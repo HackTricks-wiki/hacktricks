@@ -4,7 +4,7 @@
 
 ## Informações Básicas
 
-O namespace de tempo no Linux permite deslocamentos por namespace nos relógios monotônicos e de tempo de inicialização do sistema. É comumente usado em contêineres Linux para alterar a data/hora dentro de um contêiner e ajustar relógios após a restauração de um ponto de verificação ou instantâneo.
+O namespace de tempo no Linux permite offsets por namespace para os relógios monotônicos e de tempo de inicialização do sistema. É comumente usado em contêineres Linux para alterar a data/hora dentro de um contêiner e ajustar relógios após a restauração de um ponto de verificação ou instantâneo.
 
 ## Laboratório:
 
@@ -20,7 +20,7 @@ Ao montar uma nova instância do sistema de arquivos `/proc` se você usar o par
 
 <summary>Erro: bash: fork: Não é possível alocar memória</summary>
 
-Quando `unshare` é executado sem a opção `-f`, um erro é encontrado devido à forma como o Linux lida com novos namespaces de PID (ID do Processo). Os detalhes principais e a solução estão descritos abaixo:
+Quando `unshare` é executado sem a opção `-f`, um erro é encontrado devido à forma como o Linux lida com novos namespaces de PID (Identificação de Processo). Os detalhes principais e a solução estão descritos abaixo:
 
 1. **Explicação do Problema**:
 
@@ -44,7 +44,7 @@ Ao garantir que `unshare` seja executado com a flag `-f`, o novo namespace de PI
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
-### &#x20;Verifique em qual namespace seu processo está
+### Verifique em qual namespace seu processo está
 ```bash
 ls -l /proc/self/ns/time
 lrwxrwxrwx 1 root root 0 Apr  4 21:16 /proc/self/ns/time -> 'time:[4026531834]'
@@ -55,7 +55,7 @@ sudo find /proc -maxdepth 3 -type l -name time -exec readlink {} \; 2>/dev/null 
 # Find the processes with an specific namespace
 sudo find /proc -maxdepth 3 -type l -name time -exec ls -l  {} \; 2>/dev/null | grep <ns-number>
 ```
-### Entrar dentro de um namespace de tempo
+### Entrar em um namespace de Tempo
 ```bash
 nsenter -T TARGET_PID --pid /bin/bash
 ```

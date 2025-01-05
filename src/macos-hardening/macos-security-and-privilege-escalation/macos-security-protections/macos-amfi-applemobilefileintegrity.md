@@ -8,11 +8,11 @@ Ele se concentra em impor a integridade do código em execução no sistema, for
 
 Além disso, para algumas operações, o kext prefere contatar o daemon em espaço de usuário `/usr/libexec/amfid`. Essa relação de confiança foi abusada em vários jailbreaks.
 
-AMFI usa **MACF** políticas e registra seus hooks no momento em que é iniciado. Além disso, impedir seu carregamento ou descarregamento pode desencadear um pânico do kernel. No entanto, existem alguns argumentos de inicialização que permitem debilitar o AMFI:
+AMFI usa políticas **MACF** e registra seus hooks no momento em que é iniciado. Além disso, impedir seu carregamento ou descarregamento pode desencadear um pânico do kernel. No entanto, existem alguns argumentos de inicialização que permitem debilitar o AMFI:
 
 - `amfi_unrestricted_task_for_pid`: Permitir task_for_pid sem os direitos necessários
 - `amfi_allow_any_signature`: Permitir qualquer assinatura de código
-- `cs_enforcement_disable`: Argumento de sistema usado para desativar a aplicação da assinatura de código
+- `cs_enforcement_disable`: Argumento de sistema usado para desativar a imposição de assinatura de código
 - `amfi_prevent_old_entitled_platform_binaries`: Anular binários de plataforma com direitos
 - `amfi_get_out_of_my_way`: Desativa completamente o amfi
 
@@ -36,8 +36,8 @@ Estas são algumas das políticas MACF que ele registra:
 - **`vnode_check_exec`**: É chamado quando arquivos executáveis são carregados na memória e define `cs_hard | cs_kill`, que matará o processo se qualquer uma das páginas se tornar inválida
 - **`vnode_check_getextattr`**: MacOS: Verifica `com.apple.root.installed` e `isVnodeQuarantined()`
 - **`vnode_check_setextattr`**: Como get + com.apple.private.allow-bless e direito equivalente de instalador interno
-- &#x20;**`vnode_check_signature`**: Código que chama o XNU para verificar a assinatura de código usando direitos, cache de confiança e `amfid`
-- &#x20;**`proc_check_run_cs_invalid`**: Intercepta chamadas `ptrace()` (`PT_ATTACH` e `PT_TRACE_ME`). Verifica se algum dos direitos `get-task-allow`, `run-invalid-allow` e `run-unsigned-code` e, se nenhum, verifica se a depuração é permitida.
+- **`vnode_check_signature`**: Código que chama o XNU para verificar a assinatura de código usando direitos, cache de confiança e `amfid`
+- **`proc_check_run_cs_invalid`**: Intercepta chamadas `ptrace()` (`PT_ATTACH` e `PT_TRACE_ME`). Verifica se algum dos direitos `get-task-allow`, `run-invalid-allow` e `run-unsigned-code` e, se nenhum, verifica se a depuração é permitida.
 - **`proc_check_map_anon`**: Se mmap for chamado com a flag **`MAP_JIT`**, o AMFI verificará o direito `dynamic-codesigning`.
 
 `AMFI.kext` também expõe uma API para outras extensões do kernel, e é possível encontrar suas dependências com:
@@ -66,17 +66,17 @@ No variant specified, falling back to release
 ## amfid
 
 Este é o daemon em modo de usuário que `AMFI.kext` usará para verificar assinaturas de código em modo de usuário.\
-Para que `AMFI.kext` se comunique com o daemon, ele usa mensagens mach através da porta `HOST_AMFID_PORT`, que é a porta especial `18`.
+Para que `AMFI.kext` se comunique com o daemon, ele usa mensagens mach pela porta `HOST_AMFID_PORT`, que é a porta especial `18`.
 
 Note que no macOS não é mais possível que processos root sequestram portas especiais, pois elas são protegidas pelo `SIP` e apenas o launchd pode acessá-las. No iOS, é verificado se o processo que envia a resposta de volta tem o CDHash hardcoded de `amfid`.
 
 É possível ver quando `amfid` é solicitado a verificar um binário e a resposta dele depurando-o e definindo um ponto de interrupção em `mach_msg`.
 
-Uma vez que uma mensagem é recebida através da porta especial, **MIG** é usado para enviar cada função para a função que está chamando. As principais funções foram revertidas e explicadas dentro do livro.
+Uma vez que uma mensagem é recebida pela porta especial, **MIG** é usado para enviar cada função para a função que está chamando. As principais funções foram revertidas e explicadas dentro do livro.
 
 ## Provisioning Profiles
 
-Um perfil de provisionamento pode ser usado para assinar código. Existem perfis de **Desenvolvedor** que podem ser usados para assinar código e testá-lo, e perfis **Enterprise** que podem ser usados em todos os dispositivos.
+Um perfil de provisionamento pode ser usado para assinar código. Existem perfis **Developer** que podem ser usados para assinar código e testá-lo, e perfis **Enterprise** que podem ser usados em todos os dispositivos.
 
 Depois que um aplicativo é enviado para a Apple Store, se aprovado, ele é assinado pela Apple e o perfil de provisionamento não é mais necessário.
 
@@ -92,7 +92,7 @@ Embora às vezes referidos como certificados, esses perfis de provisionamento t�
 
 - **AppIDName:** O Identificador da Aplicação
 - **AppleInternalProfile**: Designa isso como um perfil Interno da Apple
-- **ApplicationIdentifierPrefix**: Precedido ao AppIDName (mesmo que TeamIdentifier)
+- **ApplicationIdentifierPrefix**: Precedido ao AppIDName (igual ao TeamIdentifier)
 - **CreationDate**: Data no formato `YYYY-MM-DDTHH:mm:ssZ`
 - **DeveloperCertificates**: Um array de (geralmente um) certificado(s), codificado como dados Base64
 - **Entitlements**: Os direitos permitidos com direitos para este perfil

@@ -1,10 +1,10 @@
-# Bypasses do Sandbox do Office no macOS
+# macOS Office Sandbox Bypasses
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 
 ### Bypass do Sandbox do Word via Launch Agents
 
-O aplicativo usa um **Sandbox personalizado** usando a autorização **`com.apple.security.temporary-exception.sbpl`** e esse sandbox personalizado permite escrever arquivos em qualquer lugar, desde que o nome do arquivo comece com `~$`: `(require-any (require-all (vnode-type REGULAR-FILE) (regex #"(^|/)~$[^/]+$")))`
+O aplicativo usa um **Sandbox personalizado** usando a permissão **`com.apple.security.temporary-exception.sbpl`** e esse sandbox personalizado permite escrever arquivos em qualquer lugar, desde que o nome do arquivo comece com `~$`: `(require-any (require-all (vnode-type REGULAR-FILE) (regex #"(^|/)~$[^/]+$")))`
 
 Portanto, escapar foi tão fácil quanto **escrever um `plist`** LaunchAgent em `~/Library/LaunchAgents/~$escape.plist`.
 
@@ -24,7 +24,7 @@ Verifique o [**relatório original aqui**](https://objective-see.org/blog/blog_0
 
 (Lembre-se de que, a partir da primeira fuga, o Word pode escrever arquivos arbitrários cujo nome comece com `~$`).
 
-No entanto, a técnica anterior tinha uma limitação: se a pasta **`~/Library/LaunchAgents`** existir porque algum outro software a criou, falharia. Portanto, uma cadeia diferente de Itens de Login foi descoberta para isso.
+No entanto, a técnica anterior tinha uma limitação, se a pasta **`~/Library/LaunchAgents`** existir porque algum outro software a criou, falharia. Portanto, uma cadeia diferente de Itens de Login foi descoberta para isso.
 
 Um atacante poderia criar os arquivos **`.bash_profile`** e **`.zshenv`** com o payload a ser executado e, em seguida, zipá-los e **escrever o zip na** pasta do usuário da vítima: **`~/~$escape.zip`**.
 
@@ -44,9 +44,9 @@ Verifique o [**relatório original aqui**](https://perception-point.io/blog/tech
 
 A utilidade **`open`** também suportava o parâmetro **`--stdin`** (e após o bypass anterior, não era mais possível usar `--env`).
 
-A questão é que, mesmo que **`python`** estivesse assinado pela Apple, ele **não executará** um script com o atributo **`quarantine`**. No entanto, foi possível passar um script do stdin, então ele não verificaria se estava em quarentena ou não:&#x20;
+A questão é que, mesmo que **`python`** tenha sido assinado pela Apple, ele **não executará** um script com o atributo **`quarantine`**. No entanto, foi possível passar um script do stdin, então ele não verificaria se estava em quarentena ou não:
 
-1. Coloque um **`~$exploit.py`** com comandos Python arbitrários.
-2. Execute _open_ **`–stdin='~$exploit.py' -a Python`**, que executa o aplicativo Python com nosso arquivo colocado servindo como sua entrada padrão. O Python executa nosso código, e como é um processo filho do _launchd_, não está vinculado às regras do sandbox do Word.
+1. Crie um arquivo **`~$exploit.py`** com comandos Python arbitrários.
+2. Execute _open_ **`–stdin='~$exploit.py' -a Python`**, que executa o aplicativo Python com nosso arquivo criado servindo como sua entrada padrão. O Python executa nosso código, e como é um processo filho do _launchd_, não está vinculado às regras do sandbox do Word.
 
 {{#include ../../../../../banners/hacktricks-training.md}}

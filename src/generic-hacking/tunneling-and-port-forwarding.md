@@ -276,7 +276,7 @@ socat TCP4-LISTEN:<lport>,fork TCP4:<redirect_ip>:<rport> &
 ```bash
 socat TCP4-LISTEN:1234,fork SOCKS4A:127.0.0.1:google.com:80,socksport=5678
 ```
-### Meterpreter através do SSL Socat
+### Meterpreter através de SSL Socat
 ```bash
 #Create meterpreter backdoor to port 3333 and start msfconsole listener in that port
 attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,fork,verify=1 TCP:127.0.0.1:3333
@@ -356,7 +356,7 @@ C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
 Agora podemos **conectar** à **vítima** via **RDP** usando **`mstsc.exe`**, e devemos receber um **prompt** informando que o **plugin SocksOverRDP está habilitado**, e ele irá **escutar** em **127.0.0.1:1080**.
 
-**Conecte-se** via **RDP** e faça o upload e execute no computador da vítima o binário `SocksOverRDP-Server.exe`:
+**Conecte-se** via **RDP** e faça o upload e execute o binário `SocksOverRDP-Server.exe` na máquina da vítima:
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
@@ -369,13 +369,13 @@ Agora você pode usar [**Proxifier**](https://www.proxifier.com/) **para fazer p
 ## Proxificar Aplicativos GUI do Windows
 
 Você pode fazer com que aplicativos GUI do Windows naveguem através de um proxy usando [**Proxifier**](https://www.proxifier.com/).\
-Em **Profile -> Proxy Servers** adicione o IP e a porta do servidor SOCKS.\
-Em **Profile -> Proxification Rules** adicione o nome do programa a ser proxificado e as conexões para os IPs que você deseja proxificar.
+Em **Profile -> Proxy Servers**, adicione o IP e a porta do servidor SOCKS.\
+Em **Profile -> Proxification Rules**, adicione o nome do programa a ser proxificado e as conexões para os IPs que você deseja proxificar.
 
 ## Bypass de proxy NTLM
 
 A ferramenta mencionada anteriormente: **Rpivot**\
-**OpenVPN** também pode contorná-lo, configurando essas opções no arquivo de configuração:
+**OpenVPN** também pode contorná-lo, configurando estas opções no arquivo de configuração:
 ```bash
 http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 ```
@@ -392,7 +392,7 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-Agora, se você configurar, por exemplo, no alvo o serviço **SSH** para escutar na porta 443. Você pode se conectar a ele através da porta 2222 do atacante.\
+Agora, se você configurar, por exemplo, o serviço **SSH** na vítima para escutar na porta 443. Você pode se conectar a ele através da porta 2222 do atacante.\
 Você também poderia usar um **meterpreter** que se conecta a localhost:443 e o atacante está escutando na porta 2222.
 
 ## YARP
@@ -442,7 +442,7 @@ listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this b
 ```
 #### Mudar o DNS do proxychains
 
-Proxychains intercepta a chamada `gethostbyname` da libc e encaminha a solicitação de DNS tcp através do proxy socks. Por **padrão**, o servidor **DNS** que o proxychains usa é **4.2.2.2** (hardcoded). Para mudá-lo, edite o arquivo: _/usr/lib/proxychains3/proxyresolv_ e altere o IP. Se você estiver em um **ambiente Windows**, pode definir o IP do **controlador de domínio**.
+Proxychains intercepta a chamada `gethostbyname` da libc e encaminha a solicitação de DNS TCP através do proxy socks. Por **padrão**, o servidor **DNS** que o proxychains usa é **4.2.2.2** (hardcoded). Para mudá-lo, edite o arquivo: _/usr/lib/proxychains3/proxyresolv_ e altere o IP. Se você estiver em um **ambiente Windows**, pode definir o IP do **controlador de domínio**.
 
 ## Túneis em Go
 
@@ -480,7 +480,7 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ## ngrok
 
 [**ngrok**](https://ngrok.com/) **é uma ferramenta para expor soluções à Internet em uma linha de comando.**\
-_&#x45;xposition URI são como:_ **UID.ngrok.io**
+_URI de exposição são como:_ **UID.ngrok.io**
 
 ### Instalação
 
@@ -496,7 +496,7 @@ chmod a+x ./ngrok
 
 **Documentação:** [https://ngrok.com/docs/getting-started/](https://ngrok.com/docs/getting-started/).
 
-_Também é possível adicionar autenticação e TLS, se necessário._
+_É também possível adicionar autenticação e TLS, se necessário._
 
 #### Tunneling TCP
 ```bash

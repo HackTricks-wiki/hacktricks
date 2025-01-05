@@ -13,13 +13,13 @@ Observe que, quando a impressora envia a notificação para sistemas arbitrário
 
 ### Encontrando Servidores Windows no domínio
 
-Usando PowerShell, obtenha uma lista de máquinas Windows. Servidores geralmente são prioridade, então vamos focar lá:
+Usando PowerShell, obtenha uma lista de máquinas Windows. Servidores geralmente têm prioridade, então vamos focar lá:
 ```bash
 Get-ADComputer -Filter {(OperatingSystem -like "*windows*server*") -and (OperatingSystem -notlike "2016") -and (Enabled -eq "True")} -Properties * | select Name | ft -HideTableHeaders > servers.txt
 ```
-### Encontrando serviços Spooler escutando
+### Encontrando serviços de Spooler escutando
 
-Usando uma versão ligeiramente modificada do @mysmartlogin (Vincent Le Toux) [SpoolerScanner](https://github.com/NotMedic/NetNTLMtoSilverTicket), veja se o Serviço Spooler está escutando:
+Usando uma versão ligeiramente modificada do @mysmartlogin (Vincent Le Toux) [SpoolerScanner](https://github.com/NotMedic/NetNTLMtoSilverTicket), veja se o Serviço de Spooler está escutando:
 ```bash
 . .\Get-SpoolStatus.ps1
 ForEach ($server in Get-Content servers.txt) {Get-SpoolStatus $server}
@@ -51,9 +51,9 @@ https://github.com/p0dalirius/Coercer
 
 ## PrivExchange
 
-O ataque `PrivExchange` é resultado de uma falha encontrada no **recurso `PushSubscription` do Exchange Server**. Este recurso permite que o servidor Exchange seja forçado por qualquer usuário de domínio com uma caixa de correio a se autenticar em qualquer host fornecido pelo cliente via HTTP.
+O ataque `PrivExchange` é resultado de uma falha encontrada na **funcionalidade `PushSubscription` do Exchange Server**. Esta funcionalidade permite que o servidor Exchange seja forçado por qualquer usuário de domínio com uma caixa de correio a se autenticar em qualquer host fornecido pelo cliente via HTTP.
 
-Por padrão, o **serviço Exchange é executado como SYSTEM** e recebe privilégios excessivos (especificamente, possui **privilégios WriteDacl na atualização cumulativa do domínio anterior a 2019**). Essa falha pode ser explorada para permitir o **encaminhamento de informações para o LDAP e, subsequentemente, extrair o banco de dados NTDS do domínio**. Em casos onde o encaminhamento para o LDAP não é possível, essa falha ainda pode ser usada para encaminhar e autenticar em outros hosts dentro do domínio. A exploração bem-sucedida deste ataque concede acesso imediato ao Admin do Domínio com qualquer conta de usuário autenticada do domínio.
+Por padrão, o **serviço Exchange é executado como SYSTEM** e recebe privilégios excessivos (especificamente, possui **privilégios WriteDacl na atualização cumulativa do domínio anterior a 2019**). Esta falha pode ser explorada para permitir o **encaminhamento de informações para o LDAP e, subsequentemente, extrair o banco de dados NTDS do domínio**. Em casos onde o encaminhamento para o LDAP não é possível, esta falha ainda pode ser usada para encaminhar e autenticar em outros hosts dentro do domínio. A exploração bem-sucedida deste ataque concede acesso imediato ao Admin do Domínio com qualquer conta de usuário autenticada do domínio.
 
 ## Dentro do Windows
 
@@ -104,7 +104,7 @@ Se você puder realizar um ataque MitM a um computador e injetar HTML em uma pá
 ```
 ## Quebrando NTLMv1
 
-Se você puder capturar [desafios NTLMv1 leia aqui como quebrá-los](../ntlm/index.html#ntlmv1-attack).\
-_&#x52;emember que para quebrar NTLMv1 você precisa definir o desafio do Responder como "1122334455667788"_
+Se você conseguir capturar [desafios NTLMv1 leia aqui como quebrá-los](../ntlm/index.html#ntlmv1-attack).\
+_Lembre-se de que, para quebrar o NTLMv1, você precisa definir o desafio do Responder como "1122334455667788"_
 
 {{#include ../../banners/hacktricks-training.md}}

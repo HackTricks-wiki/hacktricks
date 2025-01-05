@@ -14,7 +14,7 @@ Obviamente, isso é tão poderoso que é **complicado carregar uma extensão de 
 
 <figure><img src="../../../images/image (327).png" alt=""><figcaption></figcaption></figure>
 
-- A extensão de kernel deve ser **assinada com um certificado de assinatura de código de kernel**, que só pode ser **concedido pela Apple**. Quem irá revisar em detalhes a empresa e os motivos pelos quais é necessário.
+- A extensão de kernel deve ser **assinada com um certificado de assinatura de código de kernel**, que só pode ser **concedido pela Apple**. Quem irá revisar em detalhes a empresa e as razões pelas quais é necessário.
 - A extensão de kernel também deve ser **notarizada**, a Apple poderá verificá-la em busca de malware.
 - Então, o usuário **root** é quem pode **carregar a extensão de kernel** e os arquivos dentro do pacote devem **pertencer ao root**.
 - Durante o processo de upload, o pacote deve ser preparado em um **local protegido não-root**: `/Library/StagedExtensions` (requer a concessão `com.apple.rootless.storage.KernelExtensionManagement`).
@@ -28,7 +28,7 @@ Em Catalina era assim: É interessante notar que o processo de **verificação**
 - Ele se comunicará com **`kextd`** enviando usando um **serviço Mach**.
 2. **`kextd`** verificará várias coisas, como a **assinatura**
 - Ele se comunicará com **`syspolicyd`** para **verificar** se a extensão pode ser **carregada**.
-3. **`syspolicyd`** **pedirá** ao **usuário** se a extensão não foi carregada anteriormente.
+3. **`syspolicyd`** irá **solicitar** ao **usuário** se a extensão não foi carregada anteriormente.
 - **`syspolicyd`** relatará o resultado para **`kextd`**
 4. **`kextd`** finalmente poderá **dizer ao kernel para carregar** a extensão
 
@@ -49,7 +49,7 @@ kextstat | grep " 22 " | cut -c2-5,50- | cut -d '(' -f1
 
 O **kernelcache** é uma **versão pré-compilada e pré-linkada do kernel XNU**, juntamente com **drivers** e **extensões de kernel** essenciais. Ele é armazenado em um formato **compactado** e é descompactado na memória durante o processo de inicialização. O kernelcache facilita um **tempo de inicialização mais rápido** ao ter uma versão pronta para execução do kernel e drivers cruciais disponíveis, reduzindo o tempo e os recursos que seriam gastos carregando e vinculando dinamicamente esses componentes no momento da inicialização.
 
-### Kernelcache Local
+### Local Kerlnelcache
 
 No iOS, está localizado em **`/System/Library/Caches/com.apple.kernelcaches/kernelcache`** no macOS você pode encontrá-lo com: **`find / -name "kernelcache" 2>/dev/null`** \
 No meu caso, no macOS, eu o encontrei em:
@@ -62,13 +62,13 @@ O formato de arquivo IMG4 é um formato de contêiner usado pela Apple em seus d
 
 Geralmente, é composto pelos seguintes componentes:
 
-- **Carga útil (IM4P)**:
-- Frequentemente compactada (LZFSE4, LZSS, …)
-- Opcionalmente criptografada
-- **Manifesto (IM4M)**:
+- **Payload (IM4P)**:
+- Frequentemente compactado (LZFSE4, LZSS, …)
+- Opcionalmente criptografado
+- **Manifest (IM4M)**:
 - Contém Assinatura
 - Dicionário adicional de Chave/Valor
-- **Informações de Restauração (IM4R)**:
+- **Restore Info (IM4R)**:
 - Também conhecido como APNonce
 - Impede a repetição de algumas atualizações
 - OPCIONAL: Geralmente isso não é encontrado
@@ -81,7 +81,7 @@ img4tool -e kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
 # pyimg4 (https://github.com/m1stadev/PyIMG4)
 pyimg4 im4p extract -i kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
 ```
-### Download&#x20;
+### Download
 
 - [**KernelDebugKit Github**](https://github.com/dortania/KdkSupportPkg/releases)
 

@@ -11,7 +11,7 @@
 - **/sbin**
 - **/usr**
 
-As regras que governam o comportamento do SIP são definidas no arquivo de configuração localizado em **`/System/Library/Sandbox/rootless.conf`**. Dentro deste arquivo, os caminhos que são precedidos por um asterisco (\*) são denotados como exceções às restrições rigorosas do SIP.
+As regras que governam o comportamento do SIP são definidas no arquivo de configuração localizado em **`/System/Library/Sandbox/rootless.conf`**. Dentro deste arquivo, os caminhos que são precedidos por um asterisco (\*) são denotados como exceções às restrições rigorosas do SIP. 
 
 Considere o exemplo abaixo:
 ```javascript
@@ -27,7 +27,7 @@ Para verificar se um diretório ou arquivo está protegido pelo SIP, você pode 
 ls -lOd /usr/libexec/cups
 drwxr-xr-x  11 root  wheel  sunlnk 352 May 13 00:29 /usr/libexec/cups
 ```
-Neste caso, a flag **`sunlnk`** significa que o diretório `/usr/libexec/cups` **não pode ser deletado**, embora arquivos dentro dele possam ser criados, modificados ou deletados.
+Neste caso, a flag **`sunlnk`** significa que o diretório `/usr/libexec/cups` em si **não pode ser deletado**, embora arquivos dentro dele possam ser criados, modificados ou deletados.
 
 Por outro lado:
 ```bash
@@ -48,7 +48,7 @@ Além disso, se um arquivo contém o atributo **`com.apple.rootless`** como **at
 - Modificar variáveis NVRAM
 - Permitir depuração de kernel
 
-As opções são mantidas na variável nvram como um bitflag (`csr-active-config` no Intel e `lp-sip0` é lido da Device Tree inicializada para ARM). Você pode encontrar as flags no código-fonte do XNU em `csr.sh`:
+As opções são mantidas na variável nvram como um bitflag (`csr-active-config` em Intel e `lp-sip0` é lido da Device Tree inicializada para ARM). Você pode encontrar as flags no código-fonte do XNU em `csr.sh`:
 
 <figure><img src="../../../images/image (1192).png" alt=""><figcaption></figcaption></figure>
 
@@ -58,7 +58,7 @@ Você pode verificar se o SIP está habilitado em seu sistema com o seguinte com
 ```bash
 csrutil status
 ```
-Se você precisar desativar o SIP, deve reiniciar seu computador em modo de recuperação (pressionando Command+R durante a inicialização), e então executar o seguinte comando:
+Se você precisar desativar o SIP, deve reiniciar seu computador em modo de recuperação (pressionando Command+R durante a inicialização), em seguida, execute o seguinte comando:
 ```bash
 csrutil disable
 ```
@@ -77,7 +77,7 @@ csrutil enable --without debug
 ### **Direitos Relacionados ao SIP**
 
 - `com.apple.rootless.xpc.bootstrap`: Controlar launchd
-- `com.apple.rootless.install[.heritable]`: Acessar sistema de arquivos
+- `com.apple.rootless.install[.heritable]`: Acessar o sistema de arquivos
 - `com.apple.rootless.kext-management`: `kext_request`
 - `com.apple.rootless.datavault.controller`: Gerenciar UF_DATAVAULT
 - `com.apple.rootless.xpc.bootstrap`: Capacidades de configuração do XPC
@@ -85,15 +85,15 @@ csrutil enable --without debug
 - `com.apple.rootless.restricted-block-devices`: Acesso a dispositivos de bloco brutos
 - `com.apple.rootless.internal.installer-equivalent`: Acesso irrestrito ao sistema de arquivos
 - `com.apple.rootless.restricted-nvram-variables[.heritable]`: Acesso total ao NVRAM
-- `com.apple.rootless.storage.label`: Modificar arquivos restritos por com.apple.rootless xattr com o rótulo correspondente
-- `com.apple.rootless.volume.VM.label`: Manter swap de VM no volume
+- `com.apple.rootless.storage.label`: Modificar arquivos restritos pelo com.apple.rootless xattr com o rótulo correspondente
+- `com.apple.rootless.volume.VM.label`: Manter a troca de VM no volume
 
 ## Bypasses do SIP
 
 Contornar o SIP permite que um atacante:
 
 - **Acesse Dados do Usuário**: Leia dados sensíveis do usuário, como e-mails, mensagens e histórico do Safari de todas as contas de usuário.
-- **Bypass do TCC**: Manipule diretamente o banco de dados TCC (Transparência, Consentimento e Controle) para conceder acesso não autorizado à webcam, microfone e outros recursos.
+- **Bypass do TCC**: Manipule diretamente o banco de dados do TCC (Transparência, Consentimento e Controle) para conceder acesso não autorizado à webcam, microfone e outros recursos.
 - **Estabeleça Persistência**: Coloque malware em locais protegidos pelo SIP, tornando-o resistente à remoção, mesmo por privilégios de root. Isso também inclui a possibilidade de adulterar a Ferramenta de Remoção de Malware (MRT).
 - **Carregue Extensões de Kernel**: Embora existam salvaguardas adicionais, contornar o SIP simplifica o processo de carregamento de extensões de kernel não assinadas.
 
@@ -120,17 +120,17 @@ Se um pacote fosse instalado a partir de uma imagem montada ou unidade externa, 
 
 #### CVE-2021-30892 - Shrootless
 
-[**Pesquisadores deste post do blog**](https://www.microsoft.com/en-us/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/) descobriram uma vulnerabilidade no mecanismo de Proteção de Integridade do Sistema (SIP) do macOS, chamada de vulnerabilidade 'Shrootless'. Essa vulnerabilidade gira em torno do daemon **`system_installd`**, que possui um direito, **`com.apple.rootless.install.heritable`**, que permite que qualquer um de seus processos filhos contorne as restrições do sistema de arquivos do SIP.
+[**Pesquisadores deste post de blog**](https://www.microsoft.com/en-us/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/) descobriram uma vulnerabilidade no mecanismo de Proteção de Integridade do Sistema (SIP) do macOS, chamada de vulnerabilidade 'Shrootless'. Essa vulnerabilidade gira em torno do daemon **`system_installd`**, que possui um direito, **`com.apple.rootless.install.heritable`**, que permite que qualquer um de seus processos filhos contorne as restrições do sistema de arquivos do SIP.
 
 O daemon **`system_installd`** instalará pacotes que foram assinados pela **Apple**.
 
-Os pesquisadores descobriram que durante a instalação de um pacote assinado pela Apple (.pkg), **`system_installd`** **executa** quaisquer **scripts pós-instalação** incluídos no pacote. Esses scripts são executados pelo shell padrão, **`zsh`**, que automaticamente **executa** comandos do arquivo **`/etc/zshenv`**, se existir, mesmo em modo não interativo. Esse comportamento poderia ser explorado por atacantes: criando um arquivo `/etc/zshenv` malicioso e aguardando que **`system_installd` invocasse `zsh`**, eles poderiam realizar operações arbitrárias no dispositivo.
+Os pesquisadores descobriram que durante a instalação de um pacote assinado pela Apple (.pkg), **`system_installd`** **executa** quaisquer scripts **pós-instalação** incluídos no pacote. Esses scripts são executados pelo shell padrão, **`zsh`**, que automaticamente **executa** comandos do arquivo **`/etc/zshenv`**, se existir, mesmo em modo não interativo. Esse comportamento poderia ser explorado por atacantes: criando um arquivo `/etc/zshenv` malicioso e esperando que **`system_installd` invocasse `zsh`**, eles poderiam realizar operações arbitrárias no dispositivo.
 
-Além disso, foi descoberto que **`/etc/zshenv` poderia ser usado como uma técnica de ataque geral**, não apenas para contornar o SIP. Cada perfil de usuário tem um arquivo `~/.zshenv`, que se comporta da mesma forma que `/etc/zshenv`, mas não requer permissões de root. Este arquivo poderia ser usado como um mecanismo de persistência, sendo acionado toda vez que `zsh` inicia, ou como um mecanismo de elevação de privilégios. Se um usuário administrador elevar para root usando `sudo -s` ou `sudo <comando>`, o arquivo `~/.zshenv` seria acionado, efetivamente elevando para root.
+Além disso, foi descoberto que **`/etc/zshenv` poderia ser usado como uma técnica de ataque geral**, não apenas para um bypass do SIP. Cada perfil de usuário tem um arquivo `~/.zshenv`, que se comporta da mesma forma que `/etc/zshenv`, mas não requer permissões de root. Este arquivo poderia ser usado como um mecanismo de persistência, sendo acionado toda vez que `zsh` inicia, ou como um mecanismo de elevação de privilégios. Se um usuário administrador elevar para root usando `sudo -s` ou `sudo <comando>`, o arquivo `~/.zshenv` seria acionado, efetivamente elevando para root.
 
 #### [**CVE-2022-22583**](https://perception-point.io/blog/technical-analysis-cve-2022-22583/)
 
-Em [**CVE-2022-22583**](https://perception-point.io/blog/technical-analysis-cve-2022-22583/) foi descoberto que o mesmo processo **`system_installd`** ainda poderia ser abusado porque estava colocando o **script pós-instalação dentro de uma pasta nomeada aleatoriamente protegida pelo SIP dentro de `/tmp`**. O fato é que **`/tmp` em si não é protegido pelo SIP**, então era possível **montar** uma **imagem virtual nele**, então o **instalador** colocaria o **script pós-instalação** lá, **desmontaria** a imagem virtual, **recriaria** todas as **pastas** e **adicionaria** o **script de pós-instalação** com a **carga** a ser executada.
+Em [**CVE-2022-22583**](https://perception-point.io/blog/technical-analysis-cve-2022-22583/) foi descoberto que o mesmo processo **`system_installd`** ainda poderia ser abusado porque estava colocando o **script pós-instalação dentro de uma pasta nomeada aleatoriamente protegida pelo SIP dentro de `/tmp`**. O fato é que **`/tmp` em si não é protegido pelo SIP**, então era possível **montar** uma **imagem virtual sobre ele**, então o **instalador** colocaria lá o **script pós-instalação**, **desmontaria** a imagem virtual, **recriaria** todas as **pastas** e **adicionaria** o **script de pós-instalação** com o **payload** a ser executado.
 
 #### [fsck_cs utility](https://www.theregister.com/2016/03/30/apple_os_x_rootless/)
 
@@ -154,13 +154,13 @@ mkdir evil
 hdiutil create -srcfolder evil evil.dmg
 hdiutil attach -mountpoint /System/Library/Snadbox/ evil.dmg
 ```
-#### [Bypass do Upgrader (2016)](https://objective-see.org/blog/blog_0x14.html)
+#### [Upgrader bypass (2016)](https://objective-see.org/blog/blog_0x14.html)
 
-O sistema está configurado para inicializar a partir de uma imagem de disco do instalador incorporada dentro do `Install macOS Sierra.app` para atualizar o SO, utilizando a utilidade `bless`. O comando utilizado é o seguinte:
+O sistema está configurado para inicializar a partir de uma imagem de disco do instalador incorporada dentro do `Install macOS Sierra.app` para atualizar o SO, utilizando a ferramenta `bless`. O comando utilizado é o seguinte:
 ```bash
 /usr/sbin/bless -setBoot -folder /Volumes/Macintosh HD/macOS Install Data -bootefi /Volumes/Macintosh HD/macOS Install Data/boot.efi -options config="\macOS Install Data\com.apple.Boot" -label macOS Installer
 ```
-A segurança deste processo pode ser comprometida se um atacante alterar a imagem de atualização (`InstallESD.dmg`) antes de inicializar. A estratégia envolve substituir um carregador dinâmico (dyld) por uma versão maliciosa (`libBaseIA.dylib`). Essa substituição resulta na execução do código do atacante quando o instalador é iniciado.
+A segurança deste processo pode ser comprometida se um atacante alterar a imagem de atualização (`InstallESD.dmg`) antes da inicialização. A estratégia envolve substituir um carregador dinâmico (dyld) por uma versão maliciosa (`libBaseIA.dylib`). Essa substituição resulta na execução do código do atacante quando o instalador é iniciado.
 
 O código do atacante ganha controle durante o processo de atualização, explorando a confiança do sistema no instalador. O ataque prossegue alterando a imagem `InstallESD.dmg` via method swizzling, visando particularmente o método `extractBootBits`. Isso permite a injeção de código malicioso antes que a imagem do disco seja utilizada.
 
@@ -185,7 +185,7 @@ e foi possível criar um symlink em `${SHARED_SUPPORT_PATH}/SharedSupport.dmg` q
 
 A permissão `com.apple.rootless.install` é conhecida por contornar a Proteção de Integridade do Sistema (SIP) no macOS. Isso foi notavelmente mencionado em relação a [**CVE-2022-26712**](https://jhftss.github.io/CVE-2022-26712-The-POC-For-SIP-Bypass-Is-Even-Tweetable/).
 
-Neste caso específico, o serviço XPC do sistema localizado em `/System/Library/PrivateFrameworks/ShoveService.framework/Versions/A/XPCServices/SystemShoveService.xpc` possui essa permissão. Isso permite que o processo relacionado contorne as restrições do SIP. Além disso, esse serviço apresenta notavelmente um método que permite a movimentação de arquivos sem impor quaisquer medidas de segurança.
+Neste caso específico, o serviço XPC do sistema localizado em `/System/Library/PrivateFrameworks/ShoveService.framework/Versions/A/XPCServices/SystemShoveService.xpc` possui essa permissão. Isso permite que o processo relacionado contorne as restrições do SIP. Além disso, este serviço apresenta notavelmente um método que permite a movimentação de arquivos sem impor quaisquer medidas de segurança.
 
 ## Instantâneas do Sistema Seladas
 
@@ -210,7 +210,7 @@ O comando **`diskutil apfs list`** lista os **detalhes dos volumes APFS** e seu 
 |   Capacity In Use By Volumes:   219214536704 B (219.2 GB) (44.3% used)
 |   Capacity Not Allocated:       275170258944 B (275.2 GB) (55.7% free)
 |   |
-|   +-&#x3C; Physical Store disk0s2 86D4B7EC-6FA5-4042-93A7-D3766A222EBE
+|   +-< Physical Store disk0s2 86D4B7EC-6FA5-4042-93A7-D3766A222EBE
 |   |   -----------------------------------------------------------
 |   |   APFS Physical Store Disk:   disk0s2
 |   |   Size:                       494384795648 B (494.4 GB)

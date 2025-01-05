@@ -30,7 +30,7 @@ Em _**Edit --> Settings --> Hotkeys**_ você pode definir diferentes **teclas de
 
 ## Modificando o valor
 
-Uma vez que você **encontrou** onde está o **valor** que você está **procurando** (mais sobre isso nos próximos passos), você pode **modificá-lo** clicando duas vezes nele e, em seguida, clicando duas vezes em seu valor:
+Uma vez que você **encontrou** onde está o **valor** que está **procurando** (mais sobre isso nos próximos passos), você pode **modificá-lo** clicando duas vezes nele e, em seguida, clicando duas vezes em seu valor:
 
 ![](<../../images/image (563).png>)
 
@@ -75,7 +75,7 @@ Você será apresentado a **todos os valores que foram modificados da maneira se
 
 Uma vez que você tenha encontrado seu valor, você pode modificá-lo.
 
-Note que há uma **grande quantidade de mudanças possíveis** e você pode fazer esses **passos quantas vezes quiser** para filtrar os resultados:
+Note que há uma **muita mudança possível** e você pode fazer esses **passos quantas vezes quiser** para filtrar os resultados:
 
 ![](<../../images/image (574).png>)
 
@@ -83,7 +83,7 @@ Note que há uma **grande quantidade de mudanças possíveis** e você pode faze
 
 Até agora, aprendemos como encontrar um endereço que armazena um valor, mas é altamente provável que em **diferentes execuções do jogo, esse endereço esteja em lugares diferentes da memória**. Então, vamos descobrir como sempre encontrar esse endereço.
 
-Usando alguns dos truques mencionados, encontre o endereço onde seu jogo atual está armazenando o valor importante. Então (parando o jogo se desejar), clique com o botão direito no **endereço** encontrado e selecione "**Descobrir o que acessa este endereço**" ou "**Descobrir o que escreve neste endereço**":
+Usando alguns dos truques mencionados, encontre o endereço onde seu jogo atual está armazenando o valor importante. Então (parando o jogo se desejar) clique com o **botão direito** no **endereço** encontrado e selecione "**Descobrir o que acessa este endereço**" ou "**Descobrir o que escreve para este endereço**":
 
 ![](<../../images/image (1067).png>)
 
@@ -98,11 +98,11 @@ Agora que você encontrou o endereço que está modificando o valor, você pode 
 
 ![](<../../images/image (1057).png>)
 
-Assim, você pode agora modificá-lo para que o código não afete seu número, ou sempre afete de maneira positiva.
+Assim, você pode agora modificá-lo para que o código não afete seu número, ou sempre afete de uma maneira positiva.
 
 ### Endereço de Memória Aleatório - Encontrando o ponteiro
 
-Seguindo os passos anteriores, encontre onde o valor que você está interessado está. Então, usando "**Descobrir o que escreve neste endereço**", descubra qual endereço escreve esse valor e clique duas vezes nele para obter a visualização da desassemblagem:
+Seguindo os passos anteriores, encontre onde o valor que você está interessado está. Então, usando "**Descobrir o que escreve para este endereço**", descubra qual endereço escreve esse valor e clique duas vezes nele para obter a visualização da desassemblagem:
 
 ![](<../../images/image (1039).png>)
 

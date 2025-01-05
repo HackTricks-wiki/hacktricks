@@ -49,7 +49,7 @@ Usando alguma **engenharia social**, você poderia **impersonar, por exemplo, o 
 {{#tab name="Impersonação do Chrome"}}
 Algumas sugestões:
 
-- Verifique no Dock se há um Chrome e, nesse caso, **remova** essa entrada e **adicione** a **entrada falsa** **do Chrome na mesma posição** no array do Dock.&#x20;
+- Verifique no Dock se há um Chrome e, nesse caso, **remova** essa entrada e **adicione** a **entrada falsa** do **Chrome na mesma posição** no array do Dock.
 ```bash
 #!/bin/sh
 
@@ -121,7 +121,7 @@ killall Dock
 ```
 {{#endtab}}
 
-{{#tab name="Impersonação do Finder"}}
+{{#tab name="Imitação do Finder"}}
 Algumas sugestões:
 
 - Você **não pode remover o Finder do Dock**, então se você for adicioná-lo ao Dock, pode colocar o Finder falso logo ao lado do verdadeiro. Para isso, você precisa **adicionar a entrada do Finder falso no início do array do Dock**.

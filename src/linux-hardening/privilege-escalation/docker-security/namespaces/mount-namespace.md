@@ -2,22 +2,22 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Informações Básicas
+## Basic Information
 
-Um mount namespace é um recurso do kernel Linux que fornece isolamento dos pontos de montagem do sistema de arquivos vistos por um grupo de processos. Cada mount namespace tem seu próprio conjunto de pontos de montagem do sistema de arquivos, e **mudanças nos pontos de montagem em um namespace não afetam outros namespaces**. Isso significa que processos executando em diferentes mount namespaces podem ter visões diferentes da hierarquia do sistema de arquivos.
+Um mount namespace é um recurso do kernel Linux que fornece isolamento dos pontos de montagem do sistema de arquivos vistos por um grupo de processos. Cada mount namespace tem seu próprio conjunto de pontos de montagem do sistema de arquivos, e **mudanças nos pontos de montagem em um namespace não afetam outros namespaces**. Isso significa que processos executando em diferentes mount namespaces podem ter diferentes visões da hierarquia do sistema de arquivos.
 
-Os mount namespaces são particularmente úteis na containerização, onde cada contêiner deve ter seu próprio sistema de arquivos e configuração, isolados de outros contêineres e do sistema host.
+Mount namespaces são particularmente úteis na containerização, onde cada contêiner deve ter seu próprio sistema de arquivos e configuração, isolados de outros contêineres e do sistema host.
 
-### Como funciona:
+### How it works:
 
 1. Quando um novo mount namespace é criado, ele é inicializado com uma **cópia dos pontos de montagem de seu namespace pai**. Isso significa que, na criação, o novo namespace compartilha a mesma visão do sistema de arquivos que seu pai. No entanto, quaisquer mudanças subsequentes nos pontos de montagem dentro do namespace não afetarão o pai ou outros namespaces.
 2. Quando um processo modifica um ponto de montagem dentro de seu namespace, como montar ou desmontar um sistema de arquivos, a **mudança é local a esse namespace** e não afeta outros namespaces. Isso permite que cada namespace tenha sua própria hierarquia de sistema de arquivos independente.
 3. Processos podem se mover entre namespaces usando a chamada de sistema `setns()`, ou criar novos namespaces usando as chamadas de sistema `unshare()` ou `clone()` com a flag `CLONE_NEWNS`. Quando um processo se move para um novo namespace ou cria um, ele começará a usar os pontos de montagem associados a esse namespace.
 4. **Descritores de arquivo e inodes são compartilhados entre namespaces**, o que significa que se um processo em um namespace tiver um descritor de arquivo aberto apontando para um arquivo, ele pode **passar esse descritor de arquivo** para um processo em outro namespace, e **ambos os processos acessarão o mesmo arquivo**. No entanto, o caminho do arquivo pode não ser o mesmo em ambos os namespaces devido a diferenças nos pontos de montagem.
 
-## Laboratório:
+## Lab:
 
-### Criar diferentes Namespaces
+### Create different Namespaces
 
 #### CLI
 ```bash
@@ -43,7 +43,7 @@ Quando `unshare` é executado sem a opção `-f`, um erro é encontrado devido �
 
 3. **Solução**:
 - O problema pode ser resolvido usando a opção `-f` com `unshare`. Esta opção faz com que `unshare` fork um novo processo após criar o novo namespace de PID.
-- Executar `%unshare -fp /bin/bash%` garante que o comando `unshare` em si se torne PID 1 no novo namespace. `/bin/bash` e seus processos filhos são então contidos com segurança dentro deste novo namespace, prevenindo a saída prematura de PID 1 e permitindo a alocação normal de PID.
+- Executar `%unshare -fp /bin/bash%` garante que o comando `unshare` se torne PID 1 no novo namespace. `/bin/bash` e seus processos filhos são então contidos com segurança dentro deste novo namespace, prevenindo a saída prematura de PID 1 e permitindo a alocação normal de PID.
 
 Ao garantir que `unshare` seja executado com a flag `-f`, o novo namespace de PID é mantido corretamente, permitindo que `/bin/bash` e seus subprocessos operem sem encontrar o erro de alocação de memória.
 
@@ -53,7 +53,7 @@ Ao garantir que `unshare` seja executado com a flag `-f`, o novo namespace de PI
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
-### &#x20;Verifique em qual namespace seu processo está
+### Verifique em qual namespace seu processo está
 ```bash
 ls -l /proc/self/ns/mnt
 lrwxrwxrwx 1 root root 0 Apr  4 20:30 /proc/self/ns/mnt -> 'mnt:[4026531841]'

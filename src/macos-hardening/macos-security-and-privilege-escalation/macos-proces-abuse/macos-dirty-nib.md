@@ -17,7 +17,7 @@ O arquivo Nib principal é referenciado no valor **`NSMainNibFile`** dentro do a
 1. **Configuração Inicial**:
 - Crie um novo arquivo NIB usando o XCode.
 - Adicione um Objeto à interface, definindo sua classe como `NSAppleScript`.
-- Configure a propriedade `source` inicial via Atributos de Tempo de Execução Definidos pelo Usuário.
+- Configure a propriedade `source` inicial através de Atributos de Tempo de Execução Definidos pelo Usuário.
 2. **Gadget de Execução de Código**:
 - A configuração facilita a execução de AppleScript sob demanda.
 - Integre um botão para ativar o objeto `Apple Script`, acionando especificamente o seletor `executeAndReturnError:`.
@@ -52,7 +52,7 @@ display dialog theDialogText
 
 ### Outro Exemplo
 
-No post [https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/) você pode encontrar um tutorial sobre como criar um nib sujo.&#x20;
+No post [https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/) você pode encontrar um tutorial sobre como criar um nib sujo.
 
 ### Abordando Restrições de Lançamento
 
@@ -64,7 +64,7 @@ No post [https://sector7.computest.nl/post/2024-04-bringing-process-injection-in
 A partir do macOS Sonoma, modificações dentro de pacotes de aplicativos são restritas. No entanto, métodos anteriores envolviam:
 
 1. Copiar o aplicativo para um local diferente (por exemplo, `/tmp/`).
-2. Renomear diretórios dentro do pacote do aplicativo para contornar as proteções iniciais.
+2. Renomear diretórios dentro do pacote do aplicativo para contornar proteções iniciais.
 3. Após executar o aplicativo para registrar com o Gatekeeper, modificar o pacote do aplicativo (por exemplo, substituindo MainMenu.nib por Dirty.nib).
 4. Renomear os diretórios de volta e executar novamente o aplicativo para executar o arquivo NIB injetado.
 

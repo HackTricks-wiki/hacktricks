@@ -6,7 +6,7 @@
 
 [AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) é da Sysinternal Suite:
 
-> Um visualizador e editor avançado de Active Directory (AD). Você pode usar o AD Explorer para navegar facilmente em um banco de dados AD, definir locais favoritos, visualizar propriedades de objetos e atributos sem abrir caixas de diálogo, editar permissões, visualizar o esquema de um objeto e executar pesquisas sofisticadas que você pode salvar e reexecutar.
+> Um visualizador e editor avançado de Active Directory (AD). Você pode usar o AD Explorer para navegar facilmente em um banco de dados AD, definir locais favoritos, visualizar propriedades e atributos de objetos sem abrir caixas de diálogo, editar permissões, visualizar o esquema de um objeto e executar pesquisas sofisticadas que você pode salvar e reexecutar.
 
 ### Capturas de Tela
 
@@ -26,7 +26,7 @@ Para tirar uma captura de tela do AD, vá para `File` --> `Create Snapshot` e in
 ```
 ## BloodHound
 
-De [https://github.com/BloodHoundAD/BloodHound](https://github.com/BloodHoundAD/BloodHound)
+From [https://github.com/BloodHoundAD/BloodHound](https://github.com/BloodHoundAD/BloodHound)
 
 > BloodHound é uma aplicação web Javascript de página única, construída sobre [Linkurious](http://linkurio.us/), compilada com [Electron](http://electron.atom.io/), com um banco de dados [Neo4j](https://neo4j.com/) alimentado por um coletor de dados em C#.
 
@@ -82,6 +82,6 @@ group3r.exe -f <filepath-name.log>
 
 [**PingCastle**](https://www.pingcastle.com/documentation/) **avalia a postura de segurança de um ambiente AD** e fornece um bom **relatório** com gráficos.
 
-Para executá-lo, pode-se executar o binário `PingCastle.exe` e ele iniciará uma **sessão interativa** apresentando um menu de opções. A opção padrão a ser utilizada é **`healthcheck`** que estabelecerá uma **visão geral** do **domínio**, e encontrará **configurações incorretas** e **vulnerabilidades**.&#x20;
+Para executá-lo, pode-se executar o binário `PingCastle.exe` e ele iniciará uma **sessão interativa** apresentando um menu de opções. A opção padrão a ser utilizada é **`healthcheck`** que estabelecerá uma **visão geral** do **domínio**, e encontrará **configurações incorretas** e **vulnerabilidades**.
 
 {{#include ../../banners/hacktricks-training.md}}

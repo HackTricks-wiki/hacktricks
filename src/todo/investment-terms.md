@@ -6,7 +6,7 @@ Esta é a forma mais básica de realizar algumas negociações. Você pode **ind
 
 Normalmente, você também pode usar o **preço de mercado atual** para realizar a transação o mais rápido possível ao preço atual.
 
-**Stop Loss - Limit**: Você também pode indicar a quantidade e o preço dos ativos para comprar ou vender, enquanto também indica um preço mais baixo para comprar ou vender caso seja alcançado (para parar perdas).
+**Stop Loss - Limite**: Você também pode indicar a quantidade e o preço dos ativos para comprar ou vender, enquanto também indica um preço mais baixo para comprar ou vender caso seja alcançado (para parar perdas).
 
 ## Futuros
 
@@ -23,13 +23,13 @@ Embora nas bolsas isso seja geralmente usado para tentar obter lucro.
 
 ### Hedging Com Futuros <a href="#mntl-sc-block_7-0" id="mntl-sc-block_7-0"></a>
 
-Se um gerente de fundo tem medo de que algumas ações vão cair, ele pode assumir uma posição curta sobre alguns ativos, como bitcoins ou contratos futuros do S\&P 500. Isso seria semelhante a comprar ou ter alguns ativos e criar um contrato para vender esses ativos em um momento futuro a um preço maior.&#x20;
+Se um gerente de fundo tem medo de que algumas ações vão cair, ele pode assumir uma posição curta sobre alguns ativos, como bitcoins ou contratos futuros do S\&P 500. Isso seria semelhante a comprar ou ter alguns ativos e criar um contrato para vender esses ativos em um momento futuro a um preço maior.
 
 Caso o preço caia, o gerente do fundo ganhará benefícios porque venderá os ativos a um preço maior. Se o preço dos ativos subir, o gerente não ganhará esse benefício, mas ainda manterá seus ativos.
 
 ### Futuros Perpétuos
 
-**Estes são "futuros" que durarão indefinidamente** (sem uma data de contrato final). É muito comum encontrá-los, por exemplo, em exchanges de criptomoedas, onde você pode entrar e sair de futuros com base no preço das criptos.
+**Estes são "futuros" que durarão indefinidamente** (sem uma data de contrato final). É muito comum encontrá-los, por exemplo, em bolsas de criptomoedas, onde você pode entrar e sair de futuros com base no preço das criptos.
 
 Observe que, nesses casos, os benefícios e perdas podem ser em tempo real; se o preço aumentar 1%, você ganha 1%; se o preço diminuir 1%, você perderá.
 
@@ -40,12 +40,12 @@ Observe que, nesses casos, os benefícios e perdas podem ser em tempo real; se o
 Por exemplo, se você abrir uma posição futura no BTC/USDT com 100$ a uma alavancagem de 50x, isso significa que se o preço aumentar 1%, você estaria ganhando 1x50 = 50% do seu investimento inicial (50$). E, portanto, você terá 150$.\
 No entanto, se o preço diminuir 1%, você perderá 50% de seus fundos (59$ neste caso). E se o preço diminuir 2%, você perderá toda a sua aposta (2x50 = 100%).
 
-Portanto, a alavancagem permite controlar a quantidade de dinheiro que você aposta, enquanto aumenta os ganhos e as perdas.
+Portanto, a alavancagem permite controlar a quantidade de dinheiro que você aposta, aumentando os ganhos e as perdas.
 
 ## Diferenças entre Futuros e Opções
 
 A principal diferença entre futuros e opções é que o contrato é opcional para o comprador: ele pode decidir executá-lo ou não (geralmente ele só o fará se se beneficiar disso). O vendedor deve vender se o comprador quiser usar a opção.\
-No entanto, o comprador pagará uma taxa ao vendedor para abrir a opção (então o vendedor, que aparentemente está assumindo mais risco, começa a ganhar algum dinheiro).
+No entanto, o comprador pagará uma taxa ao vendedor para abrir a opção (assim, o vendedor, que aparentemente está assumindo mais risco, começa a ganhar algum dinheiro).
 
 ### 1. **Obrigação vs. Direito:**
 
@@ -65,4 +65,4 @@ No entanto, o comprador pagará uma taxa ao vendedor para abrir a opção (entã
 ### 4. **Potencial de Lucro:**
 
 * **Futuros:** O lucro ou a perda é baseado na diferença entre o preço de mercado na expiração e o preço acordado no contrato.
-* **Opções:** O comprador lucra quando o mercado se move favoravelmente além do preço de exercício, mais do que o prêmio pago. O vendedor lucra mantendo o prêmio se a opção não for exercida.
+* **Opções:** O comprador lucra quando o mercado se move favoravelmente além do preço de exercício por mais do que o prêmio pago. O vendedor lucra mantendo o prêmio se a opção não for exercida.

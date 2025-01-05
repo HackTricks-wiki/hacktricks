@@ -40,7 +40,7 @@ server_port :  mach_port_t;
 n1          :  uint32_t;
 n2          :  uint32_t);
 ```
-Observe que o primeiro **argumento é a porta a ser vinculada** e o MIG **lidará automaticamente com a porta de resposta** (a menos que `mig_get_reply_port()` seja chamado no código do cliente). Além disso, o **ID das operações** será **sequenial** começando pelo ID do subsistema indicado (então, se uma operação for depreciada, ela é excluída e `skip` é usado para ainda usar seu ID).
+Observe que o primeiro **argumento é a porta a ser vinculada** e o MIG **lidará automaticamente com a porta de resposta** (a menos que `mig_get_reply_port()` seja chamado no código do cliente). Além disso, o **ID das operações** será **sequencial**, começando pelo ID do subsistema indicado (portanto, se uma operação for descontinuada, ela é excluída e `skip` é usada para ainda utilizar seu ID).
 
 Agora use o MIG para gerar o código do servidor e do cliente que será capaz de se comunicar entre si para chamar a função Subtract:
 ```bash
@@ -104,7 +104,7 @@ return 0;
 return SERVERPREFmyipc_subsystem.routine[msgh_id].stub_routine;
 }
 ```
-Neste exemplo, definimos apenas 1 função nas definições, mas se tivéssemos definido mais funções, elas estariam dentro do array de **`SERVERPREFmyipc_subsystem`** e a primeira teria sido atribuída ao ID **500**, a segunda ao ID **501**...
+Neste exemplo, definimos apenas 1 função nas definições, mas se tivéssemos definido mais funções, elas estariam dentro do array de **`SERVERPREFmyipc_subsystem`** e a primeira seria atribuída ao ID **500**, a segunda ao ID **501**...
 
 Se a função fosse esperada para enviar uma **reply**, a função `mig_internal kern_return_t __MIG_check__Reply__<name>` também existiria.
 
@@ -138,7 +138,7 @@ OutHeadP->msgh_local_port = MACH_PORT_NULL;
 OutHeadP->msgh_id = InHeadP->msgh_id + 100;
 OutHeadP->msgh_reserved = 0;
 
-if ((InHeadP->msgh_id > 500) || (InHeadP->msgh_id &#x3C; 500) ||
+if ((InHeadP->msgh_id > 500) || (InHeadP->msgh_id < 500) ||
 <strong>	    ((routine = SERVERPREFmyipc_subsystem.routine[InHeadP->msgh_id - 500].stub_routine) == 0)) {
 </strong>		((mig_reply_error_t *)OutHeadP)->NDR = NDR_record;
 ((mig_reply_error_t *)OutHeadP)->RetCode = MIG_BAD_ID;
@@ -221,7 +221,7 @@ O NDR_record é exportado por `libsystem_kernel.dylib`, e é uma struct que perm
 
 Isso é interessante porque se `_NDR_record` for encontrado em um binário como uma dependência (`jtool2 -S <binary> | grep NDR` ou `nm`), isso significa que o binário é um cliente ou servidor MIG.
 
-Além disso, **servidores MIG** têm a tabela de despacho em `__DATA.__const` (ou em `__CONST.__constdata` no kernel do macOS e `__DATA_CONST.__const` em outros kernels \*OS). Isso pode ser extraído com **`jtool2`**.
+Além disso, **servidores MIG** têm a tabela de despacho em `__DATA.__const` (ou em `__CONST.__constdata` no kernel do macOS e `__DATA_CONST.__const` em outros kernels \*OS). Isso pode ser despejado com **`jtool2`**.
 
 E **clientes MIG** usarão o `__NDR_record` para enviar com `__mach_msg` para os servidores.
 
@@ -241,7 +241,7 @@ jtool2 -d __DATA.__const myipc_server | grep BL
 ```
 ### Assembly
 
-Foi mencionado anteriormente que a função que cuidará de **chamar a função correta dependendo do ID da mensagem recebida** era `myipc_server`. No entanto, você geralmente não terá os símbolos do binário (sem nomes de funções), então é interessante **ver como ela se parece decompilada**, pois será sempre muito semelhante (o código desta função é independente das funções expostas):
+Foi mencionado anteriormente que a função que se encarregará de **chamar a função correta dependendo do ID da mensagem recebida** era `myipc_server`. No entanto, você geralmente não terá os símbolos do binário (sem nomes de funções), então é interessante **ver como ela se parece decompilada**, pois será sempre muito semelhante (o código desta função é independente das funções expostas):
 
 {{#tabs}}
 {{#tab name="myipc_server decompiled 1"}}
@@ -250,13 +250,13 @@ Foi mencionado anteriormente que a função que cuidará de **chamar a função 
 var_10 = arg0;
 var_18 = arg1;
 // Instruções iniciais para encontrar os ponteiros de função apropriados
-*(int32_t *)var_18 = *(int32_t *)var_10 &#x26; 0x1f;
+*(int32_t *)var_18 = *(int32_t *)var_10 & 0x1f;
 *(int32_t *)(var_18 + 0x8) = *(int32_t *)(var_10 + 0x8);
 *(int32_t *)(var_18 + 0x4) = 0x24;
 *(int32_t *)(var_18 + 0xc) = 0x0;
 *(int32_t *)(var_18 + 0x14) = *(int32_t *)(var_10 + 0x14) + 0x64;
 *(int32_t *)(var_18 + 0x10) = 0x0;
-if (*(int32_t *)(var_10 + 0x14) &#x3C;= 0x1f4 &#x26;&#x26; *(int32_t *)(var_10 + 0x14) >= 0x1f4) {
+if (*(int32_t *)(var_10 + 0x14) <= 0x1f4 && *(int32_t *)(var_10 + 0x14) >= 0x1f4) {
 rax = *(int32_t *)(var_10 + 0x14);
 // Chamada para sign_extend_64 que pode ajudar a identificar esta função
 // Isso armazena em rax o ponteiro para a chamada que precisa ser chamada
@@ -264,7 +264,7 @@ rax = *(int32_t *)(var_10 + 0x14);
 // 0x1f4 = 500 (o ID inicial)
 <strong>            rax = *(sign_extend_64(rax - 0x1f4) * 0x28 + 0x100004040);
 </strong>            var_20 = rax;
-// Se - else, o if retorna falso, enquanto o else chama a função correta e retorna verdadeiro
+// Se - senão, o if retorna falso, enquanto o else chama a função correta e retorna verdadeiro
 <strong>            if (rax == 0x0) {
 </strong>                    *(var_18 + 0x18) = **_NDR_record;
 *(int32_t *)(var_18 + 0x20) = 0xfffffffffffffed1;
@@ -298,7 +298,7 @@ stack[-8] = r30;
 var_10 = arg0;
 var_18 = arg1;
 // Instruções iniciais para encontrar os ponteiros de função apropriados
-*(int32_t *)var_18 = *(int32_t *)var_10 &#x26; 0x1f | 0x0;
+*(int32_t *)var_18 = *(int32_t *)var_10 & 0x1f | 0x0;
 *(int32_t *)(var_18 + 0x8) = *(int32_t *)(var_10 + 0x8);
 *(int32_t *)(var_18 + 0x4) = 0x24;
 *(int32_t *)(var_18 + 0xc) = 0x0;
@@ -307,19 +307,19 @@ var_18 = arg1;
 r8 = *(int32_t *)(var_10 + 0x14);
 r8 = r8 - 0x1f4;
 if (r8 > 0x0) {
-if (CPU_FLAGS &#x26; G) {
+if (CPU_FLAGS & G) {
 r8 = 0x1;
 }
 }
-if ((r8 &#x26; 0x1) == 0x0) {
+if ((r8 & 0x1) == 0x0) {
 r8 = *(int32_t *)(var_10 + 0x14);
 r8 = r8 - 0x1f4;
-if (r8 &#x3C; 0x0) {
-if (CPU_FLAGS &#x26; L) {
+if (r8 < 0x0) {
+if (CPU_FLAGS & L) {
 r8 = 0x1;
 }
 }
-if ((r8 &#x26; 0x1) == 0x0) {
+if ((r8 & 0x1) == 0x0) {
 r8 = *(int32_t *)(var_10 + 0x14);
 // 0x1f4 = 500 (o ID inicial)
 <strong>                    r8 = r8 - 0x1f4;
@@ -328,19 +328,19 @@ r8 = *(r8 + 0x8);
 var_20 = r8;
 r8 = r8 - 0x0;
 if (r8 != 0x0) {
-if (CPU_FLAGS &#x26; NE) {
+if (CPU_FLAGS & NE) {
 r8 = 0x1;
 }
 }
-// Mesmo if else que na versão anterior
+// Mesmo se - senão que na versão anterior
 // Verifique o uso do endereço 0x100004040 (array de endereços de funções)
-<strong>                    if ((r8 &#x26; 0x1) == 0x0) {
+<strong>                    if ((r8 & 0x1) == 0x0) {
 </strong><strong>                            *(var_18 + 0x18) = **0x100004000;
 </strong>                            *(int32_t *)(var_18 + 0x20) = 0xfffffed1;
 var_4 = 0x0;
 }
 else {
-// Chamada para o endereço calculado onde a função deve estar
+// Chamada para o endereço calculado onde a função deve ser
 <strong>                            (var_20)(var_10, var_18);
 </strong>                            var_4 = 0x1;
 }
@@ -365,7 +365,7 @@ return r0;
 {{#endtab}}
 {{#endtabs}}
 
-Na verdade, se você for para a função **`0x100004000`**, encontrará o array de **`routine_descriptor`** structs. O primeiro elemento da struct é o **endereço** onde a **função** é implementada, e a **struct ocupa 0x28 bytes**, então a cada 0x28 bytes (começando do byte 0) você pode obter 8 bytes e isso será o **endereço da função** que será chamada:
+Na verdade, se você for para a função **`0x100004000`**, encontrará o array de **`routine_descriptor`** structs. O primeiro elemento da struct é o **endereço** onde a **função** é implementada, e a **struct ocupa 0x28 bytes**, então a cada 0x28 bytes (começando do byte 0) você pode obter 8 bytes e esse será o **endereço da função** que será chamada:
 
 <figure><img src="../../../../images/image (35).png" alt=""><figcaption></figcaption></figure>
 

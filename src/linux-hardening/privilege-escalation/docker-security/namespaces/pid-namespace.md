@@ -6,9 +6,9 @@
 
 O namespace PID (Identificador de Processo) é um recurso no kernel do Linux que fornece isolamento de processos, permitindo que um grupo de processos tenha seu próprio conjunto de PIDs únicos, separado dos PIDs em outros namespaces. Isso é particularmente útil na containerização, onde o isolamento de processos é essencial para segurança e gerenciamento de recursos.
 
-Quando um novo namespace PID é criado, o primeiro processo nesse namespace é atribuído ao PID 1. Esse processo se torna o processo "init" do novo namespace e é responsável por gerenciar outros processos dentro do namespace. Cada processo subsequente criado dentro do namespace terá um PID único dentro desse namespace, e esses PIDs serão independentes dos PIDs em outros namespaces.
+Quando um novo namespace PID é criado, o primeiro processo nesse namespace recebe o PID 1. Esse processo se torna o processo "init" do novo namespace e é responsável por gerenciar outros processos dentro do namespace. Cada processo subsequente criado dentro do namespace terá um PID único dentro desse namespace, e esses PIDs serão independentes dos PIDs em outros namespaces.
 
-Do ponto de vista de um processo dentro de um namespace PID, ele só pode ver outros processos no mesmo namespace. Ele não está ciente de processos em outros namespaces e não pode interagir com eles usando ferramentas tradicionais de gerenciamento de processos (por exemplo, `kill`, `wait`, etc.). Isso fornece um nível de isolamento que ajuda a evitar que os processos interfiram uns com os outros.
+Do ponto de vista de um processo dentro de um namespace PID, ele só pode ver outros processos no mesmo namespace. Ele não está ciente de processos em outros namespaces e não pode interagir com eles usando ferramentas tradicionais de gerenciamento de processos (por exemplo, `kill`, `wait`, etc.). Isso fornece um nível de isolamento que ajuda a evitar que os processos interfiram uns nos outros.
 
 ### Como funciona:
 
@@ -33,7 +33,7 @@ Quando `unshare` é executado sem a opção `-f`, um erro é encontrado devido �
 
 1. **Explicação do Problema**:
 
-- O kernel do Linux permite que um processo crie novos namespaces usando a chamada de sistema `unshare`. No entanto, o processo que inicia a criação de um novo namespace de PID (referido como o processo "unshare") não entra no novo namespace; apenas seus processos filhos o fazem.
+- O kernel do Linux permite que um processo crie novos namespaces usando a chamada de sistema `unshare`. No entanto, o processo que inicia a criação de um novo namespace de PID (referido como o processo "unshare") não entra no novo namespace; apenas seus processos filhos entram.
 - Executar `%unshare -p /bin/bash%` inicia `/bin/bash` no mesmo processo que `unshare`. Consequentemente, `/bin/bash` e seus processos filhos estão no namespace de PID original.
 - O primeiro processo filho de `/bin/bash` no novo namespace se torna PID 1. Quando esse processo sai, ele aciona a limpeza do namespace se não houver outros processos, já que PID 1 tem o papel especial de adotar processos órfãos. O kernel do Linux então desabilitará a alocação de PID nesse namespace.
 
@@ -55,7 +55,7 @@ Ao montar uma nova instância do sistema de arquivos `/proc` se você usar o par
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
-### &#x20;Verifique em qual namespace seu processo está
+### Verifique em qual namespace seu processo está
 ```bash
 ls -l /proc/self/ns/pid
 lrwxrwxrwx 1 root root 0 Apr  3 18:45 /proc/self/ns/pid -> 'pid:[4026532412]'
@@ -64,7 +64,7 @@ lrwxrwxrwx 1 root root 0 Apr  3 18:45 /proc/self/ns/pid -> 'pid:[4026532412]'
 ```bash
 sudo find /proc -maxdepth 3 -type l -name pid -exec readlink {} \; 2>/dev/null | sort -u
 ```
-Observe que o usuário root do namespace PID inicial (padrão) pode ver todos os processos, mesmo aqueles em novos namespaces PID, é por isso que podemos ver todos os namespaces PID.
+Observe que o usuário root do namespace PID inicial (padrão) pode ver todos os processos, mesmo aqueles em novos espaços de nomes PID, é por isso que podemos ver todos os namespaces PID.
 
 ### Entrar em um namespace PID
 ```bash
@@ -72,7 +72,7 @@ nsenter -t TARGET_PID --pid /bin/bash
 ```
 Quando você entra em um namespace PID a partir do namespace padrão, ainda será capaz de ver todos os processos. E o processo desse namespace PID poderá ver o novo bash no namespace PID.
 
-Além disso, você só pode **entrar em outro namespace PID de processo se for root**. E você **não pode** **entrar** em outro namespace **sem um descritor** apontando para ele (como `/proc/self/ns/pid`)
+Além disso, você só pode **entrar em outro namespace PID de processo se você for root**. E você **não pode** **entrar** em outro namespace **sem um descritor** apontando para ele (como `/proc/self/ns/pid`)
 
 ## Referências
 

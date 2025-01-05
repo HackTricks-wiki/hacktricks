@@ -26,7 +26,7 @@ Ao montar uma nova instância do sistema de arquivos `/proc` se você usar o par
 
 <summary>Erro: bash: fork: Não é possível alocar memória</summary>
 
-Quando `unshare` é executado sem a opção `-f`, um erro é encontrado devido à forma como o Linux lida com novos namespaces de PID (ID do Processo). Os detalhes principais e a solução estão descritos abaixo:
+Quando `unshare` é executado sem a opção `-f`, um erro é encontrado devido à forma como o Linux lida com novos namespaces de PID (Identificação de Processo). Os detalhes principais e a solução estão descritos abaixo:
 
 1. **Explicação do Problema**:
 
@@ -50,7 +50,7 @@ Ao garantir que `unshare` seja executado com a flag `-f`, o novo namespace de PI
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
-### &#x20;Verifique em qual namespace seu processo está
+### Verifique em qual namespace seu processo está
 ```bash
 ls -l /proc/self/ns/uts
 lrwxrwxrwx 1 root root 0 Apr  4 20:49 /proc/self/ns/uts -> 'uts:[4026531838]'
@@ -61,7 +61,7 @@ sudo find /proc -maxdepth 3 -type l -name uts -exec readlink {} \; 2>/dev/null |
 # Find the processes with an specific namespace
 sudo find /proc -maxdepth 3 -type l -name uts -exec ls -l  {} \; 2>/dev/null | grep <ns-number>
 ```
-### Entre em um namespace UTS
+### Entrar em um namespace UTS
 ```bash
 nsenter -u TARGET_PID --pid /bin/bash
 ```

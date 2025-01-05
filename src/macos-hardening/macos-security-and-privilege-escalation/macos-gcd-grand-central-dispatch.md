@@ -11,14 +11,14 @@
 > [!TIP]
 > Em resumo, para executar código em **paralelo**, processos podem enviar **blocos de código para o GCD**, que cuidará de sua execução. Portanto, os processos não criam novas threads; **o GCD executa o código fornecido com seu próprio pool de threads** (que pode aumentar ou diminuir conforme necessário).
 
-Isso é muito útil para gerenciar a execução paralela com sucesso, reduzindo significativamente o número de threads que os processos criam e otimizando a execução paralela. Isso é ideal para tarefas que requerem **grande paralelismo** (força bruta?) ou para tarefas que não devem bloquear a thread principal: Por exemplo, a thread principal no iOS lida com interações de UI, então qualquer outra funcionalidade que possa fazer o aplicativo travar (buscando, acessando um site, lendo um arquivo...) é gerenciada dessa forma.
+Isso é muito útil para gerenciar a execução paralela com sucesso, reduzindo significativamente o número de threads que os processos criam e otimizando a execução paralela. Isso é ideal para tarefas que requerem **grande paralelismo** (força bruta?) ou para tarefas que não devem bloquear a thread principal: Por exemplo, a thread principal no iOS lida com interações de UI, então qualquer outra funcionalidade que possa fazer o aplicativo travar (buscando, acessando a web, lendo um arquivo...) é gerenciada dessa forma.
 
 ### Blocos
 
 Um bloco é uma **seção de código autocontida** (como uma função com argumentos que retorna um valor) e também pode especificar variáveis vinculadas.\
 No entanto, no nível do compilador, os blocos não existem, eles são `os_object`s. Cada um desses objetos é formado por duas estruturas:
 
-- **literal de bloco**:&#x20;
+- **literal de bloco**:
 - Começa pelo campo **`isa`**, apontando para a classe do bloco:
 - `NSConcreteGlobalBlock` (blocos de `__DATA.__const`)
 - `NSConcreteMallocBlock` (blocos no heap)
@@ -37,7 +37,7 @@ No entanto, no nível do compilador, os blocos não existem, eles são `os_objec
 
 Uma fila de dispatch é um objeto nomeado que fornece ordenação FIFO de blocos para execuções.
 
-Blocos são definidos em filas para serem executados, e essas suportam 2 modos: `DISPATCH_QUEUE_SERIAL` e `DISPATCH_QUEUE_CONCURRENT`. Claro que a **serial** não terá problemas de condição de corrida, pois um bloco não será executado até que o anterior tenha terminado. Mas **o outro tipo de fila pode ter**.
+Os blocos são definidos em filas para serem executados, e essas suportam 2 modos: `DISPATCH_QUEUE_SERIAL` e `DISPATCH_QUEUE_CONCURRENT`. Claro que a **serial** não terá problemas de condição de corrida, pois um bloco não será executado até que o anterior tenha terminado. Mas **o outro tipo de fila pode ter**.
 
 Filas padrão:
 
@@ -195,7 +195,7 @@ Então, se você quiser que ele as entenda, você pode **declará-las**:
 
 <figure><img src="../../images/image (1163).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Em seguida, encontre um lugar no código onde elas são **usadas**:
+Depois, encontre um lugar no código onde elas são **usadas**:
 
 > [!TIP]
 > Note todas as referências feitas a "block" para entender como você poderia descobrir que a struct está sendo usada.
@@ -210,7 +210,7 @@ O Ghidra reescreverá automaticamente tudo:
 
 <figure><img src="../../images/image (1166).png" alt="" width="563"><figcaption></figcaption></figure>
 
-## Referências
+## References
 
 - [**\*OS Internals, Volume I: User Mode. By Jonathan Levin**](https://www.amazon.com/MacOS-iOS-Internals-User-Mode/dp/099105556X)
 

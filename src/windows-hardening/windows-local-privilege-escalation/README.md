@@ -79,7 +79,7 @@ Este [site](https://msrc.microsoft.com/update-guide/vulnerability) é útil para
 
 ### Ambiente
 
-Alguma credencial/informação valiosa salva nas variáveis de ambiente?
+Alguma credencial/informação suculenta salva nas variáveis de ambiente?
 ```bash
 set
 dir env:
@@ -114,7 +114,7 @@ Stop-Transcript
 
 Detalhes das execuções do pipeline PowerShell são registrados, abrangendo comandos executados, invocações de comandos e partes de scripts. No entanto, detalhes completos da execução e resultados de saída podem não ser capturados.
 
-Para habilitar isso, siga as instruções na seção "Arquivos de Transcrição" da documentação, optando por **"Registro de Módulo"** em vez de **"Transcrição do PowerShell"**.
+Para habilitar isso, siga as instruções na seção "Arquivos de Transcrição" da documentação, optando por **"Registro de Módulo"** em vez de **"Transcrição do Powershell"**.
 ```bash
 reg query HKCU\Software\Policies\Microsoft\Windows\PowerShell\ModuleLogging
 reg query HKLM\Software\Policies\Microsoft\Windows\PowerShell\ModuleLogging
@@ -127,7 +127,7 @@ Get-WinEvent -LogName "windows Powershell" | select -First 15 | Out-GridView
 ```
 ### PowerShell **Script Block Logging**
 
-Um registro completo de atividade e conteúdo da execução do script é capturado, garantindo que cada bloco de código seja documentado à medida que é executado. Esse processo preserva um histórico de auditoria abrangente de cada atividade, valioso para forense e análise de comportamento malicioso. Ao documentar toda a atividade no momento da execução, são fornecidas informações detalhadas sobre o processo.
+Um registro completo de atividade e conteúdo da execução do script é capturado, garantindo que cada bloco de código seja documentado à medida que é executado. Esse processo preserva um histórico de auditoria abrangente de cada atividade, valioso para investigações forenses e análise de comportamento malicioso. Ao documentar toda a atividade no momento da execução, são fornecidas informações detalhadas sobre o processo.
 ```bash
 reg query HKCU\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging
 reg query HKLM\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging
@@ -184,7 +184,7 @@ Basicamente, esta é a falha que esse bug explora:
 >
 > Além disso, uma vez que o serviço WSUS usa as configurações do usuário atual, ele também usará seu armazenamento de certificados. Se gerarmos um certificado autoassinado para o nome do host WSUS e adicionarmos esse certificado ao armazenamento de certificados do usuário atual, seremos capazes de interceptar tanto o tráfego WSUS HTTP quanto HTTPS. O WSUS não usa mecanismos semelhantes ao HSTS para implementar uma validação de confiança na primeira utilização no certificado. Se o certificado apresentado for confiável pelo usuário e tiver o nome do host correto, será aceito pelo serviço.
 
-Você pode explorar essa vulnerabilidade usando a ferramenta [**WSUSpicious**](https://github.com/GoSecure/wsuspicious) (uma vez que esteja liberada).
+Você pode explorar essa vulnerabilidade usando a ferramenta [**WSUSpicious**](https://github.com/GoSecure/wsuspicious) (uma vez que seja liberada).
 
 ## KrbRelayUp
 
@@ -192,7 +192,7 @@ Uma vulnerabilidade de **elevação de privilégio local** existe em ambientes *
 
 Encontre o **exploit em** [**https://github.com/Dec0ne/KrbRelayUp**](https://github.com/Dec0ne/KrbRelayUp)
 
-Para mais informações sobre o fluxo do ataque, verifique [https://research.nccgroup.com/2019/08/20/kerberos-resource-based-constrained-delegation-when-an-image-change-leads-to-a-privilege-escalation/](https://research.nccgroup.com/2019/08/20/kerberos-resource-based-constrained-delegation-when-an-image-change-leads-to-a-privilege-escalation/)
+Para mais informações sobre o fluxo do ataque, consulte [https://research.nccgroup.com/2019/08/20/kerberos-resource-based-constrained-delegation-when-an-image-change-leads-to-a-privilege-escalation/](https://research.nccgroup.com/2019/08/20/kerberos-resource-based-constrained-delegation-when-an-image-change-leads-to-a-privilege-escalation/)
 
 ## AlwaysInstallElevated
 
@@ -233,7 +233,7 @@ create-msi-with-wix.md
 ### Criar MSI com Visual Studio
 
 - **Gere** com Cobalt Strike ou Metasploit um **novo payload TCP EXE do Windows** em `C:\privesc\beacon.exe`
-- Abra **Visual Studio**, selecione **Criar um novo projeto** e digite "installer" na caixa de pesquisa. Selecione o projeto **Setup Wizard** e clique em **Next**.
+- Abra o **Visual Studio**, selecione **Criar um novo projeto** e digite "installer" na caixa de pesquisa. Selecione o projeto **Setup Wizard** e clique em **Next**.
 - Dê um nome ao projeto, como **AlwaysPrivesc**, use **`C:\privesc`** para o local, selecione **colocar solução e projeto no mesmo diretório**, e clique em **Create**.
 - Continue clicando em **Next** até chegar ao passo 3 de 4 (escolher arquivos para incluir). Clique em **Add** e selecione o payload Beacon que você acabou de gerar. Em seguida, clique em **Finish**.
 - Destaque o projeto **AlwaysPrivesc** no **Solution Explorer** e nas **Properties**, mude **TargetPlatform** de **x86** para **x64**.
@@ -243,7 +243,7 @@ create-msi-with-wix.md
 - Clique duas vezes em **Application Folder**, selecione seu arquivo **beacon.exe** e clique em **OK**. Isso garantirá que o payload beacon seja executado assim que o instalador for executado.
 - Nas **Custom Action Properties**, mude **Run64Bit** para **True**.
 - Finalmente, **construa-o**.
-- Se o aviso `File 'beacon-tcp.exe' targeting 'x64' is not compatible with the project's target platform 'x86'` for exibido, certifique-se de que você definiu a plataforma como x64.
+- Se o aviso `File 'beacon-tcp.exe' targeting 'x64' is not compatible with the project's target platform 'x86'` for exibido, certifique-se de definir a plataforma como x64.
 
 ### Instalação do MSI
 
@@ -263,7 +263,7 @@ reg query HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\System\Audit
 ```
 ### WEF
 
-Windows Event Forwarding, é interessante saber para onde os logs são enviados.
+O Windows Event Forwarding é interessante para saber para onde os logs são enviados.
 ```bash
 reg query HKLM\Software\Policies\Microsoft\Windows\EventLog\EventForwarding\SubscriptionManager
 ```
@@ -401,7 +401,7 @@ procdump.exe -accepteula -ma <proc_name_tasklist>
 
 **Aplicativos executando como SYSTEM podem permitir que um usuário inicie um CMD ou navegue por diretórios.**
 
-Exemplo: "Ajuda e Suporte do Windows" (Windows + F1), pesquise por "prompt de comando", clique em "Clique para abrir o Prompt de Comando"
+Exemplo: "Ajuda e Suporte do Windows" (Windows + F1), procure por "prompt de comando", clique em "Clique para abrir o Prompt de Comando"
 
 ## Serviços
 
@@ -435,8 +435,8 @@ accesschk.exe -uwcqv "Todos" * /accepteula ::Spanish version
 
 Se você estiver recebendo este erro (por exemplo, com SSDPSRV):
 
-_Erro do sistema 1058 ocorreu._\
-_&#x54;O serviço não pode ser iniciado, seja porque está desativado ou porque não possui dispositivos habilitados associados a ele._
+_Erro de sistema 1058 ocorreu._\
+_O serviço não pode ser iniciado, seja porque está desativado ou porque não possui dispositivos habilitados associados a ele._
 
 Você pode habilitá-lo usando
 ```bash
@@ -445,7 +445,7 @@ sc config SSDPSRV obj= ".\LocalSystem" password= ""
 ```
 **Leve em consideração que o serviço upnphost depende do SSDPSRV para funcionar (para XP SP1)**
 
-**Outra solução alternativa** para este problema é executar:
+**Outra solução alternativa** para esse problema é executar:
 ```
 sc.exe config usosvc start= auto
 ```
@@ -604,7 +604,7 @@ privilege-escalation-with-autorun-binaries.md
 
 ### Drivers
 
-Procure por possíveis **drivers estranhos/vulneráveis de terceiros**.
+Procure por possíveis **drivers estranhos/vulneráveis de terceiros**
 ```bash
 driverquery
 driverquery.exe /fo table
@@ -682,7 +682,7 @@ wsl whoami
 wsl whoami
 wsl python -c 'BIND_OR_REVERSE_SHELL_PYTHON_CODE'
 ```
-Para iniciar facilmente o bash como root, você pode tentar `--default-user root`
+Para iniciar o bash como root facilmente, você pode tentar `--default-user root`
 
 Você pode explorar o sistema de arquivos `WSL` na pasta `C:\Users\%USERNAME%\AppData\Local\Packages\CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc\LocalState\rootfs\`
 
@@ -707,7 +707,7 @@ O Cofre do Windows armazena credenciais de usuário para servidores, sites e out
 
 O Cofre do Windows armazena credenciais que o Windows pode usar para fazer login nos usuários automaticamente, o que significa que qualquer **aplicativo do Windows que precise de credenciais para acessar um recurso** (servidor ou um site) **pode fazer uso deste Gerenciador de Credenciais** & Cofre do Windows e usar as credenciais fornecidas em vez de os usuários digitarem o nome de usuário e a senha o tempo todo.
 
-A menos que os aplicativos interajam com o Gerenciador de Credenciais, não acho que seja possível para eles usarem as credenciais para um determinado recurso. Portanto, se seu aplicativo quiser fazer uso do cofre, ele deve de alguma forma **se comunicar com o gerenciador de credenciais e solicitar as credenciais para esse recurso** do cofre de armazenamento padrão.
+A menos que os aplicativos interajam com o Gerenciador de Credenciais, não acho que seja possível para eles usarem as credenciais para um determinado recurso. Portanto, se seu aplicativo quiser fazer uso do cofre, ele deve de alguma forma **comunicar-se com o gerenciador de credenciais e solicitar as credenciais para esse recurso** do cofre de armazenamento padrão.
 
 Use o `cmdkey` para listar as credenciais armazenadas na máquina.
 ```bash
@@ -729,11 +729,11 @@ Note que mimikatz, lazagne, [credentialfileview](https://www.nirsoft.net/utils/c
 
 ### DPAPI
 
-A **Data Protection API (DPAPI)** fornece um método para criptografia simétrica de dados, predominantemente usado dentro do sistema operacional Windows para a criptografia simétrica de chaves privadas assimétricas. Essa criptografia utiliza um segredo de usuário ou sistema para contribuir significativamente com a entropia.
+A **API de Proteção de Dados (DPAPI)** fornece um método para criptografia simétrica de dados, predominantemente utilizada dentro do sistema operacional Windows para a criptografia simétrica de chaves privadas assimétricas. Essa criptografia utiliza um segredo de usuário ou sistema para contribuir significativamente com a entropia.
 
 **A DPAPI permite a criptografia de chaves através de uma chave simétrica que é derivada dos segredos de login do usuário**. Em cenários que envolvem criptografia de sistema, utiliza os segredos de autenticação de domínio do sistema.
 
-As chaves RSA do usuário criptografadas, usando a DPAPI, são armazenadas no diretório `%APPDATA%\Microsoft\Protect\{SID}`, onde `{SID}` representa o [Security Identifier](https://en.wikipedia.org/wiki/Security_Identifier) do usuário. **A chave DPAPI, co-localizada com a chave mestra que protege as chaves privadas do usuário no mesmo arquivo**, geralmente consiste em 64 bytes de dados aleatórios. (É importante notar que o acesso a este diretório é restrito, impedindo a listagem de seu conteúdo via o comando `dir` no CMD, embora possa ser listado através do PowerShell).
+As chaves RSA de usuário criptografadas, usando a DPAPI, são armazenadas no diretório `%APPDATA%\Microsoft\Protect\{SID}`, onde `{SID}` representa o [Identificador de Segurança](https://en.wikipedia.org/wiki/Security_Identifier) do usuário. **A chave DPAPI, co-localizada com a chave mestra que protege as chaves privadas do usuário no mesmo arquivo**, normalmente consiste em 64 bytes de dados aleatórios. (É importante notar que o acesso a este diretório é restrito, impedindo a listagem de seu conteúdo via o comando `dir` no CMD, embora possa ser listado através do PowerShell).
 ```powershell
 Get-ChildItem  C:\Users\USER\AppData\Roaming\Microsoft\Protect\
 Get-ChildItem  C:\Users\USER\AppData\Local\Microsoft\Protect\
@@ -758,7 +758,7 @@ dpapi-extracting-passwords.md
 
 As **credenciais do PowerShell** são frequentemente usadas para **scripting** e tarefas de automação como uma forma de armazenar credenciais criptografadas de maneira conveniente. As credenciais são protegidas usando **DPAPI**, o que geralmente significa que só podem ser descriptografadas pelo mesmo usuário no mesmo computador em que foram criadas.
 
-Para **descriptografar** uma credencial do PS do arquivo que a contém, você pode fazer:
+Para **descriptografar** uma credencial PS do arquivo que a contém, você pode fazer:
 ```powershell
 PS C:\> $credential = Import-Clixml -Path 'C:\pass.xml'
 PS C:\> $credential.GetNetworkCredential().username
@@ -788,7 +788,7 @@ e em `HKCU\Software\Microsoft\Terminal Server Client\Servers\`
 HCU\<SID>\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\RunMRU
 HKCU\<SID>\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\RunMRU
 ```
-### **Gerenciador de Credenciais do Desktop Remoto**
+### **Gerenciador de Credenciais de Área de Trabalho Remota**
 ```
 %localappdata%\Microsoft\Remote Desktop Connection Manager\RDCMan.settings
 ```
@@ -802,7 +802,7 @@ As pessoas costumam usar o aplicativo StickyNotes em estações de trabalho Wind
 ### AppCmd.exe
 
 **Observe que para recuperar senhas do AppCmd.exe você precisa ser Administrador e executar sob um nível de Alta Integridade.**\
-**AppCmd.exe** está localizado no diretório `%systemroot%\system32\inetsrv\` .\
+**AppCmd.exe** está localizado no diretório `%systemroot%\system32\inetsrv\`.\ 
 Se este arquivo existir, então é possível que algumas **credenciais** tenham sido configuradas e podem ser **recuperadas**.
 
 Este código foi extraído do [**PowerUP**](https://github.com/PowerShellMafia/PowerSploit/blob/master/Privesc/PowerUp.ps1):
@@ -886,7 +886,7 @@ $ErrorActionPreference = $OrigError
 ### SCClient / SCCM
 
 Verifique se `C:\Windows\CCM\SCClient.exe` existe.\
-Instaladores são **executados com privilégios de SYSTEM**, muitos são vulneráveis a **DLL Sideloading (Info de** [**https://github.com/enjoiz/Privesc**](https://github.com/enjoiz/Privesc)**).**
+Instaladores são **executados com privilégios de SYSTEM**, muitos são vulneráveis a **DLL Sideloading (Info from** [**https://github.com/enjoiz/Privesc**](https://github.com/enjoiz/Privesc)**).**
 ```bash
 $result = Get-WmiObject -Namespace "root\ccm\clientSDK" -Class CCM_Application -Property * | select Name,SoftwareVersion
 if ($result) { $result }
@@ -1052,7 +1052,7 @@ C:\inetpub\logs\LogFiles\*
 #Apache
 Get-Childitem –Path C:\ -Include access.log,error.log -File -Recurse -ErrorAction SilentlyContinue
 ```
-### Peça credenciais
+### Pedir credenciais
 
 Você pode sempre **pedir ao usuário para inserir suas credenciais ou até mesmo as credenciais de um usuário diferente** se você achar que ele pode conhecê-las (note que **pedir** diretamente ao cliente as **credenciais** é realmente **arriscado**):
 ```bash
@@ -1207,7 +1207,7 @@ REG QUERY HKCU /F "password" /t REG_SZ /S /d
 ```
 ### Ferramentas que buscam por senhas
 
-[**MSF-Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **é um plugin do msf** que eu criei para **executar automaticamente todos os módulos POST do metasploit que buscam por credenciais** dentro da vítima.\
+[**MSF-Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **é um plugin msf** que eu criei para **executar automaticamente todos os módulos POST do metasploit que buscam por credenciais** dentro da vítima.\
 [**Winpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) busca automaticamente por todos os arquivos contendo senhas mencionados nesta página.\
 [**Lazagne**](https://github.com/AlessandroZ/LaZagne) é outra ótima ferramenta para extrair senhas de um sistema.
 
@@ -1222,16 +1222,16 @@ Invoke-SessionGopher -AllDomain -u domain.com\adm-arvanaghi -p s3cr3tP@ss
 
 Imagine que **um processo em execução como SYSTEM abre um novo processo** (`OpenProcess()`) com **acesso total**. O mesmo processo **também cria um novo processo** (`CreateProcess()`) **com privilégios baixos, mas herdando todos os manipuladores abertos do processo principal**.\
 Então, se você tiver **acesso total ao processo de baixo privilégio**, você pode pegar o **manipulador aberto para o processo privilegiado criado** com `OpenProcess()` e **injetar um shellcode**.\
-[Read this example for more information about **how to detect and exploit this vulnerability**.](leaked-handle-exploitation.md)\
-[Read this **other post for a more complete explanation on how to test and abuse more open handlers of processes and threads inherited with different levels of permissions (not only full access)**](http://dronesec.pw/blog/2019/08/22/exploiting-leaked-process-and-thread-handles/).
+[Leia este exemplo para mais informações sobre **como detectar e explorar essa vulnerabilidade**.](leaked-handle-exploitation.md)\
+[Leia este **outro post para uma explicação mais completa sobre como testar e abusar de mais manipuladores abertos de processos e threads herdados com diferentes níveis de permissões (não apenas acesso total)**](http://dronesec.pw/blog/2019/08/22/exploiting-leaked-process-and-thread-handles/).
 
 ## Named Pipe Client Impersonation
 
-Segmentos de memória compartilhada, referidos como **pipes**, permitem a comunicação entre processos e a transferência de dados.
+Segmentos de memória compartilhada, referidos como **pipes**, permitem comunicação entre processos e transferência de dados.
 
 O Windows fornece um recurso chamado **Named Pipes**, permitindo que processos não relacionados compartilhem dados, mesmo através de diferentes redes. Isso se assemelha a uma arquitetura cliente/servidor, com papéis definidos como **servidor de pipe nomeado** e **cliente de pipe nomeado**.
 
-Quando os dados são enviados através de um pipe por um **cliente**, o **servidor** que configurou o pipe tem a capacidade de **assumir a identidade** do **cliente**, assumindo que ele tenha os direitos necessários de **SeImpersonate**. Identificar um **processo privilegiado** que se comunica via um pipe que você pode imitar oferece uma oportunidade para **obter privilégios mais altos** ao adotar a identidade desse processo uma vez que ele interaja com o pipe que você estabeleceu. Para instruções sobre como executar tal ataque, guias úteis podem ser encontrados [**aqui**](named-pipe-client-impersonation.md) e [**aqui**](#from-high-integrity-to-system).
+Quando dados são enviados através de um pipe por um **cliente**, o **servidor** que configurou o pipe tem a capacidade de **assumir a identidade** do **cliente**, assumindo que possui os direitos necessários de **SeImpersonate**. Identificar um **processo privilegiado** que se comunica via um pipe que você pode imitar oferece uma oportunidade para **obter privilégios mais altos** ao adotar a identidade desse processo uma vez que ele interaja com o pipe que você estabeleceu. Para instruções sobre como executar tal ataque, guias úteis podem ser encontrados [**aqui**](named-pipe-client-impersonation.md) e [**aqui**](#from-high-integrity-to-system).
 
 Além disso, a seguinte ferramenta permite **interceptar uma comunicação de pipe nomeado com uma ferramenta como burp:** [**https://github.com/gabriel-sztejnworcel/pipe-intercept**](https://github.com/gabriel-sztejnworcel/pipe-intercept) **e esta ferramenta permite listar e ver todos os pipes para encontrar privescs** [**https://github.com/cyberark/PipeViewer**](https://github.com/cyberark/PipeViewer)
 
@@ -1301,25 +1301,25 @@ Você tem todos os arquivos e informações necessários no seguinte repositóri
 
 https://github.com/jas502n/CVE-2019-1388
 
-## De Nível de Integridade Médio para Alto / Bypass de UAC
+## De Nível de Integridade Médio de Administrador para Alto / Bypass de UAC
 
-Leia isto para **aprender sobre Níveis de Integridade**:
+Leia isso para **aprender sobre Níveis de Integridade**:
 
 {{#ref}}
 integrity-levels.md
 {{#endref}}
 
-Então **leia isto para aprender sobre UAC e bypasses de UAC:**
+Então **leia isso para aprender sobre UAC e bypasses de UAC:**
 
 {{#ref}}
 ../authentication-credentials-uac-and-efs/uac-user-account-control.md
 {{#endref}}
 
-## **De Alta Integridade para Sistema**
+## **De Alto Nível de Integridade para Sistema**
 
 ### **Novo serviço**
 
-Se você já estiver executando em um processo de Alta Integridade, o **passo para SYSTEM** pode ser fácil apenas **criando e executando um novo serviço**:
+Se você já estiver executando em um processo de Alto Nível de Integridade, o **passo para SYSTEM** pode ser fácil apenas **criando e executando um novo serviço**:
 ```
 sc create newservicename binPath= "C:\windows\system32\notepad.exe"
 sc start newservicename
@@ -1341,13 +1341,13 @@ Usar essa técnica geralmente **seleciona qualquer processo em execução como S
 
 ### **Named Pipes**
 
-Essa técnica é usada pelo meterpreter para escalar em `getsystem`. A técnica consiste em **criar um pipe e então criar/abusar de um serviço para escrever nesse pipe**. Então, o **servidor** que criou o pipe usando o privilégio **`SeImpersonate`** poderá **impersonar o token** do cliente do pipe (o serviço) obtendo privilégios SYSTEM.\
+Essa técnica é usada pelo meterpreter para escalar em `getsystem`. A técnica consiste em **criar um pipe e então criar/abusar um serviço para escrever nesse pipe**. Então, o **servidor** que criou o pipe usando o privilégio **`SeImpersonate`** poderá **impersonar o token** do cliente do pipe (o serviço) obtendo privilégios SYSTEM.\
 Se você quiser [**saber mais sobre pipes nomeados, você deve ler isso**](#named-pipe-client-impersonation).\
 Se você quiser ler um exemplo de [**como ir de alta integridade para System usando pipes nomeados, você deve ler isso**](from-high-integrity-to-system-with-name-pipes.md).
 
 ### Dll Hijacking
 
-Se você conseguir **sequestrar uma dll** sendo **carregada** por um **processo** em execução como **SYSTEM**, você poderá executar código arbitrário com essas permissões. Portanto, Dll Hijacking também é útil para esse tipo de escalonamento de privilégios e, além disso, é **muito mais fácil de alcançar a partir de um processo de alta integridade**, pois terá **permissões de gravação** nas pastas usadas para carregar dlls.\
+Se você conseguir **sequestrar uma dll** sendo **carregada** por um **processo** em execução como **SYSTEM**, você poderá executar código arbitrário com essas permissões. Portanto, o Dll Hijacking também é útil para esse tipo de escalonamento de privilégios e, além disso, é **muito mais fácil de alcançar a partir de um processo de alta integridade**, pois terá **permissões de gravação** nas pastas usadas para carregar dlls.\
 **Você pode** [**saber mais sobre Dll hijacking aqui**](dll-hijacking/index.html)**.**
 
 ### **From Administrator or Network Service to System**

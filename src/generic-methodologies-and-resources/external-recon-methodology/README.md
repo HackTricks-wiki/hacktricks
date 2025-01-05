@@ -10,12 +10,12 @@ O objetivo desta fase é obter todas as **empresas pertencentes à empresa princ
 
 1. Encontrar as aquisições da empresa principal, isso nos dará as empresas dentro do escopo.
 2. Encontrar o ASN (se houver) de cada empresa, isso nos dará os intervalos de IP pertencentes a cada empresa.
-3. Usar consultas de whois reverso para buscar outras entradas (nomes de organizações, domínios...) relacionadas à primeira (isso pode ser feito recursivamente).
-4. Usar outras técnicas como filtros `org` e `ssl` do shodan para buscar outros ativos (o truque `ssl` pode ser feito recursivamente).
+3. Usar consultas de whois reverso para procurar outras entradas (nomes de organizações, domínios...) relacionadas à primeira (isso pode ser feito recursivamente).
+4. Usar outras técnicas como filtros `org` e `ssl` do shodan para procurar outros ativos (o truque `ssl` pode ser feito recursivamente).
 
 ### **Aquisições**
 
-Primeiro de tudo, precisamos saber quais **outras empresas são pertencentes à empresa principal**.\
+Primeiro de tudo, precisamos saber quais **outras empresas são propriedade da empresa principal**.\
 Uma opção é visitar [https://www.crunchbase.com/](https://www.crunchbase.com), **pesquisar** pela **empresa principal** e **clicar** em "**aquisições**". Lá você verá outras empresas adquiridas pela principal.\
 Outra opção é visitar a página da **Wikipedia** da empresa principal e procurar por **aquisições**.
 
@@ -34,7 +34,7 @@ Você pode **pesquisar** pelo **nome** da empresa, por **IP** ou por **domínio*
 amass intel -org tesla
 amass intel -asn 8911,50313,394161
 ```
-Além disso, a enumeração de subdomínios do [**BBOT**](https://github.com/blacklanternsecurity/bbot)**'s** agrega e resume automaticamente os ASNs ao final da varredura.
+Além disso, a enumeração de subdomínios do [**BBOT**](https://github.com/blacklanternsecurity/bbot)**'s** agrega e resume automaticamente os ASNs no final da varredura.
 ```bash
 bbot -t tesla.com -f subdomain-enum
 ...
@@ -56,8 +56,8 @@ Você pode encontrar o IP e ASN de um domínio usando [http://ipv4info.com/](htt
 
 ### **Procurando vulnerabilidades**
 
-Neste ponto, sabemos **todos os ativos dentro do escopo**, então, se você tiver permissão, poderia lançar algum **scanner de vulnerabilidades** (Nessus, OpenVAS) sobre todos os hosts.\
-Além disso, você poderia lançar alguns [**scans de porta**](../pentesting-network/index.html#discovering-hosts-from-the-outside) **ou usar serviços como** shodan **para encontrar** portas abertas **e, dependendo do que você encontrar, deve** dar uma olhada neste livro sobre como realizar pentesting em vários serviços possíveis em execução.\
+Neste ponto, sabemos **todos os ativos dentro do escopo**, então, se você tiver permissão, pode lançar algum **scanner de vulnerabilidades** (Nessus, OpenVAS) sobre todos os hosts.\
+Além disso, você pode lançar alguns [**scans de porta**](../pentesting-network/index.html#discovering-hosts-from-the-outside) **ou usar serviços como** shodan **para encontrar** portas abertas **e, dependendo do que você encontrar, deve** dar uma olhada neste livro sobre como realizar pentesting em vários serviços possíveis em execução.\
 **Além disso, pode valer a pena mencionar que você também pode preparar algumas listas de** nomes de usuário **e** senhas **padrão e tentar** bruteforçar serviços com [https://github.com/x90skysn3k/brutespray](https://github.com/x90skysn3k/brutespray).
 
 ## Domínios
@@ -70,7 +70,7 @@ Primeiro de tudo, você deve procurar o(s) **domínio(s) principal(is)** de cada
 
 ### **DNS Reverso**
 
-Como você encontrou todos os intervalos de IP dos domínios, poderia tentar realizar **consultas de dns reverso** nesses **IPs para encontrar mais domínios dentro do escopo**. Tente usar algum servidor DNS da vítima ou algum servidor DNS bem conhecido (1.1.1.1, 8.8.8.8)
+Como você encontrou todos os intervalos de IP dos domínios, pode tentar realizar **consultas de dns reverso** nesses **IPs para encontrar mais domínios dentro do escopo**. Tente usar algum servidor dns da vítima ou algum servidor dns bem conhecido (1.1.1.1, 8.8.8.8)
 ```bash
 dnsrecon -r <DNS Range> -n <IP_DNS>   #DNS reverse of all of the addresses
 dnsrecon -d facebook.com -r 157.240.221.35/24 #Using facebooks dns
@@ -161,7 +161,7 @@ Você pode usar um site como [https://dmarc.live/info/google.com](https://dmarc.
 
 Aparentemente, é comum que as pessoas atribuam subdomínios a IPs que pertencem a provedores de nuvem e, em algum momento, **percam esse endereço IP, mas se esqueçam de remover o registro DNS**. Portanto, apenas **criar uma VM** em uma nuvem (como Digital Ocean) você estará, na verdade, **assumindo alguns subdomínios**.
 
-[**Este post**](https://kmsec.uk/blog/passive-takeover/) explica uma história sobre isso e propõe um script que **cria uma VM no DigitalOcean**, **obtém** o **IPv4** da nova máquina e **busca no Virustotal por registros de subdomínio** apontando para ela.
+[**Este post**](https://kmsec.uk/blog/passive-takeover/) explica uma história sobre isso e propõe um script que **cria uma VM no DigitalOcean**, **obtém** o **IPv4** da nova máquina e **busca no Virustotal por registros de subdomínio** que apontam para ela.
 
 ### **Outras maneiras**
 
@@ -169,7 +169,7 @@ Aparentemente, é comum que as pessoas atribuam subdomínios a IPs que pertencem
 
 **Shodan**
 
-Como você já sabe o nome da organização que possui o espaço de IP. Você pode pesquisar por esses dados no shodan usando: `org:"Tesla, Inc."` Verifique os hosts encontrados em busca de novos domínios inesperados no certificado TLS.
+Como você já sabe o nome da organização que possui o espaço de IP. Você pode pesquisar por esses dados no shodan usando: `org:"Tesla, Inc."` Verifique os hosts encontrados para novos domínios inesperados no certificado TLS.
 
 Você poderia acessar o **certificado TLS** da página principal, obter o **nome da Organização** e, em seguida, pesquisar esse nome dentro dos **certificados TLS** de todas as páginas conhecidas pelo **shodan** com o filtro: `ssl:"Tesla Motors"` ou usar uma ferramenta como [**sslsearch**](https://github.com/HarshVaragiya/sslsearch).
 
@@ -182,7 +182,7 @@ Você poderia acessar o **certificado TLS** da página principal, obter o **nome
 Verifique por alguma [tomada de domínio](../../pentesting-web/domain-subdomain-takeover.md#domain-takeover). Talvez alguma empresa esteja **usando algum domínio** mas tenha **perdido a propriedade**. Basta registrá-lo (se for barato o suficiente) e informar a empresa.
 
 Se você encontrar algum **domínio com um IP diferente** dos que você já encontrou na descoberta de ativos, você deve realizar uma **varredura básica de vulnerabilidades** (usando Nessus ou OpenVAS) e alguma [**varredura de portas**](../pentesting-network/index.html#discovering-hosts-from-the-outside) com **nmap/masscan/shodan**. Dependendo de quais serviços estão em execução, você pode encontrar neste livro algumas dicas para "atacá-los".\
-_&#x4E;ote que às vezes o domínio está hospedado dentro de um IP que não é controlado pelo cliente, então não está no escopo, tenha cuidado._
+_Observe que às vezes o domínio está hospedado dentro de um IP que não é controlado pelo cliente, então não está no escopo, tenha cuidado._
 
 ## Subdomínios
 
@@ -191,7 +191,7 @@ _&#x4E;ote que às vezes o domínio está hospedado dentro de um IP que não é 
 É hora de encontrar todos os possíveis subdomínios de cada domínio encontrado.
 
 > [!TIP]
-> Observe que algumas das ferramentas e técnicas para encontrar domínios também podem ajudar a encontrar subdomínios
+> Observe que algumas das ferramentas e técnicas para encontrar domínios também podem ajudar a encontrar subdomínios.
 
 ### **DNS**
 
@@ -319,11 +319,11 @@ Este projeto oferece **gratuitamente todos os subdomínios relacionados a progra
 
 Você pode encontrar uma **comparação** de muitas dessas ferramentas aqui: [https://blog.blacklanternsecurity.com/p/subdomain-enumeration-tool-face-off](https://blog.blacklanternsecurity.com/p/subdomain-enumeration-tool-face-off)
 
-### **Força bruta de DNS**
+### **DNS Brute force**
 
 Vamos tentar encontrar novos **subdomínios** forçando servidores DNS usando possíveis nomes de subdomínio.
 
-Para essa ação, você precisará de algumas **listas de palavras comuns de subdomínios como**:
+Para esta ação, você precisará de algumas **listas de palavras comuns de subdomínios como**:
 
 - [https://gist.github.com/jhaddix/86a06c5dc309d08580a018c66354a056](https://gist.github.com/jhaddix/86a06c5dc309d08580a018c66354a056)
 - [https://wordlists-cdn.assetnote.io/data/manual/best-dns-wordlist.txt](https://wordlists-cdn.assetnote.io/data/manual/best-dns-wordlist.txt)
@@ -331,11 +331,11 @@ Para essa ação, você precisará de algumas **listas de palavras comuns de sub
 - [https://github.com/pentester-io/commonspeak](https://github.com/pentester-io/commonspeak)
 - [https://github.com/danielmiessler/SecLists/tree/master/Discovery/DNS](https://github.com/danielmiessler/SecLists/tree/master/Discovery/DNS)
 
-E também IPs de bons resolvedores de DNS. Para gerar uma lista de resolvedores de DNS confiáveis, você pode baixar os resolvedores de [https://public-dns.info/nameservers-all.txt](https://public-dns.info/nameservers-all.txt) e usar [**dnsvalidator**](https://github.com/vortexau/dnsvalidator) para filtrá-los. Ou você poderia usar: [https://raw.githubusercontent.com/trickest/resolvers/main/resolvers-trusted.txt](https://raw.githubusercontent.com/trickest/resolvers/main/resolvers-trusted.txt)
+E também IPs de bons resolvedores DNS. Para gerar uma lista de resolvedores DNS confiáveis, você pode baixar os resolvedores de [https://public-dns.info/nameservers-all.txt](https://public-dns.info/nameservers-all.txt) e usar [**dnsvalidator**](https://github.com/vortexau/dnsvalidator) para filtrá-los. Ou você poderia usar: [https://raw.githubusercontent.com/trickest/resolvers/main/resolvers-trusted.txt](https://raw.githubusercontent.com/trickest/resolvers/main/resolvers-trusted.txt)
 
-As ferramentas mais recomendadas para força bruta de DNS são:
+As ferramentas mais recomendadas para brute-force DNS são:
 
-- [**massdns**](https://github.com/blechschmidt/massdns): Esta foi a primeira ferramenta que realizou uma força bruta de DNS eficaz. É muito rápida, no entanto, é propensa a falsos positivos.
+- [**massdns**](https://github.com/blechschmidt/massdns): Esta foi a primeira ferramenta que realizou um brute-force DNS eficaz. É muito rápida, no entanto, é propensa a falsos positivos.
 ```bash
 sed 's/$/.domain.com/' subdomains.txt > bf-subdomains.txt
 ./massdns -r resolvers.txt -w /tmp/results.txt bf-subdomains.txt
@@ -375,7 +375,7 @@ goaltdns -l subdomains.txt -w /tmp/words-permutations.txt -o /tmp/final-words-s3
 gotator -sub subdomains.txt -silent [-perm /tmp/words-permutations.txt]
 ```
 - [**altdns**](https://github.com/infosec-au/altdns): Além de gerar permutações de subdomínios, ele também pode tentar resolvê-los (mas é melhor usar as ferramentas comentadas anteriormente).
-- Você pode obter as permutações do altdns **wordlist** em [**aqui**](https://github.com/infosec-au/altdns/blob/master/words.txt).
+- Você pode obter a **wordlist** de permutações do altdns [**aqui**](https://github.com/infosec-au/altdns/blob/master/words.txt).
 ```
 altdns -i subdomains.txt -w /tmp/words-permutations.txt -o /tmp/asd3
 ```
@@ -459,7 +459,7 @@ Verifique possíveis [**subdomain takeovers**](../../pentesting-web/domain-subdo
 Se o **subdomínio** estiver apontando para algum **bucket S3**, [**verifique as permissões**](../../network-services-pentesting/pentesting-web/buckets/index.html).
 
 Se você encontrar algum **subdomínio com um IP diferente** dos que você já encontrou na descoberta de ativos, você deve realizar uma **varredura básica de vulnerabilidades** (usando Nessus ou OpenVAS) e alguma [**varredura de portas**](../pentesting-network/index.html#discovering-hosts-from-the-outside) com **nmap/masscan/shodan**. Dependendo dos serviços que estão em execução, você pode encontrar neste livro alguns truques para "atacá-los".\
-_&#x4E;ote que às vezes o subdomínio está hospedado dentro de um IP que não é controlado pelo cliente, então não está no escopo, tenha cuidado._
+_Observe que às vezes o subdomínio está hospedado dentro de um IP que não é controlado pelo cliente, então não está no escopo, tenha cuidado._
 
 ## IPs
 
@@ -474,7 +474,7 @@ Você também pode verificar domínios apontando para um endereço IP específic
 
 ### **Procurando por vulnerabilidades**
 
-**Varra todas as portas dos IPs que não pertencem a CDNs** (pois é altamente provável que você não encontre nada interessante lá). Nos serviços em execução descobertos, você pode ser **capaz de encontrar vulnerabilidades**.
+**Varra todas as portas dos IPs que não pertencem a CDNs** (pois você provavelmente não encontrará nada interessante lá). Nos serviços em execução descobertos, você pode ser **capaz de encontrar vulnerabilidades**.
 
 **Encontre um** [**guia**](../pentesting-network/index.html) **sobre como escanear hosts.**
 
@@ -510,7 +510,7 @@ Você também precisará de listas de palavras de **palavras comuns usadas em bu
 - [https://raw.githubusercontent.com/infosec-au/altdns/master/words.txt](https://raw.githubusercontent.com/infosec-au/altdns/master/words.txt)
 - [https://raw.githubusercontent.com/jordanpotti/AWSBucketDump/master/BucketNames.txt](https://raw.githubusercontent.com/jordanpotti/AWSBucketDump/master/BucketNames.txt)
 
-Então, com essas palavras, você deve gerar **permutations** (ver a [**Segunda Rodada de Força Bruta DNS**](#second-dns-bruteforce-round) para mais informações).
+Então, com essas palavras, você deve gerar **permutations** (ver [**Segunda Rodada de Brute-Force DNS**](#second-dns-bruteforce-round) para mais informações).
 
 Com as listas de palavras resultantes, você pode usar ferramentas como [**cloud_enum**](https://github.com/initstring/cloud_enum)**,** [**CloudScraper**](https://github.com/jordanpotti/CloudScraper)**,** [**cloudlist**](https://github.com/projectdiscovery/cloudlist) **ou** [**S3Scanner**](https://github.com/sa7mon/S3Scanner)**.**
 
@@ -531,7 +531,7 @@ Com os **domínios** e **subdomínios** dentro do escopo, você basicamente tem 
 
 ### **Procurando vulnerabilidades**
 
-Emails serão úteis mais tarde para **forçar logins web e serviços de autenticação** (como SSH). Além disso, eles são necessários para **phishings**. Além disso, essas APIs fornecerão ainda mais **informações sobre a pessoa** por trás do email, o que é útil para a campanha de phishing.
+Emails serão úteis mais tarde para **brute-force em logins web e serviços de autenticação** (como SSH). Além disso, eles são necessários para **phishings**. Além disso, essas APIs fornecerão ainda mais **informações sobre a pessoa** por trás do email, o que é útil para a campanha de phishing.
 
 ## Vazamentos de Credenciais
 
@@ -572,7 +572,7 @@ Você pode usar a ferramenta [**Pastos**](https://github.com/carlospolop/Pastos)
 
 Dorks do Google, embora antigos, são sempre úteis para encontrar **informações expostas que não deveriam estar lá**. O único problema é que o [**google-hacking-database**](https://www.exploit-db.com/google-hacking-database) contém vários **milhares** de possíveis consultas que você não pode executar manualmente. Então, você pode pegar suas 10 favoritas ou pode usar uma **ferramenta como** [**Gorks**](https://github.com/carlospolop/Gorks) **para executá-las todas**.
 
-_Observe que as ferramentas que esperam executar todo o banco de dados usando o navegador regular do Google nunca terminarão, pois o Google irá bloquear você muito em breve._
+_Observe que as ferramentas que esperam executar todo o banco de dados usando o navegador Google regular nunca terminarão, pois o Google irá bloquear você muito em breve._
 
 ### **Procurando vulnerabilidades**
 
@@ -596,11 +596,11 @@ Existem também serviços gratuitos que permitem que você **escaneie repositór
 
 A **maioria das vulnerabilidades** encontradas por caçadores de bugs reside dentro de **aplicações web**, então, neste ponto, eu gostaria de falar sobre uma **metodologia de teste de aplicações web**, e você pode [**encontrar essas informações aqui**](../../network-services-pentesting/pentesting-web/index.html).
 
-Eu também quero fazer uma menção especial à seção [**Ferramentas de Scanners Automáticos de Web de código aberto**](../../network-services-pentesting/pentesting-web/index.html#automatic-scanners), pois, se você não deve esperar que elas encontrem vulnerabilidades muito sensíveis, elas são úteis para implementá-las em **fluxos de trabalho para ter algumas informações iniciais da web.**
+Eu também quero fazer uma menção especial à seção [**Ferramentas de Scanners Automáticos de Web de Código Aberto**](../../network-services-pentesting/pentesting-web/index.html#automatic-scanners), pois, se você não deve esperar que elas encontrem vulnerabilidades muito sensíveis, elas são úteis para implementá-las em **fluxos de trabalho para ter algumas informações iniciais da web.**
 
 ## Recapitulação
 
-> Parabéns! Neste ponto, você já realizou **toda a enumeração básica**. Sim, é básico porque muito mais enumeração pode ser feita (veremos mais truques depois).
+> Parabéns! Neste ponto, você já realizou **toda a enumeração básica**. Sim, é básico porque muito mais enumeração pode ser feita (veremos mais truques mais tarde).
 
 Então você já:
 
