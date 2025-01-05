@@ -59,7 +59,7 @@ By mounting a new instance of the `/proc` filesystem if you use the param `--mou
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
 
-### &#x20;Check which namespace are your process in
+### Check which namespace are your process in
 
 ```bash
 ls -l /proc/self/ns/pid

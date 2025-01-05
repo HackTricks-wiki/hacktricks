@@ -55,7 +55,7 @@ Then, you do something so that **value changes**, and you **stop** the game and 
 ![](<../../images/image (684).png>)
 
 Cheat Engine will search for the **values** that **went from 100 to the new value**. Congrats, you **found** the **address** of the value you were looking for, you can now modify it.\
-_&#x49;f you still have several values, do something to modify again that value, and perform another "next scan" to filter the addresses._
+_If you still have several values, do something to modify again that value, and perform another "next scan" to filter the addresses._
 
 ### Unknown Value, known change
 

@@ -10,7 +10,7 @@ As the values of HKCU can be modified by the users **COM Hijacking** could be us
 - where the _Result_ is **NAME NOT FOUND**.
 - and the _Path_ ends with **InprocServer32**.
 
-Once you have decided which not existent COM to impersonate execute the following commands. _Be careful if you decide to impersonate a COM that is loaded every few seconds as that could be overkill._&#x20;
+Once you have decided which not existent COM to impersonate execute the following commands. _Be careful if you decide to impersonate a COM that is loaded every few seconds as that could be overkill._
 
 ```bash
 New-Item -Path "HKCU:Software\Classes\CLSID" -Name "{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}"

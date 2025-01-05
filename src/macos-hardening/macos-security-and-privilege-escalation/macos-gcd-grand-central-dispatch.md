@@ -18,7 +18,7 @@ This is very helpful to manage parallel execution successfully, greatly reducing
 A block is a **self contained section of code** (like a function with arguments returning a value) and can also specify bound variables.\
 However, at compiler level blocks doesn't exist, they are `os_object`s. Each of these objects is formed by two structures:
 
-- **block literal**:&#x20;
+- **block literal**:
   - It starts by the **`isa`** field, pointing to the block's class:
     - `NSConcreteGlobalBlock` (blocks from `__DATA.__const`)
     - `NSConcreteMallocBlock` (blocks in the heap)

@@ -51,7 +51,7 @@ Using some **social engineering** you could **impersonate for example Google Chr
 {{#tab name="Chrome Impersonation"}}
 Some suggestions:
 
-- Check in the Dock if there is a Chrome, and in that case **remove** that entry and **add** the **fake** **Chrome entry in the same position** in the Dock array.&#x20;
+- Check in the Dock if there is a Chrome, and in that case **remove** that entry and **add** the **fake** **Chrome entry in the same position** in the Dock array.
 
 ```bash
 #!/bin/sh

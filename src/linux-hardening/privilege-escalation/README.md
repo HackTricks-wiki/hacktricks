@@ -538,7 +538,7 @@ Sockets can be configured using `.socket` files.
 ### Writable .socket files
 
 If you find a **writable** `.socket` file you can **add** at the beginning of the `[Socket]` section something like: `ExecStartPre=/home/kali/sys/backdoor` and the backdoor will be executed before the socket is created. Therefore, you will **probably need to wait until the machine is rebooted.**\
-_&#x4E;ote that the system must be using that socket file configuration or the backdoor won't be executed_
+_Note that the system must be using that socket file configuration or the backdoor won't be executed_
 
 ### Writable sockets
 

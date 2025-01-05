@@ -26,7 +26,7 @@ MACF use **labels** that then the policies checking if they should grant some ac
 
 ## MACF Policies
 
-A MACF Policy defined **rule and conditions to be applied in certain kernel operations**.&#x20;
+A MACF Policy defined **rule and conditions to be applied in certain kernel operations**.
 
 A kernel extension could configure a `mac_policy_conf` struct and then register it calling `mac_policy_register`. From [here](https://opensource.apple.com/source/xnu/xnu-2050.18.24/security/mac_policy.h.auto.html):
 
@@ -115,7 +115,7 @@ mmap(proc_t p, struct mmap_args *uap, user_addr_t *retval)
 #if CONFIG_MACF
 <strong>			error = mac_file_check_mmap(vfs_context_ucred(ctx),
 </strong>			    fp->fp_glob, prot, flags, file_pos + pageoff,
-			    &#x26;maxprot);
+			    &maxprot);
 			if (error) {
 				(void)vnode_put(vp);
 				goto bad;

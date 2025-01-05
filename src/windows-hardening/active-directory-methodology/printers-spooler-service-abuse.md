@@ -127,6 +127,6 @@ If you can perform a MitM attack to a computer and inject HTML in a page he will
 ## Cracking NTLMv1
 
 If you can capture [NTLMv1 challenges read here how to crack them](../ntlm/index.html#ntlmv1-attack).\
-_&#x52;emember that in order to crack NTLMv1 you need to set Responder challenge to "1122334455667788"_
+_Remember that in order to crack NTLMv1 you need to set Responder challenge to "1122334455667788"_
 
 {{#include ../../banners/hacktricks-training.md}}

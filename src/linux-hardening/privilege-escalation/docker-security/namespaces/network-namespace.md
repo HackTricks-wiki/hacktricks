@@ -57,7 +57,7 @@ docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 # Run ifconfig or ip -a
 ```
 
-### &#x20;Check which namespace is your process in
+### Check which namespace is your process in
 
 ```bash
 ls -l /proc/self/ns/net
