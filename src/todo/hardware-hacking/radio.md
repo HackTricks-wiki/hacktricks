@@ -22,7 +22,7 @@ Dans le comportement de l'interface graphique, il est recommandé d'activer quel
 
 ### Utilisations
 
-- Juste pour **capturer un certain temps d'un signal et l'analyser**, maintenez simplement le bouton "Push to capture" aussi longtemps que vous en avez besoin.
+- Juste pour **capturer un certain temps d'un signal et l'analyser**, maintenez simplement le bouton "Push to capture" aussi longtemps que nécessaire.
 
 ![](<../../images/image (960).png>)
 
@@ -32,7 +32,7 @@ Dans le comportement de l'interface graphique, il est recommandé d'activer quel
 
 ### Synchroniser avec le canal radio
 
-Avec [**SigDigger** ](https://github.com/BatchDrake/SigDigger), synchronisez-vous avec le canal que vous souhaitez écouter, configurez l'option "Aperçu audio de la bande de base", configurez la bande passante pour obtenir toutes les informations envoyées, puis réglez le Tuner au niveau avant que le bruit ne commence vraiment à augmenter :
+Avec [**SigDigger** ](https://github.com/BatchDrake/SigDigger), synchronisez-vous avec le canal que vous souhaitez entendre, configurez l'option "Aperçu audio de la bande de base", configurez la bande passante pour obtenir toutes les informations envoyées, puis réglez le Tuner au niveau avant que le bruit ne commence vraiment à augmenter :
 
 ![](<../../images/image (585).png>)
 
@@ -55,16 +55,18 @@ Si vous vérifiez un signal, il existe différentes façons d'essayer de déterm
 
 ![](<../../images/image (788).png>)
 
-- **Détection AM** : Si dans le graphique IQ apparaissent par exemple **2 cercles** (probablement un à 0 et l'autre à une amplitude différente), cela pourrait signifier qu'il s'agit d'un signal AM. Cela est dû au fait que dans le graphique IQ, la distance entre le 0 et le cercle est l'amplitude du signal, donc il est facile de visualiser différentes amplitudes utilisées.
+- **Détection AM** : Si dans le graphique IQ apparaissent par exemple **2 cercles** (probablement un à 0 et un autre à une amplitude différente), cela pourrait signifier qu'il s'agit d'un signal AM. Cela est dû au fait que dans le graphique IQ, la distance entre le 0 et le cercle est l'amplitude du signal, donc il est facile de visualiser différentes amplitudes utilisées.
 - **Détection PM** : Comme dans l'image précédente, si vous trouvez de petits cercles non liés entre eux, cela signifie probablement qu'une modulation de phase est utilisée. Cela est dû au fait que dans le graphique IQ, l'angle entre le point et le 0,0 est la phase du signal, ce qui signifie que 4 phases différentes sont utilisées.
 - Notez que si l'information est cachée dans le fait qu'une phase est changée et non dans la phase elle-même, vous ne verrez pas différentes phases clairement différenciées.
 - **Détection FM** : IQ n'a pas de champ pour identifier les fréquences (la distance au centre est l'amplitude et l'angle est la phase).\
-Par conséquent, pour identifier FM, vous devriez **voir essentiellement un cercle** dans ce graphique.\
+Par conséquent, pour identifier la FM, vous devriez **voir essentiellement un cercle** dans ce graphique.\
 De plus, une fréquence différente est "représentée" par le graphique IQ par une **accélération de vitesse à travers le cercle** (donc dans SysDigger, en sélectionnant le signal, le graphique IQ est peuplé, si vous trouvez une accélération ou un changement de direction dans le cercle créé, cela pourrait signifier qu'il s'agit de FM) :
 
 ## Exemple AM
 
-{% file src="../../images/sigdigger_20220308_165547Z_2560000_433500000_float32_iq.raw" %}
+{{#file}}
+sigdigger_20220308_165547Z_2560000_433500000_float32_iq.raw
+{{#endfile}}
 
 ### Découverte de l'AM
 
@@ -100,7 +102,7 @@ Dans cet exemple, vous pouvez voir comment il y a un **grand cercle** mais aussi
 
 #### Avec un symbole
 
-Sélectionnez le plus petit symbole que vous pouvez trouver (pour être sûr qu'il ne s'agit que d'un) et vérifiez la "Fréquence de sélection". Dans ce cas, ce serait 1,013 kHz (donc 1 kHz).
+Sélectionnez le plus petit symbole que vous pouvez trouver (pour être sûr qu'il s'agit juste de 1) et vérifiez la "Fréquence de sélection". Dans ce cas, ce serait 1,013 kHz (donc 1 kHz).
 
 ![](<../../images/image (78).png>)
 
@@ -119,7 +121,7 @@ Ayant trouvé qu'il s'agit d'un signal **modulé en AM** et le **taux de symbole
 - **Synchroniser aux intervalles de sélection** signifie que si vous avez précédemment sélectionné des intervalles pour trouver le taux de symbole, ce taux de symbole sera utilisé.
 - **Manuel** signifie que le taux de symbole indiqué sera utilisé.
 - Dans **Sélection d'intervalle fixe**, vous indiquez le nombre d'intervalles qui doivent être sélectionnés et il calcule le taux de symbole à partir de cela.
-- **La récupération d'horloge Gadner** est généralement la meilleure option, mais vous devez toujours indiquer un taux de symbole approximatif.
+- **La récupération d'horloge Gadner** est généralement la meilleure option, mais vous devez encore indiquer un taux de symbole approximatif.
 
 En appuyant sur échantillon, cela apparaît :
 
@@ -129,19 +131,21 @@ Maintenant, pour faire comprendre à SigDigger **où se trouve la plage** du niv
 
 ![](<../../images/image (439).png>)
 
-S'il y avait par exemple **4 niveaux d'amplitude différents**, vous devriez configurer les **Bits par symbole à 2** et sélectionner du plus petit au plus grand.
+S'il y avait par exemple **4 niveaux d'amplitude différents**, vous auriez besoin de configurer les **Bits par symbole à 2** et de sélectionner du plus petit au plus grand.
 
 Enfin, **en augmentant** le **Zoom** et **en changeant la taille de la ligne**, vous pouvez voir les bits (et vous pouvez tout sélectionner et copier pour obtenir tous les bits) :
 
 ![](<../../images/image (276).png>)
 
-Si le signal a plus d'un bit par symbole (par exemple 2), SigDigger n'a **aucune façon de savoir quel symbole est** 00, 01, 10, 11, donc il utilisera différentes **échelles de gris** pour représenter chacun (et si vous copiez les bits, il utilisera **des nombres de 0 à 3**, vous devrez les traiter).
+Si le signal a plus d'1 bit par symbole (par exemple 2), SigDigger n'a **aucune façon de savoir quel symbole est** 00, 01, 10, 11, donc il utilisera différentes **échelles de gris** pour représenter chacun (et si vous copiez les bits, il utilisera **des nombres de 0 à 3**, vous devrez les traiter).
 
-De plus, utilisez des **codifications** telles que **Manchester**, et **up+down** peut être **1 ou 0** et un down+up peut être un 1 ou 0. Dans ces cas, vous devez **traiter les ups (1) et downs (0) obtenus** pour substituer les paires de 01 ou 10 par des 0s ou 1s.
+De plus, utilisez des **codifications** telles que **Manchester**, et **up+down** peut être **1 ou 0** et un down+up peut être un 1 ou 0. Dans ces cas, vous devez **traiter les ups obtenus (1) et downs (0)** pour substituer les paires de 01 ou 10 par des 0s ou 1s.
 
 ## Exemple FM
 
-{% file src="../../images/sigdigger_20220308_170858Z_2560000_433500000_float32_iq.raw" %}
+{{#file}}
+sigdigger_20220308_170858Z_2560000_433500000_float32_iq.raw
+{{#endfile}}
 
 ### Découverte de la FM
 
@@ -182,7 +186,7 @@ Et cela serait l'histogramme de phase (ce qui rend très clair que le signal n'e
 #### Avec IQ
 
 IQ n'a pas de champ pour identifier les fréquences (la distance au centre est l'amplitude et l'angle est la phase).\
-Par conséquent, pour identifier FM, vous devriez **voir essentiellement un cercle** dans ce graphique.\
+Par conséquent, pour identifier la FM, vous devriez **voir essentiellement un cercle** dans ce graphique.\
 De plus, une fréquence différente est "représentée" par le graphique IQ par une **accélération de vitesse à travers le cercle** (donc dans SysDigger, en sélectionnant le signal, le graphique IQ est peuplé, si vous trouvez une accélération ou un changement de direction dans le cercle créé, cela pourrait signifier qu'il s'agit de FM) :
 
 ![](<../../images/image (81).png>)
