@@ -4,13 +4,13 @@
 
 ## Basic Information
 
-Katika mazingira ambapo **Windows XP na Server 2003** zinafanya kazi, LM (Lan Manager) hashes zinatumika, ingawa inatambuliwa kwa urahisi kwamba hizi zinaweza kuathiriwa kwa urahisi. Hash maalum ya LM, `AAD3B435B51404EEAAD3B435B51404EE`, inaashiria hali ambapo LM haitumiki, ikiwakilisha hash ya string tupu.
+Katika mazingira ambapo **Windows XP na Server 2003** zinatumika, LM (Lan Manager) hashes zinatumika, ingawa inatambulika kwa urahisi kwamba hizi zinaweza kuathiriwa. Hash maalum ya LM, `AAD3B435B51404EEAAD3B435B51404EE`, inaashiria hali ambapo LM haitumiki, ikiwakilisha hash ya string tupu.
 
-Kwa kawaida, **Kerberos** ni itifaki ya uthibitishaji inayotumika. NTLM (NT LAN Manager) inaingia chini ya hali maalum: ukosefu wa Active Directory, kutokuwepo kwa domain, kushindwa kwa Kerberos kutokana na usanidi usio sahihi, au wakati mawasiliano yanapojaribu kutumia anwani ya IP badala ya jina halali la mwenyeji.
+Kwa kawaida, **Kerberos** ni itifaki kuu ya uthibitishaji inayotumika. NTLM (NT LAN Manager) inaingia katika hali maalum: ukosefu wa Active Directory, kutokuwepo kwa domain, kushindwa kwa Kerberos kutokana na usanidi usio sahihi, au wakati mawasiliano yanapojaribu kutumia anwani ya IP badala ya jina halali la mwenyeji.
 
-Uwepo wa kichwa cha **"NTLMSSP"** katika pakiti za mtandao unadhihirisha mchakato wa uthibitishaji wa NTLM.
+Uwepo wa kichwa cha **"NTLMSSP"** katika pakiti za mtandao unaashiria mchakato wa uthibitishaji wa NTLM.
 
-Msaada wa itifaki za uthibitishaji - LM, NTLMv1, na NTLMv2 - unapatikana kupitia DLL maalum iliyoko katika `%windir%\Windows\System32\msv1\_0.dll`.
+Msaada kwa itifaki za uthibitishaji - LM, NTLMv1, na NTLMv2 - unapatikana kupitia DLL maalum iliyoko kwenye `%windir%\Windows\System32\msv1\_0.dll`.
 
 **Key Points**:
 
@@ -51,7 +51,7 @@ Maadili yanayowezekana:
 3. **Seva** inatuma **changamoto**
 4. **Mteja anashughulikia** **changamoto** kwa kutumia hash ya nenosiri kama ufunguo na kuisafirisha kama jibu
 5. **Seva inatuma** kwa **Msimamizi wa Domain** **jina la domain, jina la mtumiaji, changamoto na jibu**. Ikiwa **hakuna** Active Directory iliyowekwa au jina la domain ni jina la seva, vithibitisho vinachunguzwa **kwa ndani**.
-6. **Msimamizi wa domain anachunguza kama kila kitu kiko sawa** na kutuma taarifa kwa seva
+6. **Msimamizi wa domain anachunguza kama kila kitu kiko sawa** na anatumia taarifa kwa seva
 
 **Seva** na **Msimamizi wa Domain** wanaweza kuunda **Kanal Salama** kupitia seva ya **Netlogon** kwani Msimamizi wa Domain anajua nenosiri la seva (lipo ndani ya **NTDS.DIT** db).
 
@@ -61,13 +61,13 @@ Uthibitishaji ni kama ule ulioelezwa **kabla lakini** **seva** inajua **hash ya 
 
 ### Changamoto ya NTLMv1
 
-**Urefu wa changamoto ni bytes 8** na **jibu lina urefu wa bytes 24**.
+**Urefu wa changamoto ni 8 bytes** na **jibu lina urefu wa 24 bytes**.
 
-**Hash NT (16bytes)** imegawanywa katika **sehemu 3 za bytes 7 kila moja** (7B + 7B + (2B+0x00\*5)): **sehemu ya mwisho imejaa sifuri**. Kisha, **changamoto** inashughulikiwa **kando** na kila sehemu na **bytes** zilizoshughulikiwa zinajumuishwa. Jumla: 8B + 8B + 8B = 24Bytes.
+**Hash NT (16bytes)** imegawanywa katika **sehemu 3 za 7bytes kila moja** (7B + 7B + (2B+0x00\*5)): **sehemu ya mwisho imejaa na sifuri**. Kisha, **changamoto** inashughulikiwa **kando** na kila sehemu na **bytes** zilizoshughulikiwa zinajumuishwa. Jumla: 8B + 8B + 8B = 24Bytes.
 
 **Matatizo**:
 
-- Ukosefu wa **uhakika**
+- Ukosefu wa **ujumla**
 - Sehemu 3 zinaweza **kushambuliwa kando** ili kupata hash ya NT
 - **DES inaweza kuvunjwa**
 - Funguo ya 3 daima ina **sifuri 5**.
@@ -75,17 +75,17 @@ Uthibitishaji ni kama ule ulioelezwa **kabla lakini** **seva** inajua **hash ya 
 
 ### Shambulio la NTLMv1
 
-Sasa hivi inakuwa nadra kupata mazingira yenye Uwakilishi Usio na Mipaka uliowekwa, lakini hii haimaanishi huwezi **kunufaika na huduma ya Print Spooler** iliyowekwa.
+Siku hizi inakuwa nadra kupata mazingira yenye Uwakilishi Usio na Mipaka uliowekwa, lakini hii haimaanishi huwezi **kunufaika na huduma ya Print Spooler** iliyowekwa.
 
-Unaweza kunufaika na baadhi ya vithibitisho/sesheni ulizo nazo kwenye AD ili **kuomba printer ithibitishe** dhidi ya **kituo chini ya udhibiti wako**. Kisha, ukitumia `metasploit auxiliary/server/capture/smb` au `responder` unaweza **kufanya changamoto ya uthibitishaji kuwa 1122334455667788**, kukamata jaribio la uthibitishaji, na ikiwa lilifanywa kwa kutumia **NTLMv1** utaweza **kulivunja**.\
+Unaweza kunufaika na baadhi ya vithibitisho/sesheni ulizo nazo kwenye AD ili **kuomba printer ithibitishe** dhidi ya **kituo chini ya udhibiti wako**. Kisha, ukitumia `metasploit auxiliary/server/capture/smb` au `responder` unaweza **kweka changamoto ya uthibitishaji kuwa 1122334455667788**, kukamata jaribio la uthibitishaji, na ikiwa lilifanywa kwa kutumia **NTLMv1** utaweza **kulivunja**.\
 Ikiwa unatumia `responder` unaweza kujaribu \*\*kutumia bendera `--lm` \*\* kujaribu **kudunisha** **uthibitishaji**.\
-&#xNAN;_&#x4E; kumbuka kwamba kwa mbinu hii uthibitishaji lazima ufanywe kwa kutumia NTLMv1 (NTLMv2 si halali)._
+_&#x4E;ote kwamba kwa mbinu hii uthibitishaji lazima ufanywe kwa kutumia NTLMv1 (NTLMv2 si halali)._
 
-Kumbuka kwamba printer itatumia akaunti ya kompyuta wakati wa uthibitishaji, na akaunti za kompyuta hutumia **nenosiri ndefu na zisizo na mpangilio** ambazo huenda **usijue jinsi ya kuzivunja** kwa kutumia **kamusi** za kawaida. Lakini uthibitishaji wa **NTLMv1** **unatumia DES** ([maelezo zaidi hapa](#ntlmv1-challenge)), hivyo kwa kutumia baadhi ya huduma zilizotengwa kwa ajili ya kuvunja DES utaweza kuivunja (unaweza kutumia [https://crack.sh/](https://crack.sh) au [https://ntlmv1.com/](https://ntlmv1.com) kwa mfano).
+Kumbuka kwamba printer itatumia akaunti ya kompyuta wakati wa uthibitishaji, na akaunti za kompyuta hutumia **nenosiri ndefu na za nasibu** ambazo huenda **usijue jinsi ya kuzivunja** kwa kutumia **kamusi** za kawaida. Lakini uthibitishaji wa **NTLMv1** **unatumia DES** ([maelezo zaidi hapa](#ntlmv1-challenge)), hivyo kwa kutumia baadhi ya huduma zilizotengwa kwa kuvunja DES utaweza kuivunja (unaweza kutumia [https://crack.sh/](https://crack.sh) au [https://ntlmv1.com/](https://ntlmv1.com) kwa mfano).
 
 ### Shambulio la NTLMv1 na hashcat
 
-NTLMv1 pia inaweza kuvunjwa kwa kutumia Zana ya NTLMv1 Multi [https://github.com/evilmog/ntlmv1-multi](https://github.com/evilmog/ntlmv1-multi) ambayo inaandaa ujumbe wa NTLMv1 kwa njia ambayo inaweza kuvunjwa na hashcat.
+NTLMv1 pia inaweza kuvunjwa kwa kutumia NTLMv1 Multi Tool [https://github.com/evilmog/ntlmv1-multi](https://github.com/evilmog/ntlmv1-multi) ambayo inaandaa ujumbe wa NTLMv1 kwa njia ambayo inaweza kuvunjwa na hashcat.
 
 Amri
 ```bash
@@ -155,7 +155,7 @@ NTHASH=b4b9b02e6f09a9bd760f388b6700586c
 ```
 ### NTLMv2 Challenge
 
-Urefu wa **changamoto ni 8 bytes** na **majibu 2 yanatumwa**: Moja ni **24 bytes** ndefu na urefu wa **nyingine** ni **mabadiliko**.
+Urefu wa **changamoto ni 8 bytes** na **majibu 2 yanatumwa**: Moja ni **24 bytes** ndefu na urefu wa **ingine** ni **mabadiliko**.
 
 **Jibu la kwanza** linaundwa kwa kuficha kwa kutumia **HMAC_MD5** **nyuzi** iliyoundwa na **mteja na eneo** na kutumia kama **funguo** **hash MD4** ya **NT hash**. Kisha, **matokeo** yatatumika kama **funguo** kuficha kwa kutumia **HMAC_MD5** **changamoto**. Kwa hili, **changamoto ya mteja ya 8 bytes itaongezwa**. Jumla: 24 B.
 
@@ -165,7 +165,7 @@ Ikiwa una **pcap ambayo imecapture mchakato wa uthibitishaji uliofanikiwa**, una
 
 ## Pass-the-Hash
 
-**Mara tu unapo kuwa na hash ya mwathirika**, unaweza kuitumia **kujifanya** kuwa yeye.\
+**Mara tu unapo kuwa na hash ya mwathirika**, unaweza kuitumia ili **kujifanya** kuwa yeye.\
 Unahitaji kutumia **chombo** ambacho kitafanya **uthibitishaji wa NTLM kwa kutumia** hiyo **hash**, **au** unaweza kuunda **sessionlogon** mpya na **kuingiza** hiyo **hash** ndani ya **LSASS**, hivyo wakati uthibitishaji wowote wa **NTLM unafanywa**, hiyo **hash itatumika.** Chaguo la mwisho ndilo ambalo mimikatz hufanya.
 
 **Tafadhali, kumbuka kwamba unaweza kufanya shambulio la Pass-the-Hash pia kwa kutumia Akaunti za Kompyuta.**
@@ -176,7 +176,7 @@ Unahitaji kutumia **chombo** ambacho kitafanya **uthibitishaji wa NTLM kwa kutum
 ```bash
 Invoke-Mimikatz -Command '"sekurlsa::pth /user:username /domain:domain.tld /ntlm:NTLMhash /run:powershell.exe"'
 ```
-Hii itazindua mchakato ambao utakuwa wa watumiaji ambao wameanzisha mimikatz lakini ndani ya LSASS, akidi zilizohifadhiwa ni zile zilizo ndani ya vigezo vya mimikatz. Kisha, unaweza kufikia rasilimali za mtandao kana kwamba wewe ni huyo mtumiaji (kama vile hila ya `runas /netonly` lakini huwezi kujua nenosiri la maandiko).
+Hii itazindua mchakato ambao utakuwa wa watumiaji ambao wameanzisha mimikatz lakini ndani ya LSASS, akidi zilizohifadhiwa ni zile zilizo ndani ya vigezo vya mimikatz. Kisha, unaweza kufikia rasilimali za mtandao kana kwamba wewe ni huyo mtumiaji (kama vile hila ya `runas /netonly` lakini huwezi kuhitaji kujua nenosiri la maandiko).
 
 ### Pass-the-Hash kutoka linux
 
@@ -194,7 +194,7 @@ Unaweza kupakua [impacket binaries za Windows hapa](https://github.com/ropnop/im
 
 ### Invoke-TheHash
 
-Unaweza kupata scripts za powershell kutoka hapa: [https://github.com/Kevin-Robertson/Invoke-TheHash](https://github.com/Kevin-Robertson/Invoke-TheHash)
+Unaweza kupata skripti za powershell kutoka hapa: [https://github.com/Kevin-Robertson/Invoke-TheHash](https://github.com/Kevin-Robertson/Invoke-TheHash)
 
 #### Invoke-SMBExec
 ```bash
@@ -214,7 +214,7 @@ Invoke-SMBEnum -Domain dollarcorp.moneycorp.local -Username svcadmin -Hash b38ff
 ```
 #### Invoke-TheHash
 
-Hii kazi ni **mchanganyiko wa zote nyingine**. Unaweza kupitisha **sehemu kadhaa**, **ondoa** wengine na **chagua** **chaguo** unalotaka kutumia (_SMBExec, WMIExec, SMBClient, SMBEnum_). Ikiwa unachagua **yoyote** ya **SMBExec** na **WMIExec** lakini **huto** toa _**Amri**_ parameter itakagua tu kama una **idhini za kutosha**.
+Hii kazi ni **mchanganyiko wa zote nyingine**. Unaweza kupitisha **mikoa kadhaa**, **kutengwa** wengine na **kuchagua** **chaguo** unalotaka kutumia (_SMBExec, WMIExec, SMBClient, SMBEnum_). Ikiwa unachagua **yoyote** ya **SMBExec** na **WMIExec** lakini **huto** toa _**Amri**_ parameter itakagua tu kama una **idhini za kutosha**.
 ```
 Invoke-TheHash -Type WMIExec -Target 192.168.100.0/24 -TargetExclude 192.168.100.50 -Username Administ -ty    h F6F38B793DB6A94BA04A52F1D3EE92F0
 ```
@@ -228,7 +228,7 @@ Hii zana itafanya kitu sawa na mimikatz (kubadilisha kumbukumbu ya LSASS).
 ```
 wce.exe -s <username>:<domain>:<hash_lm>:<hash_nt>
 ```
-### Manual Windows remote execution with username and password
+### Utekelezaji wa mbali wa Windows kwa kutumia jina la mtumiaji na nenosiri
 
 {{#ref}}
 ../lateral-movement/
@@ -246,7 +246,7 @@ wce.exe -s <username>:<domain>:<hash_lm>:<hash_nt>
 ../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md
 {{#endref}}
 
-## Parse NTLM challenges kutoka kwa kukamata mtandao
+## Parse changamoto za NTLM kutoka kwa kukamata mtandao
 
 **Unaweza kutumia** [**https://github.com/mlgualtieri/NTLMRawUnHide**](https://github.com/mlgualtieri/NTLMRawUnHide)
 

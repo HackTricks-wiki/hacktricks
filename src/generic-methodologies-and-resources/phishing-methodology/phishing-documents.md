@@ -8,7 +8,7 @@ Microsoft Word hufanya uthibitisho wa data za faili kabla ya kufungua faili. Uth
 
 Kwa kawaida, faili za Word zinazokuwa na macros hutumia kiendelezi cha `.docm`. Hata hivyo, inawezekana kubadilisha jina la faili kwa kubadilisha kiendelezi cha faili na bado kuhifadhi uwezo wao wa kutekeleza macros.\
 Kwa mfano, faili ya RTF haisaidii macros, kwa muundo, lakini faili ya DOCM iliyobadilishwa kuwa RTF itashughulikiwa na Microsoft Word na itakuwa na uwezo wa kutekeleza macros.\
-Mifumo na mitambo sawa inatumika kwa programu zote za Microsoft Office Suite (Excel, PowerPoint n.k.).
+Mifumo na mitambo ile ile inatumika kwa programu zote za Microsoft Office Suite (Excel, PowerPoint n.k.).
 
 Unaweza kutumia amri ifuatayo kuangalia ni viendelezi gani vitakavyotekelezwa na baadhi ya programu za Office:
 ```bash
@@ -19,13 +19,13 @@ DOCX files referencing a remote template (File –Options –Add-ins –Manage: 
 ### External Image Load
 
 Go to: _Insert --> Quick Parts --> Field_\
-&#xNAN;_**Categories**: Links and References, **Filed names**: includePicture, and **Filename or URL**:_ http://\<ip>/whatever
+_**Categories**: Links and References, **Filed names**: includePicture, and **Filename or URL**:_ http://\<ip>/whatever
 
 ![](<../../images/image (155).png>)
 
 ### Macros Backdoor
 
-Ni rahisi kutumia macros kuendesha msimbo wa kawaida kutoka kwenye hati.
+Ni rahisi kutumia macros kuendesha msimbo wowote kutoka kwa hati.
 
 #### Autoload functions
 
@@ -71,7 +71,7 @@ Nenda kwenye **File > Info > Inspect Document > Inspect Document**, ambayo itafu
 #### Upanuzi wa Doc
 
 Unapomaliza, chagua **Save as type** dropdown, badilisha muundo kutoka **`.docx`** hadi **Word 97-2003 `.doc`**.\
-Fanya hivi kwa sababu huwezi **kuhifadhi macro ndani ya `.docx`** na kuna **stigma** **kuhusu** upanuzi wa macro-enabled **`.docm`** (kwa mfano, ikoni ya thumbnail ina `!` kubwa na baadhi ya lango la wavuti/barua pepe yanayazuia kabisa). Hivyo, upanuzi huu wa zamani wa **`.doc`** ni suluhisho bora.
+Fanya hivi kwa sababu huwezi **kuhifadhi macro ndani ya `.docx`** na kuna **stigma** **kuhusu** upanuzi wa macro-enabled **`.docm`** (kwa mfano, ikoni ya thumbnail ina `!` kubwa na baadhi ya lango la wavuti/barua pepe yanayazuia kabisa). Kwa hivyo, huu **upanuzi wa zamani `.doc` ni suluhisho bora**.
 
 #### Watengenezaji wa Macros Mbaya
 
@@ -140,7 +140,7 @@ self.close
 ```
 ## Kulazimisha Uthibitisho wa NTLM
 
-Kuna njia kadhaa za **kulazimisha uthibitisho wa NTLM "kijijini"**, kwa mfano, unaweza kuongeza **picha zisizoonekana** kwenye barua pepe au HTML ambazo mtumiaji atafikia (hata HTTP MitM?). Au tuma mwathirika **anwani ya faili** ambazo zita **anzisha** **uthibitisho** tu kwa **kufungua folda.**
+Kuna njia kadhaa za **kulazimisha uthibitisho wa NTLM "kijijini"**, kwa mfano, unaweza kuongeza **picha zisizoonekana** kwenye barua pepe au HTML ambazo mtumiaji atafikia (hata HTTP MitM?). Au tumia mwathirika **anwani ya faili** ambazo zita **anzisha** **uthibitisho** tu kwa **kufungua folda.**
 
 **Angalia mawazo haya na mengine kwenye kurasa zifuatazo:**
 
