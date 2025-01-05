@@ -4,9 +4,9 @@
 
 ## Funksie Interposering
 
-Skep 'n **dylib** met 'n **`__interpose`** afdeling (of 'n afdeling gemerk met **`S_INTERPOSING`**) wat tupels van **funksie wysers** bevat wat na die **oorspronklike** en die **vervanging** funksies verwys.
+Skep 'n **dylib** met 'n **`__interpose`** afdeling (of 'n afdeling gemerk met **`S_INTERPOSING`**) wat tuples van **funksie wysers** bevat wat na die **oorspronklike** en die **vervanging** funksies verwys.
 
-Dan, **inspuit** die dylib met **`DYLD_INSERT_LIBRARIES`** (die interposering moet plaasvind voordat die hoof toepassing laai). Dit is duidelik dat die [**beperkings** wat op die gebruik van **`DYLD_INSERT_LIBRARIES`** van toepassing is, hier ook van toepassing is](../macos-proces-abuse/macos-library-injection/index.html#check-restrictions).&#x20;
+Dan, **inspuit** die dylib met **`DYLD_INSERT_LIBRARIES`** (die interposering moet plaasvind voordat die hoof toepassing laai). Dit is duidelik dat die [**beperkings** wat op die gebruik van **`DYLD_INSERT_LIBRARIES`** van toepassing is, hier ook van toepassing is](../macos-proces-abuse/macos-library-injection/index.html#check-restrictions).
 
 ### Interpose printf
 
@@ -160,7 +160,7 @@ return 0;
 ```
 ### Metode Swizzling met method_exchangeImplementations
 
-Die funksie **`method_exchangeImplementations`** maak dit moontlik om die **adres** van die **implementering** van **een funksie vir die ander** te **verander**.
+Die funksie **`method_exchangeImplementations`** laat toe om die **adres** van die **implementering** van **een funksie vir die ander** te **verander**.
 
 > [!CAUTION]
 > So wanneer 'n funksie aangeroep word, wat **uitgevoer word is die ander een**.
@@ -208,7 +208,7 @@ return 0;
 }
 ```
 > [!WARNING]
-> In hierdie geval, as die **implementasiekode van die wettige** metode **verifieer** die **metode** **naam**, kan dit hierdie swizzling **opspoor** en voorkom dat dit loop.
+> In hierdie geval, as die **implementasiekode van die wettige** metode **verifieer** die **metode** **naam**, kan dit hierdie swizzling **opspoor** en voorkom dat dit uitgevoer word.
 >
 > Die volgende tegniek het nie hierdie beperking nie.
 
@@ -274,7 +274,7 @@ In hierdie bladsy is verskillende maniere om funksies te hook te bespreek. Dit h
 
 Om dit te doen, is die maklikste tegniek om te gebruik om 'n [Dyld via omgewing veranderlikes of kaping](../macos-dyld-hijacking-and-dyld_insert_libraries.md) in te spuit. Ek vermoed egter dat dit ook gedoen kan word via [Dylib proses inspuiting](macos-ipc-inter-process-communication/index.html#dylib-process-injection-via-task-port).
 
-Albei opsies is egter **beperk** tot **onbeskermde** binêre/prosesse. Kyk na elke tegniek om meer oor die beperkings te leer.
+Beide opsies is egter **beperk** tot **onbeskermde** binêre/prosesse. Kyk na elke tegniek om meer oor die beperkings te leer.
 
 'n Funksie hooking aanval is egter baie spesifiek; 'n aanvaller sal dit doen om **sensitiewe inligting van binne 'n proses te steel** (as nie, sou jy net 'n proses inspuiting aanval doen nie). En hierdie sensitiewe inligting mag geleë wees in gebruiker afgelaaide toepassings soos MacPass.
 

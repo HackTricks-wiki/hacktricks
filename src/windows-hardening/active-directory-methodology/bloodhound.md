@@ -6,7 +6,7 @@
 
 [AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) is van die Sysinternal Suite:
 
-> 'n Gevorderde Active Directory (AD) kyker en redigeerder. Jy kan AD Explorer gebruik om maklik deur 'n AD-databasis te navigeer, gunsteling plekke te definieer, objek eienskappe en kenmerke te besigtig sonder om dialoogvensters te open, regte te redigeer, 'n objek se skema te besigtig, en gesofistikeerde soektogte uit te voer wat jy kan stoor en her-uitvoer.
+> 'n Gevorderde Active Directory (AD) kyker en redigeerder. Jy kan AD Explorer gebruik om maklik deur 'n AD-databasis te navigeer, gunsteling plekke te definieer, objek eienskappe en kenmerke te besigtig sonder om dialoogvensters te open, regte te redigeer, 'n objek se skema te besigtig, en gesofistikeerde soektogte uit te voer wat jy kan stoor en weer uitvoer.
 
 ### Snapshots
 
@@ -40,7 +40,7 @@ Die **ingestors** word gebruik om **die domein op te noem en al die inligting te
 
 Die **visualiseringstoepassing gebruik neo4j** om te wys hoe al die inligting verwant is en om verskillende maniere te wys om privilige in die domein te eskaleer.
 
-### Installasie
+### Installation
 
 Na die skepping van BloodHound CE, is die hele projek opgedateer vir gebruiksgemak met Docker. Die maklikste manier om te begin is om sy vooraf-gekonfigureerde Docker Compose konfigurasie te gebruik.
 
@@ -50,20 +50,20 @@ Na die skepping van BloodHound CE, is die hele projek opgedateer vir gebruiksgem
 curl -L https://ghst.ly/getbhce | docker compose -f - up
 ```
 3. Vind die ewekansig gegenereerde wagwoord in die terminaluitvoer van Docker Compose.  
-4. Gaan in 'n blaaier na http://localhost:8080/ui/login. Teken in met 'n gebruikersnaam van admin en die ewekansig gegenereerde wagwoord uit die logs.  
+4. Gaan in 'n blaaskie na http://localhost:8080/ui/login. Teken in met 'n gebruikersnaam van admin en die ewekansig gegenereerde wagwoord uit die logs.  
 
-Na hierdie sal jy die ewekansig gegenereerde wagwoord moet verander en jy sal die nuwe koppelvlak gereed hê, waarvan jy direk die ingestors kan aflaai.  
+Na hierdie sal jy die ewekansig gegenereerde wagwoord moet verander en jy sal die nuwe koppelvlak gereed hê, waarvandaan jy direk die ingestors kan aflaai.  
 
 ### SharpHound  
 
-Hulle het verskeie opsies, maar as jy SharpHound vanaf 'n PC wat by die domein aangesluit is, wil uitvoer, met jou huidige gebruiker en al die inligting wil onttrek, kan jy:
+Hulle het verskeie opsies, maar as jy SharpHound vanaf 'n PC wat by die domein aangesluit is, wil uitvoer, met jou huidige gebruiker en al die inligting wil onttrek, kan jy doen:
 ```
 ./SharpHound.exe --CollectionMethods All
 Invoke-BloodHound -CollectionMethod All
 ```
 > Jy kan meer lees oor **CollectionMethod** en lus sessie [hier](https://support.bloodhoundenterprise.io/hc/en-us/articles/17481375424795-All-SharpHound-Community-Edition-Flags-Explained)
 
-As jy SharpHound met verskillende akrediteerbesonderhede wil uitvoer, kan jy 'n CMD netonly sessie skep en SharpHound van daar af uitvoer:
+As jy SharpHound met verskillende akrediteerbesonderhede wil uitvoer, kan jy 'n CMD netonly-sessie skep en SharpHound van daar af uitvoer:
 ```
 runas /netonly /user:domain\user "powershell.exe -exec bypass"
 ```
@@ -80,8 +80,8 @@ group3r.exe -f <filepath-name.log>
 ```
 ## PingCastle
 
-[**PingCastle**](https://www.pingcastle.com/documentation/) **evalueer die sekuriteitsposisie van 'n AD omgewing** en bied 'n mooi **verslag** met grafieke.
+[**PingCastle**](https://www.pingcastle.com/documentation/) **evalueer die sekuriteitsposisie van 'n AD-omgewing** en bied 'n mooi **verslag** met grafieke.
 
-Om dit te laat loop, kan jy die binêre `PingCastle.exe` uitvoer en dit sal 'n **interaktiewe sessie** begin wat 'n menu van opsies aanbied. Die standaard opsie om te gebruik is **`healthcheck`** wat 'n basislyn **oorsig** van die **domein** sal vestig, en **misconfigurasies** en **kwesbaarhede** sal vind.&#x20;
+Om dit te laat loop, kan jy die binêre `PingCastle.exe` uitvoer en dit sal 'n **interaktiewe sessie** begin wat 'n menu van opsies aanbied. Die standaardopsie om te gebruik is **`healthcheck`** wat 'n basislyn **oorsig** van die **domein** sal vestig, en **misconfigurasies** en **kwesbaarhede** sal vind.
 
 {{#include ../../banners/hacktricks-training.md}}

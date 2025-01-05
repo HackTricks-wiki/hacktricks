@@ -11,7 +11,7 @@ Die definisie word gespesifiseer in Interface Definition Language (IDL) met die 
 Hierdie definisies het 5 afdelings:
 
 - **Substelseld verklaring**: Die sleutelwoord subsystem word gebruik om die **naam** en die **id** aan te dui. Dit is ook moontlik om dit as **`KernelServer`** te merk as die bediener in die kernel moet loop.
-- **Insluitings en invoere**: MIG gebruik die C-prepocessor, so dit is in staat om invoere te gebruik. Boonop is dit moontlik om `uimport` en `simport` te gebruik vir gebruiker of bediener gegenereerde kode.
+- **Insluitings en invoere**: MIG gebruik die C-prepocessor, so dit kan invoere gebruik. Boonop is dit moontlik om `uimport` en `simport` te gebruik vir gebruiker of bediener gegenereerde kode.
 - **Tipe verklarings**: Dit is moontlik om datatipes te definieer alhoewel dit gewoonlik `mach_types.defs` en `std_types.defs` sal invoer. Vir persoonlike tipes kan 'n sekere sintaksis gebruik word:
 - \[i`n/out]tran`: Funksie wat vertaal moet word van 'n inkomende of na 'n uitgaande boodskap
 - `c[user/server]type`: Kaart na 'n ander C tipe.
@@ -40,7 +40,7 @@ server_port :  mach_port_t;
 n1          :  uint32_t;
 n2          :  uint32_t);
 ```
-Let wel dat die eerste **argument die poort is om te bind** en MIG sal **automaties die antwoordpoort hanteer** (tenzij `mig_get_reply_port()` in die kliëntkode aangeroep word). Boonop sal die **ID van die operasies** **sekwensieel** wees wat begin by die aangeduide subsysteem-ID (so as 'n operasie verouderd is, word dit verwyder en `skip` word gebruik om steeds sy ID te gebruik).
+Let wel dat die eerste **argument die poort is om te bind** en MIG sal **automaties die antwoordpoort hanteer** (tenzij `mig_get_reply_port()` in die kliëntkode aangeroep word). Boonop sal die **ID van die operasies** **sekwensieel** wees wat begin met die aangeduide subsysteem-ID (so as 'n operasie verouderd is, word dit verwyder en `skip` word gebruik om steeds sy ID te gebruik).
 
 Gebruik nou MIG om die bediener- en kliëntkode te genereer wat in staat sal wees om met mekaar te kommunikeer om die Subtract-funksie aan te roep:
 ```bash
@@ -108,14 +108,14 @@ In hierdie voorbeeld het ons slegs 1 funksie in die definisies gedefinieer, maar
 
 As die funksie verwag is om 'n **antwoord** te stuur, sou die funksie `mig_internal kern_return_t __MIG_check__Reply__<name>` ook bestaan het.
 
-Werklik is dit moontlik om hierdie verhouding in die struktuur **`subsystem_to_name_map_myipc`** van **`myipcServer.h`** (**`subsystem*to_name_map*\***`\*\* in ander lêers) te identifiseer:
+Werklik is dit moontlik om hierdie verhouding in die struktuur **`subsystem_to_name_map_myipc`** van **`myipcServer.h`** (**`subsystem*to_name_map*\***`\*\* in ander lêers):
 ```c
 #ifndef subsystem_to_name_map_myipc
 #define subsystem_to_name_map_myipc \
 { "Subtract", 500 }
 #endif
 ```
-Uiteindelik, 'n ander belangrike funksie om die bediener te laat werk sal wees **`myipc_server`**, wat die een is wat werklik die **funksie** sal aanroep wat verband hou met die ontvangde id:
+Uiteindelik, 'n ander belangrike funksie om die bediener te laat werk sal **`myipc_server`** wees, wat die een is wat werklik die **funksie** wat verband hou met die ontvangde id sal **aanroep**:
 
 <pre class="language-c"><code class="lang-c">mig_external boolean_t myipc_server
 (mach_msg_header_t *InHeadP, mach_msg_header_t *OutHeadP)
@@ -138,7 +138,7 @@ OutHeadP->msgh_local_port = MACH_PORT_NULL;
 OutHeadP->msgh_id = InHeadP->msgh_id + 100;
 OutHeadP->msgh_reserved = 0;
 
-if ((InHeadP->msgh_id > 500) || (InHeadP->msgh_id &#x3C; 500) ||
+if ((InHeadP->msgh_id > 500) || (InHeadP->msgh_id < 500) ||
 <strong>	    ((routine = SERVERPREFmyipc_subsystem.routine[InHeadP->msgh_id - 500].stub_routine) == 0)) {
 </strong>		((mig_reply_error_t *)OutHeadP)->NDR = NDR_record;
 ((mig_reply_error_t *)OutHeadP)->RetCode = MIG_BAD_ID;
@@ -217,11 +217,11 @@ USERPREFSubtract(port, 40, 2);
 
 ### Die NDR_record
 
-Die NDR_record word uitgevoer deur `libsystem_kernel.dylib`, en dit is 'n struktuur wat MIG toelaat om **data te transformeer sodat dit onpartydig is teenoor die stelsel** waarvoor dit gebruik word, aangesien MIG bedoel was om tussen verskillende stelsels gebruik te word (en nie net op dieselfde masjien nie).
+Die NDR_record word uitgevoer deur `libsystem_kernel.dylib`, en dit is 'n struktuur wat MIG toelaat om **data te transformeer sodat dit nie afhanklik is van die stelsel** waarop dit gebruik word nie, aangesien MIG bedoel was om tussen verskillende stelsels gebruik te word (en nie net op dieselfde masjien nie).
 
 Dit is interessant omdat as `_NDR_record` in 'n binêre as 'n afhanklikheid gevind word (`jtool2 -S <binary> | grep NDR` of `nm`), dit beteken dat die binêre 'n MIG-kliënt of -bediener is.
 
-Boonop het **MIG-bedieners** die afleweringstabel in `__DATA.__const` (of in `__CONST.__constdata` in die macOS-kern en `__DATA_CONST.__const` in ander \*OS-kerns). Dit kan gedump word met **`jtool2`**.
+Boonop het **MIG-bedieners** die afleweringstabel in `__DATA.__const` (of in `__CONST.__constdata` in die macOS-kern en `__DATA_CONST.__const` in ander \*OS-kerns). Dit kan gedumpt word met **`jtool2`**.
 
 En **MIG-kliënte** sal die `__NDR_record` gebruik om met `__mach_msg` na die bedieners te stuur.
 
@@ -241,7 +241,7 @@ jtool2 -d __DATA.__const myipc_server | grep BL
 ```
 ### Assembly
 
-Daar is voorheen genoem dat die funksie wat **die korrekte funksie sal aanroep afhangende van die ontvangde boodskap ID** `myipc_server` was. Dit is egter gewoonlik dat jy nie die simbole van die binêre (geen funksie name) sal hê nie, so dit is interessant om **te kyk hoe dit dekompilleer lyk** aangesien dit altyd baie soortgelyk sal wees (die kode van hierdie funksie is onafhanklik van die funksies wat blootgestel word):
+Daar is voorheen genoem dat die funksie wat **die korrekte funksie sal aanroep afhangende van die ontvangde boodskap ID** `myipc_server` was. Dit is egter gewoonlik dat jy nie die simbole van die binêre (geen funksie name) sal hê nie, so dit is interessant om **te kyk hoe dit dekompilerend lyk** aangesien dit altyd baie soortgelyk sal wees (die kode van hierdie funksie is onafhanklik van die funksies wat blootgestel word):
 
 {{#tabs}}
 {{#tab name="myipc_server decompiled 1"}}
@@ -249,18 +249,18 @@ Daar is voorheen genoem dat die funksie wat **die korrekte funksie sal aanroep a
 <pre class="language-c"><code class="lang-c">int _myipc_server(int arg0, int arg1) {
 var_10 = arg0;
 var_18 = arg1;
-// Begininstruksies om die regte funksie aanwysers te vind
-*(int32_t *)var_18 = *(int32_t *)var_10 &#x26; 0x1f;
+// Begininstruksies om die regte funksie-aanwysers te vind
+*(int32_t *)var_18 = *(int32_t *)var_10 & 0x1f;
 *(int32_t *)(var_18 + 0x8) = *(int32_t *)(var_10 + 0x8);
 *(int32_t *)(var_18 + 0x4) = 0x24;
 *(int32_t *)(var_18 + 0xc) = 0x0;
 *(int32_t *)(var_18 + 0x14) = *(int32_t *)(var_10 + 0x14) + 0x64;
 *(int32_t *)(var_18 + 0x10) = 0x0;
-if (*(int32_t *)(var_10 + 0x14) &#x3C;= 0x1f4 &#x26;&#x26; *(int32_t *)(var_10 + 0x14) >= 0x1f4) {
+if (*(int32_t *)(var_10 + 0x14) <= 0x1f4 && *(int32_t *)(var_10 + 0x14) >= 0x1f4) {
 rax = *(int32_t *)(var_10 + 0x14);
 // Aanroep na sign_extend_64 wat kan help om hierdie funksie te identifiseer
 // Dit stoor in rax die aanwyser na die oproep wat gemaak moet word
-// Kontroleer die gebruik van die adres 0x100004040 (funksies adresse array)
+// Kontroleer die gebruik van die adres 0x100004040 (funksies aanwysers array)
 // 0x1f4 = 500 (die begin ID)
 <strong>            rax = *(sign_extend_64(rax - 0x1f4) * 0x28 + 0x100004040);
 </strong>            var_20 = rax;
@@ -289,7 +289,7 @@ return rax;
 {{#endtab}}
 
 {{#tab name="myipc_server decompiled 2"}}
-Dit is dieselfde funksie dekompilleer in 'n ander Hopper gratis weergawe:
+Dit is dieselfde funksie dekompilerend in 'n ander Hopper gratis weergawe:
 
 <pre class="language-c"><code class="lang-c">int _myipc_server(int arg0, int arg1) {
 r31 = r31 - 0x40;
@@ -297,8 +297,8 @@ saved_fp = r29;
 stack[-8] = r30;
 var_10 = arg0;
 var_18 = arg1;
-// Begininstruksies om die regte funksie aanwysers te vind
-*(int32_t *)var_18 = *(int32_t *)var_10 &#x26; 0x1f | 0x0;
+// Begininstruksies om die regte funksie-aanwysers te vind
+*(int32_t *)var_18 = *(int32_t *)var_10 & 0x1f | 0x0;
 *(int32_t *)(var_18 + 0x8) = *(int32_t *)(var_10 + 0x8);
 *(int32_t *)(var_18 + 0x4) = 0x24;
 *(int32_t *)(var_18 + 0xc) = 0x0;
@@ -307,19 +307,19 @@ var_18 = arg1;
 r8 = *(int32_t *)(var_10 + 0x14);
 r8 = r8 - 0x1f4;
 if (r8 > 0x0) {
-if (CPU_FLAGS &#x26; G) {
+if (CPU_FLAGS & G) {
 r8 = 0x1;
 }
 }
-if ((r8 &#x26; 0x1) == 0x0) {
+if ((r8 & 0x1) == 0x0) {
 r8 = *(int32_t *)(var_10 + 0x14);
 r8 = r8 - 0x1f4;
-if (r8 &#x3C; 0x0) {
-if (CPU_FLAGS &#x26; L) {
+if (r8 < 0x0) {
+if (CPU_FLAGS & L) {
 r8 = 0x1;
 }
 }
-if ((r8 &#x26; 0x1) == 0x0) {
+if ((r8 & 0x1) == 0x0) {
 r8 = *(int32_t *)(var_10 + 0x14);
 // 0x1f4 = 500 (die begin ID)
 <strong>                    r8 = r8 - 0x1f4;
@@ -328,13 +328,13 @@ r8 = *(r8 + 0x8);
 var_20 = r8;
 r8 = r8 - 0x0;
 if (r8 != 0x0) {
-if (CPU_FLAGS &#x26; NE) {
+if (CPU_FLAGS & NE) {
 r8 = 0x1;
 }
 }
 // Dieselfde as - anders soos in die vorige weergawe
-// Kontroleer die gebruik van die adres 0x100004040 (funksies adresse array)
-<strong>                    if ((r8 &#x26; 0x1) == 0x0) {
+// Kontroleer die gebruik van die adres 0x100004040 (funksies aanwysers array)
+<strong>                    if ((r8 & 0x1) == 0x0) {
 </strong><strong>                            *(var_18 + 0x18) = **0x100004000;
 </strong>                            *(int32_t *)(var_18 + 0x20) = 0xfffffed1;
 var_4 = 0x0;
@@ -365,7 +365,7 @@ return r0;
 {{#endtab}}
 {{#endtabs}}
 
-As jy eintlik na die funksie **`0x100004000`** gaan, sal jy die array van **`routine_descriptor`** strukture vind. Die eerste element van die struktuur is die **adres** waar die **funksie** geïmplementeer is, en die **struktuur neem 0x28 bytes**, so elke 0x28 bytes (begin vanaf byte 0) kan jy 8 bytes kry en dit sal die **adres van die funksie** wees wat aangeroep gaan word:
+As jy eintlik na die funksie **`0x100004000`** gaan, sal jy die array van **`routine_descriptor`** strukture vind. Die eerste element van die struktuur is die **adres** waar die **funksie** geïmplementeer is, en die **struktuur neem 0x28 bytes**, so elke 0x28 bytes (begin vanaf byte 0) kan jy 8 bytes kry en dit sal die **adres van die funksie** wees wat aangeroep sal word:
 
 <figure><img src="../../../../images/image (35).png" alt=""><figcaption></figcaption></figure>
 

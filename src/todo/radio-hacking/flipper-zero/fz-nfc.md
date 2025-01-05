@@ -30,7 +30,7 @@ Flipper Zero kan slegs 'n UID, SAK, ATQA, en gestoor data op bankkaarte **sonder
 
 Bankkaart lees skerm. Vir bankkaarte kan Flipper Zero slegs data lees **sonder om dit te stoor en te emuleer**.
 
-<figure><img src="https://cdn.flipperzero.one/Monosnap_Miro_2022-08-17_12-26-31.png?auto=format&#x26;ixlib=react-9.1.1&#x26;h=916&#x26;w=2662" alt=""><figcaption></figcaption></figure>
+<figure><img src="https://cdn.flipperzero.one/Monosnap_Miro_2022-08-17_12-26-31.png?auto=format&ixlib=react-9.1.1&h=916&w=2662" alt=""><figcaption></figcaption></figure>
 
 #### Onbekende kaarte <a href="#id-37eo8" id="id-37eo8"></a>
 
@@ -38,13 +38,13 @@ Wanneer Flipper Zero **nie in staat is om die tipe NFC-kaart te bepaal nie**, ka
 
 Onbekende kaart lees skerm. Vir onbekende NFC-kaarte kan Flipper Zero slegs 'n UID emuleer.
 
-<figure><img src="https://cdn.flipperzero.one/Monosnap_Miro_2022-08-17_12-27-53.png?auto=format&#x26;ixlib=react-9.1.1&#x26;h=932&#x26;w=2634" alt=""><figcaption></figcaption></figure>
+<figure><img src="https://cdn.flipperzero.one/Monosnap_Miro_2022-08-17_12-27-53.png?auto=format&ixlib=react-9.1.1&h=932&w=2634" alt=""><figcaption></figcaption></figure>
 
 ### NFC-kaarte tipes B, F, en V <a href="#wyg51" id="wyg51"></a>
 
 Vir **NFC-kaarte tipes B, F, en V**, kan Flipper Zero slegs **lees en vertoon 'n UID** sonder om dit te stoor.
 
-<figure><img src="https://archbee.imgix.net/3StCFqarJkJQZV-7N79yY/zBU55Fyj50TFO4U7S-OXH_screenshot-2022-08-12-at-182540.png?auto=format&#x26;ixlib=react-9.1.1&#x26;h=1080&#x26;w=2704" alt=""><figcaption></figcaption></figure>
+<figure><img src="https://archbee.imgix.net/3StCFqarJkJQZV-7N79yY/zBU55Fyj50TFO4U7S-OXH_screenshot-2022-08-12-at-182540.png?auto=format&ixlib=react-9.1.1&h=1080&w=2704" alt=""><figcaption></figcaption></figure>
 
 ## Aksies
 
@@ -60,7 +60,7 @@ Flipper Zero kan **NFC-kaarte lees**, maar dit **begryp nie al die protokolle** 
 
 In Flipper kan die lees van 13.56 MHz etikette in twee dele verdeel word:
 
-- **Lae-vlak lees** — lees slegs die UID, SAK, en ATQA. Flipper probeer om die hoë-vlak protokol te raai op grond van hierdie data wat van die kaart gelees is. Jy kan nie 100% seker wees hiervan nie, aangesien dit net 'n aanname is gebaseer op sekere faktore.
+- **Lae-vlak lees** — lees slegs die UID, SAK, en ATQA. Flipper probeer om die hoë-vlak protokol te raai op grond van hierdie data wat van die kaart gelees is. Jy kan nie 100% seker wees hiervan nie, aangesien dit net 'n aanname is op grond van sekere faktore.
 - **Hoë-vlak lees** — lees die data uit die kaart se geheue met behulp van 'n spesifieke hoë-vlak protokol. Dit sou die lees van die data op 'n Mifare Ultralight wees, die lees van die sektore van 'n Mifare Classic, of die lees van die kaart se eienskappe van PayPass/Apple Pay.
 
 ### Lees Spesifiek

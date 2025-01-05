@@ -4,7 +4,7 @@
 
 ## TCC Privilege Escalation
 
-As jy hier is op soek na TCC privilege escalation, gaan na:
+As jy hier gekom het op soek na TCC privilege escalation, gaan na:
 
 {{#ref}}
 macos-security-protections/macos-tcc/
@@ -12,7 +12,7 @@ macos-security-protections/macos-tcc/
 
 ## Linux Privesc
 
-Neem asseblief kennis dat **meeste van die truuks oor privilege escalation wat Linux/Unix raak, ook MacOS** masjiene sal raak. So kyk na:
+Neem asseblief kennis dat **die meeste van die truuks oor privilege escalation wat Linux/Unix raak, ook MacOS** masjiene sal raak. So kyk na:
 
 {{#ref}}
 ../../linux-hardening/privilege-escalation/
@@ -24,7 +24,7 @@ Neem asseblief kennis dat **meeste van die truuks oor privilege escalation wat L
 
 Jy kan die oorspronklike [Sudo Hijacking tegniek binne die Linux Privilege Escalation pos vind](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking).
 
-E however, macOS **onderhou** die gebruiker se **`PATH`** wanneer hy **`sudo`** uitvoer. Dit beteken dat 'n ander manier om hierdie aanval te bereik, sou wees om **ander binaries** te **hijack** wat die slagoffer steeds sal uitvoer wanneer **sudo** gedraai word:
+E however, macOS **onderhou** die gebruiker se **`PATH`** wanneer hy **`sudo`** uitvoer. Dit beteken dat 'n ander manier om hierdie aanval te bereik, sou wees om **ander binaries te kap** wat die slagoffer steeds sal uitvoer wanneer **sudo** gedraai word:
 ```bash
 # Let's hijack ls in /opt/homebrew/bin, as this is usually already in the users PATH
 cat > /opt/homebrew/bin/ls <<EOF
@@ -39,17 +39,17 @@ chmod +x /opt/homebrew/bin/ls
 # victim
 sudo ls
 ```
-Let daarop dat 'n gebruiker wat die terminal gebruik hoogs waarskynlik **Homebrew geïnstalleer** sal hê. Dit maak dit moontlik om binaries in **`/opt/homebrew/bin`** te kap.
+Let wel dat 'n gebruiker wat die terminal gebruik, hoogs waarskynlik **Homebrew geïnstalleer** het. Dit maak dit moontlik om binaries in **`/opt/homebrew/bin`** te kap.
 
 ### Dock Imitasie
 
-Deur sommige **sosiale ingenieurswese** te gebruik, kan jy **byvoorbeeld Google Chrome imiteer** binne die dock en werklik jou eie skrip uitvoer:
+Deur sommige **sosiale ingenieurswese** te gebruik, kan jy **byvoorbeeld Google Chrome imiteer** binne die dock en eintlik jou eie skrip uitvoer:
 
 {{#tabs}}
 {{#tab name="Chrome Impersonation"}}
 Sommige voorstelle:
 
-- Kontroleer in die Dock of daar 'n Chrome is, en in daardie geval **verwyder** daardie inskrywing en **voeg** die **valse** **Chrome-inskrywing in dieselfde posisie** in die Dock-array by.&#x20;
+- Kontroleer in die Dock of daar 'n Chrome is, en in daardie geval **verwyder** daardie inskrywing en **voeg** die **valse** **Chrome-inskrywing in dieselfde posisie** in die Dock-array by.
 ```bash
 #!/bin/sh
 
@@ -126,7 +126,7 @@ Sommige voorstelle:
 
 - Jy **kan nie Finder uit die Dock verwyder nie**, so as jy dit aan die Dock wil voeg, kan jy die vals Finder net langs die werklike een plaas. Hiervoor moet jy die **vals Finder inskrywing aan die begin van die Dock-array voeg**.
 - 'n Ander opsie is om dit nie in die Dock te plaas nie en net oop te maak, "Finder vra om Finder te beheer" is nie so vreemd nie.
-- 'n Ander opsie om **na root te eskaleer sonder om** die wagwoord met 'n vreeslike boks te vra, is om te maak dat Finder regtig om die wagwoord vra om 'n bevoorregte aksie uit te voer:
+- 'n Ander opsie om **na root te eskaleer sonder om** die wagwoord met 'n vreeslike boks te vra, is om Finder regtig te laat vra vir die wagwoord om 'n bevoorregte aksie uit te voer:
 - Vra Finder om na **`/etc/pam.d`** 'n nuwe **`sudo`** lêer te kopieer (Die prompt wat om die wagwoord vra, sal aandui dat "Finder wil sudo kopieer")
 - Vra Finder om 'n nuwe **Authorization Plugin** te kopieer (Jy kan die lêernaam beheer sodat die prompt wat om die wagwoord vra, sal aandui dat "Finder wil Finder.bundle kopieer")
 ```bash
@@ -205,7 +205,7 @@ killall Dock
 
 ### CVE-2020-9771 - mount_apfs TCC omseiling en privilege escalasie
 
-**Enige gebruiker** (selfs onprivilegieerde) kan 'n tydmasjien-snapshot skep en monteer en **toegang hê tot AL die lêers** van daardie snapshot.\
+**Enige gebruiker** (selfs onprivilegieerde) kan 'n tydmasjien-snapshot skep en monteer en **AL die lêers** van daardie snapshot toegang.\
 Die **enige privilegie** wat benodig word, is dat die toepassing wat gebruik word (soos `Terminal`) **Volledige Skyf Toegang** (FDA) toegang moet hê (`kTCCServiceSystemPolicyAllfiles`) wat deur 'n admin toegestaan moet word.
 ```bash
 # Create snapshot
@@ -226,7 +226,7 @@ mkdir /tmp/snap
 # Access it
 ls /tmp/snap/Users/admin_user # This will work
 ```
-'n Meer gedetailleerde verklaring kan [**gevind word in die oorspronklike verslag**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**
+'n Meer gedetailleerde verduideliking kan [**gevind word in die oorspronklike verslag**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**
 
 ## Sensitiewe Inligting
 

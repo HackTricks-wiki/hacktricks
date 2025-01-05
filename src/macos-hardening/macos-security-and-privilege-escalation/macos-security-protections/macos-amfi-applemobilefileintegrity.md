@@ -6,9 +6,9 @@
 
 Dit fokus op die afdwinging van die integriteit van die kode wat op die stelsel loop en bied die logika agter XNU se kodehandtekeningverifikasie. Dit is ook in staat om regte te kontroleer en ander sensitiewe take te hanteer, soos om foutopsporing toe te laat of taakpoorte te verkry.
 
-Boonop verkies die kext om vir sommige operasies die gebruikersruimte wat die daemon `/usr/libexec/amfid` uitvoer, te kontak. Hierdie vertrouensverhouding is in verskeie jailbreaks misbruik.
+Boonop, vir sommige operasies, verkies die kext om die gebruikersruimte wat die daemon `/usr/libexec/amfid` uitvoer, te kontak. Hierdie vertrouensverhouding is in verskeie jailbreaks misbruik.
 
-AMFI gebruik **MACF** beleide en dit registreer sy haakplekke die oomblik wat dit begin. Ook, om sy laai of ontlaai te verhoed, kan 'n kernpaniek veroorsaak. Daar is egter 'n paar opstartargumente wat AMFI kan verlam:
+AMFI gebruik **MACF** beleide en registreer sy haakplekke die oomblik wat dit begin. Ook, om sy laai of ontlaai te voorkom, kan 'n kernel paniek veroorsaak. Daar is egter 'n paar opstartargumente wat AMFI kan verlam:
 
 - `amfi_unrestricted_task_for_pid`: Laat task_for_pid toe sonder vereiste regte
 - `amfi_allow_any_signature`: Laat enige kodehandtekening toe
@@ -21,7 +21,7 @@ Hierdie is 'n paar van die MACF beleide wat dit registreer:
 - **`cred_check_label_update_execve:`** Etiketopdatering sal uitgevoer word en 1 teruggee
 - **`cred_label_associate`**: Werk AMFI se mac etiketgleuf met etiket op
 - **`cred_label_destroy`**: Verwyder AMFI se mac etiketgleuf
-- **`cred_label_init`**: Beweeg 0 in AMFI se mac etiketgleuf
+- **`cred_label_init`**: Plaas 0 in AMFI se mac etiketgleuf
 - **`cred_label_update_execve`:** Dit kontroleer die regte van die proses om te sien of dit toegelaat moet word om die etikette te wysig.
 - **`file_check_mmap`:** Dit kontroleer of mmap geheue verkry en dit as uitvoerbaar stel. In daardie geval kontroleer dit of biblioteekvalidasie nodig is en indien wel, roep dit die biblioteekvalidasiefunksie aan.
 - **`file_check_library_validation`**: Roep die biblioteekvalidasiefunksie aan wat onder andere kontroleer of 'n platformbinarie 'n ander platformbinarie laai of of die proses en die nuwe gelaaide lêer dieselfde TeamID het. Sekere regte sal ook toelaat om enige biblioteek te laai.
@@ -31,13 +31,13 @@ Hierdie is 'n paar van die MACF beleide wat dit registreer:
 - **`proc_check_expose_task`**: afdwing regte
 - **`amfi_exc_action_check_exception_send`**: 'n Uitsonderingboodskap word na die foutopsporingstelsel gestuur
 - **`amfi_exc_action_label_associate & amfi_exc_action_label_copy/populate & amfi_exc_action_label_destroy & amfi_exc_action_label_init & amfi_exc_action_label_update`**: Etiketlewe tydens uitsonderinghantering (foutopsporing)
-- **`proc_check_get_task`**: Kontroleer regte soos `get-task-allow` wat ander prosesse toelaat om die taakpoort te verkry en `task_for_pid-allow`, wat die proses toelaat om ander prosesse se taakpoorte te verkry. As geen van hierdie, roep dit `amfid permitunrestricteddebugging` aan om te kontroleer of dit toegelaat word.
-- **`proc_check_mprotect`**: Weier as `mprotect` met die vlag `VM_PROT_TRUSTED` aangeroep word wat aandui dat die streek asof dit 'n geldige kodehandtekening het, behandel moet word.
+- **`proc_check_get_task`**: Kontroleer regte soos `get-task-allow` wat ander prosesse toelaat om die taakpoort te verkry en `task_for_pid-allow`, wat die proses toelaat om ander prosesse se taakpoorte te verkry. As geen van hierdie, roep dit `amfid permitunrestricteddebugging` aan om te kontroleer of dit toegelaat is.
+- **`proc_check_mprotect`**: Weier as `mprotect` met die vlag `VM_PROT_TRUSTED` aangeroep word wat aandui dat die streek behandel moet word asof dit 'n geldige kodehandtekening het.
 - **`vnode_check_exec`**: Word aangeroep wanneer uitvoerbare lêers in geheue gelaai word en stel `cs_hard | cs_kill` wat die proses sal doodmaak as enige van die bladsye ongeldig word
 - **`vnode_check_getextattr`**: MacOS: Kontroleer `com.apple.root.installed` en `isVnodeQuarantined()`
-- **`vnode_check_setextattr`**: Soos kry + com.apple.private.allow-bless en interne-installer-ekwivalente regte
-- &#x20;**`vnode_check_signature`**: Kode wat XNU aanroep om die kodehandtekening te kontroleer met behulp van regte, vertrou cache en `amfid`
-- &#x20;**`proc_check_run_cs_invalid`**: Dit onderskep `ptrace()` aanroepe (`PT_ATTACH` en `PT_TRACE_ME`). Dit kontroleer vir enige van die regte `get-task-allow`, `run-invalid-allow` en `run-unsigned-code` en as geen, kontroleer dit of foutopsporing toegelaat word.
+- **`vnode_check_setextattr`**: Soos kry + com.apple.private.allow-bless en interne-installer-gelyke regte
+- **`vnode_check_signature`**: Kode wat XNU aanroep om die kodehandtekening te kontroleer met behulp van regte, vertrou cache en `amfid`
+- **`proc_check_run_cs_invalid`**: Dit onderskep `ptrace()` aanroepe (`PT_ATTACH` en `PT_TRACE_ME`). Dit kontroleer vir enige van die regte `get-task-allow`, `run-invalid-allow` en `run-unsigned-code` en as geen, kontroleer dit of foutopsporing toegelaat is.
 - **`proc_check_map_anon`**: As mmap met die **`MAP_JIT`** vlag aangeroep word, sal AMFI die `dynamic-codesigning` regte kontroleer.
 
 `AMFI.kext` stel ook 'n API vir ander kernuitbreidings bloot, en dit is moontlik om sy afhanklikhede te vind met:
@@ -65,20 +65,20 @@ No variant specified, falling back to release
 ```
 ## amfid
 
-Dit is die gebruikersmodus wat daemons wat `AMFI.kext` sal gebruik om kode-handtekeninge in gebruikersmodus te kontroleer.\
+Dit is die gebruikersmodus wat daemons wat `AMFI.kext` sal gebruik om kodehandtekeninge in gebruikersmodus te kontroleer.\
 Vir `AMFI.kext` om met die daemon te kommunikeer, gebruik dit mach-boodskappe oor die poort `HOST_AMFID_PORT` wat die spesiale poort `18` is.
 
-Let daarop dat dit in macOS nie meer moontlik is vir root prosesse om spesiale poorte te kap nie, aangesien dit deur `SIP` beskerm word en slegs launchd dit kan verkry. In iOS word dit nagegaan dat die proses wat die antwoord terugstuur die CDHash van `amfid` hardgecodeer het.
+Let daarop dat dit in macOS nie meer moontlik is vir root prosesse om spesiale poorte te kap nie, aangesien dit beskerm word deur `SIP` en slegs launchd dit kan verkry. In iOS word dit nagegaan dat die proses wat die antwoord terugstuur die CDHash van `amfid` hardgecodeer het.
 
-Dit is moontlik om te sien wanneer `amfid` versoek word om 'n binêre te kontroleer en die antwoord daarvan deur dit te debugeer en 'n breekpunt in `mach_msg` te stel.
+Dit is moontlik om te sien wanneer `amfid` versoek word om 'n binêre te kontroleer en die antwoord daarvan deur dit te debugeer en 'n breekpunt in `mach_msg` in te stel.
 
 Sodra 'n boodskap ontvang word via die spesiale poort, word **MIG** gebruik om elke funksie na die funksie wat dit aanroep te stuur. Die hooffunksies is omgekeerd en binne die boek verduidelik.
 
 ## Provisioning Profiles
 
-'n Provisioning-profiel kan gebruik word om kode te teken. Daar is **Developer** profiele wat gebruik kan word om kode te teken en dit te toets, en **Enterprise** profiele wat in alle toestelle gebruik kan word.
+'n Provisioning profiel kan gebruik word om kode te teken. Daar is **Developer** profiele wat gebruik kan word om kode te teken en dit te toets, en **Enterprise** profiele wat in alle toestelle gebruik kan word.
 
-Nadat 'n app by die Apple Store ingedien is, indien goedgekeur, word dit deur Apple geteken en is die provisioning-profiel nie meer nodig nie.
+Nadat 'n App by die Apple Store ingedien is, indien goedgekeur, word dit deur Apple geteken en is die provisioning profiel nie meer nodig nie.
 
 'n Profiel gebruik gewoonlik die uitbreiding `.mobileprovision` of `.provisionprofile` en kan gedump word met:
 ```bash
@@ -88,19 +88,19 @@ openssl asn1parse -inform der -in /path/to/profile
 
 security cms -D -i /path/to/profile
 ```
-Alhoewel dit soms as gesertifiseer verwys word, het hierdie voorsieningsprofiele meer as 'n sertifikaat:
+Hoewel dit soms as gesertifiseer verwys word, het hierdie voorsieningsprofiele meer as 'n sertifikaat:
 
-- **AppIDName:** Die Aansoek Identifiseerder
+- **AppIDName:** Die Aansoekidentifiseerder
 - **AppleInternalProfile**: Dui dit aan as 'n Apple Interne profiel
 - **ApplicationIdentifierPrefix**: Voorafgegaan aan AppIDName (dieselfde as TeamIdentifier)
 - **CreationDate**: Datum in `YYYY-MM-DDTHH:mm:ssZ` formaat
 - **DeveloperCertificates**: 'n Array van (gewoonlik een) sertifikaat(e), gekodeer as Base64 data
 - **Entitlements**: Die regte wat toegelaat word met regte vir hierdie profiel
 - **ExpirationDate**: Vervaldatum in `YYYY-MM-DDTHH:mm:ssZ` formaat
-- **Name**: Die Aansoek Naam, dieselfde as AppIDName
-- **ProvisionedDevices**: 'n Array (vir ontwikkelaar sertifikate) van UDIDs waarvoor hierdie profiel geldig is
-- **ProvisionsAllDevices**: 'n boolean (waar vir ondernemingssertifikate)
-- **TeamIdentifier**: 'n Array van (gewoonlik een) alfanumeriese string(e) wat gebruik word om die ontwikkelaar te identifiseer vir inter-app interaksie doeleindes
+- **Name**: Die Aansoeknaam, dieselfde as AppIDName
+- **ProvisionedDevices**: 'n Array (vir ontwikkelaarsertifikate) van UDIDs waarvoor hierdie profiel geldig is
+- **ProvisionsAllDevices**: 'n Boolean (waar vir ondernemingssertifikate)
+- **TeamIdentifier**: 'n Array van (gewoonlik een) alfanumeriese string(e) wat gebruik word om die ontwikkelaar te identifiseer vir inter-aansoek interaksie doeleindes
 - **TeamName**: 'n Menslike leesbare naam wat gebruik word om die ontwikkelaar te identifiseer
 - **TimeToLive**: Geldigheid (in dae) van die sertifikaat
 - **UUID**: 'n Universeel Unieke Identifiseerder vir hierdie profiel
@@ -108,7 +108,7 @@ Alhoewel dit soms as gesertifiseer verwys word, het hierdie voorsieningsprofiele
 
 Let daarop dat die regte inskrywing 'n beperkte stel regte sal bevat en die voorsieningsprofiel slegs daardie spesifieke regte kan gee om te voorkom dat Apple private regte gee.
 
-Let daarop dat profiele gewoonlik geleë is in `/var/MobileDeviceProvisioningProfiles` en dit moontlik is om hulle te kontroleer met **`security cms -D -i /path/to/profile`**
+Let daarop dat profiele gewoonlik geleë is in `/var/MobileDeviceProvisioningProfiles` en dit is moontlik om hulle te kontroleer met **`security cms -D -i /path/to/profile`**
 
 ## **libmis.dyld**
 

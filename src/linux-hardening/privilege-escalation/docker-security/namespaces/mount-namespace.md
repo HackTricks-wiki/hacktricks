@@ -2,28 +2,28 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Basiese Inligting
+## Basic Information
 
-'n Mount namespace is 'n Linux-kernfunksie wat isolasie van die lêerstelsel se monteerpunte bied wat deur 'n groep prosesse gesien word. Elke mount namespace het sy eie stel lêerstelsel monteerpunte, en **veranderinge aan die monteerpunte in een namespace beïnvloed nie ander namespaces nie**. Dit beteken dat prosesse wat in verskillende mount namespaces loop, verskillende uitsigte van die lêerstelsel hiërargie kan hê.
+'n mount namespace is 'n Linux-kernfunksie wat isolasie van die lêerstelsel se monteerpunte bied wat deur 'n groep prosesse gesien word. Elke mount namespace het sy eie stel lêerstelsel monteerpunte, en **veranderinge aan die monteerpunte in een namespace beïnvloed nie ander namespaces nie**. Dit beteken dat prosesse wat in verskillende mount namespaces loop, verskillende uitsigte van die lêerstelsel hiërargie kan hê.
 
-Mount namespaces is veral nuttig in containerisering, waar elke container sy eie lêerstelsel en konfigurasie moet hê, geïsoleer van ander containers en die gasheerstelsel.
+Mount namespaces is veral nuttig in containerisering, waar elke houer sy eie lêerstelsel en konfigurasie moet hê, geïsoleer van ander houers en die gasheerstelsel.
 
-### Hoe dit werk:
+### How it works:
 
-1. Wanneer 'n nuwe mount namespace geskep word, word dit geïnitialiseer met 'n **kopie van die monteerpunte van sy ouernamespace**. Dit beteken dat, by die skepping, die nuwe namespace dieselfde uitsig van die lêerstelsel as sy ouer deel. egter, enige daaropvolgende veranderinge aan die monteerpunte binne die namespace sal nie die ouer of ander namespaces beïnvloed nie.
+1. Wanneer 'n nuwe mount namespace geskep word, word dit geïnitialiseer met 'n **kopie van die monteerpunte van sy ouernamespace**. Dit beteken dat, by skepping, die nuwe namespace dieselfde uitsig van die lêerstelsel as sy ouer deel. egter, enige daaropvolgende veranderinge aan die monteerpunte binne die namespace sal nie die ouer of ander namespaces beïnvloed nie.
 2. Wanneer 'n proses 'n monteerpunt binne sy namespace wysig, soos om 'n lêerstelsel te monteer of te demonteer, is die **verandering plaaslik tot daardie namespace** en beïnvloed nie ander namespaces nie. Dit laat elke namespace toe om sy eie onafhanklike lêerstelsel hiërargie te hê.
 3. Prosesse kan tussen namespaces beweeg deur die `setns()` stelselskakel te gebruik, of nuwe namespaces te skep met die `unshare()` of `clone()` stelselskakels met die `CLONE_NEWNS` vlag. Wanneer 'n proses na 'n nuwe namespace beweeg of een skep, sal dit begin om die monteerpunte wat met daardie namespace geassosieer is, te gebruik.
-4. **Lêerdeskriptoren en inodes word oor namespaces gedeel**, wat beteken dat as 'n proses in een namespace 'n oop lêerdeskriptor het wat na 'n lêer wys, dit kan **daardie lêerdeskriptor** aan 'n proses in 'n ander namespace oorhandig, en **albei prosesse sal dieselfde lêer benader**. egter, die lêer se pad mag nie dieselfde wees in beide namespaces nie weens verskille in monteerpunte.
+4. **Lêerdeskriptoren en inodes word oor namespaces gedeel**, wat beteken dat as 'n proses in een namespace 'n oop lêerdeskriptor het wat na 'n lêer wys, dit kan **daardie lêerdeskriptor** aan 'n proses in 'n ander namespace oorhandig, en **albei prosesse sal toegang tot dieselfde lêer hê**. egter, die lêer se pad mag nie dieselfde wees in albei namespaces nie weens verskille in monteerpunte.
 
-## Laboratorium:
+## Lab:
 
-### Skep verskillende Namespaces
+### Create different Namespaces
 
 #### CLI
 ```bash
 sudo unshare -m [--mount-proc] /bin/bash
 ```
-Deur 'n nuwe instansie van die `/proc` lêerstelsel te monteer as jy die parameter `--mount-proc` gebruik, verseker jy dat die nuwe monteernaamruimte 'n **akkurate en geïsoleerde siening van die prosesinligting spesifiek vir daardie naamruimte** het.
+Deur 'n nuwe instansie van die `/proc` lêerstelsel te monteer as jy die parameter `--mount-proc` gebruik, verseker jy dat die nuwe monteernaamruimte 'n **akkurate en geïsoleerde weergawe van die prosesinligting spesifiek vir daardie naamruimte** het.
 
 <details>
 
@@ -53,7 +53,7 @@ Deur te verseker dat `unshare` met die `-f` vlag loop, word die nuwe PID naamrui
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
-### &#x20;Kontroleer in watter naamruimte jou proses is
+### Kontroleer in watter naamruimte jou proses is
 ```bash
 ls -l /proc/self/ns/mnt
 lrwxrwxrwx 1 root root 0 Apr  4 20:30 /proc/self/ns/mnt -> 'mnt:[4026531841]'

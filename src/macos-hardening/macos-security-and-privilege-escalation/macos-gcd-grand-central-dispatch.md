@@ -4,9 +4,9 @@
 
 ## Basiese Inligting
 
-**Grand Central Dispatch (GCD),** ook bekend as **libdispatch** (`libdispatch.dyld`), is beskikbaar in beide macOS en iOS. Dit is 'n tegnologie wat deur Apple ontwikkel is om toepassingsondersteuning vir gelyktydige (multithreaded) uitvoering op veelkern-hardware te optimaliseer.
+**Grand Central Dispatch (GCD),** ook bekend as **libdispatch** (`libdispatch.dyld`), is beskikbaar in beide macOS en iOS. Dit is 'n tegnologie wat deur Apple ontwikkel is om toepassingsondersteuning vir gelyktydige (multithreaded) uitvoering op multicore hardeware te optimaliseer.
 
-**GCD** bied en bestuur **FIFO-rye** waaraan jou toepassing **take** in die vorm van **blokobjekte** kan **indien**. Blokke wat aan afleweringsrye ingedien word, word **uitgevoer op 'n poel van drade** wat volledig deur die stelsel bestuur word. GCD skep outomaties drade om die take in die afleweringsrye uit te voer en skeduleer daardie take om op die beskikbare kerne te loop.
+**GCD** bied en bestuur **FIFO-rye** waaraan jou toepassing **take kan indien** in die vorm van **blokobjekte**. Blokke wat aan afleweringsrye ingedien word, word **op 'n poel van drade** wat volledig deur die stelsel bestuur word, **uitgevoer**. GCD skep outomaties drade om die take in die afleweringsrye uit te voer en skeduleer daardie take om op die beskikbare kerne te loop.
 
 > [!TIP]
 > In samevatting, om kode in **parallel** uit te voer, kan prosesse **kodeblokke na GCD stuur**, wat sorg vir hul uitvoering. Daarom skep prosesse nie nuwe drade nie; **GCD voer die gegewe kode uit met sy eie poel van drade** (wat kan toeneem of afneem soos nodig).
@@ -16,22 +16,22 @@ Dit is baie nuttig om parallelle uitvoering suksesvol te bestuur, wat die aantal
 ### Blokke
 
 'n Blok is 'n **self-onderhoudende gedeelte van kode** (soos 'n funksie met argumente wat 'n waarde teruggee) en kan ook gebonde veranderlikes spesifiseer.\
-E however, op kompilervlak bestaan blokke nie, hulle is `os_object`s. Elke van hierdie objekten is gevorm deur twee strukture:
+Echter, op kompilervlak bestaan blokke nie, hulle is `os_object`s. Elke van hierdie objekten bestaan uit twee strukture:
 
-- **blok letterlik**:&#x20;
+- **blok letterlik**:
 - Dit begin met die **`isa`** veld, wat na die blok se klas wys:
 - `NSConcreteGlobalBlock` (blokke van `__DATA.__const`)
 - `NSConcreteMallocBlock` (blokke in die heap)
 - `NSConcreateStackBlock` (blokke in die stapel)
-- Dit het **`flags`** (wat velde in die blokbeskrywer aandui) en 'n paar gereserveerde bytes
+- Dit het **`flags`** (wat velde aandui wat in die blok beskrywer teenwoordig is) en 'n paar gereserveerde bytes
 - Die funksie-aanwyser om aan te roep
-- 'n Aanwyser na die blokbeskrywer
+- 'n Aanwyser na die blok beskrywer
 - Blok ingevoerde veranderlikes (indien enige)
 - **blok beskrywer**: Die grootte hang af van die data wat teenwoordig is (soos aangedui in die vorige vlae)
 - Dit het 'n paar gereserveerde bytes
 - Die grootte daarvan
-- Dit sal gewoonlik 'n aanwyser na 'n Objective-C styl handtekening hê om te weet hoeveel ruimte vir die params benodig word (vlag `BLOCK_HAS_SIGNATURE`)
-- As veranderlikes verwys word, sal hierdie blok ook aanwysers na 'n kopie-hulp (wat die waarde aan die begin kopieer) en 'n ontslae-hulp (wat dit vrymaak) hê.
+- Dit sal gewoonlik 'n aanwyser na 'n Objective-C styl handtekening hê om te weet hoeveel ruimte vir die parameters benodig word (vlag `BLOCK_HAS_SIGNATURE`)
+- As veranderlikes verwys word, sal hierdie blok ook aanwysers na 'n kopie-hulpbron (wat die waarde aan die begin kopieer) en 'n ontslag-hulpbron (wat dit vrymaak) hê.
 
 ### Rye
 
@@ -42,8 +42,8 @@ Blokke word in rye gestel om uitgevoer te word, en hierdie ondersteun 2 modi: `D
 Standaard rye:
 
 - `.main-thread`: Van `dispatch_get_main_queue()`
-- `.libdispatch-manager`: GCD se rybestuurder
-- `.root.libdispatch-manager`: GCD se rybestuurder
+- `.libdispatch-manager`: GCD se ry bestuurder
+- `.root.libdispatch-manager`: GCD se ry bestuurder
 - `.root.maintenance-qos`: Laaste prioriteit take
 - `.root.maintenance-qos.overcommit`
 - `.root.background-qos`: Beskikbaar as `DISPATCH_QUEUE_PRIORITY_BACKGROUND`
@@ -57,11 +57,11 @@ Standaard rye:
 - `.root.user-interactive-qos`: Hoogste prioriteit
 - `.root.background-qos.overcommit`
 
-Let daarop dat dit die stelsel sal wees wat besluit **watter drade watter rye op enige tyd hanteer** (meervoudige drade mag in dieselfde ry werk of dieselfde draad mag op verskillende rye op 'n sekere tyd werk)
+Let op dat dit die stelsel sal wees wat **besluit watter drade watter rye op enige tyd hanteer** (meervoudige drade mag in dieselfde ry werk of dieselfde draad mag op verskillende rye op 'n sekere tyd werk)
 
 #### Attributte
 
-Wanneer 'n ry geskep word met **`dispatch_queue_create`** is die derde argument 'n `dispatch_queue_attr_t`, wat gewoonlik of `DISPATCH_QUEUE_SERIAL` (wat eintlik NULL is) of `DISPATCH_QUEUE_CONCURRENT` is wat 'n aanwyser na 'n `dispatch_queue_attr_t` strukt is wat toelaat om sommige parameters van die ry te beheer.
+Wanneer 'n ry geskep word met **`dispatch_queue_create`** is die derde argument 'n `dispatch_queue_attr_t`, wat gewoonlik of `DISPATCH_QUEUE_SERIAL` (wat eintlik NULL is) of `DISPATCH_QUEUE_CONCURRENT` is wat 'n aanwyser na 'n `dispatch_queue_attr_t` struktuur is wat toelaat om sommige parameters van die ry te beheer.
 
 ### Afleweringsobjekte
 
@@ -69,7 +69,7 @@ Daar is verskeie objekte wat libdispatch gebruik en rye en blokke is net 2 daarv
 
 - `blok`
 - `data`: Data blokke
-- `groep`: Groep van blokke
+- `group`: Groep van blokke
 - `io`: Async I/O versoeke
 - `mach`: Mach poorte
 - `mach_msg`: Mach boodskappe

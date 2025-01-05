@@ -6,7 +6,7 @@
 
 ### Wat is Nib-lêers
 
-Nib (kort vir NeXT Interface Builder) lêers, deel van Apple se ontwikkelings-ekosisteem, is bedoel om **UI-elemente** en hul interaksies in toepassings te definieer. Hulle sluit geserialiseerde voorwerpe soos vensters en knoppies in, en word tydens uitvoering gelaai. Ten spyte van hul voortgesette gebruik, beveel Apple nou Storyboards aan vir 'n meer omvattende visualisering van UI-stroom.
+Nib (kort vir NeXT Interface Builder) lêers, deel van Apple se ontwikkelings-ekosisteem, is bedoel om **UI-elemente** en hul interaksies in toepassings te definieer. Hulle sluit geserialiseerde voorwerpe soos vensters en knoppies in, en word tydens uitvoering gelaai. Ten spyte van hul voortgesette gebruik, beveel Apple nou Storyboards aan vir 'n meer omvattende UI-stroomvisualisering.
 
 Die hoof Nib-lêer word in die waarde **`NSMainNibFile`** binne die `Info.plist` lêer van die toepassing verwys en word gelaai deur die funksie **`NSApplicationMain`** wat in die `main` funksie van die toepassing uitgevoer word.
 
@@ -18,7 +18,7 @@ Die hoof Nib-lêer word in die waarde **`NSMainNibFile`** binne die `Info.plist`
 - Skep 'n nuwe NIB-lêer met XCode.
 - Voeg 'n voorwerp by die koppelvlak, stel sy klas op `NSAppleScript`.
 - Konfigureer die aanvanklike `source` eienskap via Gebruiker Gedefinieerde Runtime Attribuut.
-2. **Kode-uitvoering Gadget**:
+2. **Kode-uitvoeringsgadgets**:
 - Die opstelling fasiliteer die uitvoering van AppleScript op aanvraag.
 - Integreer 'n knoppie om die `Apple Script` voorwerp te aktiveer, spesifiek die `executeAndReturnError:` selektor te aktiveer.
 3. **Toetsing**:
@@ -40,7 +40,7 @@ display dialog theDialogText
 2. **Oorskrywing van NIB-lêer**:
 - Vervang 'n bestaande NIB-lêer (bv. About Panel NIB) met die vervaardigde DirtyNIB-lêer.
 3. **Uitvoering**:
-- aktiveer die uitvoering deur met die app te interaksie (bv. die `About` menu-item te kies).
+- Trigger die uitvoering deur met die app te interaksie (bv. die `About` menu-item te kies).
 
 #### Bewys van Konsep: Toegang tot Gebruikersdata
 
@@ -52,12 +52,12 @@ display dialog theDialogText
 
 ### Ander Voorbeeld
 
-In die pos [https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/) kan jy 'n tutoriaal vind oor hoe om 'n dirty nib te skep.&#x20;
+In die pos [https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/) kan jy 'n tutoriaal vind oor hoe om 'n dirty nib te skep.
 
 ### Aanspreek van Beginbeperkings
 
 - Beginbeperkings hinder app-uitvoering vanaf onverwagte plekke (bv. `/tmp`).
-- Dit is moontlik om apps te identifiseer wat nie deur Beginbeperkings beskerm word nie en hulle te teiken vir NIB-lêer inspuiting.
+- Dit is moontlik om apps te identifiseer wat nie deur Beginbeperkings beskerm word nie en hulle te teiken vir NIB-lêerinspuiting.
 
 ### Addisionele macOS Beskermings
 

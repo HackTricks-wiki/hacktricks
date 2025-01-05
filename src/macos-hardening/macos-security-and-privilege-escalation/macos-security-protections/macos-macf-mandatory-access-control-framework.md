@@ -4,7 +4,7 @@
 
 ## Basiese Inligting
 
-**MACF** staan vir **Verpligte Toegang Beheer Raamwerk**, wat 'n sekuriteitstelsel is wat in die bedryfstelsel ingebou is om jou rekenaar te help beskerm. Dit werk deur **strenge reëls op te stel oor wie of wat sekere dele van die stelsel kan toegang hê**, soos lêers, toepassings en stelselhulpbronne. Deur hierdie reëls outomaties af te dwing, verseker MACF dat slegs gemagtigde gebruikers en prosesse spesifieke aksies kan uitvoer, wat die risiko van ongemagtigde toegang of kwaadwillige aktiwiteite verminder.
+**MACF** staan vir **Verpligte Toegang Beheer Raamwerk**, wat 'n sekuriteitstelsel is wat in die bedryfstelsel ingebou is om jou rekenaar te help beskerm. Dit werk deur **strenge reëls op te stel oor wie of wat toegang tot sekere dele van die stelsel kan hê**, soos lêers, toepassings en stelselhulpbronne. Deur hierdie reëls outomaties af te dwing, verseker MACF dat slegs gemagtigde gebruikers en prosesse spesifieke aksies kan uitvoer, wat die risiko van ongemagtigde toegang of kwaadwillige aktiwiteite verminder.
 
 Let daarop dat MACF nie werklik enige besluite neem nie, aangesien dit net **aksies onderskep**, dit laat die besluite aan die **beleidsmodules** (kernel uitbreidings) wat dit aanroep soos `AppleMobileFileIntegrity.kext`, `Quarantine.kext`, `Sandbox.kext`, `TMSafetyNet.kext` en `mcxalr.kext`.
 
@@ -26,7 +26,7 @@ MACF gebruik **etikette** wat dan deur die beleide nagegaan word of hulle sekere
 
 ## MACF Beleide
 
-'n MACF Beleid definieer **reëls en voorwaardes wat in sekere kernel operasies toegepas moet word**.&#x20;
+'n MACF Beleid definieer **reëls en voorwaardes wat in sekere kernel operasies toegepas moet word**.
 
 'n Kernel uitbreiding kan 'n `mac_policy_conf` struktuur konfigureer en dit dan registreer deur `mac_policy_register` aan te roep. Van [hier](https://opensource.apple.com/source/xnu/xnu-2050.18.24/security/mac_policy.h.auto.html):
 ```c
@@ -67,9 +67,9 @@ void			*mpc_data;		/** module data */
 ```
 Dit is maklik om die kernuitbreidings wat hierdie beleide konfigureer te identifiseer deur oproepe na `mac_policy_register` te kontroleer. Boonop, deur die disassemble van die uitbreiding te kontroleer, is dit ook moontlik om die gebruikte `mac_policy_conf` struktuur te vind.
 
-Let daarop dat MACF-beleide ook **dynamies** geregistreer en ongeregistreer kan word.
+Let daarop dat MACF beleide ook **dynamies** geregistreer en ongeregistreer kan word.
 
-Een van die hoofvelde van die `mac_policy_conf` is die **`mpc_ops`**. Hierdie veld spesifiseer watter operasies die beleid belangrik is. Let daarop dat daar honderde daarvan is, so dit is moontlik om al hulle op nul te stel en dan net diegene te kies waarin die beleid belangstel. Van [hier](https://opensource.apple.com/source/xnu/xnu-2050.18.24/security/mac_policy.h.auto.html):
+Een van die hoofvelde van die `mac_policy_conf` is die **`mpc_ops`**. Hierdie veld spesifiseer watter operasies die beleid belangrik vind. Let daarop dat daar honderde daarvan is, so dit is moontlik om al hulle op nul te stel en dan net diegene te kies waarin die beleid belangstel. Van [hier](https://opensource.apple.com/source/xnu/xnu-2050.18.24/security/mac_policy.h.auto.html):
 ```c
 struct mac_policy_ops {
 mpo_audit_check_postselect_t		*mpo_audit_check_postselect;
@@ -82,7 +82,7 @@ mpo_cred_check_label_update_execve_t	*mpo_cred_check_label_update_execve;
 mpo_cred_check_label_update_t		*mpo_cred_check_label_update;
 [...]
 ```
-Byna al die hooks sal deur MACF teruggeroep word wanneer een van daardie operasies geintercepteer word. egter, **`mpo_policy_*`** hooks is 'n uitsondering omdat `mpo_hook_policy_init()` 'n terugroep is wat tydens registrasie aangeroep word (so na `mac_policy_register()`) en `mpo_hook_policy_initbsd()` word tydens laat registrasie aangeroep sodra die BSD-substelsel behoorlik geinitialiseer is.
+Byna al die hooks sal deur MACF teruggeroep word wanneer een van daardie operasies geïntercepteer word. egter, **`mpo_policy_*`** hooks is 'n uitsondering omdat `mpo_hook_policy_init()` 'n terugroep is wat tydens registrasie aangeroep word (so na `mac_policy_register()`) en `mpo_hook_policy_initbsd()` word tydens laat registrasie aangeroep sodra die BSD subsisteem behoorlik geinitialiseer is.
 
 Boonop kan die **`mpo_policy_syscall`** hook deur enige kext geregistreer word om 'n private **ioctl** styl oproep **interface** bloot te stel. Dan sal 'n gebruikersklient in staat wees om `mac_syscall` (#381) aan te roep en die **beleidsnaam** met 'n heelgetal **kode** en opsionele **argumente** as parameters te spesifiseer.\
 Byvoorbeeld, die **`Sandbox.kext`** gebruik dit baie.
@@ -93,11 +93,11 @@ Boonop is dit ook moontlik om die lys van kexts wat 'n beleid geconfigureer het,
 
 ## MACF Inisialiserings
 
-MACF word baie vroeg geinitialiseer. Dit word opgestel in XNU se `bootstrap_thread`: na `ipc_bootstrap` 'n oproep na `mac_policy_init()` wat die `mac_policy_list` inisialiseer en 'n oomblik later word `mac_policy_initmach()` aangeroep. Onder andere dinge, sal hierdie funksie al die Apple kexts met die `AppleSecurityExtension` sleutel in hul Info.plist soos `ALF.kext`, `AppleMobileFileIntegrity.kext`, `Quarantine.kext`, `Sandbox.kext` en `TMSafetyNet.kext` verkry en laai.
+MACF word baie vroeg geinitialiseer. Dit word opgestel in XNU se `bootstrap_thread`: na `ipc_bootstrap` 'n oproep na `mac_policy_init()` wat die `mac_policy_list` inisialiseer en 'n oomblik later word `mac_policy_initmach()` aangeroep. Onder andere dinge sal hierdie funksie al die Apple kexts met die `AppleSecurityExtension` sleutel in hul Info.plist soos `ALF.kext`, `AppleMobileFileIntegrity.kext`, `Quarantine.kext`, `Sandbox.kext` en `TMSafetyNet.kext` verkry en laai.
 
 ## MACF Oproepe
 
-Dit is algemeen om oproepe na MACF te vind wat in kode gedefinieer is soos: **`#if CONFIG_MAC`** voorwaardelike blokke. Boonop is dit binne hierdie blokke moontlik om oproepe na `mac_proc_check*` te vind wat MACF aanroep om **toestemmings te kontroleer** om sekere aksies uit te voer. Boonop is die formaat van die MACF oproepe: **`mac_<object>_<opType>_opName`**.
+Dit is algemeen om oproepe na MACF in kode te vind soos: **`#if CONFIG_MAC`** voorwaardelike blokke. Boonop is dit binne hierdie blokke moontlik om oproepe na `mac_proc_check*` te vind wat MACF aanroep om **toestemmings** te **kontroleer** om sekere aksies uit te voer. Boonop is die formaat van die MACF oproepe: **`mac_<object>_<opType>_opName`**.
 
 Die objek is een van die volgende: `bpfdesc`, `cred`, `file`, `proc`, `vnode`, `mount`, `devfs`, `ifnet`, `inpcb`, `mbuf`, `ipq`, `pipe`, `sysv[msg/msq/shm/sem]`, `posix[shm/sem]`, `socket`, `kext`.\
 Die `opType` is gewoonlik check wat gebruik sal word om die aksie toe te laat of te weier. Dit is egter ook moontlik om `notify` te vind, wat die kext sal toelaat om op die gegewe aksie te reageer.
@@ -111,7 +111,7 @@ mmap(proc_t p, struct mmap_args *uap, user_addr_t *retval)
 #if CONFIG_MACF
 <strong>			error = mac_file_check_mmap(vfs_context_ucred(ctx),
 </strong>			    fp->fp_glob, prot, flags, file_pos + pageoff,
-&#x26;maxprot);
+&maxprot);
 if (error) {
 (void)vnode_put(vp);
 goto bad;
@@ -157,10 +157,10 @@ error = mac_error_select(__step_err, error);         \
 });                                                             \
 } while (0)
 ```
-Wat al die geregistreerde mac-beleide sal deurgaan, hul funksies aanroep en die uitvoer binne die fout veranderlike stoor, wat slegs deur `mac_error_select` oorruilbaar sal wees deur sukses kodes, so as enige kontrole misluk, sal die volledige kontrole misluk en die aksie nie toegelaat word.
+Welke sal oor al die geregistreerde mac beleid gaan en hul funksies aanroep en die uitvoer binne die fout veranderlike stoor, wat slegs deur `mac_error_select` oorruilbaar sal wees deur sukses kodes, so as enige kontrole misluk, sal die volledige kontrole misluk en die aksie nie toegelaat word nie.
 
 > [!TIP]
-> Onthou egter dat nie alle MACF-aanroepings slegs gebruik word om aksies te weier nie. Byvoorbeeld, `mac_priv_grant` roep die makro [**MAC_GRANT**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac_internal.h#L274) aan, wat die aangevraagde voorreg sal toeken as enige beleid met 'n 0 antwoord gee:
+> Onthou egter dat nie alle MACF aanroep slegs gebruik word om aksies te weier nie. Byvoorbeeld, `mac_priv_grant` roep die makro [**MAC_GRANT**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac_internal.h#L274) aan, wat die aangevraagde voorreg sal toeken as enige beleid met 'n 0 antwoord:
 >
 > ```c
 > /*
@@ -187,7 +187,7 @@ Wat al die geregistreerde mac-beleide sal deurgaan, hul funksies aanroep en die 
 
 ### priv_check & priv_grant
 
-Hierdie aanroepings is bedoel om (tens of) **voorregte** te kontroleer en te verskaf wat gedefinieer is in [**bsd/sys/priv.h**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/priv.h).\
+Hierdie aanroepe is bedoel om te kontroleer en te verskaf (tens of) **voorregte** gedefinieer in [**bsd/sys/priv.h**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/priv.h).\
 Sommige kernkode sal `priv_check_cred()` van [**bsd/kern/kern_priv.c**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_priv.c) aanroep met die KAuth akrediteer van die proses en een van die voorregte kode wat `mac_priv_check` sal aanroep om te sien of enige beleid die voorreg **weier** en dan roep dit `mac_priv_grant` aan om te sien of enige beleid die `voorreg` toeken.
 
 ### proc_check_syscall_unix
@@ -203,7 +203,7 @@ goto skip_syscall;
 }
 #endif /* CONFIG_MACF */
 ```
-Wat die oproepende proses **bitmask** sal nagaan of die huidige syscall `mac_proc_check_syscall_unix` moet aanroep. Dit is omdat syscalls so gereeld aangeroep word dat dit interessant is om te vermy om `mac_proc_check_syscall_unix` elke keer aan te roep.
+Wat die oproepende proses **bitmask** sal nagaan of die huidige syscall `mac_proc_check_syscall_unix` moet aanroep. Dit is omdat syscalls so gereeld aangeroep word dat dit interessant is om te probeer om `mac_proc_check_syscall_unix` nie elke keer aan te roep nie.
 
 Let daarop dat die funksie `proc_set_syscall_filter_mask()`, wat die bitmask syscalls in 'n proses stel, deur Sandbox aangeroep word om masks op gesandboksde prosesse te stel.
 

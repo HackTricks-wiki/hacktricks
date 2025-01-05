@@ -2,7 +2,7 @@
 
 ## Spot
 
-Dit is die mees basiese manier om handel te dryf. Jy kan **die hoeveelheid van die bate en die prys** wat jy wil koop of verkoop, aandui, en wanneer daardie prys bereik word, word die transaksie gedoen.
+Dit is die mees basiese manier om handel te dryf. Jy kan **die hoeveelheid van die bate en die prys** wat jy wil koop of verkoop, aandui, en wanneer daardie prys bereik word, word die transaksie voltooi.
 
 Gewoonlik kan jy ook die **huidige markprys** gebruik om die transaksie so vinnig as moontlik teen die huidige prys uit te voer.
 
@@ -23,13 +23,13 @@ Alhoewel dit in beurse gewoonlik gebruik word om 'n wins te probeer maak.
 
 ### Hedging Met Termynkontrakte <a href="#mntl-sc-block_7-0" id="mntl-sc-block_7-0"></a>
 
-As 'n fondsbestuurder bang is dat sommige aandele gaan daal, kan hy 'n kort posisie oor sommige bates soos bitcoins of S&P 500 termynkontrakte neem. Dit sou soortgelyk wees aan die aankoop of besit van sommige bates en die skep van 'n kontrak om dit teen 'n groter prys in die toekoms te verkoop.&#x20;
+As 'n fondsbestuurder bang is dat sommige aandele gaan daal, kan hy 'n kort posisie oor sommige bates soos bitcoins of S&P 500 termynkontrakte neem. Dit sou soortgelyk wees aan die aankoop of besit van sommige bates en die skep van 'n kontrak om dit teen 'n groter prys in die toekoms te verkoop.
 
 In die geval dat die prys daal, sal die fondsbestuurder voordele verdien omdat hy die bates teen 'n groter prys sal verkoop. As die prys van die bates styg, sal die bestuurder nie daardie voordeel verdien nie, maar hy sal steeds sy bates hou.
 
 ### Perpetuele Termynkontrakte
 
-**Dit is "termynkontrakte" wat onbepaald sal duur** (sonder 'n einddatum van die kontrak). Dit is baie algemeen om hulle byvoorbeeld in crypto beurse te vind waar jy in en uit termynkontrakte kan gaan gebaseer op die prys van crypto.
+**Dit is "termynkontrakte" wat onbepaald sal duur** (sonder 'n einddatum van die kontrak). Dit is baie algemeen om hulle te vind byvoorbeeld in kripto-beurse waar jy in en uit termynkontrakte kan gaan gebaseer op die prys van kripto's.
 
 Let daarop dat in hierdie gevalle die voordele en verliese in werklike tyd kan wees, as die prys met 1% styg, wen jy 1%, as die prys met 1% daal, sal jy dit verloor.
 
@@ -49,13 +49,13 @@ Die koper sal egter 'n fooi aan die verkoper betaal om die opsie te open (sodat 
 
 ### 1. **Verpligting vs. Reg:**
 
-* **Termynkontrakte:** Wanneer jy 'n termynkontrak koop of verkoop, tree jy in 'n **bindende ooreenkoms** om 'n bate teen 'n spesifieke prys op 'n toekomstige datum te koop of te verkoop. Beide die koper en die verkoper is **verplig** om die kontrak by verstryking na te kom (tenzij die kontrak voor dit gesluit word).
+* **Termynkontrakte:** Wanneer jy 'n termynkontrak koop of verkoop, sluit jy 'n **bindende ooreenkoms** in om 'n bate teen 'n spesifieke prys op 'n toekomstige datum te koop of te verkoop. Beide die koper en die verkoper is **verplig** om die kontrak by verstryking na te kom (tenzij die kontrak voor dit gesluit word).
 * **Opsies:** Met opsies het jy die **reg, maar nie die verpligting** om 'n bate (in die geval van 'n **call opsie**) te koop of te verkoop (in die geval van 'n **put opsie**) teen 'n spesifieke prys voor of op 'n sekere vervaldatum. Die **koper** het die opsie om uit te voer, terwyl die **verkoper** verplig is om die transaksie na te kom as die koper besluit om die opsie uit te oefen.
 
 ### 2. **Risiko:**
 
-* **Termynkontrakte:** Beide die koper en die verkoper neem **onbeperkte risiko** omdat hulle verplig is om die kontrak te voltooi. Die risiko is die verskil tussen die ooreengekome prys en die markprys op die vervaldatum.
-* **Opsies:** Die koper se risiko is beperk tot die **premie** wat betaal is om die opsie te koop. As die mark nie in die guns van die opsiehouer beweeg nie, kan hulle eenvoudig die opsie laat verstryk. Die **verkoper** (skrywer) van die opsie het egter onbeperkte risiko as die mark aansienlik teen hulle beweeg.
+* **Termynkontrakte:** Beide die koper en die verkoper neem **onbeperkte risiko** aan omdat hulle verplig is om die kontrak te voltooi. Die risiko is die verskil tussen die ooreengekome prys en die markprys op die vervaldatum.
+* **Opsies:** Die koper se risiko is beperk tot die **premie** wat betaal is om die opsie te koop. As die mark nie in die guns van die opsiehouer beweeg nie, kan hulle eenvoudig die opsie laat verval. Die **verkoper** (skrywer) van die opsie het egter onbeperkte risiko as die mark aansienlik teen hulle beweeg.
 
 ### 3. **Koste:**
 
