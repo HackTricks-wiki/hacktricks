@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-[**Cheat Engine**](https://www.cheatengine.org/downloads.php) je koristan program za pronalaženje gde su važni podaci sačuvani unutar memorije aktivne igre i njihovu promenu.\
+[**Cheat Engine**](https://www.cheatengine.org/downloads.php) je koristan program za pronalaženje gde su važni podaci sačuvani unutar memorije pokrenute igre i njihovu promenu.\
 Kada ga preuzmete i pokrenete, **dobijate** **tutorijal** o tome kako koristiti alat. Ako želite da naučite kako da koristite alat, toplo se preporučuje da ga završite.
 
 ## Šta tražite?
@@ -10,7 +10,7 @@ Kada ga preuzmete i pokrenete, **dobijate** **tutorijal** o tome kako koristiti 
 ![](<../../images/image (762).png>)
 
 Ovaj alat je veoma koristan za pronalaženje **gde je neki podatak** (obično broj) **sačuvan u memoriji** programa.\
-**Obično se brojevi** čuvaju u **4bajta** formatu, ali ih možete pronaći i u **double** ili **float** formatima, ili možda želite da tražite nešto **drugo osim broja**. Zbog toga morate biti sigurni da **izaberete** ono što želite da **tražite**:
+**Obično se brojevi** čuvaju u **4bajta** formatu, ali ih možete pronaći i u **double** ili **float** formatima, ili možda želite da tražite nešto **drugačije od broja**. Iz tog razloga, morate biti sigurni da **izaberete** ono što želite da **tražite**:
 
 ![](<../../images/image (324).png>)
 
@@ -30,7 +30,7 @@ U _**Edit --> Settings --> Hotkeys**_ možete postaviti različite **prečice** 
 
 ## Modifikovanje vrednosti
 
-Kada **pronađete** gde je **vrednost** koju tražite (više o tome u sledećim koracima), možete je **modifikovati** dvostrukim klikom na nju, a zatim dvostrukim klikom na njenu vrednost:
+Kada **pronađete** gde je **vrednost** koju tražite (više o ovome u sledećim koracima), možete je **modifikovati** dvostrukim klikom na nju, a zatim dvostrukim klikom na njenu vrednost:
 
 ![](<../../images/image (563).png>)
 
@@ -40,7 +40,7 @@ I konačno **označite kvačicu** da biste izvršili modifikaciju u memoriji:
 
 **Promena** u **memoriji** će odmah biti **primenjena** (napomena: dok igra ne koristi ovu vrednost ponovo, vrednost **neće biti ažurirana u igri**).
 
-## Pretraživanje vrednosti
+## Traženje vrednosti
 
 Dakle, pretpostavićemo da postoji važna vrednost (kao što je život vašeg korisnika) koju želite da poboljšate, i tražite ovu vrednost u memoriji)
 
@@ -55,7 +55,7 @@ Zatim, uradite nešto tako da **vrednost promeni**, i **zaustavite** igru i **iz
 ![](<../../images/image (684).png>)
 
 Cheat Engine će tražiti **vrednosti** koje su **prešle sa 100 na novu vrednost**. Čestitam, **pronašli ste** **adresu** vrednosti koju ste tražili, sada je možete modifikovati.\
-&#xNAN;_Ako još uvek imate nekoliko vrednosti, uradite nešto da ponovo modifikujete tu vrednost, i izvršite još jedno "sledeće skeniranje" da filtrirate adrese._
+_&#x49;f imate još nekoliko vrednosti, uradite nešto da ponovo modifikujete tu vrednost, i izvršite još jedno "sledeće skeniranje" da filtrirate adrese._
 
 ### Nepoznata vrednost, poznata promena
 
@@ -90,7 +90,7 @@ Koristeći neke od pomenutih trikova, pronađite adresu gde vaša trenutna igra 
 **Prva opcija** je korisna da saznate koje **delove** **koda** koriste ovu **adresu** (što je korisno za više stvari kao što je **znanje gde možete modifikovati kod** igre).\
 **Druga opcija** je više **specifična**, i biće korisnija u ovom slučaju jer nas zanima da saznamo **odakle se ova vrednost piše**.
 
-Kada izaberete jednu od tih opcija, **debugger** će biti **priključen** na program i novi **prazan prozor** će se pojaviti. Sada, **igrajte** **igru** i **modifikujte** tu **vrednost** (bez ponovnog pokretanja igre). **Prozor** bi trebao biti **ispunjen** sa **adresama** koje **modifikuju** **vrednost**:
+Kada odaberete jednu od tih opcija, **debugger** će biti **priključen** na program i novi **prazan prozor** će se pojaviti. Sada, **igrajte** **igru** i **modifikujte** tu **vrednost** (bez ponovnog pokretanja igre). **Prozor** bi trebao biti **ispunjen** sa **adresama** koje **modifikuju** **vrednost**:
 
 ![](<../../images/image (91).png>)
 
@@ -102,7 +102,7 @@ Dakle, sada možete modifikovati tako da kod ne utiče na vaš broj, ili će uve
 
 ### Nasumična adresa u memoriji - Pronalaženje pokazivača
 
-Prateći prethodne korake, pronađite gde se vrednost koja vas zanima nalazi. Zatim, koristeći "**Saznajte šta piše na ovoj adresi**" saznajte koja adresa piše ovu vrednost i dvostruko kliknite na nju da biste dobili disassemblirani prikaz:
+Prateći prethodne korake, pronađite gde se nalazi vrednost koja vas zanima. Zatim, koristeći "**Saznajte šta piše na ovoj adresi**" saznajte koja adresa piše ovu vrednost i dvostruko kliknite na nju da biste dobili disassemblirani prikaz:
 
 ![](<../../images/image (1039).png>)
 
@@ -110,7 +110,7 @@ Zatim, izvršite novo skeniranje **tražeći heksadecimalnu vrednost između "\[
 
 ![](<../../images/image (994).png>)
 
-(_Ako se pojavi više njih, obično vam je potrebna najmanja adresa_)\
+(_Ako se pojavi više njih, obično vam je potrebna ona sa najmanjom adresom_)\
 Sada smo **pronašli pokazivač koji će modifikovati vrednost koja nas zanima**.
 
 Kliknite na "**Dodaj adresu ručno**":
@@ -131,7 +131,7 @@ Sada, svaki put kada modifikujete tu vrednost, **modifikujete važnu vrednost č
 
 ### Injekcija koda
 
-Injekcija koda je tehnika gde injektujete deo koda u ciljni proces, a zatim preusmeravate izvršenje koda da ide kroz vaš vlastiti napisani kod (kao što je davanje poena umesto oduzimanja).
+Injekcija koda je tehnika gde injektujete deo koda u ciljni proces, a zatim preusmeravate izvršenje koda da prolazi kroz vaš vlastiti napisani kod (kao što je davanje poena umesto oduzimanja).
 
 Dakle, zamislite da ste pronašli adresu koja oduzima 1 od života vašeg igrača:
 
@@ -158,6 +158,6 @@ Dakle, umetnite svoj novi assembly kod u sekciju "**newmem**" i uklonite origina
 
 ## **Reference**
 
-- **Cheat Engine tutorijal, završite ga da biste naučili kako da počnete sa Cheat Engine**
+- **Cheat Engine tutorijal, završite ga da biste naučili kako da započnete sa Cheat Engine**
 
 {{#include ../../banners/hacktricks-training.md}}
