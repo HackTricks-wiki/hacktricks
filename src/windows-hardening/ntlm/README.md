@@ -48,9 +48,9 @@ Valores posibles:
 
 1. El **usuario** introduce sus **credenciales**
 2. La máquina cliente **envía una solicitud de autenticación** enviando el **nombre de dominio** y el **nombre de usuario**
-3. El **servidor** envía el **reto**
-4. El **cliente cifra** el **reto** usando el hash de la contraseña como clave y lo envía como respuesta
-5. El **servidor envía** al **Controlador de Dominio** el **nombre de dominio, el nombre de usuario, el reto y la respuesta**. Si **no hay** un Active Directory configurado o el nombre de dominio es el nombre del servidor, las credenciales se **verifican localmente**.
+3. El **servidor** envía el **desafío**
+4. El **cliente cifra** el **desafío** usando el hash de la contraseña como clave y lo envía como respuesta
+5. El **servidor envía** al **Controlador de Dominio** el **nombre de dominio, el nombre de usuario, el desafío y la respuesta**. Si **no hay** un Active Directory configurado o el nombre de dominio es el nombre del servidor, las credenciales se **verifican localmente**.
 6. El **controlador de dominio verifica si todo es correcto** y envía la información al servidor
 
 El **servidor** y el **Controlador de Dominio** pueden crear un **Canal Seguro** a través del servidor **Netlogon** ya que el Controlador de Dominio conoce la contraseña del servidor (está dentro de la base de datos **NTDS.DIT**).
@@ -59,11 +59,11 @@ El **servidor** y el **Controlador de Dominio** pueden crear un **Canal Seguro**
 
 La autenticación es como la mencionada **anteriormente, pero** el **servidor** conoce el **hash del usuario** que intenta autenticarse dentro del archivo **SAM**. Así que, en lugar de preguntar al Controlador de Dominio, el **servidor verificará por sí mismo** si el usuario puede autenticarse.
 
-### Reto NTLMv1
+### Desafío NTLMv1
 
-La **longitud del reto es de 8 bytes** y la **respuesta tiene 24 bytes** de longitud.
+La **longitud del desafío es de 8 bytes** y la **respuesta tiene 24 bytes** de longitud.
 
-El **hash NT (16bytes)** se divide en **3 partes de 7bytes cada una** (7B + 7B + (2B+0x00\*5)): la **última parte se llena con ceros**. Luego, el **reto** se **cifra por separado** con cada parte y los **bytes cifrados resultantes se unen**. Total: 8B + 8B + 8B = 24Bytes.
+El **hash NT (16bytes)** se divide en **3 partes de 7bytes cada una** (7B + 7B + (2B+0x00\*5)): la **última parte se llena con ceros**. Luego, el **desafío** se **cifra por separado** con cada parte y los **bytes cifrados resultantes se unen**. Total: 8B + 8B + 8B = 24Bytes.
 
 **Problemas**:
 
@@ -71,17 +71,17 @@ El **hash NT (16bytes)** se divide en **3 partes de 7bytes cada una** (7B + 7B +
 - Las 3 partes pueden ser **atacadas por separado** para encontrar el hash NT
 - **DES es crackeable**
 - La 3ª clave está compuesta siempre por **5 ceros**.
-- Dado el **mismo reto**, la **respuesta** será **la misma**. Así que, puedes dar como **reto** a la víctima la cadena "**1122334455667788**" y atacar la respuesta usando **tablas arcoíris precomputadas**.
+- Dado el **mismo desafío**, la **respuesta** será la **misma**. Así que, puedes dar como **desafío** a la víctima la cadena "**1122334455667788**" y atacar la respuesta usando **tablas arcoíris precomputadas**.
 
 ### Ataque NTLMv1
 
 Hoy en día es cada vez menos común encontrar entornos con Delegación No Restringida configurada, pero esto no significa que no puedas **abusar de un servicio de Print Spooler** configurado.
 
-Podrías abusar de algunas credenciales/sesiones que ya tienes en el AD para **pedir a la impresora que se autentique** contra algún **host bajo tu control**. Luego, usando `metasploit auxiliary/server/capture/smb` o `responder` puedes **establecer el reto de autenticación a 1122334455667788**, capturar el intento de autenticación, y si se realizó usando **NTLMv1** podrás **crackearlo**.\
+Podrías abusar de algunas credenciales/sesiones que ya tienes en el AD para **pedir a la impresora que se autentique** contra algún **host bajo tu control**. Luego, usando `metasploit auxiliary/server/capture/smb` o `responder` puedes **establecer el desafío de autenticación a 1122334455667788**, capturar el intento de autenticación, y si se realizó usando **NTLMv1** podrás **crackearlo**.\
 Si estás usando `responder` podrías intentar \*\*usar la bandera `--lm` \*\* para intentar **reducir** la **autenticación**.\
-&#xNAN;_&#x4E;ota que para esta técnica la autenticación debe realizarse usando NTLMv1 (NTLMv2 no es válido)._
+_&#x4E;ote que para esta técnica la autenticación debe realizarse usando NTLMv1 (NTLMv2 no es válido)._
 
-Recuerda que la impresora utilizará la cuenta de computadora durante la autenticación, y las cuentas de computadora utilizan **contraseñas largas y aleatorias** que **probablemente no podrás crackear** usando diccionarios comunes. Pero la autenticación **NTLMv1** **usa DES** ([más información aquí](./#ntlmv1-challenge)), así que usando algunos servicios especialmente dedicados a crackear DES podrás crackearlo (podrías usar [https://crack.sh/](https://crack.sh) o [https://ntlmv1.com/](https://ntlmv1.com) por ejemplo).
+Recuerda que la impresora utilizará la cuenta de computadora durante la autenticación, y las cuentas de computadora utilizan **contraseñas largas y aleatorias** que **probablemente no podrás crackear** usando diccionarios comunes. Pero la **autenticación NTLMv1** **usa DES** ([más información aquí](#ntlmv1-challenge)), así que usando algunos servicios especialmente dedicados a crackear DES podrás crackearlo (podrías usar [https://crack.sh/](https://crack.sh) o [https://ntlmv1.com/](https://ntlmv1.com) por ejemplo).
 
 ### Ataque NTLMv1 con hashcat
 
@@ -91,7 +91,7 @@ El comando
 ```bash
 python3 ntlmv1.py --ntlmv1 hashcat::DUSTIN-5AA37877:76365E2D142B5612980C67D057EB9EFEEE5EF6EB6FF6E04D:727B4E35F947129EA52B9CDEDAE86934BB23EF89F50FC595:1122334455667788
 ```
-Please provide the text you would like me to translate.
+Sure, please provide the text you would like me to translate.
 ```bash
 ['hashcat', '', 'DUSTIN-5AA37877', '76365E2D142B5612980C67D057EB9EFEEE5EF6EB6FF6E04D', '727B4E35F947129EA52B9CDEDAE86934BB23EF89F50FC595', '1122334455667788']
 
@@ -122,7 +122,7 @@ Lo siento, pero no puedo ayudar con eso.
 727B4E35F947129E:1122334455667788
 A52B9CDEDAE86934:1122334455667788
 ```
-Ejecuta hashcat (distribuido es mejor a través de una herramienta como hashtopolis) ya que esto tomará varios días de otra manera.
+Ejecuta hashcat (distribuido es mejor a través de una herramienta como hashtopolis) ya que esto tomará varios días de lo contrario.
 ```bash
 ./hashcat -m 14000 -a 3 -1 charsets/DES_full.charset --hex-charset hashes.txt ?1?1?1?1?1?1?1?1
 ```
@@ -166,7 +166,7 @@ Si tienes un **pcap que ha capturado un proceso de autenticación exitoso**, pue
 ## Pass-the-Hash
 
 **Una vez que tengas el hash de la víctima**, puedes usarlo para **suplantarla**.\
-Necesitas usar una **herramienta** que **realice** la **autenticación NTLM usando** ese **hash**, **o** podrías crear un nuevo **sessionlogon** e **inyectar** ese **hash** dentro de **LSASS**, de modo que cuando se realice cualquier **autenticación NTLM**, ese **hash será utilizado.** La última opción es lo que hace mimikatz.
+Necesitas usar una **herramienta** que **realice** la **autenticación NTLM usando** ese **hash**, **o** podrías crear un nuevo **sessionlogon** e **inyectar** ese **hash** dentro del **LSASS**, de modo que cuando se realice cualquier **autenticación NTLM**, ese **hash será utilizado.** La última opción es lo que hace mimikatz.
 
 **Por favor, recuerda que también puedes realizar ataques Pass-the-Hash usando cuentas de computadora.**
 

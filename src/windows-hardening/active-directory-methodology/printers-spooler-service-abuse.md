@@ -19,7 +19,7 @@ Get-ADComputer -Filter {(OperatingSystem -like "*windows*server*") -and (Operati
 ```
 ### Encontrar servicios de Spooler escuchando
 
-Usando un @mysmartlogin (Vincent Le Toux) ligeramente modificado [SpoolerScanner](https://github.com/NotMedic/NetNTLMtoSilverTicket), verifica si el Servicio de Spooler está escuchando:
+Usando un @mysmartlogin ligeramente modificado (Vincent Le Toux) [SpoolerScanner](https://github.com/NotMedic/NetNTLMtoSilverTicket), verifica si el Servicio de Spooler está escuchando:
 ```bash
 . .\Get-SpoolStatus.ps1
 ForEach ($server in Get-Content servers.txt) {Get-SpoolStatus $server}
@@ -45,7 +45,9 @@ Si un atacante ya ha comprometido una computadora con [Delegación No Restringid
 
 ## Autenticación Forzada RCP
 
-{% embed url="https://github.com/p0dalirius/Coercer" %}
+{{#ref}}
+https://github.com/p0dalirius/Coercer
+{{#endref}}
 
 ## PrivExchange
 
@@ -102,7 +104,7 @@ Si puedes realizar un ataque MitM a una computadora e inyectar HTML en una pági
 ```
 ## Cracking NTLMv1
 
-Si puedes capturar [desafíos NTLMv1 lee aquí cómo crackearlos](../ntlm/#ntlmv1-attack).\
-&#xNAN;_&#x52;ecuerda que para crackear NTLMv1 necesitas establecer el desafío de Responder a "1122334455667788"_
+Si puedes capturar [desafíos NTLMv1 lee aquí cómo crackearlos](../ntlm/index.html#ntlmv1-attack).\
+_Recuerda que para crackear NTLMv1 necesitas establecer el desafío de Responder a "1122334455667788"_
 
 {{#include ../../banners/hacktricks-training.md}}

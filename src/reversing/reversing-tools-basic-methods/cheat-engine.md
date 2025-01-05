@@ -10,7 +10,7 @@ Cuando lo descargas y lo ejecutas, se te **presenta** un **tutorial** sobre cóm
 ![](<../../images/image (762).png>)
 
 Esta herramienta es muy útil para encontrar **dónde se almacena algún valor** (generalmente un número) **en la memoria** de un programa.\
-**Generalmente, los números** se almacenan en forma de **4bytes**, pero también podrías encontrarlos en formatos **double** o **float**, o puede que desees buscar algo **diferente de un número**. Por esa razón, necesitas asegurarte de **seleccionar** lo que deseas **buscar**:
+**Generalmente los números** se almacenan en forma de **4bytes**, pero también podrías encontrarlos en formatos **double** o **float**, o puede que desees buscar algo **diferente de un número**. Por esa razón, necesitas asegurarte de **seleccionar** lo que deseas **buscar**:
 
 ![](<../../images/image (324).png>)
 
@@ -55,7 +55,7 @@ Luego, haces algo para que **el valor cambie**, y **detienes** el juego y **real
 ![](<../../images/image (684).png>)
 
 Cheat Engine buscará los **valores** que **pasaron de 100 al nuevo valor**. Felicitaciones, **encontraste** la **dirección** del valor que estabas buscando, ahora puedes modificarlo.\
-&#xNAN;_Si aún tienes varios valores, haz algo para modificar nuevamente ese valor y realiza otro "siguiente escaneo" para filtrar las direcciones._
+_&#x49;f aún tienes varios valores, haz algo para modificar nuevamente ese valor y realiza otro "siguiente escaneo" para filtrar las direcciones._
 
 ### Valor desconocido, cambio conocido
 
@@ -65,7 +65,7 @@ Así que, comienza realizando un escaneo de tipo "**Valor inicial desconocido**"
 
 ![](<../../images/image (890).png>)
 
-Luego, haz que el valor cambie, indica **cómo** el **valor** **cambió** (en mi caso, disminuyó en 1) y realiza un **siguiente escaneo**:
+Luego, haz que el valor cambie, indica **cómo** el **valor** **cambió** (en mi caso se redujo en 1) y realiza un **siguiente escaneo**:
 
 ![](<../../images/image (371).png>)
 
@@ -81,9 +81,9 @@ Ten en cuenta que hay un **montón de cambios posibles** y puedes hacer estos **
 
 ### Dirección de memoria aleatoria - Encontrando el código
 
-Hasta ahora hemos aprendido cómo encontrar una dirección que almacena un valor, pero es muy probable que en **diferentes ejecuciones del juego esa dirección esté en diferentes lugares de la memoria**. Así que vamos a descubrir cómo encontrar siempre esa dirección.
+Hasta ahora hemos aprendido cómo encontrar una dirección que almacena un valor, pero es muy probable que en **diferentes ejecuciones del juego esa dirección esté en diferentes lugares de la memoria**. Así que vamos a averiguar cómo encontrar siempre esa dirección.
 
-Usando algunos de los trucos mencionados, encuentra la dirección donde tu juego actual está almacenando el valor importante. Luego (deteniendo el juego si lo deseas), haz clic derecho en la **dirección** encontrada y selecciona "**Descubrir qué accede a esta dirección**" o "**Descubrir qué escribe en esta dirección**":
+Usando algunos de los trucos mencionados, encuentra la dirección donde tu juego actual está almacenando el valor importante. Luego (deteniendo el juego si lo deseas) haz clic derecho en la **dirección** encontrada y selecciona "**Descubrir qué accede a esta dirección**" o "**Descubrir qué escribe en esta dirección**":
 
 ![](<../../images/image (1067).png>)
 
@@ -102,7 +102,7 @@ Así que, ahora puedes modificarlo para que el código no afecte tu número, o s
 
 ### Dirección de memoria aleatoria - Encontrando el puntero
 
-Siguiendo los pasos anteriores, encuentra dónde está el valor que te interesa. Luego, usando "**Descubrir qué escribe en esta dirección**", descubre qué dirección escribe este valor y haz doble clic en él para obtener la vista de desensamblado:
+Siguiendo los pasos anteriores, encuentra dónde está el valor que te interesa. Luego, usando "**Descubrir qué escribe en esta dirección**", averigua qué dirección escribe este valor y haz doble clic en él para obtener la vista de desensamblado:
 
 ![](<../../images/image (1039).png>)
 
@@ -142,7 +142,7 @@ Luego, haz clic en **CTRL+a** para invocar la ventana de Auto ensamblado y selec
 
 ![](<../../images/image (902).png>)
 
-Completa la **dirección de la instrucción que deseas modificar** (esto generalmente se completa automáticamente):
+Rellena la **dirección de la instrucción que deseas modificar** (esto generalmente se completa automáticamente):
 
 ![](<../../images/image (744).png>)
 
@@ -150,7 +150,7 @@ Se generará una plantilla:
 
 ![](<../../images/image (944).png>)
 
-Así que, inserta tu nuevo código ensamblador en la sección "**newmem**" y elimina el código original de "**originalcode**" si no deseas que se ejecute\*\*.\*\* En este ejemplo, el código inyectado sumará 2 puntos en lugar de restar 1:
+Así que, inserta tu nuevo código de ensamblador en la sección "**newmem**" y elimina el código original de "**originalcode**" si no deseas que se ejecute\*\*.\*\* En este ejemplo, el código inyectado sumará 2 puntos en lugar de restar 1:
 
 ![](<../../images/image (521).png>)
 

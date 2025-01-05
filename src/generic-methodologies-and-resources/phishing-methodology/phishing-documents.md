@@ -6,7 +6,7 @@
 
 Microsoft Word realiza la validación de datos del archivo antes de abrirlo. La validación de datos se lleva a cabo en forma de identificación de la estructura de datos, de acuerdo con el estándar OfficeOpenXML. Si ocurre algún error durante la identificación de la estructura de datos, el archivo que se está analizando no se abrirá.
 
-Por lo general, los archivos de Word que contienen macros utilizan la extensión `.docm`. Sin embargo, es posible renombrar el archivo cambiando la extensión del archivo y aún así mantener sus capacidades de ejecución de macros.\
+Por lo general, los archivos de Word que contienen macros utilizan la extensión `.docm`. Sin embargo, es posible renombrar el archivo cambiando la extensión y aún así mantener sus capacidades de ejecución de macros.\
 Por ejemplo, un archivo RTF no admite macros, por diseño, pero un archivo DOCM renombrado a RTF será manejado por Microsoft Word y será capaz de ejecutar macros.\
 Los mismos internos y mecanismos se aplican a todo el software de la Suite de Microsoft Office (Excel, PowerPoint, etc.).
 
@@ -14,12 +14,12 @@ Puedes usar el siguiente comando para verificar qué extensiones se van a ejecut
 ```bash
 assoc | findstr /i "word excel powerp"
 ```
-DOCX archivos que hacen referencia a una plantilla remota (Archivo – Opciones – Complementos – Administrar: Plantillas – Ir) que incluye macros pueden “ejecutar” macros también.
+DOCX files que hacen referencia a una plantilla remota (Archivo – Opciones – Complementos – Administrar: Plantillas – Ir) que incluye macros pueden “ejecutar” macros también.
 
 ### Carga de Imagen Externa
 
 Ir a: _Insertar --> Partes Rápidas --> Campo_\
-&#xNAN;_**Categorías**: Enlaces y Referencias, **Nombres de campo**: includePicture, y **Nombre de archivo o URL**:_ http://\<ip>/whatever
+_**Categorías**: Enlaces y Referencias, **Nombres de campo**: includePicture, y **Nombre de archivo o URL**:_ http://\<ip>/whatever
 
 ![](<../../images/image (155).png>)
 
@@ -27,7 +27,7 @@ Ir a: _Insertar --> Partes Rápidas --> Campo_\
 
 Es posible usar macros para ejecutar código arbitrario desde el documento.
 
-#### Funciones de Autocarga
+#### Funciones de Carga Automática
 
 Cuanto más comunes sean, más probable es que el AV las detecte.
 
@@ -71,7 +71,7 @@ Ve a **Archivo > Información > Inspeccionar documento > Inspeccionar documento*
 #### Extensión de Doc
 
 Cuando termines, selecciona el menú desplegable **Guardar como tipo**, cambia el formato de **`.docx`** a **Word 97-2003 `.doc`**.\
-Haz esto porque **no puedes guardar macros dentro de un `.docx`** y hay un **estigma** **alrededor** de la extensión habilitada para macros **`.docm`** (por ejemplo, el ícono de miniatura tiene un enorme `!` y algunos gateways web/correo los bloquean por completo). Por lo tanto, esta **extensión `.doc` heredada es el mejor compromiso**.
+Haz esto porque **no puedes guardar macros dentro de un `.docx`** y hay un **estigma** **alrededor** de la extensión habilitada para macros **`.docm`** (por ejemplo, el ícono de miniatura tiene un enorme `!` y algunos gateways web/correo los bloquean por completo). Por lo tanto, esta **extensión heredada `.doc` es el mejor compromiso**.
 
 #### Generadores de macros maliciosas
 

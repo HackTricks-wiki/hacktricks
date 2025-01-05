@@ -9,7 +9,7 @@
 ### Configuración básica
 
 Después de instalar, hay algunas cosas que podrías considerar configurar.\
-En la configuración (el segundo botón de pestaña) puedes seleccionar el **dispositivo SDR** o **seleccionar un archivo** para leer y qué frecuencia sintonizar y la tasa de muestreo (recomendado hasta 2.56Msps si tu PC lo soporta)\\
+En la configuración (el segundo botón de pestaña) puedes seleccionar el **dispositivo SDR** o **seleccionar un archivo** para leer y qué frecuencia sintonizar y la tasa de muestreo (recomendado hasta 2.56Msps si tu PC lo soporta).
 
 ![](<../../images/image (245).png>)
 
@@ -26,13 +26,13 @@ En el comportamiento de la GUI, se recomienda habilitar algunas cosas si tu PC l
 
 ![](<../../images/image (960).png>)
 
-- El **sintonizador** de SigDigger ayuda a **capturar mejores señales** (pero también puede degradarlas). Idealmente comienza con 0 y sigue **aumentándolo hasta** que encuentres que el **ruido** introducido es **mayor** que la **mejora de la señal** que necesitas).
+- El **sintonizador** de SigDigger ayuda a **capturar mejores señales** (pero también puede degradarlas). Idealmente comienza con 0 y sigue **aumentándolo hasta** que encuentres que el **ruido** introducido es **mayor** que la **mejora de la señal** que necesitas.
 
 ![](<../../images/image (1099).png>)
 
 ### Sincronizar con el canal de radio
 
-Con [**SigDigger** ](https://github.com/BatchDrake/SigDigger)sincroniza con el canal que deseas escuchar, configura la opción "Vista previa de audio de banda base", configura el ancho de banda para obtener toda la información que se envía y luego ajusta el sintonizador al nivel antes de que el ruido comience a aumentar realmente:
+Con [**SigDigger** ](https://github.com/BatchDrake/SigDigger)sincroniza con el canal que deseas escuchar, configura la opción "Baseband audio preview", configura el ancho de banda para obtener toda la información que se envía y luego ajusta el sintonizador al nivel antes de que el ruido comience a aumentar realmente:
 
 ![](<../../images/image (585).png>)
 
@@ -50,17 +50,17 @@ Con [**SigDigger** ](https://github.com/BatchDrake/SigDigger)sincroniza con el c
 
 ### Descubriendo el tipo de modulación con IQ
 
-Hay 3 formas de almacenar información en señales: Modulando la **amplitud**, **frecuencia** o **fase**.\
-Si estás revisando una señal, hay diferentes maneras de intentar averiguar qué se está utilizando para almacenar información (encuentra más formas a continuación), pero una buena es revisar el gráfico IQ.
+Hay 3 formas de almacenar información en señales: modulando la **amplitud**, **frecuencia** o **fase**.\
+Si estás revisando una señal, hay diferentes formas de intentar averiguar qué se está utilizando para almacenar información (encuentra más formas a continuación), pero una buena es revisar el gráfico IQ.
 
 ![](<../../images/image (788).png>)
 
 - **Detectando AM**: Si en el gráfico IQ aparecen, por ejemplo, **2 círculos** (probablemente uno en 0 y otro en una amplitud diferente), podría significar que esta es una señal AM. Esto se debe a que en el gráfico IQ la distancia entre el 0 y el círculo es la amplitud de la señal, por lo que es fácil visualizar diferentes amplitudes que se están utilizando.
-- **Detectando PM**: Al igual que en la imagen anterior, si encuentras pequeños círculos no relacionados entre sí, probablemente significa que se está utilizando una modulación de fase. Esto se debe a que en el gráfico IQ, el ángulo entre el punto y el 0,0 es la fase de la señal, lo que significa que se están utilizando 4 fases diferentes.
-- Ten en cuenta que si la información está oculta en el hecho de que se cambia una fase y no en la fase misma, no verás fases diferentes claramente diferenciadas.
+- **Detectando PM**: Al igual que en la imagen anterior, si encuentras pequeños círculos no relacionados entre sí, probablemente significa que se está utilizando modulación de fase. Esto se debe a que en el gráfico IQ, el ángulo entre el punto y el 0,0 es la fase de la señal, lo que significa que se están utilizando 4 fases diferentes.
+- Ten en cuenta que si la información está oculta en el hecho de que se cambia una fase y no en la fase misma, no verás diferentes fases claramente diferenciadas.
 - **Detectando FM**: IQ no tiene un campo para identificar frecuencias (la distancia al centro es amplitud y el ángulo es fase).\
 Por lo tanto, para identificar FM, deberías **ver básicamente un círculo** en este gráfico.\
-Además, una frecuencia diferente es "representada" por el gráfico IQ mediante una **aceleración de velocidad a través del círculo** (así que en SysDigger, al seleccionar la señal, el gráfico IQ se llena; si encuentras una aceleración o cambio de dirección en el círculo creado, podría significar que esto es FM):
+Además, una frecuencia diferente es "representada" por el gráfico IQ mediante una **aceleración de velocidad a través del círculo** (así que en SysDigger, al seleccionar la señal, el gráfico IQ se poblará; si encuentras una aceleración o cambio de dirección en el círculo creado, podría significar que esto es FM):
 
 ## Ejemplo de AM
 
@@ -72,7 +72,7 @@ sigdigger_20220308_165547Z_2560000_433500000_float32_iq.raw
 
 #### Revisando la envoltura
 
-Revisando la información AM con [**SigDigger** ](https://github.com/BatchDrake/SigDigger) y solo mirando la **envoltura**, puedes ver diferentes niveles de amplitud claros. La señal utilizada está enviando pulsos con información en AM, así es como se ve un pulso:
+Revisando la información AM con [**SigDigger** ](https://github.com/BatchDrake/SigDigger)y solo mirando la **envoltura**, puedes ver diferentes niveles de amplitud claros. La señal utilizada está enviando pulsos con información en AM, así es como se ve un pulso:
 
 ![](<../../images/image (590).png>)
 
@@ -82,7 +82,7 @@ Y así es como se ve parte del símbolo con la forma de onda:
 
 #### Revisando el Histograma
 
-Puedes **seleccionar toda la señal** donde se encuentra la información, seleccionar el modo **Amplitud** y **Selección** y hacer clic en **Histograma**. Puedes observar que solo se encuentran 2 niveles claros.
+Puedes **seleccionar toda la señal** donde se encuentra la información, seleccionar el modo **Amplitud** y **Selección** y hacer clic en **Histograma.** Puedes observar que solo se encuentran 2 niveles claros.
 
 ![](<../../images/image (264).png>)
 
@@ -102,7 +102,7 @@ En este ejemplo puedes ver cómo hay un **gran círculo** pero también **muchos
 
 #### Con un símbolo
 
-Selecciona el símbolo más pequeño que puedas encontrar (así te aseguras de que es solo 1) y revisa la "Frecuencia de selección". En este caso sería 1.013kHz (así que 1kHz).
+Selecciona el símbolo más pequeño que puedas encontrar (así te aseguras de que sea solo 1) y revisa la "Frecuencia de selección". En este caso sería 1.013kHz (así que 1kHz).
 
 ![](<../../images/image (78).png>)
 
@@ -155,7 +155,7 @@ Ejemplo de señal enviando información modulada en FM:
 
 ![](<../../images/image (725).png>)
 
-En la imagen anterior puedes observar bastante bien que **se utilizan 2 frecuencias**, pero si **observas** la **forma de onda** podrías **no ser capaz de identificar correctamente las 2 frecuencias diferentes**:
+En la imagen anterior puedes observar bastante bien que **se utilizan 2 frecuencias**, pero si **observas** la **forma de onda**, es posible que **no puedas identificar correctamente las 2 frecuencias diferentes**:
 
 ![](<../../images/image (717).png>)
 
@@ -187,16 +187,16 @@ Y este sería el histograma de fase (que deja muy claro que la señal no está m
 
 IQ no tiene un campo para identificar frecuencias (la distancia al centro es amplitud y el ángulo es fase).\
 Por lo tanto, para identificar FM, deberías **ver básicamente un círculo** en este gráfico.\
-Además, una frecuencia diferente es "representada" por el gráfico IQ mediante una **aceleración de velocidad a través del círculo** (así que en SysDigger, al seleccionar la señal, el gráfico IQ se llena; si encuentras una aceleración o cambio de dirección en el círculo creado, podría significar que esto es FM):
+Además, una frecuencia diferente es "representada" por el gráfico IQ mediante una **aceleración de velocidad a través del círculo** (así que en SysDigger, al seleccionar la señal, el gráfico IQ se poblará; si encuentras una aceleración o cambio de dirección en el círculo creado, podría significar que esto es FM):
 
 ![](<../../images/image (81).png>)
 
 ### Obtener la Tasa de Símbolos
 
-Puedes usar la **misma técnica que la utilizada en el ejemplo de AM** para obtener la tasa de símbolos una vez que hayas encontrado las frecuencias que llevan símbolos.
+Puedes usar la **misma técnica que se utilizó en el ejemplo de AM** para obtener la tasa de símbolos una vez que hayas encontrado las frecuencias que llevan símbolos.
 
 ### Obtener Bits
 
-Puedes usar la **misma técnica que la utilizada en el ejemplo de AM** para obtener los bits una vez que hayas **encontrado que la señal está modulada en frecuencia** y la **tasa de símbolos**.
+Puedes usar la **misma técnica que se utilizó en el ejemplo de AM** para obtener los bits una vez que hayas **encontrado que la señal está modulada en frecuencia** y la **tasa de símbolos**.
 
 {{#include ../../banners/hacktricks-training.md}}
