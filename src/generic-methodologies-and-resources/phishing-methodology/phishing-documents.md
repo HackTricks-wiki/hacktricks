@@ -1,4 +1,4 @@
-# Arquivos e Documentos de Phishing
+# Phishing Files & Documents
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -19,13 +19,13 @@ DOCX files que referenciam um modelo remoto (Arquivo – Opções – Suplemento
 ### Carregamento de Imagem Externa
 
 Vá para: _Inserir --> Partes Rápidas --> Campo_\
-&#xNAN;_**Categorias**: Links e Referências, **Nomes de arquivo**: includePicture, e **Nome do arquivo ou URL**:_ http://\<ip>/whatever
+_**Categorias**: Links e Referências, **Nomes de Campo**: includePicture, e **Nome do Arquivo ou URL**:_ http://\<ip>/whatever
 
 ![](<../../images/image (155).png>)
 
 ### Backdoor de Macros
 
-É possível usar macros para executar código arbitrário do documento.
+É possível usar macros para executar código arbitrário a partir do documento.
 
 #### Funções de Autoload
 
@@ -71,7 +71,7 @@ Vá para **Arquivo > Informações > Inspecionar Documento > Inspecionar Documen
 #### Extensão do Documento
 
 Quando terminar, selecione o dropdown **Salvar como tipo**, mude o formato de **`.docx`** para **Word 97-2003 `.doc`**.\
-Faça isso porque você **não pode salvar macros dentro de um `.docx`** e há um **estigma** **em torno** da extensão habilitada para macros **`.docm`** (por exemplo, o ícone da miniatura tem um enorme `!` e alguns gateways web/email os bloqueiam completamente). Portanto, essa **extensão legada `.doc` é o melhor compromisso**.
+Faça isso porque você **não pode salvar macros dentro de um `.docx`** e há um **estigma** **em torno** da extensão habilitada para macros **`.docm`** (por exemplo, o ícone da miniatura tem um enorme `!` e alguns gateways web/email os bloqueiam completamente). Portanto, esta **extensão legada `.doc` é o melhor compromisso**.
 
 #### Geradores de Macros Maliciosas
 
@@ -142,7 +142,7 @@ self.close
 
 Existem várias maneiras de **forçar a autenticação NTLM "remotamente"**, por exemplo, você poderia adicionar **imagens invisíveis** a e-mails ou HTML que o usuário acessará (até mesmo HTTP MitM?). Ou enviar à vítima o **endereço de arquivos** que irão **disparar** uma **autenticação** apenas por **abrir a pasta.**
 
-**Verifique essas ideias e mais nas páginas a seguir:**
+**Confira essas ideias e mais nas páginas a seguir:**
 
 {{#ref}}
 ../../windows-hardening/active-directory-methodology/printers-spooler-service-abuse.md

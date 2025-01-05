@@ -8,10 +8,10 @@
 
 | Componente    | Ação                                                             |
 | --------------| -----------------------------------------------------------------|
-| Botão de energia | Desligar e ligar o dispositivo pode expor a tela de início    |
+| Botão de energia | Desligar e ligar o dispositivo novamente pode expor a tela inicial    |
 | Cabo de energia  | Verifique se o dispositivo reinicia quando a energia é cortada brevemente |
-| Portas USB    | Conectar teclado físico com mais atalhos                      |
-| Ethernet      | Escaneamento de rede ou sniffing pode permitir mais exploração           |
+| Portas USB    | Conecte um teclado físico com mais atalhos                      |
+| Ethernet      | A varredura de rede ou sniffing pode permitir uma exploração adicional           |
 
 ## Verifique as possíveis ações dentro da aplicação GUI
 
@@ -33,7 +33,7 @@ Você deve verificar se pode:
 
 ### Execução de Comandos
 
-Talvez **usando a opção `Abrir com`** você possa abrir/executar algum tipo de shell.
+Talvez **usando uma opção `Abrir com`** você possa abrir/executar algum tipo de shell.
 
 #### Windows
 
@@ -53,7 +53,7 @@ _bash, sh, zsh..._ Mais aqui: [https://gtfobins.github.io/](https://gtfobins.git
 - **Atalhos**: CTRL+N (abrir nova sessão), CTRL+R (Executar Comandos), CTRL+SHIFT+ESC (Gerenciador de Tarefas), Windows+E (abrir explorer), CTRL-B, CTRL-I (Favoritos), CTRL-H (Histórico), CTRL-L, CTRL-O (Arquivo/Abrir Diálogo), CTRL-P (Diálogo de Impressão), CTRL-S (Salvar Como)
 - Menu Administrativo Oculto: CTRL-ALT-F8, CTRL-ESC-F9
 - **Shell URIs**: _shell:Administrative Tools, shell:DocumentsLibrary, shell:Librariesshell:UserProfiles, shell:Personal, shell:SearchHomeFolder, shell:Systemshell:NetworkPlacesFolder, shell:SendTo, shell:UsersProfiles, shell:Common Administrative Tools, shell:MyComputerFolder, shell:InternetFolder_
-- **Caminhos UNC**: Caminhos para conectar a pastas compartilhadas. Você deve tentar se conectar ao C$ da máquina local ("\\\127.0.0.1\c$\Windows\System32")
+- **Caminhos UNC**: Caminhos para conectar a pastas compartilhadas. Você deve tentar conectar ao C$ da máquina local ("\\\127.0.0.1\c$\Windows\System32")
 - **Mais caminhos UNC:**
 
 | UNC                       | UNC            | UNC                  |
@@ -74,7 +74,7 @@ Console: [https://sourceforge.net/projects/console/](https://sourceforge.net/pro
 Explorer: [https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/](https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/)\
 Editor de registro: [https://sourceforge.net/projects/uberregedit/](https://sourceforge.net/projects/uberregedit/)
 
-### Acessando o sistema de arquivos pelo navegador
+### Acessando o sistema de arquivos a partir do navegador
 
 | CAMINHO                | CAMINHO              | CAMINHO               | CAMINHO                |
 | --------------------- | ------------------- | --------------------- | --------------------- |
@@ -126,7 +126,7 @@ Editor de registro: [https://sourceforge.net/projects/uberregedit/](https://sour
 
 #### Protocolo Shell
 
-Digite essas URLs para obter uma visualização do Explorer:
+Digite estas URLs para obter uma visualização do Explorer:
 
 - `shell:Administrative Tools`
 - `shell:DocumentsLibrary`
@@ -159,7 +159,7 @@ Verifique esta página para mais informações: [https://www.howtohaven.com/syst
 Versões de backup do iKat:
 
 [http://swin.es/k/](http://swin.es/k/)\
-[http://www.ikat.kronicd.net/](http://www.ikat.kronicd.net)\\
+[http://www.ikat.kronicd.net/](http://www.ikat.kronicd.net)
 
 Crie um diálogo comum usando JavaScript e acesse o explorador de arquivos: `document.write('<input/type=file>')`\
 Fonte: https://medium.com/@Rend\_/give-me-a-browser-ill-give-you-a-shell-de19811defa0
@@ -178,14 +178,14 @@ Fonte: https://medium.com/@Rend\_/give-me-a-browser-ill-give-you-a-shell-de19811
 - Deslize rapidamente 1 dedo do centro da tela para a direita ou esquerda: Para mudar para o próximo/último aplicativo
 - Pressione e segure o botão On/**Off**/Sleep no canto superior direito do **iPad +** Mova o controle deslizante para **desligar** completamente para a direita: Para desligar
 - Pressione o botão On/**Off**/Sleep no canto superior direito do **iPad e o botão Home por alguns segundos**: Para forçar um desligamento completo
-- Pressione o botão On/**Off**/Sleep no canto superior direito do **iPad e o botão Home rapidamente**: Para tirar uma captura de tela que aparecerá no canto inferior esquerdo da tela. Pressione ambos os botões ao mesmo tempo muito rapidamente, pois se você segurá-los por alguns segundos, um desligamento completo será realizado.
+- Pressione o botão On/**Off**/Sleep no canto superior direito do **iPad e o botão Home rapidamente**: Para tirar uma captura de tela que aparecerá no canto inferior esquerdo da tela. Pressione ambos os botões ao mesmo tempo muito brevemente, pois se você segurá-los por alguns segundos, um desligamento completo será realizado.
 
 ### Atalhos
 
-Você deve ter um teclado de iPad ou um adaptador de teclado USB. Apenas atalhos que podem ajudar a escapar da aplicação serão mostrados aqui.
+Você deve ter um teclado de iPad ou um adaptador de teclado USB. Apenas atalhos que podem ajudar a escapar do aplicativo serão mostrados aqui.
 
 | Tecla | Nome         |
-| --- | ------------ |
+| ----- | ------------ |
 | ⌘   | Comando      |
 | ⌥   | Opção (Alt) |
 | ⇧   | Shift        |
@@ -208,7 +208,7 @@ Esses atalhos são para as configurações visuais e de som, dependendo do uso d
 | F7     | Voltar uma música                                                              |
 | F8     | Reproduzir/pausar                                                             |
 | F9     | Pular música                                                                  |
-| F10    | Mudo                                                                         |
+| F10    | Silenciar                                                                     |
 | F11    | Diminuir volume                                                                |
 | F12    | Aumentar volume                                                                |
 | ⌘ Espaço  | Exibir uma lista de idiomas disponíveis; para escolher um, toque novamente na barra de espaço. |
@@ -217,29 +217,29 @@ Esses atalhos são para as configurações visuais e de som, dependendo do uso d
 
 | Atalho                                           | Ação                                                  |
 | ------------------------------------------------ | ----------------------------------------------------- |
-| ⌘H                                             | Ir para a tela inicial                                |
-| ⌘⇧H (Command-Shift-H)                          | Ir para a tela inicial                                |
-| ⌘ (Espaço)                                     | Abrir Spotlight                                      |
-| ⌘⇥ (Command-Tab)                               | Listar os últimos dez aplicativos usados              |
-| ⌘\~                                            | Ir para o último aplicativo                            |
+| ⌘H                                             | Ir para a Tela Inicial                                  |
+| ⌘⇧H (Command-Shift-H)                          | Ir para a Tela Inicial                                  |
+| ⌘ (Espaço)                                     | Abrir Spotlight                                        |
+| ⌘⇥ (Command-Tab)                               | Listar os últimos dez aplicativos usados               |
+| ⌘\~                                            | Ir para o último aplicativo                             |
 | ⌘⇧3 (Command-Shift-3)                          | Captura de tela (paira no canto inferior esquerdo para salvar ou agir sobre ela) |
-| ⌘⇧4                                            | Captura de tela e abri-la no editor                  |
-| Pressione e segure ⌘                           | Lista de atalhos disponíveis para o aplicativo        |
-| ⌘⌥D (Command-Option/Alt-D)                     | Abre o dock                                          |
-| ^⌥H (Control-Option-H)                         | Botão Home                                           |
-| ^⌥H H (Control-Option-H-H)                     | Mostrar barra de multitarefa                          |
-| ^⌥I (Control-Option-i)                         | Seletor de itens                                      |
-| Escape                                          | Botão Voltar                                         |
-| → (Seta para a Direita)                        | Próximo item                                         |
-| ← (Seta para a Esquerda)                       | Item anterior                                        |
-| ↑↓ (Seta para Cima, Seta para Baixo)          | Toque simultaneamente no item selecionado            |
-| ⌥ ↓ (Option-Seta para Baixo)                   | Rolagem para baixo                                   |
-| ⌥↑ (Option-Seta para Cima)                     | Rolagem para cima                                    |
-| ⌥← ou ⌥→ (Option-Seta para a Esquerda ou Option-Seta para a Direita) | Rolagem para a esquerda ou para a direita            |
-| ^⌥S (Control-Option-S)                         | Ativar ou desativar a fala do VoiceOver             |
-| ⌘⇧⇥ (Command-Shift-Tab)                        | Alternar para o aplicativo anterior                  |
-| ⌘⇥ (Command-Tab)                               | Voltar para o aplicativo original                     |
-| ←+→, então Option + ← ou Option+→              | Navegar pelo Dock                                    |
+| ⌘⇧4                                            | Captura de tela e abri-la no editor                    |
+| Pressione e segure ⌘                           | Lista de atalhos disponíveis para o aplicativo         |
+| ⌘⌥D (Command-Option/Alt-D)                     | Abre o dock                                            |
+| ^⌥H (Control-Option-H)                         | Botão Home                                            |
+| ^⌥H H (Control-Option-H-H)                     | Mostrar a barra de multitarefa                          |
+| ^⌥I (Control-Option-i)                         | Seletor de itens                                        |
+| Escape                                         | Botão Voltar                                          |
+| → (Seta para a Direita)                        | Próximo item                                           |
+| ← (Seta para a Esquerda)                       | Item anterior                                          |
+| ↑↓ (Seta para Cima, Seta para Baixo)          | Toque simultaneamente no item selecionado              |
+| ⌥ ↓ (Option-Seta para Baixo)                   | Rolagem para baixo                                     |
+| ⌥↑ (Option-Seta para Cima)                     | Rolagem para cima                                      |
+| ⌥← ou ⌥→ (Option-Seta para a Esquerda ou Option-Seta para a Direita) | Rolagem para a esquerda ou para a direita              |
+| ^⌥S (Control-Option-S)                         | Ativar ou desativar a fala do VoiceOver               |
+| ⌘⇧⇥ (Command-Shift-Tab)                        | Alternar para o aplicativo anterior                    |
+| ⌘⇥ (Command-Tab)                               | Voltar para o aplicativo original                       |
+| ←+→, então Option + ← ou Option+→              | Navegar pelo Dock                                      |
 
 #### Atalhos do Safari
 

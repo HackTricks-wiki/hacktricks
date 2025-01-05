@@ -45,7 +45,7 @@ Se você apenas tiver acesso a um ambiente AD, mas não tiver credenciais/sessõ
 - Enumerar DNS pode fornecer informações sobre servidores chave no domínio, como web, impressoras, compartilhamentos, vpn, mídia, etc.
 - `gobuster dns -d domain.local -t 25 -w /opt/Seclist/Discovery/DNS/subdomain-top2000.txt`
 - Dê uma olhada na [**Metodologia de Pentesting**](../../generic-methodologies-and-resources/pentesting-methodology.md) para encontrar mais informações sobre como fazer isso.
-- **Verifique o acesso nulo e de convidado em serviços smb** (isso não funcionará em versões modernas do Windows):
+- **Verificar acesso nulo e de convidado em serviços smb** (isso não funcionará em versões modernas do Windows):
 - `enum4linux -a -u "" -p "" <DC IP> && enum4linux -a -u "guest" -p "" <DC IP>`
 - `smbmap -u "" -p "" -P 445 -H <DC IP> && smbmap -u "guest" -p "" -P 445 -H <DC IP>`
 - `smbclient -U '%' -L //<DC IP> && smbclient -U 'guest%' -L //`
@@ -272,7 +272,7 @@ crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9c
 > [!WARNING]
 > Note que isso é bastante **barulhento** e **LAPS** **mitigaria** isso.
 
-### Abuso de MSSQL e Links Confiáveis
+### Abuso de MSSQL & Links Confiáveis
 
 Se um usuário tiver privilégios para **acessar instâncias MSSQL**, ele poderá usá-las para **executar comandos** no host MSSQL (se estiver rodando como SA), **roubar** o **hash** NetNTLM ou até mesmo realizar um **ataque** de **relay**.\
 Além disso, se uma instância MSSQL for confiável (link de banco de dados) por uma instância MSSQL diferente. Se o usuário tiver privilégios sobre o banco de dados confiável, ele poderá **usar o relacionamento de confiança para executar consultas também na outra instância**. Essas confianças podem ser encadeadas e, em algum momento, o usuário pode ser capaz de encontrar um banco de dados mal configurado onde pode executar comandos.\
@@ -457,13 +457,13 @@ acl-persistence-abuse/
 
 ### Descritores de Segurança
 
-Os **descritores de segurança** são usados para **armazenar** as **permissões** que um **objeto** tem **sobre** um **objeto**. Se você puder apenas **fazer** uma **pequena mudança** no **descritor de segurança** de um objeto, você pode obter privilégios muito interessantes sobre esse objeto sem precisar ser membro de um grupo privilegiado.
+Os **descritores de segurança** são usados para **armazenar** as **permissões** que um **objeto** tem **sobre** um **objeto**. Se você puder apenas **fazer** uma **pequena alteração** no **descritor de segurança** de um objeto, você pode obter privilégios muito interessantes sobre esse objeto sem precisar ser membro de um grupo privilegiado.
 
 {{#ref}}
 security-descriptors.md
 {{#endref}}
 
-### Chave Esqueleto
+### Skeleton Key
 
 Alterar **LSASS** na memória para estabelecer uma **senha universal**, concedendo acesso a todas as contas de domínio.
 
@@ -474,7 +474,7 @@ skeleton-key.md
 ### SSP Personalizado
 
 [Saiba o que é um SSP (Provedor de Suporte de Segurança) aqui.](../authentication-credentials-uac-and-efs/index.html#security-support-provider-interface-sspi)\
-Você pode criar seu **próprio SSP** para **capturar** em **texto claro** as **credenciais** usadas para acessar a máquina.\\
+Você pode criar seu **próprio SSP** para **capturar** em **texto claro** as **credenciais** usadas para acessar a máquina.
 
 {{#ref}}
 custom-ssp.md
@@ -514,7 +514,7 @@ Em um cenário típico, se um usuário pretende acessar um serviço em um **dom�
 2. O DC1 emite um novo TGT se o cliente for autenticado com sucesso.
 3. O cliente então solicita um **TGT inter-realm** do DC1, que é necessário para acessar recursos no **Domínio 2**.
 4. O TGT inter-realm é criptografado com uma **chave de confiança** compartilhada entre DC1 e DC2 como parte da confiança de domínio bidirecional.
-5. O cliente leva o TGT inter-realm para o **Controlador de Domínio do Domínio 2 (DC2)**.
+5. O cliente leva o TGT inter-realm para o **Controlador de Domínio (DC2) do Domínio 2**.
 6. O DC2 verifica o TGT inter-realm usando sua chave de confiança compartilhada e, se válido, emite um **Ticket Granting Service (TGS)** para o servidor no Domínio 2 que o cliente deseja acessar.
 7. Finalmente, o cliente apresenta este TGS ao servidor, que é criptografado com o hash da conta do servidor, para obter acesso ao serviço no Domínio 2.
 
@@ -531,7 +531,7 @@ Se o Domínio A confiar no Domínio B, A é o domínio confiador e B é o confi�
 - **Confianças Externas**: Estas são configuradas entre diferentes domínios não relacionados e são não transitivas por natureza. De acordo com a [documentação da Microsoft](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>), as confianças externas são úteis para acessar recursos em um domínio fora da floresta atual que não está conectado por uma confiança de floresta. A segurança é reforçada através da filtragem de SID com confianças externas.
 - **Confianças de Raiz de Árvore**: Essas confianças são automaticamente estabelecidas entre o domínio raiz da floresta e uma nova raiz de árvore adicionada. Embora não sejam comumente encontradas, as confianças de raiz de árvore são importantes para adicionar novas árvores de domínio a uma floresta, permitindo que mantenham um nome de domínio exclusivo e garantindo a transitividade bidirecional. Mais informações podem ser encontradas no [guia da Microsoft](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>).
 - **Confianças de Floresta**: Este tipo de confiança é uma confiança transitiva bidirecional entre dois domínios raiz de floresta, também aplicando filtragem de SID para melhorar as medidas de segurança.
-- **Confianças MIT**: Essas confianças são estabelecidas com domínios Kerberos não Windows, [compatíveis com RFC4120](https://tools.ietf.org/html/rfc4120). As confianças MIT são um pouco mais especializadas e atendem a ambientes que exigem integração com sistemas baseados em Kerberos fora do ecossistema Windows.
+- **Confianças MIT**: Essas confianças são estabelecidas com domínios Kerberos não Windows, [compatíveis com RFC4120](https://tools.ietf.org/html/rfc4120). As confianças MIT são um pouco mais especializadas e atendem a ambientes que requerem integração com sistemas baseados em Kerberos fora do ecossistema Windows.
 
 #### Outras diferenças nas **relações de confiança**
 
@@ -540,16 +540,16 @@ Se o Domínio A confiar no Domínio B, A é o domínio confiador e B é o confi�
 
 ### Caminho de Ataque
 
-1. **Enumere** as relações de confiança
+1. **Enumerar** as relações de confiança
 2. Verifique se algum **principal de segurança** (usuário/grupo/computador) tem **acesso** a recursos do **outro domínio**, talvez por entradas ACE ou por estar em grupos do outro domínio. Procure por **relações entre domínios** (a confiança foi criada para isso, provavelmente).
 1. Kerberoast neste caso poderia ser outra opção.
-3. **Comprometa** as **contas** que podem **pivotar** entre domínios.
+3. **Comprometer** as **contas** que podem **pivotar** entre domínios.
 
 Os atacantes poderiam acessar recursos em outro domínio através de três mecanismos principais:
 
 - **Membro de Grupo Local**: Os principais podem ser adicionados a grupos locais em máquinas, como o grupo “Administradores” em um servidor, concedendo-lhes controle significativo sobre essa máquina.
 - **Membro de Grupo de Domínio Estrangeiro**: Os principais também podem ser membros de grupos dentro do domínio estrangeiro. No entanto, a eficácia deste método depende da natureza da confiança e do escopo do grupo.
-- **Listas de Controle de Acesso (ACLs)**: Os principais podem ser especificados em uma **ACL**, particularmente como entidades em **ACEs** dentro de um **DACL**, proporcionando-lhes acesso a recursos específicos. Para aqueles que desejam se aprofundar na mecânica de ACLs, DACLs e ACEs, o whitepaper intitulado “[An ACE Up The Sleeve](https://specterops.io/assets/resources/an_ace_up_the_sleeve.pdf)” é um recurso inestimável.
+- **Listas de Controle de Acesso (ACLs)**: Os principais podem ser especificados em uma **ACL**, particularmente como entidades em **ACEs** dentro de um **DACL**, fornecendo-lhes acesso a recursos específicos. Para aqueles que desejam se aprofundar na mecânica de ACLs, DACLs e ACEs, o whitepaper intitulado “[An ACE Up The Sleeve](https://specterops.io/assets/resources/an_ace_up_the_sleeve.pdf)” é um recurso inestimável.
 
 ### Escalonamento de privilégios de floresta de filho para pai
 ```
@@ -582,7 +582,7 @@ sid-history-injection.md
 
 #### Explorar NC de Configuração gravável
 
-Entender como o Contexto de Nomeação de Configuração (NC) pode ser explorado é crucial. O NC de Configuração serve como um repositório central para dados de configuração em ambientes do Active Directory (AD). Esses dados são replicados para todos os Controladores de Domínio (DC) dentro da floresta, com DCs graváveis mantendo uma cópia gravável do NC de Configuração. Para explorar isso, é necessário ter **privilégios de SYSTEM em um DC**, preferencialmente um DC filho.
+Entender como o Contexto de Nomeação de Configuração (NC) pode ser explorado é crucial. O NC de Configuração serve como um repositório central para dados de configuração em ambientes do Active Directory (AD). Esses dados são replicados para cada Controlador de Domínio (DC) dentro da floresta, com DCs graváveis mantendo uma cópia gravável do NC de Configuração. Para explorar isso, é necessário ter **privilégios de SYSTEM em um DC**, preferencialmente um DC filho.
 
 **Vincular GPO ao site do DC raiz**
 
@@ -592,13 +592,13 @@ Para informações detalhadas, pode-se explorar pesquisas sobre [Bypassing SID F
 
 **Comprometer qualquer gMSA na floresta**
 
-Um vetor de ataque envolve direcionar gMSAs privilegiadas dentro do domínio. A chave KDS Root, essencial para calcular as senhas de gMSAs, é armazenada dentro do NC de Configuração. Com privilégios de SYSTEM em qualquer DC, é possível acessar a chave KDS Root e calcular as senhas para qualquer gMSA na floresta.
+Um vetor de ataque envolve direcionar gMSAs privilegiadas dentro do domínio. A chave raiz do KDS, essencial para calcular as senhas dos gMSAs, é armazenada dentro do NC de Configuração. Com privilégios de SYSTEM em qualquer DC, é possível acessar a chave raiz do KDS e calcular as senhas para qualquer gMSA na floresta.
 
 Análises detalhadas podem ser encontradas na discussão sobre [Golden gMSA Trust Attacks](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-5-golden-gmsa-trust-attack-from-child-to-parent).
 
 **Ataque de mudança de esquema**
 
-Esse método requer paciência, aguardando a criação de novos objetos AD privilegiados. Com privilégios de SYSTEM, um atacante pode modificar o Esquema AD para conceder a qualquer usuário controle total sobre todas as classes. Isso pode levar a acesso não autorizado e controle sobre novos objetos AD criados.
+Esse método requer paciência, aguardando a criação de novos objetos AD privilegiados. Com privilégios de SYSTEM, um atacante pode modificar o Esquema do AD para conceder a qualquer usuário controle total sobre todas as classes. Isso pode levar a acesso não autorizado e controle sobre objetos AD recém-criados.
 
 Leitura adicional está disponível sobre [Schema Change Trust Attacks](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-6-schema-change-trust-attack-from-child-to-parent).
 
@@ -676,30 +676,30 @@ https://cloud.hacktricks.xyz/pentesting-cloud/azure-security/az-lateral-movement
 
 ## Algumas Defesas Gerais
 
-[**Saiba mais sobre como proteger credenciais aqui.**](../stealing-credentials/credentials-protections.md)\\
+[**Saiba mais sobre como proteger credenciais aqui.**](../stealing-credentials/credentials-protections.md)
 
 ### **Medidas Defensivas para Proteção de Credenciais**
 
 - **Restrições de Administradores de Domínio**: Recomenda-se que os Administradores de Domínio só possam fazer login em Controladores de Domínio, evitando seu uso em outros hosts.
 - **Privilégios de Conta de Serviço**: Serviços não devem ser executados com privilégios de Administrador de Domínio (DA) para manter a segurança.
-- **Limitação Temporal de Privilégios**: Para tarefas que requerem privilégios de DA, sua duração deve ser limitada. Isso pode ser alcançado por: `Add-ADGroupMember -Identity ‘Domain Admins’ -Members newDA -MemberTimeToLive (New-TimeSpan -Minutes 20)`
+- **Limitação Temporal de Privilégios**: Para tarefas que exigem privilégios de DA, sua duração deve ser limitada. Isso pode ser alcançado por: `Add-ADGroupMember -Identity ‘Domain Admins’ -Members newDA -MemberTimeToLive (New-TimeSpan -Minutes 20)`
 
-### **Implementando Técnicas de Engano**
+### **Implementando Técnicas de Decepção**
 
-- Implementar engano envolve a configuração de armadilhas, como usuários ou computadores de isca, com características como senhas que não expiram ou são marcadas como Confiáveis para Delegação. Uma abordagem detalhada inclui a criação de usuários com direitos específicos ou adicioná-los a grupos de alto privilégio.
+- Implementar decepção envolve a configuração de armadilhas, como usuários ou computadores de isca, com características como senhas que não expiram ou são marcadas como Confiáveis para Delegação. Uma abordagem detalhada inclui a criação de usuários com direitos específicos ou adicioná-los a grupos de alto privilégio.
 - Um exemplo prático envolve o uso de ferramentas como: `Create-DecoyUser -UserFirstName user -UserLastName manager-uncommon -Password Pass@123 | DeployUserDeception -UserFlag PasswordNeverExpires -GUID d07da11f-8a3d-42b6-b0aa-76c962be719a -Verbose`
-- Mais sobre a implementação de técnicas de engano pode ser encontrado em [Deploy-Deception no GitHub](https://github.com/samratashok/Deploy-Deception).
+- Mais sobre a implementação de técnicas de decepção pode ser encontrado em [Deploy-Deception no GitHub](https://github.com/samratashok/Deploy-Deception).
 
-### **Identificando Engano**
+### **Identificando Decepção**
 
 - **Para Objetos de Usuário**: Indicadores suspeitos incluem ObjectSID atípico, logons infrequentes, datas de criação e contagens baixas de senhas incorretas.
-- **Indicadores Gerais**: Comparar atributos de objetos de isca potenciais com os de objetos genuínos pode revelar inconsistências. Ferramentas como [HoneypotBuster](https://github.com/JavelinNetworks/HoneypotBuster) podem ajudar a identificar tais enganos.
+- **Indicadores Gerais**: Comparar atributos de objetos de isca potenciais com os de objetos genuínos pode revelar inconsistências. Ferramentas como [HoneypotBuster](https://github.com/JavelinNetworks/HoneypotBuster) podem ajudar a identificar tais decepções.
 
 ### **Evitando Sistemas de Detecção**
 
-- **Desvio de Detecção do Microsoft ATA**:
+- **Bypass de Detecção do Microsoft ATA**:
 - **Enumeração de Usuários**: Evitar a enumeração de sessões em Controladores de Domínio para prevenir a detecção do ATA.
-- **Imitação de Ticket**: Utilizar chaves **aes** para a criação de tickets ajuda a evitar a detecção ao não rebaixar para NTLM.
+- **Impersonação de Ticket**: Utilizar chaves **aes** para a criação de tickets ajuda a evitar a detecção ao não rebaixar para NTLM.
 - **Ataques DCSync**: Executar a partir de um controlador de domínio não é recomendado para evitar a detecção do ATA, pois a execução direta de um Controlador de Domínio acionará alertas.
 
 ## Referências

@@ -6,7 +6,7 @@
 
 Em ambientes onde **Windows XP e Server 2003** estão em operação, hashes LM (Lan Manager) são utilizados, embora seja amplamente reconhecido que estes podem ser facilmente comprometidos. Um hash LM específico, `AAD3B435B51404EEAAD3B435B51404EE`, indica um cenário onde o LM não é empregado, representando o hash para uma string vazia.
 
-Por padrão, o protocolo de autenticação **Kerberos** é o método principal utilizado. NTLM (NT LAN Manager) entra em ação sob circunstâncias específicas: ausência de Active Directory, não existência do domínio, mau funcionamento do Kerberos devido a configuração inadequada, ou quando conexões são tentadas usando um endereço IP em vez de um nome de host válido.
+Por padrão, o protocolo de autenticação **Kerberos** é o método principal utilizado. NTLM (NT LAN Manager) entra em cena sob circunstâncias específicas: ausência de Active Directory, não existência do domínio, mau funcionamento do Kerberos devido a configuração inadequada, ou quando conexões são tentadas usando um endereço IP em vez de um nome de host válido.
 
 A presença do cabeçalho **"NTLMSSP"** em pacotes de rede sinaliza um processo de autenticação NTLM.
 
@@ -51,7 +51,7 @@ Valores possíveis:
 3. O **servidor** envia o **desafio**
 4. O **cliente criptografa** o **desafio** usando o hash da senha como chave e o envia como resposta
 5. O **servidor envia** ao **Controlador de Domínio** o **nome do domínio, o nome de usuário, o desafio e a resposta**. Se **não houver** um Active Directory configurado ou o nome do domínio for o nome do servidor, as credenciais são **verificadas localmente**.
-6. O **controlador de domínio verifica se tudo está correto** e envia as informações para o servidor
+6. O **controlador de domínio verifica se tudo está correto** e envia as informações ao servidor
 
 O **servidor** e o **Controlador de Domínio** são capazes de criar um **Canal Seguro** via servidor **Netlogon**, pois o Controlador de Domínio conhece a senha do servidor (ela está dentro do banco de dados **NTDS.DIT**).
 
@@ -77,11 +77,11 @@ O **hash NT (16bytes)** é dividido em **3 partes de 7bytes cada** (7B + 7B + (2
 
 Atualmente, está se tornando menos comum encontrar ambientes com Delegação Não Restrita configurada, mas isso não significa que você não pode **abusar de um serviço de Print Spooler** configurado.
 
-Você poderia abusar de algumas credenciais/sessões que já possui no AD para **pedir à impressora que se autentique** contra algum **host sob seu controle**. Então, usando `metasploit auxiliary/server/capture/smb` ou `responder`, você pode **definir o desafio de autenticação como 1122334455667788**, capturar a tentativa de autenticação e, se foi feita usando **NTLMv1**, você poderá **quebrá-la**.\
+Você poderia abusar de algumas credenciais/sessões que já possui no AD para **pedir à impressora que se autentique** contra algum **host sob seu controle**. Então, usando `metasploit auxiliary/server/capture/smb` ou `responder`, você pode **definir o desafio de autenticação como 1122334455667788**, capturar a tentativa de autenticação e, se foi feito usando **NTLMv1**, você poderá **quebrá-lo**.\
 Se você estiver usando `responder`, pode tentar \*\*usar a flag `--lm` \*\* para tentar **rebaixar** a **autenticação**.\
-&#xNAN;_&#x4E;ote que para esta técnica a autenticação deve ser realizada usando NTLMv1 (NTLMv2 não é válido)._
+_&#x4E;ote que para esta técnica a autenticação deve ser realizada usando NTLMv1 (NTLMv2 não é válido)._
 
-Lembre-se de que a impressora usará a conta do computador durante a autenticação, e as contas de computador usam **senhas longas e aleatórias** que você **provavelmente não conseguirá quebrar** usando dicionários comuns. Mas a autenticação **NTLMv1** **usa DES** ([mais informações aqui](#ntlmv1-challenge)), então, usando alguns serviços especialmente dedicados a quebrar DES, você conseguirá quebrá-la (você poderia usar [https://crack.sh/](https://crack.sh) ou [https://ntlmv1.com/](https://ntlmv1.com) por exemplo).
+Lembre-se de que a impressora usará a conta do computador durante a autenticação, e contas de computador usam **senhas longas e aleatórias** que você **provavelmente não conseguirá quebrar** usando dicionários comuns. Mas a autenticação **NTLMv1** **usa DES** ([mais informações aqui](#ntlmv1-challenge)), então usando alguns serviços especialmente dedicados a quebrar DES, você conseguirá quebrá-lo (você poderia usar [https://crack.sh/](https://crack.sh) ou [https://ntlmv1.com/](https://ntlmv1.com) por exemplo).
 
 ### Ataque NTLMv1 com hashcat
 
@@ -161,12 +161,12 @@ O **tamanho do desafio é de 8 bytes** e **2 respostas são enviadas**: Uma tem 
 
 A **segunda resposta** é criada usando **vários valores** (um novo desafio do cliente, um **timestamp** para evitar **ataques de repetição**...)
 
-Se você tiver um **pcap que capturou um processo de autenticação bem-sucedido**, você pode seguir este guia para obter o domínio, nome de usuário, desafio e resposta e tentar quebrar a senha: [https://research.801labs.org/cracking-an-ntlmv2-hash/](https://www.801labs.org/research-portal/post/cracking-an-ntlmv2-hash/)
+Se você tiver um **pcap que capturou um processo de autenticação bem-sucedido**, pode seguir este guia para obter o domínio, nome de usuário, desafio e resposta e tentar quebrar a senha: [https://research.801labs.org/cracking-an-ntlmv2-hash/](https://www.801labs.org/research-portal/post/cracking-an-ntlmv2-hash/)
 
 ## Pass-the-Hash
 
 **Uma vez que você tenha o hash da vítima**, você pode usá-lo para **impersonar**.\
-Você precisa usar uma **ferramenta** que irá **realizar** a **autenticação NTLM usando** esse **hash**, **ou** você pode criar um novo **sessionlogon** e **injetar** esse **hash** dentro do **LSASS**, para que quando qualquer **autenticação NTLM for realizada**, esse **hash será usado.** A última opção é o que o mimikatz faz.
+Você precisa usar uma **ferramenta** que **realize** a **autenticação NTLM usando** esse **hash**, **ou** você pode criar um novo **sessionlogon** e **injetar** esse **hash** dentro do **LSASS**, para que quando qualquer **autenticação NTLM for realizada**, esse **hash será usado.** A última opção é o que o mimikatz faz.
 
 **Por favor, lembre-se de que você pode realizar ataques Pass-the-Hash também usando contas de computador.**
 
