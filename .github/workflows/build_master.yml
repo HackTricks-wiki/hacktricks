@@ -44,5 +44,5 @@ jobs:
       
       # Sync the build to S3
       - name: Sync to S3
-        run: aws s3 sync ./book s3://hacktricks/en --delete
+        run: aws s3 sync ./book s3://hacktricks-wiki/en --delete
       
