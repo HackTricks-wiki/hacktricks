@@ -4,13 +4,16 @@
 
 _Hacktricks logos & motion design by_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
 
-> [!TIP] > **Welcome to the wiki where you will find each hacking trick/technique/whatever I have learnt from CTFs, real life apps, reading researches, and news.**
+### Run HackTricks Locally
 
-To get started follow this page where you will find the **typical flow** that **you should follow when pentesting** one or more **machines:**
+```bash
+# Download latest version of hacktricks
+git clone https://github.com/HackTricks-wiki/hacktricks
+# Run the docker container indicating the path to the hacktricks folder
+docker run -d --rm -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
+```
 
-{{#ref}}
-generic-methodologies-and-resources/pentesting-methodology.md
-{{#endref}}
+Your local copy of HackTricks will be **available at [http://localhost:3337](http://localhost:3337)** after <5 minutes (it needs to build the book, be patient).
 
 ## Corporate Sponsors
 
@@ -110,7 +113,7 @@ You can **create a free account** [**here**](https://serpapi.com/users/sign_up)*
 
 ---
 
-### 8kSec Academy – In-Depth Mobile Security Courses
+### [8kSec Academy – In-Depth Mobile Security Courses](https://academy.8ksec.io/)
 
 <figure><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
