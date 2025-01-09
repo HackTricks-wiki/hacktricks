@@ -14,12 +14,15 @@ on:
 concurrency: build_master
 
 permissions:
+  packages: write
   id-token: write
   contents: write
 
 jobs:
   run-translation:
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image:latest
     environment: prod
 
     steps:
@@ -27,31 +30,10 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0 #Needed to download everything to be able to access the master & language branches
-
-      # Install Rust and Cargo
-      - name: Install Rust and Cargo
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
       
-      # Install mdBook and Plugins
-      - name: Install mdBook and Plugins
-        run: |
-          cargo install mdbook
-          cargo install mdbook-alerts
-          cargo install mdbook-reading-time
-          cargo install mdbook-pagetoc
-          cargo install mdbook-tabs
-          cargo install mdbook-codename
-
       # Build the mdBook
       - name: Build mdBook
-        run: MDBOOK_BOOK__LANGUAGE=en mdbook build
-      
-      # Cat hacktricks-preprocessor.log
-      #- name: Cat hacktricks-preprocessor.log
-      #  run: cat hacktricks-preprocessor.log
+        run: MDBOOK_BOOK__LANGUAGE=en mdbook build || (echo "Error logs" && cat hacktricks-preprocessor-error.log && echo "" && echo "" && echo "Debug logs" && (cat hacktricks-preprocessor.log | tail -n 20) && exit 1)
       
       # Login in AWs
       - name: Configure AWS credentials using OIDC
@@ -62,5 +44,5 @@ jobs:
       
       # Sync the build to S3
       - name: Sync to S3
-        run: aws s3 sync ./book s3://hacktricks-wiki/en --delete
+        run: aws s3 sync ./book s3://hacktricks-cloud/en --delete
       
