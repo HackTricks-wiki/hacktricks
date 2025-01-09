@@ -22,7 +22,7 @@ jobs:
   run-translation:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image:latest
+      image: ghcr.io/hacktricks-wiki/hacktricks/translator-image:latest
     environment: prod
     env:
       LANGUAGE: Italian
@@ -77,4 +77,4 @@ jobs:
       
       # Sync the build to S3
       - name: Sync to S3
-        run: aws s3 sync ./book s3://hacktricks-cloud/$BRANCH --delete
+        run: aws s3 sync ./book s3://hacktricks-wiki/$BRANCH --delete

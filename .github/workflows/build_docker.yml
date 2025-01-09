@@ -13,6 +13,11 @@ on:
 
 concurrency: build_docker
 
+permissions:
+  packages: write
+  id-token: write
+  contents: write
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
@@ -33,7 +38,7 @@ jobs:
       - name: Build and push Docker image
         run: |
           # Define image name
-          IMAGE_NAME=ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image
+          IMAGE_NAME=ghcr.io/hacktricks-wiki/hacktricks/translator-image
 
           # Build Docker image
           docker build -t $IMAGE_NAME:latest .
