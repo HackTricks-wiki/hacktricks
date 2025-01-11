@@ -4,7 +4,7 @@
 
 ## Basic Information
 
-Αν δεν ξέρετε τι είναι το Electron, μπορείτε να βρείτε [**πολλές πληροφορίες εδώ**](https://book.hacktricks.xyz/network-services-pentesting/pentesting-web/xss-to-rce-electron-desktop-apps). Αλλά προς το παρόν, απλά να ξέρετε ότι το Electron εκτελεί **node**.\
+Αν δεν ξέρετε τι είναι το Electron, μπορείτε να βρείτε [**πολλές πληροφορίες εδώ**](https://book.hacktricks.wiki/en/network-services-pentesting/pentesting-web/electron-desktop-apps/index.html#rce-xss--contextisolation). Αλλά προς το παρόν, απλά να ξέρετε ότι το Electron τρέχει **node**.\
 Και το node έχει κάποιες **παραμέτρους** και **μεταβλητές περιβάλλοντος** που μπορούν να χρησιμοποιηθούν για να **εκτελέσουν άλλο κώδικα** εκτός από το υποδεικνυόμενο αρχείο.
 
 ### Electron Fuses
@@ -19,7 +19,7 @@
 
 Μια άλλη ενδιαφέρουσα σημαία που δεν θα αποτρέπει την έγχυση κώδικα είναι:
 
-- **EnableCookieEncryption**: Αν είναι ενεργοποιημένο, το cookie store στον δίσκο κρυπτογραφείται χρησιμοποιώντας κλειδιά κρυπτογραφίας επιπέδου OS.
+- **EnableCookieEncryption**: Αν είναι ενεργοποιημένο, το cookie store στον δίσκο είναι κρυπτογραφημένο χρησιμοποιώντας κλειδιά κρυπτογραφίας επιπέδου OS.
 
 ### Checking Electron Fuses
 
@@ -37,24 +37,24 @@ EnableEmbeddedAsarIntegrityValidation is Enabled
 OnlyLoadAppFromAsar is Enabled
 LoadBrowserProcessSpecificV8Snapshot is Disabled
 ```
-### Τροποποίηση Ηλεκτρονικών Ασφαλειών
+### Τροποποίηση των Fuses του Electron
 
-Όπως αναφέρουν οι [**τεκμηριώσεις**](https://www.electronjs.org/docs/latest/tutorial/fuses#runasnode), η διαμόρφωση των **Ηλεκτρονικών Ασφαλειών** είναι ρυθμισμένη μέσα στο **Ηλεκτρονικό δυαδικό** που περιέχει κάπου τη συμβολοσειρά **`dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX`**.
+Όπως αναφέρουν οι [**τεκμηριώσεις**](https://www.electronjs.org/docs/latest/tutorial/fuses#runasnode), η διαμόρφωση των **Fuses του Electron** είναι ρυθμισμένη μέσα στο **δυαδικό αρχείο του Electron** το οποίο περιέχει κάπου τη συμβολοσειρά **`dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX`**.
 
 Στις εφαρμογές macOS, αυτό είναι συνήθως στο `application.app/Contents/Frameworks/Electron Framework.framework/Electron Framework`
 ```bash
 grep -R "dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX" Slack.app/
 Binary file Slack.app//Contents/Frameworks/Electron Framework.framework/Versions/A/Electron Framework matches
 ```
-Μπορείτε να φορτώσετε αυτό το αρχείο στο [https://hexed.it/](https://hexed.it/) και να αναζητήσετε την προηγούμενη συμβολοσειρά. Μετά από αυτή τη συμβολοσειρά μπορείτε να δείτε σε ASCII έναν αριθμό "0" ή "1" που υποδεικνύει αν κάθε ασφάλεια είναι απενεργοποιημένη ή ενεργοποιημένη. Απλώς τροποποιήστε τον κωδικό hex (`0x30` είναι `0` και `0x31` είναι `1`) για να **τροποποιήσετε τις τιμές ασφάλειας**.
+Μπορείτε να φορτώσετε αυτό το αρχείο στο [https://hexed.it/](https://hexed.it/) και να αναζητήσετε την προηγούμενη συμβολοσειρά. Μετά από αυτή τη συμβολοσειρά μπορείτε να δείτε σε ASCII έναν αριθμό "0" ή "1" που υποδεικνύει αν κάθε ασφάλεια είναι απενεργοποιημένη ή ενεργοποιημένη. Απλά τροποποιήστε τον κωδικό hex (`0x30` είναι `0` και `0x31` είναι `1`) για να **τροποποιήσετε τις τιμές ασφάλειας**.
 
 <figure><img src="../../../images/image (34).png" alt=""><figcaption></figcaption></figure>
 
-Σημειώστε ότι αν προσπαθήσετε να **επικαλύψετε** το **`Electron Framework`** δυαδικό αρχείο μέσα σε μια εφαρμογή με αυτά τα bytes τροποποιημένα, η εφαρμογή δεν θα εκτελείται.
+Σημειώστε ότι αν προσπαθήσετε να **επικαλύψετε** το **`Electron Framework` binary** μέσα σε μια εφαρμογή με αυτούς τους τροποποιημένους byte, η εφαρμογή δεν θα εκτελείται.
 
 ## RCE προσθήκη κώδικα σε εφαρμογές Electron
 
-Μπορεί να υπάρχουν **εξωτερικά αρχεία JS/HTML** που χρησιμοποιεί μια εφαρμογή Electron, οπότε ένας επιτιθέμενος θα μπορούσε να εισάγει κώδικα σε αυτά τα αρχεία των οποίων η υπογραφή δεν θα ελεγχθεί και να εκτελέσει αυθαίρετο κώδικα στο πλαίσιο της εφαρμογής.
+Μπορεί να υπάρχουν **εξωτερικά JS/HTML αρχεία** που χρησιμοποιεί μια εφαρμογή Electron, οπότε ένας επιτιθέμενος θα μπορούσε να εισάγει κώδικα σε αυτά τα αρχεία των οποίων η υπογραφή δεν θα ελεγχθεί και να εκτελέσει αυθαίρετο κώδικα στο πλαίσιο της εφαρμογής.
 
 > [!CAUTION]
 > Ωστόσο, αυτή τη στιγμή υπάρχουν 2 περιορισμοί:
@@ -64,7 +64,7 @@ Binary file Slack.app//Contents/Frameworks/Electron Framework.framework/Versions
 >
 > Κάνοντάς το αυτό το μονοπάτι επίθεσης πιο περίπλοκο (ή αδύνατο).
 
-Σημειώστε ότι είναι δυνατόν να παρακάμψετε την απαίτηση της **`kTCCServiceSystemPolicyAppBundles`** αντιγράφοντας την εφαρμογή σε άλλο κατάλογο (όπως **`/tmp`**), μετονομάζοντας τον φάκελο **`app.app/Contents`** σε **`app.app/NotCon`**, **τροποποιώντας** το αρχείο **asar** με τον **κακόβουλο** κώδικά σας, μετονομάζοντάς το πίσω σε **`app.app/Contents`** και εκτελώντας το.
+Σημειώστε ότι είναι δυνατόν να παρακαμφθεί η απαίτηση της **`kTCCServiceSystemPolicyAppBundles`** αντιγράφοντας την εφαρμογή σε έναν άλλο φάκελο (όπως **`/tmp`**), μετονομάζοντας το φάκελο **`app.app/Contents`** σε **`app.app/NotCon`**, **τροποποιώντας** το αρχείο **asar** με τον **κακόβουλο** κώδικά σας, μετονομάζοντάς το πίσω σε **`app.app/Contents`** και εκτελώντας το.
 
 Μπορείτε να αποσυμπιέσετε τον κώδικα από το αρχείο asar με:
 ```bash
@@ -155,11 +155,11 @@ NODE_OPTIONS="--require /tmp/payload.js" ELECTRON_RUN_AS_NODE=1 /Applications/Di
 require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Calculator')
 ```
 > [!CAUTION]
-> Αν η ασφάλεια **`EnableNodeCliInspectArguments`** είναι απενεργοποιημένη, η εφαρμογή θα **αγνοήσει τις παραμέτρους node** (όπως `--inspect`) όταν εκκινείται, εκτός αν η μεταβλητή περιβάλλοντος **`ELECTRON_RUN_AS_NODE`** είναι ρυθμισμένη, η οποία θα **αγνοηθεί** επίσης αν η ασφάλεια **`RunAsNode`** είναι απενεργοποιημένη.
+> Αν η ασφάλεια **`EnableNodeCliInspectArguments`** είναι απενεργοποιημένη, η εφαρμογή θα **αγνοήσει τις παραμέτρους node** (όπως `--inspect`) κατά την εκκίνηση, εκτός αν η μεταβλητή περιβάλλοντος **`ELECTRON_RUN_AS_NODE`** είναι ρυθμισμένη, η οποία θα **αγνοηθεί** επίσης αν η ασφάλεια **`RunAsNode`** είναι απενεργοποιημένη.
 >
 > Ωστόσο, μπορείτε να χρησιμοποιήσετε την παράμετρο **`--remote-debugging-port=9229`** αλλά το προηγούμενο payload δεν θα λειτουργήσει για την εκτέλεση άλλων διαδικασιών.
 
-Χρησιμοποιώντας την παράμετρο **`--remote-debugging-port=9222`** είναι δυνατόν να κλέψετε κάποιες πληροφορίες από την εφαρμογή Electron όπως το **ιστορικό** (με εντολές GET) ή τα **cookies** του προγράμματος περιήγησης (καθώς είναι **αποκρυπτογραφημένα** μέσα στο πρόγραμμα περιήγησης και υπάρχει ένα **json endpoint** που θα τα δώσει).
+Χρησιμοποιώντας την παράμετρο **`--remote-debugging-port=9222`** είναι δυνατό να κλέψετε κάποιες πληροφορίες από την εφαρμογή Electron όπως το **ιστορικό** (με εντολές GET) ή τα **cookies** του προγράμματος περιήγησης (καθώς είναι **αποκρυπτογραφημένα** μέσα στο πρόγραμμα περιήγησης και υπάρχει ένα **json endpoint** που θα τα δώσει).
 
 Μπορείτε να μάθετε πώς να το κάνετε αυτό [**εδώ**](https://posts.specterops.io/hands-in-the-cookie-jar-dumping-cookies-with-chromiums-remote-debugger-port-34c4f468844e) και [**εδώ**](https://slyd0g.medium.com/debugging-cookie-dumping-failures-with-chromiums-remote-debugger-8a4c4d19429f) και να χρησιμοποιήσετε το αυτόματο εργαλείο [WhiteChocolateMacademiaNut](https://github.com/slyd0g/WhiteChocolateMacademiaNut) ή ένα απλό script όπως:
 ```python
