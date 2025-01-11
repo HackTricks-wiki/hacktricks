@@ -7,13 +7,13 @@
 > [!TIP]
 > Estos son los **valores del Proyecto HackTricks**:
 >
-> - Dar acceso **GRATIS** a recursos de **HACKING educativo** a **TODOS** en Internet.
+> - Dar acceso **GRATIS** a recursos de **HACKING EDUCATIVO** a **TODOS** en Internet.
 >   - Hacking se trata de aprender, y aprender debería ser lo más gratuito posible.
 >   - El propósito de este libro es servir como un **recurso educativo** integral.
 > - **ALMACENAR** técnicas de **hacking** increíbles que la comunidad publica dando a los **AUTORES** **ORIGINALES** todos los **créditos**.
 >   - **No queremos el crédito de otras personas**, solo queremos almacenar trucos geniales para todos.
 >   - También escribimos **nuestras propias investigaciones** en HackTricks.
->   - En varios casos, simplemente escribiremos **en HackTricks un resumen de las partes importantes** de la técnica y **alentaremos al lector a visitar la publicación original** para más detalles.
+>   - En varios casos, solo escribiremos **en HackTricks un resumen de las partes importantes** de la técnica y **alentaremos al lector a visitar la publicación original** para más detalles.
 > - **ORGANIZAR** todas las técnicas de hacking en el libro para que sea **MÁS ACCESIBLE**
 >   - El equipo de HackTricks ha dedicado miles de horas de forma gratuita **solo para organizar el contenido** para que la gente pueda **aprender más rápido**
 
@@ -57,7 +57,7 @@ Si necesitas un bibtex, puedes usar algo como:
 author = {"HackTricks Team" or the Authors name of the specific page/trick},
 title = {Title of the Specific Page},
 year = {Year of Last Update (check it at the end of the page)},
-url = {\url{https://book.hacktricks.xyz/specific-page}},
+url = {\url{https://book.hacktricks.wiki/specific-page}},
 }
 ```
 > [!WARNING]
@@ -127,7 +127,7 @@ Esta licencia no otorga ningún derecho de marca registrada o de branding en rel
 
 **Al acceder o utilizar HackTricks, aceptas cumplir con los términos de esta licencia. Si no estás de acuerdo con estos términos, por favor, no accedas a este sitio web.**
 
-## **Disclaimer**
+## **Descargo de Responsabilidad**
 
 > [!CAUTION]
 > Este libro, 'HackTricks', está destinado únicamente a fines educativos e informativos. El contenido dentro de este libro se proporciona "tal cual", y los autores y editores no hacen representaciones ni garantías de ningún tipo, expresas o implícitas, sobre la integridad, precisión, fiabilidad, idoneidad o disponibilidad de la información, productos, servicios o gráficos relacionados contenidos en este libro. Cualquier confianza que deposites en dicha información es, por lo tanto, estrictamente bajo tu propio riesgo.
