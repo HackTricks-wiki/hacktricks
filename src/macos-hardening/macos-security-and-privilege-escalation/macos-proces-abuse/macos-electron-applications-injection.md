@@ -4,24 +4,24 @@
 
 ## 基本信息
 
-如果你不知道 Electron 是什么，你可以在 [**这里找到很多信息**](https://book.hacktricks.xyz/network-services-pentesting/pentesting-web/xss-to-rce-electron-desktop-apps)。但现在只需知道 Electron 运行 **node**。\
+如果你不知道 Electron 是什么，你可以在 [**这里找到很多信息**](https://book.hacktricks.wiki/en/network-services-pentesting/pentesting-web/electron-desktop-apps/index.html#rce-xss--contextisolation)。但现在只需知道 Electron 运行 **node**。\
 而 node 有一些 **参数** 和 **环境变量** 可以用来 **执行其他代码**，而不是指定的文件。
 
-### Electron 保护机制
+### Electron 保险丝
 
-这些技术将在接下来讨论，但最近 Electron 添加了几个 **安全标志以防止它们**。这些是 [**Electron 保护机制**](https://www.electronjs.org/docs/latest/tutorial/fuses)，用于 **防止** macOS 中的 Electron 应用程序 **加载任意代码**：
+这些技术将在接下来讨论，但最近 Electron 添加了几个 **安全标志以防止它们**。这些是 [**Electron 保险丝**](https://www.electronjs.org/docs/latest/tutorial/fuses)，用于 **防止** macOS 中的 Electron 应用程序 **加载任意代码**：
 
 - **`RunAsNode`**：如果禁用，它会阻止使用环境变量 **`ELECTRON_RUN_AS_NODE`** 来注入代码。
-- **`EnableNodeCliInspectArguments`**：如果禁用，像 `--inspect`、`--inspect-brk` 这样的参数将不被尊重。避免通过这种方式注入代码。
+- **`EnableNodeCliInspectArguments`**：如果禁用，参数如 `--inspect`、`--inspect-brk` 将不被尊重。避免通过这种方式注入代码。
 - **`EnableEmbeddedAsarIntegrityValidation`**：如果启用，加载的 **`asar`** **文件** 将由 macOS **验证**。以此方式 **防止** 通过修改该文件的内容进行 **代码注入**。
-- **`OnlyLoadAppFromAsar`**：如果启用，它将只检查并使用 app.asar，而不是按以下顺序加载：**`app.asar`**、**`app`**，最后是 **`default_app.asar`**。因此确保当与 **`embeddedAsarIntegrityValidation`** 保护机制 **结合** 时，**不可能** **加载未验证的代码**。
+- **`OnlyLoadAppFromAsar`**：如果启用，它将只检查并使用 app.asar，而不是按以下顺序加载：**`app.asar`**、**`app`**，最后是 **`default_app.asar`**。因此确保当与 **`embeddedAsarIntegrityValidation`** 保险丝 **结合** 使用时，**不可能** **加载未验证的代码**。
 - **`LoadBrowserProcessSpecificV8Snapshot`**：如果启用，浏览器进程使用名为 `browser_v8_context_snapshot.bin` 的文件作为其 V8 快照。
 
-另一个有趣的保护机制不会防止代码注入的是：
+另一个有趣的保险丝不会阻止代码注入的是：
 
 - **EnableCookieEncryption**：如果启用，磁盘上的 cookie 存储将使用操作系统级别的加密密钥进行加密。
 
-### 检查 Electron 保护机制
+### 检查 Electron 保险丝
 
 你可以通过以下方式 **检查这些标志**：
 ```bash
@@ -39,18 +39,18 @@ LoadBrowserProcessSpecificV8Snapshot is Disabled
 ```
 ### 修改 Electron Fuses
 
-如[**文档所述**](https://www.electronjs.org/docs/latest/tutorial/fuses#runasnode)，**Electron Fuses**的配置是在包含字符串**`dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX`**的**Electron 二进制文件**内部配置的。
+正如 [**文档提到的**](https://www.electronjs.org/docs/latest/tutorial/fuses#runasnode)，**Electron Fuses** 的配置是在 **Electron binary** 内部配置的，其中包含字符串 **`dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX`**。
 
-在 macOS 应用程序中，这通常位于`application.app/Contents/Frameworks/Electron Framework.framework/Electron Framework`
+在 macOS 应用程序中，这通常位于 `application.app/Contents/Frameworks/Electron Framework.framework/Electron Framework`
 ```bash
 grep -R "dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX" Slack.app/
 Binary file Slack.app//Contents/Frameworks/Electron Framework.framework/Versions/A/Electron Framework matches
 ```
-您可以在 [https://hexed.it/](https://hexed.it/) 中加载此文件并搜索前面的字符串。在此字符串之后，您可以在 ASCII 中看到数字 "0" 或 "1"，指示每个保险丝是禁用还是启用。只需修改十六进制代码（`0x30` 是 `0`，`0x31` 是 `1`）以 **修改保险丝值**。
+您可以在 [https://hexed.it/](https://hexed.it/) 中加载此文件并搜索前面的字符串。在此字符串后，您可以在 ASCII 中看到数字 "0" 或 "1"，指示每个保险丝是禁用还是启用。只需修改十六进制代码（`0x30` 是 `0`，`0x31` 是 `1`）以 **修改保险丝值**。
 
 <figure><img src="../../../images/image (34).png" alt=""><figcaption></figcaption></figure>
 
-请注意，如果您尝试 **覆盖** 应用程序内部的 **`Electron Framework`** 二进制文件并修改这些字节，则应用程序将无法运行。
+请注意，如果您尝试 **覆盖** 应用程序中已修改字节的 **`Electron Framework`** 二进制文件，则该应用程序将无法运行。
 
 ## RCE 向 Electron 应用程序添加代码
 
@@ -60,7 +60,7 @@ Binary file Slack.app//Contents/Frameworks/Electron Framework.framework/Versions
 > 但是，目前有两个限制：
 >
 > - 修改应用程序需要 **`kTCCServiceSystemPolicyAppBundles`** 权限，因此默认情况下这不再可能。
-> - 编译后的 **`asap`** 文件通常具有 **`embeddedAsarIntegrityValidation`** 和 **`onlyLoadAppFromAsar`** 权限 `启用`
+> - 编译后的 **`asap`** 文件通常具有 **`embeddedAsarIntegrityValidation`** `和` **`onlyLoadAppFromAsar`** `启用`
 >
 > 使得此攻击路径更加复杂（或不可能）。
 
@@ -70,7 +70,7 @@ Binary file Slack.app//Contents/Frameworks/Electron Framework.framework/Versions
 ```bash
 npx asar extract app.asar app-decomp
 ```
-并在修改后重新打包：
+将其打包回去，修改为：
 ```bash
 npx asar pack app-decomp app-new.asar
 ```
@@ -88,7 +88,7 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 
 ### 从应用程序 Plist 注入
 
-正如 [**这里提到的**](https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks/)，您可以在 plist 中滥用此环境变量以保持持久性：
+正如 [**这里提到的**](https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks/)，您可以在 plist 中滥用这个环境变量以保持持久性：
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -129,7 +129,7 @@ NODE_OPTIONS="--require /tmp/payload.js" ELECTRON_RUN_AS_NODE=1 /Applications/Di
 
 ### 从 App Plist 注入
 
-您可以在 plist 中滥用此环境变量，通过添加以下键来保持持久性：
+您可以在 plist 中滥用此环境变量以保持持久性，添加以下键：
 ```xml
 <dict>
 <key>EnvironmentVariables</key>
@@ -147,7 +147,7 @@ NODE_OPTIONS="--require /tmp/payload.js" ELECTRON_RUN_AS_NODE=1 /Applications/Di
 ```
 ## RCE with inspecting
 
-根据[**这个**](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f)的说法，如果你使用 **`--inspect`**、**`--inspect-brk`** 和 **`--remote-debugging-port`** 等标志执行 Electron 应用程序，将会 **打开一个调试端口**，这样你就可以连接到它（例如从 Chrome 的 `chrome://inspect`）并且你将能够 **在其上注入代码**，甚至启动新进程。\
+根据[**this**](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f)，如果你使用 **`--inspect`**、**`--inspect-brk`** 和 **`--remote-debugging-port`** 等标志执行 Electron 应用程序，将会 **打开一个调试端口**，这样你就可以连接到它（例如从 Chrome 的 `chrome://inspect`），并且你将能够 **在其上注入代码**，甚至启动新进程。\
 例如：
 ```bash
 /Applications/Signal.app/Contents/MacOS/Signal --inspect=9229
@@ -187,21 +187,21 @@ print(ws.recv()
 <true/>
 </dict>
 ```
-## TCC 绕过旧版本的滥用
+## TCC Bypass abusing Older Versions
 
 > [!TIP]
-> macOS 的 TCC 守护进程不会检查应用程序的执行版本。因此，如果你 **无法在 Electron 应用程序中注入代码**，你可以下载该应用的旧版本并在其上注入代码，因为它仍然会获得 TCC 权限（除非 Trust Cache 阻止它）。
+> macOS 的 TCC 守护进程不会检查应用程序的执行版本。因此，如果您 **无法在 Electron 应用程序中注入代码**，可以下载该应用的旧版本并在其上注入代码，因为它仍然会获得 TCC 权限（除非信任缓存阻止它）。
 
-## 运行非 JS 代码
+## Run non JS Code
 
-之前的技术将允许你在 **Electron 应用程序的进程中运行 JS 代码**。然而，请记住，**子进程在与父应用程序相同的沙箱配置文件下运行**，并且 **继承它们的 TCC 权限**。\
-因此，如果你想滥用权限访问相机或麦克风，例如，你可以直接 **从进程中运行另一个二进制文件**。
+之前的技术将允许您在 **Electron 应用程序的进程中运行 JS 代码**。但是，请记住，**子进程在与父应用程序相同的沙箱配置文件下运行**，并且 **继承它们的 TCC 权限**。\
+因此，如果您想利用权限访问相机或麦克风，例如，您可以直接 **从进程中运行另一个二进制文件**。
 
-## 自动注入
+## Automatic Injection
 
 工具 [**electroniz3r**](https://github.com/r3ggi/electroniz3r) 可以轻松用于 **查找已安装的易受攻击的 Electron 应用程序** 并在其上注入代码。该工具将尝试使用 **`--inspect`** 技术：
 
-你需要自己编译它，可以这样使用：
+您需要自己编译它，可以这样使用：
 ```bash
 # Find electron apps
 ./electroniz3r list-apps
@@ -237,7 +237,7 @@ You can now kill the app using `kill -9 57739`
 The webSocketDebuggerUrl is: ws://127.0.0.1:13337/8e0410f0-00e8-4e0e-92e4-58984daf37e5
 Shell binding requested. Check `nc 127.0.0.1 12345`
 ```
-## 参考文献
+## 参考
 
 - [https://www.electronjs.org/docs/latest/tutorial/fuses](https://www.electronjs.org/docs/latest/tutorial/fuses)
 - [https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks](https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks)

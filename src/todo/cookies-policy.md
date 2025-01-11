@@ -6,10 +6,10 @@
 
 本Cookies政策适用于HackTricks团队（“HackTricks”，“我们”，“我们”或“我们的”）拥有和运营的以下网站：
 
-* hacktricks.xyz
-* [www.hacktricks.xyz](http://www.hacktricks.xyz/)
-* book.hacktricks.xyz
-* cloud.hacktricks.xyz
+* hacktricks.wiki
+* [www.hacktricks.wiki](https://www.hacktricks.wiki/)
+* book.hacktricks.wiki
+* cloud.hacktricks.wiki
 
 通过使用这些网站中的任何一个，您同意根据本Cookies政策使用cookies。如果您不同意，请在浏览器设置中禁用cookies或避免使用我们的网站。
 
@@ -26,11 +26,11 @@ Cookies是当您访问网站时存储在您的计算机或移动设备上的小�
 3. 功能性cookies：这些cookies使我们的网站能够记住您所做的选择，例如您的语言或地区，以提供更个性化的体验。
 4. 定向/广告cookies：这些cookies用于根据您的兴趣、浏览历史和与我们网站的互动提供相关广告和营销通讯。
 
-此外，页面book.hacktricks.xyz和cloud.hacktricks.xyz托管在Gitbook上。您可以在[https://gitbook-1652864889.teamtailor.com/cookie-policy](https://gitbook-1652864889.teamtailor.com/cookie-policy)找到有关Gitbook cookies的更多信息。
+此外，页面book.hacktricks.wiki和cloud.hacktricks.wiki托管在Gitbook上。您可以在[https://gitbook-1652864889.teamtailor.com/cookie-policy](https://gitbook-1652864889.teamtailor.com/cookie-policy)找到有关Gitbook cookies的更多信息。
 
 ### 第三方cookies
 
-除了我们自己的cookies，我们还可能使用第三方cookies来报告网站使用统计信息、投放广告和启用社交媒体分享按钮。使用第三方cookies受其各自隐私政策的约束。
+除了我们自己的cookies，我们还可能使用第三方cookies来报告网站使用统计信息、投放广告和启用社交媒体分享按钮。第三方cookies的使用受其各自隐私政策的约束。
 
 管理cookies
 
