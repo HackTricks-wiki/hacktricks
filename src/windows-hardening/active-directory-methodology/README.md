@@ -12,14 +12,14 @@ Belangrike konsepte binne **Aktiewe Gids** sluit in:
 
 1. **Gids** – Huis al die inligting rakende Aktiewe Gids objekte.
 2. **Objek** – Verwys na entiteite binne die gids, insluitend **gebruikers**, **groepe**, of **gedeelde vouers**.
-3. **Domein** – Dien as 'n houer vir gidsobjekte, met die vermoë dat verskeie domeine binne 'n **woud** kan bestaan, elk wat sy eie objekversameling handhaaf.
+3. **Domein** – Dien as 'n houer vir gidsobjekte, met die vermoë dat verskeie domeine saam in 'n **woud** kan bestaan, elk wat sy eie objekversameling handhaaf.
 4. **Boom** – 'n Groepering van domeine wat 'n gemeenskaplike worteldomein deel.
 5. **Woud** – Die hoogtepunt van organisatoriese struktuur in Aktiewe Gids, saamgestel uit verskeie bome met **vertrouensverhoudings** tussen hulle.
 
 **Aktiewe Gids Domein Dienste (AD DS)** omvat 'n reeks dienste wat krities is vir die gesentraliseerde bestuur en kommunikasie binne 'n netwerk. Hierdie dienste sluit in:
 
 1. **Domein Dienste** – Sentraliseer data berging en bestuur interaksies tussen **gebruikers** en **domeine**, insluitend **verifikasie** en **soek** funksies.
-2. **Sertifikaat Dienste** – Toesig oor die skepping, verspreiding, en bestuur van veilige **digitale sertifikate**.
+2. **Sertifikaat Dienste** – Oorsien die skepping, verspreiding, en bestuur van veilige **digitale sertifikate**.
 3. **Liggewig Gids Dienste** – Ondersteun gids-geaktiveerde toepassings deur die **LDAP protokol**.
 4. **Gids Federasie Dienste** – Verskaf **enkele-aanmelding** vermoëns om gebruikers oor verskeie webtoepassings in 'n enkele sessie te verifieer.
 5. **Regte Bestuur** – Help om kopiereg materiaal te beskerm deur die ongeoorloofde verspreiding en gebruik daarvan te reguleer.
@@ -29,10 +29,10 @@ Vir 'n meer gedetailleerde verduideliking kyk: [**TechTerms - Aktiewe Gids Defin
 
 ### **Kerberos Verifikasie**
 
-Om te leer hoe om 'n **AD** aan te val, moet jy die **Kerberos verifikasie proses** regtig goed **begryp**.\
+Om te leer hoe om 'n **AD** te **aanval**, moet jy die **Kerberos verifikasie proses** regtig goed **begryp**.\
 [**Lees hierdie bladsy as jy nog nie weet hoe dit werk nie.**](kerberos-authentication.md)
 
-## Spiekbrief
+## Cheat Sheet
 
 Jy kan baie na [https://wadcoms.github.io/](https://wadcoms.github.io) neem om 'n vinnige oorsig te kry van watter opdragte jy kan uitvoer om 'n AD te enumerate/exploit.
 
@@ -41,7 +41,7 @@ Jy kan baie na [https://wadcoms.github.io/](https://wadcoms.github.io) neem om '
 As jy net toegang het tot 'n AD omgewing maar jy het geen krediete/sessies nie, kan jy:
 
 - **Pentest die netwerk:**
-- Skandeer die netwerk, vind masjiene en oop poorte en probeer om **kwesbaarhede** te **ontgin** of **krediete** daaruit te **onttrek** (byvoorbeeld, [drukkers kan baie interessante teikens wees](ad-information-in-printers.md)).
+- Skandeer die netwerk, vind masjiene en oop poorte en probeer om **kwesbaarhede** te **ontgin** of **krediete** van hulle te **onttrek** (byvoorbeeld, [drukker kan baie interessante teikens wees](ad-information-in-printers.md)).
 - Die opsporing van DNS kan inligting oor sleutelbedieners in die domein gee soos web, drukker, gedeeltes, vpn, media, ens.
 - `gobuster dns -d domain.local -t 25 -w /opt/Seclist/Discovery/DNS/subdomain-top2000.txt`
 - Kyk na die Algemene [**Pentesting Metodologie**](../../generic-methodologies-and-resources/pentesting-methodology.md) om meer inligting te vind oor hoe om dit te doen.
@@ -67,9 +67,9 @@ As jy net toegang het tot 'n AD omgewing maar jy het geen krediete/sessies nie, 
 - Versamel krediete [**deur dienste te vervang met Responder**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md)
 - Toegang tot gasheer deur [**die relay aanval te misbruik**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)
 - Versamel krediete **deur** [**valse UPnP dienste met evil-S**](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md)[**SDP**](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
-- [**OSINT**](https://book.hacktricks.xyz/external-recon-methodology):
-- Trek gebruikersname/names uit interne dokumente, sosiale media, dienste (hoofsaaklik web) binne die domein omgewings en ook van die publiek beskikbaar.
-- As jy die volledige name van maatskappywerkers vind, kan jy verskillende AD **gebruikersnaam konvensies** probeer (**[**lees dit**](https://activedirectorypro.com/active-directory-user-naming-convention/)). Die mees algemene konvensies is: _NaamVan_, _Naam.Van_, _NamVan_ (3 letters van elkeen), _Nam.Van_, _NVaan_, _N.Van_, _VanNaam_, _Van.Naam_, _VanN_, _Van.N_, 3 _willekeurige letters en 3 willekeurige nommers_ (abc123).
+- [**OSINT**](https://book.hacktricks.wiki/en/generic-methodologies-and-resources/external-recon-methodology/index.html):
+- Trek gebruikersname/names uit interne dokumente, sosiale media, dienste (hoofsaaklik web) binne die domein omgewings en ook uit die publiek beskikbaar.
+- As jy die volledige name van maatskappywerkers vind, kan jy verskillende AD **gebruikersnaam konvensies** probeer (**[**lees dit**](https://activedirectorypro.com/active-directory-user-naming-convention/)). Die mees algemene konvensies is: _NaamVan_, _Naam.Van_, _NamVan_ (3 letters van elkeen), _Nam.Van_, _NVaan_, _N.Van_, _VanNaam_, _Van.Naam_, _VanN_, _Van.N_, 3 _ewekansige letters en 3 ewekansige nommers_ (abc123).
 - Gereedskap:
 - [w0Tx/generate-ad-username](https://github.com/w0Tx/generate-ad-username)
 - [urbanadventurer/username-anarchy](https://github.com/urbanadventurer/username-anarchy)
@@ -77,7 +77,7 @@ As jy net toegang het tot 'n AD omgewing maar jy het geen krediete/sessies nie, 
 ### Gebruiker enumerasie
 
 - **Anonieme SMB/LDAP enum:** Kontroleer die [**pentesting SMB**](../../network-services-pentesting/pentesting-smb/index.html) en [**pentesting LDAP**](../../network-services-pentesting/pentesting-ldap.md) bladsye.
-- **Kerbrute enum**: Wanneer 'n **ongeldige gebruikersnaam aangevra** word, sal die bediener reageer met die **Kerberos fout** kode _KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN_, wat ons in staat stel om te bepaal dat die gebruikersnaam ongeldig was. **Geldige gebruikersname** sal of die **TGT in 'n AS-REP** antwoord of die fout _KRB5KDC_ERR_PREAUTH_REQUIRED_ uitlok, wat aandui dat die gebruiker verplig is om voorverifikasie te doen.
+- **Kerbrute enum**: Wanneer 'n **ongeldige gebruikersnaam aangevra** word, sal die bediener reageer met die **Kerberos fout** kode _KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN_, wat ons in staat stel om te bepaal dat die gebruikersnaam ongeldig was. **Geldige gebruikersname** sal of die **TGT in 'n AS-REP** antwoord of die fout _KRB5KDC_ERR_PREAUTH_REQUIRED_ uitlok, wat aandui dat die gebruiker verplig is om vooraf-verifikasie te doen.
 ```bash
 ./kerbrute_linux_amd64 userenum -d lab.ropnop.com --dc 10.10.10.10 usernames.txt #From https://github.com/ropnop/kerbrute/releases
 
@@ -121,7 +121,7 @@ password-spraying.md
 
 ### LLMNR/NBT-NS Vergiftiging
 
-Jy mag in staat wees om **uit te vind** van sommige uitdaging **hashes** om **vergiftiging** van sommige protokolle van die **netwerk** te kraak:
+Jy mag dalk in staat wees om **uitdaging **hashes** te **verkry** om **vergiftiging** van sommige protokolle van die **netwerk** te kraak:
 
 {{#ref}}
 ../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md
@@ -129,11 +129,11 @@ Jy mag in staat wees om **uit te vind** van sommige uitdaging **hashes** om **ve
 
 ### NTML Relay
 
-As jy daarin geslaag het om die aktiewe gids te enumereer, sal jy **meer e-posse en 'n beter begrip van die netwerk** hê. Jy mag in staat wees om NTML [**relay-aanvalle**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack) \*\*\*\* te dwing om toegang tot die AD omgewing te kry.
+As jy daarin geslaag het om die aktiewe gids te enumereer, sal jy **meer e-posse en 'n beter begrip van die netwerk** hê. Jy mag dalk in staat wees om NTML [**relay-aanvalle**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack) \*\*\*\* te dwing om toegang tot die AD omgewing te kry.
 
 ### Steel NTLM Krediete
 
-As jy **ander PC's of gedeeltes** met die **null of gas gebruiker** kan **toegang** kry, kan jy **lêers plaas** (soos 'n SCF-lêer) wat, as dit op een of ander manier toegang verkry, 'n **NTML-authentisering teen jou** sal **trigger** sodat jy die **NTLM uitdaging** kan steel om dit te kraak:
+As jy **ander PC's of gedeeltes** met die **null of gas gebruiker** kan **toegang** kry, kan jy **lêers plaas** (soos 'n SCF-lêer) wat, as dit op een of ander manier toegang verkry, 'n **NTML-authentisering teen jou** sal **aktiveer** sodat jy die **NTLM-uitdaging** kan **steel** om dit te kraak:
 
 {{#ref}}
 ../ntlm/places-to-steal-ntlm-creds.md
@@ -143,7 +143,7 @@ As jy **ander PC's of gedeeltes** met die **null of gas gebruiker** kan **toegan
 
 Vir hierdie fase moet jy **die krediete of 'n sessie van 'n geldige domeinrekening gekompromitteer het.** As jy 'n paar geldige krediete of 'n shell as 'n domein gebruiker het, **moet jy onthou dat die opsies wat voorheen gegee is steeds opsies is om ander gebruikers te kompromitteer**.
 
-Voordat jy die geverifieerde enumerasie begin, moet jy weet wat die **Kerberos dubbele hop probleem** is.
+Voordat jy die geverifieerde enumerasie begin, moet jy weet wat die **Kerberos double hop probleem** is.
 
 {{#ref}}
 kerberos-double-hop-problem.md
@@ -153,7 +153,7 @@ kerberos-double-hop-problem.md
 
 Om 'n rekening te kompromitteer is 'n **groot stap om die hele domein te begin kompromitteer**, want jy gaan in staat wees om die **Aktiewe Gids Enumerasie te begin:**
 
-Ten opsigte van [**ASREPRoast**](asreproast.md) kan jy nou elke moontlike kwesbare gebruiker vind, en ten opsigte van [**Password Spraying**](password-spraying.md) kan jy 'n **lys van al die gebruikersname** kry en die wagwoord van die gekompromitteerde rekening probeer, leë wagwoorde en nuwe belowende wagwoorde.
+Ten opsigte van [**ASREPRoast**](asreproast.md) kan jy nou elke moontlike kwesbare gebruiker vind, en ten opsigte van [**Password Spraying**](password-spraying.md) kan jy 'n **lys van al die gebruikersname** kry en die wagwoord van die gekompromitteerde rekening, leë wagwoorde en nuwe belowende wagwoorde probeer.
 
 - Jy kan die [**CMD gebruik om 'n basiese rekonsiliasie te doen**](../basic-cmd-for-pentesters.md#domain-info)
 - Jy kan ook [**powershell vir rekonsiliasie gebruik**](../basic-powershell-for-pentesters/index.html) wat meer stil sal wees
@@ -162,14 +162,14 @@ Ten opsigte van [**ASREPRoast**](asreproast.md) kan jy nou elke moontlike kwesba
 - **Ander geoutomatiseerde AD enumerasie hulpmiddels is:** [**AD Explorer**](bloodhound.md#ad-explorer)**,** [**ADRecon**](bloodhound.md#adrecon)**,** [**Group3r**](bloodhound.md#group3r)**,** [**PingCastle**](bloodhound.md#pingcastle)**.**
 - [**DNS rekords van die AD**](ad-dns-records.md) aangesien dit dalk interessante inligting kan bevat.
 - 'n **hulpmiddel met GUI** wat jy kan gebruik om die gids te enumereer is **AdExplorer.exe** van **SysInternal** Suite.
-- Jy kan ook in die LDAP databasis soek met **ldapsearch** om na krediete in die velde _userPassword_ & _unixUserPassword_, of selfs vir _Description_ te kyk. cf. [Wagwoord in AD Gebruiker kommentaar op PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#password-in-ad-user-comment) vir ander metodes.
+- Jy kan ook in die LDAP-databasis soek met **ldapsearch** om na krediete in die velde _userPassword_ & _unixUserPassword_, of selfs vir _Description_ te kyk. cf. [Wagwoord in AD Gebruiker kommentaar op PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#password-in-ad-user-comment) vir ander metodes.
 - As jy **Linux** gebruik, kan jy ook die domein enumereer met [**pywerview**](https://github.com/the-useless-one/pywerview).
 - Jy kan ook probeer om geoutomatiseerde hulpmiddels soos:
 - [**tomcarver16/ADSearch**](https://github.com/tomcarver16/ADSearch)
 - [**61106960/adPEAS**](https://github.com/61106960/adPEAS)
 - **Alle domein gebruikers onttrek**
 
-Dit is baie maklik om al die domein gebruikersname van Windows te verkry (`net user /domain`, `Get-DomainUser` of `wmic useraccount get name,sid`). In Linux kan jy gebruik: `GetADUsers.py -all -dc-ip 10.10.10.110 domain.com/username` of `enum4linux -a -u "user" -p "password" <DC IP>`
+Dit is baie maklik om al die domein gebruikersname van Windows te verkry (`net user /domain` ,`Get-DomainUser` of `wmic useraccount get name,sid`). In Linux kan jy gebruik: `GetADUsers.py -all -dc-ip 10.10.10.110 domain.com/username` of `enum4linux -a -u "user" -p "password" <DC IP>`
 
 > Alhoewel hierdie Enumerasie afdeling klein lyk, is dit die belangrikste deel van alles. Toegang die skakels (hoofsaaklik die een van cmd, powershell, powerview en BloodHound), leer hoe om 'n domein te enumereer en oefen totdat jy gemaklik voel. Tydens 'n assessering sal dit die sleutelmoment wees om jou pad na DA te vind of om te besluit dat daar niks gedoen kan word nie.
 
@@ -185,11 +185,11 @@ kerberoast.md
 
 ### Afgeleë verbinding (RDP, SSH, FTP, Win-RM, ens)
 
-Sodra jy 'n paar krediete verkry het, kan jy kyk of jy toegang het tot enige **masjien**. In daardie verband kan jy **CrackMapExec** gebruik om te probeer om op verskeie bedieners met verskillende protokolle te verbind, ooreenkomstig jou poort skanderings.
+Sodra jy 'n paar krediete verkry het, kan jy kyk of jy toegang tot enige **masjien** het. In daardie verband kan jy **CrackMapExec** gebruik om te probeer om op verskeie bedieners met verskillende protokolle te verbind, ooreenkomstig jou poort skanderings.
 
 ### Plaaslike Privilege Escalation
 
-As jy gekompromitteerde krediete of 'n sessie as 'n gewone domein gebruiker het en jy het **toegang** met hierdie gebruiker tot **enige masjien in die domein**, moet jy probeer om jou pad te vind om **privileges plaaslik te verhoog en krediete te soek**. Dit is omdat jy slegs met plaaslike administrateur privileges in staat sal wees om **hashes van ander gebruikers** in geheue (LSASS) en plaaslik (SAM) te **dump**.
+As jy gekompromitteerde krediete of 'n sessie as 'n gewone domein gebruiker het en jy het **toegang** met hierdie gebruiker tot **enige masjien in die domein**, moet jy probeer om jou pad te vind om **privileges plaaslik te verhoog en krediete te soek**. Dit is omdat jy slegs met plaaslike administrateurprivileges in staat sal wees om **hashes van ander gebruikers** in geheue (LSASS) en plaaslik (SAM) te **dump**.
 
 Daar is 'n volledige bladsy in hierdie boek oor [**plaaslike privilege escalasie in Windows**](../windows-local-privilege-escalation/index.html) en 'n [**kontrolelys**](../checklist-windows-privilege-escalation.md). Moet ook nie vergeet om [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) te gebruik nie.
 
@@ -242,12 +242,12 @@ Dan is dit tyd om al die hashes in geheue en plaaslik te dump.\
 ### Pass the Hash
 
 **Sodra jy die hash van 'n gebruiker het**, kan jy dit gebruik om **te verteenwoordig**.\
-Jy moet 'n **gereedskap** gebruik wat die **NTLM-authentisering met** daardie **hash** sal **uitvoer** of jy kan 'n nuwe **sessielogin** skep en daardie **hash** binne die **LSASS** **inspuit**, sodat wanneer enige **NTLM-authentisering uitgevoer word**, daardie **hash gebruik sal word.** Die laaste opsie is wat mimikatz doen.\
+Jy moet 'n **gereedskap** gebruik wat die **NTLM-authentisering met** daardie **hash** sal **uitvoer** of jy kan 'n nuwe **sessionlogon** skep en daardie **hash** binne die **LSASS** **injekteer**, sodat wanneer enige **NTLM-authentisering uitgevoer word**, daardie **hash gebruik sal word.** Die laaste opsie is wat mimikatz doen.\
 [**Lees hierdie bladsy vir meer inligting.**](../ntlm/index.html#pass-the-hash)
 
 ### Over Pass the Hash/Pass the Key
 
-Hierdie aanval is daarop gemik om **die gebruiker se NTLM-hash te gebruik om Kerberos-kaarte aan te vra**, as 'n alternatief vir die algemene Pass The Hash oor die NTLM-protokol. Daarom kan dit veral **nuttig wees in netwerke waar die NTLM-protokol gedeaktiveer is** en slegs **Kerberos toegelaat word** as authentikasieprotokol.
+Hierdie aanval is daarop gemik om die **gebruikers NTLM-hash te gebruik om Kerberos-kaarte aan te vra**, as 'n alternatief vir die algemene Pass The Hash oor NTLM-protokol. Daarom kan dit veral **nuttig wees in netwerke waar die NTLM-protokol gedeaktiveer is** en slegs **Kerberos toegelaat word** as authentiseringsprotokol.
 
 {{#ref}}
 over-pass-the-hash-pass-the-key.md
@@ -255,7 +255,7 @@ over-pass-the-hash-pass-the-key.md
 
 ### Pass the Ticket
 
-In die **Pass The Ticket (PTT)** aanvalmetode, **steel aanvallers 'n gebruiker se authentikasieticket** in plaas van hul wagwoord of hashwaardes. Hierdie gesteelde kaart word dan gebruik om die **gebruiker te verteenwoordig**, wat ongeoorloofde toegang tot hulpbronne en dienste binne 'n netwerk verkry.
+In die **Pass The Ticket (PTT)** aanvalmetode, **steel aanvallers 'n gebruiker se authentiseringsticket** in plaas van hul wagwoord of hashwaardes. Hierdie gesteelde kaart word dan gebruik om die **gebruiker te verteenwoordig**, wat ongeoorloofde toegang tot hulpbronne en dienste binne 'n netwerk verkry.
 
 {{#ref}}
 pass-the-ticket.md
@@ -263,7 +263,7 @@ pass-the-ticket.md
 
 ### Kredensiale Hergebruik
 
-As jy die **hash** of **wagwoord** van 'n **lokale administrateur** het, moet jy probeer om **lokaal in te log** op ander **PC's** daarmee.
+As jy die **hash** of **wagwoord** van 'n **lokale administrateur** het, moet jy probeer om **lokaal in te teken** op ander **PC's** daarmee.
 ```bash
 # Local Auth Spray (once you found some local admin pass or hash)
 ## --local-auth flag indicate to only try 1 time per machine
@@ -285,7 +285,7 @@ abusing-ad-mssql.md
 ### Onbeperkte Afvaardiging
 
 As jy enige rekenaarobjek met die attribuut [ADS_UF_TRUSTED_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) vind en jy het domein bevoegdhede op die rekenaar, sal jy in staat wees om TGT's uit die geheue van elke gebruiker wat op die rekenaar aanmeld, te dump.\
-So, as 'n **Domein Admin op die rekenaar aanmeld**, sal jy in staat wees om sy TGT te dump en hom na te doen met [Pass the Ticket](pass-the-ticket.md).\
+So, as 'n **Domein Admin op die rekenaar aanmeld**, sal jy in staat wees om sy TGT te dump en hom na te boots met [Pass the Ticket](pass-the-ticket.md).\
 Danksy beperkte afvaardiging kan jy selfs 'n **Drukbediener outomaties kompromenteer** (hopelik sal dit 'n DC wees).
 
 {{#ref}}
@@ -294,8 +294,8 @@ unconstrained-delegation.md
 
 ### Beperkte Afvaardiging
 
-As 'n gebruiker of rekenaar toegelaat word vir "Beperkte Afvaardiging" sal dit in staat wees om **enige gebruiker na te doen om toegang tot sekere dienste in 'n rekenaar te verkry**.\
-Dan, as jy die **hash** van hierdie gebruiker/rekenaar **kompromenteer**, sal jy in staat wees om **enige gebruiker** (selfs domein admins) na te doen om toegang tot sekere dienste te verkry.
+As 'n gebruiker of rekenaar toegelaat word vir "Beperkte Afvaardiging" sal dit in staat wees om **enige gebruiker na te boots om toegang tot sekere dienste in 'n rekenaar te verkry**.\
+Dan, as jy die **hash** van hierdie gebruiker/rekenaar **kompromenteer**, sal jy in staat wees om **enige gebruiker** (selfs domein admins) na te boots om toegang tot sekere dienste te verkry.
 
 {{#ref}}
 constrained-delegation.md
@@ -303,7 +303,7 @@ constrained-delegation.md
 
 ### Hulpbronne-gebaseerde Beperkte Afvaardiging
 
-Om **WRITE** bevoegdheid op 'n Aktiewe Directory objek van 'n afgeleë rekenaar te hê, stel die verkryging van kode-uitvoering met **verhoogde bevoegdhede** moontlik:
+Om **SKRYF** bevoegdheid op 'n Aktiewe Directory objek van 'n afgeleë rekenaar te hê, stel die verkryging van kode-uitvoering met **verhoogde bevoegdhede** moontlik:
 
 {{#ref}}
 resource-based-constrained-delegation.md
@@ -327,7 +327,7 @@ printers-spooler-service-abuse.md
 
 ### Derdeparty sessies misbruik
 
-As **ander gebruikers** die **gecompromitteerde** masjien **benader**, is dit moontlik om **geloofsbriewe uit die geheue te versamel** en selfs **beacons in hul prosesse in te spuit** om hulle na te doen.\
+As **ander gebruikers** **toegang** tot die **gecompromitteerde** masjien het, is dit moontlik om **geloofsbriewe uit die geheue te versamel** en selfs **beacons in hul prosesse in te spuit** om hulle na te boots.\
 Gewoonlik sal gebruikers die stelsel via RDP benader, so hier is hoe om 'n paar aanvalle oor derdeparty RDP-sessies uit te voer:
 
 {{#ref}}
@@ -362,7 +362,7 @@ ad-certificates/domain-escalation.md
 
 ### Dumping Domein Geloofsbriewe
 
-Sodra jy **Domein Admin** of selfs beter **Enterprise Admin** bevoegdhede kry, kan jy die **domein databasis** dump: _ntds.dit_.
+Sodra jy **Domein Admin** of selfs beter **Enterprise Admin** bevoegdhede kry, kan jy die **domeindatabasis** dump: _ntds.dit_.
 
 [**Meer inligting oor DCSync aanval kan hier gevind word**](dcsync.md).
 
@@ -391,27 +391,27 @@ Set-DomainObject -Identity <username> -XOR @{UserAccountControl=4194304}
 Add-DomainObjectAcl -TargetIdentity "DC=SUB,DC=DOMAIN,DC=LOCAL" -PrincipalIdentity bfarmer -Rights DCSync
 ```
 
-### Silwer Kaartjie
+### Silwer Kaart
 
-Die **Silwer Kaartjie aanval** skep 'n **legitieme Ticket Granting Service (TGS) kaartjie** vir 'n spesifieke diens deur die **NTLM hash** te gebruik (byvoorbeeld, die **hash van die PC rekening**). Hierdie metode word gebruik om **toegang tot die diensbevoegdhede** te verkry.
+Die **Silwer Kaart aanval** skep 'n **legitieme Ticket Granting Service (TGS) kaart** vir 'n spesifieke diens deur die **NTLM hash** te gebruik (byvoorbeeld, die **hash van die PC rekening**). Hierdie metode word gebruik om **toegang tot die diensbevoegdhede** te verkry.
 
 {{#ref}}
 silver-ticket.md
 {{#endref}}
 
-### Goue Kaartjie
+### Goue Kaart
 
-'n **Goue Kaartjie aanval** behels dat 'n aanvaller toegang verkry tot die **NTLM hash van die krbtgt rekening** in 'n Aktiewe Directory (AD) omgewing. Hierdie rekening is spesiaal omdat dit gebruik word om alle **Ticket Granting Tickets (TGTs)** te teken, wat noodsaaklik is vir autentisering binne die AD netwerk.
+'n **Goue Kaart aanval** behels dat 'n aanvaller toegang verkry tot die **NTLM hash van die krbtgt rekening** in 'n Aktiewe Directory (AD) omgewing. Hierdie rekening is spesiaal omdat dit gebruik word om alle **Ticket Granting Tickets (TGTs)** te teken, wat noodsaaklik is vir autentisering binne die AD netwerk.
 
-Sodra die aanvaller hierdie hash verkry, kan hulle **TGTs** vir enige rekening wat hulle kies skep (Silwer kaartjie aanval).
+Sodra die aanvaller hierdie hash verkry, kan hulle **TGTs** vir enige rekening wat hulle kies skep (Silwer kaart aanval).
 
 {{#ref}}
 golden-ticket.md
 {{#endref}}
 
-### Diamant Kaartjie
+### Diamant Kaart
 
-Hierdie is soos goue kaartjies wat op 'n manier vervals is wat **algemene goue kaartjie opsporingsmeganismes omseil**.
+Hierdie is soos goue kaarte wat op 'n manier vervals is wat **algemene goue kaart opsporingsmeganismes omseil**.
 
 {{#ref}}
 diamond-ticket.md
@@ -449,7 +449,7 @@ dsrm-credentials.md
 
 ### ACL Persistensie
 
-Jy kan **spesiale bevoegdhede** aan 'n **gebruiker** oor sekere spesifieke domeinobjekte gee wat die gebruiker sal laat **bevoegdhede in die toekoms verhoog**.
+Jy kan **sekere spesiale bevoegdhede** aan 'n **gebruiker** oor sekere spesifieke domeinobjekte gee wat die gebruiker sal laat **bevoegdhede in die toekoms verhoog**.
 
 {{#ref}}
 acl-persistence-abuse/
@@ -474,7 +474,7 @@ skeleton-key.md
 ### Pasgemaakte SSP
 
 [Leer wat 'n SSP (Security Support Provider) hier is.](../authentication-credentials-uac-and-efs/index.html#security-support-provider-interface-sspi)\
-Jy kan jou **eie SSP** skep om die **geloofsbriewe** wat gebruik word om toegang tot die masjien te verkry, in **duidelike teks** te **vang**.
+Jy kan jou **eie SSP** skep om **in duidelike teks** die **geloofsbriewe** wat gebruik word om toegang tot die masjien te verkry, te **vang**.
 
 {{#ref}}
 custom-ssp.md
@@ -482,7 +482,7 @@ custom-ssp.md
 
 ### DCShadow
 
-Dit registreer 'n **nuwe Domein Beheerder** in die AD en gebruik dit om **attribuutte** (SIDHistory, SPNs...) op gespesifiseerde objek te **druk** **sonder** om enige **logs** rakende die **wysigings** te laat. Jy **het DA** bevoegdhede nodig en moet binne die **worteldomein** wees.\
+Dit registreer 'n **nuwe Domein Beheerder** in die AD en gebruik dit om **attribuutte** (SIDHistory, SPNs...) op gespesifiseerde objek te **druk** **sonder** om enige **logs** rakende die **wysigings** te laat. Jy **het DA** bevoegdhede en moet binne die **worteldomein** wees.\
 Let daarop dat as jy verkeerde data gebruik, baie lelike logs sal verskyn.
 
 {{#ref}}
@@ -500,20 +500,20 @@ laps.md
 
 ## Bos Bevoegdheid Verhoging - Domein Vertroue
 
-Microsoft beskou die **Bos** as die sekuriteitsgrens. Dit impliseer dat **die kompromitering van 'n enkele domein moontlik kan lei tot die hele Bos wat gecompromitteer word**.
+Microsoft beskou die **Bos** as die sekuriteitsgrens. Dit impliseer dat **die kompromitering van 'n enkele domein potensieel kan lei tot die hele Bos wat gecompromitteer word**.
 
 ### Basiese Inligting
 
-'n [**domein vertroue**](<http://technet.microsoft.com/en-us/library/cc759554(v=ws.10).aspx>) is 'n sekuriteitsmeganisme wat 'n gebruiker van een **domein** in staat stel om toegang tot hulpbronne in 'n ander **domein** te verkry. Dit skep essensieel 'n skakel tussen die autentiseringstelsels van die twee domeine, wat autentiseringverifikasies naatloos laat vloei. Wanneer domeine 'n vertroue opstel, ruil hulle spesifieke **sleutels** uit en hou dit binne hul **Domein Beheerders (DCs)**, wat noodsaaklik is vir die integriteit van die vertroue.
+'n [**domein vertroue**](<http://technet.microsoft.com/en-us/library/cc759554(v=ws.10).aspx>) is 'n sekuriteitsmeganisme wat 'n gebruiker van een **domein** in staat stel om toegang tot hulpbronne in 'n ander **domein** te verkry. Dit skep essensieel 'n skakeling tussen die autentiseringstelsels van die twee domeine, wat autentiseringverifikasies naatloos laat vloei. Wanneer domeine 'n vertroue opstel, ruil hulle spesifieke **sleutels** uit en hou dit binne hul **Domein Beheerders (DCs)**, wat noodsaaklik is vir die integriteit van die vertroue.
 
-In 'n tipiese scenario, as 'n gebruiker 'n diens in 'n **vertroude domein** wil benader, moet hulle eers 'n spesiale kaartjie aan vra wat bekend staan as 'n **inter-realm TGT** van hul eie domein se DC. Hierdie TGT is versleuteld met 'n gedeelde **sleutel** wat albei domeine ooreengekom het. Die gebruiker bied dan hierdie TGT aan die **DC van die vertroude domein** aan om 'n diens kaartjie (**TGS**) te verkry. Na suksesvolle validasie van die inter-realm TGT deur die vertroude domein se DC, stel dit 'n TGS uit, wat die gebruiker toegang tot die diens verleen.
+In 'n tipiese scenario, as 'n gebruiker 'n diens in 'n **vertroude domein** wil benader, moet hulle eers 'n spesiale kaart aan vra wat bekend staan as 'n **inter-realm TGT** van hul eie domein se DC. Hierdie TGT is versleuteld met 'n gedeelde **sleutel** wat albei domeine ooreengekom het. Die gebruiker bied dan hierdie TGT aan die **DC van die vertroude domein** aan om 'n dienskaart (**TGS**) te verkry. Na suksesvolle validasie van die inter-realm TGT deur die vertroude domein se DC, stel dit 'n TGS uit, wat die gebruiker toegang tot die diens verleen.
 
 **Stappe**:
 
 1. 'n **klient rekenaar** in **Domein 1** begin die proses deur sy **NTLM hash** te gebruik om 'n **Ticket Granting Ticket (TGT)** van sy **Domein Beheerder (DC1)** aan te vra.
 2. DC1 stel 'n nuwe TGT uit as die klient suksesvol geverifieer word.
 3. Die klient vra dan 'n **inter-realm TGT** van DC1 aan, wat nodig is om toegang tot hulpbronne in **Domein 2** te verkry.
-4. Die inter-realm TGT is versleuteld met 'n **vertrouensleutel** wat tussen DC1 en DC2 as deel van die twee-rigting domein vertroue gedeel word.
+4. Die inter-realm TGT is versleuteld met 'n **vertrouensleutel** wat tussen DC1 en DC2 gedeel word as deel van die twee-rigting domein vertroue.
 5. Die klient neem die inter-realm TGT na **Domein 2 se Domein Beheerder (DC2)**.
 6. DC2 verifieer die inter-realm TGT met sy gedeelde vertrouensleutel en, as dit geldig is, stel 'n **Ticket Granting Service (TGS)** uit vir die bediener in Domein 2 wat die klient wil benader.
 7. Laastens bied die klient hierdie TGS aan die bediener aan, wat versleuteld is met die bediener se rekening hash, om toegang tot die diens in Domein 2 te verkry.
@@ -522,27 +522,27 @@ In 'n tipiese scenario, as 'n gebruiker 'n diens in 'n **vertroude domein** wil 
 
 Dit is belangrik om op te let dat **'n vertroue 1 rigting of 2 rigtings kan wees**. In die 2 rigtings opsies, sal albei domeine mekaar vertrou, maar in die **1 rigting** vertrouensverhouding sal een van die domeine die **vertroude** en die ander die **vertrouende** domein wees. In die laaste geval, **sal jy slegs in staat wees om toegang tot hulpbronne binne die vertrouende domein van die vertroude een te verkry**.
 
-As Domein A Domein B vertrou, is A die vertrouende domein en B is die vertroude een. Boonop, in **Domein A**, sou dit 'n **Uitgaande vertroue** wees; en in **Domein B**, sou dit 'n **Inkomende vertroue** wees.
+As Domein A Domein B vertrou, is A die vertrouende domein en B die vertroude een. Boonop, in **Domein A**, sou dit 'n **Uitgaande vertroue** wees; en in **Domein B**, sou dit 'n **Inkomende vertroue** wees.
 
 **Verskillende vertrouende verhoudings**
 
 - **Ouers-Kind Vertroue**: Dit is 'n algemene opstelling binne dieselfde bos, waar 'n kinderdomein outomaties 'n twee-rigting transitive vertroue met sy ouerdomein het. Essensieel beteken dit dat autentisering versoeke naatloos tussen die ouer en die kind kan vloei.
-- **Kruiskoppel Vertroue**: Bekend as "kortpad vertroue," word hierdie tussen kinderdomeine gevestig om verwysingsprosesse te versnel. In komplekse bosse moet autentisering verwysings tipies tot die boswortel reis en dan af na die teikendomein. Deur kruiskoppels te skep, word die reis verkort, wat veral voordelig is in geografies verspreide omgewings.
+- **Kruiskoppel Vertroue**: Bekend as "kortpad vertroue," hierdie word tussen kinderdomeine gevestig om verwysingsprosesse te versnel. In komplekse bosse moet autentisering verwysings tipies tot by die boswortel reis en dan af na die teikendomein. Deur kruiskoppels te skep, word die reis verkort, wat veral voordelig is in geografies verspreide omgewings.
 - **Buitelandse Vertroue**: Hierdie word tussen verskillende, nie-verwante domeine opgestel en is nie-transitief van aard. Volgens [Microsoft se dokumentasie](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>), is buitelandse vertroue nuttig vir toegang tot hulpbronne in 'n domein buite die huidige bos wat nie deur 'n bosvertroue verbind is nie. Sekuriteit word versterk deur SID filtrering met buitelandse vertroue.
-- **Boomwortel Vertroue**: Hierdie vertroue word outomaties gevestig tussen die bosworteldomein en 'n nuut bygevoegde boomwortel. Alhoewel dit nie algemeen teëgekom word nie, is boomwortel vertroue belangrik vir die byvoeging van nuwe domein bome aan 'n bos, wat hulle in staat stel om 'n unieke domeinnaam te handhaaf en twee-rigting transitiwiteit te verseker. Meer inligting kan gevind word in [Microsoft se gids](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>).
+- **Boomwortel Vertroue**: Hierdie vertroue word outomaties gevestig tussen die bosworteldomein en 'n nuut bygevoegde boomwortel. Alhoewel dit nie algemeen teëgekom word nie, is boomwortel vertroue belangrik vir die byvoeging van nuwe domein bome aan 'n bos, wat hulle in staat stel om 'n unieke domeinnaam te handhaaf en twee-rigting transitiwiteit te verseker. Meer inligting kan in [Microsoft se gids](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>) gevind word.
 - **Bos Vertroue**: Hierdie tipe vertroue is 'n twee-rigting transitive vertroue tussen twee bosworteldomeine, wat ook SID filtrering afdwing om sekuriteitsmaatreëls te verbeter.
 - **MIT Vertroue**: Hierdie vertroue word gevestig met nie-Windows, [RFC4120-kompatible](https://tools.ietf.org/html/rfc4120) Kerberos domeine. MIT vertroue is 'n bietjie meer gespesialiseerd en dien omgewings wat integrasie met Kerberos-gebaseerde stelsels buite die Windows-ekosisteem vereis.
 
 #### Ander verskille in **vertrouende verhoudings**
 
 - 'n Vertrouensverhouding kan ook **transitief** wees (A vertrou B, B vertrou C, dan A vertrou C) of **nie-transitief** wees.
-- 'n Vertrouensverhouding kan as **bidireksionele vertroue** (albei vertrou mekaar) of as **een-rigting vertroue** (slegs een van hulle vertrou die ander) opgestel word.
+- 'n Vertrouensverhouding kan opgestel word as **bidireksionele vertroue** (albei vertrou mekaar) of as **een-rigting vertroue** (slegs een van hulle vertrou die ander).
 
 ### Aanvalspad
 
 1. **Enumerate** die vertrouende verhoudings
 2. Kyk of enige **sekuriteitsprinsipaal** (gebruiker/groep/rekenaar) **toegang** tot hulpbronne van die **ander domein** het, dalk deur ACE inskrywings of deur in groepe van die ander domein te wees. Soek na **verhoudings oor domeine** (die vertroue is waarskynlik hiervoor geskep).
-1. Kerberoast in hierdie geval kan 'n ander opsie wees.
+1. kerberoast in hierdie geval kan 'n ander opsie wees.
 3. **Kompromenteer** die **rekeninge** wat deur domeine kan **pivot**.
 ```
 Get-DomainTrust
@@ -557,7 +557,7 @@ WhenChanged     : 2/19/2021 1:28:00 PM
 ```
 > [!WARNING]
 > Daar is **2 vertroude sleutels**, een vir _Child --> Parent_ en nog een vir _Parent_ --> _Child_.\
-> U kan die een wat deur die huidige domein gebruik word, met:
+> Jy kan die een wat deur die huidige domein gebruik word met:
 >
 > ```bash
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.my.domain.local
@@ -566,7 +566,7 @@ WhenChanged     : 2/19/2021 1:28:00 PM
 
 #### SID-History Inspuiting
 
-Verhoog as Enterprise admin na die kind/ouer domein deur die vertroue met SID-History inspuiting te misbruik:
+Verhoog as Enterprise admin na die child/parent domein deur die vertroue met SID-History inspuiting te misbruik:
 
 {{#ref}}
 sid-history-injection.md
@@ -574,7 +574,7 @@ sid-history-injection.md
 
 #### Exploit skryfbare Konfigurasie NC
 
-Om te verstaan hoe die Konfigurasie Naam Konteks (NC) misbruik kan word, is van kardinale belang. Die Konfigurasie NC dien as 'n sentrale berging vir konfigurasie data oor 'n woud in Active Directory (AD) omgewings. Hierdie data word na elke Domein Beheerder (DC) binne die woud gerepliceer, met skryfbare DC's wat 'n skryfbare kopie van die Konfigurasie NC handhaaf. Om dit te misbruik, moet 'n mens **SYSTEM regte op 'n DC** hê, verkieslik 'n kind DC.
+Om te verstaan hoe die Konfigurasie Naam Konteks (NC) misbruik kan word, is van kardinale belang. Die Konfigurasie NC dien as 'n sentrale berging vir konfigurasie data oor 'n woud in Active Directory (AD) omgewings. Hierdie data word na elke Domein Beheerder (DC) binne die woud gerepliseer, met skryfbare DC's wat 'n skryfbare kopie van die Konfigurasie NC handhaaf. Om dit te misbruik, moet 'n mens **SYSTEM regte op 'n DC** hê, verkieslik 'n child DC.
 
 **Koppel GPO aan wortel DC webwerf**
 
@@ -592,11 +592,11 @@ Gedetailleerde analise kan gevind word in die bespreking oor [Golden gMSA Trust 
 
 Hierdie metode vereis geduld, terwyl daar gewag word vir die skepping van nuwe bevoorregte AD-objekte. Met SYSTEM regte kan 'n aanvaller die AD Schema wysig om enige gebruiker volledige beheer oor alle klasse te verleen. Dit kan lei tot ongemagtigde toegang en beheer oor nuutgeskepte AD-objekte.
 
-Verder leeswerk is beskikbaar oor [Schema Change Trust Attacks](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-6-schema-change-trust-attack-from-child-to-parent).
+Verdere leeswerk is beskikbaar oor [Schema Change Trust Attacks](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-6-schema-change-trust-attack-from-child-to-parent).
 
 **Van DA na EA met ADCS ESC5**
 
-Die ADCS ESC5 kwesbaarheid teiken beheer oor Publieke Sleutel Infrastruktuur (PKI) objek om 'n sertifikaat sjabloon te skep wat autentisering as enige gebruiker binne die woud moontlik maak. Aangesien PKI objek in die Konfigurasie NC woon, stel die kompromittering van 'n skryfbare kind DC die uitvoering van ESC5-aanvalle in staat.
+Die ADCS ESC5 kwesbaarheid teiken beheer oor Publieke Sleutel Infrastruktuur (PKI) objekte om 'n sertifikaat sjabloon te skep wat verifikasie as enige gebruiker binne die woud moontlik maak. Aangesien PKI objekte in die Konfigurasie NC woon, stel die kompromittering van 'n skryfbare child DC die uitvoering van ESC5-aanvalle in staat.
 
 Meer besonderhede hieroor kan gelees word in [From DA to EA with ESC5](https://posts.specterops.io/from-da-to-ea-with-esc5-f9f045aa105c). In scenario's waar ADCS ontbreek, het die aanvaller die vermoë om die nodige komponente op te stel, soos bespreek in [Escalating from Child Domain Admins to Enterprise Admins](https://www.pkisolutions.com/escalating-from-child-domains-admins-to-enterprise-admins-in-5-minutes-by-abusing-ad-cs-a-follow-up/).
 
@@ -631,15 +631,15 @@ WhenChanged     : 2/19/2021 10:15:24 PM
 ```
 In hierdie scenario **jou domein** is **vertrou** op sommige **privileges** aan 'n hoof van 'n **verskillende domeine**.
 
-Echter, wanneer 'n **domein vertrou** word deur die vertrouende domein, skep die vertroude domein **‘n gebruiker** met 'n **voorspelbare naam** wat as **wagwoord die vertroude wagwoord** gebruik. Dit beteken dat dit moontlik is om **toegang te verkry tot 'n gebruiker van die vertrouende domein om binne die vertroude een te kom** om dit te evalueer en te probeer om meer privileges te verhoog:
+Echter, wanneer 'n **domein vertrou** word deur die vertrouende domein, skep die vertroude domein **n gebruiker** met 'n **voorspelbare naam** wat as **wagwoord die vertroude wagwoord** gebruik. Dit beteken dat dit moontlik is om **toegang te verkry tot 'n gebruiker van die vertrouende domein om binne die vertroude een te kom** om dit te evalueer en te probeer om meer privileges te verhoog:
 
 {{#ref}}
 external-forest-domain-one-way-outbound.md
 {{#endref}}
 
-‘n Ander manier om die vertroude domein te kompromitteer, is om 'n [**SQL vertroude skakel**](abusing-ad-mssql.md#mssql-trusted-links) te vind wat in die **teenoorgestelde rigting** van die domeinvertroue geskep is (wat nie baie algemeen is nie).
+Nog 'n manier om die vertroude domein te kompromitteer, is om 'n [**SQL vertroude skakel**](abusing-ad-mssql.md#mssql-trusted-links) te vind wat in die **teenoorgestelde rigting** van die domeinvertroue geskep is (wat nie baie algemeen is nie).
 
-‘n Ander manier om die vertroude domein te kompromitteer, is om te wag op 'n masjien waar 'n **gebruiker van die vertroude domein toegang kan verkry** om in te log via **RDP**. Dan kan die aanvaller kode in die RDP-sessieproses inspuit en **toegang verkry tot die oorspronklike domein van die slagoffer** van daar.\
+Nog 'n manier om die vertroude domein te kompromitteer, is om te wag op 'n masjien waar 'n **gebruiker van die vertroude domein toegang kan verkry** om in te log via **RDP**. Dan kan die aanvaller kode in die RDP-sessieproses inspuit en **toegang verkry tot die oorspronklike domein van die slagoffer** van daar.\
 Boonop, as die **slagoffer sy hardeskyf gemonteer het**, kan die aanvaller vanuit die **RDP-sessie** proses **terugdeure** in die **opstartgids van die hardeskyf** stoor. Hierdie tegniek word **RDPInception** genoem.
 
 {{#ref}}
@@ -656,14 +656,14 @@ rdp-sessions-abuse.md
 ### **Selektiewe Verifikasie:**
 
 - Vir inter-woudvertroue, verseker die gebruik van Selektiewe Verifikasie dat gebruikers van die twee woude nie outomaties geverifieer word nie. In plaas daarvan is eksplisiete toestemmings nodig vir gebruikers om toegang te verkry tot domeine en bedieners binne die vertrouende domein of woud.
-- Dit is belangrik om daarop te let dat hierdie maatreëls nie teen die uitbuiting van die skryfbare Konfigurasie Naam Konteks (NC) of aanvalle op die vertrou rekening beskerm nie.
+- Dit is belangrik om te noem dat hierdie maatreëls nie beskerm teen die uitbuiting van die skryfbare Konfigurasie Naam Konteks (NC) of aanvalle op die vertrou rekening nie.
 
 [**Meer inligting oor domeinvertroue in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain)
 
 ## AD -> Azure & Azure -> AD
 
 {{#ref}}
-https://cloud.hacktricks.xyz/pentesting-cloud/azure-security/az-lateral-movements/azure-ad-connect-hybrid-identity
+https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/azure-ad-connect-hybrid-identity/index.html
 {{#endref}}
 
 ## Sommige Algemene Verdedigings
@@ -672,26 +672,26 @@ https://cloud.hacktricks.xyz/pentesting-cloud/azure-security/az-lateral-movement
 
 ### **Defensiewe Maatreëls vir Kredensiaalbeskerming**
 
-- **Domein Administrateurs Beperkings**: Dit word aanbeveel dat Domein Administrateurs slegs toegelaat word om in te log op Domein Beheerders, en dat hulle nie op ander gasheer gebruik moet word nie.
+- **Domein Administrateurs Beperkings**: Dit word aanbeveel dat Domein Administrateurs slegs toegelaat word om in te log op Domein Beheerders, en dat hulle nie op ander gasheer gebruik word nie.
 - **Diensrekening Privileges**: Dienste moet nie met Domein Administrateur (DA) privileges gedra word om sekuriteit te handhaaf nie.
 - **Tydelike Privilege Beperking**: Vir take wat DA privileges vereis, moet die duur daarvan beperk word. Dit kan bereik word deur: `Add-ADGroupMember -Identity ‘Domain Admins’ -Members newDA -MemberTimeToLive (New-TimeSpan -Minutes 20)`
 
 ### **Implementering van Misleidingstegnieke**
 
-- Implementering van misleiding behels die opstelling van lokvalle, soos lokgebruikers of rekenaars, met kenmerke soos wagwoorde wat nie verval nie of as Vertrou vir Delegasie gemerk is. 'n Gedetailleerde benadering sluit in om gebruikers met spesifieke regte te skep of hulle aan hoëprivilege groepe toe te voeg.
+- Die implementering van misleiding behels die opstelling van lokvalle, soos lokgebruikers of rekenaars, met kenmerke soos wagwoorde wat nie verval nie of as Vertrou vir Delegasie gemerk is. 'n Gedetailleerde benadering sluit die skep van gebruikers met spesifieke regte of die toevoeging daarvan aan hoëprivilege groepe in.
 - 'n Praktiese voorbeeld behels die gebruik van gereedskap soos: `Create-DecoyUser -UserFirstName user -UserLastName manager-uncommon -Password Pass@123 | DeployUserDeception -UserFlag PasswordNeverExpires -GUID d07da11f-8a3d-42b6-b0aa-76c962be719a -Verbose`
-- Meer oor die implementering van misleidingstegnieke kan gevind word by [Deploy-Deception op GitHub](https://github.com/samratashok/Deploy-Deception).
+- Meer oor die ontplooiing van misleidingstegnieke kan gevind word by [Deploy-Deception on GitHub](https://github.com/samratashok/Deploy-Deception).
 
 ### **Identifisering van Misleiding**
 
-- **Vir Gebruiker Voorwerpe**: Verdagte aanduiders sluit ongewone ObjectSID, ongewone aanmeldings, skeppingsdatums, en lae slegte wagwoord tellings in.
-- **Algemene Aanduiders**: Vergelyking van eienskappe van potensiële lokvoorwerpe met dié van werklike kan inkonsekwensies onthul. Gereedskap soos [HoneypotBuster](https://github.com/JavelinNetworks/HoneypotBuster) kan help om sulke misleidings te identifiseer.
+- **Vir Gebruikerobjekte**: Verdagte aanduidings sluit ongewone ObjectSID, ongewone aanmeldings, skeppingsdatums, en lae slegte wagwoord tellings in.
+- **Algemene Aanduidings**: Die vergelyking van eienskappe van potensiële lokobjekte met dié van werklike kan inkonsekwensies onthul. Gereedskap soos [HoneypotBuster](https://github.com/JavelinNetworks/HoneypotBuster) kan help om sulke misleidings te identifiseer.
 
 ### **Om Ontdekkingsisteme te Omseil**
 
 - **Microsoft ATA Ontdekking Omseiling**:
-- **Gebruiker Enumerasie**: Vermy sessie-evaluering op Domein Beheerders om ATA ontdekking te voorkom.
-- **Tiket Impersonasie**: Die gebruik van **aes** sleutels vir tiket skepping help om ontdekking te ontduik deur nie na NTLM af te gradeer nie.
+- **Gebruiker Enumerasie**: Vermy sessie-evaluasie op Domein Beheerders om ATA ontdekking te voorkom.
+- **Tiket Vervalsing**: Die gebruik van **aes** sleutels vir tiket skepping help om ontdekking te ontduik deur nie na NTLM af te gradeer nie.
 - **DCSync Aanvalle**: Dit word aanbeveel om van 'n nie-Domein Beheerder uit te voer om ATA ontdekking te vermy, aangesien direkte uitvoering vanaf 'n Domein Beheerder waarskuwings sal aktiveer.
 
 ## Verwysings
