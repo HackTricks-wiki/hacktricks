@@ -4,14 +4,14 @@ Poslednje ažuriranje: 02/04/2023
 
 ### Uvod
 
-Ova Politika kolačića se primenjuje na sledeće veb sajtove u vlasništvu i pod upravom HackTricks tima ("HackTricks", "mi", "nas" ili "naš"):
+Ova Politika kolačića se primenjuje na sledeće veb sajtove u vlasništvu i pod upravom tima HackTricks ("HackTricks", "mi", "nas" ili "naš"):
 
-* hacktricks.xyz
-* [www.hacktricks.xyz](http://www.hacktricks.xyz/)
-* book.hacktricks.xyz
-* cloud.hacktricks.xyz
+* hacktricks.wiki
+* [www.hacktricks.wiki](https://www.hacktricks.wiki/)
+* book.hacktricks.wiki
+* cloud.hacktricks.wiki
 
-Korišćenjem bilo kog od ovih veb sajtova, slažete se sa upotrebom kolačića u skladu sa ovom Politikom kolačića. Ako se ne slažete, molimo vas da onemogućite kolačiće u podešavanjima vašeg pretraživača ili se suzdržite od korišćenja naših veb sajtova.
+Korišćenjem bilo kog od ovih veb sajtova, slažete se sa upotrebom kolačića u skladu sa ovom Politikom kolačića. Ako se ne slažete, molimo vas da onemogućite kolačiće u podešavanjima vašeg pregledača ili se suzdržite od korišćenja naših veb sajtova.
 
 ### Šta su kolačići?
 
@@ -26,7 +26,7 @@ Koristimo kolačiće na našim veb sajtovima u sledeće svrhe:
 3. Kolačići za funkcionalnost: Ovi kolačići omogućavaju našim veb sajtovima da pamte izbore koje napravite, kao što su vaš jezik ili region, kako bi pružili personalizovanije iskustvo.
 4. Kolačići za ciljanje/reklamu: Ovi kolačići se koriste za isporuku relevantnih oglasa i marketinških komunikacija na osnovu vaših interesa, istorije pretraživanja i interakcija sa našim veb sajtovima.
 
-Pored toga, stranice book.hacktricks.xyz i cloud.hacktricks.xyz su hostovane na Gitbook-u. Možete pronaći više informacija o kolačićima Gitbook-a na [https://gitbook-1652864889.teamtailor.com/cookie-policy](https://gitbook-1652864889.teamtailor.com/cookie-policy).
+Pored toga, stranice book.hacktricks.wiki i cloud.hacktricks.wiki su hostovane na Gitbook-u. Možete pronaći više informacija o kolačićima Gitbook-a na [https://gitbook-1652864889.teamtailor.com/cookie-policy](https://gitbook-1652864889.teamtailor.com/cookie-policy).
 
 ### Kolačići trećih strana
 
@@ -34,11 +34,11 @@ Pored naših kolačića, možemo takođe koristiti kolačiće trećih strana za 
 
 Upravljanje kolačićima
 
-Većina veb pretraživača omogućava vam da upravljate kolačićima putem svojih podešavanja. Možete izabrati da blokirate, obrišete ili ograničite upotrebu kolačića na vašem uređaju. Međutim, imajte na umu da onemogućavanje kolačića može uticati na funkcionalnost i performanse naših veb sajtova.
+Većina veb pregledača omogućava vam da upravljate kolačićima putem svojih podešavanja. Možete izabrati da blokirate, obrišete ili ograničite upotrebu kolačića na vašem uređaju. Međutim, imajte na umu da onemogućavanje kolačića može uticati na funkcionalnost i performanse naših veb sajtova.
 
 Izmene ove Politike kolačića
 
-Možemo povremeno ažurirati ovu Politiku kolačića kako bismo odražavali promene u našim praksama ili relevantnim zakonima. Preporučujemo vam da povremeno pregledate ovu stranicu za najnovije informacije o našim praksama kolačića.
+Možemo povremeno ažurirati ovu Politiku kolačića kako bismo odražavali promene u našim praksama ili relevantnim zakonima. Ohrabrujemo vas da povremeno pregledate ovu stranicu za najnovije informacije o našim praksama kolačića.
 
 ### Kontaktirajte nas
 
