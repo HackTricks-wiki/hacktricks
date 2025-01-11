@@ -11,11 +11,11 @@
 >   - Hacking geht darum zu lernen, und Lernen sollte so kostenlos wie möglich sein.
 >   - Der Zweck dieses Buches ist es, als umfassende **Bildungsressource** zu dienen.
 > - **SPEICHERN** Sie großartige **Hacking** Techniken, die die Community veröffentlicht, und geben Sie den **URSPRÜNGLICHEN** **AUTOREN** alle **Credits**.
->   - **Wir wollen nicht den Kredit von anderen Menschen**, wir wollen nur coole Tricks für alle speichern.
+>   - **Wir wollen nicht die Anerkennung von anderen**, wir wollen nur coole Tricks für alle speichern.
 >   - Wir schreiben auch **unsere eigenen Forschungen** in HackTricks.
 >   - In mehreren Fällen werden wir einfach **in HackTricks eine Zusammenfassung der wichtigen Teile** der Technik schreiben und den **Leser ermutigen, den ursprünglichen Beitrag** für weitere Details zu besuchen.
 > - **ORGANISIEREN** Sie alle Hacking-Techniken im Buch, damit es **ZUGÄNGLICHER** ist.
->   - Das HackTricks-Team hat tausende von Stunden kostenlos damit verbracht, **nur den Inhalt zu organisieren**, damit die Leute **schneller lernen** können.
+>   - Das HackTricks-Team hat tausende von Stunden kostenlos damit verbracht, **nur den Inhalt zu organisieren**, damit die Leute **schneller lernen können**.
 
 <figure><img src="../images/hack tricks gif.gif" alt="" width="375"><figcaption></figcaption></figure>
 
@@ -26,14 +26,14 @@
 > - **Vielen Dank für diese Ressourcen, wie kann ich Ihnen danken?**
 
 Sie können den HackTricks-Teams öffentlich danken, indem Sie in einem Tweet [**@hacktricks_live**](https://twitter.com/hacktricks_live) erwähnen.\
-Wenn Sie besonders dankbar sind, können Sie auch [**das Projekt hier sponsern**](https://github.com/sponsors/carlospolop).\
+Wenn Sie besonders dankbar sind, können Sie auch [**das Projekt hier unterstützen**](https://github.com/sponsors/carlospolop).\
 Und vergessen Sie nicht, **einen Stern in den Github-Projekten zu geben!** (Die Links finden Sie unten).
 
 > [!TIP]
 >
 > - **Wie kann ich zum Projekt beitragen?**
 
-Sie können **neue Tipps und Tricks mit der Community teilen oder Fehler** beheben, die Sie in den Büchern finden, indem Sie einen **Pull Request** an die jeweiligen Github-Seiten senden:
+Sie können **neue Tipps und Tricks mit der Community teilen oder Fehler** in den Büchern beheben, indem Sie einen **Pull Request** an die jeweiligen Github-Seiten senden:
 
 - [https://github.com/carlospolop/hacktricks](https://github.com/carlospolop/hacktricks)
 - [https://github.com/carlospolop/hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)
@@ -44,7 +44,7 @@ Vergessen Sie nicht, **einen Stern in den Github-Projekten zu geben!**
 >
 > - **Kann ich einige Inhalte von HackTricks kopieren und in meinem Blog verwenden?**
 
-Ja, das können Sie, aber **vergessen Sie nicht, die spezifischen Link(s)** zu erwähnen, von wo der Inhalt entnommen wurde.
+Ja, das können Sie, aber **vergessen Sie nicht, die spezifischen Link(s)** zu erwähnen, von wo der Inhalt stammt.
 
 > [!TIP]
 >
@@ -57,7 +57,7 @@ Wenn Sie ein Bibtex benötigen, können Sie etwas verwenden wie:
 author = {"HackTricks Team" or the Authors name of the specific page/trick},
 title = {Title of the Specific Page},
 year = {Year of Last Update (check it at the end of the page)},
-url = {\url{https://book.hacktricks.xyz/specific-page}},
+url = {\url{https://book.hacktricks.wiki/specific-page}},
 }
 ```
 > [!WARNING]
@@ -84,19 +84,19 @@ Sie werden HackTricks nicht mit nervigen Anzeigen gefüllt finden wie andere Blo
 >
 > - **Was soll ich tun, wenn eine HackTricks-Seite auf meinem Blogbeitrag basiert, aber nicht referenziert ist?**
 
-**Es tut uns sehr leid. Das hätte nicht passieren dürfen**. Bitte lassen Sie es uns über Github-Issues, Twitter, Discord... wissen, den Link zur HackTricks-Seite mit dem Inhalt und den Link zu Ihrem Blog und **wir werden es überprüfen und so schnell wie möglich hinzufügen**.
+**Es tut uns sehr leid. Das hätte nicht passieren dürfen**. Bitte lassen Sie es uns über Github-Issues, Twitter, Discord... wissen, den Link zur HackTricks-Seite mit dem Inhalt und den Link zu Ihrem Blog, und **wir werden es überprüfen und so schnell wie möglich hinzufügen**.
 
 > [!CAUTION]
 >
-> - **Was soll ich tun, wenn Inhalte von meinem Blog in HackTricks sind und ich möchte nicht, dass sie dort sind?**
+> - **Was soll ich tun, wenn Inhalte von meinem Blog in HackTricks sind und ich möchte, dass sie dort nicht sind?**
 
 Beachten Sie, dass Links zu Ihrer Seite in HackTricks:
 
-- Ihre **SEO** verbessern
+- Ihr **SEO** verbessern
 - Der Inhalt wird **in mehr als 15 Sprachen übersetzt**, was es mehr Menschen ermöglicht, auf diesen Inhalt zuzugreifen
-- **HackTricks ermutigt** die Menschen, **Ihre Seite zu überprüfen** (mehrere Personen haben uns mitgeteilt, dass sie seitdem eine Seite von ihnen in HackTricks haben, mehr Besuche erhalten)
+- **HackTricks ermutigt** die Menschen, **Ihre Seite zu besuchen** (mehrere Personen haben uns mitgeteilt, dass sie seitdem ihre Seite in HackTricks ist, mehr Besuche erhalten)
 
-Wenn Sie jedoch möchten, dass der Inhalt Ihres Blogs aus HackTricks entfernt wird, lassen Sie es uns einfach wissen und wir werden definitiv **jeden Link zu Ihrem Blog** und jeden darauf basierenden Inhalt entfernen.
+Wenn Sie jedoch weiterhin möchten, dass der Inhalt Ihres Blogs aus HackTricks entfernt wird, lassen Sie es uns einfach wissen und wir werden definitiv **jeden Link zu Ihrem Blog** und jeden darauf basierenden Inhalt entfernen.
 
 > [!CAUTION]
 >
@@ -104,7 +104,7 @@ Wenn Sie jedoch möchten, dass der Inhalt Ihres Blogs aus HackTricks entfernt wi
 
 Wir **geben immer den ursprünglichen Autoren alle Credits**. Wenn Sie eine Seite mit kopierten Inhalten ohne referenzierte Originalquelle finden, lassen Sie es uns wissen und wir werden entweder **es entfernen**, **den Link vor dem Text hinzufügen** oder **es umschreiben und den Link hinzufügen**.
 
-## LIZENZ
+## LICENSE
 
 Copyright © Alle Rechte vorbehalten, sofern nicht anders angegeben.
 
