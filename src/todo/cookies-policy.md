@@ -6,16 +6,16 @@ Dernière mise à jour : 02/04/2023
 
 Cette Politique de Cookies s'applique aux sites web suivants détenus et exploités par l'équipe HackTricks ("HackTricks", "nous" ou "notre") :
 
-* hacktricks.xyz
-* [www.hacktricks.xyz](http://www.hacktricks.xyz/)
-* book.hacktricks.xyz
-* cloud.hacktricks.xyz
+* hacktricks.wiki
+* [www.hacktricks.wiki](https://www.hacktricks.wiki/)
+* book.hacktricks.wiki
+* cloud.hacktricks.wiki
 
 En utilisant l'un de ces sites, vous acceptez l'utilisation de cookies conformément à cette Politique de Cookies. Si vous n'êtes pas d'accord, veuillez désactiver les cookies dans les paramètres de votre navigateur ou vous abstenir d'utiliser nos sites.
 
 ### Qu'est-ce que les cookies ?
 
-Les cookies sont de petits fichiers texte qui sont stockés sur votre ordinateur ou appareil mobile lorsque vous visitez un site web. Ils sont largement utilisés pour faire fonctionner les sites web, améliorer leur fonctionnalité et fournir une expérience utilisateur plus personnalisée.
+Les cookies sont de petits fichiers texte qui sont stockés sur votre ordinateur ou appareil mobile lorsque vous visitez un site web. Ils sont largement utilisés pour faire fonctionner les sites, améliorer leur fonctionnalité et fournir une expérience utilisateur plus personnalisée.
 
 ### Comment nous utilisons les cookies
 
@@ -26,7 +26,7 @@ Nous utilisons des cookies sur nos sites pour les finalités suivantes :
 3. Cookies de fonctionnalité : Ces cookies permettent à nos sites de se souvenir des choix que vous faites, comme votre langue ou votre région, pour offrir une expérience plus personnalisée.
 4. Cookies de ciblage/publicité : Ces cookies sont utilisés pour diffuser des publicités pertinentes et des communications marketing en fonction de vos intérêts, de votre historique de navigation et de vos interactions avec nos sites.
 
-De plus, les pages book.hacktricks.xyz et cloud.hacktricks.xyz sont hébergées sur Gitbook. Vous pouvez trouver plus d'informations sur les cookies de Gitbook à [https://gitbook-1652864889.teamtailor.com/cookie-policy](https://gitbook-1652864889.teamtailor.com/cookie-policy).
+De plus, les pages book.hacktricks.wiki et cloud.hacktricks.wiki sont hébergées sur Gitbook. Vous pouvez trouver plus d'informations sur les cookies de Gitbook à [https://gitbook-1652864889.teamtailor.com/cookie-policy](https://gitbook-1652864889.teamtailor.com/cookie-policy).
 
 ### Cookies tiers
 

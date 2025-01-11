@@ -1,4 +1,4 @@
-# Valeurs et FAQ de HackTricks
+# HackTricks Valeurs & FAQ
 
 {{#include ../banners/hacktricks-training.md}}
 
@@ -26,7 +26,7 @@
 > - **Merci beaucoup pour ces ressources, comment puis-je vous remercier ?**
 
 Vous pouvez remercier publiquement les équipes de HackTricks pour avoir rassemblé toutes ces ressources publiquement dans un tweet en mentionnant [**@hacktricks_live**](https://twitter.com/hacktricks_live).\
-Si vous êtes particulièrement reconnaissant, vous pouvez également [**soutenir le projet ici**](https://github.com/sponsors/carlospolop).\
+Si vous êtes particulièrement reconnaissant, vous pouvez également [**sponsoriser le projet ici**](https://github.com/sponsors/carlospolop).\
 Et n'oubliez pas de **donner une étoile aux projets Github !** (Trouvez les liens ci-dessous).
 
 > [!TIP]
@@ -57,7 +57,7 @@ Si vous avez besoin d'un bibtex, vous pouvez utiliser quelque chose comme :
 author = {"HackTricks Team" or the Authors name of the specific page/trick},
 title = {Title of the Specific Page},
 year = {Year of Last Update (check it at the end of the page)},
-url = {\url{https://book.hacktricks.xyz/specific-page}},
+url = {\url{https://book.hacktricks.wiki/specific-page}},
 }
 ```
 > [!WARNING]
@@ -66,7 +66,7 @@ url = {\url{https://book.hacktricks.xyz/specific-page}},
 
 **Je préférerais que non**. Cela **ne bénéficiera à personne** car tout le **contenu est déjà disponible publiquement** dans les livres officiels de HackTricks gratuitement.
 
-Si vous craignez qu'il disparaisse, il suffit de le forker sur Github ou de le télécharger, comme je l'ai dit, c'est déjà gratuit.
+Si vous craignez qu'il disparaisse, il vous suffit de le forker sur Github ou de le télécharger, comme je l'ai dit, c'est déjà gratuit.
 
 > [!WARNING]
 >
@@ -76,7 +76,7 @@ La première **valeur** de **HackTricks** est d'offrir des ressources éducative
 
 Si vous pensez que les livres HackTricks sont faits à des **fins commerciales**, vous avez **COMPLÈTEMENT TORT**.
 
-Nous avons des sponsors parce que, même si tout le contenu est GRATUIT, nous voulons **offrir à la communauté la possibilité d'apprécier notre travail** si elle le souhaite. Par conséquent, nous offrons aux gens la possibilité de faire un don à HackTricks via [**Github sponsors**](https://github.com/sponsors/carlospolop), et **des entreprises de cybersécurité pertinentes** pour sponsoriser HackTricks et **avoir des publicités** dans le livre, les **publicités** étant toujours placées à des endroits où elles sont **visibles** mais **ne perturbent pas le processus d'apprentissage** si quelqu'un se concentre sur le contenu.
+Nous avons des sponsors parce que, même si tout le contenu est GRATUIT, nous voulons **offrir à la communauté la possibilité d'apprécier notre travail** si elle le souhaite. Par conséquent, nous offrons aux gens la possibilité de faire un don à HackTricks via [**Github sponsors**](https://github.com/sponsors/carlospolop), et à des **entreprises de cybersécurité pertinentes** de sponsoriser HackTricks et d'**avoir des publicités** dans le livre, les **publicités** étant toujours placées à des endroits où elles sont **visibles** mais **ne perturbent pas le processus d'apprentissage** si quelqu'un se concentre sur le contenu.
 
 Vous ne trouverez pas HackTricks rempli de publicités ennuyeuses comme d'autres blogs avec beaucoup moins de contenu que HackTricks, car HackTricks n'est pas fait à des fins commerciales.
 
@@ -96,7 +96,7 @@ Notez que le fait d'avoir des liens vers votre page dans HackTricks :
 - Le contenu est **traduit en plus de 15 langues**, permettant à plus de personnes d'accéder à ce contenu
 - **HackTricks encourage** les gens à **vérifier votre page** (plusieurs personnes nous ont mentionné que depuis qu'une de leurs pages est dans HackTricks, elles reçoivent plus de visites)
 
-Cependant, si vous souhaitez toujours que le contenu de votre blog soit retiré de HackTricks, faites-le nous savoir et nous **retirerons définitivement chaque lien vers votre blog**, ainsi que tout contenu basé dessus.
+Cependant, si vous souhaitez toujours que le contenu de votre blog soit retiré de HackTricks, faites-le nous savoir et nous **retirerons définitivement chaque lien vers votre blog**, ainsi que tout contenu basé sur celui-ci.
 
 > [!CAUTION]
 >
@@ -138,6 +138,6 @@ Cette licence ne confère aucun droit de marque ou de branding en relation avec 
 >
 > L'utilisateur est seul responsable de toute action entreprise sur la base des informations contenues dans ce livre, et doit toujours demander des conseils et une assistance professionnels lorsqu'il tente de mettre en œuvre l'une des techniques ou conseils décrits ici.
 >
-> En utilisant ce livre, l'utilisateur accepte de dégager les auteurs et éditeurs de toute responsabilité et de toute obligation pour tout dommage, perte ou préjudice pouvant résulter de l'utilisation de ce livre ou de l'une des informations qu'il contient.
+> En utilisant ce livre, l'utilisateur accepte de dégager les auteurs et éditeurs de toute responsabilité pour tout dommage, perte ou préjudice pouvant résulter de l'utilisation de ce livre ou de toute information qu'il contient.
 
 {{#include ../banners/hacktricks-training.md}}
