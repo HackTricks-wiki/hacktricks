@@ -4,26 +4,26 @@
 
 ## Basic overview
 
-**Active Directory**는 **네트워크 관리자**가 **도메인**, **사용자**, 및 **객체**를 효율적으로 생성하고 관리할 수 있도록 하는 기본 기술로 작동합니다. 이는 확장 가능하도록 설계되어, 많은 수의 사용자를 관리 가능한 **그룹** 및 **하위 그룹**으로 조직할 수 있으며, 다양한 수준에서 **접근 권한**을 제어합니다.
+**Active Directory**는 **네트워크 관리자**가 **도메인**, **사용자**, 및 **객체**를 효율적으로 생성하고 관리할 수 있도록 하는 기본 기술로 작동합니다. 이는 확장 가능하도록 설계되어, 많은 수의 사용자를 관리 가능한 **그룹** 및 **하위 그룹**으로 조직하고, 다양한 수준에서 **접근 권한**을 제어할 수 있습니다.
 
-**Active Directory**의 구조는 세 가지 주요 계층으로 구성됩니다: **도메인**, **트리**, 및 **포리스트**. **도메인**은 공통 데이터베이스를 공유하는 **사용자** 또는 **장치**와 같은 객체의 모음을 포함합니다. **트리**는 공유 구조로 연결된 이러한 도메인의 그룹이며, **포리스트**는 여러 트리의 모음을 나타내며, **신뢰 관계**를 통해 상호 연결되어 조직 구조의 최상위 계층을 형성합니다. 각 수준에서 특정 **접근** 및 **통신 권한**을 지정할 수 있습니다.
+**Active Directory**의 구조는 세 가지 주요 계층으로 구성됩니다: **도메인**, **트리**, 및 **포리스트**. **도메인**은 공통 데이터베이스를 공유하는 **사용자** 또는 **장치**와 같은 객체의 모음을 포함합니다. **트리**는 공유 구조로 연결된 이러한 도메인 그룹이며, **포리스트**는 여러 트리의 모음을 나타내며, **신뢰 관계**를 통해 상호 연결되어 조직 구조의 최상위 계층을 형성합니다. 각 수준에서 특정 **접근** 및 **통신 권한**을 지정할 수 있습니다.
 
 **Active Directory**의 주요 개념은 다음과 같습니다:
 
-1. **디렉토리** – Active Directory 객체와 관련된 모든 정보를 저장합니다.
+1. **디렉토리** – Active Directory 객체와 관련된 모든 정보를 보관합니다.
 2. **객체** – 디렉토리 내의 엔티티를 나타내며, **사용자**, **그룹**, 또는 **공유 폴더**를 포함합니다.
 3. **도메인** – 디렉토리 객체의 컨테이너 역할을 하며, 여러 도메인이 **포리스트** 내에서 공존할 수 있으며, 각 도메인은 자체 객체 모음을 유지합니다.
-4. **트리** – 공통 루트 도메인을 공유하는 도메인의 그룹입니다.
+4. **트리** – 공통 루트 도메인을 공유하는 도메인 그룹입니다.
 5. **포리스트** – Active Directory의 조직 구조의 정점으로, 여러 트리로 구성되며 이들 간에 **신뢰 관계**가 있습니다.
 
 **Active Directory Domain Services (AD DS)**는 네트워크 내에서 중앙 집중식 관리 및 통신에 중요한 다양한 서비스를 포함합니다. 이러한 서비스는 다음과 같습니다:
 
-1. **도메인 서비스** – 데이터 저장소를 중앙 집중화하고 **사용자**와 **도메인** 간의 상호 작용을 관리하며, **인증** 및 **검색** 기능을 포함합니다.
+1. **도메인 서비스** – 데이터 저장소를 중앙 집중화하고 **사용자**와 **도메인** 간의 상호작용을 관리하며, **인증** 및 **검색** 기능을 포함합니다.
 2. **인증서 서비스** – 안전한 **디지털 인증서**의 생성, 배포 및 관리를 감독합니다.
 3. **경량 디렉토리 서비스** – **LDAP 프로토콜**을 통해 디렉토리 지원 애플리케이션을 지원합니다.
 4. **디렉토리 연합 서비스** – 여러 웹 애플리케이션에서 단일 세션으로 사용자를 인증할 수 있는 **싱글 사인온** 기능을 제공합니다.
 5. **권한 관리** – 저작권 자료를 보호하기 위해 무단 배포 및 사용을 규제하는 데 도움을 줍니다.
-6. **DNS 서비스** – **도메인 이름**의 해석에 필수적입니다.
+6. **DNS 서비스** – **도메인 이름** 해석에 필수적입니다.
 
 자세한 설명은 다음을 확인하세요: [**TechTerms - Active Directory Definition**](https://techterms.com/definition/active_directory)
 
@@ -41,7 +41,7 @@ AD를 열거/악용하기 위해 실행할 수 있는 명령어를 빠르게 확
 AD 환경에 접근할 수 있지만 자격 증명/세션이 없는 경우 다음을 수행할 수 있습니다:
 
 - **네트워크 펜테스트:**
-- 네트워크를 스캔하고, 기계와 열린 포트를 찾아 **취약점을 악용**하거나 **자격 증명**을 추출하려고 시도합니다 (예: [프린터는 매우 흥미로운 대상이 될 수 있습니다](ad-information-in-printers.md)).
+- 네트워크를 스캔하고, 기계 및 열린 포트를 찾아 **취약점을 악용**하거나 **자격 증명**을 추출하려고 시도합니다 (예: [프린터는 매우 흥미로운 대상이 될 수 있습니다](ad-information-in-printers.md)).
 - DNS를 열거하면 도메인 내의 주요 서버에 대한 정보(웹, 프린터, 공유, VPN, 미디어 등)를 얻을 수 있습니다.
 - `gobuster dns -d domain.local -t 25 -w /opt/Seclist/Discovery/DNS/subdomain-top2000.txt`
 - 이를 수행하는 방법에 대한 더 많은 정보를 찾으려면 일반 [**펜테스팅 방법론**](../../generic-methodologies-and-resources/pentesting-methodology.md)을 참조하세요.
@@ -67,9 +67,9 @@ AD 환경에 접근할 수 있지만 자격 증명/세션이 없는 경우 다�
 - [**Responder로 서비스를 가장하여 자격 증명 수집**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md)
 - [**릴레이 공격을 악용하여 호스트에 접근**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)
 - [**악성 UPnP 서비스 노출로 자격 증명 수집**](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md)[**SDP**](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
-- [**OSINT**](https://book.hacktricks.xyz/external-recon-methodology):
+- [**OSINT**](https://book.hacktricks.wiki/en/generic-methodologies-and-resources/external-recon-methodology/index.html):
 - 내부 문서, 소셜 미디어, 서비스(주로 웹)에서 사용자 이름/이름을 추출하고 공개적으로 이용 가능한 자료에서도 추출합니다.
-- 회사 직원의 전체 이름을 찾으면 다양한 AD **사용자 이름 규칙**을 시도해 볼 수 있습니다 (**[이것을 읽어보세요](https://activedirectorypro.com/active-directory-user-naming-convention/)**). 가장 일반적인 규칙은: _NameSurname_, _Name.Surname_, _NamSur_ (각각 3글자), _Nam.Sur_, _NSurname_, _N.Surname_, _SurnameName_, _Surname.Name_, _SurnameN_, _Surname.N_, 3 _무작위 문자와 3 무작위 숫자_ (abc123)입니다.
+- 회사 직원의 전체 이름을 찾으면 다양한 AD **사용자 이름 규칙**을 시도해 볼 수 있습니다 (**[읽어보세요](https://activedirectorypro.com/active-directory-user-naming-convention/)**). 가장 일반적인 규칙은: _NameSurname_, _Name.Surname_, _NamSur_ (각각 3글자), _Nam.Sur_, _NSurname_, _N.Surname_, _SurnameName_, _Surname.Name_, _SurnameN_, _Surname.N_, 3 _무작위 문자와 3 무작위 숫자_ (abc123)입니다.
 - 도구:
 - [w0Tx/generate-ad-username](https://github.com/w0Tx/generate-ad-username)
 - [urbanadventurer/username-anarchy](https://github.com/urbanadventurer/username-anarchy)
@@ -105,13 +105,13 @@ Get-GlobalAddressList -ExchHostname [ip] -UserName [domain]\[username] -Password
 > [!WARNING]
 > 사용자 이름 목록은 [**이 github repo**](https://github.com/danielmiessler/SecLists/tree/master/Usernames/Names) \*\*\*\* 및 이곳 ([**statistically-likely-usernames**](https://github.com/insidetrust/statistically-likely-usernames))에서 찾을 수 있습니다.
 >
-> 그러나 이 전에 수행했어야 할 정찰 단계에서 **회사의 직원 이름**을 알고 있어야 합니다. 이름과 성이 있으면 [**namemash.py**](https://gist.github.com/superkojiman/11076951) 스크립트를 사용하여 잠재적인 유효 사용자 이름을 생성할 수 있습니다.
+> 그러나 이 전에 수행했어야 할 정찰 단계에서 **회사의 직원 이름**을 알고 있어야 합니다. 이름과 성을 가지고 [**namemash.py**](https://gist.github.com/superkojiman/11076951) 스크립트를 사용하여 잠재적인 유효 사용자 이름을 생성할 수 있습니다.
 
 ### 하나 이상의 사용자 이름 알기
 
 좋습니다, 이미 유효한 사용자 이름이 있지만 비밀번호가 없다면... 다음을 시도해 보세요:
 
-- [**ASREPRoast**](asreproast.md): 사용자가 _DONT_REQ_PREAUTH_ 속성이 **없다면**, 해당 사용자에 대한 **AS_REP 메시지**를 요청할 수 있으며, 이 메시지에는 사용자의 비밀번호 파생으로 암호화된 데이터가 포함됩니다.
+- [**ASREPRoast**](asreproast.md): 사용자가 _DONT_REQ_PREAUTH_ 속성이 **없다면**, 해당 사용자에 대한 **AS_REP 메시지 요청**을 할 수 있으며, 이 메시지는 사용자의 비밀번호 파생으로 암호화된 데이터를 포함합니다.
 - [**Password Spraying**](password-spraying.md): 발견된 각 사용자에 대해 가장 **일반적인 비밀번호**를 시도해 보세요. 아마도 어떤 사용자가 나쁜 비밀번호를 사용하고 있을 것입니다 (비밀번호 정책을 염두에 두세요!).
 - OWA 서버를 **스프레이**하여 사용자 메일 서버에 접근을 시도할 수도 있습니다.
 
@@ -121,7 +121,7 @@ password-spraying.md
 
 ### LLMNR/NBT-NS 중독
 
-네트워크의 일부 프로토콜을 **중독**하여 **해시**를 **획득**할 수 있습니다:
+네트워크의 일부 프로토콜을 **중독**하여 **해시**를 **획득**할 수 있을지도 모릅니다:
 
 {{#ref}}
 ../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md
@@ -129,11 +129,11 @@ password-spraying.md
 
 ### NTML 릴레이
 
-활성 디렉토리를 열거하는 데 성공했다면 **더 많은 이메일과 네트워크에 대한 더 나은 이해**를 갖게 될 것입니다. NTML [**릴레이 공격**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack) \*\*\*\*을 강제로 수행하여 AD 환경에 접근할 수 있습니다.
+활성 디렉토리를 열거하는 데 성공했다면 **더 많은 이메일과 네트워크에 대한 더 나은 이해**를 갖게 될 것입니다. NTML [**릴레이 공격**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack) \*\*\*\*을 강제로 수행하여 AD 환경에 접근할 수 있을 것입니다.
 
-### NTLM 자격 증명 도용
+### NTLM 자격 증명 훔치기
 
-**null 또는 guest 사용자**로 다른 PC나 공유에 **접근**할 수 있다면, **파일을 배치**할 수 있습니다 (예: SCF 파일). 이 파일이 접근되면 **당신에 대한 NTML 인증을 트리거**하여 **NTLM 챌린지**를 도용할 수 있습니다:
+**null 또는 guest 사용자**로 다른 PC나 공유에 **접근**할 수 있다면, **파일을 배치**할 수 있습니다 (예: SCF 파일). 이 파일이 어떤 식으로든 접근되면 **당신에 대한 NTML 인증을 트리거**하여 **NTLM 챌린지**를 훔칠 수 있습니다:
 
 {{#ref}}
 ../ntlm/places-to-steal-ntlm-creds.md
@@ -158,13 +158,13 @@ kerberos-double-hop-problem.md
 - [**CMD를 사용하여 기본 정찰 수행**](../basic-cmd-for-pentesters.md#domain-info)
 - [**powershell을 사용하여 정찰**](../basic-powershell-for-pentesters/index.html)할 수도 있으며, 이는 더 은밀합니다.
 - [**powerview 사용**](../basic-powershell-for-pentesters/powerview.md)하여 더 자세한 정보를 추출할 수 있습니다.
-- 활성 디렉토리에서 정찰을 위한 또 다른 훌륭한 도구는 [**BloodHound**](bloodhound.md)입니다. 이는 **그리 은밀하지는 않지만** (사용하는 수집 방법에 따라 다름), **그것에 대해 신경 쓰지 않는다면** 꼭 시도해 보세요. 사용자가 RDP할 수 있는 위치, 다른 그룹으로의 경로 등을 찾을 수 있습니다.
+- 활성 디렉토리에서 정찰을 위한 또 다른 훌륭한 도구는 [**BloodHound**](bloodhound.md)입니다. 이는 **그리 은밀하지는 않지만** (사용하는 수집 방법에 따라 다름), **그것에 대해 신경 쓰지 않는다면** 꼭 시도해 보아야 합니다. 사용자가 RDP할 수 있는 위치를 찾고, 다른 그룹으로 가는 경로를 찾는 등의 작업을 할 수 있습니다.
 - **기타 자동화된 AD 열거 도구는:** [**AD Explorer**](bloodhound.md#ad-explorer)**,** [**ADRecon**](bloodhound.md#adrecon)**,** [**Group3r**](bloodhound.md#group3r)**,** [**PingCastle**](bloodhound.md#pingcastle)**.**
 - [**AD의 DNS 레코드**](ad-dns-records.md)도 흥미로운 정보를 포함할 수 있습니다.
 - 디렉토리를 열거하는 데 사용할 수 있는 **GUI 도구**는 **SysInternal** Suite의 **AdExplorer.exe**입니다.
 - **ldapsearch**를 사용하여 LDAP 데이터베이스에서 _userPassword_ 및 _unixUserPassword_ 필드에서 자격 증명을 찾거나 _Description_을 검색할 수 있습니다. cf. [PayloadsAllTheThings의 AD 사용자 주석에서 비밀번호](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#password-in-ad-user-comment)에서 다른 방법을 확인하세요.
 - **Linux**를 사용하는 경우 [**pywerview**](https://github.com/the-useless-one/pywerview)를 사용하여 도메인을 열거할 수 있습니다.
-- 자동화 도구를 시도할 수도 있습니다:
+- 자동화 도구로는 다음을 시도할 수 있습니다:
 - [**tomcarver16/ADSearch**](https://github.com/tomcarver16/ADSearch)
 - [**61106960/adPEAS**](https://github.com/61106960/adPEAS)
 - **모든 도메인 사용자 추출하기**
@@ -175,7 +175,7 @@ Windows에서 도메인 사용자 이름을 얻는 것은 매우 쉽습니다 (`
 
 ### Kerberoast
 
-Kerberoasting은 사용자 계정에 연결된 서비스에서 사용되는 **TGS 티켓**을 얻고, 그 암호화를 크랙하는 것입니다—이는 사용자 비밀번호를 기반으로 하며—**오프라인**에서 이루어집니다.
+Kerberoasting은 사용자 계정에 연결된 서비스에서 사용되는 **TGS 티켓**을 획득하고, 그 암호화를 크랙하는 것입니다—이는 사용자 비밀번호를 기반으로 하며—**오프라인**에서 수행됩니다.
 
 자세한 내용은:
 
@@ -191,11 +191,11 @@ kerberoast.md
 
 정상 도메인 사용자로서 자격 증명이나 세션을 손상시키고, 이 사용자로 **도메인 내의 어떤 머신에 접근**할 수 있다면, **로컬에서 권한을 상승시키고 자격 증명을 찾는 방법을 찾아야** 합니다. 이는 로컬 관리자 권한이 있어야만 **다른 사용자의 해시를 메모리(LSASS)와 로컬(SAM)에서 덤프**할 수 있기 때문입니다.
 
-이 책에는 [**Windows에서의 로컬 권한 상승**](../windows-local-privilege-escalation/index.html)에 대한 완전한 페이지와 [**체크리스트**](../checklist-windows-privilege-escalation.md)가 있습니다. 또한, [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite)를 사용하는 것을 잊지 마세요.
+이 책에는 [**Windows에서의 로컬 권한 상승**](../windows-local-privilege-escalation/index.html)과 [**체크리스트**](../checklist-windows-privilege-escalation.md)에 대한 완전한 페이지가 있습니다. 또한, [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite)를 사용하는 것을 잊지 마세요.
 
 ### 현재 세션 티켓
 
-예상치 못한 리소스에 접근할 수 있는 **티켓**을 현재 사용자에서 찾는 것은 매우 **가능성이 낮지만**, 확인할 수 있습니다:
+예상치 못한 리소스에 접근할 수 있는 **티켓**을 현재 사용자에서 찾는 것은 매우 **가능성이 낮지만**, 확인해 볼 수 있습니다:
 ```bash
 ## List all tickets (if not admin, only current user tickets)
 .\Rubeus.exe triage
@@ -229,9 +229,9 @@ kerberoast.md
 printnightmare.md
 {{#endref}}
 
-## 권한 상승: 특권 자격 증명/세션을 가진 Active Directory에서
+## 특권 자격 증명/세션으로 Active Directory에서 권한 상승
 
-**다음 기술을 수행하려면 일반 도메인 사용자로는 충분하지 않으며, 이러한 공격을 수행하기 위해 특별한 권한/자격 증명이 필요합니다.**
+**다음 기술을 수행하려면 일반 도메인 사용자로는 부족하며, 이러한 공격을 수행하기 위해 특별한 권한/자격 증명이 필요합니다.**
 
 ### 해시 추출
 
@@ -241,8 +241,8 @@ printnightmare.md
 
 ### 해시 전달
 
-**사용자의 해시를 확보한 후**, 이를 사용하여 **사용자를 가장할 수 있습니다.**\
-해시를 사용하여 **NTLM 인증을 수행하는** **도구**를 사용해야 하며, **또는** 새로운 **sessionlogon**을 생성하고 **LSASS** 내부에 그 **해시를 주입**할 수 있습니다. 그러면 **NTLM 인증이 수행될 때** 그 **해시가 사용됩니다.** 마지막 옵션이 mimikatz가 하는 일입니다.\
+**사용자의 해시를 확보하면**, 이를 사용하여 **사용자를 가장할 수 있습니다.**\
+해시를 사용하여 **NTLM 인증을 수행하는** **도구**를 사용해야 하며, **또는** 새로운 **세션로그온**을 생성하고 **LSASS** 내부에 그 **해시를 주입**할 수 있습니다. 그러면 **NTLM 인증이 수행될 때** 그 **해시가 사용됩니다.** 마지막 옵션이 mimikatz가 하는 것입니다.\
 [**자세한 정보는 이 페이지를 읽어보세요.**](../ntlm/index.html#pass-the-hash)
 
 ### 해시 우회/키 전달
@@ -255,7 +255,7 @@ over-pass-the-hash-pass-the-key.md
 
 ### 티켓 전달
 
-**티켓 전달 (PTT)** 공격 방법에서 공격자는 **사용자의 인증 티켓을 훔칩니다**. 이 훔친 티켓은 **사용자를 가장하는 데 사용되어** 네트워크 내의 리소스와 서비스에 대한 무단 접근을 얻습니다.
+**티켓 전달 (PTT)** 공격 방법에서는 공격자가 **사용자의 인증 티켓을 훔치는** 대신 비밀번호나 해시 값을 훔칩니다. 이 훔친 티켓은 **사용자를 가장하는 데 사용되어** 네트워크 내의 리소스와 서비스에 대한 무단 접근을 얻습니다.
 
 {{#ref}}
 pass-the-ticket.md
@@ -263,7 +263,7 @@ pass-the-ticket.md
 
 ### 자격 증명 재사용
 
-**로컬 관리자**의 **해시** 또는 **비밀번호**가 있다면 이를 사용하여 다른 **PC에 로컬로 로그인**해 보아야 합니다.
+**로컬 관리자**의 **해시**나 **비밀번호**가 있다면 이를 사용하여 다른 **PC에 로컬로 로그인**해 보아야 합니다.
 ```bash
 # Local Auth Spray (once you found some local admin pass or hash)
 ## --local-auth flag indicate to only try 1 time per machine
@@ -275,7 +275,7 @@ crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9c
 ### MSSQL 남용 및 신뢰 링크
 
 사용자가 **MSSQL 인스턴스에 접근할 수 있는 권한**이 있다면, 그는 MSSQL 호스트에서 **명령을 실행**하거나 (SA로 실행 중인 경우), NetNTLM **해시**를 **탈취**하거나 심지어 **릴레이** **공격**을 수행할 수 있습니다.\
-또한, MSSQL 인스턴스가 다른 MSSQL 인스턴스에 의해 신뢰받는 경우(데이터베이스 링크). 사용자가 신뢰받는 데이터베이스에 대한 권한을 가지고 있다면, 그는 **신뢰 관계를 사용하여 다른 인스턴스에서도 쿼리를 실행할 수 있습니다**. 이러한 신뢰는 연결될 수 있으며, 어느 시점에서 사용자는 명령을 실행할 수 있는 잘못 구성된 데이터베이스를 찾을 수 있습니다.\
+또한, MSSQL 인스턴스가 다른 MSSQL 인스턴스에 의해 신뢰되는 경우(데이터베이스 링크). 사용자가 신뢰된 데이터베이스에 대한 권한을 가지고 있다면, 그는 **신뢰 관계를 사용하여 다른 인스턴스에서도 쿼리를 실행할 수 있습니다**. 이러한 신뢰는 연결될 수 있으며, 어느 시점에서 사용자는 명령을 실행할 수 있는 잘못 구성된 데이터베이스를 찾을 수 있습니다.\
 **데이터베이스 간의 링크는 포리스트 신뢰를 넘어 작동합니다.**
 
 {{#ref}}
@@ -294,8 +294,8 @@ unconstrained-delegation.md
 
 ### 제약된 위임
 
-사용자 또는 컴퓨터가 "제약된 위임"을 허용받으면, **컴퓨터의 일부 서비스에 접근하기 위해 어떤 사용자도 가장할 수 있습니다**.\
-그런 다음, 이 사용자/컴퓨터의 **해시를 손상시키면** **어떤 사용자도 가장할 수 있습니다** (도메인 관리자 포함) 서비스에 접근하기 위해.
+사용자 또는 컴퓨터가 "제약된 위임"을 허용받으면, **컴퓨터의 일부 서비스에 접근하기 위해 어떤 사용자를 가장할 수 있습니다**.\
+그런 다음, 이 사용자/컴퓨터의 **해시를 손상시키면** **모든 사용자를 가장할 수 있습니다** (도메인 관리자 포함) 특정 서비스에 접근하기 위해.
 
 {{#ref}}
 constrained-delegation.md
@@ -358,7 +358,7 @@ ad-certificates/certificate-theft.md
 ad-certificates/domain-escalation.md
 {{#endref}}
 
-## 높은 권한 계정으로의 포스트 익스플로잇
+## 높은 권한 계정으로의 사후 활용
 
 ### 도메인 자격 증명 덤프
 
@@ -368,7 +368,7 @@ ad-certificates/domain-escalation.md
 
 [**NTDS.dit를 훔치는 방법에 대한 더 많은 정보는 여기에서 찾을 수 있습니다**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/active-directory-methodology/broken-reference/README.md)
 
-### 권한 상승을 위한 지속성
+### 권한 상승을 통한 지속성
 
 앞서 논의된 몇 가지 기술은 지속성에 사용될 수 있습니다.\
 예를 들어, 다음과 같이 할 수 있습니다:
@@ -419,7 +419,7 @@ diamond-ticket.md
 
 ### **인증서 계정 지속성**
 
-**계정의 인증서를 보유하거나 요청할 수 있는 것**은 사용자의 계정에서 지속성을 유지하는 매우 좋은 방법입니다 (비밀번호를 변경하더라도):
+**계정의 인증서를 보유하거나 요청할 수 있는 것**은 사용자의 계정에 지속할 수 있는 매우 좋은 방법입니다 (비밀번호를 변경하더라도):
 
 {{#ref}}
 ad-certificates/account-persistence.md
@@ -427,7 +427,7 @@ ad-certificates/account-persistence.md
 
 ### **인증서 도메인 지속성**
 
-**인증서를 사용하여 도메인 내에서 높은 권한으로 지속성을 유지하는 것도 가능합니다:**
+**인증서를 사용하여 도메인 내에서 높은 권한으로 지속하는 것도 가능합니다:**
 
 {{#ref}}
 ad-certificates/domain-persistence.md
@@ -435,13 +435,13 @@ ad-certificates/domain-persistence.md
 
 ### AdminSDHolder 그룹
 
-Active Directory의 **AdminSDHolder** 객체는 **특권 그룹**(도메인 관리자 및 엔터프라이즈 관리자와 같은)의 보안을 보장하기 위해 이러한 그룹에 표준 **액세스 제어 목록(ACL)**을 적용하여 무단 변경을 방지합니다. 그러나 이 기능은 악용될 수 있습니다. 공격자가 AdminSDHolder의 ACL을 수정하여 일반 사용자에게 전체 액세스를 부여하면, 해당 사용자는 모든 특권 그룹에 대한 광범위한 제어를 얻게 됩니다. 이 보안 조치는 보호를 위해 설계되었지만, 면밀히 모니터링되지 않으면 불법적인 접근을 허용할 수 있습니다.
+Active Directory의 **AdminSDHolder** 객체는 **특권 그룹**(도메인 관리자 및 엔터프라이즈 관리자와 같은)의 보안을 보장하기 위해 이러한 그룹에 표준 **액세스 제어 목록(ACL)**을 적용하여 무단 변경을 방지합니다. 그러나 이 기능은 악용될 수 있습니다. 공격자가 AdminSDHolder의 ACL을 수정하여 일반 사용자에게 전체 접근 권한을 부여하면, 해당 사용자는 모든 특권 그룹에 대한 광범위한 제어를 얻게 됩니다. 이 보안 조치는 보호를 위한 것이지만, 면밀히 모니터링되지 않으면 불법적인 접근을 허용할 수 있습니다.
 
 [**AdminDSHolder 그룹에 대한 더 많은 정보는 여기에서 확인할 수 있습니다.**](privileged-groups-and-token-privileges.md#adminsdholder-group)
 
 ### DSRM 자격 증명
 
-모든 **도메인 컨트롤러(DC)** 내에는 **로컬 관리자** 계정이 존재합니다. 이러한 머신에서 관리자 권한을 얻으면, **mimikatz**를 사용하여 로컬 관리자 해시를 추출할 수 있습니다. 이후, 이 비밀번호를 **사용할 수 있도록 활성화**하기 위해 레지스트리 수정을 해야 하며, 이를 통해 로컬 관리자 계정에 원격으로 접근할 수 있습니다.
+모든 **도메인 컨트롤러(DC)** 내에는 **로컬 관리자** 계정이 존재합니다. 이러한 머신에서 관리자 권한을 얻으면, **mimikatz**를 사용하여 로컬 관리자 해시를 추출할 수 있습니다. 이후, 이 비밀번호를 **사용할 수 있도록** 레지스트리 수정을 해야 하며, 이를 통해 로컬 관리자 계정에 원격으로 접근할 수 있습니다.
 
 {{#ref}}
 dsrm-credentials.md
@@ -449,7 +449,7 @@ dsrm-credentials.md
 
 ### ACL 지속성
 
-특정 도메인 객체에 대해 **사용자에게** 일부 **특별 권한**을 부여하여 사용자가 **미래에 권한을 상승**시킬 수 있도록 할 수 있습니다.
+특정 도메인 객체에 대해 **사용자에게** **특별 권한**을 부여하여 사용자가 **미래에 권한을 상승**시킬 수 있도록 할 수 있습니다.
 
 {{#ref}}
 acl-persistence-abuse/
@@ -474,7 +474,7 @@ skeleton-key.md
 ### 사용자 정의 SSP
 
 [SSP(보안 지원 제공자)가 무엇인지 여기에서 알아보세요.](../authentication-credentials-uac-and-efs/index.html#security-support-provider-interface-sspi)\
-자신의 **SSP**를 생성하여 **명확한 텍스트**로 머신에 접근하는 데 사용되는 **자격 증명**을 **캡처**할 수 있습니다.
+자신의 **SSP**를 생성하여 머신에 접근하는 데 사용되는 **자격 증명**을 **명확한 텍스트**로 **캡처**할 수 있습니다.
 
 {{#ref}}
 custom-ssp.md
@@ -482,7 +482,7 @@ custom-ssp.md
 
 ### DCShadow
 
-AD에 **새 도메인 컨트롤러**를 등록하고 이를 사용하여 지정된 객체에 **속성**(SIDHistory, SPNs...)을 **푸시**합니다 **수정**에 대한 **로그**를 남기지 않고. **DA** 권한이 필요하며 **루트 도메인** 내에 있어야 합니다.\
+AD에 **새 도메인 컨트롤러**를 등록하고 이를 사용하여 지정된 객체에 **속성**(SIDHistory, SPNs...)을 **푸시**합니다. 이 과정에서 **수정**에 대한 **로그**를 남기지 않습니다. **DA** 권한이 필요하며 **루트 도메인** 내에 있어야 합니다.\
 잘못된 데이터를 사용하면, 매우 불쾌한 로그가 나타날 수 있습니다.
 
 {{#ref}}
@@ -491,7 +491,7 @@ dcshadow.md
 
 ### LAPS 지속성
 
-이전에 **LAPS 비밀번호를 읽을 수 있는 충분한 권한**이 있을 경우 권한을 상승시키는 방법에 대해 논의했습니다. 그러나 이러한 비밀번호는 **지속성을 유지하는 데에도 사용될 수 있습니다**.\
+이전에 **LAPS 비밀번호를 읽을 수 있는 충분한 권한**이 있을 경우 권한을 상승시키는 방법에 대해 논의했습니다. 그러나 이러한 비밀번호는 **지속성을 유지하는 데도 사용될 수 있습니다**.\
 확인해 보세요:
 
 {{#ref}}
@@ -504,7 +504,7 @@ Microsoft는 **포리스트**를 보안 경계로 간주합니다. 이는 **단�
 
 ### 기본 정보
 
-[**도메인 신뢰**](<http://technet.microsoft.com/en-us/library/cc759554(v=ws.10).aspx>)는 한 **도메인**의 사용자가 다른 **도메인**의 리소스에 접근할 수 있도록 하는 보안 메커니즘입니다. 이는 본질적으로 두 도메인의 인증 시스템 간의 연결을 생성하여 인증 검증이 원활하게 흐를 수 있도록 합니다. 도메인이 신뢰를 설정하면, 그들은 특정 **키**를 **도메인 컨트롤러(DC)** 내에서 교환하고 유지하여 신뢰의 무결성을 보장합니다.
+[**도메인 신뢰**](<http://technet.microsoft.com/en-us/library/cc759554(v=ws.10).aspx>)는 한 **도메인**의 사용자가 다른 **도메인**의 리소스에 접근할 수 있도록 하는 보안 메커니즘입니다. 이는 두 도메인의 인증 시스템 간의 연결을 생성하여 인증 검증이 원활하게 흐를 수 있도록 합니다. 도메인이 신뢰를 설정하면, 그들은 특정 **키**를 **도메인 컨트롤러(DC)** 내에서 교환하고 유지하여 신뢰의 무결성을 보장합니다.
 
 일반적인 시나리오에서 사용자가 **신뢰된 도메인**의 서비스에 접근하려면, 먼저 자신의 도메인 DC에서 **인터-렐름 TGT**라는 특별한 티켓을 요청해야 합니다. 이 TGT는 두 도메인이 합의한 공유 **키**로 암호화됩니다. 사용자는 이 TGT를 **신뢰된 도메인의 DC**에 제시하여 서비스 티켓(**TGS**)을 받습니다. 신뢰된 도메인의 DC가 인터-렐름 TGT를 성공적으로 검증하면, TGS를 발급하여 사용자가 서비스에 접근할 수 있도록 합니다.
 
@@ -515,23 +515,23 @@ Microsoft는 **포리스트**를 보안 경계로 간주합니다. 이는 **단�
 3. 클라이언트는 **도메인 2**의 리소스에 접근하기 위해 DC1에서 **인터-렐름 TGT**를 요청합니다.
 4. 인터-렐름 TGT는 두 방향 도메인 신뢰의 일환으로 DC1과 DC2 간에 공유된 **신뢰 키**로 암호화됩니다.
 5. 클라이언트는 인터-렐름 TGT를 **도메인 2의 도메인 컨트롤러(DC2)**로 가져갑니다.
-6. DC2는 공유 신뢰 키를 사용하여 인터-렐름 TGT를 검증하고, 유효한 경우 클라이언트가 접근하려는 도메인 2의 서버에 대한 **티켓 부여 서비스(TGS)**를 발급합니다.
+6. DC2는 공유 신뢰 키를 사용하여 인터-렐름 TGT를 검증하고, 유효한 경우 클라이언트가 접근하고자 하는 도메인 2의 서버에 대한 **티켓 부여 서비스(TGS)**를 발급합니다.
 7. 마지막으로 클라이언트는 이 TGS를 서버에 제시하여 도메인 2의 서비스에 접근합니다. 이 TGS는 서버의 계정 해시로 암호화되어 있습니다.
 
 ### 다양한 신뢰
 
-**신뢰는 1방향 또는 2방향**일 수 있다는 점에 유의해야 합니다. 2방향 옵션에서는 두 도메인이 서로를 신뢰하지만, **1방향** 신뢰 관계에서는 한 도메인이 **신뢰받는** 도메인이고 다른 도메인이 **신뢰하는** 도메인이 됩니다. 마지막 경우, **신뢰받는 도메인에서 신뢰하는 도메인 내의 리소스에만 접근할 수 있습니다**.
+**신뢰는 1방향 또는 2방향**일 수 있다는 점에 유의해야 합니다. 2방향 옵션에서는 두 도메인이 서로를 신뢰하지만, **1방향** 신뢰 관계에서는 한 도메인이 **신뢰받는** 도메인이고 다른 도메인이 **신뢰하는** 도메인입니다. 마지막 경우, **신뢰받는 도메인에서 신뢰하는 도메인 내의 리소스에만 접근할 수 있습니다**.
 
 도메인 A가 도메인 B를 신뢰하면, A는 신뢰하는 도메인이고 B는 신뢰받는 도메인입니다. 또한, **도메인 A**에서는 이것이 **아웃바운드 신뢰**가 되고, **도메인 B**에서는 이것이 **인바운드 신뢰**가 됩니다.
 
 **다양한 신뢰 관계**
 
 - **부모-자식 신뢰**: 이는 동일한 포리스트 내에서 일반적인 설정으로, 자식 도메인은 자동으로 부모 도메인과 2방향 전이 신뢰를 가집니다. 본질적으로 이는 인증 요청이 부모와 자식 간에 원활하게 흐를 수 있음을 의미합니다.
-- **교차 링크 신뢰**: "단축 신뢰"라고도 하며, 자식 도메인 간에 설정되어 참조 프로세스를 가속화합니다. 복잡한 포리스트에서는 인증 참조가 일반적으로 포리스트 루트로 올라갔다가 대상 도메인으로 내려가야 합니다. 교차 링크를 생성함으로써 여정을 단축할 수 있으며, 이는 지리적으로 분산된 환경에서 특히 유용합니다.
-- **외부 신뢰**: 이는 서로 관련이 없는 도메인 간에 설정되며 본질적으로 비전이적입니다. [Microsoft의 문서에 따르면](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>), 외부 신뢰는 현재 포리스트와 연결되지 않은 도메인에서 리소스에 접근하는 데 유용합니다. 보안은 외부 신뢰와 함께 SID 필터링을 통해 강화됩니다.
+- **크로스 링크 신뢰**: "단축 신뢰"라고도 하며, 자식 도메인 간에 설정되어 참조 프로세스를 가속화합니다. 복잡한 포리스트에서는 인증 참조가 일반적으로 포리스트 루트로 올라갔다가 대상 도메인으로 내려가야 합니다. 크로스 링크를 생성함으로써 여정을 단축할 수 있으며, 이는 지리적으로 분산된 환경에서 특히 유용합니다.
+- **외부 신뢰**: 이는 서로 관련이 없는 도메인 간에 설정되며 본질적으로 비전이적입니다. [Microsoft의 문서에 따르면](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>), 외부 신뢰는 현재 포리스트 외부의 도메인에서 리소스에 접근하는 데 유용하며, 포리스트 신뢰로 연결되지 않은 도메인에 해당합니다. 외부 신뢰를 통해 SID 필터링을 통해 보안이 강화됩니다.
 - **트리 루트 신뢰**: 이러한 신뢰는 포리스트 루트 도메인과 새로 추가된 트리 루트 간에 자동으로 설정됩니다. 일반적으로 자주 발생하지 않지만, 트리 루트 신뢰는 포리스트에 새로운 도메인 트리를 추가하는 데 중요하며, 이를 통해 고유한 도메인 이름을 유지하고 2방향 전이성을 보장합니다. [Microsoft의 가이드에서 더 많은 정보를 찾을 수 있습니다.](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>).
 - **포리스트 신뢰**: 이 유형의 신뢰는 두 포리스트 루트 도메인 간의 2방향 전이 신뢰로, 보안 조치를 강화하기 위해 SID 필터링을 시행합니다.
-- **MIT 신뢰**: 이러한 신뢰는 비 Windows, [RFC4120 준수](https://tools.ietf.org/html/rfc4120) Kerberos 도메인과 설정됩니다. MIT 신뢰는 좀 더 전문화되어 있으며, Windows 생태계 외부의 Kerberos 기반 시스템과의 통합이 필요한 환경을 위해 설계되었습니다.
+- **MIT 신뢰**: 이러한 신뢰는 비 Windows, [RFC4120 준수](https://tools.ietf.org/html/rfc4120) Kerberos 도메인과 설정됩니다. MIT 신뢰는 좀 더 전문화되어 있으며, Windows 생태계 외부의 Kerberos 기반 시스템과의 통합이 필요한 환경에 맞춰져 있습니다.
 
 #### **신뢰 관계의 다른 차이점**
 
@@ -541,15 +541,15 @@ Microsoft는 **포리스트**를 보안 경계로 간주합니다. 이는 **단�
 ### 공격 경로
 
 1. **신뢰 관계를 열거**합니다.
-2. 어떤 **보안 주체**(사용자/그룹/컴퓨터)가 **다른 도메인의 리소스에 접근할 수 있는지** 확인합니다. ACE 항목이나 다른 도메인의 그룹에 속해 있을 수 있습니다. **도메인 간의 관계**를 찾아보세요 (신뢰가 이 목적을 위해 생성되었을 가능성이 높습니다).
+2. 어떤 **보안 주체**(사용자/그룹/컴퓨터)가 **다른 도메인의 리소스에 접근**할 수 있는지 확인합니다. ACE 항목이나 다른 도메인의 그룹에 속해 있을 수 있습니다. **도메인 간의 관계**를 찾아보세요 (신뢰가 이 목적을 위해 생성되었을 가능성이 높습니다).
 3. 이 경우 kerberoast가 또 다른 옵션이 될 수 있습니다.
 4. **계정을 손상시켜** 도메인 간에 **피벗**할 수 있습니다.
 
 공격자는 다음 세 가지 주요 메커니즘을 통해 다른 도메인의 리소스에 접근할 수 있습니다:
 
 - **로컬 그룹 구성원 자격**: 주체는 서버의 "관리자" 그룹과 같은 머신의 로컬 그룹에 추가될 수 있으며, 이를 통해 해당 머신에 대한 상당한 제어를 부여받습니다.
-- **외부 도메인 그룹 구성원 자격**: 주체는 외부 도메인 내의 그룹의 구성원이 될 수도 있습니다. 그러나 이 방법의 효과는 신뢰의 성격과 그룹의 범위에 따라 달라집니다.
-- **액세스 제어 목록(ACL)**: 주체는 **ACL**에 지정될 수 있으며, 특히 **DACL** 내의 **ACE**로서 특정 리소스에 대한 접근을 제공합니다. ACL, DACL 및 ACE의 메커니즘에 대해 더 깊이 파고들고자 하는 분들을 위해, "[An ACE Up The Sleeve](https://specterops.io/assets/resources/an_ace_up_the_sleeve.pdf)"라는 백서가 귀중한 자료입니다.
+- **외부 도메인 그룹 구성원 자격**: 주체는 외부 도메인 내의 그룹의 구성원일 수도 있습니다. 그러나 이 방법의 효과는 신뢰의 성격과 그룹의 범위에 따라 달라집니다.
+- **액세스 제어 목록(ACL)**: 주체는 **ACL**에 지정될 수 있으며, 특히 **DACL** 내의 **ACE**로서 특정 리소스에 대한 접근을 제공합니다. ACL, DACL 및 ACE의 메커니즘에 대해 더 깊이 파고들고자 하는 분들을 위해, “[An ACE Up The Sleeve](https://specterops.io/assets/resources/an_ace_up_the_sleeve.pdf)”라는 백서가 귀중한 자료입니다.
 
 ### 자식-부모 포리스트 권한 상승
 ```
@@ -619,7 +619,7 @@ TrustDirection  : Inbound          --> Inboud trust
 WhenCreated     : 2/19/2021 10:50:56 PM
 WhenChanged     : 2/19/2021 10:50:56 PM
 ```
-이 시나리오에서 **귀하의 도메인은 외부 도메인에 의해 신뢰받고 있습니다**, 이는 귀하에게 **불확실한 권한**을 부여합니다. 귀하는 **귀하의 도메인에서 외부 도메인에 대해 어떤 주체가 어떤 접근 권한을 가지고 있는지** 찾아야 하며, 그 다음 이를 악용하려고 시도해야 합니다:
+이 시나리오에서 **귀하의 도메인은 외부 도메인에 의해 신뢰받고 있습니다**, 이는 귀하에게 **확인되지 않은 권한**을 부여합니다. 귀하는 **귀하의 도메인에서 외부 도메인에 대해 어떤 주체가 어떤 접근 권한을 가지고 있는지** 찾아야 하며, 그 후 이를 악용하려고 시도해야 합니다:
 
 {{#ref}}
 external-forest-domain-oneway-inbound.md
@@ -658,7 +658,7 @@ rdp-sessions-abuse.md
 
 ### **SID 필터링:**
 
-- SID 히스토리 속성을 활용한 공격의 위험은 SID 필터링에 의해 완화되며, 이는 모든 상호 숲 신뢰에서 기본적으로 활성화되어 있습니다. 이는 Microsoft의 입장에 따라 숲을 보안 경계로 간주하고, 숲 내 신뢰가 안전하다는 가정에 기반합니다.
+- SID 역사 속성을 활용한 공격의 위험은 SID 필터링에 의해 완화되며, 이는 모든 상호 숲 신뢰에서 기본적으로 활성화되어 있습니다. 이는 Microsoft의 입장에 따라 숲을 보안 경계로 간주하고, 숲 내 신뢰가 안전하다는 가정에 기반합니다.
 - 그러나 주의할 점이 있습니다: SID 필터링은 애플리케이션과 사용자 접근을 방해할 수 있어 가끔 비활성화될 수 있습니다.
 
 ### **선택적 인증:**
@@ -671,7 +671,7 @@ rdp-sessions-abuse.md
 ## AD -> Azure & Azure -> AD
 
 {{#ref}}
-https://cloud.hacktricks.xyz/pentesting-cloud/azure-security/az-lateral-movements/azure-ad-connect-hybrid-identity
+https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/azure-ad-connect-hybrid-identity/index.html
 {{#endref}}
 
 ## 일반적인 방어 방법
@@ -680,26 +680,26 @@ https://cloud.hacktricks.xyz/pentesting-cloud/azure-security/az-lateral-movement
 
 ### **자격 증명 보호를 위한 방어 조치**
 
-- **도메인 관리자 제한**: 도메인 관리자는 도메인 컨트롤러에만 로그인할 수 있도록 권장하며, 다른 호스트에서의 사용은 피해야 합니다.
+- **도메인 관리자 제한**: 도메인 관리자는 도메인 컨트롤러에만 로그인할 수 있도록 제한하는 것이 좋으며, 다른 호스트에서의 사용은 피해야 합니다.
 - **서비스 계정 권한**: 보안을 유지하기 위해 서비스는 도메인 관리자(DA) 권한으로 실행되어서는 안 됩니다.
 - **임시 권한 제한**: DA 권한이 필요한 작업의 경우, 그 기간을 제한해야 합니다. 이는 다음과 같이 달성할 수 있습니다: `Add-ADGroupMember -Identity ‘Domain Admins’ -Members newDA -MemberTimeToLive (New-TimeSpan -Minutes 20)`
 
 ### **기만 기술 구현**
 
-- 기만을 구현하는 것은 비밀번호가 만료되지 않거나 위임을 위해 신뢰된 것으로 표시된 것과 같은 기능을 가진 유인 사용자 또는 컴퓨터를 설정하는 것을 포함합니다. 구체적인 접근 방식은 특정 권한을 가진 사용자를 생성하거나 높은 권한 그룹에 추가하는 것을 포함합니다.
+- 기만을 구현하는 것은 비밀번호가 만료되지 않거나 위임을 위해 신뢰된 것으로 표시된 사용자 또는 컴퓨터와 같은 함정을 설정하는 것을 포함합니다. 구체적인 접근 방식은 특정 권한을 가진 사용자를 생성하거나 높은 권한 그룹에 추가하는 것입니다.
 - 실용적인 예로는 다음과 같은 도구를 사용하는 것입니다: `Create-DecoyUser -UserFirstName user -UserLastName manager-uncommon -Password Pass@123 | DeployUserDeception -UserFlag PasswordNeverExpires -GUID d07da11f-8a3d-42b6-b0aa-76c962be719a -Verbose`
 - 기만 기술 배포에 대한 더 많은 정보는 [Deploy-Deception on GitHub](https://github.com/samratashok/Deploy-Deception)에서 확인할 수 있습니다.
 
 ### **기만 식별**
 
 - **사용자 객체의 경우**: 의심스러운 지표에는 비정상적인 ObjectSID, 드문 로그인, 생성 날짜 및 낮은 잘못된 비밀번호 수가 포함됩니다.
-- **일반 지표**: 잠재적인 유인 객체의 속성을 진짜 객체의 속성과 비교하면 불일치가 드러날 수 있습니다. [HoneypotBuster](https://github.com/JavelinNetworks/HoneypotBuster)와 같은 도구는 이러한 기만을 식별하는 데 도움을 줄 수 있습니다.
+- **일반 지표**: 잠재적인 유인물 객체의 속성을 진짜 객체의 속성과 비교하면 불일치가 드러날 수 있습니다. [HoneypotBuster](https://github.com/JavelinNetworks/HoneypotBuster)와 같은 도구가 이러한 기만을 식별하는 데 도움을 줄 수 있습니다.
 
 ### **탐지 시스템 우회**
 
 - **Microsoft ATA 탐지 우회**:
 - **사용자 열거**: ATA 탐지를 방지하기 위해 도메인 컨트롤러에서 세션 열거를 피합니다.
-- **티켓 가장하기**: 티켓 생성을 위해 **aes** 키를 사용하면 NTLM으로 다운그레이드하지 않아 탐지를 피할 수 있습니다.
+- **티켓 가장하기**: 티켓 생성을 위해 **aes** 키를 사용하면 NTLM으로 다운그레이드하지 않음으로써 탐지를 피할 수 있습니다.
 - **DCSync 공격**: ATA 탐지를 피하기 위해 비도메인 컨트롤러에서 실행하는 것이 권장되며, 도메인 컨트롤러에서 직접 실행하면 경고가 발생합니다.
 
 ## 참고 문헌
