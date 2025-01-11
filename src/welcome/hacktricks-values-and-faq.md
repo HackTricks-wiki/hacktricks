@@ -58,7 +58,7 @@ If you need a bibtex you can use something like:
   author = {"HackTricks Team" or the Authors name of the specific page/trick},
   title = {Title of the Specific Page},
   year = {Year of Last Update (check it at the end of the page)},
-  url = {\url{https://book.hacktricks.xyz/specific-page}},
+  url = {\url{https://book.hacktricks.wiki/specific-page}},
 }
 ```
 
