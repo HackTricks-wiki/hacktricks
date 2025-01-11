@@ -6,10 +6,10 @@ Ultimo aggiornamento: 02/04/2023
 
 Questa Cookies Policy si applica ai seguenti siti web di proprietà e gestiti dal team di HackTricks ("HackTricks", "noi", "ci" o "nostro"):
 
-* hacktricks.xyz
-* [www.hacktricks.xyz](http://www.hacktricks.xyz/)
-* book.hacktricks.xyz
-* cloud.hacktricks.xyz
+* hacktricks.wiki
+* [www.hacktricks.wiki](https://www.hacktricks.wiki/)
+* book.hacktricks.wiki
+* cloud.hacktricks.wiki
 
 Utilizzando uno di questi siti web, accetti l'uso dei cookie in conformità con questa Cookies Policy. Se non sei d'accordo, ti preghiamo di disabilitare i cookie nelle impostazioni del tuo browser o di astenerti dall'utilizzare i nostri siti web.
 
@@ -26,7 +26,7 @@ Utilizziamo i cookie sui nostri siti web per i seguenti scopi:
 3. Cookie di funzionalità: Questi cookie consentono ai nostri siti web di ricordare le scelte che fai, come la tua lingua o regione, per fornire un'esperienza più personalizzata.
 4. Cookie di targeting/pubblicità: Questi cookie vengono utilizzati per fornire annunci pertinenti e comunicazioni di marketing basate sui tuoi interessi, sulla tua cronologia di navigazione e sulle interazioni con i nostri siti web.
 
-Inoltre, le pagine book.hacktricks.xyz e cloud.hacktricks.xyz sono ospitate su Gitbook. Puoi trovare ulteriori informazioni sui cookie di Gitbook in [https://gitbook-1652864889.teamtailor.com/cookie-policy](https://gitbook-1652864889.teamtailor.com/cookie-policy).
+Inoltre, le pagine book.hacktricks.wiki e cloud.hacktricks.wiki sono ospitate in Gitbook. Puoi trovare ulteriori informazioni sui cookie di Gitbook in [https://gitbook-1652864889.teamtailor.com/cookie-policy](https://gitbook-1652864889.teamtailor.com/cookie-policy).
 
 ### Cookie di terze parti
 
@@ -38,7 +38,7 @@ La maggior parte dei browser web consente di gestire i cookie tramite le loro im
 
 Modifiche a questa Cookies Policy
 
-Potremmo aggiornare questa Cookies Policy di tanto in tanto per riflettere cambiamenti nelle nostre pratiche o nelle leggi pertinenti. Ti incoraggiamo a rivedere periodicamente questa pagina per le ultime informazioni sulle nostre pratiche relative ai cookie.
+Potremmo aggiornare questa Cookies Policy di tanto in tanto per riflettere i cambiamenti nelle nostre pratiche o nelle leggi pertinenti. Ti incoraggiamo a rivedere periodicamente questa pagina per le ultime informazioni sulle nostre pratiche relative ai cookie.
 
 ### Contattaci
 
