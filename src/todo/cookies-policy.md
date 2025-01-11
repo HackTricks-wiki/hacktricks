@@ -1,45 +1,45 @@
-# Sera ya Kuki
+# Cookies Policy
 
-Imesasishwa mwisho: 02/04/2023
+Last updated: 02/04/2023
 
-### Utangulizi
+### Introduction
 
-Sera hii ya Kuki inatumika kwa tovuti zifuatazo zinazomilikiwa na kuendeshwa na timu ya HackTricks ("HackTricks", "sisi", "sisi" au "yetu"):
+This Cookies Policy applies to the following websites owned and operated by HackTricks team ("HackTricks", "we", "us" or "our"):
 
-* hacktricks.xyz
-* [www.hacktricks.xyz](http://www.hacktricks.xyz/)
-* book.hacktricks.xyz
-* cloud.hacktricks.xyz
+* hacktricks.wiki
+* [www.hacktricks.wiki](https://www.hacktricks.wiki/)
+* book.hacktricks.wiki
+* cloud.hacktricks.wiki
 
-Kwa kutumia tovuti hizi, unakubali matumizi ya kuki kulingana na Sera hii ya Kukis. Ikiwa hukubali, tafadhali zima kuki katika mipangilio ya kivinjari chako au epuka kutumia tovuti zetu.
+By using any of these websites, you agree to the use of cookies in accordance with this Cookies Policy. If you do not agree, please disable cookies in your browser settings or refrain from using our websites.
 
-### Kuki ni nini?
+### What are cookies?
 
-Kuki ni faili ndogo za maandiko ambazo zinawekwa kwenye kompyuta yako au kifaa chako cha rununu unap visiting tovuti. Zinatumika sana kufanya tovuti zifanye kazi, kuboresha utendaji wao, na kutoa uzoefu wa mtumiaji ulio maalum zaidi.
+Cookies ni faili ndogo za maandiko ambazo zinahifadhiwa kwenye kompyuta yako au kifaa chako cha mkononi unap odwasha tovuti. Zinatumika sana kufanya tovuti zifanye kazi, kuboresha utendaji wao, na kutoa uzoefu wa mtumiaji wa kibinafsi zaidi.
 
-### Jinsi tunavyotumia kuki
+### How we use cookies
 
-Tunatumia kuki kwenye tovuti zetu kwa madhumuni yafuatayo:
+We use cookies on our websites for the following purposes:
 
-1. Kuki muhimu: Kuki hizi ni muhimu kwa utendaji wa msingi wa tovuti zetu, kama vile kuwezesha uthibitishaji wa mtumiaji, kudumisha usalama, na kukumbuka mapendeleo yako.
-2. Kuki za utendaji: Kuki hizi zinatusaidia kuelewa jinsi wageni wanavyoshirikiana na tovuti zetu, kwa kukusanya na kuripoti taarifa kwa njia isiyo ya wazi. Hii inatuwezesha kuboresha utendaji wa tovuti zetu na uzoefu wa mtumiaji.
-3. Kuki za utendaji: Kuki hizi zinawawezesha tovuti zetu kukumbuka chaguo unazofanya, kama vile lugha yako au eneo lako, ili kutoa uzoefu wa kibinafsi zaidi.
-4. Kuki za kulenga/kuadvertise: Kuki hizi zinatumika kutoa matangazo yanayohusiana na mawasiliano ya masoko kulingana na maslahi yako, historia ya kuvinjari, na mwingiliano wako na tovuti zetu.
+1. Essential cookies: These cookies are necessary for the basic functionality of our websites, such as enabling user authentication, maintaining security, and remembering your preferences.
+2. Performance cookies: These cookies help us understand how visitors interact with our websites, by collecting and reporting information anonymously. This allows us to improve our website performance and user experience.
+3. Functionality cookies: These cookies enable our websites to remember choices you make, such as your language or region, to provide a more personalized experience.
+4. Targeting/advertising cookies: These cookies are used to deliver relevant ads and marketing communications based on your interests, browsing history, and interactions with our websites.
 
-Zaidi ya hayo, kurasa book.hacktricks.xyz na cloud.hacktricks.xyz zinawekwa kwenye Gitbook. Unaweza kupata maelezo zaidi kuhusu kuki za Gitbook katika [https://gitbook-1652864889.teamtailor.com/cookie-policy](https://gitbook-1652864889.teamtailor.com/cookie-policy).
+Moreover, the pages book.hacktricks.wiki and cloud.hacktricks.wiki are hosted in Gitbook. You can find more information about Gitbooks cookies in [https://gitbook-1652864889.teamtailor.com/cookie-policy](https://gitbook-1652864889.teamtailor.com/cookie-policy).
 
-### Kuki za upande wa tatu
+### Third-party cookies
 
-Mbali na kuki zetu wenyewe, tunaweza pia kutumia kuki za upande wa tatu kuripoti takwimu za matumizi ya tovuti, kutoa matangazo, na kuwezesha vitufe vya kushiriki mitandao ya kijamii. Matumizi ya kuki za upande wa tatu yanategemea sera zao za faragha.
+In addition to our own cookies, we may also use third-party cookies to report website usage statistics, deliver advertisements, and enable social media sharing buttons. The use of third-party cookies is subject to their respective privacy policies.
 
-Kusimamia kuki
+Managing cookies
 
-Kivinjari nyingi za wavuti zinakuruhusu kusimamia kuki kupitia mipangilio yao. Unaweza kuchagua kuzuia, kufuta, au kupunguza matumizi ya kuki kwenye kifaa chako. Hata hivyo, tafadhali kumbuka kwamba kuzima kuki kunaweza kuathiri utendaji na ufanisi wa tovuti zetu.
+Most web browsers allow you to manage cookies through their settings. You can choose to block, delete, or limit the use of cookies on your device. However, please note that disabling cookies may affect the functionality and performance of our websites.
 
-Mabadiliko kwenye Sera hii ya Kukis
+Changes to this Cookies Policy
 
-Tunaweza kusasisha Sera hii ya Kukis mara kwa mara ili kuakisi mabadiliko katika mazoea yetu au sheria zinazohusiana. Tunakuhimiza uangalie ukurasa huu mara kwa mara kwa maelezo ya hivi karibuni kuhusu mazoea yetu ya kuki.
+We may update this Cookies Policy from time to time to reflect changes in our practices or relevant laws. We encourage you to periodically review this page for the latest information on our cookie practices.
 
-### Wasiliana nasi
+### Contact us
 
-Ikiwa una maswali au wasiwasi kuhusu Sera hii ya Kukis, tafadhali wasiliana nasi kwa [support@hacktricks.xyz](mailto:support@hacktricks.xyz)
+If you have any questions or concerns about this Cookies Policy, please contact us at [support@hacktricks.xyz](mailto:support@hacktricks.xyz)

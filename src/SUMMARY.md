@@ -289,7 +289,7 @@
   - [SmbExec/ScExec](windows-hardening/lateral-movement/smbexec.md)
   - [WinRM](windows-hardening/lateral-movement/winrm.md)
   - [WmiExec](windows-hardening/lateral-movement/wmiexec.md)
-- [Pivoting to the Cloud$$external:https://cloud.hacktricks.xyz/pentesting-cloud/azure-security/az-lateral-movements$$]()
+- [Pivoting to the Cloud$$external:https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/index.html$$]()
 - [Stealing Windows Credentials](windows-hardening/stealing-credentials/README.md)
   - [Windows Credentials Protections](windows-hardening/stealing-credentials/credentials-protections.md)
   - [Mimikatz](windows-hardening/stealing-credentials/credentials-mimikatz.md)
@@ -692,9 +692,9 @@
 
 # ⛈️ Cloud Security
 
-- [Pentesting Kubernetes$$external:https://cloud.hacktricks.xyz/pentesting-cloud/kubernetes-security$$]()
-- [Pentesting Cloud (AWS, GCP, Az...)$$external:https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology$$]()
-- [Pentesting CI/CD (Github, Jenkins, Terraform...)$$external:https://cloud.hacktricks.xyz/pentesting-ci-cd/pentesting-ci-cd-methodology$$]()
+- [Pentesting Kubernetes$$external:https://cloud.hacktricks.wiki/en/pentesting-cloud/kubernetes-security/index.html$$]()
+- [Pentesting Cloud (AWS, GCP, Az...)$$external:https://cloud.hacktricks.wiki/en/pentesting-cloud/pentesting-cloud-methodology.html$$]()
+- [Pentesting CI/CD (Github, Jenkins, Terraform...)$$external:https://cloud.hacktricks.wiki/en/pentesting-ci-cd/pentesting-ci-cd-methodology.html$$]()
 
 # 😎 Hardware/Physical Access
 

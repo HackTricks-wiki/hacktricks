@@ -12,7 +12,7 @@ Mifano muhimu ndani ya **Active Directory** ni pamoja na:
 
 1. **Directory** – Inahifadhi taarifa zote zinazohusiana na vitu vya Active Directory.
 2. **Object** – Inamaanisha viumbe ndani ya directory, ikiwa ni pamoja na **watumiaji**, **makundi**, au **folda zilizoshirikiwa**.
-3. **Domain** – Inatumika kama chombo cha vitu vya directory, ikiwa na uwezo wa doma nyingi kuwepo ndani ya **msitu**, kila moja ikihifadhi mkusanyiko wake wa vitu.
+3. **Domain** – Inatumika kama chombo cha vitu vya directory, ikiwa na uwezo wa doma nyingi kuishi pamoja ndani ya **msitu**, kila moja ikihifadhi mkusanyiko wake wa vitu.
 4. **Tree** – Kundi la doma zinazoshiriki domain ya mzizi wa kawaida.
 5. **Forest** – Kilele cha muundo wa shirika katika Active Directory, kinachojumuisha miti kadhaa zikiwa na **uaminifu** kati yao.
 
@@ -55,7 +55,7 @@ Ikiwa una ufikiaji tu wa mazingira ya AD lakini huna akidi/nikundi zozote unawez
 ../../network-services-pentesting/pentesting-smb/
 {{#endref}}
 
-- **Orodhesha Ldap**
+- **Kuorodhesha Ldap**
 - `nmap -n -sV --script "ldap* and not brute" -p 389 <DC IP>`
 - Mwongozo wa kina juu ya jinsi ya kuorodhesha LDAP unaweza kupatikana hapa (lipa **kipaumbele maalum kwa ufikiaji wa siri**):
 
@@ -67,8 +67,8 @@ Ikiwa una ufikiaji tu wa mazingira ya AD lakini huna akidi/nikundi zozote unawez
 - Kusanya akidi [**ukijifanya huduma kwa Responder**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md)
 - Fikia mwenyeji kwa [**kudhulumu shambulio la relay**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)
 - Kusanya akidi **ukifichua** [**huduma za UPnP za uongo na evil-S**](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md)[**SDP**](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
-- [**OSINT**](https://book.hacktricks.xyz/external-recon-methodology):
-- Toa majina ya watumiaji/majina kutoka kwa nyaraka za ndani, mitandao ya kijamii, huduma (hasa wavuti) ndani ya mazingira ya domain na pia kutoka kwa yaliyopo hadharani.
+- [**OSINT**](https://book.hacktricks.wiki/en/generic-methodologies-and-resources/external-recon-methodology/index.html):
+- Toa majina ya watumiaji kutoka kwa nyaraka za ndani, mitandao ya kijamii, huduma (hasa wavuti) ndani ya mazingira ya domain na pia kutoka kwa yaliyopo hadharani.
 - Ikiwa unapata majina kamili ya wafanyakazi wa kampuni, unaweza kujaribu mifumo tofauti ya **majina ya watumiaji AD** (**[soma hii](https://activedirectorypro.com/active-directory-user-naming-convention/)**). Mifumo ya kawaida ni: _NameSurname_, _Name.Surname_, _NamSur_ (herufi 3 za kila moja), _Nam.Sur_, _NSurname_, _N.Surname_, _SurnameName_, _Surname.Name_, _SurnameN_, _Surname.N_, herufi 3 _za nasibu na nambari 3 za nasibu_ (abc123).
 - Zana:
 - [w0Tx/generate-ad-username](https://github.com/w0Tx/generate-ad-username)
@@ -111,8 +111,8 @@ Get-GlobalAddressList -ExchHostname [ip] -UserName [domain]\[username] -Password
 
 Sawa, kwa hivyo unajua tayari una jina halali la mtumiaji lakini hakuna nywila... Kisha jaribu:
 
-- [**ASREPRoast**](asreproast.md): Ikiwa mtumiaji **hana** sifa _DONT_REQ_PREAUTH_ unaweza **kuomba ujumbe wa AS_REP** kwa mtumiaji huyo ambao utakuwa na data fulani iliyosimbwa kwa mchakato wa nywila ya mtumiaji.
-- [**Password Spraying**](password-spraying.md): Jaribu nywila **za kawaida zaidi** na kila mmoja wa watumiaji waliogunduliwa, labda mtumiaji fulani anatumia nywila mbaya (kumbuka sera ya nywila!).
+- [**ASREPRoast**](asreproast.md): Ikiwa mtumiaji **hana** sifa _DONT_REQ_PREAUTH_ unaweza **kuomba ujumbe wa AS_REP** kwa mtumiaji huyo ambao utakuwa na data fulani iliyosimbwa kwa kutumia mchanganyiko wa nywila ya mtumiaji.
+- [**Password Spraying**](password-spraying.md): Jaribu nywila za **kawaida zaidi** na kila mmoja wa watumiaji waliogunduliwa, labda mtumiaji fulani anatumia nywila mbaya (kumbuka sera ya nywila!).
 - Kumbuka kwamba unaweza pia **spray OWA servers** kujaribu kupata ufikiaji wa seva za barua za watumiaji.
 
 {{#ref}}
@@ -121,7 +121,7 @@ password-spraying.md
 
 ### LLMNR/NBT-NS Poisoning
 
-Unaweza kuwa na uwezo wa **kupata** baadhi ya changamoto **hashes** ili kuvunja **kuchafua** baadhi ya protokali za **mtandao**:
+Unaweza kuwa na uwezo wa **kupata** baadhi ya changamoto **hashes** ili kufungua **kuharibu** baadhi ya protokali za **mtandao**:
 
 {{#ref}}
 ../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md
@@ -133,15 +133,15 @@ Ikiwa umeweza kuorodhesha active directory utakuwa na **barua pepe zaidi na ufah
 
 ### Kuiba NTLM Creds
 
-Ikiwa unaweza **kufikia kompyuta nyingine au sehemu** na **mtumiaji wa null au mgeni** unaweza **kweka faili** (kama faili ya SCF) ambayo ikiwa kwa namna fulani itafikiwa itasababisha **uthibitishaji wa NTML dhidi yako** ili uweze **kuiba** **NTLM challenge** ili kuibua:
+Ikiwa unaweza **kufikia kompyuta nyingine au sehemu** na **mtumiaji wa null au mgeni** unaweza **kweka faili** (kama faili ya SCF) ambayo ikiwa kwa namna fulani itafikiwa itasababisha **uthibitishaji wa NTML dhidi yako** ili uweze **kuiba** **NTLM challenge** ili kuifungua:
 
 {{#ref}}
 ../ntlm/places-to-steal-ntlm-creds.md
 {{#endref}}
 
-## Kuorodhesha Active Directory KWA nywila/sessio
+## Kuorodhesha Active Directory KWA nywila/sessheni
 
-Kwa hatua hii unahitaji kuwa **umevunjika nywila au sessio ya akaunti halali ya kikoa.** Ikiwa una nywila halali au shell kama mtumiaji wa kikoa, **unapaswa kukumbuka kwamba chaguzi zilizotolewa hapo awali bado ni chaguzi za kuvunja watumiaji wengine**.
+Kwa hatua hii unahitaji kuwa **umevunjika kwa nywila au sessheni ya akaunti halali ya kikoa.** Ikiwa una nywila halali au shell kama mtumiaji wa kikoa, **unapaswa kukumbuka kwamba chaguzi zilizotolewa hapo awali bado ni chaguzi za kuvunja watumiaji wengine**.
 
 Kabla ya kuanza kuorodhesha kwa uthibitisho unapaswa kujua ni nini **shida ya Kerberos double hop.**
 
@@ -171,11 +171,11 @@ Kuhusu [**ASREPRoast**](asreproast.md) sasa unaweza kupata kila mtumiaji anayewe
 
 Ni rahisi sana kupata majina yote ya watumiaji wa kikoa kutoka Windows (`net user /domain` ,`Get-DomainUser` au `wmic useraccount get name,sid`). Katika Linux, unaweza kutumia: `GetADUsers.py -all -dc-ip 10.10.10.110 domain.com/username` au `enum4linux -a -u "user" -p "password" <DC IP>`
 
-> Hata kama sehemu hii ya Kuorodhesha inaonekana ndogo hii ndiyo sehemu muhimu zaidi ya yote. Fikia viungo (hasa ile ya cmd, powershell, powerview na BloodHound), jifunze jinsi ya kuorodhesha kikoa na fanya mazoezi hadi ujisikie vizuri. Wakati wa tathmini, hii itakuwa wakati muhimu wa kupata njia yako hadi DA au kuamua kwamba hakuna kinachoweza kufanywa.
+> Hata kama sehemu hii ya Kuorodhesha inaonekana ndogo hii ndiyo sehemu muhimu zaidi ya yote. Fikia viungo (hasa ile ya cmd, powershell, powerview na BloodHound), jifunze jinsi ya kuorodhesha kikoa na fanya mazoezi hadi ujisikie vizuri. Wakati wa tathmini, hii itakuwa wakati muhimu wa kupata njia yako kwenda DA au kuamua kwamba hakuna kinachoweza kufanywa.
 
 ### Kerberoast
 
-Kerberoasting inahusisha kupata **TGS tickets** zinazotumiwa na huduma zinazohusiana na akaunti za watumiaji na kuvunja usimbaji wao—ambao unategemea nywila za watumiaji—**nje ya mtandao**.
+Kerberoasting inahusisha kupata **TGS tickets** zinazotumiwa na huduma zinazohusiana na akaunti za watumiaji na kufungua usimbaji wao—ambao unategemea nywila za watumiaji—**nje ya mtandao**.
 
 Zaidi kuhusu hii katika:
 
@@ -185,17 +185,17 @@ kerberoast.md
 
 ### Muunganisho wa mbali (RDP, SSH, FTP, Win-RM, nk)
 
-Mara tu unapokuwa umepata baadhi ya nywila unaweza kuangalia ikiwa una ufikiaji wa **mashine** yoyote. Kwa jambo hilo, unaweza kutumia **CrackMapExec** kujaribu kuungana kwenye seva kadhaa kwa protokali tofauti, kulingana na skana zako za port.
+Mara tu unapokuwa umepata baadhi ya nywila unaweza kuangalia ikiwa una ufikiaji wa **mashine** yoyote. Kwa jambo hilo, unaweza kutumia **CrackMapExec** kujaribu kuungana kwenye seva kadhaa kwa kutumia protokali tofauti, kulingana na skana zako za port.
 
 ### Kuinua Privilege za Mitaa
 
-Ikiwa umevunjika nywila au sessio kama mtumiaji wa kawaida wa kikoa na una **ufikiaji** na mtumiaji huyu kwa **mashine yoyote katika kikoa** unapaswa kujaribu kupata njia yako ya **kuinua mamlaka kwa ndani na kutafuta nywila**. Hii ni kwa sababu ni tu kwa mamlaka ya msimamizi wa ndani utaweza **dump hashes za watumiaji wengine** katika kumbukumbu (LSASS) na kwa ndani (SAM).
+Ikiwa umevunjika kwa nywila au sessheni kama mtumiaji wa kawaida wa kikoa na una **ufikiaji** na mtumiaji huyu kwa **mashine yoyote katika kikoa** unapaswa kujaribu kupata njia yako ya **kuinua mamlaka kwa ndani na kutafuta nywila**. Hii ni kwa sababu ni tu kwa mamlaka ya msimamizi wa ndani utaweza **dump hashes za watumiaji wengine** katika kumbukumbu (LSASS) na kwa ndani (SAM).
 
 Kuna ukurasa kamili katika kitabu hiki kuhusu [**kuinua mamlaka ya ndani katika Windows**](../windows-local-privilege-escalation/index.html) na [**orodha ya ukaguzi**](../checklist-windows-privilege-escalation.md). Pia, usisahau kutumia [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite).
 
-### Tiketi za Sessio za Sasa
+### Tiketi za Sessheni za Sasa
 
-Ni **ngumu sana** kwamba utapata **tiketi** katika mtumiaji wa sasa **zinazokupa ruhusa ya kufikia** rasilimali zisizotarajiwa, lakini unaweza kuangalia:
+Ni **ngumu sana** kwamba utapata **tiketi** katika mtumiaji wa sasa **ukikupa ruhusa ya kufikia** rasilimali zisizotarajiwa, lakini unaweza kuangalia:
 ```bash
 ## List all tickets (if not admin, only current user tickets)
 .\Rubeus.exe triage
@@ -235,7 +235,7 @@ printnightmare.md
 
 ### Hash extraction
 
-Tuna matumaini umeweza **kudhoofisha akaunti ya msimamizi wa ndani** kwa kutumia [AsRepRoast](asreproast.md), [Password Spraying](password-spraying.md), [Kerberoast](kerberoast.md), [Responder](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md) ikiwa ni pamoja na relaying, [EvilSSDP](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md), [kuinua haki za ndani](../windows-local-privilege-escalation/index.html).\
+Tuna matumaini umeweza **kudhoofisha akaunti ya admin wa ndani** kwa kutumia [AsRepRoast](asreproast.md), [Password Spraying](password-spraying.md), [Kerberoast](kerberoast.md), [Responder](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md) ikiwa ni pamoja na relaying, [EvilSSDP](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md), [kuinua haki kwa ndani](../windows-local-privilege-escalation/index.html).\
 Kisha, ni wakati wa kutupa hash zote kwenye kumbukumbu na ndani.\
 [**Soma ukurasa huu kuhusu njia tofauti za kupata hash.**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/active-directory-methodology/broken-reference/README.md)
 
@@ -247,7 +247,7 @@ Unahitaji kutumia **chombo** ambacho kitafanya **uthibitisho wa NTLM kwa kutumia
 
 ### Over Pass the Hash/Pass the Key
 
-Shambulizi hili linakusudia **kutumia hash ya mtumiaji wa NTLM kuomba tiketi za Kerberos**, kama mbadala wa kawaida ya Pass The Hash juu ya itifaki ya NTLM. Hivyo, hii inaweza kuwa hasa **faida katika mitandao ambapo itifaki ya NTLM imezimwa** na tu **Kerberos inaruhusiwa** kama itifaki ya uthibitisho.
+Shambulizi hili linakusudia **kutumia hash ya mtumiaji wa NTLM kuomba tiketi za Kerberos**, kama mbadala wa kawaida ya Pass The Hash kupitia itifaki ya NTLM. Hivyo, hii inaweza kuwa hasa **faida katika mitandao ambapo itifaki ya NTLM imezimwa** na tu **Kerberos inaruhusiwa** kama itifaki ya uthibitisho.
 
 {{#ref}}
 over-pass-the-hash-pass-the-key.md
@@ -263,7 +263,7 @@ pass-the-ticket.md
 
 ### Credentials Reuse
 
-Ikiwa una **hash** au **nenosiri** la **msimamizi wa ndani** unapaswa kujaribu **kuingia kwa ndani** kwenye **PC nyingine** kwa kutumia hiyo.
+Ikiwa una **hash** au **nenosiri** la **meneja wa ndani** unapaswa kujaribu **kuingia kwa ndani** kwenye **PC nyingine** kwa kutumia hiyo.
 ```bash
 # Local Auth Spray (once you found some local admin pass or hash)
 ## --local-auth flag indicate to only try 1 time per machine
@@ -275,8 +275,8 @@ crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9c
 ### MSSQL Abuse & Trusted Links
 
 Ikiwa mtumiaji ana mamlaka ya **kufikia mifano ya MSSQL**, anaweza kuwa na uwezo wa kuitumia **kutekeleza amri** kwenye mwenyeji wa MSSQL (ikiwa inafanya kazi kama SA), **kuiba** NetNTLM **hash** au hata kufanya **shambulio la relay**.\
-Pia, ikiwa mfano wa MSSQL unakubaliwa (kiungo cha database) na mfano mwingine wa MSSQL. Ikiwa mtumiaji ana mamlaka juu ya database iliyoaminika, atakuwa na uwezo wa **kutumia uhusiano wa kuaminiana kutekeleza maswali pia kwenye mfano mwingine**. Uaminifu huu unaweza kuunganishwa na wakati fulani mtumiaji anaweza kupata database iliyo na mipangilio isiyo sahihi ambapo anaweza kutekeleza amri.\
-**Viungo kati ya databases vinafanya kazi hata katika uaminifu wa msitu.**
+Pia, ikiwa mfano wa MSSQL unakubaliwa (kiungo cha database) na mfano mwingine wa MSSQL. Ikiwa mtumiaji ana mamlaka juu ya database iliyoaminika, atakuwa na uwezo wa **kutumia uhusiano wa kuaminiana kutekeleza maswali pia kwenye mfano mwingine**. Uhusiano huu unaweza kuunganishwa na wakati fulani mtumiaji anaweza kupata database iliyo na mipangilio isiyo sahihi ambapo anaweza kutekeleza amri.\
+**Viungo kati ya databases vinafanya kazi hata katika uhusiano wa msitu.**
 
 {{#ref}}
 abusing-ad-mssql.md
@@ -285,8 +285,8 @@ abusing-ad-mssql.md
 ### Unconstrained Delegation
 
 Ikiwa unapata kitu chochote cha Kompyuta chenye sifa [ADS_UF_TRUSTED_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) na una mamlaka ya kikoa kwenye kompyuta, utaweza kutoa TGTs kutoka kwenye kumbukumbu ya kila mtumiaji anayeingia kwenye kompyuta.\
-Hivyo, ikiwa **Msimamizi wa Kikoa anaingia kwenye kompyuta**, utaweza kutoa TGT yake na kumwakilisha akitumia [Pass the Ticket](pass-the-ticket.md).\
-Shukrani kwa uwakilishi wa kizuizi unaweza hata **kuathiri kiotomatiki Server ya Print** (tunatumai itakuwa DC).
+Hivyo, ikiwa **Msimamizi wa Kikoa anaingia kwenye kompyuta**, utaweza kutoa TGT yake na kumwakilisha kwa kutumia [Pass the Ticket](pass-the-ticket.md).\
+Shukrani kwa uwakilishi wa kizuizi unaweza hata **kuharibu Print Server** kiotomatiki (tunatumai itakuwa DC).
 
 {{#ref}}
 unconstrained-delegation.md
@@ -295,7 +295,7 @@ unconstrained-delegation.md
 ### Constrained Delegation
 
 Ikiwa mtumiaji au kompyuta inaruhusiwa kwa "Constrained Delegation" itakuwa na uwezo wa **kumwakilisha mtumiaji yeyote ili kufikia huduma fulani kwenye kompyuta**.\
-Kisha, ikiwa **utavunja hash** ya mtumiaji/hii kompyuta utaweza **kumwakilisha mtumiaji yeyote** (hata wasimamizi wa kikoa) ili kufikia huduma fulani.
+Kisha, ikiwa **utaharibu hash** ya mtumiaji/hii kompyuta utaweza **kumwakilisha mtumiaji yeyote** (hata wasimamizi wa kikoa) ili kufikia huduma fulani.
 
 {{#ref}}
 constrained-delegation.md
@@ -311,7 +311,7 @@ resource-based-constrained-delegation.md
 
 ### ACLs Abuse
 
-Mtumiaji aliyeathiriwa anaweza kuwa na **mamlaka za kuvutia juu ya baadhi ya vitu vya kikoa** ambavyo vinaweza kukuruhusu **kuhamasisha** kwa upande/**kuinua** mamlaka.
+Mtumiaji aliyeathirika anaweza kuwa na **mamlaka za kuvutia juu ya baadhi ya vitu vya kikoa** ambavyo vinaweza kukuruhusu **kuhamasisha** kwa upande/**kuinua** mamlaka.
 
 {{#ref}}
 acl-persistence-abuse/
@@ -327,7 +327,7 @@ printers-spooler-service-abuse.md
 
 ### Third party sessions abuse
 
-Ikiwa **watumiaji wengine** **wanapata** mashine **iliyoathiriwa**, inawezekana **kukusanya akidi kutoka kwenye kumbukumbu** na hata **kuingiza beacon katika michakato yao** ili kuwawakilisha.\
+Ikiwa **watumiaji wengine** **wanapata** mashine **iliyoathirika**, inawezekana **kukusanya akidi kutoka kwenye kumbukumbu** na hata **kuingiza beacon katika michakato yao** ili kuwawakilisha.\
 Kawaida watumiaji wataingia kwenye mfumo kupitia RDP, hivyo hapa kuna jinsi ya kufanya mashambulizi kadhaa juu ya vikao vya RDP vya wahusika wengine:
 
 {{#ref}}
@@ -344,7 +344,7 @@ laps.md
 
 ### Certificate Theft
 
-**Kukusanya vyeti** kutoka kwenye mashine iliyoathiriwa inaweza kuwa njia ya kuinua mamlaka ndani ya mazingira:
+**Kukusanya vyeti** kutoka kwenye mashine iliyoathirika inaweza kuwa njia ya kuinua mamlaka ndani ya mazingira:
 
 {{#ref}}
 ad-certificates/certificate-theft.md
@@ -352,7 +352,7 @@ ad-certificates/certificate-theft.md
 
 ### Certificate Templates Abuse
 
-Ikiwa **mipango ya hatari** imewekwa inawezekana kuitumia vibaya ili kuinua mamlaka:
+Ikiwa **mipangilio ya template** iliyo hatarini imewekwa, inawezekana kuitumia vibaya ili kuinua mamlaka:
 
 {{#ref}}
 ad-certificates/domain-escalation.md
@@ -427,7 +427,7 @@ ad-certificates/account-persistence.md
 
 ### **Certificates Domain Persistence**
 
-**Kutumia vyeti pia kunawezekana kudumu na mamlaka ya juu ndani ya kikoa:**
+**Kutumia vyeti pia kunawezekana kudumu kwa mamlaka ya juu ndani ya kikoa:**
 
 {{#ref}}
 ad-certificates/domain-persistence.md
@@ -435,13 +435,13 @@ ad-certificates/domain-persistence.md
 
 ### AdminSDHolder Group
 
-Kitu cha **AdminSDHolder** katika Active Directory kinahakikisha usalama wa **makundi yenye mamlaka** (kama Wasimamizi wa Kikoa na Wasimamizi wa Biashara) kwa kutumia **Orodha ya Udhibiti wa Ufikiaji (ACL)** ya kawaida kati ya makundi haya ili kuzuia mabadiliko yasiyoidhinishwa. Hata hivyo, kipengele hiki kinaweza kutumika vibaya; ikiwa mshambuliaji atabadilisha ACL ya AdminSDHolder ili kutoa ufikiaji kamili kwa mtumiaji wa kawaida, mtumiaji huyo anapata udhibiti mkubwa juu ya makundi yote yenye mamlaka. Kipimo hiki cha usalama, kilichokusudiwa kulinda, kinaweza hivyo kurudi nyuma, kuruhusu ufikiaji usiofaa isipokuwa ufuatiliwe kwa karibu.
+Kitu cha **AdminSDHolder** katika Active Directory kinahakikisha usalama wa **makundi yenye mamlaka** (kama Wasimamizi wa Kikoa na Wasimamizi wa Biashara) kwa kutumia **Orodha ya Udhibiti wa Ufikiaji (ACL)** ya kawaida kati ya makundi haya ili kuzuia mabadiliko yasiyoidhinishwa. Hata hivyo, kipengele hiki kinaweza kutumika vibaya; ikiwa mshambuliaji atabadilisha ACL ya AdminSDHolder ili kutoa ufikiaji kamili kwa mtumiaji wa kawaida, mtumiaji huyo atapata udhibiti mkubwa juu ya makundi yote yenye mamlaka. Kipimo hiki cha usalama, kilichokusudiwa kulinda, kinaweza hivyo kurudi nyuma, kuruhusu ufikiaji usiofaa isipokuwa kifuatachokifuatiliwe kwa karibu.
 
 [**Taarifa zaidi kuhusu Kundi la AdminDSHolder hapa.**](privileged-groups-and-token-privileges.md#adminsdholder-group)
 
 ### DSRM Credentials
 
-Ndani ya kila **Msimamizi wa Kikoa (DC)**, kuna akaunti ya **msimamizi wa ndani**. Kwa kupata haki za usimamizi kwenye mashine kama hiyo, hash ya Msimamizi wa ndani inaweza kutolewa kwa kutumia **mimikatz**. Baada ya hapo, mabadiliko ya rejista yanahitajika ili **kuwezesha matumizi ya nenosiri hili**, kuruhusu ufikiaji wa mbali kwa akaunti ya Msimamizi wa ndani.
+Ndani ya kila **Msimamizi wa Kikoa (DC)**, akaunti ya **msimamizi wa ndani** inapatikana. Kwa kupata haki za admin kwenye mashine kama hiyo, hash ya Msimamizi wa ndani inaweza kutolewa kwa kutumia **mimikatz**. Baada ya hapo, mabadiliko ya rejista yanahitajika ili **kuwezesha matumizi ya nenosiri hili**, kuruhusu ufikiaji wa mbali kwa akaunti ya Msimamizi wa ndani.
 
 {{#ref}}
 dsrm-credentials.md
@@ -457,7 +457,7 @@ acl-persistence-abuse/
 
 ### Security Descriptors
 
-**Maelezo ya usalama** yanatumika kuhifadhi **mamlaka** ambayo **kitu** kina **juu ya** **kitu**. Ikiwa unaweza tu **kufanya** **mabadiliko madogo** katika **maelezo ya usalama** ya kitu, unaweza kupata mamlaka ya kuvutia juu ya kitu hicho bila kuhitaji kuwa mwanachama wa kundi lenye mamlaka.
+**Maelezo ya usalama** yanatumika kuhifadhi **mamlaka** ambayo **kitu** kina **juu ya** **kitu**. Ikiwa unaweza tu **kufanya** **mabadiliko madogo** katika **maelezo ya usalama** ya kitu, unaweza kupata mamlaka ya kuvutia juu ya hicho kitu bila kuhitaji kuwa mwanachama wa kundi lenye mamlaka.
 
 {{#ref}}
 security-descriptors.md
@@ -491,7 +491,7 @@ dcshadow.md
 
 ### LAPS Persistence
 
-Kabla tulizungumzia jinsi ya kuinua mamlaka ikiwa una **ruhusa ya kutosha kusoma maneno ya siri ya LAPS**. Hata hivyo, maneno haya ya siri yanaweza pia kutumika **kuhifadhi kudumu**.\
+Kabla tumekuwa tukizungumza kuhusu jinsi ya kuinua mamlaka ikiwa una **ruhusa ya kutosha kusoma maneno ya siri ya LAPS**. Hata hivyo, maneno haya ya siri yanaweza pia kutumika ili **kuhifadhi kudumu**.\
 Angalia:
 
 {{#ref}}
@@ -500,54 +500,54 @@ laps.md
 
 ## Forest Privilege Escalation - Domain Trusts
 
-Microsoft inaona **Msitu** kama mpaka wa usalama. Hii inamaanisha kwamba **kuathiri kikoa kimoja kunaweza kusababisha msitu mzima kuathiriwa**.
+Microsoft inaona **Msitu** kama mpaka wa usalama. Hii inamaanisha kwamba **kuharibu kikoa kimoja kunaweza kusababisha msitu mzima kuathirika**.
 
 ### Basic Information
 
-[**Uaminifu wa kikoa**](<http://technet.microsoft.com/en-us/library/cc759554(v=ws.10).aspx>) ni mekanizma ya usalama inayowezesha mtumiaji kutoka kwenye **kikoa** moja kufikia rasilimali katika **kikoa** kingine. Kimsingi inaunda uhusiano kati ya mifumo ya uthibitishaji ya vikundi viwili, ikiruhusu uthibitishaji kuhamasika bila shida. Wakati vikundi vinapoweka uaminifu, wanabadilishana na kuhifadhi funguo maalum ndani ya **Msimamizi wao wa Kikoa (DCs)**, ambazo ni muhimu kwa uaminifu wa uhusiano.
+[**Uhusiano wa kikoa**](<http://technet.microsoft.com/en-us/library/cc759554(v=ws.10).aspx>) ni mekanizma ya usalama inayowezesha mtumiaji kutoka kikoa kimoja kufikia rasilimali katika kikoa kingine. Kimsingi inaunda uhusiano kati ya mifumo ya uthibitishaji ya kikoa viwili, ikiruhusu uthibitishaji kuhamasika bila matatizo. Wakati makundi yanaanzisha uhusiano wa kuaminiana, wanabadilishana na kuhifadhi funguo maalum ndani ya **Msimamizi wao wa Kikoa (DCs)**, ambazo ni muhimu kwa uaminifu wa uhusiano huo.
 
-Katika hali ya kawaida, ikiwa mtumiaji anataka kufikia huduma katika **kikoa kilichoaminika**, lazima kwanza aombe tiketi maalum inayojulikana kama **inter-realm TGT** kutoka kwa DC ya kikoa chake mwenyewe. Hii TGT imefungwa kwa **funguo** iliyoshirikiwa ambayo vikundi vyote viwili vimekubaliana. Mtumiaji kisha anawasilisha TGT hii kwa **DC ya kikoa kilichoaminika** ili kupata tiketi ya huduma (**TGS**). Baada ya uthibitishaji wa mafanikio wa inter-realm TGT na DC ya kikoa kilichoaminika, inatoa TGS, ikimpa mtumiaji ufikiaji wa huduma.
+Katika hali ya kawaida, ikiwa mtumiaji anataka kufikia huduma katika **kikoa kilichoaminika**, lazima kwanza aombe tiketi maalum inayojulikana kama **inter-realm TGT** kutoka kwa DC ya kikoa chake mwenyewe. TGT hii imefungwa kwa **funguo** iliyoshirikiwa ambayo makundi yote mawili yamekubaliana. Mtumiaji kisha anawasilisha TGT hii kwa **DC ya kikoa kilichoaminika** ili kupata tiketi ya huduma (**TGS**). Baada ya uthibitishaji wa mafanikio wa inter-realm TGT na DC ya kikoa kilichoaminika, inatoa TGS, ikimpa mtumiaji ufikiaji wa huduma.
 
 **Hatua**:
 
 1. **Kompyuta ya mteja** katika **Kikoa 1** inaanza mchakato kwa kutumia **hash ya NTLM** kuomba **Tiketi ya Kutoa Tiketi (TGT)** kutoka kwa **Msimamizi wake wa Kikoa (DC1)**.
-2. DC1 inatoa TGT mpya ikiwa mteja amethibitishwa kwa mafanikio.
+2. DC1 inatoa TGT mpya ikiwa mteja ameidhinishwa kwa mafanikio.
 3. Mteja kisha anaomba **inter-realm TGT** kutoka DC1, ambayo inahitajika kufikia rasilimali katika **Kikoa 2**.
-4. Inter-realm TGT imefungwa kwa **funguo ya uaminifu** iliyoshirikiwa kati ya DC1 na DC2 kama sehemu ya uaminifu wa kikoa wa pande mbili.
+4. Inter-realm TGT imefungwa kwa **funguo ya kuaminiana** iliyoshirikiwa kati ya DC1 na DC2 kama sehemu ya uhusiano wa kuaminiana wa pande mbili.
 5. Mteja anachukua inter-realm TGT kwa **Msimamizi wa Kikoa 2 (DC2)**.
-6. DC2 inathibitisha inter-realm TGT kwa kutumia funguo yake ya uaminifu iliyoshirikiwa na, ikiwa ni halali, inatoa **Huduma ya Kutoa Tiketi (TGS)** kwa seva katika Kikoa 2 ambayo mteja anataka kufikia.
+6. DC2 inathibitisha inter-realm TGT kwa kutumia funguo yake ya kuaminiana iliyoshirikiwa na, ikiwa ni halali, inatoa **Huduma ya Kutoa Tiketi (TGS)** kwa seva katika Kikoa 2 ambayo mteja anataka kufikia.
 7. Hatimaye, mteja anawasilisha TGS hii kwa seva, ambayo imefungwa kwa hash ya akaunti ya seva, ili kupata ufikiaji wa huduma katika Kikoa 2.
 
 ### Different trusts
 
-Ni muhimu kutambua kwamba **uaminifu unaweza kuwa wa njia 1 au njia 2**. Katika chaguo la njia 2, vikundi vyote viwili vitakuwa na uaminifu kwa kila mmoja, lakini katika uhusiano wa **njia 1** moja ya vikundi itakuwa **imeaminika** na nyingine itakuwa **inayoaminika**. Katika kesi ya mwisho, **utaweza tu kufikia rasilimali ndani ya kikoa kinachoaminika kutoka kwa kikoa kilichoaminika**.
+Ni muhimu kutambua kwamba **uaminifu unaweza kuwa wa njia 1 au njia 2**. Katika chaguo za njia 2, makundi yote mawili yatakuwa na uaminifu kwa kila mmoja, lakini katika uhusiano wa **njia 1** moja ya makundi itakuwa **ya kuaminika** na nyingine itakuwa **ya kuamini**. Katika kesi ya mwisho, **utaweza tu kufikia rasilimali ndani ya kikoa kinachouamini kutoka kwa kile kilichoaminika**.
 
-Ikiwa Kikoa A kinatumia Kikoa B, A ni kikoa kinachoaminika na B ni kikoa kilichoaminika. Aidha, katika **Kikoa A**, hii itakuwa **uaminifu wa nje**; na katika **Kikoa B**, hii itakuwa **uaminifu wa ndani**.
+Ikiwa Kikoa A kinauamini Kikoa B, A ni kikoa kinachouamini na B ni kikoa kilichoaminika. Aidha, katika **Kikoa A**, hii itakuwa **uaminifu wa nje**; na katika **Kikoa B**, hii itakuwa **uaminifu wa ndani**.
 
-**Uhusiano tofauti wa uaminifu**
+**Uhusiano tofauti wa kuamini**
 
-- **Uaminifu wa Mzazi-Mwana**: Hii ni mipangilio ya kawaida ndani ya msitu mmoja, ambapo kikoa cha mtoto kwa otomatiki kina uaminifu wa pande mbili na kikoa chake cha mzazi. Kimsingi, hii inamaanisha kwamba maombi ya uthibitishaji yanaweza kuhamasika bila shida kati ya mzazi na mtoto.
-- **Uaminifu wa Msalaba**: Inajulikana kama "uaminifu wa mkato," hizi zimeanzishwa kati ya vikundi vya watoto ili kuharakisha michakato ya rufaa. Katika misitu ngumu, rufaa za uthibitishaji kawaida zinahitaji kusafiri hadi mzizi wa msitu na kisha kushuka hadi kikoa lengwa. Kwa kuunda uhusiano wa msalaba, safari inakuwa fupi, ambayo ni faida hasa katika mazingira yaliyosambazwa kijiografia.
-- **Uaminifu wa Nje**: Hizi zimeanzishwa kati ya vikundi tofauti, visivyo na uhusiano na ni zisizo za kupitisha kwa asili. Kulingana na [nyaraka za Microsoft](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>), uaminifu wa nje ni muhimu kwa kufikia rasilimali katika kikoa kilicho nje ya msitu wa sasa ambacho hakijashikamana na uaminifu wa msitu. Usalama unaboreshwa kupitia kuchuja SID na uaminifu wa nje.
-- **Uaminifu wa Mti-Mzizi**: Uaminifu huu huanzishwa kwa otomatiki kati ya kikoa cha mzizi wa msitu na mti mpya ulioongezwa. Ingawa si kawaida kukutana, uaminifu wa mti-mzizi ni muhimu kwa kuongeza miti mipya ya kikoa kwenye msitu, ikiruhusu kudumisha jina la kipekee la kikoa na kuhakikisha kupitisha kwa pande mbili. Taarifa zaidi zinaweza kupatikana katika [mwongozo wa Microsoft](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>).
-- **Uaminifu wa Msitu**: Aina hii ya uaminifu ni uaminifu wa pande mbili wa kupitisha kati ya vikundi viwili vya mzizi wa msitu, pia ikilazimisha kuchuja SID ili kuimarisha hatua za usalama.
-- **Uaminifu wa MIT**: Uaminifu huu umeanzishwa na vikundi vya Kerberos visivyo vya Windows, [RFC4120-inavyokubalika](https://tools.ietf.org/html/rfc4120). Uaminifu wa MIT ni maalum zaidi na unalenga mazingira yanayohitaji ushirikiano na mifumo ya Kerberos nje ya mfumo wa Windows.
+- **Uhusiano wa Mzazi-Mwana**: Hii ni mipangilio ya kawaida ndani ya msitu mmoja, ambapo kikoa cha mtoto kiotomatiki kina uhusiano wa kuaminiana wa njia mbili na kikoa chake cha mzazi. Kimsingi, hii inamaanisha kwamba maombi ya uthibitishaji yanaweza kuhamasika bila matatizo kati ya mzazi na mtoto.
+- **Uhusiano wa Msalaba**: Inajulikana kama "uaminifu wa mkato," hizi zimeanzishwa kati ya makundi ya watoto ili kuharakisha michakato ya rufaa. Katika misitu ngumu, rufaa za uthibitishaji kawaida zinahitaji kusafiri hadi mzizi wa msitu na kisha kushuka hadi kikoa lengwa. Kwa kuunda viungo vya msalaba, safari inakuwa fupi, ambayo ni muhimu hasa katika mazingira yaliyosambazwa kijiografia.
+- **Uhusiano wa Nje**: Hizi zimeanzishwa kati ya makundi tofauti, yasiyo na uhusiano na ni zisizo za kupitisha kwa asili. Kulingana na [nyaraka za Microsoft](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>), uhusiano wa nje ni muhimu kwa kufikia rasilimali katika kikoa kilichoko nje ya msitu wa sasa ambacho hakijashikamana na uhusiano wa msitu. Usalama unaboreshwa kupitia kuchuja SID na uhusiano wa nje.
+- **Uhusiano wa Mti-Mzizi**: Uhusiano huu huanzishwa kiotomatiki kati ya kikoa cha mzizi wa msitu na mti mpya ulioongezwa. Ingawa si kawaida kukutana, uhusiano wa mti-mzizi ni muhimu kwa kuongeza miti mipya ya kikoa kwenye msitu, ikiruhusu kudumisha jina la kipekee la kikoa na kuhakikisha kupitisha kwa njia mbili. Taarifa zaidi zinaweza kupatikana katika [mwongozo wa Microsoft](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>).
+- **Uhusiano wa Msitu**: Aina hii ya uhusiano ni uhusiano wa kuaminiana wa njia mbili kati ya makundi mawili ya mzizi wa msitu, pia ikilazimisha kuchuja SID ili kuimarisha hatua za usalama.
+- **Uhusiano wa MIT**: Hizi zimeanzishwa na makundi yasiyo ya Windows, [RFC4120-inayokubalika](https://tools.ietf.org/html/rfc4120) Kerberos. Uhusiano wa MIT ni maalum zaidi na unalenga mazingira yanayohitaji ushirikiano na mifumo ya Kerberos nje ya mfumo wa Windows.
 
-#### Tofauti nyingine katika **uhusiano wa uaminifu**
+#### Tofauti nyingine katika **uhusiano wa kuamini**
 
-- Uhusiano wa uaminifu unaweza pia kuwa **wa kupitisha** (A inatumia B, B inatumia C, kisha A inatumia C) au **usio wa kupitisha**.
-- Uhusiano wa uaminifu unaweza kuwekwa kama **uaminifu wa pande mbili** (vyote vinajiamini) au kama **uaminifu wa njia moja** (moja tu inajiamini nyingine).
+- Uhusiano wa kuamini unaweza pia kuwa **wa kupitisha** (A inauamini B, B inauamini C, basi A inauamini C) au **usio wa kupitisha**.
+- Uhusiano wa kuamini unaweza kuanzishwa kama **uaminifu wa pande mbili** (zote zinauamini kila mmoja) au kama **uaminifu wa njia moja** (moja tu inauamini nyingine).
 
 ### Attack Path
 
-1. **Tathmini** uhusiano wa uaminifu
-2. Angalia ikiwa **kiongozi wa usalama** (mtumiaji/kundi/kompyuta) ana **ufikiaji** wa rasilimali za **kikoa kingine**, labda kwa njia ya entries za ACE au kwa kuwa katika makundi ya kikoa kingine. Angalia **uhusiano kati ya vikundi** (uaminifu ulianzishwa kwa hili labda).
+1. **Tathmini** uhusiano wa kuamini
+2. Angalia ikiwa **kiongozi wa usalama** (mtumiaji/kundi/kompyuta) ana **ufikiaji** wa rasilimali za **kikoa kingine**, labda kwa njia ya entries za ACE au kwa kuwa katika makundi ya kikoa kingine. Angalia **uhusiano kati ya makundi** (uaminifu ulianzishwa kwa hili labda).
 1. kerberoast katika kesi hii inaweza kuwa chaguo lingine.
-3. **Athiri** **akaunti** ambazo zinaweza **kuhamasisha** kati ya vikundi.
+3. **Haribu** **akaunti** ambazo zinaweza **kuhamasisha** kupitia makundi.
 
 Wavamizi wanaweza kufikia rasilimali katika kikoa kingine kupitia mitambo mitatu kuu:
 
-- **Uanachama wa Kundi la Mitaa**: Viongozi wanaweza kuongezwa kwenye makundi ya ndani kwenye mashine, kama kundi la "Wasimamizi" kwenye seva, wakitoa udhibiti mkubwa juu ya mashine hiyo.
+- **Uanachama wa Kundi la Mitaa**: Viongozi wanaweza kuongezwa kwenye makundi ya mitaa kwenye mashine, kama kundi la "Wasimamizi" kwenye seva, wakitoa udhibiti mkubwa juu ya mashine hiyo.
 - **Uanachama wa Kundi la Kikoa la Kigeni**: Viongozi pia wanaweza kuwa wanachama wa makundi ndani ya kikoa cha kigeni. Hata hivyo, ufanisi wa mbinu hii unategemea asili ya uaminifu na upeo wa kundi.
 - **Orodha za Udhibiti wa Ufikiaji (ACLs)**: Viongozi wanaweza kutajwa katika **ACL**, hasa kama viumbe katika **ACEs** ndani ya **DACL**, wakitoa ufikiaji kwa rasilimali maalum. Kwa wale wanaotaka kuingia kwa undani zaidi katika mitambo ya ACLs, DACLs, na ACEs, karatasi ya nyeupe iliyoitwa “[An ACE Up The Sleeve](https://specterops.io/assets/resources/an_ace_up_the_sleeve.pdf)” ni rasilimali muhimu.
 
@@ -582,31 +582,31 @@ sid-history-injection.md
 
 #### Exploit writeable Configuration NC
 
-Kuelewa jinsi Configuration Naming Context (NC) inavyoweza kutumika ni muhimu. Configuration NC inatumika kama hazina kuu ya data za usanidi katika msitu wa Active Directory (AD). Data hii inakopwa kwa kila Domain Controller (DC) ndani ya msitu, huku DC zinazoweza kuandikwa zikihifadhi nakala inayoweza kuandikwa ya Configuration NC. Ili kutumia hili, mtu lazima awe na **privileges za SYSTEM kwenye DC**, bora iwe DC ya mtoto.
+Kuelewa jinsi Configuration Naming Context (NC) inavyoweza kutumika ni muhimu. Configuration NC inatumika kama hazina kuu ya data za usanidi katika msitu wa Active Directory (AD). Data hii inakopwa kwa kila Domain Controller (DC) ndani ya msitu, huku DC zinazoweza kuandikwa zikihifadhi nakala inayoweza kuandikwa ya Configuration NC. Ili kutumia hili, mtu lazima awe na **haki za SYSTEM kwenye DC**, bora iwe ni DC ya mtoto.
 
 **Link GPO to root DC site**
 
-Konteina za Sites za Configuration NC zinajumuisha taarifa kuhusu tovuti za kompyuta zote zilizounganishwa na eneo ndani ya msitu wa AD. Kwa kufanya kazi na privileges za SYSTEM kwenye DC yoyote, washambuliaji wanaweza kuunganisha GPOs kwenye tovuti za root DC. Kitendo hiki kinaweza kuhatarisha eneo la mzazi kwa kubadilisha sera zinazotumika kwenye tovuti hizi.
+Konteina ya Sites ya Configuration NC inajumuisha taarifa kuhusu tovuti za kompyuta zote zilizounganishwa na eneo ndani ya msitu wa AD. Kwa kufanya kazi na haki za SYSTEM kwenye DC yoyote, washambuliaji wanaweza kuunganisha GPOs kwenye tovuti za root DC. Kitendo hiki kinaweza kuathiri eneo la mzazi kwa kubadilisha sera zinazotumika kwenye tovuti hizi.
 
 Kwa taarifa za kina, mtu anaweza kuchunguza utafiti kuhusu [Bypassing SID Filtering](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-4-bypass-sid-filtering-research).
 
 **Compromise any gMSA in the forest**
 
-Njia ya shambulio inahusisha kulenga gMSAs zenye mamlaka ndani ya eneo. Funguo ya KDS Root, muhimu kwa kuhesabu nywila za gMSAs, inahifadhiwa ndani ya Configuration NC. Kwa kuwa na privileges za SYSTEM kwenye DC yoyote, inawezekana kufikia funguo ya KDS Root na kuhesabu nywila za gMSA yoyote ndani ya msitu.
+Njia ya shambulio inahusisha kulenga gMSAs zenye mamlaka ndani ya eneo. Funguo ya KDS Root, muhimu kwa kuhesabu nywila za gMSAs, inahifadhiwa ndani ya Configuration NC. Kwa kuwa na haki za SYSTEM kwenye DC yoyote, inawezekana kufikia funguo ya KDS Root na kuhesabu nywila za gMSA yoyote ndani ya msitu.
 
 Uchambuzi wa kina unaweza kupatikana katika majadiliano kuhusu [Golden gMSA Trust Attacks](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-5-golden-gmsa-trust-attack-from-child-to-parent).
 
 **Schema change attack**
 
-Njia hii inahitaji uvumilivu, ikisubiri kuundwa kwa vitu vipya vya AD vyenye mamlaka. Kwa kuwa na privileges za SYSTEM, mshambuliaji anaweza kubadilisha Schema ya AD ili kumpa mtumiaji yeyote udhibiti kamili juu ya makundi yote. Hii inaweza kusababisha ufikiaji usioidhinishwa na udhibiti wa vitu vipya vya AD vilivyoundwa.
+Njia hii inahitaji uvumilivu, kusubiri kuundwa kwa vitu vipya vya AD vyenye mamlaka. Kwa kuwa na haki za SYSTEM, mshambuliaji anaweza kubadilisha Schema ya AD ili kumpa mtumiaji yeyote udhibiti kamili juu ya makundi yote. Hii inaweza kusababisha ufikiaji usioidhinishwa na udhibiti wa vitu vipya vya AD vilivyoundwa.
 
 Kusoma zaidi kunaweza kupatikana kwenye [Schema Change Trust Attacks](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-6-schema-change-trust-attack-from-child-to-parent).
 
 **From DA to EA with ADCS ESC5**
 
-Ukatili wa ADCS ESC5 unalenga udhibiti wa vitu vya Public Key Infrastructure (PKI) ili kuunda kigezo cha cheti kinachowezesha uthibitisho kama mtumiaji yeyote ndani ya msitu. Kwa kuwa vitu vya PKI vinapatikana katika Configuration NC, kuhatarisha DC ya mtoto inayoweza kuandikwa kunaruhusu utekelezaji wa mashambulizi ya ESC5.
+Ukatili wa ADCS ESC5 unalenga udhibiti wa vitu vya Public Key Infrastructure (PKI) ili kuunda kigezo cha cheti kinachowezesha uthibitisho kama mtumiaji yeyote ndani ya msitu. Kwa kuwa vitu vya PKI vinapatikana katika Configuration NC, kuathiri DC ya mtoto inayoweza kuandikwa kunaruhusu utekelezaji wa mashambulizi ya ESC5.
 
-Maelezo zaidi kuhusu hili yanaweza kusomwa katika [From DA to EA with ESC5](https://posts.specterops.io/from-da-to-ea-with-esc5-f9f045aa105c). Katika hali ambazo hazina ADCS, mshambuliaji ana uwezo wa kuanzisha vipengele muhimu, kama ilivyojadiliwa katika [Escalating from Child Domain Admins to Enterprise Admins](https://www.pkisolutions.com/escalating-from-child-domains-admins-to-enterprise-admins-in-5-minutes-by-abusing-ad-cs-a-follow-up/).
+Maelezo zaidi kuhusu hili yanaweza kusomwa katika [From DA to EA with ESC5](https://posts.specterops.io/from-da-to-ea-with-esc5-f9f045aa105c). Katika hali zisizo na ADCS, mshambuliaji ana uwezo wa kuanzisha vipengele muhimu, kama ilivyojadiliwa katika [Escalating from Child Domain Admins to Enterprise Admins](https://www.pkisolutions.com/escalating-from-child-domains-admins-to-enterprise-admins-in-5-minutes-by-abusing-ad-cs-a-follow-up/).
 
 ### External Forest Domain - One-Way (Inbound) or bidirectional
 ```powershell
@@ -637,7 +637,7 @@ TrustDirection  : Outbound        --> Outbound trust
 WhenCreated     : 2/19/2021 10:15:24 PM
 WhenChanged     : 2/19/2021 10:15:24 PM
 ```
-Katika hali hii **domeni yako** in **aminia** baadhi ya **mamlaka** kwa kiongozi kutoka **domeni tofauti**.
+Katika hali hii **domeni yako** in **aminika** baadhi ya **mamlaka** kwa kiongozi kutoka **domeni tofauti**.
 
 Hata hivyo, wakati **domeni inayoaminika** na domeni inayoweka imani, domeni inayowekwa imani **inaunda mtumiaji** mwenye **jina linaloweza kutabiriwa** ambalo linatumia kama **nenosiri nenosiri lililoaminika**. Hii ina maana kwamba inawezekana **kufikia mtumiaji kutoka kwenye domeni inayoweka imani ili kuingia kwenye ile inayowekwa imani** ili kuhesabu na kujaribu kupandisha mamlaka zaidi:
 
@@ -659,47 +659,47 @@ rdp-sessions-abuse.md
 ### **SID Filtering:**
 
 - Hatari ya mashambulizi yanayotumia sifa ya historia ya SID katika imani za msitu inapunguziliwa mbali na SID Filtering, ambayo imewezeshwa kwa chaguo-msingi kwenye imani zote za kati ya msitu. Hii inategemea dhana kwamba imani za ndani ya msitu ni salama, ikizingatia msitu, badala ya domeni, kama mpaka wa usalama kulingana na msimamo wa Microsoft.
-- Hata hivyo, kuna tatizo: SID filtering inaweza kuingilia programu na ufikiaji wa watumiaji, na kusababisha kuondolewa kwake mara kwa mara.
+- Hata hivyo, kuna tatizo: SID filtering inaweza kuathiri programu na ufikiaji wa watumiaji, na kusababisha kuondolewa kwake mara kwa mara.
 
 ### **Uthibitishaji wa Chaguo:**
 
-- Kwa imani za kati ya msitu, kutumia Uthibitishaji wa Chaguo kunahakikisha kwamba watumiaji kutoka kwenye msitu mbili hawathibitishwi moja kwa moja. Badala yake, ruhusa wazi zinahitajika kwa watumiaji kufikia domeni na seva ndani ya domeni au msitu unaoweka imani.
-- Ni muhimu kutambua kwamba hatua hizi hazilindi dhidi ya matumizi mabaya ya Muktadha wa Jina la Mwandiko (NC) unaoweza kuandikwa au mashambulizi kwenye akaunti ya imani.
+- Kwa imani za kati ya msitu, kutumia Uthibitishaji wa Chaguo kunahakikisha kwamba watumiaji kutoka kwenye msitu mbili hawathibitishwi kiotomatiki. Badala yake, ruhusa wazi zinahitajika kwa watumiaji kufikia domeni na seva ndani ya domeni au msitu unaoweka imani.
+- Ni muhimu kutambua kwamba hatua hizi hazilinda dhidi ya matumizi mabaya ya Muktadha wa Jina la Mwandiko (NC) unaoweza kuandikwa au mashambulizi kwenye akaunti ya imani.
 
 [**Taarifa zaidi kuhusu imani za domeni katika ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain)
 
 ## AD -> Azure & Azure -> AD
 
 {{#ref}}
-https://cloud.hacktricks.xyz/pentesting-cloud/azure-security/az-lateral-movements/azure-ad-connect-hybrid-identity
+https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/azure-ad-connect-hybrid-identity/index.html
 {{#endref}}
 
 ## Ulinzi wa Jumla
 
-[**Jifunze zaidi kuhusu jinsi ya kulinda akidi hapa.**](../stealing-credentials/credentials-protections.md)
+[**Jifunze zaidi kuhusu jinsi ya kulinda hati hapa.**](../stealing-credentials/credentials-protections.md)
 
-### **Hatua za Kijamii za Ulinzi wa Akidi**
+### **Hatua za Kijamii za Ulinzi wa Hati**
 
 - **Vikwazo vya Wasimamizi wa Domeni**: Inapendekezwa kwamba Wasimamizi wa Domeni wanapaswa kuruhusiwa kuingia tu kwenye Wasimamizi wa Domeni, kuepuka matumizi yao kwenye mwenyeji wengine.
 - **Mamlaka ya Akaunti ya Huduma**: Huduma hazipaswi kuendeshwa kwa mamlaka ya Wasimamizi wa Domeni (DA) ili kudumisha usalama.
-- **Kikomo cha Mamlaka ya Muda**: Kwa kazi zinazohitaji mamlaka ya DA, muda wao unapaswa kuwa mdogo. Hii inaweza kufikiwa kwa: `Add-ADGroupMember -Identity ‘Domain Admins’ -Members newDA -MemberTimeToLive (New-TimeSpan -Minutes 20)`
+- **Kikomo cha Mamlaka ya Muda**: Kwa kazi zinazohitaji mamlaka ya DA, muda wao unapaswa kuwa mdogo. Hii inaweza kufanywa kwa: `Add-ADGroupMember -Identity ‘Domain Admins’ -Members newDA -MemberTimeToLive (New-TimeSpan -Minutes 20)`
 
 ### **Kutekeleza Mbinu za Udanganyifu**
 
-- Kutekeleza udanganyifu kunahusisha kuweka mtego, kama vile watumiaji wa udanganyifu au kompyuta, kwa vipengele kama vile nenosiri ambazo hazitaisha au zimewekwa kama Zinazoaminika kwa Uwakilishi. Njia ya kina inajumuisha kuunda watumiaji wenye haki maalum au kuwaongeza kwenye vikundi vya mamlaka ya juu.
+- Kutekeleza udanganyifu kunahusisha kuweka mitego, kama vile watumiaji wa udanganyifu au kompyuta, zikiwa na sifa kama vile nenosiri ambazo hazitaisha au zimewekwa kama Zinazoaminika kwa Uwakilishi. Njia ya kina inajumuisha kuunda watumiaji wenye haki maalum au kuwaongeza kwenye vikundi vya mamlaka ya juu.
 - Mfano wa vitendo unahusisha kutumia zana kama: `Create-DecoyUser -UserFirstName user -UserLastName manager-uncommon -Password Pass@123 | DeployUserDeception -UserFlag PasswordNeverExpires -GUID d07da11f-8a3d-42b6-b0aa-76c962be719a -Verbose`
 - Zaidi kuhusu kutekeleza mbinu za udanganyifu yanaweza kupatikana kwenye [Deploy-Deception kwenye GitHub](https://github.com/samratashok/Deploy-Deception).
 
 ### **Kutambua Udanganyifu**
 
-- **Kwa Vitu vya Mtumiaji**: Viashiria vya kutatanisha ni pamoja na ObjectSID isiyo ya kawaida, kuingia mara chache, tarehe za uumbaji, na idadi ndogo ya nenosiri mbaya.
+- **Kwa Vitu vya Mtumiaji**: Viashiria vya kutatanisha ni pamoja na ObjectSID isiyo ya kawaida, kuingia mara chache, tarehe za uundaji, na idadi ndogo ya nywila mbaya.
 - **Viashiria vya Jumla**: Kulinganisha sifa za vitu vya udanganyifu vinavyowezekana na zile za halali kunaweza kufichua kutokuelewana. Zana kama [HoneypotBuster](https://github.com/JavelinNetworks/HoneypotBuster) zinaweza kusaidia katika kutambua udanganyifu kama huo.
 
 ### **Kupita Mfumo wa Ugunduzi**
 
 - **Kupita Ugunduzi wa Microsoft ATA**:
 - **Uhesabuji wa Watumiaji**: Kuepuka uhesabuji wa kikao kwenye Wasimamizi wa Domeni ili kuzuia ugunduzi wa ATA.
-- **Uigaji wa Tiketi**: Kutumia **aes** funguo kwa ajili ya uundaji wa tiketi husaidia kuepuka ugunduzi kwa kutokudharau hadi NTLM.
+- **Uigaji wa Tiketi**: Kutumia **aes** funguo kwa ajili ya uundaji wa tiketi husaidia kuepuka ugunduzi kwa kutokushuka hadi NTLM.
 - **Mashambulizi ya DCSync**: Kutekeleza kutoka kwa Wasimamizi wa Domeni sio pendekezo, kwani kutekeleza moja kwa moja kutoka kwa Wasimamizi wa Domeni kutasababisha arifa.
 
 ## Marejeleo
