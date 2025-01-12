@@ -15,7 +15,7 @@ Ao usar qualquer um desses sites, você concorda com o uso de cookies de acordo 
 
 ### O que são cookies?
 
-Cookies são pequenos arquivos de texto que são armazenados em seu computador ou dispositivo móvel quando você visita um site. Eles são amplamente utilizados para fazer os sites funcionarem, melhorar sua funcionalidade e proporcionar uma experiência de usuário mais personalizada.
+Cookies são pequenos arquivos de texto que são armazenados em seu computador ou dispositivo móvel quando você visita um site. Eles são amplamente utilizados para fazer os sites funcionarem, melhorar sua funcionalidade e fornecer uma experiência de usuário mais personalizada.
 
 ### Como usamos cookies
 
@@ -23,7 +23,7 @@ Usamos cookies em nossos sites para os seguintes propósitos:
 
 1. Cookies essenciais: Esses cookies são necessários para a funcionalidade básica de nossos sites, como habilitar a autenticação do usuário, manter a segurança e lembrar suas preferências.
 2. Cookies de desempenho: Esses cookies nos ajudam a entender como os visitantes interagem com nossos sites, coletando e relatando informações de forma anônima. Isso nos permite melhorar o desempenho do nosso site e a experiência do usuário.
-3. Cookies de funcionalidade: Esses cookies permitem que nossos sites lembrem escolhas que você faz, como seu idioma ou região, para proporcionar uma experiência mais personalizada.
+3. Cookies de funcionalidade: Esses cookies permitem que nossos sites lembrem escolhas que você faz, como seu idioma ou região, para fornecer uma experiência mais personalizada.
 4. Cookies de segmentação/publicidade: Esses cookies são usados para entregar anúncios relevantes e comunicações de marketing com base em seus interesses, histórico de navegação e interações com nossos sites.
 
 Além disso, as páginas book.hacktricks.wiki e cloud.hacktricks.wiki são hospedadas no Gitbook. Você pode encontrar mais informações sobre os cookies do Gitbook em [https://gitbook-1652864889.teamtailor.com/cookie-policy](https://gitbook-1652864889.teamtailor.com/cookie-policy).

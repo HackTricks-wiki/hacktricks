@@ -9,7 +9,7 @@
 >
 > - Dar acesso **GRATUITO** a recursos de **HACKING EDUCACIONAL** para **TODOS** na Internet.
 >   - Hacking é sobre aprender, e aprender deve ser o mais gratuito possível.
->   - O propósito deste livro é servir como um **recurso educacional** abrangente.
+>   - O objetivo deste livro é servir como um **recurso educacional** abrangente.
 > - **ARMAZENAR** técnicas de **hacking** incríveis que a comunidade publica, dando aos **AUTORES** **ORIGINAIS** todos os **créditos**.
 >   - **Não queremos o crédito de outras pessoas**, apenas queremos armazenar truques legais para todos.
 >   - Também escrevemos **nossas próprias pesquisas** no HackTricks.
@@ -50,7 +50,7 @@ Sim, você pode, mas **não se esqueça de mencionar o(s) link(s) específico(s)
 >
 > - **Como posso citar uma página do HackTricks?**
 
-Desde que o link **da(s)** página(s) de onde você obteve a informação apareça, é suficiente.\
+Desde que o link **da** página(s) de onde você obteve a informação apareça, é suficiente.\
 Se você precisar de um bibtex, pode usar algo como:
 ```latex
 @misc{hacktricks-bibtexing,
