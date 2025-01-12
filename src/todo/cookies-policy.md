@@ -15,22 +15,22 @@ Korzystając z którejkolwiek z tych stron, zgadzasz się na użycie plików coo
 
 ### Czym są pliki cookie?
 
-Pliki cookie to małe pliki tekstowe, które są przechowywane na Twoim komputerze lub urządzeniu mobilnym, gdy odwiedzasz stronę internetową. Są powszechnie używane do działania stron internetowych, poprawy ich funkcjonalności oraz zapewnienia bardziej spersonalizowanego doświadczenia użytkownika.
+Pliki cookie to małe pliki tekstowe, które są przechowywane na Twoim komputerze lub urządzeniu mobilnym, gdy odwiedzasz stronę internetową. Są powszechnie używane do zapewnienia działania stron internetowych, poprawy ich funkcjonalności oraz zapewnienia bardziej spersonalizowanego doświadczenia użytkownika.
 
 ### Jak używamy plików cookie
 
 Używamy plików cookie na naszych stronach w następujących celach:
 
 1. Niezbędne pliki cookie: Te pliki cookie są niezbędne do podstawowej funkcjonalności naszych stron, takich jak umożliwienie uwierzytelniania użytkowników, utrzymanie bezpieczeństwa i zapamiętywanie Twoich preferencji.
-2. Pliki cookie wydajnościowe: Te pliki cookie pomagają nam zrozumieć, jak odwiedzający wchodzą w interakcje z naszymi stronami, zbierając i raportując informacje anonimowo. Pozwala to na poprawę wydajności naszej strony i doświadczenia użytkownika.
-3. Pliki cookie funkcjonalne: Te pliki cookie umożliwiają naszym stronom zapamiętywanie wyborów, które dokonujesz, takich jak Twój język lub region, aby zapewnić bardziej spersonalizowane doświadczenie.
+2. Pliki cookie wydajności: Te pliki cookie pomagają nam zrozumieć, jak odwiedzający wchodzą w interakcje z naszymi stronami, zbierając i raportując informacje anonimowo. Pozwala to na poprawę wydajności naszej strony i doświadczenia użytkownika.
+3. Pliki cookie funkcjonalności: Te pliki cookie umożliwiają naszym stronom zapamiętywanie wyborów, które dokonujesz, takich jak Twój język lub region, aby zapewnić bardziej spersonalizowane doświadczenie.
 4. Pliki cookie reklamowe/targetujące: Te pliki cookie są używane do dostarczania odpowiednich reklam i komunikacji marketingowej na podstawie Twoich zainteresowań, historii przeglądania i interakcji z naszymi stronami.
 
 Ponadto strony book.hacktricks.wiki i cloud.hacktricks.wiki są hostowane w Gitbook. Możesz znaleźć więcej informacji na temat plików cookie Gitbook w [https://gitbook-1652864889.teamtailor.com/cookie-policy](https://gitbook-1652864889.teamtailor.com/cookie-policy).
 
 ### Pliki cookie stron trzecich
 
-Oprócz naszych własnych plików cookie, możemy również używać plików cookie stron trzecich do raportowania statystyk użycia strony, dostarczania reklam i umożliwienia przycisków udostępniania w mediach społecznościowych. Użycie plików cookie stron trzecich podlega ich odpowiednim politykom prywatności.
+Oprócz naszych własnych plików cookie, możemy również używać plików cookie stron trzecich do raportowania statystyk dotyczących korzystania ze strony, dostarczania reklam i umożliwienia przycisków udostępniania w mediach społecznościowych. Użycie plików cookie stron trzecich podlega ich odpowiednim politykom prywatności.
 
 Zarządzanie plikami cookie
 
