@@ -12,9 +12,9 @@ Na node ina **parameta** na **env variables** ambazo zinaweza kutumika **kufanya
 Mbinu hizi zitaongelewa baadaye, lakini katika nyakati za hivi karibuni Electron imeongeza **bendera za usalama** kadhaa ili kuzuia hizo. Hizi ni [**Electron Fuses**](https://www.electronjs.org/docs/latest/tutorial/fuses) na hizi ndizo zinazotumika **kuzuia** programu za Electron katika macOS **kuchukua nambari zisizo za kawaida**:
 
 - **`RunAsNode`**: Ikiwa imezimwa, inazuia matumizi ya env var **`ELECTRON_RUN_AS_NODE`** kuingiza nambari.
-- **`EnableNodeCliInspectArguments`**: Ikiwa imezimwa, parameta kama `--inspect`, `--inspect-brk` hazitazingatiwa. Inazuia njia hii kuingiza nambari.
-- **`EnableEmbeddedAsarIntegrityValidation`**: Ikiwa imewezeshwa, **`asar`** **faili** iliyopakiwa itathibitishwa na macOS. **Inazuia** njia hii **kuingiza nambari** kwa kubadilisha maudhui ya faili hii.
-- **`OnlyLoadAppFromAsar`**: Ikiwa hii imewezeshwa, badala ya kutafuta kupakia kwa mpangilio ufuatao: **`app.asar`**, **`app`** na hatimaye **`default_app.asar`**. Itakagua tu na kutumia app.asar, hivyo kuhakikisha kwamba wakati **imeunganishwa** na **`embeddedAsarIntegrityValidation`** fuse haiwezekani **kuchukua nambari zisizothibitishwa**.
+- **`EnableNodeCliInspectArguments`**: Ikiwa imezimwa, parameta kama `--inspect`, `--inspect-brk` hazitazingatiwa. Inakwepa njia hii ya kuingiza nambari.
+- **`EnableEmbeddedAsarIntegrityValidation`**: Ikiwa imewezeshwa, **faili** ya **`asar`** itathibitishwa na macOS. **Ikizuia** njia hii **kuingiza nambari** kwa kubadilisha maudhui ya faili hii.
+- **`OnlyLoadAppFromAsar`**: Ikiwa hii imewezeshwa, badala ya kutafuta kupakia kwa mpangilio ufuatao: **`app.asar`**, **`app`** na hatimaye **`default_app.asar`**. Itakagua na kutumia tu app.asar, hivyo kuhakikisha kwamba wakati **imeunganishwa** na **`embeddedAsarIntegrityValidation`** fuse haiwezekani **kuchukua nambari zisizo thibitishwa**.
 - **`LoadBrowserProcessSpecificV8Snapshot`**: Ikiwa imewezeshwa, mchakato wa kivinjari hutumia faili inayoitwa `browser_v8_context_snapshot.bin` kwa ajili ya snapshot yake ya V8.
 
 Fuse nyingine ya kuvutia ambayo haitazuia kuingiza nambari ni:
@@ -37,40 +37,40 @@ EnableEmbeddedAsarIntegrityValidation is Enabled
 OnlyLoadAppFromAsar is Enabled
 LoadBrowserProcessSpecificV8Snapshot is Disabled
 ```
-### Modifying Electron Fuses
+### Kubadilisha Fuse za Electron
 
-Kama [**nyaraka zinavyosema**](https://www.electronjs.org/docs/latest/tutorial/fuses#runasnode), usanidi wa **Electron Fuses** umewekwa ndani ya **Electron binary** ambayo ina mahali fulani mfuatano wa **`dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX`**.
+Kama [**nyaraka zinavyosema**](https://www.electronjs.org/docs/latest/tutorial/fuses#runasnode), usanidi wa **Fuse za Electron** umewekwa ndani ya **binary ya Electron** ambayo ina mahali fulani mfuatano wa herufi **`dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX`**.
 
 Katika programu za macOS, hii kwa kawaida iko katika `application.app/Contents/Frameworks/Electron Framework.framework/Electron Framework`
 ```bash
 grep -R "dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX" Slack.app/
 Binary file Slack.app//Contents/Frameworks/Electron Framework.framework/Versions/A/Electron Framework matches
 ```
-You could load this file in [https://hexed.it/](https://hexed.it/) and search for the previous string. After this string you can see in ASCII a number "0" or "1" indicating if each fuse is disabled or enabled. Just modify the hex code (`0x30` is `0` and `0x31` is `1`) to **modify the fuse values**.
+Unaweza kupakia faili hii katika [https://hexed.it/](https://hexed.it/) na kutafuta mfuatano wa awali. Baada ya mfuatano huu unaweza kuona katika ASCII nambari "0" au "1" ikionyesha kama kila fuse imezimwa au imewezeshwa. Badilisha tu msimbo wa hex (`0x30` ni `0` na `0x31` ni `1`) ili **kubadilisha thamani za fuse**.
 
 <figure><img src="../../../images/image (34).png" alt=""><figcaption></figcaption></figure>
 
-Note that if you try to **overwrite** the **`Electron Framework` binary** inside an application with these bytes modified, the app won't run.
+Kumbuka kwamba ukijaribu **kuandika upya** **`Electron Framework` binary** ndani ya programu kwa bytes hizi zilizobadilishwa, programu hiyo haitafanya kazi.
 
-## RCE adding code to Electron Applications
+## RCE kuongeza msimbo kwenye Programu za Electron
 
-There could be **external JS/HTML files** that an Electron App is using, so an attacker could inject code in these files whose signature won't be checked and execute arbitrary code in the context of the app.
+Kunaweza kuwa na **faili za nje za JS/HTML** ambazo Programu ya Electron inatumia, hivyo mshambuliaji anaweza kuingiza msimbo katika faili hizi ambazo saini yake haitakaguliwa na kutekeleza msimbo wa kiholela katika muktadha wa programu.
 
 > [!CAUTION]
-> However, at the moment there are 2 limitations:
+> Hata hivyo, kwa sasa kuna vizuizi 2:
 >
-> - The **`kTCCServiceSystemPolicyAppBundles`** permission is **needed** to modify an App, so by default this is no longer possible.
-> - The compiled **`asap`** file usually has the fuses **`embeddedAsarIntegrityValidation`** `and` **`onlyLoadAppFromAsar`** `enabled`
+> - Ruhusa ya **`kTCCServiceSystemPolicyAppBundles`** inahitajika kubadilisha Programu, hivyo kwa kawaida hii haiwezekani tena.
+> - Faili iliyokusanywa ya **`asap`** kwa kawaida ina fuse **`embeddedAsarIntegrityValidation`** `na` **`onlyLoadAppFromAsar`** `imewezeshwa`
 >
-> Making this attack path more complicated (or impossible).
+> Hii inafanya njia hii ya shambulio kuwa ngumu zaidi (au haiwezekani).
 
-Note that it's possible to bypass the requirement of **`kTCCServiceSystemPolicyAppBundles`** by copying the application to another directory (like **`/tmp`**), renaming the folder **`app.app/Contents`** to **`app.app/NotCon`**, **modifying** the **asar** file with your **malicious** code, renaming it back to **`app.app/Contents`** and executing it.
+Kumbuka kwamba inawezekana kupita hitaji la **`kTCCServiceSystemPolicyAppBundles`** kwa kunakili programu hiyo kwenye saraka nyingine (kama **`/tmp`**), kubadilisha jina la folda **`app.app/Contents`** kuwa **`app.app/NotCon`**, **kubadilisha** faili la **asar** kwa msimbo wako **mbaya**, kubadilisha jina lake kurudi kuwa **`app.app/Contents`** na kuitekeleza.
 
-You can unpack the code from the asar file with:
+Unaweza kufungua msimbo kutoka kwa faili la asar kwa:
 ```bash
 npx asar extract app.asar app-decomp
 ```
-Na uifunge tena baada ya kuibadilisha na:
+Na uifunge tena baada ya kuibadilisha kwa:
 ```bash
 npx asar pack app-decomp app-new.asar
 ```
@@ -190,18 +190,18 @@ Unaweza kutumia vibaya hii env variable katika plist ili kudumisha uvumilivu kwa
 ## TCC Bypass abusing Older Versions
 
 > [!TIP]
-> Daemon ya TCC kutoka macOS haichunguzi toleo lililotekelezwa la programu. Hivyo kama huwezi **kuiingiza msimbo katika programu ya Electron** kwa kutumia mbinu zozote za awali unaweza kupakua toleo la zamani la APP na kuingiza msimbo ndani yake kwani bado itapata ruhusa za TCC (isipokuwa Trust Cache iizuie).
+> Daemon ya TCC kutoka macOS haichunguzi toleo lililotekelezwa la programu. Hivyo kama huwezi **kuiingiza msimbo katika programu ya Electron** kwa kutumia mbinu zozote za awali unaweza kupakua toleo la awali la APP na kuingiza msimbo ndani yake kwani bado itapata ruhusa za TCC (isipokuwa Trust Cache iizuie).
 
 ## Run non JS Code
 
 Mbinu za awali zitakuruhusu kuendesha **msimbo wa JS ndani ya mchakato wa programu ya electron**. Hata hivyo, kumbuka kwamba **mchakato wa watoto unakimbia chini ya wasifu sawa wa sandbox** kama programu ya mzazi na **unapata ruhusa zao za TCC**.\
-Hivyo, ikiwa unataka kutumia haki za kuingia kwenye kamera au kipaza sauti kwa mfano, unaweza tu **kuendesha binary nyingine kutoka kwenye mchakato**.
+Hivyo, ikiwa unataka kutumia haki za kuingia ili kufikia kamera au kipaza sauti kwa mfano, unaweza tu **kuendesha binary nyingine kutoka kwa mchakato**.
 
 ## Automatic Injection
 
-Chombo [**electroniz3r**](https://github.com/r3ggi/electroniz3r) kinaweza kutumika kwa urahisi ili **kupata programu za electron zenye udhaifu** zilizowekwa na kuingiza msimbo ndani yao. Chombo hiki kitajaribu kutumia mbinu ya **`--inspect`**:
+Zana [**electroniz3r**](https://github.com/r3ggi/electroniz3r) inaweza kutumika kwa urahisi ili **kupata programu za electron zenye udhaifu** zilizowekwa na kuingiza msimbo ndani yao. Zana hii itajaribu kutumia mbinu ya **`--inspect`**:
 
-Unahitaji kukiunda mwenyewe na unaweza kuitumia kama hii:
+Unahitaji kuikamilisha mwenyewe na unaweza kuitumia kama hii:
 ```bash
 # Find electron apps
 ./electroniz3r list-apps

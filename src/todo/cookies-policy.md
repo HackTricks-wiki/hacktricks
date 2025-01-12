@@ -15,7 +15,7 @@ By using any of these websites, you agree to the use of cookies in accordance wi
 
 ### What are cookies?
 
-Cookies ni faili ndogo za maandiko ambazo zinahifadhiwa kwenye kompyuta yako au kifaa chako cha mkononi unap odwasha tovuti. Zinatumika sana kufanya tovuti zifanye kazi, kuboresha utendaji wao, na kutoa uzoefu wa mtumiaji wa kibinafsi zaidi.
+Cookies ni faili ndogo za maandiko ambazo zinawekwa kwenye kompyuta yako au kifaa chako cha mkononi unap odwasha tovuti. Zinatumika sana kufanya tovuti zifanye kazi, kuboresha utendaji wao, na kutoa uzoefu wa mtumiaji wa kibinafsi zaidi.
 
 ### How we use cookies
 
