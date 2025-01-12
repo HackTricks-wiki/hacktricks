@@ -44,7 +44,7 @@ Ne zaboravite da **dajte zvezdicu na Github projektima!**
 >
 > - **Mogu li kopirati neki sadržaj iz HackTricks i staviti ga na svoj blog?**
 
-Da, možete, ali **ne zaboravite da pomenete specifične linkove** sa kojih je sadržaj preuzet.
+Da, možete, ali **ne zaboravite da pomenete specifičan link(ove)** sa kojih je sadržaj preuzet.
 
 > [!TIP]
 >
@@ -93,8 +93,8 @@ Nećete naći HackTricks ispunjen dosadnim oglasima kao druge blogove sa mnogo m
 Imajte na umu da linkovi ka vašoj stranici u HackTricks:
 
 - Poboljšavaju vaš **SEO**
-- Sadržaj se **prevodi na više od 15 jezika**, omogućavajući više ljudi da pristupe ovom sadržaju
-- **HackTricks podstiče** ljude da **provere vašu stranicu** (nekoliko ljudi nam je pomenulo da od kada je neka njihova stranica u HackTricks-u, dobijaju više poseta)
+- Sadržaj se **prevodi na više od 15 jezika**, što omogućava više ljudi da pristupe ovom sadržaju
+- **HackTricks podstiče** ljude da **provere vašu stranicu** (nekoliko ljudi nam je pomenulo da od kada je neka njihova stranica u HackTricks-u, primaju više poseta)
 
 Međutim, ako i dalje želite da se sadržaj vašeg bloga ukloni iz HackTricks-a, samo nas obavestite i definitivno ćemo **ukloniti svaki link ka vašem blogu**, i bilo koji sadržaj zasnovan na njemu.
 
@@ -123,20 +123,20 @@ Copyright © Sva prava zadržana osim ako nije drugačije navedeno.
 
 - Commercial Use: Za upite u vezi sa komercijalnom upotrebom ovog sadržaja, molimo kontaktirajte me.
 
-Ova licenca ne dodeljuje nikakva prava na zaštitne znakove ili brendiranje u vezi sa sadržajem. Svi zaštitni znakovi i brendiranje prikazani u ovom blogu/knjizi su svojina njihovih odgovarajućih vlasnika.
+Ova licenca ne dodeljuje nikakva prava na zaštitni znak ili brendiranje u vezi sa sadržajem. Svi zaštitni znakovi i brendiranje prikazani u ovom blogu/knjizi su svojina njihovih odgovarajućih vlasnika.
 
 **Pristupanjem ili korišćenjem HackTricks-a, slažete se da poštujete uslove ove licence. Ako se ne slažete sa ovim uslovima, molimo vas, ne pristupajte ovoj veb stranici.**
 
 ## **Disclaimer**
 
 > [!CAUTION]
-> Ova knjiga, 'HackTricks,' je namenjena isključivo obrazovnim i informativnim svrhama. Sadržaj unutar ove knjige je dostupan na 'kako jeste' osnovi, a autori i izdavači ne daju nikakve izjave ili garancije bilo koje vrste, izričite ili implicirane, o potpunosti, tačnosti, pouzdanosti, pogodnosti ili dostupnosti informacija, proizvoda, usluga ili povezanih grafika sadržanih unutar ove knjige. Svako oslanjanje na takve informacije je stoga strogo na vaš sopstveni rizik.
+> Ova knjiga, 'HackTricks,' je namenjena isključivo obrazovnim i informativnim svrhama. Sadržaj unutar ove knjige je dostupan na 'kako jeste' osnovi, a autori i izdavači ne daju nikakve izjave ili garancije bilo koje vrste, izričite ili implicirane, o potpunosti, tačnosti, pouzdanosti, pogodnosti ili dostupnosti informacija, proizvoda, usluga ili povezanih grafika sadržanih unutar ove knjige. Svako oslanjanje koje stavite na takve informacije je stoga strogo na vašem vlastitom riziku.
 >
-> Autori i izdavači u nijednom slučaju neće biti odgovorni za bilo kakav gubitak ili štetu, uključujući, bez ograničenja, indirektne ili posledične gubitke ili štete, ili bilo kakav gubitak ili štetu koja proizađe iz gubitka podataka ili profita proizašlih iz, ili u vezi sa, korišćenjem ove knjige.
+> Autori i izdavači neće u nijednom slučaju biti odgovorni za bilo kakav gubitak ili štetu, uključujući, bez ograničenja, indirektne ili posledične gubitke ili štete, ili bilo kakav gubitak ili štetu koja proizađe iz gubitka podataka ili profita proizašlih iz, ili u vezi sa, korišćenjem ove knjige.
 >
-> Štaviše, tehnike i saveti opisani u ovoj knjizi su dati isključivo u obrazovne i informativne svrhe i ne bi trebali biti korišćeni za bilo kakve ilegalne ili zlonamerne aktivnosti. Autori i izdavači ne odobravaju niti podržavaju bilo kakve ilegalne ili neetičke aktivnosti, a svaka upotreba informacija sadržanih unutar ove knjige je na korisnikov sopstveni rizik i diskreciju.
+> Štaviše, tehnike i saveti opisani u ovoj knjizi su dati isključivo u obrazovne i informativne svrhe i ne bi trebali biti korišćeni za bilo kakve ilegalne ili zlonamerne aktivnosti. Autori i izdavači ne odobravaju niti podržavaju bilo kakve ilegalne ili neetičke aktivnosti, a svaka upotreba informacija sadržanih unutar ove knjige je na korisnikov vlastiti rizik i diskreciju.
 >
-> Korisnik je isključivo odgovoran za bilo koje radnje preduzete na osnovu informacija sadržanih unutar ove knjige i uvek bi trebao potražiti profesionalni savet i pomoć prilikom pokušaja implementacije bilo koje od tehnika ili saveta opisanih ovde.
+> Korisnik je isključivo odgovoran za bilo kakve radnje preduzete na osnovu informacija sadržanih unutar ove knjige i uvek bi trebao potražiti profesionalni savet i pomoć prilikom pokušaja implementacije bilo koje od tehnika ili saveta opisanih ovde.
 >
 > Korišćenjem ove knjige, korisnik se slaže da oslobodi autore i izdavače od bilo kakve i svake odgovornosti za bilo kakve štete, gubitke ili povrede koje mogu proizaći iz korišćenja ove knjige ili bilo koje od informacija sadržanih u njoj.
 
