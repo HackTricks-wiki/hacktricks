@@ -4,7 +4,7 @@
 
 ## Basic Information
 
-If you don't know what Electron is you can find [**lots of information here**](https://book.hacktricks.xyz/network-services-pentesting/pentesting-web/xss-to-rce-electron-desktop-apps). But for now just know that Electron runs **node**.\
+If you don't know what Electron is you can find [**lots of information here**](https://book.hacktricks.wiki/en/network-services-pentesting/pentesting-web/electron-desktop-apps/index.html#rce-xss--contextisolation). But for now just know that Electron runs **node**.\
 And node has some **parameters** and **env variables** that can be use to **make it execute other code** apart from the indicated file.
 
 ### Electron Fuses
