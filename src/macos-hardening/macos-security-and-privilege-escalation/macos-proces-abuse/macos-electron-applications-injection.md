@@ -4,8 +4,8 @@
 
 ## Informazioni di Base
 
-Se non sai cos'è Electron, puoi trovare [**molte informazioni qui**](https://book.hacktricks.wiki/en/network-services-pentesting/pentesting-web/electron-desktop-apps/index.html#rce-xss--contextisolation). Ma per ora sappi solo che Electron esegue **node**.\
-E node ha alcuni **parametri** e **variabili d'ambiente** che possono essere utilizzati per **far eseguire altro codice** oltre al file indicato.
+Se non sai cos'è Electron, puoi trovare [**moltissime informazioni qui**](https://book.hacktricks.wiki/en/network-services-pentesting/pentesting-web/electron-desktop-apps/index.html#rce-xss--contextisolation). Ma per ora sappi solo che Electron esegue **node**.\
+E node ha alcuni **parametri** e **variabili d'ambiente** che possono essere utilizzati per **eseguire altro codice** oltre al file indicato.
 
 ### Fusi di Electron
 
@@ -13,7 +13,7 @@ Queste tecniche saranno discusse in seguito, ma recentemente Electron ha aggiunt
 
 - **`RunAsNode`**: Se disabilitato, impedisce l'uso della variabile d'ambiente **`ELECTRON_RUN_AS_NODE`** per iniettare codice.
 - **`EnableNodeCliInspectArguments`**: Se disabilitato, parametri come `--inspect`, `--inspect-brk` non saranno rispettati. Evitando in questo modo l'iniezione di codice.
-- **`EnableEmbeddedAsarIntegrityValidation`**: Se abilitato, il **file** **`asar`** caricato sarà **validato** da macOS. **Prevenendo** in questo modo **l'iniezione di codice** modificando i contenuti di questo file.
+- **`EnableEmbeddedAsarIntegrityValidation`**: Se abilitato, il **file** **`asar`** caricato sarà **validato** da macOS. **Prevenendo** in questo modo l'**iniezione di codice** modificando i contenuti di questo file.
 - **`OnlyLoadAppFromAsar`**: Se questo è abilitato, invece di cercare di caricare nell'ordine seguente: **`app.asar`**, **`app`** e infine **`default_app.asar`**. Controllerà e utilizzerà solo app.asar, garantendo così che quando è **combinato** con il fuso **`embeddedAsarIntegrityValidation`** sia **impossibile** **caricare codice non validato**.
 - **`LoadBrowserProcessSpecificV8Snapshot`**: Se abilitato, il processo del browser utilizza il file chiamato `browser_v8_context_snapshot.bin` per il suo snapshot V8.
 
@@ -46,7 +46,7 @@ Nelle applicazioni macOS, questo si trova tipicamente in `application.app/Conten
 grep -R "dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX" Slack.app/
 Binary file Slack.app//Contents/Frameworks/Electron Framework.framework/Versions/A/Electron Framework matches
 ```
-Puoi caricare questo file in [https://hexed.it/](https://hexed.it/) e cercare la stringa precedente. Dopo questa stringa puoi vedere in ASCII un numero "0" o "1" che indica se ogni fusibile è disabilitato o abilitato. Modifica semplicemente il codice esadecimale (`0x30` è `0` e `0x31` è `1`) per **modificare i valori dei fusibili**.
+Puoi caricare questo file in [https://hexed.it/](https://hexed.it/) e cercare la stringa precedente. Dopo questa stringa puoi vedere in ASCII un numero "0" o "1" che indica se ciascun fusibile è disabilitato o abilitato. Modifica semplicemente il codice esadecimale (`0x30` è `0` e `0x31` è `1`) per **modificare i valori dei fusibili**.
 
 <figure><img src="../../../images/image (34).png" alt=""><figcaption></figcaption></figure>
 
@@ -147,7 +147,7 @@ Potresti abusare di questa variabile d'ambiente in un plist per mantenere la per
 ```
 ## RCE con ispezione
 
-Secondo [**questo**](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f), se esegui un'applicazione Electron con flag come **`--inspect`**, **`--inspect-brk`** e **`--remote-debugging-port`**, una **porta di debug sarà aperta** così potrai connetterti ad essa (ad esempio da Chrome in `chrome://inspect`) e sarai in grado di **iniettare codice su di essa** o persino avviare nuovi processi.\
+Secondo [**questo**](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f), se esegui un'applicazione Electron con flag come **`--inspect`**, **`--inspect-brk`** e **`--remote-debugging-port`**, un **porta di debug sarà aperta** così puoi connetterti ad essa (ad esempio da Chrome in `chrome://inspect`) e sarai in grado di **iniettare codice su di essa** o persino avviare nuovi processi.\
 Ad esempio:
 ```bash
 /Applications/Signal.app/Contents/MacOS/Signal --inspect=9229
@@ -155,7 +155,7 @@ Ad esempio:
 require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Calculator')
 ```
 > [!CAUTION]
-> Se il fuse **`EnableNodeCliInspectArguments`** è disabilitato, l'app **ignorerà i parametri node** (come `--inspect`) quando viene avviata, a meno che la variabile di ambiente **`ELECTRON_RUN_AS_NODE`** non sia impostata, che sarà anch'essa **ignorata** se il fuse **`RunAsNode`** è disabilitato.
+> Se il fuse **`EnableNodeCliInspectArguments`** è disabilitato, l'app **ignorerà i parametri node** (come `--inspect`) quando viene avviata, a meno che la variabile env **`ELECTRON_RUN_AS_NODE`** non sia impostata, che sarà anch'essa **ignorata** se il fuse **`RunAsNode`** è disabilitato.
 >
 > Tuttavia, puoi ancora utilizzare il **parametro electron `--remote-debugging-port=9229`**, ma il payload precedente non funzionerà per eseguire altri processi.
 
@@ -187,17 +187,17 @@ Potresti abusare di questa variabile d'ambiente in un plist per mantenere la per
 <true/>
 </dict>
 ```
-## TCC Bypass abusando di versioni precedenti
+## TCC Bypass abusing Older Versions
 
 > [!TIP]
-> Il demone TCC di macOS non controlla la versione eseguita dell'applicazione. Quindi, se **non puoi iniettare codice in un'applicazione Electron** con nessuna delle tecniche precedenti, potresti scaricare una versione precedente dell'APP e iniettare codice su di essa poiché otterrà comunque i privilegi TCC (a meno che il Trust Cache non lo impedisca).
+> Il demone TCC di macOS non controlla la versione eseguita dell'applicazione. Quindi, se **non puoi iniettare codice in un'applicazione Electron** con nessuna delle tecniche precedenti, puoi scaricare una versione precedente dell'APP e iniettare codice su di essa poiché otterrà comunque i privilegi TCC (a meno che il Trust Cache non lo impedisca).
 
-## Eseguire codice non JS
+## Run non JS Code
 
 Le tecniche precedenti ti permetteranno di eseguire **codice JS all'interno del processo dell'applicazione electron**. Tuttavia, ricorda che i **processi figli vengono eseguiti sotto lo stesso profilo sandbox** dell'applicazione padre e **erediteranno i loro permessi TCC**.\
-Pertanto, se desideri abusare dei diritti per accedere alla fotocamera o al microfono, ad esempio, potresti semplicemente **eseguire un altro binario dal processo**.
+Pertanto, se desideri abusare dei diritti per accedere alla fotocamera o al microfono, ad esempio, puoi semplicemente **eseguire un altro binario dal processo**.
 
-## Iniezione automatica
+## Automatic Injection
 
 Lo strumento [**electroniz3r**](https://github.com/r3ggi/electroniz3r) può essere facilmente utilizzato per **trovare applicazioni electron vulnerabili** installate e iniettare codice su di esse. Questo strumento cercherà di utilizzare la tecnica **`--inspect`**:
 

@@ -10,7 +10,7 @@
 > - Dare accesso **GRATUITO** a risorse di **hacking EDUCATIVO** a **TUTTI** su Internet.
 >   - L'hacking riguarda l'apprendimento, e l'apprendimento dovrebbe essere il più gratuito possibile.
 >   - Lo scopo di questo libro è servire come una **risorsa educativa** completa.
-> - **ARCHIVIARE** tecniche di **hacking** fantastiche che la comunità pubblica dando tutti i **crediti** agli **AUTORI ORIGINALI**.
+> - **ARCHIVIARE** tecniche di **hacking** fantastiche che la comunità pubblica dando a tutti gli **AUTORI ORIGINALI** tutti i **crediti**.
 >   - **Non vogliamo il credito da altre persone**, vogliamo solo archiviare trucchi interessanti per tutti.
 >   - Scriviamo anche **le nostre ricerche** in HackTricks.
 >   - In diversi casi scriveremo **in HackTricks un riassunto delle parti importanti** della tecnica e **incoraggeremo il lettore a visitare il post originale** per maggiori dettagli.
@@ -102,7 +102,7 @@ Tuttavia, se desideri ancora che il contenuto del tuo blog venga rimosso da Hack
 >
 > - **Cosa devo fare se trovo contenuto copiato e incollato in HackTricks?**
 
-Diamo sempre **tutti i crediti agli autori originali**. Se trovi una pagina con contenuto copiato e incollato senza la fonte originale citata, faccelo sapere e **lo rimuoveremo**, **aggiungeremo il link prima del testo**, o **lo riscriveremo aggiungendo il link**.
+Noi **diamo sempre il credito agli autori originali**. Se trovi una pagina con contenuto copiato e incollato senza la fonte originale citata, faccelo sapere e noi **lo rimuoveremo**, **aggiungeremo il link prima del testo**, o **riscriveremo aggiungendo il link**.
 
 ## LICENSE
 
@@ -116,7 +116,7 @@ Copyright © Tutti i diritti riservati, salvo diversa indicazione.
 
 #### Termini Aggiuntivi:
 
-- Contenuto di Terzi: Alcune parti di questo blog/libro possono includere contenuti di altre fonti, come estratti di altri blog o pubblicazioni. L'uso di tali contenuti è fatto secondo i principi di uso equo o con esplicita autorizzazione dai rispettivi titolari dei diritti d'autore. Si prega di fare riferimento alle fonti originali per informazioni specifiche sulla licenza riguardante i contenuti di terzi.
+- Contenuto di Terzi: Alcune parti di questo blog/libro possono includere contenuti di altre fonti, come estratti di altri blog o pubblicazioni. L'uso di tali contenuti avviene secondo i principi di uso leale o con esplicita autorizzazione dai rispettivi titolari dei diritti d'autore. Si prega di fare riferimento alle fonti originali per informazioni specifiche sulla licenza riguardante i contenuti di terzi.
 - Autorialità: Il contenuto originale redatto da HackTricks è soggetto ai termini di questa licenza. Ti incoraggiamo ad attribuire questo lavoro all'autore quando lo condividi o lo adatti.
 
 #### Esenzioni:
@@ -125,7 +125,7 @@ Copyright © Tutti i diritti riservati, salvo diversa indicazione.
 
 Questa licenza non concede alcun diritto di marchio o branding in relazione al contenuto. Tutti i marchi e il branding presenti in questo blog/libro sono di proprietà dei rispettivi proprietari.
 
-**Accedendo o utilizzando HackTricks, accetti di rispettare i termini di questa licenza. Se non sei d'accordo con questi termini, ti preghiamo di non accedere a questo sito web.**
+**Accedendo o utilizzando HackTricks, accetti di rispettare i termini di questa licenza. Se non accetti questi termini, ti preghiamo di non accedere a questo sito web.**
 
 ## **Disclaimer**
 
@@ -138,6 +138,6 @@ Questa licenza non concede alcun diritto di marchio o branding in relazione al c
 >
 > L'utente è l'unico responsabile per qualsiasi azione intrapresa sulla base delle informazioni contenute in questo libro e dovrebbe sempre cercare consigli e assistenza professionale quando tenta di implementare una delle tecniche o dei suggerimenti descritti qui.
 >
-> Utilizzando questo libro, l'utente accetta di liberare gli autori e gli editori da qualsiasi responsabilità e responsabilità per eventuali danni, perdite o danni che possono derivare dall'uso di questo libro o di qualsiasi informazione in esso contenuta.
+> Utilizzando questo libro, l'utente accetta di liberare gli autori e gli editori da qualsiasi responsabilità e responsabilità per eventuali danni, perdite o danni che possono derivare dall'uso di questo libro o di qualsiasi informazione contenuta in esso.
 
 {{#include ../banners/hacktricks-training.md}}

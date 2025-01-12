@@ -26,7 +26,7 @@ Utilizziamo i cookie sui nostri siti web per i seguenti scopi:
 3. Cookie di funzionalità: Questi cookie consentono ai nostri siti web di ricordare le scelte che fai, come la tua lingua o regione, per fornire un'esperienza più personalizzata.
 4. Cookie di targeting/pubblicità: Questi cookie vengono utilizzati per fornire annunci pertinenti e comunicazioni di marketing basate sui tuoi interessi, sulla tua cronologia di navigazione e sulle interazioni con i nostri siti web.
 
-Inoltre, le pagine book.hacktricks.wiki e cloud.hacktricks.wiki sono ospitate in Gitbook. Puoi trovare ulteriori informazioni sui cookie di Gitbook in [https://gitbook-1652864889.teamtailor.com/cookie-policy](https://gitbook-1652864889.teamtailor.com/cookie-policy).
+Inoltre, le pagine book.hacktricks.wiki e cloud.hacktricks.wiki sono ospitate su Gitbook. Puoi trovare ulteriori informazioni sui cookie di Gitbook in [https://gitbook-1652864889.teamtailor.com/cookie-policy](https://gitbook-1652864889.teamtailor.com/cookie-policy).
 
 ### Cookie di terze parti
 
@@ -38,7 +38,7 @@ La maggior parte dei browser web consente di gestire i cookie tramite le loro im
 
 Modifiche a questa Cookies Policy
 
-Potremmo aggiornare questa Cookies Policy di tanto in tanto per riflettere i cambiamenti nelle nostre pratiche o nelle leggi pertinenti. Ti incoraggiamo a rivedere periodicamente questa pagina per le ultime informazioni sulle nostre pratiche relative ai cookie.
+Potremmo aggiornare questa Cookies Policy di tanto in tanto per riflettere cambiamenti nelle nostre pratiche o nelle leggi pertinenti. Ti incoraggiamo a rivedere periodicamente questa pagina per le ultime informazioni sulle nostre pratiche relative ai cookie.
 
 ### Contattaci
 
