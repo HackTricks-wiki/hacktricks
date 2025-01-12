@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-외부 시스템에서 명령을 실행하는 다양한 방법이 있습니다. 여기에서는 주요 Windows 측면 이동 기술이 작동하는 방식에 대한 설명을 찾을 수 있습니다:
+외부 시스템에서 명령을 실행하는 다양한 방법이 있습니다. 여기에서 주요 Windows 측면 이동 기술이 작동하는 방식에 대한 설명을 찾을 수 있습니다:
 
 - [**PsExec**](psexec-and-winexec.md)
 - [**SmbExec**](smbexec.md)
