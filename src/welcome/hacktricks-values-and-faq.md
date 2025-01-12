@@ -15,7 +15,7 @@
 >   - Wir schreiben auch **unsere eigenen Forschungen** in HackTricks.
 >   - In mehreren Fällen werden wir einfach **in HackTricks eine Zusammenfassung der wichtigen Teile** der Technik schreiben und den **Leser ermutigen, den ursprünglichen Beitrag** für weitere Details zu besuchen.
 > - **ORGANISIEREN** Sie alle Hacking-Techniken im Buch, damit es **ZUGÄNGLICHER** ist.
->   - Das HackTricks-Team hat tausende von Stunden kostenlos damit verbracht, **nur den Inhalt zu organisieren**, damit die Leute **schneller lernen können**.
+>   - Das HackTricks-Team hat tausende von Stunden kostenlos damit verbracht, **nur den Inhalt zu organisieren**, damit die Leute **schneller lernen** können.
 
 <figure><img src="../images/hack tricks gif.gif" alt="" width="375"><figcaption></figcaption></figure>
 
@@ -44,14 +44,14 @@ Vergessen Sie nicht, **einen Stern in den Github-Projekten zu geben!**
 >
 > - **Kann ich einige Inhalte von HackTricks kopieren und in meinem Blog verwenden?**
 
-Ja, das können Sie, aber **vergessen Sie nicht, die spezifischen Link(s)** zu erwähnen, von wo der Inhalt stammt.
+Ja, das können Sie, aber **vergessen Sie nicht, die spezifischen Link(s)** zu erwähnen, von denen der Inhalt stammt.
 
 > [!TIP]
 >
 > - **Wie kann ich eine Seite von HackTricks zitieren?**
 
 Solange der Link **der** Seite(n), von der Sie die Informationen entnommen haben, erscheint, ist das ausreichend.\
-Wenn Sie ein Bibtex benötigen, können Sie etwas verwenden wie:
+Wenn Sie ein BibTeX benötigen, können Sie etwas verwenden wie:
 ```latex
 @misc{hacktricks-bibtexing,
 author = {"HackTricks Team" or the Authors name of the specific page/trick},
@@ -76,7 +76,7 @@ Der erste **HackTricks** **Wert** ist es, **KOSTENLOSE** Bildungsressourcen für
 
 Wenn Sie denken, dass HackTricks-Bücher für **kommerzielle Zwecke** gemacht sind, liegen Sie **VÖLLIG FALSCH**.
 
-Wir haben Sponsoren, weil wir, auch wenn der gesamte Inhalt KOSTENLOS ist, der **Gemeinschaft die Möglichkeit bieten wollen, unsere Arbeit zu schätzen**, wenn sie möchten. Daher bieten wir den Menschen die Möglichkeit, HackTricks über [**Github-Sponsoren**](https://github.com/sponsors/carlospolop) zu unterstützen, und **relevante Cybersicherheitsunternehmen**, um HackTricks zu sponsern und **einige Anzeigen** im Buch zu haben, wobei die **Anzeigen** immer an Orten platziert werden, die sie **sichtbar** machen, aber den Lernprozess nicht stören, wenn sich jemand auf den Inhalt konzentriert.
+Wir haben Sponsoren, weil wir, auch wenn der gesamte Inhalt KOSTENLOS ist, der **Gemeinschaft die Möglichkeit bieten möchten, unsere Arbeit zu schätzen**, wenn sie möchten. Daher bieten wir den Menschen die Möglichkeit, HackTricks über [**Github-Sponsoren**](https://github.com/sponsors/carlospolop) zu unterstützen, und **relevante Cybersicherheitsunternehmen**, um HackTricks zu sponsern und **einige Anzeigen** im Buch zu haben, wobei die **Anzeigen** immer an Orten platziert werden, die sie **sichtbar** machen, aber den Lernprozess nicht stören, wenn sich jemand auf den Inhalt konzentriert.
 
 Sie werden HackTricks nicht mit nervigen Anzeigen gefüllt finden wie andere Blogs mit viel weniger Inhalt als HackTricks, denn HackTricks ist nicht für kommerzielle Zwecke gemacht.
 
@@ -84,17 +84,17 @@ Sie werden HackTricks nicht mit nervigen Anzeigen gefüllt finden wie andere Blo
 >
 > - **Was soll ich tun, wenn eine HackTricks-Seite auf meinem Blogbeitrag basiert, aber nicht referenziert ist?**
 
-**Es tut uns sehr leid. Das hätte nicht passieren dürfen**. Bitte lassen Sie es uns über Github-Issues, Twitter, Discord... wissen, den Link zur HackTricks-Seite mit dem Inhalt und den Link zu Ihrem Blog, und **wir werden es überprüfen und so schnell wie möglich hinzufügen**.
+**Es tut uns sehr leid. Das hätte nicht passieren dürfen**. Bitte lassen Sie es uns über Github-Issues, Twitter, Discord... wissen, den Link zur HackTricks-Seite mit dem Inhalt und den Link zu Ihrem Blog und **wir werden es überprüfen und so schnell wie möglich hinzufügen**.
 
 > [!CAUTION]
 >
-> - **Was soll ich tun, wenn Inhalte von meinem Blog in HackTricks sind und ich möchte, dass sie dort nicht sind?**
+> - **Was soll ich tun, wenn Inhalte von meinem Blog in HackTricks sind und ich möchte nicht, dass sie dort sind?**
 
 Beachten Sie, dass Links zu Ihrer Seite in HackTricks:
 
-- Ihr **SEO** verbessern
+- Ihre **SEO** verbessern
 - Der Inhalt wird **in mehr als 15 Sprachen übersetzt**, was es mehr Menschen ermöglicht, auf diesen Inhalt zuzugreifen
-- **HackTricks ermutigt** die Menschen, **Ihre Seite zu besuchen** (mehrere Personen haben uns mitgeteilt, dass sie seitdem ihre Seite in HackTricks ist, mehr Besuche erhalten)
+- **HackTricks ermutigt** die Menschen, **Ihre Seite zu überprüfen** (mehrere Personen haben uns mitgeteilt, dass sie seitdem ihre Seite in HackTricks ist, mehr Besuche erhalten)
 
 Wenn Sie jedoch weiterhin möchten, dass der Inhalt Ihres Blogs aus HackTricks entfernt wird, lassen Sie es uns einfach wissen und wir werden definitiv **jeden Link zu Ihrem Blog** und jeden darauf basierenden Inhalt entfernen.
 

@@ -34,7 +34,7 @@ Neben unseren eigenen Cookies können wir auch Cookies von Drittanbietern verwen
 
 Verwalten von Cookies
 
-Die meisten Webbrowser ermöglichen es Ihnen, Cookies über ihre Einstellungen zu verwalten. Sie können wählen, ob Sie die Verwendung von Cookies auf Ihrem Gerät blockieren, löschen oder einschränken möchten. Bitte beachten Sie jedoch, dass das Deaktivieren von Cookies die Funktionalität und Leistung unserer Websites beeinträchtigen kann.
+Die meisten Webbrowser ermöglichen es Ihnen, Cookies über ihre Einstellungen zu verwalten. Sie können wählen, ob Sie Cookies auf Ihrem Gerät blockieren, löschen oder deren Verwendung einschränken möchten. Bitte beachten Sie jedoch, dass das Deaktivieren von Cookies die Funktionalität und Leistung unserer Websites beeinträchtigen kann.
 
 Änderungen an dieser Cookies-Richtlinie
 
