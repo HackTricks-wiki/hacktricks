@@ -61,7 +61,7 @@ plutil -convert xml1 -o - /Library/Preferences/com.jamfsoftware.jamf.plist
 	<key>is_virtual_machine</key>
 	<false/>
 	<key>jss_url</key>
-	<string>https://halbornasd.jamfcloud.com/</string>
+	<string>https://subdomain-company.jamfcloud.com/</string>
 	<key>last_management_framework_change_id</key>
 	<integer>4</integer>
 [...]
