@@ -15,14 +15,14 @@ Bu web sitelerinden herhangi birini kullanarak, bu Çerez Politikasına uygun ol
 
 ### Çerezler nedir?
 
-Çerezler, bir web sitesini ziyaret ettiğinizde bilgisayarınızda veya mobil cihazınızda saklanan küçük metin dosyalarıdır. Web sitelerinin çalışmasını sağlamak, işlevselliğini artırmak ve daha kişiselleştirilmiş bir kullanıcı deneyimi sunmak için yaygın olarak kullanılırlar.
+Çerezler, bir web sitesini ziyaret ettiğinizde bilgisayarınızda veya mobil cihazınızda saklanan küçük metin dosyalarıdır. Web sitelerinin çalışmasını sağlamak, işlevselliğini artırmak ve daha kişiselleştirilmiş bir kullanıcı deneyimi sunmak için yaygın olarak kullanılır.
 
 ### Çerezleri nasıl kullanıyoruz
 
 Web sitelerimizde çerezleri aşağıdaki amaçlar için kullanıyoruz:
 
 1. Temel çerezler: Bu çerezler, kullanıcı kimlik doğrulamasını sağlamak, güvenliği korumak ve tercihlerinizi hatırlamak gibi web sitelerimizin temel işlevselliği için gereklidir.
-2. Performans çerezleri: Bu çerezler, ziyaretçilerin web sitelerimizle nasıl etkileşimde bulunduğunu anlamamıza yardımcı olur, bilgileri anonim olarak toplayıp raporlar. Bu, web sitemizin performansını ve kullanıcı deneyimini geliştirmemizi sağlar.
+2. Performans çerezleri: Bu çerezler, ziyaretçilerin web sitelerimizle nasıl etkileşimde bulunduğunu anlamamıza yardımcı olur ve bilgileri anonim olarak toplar ve raporlar. Bu, web sitesi performansımızı ve kullanıcı deneyimimizi geliştirmemizi sağlar.
 3. İşlevsellik çerezleri: Bu çerezler, web sitelerimizin diliniz veya bölgeniz gibi yaptığınız seçimleri hatırlamasını sağlar ve daha kişiselleştirilmiş bir deneyim sunar.
 4. Hedefleme/reklam çerezleri: Bu çerezler, ilgi alanlarınıza, tarayıcı geçmişinize ve web sitelerimizle etkileşimlerinize dayalı olarak ilgili reklamlar ve pazarlama iletişimleri sunmak için kullanılır.
 
@@ -38,7 +38,7 @@ Kendi çerezlerimizin yanı sıra, web sitesi kullanım istatistiklerini raporla
 
 Bu Çerez Politikasındaki değişiklikler
 
-Uygulamalarımızda veya ilgili yasalarda meydana gelen değişiklikleri yansıtmak için bu Çerez Politikasını zaman zaman güncelleyebiliriz. Çerez uygulamalarımızla ilgili en son bilgileri görmek için bu sayfayı periyodik olarak gözden geçirmenizi öneririz.
+Bu Çerez Politikasını, uygulamalarımızdaki veya ilgili yasalarındaki değişiklikleri yansıtmak için zaman zaman güncelleyebiliriz. Çerez uygulamalarımızla ilgili en son bilgileri almak için bu sayfayı periyodik olarak gözden geçirmenizi öneririz.
 
 ### Bizimle iletişime geçin
 

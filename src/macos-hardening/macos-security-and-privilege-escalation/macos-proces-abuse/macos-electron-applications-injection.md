@@ -14,7 +14,7 @@ Bu teknikler bir sonraki bölümde tartışılacak, ancak son zamanlarda Electro
 - **`RunAsNode`**: Devre dışı bırakıldığında, kod enjeksiyonu için **`ELECTRON_RUN_AS_NODE`** env değişkeninin kullanılmasını engeller.
 - **`EnableNodeCliInspectArguments`**: Devre dışı bırakıldığında, `--inspect`, `--inspect-brk` gibi parametreler dikkate alınmayacaktır. Bu şekilde kod enjeksiyonunu önler.
 - **`EnableEmbeddedAsarIntegrityValidation`**: Etkinleştirildiğinde, yüklenen **`asar`** **dosyası** macOS tarafından **doğrulanacaktır**. Bu şekilde bu dosyanın içeriğini değiştirerek **kod enjeksiyonunu** **önler**.
-- **`OnlyLoadAppFromAsar`**: Bu etkinleştirildiğinde, yüklemek için şu sırayı aramak yerine: **`app.asar`**, **`app`** ve nihayet **`default_app.asar`**. Sadece app.asar'ı kontrol edecek ve kullanacak, böylece **`embeddedAsarIntegrityValidation`** füzesi ile birleştirildiğinde **doğrulanmamış kodun yüklenmesi** **imkansız** hale gelecektir.
+- **`OnlyLoadAppFromAsar`**: Bu etkinleştirildiğinde, yüklemek için şu sırayı aramak yerine: **`app.asar`**, **`app`** ve son olarak **`default_app.asar`**. Sadece app.asar'yı kontrol edecek ve kullanacak, böylece **`embeddedAsarIntegrityValidation`** füzesi ile **birleştirildiğinde** **doğrulanmamış kodun yüklenmesi** **imkansız** hale gelecektir.
 - **`LoadBrowserProcessSpecificV8Snapshot`**: Etkinleştirildiğinde, tarayıcı süreci V8 anlık görüntüsü için `browser_v8_context_snapshot.bin` adlı dosyayı kullanır.
 
 Kod enjeksiyonunu önlemeyecek başka ilginç bir fuse ise:
@@ -62,9 +62,9 @@ Bir Electron Uygulamasının kullandığı **harici JS/HTML dosyaları** olabili
 > - Bir Uygulamayı değiştirmek için **`kTCCServiceSystemPolicyAppBundles`** izni **gerekir**, bu nedenle varsayılan olarak bu artık mümkün değildir.
 > - Derlenmiş **`asap`** dosyası genellikle **`embeddedAsarIntegrityValidation`** `ve` **`onlyLoadAppFromAsar`** sigortalarını `etkin` olarak içerir.
 >
-> Bu saldırı yolunu daha karmaşık (veya imkansız) hale getirir.
+> Bu da bu saldırı yolunu daha karmaşık (veya imkansız) hale getirir.
 
-**`kTCCServiceSystemPolicyAppBundles`** gereksinimini, uygulamayı başka bir dizine (örneğin **`/tmp`**) kopyalayarak, klasörü **`app.app/Contents`** olarak yeniden adlandırarak, **zararlı** kodunuzla **asar** dosyasını **değiştirerek**, tekrar **`app.app/Contents`** olarak adlandırarak ve çalıştırarak aşmanın mümkün olduğunu unutmayın.
+**`kTCCServiceSystemPolicyAppBundles`** gereksinimini, uygulamayı başka bir dizine (örneğin **`/tmp`**) kopyalayarak, klasörü **`app.app/Contents`** olarak yeniden adlandırarak, **zararlı** kodunuzla **asar** dosyasını **değiştirerek**, tekrar **`app.app/Contents`** olarak adlandırarak ve çalıştırarak atlatmanın mümkün olduğunu unutmayın.
 
 Asar dosyasından kodu çıkarmak için:
 ```bash
@@ -76,7 +76,7 @@ npx asar pack app-decomp app-new.asar
 ```
 ## RCE with `ELECTRON_RUN_AS_NODE` <a href="#electron_run_as_node" id="electron_run_as_node"></a>
 
-[**Belgelerde**](https://www.electronjs.org/docs/latest/api/environment-variables#electron_run_as_node) belirtildiğine göre, bu ortam değişkeni ayarlandığında, süreci normal bir Node.js süreci olarak başlatacaktır.
+[**Belgeler**](https://www.electronjs.org/docs/latest/api/environment-variables#electron_run_as_node)'e göre, bu ortam değişkeni ayarlandığında, süreci normal bir Node.js süreci olarak başlatır.
 ```bash
 # Run this
 ELECTRON_RUN_AS_NODE=1 /Applications/Discord.app/Contents/MacOS/Discord
@@ -147,19 +147,17 @@ Bu ortam değişkenini bir plist içinde kötüye kullanarak kalıcılığı sa�
 ```
 ## RCE ile inceleme
 
-[**şuna**](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f) göre, **`--inspect`**, **`--inspect-brk`** ve **`--remote-debugging-port`** gibi bayraklarla bir Electron uygulaması çalıştırırsanız, **bir hata ayıklama portu açılacaktır** böylece ona bağlanabilirsiniz (örneğin `chrome://inspect` üzerinden Chrome'dan) ve **ona kod enjekte edebilir** veya hatta yeni süreçler başlatabilirsiniz.\
-Örneğin:
+According to [**this**](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f), eğer **`--inspect`**, **`--inspect-brk`** ve **`--remote-debugging-port`** gibi bayraklarla bir Electron uygulaması çalıştırırsanız, **bir debug portu açılacaktır** böylece ona bağlanabilirsiniz (örneğin `chrome://inspect` üzerinden Chrome'dan) ve **ona kod enjekte edebilir** veya hatta yeni süreçler başlatabilirsiniz.\
+For example:
 ```bash
 /Applications/Signal.app/Contents/MacOS/Signal --inspect=9229
 # Connect to it using chrome://inspect and execute a calculator with:
 require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Calculator')
 ```
 > [!CAUTION]
-> Eğer **`EnableNodeCliInspectArguments`** sigortası devre dışı bırakılmışsa, uygulama başlatıldığında **node parametrelerini** (örneğin `--inspect`) **göz ardı edecektir**, eğer ortam değişkeni **`ELECTRON_RUN_AS_NODE`** ayarlanmamışsa, bu da **göz ardı edilecektir** eğer sigorta **`RunAsNode`** devre dışı bırakılmışsa.
+> Eğer **`EnableNodeCliInspectArguments`** sigortası devre dışı bırakılmışsa, uygulama **node parametrelerini** (örneğin `--inspect`) başlatıldığında **göz ardı edecektir**, eğer ortam değişkeni **`ELECTRON_RUN_AS_NODE`** ayarlanmamışsa, bu da **göz ardı edilecektir** eğer sigorta **`RunAsNode`** devre dışı bırakılmışsa.
 >
-> Ancak, **electron parametresi `--remote-debugging-port=9229`** kullanarak hala bazı bilgileri çalabilirsiniz, ancak önceki yük, diğer süreçleri çalıştırmak için işe yaramayacaktır.
-
-Parametre **`--remote-debugging-port=9222`** kullanarak Electron Uygulamasından **geçmiş** (GET komutları ile) veya tarayıcının **çerezlerini** çalmak mümkündür (çünkü bunlar tarayıcı içinde **şifresi çözülmüş** durumdadır ve bunları verecek bir **json uç noktası** vardır).
+> Ancak, **electron parametresi `--remote-debugging-port=9229`** kullanarak hala bazı bilgileri çalmak mümkündür, örneğin **geçmiş** (GET komutları ile) veya tarayıcının **çerezleri** (çünkü bunlar tarayıcı içinde **şifresi çözülmüş** durumdadır ve bunları verecek bir **json uç noktası** vardır).
 
 Bunu nasıl yapacağınızı [**burada**](https://posts.specterops.io/hands-in-the-cookie-jar-dumping-cookies-with-chromiums-remote-debugger-port-34c4f468844e) ve [**burada**](https://slyd0g.medium.com/debugging-cookie-dumping-failures-with-chromiums-remote-debugger-8a4c4d19429f) öğrenebilirsiniz ve otomatik aracı [WhiteChocolateMacademiaNut](https://github.com/slyd0g/WhiteChocolateMacademiaNut) veya şöyle basit bir script kullanabilirsiniz:
 ```python
@@ -190,11 +188,11 @@ Bu ortam değişkenini bir plist'te kötüye kullanarak kalıcılığı sağlama
 ## TCC Bypass eski sürümleri istismar etme
 
 > [!TIP]
-> macOS'taki TCC daemon, uygulamanın yürütülen sürümünü kontrol etmez. Bu nedenle, eğer **bir Electron uygulamasına kod enjekte edemiyorsanız** önceki tekniklerden herhangi biriyle, APP'nin önceki bir sürümünü indirip üzerine kod enjekte edebilirsiniz çünkü hala TCC ayrıcalıklarını alacaktır (Trust Cache engellemediği sürece).
+> macOS'taki TCC daemon, uygulamanın yürütülen sürümünü kontrol etmez. Bu nedenle, **bir Electron uygulamasına kod enjekte edemiyorsanız** önceki tekniklerden herhangi biriyle, APP'nin önceki bir sürümünü indirip üzerine kod enjekte edebilirsiniz çünkü hala TCC ayrıcalıklarını alacaktır (Trust Cache engellemediği sürece).
 
 ## JS Dışı Kod Çalıştırma
 
-Önceki teknikler, **electron uygulamasının sürecinde JS kodu çalıştırmanıza** olanak tanıyacaktır. Ancak, **çocuk süreçlerin ana uygulama ile aynı sandbox profilinde çalıştığını** ve **TCC izinlerini miras aldığını** unutmayın.\
+Önceki teknikler, **electron uygulamasının sürecinde JS kodu çalıştırmanıza** izin verecektir. Ancak, **çocuk süreçlerin ana uygulama ile aynı sandbox profilinde çalıştığını** ve **TCC izinlerini miras aldığını** unutmayın.\
 Bu nedenle, örneğin kameraya veya mikrofona erişmek için hakları istismar etmek istiyorsanız, sadece **süreçten başka bir ikili dosya çalıştırabilirsiniz**.
 
 ## Otomatik Enjeksiyon
