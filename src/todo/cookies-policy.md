@@ -22,7 +22,7 @@ Las cookies son pequeños archivos de texto que se almacenan en tu computadora o
 Usamos cookies en nuestros sitios web para los siguientes propósitos:
 
 1. Cookies esenciales: Estas cookies son necesarias para la funcionalidad básica de nuestros sitios web, como habilitar la autenticación de usuarios, mantener la seguridad y recordar tus preferencias.
-2. Cookies de rendimiento: Estas cookies nos ayudan a entender cómo los visitantes interactúan con nuestros sitios web, al recopilar y reportar información de manera anónima. Esto nos permite mejorar el rendimiento de nuestro sitio web y la experiencia del usuario.
+2. Cookies de rendimiento: Estas cookies nos ayudan a entender cómo los visitantes interactúan con nuestros sitios web, al recopilar y reportar información de forma anónima. Esto nos permite mejorar el rendimiento de nuestro sitio web y la experiencia del usuario.
 3. Cookies de funcionalidad: Estas cookies permiten que nuestros sitios web recuerden las elecciones que haces, como tu idioma o región, para proporcionar una experiencia más personalizada.
 4. Cookies de publicidad/segmentación: Estas cookies se utilizan para entregar anuncios relevantes y comunicaciones de marketing basadas en tus intereses, historial de navegación e interacciones con nuestros sitios web.
 
