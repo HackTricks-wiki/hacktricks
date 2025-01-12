@@ -127,17 +127,17 @@ Cette licence ne confère aucun droit de marque ou de branding en relation avec 
 
 **En accédant ou en utilisant HackTricks, vous acceptez de respecter les termes de cette licence. Si vous n'acceptez pas ces termes, veuillez ne pas accéder à ce site.**
 
-## **Avertissement**
+## **Disclaimer**
 
 > [!CAUTION]
 > Ce livre, 'HackTricks', est destiné à des fins éducatives et d'information uniquement. Le contenu de ce livre est fourni sur une base 'tel quel', et les auteurs et éditeurs ne font aucune déclaration ou garantie de quelque nature que ce soit, expresse ou implicite, concernant l'exhaustivité, l'exactitude, la fiabilité, l'adéquation ou la disponibilité des informations, produits, services ou graphiques connexes contenus dans ce livre. Toute confiance que vous placez dans de telles informations est donc strictement à vos propres risques.
 >
 > Les auteurs et éditeurs ne sauraient en aucun cas être tenus responsables de toute perte ou dommage, y compris, sans limitation, toute perte ou dommage indirect ou consécutif, ou toute perte ou dommage de quelque nature que ce soit résultant de la perte de données ou de bénéfices découlant de, ou en relation avec, l'utilisation de ce livre.
 >
-> De plus, les techniques et conseils décrits dans ce livre sont fournis à des fins éducatives et d'information uniquement, et ne doivent pas être utilisés pour des activités illégales ou malveillantes. Les auteurs et éditeurs ne cautionnent ni ne soutiennent aucune activité illégale ou contraire à l'éthique, et toute utilisation des informations contenues dans ce livre se fait à vos propres risques et à votre discrétion.
+> De plus, les techniques et conseils décrits dans ce livre sont fournis à des fins éducatives et d'information uniquement, et ne doivent pas être utilisés pour des activités illégales ou malveillantes. Les auteurs et éditeurs ne cautionnent ni ne soutiennent aucune activité illégale ou contraire à l'éthique, et toute utilisation des informations contenues dans ce livre est à vos propres risques et à votre discrétion.
 >
 > L'utilisateur est seul responsable de toute action entreprise sur la base des informations contenues dans ce livre, et doit toujours demander des conseils et une assistance professionnels lorsqu'il tente de mettre en œuvre l'une des techniques ou conseils décrits ici.
 >
-> En utilisant ce livre, l'utilisateur accepte de dégager les auteurs et éditeurs de toute responsabilité pour tout dommage, perte ou préjudice pouvant résulter de l'utilisation de ce livre ou de toute information qu'il contient.
+> En utilisant ce livre, l'utilisateur accepte de dégager les auteurs et éditeurs de toute responsabilité et de toute obligation pour tout dommage, perte ou préjudice pouvant résulter de l'utilisation de ce livre ou de toute information qu'il contient.
 
 {{#include ../banners/hacktricks-training.md}}

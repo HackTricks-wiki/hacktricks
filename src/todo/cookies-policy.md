@@ -15,7 +15,7 @@ En utilisant l'un de ces sites, vous acceptez l'utilisation de cookies conformé
 
 ### Qu'est-ce que les cookies ?
 
-Les cookies sont de petits fichiers texte qui sont stockés sur votre ordinateur ou appareil mobile lorsque vous visitez un site web. Ils sont largement utilisés pour faire fonctionner les sites, améliorer leur fonctionnalité et fournir une expérience utilisateur plus personnalisée.
+Les cookies sont de petits fichiers texte qui sont stockés sur votre ordinateur ou appareil mobile lorsque vous visitez un site web. Ils sont largement utilisés pour faire fonctionner les sites web, améliorer leur fonctionnalité et fournir une expérience utilisateur plus personnalisée.
 
 ### Comment nous utilisons les cookies
 
@@ -23,7 +23,7 @@ Nous utilisons des cookies sur nos sites pour les finalités suivantes :
 
 1. Cookies essentiels : Ces cookies sont nécessaires au bon fonctionnement de nos sites, comme l'authentification des utilisateurs, le maintien de la sécurité et la mémorisation de vos préférences.
 2. Cookies de performance : Ces cookies nous aident à comprendre comment les visiteurs interagissent avec nos sites, en collectant et en rapportant des informations de manière anonyme. Cela nous permet d'améliorer la performance de notre site et l'expérience utilisateur.
-3. Cookies de fonctionnalité : Ces cookies permettent à nos sites de se souvenir des choix que vous faites, comme votre langue ou votre région, pour offrir une expérience plus personnalisée.
+3. Cookies de fonctionnalité : Ces cookies permettent à nos sites de mémoriser les choix que vous faites, comme votre langue ou votre région, pour offrir une expérience plus personnalisée.
 4. Cookies de ciblage/publicité : Ces cookies sont utilisés pour diffuser des publicités pertinentes et des communications marketing en fonction de vos intérêts, de votre historique de navigation et de vos interactions avec nos sites.
 
 De plus, les pages book.hacktricks.wiki et cloud.hacktricks.wiki sont hébergées sur Gitbook. Vous pouvez trouver plus d'informations sur les cookies de Gitbook à [https://gitbook-1652864889.teamtailor.com/cookie-policy](https://gitbook-1652864889.teamtailor.com/cookie-policy).

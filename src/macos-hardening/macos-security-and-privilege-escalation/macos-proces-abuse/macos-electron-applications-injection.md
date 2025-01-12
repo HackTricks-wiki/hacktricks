@@ -19,7 +19,7 @@ Ces techniques seront discutées ensuite, mais récemment, Electron a ajouté pl
 
 Un autre fusible intéressant qui ne préviendra pas l'injection de code est :
 
-- **EnableCookieEncryption** : S'il est activé, le stockage des cookies sur disque est chiffré à l'aide de clés de cryptographie au niveau du système d'exploitation.
+- **EnableCookieEncryption** : S'il est activé, le magasin de cookies sur disque est chiffré à l'aide de clés de cryptographie au niveau du système d'exploitation.
 
 ### Vérification des Fusibles Electron
 
@@ -169,7 +169,7 @@ ws.connect("ws://localhost:9222/devtools/page/85976D59050BFEFDBA48204E3D865D00",
 ws.send('{\"id\": 1, \"method\": \"Network.getAllCookies\"}')
 print(ws.recv()
 ```
-Dans [**cet article de blog**](https://hackerone.com/reports/1274695), ce débogage est abusé pour faire en sorte qu'un chrome sans tête **télécharge des fichiers arbitraires à des emplacements arbitraires**.
+Dans [**ce billet de blog**](https://hackerone.com/reports/1274695), ce débogage est abusé pour faire en sorte qu'un chrome sans tête **télécharge des fichiers arbitraires à des emplacements arbitraires**.
 
 ### Injection depuis le Plist de l'App
 
