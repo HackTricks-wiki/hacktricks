@@ -24,7 +24,7 @@ Ons gebruik koekies op ons webwerwe vir die volgende doeleindes:
 1. Essensiële koekies: Hierdie koekies is noodsaaklik vir die basiese funksionaliteit van ons webwerwe, soos om gebruikersverifikasie moontlik te maak, sekuriteit te handhaaf en jou voorkeure te onthou.
 2. Prestasie koekies: Hierdie koekies help ons om te verstaan hoe besoekers met ons webwerwe interaksie het, deur anoniem inligting te versamel en te rapporteer. Dit stel ons in staat om ons webwerf se prestasie en gebruikerservaring te verbeter.
 3. Funksionaliteit koekies: Hierdie koekies stel ons webwerwe in staat om keuses wat jy maak te onthou, soos jou taal of streek, om 'n meer persoonlike ervaring te bied.
-4. Teiken/advertering koekies: Hierdie koekies word gebruik om relevante advertensies en bemarkingskommunikasies te lewer op grond van jou belangstellings, blaai geskiedenis en interaksies met ons webwerwe.
+4. Teiken/advertensie koekies: Hierdie koekies word gebruik om relevante advertensies en bemarkingskommunikasies te lewer op grond van jou belangstellings, blaai geskiedenis en interaksies met ons webwerwe.
 
 Boonop word die bladsye book.hacktricks.wiki en cloud.hacktricks.wiki in Gitbook gehos. Jy kan meer inligting oor Gitbook se koekies vind in [https://gitbook-1652864889.teamtailor.com/cookie-policy](https://gitbook-1652864889.teamtailor.com/cookie-policy).
 
@@ -34,7 +34,7 @@ Benewens ons eie koekies, mag ons ook derdeparty koekies gebruik om webwerfgebru
 
 Koekies bestuur
 
-Die meeste webblaaiers laat jou toe om koekies deur hul instellings te bestuur. Jy kan kies om die gebruik van koekies op jou toestel te blokkeer, te verwyder of te beperk. Hou egter in gedagte dat die deaktivering van koekies die funksionaliteit en prestasie van ons webwerwe kan beïnvloed.
+Meeste webblaaiers laat jou toe om koekies deur hul instellings te bestuur. Jy kan kies om koekies op jou toestel te blokkeer, te verwyder of te beperk. Neem egter kennis dat die deaktivering van koekies die funksionaliteit en prestasie van ons webwerwe kan beïnvloed.
 
 Veranderinge aan hierdie Cookiesbeleid
 

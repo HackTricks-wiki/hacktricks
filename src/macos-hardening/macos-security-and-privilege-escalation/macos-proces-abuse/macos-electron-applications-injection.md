@@ -13,11 +13,11 @@ Hierdie tegnieke sal volgende bespreek word, maar in onlangse tye het Electron v
 
 - **`RunAsNode`**: As dit gedeaktiveer is, voorkom dit die gebruik van die omgewing veranderlike **`ELECTRON_RUN_AS_NODE`** om kode in te spuit.
 - **`EnableNodeCliInspectArguments`**: As dit gedeaktiveer is, sal parameters soos `--inspect`, `--inspect-brk` nie gerespekteer word nie. Dit vermy hierdie manier om kode in te spuit.
-- **`EnableEmbeddedAsarIntegrityValidation`**: As dit geaktiveer is, sal die gelaaide **`asar`** **lêer** deur macOS **gevalideer** word. **Dit voorkom** op hierdie manier **kode-inspuiting** deur die inhoud van hierdie lêer te wysig.
+- **`EnableEmbeddedAsarIntegrityValidation`**: As dit geaktiveer is, sal die gelaaide **`asar`** **lêer** deur macOS **gevalideer** word. **Dit voorkom** op hierdie manier **kode inspuiting** deur die inhoud van hierdie lêer te wysig.
 - **`OnlyLoadAppFromAsar`**: As dit geaktiveer is, sal dit slegs app.asar nagaan en gebruik, in plaas daarvan om in die volgende volgorde te soek: **`app.asar`**, **`app`** en uiteindelik **`default_app.asar`**. Dit verseker dat wanneer dit **gekombineer** word met die **`embeddedAsarIntegrityValidation`** fuse, dit **onmoontlik** is om **nie-gevalideerde kode** te **laai**.
 - **`LoadBrowserProcessSpecificV8Snapshot`**: As dit geaktiveer is, gebruik die blaaiersproses die lêer genaamd `browser_v8_context_snapshot.bin` vir sy V8-snapshot.
 
-Nog 'n interessante fuse wat nie kode-inspuiting sal voorkom nie, is:
+Nog 'n interessante fuse wat nie kode inspuiting sal voorkom nie, is:
 
 - **EnableCookieEncryption**: As dit geaktiveer is, word die koekie stoor op skyf geënkripteer met behulp van OS-vlak kriptografie sleutels.
 
@@ -39,7 +39,7 @@ LoadBrowserProcessSpecificV8Snapshot is Disabled
 ```
 ### Modifying Electron Fuses
 
-Soos die [**dokumentasie noem**](https://www.electronjs.org/docs/latest/tutorial/fuses#runasnode), is die konfigurasie van die **Electron Fuses** geconfigureer binne die **Electron binêre** wat êrens die string **`dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX`** bevat.
+Soos die [**dokumentasie noem**](https://www.electronjs.org/docs/latest/tutorial/fuses#runasnode), die konfigurasie van die **Electron Fuses** is geconfigureer binne die **Electron binêre** wat êrens die string **`dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX`** bevat.
 
 In macOS toepassings is dit tipies in `application.app/Contents/Frameworks/Electron Framework.framework/Electron Framework`
 ```bash
@@ -66,11 +66,11 @@ Daar kan **eksterne JS/HTML lêers** wees wat 'n Electron App gebruik, so 'n aan
 
 Let daarop dat dit moontlik is om die vereiste van **`kTCCServiceSystemPolicyAppBundles`** te omseil deur die toepassing na 'n ander gids te kopieer (soos **`/tmp`**), die vouer **`app.app/Contents`** te hernoem na **`app.app/NotCon`**, **die** **asar** lêer met u **kwaadwillige** kode te **wysig**, dit weer terug te hernoem na **`app.app/Contents`** en dit uit te voer.
 
-U kan die kode uit die asar lêer onpack met:
+U kan die kode uit die asar lêer onpak met:
 ```bash
 npx asar extract app.asar app-decomp
 ```
-En pak dit weer in nadat dit met die volgende gewysig is:
+En pak dit weer in nadat dit gewysig is met:
 ```bash
 npx asar pack app-decomp app-new.asar
 ```
@@ -123,13 +123,13 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 NODE_OPTIONS="--require /tmp/payload.js" ELECTRON_RUN_AS_NODE=1 /Applications/Discord.app/Contents/MacOS/Discord
 ```
 > [!CAUTION]
-> As die fuse **`EnableNodeOptionsEnvironmentVariable`** **deaktiveer** is, sal die app die env var **NODE_OPTIONS** **ignore** wanneer dit gelaai word, tensy die env variable **`ELECTRON_RUN_AS_NODE`** gestel is, wat ook **geignore** sal word as die fuse **`RunAsNode`** deaktiveer is.
+> As die fuse **`EnableNodeOptionsEnvironmentVariable`** is **deaktiveer**, sal die app die env var **NODE_OPTIONS** **ignore** wanneer dit gelaai word, tensy die env variabele **`ELECTRON_RUN_AS_NODE`** gestel is, wat ook **geignore** sal word as die fuse **`RunAsNode`** deaktiveer is.
 >
 > As jy nie **`ELECTRON_RUN_AS_NODE`** stel nie, sal jy die **fout** vind: `Most NODE_OPTIONs are not supported in packaged apps. See documentation for more details.`
 
 ### Inspuiting vanaf die App Plist
 
-Jy kan hierdie env variable in 'n plist misbruik om volharding te handhaaf deur hierdie sleutels by te voeg:
+Jy kan hierdie env variabele in 'n plist misbruik om volharding te handhaaf deur hierdie sleutels by te voeg:
 ```xml
 <dict>
 <key>EnvironmentVariables</key>
@@ -147,7 +147,7 @@ Jy kan hierdie env variable in 'n plist misbruik om volharding te handhaaf deur 
 ```
 ## RCE met inspeksie
 
-Volgens [**hierdie**](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f) kan jy 'n Electron-toepassing uitvoer met vlae soos **`--inspect`**, **`--inspect-brk`** en **`--remote-debugging-port`**, 'n **debug-poort sal oop wees** sodat jy daarop kan aansluit (byvoorbeeld van Chrome in `chrome://inspect`) en jy sal in staat wees om **kode daarop in te spuit** of selfs nuwe prosesse te begin.\
+Volgens [**hierdie**](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f), as jy 'n Electron-toepassing uitvoer met vlae soos **`--inspect`**, **`--inspect-brk`** en **`--remote-debugging-port`**, sal 'n **debug-poort oop wees** sodat jy daaraan kan koppel (byvoorbeeld vanaf Chrome in `chrome://inspect`) en jy sal in staat wees om **kode daarop in te spuit** of selfs nuwe prosesse te begin.\
 Byvoorbeeld:
 ```bash
 /Applications/Signal.app/Contents/MacOS/Signal --inspect=9229
@@ -159,7 +159,7 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 >
 > U kan egter steeds die **electron param `--remote-debugging-port=9229`** gebruik, maar die vorige payload sal nie werk om ander prosesse uit te voer nie.
 
-Deur die param **`--remote-debugging-port=9222`** te gebruik, is dit moontlik om sekere inligting van die Electron App te steel, soos die **geskiedenis** (met GET-opdragte) of die **koekies** van die blaaier (aangesien dit **ontsleuteld** binne die blaaiers is en daar 'n **json eindpunt** is wat hulle sal gee).
+Deur die param **`--remote-debugging-port=9222`** te gebruik, is dit moontlik om sekere inligting van die Electron App te steel, soos die **geskiedenis** (met GET-opdragte) of die **cookies** van die blaaier (aangesien dit **ontsleuteld** binne die blaaier is en daar 'n **json endpoint** is wat dit sal gee).
 
 U kan leer hoe om dit te doen in [**hier**](https://posts.specterops.io/hands-in-the-cookie-jar-dumping-cookies-with-chromiums-remote-debugger-port-34c4f468844e) en [**hier**](https://slyd0g.medium.com/debugging-cookie-dumping-failures-with-chromiums-remote-debugger-8a4c4d19429f) en die outomatiese hulpmiddel [WhiteChocolateMacademiaNut](https://github.com/slyd0g/WhiteChocolateMacademiaNut) of 'n eenvoudige skrip soos:
 ```python
@@ -194,7 +194,7 @@ Jy kan hierdie omgewing veranderlike in 'n plist misbruik om volharding te handh
 
 ## Voer nie-JS Kode uit
 
-Die vorige tegnieke sal jou toelaat om **JS kode binne die proses van die electron-toepassing uit te voer**. Onthou egter dat die **kind prosesse onder dieselfde sandbox profiel** as die ouer toepassing loop en **hul TCC toestemmings erf**.\
+Die vorige tegnieke sal jou toelaat om **JS kode binne die proses van die electron-toepassing uit te voer**. Onthou egter dat die **kind proses onder dieselfde sandbox profiel** as die ouer toepassing loop en **hulle TCC toestemmings erf**.\
 Daarom, as jy voorregte wil misbruik om toegang tot die kamera of mikrofoon te verkry, kan jy eenvoudig **'n ander binêre vanaf die proses uitvoer**.
 
 ## Outomatiese Inspuiting
