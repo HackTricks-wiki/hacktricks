@@ -49,12 +49,12 @@ After the creation of BloodHound CE, the entire project was updated for ease of 
 1. Install Docker Compose. This should be included with the [Docker Desktop](https://www.docker.com/products/docker-desktop/) installation.
 2. Run:
 
-```
+```bash
 curl -L https://ghst.ly/getbhce | docker compose -f - up
 ```
 
 3. Locate the randomly generated password in the terminal output of Docker Compose.
-4. In a browser, navigate to http://localhost:8080/ui/login. Login with a username of admin and the randomly generated password from the logs.
+4. In a browser, navigate to http://localhost:8080/ui/login. Login with the username **`admin`** and a **`randomly generated password`** you can find in the logs of docker compose.
 
 After this you will need to change the randomly generated password and you will have the new interface ready, from which you can directly download the ingestors.
 
