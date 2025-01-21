@@ -6,12 +6,12 @@
 
 [AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) ni kutoka Sysinternal Suite:
 
-> Mtazamaji na mhariri wa juu wa Active Directory (AD). Unaweza kutumia AD Explorer kuvinjari hifadhidata ya AD kwa urahisi, kufafanua maeneo unayopenda, kuangalia mali za vitu, na sifa bila kufungua masanduku ya mazungumzo, kuhariri ruhusa, kuangalia muundo wa kitu, na kutekeleza utafutaji wa kisasa ambao unaweza kuokoa na kurudi kutekeleza.
+> Mtazamaji na mhariri wa hali ya juu wa Active Directory (AD). Unaweza kutumia AD Explorer kuvinjari hifadhidata ya AD kwa urahisi, kufafanua maeneo unayopenda, kuangalia mali za vitu, na sifa bila kufungua masanduku ya mazungumzo, kuhariri ruhusa, kuangalia muundo wa kitu, na kutekeleza utafutaji wa hali ya juu ambao unaweza kuokoa na kurudi kutekeleza.
 
 ### Snapshots
 
 AD Explorer inaweza kuunda snapshots za AD ili uweze kuangalia mtandaoni.\
-Inaweza kutumika kugundua vulns mtandaoni, au kulinganisha hali tofauti za DB ya AD kwa muda.
+Inaweza kutumika kugundua vulns mtandaoni, au kulinganisha hali tofauti za hifadhidata ya AD kwa muda.
 
 Utahitaji jina la mtumiaji, nenosiri, na mwelekeo wa kuungana (mtumiaji yeyote wa AD anahitajika).
 
@@ -42,28 +42,28 @@ Booldhound inajumuisha sehemu 2 kuu: **ingestors** na **programu ya uonyeshaji**
 
 ### Installation
 
-Baada ya kuundwa kwa BloodHound CE, mradi mzima ulisasishwa ili urahisi wa matumizi na Docker. Njia rahisi ya kuanza ni kutumia usanidi wa Docker Compose ulioandaliwa mapema.
+Baada ya kuundwa kwa BloodHound CE, mradi mzima ulisasishwa kwa urahisi wa matumizi na Docker. Njia rahisi ya kuanza ni kutumia usanidi wa Docker Compose ulioandaliwa mapema.
 
 1. Sakinisha Docker Compose. Hii inapaswa kujumuishwa na usakinishaji wa [Docker Desktop](https://www.docker.com/products/docker-desktop/).
-2. Endesha:
-```
+2. Kimbia:
+```bash
 curl -L https://ghst.ly/getbhce | docker compose -f - up
 ```
 3. Pata nenosiri lililotengenezwa kwa bahati katika matokeo ya terminal ya Docker Compose.  
-4. Katika kivinjari, tembelea http://localhost:8080/ui/login. Ingia kwa jina la mtumiaji admin na nenosiri lililotengenezwa kwa bahati kutoka kwa kumbukumbu.
+4. Katika kivinjari, tembelea http://localhost:8080/ui/login. Ingia kwa kutumia jina la mtumiaji **`admin`** na **`nenosiri lililotengenezwa kwa bahati`** ambalo unaweza kupata katika kumbukumbu za docker compose.
 
-Baada ya hii, utahitaji kubadilisha nenosiri lililotengenezwa kwa bahati na utakuwa na kiolesura kipya kilichokamilika, ambacho unaweza kupakua ingestors moja kwa moja.
+Baada ya hii, utahitaji kubadilisha nenosiri lililotengenezwa kwa bahati na utakuwa na kiolesura kipya kilichotayarishwa, ambacho unaweza kupakua ingestors moja kwa moja.
 
 ### SharpHound
 
-Wana chaguzi kadhaa lakini ikiwa unataka kuendesha SharpHound kutoka PC iliyojiunga na eneo, ukitumia mtumiaji wako wa sasa na kutoa taarifa zote unaweza kufanya:
+Wana chaguzi kadhaa lakini ikiwa unataka kuendesha SharpHound kutoka kwa PC iliyojiunga na eneo, ukitumia mtumiaji wako wa sasa na kutoa taarifa zote unaweza kufanya:
 ```
 ./SharpHound.exe --CollectionMethods All
 Invoke-BloodHound -CollectionMethod All
 ```
 > Unaweza kusoma zaidi kuhusu **CollectionMethod** na kikao cha loop [hapa](https://support.bloodhoundenterprise.io/hc/en-us/articles/17481375424795-All-SharpHound-Community-Edition-Flags-Explained)
 
-Ikiwa unataka kutekeleza SharpHound kwa kutumia akidi tofauti unaweza kuunda kikao cha CMD netonly na kuendesha SharpHound kutoka hapo:
+Ikiwa unataka kutekeleza SharpHound ukitumia akreditif tofauti unaweza kuunda kikao cha CMD netonly na kuendesha SharpHound kutoka hapo:
 ```
 runas /netonly /user:domain\user "powershell.exe -exec bypass"
 ```
@@ -72,7 +72,7 @@ runas /netonly /user:domain\user "powershell.exe -exec bypass"
 ## Group3r
 
 [**Group3r**](https://github.com/Group3r/Group3r) ni chombo cha kutafuta **vulnerabilities** katika Active Directory zinazohusiana na **Group Policy**. \
-Unahitaji **kuendesha group3r** kutoka kwa mwenyeji ndani ya eneo ukitumia **mtumiaji yeyote wa eneo**.
+Unahitaji **kufanya kazi group3r** kutoka kwa mwenyeji ndani ya eneo la kikoa ukitumia **mtumiaji yeyote wa kikoa**.
 ```bash
 group3r.exe -f <filepath-name.log>
 # -s sends results to stdin
