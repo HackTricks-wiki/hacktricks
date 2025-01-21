@@ -30,11 +30,11 @@ From [https://github.com/BloodHoundAD/BloodHound](https://github.com/BloodHoundA
 
 > BloodHound to aplikacja webowa w JavaScript na jednej stronie, zbudowana na bazie [Linkurious](http://linkurio.us/), skompilowana z [Electron](http://electron.atom.io/), z bazą danych [Neo4j](https://neo4j.com/) zasilaną przez zbieracz danych w C#.
 
-BloodHound wykorzystuje teorię grafów do ujawnienia ukrytych i często niezamierzonych relacji w środowisku Active Directory lub Azure. Atakujący mogą używać BloodHound do łatwego identyfikowania bardzo złożonych ścieżek ataku, które w przeciwnym razie byłyby niemożliwe do szybkiego zidentyfikowania. Obrońcy mogą używać BloodHound do identyfikacji i eliminacji tych samych ścieżek ataku. Zarówno zespoły niebieskie, jak i czerwone mogą używać BloodHound do łatwego uzyskania głębszego zrozumienia relacji uprawnień w środowisku Active Directory lub Azure.
+BloodHound wykorzystuje teorię grafów, aby ujawnić ukryte i często niezamierzone relacje w środowisku Active Directory lub Azure. Atakujący mogą używać BloodHound do łatwego identyfikowania bardzo złożonych ścieżek ataku, które w przeciwnym razie byłyby niemożliwe do szybkiego zidentyfikowania. Obrońcy mogą używać BloodHound do identyfikacji i eliminacji tych samych ścieżek ataku. Zarówno zespoły niebieskie, jak i czerwone mogą używać BloodHound do łatwego uzyskania głębszego zrozumienia relacji uprawnień w środowisku Active Directory lub Azure.
 
 Tak więc, [Bloodhound ](https://github.com/BloodHoundAD/BloodHound)to niesamowite narzędzie, które może automatycznie enumerować domenę, zapisywać wszystkie informacje, znajdować możliwe ścieżki eskalacji uprawnień i przedstawiać wszystkie informacje za pomocą grafów.
 
-BloodHound składa się z 2 głównych części: **ingestors** i **aplikacji wizualizacyjnej**.
+BloodHound składa się z 2 głównych części: **ingestorów** i **aplikacji wizualizacyjnej**.
 
 **Ingestory** są używane do **enumeracji domeny i ekstrakcji wszystkich informacji** w formacie, który zrozumie aplikacja wizualizacyjna.
 
@@ -46,13 +46,13 @@ Po utworzeniu BloodHound CE, cały projekt został zaktualizowany w celu ułatwi
 
 1. Zainstaluj Docker Compose. Powinno to być zawarte w instalacji [Docker Desktop](https://www.docker.com/products/docker-desktop/).
 2. Uruchom:
-```
+```bash
 curl -L https://ghst.ly/getbhce | docker compose -f - up
 ```
 3. Zlokalizuj losowo wygenerowane hasło w wyjściu terminala Docker Compose.  
-4. W przeglądarce przejdź do http://localhost:8080/ui/login. Zaloguj się jako admin, używając losowo wygenerowanego hasła z logów.
+4. W przeglądarce przejdź do http://localhost:8080/ui/login. Zaloguj się za pomocą nazwy użytkownika **`admin`** i **`losowo wygenerowanego hasła`**, które możesz znaleźć w logach docker compose.
 
-Po tym musisz zmienić losowo wygenerowane hasło, a nowy interfejs będzie gotowy, z którego możesz bezpośrednio pobrać ingestry.
+Po tym musisz zmienić losowo wygenerowane hasło i będziesz miał gotowy nowy interfejs, z którego możesz bezpośrednio pobrać ingestry.
 
 ### SharpHound
 
