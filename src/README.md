@@ -2,17 +2,18 @@
 
 <figure><img src="images/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
-_Hacktricks Logos & Motion Design von_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
+_Hacktricks-Logos & Motion Design von_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
 
-> [!TIP] > **Willkommen im Wiki, wo Sie jeden Hacking-Trick/Technik/was auch immer finden, was ich aus CTFs, realen Anwendungen, durch das Lesen von Forschungen und Nachrichten gelernt habe.**
+### HackTricks lokal ausführen
+```bash
+# Download latest version of hacktricks
+git clone https://github.com/HackTricks-wiki/hacktricks
+# Run the docker container indicating the path to the hacktricks folder
+docker run --rm -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
+```
+Ihre lokale Kopie von HackTricks wird **unter [http://localhost:3337](http://localhost:3337)** nach <5 Minuten verfügbar sein (es muss das Buch erstellt werden, haben Sie Geduld).
 
-Um zu beginnen, folgen Sie dieser Seite, wo Sie den **typischen Ablauf** finden, den **Sie beim Pentesting** von einem oder mehreren **Maschinen befolgen sollten:**
-
-{{#ref}}
-generic-methodologies-and-resources/pentesting-methodology.md
-{{#endref}}
-
-## Corporate Sponsors
+## Unternehmenssponsoren
 
 ### [STM Cyber](https://www.stmcyber.com)
 
@@ -30,7 +31,7 @@ Sie können ihren **Blog** unter [**https://blog.stmcyber.com**](https://blog.st
 
 <figure><img src="images/image (45).png" alt=""><figcaption></figcaption></figure>
 
-[**RootedCON**](https://www.rootedcon.com) ist die relevanteste Cybersicherheitsveranstaltung in **Spanien** und eine der wichtigsten in **Europa**. Mit **der Mission, technisches Wissen zu fördern**, ist dieser Kongress ein brodelnder Treffpunkt für Technologie- und Cybersicherheitsexperten in jeder Disziplin.
+[**RootedCON**](https://www.rootedcon.com) ist die relevanteste Cybersicherheitsveranstaltung in **Spanien** und eine der wichtigsten in **Europa**. Mit **der Mission, technisches Wissen zu fördern**, ist dieser Kongress ein heißer Treffpunkt für Technologie- und Cybersicherheitsexperten in jeder Disziplin.
 
 {{#ref}}
 https://www.rootedcon.com/
@@ -42,9 +43,9 @@ https://www.rootedcon.com/
 
 <figure><img src="images/image (47).png" alt=""><figcaption></figcaption></figure>
 
-**Intigriti** ist die **Nummer 1** Plattform für ethisches Hacking und **Bug Bounty in Europa.**
+**Intigriti** ist die **Nummer 1 in Europa** für ethisches Hacking und **Bug-Bounty-Plattform.**
 
-**Bug Bounty Tipp**: **Melden Sie sich an** für **Intigriti**, eine Premium-**Bug Bounty-Plattform, die von Hackern für Hacker erstellt wurde**! Treten Sie uns heute bei [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) und beginnen Sie, Belohnungen von bis zu **100.000 $** zu verdienen!
+**Bug-Bounty-Tipp**: **Melden Sie sich an** für **Intigriti**, eine Premium-**Bug-Bounty-Plattform, die von Hackern für Hacker erstellt wurde**! Treten Sie uns heute bei [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) und beginnen Sie, Prämien von bis zu **100.000 $** zu verdienen!
 
 {{#ref}}
 https://go.intigriti.com/hacktricks
@@ -57,7 +58,7 @@ https://go.intigriti.com/hacktricks
 <figure><img src="images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Verwenden Sie [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks), um einfach **Workflows** zu erstellen und zu **automatisieren**, die von den **fortschrittlichsten** Community-Tools der Welt unterstützt werden.
+Verwenden Sie [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks), um Workflows einfach zu erstellen und **zu automatisieren**, die von den **fortschrittlichsten** Community-Tools der Welt unterstützt werden.
 
 Zugang heute erhalten:
 
@@ -71,11 +72,11 @@ https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktr
 
 <figure><img src="images/image (3).png" alt=""><figcaption></figcaption></figure>
 
-Treten Sie dem [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) Server bei, um mit erfahrenen Hackern und Bug Bounty-Jägern zu kommunizieren!
+Treten Sie dem [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) Server bei, um mit erfahrenen Hackern und Bug-Bounty-Jägern zu kommunizieren!
 
-- **Hacking Einblicke:** Engagieren Sie sich mit Inhalten, die in die Aufregung und Herausforderungen des Hackens eintauchen
+- **Hacking-Einblicke:** Engagieren Sie sich mit Inhalten, die in die Aufregung und Herausforderungen des Hackens eintauchen
 - **Echtzeit-Hack-Nachrichten:** Bleiben Sie auf dem Laufenden mit der schnelllebigen Hack-Welt durch Echtzeit-Nachrichten und Einblicke
-- **Neueste Ankündigungen:** Bleiben Sie informiert über die neuesten Bug Bounties und wichtige Plattform-Updates
+- **Neueste Ankündigungen:** Bleiben Sie informiert über die neuesten Bug-Bounties und wichtige Plattform-Updates
 
 **Treten Sie uns auf** [**Discord**](https://discord.com/invite/N3FrSbmwdy) bei und beginnen Sie noch heute mit der Zusammenarbeit mit Top-Hackern!
 
@@ -87,7 +88,7 @@ Treten Sie dem [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) 
 
 **Erhalten Sie die Perspektive eines Hackers auf Ihre Webanwendungen, Netzwerke und Cloud**
 
-**Finden und melden Sie kritische, ausnutzbare Schwachstellen mit echtem Geschäftsauswirkungen.** Verwenden Sie unsere 20+ benutzerdefinierten Tools, um die Angriffsfläche zu kartieren, Sicherheitsprobleme zu finden, die Ihnen ermöglichen, Berechtigungen zu eskalieren, und automatisierte Exploits zu verwenden, um wesentliche Beweise zu sammeln, die Ihre harte Arbeit in überzeugende Berichte verwandeln.
+**Finden und melden Sie kritische, ausnutzbare Schwachstellen mit echtem Geschäftsauswirkungen.** Verwenden Sie unsere 20+ benutzerdefinierten Tools, um die Angriffsfläche zu kartieren, Sicherheitsprobleme zu finden, die Ihnen ermöglichen, Berechtigungen zu eskalieren, und nutzen Sie automatisierte Exploits, um wesentliche Beweise zu sammeln, die Ihre harte Arbeit in überzeugende Berichte verwandeln.
 
 {{#ref}}
 https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons
@@ -110,7 +111,7 @@ Sie können **hier ein kostenloses Konto erstellen** [**hier**](https://serpapi.
 
 ---
 
-### 8kSec Academy – Vertiefende Mobile Security Kurse
+### [8kSec Academy – Detaillierte Mobile Security Kurse](https://academy.8ksec.io/)
 
 <figure><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
@@ -126,13 +127,13 @@ https://academy.8ksec.io/
 
 <figure><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.nl) ist ein professionelles Cybersicherheitsunternehmen mit Sitz in **Amsterdam**, das **Unternehmen auf der ganzen Welt** hilft, sich gegen die neuesten Cybersicherheitsbedrohungen zu schützen, indem es **offensive Sicherheitsdienste** mit einem **modernen** Ansatz anbietet.
+[**WebSec**](https://websec.nl) ist ein professionelles Cybersicherheitsunternehmen mit Sitz in **Amsterdam**, das **Unternehmen auf der ganzen Welt** hilft, sich gegen die neuesten Bedrohungen der Cybersicherheit zu schützen, indem es **offensive Sicherheitsdienste** mit einem **modernen** Ansatz anbietet.
 
 WebSec ist ein **All-in-One-Sicherheitsunternehmen**, was bedeutet, dass sie alles anbieten; Pentesting, **Sicherheits**-Audits, Awareness-Trainings, Phishing-Kampagnen, Code-Überprüfungen, Exploit-Entwicklung, Outsourcing von Sicherheitsexperten und vieles mehr.
 
-Ein weiterer cooler Aspekt von WebSec ist, dass sie im Gegensatz zum Branchendurchschnitt **sehr zuversichtlich in ihre Fähigkeiten sind**, so sehr, dass sie **die besten Qualitätsresultate garantieren**. Auf ihrer Website steht: "**Wenn wir es nicht hacken können, zahlen Sie nicht!**". Für weitere Informationen werfen Sie einen Blick auf ihre [**Website**](https://websec.nl/en/) und [**Blog**](https://websec.nl/blog/)!
+Ein weiterer cooler Aspekt von WebSec ist, dass sie im Gegensatz zum Branchendurchschnitt **sehr zuversichtlich in ihre Fähigkeiten sind**, so sehr, dass sie **die besten Qualitätsresultate garantieren**. Auf ihrer Website steht: "**Wenn wir es nicht hacken können, zahlen Sie nicht!**". Für weitere Informationen werfen Sie einen Blick auf ihre [**Website**](https://websec.nl/en/) und ihren [**Blog**](https://websec.nl/blog/)!
 
-Zusätzlich zu den oben genannten ist WebSec auch ein **engagierter Unterstützer von HackTricks.**
+Zusätzlich zu den oben genannten Punkten ist WebSec auch ein **engagierter Unterstützer von HackTricks.**
 
 {{#ref}}
 https://www.youtube.com/watch?v=Zq2JycGDCPM
@@ -146,7 +147,7 @@ https://www.youtube.com/watch?v=Zq2JycGDCPM
 welcome/hacktricks-values-and-faq.md
 {{#endref}}
 
-## Github Stats
+## Github-Statistiken
 
 ![HackTricks Github Stats](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
 

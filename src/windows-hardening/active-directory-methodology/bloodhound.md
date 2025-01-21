@@ -26,11 +26,11 @@ Um einen Snapshot von AD zu erstellen, gehen Sie zu `Datei` --> `Snapshot erstel
 ```
 ## BloodHound
 
-From [https://github.com/BloodHoundAD/BloodHound](https://github.com/BloodHoundAD/BloodHound)
+Von [https://github.com/BloodHoundAD/BloodHound](https://github.com/BloodHoundAD/BloodHound)
 
 > BloodHound ist eine einseitige Javascript-Webanwendung, die auf [Linkurious](http://linkurio.us/) basiert, mit [Electron](http://electron.atom.io/) kompiliert wurde und eine [Neo4j](https://neo4j.com/) Datenbank verwendet, die von einem C# Datenkollektor gespeist wird.
 
-BloodHound nutzt die Graphentheorie, um die verborgenen und oft unbeabsichtigten Beziehungen innerhalb einer Active Directory- oder Azure-Umgebung offenzulegen. Angreifer können BloodHound verwenden, um hochkomplexe Angriffswege leicht zu identifizieren, die sonst nur schwer schnell zu erkennen wären. Verteidiger können BloodHound nutzen, um dieselben Angriffswege zu identifizieren und zu beseitigen. Sowohl Blue- als auch Red-Teams können BloodHound verwenden, um ein tieferes Verständnis der Berechtigungsbeziehungen in einer Active Directory- oder Azure-Umgebung zu erlangen.
+BloodHound verwendet Graphentheorie, um die verborgenen und oft unbeabsichtigten Beziehungen innerhalb einer Active Directory- oder Azure-Umgebung offenzulegen. Angreifer können BloodHound verwenden, um hochkomplexe Angriffswege leicht zu identifizieren, die sonst unmöglich schnell zu erkennen wären. Verteidiger können BloodHound nutzen, um dieselben Angriffswege zu identifizieren und zu beseitigen. Sowohl Blue- als auch Red-Teams können BloodHound verwenden, um ein tieferes Verständnis der Berechtigungsbeziehungen in einer Active Directory- oder Azure-Umgebung zu erlangen.
 
 Also, [Bloodhound ](https://github.com/BloodHoundAD/BloodHound) ist ein erstaunliches Tool, das eine Domäne automatisch auflisten, alle Informationen speichern, mögliche Privilegieneskalationspfade finden und alle Informationen mithilfe von Grafiken anzeigen kann.
 
@@ -46,17 +46,17 @@ Nach der Erstellung von BloodHound CE wurde das gesamte Projekt zur Benutzerfreu
 
 1. Installieren Sie Docker Compose. Dies sollte mit der [Docker Desktop](https://www.docker.com/products/docker-desktop/) Installation enthalten sein.
 2. Führen Sie aus:
-```
+```bash
 curl -L https://ghst.ly/getbhce | docker compose -f - up
 ```
 3. Lokalisieren Sie das zufällig generierte Passwort in der Terminalausgabe von Docker Compose.  
-4. Navigieren Sie in einem Browser zu http://localhost:8080/ui/login. Melden Sie sich mit dem Benutzernamen admin und dem zufällig generierten Passwort aus den Protokollen an.
+4. Navigieren Sie in einem Browser zu http://localhost:8080/ui/login. Melden Sie sich mit dem Benutzernamen **`admin`** und einem **`zufällig generierten Passwort`** an, das Sie in den Protokollen von Docker Compose finden können.
 
 Nachdem Sie dies getan haben, müssen Sie das zufällig generierte Passwort ändern, und Sie haben die neue Benutzeroberfläche bereit, von der aus Sie die Ingestoren direkt herunterladen können.
 
 ### SharpHound
 
-Sie haben mehrere Optionen, aber wenn Sie SharpHound von einem PC ausführen möchten, der der Domäne beigetreten ist, und Ihren aktuellen Benutzer verwenden und alle Informationen extrahieren möchten, können Sie:
+Sie haben mehrere Optionen, aber wenn Sie SharpHound von einem PC ausführen möchten, der der Domäne beigetreten ist, und Ihren aktuellen Benutzer verwenden und alle Informationen extrahieren möchten, können Sie Folgendes tun:
 ```
 ./SharpHound.exe --CollectionMethods All
 Invoke-BloodHound -CollectionMethod All
@@ -82,6 +82,6 @@ group3r.exe -f <filepath-name.log>
 
 [**PingCastle**](https://www.pingcastle.com/documentation/) **bewertet die Sicherheitslage einer AD-Umgebung** und bietet einen schönen **Bericht** mit Grafiken.
 
-Um es auszuführen, kann die Binary `PingCastle.exe` ausgeführt werden, und es wird eine **interaktive Sitzung** gestartet, die ein Menü mit Optionen präsentiert. Die Standardoption, die verwendet werden soll, ist **`healthcheck`**, die eine Basislinie **Übersicht** über die **Domäne** erstellt und **Fehlkonfigurationen** und **Schwachstellen** findet.
+Um es auszuführen, kann die Binary `PingCastle.exe` gestartet werden, und es wird eine **interaktive Sitzung** mit einem Menü von Optionen präsentiert. Die Standardoption, die verwendet werden soll, ist **`healthcheck`**, die eine Basislinie **Übersicht** über die **Domäne** erstellt und **Fehlkonfigurationen** sowie **Schwachstellen** findet.
 
 {{#include ../../banners/hacktricks-training.md}}
