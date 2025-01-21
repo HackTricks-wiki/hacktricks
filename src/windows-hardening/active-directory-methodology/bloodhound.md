@@ -46,11 +46,11 @@ Después de la creación de BloodHound CE, todo el proyecto fue actualizado para
 
 1. Instala Docker Compose. Esto debería estar incluido con la instalación de [Docker Desktop](https://www.docker.com/products/docker-desktop/).
 2. Ejecuta:
-```
+```bash
 curl -L https://ghst.ly/getbhce | docker compose -f - up
 ```
 3. Localiza la contraseña generada aleatoriamente en la salida del terminal de Docker Compose.  
-4. En un navegador, navega a http://localhost:8080/ui/login. Inicia sesión con el nombre de usuario admin y la contraseña generada aleatoriamente de los registros.
+4. En un navegador, navega a http://localhost:8080/ui/login. Inicia sesión con el nombre de usuario **`admin`** y una **`contraseña generada aleatoriamente`** que puedes encontrar en los registros de docker compose.
 
 Después de esto, necesitarás cambiar la contraseña generada aleatoriamente y tendrás la nueva interfaz lista, desde la cual podrás descargar directamente los ingestors.
 

@@ -4,13 +4,14 @@
 
 _Los logos y el diseño en movimiento de Hacktricks son de_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
 
-> [!TIP] > **Bienvenido a la wiki donde encontrarás cada truco/técnica de hacking/cualquier cosa que he aprendido de CTFs, aplicaciones de la vida real, leyendo investigaciones y noticias.**
-
-Para comenzar, sigue esta página donde encontrarás el **flujo típico** que **debes seguir al realizar pentesting** en una o más **máquinas:**
-
-{{#ref}}
-generic-methodologies-and-resources/pentesting-methodology.md
-{{#endref}}
+### Ejecutar HackTricks Localmente
+```bash
+# Download latest version of hacktricks
+git clone https://github.com/HackTricks-wiki/hacktricks
+# Run the docker container indicating the path to the hacktricks folder
+docker run --rm -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
+```
+Tu copia local de HackTricks estará **disponible en [http://localhost:3337](http://localhost:3337)** después de <5 minutos (necesita construir el libro, ten paciencia).
 
 ## Patrocinadores Corporativos
 
@@ -18,7 +19,7 @@ generic-methodologies-and-resources/pentesting-methodology.md
 
 <figure><img src="images/stm (1).png" alt=""><figcaption></figcaption></figure>
 
-[**STM Cyber**](https://www.stmcyber.com) es una gran empresa de ciberseguridad cuyo lema es **HACK THE UNHACKABLE**. Realizan su propia investigación y desarrollan sus propias herramientas de hacking para **ofrecer varios servicios valiosos de ciberseguridad** como pentesting, equipos rojos y capacitación.
+[**STM Cyber**](https://www.stmcyber.com) es una gran empresa de ciberseguridad cuyo lema es **HACK THE UNHACKABLE**. Realizan su propia investigación y desarrollan sus propias herramientas de hacking para **ofrecer varios servicios valiosos de ciberseguridad** como pentesting, Red teams y capacitación.
 
 Puedes consultar su **blog** en [**https://blog.stmcyber.com**](https://blog.stmcyber.com)
 
@@ -30,7 +31,7 @@ Puedes consultar su **blog** en [**https://blog.stmcyber.com**](https://blog.stm
 
 <figure><img src="images/image (45).png" alt=""><figcaption></figcaption></figure>
 
-[**RootedCON**](https://www.rootedcon.com) es el evento de ciberseguridad más relevante en **España** y uno de los más importantes en **Europa**. Con **la misión de promover el conocimiento técnico**, este congreso es un punto de encuentro vibrante para profesionales de la tecnología y la ciberseguridad en cada disciplina.
+[**RootedCON**](https://www.rootedcon.com) es el evento de ciberseguridad más relevante en **España** y uno de los más importantes en **Europa**. Con **la misión de promover el conocimiento técnico**, este congreso es un punto de encuentro vibrante para profesionales de la tecnología y la ciberseguridad en todas las disciplinas.
 
 {{#ref}}
 https://www.rootedcon.com/
@@ -57,7 +58,7 @@ https://go.intigriti.com/hacktricks
 <figure><img src="images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Usa [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente, impulsados por las **herramientas comunitarias más avanzadas** del mundo.
+Usa [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente, impulsados por las herramientas comunitarias **más avanzadas** del mundo.
 
 Obtén acceso hoy:
 
@@ -71,11 +72,11 @@ https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktr
 
 <figure><img src="images/image (3).png" alt=""><figcaption></figcaption></figure>
 
-Únete al servidor de [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) para comunicarte con hackers experimentados y cazadores de bug bounty!
+Únete al servidor de [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) para comunicarte con hackers experimentados y cazadores de bugs!
 
 - **Perspectivas de Hacking:** Participa en contenido que profundiza en la emoción y los desafíos del hacking
-- **Noticias de Hackeo en Tiempo Real:** Mantente al día con el mundo del hacking a través de noticias e información en tiempo real
-- **Últimos Anuncios:** Mantente informado sobre los nuevos bug bounties que se lanzan y actualizaciones cruciales de la plataforma
+- **Noticias de Hackeo en Tiempo Real:** Mantente al día con el mundo del hacking a un ritmo acelerado a través de noticias e información en tiempo real
+- **Últimos Anuncios:** Mantente informado sobre las nuevas recompensas de bugs que se lanzan y actualizaciones cruciales de la plataforma
 
 **Únete a nosotros en** [**Discord**](https://discord.com/invite/N3FrSbmwdy) y comienza a colaborar con los mejores hackers hoy!
 
@@ -99,7 +100,7 @@ https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktrick
 
 <figure><img src="images/image (1254).png" alt=""><figcaption></figcaption></figure>
 
-**SerpApi** ofrece APIs rápidas y fáciles en tiempo real para **acceder a los resultados de motores de búsqueda**. Ellos scrapean motores de búsqueda, manejan proxies, resuelven captchas y analizan todos los datos estructurados ricos por ti.
+**SerpApi** ofrece APIs rápidas y fáciles en tiempo real para **acceder a resultados de motores de búsqueda**. Ellos scrapean motores de búsqueda, manejan proxies, resuelven captchas y analizan todos los datos estructurados ricos por ti.
 
 Una suscripción a uno de los planes de SerpApi incluye acceso a más de 50 APIs diferentes para scrapeo de diferentes motores de búsqueda, incluyendo Google, Bing, Baidu, Yahoo, Yandex, y más.\
 A diferencia de otros proveedores, **SerpApi no solo scrapea resultados orgánicos**. Las respuestas de SerpApi incluyen consistentemente todos los anuncios, imágenes y videos en línea, gráficos de conocimiento y otros elementos y características presentes en los resultados de búsqueda.
@@ -110,11 +111,11 @@ Puedes **crear una cuenta gratuita** [**aquí**](https://serpapi.com/users/sign_
 
 ---
 
-### 8kSec Academy – Cursos de Seguridad Móvil en Profundidad
+### [8kSec Academy – Cursos de Seguridad Móvil en Profundidad](https://academy.8ksec.io/)
 
 <figure><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Aprende las tecnologías y habilidades necesarias para realizar investigación de vulnerabilidades, pruebas de penetración y ingeniería inversa para proteger aplicaciones y dispositivos móviles. **Domina la seguridad de iOS y Android** a través de nuestros cursos a demanda y **certifícate**:
+Aprende las tecnologías y habilidades necesarias para realizar investigación de vulnerabilidades, pruebas de penetración y ingeniería inversa para proteger aplicaciones y dispositivos móviles. **Domina la seguridad de iOS y Android** a través de nuestros cursos bajo demanda y **certifícate**:
 
 {{#ref}}
 https://academy.8ksec.io/
