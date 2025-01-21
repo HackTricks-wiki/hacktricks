@@ -4,13 +4,14 @@
 
 _Logos e design em movimento do Hacktricks por_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
 
-> [!TIP] > **Bem-vindo ao wiki onde você encontrará cada truque/técnica/habilidade de hacking que aprendi em CTFs, aplicativos da vida real, lendo pesquisas e notícias.**
-
-Para começar, siga esta página onde você encontrará o **fluxo típico** que **você deve seguir ao realizar pentesting** em uma ou mais **máquinas:**
-
-{{#ref}}
-generic-methodologies-and-resources/pentesting-methodology.md
-{{#endref}}
+### Execute o HackTricks Localmente
+```bash
+# Download latest version of hacktricks
+git clone https://github.com/HackTricks-wiki/hacktricks
+# Run the docker container indicating the path to the hacktricks folder
+docker run --rm -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
+```
+Sua cópia local do HackTricks estará **disponível em [http://localhost:3337](http://localhost:3337)** após <5 minutos (ele precisa compilar o livro, seja paciente).
 
 ## Patrocinadores Corporativos
 
@@ -20,7 +21,7 @@ generic-methodologies-and-resources/pentesting-methodology.md
 
 [**STM Cyber**](https://www.stmcyber.com) é uma ótima empresa de cibersegurança cujo slogan é **HACK THE UNHACKABLE**. Eles realizam suas próprias pesquisas e desenvolvem suas próprias ferramentas de hacking para **oferecer vários serviços valiosos de cibersegurança** como pentesting, Red teams e treinamento.
 
-Você pode conferir o **blog** deles em [**https://blog.stmcyber.com**](https://blog.stmcyber.com)
+Você pode conferir seu **blog** em [**https://blog.stmcyber.com**](https://blog.stmcyber.com)
 
 **STM Cyber** também apoia projetos de código aberto em cibersegurança como o HackTricks :)
 
@@ -42,7 +43,7 @@ https://www.rootedcon.com/
 
 <figure><img src="images/image (47).png" alt=""><figcaption></figcaption></figure>
 
-**Intigriti** é a **plataforma de hacking ético e bug bounty #1 da Europa.**
+**Intigriti** é a **plataforma de hacking ético e bug bounty número 1 da Europa.**
 
 **Dica de bug bounty**: **inscreva-se** no **Intigriti**, uma plataforma premium de **bug bounty criada por hackers, para hackers**! Junte-se a nós em [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) hoje e comece a ganhar recompensas de até **$100,000**!
 
@@ -87,7 +88,7 @@ Junte-se ao servidor [**HackenProof Discord**](https://discord.com/invite/N3FrSb
 
 **Obtenha a perspectiva de um hacker sobre seus aplicativos web, rede e nuvem**
 
-**Encontre e relate vulnerabilidades críticas e exploráveis com impacto real nos negócios.** Use nossas mais de 20 ferramentas personalizadas para mapear a superfície de ataque, encontrar problemas de segurança que permitem escalar privilégios e usar exploits automatizados para coletar evidências essenciais, transformando seu trabalho árduo em relatórios persuasivos.
+**Encontre e relate vulnerabilidades críticas e exploráveis com impacto real nos negócios.** Use nossas 20+ ferramentas personalizadas para mapear a superfície de ataque, encontrar problemas de segurança que permitem escalar privilégios e usar exploits automatizados para coletar evidências essenciais, transformando seu trabalho árduo em relatórios persuasivos.
 
 {{#ref}}
 https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons
@@ -105,12 +106,12 @@ Uma assinatura de um dos planos da SerpApi inclui acesso a mais de 50 APIs difer
 Ao contrário de outros provedores, **a SerpApi não apenas raspa resultados orgânicos**. As respostas da SerpApi incluem consistentemente todos os anúncios, imagens e vídeos inline, gráficos de conhecimento e outros elementos e recursos presentes nos resultados de busca.
 
 Os atuais clientes da SerpApi incluem **Apple, Shopify e GrubHub**.\
-Para mais informações, confira o [**blog**](https://serpapi.com/blog/)** deles,** ou experimente um exemplo em seu [**playground**](https://serpapi.com/playground)**.**\
+Para mais informações, confira seu [**blog**](https://serpapi.com/blog/)**,** ou experimente um exemplo em seu [**playground**](https://serpapi.com/playground)**.**\
 Você pode **criar uma conta gratuita** [**aqui**](https://serpapi.com/users/sign_up)**.**
 
 ---
 
-### 8kSec Academy – Cursos de Segurança Móvel em Profundidade
+### [8kSec Academy – Cursos de Segurança Móvel Aprofundados](https://academy.8ksec.io/)
 
 <figure><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
@@ -128,7 +129,7 @@ https://academy.8ksec.io/
 
 [**WebSec**](https://websec.nl) é uma empresa profissional de cibersegurança com sede em **Amsterdã** que ajuda a **proteger** empresas **em todo o mundo** contra as mais recentes ameaças de cibersegurança, fornecendo **serviços de segurança ofensiva** com uma abordagem **moderna**.
 
-WebSec é uma **empresa de segurança tudo-em-um**, o que significa que eles fazem tudo; Pentesting, **Auditorias de Segurança**, Treinamentos de Conscientização, Campanhas de Phishing, Revisão de Código, Desenvolvimento de Exploits, Terceirização de Especialistas em Segurança e muito mais.
+WebSec é uma **empresa de segurança tudo-em-um**, o que significa que eles fazem tudo; Pentesting, **Auditorias** de Segurança, Treinamentos de Conscientização, Campanhas de Phishing, Revisão de Código, Desenvolvimento de Exploits, Terceirização de Especialistas em Segurança e muito mais.
 
 Outra coisa legal sobre a WebSec é que, ao contrário da média da indústria, a WebSec é **muito confiante em suas habilidades**, a tal ponto que **garante os melhores resultados de qualidade**, afirmando em seu site "**Se não conseguimos hackear, você não paga!**". Para mais informações, dê uma olhada em seu [**site**](https://websec.nl/en/) e [**blog**](https://websec.nl/blog/)!
 
