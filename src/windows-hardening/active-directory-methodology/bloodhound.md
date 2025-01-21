@@ -46,13 +46,13 @@ BloodHound CEの作成後、プロジェクト全体がDockerを使用しやす�
 
 1. Docker Composeをインストールします。これは[Docker Desktop](https://www.docker.com/products/docker-desktop/)のインストールに含まれているはずです。
 2. 実行します:
-```
+```bash
 curl -L https://ghst.ly/getbhce | docker compose -f - up
 ```
 3. Docker Composeのターミナル出力でランダムに生成されたパスワードを見つけます。  
-4. ブラウザで http://localhost:8080/ui/login に移動します。ユーザー名にadmin、ログからのランダムに生成されたパスワードでログインします。
+4. ブラウザで http://localhost:8080/ui/login に移動します。ユーザー名 **`admin`** と、docker composeのログにある **`ランダムに生成されたパスワード`** でログインします。
 
-その後、ランダムに生成されたパスワードを変更する必要があり、新しいインターフェースが準備されます。そこから直接ingestorsをダウンロードできます。
+その後、ランダムに生成されたパスワードを変更する必要があり、新しいインターフェースが準備されます。そこから直接イングエスターをダウンロードできます。
 
 ### SharpHound
 
@@ -82,6 +82,6 @@ group3r.exe -f <filepath-name.log>
 
 [**PingCastle**](https://www.pingcastle.com/documentation/) **はAD環境のセキュリティ姿勢を評価**し、グラフ付きの素晴らしい**レポート**を提供します。
 
-実行するには、バイナリ`PingCastle.exe`を実行すると、オプションのメニューを表示する**インタラクティブセッション**が開始されます。使用するデフォルトオプションは**`healthcheck`**で、**ドメイン**の**概要**を確立し、**誤設定**や**脆弱性**を見つけます。
+実行するには、バイナリ`PingCastle.exe`を実行すると、オプションのメニューを表示する**インタラクティブセッション**が開始されます。使用するデフォルトのオプションは**`healthcheck`**で、**ドメイン**の**概要**を確立し、**誤設定**や**脆弱性**を見つけます。
 
 {{#include ../../banners/hacktricks-training.md}}
