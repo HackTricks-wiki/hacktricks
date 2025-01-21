@@ -6,7 +6,7 @@
 
 [AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) est issu de la Sysinternal Suite :
 
-> Un visualiseur et éditeur avancé d'Active Directory (AD). Vous pouvez utiliser AD Explorer pour naviguer facilement dans une base de données AD, définir des emplacements favoris, afficher les propriétés des objets et les attributs sans ouvrir de boîtes de dialogue, modifier les autorisations, voir le schéma d'un objet et exécuter des recherches sophistiquées que vous pouvez enregistrer et réexécuter.
+> Un visualiseur et éditeur avancé d'Active Directory (AD). Vous pouvez utiliser AD Explorer pour naviguer facilement dans une base de données AD, définir des emplacements favoris, afficher les propriétés des objets et les attributs sans ouvrir de boîtes de dialogue, modifier les autorisations, afficher le schéma d'un objet et exécuter des recherches sophistiquées que vous pouvez enregistrer et réexécuter.
 
 ### Instantanés
 
@@ -30,9 +30,9 @@ From [https://github.com/BloodHoundAD/BloodHound](https://github.com/BloodHoundA
 
 > BloodHound est une application web Javascript à page unique, construite sur [Linkurious](http://linkurio.us/), compilée avec [Electron](http://electron.atom.io/), avec une base de données [Neo4j](https://neo4j.com/) alimentée par un collecteur de données C#.
 
-BloodHound utilise la théorie des graphes pour révéler les relations cachées et souvent non intentionnelles au sein d'un environnement Active Directory ou Azure. Les attaquants peuvent utiliser BloodHound pour identifier facilement des chemins d'attaque hautement complexes qui seraient autrement impossibles à identifier rapidement. Les défenseurs peuvent utiliser BloodHound pour identifier et éliminer ces mêmes chemins d'attaque. Les équipes bleues et rouges peuvent utiliser BloodHound pour acquérir facilement une compréhension plus approfondie des relations de privilège dans un environnement Active Directory ou Azure.
+BloodHound utilise la théorie des graphes pour révéler les relations cachées et souvent non intentionnelles au sein d'un environnement Active Directory ou Azure. Les attaquants peuvent utiliser BloodHound pour identifier facilement des chemins d'attaque très complexes qui seraient autrement impossibles à identifier rapidement. Les défenseurs peuvent utiliser BloodHound pour identifier et éliminer ces mêmes chemins d'attaque. Les équipes bleues et rouges peuvent utiliser BloodHound pour acquérir facilement une compréhension plus approfondie des relations de privilège dans un environnement Active Directory ou Azure.
 
-Ainsi, [Bloodhound ](https://github.com/BloodHoundAD/BloodHound) est un outil incroyable qui peut énumérer un domaine automatiquement, sauvegarder toutes les informations, trouver des chemins d'escalade de privilèges possibles et afficher toutes les informations à l'aide de graphes.
+Donc, [Bloodhound ](https://github.com/BloodHoundAD/BloodHound) est un outil incroyable qui peut énumérer un domaine automatiquement, sauvegarder toutes les informations, trouver des chemins d'escalade de privilèges possibles et afficher toutes les informations à l'aide de graphes.
 
 BloodHound est composé de 2 parties principales : **ingestors** et l'**application de visualisation**.
 
@@ -46,13 +46,13 @@ Après la création de BloodHound CE, l'ensemble du projet a été mis à jour p
 
 1. Installez Docker Compose. Cela devrait être inclus avec l'installation de [Docker Desktop](https://www.docker.com/products/docker-desktop/).
 2. Exécutez :
-```
+```bash
 curl -L https://ghst.ly/getbhce | docker compose -f - up
 ```
 3. Localisez le mot de passe généré aléatoirement dans la sortie du terminal de Docker Compose.  
-4. Dans un navigateur, accédez à http://localhost:8080/ui/login. Connectez-vous avec le nom d'utilisateur admin et le mot de passe généré aléatoirement à partir des journaux.
+4. Dans un navigateur, accédez à http://localhost:8080/ui/login. Connectez-vous avec le nom d'utilisateur **`admin`** et un **`mot de passe généré aléatoirement`** que vous pouvez trouver dans les journaux de docker compose.
 
-Après cela, vous devrez changer le mot de passe généré aléatoirement et vous aurez la nouvelle interface prête, à partir de laquelle vous pourrez télécharger directement les ingestors.
+Après cela, vous devrez changer le mot de passe généré aléatoirement et vous aurez la nouvelle interface prête, à partir de laquelle vous pouvez directement télécharger les ingestors.
 
 ### SharpHound
 
@@ -72,7 +72,7 @@ runas /netonly /user:domain\user "powershell.exe -exec bypass"
 ## Group3r
 
 [**Group3r**](https://github.com/Group3r/Group3r) est un outil pour trouver des **vulnérabilités** dans Active Directory associées à **Group Policy**. \
-Vous devez **exécuter group3r** depuis un hôte à l'intérieur du domaine en utilisant **n'importe quel utilisateur de domaine**.
+Vous devez **exécuter group3r** depuis un hôte à l'intérieur du domaine en utilisant **n'importe quel utilisateur du domaine**.
 ```bash
 group3r.exe -f <filepath-name.log>
 # -s sends results to stdin
