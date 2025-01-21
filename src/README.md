@@ -4,21 +4,22 @@
 
 _Hacktricks logotipi i animacija dizajnirani od_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
 
-> [!TIP] > **Dobrodošli u wiki gde ćete pronaći svaku hakersku trik/tehniku/šta god da sam naučio iz CTF-ova, aplikacija iz stvarnog života, čitajući istraživanja i vesti.**
+### Pokrenite HackTricks lokalno
+```bash
+# Download latest version of hacktricks
+git clone https://github.com/HackTricks-wiki/hacktricks
+# Run the docker container indicating the path to the hacktricks folder
+docker run --rm -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
+```
+Vaša lokalna kopija HackTricks biće **dostupna na [http://localhost:3337](http://localhost:3337)** nakon <5 minuta (potrebno je da se izgradi knjiga, budite strpljivi).
 
-Da biste započeli, pratite ovu stranicu gde ćete pronaći **tipičan tok** koji **treba da pratite kada radite pentesting** na jednoj ili više **mašina:**
-
-{{#ref}}
-generic-methodologies-and-resources/pentesting-methodology.md
-{{#endref}}
-
-## Corporate Sponsors
+## Korporativni sponzori
 
 ### [STM Cyber](https://www.stmcyber.com)
 
 <figure><img src="images/stm (1).png" alt=""><figcaption></figcaption></figure>
 
-[**STM Cyber**](https://www.stmcyber.com) je sjajna kompanija za sajber bezbednost čiji je slogan **HACK THE UNHACKABLE**. Oni sprovode svoja istraživanja i razvijaju svoje alate za hakovanje kako bi **ponudili nekoliko vrednih usluga sajber bezbednosti** kao što su pentesting, Red timovi i obuka.
+[**STM Cyber**](https://www.stmcyber.com) je sjajna kompanija za sajber bezbednost čiji je slogan **HACK THE UNHACKABLE**. Oni sprovode sopstvena istraživanja i razvijaju svoje alate za hakovanje kako bi **ponudili nekoliko vrednih usluga sajber bezbednosti** kao što su pentesting, Red timovi i obuka.
 
 Možete proveriti njihov **blog** na [**https://blog.stmcyber.com**](https://blog.stmcyber.com)
 
@@ -30,7 +31,7 @@ Možete proveriti njihov **blog** na [**https://blog.stmcyber.com**](https://blo
 
 <figure><img src="images/image (45).png" alt=""><figcaption></figcaption></figure>
 
-[**RootedCON**](https://www.rootedcon.com) je najrelevantnija sajber bezbednosna manifestacija u **Španiji** i jedna od najvažnijih u **Evropi**. Sa **misijom promovisanja tehničkog znanja**, ovaj kongres je vrelo mesto okupljanja za profesionalce u tehnologiji i sajber bezbednosti u svakoj disciplini.
+[**RootedCON**](https://www.rootedcon.com) je najrelevantnija sajber bezbednosna manifestacija u **Španiji** i jedna od najvažnijih u **Evropi**. Sa **misijom promovisanja tehničkog znanja**, ovaj kongres je vrelo mesto okupljanja profesionalaca iz tehnologije i sajber bezbednosti u svakoj disciplini.
 
 {{#ref}}
 https://www.rootedcon.com/
@@ -42,9 +43,9 @@ https://www.rootedcon.com/
 
 <figure><img src="images/image (47).png" alt=""><figcaption></figcaption></figure>
 
-**Intigriti** je **broj 1** etička platforma za hakovanje i **bug bounty.**
+**Intigriti** je **Evropa #1** etička platforma za hakovanje i **bug bounty.**
 
-**Bug bounty savet**: **prijavite se** za **Intigriti**, premium **bug bounty platformu koju su kreirali hakeri, za hakere**! Pridružite nam se na [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) danas, i počnite da zarađujete nagrade do **$100,000**!
+**Saveta za bug bounty**: **prijavite se** za **Intigriti**, premium **bug bounty platformu koju su kreirali hakeri, za hakere**! Pridružite nam se na [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) danas, i počnite da zarađujete nagrade do **$100,000**!
 
 {{#ref}}
 https://go.intigriti.com/hacktricks
@@ -57,7 +58,7 @@ https://go.intigriti.com/hacktricks
 <figure><img src="images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Koristite [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) da lako izgradite i **automatizujete radne tokove** pokretane najnaprednijim zajedničkim alatima na svetu.
+Koristite [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) za lako kreiranje i **automatizaciju radnih tokova** pokretanih najnaprednijim zajedničkim alatima na svetu.
 
 Pribavite pristup danas:
 
@@ -73,9 +74,9 @@ https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktr
 
 Pridružite se [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) serveru da komunicirate sa iskusnim hakerima i lovcima na bugove!
 
-- **Hakerski uvidi:** Uključite se u sadržaj koji se bavi uzbuđenjem i izazovima hakovanja
+- **Uvidi u hakovanje:** Uključite se u sadržaj koji se bavi uzbuđenjem i izazovima hakovanja
 - **Vesti o hakovanju u realnom vremenu:** Budite u toku sa brzim svetom hakovanja kroz vesti i uvide u realnom vremenu
-- **Najnovija obaveštenja:** Budite informisani o najnovijim bug bounty nagradama i važnim ažuriranjima platforme
+- **Najnovija obaveštenja:** Budite informisani o najnovijim nagradama za bugove i važnim ažuriranjima platforme
 
 **Pridružite nam se na** [**Discord**](https://discord.com/invite/N3FrSbmwdy) i počnite da sarađujete sa vrhunskim hakerima danas!
 
@@ -102,7 +103,7 @@ https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktrick
 **SerpApi** nudi brze i lake API-je u realnom vremenu za **pristup rezultatima pretraživača**. Oni sakupljaju podatke sa pretraživača, upravljaju proxy-ima, rešavaju captcha izazove i analiziraju sve bogate strukturirane podatke za vas.
 
 Pretplata na jedan od SerpApi planova uključuje pristup više od 50 različitih API-ja za sakupljanje podataka sa različitih pretraživača, uključujući Google, Bing, Baidu, Yahoo, Yandex i druge.\
-Za razliku od drugih provajdera, **SerpApi ne sakuplja samo organske rezultate**. SerpApi odgovori dosledno uključuju sve oglase, inline slike i video zapise, znanje grafove i druge elemente i funkcije prisutne u rezultatima pretrage.
+Za razliku od drugih provajdera, **SerpApi ne sakuplja samo organske rezultate**. Odgovori SerpApi dosledno uključuju sve oglase, inline slike i video zapise, znanje grafove i druge elemente i funkcije prisutne u rezultatima pretrage.
 
 Trenutni klijenti SerpApi uključuju **Apple, Shopify i GrubHub**.\
 Za više informacija pogledajte njihov [**blog**](https://serpapi.com/blog/)**,** ili isprobajte primer u njihovom [**playground**](https://serpapi.com/playground)**.**\
@@ -110,11 +111,11 @@ Možete **napraviti besplatan nalog** [**ovde**](https://serpapi.com/users/sign_
 
 ---
 
-### 8kSec Academy – Dubinski kursevi mobilne bezbednosti
+### [8kSec Academy – Dubinski kursevi mobilne bezbednosti](https://academy.8ksec.io/)
 
 <figure><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Naučite tehnologije i veštine potrebne za izvođenje istraživanja ranjivosti, penetracionog testiranja i obrnute inženjeringa kako biste zaštitili mobilne aplikacije i uređaje. **Savladajte iOS i Android bezbednost** kroz naše kurseve na zahtev i **dobijte sertifikat**:
+Naučite tehnologije i veštine potrebne za sprovođenje istraživanja ranjivosti, penetracionog testiranja i obrnute inženjeringa kako biste zaštitili mobilne aplikacije i uređaje. **Savladajte iOS i Android bezbednost** kroz naše kurseve na zahtev i **dobijte sertifikat**:
 
 {{#ref}}
 https://academy.8ksec.io/
@@ -128,7 +129,7 @@ https://academy.8ksec.io/
 
 [**WebSec**](https://websec.nl) je profesionalna kompanija za sajber bezbednost sa sedištem u **Amsterdamu** koja pomaže **zaštiti** preduzeća **široko po svetu** od najnovijih pretnji u oblasti sajber bezbednosti pružajući **usluge ofanzivne bezbednosti** sa **modernim** pristupom.
 
-WebSec je **sve-u-jednom bezbednosna kompanija** što znači da rade sve; Pentesting, **Bezbednosne** revizije, Obuke o svesti, Phishing kampanje, Revizije koda, Razvoj eksploata, Outsourcing bezbednosnih stručnjaka i još mnogo toga.
+WebSec je **sve-u-jednom bezbednosna kompanija** što znači da rade sve; Pentesting, **Bezbednosne** revizije, Obuke o svesti, Phishing kampanje, Revizija koda, Razvoj eksploata, Outsourcing bezbednosnih stručnjaka i još mnogo toga.
 
 Još jedna zanimljiva stvar o WebSec-u je da, za razliku od industrijskog proseka, WebSec je **veoma samouveren u svoje veštine**, do te mere da **garantuje najbolje kvalitetne rezultate**, kako stoji na njihovom sajtu "**Ako ne možemo da hakujemo, ne plaćate!**". Za više informacija pogledajte njihov [**sajt**](https://websec.nl/en/) i [**blog**](https://websec.nl/blog/)!
 
@@ -138,7 +139,7 @@ Pored navedenog, WebSec je takođe **posvećen podržavalac HackTricks.**
 https://www.youtube.com/watch?v=Zq2JycGDCPM
 {{#endref}}
 
-## License & Disclaimer
+## Licenca i odricanje od odgovornosti
 
 Proverite ih u:
 
@@ -146,8 +147,8 @@ Proverite ih u:
 welcome/hacktricks-values-and-faq.md
 {{#endref}}
 
-## Github Stats
+## Github Statistika
 
-![HackTricks Github Stats](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
+![HackTricks Github Statistika](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
 
 {{#include ./banners/hacktricks-training.md}}
