@@ -6,12 +6,12 @@
 
 [AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) is van die Sysinternal Suite:
 
-> 'n Gevorderde Active Directory (AD) kyker en redigeerder. Jy kan AD Explorer gebruik om maklik deur 'n AD-databasis te navigeer, gunsteling plekke te definieer, objek eienskappe en kenmerke te besigtig sonder om dialoogvensters te open, regte te redigeer, 'n objek se skema te besigtig, en gesofistikeerde soektogte uit te voer wat jy kan stoor en weer uitvoer.
+> 'n Gevorderde Active Directory (AD) kyker en redigeerder. Jy kan AD Explorer gebruik om maklik deur 'n AD-databasis te navigeer, gunsteling plekke te definieer, objek eienskappe en attribuut te sien sonder om dialoogvensters te open, regte te redigeer, 'n objek se skema te sien, en gesofistikeerde soektogte uit te voer wat jy kan stoor en weer uitvoer.
 
 ### Snapshots
 
-AD Explorer kan snapshots van 'n AD skep sodat jy dit buitelyn kan nagaan.\
-Dit kan gebruik word om kwesbaarhede buitelyn te ontdek, of om verskillende toestande van die AD DB oor tyd te vergelyk.
+AD Explorer kan snapshots van 'n AD skep sodat jy dit aflyn kan nagaan.\
+Dit kan gebruik word om kwesbaarhede aflyn te ontdek, of om verskillende toestande van die AD DB oor tyd te vergelyk.
 
 Jy sal die gebruikersnaam, wagwoord, en rigting benodig om te verbind (enige AD-gebruiker is benodig).
 
@@ -46,24 +46,24 @@ Na die skepping van BloodHound CE, is die hele projek opgedateer vir gebruiksgem
 
 1. Installeer Docker Compose. Dit behoort ingesluit te wees met die [Docker Desktop](https://www.docker.com/products/docker-desktop/) installasie.
 2. Loop:
-```
+```bash
 curl -L https://ghst.ly/getbhce | docker compose -f - up
 ```
 3. Vind die ewekansig gegenereerde wagwoord in die terminaluitvoer van Docker Compose.  
-4. Gaan in 'n blaaskie na http://localhost:8080/ui/login. Teken in met 'n gebruikersnaam van admin en die ewekansig gegenereerde wagwoord uit die logs.  
+4. In 'n blaaier, navigeer na http://localhost:8080/ui/login. Meld aan met die gebruikersnaam **`admin`** en 'n **`ewekansig gegenereerde wagwoord`** wat jy in die logs van docker compose kan vind.
 
-Na hierdie sal jy die ewekansig gegenereerde wagwoord moet verander en jy sal die nuwe koppelvlak gereed hê, waarvandaan jy direk die ingestors kan aflaai.  
+Na hierdie sal jy die ewekansig gegenereerde wagwoord moet verander en jy sal die nuwe koppelvlak gereed hê, waarvan jy direk die ingestors kan aflaai.
 
-### SharpHound  
+### SharpHound
 
-Hulle het verskeie opsies, maar as jy SharpHound vanaf 'n PC wat by die domein aangesluit is, wil uitvoer, met jou huidige gebruiker en al die inligting wil onttrek, kan jy doen:
+Hulle het verskeie opsies, maar as jy SharpHound vanaf 'n rekenaar wat by die domein aangesluit is, wil uitvoer, met jou huidige gebruiker en al die inligting wil onttrek, kan jy doen:
 ```
 ./SharpHound.exe --CollectionMethods All
 Invoke-BloodHound -CollectionMethod All
 ```
 > Jy kan meer lees oor **CollectionMethod** en lus sessie [hier](https://support.bloodhoundenterprise.io/hc/en-us/articles/17481375424795-All-SharpHound-Community-Edition-Flags-Explained)
 
-As jy SharpHound met verskillende akrediteerbesonderhede wil uitvoer, kan jy 'n CMD netonly-sessie skep en SharpHound van daar af uitvoer:
+As jy SharpHound met verskillende akrediteerbesonderhede wil uitvoer, kan jy 'n CMD netonly sessie skep en SharpHound van daar af uitvoer:
 ```
 runas /netonly /user:domain\user "powershell.exe -exec bypass"
 ```
