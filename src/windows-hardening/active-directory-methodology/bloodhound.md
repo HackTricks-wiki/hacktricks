@@ -28,7 +28,7 @@ AD Explorer 可以创建 AD 的快照，以便您可以离线检查。\
 
 From [https://github.com/BloodHoundAD/BloodHound](https://github.com/BloodHoundAD/BloodHound)
 
-> BloodHound 是一个单页面的 Javascript 网络应用，建立在 [Linkurious](http://linkurio.us/) 之上，使用 [Electron](http://electron.atom.io/) 编译，并通过 C# 数据收集器提供 [Neo4j](https://neo4j.com/) 数据库。
+> BloodHound 是一个单页面的 Javascript 网络应用程序，建立在 [Linkurious](http://linkurio.us/) 之上，使用 [Electron](http://electron.atom.io/) 编译，并配备一个由 C# 数据收集器提供数据的 [Neo4j](https://neo4j.com/) 数据库。
 
 BloodHound 使用图论来揭示 Active Directory 或 Azure 环境中隐藏的、通常是无意的关系。攻击者可以使用 BloodHound 轻松识别高度复杂的攻击路径，这些路径在其他情况下将无法快速识别。防御者可以使用 BloodHound 识别并消除这些相同的攻击路径。蓝队和红队都可以使用 BloodHound 更深入地理解 Active Directory 或 Azure 环境中的权限关系。
 
@@ -36,7 +36,7 @@ BloodHound 使用图论来揭示 Active Directory 或 Azure 环境中隐藏的�
 
 BloodHound 由两个主要部分组成：**ingestors** 和 **visualisation application**。
 
-**ingestors** 用于 **枚举域并提取所有信息**，以可被可视化应用程序理解的格式。
+**ingestors** 用于 **枚举域并提取所有信息**，以便可视化应用程序理解的格式。
 
 **visualisation application 使用 neo4j** 来显示所有信息之间的关系，并展示在域中提升权限的不同方式。
 
@@ -46,11 +46,11 @@ BloodHound 由两个主要部分组成：**ingestors** 和 **visualisation appli
 
 1. 安装 Docker Compose。这应该包含在 [Docker Desktop](https://www.docker.com/products/docker-desktop/) 安装中。
 2. 运行：
-```
+```bash
 curl -L https://ghst.ly/getbhce | docker compose -f - up
 ```
-3. 在 Docker Compose 的终端输出中找到随机生成的密码。  
-4. 在浏览器中，导航到 http://localhost:8080/ui/login。使用用户名 admin 和日志中的随机生成密码登录。
+3. 在 Docker Compose 的终端输出中找到随机生成的密码。
+4. 在浏览器中，导航到 http://localhost:8080/ui/login。使用用户名 **`admin`** 和您可以在 Docker Compose 的日志中找到的 **`随机生成的密码`** 登录。
 
 之后，您需要更改随机生成的密码，您将准备好新的界面，从中可以直接下载 ingestors。
 
@@ -80,7 +80,7 @@ group3r.exe -f <filepath-name.log>
 ```
 ## PingCastle
 
-[**PingCastle**](https://www.pingcastle.com/documentation/) **评估AD环境的安全态势**，并提供一个漂亮的**报告**和图表。
+[**PingCastle**](https://www.pingcastle.com/documentation/) **评估AD环境的安全态势**并提供一个漂亮的**报告**和图表。
 
 要运行它，可以执行二进制文件`PingCastle.exe`，它将启动一个**交互式会话**，呈现选项菜单。默认选项是**`healthcheck`**，它将建立一个**域**的基线**概述**，并查找**错误配置**和**漏洞**。
 
