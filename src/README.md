@@ -2,14 +2,14 @@
 
 <figure><img src="images/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
-_Логотипи та анімаційний дизайн Hacktricks від_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
+_Hacktricks логотипи та анімаційний дизайн від_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
 
 ### Запустіть HackTricks локально
 ```bash
 # Download latest version of hacktricks
 git clone https://github.com/HackTricks-wiki/hacktricks
 # Run the docker container indicating the path to the hacktricks folder
-docker run --rm -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
+docker run -d --rm -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git config --global --add safe.directory /app && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
 Ваша локальна копія HackTricks буде **доступна за адресою [http://localhost:3337](http://localhost:3337)** через <5 хвилин (необхідно зібрати книгу, будьте терплячими).
 
@@ -75,10 +75,10 @@ https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktr
 Приєднуйтесь до сервера [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy), щоб спілкуватися з досвідченими хакерами та мисливцями за багами!
 
 - **Інсайти з хакінгу:** Залучайтеся до контенту, який занурюється в захоплення та виклики хакінгу
-- **Новини про хакінг в реальному часі:** Будьте в курсі швидкоплинного світу хакінгу через новини та інсайти в реальному часі
+- **Новини хакінгу в реальному часі:** Будьте в курсі швидкоплинного світу хакінгу через новини та інсайти в реальному часі
 - **Останні оголошення:** Будьте в курсі нових винагород за баги та важливих оновлень платформи
 
-**Приєднуйтесь до нас на** [**Discord**](https://discord.com/invite/N3FrSbmwdy) та почніть співпрацювати з провідними хакерами сьогодні!
+**Приєднуйтесь до нас на** [**Discord**](https://discord.com/invite/N3FrSbmwdy) і почніть співпрацювати з провідними хакерами сьогодні!
 
 ---
 
@@ -88,7 +88,7 @@ https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktr
 
 **Отримайте погляд хакера на ваші веб-додатки, мережу та хмару**
 
-**Знайдіть і повідомте про критичні, експлуатовані вразливості з реальним бізнес-імпактом.** Використовуйте наші 20+ спеціальних інструментів для картографування поверхні атаки, знаходження проблем безпеки, які дозволяють вам підвищити привілеї, та використовуйте автоматизовані експлойти для збору важливих доказів, перетворюючи вашу важку працю на переконливі звіти.
+**Знайдіть і повідомте про критичні, експлуатовані вразливості з реальним бізнес-імпактом.** Використовуйте наші 20+ спеціальних інструментів для картографування поверхні атаки, знаходження проблем безпеки, які дозволяють вам підвищити привілеї, і використовуйте автоматизовані експлойти для збору важливих доказів, перетворюючи вашу важку працю на переконливі звіти.
 
 {{#ref}}
 https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons
