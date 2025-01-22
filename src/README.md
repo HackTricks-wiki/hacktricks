@@ -9,7 +9,7 @@ _Hacktricks 로고 및 모션 디자인_ [_@ppiernacho_](https://www.instagram.c
 # Download latest version of hacktricks
 git clone https://github.com/HackTricks-wiki/hacktricks
 # Run the docker container indicating the path to the hacktricks folder
-docker run --rm -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
+docker run -d --rm -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git config --global --add safe.directory /app && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
 당신의 로컬 HackTricks 복사본은 **<5분 후에 [http://localhost:3337](http://localhost:3337)** **사용 가능할 것입니다 (책을 빌드해야 하므로, 인내심을 가지세요).**
 
@@ -31,7 +31,7 @@ docker run --rm -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io
 
 <figure><img src="images/image (45).png" alt=""><figcaption></figcaption></figure>
 
-[**RootedCON**](https://www.rootedcon.com)는 **스페인**에서 가장 관련성이 높은 사이버 보안 이벤트이며 **유럽**에서 가장 중요한 행사 중 하나입니다. **기술 지식을 촉진하는 사명**을 가지고 있는 이 회의는 모든 분야의 기술 및 사이버 보안 전문가들이 모이는 뜨거운 만남의 장소입니다.
+[**RootedCON**](https://www.rootedcon.com)는 **스페인**에서 가장 관련성 높은 사이버 보안 이벤트이며 **유럽**에서 가장 중요한 행사 중 하나입니다. **기술 지식을 촉진하는 임무**를 가지고 있는 이 회의는 모든 분야의 기술 및 사이버 보안 전문가들이 모이는 뜨거운 만남의 장소입니다.
 
 {{#ref}}
 https://www.rootedcon.com/
@@ -45,7 +45,7 @@ https://www.rootedcon.com/
 
 **Intigriti**는 **유럽의 #1** 윤리적 해킹 및 **버그 바운티 플랫폼**입니다.
 
-**버그 바운티 팁**: **Intigriti**에 **가입하세요**, 해커를 위해 해커가 만든 프리미엄 **버그 바운티 플랫폼**입니다! 오늘 [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks)에 가입하고 최대 **$100,000**의 보상을 받기 시작하세요!
+**버그 바운티 팁**: **Intigriti**에 **가입**하세요. 해커를 위해 해커가 만든 프리미엄 **버그 바운티 플랫폼**입니다! 오늘 [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks)에 가입하고 최대 **$100,000**의 보상을 받기 시작하세요!
 
 {{#ref}}
 https://go.intigriti.com/hacktricks
@@ -88,7 +88,7 @@ https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktr
 
 **웹 앱, 네트워크 및 클라우드에 대한 해커의 관점을 얻으세요.**
 
-**실제 비즈니스에 영향을 미치는 중요한, 악용 가능한 취약점을 찾아보고 보고하세요.** 공격 표면을 매핑하고 권한 상승을 허용하는 보안 문제를 찾아내며, 필수 증거를 수집하기 위해 자동화된 익스플로잇을 사용하여 귀하의 노력을 설득력 있는 보고서로 전환하세요.
+**실제 비즈니스에 영향을 미치는 중요한 취약점을 찾아보고 보고하세요.** 공격 표면을 매핑하고 권한 상승을 허용하는 보안 문제를 찾아내며, 필수 증거를 수집하기 위해 자동화된 익스플로잇을 사용하여 귀하의 노력을 설득력 있는 보고서로 전환하세요.
 
 {{#ref}}
 https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons
@@ -102,10 +102,10 @@ https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktrick
 
 **SerpApi**는 **검색 엔진 결과**에 **접근하기 위한** 빠르고 쉬운 실시간 API를 제공합니다. 그들은 검색 엔진을 스크랩하고, 프록시를 처리하며, 캡차를 해결하고, 모든 풍부한 구조화된 데이터를 파싱합니다.
 
-SerpApi의 플랜 중 하나에 대한 구독은 Google, Bing, Baidu, Yahoo, Yandex 등 다양한 검색 엔진을 스크랩하기 위한 50개 이상의 서로 다른 API에 대한 접근을 포함합니다.\
-다른 제공업체와 달리, **SerpApi는 단순히 유기적 결과를 스크랩하지 않습니다**. SerpApi 응답은 항상 모든 광고, 인라인 이미지 및 비디오, 지식 그래프 및 검색 결과에 있는 기타 요소와 기능을 포함합니다.
+SerpApi의 플랜 중 하나에 가입하면 Google, Bing, Baidu, Yahoo, Yandex 등 다양한 검색 엔진을 스크랩하기 위한 50개 이상의 API에 접근할 수 있습니다.\
+다른 제공업체와 달리 **SerpApi는 유기적 결과만 스크랩하지 않습니다**. SerpApi 응답은 항상 모든 광고, 인라인 이미지 및 비디오, 지식 그래프 및 검색 결과에 있는 기타 요소와 기능을 포함합니다.
 
-현재 SerpApi 고객에는 **Apple, Shopify, GrubHub**가 포함됩니다.\
+현재 SerpApi 고객에는 **Apple, Shopify 및 GrubHub**가 포함됩니다.\
 자세한 정보는 그들의 [**블로그**](https://serpapi.com/blog/)를 확인하거나 [**플레이그라운드**](https://serpapi.com/playground)에서 예제를 시도해 보세요.\
 여기에서 **무료 계정을 생성**할 수 있습니다 [**여기**](https://serpapi.com/users/sign_up)**.**
 
@@ -115,7 +115,7 @@ SerpApi의 플랜 중 하나에 대한 구독은 Google, Bing, Baidu, Yahoo, Yan
 
 <figure><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-취약점 연구, 침투 테스트 및 리버스 엔지니어링을 수행하여 모바일 애플리케이션 및 장치를 보호하는 데 필요한 기술과 기술을 배우세요. **온디맨드 과정**을 통해 iOS 및 Android 보안을 **마스터하고** **인증을 받으세요**:
+취약점 연구, 침투 테스트 및 리버스 엔지니어링을 수행하여 모바일 애플리케이션 및 장치를 보호하는 데 필요한 기술과 기술을 배우세요. **온디맨드 과정**을 통해 iOS 및 Android 보안을 **마스터**하고 **인증을 받으세요**:
 
 {{#ref}}
 https://academy.8ksec.io/
