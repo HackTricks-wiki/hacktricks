@@ -9,9 +9,9 @@ _Hacktricks लोगो और मोशन डिज़ाइन_ [_@ppiernach
 # Download latest version of hacktricks
 git clone https://github.com/HackTricks-wiki/hacktricks
 # Run the docker container indicating the path to the hacktricks folder
-docker run --rm -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
+docker run -d --rm -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git config --global --add safe.directory /app && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
-आपकी स्थानीय कॉपी HackTricks **[http://localhost:3337](http://localhost:3337)** पर <5 मिनट के बाद उपलब्ध होगी (इसमें पुस्तक बनाने की आवश्यकता है, धैर्य रखें)।
+आपकी स्थानीय कॉपी HackTricks **[http://localhost:3337](http://localhost:3337)** पर <5 मिनट के बाद उपलब्ध होगी (इसमें पुस्तक का निर्माण करना है, धैर्य रखें)।
 
 ## कॉर्पोरेट प्रायोजक
 
@@ -31,7 +31,7 @@ docker run --rm -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io
 
 <figure><img src="images/image (45).png" alt=""><figcaption></figcaption></figure>
 
-[**RootedCON**](https://www.rootedcon.com) **स्पेन** में सबसे प्रासंगिक साइबरसिक्योरिटी इवेंट है और **यूरोप** में सबसे महत्वपूर्ण में से एक है। **तकनीकी ज्ञान को बढ़ावा देने** के मिशन के साथ, यह कांग्रेस हर अनुशासन में प्रौद्योगिकी और साइबरसिक्योरिटी पेशेवरों के लिए एक उबालता हुआ बैठक बिंदु है।
+[**RootedCON**](https://www.rootedcon.com) **स्पेन** में सबसे प्रासंगिक साइबरसिक्योरिटी इवेंट है और **यूरोप** में सबसे महत्वपूर्ण में से एक है। **तकनीकी ज्ञान को बढ़ावा देने** के मिशन के साथ, यह कांग्रेस हर अनुशासन में प्रौद्योगिकी और साइबरसिक्योरिटी पेशेवरों के लिए एक उष्णकटिबंधीय बैठक स्थल है।
 
 {{#ref}}
 https://www.rootedcon.com/
@@ -45,7 +45,7 @@ https://www.rootedcon.com/
 
 **Intigriti** **यूरोप का #1** एथिकल हैकिंग और **बग बाउंटी प्लेटफॉर्म** है।
 
-**बग बाउंटी टिप**: **Intigriti** के लिए **साइन अप करें**, एक प्रीमियम **बग बाउंटी प्लेटफॉर्म जो हैकर्स द्वारा, हैकर्स के लिए बनाया गया है**! आज ही [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) पर हमारे साथ जुड़ें, और **$100,000** तक बाउंटी कमाना शुरू करें!
+**बग बाउंटी टिप**: **Intigriti** के लिए **साइन अप करें**, एक प्रीमियम **बग बाउंटी प्लेटफॉर्म जो हैकर्स द्वारा, हैकर्स के लिए बनाया गया है**! आज ही [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) पर हमारे साथ जुड़ें, और **$100,000** तक के बाउंटी कमाना शुरू करें!
 
 {{#ref}}
 https://go.intigriti.com/hacktricks
@@ -72,13 +72,13 @@ https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktr
 
 <figure><img src="images/image (3).png" alt=""><figcaption></figcaption></figure>
 
-[**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) सर्वर में शामिल हों ताकि आप अनुभवी हैकर्स और बग बाउंटी शिकारियों के साथ संवाद कर सकें!
+अनुभवी हैकर्स और बग बाउंटी शिकारियों के साथ संवाद करने के लिए [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) सर्वर में शामिल हों!
 
 - **हैकिंग अंतर्दृष्टि:** हैकिंग के रोमांच और चुनौतियों में गहराई से जाने वाली सामग्री के साथ संलग्न हों
 - **वास्तविक समय हैक समाचार:** वास्तविक समय की समाचार और अंतर्दृष्टि के माध्यम से तेज़-तर्रार हैकिंग दुनिया के साथ अद्यतित रहें
 - **नवीनतम घोषणाएँ:** नए बग बाउंटी लॉन्च और महत्वपूर्ण प्लेटफॉर्म अपडेट के साथ सूचित रहें
 
-**हमारे साथ जुड़ें** [**Discord**](https://discord.com/invite/N3FrSbmwdy) पर और आज ही शीर्ष हैकर्स के साथ सहयोग करना शुरू करें!
+**आज ही हमारे साथ [**Discord**](https://discord.com/invite/N3FrSbmwdy) पर जुड़ें और शीर्ष हैकर्स के साथ सहयोग करना शुरू करें!**
 
 ---
 
@@ -100,14 +100,14 @@ https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktrick
 
 <figure><img src="images/image (1254).png" alt=""><figcaption></figcaption></figure>
 
-**SerpApi** तेज और आसान वास्तविक समय APIs प्रदान करता है ताकि आप **सर्च इंजन परिणामों** तक पहुँच सकें। वे सर्च इंजनों को स्क्रैप करते हैं, प्रॉक्सी को संभालते हैं, कैप्चा हल करते हैं, और आपके लिए सभी समृद्ध संरचित डेटा को पार्स करते हैं।
+**SerpApi** तेज और आसान वास्तविक समय APIs प्रदान करता है ताकि **सर्च इंजन परिणामों** तक पहुंच प्राप्त की जा सके। वे सर्च इंजनों को स्क्रैप करते हैं, प्रॉक्सी को संभालते हैं, कैप्चा हल करते हैं, और आपके लिए सभी समृद्ध संरचित डेटा को पार्स करते हैं।
 
-SerpApi की योजनाओं में से एक की सदस्यता में Google, Bing, Baidu, Yahoo, Yandex और अन्य सहित विभिन्न सर्च इंजनों को स्क्रैप करने के लिए 50 से अधिक विभिन्न APIs तक पहुँच शामिल है।\
+SerpApi की योजनाओं में से एक की सदस्यता में विभिन्न सर्च इंजनों को स्क्रैप करने के लिए 50 से अधिक विभिन्न APIs तक पहुंच शामिल है, जिसमें Google, Bing, Baidu, Yahoo, Yandex, और अधिक शामिल हैं।\
 अन्य प्रदाताओं के विपरीत, **SerpApi केवल ऑर्गेनिक परिणामों को स्क्रैप नहीं करता**। SerpApi प्रतिक्रियाएँ लगातार सभी विज्ञापनों, इनलाइन छवियों और वीडियो, ज्ञान ग्राफ़, और खोज परिणामों में मौजूद अन्य तत्वों और सुविधाओं को शामिल करती हैं।
 
 वर्तमान SerpApi ग्राहक **Apple, Shopify, और GrubHub** हैं।\
 अधिक जानकारी के लिए उनके [**ब्लॉग**](https://serpapi.com/blog/) पर जाएं, या उनके [**प्लेग्राउंड**](https://serpapi.com/playground) में एक उदाहरण आजमाएं।\
-आप [**यहां**](https://serpapi.com/users/sign_up) **एक मुफ्त खाता बना सकते हैं**।
+आप [**यहां**](https://serpapi.com/users/sign_up) **एक मुफ्त खाता बना सकते हैं**। 
 
 ---
 
@@ -133,7 +133,7 @@ WebSec एक **ऑल-इन-वन सुरक्षा कंपनी** ह
 
 WebSec के बारे में एक और अच्छी बात यह है कि उद्योग के औसत के विपरीत WebSec **अपनी क्षमताओं में बहुत आत्मविश्वास** है, इस हद तक कि वे **सर्वश्रेष्ठ गुणवत्ता परिणामों की गारंटी** देते हैं, यह उनके वेबसाइट पर लिखा है "**अगर हम इसे हैक नहीं कर सकते, तो आप इसे नहीं चुकाएंगे!**" अधिक जानकारी के लिए उनकी [**वेबसाइट**](https://websec.nl/en/) और [**ब्लॉग**](https://websec.nl/blog/) पर जाएं!
 
-उपरोक्त के अलावा WebSec भी HackTricks का **प्रतिबद्ध समर्थक** है।
+इसके अलावा WebSec भी HackTricks का **प्रतिबद्ध समर्थक** है।
 
 {{#ref}}
 https://www.youtube.com/watch?v=Zq2JycGDCPM
