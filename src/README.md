@@ -9,9 +9,9 @@ _Hacktricksのロゴとモーションデザインは_ [_@ppiernacho_](https://w
 # Download latest version of hacktricks
 git clone https://github.com/HackTricks-wiki/hacktricks
 # Run the docker container indicating the path to the hacktricks folder
-docker run --rm -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
+docker run -d --rm -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git config --global --add safe.directory /app && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
-あなたのローカルコピーのHackTricksは、**<5分後に[http://localhost:3337](http://localhost:3337)** 利用可能になります（本をビルドする必要があるため、しばらくお待ちください）。
+あなたのローカルコピーのHackTricksは、**5分以内に[http://localhost:3337](http://localhost:3337)**で**利用可能になります**（本をビルドする必要があるため、しばらくお待ちください）。
 
 ## 企業スポンサー
 
@@ -31,7 +31,7 @@ docker run --rm -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io
 
 <figure><img src="images/image (45).png" alt=""><figcaption></figcaption></figure>
 
-[**RootedCON**](https://www.rootedcon.com)は、**スペイン**で最も重要なサイバーセキュリティイベントであり、**ヨーロッパ**で最も重要なイベントの一つです。**技術的知識を促進することを使命**とし、この会議はあらゆる分野の技術とサイバーセキュリティの専門家のための熱い交流の場です。
+[**RootedCON**](https://www.rootedcon.com)は、**スペイン**で最も重要なサイバーセキュリティイベントであり、**ヨーロッパ**で最も重要なイベントの1つです。**技術的知識を促進することを使命として**、この会議は、あらゆる分野の技術とサイバーセキュリティの専門家が集まる熱い交流の場です。
 
 {{#ref}}
 https://www.rootedcon.com/
@@ -45,7 +45,7 @@ https://www.rootedcon.com/
 
 **Intigriti**は、**ヨーロッパの#1**エシカルハッキングおよび**バグバウンティプラットフォーム**です。
 
-**バグバウンティのヒント**: **Intigriti**に**サインアップ**してください。これは、**ハッカーによって、ハッカーのために作られたプレミアム**バグバウンティプラットフォームです！今日、[**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks)に参加し、最大**$100,000**の報酬を得始めましょう！
+**バグバウンティのヒント**: **Intigriti**に**サインアップ**してください。これは、**ハッカーによって、ハッカーのために作られたプレミアムなバグバウンティプラットフォーム**です！今日、[**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks)に参加し、最大**$100,000**の報酬を得始めましょう！
 
 {{#ref}}
 https://go.intigriti.com/hacktricks
@@ -58,7 +58,7 @@ https://go.intigriti.com/hacktricks
 <figure><img src="images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)を使用して、世界で最も**高度な**コミュニティツールによって**ワークフローを簡単に構築および自動化**します。
+[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)を使用して、世界で**最も進んだ**コミュニティツールによって**ワークフローを簡単に構築および自動化**します。
 
 今すぐアクセスを取得：
 
@@ -75,7 +75,7 @@ https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktr
 [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy)サーバーに参加して、経験豊富なハッカーやバグバウンティハンターとコミュニケーションを取りましょう！
 
 - **ハッキングの洞察:** ハッキングのスリルと課題に関するコンテンツに参加
-- **リアルタイムハックニュース:** リアルタイムのニュースと洞察を通じて、急速に進化するハッキングの世界を把握
+- **リアルタイムハックニュース:** リアルタイムのニュースと洞察を通じて、急速に変化するハッキングの世界を把握
 - **最新の発表:** 新しいバグバウンティの開始や重要なプラットフォームの更新についての情報を得る
 
 **私たちと一緒に** [**Discord**](https://discord.com/invite/N3FrSbmwdy)に参加し、今日からトップハッカーとコラボレーションを始めましょう！
@@ -115,7 +115,7 @@ SerpApiのプランのサブスクリプションには、Google、Bing、Baidu�
 
 <figure><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-脆弱性研究、ペネトレーションテスト、リバースエンジニアリングを実施するために必要な技術とスキルを学び、モバイルアプリケーションとデバイスを保護します。**オンデマンドコースを通じてiOSとAndroidのセキュリティをマスターし、**認定を取得しましょう：
+脆弱性研究、ペネトレーションテスト、リバースエンジニアリングを実施するために必要な技術とスキルを学び、モバイルアプリケーションとデバイスを保護します。**オンデマンドコースを通じてiOSとAndroidのセキュリティをマスターし、**認定を取得します：
 
 {{#ref}}
 https://academy.8ksec.io/
