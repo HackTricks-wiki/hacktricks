@@ -9,7 +9,7 @@ _I loghi e il design in movimento di Hacktricks sono di_ [_@ppiernacho_](https:/
 # Download latest version of hacktricks
 git clone https://github.com/HackTricks-wiki/hacktricks
 # Run the docker container indicating the path to the hacktricks folder
-docker run --rm -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
+docker run -d --rm -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git config --global --add safe.directory /app && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
 La tua copia locale di HackTricks sarà **disponibile su [http://localhost:3337](http://localhost:3337)** dopo <5 minuti (deve costruire il libro, sii paziente).
 
@@ -45,7 +45,7 @@ https://www.rootedcon.com/
 
 **Intigriti** è la **piattaforma di hacking etico e bug bounty numero 1 in Europa.**
 
-**Suggerimento per bug bounty**: **iscriviti** a **Intigriti**, una premium **piattaforma di bug bounty creata da hacker, per hacker**! Unisciti a noi su [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) oggi, e inizia a guadagnare bounty fino a **$100,000**!
+**Suggerimento per bug bounty**: **iscriviti** a **Intigriti**, una premium **piattaforma di bug bounty creata da hacker, per hacker**! Unisciti a noi su [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) oggi e inizia a guadagnare bounty fino a **$100,000**!
 
 {{#ref}}
 https://go.intigriti.com/hacktricks
@@ -58,7 +58,7 @@ https://go.intigriti.com/hacktricks
 <figure><img src="images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Usa [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) per costruire e **automatizzare flussi di lavoro** alimentati dagli **strumenti comunitari più avanzati** al mondo.
+Usa [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) per costruire e **automatizzare facilmente i flussi di lavoro** alimentati dagli **strumenti comunitari più avanzati** al mondo.
 
 Accedi oggi:
 
@@ -76,7 +76,7 @@ Unisciti al server [**HackenProof Discord**](https://discord.com/invite/N3FrSbmw
 
 - **Approfondimenti sul hacking:** Interagisci con contenuti che approfondiscono l'emozione e le sfide dell'hacking
 - **Notizie di hacking in tempo reale:** Rimani aggiornato con il mondo frenetico dell'hacking attraverso notizie e approfondimenti in tempo reale
-- **Ultimi annunci:** Rimani informato sui nuovi bug bounty in arrivo e sugli aggiornamenti cruciali della piattaforma
+- **Ultimi annunci:** Rimani informato sugli ultimi bug bounty in arrivo e aggiornamenti cruciali della piattaforma
 
 **Unisciti a noi su** [**Discord**](https://discord.com/invite/N3FrSbmwdy) e inizia a collaborare con i migliori hacker oggi!
 
@@ -115,7 +115,7 @@ Puoi **creare un account gratuito** [**qui**](https://serpapi.com/users/sign_up)
 
 <figure><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Impara le tecnologie e le competenze necessarie per eseguire ricerche sulle vulnerabilità, penetration testing e reverse engineering per proteggere le applicazioni e i dispositivi mobili. **Padroneggia la sicurezza di iOS e Android** attraverso i nostri corsi on-demand e **ottieni la certificazione**:
+Impara le tecnologie e le competenze necessarie per eseguire ricerche sulle vulnerabilità, penetration testing e reverse engineering per proteggere le applicazioni e i dispositivi mobili. **Diventa esperto in sicurezza iOS e Android** attraverso i nostri corsi on-demand e **ottieni una certificazione**:
 
 {{#ref}}
 https://academy.8ksec.io/
@@ -127,7 +127,7 @@ https://academy.8ksec.io/
 
 <figure><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.nl) è un'azienda di cybersecurity professionale con sede ad **Amsterdam** che aiuta **a proteggere** le aziende **in tutto il mondo** contro le ultime minacce alla cybersecurity fornendo **servizi di sicurezza offensiva** con un approccio **moderno**.
+[**WebSec**](https://websec.nl) è un'azienda di cybersecurity professionale con sede ad **Amsterdam** che aiuta **a proteggere** le aziende **in tutto il mondo** contro le ultime minacce di cybersecurity fornendo **servizi di sicurezza offensiva** con un **approccio moderno**.
 
 WebSec è un'**azienda di sicurezza all-in-one**, il che significa che fanno tutto; Pentesting, **Audit** di Sicurezza, Formazione sulla Consapevolezza, Campagne di Phishing, Revisione del Codice, Sviluppo di Exploit, Outsourcing di Esperti di Sicurezza e molto altro.
 
@@ -139,7 +139,7 @@ In aggiunta a quanto sopra, WebSec è anche un **sostenitore impegnato di HackTr
 https://www.youtube.com/watch?v=Zq2JycGDCPM
 {{#endref}}
 
-## Licenza e Dichiarazione di Non Responsabilità
+## Licenza e Dichiarazione di Esclusione di Responsabilità
 
 Controllali in:
 
@@ -149,6 +149,6 @@ welcome/hacktricks-values-and-faq.md
 
 ## Statistiche di Github
 
-![HackTricks Github Stats](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
+![Statistiche di HackTricks Github](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
 
 {{#include ./banners/hacktricks-training.md}}
