@@ -2,14 +2,14 @@
 
 <figure><img src="images/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
-_Logotypy i projektowanie ruchu Hacktricks autorstwa_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
+_Hacktricks loga i projektowanie ruchu autorstwa_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
 
 ### Uruchom HackTricks lokalnie
 ```bash
 # Download latest version of hacktricks
 git clone https://github.com/HackTricks-wiki/hacktricks
 # Run the docker container indicating the path to the hacktricks folder
-docker run --rm -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
+docker run -d --rm -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git config --global --add safe.directory /app && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
 Twoja lokalna kopia HackTricks będzie **dostępna pod adresem [http://localhost:3337](http://localhost:3337)** po <5 minutach (musi zbudować książkę, bądź cierpliwy).
 
@@ -76,7 +76,7 @@ Dołącz do serwera [**HackenProof Discord**](https://discord.com/invite/N3FrSbm
 
 - **Wgląd w hacking:** Angażuj się w treści, które zagłębiają się w emocje i wyzwania związane z hackingiem
 - **Aktualności o hackingu w czasie rzeczywistym:** Bądź na bieżąco z dynamicznym światem hackingu dzięki aktualnym wiadomościom i wglądom
-- **Najnowsze ogłoszenia:** Bądź na bieżąco z najnowszymi nagrodami bug bounty i istotnymi aktualizacjami platformy
+- **Najnowsze ogłoszenia:** Bądź na bieżąco z najnowszymi nagrodami bug bounty oraz istotnymi aktualizacjami platformy
 
 **Dołącz do nas na** [**Discord**](https://discord.com/invite/N3FrSbmwdy) i zacznij współpracować z najlepszymi hakerami już dziś!
 
@@ -129,7 +129,7 @@ https://academy.8ksec.io/
 
 [**WebSec**](https://websec.nl) to profesjonalna firma zajmująca się cyberbezpieczeństwem z siedzibą w **Amsterdamie**, która pomaga **chronić** firmy **na całym świecie** przed najnowszymi zagrożeniami w dziedzinie cyberbezpieczeństwa, oferując **usługi ofensywne** z **nowoczesnym** podejściem.
 
-WebSec to **wszystko w jednym** firma zajmująca się bezpieczeństwem, co oznacza, że robią wszystko; Pentesting, **Audyty** Bezpieczeństwa, Szkolenia w zakresie Świadomości, Kampanie Phishingowe, Przegląd Kodów, Rozwój Exploitów, Outsourcing Ekspertów ds. Bezpieczeństwa i wiele więcej.
+WebSec to **wszystko w jednym** firma zajmująca się bezpieczeństwem, co oznacza, że robią wszystko; Pentesting, **Audyty** Bezpieczeństwa, Szkolenia w zakresie świadomości, Kampanie Phishingowe, Przegląd Kodów, Rozwój Exploitów, Outsourcing Ekspertów ds. Bezpieczeństwa i wiele więcej.
 
 Kolejną fajną rzeczą w WebSec jest to, że w przeciwieństwie do średniej w branży, WebSec jest **bardzo pewny swoich umiejętności**, do tego stopnia, że **gwarantują najlepsze wyniki jakościowe**, jak stwierdzają na swojej stronie "**Jeśli nie możemy tego zhakować, nie płacisz!**". Aby uzyskać więcej informacji, zajrzyj na ich [**stronę**](https://websec.nl/en/) i [**blog**](https://websec.nl/blog/)!
 
@@ -139,7 +139,7 @@ Oprócz powyższego, WebSec jest również **zaangażowanym wsparciem HackTricks
 https://www.youtube.com/watch?v=Zq2JycGDCPM
 {{#endref}}
 
-## Licencja i zastrzeżenie
+## Licencja i zastrzeżenia
 
 Sprawdź je w:
 
