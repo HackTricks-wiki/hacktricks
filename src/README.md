@@ -9,7 +9,7 @@ _Hacktricks-Logos & Motion Design von_ [_@ppiernacho_](https://www.instagram.com
 # Download latest version of hacktricks
 git clone https://github.com/HackTricks-wiki/hacktricks
 # Run the docker container indicating the path to the hacktricks folder
-docker run --rm -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
+docker run -d --rm -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git config --global --add safe.directory /app && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
 Ihre lokale Kopie von HackTricks wird **unter [http://localhost:3337](http://localhost:3337)** nach <5 Minuten verfügbar sein (es muss das Buch erstellt werden, haben Sie Geduld).
 
@@ -75,7 +75,7 @@ https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktr
 Treten Sie dem [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) Server bei, um mit erfahrenen Hackern und Bug-Bounty-Jägern zu kommunizieren!
 
 - **Hacking-Einblicke:** Engagieren Sie sich mit Inhalten, die in die Aufregung und Herausforderungen des Hackens eintauchen
-- **Echtzeit-Hack-Nachrichten:** Bleiben Sie auf dem Laufenden mit der schnelllebigen Hack-Welt durch Echtzeit-Nachrichten und Einblicke
+- **Echtzeit-Hack-Nachrichten:** Bleiben Sie auf dem Laufenden über die schnelllebige Welt des Hackens durch Echtzeitnachrichten und Einblicke
 - **Neueste Ankündigungen:** Bleiben Sie informiert über die neuesten Bug-Bounties und wichtige Plattform-Updates
 
 **Treten Sie uns auf** [**Discord**](https://discord.com/invite/N3FrSbmwdy) bei und beginnen Sie noch heute mit der Zusammenarbeit mit Top-Hackern!
@@ -88,7 +88,7 @@ Treten Sie dem [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) 
 
 **Erhalten Sie die Perspektive eines Hackers auf Ihre Webanwendungen, Netzwerke und Cloud**
 
-**Finden und melden Sie kritische, ausnutzbare Schwachstellen mit echtem Geschäftsauswirkungen.** Verwenden Sie unsere 20+ benutzerdefinierten Tools, um die Angriffsfläche zu kartieren, Sicherheitsprobleme zu finden, die Ihnen ermöglichen, Berechtigungen zu eskalieren, und nutzen Sie automatisierte Exploits, um wesentliche Beweise zu sammeln, die Ihre harte Arbeit in überzeugende Berichte verwandeln.
+**Finden und melden Sie kritische, ausnutzbare Schwachstellen mit echtem Geschäftswert.** Verwenden Sie unsere 20+ benutzerdefinierten Tools, um die Angriffsfläche zu kartieren, Sicherheitsprobleme zu finden, die Ihnen ermöglichen, Berechtigungen zu eskalieren, und automatisierte Exploits zu verwenden, um wesentliche Beweise zu sammeln, die Ihre harte Arbeit in überzeugende Berichte verwandeln.
 
 {{#ref}}
 https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons
@@ -111,7 +111,7 @@ Sie können **hier ein kostenloses Konto erstellen** [**hier**](https://serpapi.
 
 ---
 
-### [8kSec Academy – Detaillierte Mobile Security Kurse](https://academy.8ksec.io/)
+### [8kSec Academy – Detaillierte Mobile Security-Kurse](https://academy.8ksec.io/)
 
 <figure><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
@@ -127,7 +127,7 @@ https://academy.8ksec.io/
 
 <figure><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.nl) ist ein professionelles Cybersicherheitsunternehmen mit Sitz in **Amsterdam**, das **Unternehmen auf der ganzen Welt** hilft, sich gegen die neuesten Bedrohungen der Cybersicherheit zu schützen, indem es **offensive Sicherheitsdienste** mit einem **modernen** Ansatz anbietet.
+[**WebSec**](https://websec.nl) ist ein professionelles Cybersicherheitsunternehmen mit Sitz in **Amsterdam**, das **Unternehmen auf der ganzen Welt** dabei hilft, sich gegen die neuesten Bedrohungen der Cybersicherheit zu **schützen**, indem es **offensive Sicherheitsdienste** mit einem **modernen** Ansatz anbietet.
 
 WebSec ist ein **All-in-One-Sicherheitsunternehmen**, was bedeutet, dass sie alles anbieten; Pentesting, **Sicherheits**-Audits, Awareness-Trainings, Phishing-Kampagnen, Code-Überprüfungen, Exploit-Entwicklung, Outsourcing von Sicherheitsexperten und vieles mehr.
 
