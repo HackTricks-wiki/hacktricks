@@ -9,9 +9,9 @@ _Hacktricks 标志和动态设计由_ [_@ppiernacho_](https://www.instagram.com/
 # Download latest version of hacktricks
 git clone https://github.com/HackTricks-wiki/hacktricks
 # Run the docker container indicating the path to the hacktricks folder
-docker run --rm -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
+docker run -d --rm -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git config --global --add safe.directory /app && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
-您的本地 HackTricks 副本将在 **[http://localhost:3337](http://localhost:3337)** 后 <5 分钟 可用（它需要构建书籍，请耐心等待）。
+您的本地 HackTricks 副本将在 **[http://localhost:3337](http://localhost:3337)** 后 <5 分钟内可用（它需要构建书籍，请耐心等待）。
 
 ## 企业赞助商
 
@@ -31,7 +31,7 @@ docker run --rm -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io
 
 <figure><img src="images/image (45).png" alt=""><figcaption></figcaption></figure>
 
-[**RootedCON**](https://www.rootedcon.com) 是 **西班牙** 最相关的网络安全事件，也是 **欧洲** 最重要的事件之一。以 **促进技术知识** 为使命，这个大会是技术和网络安全专业人士在各个学科的一个热烈交流点。
+[**RootedCON**](https://www.rootedcon.com) 是 **西班牙** 最相关的网络安全事件，也是 **欧洲** 最重要的事件之一。该大会的 **使命是促进技术知识**，是各个学科技术和网络安全专业人士的热烈交流点。
 
 {{#ref}}
 https://www.rootedcon.com/
@@ -75,7 +75,7 @@ https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktr
 加入 [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) 服务器，与经验丰富的黑客和漏洞赏金猎人交流！
 
 - **黑客见解**：参与深入探讨黑客的刺激和挑战的内容
-- **实时黑客新闻**：通过实时新闻和见解跟上快速变化的黑客世界
+- **实时黑客新闻**：通过实时新闻和见解，跟上快速变化的黑客世界
 - **最新公告**：了解最新的漏洞赏金发布和重要平台更新
 
 **今天就加入我们** [**Discord**](https://discord.com/invite/N3FrSbmwdy)，开始与顶级黑客合作！
@@ -88,7 +88,7 @@ https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktr
 
 **从黑客的角度看待您的网络应用、网络和云**
 
-**查找并报告具有实际商业影响的关键、可利用的漏洞。** 使用我们 20 多个自定义工具来映射攻击面，查找让您提升权限的安全问题，并使用自动化漏洞利用收集重要证据，将您的辛勤工作转化为有说服力的报告。
+**发现并报告具有实际商业影响的关键可利用漏洞。** 使用我们 20 多个自定义工具来映射攻击面，查找让您提升权限的安全问题，并使用自动化漏洞利用收集重要证据，将您的辛勤工作转化为有说服力的报告。
 
 {{#ref}}
 https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons
