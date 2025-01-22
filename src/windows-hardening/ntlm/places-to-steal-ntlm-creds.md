@@ -2,6 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**Confira todas as ótimas ideias em [https://osandamalith.com/2017/03/24/places-of-interest-in-stealing-netntlm-hashes/](https://osandamalith.com/2017/03/24/places-of-interest-in-stealing-netntlm-hashes/)**
-
+**Verifique todas as ótimas ideias de [https://osandamalith.com/2017/03/24/places-of-interest-in-stealing-netntlm-hashes/](https://osandamalith.com/2017/03/24/places-of-interest-in-stealing-netntlm-hashes/)**
+desde o download de um arquivo microsoft word online até a fonte de vazamentos ntlm: https://github.com/soufianetahiri/TeamsNTLMLeak/blob/main/README.md
 {{#include ../../banners/hacktricks-training.md}}
