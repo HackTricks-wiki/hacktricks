@@ -1,4 +1,4 @@
-# ワイドソースコード検索
+# Wide Source Code Search
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -6,9 +6,10 @@
 
 これは、**漏洩情報**や**脆弱性**パターンを検索する際に役立ちます。
 
+- [**Sourcebot**](https://www.sourcebot.dev/): オープンソースのコード検索ツール。モダンなウェブインターフェースを通じて、数千のリポジトリをインデックス化し、検索します。
 - [**SourceGraph**](https://sourcegraph.com/search): 数百万のリポジトリを検索します。無料版とエンタープライズ版（15日間無料）があります。正規表現をサポートしています。
 - [**Github Search**](https://github.com/search): Github全体を検索します。正規表現をサポートしています。
-- もしかしたら、[**Github Code Search**](https://cs.github.com/)も確認するのが有用かもしれません。
+- もしかしたら、[**Github Code Search**](https://cs.github.com/)もチェックするのが有用かもしれません。
 - [**Gitlab Advanced Search**](https://docs.gitlab.com/ee/user/search/advanced_search.html): Gitlabプロジェクト全体を検索します。正規表現をサポートしています。
 - [**SearchCode**](https://searchcode.com/): 数百万のプロジェクトのコードを検索します。
 
