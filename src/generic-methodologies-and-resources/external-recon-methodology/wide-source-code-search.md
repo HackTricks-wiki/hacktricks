@@ -6,7 +6,8 @@
 
 这在多个场合有助于**搜索泄露的信息**或**漏洞**模式。
 
-- [**SourceGraph**](https://sourcegraph.com/search): 在数百万个代码库中搜索。提供免费版本和企业版本（15天免费）。支持正则表达式。
+- [**Sourcebot**](https://www.sourcebot.dev/): 开源代码搜索工具。通过现代网页界面索引和搜索成千上万的代码库。
+- [**SourceGraph**](https://sourcegraph.com/search): 在数百万个代码库中搜索。有免费版本和企业版本（提供15天免费试用）。支持正则表达式。
 - [**Github Search**](https://github.com/search): 在Github上搜索。支持正则表达式。
 - 也许检查一下[**Github Code Search**](https://cs.github.com/)也很有用。
 - [**Gitlab Advanced Search**](https://docs.gitlab.com/ee/user/search/advanced_search.html): 在Gitlab项目中搜索。支持正则表达式。
