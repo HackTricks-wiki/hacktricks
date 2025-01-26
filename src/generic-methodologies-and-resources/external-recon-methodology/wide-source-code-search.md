@@ -4,12 +4,13 @@
 
 Cilj ove stranice je da nabroji **platforme koje omogućavaju pretragu koda** (literalno ili regex) u hiljadama/milionima repozitorijuma na jednoj ili više platformi.
 
-Ovo pomaže u nekoliko slučajeva da **pronađete provale informacija** ili **uzorke ranjivosti**.
+Ovo pomaže u nekoliko slučajeva da **pronađete provale informacija** ili obrasce **ranjivosti**.
 
+- [**Sourcebot**](https://www.sourcebot.dev/): Alat za pretragu otvorenog koda. Indeksirajte i pretražujte hiljade vaših repozitorijuma kroz moderan veb interfejs.
 - [**SourceGraph**](https://sourcegraph.com/search): Pretražujte u milionima repozitorijuma. Postoji besplatna verzija i verzija za preduzeća (sa 15 dana besplatno). Podržava regex.
-- [**Github Search**](https://github.com/search): Pretražujte po Github-u. Podržava regex.
+- [**Github Search**](https://github.com/search): Pretražujte na Github-u. Podržava regex.
 - Možda je takođe korisno proveriti i [**Github Code Search**](https://cs.github.com/).
-- [**Gitlab Advanced Search**](https://docs.gitlab.com/ee/user/search/advanced_search.html): Pretražujte po Gitlab projektima. Podržava regex.
+- [**Gitlab Advanced Search**](https://docs.gitlab.com/ee/user/search/advanced_search.html): Pretražujte u Gitlab projektima. Podržava regex.
 - [**SearchCode**](https://searchcode.com/): Pretražujte kod u milionima projekata.
 
 > [!WARNING]
