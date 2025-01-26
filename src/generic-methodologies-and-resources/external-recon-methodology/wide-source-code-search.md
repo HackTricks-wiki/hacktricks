@@ -6,7 +6,8 @@ Lengo la ukurasa huu ni kuorodhesha **majukwaa yanayoruhusu kutafuta msimbo** (h
 
 Hii inasaidia katika matukio kadhaa kutafuta **habari zilizovuja** au kwa mifumo ya **udhaifu**.
 
-- [**SourceGraph**](https://sourcegraph.com/search): Tafuta katika mamilioni ya repos. Kuna toleo la bure na toleo la biashara (pamoja na siku 15 za bure). Inasaidia regexes.
+- [**Sourcebot**](https://www.sourcebot.dev/): Zana ya kutafuta msimbo wa chanzo wazi. Panga na tafuta katika maelfu ya repos zako kupitia kiolesura cha mtandao cha kisasa.
+- [**SourceGraph**](https://sourcegraph.com/search): Tafuta katika maelfu ya repos. Kuna toleo la bure na toleo la biashara (pamoja na siku 15 za bure). Inasaidia regexes.
 - [**Github Search**](https://github.com/search): Tafuta katika Github. Inasaidia regexes.
 - Labda pia ni muhimu kuangalia pia [**Github Code Search**](https://cs.github.com/).
 - [**Gitlab Advanced Search**](https://docs.gitlab.com/ee/user/search/advanced_search.html): Tafuta katika miradi ya Gitlab. Inasaidia regexes.
