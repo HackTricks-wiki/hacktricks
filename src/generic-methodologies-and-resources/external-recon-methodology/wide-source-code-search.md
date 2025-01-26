@@ -6,10 +6,11 @@ Die doel van hierdie bladsy is om **platforms te noem wat toelaat om kode** (let
 
 Dit help in verskeie gevalle om **gelekte inligting** of **kwesbaarhede** patrone te soek.
 
+- [**Sourcebot**](https://www.sourcebot.dev/): Oopbron kode soek instrument. Indekseer en soek deur duisende van jou repos deur 'n moderne webkoppelvlak.
 - [**SourceGraph**](https://sourcegraph.com/search): Soek in miljoene repos. Daar is 'n gratis weergawe en 'n ondernemingsweergawe (met 15 dae gratis). Dit ondersteun regexes.
-- [**Github Search**](https://github.com/search): Soek oor Github. Dit ondersteun regexes.
+- [**Github Search**](https://github.com/search): Soek deur Github. Dit ondersteun regexes.
 - Miskien is dit ook nuttig om ook [**Github Code Search**](https://cs.github.com/) te kyk.
-- [**Gitlab Advanced Search**](https://docs.gitlab.com/ee/user/search/advanced_search.html): Soek oor Gitlab projekte. Ondersteun regexes.
+- [**Gitlab Advanced Search**](https://docs.gitlab.com/ee/user/search/advanced_search.html): Soek deur Gitlab projekte. Ondersteun regexes.
 - [**SearchCode**](https://searchcode.com/): Soek kode in miljoene projekte.
 
 > [!WARNING]
