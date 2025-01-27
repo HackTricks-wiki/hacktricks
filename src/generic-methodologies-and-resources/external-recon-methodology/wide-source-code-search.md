@@ -4,7 +4,7 @@
 
 Cilj ove stranice je da nabroji **platforme koje omogućavaju pretragu koda** (literalno ili regex) u hiljadama/milionima repozitorijuma na jednoj ili više platformi.
 
-Ovo pomaže u nekoliko slučajeva da **pronađete provale informacija** ili obrasce **ranjivosti**.
+Ovo pomaže u nekoliko slučajeva da **pronađete provale informacija** ili **uzorke ranjivosti**.
 
 - [**Sourcebot**](https://www.sourcebot.dev/): Alat za pretragu otvorenog koda. Indeksirajte i pretražujte hiljade vaših repozitorijuma kroz moderan veb interfejs.
 - [**SourceGraph**](https://sourcegraph.com/search): Pretražujte u milionima repozitorijuma. Postoji besplatna verzija i verzija za preduzeća (sa 15 dana besplatno). Podržava regex.
