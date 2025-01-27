@@ -82,7 +82,7 @@ And pack it back after having modified it with:
 npx asar pack app-decomp app-new.asar
 ```
 
-## RCE with `ELECTRON_RUN_AS_NODE` <a href="#electron_run_as_node" id="electron_run_as_node"></a>
+## RCE with ELECTRON_RUN_AS_NODE
 
 According to [**the docs**](https://www.electronjs.org/docs/latest/api/environment-variables#electron_run_as_node), if this env variable is set, it will start the process as a normal Node.js process.
 
