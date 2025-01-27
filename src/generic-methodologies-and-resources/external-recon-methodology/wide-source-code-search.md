@@ -1,4 +1,4 @@
-# Wye Bronkode Soektog
+# Wye Bronnkode Soektog
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -14,6 +14,6 @@ Dit help in verskeie gevalle om **gelekte inligting** of **kwesbaarhede** patron
 - [**SearchCode**](https://searchcode.com/): Soek kode in miljoene projekte.
 
 > [!WARNING]
-> Wanneer jy soek na lekkasies in 'n repo en iets soos `git log -p` uitvoer, moenie vergeet dat daar dalk **ander takke met ander verbintenisse** is wat geheime bevat nie!
+> Wanneer jy soek na lekkasies in 'n repo en iets soos `git log -p` uitvoer, moenie vergeet daar mag **ander takke met ander verbintenisse** wees wat geheime bevat nie!
 
 {{#include ../../banners/hacktricks-training.md}}
