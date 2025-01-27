@@ -9,7 +9,7 @@
 - [**Sourcebot**](https://www.sourcebot.dev/): Εργαλείο αναζήτησης κώδικα ανοιχτού κώδικα. Ευρετηρίαση και αναζήτηση σε χιλιάδες από τα αποθετήριά σας μέσω μιας σύγχρονης διαδικτυακής διεπαφής.
 - [**SourceGraph**](https://sourcegraph.com/search): Αναζητήστε σε εκατομμύρια αποθετήρια. Υπάρχει μια δωρεάν έκδοση και μια έκδοση επιχείρησης (με 15 ημέρες δωρεάν). Υποστηρίζει regexes.
 - [**Github Search**](https://github.com/search): Αναζητήστε σε όλο το Github. Υποστηρίζει regexes.
-- Ίσως είναι επίσης χρήσιμο να ελέγξετε και το [**Github Code Search**](https://cs.github.com/).
+- Ίσως είναι επίσης χρήσιμο να ελέγξετε και [**Github Code Search**](https://cs.github.com/).
 - [**Gitlab Advanced Search**](https://docs.gitlab.com/ee/user/search/advanced_search.html): Αναζητήστε σε έργα Gitlab. Υποστηρίζει regexes.
 - [**SearchCode**](https://searchcode.com/): Αναζητήστε κώδικα σε εκατομμύρια έργα.
 
