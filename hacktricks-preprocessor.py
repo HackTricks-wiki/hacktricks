@@ -78,6 +78,9 @@ def ref(matchobj):
                 sys.exit(1)
 
 
+    if href.endswith("/README.md"):
+        href = href.replace("/README.md", "/index.html")
+
     template = f"""<a class="content_ref" href="{href}"><span class="content_ref_label">{title}</span></a>"""
 
     # translate_table = str.maketrans({"\"":"\\\"","\n":"\\n"})
