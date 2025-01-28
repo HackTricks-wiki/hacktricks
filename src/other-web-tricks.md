@@ -36,3 +36,6 @@ Developers might forget to disable various debugging options in the production e
 
 {{#include ./banners/hacktricks-training.md}}
 
+### Same-Site Scripting
+
+It occurs when we encounter a domain or subdomain which resolves to localhost or 127.0.0.1 due to certain DNS misconfigurations.It allows an attacker to cheat the RFC2109 (HTTP State Management Mechanism) same origin restrictions, and therefore hijack state management data. It may also allow cross-site scripting. You can read more about it from [here](https://seclists.org/bugtraq/2008/Jan/270)
