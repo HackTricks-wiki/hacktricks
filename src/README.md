@@ -11,7 +11,7 @@ git clone https://github.com/HackTricks-wiki/hacktricks
 # Run the docker container indicating the path to the hacktricks folder
 docker run -d --rm -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git config --global --add safe.directory /app && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
-您的本地 HackTricks 副本将在 **[http://localhost:3337](http://localhost:3337)** 后 <5 分钟内可用（它需要构建书籍，请耐心等待）。
+您的本地 HackTricks 副本将在 **[http://localhost:3337](http://localhost:3337)** 后 <5 分钟可用（它需要构建书籍，请耐心等待）。
 
 ## 企业赞助商
 
@@ -31,7 +31,7 @@ docker run -d --rm -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr
 
 <figure><img src="images/image (45).png" alt=""><figcaption></figcaption></figure>
 
-[**RootedCON**](https://www.rootedcon.com) 是 **西班牙** 最相关的网络安全事件，也是 **欧洲** 最重要的事件之一。该大会的 **使命是促进技术知识**，是各个学科技术和网络安全专业人士的热烈交流点。
+[**RootedCON**](https://www.rootedcon.com) 是 **西班牙** 最相关的网络安全事件，也是 **欧洲** 最重要的事件之一。以 **促进技术知识** 为使命，这个大会是各个学科技术和网络安全专业人士的热烈交流点。
 
 {{#ref}}
 https://www.rootedcon.com/
@@ -78,7 +78,7 @@ https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktr
 - **实时黑客新闻**：通过实时新闻和见解，跟上快速变化的黑客世界
 - **最新公告**：了解最新的漏洞赏金发布和重要平台更新
 
-**今天就加入我们** [**Discord**](https://discord.com/invite/N3FrSbmwdy)，开始与顶级黑客合作！
+**加入我们** [**Discord**](https://discord.com/invite/N3FrSbmwdy)，今天就开始与顶级黑客合作！
 
 ---
 
@@ -88,7 +88,7 @@ https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktr
 
 **从黑客的角度看待您的网络应用、网络和云**
 
-**发现并报告具有实际商业影响的关键可利用漏洞。** 使用我们 20 多个自定义工具来映射攻击面，查找让您提升权限的安全问题，并使用自动化漏洞利用收集重要证据，将您的辛勤工作转化为有说服力的报告。
+**发现并报告具有实际商业影响的关键、可利用的漏洞。** 使用我们 20 多个自定义工具来映射攻击面，查找让您提升权限的安全问题，并使用自动化漏洞利用收集重要证据，将您的辛勤工作转化为有说服力的报告。
 
 {{#ref}}
 https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons
@@ -105,7 +105,7 @@ https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktrick
 订阅 SerpApi 的计划之一可访问超过 50 个不同的 API，用于抓取不同的搜索引擎，包括 Google、Bing、百度、Yahoo、Yandex 等。\
 与其他提供商不同，**SerpApi 不仅仅抓取自然结果**。SerpApi 的响应始终包括所有广告、内联图像和视频、知识图谱以及搜索结果中存在的其他元素和功能。
 
-当前的 SerpApi 客户包括 **Apple、Shopify 和 GrubHub**。\
+当前 SerpApi 的客户包括 **Apple、Shopify 和 GrubHub**。\
 有关更多信息，请查看他们的 [**博客**](https://serpapi.com/blog/)**，**或在他们的 [**游乐场**](https://serpapi.com/playground)** 尝试示例。**\
 您可以 [**在这里**](https://serpapi.com/users/sign_up)** 创建一个免费帐户。**
 
@@ -123,15 +123,15 @@ https://academy.8ksec.io/
 
 ---
 
-### [WebSec](https://websec.nl/)
+### [WebSec](https://websec.net/)
 
 <figure><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.nl) 是一家总部位于 **阿姆斯特丹** 的专业网络安全公司，帮助 **保护** 全球企业免受最新网络安全威胁，通过提供 **进攻性安全服务** 采用 **现代** 方法。
+[**WebSec**](https://websec.net) 是一家总部位于 **阿姆斯特丹** 的专业网络安全公司，帮助 **保护** 全球企业免受最新网络安全威胁，通过提供 **进攻性安全服务** 采用 **现代** 方法。
 
-WebSec 是一家 **一体化安全公司**，这意味着他们可以做所有事情；渗透测试、**安全** 审计、意识培训、网络钓鱼活动、代码审查、漏洞开发、安全专家外包等等。
+WebSec 是一家国际安全公司，在阿姆斯特丹和怀俄明州设有办事处。他们提供 **一体化安全服务**，这意味着他们可以做所有事情；渗透测试、**安全** 审计、意识培训、网络钓鱼活动、代码审查、漏洞开发、安全专家外包等等。
 
-WebSec 的另一个酷点是，与行业平均水平不同，WebSec 对他们的技能 **非常自信**，以至于他们 **保证最佳质量结果**，他们在网站上声明“**如果我们无法攻破它，您就不需要支付！**”。有关更多信息，请查看他们的 [**网站**](https://websec.nl/en/) 和 [**博客**](https://websec.nl/blog/)！
+WebSec 的另一个酷点是，与行业平均水平不同，WebSec 对他们的技能 **非常自信**，以至于他们 **保证最佳质量结果**，他们在网站上声明“**如果我们无法攻破它，您就不需要支付！**”。有关更多信息，请查看他们的 [**网站**](https://websec.net/en/) 和 [**博客**](https://websec.net/blog/)！
 
 除了上述内容，WebSec 还是 **HackTricks 的坚定支持者**。
 
