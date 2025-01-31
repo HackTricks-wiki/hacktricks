@@ -58,7 +58,7 @@ https://go.intigriti.com/hacktricks
 <figure><img src="images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Usa [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) per costruire e **automatizzare facilmente i flussi di lavoro** alimentati dagli **strumenti comunitari più avanzati** al mondo.
+Usa [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) per costruire e **automatizzare facilmente i flussi di lavoro** alimentati dagli strumenti comunitari **più avanzati** al mondo.
 
 Accedi oggi:
 
@@ -76,7 +76,7 @@ Unisciti al server [**HackenProof Discord**](https://discord.com/invite/N3FrSbmw
 
 - **Approfondimenti sul hacking:** Interagisci con contenuti che approfondiscono l'emozione e le sfide dell'hacking
 - **Notizie di hacking in tempo reale:** Rimani aggiornato con il mondo frenetico dell'hacking attraverso notizie e approfondimenti in tempo reale
-- **Ultimi annunci:** Rimani informato sugli ultimi bug bounty in arrivo e aggiornamenti cruciali della piattaforma
+- **Ultimi annunci:** Rimani informato sui nuovi bug bounty in arrivo e sugli aggiornamenti cruciali della piattaforma
 
 **Unisciti a noi su** [**Discord**](https://discord.com/invite/N3FrSbmwdy) e inizia a collaborare con i migliori hacker oggi!
 
@@ -123,15 +123,15 @@ https://academy.8ksec.io/
 
 ---
 
-### [WebSec](https://websec.nl/)
+### [WebSec](https://websec.net/)
 
 <figure><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.nl) è un'azienda di cybersecurity professionale con sede ad **Amsterdam** che aiuta **a proteggere** le aziende **in tutto il mondo** contro le ultime minacce di cybersecurity fornendo **servizi di sicurezza offensiva** con un **approccio moderno**.
+[**WebSec**](https://websec.net) è un'azienda di cybersecurity professionale con sede ad **Amsterdam** che aiuta **a proteggere** le aziende **in tutto il mondo** contro le ultime minacce alla cybersecurity fornendo **servizi di sicurezza offensiva** con un approccio **moderno**.
 
-WebSec è un'**azienda di sicurezza all-in-one**, il che significa che fanno tutto; Pentesting, **Audit** di Sicurezza, Formazione sulla Consapevolezza, Campagne di Phishing, Revisione del Codice, Sviluppo di Exploit, Outsourcing di Esperti di Sicurezza e molto altro.
+WebSec è un'azienda di sicurezza internazionale con uffici ad Amsterdam e Wyoming. Offrono **servizi di sicurezza all-in-one**, il che significa che fanno tutto; Pentesting, **Audit** di Sicurezza, Formazione sulla Consapevolezza, Campagne di Phishing, Revisione del Codice, Sviluppo di Exploit, Outsourcing di Esperti di Sicurezza e molto altro.
 
-Un'altra cosa interessante di WebSec è che, a differenza della media del settore, WebSec è **molto sicura delle proprie competenze**, tanto da **garantire i migliori risultati di qualità**, come dichiarato sul loro sito web "**Se non possiamo hackarlo, non lo paghi!**". Per ulteriori informazioni, dai un'occhiata al loro [**sito web**](https://websec.nl/en/) e [**blog**](https://websec.nl/blog/)!
+Un'altra cosa interessante di WebSec è che, a differenza della media del settore, WebSec è **molto sicura delle proprie competenze**, tanto da **garantire i migliori risultati di qualità**, come dichiarato sul loro sito web "**Se non possiamo hackarlo, non lo paghi!**". Per ulteriori informazioni, dai un'occhiata al loro [**sito web**](https://websec.net/en/) e [**blog**](https://websec.net/blog/)!
 
 In aggiunta a quanto sopra, WebSec è anche un **sostenitore impegnato di HackTricks.**
 
@@ -139,7 +139,7 @@ In aggiunta a quanto sopra, WebSec è anche un **sostenitore impegnato di HackTr
 https://www.youtube.com/watch?v=Zq2JycGDCPM
 {{#endref}}
 
-## Licenza e Dichiarazione di Esclusione di Responsabilità
+## Licenza & Dichiarazione di Non Responsabilità
 
 Controllali in:
 
