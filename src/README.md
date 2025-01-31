@@ -2,7 +2,7 @@
 
 <figure><img src="images/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
-_Hacktricks loga i projektowanie ruchu autorstwa_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
+_Logo i animacja Hacktricks autorstwa_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
 
 ### Uruchom HackTricks lokalnie
 ```bash
@@ -31,7 +31,7 @@ Możesz sprawdzić ich **blog** pod adresem [**https://blog.stmcyber.com**](http
 
 <figure><img src="images/image (45).png" alt=""><figcaption></figcaption></figure>
 
-[**RootedCON**](https://www.rootedcon.com) to najważniejsze wydarzenie związane z cyberbezpieczeństwem w **Hiszpanii** i jedno z najważniejszych w **Europie**. Z **misją promowania wiedzy technicznej**, ten kongres jest gorącym punktem spotkań dla profesjonalistów z dziedziny technologii i cyberbezpieczeństwa w każdej dyscyplinie.
+[**RootedCON**](https://www.rootedcon.com) to najważniejsze wydarzenie w dziedzinie cyberbezpieczeństwa w **Hiszpanii** i jedno z najważniejszych w **Europie**. Z **misją promowania wiedzy technicznej**, ten kongres jest gorącym punktem spotkań dla profesjonalistów z dziedziny technologii i cyberbezpieczeństwa w każdej dyscyplinie.
 
 {{#ref}}
 https://www.rootedcon.com/
@@ -43,7 +43,7 @@ https://www.rootedcon.com/
 
 <figure><img src="images/image (47).png" alt=""><figcaption></figcaption></figure>
 
-**Intigriti** to **numer 1 w Europie** w zakresie etycznego hackingu i **platforma bug bounty.**
+**Intigriti** to **numer 1 w Europie** w dziedzinie etycznego hackingu i **platforma bug bounty.**
 
 **Wskazówka dotycząca bug bounty**: **zarejestruj się** w **Intigriti**, premium **platformie bug bounty stworzonej przez hakerów, dla hackerów**! Dołącz do nas pod adresem [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) już dziś i zacznij zarabiać nagrody do **100 000 USD**!
 
@@ -74,9 +74,9 @@ https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktr
 
 Dołącz do serwera [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy), aby komunikować się z doświadczonymi hakerami i łowcami bugów!
 
-- **Wgląd w hacking:** Angażuj się w treści, które zagłębiają się w emocje i wyzwania związane z hackingiem
+- **Wglądy w hacking:** Angażuj się w treści, które zagłębiają się w emocje i wyzwania związane z hackingiem
 - **Aktualności o hackingu w czasie rzeczywistym:** Bądź na bieżąco z dynamicznym światem hackingu dzięki aktualnym wiadomościom i wglądom
-- **Najnowsze ogłoszenia:** Bądź na bieżąco z najnowszymi nagrodami bug bounty oraz istotnymi aktualizacjami platformy
+- **Najnowsze ogłoszenia:** Bądź na bieżąco z nowymi nagrodami bug bounty i istotnymi aktualizacjami platformy
 
 **Dołącz do nas na** [**Discord**](https://discord.com/invite/N3FrSbmwdy) i zacznij współpracować z najlepszymi hakerami już dziś!
 
@@ -123,23 +123,23 @@ https://academy.8ksec.io/
 
 ---
 
-### [WebSec](https://websec.nl/)
+### [WebSec](https://websec.net/)
 
 <figure><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.nl) to profesjonalna firma zajmująca się cyberbezpieczeństwem z siedzibą w **Amsterdamie**, która pomaga **chronić** firmy **na całym świecie** przed najnowszymi zagrożeniami w dziedzinie cyberbezpieczeństwa, oferując **usługi ofensywne** z **nowoczesnym** podejściem.
+[**WebSec**](https://websec.net) to profesjonalna firma zajmująca się cyberbezpieczeństwem z siedzibą w **Amsterdamie**, która pomaga **chronić** firmy **na całym świecie** przed najnowszymi zagrożeniami w dziedzinie cyberbezpieczeństwa, oferując **usługi ofensywne** z **nowoczesnym** podejściem.
 
-WebSec to **wszystko w jednym** firma zajmująca się bezpieczeństwem, co oznacza, że robią wszystko; Pentesting, **Audyty** Bezpieczeństwa, Szkolenia w zakresie świadomości, Kampanie Phishingowe, Przegląd Kodów, Rozwój Exploitów, Outsourcing Ekspertów ds. Bezpieczeństwa i wiele więcej.
+WebSec to międzynarodowa firma zajmująca się bezpieczeństwem z biurami w Amsterdamie i Wyoming. Oferują **wszystko w jednym** usługi bezpieczeństwa, co oznacza, że robią wszystko; Pentesting, **Audyty** Bezpieczeństwa, Szkolenia w zakresie świadomości, Kampanie phishingowe, Przegląd kodu, Rozwój exploitów, Outsourcing ekspertów ds. bezpieczeństwa i wiele więcej.
 
-Kolejną fajną rzeczą w WebSec jest to, że w przeciwieństwie do średniej w branży, WebSec jest **bardzo pewny swoich umiejętności**, do tego stopnia, że **gwarantują najlepsze wyniki jakościowe**, jak stwierdzają na swojej stronie "**Jeśli nie możemy tego zhakować, nie płacisz!**". Aby uzyskać więcej informacji, zajrzyj na ich [**stronę**](https://websec.nl/en/) i [**blog**](https://websec.nl/blog/)!
+Kolejną fajną rzeczą w WebSec jest to, że w przeciwieństwie do średniej w branży, WebSec jest **bardzo pewny swoich umiejętności**, do tego stopnia, że **gwarantują najlepsze wyniki jakościowe**, jak stwierdzają na swojej stronie "**Jeśli nie możemy tego zhakować, nie płacisz!**". Aby uzyskać więcej informacji, zajrzyj na ich [**stronę**](https://websec.net/en/) i [**blog**](https://websec.net/blog/)!
 
-Oprócz powyższego, WebSec jest również **zaangażowanym wsparciem HackTricks.**
+Oprócz powyższego, WebSec jest również **zaangażowanym wsparciem dla HackTricks.**
 
 {{#ref}}
 https://www.youtube.com/watch?v=Zq2JycGDCPM
 {{#endref}}
 
-## Licencja i zastrzeżenia
+## Licencja i zrzeczenie się odpowiedzialności
 
 Sprawdź je w:
 
