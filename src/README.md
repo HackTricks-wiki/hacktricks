@@ -58,7 +58,7 @@ https://go.intigriti.com/hacktricks
 <figure><img src="images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Usa [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente, impulsados por las herramientas comunitarias **más avanzadas** del mundo.
+Usa [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente, impulsados por las **herramientas comunitarias más avanzadas** del mundo.
 
 Obtén acceso hoy:
 
@@ -75,7 +75,7 @@ https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktr
 Únete al servidor de [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) para comunicarte con hackers experimentados y cazadores de bugs!
 
 - **Perspectivas de Hacking:** Participa en contenido que profundiza en la emoción y los desafíos del hacking
-- **Noticias de Hackeo en Tiempo Real:** Mantente al día con el mundo del hacking a un ritmo acelerado a través de noticias e información en tiempo real
+- **Noticias de Hackeo en Tiempo Real:** Mantente al día con el mundo del hacking a través de noticias e información en tiempo real
 - **Últimos Anuncios:** Mantente informado sobre las nuevas recompensas de bugs que se lanzan y actualizaciones cruciales de la plataforma
 
 **Únete a nosotros en** [**Discord**](https://discord.com/invite/N3FrSbmwdy) y comienza a colaborar con los mejores hackers hoy!
@@ -88,7 +88,7 @@ https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktr
 
 **Obtén la perspectiva de un hacker sobre tus aplicaciones web, red y nube**
 
-**Encuentra y reporta vulnerabilidades críticas y explotables con un impacto real en los negocios.** Usa nuestras más de 20 herramientas personalizadas para mapear la superficie de ataque, encontrar problemas de seguridad que te permitan escalar privilegios, y utiliza exploits automatizados para recopilar evidencia esencial, convirtiendo tu arduo trabajo en informes persuasivos.
+**Encuentra y reporta vulnerabilidades críticas y explotables con un impacto real en los negocios.** Usa nuestras más de 20 herramientas personalizadas para mapear la superficie de ataque, encontrar problemas de seguridad que te permitan escalar privilegios, y usar exploits automatizados para recopilar evidencia esencial, convirtiendo tu arduo trabajo en informes persuasivos.
 
 {{#ref}}
 https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons
@@ -123,15 +123,15 @@ https://academy.8ksec.io/
 
 ---
 
-### [WebSec](https://websec.nl/)
+### [WebSec](https://websec.net/)
 
 <figure><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.nl) es una empresa profesional de ciberseguridad con sede en **Ámsterdam** que ayuda a **proteger** negocios **en todo el mundo** contra las últimas amenazas de ciberseguridad al proporcionar **servicios de seguridad ofensiva** con un enfoque **moderno**.
+[**WebSec**](https://websec.net) es una empresa profesional de ciberseguridad con sede en **Ámsterdam** que ayuda a **proteger** negocios **en todo el mundo** contra las últimas amenazas de ciberseguridad al proporcionar **servicios de seguridad ofensiva** con un enfoque **moderno**.
 
-WebSec es una **empresa de seguridad todo en uno**, lo que significa que hacen de todo; Pentesting, **Auditorías** de Seguridad, Capacitación en Conciencia, Campañas de Phishing, Revisión de Código, Desarrollo de Exploits, Externalización de Expertos en Seguridad y mucho más.
+WebSec es una empresa de seguridad internacional con oficinas en Ámsterdam y Wyoming. Ofrecen **servicios de seguridad todo en uno**, lo que significa que lo hacen todo; Pentesting, **Auditorías** de Seguridad, Capacitación en Conciencia, Campañas de Phishing, Revisión de Código, Desarrollo de Exploits, Externalización de Expertos en Seguridad y mucho más.
 
-Otra cosa interesante sobre WebSec es que, a diferencia del promedio de la industria, WebSec es **muy confiado en sus habilidades**, hasta el punto de que **garantizan los mejores resultados de calidad**, se indica en su sitio web "**Si no podemos hackearlo, ¡no pagas!**". Para más información, echa un vistazo a su [**sitio web**](https://websec.nl/en/) y [**blog**](https://websec.nl/blog/)!
+Otra cosa interesante sobre WebSec es que, a diferencia del promedio de la industria, WebSec es **muy confiado en sus habilidades**, hasta el punto de que **garantizan los mejores resultados de calidad**, se indica en su sitio web "**Si no podemos hackearlo, ¡no pagas!**". Para más información, echa un vistazo a su [**sitio web**](https://websec.net/en/) y [**blog**](https://websec.net/blog/)!
 
 Además de lo anterior, WebSec también es un **apoyo comprometido de HackTricks.**
 
