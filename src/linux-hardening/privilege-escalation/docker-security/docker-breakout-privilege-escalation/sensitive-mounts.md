@@ -2,11 +2,11 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-L'esposizione di `/proc`, `/sys` e `/var` senza un'adeguata isolamento dei namespace introduce significativi rischi per la sicurezza, inclusi l'ampliamento della superficie di attacco e la divulgazione di informazioni. Questi directory contengono file sensibili che, se mal configurati o accessibili da un utente non autorizzato, possono portare a fuga di container, modifica dell'host o fornire informazioni che facilitano ulteriori attacchi. Ad esempio, montare in modo errato `-v /proc:/host/proc` può eludere la protezione di AppArmor a causa della sua natura basata su percorso, lasciando `/host/proc` non protetto.
+L'esposizione di `/proc`, `/sys` e `/var` senza un'adeguata isolamento dei namespace introduce significativi rischi per la sicurezza, inclusi l'ampliamento della superficie di attacco e la divulgazione di informazioni. Questi directory contengono file sensibili che, se mal configurati o accessibili da un utente non autorizzato, possono portare a fuga dal container, modifica dell'host o fornire informazioni che facilitano ulteriori attacchi. Ad esempio, montare in modo errato `-v /proc:/host/proc` può eludere la protezione di AppArmor a causa della sua natura basata su percorso, lasciando `/host/proc` non protetto.
 
 **Puoi trovare ulteriori dettagli su ciascuna potenziale vulnerabilità in** [**https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts**](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)**.**
 
-## Vulnerabilità di procfs
+## procfs Vulnerabilities
 
 ### `/proc/sys`
 
@@ -48,7 +48,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Controlla accesso a modprobe
 #### **`/proc/sys/fs/binfmt_misc`**
 
 - Consente di registrare interpreti per formati binari non nativi basati sul loro numero magico.
-- Può portare a escalation di privilegi o accesso a shell root se `/proc/sys/fs/binfmt_misc/register` è scrivibile.
+- Può portare a escalation dei privilegi o accesso a shell root se `/proc/sys/fs/binfmt_misc/register` è scrivibile.
 - Sfruttamento e spiegazione rilevanti:
 - [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
 - Tutorial approfondito: [Video link](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
@@ -84,7 +84,7 @@ echo b > /proc/sysrq-trigger # Riavvia l'host
 #### **`/proc/[pid]/mem`**
 
 - Interfaccia con il dispositivo di memoria del kernel `/dev/mem`.
-- Storicamente vulnerabile ad attacchi di escalation di privilegi.
+- Storicamente vulnerabile ad attacchi di escalation dei privilegi.
 - Maggiori informazioni su [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 
 #### **`/proc/kcore`**
@@ -107,14 +107,14 @@ echo b > /proc/sysrq-trigger # Riavvia l'host
 #### **`/proc/sched_debug`**
 
 - Restituisce informazioni sulla pianificazione dei processi, eludendo le protezioni del namespace PID.
-- Espone nomi di processi, ID e identificatori di cgroup.
+- Espone nomi di processi, ID e identificatori cgroup.
 
 #### **`/proc/[pid]/mountinfo`**
 
 - Fornisce informazioni sui punti di montaggio nel namespace di montaggio del processo.
 - Espone la posizione del `rootfs` o dell'immagine del container.
 
-### Vulnerabilità di `/sys`
+### `/sys` Vulnerabilities
 
 #### **`/sys/kernel/uevent_helper`**
 
@@ -165,7 +165,7 @@ cat /output %%%
 - `debugfs` offre un'interfaccia di debug "senza regole" al kernel.
 - Storia di problemi di sicurezza a causa della sua natura illimitata.
 
-### Vulnerabilità di `/var`
+### `/var` Vulnerabilities
 
 La cartella **/var** dell'host contiene socket di runtime del container e i filesystem dei container. Se questa cartella è montata all'interno di un container, quel container avrà accesso in lettura-scrittura ai filesystem di altri container con privilegi di root. Questo può essere abusato per passare tra i container, causare un denial of service o inserire backdoor in altri container e applicazioni che vi girano.
 
@@ -218,17 +218,21 @@ L'XSS è stato ottenuto:
 
 ![Stored XSS via mounted /var folder](/images/stored-xss-via-mounted-var-folder.png)
 
-Nota che il container NON richiede un riavvio o altro. Qualsiasi modifica effettuata tramite la cartella montata **/var** verrà applicata istantaneamente.
+Nota che il container NON richiede un riavvio o altro. Qualsiasi modifica effettuata tramite la cartella montata **/var** sarà applicata istantaneamente.
 
-Puoi anche sostituire file di configurazione, binari, servizi, file dell'applicazione e profili shell per ottenere RCE automatico (o semi-automatico).
+Puoi anche sostituire file di configurazione, binari, servizi, file di applicazione e profili di shell per ottenere RCE automatico (o semi-automatico).
 
 ##### Accesso alle credenziali cloud
 
 Il container può leggere i token del serviceaccount K8s o i token webidentity AWS
 che consentono al container di ottenere accesso non autorizzato a K8s o al cloud:
 ```bash
-/ # cat /host-var/run/secrets/kubernetes.io/serviceaccount/token
-/ # cat /host-var/run/secrets/eks.amazonaws.com/serviceaccount/token
+/ # find /host-var/ -type f -iname '*token*' 2>/dev/null | grep kubernetes.io
+/host-var/lib/kubelet/pods/21411f19-934c-489e-aa2c-4906f278431e/volumes/kubernetes.io~projected/kube-api-access-64jw2/..2025_01_22_12_37_42.4197672587/token
+<SNIP>
+/host-var/lib/kubelet/pods/01c671a5-aaeb-4e0b-adcd-1cacd2e418ac/volumes/kubernetes.io~projected/kube-api-access-bljdj/..2025_01_22_12_17_53.265458487/token
+/host-var/lib/kubelet/pods/01c671a5-aaeb-4e0b-adcd-1cacd2e418ac/volumes/kubernetes.io~projected/aws-iam-token/..2025_01_22_03_45_56.2328221474/token
+/host-var/lib/kubelet/pods/5fb6bd26-a6aa-40cc-abf7-ecbf18dde1f6/volumes/kubernetes.io~projected/kube-api-access-fm2t6/..2025_01_22_12_25_25.3018586444/token
 ```
 #### Docker
 
@@ -250,7 +254,7 @@ drwx--x---  4 root root  4096 Jan  9 21:22 062f14e5adbedce75cea699828e22657c8044
 ```
 #### Nota
 
-I percorsi effettivi possono differire in diverse configurazioni, motivo per cui la tua migliore opzione è utilizzare il comando **find** per localizzare i filesystem degli altri contenitori.
+I percorsi effettivi possono differire in diverse configurazioni, motivo per cui la tua migliore opzione è utilizzare il comando **find** per localizzare i filesystem degli altri contenitori e i token di identità SA / web.
 
 ### Riferimenti
 
