@@ -16,13 +16,13 @@ Tuttavia, se **superi il controllo** e alla tua sessione viene concesso quel val
 
 ### Funzionalità di registrazione
 
-Prova a registrarti come un utente già esistente. Prova anche a utilizzare caratteri equivalenti (punti, molti spazi e Unicode).
+Prova a registrarti come un utente già esistente. Prova anche a utilizzare caratteri equivalenti (punti, molte spaziature e Unicode).
 
 ### Prendere il controllo delle email
 
-Registrati con un'email, prima di confermarla cambia l'email, poi, se la nuova email di conferma viene inviata alla prima email registrata, puoi prendere il controllo di qualsiasi email. Oppure, se puoi abilitare la seconda email che conferma la prima, puoi anche prendere il controllo di qualsiasi account.
+Registrati con un'email, prima di confermarla cambia l'email, poi, se la nuova email di conferma viene inviata alla prima email registrata, puoi prendere il controllo di qualsiasi email. Oppure, se puoi abilitare la seconda email confermando la prima, puoi anche prendere il controllo di qualsiasi account.
 
-### Accesso al servicedesk interno delle aziende che utilizzano Atlassian
+### Accesso al servizio interno di assistenza delle aziende che utilizzano Atlassian
 
 {{#ref}}
 https://yourcompanyname.atlassian.net/servicedesk/customer/user/login
@@ -30,8 +30,12 @@ https://yourcompanyname.atlassian.net/servicedesk/customer/user/login
 
 ### Metodo TRACE
 
-Gli sviluppatori potrebbero dimenticare di disabilitare varie opzioni di debug nell'ambiente di produzione. Ad esempio, il metodo HTTP `TRACE` è progettato per scopi diagnostici. Se abilitato, il server web risponderà alle richieste che utilizzano il metodo `TRACE` restituendo nella risposta la richiesta esatta che è stata ricevuta. Questo comportamento è spesso innocuo, ma occasionalmente porta a divulgazione di informazioni, come il nome delle intestazioni di autenticazione interne che potrebbero essere aggiunte alle richieste da proxy inversi.![Image for post](https://miro.medium.com/max/60/1*wDFRADTOd9Tj63xucenvAA.png?q=20)
+Gli sviluppatori potrebbero dimenticare di disabilitare varie opzioni di debug nell'ambiente di produzione. Ad esempio, il metodo HTTP `TRACE` è progettato per scopi diagnostici. Se abilitato, il server web risponderà alle richieste che utilizzano il metodo `TRACE` ripetendo nella risposta la richiesta esatta ricevuta. Questo comportamento è spesso innocuo, ma occasionalmente porta a divulgazione di informazioni, come il nome delle intestazioni di autenticazione interne che potrebbero essere aggiunte alle richieste da proxy inversi. ![Image for post](https://miro.medium.com/max/60/1*wDFRADTOd9Tj63xucenvAA.png?q=20)
 
 ![Image for post](https://miro.medium.com/max/1330/1*wDFRADTOd9Tj63xucenvAA.png)
 
 {{#include ./banners/hacktricks-training.md}}
+
+### Same-Site Scripting
+
+Si verifica quando ci imbattiamo in un dominio o sottodominio che si risolve in localhost o 127.0.0.1 a causa di alcune errate configurazioni DNS. Consente a un attaccante di eludere le restrizioni di origine stessa del RFC2109 (Meccanismo di gestione dello stato HTTP) e quindi di dirottare i dati di gestione dello stato. Può anche consentire il cross-site scripting. Puoi leggere di più al riguardo [qui](https://seclists.org/bugtraq/2008/Jan/270)
