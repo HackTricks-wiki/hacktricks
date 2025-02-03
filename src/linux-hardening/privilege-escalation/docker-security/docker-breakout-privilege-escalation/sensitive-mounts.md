@@ -2,7 +2,7 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-`/proc`, `/sys`, 및 `/var`의 적절한 네임스페이스 격리 없이 노출되면 공격 표면 확대 및 정보 유출을 포함한 상당한 보안 위험이 발생합니다. 이러한 디렉토리는 민감한 파일을 포함하고 있으며, 잘못 구성되거나 무단 사용자가 접근할 경우 컨테이너 탈출, 호스트 수정 또는 추가 공격에 도움이 되는 정보를 제공할 수 있습니다. 예를 들어, `-v /proc:/host/proc`를 잘못 마운트하면 경로 기반 특성으로 인해 AppArmor 보호를 우회할 수 있으며, `/host/proc`가 보호되지 않게 됩니다.
+`/proc`, `/sys`, 및 `/var`의 노출은 적절한 네임스페이스 격리 없이 상당한 보안 위험을 초래하며, 공격 표면 확대 및 정보 유출을 포함합니다. 이러한 디렉토리는 민감한 파일을 포함하고 있으며, 잘못 구성되거나 무단 사용자가 접근할 경우 컨테이너 탈출, 호스트 수정 또는 추가 공격에 도움이 되는 정보를 제공할 수 있습니다. 예를 들어, `-v /proc:/host/proc`를 잘못 마운트하면 경로 기반 특성으로 인해 AppArmor 보호를 우회할 수 있으며, `/host/proc`가 보호되지 않게 됩니다.
 
 **각 잠재적 취약점에 대한 자세한 내용은** [**https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts**](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)**에서 확인할 수 있습니다.**
 
@@ -10,7 +10,7 @@
 
 ### `/proc/sys`
 
-이 디렉토리는 일반적으로 `sysctl(2)`를 통해 커널 변수를 수정할 수 있는 접근을 허용하며, 여러 개의 우려되는 하위 디렉토리를 포함합니다:
+이 디렉토리는 일반적으로 `sysctl(2)`를 통해 커널 변수를 수정할 수 있는 접근을 허용하며, 여러 개의 하위 디렉토리가 있습니다:
 
 #### **`/proc/sys/kernel/core_pattern`**
 
@@ -51,7 +51,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # modprobe 접근 확인
 - `/proc/sys/fs/binfmt_misc/register`가 쓰기 가능할 경우 권한 상승 또는 루트 쉘 접근으로 이어질 수 있습니다.
 - 관련된 악용 및 설명:
 - [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
-- 심층 튜토리얼: [비디오 링크](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
+- 심층 튜토리얼: [Video link](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
 
 ### Others in `/proc`
 
@@ -92,7 +92,7 @@ echo b > /proc/sysrq-trigger # 호스트 재부팅
 - 시스템의 물리적 메모리를 ELF 코어 형식으로 나타냅니다.
 - 읽기는 호스트 시스템 및 다른 컨테이너의 메모리 내용을 유출할 수 있습니다.
 - 큰 파일 크기는 읽기 문제나 소프트웨어 충돌을 초래할 수 있습니다.
-- [2019년 /proc/kcore 덤프하기](https://schlafwandler.github.io/posts/dumping-/proc/kcore/)에서 자세한 사용법.
+- [Dumping /proc/kcore in 2019](https://schlafwandler.github.io/posts/dumping-/proc/kcore/)에서 자세한 사용법.
 
 #### **`/proc/kmem`**
 
@@ -102,7 +102,7 @@ echo b > /proc/sysrq-trigger # 호스트 재부팅
 #### **`/proc/mem`**
 
 - 물리적 메모리를 나타내는 `/dev/mem`의 대체 인터페이스입니다.
-- 읽기 및 쓰기를 허용하며, 모든 메모리 수정을 위해 가상 주소를 물리적 주소로 변환해야 합니다.
+- 읽기 및 쓰기를 허용하며, 모든 메모리 수정을 위해서는 가상 주소를 물리 주소로 변환해야 합니다.
 
 #### **`/proc/sched_debug`**
 
@@ -126,7 +126,7 @@ echo b > /proc/sysrq-trigger # 호스트 재부팅
 
 echo "#!/bin/sh" > /evil-helper echo "ps > /output" >> /evil-helper chmod +x /evil-helper
 
-#### OverlayFS 마운트에서 호스트 경로 찾기
+#### 컨테이너의 OverlayFS 마운트에서 호스트 경로 찾기
 
 host*path=$(sed -n 's/.*\perdir=(\[^,]\_).\*/\1/p' /etc/mtab)
 
@@ -158,7 +158,7 @@ cat /output %%%
 #### **`/sys/firmware/efi/vars` 및 `/sys/firmware/efi/efivars`**
 
 - NVRAM에서 EFI 변수를 상호작용하기 위한 인터페이스를 노출합니다.
-- 잘못 구성되거나 악용될 경우 노트북이 벽돌이 되거나 부팅할 수 없는 호스트 머신이 될 수 있습니다.
+- 잘못된 구성이나 악용은 노트북이 벽돌이 되거나 부팅할 수 없는 호스트 머신으로 이어질 수 있습니다.
 
 #### **`/sys/kernel/debug`**
 
@@ -167,7 +167,7 @@ cat /output %%%
 
 ### `/var` Vulnerabilities
 
-호스트의 **/var** 폴더는 컨테이너 런타임 소켓과 컨테이너의 파일 시스템을 포함합니다. 이 폴더가 컨테이너 내부에 마운트되면 해당 컨테이너는 다른 컨테이너의 파일 시스템에 루트 권한으로 읽기-쓰기 접근을 하게 됩니다. 이는 컨테이너 간 피벗, 서비스 거부를 유발하거나 다른 컨테이너 및 그 안에서 실행되는 애플리케이션에 백도어를 설정하는 데 악용될 수 있습니다.
+호스트의 **/var** 폴더는 컨테이너 런타임 소켓과 컨테이너의 파일 시스템을 포함합니다. 이 폴더가 컨테이너 내부에 마운트되면 해당 컨테이너는 다른 컨테이너의 파일 시스템에 루트 권한으로 읽기-쓰기 접근을 하게 됩니다. 이는 컨테이너 간의 피벗, 서비스 거부를 유발하거나 다른 컨테이너 및 그 안에서 실행되는 애플리케이션에 백도어를 설치하는 데 악용될 수 있습니다.
 
 #### Kubernetes
 
@@ -218,7 +218,7 @@ XSS는 다음과 같이 달성되었습니다:
 
 ![Stored XSS via mounted /var folder](/images/stored-xss-via-mounted-var-folder.png)
 
-컨테이너는 재시작이나 다른 작업이 필요하지 않음을 유의하세요. 마운트된 **/var** 폴더를 통해 이루어진 모든 변경 사항은 즉시 적용됩니다.
+컨테이너는 재시작이나 다른 작업이 필요하지 않다는 점에 유의하세요. 마운트된 **/var** 폴더를 통해 이루어진 모든 변경 사항은 즉시 적용됩니다.
 
 구성 파일, 바이너리, 서비스, 애플리케이션 파일 및 셸 프로필을 교체하여 자동(또는 반자동) RCE를 달성할 수도 있습니다.
 
@@ -226,12 +226,16 @@ XSS는 다음과 같이 달성되었습니다:
 
 컨테이너는 K8s 서비스 계정 토큰 또는 AWS 웹 아이덴티티 토큰을 읽을 수 있으며, 이를 통해 컨테이너는 K8s 또는 클라우드에 대한 무단 접근을 얻을 수 있습니다.
 ```bash
-/ # cat /host-var/run/secrets/kubernetes.io/serviceaccount/token
-/ # cat /host-var/run/secrets/eks.amazonaws.com/serviceaccount/token
+/ # find /host-var/ -type f -iname '*token*' 2>/dev/null | grep kubernetes.io
+/host-var/lib/kubelet/pods/21411f19-934c-489e-aa2c-4906f278431e/volumes/kubernetes.io~projected/kube-api-access-64jw2/..2025_01_22_12_37_42.4197672587/token
+<SNIP>
+/host-var/lib/kubelet/pods/01c671a5-aaeb-4e0b-adcd-1cacd2e418ac/volumes/kubernetes.io~projected/kube-api-access-bljdj/..2025_01_22_12_17_53.265458487/token
+/host-var/lib/kubelet/pods/01c671a5-aaeb-4e0b-adcd-1cacd2e418ac/volumes/kubernetes.io~projected/aws-iam-token/..2025_01_22_03_45_56.2328221474/token
+/host-var/lib/kubelet/pods/5fb6bd26-a6aa-40cc-abf7-ecbf18dde1f6/volumes/kubernetes.io~projected/kube-api-access-fm2t6/..2025_01_22_12_25_25.3018586444/token
 ```
 #### Docker
 
-Docker(또는 Docker Compose 배포)에서의 악용은 정확히 동일하지만, 일반적으로 다른 컨테이너의 파일 시스템은 다른 기본 경로 아래에서 사용 가능합니다:
+Docker(또는 Docker Compose 배포)에서의 악용은 정확히 동일하지만, 일반적으로 다른 컨테이너의 파일 시스템은 다른 기본 경로 아래에서 사용할 수 있습니다:
 ```bash
 $ docker info | grep -i 'docker root\|storage driver'
 Storage Driver: overlay2
@@ -249,7 +253,7 @@ drwx--x---  4 root root  4096 Jan  9 21:22 062f14e5adbedce75cea699828e22657c8044
 ```
 #### 주의
 
-실제 경로는 서로 다른 설정에서 다를 수 있으므로, 다른 컨테이너의 파일 시스템을 찾기 위해 **find** 명령어를 사용하는 것이 가장 좋습니다.
+실제 경로는 서로 다른 설정에서 다를 수 있으므로, 다른 컨테이너의 파일 시스템과 SA / 웹 아이덴티티 토큰을 찾기 위해 **find** 명령어를 사용하는 것이 가장 좋습니다.
 
 ### 참고 문헌
 
