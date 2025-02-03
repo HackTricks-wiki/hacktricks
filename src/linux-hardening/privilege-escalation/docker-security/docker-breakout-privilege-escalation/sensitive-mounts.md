@@ -2,7 +2,7 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-L'exposition de `/proc`, `/sys` et `/var` sans une isolation appropriée des espaces de noms introduit des risques de sécurité significatifs, y compris l'élargissement de la surface d'attaque et la divulgation d'informations. Ces répertoires contiennent des fichiers sensibles qui, s'ils sont mal configurés ou accessibles par un utilisateur non autorisé, peuvent conduire à une évasion de conteneur, à une modification de l'hôte ou fournir des informations aidant à d'autres attaques. Par exemple, le montage incorrect de `-v /proc:/host/proc` peut contourner la protection AppArmor en raison de sa nature basée sur le chemin, laissant `/host/proc` non protégé.
+L'exposition de `/proc`, `/sys` et `/var` sans une isolation appropriée des espaces de noms introduit des risques de sécurité significatifs, y compris l'augmentation de la surface d'attaque et la divulgation d'informations. Ces répertoires contiennent des fichiers sensibles qui, s'ils sont mal configurés ou accessibles par un utilisateur non autorisé, peuvent conduire à une évasion de conteneur, à une modification de l'hôte ou fournir des informations aidant à d'autres attaques. Par exemple, le montage incorrect de `-v /proc:/host/proc` peut contourner la protection AppArmor en raison de sa nature basée sur le chemin, laissant `/host/proc` non protégé.
 
 **Vous pouvez trouver plus de détails sur chaque vulnérabilité potentielle dans** [**https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts**](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)**.**
 
@@ -118,7 +118,7 @@ echo b > /proc/sysrq-trigger # Redémarre l'hôte
 
 #### **`/sys/kernel/uevent_helper`**
 
-- Utilisé pour gérer les `uevents` des dispositifs du noyau.
+- Utilisé pour gérer les `uevents` des périphériques du noyau.
 - Écrire dans `/sys/kernel/uevent_helper` peut exécuter des scripts arbitraires lors des déclenchements de `uevent`.
 - **Exemple d'exploitation** : %%%bash
 
@@ -144,7 +144,7 @@ cat /output %%%
 
 #### **`/sys/class/thermal`**
 
-- Contrôle les paramètres de température, pouvant causer des attaques DoS ou des dommages physiques.
+- Contrôle les paramètres de température, pouvant provoquer des attaques DoS ou des dommages physiques.
 
 #### **`/sys/kernel/vmcoreinfo`**
 
@@ -158,7 +158,7 @@ cat /output %%%
 #### **`/sys/firmware/efi/vars` et `/sys/firmware/efi/efivars`**
 
 - Expose des interfaces pour interagir avec les variables EFI dans NVRAM.
-- Une mauvaise configuration ou exploitation peut conduire à des ordinateurs portables bloqués ou à des machines hôtes non amorçables.
+- Une mauvaise configuration ou une exploitation peut conduire à des ordinateurs portables brisés ou à des machines hôtes non amorçables.
 
 #### **`/sys/kernel/debug`**
 
@@ -226,8 +226,12 @@ Vous pouvez également remplacer des fichiers de configuration, des binaires, de
 
 Le conteneur peut lire les jetons de service K8s ou les jetons webidentity AWS, ce qui permet au conteneur d'accéder de manière non autorisée à K8s ou au cloud :
 ```bash
-/ # cat /host-var/run/secrets/kubernetes.io/serviceaccount/token
-/ # cat /host-var/run/secrets/eks.amazonaws.com/serviceaccount/token
+/ # find /host-var/ -type f -iname '*token*' 2>/dev/null | grep kubernetes.io
+/host-var/lib/kubelet/pods/21411f19-934c-489e-aa2c-4906f278431e/volumes/kubernetes.io~projected/kube-api-access-64jw2/..2025_01_22_12_37_42.4197672587/token
+<SNIP>
+/host-var/lib/kubelet/pods/01c671a5-aaeb-4e0b-adcd-1cacd2e418ac/volumes/kubernetes.io~projected/kube-api-access-bljdj/..2025_01_22_12_17_53.265458487/token
+/host-var/lib/kubelet/pods/01c671a5-aaeb-4e0b-adcd-1cacd2e418ac/volumes/kubernetes.io~projected/aws-iam-token/..2025_01_22_03_45_56.2328221474/token
+/host-var/lib/kubelet/pods/5fb6bd26-a6aa-40cc-abf7-ecbf18dde1f6/volumes/kubernetes.io~projected/kube-api-access-fm2t6/..2025_01_22_12_25_25.3018586444/token
 ```
 #### Docker
 
@@ -249,7 +253,7 @@ drwx--x---  4 root root  4096 Jan  9 21:22 062f14e5adbedce75cea699828e22657c8044
 ```
 #### Remarque
 
-Les chemins réels peuvent différer selon les configurations, c'est pourquoi votre meilleur choix est d'utiliser la commande **find** pour localiser les systèmes de fichiers des autres conteneurs.
+Les chemins réels peuvent différer selon les configurations, c'est pourquoi votre meilleur choix est d'utiliser la commande **find** pour localiser les systèmes de fichiers des autres conteneurs et les jetons d'identité SA / web.
 
 ### Références
 
