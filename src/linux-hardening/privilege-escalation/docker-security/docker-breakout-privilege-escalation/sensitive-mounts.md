@@ -2,7 +2,7 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-Izlaganje `/proc`, `/sys` i `/var` bez odgovarajuće izolacije prostora imena uvodi značajne bezbednosne rizike, uključujući povećanje napadačke površine i otkrivanje informacija. Ovi direktorijumi sadrže osetljive datoteke koje, ako su pogrešno konfigurisane ili pristupaju im neovlašćeni korisnici, mogu dovesti do bekstva iz kontejnera, modifikacije hosta ili pružiti informacije koje pomažu daljim napadima. Na primer, pogrešno montiranje `-v /proc:/host/proc` može zaobići AppArmor zaštitu zbog svoje putanje, ostavljajući `/host/proc` nezaštićenim.
+Izlaganje `/proc`, `/sys` i `/var` bez odgovarajuće izolacije prostora imena uvodi značajne bezbednosne rizike, uključujući povećanje napadačke površine i otkrivanje informacija. Ovi direktorijumi sadrže osetljive datoteke koje, ako su pogrešno konfigurisane ili pristupene od strane neovlašćenog korisnika, mogu dovesti do bekstva iz kontejnera, modifikacije hosta ili pružiti informacije koje pomažu daljim napadima. Na primer, pogrešno montiranje `-v /proc:/host/proc` može zaobići AppArmor zaštitu zbog svoje putanje, ostavljajući `/host/proc` nezaštićenim.
 
 **Možete pronaći dodatne detalje o svakoj potencijalnoj ranjivosti u** [**https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts**](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)**.**
 
@@ -15,7 +15,7 @@ Ovaj direktorijum omogućava pristup za modifikaciju kernel varijabli, obično p
 #### **`/proc/sys/kernel/core_pattern`**
 
 - Opisano u [core(5)](https://man7.org/linux/man-pages/man5/core.5.html).
-- Omogućava definisanje programa koji će se izvršiti prilikom generisanja core datoteke sa prva 128 bajtova kao argumentima. Ovo može dovesti do izvršavanja koda ako datoteka počinje sa cevom `|`.
+- Omogućava definisanje programa koji će se izvršiti prilikom generisanja core datoteke sa prvih 128 bajtova kao argumentima. Ovo može dovesti do izvršavanja koda ako datoteka počinje sa cevom `|`.
 - **Primer testiranja i eksploatacije**:
 
 ```bash
@@ -28,7 +28,7 @@ sleep 5 && ./crash & # Trigger handler
 #### **`/proc/sys/kernel/modprobe`**
 
 - Detaljno opisano u [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
-- Sadrži putanju do učitača kernel modula, pozvanog za učitavanje kernel modula.
+- Sadrži putanju do učitača kernel modula, koji se poziva za učitavanje kernel modula.
 - **Primer provere pristupa**:
 
 ```bash
@@ -43,17 +43,17 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Check access to modprobe
 #### **`/proc/sys/fs`**
 
 - Prema [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html), sadrži opcije i informacije o datotečnom sistemu.
-- Pristup za pisanje može omogućiti razne napade uskraćivanja usluge protiv hosta.
+- Pristup za pisanje može omogućiti različite napade uskraćivanja usluge protiv hosta.
 
 #### **`/proc/sys/fs/binfmt_misc`**
 
-- Omogućava registraciju interpretera za nenativne binarne formate na osnovu njihovog magičnog broja.
+- Omogućava registraciju interpretatora za nenativne binarne formate na osnovu njihovog magičnog broja.
 - Može dovesti do eskalacije privilegija ili pristupa root shell-u ako je `/proc/sys/fs/binfmt_misc/register` zapisiv.
 - Relevantna eksploatacija i objašnjenje:
 - [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
 - Detaljan tutorijal: [Video link](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
 
-### Ostali u `/proc`
+### Others in `/proc`
 
 #### **`/proc/config.gz`**
 
@@ -91,13 +91,13 @@ echo b > /proc/sysrq-trigger # Reboots the host
 
 - Predstavlja fizičku memoriju sistema u ELF core formatu.
 - Čitanje može otkriti sadržaj memorije host sistema i drugih kontejnera.
-- Velika veličina datoteke može dovesti do problema sa čitanjem ili rušenjem softvera.
+- Velika veličina datoteke može dovesti do problema sa čitanjem ili rušenja softvera.
 - Detaljna upotreba u [Dumping /proc/kcore in 2019](https://schlafwandler.github.io/posts/dumping-/proc/kcore/).
 
 #### **`/proc/kmem`**
 
 - Alternativni interfejs za `/dev/kmem`, predstavlja kernel virtuelnu memoriju.
-- Omogućava čitanje i pisanje, što znači direktnu modifikaciju kernel memorije.
+- Omogućava čitanje i pisanje, što omogućava direktnu modifikaciju kernel memorije.
 
 #### **`/proc/mem`**
 
@@ -107,7 +107,7 @@ echo b > /proc/sysrq-trigger # Reboots the host
 #### **`/proc/sched_debug`**
 
 - Vraća informacije o rasporedu procesa, zaobilazeći PID namespace zaštite.
-- Izlaže imena procesa, ID-ove i cgroup identifikatore.
+- Izlaže imena procesa, ID-eve i cgroup identifikatore.
 
 #### **`/proc/[pid]/mountinfo`**
 
@@ -130,7 +130,7 @@ echo "#!/bin/sh" > /evil-helper echo "ps > /output" >> /evil-helper chmod +x /ev
 
 host*path=$(sed -n 's/.*\perdir=(\[^,]\_).\*/\1/p' /etc/mtab)
 
-#### Postavlja uevent_helper na zloćudnog pomoćnika
+#### Postavlja uevent_helper na maliciozni helper
 
 echo "$host_path/evil-helper" > /sys/kernel/uevent_helper
 
@@ -144,11 +144,11 @@ cat /output %%%
 
 #### **`/sys/class/thermal`**
 
-- Kontroliše postavke temperature, potencijalno uzrokujući DoS napade ili fizička oštećenja.
+- Kontroliše postavke temperature, potencijalno uzrokujući DoS napade ili fizičku štetu.
 
 #### **`/sys/kernel/vmcoreinfo`**
 
-- Curene adrese kernela, potencijalno kompromitujući KASLR.
+- Curi kernel adrese, potencijalno ugrožavajući KASLR.
 
 #### **`/sys/kernel/security`**
 
@@ -162,12 +162,12 @@ cat /output %%%
 
 #### **`/sys/kernel/debug`**
 
-- `debugfs` nudi "bez pravila" interfejs za debagovanje kernela.
+- `debugfs` nudi "bez pravila" debagiranje interfejsa za kernel.
 - Istorija bezbednosnih problema zbog svoje neograničene prirode.
 
 ### `/var` Vulnerabilities
 
-Hostova **/var** fascikla sadrži sokete za runtime kontejnera i datotečne sisteme kontejnera. Ako je ova fascikla montirana unutar kontejnera, taj kontejner će dobiti pristup za čitanje i pisanje drugim datotečnim sistemima kontejnera sa root privilegijama. Ovo se može zloupotrebiti za prebacivanje između kontejnera, izazivanje uskraćivanja usluge ili postavljanje zadnjih vrata u druge kontejnere i aplikacije koje se u njima pokreću.
+Hostova **/var** fascikla sadrži sokete kontejnerskog runtime-a i datotečne sisteme kontejnera. Ako je ova fascikla montirana unutar kontejnera, taj kontejner će dobiti pristup za čitanje i pisanje drugim datotečnim sistemima kontejnera sa root privilegijama. Ovo se može zloupotrebiti za prebacivanje između kontejnera, izazivanje uskraćivanja usluge ili postavljanje backdoora u druge kontejnere i aplikacije koje se u njima izvršavaju.
 
 #### Kubernetes
 
@@ -226,13 +226,16 @@ Takođe možete zameniti konfiguracione datoteke, binarne datoteke, servise, dat
 
 Kontejner može čitati K8s serviceaccount tokene ili AWS webidentity tokene što omogućava kontejneru da dobije neovlašćen pristup K8s ili cloudu:
 ```bash
-/ # cat /host-var/run/secrets/kubernetes.io/serviceaccount/token
-/ # cat /host-var/run/secrets/eks.amazonaws.com/serviceaccount/token
+/ # find /host-var/ -type f -iname '*token*' 2>/dev/null | grep kubernetes.io
+/host-var/lib/kubelet/pods/21411f19-934c-489e-aa2c-4906f278431e/volumes/kubernetes.io~projected/kube-api-access-64jw2/..2025_01_22_12_37_42.4197672587/token
+<SNIP>
+/host-var/lib/kubelet/pods/01c671a5-aaeb-4e0b-adcd-1cacd2e418ac/volumes/kubernetes.io~projected/kube-api-access-bljdj/..2025_01_22_12_17_53.265458487/token
+/host-var/lib/kubelet/pods/01c671a5-aaeb-4e0b-adcd-1cacd2e418ac/volumes/kubernetes.io~projected/aws-iam-token/..2025_01_22_03_45_56.2328221474/token
+/host-var/lib/kubelet/pods/5fb6bd26-a6aa-40cc-abf7-ecbf18dde1f6/volumes/kubernetes.io~projected/kube-api-access-fm2t6/..2025_01_22_12_25_25.3018586444/token
 ```
 #### Docker
 
-Eksploatacija u Dockeru (ili u Docker Compose implementacijama) je potpuno ista, osim što su obično
-datoteke drugih kontejnera dostupne pod drugačijom osnovnom putanjom:
+Eksploatacija u Dockeru (ili u Docker Compose implementacijama) je potpuno ista, osim što su obično datoteke drugih kontejnera dostupne pod drugačijom osnovnom putanjom:
 ```bash
 $ docker info | grep -i 'docker root\|storage driver'
 Storage Driver: overlay2
@@ -251,12 +254,12 @@ drwx--x---  4 root root  4096 Jan  9 21:22 062f14e5adbedce75cea699828e22657c8044
 #### Napomena
 
 Stvarne putanje mogu se razlikovati u različitim postavkama, zbog čega je najbolje koristiti **find** komandu za
-lociranje datoteka drugih kontejnera.
+lociranje datoteka drugih kontejnera i SA / web identitet tokena
 
 ### Reference
 
 - [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)
-- [Understanding and Hardening Linux Containers](https://research.nccgroup.com/wp-content/uploads/2020/07/ncc_group_understanding_hardening_linux_containers-1-1.pdf)
-- [Abusing Privileged and Unprivileged Linux Containers](https://www.nccgroup.com/globalassets/our-research/us/whitepapers/2016/june/container_whitepaper.pdf)
+- [Razumevanje i učvršćivanje Linux kontejnera](https://research.nccgroup.com/wp-content/uploads/2020/07/ncc_group_understanding_hardening_linux_containers-1-1.pdf)
+- [Zloupotreba privilegovanih i neprivilegovanih Linux kontejnera](https://www.nccgroup.com/globalassets/our-research/us/whitepapers/2016/june/container_whitepaper.pdf)
 
 {{#include ../../../../banners/hacktricks-training.md}}
