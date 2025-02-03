@@ -2,7 +2,7 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-`/proc`, `/sys` ve `/var`'ın uygun namespace izolasyonu olmadan açılması, saldırı yüzeyinin genişlemesi ve bilgi sızıntısı da dahil olmak üzere önemli güvenlik riskleri oluşturur. Bu dizinler, yanlış yapılandırıldığında veya yetkisiz bir kullanıcı tarafından erişildiğinde, konteyner kaçışı, ana makine değişikliği veya daha fazla saldırıyı destekleyen bilgilerin sağlanmasına yol açabilecek hassas dosyalar içerir. Örneğin, `-v /proc:/host/proc` yanlış bir şekilde monte edildiğinde, yol tabanlı doğası nedeniyle AppArmor korumasını atlayabilir ve `/host/proc`'u korumasız bırakabilir.
+`/proc`, `/sys` ve `/var`'ın uygun namespace izolasyonu olmadan açığa çıkması, saldırı yüzeyinin genişlemesi ve bilgi sızıntısı da dahil olmak üzere önemli güvenlik riskleri oluşturur. Bu dizinler, yanlış yapılandırıldığında veya yetkisiz bir kullanıcı tarafından erişildiğinde, konteyner kaçışına, ana makine değişikliğine veya daha fazla saldırıyı destekleyen bilgilerin sağlanmasına yol açabilecek hassas dosyalar içerir. Örneğin, `-v /proc:/host/proc` yanlış bir şekilde monte edilirse, yol tabanlı doğası nedeniyle AppArmor korumasını atlayabilir ve `/host/proc`'u korumasız bırakabilir.
 
 **Her potansiyel zafiyetin daha fazla detayını bulabilirsiniz** [**https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts**](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)**.**
 
@@ -10,12 +10,12 @@
 
 ### `/proc/sys`
 
-Bu dizin, genellikle `sysctl(2)` aracılığıyla çekirdek değişkenlerini değiştirme erişimi sağlar ve birkaç endişe verici alt dizin içerir:
+Bu dizin, genellikle `sysctl(2)` aracılığıyla çekirdek değişkenlerini değiştirme izni verir ve birkaç endişe verici alt dizin içerir:
 
 #### **`/proc/sys/kernel/core_pattern`**
 
 - [core(5)](https://man7.org/linux/man-pages/man5/core.5.html) içinde tanımlanmıştır.
-- Çekirdek dosyası oluşturulduğunda çalıştırılacak bir program tanımlamaya izin verir; ilk 128 bayt argüman olarak kullanılır. Dosya bir boru `|` ile başlarsa, kod yürütmeye yol açabilir.
+- İlk 128 baytı argüman olarak kullanarak çekirdek dosyası oluşturulduğunda çalıştırılacak bir program tanımlamaya izin verir. Dosya bir boru `|` ile başlarsa, bu kod yürütmeye yol açabilir.
 - **Test ve Sömürü Örneği**:
 
 ```bash
@@ -47,7 +47,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # modprobe erişimini kontrol et
 
 #### **`/proc/sys/fs/binfmt_misc`**
 
-- Sihirli numaralarına dayalı olarak yerel olmayan ikili formatlar için yorumlayıcıların kaydedilmesine izin verir.
+- Büyü numarasına dayalı olarak yerel olmayan ikili formatlar için yorumlayıcıları kaydetmeye izin verir.
 - `/proc/sys/fs/binfmt_misc/register` yazılabilir olduğunda ayrıcalık yükselmesine veya root shell erişimine yol açabilir.
 - İlgili sömürü ve açıklama:
 - [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
@@ -58,11 +58,11 @@ ls -l $(cat /proc/sys/kernel/modprobe) # modprobe erişimini kontrol et
 #### **`/proc/config.gz`**
 
 - `CONFIG_IKCONFIG_PROC` etkinse çekirdek yapılandırmasını açığa çıkarabilir.
-- Saldırganlar için çalışan çekirdekteki zafiyetleri tanımlamak için yararlıdır.
+- Saldırganlar için çalışan çekirdekteki zayıflıkları tanımlamak için yararlıdır.
 
 #### **`/proc/sysrq-trigger`**
 
-- Sysrq komutlarını çağırmaya izin verir, bu da hemen sistem yeniden başlatmalarına veya diğer kritik eylemlere neden olabilir.
+- Sysrq komutlarını çağırmaya izin verir, bu da ani sistem yeniden başlatmalarına veya diğer kritik eylemlere neden olabilir.
 - **Ana Makineyi Yeniden Başlatma Örneği**:
 
 ```bash
@@ -92,17 +92,17 @@ echo b > /proc/sysrq-trigger # Ana makineyi yeniden başlatır
 - Sistemin fiziksel belleğini ELF çekirdek formatında temsil eder.
 - Okuma, ana makine ve diğer konteynerlerin bellek içeriklerini sızdırabilir.
 - Büyük dosya boyutu okuma sorunlarına veya yazılım çökmesine yol açabilir.
-- Detaylı kullanım için [Dumping /proc/kcore in 2019](https://schlafwandler.github.io/posts/dumping-/proc/kcore/) bakınız.
+- Detaylı kullanım için [Dumping /proc/kcore in 2019](https://schlafwandler.github.io/posts/dumping-/proc/kcore/) bakılabilir.
 
 #### **`/proc/kmem`**
 
 - Çekirdek sanal belleğini temsil eden `/dev/kmem` için alternatif bir arayüzdür.
-- Okuma ve yazma işlemlerine izin verir, dolayısıyla çekirdek belleğini doğrudan değiştirme imkanı sunar.
+- Okuma ve yazma izni verir, dolayısıyla çekirdek belleğini doğrudan değiştirmeye olanak tanır.
 
 #### **`/proc/mem`**
 
 - Fiziksel belleği temsil eden `/dev/mem` için alternatif bir arayüzdür.
-- Okuma ve yazma işlemlerine izin verir, tüm belleği değiştirmek için sanal adreslerin fiziksel adreslere dönüştürülmesi gerekir.
+- Okuma ve yazma izni verir, tüm belleği değiştirmek için sanal adreslerin fiziksel adreslere çözülmesi gerekir.
 
 #### **`/proc/sched_debug`**
 
@@ -112,13 +112,13 @@ echo b > /proc/sysrq-trigger # Ana makineyi yeniden başlatır
 #### **`/proc/[pid]/mountinfo`**
 
 - Sürecin mount namespace'inde mount noktaları hakkında bilgi sağlar.
-- Konteynerin `rootfs` veya görüntüsünün konumunu açığa çıkarır.
+- Konteyner `rootfs` veya görüntüsünün konumunu açığa çıkarır.
 
 ### `/sys` Vulnerabilities
 
 #### **`/sys/kernel/uevent_helper`**
 
-- Çekirdek cihaz `uevent`'lerini işlemek için kullanılır.
+- Çekirdek cihaz `uevents`'lerini işlemek için kullanılır.
 - `/sys/kernel/uevent_helper`'a yazmak, `uevent` tetikleyicileri üzerine rastgele betikler çalıştırabilir.
 - **Sömürü Örneği**: %%%bash
 
@@ -130,7 +130,7 @@ echo "#!/bin/sh" > /evil-helper echo "ps > /output" >> /evil-helper chmod +x /ev
 
 host*path=$(sed -n 's/.*\perdir=(\[^,]\_).\*/\1/p' /etc/mtab)
 
-#### uevent_helper'ı kötü niyetli yardımcıya ayarlar
+#### Uevent_helper'ı kötü niyetli yardımcıya ayarlar
 
 echo "$host_path/evil-helper" > /sys/kernel/uevent_helper
 
@@ -167,7 +167,7 @@ cat /output %%%
 
 ### `/var` Vulnerabilities
 
-Ana makinenin **/var** klasörü, konteyner çalışma soketlerini ve konteynerlerin dosya sistemlerini içerir. Bu klasör bir konteyner içinde monte edilirse, o konteyner diğer konteynerlerin dosya sistemlerine root ayrıcalıklarıyla okuma-yazma erişimi alır. Bu, konteynerler arasında geçiş yapmak, hizmet reddi oluşturmak veya içinde çalışan diğer konteynerler ve uygulamalara arka kapı açmak için kötüye kullanılabilir.
+Ana makinenin **/var** klasörü, konteyner çalışma soketlerini ve konteynerlerin dosya sistemlerini içerir. Bu klasör bir konteyner içinde monte edilirse, o konteyner diğer konteynerlerin dosya sistemlerine root ayrıcalıklarıyla okuma-yazma erişimi alır. Bu, konteynerler arasında geçiş yapmak, hizmet reddi oluşturmak veya içinde çalışan diğer konteynerlere ve uygulamalara arka kapı açmak için kötüye kullanılabilir.
 
 #### Kubernetes
 
@@ -216,7 +216,7 @@ are/nginx/html/index2.html
 ```
 XSS şu şekilde gerçekleştirildi:
 
-![Mounted /var klasörü aracılığıyla Saklanan XSS](/images/stored-xss-via-mounted-var-folder.png)
+![Mounted /var klasörü aracılığıyla saklanan XSS](/images/stored-xss-via-mounted-var-folder.png)
 
 Konteynerin bir yeniden başlatmaya veya başka bir şeye ihtiyaç duymadığını unutmayın. Mounted **/var** klasörü aracılığıyla yapılan herhangi bir değişiklik anında uygulanacaktır.
 
@@ -226,8 +226,12 @@ Ayrıca, otomatik (veya yarı otomatik) RCE elde etmek için yapılandırma dosy
 
 Konteyner, K8s serviceaccount token'larını veya AWS webidentity token'larını okuyabilir, bu da konteynerin K8s veya buluta yetkisiz erişim elde etmesine olanak tanır.
 ```bash
-/ # cat /host-var/run/secrets/kubernetes.io/serviceaccount/token
-/ # cat /host-var/run/secrets/eks.amazonaws.com/serviceaccount/token
+/ # find /host-var/ -type f -iname '*token*' 2>/dev/null | grep kubernetes.io
+/host-var/lib/kubelet/pods/21411f19-934c-489e-aa2c-4906f278431e/volumes/kubernetes.io~projected/kube-api-access-64jw2/..2025_01_22_12_37_42.4197672587/token
+<SNIP>
+/host-var/lib/kubelet/pods/01c671a5-aaeb-4e0b-adcd-1cacd2e418ac/volumes/kubernetes.io~projected/kube-api-access-bljdj/..2025_01_22_12_17_53.265458487/token
+/host-var/lib/kubelet/pods/01c671a5-aaeb-4e0b-adcd-1cacd2e418ac/volumes/kubernetes.io~projected/aws-iam-token/..2025_01_22_03_45_56.2328221474/token
+/host-var/lib/kubelet/pods/5fb6bd26-a6aa-40cc-abf7-ecbf18dde1f6/volumes/kubernetes.io~projected/kube-api-access-fm2t6/..2025_01_22_12_25_25.3018586444/token
 ```
 #### Docker
 
@@ -237,7 +241,7 @@ $ docker info | grep -i 'docker root\|storage driver'
 Storage Driver: overlay2
 Docker Root Dir: /var/lib/docker
 ```
-Bu nedenle dosya sistemleri `/var/lib/docker/overlay2/` altında bulunmaktadır:
+Dosya sistemleri `/var/lib/docker/overlay2/` altında bulunmaktadır:
 ```bash
 $ sudo ls -la /var/lib/docker/overlay2
 
@@ -249,7 +253,7 @@ drwx--x---  4 root root  4096 Jan  9 21:22 062f14e5adbedce75cea699828e22657c8044
 ```
 #### Not
 
-Gerçek yollar farklı kurulumlarda farklılık gösterebilir, bu yüzden en iyi seçeneğiniz diğer konteynerlerin dosya sistemlerini bulmak için **find** komutunu kullanmaktır.
+Gerçek yollar farklı kurulumlarda farklılık gösterebilir, bu yüzden en iyi seçeneğiniz diğer konteynerlerin dosya sistemlerini ve SA / web kimlik belirteçlerini bulmak için **find** komutunu kullanmaktır.
 
 ### Referanslar
 
