@@ -2,7 +2,7 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-Die Exposition von `/proc`, `/sys` und `/var` ohne angemessene Namensraum-Isolierung führt zu erheblichen Sicherheitsrisiken, einschließlich einer Vergrößerung der Angriffsfläche und Informationsoffenlegung. Diese Verzeichnisse enthalten sensible Dateien, die, wenn sie falsch konfiguriert oder von einem unbefugten Benutzer zugegriffen werden, zu einem Container-Ausbruch, Host-Modifikation oder zur Bereitstellung von Informationen führen können, die weitere Angriffe unterstützen. Zum Beispiel kann das falsche Einhängen von `-v /proc:/host/proc` den AppArmor-Schutz aufgrund seiner pfadbasierenden Natur umgehen und `/host/proc` ungeschützt lassen.
+Die Exposition von `/proc`, `/sys` und `/var` ohne angemessene Namensraum-Isolierung führt zu erheblichen Sicherheitsrisiken, einschließlich einer Vergrößerung der Angriffsfläche und Informationsoffenlegung. Diese Verzeichnisse enthalten sensible Dateien, die, wenn sie falsch konfiguriert oder von einem unbefugten Benutzer zugegriffen werden, zu einem Container-Ausbruch, Host-Modifikation oder zur Bereitstellung von Informationen führen können, die weitere Angriffe unterstützen. Zum Beispiel kann das falsche Einbinden von `-v /proc:/host/proc` den AppArmor-Schutz aufgrund seiner pfadbasierten Natur umgehen und `/host/proc` ungeschützt lassen.
 
 **Weitere Details zu jeder potenziellen Schwachstelle finden Sie unter** [**https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts**](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)**.**
 
@@ -15,7 +15,7 @@ Dieses Verzeichnis erlaubt den Zugriff zur Modifikation von Kernel-Variablen, no
 #### **`/proc/sys/kernel/core_pattern`**
 
 - Beschrieben in [core(5)](https://man7.org/linux/man-pages/man5/core.5.html).
-- Ermöglicht die Definition eines Programms, das bei der Erzeugung von Kernelspeicherabbildern ausgeführt wird, wobei die ersten 128 Bytes als Argumente verwendet werden. Dies kann zu einer Codeausführung führen, wenn die Datei mit einer Pipe `|` beginnt.
+- Ermöglicht die Definition eines Programms, das bei der Erzeugung von Kernelspeicherabbilddateien ausgeführt wird, wobei die ersten 128 Bytes als Argumente verwendet werden. Dies kann zu einer Codeausführung führen, wenn die Datei mit einer Pipe `|` beginnt.
 - **Test- und Ausbeutungsbeispiel**:
 
 ```bash
@@ -77,7 +77,7 @@ echo b > /proc/sysrq-trigger # Neustart des Hosts
 #### **`/proc/kallsyms`**
 
 - Listet vom Kernel exportierte Symbole und deren Adressen auf.
-- Essentiell für die Entwicklung von Kernel-Ausnutzungen, insbesondere um KASLR zu überwinden.
+- Essentiell für die Entwicklung von Kernel-Ausnutzungen, insbesondere zum Überwinden von KASLR.
 - Adressinformationen sind eingeschränkt, wenn `kptr_restrict` auf `1` oder `2` gesetzt ist.
 - Details in [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 
@@ -148,7 +148,7 @@ cat /output %%%
 
 #### **`/sys/kernel/vmcoreinfo`**
 
-- Leckt Kernel-Adressen, was KASLR gefährden kann.
+- Leaks Kernel-Adressen, was möglicherweise KASLR gefährdet.
 
 #### **`/sys/kernel/security`**
 
@@ -167,7 +167,7 @@ cat /output %%%
 
 ### `/var` Schwachstellen
 
-Der **/var**-Ordner des Hosts enthält Container-Runtime-Sockets und die Dateisysteme der Container. Wenn dieser Ordner innerhalb eines Containers eingehängt wird, erhält dieser Container Lese- und Schreibzugriff auf die Dateisysteme anderer Container mit Root-Rechten. Dies kann missbraucht werden, um zwischen Containern zu pivotieren, um einen Denial of Service zu verursachen oder um andere Container und Anwendungen, die darin ausgeführt werden, zu hintertüren.
+Der **/var**-Ordner des Hosts enthält Container-Runtime-Sockets und die Dateisysteme der Container. Wenn dieser Ordner innerhalb eines Containers eingebunden ist, erhält dieser Container Lese- und Schreibzugriff auf die Dateisysteme anderer Container mit Root-Rechten. Dies kann missbraucht werden, um zwischen Containern zu pivotieren, um einen Denial-of-Service zu verursachen oder um andere Container und Anwendungen, die darin ausgeführt werden, zu hintertüren.
 
 #### Kubernetes
 
@@ -226,8 +226,12 @@ Sie können auch Konfigurationsdateien, Binärdateien, Dienste, Anwendungsdateie
 
 Der Container kann K8s-Servicekonto-Token oder AWS-Webidentitäts-Token lesen, was dem Container unbefugten Zugriff auf K8s oder die Cloud ermöglicht:
 ```bash
-/ # cat /host-var/run/secrets/kubernetes.io/serviceaccount/token
-/ # cat /host-var/run/secrets/eks.amazonaws.com/serviceaccount/token
+/ # find /host-var/ -type f -iname '*token*' 2>/dev/null | grep kubernetes.io
+/host-var/lib/kubelet/pods/21411f19-934c-489e-aa2c-4906f278431e/volumes/kubernetes.io~projected/kube-api-access-64jw2/..2025_01_22_12_37_42.4197672587/token
+<SNIP>
+/host-var/lib/kubelet/pods/01c671a5-aaeb-4e0b-adcd-1cacd2e418ac/volumes/kubernetes.io~projected/kube-api-access-bljdj/..2025_01_22_12_17_53.265458487/token
+/host-var/lib/kubelet/pods/01c671a5-aaeb-4e0b-adcd-1cacd2e418ac/volumes/kubernetes.io~projected/aws-iam-token/..2025_01_22_03_45_56.2328221474/token
+/host-var/lib/kubelet/pods/5fb6bd26-a6aa-40cc-abf7-ecbf18dde1f6/volumes/kubernetes.io~projected/kube-api-access-fm2t6/..2025_01_22_12_25_25.3018586444/token
 ```
 #### Docker
 
@@ -249,7 +253,7 @@ drwx--x---  4 root root  4096 Jan  9 21:22 062f14e5adbedce75cea699828e22657c8044
 ```
 #### Hinweis
 
-Die tatsächlichen Pfade können in verschiedenen Setups abweichen, weshalb es am besten ist, den **find**-Befehl zu verwenden, um die Dateisysteme der anderen Container zu lokalisieren.
+Die tatsächlichen Pfade können in verschiedenen Setups abweichen, weshalb es am besten ist, den **find**-Befehl zu verwenden, um die Dateisysteme der anderen Container und die SA / Web-Identitätstoken zu lokalisieren.
 
 ### Referenzen
 
