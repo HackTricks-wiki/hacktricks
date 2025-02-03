@@ -15,7 +15,7 @@ Ten katalog pozwala na modyfikację zmiennych jądra, zazwyczaj za pomocą `sysc
 #### **`/proc/sys/kernel/core_pattern`**
 
 - Opisany w [core(5)](https://man7.org/linux/man-pages/man5/core.5.html).
-- Umożliwia zdefiniowanie programu do wykonania przy generowaniu pliku rdzenia z pierwszymi 128 bajtami jako argumentami. Może to prowadzić do wykonania kodu, jeśli plik zaczyna się od rury `|`.
+- Umożliwia zdefiniowanie programu do wykonania przy generowaniu pliku core z pierwszymi 128 bajtami jako argumentami. Może to prowadzić do wykonania kodu, jeśli plik zaczyna się od rury `|`.
 - **Przykład testowania i eksploatacji**:
 
 ```bash
@@ -51,7 +51,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Sprawdź dostęp do modprobe
 - Może prowadzić do eskalacji uprawnień lub dostępu do powłoki root, jeśli `/proc/sys/fs/binfmt_misc/register` jest zapisywalny.
 - Istotny exploit i wyjaśnienie:
 - [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
-- Szczegółowy samouczek: [Link do wideo](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
+- Szczegółowy tutorial: [Video link](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
 
 ### Inne w `/proc`
 
@@ -111,7 +111,7 @@ echo b > /proc/sysrq-trigger # Ponownie uruchamia hosta
 
 #### **`/proc/[pid]/mountinfo`**
 
-- Dostarcza informacji o punktach montowania w przestrzeni nazw montowania procesu.
+- Dostarcza informacje o punktach montowania w przestrzeni nazw montowania procesu.
 - Ujawnia lokalizację `rootfs` kontenera lub obrazu.
 
 ### `/sys` Vulnerabilities
@@ -158,7 +158,7 @@ cat /output %%%
 #### **`/sys/firmware/efi/vars` i `/sys/firmware/efi/efivars`**
 
 - Ujawnia interfejsy do interakcji z zmiennymi EFI w NVRAM.
-- Błędna konfiguracja lub eksploatacja mogą prowadzić do zablokowanych laptopów lub nieuruchamialnych maszyn hosta.
+- Błędna konfiguracja lub eksploatacja może prowadzić do zablokowanych laptopów lub nieuruchamialnych maszyn hosta.
 
 #### **`/sys/kernel/debug`**
 
@@ -226,12 +226,16 @@ Możesz również zastąpić pliki konfiguracyjne, binaria, usługi, pliki aplik
 
 Kontener może odczytywać tokeny K8s serviceaccount lub tokeny AWS webidentity, co pozwala kontenerowi uzyskać nieautoryzowany dostęp do K8s lub chmury:
 ```bash
-/ # cat /host-var/run/secrets/kubernetes.io/serviceaccount/token
-/ # cat /host-var/run/secrets/eks.amazonaws.com/serviceaccount/token
+/ # find /host-var/ -type f -iname '*token*' 2>/dev/null | grep kubernetes.io
+/host-var/lib/kubelet/pods/21411f19-934c-489e-aa2c-4906f278431e/volumes/kubernetes.io~projected/kube-api-access-64jw2/..2025_01_22_12_37_42.4197672587/token
+<SNIP>
+/host-var/lib/kubelet/pods/01c671a5-aaeb-4e0b-adcd-1cacd2e418ac/volumes/kubernetes.io~projected/kube-api-access-bljdj/..2025_01_22_12_17_53.265458487/token
+/host-var/lib/kubelet/pods/01c671a5-aaeb-4e0b-adcd-1cacd2e418ac/volumes/kubernetes.io~projected/aws-iam-token/..2025_01_22_03_45_56.2328221474/token
+/host-var/lib/kubelet/pods/5fb6bd26-a6aa-40cc-abf7-ecbf18dde1f6/volumes/kubernetes.io~projected/kube-api-access-fm2t6/..2025_01_22_12_25_25.3018586444/token
 ```
 #### Docker
 
-Eksploatacja w Dockerze (lub w wdrożeniach Docker Compose) jest dokładnie taka sama, z tym że zazwyczaj systemy plików innych kontenerów są dostępne pod inną ścieżką bazową:
+Eksploatacja w Dockerze (lub w wdrożeniach Docker Compose) jest dokładnie taka sama, z tym że zazwyczaj systemy plików innych kontenerów są dostępne pod inną podstawową ścieżką:
 ```bash
 $ docker info | grep -i 'docker root\|storage driver'
 Storage Driver: overlay2
@@ -249,10 +253,7 @@ drwx--x---  4 root root  4096 Jan  9 21:22 062f14e5adbedce75cea699828e22657c8044
 ```
 #### Uwaga
 
-Rzeczywiste ścieżki mogą się różnić w różnych konfiguracjach, dlatego najlepszym rozwiązaniem jest użycie polecenia **find**, aby
-znaleźć systemy plików innych kontenerów
-
-
+Rzeczywiste ścieżki mogą się różnić w różnych konfiguracjach, dlatego najlepszym rozwiązaniem jest użycie polecenia **find**, aby zlokalizować systemy plików innych kontenerów oraz tokeny tożsamości SA / web.
 
 ### Odniesienia
 
