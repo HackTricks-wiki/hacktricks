@@ -16,7 +16,7 @@ Este directorio permite el acceso para modificar variables del kernel, generalme
 
 - Descrito en [core(5)](https://man7.org/linux/man-pages/man5/core.5.html).
 - Permite definir un programa para ejecutar en la generación de archivos de núcleo con los primeros 128 bytes como argumentos. Esto puede llevar a la ejecución de código si el archivo comienza con un pipe `|`.
-- **Ejemplo de Prueba y Explotación**:
+- **Ejemplo de prueba y explotación**:
 
 ```bash
 [ -w /proc/sys/kernel/core_pattern ] && echo Yes # Probar acceso de escritura
@@ -29,10 +29,10 @@ sleep 5 && ./crash & # Activar controlador
 
 - Detallado en [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 - Contiene la ruta al cargador de módulos del kernel, invocado para cargar módulos del kernel.
-- **Ejemplo de Comprobación de Acceso**:
+- **Ejemplo de verificación de acceso**:
 
 ```bash
-ls -l $(cat /proc/sys/kernel/modprobe) # Comprobar acceso a modprobe
+ls -l $(cat /proc/sys/kernel/modprobe) # Verificar acceso a modprobe
 ```
 
 #### **`/proc/sys/vm/panic_on_oom`**
@@ -63,7 +63,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Comprobar acceso a modprobe
 #### **`/proc/sysrq-trigger`**
 
 - Permite invocar comandos Sysrq, potencialmente causando reinicios inmediatos del sistema u otras acciones críticas.
-- **Ejemplo de Reinicio del Host**:
+- **Ejemplo de reinicio del host**:
 
 ```bash
 echo b > /proc/sysrq-trigger # Reinicia el host
@@ -78,31 +78,31 @@ echo b > /proc/sysrq-trigger # Reinicia el host
 
 - Lista símbolos exportados del kernel y sus direcciones.
 - Esencial para el desarrollo de exploits del kernel, especialmente para superar KASLR.
-- La información de direcciones está restringida con `kptr_restrict` configurado en `1` o `2`.
+- La información de dirección está restringida con `kptr_restrict` configurado en `1` o `2`.
 - Detalles en [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 
 #### **`/proc/[pid]/mem`**
 
-- Interactúa con el dispositivo de memoria del kernel `/dev/mem`.
+- Interfaz con el dispositivo de memoria del kernel `/dev/mem`.
 - Históricamente vulnerable a ataques de escalada de privilegios.
 - Más sobre [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 
 #### **`/proc/kcore`**
 
 - Representa la memoria física del sistema en formato ELF core.
-- La lectura puede filtrar el contenido de la memoria del sistema host y otros contenedores.
+- La lectura puede filtrar el contenido de la memoria del sistema host y de otros contenedores.
 - El gran tamaño del archivo puede llevar a problemas de lectura o fallos de software.
 - Uso detallado en [Dumping /proc/kcore in 2019](https://schlafwandler.github.io/posts/dumping-/proc/kcore/).
 
 #### **`/proc/kmem`**
 
 - Interfaz alternativa para `/dev/kmem`, representando la memoria virtual del kernel.
-- Permite la lectura y escritura, por lo que la modificación directa de la memoria del kernel.
+- Permite lectura y escritura, por lo tanto, modificación directa de la memoria del kernel.
 
 #### **`/proc/mem`**
 
 - Interfaz alternativa para `/dev/mem`, representando la memoria física.
-- Permite la lectura y escritura, la modificación de toda la memoria requiere resolver direcciones virtuales a físicas.
+- Permite lectura y escritura, la modificación de toda la memoria requiere resolver direcciones virtuales a físicas.
 
 #### **`/proc/sched_debug`**
 
@@ -111,7 +111,7 @@ echo b > /proc/sysrq-trigger # Reinicia el host
 
 #### **`/proc/[pid]/mountinfo`**
 
-- Proporciona información sobre los puntos de montaje en el namespace de montaje del proceso.
+- Proporciona información sobre puntos de montaje en el namespace de montaje del proceso.
 - Expone la ubicación del `rootfs` o imagen del contenedor.
 
 ### Vulnerabilidades de `/sys`
@@ -120,7 +120,7 @@ echo b > /proc/sysrq-trigger # Reinicia el host
 
 - Usado para manejar `uevents` de dispositivos del kernel.
 - Escribir en `/sys/kernel/uevent_helper` puede ejecutar scripts arbitrarios al activarse `uevent`.
-- **Ejemplo de Explotación**: %%%bash
+- **Ejemplo de explotación**: %%%bash
 
 #### Crea una carga útil
 
@@ -226,8 +226,12 @@ También puede reemplazar archivos de configuración, binarios, servicios, archi
 
 El contenedor puede leer tokens de serviceaccount de K8s o tokens de webidentity de AWS, lo que permite al contenedor obtener acceso no autorizado a K8s o a la nube:
 ```bash
-/ # cat /host-var/run/secrets/kubernetes.io/serviceaccount/token
-/ # cat /host-var/run/secrets/eks.amazonaws.com/serviceaccount/token
+/ # find /host-var/ -type f -iname '*token*' 2>/dev/null | grep kubernetes.io
+/host-var/lib/kubelet/pods/21411f19-934c-489e-aa2c-4906f278431e/volumes/kubernetes.io~projected/kube-api-access-64jw2/..2025_01_22_12_37_42.4197672587/token
+<SNIP>
+/host-var/lib/kubelet/pods/01c671a5-aaeb-4e0b-adcd-1cacd2e418ac/volumes/kubernetes.io~projected/kube-api-access-bljdj/..2025_01_22_12_17_53.265458487/token
+/host-var/lib/kubelet/pods/01c671a5-aaeb-4e0b-adcd-1cacd2e418ac/volumes/kubernetes.io~projected/aws-iam-token/..2025_01_22_03_45_56.2328221474/token
+/host-var/lib/kubelet/pods/5fb6bd26-a6aa-40cc-abf7-ecbf18dde1f6/volumes/kubernetes.io~projected/kube-api-access-fm2t6/..2025_01_22_12_25_25.3018586444/token
 ```
 #### Docker
 
@@ -249,7 +253,7 @@ drwx--x---  4 root root  4096 Jan  9 21:22 062f14e5adbedce75cea699828e22657c8044
 ```
 #### Nota
 
-Las rutas reales pueden diferir en diferentes configuraciones, por lo que tu mejor opción es usar el comando **find** para localizar los sistemas de archivos de los otros contenedores.
+Las rutas reales pueden diferir en diferentes configuraciones, por lo que tu mejor opción es usar el comando **find** para localizar los sistemas de archivos de otros contenedores y los tokens de identidad SA / web.
 
 ### Referencias
 
