@@ -11,8 +11,8 @@ Verskeie kere vertrou die agterkant op die **Gasheer kop** om sekere aksies uit 
 
 ### Sessie booleans
 
-Soms wanneer jy 'n sekere verifikasie korrek voltooi, sal die agterkant **net 'n boolean met die waarde "True" by 'n sekuriteitsattribuut van jou sessie voeg**. Dan sal 'n ander eindpunt weet of jy daardie toets suksesvol geslaag het.\
-As jy egter **die toets slaag** en jou sessie daardie "True" waarde in die sekuriteitsattribuut toegeken word, kan jy probeer om **toegang te verkry tot ander hulpbronne** wat **afhang van dieselfde attribuut** maar waarvoor jy **nie toestemming behoort te hê nie**. [WriteUp](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a).
+Soms, wanneer jy sekere verifikasies korrek voltooi, sal die agterkant **net 'n boolean met die waarde "True" by 'n sekuriteitsattribuut van jou sessie voeg**. Dan sal 'n ander eindpunt weet of jy daardie toets suksesvol geslaag het.\
+As jy egter **die toets slaag** en jou sessie daardie "True" waarde in die sekuriteitsattribuut toegeken word, kan jy probeer om **ander hulpbronne te benader** wat **afhang van dieselfde attribuut** maar waarvoor jy **nie toestemming behoort te hê nie**. [WriteUp](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a).
 
 ### Registreer funksionaliteit
 
@@ -35,3 +35,7 @@ Ontwikkelaars mag vergeet om verskeie foutopsporing opsies in die produksie-omge
 ![Image for post](https://miro.medium.com/max/1330/1*wDFRADTOd9Tj63xucenvAA.png)
 
 {{#include ./banners/hacktricks-training.md}}
+
+### Selfde-web Scripting
+
+Dit gebeur wanneer ons 'n domein of subdomein teëkom wat na localhost of 127.0.0.1 oplos as gevolg van sekere DNS miskonfigurasies. Dit stel 'n aanvaller in staat om die RFC2109 (HTTP State Management Mechanism) dieselfde oorsprong beperkings te omseil, en dus statusbestuurdata te kap. Dit mag ook kruis-web scripting toelaat. Jy kan meer daaroor lees [hier](https://seclists.org/bugtraq/2008/Jan/270)
