@@ -4,7 +4,7 @@
 
 ### Cabeçalho Host
 
-Várias vezes o back-end confia no **cabeçalho Host** para realizar algumas ações. Por exemplo, ele pode usar seu valor como o **domínio para enviar um reset de senha**. Assim, quando você recebe um e-mail com um link para redefinir sua senha, o domínio utilizado é aquele que você colocou no cabeçalho Host. Então, você pode solicitar o reset de senha de outros usuários e mudar o domínio para um controlado por você para roubar seus códigos de reset de senha. [WriteUp](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2).
+Várias vezes o back-end confia no **Cabeçalho Host** para realizar algumas ações. Por exemplo, ele pode usar seu valor como o **domínio para enviar um reset de senha**. Assim, quando você recebe um e-mail com um link para redefinir sua senha, o domínio utilizado é aquele que você colocou no Cabeçalho Host. Então, você pode solicitar o reset de senha de outros usuários e mudar o domínio para um controlado por você para roubar seus códigos de reset de senha. [WriteUp](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2).
 
 > [!WARNING]
 > Note que é possível que você não precise nem esperar o usuário clicar no link de redefinição de senha para obter o token, pois talvez até mesmo **filtros de spam ou outros dispositivos/bots intermediários cliquem nele para analisá-lo**.
@@ -30,8 +30,12 @@ https://yourcompanyname.atlassian.net/servicedesk/customer/user/login
 
 ### Método TRACE
 
-Os desenvolvedores podem esquecer de desativar várias opções de depuração no ambiente de produção. Por exemplo, o método HTTP `TRACE` é projetado para fins de diagnóstico. Se habilitado, o servidor web responderá a solicitações que usam o método `TRACE` ecoando na resposta a exata solicitação que foi recebida. Esse comportamento é frequentemente inofensivo, mas ocasionalmente leva à divulgação de informações, como o nome de cabeçalhos de autenticação internos que podem ser anexados a solicitações por proxies reversos.![Image for post](https://miro.medium.com/max/60/1*wDFRADTOd9Tj63xucenvAA.png?q=20)
+Os desenvolvedores podem esquecer de desabilitar várias opções de depuração no ambiente de produção. Por exemplo, o método HTTP `TRACE` é projetado para fins de diagnóstico. Se habilitado, o servidor web responderá a solicitações que usam o método `TRACE` ecoando na resposta a exata solicitação que foi recebida. Esse comportamento é frequentemente inofensivo, mas ocasionalmente leva à divulgação de informações, como o nome de cabeçalhos de autenticação internos que podem ser anexados a solicitações por proxies reversos.![Image for post](https://miro.medium.com/max/60/1*wDFRADTOd9Tj63xucenvAA.png?q=20)
 
 ![Image for post](https://miro.medium.com/max/1330/1*wDFRADTOd9Tj63xucenvAA.png)
 
 {{#include ./banners/hacktricks-training.md}}
+
+### Scripting de Mesmo Site
+
+Isso ocorre quando encontramos um domínio ou subdomínio que resolve para localhost ou 127.0.0.1 devido a certas configurações incorretas de DNS. Isso permite que um atacante contorne as restrições de mesma origem do RFC2109 (Mecanismo de Gerenciamento de Estado HTTP) e, portanto, sequestrar dados de gerenciamento de estado. Também pode permitir scripting entre sites. Você pode ler mais sobre isso [aqui](https://seclists.org/bugtraq/2008/Jan/270)
