@@ -1,4 +1,4 @@
-# Autres astuces web
+# Autres astuces Web
 
 {{#include ./banners/hacktricks-training.md}}
 
@@ -11,7 +11,7 @@ Plusieurs fois, le back-end fait confiance à l'**en-tête d'hôte** pour effect
 
 ### Booléens de session
 
-Parfois, lorsque vous complétez correctement une vérification, le back-end **ajoute simplement un booléen avec la valeur "True" à un attribut de sécurité de votre session**. Ensuite, un point de terminaison différent saura si vous avez réussi à passer cette vérification.\
+Parfois, lorsque vous complétez une vérification correctement, le back-end **ajoute simplement un booléen avec la valeur "True" à un attribut de sécurité de votre session**. Ensuite, un point de terminaison différent saura si vous avez réussi à passer cette vérification.\
 Cependant, si vous **passez la vérification** et que votre session se voit attribuer cette valeur "True" dans l'attribut de sécurité, vous pouvez essayer d'**accéder à d'autres ressources** qui **dépendent du même attribut** mais auxquelles vous **ne devriez pas avoir accès**. [WriteUp](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a).
 
 ### Fonctionnalité d'enregistrement
@@ -30,8 +30,12 @@ https://yourcompanyname.atlassian.net/servicedesk/customer/user/login
 
 ### Méthode TRACE
 
-Les développeurs peuvent oublier de désactiver diverses options de débogage dans l'environnement de production. Par exemple, la méthode HTTP `TRACE` est conçue à des fins de diagnostic. Si elle est activée, le serveur web répondra aux requêtes utilisant la méthode `TRACE` en écho dans la réponse de la requête exacte qui a été reçue. Ce comportement est souvent inoffensif, mais conduit parfois à une divulgation d'informations, comme le nom des en-têtes d'authentification internes qui peuvent être ajoutés aux requêtes par des proxys inverses.![Image for post](https://miro.medium.com/max/60/1*wDFRADTOd9Tj63xucenvAA.png?q=20)
+Les développeurs peuvent oublier de désactiver diverses options de débogage dans l'environnement de production. Par exemple, la méthode HTTP `TRACE` est conçue à des fins de diagnostic. Si elle est activée, le serveur web répondra aux requêtes utilisant la méthode `TRACE` en écho dans la réponse de la requête exacte qui a été reçue. Ce comportement est souvent inoffensif, mais peut parfois entraîner une divulgation d'informations, comme le nom des en-têtes d'authentification internes qui peuvent être ajoutés aux requêtes par des proxies inverses.![Image for post](https://miro.medium.com/max/60/1*wDFRADTOd9Tj63xucenvAA.png?q=20)
 
 ![Image for post](https://miro.medium.com/max/1330/1*wDFRADTOd9Tj63xucenvAA.png)
 
 {{#include ./banners/hacktricks-training.md}}
+
+### Scripting Same-Site
+
+Cela se produit lorsque nous rencontrons un domaine ou un sous-domaine qui résout à localhost ou 127.0.0.1 en raison de certaines erreurs de configuration DNS. Cela permet à un attaquant de contourner les restrictions de même origine du RFC2109 (Mécanisme de gestion d'état HTTP) et donc de détourner les données de gestion d'état. Cela peut également permettre le cross-site scripting. Vous pouvez en lire plus à ce sujet [ici](https://seclists.org/bugtraq/2008/Jan/270)
