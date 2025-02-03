@@ -2,27 +2,27 @@
 
 {{#include ./banners/hacktricks-training.md}}
 
-### 主机头
+### Host header
 
-几次后端信任 **Host header** 来执行某些操作。例如，它可能会使用其值作为 **发送密码重置的域**。因此，当您收到一封带有重置密码链接的电子邮件时，使用的域是您在 Host header 中输入的域。然后，您可以请求其他用户的密码重置，并将域更改为您控制的域，以窃取他们的密码重置代码。 [WriteUp](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2)。
+几次后端信任 **Host header** 来执行某些操作。例如，它可以使用其值作为 **发送密码重置的域**。因此，当您收到一封包含重置密码链接的电子邮件时，使用的域是您在 Host header 中输入的域。然后，您可以请求其他用户的密码重置，并将域更改为您控制的域，以窃取他们的密码重置代码。 [WriteUp](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2)。
 
 > [!WARNING]
-> 请注意，您甚至可能不需要等待用户点击重置密码链接来获取令牌，因为可能连 **垃圾邮件过滤器或其他中介设备/机器人都会点击它进行分析**。
+> 请注意，您甚至可能不需要等待用户点击重置密码链接来获取令牌，因为 **垃圾邮件过滤器或其他中介设备/机器人可能会点击它进行分析**。
 
-### 会话布尔值
+### Session booleans
 
 有时，当您正确完成某些验证时，后端会 **仅将值为 "True" 的布尔值添加到您的会话的安全属性中**。然后，另一个端点将知道您是否成功通过了该检查。\
 然而，如果您 **通过了检查**，并且您的会话在安全属性中获得了 "True" 值，您可以尝试 **访问其他资源**，这些资源 **依赖于相同的属性**，但您 **不应该有权限** 访问。 [WriteUp](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a)。
 
 ### 注册功能
 
-尝试以已存在的用户身份注册。还可以尝试使用等效字符（点、多个空格和 Unicode）。
+尝试以已存在用户的身份注册。还可以尝试使用等效字符（点、多个空格和 Unicode）。
 
 ### 接管电子邮件
 
-注册一个电子邮件，在确认之前更改电子邮件，然后，如果新的确认电子邮件发送到第一个注册的电子邮件，您可以接管任何电子邮件。或者，如果您可以启用第二个电子邮件以确认第一个电子邮件，您也可以接管任何账户。
+注册一个电子邮件，在确认之前更改电子邮件，然后，如果新的确认电子邮件发送到第一个注册的电子邮件，您可以接管任何电子邮件。或者，如果您可以启用第二个电子邮件以确认第一个电子邮件，您也可以接管任何帐户。
 
-### 访问使用 atlassian 的公司的内部服务台
+### 访问使用 atlassian 的公司内部服务台
 
 {{#ref}}
 https://yourcompanyname.atlassian.net/servicedesk/customer/user/login
@@ -35,3 +35,7 @@ https://yourcompanyname.atlassian.net/servicedesk/customer/user/login
 ![Image for post](https://miro.medium.com/max/1330/1*wDFRADTOd9Tj63xucenvAA.png)
 
 {{#include ./banners/hacktricks-training.md}}
+
+### Same-Site Scripting
+
+当我们遇到由于某些 DNS 配置错误而解析为 localhost 或 127.0.0.1 的域或子域时，就会发生这种情况。它允许攻击者绕过 RFC2109 (HTTP 状态管理机制) 的同源限制，从而劫持状态管理数据。它还可能允许跨站脚本攻击。您可以从 [这里](https://seclists.org/bugtraq/2008/Jan/270) 阅读更多信息。
