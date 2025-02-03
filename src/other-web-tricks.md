@@ -11,7 +11,7 @@ Mehrmals vertraut das Backend dem **Host-Header**, um einige Aktionen durchzufü
 
 ### Sitzungs-Boolean
 
-Manchmal, wenn Sie eine Überprüfung korrekt abschließen, wird das Backend **einfach ein Boolean mit dem Wert "True" zu einem Sicherheitsattribut Ihrer Sitzung hinzufügen**. Dann wird ein anderer Endpunkt wissen, ob Sie diese Überprüfung erfolgreich bestanden haben.\
+Manchmal, wenn Sie eine Überprüfung korrekt abschließen, wird das Backend **einfach einen Boolean mit dem Wert "True" zu einem Sicherheitsattribut Ihrer Sitzung hinzufügen**. Dann wird ein anderer Endpunkt wissen, ob Sie diese Überprüfung erfolgreich bestanden haben.\
 Wenn Sie jedoch **die Überprüfung bestehen** und Ihre Sitzung diesen "True"-Wert im Sicherheitsattribut erhält, können Sie versuchen, **auf andere Ressourcen zuzugreifen**, die **von demselben Attribut abhängen**, auf die Sie jedoch **keine Berechtigung** haben sollten. [WriteUp](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a).
 
 ### Registrierungsfunktionalität
@@ -35,3 +35,7 @@ Entwickler könnten vergessen, verschiedene Debugging-Optionen in der Produktion
 ![Image for post](https://miro.medium.com/max/1330/1*wDFRADTOd9Tj63xucenvAA.png)
 
 {{#include ./banners/hacktricks-training.md}}
+
+### Same-Site-Scripting
+
+Es tritt auf, wenn wir auf eine Domain oder Subdomain stoßen, die aufgrund bestimmter DNS-Fehlkonfigurationen auf localhost oder 127.0.0.1 aufgelöst wird. Es ermöglicht einem Angreifer, die Same-Origin-Beschränkungen des RFC2109 (HTTP State Management Mechanism) zu umgehen und somit die Zustandsverwaltungsdaten zu übernehmen. Es kann auch Cross-Site-Scripting ermöglichen. Sie können mehr darüber [hier](https://seclists.org/bugtraq/2008/Jan/270) lesen.
