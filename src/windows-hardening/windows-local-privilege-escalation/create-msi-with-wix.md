@@ -7,7 +7,7 @@ MSI yükleyicisinin oluşturulması wixtools kullanılarak yapılacaktır, özel
 Wix MSI kullanım örnekleri hakkında kapsamlı bir anlayış için, [bu sayfayı](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with) incelemeniz önerilir. Burada, wix MSI kullanımını gösteren çeşitli örnekler bulabilirsiniz.
 
 Amaç, lnk dosyasını çalıştıracak bir MSI oluşturmaktır. Bunu başarmak için aşağıdaki XML kodu kullanılabilir ([xml buradan](https://0xrick.github.io/hack-the-box/ethereal/index.html#Creating-Malicious-msi-and-getting-root)):
-```markup
+```html
 <?xml version="1.0"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
 <Product Id="*" UpgradeCode="12345678-1234-1234-1234-111111111111" Name="Example Product Name"

