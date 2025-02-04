@@ -6,8 +6,8 @@ MSI 설치 프로그램의 생성은 wixtools를 사용하여 수행되며, 특�
 
 wix MSI 사용 예에 대한 포괄적인 이해를 위해 [이 페이지](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with)를 참조하는 것이 좋습니다. 여기에서는 wix MSI 사용을 보여주는 다양한 예를 찾을 수 있습니다.
 
-목표는 lnk 파일을 실행하는 MSI를 생성하는 것입니다. 이를 달성하기 위해 다음 XML 코드를 사용할 수 있습니다 ([xml from here](https://0xrick.github.io/hack-the-box/ethereal/index.html#Creating-Malicious-msi-and-getting-root)):
-```markup
+목표는 lnk 파일을 실행할 MSI를 생성하는 것입니다. 이를 달성하기 위해 다음 XML 코드를 사용할 수 있습니다 ([xml from here](https://0xrick.github.io/hack-the-box/ethereal/index.html#Creating-Malicious-msi-and-getting-root)):
+```html
 <?xml version="1.0"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
 <Product Id="*" UpgradeCode="12345678-1234-1234-1234-111111111111" Name="Example Product Name"
@@ -50,7 +50,7 @@ candle.exe -out C:\tem\wix C:\tmp\Ethereal\msi.xml
 ```
 light.exe -out C:\tm\Ethereal\rick.msi C:\tmp\wix
 ```
-이전 명령과 유사하게, 명령과 그 출력 결과를 설명하는 이미지가 게시물에 포함되어 있습니다.
+이전 명령과 유사하게, 명령과 그 출력을 설명하는 이미지가 게시물에 포함되어 있습니다.
 
 이 요약이 유용한 정보를 제공하는 것을 목표로 하지만, 보다 포괄적인 세부정보와 정확한 지침을 위해 원본 게시물을 참조하는 것이 권장됩니다.
 

