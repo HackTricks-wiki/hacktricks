@@ -7,7 +7,7 @@ A criação do instalador MSI será feita usando wixtools, especificamente [wixt
 Para uma compreensão abrangente de exemplos de uso do wix MSI, é aconselhável consultar [esta página](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with). Aqui, você pode encontrar vários exemplos que demonstram o uso do wix MSI.
 
 O objetivo é gerar um MSI que executará o arquivo lnk. Para alcançar isso, o seguinte código XML pode ser empregado ([xml from here](https://0xrick.github.io/hack-the-box/ethereal/index.html#Creating-Malicious-msi-and-getting-root)):
-```markup
+```html
 <?xml version="1.0"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
 <Product Id="*" UpgradeCode="12345678-1234-1234-1234-111111111111" Name="Example Product Name"

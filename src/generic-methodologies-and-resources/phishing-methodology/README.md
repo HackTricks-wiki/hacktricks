@@ -22,7 +22,7 @@
 ### Técnicas de Variação de Nome de Domínio
 
 - **Palavra-chave**: O nome do domínio **contém** uma **palavra-chave** importante do domínio original (por exemplo, zelster.com-management.com).
-- **subdomínio hifenizado**: Trocar o **ponto por um hífen** de um subdomínio (por exemplo, www-zelster.com).
+- **subdomínio hifenizado**: Mudar o **ponto por um hífen** de um subdomínio (por exemplo, www-zelster.com).
 - **Novo TLD**: Mesmo domínio usando um **novo TLD** (por exemplo, zelster.org).
 - **Homoglyph**: **Substitui** uma letra no nome do domínio por **letras que parecem semelhantes** (por exemplo, zelfser.com).
 - **Transposição:** **Troca duas letras** dentro do nome do domínio (por exemplo, zelsetr.com).
@@ -91,7 +91,7 @@ ssh -L 3333:127.0.0.1:3333 <user>@<ip>
 
 **Configuração do certificado TLS**
 
-Antes desta etapa, você deve **já ter comprado o domínio** que vai usar e ele deve **apontar** para o **IP do VPS** onde você está configurando **gophish**.
+Antes desta etapa, você deve **já ter comprado o domínio** que vai usar e ele deve estar **apontando** para o **IP do VPS** onde você está configurando **gophish**.
 ```bash
 DOMAIN="<domain>"
 wget https://dl.eff.org/certbot-auto
@@ -239,11 +239,11 @@ Você pode usar [https://www.spfwizard.net/](https://www.spfwizard.net) para ger
 
 ![](<../../images/image (1037).png>)
 
-Este é o conteúdo que deve ser definido dentro de um registro TXT dentro do domínio:
+Este é o conteúdo que deve ser definido dentro de um registro TXT no domínio:
 ```bash
 v=spf1 mx a ip4:ip.ip.ip.ip ?all
 ```
-### Registro de Autenticação, Relatório e Conformidade de Mensagens Baseado em Domínio (DMARC)
+### Domain-based Message Authentication, Reporting & Conformance (DMARC) Record
 
 Você deve **configurar um registro DMARC para o novo domínio**. Se você não sabe o que é um registro DMARC [**leia esta página**](../../network-services-pentesting/pentesting-smtp/index.html#dmarc).
 
@@ -305,7 +305,7 @@ A página [www.mail-tester.com](https://www.mail-tester.com) pode indicar se seu
 - Decida de qual conta você vai enviar os emails de phishing. Sugestões: _noreply, support, servicedesk, salesforce..._
 - Você pode deixar em branco o nome de usuário e a senha, mas certifique-se de marcar a opção Ignorar Erros de Certificado
 
-![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
+![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
 
 > [!NOTE]
 > É recomendado usar a funcionalidade "**Enviar Email de Teste**" para testar se tudo está funcionando.\
@@ -317,7 +317,7 @@ A página [www.mail-tester.com](https://www.mail-tester.com) pode indicar se seu
 - Em seguida, escreva um **assunto** (nada estranho, apenas algo que você poderia esperar ler em um email regular)
 - Certifique-se de que você marcou "**Adicionar Imagem de Rastreamento**"
 - Escreva o **modelo de email** (você pode usar variáveis como no exemplo a seguir):
-```markup
+```html
 <html>
 <head>
 <title></title>
@@ -338,7 +338,7 @@ WRITE HERE SOME SIGNATURE OF SOMEONE FROM THE COMPANY
 Note que **para aumentar a credibilidade do e-mail**, é recomendável usar alguma assinatura de um e-mail do cliente. Sugestões:
 
 - Envie um e-mail para um **endereço inexistente** e verifique se a resposta tem alguma assinatura.
-- Procure por **e-mails públicos** como info@ex.com ou press@ex.com ou public@ex.com e envie um e-mail para eles e aguarde a resposta.
+- Pesquise por **e-mails públicos** como info@ex.com ou press@ex.com ou public@ex.com e envie um e-mail para eles e aguarde a resposta.
 - Tente contatar **algum e-mail válido descoberto** e aguarde a resposta.
 
 ![](<../../images/image (80).png>)
@@ -378,7 +378,7 @@ Note que o **Perfil de Envio permite enviar um e-mail de teste para ver como ser
 ![](<../../images/image (192).png>)
 
 > [!NOTE]
-> Eu recomendaria **enviar os e-mails de teste para endereços de 10min** a fim de evitar ser colocado na lista negra durante os testes.
+> Eu recomendaria **enviar os e-mails de teste para endereços de e-mail de 10 minutos** para evitar ser colocado na lista negra durante os testes.
 
 Uma vez que tudo esteja pronto, basta lançar a campanha!
 
@@ -403,9 +403,9 @@ phishing-documents.md
 
 ### Via Proxy MitM
 
-O ataque anterior é bastante inteligente, pois você está falsificando um site real e coletando as informações fornecidas pelo usuário. Infelizmente, se o usuário não inseriu a senha correta ou se o aplicativo que você falsificou está configurado com 2FA, **essa informação não permitirá que você se passe pelo usuário enganado**.
+O ataque anterior é bastante inteligente, pois você está falsificando um site real e coletando as informações fornecidas pelo usuário. Infelizmente, se o usuário não inserir a senha correta ou se o aplicativo que você falsificou estiver configurado com 2FA, **essa informação não permitirá que você se passe pelo usuário enganado**.
 
-É aqui que ferramentas como [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** [**CredSniper**](https://github.com/ustayready/CredSniper) e [**muraena**](https://github.com/muraenateam/muraena) são úteis. Esta ferramenta permitirá que você gere um ataque do tipo MitM. Basicamente, os ataques funcionam da seguinte maneira:
+É aqui que ferramentas como [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** [**CredSniper**](https://github.com/ustayready/CredSniper) e [**muraena**](https://github.com/muraenateam/muraena) são úteis. Essa ferramenta permitirá que você gere um ataque do tipo MitM. Basicamente, os ataques funcionam da seguinte maneira:
 
 1. Você **falsifica o formulário de login** da página da web real.
 2. O usuário **envia** suas **credenciais** para sua página falsa e a ferramenta as envia para a página da web real, **verificando se as credenciais funcionam**.
