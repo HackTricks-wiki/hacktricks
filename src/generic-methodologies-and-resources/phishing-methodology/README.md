@@ -21,18 +21,18 @@
 
 ### 域名变体技术
 
-- **关键词**: 域名 **包含** 原始域名的重要 **关键词** (例如，zelster.com-management.com)。
-- **带连字符的子域**: 将子域的 **点替换为连字符** (例如，www-zelster.com)。
-- **新 TLD**: 使用 **新 TLD** 的相同域名 (例如，zelster.org)
-- **同形异义字**: 它 **用看起来相似的字母替换** 域名中的一个字母 (例如，zelfser.com)。
-- **置换**: 它 **交换域名中的两个字母** (例如，zelsetr.com)。
-- **单数/复数化**: 在域名末尾添加或删除 “s” (例如，zeltsers.com)。
-- **省略**: 它 **删除域名中的一个字母** (例如，zelser.com)。
-- **重复**: 它 **重复域名中的一个字母** (例如，zeltsser.com)。
-- **替换**: 类似于同形异义字，但不那么隐蔽。它替换域名中的一个字母，可能是与原字母在键盘上相邻的字母 (例如，zektser.com)。
-- **子域化**: 在域名中引入一个 **点** (例如，ze.lster.com)。
-- **插入**: 它 **在域名中插入一个字母** (例如，zerltser.com)。
-- **缺失点**: 将 TLD 附加到域名上。 (例如，zelstercom.com)
+- **关键词**：域名 **包含** 原始域名的重要 **关键词** (例如，zelster.com-management.com)。
+- **带连字符的子域**：将子域的 **点替换为连字符** (例如，www-zelster.com)。
+- **新 TLD**：使用 **新 TLD** 的相同域名 (例如，zelster.org)
+- **同形异义字**：它 **用看起来相似的字母替换** 域名中的一个字母 (例如，zelfser.com)。
+- **置换**：它 **交换域名中的两个字母** (例如，zelsetr.com)。
+- **单数/复数化**：在域名末尾添加或删除“s” (例如，zeltsers.com)。
+- **省略**：它 **删除域名中的一个字母** (例如，zelser.com)。
+- **重复**：它 **重复域名中的一个字母** (例如，zeltsser.com)。
+- **替换**：类似于同形异义字，但不太隐蔽。它替换域名中的一个字母，可能是与原字母在键盘上相邻的字母 (例如，zektser.com)。
+- **子域化**：在域名中引入一个 **点** (例如，ze.lster.com)。
+- **插入**：它 **在域名中插入一个字母** (例如，zerltser.com)。
+- **缺失点**：将 TLD 附加到域名上。 (例如，zelstercom.com)
 
 **自动工具**
 
@@ -73,7 +73,7 @@
 - [https://hunter.io/](https://hunter.io)
 - [https://anymailfinder.com/](https://anymailfinder.com)
 
-为了 **发现更多** 有效的电子邮件地址或 **验证你已经发现的地址**，你可以检查是否可以对受害者的 smtp 服务器进行暴力破解。 [在这里学习如何验证/发现电子邮件地址](../../network-services-pentesting/pentesting-smtp/index.html#username-bruteforce-enumeration)。\
+为了 **发现更多** 有效的电子邮件地址或 **验证你已经发现的地址**，你可以检查是否可以对受害者的 smtp 服务器进行暴力破解。 [在这里了解如何验证/发现电子邮件地址](../../network-services-pentesting/pentesting-smtp/index.html#username-bruteforce-enumeration)。\
 此外，不要忘记，如果用户使用 **任何网络门户访问他们的邮件**，你可以检查它是否容易受到 **用户名暴力破解**，并在可能的情况下利用该漏洞。
 
 ## 配置 GoPhish
@@ -82,7 +82,7 @@
 
 你可以从 [https://github.com/gophish/gophish/releases/tag/v0.11.0](https://github.com/gophish/gophish/releases/tag/v0.11.0) 下载它。
 
-下载并解压到 `/opt/gophish` 中，并执行 `/opt/gophish/gophish`\
+下载并解压到 `/opt/gophish` 中，并执行 `/opt/gophish/gophish`。\
 你将在输出中获得端口 3333 的管理员用户密码。因此，访问该端口并使用这些凭据更改管理员密码。你可能需要将该端口隧道到本地：
 ```bash
 ssh -L 3333:127.0.0.1:3333 <user>@<ip>
@@ -91,7 +91,7 @@ ssh -L 3333:127.0.0.1:3333 <user>@<ip>
 
 **TLS 证书配置**
 
-在这一步之前，您应该已经**购买了您将要使用的域名**，并且它必须**指向**您正在配置**gophish**的**VPS 的 IP**。
+在此步骤之前，您应该**已经购买了您将要使用的域名**，并且它必须**指向**您正在配置**gophish**的**VPS 的 IP**。
 ```bash
 DOMAIN="<domain>"
 wget https://dl.eff.org/certbot-auto
@@ -283,7 +283,7 @@ DKIM check:         pass
 Sender-ID check:    pass
 SpamAssassin check: ham
 ```
-您还可以向**您控制的Gmail发送消息**，并检查您Gmail收件箱中的**电子邮件头**，`dkim=pass`应出现在`Authentication-Results`头字段中。
+您还可以向**您控制的Gmail发送消息**，并在您的Gmail收件箱中检查**电子邮件的头部**，`dkim=pass`应出现在`Authentication-Results`头字段中。
 ```
 Authentication-Results: mx.google.com;
 spf=pass (google.com: domain of contact@example.com designates --- as permitted sender) smtp.mail=contact@example.com;
@@ -291,7 +291,7 @@ dkim=pass header.i=@example.com;
 ```
 ### ​从Spamhouse黑名单中移除
 
-页面 [www.mail-tester.com](https://www.mail-tester.com) 可以指示您的域名是否被spamhouse阻止。您可以在以下网址请求移除您的域名/IP: ​[https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)
+页面 [www.mail-tester.com](https://www.mail-tester.com) 可以指示您的域名是否被spamhouse阻止。您可以在以下地址请求移除您的域名/IP: ​[https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)
 
 ### 从Microsoft黑名单中移除
 
@@ -317,7 +317,7 @@ dkim=pass header.i=@example.com;
 - 然后写一个 **主题**（没有奇怪的内容，只是您在常规邮件中可以期待看到的内容）
 - 确保您已勾选“**添加跟踪图像**”
 - 编写 **邮件模板**（您可以使用变量，如以下示例所示）：
-```markup
+```html
 <html>
 <head>
 <title></title>
@@ -360,7 +360,7 @@ WRITE HERE SOME SIGNATURE OF SOMEONE FROM THE COMPANY
 > 请注意，如果您需要**使用某些静态资源**用于 HTML（可能是一些 CSS 和 JS 页面），您可以将它们保存在 _**/opt/gophish/static/endpoint**_ 中，然后从 _**/static/\<filename>**_ 访问它们。
 
 > [!NOTE]
-> 对于重定向，您可以**将用户重定向到受害者的合法主网页**，或者例如重定向到 _/static/migration.html_，放置一些**旋转轮**（**[https://loading.io/](https://loading.io)**）5 秒钟，然后指示该过程成功。
+> 对于重定向，您可以**将用户重定向到受害者的合法主网页**，或者例如将他们重定向到 _/static/migration.html_，放置一些**旋转轮**（**[https://loading.io/](https://loading.io)**）5 秒钟，然后指示该过程成功。
 
 ### 用户与组
 
@@ -392,7 +392,7 @@ clone-a-website.md
 
 ## 后门文档和文件
 
-在某些钓鱼评估中（主要针对红队），您还可能想要**发送包含某种后门的文件**（可能是 C2，或者只是一些会触发身份验证的东西）。\
+在某些钓鱼评估中（主要针对红队），您可能还想**发送包含某种后门的文件**（可能是 C2，或者只是一些会触发身份验证的东西）。\
 查看以下页面以获取一些示例：
 
 {{#ref}}
@@ -428,7 +428,7 @@ phishing-documents.md
 detecting-phising.md
 {{#endref}}
 
-您可以**购买一个与受害者域名非常相似的域名**，**和/或为您控制的域的**一个**子域生成证书**，**包含**受害者域名的**关键字**。如果**受害者**与它们进行任何类型的**DNS 或 HTTP 交互**，您将知道**他在积极寻找**可疑域，您需要非常隐蔽。
+您可以**购买一个与受害者域名非常相似的域名**，**和/或为您控制的域的**子域**生成证书**，**包含**受害者域名的**关键字**。如果**受害者**与它们进行任何类型的**DNS 或 HTTP 交互**，您将知道**他在积极寻找**可疑域名，您需要非常隐蔽。
 
 ### 评估钓鱼
 
