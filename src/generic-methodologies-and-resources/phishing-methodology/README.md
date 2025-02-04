@@ -340,7 +340,7 @@ The page [www.mail-tester.com](https://www.mail-tester.com) can indicate you if 
 - Make sure you have checked "**Add Tracking Image**"
 - Write the **email template** (you can use variables like in the following example):
 
-```markup
+```html
 <html>
 <head>
     <title></title>
