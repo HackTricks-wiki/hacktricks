@@ -9,7 +9,7 @@
 2. Wykonaj podstawową enumerację sieci **szukając portali logowania** używanych przez ofiarę i **zdecyduj**, który z nich będziesz **podrabiać**.
 3. Użyj **OSINT**, aby **znaleźć e-maile**.
 2. Przygotowanie środowiska
-1. **Kup domenę**, którą zamierzasz użyć do oceny phishingowej.
+1. **Kup domenę**, której zamierzasz użyć do oceny phishingowej.
 2. **Skonfiguruj usługi e-mail** związane z rekordami (SPF, DMARC, DKIM, rDNS).
 3. Skonfiguruj VPS z **gophish**.
 3. Przygotowanie kampanii
@@ -59,8 +59,8 @@ Aby uzyskać więcej informacji, przeczytaj [https://www.bleepingcomputer.com/ne
 
 ### Kup zaufaną domenę
 
-Możesz poszukać na [https://www.expireddomains.net/](https://www.expireddomains.net) wygasłej domeny, którą mógłbyś użyć.\
-Aby upewnić się, że wygasła domena, którą zamierzasz kupić **ma już dobrą SEO**, możesz sprawdzić, jak jest sklasyfikowana w:
+Możesz poszukać na [https://www.expireddomains.net/](https://www.expireddomains.net) wygasłej domeny, której możesz użyć.\
+Aby upewnić się, że wygasła domena, którą zamierzasz kupić, **ma już dobre SEO**, możesz sprawdzić, jak jest sklasyfikowana w:
 
 - [http://www.fortiguard.com/webfilter](http://www.fortiguard.com/webfilter)
 - [https://urlfiltering.paloaltonetworks.com/query/](https://urlfiltering.paloaltonetworks.com/query/)
@@ -80,7 +80,7 @@ Ponadto nie zapomnij, że jeśli użytkownicy korzystają z **jakiegokolwiek por
 
 ### Instalacja
 
-Możesz go pobrać z [https://github.com/gophish/gophish/releases/tag/v0.11.0](https://github.com/gophish/gophish/releases/tag/v0.11.0)
+Możesz pobrać go z [https://github.com/gophish/gophish/releases/tag/v0.11.0](https://github.com/gophish/gophish/releases/tag/v0.11.0)
 
 Pobierz i rozpakuj go w `/opt/gophish` i uruchom `/opt/gophish/gophish`\
 Otrzymasz hasło dla użytkownika admin na porcie 3333 w wyjściu. Dlatego uzyskaj dostęp do tego portu i użyj tych danych logowania, aby zmienić hasło administratora. Może być konieczne tunelowanie tego portu do lokalnego:
@@ -119,12 +119,12 @@ Następnie dodaj domenę do następujących plików:
 
 **Zmień także wartości następujących zmiennych w /etc/postfix/main.cf**
 
-`myhostname = <domain>`\
-`mydestination = $myhostname, <domain>, localhost.com, localhost`
+`myhostname = <domena>`\
+`mydestination = $myhostname, <domena>, localhost.com, localhost`
 
 Na koniec zmodyfikuj pliki **`/etc/hostname`** i **`/etc/mailname`** na swoją nazwę domeny i **zrestartuj swój VPS.**
 
-Teraz utwórz **rekord A DNS** dla `mail.<domain>` wskazujący na **adres IP** VPS oraz **rekord MX DNS** wskazujący na `mail.<domain>`
+Teraz stwórz **rekord A DNS** dla `mail.<domena>` wskazujący na **adres IP** VPS oraz **rekord MX DNS** wskazujący na `mail.<domena>`
 
 Teraz przetestuj wysyłanie e-maila:
 ```bash
@@ -235,7 +235,7 @@ Ustaw rekord rDNS (PTR), który rozwiązuje adres IP VPS na nazwę domeny.
 
 Musisz **skonfigurować rekord SPF dla nowej domeny**. Jeśli nie wiesz, czym jest rekord SPF [**przeczytaj tę stronę**](../../network-services-pentesting/pentesting-smtp/index.html#spf).
 
-Możesz użyć [https://www.spfwizard.net/](https://www.spfwizard.net) do wygenerowania swojej polityki SPF (użyj adresu IP maszyny VPS)
+Możesz użyć [https://www.spfwizard.net/](https://www.spfwizard.net), aby wygenerować swoją politykę SPF (użyj adresu IP maszyny VPS)
 
 ![](<../../images/image (1037).png>)
 
@@ -243,7 +243,7 @@ To jest zawartość, która musi być ustawiona wewnątrz rekordu TXT w domenie:
 ```bash
 v=spf1 mx a ip4:ip.ip.ip.ip ?all
 ```
-### Rekord uwierzytelniania wiadomości opartego na domenie, raportowania i zgodności (DMARC)
+### Rekord uwierzytelniania wiadomości oparty na domenie, raportowanie i zgodność (DMARC)
 
 Musisz **skonfigurować rekord DMARC dla nowej domeny**. Jeśli nie wiesz, czym jest rekord DMARC [**przeczytaj tę stronę**](../../network-services-pentesting/pentesting-smtp/index.html#dmarc).
 
@@ -253,7 +253,7 @@ v=DMARC1; p=none
 ```
 ### DomainKeys Identified Mail (DKIM)
 
-Musisz **skonfigurować DKIM dla nowej domeny**. Jeśli nie wiesz, czym jest rekord DMARC [**przeczytaj tę stronę**](../../network-services-pentesting/pentesting-smtp/index.html#dkim).
+Musisz **skonfigurować DKIM dla nowej domeny**. Jeśli nie wiesz, co to jest rekord DMARC [**przeczytaj tę stronę**](../../network-services-pentesting/pentesting-smtp/index.html#dkim).
 
 Ten samouczek oparty jest na: [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
 
@@ -264,7 +264,7 @@ Ten samouczek oparty jest na: [https://www.digitalocean.com/community/tutorials/
 > v=DKIM1; h=sha256; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0wPibdqPtzYk81njjQCrChIcHzxOp8a1wjbsoNtka2X9QXCZs+iXkvw++QsWDtdYu3q0Ofnr0Yd/TmG/Y2bBGoEgeE+YTUG2aEgw8Xx42NLJq2D1pB2lRQPW4IxefROnXu5HfKSm7dyzML1gZ1U0pR5X4IZCH0wOPhIq326QjxJZm79E1nTh3xj" "Y9N/Dt3+fVnIbMupzXE216TdFuifKM6Tl6O/axNsbswMS1TH812euno8xRpsdXJzFlB9q3VbMkVWig4P538mHolGzudEBg563vv66U8D7uuzGYxYT4WS8NVm3QBMg0QKPWZaKp+bADLkOSB9J2nUpk4Aj9KB5swIDAQAB
 > ```
 
-### Testuj wynik konfiguracji e-maila
+### Testuj wynik konfiguracji swojego e-maila
 
 Możesz to zrobić, korzystając z [https://www.mail-tester.com/](https://www.mail-tester.com)\
 Po prostu wejdź na stronę i wyślij e-mail na adres, który ci podadzą:
@@ -289,35 +289,35 @@ Authentication-Results: mx.google.com;
 spf=pass (google.com: domain of contact@example.com designates --- as permitted sender) smtp.mail=contact@example.com;
 dkim=pass header.i=@example.com;
 ```
-### ​Usuwanie z Czarnej Listy Spamhouse
+### ​Usuwanie z czarnej listy Spamhouse
 
 Strona [www.mail-tester.com](https://www.mail-tester.com) może wskazać, czy Twoja domena jest blokowana przez spamhouse. Możesz poprosić o usunięcie swojej domeny/IP pod adresem: ​[https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)
 
-### Usuwanie z Czarnej Listy Microsoft
+### Usuwanie z czarnej listy Microsoftu
 
 ​​Możesz poprosić o usunięcie swojej domeny/IP pod adresem [https://sender.office.com/](https://sender.office.com).
 
-## Utwórz i Uruchom Kampanię GoPhish
+## Utwórz i uruchom kampanię GoPhish
 
-### Profil Wysyłania
+### Profil wysyłania
 
 - Ustaw **nazwę identyfikującą** profil nadawcy
 - Zdecyduj, z którego konta będziesz wysyłać phishingowe e-maile. Sugestie: _noreply, support, servicedesk, salesforce..._
-- Możesz pozostawić puste nazwę użytkownika i hasło, ale upewnij się, że zaznaczyłeś Ignoruj błędy certyfikatu
+- Możesz pozostawić puste pole z nazwą użytkownika i hasłem, ale upewnij się, że zaznaczyłeś Ignoruj błędy certyfikatu
 
-![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
+![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
 
 > [!NOTE]
 > Zaleca się korzystanie z funkcji "**Wyślij e-mail testowy**", aby sprawdzić, czy wszystko działa.\
 > Zalecałbym **wysyłanie e-maili testowych na adresy 10min mail**, aby uniknąć dodania do czarnej listy podczas testów.
 
-### Szablon E-mail
+### Szablon e-maila
 
 - Ustaw **nazwę identyfikującą** szablon
 - Następnie napisz **temat** (nic dziwnego, po prostu coś, co mógłbyś oczekiwać w zwykłym e-mailu)
 - Upewnij się, że zaznaczyłeś "**Dodaj obrazek śledzący**"
-- Napisz **szablon e-mail** (możesz używać zmiennych, jak w poniższym przykładzie):
-```markup
+- Napisz **szablon e-maila** (możesz używać zmiennych, jak w poniższym przykładzie):
+```html
 <html>
 <head>
 <title></title>
@@ -357,7 +357,7 @@ Zauważ, że **aby zwiększyć wiarygodność e-maila**, zaleca się użycie jak
 
 > [!NOTE]
 > Zazwyczaj będziesz musiał zmodyfikować kod HTML strony i przeprowadzić kilka testów lokalnie (może używając jakiegoś serwera Apache) **aż do uzyskania zadowalających wyników.** Następnie wpisz ten kod HTML w polu.\
-> Zauważ, że jeśli potrzebujesz **użyć jakichś statycznych zasobów** dla HTML (może jakieś strony CSS i JS), możesz je zapisać w _**/opt/gophish/static/endpoint**_ i następnie uzyskać do nich dostęp z _**/static/\<filename>**_
+> Zauważ, że jeśli potrzebujesz **użyć jakichś zasobów statycznych** dla HTML (może jakieś strony CSS i JS), możesz je zapisać w _**/opt/gophish/static/endpoint**_ i następnie uzyskać do nich dostęp z _**/static/\<filename>**_
 
 > [!NOTE]
 > W przypadku przekierowania możesz **przekierować użytkowników na legitną główną stronę internetową** ofiary lub przekierować ich na _/static/migration.html_, na przykład, umieścić jakiś **kręcący się kółko (**[**https://loading.io/**](https://loading.io)**) przez 5 sekund, a następnie wskazać, że proces zakończył się sukcesem**.

