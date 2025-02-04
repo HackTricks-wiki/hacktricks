@@ -6,8 +6,8 @@ La creación del instalador MSI se realizará utilizando wixtools, específicame
 
 Para una comprensión completa de los ejemplos de uso de wix MSI, se aconseja consultar [esta página](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with). Aquí, puedes encontrar varios ejemplos que demuestran el uso de wix MSI.
 
-El objetivo es generar un MSI que ejecute el archivo lnk. Para lograr esto, se podría emplear el siguiente código XML ([xml de aquí](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)):
-```markup
+El objetivo es generar un MSI que ejecute el archivo lnk. Para lograr esto, se podría emplear el siguiente código XML ([xml de aquí](https://0xrick.github.io/hack-the-box/ethereal/index.html#Creating-Malicious-msi-and-getting-root)):
+```html
 <?xml version="1.0"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
 <Product Id="*" UpgradeCode="12345678-1234-1234-1234-111111111111" Name="Example Product Name"
@@ -40,13 +40,13 @@ fail_here
 ```
 Es importante notar que el elemento Package contiene atributos como InstallerVersion y Compressed, que especifican la versión del instalador e indican si el paquete está comprimido o no, respectivamente.
 
-El proceso de creación implica utilizar candle.exe, una herramienta de wixtools, para generar un wixobject a partir de msi.xml. Se debe ejecutar el siguiente comando:
+El proceso de creación implica utilizar candle.exe, una herramienta de wixtools, para generar un wixobject a partir de msi.xml. El siguiente comando debe ser ejecutado:
 ```
 candle.exe -out C:\tem\wix C:\tmp\Ethereal\msi.xml
 ```
 Además, vale la pena mencionar que se proporciona una imagen en la publicación, que muestra el comando y su salida. Puedes referirte a ella para obtener orientación visual.
 
-Además, light.exe, otra herramienta de wixtools, se utilizará para crear el archivo MSI a partir del wixobject. El comando que se ejecutará es el siguiente:
+Además, se utilizará light.exe, otra herramienta de wixtools, para crear el archivo MSI a partir del wixobject. El comando que se ejecutará es el siguiente:
 ```
 light.exe -out C:\tm\Ethereal\rick.msi C:\tmp\wix
 ```

