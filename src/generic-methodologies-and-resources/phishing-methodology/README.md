@@ -22,7 +22,7 @@
 ### Tecniche di Variazione del Nome di Dominio
 
 - **Parola chiave**: Il nome di dominio **contiene** una **parola chiave** importante del dominio originale (es., zelster.com-management.com).
-- **sottodominio con trattino**: Cambiare il **punto in un trattino** di un sottodominio (es., www-zelster.com).
+- **sottodominio con trattino**: Cambiare il **punto con un trattino** di un sottodominio (es., www-zelster.com).
 - **Nuovo TLD**: Stesso dominio utilizzando un **nuovo TLD** (es., zelster.org)
 - **Omo-glyph**: **sostituisce** una lettera nel nome di dominio con **lettere che sembrano simili** (es., zelfser.com).
 - **Trasposizione:** **scambia due lettere** all'interno del nome di dominio (es., zelsetr.com).
@@ -255,10 +255,10 @@ v=DMARC1; p=none
 
 Devi **configurare un DKIM per il nuovo dominio**. Se non sai cos'è un record DMARC [**leggi questa pagina**](../../network-services-pentesting/pentesting-smtp/index.html#dkim).
 
-Questo tutorial si basa su: [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
+Questo tutorial è basato su: [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
 
 > [!NOTE]
-> Devi concatenare entrambi i valori B64 che genera la chiave DKIM:
+> Devi concatenare entrambi i valori B64 che la chiave DKIM genera:
 >
 > ```
 > v=DKIM1; h=sha256; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0wPibdqPtzYk81njjQCrChIcHzxOp8a1wjbsoNtka2X9QXCZs+iXkvw++QsWDtdYu3q0Ofnr0Yd/TmG/Y2bBGoEgeE+YTUG2aEgw8Xx42NLJq2D1pB2lRQPW4IxefROnXu5HfKSm7dyzML1gZ1U0pR5X4IZCH0wOPhIq326QjxJZm79E1nTh3xj" "Y9N/Dt3+fVnIbMupzXE216TdFuifKM6Tl6O/axNsbswMS1TH812euno8xRpsdXJzFlB9q3VbMkVWig4P538mHolGzudEBg563vv66U8D7uuzGYxYT4WS8NVm3QBMg0QKPWZaKp+bADLkOSB9J2nUpk4Aj9KB5swIDAQAB
@@ -267,7 +267,7 @@ Questo tutorial si basa su: [https://www.digitalocean.com/community/tutorials/ho
 ### Testa il punteggio della tua configurazione email
 
 Puoi farlo usando [https://www.mail-tester.com/](https://www.mail-tester.com)\
-Basta accedere alla pagina e inviare un'email all'indirizzo che ti forniscono:
+Basta accedere alla pagina e inviare un'email all'indirizzo che ti danno:
 ```bash
 echo "This is the body of the email" | mail -s "This is the subject line" test-iimosa79z@srv1.mail-tester.com
 ```
@@ -303,7 +303,7 @@ Puoi richiedere la rimozione del tuo dominio/IP su [https://sender.office.com/](
 
 - Imposta un **nome per identificare** il profilo del mittente
 - Decidi da quale account invierai le email di phishing. Suggerimenti: _noreply, support, servicedesk, salesforce..._
-- Puoi lasciare vuoti il nome utente e la password, ma assicurati di controllare Ignora Errori di Certificato
+- Puoi lasciare vuoti il nome utente e la password, ma assicurati di selezionare Ignora Errori di Certificato
 
 ![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
 
@@ -317,7 +317,7 @@ Puoi richiedere la rimozione del tuo dominio/IP su [https://sender.office.com/](
 - Poi scrivi un **oggetto** (niente di strano, solo qualcosa che ti aspetteresti di leggere in una email normale)
 - Assicurati di aver selezionato "**Aggiungi Immagine di Tracciamento**"
 - Scrivi il **modello di email** (puoi usare variabili come nel seguente esempio):
-```markup
+```html
 <html>
 <head>
 <title></title>
@@ -344,9 +344,9 @@ Nota che **per aumentare la credibilità dell'email**, è consigliato utilizzare
 ![](<../../images/image (80).png>)
 
 > [!NOTE]
-> Il Modello di Email consente anche di **allegare file da inviare**. Se desideri anche rubare le sfide NTLM utilizzando alcuni file/documenti appositamente creati [leggi questa pagina](../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md).
+> Il modello di email consente anche di **allegare file da inviare**. Se desideri anche rubare le sfide NTLM utilizzando alcuni file/documenti appositamente creati [leggi questa pagina](../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md).
 
-### Pagina di Atterraggio
+### Landing Page
 
 - Scrivi un **nome**
 - **Scrivi il codice HTML** della pagina web. Nota che puoi **importare** pagine web.
@@ -356,11 +356,11 @@ Nota che **per aumentare la credibilità dell'email**, è consigliato utilizzare
 ![](<../../images/image (826).png>)
 
 > [!NOTE]
-> Di solito dovrai modificare il codice HTML della pagina e fare alcuni test in locale (magari utilizzando un server Apache) **fino a quando non ti piacciono i risultati.** Poi, scrivi quel codice HTML nella casella.\
+> Di solito dovrai modificare il codice HTML della pagina e fare alcuni test in locale (magari usando un server Apache) **fino a quando non ti piacciono i risultati.** Poi, scrivi quel codice HTML nella casella.\
 > Nota che se hai bisogno di **utilizzare alcune risorse statiche** per l'HTML (magari alcune pagine CSS e JS) puoi salvarle in _**/opt/gophish/static/endpoint**_ e poi accedervi da _**/static/\<filename>**_
 
 > [!NOTE]
-> Per il reindirizzamento potresti **reindirizzare gli utenti alla legittima pagina web principale** della vittima, o reindirizzarli a _/static/migration.html_ per esempio, mettere qualche **ruota che gira (**[**https://loading.io/**](https://loading.io)**) per 5 secondi e poi indicare che il processo è stato completato con successo**.
+> Per il reindirizzamento potresti **reindirizzare gli utenti alla legittima pagina principale** della vittima, o reindirizzarli a _/static/migration.html_ per esempio, mettere qualche **ruota che gira (**[**https://loading.io/**](https://loading.io)**) per 5 secondi e poi indicare che il processo è stato completato con successo**.
 
 ### Utenti e Gruppi
 
@@ -371,7 +371,7 @@ Nota che **per aumentare la credibilità dell'email**, è consigliato utilizzare
 
 ### Campagna
 
-Infine, crea una campagna selezionando un nome, il modello di email, la pagina di atterraggio, l'URL, il profilo di invio e il gruppo. Nota che l'URL sarà il link inviato alle vittime.
+Infine, crea una campagna selezionando un nome, il modello di email, la landing page, l'URL, il profilo di invio e il gruppo. Nota che l'URL sarà il link inviato alle vittime.
 
 Nota che il **Profilo di Invio consente di inviare un'email di prova per vedere come apparirà l'email di phishing finale**:
 
@@ -414,7 +414,7 @@ L'attacco precedente è piuttosto astuto poiché stai falsificando un sito web r
 
 ### Via VNC
 
-E se invece di **inviare la vittima a una pagina malevola** con lo stesso aspetto di quella originale, lo invii a una **sessione VNC con un browser connesso alla pagina web reale**? Sarai in grado di vedere cosa fa, rubare la password, il MFA utilizzato, i cookie...\
+E se invece di **inviare la vittima a una pagina malevola** con lo stesso aspetto di quella originale, la invii a una **sessione VNC con un browser connesso alla pagina web reale**? Sarai in grado di vedere cosa fa, rubare la password, il MFA utilizzato, i cookie...\
 Puoi farlo con [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC)
 
 ## Rilevare la rilevazione

