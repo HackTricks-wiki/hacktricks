@@ -5,7 +5,7 @@
 ## Methodik
 
 1. Rekognoszieren Sie das Opfer
-1. Wählen Sie die **Opferdomain**.
+1. Wählen Sie die **Opferdomain** aus.
 2. Führen Sie eine grundlegende Webenumeration durch, **um nach Anmeldeportalen** zu suchen, die vom Opfer verwendet werden, und **entscheiden** Sie, welches Sie **nachahmen** möchten.
 3. Verwenden Sie einige **OSINT**, um **E-Mails zu finden**.
 2. Bereiten Sie die Umgebung vor
@@ -73,8 +73,8 @@ Um sicherzustellen, dass die abgelaufene Domain, die Sie kaufen möchten, **bere
 - [https://hunter.io/](https://hunter.io)
 - [https://anymailfinder.com/](https://anymailfinder.com)
 
-Um **mehr** gültige E-Mail-Adressen zu **entdecken** oder die bereits entdeckten zu **verifizieren**, können Sie überprüfen, ob Sie die SMTP-Server des Opfers bruteforcen können. [Erfahren Sie hier, wie Sie E-Mail-Adressen verifizieren/entdecken können](../../network-services-pentesting/pentesting-smtp/index.html#username-bruteforce-enumeration).\
-Vergessen Sie außerdem nicht, dass, wenn die Benutzer **ein beliebiges Webportal verwenden, um auf ihre E-Mails zuzugreifen**, Sie überprüfen können, ob es anfällig für **Benutzernamen-Bruteforce** ist, und die Schwachstelle, wenn möglich, ausnutzen.
+Um **mehr** gültige E-Mail-Adressen zu **entdecken** oder die bereits entdeckten **zu überprüfen**, können Sie prüfen, ob Sie die SMTP-Server des Opfers brute-forcen können. [Erfahren Sie hier, wie Sie E-Mail-Adressen überprüfen/entdecken](../../network-services-pentesting/pentesting-smtp/index.html#username-bruteforce-enumeration).\
+Vergessen Sie außerdem nicht, dass, wenn die Benutzer **ein beliebiges Webportal verwenden, um auf ihre E-Mails zuzugreifen**, Sie überprüfen können, ob es anfällig für **Benutzername-Brute-Force** ist, und die Schwachstelle, wenn möglich, ausnutzen.
 
 ## Konfigurieren von GoPhish
 
@@ -223,7 +223,7 @@ service gophish stop
 
 ### Warten & legitim sein
 
-Je älter eine Domain ist, desto unwahrscheinlicher ist es, dass sie als Spam erkannt wird. Daher solltest du so viel Zeit wie möglich warten (mindestens 1 Woche) vor der Phishing-Bewertung. Außerdem wird die Reputation besser, wenn du eine Seite über einen reputationswürdigen Sektor erstellst.
+Je älter eine Domain ist, desto unwahrscheinlicher ist es, dass sie als Spam erkannt wird. Daher solltest du so viel Zeit wie möglich warten (mindestens 1 Woche) vor der Phishing-Bewertung. Außerdem wird die Reputation besser, wenn du eine Seite über einen reputationswürdigen Sektor einrichtest.
 
 Beachte, dass du auch, wenn du eine Woche warten musst, jetzt alles konfigurieren kannst.
 
@@ -267,7 +267,7 @@ Dieses Tutorial basiert auf: [https://www.digitalocean.com/community/tutorials/h
 ### Testen Sie Ihre E-Mail-Konfigurationsbewertung
 
 Sie können das mit [https://www.mail-tester.com/](https://www.mail-tester.com) tun.\
-Zugreifen Sie einfach auf die Seite und senden Sie eine E-Mail an die Adresse, die sie Ihnen geben:
+Greifen Sie einfach auf die Seite zu und senden Sie eine E-Mail an die Adresse, die sie Ihnen geben:
 ```bash
 echo "This is the body of the email" | mail -s "This is the subject line" test-iimosa79z@srv1.mail-tester.com
 ```
@@ -305,7 +305,7 @@ Die Seite [www.mail-tester.com](https://www.mail-tester.com) kann Ihnen anzeigen
 - Entscheiden Sie, von welchem Konto Sie die Phishing-E-Mails senden werden. Vorschläge: _noreply, support, servicedesk, salesforce..._
 - Sie können den Benutzernamen und das Passwort leer lassen, aber stellen Sie sicher, dass Sie die Option "Zertifikatfehler ignorieren" aktivieren
 
-![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
+![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
 
 > [!NOTE]
 > Es wird empfohlen, die Funktion "**Test-E-Mail senden**" zu verwenden, um zu testen, ob alles funktioniert.\
@@ -317,7 +317,7 @@ Die Seite [www.mail-tester.com](https://www.mail-tester.com) kann Ihnen anzeigen
 - Schreiben Sie dann einen **Betreff** (nichts Ungewöhnliches, nur etwas, das Sie in einer regulären E-Mail erwarten würden)
 - Stellen Sie sicher, dass Sie "**Tracking-Bild hinzufügen**" aktiviert haben
 - Schreiben Sie die **E-Mail-Vorlage** (Sie können Variablen wie im folgenden Beispiel verwenden):
-```markup
+```html
 <html>
 <head>
 <title></title>
@@ -357,7 +357,7 @@ Beachten Sie, dass **um die Glaubwürdigkeit der E-Mail zu erhöhen**, empfohlen
 
 > [!NOTE]
 > Normalerweise müssen Sie den HTML-Code der Seite ändern und einige Tests lokal durchführen (vielleicht mit einem Apache-Server), **bis Ihnen die Ergebnisse gefallen.** Schreiben Sie dann diesen HTML-Code in das Feld.\
-> Beachten Sie, dass Sie, wenn Sie **statische Ressourcen** für das HTML benötigen (vielleicht einige CSS- und JS-Seiten), diese in _**/opt/gophish/static/endpoint**_ speichern können und dann von _**/static/\<dateiname>**_ darauf zugreifen können.
+> Beachten Sie, dass Sie, wenn Sie **statische Ressourcen** für das HTML verwenden müssen (vielleicht einige CSS- und JS-Seiten), diese in _**/opt/gophish/static/endpoint**_ speichern können und dann von _**/static/\<dateiname>**_ darauf zugreifen können.
 
 > [!NOTE]
 > Für die Weiterleitung könnten Sie **die Benutzer zur legitimen Hauptwebseite** des Opfers umleiten oder sie beispielsweise zu _/static/migration.html_ umleiten, eine **Ladeanimation** ([**https://loading.io/**](https://loading.io)**) für 5 Sekunden anzeigen und dann angeben, dass der Prozess erfolgreich war**.
@@ -365,7 +365,7 @@ Beachten Sie, dass **um die Glaubwürdigkeit der E-Mail zu erhöhen**, empfohlen
 ### Benutzer & Gruppen
 
 - Setzen Sie einen Namen
-- **Importieren Sie die Daten** (beachten Sie, dass Sie, um die Vorlage für das Beispiel zu verwenden, den Vornamen, Nachnamen und die E-Mail-Adresse jedes Benutzers benötigen)
+- **Importieren Sie die Daten** (beachten Sie, dass Sie für die Verwendung der Vorlage für das Beispiel den Vornamen, Nachnamen und die E-Mail-Adresse jedes Benutzers benötigen)
 
 ![](<../../images/image (163).png>)
 
@@ -401,7 +401,7 @@ phishing-documents.md
 
 ## Phishing MFA
 
-### Über Proxy MitM
+### Via Proxy MitM
 
 Der vorherige Angriff ist ziemlich clever, da Sie eine echte Website fälschen und die Informationen sammeln, die der Benutzer eingibt. Leider, wenn der Benutzer das richtige Passwort nicht eingegeben hat oder wenn die gefälschte Anwendung mit 2FA konfiguriert ist, **erlaubt Ihnen diese Information nicht, den getäuschten Benutzer zu impersonieren**.
 
@@ -410,11 +410,11 @@ Hier sind Tools wie [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** 
 1. Sie **imitieren das Anmeldeformular** der echten Webseite.
 2. Der Benutzer **sendet** seine **Anmeldeinformationen** an Ihre gefälschte Seite und das Tool sendet diese an die echte Webseite, **um zu überprüfen, ob die Anmeldeinformationen funktionieren**.
 3. Wenn das Konto mit **2FA** konfiguriert ist, wird die MitM-Seite danach fragen, und sobald der **Benutzer es eingibt**, sendet das Tool es an die echte Webseite.
-4. Sobald der Benutzer authentifiziert ist, haben Sie (als Angreifer) die **Anmeldeinformationen, die 2FA, das Cookie und alle Informationen** jeder Interaktion erfasst, während das Tool einen MitM durchführt.
+4. Sobald der Benutzer authentifiziert ist, haben Sie (als Angreifer) **die Anmeldeinformationen, die 2FA, das Cookie und alle Informationen** jeder Interaktion erfasst, während das Tool einen MitM durchführt.
 
-### Über VNC
+### Via VNC
 
-Was wäre, wenn Sie anstatt den **Opfer zu einer bösartigen Seite** mit dem gleichen Aussehen wie die Originalseite zu senden, ihn zu einer **VNC-Sitzung mit einem Browser, der mit der echten Webseite verbunden ist, senden**? Sie können sehen, was er tut, das Passwort, die verwendete MFA, die Cookies stehlen...\
+Was wäre, wenn Sie anstatt **das Opfer auf eine bösartige Seite** mit dem gleichen Aussehen wie die Originalseite zu senden, ihn zu einer **VNC-Sitzung mit einem Browser, der mit der echten Webseite verbunden ist, senden**? Sie können sehen, was er tut, das Passwort stehlen, die verwendete MFA, die Cookies...\
 Sie können dies mit [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC) tun.
 
 ## Erkennung der Erkennung
@@ -428,7 +428,7 @@ Es gibt jedoch auch andere Möglichkeiten zu wissen, ob das Opfer **aktiv nach v
 detecting-phising.md
 {{#endref}}
 
-Sie können **eine Domain mit einem sehr ähnlichen Namen** zur Domain des Opfers **kaufen und/oder ein Zertifikat** für einen **Subdomain** einer von Ihnen kontrollierten Domain **erzeugen**, die das **Schlüsselwort** der Domain des Opfers enthält. Wenn das **Opfer** irgendeine Art von **DNS- oder HTTP-Interaktion** mit ihnen durchführt, wissen Sie, dass **es aktiv nach** verdächtigen Domains sucht und Sie sehr stealthy sein müssen.
+Sie können **eine Domain mit einem sehr ähnlichen Namen** zur Domain des Opfers **kaufen und/oder ein Zertifikat** für eine **Subdomain** einer von Ihnen kontrollierten Domain **erstellen**, die das **Schlüsselwort** der Domain des Opfers enthält. Wenn das **Opfer** irgendeine Art von **DNS- oder HTTP-Interaktion** mit ihnen durchführt, wissen Sie, dass **es aktiv nach** verdächtigen Domains sucht und Sie sehr stealthy sein müssen.
 
 ### Phishing bewerten
 
