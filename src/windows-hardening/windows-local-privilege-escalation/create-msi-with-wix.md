@@ -7,7 +7,7 @@ Kreiranje MSI instalatera će se obaviti korišćenjem wixtools, posebno će se 
 Za sveobuhvatno razumevanje primera korišćenja wix MSI, preporučuje se da se konsultuje [ova stranica](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with). Ovde možete pronaći razne primere koji demonstriraju korišćenje wix MSI.
 
 Cilj je generisati MSI koji će izvršiti lnk datoteku. Da bi se to postiglo, može se koristiti sledeći XML kod ([xml odavde](https://0xrick.github.io/hack-the-box/ethereal/index.html#Creating-Malicious-msi-and-getting-root)):
-```markup
+```html
 <?xml version="1.0"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
 <Product Id="*" UpgradeCode="12345678-1234-1234-1234-111111111111" Name="Example Product Name"

