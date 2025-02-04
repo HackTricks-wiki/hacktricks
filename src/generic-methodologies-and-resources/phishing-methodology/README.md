@@ -22,14 +22,14 @@
 ### Techniques de Variation de Noms de Domaine
 
 - **Mot-clé** : Le nom de domaine **contient** un **mot-clé** important du domaine original (par exemple, zelster.com-management.com).
-- **sous-domaine hyphéné** : Remplacer le **point par un tiret** dans un sous-domaine (par exemple, www-zelster.com).
+- **sous-domaine hyphéné** : Remplacer le **point par un tiret** d'un sous-domaine (par exemple, www-zelster.com).
 - **Nouveau TLD** : Même domaine utilisant un **nouveau TLD** (par exemple, zelster.org).
-- **Homoglyph** : Il **remplace** une lettre dans le nom de domaine par des **lettres qui se ressemblent** (par exemple, zelfser.com).
+- **Homoglyphes** : Il **remplace** une lettre dans le nom de domaine par des **lettres qui se ressemblent** (par exemple, zelfser.com).
 - **Transposition** : Il **échange deux lettres** dans le nom de domaine (par exemple, zelsetr.com).
-- **Singularisation/Pluralisation** : Ajoute ou enlève un “s” à la fin du nom de domaine (par exemple, zeltsers.com).
+- **Singularisation/Pluralisation** : Ajoute ou enlève un "s" à la fin du nom de domaine (par exemple, zeltsers.com).
 - **Omission** : Il **supprime une** des lettres du nom de domaine (par exemple, zelser.com).
 - **Répétition** : Il **répète une** des lettres dans le nom de domaine (par exemple, zeltsser.com).
-- **Remplacement** : Comme homoglyph mais moins furtif. Il remplace une des lettres dans le nom de domaine, peut-être par une lettre proche de la lettre originale sur le clavier (par exemple, zektser.com).
+- **Remplacement** : Comme homoglyphes mais moins furtif. Il remplace une des lettres dans le nom de domaine, peut-être par une lettre proche de la lettre originale sur le clavier (par exemple, zektser.com).
 - **Sous-domaine** : Introduire un **point** à l'intérieur du nom de domaine (par exemple, ze.lster.com).
 - **Insertion** : Il **insère une lettre** dans le nom de domaine (par exemple, zerltser.com).
 - **Point manquant** : Ajouter le TLD au nom de domaine. (par exemple, zelstercom.com)
@@ -53,7 +53,7 @@ Lorsque ce concept est **appliqué aux requêtes DNS**, il est possible que le *
 
 Par exemple, une seule modification de bit dans le domaine "windows.com" peut le changer en "windnws.com".
 
-Les attaquants peuvent **profiter de cela en enregistrant plusieurs domaines à inversion de bits** qui sont similaires au domaine de la victime. Leur intention est de rediriger les utilisateurs légitimes vers leur propre infrastructure.
+Les attaquants peuvent **profiter de cela en enregistrant plusieurs domaines à bit-flipping** qui sont similaires au domaine de la victime. Leur intention est de rediriger les utilisateurs légitimes vers leur propre infrastructure.
 
 Pour plus d'informations, lisez [https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
 
@@ -91,7 +91,7 @@ ssh -L 3333:127.0.0.1:3333 <user>@<ip>
 
 **Configuration du certificat TLS**
 
-Avant cette étape, vous devez **déjà avoir acheté le domaine** que vous allez utiliser et il doit **pointer** vers l'**IP du VPS** où vous configurez **gophish**.
+Avant cette étape, vous devriez **déjà avoir acheté le domaine** que vous allez utiliser et il doit **pointer** vers l'**IP du VPS** où vous configurez **gophish**.
 ```bash
 DOMAIN="<domain>"
 wget https://dl.eff.org/certbot-auto
@@ -223,7 +223,7 @@ service gophish stop
 
 ### Attendre et être légitime
 
-Plus un domaine est ancien, moins il est probable qu'il soit considéré comme du spam. Vous devriez donc attendre le plus longtemps possible (au moins 1 semaine) avant l'évaluation de phishing. De plus, si vous mettez en place une page sur un secteur de réputation, la réputation obtenue sera meilleure.
+Plus un domaine est ancien, moins il est probable qu'il soit considéré comme du spam. Vous devriez donc attendre le plus longtemps possible (au moins 1 semaine) avant l'évaluation de phishing. De plus, si vous mettez une page sur un secteur de réputation, la réputation obtenue sera meilleure.
 
 Notez que même si vous devez attendre une semaine, vous pouvez terminer la configuration de tout maintenant.
 
@@ -317,7 +317,7 @@ La page [www.mail-tester.com](https://www.mail-tester.com) peut vous indiquer si
 - Ensuite, écrivez un **sujet** (rien d'étrange, juste quelque chose que vous pourriez vous attendre à lire dans un email régulier)
 - Assurez-vous d'avoir coché "**Ajouter une image de suivi**"
 - Rédigez le **modèle d'email** (vous pouvez utiliser des variables comme dans l'exemple suivant) :
-```markup
+```html
 <html>
 <head>
 <title></title>
@@ -403,9 +403,9 @@ phishing-documents.md
 
 ### Via Proxy MitM
 
-L'attaque précédente est assez astucieuse car vous simulez un vrai site web et recueillez les informations fournies par l'utilisateur. Malheureusement, si l'utilisateur n'a pas saisi le bon mot de passe ou si l'application que vous avez simulée est configurée avec 2FA, **ces informations ne vous permettront pas d'usurper l'utilisateur trompé**.
+L'attaque précédente est assez astucieuse car vous simulez un vrai site web et recueillez les informations fournies par l'utilisateur. Malheureusement, si l'utilisateur n'a pas saisi le bon mot de passe ou si l'application que vous avez simulée est configurée avec 2FA, **ces informations ne vous permettront pas d'usurper l'identité de l'utilisateur trompé**.
 
-C'est là que des outils comme [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** [**CredSniper**](https://github.com/ustayready/CredSniper) et [**muraena**](https://github.com/muraenateam/muraena) sont utiles. Cet outil vous permettra de générer une attaque de type MitM. En gros, les attaques fonctionnent de la manière suivante :
+C'est là que des outils comme [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** [**CredSniper**](https://github.com/ustayready/CredSniper) et [**muraena**](https://github.com/muraenateam/muraena) sont utiles. Cet outil vous permettra de générer une attaque de type MitM. En gros, l'attaque fonctionne de la manière suivante :
 
 1. Vous **usurpez le formulaire de connexion** de la vraie page web.
 2. L'utilisateur **envoie** ses **identifiants** à votre page factice et l'outil les envoie à la vraie page web, **vérifiant si les identifiants fonctionnent**.

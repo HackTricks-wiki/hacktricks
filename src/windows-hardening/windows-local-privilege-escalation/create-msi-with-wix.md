@@ -7,7 +7,7 @@ La création de l'installateur MSI se fera en utilisant wixtools, spécifiquemen
 Pour une compréhension complète des exemples d'utilisation de wix MSI, il est conseillé de consulter [cette page](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with). Ici, vous pouvez trouver divers exemples qui démontrent l'utilisation de wix MSI.
 
 L'objectif est de générer un MSI qui exécutera le fichier lnk. Afin d'y parvenir, le code XML suivant pourrait être utilisé ([xml from here](https://0xrick.github.io/hack-the-box/ethereal/index.html#Creating-Malicious-msi-and-getting-root)):
-```markup
+```html
 <?xml version="1.0"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
 <Product Id="*" UpgradeCode="12345678-1234-1234-1234-111111111111" Name="Example Product Name"
@@ -40,13 +40,13 @@ fail_here
 ```
 Il est important de noter que l'élément Package contient des attributs tels que InstallerVersion et Compressed, spécifiant la version de l'installateur et indiquant si le package est compressé ou non, respectivement.
 
-Le processus de création implique l'utilisation de candle.exe, un outil de wixtools, pour générer un wixobject à partir de msi.xml. La commande suivante doit être exécutée :
+Le processus de création implique d'utiliser candle.exe, un outil de wixtools, pour générer un wixobject à partir de msi.xml. La commande suivante doit être exécutée :
 ```
 candle.exe -out C:\tem\wix C:\tmp\Ethereal\msi.xml
 ```
 De plus, il convient de mentionner qu'une image est fournie dans le post, qui illustre la commande et sa sortie. Vous pouvez vous y référer pour une guidance visuelle.
 
-En outre, light.exe, un autre outil de wixtools, sera utilisé pour créer le fichier MSI à partir de l'objet wix. La commande à exécuter est la suivante :
+En outre, light.exe, un autre outil de wixtools, sera utilisé pour créer le fichier MSI à partir de l'wixobject. La commande à exécuter est la suivante :
 ```
 light.exe -out C:\tm\Ethereal\rick.msi C:\tmp\wix
 ```
