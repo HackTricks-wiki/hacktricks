@@ -10,7 +10,7 @@
 3. Tumia **OSINT** ili **kupata barua pepe**.
 2. Andaa mazingira
 1. **Nunua domeni** ambayo utatumia kwa tathmini ya phishing
-2. **Sanidi huduma ya barua pepe** inayohusiana na rekodi (SPF, DMARC, DKIM, rDNS)
+2. **Sanidi huduma ya barua pepe** rekodi zinazohusiana (SPF, DMARC, DKIM, rDNS)
 3. Sanidi VPS na **gophish**
 3. Andaa kampeni
 1. Andaa **kigezo cha barua pepe**
@@ -21,15 +21,15 @@
 
 ### Mbinu za Mabadiliko ya Jina la Domeni
 
-- **Neno muhimu**: Jina la domeni **linajumuisha** neno muhimu la **domeni la asili** (mfano, zelster.com-management.com).
+- **Neno muhimu**: Jina la domeni **linajumuisha** neno muhimu la asili (mfano, zelster.com-management.com).
 - **subdomain yenye hyphen**: Badilisha **dot kuwa hyphen** ya subdomain (mfano, www-zelster.com).
 - **TLD Mpya**: Domeni sawa ikitumia **TLD mpya** (mfano, zelster.org)
 - **Homoglyph**: In **badilisha** herufi katika jina la domeni kwa **herufi zinazofanana** (mfano, zelfser.com).
 - **Mabadiliko:** In **badilisha herufi mbili** ndani ya jina la domeni (mfano, zelsetr.com).
-- **Kuweka umoja/kuongeza wingi**: Ongeza au ondolea “s” mwishoni mwa jina la domeni (mfano, zeltsers.com).
+- **Kuweka umoja/mengi**: Ongeza au ondolea “s” mwishoni mwa jina la domeni (mfano, zeltsers.com).
 - **Kuondoa**: In **ondoa moja** ya herufi kutoka jina la domeni (mfano, zelser.com).
 - **Kurudia:** In **rudia moja** ya herufi katika jina la domeni (mfano, zeltsser.com).
-- **Badiliko**: Kama homoglyph lakini si ya siri sana. Inabadilisha moja ya herufi katika jina la domeni, labda kwa herufi iliyo karibu na herufi ya asili kwenye kibodi (mfano, zektser.com).
+- **Badiliko**: Kama homoglyph lakini si wa siri sana. Inabadilisha moja ya herufi katika jina la domeni, labda kwa herufi iliyo karibu na herufi asilia kwenye kibodi (mfano, zektser.com).
 - **Subdomained**: Ingiza **dot** ndani ya jina la domeni (mfano, ze.lster.com).
 - **Kuingiza**: In **ingiza herufi** ndani ya jina la domeni (mfano, zerltser.com).
 - **Dot iliyokosekana**: Ongeza TLD kwenye jina la domeni. (mfano, zelstercom.com)
@@ -107,7 +107,7 @@ mkdir /opt/gophish/ssl_keys
 cp "/etc/letsencrypt/live/$DOMAIN/privkey.pem" /opt/gophish/ssl_keys/key.pem
 cp "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" /opt/gophish/ssl_keys/key.crt​
 ```
-**Mikakati ya barua**
+**Usanidi wa barua pepe**
 
 Anza kufunga: `apt-get install postfix`
 
@@ -117,7 +117,7 @@ Kisha ongeza kikoa kwenye faili zifuatazo:
 - **/etc/postfix/transport**
 - **/etc/postfix/virtual_regexp**
 
-**Badilisha pia thamani za mabadiliko yafuatayo ndani ya /etc/postfix/main.cf**
+**Badilisha pia thamani za vigezo vifuatavyo ndani ya /etc/postfix/main.cf**
 
 `myhostname = <domain>`\
 `mydestination = $myhostname, <domain>, localhost.com, localhost`
@@ -133,7 +133,7 @@ echo "This is the body of the email" | mail -s "This is the subject line" test@e
 ```
 **Mipangilio ya Gophish**
 
-Acha kuendesha gophish na hebu tuipange.\
+Acha utekelezaji wa gophish na hebu tuipange.\
 Badilisha `/opt/gophish/config.json` kuwa ifuatayo (zingatia matumizi ya https):
 ```bash
 {
@@ -229,7 +229,7 @@ Kumbuka kwamba hata kama unapaswa kusubiri wiki moja unaweza kumaliza kuunda kil
 
 ### Sanidi Rekodi ya Reverse DNS (rDNS)
 
-Weka rekodi ya rDNS (PTR) inayotatua anwani ya IP ya VPS kwa jina la kikoa.
+Weka rekodi ya rDNS (PTR) inayotatua anwani ya IP ya VPS hadi jina la kikoa.
 
 ### Rekodi ya Sender Policy Framework (SPF)
 
@@ -255,7 +255,7 @@ v=DMARC1; p=none
 
 Lazima **uweke DKIM kwa jina jipya la kikoa**. Ikiwa hujui ni nini rekodi ya DMARC [**soma ukurasa huu**](../../network-services-pentesting/pentesting-smtp/index.html#dkim).
 
-Taaluma hii inategemea: [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
+Mafunzo haya yanategemea: [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
 
 > [!NOTE]
 > Unahitaji kuunganisha thamani zote mbili za B64 ambazo funguo za DKIM zinazalisha:
@@ -272,7 +272,7 @@ Fikia tu ukurasa huo na tuma barua pepe kwa anwani wanayokupa:
 echo "This is the body of the email" | mail -s "This is the subject line" test-iimosa79z@srv1.mail-tester.com
 ```
 Unaweza pia **kuangalia usanidi wako wa barua pepe** kwa kutuma barua pepe kwa `check-auth@verifier.port25.com` na **kusoma jibu** (kwa hili utahitaji **kufungua** bandari **25** na kuona jibu katika faili _/var/mail/root_ ikiwa utatuma barua pepe kama root).\
-Angalia kwamba unapitisha majaribio yote:
+Angalia kwamba unapita majaribio yote:
 ```bash
 ==========================================================
 Summary of Results
@@ -289,13 +289,13 @@ Authentication-Results: mx.google.com;
 spf=pass (google.com: domain of contact@example.com designates --- as permitted sender) smtp.mail=contact@example.com;
 dkim=pass header.i=@example.com;
 ```
-### ​Kuondoa kutoka kwenye Orodha ya Spamhouse
+### ​Kuondoa kutoka kwenye Spamhouse Blacklist
 
-Ukurasa [www.mail-tester.com](https://www.mail-tester.com) unaweza kuonyesha ikiwa jina la kikoa chako linazuiwa na spamhouse. Unaweza kuomba jina la kikoa/IP yako kuondolewa kwenye: ​[https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)
+Ukurasa [www.mail-tester.com](https://www.mail-tester.com) unaweza kuonyesha ikiwa domain yako inazuia na spamhouse. Unaweza kuomba kuondolewa kwa domain/IP yako hapa: ​[https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)
 
-### Kuondoa kutoka kwenye Orodha ya Microsoft
+### Kuondoa kutoka kwenye Microsoft Blacklist
 
-​​Unaweza kuomba jina la kikoa/IP yako kuondolewa kwenye [https://sender.office.com/](https://sender.office.com).
+​​Unaweza kuomba kuondolewa kwa domain/IP yako hapa [https://sender.office.com/](https://sender.office.com).
 
 ## Unda & Uzindue Kampeni ya GoPhish
 
@@ -305,19 +305,19 @@ Ukurasa [www.mail-tester.com](https://www.mail-tester.com) unaweza kuonyesha iki
 - Amua kutoka kwenye akaunti gani utaenda kutuma barua pepe za phishing. Mapendekezo: _noreply, support, servicedesk, salesforce..._
 - Unaweza kuacha jina la mtumiaji na nenosiri kuwa tupu, lakini hakikisha umeangalia Ignore Certificate Errors
 
-![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
+![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
 
 > [!NOTE]
 > Inapendekezwa kutumia kazi ya "**Send Test Email**" ili kujaribu kwamba kila kitu kinafanya kazi.\
-> Ningependekeza **kutuma barua pepe za majaribio kwa anwani za barua za 10min** ili kuepuka kuorodheshwa kwenye orodha ya watu wasiohitajika wakati wa majaribio.
+> Ningependekeza **kutuma barua pepe za majaribio kwa anwani za 10min mails** ili kuepuka kuorodheshwa kwenye orodha ya watu wabaya wakati wa majaribio.
 
 ### Kiolezo cha Barua Pepe
 
 - Weka **jina la kutambulisha** kiolezo
-- Kisha andika **kichwa** (hakuna kitu cha ajabu, ni kitu ambacho unaweza kutarajia kusoma katika barua pepe ya kawaida)
+- Kisha andika **kichwa** (hakuna kitu cha ajabu, ni kitu ambacho ungeweza kutarajia kusoma katika barua pepe ya kawaida)
 - Hakikisha umeangalia "**Add Tracking Image**"
 - Andika **kiolezo cha barua pepe** (unaweza kutumia vigezo kama katika mfano ufuatao):
-```markup
+```html
 <html>
 <head>
 <title></title>
@@ -335,9 +335,9 @@ WRITE HERE SOME SIGNATURE OF SOMEONE FROM THE COMPANY
 </body>
 </html>
 ```
-Kumbuka kwamba **ili kuongeza uaminifu wa barua pepe**, inapendekezwa kutumia saini kutoka kwa barua pepe ya mteja. Mapendekezo:
+Kumbuka kwamba **ili kuongeza uaminifu wa barua pepe**, inashauriwa kutumia saini kutoka kwa barua pepe ya mteja. Mapendekezo:
 
-- Tuma barua pepe kwa **anwani isiyo na msingi** na uangalie kama jibu lina saini yoyote.
+- Tuma barua pepe kwa **anwani isiyo na uwepo** na uangalie kama jibu lina saini yoyote.
 - Tafuta **barua pepe za umma** kama info@ex.com au press@ex.com au public@ex.com na uwatume barua pepe na subiri jibu.
 - Jaribu kuwasiliana na **barua pepe halali zilizogunduliwa** na subiri jibu.
 
@@ -350,7 +350,7 @@ Kumbuka kwamba **ili kuongeza uaminifu wa barua pepe**, inapendekezwa kutumia sa
 
 - Andika **jina**
 - **Andika msimbo wa HTML** wa ukurasa wa wavuti. Kumbuka kwamba unaweza **kuagiza** kurasa za wavuti.
-- Mark **Kamata Data Iliyowasilishwa** na **Kamata Nywila**
+- Chagua **Kamata Data Iliyowasilishwa** na **Kamata Nywila**
 - Weka **mwelekeo**
 
 ![](<../../images/image (826).png>)
@@ -360,7 +360,7 @@ Kumbuka kwamba **ili kuongeza uaminifu wa barua pepe**, inapendekezwa kutumia sa
 > Kumbuka kwamba ikiwa unahitaji **kutumia rasilimali za kudumu** kwa HTML (labda kurasa za CSS na JS) unaweza kuziokoa katika _**/opt/gophish/static/endpoint**_ na kisha uzifikie kutoka _**/static/\<filename>**_
 
 > [!NOTE]
-> Kwa mwelekeo unaweza **kuwapeleka watumiaji kwenye ukurasa halali wa wavuti** wa mwathirika, au kuwapeleka kwenye _/static/migration.html_ kwa mfano, weka **gari inayozunguka (**[**https://loading.io/**](https://loading.io)**) kwa sekunde 5 na kisha onyesha kwamba mchakato umekuwa na mafanikio**.
+> Kwa mwelekeo unaweza **kuhamasisha watumiaji kwenye ukurasa halali wa wavuti** wa mwathirika, au kuwahamisha kwenye _/static/migration.html_ kwa mfano, weka **gari inayozunguka (**[**https://loading.io/**](https://loading.io)**) kwa sekunde 5 na kisha onyesha kwamba mchakato ulikuwa na mafanikio**.
 
 ### Watumiaji na Makundi
 
@@ -378,13 +378,13 @@ Kumbuka kwamba **Wasifu wa Kutuma unaruhusu kutuma barua pepe ya majaribio kuona
 ![](<../../images/image (192).png>)
 
 > [!NOTE]
-> Ningependekeza **kutuma barua pepe za majaribio kwa anwani za barua pepe za 10min** ili kuepuka kuorodheshwa kwenye orodha za mblacklisted wakati wa kufanya majaribio.
+> Ningependekeza **kutuma barua pepe za majaribio kwa anwani za barua pepe za 10min** ili kuepuka kuorodheshwa kwenye orodha ya mblacklist wakati wa kufanya majaribio.
 
 Mara kila kitu kiko tayari, uzindue kampeni!
 
 ## Kloni ya Tovuti
 
-Ikiwa kwa sababu yoyote unataka kunakili tovuti angalia ukurasa ufuatao:
+Ikiwa kwa sababu yoyote unataka kunakili tovuti, angalia ukurasa ufuatao:
 
 {{#ref}}
 clone-a-website.md
@@ -403,13 +403,13 @@ phishing-documents.md
 
 ### Kupitia Proxy MitM
 
-Shambulio la awali ni la busara kwani unafanyia kazi tovuti halisi na kukusanya taarifa zilizowekwa na mtumiaji. Kwa bahati mbaya, ikiwa mtumiaji hakuweka nywila sahihi au ikiwa programu uliyofanya kazi nayo imewekwa na 2FA, **habari hii haitakuruhusu kujifanya kama mtumiaji aliyejipatia hila**.
+Shambulio la awali ni la busara kwani unafanyia kazi tovuti halisi na kukusanya taarifa zilizowekwa na mtumiaji. Kwa bahati mbaya, ikiwa mtumiaji hakuweka nywila sahihi au ikiwa programu uliyofanya kazi nayo imewekwa na 2FA, **habari hii haitakuruhusu kujifanya kuwa mtumiaji aliyejipatia hila**.
 
 Hapa ndipo zana kama [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** [**CredSniper**](https://github.com/ustayready/CredSniper) na [**muraena**](https://github.com/muraenateam/muraena) zinakuwa na manufaa. Zana hii itakuruhusu kuunda shambulio kama la MitM. Kimsingi, shambulio linafanya kazi kwa njia ifuatayo:
 
-1. Unajifanya **fomu ya kuingia** ya ukurasa halisi.
-2. Mtumiaji **anatumia** **taarifa zake** kwenye ukurasa wako wa uongo na zana inapeleka hizo kwenye ukurasa halisi, **ikikagua ikiwa taarifa hizo zinafanya kazi**.
-3. Ikiwa akaunti imewekwa na **2FA**, ukurasa wa MitM utauliza kwa hiyo na mara **mtumiaji anapoweka** hiyo zana itapeleka kwenye ukurasa halisi.
+1. Unajifanya kuwa fomu ya kuingia ya ukurasa halisi wa wavuti.
+2. Mtumiaji **anatumia** **taarifa zake** kwenye ukurasa wako wa uongo na zana inatumia hizo kwenye ukurasa halisi wa wavuti, **ikikagua ikiwa taarifa hizo zinafanya kazi**.
+3. Ikiwa akaunti imewekwa na **2FA**, ukurasa wa MitM utauliza kwa hiyo na mara **mtumiaji anapoweka** hiyo zana itatuma kwa ukurasa halisi wa wavuti.
 4. Mara mtumiaji anapothibitishwa wewe (kama mshambuliaji) utakuwa **umechukua taarifa, 2FA, cookie na taarifa yoyote** ya kila mwingiliano wako wakati zana inafanya MitM.
 
 ### Kupitia VNC
@@ -419,8 +419,8 @@ Unaweza kufanya hivi kwa kutumia [**EvilnVNC**](https://github.com/JoelGMSec/Evi
 
 ## Kugundua kugundua
 
-Kwa wazi moja ya njia bora za kujua ikiwa umekamatwa ni **kutafuta kikoa chako ndani ya orodha za mblacklisted**. Ikiwa inajitokeza, kwa namna fulani kikoa chako kimegunduliwa kama cha mashaka.\
-Njia rahisi ya kuangalia ikiwa kikoa chako kinajitokeza katika orodha yoyote ya mblacklisted ni kutumia [https://malwareworld.com/](https://malwareworld.com)
+Kwa wazi moja ya njia bora za kujua ikiwa umekamatwa ni **kutafuta kikoa chako ndani ya orodha za mblacklist**. Ikiwa inajitokeza, kwa namna fulani kikoa chako kiligunduliwa kama cha mashaka.\
+Njia rahisi ya kuangalia ikiwa kikoa chako kinajitokeza katika orodha yoyote ya mblacklist ni kutumia [https://malwareworld.com/](https://malwareworld.com)
 
 Hata hivyo, kuna njia nyingine za kujua ikiwa mwathirika **anatafuta kwa nguvu shughuli za udukuzi za mashaka katika mazingira** kama ilivyoelezwa katika:
 
@@ -428,11 +428,11 @@ Hata hivyo, kuna njia nyingine za kujua ikiwa mwathirika **anatafuta kwa nguvu s
 detecting-phising.md
 {{#endref}}
 
-Unaweza **kununua kikoa chenye jina linalofanana sana** na kikoa cha mwathirika **na/au kuunda cheti** kwa **subdomain** ya kikoa kinachodhibitiwa na wewe **kilichokuwa** na **neno muhimu** la kikoa cha mwathirika. Ikiwa **mwathirika** atafanya aina yoyote ya **maingiliano ya DNS au HTTP** nao, utajua kwamba **anatafuta kwa nguvu** kikoa cha mashaka na utahitaji kuwa na uangalifu mkubwa.
+Unaweza **kununua kikoa chenye jina linalofanana sana** na kikoa cha mwathirika **na/au kuunda cheti** kwa **subdomain** ya kikoa kinachodhibitiwa na wewe **kilichokuwa** na **neno muhimu** la kikoa cha mwathirika. Ikiwa **mwathirika** atafanya aina yoyote ya **maingiliano ya DNS au HTTP** nao, utajua kwamba **anatafuta kwa nguvu** kikoa cha mashaka na itabidi uwe na uangalifu mkubwa.
 
 ### Kadiria udukuzi
 
-Tumia [**Phishious** ](https://github.com/Rices/Phishious)kadiria ikiwa barua pepe yako itakwenda kwenye folda ya spam au ikiwa itazuiwa au kufanikiwa.
+Tumia [**Phishious** ](https://github.com/Rices/Phishious)kadiria ikiwa barua pepe yako itamalizika kwenye folda ya spam au ikiwa itazuiwa au kufanikiwa.
 
 ## Marejeleo
 

