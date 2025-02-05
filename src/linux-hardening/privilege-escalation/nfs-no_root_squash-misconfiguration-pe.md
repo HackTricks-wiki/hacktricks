@@ -6,14 +6,14 @@ NFS di solito (soprattutto in linux) si fida del `uid` e `gid` indicati dal clie
 
 - **`all_squash`**: Squasha tutti gli accessi mappando ogni utente e gruppo a **`nobody`** (65534 unsigned / -2 signed). Pertanto, tutti sono `nobody` e non vengono utilizzati utenti.
 - **`root_squash`/`no_all_squash`**: Questo è il valore predefinito su Linux e **squasha solo l'accesso con uid 0 (root)**. Pertanto, qualsiasi `UID` e `GID` sono fidati, ma `0` è squashed a `nobody` (quindi non è possibile impersonare root).
-- **``no_root_squash`**: Questa configurazione, se abilitata, non squasha nemmeno l'utente root. Ciò significa che se monti una directory con questa configurazione, puoi accedervi come root.
+- **``no_root_squash`**: Questa configurazione, se abilitata, non squasha nemmeno l'utente root. Questo significa che se monti una directory con questa configurazione, puoi accedervi come root.
 
 Nel file **/etc/exports**, se trovi qualche directory configurata come **no_root_squash**, allora puoi **accedervi** da **client** e **scrivere all'interno** di quella directory **come** se fossi il **root** locale della macchina.
 
 Per ulteriori informazioni su **NFS** controlla:
 
 {{#ref}}
-/network-services-pentesting/nfs-service-pentesting.md
+../../network-services-pentesting/nfs-service-pentesting.md
 {{#endref}}
 
 # Escalation dei Privilegi
@@ -21,9 +21,9 @@ Per ulteriori informazioni su **NFS** controlla:
 ## Exploit Remoto
 
 Opzione 1 usando bash:
-- **Montare quella directory** in una macchina client e **come root copiare** all'interno della cartella montata il **/bin/bash** binario e dargli diritti **SUID**, ed **eseguire dalla macchina vittima** quel binario bash.
+- **Montare quella directory** in una macchina client e **come root copiare** all'interno della cartella montata il **/bin/bash** binario e dargli i diritti **SUID**, ed **eseguire dalla macchina vittima** quel binario bash.
 - Nota che per essere root all'interno della condivisione NFS, **`no_root_squash`** deve essere configurato nel server.
-- Tuttavia, se non abilitato, potresti elevare i privilegi a un altro utente copiando il binario nella condivisione NFS e dandogli il permesso SUID come l'utente a cui vuoi elevare i privilegi.
+- Tuttavia, se non è abilitato, potresti escalare a un altro utente copiando il binario nella condivisione NFS e dandogli il permesso SUID come l'utente a cui vuoi escalare.
 ```bash
 #Attacker, as root user
 mkdir /tmp/pe
@@ -62,7 +62,7 @@ cd <SHAREDD_FOLDER>
 
 ## Basic Information
 
-Lo scenario prevede di sfruttare una condivisione NFS montata su una macchina locale, sfruttando un difetto nella specifica NFSv3 che consente al client di specificare il proprio uid/gid, potenzialmente abilitando l'accesso non autorizzato. Lo sfruttamento comporta l'uso di [libnfs](https://github.com/sahlberg/libnfs), una libreria che consente la falsificazione delle chiamate RPC NFS.
+Lo scenario prevede di sfruttare una condivisione NFS montata su una macchina locale, sfruttando un difetto nella specifica NFSv3 che consente al client di specificare il proprio uid/gid, potenzialmente abilitando l'accesso non autorizzato. Lo sfruttamento coinvolge l'uso di [libnfs](https://github.com/sahlberg/libnfs), una libreria che consente la falsificazione delle chiamate RPC NFS.
 
 ### Compiling the Library
 
@@ -95,7 +95,7 @@ LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod u+s nfs:/
 /mnt/share/a.out
 #root
 ```
-## Bonus: NFShell per Accesso ai File Stealthy
+## Bonus: NFShell per Accesso ai File Stealth
 
 Una volta ottenuto l'accesso root, per interagire con la condivisione NFS senza cambiare la proprietà (per evitare di lasciare tracce), viene utilizzato uno script Python (nfsh.py). Questo script regola l'uid per corrispondere a quello del file a cui si accede, consentendo l'interazione con i file sulla condivisione senza problemi di autorizzazione:
 ```python
