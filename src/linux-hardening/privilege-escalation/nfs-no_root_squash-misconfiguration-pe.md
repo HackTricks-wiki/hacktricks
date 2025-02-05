@@ -14,7 +14,7 @@ In the **/etc/exports** file, if you find some directory that is configured as *
 For more information about **NFS** check:
 
 {{#ref}}
-/network-services-pentesting/nfs-service-pentesting.md
+../../network-services-pentesting/nfs-service-pentesting.md
 {{#endref}}
 
 # Privilege Escalation
