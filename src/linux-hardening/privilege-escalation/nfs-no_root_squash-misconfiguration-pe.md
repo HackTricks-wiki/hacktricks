@@ -6,14 +6,14 @@ NFS fera généralement (surtout sous Linux) confiance au `uid` et `gid` indiqu�
 
 - **`all_squash`** : Cela écrase tous les accès en mappant chaque utilisateur et groupe à **`nobody`** (65534 non signé / -2 signé). Par conséquent, tout le monde est `nobody` et aucun utilisateur n'est utilisé.
 - **`root_squash`/`no_all_squash`** : C'est la valeur par défaut sur Linux et **n'écrase que l'accès avec uid 0 (root)**. Par conséquent, tout `UID` et `GID` sont de confiance, mais `0` est écrasé à `nobody` (donc aucune usurpation de root n'est possible).
-- **`no_root_squash`** : Cette configuration, si elle est activée, n'écrase même pas l'utilisateur root. Cela signifie que si vous montez un répertoire avec cette configuration, vous pouvez y accéder en tant que root.
+- **``no_root_squash`** : Cette configuration, si elle est activée, n'écrase même pas l'utilisateur root. Cela signifie que si vous montez un répertoire avec cette configuration, vous pouvez y accéder en tant que root.
 
 Dans le fichier **/etc/exports**, si vous trouvez un répertoire configuré comme **no_root_squash**, alors vous pouvez **y accéder** en tant que **client** et **écrire à l'intérieur** de ce répertoire **comme** si vous étiez le **root** local de la machine.
 
 Pour plus d'informations sur **NFS**, consultez :
 
 {{#ref}}
-/network-services-pentesting/nfs-service-pentesting.md
+../../network-services-pentesting/nfs-service-pentesting.md
 {{#endref}}
 
 # Escalade de privilèges
@@ -56,8 +56,8 @@ cd <SHAREDD_FOLDER>
 
 > [!NOTE]
 > Notez que si vous pouvez créer un **tunnel de votre machine à la machine victime, vous pouvez toujours utiliser la version distante pour exploiter cette élévation de privilèges en tunnelant les ports requis**.\
-> Le truc suivant est au cas où le fichier `/etc/exports` **indique une IP**. Dans ce cas, vous **ne pourrez pas utiliser** en aucun cas l'**exploit distant** et vous devrez **abuser de ce truc**.\
-> Une autre exigence requise pour que l'exploit fonctionne est que **l'exportation à l'intérieur de `/etc/export`** **doit utiliser le drapeau `insecure`**.\
+> Le truc suivant est dans le cas où le fichier `/etc/exports` **indique une IP**. Dans ce cas, vous **ne pourrez pas utiliser** en aucun cas l'**exploitation distante** et vous devrez **abuser de ce truc**.\
+> Une autre exigence requise pour que l'exploitation fonctionne est que **l'exportation à l'intérieur de `/etc/export`** **doit utiliser le drapeau `insecure`**.\
 > --_Je ne suis pas sûr que si `/etc/export` indique une adresse IP, ce truc fonctionnera_--
 
 ## Basic Information
