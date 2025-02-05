@@ -13,7 +13,7 @@ In die **/etc/exports** lêer, as jy 'n gids vind wat as **no_root_squash** geco
 Vir meer inligting oor **NFS** kyk:
 
 {{#ref}}
-/network-services-pentesting/nfs-service-pentesting.md
+../../network-services-pentesting/nfs-service-pentesting.md
 {{#endref}}
 
 # Privilege Escalation
@@ -66,7 +66,7 @@ Die scenario behels die eksploitering van 'n gemonteerde NFS deel op 'n plaaslik
 
 ### Kompilerings van die Biblioteek
 
-Die biblioteek kompileringsstappe mag aanpassings vereis gebaseer op die kern weergawe. In hierdie spesifieke geval is die fallocate syscalls kommentaar gegee. Die kompileringsproses behels die volgende opdragte:
+Die biblioteek kompileringsstappe mag aanpassings vereis gebaseer op die kern weergawe. In hierdie spesifieke geval was die fallocate syscalls kommentaar gemaak. Die kompileringsproses behels die volgende opdragte:
 ```bash
 ./bootstrap
 ./configure
@@ -95,9 +95,9 @@ LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod u+s nfs:/
 /mnt/share/a.out
 #root
 ```
-## Bonus: NFShell vir Stealthy File Toegang
+## Bonus: NFShell vir Stealthy Lêertoegang
 
-Sodra root-toegang verkry is, om met die NFS-aandeel te kommunikeer sonder om eienaarskap te verander (om te verhoed dat daar spore agtergelaat word), word 'n Python-skrip (nfsh.py) gebruik. Hierdie skrip pas die uid aan om te ooreenstem met dié van die lêer wat toegang verkry, wat interaksie met lêers op die aandeel moontlik maak sonder toestemmingkwessies:
+Sodra root-toegang verkry is, om met die NFS-aandeel te kommunikeer sonder om eienaarskap te verander (om te verhoed dat daar spore agtergelaat word), word 'n Python-skrip (nfsh.py) gebruik. Hierdie skrip pas die uid aan om te ooreenstem met dié van die lêer wat toegang verkry word, wat interaksie met lêers op die aandeel moontlik maak sonder toestemmingkwessies:
 ```python
 #!/usr/bin/env python
 # script from https://www.errno.fr/nfs_privesc.html
