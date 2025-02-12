@@ -37,11 +37,11 @@ jobs:
       
       - name: Update searchindex.js in repo
         run: |
+          git config --global --add safe.directory /__w/hacktricks/hacktricks
+          git pull
           git config --global user.email "build@example.com"
           git config --global user.name "Build master"
           git config pull.rebase false
-          git config --global --add safe.directory /__w/hacktricks/hacktricks
-          git pull
           cp book/searchindex.js searchindex.js
           cp book/searchindex.json searchindex.json
           git add searchindex.js searchindex.json
