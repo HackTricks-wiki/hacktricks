@@ -27,7 +27,7 @@ Um eine Privilegieneskalation zu versuchen, identifizieren Sie zunächst den Ben
 - Besitzen Sie **Schreibzugriff** auf eine Pipeline-**.conf**-Datei **oder**
 - Die **/etc/logstash/pipelines.yml**-Datei verwendet einen Platzhalter, und Sie können in den Zielordner schreiben
 
-Darüber hinaus muss **eine** dieser Bedingungen erfüllt sein:
+Zusätzlich muss **eine** dieser Bedingungen erfüllt sein:
 
 - Fähigkeit, den Logstash-Dienst neu zu starten **oder**
 - Die **/etc/logstash/logstash.yml**-Datei hat **config.reload.automatic: true** gesetzt
@@ -50,7 +50,7 @@ codec => rubydebug
 ```
 Hier bestimmt **interval** die Ausführungsfrequenz in Sekunden. Im gegebenen Beispiel wird der **whoami**-Befehl alle 120 Sekunden ausgeführt, wobei die Ausgabe an **/tmp/output.log** geleitet wird.
 
-Mit **config.reload.automatic: true** in **/etc/logstash/logstash.yml** wird Logstash automatisch neue oder modifizierte Pipeline-Konfigurationen erkennen und anwenden, ohne dass ein Neustart erforderlich ist. Wenn es kein Wildcard gibt, können weiterhin Änderungen an bestehenden Konfigurationen vorgenommen werden, jedoch ist Vorsicht geboten, um Störungen zu vermeiden.
+Mit **config.reload.automatic: true** in **/etc/logstash/logstash.yml** wird Logstash automatisch neue oder modifizierte Pipeline-Konfigurationen erkennen und anwenden, ohne dass ein Neustart erforderlich ist. Wenn es kein Wildcard gibt, können weiterhin Änderungen an bestehenden Konfigurationen vorgenommen werden, jedoch ist Vorsicht geboten, um Unterbrechungen zu vermeiden.
 
 ## References
 
