@@ -18,13 +18,13 @@ path.config: "/etc/logstash/conf.d/*.conf"
 path.config: "/usr/share/logstash/pipeline/1*.conf"
 pipeline.workers: 6
 ```
-Ten plik ujawnia, gdzie znajdują się pliki **.conf**, zawierające konfiguracje potoków. Przy użyciu **modułu wyjściowego Elasticsearch**, powszechnie zdarza się, że **potoki** zawierają **poświadczenia Elasticsearch**, które często mają szerokie uprawnienia z powodu potrzeby Logstasha do zapisywania danych w Elasticsearch. Znaki wieloznaczne w ścieżkach konfiguracji pozwalają Logstashowi na wykonanie wszystkich pasujących potoków w wyznaczonym katalogu.
+Ten plik ujawnia, gdzie znajdują się pliki **.conf**, zawierające konfiguracje potoków. Przy użyciu **modułu wyjściowego Elasticsearch** powszechnie zdarza się, że **potoki** zawierają **poświadczenia Elasticsearch**, które często mają szerokie uprawnienia z powodu potrzeby Logstasha do zapisywania danych w Elasticsearch. Znaki wieloznaczne w ścieżkach konfiguracji pozwalają Logstashowi na wykonanie wszystkich pasujących potoków w wyznaczonym katalogu.
 
 ### Eskalacja uprawnień za pomocą zapisywalnych potoków
 
 Aby spróbować eskalacji uprawnień, najpierw zidentyfikuj użytkownika, pod którym działa usługa Logstash, zazwyczaj użytkownika **logstash**. Upewnij się, że spełniasz **jedno** z tych kryteriów:
 
-- Posiadasz **dostęp do zapisu** do pliku potoku **.conf** **lub**
+- Posiadasz **dostęp do zapisu** w pliku **.conf** potoku **lub**
 - Plik **/etc/logstash/pipelines.yml** używa znaku wieloznacznego, a ty możesz zapisywać w docelowym folderze
 
 Dodatkowo, **jedno** z tych warunków musi być spełnione:
@@ -50,7 +50,7 @@ codec => rubydebug
 ```
 Tutaj **interval** określa częstotliwość wykonywania w sekundach. W podanym przykładzie polecenie **whoami** jest uruchamiane co 120 sekund, a jego wyjście jest kierowane do **/tmp/output.log**.
 
-Dzięki **config.reload.automatic: true** w **/etc/logstash/logstash.yml**, Logstash automatycznie wykryje i zastosuje nowe lub zmodyfikowane konfiguracje potoków bez potrzeby ponownego uruchamiania. Jeśli nie ma znaku wieloznacznego, modyfikacje można nadal wprowadzać w istniejących konfiguracjach, ale zaleca się ostrożność, aby uniknąć zakłóceń.
+Dzięki **config.reload.automatic: true** w **/etc/logstash/logstash.yml**, Logstash automatycznie wykryje i zastosuje nowe lub zmodyfikowane konfiguracje potoków bez potrzeby ponownego uruchamiania. Jeśli nie ma znaku wieloznacznego, modyfikacje mogą być nadal wprowadzane do istniejących konfiguracji, ale zaleca się ostrożność, aby uniknąć zakłóceń.
 
 ## References
 
