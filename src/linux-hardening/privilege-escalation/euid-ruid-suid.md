@@ -5,7 +5,7 @@
 ### ユーザー識別変数
 
 - **`ruid`**: **実ユーザーID**は、プロセスを開始したユーザーを示します。
-- **`euid`**: **有効ユーザーID**として知られ、システムがプロセスの特権を確認するために使用するユーザーの識別を表します。一般的に、`euid`は`ruid`と同じですが、SetUIDバイナリの実行のような場合には、`euid`がファイル所有者の識別を引き受け、特定の操作権限を付与します。
+- **`euid`**: **有効ユーザーID**として知られ、システムがプロセスの特権を確認するために使用するユーザーの識別を表します。一般的に、`euid`は`ruid`と一致しますが、SetUIDバイナリの実行のような場合には、`euid`がファイル所有者の識別を引き受け、特定の操作権限を付与します。
 - **`suid`**: この**保存されたユーザーID**は、高特権プロセス（通常はrootとして実行される）が特定のタスクを実行するために一時的に特権を放棄し、後に元の昇格した状態を取り戻す必要があるときに重要です。
 
 #### 重要な注意
@@ -14,12 +14,12 @@ rootでないプロセスは、`euid`を現在の`ruid`、`euid`、または`sui
 
 ### set\*uid関数の理解
 
-- **`setuid`**: 初期の仮定とは異なり、`setuid`は主に`ruid`ではなく`euid`を変更します。具体的には、特権プロセスの場合、指定されたユーザー（通常はroot）に`ruid`、`euid`、および`suid`を合わせ、これらのIDを上書きする`suid`によって強化します。詳細な情報は、[setuid man page](https://man7.org/linux/man-pages/man2/setuid.2.html)で確認できます。
-- **`setreuid`**および**`setresuid`**: これらの関数は、`ruid`、`euid`、および`suid`の微妙な調整を可能にします。ただし、その機能はプロセスの特権レベルに依存します。rootでないプロセスの場合、変更は現在の`ruid`、`euid`、および`suid`の値に制限されます。一方、rootプロセスまたは`CAP_SETUID`権限を持つプロセスは、これらのIDに任意の値を割り当てることができます。詳細は、[setresuid man page](https://man7.org/linux/man-pages/man2/setresuid.2.html)および[setreuid man page](https://man7.org/linux/man-pages/man2/setreuid.2.html)で確認できます。
+- **`setuid`**: 初期の仮定とは異なり、`setuid`は主に`ruid`ではなく`euid`を変更します。具体的には、特権プロセスの場合、指定されたユーザー（通常はroot）に`ruid`、`euid`、および`suid`を一致させ、これらのIDを強化します。詳細な情報は[setuid man page](https://man7.org/linux/man-pages/man2/setuid.2.html)で確認できます。
+- **`setreuid`**および**`setresuid`**: これらの関数は、`ruid`、`euid`、および`suid`の微妙な調整を可能にします。ただし、その機能はプロセスの特権レベルに依存します。非rootプロセスの場合、変更は現在の`ruid`、`euid`、および`suid`の値に制限されます。対照的に、rootプロセスまたは`CAP_SETUID`権限を持つプロセスは、これらのIDに任意の値を割り当てることができます。詳細は[setresuid man page](https://man7.org/linux/man-pages/man2/setresuid.2.html)および[setreuid man page](https://man7.org/linux/man-pages/man2/setreuid.2.html)で確認できます。
 
 これらの機能は、セキュリティメカニズムとしてではなく、プログラムが有効ユーザーIDを変更して他のユーザーの識別を採用するなど、意図された操作フローを促進するために設計されています。
 
-特に、`setuid`はrootへの特権昇格の一般的な手段である一方で、これらの関数の違いを理解し、さまざまなシナリオでユーザーIDの動作を操作することが重要です。
+特に、`setuid`はrootへの特権昇格の一般的な手段である一方で（すべてのIDをrootに一致させるため）、これらの関数の違いを理解し、さまざまなシナリオでユーザーIDの動作を操作することが重要です。
 
 ### Linuxにおけるプログラム実行メカニズム
 
@@ -36,9 +36,9 @@ rootでないプロセスは、`euid`を現在の`ruid`、`euid`、または`sui
 #### **`system`関数**
 
 - **機能**: `execve`とは異なり、`system`は`fork`を使用して子プロセスを作成し、その子プロセス内でコマンドを実行します。
-- **コマンド実行**: `sh`を介してコマンドを実行します。`execl("/bin/sh", "sh", "-c", command, (char *) NULL);`。
+- **コマンド実行**: `sh`を介してコマンドを実行します。`execl("/bin/sh", "sh", "-c", command, (char *) NULL);`を使用します。
 - **動作**: `execl`は`execve`の一形態であり、同様に動作しますが、新しい子プロセスの文脈で実行されます。
-- **文書**: さらなる情報は[`system` man page](https://man7.org/linux/man-pages/man3/system.3.html)で得られます。
+- **文書**: さらなる洞察は[`system` man page](https://man7.org/linux/man-pages/man3/system.3.html)で得られます。
 
 #### **SUIDを持つ`bash`と`sh`の動作**
 
@@ -50,13 +50,13 @@ rootでないプロセスは、`euid`を現在の`ruid`、`euid`、または`sui
 - **`sh`**:
 - `bash`の`-p`に類似したメカニズムはありません。
 - ユーザーIDに関する動作は明示的に記載されていませんが、`-i`オプションの下で`euid`と`ruid`の等価性の保持が強調されています。
-- 追加情報は[`sh` man page](https://man7.org/linux/man-pages/man1/sh.1p.html)で確認できます。
+- 追加情報は[`sh` man page](https://man7.org/linux/man-pages/man1/sh.1p.html)で入手できます。
 
-これらのメカニズムは、それぞれ異なる動作を持ち、プログラムの実行と遷移のための多様なオプションを提供し、ユーザーIDの管理と保持における特定のニュアンスを持っています。
+これらのメカニズムは、異なる動作を持ち、プログラムの実行と遷移のための多様なオプションを提供し、ユーザーIDの管理と保持における特定のニュアンスを持っています。
 
 ### 実行におけるユーザーIDの動作のテスト
 
-例はhttps://0xdf.gitlab.io/2022/05/31/setuid-rabbithole.html#testing-on-jailから取得されており、さらなる情報はそちらで確認できます。
+例はhttps://0xdf.gitlab.io/2022/05/31/setuid-rabbithole.html#testing-on-jailから取得しています。さらなる情報はそちらで確認してください。
 
 #### ケース1: `system`との`setuid`の使用
 
@@ -89,9 +89,9 @@ uid=99(nobody) gid=99(nobody) groups=99(nobody) context=system_u:system_r:unconf
 - `ruid` と `euid` はそれぞれ 99 (nobody) と 1000 (frank) から始まります。
 - `setuid` は両方を 1000 に揃えます。
 - `system` は `/bin/bash -c id` を実行します。これは sh から bash へのシンボリックリンクによるものです。
-- `bash` は `-p` なしで `euid` を `ruid` に合わせるため、両方が 99 (nobody) になります。
+- `bash` は `-p` なしで実行され、`euid` を `ruid` に合わせるため、両方が 99 (nobody) になります。
 
-#### ケース 2: system と setreuid を使用する
+#### ケース 2: system とともに setreuid を使用する
 
 **C コード**:
 ```c
@@ -119,9 +119,9 @@ uid=1000(frank) gid=99(nobody) groups=99(nobody) context=system_u:system_r:uncon
 - `setreuid` は ruid と euid の両方を 1000 に設定します。
 - `system` は bash を呼び出し、ユーザー ID の等価性によりそれらを維持し、実質的に frank として動作します。
 
-#### ケース 3: execve と setuid の相互作用を使用する
+#### ケース 3: execve とともに setuid を使用する
 
-目的: setuid と execve の相互作用を探ること。
+目的: setuid と execve の相互作用を探る。
 ```bash
 #define _GNU_SOURCE
 #include <stdlib.h>
@@ -162,9 +162,9 @@ uid=99(nobody) gid=99(nobody) groups=99(nobody) context=system_u:system_r:unconf
 ```
 **分析:**
 
-- `euid` は `setuid` によって 1000 に設定されていますが、`bash` は `-p` がないため `ruid` (99) に `euid` をリセットします。
+- `euid`が`setuid`によって1000に設定されているにもかかわらず、`bash`は`-p`がないために`euid`を`ruid`（99）にリセットします。
 
-**C コード例 3 (bash -p を使用):**
+**Cコード例 3（bash -pを使用）:**
 ```bash
 #define _GNU_SOURCE
 #include <stdlib.h>
