@@ -15,10 +15,10 @@ Ein Prozess, der nicht unter root läuft, kann seine `euid` nur so ändern, dass
 
 ### Verständnis der set\*uid-Funktionen
 
-- **`setuid`**: Entgegen anfänglicher Annahmen ändert `setuid` hauptsächlich `euid` und nicht `ruid`. Insbesondere für privilegierte Prozesse richtet es `ruid`, `euid` und `suid` auf den angegebenen Benutzer, oft root, aus und festigt diese IDs aufgrund des übergeordneten `suid`. Detaillierte Informationen finden Sie in der [setuid man page](https://man7.org/linux/man-pages/man2/setuid.2.html).
-- **`setreuid`** und **`setresuid`**: Diese Funktionen ermöglichen die nuancierte Anpassung von `ruid`, `euid` und `suid`. Ihre Fähigkeiten hängen jedoch vom Privilegienniveau des Prozesses ab. Für Nicht-Root-Prozesse sind Änderungen auf die aktuellen Werte von `ruid`, `euid` und `suid` beschränkt. Im Gegensatz dazu können Root-Prozesse oder solche mit der `CAP_SETUID`-Berechtigung beliebige Werte für diese IDs zuweisen. Weitere Informationen finden Sie in der [setresuid man page](https://man7.org/linux/man-pages/man2/setresuid.2.html) und der [setreuid man page](https://man7.org/linux/man-pages/man2/setreuid.2.html).
+- **`setuid`**: Entgegen anfänglicher Annahmen ändert `setuid` hauptsächlich `euid` und nicht `ruid`. Insbesondere für privilegierte Prozesse richtet es `ruid`, `euid` und `suid` auf den angegebenen Benutzer, oft root, aus und festigt diese IDs aufgrund des übergeordneten `suid`. Detaillierte Informationen sind in der [setuid man page](https://man7.org/linux/man-pages/man2/setuid.2.html) zu finden.
+- **`setreuid`** und **`setresuid`**: Diese Funktionen ermöglichen die nuancierte Anpassung von `ruid`, `euid` und `suid`. Ihre Möglichkeiten hängen jedoch vom Privilegienniveau des Prozesses ab. Für Nicht-Root-Prozesse sind Änderungen auf die aktuellen Werte von `ruid`, `euid` und `suid` beschränkt. Im Gegensatz dazu können Root-Prozesse oder solche mit der `CAP_SETUID`-Berechtigung beliebige Werte für diese IDs zuweisen. Weitere Informationen sind in der [setresuid man page](https://man7.org/linux/man-pages/man2/setresuid.2.html) und der [setreuid man page](https://man7.org/linux/man-pages/man2/setreuid.2.html) zu finden.
 
-Diese Funktionen sind nicht als Sicherheitsmechanismus konzipiert, sondern um den beabsichtigten Betriebsablauf zu erleichtern, beispielsweise wenn ein Programm die Identität eines anderen Benutzers annimmt, indem es seine effektive Benutzer-ID ändert.
+Diese Funktionen sind nicht als Sicherheitsmechanismus konzipiert, sondern um den beabsichtigten Betriebsablauf zu erleichtern, wie wenn ein Programm die Identität eines anderen Benutzers annimmt, indem es seine effektive Benutzer-ID ändert.
 
 Es ist bemerkenswert, dass `setuid` zwar ein gängiges Mittel zur Erhöhung der Privilegien auf root sein kann (da es alle IDs auf root ausrichtet), das Unterscheiden zwischen diesen Funktionen entscheidend ist, um das Verhalten der Benutzer-IDs in unterschiedlichen Szenarien zu verstehen und zu manipulieren.
 
@@ -32,14 +32,14 @@ Es ist bemerkenswert, dass `setuid` zwar ein gängiges Mittel zur Erhöhung der 
 - `ruid`, `euid` und zusätzliche Gruppen-IDs bleiben unverändert.
 - `euid` kann nuancierte Änderungen aufweisen, wenn das neue Programm das SetUID-Bit gesetzt hat.
 - `suid` wird nach der Ausführung von `euid` aktualisiert.
-- **Dokumentation**: Detaillierte Informationen finden Sie auf der [`execve` man page](https://man7.org/linux/man-pages/man2/execve.2.html).
+- **Dokumentation**: Detaillierte Informationen sind auf der [`execve` man page](https://man7.org/linux/man-pages/man2/execve.2.html) zu finden.
 
 #### **`system` Funktion**
 
 - **Funktionalität**: Im Gegensatz zu `execve` erstellt `system` einen Kindprozess mit `fork` und führt einen Befehl innerhalb dieses Kindprozesses mit `execl` aus.
 - **Befehlsausführung**: Führt den Befehl über `sh` mit `execl("/bin/sh", "sh", "-c", command, (char *) NULL);` aus.
 - **Verhalten**: Da `execl` eine Form von `execve` ist, funktioniert es ähnlich, jedoch im Kontext eines neuen Kindprozesses.
-- **Dokumentation**: Weitere Einblicke können von der [`system` man page](https://man7.org/linux/man-pages/man3/system.3.html) gewonnen werden.
+- **Dokumentation**: Weitere Einblicke sind in der [`system` man page](https://man7.org/linux/man-pages/man3/system.3.html) zu erhalten.
 
 #### **Verhalten von `bash` und `sh` mit SUID**
 
@@ -47,10 +47,10 @@ Es ist bemerkenswert, dass `setuid` zwar ein gängiges Mittel zur Erhöhung der 
 - Hat eine `-p`-Option, die beeinflusst, wie `euid` und `ruid` behandelt werden.
 - Ohne `-p` setzt `bash` `euid` auf `ruid`, wenn sie anfangs unterschiedlich sind.
 - Mit `-p` wird das ursprüngliche `euid` beibehalten.
-- Weitere Details finden Sie auf der [`bash` man page](https://linux.die.net/man/1/bash).
+- Weitere Details sind auf der [`bash` man page](https://linux.die.net/man/1/bash) zu finden.
 - **`sh`**:
 - Verfügt nicht über einen Mechanismus ähnlich der `-p`-Option in `bash`.
-- Das Verhalten in Bezug auf Benutzer-IDs wird nicht ausdrücklich erwähnt, außer unter der `-i`-Option, die die Erhaltung der Gleichheit von `euid` und `ruid` betont.
+- Das Verhalten bezüglich der Benutzer-IDs wird nicht ausdrücklich erwähnt, außer unter der `-i`-Option, die die Erhaltung der Gleichheit von `euid` und `ruid` betont.
 - Zusätzliche Informationen sind auf der [`sh` man page](https://man7.org/linux/man-pages/man1/sh.1p.html) verfügbar.
 
 Diese Mechanismen, die sich in ihrem Betrieb unterscheiden, bieten eine vielseitige Palette von Optionen zur Ausführung und zum Übergang zwischen Programmen, mit spezifischen Nuancen in der Verwaltung und Erhaltung von Benutzer-IDs.
@@ -89,7 +89,7 @@ uid=99(nobody) gid=99(nobody) groups=99(nobody) context=system_u:system_r:unconf
 
 - `ruid` und `euid` beginnen als 99 (nobody) und 1000 (frank) respektive.
 - `setuid` richtet beide auf 1000 aus.
-- `system` führt `/bin/bash -c id` aus aufgrund des Symlinks von sh zu bash.
+- `system` führt `/bin/bash -c id` aus, aufgrund des Symlinks von sh zu bash.
 - `bash`, ohne `-p`, passt `euid` an `ruid` an, was dazu führt, dass beide 99 (nobody) sind.
 
 #### Fall 2: Verwendung von setreuid mit system
@@ -163,7 +163,7 @@ uid=99(nobody) gid=99(nobody) groups=99(nobody) context=system_u:system_r:unconf
 ```
 **Analyse:**
 
-- Obwohl `euid` durch `setuid` auf 1000 gesetzt ist, setzt `bash` `euid` aufgrund der Abwesenheit von `-p` auf `ruid` (99) zurück.
+- Obwohl `euid` durch `setuid` auf 1000 gesetzt ist, setzt `bash` `euid` auf `ruid` (99) zurück, da `-p` fehlt.
 
 **C Code Beispiel 3 (Verwendung von bash -p):**
 ```bash
