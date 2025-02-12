@@ -18,18 +18,18 @@ path.config: "/etc/logstash/conf.d/*.conf"
 path.config: "/usr/share/logstash/pipeline/1*.conf"
 pipeline.workers: 6
 ```
-Questo file rivela dove si trovano i file **.conf**, contenenti configurazioni dei pipeline. Quando si utilizza un **Elasticsearch output module**, è comune che i **pipelines** includano **Elasticsearch credentials**, che spesso possiedono ampi privilegi a causa della necessità di Logstash di scrivere dati in Elasticsearch. I caratteri jolly nei percorsi di configurazione consentono a Logstash di eseguire tutti i pipeline corrispondenti nella directory designata.
+Questo file rivela dove si trovano i file **.conf**, contenenti configurazioni dei pipeline. Quando si utilizza un **Elasticsearch output module**, è comune che i **pipelines** includano **Elasticsearch credentials**, che spesso possiedono ampi privilegi a causa della necessità di Logstash di scrivere dati su Elasticsearch. I caratteri jolly nei percorsi di configurazione consentono a Logstash di eseguire tutti i pipeline corrispondenti nella directory designata.
 
 ### Privilege Escalation via Writable Pipelines
 
 Per tentare l'escalation dei privilegi, prima identifica l'utente sotto il quale il servizio Logstash è in esecuzione, tipicamente l'utente **logstash**. Assicurati di soddisfare **uno** di questi criteri:
 
-- Possedere **accesso in scrittura** a un file **.conf** del pipeline **oppure**
+- Possedere **write access** a un file **.conf** del pipeline **o**
 - Il file **/etc/logstash/pipelines.yml** utilizza un carattere jolly e puoi scrivere nella cartella di destinazione
 
 Inoltre, **una** di queste condizioni deve essere soddisfatta:
 
-- Capacità di riavviare il servizio Logstash **oppure**
+- Capacità di riavviare il servizio Logstash **o**
 - Il file **/etc/logstash/logstash.yml** ha **config.reload.automatic: true** impostato
 
 Data la presenza di un carattere jolly nella configurazione, creare un file che corrisponde a questo carattere jolly consente l'esecuzione di comandi. Ad esempio:
