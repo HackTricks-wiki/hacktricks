@@ -37,10 +37,10 @@ jobs:
       
       - name: Update searchindex.js in repo
         run: |
+          git config --global --add safe.directory /__w/hacktricks/hacktricks
           git pull
           cp book/searchindex.js searchindex.js
           cp book/searchindex.json searchindex.json
-          git config --global --add safe.directory /__w/hacktricks/hacktricks
           git add searchindex.js searchindex.json
           git commit -m "Update searchindex"
           git push
