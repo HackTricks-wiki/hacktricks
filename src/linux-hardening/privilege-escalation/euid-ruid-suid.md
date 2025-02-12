@@ -214,4 +214,3 @@ uid=99(nobody) gid=99(nobody) euid=100
 {{#include ../../banners/hacktricks-training.md}}
 
 
-
