@@ -11,16 +11,16 @@
 
 #### Ważna uwaga
 
-Proces, który nie działa jako root, może zmienić swój `euid` tylko na wartość odpowiadającą bieżącemu `ruid`, `euid` lub `suid`.
+Proces, który nie działa jako root, może zmodyfikować swój `euid` tylko tak, aby odpowiadał bieżącemu `ruid`, `euid` lub `suid`.
 
 ### Zrozumienie funkcji set\*uid
 
-- **`setuid`**: W przeciwieństwie do początkowych założeń, `setuid` przede wszystkim modyfikuje `euid`, a nie `ruid`. Konkretnie, dla procesów z uprawnieniami, synchronizuje `ruid`, `euid` i `suid` z określonym użytkownikiem, często root, skutecznie utrwalając te identyfikatory z powodu dominującego `suid`. Szczegółowe informacje można znaleźć w [stronie podręcznika setuid](https://man7.org/linux/man-pages/man2/setuid.2.html).
+- **`setuid`**: W przeciwieństwie do początkowych założeń, `setuid` przede wszystkim modyfikuje `euid`, a nie `ruid`. Konkretnie, dla procesów z uprawnieniami, synchronizuje `ruid`, `euid` i `suid` z określonym użytkownikiem, często root, skutecznie utrwalając te identyfikatory dzięki dominującemu `suid`. Szczegółowe informacje można znaleźć w [stronie podręcznika setuid](https://man7.org/linux/man-pages/man2/setuid.2.html).
 - **`setreuid`** i **`setresuid`**: Te funkcje pozwalają na subtelną regulację `ruid`, `euid` i `suid`. Jednak ich możliwości są uzależnione od poziomu uprawnień procesu. Dla procesów niebędących root, modyfikacje są ograniczone do bieżących wartości `ruid`, `euid` i `suid`. W przeciwieństwie do tego, procesy root lub te z uprawnieniem `CAP_SETUID` mogą przypisywać dowolne wartości tym identyfikatorom. Więcej informacji można znaleźć na [stronie podręcznika setresuid](https://man7.org/linux/man-pages/man2/setresuid.2.html) oraz [stronie podręcznika setreuid](https://man7.org/linux/man-pages/man2/setreuid.2.html).
 
-Te funkcjonalności nie są zaprojektowane jako mechanizm zabezpieczający, ale mają na celu ułatwienie zamierzonego przepływu operacyjnego, na przykład gdy program przyjmuje tożsamość innego użytkownika, zmieniając swój efektywny identyfikator użytkownika.
+Funkcjonalności te nie są zaprojektowane jako mechanizm zabezpieczający, lecz mają na celu ułatwienie zamierzonego przepływu operacyjnego, na przykład, gdy program przyjmuje tożsamość innego użytkownika, zmieniając swój efektywny identyfikator użytkownika.
 
-Warto zauważyć, że podczas gdy `setuid` może być powszechnie stosowany do podnoszenia uprawnień do roota (ponieważ synchronizuje wszystkie identyfikatory z root), rozróżnienie między tymi funkcjami jest kluczowe dla zrozumienia i manipulowania zachowaniami identyfikatorów użytkowników w różnych scenariuszach.
+Warto zauważyć, że chociaż `setuid` może być powszechnie stosowane do podnoszenia uprawnień do roota (ponieważ synchronizuje wszystkie identyfikatory z root), rozróżnienie między tymi funkcjami jest kluczowe dla zrozumienia i manipulowania zachowaniami identyfikatorów użytkowników w różnych scenariuszach.
 
 ### Mechanizmy wykonywania programów w Linuxie
 
@@ -49,7 +49,7 @@ Warto zauważyć, że podczas gdy `setuid` może być powszechnie stosowany do p
 - Z `-p`, początkowy `euid` jest zachowywany.
 - Więcej szczegółów można znaleźć na [stronie podręcznika `bash`](https://linux.die.net/man/1/bash).
 - **`sh`**:
-- Nie ma mechanizmu podobnego do `-p` w `bash`.
+- Nie posiada mechanizmu podobnego do `-p` w `bash`.
 - Zachowanie dotyczące identyfikatorów użytkowników nie jest wyraźnie wspomniane, z wyjątkiem opcji `-i`, podkreślającej zachowanie równości `euid` i `ruid`.
 - Dodatkowe informacje są dostępne na [stronie podręcznika `sh`](https://man7.org/linux/man-pages/man1/sh.1p.html).
 
