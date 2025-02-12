@@ -2,11 +2,11 @@
 
 ## Logstash
 
-Logstash 用于 **收集、转换和分发日志**，通过一种称为 **管道** 的系统。这些管道由 **输入**、**过滤** 和 **输出** 阶段组成。当 Logstash 在被攻陷的机器上运行时，会出现一个有趣的方面。
+Logstash 用于 **收集、转换和分发日志**，通过一个称为 **管道** 的系统。这些管道由 **输入**、**过滤** 和 **输出** 阶段组成。当 Logstash 在被攻陷的机器上运行时，会出现一个有趣的方面。
 
 ### Pipeline Configuration
 
-管道配置在文件 **/etc/logstash/pipelines.yml** 中，该文件列出了管道配置的位置：
+管道在文件 **/etc/logstash/pipelines.yml** 中配置，该文件列出了管道配置的位置：
 ```yaml
 # Define your pipelines here. Multiple pipelines can be defined.
 # For details on multiple pipelines, refer to the documentation:
