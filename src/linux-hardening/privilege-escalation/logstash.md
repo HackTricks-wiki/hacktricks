@@ -18,13 +18,13 @@ path.config: "/etc/logstash/conf.d/*.conf"
 path.config: "/usr/share/logstash/pipeline/1*.conf"
 pipeline.workers: 6
 ```
-Este archivo revela dónde se encuentran los archivos **.conf**, que contienen configuraciones de pipeline. Al emplear un **módulo de salida de Elasticsearch**, es común que los **pipelines** incluyan **credenciales de Elasticsearch**, que a menudo poseen amplios privilegios debido a la necesidad de Logstash de escribir datos en Elasticsearch. Los comodines en las rutas de configuración permiten a Logstash ejecutar todos los pipelines que coincidan en el directorio designado.
+Este archivo revela dónde se encuentran los archivos **.conf**, que contienen configuraciones de pipeline. Al emplear un **módulo de salida de Elasticsearch**, es común que los **pipelines** incluyan **credenciales de Elasticsearch**, que a menudo poseen amplios privilegios debido a la necesidad de Logstash de escribir datos en Elasticsearch. Los comodines en las rutas de configuración permiten que Logstash ejecute todos los pipelines coincidentes en el directorio designado.
 
 ### Escalación de Privilegios a través de Pipelines Escribibles
 
 Para intentar la escalación de privilegios, primero identifica el usuario bajo el cual se está ejecutando el servicio de Logstash, típicamente el usuario **logstash**. Asegúrate de cumplir **uno** de estos criterios:
 
-- Poseer **acceso de escritura** a un archivo de pipeline **.conf** **o**
+- Poseer **acceso de escritura** a un archivo **.conf** de pipeline **o**
 - El archivo **/etc/logstash/pipelines.yml** utiliza un comodín, y puedes escribir en la carpeta de destino
 
 Además, **una** de estas condiciones debe cumplirse:
@@ -50,7 +50,7 @@ codec => rubydebug
 ```
 Aquí, **interval** determina la frecuencia de ejecución en segundos. En el ejemplo dado, el comando **whoami** se ejecuta cada 120 segundos, con su salida dirigida a **/tmp/output.log**.
 
-Con **config.reload.automatic: true** en **/etc/logstash/logstash.yml**, Logstash detectará y aplicará automáticamente nuevas configuraciones de pipeline o modificaciones sin necesidad de reiniciar. Si no hay un comodín, aún se pueden hacer modificaciones a las configuraciones existentes, pero se aconseja tener precaución para evitar interrupciones.
+Con **config.reload.automatic: true** en **/etc/logstash/logstash.yml**, Logstash detectará y aplicará automáticamente nuevas o modificadas configuraciones de pipeline sin necesidad de reiniciar. Si no hay un comodín, aún se pueden hacer modificaciones a las configuraciones existentes, pero se aconseja tener precaución para evitar interrupciones.
 
 ## References
 
