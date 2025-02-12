@@ -2,7 +2,7 @@
 
 ## Logstash
 
-Logstash é usado para **coletar, transformar e despachar logs** através de um sistema conhecido como **pipelines**. Esses pipelines são compostos por estágios de **entrada**, **filtro** e **saída**. Um aspecto interessante surge quando o Logstash opera em uma máquina comprometida.
+Logstash é usado para **coletar, transformar e enviar logs** através de um sistema conhecido como **pipelines**. Esses pipelines são compostos por estágios de **entrada**, **filtro** e **saída**. Um aspecto interessante surge quando o Logstash opera em uma máquina comprometida.
 
 ### Configuração do Pipeline
 
