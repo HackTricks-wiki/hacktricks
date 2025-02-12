@@ -24,7 +24,7 @@ Ce fichier révèle où se trouvent les fichiers **.conf**, contenant des config
 
 Pour tenter une escalade de privilèges, identifiez d'abord l'utilisateur sous lequel le service Logstash s'exécute, généralement l'utilisateur **logstash**. Assurez-vous de répondre à **un** de ces critères :
 
-- Posséder un **accès en écriture** à un fichier **.conf** de pipeline **ou**
+- Posséder un **accès en écriture** à un fichier de pipeline **.conf** **ou**
 - Le fichier **/etc/logstash/pipelines.yml** utilise un caractère générique, et vous pouvez écrire dans le dossier cible
 
 De plus, **une** de ces conditions doit être remplie :
@@ -48,10 +48,10 @@ codec => rubydebug
 }
 }
 ```
-Ici, **interval** détermine la fréquence d'exécution en secondes. Dans l'exemple donné, la commande **whoami** s'exécute toutes les 120 secondes, avec sa sortie dirigée vers **/tmp/output.log**.
+Ici, **intervalle** détermine la fréquence d'exécution en secondes. Dans l'exemple donné, la commande **whoami** s'exécute toutes les 120 secondes, avec sa sortie dirigée vers **/tmp/output.log**.
 
-Avec **config.reload.automatic: true** dans **/etc/logstash/logstash.yml**, Logstash détectera et appliquera automatiquement les nouvelles configurations de pipeline ou les modifications sans nécessiter de redémarrage. S'il n'y a pas de caractère générique, des modifications peuvent toujours être apportées aux configurations existantes, mais il est conseillé de faire preuve de prudence pour éviter les interruptions.
+Avec **config.reload.automatic: true** dans **/etc/logstash/logstash.yml**, Logstash détectera et appliquera automatiquement les nouvelles configurations de pipeline ou les modifications sans nécessiter un redémarrage. S'il n'y a pas de caractère générique, des modifications peuvent toujours être apportées aux configurations existantes, mais il est conseillé de faire preuve de prudence pour éviter les interruptions.
 
-## References
+## Références
 
 {{#include ../../banners/hacktricks-training.md}}
