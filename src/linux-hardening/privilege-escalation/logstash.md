@@ -18,7 +18,7 @@ path.config: "/etc/logstash/conf.d/*.conf"
 path.config: "/usr/share/logstash/pipeline/1*.conf"
 pipeline.workers: 6
 ```
-Ten plik ujawnia, gdzie znajdują się pliki **.conf**, zawierające konfiguracje potoków. Przy użyciu **modułu wyjściowego Elasticsearch** powszechnie zdarza się, że **potoki** zawierają **poświadczenia Elasticsearch**, które często mają szerokie uprawnienia z powodu potrzeby Logstasha do zapisywania danych w Elasticsearch. Znaki wieloznaczne w ścieżkach konfiguracji pozwalają Logstashowi na wykonanie wszystkich pasujących potoków w wyznaczonym katalogu.
+Ten plik ujawnia, gdzie znajdują się pliki **.conf**, zawierające konfiguracje potoków. Przy użyciu **modułu wyjściowego Elasticsearch**, powszechnie zdarza się, że **potoki** zawierają **poświadczenia Elasticsearch**, które często mają szerokie uprawnienia z powodu potrzeby Logstasha do zapisywania danych w Elasticsearch. Znaki wieloznaczne w ścieżkach konfiguracji pozwalają Logstashowi na wykonanie wszystkich pasujących potoków w wyznaczonym katalogu.
 
 ### Eskalacja uprawnień za pomocą zapisywalnych potoków
 
