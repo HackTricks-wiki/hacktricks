@@ -6,8 +6,8 @@
 ### Gebruiker Identifikasie Veranderlikes
 
 - **`ruid`**: Die **werklike gebruiker ID** dui die gebruiker aan wat die proses begin het.
-- **`euid`**: Bekend as die **effektiewe gebruiker ID**, dit verteenwoordig die gebruiker identiteit wat deur die stelsel gebruik word om proses bevoegdhede te bepaal. Gewoonlik spieël `euid` `ruid`, behalwe in gevalle soos 'n SetUID-binary uitvoering, waar `euid` die identiteit van die lêer eienaar aanneem, wat spesifieke operasionele toestemmings toeken.
-- **`suid`**: Hierdie **gespaarde gebruiker ID** is belangrik wanneer 'n hoë-bevoegdheid proses (gewoonlik wat as root loop) tydelik sy bevoegdhede moet prysgee om sekere take uit te voer, net om later sy aanvanklike verhoogde status te herwin.
+- **`euid`**: Bekend as die **effektiewe gebruiker ID**, dit verteenwoordig die gebruiker identiteit wat deur die stelsel gebruik word om proses regte te bepaal. Gewoonlik spieël `euid` `ruid`, behalwe in gevalle soos 'n SetUID binêre uitvoering, waar `euid` die lêer eienaar se identiteit aanneem, wat spesifieke operasionele toestemmings toeken.
+- **`suid`**: Hierdie **bespaarde gebruiker ID** is belangrik wanneer 'n hoë-regte proses (gewoonlik wat as root loop) tydelik sy regte moet prysgee om sekere take uit te voer, net om later sy aanvanklike verhoogde status te herwin.
 
 #### Belangrike Nota
 
@@ -15,16 +15,16 @@
 
 ### Verstaan set\*uid Funksies
 
-- **`setuid`**: Teen die aanvanklike aannames, `setuid` pas hoofsaaklik `euid` aan eerder as `ruid`. Spesifiek, vir bevoegde prosesse, dit belyn `ruid`, `euid`, en `suid` met die gespesifiseerde gebruiker, dikwels root, wat effektief hierdie ID's versterk as gevolg van die oorheersende `suid`. Gedetailleerde insigte kan gevind word in die [setuid man bladsy](https://man7.org/linux/man-pages/man2/setuid.2.html).
-- **`setreuid`** en **`setresuid`**: Hierdie funksies stel in staat tot die nuanses aanpassing van `ruid`, `euid`, en `suid`. Hulle vermoëns is egter afhanklik van die proses se bevoegdheidsvlak. Vir nie-root prosesse is aanpassings beperk tot die huidige waardes van `ruid`, `euid`, en `suid`. In teenstelling, root prosesse of dié met `CAP_SETUID` vermoë kan arbitrêre waardes aan hierdie ID's toeken. Meer inligting kan verkry word van die [setresuid man bladsy](https://man7.org/linux/man-pages/man2/setresuid.2.html) en die [setreuid man bladsy](https://man7.org/linux/man-pages/man2/setreuid.2.html).
+- **`setuid`**: Teen die aanvanklike aannames, verander `setuid` hoofsaaklik `euid` eerder as `ruid`. Spesifiek, vir bevoorregte prosesse, pas dit `ruid`, `euid`, en `suid` aan met die gespesifiseerde gebruiker, dikwels root, wat hierdie ID's effektief versterk as gevolg van die oorheersende `suid`. Gedetailleerde insigte kan gevind word in die [setuid man bladsy](https://man7.org/linux/man-pages/man2/setuid.2.html).
+- **`setreuid`** en **`setresuid`**: Hierdie funksies stel in staat tot die nuanses aanpassing van `ruid`, `euid`, en `suid`. Hulle vermoëns is egter afhanklik van die proses se regte vlak. Vir nie-root prosesse is aanpassings beperk tot die huidige waardes van `ruid`, `euid`, en `suid`. In teenstelling, root prosesse of dié met `CAP_SETUID` vermoë kan arbitrêre waardes aan hierdie ID's toeken. Meer inligting kan verkry word van die [setresuid man bladsy](https://man7.org/linux/man-pages/man2/setresuid.2.html) en die [setreuid man bladsy](https://man7.org/linux/man-pages/man2/setreuid.2.html).
 
 Hierdie funksionaliteite is nie ontwerp as 'n sekuriteitsmeganisme nie, maar om die beoogde operasionele vloei te fasiliteer, soos wanneer 'n program 'n ander gebruiker se identiteit aanneem deur sy effektiewe gebruiker ID te verander.
 
-Opmerklik, terwyl `setuid` 'n algemene keuse mag wees vir bevoegdheid verhoging na root (aangesien dit al die ID's na root belyn), is dit belangrik om te onderskei tussen hierdie funksies om gebruiker ID gedrag in verskillende scenario's te verstaan en te manipuleer.
+Opmerklik, terwyl `setuid` 'n algemene keuse mag wees vir regte verhoging na root (aangesien dit al die ID's na root aanpas), is dit belangrik om te onderskei tussen hierdie funksies om gebruikers ID gedrag in verskillende scenario's te verstaan en te manipuleer.
 
-### Program Uitvoering Meganismes in Linux
+### Program Uitvoeringsmeganismes in Linux
 
-#### **`execve` Stelseloproep**
+#### **`execve` Stelselsoproep**
 
 - **Funksionaliteit**: `execve` begin 'n program, bepaal deur die eerste argument. Dit neem twee array argumente, `argv` vir argumente en `envp` vir die omgewing.
 - **Gedrag**: Dit behou die geheue ruimte van die oproeper maar verfris die stapel, hoop, en data segmente. Die program se kode word vervang deur die nuwe program.
@@ -50,10 +50,10 @@ Opmerklik, terwyl `setuid` 'n algemene keuse mag wees vir bevoegdheid verhoging 
 - Meer besonderhede kan gevind word op die [`bash` man bladsy](https://linux.die.net/man/1/bash).
 - **`sh`**:
 - Besit nie 'n meganisme soortgelyk aan `-p` in `bash` nie.
-- Die gedrag rakende gebruiker ID's word nie eksplisiet genoem nie, behalwe onder die `-i` opsie, wat die bewaring van `euid` en `ruid` gelykheid beklemtoon.
+- Die gedrag rakende gebruikers ID's word nie eksplisiet genoem nie, behalwe onder die `-i` opsie, wat die bewaring van `euid` en `ruid` gelykheid beklemtoon.
 - Bykomende inligting is beskikbaar op die [`sh` man bladsy](https://man7.org/linux/man-pages/man1/sh.1p.html).
 
-Hierdie meganismes, wat in hul werking uniek is, bied 'n veelsydige reeks opsies vir die uitvoering en oorgang tussen programme, met spesifieke nuanses in hoe gebruiker ID's bestuur en bewaar word.
+Hierdie meganismes, wat in hul werking uniek is, bied 'n veelsydige reeks opsies vir die uitvoering en oorgang tussen programme, met spesifieke nuanses in hoe gebruikers ID's bestuur en bewaar word.
 
 ### Toetsing van Gebruiker ID Gedrag in Uitvoerings
 
@@ -75,7 +75,7 @@ system("id");
 return 0;
 }
 ```
-**Samestelling en Toestemmings:**
+**Kompilering en Toestemmings:**
 ```bash
 oxdf@hacky$ gcc a.c -o /mnt/nfsshare/a;
 oxdf@hacky$ chmod 4755 /mnt/nfsshare/a
@@ -106,7 +106,7 @@ system("id");
 return 0;
 }
 ```
-**Samevoeging en Toestemmings:**
+**Kompilering en Toestemmings:**
 ```bash
 oxdf@hacky$ gcc b.c -o /mnt/nfsshare/b; chmod 4755 /mnt/nfsshare/b
 ```
@@ -143,7 +143,7 @@ uid=99(nobody) gid=99(nobody) euid=1000(frank) groups=99(nobody) context=system_
 
 - `ruid` bly 99, maar euid is op 1000 gestel, in ooreenstemming met setuid se effek.
 
-**C Kode Voorbeeld 2 (Bash Aanroep):**
+**C Kode Voorbeeld 2 (Bel Bash):**
 ```bash
 #define _GNU_SOURCE
 #include <stdlib.h>
