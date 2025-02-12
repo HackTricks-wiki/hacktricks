@@ -2,7 +2,7 @@
 
 ## Logstash
 
-Logstash é usado para **coletar, transformar e enviar logs** através de um sistema conhecido como **pipelines**. Esses pipelines são compostos por estágios de **entrada**, **filtro** e **saída**. Um aspecto interessante surge quando o Logstash opera em uma máquina comprometida.
+Logstash é usado para **coletar, transformar e despachar logs** através de um sistema conhecido como **pipelines**. Esses pipelines são compostos por estágios de **entrada**, **filtro** e **saída**. Um aspecto interessante surge quando o Logstash opera em uma máquina comprometida.
 
 ### Configuração do Pipeline
 
@@ -18,13 +18,13 @@ path.config: "/etc/logstash/conf.d/*.conf"
 path.config: "/usr/share/logstash/pipeline/1*.conf"
 pipeline.workers: 6
 ```
-Este arquivo revela onde os arquivos **.conf**, contendo configurações de pipeline, estão localizados. Ao empregar um **módulo de saída Elasticsearch**, é comum que os **pipelines** incluam **credenciais do Elasticsearch**, que frequentemente possuem privilégios extensos devido à necessidade do Logstash de gravar dados no Elasticsearch. Caracteres curinga em caminhos de configuração permitem que o Logstash execute todos os pipelines correspondentes no diretório designado.
+Este arquivo revela onde os arquivos **.conf**, contendo configurações de pipeline, estão localizados. Ao empregar um **módulo de saída Elasticsearch**, é comum que os **pipelines** incluam **credenciais do Elasticsearch**, que frequentemente possuem extensos privilégios devido à necessidade do Logstash de gravar dados no Elasticsearch. Caracteres curinga em caminhos de configuração permitem que o Logstash execute todos os pipelines correspondentes no diretório designado.
 
 ### Escalada de Privilégios via Pipelines Graváveis
 
 Para tentar a escalada de privilégios, primeiro identifique o usuário sob o qual o serviço Logstash está sendo executado, tipicamente o usuário **logstash**. Certifique-se de atender a **um** desses critérios:
 
-- Possuir **acesso de gravação** a um arquivo **.conf** de pipeline **ou**
+- Possuir **acesso de gravação** a um arquivo de pipeline **.conf** **ou**
 - O arquivo **/etc/logstash/pipelines.yml** usa um curinga, e você pode gravar na pasta de destino
 
 Além disso, **uma** dessas condições deve ser cumprida:
