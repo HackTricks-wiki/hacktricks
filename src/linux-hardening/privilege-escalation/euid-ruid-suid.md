@@ -6,17 +6,17 @@
 ### Variabili di Identificazione Utente
 
 - **`ruid`**: L'**ID utente reale** denota l'utente che ha avviato il processo.
-- **`euid`**: Conosciuto come l'**ID utente efficace**, rappresenta l'identità dell'utente utilizzata dal sistema per determinare i privilegi del processo. Generalmente, `euid` rispecchia `ruid`, tranne in casi come l'esecuzione di un binario SetUID, dove `euid` assume l'identità del proprietario del file, concedendo così specifici permessi operativi.
+- **`euid`**: Conosciuto come l'**ID utente efficace**, rappresenta l'identità utente utilizzata dal sistema per determinare i privilegi del processo. Generalmente, `euid` rispecchia `ruid`, tranne in casi come l'esecuzione di un binario SetUID, dove `euid` assume l'identità del proprietario del file, concedendo così specifici permessi operativi.
 - **`suid`**: Questo **ID utente salvato** è fondamentale quando un processo ad alto privilegio (tipicamente in esecuzione come root) deve temporaneamente rinunciare ai propri privilegi per eseguire determinate operazioni, per poi riprendere successivamente il proprio stato elevato iniziale.
 
 #### Nota Importante
 
-Un processo che non opera come root può modificare il proprio `euid` solo per farlo corrispondere all'attuale `ruid`, `euid` o `suid`.
+Un processo che non opera sotto root può modificare il proprio `euid` solo per farlo corrispondere all'attuale `ruid`, `euid` o `suid`.
 
 ### Comprendere le Funzioni set\*uid
 
-- **`setuid`**: Contrariamente alle assunzioni iniziali, `setuid` modifica principalmente `euid` piuttosto che `ruid`. Specificamente, per i processi privilegiati, allinea `ruid`, `euid` e `suid` con l'utente specificato, spesso root, consolidando effettivamente questi ID a causa del `suid` sovrascrivente. Ulteriori dettagli possono essere trovati nella [pagina man di setuid](https://man7.org/linux/man-pages/man2/setuid.2.html).
-- **`setreuid`** e **`setresuid`**: Queste funzioni consentono un aggiustamento sfumato di `ruid`, `euid` e `suid`. Tuttavia, le loro capacità dipendono dal livello di privilegio del processo. Per i processi non root, le modifiche sono limitate ai valori attuali di `ruid`, `euid` e `suid`. Al contrario, i processi root o quelli con la capacità `CAP_SETUID` possono assegnare valori arbitrari a questi ID. Maggiori informazioni possono essere ottenute dalla [pagina man di setresuid](https://man7.org/linux/man-pages/man2/setresuid.2.html) e dalla [pagina man di setreuid](https://man7.org/linux/man-pages/man2/setreuid.2.html).
+- **`setuid`**: Contrariamente alle assunzioni iniziali, `setuid` modifica principalmente `euid` piuttosto che `ruid`. Specificamente, per i processi privilegiati, allinea `ruid`, `euid` e `suid` con l'utente specificato, spesso root, solidificando effettivamente questi ID a causa del `suid` sovrascrivente. Informazioni dettagliate possono essere trovate nella [pagina man di setuid](https://man7.org/linux/man-pages/man2/setuid.2.html).
+- **`setreuid`** e **`setresuid`**: Queste funzioni consentono l'aggiustamento sfumato di `ruid`, `euid` e `suid`. Tuttavia, le loro capacità dipendono dal livello di privilegio del processo. Per i processi non root, le modifiche sono limitate ai valori attuali di `ruid`, `euid` e `suid`. Al contrario, i processi root o quelli con la capacità `CAP_SETUID` possono assegnare valori arbitrari a questi ID. Maggiori informazioni possono essere ottenute dalla [pagina man di setresuid](https://man7.org/linux/man-pages/man2/setresuid.2.html) e dalla [pagina man di setreuid](https://man7.org/linux/man-pages/man2/setreuid.2.html).
 
 Queste funzionalità non sono progettate come un meccanismo di sicurezza, ma per facilitare il flusso operativo previsto, come quando un programma adotta l'identità di un altro utente modificando il proprio ID utente efficace.
 
@@ -32,14 +32,14 @@ Queste funzionalità non sono progettate come un meccanismo di sicurezza, ma per
 - `ruid`, `euid` e gli ID di gruppo supplementari rimangono invariati.
 - `euid` potrebbe subire modifiche sfumate se il nuovo programma ha impostato il bit SetUID.
 - `suid` viene aggiornato da `euid` dopo l'esecuzione.
-- **Documentazione**: Informazioni dettagliate possono essere trovate nella [pagina man di `execve`](https://man7.org/linux/man-pages/man2/execve.2.html).
+- **Documentazione**: Informazioni dettagliate possono essere trovate nella [`pagina man di execve`](https://man7.org/linux/man-pages/man2/execve.2.html).
 
 #### **Funzione `system`**
 
 - **Funzionalità**: A differenza di `execve`, `system` crea un processo figlio utilizzando `fork` ed esegue un comando all'interno di quel processo figlio utilizzando `execl`.
 - **Esecuzione del Comando**: Esegue il comando tramite `sh` con `execl("/bin/sh", "sh", "-c", command, (char *) NULL);`.
 - **Comportamento**: Poiché `execl` è una forma di `execve`, opera in modo simile ma nel contesto di un nuovo processo figlio.
-- **Documentazione**: Ulteriori approfondimenti possono essere ottenuti dalla [pagina man di `system`](https://man7.org/linux/man-pages/man3/system.3.html).
+- **Documentazione**: Ulteriori informazioni possono essere ottenute dalla [`pagina man di system`](https://man7.org/linux/man-pages/man3/system.3.html).
 
 #### **Comportamento di `bash` e `sh` con SUID**
 
@@ -47,11 +47,11 @@ Queste funzionalità non sono progettate come un meccanismo di sicurezza, ma per
 - Ha un'opzione `-p` che influisce su come vengono trattati `euid` e `ruid`.
 - Senza `-p`, `bash` imposta `euid` su `ruid` se inizialmente differiscono.
 - Con `-p`, l'iniziale `euid` viene preservato.
-- Maggiori dettagli possono essere trovati nella [pagina man di `bash`](https://linux.die.net/man/1/bash).
+- Maggiori dettagli possono essere trovati nella [`pagina man di bash`](https://linux.die.net/man/1/bash).
 - **`sh`**:
 - Non possiede un meccanismo simile a `-p` in `bash`.
 - Il comportamento riguardante gli ID utente non è esplicitamente menzionato, tranne che sotto l'opzione `-i`, enfatizzando la preservazione dell'uguaglianza tra `euid` e `ruid`.
-- Ulteriori informazioni sono disponibili sulla [pagina man di `sh`](https://man7.org/linux/man-pages/man1/sh.1p.html).
+- Ulteriori informazioni sono disponibili sulla [`pagina man di sh`](https://man7.org/linux/man-pages/man1/sh.1p.html).
 
 Questi meccanismi, distinti nel loro funzionamento, offrono una gamma versatile di opzioni per eseguire e passare tra programmi, con specifiche sfumature nel modo in cui gli ID utente vengono gestiti e preservati.
 
@@ -163,7 +163,7 @@ uid=99(nobody) gid=99(nobody) groups=99(nobody) context=system_u:system_r:unconf
 ```
 **Analisi:**
 
-- Anche se `euid` è impostato a 1000 da `setuid`, `bash` ripristina `euid` a `ruid` (99) a causa dell'assenza di `-p`.
+- Anche se `euid` è impostato su 1000 da `setuid`, `bash` ripristina `euid` a `ruid` (99) a causa dell'assenza di `-p`.
 
 **Esempio di codice C 3 (Utilizzando bash -p):**
 ```bash
