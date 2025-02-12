@@ -18,9 +18,9 @@ Un proceso que no opera bajo root solo puede modificar su `euid` para que coinci
 - **`setuid`**: Contrario a las suposiciones iniciales, `setuid` modifica principalmente `euid` en lugar de `ruid`. Específicamente, para procesos privilegiados, alinea `ruid`, `euid` y `suid` con el usuario especificado, a menudo root, solidificando efectivamente estos IDs debido al `suid` que prevalece. Se pueden encontrar detalles en la [página del manual de setuid](https://man7.org/linux/man-pages/man2/setuid.2.html).
 - **`setreuid`** y **`setresuid`**: Estas funciones permiten el ajuste matizado de `ruid`, `euid` y `suid`. Sin embargo, sus capacidades dependen del nivel de privilegio del proceso. Para procesos que no son root, las modificaciones están restringidas a los valores actuales de `ruid`, `euid` y `suid`. En contraste, los procesos root o aquellos con la capacidad `CAP_SETUID` pueden asignar valores arbitrarios a estos IDs. Se puede obtener más información de la [página del manual de setresuid](https://man7.org/linux/man-pages/man2/setresuid.2.html) y de la [página del manual de setreuid](https://man7.org/linux/man-pages/man2/setreuid.2.html).
 
-Estas funcionalidades están diseñadas no como un mecanismo de seguridad, sino para facilitar el flujo operativo previsto, como cuando un programa adopta la identidad de otro usuario al alterar su ID de usuario efectivo.
+Estas funcionalidades no están diseñadas como un mecanismo de seguridad, sino para facilitar el flujo operativo previsto, como cuando un programa adopta la identidad de otro usuario al alterar su ID de usuario efectivo.
 
-Notablemente, aunque `setuid` puede ser una opción común para la elevación de privilegios a root (ya que alinea todos los IDs a root), diferenciar entre estas funciones es crucial para entender y manipular los comportamientos de los IDs de usuario en diferentes escenarios.
+Notablemente, aunque `setuid` puede ser un recurso común para la elevación de privilegios a root (ya que alinea todos los IDs a root), diferenciar entre estas funciones es crucial para entender y manipular los comportamientos del ID de usuario en diferentes escenarios.
 
 ### Mecanismos de Ejecución de Programas en Linux
 
@@ -29,7 +29,7 @@ Notablemente, aunque `setuid` puede ser una opción común para la elevación de
 - **Funcionalidad**: `execve` inicia un programa, determinado por el primer argumento. Toma dos argumentos de matriz, `argv` para argumentos y `envp` para el entorno.
 - **Comportamiento**: Retiene el espacio de memoria del llamador pero actualiza la pila, el montón y los segmentos de datos. El código del programa es reemplazado por el nuevo programa.
 - **Preservación del ID de Usuario**:
-- `ruid`, `euid` y los IDs de grupo suplementarios permanecen sin cambios.
+- `ruid`, `euid` y los IDs de grupo suplementarios permanecen inalterados.
 - `euid` puede tener cambios matizados si el nuevo programa tiene el bit SetUID establecido.
 - `suid` se actualiza desde `euid` después de la ejecución.
 - **Documentación**: Se puede encontrar información detallada en la [página del manual de `execve`](https://man7.org/linux/man-pages/man2/execve.2.html).
@@ -117,7 +117,7 @@ uid=1000(frank) gid=99(nobody) groups=99(nobody) context=system_u:system_r:uncon
 ```
 **Análisis:**
 
-- `setreuid` establece tanto ruid como euid en 1000.
+- `setreuid` establece tanto ruid como euid a 1000.
 - `system` invoca bash, que mantiene los IDs de usuario debido a su igualdad, operando efectivamente como frank.
 
 #### Caso 3: Usando setuid con execve
@@ -163,7 +163,7 @@ uid=99(nobody) gid=99(nobody) groups=99(nobody) context=system_u:system_r:unconf
 ```
 **Análisis:**
 
-- Aunque `euid` está configurado a 1000 por `setuid`, `bash` restablece `euid` a `ruid` (99) debido a la ausencia de `-p`.
+- Aunque `euid` se establece en 1000 por `setuid`, `bash` restablece `euid` a `ruid` (99) debido a la ausencia de `-p`.
 
 **Ejemplo de código C 3 (Usando bash -p):**
 ```bash
