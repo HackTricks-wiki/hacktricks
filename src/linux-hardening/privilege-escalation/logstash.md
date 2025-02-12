@@ -22,7 +22,7 @@ Hierdie lêer onthul waar die **.conf** lêers, wat pyplyn konfigurasies bevat, 
 
 ### Bevoegdheid Escalatie via Skryfbare Pyplyne
 
-Om 'n poging tot bevoegdheidsekalasie te doen, identifiseer eers die gebruiker waaronder die Logstash diens loop, tipies die **logstash** gebruiker. Verseker dat jy aan **een** van hierdie kriteria voldoen:
+Om te probeer om bevoegdheid te eskaleer, identifiseer eers die gebruiker waaronder die Logstash diens loop, tipies die **logstash** gebruiker. Verseker dat jy aan **een** van hierdie kriteria voldoen:
 
 - Besit **skrywe toegang** tot 'n pyplyn **.conf** lêer **of**
 - Die **/etc/logstash/pipelines.yml** lêer gebruik 'n wildcard, en jy kan na die teiken gids skryf
@@ -32,7 +32,7 @@ Boonop moet **een** van hierdie toestande vervul word:
 - Vermoë om die Logstash diens te herbegin **of**
 - Die **/etc/logstash/logstash.yml** lêer het **config.reload.automatic: true** ingestel
 
-Gegewe 'n wildcard in die konfigurasie, laat die skep van 'n lêer wat met hierdie wildcard ooreenstem toe dat opdragte uitgevoer word. Byvoorbeeld:
+Gegewe 'n wildcard in die konfigurasie, laat die skep van 'n lêer wat met hierdie wildcard ooreenstem toe dat opdragte uitgevoer kan word. Byvoorbeeld:
 ```bash
 input {
 exec {
