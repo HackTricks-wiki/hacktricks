@@ -2,11 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
+
 ### Variables d'Identification de l'Utilisateur
 
 - **`ruid`** : L'**ID utilisateur réel** désigne l'utilisateur qui a initié le processus.
 - **`euid`** : Connu sous le nom d'**ID utilisateur effectif**, il représente l'identité utilisateur utilisée par le système pour déterminer les privilèges du processus. En général, `euid` reflète `ruid`, sauf dans des cas comme l'exécution d'un binaire SetUID, où `euid` prend l'identité du propriétaire du fichier, accordant ainsi des permissions opérationnelles spécifiques.
-- **`suid`** : Cet **ID utilisateur sauvegardé** est essentiel lorsqu'un processus à privilèges élevés (généralement exécuté en tant que root) doit temporairement renoncer à ses privilèges pour effectuer certaines tâches, avant de retrouver ultérieurement son statut élevé initial.
+- **`suid`** : Cet **ID utilisateur sauvegardé** est essentiel lorsqu'un processus à privilèges élevés (généralement exécuté en tant que root) doit temporairement renoncer à ses privilèges pour effectuer certaines tâches, avant de retrouver son statut élevé initial.
 
 #### Remarque Importante
 
@@ -14,10 +15,10 @@ Un processus ne fonctionnant pas sous root ne peut modifier son `euid` que pour 
 
 ### Comprendre les Fonctions set\*uid
 
-- **`setuid`** : Contrairement aux hypothèses initiales, `setuid` modifie principalement `euid` plutôt que `ruid`. Plus précisément, pour les processus privilégiés, il aligne `ruid`, `euid` et `suid` avec l'utilisateur spécifié, souvent root, solidifiant ainsi ces IDs en raison du `suid` prévalent. Des informations détaillées peuvent être trouvées dans la [page de manuel setuid](https://man7.org/linux/man-pages/man2/setuid.2.html).
+- **`setuid`** : Contrairement aux suppositions initiales, `setuid` modifie principalement `euid` plutôt que `ruid`. Plus précisément, pour les processus privilégiés, il aligne `ruid`, `euid` et `suid` avec l'utilisateur spécifié, souvent root, solidifiant ainsi ces IDs en raison du `suid` prévalent. Des informations détaillées peuvent être trouvées dans la [page de manuel setuid](https://man7.org/linux/man-pages/man2/setuid.2.html).
 - **`setreuid`** et **`setresuid`** : Ces fonctions permettent l'ajustement nuancé de `ruid`, `euid` et `suid`. Cependant, leurs capacités dépendent du niveau de privilège du processus. Pour les processus non-root, les modifications sont limitées aux valeurs actuelles de `ruid`, `euid` et `suid`. En revanche, les processus root ou ceux ayant la capacité `CAP_SETUID` peuvent attribuer des valeurs arbitraires à ces IDs. Plus d'informations peuvent être obtenues à partir de la [page de manuel setresuid](https://man7.org/linux/man-pages/man2/setresuid.2.html) et de la [page de manuel setreuid](https://man7.org/linux/man-pages/man2/setreuid.2.html).
 
-Ces fonctionnalités ne sont pas conçues comme un mécanisme de sécurité, mais pour faciliter le flux opérationnel prévu, comme lorsqu'un programme adopte l'identité d'un autre utilisateur en modifiant son ID utilisateur effectif.
+Ces fonctionnalités ne sont pas conçues comme un mécanisme de sécurité mais pour faciliter le flux opérationnel prévu, comme lorsqu'un programme adopte l'identité d'un autre utilisateur en modifiant son ID utilisateur effectif.
 
 Notamment, bien que `setuid` puisse être un recours courant pour l'élévation de privilèges à root (puisqu'il aligne tous les IDs sur root), il est crucial de différencier ces fonctions pour comprendre et manipuler les comportements des IDs utilisateurs dans divers scénarios.
 
