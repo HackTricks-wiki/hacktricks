@@ -27,7 +27,7 @@ pipeline.workers: 6
 - 파이프라인 **.conf** 파일에 **쓰기 권한**을 가지고 있거나
 - **/etc/logstash/pipelines.yml** 파일이 와일드카드를 사용하고, 대상 폴더에 쓸 수 있는 경우
 
-또한, 다음 조건 중 **하나**를 충족해야 합니다:
+또한, 다음 조건 중 **하나**가 충족되어야 합니다:
 
 - Logstash 서비스를 재시작할 수 있는 능력 **또는**
 - **/etc/logstash/logstash.yml** 파일에 **config.reload.automatic: true**가 설정되어 있는 경우
@@ -48,7 +48,7 @@ codec => rubydebug
 }
 }
 ```
-여기서, **interval**은 초 단위로 실행 빈도를 결정합니다. 주어진 예에서 **whoami** 명령은 120초마다 실행되며, 그 출력은 **/tmp/output.log**로 전송됩니다.
+여기서, **interval**은 초 단위로 실행 빈도를 결정합니다. 주어진 예에서 **whoami** 명령은 120초마다 실행되며, 그 출력은 **/tmp/output.log**로 전달됩니다.
 
 **/etc/logstash/logstash.yml**에 **config.reload.automatic: true**가 설정되어 있으면, Logstash는 자동으로 새로운 또는 수정된 파이프라인 구성을 감지하고 적용하며, 재시작이 필요하지 않습니다. 와일드카드가 없으면 기존 구성에 대한 수정이 여전히 가능하지만, 중단을 피하기 위해 주의가 필요합니다.
 
