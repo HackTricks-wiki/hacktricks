@@ -50,7 +50,7 @@ codec => rubydebug
 ```
 Burada, **interval** yürütme sıklığını saniye cinsinden belirler. Verilen örnekte, **whoami** komutu her 120 saniyede bir çalışır ve çıktısı **/tmp/output.log** dosyasına yönlendirilir.
 
-**/etc/logstash/logstash.yml** dosyasında **config.reload.automatic: true** ayarı ile Logstash, yeni veya değiştirilmiş pipeline yapılandırmalarını otomatik olarak algılayacak ve uygulayacaktır; yeniden başlatmaya gerek kalmadan. Eğer bir joker karakter yoksa, mevcut yapılandırmalarda değişiklikler yapılabilir, ancak kesintileri önlemek için dikkatli olunması önerilir.
+**/etc/logstash/logstash.yml** dosyasında **config.reload.automatic: true** ayarı ile Logstash, yeni veya değiştirilmiş boru hattı yapılandırmalarını otomatik olarak algılayacak ve uygulayacaktır; yeniden başlatmaya gerek kalmadan. Eğer bir joker karakter yoksa, mevcut yapılandırmalarda değişiklikler yapılabilir, ancak kesintileri önlemek için dikkatli olunması önerilir.
 
 ## References
 
