@@ -2,7 +2,7 @@
 
 ## Logstash
 
-Logstash wird verwendet, um **Protokolle zu sammeln, zu transformieren und zu versenden** durch ein System, das als **Pipelines** bekannt ist. Diese Pipelines bestehen aus **Eingabe**, **Filter** und **Ausgabe**-Stufen. Ein interessantes Aspekt tritt auf, wenn Logstash auf einem kompromittierten Rechner arbeitet.
+Logstash wird verwendet, um **Protokolle zu sammeln, zu transformieren und zu versenden** durch ein System, das als **Pipelines** bekannt ist. Diese Pipelines bestehen aus **Eingabe**, **Filter** und **Ausgabe** Phasen. Ein interessantes Aspekt tritt auf, wenn Logstash auf einem kompromittierten Rechner arbeitet.
 
 ### Pipeline-Konfiguration
 
