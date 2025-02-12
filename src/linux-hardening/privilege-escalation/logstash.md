@@ -4,7 +4,7 @@
 
 Logstash est utilisé pour **rassembler, transformer et dispatcher des journaux** à travers un système connu sous le nom de **pipelines**. Ces pipelines sont composés de **stages d'entrée**, **de filtrage** et **de sortie**. Un aspect intéressant se présente lorsque Logstash fonctionne sur une machine compromise.
 
-### Configuration des Pipelines
+### Configuration du Pipeline
 
 Les pipelines sont configurés dans le fichier **/etc/logstash/pipelines.yml**, qui liste les emplacements des configurations de pipeline :
 ```yaml
@@ -24,7 +24,7 @@ Ce fichier révèle où se trouvent les fichiers **.conf**, contenant des config
 
 Pour tenter une escalade de privilèges, identifiez d'abord l'utilisateur sous lequel le service Logstash s'exécute, généralement l'utilisateur **logstash**. Assurez-vous de répondre à **un** de ces critères :
 
-- Posséder un **accès en écriture** à un fichier de pipeline **.conf** **ou**
+- Posséder un **accès en écriture** à un fichier **.conf** de pipeline **ou**
 - Le fichier **/etc/logstash/pipelines.yml** utilise un caractère générique, et vous pouvez écrire dans le dossier cible
 
 De plus, **une** de ces conditions doit être remplie :
@@ -52,6 +52,6 @@ Ici, **interval** détermine la fréquence d'exécution en secondes. Dans l'exem
 
 Avec **config.reload.automatic: true** dans **/etc/logstash/logstash.yml**, Logstash détectera et appliquera automatiquement les nouvelles configurations de pipeline ou les modifications sans nécessiter de redémarrage. S'il n'y a pas de caractère générique, des modifications peuvent toujours être apportées aux configurations existantes, mais il est conseillé de faire preuve de prudence pour éviter les interruptions.
 
-## Références
+## References
 
 {{#include ../../banners/hacktricks-training.md}}
