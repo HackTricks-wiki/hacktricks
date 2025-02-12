@@ -18,11 +18,11 @@ path.config: "/etc/logstash/conf.d/*.conf"
 path.config: "/usr/share/logstash/pipeline/1*.conf"
 pipeline.workers: 6
 ```
-Ovaj fajl otkriva gde se nalaze **.conf** fajlovi koji sadrže konfiguracije pipeline-a. Kada se koristi **Elasticsearch output module**, uobičajeno je da **pipeline-i** uključuju **Elasticsearch kredencijale**, koji često imaju opsežne privilegije zbog potrebe Logstash-a da piše podatke u Elasticsearch. Wildcard-ovi u putanjama konfiguracije omogućavaju Logstash-u da izvrši sve odgovarajuće pipeline-e u određenom direktorijumu.
+Ovaj fajl otkriva gde se nalaze **.conf** fajlovi koji sadrže konfiguracije pipeline-a. Kada se koristi **Elasticsearch output module**, uobičajeno je da **pipelines** uključuju **Elasticsearch credentials**, koje često imaju opsežne privilegije zbog potrebe Logstasha da piše podatke u Elasticsearch. Wildcard-ovi u putanjama konfiguracije omogućavaju Logstasha da izvrši sve odgovarajuće pipeline-ove u određenom direktorijumu.
 
 ### Eskalacija privilegija putem zapisivih pipeline-a
 
-Da biste pokušali eskalaciju privilegija, prvo identifikujte korisnika pod kojim Logstash servis radi, obično korisnika **logstash**. Uverite se da ispunjavate **jedan** od ovih kriterijuma:
+Da biste pokušali eskalaciju privilegija, prvo identifikujte korisnika pod kojim se Logstash servis pokreće, obično korisnika **logstash**. Uverite se da ispunjavate **jedan** od ovih kriterijuma:
 
 - Imate **pristup za pisanje** u **.conf** fajl pipeline-a **ili**
 - Fajl **/etc/logstash/pipelines.yml** koristi wildcard, i možete pisati u ciljni folder
