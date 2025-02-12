@@ -67,6 +67,16 @@ jobs:
         run: |
           MDBOOK_BOOK__LANGUAGE=$BRANCH mdbook build || (echo "Error logs" && cat hacktricks-preprocessor-error.log && echo "" && echo "" && echo "Debug logs" && (cat hacktricks-preprocessor.log | tail -n 20) && exit 1)
       
+      - name: Update searchindex.js in repo
+        run: |
+          git checkout $BRANCH
+          git pull
+          cp book/searchindex.js searchindex.js
+          cp book/searchindex.json searchindex.json
+          git add searchindex.js searchindex.json
+          git commit -m "Update searchindex for $BRANCH"
+          git push
+      
       # Login in AWs
       - name: Configure AWS credentials using OIDC
         uses: aws-actions/configure-aws-credentials@v3
