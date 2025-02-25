@@ -471,12 +471,13 @@ window.search = window.search || {};
         showResults(true);
     }
 
-    fetch(path_to_root + 'searchindex.json')
+    var branch = lang === "en" ? "master" : lang
+    fetch(`https://raw.githubusercontent.com/HackTricks-wiki/hacktricks/refs/heads/${branch}/searchindex.json`)
         .then(response => response.json())
         .then(json => init(json))        
         .catch(error => { // Try to load searchindex.js if fetch failed
             var script = document.createElement('script');
-            script.src = path_to_root + 'searchindex.js';
+            script.src = `https://raw.githubusercontent.com/HackTricks-wiki/hacktricks/refs/heads/${branch}/searchindex.js`;
             script.onload = () => init(window.search);
             document.head.appendChild(script);
         });
