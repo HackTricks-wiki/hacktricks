@@ -21,7 +21,7 @@
 
 ## **Erstellen Sie Ihre eigenen Wörterbücher**
 
-Sammeln Sie so viele Informationen über das Ziel wie möglich und erstellen Sie ein benutzerdefiniertes Wörterbuch. Tools, die helfen können:
+Sammeln Sie so viele Informationen über das Ziel, wie Sie können, und erstellen Sie ein benutzerdefiniertes Wörterbuch. Tools, die helfen können:
 
 ### Crunch
 ```bash
@@ -34,9 +34,16 @@ crunch 4 4 -f /usr/share/crunch/charset.lst mixalpha # Only length 4 using chars
 ^ Special characters including spac
 crunch 6 8 -t ,@@^^%%
 ```
-### Cewl
+### Website-basierte Wortlisten
 ```bash
+# Cewl gets words from the victims page
 cewl example.com -m 5 -w words.txt
+
+# Tok (https://github.com/tomnomnom/hacks/tree/master/tok) gets words from a list of URLs
+cat /path/to/urls.txt | tok
+
+# https://github.com/m4ll0k/BBTz/blob/master/getjswords.py gets words from a list of JS URLs
+cat /path/to/js-urls.txt | python3 getjswords.py
 ```
 ### [CUPP](https://github.com/Mebus/cupp)
 
@@ -275,7 +282,7 @@ Um **oracle_login** mit **patator** zu verwenden, müssen Sie **installieren**:
 ```bash
 pip3 install cx_Oracle --upgrade
 ```
-[Offline OracleSQL hash bruteforce](https://github.com/carlospolop/hacktricks/blob/master/network-services-pentesting/1521-1522-1529-pentesting-oracle-listener/remote-stealth-pass-brute-force.md#outer-perimeter-remote-stealth-pass-brute-force) (**Versionen 11.1.0.6, 11.1.0.7, 11.2.0.1, 11.2.0.2,** und **11.2.0.3**):
+[Offline OracleSQL hash bruteforce](https://github.com/carlospolop/hacktricks/blob/master/network-services-pentesting/1521-1522-1529-pentesting-oracle-listener/remote-stealth-pass-brute-force.md#outer-perimeter-remote-stealth-pass-brute-force) (**Versionen 11.1.0.6, 11.1.0.7, 11.2.0.1, 11.2.0.2** und **11.2.0.3**):
 ```bash
 nmap -p1521 --script oracle-brute-stealth --script-args oracle-brute-stealth.sid=DB11g -n 10.11.21.30
 ```
@@ -395,11 +402,11 @@ legba ssh --username admin --password '@/some/path/*' --ssh-auth-mode key --targ
 ```
 #### Schwache SSH-Schlüssel / Vorhersehbarer PRNG in Debian
 
-Einige Systeme haben bekannte Schwächen im Zufallsseed, der zur Generierung kryptografischer Materialien verwendet wird. Dies kann zu einem dramatisch reduzierten Schlüsselraum führen, der mit Tools wie [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute) bruteforced werden kann. Vorgefertigte Sets schwacher Schlüssel sind ebenfalls verfügbar, wie [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh).
+Einige Systeme weisen bekannte Mängel im Zufallsseed auf, der zur Generierung kryptografischer Materialien verwendet wird. Dies kann zu einem dramatisch reduzierten Schlüsselraum führen, der mit Tools wie [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute) bruteforced werden kann. Vorgefertigte Sets schwacher Schlüssel sind ebenfalls verfügbar, wie [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh).
 
 ### STOMP (ActiveMQ, RabbitMQ, HornetQ und OpenMQ)
 
-Das STOMP-Textprotokoll ist ein weit verbreitetes Messaging-Protokoll, das **nahtlose Kommunikation und Interaktion mit beliebten Nachrichtenwarteschlangen-Diensten** wie RabbitMQ, ActiveMQ, HornetQ und OpenMQ ermöglicht. Es bietet einen standardisierten und effizienten Ansatz zum Austausch von Nachrichten und zur Durchführung verschiedener Messaging-Operationen.
+Das STOMP-Textprotokoll ist ein weit verbreitetes Messaging-Protokoll, das **nahtlose Kommunikation und Interaktion mit beliebten Message-Queue-Diensten** wie RabbitMQ, ActiveMQ, HornetQ und OpenMQ ermöglicht. Es bietet einen standardisierten und effizienten Ansatz zum Austausch von Nachrichten und zur Durchführung verschiedener Messaging-Operationen.
 ```bash
 legba stomp --target localhost:61613 --username admin --password data/passwords.txt
 ```
@@ -508,7 +515,7 @@ qpdf --password=<PASSWORD> --decrypt encrypted.pdf plaintext.pdf
 ```
 ### PDF-Besitzerpasswort
 
-Um ein PDF-Besitzerpasswort zu knacken, überprüfen Sie dies: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
+Um ein PDF-Besitzerpasswort zu knacken, siehe dies: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
 
 ### JWT
 ```bash
@@ -622,7 +629,7 @@ hash-identifier
 
 ### **Wortlist-Generierungswerkzeuge**
 
-- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** Fortgeschrittener Tastatur-Walk-Generator mit konfigurierbaren Basiszeichen, Tastenzuordnungen und Routen.
+- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** Fortschrittlicher Tastatur-Walk-Generator mit konfigurierbaren Basiszeichen, Tastaturbelegung und Routen.
 ```bash
 kwp64.exe basechars\custom.base keymaps\uk.keymap routes\2-to-10-max-3-direction-changes.route -o D:\Tools\keywalk.txt
 ```
@@ -645,7 +652,7 @@ hashcat.exe -a 0 -m 1000 C:\Temp\ntlm.txt .\rockyou.txt -r rules\best64.rule
 ```
 - **Wordlist-Kombinator**-Angriff
 
-Es ist möglich, **2 Wortlisten zu 1 zu kombinieren** mit hashcat.\
+Es ist möglich, **2 Wortlisten zu 1** mit hashcat zu kombinieren.\
 Wenn Liste 1 das Wort **"hello"** enthielt und die zweite 2 Zeilen mit den Wörtern **"world"** und **"earth"** enthielt. Die Wörter `helloworld` und `helloearth` werden generiert.
 ```bash
 # This will combine 2 wordlists
@@ -701,7 +708,7 @@ hashcat.exe -a 7 -m 1000 C:\Temp\ntlm.txt ?d?d?d?d \wordlist.txt
 ```bash
 hashcat --example-hashes | grep -B1 -A2 "NTLM"
 ```
-Knacken von Linux-Hashes - /etc/shadow-Datei
+Cracking von Linux-Hashes - /etc/shadow-Datei
 ```
 500 | md5crypt $1$, MD5(Unix)                          | Operating-Systems
 3200 | bcrypt $2*$, Blowfish(Unix)                      | Operating-Systems
