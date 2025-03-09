@@ -4,7 +4,7 @@
 
 ## Varsayılan Kimlik Bilgileri
 
-**Kullanılan teknolojinin** varsayılan kimlik bilgilerini **google'da arayın** veya **bu bağlantıları deneyin**:
+**Kullanılan teknolojinin** varsayılan kimlik bilgilerini google'da arayın veya **bu bağlantıları deneyin**:
 
 - [**https://github.com/ihebski/DefaultCreds-cheat-sheet**](https://github.com/ihebski/DefaultCreds-cheat-sheet)
 - [**http://www.phenoelit.org/dpl/dpl.html**](http://www.phenoelit.org/dpl/dpl.html)
@@ -34,19 +34,26 @@ crunch 4 4 -f /usr/share/crunch/charset.lst mixalpha # Only length 4 using chars
 ^ Special characters including spac
 crunch 6 8 -t ,@@^^%%
 ```
-### Cewl
+### Web Sitesine Dayalı Kelime Listeleri
 ```bash
+# Cewl gets words from the victims page
 cewl example.com -m 5 -w words.txt
+
+# Tok (https://github.com/tomnomnom/hacks/tree/master/tok) gets words from a list of URLs
+cat /path/to/urls.txt | tok
+
+# https://github.com/m4ll0k/BBTz/blob/master/getjswords.py gets words from a list of JS URLs
+cat /path/to/js-urls.txt | python3 getjswords.py
 ```
 ### [CUPP](https://github.com/Mebus/cupp)
 
-Kurban hakkındaki bilginize (isimler, tarihler...) dayalı şifreler oluşturun.
+Kurban hakkında bildiklerinize (isimler, tarihler...) dayalı şifreler oluşturun.
 ```
 python3 cupp.py -h
 ```
 ### [Wister](https://github.com/cycurity/wister)
 
-Belirli bir hedefle ilgili kullanılacak benzersiz ve ideal bir kelime listesi oluşturmanıza olanak tanıyan, bir dizi kelime sağlamanızı sağlayan bir kelime listesi oluşturucu aracıdır. Verilen kelimelerden birden fazla varyasyon oluşturma imkanı sunar.
+Bir kelime listesi oluşturucu aracı, size bir dizi kelime sağlamanıza olanak tanır, verilen kelimelerden birden fazla varyasyon oluşturma imkanı sunarak belirli bir hedefle ilgili kullanılacak benzersiz ve ideal bir kelime listesi oluşturur.
 ```bash
 python3 wister.py -w jane doe 2022 summer madrid 1998 -c 1 2 3 4 5 -o wordlist.lst
 
@@ -271,7 +278,7 @@ nmap --script oracle-brute -p 1521 --script-args oracle-brute.sid=<SID> <IP>
 
 legba oracle --target localhost:1521 --oracle-database SYSTEM --username admin --password data/passwords.txt
 ```
-**oracle_login**'ı **patator** ile kullanmak için **kurmanız** gerekiyor:
+**oracle_login**'ı **patator** ile kullanmak için **kurmanız** gerekir:
 ```bash
 pip3 install cx_Oracle --upgrade
 ```
@@ -395,11 +402,11 @@ legba ssh --username admin --password '@/some/path/*' --ssh-auth-mode key --targ
 ```
 #### Zayıf SSH anahtarları / Debian tahmin edilebilir PRNG
 
-Bazı sistemler, kriptografik materyal oluşturmak için kullanılan rastgele tohumda bilinen hatalara sahiptir. Bu, [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute) gibi araçlarla zorlanabilecek dramatik şekilde azaltılmış bir anahtar alanına yol açabilir. Ayrıca, [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh) gibi önceden oluşturulmuş zayıf anahtar setleri de mevcuttur.
+Bazı sistemler, kriptografik materyal oluşturmak için kullanılan rastgele tohumda bilinen hatalara sahiptir. Bu, [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute) gibi araçlarla zorlanabilen dramatik şekilde azaltılmış bir anahtar alanına yol açabilir. Ayrıca, [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh) gibi önceden oluşturulmuş zayıf anahtar setleri de mevcuttur.
 
 ### STOMP (ActiveMQ, RabbitMQ, HornetQ ve OpenMQ)
 
-STOMP metin protokolü, **RabbitMQ, ActiveMQ, HornetQ ve OpenMQ gibi popüler mesaj kuyruklama hizmetleriyle kesintisiz iletişim ve etkileşim sağlar**. Mesajları değiştirmek ve çeşitli mesajlaşma işlemleri gerçekleştirmek için standartlaştırılmış ve verimli bir yaklaşım sunar.
+STOMP metin protokolü, **RabbitMQ, ActiveMQ, HornetQ ve OpenMQ gibi popüler mesaj kuyruklama hizmetleriyle kesintisiz iletişim ve etkileşim sağlar.** Mesajları değiştirmek ve çeşitli mesajlaşma işlemleri gerçekleştirmek için standartlaştırılmış ve verimli bir yaklaşım sunar.
 ```bash
 legba stomp --target localhost:61613 --username admin --password data/passwords.txt
 ```
@@ -442,8 +449,8 @@ crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 ### Çevrimiçi kırma veritabanları
 
 - [~~http://hashtoolkit.com/reverse-hash?~~](http://hashtoolkit.com/reverse-hash?) (MD5 & SHA1)
-- [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 ile/olmaksızın ESS/SSP ve herhangi bir zorluk değeri ile)
-- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (Hashler, WPA2 yakalamaları ve MSOffice, ZIP, PDF arşivleri...)
+- [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 ESS/SSP ile/olmaksızın ve herhangi bir zorluk değeri ile)
+- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (Hashler, WPA2 yakalamaları ve MSOffice, ZIP, PDF... arşivleri)
 - [https://crackstation.net/](https://crackstation.net) (Hashler)
 - [https://md5decrypt.net/](https://md5decrypt.net) (MD5)
 - [https://gpuhash.me/](https://gpuhash.me) (Hashler ve dosya hashleri)
@@ -453,7 +460,7 @@ crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 - [https://www.md5online.org/md5-decrypt.html](https://www.md5online.org/md5-decrypt.html) (MD5)
 - [http://reverse-hash-lookup.online-domain-tools.com/](http://reverse-hash-lookup.online-domain-tools.com)
 
-Bir Hash'i brute force denemeden önce bunu kontrol edin.
+Bir Hash'ı brute force denemeden önce bunu kontrol edin.
 
 ### ZIP
 ```bash
@@ -473,8 +480,8 @@ hashcat.exe -m 13600 -a 0 .\hashzip.txt .\wordlists\rockyou.txt
 ```
 #### Bilinen düz metin zip saldırısı
 
-Şifreli zip içinde bulunan bir dosyanın **düz metnini** (veya düz metnin bir kısmını) bilmeniz gerekir. Şifreli zip içinde bulunan **dosya adlarını ve dosyaların boyutunu** kontrol etmek için şunu çalıştırabilirsiniz: **`7z l encrypted.zip`**\
-[**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0)indirin.
+Şifreli zip içinde bulunan bir dosyanın **düz metnini** (veya düz metnin bir kısmını) bilmeniz gerekir. Şifreli zip içinde bulunan **dosya adlarını ve dosyaların boyutunu** kontrol etmek için: **`7z l encrypted.zip`** komutunu çalıştırabilirsiniz.\
+[**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0) indirin.
 ```bash
 # You need to create a zip file containing only the file that is inside the encrypted zip
 zip plaintext.zip plaintext.file
@@ -508,7 +515,7 @@ qpdf --password=<PASSWORD> --decrypt encrypted.pdf plaintext.pdf
 ```
 ### PDF Sahibi Parolası
 
-Bir PDF sahibi parolasını kırmak için bunu kontrol edin: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
+Bir PDF sahibi parolasını kırmak için şunu kontrol edin: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
 
 ### JWT
 ```bash
@@ -585,7 +592,7 @@ john --wordlist=/usr/share/wordlists/rockyou.txt ./hash
 
 ### Open Office Pwd Protected Column
 
-Eğer bir şifre ile korunan bir sütun içeren bir xlsx dosyanız varsa, onu korumasını kaldırabilirsiniz:
+Eğer bir şifre ile korunan bir sütunu olan bir xlsx dosyanız varsa, onu korumasını kaldırabilirsiniz:
 
 - **Google Drive'a yükleyin** ve şifre otomatik olarak kaldırılacaktır
 - **Manuel olarak kaldırmak için**:
@@ -626,7 +633,7 @@ hash-identifier
 ```bash
 kwp64.exe basechars\custom.base keymaps\uk.keymap routes\2-to-10-max-3-direction-changes.route -o D:\Tools\keywalk.txt
 ```
-### John mutasyonu
+### John mutation
 
 _**/etc/john/john.conf**_ dosyasını okuyun ve yapılandırın.
 ```bash
@@ -689,7 +696,7 @@ hashcat.exe -a 3 -m 1000 C:\Temp\ntlm.txt -1 ?d?s ?u?l?l?l?l?l?l?l?1
 ## Use it to crack the password
 hashcat.exe -a 3 -m 1000 C:\Temp\ntlm.txt .\masks.hcmask
 ```
-- Kelime listesi + Maske (`-a 6`) / Maske + Kelime listesi (`-a 7`) saldırısı
+- Wordlist + Mask (`-a 6`) / Mask + Wordlist (`-a 7`) saldırısı
 ```bash
 # Mask numbers will be appended to each word in the wordlist
 hashcat.exe -a 6 -m 1000 C:\Temp\ntlm.txt \wordlist.txt ?d?d?d?d
