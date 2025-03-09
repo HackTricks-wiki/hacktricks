@@ -34,9 +34,16 @@ crunch 4 4 -f /usr/share/crunch/charset.lst mixalpha # Only length 4 using chars
 ^ Special characters including spac
 crunch 6 8 -t ,@@^^%%
 ```
-### Cewl
+### Словники на основі веб-сайтів
 ```bash
+# Cewl gets words from the victims page
 cewl example.com -m 5 -w words.txt
+
+# Tok (https://github.com/tomnomnom/hacks/tree/master/tok) gets words from a list of URLs
+cat /path/to/urls.txt | tok
+
+# https://github.com/m4ll0k/BBTz/blob/master/getjswords.py gets words from a list of JS URLs
+cat /path/to/js-urls.txt | python3 getjswords.py
 ```
 ### [CUPP](https://github.com/Mebus/cupp)
 
@@ -113,7 +120,7 @@ legba scylla --username cassandra --password wordlists/passwords.txt --target lo
 msf> use auxiliary/scanner/couchdb/couchdb_login
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst localhost -s 5984 http-get /
 ```
-### Docker Реєстр
+### Docker Registry
 ```
 hydra -L /usr/share/brutex/wordlists/simple-users.txt  -P /usr/share/brutex/wordlists/password.lst 10.10.10.10 -s 5000 https-get /v2/
 ```
@@ -332,6 +339,8 @@ hydra -l <username> -P <password_file> rlogin://<Victim-IP> -v -V
 ```bash
 hydra -L <Username_list> rsh://<Victim_IP> -v -V
 ```
+[http://pentestmonkey.net/tools/misc/rsh-grind](http://pentestmonkey.net/tools/misc/rsh-grind)
+
 ### Rsync
 ```bash
 nmap -sV --script rsync-brute --script-args userdb=/var/usernames.txt,passdb=/var/passwords.txt -p 873 <IP>
@@ -435,7 +444,7 @@ set PASS_FILE /usr/share/metasploit-framework/data/wordlists/passwords.lst
 ```bash
 crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 ```
-## Локальний
+## Local
 
 ### Онлайн бази даних для злому
 
@@ -451,7 +460,7 @@ crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 - [https://www.md5online.org/md5-decrypt.html](https://www.md5online.org/md5-decrypt.html) (MD5)
 - [http://reverse-hash-lookup.online-domain-tools.com/](http://reverse-hash-lookup.online-domain-tools.com)
 
-Перевірте це перед тим, як спробувати зламати хеш за допомогою брутфорсу.
+Перевірте це перед спробою злому хешу.
 
 ### ZIP
 ```bash
@@ -469,9 +478,9 @@ john zip.john
 hashcat.exe -m 13600 -a 0 .\hashzip.txt .\wordlists\rockyou.txt
 .\hashcat.exe -m 13600 -i -a 0 .\hashzip.txt #Incremental attack
 ```
-#### Відома атака на zip з відкритим текстом
+#### Відомий атака на zip з відкритим текстом
 
-Вам потрібно знати **відкритий текст** (або частину відкритого тексту) **файлу, що міститься всередині** зашифрованого zip. Ви можете перевірити **імена файлів та розмір файлів, що містяться всередині** зашифрованого zip, виконавши: **`7z l encrypted.zip`**\
+Вам потрібно знати **відкритий текст** (або частину відкритого тексту) **файлу, що міститься всередині** зашифрованого zip. Ви можете перевірити **імена файлів та розмір файлів, що містяться всередині** зашифрованого zip, запустивши: **`7z l encrypted.zip`**\
 Завантажте [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0) зі сторінки релізів.
 ```bash
 # You need to create a zip file containing only the file that is inside the encrypted zip
@@ -560,7 +569,7 @@ cryptsetup luksOpen backup.img mylucksopen
 ls /dev/mapper/ #You should find here the image mylucksopen
 mount /dev/mapper/mylucksopen /mnt
 ```
-Інший туторіал Luks BF: [http://blog.dclabs.com.br/2020/03/bruteforcing-linux-disk-encription-luks.html?m=1](http://blog.dclabs.com.br/2020/03/bruteforcing-linux-disk-encription-luks.html?m=1)
+Інший туторіал по Luks BF: [http://blog.dclabs.com.br/2020/03/bruteforcing-linux-disk-encription-luks.html?m=1](http://blog.dclabs.com.br/2020/03/bruteforcing-linux-disk-encription-luks.html?m=1)
 
 ### Mysql
 ```bash
@@ -606,12 +615,12 @@ crackpkcs12 -d /usr/share/wordlists/rockyou.txt ./cert.pfx
 
 **Приклади хешів:** [https://openwall.info/wiki/john/sample-hashes](https://openwall.info/wiki/john/sample-hashes)
 
-### Ідентифікатор хешів
+### Hash-identifier
 ```bash
 hash-identifier
 > <HASH>
 ```
-### Словники
+### Wordlists
 
 - **Rockyou**
 - [**Probable-Wordlists**](https://github.com/berzerk0/Probable-Wordlists)
@@ -699,7 +708,7 @@ hashcat.exe -a 7 -m 1000 C:\Temp\ntlm.txt ?d?d?d?d \wordlist.txt
 ```bash
 hashcat --example-hashes | grep -B1 -A2 "NTLM"
 ```
-Злом Linux хешів - файл /etc/shadow
+Злом Linux Hashes - файл /etc/shadow
 ```
 500 | md5crypt $1$, MD5(Unix)                          | Operating-Systems
 3200 | bcrypt $2*$, Blowfish(Unix)                      | Operating-Systems
@@ -711,7 +720,7 @@ hashcat --example-hashes | grep -B1 -A2 "NTLM"
 3000 | LM                                               | Operating-Systems
 1000 | NTLM                                             | Operating-Systems
 ```
-Зламування загальних хешів додатків
+Злом загальних хешів додатків
 ```
 900 | MD4                                              | Raw Hash
 0 | MD5                                              | Raw Hash
