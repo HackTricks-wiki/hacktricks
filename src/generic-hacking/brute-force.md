@@ -4,7 +4,7 @@
 
 ## Default Credentials
 
-**Pretražite na google-u** za podrazumevane akreditive tehnologije koja se koristi, ili **probajte ove linkove**:
+**Pretražujte na google-u** za podrazumevane akreditive tehnologije koja se koristi, ili **probajte ove linkove**:
 
 - [**https://github.com/ihebski/DefaultCreds-cheat-sheet**](https://github.com/ihebski/DefaultCreds-cheat-sheet)
 - [**http://www.phenoelit.org/dpl/dpl.html**](http://www.phenoelit.org/dpl/dpl.html)
@@ -34,9 +34,16 @@ crunch 4 4 -f /usr/share/crunch/charset.lst mixalpha # Only length 4 using chars
 ^ Special characters including spac
 crunch 6 8 -t ,@@^^%%
 ```
-### Cewl
+### Liste reči zasnovane na vebsajtovima
 ```bash
+# Cewl gets words from the victims page
 cewl example.com -m 5 -w words.txt
+
+# Tok (https://github.com/tomnomnom/hacks/tree/master/tok) gets words from a list of URLs
+cat /path/to/urls.txt | tok
+
+# https://github.com/m4ll0k/BBTz/blob/master/getjswords.py gets words from a list of JS URLs
+cat /path/to/js-urls.txt | python3 getjswords.py
 ```
 ### [CUPP](https://github.com/Mebus/cupp)
 
@@ -144,7 +151,7 @@ legba http.basic --username admin --password wordlists/passwords.txt --target ht
 legba http.ntlm1 --domain example.org --workstation client --username admin --password wordlists/passwords.txt --target https://localhost:8888/
 legba http.ntlm2 --domain example.org --workstation client --username admin --password wordlists/passwords.txt --target https://localhost:8888/
 ```
-### HTTP - Post Forma
+### HTTP - Post Form
 ```bash
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst domain.htb  http-post-form "/path/index.php:name=^USER^&password=^PASS^&enter=Sign+in:Login name or password is incorrect" -V
 # Use https-post-form mode for https
@@ -393,13 +400,13 @@ legba ssh --username admin --password wordlists/passwords.txt --target localhost
 # Try keys from a folder
 legba ssh --username admin --password '@/some/path/*' --ssh-auth-mode key --target localhost:22
 ```
-#### Slabi SSH ključevi / Predvidljiv PRNG na Debijanu
+#### Slabi SSH ključevi / Debian predvidljiv PRNG
 
 Neki sistemi imaju poznate greške u nasumičnom semenu koje se koristi za generisanje kriptografskog materijala. To može rezultirati dramatično smanjenim prostorom ključeva koji se može bruteforcovati alatima kao što su [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute). Takođe su dostupni unapred generisani setovi slabih ključeva kao što su [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh).
 
 ### STOMP (ActiveMQ, RabbitMQ, HornetQ i OpenMQ)
 
-STOMP tekstualni protokol je široko korišćen protokol za razmenu poruka koji **omogućava besprekornu komunikaciju i interakciju sa popularnim servisima za redove poruka** kao što su RabbitMQ, ActiveMQ, HornetQ i OpenMQ. Pruža standardizovan i efikasan pristup razmeni poruka i izvođenju raznih operacija sa porukama.
+STOMP tekstualni protokol je široko korišćen protokol za razmenu poruka koji **omogućava besprekornu komunikaciju i interakciju sa popularnim servisima za redove poruka** kao što su RabbitMQ, ActiveMQ, HornetQ i OpenMQ. Pruža standardizovan i efikasan pristup za razmenu poruka i izvođenje raznih operacija sa porukama.
 ```bash
 legba stomp --target localhost:61613 --username admin --password data/passwords.txt
 ```
@@ -439,7 +446,7 @@ crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 ```
 ## Lokalno
 
-### Online baze podataka za razbijanje
+### Online baze podataka za dešifrovanje
 
 - [~~http://hashtoolkit.com/reverse-hash?~~](http://hashtoolkit.com/reverse-hash?) (MD5 & SHA1)
 - [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 sa/bez ESS/SSP i sa bilo kojom vrednošću izazova)
@@ -471,10 +478,10 @@ john zip.john
 hashcat.exe -m 13600 -a 0 .\hashzip.txt .\wordlists\rockyou.txt
 .\hashcat.exe -m 13600 -i -a 0 .\hashzip.txt #Incremental attack
 ```
-#### Napad sa poznatim otvorenim tekstom zip
+#### Napad sa poznatim otvorenim tekstom na zip
 
-Morate znati **otvoreni tekst** (ili deo otvorenog teksta) **fajla koji se nalazi unutar** enkriptovanog zip-a. Možete proveriti **imena fajlova i veličinu fajlova koji se nalaze unutar** enkriptovanog zip-a pokretanjem: **`7z l encrypted.zip`**\
-Preuzmite [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0) sa stranice sa izdanjima.
+Potrebno je da znate **otvoreni tekst** (ili deo otvorenog teksta) **fajla koji se nalazi unutar** enkriptovanog zip-a. Možete proveriti **imena fajlova i veličinu fajlova koji se nalaze unutar** enkriptovanog zip-a pokretanjem: **`7z l encrypted.zip`**\
+Preuzmite [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0) sa stranice za izdanja.
 ```bash
 # You need to create a zip file containing only the file that is inside the encrypted zip
 zip plaintext.zip plaintext.file
@@ -588,7 +595,7 @@ Koristite [https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john
 Ako imate xlsx datoteku sa kolonom zaštićenom lozinkom, možete je otključati:
 
 - **Otpremite je na google drive** i lozinka će biti automatski uklonjena
-- Da **uklonite** to **ručno**:
+- Da **uklonite** je **ručno**:
 ```bash
 unzip file.xlsx
 grep -R "sheetProtection" ./*
@@ -637,7 +644,7 @@ john --wordlist=words.txt --rules=all --stdout > w_mutated.txt #Apply all rules
 
 #### Hashcat napadi
 
-- **Napad rečnika** (`-a 0`) sa pravilima
+- **Napad sa rečnikom** (`-a 0`) sa pravilima
 
 **Hashcat** već dolazi sa **folderom koji sadrži pravila** ali možete pronaći [**druga zanimljiva pravila ovde**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules).
 ```
@@ -689,7 +696,7 @@ hashcat.exe -a 3 -m 1000 C:\Temp\ntlm.txt -1 ?d?s ?u?l?l?l?l?l?l?l?1
 ## Use it to crack the password
 hashcat.exe -a 3 -m 1000 C:\Temp\ntlm.txt .\masks.hcmask
 ```
-- Wordlist + Mask (`-a 6`) / Mask + Wordlist (`-a 7`) napad
+- Lista reči + Maska (`-a 6`) / Maska + Lista reči (`-a 7`) napad
 ```bash
 # Mask numbers will be appended to each word in the wordlist
 hashcat.exe -a 6 -m 1000 C:\Temp\ntlm.txt \wordlist.txt ?d?d?d?d
@@ -697,11 +704,11 @@ hashcat.exe -a 6 -m 1000 C:\Temp\ntlm.txt \wordlist.txt ?d?d?d?d
 # Mask numbers will be prepended to each word in the wordlist
 hashcat.exe -a 7 -m 1000 C:\Temp\ntlm.txt ?d?d?d?d \wordlist.txt
 ```
-#### Hashcat modusi
+#### Hashcat modovi
 ```bash
 hashcat --example-hashes | grep -B1 -A2 "NTLM"
 ```
-Kršenje Linux hešova - /etc/shadow datoteka
+Razbijanje Linux hešova - /etc/shadow datoteka
 ```
 500 | md5crypt $1$, MD5(Unix)                          | Operating-Systems
 3200 | bcrypt $2*$, Blowfish(Unix)                      | Operating-Systems
