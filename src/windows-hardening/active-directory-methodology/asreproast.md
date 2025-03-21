@@ -4,7 +4,7 @@
 
 ## ASREPRoast
 
-ASREPRoast to atak bezpieczeństwa, który wykorzystuje użytkowników, którzy nie mają włączonego **wymaganego atrybutu wstępnej autoryzacji Kerberos**. W zasadzie ta luka pozwala atakującym na żądanie autoryzacji dla użytkownika z Kontrolera Domeny (DC) bez potrzeby znajomości hasła użytkownika. DC następnie odpowiada wiadomością zaszyfrowaną kluczem pochodzącym z hasła użytkownika, który atakujący mogą próbować złamać offline, aby odkryć hasło użytkownika.
+ASREPRoast to atak bezpieczeństwa, który wykorzystuje użytkowników, którzy nie mają włączonego **atrybutu wymaganego do wstępnej autoryzacji Kerberos**. W zasadzie ta luka pozwala atakującym na żądanie autoryzacji dla użytkownika z Kontrolera Domeny (DC) bez potrzeby znajomości hasła użytkownika. DC następnie odpowiada wiadomością zaszyfrowaną kluczem pochodzącym z hasła użytkownika, który atakujący mogą próbować złamać offline, aby odkryć hasło użytkownika.
 
 Główne wymagania dla tego ataku to:
 
@@ -12,7 +12,7 @@ Główne wymagania dla tego ataku to:
 - **Połączenie z Kontrolerem Domeny (DC)**: Atakujący potrzebują dostępu do DC, aby wysyłać żądania i odbierać zaszyfrowane wiadomości.
 - **Opcjonalne konto domenowe**: Posiadanie konta domenowego pozwala atakującym na bardziej efektywne identyfikowanie podatnych użytkowników za pomocą zapytań LDAP. Bez takiego konta atakujący muszą zgadywać nazwy użytkowników.
 
-#### Enumerowanie podatnych użytkowników (potrzebne dane uwierzytelniające domeny)
+#### Enumerowanie podatnych użytkowników (potrzebne dane uwierzytelniające do domeny)
 ```bash:Using Windows
 Get-DomainUser -PreauthNotRequired -verbose #List vuln users using PowerView
 ```
@@ -42,17 +42,17 @@ hashcat -m 18200 --force -a 0 hashes.asreproast passwords_kerb.txt
 ```
 ### Utrzymywanie
 
-Wymuś **preauth** nie wymagany dla użytkownika, gdzie masz uprawnienia **GenericAll** (lub uprawnienia do zapisywania właściwości):
+Wymuś **preauth**, który nie jest wymagany dla użytkownika, gdzie masz uprawnienia **GenericAll** (lub uprawnienia do zapisywania właściwości):
 ```bash:Using Windows
 Set-DomainObject -Identity <username> -XOR @{useraccountcontrol=4194304} -Verbose
 ```
 
 ```bash:Using Linux
-bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 add uac -f DONT_REQ_PREAUTH
+bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 add uac -f DONT_REQ_PREAUTH 'target_user'
 ```
 ## ASREProast bez poświadczeń
 
-Atakujący może wykorzystać pozycję man-in-the-middle, aby przechwycić pakiety AS-REP podczas ich przesyłania w sieci, nie polegając na wyłączeniu wstępnej autoryzacji Kerberos. Działa to zatem dla wszystkich użytkowników w VLAN.\
+Atakujący może wykorzystać pozycję man-in-the-middle, aby przechwycić pakiety AS-REP, gdy przemieszczają się w sieci, nie polegając na wyłączeniu wstępnej autoryzacji Kerberos. Działa to zatem dla wszystkich użytkowników w VLAN.\
 [ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher) pozwala nam to zrobić. Co więcej, narzędzie zmusza stacje robocze klientów do używania RC4, zmieniając negocjację Kerberos.
 ```bash
 # Actively acting as a proxy between the clients and the DC, forcing RC4 downgrade if supported
