@@ -4,7 +4,7 @@
 
 ## [ProjectHoneypot](https://www.projecthoneypot.org/)
 
-您可以询问某个IP是否与可疑/恶意活动相关。完全免费。
+您可以查询某个IP是否与可疑/恶意活动相关。完全免费。
 
 ## [**BotScout**](http://botscout.com/api.htm)
 
@@ -13,7 +13,7 @@
 ## [Hunter](https://hunter.io/)
 
 查找和验证电子邮件。\
-一些免费API请求，更多需要付费。\
+一些API请求免费，更多需要付费。\
 商业？
 
 ## [AlientVault](https://otx.alienvault.com/api)
@@ -46,24 +46,24 @@
 
 ## [mywot](https://www.mywot.com/)
 
-基于意见和其他指标判断某个域名是否与可疑/恶意信息相关。
+基于意见和其他指标判断域名是否与可疑/恶意信息相关。
 
 ## [ipinfo](https://ipinfo.io/)
 
-获取IP地址的基本信息。您每月可以测试最多100K。
+获取IP地址的基本信息。您每月可以测试最多100K次。
 
 ## [securitytrails](https://securitytrails.com/app/account)
 
-该平台提供有关域名和IP地址的信息，例如IP或域名服务器内的域名、由电子邮件拥有的域名（查找相关域名）、域名的IP历史（查找CloudFlare背后的主机）、使用某个名称服务器的所有域名....\
+该平台提供有关域名和IP地址的信息，如IP内的域名或域名服务器内的域名、由电子邮件拥有的域名（查找相关域名）、域名的IP历史（查找CloudFlare背后的主机）、使用某个名称服务器的所有域名....\
 您有一些免费访问权限。
 
 ## [fullcontact](https://www.fullcontact.com/)
 
-允许通过电子邮件、域名或公司名称进行搜索并检索相关的“个人”信息。它还可以验证电子邮件。有一些免费访问。
+允许通过电子邮件、域名或公司名称进行搜索，并检索相关的“个人”信息。它还可以验证电子邮件。有一些免费访问。
 
 ## [RiskIQ](https://www.spiderfoot.net/documentation/)
 
-即使在免费/社区版本中，也有大量关于域名和IP的信息。
+即使在免费/社区版本中，也提供大量有关域名和IP的信息。
 
 ## [\_IntelligenceX](https://intelx.io/)
 
@@ -91,12 +91,12 @@
 
 ## [Dehashed](https://www.dehashed.com/data)
 
-查找泄露的电子邮件和域名凭据\
+查找电子邮件甚至域名的泄露凭据\
 商业？
 
 ## [psbdmp](https://psbdmp.ws/)
 
-搜索出现某个电子邮件的pastebins。商业？
+搜索电子邮件出现的pastebins。商业？
 
 ## [emailrep.io](https://emailrep.io/key)
 
@@ -104,7 +104,7 @@
 
 ## [ghostproject](https://ghostproject.fr/)
 
-从泄露的电子邮件中获取密码。商业？
+获取泄露电子邮件的密码。商业？
 
 ## [Binaryedge](https://www.binaryedge.io/)
 
@@ -117,6 +117,9 @@
 ### [IP2Location.io](https://www.ip2location.io/)
 
 它检测IP地理位置、数据中心、ASN甚至VPN信息。每月提供免费30K查询。
+
+### [IPQuery.io](https://www.ipquery.io/)
+IP地理位置和OISNT，具有针对性的数据点。非商业。
 
 [https://dnsdumpster.com/](https://dnsdumpster.com/)(在商业工具中？)
 
