@@ -118,6 +118,10 @@ Search by domain and email and get if it was pwned and passwords. Commercial?
 
 It detects IP geolocation, data center, ASN and even VPN information. It offers free 30K queries per month.
 
+### [IPQuery.io](https://www.ipquery.io/)
+IP Geolocation and OISNT with targeted datapoints. Non commerical. 
+
+
 [https://dnsdumpster.com/](https://dnsdumpster.com/)(in a commercial tool?)
 
 [https://www.netcraft.com/](https://www.netcraft.com/) (in a commercial tool?)
