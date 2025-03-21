@@ -4,12 +4,12 @@
 
 ## ASREPRoast
 
-ASREPRoast is 'n sekuriteitsaanval wat gebruikers teiken wat die **Kerberos pre-authentication vereiste attribuut** mis. Essensieel stel hierdie kwesbaarheid aanvallers in staat om 'n versoek vir verifikasie vir 'n gebruiker van die Domeinbeheerder (DC) te vra sonder om die gebruiker se wagwoord te benodig. Die DC antwoord dan met 'n boodskap wat geënkripteer is met die gebruiker se wagwoord-afgeleide sleutel, wat aanvallers kan probeer om offline te kraak om die gebruiker se wagwoord te ontdek.
+ASREPRoast is 'n sekuriteitsaanval wat gebruikers teiken wat die **Kerberos voor-sertifisering vereiste attribuut** ontbreek. Essensieel stel hierdie kwesbaarheid aanvallers in staat om 'n sertifisering vir 'n gebruiker van die Domeinbeheerder (DC) aan te vra sonder om die gebruiker se wagwoord te benodig. Die DC antwoord dan met 'n boodskap wat versleuteld is met die gebruiker se wagwoord-afgeleide sleutel, wat aanvallers kan probeer om offline te kraak om die gebruiker se wagwoord te ontdek.
 
 Die hoofvereistes vir hierdie aanval is:
 
-- **Gebrek aan Kerberos pre-authentication**: Teiken gebruikers moet nie hierdie sekuriteitskenmerk geaktiveer hê nie.
-- **Verbinding met die Domeinbeheerder (DC)**: Aanvallers het toegang tot die DC nodig om versoeke te stuur en geënkripteerde boodskappe te ontvang.
+- **Ontbreking van Kerberos voor-sertifisering**: Teiken gebruikers moet nie hierdie sekuriteitskenmerk geaktiveer hê nie.
+- **Verbinding met die Domeinbeheerder (DC)**: Aanvallers het toegang tot die DC nodig om versoeke te stuur en versleutelde boodskappe te ontvang.
 - **Opsionele domeinrekening**: Om 'n domeinrekening te hê, stel aanvallers in staat om kwesbare gebruikers meer doeltreffend te identifiseer deur middel van LDAP-navrae. Sonder so 'n rekening moet aanvallers gebruikersname raai.
 
 #### Enumerating vulnerable users (need domain credentials)
@@ -48,11 +48,11 @@ Set-DomainObject -Identity <username> -XOR @{useraccountcontrol=4194304} -Verbos
 ```
 
 ```bash:Using Linux
-bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 add uac -f DONT_REQ_PREAUTH
+bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 add uac -f DONT_REQ_PREAUTH 'target_user'
 ```
 ## ASREProast sonder geloofsbriewe
 
-'n Aanvaller kan 'n man-in-the-middle posisie gebruik om AS-REP pakkette te vang terwyl hulle die netwerk oorsteek sonder om op Kerberos vooraf-authentisering staat te maak om gedeaktiveer te wees. Dit werk dus vir alle gebruikers op die VLAN.\
+'n Aanvaller kan 'n man-in-the-middle posisie gebruik om AS-REP pakkette te vang terwyl hulle die netwerk oorsteek sonder om op Kerberos voorverifikasie staat te maak om gedeaktiveer te wees. Dit werk dus vir alle gebruikers op die VLAN.\
 [ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher) stel ons in staat om dit te doen. Boonop dwing die hulpmiddel kliënt werkstasies om RC4 te gebruik deur die Kerberos onderhandeling te verander.
 ```bash
 # Actively acting as a proxy between the clients and the DC, forcing RC4 downgrade if supported
