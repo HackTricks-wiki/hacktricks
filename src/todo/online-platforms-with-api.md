@@ -8,7 +8,7 @@ Jy kan vra of 'n IP verband hou met verdagte/slegte aktiwiteite. Heeltemal grati
 
 ## [**BotScout**](http://botscout.com/api.htm)
 
-Kontroleer of die IP-adres verband hou met 'n bot wat rekeninge registreer. Dit kan ook gebruikersname en e-pos adresse kontroleer. Aanvanklik gratis.
+Kontroleer of die IP-adres verband hou met 'n bot wat rekeninge registreer. Dit kan ook gebruikersname en e-posse kontroleer. Aanvanklik gratis.
 
 ## [Hunter](https://hunter.io/)
 
@@ -46,7 +46,7 @@ Gee aan of 'n gasheer verband hou met spamaktiwiteit. Het 'n paar gratis API-toe
 
 ## [mywot](https://www.mywot.com/)
 
-Gebaseer op menings en ander metrieks, kry of 'n domein verband hou met verdagte/slegte inligting.
+Gebaseer op menings en ander metrieke, kry of 'n domein verband hou met verdagte/slegte inligting.
 
 ## [ipinfo](https://ipinfo.io/)
 
@@ -116,7 +116,11 @@ Soek op domein en e-pos en kry of dit gecompromitteer is en wagwoorde. Kommersie
 
 ### [IP2Location.io](https://www.ip2location.io/)
 
-Dit detecteer IP-geolokasie, datacentrum, ASN en selfs VPN-inligting. Dit bied gratis 30K navrae per maand aan.
+Dit detecteer IP-geolokasie, datacentrum, ASN en selfs VPN-inligting. Dit bied gratis 30K navrae per maand.
+
+### [IPQuery.io](https://www.ipquery.io/)
+IP Geolokasie en OISNT met geteikende datapunte. Nie kommersieel.
+
 
 [https://dnsdumpster.com/](https://dnsdumpster.com/)(in 'n kommersiële hulpmiddel?)
 
