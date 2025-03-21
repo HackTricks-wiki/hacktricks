@@ -4,13 +4,13 @@
 
 ## ASREPRoast
 
-ASREPRoast je bezbednosni napad koji koristi korisnike koji nemaju **atribut potrebne Kerberos pre-autentifikacije**. Suštinski, ova ranjivost omogućava napadačima da zatraže autentifikaciju za korisnika od Kontrolera domena (DC) bez potrebe za korisnikovom lozinkom. DC zatim odgovara porukom šifrovanom korisnikovim ključem izvedenim iz lozinke, koju napadači mogu pokušati da dešifruju offline kako bi otkrili korisnikovu lozinku.
+ASREPRoast je bezbednosni napad koji koristi korisnike koji nemaju **atribut potreban za Kerberos pre-autentifikaciju**. Suštinski, ova ranjivost omogućava napadačima da zatraže autentifikaciju za korisnika od Kontrolera domena (DC) bez potrebe za korisnikovom lozinkom. DC zatim odgovara porukom šifrovanom ključem izvedenim iz korisnikove lozinke, koji napadači mogu pokušati da dešifruju van mreže kako bi otkrili korisnikovu lozinku.
 
 Glavni zahtevi za ovaj napad su:
 
 - **Nedostatak Kerberos pre-autentifikacije**: Ciljani korisnici ne smeju imati ovu bezbednosnu funkciju omogućenu.
-- **Konekcija sa Kontrolerom domena (DC)**: Napadači trebaju pristup DC-u da bi slali zahteve i primali šifrovane poruke.
-- **Opcioni domen korisnički nalog**: Imati domen korisnički nalog omogućava napadačima da efikasnije identifikuju ranjive korisnike putem LDAP upita. Bez takvog naloga, napadači moraju da pogađaju korisnička imena.
+- **Veza sa Kontrolerom domena (DC)**: Napadači trebaju pristup DC-u da bi slali zahteve i primali šifrovane poruke.
+- **Opcionalni domen korisnički nalog**: Imati domen korisnički nalog omogućava napadačima da efikasnije identifikuju ranjive korisnike putem LDAP upita. Bez takvog naloga, napadači moraju da pogađaju korisnička imena.
 
 #### Enumerating vulnerable users (need domain credentials)
 ```bash:Using Windows
@@ -40,19 +40,19 @@ Get-ASREPHash -Username VPN114user -verbose #From ASREPRoast.ps1 (https://github
 john --wordlist=passwords_kerb.txt hashes.asreproast
 hashcat -m 18200 --force -a 0 hashes.asreproast passwords_kerb.txt
 ```
-### Persistencija
+### Persistence
 
-Prisilite **preauth** da nije potreban za korisnika gde imate **GenericAll** dozvole (ili dozvole za pisanje svojstava):
+Force **preauth** not required for a user where you have **GenericAll** permissions (or permissions to write properties):
 ```bash:Using Windows
 Set-DomainObject -Identity <username> -XOR @{useraccountcontrol=4194304} -Verbose
 ```
 
 ```bash:Using Linux
-bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 add uac -f DONT_REQ_PREAUTH
+bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 add uac -f DONT_REQ_PREAUTH 'target_user'
 ```
 ## ASREProast bez kredencijala
 
-Napadač može iskoristiti poziciju man-in-the-middle da uhvati AS-REP pakete dok prolaze kroz mrežu, bez oslanjanja na to da Kerberos pre-autentifikacija bude onemogućena. Stoga funkcioniše za sve korisnike na VLAN-u.\
+Napadač može iskoristiti poziciju man-in-the-middle da uhvati AS-REP pakete dok prolaze kroz mrežu, bez oslanjanja na to da je Kerberos pre-autentifikacija onemogućena. Stoga funkcioniše za sve korisnike na VLAN-u.\
 [ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher) nam to omogućava. Štaviše, alat prisiljava klijentske radne stanice da koriste RC4 menjajući Kerberos pregovaranje.
 ```bash
 # Actively acting as a proxy between the clients and the DC, forcing RC4 downgrade if supported
