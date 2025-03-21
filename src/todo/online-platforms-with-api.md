@@ -1,4 +1,4 @@
-# Online Platforms with API
+# Platformy online z API
 
 {{#include ../banners/hacktricks-training.md}}
 
@@ -22,7 +22,7 @@ Znajdź złośliwe działania związane z adresami IP i domenami. Darmowe.
 
 ## [Clearbit](https://dashboard.clearbit.com/)
 
-Znajdź powiązane dane osobowe z e-mailem (profile na innych platformach), domeną (podstawowe informacje o firmie, maile i osoby pracujące) oraz firmami (uzyskaj informacje o firmie z maila).\
+Znajdź powiązane dane osobowe z e-mailem (profile na innych platformach), domeną (podstawowe informacje o firmie, e-maile i osoby pracujące) oraz firmami (uzyskaj informacje o firmie z e-maila).\
 Musisz zapłacić, aby uzyskać dostęp do wszystkich możliwości.\
 Komercyjne?
 
@@ -33,16 +33,16 @@ Komercyjne?
 
 ## [Fraudguard](https://fraudguard.io/)
 
-Sprawdź, czy host (domena lub IP) jest związany z podejrzanymi/maliciousnymi działaniami. Posiada pewien darmowy dostęp do API.\
+Sprawdź, czy host (domena lub IP) jest związany z podejrzanymi/maliciousnymi działaniami. Ma pewien darmowy dostęp do API.\
 Komercyjne?
 
 ## [FortiGuard](https://fortiguard.com/)
 
-Sprawdź, czy host (domena lub IP) jest związany z podejrzanymi/maliciousnymi działaniami. Posiada pewien darmowy dostęp do API.
+Sprawdź, czy host (domena lub IP) jest związany z podejrzanymi/maliciousnymi działaniami. Ma pewien darmowy dostęp do API.
 
 ## [SpamCop](https://www.spamcop.net/)
 
-Wskazuje, czy host jest związany z działalnością spamową. Posiada pewien darmowy dostęp do API.
+Wskazuje, czy host jest związany z działalnością spamową. Ma pewien darmowy dostęp do API.
 
 ## [mywot](https://www.mywot.com/)
 
@@ -67,7 +67,7 @@ Wiele informacji o domenach i IP, nawet w wersji darmowej/community.
 
 ## [\_IntelligenceX](https://intelx.io/)
 
-Wyszukuj domeny, IP i e-maile oraz uzyskuj informacje z wycieków. Posiada pewien darmowy dostęp.
+Wyszukuj domeny, IP i e-maile oraz uzyskuj informacje z wycieków. Ma pewien darmowy dostęp.
 
 ## [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/)
 
@@ -79,7 +79,7 @@ Wyszukuj według IP lub zakresu IP i uzyskuj informacje o IP skanujących Intern
 
 ## [Shodan](https://www.shodan.io/)
 
-Uzyskaj informacje o skanowaniu adresu IP. Posiada pewien darmowy dostęp do API.
+Uzyskaj informacje o skanowaniu adresu IP. Ma pewien darmowy dostęp do API.
 
 ## [Censys](https://censys.io/)
 
@@ -100,7 +100,7 @@ Wyszukaj pastebiny, w których pojawił się e-mail. Komercyjne?
 
 ## [emailrep.io](https://emailrep.io/key)
 
-Uzyskaj reputację maila. Komercyjne?
+Uzyskaj reputację e-maila. Komercyjne?
 
 ## [ghostproject](https://ghostproject.fr/)
 
@@ -112,11 +112,15 @@ Uzyskaj interesujące informacje z IP
 
 ## [haveibeenpwned](https://haveibeenpwned.com/)
 
-Wyszukaj według domeny i e-maila i sprawdź, czy został pwned oraz hasła. Komercyjne?
+Wyszukuj według domeny i e-maila i sprawdź, czy został pwned oraz hasła. Komercyjne?
 
 ### [IP2Location.io](https://www.ip2location.io/)
 
 Wykrywa geolokalizację IP, centrum danych, ASN, a nawet informacje o VPN. Oferuje darmowe 30K zapytań miesięcznie.
+
+### [IPQuery.io](https://www.ipquery.io/)
+Geolokalizacja IP i OISNT z ukierunkowanymi danymi. Niekomercyjne.
+
 
 [https://dnsdumpster.com/](https://dnsdumpster.com/)(w narzędziu komercyjnym?)
 
