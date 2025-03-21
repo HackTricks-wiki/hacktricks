@@ -100,7 +100,7 @@ Pesquise pastebins onde um e-mail apareceu. Comercial?
 
 ## [emailrep.io](https://emailrep.io/key)
 
-Obtenha a reputação de um e-mail. Comercial?
+Obtenha reputação de um e-mail. Comercial?
 
 ## [ghostproject](https://ghostproject.fr/)
 
@@ -117,6 +117,9 @@ Pesquise por domínio e e-mail e verifique se foi comprometido e senhas. Comerci
 ### [IP2Location.io](https://www.ip2location.io/)
 
 Detecta geolocalização de IP, data center, ASN e até informações de VPN. Oferece 30K consultas gratuitas por mês.
+
+### [IPQuery.io](https://www.ipquery.io/)
+Geolocalização de IP e OISNT com pontos de dados direcionados. Não comercial.
 
 [https://dnsdumpster.com/](https://dnsdumpster.com/)(em uma ferramenta comercial?)
 
