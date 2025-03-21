@@ -112,11 +112,14 @@ Erhalten Sie interessante Informationen von IPs.
 
 ## [haveibeenpwned](https://haveibeenpwned.com/)
 
-Suchen Sie nach Domain und E-Mail und erfahren Sie, ob sie gehackt wurde und Passwörter. Kommerziell?
+Suchen Sie nach Domain und E-Mail und erfahren Sie, ob sie kompromittiert wurde und welche Passwörter. Kommerziell?
 
 ### [IP2Location.io](https://www.ip2location.io/)
 
 Es erkennt die IP-Geolokalisierung, Rechenzentrum, ASN und sogar VPN-Informationen. Es bietet 30K Abfragen pro Monat kostenlos an.
+
+### [IPQuery.io](https://www.ipquery.io/)
+IP-Geolokalisierung und OISNT mit gezielten Datenpunkten. Nicht kommerziell.
 
 [https://dnsdumpster.com/](https://dnsdumpster.com/)(in einem kommerziellen Tool?)
 
