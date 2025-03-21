@@ -4,11 +4,11 @@
 
 ## [ProjectHoneypot](https://www.projecthoneypot.org/)
 
-Unaweza kuuliza ikiwa IP inahusiana na shughuli za kutatanisha/mbaya. Bure kabisa.
+Unaweza kuuliza kama IP inahusiana na shughuli za kutatanisha/mbaya. Bure kabisa.
 
 ## [**BotScout**](http://botscout.com/api.htm)
 
-Angalia ikiwa anwani ya IP inahusiana na bot inayosajili akaunti. Inaweza pia kuangalia majina ya watumiaji na barua pepe. Kwanza bure.
+Angalia kama anwani ya IP inahusiana na bot inayosajili akaunti. Inaweza pia kuangalia majina ya watumiaji na barua pepe. Kwanza bure.
 
 ## [Hunter](https://hunter.io/)
 
@@ -33,20 +33,20 @@ Kibiashara?
 
 ## [Fraudguard](https://fraudguard.io/)
 
-Angalia ikiwa mwenyeji (domain au IP) anahusiana na shughuli za kutatanisha/mbaya. Ina upatikanaji wa bure wa API.\
+Angalia kama mwenyeji (domain au IP) anahusiana na shughuli za kutatanisha/mbaya. Ina upatikanaji wa bure wa API.\
 Kibiashara?
 
 ## [FortiGuard](https://fortiguard.com/)
 
-Angalia ikiwa mwenyeji (domain au IP) anahusiana na shughuli za kutatanisha/mbaya. Ina upatikanaji wa bure wa API.
+Angalia kama mwenyeji (domain au IP) anahusiana na shughuli za kutatanisha/mbaya. Ina upatikanaji wa bure wa API.
 
 ## [SpamCop](https://www.spamcop.net/)
 
-Inaonyesha ikiwa mwenyeji anahusiana na shughuli za spam. Ina upatikanaji wa bure wa API.
+Inaonyesha kama mwenyeji anahusiana na shughuli za spam. Ina upatikanaji wa bure wa API.
 
 ## [mywot](https://www.mywot.com/)
 
-Kulingana na maoni na vipimo vingine pata ikiwa domain inahusiana na taarifa za kutatanisha/mbaya.
+Kulingana na maoni na vipimo vingine pata kama domain inahusiana na taarifa za kutatanisha/mbaya.
 
 ## [ipinfo](https://ipinfo.io/)
 
@@ -79,11 +79,11 @@ Tafuta kwa IP au anuwai ya IP na pata taarifa kuhusu IPs zinazoskanisha Mtandao.
 
 ## [Shodan](https://www.shodan.io/)
 
-Pata taarifa za skana za anwani ya IP. Ina upatikanaji wa bure wa api.
+Pata taarifa za skana za anwani ya IP. Ina upatikanaji wa bure wa API.
 
 ## [Censys](https://censys.io/)
 
-Inafanana sana na shodan
+Ni sawa sana na shodan
 
 ## [buckets.grayhatwarfare.com](https://buckets.grayhatwarfare.com/)
 
@@ -91,7 +91,7 @@ Pata ndoo za S3 zilizo wazi kwa kutafuta kwa neno muhimu.
 
 ## [Dehashed](https://www.dehashed.com/data)
 
-Pata akidi zilizovuja za barua pepe na hata domains\
+Pata taarifa za kuvuja za barua pepe na hata domains\
 Kibiashara?
 
 ## [psbdmp](https://psbdmp.ws/)
@@ -112,16 +112,20 @@ Pata taarifa za kuvutia kutoka kwa IPs
 
 ## [haveibeenpwned](https://haveibeenpwned.com/)
 
-Tafuta kwa domain na barua pepe na pata ikiwa imepata na nywila. Kibiashara?
+Tafuta kwa domain na barua pepe na pata kama ilipatikana na nywila. Kibiashara?
 
 ### [IP2Location.io](https://www.ip2location.io/)
 
 Inagundua geolocation ya IP, kituo cha data, ASN na hata taarifa za VPN. Inatoa maswali 30K bure kwa mwezi.
 
-[https://dnsdumpster.com/](https://dnsdumpster.com/)(katika zana ya kibiashara?)
+### [IPQuery.io](https://www.ipquery.io/)
+Geolocation ya IP na OISNT na datapoints zilizolengwa. Si kibiashara.
 
-[https://www.netcraft.com/](https://www.netcraft.com/) (katika zana ya kibiashara?)
 
-[https://www.nmmapper.com/sys/tools/subdomainfinder/](https://www.nmmapper.com/) (katika zana ya kibiashara?)
+[https://dnsdumpster.com/](https://dnsdumpster.com/)(katika chombo cha kibiashara?)
+
+[https://www.netcraft.com/](https://www.netcraft.com/) (katika chombo cha kibiashara?)
+
+[https://www.nmmapper.com/sys/tools/subdomainfinder/](https://www.nmmapper.com/) (katika chombo cha kibiashara?)
 
 {{#include ../banners/hacktricks-training.md}}
