@@ -50,11 +50,11 @@ Görüşler ve diğer metriklere dayanarak bir alan adının şüpheli/kötü ni
 
 ## [ipinfo](https://ipinfo.io/)
 
-Bir IP adresinden temel bilgileri elde edin. Ayda 100K'a kadar test edebilirsiniz.
+Bir IP adresinden temel bilgileri elde edin. Aylık 100K'a kadar test edebilirsiniz.
 
 ## [securitytrails](https://securitytrails.com/app/account)
 
-Bu platform, bir IP içindeki veya bir alan adı sunucusundaki alan adları gibi alan adları ve IP adresleri hakkında bilgi verir, bir e-posta ile sahip olunan alan adlarını (ilişkili alan adlarını bulun), alanların IP geçmişini (CloudFlare arkasındaki ana bilgisayarı bulun), tüm alan adlarını bir nameserver kullanarak....\
+Bu platform, bir IP içindeki veya bir alan adı sunucusundaki alan adları, bir e-posta ile sahip olunan alan adları (ilişkili alan adlarını bulma), alanların IP geçmişi (CloudFlare arkasındaki ana bilgisayarı bulma), tüm alan adları için bir nameserver kullanma gibi alanlar ve IP adresleri hakkında bilgi verir....\
 Bazı ücretsiz erişiminiz var.
 
 ## [fullcontact](https://www.fullcontact.com/)
@@ -83,7 +83,7 @@ Bir IP adresinin tarama bilgilerini alın. Bazı ücretsiz API erişimi mevcut.
 
 ## [Censys](https://censys.io/)
 
-Shodan'a çok benzer
+Shodan'a çok benzer.
 
 ## [buckets.grayhatwarfare.com](https://buckets.grayhatwarfare.com/)
 
@@ -91,7 +91,7 @@ Anahtar kelime ile arama yaparak açık S3 kovalarını bulun.
 
 ## [Dehashed](https://www.dehashed.com/data)
 
-Sızdırılan e-posta ve hatta alan adlarının kimlik bilgilerini bulun.\
+E-postaların ve hatta alan adlarının sızdırılmış kimlik bilgilerini bulun.\
 Ticari mi?
 
 ## [psbdmp](https://psbdmp.ws/)
@@ -104,7 +104,7 @@ Bir e-postanın itibarını alın. Ticari mi?
 
 ## [ghostproject](https://ghostproject.fr/)
 
-Sızdırılan e-postalardan şifreleri alın. Ticari mi?
+Sızdırılmış e-postalardan şifreleri alın. Ticari mi?
 
 ## [Binaryedge](https://www.binaryedge.io/)
 
@@ -116,7 +116,11 @@ Alan adı ve e-posta ile arama yapın ve pwned olup olmadığını ve şifreleri
 
 ### [IP2Location.io](https://www.ip2location.io/)
 
-IP coğrafi konumunu, veri merkezini, ASN ve hatta VPN bilgilerini tespit eder. Ayda 30K ücretsiz sorgu sunar.
+IP coğrafi konumunu, veri merkezini, ASN ve hatta VPN bilgilerini tespit eder. Aylık 30K sorgu ücretsiz sunar.
+
+### [IPQuery.io](https://www.ipquery.io/)
+Hedeflenmiş veri noktaları ile IP Coğrafi Konumu ve OISNT. Ticari değil.
+
 
 [https://dnsdumpster.com/](https://dnsdumpster.com/)(ticari bir araçta mı?)
 
