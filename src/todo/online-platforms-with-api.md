@@ -1,4 +1,4 @@
-# APIを持つオンラインプラットフォーム
+# オンラインプラットフォームとAPI
 
 {{#include ../banners/hacktricks-training.md}}
 
@@ -22,8 +22,8 @@ IPやドメインに関連する悪意のある活動を見つけます。無料
 
 ## [Clearbit](https://dashboard.clearbit.com/)
 
-メールに関連する個人データ（他のプラットフォームのプロフィール）、ドメイン（基本的な会社情報、メール、従業員）および会社（メールから会社情報を取得）を見つけます。\
-すべての機能にアクセスするには支払いが必要です。\
+メールに関連する個人データ（他のプラットフォームのプロフィール）、ドメイン（基本的な会社情報、メール、働いている人）、および会社（メールから会社情報を取得）を見つけます。\
+すべての可能性にアクセスするには支払いが必要です。\
 商業用？
 
 ## [BuiltWith](https://builtwith.com/)
@@ -59,11 +59,11 @@ IPアドレスから基本情報を取得します。月に最大100Kまでテ�
 
 ## [fullcontact](https://www.fullcontact.com/)
 
-メール、ドメイン、会社名で検索し、関連する「個人」情報を取得します。メールの確認もできます。いくつかの無料アクセスがあります。
+メール、ドメイン、または会社名で検索し、関連する「個人」情報を取得します。メールの確認もできます。いくつかの無料アクセスがあります。
 
 ## [RiskIQ](https://www.spiderfoot.net/documentation/)
 
-ドメインやIPに関する多くの情報があり、無料/コミュニティ版でも利用可能です。
+ドメインやIPに関する多くの情報が、無料/コミュニティ版でも得られます。
 
 ## [\_IntelligenceX](https://intelx.io/)
 
@@ -87,7 +87,7 @@ Shodanに非常に似ています。
 
 ## [buckets.grayhatwarfare.com](https://buckets.grayhatwarfare.com/)
 
-キーワードで検索してオープンなS3バケットを見つけます。
+キーワードで検索してオープンS3バケットを見つけます。
 
 ## [Dehashed](https://www.dehashed.com/data)
 
@@ -116,7 +116,10 @@ IPから興味深い情報を取得します。
 
 ### [IP2Location.io](https://www.ip2location.io/)
 
-IPのジオロケーション、データセンター、ASN、さらにはVPN情報を検出します。月に30Kの無料クエリを提供します。
+IPのジオロケーション、データセンター、ASN、さらにはVPN情報を検出します。月に30Kのクエリが無料で提供されます。
+
+### [IPQuery.io](https://www.ipquery.io/)
+IPジオロケーションとOISNTをターゲットデータポイントで提供します。非商業用。
 
 [https://dnsdumpster.com/](https://dnsdumpster.com/)(商業ツール内？)
 
