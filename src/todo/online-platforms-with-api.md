@@ -59,7 +59,7 @@ Vous avez un accès gratuit.
 
 ## [fullcontact](https://www.fullcontact.com/)
 
-Permet de rechercher par e-mail, domaine ou nom d'entreprise et de récupérer des informations "personnelles" liées. Il peut également vérifier les e-mails. Il y a un accès gratuit.
+Permet de rechercher par e-mail, domaine ou nom d'entreprise et de récupérer des informations "personnelles" liées. Il peut également vérifier des e-mails. Il y a un accès gratuit.
 
 ## [RiskIQ](https://www.spiderfoot.net/documentation/)
 
@@ -117,6 +117,10 @@ Recherchez par domaine et e-mail et obtenez s'il a été compromis et les mots d
 ### [IP2Location.io](https://www.ip2location.io/)
 
 Il détecte la géolocalisation IP, le centre de données, l'ASN et même les informations VPN. Il offre 30K requêtes gratuites par mois.
+
+### [IPQuery.io](https://www.ipquery.io/)
+Géolocalisation IP et OISNT avec des points de données ciblés. Non commercial.
+
 
 [https://dnsdumpster.com/](https://dnsdumpster.com/)(dans un outil commercial?)
 
