@@ -4,7 +4,7 @@
 
 ## [ProjectHoneypot](https://www.projecthoneypot.org/)
 
-Puedes preguntar si una IP está relacionada con actividades sospechosas/maliciosas. Totalmente gratis.
+Puedes preguntar si una IP está relacionada con actividades sospechosas/maliciosas. Completamente gratis.
 
 ## [**BotScout**](http://botscout.com/api.htm)
 
@@ -33,20 +33,20 @@ Tecnologías utilizadas por sitios web. Caro...\
 
 ## [Fraudguard](https://fraudguard.io/)
 
-Verifica si un host (dominio o IP) está relacionado con actividades sospechosas/maliciosas. Tiene algo de acceso gratuito a la API.\
+Verifica si un host (dominio o IP) está relacionado con actividades sospechosas/maliciosas. Tiene acceso gratuito a algunas API.\
 ¿Comercial?
 
 ## [FortiGuard](https://fortiguard.com/)
 
-Verifica si un host (dominio o IP) está relacionado con actividades sospechosas/maliciosas. Tiene algo de acceso gratuito a la API.
+Verifica si un host (dominio o IP) está relacionado con actividades sospechosas/maliciosas. Tiene acceso gratuito a algunas API.
 
 ## [SpamCop](https://www.spamcop.net/)
 
-Indica si el host está relacionado con actividad de spam. Tiene algo de acceso gratuito a la API.
+Indica si el host está relacionado con actividad de spam. Tiene acceso gratuito a algunas API.
 
 ## [mywot](https://www.mywot.com/)
 
-Basado en opiniones y otros métricas, determina si un dominio está relacionado con información sospechosa/maliciosa.
+Basado en opiniones y otras métricas, determina si un dominio está relacionado con información sospechosa/maliciosa.
 
 ## [ipinfo](https://ipinfo.io/)
 
@@ -54,12 +54,12 @@ Obtiene información básica de una dirección IP. Puedes probar hasta 100K/mes.
 
 ## [securitytrails](https://securitytrails.com/app/account)
 
-Esta plataforma proporciona información sobre dominios y direcciones IP, como dominios dentro de una IP o dentro de un servidor de dominio, dominios propiedad de un correo electrónico (encuentra dominios relacionados), historial de IP de dominios (encuentra el host detrás de CloudFlare), todos los dominios que utilizan un nameserver....\
-Tienes algo de acceso gratuito.
+Esta plataforma proporciona información sobre dominios y direcciones IP, como dominios dentro de una IP o dentro de un servidor de dominio, dominios propiedad de un correo electrónico (encuentra dominios relacionados), historial de IP de dominios (encuentra el host detrás de CloudFlare), todos los dominios que utilizan un servidor de nombres....\
+Tienes acceso gratuito.
 
 ## [fullcontact](https://www.fullcontact.com/)
 
-Permite buscar por correo electrónico, dominio o nombre de empresa y recuperar información "personal" relacionada. También puede verificar correos electrónicos. Hay algo de acceso gratuito.
+Permite buscar por correo electrónico, dominio o nombre de empresa y recuperar información "personal" relacionada. También puede verificar correos electrónicos. Hay acceso gratuito.
 
 ## [RiskIQ](https://www.spiderfoot.net/documentation/)
 
@@ -67,11 +67,11 @@ Mucha información de dominios e IPs incluso en la versión gratuita/comunitaria
 
 ## [\_IntelligenceX](https://intelx.io/)
 
-Busca dominios, IPs y correos electrónicos y obtiene información de dumps. Tiene algo de acceso gratuito.
+Busca dominios, IPs y correos electrónicos y obtiene información de filtraciones. Tiene acceso gratuito.
 
 ## [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/)
 
-Busca por IP y recopila información relacionada con actividades sospechosas. Hay algo de acceso gratuito.
+Busca por IP y recopila información relacionada con actividades sospechosas. Hay acceso gratuito.
 
 ## [Greynoise](https://viz.greynoise.io/)
 
@@ -79,7 +79,7 @@ Busca por IP o rango de IP y obtiene información sobre IPs que escanean Interne
 
 ## [Shodan](https://www.shodan.io/)
 
-Obtén información de escaneo de una dirección IP. Tiene algo de acceso gratuito a la API.
+Obtén información de escaneo de una dirección IP. Tiene acceso gratuito a algunas API.
 
 ## [Censys](https://censys.io/)
 
@@ -117,6 +117,9 @@ Busca por dominio y correo electrónico y verifica si ha sido comprometido y con
 ### [IP2Location.io](https://www.ip2location.io/)
 
 Detecta la geolocalización de IP, centro de datos, ASN e incluso información de VPN. Ofrece 30K consultas gratuitas por mes.
+
+### [IPQuery.io](https://www.ipquery.io/)
+Geolocalización de IP y OISNT con puntos de datos específicos. No comercial.
 
 [https://dnsdumpster.com/](https://dnsdumpster.com/)(¿en una herramienta comercial?)
 
