@@ -96,7 +96,7 @@ Komercijalno?
 
 ## [psbdmp](https://psbdmp.ws/)
 
-Pretražujte pastebine gde se e-mail pojavio. Komercijalno?
+Pretražujte pastebine gde se pojavio e-mail. Komercijalno?
 
 ## [emailrep.io](https://emailrep.io/key)
 
@@ -117,6 +117,10 @@ Pretražujte po domenu i e-mailu i saznajte da li je bio provaljen i lozinke. Ko
 ### [IP2Location.io](https://www.ip2location.io/)
 
 Detektuje geolokaciju IP-a, data centar, ASN i čak VPN informacije. Nudi besplatno 30K upita mesečno.
+
+### [IPQuery.io](https://www.ipquery.io/)
+Geolokacija IP-a i OISNT sa ciljanjem podataka. Ne komercijalno.
+
 
 [https://dnsdumpster.com/](https://dnsdumpster.com/)(u komercijalnom alatu?)
 
