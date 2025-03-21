@@ -71,7 +71,7 @@ Cerca domini, IP ed email e ottieni informazioni da dump. Ha un accesso gratuito
 
 ## [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/)
 
-Cerca per IP e raccogli informazioni relative ad attività sospette. C'è un accesso gratuito.
+Cerca per IP e raccogli informazioni correlate ad attività sospette. C'è un accesso gratuito.
 
 ## [Greynoise](https://viz.greynoise.io/)
 
@@ -117,6 +117,10 @@ Cerca per dominio e email e verifica se è stato compromesso e le password. Comm
 ### [IP2Location.io](https://www.ip2location.io/)
 
 Rileva geolocalizzazione IP, data center, ASN e persino informazioni VPN. Offre 30K query gratuite al mese.
+
+### [IPQuery.io](https://www.ipquery.io/)
+Geolocalizzazione IP e OISNT con punti dati mirati. Non commerciale.
+
 
 [https://dnsdumpster.com/](https://dnsdumpster.com/)(in uno strumento commerciale?)
 
