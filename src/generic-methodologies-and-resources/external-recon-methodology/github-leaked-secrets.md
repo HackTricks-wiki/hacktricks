@@ -2,16 +2,13 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-अब जब हमने अपने दायरे के संपत्तियों की सूची बना ली है, तो कुछ OSINT कम-से-कम फलों की खोज करने का समय है।
-
-### पहले से लीक के लिए खोजी गई प्लेटफार्म
-
-- [https://trufflesecurity.com/blog/introducing-forager/](https://trufflesecurity.com/blog/introducing-forager/)
-
-### Github में Api keys लीक
+### गिट रिपोजिटरी और फ़ाइल सिस्टम में रहस्यों को खोजने के लिए उपकरण
 
 - [https://github.com/dxa4481/truffleHog](https://github.com/dxa4481/truffleHog)
 - [https://github.com/gitleaks/gitleaks](https://github.com/gitleaks/gitleaks)
+- [https://github.com/praetorian-inc/noseyparker](https://github.com/praetorian-inc/noseyparker)
+- [https://github.com/GitGuardian/ggshield](https://github.com/GitGuardian/ggshield)
+- [https://github.com/JaimePolop/RExpository](https://github.com/JaimePolop/RExpository)
 - [https://github.com/Yelp/detect-secrets](https://github.com/Yelp/detect-secrets)
 - [https://github.com/hisxo/gitGraber](https://github.com/hisxo/gitGraber)
 - [https://github.com/eth0izzle/shhgit](https://github.com/eth0izzle/shhgit)
