@@ -2,16 +2,14 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Jetzt, da wir die Liste der Vermögenswerte unseres Umfangs erstellt haben, ist es an der Zeit, nach einigen OSINT-Niedrighängenden Früchten zu suchen.
 
-### Plattformen, die bereits nach Leaks gesucht haben
-
-- [https://trufflesecurity.com/blog/introducing-forager/](https://trufflesecurity.com/blog/introducing-forager/)
-
-### Api-Schlüssel-Leaks in Github
+### Tools zum Finden von Geheimnissen in Git-Repos und Dateisystemen
 
 - [https://github.com/dxa4481/truffleHog](https://github.com/dxa4481/truffleHog)
 - [https://github.com/gitleaks/gitleaks](https://github.com/gitleaks/gitleaks)
+- [https://github.com/praetorian-inc/noseyparker](https://github.com/praetorian-inc/noseyparker)
+- [https://github.com/GitGuardian/ggshield](https://github.com/GitGuardian/ggshield)
+- [https://github.com/JaimePolop/RExpository](https://github.com/JaimePolop/RExpository)
 - [https://github.com/Yelp/detect-secrets](https://github.com/Yelp/detect-secrets)
 - [https://github.com/hisxo/gitGraber](https://github.com/hisxo/gitGraber)
 - [https://github.com/eth0izzle/shhgit](https://github.com/eth0izzle/shhgit)
