@@ -3,17 +3,13 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 
-
-Sasa kwamba tumeshajenga orodha ya mali za wigo wetu, ni wakati wa kutafuta matunda ya OSINT yaliyo rahisi kufikia.
-
-### Majukwaa ambayo tayari yamefanya utafutaji wa leaks
-
-- [https://trufflesecurity.com/blog/introducing-forager/](https://trufflesecurity.com/blog/introducing-forager/)
-
-### Mvuwa ya api keys katika github
+### Zana za kutafuta siri katika git repos na mfumo wa faili
 
 - [https://github.com/dxa4481/truffleHog](https://github.com/dxa4481/truffleHog)
 - [https://github.com/gitleaks/gitleaks](https://github.com/gitleaks/gitleaks)
+- [https://github.com/praetorian-inc/noseyparker](https://github.com/praetorian-inc/noseyparker)
+- [https://github.com/GitGuardian/ggshield](https://github.com/GitGuardian/ggshield)
+- [https://github.com/JaimePolop/RExpository](https://github.com/JaimePolop/RExpository)
 - [https://github.com/Yelp/detect-secrets](https://github.com/Yelp/detect-secrets)
 - [https://github.com/hisxo/gitGraber](https://github.com/hisxo/gitGraber)
 - [https://github.com/eth0izzle/shhgit](https://github.com/eth0izzle/shhgit)
