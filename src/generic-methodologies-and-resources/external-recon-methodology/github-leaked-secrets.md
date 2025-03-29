@@ -2,16 +2,13 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Artık kapsamımızdaki varlıkların listesini oluşturduğumuza göre, bazı OSINT düşük-hanging meyvelerini arama zamanı.
-
-### Zaten sızıntıları arayan platformlar
-
-- [https://trufflesecurity.com/blog/introducing-forager/](https://trufflesecurity.com/blog/introducing-forager/)
-
-### Github'daki api anahtarları sızıntıları
+### Git repos ve dosya sisteminde gizli bilgileri bulmak için araçlar
 
 - [https://github.com/dxa4481/truffleHog](https://github.com/dxa4481/truffleHog)
 - [https://github.com/gitleaks/gitleaks](https://github.com/gitleaks/gitleaks)
+- [https://github.com/praetorian-inc/noseyparker](https://github.com/praetorian-inc/noseyparker)
+- [https://github.com/GitGuardian/ggshield](https://github.com/GitGuardian/ggshield)
+- [https://github.com/JaimePolop/RExpository](https://github.com/JaimePolop/RExpository)
 - [https://github.com/Yelp/detect-secrets](https://github.com/Yelp/detect-secrets)
 - [https://github.com/hisxo/gitGraber](https://github.com/hisxo/gitGraber)
 - [https://github.com/eth0izzle/shhgit](https://github.com/eth0izzle/shhgit)
