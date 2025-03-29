@@ -2,18 +2,13 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-
-
-Τώρα που έχουμε δημιουργήσει τη λίστα των περιουσιακών στοιχείων του πεδίου μας, είναι καιρός να αναζητήσουμε μερικούς καρπούς OSINT που είναι εύκολα προσβάσιμοι.
-
-### Πλατφόρμες που έχουν ήδη αναζητήσει διαρροές
-
-- [https://trufflesecurity.com/blog/introducing-forager/](https://trufflesecurity.com/blog/introducing-forager/)
-
-### Διαρροές κλειδιών API στο github
+### Εργαλεία για να βρείτε μυστικά σε git repos και το σύστημα αρχείων
 
 - [https://github.com/dxa4481/truffleHog](https://github.com/dxa4481/truffleHog)
 - [https://github.com/gitleaks/gitleaks](https://github.com/gitleaks/gitleaks)
+- [https://github.com/praetorian-inc/noseyparker](https://github.com/praetorian-inc/noseyparker)
+- [https://github.com/GitGuardian/ggshield](https://github.com/GitGuardian/ggshield)
+- [https://github.com/JaimePolop/RExpository](https://github.com/JaimePolop/RExpository)
 - [https://github.com/Yelp/detect-secrets](https://github.com/Yelp/detect-secrets)
 - [https://github.com/hisxo/gitGraber](https://github.com/hisxo/gitGraber)
 - [https://github.com/eth0izzle/shhgit](https://github.com/eth0izzle/shhgit)
