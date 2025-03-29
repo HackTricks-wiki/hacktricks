@@ -2,16 +2,13 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Maintenant que nous avons construit la liste des actifs de notre périmètre, il est temps de rechercher des fruits à portée de main en OSINT.
-
-### Plates-formes qui ont déjà recherché des fuites
-
-- [https://trufflesecurity.com/blog/introducing-forager/](https://trufflesecurity.com/blog/introducing-forager/)
-
-### Fuites de clés API sur github
+### Outils pour trouver des secrets dans les dépôts git et le système de fichiers
 
 - [https://github.com/dxa4481/truffleHog](https://github.com/dxa4481/truffleHog)
 - [https://github.com/gitleaks/gitleaks](https://github.com/gitleaks/gitleaks)
+- [https://github.com/praetorian-inc/noseyparker](https://github.com/praetorian-inc/noseyparker)
+- [https://github.com/GitGuardian/ggshield](https://github.com/GitGuardian/ggshield)
+- [https://github.com/JaimePolop/RExpository](https://github.com/JaimePolop/RExpository)
 - [https://github.com/Yelp/detect-secrets](https://github.com/Yelp/detect-secrets)
 - [https://github.com/hisxo/gitGraber](https://github.com/hisxo/gitGraber)
 - [https://github.com/eth0izzle/shhgit](https://github.com/eth0izzle/shhgit)
