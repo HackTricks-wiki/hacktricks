@@ -2,18 +2,13 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-
-
-Ahora que hemos construido la lista de activos de nuestro alcance, es hora de buscar algunos frutos bajos de OSINT.
-
-### Plataformas que ya buscaron filtraciones
-
-- [https://trufflesecurity.com/blog/introducing-forager/](https://trufflesecurity.com/blog/introducing-forager/)
-
-### Filtraciones de claves API en github
+### Herramientas para encontrar secretos en repositorios de git y sistemas de archivos
 
 - [https://github.com/dxa4481/truffleHog](https://github.com/dxa4481/truffleHog)
 - [https://github.com/gitleaks/gitleaks](https://github.com/gitleaks/gitleaks)
+- [https://github.com/praetorian-inc/noseyparker](https://github.com/praetorian-inc/noseyparker)
+- [https://github.com/GitGuardian/ggshield](https://github.com/GitGuardian/ggshield)
+- [https://github.com/JaimePolop/RExpository](https://github.com/JaimePolop/RExpository)
 - [https://github.com/Yelp/detect-secrets](https://github.com/Yelp/detect-secrets)
 - [https://github.com/hisxo/gitGraber](https://github.com/hisxo/gitGraber)
 - [https://github.com/eth0izzle/shhgit](https://github.com/eth0izzle/shhgit)
