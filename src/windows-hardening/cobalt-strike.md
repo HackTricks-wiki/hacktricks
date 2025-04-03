@@ -138,6 +138,8 @@ jump [method] [target] [listener]
 ## psexec_psh                x86   Use a service to run a PowerShell one-liner
 ## winrm                     x86   Run a PowerShell script via WinRM
 ## winrm64                   x64   Run a PowerShell script via WinRM
+## wmi_msbuild               x64   wmi lateral movement with msbuild inline c# task (oppsec)
+
 
 remote-exec [method] [target] [command]
 ## Methods:
