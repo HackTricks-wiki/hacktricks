@@ -53,7 +53,7 @@ foreach ($Task in $Tasks)
 
 Checking the output you can select one that is going to be executed **every time a user logs in** for example.
 
-Now searching for the CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}** in **HKEY\_**_**CLASSES\_**_**ROOT\CLSID** and in HKLM and HKCU, you usually will find that the value doesn't exist in HKCU.
+Now searching for the CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}** in **HKEY\CLASSES\ROOT\CLSID** and in HKLM and HKCU, you usually will find that the value doesn't exist in HKCU.
 
 ```bash
 # Exists in HKCR\CLSID\

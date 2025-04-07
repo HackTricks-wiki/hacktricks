@@ -431,6 +431,8 @@ Therefore, if you want to abuse entitlements to access the camera or microphone 
 
 ## Automatic Injection
 
+- [**electroniz3r**](https://github.com/r3ggi/electroniz3r)
+
 The tool [**electroniz3r**](https://github.com/r3ggi/electroniz3r) can be easily used to **find vulnerable electron applications** installed and inject code on them. This tool will try to use the **`--inspect`** technique:
 
 You need to compile it yourself and can use it like this:
@@ -470,6 +472,12 @@ You can now kill the app using `kill -9 57739`
 The webSocketDebuggerUrl is: ws://127.0.0.1:13337/8e0410f0-00e8-4e0e-92e4-58984daf37e5
 Shell binding requested. Check `nc 127.0.0.1 12345`
 ```
+
+
+- [https://github.com/boku7/Loki](https://github.com/boku7/Loki)
+
+Loki was designed to backdoor Electron applications by replacing the applications JavaScript files with the Loki Command & Control JavaScript files.
+
 
 ## References
 
