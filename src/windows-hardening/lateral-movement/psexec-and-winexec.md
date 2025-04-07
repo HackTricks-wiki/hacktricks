@@ -1,4 +1,4 @@
-# PsExec/Winexec/ScExec
+# PsExec/Winexec/ScExec/SMBExec
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -13,24 +13,37 @@
 
 ### **PsExec को मैन्युअल रूप से निष्पादित करने की प्रक्रिया**
 
-मान लेते हैं कि एक निष्पादन योग्य पेलोड (जो msfvenom के साथ बनाया गया है और एंटीवायरस पहचान से बचने के लिए Veil का उपयोग करके छिपाया गया है), जिसका नाम 'met8888.exe' है, जो एक मीटरप्रीटर रिवर्स_http पेलोड का प्रतिनिधित्व करता है, निम्नलिखित चरण उठाए जाते हैं:
+मान लेते हैं कि एक निष्पादन योग्य पेलोड है (जो msfvenom के साथ बनाया गया है और एंटीवायरस पहचान से बचने के लिए Veil का उपयोग करके छिपाया गया है), जिसका नाम 'met8888.exe' है, जो एक मीटरप्रीटर रिवर्स_http पेलोड का प्रतिनिधित्व करता है, निम्नलिखित चरण उठाए जाते हैं:
 
-- **बाइनरी की कॉपी करना**: निष्पादन योग्य को एक कमांड प्रॉम्प्ट से ADMIN$ शेयर पर कॉपी किया जाता है, हालांकि इसे फ़ाइल सिस्टम पर कहीं भी रखा जा सकता है ताकि यह छिपा रहे।
+- **बाइनरी की कॉपी करना**: निष्पादन योग्य को कमांड प्रॉम्प्ट से ADMIN$ शेयर में कॉपी किया जाता है, हालांकि इसे फ़ाइल सिस्टम पर कहीं भी रखा जा सकता है ताकि यह छिपा रहे।
+- बाइनरी की कॉपी करने के बजाय, सीधे तर्कों से आदेश निष्पादित करने के लिए `powershell.exe` या `cmd.exe` जैसे LOLBAS बाइनरी का उपयोग करना भी संभव है। उदाहरण: `sc create [ServiceName] binPath= "cmd.exe /c [PayloadCommand]"`
 - **एक सेवा बनाना**: Windows `sc` कमांड का उपयोग करते हुए, जो दूरस्थ रूप से Windows सेवाओं को क्वेरी, बनाने और हटाने की अनुमति देता है, "meterpreter" नामक एक सेवा बनाई जाती है जो अपलोड की गई बाइनरी की ओर इशारा करती है।
-- **सेवा शुरू करना**: अंतिम चरण में सेवा को शुरू करना शामिल है, जो संभवतः "टाइम-आउट" त्रुटि का परिणाम देगा क्योंकि बाइनरी एक वास्तविक सेवा बाइनरी नहीं है और अपेक्षित प्रतिक्रिया कोड लौटाने में विफल रहती है। यह त्रुटि महत्वहीन है क्योंकि प्राथमिक लक्ष्य बाइनरी का निष्पादन है।
+- **सेवा शुरू करना**: अंतिम चरण में सेवा शुरू करना शामिल है, जो संभवतः "टाइम-आउट" त्रुटि का परिणाम देगा क्योंकि बाइनरी एक वास्तविक सेवा बाइनरी नहीं है और अपेक्षित प्रतिक्रिया कोड लौटाने में विफल रहती है। यह त्रुटि महत्वहीन है क्योंकि प्राथमिक लक्ष्य बाइनरी का निष्पादन है।
 
-Metasploit श्रोता का अवलोकन करने पर पता चलेगा कि सत्र सफलतापूर्वक आरंभ किया गया है।
+Metasploit श्रोता का अवलोकन करने से पता चलेगा कि सत्र सफलतापूर्वक आरंभ किया गया है।
 
 [Learn more about the `sc` command](https://technet.microsoft.com/en-us/library/bb490995.aspx).
 
 Find moe detailed steps in: [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
 
-**आप Windows Sysinternals बाइनरी PsExec.exe का भी उपयोग कर सकते हैं:**
+- आप **Windows Sysinternals बाइनरी PsExec.exe** का भी उपयोग कर सकते हैं:
 
 ![](<../../images/image (928).png>)
 
-आप [**SharpLateral**](https://github.com/mertdas/SharpLateral) का भी उपयोग कर सकते हैं:
+या इसे webddav के माध्यम से एक्सेस करें:
+```bash
+\\live.sysinternals.com\tools\PsExec64.exe -accepteula
+```
+- आप [**SharpLateral**](https://github.com/mertdas/SharpLateral) का भी उपयोग कर सकते हैं:
 ```bash
 SharpLateral.exe redexec HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe.exe malware.exe ServiceName
 ```
+- आप [**SharpMove**](https://github.com/0xthirteen/SharpMove) का भी उपयोग कर सकते हैं:
+```bash
+SharpMove.exe action=modsvc computername=remote.host.local command="C:\windows\temp\payload.exe" amsi=true servicename=TestService
+SharpMove.exe action=startservice computername=remote.host.local servicename=TestService
+```
+- आप **Impacket's `psexec` और `smbexec.py`** का भी उपयोग कर सकते हैं।
+
+
 {{#include ../../banners/hacktricks-training.md}}

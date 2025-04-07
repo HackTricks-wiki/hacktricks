@@ -4,15 +4,15 @@
 
 एक लिनक्स मशीन भी एक Active Directory वातावरण के अंदर मौजूद हो सकती है।
 
-एक AD में लिनक्स मशीन **फाइलों के अंदर विभिन्न CCACHE टिकटों को स्टोर कर सकती है। ये टिकट किसी अन्य kerberos टिकट की तरह उपयोग और दुरुपयोग किए जा सकते हैं**। इन टिकटों को पढ़ने के लिए, आपको टिकट का उपयोगकर्ता मालिक होना चाहिए या **root** होना चाहिए मशीन के अंदर।
+एक AD में लिनक्स मशीन **फाइलों के अंदर विभिन्न CCACHE टिकटों को स्टोर कर सकती है। ये टिकट किसी अन्य kerberos टिकट की तरह उपयोग और दुरुपयोग किए जा सकते हैं**। इन टिकटों को पढ़ने के लिए, आपको टिकट के उपयोगकर्ता मालिक या मशीन के अंदर **root** होना आवश्यक है।
 
 ## Enumeration
 
-### लिनक्स से AD enumeration
+### AD enumeration from linux
 
-यदि आपके पास लिनक्स (या Windows में bash) पर AD तक पहुंच है, तो आप AD को enumer करने के लिए [https://github.com/lefayjey/linWinPwn](https://github.com/lefayjey/linWinPwn) का प्रयास कर सकते हैं।
+यदि आपके पास लिनक्स (या Windows में bash) में AD पर पहुंच है, तो आप AD को सूचीबद्ध करने के लिए [https://github.com/lefayjey/linWinPwn](https://github.com/lefayjey/linWinPwn) का प्रयास कर सकते हैं।
 
-आप लिनक्स से AD को enumer करने के लिए **अन्य तरीकों** के बारे में जानने के लिए निम्नलिखित पृष्ठ की भी जांच कर सकते हैं:
+आप लिनक्स से AD को सूचीबद्ध करने के **अन्य तरीकों** के बारे में जानने के लिए निम्नलिखित पृष्ठ की भी जांच कर सकते हैं:
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-ldap.md
@@ -20,23 +20,23 @@
 
 ### FreeIPA
 
-FreeIPA एक ओपन-सोर्स **वैकल्पिक** है Microsoft Windows **Active Directory** के लिए, मुख्य रूप से **Unix** वातावरण के लिए। यह Active Directory के समान प्रबंधन के लिए एक पूर्ण **LDAP directory** को MIT **Kerberos** Key Distribution Center के साथ जोड़ता है। CA और RA प्रमाणपत्र प्रबंधन के लिए Dogtag **Certificate System** का उपयोग करते हुए, यह **multi-factor** प्रमाणीकरण का समर्थन करता है, जिसमें स्मार्टकार्ड शामिल हैं। Unix प्रमाणीकरण प्रक्रियाओं के लिए SSSD एकीकृत है। इसके बारे में अधिक जानें:
+FreeIPA एक ओपन-सोर्स **वैकल्पिक** है Microsoft Windows **Active Directory** के लिए, मुख्य रूप से **Unix** वातावरण के लिए। यह Active Directory के समान प्रबंधन के लिए एक पूर्ण **LDAP directory** को MIT **Kerberos** Key Distribution Center के साथ जोड़ता है। CA और RA प्रमाणपत्र प्रबंधन के लिए Dogtag **Certificate System** का उपयोग करते हुए, यह स्मार्टकार्ड सहित **multi-factor** प्रमाणीकरण का समर्थन करता है। Unix प्रमाणीकरण प्रक्रियाओं के लिए SSSD एकीकृत है। इसके बारे में अधिक जानें:
 
 {{#ref}}
 ../freeipa-pentesting.md
 {{#endref}}
 
-## टिकटों के साथ खेलना
+## Playing with tickets
 
 ### Pass The Ticket
 
-इस पृष्ठ पर आप विभिन्न स्थान पाएंगे जहाँ आप **एक लिनक्स होस्ट के अंदर kerberos टिकट पा सकते हैं**, अगले पृष्ठ पर आप सीख सकते हैं कि इन CCache टिकटों के प्रारूपों को Kirbi (विंडोज़ में उपयोग करने के लिए आवश्यक प्रारूप) में कैसे परिवर्तित किया जाए और PTT हमले को कैसे किया जाए:
+इस पृष्ठ पर आप विभिन्न स्थान पाएंगे जहाँ आप **एक लिनक्स होस्ट के अंदर kerberos टिकट पा सकते हैं**, अगले पृष्ठ पर आप जान सकते हैं कि इन CCache टिकटों के प्रारूपों को Kirbi (विंडोज़ में उपयोग करने के लिए आवश्यक प्रारूप) में कैसे परिवर्तित किया जाए और PTT हमले को कैसे किया जाए:
 
 {{#ref}}
 ../../windows-hardening/active-directory-methodology/pass-the-ticket.md
 {{#endref}}
 
-### /tmp से CCACHE टिकट पुन: उपयोग
+### CCACHE ticket reuse from /tmp
 
 CCACHE फ़ाइलें **Kerberos क्रेडेंशियल्स** को स्टोर करने के लिए बाइनरी प्रारूप हैं जो आमतौर पर `/tmp` में 600 अनुमतियों के साथ स्टोर की जाती हैं। इन फ़ाइलों की पहचान उनके **नाम प्रारूप, `krb5cc_%{uid}`,** द्वारा की जा सकती है, जो उपयोगकर्ता के UID से संबंधित है। प्रमाणीकरण टिकट सत्यापन के लिए, **पर्यावरण चर `KRB5CCNAME`** को इच्छित टिकट फ़ाइल के पथ पर सेट किया जाना चाहिए, जिससे इसका पुन: उपयोग सक्षम हो सके।
 
@@ -49,9 +49,9 @@ krb5cc_1000
 # Prepare to use it
 export KRB5CCNAME=/tmp/krb5cc_1000
 ```
-### CCACHE टिकट पुन: उपयोग कीजिए कीरिंग से
+### CCACHE टिकट पुन: उपयोग कीजिए की रिंग से
 
-**एक प्रक्रिया की मेमोरी में संग्रहीत Kerberos टिकट निकाले जा सकते हैं**, विशेष रूप से जब मशीन की ptrace सुरक्षा बंद हो (`/proc/sys/kernel/yama/ptrace_scope`)। इस उद्देश्य के लिए एक उपयोगी उपकरण [https://github.com/TarlogicSecurity/tickey](https://github.com/TarlogicSecurity/tickey) पर पाया जा सकता है, जो सत्रों में इंजेक्ट करके और `/tmp` में टिकटों को डंप करके निकासी को सुविधाजनक बनाता है।
+**किसी प्रक्रिया की मेमोरी में संग्रहीत Kerberos टिकटों को निकाला जा सकता है**, विशेष रूप से जब मशीन की ptrace सुरक्षा अक्षम होती है (`/proc/sys/kernel/yama/ptrace_scope`)। इस उद्देश्य के लिए एक उपयोगी उपकरण [https://github.com/TarlogicSecurity/tickey](https://github.com/TarlogicSecurity/tickey) पर पाया जा सकता है, जो सत्रों में इंजेक्ट करके और टिकटों को `/tmp` में डंप करके निकासी की सुविधा प्रदान करता है।
 
 इस उपकरण को कॉन्फ़िगर और उपयोग करने के लिए, नीचे दिए गए चरणों का पालन किया जाता है:
 ```bash
@@ -66,24 +66,24 @@ make CONF=Release
 
 SSSD `/var/lib/sss/secrets/secrets.ldb` पथ पर डेटाबेस की एक प्रति बनाए रखता है। संबंधित कुंजी `/var/lib/sss/secrets/.secrets.mkey` पथ पर एक छिपी हुई फ़ाइल के रूप में संग्रहीत होती है। डिफ़ॉल्ट रूप से, कुंजी केवल तब पढ़ी जा सकती है जब आपके पास **root** अनुमतियाँ हों।
 
-\*\*`SSSDKCMExtractor` \*\* को --database और --key पैरामीटर के साथ बुलाने से डेटाबेस को पार्स किया जाएगा और **गुप्त को डिक्रिप्ट** किया जाएगा।
+**`SSSDKCMExtractor`** को --database और --key पैरामीटर के साथ बुलाने से डेटाबेस को पार्स किया जाएगा और **गुप्त को डिक्रिप्ट** किया जाएगा।
 ```bash
 git clone https://github.com/fireeye/SSSDKCMExtractor
 python3 SSSDKCMExtractor.py --database secrets.ldb --key secrets.mkey
 ```
-**क्रेडेंशियल कैश कर्बेरोस ब्लॉब को एक उपयोगी कर्बेरोस CCACHE** फ़ाइल में परिवर्तित किया जा सकता है जिसे Mimikatz/Rubeus को पास किया जा सकता है।
+**क्रेडेंशियल कैश कर्बेरोस ब्लॉब को एक उपयोगी कर्बेरोस CCache** फ़ाइल में परिवर्तित किया जा सकता है जिसे Mimikatz/Rubeus को पास किया जा सकता है।
 
-### CCACHE टिकट पुन: उपयोग कीजिए कीटैब से
+### CCACHE टिकट पुन: उपयोग कीजटैब से
 ```bash
 git clone https://github.com/its-a-feature/KeytabParser
 python KeytabParser.py /etc/krb5.keytab
 klist -k /etc/krb5.keytab
 ```
-### /etc/krb5.keytab से खाते निकालें
+### Extract accounts from /etc/krb5.keytab
 
-सेवा खाता कुंजी, जो रूट विशेषाधिकारों के साथ काम करने वाली सेवाओं के लिए आवश्यक हैं, सुरक्षित रूप से **`/etc/krb5.keytab`** फ़ाइलों में संग्रहीत होती हैं। ये कुंजी, सेवाओं के लिए पासवर्ड के समान, कड़ी गोपनीयता की मांग करती हैं।
+Service account keys, essential for services operating with root privileges, are securely stored in **`/etc/krb5.keytab`** files. These keys, akin to passwords for services, demand strict confidentiality.
 
-कीटैब फ़ाइल की सामग्री की जांच करने के लिए, **`klist`** का उपयोग किया जा सकता है। यह उपकरण कुंजी विवरण प्रदर्शित करने के लिए डिज़ाइन किया गया है, जिसमें उपयोगकर्ता प्रमाणीकरण के लिए **NT Hash** शामिल है, विशेष रूप से जब कुंजी प्रकार को 23 के रूप में पहचाना जाता है।
+To inspect the keytab file's contents, **`klist`** can be employed. The tool is designed to display key details, including the **NT Hash** for user authentication, particularly when the key type is identified as 23.
 ```bash
 klist.exe -t -K -e -k FILE:C:/Path/to/your/krb5.keytab
 # Output includes service principal details and the NT Hash

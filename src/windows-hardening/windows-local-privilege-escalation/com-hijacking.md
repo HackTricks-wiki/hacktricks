@@ -4,7 +4,7 @@
 
 ### गैर-मौजूद COM घटकों की खोज
 
-चूंकि HKCU के मानों को उपयोगकर्ताओं द्वारा संशोधित किया जा सकता है, **COM Hijacking** को **स्थायी तंत्र** के रूप में उपयोग किया जा सकता है। `procmon` का उपयोग करके, उन खोजे गए COM रजिस्ट्रियों को ढूंढना आसान है जो मौजूद नहीं हैं और जिन्हें एक हमलावर स्थायी बनाने के लिए बना सकता है। फ़िल्टर:
+चूंकि HKCU के मानों को उपयोगकर्ताओं द्वारा संशोधित किया जा सकता है, **COM Hijacking** को **स्थायी तंत्र** के रूप में उपयोग किया जा सकता है। `procmon` का उपयोग करके, उन खोजे गए COM रजिस्ट्रियों को खोजना आसान है जो मौजूद नहीं हैं और जिन्हें एक हमलावर स्थायी बनाने के लिए बना सकता है। फ़िल्टर:
 
 - **RegOpenKey** संचालन।
 - जहाँ _Result_ **NAME NOT FOUND** है।
@@ -18,7 +18,7 @@ New-ItemProperty -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F
 ```
 ### Hijackable Task Scheduler COM components
 
-Windows Tasks Custom Triggers का उपयोग COM objects को कॉल करने के लिए करते हैं और चूंकि इन्हें Task Scheduler के माध्यम से निष्पादित किया जाता है, इसलिए यह अनुमान लगाना आसान होता है कि ये कब ट्रिगर होंगे।
+Windows Tasks Custom Triggers का उपयोग COM ऑब्जेक्ट्स को कॉल करने के लिए करते हैं और चूंकि इन्हें Task Scheduler के माध्यम से निष्पादित किया जाता है, इसलिए यह भविष्यवाणी करना आसान होता है कि ये कब ट्रिगर होंगे।
 
 <pre class="language-powershell"><code class="lang-powershell"># Show COM CLSIDs
 $Tasks = Get-ScheduledTask
@@ -49,9 +49,9 @@ Write-Host
 # CLSID:  {1936ED8A-BD93-3213-E325-F38D112938E1}
 # [more like the previous one...]</code></pre>
 
-आउटपुट की जांच करते समय, आप एक ऐसा चयन कर सकते हैं जो **हर बार एक उपयोगकर्ता लॉग इन करता है** उदाहरण के लिए।
+आउटपुट की जांच करते समय, आप एक ऐसा चयन कर सकते हैं जो **हर बार एक उपयोगकर्ता लॉग इन करता है** उदाहरण के लिए निष्पादित होने वाला है।
 
-अब **HKEY\_**_**CLASSES\_**_**ROOT\CLSID** और HKLM और HKCU में CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}** की खोज करते समय, आप आमतौर पर पाएंगे कि यह मान HKCU में मौजूद नहीं है।
+अब **HKEY\CLASSES\ROOT\CLSID** और HKLM और HKCU में CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}** की खोज करते समय, आप आमतौर पर पाएंगे कि यह मान HKCU में मौजूद नहीं है।
 ```bash
 # Exists in HKCR\CLSID\
 Get-ChildItem -Path "Registry::HKCR\CLSID\{1936ED8A-BD93-3213-E325-F38D112938EF}"

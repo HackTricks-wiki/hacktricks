@@ -4,42 +4,49 @@
 
 ## Unconstrained delegation
 
-यह एक विशेषता है जिसे एक Domain Administrator किसी भी **Computer** पर सेट कर सकता है जो डोमेन के अंदर है। फिर, जब भी कोई **उपयोगकर्ता उस Computer पर लॉगिन करता है**, उस उपयोगकर्ता का **TGT की एक प्रति** **DC द्वारा प्रदान किए गए TGS के अंदर भेजी जाएगी** **और LSASS में मेमोरी में सहेजी जाएगी**। इसलिए, यदि आपके पास मशीन पर Administrator विशेषाधिकार हैं, तो आप **टिकटों को डंप कर सकते हैं और किसी भी मशीन पर उपयोगकर्ताओं का अनुकरण कर सकते हैं**।
+यह एक विशेषता है जिसे एक डोमेन प्रशासक डोमेन के अंदर किसी भी **कंप्यूटर** पर सेट कर सकता है। फिर, जब भी कोई **उपयोगकर्ता उस कंप्यूटर पर लॉगिन करता है**, उस उपयोगकर्ता का **TGT की एक प्रति** **DC द्वारा प्रदान किए गए TGS के अंदर भेजी जाएगी** **और LSASS में मेमोरी में सहेजी जाएगी**। इसलिए, यदि आपके पास मशीन पर प्रशासक विशेषाधिकार हैं, तो आप **टिकटों को डंप कर सकते हैं और किसी भी मशीन पर उपयोगकर्ताओं का अनुकरण कर सकते हैं**।
 
-तो यदि एक डोमेन एडमिन "Unconstrained Delegation" विशेषता सक्रिय करके किसी Computer पर लॉगिन करता है, और आपके पास उस मशीन पर स्थानीय एडमिन विशेषाधिकार हैं, तो आप टिकट को डंप कर सकते हैं और डोमेन एडमिन का अनुकरण कहीं भी कर सकते हैं (डोमेन प्रिवेस्क)।
+तो यदि एक डोमेन प्रशासक "Unconstrained Delegation" विशेषता सक्रिय होने के साथ किसी कंप्यूटर पर लॉगिन करता है, और आपके पास उस मशीन के अंदर स्थानीय प्रशासक विशेषाधिकार हैं, तो आप टिकट को डंप कर सकते हैं और कहीं भी डोमेन प्रशासक का अनुकरण कर सकते हैं (डोमेन प्रिवेस्क)।
 
-आप इस विशेषता के साथ **Computer ऑब्जेक्ट्स को खोज सकते हैं** यह जांचकर कि [userAccountControl](<https://msdn.microsoft.com/en-us/library/ms680832(v=vs.85).aspx>) विशेषता में [ADS_UF_TRUSTED_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) शामिल है या नहीं। आप इसे ‘(userAccountControl:1.2.840.113556.1.4.803:=524288)’ LDAP फ़िल्टर के साथ कर सकते हैं, जो powerview करता है:
-
-<pre class="language-bash"><code class="lang-bash"># List unconstrained computers
+आप इस विशेषता के साथ **कंप्यूटर ऑब्जेक्ट्स को खोज सकते हैं** यह जांचकर कि [userAccountControl](<https://msdn.microsoft.com/en-us/library/ms680832(v=vs.85).aspx>) विशेषता में [ADS_UF_TRUSTED_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) शामिल है या नहीं। आप इसे ‘(userAccountControl:1.2.840.113556.1.4.803:=524288)’ LDAP फ़िल्टर के साथ कर सकते हैं, जो कि पॉवerview करता है:
+```bash
+# List unconstrained computers
 ## Powerview
-Get-NetComputer -Unconstrained #DCs हमेशा दिखाई देते हैं लेकिन प्रिवेस्क के लिए उपयोगी नहीं होते
-<strong>## ADSearch
-</strong>ADSearch.exe --search "(&(objectCategory=computer)(userAccountControl:1.2.840.113556.1.4.803:=524288))" --attributes samaccountname,dnshostname,operatingsystem
-<strong># Mimikatz के साथ टिकट निर्यात करें
-</strong>privilege::debug
-sekurlsa::tickets /export #अनुशंसित तरीका
-kerberos::list /export #एक और तरीका
+## A DCs always appear and might be useful to attack a DC from another compromised DC from a different domain (coercing the other DC to authenticate to it)
+Get-DomainComputer –Unconstrained –Properties name
+Get-DomainUser -LdapFilter '(userAccountControl:1.2.840.113556.1.4.803:=524288)'
 
-# लॉगिन की निगरानी करें और नए टिकट निर्यात करें
-.\Rubeus.exe monitor /targetuser:<username> /interval:10 #हर 10 सेकंड में नए TGT के लिए जांचें</code></pre>
+## ADSearch
+ADSearch.exe --search "(&(objectCategory=computer)(userAccountControl:1.2.840.113556.1.4.803:=524288))" --attributes samaccountname,dnshostname,operatingsystem
 
-**Mimikatz** या **Rubeus** के साथ Administrator (या पीड़ित उपयोगकर्ता) का टिकट मेमोरी में लोड करें **[**Pass the Ticket**](pass-the-ticket.md)** के लिए।\
+# Export tickets with Mimikatz
+## Access LSASS memory
+privilege::debug
+sekurlsa::tickets /export #Recommended way
+kerberos::list /export #Another way
+
+# Monitor logins and export new tickets
+## Doens't access LSASS memory directly, but uses Windows APIs
+Rubeus.exe dump
+Rubeus.exe monitor /interval:10 [/filteruser:<username>] #Check every 10s for new TGTs
+```
+Administrator (या पीड़ित उपयोगकर्ता) का टिकट **Mimikatz** या **Rubeus** के साथ मेमोरी में लोड करें [**Pass the Ticket**](pass-the-ticket.md)**.**\
 अधिक जानकारी: [https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/](https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/)\
 [**Unconstrained delegation के बारे में अधिक जानकारी ired.team पर।**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-unrestricted-kerberos-delegation)
 
-### **Force Authentication**
+### **प्रमाणन को मजबूर करें**
 
-यदि एक हमलावर **"Unconstrained Delegation" के लिए अनुमत एक कंप्यूटर को समझौता करने में सक्षम है**, तो वह **Print server** को **स्वचालित रूप से लॉगिन** करने के लिए **धोखा दे सकता है** जिससे **सर्वर की मेमोरी में एक TGT सहेजी जाएगी**।\
-फिर, हमलावर **उपयोगकर्ता Print server कंप्यूटर खाते का अनुकरण करने के लिए Pass the Ticket हमला कर सकता है**।
+यदि एक हमलावर **"Unconstrained Delegation"** के लिए अनुमति प्राप्त कंप्यूटर को **समझौता** करने में सक्षम है, तो वह **Print server** को **स्वचालित रूप से लॉगिन** करने के लिए **धोखा** दे सकता है **जिससे एक TGT** सर्वर की मेमोरी में सहेजा जाएगा।\
+फिर, हमलावर **Print server कंप्यूटर खाते का प्रतिनिधित्व करने के लिए Pass the Ticket हमला** कर सकता है।
 
 किसी भी मशीन के खिलाफ प्रिंट सर्वर को लॉगिन कराने के लिए आप [**SpoolSample**](https://github.com/leechristensen/SpoolSample) का उपयोग कर सकते हैं:
 ```bash
 .\SpoolSample.exe <printmachine> <unconstrinedmachine>
 ```
-यदि TGT एक डोमेन कंट्रोलर से है, तो आप एक [**DCSync attack**](acl-persistence-abuse/index.html#dcsync) कर सकते हैं और DC से सभी हैश प्राप्त कर सकते हैं।\
+यदि TGT एक डोमेन कंट्रोलर से है, तो आप [**DCSync हमला**](acl-persistence-abuse/index.html#dcsync) कर सकते हैं और DC से सभी हैश प्राप्त कर सकते हैं।\
 [**इस हमले के बारे में अधिक जानकारी ired.team पर।**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-dc-print-server-and-kerberos-delegation)
 
-**यहाँ प्रमाणीकरण को मजबूर करने के अन्य तरीके हैं:**
+यहाँ **प्रमाणीकरण को मजबूर करने** के अन्य तरीके खोजें:
 
 {{#ref}}
 printers-spooler-service-abuse.md

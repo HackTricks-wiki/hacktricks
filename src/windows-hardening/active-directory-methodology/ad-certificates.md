@@ -77,29 +77,29 @@ Certificates can be requested through:
 5. The **Network Device Enrollment Service** (NDES) for network devices, using the Simple Certificate Enrollment Protocol (SCEP).
 
 Windows users can also request certificates via the GUI (`certmgr.msc` or `certlm.msc`) or command-line tools (`certreq.exe` or PowerShell's `Get-Certificate` command).
-```powershell
+```bash
 # Example of requesting a certificate using PowerShell
 Get-Certificate -Template "User" -CertStoreLocation "cert:\\CurrentUser\\My"
 ```
-## प्रमाणपत्र प्रमाणीकरण
+## Certificate Authentication
 
 Active Directory (AD) प्रमाणपत्र प्रमाणीकरण का समर्थन करता है, मुख्य रूप से **Kerberos** और **Secure Channel (Schannel)** प्रोटोकॉल का उपयोग करते हुए।
 
-### Kerberos प्रमाणीकरण प्रक्रिया
+### Kerberos Authentication Process
 
 Kerberos प्रमाणीकरण प्रक्रिया में, एक उपयोगकर्ता के Ticket Granting Ticket (TGT) के लिए अनुरोध को उपयोगकर्ता के प्रमाणपत्र की **निजी कुंजी** का उपयोग करके हस्ताक्षरित किया जाता है। यह अनुरोध डोमेन नियंत्रक द्वारा कई मान्यताओं से गुजरता है, जिसमें प्रमाणपत्र की **वैधता**, **पथ**, और **रद्दीकरण स्थिति** शामिल हैं। मान्यताओं में यह भी शामिल है कि प्रमाणपत्र एक विश्वसनीय स्रोत से आता है और **NTAUTH प्रमाणपत्र स्टोर** में जारीकर्ता की उपस्थिति की पुष्टि करना। सफल मान्यताओं के परिणामस्वरूप एक TGT जारी किया जाता है। AD में **`NTAuthCertificates`** ऑब्जेक्ट, जो कि यहाँ पाया जाता है:
 ```bash
 CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>
 ```
-सर्टिफिकेट प्रमाणीकरण के लिए विश्वास स्थापित करने में केंद्रीय है।
+विश्वास स्थापित करने के लिए प्रमाणपत्र प्रमाणीकरण के लिए केंद्रीय है।
 
 ### सुरक्षित चैनल (Schannel) प्रमाणीकरण
 
-Schannel सुरक्षित TLS/SSL कनेक्शनों को सुविधाजनक बनाता है, जहां एक हैंडशेक के दौरान, क्लाइंट एक सर्टिफिकेट प्रस्तुत करता है जो, यदि सफलतापूर्वक मान्य किया जाता है, तो पहुंच को अधिकृत करता है। एक सर्टिफिकेट को AD खाते से मैप करने में Kerberos का **S4U2Self** फ़ंक्शन या सर्टिफिकेट का **Subject Alternative Name (SAN)** शामिल हो सकता है, अन्य तरीकों के बीच।
+Schannel सुरक्षित TLS/SSL कनेक्शनों की सुविधा प्रदान करता है, जहां एक हैंडशेक के दौरान, क्लाइंट एक प्रमाणपत्र प्रस्तुत करता है जो, यदि सफलतापूर्वक मान्य किया जाता है, तो पहुंच को अधिकृत करता है। एक प्रमाणपत्र को AD खाते से मानचित्रित करने में Kerberos का **S4U2Self** फ़ंक्शन या प्रमाणपत्र का **Subject Alternative Name (SAN)** शामिल हो सकता है, अन्य तरीकों के बीच।
 
-### AD सर्टिफिकेट सेवाओं की गणना
+### AD प्रमाणपत्र सेवाओं की गणना
 
-AD की सर्टिफिकेट सेवाओं को LDAP क्वेरी के माध्यम से गणना की जा सकती है, जो **Enterprise Certificate Authorities (CAs)** और उनकी कॉन्फ़िगरेशन के बारे में जानकारी प्रकट करती है। यह किसी भी डोमेन-प्रमाणित उपयोगकर्ता द्वारा विशेष विशेषाधिकार के बिना सुलभ है। **[Certify](https://github.com/GhostPack/Certify)** और **[Certipy](https://github.com/ly4k/Certipy)** जैसे उपकरण AD CS वातावरण में गणना और भेद्यता मूल्यांकन के लिए उपयोग किए जाते हैं।
+AD की प्रमाणपत्र सेवाओं को LDAP क्वेरी के माध्यम से गणना की जा सकती है, जो **Enterprise Certificate Authorities (CAs)** और उनके कॉन्फ़िगरेशन के बारे में जानकारी प्रकट करती है। यह किसी भी डोमेन-प्रमाणित उपयोगकर्ता द्वारा विशेष विशेषाधिकार के बिना सुलभ है। **[Certify](https://github.com/GhostPack/Certify)** और **[Certipy](https://github.com/ly4k/Certipy)** जैसे उपकरण AD CS वातावरण में गणना और भेद्यता मूल्यांकन के लिए उपयोग किए जाते हैं।
 
 इन उपकरणों का उपयोग करने के लिए कमांड में शामिल हैं:
 ```bash

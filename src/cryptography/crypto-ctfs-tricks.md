@@ -33,7 +33,7 @@
 ### Substitution Autosolvers
 
 - [https://www.boxentriq.com/code-breaking/cryptogram](https://www.boxentriq.com/code-breaking/cryptogram)
-- [https://quipqiup.com/](https://quipqiup.com) - बहुत अच्छा !
+- [https://quipqiup.com/](https://quipqiup.com) - बहुत अच्छा!
 
 #### Caesar - ROTx Autosolvers
 
@@ -45,7 +45,7 @@
 
 ### Base Encodings Autosolver
 
-इन सभी बेसों की जांच करें: [https://github.com/dhondta/python-codext](https://github.com/dhondta/python-codext)
+इन सभी बेस को चेक करें: [https://github.com/dhondta/python-codext](https://github.com/dhondta/python-codext)
 
 - **Ascii85**
 - `BQ%]q@psCd@rH0l`
@@ -184,19 +184,19 @@ drnajapajrna
 ```
 ### Affine Cipher Encode
 
-अक्षर को संख्या `(ax+b)%26` (_a_ और _b_ कुंजी हैं और _x_ अक्षर है) और परिणाम को फिर से अक्षर में बदलें
+अक्षर को संख्या `(ax+b)%26` (_a_ और _b_ कुंजी हैं और _x_ अक्षर है) और परिणाम को फिर से अक्षर में।
 ```
 krodfdudfrod
 ```
-### SMS कोड
+### SMS Code
 
-**Multitap** [एक अक्षर को बदलता है](https://www.dcode.fr/word-letter-change) द्वारा बार-बार दिए गए अंकों के साथ जो मोबाइल [फोन कीपैड](https://www.dcode.fr/phone-keypad-cipher) पर संबंधित कुंजी कोड द्वारा परिभाषित होते हैं (यह मोड SMS लिखते समय उपयोग किया जाता है)।\
+**Multitap** [replaces a letter](https://www.dcode.fr/word-letter-change) द्वारा बार-बार दोहराए गए अंकों को मोबाइल [फोन कीपैड](https://www.dcode.fr/phone-keypad-cipher) पर संबंधित कुंजी कोड द्वारा परिभाषित किया जाता है (यह मोड SMS लिखते समय उपयोग किया जाता है)।\
 उदाहरण के लिए: 2=A, 22=B, 222=C, 3=D...\
-आप इस कोड की पहचान कर सकते हैं क्योंकि आप\*\* कई अंकों को दोहराते हुए देखेंगे\*\*।
+आप इस कोड की पहचान कर सकते हैं क्योंकि आप **कई नंबरों को दोहराते हुए** देखेंगे।
 
 आप इस कोड को डिकोड कर सकते हैं: [https://www.dcode.fr/multitap-abc-cipher](https://www.dcode.fr/multitap-abc-cipher)
 
-### बेकन कोड
+### Bacon Code
 
 प्रत्येक अक्षर को 4 A या B (या 1s और 0s) के लिए प्रतिस्थापित करें
 ```
@@ -219,7 +219,7 @@ AABBB ABBAB ABABA AAAAA AAABA AAAAA BAAAA AAAAA AAABA ABBAB ABABA AAAAA
 
 ### Bifid
 
-एक कुंजीशब्द की आवश्यकता है
+एक कीवर्ड की आवश्यकता है
 ```
 fgaargaamnlunesuneoa
 ```
@@ -247,9 +247,9 @@ Key:
 ```
 - [https://asecuritysite.com/encryption/ferdecode](https://asecuritysite.com/encryption/ferdecode)
 
-### समीर गुप्त साझाकरण
+### Samir Secret Sharing
 
-एक गुप्त को X भागों में विभाजित किया जाता है और इसे पुनर्प्राप्त करने के लिए आपको Y भागों की आवश्यकता होती है (_Y <=X_).
+एक रहस्य X भागों में विभाजित किया जाता है और इसे पुनर्प्राप्त करने के लिए आपको Y भागों की आवश्यकता होती है (_Y <=X_).
 ```
 8019f8fa5879aa3e07858d08308dc1a8b45
 80223035713295bddf0b0bd1b10a5340b89

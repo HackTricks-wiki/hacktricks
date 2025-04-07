@@ -25,7 +25,7 @@
 
 ## Encoders
 
-Most of encoded data can be decoded with these 2 ressources:
+अधिकांश एन्कोडेड डेटा को इन 2 संसाधनों के साथ डिकोड किया जा सकता है:
 
 - [https://www.dcode.fr/tools-list](https://www.dcode.fr/tools-list)
 - [https://gchq.github.io/CyberChef/](https://gchq.github.io/CyberChef/)
@@ -33,7 +33,7 @@ Most of encoded data can be decoded with these 2 ressources:
 ### Substitution Autosolvers
 
 - [https://www.boxentriq.com/code-breaking/cryptogram](https://www.boxentriq.com/code-breaking/cryptogram)
-- [https://quipqiup.com/](https://quipqiup.com) - बहुत अच्छा !
+- [https://quipqiup.com/](https://quipqiup.com) - बहुत अच्छा!
 
 #### Caesar - ROTx Autosolvers
 
@@ -45,7 +45,7 @@ Most of encoded data can be decoded with these 2 ressources:
 
 ### Base Encodings Autosolver
 
-Check all these bases with: [https://github.com/dhondta/python-codext](https://github.com/dhondta/python-codext)
+इन सभी बेसों की जांच करें: [https://github.com/dhondta/python-codext](https://github.com/dhondta/python-codext)
 
 - **Ascii85**
 - `BQ%]q@psCd@rH0l`
@@ -122,7 +122,7 @@ Check all these bases with: [https://github.com/dhondta/python-codext](https://g
 ```
 - [http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html](http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html) - 404 मृत: [https://web.archive.org/web/20190228181208/http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html](https://web.archive.org/web/20190228181208/http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html)
 
-### मोर्स
+### Morse
 ```
 .... --- .-.. -.-. .- .-. .- -.-. --- .-.. .-
 ```
@@ -178,27 +178,27 @@ drnajapajrna
 
 ### A1Z26
 
-अक्षरों को उनके संख्यात्मक मान में बदलना
+अक्षरों को उनके संख्यात्मक मान में परिवर्तित करें
 ```
 8 15 12 1 3 1 18 1 3 15 12 1
 ```
 ### Affine Cipher Encode
 
-अक्षर को संख्या `(ax+b)%26` (_a_ और _b_ कुंजी हैं और _x_ अक्षर है) और परिणाम को फिर से अक्षर में।
+Letter to num `(ax+b)%26` (_a_ और _b_ कुंजी हैं और _x_ अक्षर है) और परिणाम को फिर से अक्षर में बदलें
 ```
 krodfdudfrod
 ```
-### SMS कोड
+### SMS Code
 
-**Multitap** [एक अक्षर को बदलता है](https://www.dcode.fr/word-letter-change) मोबाइल [फोन कीपैड](https://www.dcode.fr/phone-keypad-cipher) पर संबंधित कुंजी कोड द्वारा परिभाषित दोहराए गए अंकों से (यह मोड SMS लिखते समय उपयोग किया जाता है)।\
+**Multitap** [replaces a letter](https://www.dcode.fr/word-letter-change) द्वारा पुनरावृत्त अंकों को मोबाइल [फोन कीपैड](https://www.dcode.fr/phone-keypad-cipher) पर संबंधित कुंजी कोड द्वारा परिभाषित किया जाता है (यह मोड SMS लिखते समय उपयोग किया जाता है)।\
 उदाहरण के लिए: 2=A, 22=B, 222=C, 3=D...\
-आप इस कोड की पहचान कर सकते हैं क्योंकि आप\*\* कई अंकों को दोहराते हुए देखेंगे\*\*।
+आप इस कोड की पहचान कर सकते हैं क्योंकि आप **कई संख्याएँ पुनरावृत्त** देखेंगे।
 
 आप इस कोड को डिकोड कर सकते हैं: [https://www.dcode.fr/multitap-abc-cipher](https://www.dcode.fr/multitap-abc-cipher)
 
-### बेकन कोड
+### Bacon Code
 
-प्रत्येक अक्षर को 4 A या B (या 1s और 0s) से बदलें
+प्रत्येक अक्षर को 4 A या B (या 1s और 0s) के लिए प्रतिस्थापित करें
 ```
 00111 01101 01010 00000 00010 00000 10000 00000 00010 01101 01010 00000
 AABBB ABBAB ABABA AAAAA AAABA AAAAA BAAAA AAAAA AAABA ABBAB ABABA AAAAA
@@ -237,7 +237,7 @@ wodsyoidrods
 
 ### फर्नेट
 
-2 बेस64 स्ट्रिंग (टोकन और कुंजी)
+2 base64 स्ट्रिंग (टोकन और कुंजी)
 ```
 Token:
 gAAAAABWC9P7-9RsxTz_dwxh9-O2VUB7Ih8UCQL1_Zk4suxnkCvb26Ie4i8HSUJ4caHZuiNtjLl3qfmCv_fS3_VpjL7HxCz7_Q==

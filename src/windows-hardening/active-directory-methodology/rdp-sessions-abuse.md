@@ -6,8 +6,8 @@
 
 यदि **बाहरी समूह** के पास वर्तमान डोमेन में किसी भी **कंप्यूटर** तक **RDP पहुंच** है, तो एक **हमलावर** उस **कंप्यूटर को समझौता कर सकता है और उसका इंतजार कर सकता है**।
 
-एक बार जब उस उपयोगकर्ता ने RDP के माध्यम से पहुंच प्राप्त कर ली, तो **हमलावर उस उपयोगकर्ता के सत्र पर पिवट कर सकता है** और बाहरी डोमेन में इसकी अनुमतियों का दुरुपयोग कर सकता है।
-```powershell
+एक बार जब उस उपयोगकर्ता ने RDP के माध्यम से पहुंच प्राप्त कर ली, तो **हमलावर उस उपयोगकर्ता के सत्र में पिवट कर सकता है** और बाहरी डोमेन में इसकी अनुमतियों का दुरुपयोग कर सकता है।
+```bash
 # Supposing the group "External Users" has RDP access in the current domain
 ## lets find where they could access
 ## The easiest way would be with bloodhound, but you could also run:
@@ -30,14 +30,14 @@ PID   PPID  Name                         Arch  Session     User
 beacon> inject 4960 x64 tcp-local
 ## From that beacon you can just run powerview modules interacting with the external domain as that user
 ```
-चेक करें **अन्य उपकरणों के साथ सत्र चुराने के अन्य तरीके** [**इस पृष्ठ में।**](../../network-services-pentesting/pentesting-rdp.md#session-stealing)
+Check **other ways to steal sessions with other tools** [**in this page.**](../../network-services-pentesting/pentesting-rdp.md#session-stealing)
 
 ## RDPInception
 
-यदि एक उपयोगकर्ता **RDP के माध्यम से एक मशीन** में प्रवेश करता है जहाँ एक **हमलावर** उसके लिए **इंतज़ार** कर रहा है, तो हमलावर **उपयोगकर्ता के RDP सत्र में एक बीकन इंजेक्ट** करने में सक्षम होगा और यदि **पीड़ित ने RDP के माध्यम से पहुँचते समय अपना ड्राइव माउंट किया** है, तो **हमलावर उसे एक्सेस कर सकता है**।
+यदि एक उपयोगकर्ता **RDP के माध्यम से एक मशीन** में प्रवेश करता है जहाँ एक **हमलावर** उसके लिए **इंतज़ार** कर रहा है, तो हमलावर **उपयोगकर्ता के RDP सत्र में एक बीकन इंजेक्ट** करने में सक्षम होगा और यदि **शिकार ने RDP के माध्यम से पहुँचते समय अपना ड्राइव माउंट किया** है, तो **हमलावर उसे एक्सेस कर सकता है**।
 
-इस मामले में आप बस **पीड़ित के** **मूल कंप्यूटर** को **बैकडोर** लिखकर **समझौता** कर सकते हैं **स्टार्टअप फ़ोल्डर** में।
-```powershell
+इस मामले में आप बस **शिकार के** **मूल कंप्यूटर** को **बैकडोर** लिखकर **समझौता** कर सकते हैं **स्टार्टअप फ़ोल्डर** में।
+```bash
 # Wait til someone logs in:
 net logons
 Logged on users at \\localhost:
