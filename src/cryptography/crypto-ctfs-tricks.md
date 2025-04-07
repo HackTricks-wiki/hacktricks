@@ -4,7 +4,7 @@
 
 ## Online Hashes DBs
 
-- _**Googleで検索**_
+- _**Google it**_
 - [http://hashtoolkit.com/reverse-hash?hash=4d186321c1a7f0f354b297e8914ab240](http://hashtoolkit.com/reverse-hash?hash=4d186321c1a7f0f354b297e8914ab240)
 - [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com)
 - [https://crackstation.net/](https://crackstation.net)
@@ -120,8 +120,6 @@
 ```
 ╫☐↑Λ↻Λ┏Λ↻☐↑Λ
 ```
-- [http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html](http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html) - 404 デッド: [https://web.archive.org/web/20190228181208/http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html](https://web.archive.org/web/20190228181208/http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html)
-
 ### モールス
 ```
 .... --- .-.. -.-. .- .-. .- -.-. --- .-.. .-
@@ -190,9 +188,9 @@ krodfdudfrod
 ```
 ### SMSコード
 
-**Multitap** [は文字を置き換えます](https://www.dcode.fr/word-letter-change) それぞれのキーコードによって定義された繰り返し数字で、モバイル [電話のキーパッド](https://www.dcode.fr/phone-keypad-cipher) 上で（このモードはSMSを書くときに使用されます）。\
+**Multitap** [は文字を置き換えます](https://www.dcode.fr/word-letter-change) モバイル [電話のキーパッド](https://www.dcode.fr/phone-keypad-cipher) の対応するキーコードによって定義された繰り返しの数字で（このモードはSMSを書くときに使用されます）。\
 例えば: 2=A, 22=B, 222=C, 3=D...\
-このコードは、\*\*いくつかの数字が繰り返されているのが見えるので\*\*識別できます。
+このコードは**いくつかの数字が繰り返される**のを見ることで識別できます。
 
 このコードをデコードすることができます: [https://www.dcode.fr/multitap-abc-cipher](https://www.dcode.fr/multitap-abc-cipher)
 
@@ -209,7 +207,7 @@ AABBB ABBAB ABABA AAAAA AAABA AAAAA BAAAA AAAAA AAABA ABBAB ABABA AAAAA
 
 ## 圧縮
 
-**Raw Deflate** と **Raw Inflate** (どちらもCyberchefで見つけることができます) は、ヘッダーなしでデータを圧縮および解凍できます。
+**Raw Deflate** と **Raw Inflate** (両方ともCyberchefで見つけることができます) は、ヘッダーなしでデータを圧縮および解凍できます。
 
 ## 簡単な暗号
 
@@ -247,9 +245,9 @@ Key:
 ```
 - [https://asecuritysite.com/encryption/ferdecode](https://asecuritysite.com/encryption/ferdecode)
 
-### Samir Secret Sharing
+### サミール秘密分散
 
-秘密はX部分に分割され、回復するにはY部分が必要です (_Y <=X_)。
+秘密はX部分に分割され、回復するにはY部分が必要です（_Y <=X_）。
 ```
 8019f8fa5879aa3e07858d08308dc1a8b45
 80223035713295bddf0b0bd1b10a5340b89

@@ -6,20 +6,20 @@
 
 ### Components of a Certificate
 
-- **証明書の主題**はその所有者を示します。
+- **証明書の主題**は、その所有者を示します。
 - **公開鍵**は、証明書を正当な所有者にリンクするために、プライベートキーとペアになります。
 - **有効期間**は、**NotBefore**および**NotAfter**の日付によって定義され、証明書の有効な期間を示します。
 - 一意の**シリアル番号**は、証明書機関（CA）によって提供され、各証明書を識別します。
 - **発行者**は、証明書を発行したCAを指します。
 - **SubjectAlternativeName**は、主題の追加名を許可し、識別の柔軟性を高めます。
 - **基本制約**は、証明書がCA用かエンドエンティティ用かを識別し、使用制限を定義します。
-- **拡張キー使用法（EKU）**は、オブジェクト識別子（OID）を通じて、コード署名やメール暗号化など、証明書の特定の目的を示します。
+- **拡張キー使用法（EKU）**は、オブジェクト識別子（OID）を通じて、証明書の特定の目的（コード署名やメール暗号化など）を区別します。
 - **署名アルゴリズム**は、証明書に署名する方法を指定します。
 - **署名**は、発行者のプライベートキーで作成され、証明書の真正性を保証します。
 
 ### Special Considerations
 
-- **Subject Alternative Names (SANs)**は、証明書の適用範囲を複数のアイデンティティに拡張し、複数のドメインを持つサーバーにとって重要です。攻撃者がSAN仕様を操作することによる偽装リスクを避けるために、安全な発行プロセスが重要です。
+- **Subject Alternative Names (SANs)**は、証明書の適用範囲を複数のアイデンティティに拡張し、複数のドメインを持つサーバーにとって重要です。攻撃者がSAN仕様を操作することによるなりすましリスクを回避するために、安全な発行プロセスが重要です。
 
 ### Certificate Authorities (CAs) in Active Directory (AD)
 
@@ -39,7 +39,7 @@ AD CSは、指定されたコンテナを通じてADフォレスト内のCA証�
 
 ### Certificate Templates
 
-AD内で定義されているこれらのテンプレートは、証明書を発行するための設定と権限を概説し、許可されたEKUや登録または変更権限を含み、証明書サービスへのアクセス管理において重要です。
+AD内で定義されたこれらのテンプレートは、証明書を発行するための設定と権限を概説し、許可されたEKUや登録または変更権限を含み、証明書サービスへのアクセス管理において重要です。
 
 ## Certificate Enrollment
 
@@ -57,27 +57,27 @@ AD内で定義されているこれらのテンプレートは、証明書を発
 
 ### Enterprise CA Enrollment Rights
 
-CAの権限は、そのセキュリティ記述子に記載されており、証明書機関管理コンソールを介してアクセス可能です。一部の設定では、低権限のユーザーにリモートアクセスを許可することもあり、これはセキュリティ上の懸念となる可能性があります。
+CAの権限は、そのセキュリティ記述子に記載されており、証明書機関管理コンソールを介してアクセスできます。一部の設定では、低権限のユーザーにリモートアクセスを許可することもあり、これはセキュリティ上の懸念となる可能性があります。
 
 ### Additional Issuance Controls
 
 特定の制御が適用される場合があります。たとえば：
 
-- **マネージャーの承認**：リクエストを保留状態にし、証明書マネージャーによって承認されるまで待機します。
+- **マネージャーの承認**：リクエストを保留状態にし、証明書マネージャーによる承認を待ちます。
 - **登録エージェントおよび承認された署名**：CSRに必要な署名の数と必要なアプリケーションポリシーOIDを指定します。
 
 ### Methods to Request Certificates
 
 証明書は次の方法でリクエストできます：
 
-1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE)、DCOMインターフェースを使用。
-2. **ICertPassage Remote Protocol** (MS-ICPR)、名前付きパイプまたはTCP/IPを介して。
-3. **証明書登録Webインターフェース**、証明書機関Web登録役割がインストールされていること。
-4. **証明書登録サービス** (CES)、証明書登録ポリシー（CEP）サービスと連携して。
-5. **ネットワークデバイス登録サービス** (NDES)、ネットワークデバイス用に、シンプル証明書登録プロトコル（SCEP）を使用。
+1. **Windows Client Certificate Enrollment Protocol**（MS-WCCE）、DCOMインターフェースを使用。
+2. **ICertPassage Remote Protocol**（MS-ICPR）、名前付きパイプまたはTCP/IPを介して。
+3. **証明書登録ウェブインターフェース**、証明書機関ウェブ登録役割がインストールされていること。
+4. **Certificate Enrollment Service**（CES）、証明書登録ポリシー（CEP）サービスと連携。
+5. **Network Device Enrollment Service**（NDES）、ネットワークデバイス用、シンプル証明書登録プロトコル（SCEP）を使用。
 
 Windowsユーザーは、GUI（`certmgr.msc`または`certlm.msc`）またはコマンドラインツール（`certreq.exe`またはPowerShellの`Get-Certificate`コマンド）を介しても証明書をリクエストできます。
-```powershell
+```bash
 # Example of requesting a certificate using PowerShell
 Get-Certificate -Template "User" -CertStoreLocation "cert:\\CurrentUser\\My"
 ```
@@ -91,11 +91,11 @@ Kerberos 認証プロセスでは、ユーザーの Ticket Granting Ticket (TGT)
 ```bash
 CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>
 ```
-信頼を確立するために中心的な役割を果たします。
+信頼を確立するために重要です。
 
 ### セキュアチャネル (Schannel) 認証
 
-Schannelは安全なTLS/SSL接続を促進し、ハンドシェイク中にクライアントが証明書を提示します。証明書が正常に検証されると、アクセスが許可されます。証明書をADアカウントにマッピングするには、Kerberosの**S4U2Self**機能や証明書の**Subject Alternative Name (SAN)**など、他の方法が関与する場合があります。
+Schannelは安全なTLS/SSL接続を促進し、ハンドシェイク中にクライアントが証明書を提示します。これが成功裏に検証されると、アクセスが許可されます。証明書をADアカウントにマッピングするには、Kerberosの**S4U2Self**機能や証明書の**Subject Alternative Name (SAN)**など、他の方法が関与する場合があります。
 
 ### AD証明書サービスの列挙
 

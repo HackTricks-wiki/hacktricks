@@ -10,7 +10,7 @@ AD内のLinuxマシンは、**異なるCCACHEチケットをファイル内に�
 
 ### LinuxからのAD列挙
 
-Linux（またはWindowsのbash）でADにアクセスできる場合、[https://github.com/lefayjey/linWinPwn](https://github.com/lefayjey/linWinPwn)を試してADを列挙できます。
+Linux（またはWindowsのbash）でADにアクセスできる場合、ADを列挙するために[https://github.com/lefayjey/linWinPwn](https://github.com/lefayjey/linWinPwn)を試すことができます。
 
 LinuxからADを列挙する**他の方法**を学ぶには、次のページを確認してください：
 
@@ -28,7 +28,7 @@ FreeIPAは、主に**Unix**環境向けのMicrosoft Windows **Active Directory**
 
 ## チケットの操作
 
-### Pass The Ticket
+### パス・ザ・チケット
 
 このページでは、**Linuxホスト内でKerberosチケットを見つけることができるさまざまな場所**を見つけることができます。次のページでは、これらのCCacheチケット形式をKirbi（Windowsで使用する必要がある形式）に変換する方法と、PTT攻撃を実行する方法を学ぶことができます：
 
@@ -38,9 +38,9 @@ FreeIPAは、主に**Unix**環境向けのMicrosoft Windows **Active Directory**
 
 ### /tmpからのCCACHEチケット再利用
 
-CCACHEファイルは**Kerberos資格情報**を保存するためのバイナリ形式で、通常は`/tmp`に600の権限で保存されます。これらのファイルは、ユーザーのUIDに関連する**名前形式`krb5cc_%{uid}`**で識別できます。認証チケットの検証には、**環境変数`KRB5CCNAME`**を希望するチケットファイルのパスに設定する必要があり、再利用を可能にします。
+CCACHEファイルは**Kerberos資格情報**を保存するためのバイナリ形式で、通常は`/tmp`に600の権限で保存されます。これらのファイルは、ユーザーのUIDに相当する**名前形式`krb5cc_%{uid}`**で識別できます。認証チケットの検証には、**環境変数`KRB5CCNAME`**を希望するチケットファイルのパスに設定する必要があり、再利用を可能にします。
 
-`env | grep KRB5CCNAME`を使用して、認証に使用されている現在のチケットをリストします。この形式はポータブルで、環境変数を設定することでチケットを**再利用できます**。`export KRB5CCNAME=/tmp/ticket.ccache`を使用します。Kerberosチケットの名前形式は`krb5cc_%{uid}`で、uidはユーザーのUIDです。
+`env | grep KRB5CCNAME`を使用して、認証に使用されている現在のチケットをリストします。形式はポータブルで、環境変数を設定することでチケットを**再利用できます**。`export KRB5CCNAME=/tmp/ticket.ccache`を使用します。Kerberosチケットの名前形式は`krb5cc_%{uid}`で、uidはユーザーのUIDです。
 ```bash
 # Find tickets
 ls /tmp/ | grep krb5cc
@@ -60,13 +60,13 @@ cd tickey/tickey
 make CONF=Release
 /tmp/tickey -i
 ```
-この手順は、さまざまなセッションに注入を試み、抽出されたチケットを `/tmp` に `__krb_UID.ccache` という命名規則で保存することで成功を示します。
+この手順は、さまざまなセッションに注入を試み、成功を示すために抽出されたチケットを `/tmp` に `__krb_UID.ccache` という命名規則で保存します。
 
-### SSSD KCMからのCCACHEチケット再利用
+### SSSD KCMからのCCACHEチケットの再利用
 
 SSSDは、パス `/var/lib/sss/secrets/secrets.ldb` にデータベースのコピーを保持しています。対応するキーは、パス `/var/lib/sss/secrets/.secrets.mkey` に隠しファイルとして保存されています。デフォルトでは、キーは **root** 権限を持っている場合にのみ読み取ることができます。
 
-\*\*`SSSDKCMExtractor` \*\* を --database および --key パラメータで呼び出すと、データベースを解析し、**秘密を復号化**します。
+**`SSSDKCMExtractor`** を --database および --key パラメータで呼び出すと、データベースを解析し、**秘密を復号化**します。
 ```bash
 git clone https://github.com/fireeye/SSSDKCMExtractor
 python3 SSSDKCMExtractor.py --database secrets.ldb --key secrets.mkey
@@ -97,7 +97,7 @@ macOSでは、**`bifrost`**はkeytabファイル分析のためのツールと�
 ```bash
 ./bifrost -action dump -source keytab -path /path/to/your/file
 ```
-抽出したアカウントとハッシュ情報を利用して、**`crackmapexec`**のようなツールを使用してサーバーへの接続を確立できます。
+抽出したアカウントとハッシュ情報を利用して、**`crackmapexec`** のようなツールを使用してサーバーへの接続を確立できます。
 ```bash
 crackmapexec 10.XXX.XXX.XXX -u 'ServiceAccount$' -H "HashPlaceholder" -d "YourDOMAIN"
 ```

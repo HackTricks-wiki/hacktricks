@@ -8,7 +8,7 @@ HKCUの値はユーザーによって変更可能であるため、**COM Hijacki
 
 - **RegOpenKey**操作。
 - _Result_が**NAME NOT FOUND**であること。
-- _Path_が**InprocServer32**で終わること。
+- そして、_Path_が**InprocServer32**で終わること。
 
 どの存在しないCOMを偽装するか決定したら、次のコマンドを実行します。_数秒ごとに読み込まれるCOMを偽装することを決定した場合は、過剰になる可能性があるため注意してください。_
 ```bash
@@ -18,7 +18,7 @@ New-ItemProperty -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F
 ```
 ### Hijackable Task Scheduler COM components
 
-Windows Tasksはカスタムトリガーを使用してCOMオブジェクトを呼び出し、タスクスケジューラを通じて実行されるため、いつトリガーされるかを予測しやすくなっています。
+Windows Tasksはカスタムトリガーを使用してCOMオブジェクトを呼び出し、タスクスケジューラを通じて実行されるため、いつトリガーされるかを予測しやすくなります。
 
 <pre class="language-powershell"><code class="lang-powershell"># Show COM CLSIDs
 $Tasks = Get-ScheduledTask
@@ -51,7 +51,7 @@ Write-Host
 
 出力を確認すると、例えば**ユーザーがログインするたびに実行される**ものを選択できます。
 
-次に、**HKEY\_**_**CLASSES\_**_**ROOT\CLSID**およびHKLMとHKCUでCLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}**を検索すると、通常HKCUにはその値が存在しないことがわかります。
+次に、**HKEY\CLASSES\ROOT\CLSID**およびHKLMとHKCUでCLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}**を検索すると、通常、HKCUにはその値が存在しないことがわかります。
 ```bash
 # Exists in HKCR\CLSID\
 Get-ChildItem -Path "Registry::HKCR\CLSID\{1936ED8A-BD93-3213-E325-F38D112938EF}"

