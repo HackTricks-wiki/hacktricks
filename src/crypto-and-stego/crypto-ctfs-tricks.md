@@ -120,8 +120,6 @@ Kontroleer al hierdie basisse met: [https://github.com/dhondta/python-codext](ht
 ```
 ╫☐↑Λ↻Λ┏Λ↻☐↑Λ
 ```
-- [http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html](http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html) - 404 Dood: [https://web.archive.org/web/20190228181208/http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html](https://web.archive.org/web/20190228181208/http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html)
-
 ### Morse
 ```
 .... --- .-.. -.-. .- .-. .- -.-. --- .-.. .-
@@ -192,9 +190,9 @@ krodfdudfrod
 
 **Multitap** [vervang 'n letter](https://www.dcode.fr/word-letter-change) deur herhaalde syfers gedefinieer deur die ooreenstemmende sleutelkode op 'n mobiele [foon sleutelbord](https://www.dcode.fr/phone-keypad-cipher) (Hierdie modus word gebruik wanneer SMS geskryf word).\
 Byvoorbeeld: 2=A, 22=B, 222=C, 3=D...\
-Jy kan hierdie kode identifiseer omdat jy\*\* verskeie syfers herhaal\*\* sal sien.
+Jy kan hierdie kode identifiseer omdat jy **verskeie syfers herhaal** sal sien.
 
-Jy kan hierdie kode dekodeer in: [https://www.dcode.fr/multitap-abc-cipher](https://www.dcode.fr/multitap-abc-cipher)
+Jy kan hierdie kode ontcijfer in: [https://www.dcode.fr/multitap-abc-cipher](https://www.dcode.fr/multitap-abc-cipher)
 
 ### Bacon Kode
 
@@ -209,7 +207,7 @@ AABBB ABBAB ABABA AAAAA AAABA AAAAA BAAAA AAAAA AAABA ABBAB ABABA AAAAA
 
 ## Kompressie
 
-**Raw Deflate** en **Raw Inflate** (jy kan albei in Cyberchef vind) kan data saamgepers en ontspan sonder koptekste.
+**Raw Deflate** en **Raw Inflate** (jy kan albei in Cyberchef vind) kan data saamgepers en ontgonne sonder koptekste.
 
 ## Maklike Crypto
 
@@ -249,7 +247,7 @@ Key:
 
 ### Samir Geheime Deel
 
-'n Geheim word in X dele verdeel en om dit te herstel, het jy Y dele nodig (_Y <=X_).
+'n Geheim word in X dele gesplit en om dit te herstel, het jy Y dele nodig (_Y <=X_).
 ```
 8019f8fa5879aa3e07858d08308dc1a8b45
 80223035713295bddf0b0bd1b10a5340b89
@@ -262,7 +260,7 @@ Key:
 - [https://github.com/glv2/bruteforce-salted-openssl](https://github.com/glv2/bruteforce-salted-openssl)
 - [https://github.com/carlospolop/easy_BFopensslCTF](https://github.com/carlospolop/easy_BFopensslCTF)
 
-## Gereedskap
+## Tools
 
 - [https://github.com/Ganapati/RsaCtfTool](https://github.com/Ganapati/RsaCtfTool)
 - [https://github.com/lockedbyte/cryptovenom](https://github.com/lockedbyte/cryptovenom)

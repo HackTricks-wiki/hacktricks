@@ -25,7 +25,7 @@
 
 ## Encoders
 
-Meeste van die geënkodeerde data kan met hierdie 2 hulpbronne gedekodeer word:
+Meeste van die geënkodeerde data kan met hierdie 2 hulpbronne gedecodeer word:
 
 - [https://www.dcode.fr/tools-list](https://www.dcode.fr/tools-list)
 - [https://gchq.github.io/CyberChef/](https://gchq.github.io/CyberChef/)
@@ -192,9 +192,9 @@ krodfdudfrod
 
 **Multitap** [vervang 'n letter](https://www.dcode.fr/word-letter-change) deur herhaalde syfers gedefinieer deur die ooreenstemmende sleutelkode op 'n mobiele [foon sleutelbord](https://www.dcode.fr/phone-keypad-cipher) (Hierdie modus word gebruik wanneer SMS geskryf word).\
 Byvoorbeeld: 2=A, 22=B, 222=C, 3=D...\
-Jy kan hierdie kode identifiseer omdat jy\*\* verskeie syfers herhaal\*\* sal sien.
+Jy kan hierdie kode identifiseer omdat jy **verskeie getalle herhaal** sal sien.
 
-Jy kan hierdie kode dekodeer in: [https://www.dcode.fr/multitap-abc-cipher](https://www.dcode.fr/multitap-abc-cipher)
+Jy kan hierdie kode ontcijfer in: [https://www.dcode.fr/multitap-abc-cipher](https://www.dcode.fr/multitap-abc-cipher)
 
 ### Bacon Kode
 
@@ -213,7 +213,7 @@ AABBB ABBAB ABABA AAAAA AAABA AAAAA BAAAA AAAAA AAABA ABBAB ABABA AAAAA
 
 ## Maklike Crypto
 
-### XOR - Autosolver
+### XOR - Outomatiese Oplosser
 
 - [https://wiremask.eu/tools/xor-cracker/](https://wiremask.eu/tools/xor-cracker/)
 
@@ -249,7 +249,7 @@ Key:
 
 ### Samir Geheime Deel
 
-'n Geheim word in X dele gesplit en om dit te herstel, het jy Y dele nodig (_Y <=X_).
+'n Geheim word in X dele gesplit en om dit te herstel het jy Y dele nodig (_Y <=X_).
 ```
 8019f8fa5879aa3e07858d08308dc1a8b45
 80223035713295bddf0b0bd1b10a5340b89
@@ -262,7 +262,7 @@ Key:
 - [https://github.com/glv2/bruteforce-salted-openssl](https://github.com/glv2/bruteforce-salted-openssl)
 - [https://github.com/carlospolop/easy_BFopensslCTF](https://github.com/carlospolop/easy_BFopensslCTF)
 
-## Gereedskap
+## Tools
 
 - [https://github.com/Ganapati/RsaCtfTool](https://github.com/Ganapati/RsaCtfTool)
 - [https://github.com/lockedbyte/cryptovenom](https://github.com/lockedbyte/cryptovenom)

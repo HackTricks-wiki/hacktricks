@@ -10,9 +10,9 @@
 
 ### AD enumerasie vanaf linux
 
-As jy toegang het oor 'n AD in linux (of bash in Windows) kan jy probeer [https://github.com/lefayjey/linWinPwn](https://github.com/lefayjey/linWinPwn) om die AD te enumerate.
+As jy toegang het tot 'n AD in linux (of bash in Windows) kan jy probeer [https://github.com/lefayjey/linWinPwn](https://github.com/lefayjey/linWinPwn) om die AD te enumerate.
 
-Jy kan ook die volgende bladsy nagaan om te leer **ander maniere om AD vanaf linux te enumerate**:
+Jy kan ook die volgende bladsy nagaan om **ander maniere te leer om AD vanaf linux te enumerate**:
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-ldap.md
@@ -30,7 +30,7 @@ FreeIPA is 'n oopbron **alternatief** vir Microsoft Windows **Active Directory**
 
 ### Pass The Ticket
 
-Op hierdie bladsy gaan jy verskillende plekke vind waar jy **kerberos kaartjies binne 'n linux gasheer kan vind**, op die volgende bladsy kan jy leer hoe om hierdie CCache kaartjie formate na Kirbi (die formaat wat jy in Windows moet gebruik) te transformeer en ook hoe om 'n PTT aanval uit te voer:
+Op hierdie bladsy gaan jy verskillende plekke vind waar jy **kerberos kaartjies binne 'n linux gasheer kan vind**, op die volgende bladsy kan jy leer hoe om hierdie CCache kaartjie formate na Kirbi te transformeer (die formaat wat jy in Windows moet gebruik) en ook hoe om 'n PTT aanval uit te voer:
 
 {{#ref}}
 ../../windows-hardening/active-directory-methodology/pass-the-ticket.md
@@ -38,7 +38,7 @@ Op hierdie bladsy gaan jy verskillende plekke vind waar jy **kerberos kaartjies 
 
 ### CCACHE kaartjie hergebruik vanaf /tmp
 
-CCACHE lêers is binêre formate vir **storing Kerberos geloofsbriewe** wat tipies met 600 toestemmings in `/tmp` gestoor word. Hierdie lêers kan geïdentifiseer word deur hul **naamformaat, `krb5cc_%{uid}`,** wat ooreenstem met die gebruiker se UID. Vir verifikasie van die verifikasieticket, moet die **omgewing veranderlike `KRB5CCNAME`** op die pad van die gewenste kaartjie lêer gestel word, wat hergebruik moontlik maak.
+CCACHE lêers is binêre formate vir **storing van Kerberos geloofsbriewe** wat tipies met 600 toestemmings in `/tmp` gestoor word. Hierdie lêers kan geïdentifiseer word deur hul **naamformaat, `krb5cc_%{uid}`,** wat ooreenstem met die gebruiker se UID. Vir verifikasie van die verifikasieticket, moet die **omgewing veranderlike `KRB5CCNAME`** op die pad van die gewenste kaartjie lêer gestel word, wat hergebruik daarvan moontlik maak.
 
 Lys die huidige kaartjie wat vir verifikasie gebruik word met `env | grep KRB5CCNAME`. Die formaat is draagbaar en die kaartjie kan **hergebruik word deur die omgewing veranderlike** met `export KRB5CCNAME=/tmp/ticket.ccache` te stel. Kerberos kaartjie naamformaat is `krb5cc_%{uid}` waar uid die gebruiker se UID is.
 ```bash
@@ -66,12 +66,12 @@ Hierdie prosedure sal probeer om in verskeie sessies in te spuit, wat sukses aan
 
 SSSD hou 'n kopie van die databasis by die pad `/var/lib/sss/secrets/secrets.ldb`. Die ooreenstemmende sleutel word as 'n verborge lêer by die pad `/var/lib/sss/secrets/.secrets.mkey` gestoor. Standaard is die sleutel slegs leesbaar as jy **root** regte het.
 
-Die aanroep van \*\*`SSSDKCMExtractor` \*\* met die --database en --key parameters sal die databasis ontleed en **die geheime ontcijfer**.
+Die aanroep van **`SSSDKCMExtractor`** met die --database en --key parameters sal die databasis ontleed en **die geheime ontcijfer**.
 ```bash
 git clone https://github.com/fireeye/SSSDKCMExtractor
 python3 SSSDKCMExtractor.py --database secrets.ldb --key secrets.mkey
 ```
-Die **credential cache Kerberos blob kan omskep word in 'n bruikbare Kerberos CCache** lêer wat aan Mimikatz/Rubeus oorgedra kan word.
+Die **akkrediteringskas Kerberos blob kan omskep word in 'n bruikbare Kerberos CCache** lêer wat aan Mimikatz/Rubeus oorgedra kan word.
 
 ### CCACHE kaartjie hergebruik vanaf keytab
 ```bash
@@ -83,7 +83,7 @@ klist -k /etc/krb5.keytab
 
 Diensrekening sleutels, wat noodsaaklik is vir dienste wat met wortelprivileges werk, word veilig gestoor in **`/etc/krb5.keytab`** lêers. Hierdie sleutels, soortgelyk aan wagwoorde vir dienste, vereis streng vertroulikheid.
 
-Om die inhoud van die keytab-lêer te ondersoek, kan **`klist`** gebruik word. Die hulpmiddel is ontwerp om sleuteldetails te vertoon, insluitend die **NT Hash** vir gebruikersverifikasie, veral wanneer die sleuteltipe as 23 geïdentifiseer word.
+Om die inhoud van die keytab-lêer te inspekteer, kan **`klist`** gebruik word. Die hulpmiddel is ontwerp om sleuteldetails te vertoon, insluitend die **NT Hash** vir gebruikersverifikasie, veral wanneer die sleuteltipe as 23 geïdentifiseer word.
 ```bash
 klist.exe -t -K -e -k FILE:C:/Path/to/your/krb5.keytab
 # Output includes service principal details and the NT Hash

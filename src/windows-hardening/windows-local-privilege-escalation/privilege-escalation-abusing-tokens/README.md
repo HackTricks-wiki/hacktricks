@@ -10,11 +10,11 @@ As jy **nie weet wat Windows Toegangstokens is nie**, lees hierdie bladsy voorda
 ../access-tokens.md
 {{#endref}}
 
-**Miskien kan jy voorregte verhoog deur die tokens wat jy reeds het, te misbruik**
+**Miskien kan jy bevoegdhede verhoog deur die tokens wat jy reeds het, te misbruik**
 
 ### SeImpersonatePrivilege
 
-Dit is 'n voorreg wat deur enige proses gehou word wat die verpersoonliking (maar nie die skepping) van enige token toelaat, mits 'n handvatsel daarvoor verkry kan word. 'n Bevoorregte token kan van 'n Windows-diens (DCOM) verkry word deur dit te dwing om NTLM-verifikasie teen 'n ontploffing uit te voer, wat die uitvoering van 'n proses met SYSTEM-voorregte moontlik maak. Hierdie kwesbaarheid kan benut word met verskeie gereedskap, soos [juicy-potato](https://github.com/ohpe/juicy-potato), [RogueWinRM](https://github.com/antonioCoco/RogueWinRM) (wat vereis dat winrm gedeaktiveer moet wees), [SweetPotato](https://github.com/CCob/SweetPotato), [EfsPotato](https://github.com/zcgonvh/EfsPotato), [DCOMPotato](https://github.com/zcgonvh/DCOMPotato) en [PrintSpoofer](https://github.com/itm4n/PrintSpoofer).
+Dit is 'n voorreg wat deur enige proses gehou word wat die impersonasie (maar nie die skepping) van enige token toelaat, mits 'n handvatsel daarvoor verkry kan word. 'n Bevoorregte token kan van 'n Windows-diens (DCOM) verkry word deur dit te dwing om NTLM-verifikasie teen 'n exploit uit te voer, wat vervolgens die uitvoering van 'n proses met SYSTEM-bevoegdhede moontlik maak. Hierdie kwesbaarheid kan benut word met verskeie gereedskap, soos [juicy-potato](https://github.com/ohpe/juicy-potato), [RogueWinRM](https://github.com/antonioCoco/RogueWinRM) (wat vereis dat winrm gedeaktiveer moet wees), [SweetPotato](https://github.com/CCob/SweetPotato), [EfsPotato](https://github.com/zcgonvh/EfsPotato), [DCOMPotato](https://github.com/zcgonvh/DCOMPotato) en [PrintSpoofer](https://github.com/itm4n/PrintSpoofer).
 
 {{#ref}}
 ../roguepotato-and-printspoofer.md
@@ -27,22 +27,22 @@ Dit is 'n voorreg wat deur enige proses gehou word wat die verpersoonliking (maa
 ### SeAssignPrimaryPrivilege
 
 Dit is baie soortgelyk aan **SeImpersonatePrivilege**, dit sal die **dieselfde metode** gebruik om 'n bevoorregte token te verkry.\
-Dan laat hierdie voorreg **toe om 'n primêre token** aan 'n nuwe/gesuspendeerde proses toe te ken. Met die bevoorregte verpersoonliking token kan jy 'n primêre token aflei (DuplicateTokenEx).\
-Met die token kan jy 'n **nuwe proses** skep met 'CreateProcessAsUser' of 'n proses gesuspend en **die token stel** (in die algemeen kan jy nie die primêre token van 'n lopende proses verander nie).
+Dan laat hierdie voorreg **toe om 'n primêre token** aan 'n nuwe/onderbreekte proses toe te ken. Met die bevoorregte impersonasie-token kan jy 'n primêre token aflei (DuplicateTokenEx).\
+Met die token kan jy 'n **nuwe proses** skep met 'CreateProcessAsUser' of 'n proses onderbreek en **die token stel** (in die algemeen kan jy nie die primêre token van 'n lopende proses verander nie).
 
 ### SeTcbPrivilege
 
-As jy hierdie token geaktiveer het, kan jy **KERB_S4U_LOGON** gebruik om 'n **verpersoonliking token** vir enige ander gebruiker te verkry sonder om die akrediteer te ken, **voeg 'n arbitrêre groep** (admins) by die token, stel die **integriteitsvlak** van die token op "**medium**", en ken hierdie token toe aan die **huidige draad** (SetThreadToken).
+As jy hierdie token geaktiveer het, kan jy **KERB_S4U_LOGON** gebruik om 'n **impersonasie-token** vir enige ander gebruiker te verkry sonder om die akrediteer te ken, **voeg 'n arbitrêre groep** (admins) by die token, stel die **integriteitsvlak** van die token op "**medium**", en ken hierdie token toe aan die **huidige draad** (SetThreadToken).
 
 ### SeBackupPrivilege
 
-Die stelsel word gedwing om **alle lees toegang** beheer aan enige lêer (beperk tot lees operasies) deur hierdie voorreg te verleen. Dit word gebruik vir **die lees van die wagwoord hashes van plaaslike Administrateur** rekeninge uit die registrasie, waarna gereedskap soos "**psexec**" of "**wmiexec**" met die hash gebruik kan word (Pass-the-Hash tegniek). Hierdie tegniek faal egter onder twee toestande: wanneer die Plaaslike Administrateur rekening gedeaktiveer is, of wanneer 'n beleid in plek is wat administratiewe regte van Plaaslike Administrateurs wat afstand doen, verwyder.\
+Die stelsel word veroorsaak om **alle lees toegang** beheer aan enige lêer te verleen (beperk tot leesoperasies) deur hierdie voorreg. Dit word gebruik om **die wagwoord-hashes van plaaslike Administrateur** rekeninge uit die register te lees, waarna gereedskap soos "**psexec**" of "**wmiexec**" met die hash (Pass-the-Hash tegniek) gebruik kan word. Hierdie tegniek faal egter onder twee toestande: wanneer die Plaaslike Administrateur rekening gedeaktiveer is, of wanneer 'n beleid in plek is wat administratiewe regte van Plaaslike Administrateurs wat afstand doen, verwyder.\
 Jy kan **hierdie voorreg misbruik** met:
 
 - [https://github.com/Hackplayers/PsCabesha-tools/blob/master/Privesc/Acl-FullControl.ps1](https://github.com/Hackplayers/PsCabesha-tools/blob/master/Privesc/Acl-FullControl.ps1)
 - [https://github.com/giuliano108/SeBackupPrivilege/tree/master/SeBackupPrivilegeCmdLets/bin/Debug](https://github.com/giuliano108/SeBackupPrivilege/tree/master/SeBackupPrivilegeCmdLets/bin/Debug)
 - volg **IppSec** in [https://www.youtube.com/watch?v=IfCysW0Od8w\&t=2610\&ab_channel=IppSec](https://www.youtube.com/watch?v=IfCysW0Od8w&t=2610&ab_channel=IppSec)
-- Of soos verduidelik in die **verhoogde voorregte met Backup Operators** afdeling van:
+- Of soos verduidelik in die **verhoogde bevoegdhede met Backup Operators** afdeling van:
 
 {{#ref}}
 ../../active-directory-methodology/privileged-groups-and-token-privileges.md
@@ -50,33 +50,33 @@ Jy kan **hierdie voorreg misbruik** met:
 
 ### SeRestorePrivilege
 
-Toestemming vir **skrywe toegang** tot enige stelsellêer, ongeag die lêer se Toegang Beheer Lys (ACL), word deur hierdie voorreg verskaf. Dit bied talle moontlikhede vir verhoging, insluitend die vermoë om **dienste te verander**, DLL Hijacking uit te voer, en **debuggers** via Image File Execution Options in te stel, onder verskeie ander tegnieke.
+Toestemming vir **skrywe toegang** tot enige stelsellêer, ongeag die lêer se Toegang Beheer Lys (ACL), word deur hierdie voorreg verskaf. Dit bied talle moontlikhede vir verhoogde bevoegdhede, insluitend die vermoë om **dienste te wysig**, DLL Hijacking uit te voer, en **debuggers** via Image File Execution Options in te stel, onder verskeie ander tegnieke.
 
 ### SeCreateTokenPrivilege
 
-SeCreateTokenPrivilege is 'n kragtige toestemming, veral nuttig wanneer 'n gebruiker die vermoë het om tokens te verpersoonlik, maar ook in die afwesigheid van SeImpersonatePrivilege. Hierdie vermoë hang af van die vermoë om 'n token te verpersoonlik wat dieselfde gebruiker verteenwoordig en wie se integriteitsvlak nie hoër is as dié van die huidige proses nie.
+SeCreateTokenPrivilege is 'n kragtige toestemming, veral nuttig wanneer 'n gebruiker die vermoë het om tokens te impersonate, maar ook in die afwesigheid van SeImpersonatePrivilege. Hierdie vermoë hang af van die vermoë om 'n token te impersonate wat dieselfde gebruiker verteenwoordig en wie se integriteitsvlak nie hoër is as dié van die huidige proses nie.
 
 **Belangrike Punten:**
 
-- **Verpersoonliking sonder SeImpersonatePrivilege:** Dit is moontlik om SeCreateTokenPrivilege vir EoP te benut deur tokens onder spesifieke toestande te verpersoonlik.
-- **Toestande vir Token Verpersoonliking:** Succesvolle verpersoonliking vereis dat die teiken token aan dieselfde gebruiker behoort en 'n integriteitsvlak het wat minder of gelyk is aan die integriteitsvlak van die proses wat verpersoonliking probeer.
-- **Skepping en Wysiging van Verpersoonliking Tokens:** Gebruikers kan 'n verpersoonliking token skep en dit verbeter deur 'n bevoorregte groep se SID (Security Identifier) by te voeg.
+- **Impersonasie sonder SeImpersonatePrivilege:** Dit is moontlik om SeCreateTokenPrivilege te benut vir EoP deur tokens onder spesifieke toestande te impersonate.
+- **Toestande vir Token Impersonasie:** Succesvolle impersonasie vereis dat die teiken token aan dieselfde gebruiker behoort en 'n integriteitsvlak het wat minder of gelyk is aan die integriteitsvlak van die proses wat impersonasie probeer.
+- **Skepping en Wysiging van Impersonasie Tokens:** Gebruikers kan 'n impersonasie-token skep en dit verbeter deur 'n bevoorregte groep se SID (Security Identifier) by te voeg.
 
 ### SeLoadDriverPrivilege
 
-Hierdie voorreg laat toe om **toestel bestuurders te laai en te verwyder** met die skepping van 'n registrasie-invoer met spesifieke waardes vir `ImagePath` en `Type`. Aangesien direkte skrywe toegang tot `HKLM` (HKEY_LOCAL_MACHINE) beperk is, moet `HKCU` (HKEY_CURRENT_USER) eerder gebruik word. Om egter `HKCU` vir die kern herkenbaar te maak vir bestuurder konfigurasie, moet 'n spesifieke pad gevolg word.
+Hierdie voorreg laat toe om **toestel bestuurders te laai en te ontlaai** met die skepping van 'n registerinskrywing met spesifieke waardes vir `ImagePath` en `Type`. Aangesien direkte skrywe toegang tot `HKLM` (HKEY_LOCAL_MACHINE) beperk is, moet `HKCU` (HKEY_CURRENT_USER) eerder gebruik word. Om egter `HKCU` vir die kern herkenbaar te maak vir bestuurderkonfigurasie, moet 'n spesifieke pad gevolg word.
 
 Hierdie pad is `\Registry\User\<RID>\System\CurrentControlSet\Services\DriverName`, waar `<RID>` die Relatiewe Identifiseerder van die huidige gebruiker is. Binne `HKCU` moet hierdie hele pad geskep word, en twee waardes moet gestel word:
 
-- `ImagePath`, wat die pad na die binêre is wat uitgevoer moet word
+- `ImagePath`, wat die pad na die binaire is wat uitgevoer moet word
 - `Type`, met 'n waarde van `SERVICE_KERNEL_DRIVER` (`0x00000001`).
 
 **Stappe om te Volg:**
 
-1. Toegang `HKCU` eerder as `HKLM` weens beperkte skrywe toegang.
+1. Toegang tot `HKCU` eerder as `HKLM` weens beperkte skrywe toegang.
 2. Skep die pad `\Registry\User\<RID>\System\CurrentControlSet\Services\DriverName` binne `HKCU`, waar `<RID>` die huidige gebruiker se Relatiewe Identifiseerder verteenwoordig.
-3. Stel die `ImagePath` na die binêre se uitvoeringspad.
-4. Ken die `Type` toe as `SERVICE_KERNEL_DRIVER` (`0x00000001`).
+3. Stel die `ImagePath` op die binaire se uitvoeringspad.
+4. Ken die `Type` as `SERVICE_KERNEL_DRIVER` (`0x00000001`) toe.
 ```python
 # Example Python code to set the registry values
 import winreg as reg
@@ -110,11 +110,11 @@ c:\inetpub\wwwwroot\web.config
 ```
 ### SeDebugPrivilege
 
-Hierdie voorreg laat die **debug ander prosesse** toe, insluitend om in die geheue te lees en te skryf. Verskeie strategieë vir geheue-inspuiting, wat in staat is om die meeste antivirus- en gasheer-inbraakvoorkomingsoplossings te ontwyk, kan met hierdie voorreg gebruik word.
+Hierdie voorreg stel die **debug ander prosesse** in staat, insluitend om in die geheue te lees en te skryf. Verskeie strategieë vir geheue-inspuiting, wat in staat is om die meeste antivirus- en gasheer-inbraakvoorkomingsoplossings te omseil, kan met hierdie voorreg gebruik word.
 
 #### Dump geheue
 
-Jy kan [ProcDump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) van die [SysInternals Suite](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite) gebruik om die **geheue van 'n proses** te **vang**. Spesifiek kan dit van toepassing wees op die **Local Security Authority Subsystem Service ([LSASS](https://en.wikipedia.org/wiki/Local_Security_Authority_Subsystem_Service))** proses, wat verantwoordelik is vir die stoor van gebruikersbewyse sodra 'n gebruiker suksesvol in 'n stelsel aangemeld het.
+Jy kan [ProcDump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) van die [SysInternals Suite](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite) of [SharpDump](https://github.com/GhostPack/SharpDump) gebruik om die **geheue van 'n proses** te **vang**. Spesifiek kan dit van toepassing wees op die **Local Security Authority Subsystem Service ([LSASS](https://en.wikipedia.org/wiki/Local_Security_Authority_Subsystem_Service))** proses, wat verantwoordelik is vir die stoor van gebruikersakkrediteer nadat 'n gebruiker suksesvol in 'n stelsel aangemeld het.
 
 Jy kan dan hierdie dump in mimikatz laai om wagwoorde te verkry:
 ```
@@ -127,31 +127,31 @@ mimikatz # sekurlsa::logonpasswords
 
 As jy 'n `NT SYSTEM` shell wil kry, kan jy gebruik maak van:
 
-- \***\*[**SeDebugPrivilege-Exploit (C++)**](https://github.com/bruno-1337/SeDebugPrivilege-Exploit)\*\***
-- \***\*[**SeDebugPrivilegePoC (C#)**](https://github.com/daem0nc0re/PrivFu/tree/main/PrivilegedOperations/SeDebugPrivilegePoC)\*\***
-- \***\*[**psgetsys.ps1 (Powershell Script)**](https://raw.githubusercontent.com/decoder-it/psgetsystem/master/psgetsys.ps1)\*\***
-```powershell
+- [**SeDebugPrivilege-Exploit (C++)**](https://github.com/bruno-1337/SeDebugPrivilege-Exploit)
+- [**SeDebugPrivilegePoC (C#)**](https://github.com/daem0nc0re/PrivFu/tree/main/PrivilegedOperations/SeDebugPrivilegePoC)
+- [**psgetsys.ps1 (Powershell Script)**](https://raw.githubusercontent.com/decoder-it/psgetsystem/master/psgetsys.ps1)
+```bash
 # Get the PID of a process running as NT SYSTEM
 import-module psgetsys.ps1; [MyProcess]::CreateProcessFromParent(<system_pid>,<command_to_execute>)
 ```
 ### SeManageVolumePrivilege
 
-Die `SeManageVolumePrivilege` is 'n Windows gebruikersreg wat gebruikers toelaat om skyf volumes te bestuur, insluitend die skep en verwyder daarvan. Alhoewel dit bedoel is vir administrateurs, kan dit, indien aan nie-admin gebruikers toegeken, uitgebuit word vir privilige-escalasie.
+Die `SeManageVolumePrivilege` is 'n Windows gebruikersreg wat gebruikers toelaat om skyf volumes te bestuur, insluitend die skep en verwyder van hulle. Alhoewel dit bedoel is vir administrateurs, kan dit, indien aan nie-admin gebruikers toegeken, uitgebuit word vir privilige-eskalasie.
 
 Dit is moontlik om hierdie privilige te benut om volumes te manipuleer, wat lei tot volle volume toegang. Die [SeManageVolumeExploit](https://github.com/CsEnox/SeManageVolumeExploit) kan gebruik word om volle toegang aan alle gebruikers vir C:\ te gee.
 
 Boonop beskryf die proses uiteengesit in [hierdie Medium artikel](https://medium.com/@raphaeltzy13/exploiting-semanagevolumeprivilege-with-dll-hijacking-windows-privilege-escalation-1a4f28372d37) die gebruik van DLL-hijacking in samewerking met `SeManageVolumePrivilege` om privilige te eskaleer. Deur 'n payload DLL `C:\Windows\System32\wbem\tzres.dll` te plaas en `systeminfo` aan te roep, word die dll uitgevoer.
 
-## Kontroleer privilige
+## Check privileges
 ```
 whoami /priv
 ```
-Die **tokens wat as Gestremd verskyn** kan geaktiveer word, jy kan eintlik _Geaktiveerde_ en _Gestremde_ tokens misbruik.
+Die **tokens wat as Gestremde verskyn** kan geaktiveer word, jy kan eintlik _Geaktiveerde_ en _Gestremde_ tokens misbruik.
 
 ### Aktiveer Alle die tokens
 
-As jy tokens het wat gestremd is, kan jy die skrif [**EnableAllTokenPrivs.ps1**](https://raw.githubusercontent.com/fashionproof/EnableAllTokenPrivs/master/EnableAllTokenPrivs.ps1) gebruik om al die tokens te aktiveer:
-```powershell
+As jy tokens het wat gestremd is, kan jy die skrip [**EnableAllTokenPrivs.ps1**](https://raw.githubusercontent.com/fashionproof/EnableAllTokenPrivs/master/EnableAllTokenPrivs.ps1) gebruik om al die tokens te aktiveer:
+```bash
 .\EnableAllTokenPrivs.ps1
 whoami /priv
 ```
@@ -159,17 +159,17 @@ Of die **script** ingebed in hierdie [**plasing**](https://www.leeholmes.com/adj
 
 ## Tabel
 
-Volledige token bevoegdhede cheatsheet by [https://github.com/gtworek/Priv2Admin](https://github.com/gtworek/Priv2Admin), opsomming hieronder sal slegs direkte maniere lys om die bevoegdheid te benut om 'n admin-sessie te verkry of sensitiewe lêers te lees.
+Volledige token bevoegdhede cheatsheet by [https://github.com/gtworek/Priv2Admin](https://github.com/gtworek/Priv2Admin), samevatting hieronder sal slegs direkte maniere lys om die bevoegdheid te benut om 'n admin-sessie te verkry of sensitiewe lêers te lees.
 
 | Bevoegdheid                | Impak       | Gereedskap              | Uitvoeringspad                                                                                                                                                                                                                                                                                                                                     | Opmerkings                                                                                                                                                                                                                                                                                                                        |
 | -------------------------- | ----------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **`SeAssignPrimaryToken`** | _**Admin**_ | 3de party gereedskap    | _"Dit sal 'n gebruiker toelaat om tokens na te boots en privesc na nt stelsel te gebruik met gereedskap soos potato.exe, rottenpotato.exe en juicypotato.exe"_                                                                                                                                                                              | Dankie [Aurélien Chalot](https://twitter.com/Defte_) vir die opdatering. Ek sal probeer om dit binnekort in iets meer resep-agtig te herformuleer.                                                                                                                                                                           |
+| **`SeAssignPrimaryToken`** | _**Admin**_ | 3de party gereedskap    | _"Dit sal 'n gebruiker toelaat om tokens na te boots en privesc na nt stelsel te gebruik met gereedskap soos potato.exe, rottenpotato.exe en juicypotato.exe"_                                                                                                                                                                                  | Dankie [Aurélien Chalot](https://twitter.com/Defte_) vir die opdatering. Ek sal probeer om dit binnekort in iets meer resep-agtig te herformuleer.                                                                                                                                                                           |
 | **`SeBackup`**             | **Dreig**   | _**Ingeboude opdragte**_ | Lees sensitiewe lêers met `robocopy /b`                                                                                                                                                                                                                                                                                                             | <p>- Mag meer interessant wees as jy %WINDIR%\MEMORY.DMP kan lees<br><br>- <code>SeBackupPrivilege</code> (en robocopy) is nie nuttig wanneer dit kom by oop lêers nie.<br><br>- Robocopy vereis beide SeBackup en SeRestore om met /b parameter te werk.</p>                                                                      |
 | **`SeCreateToken`**        | _**Admin**_ | 3de party gereedskap    | Skep arbitrêre token insluitend plaaslike admin regte met `NtCreateToken`.                                                                                                                                                                                                                                                                          |                                                                                                                                                                                                                                                                                                                                |
 | **`SeDebug`**              | _**Admin**_ | **PowerShell**          | Dubbel die `lsass.exe` token.                                                                                                                                                                                                                                                                                                                   | Skrip om te vind by [FuzzySecurity](https://github.com/FuzzySecurity/PowerShell-Suite/blob/master/Conjure-LSASS.ps1)                                                                                                                                                                                                         |
-| **`SeLoadDriver`**         | _**Admin**_ | 3de party gereedskap    | <p>1. Laai 'n foutiewe kern bestuurder soos <code>szkg64.sys</code><br>2. Benut die bestuurder kwesbaarheid<br><br>Alternatiewelik kan die bevoegdheid gebruik word om sekuriteitsverwante bestuurders met <code>ftlMC</code> ingeboude opdrag te ontlaai. d.w.s.: <code>fltMC sysmondrv</code></p> | <p>1. Die <code>szkg64</code> kwesbaarheid is gelys as <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-15732">CVE-2018-15732</a><br>2. Die <code>szkg64</code> <a href="https://www.greyhathacker.net/?p=1025">benuttingskode</a> is geskep deur <a href="https://twitter.com/parvezghh">Parvez Anwar</a></p> |
-| **`SeRestore`**            | _**Admin**_ | **PowerShell**          | <p>1. Begin PowerShell/ISE met die SeRestore bevoegdheid teenwoordig.<br>2. Aktiveer die bevoegdheid met <a href="https://github.com/gtworek/PSBits/blob/master/Misc/EnableSeRestorePrivilege.ps1">Enable-SeRestorePrivilege</a>).<br>3. Hernoem utilman.exe na utilman.old<br>4. Hernoem cmd.exe na utilman.exe<br>5. Vergrendel die konsole en druk Win+U</p> | <p>Die aanval mag deur sommige AV sagteware opgespoor word.</p><p>Alternatiewe metode berus op die vervanging van diens binêre lêers wat in "Program Files" gestoor is met dieselfde bevoegdheid</p>                                                                                                                                                            |
-| **`SeTakeOwnership`**      | _**Admin**_ | _**Ingeboude opdragte**_ | <p>1. <code>takeown.exe /f "%windir%\system32"</code><br>2. <code>icalcs.exe "%windir%\system32" /grant "%username%":F</code><br>3. Hernoem cmd.exe na utilman.exe<br>4. Vergrendel die konsole en druk Win+U</p>                                                                                                                                       | <p>Die aanval mag deur sommige AV sagteware opgespoor word.</p><p>Alternatiewe metode berus op die vervanging van diens binêre lêers wat in "Program Files" gestoor is met dieselfde bevoegdheid.</p>                                                                                                                                                           |
+| **`SeLoadDriver`**         | _**Admin**_ | 3de party gereedskap    | <p>1. Laai foutiewe kern bestuurder soos <code>szkg64.sys</code><br>2. Benut die bestuurder kwesbaarheid<br><br>Alternatiewelik kan die bevoegdheid gebruik word om sekuriteitsverwante bestuurders met <code>ftlMC</code> ingeboude opdrag te ontlaai. d.w.z.: <code>fltMC sysmondrv</code></p>                                   | <p>1. Die <code>szkg64</code> kwesbaarheid is gelys as <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-15732">CVE-2018-15732</a><br>2. Die <code>szkg64</code> <a href="https://www.greyhathacker.net/?p=1025">benuttingskode</a> is geskep deur <a href="https://twitter.com/parvezghh">Parvez Anwar</a></p> |
+| **`SeRestore`**            | _**Admin**_ | **PowerShell**          | <p>1. Begin PowerShell/ISE met die SeRestore bevoegdheid teenwoordig.<br>2. Aktiveer die bevoegdheid met <a href="https://github.com/gtworek/PSBits/blob/master/Misc/EnableSeRestorePrivilege.ps1">Enable-SeRestorePrivilege</a>).<br>3. Hernoem utilman.exe na utilman.old<br>4. Hernoem cmd.exe na utilman.exe<br>5. Sluit die konsole en druk Win+U</p> | <p>Die aanval mag deur sommige AV sagteware opgespoor word.</p><p>Alternatiewe metode berus op die vervanging van diens binaire wat in "Program Files" gestoor is met dieselfde bevoegdheid</p>                                                                                                                                                            |
+| **`SeTakeOwnership`**      | _**Admin**_ | _**Ingeboude opdragte**_ | <p>1. <code>takeown.exe /f "%windir%\system32"</code><br>2. <code>icalcs.exe "%windir%\system32" /grant "%username%":F</code><br>3. Hernoem cmd.exe na utilman.exe<br>4. Sluit die konsole en druk Win+U</p>                                                                                                                                       | <p>Die aanval mag deur sommige AV sagteware opgespoor word.</p><p>Alternatiewe metode berus op die vervanging van diens binaire wat in "Program Files" gestoor is met dieselfde bevoegdheid.</p>                                                                                                                                                           |
 | **`SeTcb`**                | _**Admin**_ | 3de party gereedskap    | <p>Manipuleer tokens om plaaslike admin regte ingesluit te hê. Mag SeImpersonate vereis.</p><p>Om geverifieer te word.</p>                                                                                                                                                                                                                                     |                                                                                                                                                                                                                                                                                                                                |
 
 ## Verwysing

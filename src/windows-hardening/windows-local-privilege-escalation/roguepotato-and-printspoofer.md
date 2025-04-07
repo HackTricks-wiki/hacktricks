@@ -2,9 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-> [!WARNING] > **JuicyPotato werk nie** op Windows Server 2019 en Windows 10 weergawe 1809 en later nie. Tog kan [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**,** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**,** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato)**,** [**GodPotato**](https://github.com/BeichenDream/GodPotato)**,** [**EfsPotato**](https://github.com/zcgonvh/EfsPotato)**,** [**DCOMPotato**](https://github.com/zcgonvh/DCOMPotato)** gebruik word om **die selfde voorregte te benut en `NT AUTHORITY\SYSTEM`\*\* vlak toegang te verkry. Hierdie [blogpos](https://itm4n.github.io/printspoofer-abusing-impersonate-privileges/) gaan in diepte in op die `PrintSpoofer` hulpmiddel, wat gebruik kan word om impersonasie voorregte op Windows 10 en Server 2019 gasheer waar JuicyPotato nie meer werk nie, te misbruik.
+> [!WARNING] > **JuicyPotato werk nie** op Windows Server 2019 en Windows 10 weergawe 1809 en later nie. Tog kan [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**,** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**,** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato)**,** [**GodPotato**](https://github.com/BeichenDream/GodPotato)**,** [**EfsPotato**](https://github.com/zcgonvh/EfsPotato)**,** [**DCOMPotato**](https://github.com/zcgonvh/DCOMPotato)** gebruik word om **die selfde voorregte te benut en `NT AUTHORITY\SYSTEM`** vlak toegang te verkry. Hierdie [blogpos](https://itm4n.github.io/printspoofer-abusing-impersonate-privileges/) gaan in diepte in op die `PrintSpoofer` hulpmiddel, wat gebruik kan word om impersonasie voorregte op Windows 10 en Server 2019 gasheer te misbruik waar JuicyPotato nie meer werk nie.
 
-## Vinige Demo
+## Quick Demo
 
 ### PrintSpoofer
 ```bash

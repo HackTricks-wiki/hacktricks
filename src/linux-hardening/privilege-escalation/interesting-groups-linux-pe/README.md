@@ -26,12 +26,12 @@ Vind alle suid binêre en kyk of daar die binêre **Pkexec** is:
 ```bash
 find / -perm -4000 2>/dev/null
 ```
-As jy vind dat die binêre **pkexec 'n SUID-binary is** en jy behoort tot **sudo** of **admin**, kan jy waarskynlik binêre as sudo uitvoer met `pkexec`.\
+As jy vind dat die binêre **pkexec 'n SUID-binary** is en jy behoort tot **sudo** of **admin**, kan jy waarskynlik binêre uitvoer as sudo met behulp van `pkexec`.\
 Dit is omdat dit tipies die groepe is binne die **polkit-beleid**. Hierdie beleid identifiseer basies watter groepe `pkexec` kan gebruik. Kontroleer dit met:
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
-Daar sal jy vind watter groepe toegelaat is om **pkexec** uit te voer en **per standaard** verskyn die groepe **sudo** en **admin** in sommige Linux-distribusies.
+Daar sal jy vind watter groepe toegelaat word om **pkexec** uit te voer en **per standaard** verskyn die groepe **sudo** en **admin** in sommige Linux-distribusies.
 
 Om **root te word kan jy uitvoer**:
 ```bash
@@ -68,7 +68,7 @@ sudo su
 ```
 ## Shadow Group
 
-Gebruikers van die **groep shadow** kan **lees** die **/etc/shadow** lêer:
+Users from the **group shadow** can **read** the **/etc/shadow** file:
 ```
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
@@ -130,7 +130,7 @@ $ /bin/bash -p
 ```
 ## Disk Group
 
-Hierdie voorreg is byna **gelyk aan worteltoegang** aangesien jy toegang tot al die data binne die masjien het.
+Hierdie voorreg is byna **gelyk aan worteltoegang** aangesien jy toegang tot al die data binne die masjien kan verkry.
 
 Files:`/dev/sd[a-z][1-9]`
 ```bash
@@ -156,24 +156,24 @@ USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
 yossi    tty1                      22:16    5:13m  0.05s  0.04s -bash
 moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 ```
-Die **tty1** beteken dat die gebruiker **yossi fisies ingelogde** is op 'n terminal op die masjien.
+Die **tty1** beteken dat die gebruiker **yossi fisies ingelog is** op 'n terminal op die masjien.
 
 Die **video groep** het toegang om die skermuitset te sien. Basies kan jy die skerms observeer. Om dit te doen, moet jy die **huidige beeld op die skerm** in rou data gryp en die resolusie wat die skerm gebruik, kry. Die skermdata kan gestoor word in `/dev/fb0` en jy kan die resolusie van hierdie skerm op `/sys/class/graphics/fb0/virtual_size` vind.
 ```bash
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
 ```
-Om die **rauwe beeld** te **open**, kan jy **GIMP** gebruik, die \*\*`screen.raw` \*\* lêer te kies en as lêertipe **Raw image data** te kies:
+Om die **rauwe beeld** te **open**, kan jy **GIMP** gebruik, kies die **`screen.raw`** lêer en kies as lêertipe **Raw image data**:
 
 ![](<../../../images/image (463).png>)
 
-Verander dan die Breedte en Hoogte na diegene wat op die skerm gebruik word en kyk na verskillende Beeldtipes (en kies die een wat die skerm beter wys):
+Verander dan die Breedte en Hoogte na diegene wat op die skerm gebruik word en kyk na verskillende Beeldtipes (en kies die een wat die skerm beter vertoon):
 
 ![](<../../../images/image (317).png>)
 
 ## Root Groep
 
-Dit lyk of **lede van die root groep** standaard toegang kan hê om **te wysig** sommige **diens** konfigurasielêers of sommige **biblioteek** lêers of **ander interessante dinge** wat gebruik kan word om voorregte te verhoog...
+Dit lyk of **lede van die root groep** standaard toegang kan hê om sommige **diens** konfigurasielêers of sommige **biblioteek** lêers of **ander interessante dinge** wat gebruik kan word om voorregte te verhoog, te **wysig**...
 
 **Kontroleer watter lêers root lede kan wysig**:
 ```bash
@@ -199,7 +199,7 @@ Uiteindelik, as jy nie van enige van die voorstelle hou nie, of hulle werk om ee
 ../docker-security/
 {{#endref}}
 
-As jy skrywe toestemmings oor die docker socket het, lees [**hierdie pos oor hoe om voorregte te verhoog deur die docker socket te misbruik**](../index.html#writable-docker-socket)**.**
+As jy skryfrechten oor die docker socket het, lees [**hierdie pos oor hoe om voorregte te verhoog deur die docker socket te misbruik**](../index.html#writable-docker-socket)**.**
 
 {{#ref}}
 https://github.com/KrustyHack/docker-privilege-escalation
@@ -223,6 +223,6 @@ Daarom, as jy 'n gebruiker binne hierdie groep gecompromitteer het, moet jy besl
 ## Auth groep
 
 Binne OpenBSD kan die **auth** groep gewoonlik in die vouers _**/etc/skey**_ en _**/var/db/yubikey**_ skryf as hulle gebruik word.\
-Hierdie toestemmings kan misbruik word met die volgende eksploit om **voorregte** na root te verhoog: [https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
+Hierdie toestemmings kan misbruik word met die volgende exploit om **voorregte** na root te verhoog: [https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
 
 {{#include ../../../banners/hacktricks-training.md}}

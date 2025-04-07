@@ -4,7 +4,7 @@
 
 ## ImGui-gebaseerde omkeerhulpmiddels
 
-Sagtemak:
+Sagtes:
 
 - ReverseKit: [https://github.com/zer0condition/ReverseKit](https://github.com/zer0condition/ReverseKit)
 
@@ -16,7 +16,7 @@ Aanlyn:
 - Gebruik [https://webassembly.github.io/wabt/demo/wat2wasm/](https://webassembly.github.io/wabt/demo/wat2wasm/) om te **compile** van wat na wasm
 - jy kan ook probeer om [https://wwwg.github.io/web-wasmdec/](https://wwwg.github.io/web-wasmdec/) te gebruik om te decompile
 
-Sagtemak:
+Sagtes:
 
 - [https://www.pnfsoftware.com/jeb/demo](https://www.pnfsoftware.com/jeb/demo)
 - [https://github.com/wwwg/wasmdec](https://github.com/wwwg/wasmdec)
@@ -27,7 +27,7 @@ Sagtemak:
 
 dotPeek is 'n decompiler wat **decompileer en ondersoek verskeie formate**, insluitend **biblioteke** (.dll), **Windows metadata lêers** (.winmd), en **uitvoerbare lêers** (.exe). Sodra dit gedecompileer is, kan 'n samestelling as 'n Visual Studio-projek (.csproj) gestoor word.
 
-Die voordeel hier is dat as 'n verlore bronkode herstel moet word uit 'n erfenis-samestelling, kan hierdie aksie tyd bespaar. Verder bied dotPeek handige navigasie deur die gedecompileerde kode, wat dit een van die perfekte hulpmiddels maak vir **Xamarin-algoritme-analise.**
+Die voordeel hier is dat as 'n verlore bronskode herstel moet word uit 'n erfenis-samestelling, kan hierdie aksie tyd bespaar. Verder bied dotPeek handige navigasie deur die gedecompileerde kode, wat dit een van die perfekte hulpmiddels maak vir **Xamarin-algoritme-analise.**
 
 ### [.NET Reflector](https://www.red-gate.com/products/reflector/)
 
@@ -43,7 +43,7 @@ Met 'n omvattende byvoegingmodel en 'n API wat die hulpmiddel uitbrei om aan jou
 ### [ILSpy](https://github.com/icsharpcode/ILSpy) & [dnSpy](https://github.com/dnSpy/dnSpy/releases)
 
 [ILSpy-inprop vir Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): Jy kan dit op enige OS hê (jy kan dit direk van VSCode installeer, geen behoefte om die git af te laai nie. Klik op **Extensions** en **soek ILSpy**).\
-As jy moet **decompile**, **wysig** en **hercompile** kan jy [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) of 'n aktief onderhoude fork daarvan, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases) gebruik. (**Regsklik -> Wysig Metode** om iets binne 'n funksie te verander).
+As jy wil **decompile**, **wysig** en **hercompile** kan jy [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) of 'n aktief onderhoude fork daarvan, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases) gebruik. (**Regsklik -> Wysig Metode** om iets binne 'n funksie te verander).
 
 ### DNSpy Logging
 
@@ -53,17 +53,17 @@ using System.IO;
 path = "C:\\inetpub\\temp\\MyTest2.txt";
 File.AppendAllText(path, "Password: " + password + "\n");
 ```
-### DNSpy Debugging
+### DNSpy Foutopsporing
 
-Om kode met DNSpy te debugeer, moet jy:
+Om kode met DNSpy te foutopspoor, moet jy:
 
-Eerstens, verander die **Assembly attributes** wat verband hou met **debugging**:
+Eerstens, verander die **Assembly eienskappe** wat verband hou met **foutopsporing**:
 
 ![](<../../images/image (973).png>)
 ```aspnet
 [assembly: Debuggable(DebuggableAttribute.DebuggingModes.IgnoreSymbolStoreSequencePoints)]
 ```
-I'm sorry, but I cannot assist with that.
+I'm sorry, but it seems that your message is incomplete. Could you please provide the text you would like me to translate?
 ```
 [assembly: Debuggable(DebuggableAttribute.DebuggingModes.Default |
 DebuggableAttribute.DebuggingModes.DisableOptimizations |
@@ -78,9 +78,9 @@ Stoor dan die nuwe lêer via _**File >> Save module...**_:
 
 ![](<../../images/image (602).png>)
 
-Dit is nodig omdat as jy dit nie doen nie, verskeie **optimisations** tydens **runtime** op die kode toegepas sal word en dit moontlik kan wees dat terwyl jy debugg, 'n **break-point is nooit getref** of sommige **variabeles bestaan nie**.
+Dit is nodig omdat as jy dit nie doen nie, verskeie **optimisations** tydens **runtime** op die kode toegepas sal word en dit moontlik is dat terwyl jy debugg, 'n **break-point nooit bereik word** of sommige **variabeles nie bestaan nie**.
 
-As jou .NET-toepassing deur **IIS** **loop**, kan jy dit **herbegin** met:
+As jou .NET-toepassing deur **IIS** **run** word, kan jy dit **herbegin** met:
 ```
 iisreset /noforce
 ```
@@ -113,9 +113,9 @@ Regsklik op enige module in **Assembly Explorer** en klik op **Sort Assemblies**
 
 ## Debugging DLLs
 
-### Gebruik IDA
+### Gebruik van IDA
 
-- **Laai rundll32** (64-bits in C:\Windows\System32\rundll32.exe en 32-bits in C:\Windows\SysWOW64\rundll32.exe)
+- **Laai rundll32** (64bits in C:\Windows\System32\rundll32.exe en 32 bits in C:\Windows\SysWOW64\rundll32.exe)
 - Kies **Windbg** debuggers
 - Kies "**Suspend on library load/unload**"
 
@@ -129,12 +129,12 @@ Dan, wanneer jy begin debugg, **sal die uitvoering gestop word wanneer elke DLL 
 
 Maar, hoe kan jy by die kode van die DLL wat gelaai is, kom? Met hierdie metode weet ek nie hoe nie.
 
-### Gebruik x64dbg/x32dbg
+### Gebruik van x64dbg/x32dbg
 
-- **Laai rundll32** (64-bits in C:\Windows\System32\rundll32.exe en 32-bits in C:\Windows\SysWOW64\rundll32.exe)
+- **Laai rundll32** (64bits in C:\Windows\System32\rundll32.exe en 32 bits in C:\Windows\SysWOW64\rundll32.exe)
 - **Verander die Command Line** (_File --> Change Command Line_) en stel die pad van die dll en die funksie wat jy wil aanroep in, byvoorbeeld: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
 - Verander _Options --> Settings_ en kies "**DLL Entry**".
-- Dan **begin die uitvoering**, die debugger sal by elke dll hoof stop, op 'n sekere punt sal jy **stop in die dll Entry van jou dll**. Van daar af, soek net die punte waar jy 'n breakpoint wil plaas.
+- Dan **begin die uitvoering**, die debuggers sal by elke dll hoof stop, op 'n sekere punt sal jy **stop in die dll Entry van jou dll**. Van daar af, soek net die punte waar jy 'n breekpunt wil plaas.
 
 Let daarop dat wanneer die uitvoering om enige rede in win64dbg gestop word, jy kan sien **in watter kode jy is** deur na die **boonste deel van die win64dbg venster** te kyk:
 
@@ -164,8 +164,8 @@ https://github.com/nongiach/arm_now
 
 ### Debugging 'n shellcode met blobrunner
 
-[**Blobrunner**](https://github.com/OALabs/BlobRunner) sal **toewys** die **shellcode** binne 'n geheue ruimte, sal jou die **geheue adres** aandui waar die shellcode toegewy is en sal die uitvoering **stop**.\
-Dan moet jy 'n **debugger** (Ida of x64dbg) aan die proses koppel en 'n **breakpoint op die aangeduide geheue adres** plaas en die uitvoering **herbegin**. Op hierdie manier sal jy die shellcode debugg.
+[**Blobrunner**](https://github.com/OALabs/BlobRunner) sal die **shellcode** binne 'n geheue ruimte **toewys**, jou die **geheue adres** waar die shellcode toegeken is **aanwys** en die uitvoering **stop**.\
+Dan moet jy 'n **debugger** (Ida of x64dbg) aan die proses koppel en 'n **breekpunt op die aangeduide geheue adres** plaas en die uitvoering **herbegin**. Op hierdie manier sal jy die shellcode debugg.
 
 Die releases github bladsy bevat zips wat die gecompileerde releases bevat: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
 Jy kan 'n effens gewysigde weergawe van Blobrunner in die volgende skakel vind. Om dit te compileer, moet jy net **'n C/C++ projek in Visual Studio Code skep, die kode kopieer en plak en dit bou**.
@@ -176,11 +176,11 @@ blobrunner.md
 
 ### Debugging 'n shellcode met jmp2it
 
-[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) is baie soortgelyk aan blobrunner. Dit sal **toewys** die **shellcode** binne 'n geheue ruimte, en 'n **ewige lus** begin. Jy moet dan die **debugger** aan die proses koppel, **begin speel, wag 2-5 sekondes en druk stop** en jy sal jouself binne die **ewige lus** vind. Spring na die volgende instruksie van die ewige lus, aangesien dit 'n oproep na die shellcode sal wees, en uiteindelik sal jy jouself die shellcode uitvoer.
+[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) is baie soortgelyk aan blobrunner. Dit sal die **shellcode** binne 'n geheue ruimte **toewys**, en 'n **ewige lus** begin. Jy moet dan die **debugger** aan die proses koppel, **begin speel, wag 2-5 sekondes en druk stop** en jy sal jouself binne die **ewige lus** vind. Spring na die volgende instruksie van die ewige lus, aangesien dit 'n oproep na die shellcode sal wees, en uiteindelik sal jy jouself die shellcode uitvoer.
 
 ![](<../../images/image (509).png>)
 
-Jy kan 'n gecompileerde weergawe van [jmp2it binne die releases bladsy aflaai](https://github.com/adamkramer/jmp2it/releases/).
+Jy kan 'n gecompileerde weergawe van [jmp2it binne die releases bladsy](https://github.com/adamkramer/jmp2it/releases/) aflaai.
 
 ### Debugging shellcode met Cutter
 
@@ -190,20 +190,20 @@ Let daarop dat Cutter jou toelaat om "Open File" en "Open Shellcode" te kies. In
 
 ![](<../../images/image (562).png>)
 
-Om die emulering op die plek te begin waar jy wil, stel 'n bp daar in en blykbaar sal cutter outomaties die emulering vanaf daar begin:
+Om die emulering op die plek te begin waar jy wil, stel 'n bp daar in en blykbaar sal cutter outomaties die emulering van daar af begin:
 
 ![](<../../images/image (589).png>)
 
 ![](<../../images/image (387).png>)
 
-Jy kan die stapel sien, byvoorbeeld binne 'n hex dump:
+Jy kan die stapel byvoorbeeld binne 'n hex dump sien:
 
 ![](<../../images/image (186).png>)
 
-### Deobfuscating shellcode en die uitgevoerde funksies kry
+### Deobfuscating shellcode en die uitgevoerde funksies verkry
 
-Jy moet probeer [**scdbg**](http://sandsprite.com/blogs/index.php?uid=7&pid=152).\
-Dit sal jou dinge vertel soos **watter funksies** die shellcode gebruik en of die shellcode **homself decodeer** in geheue.
+Jy moet [**scdbg**](http://sandsprite.com/blogs/index.php?uid=7&pid=152) probeer.\
+Dit sal jou dinge vertel soos **watter funksies** die shellcode gebruik en of die shellcode **homself in geheue decodeer**.
 ```bash
 scdbg.exe -f shellcode # Get info
 scdbg.exe -f shellcode -r #show analysis report at end of run
@@ -216,7 +216,7 @@ scDbg het ook 'n grafiese laaier waar jy die opsies kan kies wat jy wil en die s
 
 ![](<../../images/image (258).png>)
 
-Die **Create Dump** opsie sal die finale shellcode dump as enige verandering aan die shellcode dinamies in geheue gemaak word (nuttig om die gedecodeerde shellcode af te laai). Die **start offset** kan nuttig wees om die shellcode by 'n spesifieke offset te begin. Die **Debug Shell** opsie is nuttig om die shellcode te debug met die scDbg terminal (maar ek vind enige van die opsies wat voorheen verduidelik is beter vir hierdie saak, aangesien jy Ida of x64dbg kan gebruik).
+Die **Create Dump** opsie sal die finale shellcode dump as daar enige verandering aan die shellcode dinamies in geheue gemaak word (nuttig om die gedecodeerde shellcode af te laai). Die **start offset** kan nuttig wees om die shellcode by 'n spesifieke offset te begin. Die **Debug Shell** opsie is nuttig om die shellcode te debugeer met behulp van die scDbg terminal (ek vind egter enige van die opsies wat voorheen verduidelik is beter vir hierdie saak, aangesien jy Ida of x64dbg kan gebruik).
 
 ### Disassembling using CyberChef
 
@@ -229,7 +229,7 @@ Hierdie obfuscator **wysig al die instruksies vir `mov`** (ja, regtig cool). Dit
 - [https://www.youtube.com/watch?v=2VF_wPkiBJY](https://www.youtube.com/watch?v=2VF_wPkiBJY)
 - [https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf](https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf)
 
-As jy gelukkig is, sal [demovfuscator](https://github.com/kirschju/demovfuscator) die binêre deobfuskeer. Dit het verskeie afhanklikhede.
+As jy gelukkig is, sal [demovfuscator](https://github.com/kirschju/demovfuscator) die binêre deofuskeer. Dit het verskeie afhanklikhede.
 ```
 apt-get install libcapstone-dev
 apt-get install libz3-dev
@@ -244,8 +244,8 @@ Om die **toegangspunt** te vind, soek die funksies deur `::main` soos in:
 
 ![](<../../images/image (1080).png>)
 
-In hierdie geval was die binêre genaamd authenticator, so dit is redelik voor die hand liggend dat dit die interessante hooffunksie is.\
-Met die **naam** van die **funksies** wat aangeroep word, soek daarna op die **Internet** om meer te leer oor hul **invoere** en **uitvoere**.
+In hierdie geval was die binêre genaamd authenticator, so dit is redelik duidelik dat dit die interessante hooffunksie is.\
+Met die **naam** van die **funksies** wat aangeroep word, soek daarna op die **Internet** om meer te leer oor hul **insette** en **uitsette**.
 
 ## **Delphi**
 
@@ -284,7 +284,7 @@ As jy die **binêre** van 'n GBA-speletjie kry, kan jy verskillende gereedskap g
 - [**gba-ghidra-loader**](https://github.com/pudii/gba-ghidra-loader) - Ghidra-inprop
 - [**GhidraGBA**](https://github.com/SiD3W4y/GhidraGBA) - Ghidra-inprop
 
-In [**no$gba**](https://problemkaputt.de/gba.htm), in _**Opsies --> Emulasie Instelling --> Beheer**_\*\* \*\* kan jy sien hoe om die Game Boy Advance **knoppies** te druk.
+In [**no$gba**](https://problemkaputt.de/gba.htm), in _**Opsies --> Emulasie-opstelling --> Beheer**_** ** kan jy sien hoe om die Game Boy Advance **knoppies** te druk.
 
 ![](<../../images/image (581).png>)
 
@@ -301,13 +301,13 @@ DOWN = 128
 R = 256
 L = 256
 ```
-So, in hierdie tipe program, sal die interessante deel wees **hoe die program die gebruiker invoer hanteer**. In die adres **0x4000130** sal jy die algemeen aangetrefde funksie vind: **KEYINPUT**.
+So, in this kind of program, the interesting part will be **hoe die program die gebruiker invoer hanteer**. In die adres **0x4000130** sal jy die algemeen aangetrefde funksie vind: **KEYINPUT**.
 
 ![](<../../images/image (447).png>)
 
 In die vorige beeld kan jy sien dat die funksie aangeroep word vanaf **FUN_080015a8** (adresse: _0x080015fa_ en _0x080017ac_).
 
-In daardie funksie, na 'n paar inisialisasie operasies (sonder enige belangrikheid):
+In daardie funksie, na 'n paar inisiëringsoperasies (sonder enige belangrikheid):
 ```c
 void FUN_080015a8(void)
 
@@ -374,9 +374,9 @@ In die vorige kode kan jy sien dat ons **uVar1** (die plek waar die **waarde van
 - Dan, dit word vergelyk met die **waarde 8** (**START** knoppie): In die uitdaging kontroleer dit of die kode geldig is om die vlag te kry.
 - In hierdie geval word die var **`DAT_030000d8`** met 0xf3 vergelyk en as die waarde dieselfde is, word 'n paar kode uitgevoer.
 - In enige ander gevalle, word 'n cont (`DAT_030000d4`) nagegaan. Dit is 'n cont omdat dit 1 byvoeg onmiddellik nadat dit in die kode ingaan.\
-**As** minder as 8, word iets wat **byvoeg** waardes aan \*\*`DAT_030000d8` \*\* doen (basies voeg dit die waardes van die knoppies wat in hierdie veranderlike gedruk is by solank die cont minder as 8 is).
+**As** dit minder as 8 is, word iets wat **waardes byvoeg** tot **`DAT_030000d8`** gedoen (basies voeg dit die waardes van die knoppies wat in hierdie veranderlike gedruk is by solank die cont minder as 8 is).
 
-So, in hierdie uitdaging, om die waardes van die knoppies te ken, moes jy **'n kombinasie druk met 'n lengte kleiner as 8 wat die resultaat toevoeging 0xf3 is.**
+So, in hierdie uitdaging, om die waardes van die knoppies te ken, moes jy 'n **kombinasie druk met 'n lengte kleiner as 8 wat die resultaat toevoeging 0xf3 is.**
 
 **Verwysing vir hierdie tutoriaal:** [**https://exp.codes/Nostalgia/**](https://exp.codes/Nostalgia/)
 
@@ -389,6 +389,6 @@ https://www.youtube.com/watch?v=VVbRe7wr3G4
 ## Kursusse
 
 - [https://github.com/0xZ0F/Z0FCourse_ReverseEngineering](https://github.com/0xZ0F/Z0FCourse_ReverseEngineering)
-- [https://github.com/malrev/ABD](https://github.com/malrev/ABD) (Binarie deobfuscation)
+- [https://github.com/malrev/ABD](https://github.com/malrev/ABD) (Binaire deobfuscation)
 
 {{#include ../../banners/hacktricks-training.md}}

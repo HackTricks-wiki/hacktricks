@@ -3,7 +3,7 @@
 # Tydstempels
 
 'n Aanvaller mag belangstel in **die verandering van die tydstempels van lêers** om nie opgespoor te word nie.\
-Dit is moontlik om die tydstempels binne die MFT in die eienskappe `$STANDARD_INFORMATION` ** en ** `$FILE_NAME` te vind.
+Dit is moontlik om die tydstempels binne die MFT in die eienskappe `$STANDARD_INFORMATION`**en**`$FILE_NAME` te vind.
 
 Albei eienskappe het 4 tydstempels: **Wysiging**, **toegang**, **skepping**, en **MFT registrasie wysiging** (MACE of MACB).
 
@@ -23,7 +23,7 @@ Die vorige beeld is die **uitset** wat deur die **gereedskap** gewys word waar d
 
 ## $LogFile
 
-**Alle metadata veranderinge aan 'n lêerstelsel word gelog** in 'n proses bekend as [write-ahead logging](https://en.wikipedia.org/wiki/Write-ahead_logging). Die gelogde metadata word in 'n lêer genaamd `**$LogFile**` gehou, geleë in die wortelgids van 'n NTFS lêerstelsel. Gereedskap soos [LogFileParser](https://github.com/jschicht/LogFileParser) kan gebruik word om hierdie lêer te ontleed en veranderinge te identifiseer.
+**Alle metadata veranderinge aan 'n lêerstelsel word gelog** in 'n proses bekend as [write-ahead logging](https://en.wikipedia.org/wiki/Write-ahead_logging). Die gelogde metadata word in 'n lêer genaamd `**$LogFile**`, geleë in die wortelgids van 'n NTFS lêerstelsel, gehou. Gereedskap soos [LogFileParser](https://github.com/jschicht/LogFileParser) kan gebruik word om hierdie lêer te ontleed en veranderinge te identifiseer.
 
 ![](<../../images/image (450).png>)
 
@@ -40,7 +40,7 @@ Met dieselfde gereedskap is dit moontlik om te identifiseer **tot watter tyd die
 
 ## `$STANDARD_INFORMATION` en `$FILE_NAME` vergelyking
 
-'n Ander manier om verdagte gewysigde lêers te identifiseer, sou wees om die tyd op albei eienskappe te vergelyk en te soek na **ongelykhede**.
+'n Ander manier om verdagte gewysigde lêers te identifiseer, sou wees om die tyd op albei eienskappe te vergelyk op soek na **verskille**.
 
 ## Nanosekondes
 
@@ -67,7 +67,7 @@ Dit is 'n gereedskap wat die **rekenaar sal afskakel as enige verandering in die
 
 # Lewende Linux Verspreidings
 
-Hierdie distros word **binne die RAM** geheue uitgevoer. Die enigste manier om hulle te ontdek is **in die geval dat die NTFS lêerstelsel met skryf toestemmings gemonteer is**. As dit net met lees toestemmings gemonteer is, sal dit nie moontlik wees om die indringing te ontdek nie.
+Hierdie distros word **binne die RAM** geheue uitgevoer. Die enigste manier om hulle te ontdek is **as die NTFS lêerstelsel met skryf regte gemonteer is**. As dit net met lees regte gemonteer is, sal dit nie moontlik wees om die indringing te ontdek nie.
 
 # Veilige Verwydering
 
@@ -79,7 +79,7 @@ Dit is moontlik om verskeie Windows logging metodes te deaktiveer om die forensi
 
 ## Deaktiveer Tydstempels - UserAssist
 
-Dit is 'n registriesleutel wat datums en ure behou wanneer elke uitvoerbare lêer deur die gebruiker uitgevoer is.
+Dit is 'n registriesleutel wat datums en ure behou wanneer elke eksekutabele deur die gebruiker uitgevoer is.
 
 Deaktivering van UserAssist vereis twee stappe:
 
@@ -93,12 +93,12 @@ Dit sal inligting oor die toepassings wat uitgevoer is, stoor met die doel om di
 - Voer `regedit` uit
 - Kies die lêer pad `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SessionManager\Memory Management\PrefetchParameters`
 - Regsklik op beide `EnablePrefetcher` en `EnableSuperfetch`
-- Kies Wysig op elk van hierdie om die waarde van 1 (of 3) na 0 te verander
+- Kies Wysig op elkeen van hierdie om die waarde van 1 (of 3) na 0 te verander
 - Herbegin
 
 ## Deaktiveer Tydstempels - Laaste Toegangstyd
 
-Wanneer 'n gids vanaf 'n NTFS volume op 'n Windows NT bediener geopen word, neem die stelsel die tyd om **'n tydstempelveld op elke gelysde gids op te dateer**, genaamd die laaste toegangstyd. Op 'n intensief gebruikte NTFS volume kan dit die prestasie beïnvloed.
+Wanneer 'n gids vanaf 'n NTFS volume op 'n Windows NT bediener geopen word, neem die stelsel die tyd om **'n tydstempelveld op elke gelysde gids op te dateer**, genaamd die laaste toegangstyd. Op 'n intensief gebruikte NTFS volume kan dit prestasie beïnvloed.
 
 1. Maak die Registrie Redigeerder (Regedit.exe) oop.
 2. Blaai na `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem`.
@@ -115,7 +115,7 @@ Jy kan ook die gereedskap [**USBDeview**](https://www.nirsoft.net/utils/usb_devi
 ## Deaktiveer Skadu Kopieë
 
 **Lys** skadu kopieë met `vssadmin list shadowstorage`\
-**Verwyder** hulle deur `vssadmin delete shadow` uit te voer
+**Verwyder** hulle deur `vssadmin delete shadow`
 
 Jy kan hulle ook via GUI verwyder deur die stappe voor te stel in [https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html)
 
@@ -123,9 +123,9 @@ Om skadu kopieë te deaktiveer [stappe van hier](https://support.waters.com/KB_I
 
 1. Maak die Dienste program oop deur "dienste" in die teks soekboks te tik nadat jy op die Windows startknoppie geklik het.
 2. Vind "Volume Shadow Copy" in die lys, kies dit, en toegang eienskappe deur regsklik.
-3. Kies Gedeaktiveer uit die "Opstart tipe" keuselys, en bevestig die verandering deur Toepas en OK te klik.
+3. Kies Gedeaktiveer van die "Opstart tipe" keuselys, en bevestig die verandering deur Toepas en OK te klik.
 
-Dit is ook moontlik om die konfigurasie van watter lêers in die skadu kopie gekopieer gaan word in die registrie `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot` te wysig.
+Dit is ook moontlik om die konfigurasie van watter lêers in die skadu kopie gaan wees, in die registrasie `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot` te wysig.
 
 ## Oorskryf verwyderde lêers
 
@@ -134,7 +134,7 @@ Dit is ook moontlik om die konfigurasie van watter lêers in die skadu kopie gek
 
 ## Verwyder Windows gebeurtenis logs
 
-- Windows + R --> eventvwr.msc --> Brei "Windows Logs" uit --> Regsklik op elke kategorie en kies "Clear Log"
+- Windows + R --> eventvwr.msc --> Brei "Windows Logs" uit --> Regsklik op elke kategorie en kies "Log Maak Skoon"
 - `for /F "tokens=*" %1 in ('wevtutil.exe el') DO wevtutil.exe cl "%1"`
 - `Get-EventLog -LogName * | ForEach { Clear-EventLog $_.Log }`
 

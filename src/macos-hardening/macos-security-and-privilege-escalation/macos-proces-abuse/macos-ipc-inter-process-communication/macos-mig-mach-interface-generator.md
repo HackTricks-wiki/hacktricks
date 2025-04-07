@@ -10,7 +10,7 @@ Die definisie word gespesifiseer in Interface Definition Language (IDL) met die 
 
 Hierdie definisies het 5 afdelings:
 
-- **Substelseld verklaring**: Die sleutelwoord subsystem word gebruik om die **naam** en die **id** aan te dui. Dit is ook moontlik om dit as **`KernelServer`** te merk as die bediener in die kernel moet loop.
+- **Substelseld verklaring**: Die sleutelwoord substelsel word gebruik om die **naam** en die **id** aan te dui. Dit is ook moontlik om dit as **`KernelServer`** te merk as die bediener in die kernel moet loop.
 - **Insluitings en invoere**: MIG gebruik die C-prepocessor, so dit kan invoere gebruik. Boonop is dit moontlik om `uimport` en `simport` te gebruik vir gebruiker of bediener gegenereerde kode.
 - **Tipe verklarings**: Dit is moontlik om datatipes te definieer alhoewel dit gewoonlik `mach_types.defs` en `std_types.defs` sal invoer. Vir persoonlike tipes kan 'n sekere sintaksis gebruik word:
 - \[i`n/out]tran`: Funksie wat vertaal moet word van 'n inkomende of na 'n uitgaande boodskap
@@ -42,7 +42,7 @@ n2          :  uint32_t);
 ```
 Let wel dat die eerste **argument die poort is om te bind** en MIG sal **automaties die antwoordpoort hanteer** (tenzij `mig_get_reply_port()` in die kliëntkode aangeroep word). Boonop sal die **ID van die operasies** **sekwensieel** wees wat begin met die aangeduide subsysteem-ID (so as 'n operasie verouderd is, word dit verwyder en `skip` word gebruik om steeds sy ID te gebruik).
 
-Gebruik nou MIG om die bediener- en kliëntkode te genereer wat in staat sal wees om met mekaar te kommunikeer om die Subtract-funksie aan te roep:
+Gebruik nou MIG om die bediener- en kliëntkode te genereer wat in staat sal wees om met mekaar te kommunikeer om die Aftrek-funksie aan te roep:
 ```bash
 mig -header myipcUser.h -sheader myipcServer.h myipc.defs
 ```
@@ -108,14 +108,14 @@ In hierdie voorbeeld het ons slegs 1 funksie in die definisies gedefinieer, maar
 
 As die funksie verwag is om 'n **antwoord** te stuur, sou die funksie `mig_internal kern_return_t __MIG_check__Reply__<name>` ook bestaan het.
 
-Werklik is dit moontlik om hierdie verhouding in die struktuur **`subsystem_to_name_map_myipc`** van **`myipcServer.h`** (**`subsystem*to_name_map*\***`\*\* in ander lêers):
+Werklik is dit moontlik om hierdie verhouding in die struktuur **`subsystem_to_name_map_myipc`** van **`myipcServer.h`** (**`subsystem*to_name_map*\***`** in ander lêers) te identifiseer:
 ```c
 #ifndef subsystem_to_name_map_myipc
 #define subsystem_to_name_map_myipc \
 { "Subtract", 500 }
 #endif
 ```
-Uiteindelik, 'n ander belangrike funksie om die bediener te laat werk sal **`myipc_server`** wees, wat die een is wat werklik die **funksie** wat verband hou met die ontvangde id sal **aanroep**:
+Uiteindelik, 'n ander belangrike funksie om die bediener te laat werk sal wees **`myipc_server`**, wat die een is wat werklik die **funksie** wat verband hou met die ontvangde id sal **aanroep**:
 
 <pre class="language-c"><code class="lang-c">mig_external boolean_t myipc_server
 (mach_msg_header_t *InHeadP, mach_msg_header_t *OutHeadP)
@@ -229,7 +229,7 @@ En **MIG-kliënte** sal die `__NDR_record` gebruik om met `__mach_msg` na die be
 
 ### jtool
 
-Aangesien baie binêre nou MIG gebruik om mach-poorte bloot te stel, is dit interessant om te weet hoe om **te identifiseer dat MIG gebruik is** en die **funksies wat MIG met elke boodskap-ID uitvoer**.
+Aangesien baie binêre nou MIG gebruik om mach-poorte bloot te stel, is dit interessant om te weet hoe om **te identifiseer dat MIG gebruik is** en die **funksies wat MIG uitvoer** met elke boodskap-ID.
 
 [**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/index.html#jtool2) kan MIG-inligting uit 'n Mach-O binêre ontleed wat die boodskap-ID aandui en die funksie identifiseer wat uitgevoer moet word:
 ```bash
@@ -241,7 +241,7 @@ jtool2 -d __DATA.__const myipc_server | grep BL
 ```
 ### Assembly
 
-Daar is voorheen genoem dat die funksie wat **die korrekte funksie sal aanroep afhangende van die ontvangde boodskap ID** `myipc_server` was. Dit is egter gewoonlik dat jy nie die simbole van die binêre (geen funksie name) sal hê nie, so dit is interessant om **te kyk hoe dit dekompilerend lyk** aangesien dit altyd baie soortgelyk sal wees (die kode van hierdie funksie is onafhanklik van die funksies wat blootgestel word):
+Daar is voorheen genoem dat die funksie wat **die korrekte funksie sal aanroep afhangende van die ontvangde boodskap-ID** `myipc_server` was. Dit is egter gewoonlik dat jy nie die simbole van die binêre (geen funksiename) sal hê nie, so dit is interessant om **te kyk hoe dit dekompilleer lyk** aangesien dit altyd baie soortgelyk sal wees (die kode van hierdie funksie is onafhanklik van die funksies wat blootgestel word):
 
 {{#tabs}}
 {{#tab name="myipc_server decompiled 1"}}
@@ -259,9 +259,9 @@ var_18 = arg1;
 if (*(int32_t *)(var_10 + 0x14) <= 0x1f4 && *(int32_t *)(var_10 + 0x14) >= 0x1f4) {
 rax = *(int32_t *)(var_10 + 0x14);
 // Aanroep na sign_extend_64 wat kan help om hierdie funksie te identifiseer
-// Dit stoor in rax die aanwyser na die oproep wat gemaak moet word
-// Kontroleer die gebruik van die adres 0x100004040 (funksies aanwysers array)
-// 0x1f4 = 500 (die begin ID)
+// Dit stoor in rax die aanwyser na die oproep wat aangeroep moet word
+// Kontroleer die gebruik van die adres 0x100004040 (funksies se adresse array)
+// 0x1f4 = 500 (die begin-ID)
 <strong>            rax = *(sign_extend_64(rax - 0x1f4) * 0x28 + 0x100004040);
 </strong>            var_20 = rax;
 // As - anders, die as keer vals terug, terwyl die anders die korrekte funksie aanroep en waarborg waar
@@ -289,7 +289,7 @@ return rax;
 {{#endtab}}
 
 {{#tab name="myipc_server decompiled 2"}}
-Dit is dieselfde funksie dekompilerend in 'n ander Hopper gratis weergawe:
+Dit is dieselfde funksie dekompilleer in 'n ander Hopper gratis weergawe:
 
 <pre class="language-c"><code class="lang-c">int _myipc_server(int arg0, int arg1) {
 r31 = r31 - 0x40;
@@ -321,7 +321,7 @@ r8 = 0x1;
 }
 if ((r8 & 0x1) == 0x0) {
 r8 = *(int32_t *)(var_10 + 0x14);
-// 0x1f4 = 500 (die begin ID)
+// 0x1f4 = 500 (die begin-ID)
 <strong>                    r8 = r8 - 0x1f4;
 </strong>                    asm { smaddl     x8, w8, w9, x10 };
 r8 = *(r8 + 0x8);
@@ -333,7 +333,7 @@ r8 = 0x1;
 }
 }
 // Dieselfde as - anders soos in die vorige weergawe
-// Kontroleer die gebruik van die adres 0x100004040 (funksies aanwysers array)
+// Kontroleer die gebruik van die adres 0x100004040 (funksies se adresse array)
 <strong>                    if ((r8 & 0x1) == 0x0) {
 </strong><strong>                            *(var_18 + 0x18) = **0x100004000;
 </strong>                            *(int32_t *)(var_18 + 0x20) = 0xfffffed1;
@@ -371,7 +371,7 @@ As jy eintlik na die funksie **`0x100004000`** gaan, sal jy die array van **`rou
 
 <figure><img src="../../../../images/image (36).png" alt=""><figcaption></figcaption></figure>
 
-Hierdie data kan [**met hierdie Hopper skrip**](https://github.com/knightsc/hopper/blob/master/scripts/MIG%20Detect.py) onttrek word.
+Hierdie data kan [**gebruik word om hierdie Hopper-skrip**](https://github.com/knightsc/hopper/blob/master/scripts/MIG%20Detect.py) te onttrek.
 
 ### Debug
 

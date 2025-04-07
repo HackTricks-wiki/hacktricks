@@ -1,13 +1,13 @@
-# RDP Sessies Misbruik
+# RDP Sessions Abuse
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## RDP Proses Inspuiting
 
-As die **eksterne groep** **RDP-toegang** tot enige **rekenaar** in die huidige domein het, kan 'n **aanvaller** daardie rekenaar **kompromitteer en op hom wag**.
+As die **buitelandse groep** **RDP-toegang** tot enige **rekenaar** in die huidige domein het, kan 'n **aanvaller** daardie rekenaar **kompromitteer en op hom wag**.
 
-Sodra daardie gebruiker via RDP toegang verkry het, kan die **aanvaller na daardie gebruiker se sessie pivot** en sy toestemmings in die eksterne domein misbruik.
-```powershell
+Sodra daardie gebruiker via RDP toegang verkry het, kan die **aanvaller na daardie gebruiker se sessie pivot** en sy toestemmings in die buitelandse domein misbruik.
+```bash
 # Supposing the group "External Users" has RDP access in the current domain
 ## lets find where they could access
 ## The easiest way would be with bloodhound, but you could also run:
@@ -36,8 +36,8 @@ Kontroleer **ander maniere om sessies te steel met ander gereedskap** [**op hier
 
 As 'n gebruiker via **RDP in 'n masjien** toegang verkry waar 'n **aanvaller** op hom **wag**, sal die aanvaller in staat wees om 'n **beacon in die RDP-sessie van die gebruiker** te **injekteer** en as die **slagoffer sy skyf gemonteer het** toe hy via RDP toegang verkry, kan die **aanvaller dit toegang**.
 
-In hierdie geval kan jy net die **slagoffer se** **oorspronklike rekenaar** **kompromitteer** deur 'n **backdoor** in die **opstartgids** te skryf.
-```powershell
+In hierdie geval kan jy net die **slagoffers** **oorspronklike rekenaar** **kompromitteer** deur 'n **backdoor** in die **opstartgids** te skryf.
+```bash
 # Wait til someone logs in:
 net logons
 Logged on users at \\localhost:
