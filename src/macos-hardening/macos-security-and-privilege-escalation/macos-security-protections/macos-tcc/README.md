@@ -20,32 +20,32 @@ ps -ef | grep tcc
 0   374     1   0 Thu07PM ??         2:01.66 /System/Library/PrivateFrameworks/TCC.framework/Support/tccd system
 501 63079     1   0  6:59PM ??         0:01.95 /System/Library/PrivateFrameworks/TCC.framework/Support/tccd
 ```
-Permissions are **親**アプリケーションから**継承**され、**権限**は**バンドルID**と**開発者ID**に基づいて**追跡**されます。
+権限は**親**アプリケーションから**継承**され、**権限**は**バンドルID**と**開発者ID**に基づいて**追跡**されます。
 
-### TCC データベース
+### TCCデータベース
 
-許可/拒否は、いくつかの TCC データベースに保存されます：
+許可/拒否は、いくつかのTCCデータベースに保存されます：
 
 - **`/Library/Application Support/com.apple.TCC/TCC.db`** にあるシステム全体のデータベース。
 - このデータベースは**SIP保護**されているため、SIPバイパスのみが書き込むことができます。
-- ユーザー TCC データベース **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`** は、ユーザーごとの設定用です。
-- このデータベースは保護されているため、フルディスクアクセスのような高い TCC 権限を持つプロセスのみが書き込むことができます（ただし、SIP によって保護されてはいません）。
+- ユーザーTCCデータベースは、ユーザーごとの設定用の**`$HOME/Library/Application Support/com.apple.TCC/TCC.db`**です。
+- このデータベースは保護されているため、フルディスクアクセスのような高いTCC権限を持つプロセスのみが書き込むことができます（ただし、SIPによって保護されていません）。
 
 > [!WARNING]
-> 前述のデータベースは、**読み取りアクセスのために TCC 保護**されています。したがって、TCC 権限のあるプロセスからでない限り、通常のユーザー TCC データベースを**読み取ることはできません**。
+> 前述のデータベースは、**読み取りアクセスのためにTCC保護**されています。したがって、TCC特権プロセスからでない限り、通常のユーザーTCCデータベースを**読み取ることはできません**。
 >
-> ただし、これらの高い権限を持つプロセス（**FDA** または **`kTCCServiceEndpointSecurityClient`** など）は、ユーザーの TCC データベースに書き込むことができます。
+> ただし、これらの高い権限を持つプロセス（**FDA**や**`kTCCServiceEndpointSecurityClient`**など）は、ユーザーのTCCデータベースに書き込むことができます。
 
-- **`/var/db/locationd/clients.plist`** にある**第三の** TCC データベースは、**位置情報サービス**にアクセスを許可されたクライアントを示します。
-- SIP 保護されたファイル **`/Users/carlospolop/Downloads/REG.db`**（TCC による読み取りアクセスからも保護されています）は、すべての**有効な TCC データベース**の**位置**を含んでいます。
-- SIP 保護されたファイル **`/Users/carlospolop/Downloads/MDMOverrides.plist`**（TCC による読み取りアクセスからも保護されています）は、さらに多くの TCC 許可された権限を含んでいます。
-- SIP 保護されたファイル **`/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist`**（誰でも読み取れる）は、TCC 例外を必要とするアプリケーションの許可リストです。
+- **`/var/db/locationd/clients.plist`** にある**第三の**TCCデータベースは、**位置情報サービス**にアクセスを許可されたクライアントを示します。
+- SIP保護されたファイル**`/Users/carlospolop/Downloads/REG.db`**（TCCによる読み取りアクセスからも保護されています）は、すべての**有効なTCCデータベース**の**位置**を含んでいます。
+- SIP保護されたファイル**`/Users/carlospolop/Downloads/MDMOverrides.plist`**（TCCによる読み取りアクセスからも保護されています）は、さらに多くのTCC付与された権限を含んでいます。
+- SIP保護されたファイル**`/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist`**（誰でも読み取れる）は、TCC例外を必要とするアプリケーションの許可リストです。
 
 > [!TIP]
-> **iOS** の TCC データベースは **`/private/var/mobile/Library/TCC/TCC.db`** にあります。
+> **iOS**のTCCデータベースは**`/private/var/mobile/Library/TCC/TCC.db`**にあります。
 
 > [!NOTE]
-> **通知センター UI** は、**システム TCC データベース**に**変更**を加えることができます：
+> **通知センターUI**は、**システムTCCデータベース**に**変更**を加えることができます：
 >
 > ```bash
 > codesign -dv --entitlements :- /System/Library/PrivateFrameworks/TCC.framework/> Support/tccd
@@ -54,9 +54,9 @@ Permissions are **親**アプリケーションから**継承**され、**権限
 > com.apple.rootless.storage.TCC
 > ```
 >
-> ただし、ユーザーは **`tccutil`** コマンドラインユーティリティを使用して**ルールを削除または照会**できます。
+> ただし、ユーザーは**`tccutil`**コマンドラインユーティリティを使用して**ルールを削除または照会**できます。
 
-#### データベースを照会する
+#### データベースの照会
 
 {{#tabs}}
 {{#tab name="user DB"}}
@@ -106,7 +106,7 @@ sqlite> select * from access where client LIKE "%telegram%" and auth_value=0;
 
 - **`service`** は TCC **権限** の文字列表現です
 - **`client`** は **バンドル ID** または権限を持つ **バイナリへのパス** です
-- **`client_type`** は、それがバンドル識別子(0)か絶対パス(1)かを示します
+- **`client_type`** は、バンドル識別子(0)か絶対パス(1)かを示します
 
 <details>
 
@@ -151,9 +151,9 @@ sqlite> select * from access where client LIKE "%telegram%" and auth_value=0;
 ```
 </details>
 
-- **`auth_value`** は異なる値を持つことができます: denied(0), unknown(1), allowed(2), または limited(3).
+- **`auth_value`** は異なる値を持つことができます: denied(0), unknown(1), allowed(2), または limited(3)。
 - **`auth_reason`** は次の値を取ることができます: Error(1), User Consent(2), User Set(3), System Set(4), Service Policy(5), MDM Policy(6), Override Policy(7), Missing usage string(8), Prompt Timeout(9), Preflight Unknown(10), Entitled(11), App Type Policy(12)
-- **csreq** フィールドは、バイナリを検証してTCC権限を付与する方法を示すためにあります:
+- **csreq** フィールドは、実行するバイナリを検証し、TCC 権限を付与する方法を示すためにあります:
 ```bash
 # Query to get cserq in printable hex
 select service, client, hex(csreq) from access where auth_value=2;
@@ -184,9 +184,9 @@ tccutil reset All app.some.id
 # Reset the permissions granted to all apps
 tccutil reset All
 ```
-### TCC シグネチャーチェック
+### TCC シグネチャチェック
 
-TCC **データベース**はアプリケーションの**バンドルID**を保存しますが、**シグネチャー**に関する**情報**も**保存**しており、権限を使用するように要求しているアプリが正しいものであることを**確認**します。
+TCC **データベース**はアプリケーションの**バンドルID**を保存しますが、**シグネチャ**に関する**情報**も**保存**しており、権限を使用するように要求しているアプリが正しいものであることを**確認**します。
 ```bash
 # From sqlite
 sqlite> select service, client, hex(csreq) from access where auth_value=2;
@@ -204,9 +204,9 @@ csreq -t -r /tmp/telegram_csreq.bin
 ### 権限とTCCの許可
 
 アプリは**リクエスト**を行い、いくつかのリソースへの**アクセスを許可される**だけでなく、**関連する権限を持っている必要があります**。\
-例えば、**Telegram**はカメラへの**アクセスをリクエストするために**`com.apple.security.device.camera`という権限を持っています。この**アプリ**はこの**権限を持っていないと**カメラにアクセスできません（ユーザーは権限を求められることすらありません）。
+例えば、**Telegram**はカメラへの**アクセスをリクエストするために**`com.apple.security.device.camera`という権限を持っています。**この権限を持たないアプリは**カメラにアクセスできません（ユーザーに権限を求めることすらありません）。
 
-しかし、アプリが`~/Desktop`、`~/Downloads`、`~/Documents`などの**特定のユーザーフォルダにアクセスするためには、特別な**権限を持つ必要はありません。システムはアクセスを透過的に処理し、必要に応じて**ユーザーにプロンプトを表示します**。
+ただし、アプリが`~/Desktop`、`~/Downloads`、`~/Documents`などの**特定のユーザーフォルダにアクセスするためには、特別な**権限を持つ必要はありません。システムはアクセスを透過的に処理し、必要に応じて**ユーザーにプロンプトを表示します**。
 
 Appleのアプリは**プロンプトを生成しません**。それらは**権限**リストに**事前に付与された権利**を含んでおり、つまり**ポップアップを生成することは決してなく**、**TCCデータベース**にも表示されません。例えば：
 ```bash
@@ -222,19 +222,19 @@ codesign -dv --entitlements :- /System/Applications/Calendar.app
 これにより、カレンダーがユーザーにリマインダー、カレンダー、アドレスブックへのアクセスを求めることを避けることができます。
 
 > [!TIP]
-> 権限に関する公式文書の他に、**権限に関する興味深い非公式情報を見つけることも可能です** [**https://newosxbook.com/ent.jl**](https://newosxbook.com/ent.jl)
+> 権限に関する公式文書の他に、**非公式の興味深い情報を見つけることも可能です** [**https://newosxbook.com/ent.jl**](https://newosxbook.com/ent.jl)
 
 いくつかのTCC権限は、kTCCServiceAppleEvents、kTCCServiceCalendar、kTCCServicePhotosなどです。すべてを定義する公開リストはありませんが、この[**既知のリスト**](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive#service)を確認できます。
 
 ### 敏感な保護されていない場所
 
-- $HOME (自体)
-- $HOME/.ssh, $HOME/.aws, など
+- $HOME（自体）
+- $HOME/.ssh、$HOME/.awsなど
 - /tmp
 
 ### ユーザーの意図 / com.apple.macl
 
-前述のように、**ファイルにアプリへのアクセスを付与するためにドラッグ＆ドロップすることが可能です**。このアクセスは、いかなるTCCデータベースにも指定されませんが、**ファイルの拡張属性**として保存されます。この属性は、許可されたアプリの**UUID**を**保存します**。
+前述のように、**ファイルにアクセスを許可するためにアプリにドラッグ＆ドロップすることが可能です**。このアクセスは、いかなるTCCデータベースにも指定されませんが、**ファイルの拡張属性**として保存されます。この属性は、許可されたアプリの**UUID**を**保存します**。
 ```bash
 xattr Desktop/private.txt
 com.apple.macl
@@ -250,7 +250,7 @@ otool -l /System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal| gr
 uuid 769FD8F1-90E0-3206-808C-A8947BEBD6C3
 ```
 > [!NOTE]
-> **`com.apple.macl`** 属性は **Sandbox** によって管理されており、tccd ではないのが興味深いです。
+> **`com.apple.macl`** 属性は **Sandbox** によって管理されており、tccd ではありません。
 >
 > また、コンピュータ内のアプリの UUID を許可するファイルを別のコンピュータに移動すると、同じアプリが異なる UID を持つため、そのアプリへのアクセスは許可されません。
 
@@ -260,7 +260,7 @@ uuid 769FD8F1-90E0-3206-808C-A8947BEBD6C3
 
 ### TCC への挿入
 
-もし、ある時点で TCC データベースに対して書き込みアクセスを取得できた場合、以下のようなものを使用してエントリを追加できます（コメントを削除してください）：
+もし、TCC データベースに対して書き込みアクセスを取得できた場合、以下のようなものを使用してエントリを追加できます（コメントを削除してください）：
 
 <details>
 
@@ -306,9 +306,9 @@ strftime('%s', 'now') -- last_reminded with default current timestamp
 ```
 </details>
 
-### TCC ペイロード
+### TCCペイロード
 
-TCC 権限を持つアプリに侵入できた場合は、以下のページを確認して TCC ペイロードを悪用してください：
+TCC権限を持つアプリに侵入できた場合は、以下のページを確認してTCCペイロードを悪用してください：
 
 {{#ref}}
 macos-tcc-payloads.md
@@ -316,7 +316,7 @@ macos-tcc-payloads.md
 
 ### Apple Events
 
-Apple Events については、以下を参照してください：
+Apple Eventsについては、以下を参照してください：
 
 {{#ref}}
 macos-apple-events.md
@@ -324,14 +324,14 @@ macos-apple-events.md
 
 ### Automation (Finder) to FDA\*
 
-Automation 権限の TCC 名は：**`kTCCServiceAppleEvents`**\
-この特定の TCC 権限は、TCC データベース内で管理できる **アプリケーションを示します**（したがって、権限はすべてを管理することを許可するわけではありません）。
+Automation権限のTCC名は：**`kTCCServiceAppleEvents`**\
+この特定のTCC権限は、TCCデータベース内で**管理できるアプリケーション**も示しています（したがって、権限はすべてを管理することを許可するわけではありません）。
 
-**Finder** は **常に FDA を持つアプリケーション** です（UI に表示されなくても）。したがって、**Automation** 権限を持っている場合、その権限を悪用して **いくつかのアクションを実行させる** ことができます。\
-この場合、あなたのアプリは **`com.apple.Finder`** に対して **`kTCCServiceAppleEvents`** 権限を必要とします。
+**Finder**は、**常にFDAを持つアプリケーション**です（UIに表示されなくても）。したがって、**Automation**権限を持っている場合、その権限を悪用して**いくつかのアクションを実行させる**ことができます。\
+この場合、あなたのアプリは**`com.apple.Finder`**に対して**`kTCCServiceAppleEvents`**の権限が必要です。
 
 {{#tabs}}
-{{#tab name="Steal users TCC.db"}}
+{{#tab name="ユーザーのTCC.dbを盗む"}}
 ```applescript
 # This AppleScript will copy the system TCC database into /tmp
 osascript<<EOD
@@ -444,7 +444,7 @@ rm "$HOME/Desktop/file"
 ```
 ### Automation (SE) + Accessibility (**`kTCCServicePostEvent`|**`kTCCServiceAccessibility`**)** to FDA\*
 
-**`System Events`**上の自動化 + アクセシビリティ (**`kTCCServicePostEvent`**) は、**プロセスにキーストロークを送信する**ことを可能にします。この方法で、Finderを悪用してユーザーのTCC.dbを変更したり、任意のアプリにFDAを付与したりすることができます（ただし、これにはパスワードの入力が求められる場合があります）。
+**`System Events`**上のAutomation + Accessibility (**`kTCCServicePostEvent`**) は、**プロセスにキーストロークを送信する**ことを可能にします。この方法で、Finderを悪用してユーザーのTCC.dbを変更したり、任意のアプリにFDAを付与したりすることができます（ただし、そのためにパスワードの入力が求められる場合があります）。
 
 FinderがユーザーのTCC.dbを上書きする例:
 ```applescript
@@ -494,39 +494,39 @@ EOF
 ```
 ### `kTCCServiceAccessibility` to FDA\*
 
-このページで、**アクセシビリティ権限を悪用するためのペイロード**を確認してください [**payloads to abuse the Accessibility permissions**](macos-tcc-payloads.md#accessibility) でFDA\*に昇格するか、例えばキーロガーを実行します。
+このページで、**アクセシビリティ権限を悪用するためのペイロード**を確認してください（macos-tcc-payloads.md#accessibility）FDA\*に昇格するか、例えばキーロガーを実行するために。
 
-### **Endpoint Security Client to FDA**
+### **エンドポイントセキュリティクライアントからFDAへ**
 
 **`kTCCServiceEndpointSecurityClient`**を持っていれば、FDAがあります。終了。
 
-### System Policy SysAdmin File to FDA
+### システムポリシーSysAdminファイルからFDAへ
 
 **`kTCCServiceSystemPolicySysAdminFiles`**は、ユーザーの**`NFSHomeDirectory`**属性を**変更**することを許可し、これによりホームフォルダを変更し、**TCCをバイパス**することができます。
 
-### User TCC DB to FDA
+### ユーザーTCC DBからFDAへ
 
 **ユーザーTCC**データベースに対する**書き込み権限**を取得しても、**`FDA`**権限を自分に付与することはできません。システムデータベースに存在する者だけがそれを付与できます。
 
-しかし、**`Finderへの自動化権限`**を自分に与え、前述の技術を悪用してFDA\*に昇格することができます。
+しかし、**`Finderへの自動化権限`**を自分に与え、前述の技術を悪用してFDA\*に昇格することはできます。
 
-### **FDA to TCC permissions**
+### **FDAからTCC権限へ**
 
 **フルディスクアクセス**のTCC名は**`kTCCServiceSystemPolicyAllFiles`**です。
 
-これは実際の昇格ではないと思いますが、念のため役立つかもしれません：FDAを持つプログラムを制御している場合、**ユーザーのTCCデータベースを変更して自分に任意のアクセスを与えることができます**。これは、FDA権限を失う可能性がある場合の持続技術として役立つかもしれません。
+これは実際の昇格ではないと思いますが、もし役に立つ場合に備えて：FDAを持つプログラムを制御している場合、**ユーザーのTCCデータベースを変更し、任意のアクセスを自分に与えることができます**。これは、FDA権限を失う可能性がある場合の持続技術として役立つかもしれません。
 
-### **SIP Bypass to TCC Bypass**
+### **SIPバイパスからTCCバイパスへ**
 
-システムの**TCCデータベース**は**SIP**によって保護されているため、**指定された権限を持つプロセスのみがそれを変更できる**のです。したがって、攻撃者が**ファイルに対するSIPバイパス**を見つけた場合（SIPによって制限されたファイルを変更できる）、彼は以下のことができます：
+システムの**TCCデータベース**は**SIP**によって保護されているため、**指定された権利を持つプロセスのみが**それを変更できるようになります。したがって、攻撃者が**ファイルに対するSIPバイパス**を見つけた場合（SIPによって制限されたファイルを変更できるようになる）、彼は以下のことができます：
 
-- **TCCデータベースの保護を削除**し、すべてのTCC権限を自分に与えることができます。例えば、これらのファイルのいずれかを悪用することができます：
+- TCCデータベースの**保護を解除**し、すべてのTCC権限を自分に与えることができます。例えば、これらのファイルのいずれかを悪用することができます：
 - TCCシステムデータベース
 - REG.db
 - MDMOverrides.plist
 
-ただし、**TCCをバイパスするためのSIPバイパスを悪用する**別のオプションがあります。ファイル`/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist`は、TCC例外を必要とするアプリケーションの許可リストです。したがって、攻撃者がこのファイルから**SIP保護を削除**し、**自分のアプリケーション**を追加できれば、そのアプリケーションはTCCをバイパスできるようになります。\
-例えば、ターミナルを追加するには：
+ただし、この**SIPバイパスを使用してTCCをバイパスする**別のオプションがあります。ファイル`/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist`は、TCC例外を必要とするアプリケーションの許可リストです。したがって、攻撃者がこのファイルから**SIP保護を解除**し、自分の**アプリケーション**を追加できれば、そのアプリケーションはTCCをバイパスできるようになります。\
+例えば、ターミナルを追加するために：
 ```bash
 # Get needed info
 codesign -d -r- /System/Applications/Utilities/Terminal.app
