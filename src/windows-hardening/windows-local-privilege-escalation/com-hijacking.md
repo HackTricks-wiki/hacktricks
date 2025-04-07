@@ -6,7 +6,7 @@
 
 Comme les valeurs de HKCU peuvent être modifiées par les utilisateurs, **COM Hijacking** pourrait être utilisé comme un **mécanisme persistant**. En utilisant `procmon`, il est facile de trouver des enregistrements COM recherchés qui n'existent pas et qu'un attaquant pourrait créer pour persister. Filtres :
 
-- opérations **RegOpenKey**.
+- Opérations **RegOpenKey**.
 - où le _Résultat_ est **NOM NON TROUVÉ**.
 - et le _Chemin_ se termine par **InprocServer32**.
 
@@ -51,7 +51,7 @@ Write-Host
 
 En vérifiant la sortie, vous pouvez en sélectionner une qui va être exécutée **à chaque fois qu'un utilisateur se connecte**, par exemple.
 
-Maintenant, en recherchant le CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}** dans **HKEY\_**_**CLASSES\_**_**ROOT\CLSID** et dans HKLM et HKCU, vous constaterez généralement que la valeur n'existe pas dans HKCU.
+Maintenant, en recherchant le CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}** dans **HKEY\CLASSES\ROOT\CLSID** et dans HKLM et HKCU, vous constaterez généralement que la valeur n'existe pas dans HKCU.
 ```bash
 # Exists in HKCR\CLSID\
 Get-ChildItem -Path "Registry::HKCR\CLSID\{1936ED8A-BD93-3213-E325-F38D112938EF}"
@@ -72,6 +72,6 @@ Name                                   Property
 PS C:\> Get-Item -Path "HKCU:Software\Classes\CLSID\{01575CFE-9A55-4003-A5E1-F38D1EBDCBE1}"
 Get-Item : Cannot find path 'HKCU:\Software\Classes\CLSID\{01575CFE-9A55-4003-A5E1-F38D1EBDCBE1}' because it does not exist.
 ```
-Ensuite, vous pouvez simplement créer l'entrée HKCU et chaque fois que l'utilisateur se connecte, votre backdoor sera activée.
+Ensuite, vous pouvez simplement créer l'entrée HKCU et chaque fois que l'utilisateur se connecte, votre porte dérobée sera activée.
 
 {{#include ../../banners/hacktricks-training.md}}

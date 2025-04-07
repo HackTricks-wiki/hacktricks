@@ -35,7 +35,7 @@ La plupart des données encodées peuvent être décodées avec ces 2 ressources
 - [https://www.boxentriq.com/code-breaking/cryptogram](https://www.boxentriq.com/code-breaking/cryptogram)
 - [https://quipqiup.com/](https://quipqiup.com) - Très bon !
 
-#### Résolveurs automatiques Caesar - ROTx
+#### Résolveurs automatiques de César - ROTx
 
 - [https://www.nayuki.io/page/automatic-caesar-cipher-breaker-javascript](https://www.nayuki.io/page/automatic-caesar-cipher-breaker-javascript)
 
@@ -137,6 +137,8 @@ F3$%(3TQ!2$],04A/3$%(3TQ!2$],04A/3$%(3TQ!2$],04A/3$$`
 `
 end
 ```
+- [http://www.webutils.pl/index.php?idx=uu](http://www.webutils.pl/index.php?idx=uu)
+
 ### XXEncoder
 ```
 begin 644 webutils_pl
@@ -186,15 +188,15 @@ Lettre à numéro `(ax+b)%26` (_a_ et _b_ sont les clés et _x_ est la lettre) e
 ```
 krodfdudfrod
 ```
-### SMS Code
+### Code SMS
 
 **Multitap** [remplace une lettre](https://www.dcode.fr/word-letter-change) par des chiffres répétés définis par le code de la touche correspondante sur un [clavier de téléphone](https://www.dcode.fr/phone-keypad-cipher) (Ce mode est utilisé lors de l'écriture de SMS).\
 Par exemple : 2=A, 22=B, 222=C, 3=D...\
-Vous pouvez identifier ce code car vous verrez\*\* plusieurs chiffres répétés\*\*.
+Vous pouvez identifier ce code car vous verrez **plusieurs chiffres répétés**.
 
-Vous pouvez décoder ce code ici : [https://www.dcode.fr/multitap-abc-cipher](https://www.dcode.fr/multitap-abc-cipher)
+Vous pouvez décoder ce code sur : [https://www.dcode.fr/multitap-abc-cipher](https://www.dcode.fr/multitap-abc-cipher)
 
-### Bacon Code
+### Code Bacon
 
 Substituez chaque lettre par 4 A ou B (ou 1 et 0)
 ```
@@ -245,7 +247,7 @@ Key:
 ```
 - [https://asecuritysite.com/encryption/ferdecode](https://asecuritysite.com/encryption/ferdecode)
 
-### Partage secret de Samir
+### Partage Secret de Samir
 
 Un secret est divisé en X parties et pour le récupérer, vous avez besoin de Y parties (_Y <=X_).
 ```

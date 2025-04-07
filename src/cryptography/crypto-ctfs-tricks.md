@@ -35,15 +35,15 @@ La plupart des données encodées peuvent être décodées avec ces 2 ressources
 - [https://www.boxentriq.com/code-breaking/cryptogram](https://www.boxentriq.com/code-breaking/cryptogram)
 - [https://quipqiup.com/](https://quipqiup.com) - Très bon !
 
-#### Résolveurs automatiques Caesar - ROTx
+#### Résolveurs automatiques de César - ROTx
 
 - [https://www.nayuki.io/page/automatic-caesar-cipher-breaker-javascript](https://www.nayuki.io/page/automatic-caesar-cipher-breaker-javascript)
 
-#### Chiffre Atbash
+#### Chiffre d'Atbash
 
 - [http://rumkin.com/tools/cipher/atbash.php](http://rumkin.com/tools/cipher/atbash.php)
 
-### Résolveur automatique d'encodages Base
+### Résolveur automatique d'encodages de base
 
 Vérifiez toutes ces bases avec : [https://github.com/dhondta/python-codext](https://github.com/dhondta/python-codext)
 
@@ -154,6 +154,8 @@ end
 ryvkryvkryvkryvkryvkryvkryvk
 =yend size=28 crc32=35834c86
 ```
+- [http://www.webutils.pl/index.php?idx=yenc](http://www.webutils.pl/index.php?idx=yenc)
+
 ### BinHex
 ```
 (This file must be converted with BinHex 4.0)
@@ -186,15 +188,15 @@ Lettre à numéro `(ax+b)%26` (_a_ et _b_ sont les clés et _x_ est la lettre) e
 ```
 krodfdudfrod
 ```
-### Code SMS
+### SMS Code
 
 **Multitap** [remplace une lettre](https://www.dcode.fr/word-letter-change) par des chiffres répétés définis par le code de la touche correspondante sur un [clavier de téléphone](https://www.dcode.fr/phone-keypad-cipher) (Ce mode est utilisé lors de l'écriture de SMS).\
 Par exemple : 2=A, 22=B, 222=C, 3=D...\
-Vous pouvez identifier ce code car vous verrez\*\* plusieurs chiffres répétés\*\*.
+Vous pouvez identifier ce code car vous verrez **plusieurs chiffres répétés**.
 
 Vous pouvez décoder ce code ici : [https://www.dcode.fr/multitap-abc-cipher](https://www.dcode.fr/multitap-abc-cipher)
 
-### Code Bacon
+### Bacon Code
 
 Substituez chaque lettre par 4 A ou B (ou 1 et 0)
 ```
@@ -245,7 +247,7 @@ Key:
 ```
 - [https://asecuritysite.com/encryption/ferdecode](https://asecuritysite.com/encryption/ferdecode)
 
-### Partage de secret de Samir
+### Partage Secret de Samir
 
 Un secret est divisé en X parties et pour le récupérer, vous avez besoin de Y parties (_Y <=X_).
 ```

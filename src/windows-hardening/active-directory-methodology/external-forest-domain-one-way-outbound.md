@@ -7,7 +7,7 @@ Dans ce scénario, **votre domaine** **fait confiance** à certains **privilège
 ## Énumération
 
 ### Confiance sortante
-```powershell
+```bash
 # Notice Outbound trust
 Get-DomainTrust
 SourceName      : root.local
@@ -32,8 +32,8 @@ MemberDistinguishedName : CN=S-1-5-21-1028541967-2937615241-1935644758-1115,CN=F
 
 Une vulnérabilité de sécurité existe lorsqu'une relation de confiance est établie entre deux domaines, identifiés ici comme le domaine **A** et le domaine **B**, où le domaine **B** étend sa confiance au domaine **A**. Dans cette configuration, un compte spécial est créé dans le domaine **A** pour le domaine **B**, qui joue un rôle crucial dans le processus d'authentification entre les deux domaines. Ce compte, associé au domaine **B**, est utilisé pour chiffrer les tickets d'accès aux services entre les domaines.
 
-L'aspect critique à comprendre ici est que le mot de passe et le hachage de ce compte spécial peuvent être extraits d'un contrôleur de domaine dans le domaine **A** à l'aide d'un outil en ligne de commande. La commande pour effectuer cette action est :
-```powershell
+L'aspect critique à comprendre ici est que le mot de passe et le hachage de ce compte spécial peuvent être extraits d'un Contrôleur de Domaine dans le domaine **A** en utilisant un outil en ligne de commande. La commande pour effectuer cette action est :
+```bash
 Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.my.domain.local
 ```
 Cette extraction est possible car le compte, identifié par un **$** après son nom, est actif et appartient au groupe "Domain Users" du domaine **A**, héritant ainsi des permissions associées à ce groupe. Cela permet aux individus de s'authentifier contre le domaine **A** en utilisant les identifiants de ce compte.
@@ -62,7 +62,7 @@ Le mot de passe en clair peut être obtenu en convertissant la sortie \[ CLEAR ]
 
 Parfois, lors de la création d'une relation de confiance, un mot de passe doit être saisi par l'utilisateur pour la confiance. Dans cette démonstration, la clé est le mot de passe de confiance original et donc lisible par l'homme. Au fur et à mesure que la clé change (tous les 30 jours), le mot de passe en clair ne sera pas lisible par l'homme mais techniquement toujours utilisable.
 
-Le mot de passe en clair peut être utilisé pour effectuer une authentification régulière en tant que compte de confiance, une alternative à la demande d'un TGT en utilisant la clé secrète Kerberos du compte de confiance. Ici, interrogation de root.local depuis ext.local pour les membres de Domain Admins :
+Le mot de passe en clair peut être utilisé pour effectuer une authentification régulière en tant que compte de confiance, une alternative à la demande d'un TGT en utilisant la clé secrète Kerberos du compte de confiance. Ici, interrogation de root.local depuis ext.local pour les membres des Domain Admins :
 
 ![](<../../images/image (792).png>)
 

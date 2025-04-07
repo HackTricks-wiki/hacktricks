@@ -1,17 +1,18 @@
 {{#include ../../banners/hacktricks-training.md}}
 
+
 # Horodatages
 
 Un attaquant peut être intéressé par **le changement des horodatages des fichiers** pour éviter d'être détecté.\
-Il est possible de trouver les horodatages à l'intérieur du MFT dans les attributs `$STANDARD_INFORMATION` ** et ** `$FILE_NAME`.
+Il est possible de trouver les horodatages à l'intérieur du MFT dans les attributs `$STANDARD_INFORMATION`**et**`$FILE_NAME`.
 
-Les deux attributs ont 4 horodatages : **Modification**, **accès**, **création**, et **modification du registre MFT** (MACE ou MACB).
+Les deux attributs ont 4 horodatages : **Modification**, **accès**, **création**, et **modification de l'enregistrement MFT** (MACE ou MACB).
 
 **L'explorateur Windows** et d'autres outils affichent les informations de **`$STANDARD_INFORMATION`**.
 
 ## TimeStomp - Outil anti-forensique
 
-Cet outil **modifie** les informations d'horodatage à l'intérieur de **`$STANDARD_INFORMATION`** **mais** **pas** les informations à l'intérieur de **`$FILE_NAME`**. Par conséquent, il est possible d'**identifier** **une activité** **suspecte**.
+Cet outil **modifie** les informations d'horodatage à l'intérieur de **`$STANDARD_INFORMATION`** **mais** **pas** les informations à l'intérieur de **`$FILE_NAME`**. Par conséquent, il est possible d'**identifier** une **activité** **suspecte**.
 
 ## Usnjrnl
 
@@ -35,7 +36,7 @@ En utilisant le même outil, il est possible d'identifier **à quel moment les h
 
 - CTIME : Heure de création du fichier
 - ATIME : Heure de modification du fichier
-- MTIME : Modification du registre MFT du fichier
+- MTIME : Modification de l'enregistrement MFT du fichier
 - RTIME : Heure d'accès du fichier
 
 ## Comparaison de `$STANDARD_INFORMATION` et `$FILE_NAME`
@@ -52,18 +53,18 @@ Cet outil peut modifier les deux attributs `$STARNDAR_INFORMATION` et `$FILE_NAM
 
 # Masquage de données
 
-NFTS utilise un cluster et la taille minimale d'information. Cela signifie que si un fichier occupe un et demi cluster, la **moitié restante ne sera jamais utilisée** jusqu'à ce que le fichier soit supprimé. Il est donc possible de **cacher des données dans cet espace de réserve**.
+NFTS utilise un cluster et la taille minimale d'information. Cela signifie que si un fichier occupe un et demi cluster, la **moitié restante ne sera jamais utilisée** jusqu'à ce que le fichier soit supprimé. Il est donc possible de **cacher des données dans cet espace de remplissage**.
 
 Il existe des outils comme slacker qui permettent de cacher des données dans cet espace "caché". Cependant, une analyse du `$logfile` et du `$usnjrnl` peut montrer que certaines données ont été ajoutées :
 
 ![](<../../images/image (452).png>)
 
-Il est alors possible de récupérer l'espace de réserve en utilisant des outils comme FTK Imager. Notez que ce type d'outil peut sauvegarder le contenu obfusqué ou même chiffré.
+Il est alors possible de récupérer l'espace de remplissage en utilisant des outils comme FTK Imager. Notez que ce type d'outil peut sauvegarder le contenu obfusqué ou même chiffré.
 
 # UsbKill
 
 C'est un outil qui **éteindra l'ordinateur si un changement dans les ports USB** est détecté.\
-Une façon de découvrir cela serait d'inspecter les processus en cours et de **réviser chaque script python en cours d'exécution**.
+Une façon de le découvrir serait d'inspecter les processus en cours et de **réviser chaque script python en cours d'exécution**.
 
 # Distributions Linux Live
 
@@ -112,20 +113,20 @@ Vous pouvez également utiliser l'outil [**USBDeview**](https://www.nirsoft.net/
 
 Un autre fichier qui sauvegarde des informations sur les USB est le fichier `setupapi.dev.log` à l'intérieur de `C:\Windows\INF`. Cela devrait également être supprimé.
 
-## Désactiver les copies de sauvegarde
+## Désactiver les copies d'ombre
 
-**Lister** les copies de sauvegarde avec `vssadmin list shadowstorage`\
+**Lister** les copies d'ombre avec `vssadmin list shadowstorage`\
 **Les supprimer** en exécutant `vssadmin delete shadow`
 
 Vous pouvez également les supprimer via l'interface graphique en suivant les étapes proposées dans [https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html)
 
-Pour désactiver les copies de sauvegarde [étapes à partir d'ici](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows):
+Pour désactiver les copies d'ombre [étapes à partir d'ici](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows):
 
 1. Ouvrez le programme Services en tapant "services" dans la zone de recherche après avoir cliqué sur le bouton de démarrage Windows.
 2. Dans la liste, trouvez "Volume Shadow Copy", sélectionnez-le, puis accédez aux Propriétés en cliquant avec le bouton droit.
 3. Choisissez Désactivé dans le menu déroulant "Type de démarrage", puis confirmez le changement en cliquant sur Appliquer et OK.
 
-Il est également possible de modifier la configuration des fichiers qui vont être copiés dans la copie de sauvegarde dans le registre `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`
+Il est également possible de modifier la configuration des fichiers qui vont être copiés dans la copie d'ombre dans le registre `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`
 
 ## Écraser les fichiers supprimés
 
@@ -141,11 +142,12 @@ Il est également possible de modifier la configuration des fichiers qui vont ê
 ## Désactiver les journaux d'événements Windows
 
 - `reg add 'HKLM\SYSTEM\CurrentControlSet\Services\eventlog' /v Start /t REG_DWORD /d 4 /f`
-- Dans la section des services, désactivez le service "Windows Event Log"
+- Dans la section des services, désactivez le service "Journal des événements Windows"
 - `WEvtUtil.exec clear-log` ou `WEvtUtil.exe cl`
 
 ## Désactiver $UsnJrnl
 
 - `fsutil usn deletejournal /d c:`
+
 
 {{#include ../../banners/hacktricks-training.md}}

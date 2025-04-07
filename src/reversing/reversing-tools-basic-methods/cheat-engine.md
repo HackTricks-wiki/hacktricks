@@ -10,7 +10,7 @@ Lorsque vous le téléchargez et l'exécutez, vous êtes **présenté** avec un 
 ![](<../../images/image (762).png>)
 
 Cet outil est très utile pour trouver **où une certaine valeur** (généralement un nombre) **est stockée dans la mémoire** d'un programme.\
-**Généralement, les nombres** sont stockés sous forme de **4 octets**, mais vous pourriez également les trouver sous des formats **double** ou **float**, ou vous pourriez vouloir chercher quelque chose **de différent d'un nombre**. Pour cette raison, vous devez vous assurer de **sélectionner** ce que vous souhaitez **chercher** :
+**Généralement, les nombres** sont stockés sous forme de **4 octets**, mais vous pouvez également les trouver sous des formats **double** ou **float**, ou vous pouvez vouloir chercher quelque chose **de différent d'un nombre**. Pour cette raison, vous devez vous assurer de **sélectionner** ce que vous souhaitez **chercher** :
 
 ![](<../../images/image (324).png>)
 
@@ -75,13 +75,13 @@ Vous serez présenté avec **toutes les valeurs qui ont été modifiées de la m
 
 Une fois que vous avez trouvé votre valeur, vous pouvez la modifier.
 
-Notez qu'il y a un **grand nombre de changements possibles** et vous pouvez effectuer ces **étapes autant de fois que vous le souhaitez** pour filtrer les résultats :
+Notez qu'il y a un **grand nombre de changements possibles** et vous pouvez faire ces **étapes autant de fois que vous le souhaitez** pour filtrer les résultats :
 
 ![](<../../images/image (574).png>)
 
 ### Adresse mémoire aléatoire - Trouver le code
 
-Jusqu'à présent, nous avons appris à trouver une adresse stockant une valeur, mais il est très probable que lors de **différentes exécutions du jeu, cette adresse se trouve à différents endroits de la mémoire**. Alors découvrons comment toujours trouver cette adresse.
+Jusqu'à présent, nous avons appris à trouver une adresse stockant une valeur, mais il est très probable que dans **différentes exécutions du jeu, cette adresse se trouve à différents endroits de la mémoire**. Alors découvrons comment toujours trouver cette adresse.
 
 En utilisant certains des trucs mentionnés, trouvez l'adresse où votre jeu actuel stocke la valeur importante. Ensuite (en arrêtant le jeu si vous le souhaitez), faites un **clic droit** sur l'**adresse** trouvée et sélectionnez "**Découvrir ce qui accède à cette adresse**" ou "**Découvrir ce qui écrit à cette adresse**" :
 
@@ -150,7 +150,7 @@ Un modèle sera généré :
 
 ![](<../../images/image (944).png>)
 
-Ainsi, insérez votre nouveau code d'assemblage dans la section "**newmem**" et retirez le code original de la section "**originalcode**" si vous ne souhaitez pas qu'il soit exécuté\*\*.\*\* Dans cet exemple, le code injecté ajoutera 2 points au lieu de soustraire 1 :
+Ainsi, insérez votre nouveau code d'assemblage dans la section "**newmem**" et retirez le code original de la section "**originalcode**" si vous ne souhaitez pas qu'il soit exécuté. Dans cet exemple, le code injecté ajoutera 2 points au lieu de soustraire 1 :
 
 ![](<../../images/image (521).png>)
 

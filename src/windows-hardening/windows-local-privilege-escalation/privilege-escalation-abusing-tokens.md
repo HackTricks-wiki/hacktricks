@@ -36,7 +36,7 @@ Si vous avez activé ce token, vous pouvez utiliser **KERB_S4U_LOGON** pour obte
 
 ### SeBackupPrivilege
 
-Le système est amené à **accorder tous les droits de lecture** sur tout fichier (limité aux opérations de lecture) par ce privilège. Il est utilisé pour **lire les hachages de mot de passe des comptes Administrateur locaux** à partir du registre, après quoi des outils comme "**psexec**" ou "**wmiexec**" peuvent être utilisés avec le hachage (technique Pass-the-Hash). Cependant, cette technique échoue dans deux conditions : lorsque le compte Administrateur local est désactivé, ou lorsqu'une politique est en place qui retire les droits administratifs des Administrateurs locaux se connectant à distance.\
+Le système est amené à **accorder tous les accès en lecture** à tout fichier (limité aux opérations de lecture) par ce privilège. Il est utilisé pour **lire les hachages de mot de passe des comptes Administrateur locaux** à partir du registre, après quoi des outils comme "**psexec**" ou "**wmiexec**" peuvent être utilisés avec le hachage (technique Pass-the-Hash). Cependant, cette technique échoue dans deux conditions : lorsque le compte Administrateur local est désactivé, ou lorsqu'une politique est en place qui supprime les droits administratifs des Administrateurs locaux se connectant à distance.\
 Vous pouvez **abuser de ce privilège** avec :
 
 - [https://github.com/Hackplayers/PsCabesha-tools/blob/master/Privesc/Acl-FullControl.ps1](https://github.com/Hackplayers/PsCabesha-tools/blob/master/Privesc/Acl-FullControl.ps1)
@@ -58,13 +58,13 @@ SeCreateTokenPrivilege est un puissant privilège, particulièrement utile lorsq
 
 **Points Clés :**
 
-- **Imitation sans SeImpersonatePrivilege :** Il est possible de tirer parti de SeCreateTokenPrivilege pour EoP en imitant des tokens dans des conditions spécifiques.
+- **Imitation sans SeImpersonatePrivilege :** Il est possible de tirer parti de SeCreateTokenPrivilege pour l'EoP en imitant des tokens dans des conditions spécifiques.
 - **Conditions pour l'imitation de token :** Une imitation réussie nécessite que le token cible appartienne au même utilisateur et ait un niveau d'intégrité inférieur ou égal à celui du processus tentant l'imitation.
 - **Création et modification de tokens d'imitation :** Les utilisateurs peuvent créer un token d'imitation et l'améliorer en ajoutant un SID (Identifiant de Sécurité) d'un groupe privilégié.
 
 ### SeLoadDriverPrivilege
 
-Ce privilège permet de **charger et décharger des pilotes de périphériques** en créant une entrée de registre avec des valeurs spécifiques pour `ImagePath` et `Type`. Étant donné que l'accès en écriture direct à `HKLM` (HKEY_LOCAL_MACHINE) est restreint, `HKCU` (HKEY_CURRENT_USER) doit être utilisé à la place. Cependant, pour rendre `HKCU` reconnaissable par le noyau pour la configuration des pilotes, un chemin spécifique doit être suivi.
+Ce privilège permet de **charger et décharger des pilotes de périphériques** en créant une entrée de registre avec des valeurs spécifiques pour `ImagePath` et `Type`. Étant donné que l'accès en écriture direct à `HKLM` (HKEY_LOCAL_MACHINE) est restreint, `HKCU` (HKEY_CURRENT_USER) doit être utilisé à la place. Cependant, pour rendre `HKCU` reconnaissable par le noyau pour la configuration du pilote, un chemin spécifique doit être suivi.
 
 Ce chemin est `\Registry\User\<RID>\System\CurrentControlSet\Services\DriverName`, où `<RID>` est l'Identifiant Relatif de l'utilisateur actuel. À l'intérieur de `HKCU`, ce chemin entier doit être créé, et deux valeurs doivent être définies :
 
@@ -114,7 +114,7 @@ Ce privilège permet de **déboguer d'autres processus**, y compris de lire et d
 
 #### Dump mémoire
 
-Vous pourriez utiliser [ProcDump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) de la [SysInternals Suite](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite) pour **capturer la mémoire d'un processus**. Plus précisément, cela peut s'appliquer au processus **Local Security Authority Subsystem Service (**[**LSASS**](https://en.wikipedia.org/wiki/Local_Security_Authority_Subsystem_Service)**)**, qui est responsable du stockage des informations d'identification des utilisateurs une fois qu'un utilisateur s'est connecté avec succès à un système.
+Vous pouvez utiliser [ProcDump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) de la [SysInternals Suite](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite) pour **capturer la mémoire d'un processus**. Plus précisément, cela peut s'appliquer au processus **Local Security Authority Subsystem Service (**[**LSASS**](https://en.wikipedia.org/wiki/Local_Security_Authority_Subsystem_Service)**)**, qui est responsable du stockage des informations d'identification des utilisateurs une fois qu'un utilisateur s'est connecté avec succès à un système.
 
 Vous pouvez ensuite charger ce dump dans mimikatz pour obtenir des mots de passe :
 ```
@@ -130,7 +130,7 @@ Si vous voulez obtenir un shell `NT SYSTEM`, vous pouvez utiliser :
 - [**SeDebugPrivilege-Exploit (C++)**](https://github.com/bruno-1337/SeDebugPrivilege-Exploit)
 - [**SeDebugPrivilegePoC (C#)**](https://github.com/daem0nc0re/PrivFu/tree/main/PrivilegedOperations/SeDebugPrivilegePoC)
 - [**psgetsys.ps1 (Script Powershell)**](https://raw.githubusercontent.com/decoder-it/psgetsystem/master/psgetsys.ps1)
-```powershell
+```bash
 # Get the PID of a process running as NT SYSTEM
 import-module psgetsys.ps1; [MyProcess]::CreateProcessFromParent(<system_pid>,<command_to_execute>)
 ```
@@ -143,7 +143,7 @@ Les **tokens qui apparaissent comme Désactivés** peuvent être activés, vous 
 ### Activer tous les tokens
 
 Si vous avez des tokens désactivés, vous pouvez utiliser le script [**EnableAllTokenPrivs.ps1**](https://raw.githubusercontent.com/fashionproof/EnableAllTokenPrivs/master/EnableAllTokenPrivs.ps1) pour activer tous les tokens :
-```powershell
+```bash
 .\EnableAllTokenPrivs.ps1
 whoami /priv
 ```

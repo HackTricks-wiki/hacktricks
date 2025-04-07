@@ -1,21 +1,22 @@
-# PsExec/Winexec/ScExec
+# PsExec/Winexec/ScExec/SMBExec
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Comment ça fonctionne
+## Comment ils fonctionnent
 
 Le processus est décrit dans les étapes ci-dessous, illustrant comment les binaires de service sont manipulés pour réaliser une exécution à distance sur une machine cible via SMB :
 
 1. **La copie d'un binaire de service sur le partage ADMIN$ via SMB** est effectuée.
 2. **La création d'un service sur la machine distante** est réalisée en pointant vers le binaire.
 3. Le service est **démarré à distance**.
-4. À la sortie, le service est **arrêté et le binaire est supprimé**.
+4. À la sortie, le service est **arrêté, et le binaire est supprimé**.
 
 ### **Processus d'exécution manuelle de PsExec**
 
-En supposant qu'il y ait une charge utile exécutable (créée avec msfvenom et obfusquée à l'aide de Veil pour échapper à la détection antivirus), nommée 'met8888.exe', représentant une charge utile meterpreter reverse_http, les étapes suivantes sont suivies :
+En supposant qu'il y ait un payload exécutable (créé avec msfvenom et obfusqué à l'aide de Veil pour échapper à la détection antivirus), nommé 'met8888.exe', représentant un payload meterpreter reverse_http, les étapes suivantes sont suivies :
 
 - **Copie du binaire** : L'exécutable est copié sur le partage ADMIN$ depuis une invite de commande, bien qu'il puisse être placé n'importe où sur le système de fichiers pour rester dissimulé.
+- Au lieu de copier le binaire, il est également possible d'utiliser un binaire LOLBAS comme `powershell.exe` ou `cmd.exe` pour exécuter des commandes directement à partir des arguments. Par exemple, `sc create [ServiceName] binPath= "cmd.exe /c [PayloadCommand]"`
 - **Création d'un service** : En utilisant la commande Windows `sc`, qui permet de requêter, créer et supprimer des services Windows à distance, un service nommé "meterpreter" est créé pour pointer vers le binaire téléchargé.
 - **Démarrage du service** : La dernière étape consiste à démarrer le service, ce qui entraînera probablement une erreur de "délai d'attente" en raison du fait que le binaire n'est pas un véritable binaire de service et échoue à renvoyer le code de réponse attendu. Cette erreur est sans conséquence car l'objectif principal est l'exécution du binaire.
 
@@ -25,12 +26,24 @@ L'observation de l'auditeur Metasploit révélera que la session a été initié
 
 Trouvez des étapes plus détaillées dans : [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
 
-**Vous pouvez également utiliser le binaire PsExec.exe de Windows Sysinternals :**
+- Vous pouvez également utiliser le **binaire PsExec.exe de Windows Sysinternals** :
 
 ![](<../../images/image (928).png>)
 
-Vous pouvez également utiliser [**SharpLateral**](https://github.com/mertdas/SharpLateral) :
+Ou y accéder via webddav :
+```bash
+\\live.sysinternals.com\tools\PsExec64.exe -accepteula
+```
+- Vous pouvez également utiliser [**SharpLateral**](https://github.com/mertdas/SharpLateral) :
 ```bash
 SharpLateral.exe redexec HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe.exe malware.exe ServiceName
 ```
+- Vous pouvez également utiliser [**SharpMove**](https://github.com/0xthirteen/SharpMove) :
+```bash
+SharpMove.exe action=modsvc computername=remote.host.local command="C:\windows\temp\payload.exe" amsi=true servicename=TestService
+SharpMove.exe action=startservice computername=remote.host.local servicename=TestService
+```
+- Vous pouvez également utiliser **Impacket's `psexec` et `smbexec.py`**.
+
+
 {{#include ../../banners/hacktricks-training.md}}

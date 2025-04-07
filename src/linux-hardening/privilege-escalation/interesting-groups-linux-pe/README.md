@@ -16,7 +16,7 @@
 ```
 Cela signifie que **tout utilisateur appartenant au groupe sudo ou admin peut exécuter n'importe quoi en tant que sudo**.
 
-Si c'est le cas, pour **devenir root, vous pouvez simplement exécuter** :
+Si c'est le cas, pour **devenir root, vous pouvez simplement exécuter**:
 ```
 sudo su
 ```
@@ -66,7 +66,7 @@ Si c'est le cas, pour **devenir root, vous pouvez simplement exécuter**:
 ```
 sudo su
 ```
-## Groupe Shadow
+## Shadow Group
 
 Les utilisateurs du **groupe shadow** peuvent **lire** le fichier **/etc/shadow** :
 ```
@@ -74,7 +74,7 @@ Les utilisateurs du **groupe shadow** peuvent **lire** le fichier **/etc/shadow*
 ```
 Alors, lisez le fichier et essayez de **craquer quelques hashes**.
 
-## Groupe du personnel
+## Groupe Staff
 
 **staff** : Permet aux utilisateurs d'ajouter des modifications locales au système (`/usr/local`) sans avoir besoin de privilèges root (notez que les exécutables dans `/usr/local/bin` sont dans la variable PATH de tout utilisateur, et ils peuvent "remplacer" les exécutables dans `/bin` et `/usr/bin` ayant le même nom). Comparez avec le groupe "adm", qui est plus lié à la surveillance/sécurité. [\[source\]](https://wiki.debian.org/SystemGroups)
 
@@ -132,7 +132,7 @@ $ /bin/bash -p
 
 Ce privilège est presque **équivalent à un accès root** car vous pouvez accéder à toutes les données à l'intérieur de la machine.
 
-Fichiers : `/dev/sd[a-z][1-9]`
+Fichiers :`/dev/sd[a-z][1-9]`
 ```bash
 df -h #Find where "/" is mounted
 debugfs /dev/sda1
@@ -146,9 +146,9 @@ Notez qu'en utilisant debugfs, vous pouvez également **écrire des fichiers**. 
 debugfs -w /dev/sda1
 debugfs:  dump /tmp/asd1.txt /tmp/asd2.txt
 ```
-Cependant, si vous essayez de **modifier des fichiers appartenant à root** (comme `/etc/shadow` ou `/etc/passwd`), vous obtiendrez une erreur "**Permission denied**".
+Cependant, si vous essayez de **écrire des fichiers appartenant à root** (comme `/etc/shadow` ou `/etc/passwd`), vous obtiendrez une erreur "**Permission denied**".
 
-## Groupe Vidéo
+## Video Group
 
 En utilisant la commande `w`, vous pouvez trouver **qui est connecté au système** et cela affichera une sortie comme celle-ci :
 ```bash
@@ -163,11 +163,11 @@ Le **groupe vidéo** a accès à l'affichage de la sortie écran. En gros, vous 
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
 ```
-Pour **ouvrir** l'**image brute**, vous pouvez utiliser **GIMP**, sélectionner le fichier \*\*`screen.raw` \*\* et choisir comme type de fichier **Données d'image brute** :
+Pour **ouvrir** l'**image brute**, vous pouvez utiliser **GIMP**, sélectionner le fichier **`screen.raw`** et choisir comme type de fichier **Données d'image brute** :
 
 ![](<../../../images/image (463).png>)
 
-Ensuite, modifiez la largeur et la hauteur pour celles utilisées sur l'écran et vérifiez différents types d'images (et sélectionnez celui qui montre mieux l'écran) :
+Ensuite, modifiez la largeur et la hauteur pour celles utilisées sur l'écran et vérifiez différents types d'images (et sélectionnez celui qui montre le mieux l'écran) :
 
 ![](<../../../images/image (317).png>)
 
@@ -193,7 +193,7 @@ echo 'toor:$1$.ZcF5ts0$i4k6rQYzeegUkacRCvfxC0:0:0:root:/root:/bin/sh' >> /etc/pa
 #Ifyou just want filesystem and network access you can startthe following container:
 docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chroot /mnt bashbash
 ```
-Enfin, si vous n'aimez aucune des suggestions précédentes, ou si elles ne fonctionnent pas pour une raison quelconque (docker api firewall ?), vous pouvez toujours essayer de **lancer un conteneur privilégié et d'en échapper** comme expliqué ici :
+Enfin, si aucune des suggestions précédentes ne vous convient, ou si elles ne fonctionnent pas pour une raison quelconque (pare-feu de l'API docker ?), vous pouvez toujours essayer de **lancer un conteneur privilégié et d'en échapper** comme expliqué ici :
 
 {{#ref}}
 ../docker-security/

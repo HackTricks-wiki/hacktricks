@@ -16,7 +16,7 @@ Ces définitions ont 5 sections :
 - \[i`n/out]tran : Fonction qui doit être traduite d'un message entrant ou vers un message sortant
 - `c[user/server]type` : Mapping vers un autre type C.
 - `destructor` : Appelez cette fonction lorsque le type est libéré.
-- **Opérations** : Ce sont les définitions des méthodes RPC. Il existe 5 types différents :
+- **Opérations** : Ce sont les définitions des méthodes RPC. Il y a 5 types différents :
 - `routine` : S'attend à une réponse
 - `simpleroutine` : Ne s'attend pas à une réponse
 - `procedure` : S'attend à une réponse
@@ -108,7 +108,7 @@ Dans cet exemple, nous avons seulement défini 1 fonction dans les définitions,
 
 Si la fonction devait envoyer une **réponse**, la fonction `mig_internal kern_return_t __MIG_check__Reply__<name>` existerait également.
 
-En fait, il est possible d'identifier cette relation dans la structure **`subsystem_to_name_map_myipc`** de **`myipcServer.h`** (**`subsystem*to_name_map*\***`\*\* dans d'autres fichiers) :
+En fait, il est possible d'identifier cette relation dans la structure **`subsystem_to_name_map_myipc`** de **`myipcServer.h`** (**`subsystem*to_name_map*\***`** dans d'autres fichiers) :
 ```c
 #ifndef subsystem_to_name_map_myipc
 #define subsystem_to_name_map_myipc \
@@ -235,7 +235,7 @@ Comme de nombreux binaires utilisent maintenant MIG pour exposer des ports mach,
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep MIG
 ```
-De plus, les fonctions MIG ne sont que des wrappers de la fonction réelle qui est appelée, ce qui signifie qu'en obtenant sa désassemblage et en recherchant BL, vous pourriez être en mesure de trouver la fonction réelle qui est appelée :
+De plus, les fonctions MIG ne sont que des wrappers de la fonction réelle qui est appelée, ce qui signifie qu'en obtenant sa désassemblage et en cherchant BL, vous pourriez être en mesure de trouver la fonction réelle qui est appelée :
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep BL
 ```
@@ -289,7 +289,7 @@ return rax;
 {{#endtab}}
 
 {{#tab name="myipc_server décompilé 2"}}
-Ceci est la même fonction décompilée dans une version différente de Hopper free :
+C'est la même fonction décompilée dans une version différente de Hopper free :
 
 <pre class="language-c"><code class="lang-c">int _myipc_server(int arg0, int arg1) {
 r31 = r31 - 0x40;
@@ -375,7 +375,7 @@ Ces données peuvent être extraites [**en utilisant ce script Hopper**](https:/
 
 ### Debug
 
-Le code généré par MIG appelle également `kernel_debug` pour générer des journaux sur les opérations d'entrée et de sortie. Il est possible de les vérifier en utilisant **`trace`** ou **`kdv`** : `kdv all | grep MIG`
+Le code généré par MIG appelle également `kernel_debug` pour générer des journaux sur les opérations à l'entrée et à la sortie. Il est possible de les vérifier en utilisant **`trace`** ou **`kdv`** : `kdv all | grep MIG`
 
 ## References
 

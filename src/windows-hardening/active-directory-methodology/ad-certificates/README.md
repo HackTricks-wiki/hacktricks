@@ -6,20 +6,20 @@
 
 ### Components of a Certificate
 
-- Le **Sujet** du certificat désigne son propriétaire.
-- Une **Clé Publique** est associée à une clé privée pour lier le certificat à son propriétaire légitime.
-- La **Période de Validité**, définie par les dates **NotBefore** et **NotAfter**, marque la durée effective du certificat.
-- Un **Numéro de Série** unique, fourni par l'Autorité de Certification (CA), identifie chaque certificat.
-- L'**Émetteur** fait référence à la CA qui a émis le certificat.
+- Le **Subject** du certificat désigne son propriétaire.
+- Une **Public Key** est associée à une clé privée pour lier le certificat à son propriétaire légitime.
+- La **Validity Period**, définie par les dates **NotBefore** et **NotAfter**, marque la durée effective du certificat.
+- Un **Serial Number** unique, fourni par l'Autorité de Certification (CA), identifie chaque certificat.
+- L'**Issuer** fait référence à la CA qui a émis le certificat.
 - **SubjectAlternativeName** permet d'ajouter des noms supplémentaires pour le sujet, améliorant la flexibilité d'identification.
 - **Basic Constraints** identifient si le certificat est destiné à une CA ou à une entité finale et définissent les restrictions d'utilisation.
 - **Extended Key Usages (EKUs)** délimitent les objectifs spécifiques du certificat, comme la signature de code ou le chiffrement des e-mails, à travers des Identifiants d'Objet (OIDs).
-- L'**Algorithme de Signature** spécifie la méthode de signature du certificat.
+- L'**Signature Algorithm** spécifie la méthode de signature du certificat.
 - La **Signature**, créée avec la clé privée de l'émetteur, garantit l'authenticité du certificat.
 
 ### Special Considerations
 
-- Les **Noms Alternatifs du Sujet (SANs)** étendent l'applicabilité d'un certificat à plusieurs identités, crucial pour les serveurs avec plusieurs domaines. Des processus d'émission sécurisés sont essentiels pour éviter les risques d'usurpation par des attaquants manipulant la spécification SAN.
+- Les **Subject Alternative Names (SANs)** étendent l'applicabilité d'un certificat à plusieurs identités, crucial pour les serveurs avec plusieurs domaines. Des processus d'émission sécurisés sont essentiels pour éviter les risques d'usurpation par des attaquants manipulant la spécification SAN.
 
 ### Certificate Authorities (CAs) in Active Directory (AD)
 
@@ -39,7 +39,7 @@ AD CS reconnaît les certificats CA dans une forêt AD à travers des conteneurs
 
 ### Certificate Templates
 
-Définis dans AD, ces modèles décrivent les paramètres et les autorisations pour l'émission de certificats, y compris les EKUs autorisés et les droits d'inscription ou de modification, essentiels pour gérer l'accès aux services de certificats.
+Définis dans AD, ces modèles décrivent les paramètres et les autorisations pour l'émission de certificats, y compris les EKUs autorisés et les droits d'inscription ou de modification, critiques pour la gestion de l'accès aux services de certificats.
 
 ## Certificate Enrollment
 
@@ -70,14 +70,14 @@ Certaines contrôles peuvent s'appliquer, tels que :
 
 Les certificats peuvent être demandés via :
 
-1. Le **Protocole d'Inscription de Certificat Client Windows** (MS-WCCE), utilisant des interfaces DCOM.
-2. Le **Protocole à Distance ICertPassage** (MS-ICPR), à travers des pipes nommés ou TCP/IP.
+1. Le **Windows Client Certificate Enrollment Protocol** (MS-WCCE), utilisant des interfaces DCOM.
+2. Le **ICertPassage Remote Protocol** (MS-ICPR), à travers des pipes nommés ou TCP/IP.
 3. L'**interface web d'inscription de certificats**, avec le rôle d'Inscription Web de l'Autorité de Certification installé.
-4. Le **Service d'Inscription de Certificat** (CES), en conjonction avec le service de Politique d'Inscription de Certificat (CEP).
-5. Le **Service d'Inscription de Dispositifs Réseau** (NDES) pour les dispositifs réseau, utilisant le Protocole Simple d'Inscription de Certificat (SCEP).
+4. Le **Certificate Enrollment Service** (CES), en conjonction avec le service de Politique d'Inscription de Certificats (CEP).
+5. Le **Network Device Enrollment Service** (NDES) pour les dispositifs réseau, utilisant le Simple Certificate Enrollment Protocol (SCEP).
 
 Les utilisateurs Windows peuvent également demander des certificats via l'interface graphique (`certmgr.msc` ou `certlm.msc`) ou des outils en ligne de commande (`certreq.exe` ou la commande `Get-Certificate` de PowerShell).
-```powershell
+```bash
 # Example of requesting a certificate using PowerShell
 Get-Certificate -Template "User" -CertStoreLocation "cert:\\CurrentUser\\My"
 ```
@@ -95,11 +95,11 @@ est central pour établir la confiance pour l'authentification par certificat.
 
 ### Authentification Secure Channel (Schannel)
 
-Schannel facilite les connexions TLS/SSL sécurisées, où lors d'une poignée de main, le client présente un certificat qui, s'il est validé avec succès, autorise l'accès. La correspondance d'un certificat à un compte AD peut impliquer la fonction **S4U2Self** de Kerberos ou le **Nom Alternatif du Sujet (SAN)** du certificat, parmi d'autres méthodes.
+Schannel facilite les connexions TLS/SSL sécurisées, où lors d'une poignée de main, le client présente un certificat qui, s'il est validé avec succès, autorise l'accès. La correspondance d'un certificat à un compte AD peut impliquer la fonction **S4U2Self** de Kerberos ou le **Subject Alternative Name (SAN)** du certificat, parmi d'autres méthodes.
 
 ### Énumération des Services de Certificat AD
 
-Les services de certificat AD peuvent être énumérés via des requêtes LDAP, révélant des informations sur les **Autorités de Certification (CA) d'Entreprise** et leurs configurations. Cela est accessible par tout utilisateur authentifié dans le domaine sans privilèges spéciaux. Des outils comme **[Certify](https://github.com/GhostPack/Certify)** et **[Certipy](https://github.com/ly4k/Certipy)** sont utilisés pour l'énumération et l'évaluation des vulnérabilités dans les environnements AD CS.
+Les services de certificat AD peuvent être énumérés via des requêtes LDAP, révélant des informations sur les **Autorités de Certification (CAs) d'Entreprise** et leurs configurations. Cela est accessible par tout utilisateur authentifié dans le domaine sans privilèges spéciaux. Des outils comme **[Certify](https://github.com/GhostPack/Certify)** et **[Certipy](https://github.com/ly4k/Certipy)** sont utilisés pour l'énumération et l'évaluation des vulnérabilités dans les environnements AD CS.
 
 Les commandes pour utiliser ces outils incluent :
 ```bash

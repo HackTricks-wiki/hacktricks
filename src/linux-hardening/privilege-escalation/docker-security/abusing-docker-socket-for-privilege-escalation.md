@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Il y a des occasions où vous avez juste **accès au socket docker** et vous voulez l'utiliser pour **escalader les privilèges**. Certaines actions peuvent être très suspectes et vous voudrez peut-être les éviter, donc ici vous pouvez trouver différents drapeaux qui peuvent être utiles pour escalader les privilèges :
+Il y a des occasions où vous avez juste **accès au socket docker** et vous souhaitez l'utiliser pour **escalader les privilèges**. Certaines actions peuvent être très suspectes et vous voudrez peut-être les éviter, donc ici vous pouvez trouver différents drapeaux qui peuvent être utiles pour escalader les privilèges :
 
 ### Via mount
 
@@ -20,12 +20,12 @@ Vous pourriez également **abuser d'un montage pour escalader les privilèges** 
 - `--userns=host`
 - `--uts=host`
 - `--cgroupns=host`
-- \*\*`--device=/dev/sda1 --cap-add=SYS_ADMIN --security-opt apparmor=unconfined` \*\* -> Cela est similaire à la méthode précédente, mais ici nous **montons le disque de l'appareil**. Ensuite, à l'intérieur du conteneur, exécutez `mount /dev/sda1 /mnt` et vous pouvez **accéder** au **système de fichiers de l'hôte** dans `/mnt`
+- **`--device=/dev/sda1 --cap-add=SYS_ADMIN --security-opt apparmor=unconfined`** -> Cela est similaire à la méthode précédente, mais ici nous **montons le disque de l'appareil**. Ensuite, à l'intérieur du conteneur, exécutez `mount /dev/sda1 /mnt` et vous pouvez **accéder** au **système de fichiers de l'hôte** dans `/mnt`
 - Exécutez `fdisk -l` sur l'hôte pour trouver le dispositif `</dev/sda1>` à monter
 - **`-v /tmp:/host`** -> Si pour une raison quelconque vous ne pouvez **monter qu'un répertoire** de l'hôte et que vous avez accès à l'intérieur de l'hôte. Montez-le et créez un **`/bin/bash`** avec **suid** dans le répertoire monté afin que vous puissiez **l'exécuter depuis l'hôte et escalader vers root**.
 
 > [!NOTE]
-> Notez que vous ne pouvez peut-être pas monter le dossier `/tmp` mais vous pouvez monter un **autre dossier écrivable**. Vous pouvez trouver des répertoires écrits en utilisant : `find / -writable -type d 2>/dev/null`
+> Notez que vous ne pouvez peut-être pas monter le dossier `/tmp`, mais vous pouvez monter un **autre dossier écrivable**. Vous pouvez trouver des répertoires écrits en utilisant : `find / -writable -type d 2>/dev/null`
 >
 > **Notez que tous les répertoires d'une machine linux ne prendront pas en charge le bit suid !** Pour vérifier quels répertoires prennent en charge le bit suid, exécutez `mount | grep -v "nosuid"` Par exemple, généralement `/dev/shm`, `/run`, `/proc`, `/sys/fs/cgroup` et `/var/lib/lxcfs` ne prennent pas en charge le bit suid.
 >

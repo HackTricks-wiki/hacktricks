@@ -20,7 +20,7 @@ Vous pouvez également consulter la page suivante pour apprendre **d'autres faç
 
 ### FreeIPA
 
-FreeIPA est une **alternative** open-source à Microsoft Windows **Active Directory**, principalement pour les environnements **Unix**. Il combine un **annuaire LDAP** complet avec un centre de distribution de clés **Kerberos** MIT pour une gestion similaire à Active Directory. Utilisant le système de certificats **Dogtag** pour la gestion des certificats CA et RA, il prend en charge l'authentification **multi-facteurs**, y compris les cartes intelligentes. SSSD est intégré pour les processus d'authentification Unix. En savoir plus à ce sujet dans :
+FreeIPA est une **alternative** open-source à Microsoft Windows **Active Directory**, principalement pour les environnements **Unix**. Il combine un **annuaire LDAP** complet avec un centre de distribution de clés Kerberos MIT pour une gestion similaire à Active Directory. Utilisant le système de certificats Dogtag pour la gestion des certificats CA et RA, il prend en charge l'**authentification multi-facteurs**, y compris les cartes intelligentes. SSSD est intégré pour les processus d'authentification Unix. En savoir plus à ce sujet dans :
 
 {{#ref}}
 ../freeipa-pentesting.md
@@ -64,9 +64,9 @@ Cette procédure tentera d'injecter dans diverses sessions, indiquant le succès
 
 ### Réutilisation des tickets CCACHE à partir de SSSD KCM
 
-SSSD maintient une copie de la base de données au chemin `/var/lib/sss/secrets/secrets.ldb`. La clé correspondante est stockée en tant que fichier caché au chemin `/var/lib/sss/secrets/.secrets.mkey`. Par défaut, la clé n'est lisible que si vous avez des permissions **root**.
+SSSD maintient une copie de la base de données à l'emplacement `/var/lib/sss/secrets/secrets.ldb`. La clé correspondante est stockée en tant que fichier caché à l'emplacement `/var/lib/sss/secrets/.secrets.mkey`. Par défaut, la clé n'est lisible que si vous avez des permissions **root**.
 
-L'invocation de \*\*`SSSDKCMExtractor` \*\* avec les paramètres --database et --key analysera la base de données et **décrypta les secrets**.
+L'invocation de **`SSSDKCMExtractor`** avec les paramètres --database et --key analysera la base de données et **décryptera les secrets**.
 ```bash
 git clone https://github.com/fireeye/SSSDKCMExtractor
 python3 SSSDKCMExtractor.py --database secrets.ldb --key secrets.mkey
@@ -97,7 +97,7 @@ Sur macOS, **`bifrost`** sert d'outil pour l'analyse des fichiers keytab.
 ```bash
 ./bifrost -action dump -source keytab -path /path/to/your/file
 ```
-En utilisant les informations de compte et de hachage extraites, des connexions aux serveurs peuvent être établies à l'aide d'outils comme **`crackmapexec`**.
+En utilisant les informations de compte et de hachage extraites, des connexions aux serveurs peuvent être établies en utilisant des outils comme **`crackmapexec`**.
 ```bash
 crackmapexec 10.XXX.XXX.XXX -u 'ServiceAccount$' -H "HashPlaceholder" -d "YourDOMAIN"
 ```

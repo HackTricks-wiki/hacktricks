@@ -1,13 +1,13 @@
-# Abus des sessions RDP
+# RDP Sessions Abuse
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Injection de processus RDP
+## Injection de Processus RDP
 
 Si le **groupe externe** a un **accès RDP** à un **ordinateur** dans le domaine actuel, un **attaquant** pourrait **compromettre cet ordinateur et l'attendre**.
 
 Une fois que cet utilisateur a accédé via RDP, l'**attaquant peut pivoter vers la session de cet utilisateur** et abuser de ses permissions dans le domaine externe.
-```powershell
+```bash
 # Supposing the group "External Users" has RDP access in the current domain
 ## lets find where they could access
 ## The easiest way would be with bloodhound, but you could also run:
@@ -36,8 +36,8 @@ Vérifiez **d'autres façons de voler des sessions avec d'autres outils** [**sur
 
 Si un utilisateur accède via **RDP à une machine** où un **attaquant** l'attend, l'attaquant pourra **injecter un beacon dans la session RDP de l'utilisateur** et si la **victime a monté son disque** en accédant via RDP, l'**attaquant pourrait y accéder**.
 
-Dans ce cas, vous pourriez simplement **compromettre** le **ordinateur original des victimes** en écrivant une **porte dérobée** dans le **dossier de démarrage**.
-```powershell
+Dans ce cas, vous pourriez simplement **compromettre** l'**ordinateur original** de la **victime** en écrivant une **backdoor** dans le **dossier de démarrage**.
+```bash
 # Wait til someone logs in:
 net logons
 Logged on users at \\localhost:

