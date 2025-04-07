@@ -27,7 +27,7 @@ Software:
 
 dotPeek es un descompilador que **descompila y examina múltiples formatos**, incluyendo **bibliotecas** (.dll), **archivos de metadatos de Windows** (.winmd) y **ejecutables** (.exe). Una vez descompilado, un ensamblaje puede ser guardado como un proyecto de Visual Studio (.csproj).
 
-El mérito aquí es que si un código fuente perdido requiere restauración desde un ensamblaje legado, esta acción puede ahorrar tiempo. Además, dotPeek proporciona una navegación útil a través del código descompilado, convirtiéndolo en una de las herramientas perfectas para el **análisis de algoritmos de Xamarin.**
+El mérito aquí es que si un código fuente perdido requiere restauración desde un ensamblaje legado, esta acción puede ahorrar tiempo. Además, dotPeek proporciona una navegación útil a través del código descompilado, convirtiéndolo en una de las herramientas perfectas para **análisis de algoritmos de Xamarin.**
 
 ### [.NET Reflector](https://www.red-gate.com/products/reflector/)
 
@@ -40,14 +40,14 @@ Con un modelo de complemento integral y una API que extiende la herramienta para
 - Localiza exactamente los errores en tu código, componentes de terceros y bibliotecas.
 - Depura en la fuente de todo el código .NET con el que trabajas.
 
-### [ILSpy](https://github.com/icsharpcode/ILSpy) & [dnSpy](https://github.com/dnSpy/dnSpy/releases)
+### [ILSpy](https://github.com/icsharpcode/ILSpy) y [dnSpy](https://github.com/dnSpy/dnSpy/releases)
 
 [Plugin ILSpy para Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): Puedes tenerlo en cualquier sistema operativo (puedes instalarlo directamente desde VSCode, no es necesario descargar el git. Haz clic en **Extensiones** y **busca ILSpy**).\
-Si necesitas **descompilar**, **modificar** y **recompilar** de nuevo, puedes usar [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) o un fork mantenido activamente de él, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases). (**Clic derecho -> Modificar Método** para cambiar algo dentro de una función).
+Si necesitas **descompilar**, **modificar** y **recompilar** de nuevo, puedes usar [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) o un fork mantenido activamente de él, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases). (**Clic derecho -> Modificar método** para cambiar algo dentro de una función).
 
 ### Registro de DNSpy
 
-Para hacer que **DNSpy registre información en un archivo**, podrías usar este fragmento:
+Para hacer que **DNSpy registre alguna información en un archivo**, podrías usar este fragmento:
 ```cs
 using System.IO;
 path = "C:\\inetpub\\temp\\MyTest2.txt";
@@ -70,17 +70,17 @@ DebuggableAttribute.DebuggingModes.DisableOptimizations |
 DebuggableAttribute.DebuggingModes.IgnoreSymbolStoreSequencePoints |
 DebuggableAttribute.DebuggingModes.EnableEditAndContinue)]
 ```
-Y haz clic en **compilar**:
+Y haz clic en **compile**:
 
 ![](<../../images/image (314) (1).png>)
 
-Luego guarda el nuevo archivo a través de _**Archivo >> Guardar módulo...**_:
+Luego guarda el nuevo archivo a través de _**File >> Save module...**_:
 
 ![](<../../images/image (602).png>)
 
-Esto es necesario porque si no lo haces, en **tiempo de ejecución** se aplicarán varias **optimizaciones** al código y podría ser posible que mientras depuras un **punto de interrupción nunca se active** o algunas **variables no existan**.
+Esto es necesario porque si no lo haces, en **runtime** se aplicarán varias **optimisations** al código y podría ser posible que mientras depuras un **break-point nunca se alcance** o algunas **variables no existan**.
 
-Luego, si tu aplicación .NET está siendo **ejecutada** por **IIS**, puedes **reiniciarla** con:
+Luego, si tu aplicación .NET está siendo **run** por **IIS**, puedes **restart** con:
 ```
 iisreset /noforce
 ```
@@ -88,7 +88,7 @@ Luego, para comenzar a depurar, debes cerrar todos los archivos abiertos y dentr
 
 ![](<../../images/image (318).png>)
 
-Luego selecciona **w3wp.exe** para adjuntarte al **servidor IIS** y haz clic en **attach**:
+Luego selecciona **w3wp.exe** para adjuntarlo al **servidor IIS** y haz clic en **attach**:
 
 ![](<../../images/image (113).png>)
 
@@ -125,7 +125,7 @@ Haz clic derecho en cualquier módulo en **Assembly Explorer** y haz clic en **S
 
 ![](<../../images/image (704).png>)
 
-Luego, cuando comiences a depurar, **la ejecución se detendrá cuando se cargue cada DLL**, luego, cuando rundll32 cargue tu DLL, la ejecución se detendrá.
+Luego, cuando comiences a depurar **la ejecución se detendrá cuando se cargue cada DLL**, luego, cuando rundll32 cargue tu DLL, la ejecución se detendrá.
 
 Pero, ¿cómo puedes llegar al código de la DLL que fue cargada? Usando este método, no sé cómo.
 
@@ -134,13 +134,13 @@ Pero, ¿cómo puedes llegar al código de la DLL que fue cargada? Usando este m�
 - **Cargar rundll32** (64 bits en C:\Windows\System32\rundll32.exe y 32 bits en C:\Windows\SysWOW64\rundll32.exe)
 - **Cambiar la Línea de Comando** (_File --> Change Command Line_) y establecer la ruta de la dll y la función que deseas llamar, por ejemplo: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
 - Cambiar _Options --> Settings_ y seleccionar "**DLL Entry**".
-- Luego **iniciar la ejecución**, el depurador se detendrá en cada main de dll, en algún momento te **detendrás en la entrada de dll de tu dll**. Desde allí, solo busca los puntos donde deseas poner un punto de interrupción.
+- Luego **iniciar la ejecución**, el depurador se detendrá en cada main de dll, en algún momento te **detendrás en la entrada de la dll** que deseas depurar. Desde allí, solo busca los puntos donde deseas poner un punto de interrupción.
 
 Ten en cuenta que cuando la ejecución se detiene por cualquier razón en win64dbg, puedes ver **en qué código estás** mirando en **la parte superior de la ventana de win64dbg**:
 
 ![](<../../images/image (842).png>)
 
-Luego, mirando esto, puedes ver cuándo se detuvo la ejecución en la dll que deseas depurar.
+Luego, mirando esto puedes ver cuándo se detuvo la ejecución en la dll que deseas depurar.
 
 ## Aplicaciones GUI / Videojuegos
 
@@ -150,13 +150,15 @@ Luego, mirando esto, puedes ver cuándo se detuvo la ejecución en la dll que de
 cheat-engine.md
 {{#endref}}
 
-[**PiNCE**](https://github.com/korcankaraokcu/PINCE) es una herramienta de front-end/reverse engineering para el Depurador del Proyecto GNU (GDB), enfocada en juegos. Sin embargo, se puede usar para cualquier cosa relacionada con la ingeniería inversa.
+[**PiNCE**](https://github.com/korcankaraokcu/PINCE) es una herramienta de interfaz/reverse engineering para el depurador del Proyecto GNU (GDB), enfocada en juegos. Sin embargo, se puede usar para cualquier cosa relacionada con la ingeniería inversa.
 
-[**Decompiler Explorer**](https://dogbolt.org/) es un front-end web para varios descompiladores. Este servicio web te permite comparar la salida de diferentes descompiladores en pequeños ejecutables.
+[**Decompiler Explorer**](https://dogbolt.org/) es una interfaz web para varios descompiladores. Este servicio web te permite comparar la salida de diferentes descompiladores en pequeños ejecutables.
 
 ## ARM & MIPS
 
-{% embed url="https://github.com/nongiach/arm_now" %}
+{{#ref}}
+https://github.com/nongiach/arm_now
+{{#endref}}
 
 ## Shellcodes
 
@@ -174,7 +176,7 @@ blobrunner.md
 
 ### Depurando un shellcode con jmp2it
 
-[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) es muy similar a blobrunner. **Asignará** el **shellcode** dentro de un espacio de memoria y comenzará un **bucle eterno**. Luego necesitas **adjuntar el depurador** al proceso, **presionar iniciar, esperar 2-5 segundos y presionar detener** y te encontrarás dentro del **bucle eterno**. Salta a la siguiente instrucción del bucle eterno ya que será una llamada al shellcode, y finalmente te encontrarás ejecutando el shellcode.
+[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) es muy similar a blobrunner. **Asignará** el **shellcode** dentro de un espacio de memoria y comenzará un **bucle eterno**. Luego necesitas **adjuntar el depurador** al proceso, **jugar, esperar 2-5 segundos y presionar detener** y te encontrarás dentro del **bucle eterno**. Salta a la siguiente instrucción del bucle eterno ya que será una llamada al shellcode, y finalmente te encontrarás ejecutando el shellcode.
 
 ![](<../../images/image (509).png>)
 
@@ -184,7 +186,7 @@ Puedes descargar una versión compilada de [jmp2it en la página de lanzamientos
 
 [**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) es la GUI de radare. Usando cutter puedes emular el shellcode e inspeccionarlo dinámicamente.
 
-Ten en cuenta que Cutter te permite "Abrir Archivo" y "Abrir Shellcode". En mi caso, cuando abrí el shellcode como un archivo, lo descompiló correctamente, pero cuando lo abrí como un shellcode no lo hizo:
+Ten en cuenta que Cutter te permite "Open File" y "Open Shellcode". En mi caso, cuando abrí el shellcode como un archivo, lo descompiló correctamente, pero cuando lo abrí como un shellcode no lo hizo:
 
 ![](<../../images/image (562).png>)
 
@@ -218,7 +220,7 @@ La opción **Create Dump** volcará el shellcode final si se realiza algún camb
 
 ### Desensamblando usando CyberChef
 
-Sube tu archivo de shellcode como entrada y utiliza la siguiente receta para decompilarlo: [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
+Sube tu archivo de shellcode como entrada y utiliza la siguiente receta para decompilarlo: [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/index.html#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
 
 ## [Movfuscator](https://github.com/xoreaxeaxeax/movfuscator)
 
@@ -249,7 +251,7 @@ Teniendo el **nombre** de las **funciones** que se están llamando, búscalas en
 
 Para binarios compilados en Delphi puedes usar [https://github.com/crypto2011/IDR](https://github.com/crypto2011/IDR)
 
-Si tienes que hacer ingeniería inversa a un binario de Delphi, te sugeriría usar el plugin de IDA [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)
+Si tienes que revertir un binario de Delphi, te sugeriría usar el plugin de IDA [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)
 
 Solo presiona **ATL+f7** (importar plugin de python en IDA) y selecciona el plugin de python.
 
@@ -259,7 +261,7 @@ También es muy interesante porque si presionas un botón en la aplicación grá
 
 ## Golang
 
-Si tienes que hacer ingeniería inversa a un binario de Golang, te sugeriría usar el plugin de IDA [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)
+Si tienes que revertir un binario de Golang, te sugeriría usar el plugin de IDA [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)
 
 Solo presiona **ATL+f7** (importar plugin de python en IDA) y selecciona el plugin de python.
 
@@ -282,7 +284,7 @@ Si obtienes el **binario** de un juego de GBA, puedes usar diferentes herramient
 - [**gba-ghidra-loader**](https://github.com/pudii/gba-ghidra-loader) - Plugin de Ghidra
 - [**GhidraGBA**](https://github.com/SiD3W4y/GhidraGBA) - Plugin de Ghidra
 
-En [**no$gba**](https://problemkaputt.de/gba.htm), en _**Opciones --> Configuración de Emulación --> Controles**_\*\* \*\* puedes ver cómo presionar los **botones** de Game Boy Advance
+En [**no$gba**](https://problemkaputt.de/gba.htm), en _**Opciones --> Configuración de Emulación --> Controles**_ puedes ver cómo presionar los **botones** de Game Boy Advance
 
 ![](<../../images/image (581).png>)
 
@@ -338,7 +340,7 @@ uVar2 = DAT_030004dc;
 uVar1 = *puVar6;
 if ((uVar1 & DAT_030004da & ~uVar4) != 0) {
 ```
-La última condición if verifica que **`uVar4`** esté en las **últimas teclas** y no sea la tecla actual, también llamada soltar un botón (la tecla actual se almacena en **`uVar1`**).
+La última condición if verifica si **`uVar4`** está en las **últimas teclas** y no es la tecla actual, también llamada soltar un botón (la tecla actual se almacena en **`uVar1`**).
 ```c
 if (uVar1 == 4) {
 DAT_030000d4 = 0;
@@ -366,13 +368,13 @@ FUN_08000864();
 if (uVar1 == 0x10) {
 DAT_030000d8 = DAT_030000d8 + 0x3a;
 ```
-En el código anterior, puedes ver que estamos comparando **uVar1** (el lugar donde se encuentra **el valor del botón presionado**) con algunos valores:
+En el código anterior, puedes ver que estamos comparando **uVar1** (el lugar donde está **el valor del botón presionado**) con algunos valores:
 
-- Primero, se compara con el **valor 4** (botón **SELECT**): En el desafío, este botón borra la pantalla.
-- Luego, se compara con el **valor 8** (botón **START**): En el desafío, esto verifica si el código es válido para obtener la bandera.
+- Primero, se compara con el **valor 4** (**botón SELECT**): En el desafío, este botón borra la pantalla.
+- Luego, se compara con el **valor 8** (**botón START**): En el desafío, esto verifica si el código es válido para obtener la bandera.
 - En este caso, la var **`DAT_030000d8`** se compara con 0xf3 y si el valor es el mismo, se ejecuta algún código.
 - En cualquier otro caso, se verifica algún cont (`DAT_030000d4`). Es un cont porque se suma 1 justo después de entrar en el código.\
-**Si** es menor que 8, se realiza algo que involucra **sumar** valores a \*\*`DAT_030000d8` \*\* (básicamente, se suman los valores de las teclas presionadas en esta variable siempre que el cont sea menor que 8).
+**Si** es menor que 8, se realiza algo que implica **sumar** valores a **`DAT_030000d8`** (básicamente, se suman los valores de las teclas presionadas en esta variable siempre que el cont sea menor que 8).
 
 Así que, en este desafío, conociendo los valores de los botones, necesitabas **presionar una combinación con una longitud menor que 8 cuya suma resultante sea 0xf3.**
 
@@ -380,7 +382,9 @@ Así que, en este desafío, conociendo los valores de los botones, necesitabas *
 
 ## Game Boy
 
-{% embed url="https://www.youtube.com/watch?v=VVbRe7wr3G4" %}
+{{#ref}}
+https://www.youtube.com/watch?v=VVbRe7wr3G4
+{{#endref}}
 
 ## Cursos
 

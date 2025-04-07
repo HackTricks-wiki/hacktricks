@@ -8,9 +8,9 @@ Descarga el código fuente desde github y compila **EvilSalsa** y **SalseoLoader
 
 Compila esos proyectos para la arquitectura de la caja de Windows donde los vas a usar (Si Windows soporta x64, compílalos para esa arquitectura).
 
-Puedes **seleccionar la arquitectura** dentro de Visual Studio en la **pestaña "Build" izquierda** en **"Platform Target".**
+Puedes **seleccionar la arquitectura** dentro de Visual Studio en la **pestaña "Build"** a la izquierda en **"Platform Target".**
 
-(\*\*Si no puedes encontrar estas opciones, presiona en **"Project Tab"** y luego en **"\<Project Name> Properties"**)
+(**Si no puedes encontrar estas opciones, presiona en **"Project Tab"** y luego en **"\<Project Name> Properties"**)
 
 ![](<../images/image (132).png>)
 
@@ -83,7 +83,7 @@ Abre el proyecto SalseoLoader usando Visual Studio.
 
 ![](<../images/image (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
-#### **Busca el paquete DllExport (usando la pestaña Examinar), y presiona Instalar (y acepta el popup)**
+#### **Busca el paquete DllExport (usando la pestaña Examinar) y presiona Instalar (y acepta el popup)**
 
 ![](<../images/image (4) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
@@ -101,7 +101,7 @@ Simplemente **sal** de Visual Studio
 
 Luego, ve a tu **carpeta SalseoLoader** y **ejecuta DllExport_Configure.bat**
 
-Selecciona **x64** (si vas a usarlo dentro de una caja x64, ese fue mi caso), selecciona **System.Runtime.InteropServices** (dentro de **Namespace for DllExport**) y presiona **Aplicar**
+Selecciona **x64** (si vas a usarlo dentro de una caja x64, ese fue mi caso), selecciona **System.Runtime.InteropServices** (dentro de **Namespace para DllExport**) y presiona **Aplicar**
 
 ![](<../images/image (7) (1) (1) (1) (1).png>)
 

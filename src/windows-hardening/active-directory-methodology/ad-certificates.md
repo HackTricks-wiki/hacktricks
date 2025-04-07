@@ -34,7 +34,7 @@ AD CS reconoce los certificados de CA en un bosque de AD a través de contenedor
 
 1. El proceso de solicitud comienza con los clientes encontrando una CA empresarial.
 2. Se crea un CSR, que contiene una clave pública y otros detalles, después de generar un par de claves pública-privada.
-3. La CA evalúa el CSR contra las plantillas de certificados disponibles, emitiendo el certificado basado en los permisos de la plantilla.
+3. La CA evalúa el CSR en función de las plantillas de certificados disponibles, emitiendo el certificado según los permisos de la plantilla.
 4. Tras la aprobación, la CA firma el certificado con su clave privada y se lo devuelve al cliente.
 
 ### Plantillas de Certificados
@@ -53,7 +53,7 @@ Estos derechos se especifican a través de Entradas de Control de Acceso (ACEs),
 
 - Derechos de **Inscripción de Certificado** y **Autoinscripción de Certificado**, cada uno asociado con GUIDs específicos.
 - **Derechos Extendidos**, que permiten todos los permisos extendidos.
-- **ControlTotal/TodosGenericos**, proporcionando control completo sobre la plantilla.
+- **ControlTotal/GenericAll**, proporcionando control completo sobre la plantilla.
 
 ### Derechos de Inscripción de CA Empresarial
 
@@ -61,7 +61,7 @@ Los derechos de la CA están delineados en su descriptor de seguridad, accesible
 
 ### Controles Adicionales de Emisión
 
-Ciertos controles pueden aplicarse, tales como:
+Ciertos controles pueden aplicarse, como:
 
 - **Aprobación del Gerente**: Coloca las solicitudes en un estado pendiente hasta que sean aprobadas por un gerente de certificados.
 - **Agentes de Inscripción y Firmas Autorizadas**: Especifican el número de firmas requeridas en un CSR y los OIDs de Política de Aplicación necesarios.
@@ -71,13 +71,13 @@ Ciertos controles pueden aplicarse, tales como:
 Los certificados se pueden solicitar a través de:
 
 1. **Protocolo de Inscripción de Certificados de Cliente de Windows** (MS-WCCE), utilizando interfaces DCOM.
-2. **Protocolo Remoto ICertPassage** (MS-ICPR), a través de tuberías nombradas o TCP/IP.
-3. La **interfaz web de inscripción de certificados**, con el rol de Inscripción Web de la Autoridad de Certificación instalado.
+2. **Protocolo Remoto ICertPassage** (MS-ICPR), a través de pipes nombrados o TCP/IP.
+3. La **interfaz web de inscripción de certificados**, con el rol de Inscripción Web de Autoridad de Certificación instalado.
 4. El **Servicio de Inscripción de Certificados** (CES), en conjunto con el servicio de Política de Inscripción de Certificados (CEP).
 5. El **Servicio de Inscripción de Dispositivos de Red** (NDES) para dispositivos de red, utilizando el Protocolo Simple de Inscripción de Certificados (SCEP).
 
 Los usuarios de Windows también pueden solicitar certificados a través de la GUI (`certmgr.msc` o `certlm.msc`) o herramientas de línea de comandos (`certreq.exe` o el comando `Get-Certificate` de PowerShell).
-```powershell
+```bash
 # Example of requesting a certificate using PowerShell
 Get-Certificate -Template "User" -CertStoreLocation "cert:\\CurrentUser\\My"
 ```
@@ -85,9 +85,9 @@ Get-Certificate -Template "User" -CertStoreLocation "cert:\\CurrentUser\\My"
 
 Active Directory (AD) admite la autenticación de certificados, utilizando principalmente los protocolos **Kerberos** y **Secure Channel (Schannel)**.
 
-### Proceso de Autenticación Kerberos
+### Proceso de Autenticación de Kerberos
 
-En el proceso de autenticación Kerberos, la solicitud de un usuario para un Ticket Granting Ticket (TGT) se firma utilizando la **clave privada** del certificado del usuario. Esta solicitud pasa por varias validaciones por parte del controlador de dominio, incluyendo la **validez**, **ruta** y **estado de revocación** del certificado. Las validaciones también incluyen verificar que el certificado provenga de una fuente confiable y confirmar la presencia del emisor en el **almacén de certificados NTAUTH**. Las validaciones exitosas resultan en la emisión de un TGT. El objeto **`NTAuthCertificates`** en AD, encontrado en:
+En el proceso de autenticación de Kerberos, la solicitud de un usuario para un Ticket Granting Ticket (TGT) se firma utilizando la **clave privada** del certificado del usuario. Esta solicitud pasa por varias validaciones por parte del controlador de dominio, incluyendo la **validez**, **ruta** y **estado de revocación** del certificado. Las validaciones también incluyen verificar que el certificado provenga de una fuente confiable y confirmar la presencia del emisor en el **almacén de certificados NTAUTH**. Las validaciones exitosas resultan en la emisión de un TGT. El objeto **`NTAuthCertificates`** en AD, encontrado en:
 ```bash
 CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>
 ```

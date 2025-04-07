@@ -20,7 +20,7 @@ También puedes consultar la siguiente página para aprender **otras formas de e
 
 ### FreeIPA
 
-FreeIPA es una **alternativa** de código abierto a Microsoft Windows **Active Directory**, principalmente para entornos **Unix**. Combina un **directorio LDAP** completo con un centro de distribución de claves **Kerberos** de MIT para la gestión similar a Active Directory. Utiliza el **Sistema de Certificados Dogtag** para la gestión de certificados CA y RA, y admite autenticación **multifactor**, incluyendo tarjetas inteligentes. SSSD está integrado para procesos de autenticación Unix. Aprende más sobre ello en:
+FreeIPA es una **alternativa** de código abierto a **Active Directory** de Microsoft, principalmente para entornos **Unix**. Combina un **directorio LDAP** completo con un Centro de Distribución de Claves **Kerberos** de MIT para la gestión similar a Active Directory. Utiliza el **Sistema de Certificados** Dogtag para la gestión de certificados CA y RA, y admite autenticación **multifactor** que incluye tarjetas inteligentes. SSSD está integrado para procesos de autenticación Unix. Aprende más sobre ello en:
 
 {{#ref}}
 ../freeipa-pentesting.md
@@ -38,7 +38,7 @@ En esta página encontrarás diferentes lugares donde podrías **encontrar ticke
 
 ### Reutilización de tickets CCACHE desde /tmp
 
-Los archivos CCACHE son formatos binarios para **almacenar credenciales Kerberos** que generalmente se almacenan con permisos 600 en `/tmp`. Estos archivos pueden ser identificados por su **formato de nombre, `krb5cc_%{uid}`,** que corresponde al UID del usuario. Para la verificación del ticket de autenticación, la **variable de entorno `KRB5CCNAME`** debe establecerse en la ruta del archivo de ticket deseado, permitiendo su reutilización.
+Los archivos CCACHE son formatos binarios para **almacenar credenciales Kerberos** que generalmente se almacenan con permisos 600 en `/tmp`. Estos archivos pueden ser identificados por su **formato de nombre, `krb5cc_%{uid}`,** que se correlaciona con el UID del usuario. Para la verificación del ticket de autenticación, la **variable de entorno `KRB5CCNAME`** debe establecerse en la ruta del archivo de ticket deseado, permitiendo su reutilización.
 
 Lista el ticket actual utilizado para la autenticación con `env | grep KRB5CCNAME`. El formato es portátil y el ticket puede ser **reutilizado configurando la variable de entorno** con `export KRB5CCNAME=/tmp/ticket.ccache`. El formato del nombre del ticket Kerberos es `krb5cc_%{uid}` donde uid es el UID del usuario.
 ```bash
@@ -51,7 +51,7 @@ export KRB5CCNAME=/tmp/krb5cc_1000
 ```
 ### Reutilización de tickets CCACHE desde el keyring
 
-**Los tickets de Kerberos almacenados en la memoria de un proceso pueden ser extraídos**, particularmente cuando la protección ptrace de la máquina está deshabilitada (`/proc/sys/kernel/yama/ptrace_scope`). Una herramienta útil para este propósito se encuentra en [https://github.com/TarlogicSecurity/tickey](https://github.com/TarlogicSecurity/tickey), que facilita la extracción inyectando en sesiones y volcando tickets en `/tmp`.
+**Los tickets de Kerberos almacenados en la memoria de un proceso pueden ser extraídos**, particularmente cuando la protección ptrace de la máquina está desactivada (`/proc/sys/kernel/yama/ptrace_scope`). Una herramienta útil para este propósito se encuentra en [https://github.com/TarlogicSecurity/tickey](https://github.com/TarlogicSecurity/tickey), que facilita la extracción al inyectar en sesiones y volcar tickets en `/tmp`.
 
 Para configurar y usar esta herramienta, se siguen los pasos a continuación:
 ```bash
@@ -66,7 +66,7 @@ Este procedimiento intentará inyectar en varias sesiones, indicando el éxito a
 
 SSSD mantiene una copia de la base de datos en la ruta `/var/lib/sss/secrets/secrets.ldb`. La clave correspondiente se almacena como un archivo oculto en la ruta `/var/lib/sss/secrets/.secrets.mkey`. Por defecto, la clave solo es legible si tienes permisos de **root**.
 
-Invocar \*\*`SSSDKCMExtractor` \*\* con los parámetros --database y --key analizará la base de datos y **desencriptará los secretos**.
+Invocar **`SSSDKCMExtractor`** con los parámetros --database y --key analizará la base de datos y **desencriptará los secretos**.
 ```bash
 git clone https://github.com/fireeye/SSSDKCMExtractor
 python3 SSSDKCMExtractor.py --database secrets.ldb --key secrets.mkey

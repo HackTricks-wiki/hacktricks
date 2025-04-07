@@ -9,10 +9,10 @@ Una lista blanca de aplicaciones es una lista de aplicaciones de software o ejec
 [AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) es la **solución de lista blanca de aplicaciones** de Microsoft y da a los administradores del sistema control sobre **qué aplicaciones y archivos pueden ejecutar los usuarios**. Proporciona **control granular** sobre ejecutables, scripts, archivos de instalación de Windows, DLLs, aplicaciones empaquetadas y instaladores de aplicaciones empaquetadas.\
 Es común que las organizaciones **bloqueen cmd.exe y PowerShell.exe** y el acceso de escritura a ciertos directorios, **pero todo esto se puede eludir**.
 
-### Verificar
+### Verificación
 
 Verifique qué archivos/extensiones están en la lista negra/lista blanca:
-```powershell
+```bash
 Get-ApplockerPolicy -Effective -xml
 
 Get-AppLockerPolicy -Effective | select -ExpandProperty RuleCollections
@@ -37,7 +37,7 @@ C:\windows\tracing
 - **Reglas mal escritas también podrían ser eludidas**
 - Por ejemplo, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, puedes crear una **carpeta llamada `allowed`** en cualquier lugar y será permitida.
 - Las organizaciones también suelen centrarse en **bloquear el ejecutable `%System32%\WindowsPowerShell\v1.0\powershell.exe`**, pero se olvidan de las **otras** [**ubicaciones de ejecutables de PowerShell**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) como `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` o `PowerShell_ISE.exe`.
-- **La imposición de DLL rara vez está habilitada** debido a la carga adicional que puede poner en un sistema y la cantidad de pruebas requeridas para asegurar que nada se rompa. Así que usar **DLLs como puertas traseras ayudará a eludir AppLocker**.
+- **La aplicación de DLL rara vez está habilitada** debido a la carga adicional que puede poner en un sistema y la cantidad de pruebas requeridas para asegurar que nada se rompa. Así que usar **DLLs como puertas traseras ayudará a eludir AppLocker**.
 - Puedes usar [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) o [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) para **ejecutar código de Powershell** en cualquier proceso y eludir AppLocker. Para más información consulta: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
 
 ## Almacenamiento de Credenciales
@@ -103,14 +103,14 @@ sc query windefend
 ```
 ## Encrypted File System (EFS)
 
-EFS asegura archivos a través de la encriptación, utilizando una **clave simétrica** conocida como la **Clave de Encriptación de Archivos (FEK)**. Esta clave se encripta con la **clave pública** del usuario y se almacena dentro del **flujo de datos alternativo** $EFS del archivo encriptado. Cuando se necesita la desencriptación, se utiliza la **clave privada** correspondiente del certificado digital del usuario para desencriptar la FEK del flujo $EFS. Más detalles se pueden encontrar [aquí](https://en.wikipedia.org/wiki/Encrypting_File_System).
+EFS asegura archivos a través de la encriptación, utilizando una **clave simétrica** conocida como la **Clave de Encriptación de Archivos (FEK)**. Esta clave se encripta con la **clave pública** del usuario y se almacena dentro del **flujo de datos alternativo** $EFS del archivo encriptado. Cuando se necesita la desencriptación, se utiliza la correspondiente **clave privada** del certificado digital del usuario para desencriptar la FEK del flujo $EFS. Más detalles se pueden encontrar [aquí](https://en.wikipedia.org/wiki/Encrypting_File_System).
 
 **Escenarios de desencriptación sin iniciación del usuario** incluyen:
 
-- Cuando archivos o carpetas se mueven a un sistema de archivos no EFS, como [FAT32](https://en.wikipedia.org/wiki/File_Allocation_Table), se desencriptan automáticamente.
-- Archivos encriptados enviados a través de la red mediante el protocolo SMB/CIFS se desencriptan antes de la transmisión.
+- Cuando los archivos o carpetas se mueven a un sistema de archivos no EFS, como [FAT32](https://en.wikipedia.org/wiki/File_Allocation_Table), se desencriptan automáticamente.
+- Los archivos encriptados enviados a través de la red mediante el protocolo SMB/CIFS se desencriptan antes de la transmisión.
 
-Este método de encriptación permite **acceso transparente** a archivos encriptados para el propietario. Sin embargo, simplemente cambiar la contraseña del propietario e iniciar sesión no permitirá la desencriptación.
+Este método de encriptación permite **acceso transparente** a los archivos encriptados para el propietario. Sin embargo, simplemente cambiar la contraseña del propietario e iniciar sesión no permitirá la desencriptación.
 
 **Puntos Clave**:
 
@@ -119,7 +119,7 @@ Este método de encriptación permite **acceso transparente** a archivos encript
 - La desencriptación automática ocurre bajo condiciones específicas, como copiar a FAT32 o transmisión por red.
 - Los archivos encriptados son accesibles para el propietario sin pasos adicionales.
 
-### Verificar información de EFS
+### Ver información de EFS
 
 Verifique si un **usuario** ha **utilizado** este **servicio** comprobando si existe esta ruta: `C:\users\<username>\appdata\roaming\Microsoft\Protect`
 
@@ -134,7 +134,9 @@ Este método requiere que el **usuario víctima** esté **ejecutando** un **proc
 
 #### Conociendo la contraseña del usuario
 
-{% embed url="https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files" %}
+{{#ref}}
+https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files
+{{#endref}}
 
 ## Group Managed Service Accounts (gMSA)
 
@@ -146,7 +148,7 @@ Microsoft desarrolló **Group Managed Service Accounts (gMSA)** para simplificar
 - **Capacidad de Tareas Programadas**: a diferencia de las cuentas de servicio administradas, los gMSA admiten la ejecución de tareas programadas.
 - **Gestión Simplificada de SPN**: el sistema actualiza automáticamente el Nombre Principal del Servicio (SPN) cuando hay cambios en los detalles de sAMaccount de la computadora o en el nombre DNS, simplificando la gestión de SPN.
 
-Las contraseñas para los gMSA se almacenan en la propiedad LDAP _**msDS-ManagedPassword**_ y se restablecen automáticamente cada 30 días por los Controladores de Dominio (DC). Esta contraseña, un blob de datos encriptados conocido como [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e), solo puede ser recuperada por administradores autorizados y los servidores en los que están instalados los gMSA, asegurando un entorno seguro. Para acceder a esta información, se requiere una conexión segura como LDAPS, o la conexión debe estar autenticada con 'Sealing & Secure'.
+Las contraseñas para los gMSA se almacenan en la propiedad LDAP _**msDS-ManagedPassword**_ y se restablecen automáticamente cada 30 días por los Controladores de Dominio (DC). Esta contraseña, un blob de datos encriptados conocido como [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e), solo puede ser recuperada por administradores autorizados y los servidores en los que están instalados los gMSA, asegurando un entorno seguro. Para acceder a esta información, se requiere una conexión segura como LDAPS, o la conexión debe ser autenticada con 'Sealing & Secure'.
 
 ![https://cube0x0.github.io/Relaying-for-gMSA/](../images/asd1.png)
 
@@ -160,7 +162,7 @@ Además, consulta esta [página web](https://cube0x0.github.io/Relaying-for-gMSA
 
 ## LAPS
 
-La **Solución de Contraseña de Administrador Local (LAPS)**, disponible para descargar desde [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), permite la gestión de contraseñas de administradores locales. Estas contraseñas, que son **aleatorias**, únicas y **cambiadas regularmente**, se almacenan de forma central en Active Directory. El acceso a estas contraseñas está restringido a través de ACLs a usuarios autorizados. Con los permisos suficientes otorgados, se proporciona la capacidad de leer las contraseñas de administrador local.
+La **Solución de Contraseña de Administrador Local (LAPS)**, disponible para descargar desde [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), permite la gestión de contraseñas de Administrador local. Estas contraseñas, que son **aleatorias**, únicas y **cambiadas regularmente**, se almacenan de forma central en Active Directory. El acceso a estas contraseñas está restringido a través de ACLs a usuarios autorizados. Con los permisos suficientes otorgados, se proporciona la capacidad de leer contraseñas de administrador local.
 
 {{#ref}}
 active-directory-methodology/laps.md
@@ -168,15 +170,15 @@ active-directory-methodology/laps.md
 
 ## Modo de Lenguaje Restringido de PowerShell
 
-PowerShell [**Modo de Lenguaje Restringido**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **bloquea muchas de las características** necesarias para usar PowerShell de manera efectiva, como bloquear objetos COM, permitir solo tipos .NET aprobados, flujos de trabajo basados en XAML, clases de PowerShell y más.
+PowerShell [**Modo de Lenguaje Restringido**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **bloquea muchas de las características** necesarias para usar PowerShell de manera efectiva, como bloquear objetos COM, permitiendo solo tipos .NET aprobados, flujos de trabajo basados en XAML, clases de PowerShell y más.
 
 ### **Verificar**
-```powershell
+```bash
 $ExecutionContext.SessionState.LanguageMode
 #Values could be: FullLanguage or ConstrainedLanguage
 ```
 ### Bypass
-```powershell
+```bash
 #Easy bypass
 Powershell -version 2
 ```
@@ -196,7 +198,7 @@ Puedes usar [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/
 ## Política de Ejecución de PS
 
 Por defecto, está configurada como **restringida.** Principales formas de eludir esta política:
-```powershell
+```bash
 1º Just copy and paste inside the interactive PS console
 2º Read en Exec
 Get-Content .runme.ps1 | PowerShell.exe -noprofile -
@@ -245,6 +247,5 @@ El SSPI se encargará de encontrar el protocolo adecuado para dos máquinas que 
 {{#ref}}
 windows-security-controls/uac-user-account-control.md
 {{#endref}}
-
 
 {{#include ../banners/hacktricks-training.md}}

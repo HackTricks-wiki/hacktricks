@@ -7,7 +7,7 @@
 Si el **grupo externo** tiene **acceso RDP** a cualquier **computadora** en el dominio actual, un **atacante** podría **comprometer esa computadora y esperar a que él**.
 
 Una vez que ese usuario ha accedido a través de RDP, el **atacante puede pivotar a la sesión de ese usuario** y abusar de sus permisos en el dominio externo.
-```powershell
+```bash
 # Supposing the group "External Users" has RDP access in the current domain
 ## lets find where they could access
 ## The easiest way would be with bloodhound, but you could also run:
@@ -36,8 +36,8 @@ Check **otras formas de robar sesiones con otras herramientas** [**en esta pági
 
 Si un usuario accede a través de **RDP a una máquina** donde un **atacante** está **esperándolo**, el atacante podrá **inyectar un beacon en la sesión RDP del usuario** y si la **víctima montó su unidad** al acceder por RDP, el **atacante podría acceder a ella**.
 
-En este caso, podrías simplemente **comprometer** el **ordenador original** de la **víctima** escribiendo un **backdoor** en la **carpeta de inicio**.
-```powershell
+En este caso, podrías simplemente **comprometer** la **computadora original de la víctima** escribiendo un **backdoor** en la **carpeta de inicio**.
+```bash
 # Wait til someone logs in:
 net logons
 Logged on users at \\localhost:

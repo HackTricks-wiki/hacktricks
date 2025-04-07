@@ -19,7 +19,7 @@
 ## Autosolvers Mágicos
 
 - [**https://github.com/Ciphey/Ciphey**](https://github.com/Ciphey/Ciphey)
-- [https://gchq.github.io/CyberChef/](https://gchq.github.io/CyberChef/) (Módulo mágico)
+- [https://gchq.github.io/CyberChef/](https://gchq.github.io/CyberChef/) (módulo mágico)
 - [https://github.com/dhondta/python-codext](https://github.com/dhondta/python-codext)
 - [https://www.boxentriq.com/code-breaking](https://www.boxentriq.com/code-breaking)
 
@@ -188,15 +188,15 @@ Letra a número `(ax+b)%26` (_a_ y _b_ son las claves y _x_ es la letra) y el re
 ```
 krodfdudfrod
 ```
-### Código SMS
+### SMS Code
 
-**Multitap** [reemplaza una letra](https://www.dcode.fr/word-letter-change) por dígitos repetidos definidos por el código de la tecla correspondiente en un [teclado de teléfono](https://www.dcode.fr/phone-keypad-cipher) (Este modo se utiliza al escribir SMS).\
+**Multitap** [replaces a letter](https://www.dcode.fr/word-letter-change) por dígitos repetidos definidos por el código de la tecla correspondiente en un [teclado de teléfono móvil](https://www.dcode.fr/phone-keypad-cipher) (Este modo se utiliza al escribir SMS).\
 Por ejemplo: 2=A, 22=B, 222=C, 3=D...\
-Puedes identificar este código porque verás\*\* varios números repetidos\*\*.
+Puedes identificar este código porque verás **varios números repetidos**.
 
 Puedes decodificar este código en: [https://www.dcode.fr/multitap-abc-cipher](https://www.dcode.fr/multitap-abc-cipher)
 
-### Código Bacon
+### Bacon Code
 
 Sustituye cada letra por 4 As o Bs (o 1s y 0s)
 ```
@@ -247,7 +247,7 @@ Key:
 ```
 - [https://asecuritysite.com/encryption/ferdecode](https://asecuritysite.com/encryption/ferdecode)
 
-### Compartición Secreta de Samir
+### Samir Secret Sharing
 
 Un secreto se divide en X partes y para recuperarlo necesitas Y partes (_Y <=X_).
 ```

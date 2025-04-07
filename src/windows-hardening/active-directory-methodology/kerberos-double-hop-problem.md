@@ -1,34 +1,34 @@
-# Kerberos Double Hop Problem
+# Problema de Doble Salto de Kerberos
 
 {{#include ../../banners/hacktricks-training.md}}
 
 
 ## Introducción
 
-El problema de "Double Hop" de Kerberos aparece cuando un atacante intenta usar **Kerberos authentication across two** **hops**, por ejemplo usando **PowerShell**/**WinRM**.
+El problema de "Doble Salto" de Kerberos aparece cuando un atacante intenta usar **la autenticación de Kerberos a través de dos** **saltos**, por ejemplo usando **PowerShell**/**WinRM**.
 
-Cuando ocurre una **authentication** a través de **Kerberos**, las **credentials** **no están** almacenadas en **memoria.** Por lo tanto, si ejecutas mimikatz **no encontrarás credentials** del usuario en la máquina incluso si está ejecutando procesos.
+Cuando ocurre una **autenticación** a través de **Kerberos**, las **credenciales** **no están** almacenadas en **memoria.** Por lo tanto, si ejecutas mimikatz **no encontrarás credenciales** del usuario en la máquina, incluso si está ejecutando procesos.
 
-Esto se debe a que al conectarse con Kerberos estos son los pasos:
+Esto se debe a que al conectarse con Kerberos, estos son los pasos:
 
-1. User1 proporciona credentials y el **domain controller** devuelve un **TGT** de Kerberos a User1.
-2. User1 usa el **TGT** para solicitar un **service ticket** para **connect** a Server1.
-3. User1 **connects** a **Server1** y proporciona el **service ticket**.
-4. **Server1** **no tiene** las **credentials** de User1 almacenadas o el **TGT** de User1. Por lo tanto, cuando User1 desde Server1 intenta iniciar sesión en un segundo servidor, **no puede autenticarse**.
+1. User1 proporciona credenciales y el **controlador de dominio** devuelve un **TGT** de Kerberos a User1.
+2. User1 usa el **TGT** para solicitar un **ticket de servicio** para **conectarse** a Server1.
+3. User1 **se conecta** a **Server1** y proporciona el **ticket de servicio**.
+4. **Server1** **no tiene** las **credenciales** de User1 almacenadas o el **TGT** de User1. Por lo tanto, cuando User1 desde Server1 intenta iniciar sesión en un segundo servidor, **no puede autenticarse**.
 
 ### Delegación No Restringida
 
-Si la **unconstrained delegation** está habilitada en la PC, esto no sucederá ya que el **Server** **obtendrá** un **TGT** de cada usuario que acceda a él. Además, si se utiliza la delegación no restringida, probablemente puedas **comprometer el Domain Controller** desde él.\
+Si la **delegación no restringida** está habilitada en la PC, esto no sucederá ya que el **Servidor** **obtendrá** un **TGT** de cada usuario que acceda a él. Además, si se utiliza la delegación no restringida, probablemente puedas **comprometer el Controlador de Dominio** desde él.\
 [**Más información en la página de delegación no restringida**](unconstrained-delegation.md).
 
 ### CredSSP
 
-Otra forma de evitar este problema que es [**notablemente insegura**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7) es **Credential Security Support Provider**. De Microsoft:
+Otra forma de evitar este problema, que es [**notablemente insegura**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7), es el **Proveedor de Soporte de Seguridad de Credenciales**. De Microsoft:
 
-> La autenticación CredSSP delega las credentials del usuario desde la computadora local a una computadora remota. Esta práctica aumenta el riesgo de seguridad de la operación remota. Si la computadora remota es comprometida, cuando se pasan las credentials a ella, las credentials pueden ser utilizadas para controlar la sesión de red.
+> La autenticación de CredSSP delega las credenciales del usuario desde la computadora local a una computadora remota. Esta práctica aumenta el riesgo de seguridad de la operación remota. Si la computadora remota es comprometida, cuando se pasan las credenciales a ella, las credenciales pueden ser utilizadas para controlar la sesión de red.
 
-Se recomienda encarecidamente que **CredSSP** esté deshabilitado en sistemas de producción, redes sensibles y entornos similares debido a preocupaciones de seguridad. Para determinar si **CredSSP** está habilitado, se puede ejecutar el comando `Get-WSManCredSSP`. Este comando permite la **verificación del estado de CredSSP** e incluso puede ser ejecutado de forma remota, siempre que **WinRM** esté habilitado.
-```powershell
+Se recomienda encarecidamente que **CredSSP** esté deshabilitado en sistemas de producción, redes sensibles y entornos similares debido a preocupaciones de seguridad. Para determinar si **CredSSP** está habilitado, se puede ejecutar el comando `Get-WSManCredSSP`. Este comando permite **verificar el estado de CredSSP** y puede incluso ejecutarse de forma remota, siempre que **WinRM** esté habilitado.
+```bash
 Invoke-Command -ComputerName bizintel -Credential ta\redsuit -ScriptBlock {
 Get-WSManCredSSP
 }
@@ -37,8 +37,8 @@ Get-WSManCredSSP
 
 ### Invocar Comando
 
-Para abordar el problema del doble salto, se presenta un método que involucra un `Invoke-Command` anidado. Esto no resuelve el problema directamente, pero ofrece una solución alternativa sin necesidad de configuraciones especiales. El enfoque permite ejecutar un comando (`hostname`) en un servidor secundario a través de un comando de PowerShell ejecutado desde una máquina atacante inicial o a través de una PS-Session previamente establecida con el primer servidor. Así es como se hace:
-```powershell
+Para abordar el problema del doble salto, se presenta un método que involucra un `Invoke-Command` anidado. Esto no resuelve el problema directamente, pero ofrece una solución alternativa sin necesidad de configuraciones especiales. El enfoque permite ejecutar un comando (`hostname`) en un servidor secundario a través de un comando de PowerShell ejecutado desde una máquina de ataque inicial o a través de una PS-Session previamente establecida con el primer servidor. Así es como se hace:
+```bash
 $cred = Get-Credential ta\redsuit
 Invoke-Command -ComputerName bizintel -Credential $cred -ScriptBlock {
 Invoke-Command -ComputerName secdev -Credential $cred -ScriptBlock {hostname}
@@ -49,7 +49,7 @@ Alternativamente, se sugiere establecer una PS-Session con el primer servidor y 
 ### Registrar la Configuración de PSSession
 
 Una solución para el problema del doble salto implica usar `Register-PSSessionConfiguration` con `Enter-PSSession`. Este método requiere un enfoque diferente al de `evil-winrm` y permite una sesión que no sufre de la limitación del doble salto.
-```powershell
+```bash
 Register-PSSessionConfiguration -Name doublehopsess -RunAsCredential domain_name\username
 Restart-Service WinRM
 Enter-PSSession -ConfigurationName doublehopsess -ComputerName <pc_name> -Credential domain_name\username
@@ -74,7 +74,7 @@ Instalar OpenSSH en el primer servidor permite una solución para el problema de
 
 #### Pasos de Instalación de OpenSSH
 
-1. Descargue y mueva el último zip de la versión de OpenSSH al servidor objetivo.
+1. Descargue y mueva el último zip de la versión de OpenSSH al servidor de destino.
 2. Descomprima y ejecute el script `Install-sshd.ps1`.
 3. Agregue una regla de firewall para abrir el puerto 22 y verifique que los servicios SSH estén en funcionamiento.
 

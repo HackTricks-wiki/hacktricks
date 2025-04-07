@@ -7,7 +7,7 @@
 
 El ataque **Overpass The Hash/Pass The Key (PTK)** está diseñado para entornos donde el protocolo NTLM tradicional está restringido y la autenticación Kerberos tiene prioridad. Este ataque aprovecha el hash NTLM o las claves AES de un usuario para solicitar tickets Kerberos, lo que permite el acceso no autorizado a recursos dentro de una red.
 
-Para ejecutar este ataque, el primer paso implica adquirir el hash NTLM o la contraseña de la cuenta del usuario objetivo. Al asegurar esta información, se puede obtener un Ticket Granting Ticket (TGT) para la cuenta, lo que permite al atacante acceder a servicios o máquinas a los que el usuario tiene permisos.
+Para ejecutar este ataque, el primer paso implica adquirir el hash NTLM o la contraseña de la cuenta del usuario objetivo. Al asegurar esta información, se puede obtener un Ticket Granting Ticket (TGT) para la cuenta, lo que permite al atacante acceder a servicios o máquinas a las que el usuario tiene permisos.
 
 El proceso se puede iniciar con los siguientes comandos:
 ```bash
@@ -26,10 +26,19 @@ Una secuencia de comandos alternativa utilizando Rubeus.exe demuestra otro aspec
 ```
 Este método refleja el enfoque de **Pass the Key**, con un enfoque en apoderarse y utilizar el ticket directamente para fines de autenticación. Es crucial notar que la iniciación de una solicitud de TGT activa el evento `4768: A Kerberos authentication ticket (TGT) was requested`, lo que significa un uso de RC4-HMAC por defecto, aunque los sistemas Windows modernos prefieren AES256.
 
-Para conformarse a la seguridad operativa y usar AES256, se puede aplicar el siguiente comando:
+Para cumplir con la seguridad operativa y usar AES256, se puede aplicar el siguiente comando:
 ```bash
 .\Rubeus.exe asktgt /user:<USERNAME> /domain:<DOMAIN> /aes256:HASH /nowrap /opsec
 ```
+## Versión más sigilosa
+
+> [!WARNING]
+> Cada sesión de inicio de sesión solo puede tener un TGT activo a la vez, así que ten cuidado.
+
+1. Crea una nueva sesión de inicio de sesión con **`make_token`** de Cobalt Strike.
+2. Luego, usa Rubeus para generar un TGT para la nueva sesión de inicio de sesión sin afectar la existente.
+
+
 ## Referencias
 
 - [https://www.tarlogic.com/es/blog/como-atacar-kerberos/](https://www.tarlogic.com/es/blog/como-atacar-kerberos/)

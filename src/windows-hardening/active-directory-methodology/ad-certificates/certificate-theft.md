@@ -6,8 +6,8 @@
 
 ## ¿Qué puedo hacer con un certificado?
 
-Antes de revisar cómo robar los certificados, aquí tienes información sobre cómo encontrar para qué es útil el certificado:
-```powershell
+Antes de verificar cómo robar los certificados, aquí tienes algo de información sobre cómo encontrar para qué es útil el certificado:
+```bash
 # Powershell
 $CertPath = "C:\path\to\cert.pfx"
 $CertPass = "P@ssw0rd"
@@ -22,7 +22,7 @@ certutil.exe -dump -v cert.pfx
 
 En una **sesión de escritorio interactiva**, extraer un certificado de usuario o de máquina, junto con la clave privada, se puede hacer fácilmente, particularmente si la **clave privada es exportable**. Esto se puede lograr navegando al certificado en `certmgr.msc`, haciendo clic derecho sobre él y seleccionando `All Tasks → Export` para generar un archivo .pfx protegido por contraseña.
 
-Para un **enfoque programático**, están disponibles herramientas como el cmdlet `ExportPfxCertificate` de PowerShell o proyectos como [TheWover’s CertStealer C# project](https://github.com/TheWover/CertStealer). Estas utilizan la **Microsoft CryptoAPI** (CAPI) o la Cryptography API: Next Generation (CNG) para interactuar con el almacén de certificados. Estas APIs proporcionan una gama de servicios criptográficos, incluidos los necesarios para el almacenamiento y la autenticación de certificados.
+Para un **enfoque programático**, están disponibles herramientas como el cmdlet de PowerShell `ExportPfxCertificate` o proyectos como [TheWover’s CertStealer C# project](https://github.com/TheWover/CertStealer). Estas utilizan la **Microsoft CryptoAPI** (CAPI) o la Cryptography API: Next Generation (CNG) para interactuar con el almacén de certificados. Estas APIs proporcionan una gama de servicios criptográficos, incluidos los necesarios para el almacenamiento y la autenticación de certificados.
 
 Sin embargo, si una clave privada está configurada como no exportable, tanto CAPI como CNG normalmente bloquearán la extracción de tales certificados. Para eludir esta restricción, se pueden emplear herramientas como **Mimikatz**. Mimikatz ofrece comandos `crypto::capi` y `crypto::cng` para parchear las respectivas APIs, permitiendo la exportación de claves privadas. Específicamente, `crypto::capi` parchea el CAPI dentro del proceso actual, mientras que `crypto::cng` apunta a la memoria de **lsass.exe** para el parcheo.
 
@@ -66,11 +66,11 @@ Los certificados de máquina almacenados por Windows en el registro en `HKEY_LOC
 
 La desencriptación manual se puede lograr ejecutando el comando `lsadump::secrets` en **Mimikatz** para extraer el secreto LSA DPAPI_SYSTEM, y posteriormente utilizando esta clave para desencriptar las claves maestras de la máquina. Alternativamente, se puede usar el comando `crypto::certificates /export /systemstore:LOCAL_MACHINE` de Mimikatz después de parchear CAPI/CNG como se describió anteriormente.
 
-**SharpDPAPI** ofrece un enfoque más automatizado con su comando de certificados. Cuando se utiliza la bandera `/machine` con permisos elevados, se eleva a SYSTEM, se vuelca el secreto LSA DPAPI_SYSTEM, se utiliza para desencriptar las claves maestras DPAPI de la máquina y luego emplea estas claves en texto plano como una tabla de búsqueda para desencriptar cualquier clave privada de certificado de máquina.
+**SharpDPAPI** ofrece un enfoque más automatizado con su comando de certificados. Cuando se utiliza la bandera `/machine` con permisos elevados, se eleva a SYSTEM, extrae el secreto LSA DPAPI_SYSTEM, lo utiliza para desencriptar las claves maestras DPAPI de la máquina y luego emplea estas claves en texto plano como una tabla de búsqueda para desencriptar cualquier clave privada de certificado de máquina.
 
 ## Encontrando Archivos de Certificados – THEFT4
 
-Los certificados a veces se encuentran directamente dentro del sistema de archivos, como en recursos compartidos de archivos o en la carpeta de Descargas. Los tipos de archivos de certificados más comúnmente encontrados dirigidos a entornos de Windows son los archivos `.pfx` y `.p12`. Aunque con menos frecuencia, también aparecen archivos con extensiones `.pkcs12` y `.pem`. Otras extensiones de archivo relacionadas con certificados que son dignas de mención incluyen:
+Los certificados a veces se encuentran directamente dentro del sistema de archivos, como en recursos compartidos de archivos o en la carpeta de Descargas. Los tipos de archivos de certificados más comúnmente encontrados dirigidos a entornos de Windows son los archivos `.pfx` y `.p12`. Aunque con menos frecuencia, también aparecen archivos con extensiones `.pkcs12` y `.pem`. Otras extensiones de archivo relacionadas con certificados que son notables incluyen:
 
 - `.key` para claves privadas,
 - `.crt`/`.cer` solo para certificados,
@@ -80,7 +80,7 @@ Los certificados a veces se encuentran directamente dentro del sistema de archiv
 Estos archivos se pueden buscar utilizando PowerShell o el símbolo del sistema buscando las extensiones mencionadas.
 
 En casos donde se encuentra un archivo de certificado PKCS#12 y está protegido por una contraseña, la extracción de un hash es posible mediante el uso de `pfx2john.py`, disponible en [fossies.org](https://fossies.org/dox/john-1.9.0-jumbo-1/pfx2john_8py_source.html). Posteriormente, se puede emplear JohnTheRipper para intentar descifrar la contraseña.
-```powershell
+```bash
 # Example command to search for certificate files in PowerShell
 Get-ChildItem -Recurse -Path C:\Users\ -Include *.pfx, *.p12, *.pkcs12, *.pem, *.key, *.crt, *.cer, *.csr, *.jks, *.keystore, *.keys
 
@@ -90,17 +90,19 @@ pfx2john.py certificate.pfx > hash.txt
 # Command to crack the hash with JohnTheRipper
 john --wordlist=passwords.txt hash.txt
 ```
-## Robo de Credenciales NTLM a través de PKINIT – THEFT5
+## Robo de Credenciales NTLM a través de PKINIT – THEFT5 (UnPAC el hash)
 
 El contenido dado explica un método para el robo de credenciales NTLM a través de PKINIT, específicamente mediante el método de robo etiquetado como THEFT5. Aquí hay una reexplicación en voz pasiva, con el contenido anonimizado y resumido donde sea aplicable:
 
-Para soportar la autenticación NTLM [MS-NLMP] para aplicaciones que no facilitan la autenticación Kerberos, el KDC está diseñado para devolver la función unidireccional (OWF) NTLM del usuario dentro del certificado de atributo de privilegio (PAC), específicamente en el búfer `PAC_CREDENTIAL_INFO`, cuando se utiliza PKCA. En consecuencia, si una cuenta se autentica y asegura un Ticket-Granting Ticket (TGT) a través de PKINIT, se proporciona inherentemente un mecanismo que permite al host actual extraer el hash NTLM del TGT para mantener los protocolos de autenticación heredados. Este proceso implica la decripción de la estructura `PAC_CREDENTIAL_DATA`, que es esencialmente una representación serializada NDR del texto plano NTLM.
+Para soportar la autenticación NTLM `MS-NLMP` para aplicaciones que no facilitan la autenticación Kerberos, el KDC está diseñado para devolver la función unidireccional (OWF) NTLM del usuario dentro del certificado de atributo de privilegio (PAC), específicamente en el búfer `PAC_CREDENTIAL_INFO`, cuando se utiliza PKCA. En consecuencia, si una cuenta se autentica y asegura un Ticket-Granting Ticket (TGT) a través de PKINIT, se proporciona inherentemente un mecanismo que permite al host actual extraer el hash NTLM del TGT para mantener los protocolos de autenticación heredados. Este proceso implica la decripción de la estructura `PAC_CREDENTIAL_DATA`, que es esencialmente una representación serializada NDR del texto plano NTLM.
 
 La utilidad **Kekeo**, accesible en [https://github.com/gentilkiwi/kekeo](https://github.com/gentilkiwi/kekeo), se menciona como capaz de solicitar un TGT que contenga estos datos específicos, facilitando así la recuperación del NTLM del usuario. El comando utilizado para este propósito es el siguiente:
 ```bash
 tgt::pac /caname:generic-DC-CA /subject:genericUser /castore:current_user /domain:domain.local
 ```
-Además, se señala que Kekeo puede procesar certificados protegidos por tarjeta inteligente, dado que el pin puede ser recuperado, haciendo referencia a [https://github.com/CCob/PinSwipe](https://github.com/CCob/PinSwipe). La misma capacidad se indica que es soportada por **Rubeus**, disponible en [https://github.com/GhostPack/Rubeus](https://github.com/GhostPack/Rubeus).
+**`Rubeus`** también puede obtener esta información con la opción **`asktgt [...] /getcredentials`**.
+
+Además, se señala que Kekeo puede procesar certificados protegidos por tarjeta inteligente, dado que se puede recuperar el pin, haciendo referencia a [https://github.com/CCob/PinSwipe](https://github.com/CCob/PinSwipe). La misma capacidad se indica que es soportada por **Rubeus**, disponible en [https://github.com/GhostPack/Rubeus](https://github.com/GhostPack/Rubeus).
 
 Esta explicación encapsula el proceso y las herramientas involucradas en el robo de credenciales NTLM a través de PKINIT, centrándose en la recuperación de hashes NTLM a través de TGT obtenidos usando PKINIT, y las utilidades que facilitan este proceso.
 

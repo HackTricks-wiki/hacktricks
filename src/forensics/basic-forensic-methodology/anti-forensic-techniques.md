@@ -3,11 +3,11 @@
 # Timestamps
 
 Un atacante puede estar interesado en **cambiar las marcas de tiempo de los archivos** para evitar ser detectado.\
-Es posible encontrar las marcas de tiempo dentro del MFT en los atributos `$STANDARD_INFORMATION` ** y ** `$FILE_NAME`.
+Es posible encontrar las marcas de tiempo dentro del MFT en los atributos `$STANDARD_INFORMATION`**y**`$FILE_NAME`.
 
 Ambos atributos tienen 4 marcas de tiempo: **Modificación**, **acceso**, **creación** y **modificación del registro MFT** (MACE o MACB).
 
-**El explorador de Windows** y otras herramientas muestran la información de **`$STANDARD_INFORMATION`**.
+**Windows explorer** y otras herramientas muestran la información de **`$STANDARD_INFORMATION`**.
 
 ## TimeStomp - Herramienta anti-forense
 
@@ -40,42 +40,42 @@ Usando la misma herramienta es posible identificar **a qué hora se modificaron 
 
 ## Comparación de `$STANDARD_INFORMATION` y `$FILE_NAME`
 
-Otra forma de identificar archivos modificados sospechosos sería comparar el tiempo en ambos atributos buscando **incongruencias**.
+Otra forma de identificar archivos modificados sospechosos sería comparar el tiempo en ambos atributos buscando **desajustes**.
 
 ## Nanosegundos
 
-Las marcas de tiempo de **NTFS** tienen una **precisión** de **100 nanosegundos**. Por lo tanto, encontrar archivos con marcas de tiempo como 2010-10-10 10:10:**00.000:0000 es muy sospechoso**.
+Las marcas de tiempo de **NTFS** tienen una **precisión** de **100 nanosegundos**. Entonces, encontrar archivos con marcas de tiempo como 2010-10-10 10:10:**00.000:0000 es muy sospechoso**.
 
 ## SetMace - Herramienta anti-forense
 
 Esta herramienta puede modificar ambos atributos `$STARNDAR_INFORMATION` y `$FILE_NAME`. Sin embargo, desde Windows Vista, es necesario que un sistema operativo en vivo modifique esta información.
 
-# Data Hiding
+# Ocultación de datos
 
-NFTS utiliza un clúster y el tamaño mínimo de información. Eso significa que si un archivo ocupa y utiliza un clúster y medio, la **mitad restante nunca se va a utilizar** hasta que se elimine el archivo. Entonces, es posible **ocultar datos en este espacio de holgura**.
+NFTS utiliza un clúster y el tamaño mínimo de información. Eso significa que si un archivo ocupa un clúster y medio, la **mitad restante nunca se va a utilizar** hasta que se elimine el archivo. Entonces, es posible **ocultar datos en este espacio de relleno**.
 
 Hay herramientas como slacker que permiten ocultar datos en este espacio "oculto". Sin embargo, un análisis del `$logfile` y `$usnjrnl` puede mostrar que se añadieron algunos datos:
 
 ![](<../../images/image (452).png>)
 
-Entonces, es posible recuperar el espacio de holgura usando herramientas como FTK Imager. Tenga en cuenta que este tipo de herramienta puede guardar el contenido ofuscado o incluso cifrado.
+Entonces, es posible recuperar el espacio de relleno usando herramientas como FTK Imager. Tenga en cuenta que este tipo de herramienta puede guardar el contenido ofuscado o incluso cifrado.
 
 # UsbKill
 
 Esta es una herramienta que **apagará la computadora si se detecta algún cambio en los puertos USB**.\
 Una forma de descubrir esto sería inspeccionar los procesos en ejecución y **revisar cada script de python en ejecución**.
 
-# Live Linux Distributions
+# Distribuciones de Linux en vivo
 
 Estas distribuciones se **ejecutan dentro de la memoria RAM**. La única forma de detectarlas es **en caso de que el sistema de archivos NTFS esté montado con permisos de escritura**. Si está montado solo con permisos de lectura, no será posible detectar la intrusión.
 
-# Secure Deletion
+# Eliminación segura
 
 [https://github.com/Claudio-C/awesome-data-sanitization](https://github.com/Claudio-C/awesome-data-sanitization)
 
-# Windows Configuration
+# Configuración de Windows
 
-Es posible deshabilitar varios métodos de registro de Windows para dificultar mucho la investigación forense.
+Es posible deshabilitar varios métodos de registro de Windows para hacer que la investigación forense sea mucho más difícil.
 
 ## Deshabilitar marcas de tiempo - UserAssist
 
@@ -92,8 +92,8 @@ Esto guardará información sobre las aplicaciones ejecutadas con el objetivo de
 
 - Ejecutar `regedit`
 - Seleccionar la ruta del archivo `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SessionManager\Memory Management\PrefetchParameters`
-- Haga clic derecho en `EnablePrefetcher` y `EnableSuperfetch`
-- Seleccione Modificar en cada uno de estos para cambiar el valor de 1 (o 3) a 0
+- Hacer clic derecho en `EnablePrefetcher` y `EnableSuperfetch`
+- Seleccionar Modificar en cada uno de estos para cambiar el valor de 1 (o 3) a 0
 - Reiniciar
 
 ## Deshabilitar marcas de tiempo - Última hora de acceso
@@ -107,8 +107,8 @@ Cada vez que se abre una carpeta desde un volumen NTFS en un servidor Windows NT
 
 ## Eliminar historial de USB
 
-Todas las **Entradas de Dispositivos USB** se almacenan en el Registro de Windows bajo la clave de registro **USBSTOR** que contiene subclaves que se crean cada vez que conecta un dispositivo USB a su PC o Laptop. Puede encontrar esta clave aquí `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Eliminando esto** eliminará el historial de USB.\
-También puede usar la herramienta [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html) para asegurarse de que los ha eliminado (y para eliminarlos).
+Todas las **entradas de dispositivos USB** se almacenan en el Registro de Windows bajo la clave de registro **USBSTOR** que contiene subclaves que se crean cada vez que conecta un dispositivo USB a su PC o Laptop. Puede encontrar esta clave aquí `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Eliminando esto** eliminará el historial de USB.\
+También puede usar la herramienta [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html) para asegurarse de que las ha eliminado (y para eliminarlas).
 
 Otro archivo que guarda información sobre los USB es el archivo `setupapi.dev.log` dentro de `C:\Windows\INF`. Este también debe ser eliminado.
 
@@ -134,14 +134,14 @@ También es posible modificar la configuración de qué archivos se van a copiar
 
 ## Eliminar registros de eventos de Windows
 
-- Windows + R --> eventvwr.msc --> Expandir "Registros de Windows" --> Haga clic derecho en cada categoría y seleccione "Borrar registro"
+- Windows + R --> eventvwr.msc --> Expandir "Registros de Windows" --> Hacer clic derecho en cada categoría y seleccionar "Borrar registro"
 - `for /F "tokens=*" %1 in ('wevtutil.exe el') DO wevtutil.exe cl "%1"`
 - `Get-EventLog -LogName * | ForEach { Clear-EventLog $_.Log }`
 
 ## Deshabilitar registros de eventos de Windows
 
 - `reg add 'HKLM\SYSTEM\CurrentControlSet\Services\eventlog' /v Start /t REG_DWORD /d 4 /f`
-- Dentro de la sección de servicios, deshabilite el servicio "Registro de Eventos de Windows"
+- Dentro de la sección de servicios, deshabilitar el servicio "Registro de Eventos de Windows"
 - `WEvtUtil.exec clear-log` o `WEvtUtil.exe cl`
 
 ## Deshabilitar $UsnJrnl

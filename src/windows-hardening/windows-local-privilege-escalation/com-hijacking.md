@@ -4,13 +4,13 @@
 
 ### Búsqueda de componentes COM inexistentes
 
-Dado que los valores de HKCU pueden ser modificados por los usuarios, **COM Hijacking** podría ser utilizado como un **mecanismo persistente**. Usando `procmon` es fácil encontrar registros COM buscados que no existen y que un atacante podría crear para persistir. Filtros:
+Dado que los valores de HKCU pueden ser modificados por los usuarios, **COM Hijacking** podría ser utilizado como un **mecanismo persistente**. Usando `procmon`, es fácil encontrar registros COM buscados que no existen y que un atacante podría crear para persistir. Filtros:
 
 - Operaciones de **RegOpenKey**.
 - donde el _Resultado_ es **NOMBRE NO ENCONTRADO**.
 - y el _Path_ termina con **InprocServer32**.
 
-Una vez que hayas decidido qué COM inexistente impersonar, ejecuta los siguientes comandos. _Ten cuidado si decides impersonar un COM que se carga cada pocos segundos, ya que eso podría ser excesivo._
+Una vez que hayas decidido qué COM inexistente suplantar, ejecuta los siguientes comandos. _Ten cuidado si decides suplantar un COM que se carga cada pocos segundos, ya que eso podría ser excesivo._
 ```bash
 New-Item -Path "HKCU:Software\Classes\CLSID" -Name "{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}"
 New-Item -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}" -Name "InprocServer32" -Value "C:\beacon.dll"
@@ -51,7 +51,7 @@ Write-Host
 
 Al revisar la salida, puedes seleccionar una que se va a ejecutar **cada vez que un usuario inicie sesión**, por ejemplo.
 
-Ahora, al buscar el CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}** en **HKEY\_**_**CLASSES\_**_**ROOT\CLSID** y en HKLM y HKCU, generalmente encontrarás que el valor no existe en HKCU.
+Ahora, buscando el CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}** en **HKEY\CLASSES\ROOT\CLSID** y en HKLM y HKCU, generalmente encontrarás que el valor no existe en HKCU.
 ```bash
 # Exists in HKCR\CLSID\
 Get-ChildItem -Path "Registry::HKCR\CLSID\{1936ED8A-BD93-3213-E325-F38D112938EF}"

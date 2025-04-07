@@ -192,7 +192,7 @@ krodfdudfrod
 
 **Multitap** [replaces a letter](https://www.dcode.fr/word-letter-change) por dígitos repetidos definidos por el código de la tecla correspondiente en un [teclado de teléfono móvil](https://www.dcode.fr/phone-keypad-cipher) (Este modo se utiliza al escribir SMS).\
 Por ejemplo: 2=A, 22=B, 222=C, 3=D...\
-Puedes identificar este código porque verás\*\* varios números repetidos\*\*.
+Puedes identificar este código porque verás **varios números repetidos**.
 
 Puedes decodificar este código en: [https://www.dcode.fr/multitap-abc-cipher](https://www.dcode.fr/multitap-abc-cipher)
 

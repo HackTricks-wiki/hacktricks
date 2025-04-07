@@ -20,12 +20,12 @@ También podrías **abusar de un mount para escalar privilegios** dentro del con
 - `--userns=host`
 - `--uts=host`
 - `--cgroupns=host`
-- \*\*`--device=/dev/sda1 --cap-add=SYS_ADMIN --security-opt apparmor=unconfined` \*\* -> Esto es similar al método anterior, pero aquí estamos **montando el disco del dispositivo**. Luego, dentro del contenedor ejecuta `mount /dev/sda1 /mnt` y puedes **acceder** al **sistema de archivos del host** en `/mnt`
+- **`--device=/dev/sda1 --cap-add=SYS_ADMIN --security-opt apparmor=unconfined`** -> Esto es similar al método anterior, pero aquí estamos **montando el disco del dispositivo**. Luego, dentro del contenedor ejecuta `mount /dev/sda1 /mnt` y puedes **acceder** al **sistema de archivos del host** en `/mnt`
 - Ejecuta `fdisk -l` en el host para encontrar el dispositivo `</dev/sda1>` para montar
 - **`-v /tmp:/host`** -> Si por alguna razón solo puedes **montar algún directorio** del host y tienes acceso dentro del host. Móntalo y crea un **`/bin/bash`** con **suid** en el directorio montado para que puedas **ejecutarlo desde el host y escalar a root**.
 
 > [!NOTE]
-> Ten en cuenta que tal vez no puedas montar la carpeta `/tmp` pero puedes montar una **carpeta escribible diferente**. Puedes encontrar directorios escribibles usando: `find / -writable -type d 2>/dev/null`
+> Ten en cuenta que tal vez no puedas montar la carpeta `/tmp`, pero puedes montar una **carpeta diferente escribible**. Puedes encontrar directorios escribibles usando: `find / -writable -type d 2>/dev/null`
 >
 > **¡Ten en cuenta que no todos los directorios en una máquina linux soportarán el bit suid!** Para verificar qué directorios soportan el bit suid ejecuta `mount | grep -v "nosuid"` Por ejemplo, generalmente `/dev/shm`, `/run`, `/proc`, `/sys/fs/cgroup` y `/var/lib/lxcfs` no soportan el bit suid.
 >

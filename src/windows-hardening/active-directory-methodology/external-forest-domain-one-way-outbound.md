@@ -7,7 +7,7 @@ En este escenario, **tu dominio** está **confiando** algunos **privilegios** a 
 ## Enumeración
 
 ### Confianza Saliente
-```powershell
+```bash
 # Notice Outbound trust
 Get-DomainTrust
 SourceName      : root.local
@@ -28,17 +28,17 @@ MemberName              : S-1-5-21-1028541967-2937615241-1935644758-1115
 MemberDistinguishedName : CN=S-1-5-21-1028541967-2937615241-1935644758-1115,CN=ForeignSecurityPrincipals,DC=DOMAIN,DC=LOCAL
 ## Note how the members aren't from the current domain (ConvertFrom-SID won't work)
 ```
-## Ataque a Cuentas de Confianza
+## Ataque a la Cuenta de Confianza
 
 Una vulnerabilidad de seguridad existe cuando se establece una relación de confianza entre dos dominios, identificados aquí como dominio **A** y dominio **B**, donde el dominio **B** extiende su confianza al dominio **A**. En esta configuración, se crea una cuenta especial en el dominio **A** para el dominio **B**, que juega un papel crucial en el proceso de autenticación entre los dos dominios. Esta cuenta, asociada con el dominio **B**, se utiliza para cifrar tickets para acceder a servicios a través de los dominios.
 
 El aspecto crítico a entender aquí es que la contraseña y el hash de esta cuenta especial pueden ser extraídos de un Controlador de Dominio en el dominio **A** utilizando una herramienta de línea de comandos. El comando para realizar esta acción es:
-```powershell
+```bash
 Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.my.domain.local
 ```
-Esta extracción es posible porque la cuenta, identificada con un **$** después de su nombre, está activa y pertenece al grupo "Domain Users" del dominio **A**, heredando así los permisos asociados con este grupo. Esto permite a los individuos autenticarse contra el dominio **A** utilizando las credenciales de esta cuenta.
+Esta extracción es posible porque la cuenta, identificada con un **$** después de su nombre, está activa y pertenece al grupo "Domain Users" del dominio **A**, heredando así los permisos asociados con este grupo. Esto permite a las personas autenticarse en el dominio **A** utilizando las credenciales de esta cuenta.
 
-**Advertencia:** Es factible aprovechar esta situación para obtener un acceso en el dominio **A** como usuario, aunque con permisos limitados. Sin embargo, este acceso es suficiente para realizar enumeraciones en el dominio **A**.
+**Advertencia:** Es factible aprovechar esta situación para obtener un acceso inicial en el dominio **A** como usuario, aunque con permisos limitados. Sin embargo, este acceso es suficiente para realizar enumeraciones en el dominio **A**.
 
 En un escenario donde `ext.local` es el dominio de confianza y `root.local` es el dominio confiado, se crearía una cuenta de usuario llamada `EXT$` dentro de `root.local`. A través de herramientas específicas, es posible volcar las claves de confianza de Kerberos, revelando las credenciales de `EXT$` en `root.local`. El comando para lograr esto es:
 ```bash

@@ -1,4 +1,4 @@
-# PsExec/Winexec/ScExec
+# PsExec/Winexec/ScExec/SMBExec
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -16,6 +16,7 @@ El proceso se describe en los pasos a continuación, ilustrando cómo se manipul
 Suponiendo que hay una carga útil ejecutable (creada con msfvenom y ofuscada usando Veil para evadir la detección de antivirus), llamada 'met8888.exe', que representa una carga útil de meterpreter reverse_http, se llevan a cabo los siguientes pasos:
 
 - **Copiando el binario**: El ejecutable se copia al recurso compartido ADMIN$ desde un símbolo del sistema, aunque puede colocarse en cualquier parte del sistema de archivos para permanecer oculto.
+- En lugar de copiar el binario, también es posible usar un binario LOLBAS como `powershell.exe` o `cmd.exe` para ejecutar comandos directamente desde los argumentos. Ej. `sc create [ServiceName] binPath= "cmd.exe /c [PayloadCommand]"`
 - **Creando un servicio**: Utilizando el comando `sc` de Windows, que permite consultar, crear y eliminar servicios de Windows de forma remota, se crea un servicio llamado "meterpreter" que apunta al binario subido.
 - **Iniciando el servicio**: El paso final implica iniciar el servicio, lo que probablemente resultará en un error de "tiempo de espera" debido a que el binario no es un binario de servicio genuino y no devuelve el código de respuesta esperado. Este error es irrelevante ya que el objetivo principal es la ejecución del binario.
 
@@ -25,12 +26,23 @@ La observación del listener de Metasploit revelará que la sesión se ha inicia
 
 Encuentra pasos más detallados en: [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
 
-**También podrías usar el binario PsExec.exe de Windows Sysinternals:**
+- También podrías usar el **binario PsExec.exe de Windows Sysinternals**:
 
 ![](<../../images/image (928).png>)
 
-También podrías usar [**SharpLateral**](https://github.com/mertdas/SharpLateral):
+O acceder a él a través de webddav:
+```bash
+\\live.sysinternals.com\tools\PsExec64.exe -accepteula
+```
+- También podrías usar [**SharpLateral**](https://github.com/mertdas/SharpLateral):
 ```bash
 SharpLateral.exe redexec HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe.exe malware.exe ServiceName
 ```
+- También podrías usar [**SharpMove**](https://github.com/0xthirteen/SharpMove):
+```bash
+SharpMove.exe action=modsvc computername=remote.host.local command="C:\windows\temp\payload.exe" amsi=true servicename=TestService
+SharpMove.exe action=startservice computername=remote.host.local servicename=TestService
+```
+- También podrías usar **Impacket's `psexec` y `smbexec.py`**.
+
 {{#include ../../banners/hacktricks-training.md}}

