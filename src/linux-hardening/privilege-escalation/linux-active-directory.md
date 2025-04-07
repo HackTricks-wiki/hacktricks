@@ -2,9 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Mashine ya linux inaweza pia kuwa ndani ya mazingira ya Active Directory.
+Mashine ya linux inaweza pia kuwepo ndani ya mazingira ya Active Directory.
 
-Mashine ya linux katika AD inaweza kuwa **ikiweka tiketi tofauti za CCACHE ndani ya faili. Tiketi hizi zinaweza kutumika na kutumiwa vibaya kama tiketi nyingine yoyote ya kerberos**. Ili kusoma tiketi hizi utahitaji kuwa mmiliki wa tiketi au **root** ndani ya mashine.
+Mashine ya linux katika AD inaweza kuwa **ikiweka tiketi tofauti za CCACHE ndani ya faili. Tiketi hizi zinaweza kutumika na kutumiwa vibaya kama tiketi nyingine za kerberos**. Ili kusoma tiketi hizi utahitaji kuwa mmiliki wa tiketi au **root** ndani ya mashine.
 
 ## Enumeration
 
@@ -20,7 +20,7 @@ Unaweza pia kuangalia ukurasa ufuatao kujifunza **njia nyingine za kuhesabu AD k
 
 ### FreeIPA
 
-FreeIPA ni **mbadala** wa chanzo wazi kwa Microsoft Windows **Active Directory**, hasa kwa mazingira ya **Unix**. Inachanganya **LDAP directory** kamili na Kituo cha Usambazaji wa Funguo za MIT **Kerberos** kwa usimamizi unaofanana na Active Directory. Kutumia Mfumo wa **Cheti** wa Dogtag kwa usimamizi wa cheti za CA & RA, inasaidia **uthibitishaji wa hatua nyingi**, ikiwa ni pamoja na kadi za smart. SSSD imeunganishwa kwa michakato ya uthibitishaji wa Unix. Jifunze zaidi kuhusu hilo katika:
+FreeIPA ni **mbadala** wa chanzo wazi kwa Microsoft Windows **Active Directory**, hasa kwa mazingira ya **Unix**. Inachanganya **LDAP directory** kamili na Kituo cha Usambazaji wa Funguo za MIT **Kerberos** kwa usimamizi unaofanana na Active Directory. Inatumia Mfumo wa **Cheti** wa Dogtag kwa usimamizi wa cheti za CA & RA, inasaidia **uthibitishaji wa hatua nyingi**, ikiwa ni pamoja na kadi za smart. SSSD imeunganishwa kwa michakato ya uthibitishaji wa Unix. Jifunze zaidi kuhusu hilo katika:
 
 {{#ref}}
 ../freeipa-pentesting.md
@@ -49,9 +49,9 @@ krb5cc_1000
 # Prepare to use it
 export KRB5CCNAME=/tmp/krb5cc_1000
 ```
-### CCACHE tiketi matumizi kutoka kwenye keyring
+### CCACHE ticket reuse from keyring
 
-**Tiketi za Kerberos zilizohifadhiwa katika kumbukumbu ya mchakato zinaweza kutolewa**, hasa wakati ulinzi wa ptrace wa mashine umezimwa (`/proc/sys/kernel/yama/ptrace_scope`). Chombo chenye manufaa kwa kusudi hili kinapatikana kwenye [https://github.com/TarlogicSecurity/tickey](https://github.com/TarlogicSecurity/tickey), ambacho kinasaidia kutoa tiketi kwa kuingiza kwenye vikao na kutupa tiketi kwenye `/tmp`.
+**Tiketi za Kerberos zilizohifadhiwa katika kumbukumbu ya mchakato zinaweza kutolewa**, hasa wakati ulinzi wa ptrace wa mashine umezimwa (`/proc/sys/kernel/yama/ptrace_scope`). Chombo chenye manufaa kwa kusudi hili kinapatikana kwenye [https://github.com/TarlogicSecurity/tickey](https://github.com/TarlogicSecurity/tickey), ambacho kinasaidia kutoa tiketi kwa kuingiza katika vikao na kutupa tiketi kwenye `/tmp`.
 
 Ili kuunda na kutumia chombo hiki, hatua zilizo hapa chini zinafuatwa:
 ```bash
@@ -66,24 +66,24 @@ Hii taratibu itajaribu kuingiza katika vikao mbalimbali, ikionyesha mafanikio kw
 
 SSSD inashikilia nakala ya hifadhidata katika njia `/var/lib/sss/secrets/secrets.ldb`. Funguo inayohusiana inahifadhiwa kama faili iliyofichwa katika njia `/var/lib/sss/secrets/.secrets.mkey`. Kwa kawaida, funguo hiyo inaweza kusomwa tu ikiwa una ruhusa za **root**.
 
-Kuita \*\*`SSSDKCMExtractor` \*\* na vigezo --database na --key vitachambua hifadhidata na **kufichua siri**.
+Kuita **`SSSDKCMExtractor`** na vigezo --database na --key vitachambua hifadhidata na **kufichua siri**.
 ```bash
 git clone https://github.com/fireeye/SSSDKCMExtractor
 python3 SSSDKCMExtractor.py --database secrets.ldb --key secrets.mkey
 ```
-**Kikasha cha akiba ya sifa za Kerberos kinaweza kubadilishwa kuwa faili ya Kerberos CCache inayoweza kutumika** ambayo inaweza kupitishwa kwa Mimikatz/Rubeus.
+**Kikundi cha akiba ya sifa za Kerberos kinaweza kubadilishwa kuwa faili ya Kerberos CCache inayoweza kutumika** ambayo inaweza kupitishwa kwa Mimikatz/Rubeus.
 
-### Urejeleaji wa tiketi za CCACHE kutoka kwa keytab
+### Urejeleaji wa tiketi ya CCACHE kutoka kwa keytab
 ```bash
 git clone https://github.com/its-a-feature/KeytabParser
 python KeytabParser.py /etc/krb5.keytab
 klist -k /etc/krb5.keytab
 ```
-### Toa akaunti kutoka /etc/krb5.keytab
+### Extract accounts from /etc/krb5.keytab
 
-Funguo za akaunti za huduma, muhimu kwa huduma zinazofanya kazi na ruhusa za mzizi, zimehifadhiwa kwa usalama katika faili za **`/etc/krb5.keytab`**. Funguo hizi, kama nywila za huduma, zinahitaji faragha kali.
+Hifadhi za akaunti za huduma, muhimu kwa huduma zinazofanya kazi na ruhusa za mzizi, zimehifadhiwa kwa usalama katika faili za **`/etc/krb5.keytab`**. Hifadhi hizi, kama nywila za huduma, zinahitaji faragha kali.
 
-Ili kukagua maudhui ya faili ya keytab, **`klist`** inaweza kutumika. Chombo hiki kimeundwa kuonyesha maelezo ya funguo, ikiwa ni pamoja na **NT Hash** kwa ajili ya uthibitishaji wa mtumiaji, hasa wakati aina ya funguo inatambulika kama 23.
+Ili kukagua maudhui ya faili la keytab, **`klist`** inaweza kutumika. Zana hii imeundwa kuonyesha maelezo ya hifadhi, ikiwa ni pamoja na **NT Hash** kwa uthibitishaji wa mtumiaji, hasa wakati aina ya hifadhi inatambulika kama 23.
 ```bash
 klist.exe -t -K -e -k FILE:C:/Path/to/your/krb5.keytab
 # Output includes service principal details and the NT Hash

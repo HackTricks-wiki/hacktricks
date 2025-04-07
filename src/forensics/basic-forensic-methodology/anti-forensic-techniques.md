@@ -3,7 +3,7 @@
 # Timestamps
 
 Mshambuliaji anaweza kuwa na hamu ya **kubadilisha timestamps za faili** ili kuepuka kugunduliwa.\
-Inawezekana kupata timestamps ndani ya MFT katika sifa `$STANDARD_INFORMATION` ** na ** `$FILE_NAME`.
+Inawezekana kupata timestamps ndani ya MFT katika sifa `$STANDARD_INFORMATION`**na**`$FILE_NAME`.
 
 Sifa zote zina timestamps 4: **Modification**, **access**, **creation**, na **MFT registry modification** (MACE au MACB).
 
@@ -11,7 +11,7 @@ Sifa zote zina timestamps 4: **Modification**, **access**, **creation**, na **MF
 
 ## TimeStomp - Anti-forensic Tool
 
-Zana hii **inasanifu** taarifa za timestamp ndani ya **`$STANDARD_INFORMATION`** **lakini** **sio** taarifa ndani ya **`$FILE_NAME`**. Hivyo, inawezekana **kutambua** **shughuli** **za kutatanisha**.
+Zana hii **inabadilisha** taarifa za timestamp ndani ya **`$STANDARD_INFORMATION`** **lakini** **sio** taarifa ndani ya **`$FILE_NAME`**. Hivyo, inawezekana **kutambua** **shughuli** **za kutatanisha**.
 
 ## Usnjrnl
 
@@ -23,13 +23,13 @@ Picha ya awali ni **matokeo** yanayoonyeshwa na **zana** ambapo inaonekana kuwa 
 
 ## $LogFile
 
-**Mabadiliko yote ya metadata kwa mfumo wa faili yanarekodiwa** katika mchakato unaojulikana kama [write-ahead logging](https://en.wikipedia.org/wiki/Write-ahead_logging). Metadata iliyorekodiwa inahifadhiwa katika faili inayoitwa `**$LogFile**`, iliyoko katika saraka kuu ya mfumo wa faili wa NTFS. Zana kama [LogFileParser](https://github.com/jschicht/LogFileParser) zinaweza kutumika kuchambua faili hii na kutambua mabadiliko.
+**Mabadiliko yote ya metadata kwa mfumo wa faili yanarekodiwa** katika mchakato unaojulikana kama [write-ahead logging](https://en.wikipedia.org/wiki/Write-ahead_logging). Metadata iliyorekodiwa inahifadhiwa katika faili inayoitwa `**$LogFile**`, iliyoko katika saraka ya mzizi ya mfumo wa faili wa NTFS. Zana kama [LogFileParser](https://github.com/jschicht/LogFileParser) zinaweza kutumika kuchambua faili hii na kutambua mabadiliko.
 
 ![](<../../images/image (450).png>)
 
 Tena, katika matokeo ya zana inawezekana kuona kuwa **baadhi ya mabadiliko yalifanywa**.
 
-Kwa kutumia zana hiyo hiyo inawezekana kutambua **ni wakati gani timestamps zilipobadilishwa**:
+Kwa kutumia zana hiyo hiyo inawezekana kutambua **wakati timestamps zilipobadilishwa**:
 
 ![](<../../images/image (451).png>)
 
@@ -40,7 +40,7 @@ Kwa kutumia zana hiyo hiyo inawezekana kutambua **ni wakati gani timestamps zili
 
 ## `$STANDARD_INFORMATION` na `$FILE_NAME` kulinganisha
 
-Njia nyingine ya kutambua faili zilizobadilishwa kwa njia ya kutatanisha ni kulinganisha wakati kwenye sifa zote mbili kutafuta **mismatch**.
+Njia nyingine ya kutambua faili zilizobadilishwa kwa njia ya kutatanisha ingekuwa kulinganisha wakati kwenye sifa zote mbili kutafuta **mismatch**.
 
 ## Nanoseconds
 
@@ -52,22 +52,22 @@ Zana hii inaweza kubadilisha sifa zote mbili `$STARNDAR_INFORMATION` na `$FILE_N
 
 # Data Hiding
 
-NFTS inatumia klasta na ukubwa wa taarifa wa chini. Hii inamaanisha kwamba ikiwa faili inachukua klasta na nusu, **nusu iliyobaki haitatumika kamwe** hadi faili itakapofutwa. Hivyo, inawezekana **kuficha data katika nafasi hii ya slack**.
+NFTS inatumia klasta na ukubwa wa chini wa taarifa. Hii inamaanisha kwamba ikiwa faili inachukua klasta na nusu, **nusu iliyobaki haitatumika kamwe** hadi faili itakapofutwa. Hivyo, inawezekana **kuficha data katika nafasi hii ya slack**.
 
 Kuna zana kama slacker zinazoruhusu kuficha data katika nafasi hii "iliyojificha". Hata hivyo, uchambuzi wa `$logfile` na `$usnjrnl` unaweza kuonyesha kuwa baadhi ya data iliongezwa:
 
 ![](<../../images/image (452).png>)
 
-Hivyo, inawezekana kurejesha nafasi ya slack kwa kutumia zana kama FTK Imager. Kumbuka kuwa aina hii ya zana inaweza kuhifadhi maudhui yaliyofichwa au hata yaliyosimbwa.
+Hivyo, inawezekana kurejesha nafasi ya slack kwa kutumia zana kama FTK Imager. Kumbuka kwamba aina hii ya zana inaweza kuhifadhi maudhui yaliyofichwa au hata yaliyosimbwa.
 
 # UsbKill
 
-Hii ni zana ambayo it **izima kompyuta ikiwa mabadiliko yoyote katika USB** bandari yanagundulika.\
-Njia moja ya kugundua hii ni kukagua michakato inayoendesha na **kurejea kila script ya python inayotembea**.
+Hii ni zana ambayo it **izima kompyuta ikiwa mabadiliko yoyote katika USB** ports yanagundulika.\
+Njia moja ya kugundua hii ingekuwa kukagua michakato inayotembea na **kurejea kila script ya python inayotembea**.
 
 # Live Linux Distributions
 
-Hizi distros zina **tekelezwa ndani ya RAM** kumbukumbu. Njia pekee ya kuzitambua ni **ikiwa mfumo wa faili wa NTFS umewekwa na ruhusa za kuandika**. Ikiwa umewekwa tu na ruhusa za kusoma haitakuwa rahisi kugundua uvamizi.
+Hizi distros zina **tekelezwa ndani ya kumbukumbu ya RAM**. Njia pekee ya kuzitambua ni **ikiwa mfumo wa faili wa NTFS umewekwa na ruhusa za kuandika**. Ikiwa umewekwa tu na ruhusa za kusoma haitakuwa rahisi kugundua uvamizi.
 
 # Secure Deletion
 
@@ -79,12 +79,12 @@ Inawezekana kuzima mbinu kadhaa za kurekodi za windows ili kufanya uchunguzi wa 
 
 ## Disable Timestamps - UserAssist
 
-Hii ni funguo ya rejista inayohifadhi tarehe na saa wakati kila executable ilipokimbizwa na mtumiaji.
+Hii ni funguo ya rejista inayoshikilia tarehe na saa wakati kila executable ilipokimbizwa na mtumiaji.
 
 Kuzima UserAssist kunahitaji hatua mbili:
 
 1. Weka funguo mbili za rejista, `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackProgs` na `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackEnabled`, zote kuwa sifuri ili kuashiria kwamba tunataka UserAssist izimwe.
-2. Futa subtrees zako za rejista zinazofanana na `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\<hash>`.
+2. Futa subtrees zako za rejista ambazo zinaonekana kama `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\<hash>`.
 
 ## Disable Timestamps - Prefetch
 
@@ -93,22 +93,22 @@ Hii itahifadhi taarifa kuhusu programu zilizotekelezwa kwa lengo la kuboresha ut
 - Tekeleza `regedit`
 - Chagua njia ya faili `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SessionManager\Memory Management\PrefetchParameters`
 - Bonyeza kulia kwenye `EnablePrefetcher` na `EnableSuperfetch`
-- Chagua Badilisha kwenye kila moja ya hizi kubadilisha thamani kutoka 1 (au 3) hadi 0
+- Chagua Badilisha kwenye kila moja ya hizi kubadilisha thamani kutoka 1 (au 3) kuwa 0
 - Anzisha upya
 
 ## Disable Timestamps - Last Access Time
 
-Wakati wowote folda inafunguliwa kutoka kiasi cha NTFS kwenye seva ya Windows NT, mfumo unachukua wakati wa **kupdate timestamp field kwenye kila folda iliyoorodheshwa**, inayoitwa wakati wa mwisho wa ufikiaji. Katika kiasi cha NTFS kinachotumiwa sana, hii inaweza kuathiri utendaji.
+Kila wakati folda inafunguliwa kutoka kiasi cha NTFS kwenye seva ya Windows NT, mfumo unachukua wakati wa **k更新 timestamp field kwenye kila folda iliyoorodheshwa**, inayoitwa wakati wa mwisho wa ufikiaji. Katika kiasi cha NTFS kinachotumiwa sana, hii inaweza kuathiri utendaji.
 
 1. Fungua Mhariri wa Rejista (Regedit.exe).
 2. Tembelea `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem`.
-3. Tafuta `NtfsDisableLastAccessUpdate`. Ikiwa haipo, ongeza hii DWORD na weka thamani yake kuwa 1, ambayo itazima mchakato.
-4. Funga Mhariri wa Rejista, na uanzishe upya seva.
+3. Tafuta `NtfsDisableLastAccessUpdate`. Ikiwa haipo, ongeza DWORD hii na weka thamani yake kuwa 1, ambayo itazima mchakato.
+4. Funga Mhariri wa Rejista, na anzisha upya seva.
 
 ## Delete USB History
 
-Makala yote ya **USB Device Entries** huhifadhiwa katika Rejista ya Windows Chini ya funguo ya **USBSTOR** ambayo ina funguo ndogo zinazoundwa kila wakati unapoingiza Kifaa cha USB kwenye PC au Laptop yako. Unaweza kupata funguo hii hapa `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Kufuta hii** utafuta historia ya USB.\
-Unaweza pia kutumia zana [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html) kuhakikisha umekifuta (na kukifuta).
+Makala yote ya **USB Device Entries** yanahifadhiwa katika Rejista ya Windows Chini ya funguo ya **USBSTOR** ambayo ina funguo ndogo zinazoundwa kila wakati unapoingiza Kifaa cha USB kwenye PC au Laptop yako. Unaweza kupata funguo hii hapa `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Kufuta hii** utafuta historia ya USB.\
+Unaweza pia kutumia zana [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html) ili kuwa na uhakika umekifuta (na kufuta).
 
 Faili nyingine inayohifadhi taarifa kuhusu USB ni faili `setupapi.dev.log` ndani ya `C:\Windows\INF`. Hii pia inapaswa kufutwa.
 
@@ -117,13 +117,13 @@ Faili nyingine inayohifadhi taarifa kuhusu USB ni faili `setupapi.dev.log` ndani
 **Orodha** ya nakala za kivuli kwa kutumia `vssadmin list shadowstorage`\
 **Futa** kwa kuendesha `vssadmin delete shadow`
 
-Unaweza pia kuzifuta kupitia GUI ukifuatilia hatua zilizopendekezwa katika [https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html)
+Unaweza pia kuzifuta kupitia GUI kwa kufuata hatua zilizopendekezwa katika [https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html)
 
 Ili kuzima nakala za kivuli [hatua kutoka hapa](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows):
 
 1. Fungua programu za Huduma kwa kuandika "services" kwenye kisanduku cha kutafuta maandiko baada ya kubonyeza kitufe cha kuanzisha cha Windows.
 2. Kutoka kwenye orodha, pata "Volume Shadow Copy", chagua, kisha upate Mali kwa kubonyeza kulia.
-3. Chagua Zime kutoka kwenye orodha ya "Aina ya Kuanzisha", kisha thibitisha mabadiliko kwa kubonyeza Apply na OK.
+3. Chagua Zimezima kutoka kwenye orodha ya "Aina ya Kuanzisha", kisha thibitisha mabadiliko kwa kubonyeza Tumia na Sawa.
 
 Pia inawezekana kubadilisha usanidi wa faili zipi zitakazokopwa katika nakala ya kivuli katika rejista `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`
 

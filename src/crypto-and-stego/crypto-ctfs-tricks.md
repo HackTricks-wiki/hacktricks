@@ -184,15 +184,15 @@ Herufi kwa thamani yao ya nambari
 ```
 ### Affine Cipher Encode
 
-Herufi kwa nambari `(ax+b)%26` (_a_ na _b_ ni funguo na _x_ ni herufi) na matokeo kurudi kwa herufi
+Herufi hadi nambari `(ax+b)%26` (_a_ na _b_ ni funguo na _x_ ni herufi) na matokeo kurudi kwa herufi
 ```
 krodfdudfrod
 ```
 ### SMS Code
 
-**Multitap** [inabadilisha herufi](https://www.dcode.fr/word-letter-change) kwa nambari zinazojirudia zilizofafanuliwa na nambari husika kwenye [keypad ya simu](https://www.dcode.fr/phone-keypad-cipher) (Hali hii inatumika wakati wa kuandika SMS).\
+**Multitap** [inabadilisha herufi](https://www.dcode.fr/word-letter-change) kwa nambari zinazojirudia zilizofafanuliwa na msimbo wa funguo unaolingana kwenye [keypad ya simu](https://www.dcode.fr/phone-keypad-cipher) (Hali hii inatumika wakati wa kuandika SMS).\
 Kwa mfano: 2=A, 22=B, 222=C, 3=D...\
-Unaweza kutambua msimbo huu kwa sababu utaona\*\* nambari kadhaa zinazojirudia\*\*.
+Unaweza kutambua msimbo huu kwa sababu utaona **nambari kadhaa zinazojirudia**.
 
 Unaweza kufungua msimbo huu katika: [https://www.dcode.fr/multitap-abc-cipher](https://www.dcode.fr/multitap-abc-cipher)
 
@@ -225,7 +225,7 @@ fgaargaamnlunesuneoa
 ```
 ### Vigenere
 
-Inahitajika neno muhimu
+Inahitajika neno la ufunguo
 ```
 wodsyoidrods
 ```
@@ -237,7 +237,7 @@ wodsyoidrods
 
 ### Fernet
 
-2 base64 strings (token na ufunguo)
+2 mfuatano wa base64 (token na ufunguo)
 ```
 Token:
 gAAAAABWC9P7-9RsxTz_dwxh9-O2VUB7Ih8UCQL1_Zk4suxnkCvb26Ie4i8HSUJ4caHZuiNtjLl3qfmCv_fS3_VpjL7HxCz7_Q==

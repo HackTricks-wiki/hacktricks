@@ -7,14 +7,14 @@
 
 Tatizo la "Double Hop" la Kerberos linaonekana wakati mshambuliaji anajaribu kutumia **uthibitishaji wa Kerberos kati ya hops mbili**, kwa mfano kutumia **PowerShell**/**WinRM**.
 
-Wakati **uthibitishaji** unapotokea kupitia **Kerberos**, **akili** **hazihifadhiwi** katika **kumbukumbu.** Hivyo, ikiwa unakimbia mimikatz hu **wezi kupata akili** za mtumiaji katika mashine hata kama anafanya michakato.
+Wakati **uthibitishaji** unapotokea kupitia **Kerberos**, **akili** **hazihifadhiwi** katika **kumbukumbu.** Hivyo, ikiwa unakimbia mimikatz hu **wezi kupata akili** za mtumiaji kwenye mashine hata kama anafanya michakato.
 
 Hii ni kwa sababu wakati wa kuungana na Kerberos hatua hizi zinafuatwa:
 
 1. User1 anatoa akili na **meneja wa eneo** anarudisha **TGT** ya Kerberos kwa User1.
 2. User1 anatumia **TGT** kuomba **tiketi ya huduma** ili **kuungana** na Server1.
 3. User1 **anajiunga** na **Server1** na anatoa **tiketi ya huduma**.
-4. **Server1** **hainayo** **akili** za User1 zilizohifadhiwa au **TGT** ya User1. Hivyo, wakati User1 kutoka Server1 anajaribu kuingia kwenye seva ya pili, hawezi **kujiuthibitisha**.
+4. **Server1** **hainayo** **akili** za User1 zilizohifadhiwa au **TGT** ya User1. Hivyo, wakati User1 kutoka Server1 anajaribu kuingia kwenye seva ya pili, hawezi **kujiandikisha**.
 
 ### Unconstrained Delegation
 
@@ -25,10 +25,10 @@ Ikiwa **unconstrained delegation** imewezeshwa kwenye PC, hii haitatokea kwani *
 
 Njia nyingine ya kuepuka tatizo hili ambayo ni [**isiyo salama sana**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7) ni **Mtoa Huduma wa Usalama wa Akili**. Kutoka Microsoft:
 
-> Uthibitishaji wa CredSSP unapeleka akili za mtumiaji kutoka kwenye kompyuta ya ndani hadi kwenye kompyuta ya mbali. Praktiki hii inaongeza hatari ya usalama wa operesheni ya mbali. Ikiwa kompyuta ya mbali imevunjwa, wakati akili zinapopelekwa kwake, akili zinaweza kutumika kudhibiti kikao cha mtandao.
+> Uthibitishaji wa CredSSP unapeleka akili za mtumiaji kutoka kompyuta ya ndani hadi kompyuta ya mbali. Praktiki hii inaongeza hatari ya usalama wa operesheni ya mbali. Ikiwa kompyuta ya mbali imevunjwa, wakati akili zinapopelekwa kwake, akili zinaweza kutumika kudhibiti kikao cha mtandao.
 
-Inapendekezwa sana kwamba **CredSSP** izuiwe kwenye mifumo ya uzalishaji, mitandao nyeti, na mazingira kama hayo kutokana na wasiwasi wa usalama. Ili kubaini ikiwa **CredSSP** imewezeshwa, amri ya `Get-WSManCredSSP` inaweza kukimbizwa. Amri hii inaruhusu **kuangalia hali ya CredSSP** na inaweza hata kutekelezwa kwa mbali, ikiwa **WinRM** imewezeshwa.
-```powershell
+Inapendekezwa sana kwamba **CredSSP** izimwe kwenye mifumo ya uzalishaji, mitandao nyeti, na mazingira kama hayo kutokana na wasiwasi wa usalama. Ili kubaini ikiwa **CredSSP** imewezeshwa, amri ya `Get-WSManCredSSP` inaweza kukimbizwa. Amri hii inaruhusu **kuangalia hali ya CredSSP** na inaweza hata kutekelezwa kwa mbali, ikiwa **WinRM** imewezeshwa.
+```bash
 Invoke-Command -ComputerName bizintel -Credential ta\redsuit -ScriptBlock {
 Get-WSManCredSSP
 }
@@ -38,18 +38,18 @@ Get-WSManCredSSP
 ### Wito wa Amri
 
 Ili kushughulikia tatizo la double hop, njia inayohusisha `Invoke-Command` iliyo ndani inawasilishwa. Hii haisuluhishi tatizo moja kwa moja lakini inatoa njia mbadala bila kuhitaji usanidi maalum. Mbinu hii inaruhusu kutekeleza amri (`hostname`) kwenye seva ya pili kupitia amri ya PowerShell inayotekelezwa kutoka kwenye mashine ya awali ya shambulio au kupitia PS-Session iliyowekwa awali na seva ya kwanza. Hapa kuna jinsi inavyofanywa:
-```powershell
+```bash
 $cred = Get-Credential ta\redsuit
 Invoke-Command -ComputerName bizintel -Credential $cred -ScriptBlock {
 Invoke-Command -ComputerName secdev -Credential $cred -ScriptBlock {hostname}
 }
 ```
-Kwa upande mwingine, kuanzisha PS-Session na seva ya kwanza na kuendesha `Invoke-Command` kwa kutumia `$cred` kunapendekezwa kwa ajili ya kuunganisha kazi.
+Kwa upande mwingine, kuanzisha PS-Session na seva ya kwanza na kuendesha `Invoke-Command` kwa kutumia `$cred` inapendekezwa kwa ajili ya kuunganisha kazi.
 
 ### Sajili Mipangilio ya PSSession
 
 Suluhisho la kupita tatizo la double hop linahusisha kutumia `Register-PSSessionConfiguration` na `Enter-PSSession`. Njia hii inahitaji mbinu tofauti na `evil-winrm` na inaruhusu kikao ambacho hakikabiliwi na kikomo cha double hop.
-```powershell
+```bash
 Register-PSSessionConfiguration -Name doublehopsess -RunAsCredential domain_name\username
 Restart-Service WinRM
 Enter-PSSession -ConfigurationName doublehopsess -ComputerName <pc_name> -Credential domain_name\username
@@ -57,7 +57,7 @@ klist
 ```
 ### PortForwarding
 
-Kwa wasimamizi wa ndani kwenye lengo la kati, upitishaji wa bandari unaruhusu maombi kutumwa kwa seva ya mwisho. Kwa kutumia `netsh`, sheria inaweza kuongezwa kwa upitishaji wa bandari, pamoja na sheria ya moto ya Windows kuruhusu bandari iliyopitishwa.
+Kwa wasimamizi wa ndani kwenye lengo la kati, kuhamasisha bandari kunaruhusu maombi kutumwa kwa seva ya mwisho. Kwa kutumia `netsh`, sheria inaweza kuongezwa kwa kuhamasisha bandari, pamoja na sheria ya moto ya Windows kuruhusu bandari iliyohamishwa.
 ```bash
 netsh interface portproxy add v4tov4 listenport=5446 listenaddress=10.35.8.17 connectport=5985 connectaddress=10.35.8.23
 netsh advfirewall firewall add rule name=fwd dir=in action=allow protocol=TCP localport=5446
@@ -70,15 +70,15 @@ winrs -r:http://bizintel:5446 -u:ta\redsuit -p:2600leet hostname
 ```
 ### OpenSSH
 
-Kuweka OpenSSH kwenye seva ya kwanza kunaruhusu suluhisho la tatizo la double-hop, hasa katika hali za jump box. Njia hii inahitaji usakinishaji wa CLI na usanidi wa OpenSSH kwa Windows. Wakati imewekwa kwa Uthibitishaji wa Nywila, hii inaruhusu seva ya kati kupata TGT kwa niaba ya mtumiaji.
+Kuweka OpenSSH kwenye seva ya kwanza kunaruhusu suluhisho la tatizo la double-hop, hasa katika hali za jump box. Njia hii inahitaji usakinishaji wa CLI na mipangilio ya OpenSSH kwa Windows. Wakati imewekwa kwa Uthibitishaji wa Nywila, hii inaruhusu seva ya kati kupata TGT kwa niaba ya mtumiaji.
 
 #### Hatua za Usakinishaji wa OpenSSH
 
-1. Pakua na uhamishe toleo la hivi karibuni la OpenSSH zip kwenye seva lengwa.
+1. Pakua na uhamishe toleo jipya la OpenSSH zip kwenye seva lengwa.
 2. Fungua na endesha skripti ya `Install-sshd.ps1`.
 3. Ongeza sheria ya firewall kufungua bandari 22 na thibitisha huduma za SSH zinaendesha.
 
-Ili kutatua makosa ya `Connection reset`, ruhusa zinaweza kuhitajika kuboreshwa ili kuruhusu kila mtu kusoma na kutekeleza kwenye directory ya OpenSSH.
+Ili kutatua makosa ya `Connection reset`, ruhusa zinaweza kuhitaji kusasishwa ili kuruhusu kila mtu kuwa na ufikiaji wa kusoma na kutekeleza kwenye directory ya OpenSSH.
 ```bash
 icacls.exe "C:\Users\redsuit\Documents\ssh\OpenSSH-Win64" /grant Everyone:RX /T
 ```

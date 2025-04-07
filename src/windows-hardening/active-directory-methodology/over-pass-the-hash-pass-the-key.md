@@ -5,9 +5,9 @@
 
 ## Overpass The Hash/Pass The Key (PTK)
 
-Shambulio la **Overpass The Hash/Pass The Key (PTK)** limetengenezwa kwa mazingira ambapo itifaki ya NTLM ya jadi imezuiliwa, na uthibitishaji wa Kerberos unachukua kipaumbele. Shambulio hili linatumia NTLM hash au funguo za AES za mtumiaji ili kuomba tiketi za Kerberos, kuruhusu ufikiaji usioidhinishwa wa rasilimali ndani ya mtandao.
+Shambulio la **Overpass The Hash/Pass The Key (PTK)** limetengenezwa kwa mazingira ambapo itifaki ya NTLM ya jadi imezuiliwa, na uthibitishaji wa Kerberos unachukua kipaumbele. Shambulio hili linatumia hash ya NTLM au funguo za AES za mtumiaji ili kuomba tiketi za Kerberos, kuruhusu ufikiaji usioidhinishwa wa rasilimali ndani ya mtandao.
 
-Ili kutekeleza shambulio hili, hatua ya kwanza ni kupata NTLM hash au nywila ya akaunti ya mtumiaji anayelengwa. Baada ya kupata taarifa hii, Tiketi ya Kutoa Tiketi (TGT) kwa akaunti hiyo inaweza kupatikana, ikiruhusu mshambuliaji kufikia huduma au mashine ambazo mtumiaji ana ruhusa.
+Ili kutekeleza shambulio hili, hatua ya kwanza ni kupata hash ya NTLM au nywila ya akaunti ya mtumiaji aliyechaguliwa. Baada ya kupata taarifa hii, Tiketi ya Kutoa Tiketi (TGT) kwa akaunti hiyo inaweza kupatikana, ikiruhusu mshambuliaji kufikia huduma au mashine ambazo mtumiaji ana ruhusa.
 
 Mchakato unaweza kuanzishwa kwa amri zifuatazo:
 ```bash
@@ -30,9 +30,16 @@ Ili kuzingatia usalama wa operesheni na kutumia AES256, amri ifuatayo inaweza ku
 ```bash
 .\Rubeus.exe asktgt /user:<USERNAME> /domain:<DOMAIN> /aes256:HASH /nowrap /opsec
 ```
+## Toleo la siri
+
+> [!WARNING]
+> Kila kikao cha kuingia kinaweza kuwa na TGT moja tu inayofanya kazi kwa wakati mmoja, hivyo kuwa makini.
+
+1. Unda kikao kipya cha kuingia na **`make_token`** kutoka Cobalt Strike.
+2. Kisha, tumia Rubeus kuunda TGT kwa kikao kipya cha kuingia bila kuathiri kile kilichopo.
+
 ## Marejeo
 
 - [https://www.tarlogic.com/es/blog/como-atacar-kerberos/](https://www.tarlogic.com/es/blog/como-atacar-kerberos/)
-
 
 {{#include ../../banners/hacktricks-training.md}}

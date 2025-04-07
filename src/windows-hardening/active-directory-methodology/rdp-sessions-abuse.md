@@ -4,10 +4,10 @@
 
 ## RDP Process Injection
 
-Ikiwa **kikundi cha nje** kina **ufikiaji wa RDP** kwa **kompyuta** yoyote katika eneo la sasa, **mshambuliaji** anaweza **kuharibu kompyuta hiyo na kumsubiri**.
+Ikiwa **kikundi cha nje** kina **ufikiaji wa RDP** kwa **kompyuta** yoyote katika eneo la sasa, **mshambuliaji** anaweza **kudhoofisha kompyuta hiyo na kumsubiri**.
 
 Mara tu mtumiaji huyo anapofikia kupitia RDP, **mshambuliaji anaweza kuhamasisha kwenye kikao cha mtumiaji huyo** na kutumia ruhusa zake katika eneo la nje.
-```powershell
+```bash
 # Supposing the group "External Users" has RDP access in the current domain
 ## lets find where they could access
 ## The easiest way would be with bloodhound, but you could also run:
@@ -30,14 +30,14 @@ PID   PPID  Name                         Arch  Session     User
 beacon> inject 4960 x64 tcp-local
 ## From that beacon you can just run powerview modules interacting with the external domain as that user
 ```
-Angalia **njia nyingine za kuiba vikao kwa kutumia zana nyingine** [**katika ukurasa huu.**](../../network-services-pentesting/pentesting-rdp.md#session-stealing)
+Check **njia nyingine za kuiba vikao kwa kutumia zana nyingine** [**katika ukurasa huu.**](../../network-services-pentesting/pentesting-rdp.md#session-stealing)
 
 ## RDPInception
 
-Ikiwa mtumiaji anapata kupitia **RDP kwenye mashine** ambapo **mshambuliaji** anangojea, mshambuliaji ataweza **kuingiza beacon katika kikao cha RDP cha mtumiaji** na ikiwa **mhasiriwa ameunganisha diski yake** alipoingia kupitia RDP, **mshambuliaji anaweza kuipata**.
+Ikiwa mtumiaji anapata **RDP kwenye mashine** ambapo **mshambuliaji** anangojea, mshambuliaji ataweza **kuiingiza beacon katika kikao cha RDP cha mtumiaji** na ikiwa **mhasiriwa ameunganisha diski yake** alipoingia kupitia RDP, **mshambuliaji anaweza kuipata**.
 
-Katika kesi hii unaweza tu **kudhoofisha** **kompyuta** ya **mhasiriwa** kwa kuandika **backdoor** katika **folda ya kuanzisha**.
-```powershell
+Katika kesi hii unaweza tu **kuharibu** **kompyuta** ya **mhasiriwa** kwa kuandika **backdoor** katika **folda ya kuanzisha**.
+```bash
 # Wait til someone logs in:
 net logons
 Logged on users at \\localhost:

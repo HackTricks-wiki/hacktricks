@@ -10,7 +10,7 @@ Unaposhusha na kuendesha, unapata **mafunzo** ya jinsi ya kutumia chombo hicho. 
 ![](<../../images/image (762).png>)
 
 Chombo hiki ni muhimu sana kutafuta **mahali ambapo thamani fulani** (kawaida ni nambari) **imehifadhiwa katika kumbukumbu** ya programu.\
-**Kawaida nambari** huhifadhiwa katika **4bytes** form, lakini unaweza pia kuziona katika **double** au **float** formats, au unaweza kutaka kutafuta kitu **tofauti na nambari**. Kwa hiyo unahitaji kuwa na uhakika unachagua kile unachotaka **kutafuta**:
+**Kawaida nambari** huhifadhiwa katika **4bytes**, lakini unaweza pia kuziona katika **double** au **float** formats, au unaweza kutaka kutafuta kitu **tofauti na nambari**. Kwa hiyo unahitaji kuwa na uhakika unachagua kile unachotaka **kutafuta**:
 
 ![](<../../images/image (324).png>)
 
@@ -18,7 +18,7 @@ Pia unaweza kuashiria **aina tofauti** za **tafutizi**:
 
 ![](<../../images/image (311).png>)
 
-Pia unaweza kuangalia kisanduku ili **kusitisha mchezo wakati wa kuskania kumbukumbu**:
+Unaweza pia kuangalia kisanduku ili **kusitisha mchezo wakati wa kuskania kumbukumbu**:
 
 ![](<../../images/image (1052).png>)
 
@@ -30,7 +30,7 @@ Katika _**Edit --> Settings --> Hotkeys**_ unaweza kuweka **hotkeys** tofauti kw
 
 ## Kubadilisha thamani
 
-Mara tu unapokuwa **umeipata** wapi **thamani** unayo **itafuta** (zaidi kuhusu hii katika hatua zinazofuata) unaweza **kuibadilisha** kwa kubofya mara mbili, kisha kubofya mara mbili kwenye thamani yake:
+Mara tu unapokuwa **umeipata** ambapo **thamani** unayo **tafuta** (zaidi kuhusu hii katika hatua zinazofuata) unaweza **kuibadilisha** kwa kubofya mara mbili, kisha kubofya mara mbili kwenye thamani yake:
 
 ![](<../../images/image (563).png>)
 
@@ -38,11 +38,11 @@ Na hatimaye **kuweka alama** ili kupata mabadiliko yafanyike katika kumbukumbu:
 
 ![](<../../images/image (385).png>)
 
-**Mabadiliko** kwa **kumbukumbu** yatakuwa **yamewekwa** mara moja (kumbuka kwamba hadi mchezo usitumie thamani hii tena thamani **haitawekwa upya katika mchezo**).
+**Mabadiliko** kwa **kumbukumbu** yatatumika mara moja **(kumbuka kwamba hadi mchezo usitumie thamani hii tena thamani **haitawekwa upya katika mchezo**).**
 
 ## Kutafuta thamani
 
-Hivyo, tutadhani kuna thamani muhimu (kama maisha ya mtumiaji wako) unayotaka kuboresha, na unatafuta thamani hii katika kumbukumbu)
+Hivyo, tunaweza kudhani kwamba kuna thamani muhimu (kama maisha ya mtumiaji wako) ambayo unataka kuboresha, na unatafuta thamani hii katika kumbukumbu)
 
 ### Kupitia mabadiliko yanayojulikana
 
@@ -55,7 +55,7 @@ Kisha, unafanya kitu ili **thamani ibadilike**, na un **asitisha** mchezo na **u
 ![](<../../images/image (684).png>)
 
 Cheat Engine itatafuta **thamani** ambazo **zilipita kutoka 100 hadi thamani mpya**. Hongera, umepata **anwani** ya thamani uliyokuwa unatafuta, sasa unaweza kuibadilisha.\
-_Ikiwa bado una thamani kadhaa, fanya kitu kubadilisha tena thamani hiyo, na fanya "scan inayofuata" ili kuchuja anwani._
+_Ikiwa bado una thamani kadhaa, fanya kitu ili kubadilisha tena thamani hiyo, na fanya "scan inayofuata" ili kuchuja anwani._
 
 ### Thamani isiyojulikana, mabadiliko yanayojulikana
 
@@ -65,32 +65,32 @@ Hivyo, anza kwa kufanya scan ya aina "**Thamani ya mwanzo isiyojulikana**":
 
 ![](<../../images/image (890).png>)
 
-Kisha, fanya thamani ibadilike, eleza **jinsi** **thamani** **ilibadilika** (katika kesi yangu ilipungua kwa 1) na fanya **scan inayofuata**:
+Kisha, fanya thamani ibadilike, onyesha **jinsi** **thamani** **ilibadilika** (katika kesi yangu ilipungua kwa 1) na fanya **scan inayofuata**:
 
 ![](<../../images/image (371).png>)
 
-Utawasilishwa **na thamani zote ambazo zilibadilishwa kwa njia iliyochaguliwa**:
+Utawasilishwa **na thamani zote ambazo zilibadilishwa kwa njia iliyo chaguliwa**:
 
 ![](<../../images/image (569).png>)
 
 Mara tu unapokuwa umepata thamani yako, unaweza kuibadilisha.
 
-Kumbuka kwamba kuna **mabadiliko mengi yanayowezekana** na unaweza kufanya **hatua hizi kadri unavyotaka** ili kuchuja matokeo:
+Kumbuka kwamba kuna **mabadiliko mengi yanayowezekana** na unaweza kufanya hatua hizi **mara nyingi kadri unavyotaka** ili kuchuja matokeo:
 
 ![](<../../images/image (574).png>)
 
 ### Anwani ya Kumbukumbu ya Nasibu - Kutafuta msimbo
 
-Hadi sasa tumefundishwa jinsi ya kupata anwani inayohifadhi thamani, lakini kuna uwezekano mkubwa kwamba katika **utekelezaji tofauti wa mchezo anwani hiyo iko katika maeneo tofauti ya kumbukumbu**. Hivyo hebu tujifunze jinsi ya kila wakati kupata anwani hiyo.
+Hadi sasa tumefundishwa jinsi ya kupata anwani inayohifadhi thamani, lakini ni uwezekano mkubwa kwamba katika **utekelezaji tofauti wa mchezo anwani hiyo iko katika maeneo tofauti ya kumbukumbu**. Hivyo hebu tujifunze jinsi ya kila wakati kupata anwani hiyo.
 
-Tumia baadhi ya hila zilizotajwa, pata anwani ambapo mchezo wako wa sasa unahifadhi thamani muhimu. Kisha (ukisimamisha mchezo ikiwa unataka) fanya **kulia bonyeza** kwenye **anwani** iliyopatikana na uchague "**Jua ni nani anayeingia kwenye anwani hii**" au "**Jua ni nani anayeandika kwenye anwani hii**":
+Kwa kutumia baadhi ya hila zilizotajwa, pata anwani ambapo mchezo wako wa sasa unahifadhi thamani muhimu. Kisha (ukisitisha mchezo ikiwa unataka) fanya **kulia** kwenye **anwani** iliyopatikana na uchague "**Jua ni nani anayefikia anwani hii**" au "**Jua ni nani anayandika kwenye anwani hii**":
 
 ![](<../../images/image (1067).png>)
 
-**Chaguo la kwanza** ni muhimu kujua **sehemu** za **msimbo** zinazotumia **anwani hii** (ambayo ni muhimu kwa mambo mengine kama **kujua wapi unaweza kubadilisha msimbo** wa mchezo).\
+**Chaguo la kwanza** ni muhimu kujua ni **sehemu** gani za **msimbo** zinazo **tumia** **anwani hii** (ambayo ni muhimu kwa mambo mengine kama **kujua wapi unaweza kubadilisha msimbo** wa mchezo).\
 **Chaguo la pili** ni **maalum zaidi**, na litakuwa na msaada zaidi katika kesi hii kwani tunavutiwa kujua **kutoka wapi thamani hii inaandikwa**.
 
-Mara tu unapochagua moja ya chaguzi hizo, **debugger** itakuwa **imeunganishwa** na programu na dirisha jipya **bila maudhui** litajitokeza. Sasa, **cheza** **mchezo** na **badilisha** **thamani hiyo** (bila kuanzisha upya mchezo). **Dirisha** linapaswa kuwa **limejaa** na **anwani** zinazobadilisha **thamani**:
+Mara tu unapochagua moja ya chaguzi hizo, **debugger** itakuwa **imeunganishwa** na programu na dirisha jipya **bila maudhui** litajitokeza. Sasa, **cheza** **mchezo** na **badilisha** hiyo **thamani** (bila kuanzisha upya mchezo). **Dirisha** linapaswa kuwa **limejaa** na **anwani** ambazo zina **badilisha** **thamani**:
 
 ![](<../../images/image (91).png>)
 
@@ -102,7 +102,7 @@ Hivyo, sasa unaweza kuibadilisha ili msimbo usiathiri nambari yako, au uathiri k
 
 ### Anwani ya Kumbukumbu ya Nasibu - Kutafuta kiashiria
 
-Kufuata hatua zilizopita, pata wapi thamani unayovutiwa nayo iko. Kisha, kwa kutumia "**Jua ni nani anayeandika kwenye anwani hii**" pata ni anwani gani inayoandika thamani hii na ubofye mara mbili ili kupata mtazamo wa disassembly:
+Kufuata hatua zilizopita, pata mahali ambapo thamani unayovutiwa nayo iko. Kisha, kwa kutumia "**Jua ni nani anayandika kwenye anwani hii**" pata ni anwani gani inayoandika thamani hii na ubofye mara mbili ili kupata mtazamo wa disassembly:
 
 ![](<../../images/image (1039).png>)
 
@@ -110,20 +110,20 @@ Kisha, fanya scan mpya **ukitafuta thamani ya hex kati ya "\[]"** (thamani ya $e
 
 ![](<../../images/image (994).png>)
 
-(_Ikiwa kadhaa zinaonekana kawaida unahitaji ile anwani ndogo zaidi_)\
-Sasa, tumepata **kiashiria ambacho kitakuwa kinabadilisha thamani tunayotaka**.
+(_Ikiwa kadhaa zinaonekana kawaida unahitaji anwani ndogo zaidi_)\
+Sasa, tumepata **kiashiria ambacho kitakuwa kinabadilisha thamani tunayoipenda**.
 
-Bonyeza "**Ongeza Anwani kwa Mikono**":
+Bofya kwenye "**Ongeza Anwani kwa Mikono**":
 
 ![](<../../images/image (990).png>)
 
-Sasa, bonyeza kisanduku cha "Kiashiria" na ongeza anwani iliyopatikana katika kisanduku cha maandiko (katika hali hii, anwani iliyopatikana katika picha iliyopita ilikuwa "Tutorial-i386.exe"+2426B0):
+Sasa, bofya kwenye kisanduku cha "Kiashiria" na ongeza anwani iliyopatikana kwenye kisanduku cha maandiko (katika hali hii, anwani iliyopatikana katika picha ya awali ilikuwa "Tutorial-i386.exe"+2426B0):
 
 ![](<../../images/image (392).png>)
 
 (Kumbuka jinsi "Anwani" ya kwanza inajazwa kiotomatiki kutoka kwa anwani ya kiashiria unayoingiza)
 
-Bonyeza OK na kiashiria kipya kitaundwa:
+Bofya OK na kiashiria kipya kitaundwa:
 
 ![](<../../images/image (308).png>)
 
@@ -131,14 +131,14 @@ Sasa, kila wakati unabadilisha thamani hiyo unakuwa **unabadilisha thamani muhim
 
 ### Uingizaji wa Msimbo
 
-Uingizaji wa msimbo ni mbinu ambapo unatia kipande cha msimbo katika mchakato wa lengo, na kisha kuhamasisha utekelezaji wa msimbo ili kupita kupitia msimbo wako ulioandikwa (kama kukupa pointi badala ya kuziondoa).
+Uingizaji wa msimbo ni mbinu ambapo unatia kipande cha msimbo ndani ya mchakato wa lengo, na kisha kuhamasisha utekelezaji wa msimbo ili upite kupitia msimbo wako ulioandikwa (kama kukupa alama badala ya kuziondoa).
 
 Hivyo, fikiria umepata anwani inayopunguza 1 kwa maisha ya mchezaji wako:
 
 ![](<../../images/image (203).png>)
 
-Bonyeza onyesha disassembler ili kupata **msimbo wa disassemble**.\
-Kisha, bonyeza **CTRL+a** ili kuanzisha dirisha la Auto assemble na uchague _**Template --> Uingizaji wa Msimbo**_
+Bofya onyesha disassembler ili kupata **msimbo wa disassemble**.\
+Kisha, bofya **CTRL+a** ili kuanzisha dirisha la Auto assemble na uchague _**Template --> Uingizaji wa Msimbo**_
 
 ![](<../../images/image (902).png>)
 
@@ -150,11 +150,11 @@ Kigezo kitaundwa:
 
 ![](<../../images/image (944).png>)
 
-Hivyo, ingiza msimbo wako mpya wa assembly katika sehemu ya "**newmem**" na ondolea msimbo wa asili kutoka kwenye "**originalcode**" ikiwa hutaki itekelezwe\*\*.\*\* Katika mfano huu msimbo uliotiwa utaongeza pointi 2 badala ya kupunguza 1:
+Hivyo, ingiza msimbo wako mpya wa assembly katika sehemu ya "**newmem**" na ondoa msimbo wa asili kutoka kwa "**originalcode**" ikiwa hutaki utekelezwe. Katika mfano huu, msimbo uliotiwa utaongeza alama 2 badala ya kupunguza 1:
 
 ![](<../../images/image (521).png>)
 
-**Bonyeza kwenye tekeleza na kadhalika na msimbo wako unapaswa kuingizwa katika programu ukibadilisha tabia ya kazi hiyo!**
+**Bofya kwenye tekeleza na kadhalika na msimbo wako unapaswa kuingizwa katika programu ukibadilisha tabia ya kazi hiyo!**
 
 ## **Marejeleo**
 

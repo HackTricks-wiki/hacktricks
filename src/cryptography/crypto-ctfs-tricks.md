@@ -25,7 +25,7 @@
 
 ## Encoders
 
-Sehemu kubwa ya data iliyokodishwa inaweza kufichuliwa kwa kutumia rasilimali hizi 2:
+Sehemu kubwa ya data iliyokodishwa inaweza kufutwa na rasilimali hizi 2:
 
 - [https://www.dcode.fr/tools-list](https://www.dcode.fr/tools-list)
 - [https://gchq.github.io/CyberChef/](https://gchq.github.io/CyberChef/)
@@ -120,11 +120,13 @@ Angalia hizi zote za msingi na: [https://github.com/dhondta/python-codext](https
 ```
 ╫☐↑Λ↻Λ┏Λ↻☐↑Λ
 ```
+- [http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html](http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html) - 404 Dead: [https://web.archive.org/web/20190228181208/http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html](https://web.archive.org/web/20190228181208/http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html)
+
 ### Morse
 ```
 .... --- .-.. -.-. .- .-. .- -.-. --- .-.. .-
 ```
-- [http://k4.cba.pl/dw/crypo/tools/eng_morse-encode.html](http://k4.cba.pl/dw/crypo/tools/eng_morse-encode.html) - 404 Kufa: [https://gchq.github.io/CyberChef/](https://gchq.github.io/CyberChef/)
+- [http://k4.cba.pl/dw/crypo/tools/eng_morse-encode.html](http://k4.cba.pl/dw/crypo/tools/eng_morse-encode.html) - 404 Dead: [https://gchq.github.io/CyberChef/](https://gchq.github.io/CyberChef/)
 
 ### UUencoder
 ```
@@ -152,6 +154,8 @@ end
 ryvkryvkryvkryvkryvkryvkryvk
 =yend size=28 crc32=35834c86
 ```
+- [http://www.webutils.pl/index.php?idx=yenc](http://www.webutils.pl/index.php?idx=yenc)
+
 ### BinHex
 ```
 (This file must be converted with BinHex 4.0)
@@ -180,7 +184,7 @@ Herufi kwa thamani yao ya nambari
 ```
 ### Affine Cipher Encode
 
-Herufi hadi nambari `(ax+b)%26` (_a_ na _b_ ni funguo na _x_ ni herufi) na matokeo kurudi kwa herufi
+Herufi kwa nambari `(ax+b)%26` (_a_ na _b_ ni funguo na _x_ ni herufi) na matokeo kurudi kwa herufi
 ```
 krodfdudfrod
 ```
@@ -188,7 +192,7 @@ krodfdudfrod
 
 **Multitap** [inabadilisha herufi](https://www.dcode.fr/word-letter-change) kwa nambari zinazojirudia zilizofafanuliwa na msimbo wa funguo unaolingana kwenye [keypad ya simu](https://www.dcode.fr/phone-keypad-cipher) (Hali hii inatumika wakati wa kuandika SMS).\
 Kwa mfano: 2=A, 22=B, 222=C, 3=D...\
-Unaweza kutambua msimbo huu kwa sababu utaona\*\* nambari kadhaa zinazojirudia\*\*.
+Unaweza kutambua msimbo huu kwa sababu utaona **nambari kadhaa zinazojirudia**.
 
 Unaweza kufungua msimbo huu katika: [https://www.dcode.fr/multitap-abc-cipher](https://www.dcode.fr/multitap-abc-cipher)
 
@@ -205,7 +209,7 @@ AABBB ABBAB ABABA AAAAA AAABA AAAAA BAAAA AAAAA AAABA ABBAB ABABA AAAAA
 
 ## Compression
 
-**Raw Deflate** na **Raw Inflate** (unaweza kupata zote mbili katika Cyberchef) zinaweza kubana na kufungua data bila vichwa.
+**Raw Deflate** na **Raw Inflate** (unaweza kuzipata zote katika Cyberchef) zinaweza kubana na kufungua data bila vichwa.
 
 ## Easy Crypto
 
@@ -215,13 +219,13 @@ AABBB ABBAB ABABA AAAAA AAABA AAAAA BAAAA AAAAA AAABA ABBAB ABABA AAAAA
 
 ### Bifid
 
-Inahitajika neno la ufunguo
+Neno la ufunguo linahitajika
 ```
 fgaargaamnlunesuneoa
 ```
 ### Vigenere
 
-Inahitajika neno muhimu
+Inahitajika neno la ufunguo
 ```
 wodsyoidrods
 ```
@@ -233,7 +237,7 @@ wodsyoidrods
 
 ### Fernet
 
-2 base64 strings (token na ufunguo)
+2 mfuatano wa base64 (token na ufunguo)
 ```
 Token:
 gAAAAABWC9P7-9RsxTz_dwxh9-O2VUB7Ih8UCQL1_Zk4suxnkCvb26Ie4i8HSUJ4caHZuiNtjLl3qfmCv_fS3_VpjL7HxCz7_Q==
