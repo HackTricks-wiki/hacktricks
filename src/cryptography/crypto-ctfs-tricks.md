@@ -4,7 +4,7 @@
 
 ## Online Hashes DBs
 
-- _**구글 검색**_
+- _**구글링하기**_
 - [http://hashtoolkit.com/reverse-hash?hash=4d186321c1a7f0f354b297e8914ab240](http://hashtoolkit.com/reverse-hash?hash=4d186321c1a7f0f354b297e8914ab240)
 - [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com)
 - [https://crackstation.net/](https://crackstation.net)
@@ -25,7 +25,7 @@
 
 ## Encoders
 
-Most of encoded data can be decoded with these 2 ressources:
+대부분의 인코딩된 데이터는 이 두 리소스로 디코딩할 수 있습니다:
 
 - [https://www.dcode.fr/tools-list](https://www.dcode.fr/tools-list)
 - [https://gchq.github.io/CyberChef/](https://gchq.github.io/CyberChef/)
@@ -33,7 +33,7 @@ Most of encoded data can be decoded with these 2 ressources:
 ### Substitution Autosolvers
 
 - [https://www.boxentriq.com/code-breaking/cryptogram](https://www.boxentriq.com/code-breaking/cryptogram)
-- [https://quipqiup.com/](https://quipqiup.com) - 매우 좋음!
+- [https://quipqiup.com/](https://quipqiup.com) - 매우 좋습니다!
 
 #### Caesar - ROTx Autosolvers
 
@@ -45,7 +45,7 @@ Most of encoded data can be decoded with these 2 ressources:
 
 ### Base Encodings Autosolver
 
-Check all these bases with: [https://github.com/dhondta/python-codext](https://github.com/dhondta/python-codext)
+모든 이러한 베이스를 확인하세요: [https://github.com/dhondta/python-codext](https://github.com/dhondta/python-codext)
 
 - **Ascii85**
 - `BQ%]q@psCd@rH0l`
@@ -184,40 +184,40 @@ drnajapajrna
 ```
 ### Affine Cipher Encode
 
-문자를 숫자로 변환 `(ax+b)%26` (_a_와 _b_는 키이고 _x_는 문자) 그리고 결과를 다시 문자로 변환
+문자에서 숫자로 `(ax+b)%26` (_a_와 _b_는 키이고 _x_는 문자) 변환한 후 결과를 다시 문자로 변환합니다.
 ```
 krodfdudfrod
 ```
 ### SMS 코드
 
-**Multitap** [는 문자를 대체합니다](https://www.dcode.fr/word-letter-change) 반복된 숫자로, 이는 모바일 [전화 키패드](https://www.dcode.fr/phone-keypad-cipher)의 해당 키 코드에 의해 정의됩니다 (이 모드는 SMS를 작성할 때 사용됩니다).\
+**Multitap** [문자를 대체](https://www.dcode.fr/word-letter-change)하는 것은 모바일 [전화 키패드](https://www.dcode.fr/phone-keypad-cipher)에서 해당 키 코드에 의해 정의된 반복된 숫자입니다 (이 모드는 SMS를 작성할 때 사용됩니다).\
 예를 들어: 2=A, 22=B, 222=C, 3=D...\
-이 코드는\*\* 여러 숫자가 반복되는 것을 볼 수 있기 때문에 식별할 수 있습니다\*\*.
+이 코드는 **여러 숫자가 반복되는** 것을 볼 수 있기 때문에 식별할 수 있습니다.
 
 이 코드는 다음에서 해독할 수 있습니다: [https://www.dcode.fr/multitap-abc-cipher](https://www.dcode.fr/multitap-abc-cipher)
 
 ### 베이컨 코드
 
-각 문자를 4개의 A 또는 B (또는 1과 0)로 대체합니다.
+각 문자를 4개의 A 또는 B(또는 1과 0)로 대체합니다.
 ```
 00111 01101 01010 00000 00010 00000 10000 00000 00010 01101 01010 00000
 AABBB ABBAB ABABA AAAAA AAABA AAAAA BAAAA AAAAA AAABA ABBAB ABABA AAAAA
 ```
-### 룬
+### Runes
 
 ![](../images/runes.jpg)
 
-## 압축
+## Compression
 
-**Raw Deflate**와 **Raw Inflate**(두 가지 모두 Cyberchef에서 찾을 수 있음)는 헤더 없이 데이터를 압축하고 압축 해제할 수 있습니다.
+**Raw Deflate**와 **Raw Inflate** (둘 다 Cyberchef에서 찾을 수 있음)는 헤더 없이 데이터를 압축하고 압축 해제할 수 있습니다.
 
-## 쉬운 암호화
+## Easy Crypto
 
-### XOR - 자동 해결기
+### XOR - Autosolver
 
 - [https://wiremask.eu/tools/xor-cracker/](https://wiremask.eu/tools/xor-cracker/)
 
-### 비피드
+### Bifid
 
 키워드가 필요합니다.
 ```
@@ -235,7 +235,7 @@ wodsyoidrods
 
 ## 강력한 암호
 
-### 페르네트
+### 페르넷
 
 2개의 base64 문자열 (토큰 및 키)
 ```
@@ -249,7 +249,7 @@ Key:
 
 ### Samir 비밀 공유
 
-비밀은 X 부분으로 나뉘며, 이를 복구하려면 Y 부분이 필요합니다 (_Y <=X_).
+비밀은 X 부분으로 나뉘며, 이를 복구하기 위해서는 Y 부분이 필요합니다 (_Y <=X_).
 ```
 8019f8fa5879aa3e07858d08308dc1a8b45
 80223035713295bddf0b0bd1b10a5340b89
@@ -257,7 +257,7 @@ Key:
 ```
 [http://christian.gen.co/secrets/](http://christian.gen.co/secrets/)
 
-### OpenSSL 무차별 대입
+### OpenSSL 무차별 대입 공격
 
 - [https://github.com/glv2/bruteforce-salted-openssl](https://github.com/glv2/bruteforce-salted-openssl)
 - [https://github.com/carlospolop/easy_BFopensslCTF](https://github.com/carlospolop/easy_BFopensslCTF)

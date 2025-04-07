@@ -7,7 +7,7 @@
 
 **Overpass The Hash/Pass The Key (PTK)** 공격은 전통적인 NTLM 프로토콜이 제한되고 Kerberos 인증이 우선시되는 환경을 위해 설계되었습니다. 이 공격은 사용자의 NTLM 해시 또는 AES 키를 활용하여 Kerberos 티켓을 요청함으로써 네트워크 내의 리소스에 대한 무단 접근을 가능하게 합니다.
 
-이 공격을 실행하기 위한 첫 번째 단계는 대상 사용자의 계정에 대한 NTLM 해시 또는 비밀번호를 획득하는 것입니다. 이 정보를 확보한 후, 해당 계정에 대한 티켓 부여 티켓(TGT)을 얻을 수 있으며, 이를 통해 공격자는 사용자가 권한을 가진 서비스나 머신에 접근할 수 있습니다.
+이 공격을 실행하기 위한 첫 번째 단계는 대상 사용자의 계정의 NTLM 해시 또는 비밀번호를 획득하는 것입니다. 이 정보를 확보한 후, 해당 계정에 대한 티켓 부여 티켓(TGT)을 얻을 수 있으며, 이를 통해 공격자는 사용자가 권한을 가진 서비스나 머신에 접근할 수 있습니다.
 
 이 프로세스는 다음 명령어로 시작할 수 있습니다:
 ```bash
@@ -30,7 +30,16 @@ Rubeus.exe를 사용하는 대체 명령 시퀀스는 이 기술의 또 다른 �
 ```bash
 .\Rubeus.exe asktgt /user:<USERNAME> /domain:<DOMAIN> /aes256:HASH /nowrap /opsec
 ```
-## 참고문헌
+## Stealthier version
+
+> [!WARNING]
+> 각 로그온 세션은 한 번에 하나의 활성 TGT만 가질 수 있으므로 주의하세요.
+
+1. Cobalt Strike의 **`make_token`**을 사용하여 새로운 로그온 세션을 만듭니다.
+2. 그런 다음, Rubeus를 사용하여 기존 세션에 영향을 주지 않고 새로운 로그온 세션에 대한 TGT를 생성합니다.
+
+
+## References
 
 - [https://www.tarlogic.com/es/blog/como-atacar-kerberos/](https://www.tarlogic.com/es/blog/como-atacar-kerberos/)
 

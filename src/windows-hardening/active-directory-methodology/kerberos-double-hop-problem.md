@@ -6,28 +6,28 @@
 
 Kerberos "Double Hop" 문제는 공격자가 **두 개의** **홉**을 통해 **Kerberos 인증**을 사용하려고 할 때 발생합니다. 예를 들어 **PowerShell**/**WinRM**을 사용하는 경우입니다.
 
-**Kerberos**를 통해 **인증**이 발생할 때, **자격 증명**이 **메모리**에 캐시되지 않습니다. 따라서 사용자가 프로세스를 실행하고 있더라도 mimikatz를 실행하면 해당 사용자의 **자격 증명**을 머신에서 찾을 수 없습니다.
+**Kerberos**를 통해 **인증**이 발생할 때, **자격 증명**이 **메모리**에 캐시되지 않습니다. 따라서, 사용자가 프로세스를 실행하고 있더라도 mimikatz를 실행하면 해당 사용자의 **자격 증명**을 머신에서 찾을 수 없습니다.
 
 이는 Kerberos로 연결할 때 다음과 같은 단계가 있기 때문입니다:
 
 1. User1이 자격 증명을 제공하고 **도메인 컨트롤러**가 User1에게 Kerberos **TGT**를 반환합니다.
 2. User1이 **TGT**를 사용하여 **Server1**에 연결하기 위한 **서비스 티켓**을 요청합니다.
 3. User1이 **Server1**에 **연결**하고 **서비스 티켓**을 제공합니다.
-4. **Server1**은 User1의 **자격 증명**이나 User1의 **TGT**를 캐시하지 않습니다. 따라서 Server1의 User1이 두 번째 서버에 로그인하려고 할 때 **인증할 수 없습니다**.
+4. **Server1**은 User1의 **자격 증명**이나 User1의 **TGT**를 캐시하지 않습니다. 따라서 User1이 Server1에서 두 번째 서버에 로그인하려고 할 때, 그는 **인증할 수 없습니다**.
 
 ### Unconstrained Delegation
 
-PC에서 **제한 없는 위임**이 활성화되어 있으면, **서버**는 접근하는 각 사용자의 **TGT**를 **얻습니다**. 게다가, 제한 없는 위임이 사용되면 **도메인 컨트롤러**를 **타격할 수** 있습니다.\
+PC에서 **제한 없는 위임**이 활성화되어 있으면, **서버**는 접근하는 각 사용자의 **TGT**를 **얻기** 때문에 이러한 일이 발생하지 않습니다. 게다가, 제한 없는 위임을 사용하면 **도메인 컨트롤러**를 **타격**할 수 있습니다.\
 [**제한 없는 위임 페이지에서 더 많은 정보**](unconstrained-delegation.md).
 
 ### CredSSP
 
-이 문제를 피하는 또 다른 방법은 [**상당히 안전하지 않은**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7) **자격 증명 보안 지원 공급자**입니다. Microsoft에서:
+이 문제를 피하는 또 다른 방법은 [**상당히 안전하지 않은**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7) **Credential Security Support Provider**입니다. Microsoft에서:
 
 > CredSSP 인증은 로컬 컴퓨터에서 원격 컴퓨터로 사용자 자격 증명을 위임합니다. 이 관행은 원격 작업의 보안 위험을 증가시킵니다. 원격 컴퓨터가 손상되면 자격 증명이 전달될 때, 해당 자격 증명은 네트워크 세션을 제어하는 데 사용될 수 있습니다.
 
-보안 문제로 인해 **CredSSP**는 프로덕션 시스템, 민감한 네트워크 및 유사한 환경에서 비활성화하는 것이 강력히 권장됩니다. **CredSSP**가 활성화되어 있는지 확인하려면 `Get-WSManCredSSP` 명령을 실행할 수 있습니다. 이 명령은 **CredSSP 상태를 확인**할 수 있으며, **WinRM**이 활성화되어 있으면 원격으로도 실행할 수 있습니다.
-```powershell
+보안 문제로 인해 **CredSSP**는 프로덕션 시스템, 민감한 네트워크 및 유사한 환경에서 비활성화하는 것이 강력히 권장됩니다. **CredSSP**가 활성화되어 있는지 확인하려면 `Get-WSManCredSSP` 명령을 실행할 수 있습니다. 이 명령은 **CredSSP 상태를 확인**할 수 있으며, **WinRM**이 활성화되어 있는 경우 원격으로도 실행할 수 있습니다.
+```bash
 Invoke-Command -ComputerName bizintel -Credential ta\redsuit -ScriptBlock {
 Get-WSManCredSSP
 }
@@ -36,8 +36,8 @@ Get-WSManCredSSP
 
 ### Invoke Command
 
-더블 홉 문제를 해결하기 위해 중첩된 `Invoke-Command`를 포함하는 방법이 제시됩니다. 이는 문제를 직접적으로 해결하지는 않지만 특별한 구성이 필요 없는 우회 방법을 제공합니다. 이 접근 방식은 초기 공격 머신에서 실행된 PowerShell 명령어를 통해 또는 첫 번째 서버와 이전에 설정된 PS-Session을 통해 보조 서버에서 명령어(`hostname`)를 실행할 수 있게 합니다. 방법은 다음과 같습니다:
-```powershell
+더블 홉 문제를 해결하기 위해 중첩된 `Invoke-Command`를 포함하는 방법이 제시됩니다. 이는 문제를 직접적으로 해결하지는 않지만 특별한 구성 없이 우회 방법을 제공합니다. 이 접근 방식은 초기 공격 머신에서 실행된 PowerShell 명령어를 통해 또는 첫 번째 서버와 이전에 설정된 PS-Session을 통해 보조 서버에서 명령어(`hostname`)를 실행할 수 있게 합니다. 방법은 다음과 같습니다:
+```bash
 $cred = Get-Credential ta\redsuit
 Invoke-Command -ComputerName bizintel -Credential $cred -ScriptBlock {
 Invoke-Command -ComputerName secdev -Credential $cred -ScriptBlock {hostname}
@@ -48,7 +48,7 @@ Invoke-Command -ComputerName secdev -Credential $cred -ScriptBlock {hostname}
 ### PSSession 구성 등록
 
 더블 홉 문제를 우회하는 솔루션은 `Enter-PSSession`과 함께 `Register-PSSessionConfiguration`을 사용하는 것입니다. 이 방법은 `evil-winrm`과는 다른 접근 방식을 요구하며, 더블 홉 제한이 없는 세션을 허용합니다.
-```powershell
+```bash
 Register-PSSessionConfiguration -Name doublehopsess -RunAsCredential domain_name\username
 Restart-Service WinRM
 Enter-PSSession -ConfigurationName doublehopsess -ComputerName <pc_name> -Credential domain_name\username
@@ -77,11 +77,11 @@ winrs -r:http://bizintel:5446 -u:ta\redsuit -p:2600leet hostname
 2. 압축을 풀고 `Install-sshd.ps1` 스크립트를 실행합니다.
 3. 포트 22를 열기 위해 방화벽 규칙을 추가하고 SSH 서비스가 실행 중인지 확인합니다.
 
-`Connection reset` 오류를 해결하려면 OpenSSH 디렉토리에 대해 모든 사용자가 읽기 및 실행 권한을 갖도록 권한을 업데이트해야 할 수 있습니다.
+`Connection reset` 오류를 해결하려면 OpenSSH 디렉토리에 대해 모든 사용자가 읽기 및 실행 액세스를 허용하도록 권한을 업데이트해야 할 수 있습니다.
 ```bash
 icacls.exe "C:\Users\redsuit\Documents\ssh\OpenSSH-Win64" /grant Everyone:RX /T
 ```
-## 참고 문헌
+## References
 
 - [https://techcommunity.microsoft.com/t5/ask-the-directory-services-team/understanding-kerberos-double-hop/ba-p/395463?lightbox-message-images-395463=102145i720503211E78AC20](https://techcommunity.microsoft.com/t5/ask-the-directory-services-team/understanding-kerberos-double-hop/ba-p/395463?lightbox-message-images-395463=102145i720503211E78AC20)
 - [https://posts.slayerlabs.com/double-hop/](https://posts.slayerlabs.com/double-hop/)

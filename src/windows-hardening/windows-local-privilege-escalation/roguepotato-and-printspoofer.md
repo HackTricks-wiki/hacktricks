@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-> [!WARNING] > **JuicyPotato는** Windows Server 2019 및 Windows 10 빌드 1809 이상에서 작동하지 않습니다. 그러나, [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**,** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**,** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato)**,** [**GodPotato**](https://github.com/BeichenDream/GodPotato)**,** [**EfsPotato**](https://github.com/zcgonvh/EfsPotato)**,** [**DCOMPotato**](https://github.com/zcgonvh/DCOMPotato)**는 동일한 권한을 활용하고 `NT AUTHORITY\SYSTEM`\*\* 수준의 접근을 얻는 데 사용할 수 있습니다. 이 [블로그 게시물](https://itm4n.github.io/printspoofer-abusing-impersonate-privileges/)은 JuicyPotato가 더 이상 작동하지 않는 Windows 10 및 Server 2019 호스트에서 임시 권한을 남용하는 데 사용할 수 있는 `PrintSpoofer` 도구에 대해 자세히 설명합니다.
+> [!WARNING] > **JuicyPotato는** Windows Server 2019 및 Windows 10 빌드 1809 이상에서 작동하지 않습니다. 그러나, [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**,** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**,** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato)**,** [**GodPotato**](https://github.com/BeichenDream/GodPotato)**,** [**EfsPotato**](https://github.com/zcgonvh/EfsPotato)**,** [**DCOMPotato**](https://github.com/zcgonvh/DCOMPotato)**를 사용하여 **동일한 권한을 활용하고 `NT AUTHORITY\SYSTEM`** 수준의 접근을 얻을 수 있습니다. 이 [블로그 게시물](https://itm4n.github.io/printspoofer-abusing-impersonate-privileges/)은 JuicyPotato가 더 이상 작동하지 않는 Windows 10 및 Server 2019 호스트에서 임시 권한을 남용하는 데 사용할 수 있는 `PrintSpoofer` 도구에 대해 자세히 설명합니다.
 
 ## Quick Demo
 

