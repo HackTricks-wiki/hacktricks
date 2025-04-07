@@ -19,13 +19,13 @@
 ## Magic Autosolvers
 
 - [**https://github.com/Ciphey/Ciphey**](https://github.com/Ciphey/Ciphey)
-- [https://gchq.github.io/CyberChef/](https://gchq.github.io/CyberChef/) (Modulo Magico)
+- [https://gchq.github.io/CyberChef/](https://gchq.github.io/CyberChef/) (modulo Magico)
 - [https://github.com/dhondta/python-codext](https://github.com/dhondta/python-codext)
 - [https://www.boxentriq.com/code-breaking](https://www.boxentriq.com/code-breaking)
 
 ## Encoders
 
-La maggior parte dei dati codificati può essere decifrata con queste 2 risorse:
+La maggior parte dei dati codificati può essere decodificata con queste 2 risorse:
 
 - [https://www.dcode.fr/tools-list](https://www.dcode.fr/tools-list)
 - [https://gchq.github.io/CyberChef/](https://gchq.github.io/CyberChef/)
@@ -184,15 +184,15 @@ Lettere al loro valore numerico
 ```
 ### Affine Cipher Encode
 
-Lettera a numero `(ax+b)%26` (_a_ e _b_ sono le chiavi e _x_ è la lettera) e il risultato di nuovo in lettera
+Lettera a numero `(ax+b)%26` (_a_ e _b_ sono le chiavi e _x_ è la lettera) e il risultato torna a lettera
 ```
 krodfdudfrod
 ```
 ### SMS Code
 
-**Multitap** [sostituisce una lettera](https://www.dcode.fr/word-letter-change) con cifre ripetute definite dal corrispondente codice chiave su una [tastiera del telefono](https://www.dcode.fr/phone-keypad-cipher) (Questo modo è usato quando si scrivono SMS).\
+**Multitap** [replaces a letter](https://www.dcode.fr/word-letter-change) con cifre ripetute definite dal codice chiave corrispondente su una [tastiera del telefono](https://www.dcode.fr/phone-keypad-cipher) (Questo modo è usato quando si scrivono SMS).\
 Ad esempio: 2=A, 22=B, 222=C, 3=D...\
-Puoi identificare questo codice perché vedrai\*\* diversi numeri ripetuti\*\*.
+Puoi identificare questo codice perché vedrai **diversi numeri ripetuti**.
 
 Puoi decodificare questo codice in: [https://www.dcode.fr/multitap-abc-cipher](https://www.dcode.fr/multitap-abc-cipher)
 

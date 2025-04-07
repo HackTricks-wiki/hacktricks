@@ -3,7 +3,7 @@
 # Timestamp
 
 Un attaccante potrebbe essere interessato a **cambiare i timestamp dei file** per evitare di essere rilevato.\
-È possibile trovare i timestamp all'interno del MFT negli attributi `$STANDARD_INFORMATION` ** e ** `$FILE_NAME`.
+È possibile trovare i timestamp all'interno del MFT negli attributi `$STANDARD_INFORMATION` **e** `$FILE_NAME`.
 
 Entrambi gli attributi hanno 4 timestamp: **Modifica**, **accesso**, **creazione** e **modifica del registro MFT** (MACE o MACB).
 
@@ -52,7 +52,7 @@ Questo strumento può modificare entrambi gli attributi `$STARNDAR_INFORMATION` 
 
 # Nascondere dati
 
-NFTS utilizza un cluster e la dimensione minima delle informazioni. Ciò significa che se un file occupa un cluster e mezzo, il **mezzo rimanente non verrà mai utilizzato** fino a quando il file non viene eliminato. Quindi, è possibile **nascondere dati in questo spazio di slack**.
+NFTS utilizza un cluster e la dimensione minima delle informazioni. Ciò significa che se un file occupa e utilizza un cluster e mezzo, il **mezzo rimanente non verrà mai utilizzato** fino a quando il file non viene eliminato. Quindi, è possibile **nascondere dati in questo spazio di slack**.
 
 Ci sono strumenti come slacker che consentono di nascondere dati in questo spazio "nascosto". Tuttavia, un'analisi del `$logfile` e del `$usnjrnl` può mostrare che alcuni dati sono stati aggiunti:
 
@@ -63,7 +63,7 @@ Quindi, è possibile recuperare lo spazio di slack utilizzando strumenti come FT
 # UsbKill
 
 Questo è uno strumento che **spegnerà il computer se viene rilevata qualsiasi modifica nelle porte USB**.\
-Un modo per scoprirlo sarebbe ispezionare i processi in esecuzione e **esaminare ogni script python in esecuzione**.
+Un modo per scoprirlo sarebbe ispezionare i processi in esecuzione e **rivedere ogni script python in esecuzione**.
 
 # Distribuzioni Linux Live
 
@@ -96,21 +96,21 @@ Questo salverà informazioni sulle applicazioni eseguite con l'obiettivo di migl
 - Selezionare Modifica su ciascuno di questi per cambiare il valore da 1 (o 3) a 0
 - Riavviare
 
-## Disabilitare i timestamp - Ultimo tempo di accesso
+## Disabilitare i timestamp - Ultimo accesso
 
-Ogni volta che una cartella viene aperta da un volume NTFS su un server Windows NT, il sistema impiega tempo per **aggiornare un campo di timestamp su ciascuna cartella elencata**, chiamato ultimo tempo di accesso. Su un volume NTFS molto utilizzato, questo può influire sulle prestazioni.
+Ogni volta che una cartella viene aperta da un volume NTFS su un server Windows NT, il sistema impiega tempo per **aggiornare un campo di timestamp su ciascuna cartella elencata**, chiamato ultimo accesso. Su un volume NTFS molto utilizzato, questo può influire sulle prestazioni.
 
-1. Aprire l'Editor del Registro (Regedit.exe).
+1. Aprire l'Editor del Registro di sistema (Regedit.exe).
 2. Navigare a `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem`.
-3. Cercare `NtfsDisableLastAccessUpdate`. Se non esiste, aggiungere questo DWORD e impostare il suo valore su 1, il che disabiliterà il processo.
-4. Chiudere l'Editor del Registro e riavviare il server.
+3. Cercare `NtfsDisableLastAccessUpdate`. Se non esiste, aggiungere questo DWORD e impostare il suo valore su 1, che disabiliterà il processo.
+4. Chiudere l'Editor del Registro di sistema e riavviare il server.
 
 ## Eliminare la cronologia USB
 
-Tutti gli **USB Device Entries** sono memorizzati nel Registro di Windows sotto la chiave di registro **USBSTOR** che contiene sottochiavi create ogni volta che si collega un dispositivo USB al PC o Laptop. Puoi trovare questa chiave qui `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Eliminando questo** eliminerai la cronologia USB.\
+Tutti i **USB Device Entries** sono memorizzati nel Registro di Windows sotto la chiave di registro **USBSTOR** che contiene sottochiavi create ogni volta che si collega un dispositivo USB al PC o Laptop. Puoi trovare questa chiave qui `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Eliminando questo** eliminerai la cronologia USB.\
 Puoi anche utilizzare lo strumento [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html) per essere sicuro di averle eliminate (e per eliminarle).
 
-Un altro file che salva informazioni sugli USB è il file `setupapi.dev.log` all'interno di `C:\Windows\INF`. Questo dovrebbe essere eliminato.
+Un altro file che salva informazioni sugli USB è il file `setupapi.dev.log` all'interno di `C:\Windows\INF`. Questo dovrebbe essere eliminato anche.
 
 ## Disabilitare le copie shadow
 
@@ -121,9 +121,9 @@ Puoi anche eliminarle tramite GUI seguendo i passaggi proposti in [https://www.u
 
 Per disabilitare le copie shadow [passaggi da qui](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows):
 
-1. Apri il programma Servizi digitando "servizi" nella casella di ricerca dopo aver cliccato sul pulsante di avvio di Windows.
-2. Dall'elenco, trova "Volume Shadow Copy", selezionalo e poi accedi alle Proprietà facendo clic con il tasto destro.
-3. Scegli Disabilitato dal menu a discesa "Tipo di avvio" e poi conferma la modifica facendo clic su Applica e OK.
+1. Aprire il programma Servizi digitando "servizi" nella casella di ricerca dopo aver cliccato sul pulsante di avvio di Windows.
+2. Dall'elenco, trovare "Volume Shadow Copy", selezionarlo e quindi accedere alle Proprietà facendo clic con il tasto destro.
+3. Scegliere Disabilitato dal menu a discesa "Tipo di avvio" e quindi confermare la modifica facendo clic su Applica e OK.
 
 È anche possibile modificare la configurazione di quali file verranno copiati nella copia shadow nel registro `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`
 
@@ -141,7 +141,7 @@ Per disabilitare le copie shadow [passaggi da qui](https://support.waters.com/KB
 ## Disabilitare i registri eventi di Windows
 
 - `reg add 'HKLM\SYSTEM\CurrentControlSet\Services\eventlog' /v Start /t REG_DWORD /d 4 /f`
-- All'interno della sezione servizi disabilita il servizio "Windows Event Log"
+- All'interno della sezione servizi disabilitare il servizio "Windows Event Log"
 - `WEvtUtil.exec clear-log` o `WEvtUtil.exe cl`
 
 ## Disabilitare $UsnJrnl

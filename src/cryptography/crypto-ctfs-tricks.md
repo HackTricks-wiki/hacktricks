@@ -79,7 +79,7 @@ Controlla tutte queste basi con: [https://github.com/dhondta/python-codext](http
 - `BQ%]q@psCd@rH0l`
 - **Base85 (Adobe)** \[_!"#$%&'()\*+,-./0-9:;<=>?@A-Z\[\\]^\_\`a-u_]
 - `<~BQ%]q@psCd@rH0l~>`
-- **Base85 (IPv6 o RFC1924)** \[_0-9A-Za-z!#$%&()\*+-;<=>?@^_\`{|}\~\_]
+- **Base85 (IPv6 or RFC1924)** \[_0-9A-Za-z!#$%&()\*+-;<=>?@^_\`{|}\~\_]
 - `Xm4y`V\_|Y(V{dF>\`
 - **Base85 (xbtoa)** \[_!"#$%&'()\*+,-./0-9:;<=>?@A-Z\[\\]^\_\`a-u_]
 - `xbtoa Begin\nBQ%]q@psCd@rH0l\nxbtoa End N 12 c E 1a S 4e6 R 6991d`
@@ -174,7 +174,7 @@ ryvkryvkryvkryvkryvkryvkryvk
 ```
 drnajapajrna
 ```
-- [https://www.geocachingtoolbox.com/index.php?lang=it\&page=dvorakKeyboard](https://www.geocachingtoolbox.com/index.php?lang=it&page=dvorakKeyboard)
+- [https://www.geocachingtoolbox.com/index.php?lang=en\&page=dvorakKeyboard](https://www.geocachingtoolbox.com/index.php?lang=en&page=dvorakKeyboard)
 
 ### A1Z26
 
@@ -184,15 +184,15 @@ Lettere al loro valore numerico
 ```
 ### Affine Cipher Encode
 
-Lettera a numero `(ax+b)%26` (_a_ e _b_ sono le chiavi e _x_ è la lettera) e il risultato torna a lettera
+Lettera a numero `(ax+b)%26` (_a_ e _b_ sono le chiavi e _x_ è la lettera) e il risultato di nuovo in lettera
 ```
 krodfdudfrod
 ```
 ### SMS Code
 
-**Multitap** [sostituisce una lettera](https://www.dcode.fr/word-letter-change) con cifre ripetute definite dal corrispondente codice chiave su una [tastiera del telefono](https://www.dcode.fr/phone-keypad-cipher) (Questa modalità è utilizzata quando si scrivono SMS).\
+**Multitap** [sostituisce una lettera](https://www.dcode.fr/word-letter-change) con cifre ripetute definite dal corrispondente codice del tasto su una [tastiera del telefono](https://www.dcode.fr/phone-keypad-cipher) (Questo modo è usato quando si scrivono SMS).\
 Ad esempio: 2=A, 22=B, 222=C, 3=D...\
-Puoi identificare questo codice perché vedrai\*\* diversi numeri ripetuti\*\*.
+Puoi identificare questo codice perché vedrai** diversi numeri ripetuti**.
 
 Puoi decodificare questo codice in: [https://www.dcode.fr/multitap-abc-cipher](https://www.dcode.fr/multitap-abc-cipher)
 

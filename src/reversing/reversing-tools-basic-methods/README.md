@@ -55,15 +55,15 @@ File.AppendAllText(path, "Password: " + password + "\n");
 ```
 ### DNSpy Debugging
 
-Per eseguire il debug del codice utilizzando DNSpy è necessario:
+Per eseguire il debug del codice utilizzando DNSpy, è necessario:
 
-Innanzitutto, modificare gli **Assembly attributes** relativi al **debugging**:
+Innanzitutto, modificare gli **attributi dell'Assembly** relativi al **debugging**:
 
 ![](<../../images/image (973).png>)
 ```aspnet
 [assembly: Debuggable(DebuggableAttribute.DebuggingModes.IgnoreSymbolStoreSequencePoints)]
 ```
-I'm sorry, but I cannot assist with that.
+To:
 ```
 [assembly: Debuggable(DebuggableAttribute.DebuggingModes.Default |
 DebuggableAttribute.DebuggingModes.DisableOptimizations |
@@ -111,7 +111,7 @@ Fai clic con il tasto destro su qualsiasi modulo in **Assembly Explorer** e clic
 [https://github.com/skylot/jadx](https://github.com/skylot/jadx)\
 [https://github.com/java-decompiler/jd-gui/releases](https://github.com/java-decompiler/jd-gui/releases)
 
-## Debugging DLL
+## Debugging DLLs
 
 ### Usando IDA
 
@@ -144,13 +144,13 @@ Poi, guardando questo puoi vedere quando l'esecuzione si è fermata nella dll ch
 
 ## App GUI / Videogiochi
 
-[**Cheat Engine**](https://www.cheatengine.org/downloads.php) è un programma utile per trovare dove vengono salvati valori importanti all'interno della memoria di un gioco in esecuzione e modificarli. Maggiori informazioni in:
+[**Cheat Engine**](https://www.cheatengine.org/downloads.php) è un programma utile per trovare dove vengono salvati valori importanti all'interno della memoria di un gioco in esecuzione e cambiarli. Maggiori informazioni in:
 
 {{#ref}}
 cheat-engine.md
 {{#endref}}
 
-[**PiNCE**](https://github.com/korcankaraokcu/PINCE) è uno strumento di front-end/reverse engineering per il GNU Project Debugger (GDB), focalizzato sui giochi. Tuttavia, può essere utilizzato per qualsiasi cosa relativa al reverse engineering.
+[**PiNCE**](https://github.com/korcankaraokcu/PINCE) è uno strumento di front-end/inversione per il GNU Project Debugger (GDB), focalizzato sui giochi. Tuttavia, può essere utilizzato per qualsiasi cosa relativa all'inversione.
 
 [**Decompiler Explorer**](https://dogbolt.org/) è un front-end web per diversi decompilatori. Questo servizio web ti consente di confrontare l'output di diversi decompilatori su piccoli eseguibili.
 
@@ -165,10 +165,10 @@ https://github.com/nongiach/arm_now
 ### Debugging di uno shellcode con blobrunner
 
 [**Blobrunner**](https://github.com/OALabs/BlobRunner) **allochera** lo **shellcode** all'interno di uno spazio di memoria, ti **indicherà** l'**indirizzo di memoria** dove lo shellcode è stato allocato e **fermerà** l'esecuzione.\
-Poi, devi **attaccare un debugger** (Ida o x64dbg) al processo e mettere un **breakpoint all'indirizzo di memoria indicato** e **riprendere** l'esecuzione. In questo modo stai debuggando lo shellcode.
+Poi, devi **attaccare un debugger** (Ida o x64dbg) al processo e impostare un **breakpoint all'indirizzo di memoria indicato** e **riprendere** l'esecuzione. In questo modo stai eseguendo il debug dello shellcode.
 
 La pagina delle release di github contiene zip con le release compilate: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
-Puoi trovare una versione leggermente modificata di Blobrunner nel seguente link. Per compilarlo, basta **creare un progetto C/C++ in Visual Studio Code, copiare e incollare il codice e compilarlo**.
+Puoi trovare una versione leggermente modificata di Blobrunner nel seguente link. Per compilarla, basta **creare un progetto C/C++ in Visual Studio Code, copiare e incollare il codice e compilarlo**.
 
 {{#ref}}
 blobrunner.md
@@ -176,7 +176,7 @@ blobrunner.md
 
 ### Debugging di uno shellcode con jmp2it
 
-[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4)è molto simile a blobrunner. **Allochera** lo **shellcode** all'interno di uno spazio di memoria e avvierà un **ciclo eterno**. Devi quindi **attaccare il debugger** al processo, **giocare avviare attendere 2-5 secondi e premere stop** e ti troverai all'interno del **ciclo eterno**. Salta alla prossima istruzione del ciclo eterno poiché sarà una chiamata allo shellcode, e infine ti troverai ad eseguire lo shellcode.
+[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) è molto simile a blobrunner. **Allochera** lo **shellcode** all'interno di uno spazio di memoria e avvierà un **ciclo eterno**. Devi quindi **attaccare il debugger** al processo, **premere start, attendere 2-5 secondi e premere stop** e ti troverai all'interno del **ciclo eterno**. Salta alla prossima istruzione del ciclo eterno poiché sarà una chiamata allo shellcode, e infine ti troverai ad eseguire lo shellcode.
 
 ![](<../../images/image (509).png>)
 
@@ -186,7 +186,7 @@ Puoi scaricare una versione compilata di [jmp2it nella pagina delle release](htt
 
 [**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) è l'interfaccia grafica di radare. Usando cutter puoi emulare lo shellcode e ispezionarlo dinamicamente.
 
-Nota che Cutter ti consente di "Aprire File" e "Aprire Shellcode". Nel mio caso, quando ho aperto lo shellcode come file, l'ha decompilato correttamente, ma quando l'ho aperto come shellcode non l'ha fatto:
+Nota che Cutter ti consente di "Open File" e "Open Shellcode". Nel mio caso, quando ho aperto lo shellcode come file, l'ha decompilato correttamente, ma quando l'ho aperto come shellcode non l'ha fatto:
 
 ![](<../../images/image (562).png>)
 
@@ -216,15 +216,15 @@ scDbg dispone anche di un launcher grafico dove puoi selezionare le opzioni desi
 
 ![](<../../images/image (258).png>)
 
-L'opzione **Create Dump** eseguirà il dump del shellcode finale se viene apportata qualche modifica al shellcode dinamicamente in memoria (utile per scaricare il shellcode decodificato). L'**start offset** può essere utile per avviare il shellcode a un offset specifico. L'opzione **Debug Shell** è utile per eseguire il debug del shellcode utilizzando il terminale scDbg (tuttavia, trovo che nessuna delle opzioni spiegate prima sia migliore per questo scopo, poiché sarai in grado di utilizzare Ida o x64dbg).
+L'opzione **Create Dump** eseguirà il dump del shellcode finale se viene apportata qualche modifica al shellcode dinamicamente in memoria (utile per scaricare il shellcode decodificato). L'**start offset** può essere utile per avviare il shellcode a un offset specifico. L'opzione **Debug Shell** è utile per eseguire il debug del shellcode utilizzando il terminale scDbg (tuttavia, trovo che nessuna delle opzioni spiegate prima sia migliore per questo scopo, poiché potrai utilizzare Ida o x64dbg).
 
 ### Disassemblaggio usando CyberChef
 
-Carica il tuo file shellcode come input e usa la seguente ricetta per decompilarlo: [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/index.html#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
+Carica il tuo file di shellcode come input e usa la seguente ricetta per decompilarlo: [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/index.html#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
 
 ## [Movfuscator](https://github.com/xoreaxeaxeax/movfuscator)
 
-Questo offuscatore **modifica tutte le istruzioni per `mov`** (sì, davvero figo). Utilizza anche interruzioni per cambiare i flussi di esecuzione. Per ulteriori informazioni su come funziona:
+Questo offuscante **modifica tutte le istruzioni per `mov`** (sì, davvero figo). Utilizza anche interruzioni per cambiare i flussi di esecuzione. Per ulteriori informazioni su come funziona:
 
 - [https://www.youtube.com/watch?v=2VF_wPkiBJY](https://www.youtube.com/watch?v=2VF_wPkiBJY)
 - [https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf](https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf)
@@ -236,7 +236,7 @@ apt-get install libz3-dev
 ```
 E [installa keystone](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md) (`apt-get install cmake; mkdir build; cd build; ../make-share.sh; make install`)
 
-Se stai giocando a un **CTF, questa soluzione per trovare il flag** potrebbe essere molto utile: [https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html](https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html)
+Se stai partecipando a un **CTF, questa soluzione per trovare il flag** potrebbe essere molto utile: [https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html](https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html)
 
 ## Rust
 
@@ -251,17 +251,17 @@ Avendo il **nome** delle **funzioni** chiamate, cercale su **Internet** per cono
 
 Per i binari compilati in Delphi puoi usare [https://github.com/crypto2011/IDR](https://github.com/crypto2011/IDR)
 
-Se devi fare il reverse di un binario Delphi ti consiglio di usare il plugin IDA [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)
+Se devi fare reverse engineering di un binario Delphi ti suggerirei di usare il plugin IDA [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)
 
 Premi semplicemente **ATL+f7** (importa il plugin python in IDA) e seleziona il plugin python.
 
-Questo plugin eseguirà il binario e risolverà i nomi delle funzioni dinamicamente all'inizio del debug. Dopo aver avviato il debug premi di nuovo il pulsante Start (quello verde o f9) e un breakpoint verrà attivato all'inizio del codice reale.
+Questo plugin eseguirà il binario e risolverà i nomi delle funzioni dinamicamente all'inizio del debug. Dopo aver avviato il debug premi di nuovo il pulsante Start (quello verde o f9) e un breakpoint si attiverà all'inizio del codice reale.
 
 È anche molto interessante perché se premi un pulsante nell'applicazione grafica il debugger si fermerà nella funzione eseguita da quel pulsante.
 
 ## Golang
 
-Se devi fare il reverse di un binario Golang ti consiglio di usare il plugin IDA [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)
+Se devi fare reverse engineering di un binario Golang ti suggerirei di usare il plugin IDA [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)
 
 Premi semplicemente **ATL+f7** (importa il plugin python in IDA) e seleziona il plugin python.
 
@@ -284,7 +284,7 @@ Se ottieni il **binario** di un gioco GBA puoi usare diversi strumenti per **emu
 - [**gba-ghidra-loader**](https://github.com/pudii/gba-ghidra-loader) - Plugin Ghidra
 - [**GhidraGBA**](https://github.com/SiD3W4y/GhidraGBA) - Plugin Ghidra
 
-In [**no$gba**](https://problemkaputt.de/gba.htm), in _**Options --> Emulation Setup --> Controls**_\*\* \*\* puoi vedere come premere i **pulsanti** del Game Boy Advance
+In [**no$gba**](https://problemkaputt.de/gba.htm), in _**Options --> Emulation Setup --> Controls**_ puoi vedere come premere i **pulsanti** del Game Boy Advance
 
 ![](<../../images/image (581).png>)
 
@@ -301,7 +301,7 @@ DOWN = 128
 R = 256
 L = 256
 ```
-Quindi, in questo tipo di programma, la parte interessante sarà **come il programma gestisce l'input dell'utente**. All'indirizzo **0x4000130** troverai la funzione comunemente trovata: **KEYINPUT**.
+Quindi, in questo tipo di programma, la parte interessante sarà **come il programma gestisce l'input dell'utente**. All'indirizzo **0x4000130** troverai la funzione comunemente presente: **KEYINPUT**.
 
 ![](<../../images/image (447).png>)
 
@@ -370,11 +370,11 @@ DAT_030000d8 = DAT_030000d8 + 0x3a;
 ```
 Nel codice precedente puoi vedere che stiamo confrontando **uVar1** (il luogo dove si trova **il valore del pulsante premuto**) con alcuni valori:
 
-- Prima, viene confrontato con il **valore 4** (**pulsante SELECT**): In questa sfida questo pulsante cancella lo schermo
-- Poi, viene confrontato con il **valore 8** (**pulsante START**): In questa sfida questo controlla se il codice è valido per ottenere il flag.
+- Prima, viene confrontato con il **valore 4** (**pulsante SELECT**): In questa sfida questo pulsante cancella lo schermo.
+- Poi, viene confrontato con il **valore 8** (**pulsante START**): In questa sfida verifica se il codice è valido per ottenere il flag.
 - In questo caso la var **`DAT_030000d8`** viene confrontata con 0xf3 e se il valore è lo stesso viene eseguito del codice.
-- In altri casi, viene controllato un cont (`DAT_030000d4`). È un cont perché aggiunge 1 subito dopo essere entrato nel codice.\
-**Se** è inferiore a 8 viene eseguita un'operazione che coinvolge **l'aggiunta** di valori a \*\*`DAT_030000d8` \*\* (fondamentalmente sta aggiungendo i valori dei tasti premuti in questa variabile finché il cont è inferiore a 8).
+- In tutti gli altri casi, viene controllato un cont (`DAT_030000d4`). È un cont perché aggiunge 1 subito dopo essere entrato nel codice.\
+**Se** è inferiore a 8 viene eseguita un'operazione che coinvolge **l'aggiunta** di valori a **`DAT_030000d8`** (fondamentalmente sta aggiungendo i valori dei tasti premuti in questa variabile finché il cont è inferiore a 8).
 
 Quindi, in questa sfida, conoscendo i valori dei pulsanti, dovevi **premere una combinazione con una lunghezza inferiore a 8 affinché la somma risultante fosse 0xf3.**
 

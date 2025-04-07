@@ -19,12 +19,12 @@ L'obiettivo di armare un container distroless è essere in grado di **eseguire b
 
 ### Through memory
 
-In arrivo in un certo momento del 2023...
+In arrivo a un certo punto del 2023...
 
 ### Via Existing binaries
 
 #### openssl
 
-\***\*[**In questo post,**](https://www.form3.tech/engineering/content/exploiting-distroless-images) si spiega che il binario **`openssl`** è frequentemente trovato in questi container, potenzialmente perché è **necessario\*\* dal software che verrà eseguito all'interno del container.
+\***\*[**In questo post,**](https://www.form3.tech/engineering/content/exploiting-distroless-images) si spiega che il binario **`openssl`** è frequentemente trovato in questi container, potenzialmente perché è **necessario** dal software che verrà eseguito all'interno del container.
 
 {{#include ../../../banners/hacktricks-training.md}}

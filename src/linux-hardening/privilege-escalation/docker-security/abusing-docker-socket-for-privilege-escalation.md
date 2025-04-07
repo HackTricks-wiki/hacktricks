@@ -1,4 +1,4 @@
-# Abusare del Docker Socket per l'Escalation dei Privilegi
+# Abusing Docker Socket for Privilege Escalation
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -10,7 +10,7 @@ Puoi **montare** diverse parti del **filesystem** in un container in esecuzione 
 Potresti anche **abusare di un mount per escalare i privilegi** all'interno del container.
 
 - **`-v /:/host`** -> Monta il filesystem dell'host nel container in modo da poter **leggere il filesystem dell'host.**
-- Se vuoi **sentirti come se fossi nell'host** ma essere nel container, potresti disabilitare altri meccanismi di difesa usando opzioni come:
+- Se vuoi **sentirti come se fossi nell'host** ma essere nel container, puoi disabilitare altri meccanismi di difesa usando flag come:
 - `--privileged`
 - `--cap-add=ALL`
 - `--security-opt apparmor=unconfined`
@@ -20,7 +20,7 @@ Potresti anche **abusare di un mount per escalare i privilegi** all'interno del 
 - `--userns=host`
 - `--uts=host`
 - `--cgroupns=host`
-- \*\*`--device=/dev/sda1 --cap-add=SYS_ADMIN --security-opt apparmor=unconfined` \*\* -> Questo è simile al metodo precedente, ma qui stiamo **montando il disco del dispositivo**. Poi, all'interno del container esegui `mount /dev/sda1 /mnt` e puoi **accedere** al **filesystem dell'host** in `/mnt`
+- **`--device=/dev/sda1 --cap-add=SYS_ADMIN --security-opt apparmor=unconfined`** -> Questo è simile al metodo precedente, ma qui stiamo **montando il disco del dispositivo**. Poi, all'interno del container esegui `mount /dev/sda1 /mnt` e puoi **accedere** al **filesystem dell'host** in `/mnt`
 - Esegui `fdisk -l` nell'host per trovare il dispositivo `</dev/sda1>` da montare
 - **`-v /tmp:/host`** -> Se per qualche motivo puoi **solo montare una directory** dall'host e hai accesso all'interno dell'host. Montala e crea un **`/bin/bash`** con **suid** nella directory montata in modo da poter **eseguirlo dall'host e escalare a root**.
 
@@ -29,15 +29,15 @@ Potresti anche **abusare di un mount per escalare i privilegi** all'interno del 
 >
 > **Nota che non tutte le directory in una macchina linux supporteranno il bit suid!** Per controllare quali directory supportano il bit suid esegui `mount | grep -v "nosuid"` Ad esempio, di solito `/dev/shm`, `/run`, `/proc`, `/sys/fs/cgroup` e `/var/lib/lxcfs` non supportano il bit suid.
 >
-> Nota anche che se puoi **montare `/etc`** o qualsiasi altra cartella **contenente file di configurazione**, puoi modificarli dal container docker come root per **abusarne nell'host** e escalare i privilegi (magari modificando `/etc/shadow`)
+> Nota anche che se puoi **montare `/etc`** o qualsiasi altra cartella **contenente file di configurazione**, puoi modificarli dal container docker come root per **abusarli nell'host** e escalare i privilegi (magari modificando `/etc/shadow`)
 
-### Uscire dal container
+### Escaping from the container
 
-- **`--privileged`** -> Con questa opzione [rimuovi tutta l'isolamento dal container](docker-privileged.md#what-affects). Controlla le tecniche per [uscire dai container privilegiati come root](docker-breakout-privilege-escalation/index.html#automatic-enumeration-and-escape).
+- **`--privileged`** -> Con questo flag [rimuovi tutta l'isolamento dal container](docker-privileged.md#what-affects). Controlla le tecniche per [uscire da container privilegiati come root](docker-breakout-privilege-escalation/index.html#automatic-enumeration-and-escape).
 - **`--cap-add=<CAPABILITY/ALL> [--security-opt apparmor=unconfined] [--security-opt seccomp=unconfined] [-security-opt label:disable]`** -> Per [escalare abusando delle capacità](../linux-capabilities.md), **concedi quella capacità al container** e disabilita altri metodi di protezione che potrebbero impedire il funzionamento dell'exploit.
 
 ### Curl
 
-In questa pagina abbiamo discusso modi per escalare i privilegi usando le opzioni docker, puoi trovare **modi per abusare di questi metodi usando il comando curl** nella pagina:
+In questa pagina abbiamo discusso modi per escalare i privilegi usando flag docker, puoi trovare **modi per abusare di questi metodi usando il comando curl** nella pagina:
 
 {{#include ../../../banners/hacktricks-training.md}}

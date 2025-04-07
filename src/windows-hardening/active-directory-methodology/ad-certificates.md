@@ -19,7 +19,7 @@
 
 ### Considerazioni Speciali
 
-- I **Subject Alternative Names (SANs)** espandono l'applicabilità di un certificato a più identità, cruciale per server con più domini. Processi di emissione sicuri sono vitali per evitare rischi di impersonificazione da parte di attaccanti che manipolano la specifica SAN.
+- I **Subject Alternative Names (SANs)** espandono l'applicabilità di un certificato a più identità, cruciale per i server con più domini. Processi di emissione sicuri sono vitali per evitare rischi di impersonificazione da parte di attaccanti che manipolano la specifica SAN.
 
 ### Autorità di Certificazione (CA) in Active Directory (AD)
 
@@ -57,7 +57,7 @@ Questi diritti sono specificati attraverso Access Control Entries (ACEs), dettag
 
 ### Diritti di Registrazione della CA Aziendale
 
-I diritti della CA sono delineati nel suo descrittore di sicurezza, accessibile tramite la console di gestione dell'Autorità di Certificazione. Alcune impostazioni consentono anche a utenti con privilegi ridotti l'accesso remoto, il che potrebbe essere una preoccupazione per la sicurezza.
+I diritti della CA sono delineati nel suo descrittore di sicurezza, accessibile tramite la console di gestione dell'Autorità di Certificazione. Alcune impostazioni consentono anche a utenti con privilegi bassi l'accesso remoto, il che potrebbe essere una preoccupazione per la sicurezza.
 
 ### Controlli Aggiuntivi per l'Emissione
 
@@ -73,29 +73,29 @@ I certificati possono essere richiesti tramite:
 1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE), utilizzando interfacce DCOM.
 2. **ICertPassage Remote Protocol** (MS-ICPR), attraverso pipe nominate o TCP/IP.
 3. L'**interfaccia web di registrazione dei certificati**, con il ruolo di Web Enrollment dell'Autorità di Certificazione installato.
-4. Il **Certificate Enrollment Service** (CES), in congiunzione con il servizio di Politica di Registrazione dei Certificati (CEP).
+4. Il **Certificate Enrollment Service** (CES), in combinazione con il servizio di Politica di Registrazione dei Certificati (CEP).
 5. Il **Network Device Enrollment Service** (NDES) per dispositivi di rete, utilizzando il Simple Certificate Enrollment Protocol (SCEP).
 
 Gli utenti Windows possono anche richiedere certificati tramite l'interfaccia GUI (`certmgr.msc` o `certlm.msc`) o strumenti da riga di comando (`certreq.exe` o il comando `Get-Certificate` di PowerShell).
-```powershell
+```bash
 # Example of requesting a certificate using PowerShell
 Get-Certificate -Template "User" -CertStoreLocation "cert:\\CurrentUser\\My"
 ```
-## Autenticazione con Certificato
+## Autenticazione tramite Certificato
 
-Active Directory (AD) supporta l'autenticazione con certificato, utilizzando principalmente i protocolli **Kerberos** e **Secure Channel (Schannel)**.
+Active Directory (AD) supporta l'autenticazione tramite certificato, utilizzando principalmente i protocolli **Kerberos** e **Secure Channel (Schannel)**.
 
 ### Processo di Autenticazione Kerberos
 
-Nel processo di autenticazione Kerberos, la richiesta di un utente per un Ticket Granting Ticket (TGT) è firmata utilizzando la **chiave privata** del certificato dell'utente. Questa richiesta subisce diverse validazioni da parte del controller di dominio, inclusi la **validità**, il **percorso** e lo **stato di revoca** del certificato. Le validazioni includono anche la verifica che il certificato provenga da una fonte fidata e la conferma della presenza dell'emittente nel **NTAUTH certificate store**. Validazioni riuscite portano all'emissione di un TGT. L'oggetto **`NTAuthCertificates`** in AD, si trova in:
+Nel processo di autenticazione Kerberos, la richiesta di un utente per un Ticket Granting Ticket (TGT) è firmata utilizzando la **chiave privata** del certificato dell'utente. Questa richiesta subisce diverse validazioni da parte del controller di dominio, inclusi la **validità** del certificato, il **percorso** e lo **stato di revoca**. Le validazioni includono anche la verifica che il certificato provenga da una fonte affidabile e la conferma della presenza dell'emittente nel **NTAUTH certificate store**. Validazioni riuscite portano all'emissione di un TGT. L'oggetto **`NTAuthCertificates`** in AD, si trova in:
 ```bash
 CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>
 ```
-è centrale per stabilire la fiducia per l'autenticazione dei certificati.
+è centrale per stabilire fiducia per l'autenticazione dei certificati.
 
 ### Autenticazione Secure Channel (Schannel)
 
-Schannel facilita connessioni TLS/SSL sicure, dove durante un handshake, il client presenta un certificato che, se validato con successo, autorizza l'accesso. La mappatura di un certificato a un account AD può coinvolgere la funzione **S4U2Self** di Kerberos o il **Subject Alternative Name (SAN)** del certificato, tra i vari metodi.
+Schannel facilita connessioni TLS/SSL sicure, dove durante un handshake, il client presenta un certificato che, se validato con successo, autorizza l'accesso. L'associazione di un certificato a un account AD può coinvolgere la funzione **S4U2Self** di Kerberos o il **Subject Alternative Name (SAN)** del certificato, tra i vari metodi.
 
 ### Enumerazione dei Servizi di Certificato AD
 

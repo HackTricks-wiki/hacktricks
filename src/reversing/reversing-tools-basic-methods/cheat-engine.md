@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-[**Cheat Engine**](https://www.cheatengine.org/downloads.php) è un programma utile per trovare dove vengono salvati valori importanti nella memoria di un gioco in esecuzione e modificarli.\
+[**Cheat Engine**](https://www.cheatengine.org/downloads.php) è un programma utile per trovare dove vengono salvati valori importanti all'interno della memoria di un gioco in esecuzione e modificarli.\
 Quando lo scarichi e lo esegui, ti viene **presentato** un **tutorial** su come utilizzare lo strumento. Se vuoi imparare a usare lo strumento, è altamente consigliato completarlo.
 
 ## Cosa stai cercando?
@@ -10,7 +10,7 @@ Quando lo scarichi e lo esegui, ti viene **presentato** un **tutorial** su come 
 ![](<../../images/image (762).png>)
 
 Questo strumento è molto utile per trovare **dove alcuni valori** (di solito un numero) **sono memorizzati nella memoria** di un programma.\
-**Di solito i numeri** sono memorizzati in forma di **4byte**, ma potresti anche trovarli in formati **double** o **float**, o potresti voler cercare qualcosa di **diverso da un numero**. Per questo motivo, devi essere sicuro di **selezionare** ciò che vuoi **cercare**:
+**Di solito i numeri** sono memorizzati in forma di **4byte**, ma potresti anche trovarli in formati **double** o **float**, o potresti voler cercare qualcosa **di diverso da un numero**. Per questo motivo devi essere sicuro di **selezionare** ciò che vuoi **cercare**:
 
 ![](<../../images/image (324).png>)
 
@@ -38,7 +38,7 @@ E infine **spuntando la casella** per applicare la modifica nella memoria:
 
 ![](<../../images/image (385).png>)
 
-La **modifica** alla **memoria** sarà immediatamente **applicata** (nota che fino a quando il gioco non utilizza di nuovo questo valore, il valore **non verrà aggiornato nel gioco**).
+La **modifica** alla **memoria** sarà immediatamente **applicata** (nota che finché il gioco non utilizza di nuovo questo valore, il valore **non verrà aggiornato nel gioco**).
 
 ## Cercare il valore
 
@@ -75,13 +75,13 @@ Ti verranno presentati **tutti i valori che sono stati modificati nel modo selez
 
 Una volta trovato il tuo valore, puoi modificarlo.
 
-Nota che ci sono **molti cambiamenti possibili** e puoi fare questi **passaggi quante più volte vuoi** per filtrare i risultati:
+Nota che ci sono **molti possibili cambiamenti** e puoi fare questi **passaggi quante più volte vuoi** per filtrare i risultati:
 
 ![](<../../images/image (574).png>)
 
 ### Indirizzo di memoria casuale - Trovare il codice
 
-Fino ad ora abbiamo imparato come trovare un indirizzo che memorizza un valore, ma è altamente probabile che in **diverse esecuzioni del gioco quell'indirizzo si trovi in posti diversi della memoria**. Quindi vediamo come trovare sempre quell'indirizzo.
+Fino ad ora abbiamo imparato come trovare un indirizzo che memorizza un valore, ma è altamente probabile che in **diverse esecuzioni del gioco quell'indirizzo si trovi in posti diversi della memoria**. Quindi scopriamo come trovare sempre quell'indirizzo.
 
 Utilizzando alcuni dei trucchi menzionati, trova l'indirizzo dove il tuo gioco attuale sta memorizzando il valore importante. Poi (ferma il gioco se lo desideri) fai **clic destro** sull'**indirizzo** trovato e seleziona "**Scopri cosa accede a questo indirizzo**" o "**Scopri cosa scrive a questo indirizzo**":
 
@@ -98,7 +98,7 @@ Ora che hai trovato l'indirizzo che modifica il valore, puoi **modificare il cod
 
 ![](<../../images/image (1057).png>)
 
-Quindi, ora puoi modificarlo affinché il codice non influisca sul tuo numero, o influisca sempre in modo positivo.
+Quindi, ora puoi modificarlo in modo che il codice non influisca sul tuo numero, o influisca sempre in modo positivo.
 
 ### Indirizzo di memoria casuale - Trovare il puntatore
 
@@ -110,7 +110,7 @@ Poi, esegui una nuova scansione **cercando il valore esadecimale tra "\[]"** (il
 
 ![](<../../images/image (994).png>)
 
-(_Se ne appaiono diversi, di solito hai bisogno di quello con l'indirizzo più piccolo_)\
+(_Se ne appaiono diversi, di solito hai bisogno dell'indirizzo più piccolo_)\
 Ora, abbiamo **trovato il puntatore che modificherà il valore che ci interessa**.
 
 Fai clic su "**Aggiungi indirizzo manualmente**":
@@ -133,12 +133,12 @@ Ora, ogni volta che modifichi quel valore, stai **modificando il valore importan
 
 L'iniezione di codice è una tecnica in cui inietti un pezzo di codice nel processo target e poi reindirizzi l'esecuzione del codice per passare attraverso il tuo codice scritto (come darti punti invece di sottrarli).
 
-Quindi, immagina di aver trovato l'indirizzo che sta sottraendo 1 dalla vita del tuo giocatore:
+Quindi, immagina di aver trovato l'indirizzo che sottrae 1 alla vita del tuo giocatore:
 
 ![](<../../images/image (203).png>)
 
 Fai clic su Mostra disassemblatore per ottenere il **codice disassemblato**.\
-Poi, fai clic su **CTRL+a** per invocare la finestra di Auto assemblaggio e seleziona _**Modello --> Iniezione di codice**_
+Poi, fai clic su **CTRL+a** per invocare la finestra di Auto assemblaggio e seleziona _**Template --> Iniezione di codice**_
 
 ![](<../../images/image (902).png>)
 
@@ -146,11 +146,11 @@ Compila l'**indirizzo dell'istruzione che vuoi modificare** (questo di solito vi
 
 ![](<../../images/image (744).png>)
 
-Verrà generato un modello:
+Verrà generato un template:
 
 ![](<../../images/image (944).png>)
 
-Quindi, inserisci il tuo nuovo codice assembly nella sezione "**newmem**" e rimuovi il codice originale dalla sezione "**originalcode**" se non vuoi che venga eseguito\*\*.\*\* In questo esempio, il codice iniettato aggiungerà 2 punti invece di sottrarre 1:
+Quindi, inserisci il tuo nuovo codice assembly nella sezione "**newmem**" e rimuovi il codice originale dalla sezione "**originalcode**" se non vuoi che venga eseguito. In questo esempio, il codice iniettato aggiungerà 2 punti invece di sottrarre 1:
 
 ![](<../../images/image (521).png>)
 

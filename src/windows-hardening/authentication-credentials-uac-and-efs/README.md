@@ -1,18 +1,18 @@
-# Controlli di Sicurezza di Windows
+# Windows Security Controls
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Politica di AppLocker
+## AppLocker Policy
 
-Un elenco di applicazioni approvate è un elenco di software o eseguibili approvati che sono autorizzati a essere presenti e a funzionare su un sistema. L'obiettivo è proteggere l'ambiente da malware dannosi e software non approvati che non si allineano con le specifiche esigenze aziendali di un'organizzazione.
+Un elenco di autorizzazione delle applicazioni è un elenco di applicazioni software o eseguibili approvati che possono essere presenti ed eseguiti su un sistema. L'obiettivo è proteggere l'ambiente da malware dannoso e software non approvato che non si allinea con le specifiche esigenze aziendali di un'organizzazione.
 
-[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) è la **soluzione di whitelisting delle applicazioni** di Microsoft e offre agli amministratori di sistema il controllo su **quali applicazioni e file gli utenti possono eseguire**. Fornisce **controllo granulare** su eseguibili, script, file di installazione di Windows, DLL, app confezionate e installatori di app confezionate.\
+[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) è la **soluzione di autorizzazione delle applicazioni** di Microsoft e offre agli amministratori di sistema il controllo su **quali applicazioni e file gli utenti possono eseguire**. Fornisce **controllo granulare** su eseguibili, script, file di installazione di Windows, DLL, app confezionate e installatori di app confezionate.\
 È comune per le organizzazioni **bloccare cmd.exe e PowerShell.exe** e l'accesso in scrittura a determinate directory, **ma tutto questo può essere aggirato**.
 
-### Controllo
+### Check
 
-Controlla quali file/estensioni sono nella lista nera/bianca:
-```powershell
+Controlla quali file/estensioni sono nella lista nera/nella lista bianca:
+```bash
 Get-ApplockerPolicy -Effective -xml
 
 Get-AppLockerPolicy -Effective | select -ExpandProperty RuleCollections
@@ -33,12 +33,12 @@ C:\Windows\System32\spool\drivers\color
 C:\Windows\Tasks
 C:\windows\tracing
 ```
-- I comuni **binaries** [**"LOLBAS's"**](https://lolbas-project.github.io/) possono essere utili per bypassare AppLocker.
-- **Regole scritte male possono essere bypassate**
+- I comuni **binaries** **"LOLBAS's"** possono essere utili per bypassare AppLocker.
+- **Regole scritte male possono anche essere bypassate**
 - Ad esempio, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, puoi creare una **cartella chiamata `allowed`** ovunque e sarà consentita.
-- Le organizzazioni spesso si concentrano sul **bloccare l'eseguibile `%System32%\WindowsPowerShell\v1.0\powershell.exe`**, ma dimenticano le **altre** [**posizioni eseguibili di PowerShell**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) come `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` o `PowerShell_ISE.exe`.
+- Le organizzazioni spesso si concentrano sul **blocco dell'eseguibile `%System32%\WindowsPowerShell\v1.0\powershell.exe`**, ma dimenticano le **altre** **posizioni degli eseguibili di PowerShell** come `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` o `PowerShell_ISE.exe`.
 - **L'applicazione delle DLL è molto raramente abilitata** a causa del carico aggiuntivo che può mettere su un sistema e della quantità di test necessari per garantire che nulla si rompa. Quindi utilizzare **DLL come backdoor aiuterà a bypassare AppLocker**.
-- Puoi usare [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) o [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) per **eseguire codice Powershell** in qualsiasi processo e bypassare AppLocker. Per ulteriori informazioni controlla: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
+- Puoi usare **ReflectivePick** o **SharpPick** per **eseguire codice Powershell** in qualsiasi processo e bypassare AppLocker. Per ulteriori informazioni controlla: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
 
 ## Archiviazione delle Credenziali
 
@@ -65,7 +65,7 @@ LSA potrebbe salvare su disco alcune credenziali:
 
 ### NTDS.dit
 
-È il database dell'Active Directory. È presente solo nei Controller di Dominio.
+È il database dell'Active Directory. È presente solo nei Domain Controllers.
 
 ## Defender
 
@@ -107,7 +107,7 @@ EFS protegge i file attraverso la crittografia, utilizzando una **chiave simmetr
 
 **Scenari di decrittazione senza iniziativa dell'utente** includono:
 
-- Quando file o cartelle vengono spostati su un file system non EFS, come [FAT32](https://en.wikipedia.org/wiki/File_Allocation_Table), vengono automaticamente decrittografati.
+- Quando file o cartelle vengono spostati in un file system non EFS, come [FAT32](https://en.wikipedia.org/wiki/File_Allocation_Table), vengono automaticamente decrittografati.
 - I file crittografati inviati attraverso la rete tramite il protocollo SMB/CIFS vengono decrittografati prima della trasmissione.
 
 Questo metodo di crittografia consente un **accesso trasparente** ai file crittografati per il proprietario. Tuttavia, cambiare semplicemente la password del proprietario e accedere non permetterà la decrittazione.
@@ -116,19 +116,19 @@ Questo metodo di crittografia consente un **accesso trasparente** ai file critto
 
 - EFS utilizza una FEK simmetrica, crittografata con la chiave pubblica dell'utente.
 - La decrittazione impiega la chiave privata dell'utente per accedere alla FEK.
-- La decrittazione automatica avviene in determinate condizioni, come il copia su FAT32 o la trasmissione in rete.
+- La decrittazione automatica avviene in condizioni specifiche, come la copia su FAT32 o la trasmissione in rete.
 - I file crittografati sono accessibili al proprietario senza passaggi aggiuntivi.
 
 ### Controlla le informazioni EFS
 
-Controlla se un **utente** ha **utilizzato** questo **servizio** verificando se esiste questo percorso:`C:\users\<username>\appdata\roaming\Microsoft\Protect`
+Controlla se un **utente** ha **utilizzato** questo **servizio** verificando se esiste questo percorso: `C:\users\<username>\appdata\roaming\Microsoft\Protect`
 
 Controlla **chi** ha **accesso** al file usando cipher /c \<file>\
 Puoi anche usare `cipher /e` e `cipher /d` all'interno di una cartella per **crittografare** e **decrittografare** tutti i file
 
 ### Decrittazione dei file EFS
 
-#### Essere Autorità di Sistema
+#### Essere Authority System
 
 Questo metodo richiede che l'**utente vittima** stia **eseguendo** un **processo** all'interno dell'host. Se è così, utilizzando una sessione `meterpreter` puoi impersonare il token del processo dell'utente (`impersonate_token` da `incognito`). Oppure potresti semplicemente `migrate` al processo dell'utente.
 
@@ -140,7 +140,7 @@ https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files
 
 ## Group Managed Service Accounts (gMSA)
 
-Microsoft ha sviluppato **Group Managed Service Accounts (gMSA)** per semplificare la gestione degli account di servizio nelle infrastrutture IT. A differenza degli account di servizio tradizionali che spesso hanno l'impostazione "**Password mai scaduta**" abilitata, i gMSA offrono una soluzione più sicura e gestibile:
+Microsoft ha sviluppato **Group Managed Service Accounts (gMSA)** per semplificare la gestione degli account di servizio nelle infrastrutture IT. A differenza degli account di servizio tradizionali che spesso hanno l'impostazione "**Password never expire**" abilitata, i gMSA offrono una soluzione più sicura e gestibile:
 
 - **Gestione automatica delle password**: i gMSA utilizzano una password complessa di 240 caratteri che cambia automaticamente in base alla politica del dominio o del computer. Questo processo è gestito dal Key Distribution Service (KDC) di Microsoft, eliminando la necessità di aggiornamenti manuali delle password.
 - **Sicurezza migliorata**: questi account sono immuni ai blocchi e non possono essere utilizzati per accessi interattivi, migliorando la loro sicurezza.
@@ -162,7 +162,7 @@ Inoltre, controlla questa [pagina web](https://cube0x0.github.io/Relaying-for-gM
 
 ## LAPS
 
-La **Local Administrator Password Solution (LAPS)**, disponibile per il download da [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), consente la gestione delle password degli amministratori locali. Queste password, che sono **randomizzate**, uniche e **cambiate regolarmente**, sono memorizzate centralmente in Active Directory. L'accesso a queste password è limitato tramite ACL a utenti autorizzati. Con permessi sufficienti concessi, è fornita la possibilità di leggere le password degli amministratori locali.
+La **Local Administrator Password Solution (LAPS)**, disponibile per il download da [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), consente la gestione delle password degli amministratori locali. Queste password, che sono **randomizzate**, uniche e **cambiate regolarmente**, sono memorizzate centralmente in Active Directory. L'accesso a queste password è limitato tramite ACL a utenti autorizzati. Con permessi sufficienti, è possibile leggere le password degli amministratori locali.
 
 {{#ref}}
 ../active-directory-methodology/laps.md
@@ -173,16 +173,16 @@ La **Local Administrator Password Solution (LAPS)**, disponibile per il download
 PowerShell [**Constrained Language Mode**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **blocca molte delle funzionalità** necessarie per utilizzare PowerShell in modo efficace, come il blocco degli oggetti COM, consentendo solo tipi .NET approvati, flussi di lavoro basati su XAML, classi PowerShell e altro ancora.
 
 ### **Controlla**
-```powershell
+```bash
 $ExecutionContext.SessionState.LanguageMode
 #Values could be: FullLanguage or ConstrainedLanguage
 ```
 ### Bypass
-```powershell
+```bash
 #Easy bypass
 Powershell -version 2
 ```
-In Windows attuale quel bypass non funzionerà, ma puoi usare [**PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM).\
+In Windows attuali, quel bypass non funzionerà, ma puoi usare [**PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM).\
 **Per compilarlo potresti aver bisogno di** **_Aggiungere un Riferimento_** -> _Sfoglia_ -> _Sfoglia_ -> aggiungi `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` e **cambiare il progetto in .Net4.5**.
 
 #### Bypass diretto:
@@ -195,10 +195,10 @@ C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogTo
 ```
 Puoi usare [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) o [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) per **eseguire codice Powershell** in qualsiasi processo e bypassare la modalità vincolata. Per ulteriori informazioni controlla: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
 
-## Politica di Esecuzione PS
+## PS Execution Policy
 
-Per impostazione predefinita è impostata su **riservata.** I principali modi per bypassare questa politica:
-```powershell
+Per impostazione predefinita è impostato su **restricted.** I principali modi per bypassare questa politica:
+```bash
 1º Just copy and paste inside the interactive PS console
 2º Read en Exec
 Get-Content .runme.ps1 | PowerShell.exe -noprofile -

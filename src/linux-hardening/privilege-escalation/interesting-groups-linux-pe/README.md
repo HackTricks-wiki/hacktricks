@@ -6,7 +6,7 @@
 
 ### **PE - Metodo 1**
 
-**A volte**, **per impostazione predefinita (o perché qualche software ne ha bisogno)** all'interno del **/etc/sudoers** file puoi trovare alcune di queste righe:
+**A volte**, **per impostazione predefinita (o perché alcuni software ne hanno bisogno)** all'interno del **/etc/sudoers** file puoi trovare alcune di queste righe:
 ```bash
 # Allow members of group sudo to execute any command
 %sudo	ALL=(ALL:ALL) ALL
@@ -26,7 +26,7 @@ Trova tutti i binari suid e controlla se c'è il binario **Pkexec**:
 ```bash
 find / -perm -4000 2>/dev/null
 ```
-Se scopri che il binario **pkexec è un binario SUID** e appartieni a **sudo** o **admin**, probabilmente potresti eseguire binari come sudo usando `pkexec`.\
+Se trovi che il binario **pkexec è un binario SUID** e appartieni a **sudo** o **admin**, probabilmente potresti eseguire binari come sudo usando `pkexec`.\
 Questo perché tipicamente questi sono i gruppi all'interno della **politica polkit**. Questa politica identifica fondamentalmente quali gruppi possono utilizzare `pkexec`. Controllalo con:
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
@@ -43,7 +43,7 @@ polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freed
 ==== AUTHENTICATION FAILED ===
 Error executing command as another user: Not authorized
 ```
-**Non è perché non hai permessi, ma perché non sei connesso senza una GUI**. E c'è una soluzione per questo problema qui: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Hai bisogno di **2 sessioni ssh diverse**:
+**Non è perché non hai permessi, ma perché non sei connesso senza una GUI**. E c'è una soluzione a questo problema qui: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Hai bisogno di **2 sessioni ssh diverse**:
 ```bash:session1
 echo $$ #Step1: Get current PID
 pkexec "/bin/bash" #Step 3, execute pkexec
@@ -141,7 +141,7 @@ debugfs: ls
 debugfs: cat /root/.ssh/id_rsa
 debugfs: cat /etc/shadow
 ```
-Nota che usando debugfs puoi anche **scrivere file**. Ad esempio, per copiare `/tmp/asd1.txt` in `/tmp/asd2.txt` puoi fare:
+Nota che utilizzando debugfs puoi anche **scrivere file**. Ad esempio, per copiare `/tmp/asd1.txt` in `/tmp/asd2.txt` puoi fare:
 ```bash
 debugfs -w /dev/sda1
 debugfs:  dump /tmp/asd1.txt /tmp/asd2.txt
@@ -163,7 +163,7 @@ Il **gruppo video** ha accesso per visualizzare l'output dello schermo. Fondamen
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
 ```
-Per **aprire** l'**immagine raw** puoi usare **GIMP**, selezionare il file **`screen.raw`** e selezionare come tipo di file **Raw image data**:
+Per **aprire** l'**immagine raw** puoi usare **GIMP**, selezionare il file **`screen.raw`** e selezionare come tipo di file **Dati immagine raw**:
 
 ![](<../../../images/image (463).png>)
 
@@ -173,7 +173,7 @@ Poi modifica la Larghezza e l'Altezza a quelle utilizzate sullo schermo e contro
 
 ## Gruppo Root
 
-Sembra che per impostazione predefinita i **membri del gruppo root** possano avere accesso a **modificare** alcuni file di configurazione dei **servizi** o alcuni file di **librerie** o **altre cose interessanti** che potrebbero essere utilizzate per escalare i privilegi...
+Sembra che per impostazione predefinita i **membri del gruppo root** possano avere accesso a **modificare** alcuni file di configurazione dei **servizi** o alcuni file di **librerie** o **altre cose interessanti** che potrebbero essere utilizzate per elevare i privilegi...
 
 **Controlla quali file i membri root possono modificare**:
 ```bash
@@ -218,7 +218,7 @@ https://fosterelli.co/privilege-escalation-via-docker.html
 ## Gruppo Adm
 
 Di solito i **membri** del gruppo **`adm`** hanno permessi per **leggere i file di log** situati in _/var/log/_.\
-Pertanto, se hai compromesso un utente all'interno di questo gruppo dovresti sicuramente dare un **occhiata ai log**.
+Pertanto, se hai compromesso un utente all'interno di questo gruppo, dovresti sicuramente dare un **occhiata ai log**.
 
 ## Gruppo Auth
 

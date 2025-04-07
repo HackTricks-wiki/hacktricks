@@ -10,7 +10,7 @@ La definizione è specificata in Interface Definition Language (IDL) utilizzando
 
 Queste definizioni hanno 5 sezioni:
 
-- **Dichiarazione del sottosistema**: La parola chiave subsystem è usata per indicare il **nome** e l'**id**. È anche possibile contrassegnarlo come **`KernelServer`** se il server deve essere eseguito nel kernel.
+- **Dichiarazione del sottosistema**: La parola chiave subsystem è usata per indicare il **nome** e l'**id**. È anche possibile marcarlo come **`KernelServer`** se il server deve essere eseguito nel kernel.
 - **Inclusioni e importazioni**: MIG utilizza il preprocessore C, quindi è in grado di utilizzare importazioni. Inoltre, è possibile utilizzare `uimport` e `simport` per il codice generato dall'utente o dal server.
 - **Dichiarazioni di tipo**: È possibile definire tipi di dati anche se di solito importerà `mach_types.defs` e `std_types.defs`. Per quelli personalizzati si può utilizzare una certa sintassi:
 - \[i`n/out]tran`: Funzione che deve essere tradotta da un messaggio in arrivo o a un messaggio in uscita
@@ -40,13 +40,13 @@ server_port :  mach_port_t;
 n1          :  uint32_t;
 n2          :  uint32_t);
 ```
-Nota che il primo **argomento è la porta da associare** e MIG gestirà **automaticamente la porta di risposta** (a meno che non venga chiamato `mig_get_reply_port()` nel codice del client). Inoltre, l'**ID delle operazioni** sarà **sequenziale** a partire dall'ID del sottosistema indicato (quindi se un'operazione è deprecata viene eliminata e `skip` viene utilizzato per continuare a utilizzare il suo ID).
+Nota che il primo **argomento è la porta da associare** e MIG gestirà **automaticamente la porta di risposta** (a meno che non venga chiamato `mig_get_reply_port()` nel codice del client). Inoltre, l'**ID delle operazioni** sarà **sequenziale** a partire dall'ID del sottosistema indicato (quindi se un'operazione è deprecata viene eliminata e `skip` viene utilizzato per continuare a usare il suo ID).
 
 Ora usa MIG per generare il codice del server e del client che sarà in grado di comunicare tra loro per chiamare la funzione Subtract:
 ```bash
 mig -header myipcUser.h -sheader myipcServer.h myipc.defs
 ```
-Saranno creati diversi nuovi file nella directory corrente.
+Diversi nuovi file verranno creati nella directory corrente.
 
 > [!TIP]
 > Puoi trovare un esempio più complesso nel tuo sistema con: `mdfind mach_port.defs`\
@@ -89,7 +89,7 @@ routine[1];
 {{#endtab}}
 {{#endtabs}}
 
-Basato sulla struttura precedente, la funzione **`myipc_server_routine`** otterrà il **message ID** e restituirà la funzione appropriata da chiamare:
+In base alla struttura precedente, la funzione **`myipc_server_routine`** otterrà il **message ID** e restituirà la funzione appropriata da chiamare:
 ```c
 mig_external mig_routine_t myipc_server_routine
 (mach_msg_header_t *InHeadP)
@@ -108,7 +108,7 @@ In questo esempio abbiamo definito solo 1 funzione nelle definizioni, ma se aves
 
 Se la funzione doveva inviare una **risposta**, la funzione `mig_internal kern_return_t __MIG_check__Reply__<name>` esisterebbe anche.
 
-In realtà è possibile identificare questa relazione nella struct **`subsystem_to_name_map_myipc`** da **`myipcServer.h`** (**`subsystem*to_name_map*\***`\*\* in altri file):
+In realtà è possibile identificare questa relazione nella struct **`subsystem_to_name_map_myipc`** da **`myipcServer.h`** (**`subsystem*to_name_map*\***`** in altri file):
 ```c
 #ifndef subsystem_to_name_map_myipc
 #define subsystem_to_name_map_myipc \
@@ -235,7 +235,7 @@ Poiché molti binari ora utilizzano MIG per esporre porte mach, è interessante 
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep MIG
 ```
-Inoltre, le funzioni MIG sono semplicemente wrapper della funzione reale che viene chiamata, il che significa che ottenendo la sua disassemblaggio e cercando BL potresti essere in grado di trovare la funzione effettiva che viene chiamata:
+Inoltre, le funzioni MIG sono semplicemente dei wrapper della funzione reale che viene chiamata, il che significa che ottenendo il suo disassemblaggio e cercando BL potresti essere in grado di trovare la funzione effettiva che viene chiamata:
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep BL
 ```

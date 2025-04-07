@@ -7,7 +7,7 @@ In questo scenario **il tuo dominio** sta **fidandosi** di alcuni **privilegi** 
 ## Enumerazione
 
 ### Fiducia in Uscita
-```powershell
+```bash
 # Notice Outbound trust
 Get-DomainTrust
 SourceName      : root.local
@@ -33,12 +33,12 @@ MemberDistinguishedName : CN=S-1-5-21-1028541967-2937615241-1935644758-1115,CN=F
 Una vulnerabilità di sicurezza esiste quando viene stabilita una relazione di fiducia tra due domini, identificati qui come dominio **A** e dominio **B**, dove il dominio **B** estende la sua fiducia al dominio **A**. In questa configurazione, un account speciale viene creato nel dominio **A** per il dominio **B**, che gioca un ruolo cruciale nel processo di autenticazione tra i due domini. Questo account, associato al dominio **B**, viene utilizzato per crittografare i ticket per accedere ai servizi tra i domini.
 
 L'aspetto critico da comprendere qui è che la password e l'hash di questo account speciale possono essere estratti da un Domain Controller nel dominio **A** utilizzando uno strumento da riga di comando. Il comando per eseguire questa azione è:
-```powershell
+```bash
 Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.my.domain.local
 ```
 Questa estrazione è possibile perché l'account, identificato con un **$** dopo il suo nome, è attivo e appartiene al gruppo "Domain Users" del dominio **A**, ereditando così i permessi associati a questo gruppo. Ciò consente agli individui di autenticarsi contro il dominio **A** utilizzando le credenziali di questo account.
 
-**Attenzione:** È fattibile sfruttare questa situazione per ottenere un accesso nel dominio **A** come utente, sebbene con permessi limitati. Tuttavia, questo accesso è sufficiente per eseguire l'enumerazione nel dominio **A**.
+**Attenzione:** È possibile sfruttare questa situazione per ottenere un accesso nel dominio **A** come utente, sebbene con permessi limitati. Tuttavia, questo accesso è sufficiente per eseguire l'enumerazione nel dominio **A**.
 
 In uno scenario in cui `ext.local` è il dominio fiducioso e `root.local` è il dominio fidato, un account utente chiamato `EXT$` verrebbe creato all'interno di `root.local`. Attraverso strumenti specifici, è possibile estrarre le chiavi di fiducia di Kerberos, rivelando le credenziali di `EXT$` in `root.local`. Il comando per ottenere questo è:
 ```bash

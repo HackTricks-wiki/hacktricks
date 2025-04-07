@@ -4,7 +4,7 @@
 
 ### Ricerca di componenti COM inesistenti
 
-Poiché i valori di HKCU possono essere modificati dagli utenti, **COM Hijacking** potrebbe essere utilizzato come un **meccanismo persistente**. Utilizzando `procmon`, è facile trovare registri COM cercati che non esistono e che un attaccante potrebbe creare per persistere. Filtri:
+Poiché i valori di HKCU possono essere modificati dagli utenti, **COM Hijacking** potrebbe essere utilizzato come un **meccanismo persistente**. Utilizzando `procmon` è facile trovare registri COM cercati che non esistono e che un attaccante potrebbe creare per persistere. Filtri:
 
 - Operazioni **RegOpenKey**.
 - dove il _Risultato_ è **NOME NON TROVATO**.
@@ -18,7 +18,7 @@ New-ItemProperty -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F
 ```
 ### Componenti COM del Task Scheduler suscettibili di hijacking
 
-Windows Tasks utilizzano Trigger personalizzati per chiamare oggetti COM e poiché vengono eseguiti tramite il Task Scheduler, è più facile prevedere quando verranno attivati.
+Windows Tasks utilizza Trigger personalizzati per chiamare oggetti COM e poiché vengono eseguiti tramite il Task Scheduler, è più facile prevedere quando verranno attivati.
 
 <pre class="language-powershell"><code class="lang-powershell"># Mostra i CLSID COM
 $Tasks = Get-ScheduledTask
@@ -47,11 +47,11 @@ Write-Host
 <strong># Nome Task:  Esempio
 </strong># Percorso Task:  \Microsoft\Windows\Esempio\
 # CLSID:  {1936ED8A-BD93-3213-E325-F38D112938E1}
-# [più simile al precedente...]</code></pre>
+# [più simile a quello precedente...]</code></pre>
 
 Controllando l'output puoi selezionare uno che verrà eseguito **ogni volta che un utente accede** ad esempio.
 
-Ora cercando il CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}** in **HKEY\_**_**CLASSES\_**_**ROOT\CLSID** e in HKLM e HKCU, di solito scoprirai che il valore non esiste in HKCU.
+Ora cercando il CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}** in **HKEY\CLASSES\ROOT\CLSID** e in HKLM e HKCU, di solito scoprirai che il valore non esiste in HKCU.
 ```bash
 # Exists in HKCR\CLSID\
 Get-ChildItem -Path "Registry::HKCR\CLSID\{1936ED8A-BD93-3213-E325-F38D112938EF}"

