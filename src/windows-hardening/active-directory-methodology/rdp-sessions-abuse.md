@@ -7,7 +7,7 @@
 Ako **spoljašnja grupa** ima **RDP pristup** bilo kojem **računaru** u trenutnom domenu, **napadač** bi mogao **kompromitovati taj računar i čekati ga**.
 
 Kada taj korisnik pristupi putem RDP-a, **napadač može preći na sesiju tog korisnika** i zloupotrebiti njegove dozvole u spoljašnjem domenu.
-```powershell
+```bash
 # Supposing the group "External Users" has RDP access in the current domain
 ## lets find where they could access
 ## The easiest way would be with bloodhound, but you could also run:
@@ -36,8 +36,8 @@ Proverite **druge načine za krađu sesija sa drugim alatima** [**na ovoj strani
 
 Ako korisnik pristupi **RDP-u na mašini** gde **napadač** čeka na njega, napadač će moći da **ubaci beacon u RDP sesiju korisnika** i ako je **žrtva montirala svoj disk** prilikom pristupa putem RDP-a, **napadač bi mogao da mu pristupi**.
 
-U ovom slučaju, mogli biste samo da **kompromitujete** **originalni računar žrtve** tako što ćete napisati **backdoor** u **startup folder**.
-```powershell
+U ovom slučaju, mogli biste samo **kompromitovati** **originalni računar žrtve** tako što ćete napisati **backdoor** u **folderu za pokretanje**.
+```bash
 # Wait til someone logs in:
 net logons
 Logged on users at \\localhost:

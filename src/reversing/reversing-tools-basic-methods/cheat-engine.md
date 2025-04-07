@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-[**Cheat Engine**](https://www.cheatengine.org/downloads.php) je koristan program za pronalaženje gde su važni podaci sačuvani unutar memorije pokrenute igre i njihovu promenu.\
+[**Cheat Engine**](https://www.cheatengine.org/downloads.php) je koristan program za pronalaženje gde su važni podaci sačuvani unutar memorije aktivne igre i njihovu promenu.\
 Kada ga preuzmete i pokrenete, **prikazuje** vam se **tutorijal** o tome kako koristiti alat. Ako želite da naučite kako da koristite alat, toplo se preporučuje da ga završite.
 
 ## Šta tražite?
@@ -34,13 +34,13 @@ Kada **pronađete** gde je **vrednost** koju tražite (više o tome u sledećim 
 
 ![](<../../images/image (563).png>)
 
-I konačno **označite kvačicu** da biste izvršili modifikaciju u memoriji:
+I konačno, **označite** kvačicu da biste izvršili modifikaciju u memoriji:
 
 ![](<../../images/image (385).png>)
 
 **Promena** u **memoriji** će odmah biti **primenjena** (imajte na umu da dok igra ne koristi ovu vrednost ponovo, vrednost **neće biti ažurirana u igri**).
 
-## Traženje vrednosti
+## Pretraživanje vrednosti
 
 Dakle, pretpostavićemo da postoji važna vrednost (kao što je život vašeg korisnika) koju želite da poboljšate, i tražite ovu vrednost u memoriji)
 
@@ -65,7 +65,7 @@ Dakle, počnite tako što ćete izvršiti skeniranje tipa "**Nepoznata početna 
 
 ![](<../../images/image (890).png>)
 
-Zatim, promenite vrednost, navedite **kako** se **vrednost** **promenila** (u mom slučaju smanjena je za 1) i izvršite **sledeće skeniranje**:
+Zatim, promenite vrednost, navedite **kako** se **vrednost** **promenila** (u mom slučaju je smanjena za 1) i izvršite **sledeće skeniranje**:
 
 ![](<../../images/image (371).png>)
 
@@ -90,11 +90,11 @@ Koristeći neke od pomenutih trikova, pronađite adresu gde vaša trenutna igra 
 **Prva opcija** je korisna da saznate koje **delove** **koda** koriste ovu **adresu** (što je korisno za više stvari kao što je **znanje gde možete modifikovati kod** igre).\
 **Druga opcija** je više **specifična**, i biće korisnija u ovom slučaju jer nas zanima da saznamo **odakle se ova vrednost piše**.
 
-Kada odaberete jednu od tih opcija, **debugger** će biti **priključen** na program i novi **prazan prozor** će se pojaviti. Sada, **igrajte** **igru** i **modifikujte** tu **vrednost** (bez ponovnog pokretanja igre). **Prozor** bi trebao biti **ispunjen** sa **adresama** koje **modifikuju** **vrednost**:
+Kada izaberete jednu od tih opcija, **debugger** će biti **priključen** na program i novi **prazan prozor** će se pojaviti. Sada, **igrajte** **igru** i **modifikujte** tu **vrednost** (bez ponovnog pokretanja igre). **Prozor** bi trebao biti **ispunjen** sa **adresama** koje **modifikuju** **vrednost**:
 
 ![](<../../images/image (91).png>)
 
-Sada kada ste pronašli adresu koja modifikuje vrednost, možete **modifikovati kod po svojoj želji** (Cheat Engine vam omogućava da ga brzo modifikujete za NOPs):
+Sada kada ste pronašli adresu koja modifikuje vrednost, možete **modifikovati kod po vašoj želji** (Cheat Engine vam omogućava da ga brzo modifikujete za NOPs):
 
 ![](<../../images/image (1057).png>)
 
@@ -102,7 +102,7 @@ Dakle, sada možete modifikovati tako da kod ne utiče na vaš broj, ili će uve
 
 ### Nasumična adresa u memoriji - Pronalaženje pokazivača
 
-Prateći prethodne korake, pronađite gde se nalazi vrednost koja vas zanima. Zatim, koristeći "**Saznajte šta piše na ovoj adresi**" saznajte koja adresa piše ovu vrednost i dvostruko kliknite na nju da biste dobili disassemblirani prikaz:
+Prateći prethodne korake, pronađite gde se nalazi vrednost koja vas zanima. Zatim, koristeći "**Saznajte šta piše na ovoj adresi**" saznajte koja adresa piše ovu vrednost i dvostruko kliknite na nju da biste dobili prikaz disasembly-a:
 
 ![](<../../images/image (1039).png>)
 
@@ -137,7 +137,7 @@ Dakle, zamislite da ste pronašli adresu koja oduzima 1 od života vašeg igrač
 
 ![](<../../images/image (203).png>)
 
-Kliknite na Prikaži disassembler da biste dobili **disassemblirani kod**.\
+Kliknite na Prikaži disassembler da biste dobili **disassembled kod**.\
 Zatim, kliknite **CTRL+a** da pozovete prozor Auto assemble i izaberite _**Template --> Injekcija koda**_
 
 ![](<../../images/image (902).png>)
@@ -150,7 +150,7 @@ Generisaće se šablon:
 
 ![](<../../images/image (944).png>)
 
-Dakle, umetnite svoj novi assembly kod u sekciju "**newmem**" i uklonite originalni kod iz "**originalcode**" ako ne želite da se izvršava\*\*.\*\* U ovom primeru, injektovani kod će dodati 2 poena umesto oduzimanja 1:
+Dakle, umetnite svoj novi assembly kod u sekciju "**newmem**" i uklonite originalni kod iz sekcije "**originalcode**" ako ne želite da se izvršava. U ovom primeru, injektovani kod će dodati 2 poena umesto oduzimanja 1:
 
 ![](<../../images/image (521).png>)
 

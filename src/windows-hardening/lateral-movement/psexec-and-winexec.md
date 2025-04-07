@@ -1,10 +1,10 @@
-# PsExec/Winexec/ScExec
+# PsExec/Winexec/ScExec/SMBExec
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Kako funkcionišu
 
-Proces je prikazan u koracima ispod, ilustrujući kako se binarni fajlovi servisa manipulišu da bi se postigla daljinska izvršenja na ciljnim mašinama putem SMB:
+Proces je opisan u koracima ispod, ilustrujući kako se binarni fajlovi servisa manipulišu da bi se postigla daljinska izvršenja na ciljnim mašinama putem SMB:
 
 1. **Kopiranje binarnog fajla servisa na ADMIN$ share preko SMB** se vrši.
 2. **Kreiranje servisa na udaljenoj mašini** se vrši upućivanjem na binarni fajl.
@@ -13,24 +13,37 @@ Proces je prikazan u koracima ispod, ilustrujući kako se binarni fajlovi servis
 
 ### **Proces ručnog izvršavanja PsExec**
 
-Pretpostavljajući da postoji izvršni payload (napravljen sa msfvenom i obfuskovan korišćenjem Veil-a da bi se izbegla detekcija antivirusom), nazvan 'met8888.exe', koji predstavlja meterpreter reverse_http payload, sledeći koraci se preduzimaju:
+Pretpostavljajući da postoji izvršni payload (napravljen sa msfvenom i obfuskiran koristeći Veil da bi izbegao detekciju antivirusnog softvera), nazvan 'met8888.exe', koji predstavlja meterpreter reverse_http payload, sledeći koraci se preduzimaju:
 
 - **Kopiranje binarnog fajla**: Izvršni fajl se kopira na ADMIN$ share iz komandne linije, iako može biti postavljen bilo gde na fajl sistemu da bi ostao skriven.
+- Umesto kopiranja binarnog fajla, takođe je moguće koristiti LOLBAS binarni fajl kao što je `powershell.exe` ili `cmd.exe` da se izvrše komande direktno iz argumenata. Npr. `sc create [ServiceName] binPath= "cmd.exe /c [PayloadCommand]"`
 - **Kreiranje servisa**: Korišćenjem Windows `sc` komande, koja omogućava upit, kreiranje i brisanje Windows servisa daljinski, kreira se servis nazvan "meterpreter" koji upućuje na otpremljeni binarni fajl.
 - **Pokretanje servisa**: Poslednji korak uključuje pokretanje servisa, što će verovatno rezultirati "time-out" greškom zbog toga što binarni fajl nije pravi binarni fajl servisa i ne uspeva da vrati očekivani kod odgovora. Ova greška je beznačajna jer je primarni cilj izvršenje binarnog fajla.
 
-Posmatranje Metasploit slušatelja će otkriti da je sesija uspešno inicirana.
+Posmatranje Metasploit slušatelja će otkriti da je sesija uspešno započeta.
 
-[Saaznajte više o `sc` komandi](https://technet.microsoft.com/en-us/library/bb490995.aspx).
+[Saznajte više o `sc` komandi](https://technet.microsoft.com/en-us/library/bb490995.aspx).
 
 Pronađite detaljnije korake u: [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
 
-**Takođe možete koristiti Windows Sysinternals binarni fajl PsExec.exe:**
+- Takođe možete koristiti **Windows Sysinternals binarni fajl PsExec.exe**:
 
 ![](<../../images/image (928).png>)
 
-Takođe možete koristiti [**SharpLateral**](https://github.com/mertdas/SharpLateral):
+Ili mu pristupiti putem webddav:
+```bash
+\\live.sysinternals.com\tools\PsExec64.exe -accepteula
+```
+- Takođe možete koristiti [**SharpLateral**](https://github.com/mertdas/SharpLateral):
 ```bash
 SharpLateral.exe redexec HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe.exe malware.exe ServiceName
 ```
+- Takođe možete koristiti [**SharpMove**](https://github.com/0xthirteen/SharpMove):
+```bash
+SharpMove.exe action=modsvc computername=remote.host.local command="C:\windows\temp\payload.exe" amsi=true servicename=TestService
+SharpMove.exe action=startservice computername=remote.host.local servicename=TestService
+```
+- Takođe možete koristiti **Impacketov `psexec` i `smbexec.py`**.
+
+
 {{#include ../../banners/hacktricks-training.md}}

@@ -126,7 +126,7 @@ Proverite sve ove baze sa: [https://github.com/dhondta/python-codext](https://gi
 ```
 .... --- .-.. -.-. .- .-. .- -.-. --- .-.. .-
 ```
-- [http://k4.cba.pl/dw/crypo/tools/eng_morse-encode.html](http://k4.cba.pl/dw/crypo/tools/eng_morse-encode.html) - 404 Mrtav: [https://gchq.github.io/CyberChef/](https://gchq.github.io/CyberChef/)
+- [http://k4.cba.pl/dw/crypo/tools/eng_morse-encode.html](http://k4.cba.pl/dw/crypo/tools/eng_morse-encode.html) - 404 Dead: [https://gchq.github.io/CyberChef/](https://gchq.github.io/CyberChef/)
 
 ### UUencoder
 ```
@@ -137,6 +137,8 @@ F3$%(3TQ!2$],04A/3$%(3TQ!2$],04A/3$%(3TQ!2$],04A/3$$`
 `
 end
 ```
+- [http://www.webutils.pl/index.php?idx=uu](http://www.webutils.pl/index.php?idx=uu)
+
 ### XXEncoder
 ```
 begin 644 webutils_pl
@@ -186,17 +188,17 @@ Pismo u broj `(ax+b)%26` (_a_ i _b_ su ključevi, a _x_ je pismo) i rezultat naz
 ```
 krodfdudfrod
 ```
-### SMS Kod
+### SMS Code
 
-**Multitap** [menja slovo](https://www.dcode.fr/word-letter-change) ponovljenim ciframa definisanim odgovarajućim kodom tastera na mobilnom [tastaturi telefona](https://www.dcode.fr/phone-keypad-cipher) (Ovaj način se koristi prilikom pisanja SMS-a).\
+**Multitap** [replaces a letter](https://www.dcode.fr/word-letter-change) by repeated digits defined by the corresponding key code on a mobile [phone keypad](https://www.dcode.fr/phone-keypad-cipher) (Ovaj način se koristi prilikom pisanja SMS-a).\
 Na primer: 2=A, 22=B, 222=C, 3=D...\
-Možete identifikovati ovaj kod jer ćete videti\*\* nekoliko ponovljenih brojeva\*\*.
+Možete identifikovati ovaj kod jer ćete videti **nekoliko ponovljenih brojeva**.
 
 Možete dekodirati ovaj kod na: [https://www.dcode.fr/multitap-abc-cipher](https://www.dcode.fr/multitap-abc-cipher)
 
-### Bacon Kod
+### Bacon Code
 
-Zamenite svako slovo sa 4 A ili B (ili 1 i 0)
+Substitude each letter for 4 As or Bs (or 1s and 0s)
 ```
 00111 01101 01010 00000 00010 00000 10000 00000 00010 01101 01010 00000
 AABBB ABBAB ABABA AAAAA AAABA AAAAA BAAAA AAAAA AAABA ABBAB ABABA AAAAA
@@ -217,7 +219,7 @@ AABBB ABBAB ABABA AAAAA AAABA AAAAA BAAAA AAAAA AAABA ABBAB ABABA AAAAA
 
 ### Bifid
 
-Potrebna je ključna reč
+Potrebna je ključna reč.
 ```
 fgaargaamnlunesuneoa
 ```

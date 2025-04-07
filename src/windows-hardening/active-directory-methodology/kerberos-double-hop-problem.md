@@ -7,7 +7,7 @@
 
 Kerberos "Double Hop" problem se pojavljuje kada napadač pokušava da koristi **Kerberos autentifikaciju preko dva** **hopa**, na primer koristeći **PowerShell**/**WinRM**.
 
-Kada se **autentifikacija** vrši putem **Kerberos-a**, **akreditivi** **nisu** keširani u **memoriji.** Stoga, ako pokrenete mimikatz nećete **pronaći akreditive** korisnika na mašini čak i ako on pokreće procese.
+Kada se **autentifikacija** vrši putem **Kerberos-a**, **akreditivi** **nisu** keširani u **memoriji.** Stoga, ako pokrenete mimikatz nećete naći **akreditive** korisnika na mašini čak i ako on pokreće procese.
 
 To je zato što su koraci prilikom povezivanja sa Kerberos-om sledeći:
 
@@ -23,22 +23,22 @@ Ako je **neograničena delegacija** omogućena na PC-u, to se neće desiti jer �
 
 ### CredSSP
 
-Još jedan način da se izbegne ovaj problem koji je [**posebno nesiguran**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7) je **Credential Security Support Provider**. Od Microsoft-a:
+Još jedan način da se izbegne ovaj problem koji je [**značajno nesiguran**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7) je **Credential Security Support Provider**. Od Microsoft-a:
 
 > CredSSP autentifikacija delegira korisničke akreditive sa lokalnog računara na udaljeni računar. Ova praksa povećava sigurnosni rizik udaljene operacije. Ako je udaljeni računar kompromitovan, kada se akreditive proslede njemu, akreditive se mogu koristiti za kontrolu mrežne sesije.
 
-Preporučuje se da **CredSSP** bude onemogućen na produkcionim sistemima, osetljivim mrežama i sličnim okruženjima zbog sigurnosnih razloga. Da biste utvrdili da li je **CredSSP** omogućen, može se pokrenuti komanda `Get-WSManCredSSP`. Ova komanda omogućava **proveru statusa CredSSP** i može se čak izvršiti daljinski, pod uslovom da je **WinRM** omogućen.
-```powershell
+Preporučuje se da **CredSSP** bude onemogućen na produkcionim sistemima, osetljivim mrežama i sličnim okruženjima zbog sigurnosnih problema. Da biste utvrdili da li je **CredSSP** omogućen, može se pokrenuti komanda `Get-WSManCredSSP`. Ova komanda omogućava **proveru statusa CredSSP** i može se čak izvršiti daljinski, pod uslovom da je **WinRM** omogućen.
+```bash
 Invoke-Command -ComputerName bizintel -Credential ta\redsuit -ScriptBlock {
 Get-WSManCredSSP
 }
 ```
-## Obilaznice
+## Workarounds
 
-### Pozivanje komande
+### Invoke Command
 
-Da bi se rešio problem dvostrukog skakanja, predstavljena je metoda koja uključuje ugnježdeni `Invoke-Command`. Ovo ne rešava problem direktno, ali nudi obilaznicu bez potrebe za posebnim konfiguracijama. Pristup omogućava izvršavanje komande (`hostname`) na sekundarnom serveru putem PowerShell komande izvršene sa inicijalne napadačke mašine ili kroz prethodno uspostavljenu PS-Session sa prvim serverom. Evo kako se to radi:
-```powershell
+Da bi se rešio problem dvostrukog skoka, predstavljen je metod koji uključuje ugnježdeni `Invoke-Command`. Ovo ne rešava problem direktno, ali nudi rešenje bez potrebe za posebnim konfiguracijama. Pristup omogućava izvršavanje komande (`hostname`) na sekundarnom serveru putem PowerShell komande izvršene sa početne napadačke mašine ili kroz prethodno uspostavljenu PS-Session sa prvim serverom. Evo kako se to radi:
+```bash
 $cred = Get-Credential ta\redsuit
 Invoke-Command -ComputerName bizintel -Credential $cred -ScriptBlock {
 Invoke-Command -ComputerName secdev -Credential $cred -ScriptBlock {hostname}
@@ -49,7 +49,7 @@ Alternativno, preporučuje se uspostavljanje PS-Session sa prvim serverom i pokr
 ### Registracija PSSession Konfiguracije
 
 Rešenje za zaobilaženje problema sa dvostrukim skakanjem uključuje korišćenje `Register-PSSessionConfiguration` sa `Enter-PSSession`. Ova metoda zahteva drugačiji pristup od `evil-winrm` i omogućava sesiju koja ne pati od ograničenja dvostrukog skakanja.
-```powershell
+```bash
 Register-PSSessionConfiguration -Name doublehopsess -RunAsCredential domain_name\username
 Restart-Service WinRM
 Enter-PSSession -ConfigurationName doublehopsess -ComputerName <pc_name> -Credential domain_name\username
@@ -74,9 +74,9 @@ Instalacija OpenSSH na prvom serveru omogućava rešenje za problem dvostrukog s
 
 #### Koraci za instalaciju OpenSSH
 
-1. Preuzmite i premestite najnoviju OpenSSH zip datoteku na ciljni server.
+1. Preuzmite i premestite najnoviju OpenSSH verziju zip datoteke na ciljni server.
 2. Raspakujte i pokrenite `Install-sshd.ps1` skriptu.
-3. Dodajte pravilo vatrozida za otvaranje porta 22 i proverite da li SSH usluge rade.
+3. Dodajte pravilo vatrozida da otvorite port 22 i proverite da li SSH usluge rade.
 
 Da biste rešili greške `Connection reset`, možda će biti potrebno ažurirati dozvole kako bi svako imao pristup za čitanje i izvršavanje u OpenSSH direktorijumu.
 ```bash

