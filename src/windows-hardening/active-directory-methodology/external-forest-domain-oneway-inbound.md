@@ -7,7 +7,7 @@
 ## Καταμέτρηση
 
 Πρώτα απ' όλα, πρέπει να **καταμετρήσετε** την **εμπιστοσύνη**:
-```powershell
+```bash
 Get-DomainTrust
 SourceName      : a.domain.local   --> Current domain
 TargetName      : domain.external  --> Destination domain
@@ -56,14 +56,14 @@ IsDomain     : True
 # You may also enumerate where foreign groups and/or users have been assigned
 # local admin access via Restricted Group by enumerating the GPOs in the foreign domain.
 ```
-Στην προηγούμενη καταμέτρηση βρέθηκε ότι ο χρήστης **`crossuser`** είναι μέσα στην ομάδα **`External Admins`** που έχει **Admin access** μέσα στο **DC του εξωτερικού τομέα**.
+Στην προηγούμενη αρίθμηση βρέθηκε ότι ο χρήστης **`crossuser`** είναι μέσα στην ομάδα **`External Admins`** που έχει **Admin access** μέσα στο **DC του εξωτερικού τομέα**.
 
 ## Αρχική Πρόσβαση
 
-Αν **δεν μπορέσατε** να βρείτε καμία **ειδική** πρόσβαση του χρήστη σας στον άλλο τομέα, μπορείτε ακόμα να επιστρέψετε στη Μεθοδολογία AD και να προσπαθήσετε να **privesc από έναν μη προνομιούχο χρήστη** (πράγματα όπως το kerberoasting για παράδειγμα):
+Αν **δεν μπορέσατε** να βρείτε καμία **ειδική** πρόσβαση του χρήστη σας στον άλλο τομέα, μπορείτε να επιστρέψετε στη Μεθοδολογία AD και να προσπαθήσετε να **privesc από έναν μη προνομιούχο χρήστη** (πράγματα όπως το kerberoasting για παράδειγμα):
 
-Μπορείτε να χρησιμοποιήσετε τις **Powerview functions** για να **καταμετρήσετε** τον **άλλο τομέα** χρησιμοποιώντας την παράμετρο `-Domain` όπως στο:
-```powershell
+Μπορείτε να χρησιμοποιήσετε τις **Powerview functions** για να **enumerate** τον **άλλο τομέα** χρησιμοποιώντας την παράμετρο `-Domain` όπως στο:
+```bash
 Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ```
 {{#ref}}
@@ -74,20 +74,20 @@ Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 
 ### Σύνδεση
 
-Χρησιμοποιώντας μια κανονική μέθοδο με τα διαπιστευτήρια των χρηστών που έχουν πρόσβαση στο εξωτερικό domain, θα πρέπει να μπορείτε να αποκτήσετε πρόσβαση:
-```powershell
+Χρησιμοποιώντας μια κανονική μέθοδο με τα διαπιστευτήρια των χρηστών που έχουν πρόσβαση στο εξωτερικό domain, θα πρέπει να μπορείτε να έχετε πρόσβαση:
+```bash
 Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\administrator
 ```
 ### Κατάχρηση Ιστορικού SID
 
-Μπορείτε επίσης να καταχραστείτε [**Ιστορικό SID**](sid-history-injection.md) σε ένα δάσος εμπιστοσύνης.
+Μπορείτε επίσης να καταχραστείτε το [**Ιστορικό SID**](sid-history-injection.md) σε ένα δάσος εμπιστοσύνης.
 
 Εάν ένας χρήστης μεταφερθεί **από ένα δάσος σε άλλο** και **η Φιλτράρισμα SID δεν είναι ενεργοποιημένη**, γίνεται δυνατή η **προσθήκη ενός SID από το άλλο δάσος**, και αυτό το **SID** θα **προστεθεί** στο **token του χρήστη** κατά την αυθεντικοποίηση **μέσω της εμπιστοσύνης**.
 
 > [!WARNING]
 > Ως υπενθύμιση, μπορείτε να αποκτήσετε το κλειδί υπογραφής με
 >
-> ```powershell
+> ```bash
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.domain.local
 > ```
 

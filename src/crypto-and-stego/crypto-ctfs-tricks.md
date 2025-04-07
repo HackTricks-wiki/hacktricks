@@ -4,7 +4,7 @@
 
 ## Online Hashes DBs
 
-- _**Google it**_
+- _**Google το**_
 - [http://hashtoolkit.com/reverse-hash?hash=4d186321c1a7f0f354b297e8914ab240](http://hashtoolkit.com/reverse-hash?hash=4d186321c1a7f0f354b297e8914ab240)
 - [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com)
 - [https://crackstation.net/](https://crackstation.net)
@@ -19,7 +19,7 @@
 ## Magic Autosolvers
 
 - [**https://github.com/Ciphey/Ciphey**](https://github.com/Ciphey/Ciphey)
-- [https://gchq.github.io/CyberChef/](https://gchq.github.io/CyberChef/) (Magic module)
+- [https://gchq.github.io/CyberChef/](https://gchq.github.io/CyberChef/) (Μαγικό module)
 - [https://github.com/dhondta/python-codext](https://github.com/dhondta/python-codext)
 - [https://www.boxentriq.com/code-breaking](https://www.boxentriq.com/code-breaking)
 
@@ -120,7 +120,7 @@
 ```
 ╫☐↑Λ↻Λ┏Λ↻☐↑Λ
 ```
-- [http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html](http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html) - 404 Dead: [https://web.archive.org/web/20190228181208/http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html](https://web.archive.org/web/20190228181208/http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html)
+- [http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html](http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html) - 404 Νεκρός: [https://web.archive.org/web/20190228181208/http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html](https://web.archive.org/web/20190228181208/http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html)
 
 ### Μορς
 ```
@@ -192,7 +192,7 @@ krodfdudfrod
 
 **Multitap** [αντικαθιστά ένα γράμμα](https://www.dcode.fr/word-letter-change) με επαναλαμβανόμενους ψηφίους που καθορίζονται από τον αντίστοιχο κωδικό πλήκτρου σε ένα κινητό [πληκτρολόγιο τηλεφώνου](https://www.dcode.fr/phone-keypad-cipher) (Αυτή η λειτουργία χρησιμοποιείται κατά την αποστολή SMS).\
 Για παράδειγμα: 2=A, 22=B, 222=C, 3=D...\
-Μπορείτε να αναγνωρίσετε αυτόν τον κωδικό γιατί θα δείτε\*\* αρκετούς αριθμούς επαναλαμβανόμενους\*\*.
+Μπορείτε να αναγνωρίσετε αυτόν τον κωδικό γιατί θα δείτε **πολλούς επαναλαμβανόμενους αριθμούς**.
 
 Μπορείτε να αποκωδικοποιήσετε αυτόν τον κωδικό στο: [https://www.dcode.fr/multitap-abc-cipher](https://www.dcode.fr/multitap-abc-cipher)
 
@@ -211,7 +211,7 @@ AABBB ABBAB ABABA AAAAA AAABA AAAAA BAAAA AAAAA AAABA ABBAB ABABA AAAAA
 
 **Raw Deflate** και **Raw Inflate** (μπορείτε να βρείτε και τα δύο στο Cyberchef) μπορούν να συμπιέσουν και να αποσυμπιέσουν δεδομένα χωρίς κεφαλίδες.
 
-## Εύκολη Κρυπτογράφηση
+## Εύκολη Κρυπτογραφία
 
 ### XOR - Αυτόματη Λύση
 
@@ -219,7 +219,7 @@ AABBB ABBAB ABABA AAAAA AAABA AAAAA BAAAA AAAAA AAABA ABBAB ABABA AAAAA
 
 ### Bifid
 
-Απαιτείται μια λέξη-κλειδί
+Απαιτείται μια λέξη-κλειδί.
 ```
 fgaargaamnlunesuneoa
 ```
@@ -237,7 +237,7 @@ wodsyoidrods
 
 ### Fernet
 
-2 base64 strings (token και key)
+2 base64 συμβολοσειρές (token και key)
 ```
 Token:
 gAAAAABWC9P7-9RsxTz_dwxh9-O2VUB7Ih8UCQL1_Zk4suxnkCvb26Ie4i8HSUJ4caHZuiNtjLl3qfmCv_fS3_VpjL7HxCz7_Q==

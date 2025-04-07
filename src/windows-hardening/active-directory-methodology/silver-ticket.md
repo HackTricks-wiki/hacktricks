@@ -6,7 +6,11 @@
 
 ## Silver ticket
 
-Η επίθεση **Silver Ticket** περιλαμβάνει την εκμετάλλευση υπηρεσιακών εισιτηρίων σε περιβάλλοντα Active Directory (AD). Αυτή η μέθοδος βασίζεται στην **απόκτηση του NTLM hash ενός λογαριασμού υπηρεσίας**, όπως ενός λογαριασμού υπολογιστή, για να κατασκευαστεί ένα εισιτήριο Ticket Granting Service (TGS). Με αυτό το πλαστό εισιτήριο, ένας επιτιθέμενος μπορεί να έχει πρόσβαση σε συγκεκριμένες υπηρεσίες στο δίκτυο, **υποδυόμενος οποιονδήποτε χρήστη**, συνήθως στοχεύοντας σε διοικητικά δικαιώματα. Τονίζεται ότι η χρήση κλειδιών AES για την κατασκευή εισιτηρίων είναι πιο ασφαλής και λιγότερο ανιχνεύσιμη.
+Η επίθεση **Silver Ticket** περιλαμβάνει την εκμετάλλευση υπηρεσιακών εισιτηρίων σε περιβάλλοντα Active Directory (AD). Αυτή η μέθοδος βασίζεται στην **απόκτηση του NTLM hash ενός λογαριασμού υπηρεσίας**, όπως ενός λογαριασμού υπολογιστή, για να κατασκευαστεί ένα Ticket Granting Service (TGS) ticket. Με αυτό το πλαστό εισιτήριο, ένας επιτιθέμενος μπορεί να έχει πρόσβαση σε συγκεκριμένες υπηρεσίες στο δίκτυο, **υποδυόμενος οποιονδήποτε χρήστη**, συνήθως στοχεύοντας σε διοικητικά δικαιώματα. Τονίζεται ότι η χρήση κλειδιών AES για την κατασκευή εισιτηρίων είναι πιο ασφαλής και λιγότερο ανιχνεύσιμη.
+
+> [!WARNING]
+> Τα Silver Tickets είναι λιγότερο ανιχνεύσιμα από τα Golden Tickets επειδή απαιτούν μόνο το **hash του λογαριασμού υπηρεσίας**, όχι τον λογαριασμό krbtgt. Ωστόσο, είναι περιορισμένα στην συγκεκριμένη υπηρεσία που στοχεύουν. Επιπλέον, απλώς κλέβοντας τον κωδικό πρόσβασης ενός χρήστη.
+Επιπλέον, αν παραβιάσετε τον **κωδικό πρόσβασης ενός λογαριασμού με SPN** μπορείτε να χρησιμοποιήσετε αυτόν τον κωδικό πρόσβασης για να δημιουργήσετε ένα Silver Ticket υποδυόμενοι οποιονδήποτε χρήστη σε αυτή την υπηρεσία.
 
 Για την κατασκευή εισιτηρίων, χρησιμοποιούνται διάφορα εργαλεία ανάλογα με το λειτουργικό σύστημα:
 
@@ -18,6 +22,11 @@ python psexec.py <DOMAIN>/<USER>@<TARGET> -k -no-pass
 ```
 ### Στα Windows
 ```bash
+# Using Rubeus
+## /ldap option is used to get domain data automatically
+## With /ptt we already load the tickt in memory
+rubeus.exe asktgs /user:<USER> [/rc4:<HASH> /aes128:<HASH> /aes256:<HASH>] /domain:<DOMAIN> /ldap /service:cifs/domain.local /ptt /nowrap /printcmd
+
 # Create the ticket
 mimikatz.exe "kerberos::golden /domain:<DOMAIN> /sid:<DOMAIN_SID> /rc4:<HASH> /user:<USER> /service:<SERVICE> /target:<TARGET>"
 
@@ -33,25 +42,29 @@ mimikatz.exe "kerberos::ptt <TICKET_FILE>"
 ## Διαθέσιμες Υπηρεσίες
 
 | Τύπος Υπηρεσίας                            | Υπηρεσία Silver Tickets                                                   |
-| ------------------------------------------ | ------------------------------------------------------------------------- |
-| WMI                                        | <p>HOST</p><p>RPCSS</p>                                                 |
-| PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>Ανάλογα με το OS επίσης:</p><p>WSMAN</p><p>RPCSS</p> |
+| ------------------------------------------ | ------------------------------------------------------------------------ |
+| WMI                                        | <p>HOST</p><p>RPCSS</p>                                                |
+| PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>Ανάλογα με το λειτουργικό σύστημα επίσης:</p><p>WSMAN</p><p>RPCSS</p> |
 | WinRM                                      | <p>HOST</p><p>HTTP</p><p>Σε ορισμένες περιπτώσεις μπορείτε απλώς να ζητήσετε: WINRM</p> |
-| Προγραμματισμένα Καθήκοντα                | HOST                                                                     |
-| Κοινή Χρήση Αρχείων Windows, επίσης psexec | CIFS                                                                     |
-| Λειτουργίες LDAP, συμπεριλαμβανομένου του DCSync | LDAP                                                                     |
-| Εργαλεία Διαχείρισης Απομακρυσμένου Διακομιστή Windows | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                       |
-| Χρυσά Εισιτήρια                            | krbtgt                                                                   |
+| Προγραμματισμένα Καθήκοντα                | HOST                                                                   |
+| Κοινή Χρήση Αρχείων Windows, επίσης psexec | CIFS                                                                   |
+| Λειτουργίες LDAP, συμπεριλαμβανομένου του DCSync | LDAP                                                                   |
+| Εργαλεία Διαχείρισης Απομακρυσμένου Διακομιστή Windows | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                     |
+| Χρυσά Εισιτήρια                            | krbtgt                                                                 |
 
 Χρησιμοποιώντας **Rubeus** μπορείτε να **ζητήσετε όλα** αυτά τα εισιτήρια χρησιμοποιώντας την παράμετρο:
 
 - `/altservice:host,RPCSS,http,wsman,cifs,ldap,krbtgt,winrm`
 
-### Event IDs Εισιτηρίων Silver
+### IDs Εκδηλώσεων Silver tickets
 
 - 4624: Σύνδεση Λογαριασμού
 - 4634: Αποσύνδεση Λογαριασμού
 - 4672: Σύνδεση Διαχειριστή
+
+## Επιμονή
+
+Για να αποφευχθεί η περιστροφή του κωδικού πρόσβασης των μηχανών κάθε 30 ημέρες, ρυθμίστε `HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange = 1` ή μπορείτε να ρυθμίσετε `HKLM\SYSTEM\CurrentControlSet\Services\NetLogon\Parameters\MaximumPasswordAge` σε μεγαλύτερη τιμή από 30 ημέρες για να υποδείξετε την περίοδο περιστροφής κατά την οποία θα πρέπει να περιστραφεί ο κωδικός πρόσβασης της μηχανής.
 
 ## Κατάχρηση Εισιτηρίων Υπηρεσίας
 
@@ -126,14 +139,16 @@ mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.loc
 ```
 **Μάθετε περισσότερα για το DCSync** στην παρακάτω σελίδα:
 
+{{#ref}}
+dcsync.md
+{{#endref}}
+
+
 ## Αναφορές
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets)
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
-
-{{#ref}}
-dcsync.md
-{{#endref}}
+- [https://techcommunity.microsoft.com/blog/askds/machine-account-password-process/396027](https://techcommunity.microsoft.com/blog/askds/machine-account-password-process/396027)
 
 
 

