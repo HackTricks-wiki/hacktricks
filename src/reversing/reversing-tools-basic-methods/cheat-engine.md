@@ -10,7 +10,7 @@
 ![](<../../images/image (762).png>)
 
 Bu araç, bir programın belleğinde **bir değerin** (genellikle bir sayı) **nerede saklandığını** bulmak için çok yararlıdır.\
-**Genellikle sayılar** **4byte** formatında saklanır, ancak bunları **double** veya **float** formatlarında da bulabilirsiniz veya **bir sayıdan farklı bir şey** aramak isteyebilirsiniz. Bu nedenle, neyi **arama** yapmak istediğinizi **seçtiğinizden** emin olmalısınız:
+**Genellikle sayılar** **4bayt** formatında saklanır, ancak bunları **double** veya **float** formatlarında da bulabilirsiniz veya **bir sayıdan farklı** bir şey aramak isteyebilirsiniz. Bu nedenle, neyi **arama** yapmak istediğinizi **seçtiğinizden** emin olmalısınız:
 
 ![](<../../images/image (324).png>)
 
@@ -28,23 +28,23 @@ _**Düzenle --> Ayarlar --> Kısayollar**_ bölümünde, **oyunu durdurma** gibi
 
 ![](<../../images/image (864).png>)
 
-## Değeri Değiştirme
+## Değeri değiştirme
 
-Aradığınız **değerin** nerede olduğunu **bulduğunuzda** (bununla ilgili daha fazla bilgi sonraki adımlarda) üzerine çift tıklayarak **değiştirebilirsiniz**, ardından değerine çift tıklayın:
+Aradığınız **değeri** nerede **bulduysanız** (bununla ilgili daha fazla bilgi sonraki adımlarda) çift tıklayarak **değiştirebilirsiniz**, ardından değerine çift tıklayın:
 
 ![](<../../images/image (563).png>)
 
-Ve son olarak, bellekteki değişikliği gerçekleştirmek için **onay kutusunu işaretleyin**:
+Ve son olarak, bellekteki değişikliği yapmak için **onay kutusunu işaretleyin**:
 
 ![](<../../images/image (385).png>)
 
-**Bellekteki değişiklik** hemen **uygulanacaktır** (oyun bu değeri tekrar kullanmadığı sürece değer **oyunda güncellenmeyecektir**).
+Bellekteki **değişiklik** hemen **uygulanacaktır** (oyun bu değeri tekrar kullanmadığı sürece değer **oyunda güncellenmeyecektir**).
 
-## Değeri Arama
+## Değeri arama
 
-Öyleyse, geliştirmek istediğiniz önemli bir değer (kullanıcınızın hayatı gibi) olduğunu varsayıyoruz ve bu değeri bellekte arıyorsunuz.
+Öyleyse, kullanıcı yaşamı gibi önemli bir değeri geliştirmek istediğinizi varsayalım ve bu değeri bellekte arıyorsunuz.
 
-### Bilinen bir değişim yoluyla
+### Bilinen değişim yoluyla
 
 100 değerini aradığınızı varsayalım, bu değeri aramak için bir **tarama** yapıyorsunuz ve birçok eşleşme buluyorsunuz:
 
@@ -59,7 +59,7 @@ _Eğer hala birkaç değer varsa, o değeri tekrar değiştirmek için bir şey 
 
 ### Bilinmeyen Değer, bilinen değişim
 
-Değeri **bilmiyorsanız** ama **değiştirmek için ne yapacağınızı** biliyorsanız (ve hatta değişimin değerini de biliyorsanız) numaranızı arayabilirsiniz.
+Eğer **değeri bilmiyorsanız** ama **değiştirmek için ne yapmanız gerektiğini** biliyorsanız (ve hatta değişim değerini de biliyorsanız) numaranızı arayabilirsiniz.
 
 Öyleyse, "**Bilinmeyen başlangıç değeri**" türünde bir tarama yaparak başlayın:
 
@@ -69,7 +69,7 @@ Sonra, değeri değiştirin, **değerin** **nasıl değiştiğini** belirtin (be
 
 ![](<../../images/image (371).png>)
 
-Seçilen şekilde **değiştirilen tüm değerler** ile karşılaşacaksınız:
+Seçilen şekilde **değiştirilen tüm değerler** size sunulacaktır:
 
 ![](<../../images/image (569).png>)
 
@@ -90,17 +90,17 @@ Bahsedilen bazı ipuçlarını kullanarak, mevcut oyununuzun önemli değeri sak
 **İlk seçenek**, bu **adresin** **kullanıldığı** **kodun** **hangi kısımlarını** bilmek için yararlıdır (bu, oyunun kodunu **nerede değiştirebileceğinizi** bilmek gibi daha fazla şey için yararlıdır).\
 **İkinci seçenek** daha **özeldir** ve bu durumda **değerin nereden yazıldığını** bilmekle ilgilendiğimiz için daha faydalı olacaktır.
 
-Bu seçeneklerden birini seçtiğinizde, **hata ayıklayıcı** programa **bağlanacak** ve yeni bir **boş pencere** açılacaktır. Şimdi, **oyunu oynayın** ve **değeri değiştirin** (oyunu yeniden başlatmadan). **Pencere**, **değeri değiştiren** **adreslerle** **doldurulmalıdır**:
+Bu seçeneklerden birini seçtikten sonra, **hata ayıklayıcı** programa **bağlanacak** ve yeni bir **boş pencere** açılacaktır. Şimdi, **oyunu oynayın** ve **değeri değiştirin** (oyunu yeniden başlatmadan). **Pencere**, **değeri değiştiren** **adreslerle** **doldurulmalıdır**:
 
 ![](<../../images/image (91).png>)
 
-Artık değeri değiştiren adresi bulduğunuza göre, **kodu istediğiniz gibi değiştirebilirsiniz** (Cheat Engine, bunu NOP'lar için hızlı bir şekilde değiştirmenize izin verir):
+Artık değeri değiştiren adresi bulduğunuza göre, kodu **istediğiniz gibi değiştirebilirsiniz** (Cheat Engine, bunu NOP'lar için hızlıca değiştirmenize izin verir):
 
 ![](<../../images/image (1057).png>)
 
-Artık kodu, sayınızı etkilemeyecek şekilde veya her zaman olumlu bir şekilde etkileyecek şekilde değiştirebilirsiniz.
+Böylece, kodu değiştirerek sayınıza etki etmeyecek veya her zaman olumlu bir şekilde etki edecek şekilde değiştirebilirsiniz.
 
-### Rastgele Bellek Adresi - Pointer Bulma
+### Rastgele Bellek Adresi - Göstergeleri Bulma
 
 Önceki adımları takip ederek, ilgilendiğiniz değerin nerede olduğunu bulun. Sonra, "**Bu adrese neyin yazdığını bul**" seçeneğini kullanarak bu değeri yazan adresi bulun ve üzerine çift tıklayarak ayrıştırma görünümünü alın:
 
@@ -111,29 +111,29 @@ Sonra, **"\[]"** arasındaki hex değerini aramak için yeni bir tarama yapın (
 ![](<../../images/image (994).png>)
 
 (_Birden fazla görünüyorsa genellikle en küçük adres olanı almanız gerekir_)\
-Artık **ilgilendiğimiz değeri değiştirecek pointer'ı bulduk**.
+Artık **ilgilendiğimiz değeri değiştirecek göstericiyi bulduk**.
 
-"**Adresi Manuel Olarak Ekle**" seçeneğine tıklayın:
+"**Adres Ekle**" seçeneğine tıklayın:
 
 ![](<../../images/image (990).png>)
 
-Şimdi, "Pointer" onay kutusuna tıklayın ve metin kutusuna bulunan adresi ekleyin (bu senaryoda, önceki resimde bulunan adres "Tutorial-i386.exe"+2426B0 idi):
+Şimdi, "Gösterici" onay kutusuna tıklayın ve metin kutusuna bulunan adresi ekleyin (bu senaryoda, önceki resimde bulunan adres "Tutorial-i386.exe"+2426B0 idi):
 
 ![](<../../images/image (392).png>)
 
-(İlk "Adres"in, girdiğiniz pointer adresinden otomatik olarak doldurulduğuna dikkat edin)
+(İlk "Adresin", girdiğiniz gösterici adresinden otomatik olarak doldurulduğuna dikkat edin)
 
-Tamam'a tıklayın ve yeni bir pointer oluşturulacaktır:
+Tamam'a tıklayın ve yeni bir gösterici oluşturulacaktır:
 
 ![](<../../images/image (308).png>)
 
-Artık bu değeri her değiştirdiğinizde, **değerin bulunduğu bellek adresi farklı olsa bile önemli değeri değiştiriyorsunuz.**
+Artık o değeri her değiştirdiğinizde, **değerin bulunduğu bellek adresi farklı olsa bile önemli değeri değiştiriyorsunuz.**
 
 ### Kod Enjeksiyonu
 
-Kod enjeksiyonu, hedef işleme bir kod parçası enjekte etme ve ardından kodun yürütülmesini kendi yazdığınız koddan geçirecek şekilde yönlendirme tekniğidir (örneğin, puan vermek yerine puan almak).
+Kod enjeksiyonu, hedef işleme bir kod parçası enjekte etme ve ardından kodun yürütülmesini kendi yazdığınız koddan geçirecek şekilde yönlendirme tekniğidir (örneğin, puan vermek yerine puan düşürmek).
 
-Öyleyse, oyuncunuzun hayatından 1 çıkaran adresi bulduğunuzu hayal edin:
+Öyleyse, oyuncunuzun yaşamından 1 çıkaran adresi bulduğunuzu hayal edin:
 
 ![](<../../images/image (203).png>)
 
@@ -150,7 +150,7 @@ Bir şablon oluşturulacaktır:
 
 ![](<../../images/image (944).png>)
 
-Bu nedenle, yeni assembly kodunuzu "**newmem**" bölümüne ekleyin ve **çalıştırılmasını istemiyorsanız** "**originalcode**" bölümündeki orijinal kodu kaldırın\*\*.\*\* Bu örnekte, enjekte edilen kod 1 çıkarmak yerine 2 puan ekleyecektir:
+Böylece, "**newmem**" bölümüne yeni assembly kodunuzu ekleyin ve "**originalcode**" bölümünden orijinal kodu kaldırın eğer çalıştırılmasını istemiyorsanız. Bu örnekte, enjekte edilen kod 1 çıkarmak yerine 2 puan ekleyecektir:
 
 ![](<../../images/image (521).png>)
 

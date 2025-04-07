@@ -26,7 +26,7 @@ Tüm suid ikili dosyalarını bulun ve **Pkexec** ikili dosyasının olup olmad�
 ```bash
 find / -perm -4000 2>/dev/null
 ```
-Eğer **pkexec** ikilisinin **SUID ikilisi** olduğunu ve **sudo** veya **admin** grubuna ait olduğunuzu bulursanız, muhtemelen `pkexec` kullanarak ikilileri sudo olarak çalıştırabilirsiniz.\
+Eğer **pkexec'in bir SUID ikili dosyası** olduğunu ve **sudo** veya **admin** grubuna ait olduğunuzu bulursanız, muhtemelen `pkexec` kullanarak ikili dosyaları sudo olarak çalıştırabilirsiniz.\
 Bu, genellikle bu grupların **polkit politikası** içinde yer alması nedeniyledir. Bu politika, temelde hangi grupların `pkexec` kullanabileceğini belirler. Bunu kontrol etmek için:
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
@@ -66,19 +66,19 @@ Eğer durum böyleyse, **root olmak için sadece şunu çalıştırabilirsiniz**
 ```
 sudo su
 ```
-## Shadow Grubu
+## Shadow Group
 
 **shadow** grubundaki kullanıcılar **/etc/shadow** dosyasını **okuyabilir**:
 ```
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
-So, read the file and try to **crack some hashes**.
+So, dosyayı okuyun ve bazı **hash'leri kırmaya** çalışın.
 
 ## Personel Grubu
 
-**staff**: Kullanıcıların root ayrıcalıklarına ihtiyaç duymadan sisteme yerel değişiklikler eklemelerine olanak tanır (`/usr/local`) (not: `/usr/local/bin` içindeki çalıştırılabilir dosyalar, herhangi bir kullanıcının PATH değişkenindedir ve aynı isimdeki `/bin` ve `/usr/bin` içindeki çalıştırılabilir dosyaların "üstüne yazabilir"). "adm" grubu ile karşılaştırın, bu grup daha çok izleme/güvenlik ile ilgilidir. [\[source\]](https://wiki.debian.org/SystemGroups)
+**staff**: Kullanıcıların kök ayrıcalıkları olmadan sisteme yerel değişiklikler eklemelerine izin verir (`/usr/local`) (not: `/usr/local/bin` içindeki çalıştırılabilir dosyalar, herhangi bir kullanıcının PATH değişkenindedir ve aynı isimdeki `/bin` ve `/usr/bin` içindeki çalıştırılabilir dosyaların "üstüne yazabilir"). "adm" grubu ile karşılaştırın, bu grup daha çok izleme/güvenlik ile ilgilidir. [\[source\]](https://wiki.debian.org/SystemGroups)
 
-Debian dağıtımlarında, `$PATH` değişkeni `/usr/local/`'un en yüksek öncelikle çalıştırılacağını gösterir, ayrıcalıklı bir kullanıcı olup olmadığınız önemli değildir.
+Debian dağıtımlarında, `$PATH` değişkeni `/usr/local/`'un en yüksek öncelikle çalıştırılacağını gösterir, ayrıcalıklı bir kullanıcı olup olmadığınıza bakılmaksızın.
 ```bash
 $ echo $PATH
 /usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
@@ -130,7 +130,7 @@ $ /bin/bash -p
 ```
 ## Disk Group
 
-Bu ayrıcalık neredeyse **root erişimi ile eşdeğerdir** çünkü makinenin içindeki tüm verilere erişebilirsiniz.
+Bu ayrıcalık neredeyse **root erişimine eşdeğerdir** çünkü makinenin içindeki tüm verilere erişebilirsiniz.
 
 Dosyalar:`/dev/sd[a-z][1-9]`
 ```bash
@@ -156,9 +156,9 @@ USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
 yossi    tty1                      22:16    5:13m  0.05s  0.04s -bash
 moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 ```
-**tty1**, kullanıcının **yossi'nin makinedeki bir terminale fiziksel olarak giriş yaptığını** gösterir.
+**tty1**, kullanıcının **yossi'nin makinedeki bir terminale fiziksel olarak giriş yaptığını** ifade eder.
 
-**video grubu**, ekran çıktısını görüntüleme erişimine sahiptir. Temelde ekranları gözlemleyebilirsiniz. Bunu yapmak için, ekranın üzerindeki **mevcut görüntüyü ham veri olarak yakalamanız** ve ekranın kullandığı çözünürlüğü almanız gerekir. Ekran verileri `/dev/fb0`'da kaydedilebilir ve bu ekranın çözünürlüğünü `/sys/class/graphics/fb0/virtual_size`'da bulabilirsiniz.
+**video grubu**, ekran çıktısını görüntüleme erişimine sahiptir. Temelde ekranları gözlemleyebilirsiniz. Bunu yapmak için, ekranın **mevcut görüntüsünü ham veri olarak yakalamanız** ve ekranın kullandığı çözünürlüğü almanız gerekir. Ekran verileri `/dev/fb0`'da kaydedilebilir ve bu ekranın çözünürlüğünü `/sys/class/graphics/fb0/virtual_size`'da bulabilirsiniz.
 ```bash
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
@@ -181,7 +181,7 @@ find / -group root -perm -g=w 2>/dev/null
 ```
 ## Docker Grubu
 
-**Ana makinenin kök dosya sistemini bir örneğin hacmine bağlayabilirsiniz**, böylece örnek başladığında hemen o hacme `chroot` yükler. Bu, makinede size kök erişimi sağlar.
+Ana makinenin kök dosya sistemini bir örneğin hacmine **monte edebilirsiniz**, böylece örnek başladığında hemen o hacme `chroot` yükler. Bu, makinede size kök erişimi sağlar.
 ```bash
 docker image #Get images from the docker service
 
@@ -199,7 +199,7 @@ Son olarak, eğer daha önceki önerilerden hiçbiri hoşunuza gitmiyorsa veya b
 ../docker-security/
 {{#endref}}
 
-Eğer docker soketi üzerinde yazma izinleriniz varsa [**docker soketini kötüye kullanarak nasıl yetki yükselteceğinizi anlatan bu yazıyı**](../index.html#writable-docker-socket)** okuyun.**
+Eğer docker soketi üzerinde yazma izinleriniz varsa [**docker soketini kötüye kullanarak yetki yükseltme hakkında bu yazıyı**](../index.html#writable-docker-socket)** okuyun.**
 
 {{#ref}}
 https://github.com/KrustyHack/docker-privilege-escalation

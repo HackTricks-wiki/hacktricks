@@ -4,10 +4,10 @@
 
 ## RDP Süreç Enjeksiyonu
 
-Eğer **harici grup**, mevcut alandaki herhangi bir **bilgisayara** **RDP erişimine** sahipse, bir **saldırgan** o **bilgisayarı ele geçirebilir ve onu bekleyebilir**.
+Eğer **harici grup**, mevcut alandaki herhangi bir **bilgisayara RDP erişimine** sahipse, bir **saldırgan** o **bilgisayarı ele geçirebilir ve onu bekleyebilir**.
 
 O kullanıcı RDP üzerinden erişim sağladıktan sonra, **saldırgan o kullanıcının oturumuna geçebilir** ve harici alandaki izinlerini istismar edebilir.
-```powershell
+```bash
 # Supposing the group "External Users" has RDP access in the current domain
 ## lets find where they could access
 ## The easiest way would be with bloodhound, but you could also run:
@@ -36,8 +36,8 @@ Check **other ways to steal sessions with other tools** [**in this page.**](../.
 
 Eğer bir kullanıcı **RDP ile bir makineye** erişirse ve burada bir **saldırgan** onu **bekliyorsa**, saldırgan **kullanıcının RDP oturumuna bir beacon enjekte edebilir** ve eğer **kurban RDP ile erişirken diski bağladıysa**, **saldırgan buna erişebilir**.
 
-Bu durumda, sadece **kurbanın** **orijinal bilgisayarını** **backdoor** yazarak **tehdit edebilirsiniz**.
-```powershell
+Bu durumda, **kurbanın** **orijinal bilgisayarını** **backdoor** yazarak **tehdit edebilirsiniz**.
+```bash
 # Wait til someone logs in:
 net logons
 Logged on users at \\localhost:

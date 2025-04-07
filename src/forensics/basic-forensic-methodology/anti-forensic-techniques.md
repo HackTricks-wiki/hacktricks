@@ -3,15 +3,15 @@
 # Zaman Damgaları
 
 Bir saldırgan, **dosyaların zaman damgalarını değiştirmekle** ilgilenebilir.\
-Zaman damgalarını, MFT içinde `$STANDARD_INFORMATION` **ve** `$FILE_NAME` özniteliklerinde bulmak mümkündür.
+Zaman damgalarını, `$STANDARD_INFORMATION`**ve**`$FILE_NAME` öznitelikleri içinde MFT'de bulmak mümkündür.
 
-Her iki öznitelik de 4 zaman damgasına sahiptir: **Değiştirme**, **erişim**, **oluşturma** ve **MFT kayıt değişikliği** (MACE veya MACB).
+Her iki öznitelikte de 4 zaman damgası vardır: **Değiştirme**, **erişim**, **oluşturma** ve **MFT kayıt değişikliği** (MACE veya MACB).
 
 **Windows Gezgini** ve diğer araçlar, **`$STANDARD_INFORMATION`** içindeki bilgileri gösterir.
 
 ## TimeStomp - Anti-forensic Aracı
 
-Bu araç, **`$STANDARD_INFORMATION`** içindeki zaman damgası bilgilerini **değiştirir** **ancak** **`$FILE_NAME`** içindeki bilgileri **değiştirmez**. Bu nedenle, **şüpheli** **etkinlikleri** **belirlemek** mümkündür.
+Bu araç, **`$STANDARD_INFORMATION`** içindeki zaman damgası bilgilerini **değiştirir** **ama** **`$FILE_NAME`** içindeki bilgileri **değiştirmez**. Bu nedenle, **şüpheli** **etkinlikleri** **belirlemek** mümkündür.
 
 ## Usnjrnl
 
@@ -19,7 +19,7 @@ Bu araç, **`$STANDARD_INFORMATION`** içindeki zaman damgası bilgilerini **de�
 
 ![](<../../images/image (449).png>)
 
-Önceki görüntü, dosya üzerinde bazı **değişikliklerin yapıldığını** gözlemleyebileceğimiz **aracın** gösterdiği **çıktıdır**.
+Önceki resim, dosya üzerinde bazı **değişikliklerin yapıldığını** gözlemleyebileceğimiz **aracın** gösterdiği **çıktıdır**.
 
 ## $LogFile
 
@@ -52,7 +52,7 @@ Bu araç, hem `$STARNDAR_INFORMATION` hem de `$FILE_NAME` özniteliklerini deği
 
 # Veri Gizleme
 
-NFTS, bir küme ve minimum bilgi boyutu kullanır. Bu, bir dosya bir buçuk küme kaplıyorsa, **kalan yarının asla kullanılmayacağı** anlamına gelir. Bu nedenle, bu boşlukta **veri gizlemek mümkündür**.
+NFTS, bir küme ve minimum bilgi boyutu kullanır. Bu, bir dosya bir buçuk küme kapladığında, **kalan yarımın asla kullanılmayacağı** anlamına gelir, ta ki dosya silinene kadar. Bu nedenle, bu boşlukta **veri gizlemek mümkündür**.
 
 Slacker gibi, bu "gizli" alanda veri gizlemeye olanak tanıyan araçlar vardır. Ancak, `$logfile` ve `$usnjrnl` analizi, bazı verilerin eklendiğini gösterebilir:
 
@@ -63,7 +63,7 @@ Bu nedenle, FTK Imager gibi araçlar kullanarak boş alanı geri almak mümkünd
 # UsbKill
 
 Bu, **USB** portlarında herhangi bir değişiklik tespit edildiğinde bilgisayarı **kapatan** bir araçtır.\
-Bunu keşfetmenin bir yolu, çalışan süreçleri incelemek ve **her bir python betiğini gözden geçirmektir**.
+Bunu keşfetmenin bir yolu, çalışan süreçleri incelemek ve **her bir çalışan python betiğini gözden geçirmektir**.
 
 # Canlı Linux Dağıtımları
 
@@ -75,7 +75,7 @@ Bu dağıtımlar, **RAM** belleği içinde **çalıştırılır**. Onları tespi
 
 # Windows Yapılandırması
 
-Adli soruşturmayı çok daha zor hale getirmek için birçok Windows günlüğü yöntemini devre dışı bırakmak mümkündür.
+Adli soruşturmayı çok daha zor hale getirmek için birçok Windows günlükleme yöntemini devre dışı bırakmak mümkündür.
 
 ## Zaman Damgalarını Devre Dışı Bırak - UserAssist
 
@@ -102,27 +102,27 @@ Bir NTFS hacminden bir klasör açıldığında, sistem, listedeki her klasör i
 
 1. Kayıt Defteri Düzenleyicisini (Regedit.exe) açın.
 2. `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem` yoluna gidin.
-3. `NtfsDisableLastAccessUpdate` anahtarını arayın. Eğer yoksa, bu DWORD'u ekleyin ve değerini 1 olarak ayarlayın, bu işlem devre dışı bırakılacaktır.
+3. `NtfsDisableLastAccessUpdate`'i arayın. Eğer yoksa, bu DWORD'u ekleyin ve değerini 1 olarak ayarlayın, bu işlemi devre dışı bırakacaktır.
 4. Kayıt Defteri Düzenleyicisini kapatın ve sunucuyu yeniden başlatın.
 
 ## USB Geçmişini Sil
 
-Tüm **USB Aygıt Girişleri**, bir USB Aygıtını PC veya dizüstü bilgisayarınıza taktığınızda oluşturulan alt anahtarları içeren **USBSTOR** kayıt anahtarı altında Windows Kayıt Defteri'nde saklanır. Bu anahtarı burada bulabilirsiniz: `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Bunu silerek**, USB geçmişini sileceksiniz.\
-Ayrıca, silindiğinizden emin olmak için [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html) aracını kullanabilirsiniz (ve silmek için).
+Tüm **USB Aygıt Girişleri**, bir USB Aygıtını PC veya Dizüstü Bilgisayarınıza taktığınızda oluşturulan alt anahtarları içeren **USBSTOR** kayıt anahtarı altında Windows Kayıt Defteri'nde saklanır. Bu anahtarı burada bulabilirsiniz: `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Bunu silerek** USB geçmişini sileceksiniz.\
+Ayrıca, bunları sildiğinizden emin olmak için [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html) aracını da kullanabilirsiniz (ve silmek için).
 
 USB'ler hakkında bilgi kaydeden bir diğer dosya, `C:\Windows\INF` içindeki `setupapi.dev.log` dosyasıdır. Bu dosya da silinmelidir.
 
 ## Gölge Kopyalarını Devre Dışı Bırak
 
-**Gölge kopyaları listeleyin**: `vssadmin list shadowstorage`\
-**Silin**: `vssadmin delete shadow`
+**Gölge kopyaları** listelemek için `vssadmin list shadowstorage`\
+**Silmek** için `vssadmin delete shadow` komutunu çalıştırın.
 
 Ayrıca, [https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html) adresinde önerilen adımları izleyerek GUI üzerinden de silebilirsiniz.
 
-Gölge kopyalarını devre dışı bırakmak için [buradaki adımları](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows) izleyebilirsiniz:
+Gölge kopyalarını devre dışı bırakmak için [buradaki adımları](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows) izleyin:
 
 1. Windows başlat düğmesine tıkladıktan sonra metin arama kutusuna "services" yazarak Hizmetler programını açın.
-2. Listeden "Volume Shadow Copy"yi bulun, seçin ve sağ tıklayarak Özellikler'e erişin.
+2. Listeden "Hacim Gölge Kopyası"nı bulun, seçin ve sağ tıklayarak Özellikler'e erişin.
 3. "Başlangıç türü" açılır menüsünden Devre Dışı seçeneğini seçin ve ardından değişikliği onaylamak için Uygula ve Tamam'a tıklayın.
 
 Hangi dosyaların gölge kopyasında kopyalanacağını yapılandırmayı da kayıt defterinde `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot` ile değiştirmek mümkündür.

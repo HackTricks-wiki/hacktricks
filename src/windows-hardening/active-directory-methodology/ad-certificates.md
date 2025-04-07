@@ -1,10 +1,10 @@
-# AD Sertifikaları
+# AD Certificates
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Giriş
+## Introduction
 
-### Sertifikanın Bileşenleri
+### Components of a Certificate
 
 - Sertifikanın **Sahibi**, sertifikanın sahibini belirtir.
 - **Açık Anahtar**, sertifikayı gerçek sahibine bağlamak için özel bir anahtarla eşleştirilir.
@@ -12,72 +12,72 @@
 - Sertifikayı tanımlayan benzersiz bir **Seri Numarası**, Sertifika Otoritesi (CA) tarafından sağlanır.
 - **Verici**, sertifikayı veren CA'yı ifade eder.
 - **SubjectAlternativeName**, kimlik tanımlama esnekliğini artırarak konu için ek adlar sağlar.
-- **Temel Kısıtlamalar**, sertifikanın bir CA veya son varlık için olup olmadığını belirler ve kullanım kısıtlamalarını tanımlar.
-- **Genişletilmiş Anahtar Kullanımları (EKU'lar)**, sertifikanın belirli amaçlarını, örneğin kod imzalama veya e-posta şifreleme, Nesne Tanımlayıcıları (OID'ler) aracılığıyla belirler.
+- **Temel Kısıtlamalar**, sertifikanın bir CA veya son varlık için olup olmadığını tanımlar ve kullanım kısıtlamalarını belirler.
+- **Genişletilmiş Anahtar Kullanımları (EKUs)**, sertifikanın belirli amaçlarını, örneğin kod imzalama veya e-posta şifreleme gibi, Nesne Tanımlayıcıları (OIDs) aracılığıyla belirler.
 - **İmza Algoritması**, sertifikayı imzalamak için kullanılan yöntemi belirtir.
 - **İmza**, vericinin özel anahtarı ile oluşturulur ve sertifikanın doğruluğunu garanti eder.
 
-### Özel Hususlar
+### Special Considerations
 
-- **Subject Alternative Names (SAN'lar)**, bir sertifikanın birden fazla kimliğe uygulanabilirliğini genişletir, bu da birden fazla alan adı olan sunucular için kritik öneme sahiptir. Güvenli verilme süreçleri, saldırganların SAN spesifikasyonunu manipüle ederek kimlik taklidi risklerini önlemek için hayati öneme sahiptir.
+- **Subject Alternative Names (SANs)**, bir sertifikanın birden fazla kimliğe uygulanabilirliğini genişletir, bu da birden fazla alan adı olan sunucular için kritik öneme sahiptir. Güvenli verilme süreçleri, saldırganların SAN spesifikasyonunu manipüle ederek kimlik taklit etme risklerini önlemek için hayati öneme sahiptir.
 
-### Aktif Dizin (AD) İçindeki Sertifika Otoriteleri (CA)
+### Certificate Authorities (CAs) in Active Directory (AD)
 
 AD CS, AD ormanında CA sertifikalarını belirlenmiş konteynerler aracılığıyla tanır; her biri benzersiz roller üstlenir:
 
 - **Sertifika Otoriteleri** konteyneri, güvenilir kök CA sertifikalarını tutar.
-- **Kayıt Hizmetleri** konteyneri, Kurumsal CA'lar ve sertifika şablonlarını detaylandırır.
+- **Kayıt Hizmetleri** konteyneri, Kurumsal CA'ları ve sertifika şablonlarını detaylandırır.
 - **NTAuthCertificates** nesnesi, AD kimlik doğrulaması için yetkilendirilmiş CA sertifikalarını içerir.
 - **AIA (Otorite Bilgi Erişimi)** konteyneri, ara ve çapraz CA sertifikaları ile sertifika zinciri doğrulamasını kolaylaştırır.
 
-### Sertifika Edinimi: İstemci Sertifika Talep Akışı
+### Certificate Acquisition: Client Certificate Request Flow
 
-1. Talep süreci, istemcilerin bir Kurumsal CA bulmasıyla başlar.
-2. Bir açık anahtar ve diğer detayları içeren bir CSR oluşturulur, ardından bir açık-özel anahtar çifti üretilir.
+1. İstek süreci, istemcilerin bir Kurumsal CA bulmasıyla başlar.
+2. Bir kamu-özel anahtar çifti oluşturulduktan sonra, bir kamu anahtarı ve diğer detayları içeren bir CSR oluşturulur.
 3. CA, mevcut sertifika şablonlarına karşı CSR'yi değerlendirir ve şablonun izinlerine dayanarak sertifikayı verir.
 4. Onaylandığında, CA sertifikayı özel anahtarı ile imzalar ve istemciye geri gönderir.
 
-### Sertifika Şablonları
+### Certificate Templates
 
 AD içinde tanımlanan bu şablonlar, sertifika vermek için ayarları ve izinleri belirler; izin verilen EKU'lar ve kayıt veya değişiklik hakları dahil, sertifika hizmetlerine erişimi yönetmek için kritik öneme sahiptir.
 
-## Sertifika Kaydı
+## Certificate Enrollment
 
 Sertifikalar için kayıt süreci, bir yöneticinin **bir sertifika şablonu oluşturması** ile başlar; bu şablon daha sonra bir Kurumsal Sertifika Otoritesi (CA) tarafından **yayınlanır**. Bu, şablonu istemci kaydı için kullanılabilir hale getirir; bu adım, şablonun adını bir Active Directory nesnesinin `certificatetemplates` alanına ekleyerek gerçekleştirilir.
 
 Bir istemcinin sertifika talep edebilmesi için, **kayıt hakları** verilmelidir. Bu haklar, sertifika şablonundaki güvenlik tanımlayıcıları ve Kurumsal CA'nın kendisi tarafından tanımlanır. Bir talebin başarılı olması için her iki konumda da izinler verilmelidir.
 
-### Şablon Kayıt Hakları
+### Template Enrollment Rights
 
-Bu haklar, izinleri detaylandıran Erişim Kontrol Girişleri (ACE'ler) aracılığıyla belirtilir:
+Bu haklar, aşağıdaki gibi izinleri detaylandıran Erişim Kontrol Girişleri (ACE'ler) aracılığıyla belirtilir:
 
-- **Sertifika-Kayıt** ve **Sertifika-Otomatik Kayıt** hakları, her biri belirli GUID'lerle ilişkilidir.
+- **Sertifika-Kayıt** ve **Sertifika-OtomatikKayıt** hakları, her biri belirli GUID'lerle ilişkilidir.
 - **GenişletilmişHaklar**, tüm genişletilmiş izinlere izin verir.
 - **TamKontrol/GeniGenericAll**, şablon üzerinde tam kontrol sağlar.
 
-### Kurumsal CA Kayıt Hakları
+### Enterprise CA Enrollment Rights
 
-CA'nın hakları, Sertifika Otoritesi yönetim konsolu aracılığıyla erişilebilen güvenlik tanımlayıcısında belirtilmiştir. Bazı ayarlar, düşük ayrıcalıklı kullanıcıların uzaktan erişimine bile izin verebilir, bu da bir güvenlik endişesi olabilir.
+CA'nın hakları, Sertifika Otoritesi yönetim konsolu aracılığıyla erişilebilen güvenlik tanımlayıcısında belirtilmiştir. Bazı ayarlar, düşük ayrıcalıklı kullanıcıların uzaktan erişim sağlamasına bile izin verebilir, bu da bir güvenlik endişesi olabilir.
 
-### Ek Verme Kontrolleri
+### Additional Issuance Controls
 
 Bazı kontroller uygulanabilir, örneğin:
 
 - **Yönetici Onayı**: Talepleri, bir sertifika yöneticisi tarafından onaylanana kadar beklemede tutar.
-- **Kayıt Temsilcileri ve Yetkili İmzalar**: Bir CSR üzerindeki gerekli imza sayısını ve gerekli Uygulama Politika OID'lerini belirtir.
+- **Kayıt Ajanları ve Yetkili İmzalar**: Bir CSR üzerindeki gerekli imza sayısını ve gerekli Uygulama Politika OID'lerini belirtir.
 
-### Sertifika Talep Yöntemleri
+### Methods to Request Certificates
 
-Sertifikalar şu yollarla talep edilebilir:
+Sertifikalar aşağıdaki yöntemlerle talep edilebilir:
 
-1. **Windows İstemci Sertifika Kayıt Protokolü** (MS-WCCE), DCOM arayüzlerini kullanarak.
-2. **ICertPassage Uzak Protokolü** (MS-ICPR), adlandırılmış borular veya TCP/IP aracılığıyla.
+1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE), DCOM arayüzlerini kullanarak.
+2. **ICertPassage Remote Protocol** (MS-ICPR), adlandırılmış borular veya TCP/IP aracılığıyla.
 3. **Sertifika kayıt web arayüzü**, Sertifika Otoritesi Web Kayıt rolü yüklü olduğunda.
-4. **Sertifika Kayıt Hizmeti** (CES), Sertifika Kayıt Politikası (CEP) hizmeti ile birlikte.
-5. **Ağ Cihazı Kayıt Hizmeti** (NDES), ağ cihazları için, Basit Sertifika Kayıt Protokolü (SCEP) kullanarak.
+4. **Sertifika Kayıt Servisi** (CES), Sertifika Kayıt Politikası (CEP) servisi ile birlikte.
+5. **Ağ Cihazı Kayıt Servisi** (NDES) için ağ cihazları, Basit Sertifika Kayıt Protokolü (SCEP) kullanarak.
 
 Windows kullanıcıları ayrıca GUI (`certmgr.msc` veya `certlm.msc`) veya komut satırı araçları (`certreq.exe` veya PowerShell'in `Get-Certificate` komutu) aracılığıyla sertifika talep edebilir.
-```powershell
+```bash
 # Example of requesting a certificate using PowerShell
 Get-Certificate -Template "User" -CertStoreLocation "cert:\\CurrentUser\\My"
 ```
@@ -87,7 +87,7 @@ Active Directory (AD) sertifika kimlik doğrulamasını destekler, esasen **Kerb
 
 ### Kerberos Kimlik Doğrulama Süreci
 
-Kerberos kimlik doğrulama sürecinde, bir kullanıcının Ticket Granting Ticket (TGT) talebi, kullanıcının sertifikasının **özel anahtarı** ile imzalanır. Bu talep, alan denetleyicisi tarafından sertifikanın **geçerliliği**, **yolu** ve **iptal durumu** dahil olmak üzere birkaç doğrulamadan geçer. Doğrulamalar ayrıca sertifikanın güvenilir bir kaynaktan geldiğini doğrulamayı ve vericinin **NTAUTH sertifika deposu** içindeki varlığını onaylamayı içerir. Başarılı doğrulamalar, bir TGT'nin verilmesiyle sonuçlanır. AD'deki **`NTAuthCertificates`** nesnesi, şu konumda bulunur:
+Kerberos kimlik doğrulama sürecinde, bir kullanıcının Ticket Granting Ticket (TGT) talebi, kullanıcının sertifikasının **özel anahtarı** ile imzalanır. Bu talep, alan denetleyicisi tarafından sertifikanın **geçerliliği**, **yolu** ve **iptal durumu** dahil olmak üzere birkaç doğrulamadan geçer. Doğrulamalar ayrıca sertifikanın güvenilir bir kaynaktan geldiğini doğrulamayı ve vericinin **NTAUTH sertifika deposu** içindeki varlığını onaylamayı içerir. Başarılı doğrulamalar, bir TGT'nin verilmesiyle sonuçlanır. AD'deki **`NTAuthCertificates`** nesnesi, şu adreste bulunur:
 ```bash
 CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>
 ```
@@ -95,7 +95,7 @@ güvenilirliği sağlamak için merkezi bir öneme sahiptir.
 
 ### Güvenli Kanal (Schannel) Kimlik Doğrulaması
 
-Schannel, bir el sıkışma sırasında istemcinin, başarılı bir şekilde doğrulandığında erişimi yetkilendiren bir sertifika sunduğu güvenli TLS/SSL bağlantılarını kolaylaştırır. Bir sertifikanın bir AD hesabına eşlenmesi, Kerberos'un **S4U2Self** işlevini veya sertifikanın **Subject Alternative Name (SAN)**'ini içeren diğer yöntemleri içerebilir.
+Schannel, bir el sıkışma sırasında istemcinin, başarılı bir şekilde doğrulanırsa erişimi yetkilendiren bir sertifika sunduğu güvenli TLS/SSL bağlantılarını kolaylaştırır. Bir sertifikanın bir AD hesabına eşlenmesi, Kerberos’un **S4U2Self** fonksiyonu veya sertifikanın **Subject Alternative Name (SAN)** gibi diğer yöntemleri içerebilir.
 
 ### AD Sertifika Hizmetleri Sayımı
 

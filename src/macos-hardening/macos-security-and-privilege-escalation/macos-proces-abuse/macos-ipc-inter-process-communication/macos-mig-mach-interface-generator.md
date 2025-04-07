@@ -10,12 +10,12 @@ Tanım, `.defs` uzantısını kullanarak Arayüz Tanım Dili (IDL) ile belirtili
 
 Bu tanımlar 5 bölümden oluşur:
 
-- **Alt sistem bildirimi**: Alt sistem anahtar kelimesi, **isim** ve **kimlik** belirtmek için kullanılır. Ayrıca, sunucunun çekirdekte çalışması gerekiyorsa **`KernelServer`** olarak işaretlemek de mümkündür.
-- **Dahil etme ve içe aktarma**: MIG, C ön işleyicisini kullandığı için içe aktarmaları kullanabilir. Ayrıca, kullanıcı veya sunucu tarafından üretilen kodlar için `uimport` ve `simport` kullanmak da mümkündür.
+- **Alt sistem bildirimi**: Alt sistem anahtar kelimesi, **isim** ve **kimlik** belirtmek için kullanılır. Sunucunun çekirdek içinde çalışması gerekiyorsa **`KernelServer`** olarak işaretlemek de mümkündür.
+- **Dahil etme ve içe aktarma**: MIG, C ön işleyicisini kullandığı için içe aktarmaları kullanabilir. Ayrıca, kullanıcı veya sunucu tarafından üretilen kodlar için `uimport` ve `simport` kullanmak mümkündür.
 - **Tür bildirimleri**: Veri türlerini tanımlamak mümkündür, ancak genellikle `mach_types.defs` ve `std_types.defs` dosyalarını içe aktarır. Özel türler için bazı sözdizimleri kullanılabilir:
-- \[i`n/out]tran`: Gelen veya giden bir mesajdan çevrilmesi gereken işlev
+- \[i`n/out]tran`: Gelen veya giden bir mesajdan çevrilmesi gereken fonksiyon
 - `c[user/server]type`: Başka bir C türüne eşleme.
-- `destructor`: Tür serbest bırakıldığında bu işlevi çağırın.
+- `destructor`: Tür serbest bırakıldığında bu fonksiyonu çağır.
 - **İşlemler**: Bunlar RPC yöntemlerinin tanımlarıdır. 5 farklı tür vardır:
 - `routine`: Yanıt bekler
 - `simpleroutine`: Yanıt beklemez
@@ -25,7 +25,7 @@ Bu tanımlar 5 bölümden oluşur:
 
 ### Örnek
 
-Bu durumda çok basit bir işlev ile bir tanım dosyası oluşturun:
+Bu durumda çok basit bir fonksiyon ile bir tanım dosyası oluşturun:
 ```cpp:myipc.defs
 subsystem myipc 500; // Arbitrary name and id
 
@@ -40,7 +40,7 @@ server_port :  mach_port_t;
 n1          :  uint32_t;
 n2          :  uint32_t);
 ```
-Not edin ki ilk **argüman bağlanacak porttur** ve MIG **yanıt portunu otomatik olarak yönetecektir** (müşteri kodunda `mig_get_reply_port()` çağrılmadıkça). Ayrıca, **işlemlerin ID'si** belirtilen alt sistem ID'sinden başlayarak **sıralı** olacaktır (yani bir işlem geçersiz kılındığında silinir ve ID'sini hala kullanmak için `skip` kullanılır).
+Not edin ki ilk **argüman bağlanacak porttur** ve MIG **yanıt portunu otomatik olarak yönetecektir** (müşteri kodunda `mig_get_reply_port()` çağrılmadığı sürece). Ayrıca, **işlemlerin ID'si** belirtilen alt sistem ID'sinden **sıralı** olarak başlayacaktır (yani bir işlem geçersiz kılındığında silinir ve ID'sini hala kullanmak için `skip` kullanılır).
 
 Şimdi MIG'i kullanarak birbirleriyle iletişim kurabilecek sunucu ve istemci kodunu oluşturun ve Çıkarma fonksiyonunu çağırın:
 ```bash
@@ -50,7 +50,7 @@ Mevcut dizinde birkaç yeni dosya oluşturulacaktır.
 
 > [!TIP]
 > Daha karmaşık bir örneği sisteminizde bulabilirsiniz: `mdfind mach_port.defs`\
-> Ve dosya ile aynı klasörden derleyebilirsiniz: `mig -DLIBSYSCALL_INTERFACE mach_ports.defs`
+> Ve dosyanın bulunduğu klasörden derleyebilirsiniz: `mig -DLIBSYSCALL_INTERFACE mach_ports.defs`
 
 Dosyalarda **`myipcServer.c`** ve **`myipcServer.h`** **`SERVERPREFmyipc_subsystem`** yapısının beyanını ve tanımını bulabilirsiniz; bu yapı, alınan mesaj ID'sine dayalı olarak çağrılacak fonksiyonu tanımlar (başlangıç numarası olarak 500 belirttik):
 
@@ -89,7 +89,7 @@ routine[1];
 {{#endtab}}
 {{#endtabs}}
 
-Önceki yapıya dayanarak **`myipc_server_routine`** fonksiyonu **mesaj ID'sini** alacak ve çağrılacak uygun fonksiyonu döndürecektir:
+Önceki yapıya dayanarak, **`myipc_server_routine`** fonksiyonu **mesaj ID'sini** alacak ve çağrılacak uygun fonksiyonu döndürecektir:
 ```c
 mig_external mig_routine_t myipc_server_routine
 (mach_msg_header_t *InHeadP)
@@ -104,18 +104,18 @@ return 0;
 return SERVERPREFmyipc_subsystem.routine[msgh_id].stub_routine;
 }
 ```
-Bu örnekte tanımlarda yalnızca 1 fonksiyon tanımlamışız, ancak daha fazla fonksiyon tanımlasaydık, bunlar **`SERVERPREFmyipc_subsystem`** dizisi içinde yer alırdı ve ilki ID **500**'e, ikincisi ID **501**'e atanırdı...
+Bu örnekte tanımlamalarda yalnızca 1 fonksiyon tanımlamışız, ancak daha fazla fonksiyon tanımlasaydık, bunlar **`SERVERPREFmyipc_subsystem`** dizisi içinde yer alırdı ve ilki ID **500**'e, ikincisi ID **501**'e atanırdı...
 
 Fonksiyonun bir **reply** göndermesi bekleniyorsa, `mig_internal kern_return_t __MIG_check__Reply__<name>` fonksiyonu da mevcut olurdu.
 
-Aslında, bu ilişkiyi **`myipcServer.h`** içindeki **`subsystem_to_name_map_myipc`** yapısında tanımlamak mümkündür (**`subsystem*to_name_map*\***`\*\* diğer dosyalarda):
+Aslında, bu ilişkiyi **`myipcServer.h`** içindeki **`subsystem_to_name_map_myipc`** yapısında tanımlamak mümkündür (**`subsystem*to_name_map*\***`** diğer dosyalarda):
 ```c
 #ifndef subsystem_to_name_map_myipc
 #define subsystem_to_name_map_myipc \
 { "Subtract", 500 }
 #endif
 ```
-Son olarak, sunucunun çalışmasını sağlamak için önemli bir başka işlev **`myipc_server`** olacaktır; bu, alınan kimlikle ilgili **işlevi çağıracak** olanıdır:
+Son olarak, sunucunun çalışmasını sağlamak için önemli bir başka işlev **`myipc_server`** olacaktır; bu, alınan id ile ilgili **işlevi çağıracak** olanıdır:
 
 <pre class="language-c"><code class="lang-c">mig_external boolean_t myipc_server
 (mach_msg_header_t *InHeadP, mach_msg_header_t *OutHeadP)
@@ -217,11 +217,11 @@ USERPREFSubtract(port, 40, 2);
 
 ### NDR_record
 
-NDR_record, `libsystem_kernel.dylib` tarafından dışa aktarılır ve MIG'in **verileri sistemden bağımsız hale getirmesine** olanak tanıyan bir yapıdır; çünkü MIG'in farklı sistemler arasında (sadece aynı makinede değil) kullanılacağı düşünülmüştür.
+NDR_record, `libsystem_kernel.dylib` tarafından dışa aktarılır ve MIG'in **verileri sistemden bağımsız hale getirmesine** olanak tanıyan bir yapıdır; çünkü MIG'in farklı sistemler arasında (sadece aynı makinede değil) kullanılmak üzere tasarlandığı düşünülmektedir.
 
-Bu ilginçtir çünkü bir ikili dosyada `_NDR_record` bir bağımlılık olarak bulunursa (`jtool2 -S <binary> | grep NDR` veya `nm`), bu, ikili dosyanın bir MIG istemcisi veya sunucusu olduğu anlamına gelir.
+Bu ilginçtir çünkü eğer bir ikili dosyada `_NDR_record` bir bağımlılık olarak bulunursa (`jtool2 -S <binary> | grep NDR` veya `nm`), bu, ikili dosyanın bir MIG istemcisi veya sunucusu olduğu anlamına gelir.
 
-Ayrıca **MIG sunucuları**, `__DATA.__const` içinde (veya macOS çekirdeğinde `__CONST.__constdata` ve diğer \*OS çekirdeklerinde `__DATA_CONST.__const` içinde) dağıtım tablosuna sahiptir. Bu, **`jtool2`** ile dökülebilir.
+Ayrıca **MIG sunucuları**, `__DATA.__const` içinde (veya macOS çekirdeğinde `__CONST.__constdata` ve diğer \*OS çekirdeklerinde `__DATA_CONST.__const`) dağıtım tablosuna sahiptir. Bu, **`jtool2`** ile dökülebilir.
 
 Ve **MIG istemcileri**, sunuculara `__mach_msg` ile göndermek için `__NDR_record` kullanacaktır.
 
@@ -235,13 +235,13 @@ Birçok ikili dosya artık mach portlarını açmak için MIG kullanıyorsa, **M
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep MIG
 ```
-Ayrıca, MIG fonksiyonları çağrılan gerçek fonksiyonların sadece sarmalayıcılarıdır, bu da demektir ki, onun ayrıştırmasını alıp BL için arama yaparsanız, çağrılan gerçek fonksiyonu bulabilirsiniz:
+Ayrıca, MIG fonksiyonları çağrılan gerçek fonksiyonların sadece sarmalayıcılarıdır, bu da demektir ki, onun ayrıştırmasını alıp BL için grep yaparsanız, çağrılan gerçek fonksiyonu bulabilirsiniz:
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep BL
 ```
 ### Assembly
 
-Daha önce, **gelen mesaj ID'sine bağlı olarak doğru fonksiyonu çağıracak olan** fonksiyonun `myipc_server` olduğu belirtilmişti. Ancak, genellikle ikili dosyanın sembollerine (fonksiyon isimlerine) sahip olmayacaksınız, bu yüzden **dekompile edilmiş halinin nasıl göründüğünü kontrol etmek ilginçtir** çünkü bu fonksiyonun kodu, sergilenen fonksiyonlardan bağımsızdır:
+Daha önce, **gelen mesaj ID'sine bağlı olarak doğru fonksiyonu çağıracak olan** fonksiyonun `myipc_server` olduğu belirtilmişti. Ancak genellikle ikili dosyanın sembollerine (fonksiyon isimlerine) sahip olmayacaksınız, bu nedenle **dekompile edilmiş halinin nasıl göründüğünü kontrol etmek ilginçtir** çünkü bu fonksiyonun kodu, sergilenen fonksiyonlardan bağımsız olarak her zaman çok benzer olacaktır:
 
 {{#tabs}}
 {{#tab name="myipc_server decompiled 1"}}
@@ -258,13 +258,13 @@ var_18 = arg1;
 *(int32_t *)(var_18 + 0x10) = 0x0;
 if (*(int32_t *)(var_10 + 0x14) <= 0x1f4 && *(int32_t *)(var_10 + 0x14) >= 0x1f4) {
 rax = *(int32_t *)(var_10 + 0x14);
-// sign_extend_64 çağrısı, bu fonksiyonu tanımlamaya yardımcı olabilir
-// Bu, rax'ta çağrılması gereken işaretçiyi saklar
-// 0x100004040 adresinin kullanımı kontrol edilir (fonksiyon adresleri dizisi)
+// Bu fonksiyonu tanımlamaya yardımcı olabilecek sign_extend_64 çağrısı
+// Bu, rax'ta çağrılması gereken çağrının işaretçisini saklar
+// 0x100004040 adresinin kullanıldığını kontrol et (fonksiyon adresleri dizisi)
 // 0x1f4 = 500 (başlangıç ID'si)
 <strong>            rax = *(sign_extend_64(rax - 0x1f4) * 0x28 + 0x100004040);
 </strong>            var_20 = rax;
-// If - else, if false dönerken, else doğru fonksiyonu çağırır ve true döner
+// Eğer - else, if false dönerken, else doğru fonksiyonu çağırır ve true döner
 <strong>            if (rax == 0x0) {
 </strong>                    *(var_18 + 0x18) = **_NDR_record;
 *(int32_t *)(var_18 + 0x20) = 0xfffffffffffffed1;
@@ -333,7 +333,7 @@ r8 = 0x1;
 }
 }
 // Önceki versiyondakiyle aynı if else
-// 0x100004040 adresinin kullanımı kontrol edilir (fonksiyon adresleri dizisi)
+// 0x100004040 adresinin kullanıldığını kontrol et (fonksiyon adresleri dizisi)
 <strong>                    if ((r8 & 0x1) == 0x0) {
 </strong><strong>                            *(var_18 + 0x18) = **0x100004000;
 </strong>                            *(int32_t *)(var_18 + 0x20) = 0xfffffed1;
@@ -365,17 +365,17 @@ return r0;
 {{#endtab}}
 {{#endtabs}}
 
-Aslında, **`0x100004000`** fonksiyonuna giderseniz, **`routine_descriptor`** yapıların dizisini bulacaksınız. Yapının ilk elemanı, **fonksiyonun** uygulandığı **adres** ve **yapı 0x28 byte** alır, bu yüzden her 0x28 byte'tan (byte 0'dan başlayarak) 8 byte alarak, çağrılacak **fonksiyonun adresini** elde edebilirsiniz:
+Aslında **`0x100004000`** fonksiyonuna giderseniz, **`routine_descriptor`** yapıların dizisini bulacaksınız. Yapının ilk elemanı, **fonksiyonun** uygulandığı **adres** ve **yapı 0x28 bayt** alır, bu nedenle her 0x28 bayt (0. bayttan başlayarak) 8 bayt alabilir ve bu, çağrılacak **fonksiyonun adresi** olacaktır:
 
 <figure><img src="../../../../images/image (35).png" alt=""><figcaption></figcaption></figure>
 
 <figure><img src="../../../../images/image (36).png" alt=""><figcaption></figcaption></figure>
 
-Bu veriler, [**bu Hopper script'i kullanılarak**](https://github.com/knightsc/hopper/blob/master/scripts/MIG%20Detect.py) çıkarılabilir.
+Bu veriler [**bu Hopper scriptini kullanarak**](https://github.com/knightsc/hopper/blob/master/scripts/MIG%20Detect.py) çıkarılabilir.
 
 ### Debug
 
-MIG tarafından üretilen kod ayrıca giriş ve çıkış işlemleri hakkında günlükler oluşturmak için `kernel_debug` çağrısını yapar. Bunları **`trace`** veya **`kdv`** kullanarak kontrol etmek mümkündür: `kdv all | grep MIG`
+MIG tarafından üretilen kod ayrıca giriş ve çıkış işlemleri hakkında günlükler oluşturmak için `kernel_debug` çağrısını da yapar. Bunları **`trace`** veya **`kdv`** kullanarak kontrol etmek mümkündür: `kdv all | grep MIG`
 
 ## References
 

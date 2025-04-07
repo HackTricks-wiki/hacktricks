@@ -2,9 +2,9 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## What is Distroless
+## Distroless Nedir
 
-Distroless bir konteyner, **belirli bir uygulamayı çalıştırmak için yalnızca gerekli bağımlılıkları içeren** bir konteyner türüdür; gereksiz yazılım veya araçlar içermez. Bu konteynerler, **hafif** ve **güvenli** olmaları için tasarlanmıştır ve gereksiz bileşenleri kaldırarak **saldırı yüzeyini minimize etmeyi** hedefler.
+Distroless bir konteyner, **belirli bir uygulamayı çalıştırmak için gerekli olan bağımlılıkları** içeren bir konteyner türüdür; gereksiz yazılım veya araçlar içermez. Bu konteynerler, **hafif** ve **güvenli** olmaları için tasarlanmıştır ve gereksiz bileşenleri kaldırarak **saldırı yüzeyini minimize etmeyi** hedefler.
 
 Distroless konteynerler genellikle **güvenlik ve güvenilirliğin ön planda olduğu üretim ortamlarında** kullanılır.
 
@@ -13,18 +13,18 @@ Distroless konteynerler genellikle **güvenlik ve güvenilirliğin ön planda ol
 - **Google** tarafından sağlanan: [https://console.cloud.google.com/gcr/images/distroless/GLOBAL](https://console.cloud.google.com/gcr/images/distroless/GLOBAL)
 - **Chainguard** tarafından sağlanan: [https://github.com/chainguard-images/images/tree/main/images](https://github.com/chainguard-images/images/tree/main/images)
 
-## Weaponizing Distroless
+## Distroless'ı Silahlandırma
 
-Distroless bir konteyneri silahlandırmanın amacı, **sistem üzerindeki yaygın ikili dosyaların eksikliği** ve ayrıca konteynerlerde sıkça bulunan **salt okunur** veya **çalıştırılamaz** gibi korumalarla birlikte **rastgele ikili dosyaları ve yükleri çalıştırabilmektir**.
+Distroless bir konteyneri silahlandırmanın amacı, **distroless'in getirdiği sınırlamalara** (sistemde yaygın ikili dosyaların eksikliği) rağmen **rastgele ikili dosyaları ve yükleri çalıştırabilmektir**; ayrıca konteynerlerde yaygın olarak bulunan **salt okunur** veya **çalıştırılamaz** gibi korumaları da aşmaktır.
 
-### Through memory
+### Bellek Üzerinden
 
-2023'ün bir noktasında geliyor...
+2023'ün bir noktasında gelecek...
 
-### Via Existing binaries
+### Mevcut ikili dosyalar aracılığıyla
 
 #### openssl
 
-\***\*[**Bu yazıda,**](https://www.form3.tech/engineering/content/exploiting-distroless-images) **`openssl`** ikili dosyasının bu konteynerlerde sıkça bulunduğu, muhtemelen konteyner içinde çalışacak yazılım tarafından **gerekli olduğu** açıklanmaktadır.
+\***\*[**Bu yazıda,**](https://www.form3.tech/engineering/content/exploiting-distroless-images) **`openssl`** ikilisinin bu konteynerlerde sıkça bulunduğu, muhtemelen konteyner içinde çalışacak yazılım tarafından **gerekli** olduğu açıklanmaktadır.
 
 {{#include ../../../banners/hacktricks-training.md}}

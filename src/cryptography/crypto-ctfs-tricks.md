@@ -25,7 +25,7 @@
 
 ## Encoders
 
-Çoğu kodlanmış veri bu 2 kaynakla çözülebilir:
+Kodlanmış verilerin çoğu bu 2 kaynakla çözülebilir:
 
 - [https://www.dcode.fr/tools-list](https://www.dcode.fr/tools-list)
 - [https://gchq.github.io/CyberChef/](https://gchq.github.io/CyberChef/)
@@ -154,8 +154,6 @@ end
 ryvkryvkryvkryvkryvkryvkryvk
 =yend size=28 crc32=35834c86
 ```
-- [http://www.webutils.pl/index.php?idx=yenc](http://www.webutils.pl/index.php?idx=yenc)
-
 ### BinHex
 ```
 (This file must be converted with BinHex 4.0)
@@ -192,9 +190,9 @@ krodfdudfrod
 
 **Multitap** [bir harfi](https://www.dcode.fr/word-letter-change) mobil [telefon tuş takımı](https://www.dcode.fr/phone-keypad-cipher) üzerindeki karşılık gelen tuş kodu ile tanımlanan tekrar eden rakamlarla değiştirir (Bu mod SMS yazarken kullanılır).\
 Örneğin: 2=A, 22=B, 222=C, 3=D...\
-Bu kodu tanıyabilirsiniz çünkü\*\* birkaç rakamın tekrarlandığını\*\* göreceksiniz.
+Bu kodu tanıyabilirsiniz çünkü **birden fazla rakamın tekrarlandığını** göreceksiniz.
 
-Bu kodu şuradan çözebilirsiniz: [https://www.dcode.fr/multitap-abc-cipher](https://www.dcode.fr/multitap-abc-cipher)
+Bu kodu şurada çözebilirsiniz: [https://www.dcode.fr/multitap-abc-cipher](https://www.dcode.fr/multitap-abc-cipher)
 
 ### Bacon Kodu
 
@@ -207,19 +205,19 @@ AABBB ABBAB ABABA AAAAA AAABA AAAAA BAAAA AAAAA AAABA ABBAB ABABA AAAAA
 
 ![](../images/runes.jpg)
 
-## Compression
+## Sıkıştırma
 
 **Raw Deflate** ve **Raw Inflate** (her ikisini de Cyberchef'te bulabilirsiniz) başlık olmadan verileri sıkıştırabilir ve açabilir.
 
-## Easy Crypto
+## Kolay Kripto
 
-### XOR - Autosolver
+### XOR - Otomatik Çözücü
 
 - [https://wiremask.eu/tools/xor-cracker/](https://wiremask.eu/tools/xor-cracker/)
 
 ### Bifid
 
-Bir anahtar kelime gereklidir.
+Bir anahtar kelime gereklidir
 ```
 fgaargaamnlunesuneoa
 ```
@@ -249,7 +247,7 @@ Key:
 
 ### Samir Gizli Paylaşımı
 
-Bir gizli bilgi X parçaya bölünür ve onu geri kazanmak için Y parçaya ihtiyacınız vardır (_Y <=X_).
+Bir gizli X parçaya bölünür ve onu geri almak için Y parçaya ihtiyacınız vardır (_Y <=X_).
 ```
 8019f8fa5879aa3e07858d08308dc1a8b45
 80223035713295bddf0b0bd1b10a5340b89

@@ -7,7 +7,7 @@ Bu senaryoda **alanınız** **farklı alanlardan** bir **prensipe** bazı **yetk
 ## Sayım
 
 ### Çıkış Güveni
-```powershell
+```bash
 # Notice Outbound trust
 Get-DomainTrust
 SourceName      : root.local
@@ -32,15 +32,15 @@ MemberDistinguishedName : CN=S-1-5-21-1028541967-2937615241-1935644758-1115,CN=F
 
 Bir güvenlik açığı, iki alan arasında bir güven ilişkisi kurulduğunda ortaya çıkar; burada alan **A** ve alan **B** olarak tanımlanmıştır. Alan **B**, alan **A**'ya güvenini genişletir. Bu yapılandırmada, alan **B** için alan **A**'da özel bir hesap oluşturulur ve bu hesap, iki alan arasındaki kimlik doğrulama sürecinde kritik bir rol oynar. Alan **B** ile ilişkilendirilen bu hesap, alanlar arasında hizmetlere erişim için biletleri şifrelemek amacıyla kullanılır.
 
-Burada anlaşılması gereken kritik nokta, bu özel hesabın şifresi ve hash'inin, alan **A**'daki bir Domain Controller'dan bir komut satırı aracı kullanılarak çıkarılabileceğidir. Bu işlemi gerçekleştirmek için kullanılan komut şudur:
-```powershell
+Burada anlaşılması gereken kritik nokta, bu özel hesabın şifresi ve hash'inin, alan **A**'daki bir Alan Denetleyicisinden bir komut satırı aracı kullanılarak çıkarılabileceğidir. Bu işlemi gerçekleştirmek için kullanılan komut şudur:
+```bash
 Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.my.domain.local
 ```
-Bu çıkarım, adının sonunda **$** ile belirtilen hesabın aktif olması ve **A** alanının "Domain Users" grubuna ait olması nedeniyle mümkündür; bu da bu grubun ilişkili izinlerini miras almasını sağlar. Bu, bireylerin bu hesabın kimlik bilgilerini kullanarak **A** alanına kimlik doğrulaması yapmalarına olanak tanır.
+Bu çıkarım, adının sonunda **$** ile belirtilen hesabın aktif olması ve **A** alanının "Domain Users" grubuna ait olması nedeniyle mümkündür; bu da bu grupla ilişkili izinleri miras almasını sağlar. Bu, bireylerin bu hesabın kimlik bilgilerini kullanarak **A** alanına kimlik doğrulaması yapmalarına olanak tanır.
 
 **Uyarı:** Bu durumu, sınırlı izinlerle de olsa bir kullanıcı olarak **A** alanında bir yer edinmek için kullanmak mümkündür. Ancak, bu erişim **A** alanında numaralandırma yapmak için yeterlidir.
 
-`ext.local` güvenen alan ve `root.local` güvenilen alan olduğunda, `root.local` içinde `EXT$` adında bir kullanıcı hesabı oluşturulacaktır. Belirli araçlar aracılığıyla, Kerberos güven anahtarlarını dökerek `root.local` içindeki `EXT$` kimlik bilgilerini açığa çıkarmak mümkündür. Bunu başarmak için kullanılan komut şudur:
+`ext.local` güvenen alan ve `root.local` güvenilen alan olduğunda, `root.local` içinde `EXT$` adında bir kullanıcı hesabı oluşturulacaktır. Belirli araçlar aracılığıyla, Kerberos güven ilişkisi anahtarlarını dökerek `root.local` içindeki `EXT$` kimlik bilgilerini açığa çıkarmak mümkündür. Bunu başarmak için kullanılan komut:
 ```bash
 lsadump::trust /patch
 ```

