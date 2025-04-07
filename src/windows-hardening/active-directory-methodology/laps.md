@@ -5,9 +5,9 @@
 
 ## Podstawowe informacje
 
-Local Administrator Password Solution (LAPS) to narzędzie używane do zarządzania systemem, w którym **hasła administratorów**, które są **unikalne, losowe i często zmieniane**, są stosowane do komputerów dołączonych do domeny. Te hasła są bezpiecznie przechowywane w Active Directory i są dostępne tylko dla użytkowników, którzy otrzymali pozwolenie za pośrednictwem list kontroli dostępu (ACL). Bezpieczeństwo transmisji haseł z klienta do serwera jest zapewnione dzięki użyciu **Kerberos wersja 5** i **Advanced Encryption Standard (AES)**.
+Local Administrator Password Solution (LAPS) to narzędzie używane do zarządzania systemem, w którym **hasła administratorów**, które są **unikalne, losowe i często zmieniane**, są stosowane w komputerach dołączonych do domeny. Te hasła są bezpiecznie przechowywane w Active Directory i są dostępne tylko dla użytkowników, którzy otrzymali uprawnienia za pośrednictwem list kontroli dostępu (ACL). Bezpieczeństwo transmisji haseł z klienta do serwera jest zapewnione dzięki użyciu **Kerberos wersja 5** oraz **Advanced Encryption Standard (AES)**.
 
-W obiektach komputerowych domeny wdrożenie LAPS skutkuje dodaniem dwóch nowych atrybutów: **`ms-mcs-AdmPwd`** i **`ms-mcs-AdmPwdExpirationTime`**. Atrybuty te przechowują **hasło administratora w postaci jawnej** oraz **czas jego wygaśnięcia**, odpowiednio.
+W obiektach komputerowych domeny wdrożenie LAPS skutkuje dodaniem dwóch nowych atrybutów: **`ms-mcs-AdmPwd`** oraz **`ms-mcs-AdmPwdExpirationTime`**. Atrybuty te przechowują **hasło administratora w postaci jawnej** oraz **czas jego wygaśnięcia**, odpowiednio.
 
 ### Sprawdź, czy aktywowane
 ```bash
@@ -27,7 +27,7 @@ Get-DomainObject -SearchBase "LDAP://DC=sub,DC=domain,DC=local" | ? { $_."ms-mcs
 Możesz **pobrać surową politykę LAPS** z `\\dc\SysVol\domain\Policies\{4A8A4E8E-929F-401A-95BD-A7D40E0976C8}\Machine\Registry.pol`, a następnie użyć **`Parse-PolFile`** z pakietu [**GPRegistryPolicyParser**](https://github.com/PowerShell/GPRegistryPolicyParser), aby przekonwertować ten plik na format czytelny dla ludzi.
 
 Ponadto, **natywne cmdlety PowerShell LAPS** mogą być używane, jeśli są zainstalowane na maszynie, do której mamy dostęp:
-```powershell
+```bash
 Get-Command *AdmPwd*
 
 CommandType     Name                                               Version    Source
@@ -47,8 +47,8 @@ Find-AdmPwdExtendedRights -Identity Workstations | fl
 # Read the password
 Get-AdmPwdPassword -ComputerName wkstn-2 | fl
 ```
-**PowerView** może być również używany do ustalenia **kto może odczytać hasło i je odczytać**:
-```powershell
+**PowerView** może być również użyty do ustalenia **kto może odczytać hasło i je odczytać**:
+```bash
 # Find the principals that have ReadPropery on ms-Mcs-AdmPwd
 Get-AdmPwdPassword -ComputerName wkstn-2 | fl
 
@@ -59,8 +59,8 @@ Get-DomainObject -Identity wkstn-2 -Properties ms-Mcs-AdmPwd
 
 The [LAPSToolkit](https://github.com/leoloobeek/LAPSToolkit) ułatwia enumerację LAPS za pomocą kilku funkcji.\
 Jedną z nich jest analizowanie **`ExtendedRights`** dla **wszystkich komputerów z włączonym LAPS.** To pokaże **grupy** specjalnie **delegowane do odczytu haseł LAPS**, które często są użytkownikami w chronionych grupach.\
-**Konto**, które **dołączyło komputer** do domeny, otrzymuje `All Extended Rights` nad tym hostem, a to prawo daje **konta** możliwość **odczytu haseł**. Enumeracja może pokazać konto użytkownika, które może odczytać hasło LAPS na hoście. To może pomóc nam **skierować się na konkretnych użytkowników AD**, którzy mogą odczytać hasła LAPS.
-```powershell
+**Konto**, które **dołączyło komputer** do domeny, otrzymuje `All Extended Rights` nad tym hostem, a to prawo daje **konta** możliwość **odczytu haseł**. Enumeracja może pokazać konto użytkownika, które może odczytać hasło LAPS na hoście. To może pomóc nam **skupić się na konkretnych użytkownikach AD**, którzy mogą odczytać hasła LAPS.
+```bash
 # Get groups that can read passwords
 Find-LAPSDelegatedGroups
 
@@ -103,8 +103,8 @@ Password: 2Z@Ae)7!{9#Cq
 
 ### **Data wygaśnięcia**
 
-Po uzyskaniu uprawnień administratora, możliwe jest **uzyskanie haseł** i **zapobieżenie** aktualizacji **hasła** maszyny poprzez **ustawienie daty wygaśnięcia w przyszłość**.
-```powershell
+Po uzyskaniu uprawnień administratora, możliwe jest **uzyskanie haseł** i **zapobieganie** aktualizacji **hasła** maszyny poprzez **ustawienie daty wygaśnięcia w przyszłość**.
+```bash
 # Get expiration time
 Get-DomainObject -Identity computer-21 -Properties ms-mcs-admpwdexpirationtime
 
@@ -113,7 +113,7 @@ Get-DomainObject -Identity computer-21 -Properties ms-mcs-admpwdexpirationtime
 Set-DomainObject -Identity wkstn-2 -Set @{"ms-mcs-admpwdexpirationtime"="232609935231523081"}
 ```
 > [!WARNING]
-> Hasło nadal zostanie zresetowane, jeśli **admin** użyje polecenia **`Reset-AdmPwdPassword`**; lub jeśli **Nie zezwalaj na czas wygaśnięcia hasła dłuższy niż wymagany przez politykę** jest włączone w GPO LAPS.
+> Hasło nadal zostanie zresetowane, jeśli **admin** użyje polecenia **`Reset-AdmPwdPassword`**; lub jeśli w LAPS GPO jest włączona opcja **Nie pozwalaj na czas wygaśnięcia hasła dłuższy niż wymagany przez politykę**.
 
 ### Backdoor
 

@@ -2,9 +2,9 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Czym jest Distroless
+## Co to jest Distroless
 
-Kontener distroless to rodzaj kontenera, który **zawiera tylko niezbędne zależności do uruchomienia konkretnej aplikacji**, bez dodatkowego oprogramowania lub narzędzi, które nie są wymagane. Te kontenery są zaprojektowane, aby być jak **najlżejsze** i **najbezpieczniejsze** możliwe, a ich celem jest **minimalizacja powierzchni ataku** poprzez usunięcie wszelkich zbędnych komponentów.
+Kontener distroless to rodzaj kontenera, który **zawiera tylko niezbędne zależności do uruchomienia konkretnej aplikacji**, bez dodatkowego oprogramowania lub narzędzi, które nie są wymagane. Te kontenery są zaprojektowane, aby być jak **najlżejsze** i **bezpieczne** jak to możliwe, a ich celem jest **minimalizacja powierzchni ataku** poprzez usunięcie wszelkich zbędnych komponentów.
 
 Kontenery distroless są często używane w **środowiskach produkcyjnych, gdzie bezpieczeństwo i niezawodność są kluczowe**.
 
@@ -25,6 +25,6 @@ Nadchodzi w pewnym momencie 2023...
 
 #### openssl
 
-\***\*[**W tym poście,**](https://www.form3.tech/engineering/content/exploiting-distroless-images) wyjaśniono, że binarka **`openssl`** jest często spotykana w tych kontenerach, potencjalnie dlatego, że jest **potrzebna\*\* przez oprogramowanie, które ma działać wewnątrz kontenera.
+\***\*[**W tym poście,**](https://www.form3.tech/engineering/content/exploiting-distroless-images) wyjaśniono, że binarka **`openssl`** jest często znajdowana w tych kontenerach, potencjalnie dlatego, że jest **potrzebna** przez oprogramowanie, które ma działać wewnątrz kontenera.
 
 {{#include ../../../banners/hacktricks-training.md}}

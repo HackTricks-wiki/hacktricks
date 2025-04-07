@@ -10,7 +10,7 @@ Skompiluj te projekty dla architektury komputera z systemem Windows, na którym 
 
 Możesz **wybrać architekturę** w Visual Studio w **lewej zakładce "Build"** w **"Platform Target".**
 
-(\*\*Jeśli nie możesz znaleźć tych opcji, kliknij w **"Project Tab"** a następnie w **"\<Nazwa Projektu> Properties"**)
+(**Jeśli nie możesz znaleźć tych opcji, kliknij w **"Project Tab"** a następnie w **"\<Project Name> Properties"**)
 
 ![](<../images/image (132).png>)
 
@@ -34,7 +34,7 @@ EncrypterAssembly.exe EvilSalsax.dll password evilsalsa.dll.txt
 ```
 Ok, teraz masz wszystko, co potrzebne do wykonania całej operacji Salseo: **zakodowany EvilDalsa.dll** i **plik binarny SalseoLoader.**
 
-**Prześlij plik binarny SalseoLoader.exe na maszynę. Nie powinny być wykrywane przez żadne AV...**
+**Prześlij plik binarny SalseoLoader.exe na maszynę. Nie powinny być wykrywane przez żadne oprogramowanie antywirusowe...**
 
 ## **Wykonaj backdoora**
 
@@ -85,11 +85,11 @@ Otwórz projekt SalseoLoader w Visual Studio.
 
 #### **Wyszukaj pakiet DllExport (używając zakładki Przeglądaj) i naciśnij Zainstaluj (i zaakceptuj okno popup)**
 
-![](<../images/image (4) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
+![](<../images/image (4) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
 W folderze projektu pojawiły się pliki: **DllExport.bat** i **DllExport_Configure.bat**
 
-### **U**ninstall DllExport
+### **U**ninstaluj DllExport
 
 Naciśnij **Odinstaluj** (tak, to dziwne, ale uwierz mi, to konieczne)
 
@@ -101,13 +101,13 @@ Po prostu **zamknij** Visual Studio
 
 Następnie przejdź do swojego **folderu SalseoLoader** i **uruchom DllExport_Configure.bat**
 
-Wybierz **x64** (jeśli zamierzasz używać go w środowisku x64, tak było w moim przypadku), wybierz **System.Runtime.InteropServices** (w **Namespace for DllExport**) i naciśnij **Zastosuj**
+Wybierz **x64** (jeśli zamierzasz używać go w środowisku x64, tak było w moim przypadku), wybierz **System.Runtime.InteropServices** (w **Namespace dla DllExport**) i naciśnij **Zastosuj**
 
 ![](<../images/image (7) (1) (1) (1) (1).png>)
 
 ### **Otwórz projekt ponownie w Visual Studio**
 
-**\[DllExport]** nie powinien być już oznaczony jako błąd
+**\[DllExport]** nie powinno być już oznaczone jako błąd
 
 ![](<../images/image (8) (1).png>)
 
@@ -125,7 +125,7 @@ Aby **zbudować** rozwiązanie: Buduj --> Zbuduj rozwiązanie (W konsoli wyjści
 
 ### Przetestuj wygenerowane Dll
 
-Skopiuj i wklej Dll tam, gdzie chcesz go przetestować.
+Skopiuj i wklej Dll tam, gdzie chcesz je przetestować.
 
 Wykonaj:
 ```

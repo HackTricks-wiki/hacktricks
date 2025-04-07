@@ -120,7 +120,7 @@ Sprawdź wszystkie te bazy za pomocą: [https://github.com/dhondta/python-codext
 ```
 ╫☐↑Λ↻Λ┏Λ↻☐↑Λ
 ```
-- [http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html](http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html) - 404 Dead: [https://web.archive.org/web/20190228181208/http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html](https://web.archive.org/web/20190228181208/http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html)
+- [http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html](http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html) - 404 Martwy: [https://web.archive.org/web/20190228181208/http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html](https://web.archive.org/web/20190228181208/http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html)
 
 ### Morse
 ```
@@ -184,21 +184,21 @@ Litery do ich wartości numerycznej
 ```
 ### Szyfr Afiniczny Kodowanie
 
-Litera na numer `(ax+b)%26` (_a_ i _b_ to klucze, a _x_ to litera) i wynik z powrotem na literę
+Litera na num `(ax+b)%26` (_a_ i _b_ to klucze, a _x_ to litera) i wynik z powrotem na literę
 ```
 krodfdudfrod
 ```
 ### SMS Code
 
-**Multitap** [zastępuje literę](https://www.dcode.fr/word-letter-change) powtarzanymi cyframi zdefiniowanymi przez odpowiadający kod klawisza na mobilnej [klawiaturze telefonu](https://www.dcode.fr/phone-keypad-cipher) (Ten tryb jest używany podczas pisania SMS).\
+**Multitap** [replaces a letter](https://www.dcode.fr/word-letter-change) przez powtarzające się cyfry zdefiniowane przez odpowiadający kod klawisza na mobilnej [klawiaturze telefonu](https://www.dcode.fr/phone-keypad-cipher) (Ten tryb jest używany podczas pisania SMS).\
 Na przykład: 2=A, 22=B, 222=C, 3=D...\
-Możesz zidentyfikować ten kod, ponieważ zobaczysz\*\* kilka powtarzających się cyfr\*\*.
+Możesz zidentyfikować ten kod, ponieważ zobaczysz **wiele powtarzających się cyfr**.
 
 Możesz odszyfrować ten kod w: [https://www.dcode.fr/multitap-abc-cipher](https://www.dcode.fr/multitap-abc-cipher)
 
 ### Bacon Code
 
-Zastąp każdą literę 4 A lub B (lub 1s i 0s)
+Substitude każdą literę na 4 A lub B (lub 1s i 0s)
 ```
 00111 01101 01010 00000 00010 00000 10000 00000 00010 01101 01010 00000
 AABBB ABBAB ABABA AAAAA AAABA AAAAA BAAAA AAAAA AAABA ABBAB ABABA AAAAA

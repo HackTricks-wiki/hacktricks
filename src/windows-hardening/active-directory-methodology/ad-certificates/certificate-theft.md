@@ -2,12 +2,12 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**To mały podsumowanie rozdziałów o kradzieży z niesamowitych badań z [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)**
+**To jest małe podsumowanie rozdziałów o kradzieży z niesamowitych badań z [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)**
 
 ## Co mogę zrobić z certyfikatem
 
-Zanim sprawdzisz, jak ukraść certyfikaty, oto kilka informacji na temat tego, do czego certyfikat może być przydatny:
-```powershell
+Zanim sprawdzisz, jak ukraść certyfikaty, tutaj masz kilka informacji na temat tego, do czego certyfikat może być przydatny:
+```bash
 # Powershell
 $CertPath = "C:\path\to\cert.pfx"
 $CertPass = "P@ssw0rd"
@@ -24,7 +24,7 @@ W **interaktywnej sesji pulpitu**, ekstrakcja certyfikatu użytkownika lub maszy
 
 Dla **programatycznego podejścia**, dostępne są narzędzia takie jak cmdlet PowerShell `ExportPfxCertificate` lub projekty takie jak [projekt CertStealer C# TheWovera](https://github.com/TheWover/CertStealer). Wykorzystują one **Microsoft CryptoAPI** (CAPI) lub Cryptography API: Next Generation (CNG) do interakcji z magazynem certyfikatów. Te API oferują szereg usług kryptograficznych, w tym te niezbędne do przechowywania certyfikatów i uwierzytelniania.
 
-Jednakże, jeśli klucz prywatny jest ustawiony jako nieeksportowalny, zarówno CAPI, jak i CNG zazwyczaj zablokują ekstrakcję takich certyfikatów. Aby obejść to ograniczenie, można wykorzystać narzędzia takie jak **Mimikatz**. Mimikatz oferuje polecenia `crypto::capi` i `crypto::cng` do patchowania odpowiednich API, co pozwala na eksport kluczy prywatnych. Konkretnie, `crypto::capi` patchuje CAPI w bieżącym procesie, podczas gdy `crypto::cng` celuje w pamięć **lsass.exe** do patchowania.
+Jednakże, jeśli klucz prywatny jest ustawiony jako nieeksportowalny, zarówno CAPI, jak i CNG zazwyczaj zablokują ekstrakcję takich certyfikatów. Aby obejść to ograniczenie, można wykorzystać narzędzia takie jak **Mimikatz**. Mimikatz oferuje polecenia `crypto::capi` i `crypto::cng` do patchowania odpowiednich API, co pozwala na eksport kluczy prywatnych. Konkretne, `crypto::capi` patchuje CAPI w bieżącym procesie, podczas gdy `crypto::cng` celuje w pamięć **lsass.exe** do patchowania.
 
 ## Kradzież certyfikatu użytkownika za pomocą DPAPI – THEFT2
 
@@ -44,7 +44,7 @@ Aby **wyekstrahować certyfikat i jego powiązany klucz prywatny**, proces obejm
 2. **Zlokalizowanie wymaganego klucza głównego DPAPI** do deszyfrowania odpowiadającego klucza prywatnego.
 3. **Deszyfrowanie klucza prywatnego** przy użyciu jawnego klucza głównego DPAPI.
 
-Aby **uzyskać jawny klucz główny DPAPI**, można wykorzystać następujące podejścia:
+Aby **zdobyć jawny klucz główny DPAPI**, można wykorzystać następujące podejścia:
 ```bash
 # With mimikatz, when running in the user's context
 dpapi::masterkey /in:"C:\PATH\TO\KEY" /rpc
@@ -62,11 +62,11 @@ openssl pkcs12 -in cert.pem -keyex -CSP "Microsoft Enhanced Cryptographic Provid
 ```
 ## Kradzież certyfikatów maszynowych za pomocą DPAPI – THEFT3
 
-Certyfikaty maszynowe przechowywane przez Windows w rejestrze pod `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\SystemCertificates` oraz powiązane klucze prywatne znajdujące się w `%ALLUSERSPROFILE%\Application Data\Microsoft\Crypto\RSA\MachineKeys` (dla CAPI) i `%ALLUSERSPROFILE%\Application Data\Microsoft\Crypto\Keys` (dla CNG) są szyfrowane za pomocą głównych kluczy DPAPI maszyny. Klucze te nie mogą być odszyfrowane za pomocą zapasowego klucza DPAPI domeny; zamiast tego wymagany jest **sekret DPAPI_SYSTEM LSA**, do którego dostęp ma tylko użytkownik SYSTEM.
+Certyfikaty maszynowe przechowywane przez Windows w rejestrze pod `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\SystemCertificates` oraz powiązane klucze prywatne znajdujące się w `%ALLUSERSPROFILE%\Application Data\Microsoft\Crypto\RSA\MachineKeys` (dla CAPI) i `%ALLUSERSPROFILE%\Application Data\Microsoft\Crypto\Keys` (dla CNG) są szyfrowane za pomocą głównych kluczy DPAPI maszyny. Klucze te nie mogą być odszyfrowane za pomocą klucza zapasowego DPAPI domeny; zamiast tego wymagany jest **sekret DPAPI_SYSTEM LSA**, do którego dostęp ma tylko użytkownik SYSTEM.
 
-Ręczne odszyfrowanie można osiągnąć, wykonując polecenie `lsadump::secrets` w **Mimikatz**, aby wyodrębnić sekret DPAPI_SYSTEM LSA, a następnie używając tego klucza do odszyfrowania głównych kluczy maszyny. Alternatywnie, polecenie `crypto::certificates /export /systemstore:LOCAL_MACHINE` w Mimikatz może być użyte po załataniu CAPI/CNG, jak opisano wcześniej.
+Ręczne odszyfrowanie można osiągnąć, wykonując polecenie `lsadump::secrets` w **Mimikatz**, aby wyodrębnić sekret DPAPI_SYSTEM LSA, a następnie używając tego klucza do odszyfrowania głównych kluczy maszyny. Alternatywnie, polecenie `crypto::certificates /export /systemstore:LOCAL_MACHINE` w Mimikatz może być użyte po załataniu CAPI/CNG, jak wcześniej opisano.
 
-**SharpDPAPI** oferuje bardziej zautomatyzowane podejście za pomocą swojego polecenia certyfikatów. Gdy używany jest znacznik `/machine` z podwyższonymi uprawnieniami, eskaluje do SYSTEM, zrzuca sekret DPAPI_SYSTEM LSA, używa go do odszyfrowania głównych kluczy DPAPI maszyny, a następnie wykorzystuje te klucze w postaci jawnej jako tabelę wyszukiwania do odszyfrowania wszelkich kluczy prywatnych certyfikatów maszynowych.
+**SharpDPAPI** oferuje bardziej zautomatyzowane podejście za pomocą swojego polecenia certyfikatów. Gdy używany jest znacznik `/machine` z podwyższonymi uprawnieniami, eskaluje do SYSTEM, zrzuca sekret DPAPI_SYSTEM LSA, używa go do odszyfrowania głównych kluczy DPAPI maszyny, a następnie wykorzystuje te klucze w postaci tekstu jawnego jako tabelę wyszukiwania do odszyfrowania wszelkich kluczy prywatnych certyfikatów maszynowych.
 
 ## Znajdowanie plików certyfikatów – THEFT4
 
@@ -80,7 +80,7 @@ Certyfikaty czasami znajdują się bezpośrednio w systemie plików, na przykła
 Pliki te można wyszukiwać za pomocą PowerShell lub wiersza poleceń, szukając wymienionych rozszerzeń.
 
 W przypadkach, gdy znaleziony zostanie plik certyfikatu PKCS#12 i jest on chroniony hasłem, możliwe jest wyodrębnienie hasha za pomocą `pfx2john.py`, dostępnego na [fossies.org](https://fossies.org/dox/john-1.9.0-jumbo-1/pfx2john_8py_source.html). Następnie można użyć JohnTheRipper, aby spróbować złamać hasło.
-```powershell
+```bash
 # Example command to search for certificate files in PowerShell
 Get-ChildItem -Recurse -Path C:\Users\ -Include *.pfx, *.p12, *.pkcs12, *.pem, *.key, *.crt, *.cer, *.csr, *.jks, *.keystore, *.keys
 
@@ -90,16 +90,18 @@ pfx2john.py certificate.pfx > hash.txt
 # Command to crack the hash with JohnTheRipper
 john --wordlist=passwords.txt hash.txt
 ```
-## NTLM Credential Theft via PKINIT – THEFT5
+## NTLM Credential Theft via PKINIT – THEFT5 (UnPAC the hash)
 
-Podany materiał wyjaśnia metodę kradzieży poświadczeń NTLM za pomocą PKINIT, szczególnie poprzez metodę kradzieży oznaczoną jako THEFT5. Oto ponowne wyjaśnienie w stronie biernej, z zanonimizowanym i podsumowanym materiałem tam, gdzie to możliwe:
+Podany materiał wyjaśnia metodę kradzieży poświadczeń NTLM za pomocą PKINIT, szczególnie poprzez metodę kradzieży oznaczoną jako THEFT5. Oto ponowne wyjaśnienie w stronie biernej, z treścią zanonimizowaną i podsumowaną tam, gdzie to możliwe:
 
-Aby wspierać uwierzytelnianie NTLM [MS-NLMP] dla aplikacji, które nie umożliwiają uwierzytelniania Kerberos, KDC jest zaprojektowany tak, aby zwracać jednostronną funkcję NTLM użytkownika (OWF) w certyfikacie atrybutów uprawnień (PAC), szczególnie w buforze `PAC_CREDENTIAL_INFO`, gdy wykorzystywane jest PKCA. W konsekwencji, jeśli konto uwierzytelni się i zabezpieczy Ticket-Granting Ticket (TGT) za pomocą PKINIT, wbudowany mechanizm umożliwia bieżącemu hostowi wydobycie hasha NTLM z TGT, aby wspierać starsze protokoły uwierzytelniania. Proces ten obejmuje deszyfrowanie struktury `PAC_CREDENTIAL_DATA`, która jest zasadniczo zserializowanym przedstawieniem NTLM w postaci jawnej.
+Aby wspierać uwierzytelnianie NTLM `MS-NLMP` dla aplikacji, które nie umożliwiają uwierzytelniania Kerberos, KDC jest zaprojektowany tak, aby zwracać jednostronną funkcję NTLM użytkownika (OWF) w certyfikacie atrybutów uprawnień (PAC), szczególnie w buforze `PAC_CREDENTIAL_INFO`, gdy wykorzystywane jest PKCA. W związku z tym, jeśli konto uwierzytelni się i zabezpieczy bilet TGT za pomocą PKINIT, wbudowany mechanizm umożliwia bieżącemu hostowi wydobycie hasha NTLM z TGT, aby wspierać starsze protokoły uwierzytelniania. Proces ten obejmuje deszyfrowanie struktury `PAC_CREDENTIAL_DATA`, która jest zasadniczo zserializowanym przedstawieniem NTLM w postaci jawnej.
 
 Narzędzie **Kekeo**, dostępne pod adresem [https://github.com/gentilkiwi/kekeo](https://github.com/gentilkiwi/kekeo), jest wspomniane jako zdolne do żądania TGT zawierającego te konkretne dane, co ułatwia odzyskanie NTLM użytkownika. Komenda używana w tym celu jest następująca:
 ```bash
 tgt::pac /caname:generic-DC-CA /subject:genericUser /castore:current_user /domain:domain.local
 ```
+**`Rubeus`** może również uzyskać te informacje za pomocą opcji **`asktgt [...] /getcredentials`**.
+
 Dodatkowo zauważono, że Kekeo może przetwarzać certyfikaty chronione kartą inteligentną, pod warunkiem, że pin może być odzyskany, z odniesieniem do [https://github.com/CCob/PinSwipe](https://github.com/CCob/PinSwipe). Ta sama funkcjonalność jest wskazana jako wspierana przez **Rubeus**, dostępny pod adresem [https://github.com/GhostPack/Rubeus](https://github.com/GhostPack/Rubeus).
 
 To wyjaśnienie podsumowuje proces i narzędzia zaangażowane w kradzież poświadczeń NTLM za pomocą PKINIT, koncentrując się na odzyskiwaniu hashy NTLM poprzez TGT uzyskane za pomocą PKINIT oraz narzędziach, które ułatwiają ten proces.

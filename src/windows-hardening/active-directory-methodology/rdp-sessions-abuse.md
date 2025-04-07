@@ -6,8 +6,8 @@
 
 Jeśli **grupa zewnętrzna** ma **dostęp RDP** do jakiegokolwiek **komputera** w bieżącej domenie, **atakujący** może **skompromentować ten komputer i czekać na niego**.
 
-Gdy ten użytkownik uzyska dostęp przez RDP, **atakujący może przejąć sesję tego użytkownika** i wykorzystać jego uprawnienia w zewnętrznej domenie.
-```powershell
+Gdy ten użytkownik uzyska dostęp przez RDP, **atakujący może przejąć sesję tego użytkownika** i nadużyć jego uprawnień w zewnętrznej domenie.
+```bash
 # Supposing the group "External Users" has RDP access in the current domain
 ## lets find where they could access
 ## The easiest way would be with bloodhound, but you could also run:
@@ -34,10 +34,10 @@ Sprawdź **inne sposoby kradzieży sesji za pomocą innych narzędzi** [**na tej
 
 ## RDPInception
 
-Jeśli użytkownik uzyskuje dostęp przez **RDP do maszyny**, gdzie **atakujący** **czeka** na niego, atakujący będzie mógł **wstrzyknąć beacon w sesję RDP użytkownika**, a jeśli **ofiara zamontowała swój dysk** podczas uzyskiwania dostępu przez RDP, **atakujący mógłby uzyskać do niego dostęp**.
+Jeśli użytkownik uzyskuje dostęp przez **RDP do maszyny**, gdzie **atakujący** czeka na niego, atakujący będzie mógł **wstrzyknąć beacon w sesję RDP użytkownika**, a jeśli **ofiara zamontowała swój dysk** podczas uzyskiwania dostępu przez RDP, **atakujący mógłby uzyskać do niego dostęp**.
 
 W tym przypadku możesz po prostu **skompromentować** **oryginalny komputer ofiary**, pisząc **tylną furtkę** w **folderze uruchamiania**.
-```powershell
+```bash
 # Wait til someone logs in:
 net logons
 Logged on users at \\localhost:

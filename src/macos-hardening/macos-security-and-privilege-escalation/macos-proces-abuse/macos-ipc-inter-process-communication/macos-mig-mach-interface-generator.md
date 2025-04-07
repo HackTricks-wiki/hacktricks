@@ -4,15 +4,15 @@
 
 ## Podstawowe informacje
 
-MIG został stworzony, aby **uprościć proces tworzenia kodu Mach IPC**. W zasadzie **generuje potrzebny kod** dla serwera i klienta do komunikacji na podstawie podanej definicji. Nawet jeśli wygenerowany kod jest brzydki, programista będzie musiał tylko go zaimportować, a jego kod będzie znacznie prostszy niż wcześniej.
+MIG został stworzony, aby **uprościć proces tworzenia kodu Mach IPC**. W zasadzie **generuje potrzebny kod** dla serwera i klienta, aby mogły komunikować się zgodnie z daną definicją. Nawet jeśli wygenerowany kod jest brzydki, programista będzie musiał go tylko zaimportować, a jego kod będzie znacznie prostszy niż wcześniej.
 
-Definicja jest określona w języku definicji interfejsu (IDL) z użyciem rozszerzenia `.defs`.
+Definicja jest określona w języku definicji interfejsu (IDL) przy użyciu rozszerzenia `.defs`.
 
 Te definicje mają 5 sekcji:
 
 - **Deklaracja podsystemu**: Słowo kluczowe subsystem jest używane do wskazania **nazwa** i **id**. Możliwe jest również oznaczenie go jako **`KernelServer`**, jeśli serwer ma działać w jądrze.
 - **Inkluzje i importy**: MIG używa preprocesora C, więc może korzystać z importów. Ponadto możliwe jest użycie `uimport` i `simport` dla kodu generowanego przez użytkownika lub serwer.
-- **Deklaracje typów**: Możliwe jest definiowanie typów danych, chociaż zazwyczaj zaimportuje `mach_types.defs` i `std_types.defs`. Dla niestandardowych można użyć następującej składni:
+- **Deklaracje typów**: Możliwe jest zdefiniowanie typów danych, chociaż zazwyczaj zaimportuje `mach_types.defs` i `std_types.defs`. Dla niestandardowych można użyć następującej składni:
 - \[i`n/out]tran`: Funkcja, która musi być przetłumaczona z wiadomości przychodzącej lub do wiadomości wychodzącej
 - `c[user/server]type`: Mapowanie na inny typ C.
 - `destructor`: Wywołaj tę funkcję, gdy typ jest zwalniany.
@@ -40,7 +40,7 @@ server_port :  mach_port_t;
 n1          :  uint32_t;
 n2          :  uint32_t);
 ```
-Zauważ, że pierwszy **argument to port do powiązania** a MIG **automatycznie obsłuży port odpowiedzi** (chyba że wywołasz `mig_get_reply_port()` w kodzie klienta). Ponadto, **ID operacji** będzie **sekwencyjne**, zaczynając od wskazanego ID podsystemu (więc jeśli operacja jest przestarzała, jest usuwana, a `skip` jest używane, aby nadal używać jej ID).
+Zauważ, że pierwszy **argument to port do powiązania** i MIG **automatycznie obsłuży port odpowiedzi** (chyba że wywołasz `mig_get_reply_port()` w kodzie klienta). Ponadto, **ID operacji** będzie **sekwencyjne**, zaczynając od wskazanego ID podsystemu (więc jeśli operacja jest przestarzała, jest usuwana, a `skip` jest używane, aby nadal używać jej ID).
 
 Teraz użyj MIG, aby wygenerować kod serwera i klienta, który będzie w stanie komunikować się ze sobą, aby wywołać funkcję Subtract:
 ```bash
@@ -108,14 +108,14 @@ W tym przykładzie zdefiniowaliśmy tylko 1 funkcję w definicjach, ale gdybyśm
 
 Jeśli oczekiwano, że funkcja wyśle **reply**, funkcja `mig_internal kern_return_t __MIG_check__Reply__<name>` również by istniała.
 
-W rzeczywistości możliwe jest zidentyfikowanie tej relacji w strukturze **`subsystem_to_name_map_myipc`** z **`myipcServer.h`** (**`subsystem*to_name_map*\***`\*\* w innych plikach):
+W rzeczywistości możliwe jest zidentyfikowanie tej relacji w strukturze **`subsystem_to_name_map_myipc`** z **`myipcServer.h`** (**`subsystem*to_name_map*\***`** w innych plikach):
 ```c
 #ifndef subsystem_to_name_map_myipc
 #define subsystem_to_name_map_myipc \
 { "Subtract", 500 }
 #endif
 ```
-Ostatecznie, inną ważną funkcją, aby serwer działał, będzie **`myipc_server`**, która faktycznie **wywoła funkcję** związaną z otrzymanym identyfikatorem:
+Wreszcie, inną ważną funkcją, aby serwer działał, będzie **`myipc_server`**, która faktycznie **wywoła funkcję** związaną z otrzymanym identyfikatorem:
 
 <pre class="language-c"><code class="lang-c">mig_external boolean_t myipc_server
 (mach_msg_header_t *InHeadP, mach_msg_header_t *OutHeadP)
@@ -132,7 +132,7 @@ mig_routine_t routine;
 
 OutHeadP->msgh_bits = MACH_MSGH_BITS(MACH_MSGH_BITS_REPLY(InHeadP->msgh_bits), 0);
 OutHeadP->msgh_remote_port = InHeadP->msgh_reply_port;
-/* Minimalny rozmiar: routine() zaktualizuje go, jeśli będzie inny */
+/* Minimalny rozmiar: routine() zaktualizuje go, jeśli jest inny */
 OutHeadP->msgh_size = (mach_msg_size_t)sizeof(mig_reply_error_t);
 OutHeadP->msgh_local_port = MACH_PORT_NULL;
 OutHeadP->msgh_id = InHeadP->msgh_id + 100;
@@ -151,7 +151,7 @@ return FALSE;
 
 Sprawdź wcześniej wyróżnione linie uzyskujące dostęp do funkcji, aby wywołać ją według identyfikatora.
 
-Poniższy kod tworzy prosty **serwer** i **klienta**, gdzie klient może wywołać funkcje Odejmij z serwera:
+Poniżej znajduje się kod do stworzenia prostego **serwera** i **klienta**, gdzie klient może wywołać funkcje Odejmij z serwera:
 
 {{#tabs}}
 {{#tab name="myipc_server.c"}}
@@ -217,19 +217,19 @@ USERPREFSubtract(port, 40, 2);
 
 ### NDR_record
 
-NDR_record jest eksportowany przez `libsystem_kernel.dylib` i jest to struktura, która pozwala MIG na **transformację danych, aby były niezależne od systemu**, w którym są używane, ponieważ MIG miał być używany między różnymi systemami (a nie tylko na tej samej maszynie).
+NDR_record jest eksportowany przez `libsystem_kernel.dylib` i jest to struktura, która pozwala MIG na **transformację danych, aby były niezależne od systemu**, ponieważ MIG był zaprojektowany do użycia między różnymi systemami (a nie tylko na tej samej maszynie).
 
-To jest interesujące, ponieważ jeśli `_NDR_record` zostanie znaleziony w binarnym pliku jako zależność (`jtool2 -S <binary> | grep NDR` lub `nm`), oznacza to, że binarny plik jest klientem lub serwerem MIG.
+To jest interesujące, ponieważ jeśli `_NDR_record` zostanie znaleziony w binarnym pliku jako zależność (`jtool2 -S <binary> | grep NDR` lub `nm`), oznacza to, że plik binarny jest klientem lub serwerem MIG.
 
 Ponadto **serwery MIG** mają tabelę dyspozycyjną w `__DATA.__const` (lub w `__CONST.__constdata` w jądrze macOS i `__DATA_CONST.__const` w innych jądrze \*OS). Można to zrzucić za pomocą **`jtool2`**.
 
-A **klienci MIG** będą używać `__NDR_record`, aby wysłać z `__mach_msg` do serwerów.
+A **klienci MIG** będą używać `__NDR_record` do wysyłania za pomocą `__mach_msg` do serwerów.
 
 ## Analiza binarna
 
 ### jtool
 
-Ponieważ wiele binarnych plików teraz używa MIG do udostępniania portów mach, interesujące jest wiedzieć, jak **zidentyfikować, że MIG był używany** oraz **funkcje, które MIG wykonuje** z każdym identyfikatorem wiadomości.
+Ponieważ wiele binarnych plików teraz używa MIG do eksponowania portów mach, interesujące jest wiedzieć, jak **zidentyfikować, że MIG był używany** oraz **funkcje, które MIG wykonuje** z każdym identyfikatorem wiadomości.
 
 [**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/index.html#jtool2) może analizować informacje MIG z binarnego pliku Mach-O, wskazując identyfikator wiadomości i identyfikując funkcję do wykonania:
 ```bash
@@ -241,7 +241,7 @@ jtool2 -d __DATA.__const myipc_server | grep BL
 ```
 ### Assembly
 
-Wcześniej wspomniano, że funkcja, która zajmie się **wywoływaniem odpowiedniej funkcji w zależności od otrzymanego identyfikatora wiadomości**, to `myipc_server`. Jednak zazwyczaj nie będziesz miał symboli binarnych (brak nazw funkcji), więc interesujące jest **sprawdzić, jak wygląda dekompilacja**, ponieważ zawsze będzie bardzo podobna (kod tej funkcji jest niezależny od funkcji wystawionych):
+Wcześniej wspomniano, że funkcja, która zajmie się **wywoływaniem odpowiedniej funkcji w zależności od otrzymanego identyfikatora wiadomości**, to `myipc_server`. Jednak zazwyczaj nie będziesz miał symboli binarnych (brak nazw funkcji), więc warto **sprawdzić, jak wygląda dekompilacja**, ponieważ zawsze będzie bardzo podobna (kod tej funkcji jest niezależny od funkcji wystawionych):
 
 {{#tabs}}
 {{#tab name="myipc_server decompiled 1"}}
@@ -340,7 +340,7 @@ r8 = 0x1;
 var_4 = 0x0;
 }
 else {
-// Wywołanie do obliczonego adresu, gdzie powinna być funkcja
+// Wywołanie obliczonego adresu, gdzie powinna być funkcja
 <strong>                            (var_20)(var_10, var_18);
 </strong>                            var_4 = 0x1;
 }

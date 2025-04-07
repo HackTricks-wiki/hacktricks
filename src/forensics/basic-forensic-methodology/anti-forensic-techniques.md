@@ -2,16 +2,16 @@
 
 # Timestamps
 
-Atakujący może być zainteresowany **zmianą znaczników czasu plików**, aby uniknąć wykrycia.\
-Możliwe jest znalezienie znaczników czasu w MFT w atrybutach `$STANDARD_INFORMATION` ** i ** `$FILE_NAME`.
+Atakujący może być zainteresowany **zmianą znaczników czasowych plików**, aby uniknąć wykrycia.\
+Możliwe jest znalezienie znaczników czasowych w MFT w atrybutach `$STANDARD_INFORMATION`**i**`$FILE_NAME`.
 
-Oba atrybuty mają 4 znaczniki czasu: **Modyfikacja**, **dostęp**, **utworzenie** i **modyfikacja rejestru MFT** (MACE lub MACB).
+Oba atrybuty mają 4 znaczniki czasowe: **Modyfikacja**, **dostęp**, **utworzenie** i **modyfikacja rejestru MFT** (MACE lub MACB).
 
 **Eksplorator Windows** i inne narzędzia pokazują informacje z **`$STANDARD_INFORMATION`**.
 
 ## TimeStomp - Narzędzie antyforensyczne
 
-To narzędzie **modyfikuje** informacje o znaczniku czasu wewnątrz **`$STANDARD_INFORMATION`** **ale** **nie** informacje wewnątrz **`$FILE_NAME`**. Dlatego możliwe jest **zidentyfikowanie** **podejrzanej** **aktywności**.
+To narzędzie **modyfikuje** informacje o znaczniku czasowym wewnątrz **`$STANDARD_INFORMATION`**, **ale** **nie** modyfikuje informacji wewnątrz **`$FILE_NAME`**. Dlatego możliwe jest **zidentyfikowanie** **podejrzanej** **aktywności**.
 
 ## Usnjrnl
 
@@ -29,7 +29,7 @@ Poprzedni obrazek to **wyjście** pokazane przez **narzędzie**, gdzie można za
 
 Ponownie, w wyjściu narzędzia można zobaczyć, że **wprowadzono pewne zmiany**.
 
-Używając tego samego narzędzia, można zidentyfikować, **do którego czasu zmieniono znaczniki czasu**:
+Używając tego samego narzędzia, można zidentyfikować, **do którego czasu zmieniono znaczniki czasowe**:
 
 ![](<../../images/image (451).png>)
 
@@ -44,11 +44,11 @@ Innym sposobem na zidentyfikowanie podejrzanych zmodyfikowanych plików byłoby 
 
 ## Nanosekundy
 
-**Znaczniki czasu NTFS** mają **precyzję** **100 nanosekund**. Dlatego znalezienie plików z znacznikami czasu takimi jak 2010-10-10 10:10:**00.000:0000 jest bardzo podejrzane**.
+**Znaczniki czasowe NTFS** mają **precyzję** **100 nanosekund**. Dlatego znalezienie plików z znacznikami czasowymi takimi jak 2010-10-10 10:10:**00.000:0000 jest bardzo podejrzane**.
 
 ## SetMace - Narzędzie antyforensyczne
 
-To narzędzie może modyfikować oba atrybuty `$STARNDAR_INFORMATION` i `$FILE_NAME`. Jednak od Windows Vista, konieczne jest, aby system operacyjny na żywo mógł modyfikować te informacje.
+To narzędzie może modyfikować oba atrybuty `$STARNDAR_INFORMATION` i `$FILE_NAME`. Jednak od Windows Vista, konieczne jest, aby system operacyjny na żywo modyfikował te informacje.
 
 # Ukrywanie danych
 
@@ -62,8 +62,8 @@ Wtedy możliwe jest odzyskanie przestrzeni slack za pomocą narzędzi takich jak
 
 # UsbKill
 
-To narzędzie, które **wyłączy komputer, jeśli wykryje jakiekolwiek zmiany w portach USB**.\
-Sposobem na odkrycie tego byłoby sprawdzenie uruchomionych procesów i **przejrzenie każdego uruchomionego skryptu python**.
+To narzędzie, które **wyłączy komputer, jeśli wykryje jakąkolwiek zmianę w portach USB**.\
+Sposobem na odkrycie tego byłoby sprawdzenie uruchomionych procesów i **przejrzenie każdego uruchomionego skryptu Pythona**.
 
 # Dystrybucje Live Linux
 
@@ -77,7 +77,7 @@ Te dystrybucje są **uruchamiane w pamięci RAM**. Jedynym sposobem na ich wykry
 
 Możliwe jest wyłączenie kilku metod logowania w systemie Windows, aby znacznie utrudnić dochodzenie forensyczne.
 
-## Wyłącz znaczniki czasu - UserAssist
+## Wyłącz znaczniki czasowe - UserAssist
 
 To klucz rejestru, który utrzymuje daty i godziny, kiedy każdy plik wykonywalny był uruchamiany przez użytkownika.
 
@@ -86,7 +86,7 @@ Wyłączenie UserAssist wymaga dwóch kroków:
 1. Ustawienie dwóch kluczy rejestru, `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackProgs` i `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackEnabled`, oba na zero, aby sygnalizować, że chcemy wyłączyć UserAssist.
 2. Wyczyść swoje poddrzewa rejestru, które wyglądają jak `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\<hash>`.
 
-## Wyłącz znaczniki czasu - Prefetch
+## Wyłącz znaczniki czasowe - Prefetch
 
 To zapisze informacje o aplikacjach uruchamianych w celu poprawy wydajności systemu Windows. Jednak może to być również przydatne w praktykach forensycznych.
 
@@ -96,13 +96,13 @@ To zapisze informacje o aplikacjach uruchamianych w celu poprawy wydajności sys
 - Wybierz Modyfikuj dla każdego z nich, aby zmienić wartość z 1 (lub 3) na 0
 - Uruchom ponownie
 
-## Wyłącz znaczniki czasu - Czas ostatniego dostępu
+## Wyłącz znaczniki czasowe - Czas ostatniego dostępu
 
-Kiedy folder jest otwierany z woluminu NTFS na serwerze Windows NT, system zajmuje czas na **aktualizację pola znacznika czasu w każdym wymienionym folderze**, nazywanego czasem ostatniego dostępu. Na mocno używanym woluminie NTFS może to wpłynąć na wydajność.
+Kiedy folder jest otwierany z woluminu NTFS na serwerze Windows NT, system zajmuje czas na **aktualizację pola znacznika czasowego w każdym wymienionym folderze**, nazywanego czasem ostatniego dostępu. Na mocno używanym woluminie NTFS może to wpływać na wydajność.
 
 1. Otwórz Edytor rejestru (Regedit.exe).
 2. Przejdź do `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem`.
-3. Poszukaj `NtfsDisableLastAccessUpdate`. Jeśli nie istnieje, dodaj ten DWORD i ustaw jego wartość na 1, co wyłączy ten proces.
+3. Poszukaj `NtfsDisableLastAccessUpdate`. Jeśli nie istnieje, dodaj ten DWORD i ustaw jego wartość na 1, co wyłączy proces.
 4. Zamknij Edytor rejestru i uruchom ponownie serwer.
 
 ## Usuń historię USB
@@ -110,22 +110,22 @@ Kiedy folder jest otwierany z woluminu NTFS na serwerze Windows NT, system zajmu
 Wszystkie **Wpisy urządzeń USB** są przechowywane w rejestrze Windows pod kluczem **USBSTOR**, który zawiera podklucze tworzone za każdym razem, gdy podłączasz urządzenie USB do swojego komputera lub laptopa. Możesz znaleźć ten klucz tutaj `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Usunięcie tego** spowoduje usunięcie historii USB.\
 Możesz również użyć narzędzia [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html), aby upewnić się, że je usunąłeś (i aby je usunąć).
 
-Innym plikiem, który zapisuje informacje o USB, jest plik `setupapi.dev.log` w `C:\Windows\INF`. Ten plik również powinien zostać usunięty.
+Innym plikiem, który zapisuje informacje o USB, jest plik `setupapi.dev.log` wewnątrz `C:\Windows\INF`. Ten plik również powinien zostać usunięty.
 
 ## Wyłącz kopie zapasowe
 
-**Wylistuj** kopie zapasowe za pomocą `vssadmin list shadowstorage`\
+**Lista** kopii zapasowych za pomocą `vssadmin list shadowstorage`\
 **Usuń** je, uruchamiając `vssadmin delete shadow`
 
-Możesz również usunąć je za pomocą GUI, postępując zgodnie z krokami zaproponowanymi w [https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html)
+Możesz również usunąć je za pomocą GUI, postępując zgodnie z krokami opisanymi w [https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html)
 
 Aby wyłączyć kopie zapasowe, [kroki stąd](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows):
 
-1. Otwórz program Usługi, wpisując "services" w polu wyszukiwania tekstowego po kliknięciu przycisku start w Windows.
+1. Otwórz program Usługi, wpisując "usługi" w polu wyszukiwania tekstowego po kliknięciu przycisku start w Windows.
 2. Z listy znajdź "Kopia zapasowa woluminu", wybierz ją, a następnie uzyskaj dostęp do Właściwości, klikając prawym przyciskiem myszy.
 3. Wybierz Wyłączone z rozwijanego menu "Typ uruchomienia", a następnie potwierdź zmianę, klikając Zastosuj i OK.
 
-Możliwe jest również modyfikowanie konfiguracji, które pliki będą kopiowane w kopii zapasowej w rejestrze `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`
+Możliwe jest również modyfikowanie konfiguracji, które pliki mają być kopiowane w kopii zapasowej w rejestrze `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`
 
 ## Nadpisz usunięte pliki
 

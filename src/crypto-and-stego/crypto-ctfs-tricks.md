@@ -4,7 +4,7 @@
 
 ## Online Hashes DBs
 
-- _**Wyszukaj w Google**_
+- _**Google to**_
 - [http://hashtoolkit.com/reverse-hash?hash=4d186321c1a7f0f354b297e8914ab240](http://hashtoolkit.com/reverse-hash?hash=4d186321c1a7f0f354b297e8914ab240)
 - [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com)
 - [https://crackstation.net/](https://crackstation.net)
@@ -184,7 +184,7 @@ Litery do ich wartości numerycznej
 ```
 ### Szyfr Afiniczny Kodowanie
 
-Litera na numer `(ax+b)%26` (_a_ i _b_ to klucze, a _x_ to litera) i wynik z powrotem na literę
+Litera na num `(ax+b)%26` (_a_ i _b_ to klucze, a _x_ to litera) i wynik z powrotem na literę
 ```
 krodfdudfrod
 ```
@@ -192,9 +192,9 @@ krodfdudfrod
 
 **Multitap** [replaces a letter](https://www.dcode.fr/word-letter-change) przez powtarzające się cyfry zdefiniowane przez odpowiadający kod klawisza na mobilnej [klawiaturze telefonu](https://www.dcode.fr/phone-keypad-cipher) (Ten tryb jest używany podczas pisania SMS).\
 Na przykład: 2=A, 22=B, 222=C, 3=D...\
-Możesz zidentyfikować ten kod, ponieważ zobaczysz\*\* kilka powtarzających się cyfr\*\*.
+Możesz zidentyfikować ten kod, ponieważ zobaczysz **wiele powtarzających się cyfr**.
 
-Możesz dekodować ten kod w: [https://www.dcode.fr/multitap-abc-cipher](https://www.dcode.fr/multitap-abc-cipher)
+Możesz zdekodować ten kod w: [https://www.dcode.fr/multitap-abc-cipher](https://www.dcode.fr/multitap-abc-cipher)
 
 ### Bacon Code
 

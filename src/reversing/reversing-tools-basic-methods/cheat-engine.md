@@ -10,7 +10,7 @@ Po pobraniu i uruchomieniu, **zostaniesz** **przedstawiony** z **samouczkiem** j
 ![](<../../images/image (762).png>)
 
 To narzędzie jest bardzo przydatne do znalezienia **gdzie jakaś wartość** (zwykle liczba) **jest przechowywana w pamięci** programu.\
-**Zwykle liczby** są przechowywane w formie **4 bajtów**, ale możesz je również znaleźć w formatach **double** lub **float**, lub możesz chcieć szukać czegoś **innego niż liczba**. Z tego powodu musisz upewnić się, że **wybierasz**, czego chcesz **szukać**:
+**Zwykle liczby** są przechowywane w formie **4 bajtów**, ale możesz je również znaleźć w formatach **double** lub **float**, lub możesz chcieć szukać czegoś **innego niż liczba**. Z tego powodu musisz upewnić się, że **wybierasz** to, co chcesz **wyszukiwać**:
 
 ![](<../../images/image (324).png>)
 
@@ -40,17 +40,17 @@ A na koniec **zaznaczając pole**, aby wprowadzić modyfikację w pamięci:
 
 **Zmiana** w **pamięci** zostanie natychmiast **zastosowana** (zauważ, że dopóki gra nie użyje tej wartości ponownie, wartość **nie zostanie zaktualizowana w grze**).
 
-## Szukanie wartości
+## Wyszukiwanie wartości
 
 Załóżmy, że istnieje ważna wartość (jak życie twojego użytkownika), którą chcesz poprawić, i szukasz tej wartości w pamięci.
 
 ### Przez znaną zmianę
 
-Zakładając, że szukasz wartości 100, **przeprowadzasz skanowanie** w poszukiwaniu tej wartości i znajdujesz wiele zbieżności:
+Zakładając, że szukasz wartości 100, **przeprowadzasz skanowanie** w poszukiwaniu tej wartości i znajdujesz wiele trafień:
 
 ![](<../../images/image (108).png>)
 
-Następnie robisz coś, aby **wartość się zmieniła**, a następnie **zatrzymujesz** grę i **przeprowadzasz** **następne skanowanie**:
+Następnie robisz coś, aby **wartość się zmieniła**, zatrzymujesz grę i **przeprowadzasz** **następne skanowanie**:
 
 ![](<../../images/image (684).png>)
 
@@ -61,15 +61,15 @@ _Jeśli nadal masz kilka wartości, zrób coś, aby ponownie zmodyfikować tę w
 
 W scenariuszu, w którym **nie znasz wartości**, ale wiesz **jak ją zmienić** (a nawet wartość zmiany), możesz szukać swojej liczby.
 
-Zacznij od przeprowadzenia skanowania typu "**Nieznana wartość początkowa**":
+Zacznij od przeprowadzenia skanowania typu "**Nieznana początkowa wartość**":
 
 ![](<../../images/image (890).png>)
 
-Następnie zmień wartość, wskaź **jak** **wartość** **się zmieniła** (w moim przypadku zmniejszyła się o 1) i przeprowadź **następne skanowanie**:
+Następnie zmień wartość, wskaż **jak** **wartość** **się zmieniła** (w moim przypadku zmniejszyła się o 1) i przeprowadź **następne skanowanie**:
 
 ![](<../../images/image (371).png>)
 
-Zostaniesz przedstawiony **wszystkimi wartościami, które zostały zmodyfikowane w wybrany sposób**:
+Zostaną przedstawione **wszystkie wartości, które zostały zmodyfikowane w wybrany sposób**:
 
 ![](<../../images/image (569).png>)
 
@@ -94,7 +94,7 @@ Gdy wybierzesz jedną z tych opcji, **debugger** zostanie **przyłączony** do p
 
 ![](<../../images/image (91).png>)
 
-Teraz, gdy znalazłeś adres, który zmienia wartość, możesz **zmodyfikować kod według własnego uznania** (Cheat Engine pozwala na szybkie modyfikowanie go na NOP):
+Teraz, gdy znalazłeś adres, który zmienia wartość, możesz **zmodyfikować kod według własnego uznania** (Cheat Engine pozwala na szybkie modyfikowanie go na NOPs):
 
 ![](<../../images/image (1057).png>)
 
@@ -111,13 +111,13 @@ Następnie przeprowadź nowe skanowanie **szukając wartości hex między "\[]"*
 ![](<../../images/image (994).png>)
 
 (_Jeśli pojawi się kilka, zazwyczaj potrzebujesz najmniejszego adresu_)\
-Teraz, znaleźliśmy **wskaźnik, który będzie modyfikował wartość, która nas interesuje**.
+Teraz, **znaleźliśmy wskaźnik, który będzie modyfikował wartość, która nas interesuje**.
 
 Kliknij na "**Dodaj adres ręcznie**":
 
 ![](<../../images/image (990).png>)
 
-Teraz kliknij na pole "Wskaźnik" i dodaj znaleziony adres w polu tekstowym (w tym scenariuszu, znaleziony adres na poprzednim obrazie to "Tutorial-i386.exe"+2426B0):
+Następnie zaznacz pole "Wskaźnik" i dodaj znaleziony adres w polu tekstowym (w tym scenariuszu, znaleziony adres na poprzednim obrazie to "Tutorial-i386.exe"+2426B0):
 
 ![](<../../images/image (392).png>)
 
@@ -138,11 +138,11 @@ Wyobraź sobie, że znalazłeś adres, który odejmuje 1 od życia twojego gracz
 ![](<../../images/image (203).png>)
 
 Kliknij na Pokaż disassembler, aby uzyskać **kod disassembly**.\
-Następnie kliknij **CTRL+a**, aby wywołać okno Auto assemble i wybierz _**Template --> Wstrzykiwanie kodu**_
+Następnie kliknij **CTRL+a**, aby wywołać okno Auto assemble i wybierz _**Template --> Code Injection**_
 
 ![](<../../images/image (902).png>)
 
-Wypełnij **adres instrukcji, którą chcesz zmodyfikować** (zwykle jest to automatycznie wypełnione):
+Wypełnij **adres instrukcji, którą chcesz zmodyfikować** (zwykle jest to automatycznie wypełniane):
 
 ![](<../../images/image (744).png>)
 
@@ -150,11 +150,11 @@ Zostanie wygenerowany szablon:
 
 ![](<../../images/image (944).png>)
 
-Wstaw swój nowy kod asemblera w sekcji "**newmem**" i usuń oryginalny kod z sekcji "**originalcode**", jeśli nie chcesz, aby był wykonywany\*\*.\*\* W tym przykładzie wstrzyknięty kod doda 2 punkty zamiast odejmować 1:
+Wstaw swój nowy kod asemblera w sekcji "**newmem**" i usuń oryginalny kod z "**originalcode**", jeśli nie chcesz, aby był wykonywany. W tym przykładzie wstrzyknięty kod doda 2 punkty zamiast odejmować 1:
 
 ![](<../../images/image (521).png>)
 
-**Kliknij na wykonaj i tak dalej, a twój kod powinien być wstrzyknięty do programu, zmieniając zachowanie funkcjonalności!**
+**Kliknij na wykonaj i tak dalej, a twój kod powinien zostać wstrzyknięty do programu, zmieniając zachowanie funkcjonalności!**
 
 ## **Referencje**
 

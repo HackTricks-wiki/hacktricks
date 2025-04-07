@@ -72,7 +72,7 @@ Użytkownicy z **grupy shadow** mogą **czytać** plik **/etc/shadow**:
 ```
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
-So, read the file and try to **crack some hashes**.
+So, przeczytaj plik i spróbuj **złamać niektóre hashe**.
 
 ## Grupa Pracowników
 
@@ -148,7 +148,7 @@ debugfs:  dump /tmp/asd1.txt /tmp/asd2.txt
 ```
 Jednakże, jeśli spróbujesz **zapisać pliki należące do roota** (takie jak `/etc/shadow` lub `/etc/passwd`), otrzymasz błąd "**Permission denied**".
 
-## Grupa Wideo
+## Grupa Video
 
 Używając polecenia `w`, możesz znaleźć **kto jest zalogowany w systemie** i wyświetli to wynik podobny do poniższego:
 ```bash
@@ -163,7 +163,7 @@ Grupa **video** ma dostęp do wyświetlania wyjścia ekranu. W zasadzie możesz 
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
 ```
-Aby **otworzyć** **surowy obraz**, możesz użyć **GIMP**, wybrać plik **`screen.raw`** i jako typ pliku wybrać **Surowe dane obrazu**:
+Aby **otworzyć** **surowy obraz**, możesz użyć **GIMP**, wybrać plik **`screen.raw`** i jako typ pliku wybrać **Dane surowego obrazu**:
 
 ![](<../../../images/image (463).png>)
 
@@ -175,7 +175,7 @@ Następnie zmodyfikuj Szerokość i Wysokość na te używane na ekranie i spraw
 
 Wygląda na to, że domyślnie **członkowie grupy root** mogą mieć dostęp do **modyfikacji** niektórych plików konfiguracyjnych **usług** lub niektórych plików **bibliotek** lub **innych interesujących rzeczy**, które mogą być użyte do eskalacji uprawnień...
 
-**Sprawdź, które pliki członkowie roota mogą modyfikować**:
+**Sprawdź, które pliki członkowie root mogą modyfikować**:
 ```bash
 find / -group root -perm -g=w 2>/dev/null
 ```
@@ -193,13 +193,13 @@ echo 'toor:$1$.ZcF5ts0$i4k6rQYzeegUkacRCvfxC0:0:0:root:/root:/bin/sh' >> /etc/pa
 #Ifyou just want filesystem and network access you can startthe following container:
 docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chroot /mnt bashbash
 ```
-Na koniec, jeśli nie podoba Ci się żadna z wcześniejszych sugestii lub z jakiegoś powodu nie działają (firewall API dockera?), zawsze możesz spróbować **uruchomić kontener z uprawnieniami i wydostać się z niego**, jak wyjaśniono tutaj:
+Na koniec, jeśli nie podoba Ci się żadna z wcześniejszych sugestii lub z jakiegoś powodu nie działają (firewall API dockera?), zawsze możesz spróbować **uruchomić uprzywilejowany kontener i uciec z niego**, jak wyjaśniono tutaj:
 
 {{#ref}}
 ../docker-security/
 {{#endref}}
 
-Jeśli masz uprawnienia do zapisu w gnieździe dockera, przeczytaj [**ten post o tym, jak eskalować uprawnienia, nadużywając gniazda dockera**](../index.html#writable-docker-socket)**.**
+Jeśli masz uprawnienia do zapisu w gnieździe dockera, przeczytaj [**ten post o tym, jak podnieść uprawnienia, nadużywając gniazda dockera**](../index.html#writable-docker-socket)**.**
 
 {{#ref}}
 https://github.com/KrustyHack/docker-privilege-escalation
@@ -217,12 +217,12 @@ https://fosterelli.co/privilege-escalation-via-docker.html
 
 ## Grupa Adm
 
-Zazwyczaj **członkowie** grupy **`adm`** mają uprawnienia do **odczytu plików** dziennika znajdujących się w _/var/log/_.\
+Zazwyczaj **członkowie** grupy **`adm`** mają uprawnienia do **czytania plików** dziennika znajdujących się w _/var/log/_.\
 Dlatego, jeśli skompromitowałeś użytkownika w tej grupie, zdecydowanie powinieneś **sprawdzić logi**.
 
 ## Grupa Auth
 
 W OpenBSD grupa **auth** zazwyczaj może pisać w folderach _**/etc/skey**_ i _**/var/db/yubikey**_, jeśli są używane.\
-Te uprawnienia mogą być nadużywane za pomocą następującego exploita, aby **eskalować uprawnienia** do roota: [https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
+Te uprawnienia mogą być nadużywane za pomocą następującego exploita, aby **podnieść uprawnienia** do roota: [https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
 
 {{#include ../../../banners/hacktricks-training.md}}
