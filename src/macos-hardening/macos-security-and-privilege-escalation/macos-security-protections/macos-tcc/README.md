@@ -20,7 +20,7 @@ ps -ef | grep tcc
 0   374     1   0 Thu07PM ??         2:01.66 /System/Library/PrivateFrameworks/TCC.framework/Support/tccd system
 501 63079     1   0  6:59PM ??         0:01.95 /System/Library/PrivateFrameworks/TCC.framework/Support/tccd
 ```
-Los **permisos** son **heredados de la aplicación padre** y los **permisos** son **seguros** en función del **Bundle ID** y el **Developer ID**.
+Los permisos son **heredados de la aplicación padre** y los **permisos** son **seguros** basados en el **Bundle ID** y el **Developer ID**.
 
 ### Bases de datos TCC
 
@@ -29,14 +29,14 @@ Las concesiones/denegaciones se almacenan en algunas bases de datos TCC:
 - La base de datos a nivel del sistema en **`/Library/Application Support/com.apple.TCC/TCC.db`**.
 - Esta base de datos está **protegida por SIP**, por lo que solo un bypass de SIP puede escribir en ella.
 - La base de datos TCC del usuario **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`** para preferencias por usuario.
-- Esta base de datos está protegida, por lo que solo los procesos con altos privilegios de TCC, como Acceso Completo al Disco, pueden escribir en ella (pero no está protegida por SIP).
+- Esta base de datos está protegida, por lo que solo los procesos con altos privilegios TCC, como Acceso Completo al Disco, pueden escribir en ella (pero no está protegida por SIP).
 
 > [!WARNING]
 > Las bases de datos anteriores también están **protegidas por TCC para acceso de lectura**. Así que **no podrás leer** tu base de datos TCC de usuario regular a menos que sea desde un proceso privilegiado de TCC.
 >
 > Sin embargo, recuerda que un proceso con estos altos privilegios (como **FDA** o **`kTCCServiceEndpointSecurityClient`**) podrá escribir en la base de datos TCC de los usuarios.
 
-- Hay una **tercera** base de datos TCC en **`/var/db/locationd/clients.plist`** para indicar los clientes permitidos para **acceder a los servicios de ubicación**.
+- Hay una **tercera** base de datos TCC en **`/var/db/locationd/clients.plist`** para indicar los clientes permitidos para **acceder a los servicios de localización**.
 - El archivo protegido por SIP **`/Users/carlospolop/Downloads/REG.db`** (también protegido del acceso de lectura con TCC), contiene la **ubicación** de todas las **bases de datos TCC válidas**.
 - El archivo protegido por SIP **`/Users/carlospolop/Downloads/MDMOverrides.plist`** (también protegido del acceso de lectura con TCC), contiene más permisos otorgados por TCC.
 - El archivo protegido por SIP **`/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist`** (pero legible por cualquier persona) es una lista de aplicaciones que requieren una excepción de TCC.
@@ -102,7 +102,7 @@ sqlite> select * from access where client LIKE "%telegram%" and auth_value=0;
 {{#endtabs}}
 
 > [!TIP]
-> Al verificar ambas bases de datos, puedes comprobar los permisos que una aplicación ha permitido, ha prohibido o no tiene (lo pedirá).
+> Al verificar ambas bases de datos, puedes comprobar los permisos que una aplicación ha permitido, ha prohibido o no tiene (lo solicitará).
 
 - El **`service`** es la representación en cadena de la **permisión** de TCC
 - El **`client`** es el **ID del paquete** o **ruta al binario** con los permisos
@@ -152,7 +152,7 @@ Simplemente haz **`launctl load you_bin.plist`**, con un plist como:
 </details>
 
 - El **`auth_value`** puede tener diferentes valores: denied(0), unknown(1), allowed(2) o limited(3).
-- El **`auth_reason`** puede tomar los siguientes valores: Error(1), User Consent(2), User Set(3), System Set(4), Service Policy(5), MDM Policy(6), Override Policy(7), Missing usage string(8), Prompt Timeout(9), Preflight Unknown(10), Entitled(11), App Type Policy(12)
+- El **`auth_reason`** puede tomar los siguientes valores: Error(1), Consentimiento del Usuario(2), Establecido por el Usuario(3), Establecido por el Sistema(4), Política de Servicio(5), Política de MDM(6), Política de Anulación(7), Cadena de uso faltante(8), Tiempo de espera del aviso(9), Preflight Desconocido(10), Con derecho(11), Política de Tipo de Aplicación(12)
 - El campo **csreq** está ahí para indicar cómo verificar el binario para ejecutar y otorgar los permisos de TCC:
 ```bash
 # Query to get cserq in printable hex
@@ -203,7 +203,7 @@ csreq -t -r /tmp/telegram_csreq.bin
 
 ### Derechos y Permisos de TCC
 
-Las aplicaciones **no solo necesitan** **solicitar** y haber **recibido acceso** a algunos recursos, también necesitan **tener los derechos relevantes**.\
+Las aplicaciones **no solo necesitan** **solicitar** y haber sido **otorgadas acceso** a algunos recursos, también necesitan **tener los derechos relevantes**.\
 Por ejemplo, **Telegram** tiene el derecho `com.apple.security.device.camera` para solicitar **acceso a la cámara**. Una **aplicación** que **no tenga** este **derecho no podrá** acceder a la cámara (y el usuario ni siquiera será preguntado por los permisos).
 
 Sin embargo, para que las aplicaciones **accedan** a **ciertas carpetas de usuario**, como `~/Desktop`, `~/Downloads` y `~/Documents`, **no necesitan** tener ningún **derecho específico.** El sistema manejará el acceso de manera transparente y **pedirá al usuario** según sea necesario.
@@ -370,7 +370,7 @@ Este es el aviso de TCC para obtener privilegios de Automatización sobre Finder
 <figure><img src="../../../../images/image (27).png" alt="" width="244"><figcaption></figcaption></figure>
 
 > [!CAUTION]
-> Ten en cuenta que debido a que la aplicación **Automator** tiene el permiso TCC **`kTCCServiceAppleEvents`**, puede **controlar cualquier aplicación**, como Finder. Así que al tener el permiso para controlar Automator, también podrías controlar el **Finder** con un código como el siguiente:
+> Ten en cuenta que debido a que la aplicación **Automator** tiene el permiso TCC **`kTCCServiceAppleEvents`**, puede **controlar cualquier aplicación**, como Finder. Así que al tener el permiso para controlar Automator, también podrías controlar el **Finder** con un código como el que se muestra a continuación:
 
 <details>
 
@@ -400,7 +400,7 @@ Lo mismo sucede con la **aplicación Script Editor,** puede controlar Finder, pe
 
 ### Automatización (SE) a algunos TCC
 
-**System Events puede crear Acciones de Carpeta, y las acciones de carpeta pueden acceder a algunas carpetas TCC** (Escritorio, Documentos y Descargas), por lo que se puede usar un script como el siguiente para abusar de este comportamiento:
+**System Events puede crear Acciones de Carpeta, y las acciones de carpeta pueden acceder a algunas carpetas de TCC** (Escritorio, Documentos y Descargas), por lo que se puede usar un script como el siguiente para abusar de este comportamiento:
 ```bash
 # Create script to execute with the action
 cat > "/tmp/script.js" <<EOD
@@ -506,7 +506,7 @@ Si tienes **`kTCCServiceEndpointSecurityClient`**, tienes FDA. Fin.
 
 ### Base de Datos TCC de Usuario a FDA
 
-Obteniendo **permisos de escritura** sobre la base de datos **TCC** del usuario no **puedes** otorgarte permisos de **`FDA`**, solo el que vive en la base de datos del sistema puede otorgar eso.
+Obteniendo **permisos de escritura** sobre la base de datos **TCC** del **usuario** no puedes otorgarte permisos de **`FDA`**, solo el que vive en la base de datos del sistema puede otorgar eso.
 
 Pero puedes **dar** a ti mismo **`derechos de automatización al Finder`**, y abusar de la técnica anterior para escalar a FDA\*.
 
