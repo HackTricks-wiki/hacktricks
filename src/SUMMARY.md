@@ -288,7 +288,6 @@
   - [PsExec/Winexec/ScExec](windows-hardening/lateral-movement/psexec-and-winexec.md)
   - [RDPexec](windows-hardening/lateral-movement/rdpexec.md)
   - [SCMexec](windows-hardening/lateral-movement/scmexec.md)
-  - [SmbExec/ScExec](windows-hardening/lateral-movement/smbexec.md)
   - [WinRM](windows-hardening/lateral-movement/winrm.md)
   - [WmiExec](windows-hardening/lateral-movement/wmiexec.md)
 - [Pivoting to the Cloud$$external:https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/index.html$$]()
