@@ -13,7 +13,7 @@ It is common for organizations to **block cmd.exe and PowerShell.exe** and write
 
 Check which files/extensions are blacklisted/whitelisted:
 
-```powershell
+```bash
 Get-ApplockerPolicy -Effective -xml
 
 Get-AppLockerPolicy -Effective | select -ExpandProperty RuleCollections
@@ -182,14 +182,14 @@ PowerShell [**Constrained Language Mode**](https://devblogs.microsoft.com/powers
 
 ### **Check**
 
-```powershell
+```bash
 $ExecutionContext.SessionState.LanguageMode
 #Values could be: FullLanguage or ConstrainedLanguage
 ```
 
 ### Bypass
 
-```powershell
+```bash
 #Easy bypass
 Powershell -version 2
 ```
@@ -215,7 +215,7 @@ You can use [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/
 
 By default it is set to **restricted.** Main ways to bypass this policy:
 
-```powershell
+```bash
 1º Just copy and paste inside the interactive PS console
 2º Read en Exec
 Get-Content .runme.ps1 | PowerShell.exe -noprofile -

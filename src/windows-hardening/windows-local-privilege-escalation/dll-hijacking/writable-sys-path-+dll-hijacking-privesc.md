@@ -24,7 +24,7 @@ The problem in this cases is that probably thoses processes are already running.
 
 - **Create** the folder `C:\privesc_hijacking` and add the path `C:\privesc_hijacking` to **System Path env variable**. You can do this **manually** or with **PS**:
 
-```powershell
+```bash
 # Set the folder path to create and check events for
 $folderPath = "C:\privesc_hijacking"
 

@@ -10,7 +10,7 @@ Compile those projects for the architecture of the windows box where your are go
 
 You can **select the architecture** inside Visual Studio in the **left "Build" Tab** in **"Platform Target".**
 
-(\*\*If you can't find this options press in **"Project Tab"** and then in **"\<Project Name> Properties"**)
+(**If you can't find this options press in **"Project Tab"** and then in **"\<Project Name> Properties"**)
 
 ![](<../images/image (132).png>)
 

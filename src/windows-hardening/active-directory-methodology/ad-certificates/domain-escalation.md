@@ -262,7 +262,7 @@ Possession of **`ManageCertificates`** rights facilitates the approval of pendin
 
 A combination of **Certify** and **PSPKI** modules can be utilized to request, approve, and download a certificate:
 
-```powershell
+```bash
 # Request a certificate that will require an approval
 Certify.exe request /ca:dc.domain.local\theshire-DC-CA /template:ApprovalNeeded
 [...]
@@ -403,7 +403,7 @@ certutil.exe -enrollmentServerURL -config DC01.DOMAIN.LOCAL\DOMAIN-CA
 
 <figure><img src="../../../images/image (757).png" alt=""><figcaption></figcaption></figure>
 
-```powershell
+```bash
 Import-Module PSPKI
 Get-CertificationAuthority | select Name,Enroll* | Format-List *
 ```
@@ -686,7 +686,7 @@ In other words, when a user has permission to enroll a certificate and the certi
 
 Use [Check-ADCSESC13.ps1](https://github.com/JonasBK/Powershell/blob/master/Check-ADCSESC13.ps1) to find OIDToGroupLink:
 
-```powershell
+```bash
 Enumerating OIDs
 ------------------------
 OID 23541150.FCB720D24BC82FBD1A33CB406A14094D links to group: CN=VulnerableGroup,CN=Users,DC=domain,DC=local

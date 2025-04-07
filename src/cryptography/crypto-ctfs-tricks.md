@@ -212,7 +212,7 @@ krodfdudfrod
 
 **Multitap** [replaces a letter](https://www.dcode.fr/word-letter-change) by repeated digits defined by the corresponding key code on a mobile [phone keypad](https://www.dcode.fr/phone-keypad-cipher) (This mode is used when writing SMS).\
 For example: 2=A, 22=B, 222=C, 3=D...\
-You can identify this code because you will see\*\* several numbers repeated\*\*.
+You can identify this code because you will see** several numbers repeated**.
 
 You can decode this code in: [https://www.dcode.fr/multitap-abc-cipher](https://www.dcode.fr/multitap-abc-cipher)
 
