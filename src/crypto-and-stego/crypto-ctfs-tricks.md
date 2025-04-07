@@ -184,7 +184,7 @@ Letras para seu valor numérico
 ```
 ### Codificação de Cifra Afim
 
-Letra para número `(ax+b)%26` (_a_ e _b_ são as chaves e _x_ é a letra) e o resultado de volta para a letra
+Letra para número `(ax+b)%26` (_a_ e _b_ são as chaves e _x_ é a letra) e o resultado de volta para letra
 ```
 krodfdudfrod
 ```
@@ -192,7 +192,7 @@ krodfdudfrod
 
 **Multitap** [substitui uma letra](https://www.dcode.fr/word-letter-change) por dígitos repetidos definidos pelo código da tecla correspondente em um [teclado de telefone](https://www.dcode.fr/phone-keypad-cipher) (Este modo é usado ao escrever SMS).\
 Por exemplo: 2=A, 22=B, 222=C, 3=D...\
-Você pode identificar este código porque verá\*\* vários números repetidos\*\*.
+Você pode identificar este código porque verá **vários números repetidos**.
 
 Você pode decodificar este código em: [https://www.dcode.fr/multitap-abc-cipher](https://www.dcode.fr/multitap-abc-cipher)
 

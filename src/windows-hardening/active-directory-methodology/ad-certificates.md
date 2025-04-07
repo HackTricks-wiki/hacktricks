@@ -23,12 +23,12 @@
 
 ### Autoridades Certificadoras (CAs) no Active Directory (AD)
 
-O AD CS reconhece certificados de CA em uma floresta AD através de contêineres designados, cada um servindo papéis únicos:
+O AD CS reconhece certificados CA em uma floresta AD através de contêineres designados, cada um servindo a papéis únicos:
 
-- O contêiner **Certification Authorities** contém certificados de CA raiz confiáveis.
+- O contêiner **Certification Authorities** contém certificados CA raiz confiáveis.
 - O contêiner **Enrolment Services** detalha CAs Empresariais e seus modelos de certificado.
-- O objeto **NTAuthCertificates** inclui certificados de CA autorizados para autenticação AD.
-- O contêiner **AIA (Authority Information Access)** facilita a validação da cadeia de certificados com certificados de CA intermediários e cruzados.
+- O objeto **NTAuthCertificates** inclui certificados CA autorizados para autenticação AD.
+- O contêiner **AIA (Authority Information Access)** facilita a validação da cadeia de certificados com certificados CA intermediários e cruzados.
 
 ### Aquisição de Certificado: Fluxo de Solicitação de Certificado do Cliente
 
@@ -73,11 +73,11 @@ Os certificados podem ser solicitados através de:
 1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE), usando interfaces DCOM.
 2. **ICertPassage Remote Protocol** (MS-ICPR), através de pipes nomeados ou TCP/IP.
 3. A **interface web de inscrição de certificados**, com o papel de Inscrição Web da Autoridade Certificadora instalado.
-4. O **Serviço de Inscrição de Certificado** (CES), em conjunto com o serviço de Política de Inscrição de Certificado (CEP).
-5. O **Serviço de Inscrição de Dispositivos de Rede** (NDES) para dispositivos de rede, usando o Protocolo Simples de Inscrição de Certificado (SCEP).
+4. O **Serviço de Inscrição de Certificados** (CES), em conjunto com o serviço de Política de Inscrição de Certificados (CEP).
+5. O **Serviço de Inscrição de Dispositivos de Rede** (NDES) para dispositivos de rede, usando o Protocolo Simples de Inscrição de Certificados (SCEP).
 
 Usuários do Windows também podem solicitar certificados via GUI (`certmgr.msc` ou `certlm.msc`) ou ferramentas de linha de comando (`certreq.exe` ou o comando `Get-Certificate` do PowerShell).
-```powershell
+```bash
 # Example of requesting a certificate using PowerShell
 Get-Certificate -Template "User" -CertStoreLocation "cert:\\CurrentUser\\My"
 ```
@@ -91,7 +91,7 @@ No processo de autenticação Kerberos, o pedido de um usuário para um Ticket G
 ```bash
 CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>
 ```
-é central para estabelecer confiança para autenticação de certificados.
+é central para estabelecer confiança na autenticação de certificados.
 
 ### Autenticação de Canal Seguro (Schannel)
 

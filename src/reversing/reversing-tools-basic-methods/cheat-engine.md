@@ -3,7 +3,7 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 [**Cheat Engine**](https://www.cheatengine.org/downloads.php) é um programa útil para encontrar onde valores importantes são salvos dentro da memória de um jogo em execução e alterá-los.\
-Quando você o baixa e executa, é **apresentado** a um **tutorial** de como usar a ferramenta. Se você quiser aprender a usar a ferramenta, é altamente recomendado completá-lo.
+Quando você o baixa e executa, é **apresentado** a um **tutorial** de como usar a ferramenta. Se você quiser aprender a usar a ferramenta, é altamente recomendável completá-lo.
 
 ## O que você está procurando?
 
@@ -22,9 +22,9 @@ Você também pode marcar a caixa para **parar o jogo enquanto escaneia a memór
 
 ![](<../../images/image (1052).png>)
 
-### Teclas de Atalho
+### Teclas de atalho
 
-Em _**Edit --> Settings --> Hotkeys**_ você pode definir diferentes **teclas de atalho** para diferentes propósitos, como **parar** o **jogo** (o que é bastante útil se em algum momento você quiser escanear a memória). Outras opções estão disponíveis:
+Em _**Editar --> Configurações --> Teclas de atalho**_ você pode definir diferentes **teclas de atalho** para diferentes propósitos, como **parar** o **jogo** (o que é bastante útil se em algum momento você quiser escanear a memória). Outras opções estão disponíveis:
 
 ![](<../../images/image (864).png>)
 
@@ -46,26 +46,26 @@ Então, vamos supor que há um valor importante (como a vida do seu usuário) qu
 
 ### Através de uma mudança conhecida
 
-Supondo que você está procurando o valor 100, você **realiza um escaneamento** buscando por esse valor e encontra muitas coincidências:
+Supondo que você está procurando o valor 100, você **realiza uma varredura** procurando por esse valor e encontra muitas coincidências:
 
 ![](<../../images/image (108).png>)
 
-Então, você faz algo para que **o valor mude**, e você **para** o jogo e **realiza** um **próximo escaneamento**:
+Então, você faz algo para que **o valor mude**, e você **para** o jogo e **realiza** uma **próxima varredura**:
 
 ![](<../../images/image (684).png>)
 
 Cheat Engine irá procurar os **valores** que **foram de 100 para o novo valor**. Parabéns, você **encontrou** o **endereço** do valor que estava procurando, agora você pode modificá-lo.\
-_Se você ainda tiver vários valores, faça algo para modificar novamente esse valor e realize outro "próximo escaneamento" para filtrar os endereços._
+_Se você ainda tiver vários valores, faça algo para modificar novamente esse valor e realize outra "próxima varredura" para filtrar os endereços._
 
-### Valor Desconhecido, mudança conhecida
+### Valor desconhecido, mudança conhecida
 
-No cenário em que você **não sabe o valor**, mas sabe **como fazê-lo mudar** (e até mesmo o valor da mudança), você pode procurar seu número.
+No cenário em que você **não sabe o valor**, mas sabe **como fazê-lo mudar** (e até o valor da mudança), você pode procurar seu número.
 
-Então, comece realizando um escaneamento do tipo "**Valor inicial desconhecido**":
+Então, comece realizando uma varredura do tipo "**Valor inicial desconhecido**":
 
 ![](<../../images/image (890).png>)
 
-Em seguida, faça o valor mudar, indique **como** o **valor** **mudou** (no meu caso, foi diminuído em 1) e realize um **próximo escaneamento**:
+Em seguida, faça o valor mudar, indique **como** o **valor** **mudou** (no meu caso, foi diminuído em 1) e realize uma **próxima varredura**:
 
 ![](<../../images/image (371).png>)
 
@@ -75,15 +75,15 @@ Você será apresentado a **todos os valores que foram modificados da maneira se
 
 Uma vez que você tenha encontrado seu valor, você pode modificá-lo.
 
-Note que há uma **muita mudança possível** e você pode fazer esses **passos quantas vezes quiser** para filtrar os resultados:
+Note que há uma **porção de mudanças possíveis** e você pode fazer esses **passos quantas vezes quiser** para filtrar os resultados:
 
 ![](<../../images/image (574).png>)
 
-### Endereço de Memória Aleatório - Encontrando o código
+### Endereço de memória aleatório - Encontrando o código
 
 Até agora, aprendemos como encontrar um endereço que armazena um valor, mas é altamente provável que em **diferentes execuções do jogo, esse endereço esteja em lugares diferentes da memória**. Então, vamos descobrir como sempre encontrar esse endereço.
 
-Usando alguns dos truques mencionados, encontre o endereço onde seu jogo atual está armazenando o valor importante. Então (parando o jogo se desejar) clique com o **botão direito** no **endereço** encontrado e selecione "**Descobrir o que acessa este endereço**" ou "**Descobrir o que escreve para este endereço**":
+Usando alguns dos truques mencionados, encontre o endereço onde seu jogo atual está armazenando o valor importante. Então (parando o jogo se desejar), clique com o botão direito no **endereço** encontrado e selecione "**Descobrir o que acessa este endereço**" ou "**Descobrir o que escreve para este endereço**":
 
 ![](<../../images/image (1067).png>)
 
@@ -100,13 +100,13 @@ Agora que você encontrou o endereço que está modificando o valor, você pode 
 
 Assim, você pode agora modificá-lo para que o código não afete seu número, ou sempre afete de uma maneira positiva.
 
-### Endereço de Memória Aleatório - Encontrando o ponteiro
+### Endereço de memória aleatório - Encontrando o ponteiro
 
-Seguindo os passos anteriores, encontre onde o valor que você está interessado está. Então, usando "**Descobrir o que escreve para este endereço**", descubra qual endereço escreve esse valor e clique duas vezes nele para obter a visualização da desassemblagem:
+Seguindo os passos anteriores, encontre onde o valor que você está interessado está. Em seguida, usando "**Descobrir o que escreve para este endereço**", descubra qual endereço escreve esse valor e clique duas vezes nele para obter a visualização da desassemblagem:
 
 ![](<../../images/image (1039).png>)
 
-Em seguida, realize um novo escaneamento **buscando o valor hex entre "\[]"** (o valor de $edx neste caso):
+Em seguida, realize uma nova varredura **procurando o valor hex entre "\[]"** (o valor de $edx neste caso):
 
 ![](<../../images/image (994).png>)
 
@@ -138,7 +138,7 @@ Então, imagine que você encontrou o endereço que está subtraindo 1 da vida d
 ![](<../../images/image (203).png>)
 
 Clique em Mostrar desassemblador para obter o **código desassemblado**.\
-Em seguida, clique **CTRL+a** para invocar a janela de Auto assemble e selecione _**Template --> Injeção de Código**_
+Em seguida, clique **CTRL+a** para invocar a janela de Auto assemble e selecione _**Modelo --> Injeção de Código**_
 
 ![](<../../images/image (902).png>)
 
@@ -146,15 +146,15 @@ Preencha o **endereço da instrução que você deseja modificar** (isso geralme
 
 ![](<../../images/image (744).png>)
 
-Um template será gerado:
+Um modelo será gerado:
 
 ![](<../../images/image (944).png>)
 
-Assim, insira seu novo código assembly na seção "**newmem**" e remova o código original da seção "**originalcode**" se você não quiser que ele seja executado\*\*.\*\* Neste exemplo, o código injetado adicionará 2 pontos em vez de subtrair 1:
+Então, insira seu novo código assembly na seção "**newmem**" e remova o código original da seção "**originalcode**" se você não quiser que ele seja executado. Neste exemplo, o código injetado adicionará 2 pontos em vez de subtrair 1:
 
 ![](<../../images/image (521).png>)
 
-**Clique em executar e assim seu código deve ser injetado no programa, mudando o comportamento da funcionalidade!**
+**Clique em executar e assim por diante e seu código deve ser injetado no programa, mudando o comportamento da funcionalidade!**
 
 ## **Referências**
 

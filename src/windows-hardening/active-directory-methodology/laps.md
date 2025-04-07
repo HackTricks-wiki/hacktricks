@@ -9,7 +9,7 @@ Local Administrator Password Solution (LAPS) é uma ferramenta usada para gerenc
 
 Nos objetos de computador do domínio, a implementação do LAPS resulta na adição de dois novos atributos: **`ms-mcs-AdmPwd`** e **`ms-mcs-AdmPwdExpirationTime`**. Esses atributos armazenam a **senha de administrador em texto simples** e **seu tempo de expiração**, respectivamente.
 
-### Verifique se ativado
+### Verificar se ativado
 ```bash
 reg query "HKLM\Software\Policies\Microsoft Services\AdmPwd" /v AdmPwdEnabled
 
@@ -27,7 +27,7 @@ Get-DomainObject -SearchBase "LDAP://DC=sub,DC=domain,DC=local" | ? { $_."ms-mcs
 Você pode **baixar a política LAPS bruta** de `\\dc\SysVol\domain\Policies\{4A8A4E8E-929F-401A-95BD-A7D40E0976C8}\Machine\Registry.pol` e então usar **`Parse-PolFile`** do pacote [**GPRegistryPolicyParser**](https://github.com/PowerShell/GPRegistryPolicyParser) para converter este arquivo em um formato legível por humanos.
 
 Além disso, os **cmdlets nativos do PowerShell LAPS** podem ser usados se estiverem instalados em uma máquina à qual temos acesso:
-```powershell
+```bash
 Get-Command *AdmPwd*
 
 CommandType     Name                                               Version    Source
@@ -48,7 +48,7 @@ Find-AdmPwdExtendedRights -Identity Workstations | fl
 Get-AdmPwdPassword -ComputerName wkstn-2 | fl
 ```
 **PowerView** também pode ser usado para descobrir **quem pode ler a senha e lê-la**:
-```powershell
+```bash
 # Find the principals that have ReadPropery on ms-Mcs-AdmPwd
 Get-AdmPwdPassword -ComputerName wkstn-2 | fl
 
@@ -60,7 +60,7 @@ Get-DomainObject -Identity wkstn-2 -Properties ms-Mcs-AdmPwd
 O [LAPSToolkit](https://github.com/leoloobeek/LAPSToolkit) facilita a enumeração do LAPS com várias funções.\
 Uma delas é a análise de **`ExtendedRights`** para **todos os computadores com LAPS habilitado.** Isso mostrará **grupos** especificamente **delegados para ler senhas LAPS**, que muitas vezes são usuários em grupos protegidos.\
 Uma **conta** que **juntou um computador** a um domínio recebe `All Extended Rights` sobre aquele host, e esse direito dá à **conta** a capacidade de **ler senhas**. A enumeração pode mostrar uma conta de usuário que pode ler a senha LAPS em um host. Isso pode nos ajudar a **mirar usuários específicos do AD** que podem ler senhas LAPS.
-```powershell
+```bash
 # Get groups that can read passwords
 Find-LAPSDelegatedGroups
 
@@ -99,12 +99,12 @@ Password: 2Z@Ae)7!{9#Cq
 python psexec.py Administrator@web.example.com
 Password: 2Z@Ae)7!{9#Cq
 ```
-## **Persistência LAPS**
+## **Persistência do LAPS**
 
 ### **Data de Expiração**
 
 Uma vez administrador, é possível **obter as senhas** e **prevenir** que uma máquina **atualize** sua **senha** **definindo a data de expiração para o futuro**.
-```powershell
+```bash
 # Get expiration time
 Get-DomainObject -Identity computer-21 -Properties ms-mcs-admpwdexpirationtime
 
@@ -121,7 +121,7 @@ O código-fonte original do LAPS pode ser encontrado [aqui](https://github.com/G
 
 Em seguida, basta compilar o novo `AdmPwd.PS.dll` e enviá-lo para a máquina em `C:\Tools\admpwd\Main\AdmPwd.PS\bin\Debug\AdmPwd.PS.dll` (e alterar o horário de modificação).
 
-## Referências
+## References
 
 - [https://4sysops.com/archives/introduction-to-microsoft-laps-local-administrator-password-solution/](https://4sysops.com/archives/introduction-to-microsoft-laps-local-administrator-password-solution/)
 

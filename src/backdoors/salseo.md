@@ -10,7 +10,7 @@ Compile esses projetos para a arquitetura da máquina Windows onde você vai us�
 
 Você pode **selecionar a arquitetura** dentro do Visual Studio na **aba "Build" à esquerda** em **"Platform Target".**
 
-(\*\*Se você não encontrar essas opções, clique na **"Project Tab"** e depois em **"\<Project Name> Properties"**)
+(**Se você não encontrar essas opções, clique na **"Project Tab"** e depois em **"\<Project Name> Properties"**)
 
 ![](<../images/image (132).png>)
 
@@ -20,7 +20,7 @@ Em seguida, construa ambos os projetos (Build -> Build Solution) (Dentro dos log
 
 ## Preparar o Backdoor
 
-Primeiro de tudo, você precisará codificar o **EvilSalsa.dll.** Para isso, você pode usar o script python **encrypterassembly.py** ou pode compilar o projeto **EncrypterAssembly**:
+Primeiramente, você precisará codificar o **EvilSalsa.dll.** Para isso, você pode usar o script python **encrypterassembly.py** ou pode compilar o projeto **EncrypterAssembly**:
 
 ### **Python**
 ```

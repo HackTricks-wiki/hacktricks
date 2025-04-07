@@ -14,17 +14,46 @@ Para **ativar ou desativar este recurso**, as chaves de registro _**UseLogonCred
 ```bash
 reg query HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest /v UseLogonCredential
 ```
-## Proteção LSA
+## Proteção LSA (Processos protegidos PP e PPL)
 
-A partir do **Windows 8.1**, a Microsoft aprimorou a segurança do LSA para **bloquear leituras de memória não autorizadas ou injeções de código por processos não confiáveis**. Esse aprimoramento dificulta o funcionamento típico de comandos como `mimikatz.exe sekurlsa:logonpasswords`. Para **ativar essa proteção aprimorada**, o valor _**RunAsPPL**_ em _**HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA**_ deve ser ajustado para 1:
-```
-reg query HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA /v RunAsPPL
-```
-### Bypass
+**Processo Protegido (PP)** e **Processo Protegido Leve (PPL)** são **proteções a nível de kernel do Windows** projetadas para evitar acesso não autorizado a processos sensíveis como **LSASS**. Introduzido no **Windows Vista**, o **modelo PP** foi originalmente criado para a aplicação de **DRM** e permitia apenas que binários assinados com um **certificado de mídia especial** fossem protegidos. Um processo marcado como **PP** só pode ser acessado por outros processos que também são **PP** e têm um **nível de proteção igual ou superior**, e mesmo assim, **apenas com direitos de acesso limitados** a menos que especificamente permitido.
 
-É possível contornar essa proteção usando o driver do Mimikatz mimidrv.sys:
+**PPL**, introduzido no **Windows 8.1**, é uma versão mais flexível do PP. Ele permite **casos de uso mais amplos** (por exemplo, LSASS, Defender) ao introduzir **"níveis de proteção"** baseados no campo **EKU (Enhanced Key Usage)** da **assinatura digital**. O nível de proteção é armazenado no campo `EPROCESS.Protection`, que é uma estrutura `PS_PROTECTION` com:
+- **Tipo** (`Protected` ou `ProtectedLight`)
+- **Signatário** (por exemplo, `WinTcb`, `Lsa`, `Antimalware`, etc.)
+
+Essa estrutura é compactada em um único byte e determina **quem pode acessar quem**:
+- **Valores de signatário mais altos podem acessar os mais baixos**
+- **PPLs não podem acessar PPs**
+- **Processos não protegidos não podem acessar nenhum PPL/PP**
+
+### O que você precisa saber de uma perspectiva ofensiva
+
+- Quando **LSASS é executado como um PPL**, tentativas de abri-lo usando `OpenProcess(PROCESS_VM_READ | QUERY_INFORMATION)` a partir de um contexto de administrador normal **falham com `0x5 (Acesso Negado)`**, mesmo que `SeDebugPrivilege` esteja habilitado.
+- Você pode **verificar o nível de proteção do LSASS** usando ferramentas como Process Hacker ou programaticamente lendo o valor `EPROCESS.Protection`.
+- O LSASS normalmente terá `PsProtectedSignerLsa-Light` (`0x41`), que pode ser acessado **apenas por processos assinados com um signatário de nível superior**, como `WinTcb` (`0x61` ou `0x62`).
+- PPL é uma **restrição apenas de Userland**; **código a nível de kernel pode contorná-la completamente**.
+- O LSASS sendo PPL **não impede o despejo de credenciais se você puder executar shellcode de kernel** ou **aproveitar um processo de alta privilégio com acesso adequado**.
+- **Definir ou remover PPL** requer reinicialização ou **configurações de Secure Boot/UEFI**, que podem persistir a configuração PPL mesmo após as alterações no registro serem revertidas.
+
+**Opções para contornar as proteções PPL:**
+
+Se você quiser despejar o LSASS apesar do PPL, você tem 3 opções principais:
+1. **Usar um driver de kernel assinado (por exemplo, Mimikatz + mimidrv.sys)** para **remover a flag de proteção do LSASS**:
 
 ![](../../images/mimidrv.png)
+
+2. **Trazer seu próprio driver vulnerável (BYOVD)** para executar código de kernel personalizado e desativar a proteção. Ferramentas como **PPLKiller**, **gdrv-loader** ou **kdmapper** tornam isso viável.
+3. **Roubar um handle existente do LSASS** de outro processo que o tenha aberto (por exemplo, um processo de AV), então **duplicá-lo** em seu processo. Esta é a base da técnica `pypykatz live lsa --method handledup`.
+4. **Abusar de algum processo privilegiado** que permitirá que você carregue código arbitrário em seu espaço de endereço ou dentro de outro processo privilegiado, contornando efetivamente as restrições do PPL. Você pode verificar um exemplo disso em [bypassing-lsa-protection-in-userland](https://blog.scrt.ch/2021/04/22/bypassing-lsa-protection-in-userland/) ou [https://github.com/itm4n/PPLdump](https://github.com/itm4n/PPLdump).
+
+**Verifique o status atual da proteção LSA (PPL/PP) para LSASS**:
+```bash
+reg query HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA /v RunAsPPL
+```
+Quando você executa **`mimikatz privilege::debug sekurlsa::logonpasswords`**, provavelmente falhará com o código de erro `0x00000005` por causa disso.
+
+- Para mais informações sobre isso, verifique [https://itm4n.github.io/lsass-runasppl/](https://itm4n.github.io/lsass-runasppl/)
 
 ## Credential Guard
 
@@ -33,7 +62,7 @@ reg query HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA /v RunAsPPL
 Por padrão, **Credential Guard** não está ativo e requer ativação manual dentro de uma organização. É crítico para melhorar a segurança contra ferramentas como **Mimikatz**, que são dificultadas em sua capacidade de extrair credenciais. No entanto, vulnerabilidades ainda podem ser exploradas através da adição de **Security Support Providers (SSP)** personalizados para capturar credenciais em texto claro durante tentativas de login.
 
 Para verificar o status de ativação do **Credential Guard**, a chave de registro _**LsaCfgFlags**_ sob _**HKLM\System\CurrentControlSet\Control\LSA**_ pode ser inspecionada. Um valor de "**1**" indica ativação com **UEFI lock**, "**2**" sem bloqueio, e "**0**" denota que não está habilitado. Essa verificação de registro, embora um forte indicador, não é o único passo para habilitar o Credential Guard. Orientações detalhadas e um script PowerShell para habilitar essa funcionalidade estão disponíveis online.
-```powershell
+```bash
 reg query HKLM\System\CurrentControlSet\Control\LSA /v LsaCfgFlags
 ```
 Para uma compreensão abrangente e instruções sobre como habilitar o **Credential Guard** no Windows 10 e sua ativação automática em sistemas compatíveis do **Windows 11 Enterprise e Education (versão 22H2)**, visite [a documentação da Microsoft](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage).
@@ -42,7 +71,7 @@ Mais detalhes sobre a implementação de SSPs personalizados para captura de cre
 
 ## Modo RestrictedAdmin do RDP
 
-O **Windows 8.1 e o Windows Server 2012 R2** introduziram vários novos recursos de segurança, incluindo o _**modo Restricted Admin para RDP**_. Este modo foi projetado para aumentar a segurança, mitigando os riscos associados a [**pass the hash**](https://blog.ahasayen.com/pass-the-hash/) ataques.
+O **Windows 8.1 e o Windows Server 2012 R2** introduziram várias novas funcionalidades de segurança, incluindo o _**modo Restricted Admin para RDP**_. Este modo foi projetado para aumentar a segurança, mitigando os riscos associados a ataques de [**pass the hash**](https://blog.ahasayen.com/pass-the-hash/).
 
 Tradicionalmente, ao conectar-se a um computador remoto via RDP, suas credenciais são armazenadas na máquina alvo. Isso representa um risco significativo de segurança, especialmente ao usar contas com privilégios elevados. No entanto, com a introdução do _**modo Restricted Admin**_, esse risco é substancialmente reduzido.
 
@@ -58,9 +87,9 @@ Para mais informações detalhadas, visite [este recurso](https://blog.ahasayen.
 
 ## Credenciais em Cache
 
-O Windows protege as **credenciais de domínio** através da **Local Security Authority (LSA)**, suportando processos de logon com protocolos de segurança como **Kerberos** e **NTLM**. Um recurso chave do Windows é sua capacidade de armazenar em cache os **últimos dez logons de domínio** para garantir que os usuários ainda possam acessar seus computadores mesmo se o **controlador de domínio estiver offline**—uma vantagem para usuários de laptops que frequentemente estão fora da rede da empresa.
+O Windows protege as **credenciais de domínio** através da **Autoridade de Segurança Local (LSA)**, suportando processos de logon com protocolos de segurança como **Kerberos** e **NTLM**. Uma característica chave do Windows é sua capacidade de armazenar em cache os **últimos dez logons de domínio** para garantir que os usuários ainda possam acessar seus computadores mesmo se o **controlador de domínio estiver offline**—uma vantagem para usuários de laptops que frequentemente estão fora da rede da empresa.
 
-O número de logons em cache é ajustável através de uma **chave de registro específica ou política de grupo**. Para visualizar ou alterar essa configuração, o seguinte comando é utilizado:
+O número de logons em cache é ajustável através de uma **chave de registro ou política de grupo** específica. Para visualizar ou alterar essa configuração, o seguinte comando é utilizado:
 ```bash
 reg query "HKEY_LOCAL_MACHINE\SOFTWARE\MICROSOFT\WINDOWS NT\CURRENTVERSION\WINLOGON" /v CACHEDLOGONSCOUNT
 ```

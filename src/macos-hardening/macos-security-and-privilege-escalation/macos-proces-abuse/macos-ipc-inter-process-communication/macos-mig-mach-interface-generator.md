@@ -108,7 +108,7 @@ Neste exemplo, definimos apenas 1 função nas definições, mas se tivéssemos 
 
 Se a função fosse esperada para enviar uma **reply**, a função `mig_internal kern_return_t __MIG_check__Reply__<name>` também existiria.
 
-Na verdade, é possível identificar essa relação na struct **`subsystem_to_name_map_myipc`** de **`myipcServer.h`** (**`subsystem*to_name_map*\***`\*\* em outros arquivos):
+Na verdade, é possível identificar essa relação na struct **`subsystem_to_name_map_myipc`** de **`myipcServer.h`** (**`subsystem*to_name_map*\***`** em outros arquivos):
 ```c
 #ifndef subsystem_to_name_map_myipc
 #define subsystem_to_name_map_myipc \
@@ -151,7 +151,7 @@ return FALSE;
 
 Verifique as linhas destacadas anteriormente acessando a função a ser chamada pelo ID.
 
-O seguinte é o código para criar um **servidor** e **cliente** simples onde o cliente pode chamar as funções Subtract do servidor:
+O seguinte é o código para criar um **servidor** e **cliente** simples onde o cliente pode chamar as funções Subtrair do servidor:
 
 {{#tabs}}
 {{#tab name="myipc_server.c"}}
@@ -217,7 +217,7 @@ USERPREFSubtract(port, 40, 2);
 
 ### O NDR_record
 
-O NDR_record é exportado por `libsystem_kernel.dylib`, e é uma struct que permite que o MIG **transforme dados para que sejam agnósticos ao sistema** em que está sendo usado, já que o MIG foi pensado para ser utilizado entre diferentes sistemas (e não apenas na mesma máquina).
+O NDR_record é exportado por `libsystem_kernel.dylib`, e é uma struct que permite que o MIG **transforme dados para que seja agnóstico ao sistema** em que está sendo usado, já que o MIG foi pensado para ser utilizado entre diferentes sistemas (e não apenas na mesma máquina).
 
 Isso é interessante porque se `_NDR_record` for encontrado em um binário como uma dependência (`jtool2 -S <binary> | grep NDR` ou `nm`), isso significa que o binário é um cliente ou servidor MIG.
 
@@ -241,7 +241,7 @@ jtool2 -d __DATA.__const myipc_server | grep BL
 ```
 ### Assembly
 
-Foi mencionado anteriormente que a função que se encarregará de **chamar a função correta dependendo do ID da mensagem recebida** era `myipc_server`. No entanto, você geralmente não terá os símbolos do binário (sem nomes de funções), então é interessante **ver como ela se parece decompilada**, pois será sempre muito semelhante (o código desta função é independente das funções expostas):
+Foi mencionado anteriormente que a função que se encarregará de **chamar a função correta dependendo do ID da mensagem recebida** era `myipc_server`. No entanto, você geralmente não terá os símbolos do binário (sem nomes de funções), então é interessante **ver como ela aparece decompilada**, pois será sempre muito semelhante (o código desta função é independente das funções expostas):
 
 {{#tabs}}
 {{#tab name="myipc_server decompiled 1"}}
@@ -264,7 +264,7 @@ rax = *(int32_t *)(var_10 + 0x14);
 // 0x1f4 = 500 (o ID inicial)
 <strong>            rax = *(sign_extend_64(rax - 0x1f4) * 0x28 + 0x100004040);
 </strong>            var_20 = rax;
-// Se - senão, o if retorna falso, enquanto o else chama a função correta e retorna verdadeiro
+// Se - else, o if retorna falso, enquanto o else chama a função correta e retorna verdadeiro
 <strong>            if (rax == 0x0) {
 </strong>                    *(var_18 + 0x18) = **_NDR_record;
 *(int32_t *)(var_18 + 0x20) = 0xfffffffffffffed1;
@@ -332,7 +332,7 @@ if (CPU_FLAGS & NE) {
 r8 = 0x1;
 }
 }
-// Mesmo se - senão que na versão anterior
+// Mesmo if else que na versão anterior
 // Verifique o uso do endereço 0x100004040 (array de endereços de funções)
 <strong>                    if ((r8 & 0x1) == 0x0) {
 </strong><strong>                            *(var_18 + 0x18) = **0x100004000;
@@ -340,7 +340,7 @@ r8 = 0x1;
 var_4 = 0x0;
 }
 else {
-// Chamada para o endereço calculado onde a função deve ser
+// Chamada para o endereço calculado onde a função deve estar
 <strong>                            (var_20)(var_10, var_18);
 </strong>                            var_4 = 0x1;
 }

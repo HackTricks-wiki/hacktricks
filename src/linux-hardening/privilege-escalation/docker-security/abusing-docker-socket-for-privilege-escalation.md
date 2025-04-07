@@ -1,8 +1,8 @@
-# Abusando do Socket Docker para Escalação de Privilégios
+# Abusando do Socket do Docker para Escalação de Privilégios
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Existem algumas ocasiões em que você tem **acesso ao socket docker** e deseja usá-lo para **escalar privilégios**. Algumas ações podem ser muito suspeitas e você pode querer evitá-las, então aqui você pode encontrar diferentes flags que podem ser úteis para escalar privilégios:
+Existem algumas ocasiões em que você tem **acesso ao socket do docker** e deseja usá-lo para **escalar privilégios**. Algumas ações podem ser muito suspeitas e você pode querer evitá-las, então aqui você pode encontrar diferentes flags que podem ser úteis para escalar privilégios:
 
 ### Via mount
 
@@ -10,7 +10,7 @@ Você pode **montar** diferentes partes do **sistema de arquivos** em um contêi
 Você também pode **abusar de um mount para escalar privilégios** dentro do contêiner.
 
 - **`-v /:/host`** -> Monte o sistema de arquivos do host no contêiner para que você possa **ler o sistema de arquivos do host.**
-- Se você quiser **sentir que está no host** mas estando no contêiner, você pode desativar outros mecanismos de defesa usando flags como:
+- Se você quiser **sentir que está no host** mas estando no contêiner, pode desativar outros mecanismos de defesa usando flags como:
 - `--privileged`
 - `--cap-add=ALL`
 - `--security-opt apparmor=unconfined`
@@ -20,7 +20,7 @@ Você também pode **abusar de um mount para escalar privilégios** dentro do co
 - `--userns=host`
 - `--uts=host`
 - `--cgroupns=host`
-- \*\*`--device=/dev/sda1 --cap-add=SYS_ADMIN --security-opt apparmor=unconfined` \*\* -> Isso é semelhante ao método anterior, mas aqui estamos **montando o disco do dispositivo**. Então, dentro do contêiner, execute `mount /dev/sda1 /mnt` e você pode **acessar** o **sistema de arquivos do host** em `/mnt`
+- **`--device=/dev/sda1 --cap-add=SYS_ADMIN --security-opt apparmor=unconfined`** -> Isso é semelhante ao método anterior, mas aqui estamos **montando o disco do dispositivo**. Então, dentro do contêiner, execute `mount /dev/sda1 /mnt` e você pode **acessar** o **sistema de arquivos do host** em `/mnt`
 - Execute `fdisk -l` no host para encontrar o dispositivo `</dev/sda1>` para montar
 - **`-v /tmp:/host`** -> Se por algum motivo você pode **apenas montar algum diretório** do host e você tem acesso dentro do host. Monte-o e crie um **`/bin/bash`** com **suid** no diretório montado para que você possa **executá-lo a partir do host e escalar para root**.
 

@@ -5,7 +5,7 @@
 
 ## Overpass The Hash/Pass The Key (PTK)
 
-O **Overpass The Hash/Pass The Key (PTK)** é um ataque projetado para ambientes onde o protocolo NTLM tradicional é restrito e a autenticação Kerberos tem prioridade. Este ataque aproveita o hash NTLM ou as chaves AES de um usuário para solicitar tickets Kerberos, permitindo acesso não autorizado a recursos dentro de uma rede.
+O ataque **Overpass The Hash/Pass The Key (PTK)** é projetado para ambientes onde o protocolo NTLM tradicional é restrito, e a autenticação Kerberos tem prioridade. Este ataque aproveita o hash NTLM ou as chaves AES de um usuário para solicitar tickets Kerberos, permitindo acesso não autorizado a recursos dentro de uma rede.
 
 Para executar este ataque, o primeiro passo envolve adquirir o hash NTLM ou a senha da conta do usuário alvo. Após garantir essa informação, um Ticket Granting Ticket (TGT) para a conta pode ser obtido, permitindo que o atacante acesse serviços ou máquinas para os quais o usuário tem permissões.
 
@@ -15,7 +15,7 @@ python getTGT.py jurassic.park/velociraptor -hashes :2a3de7fe356ee524cc9f3d579f2
 export KRB5CCNAME=/root/impacket-examples/velociraptor.ccache
 python psexec.py jurassic.park/velociraptor@labwws02.jurassic.park -k -no-pass
 ```
-Para cenários que necessitam de AES256, a opção `-aesKey [AES key]` pode ser utilizada. Além disso, o ticket adquirido pode ser empregado com várias ferramentas, incluindo smbexec.py ou wmiexec.py, ampliando o escopo do ataque.
+Para cenários que exigem AES256, a opção `-aesKey [AES key]` pode ser utilizada. Além disso, o ticket adquirido pode ser empregado com várias ferramentas, incluindo smbexec.py ou wmiexec.py, ampliando o escopo do ataque.
 
 Problemas encontrados, como _PyAsn1Error_ ou _KDC cannot find the name_, são tipicamente resolvidos atualizando a biblioteca Impacket ou usando o nome do host em vez do endereço IP, garantindo compatibilidade com o KDC do Kerberos.
 
@@ -30,6 +30,15 @@ Para conformar-se à segurança operacional e usar AES256, o seguinte comando po
 ```bash
 .\Rubeus.exe asktgt /user:<USERNAME> /domain:<DOMAIN> /aes256:HASH /nowrap /opsec
 ```
+## Versão mais discreta
+
+> [!WARNING]
+> Cada sessão de logon pode ter apenas um TGT ativo por vez, então tenha cuidado.
+
+1. Crie uma nova sessão de logon com **`make_token`** do Cobalt Strike.
+2. Em seguida, use o Rubeus para gerar um TGT para a nova sessão de logon sem afetar a existente.
+
+
 ## Referências
 
 - [https://www.tarlogic.com/es/blog/como-atacar-kerberos/](https://www.tarlogic.com/es/blog/como-atacar-kerberos/)

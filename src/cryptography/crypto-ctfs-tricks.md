@@ -19,7 +19,7 @@
 ## Solucionadores Automáticos Mágicos
 
 - [**https://github.com/Ciphey/Ciphey**](https://github.com/Ciphey/Ciphey)
-- [https://gchq.github.io/CyberChef/](https://gchq.github.io/CyberChef/) (módulo mágico)
+- [https://gchq.github.io/CyberChef/](https://gchq.github.io/CyberChef/) (Módulo Mágico)
 - [https://github.com/dhondta/python-codext](https://github.com/dhondta/python-codext)
 - [https://www.boxentriq.com/code-breaking](https://www.boxentriq.com/code-breaking)
 
@@ -174,7 +174,7 @@ ryvkryvkryvkryvkryvkryvkryvk
 ```
 drnajapajrna
 ```
-- [https://www.geocachingtoolbox.com/index.php?lang=pt\&page=dvorakKeyboard](https://www.geocachingtoolbox.com/index.php?lang=pt&page=dvorakKeyboard)
+- [https://www.geocachingtoolbox.com/index.php?lang=en\&page=dvorakKeyboard](https://www.geocachingtoolbox.com/index.php?lang=en&page=dvorakKeyboard)
 
 ### A1Z26
 
@@ -184,19 +184,19 @@ Letras para seu valor numérico
 ```
 ### Codificação de Cifra Afim
 
-Letra para número `(ax+b)%26` (_a_ e _b_ são as chaves e _x_ é a letra) e o resultado de volta para a letra
+Letra para número `(ax+b)%26` (_a_ e _b_ são as chaves e _x_ é a letra) e o resultado de volta para letra
 ```
 krodfdudfrod
 ```
-### Código SMS
+### SMS Code
 
 **Multitap** [substitui uma letra](https://www.dcode.fr/word-letter-change) por dígitos repetidos definidos pelo código da tecla correspondente em um [teclado de telefone](https://www.dcode.fr/phone-keypad-cipher) (Este modo é usado ao escrever SMS).\
 Por exemplo: 2=A, 22=B, 222=C, 3=D...\
-Você pode identificar este código porque verá\*\* vários números repetidos\*\*.
+Você pode identificar esse código porque verá **vários números repetidos**.
 
-Você pode decodificar este código em: [https://www.dcode.fr/multitap-abc-cipher](https://www.dcode.fr/multitap-abc-cipher)
+Você pode decodificar esse código em: [https://www.dcode.fr/multitap-abc-cipher](https://www.dcode.fr/multitap-abc-cipher)
 
-### Código Bacon
+### Bacon Code
 
 Substitua cada letra por 4 As ou Bs (ou 1s e 0s)
 ```
@@ -213,7 +213,7 @@ AABBB ABBAB ABABA AAAAA AAABA AAAAA BAAAA AAAAA AAABA ABBAB ABABA AAAAA
 
 ## Cripto Fácil
 
-### XOR - Autosolver
+### XOR - Solucionador Automático
 
 - [https://wiremask.eu/tools/xor-cracker/](https://wiremask.eu/tools/xor-cracker/)
 

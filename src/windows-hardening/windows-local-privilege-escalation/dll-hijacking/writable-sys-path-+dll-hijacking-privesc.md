@@ -23,7 +23,7 @@ A primeira coisa que você precisa é **identificar um processo** em execução 
 O problema nesses casos é que provavelmente esses processos já estão em execução. Para descobrir quais Dlls estão faltando, você precisa iniciar o procmon o mais rápido possível (antes que os processos sejam carregados). Então, para encontrar Dlls ausentes, faça:
 
 - **Crie** a pasta `C:\privesc_hijacking` e adicione o caminho `C:\privesc_hijacking` à **variável de ambiente System Path**. Você pode fazer isso **manualmente** ou com **PS**:
-```powershell
+```bash
 # Set the folder path to create and check events for
 $folderPath = "C:\privesc_hijacking"
 
@@ -47,13 +47,13 @@ $newPath = "$envPath;$folderPath"
 
 <figure><img src="../../../images/image (945).png" alt=""><figcaption></figcaption></figure>
 
-### Dlls Perdidas
+### Dlls Perdidos
 
 Executando isso em uma **máquina virtual (vmware) Windows 11** gratuita, obtive os seguintes resultados:
 
 <figure><img src="../../../images/image (607).png" alt=""><figcaption></figcaption></figure>
 
-Neste caso, os .exe são inúteis, então ignore-os, as DLLs perdidas eram de:
+Neste caso, os .exe são inúteis, então ignore-os, os DLLs perdidos eram de:
 
 | Serviço                         | Dll                | Linha de CMD                                                         |
 | ------------------------------- | ------------------ | -------------------------------------------------------------------- |
@@ -61,22 +61,22 @@ Neste caso, os .exe são inúteis, então ignore-os, as DLLs perdidas eram de:
 | Serviço de Política de Diagnóstico (DPS) | Unknown.DLL        | `C:\Windows\System32\svchost.exe -k LocalServiceNoNetwork -p -s DPS` |
 | ???                             | SharedRes.dll      | `C:\Windows\system32\svchost.exe -k UnistackSvcGroup`                |
 
-Depois de encontrar isso, encontrei este interessante post de blog que também explica como [**abusar de WptsExtensions.dll para privesc**](https://juggernaut-sec.com/dll-hijacking/#Windows_10_Phantom_DLL_Hijacking_-_WptsExtensionsdll). Que é o que **vamos fazer agora**.
+Depois de encontrar isso, encontrei este interessante post de blog que também explica como [**abusar do WptsExtensions.dll para privesc**](https://juggernaut-sec.com/dll-hijacking/#Windows_10_Phantom_DLL_Hijacking_-_WptsExtensionsdll). Que é o que **vamos fazer agora**.
 
 ### Exploração
 
-Então, para **escalar privilégios**, vamos sequestrar a biblioteca **WptsExtensions.dll**. Tendo o **caminho** e o **nome**, só precisamos **gerar a dll maliciosa**.
+Então, para **escalar privilégios**, vamos sequestrar a biblioteca **WptsExtensions.dll**. Tendo o **caminho** e o **nome**, só precisamos **gerar o dll malicioso**.
 
 Você pode [**tentar usar qualquer um desses exemplos**](#creating-and-compiling-dlls). Você poderia executar payloads como: obter um rev shell, adicionar um usuário, executar um beacon...
 
 > [!WARNING]
-> Note que **nem todos os serviços são executados** com **`NT AUTHORITY\SYSTEM`**, alguns também são executados com **`NT AUTHORITY\LOCAL SERVICE`**, que tem **menos privilégios** e você **não poderá criar um novo usuário** abusando de suas permissões.\
+> Note que **nem todos os serviços são executados** com **`NT AUTHORITY\SYSTEM`**, alguns também são executados com **`NT AUTHORITY\LOCAL SERVICE`**, que tem **menos privilégios** e você **não poderá criar um novo usuário** para abusar de suas permissões.\
 > No entanto, esse usuário tem o privilégio **`seImpersonate`**, então você pode usar o [**potato suite para escalar privilégios**](../roguepotato-and-printspoofer.md). Portanto, neste caso, um rev shell é uma opção melhor do que tentar criar um usuário.
 
-No momento da escrita, o serviço **Agendador de Tarefas** está sendo executado com **Nt AUTHORITY\SYSTEM**.
+No momento em que escrevo, o serviço **Agendador de Tarefas** está sendo executado com **Nt AUTHORITY\SYSTEM**.
 
-Tendo **gerado a Dll maliciosa** (_no meu caso, usei um rev shell x64 e recebi um shell de volta, mas o defender o matou porque era do msfvenom_), salve-a no System Path gravável com o nome **WptsExtensions.dll** e **reinicie** o computador (ou reinicie o serviço ou faça o que for necessário para reiniciar o serviço/programa afetado).
+Tendo **gerado o Dll malicioso** (_no meu caso, usei um rev shell x64 e recebi um shell de volta, mas o defender o matou porque era do msfvenom_), salve-o no System Path gravável com o nome **WptsExtensions.dll** e **reinicie** o computador (ou reinicie o serviço ou faça o que for necessário para reiniciar o serviço/programa afetado).
 
-Quando o serviço for reiniciado, a **dll deve ser carregada e executada** (você pode **reutilizar** o truque do **procmon** para verificar se a **biblioteca foi carregada conforme esperado**).
+Quando o serviço for reiniciado, o **dll deve ser carregado e executado** (você pode **reutilizar** o truque do **procmon** para verificar se a **biblioteca foi carregada conforme esperado**).
 
 {{#include ../../../banners/hacktricks-training.md}}

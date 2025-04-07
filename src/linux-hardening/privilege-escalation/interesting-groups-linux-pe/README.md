@@ -68,7 +68,7 @@ sudo su
 ```
 ## Shadow Group
 
-Usuários do **grupo shadow** podem **ler** o arquivo **/etc/shadow**:
+Usuários do **grupo shadow** podem **ler** o **/etc/shadow** arquivo:
 ```
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
@@ -76,7 +76,7 @@ Então, leia o arquivo e tente **quebrar algumas hashes**.
 
 ## Grupo de Funcionários
 
-**staff**: Permite que usuários adicionem modificações locais ao sistema (`/usr/local`) sem precisar de privilégios de root (note que executáveis em `/usr/local/bin` estão na variável PATH de qualquer usuário, e podem "substituir" os executáveis em `/bin` e `/usr/bin` com o mesmo nome). Compare com o grupo "adm", que está mais relacionado à monitoramento/segurança. [\[source\]](https://wiki.debian.org/SystemGroups)
+**staff**: Permite que usuários adicionem modificações locais ao sistema (`/usr/local`) sem precisar de privilégios de root (note que executáveis em `/usr/local/bin` estão na variável PATH de qualquer usuário, e podem "substituir" os executáveis em `/bin` e `/usr/bin` com o mesmo nome). Compare com o grupo "adm", que está mais relacionado a monitoramento/segurança. [\[source\]](https://wiki.debian.org/SystemGroups)
 
 Em distribuições debian, a variável `$PATH` mostra que `/usr/local/` será executado com a maior prioridade, independentemente de você ser um usuário privilegiado ou não.
 ```bash
@@ -193,7 +193,7 @@ echo 'toor:$1$.ZcF5ts0$i4k6rQYzeegUkacRCvfxC0:0:0:root:/root:/bin/sh' >> /etc/pa
 #Ifyou just want filesystem and network access you can startthe following container:
 docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chroot /mnt bashbash
 ```
-Finalmente, se você não gostar de nenhuma das sugestões anteriores, ou elas não estiverem funcionando por algum motivo (firewall da API do docker?), você sempre pode tentar **executar um contêiner privilegiado e escapar dele** como explicado aqui:
+Finalmente, se você não gostar de nenhuma das sugestões anteriores, ou se elas não estiverem funcionando por algum motivo (firewall da API do docker?), você sempre pode tentar **executar um contêiner privilegiado e escapar dele** como explicado aqui:
 
 {{#ref}}
 ../docker-security/
@@ -222,7 +222,7 @@ Portanto, se você comprometeu um usuário dentro deste grupo, você definitivam
 
 ## Grupo Auth
 
-Dentro do OpenBSD, o grupo **auth** geralmente pode escrever nas pastas _**/etc/skey**_ e _**/var/db/yubikey**_ se elas forem usadas.\
+Dentro do OpenBSD, o grupo **auth** geralmente pode escrever nas pastas _**/etc/skey**_ e _**/var/db/yubikey**_ se forem usadas.\
 Essas permissões podem ser abusadas com o seguinte exploit para **escalar privilégios** para root: [https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
 
 {{#include ../../../banners/hacktricks-training.md}}

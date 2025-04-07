@@ -2,32 +2,32 @@
 
 # Timestamps
 
-Um atacante pode estar interessado em **alterar os timestamps dos arquivos** para evitar ser detectado.\
-É possível encontrar os timestamps dentro do MFT nos atributos `$STANDARD_INFORMATION` ** e ** `$FILE_NAME`.
+Um atacante pode estar interessado em **alterar os timestamps de arquivos** para evitar ser detectado.\
+É possível encontrar os timestamps dentro do MFT nos atributos `$STANDARD_INFORMATION` **e** `$FILE_NAME`.
 
 Ambos os atributos têm 4 timestamps: **Modificação**, **acesso**, **criação** e **modificação do registro MFT** (MACE ou MACB).
 
-**Windows explorer** e outras ferramentas mostram as informações de **`$STANDARD_INFORMATION`**.
+**O explorador do Windows** e outras ferramentas mostram as informações de **`$STANDARD_INFORMATION`**.
 
 ## TimeStomp - Ferramenta Anti-forense
 
-Esta ferramenta **modifica** as informações de timestamp dentro de **`$STANDARD_INFORMATION`** **mas** **não** as informações dentro de **`$FILE_NAME`**. Portanto, é possível **identificar** **atividade** **suspeita**.
+Esta ferramenta **modifica** as informações de timestamp dentro de **`$STANDARD_INFORMATION`**, **mas** **não** as informações dentro de **`$FILE_NAME`**. Portanto, é possível **identificar** **atividade** **suspeita**.
 
 ## Usnjrnl
 
-O **USN Journal** (Update Sequence Number Journal) é um recurso do NTFS (sistema de arquivos Windows NT) que rastreia as alterações do volume. A ferramenta [**UsnJrnl2Csv**](https://github.com/jschicht/UsnJrnl2Csv) permite a análise dessas alterações.
+O **USN Journal** (Journal de Número de Sequência de Atualização) é um recurso do NTFS (sistema de arquivos Windows NT) que rastreia alterações no volume. A ferramenta [**UsnJrnl2Csv**](https://github.com/jschicht/UsnJrnl2Csv) permite a análise dessas mudanças.
 
 ![](<../../images/image (449).png>)
 
-A imagem anterior é a **saída** mostrada pela **ferramenta**, onde pode-se observar que algumas **alterações foram realizadas** no arquivo.
+A imagem anterior é a **saída** mostrada pela **ferramenta**, onde pode-se observar que algumas **mudanças foram realizadas** no arquivo.
 
 ## $LogFile
 
-**Todas as alterações de metadados em um sistema de arquivos são registradas** em um processo conhecido como [write-ahead logging](https://en.wikipedia.org/wiki/Write-ahead_logging). Os metadados registrados são mantidos em um arquivo chamado `**$LogFile**`, localizado no diretório raiz de um sistema de arquivos NTFS. Ferramentas como [LogFileParser](https://github.com/jschicht/LogFileParser) podem ser usadas para analisar este arquivo e identificar alterações.
+**Todas as alterações de metadados em um sistema de arquivos são registradas** em um processo conhecido como [write-ahead logging](https://en.wikipedia.org/wiki/Write-ahead_logging). Os metadados registrados são mantidos em um arquivo chamado `**$LogFile**`, localizado no diretório raiz de um sistema de arquivos NTFS. Ferramentas como [LogFileParser](https://github.com/jschicht/LogFileParser) podem ser usadas para analisar este arquivo e identificar mudanças.
 
 ![](<../../images/image (450).png>)
 
-Novamente, na saída da ferramenta é possível ver que **algumas alterações foram realizadas**.
+Novamente, na saída da ferramenta é possível ver que **algumas mudanças foram realizadas**.
 
 Usando a mesma ferramenta, é possível identificar **a que hora os timestamps foram modificados**:
 
@@ -48,21 +48,21 @@ Os timestamps do **NTFS** têm uma **precisão** de **100 nanosegundos**. Portan
 
 ## SetMace - Ferramenta Anti-forense
 
-Esta ferramenta pode modificar ambos os atributos `$STARNDAR_INFORMATION` e `$FILE_NAME`. No entanto, a partir do Windows Vista, é necessário que um sistema operacional ao vivo modifique essas informações.
+Esta ferramenta pode modificar ambos os atributos `$STANDARD_INFORMATION` e `$FILE_NAME`. No entanto, a partir do Windows Vista, é necessário que um sistema operacional ao vivo modifique essas informações.
 
 # Data Hiding
 
-O NFTS usa um cluster e o tamanho mínimo da informação. Isso significa que se um arquivo ocupa um e meio cluster, a **metade restante nunca será usada** até que o arquivo seja excluído. Portanto, é possível **ocultar dados neste espaço livre**.
+O NFTS usa um cluster e o tamanho mínimo da informação. Isso significa que se um arquivo ocupa um e meio cluster, a **metade restante nunca será usada** até que o arquivo seja excluído. Portanto, é possível **ocultar dados neste espaço de sobra**.
 
 Existem ferramentas como slacker que permitem ocultar dados neste espaço "oculto". No entanto, uma análise do `$logfile` e `$usnjrnl` pode mostrar que alguns dados foram adicionados:
 
 ![](<../../images/image (452).png>)
 
-Então, é possível recuperar o espaço livre usando ferramentas como FTK Imager. Note que esse tipo de ferramenta pode salvar o conteúdo ofuscado ou até mesmo criptografado.
+Então, é possível recuperar o espaço de sobra usando ferramentas como FTK Imager. Note que esse tipo de ferramenta pode salvar o conteúdo ofuscado ou até mesmo criptografado.
 
 # UsbKill
 
-Esta é uma ferramenta que **desligará o computador se qualquer alteração nas portas USB** for detectada.\
+Esta é uma ferramenta que **desliga o computador se qualquer alteração nas portas USB** for detectada.\
 Uma maneira de descobrir isso seria inspecionar os processos em execução e **revisar cada script python em execução**.
 
 # Live Linux Distributions
@@ -83,7 +83,7 @@ Esta é uma chave de registro que mantém datas e horas quando cada executável 
 
 Desativar o UserAssist requer duas etapas:
 
-1. Defina duas chaves de registro, `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackProgs` e `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackEnabled`, ambas para zero a fim de sinalizar que queremos desativar o UserAssist.
+1. Defina duas chaves de registro, `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackProgs` e `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackEnabled`, ambas para zero, a fim de sinalizar que queremos desativar o UserAssist.
 2. Limpe suas subárvores de registro que se parecem com `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\<hash>`.
 
 ## Desativar Timestamps - Prefetch
@@ -98,7 +98,7 @@ Isso salvará informações sobre os aplicativos executados com o objetivo de me
 
 ## Desativar Timestamps - Last Access Time
 
-Sempre que uma pasta é aberta a partir de um volume NTFS em um servidor Windows NT, o sistema leva o tempo para **atualizar um campo de timestamp em cada pasta listada**, chamado de hora de último acesso. Em um volume NTFS muito utilizado, isso pode afetar o desempenho.
+Sempre que uma pasta é aberta a partir de um volume NTFS em um servidor Windows NT, o sistema leva o tempo para **atualizar um campo de timestamp em cada pasta listada**, chamado de hora do último acesso. Em um volume NTFS muito utilizado, isso pode afetar o desempenho.
 
 1. Abra o Editor do Registro (Regedit.exe).
 2. Navegue até `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem`.
@@ -107,23 +107,23 @@ Sempre que uma pasta é aberta a partir de um volume NTFS em um servidor Windows
 
 ## Deletar Histórico USB
 
-Todas as **Entradas de Dispositivos USB** são armazenadas no Registro do Windows sob a chave de registro **USBSTOR** que contém subchaves que são criadas sempre que você conecta um dispositivo USB ao seu PC ou Laptop. Você pode encontrar esta chave aqui `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Deletando isso**, você excluirá o histórico USB.\
-Você também pode usar a ferramenta [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html) para ter certeza de que as deletou (e para deletá-las).
+Todas as **Entradas de Dispositivos USB** são armazenadas no Registro do Windows sob a chave de registro **USBSTOR**, que contém subchaves que são criadas sempre que você conecta um dispositivo USB ao seu PC ou Laptop. Você pode encontrar esta chave aqui `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Deletando isso**, você excluirá o histórico USB.\
+Você também pode usar a ferramenta [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html) para ter certeza de que as excluiu (e para excluí-las).
 
-Outro arquivo que salva informações sobre os USBs é o arquivo `setupapi.dev.log` dentro de `C:\Windows\INF`. Este também deve ser deletado.
+Outro arquivo que salva informações sobre os USBs é o arquivo `setupapi.dev.log` dentro de `C:\Windows\INF`. Este também deve ser excluído.
 
 ## Desativar Cópias de Sombra
 
 **Liste** as cópias de sombra com `vssadmin list shadowstorage`\
-**Deletar** executando `vssadmin delete shadow`
+**Exclua**-as executando `vssadmin delete shadow`
 
-Você também pode deletá-las via GUI seguindo os passos propostos em [https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html)
+Você também pode excluí-las via GUI seguindo os passos propostos em [https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html)
 
-Para desativar cópias de sombra [passos daqui](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows):
+Para desativar cópias de sombra [passos a partir daqui](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows):
 
-1. Abra o programa Serviços digitando "services" na caixa de pesquisa de texto após clicar no botão iniciar do Windows.
+1. Abra o programa Serviços digitando "serviços" na caixa de pesquisa de texto após clicar no botão iniciar do Windows.
 2. Na lista, encontre "Volume Shadow Copy", selecione-o e acesse Propriedades clicando com o botão direito.
-3. Escolha Desativado no menu suspenso "Tipo de Inicialização" e confirme a alteração clicando em Aplicar e OK.
+3. Escolha Desativado no menu suspenso "Tipo de inicialização" e confirme a alteração clicando em Aplicar e OK.
 
 Também é possível modificar a configuração de quais arquivos serão copiados na cópia de sombra no registro `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`
 

