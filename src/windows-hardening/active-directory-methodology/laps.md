@@ -3,13 +3,13 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 
-## Основна інформація
+## Basic Information
 
-Local Administrator Password Solution (LAPS) - це інструмент, що використовується для управління системою, де **паролі адміністратора**, які є **унікальними, випадковими та часто змінюються**, застосовуються до комп'ютерів, приєднаних до домену. Ці паролі зберігаються безпечно в Active Directory і доступні лише користувачам, яким надано дозвіл через списки контролю доступу (ACL). Безпека передачі паролів від клієнта до сервера забезпечується за допомогою **Kerberos версії 5** та **Advanced Encryption Standard (AES)**.
+Local Administrator Password Solution (LAPS) - це інструмент, що використовується для управління системою, де **паролі адміністраторів**, які є **унікальними, випадковими та часто змінюються**, застосовуються до комп'ютерів, приєднаних до домену. Ці паролі зберігаються безпечно в Active Directory і доступні лише користувачам, яким надано дозвіл через списки контролю доступу (ACL). Безпека передачі паролів від клієнта до сервера забезпечується за допомогою **Kerberos версії 5** та **Стандарту розширеного шифрування (AES)**.
 
-У комп'ютерних об'єктах домену впровадження LAPS призводить до додавання двох нових атрибутів: **`ms-mcs-AdmPwd`** та **`ms-mcs-AdmPwdExpirationTime`**. Ці атрибути зберігають **пароль адміністратора у відкритому вигляді** та **його час закінчення терміну дії** відповідно.
+У комп'ютерних об'єктах домену реалізація LAPS призводить до додавання двох нових атрибутів: **`ms-mcs-AdmPwd`** та **`ms-mcs-AdmPwdExpirationTime`**. Ці атрибути зберігають **пароль адміністратора у відкритому вигляді** та **час його закінчення**, відповідно.
 
-### Перевірте, чи активовано
+### Check if activated
 ```bash
 reg query "HKLM\Software\Policies\Microsoft Services\AdmPwd" /v AdmPwdEnabled
 
@@ -27,7 +27,7 @@ Get-DomainObject -SearchBase "LDAP://DC=sub,DC=domain,DC=local" | ? { $_."ms-mcs
 Ви можете **завантажити сирий LAPS політику** з `\\dc\SysVol\domain\Policies\{4A8A4E8E-929F-401A-95BD-A7D40E0976C8}\Machine\Registry.pol`, а потім використати **`Parse-PolFile`** з пакету [**GPRegistryPolicyParser**](https://github.com/PowerShell/GPRegistryPolicyParser), щоб перетворити цей файл у формат, зрозумілий людині.
 
 Більш того, **рідні LAPS PowerShell cmdlets** можуть бути використані, якщо вони встановлені на машині, до якої ми маємо доступ:
-```powershell
+```bash
 Get-Command *AdmPwd*
 
 CommandType     Name                                               Version    Source
@@ -48,7 +48,7 @@ Find-AdmPwdExtendedRights -Identity Workstations | fl
 Get-AdmPwdPassword -ComputerName wkstn-2 | fl
 ```
 **PowerView** також можна використовувати, щоб дізнатися **хто може читати пароль і прочитати його**:
-```powershell
+```bash
 # Find the principals that have ReadPropery on ms-Mcs-AdmPwd
 Get-AdmPwdPassword -ComputerName wkstn-2 | fl
 
@@ -58,9 +58,9 @@ Get-DomainObject -Identity wkstn-2 -Properties ms-Mcs-AdmPwd
 ### LAPSToolkit
 
 [LAPSToolkit](https://github.com/leoloobeek/LAPSToolkit) полегшує перерахунок LAPS за допомогою кількох функцій.\
-Одна з них - парсинг **`ExtendedRights`** для **всіх комп'ютерів з увімкненим LAPS.** Це покаже **групи**, які спеціально **делеговані для читання паролів LAPS**, які часто є користувачами в захищених групах.\
+Одна з них - це парсинг **`ExtendedRights`** для **всіх комп'ютерів з увімкненим LAPS.** Це покаже **групи**, які спеціально **делеговані для читання паролів LAPS**, які часто є користувачами в захищених групах.\
 **Обліковий запис**, який **долучив комп'ютер** до домену, отримує `All Extended Rights` над цим хостом, і це право надає **обліковому запису** можливість **читати паролі**. Перерахунок може показати обліковий запис користувача, який може читати пароль LAPS на хості. Це може допомогти нам **націлити конкретних користувачів AD**, які можуть читати паролі LAPS.
-```powershell
+```bash
 # Get groups that can read passwords
 Find-LAPSDelegatedGroups
 
@@ -103,8 +103,8 @@ Password: 2Z@Ae)7!{9#Cq
 
 ### **Дата закінчення терміну дії**
 
-Після отримання прав адміністратора, можна **отримати паролі** та **запобігти** оновленню пароля машини, **встановивши дату закінчення терміну дії в майбутнє**.
-```powershell
+Після отримання прав адміністратора, можливо **отримати паролі** та **запобігти** оновленню **пароля** машини, **встановивши дату закінчення терміну дії в майбутньому**.
+```bash
 # Get expiration time
 Get-DomainObject -Identity computer-21 -Properties ms-mcs-admpwdexpirationtime
 

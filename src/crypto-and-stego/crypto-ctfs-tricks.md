@@ -30,7 +30,7 @@
 - [https://www.dcode.fr/tools-list](https://www.dcode.fr/tools-list)
 - [https://gchq.github.io/CyberChef/](https://gchq.github.io/CyberChef/)
 
-### Авто-розв'язувачі заміни
+### Авто-розв'язувачі заміщення
 
 - [https://www.boxentriq.com/code-breaking/cryptogram](https://www.boxentriq.com/code-breaking/cryptogram)
 - [https://quipqiup.com/](https://quipqiup.com) - Дуже добре!
@@ -182,23 +182,23 @@ drnajapajrna
 ```
 8 15 12 1 3 1 18 1 3 15 12 1
 ```
-### Шифр Афіна Encode
+### Affine Cipher Encode
 
 Літера в число `(ax+b)%26` (_a_ та _b_ - це ключі, а _x_ - літера) і результат назад у літеру
 ```
 krodfdudfrod
 ```
-### SMS Код
+### SMS Code
 
-**Multitap** [замінює літеру](https://www.dcode.fr/word-letter-change) на повторювані цифри, визначені відповідним кодом клавіші на мобільному [клавіатурі телефону](https://www.dcode.fr/phone-keypad-cipher) (цей режим використовується при написанні SMS).\
+**Multitap** [замінює літеру](https://www.dcode.fr/word-letter-change) на повторювані цифри, визначені відповідним кодом клавіші на мобільному [клавіатурі телефону](https://www.dcode.fr/phone-keypad-cipher) (Цей режим використовується при написанні SMS).\
 Наприклад: 2=A, 22=B, 222=C, 3=D...\
-Ви можете ідентифікувати цей код, оскільки ви побачите\*\* кілька повторюваних чисел\*\*.
+Ви можете ідентифікувати цей код, оскільки ви побачите **кілька повторюваних чисел**.
 
 Ви можете декодувати цей код на: [https://www.dcode.fr/multitap-abc-cipher](https://www.dcode.fr/multitap-abc-cipher)
 
-### Код Бекона
+### Bacon Code
 
-Замініть кожну літеру на 4 А або В (або 1s і 0s)
+Замініть кожну літеру на 4 А або B (або 1s і 0s)
 ```
 00111 01101 01010 00000 00010 00000 10000 00000 00010 01101 01010 00000
 AABBB ABBAB ABABA AAAAA AAABA AAAAA BAAAA AAAAA AAABA ABBAB ABABA AAAAA
@@ -219,13 +219,13 @@ AABBB ABBAB ABABA AAAAA AAABA AAAAA BAAAA AAAAA AAABA ABBAB ABABA AAAAA
 
 ### Біфід
 
-Потрібен ключове слово
+Потрібне ключове слово
 ```
 fgaargaamnlunesuneoa
 ```
 ### Vigenere
 
-Потрібен ключ.
+Потрібен ключове слово
 ```
 wodsyoidrods
 ```

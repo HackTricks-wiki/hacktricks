@@ -1,4 +1,4 @@
-# Зброя Distroless
+# Weaponizing Distroless
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -13,7 +13,7 @@
 - Надано **Google**: [https://console.cloud.google.com/gcr/images/distroless/GLOBAL](https://console.cloud.google.com/gcr/images/distroless/GLOBAL)
 - Надано **Chainguard**: [https://github.com/chainguard-images/images/tree/main/images](https://github.com/chainguard-images/images/tree/main/images)
 
-## Зброя Distroless
+## Weaponizing Distroless
 
 Мета озброєння контейнера distroless полягає в тому, щоб мати можливість **виконувати довільні бінарні файли та корисні навантаження, навіть з обмеженнями**, які накладає **distroless** (відсутність загальних бінарних файлів у системі), а також захистами, які зазвичай зустрічаються в контейнерах, такими як **тільки для читання** або **без виконання** в `/dev/shm`.
 
@@ -25,6 +25,6 @@
 
 #### openssl
 
-\***\*[**У цьому пості,**](https://www.form3.tech/engineering/content/exploiting-distroless-images) пояснюється, що бінарний файл **`openssl`** часто зустрічається в цих контейнерах, можливо, тому що він **потрібен\*\* програмному забезпеченню, яке буде працювати всередині контейнера.
+\***\*[**У цьому пості,**](https://www.form3.tech/engineering/content/exploiting-distroless-images) пояснюється, що бінарний файл **`openssl`** часто зустрічається в цих контейнерах, можливо, тому що він **потрібен** програмному забезпеченню, яке буде працювати всередині контейнера.
 
 {{#include ../../../banners/hacktricks-training.md}}

