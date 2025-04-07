@@ -6,7 +6,7 @@
 
 **TCC (Transparency, Consent, and Control)** ni itifaki ya usalama inayolenga kudhibiti ruhusa za programu. Jukumu lake kuu ni kulinda vipengele nyeti kama **huduma za eneo, mawasiliano, picha, kipaza sauti, kamera, upatikanaji wa urahisi, na upatikanaji wa diski nzima**. Kwa kuhitaji idhini wazi ya mtumiaji kabla ya kutoa ruhusa kwa programu kuingia kwenye vipengele hivi, TCC inaboresha faragha na udhibiti wa mtumiaji juu ya data zao.
 
-Watumiaji wanakutana na TCC wakati programu zinapohitaji ruhusa kwa vipengele vilivyolindwa. Hii inaonekana kupitia kiashiria kinachowaruhusu watumiaji **kuthibitisha au kukataa ruhusa**. Zaidi ya hayo, TCC inaruhusu vitendo vya moja kwa moja vya mtumiaji, kama **kuvuta na kuacha faili ndani ya programu**, ili kutoa ruhusa kwa faili maalum, kuhakikisha kwamba programu zina upatikanaji tu kwa kile kilichoruhusiwa wazi.
+Watumiaji wanakutana na TCC wakati programu zinapohitaji upatikanaji wa vipengele vilivyolindwa. Hii inaonekana kupitia ujumbe unaowaruhusu watumiaji **kuthibitisha au kukataa upatikanaji**. Zaidi ya hayo, TCC inaruhusu vitendo vya moja kwa moja vya mtumiaji, kama **kuvuta na kuacha faili ndani ya programu**, ili kutoa upatikanaji wa faili maalum, kuhakikisha kwamba programu zina upatikanaji tu wa kile kilichoruhusiwa wazi.
 
 ![An example of a TCC prompt](https://rainforest.engineering/images/posts/macos-tcc/tcc-prompt.png?1620047855)
 
@@ -24,7 +24,7 @@ Permissions zinapatikana **kutoka kwa programu ya mzazi** na **permissions** zin
 
 ### TCC Databases
 
-Ruhusa/zuia kisha zinawekwa katika baadhi ya hifadhidata za TCC:
+Ruhusa/zuia kisha zinawekwa katika baadhi ya TCC databases:
 
 - Hifadhidata ya mfumo mzima katika **`/Library/Application Support/com.apple.TCC/TCC.db`**.
 - Hifadhidata hii ina **ulinzi wa SIP**, hivyo ni lazima kupita SIP ili kuandika ndani yake.
@@ -45,7 +45,7 @@ Ruhusa/zuia kisha zinawekwa katika baadhi ya hifadhidata za TCC:
 > Hifadhidata ya TCC katika **iOS** iko katika **`/private/var/mobile/Library/TCC/TCC.db`**.
 
 > [!NOTE]
-> **Kituo cha arifa UI** kinaweza kufanya **mabadiliko katika hifadhidata ya TCC ya mfumo**:
+> **Kituo cha arifa UI** kinaweza kufanya **mabadiliko katika hifadhidata ya mfumo wa TCC**:
 >
 > ```bash
 > codesign -dv --entitlements :- /System/Library/PrivateFrameworks/TCC.framework/> Support/tccd
@@ -153,7 +153,7 @@ Fanya tu **`launctl load you_bin.plist`**, na plist kama:
 
 - **`auth_value`** inaweza kuwa na thamani tofauti: denied(0), unknown(1), allowed(2), au limited(3).
 - **`auth_reason`** inaweza kuchukua thamani zifuatazo: Error(1), User Consent(2), User Set(3), System Set(4), Service Policy(5), MDM Policy(6), Override Policy(7), Missing usage string(8), Prompt Timeout(9), Preflight Unknown(10), Entitled(11), App Type Policy(12)
-- Uwanja wa **csreq** uko hapo kuonyesha jinsi ya kuthibitisha binary ili kutekeleza na kutoa ruhusa za TCC:
+- Uwanja wa **csreq** upo ili kuonyesha jinsi ya kuthibitisha binary ili kutekeleza na kutoa ruhusa za TCC:
 ```bash
 # Query to get cserq in printable hex
 select service, client, hex(csreq) from access where auth_value=2;
@@ -171,7 +171,7 @@ echo "X'$REQ_HEX'"
 ```
 - Kwa maelezo zaidi kuhusu **sehemu nyingine** za jedwali [**angalia chapisho hili la blog**](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive).
 
-Unaweza pia kuangalia **idhini ambazo tayari zimetolewa** kwa programu katika `System Preferences --> Security & Privacy --> Privacy --> Files and Folders`.
+Unaweza pia kuangalia **idhini zilizotolewa tayari** kwa programu katika `System Preferences --> Security & Privacy --> Privacy --> Files and Folders`.
 
 > [!TIP]
 > Watumiaji _wanaweza_ **kufuta au kuuliza sheria** kwa kutumia **`tccutil`**.
@@ -199,16 +199,16 @@ csreq -t -r /tmp/telegram_csreq.bin
 (anchor apple generic and certificate leaf[field.1.2.840.113635.100.6.1.9] /* exists */ or anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = "6N38VWS5BX") and identifier "ru.keepcoder.Telegram"
 ```
 > [!WARNING]
-> Kwa hivyo, programu nyingine zinazotumia jina sawa na ID ya kifurushi hazitaweza kupata ruhusa zilizotolewa kwa programu nyingine.
+> Hivyo, programu nyingine zinazotumia jina moja na ID ya kifurushi hazitaweza kupata ruhusa zilizotolewa kwa programu nyingine.
 
 ### Haki & Ruhusa za TCC
 
-Programu **hazihitaji tu** ku **omba** na kupewa **ruhsusa** kwa baadhi ya rasilimali, zinahitaji pia **kuwa na haki zinazohusiana.**\
-Kwa mfano, **Telegram** ina haki `com.apple.security.device.camera` kuomba **ruhsusa ya kutumia kamera.** Programu **ambayo** **haina** haki hii **haitaweza** kupata kamera (na mtumiaji hataulizwa kuhusu ruhusa).
+Programu **hazihitaji tu** **kuomba** na **kupewa ruhusa** kwa baadhi ya rasilimali, zinahitaji pia **kuwa na haki zinazofaa**.\
+Kwa mfano, **Telegram** ina haki `com.apple.security.device.camera` kuomba **ruhusa ya kutumia kamera**. **Programu** ambayo **haina** haki hii **haitaweza** kupata kamera (na mtumiaji hataulizwa kuhusu ruhusa).
 
-Hata hivyo, ili programu **zipate** **kufikia** **folda fulani za mtumiaji**, kama `~/Desktop`, `~/Downloads` na `~/Documents`, **hazihitaji** kuwa na haki maalum **zaidi.** Mfumo utaendesha ufikiaji kwa uwazi na **kuuliza mtumiaji** inapohitajika.
+Hata hivyo, ili programu **zipate** **kufikia** **folda fulani za mtumiaji**, kama vile `~/Desktop`, `~/Downloads` na `~/Documents`, **hazihitaji** kuwa na haki maalum **zaidi.** Mfumo utaendesha ufikiaji kwa uwazi na **kuuliza mtumiaji** inapohitajika.
 
-Programu za Apple **hazitaunda maonyesho.** Zinashikilia **haki zilizotolewa mapema** katika orodha yao ya **haki**, ikimaanisha hazita **unda popup** kamwe, **wala** hazitaonekana katika yoyote ya **maktaba za TCC.** Kwa mfano:
+Programu za Apple **hazitaunda maonyesho**. Zinajumuisha **haki zilizotolewa mapema** katika orodha yao ya **haki**, ikimaanisha hazita **wahi kuunda popup**, **wala** hazitaonekana katika yoyote ya **maktaba za TCC.** Kwa mfano:
 ```bash
 codesign -dv --entitlements :- /System/Applications/Calendar.app
 [...]
@@ -224,7 +224,7 @@ Hii itazuia Calendar kumuuliza mtumiaji kupata kumbukumbu, kalenda na kitabu cha
 > [!TIP]
 > Mbali na baadhi ya nyaraka rasmi kuhusu ruhusa, pia inawezekana kupata **habari za kuvutia kuhusu ruhusa katika** [**https://newosxbook.com/ent.jl**](https://newosxbook.com/ent.jl)
 
-Baadhi ya ruhusa za TCC ni: kTCCServiceAppleEvents, kTCCServiceCalendar, kTCCServicePhotos... Hakuna orodha ya umma inayofafanua zote lakini unaweza kuangalia hii [**orodha ya zile zinazojulikana**](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive#service).
+Baadhi ya ruhusa za TCC ni: kTCCServiceAppleEvents, kTCCServiceCalendar, kTCCServicePhotos... Hakuna orodha ya umma inayofafanua zote lakini unaweza kuangalia hii [**orodha ya zinazojulikana**](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive#service).
 
 ### Mahali salama yasiyolindwa
 
@@ -234,7 +234,7 @@ Baadhi ya ruhusa za TCC ni: kTCCServiceAppleEvents, kTCCServiceCalendar, kTCCSer
 
 ### Nia ya Mtumiaji / com.apple.macl
 
-Kama ilivyotajwa hapo awali, inawezekana **kutoa ruhusa kwa App kwa faili kwa kuhamasisha na kuacha**. Ruhusa hii haitatajwa katika yoyote TCC database lakini kama **sifa** **panua ya faili**. Sifa hii itahifadhi **UUID** ya app iliyoidhinishwa:
+Kama ilivyotajwa hapo awali, inawezekana **kutoa ufikiaji kwa App kwa faili kwa kuhamasisha na kuacha**. Ufikiaji huu hautatajwa katika yoyote TCC database lakini kama **sifa** **panua ya faili**. Sifa hii itahifadhi **UUID** ya app iliyoidhinishwa:
 ```bash
 xattr Desktop/private.txt
 com.apple.macl
@@ -252,9 +252,9 @@ uuid 769FD8F1-90E0-3206-808C-A8947BEBD6C3
 > [!NOTE]
 > Ni ya kushangaza kwamba sifa ya **`com.apple.macl`** inasimamiwa na **Sandbox**, si tccd.
 >
-> Pia kumbuka kwamba ikiwa unahamisha faili inayoruhusu UUID ya programu kwenye kompyuta yako kwenda kwenye kompyuta tofauti, kwa sababu programu hiyo hiyo itakuwa na UIDs tofauti, haitatoa ufikiaji kwa programu hiyo.
+> Pia kumbuka kwamba ikiwa unahamisha faili inayoruhusu UUID ya programu kwenye kompyuta yako kwenda kompyuta tofauti, kwa sababu programu hiyo hiyo itakuwa na UIDs tofauti, haitatoa ufikiaji kwa programu hiyo.
 
-Sifa ya ziada `com.apple.macl` **haiwezi kufutwa** kama sifa nyingine za ziada kwa sababu in **lindwa na SIP**. Hata hivyo, kama [**ilivyoelezwa katika chapisho hili**](https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/), inawezekana kuizima **kwa kuzipa** faili, **kuifuta** na **kuifungua**.
+Sifa ya ziada `com.apple.macl` **haiwezi kufutwa** kama sifa nyingine za ziada kwa sababu in **lindwa na SIP**. Hata hivyo, kama [**ilivyoelezwa katika chapisho hili**](https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/), inawezekana kuizima **kwa kuzipa** faili, **kuifuta** na **kuizipua**.
 
 ## TCC Privesc & Bypasses
 
@@ -264,7 +264,7 @@ Ikiwa kwa wakati fulani unafanikiwa kupata ufikiaji wa kuandika juu ya hifadhida
 
 <details>
 
-<summary>Ingiza katika TCC mfano</summary>
+<summary>Ingiza katika mfano wa TCC</summary>
 ```sql
 INSERT INTO access (
 service,
@@ -361,7 +361,7 @@ EOD
 Unaweza kutumia hii **kuandika database yako ya TCC ya mtumiaji**.
 
 > [!WARNING]
-> Kwa ruhusa hii utaweza **kuomba finder kufikia folda zilizozuiwa za TCC** na kukupa faili, lakini kwa maelezo ninayojua huwezi **kufanya Finder itekeleze msimbo wowote** ili kutumia kikamilifu ufikiaji wake wa FDA.
+> Kwa ruhusa hii utaweza **kuomba finder kufikia folda zilizozuiwa za TCC** na kukupa faili, lakini kadri ninavyojua huwezi **kufanya Finder itekeleze msimbo wowote** ili kutumia kikamilifu ufikiaji wake wa FDA.
 >
 > Hivyo, huwezi kutumia uwezo wote wa FDA.
 
@@ -396,7 +396,7 @@ EOD
 ```
 </details>
 
-Vivyo hivyo na **Script Editor app,** inaweza kudhibiti Finder, lakini kwa kutumia AppleScript huwezi kulazimisha itekeleze script.
+Ikitukana na **Script Editor app,** inaweza kudhibiti Finder, lakini kwa kutumia AppleScript huwezi kulazimisha itekeleze script.
 
 ### Automation (SE) kwa baadhi ya TCC
 
@@ -442,11 +442,11 @@ EOD
 touch "$HOME/Desktop/file"
 rm "$HOME/Desktop/file"
 ```
-### Automation (SE) + Accessibility (**`kTCCServicePostEvent`|**`kTCCServiceAccessibility`**)** kwa FDA\*
+### Automation (SE) + Accessibility (**`kTCCServicePostEvent`|**`kTCCServiceAccessibility`**)** to FDA\*
 
-Automatisering kwenye **`System Events`** + Accessibility (**`kTCCServicePostEvent`**) inaruhusu kutuma **mipigo ya funguo kwa michakato**. Kwa njia hii unaweza kutumia Finder kubadilisha TCC.db ya watumiaji au kutoa FDA kwa programu yoyote (ingawa nenosiri linaweza kuombwa kwa hili).
+Automatiki kwenye **`System Events`** + Upatikanaji (**`kTCCServicePostEvent`**) inaruhusu kutuma **vibonye kwa michakato**. Kwa njia hii unaweza kutumia Finder kubadilisha TCC.db ya watumiaji au kutoa FDA kwa programu yoyote (ingawa nenosiri linaweza kuombwa kwa hili).
 
-Mfano wa Finder inayoandika TCC.db ya watumiaji:
+Mfano wa Finder kuandika tena TCC.db ya watumiaji:
 ```applescript
 -- store the TCC.db file to copy in /tmp
 osascript <<EOF
@@ -514,11 +514,11 @@ Lakini unaweza **kujipe** **`Ruhusa za Automation kwa Finder`**, na kutumia mbin
 
 **Upatikanaji wa Disk Kamili** ni jina la TCC ni **`kTCCServiceSystemPolicyAllFiles`**
 
-Sidhani hii ni privesc halisi, lakini kwa kuwa unaweza kuiona kuwa ya manufaa: Ikiwa unadhibiti programu yenye FDA unaweza **kubadilisha database ya TCC ya watumiaji na kujipa ufikiaji wowote**. Hii inaweza kuwa ya manufaa kama mbinu ya kudumu endapo unaweza kupoteza ruhusa zako za FDA.
+Sidhani kama hii ni kweli privesc, lakini kwa kuwa tu unapata kuwa na manufaa: Ikiwa unadhibiti programu yenye FDA unaweza **kubadilisha database ya TCC ya watumiaji na kujipa ufikiaji wowote**. Hii inaweza kuwa na manufaa kama mbinu ya kudumu endapo unaweza kupoteza ruhusa zako za FDA.
 
 ### **Kuepuka SIP hadi Kuepuka TCC**
 
-Database ya **TCC ya mfumo** inalindwa na **SIP**, ndiyo maana ni mchakato pekee wenye **entitlements zilizotajwa zitakazoweza kuibadilisha**. Hivyo, ikiwa mshambuliaji atapata **kuepuka SIP** juu ya **faili** (kuwa na uwezo wa kubadilisha faili iliyozuiliwa na SIP), ataweza:
+Database ya **TCC ya mfumo** inalindwa na **SIP**, ndiyo maana ni mchakato pekee wenye **haki zilizotajwa zitakuwa na uwezo wa kubadilisha** hiyo. Hivyo, ikiwa mshambuliaji atapata **kuepuka SIP** juu ya **faili** (kuwa na uwezo wa kubadilisha faili iliyozuiliwa na SIP), ataweza:
 
 - **Kuondoa ulinzi** wa database ya TCC, na kujipa ruhusa zote za TCC. Anaweza kutumia vibaya faili yoyote kati ya hizi kwa mfano:
 - Database ya mifumo ya TCC
