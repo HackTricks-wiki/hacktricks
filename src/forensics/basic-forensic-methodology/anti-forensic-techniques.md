@@ -3,7 +3,7 @@
 # Zeitstempel
 
 Ein Angreifer könnte daran interessiert sein, **die Zeitstempel von Dateien zu ändern**, um nicht entdeckt zu werden.\
-Es ist möglich, die Zeitstempel im MFT in den Attributen `$STANDARD_INFORMATION` ** und ** `$FILE_NAME` zu finden.
+Es ist möglich, die Zeitstempel im MFT in den Attributen `$STANDARD_INFORMATION`**und**`$FILE_NAME` zu finden.
 
 Beide Attribute haben 4 Zeitstempel: **Änderung**, **Zugriff**, **Erstellung** und **MFT-Registrierungsänderung** (MACE oder MACB).
 
@@ -19,7 +19,7 @@ Das **USN Journal** (Update Sequence Number Journal) ist eine Funktion des NTFS 
 
 ![](<../../images/image (449).png>)
 
-Das vorherige Bild ist die **Ausgabe**, die vom **Tool** angezeigt wird, wo zu beobachten ist, dass einige **Änderungen vorgenommen wurden**.
+Das vorherige Bild ist die **Ausgabe**, die von dem **Tool** angezeigt wird, wo zu beobachten ist, dass einige **Änderungen vorgenommen wurden**.
 
 ## $LogFile
 
@@ -40,11 +40,11 @@ Mit demselben Tool ist es möglich zu identifizieren, **zu welcher Zeit die Zeit
 
 ## Vergleich von `$STANDARD_INFORMATION` und `$FILE_NAME`
 
-Eine weitere Möglichkeit, verdächtig modifizierte Dateien zu identifizieren, wäre der Vergleich der Zeit auf beiden Attributen auf **Unstimmigkeiten**.
+Eine weitere Möglichkeit, verdächtig modifizierte Dateien zu identifizieren, wäre der Vergleich der Zeit auf beiden Attributen auf **Unstimmigkeiten** zu überprüfen.
 
 ## Nanosekunden
 
-**NTFS**-Zeitstempel haben eine **Präzision** von **100 Nanosekunden**. Daher ist es sehr verdächtig, Dateien mit Zeitstempeln wie 2010-10-10 10:10:**00.000:0000 zu finden**.
+**NTFS**-Zeitstempel haben eine **Präzision** von **100 Nanosekunden**. Daher ist es sehr **verdächtig**, Dateien mit Zeitstempeln wie 2010-10-10 10:10:**00.000:0000 zu finden.
 
 ## SetMace - Anti-Forensik-Tool
 
@@ -94,7 +94,7 @@ Dies speichert Informationen über die ausgeführten Anwendungen mit dem Ziel, d
 - Wählen Sie den Dateipfad `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SessionManager\Memory Management\PrefetchParameters`
 - Klicken Sie mit der rechten Maustaste auf `EnablePrefetcher` und `EnableSuperfetch`
 - Wählen Sie Ändern bei jedem dieser, um den Wert von 1 (oder 3) auf 0 zu ändern
-- Neustarten
+- Neustart
 
 ## Zeitstempel deaktivieren - Letzte Zugriffszeit
 
@@ -107,25 +107,25 @@ Immer wenn ein Ordner von einem NTFS-Volume auf einem Windows NT-Server geöffne
 
 ## USB-Historie löschen
 
-Alle **USB-Geräteeinträge** werden in der Windows-Registrierung unter dem **USBSTOR**-Registrierungsschlüssel gespeichert, der Unterkeys enthält, die erstellt werden, wenn Sie ein USB-Gerät an Ihren PC oder Laptop anschließen. Sie finden diesen Schlüssel hier: `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Durch das Löschen dieses Schlüssels** löschen Sie die USB-Historie.\
+Alle **USB-Geräteeinträge** werden in der Windows-Registrierung unter dem **USBSTOR**-Registrierungsschlüssel gespeichert, der Unterschlüssel enthält, die erstellt werden, wenn Sie ein USB-Gerät an Ihren PC oder Laptop anschließen. Sie finden diesen Schlüssel hier `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Durch das Löschen dieses** Schlüssels löschen Sie die USB-Historie.\
 Sie können auch das Tool [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html) verwenden, um sicherzustellen, dass Sie sie gelöscht haben (und um sie zu löschen).
 
 Eine weitere Datei, die Informationen über die USBs speichert, ist die Datei `setupapi.dev.log` im Verzeichnis `C:\Windows\INF`. Diese sollte ebenfalls gelöscht werden.
 
 ## Schattenkopien deaktivieren
 
-**Listen** Sie Schattenkopien mit `vssadmin list shadowstorage`\
+**Liste** der Schattenkopien mit `vssadmin list shadowstorage`\
 **Löschen** Sie sie, indem Sie `vssadmin delete shadow` ausführen.
 
 Sie können sie auch über die GUI löschen, indem Sie die Schritte in [https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html) befolgen.
 
 Um Schattenkopien zu deaktivieren, [Schritte von hier](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows):
 
-1. Öffnen Sie das Programm Dienste, indem Sie "Dienste" in das Textsuchfeld eingeben, nachdem Sie auf die Schaltfläche "Windows-Start" geklickt haben.
-2. Suchen Sie in der Liste nach "Volume Shadow Copy", wählen Sie es aus und greifen Sie dann mit einem Rechtsklick auf die Eigenschaften zu.
-3. Wählen Sie Deaktiviert aus dem Dropdown-Menü "Starttyp" und bestätigen Sie die Änderung, indem Sie auf Übernehmen und OK klicken.
+1. Öffnen Sie das Dienstprogramm "Dienste", indem Sie "Dienste" in das Textsuchfeld eingeben, nachdem Sie auf die Schaltfläche "Windows-Start" geklickt haben.
+2. Suchen Sie in der Liste "Volume Shadow Copy", wählen Sie es aus und greifen Sie dann mit einem Rechtsklick auf die Eigenschaften zu.
+3. Wählen Sie "Deaktiviert" aus dem Dropdown-Menü "Starttyp" und bestätigen Sie die Änderung, indem Sie auf Übernehmen und OK klicken.
 
-Es ist auch möglich, die Konfiguration zu ändern, welche Dateien in der Schattenkopie kopiert werden, in der Registrierung `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`.
+Es ist auch möglich, die Konfiguration zu ändern, welche Dateien in der Schattenkopie kopiert werden sollen, in der Registrierung `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`.
 
 ## Gelöschte Dateien überschreiben
 
@@ -144,7 +144,7 @@ Es ist auch möglich, die Konfiguration zu ändern, welche Dateien in der Schatt
 - Deaktivieren Sie im Abschnitt Dienste den Dienst "Windows-Ereignisprotokoll"
 - `WEvtUtil.exec clear-log` oder `WEvtUtil.exe cl`
 
-## Deaktivieren von $UsnJrnl
+## $UsnJrnl deaktivieren
 
 - `fsutil usn deletejournal /d c:`
 

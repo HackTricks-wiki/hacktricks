@@ -3,14 +3,14 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 [**Cheat Engine**](https://www.cheatengine.org/downloads.php) ist ein nützliches Programm, um herauszufinden, wo wichtige Werte im Speicher eines laufenden Spiels gespeichert sind, und um sie zu ändern.\
-Wenn Sie es herunterladen und ausführen, wird Ihnen ein **Tutorial** angezeigt, wie Sie das Tool verwenden. Wenn Sie lernen möchten, wie man das Tool benutzt, wird dringend empfohlen, es abzuschließen.
+Wenn Sie es herunterladen und ausführen, wird Ihnen ein **Tutorial** zur Verwendung des Tools **präsentiert**. Wenn Sie lernen möchten, wie man das Tool verwendet, wird dringend empfohlen, es abzuschließen.
 
 ## Was suchen Sie?
 
 ![](<../../images/image (762).png>)
 
 Dieses Tool ist sehr nützlich, um **herauszufinden, wo ein Wert** (normalerweise eine Zahl) **im Speicher** eines Programms **gespeichert ist**.\
-**Normalerweise werden Zahlen** in **4 Bytes** gespeichert, aber Sie könnten sie auch in **double** oder **float** Formaten finden, oder Sie möchten nach etwas **anderem als einer Zahl** suchen. Aus diesem Grund müssen Sie sicherstellen, dass Sie **auswählen**, wonach Sie **suchen möchten**:
+**Normalerweise** werden Zahlen in **4bytes**-Form gespeichert, aber Sie könnten sie auch in **double**- oder **float**-Formaten finden, oder Sie möchten nach etwas **anderem als einer Zahl** suchen. Aus diesem Grund müssen Sie sicherstellen, dass Sie **auswählen**, wonach Sie **suchen möchten**:
 
 ![](<../../images/image (324).png>)
 
@@ -18,29 +18,29 @@ Außerdem können Sie **verschiedene** Arten von **Suchen** angeben:
 
 ![](<../../images/image (311).png>)
 
-Sie können auch das Kästchen aktivieren, um **das Spiel während des Scannens des Speichers zu stoppen**:
+Sie können auch das Kästchen ankreuzen, um **das Spiel während des Scannens des Speichers zu stoppen**:
 
 ![](<../../images/image (1052).png>)
 
 ### Hotkeys
 
-In _**Bearbeiten --> Einstellungen --> Hotkeys**_ können Sie verschiedene **Hotkeys** für verschiedene Zwecke festlegen, wie z.B. **das Spiel zu stoppen** (was sehr nützlich ist, wenn Sie zu einem bestimmten Zeitpunkt den Speicher scannen möchten). Weitere Optionen sind verfügbar:
+In _**Edit --> Settings --> Hotkeys**_ können Sie verschiedene **Hotkeys** für verschiedene Zwecke festlegen, wie z.B. **das Spiel zu stoppen** (was sehr nützlich ist, wenn Sie zu einem bestimmten Zeitpunkt den Speicher scannen möchten). Weitere Optionen sind verfügbar:
 
 ![](<../../images/image (864).png>)
 
-## Wert ändern
+## Den Wert ändern
 
-Sobald Sie **gefunden** haben, wo der **Wert** ist, den Sie **suchen** (mehr dazu in den folgenden Schritten), können Sie ihn **ändern**, indem Sie doppelt darauf klicken und dann erneut auf seinen Wert doppelt klicken:
+Sobald Sie **gefunden** haben, wo der **Wert** ist, den Sie **suchen** (mehr dazu in den folgenden Schritten), können Sie ihn **ändern**, indem Sie doppelt darauf klicken und dann doppelt auf seinen Wert klicken:
 
 ![](<../../images/image (563).png>)
 
-Und schließlich **das Häkchen setzen**, um die Änderung im Speicher vorzunehmen:
+Und schließlich **das Kästchen markieren**, um die Änderung im Speicher vorzunehmen:
 
 ![](<../../images/image (385).png>)
 
 Die **Änderung** im **Speicher** wird sofort **angewendet** (beachten Sie, dass der Wert **nicht im Spiel aktualisiert wird**, bis das Spiel diesen Wert nicht erneut verwendet).
 
-## Wert suchen
+## Den Wert suchen
 
 Angenommen, es gibt einen wichtigen Wert (wie das Leben Ihres Benutzers), den Sie verbessern möchten, und Sie suchen nach diesem Wert im Speicher.
 
@@ -54,8 +54,8 @@ Dann tun Sie etwas, damit sich der **Wert ändert**, und Sie **stoppen** das Spi
 
 ![](<../../images/image (684).png>)
 
-Cheat Engine sucht nach den **Werten**, die **von 100 auf den neuen Wert** gewechselt sind. Glückwunsch, Sie **haben** die **Adresse** des Wertes gefunden, den Sie gesucht haben, und können ihn jetzt ändern.\
-_Wenn Sie immer noch mehrere Werte haben, ändern Sie diesen Wert erneut und führen Sie einen weiteren "nächsten Scan" durch, um die Adressen zu filtern._
+Cheat Engine wird nach den **Werten** suchen, die **von 100 auf den neuen Wert** gewechselt sind. Glückwunsch, Sie **haben** die **Adresse** des Wertes gefunden, den Sie gesucht haben, und können ihn jetzt ändern.\
+_Wenn Sie immer noch mehrere Werte haben, tun Sie etwas, um diesen Wert erneut zu ändern, und führen Sie einen weiteren "nächsten Scan" durch, um die Adressen zu filtern._
 
 ### Unbekannter Wert, bekannte Änderung
 
@@ -75,7 +75,7 @@ Ihnen werden **alle Werte angezeigt, die auf die ausgewählte Weise geändert wu
 
 Sobald Sie Ihren Wert gefunden haben, können Sie ihn ändern.
 
-Beachten Sie, dass es eine **Menge möglicher Änderungen** gibt und Sie diese **Schritte so oft wiederholen können, wie Sie möchten**, um die Ergebnisse zu filtern:
+Beachten Sie, dass es **viele mögliche Änderungen** gibt und Sie diese **Schritte so oft wiederholen können, wie Sie möchten**, um die Ergebnisse zu filtern:
 
 ![](<../../images/image (574).png>)
 
@@ -83,14 +83,14 @@ Beachten Sie, dass es eine **Menge möglicher Änderungen** gibt und Sie diese *
 
 Bis jetzt haben wir gelernt, wie man eine Adresse findet, die einen Wert speichert, aber es ist sehr wahrscheinlich, dass in **verschiedenen Ausführungen des Spiels diese Adresse an verschiedenen Stellen im Speicher** ist. Lassen Sie uns also herausfinden, wie man diese Adresse immer findet.
 
-Verwenden Sie einige der erwähnten Tricks, um die Adresse zu finden, an der Ihr aktuelles Spiel den wichtigen Wert speichert. Dann (stoppen Sie das Spiel, wenn Sie möchten) klicken Sie mit der **rechten Maustaste** auf die gefundene **Adresse** und wählen Sie "**Herausfinden, was auf diese Adresse zugreift**" oder "**Herausfinden, was in diese Adresse schreibt**":
+Verwenden Sie einige der genannten Tricks, um die Adresse zu finden, an der Ihr aktuelles Spiel den wichtigen Wert speichert. Dann (stoppen Sie das Spiel, wenn Sie möchten) klicken Sie mit der **rechten Maustaste** auf die gefundene **Adresse** und wählen Sie "**Herausfinden, was auf diese Adresse zugreift**" oder "**Herausfinden, was in diese Adresse schreibt**":
 
 ![](<../../images/image (1067).png>)
 
-Die **erste Option** ist nützlich, um zu wissen, welche **Teile** des **Codes** diese **Adresse** **verwenden** (was für mehr Dinge nützlich ist, wie z.B. **zu wissen, wo Sie den Code** des Spiels **ändern können**).\
+Die **erste Option** ist nützlich, um zu wissen, welche **Teile** des **Codes** diese **Adresse verwenden** (was für mehr Dinge nützlich ist, wie z.B. **zu wissen, wo Sie den Code** des Spiels **ändern können**).\
 Die **zweite Option** ist spezifischer und wird in diesem Fall hilfreicher sein, da wir daran interessiert sind, **von wo dieser Wert geschrieben wird**.
 
-Sobald Sie eine dieser Optionen ausgewählt haben, wird der **Debugger** an das Programm **angehängt** und ein neues **leeres Fenster** erscheint. Jetzt **spielen** Sie das **Spiel** und **ändern** Sie diesen **Wert** (ohne das Spiel neu zu starten). Das **Fenster** sollte mit den **Adressen** **gefüllt** sein, die den **Wert** **ändern**:
+Sobald Sie eine dieser Optionen ausgewählt haben, wird der **Debugger** an das Programm **angehängt** und ein neues **leeres Fenster** erscheint. Jetzt **spielen** Sie das **Spiel** und **ändern** Sie diesen **Wert** (ohne das Spiel neu zu starten). Das **Fenster** sollte mit den **Adressen** gefüllt sein, die den **Wert ändern**:
 
 ![](<../../images/image (91).png>)
 
@@ -117,17 +117,17 @@ Klicken Sie auf "**Adresse manuell hinzufügen**":
 
 ![](<../../images/image (990).png>)
 
-Klicken Sie nun auf das Kontrollkästchen "Zeiger" und fügen Sie die gefundene Adresse in das Textfeld ein (in diesem Szenario war die gefundene Adresse im vorherigen Bild "Tutorial-i386.exe"+2426B0):
+Klicken Sie nun auf das Kontrollkästchen "Zeiger" und fügen Sie die gefundene Adresse im Textfeld hinzu (in diesem Szenario war die gefundene Adresse im vorherigen Bild "Tutorial-i386.exe"+2426B0):
 
 ![](<../../images/image (392).png>)
 
 (Beachten Sie, dass die erste "Adresse" automatisch mit der Zeigeradresse ausgefüllt wird, die Sie eingeben)
 
-Klicken Sie auf OK und ein neuer Zeiger wird erstellt:
+Klicken Sie auf OK, und ein neuer Zeiger wird erstellt:
 
 ![](<../../images/image (308).png>)
 
-Jetzt, jedes Mal, wenn Sie diesen Wert ändern, ändern Sie **den wichtigen Wert, auch wenn die Speicheradresse, an der der Wert gespeichert ist, unterschiedlich ist.**
+Jetzt, jedes Mal, wenn Sie diesen Wert ändern, ändern Sie **den wichtigen Wert, auch wenn die Speicheradresse, an der der Wert ist, unterschiedlich ist.**
 
 ### Code-Injektion
 
@@ -138,7 +138,7 @@ Stellen Sie sich vor, Sie haben die Adresse gefunden, die 1 vom Leben Ihres Spie
 ![](<../../images/image (203).png>)
 
 Klicken Sie auf "Disassembler anzeigen", um den **disassemblierten Code** zu erhalten.\
-Klicken Sie dann auf **CTRL+a**, um das Auto-Assembly-Fenster aufzurufen, und wählen Sie _**Vorlage --> Code-Injektion**_
+Klicken Sie dann auf **CTRL+a**, um das Auto-Assembly-Fenster aufzurufen, und wählen Sie _**Template --> Code Injection**_
 
 ![](<../../images/image (902).png>)
 
@@ -146,11 +146,11 @@ Füllen Sie die **Adresse der Anweisung aus, die Sie ändern möchten** (dies wi
 
 ![](<../../images/image (744).png>)
 
-Eine Vorlage wird generiert:
+Ein Template wird generiert:
 
 ![](<../../images/image (944).png>)
 
-Fügen Sie Ihren neuen Assembly-Code in den Abschnitt "**newmem**" ein und entfernen Sie den ursprünglichen Code aus dem "**originalcode**", wenn Sie nicht möchten, dass er ausgeführt wird\*\*.\*\* In diesem Beispiel wird der injizierte Code 2 Punkte hinzufügen, anstatt 1 abzuziehen:
+Fügen Sie Ihren neuen Assembly-Code in den Abschnitt "**newmem**" ein und entfernen Sie den ursprünglichen Code aus dem Abschnitt "**originalcode**", wenn Sie nicht möchten, dass er ausgeführt wird. In diesem Beispiel wird der injizierte Code 2 Punkte hinzufügen, anstatt 1 abzuziehen:
 
 ![](<../../images/image (521).png>)
 

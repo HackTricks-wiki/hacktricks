@@ -36,9 +36,12 @@ Um zu lernen, wie man **ein AD angreift**, müssen Sie den **Kerberos-Authentifi
 
 Sie können viel auf [https://wadcoms.github.io/](https://wadcoms.github.io) nehmen, um einen schnellen Überblick darüber zu erhalten, welche Befehle Sie ausführen können, um ein AD zu enumerieren/exploiten.
 
+> [!WARNING]
+> Die Kerberos-Kommunikation **erfordert einen vollqualifizierten Namen (FQDN)**, um Aktionen auszuführen. Wenn Sie versuchen, auf eine Maschine über die IP-Adresse zuzugreifen, **wird NTLM und nicht Kerberos verwendet**.
+
 ## Recon Active Directory (Keine Anmeldeinformationen/Sitzungen)
 
-Wenn Sie nur Zugriff auf eine AD-Umgebung haben, aber keine Anmeldeinformationen/Sitzungen besitzen, könnten Sie:
+Wenn Sie nur Zugriff auf eine AD-Umgebung haben, aber keine Anmeldeinformationen/Sitzungen haben, könnten Sie:
 
 - **Das Netzwerk testen:**
 - Scannen Sie das Netzwerk, finden Sie Maschinen und offene Ports und versuchen Sie, **Schwachstellen auszunutzen** oder **Anmeldeinformationen** von ihnen zu **extrahieren** (zum Beispiel könnten [Drucker sehr interessante Ziele sein](ad-information-in-printers.md)).
@@ -76,9 +79,9 @@ Wenn Sie nur Zugriff auf eine AD-Umgebung haben, aber keine Anmeldeinformationen
 
 ### Benutzerenumeration
 
-- **Anonymer SMB/LDAP enum:** Überprüfen Sie die [**Pentesting SMB**](../../network-services-pentesting/pentesting-smb/index.html) und [**Pentesting LDAP**](../../network-services-pentesting/pentesting-ldap.md) Seiten.
-- **Kerbrute enum**: Wenn ein **ungültiger Benutzername angefordert wird**, wird der Server mit dem **Kerberos-Fehler**-Code _KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN_ antworten, was uns ermöglicht festzustellen, dass der Benutzername ungültig war. **Gültige Benutzernamen** werden entweder die **TGT in einer AS-REP**-Antwort hervorrufen oder den Fehler _KRB5KDC_ERR_PREAUTH_REQUIRED_, was darauf hinweist, dass der Benutzer eine Vor-Authentifizierung durchführen muss.
-- **Keine Authentifizierung gegen MS-NRPC**: Verwendung von auth-level = 1 (Keine Authentifizierung) gegen die MS-NRPC (Netlogon) Schnittstelle auf Domänencontrollern. Die Methode ruft die Funktion `DsrGetDcNameEx2` auf, nachdem die MS-NRPC-Schnittstelle gebunden wurde, um zu überprüfen, ob der Benutzer oder Computer ohne Anmeldeinformationen existiert. Das [NauthNRPC](https://github.com/sud0Ru/NauthNRPC) Tool implementiert diese Art der Enumeration. Die Forschung kann [hier](https://media.kasperskycontenthub.com/wp-content/uploads/sites/43/2024/05/22190247/A-journey-into-forgotten-Null-Session-and-MS-RPC-interfaces.pdf) gefunden werden.
+- **Anonyme SMB/LDAP-Enumeration:** Überprüfen Sie die [**Pentesting SMB**](../../network-services-pentesting/pentesting-smb/index.html) und [**Pentesting LDAP**](../../network-services-pentesting/pentesting-ldap.md) Seiten.
+- **Kerbrute-Enumeration**: Wenn ein **ungültiger Benutzername angefordert wird**, wird der Server mit dem **Kerberos-Fehler**-Code _KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN_ antworten, was uns ermöglicht zu bestimmen, dass der Benutzername ungültig war. **Gültige Benutzernamen** werden entweder die **TGT in einer AS-REP**-Antwort hervorrufen oder den Fehler _KRB5KDC_ERR_PREAUTH_REQUIRED_, was darauf hinweist, dass der Benutzer eine Vor-Authentifizierung durchführen muss.
+- **Keine Authentifizierung gegen MS-NRPC**: Verwendung von auth-level = 1 (Keine Authentifizierung) gegen die MS-NRPC (Netlogon) Schnittstelle auf Domänencontrollern. Die Methode ruft die Funktion `DsrGetDcNameEx2` auf, nachdem die MS-NRPC-Schnittstelle gebunden wurde, um zu überprüfen, ob der Benutzer oder Computer existiert, ohne Anmeldeinformationen. Das [NauthNRPC](https://github.com/sud0Ru/NauthNRPC) Tool implementiert diese Art der Enumeration. Die Forschung kann [hier](https://media.kasperskycontenthub.com/wp-content/uploads/sites/43/2024/05/22190247/A-journey-into-forgotten-Null-Session-and-MS-RPC-interfaces.pdf) gefunden werden.
 ```bash
 ./kerbrute_linux_amd64 userenum -d lab.ropnop.com --dc 10.10.10.10 usernames.txt #From https://github.com/ropnop/kerbrute/releases
 
@@ -105,15 +108,15 @@ Invoke-PasswordSprayOWA -ExchHostname [ip] -UserList .\valid.txt -Password Summe
 Get-GlobalAddressList -ExchHostname [ip] -UserName [domain]\[username] -Password Summer2021 -OutFile gal.txt
 ```
 > [!WARNING]
-> Sie finden Listen von Benutzernamen in [**diesem GitHub-Repo**](https://github.com/danielmiessler/SecLists/tree/master/Usernames/Names) \*\*\*\* und diesem hier ([**statistisch wahrscheinliche Benutzernamen**](https://github.com/insidetrust/statistically-likely-usernames)).
+> Sie finden Listen von Benutzernamen in [**diesem GitHub-Repo**](https://github.com/danielmiessler/SecLists/tree/master/Usernames/Names) und diesem hier ([**statistisch wahrscheinliche Benutzernamen**](https://github.com/insidetrust/statistically-likely-usernames)).
 >
 > Sie sollten jedoch den **Namen der Personen, die im Unternehmen arbeiten**, aus dem Recon-Schritt haben, den Sie zuvor durchgeführt haben sollten. Mit dem Vorname und Nachname könnten Sie das Skript [**namemash.py**](https://gist.github.com/superkojiman/11076951) verwenden, um potenziell gültige Benutzernamen zu generieren.
 
 ### Kenntnis eines oder mehrerer Benutzernamen
 
-Okay, Sie wissen, dass Sie bereits einen gültigen Benutzernamen haben, aber keine Passwörter... Dann versuchen Sie:
+Okay, Sie wissen also, dass Sie bereits einen gültigen Benutzernamen haben, aber keine Passwörter... Dann versuchen Sie:
 
-- [**ASREPRoast**](asreproast.md): Wenn ein Benutzer **nicht** das Attribut _DONT_REQ_PREAUTH_ hat, können Sie **eine AS_REP-Nachricht** für diesen Benutzer anfordern, die einige Daten enthält, die mit einer Ableitung des Passworts des Benutzers verschlüsselt sind.
+- [**ASREPRoast**](asreproast.md): Wenn ein Benutzer **nicht das** Attribut _DONT_REQ_PREAUTH_ hat, können Sie **eine AS_REP-Nachricht** für diesen Benutzer anfordern, die einige Daten enthält, die mit einer Ableitung des Passworts des Benutzers verschlüsselt sind.
 - [**Password Spraying**](password-spraying.md): Lassen Sie uns die **häufigsten Passwörter** mit jedem der entdeckten Benutzer ausprobieren, vielleicht verwendet ein Benutzer ein schlechtes Passwort (denken Sie an die Passwort-Richtlinie!).
 - Beachten Sie, dass Sie auch **OWA-Server sprühen** können, um zu versuchen, Zugriff auf die Mail-Server der Benutzer zu erhalten.
 
@@ -131,11 +134,11 @@ Sie könnten in der Lage sein, einige Challenge-**Hashes** zu erhalten, um **Pro
 
 ### NTLM Relay
 
-Wenn Sie es geschafft haben, das Active Directory zu enumerieren, haben Sie **mehr E-Mails und ein besseres Verständnis des Netzwerks**. Sie könnten in der Lage sein, NTLM [**Relay-Angriffe**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack) \*\*\*\* zu erzwingen, um Zugriff auf die AD-Umgebung zu erhalten.
+Wenn Sie es geschafft haben, das Active Directory zu enumerieren, haben Sie **mehr E-Mails und ein besseres Verständnis des Netzwerks**. Sie könnten in der Lage sein, NTLM [**Relay-Angriffe**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack) zu erzwingen, um Zugriff auf die AD-Umgebung zu erhalten.
 
 ### NTLM-Credentials stehlen
 
-Wenn Sie mit dem **null- oder Gastbenutzer** **auf andere PCs oder Freigaben zugreifen** können, könnten Sie **Dateien** (wie eine SCF-Datei) ablegen, die, wenn sie irgendwie aufgerufen werden, eine **NTLM-Authentifizierung gegen Sie auslösen**, sodass Sie die **NTLM-Herausforderung** stehlen können, um sie zu cracken:
+Wenn Sie mit dem **null- oder Gastbenutzer** **auf andere PCs oder Freigaben zugreifen** können, könnten Sie **Dateien** (wie eine SCF-Datei) platzieren, die, wenn sie irgendwie aufgerufen werden, eine **NTLM-Authentifizierung gegen Sie auslösen**, sodass Sie die **NTLM-Challenge** stehlen können, um sie zu cracken:
 
 {{#ref}}
 ../ntlm/places-to-steal-ntlm-creds.md
@@ -143,7 +146,7 @@ Wenn Sie mit dem **null- oder Gastbenutzer** **auf andere PCs oder Freigaben zug
 
 ## Enumerierung des Active Directory MIT Anmeldeinformationen/Sitzung
 
-Für diese Phase müssen Sie **die Anmeldeinformationen oder eine Sitzung eines gültigen Domänenkontos kompromittiert haben.** Wenn Sie einige gültige Anmeldeinformationen oder eine Shell als Domänenbenutzer haben, **sollten Sie sich daran erinnern, dass die zuvor genannten Optionen weiterhin Optionen sind, um andere Benutzer zu kompromittieren**.
+Für diese Phase müssen Sie **die Anmeldeinformationen oder eine Sitzung eines gültigen Domänenkontos kompromittiert haben.** Wenn Sie einige gültige Anmeldeinformationen oder eine Shell als Domänenbenutzer haben, **sollten Sie sich daran erinnern, dass die zuvor genannten Optionen weiterhin Möglichkeiten sind, andere Benutzer zu kompromittieren**.
 
 Bevor Sie mit der authentifizierten Enumeration beginnen, sollten Sie wissen, was das **Kerberos-Doppelhop-Problem** ist.
 
@@ -160,11 +163,11 @@ Bezüglich [**ASREPRoast**](asreproast.md) können Sie jetzt jeden möglichen ve
 - Sie könnten die [**CMD verwenden, um eine grundlegende Recon durchzuführen**](../basic-cmd-for-pentesters.md#domain-info)
 - Sie können auch [**PowerShell für Recon verwenden**](../basic-powershell-for-pentesters/index.html), was stealthier sein wird
 - Sie können auch [**PowerView verwenden**](../basic-powershell-for-pentesters/powerview.md), um detailliertere Informationen zu extrahieren
-- Ein weiteres erstaunliches Tool für Recon in einem Active Directory ist [**BloodHound**](bloodhound.md). Es ist **nicht sehr stealthy** (je nach den verwendeten Erfassungsmethoden), aber **wenn es Ihnen egal ist**, sollten Sie es auf jeden Fall ausprobieren. Finden Sie heraus, wo Benutzer RDP nutzen können, finden Sie Wege zu anderen Gruppen usw.
+- Ein weiteres erstaunliches Tool für Recon in einem Active Directory ist [**BloodHound**](bloodhound.md). Es ist **nicht sehr stealthy** (je nach den verwendeten Erfassungsmethoden), aber **wenn es Ihnen egal ist**, sollten Sie es auf jeden Fall ausprobieren. Finden Sie heraus, wo Benutzer RDP nutzen können, finden Sie den Weg zu anderen Gruppen usw.
 - **Andere automatisierte AD-Enumerationstools sind:** [**AD Explorer**](bloodhound.md#ad-explorer)**,** [**ADRecon**](bloodhound.md#adrecon)**,** [**Group3r**](bloodhound.md#group3r)**,** [**PingCastle**](bloodhound.md#pingcastle)**.**
 - [**DNS-Einträge des AD**](ad-dns-records.md), da sie interessante Informationen enthalten könnten.
 - Ein **Tool mit GUI**, das Sie zur Enumeration des Verzeichnisses verwenden können, ist **AdExplorer.exe** aus der **SysInternal** Suite.
-- Sie können auch in der LDAP-Datenbank mit **ldapsearch** nach Anmeldeinformationen in den Feldern _userPassword_ & _unixUserPassword_ suchen oder sogar nach _Description_. cf. [Passwort im AD-Benutzerkommentar auf PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#password-in-ad-user-comment) für andere Methoden.
+- Sie können auch in der LDAP-Datenbank mit **ldapsearch** nach Anmeldeinformationen in den Feldern _userPassword_ & _unixUserPassword_ suchen oder sogar nach _Description_. Siehe [Passwort im AD-Benutzerkommentar auf PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#password-in-ad-user-comment) für andere Methoden.
 - Wenn Sie **Linux** verwenden, könnten Sie auch die Domäne mit [**pywerview**](https://github.com/the-useless-one/pywerview) enumerieren.
 - Sie könnten auch automatisierte Tools wie:
 - [**tomcarver16/ADSearch**](https://github.com/tomcarver16/ADSearch)
@@ -177,7 +180,7 @@ Es ist sehr einfach, alle Benutzernamen der Domäne von Windows zu erhalten (`ne
 
 ### Kerberoast
 
-Kerberoasting beinhaltet das Erhalten von **TGS-Tickets**, die von Diensten verwendet werden, die mit Benutzerkonten verbunden sind, und das Knacken ihrer Verschlüsselung—die auf Benutzerpasswörtern basiert—**offline**.
+Kerberoasting beinhaltet das Erhalten von **TGS-Tickets**, die von Diensten verwendet werden, die an Benutzerkonten gebunden sind, und das Knacken ihrer Verschlüsselung – die auf Benutzerpasswörtern basiert – **offline**.
 
 Mehr dazu in:
 
@@ -187,13 +190,13 @@ kerberoast.md
 
 ### Remote-Verbindung (RDP, SSH, FTP, Win-RM usw.)
 
-Sobald Sie einige Anmeldeinformationen erhalten haben, könnten Sie überprüfen, ob Sie Zugriff auf irgendeine **Maschine** haben. Zu diesem Zweck könnten Sie **CrackMapExec** verwenden, um zu versuchen, sich mit verschiedenen Protokollen auf mehreren Servern zu verbinden, entsprechend Ihren Port-Scans.
+Sobald Sie einige Anmeldeinformationen erhalten haben, könnten Sie überprüfen, ob Sie Zugriff auf irgendeine **Maschine** haben. Zu diesem Zweck könnten Sie **CrackMapExec** verwenden, um zu versuchen, sich auf mehreren Servern mit verschiedenen Protokollen entsprechend Ihren Port-Scans zu verbinden.
 
 ### Lokale Privilegieneskalation
 
 Wenn Sie kompromittierte Anmeldeinformationen oder eine Sitzung als regulärer Domänenbenutzer haben und Sie mit diesem Benutzer **Zugriff** auf **irgendeine Maschine in der Domäne** haben, sollten Sie versuchen, Ihren Weg zur **lokalen Eskalation von Privilegien und zum Ausspähen von Anmeldeinformationen** zu finden. Dies liegt daran, dass Sie nur mit lokalen Administratorrechten in der Lage sind, **Hashes anderer Benutzer** im Speicher (LSASS) und lokal (SAM) zu dumpen.
 
-Es gibt eine komplette Seite in diesem Buch über [**lokale Privilegieneskalation in Windows**](../windows-local-privilege-escalation/index.html) und eine [**Checkliste**](../checklist-windows-privilege-escalation.md). Vergessen Sie auch nicht, [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) zu verwenden.
+Es gibt eine vollständige Seite in diesem Buch über [**lokale Privilegieneskalation in Windows**](../windows-local-privilege-escalation/index.html) und eine [**Checkliste**](../checklist-windows-privilege-escalation.md). Vergessen Sie auch nicht, [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) zu verwenden.
 
 ### Aktuelle Sitzungstickets
 
@@ -209,7 +212,7 @@ Es ist sehr **unwahrscheinlich**, dass Sie **Tickets** im aktuellen Benutzer fin
 
 Wenn Sie es geschafft haben, das Active Directory zu enumerieren, haben Sie **mehr E-Mails und ein besseres Verständnis des Netzwerks**. Möglicherweise können Sie NTLM [**Relay-Angriffe**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)** erzwingen.**
 
-### **Suchen Sie nach Anmeldeinformationen in Computerfreigaben**
+### Suchen Sie nach Anmeldeinformationen in Computerfreigaben | SMB-Freigaben
 
 Jetzt, da Sie einige grundlegende Anmeldeinformationen haben, sollten Sie überprüfen, ob Sie **interessante Dateien finden können, die im AD geteilt werden**. Sie könnten das manuell tun, aber es ist eine sehr langweilige, sich wiederholende Aufgabe (und noch mehr, wenn Sie Hunderte von Dokumenten finden, die Sie überprüfen müssen).
 
@@ -217,7 +220,7 @@ Jetzt, da Sie einige grundlegende Anmeldeinformationen haben, sollten Sie überp
 
 ### NTLM-Anmeldeinformationen stehlen
 
-Wenn Sie **auf andere PCs oder Freigaben zugreifen können**, könnten Sie **Dateien platzieren** (wie eine SCF-Datei), die, wenn sie irgendwie aufgerufen werden, **eine NTLM-Authentifizierung gegen Sie auslösen**, sodass Sie die **NTLM-Herausforderung stehlen** können, um sie zu knacken:
+Wenn Sie **auf andere PCs oder Freigaben zugreifen können**, könnten Sie **Dateien platzieren** (wie eine SCF-Datei), die, wenn sie irgendwie aufgerufen werden, **eine NTLM-Authentifizierung gegen Sie auslösen**, sodass Sie die **NTLM-Herausforderung** stehlen können, um sie zu knacken:
 
 {{#ref}}
 ../ntlm/places-to-steal-ntlm-creds.md
@@ -225,7 +228,7 @@ Wenn Sie **auf andere PCs oder Freigaben zugreifen können**, könnten Sie **Dat
 
 ### CVE-2021-1675/CVE-2021-34527 PrintNightmare
 
-Diese Schwachstelle erlaubte es jedem authentifizierten Benutzer, **den Domänencontroller zu kompromittieren**.
+Diese Schwachstelle ermöglichte es jedem authentifizierten Benutzer, **den Domänencontroller zu kompromittieren**.
 
 {{#ref}}
 printnightmare.md
@@ -237,14 +240,14 @@ printnightmare.md
 
 ### Hash-Extraktion
 
-Hoffentlich ist es Ihnen gelungen, ein **lokales Administratorkonto** mit [AsRepRoast](asreproast.md), [Password Spraying](password-spraying.md), [Kerberoast](kerberoast.md), [Responder](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md) einschließlich Relaying, [EvilSSDP](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md), [lokale Privilegien zu eskalieren](../windows-local-privilege-escalation/index.html) zu kompromittieren.\
+Hoffentlich ist es Ihnen gelungen, ein **lokales Administratorkonto** mithilfe von [AsRepRoast](asreproast.md), [Password Spraying](password-spraying.md), [Kerberoast](kerberoast.md), [Responder](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md) einschließlich Relaying, [EvilSSDP](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md), [lokale Privilegien zu eskalieren](../windows-local-privilege-escalation/index.html) zu kompromittieren.\
 Dann ist es Zeit, alle Hashes im Speicher und lokal zu dumpen.\
 [**Lesen Sie diese Seite über verschiedene Möglichkeiten, die Hashes zu erhalten.**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/active-directory-methodology/broken-reference/README.md)
 
 ### Pass the Hash
 
 **Sobald Sie den Hash eines Benutzers haben**, können Sie ihn verwenden, um **ihn zu impersonieren**.\
-Sie müssen ein **Tool** verwenden, das die **NTLM-Authentifizierung mit** diesem **Hash** **durchführt**, **oder** Sie könnten eine neue **Sitzungsanmeldung** erstellen und diesen **Hash** in die **LSASS** **einspeisen**, sodass bei jeder **NTLM-Authentifizierung** dieser **Hash verwendet wird.** Die letzte Option ist das, was Mimikatz tut.\
+Sie müssen ein **Tool** verwenden, das die **NTLM-Authentifizierung mit** diesem **Hash** **durchführt**, **oder** Sie könnten eine neue **Sitzungsanmeldung** erstellen und diesen **Hash** in die **LSASS** **einspeisen**, sodass bei jeder **NTLM-Authentifizierung** dieser **Hash verwendet wird.** Die letzte Option ist das, was mimikatz tut.\
 [**Lesen Sie diese Seite für weitere Informationen.**](../ntlm/index.html#pass-the-hash)
 
 ### Over Pass the Hash/Pass the Key
@@ -257,7 +260,7 @@ over-pass-the-hash-pass-the-key.md
 
 ### Pass the Ticket
 
-Im **Pass The Ticket (PTT)** Angriffsverfahren stehlen Angreifer **das Authentifizierungsticket eines Benutzers** anstelle seines Passworts oder Hash-Werte. Dieses gestohlene Ticket wird dann verwendet, um **den Benutzer zu impersonieren** und unbefugten Zugriff auf Ressourcen und Dienste innerhalb eines Netzwerks zu erhalten.
+Im **Pass The Ticket (PTT)**-Angriffsverfahren stehlen Angreifer **das Authentifizierungsticket eines Benutzers** anstelle seines Passworts oder seiner Hash-Werte. Dieses gestohlene Ticket wird dann verwendet, um **den Benutzer zu impersonieren** und unbefugten Zugriff auf Ressourcen und Dienste innerhalb eines Netzwerks zu erhalten.
 
 {{#ref}}
 pass-the-ticket.md
@@ -274,10 +277,10 @@ crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9c
 > [!WARNING]
 > Beachten Sie, dass dies ziemlich **laut** ist und **LAPS** es **mildern** würde.
 
-### MSSQL-Missbrauch & Vertrauenswürdige Links
+### MSSQL Missbrauch & Vertrauenswürdige Links
 
-Wenn ein Benutzer Berechtigungen hat, um **auf MSSQL-Instanzen zuzugreifen**, könnte er in der Lage sein, es zu **benutzen, um Befehle** auf dem MSSQL-Host auszuführen (wenn er als SA läuft), den NetNTLM **Hash** zu **stehlen** oder sogar einen **Relay**-**Angriff** durchzuführen.\
-Außerdem, wenn eine MSSQL-Instanz von einer anderen MSSQL-Instanz als vertrauenswürdig (Datenbanklink) betrachtet wird. Wenn der Benutzer Berechtigungen über die vertrauenswürdige Datenbank hat, wird er in der Lage sein, **die Vertrauensbeziehung zu nutzen, um auch in der anderen Instanz Abfragen auszuführen**. Diese Vertrauensstellungen können verkettet werden, und irgendwann könnte der Benutzer in der Lage sein, eine falsch konfigurierte Datenbank zu finden, in der er Befehle ausführen kann.\
+Wenn ein Benutzer Berechtigungen hat, um **auf MSSQL-Instanzen zuzugreifen**, könnte er in der Lage sein, es zu **benutzen, um Befehle** auf dem MSSQL-Host auszuführen (wenn er als SA läuft), den NetNTLM **Hash** zu **stehlen** oder sogar einen **Relay** **Angriff** durchzuführen.\
+Außerdem, wenn eine MSSQL-Instanz von einer anderen MSSQL-Instanz als vertrauenswürdig (Datenbanklink) betrachtet wird. Wenn der Benutzer Berechtigungen über die vertrauenswürdige Datenbank hat, wird er in der Lage sein, **die Vertrauensbeziehung zu nutzen, um auch in der anderen Instanz Abfragen auszuführen**. Diese Vertrauensstellungen können verkettet werden und irgendwann könnte der Benutzer in der Lage sein, eine falsch konfigurierte Datenbank zu finden, in der er Befehle ausführen kann.\
 **Die Links zwischen Datenbanken funktionieren sogar über Waldvertrauensstellungen hinweg.**
 
 {{#ref}}
@@ -287,7 +290,7 @@ abusing-ad-mssql.md
 ### Unbeschränkte Delegation
 
 Wenn Sie ein Computerobjekt mit dem Attribut [ADS_UF_TRUSTED_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) finden und Sie über Domain-Berechtigungen auf dem Computer verfügen, können Sie TGTs aus dem Speicher jedes Benutzers, der sich auf dem Computer anmeldet, dumpen.\
-Wenn sich also ein **Domain-Admin auf dem Computer anmeldet**, können Sie sein TGT dumpen und ihn mit [Pass the Ticket](pass-the-ticket.md) impersonieren.\
+Wenn sich also ein **Domain Admin auf dem Computer anmeldet**, können Sie sein TGT dumpen und ihn mit [Pass the Ticket](pass-the-ticket.md) impersonieren.\
 Dank der eingeschränkten Delegation könnten Sie sogar **automatisch einen Druckserver kompromittieren** (hoffentlich wird es ein DC sein).
 
 {{#ref}}
@@ -297,7 +300,7 @@ unconstrained-delegation.md
 ### Eingeschränkte Delegation
 
 Wenn ein Benutzer oder Computer für "Eingeschränkte Delegation" zugelassen ist, kann er **jeden Benutzer impersonieren, um auf einige Dienste auf einem Computer zuzugreifen**.\
-Wenn Sie dann den **Hash** dieses Benutzers/Computers **kompromittieren**, können Sie **jeden Benutzer impersonieren** (sogar Domain-Admins), um auf einige Dienste zuzugreifen.
+Wenn Sie dann den **Hash** dieses Benutzers/Computers **kompromittieren**, können Sie **jeden Benutzer** (sogar Domain-Admins) impersonieren, um auf einige Dienste zuzugreifen.
 
 {{#ref}}
 constrained-delegation.md
@@ -311,7 +314,7 @@ Das Vorhandensein von **WRITE**-Berechtigungen auf einem Active Directory-Objekt
 resource-based-constrained-delegation.md
 {{#endref}}
 
-### ACLs-Missbrauch
+### ACLs Missbrauch
 
 Der kompromittierte Benutzer könnte einige **interessante Berechtigungen über einige Domänenobjekte** haben, die es Ihnen ermöglichen könnten, **seitlich zu bewegen**/**Berechtigungen zu eskalieren**.
 
@@ -327,10 +330,10 @@ Das Entdecken eines **Warteschlangendienstes, der im Domänenbereich lauscht**, 
 printers-spooler-service-abuse.md
 {{#endref}}
 
-### Missbrauch von Drittanbietersitzungen
+### Missbrauch von Drittanbieter-Sitzungen
 
 Wenn **andere Benutzer** die **kompromittierte** Maschine **zugreifen**, ist es möglich, **Anmeldeinformationen aus dem Speicher zu sammeln** und sogar **Beacons in ihren Prozessen zu injizieren**, um sie zu impersonieren.\
-In der Regel greifen Benutzer über RDP auf das System zu, hier ist, wie Sie ein paar Angriffe über Drittanbieter-RDP-Sitzungen durchführen können:
+In der Regel greifen Benutzer über RDP auf das System zu, daher hier, wie man ein paar Angriffe über Drittanbieter-RDP-Sitzungen durchführt:
 
 {{#ref}}
 rdp-sessions-abuse.md
@@ -346,7 +349,7 @@ laps.md
 
 ### Zertifikatsdiebstahl
 
-**Das Sammeln von Zertifikaten** von der kompromittierten Maschine könnte eine Möglichkeit sein, Berechtigungen innerhalb der Umgebung zu eskalieren:
+**Zertifikate** von der kompromittierten Maschine zu **sammeln** könnte ein Weg sein, um Berechtigungen innerhalb der Umgebung zu eskalieren:
 
 {{#ref}}
 ad-certificates/certificate-theft.md
@@ -362,9 +365,9 @@ ad-certificates/domain-escalation.md
 
 ## Post-Exploitation mit hochprivilegiertem Konto
 
-### Dumping von Domänenanmeldeinformationen
+### Dumpen von Domain-Anmeldeinformationen
 
-Sobald Sie **Domain Admin** oder noch besser **Enterprise Admin**-Berechtigungen erhalten, können Sie die **Domänendatenbank** dumpen: _ntds.dit_.
+Sobald Sie **Domain Admin** oder sogar besser **Enterprise Admin**-Berechtigungen erhalten, können Sie die **Domänendatenbank** dumpen: _ntds.dit_.
 
 [**Weitere Informationen über den DCSync-Angriff finden Sie hier**](dcsync.md).
 
@@ -377,43 +380,43 @@ Zum Beispiel könnten Sie:
 
 - Benutzer anfällig für [**Kerberoast**](kerberoast.md) machen
 
-```powershell
+```bash
 Set-DomainObject -Identity <username> -Set @{serviceprincipalname="fake/NOTHING"}r
 ```
 
 - Benutzer anfällig für [**ASREPRoast**](asreproast.md) machen
 
-```powershell
+```bash
 Set-DomainObject -Identity <username> -XOR @{UserAccountControl=4194304}
 ```
 
 - [**DCSync**](#dcsync) Berechtigungen an einen Benutzer gewähren
 
-```powershell
+```bash
 Add-DomainObjectAcl -TargetIdentity "DC=SUB,DC=DOMAIN,DC=LOCAL" -PrincipalIdentity bfarmer -Rights DCSync
 ```
 
-### Silver Ticket
+### Silbernes Ticket
 
-Der **Silver Ticket-Angriff** erstellt ein **legitimes Ticket Granting Service (TGS)-Ticket** für einen bestimmten Dienst, indem der **NTLM-Hash** verwendet wird (zum Beispiel der **Hash des PC-Kontos**). Diese Methode wird verwendet, um **auf die Dienstberechtigungen** zuzugreifen.
+Der **Silberne Ticket-Angriff** erstellt ein **legitimes Ticket Granting Service (TGS) Ticket** für einen bestimmten Dienst, indem der **NTLM-Hash** (zum Beispiel der **Hash des PC-Kontos**) verwendet wird. Diese Methode wird verwendet, um **auf die Dienstberechtigungen** zuzugreifen.
 
 {{#ref}}
 silver-ticket.md
 {{#endref}}
 
-### Golden Ticket
+### Goldenes Ticket
 
-Ein **Golden Ticket-Angriff** beinhaltet, dass ein Angreifer Zugriff auf den **NTLM-Hash des krbtgt-Kontos** in einer Active Directory (AD)-Umgebung erhält. Dieses Konto ist besonders, da es verwendet wird, um alle **Ticket Granting Tickets (TGTs)** zu signieren, die für die Authentifizierung im AD-Netzwerk unerlässlich sind.
+Ein **Goldenes Ticket-Angriff** beinhaltet, dass ein Angreifer Zugriff auf den **NTLM-Hash des krbtgt-Kontos** in einer Active Directory (AD)-Umgebung erhält. Dieses Konto ist besonders, da es verwendet wird, um alle **Ticket Granting Tickets (TGTs)** zu signieren, die für die Authentifizierung im AD-Netzwerk unerlässlich sind.
 
-Sobald der Angreifer diesen Hash erhält, kann er **TGTs** für jedes Konto erstellen, das er wählt (Silver Ticket-Angriff).
+Sobald der Angreifer diesen Hash erhält, kann er **TGTs** für jedes Konto erstellen, das er wählt (Silbernes Ticket-Angriff).
 
 {{#ref}}
 golden-ticket.md
 {{#endref}}
 
-### Diamond Ticket
+### Diamant-Ticket
 
-Diese sind wie goldene Tickets, die so gefälscht sind, dass sie **gewöhnliche Erkennungsmechanismen für goldene Tickets umgehen**.
+Diese sind wie goldene Tickets, die so gefälscht sind, dass sie **gewöhnliche Erkennungsmechanismen für goldene Tickets umgehen.**
 
 {{#ref}}
 diamond-ticket.md
@@ -435,7 +438,7 @@ ad-certificates/account-persistence.md
 ad-certificates/domain-persistence.md
 {{#endref}}
 
-### AdminSDHolder-Gruppe
+### AdminSDHolder Gruppe
 
 Das **AdminSDHolder**-Objekt in Active Directory gewährleistet die Sicherheit von **privilegierten Gruppen** (wie Domain Admins und Enterprise Admins), indem es eine standardisierte **Zugriffskontrollliste (ACL)** auf diese Gruppen anwendet, um unbefugte Änderungen zu verhindern. Diese Funktion kann jedoch ausgenutzt werden; wenn ein Angreifer die ACL des AdminSDHolder so ändert, dass ein regulärer Benutzer vollen Zugriff erhält, erlangt dieser Benutzer umfangreiche Kontrolle über alle privilegierten Gruppen. Diese Sicherheitsmaßnahme, die zum Schutz gedacht ist, kann somit nach hinten losgehen und unbefugten Zugriff ermöglichen, es sei denn, sie wird genau überwacht.
 
@@ -443,7 +446,7 @@ Das **AdminSDHolder**-Objekt in Active Directory gewährleistet die Sicherheit v
 
 ### DSRM-Anmeldeinformationen
 
-Innerhalb jedes **Domänencontrollers (DC)** existiert ein **lokales Administratorkonto**. Durch den Erhalt von Admin-Rechten auf einem solchen Computer kann der Hash des lokalen Administrators mit **mimikatz** extrahiert werden. Danach ist eine Registrierungänderung erforderlich, um **die Verwendung dieses Passworts zu aktivieren**, was den Remote-Zugriff auf das lokale Administratorkonto ermöglicht.
+In jedem **Domain Controller (DC)** existiert ein **lokales Administratorkonto**. Durch den Erwerb von Admin-Rechten auf einem solchen Computer kann der Hash des lokalen Administrators mit **mimikatz** extrahiert werden. Danach ist eine Registrierungänderung erforderlich, um **die Verwendung dieses Passworts zu aktivieren**, was den Remote-Zugriff auf das lokale Administratorkonto ermöglicht.
 
 {{#ref}}
 dsrm-credentials.md
@@ -484,7 +487,7 @@ custom-ssp.md
 
 ### DCShadow
 
-Es registriert einen **neuen Domänencontroller** im AD und verwendet ihn, um **Attribute** (SIDHistory, SPNs...) auf bestimmten Objekten **ohne** das Hinterlassen von **Protokollen** bezüglich der **Änderungen** zu **pushen**. Sie **benötigen DA**-Berechtigungen und müssen sich im **Root-Domain** befinden.\
+Es registriert einen **neuen Domain Controller** im AD und verwendet ihn, um **Attribute** (SIDHistory, SPNs...) auf bestimmten Objekten **ohne** das Hinterlassen von **Protokollen** bezüglich der **Änderungen** zu **pushen**. Sie **benötigen DA**-Berechtigungen und müssen sich im **Root-Domain** befinden.\
 Beachten Sie, dass bei Verwendung falscher Daten ziemlich hässliche Protokolle erscheinen werden.
 
 {{#ref}}
@@ -506,17 +509,17 @@ Microsoft betrachtet den **Wald** als die Sicherheitsgrenze. Dies impliziert, da
 
 ### Grundlegende Informationen
 
-Eine [**Domänenvertrauensstellung**](<http://technet.microsoft.com/en-us/library/cc759554(v=ws.10).aspx>) ist ein Sicherheitsmechanismus, der es einem Benutzer aus einer **Domäne** ermöglicht, auf Ressourcen in einer anderen **Domäne** zuzugreifen. Es schafft im Wesentlichen eine Verbindung zwischen den Authentifizierungssystemen der beiden Domänen, die es ermöglicht, dass Authentifizierungsüberprüfungen nahtlos fließen. Wenn Domänen eine Vertrauensstellung einrichten, tauschen sie spezifische **Schlüssel** innerhalb ihrer **Domänencontroller (DCs)** aus und behalten diese, was für die Integrität der Vertrauensstellung entscheidend ist.
+Eine [**Domänenvertrauensstellung**](<http://technet.microsoft.com/en-us/library/cc759554(v=ws.10).aspx>) ist ein Sicherheitsmechanismus, der es einem Benutzer aus einer **Domäne** ermöglicht, auf Ressourcen in einer anderen **Domäne** zuzugreifen. Es schafft im Wesentlichen eine Verbindung zwischen den Authentifizierungssystemen der beiden Domänen, die es ermöglicht, dass Authentifizierungsüberprüfungen nahtlos fließen. Wenn Domänen eine Vertrauensstellung einrichten, tauschen sie spezifische **Schlüssel** innerhalb ihrer **Domain Controllers (DCs)** aus und behalten diese, die für die Integrität der Vertrauensstellung entscheidend sind.
 
 In einem typischen Szenario muss ein Benutzer, der auf einen Dienst in einer **vertrauenswürdigen Domäne** zugreifen möchte, zunächst ein spezielles Ticket anfordern, das als **inter-realm TGT** bekannt ist, von dem DC seiner eigenen Domäne. Dieses TGT ist mit einem gemeinsamen **Schlüssel** verschlüsselt, auf den sich beide Domänen geeinigt haben. Der Benutzer präsentiert dann dieses TGT dem **DC der vertrauenswürdigen Domäne**, um ein Dienstticket (**TGS**) zu erhalten. Nach erfolgreicher Validierung des inter-realm TGT durch den DC der vertrauenswürdigen Domäne gibt dieser ein TGS aus, das dem Benutzer den Zugriff auf den Dienst gewährt.
 
 **Schritte**:
 
-1. Ein **Client-Computer** in **Domäne 1** beginnt den Prozess, indem er seinen **NTLM-Hash** verwendet, um ein **Ticket Granting Ticket (TGT)** von seinem **Domänencontroller (DC1)** anzufordern.
+1. Ein **Client-Computer** in **Domäne 1** beginnt den Prozess, indem er seinen **NTLM-Hash** verwendet, um ein **Ticket Granting Ticket (TGT)** von seinem **Domain Controller (DC1)** anzufordern.
 2. DC1 gibt ein neues TGT aus, wenn der Client erfolgreich authentifiziert wird.
 3. Der Client fordert dann ein **inter-realm TGT** von DC1 an, das benötigt wird, um auf Ressourcen in **Domäne 2** zuzugreifen.
 4. Das inter-realm TGT ist mit einem **Vertrauensschlüssel** verschlüsselt, der zwischen DC1 und DC2 im Rahmen der zweiseitigen Domänenvertrauensstellung geteilt wird.
-5. Der Client bringt das inter-realm TGT zu **Domäne 2's Domänencontroller (DC2)**.
+5. Der Client bringt das inter-realm TGT zu **Domain 2's Domain Controller (DC2)**.
 6. DC2 überprüft das inter-realm TGT mit seinem gemeinsamen Vertrauensschlüssel und gibt, wenn es gültig ist, ein **Ticket Granting Service (TGS)** für den Server in Domäne 2 aus, auf den der Client zugreifen möchte.
 7. Schließlich präsentiert der Client dieses TGS dem Server, das mit dem Hash des Serverkontos verschlüsselt ist, um Zugriff auf den Dienst in Domäne 2 zu erhalten.
 
@@ -524,21 +527,21 @@ In einem typischen Szenario muss ein Benutzer, der auf einen Dienst in einer **v
 
 Es ist wichtig zu beachten, dass **eine Vertrauensstellung einseitig oder zweiseitig sein kann**. Bei der zweiseitigen Option vertrauen sich beide Domänen gegenseitig, aber in der **einseitigen** Vertrauensbeziehung ist eine der Domänen die **vertrauenswürdige** und die andere die **vertrauende** Domäne. Im letzteren Fall **können Sie nur auf Ressourcen innerhalb der vertrauenden Domäne von der vertrauenswürdigen zugreifen**.
 
-Wenn Domäne A Domäne B vertraut, ist A die vertrauende Domäne und B die vertrauenswürdige. Darüber hinaus wäre dies in **Domäne A** eine **Outbound-Vertrauensstellung**; und in **Domäne B** wäre dies eine **Inbound-Vertrauensstellung**.
+Wenn Domäne A Domäne B vertraut, ist A die vertrauende Domäne und B die vertrauenswürdige. Darüber hinaus wäre dies in **Domäne A** eine **ausgehende Vertrauensstellung**; und in **Domäne B** wäre dies eine **eingehende Vertrauensstellung**.
 
 **Verschiedene vertrauende Beziehungen**
 
 - **Eltern-Kind-Vertrauensstellungen**: Dies ist eine gängige Konfiguration innerhalb desselben Waldes, bei der eine Kinddomäne automatisch eine zweiseitige transitive Vertrauensstellung mit ihrer Elterndomäne hat. Im Wesentlichen bedeutet dies, dass Authentifizierungsanfragen nahtlos zwischen der Eltern- und der Kinddomäne fließen können.
-- **Kreuzverbindungen**: Auch als "Shortcut-Vertrauensstellungen" bezeichnet, werden diese zwischen Kinddomänen eingerichtet, um die Verweisprozesse zu beschleunigen. In komplexen Wäldern müssen Authentifizierungsreferenzen typischerweise bis zum Wurzelwald und dann zur Ziel-Domäne reisen. Durch die Erstellung von Kreuzverbindungen wird die Reise verkürzt, was besonders vorteilhaft in geografisch verteilten Umgebungen ist.
+- **Cross-Link-Vertrauensstellungen**: Diese werden als "Shortcut-Vertrauensstellungen" bezeichnet und werden zwischen Kinddomänen eingerichtet, um die Verweisprozesse zu beschleunigen. In komplexen Wäldern müssen Authentifizierungsreferenzen typischerweise bis zum Wurzel des Waldes und dann zur Ziel-Domäne reisen. Durch die Erstellung von Cross-Links wird die Reise verkürzt, was besonders vorteilhaft in geografisch verteilten Umgebungen ist.
 - **Externe Vertrauensstellungen**: Diese werden zwischen verschiedenen, nicht verwandten Domänen eingerichtet und sind von Natur aus nicht transitiv. Laut [Microsofts Dokumentation](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>) sind externe Vertrauensstellungen nützlich, um auf Ressourcen in einer Domäne außerhalb des aktuellen Waldes zuzugreifen, die nicht durch eine Waldvertrauensstellung verbunden ist. Die Sicherheit wird durch SID-Filterung bei externen Vertrauensstellungen erhöht.
-- **Baum-Wurzel-Vertrauensstellungen**: Diese Vertrauensstellungen werden automatisch zwischen der Wurzel-Domäne des Waldes und einem neu hinzugefügten Baum-Wurzel eingerichtet. Obwohl sie nicht häufig vorkommen, sind Baum-Wurzel-Vertrauensstellungen wichtig, um neue Domänenbäume zu einem Wald hinzuzufügen, damit sie einen einzigartigen Domänennamen beibehalten und eine zweiseitige Transitivität gewährleisten können. Weitere Informationen finden Sie in [Microsofts Anleitung](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>).
+- **Tree-root-Vertrauensstellungen**: Diese Vertrauensstellungen werden automatisch zwischen der Wurzel-Domäne des Waldes und einem neu hinzugefügten Baumstamm eingerichtet. Obwohl sie nicht häufig vorkommen, sind Tree-root-Vertrauensstellungen wichtig, um neue Domänenbäume zu einem Wald hinzuzufügen, damit sie einen einzigartigen Domänennamen beibehalten und eine zweiseitige Transitivität gewährleisten können. Weitere Informationen finden Sie in [Microsofts Anleitung](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>).
 - **Waldvertrauensstellungen**: Diese Art von Vertrauensstellung ist eine zweiseitige transitive Vertrauensstellung zwischen zwei Wurzel-Domänen des Waldes, die ebenfalls SID-Filterung durchsetzt, um Sicherheitsmaßnahmen zu verbessern.
 - **MIT-Vertrauensstellungen**: Diese Vertrauensstellungen werden mit nicht-Windows, [RFC4120-konformen](https://tools.ietf.org/html/rfc4120) Kerberos-Domänen eingerichtet. MIT-Vertrauensstellungen sind etwas spezialisierter und richten sich an Umgebungen, die eine Integration mit Kerberos-basierten Systemen außerhalb des Windows-Ökosystems erfordern.
 
 #### Weitere Unterschiede in **vertrauenden Beziehungen**
 
 - Eine Vertrauensbeziehung kann auch **transitiv** sein (A vertraut B, B vertraut C, dann vertraut A C) oder **nicht-transitiv**.
-- Eine Vertrauensbeziehung kann als **bidirektionale Vertrauensstellung** (beide vertrauen sich gegenseitig) oder als **einseitige Vertrauensstellung** (nur eine von ihnen vertraut der anderen) eingerichtet werden.
+- Eine Vertrauensbeziehung kann als **bidirektionale Vertrauensstellung** (beide vertrauen sich gegenseitig) oder als **einseitige Vertrauensstellung** (nur einer von ihnen vertraut dem anderen) eingerichtet werden.
 
 ### Angriffsweg
 
@@ -549,12 +552,25 @@ Wenn Domäne A Domäne B vertraut, ist A die vertrauende Domäne und B die vertr
 
 Angreifer könnten über drei Hauptmechanismen auf Ressourcen in einer anderen Domäne zugreifen:
 
-- **Lokale Gruppenmitgliedschaft**: Prinzipale könnten zu lokalen Gruppen auf Maschinen hinzugefügt werden, wie der "Administratoren"-Gruppe auf einem Server, was ihnen erheblichen Einfluss auf diese Maschine gewährt.
-- **Mitgliedschaft in Gruppen der fremden Domäne**: Prinzipale können auch Mitglieder von Gruppen innerhalb der fremden Domäne sein. Die Wirksamkeit dieser Methode hängt jedoch von der Art der Vertrauensstellung und dem Umfang der Gruppe ab.
-- **Zugriffskontrolllisten (ACLs)**: Prinzipale könnten in einer **ACL** angegeben sein, insbesondere als Entitäten in **ACEs** innerhalb einer **DACL**, die ihnen Zugriff auf spezifische Ressourcen gewährt. Für diejenigen, die tiefer in die Mechanik von ACLs, DACLs und ACEs eintauchen möchten, ist das Whitepaper mit dem Titel “[An ACE Up The Sleeve](https://specterops.io/assets/resources/an_ace_up_the_sleeve.pdf)” eine wertvolle Ressource.
+- **Lokale Gruppenmitgliedschaft**: Prinzipale könnten zu lokalen Gruppen auf Maschinen hinzugefügt werden, wie der „Administratoren“-Gruppe auf einem Server, was ihnen erheblichen Einfluss auf diese Maschine gewährt.
+- **Mitgliedschaft in Gruppen der Fremddomäne**: Prinzipale können auch Mitglieder von Gruppen innerhalb der Fremddomäne sein. Die Wirksamkeit dieser Methode hängt jedoch von der Art der Vertrauensstellung und dem Umfang der Gruppe ab.
+- **Zugriffskontrolllisten (ACLs)**: Prinzipale könnten in einer **ACL** angegeben sein, insbesondere als Entitäten in **ACEs** innerhalb einer **DACL**, die ihnen Zugriff auf spezifische Ressourcen gewährt. Für diejenigen, die tiefer in die Mechanik von ACLs, DACLs und ACEs eintauchen möchten, ist das Whitepaper mit dem Titel „[An ACE Up The Sleeve](https://specterops.io/assets/resources/an_ace_up_the_sleeve.pdf)“ eine wertvolle Ressource.
 
-### Kind-zu-Eltern-Wald-Berechtigungseskalation
+### Externe Benutzer/Gruppen mit Berechtigungen finden
+
+Sie können **`CN=<user_SID>,CN=ForeignSecurityPrincipals,DC=domain,DC=com`** überprüfen, um ausländische Sicherheitsprinzipale in der Domäne zu finden. Dies werden Benutzer/Gruppen aus **einer externen Domäne/Wald** sein.
+
+Sie könnten dies in **Bloodhound** oder mit powerview überprüfen:
+```powershell
+# Get users that are i groups outside of the current domain
+Get-DomainForeignUser
+
+# Get groups inside a domain with users our
+Get-DomainForeignGroupMember
 ```
+### Child-to-Parent-Waldprivilegieneskalation
+```bash
+# Fro powerview
 Get-DomainTrust
 
 SourceName      : sub.domain.local    --> current domain
@@ -564,6 +580,18 @@ TrustAttributes : WITHIN_FOREST       --> WITHIN_FOREST: Both in the same forest
 TrustDirection  : Bidirectional       --> Trust direction (2ways in this case)
 WhenCreated     : 2/19/2021 1:28:00 PM
 WhenChanged     : 2/19/2021 1:28:00 PM
+```
+Andere Möglichkeiten zur Aufzählung von Domänenvertrauen:
+```bash
+# Get DCs
+nltest /dsgetdc:<DOMAIN>
+
+# Get all domain trusts
+nltest /domain_trusts /all_trusts /v
+
+# Get all trust of a domain
+nltest /dclist:sub.domain.local
+nltest /server:dc.sub.domain.local /domain_trusts /all_trusts
 ```
 > [!WARNING]
 > Es gibt **2 vertrauenswürdige Schlüssel**, einen für _Child --> Parent_ und einen anderen für _Parent_ --> _Child_.\
@@ -586,15 +614,15 @@ sid-history-injection.md
 
 Das Verständnis, wie der Configuration Naming Context (NC) ausgenutzt werden kann, ist entscheidend. Der Configuration NC dient als zentrales Repository für Konfigurationsdaten in Active Directory (AD)-Umgebungen. Diese Daten werden auf jeden Domain Controller (DC) innerhalb des Waldes repliziert, wobei beschreibbare DCs eine beschreibbare Kopie des Configuration NC führen. Um dies auszunutzen, muss man **SYSTEM-Rechte auf einem DC** haben, vorzugsweise auf einem Child DC.
 
-**GPO mit Root-DC-Standort verknüpfen**
+**GPO mit Root DC-Standort verknüpfen**
 
-Der Sites-Container des Configuration NC enthält Informationen über alle domänenverbundenen Computerstandorte innerhalb des AD-Waldes. Durch das Arbeiten mit SYSTEM-Rechten auf einem DC können Angreifer GPOs mit den Root-DC-Standorten verknüpfen. Diese Aktion könnte die Root-Domäne gefährden, indem die auf diese Standorte angewendeten Richtlinien manipuliert werden.
+Der Sites-Container des Configuration NC enthält Informationen über die Standorte aller domänenverbundenen Computer innerhalb des AD-Waldes. Durch das Arbeiten mit SYSTEM-Rechten auf einem DC können Angreifer GPOs mit den Root DC-Standorten verknüpfen. Diese Aktion könnte die Root-Domäne gefährden, indem die auf diese Standorte angewendeten Richtlinien manipuliert werden.
 
 Für detaillierte Informationen könnte man die Forschung zu [Bypassing SID Filtering](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-4-bypass-sid-filtering-research) erkunden.
 
 **Jede gMSA im Wald kompromittieren**
 
-Ein Angriffsvektor besteht darin, privilegierte gMSAs innerhalb der Domäne ins Visier zu nehmen. Der KDS Root-Schlüssel, der für die Berechnung der gMSA-Passwörter erforderlich ist, wird im Configuration NC gespeichert. Mit SYSTEM-Rechten auf einem DC ist es möglich, auf den KDS Root-Schlüssel zuzugreifen und die Passwörter für jede gMSA im Wald zu berechnen.
+Ein Angriffsvektor besteht darin, privilegierte gMSAs innerhalb der Domäne ins Visier zu nehmen. Der KDS Root-Schlüssel, der für die Berechnung der Passwörter von gMSAs erforderlich ist, wird im Configuration NC gespeichert. Mit SYSTEM-Rechten auf einem DC ist es möglich, auf den KDS Root-Schlüssel zuzugreifen und die Passwörter für jede gMSA im Wald zu berechnen.
 
 Eine detaillierte Analyse findet sich in der Diskussion über [Golden gMSA Trust Attacks](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-5-golden-gmsa-trust-attack-from-child-to-parent).
 
@@ -606,12 +634,12 @@ Weiterführende Informationen sind verfügbar zu [Schema Change Trust Attacks](h
 
 **Von DA zu EA mit ADCS ESC5**
 
-Die ADCS ESC5-Sicherheitsanfälligkeit zielt darauf ab, die Kontrolle über Public Key Infrastructure (PKI)-Objekte zu erlangen, um eine Zertifikatvorlage zu erstellen, die die Authentifizierung als beliebiger Benutzer im Wald ermöglicht. Da PKI-Objekte im Configuration NC gespeichert sind, ermöglicht das Kompromittieren eines beschreibbaren Child DC die Durchführung von ESC5-Angriffen.
+Die ADCS ESC5-Schwachstelle zielt darauf ab, die Kontrolle über Public Key Infrastructure (PKI)-Objekte zu erlangen, um eine Zertifikatvorlage zu erstellen, die die Authentifizierung als beliebiger Benutzer im Wald ermöglicht. Da PKI-Objekte im Configuration NC gespeichert sind, ermöglicht das Kompromittieren eines beschreibbaren Child DC die Durchführung von ESC5-Angriffen.
 
 Weitere Details dazu können in [From DA to EA with ESC5](https://posts.specterops.io/from-da-to-ea-with-esc5-f9f045aa105c) nachgelesen werden. In Szenarien ohne ADCS hat der Angreifer die Möglichkeit, die erforderlichen Komponenten einzurichten, wie in [Escalating from Child Domain Admins to Enterprise Admins](https://www.pkisolutions.com/escalating-from-child-domains-admins-to-enterprise-admins-in-5-minutes-by-abusing-ad-cs-a-follow-up/) besprochen.
 
 ### Externer Wald-Domäne - Einweg (Inbound) oder bidirektional
-```powershell
+```bash
 Get-DomainTrust
 SourceName      : a.domain.local   --> Current domain
 TargetName      : domain.external  --> Destination domain
@@ -621,14 +649,14 @@ TrustDirection  : Inbound          --> Inboud trust
 WhenCreated     : 2/19/2021 10:50:56 PM
 WhenChanged     : 2/19/2021 10:50:56 PM
 ```
-In diesem Szenario **wird Ihre Domäne von einer externen vertraut** und gibt Ihnen **unbestimmte Berechtigungen** über sie. Sie müssen herausfinden, **welche Prinzipale Ihrer Domäne welchen Zugriff auf die externe Domäne haben** und dann versuchen, dies auszunutzen:
+In diesem Szenario **wird Ihre Domäne von einer externen vertraut** und gibt Ihnen **unbestimmte Berechtigungen** darüber. Sie müssen herausfinden, **welche Prinzipale Ihrer Domäne über welchen Zugriff auf die externe Domäne verfügen** und dann versuchen, dies auszunutzen:
 
 {{#ref}}
 external-forest-domain-oneway-inbound.md
 {{#endref}}
 
 ### Externe Walddomäne - Einweg (Ausgehend)
-```powershell
+```bash
 Get-DomainTrust -Domain current.local
 
 SourceName      : current.local   --> Current domain
@@ -649,8 +677,8 @@ external-forest-domain-one-way-outbound.md
 
 Eine weitere Möglichkeit, die vertrauenswürdige Domäne zu kompromittieren, besteht darin, einen [**SQL vertrauenswürdigen Link**](abusing-ad-mssql.md#mssql-trusted-links) zu finden, der in die **entgegengesetzte Richtung** des Domänenvertrauens erstellt wurde (was nicht sehr häufig vorkommt).
 
-Eine weitere Möglichkeit, die vertrauenswürdige Domäne zu kompromittieren, besteht darin, auf einem Rechner zu warten, auf den ein **Benutzer aus der vertrauenswürdigen Domäne zugreifen kann**, um sich über **RDP** anzumelden. Dann könnte der Angreifer Code im RDP-Sitzungsprozess injizieren und **auf die Ursprungsdomäne des Opfers** von dort aus zugreifen.\
-Darüber hinaus, wenn das **Opfer seine Festplatte eingebunden hat**, könnte der Angreifer im **RDP-Sitzungsprozess** **Backdoors** im **Autostart-Ordner der Festplatte** speichern. Diese Technik wird als **RDPInception** bezeichnet.
+Eine weitere Möglichkeit, die vertrauenswürdige Domäne zu kompromittieren, besteht darin, auf einem Rechner zu warten, auf den ein **Benutzer aus der vertrauenswürdigen Domäne zugreifen kann**, um sich über **RDP** anzumelden. Dann könnte der Angreifer Code in den RDP-Sitzungsprozess injizieren und **auf die Ursprungsdomäne des Opfers** von dort aus zugreifen.\
+Darüber hinaus, wenn das **Opfer seine Festplatte eingebunden hat**, könnte der Angreifer über den **RDP-Sitzungsprozess** **Backdoors** im **Autostart-Ordner der Festplatte** speichern. Diese Technik wird als **RDPInception** bezeichnet.
 
 {{#ref}}
 rdp-sessions-abuse.md
@@ -660,12 +688,12 @@ rdp-sessions-abuse.md
 
 ### **SID-Filterung:**
 
-- Das Risiko von Angriffen, die das SID-Historienattribut über Waldvertrauensstellungen ausnutzen, wird durch die SID-Filterung gemindert, die standardmäßig bei allen inter-Wald-Vertrauensstellungen aktiviert ist. Dies basiert auf der Annahme, dass intra-Wald-Vertrauensstellungen sicher sind, wobei der Wald, nicht die Domäne, als Sicherheitsgrenze gemäß Microsofts Standpunkt betrachtet wird.
+- Das Risiko von Angriffen, die das SID-Historienattribut über Waldvertrauensstellungen ausnutzen, wird durch die SID-Filterung gemindert, die standardmäßig bei allen inter-waldlichen Vertrauensstellungen aktiviert ist. Dies basiert auf der Annahme, dass intra-waldliche Vertrauensstellungen sicher sind, wobei der Wald, nicht die Domäne, als Sicherheitsgrenze gemäß Microsofts Auffassung betrachtet wird.
 - Es gibt jedoch einen Haken: Die SID-Filterung könnte Anwendungen und den Benutzerzugang stören, was gelegentlich zu ihrer Deaktivierung führt.
 
 ### **Selektive Authentifizierung:**
 
-- Bei inter-Wald-Vertrauensstellungen stellt die Verwendung von selektiver Authentifizierung sicher, dass Benutzer aus den beiden Wäldern nicht automatisch authentifiziert werden. Stattdessen sind explizite Berechtigungen erforderlich, damit Benutzer auf Domänen und Server innerhalb der vertrauenden Domäne oder des Waldes zugreifen können.
+- Bei inter-waldlichen Vertrauensstellungen sorgt die Verwendung von selektiver Authentifizierung dafür, dass Benutzer aus den beiden Wäldern nicht automatisch authentifiziert werden. Stattdessen sind explizite Berechtigungen erforderlich, damit Benutzer auf Domänen und Server innerhalb der vertrauenden Domäne oder des Waldes zugreifen können.
 - Es ist wichtig zu beachten, dass diese Maßnahmen nicht vor der Ausnutzung des beschreibbaren Configuration Naming Context (NC) oder Angriffen auf das Vertrauenskonto schützen.
 
 [**Weitere Informationen zu Domänenvertrauen bei ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain)
@@ -676,7 +704,7 @@ rdp-sessions-abuse.md
 https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/azure-ad-connect-hybrid-identity/index.html
 {{#endref}}
 
-## Einige allgemeine Abwehrmaßnahmen
+## Einige allgemeine Verteidigungen
 
 [**Erfahren Sie hier mehr darüber, wie Sie Anmeldeinformationen schützen können.**](../stealing-credentials/credentials-protections.md)
 
@@ -688,7 +716,7 @@ https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-move
 
 ### **Implementierung von Täuschungstechniken**
 
-- Die Implementierung von Täuschung umfasst das Einrichten von Fallen, wie z. B. Lockvogelbenutzern oder -computern, mit Funktionen wie Passwörtern, die nicht ablaufen oder als vertrauenswürdig für Delegation gekennzeichnet sind. Ein detaillierter Ansatz umfasst die Erstellung von Benutzern mit spezifischen Rechten oder deren Hinzufügen zu hochprivilegierten Gruppen.
+- Die Implementierung von Täuschung umfasst das Einrichten von Fallen, wie z. B. Lockvogelbenutzern oder -computern, mit Funktionen wie Passwörtern, die nicht ablaufen oder als vertrauenswürdig für Delegation gekennzeichnet sind. Ein detaillierter Ansatz umfasst die Erstellung von Benutzern mit spezifischen Rechten oder deren Hinzufügung zu Gruppen mit hohen Berechtigungen.
 - Ein praktisches Beispiel umfasst die Verwendung von Tools wie: `Create-DecoyUser -UserFirstName user -UserLastName manager-uncommon -Password Pass@123 | DeployUserDeception -UserFlag PasswordNeverExpires -GUID d07da11f-8a3d-42b6-b0aa-76c962be719a -Verbose`
 - Weitere Informationen zur Bereitstellung von Täuschungstechniken finden Sie unter [Deploy-Deception auf GitHub](https://github.com/samratashok/Deploy-Deception).
 

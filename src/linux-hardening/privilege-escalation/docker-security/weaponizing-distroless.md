@@ -15,7 +15,7 @@ Einige **Beispiele** für **distroless Container** sind:
 
 ## Weaponizing Distroless
 
-Das Ziel, einen distroless Container zu waffen, besteht darin, **willkürliche Binärdateien und Payloads auszuführen, selbst mit den Einschränkungen**, die durch **distroless** (Fehlen gängiger Binärdateien im System) und auch durch Schutzmaßnahmen, die häufig in Containern zu finden sind, wie **schreibgeschützt** oder **nicht ausführbar** in `/dev/shm`, impliziert werden.
+Das Ziel, einen distroless Container zu waffen, besteht darin, **willkürliche Binärdateien und Payloads auszuführen, selbst mit den Einschränkungen**, die durch **distroless** (Fehlen gängiger Binärdateien im System) und auch durch in Containern häufig vorkommende Schutzmaßnahmen wie **schreibgeschützt** oder **nicht ausführbar** in `/dev/shm` impliziert werden.
 
 ### Durch Speicher
 

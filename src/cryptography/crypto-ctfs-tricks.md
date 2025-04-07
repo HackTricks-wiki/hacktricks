@@ -174,7 +174,7 @@ ryvkryvkryvkryvkryvkryvkryvk
 ```
 drnajapajrna
 ```
-- [https://www.geocachingtoolbox.com/index.php?lang=de\&page=dvorakKeyboard](https://www.geocachingtoolbox.com/index.php?lang=de&page=dvorakKeyboard)
+- [https://www.geocachingtoolbox.com/index.php?lang=en\&page=dvorakKeyboard](https://www.geocachingtoolbox.com/index.php?lang=en&page=dvorakKeyboard)
 
 ### A1Z26
 
@@ -192,7 +192,7 @@ krodfdudfrod
 
 **Multitap** [ersetzt einen Buchstaben](https://www.dcode.fr/word-letter-change) durch wiederholte Ziffern, die durch den entsprechenden Tastencode auf einer mobilen [Telefon-Tastatur](https://www.dcode.fr/phone-keypad-cipher) definiert sind (Dieser Modus wird beim Schreiben von SMS verwendet).\
 Zum Beispiel: 2=A, 22=B, 222=C, 3=D...\
-Sie können diesen Code identifizieren, weil Sie\*\* mehrere Zahlen wiederholt sehen\*\*.
+Sie können diesen Code identifizieren, weil Sie **mehrere Zahlen wiederholt** sehen werden.
 
 Sie können diesen Code entschlüsseln unter: [https://www.dcode.fr/multitap-abc-cipher](https://www.dcode.fr/multitap-abc-cipher)
 

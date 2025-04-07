@@ -4,7 +4,7 @@
 
 ## Grundinformationen
 
-MIG wurde entwickelt, um den **Prozess der Mach IPC** Codeerstellung zu **vereinfachen**. Es **generiert den benötigten Code** für Server und Client, um mit einer gegebenen Definition zu kommunizieren. Auch wenn der generierte Code unansehnlich ist, muss ein Entwickler ihn nur importieren, und sein Code wird viel einfacher sein als zuvor.
+MIG wurde entwickelt, um **den Prozess der Mach IPC** Codeerstellung zu vereinfachen. Es **generiert den benötigten Code** für Server und Client, um mit einer gegebenen Definition zu kommunizieren. Auch wenn der generierte Code unübersichtlich ist, muss ein Entwickler ihn nur importieren, und sein Code wird viel einfacher sein als zuvor.
 
 Die Definition wird in der Interface Definition Language (IDL) mit der Erweiterung `.defs` angegeben.
 
@@ -40,7 +40,7 @@ server_port :  mach_port_t;
 n1          :  uint32_t;
 n2          :  uint32_t);
 ```
-Beachten Sie, dass das erste **Argument der Port ist, an den gebunden werden soll** und MIG **automatisch den Antwortport verwaltet** (es sei denn, `mig_get_reply_port()` wird im Client-Code aufgerufen). Darüber hinaus wird die **ID der Operationen** **sequentiell** beginnend mit der angegebenen Subsystem-ID sein (wenn eine Operation veraltet ist, wird sie gelöscht und `skip` wird verwendet, um ihre ID weiterhin zu verwenden).
+Beachten Sie, dass das erste **Argument der Port ist, an den gebunden werden soll**, und MIG wird **automatisch den Antwortport verwalten** (es sei denn, `mig_get_reply_port()` wird im Client-Code aufgerufen). Darüber hinaus wird die **ID der Operationen** **sequentiell** beginnend mit der angegebenen Subsystem-ID sein (wenn eine Operation veraltet ist, wird sie gelöscht und `skip` wird verwendet, um ihre ID weiterhin zu verwenden).
 
 Verwenden Sie nun MIG, um den Server- und Client-Code zu generieren, der in der Lage ist, miteinander zu kommunizieren, um die Subtract-Funktion aufzurufen:
 ```bash
@@ -52,7 +52,7 @@ Mehrere neue Dateien werden im aktuellen Verzeichnis erstellt.
 > Sie können ein komplexeres Beispiel in Ihrem System finden mit: `mdfind mach_port.defs`\
 > Und Sie können es aus demselben Ordner wie die Datei kompilieren mit: `mig -DLIBSYSCALL_INTERFACE mach_ports.defs`
 
-In den Dateien **`myipcServer.c`** und **`myipcServer.h`** finden Sie die Deklaration und Definition der Struktur **`SERVERPREFmyipc_subsystem`**, die im Grunde die Funktion definiert, die basierend auf der empfangenen Nachrichten-ID aufgerufen werden soll (wir haben eine Startnummer von 500 angegeben):
+In den Dateien **`myipcServer.c`** und **`myipcServer.h`** finden Sie die Deklaration und Definition der Struktur **`SERVERPREFmyipc_subsystem`**, die im Wesentlichen die Funktion definiert, die basierend auf der empfangenen Nachrichten-ID aufgerufen werden soll (wir haben eine Startnummer von 500 angegeben):
 
 {{#tabs}}
 {{#tab name="myipcServer.c"}}
@@ -108,7 +108,7 @@ In diesem Beispiel haben wir nur 1 Funktion in den Definitionen definiert, aber 
 
 Wenn die Funktion eine **Antwort** senden sollte, würde die Funktion `mig_internal kern_return_t __MIG_check__Reply__<name>` ebenfalls existieren.
 
-Tatsächlich ist es möglich, diese Beziehung in der Struktur **`subsystem_to_name_map_myipc`** aus **`myipcServer.h`** (**`subsystem*to_name_map*\***`\*\* in anderen Dateien) zu identifizieren:
+Tatsächlich ist es möglich, diese Beziehung in der Struktur **`subsystem_to_name_map_myipc`** aus **`myipcServer.h`** (**`subsystem*to_name_map*\***`** in anderen Dateien) zu identifizieren:
 ```c
 #ifndef subsystem_to_name_map_myipc
 #define subsystem_to_name_map_myipc \
@@ -132,7 +132,7 @@ mig_routine_t routine;
 
 OutHeadP->msgh_bits = MACH_MSGH_BITS(MACH_MSGH_BITS_REPLY(InHeadP->msgh_bits), 0);
 OutHeadP->msgh_remote_port = InHeadP->msgh_reply_port;
-/* Minimale Größe: routine() wird aktualisiert, wenn sie unterschiedlich ist */
+/* Minimale Größe: routine() wird sie aktualisieren, wenn sie unterschiedlich ist */
 OutHeadP->msgh_size = (mach_msg_size_t)sizeof(mig_reply_error_t);
 OutHeadP->msgh_local_port = MACH_PORT_NULL;
 OutHeadP->msgh_id = InHeadP->msgh_id + 100;
@@ -219,7 +219,7 @@ USERPREFSubtract(port, 40, 2);
 
 Der NDR_record wird von `libsystem_kernel.dylib` exportiert und ist eine Struktur, die es MIG ermöglicht, **Daten so zu transformieren, dass sie systemunabhängig sind**, da MIG ursprünglich für die Verwendung zwischen verschiedenen Systemen gedacht war (und nicht nur auf derselben Maschine).
 
-Das ist interessant, weil das Vorhandensein von `_NDR_record` in einer Binärdatei als Abhängigkeit (`jtool2 -S <binary> | grep NDR` oder `nm`) bedeutet, dass die Binärdatei ein MIG-Client oder -Server ist.
+Das ist interessant, weil, wenn `_NDR_record` in einer Binärdatei als Abhängigkeit gefunden wird (`jtool2 -S <binary> | grep NDR` oder `nm`), bedeutet das, dass die Binärdatei ein MIG-Client oder -Server ist.
 
 Darüber hinaus haben **MIG-Server** die Dispatch-Tabelle in `__DATA.__const` (oder in `__CONST.__constdata` im macOS-Kernel und `__DATA_CONST.__const` in anderen \*OS-Kernen). Dies kann mit **`jtool2`** ausgegeben werden.
 
@@ -260,7 +260,7 @@ if (*(int32_t *)(var_10 + 0x14) <= 0x1f4 && *(int32_t *)(var_10 + 0x14) >= 0x1f4
 rax = *(int32_t *)(var_10 + 0x14);
 // Aufruf von sign_extend_64, der helfen kann, diese Funktion zu identifizieren
 // Dies speichert in rax den Zeiger auf den Aufruf, der aufgerufen werden muss
-// Überprüfen der Verwendung der Adresse 0x100004040 (Funktionsadressenarray)
+// Überprüfen der Verwendung der Adresse 0x100004040 (Array der Funktionsadressen)
 // 0x1f4 = 500 (die Start-ID)
 <strong>            rax = *(sign_extend_64(rax - 0x1f4) * 0x28 + 0x100004040);
 </strong>            var_20 = rax;
@@ -289,7 +289,7 @@ return rax;
 {{#endtab}}
 
 {{#tab name="myipc_server decompiled 2"}}
-Dies ist die gleiche Funktion, die in einer anderen Hopper-Free-Version dekompiliert wurde:
+Dies ist die gleiche Funktion, dekompiliert in einer anderen Hopper-Free-Version:
 
 <pre class="language-c"><code class="lang-c">int _myipc_server(int arg0, int arg1) {
 r31 = r31 - 0x40;
@@ -332,8 +332,8 @@ if (CPU_FLAGS & NE) {
 r8 = 0x1;
 }
 }
-// Das gleiche if-else wie in der vorherigen Version
-// Überprüfen der Verwendung der Adresse 0x100004040 (Funktionsadressenarray)
+// Gleiches if-else wie in der vorherigen Version
+// Überprüfen der Verwendung der Adresse 0x100004040 (Array der Funktionsadressen)
 <strong>                    if ((r8 & 0x1) == 0x0) {
 </strong><strong>                            *(var_18 + 0x18) = **0x100004000;
 </strong>                            *(int32_t *)(var_18 + 0x20) = 0xfffffed1;
@@ -365,7 +365,7 @@ return r0;
 {{#endtab}}
 {{#endtabs}}
 
-Tatsächlich, wenn Sie zur Funktion **`0x100004000`** gehen, finden Sie das Array von **`routine_descriptor`** Strukturen. Das erste Element der Struktur ist die **Adresse**, an der die **Funktion** implementiert ist, und die **Struktur benötigt 0x28 Bytes**, sodass Sie alle 0x28 Bytes (beginnend bei Byte 0) 8 Bytes erhalten können, und das wird die **Adresse der Funktion** sein, die aufgerufen wird:
+Tatsächlich, wenn Sie zur Funktion **`0x100004000`** gehen, finden Sie das Array von **`routine_descriptor`**-Strukturen. Das erste Element der Struktur ist die **Adresse**, an der die **Funktion** implementiert ist, und die **Struktur benötigt 0x28 Bytes**, sodass Sie alle 0x28 Bytes (beginnend bei Byte 0) 8 Bytes erhalten können, und das wird die **Adresse der Funktion** sein, die aufgerufen wird:
 
 <figure><img src="../../../../images/image (35).png" alt=""><figcaption></figcaption></figure>
 
@@ -375,7 +375,7 @@ Diese Daten können [**mit diesem Hopper-Skript extrahiert werden**](https://git
 
 ### Debug
 
-Der von MIG generierte Code ruft auch `kernel_debug` auf, um Protokolle über Operationen beim Eintritt und Austritt zu generieren. Es ist möglich, sie mit **`trace`** oder **`kdv`** zu überprüfen: `kdv all | grep MIG`
+Der von MIG generierte Code ruft auch `kernel_debug` auf, um Protokolle über Operationen beim Ein- und Austritt zu generieren. Es ist möglich, sie mit **`trace`** oder **`kdv`** zu überprüfen: `kdv all | grep MIG`
 
 ## References
 

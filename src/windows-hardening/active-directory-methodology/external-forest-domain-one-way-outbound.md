@@ -2,12 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-In diesem Szenario **vertraut deine Domain** einigen **Befugnissen** einem Principal aus **anderen Domains**.
+In diesem Szenario **vertraut Ihre Domain** einigen **Befugnissen** einem Principal aus **anderen Domains**.
 
 ## Aufzählung
 
 ### Outbound-Vertrauen
-```powershell
+```bash
 # Notice Outbound trust
 Get-DomainTrust
 SourceName      : root.local
@@ -33,7 +33,7 @@ MemberDistinguishedName : CN=S-1-5-21-1028541967-2937615241-1935644758-1115,CN=F
 Eine Sicherheitsanfälligkeit besteht, wenn eine Vertrauensbeziehung zwischen zwei Domänen hergestellt wird, hier als Domäne **A** und Domäne **B** identifiziert, wobei Domäne **B** ihr Vertrauen auf Domäne **A** ausdehnt. In diesem Setup wird ein spezielles Konto in Domäne **A** für Domäne **B** erstellt, das eine entscheidende Rolle im Authentifizierungsprozess zwischen den beiden Domänen spielt. Dieses Konto, das mit Domäne **B** verbunden ist, wird verwendet, um Tickets für den Zugriff auf Dienste über die Domänen hinweg zu verschlüsseln.
 
 Der kritische Aspekt, den es hier zu verstehen gilt, ist, dass das Passwort und der Hash dieses speziellen Kontos von einem Domänencontroller in Domäne **A** mit einem Befehlszeilenwerkzeug extrahiert werden können. Der Befehl, um diese Aktion auszuführen, ist:
-```powershell
+```bash
 Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.my.domain.local
 ```
 Diese Extraktion ist möglich, da das Konto, das mit einem **$** nach seinem Namen identifiziert wird, aktiv ist und zur Gruppe "Domain Users" der Domäne **A** gehört, wodurch es die mit dieser Gruppe verbundenen Berechtigungen erbt. Dies ermöglicht es Personen, sich mit den Anmeldeinformationen dieses Kontos gegen die Domäne **A** zu authentifizieren.
@@ -54,15 +54,15 @@ Dieser Authentifizierungsschritt eröffnet die Möglichkeit, Dienste innerhalb v
 ```
 ### Sammeln des Klartext-Vertrauenspassworts
 
-Im vorherigen Ablauf wurde der Vertrauenshash anstelle des **Klartextpassworts** verwendet (das ebenfalls **von mimikatz** extrahiert wurde).
+Im vorherigen Ablauf wurde der Vertrauens-Hash anstelle des **Klartextpassworts** verwendet (das ebenfalls **von mimikatz** extrahiert wurde).
 
-Das Klartextpasswort kann erhalten werden, indem die \[ CLEAR ]-Ausgabe von mimikatz in Hexadezimal umgewandelt und Nullbytes ‘\x00’ entfernt werden:
+Das Klartextpasswort kann erhalten werden, indem die \[ CLEAR ]-Ausgabe von mimikatz in Hexadezimal umgewandelt und Null-Bytes ‘\x00’ entfernt werden:
 
 ![](<../../images/image (938).png>)
 
-Manchmal muss bei der Erstellung einer Vertrauensbeziehung ein Passwort vom Benutzer für das Vertrauen eingegeben werden. In dieser Demonstration ist der Schlüssel das ursprüngliche Vertrauenspasswort und daher menschenlesbar. Da der Schlüssel zyklisch ist (30 Tage), wird der Klartext nicht menschenlesbar sein, ist aber technisch weiterhin verwendbar.
+Manchmal muss bei der Erstellung einer Vertrauensbeziehung ein Passwort vom Benutzer für das Vertrauen eingegeben werden. In dieser Demonstration ist der Schlüssel das ursprüngliche Vertrauenspasswort und daher menschenlesbar. Da der Schlüssel zyklisch ist (alle 30 Tage), wird der Klartext nicht menschenlesbar sein, ist aber technisch weiterhin verwendbar.
 
-Das Klartextpasswort kann verwendet werden, um eine reguläre Authentifizierung als das Vertrauenskonto durchzuführen, eine Alternative zur Anforderung eines TGT unter Verwendung des Kerberos-Geheimschlüssels des Vertrauenskontos. Hier wird root.local von ext.local nach Mitgliedern der Domain Admins abgefragt:
+Das Klartextpasswort kann verwendet werden, um eine reguläre Authentifizierung als Vertrauenskonto durchzuführen, als Alternative zur Anforderung eines TGT unter Verwendung des Kerberos-Geheimschlüssels des Vertrauenskontos. Hier wird root.local von ext.local nach Mitgliedern der Domain Admins abgefragt:
 
 ![](<../../images/image (792).png>)
 

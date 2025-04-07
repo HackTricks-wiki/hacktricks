@@ -1,4 +1,4 @@
-# RDP-Sitzungen Missbrauch
+# RDP-Sitzungen-Missbrauch
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -7,7 +7,7 @@
 Wenn die **externe Gruppe** **RDP-Zugriff** auf einen **Computer** in der aktuellen Domäne hat, könnte ein **Angreifer** **diesen Computer kompromittieren und auf ihn warten**.
 
 Sobald dieser Benutzer über RDP zugegriffen hat, kann der **Angreifer zu dieser Benutzersitzung pivotieren** und dessen Berechtigungen in der externen Domäne missbrauchen.
-```powershell
+```bash
 # Supposing the group "External Users" has RDP access in the current domain
 ## lets find where they could access
 ## The easiest way would be with bloodhound, but you could also run:
@@ -34,10 +34,10 @@ beacon> inject 4960 x64 tcp-local
 
 ## RDPInception
 
-Wenn ein Benutzer über **RDP auf eine Maschine** zugreift, wo ein **Angreifer** auf ihn **wartet**, kann der Angreifer einen **Beacon in die RDP-Sitzung des Benutzers injizieren** und wenn das **Opfer sein Laufwerk** beim Zugriff über RDP **gemountet hat**, könnte der **Angreifer darauf zugreifen**.
+Wenn ein Benutzer über **RDP auf eine Maschine** zugreift, wo ein **Angreifer** auf ihn **wartet**, kann der Angreifer **ein Beacon in die RDP-Sitzung des Benutzers injizieren** und wenn das **Opfer sein Laufwerk** beim Zugriff über RDP **gemountet hat**, könnte der **Angreifer darauf zugreifen**.
 
 In diesem Fall könnten Sie einfach den **ursprünglichen Computer des Opfers** kompromittieren, indem Sie eine **Hintertür** im **Startup-Ordner** schreiben.
-```powershell
+```bash
 # Wait til someone logs in:
 net logons
 Logged on users at \\localhost:

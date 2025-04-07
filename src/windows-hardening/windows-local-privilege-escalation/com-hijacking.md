@@ -51,7 +51,7 @@ Write-Host
 
 Wenn Sie die Ausgabe überprüfen, können Sie eine auswählen, die **jedes Mal ausgeführt wird, wenn sich ein Benutzer anmeldet**.
 
-Jetzt suchen Sie nach der CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}** in **HKEY\_**_**CLASSES\_**_**ROOT\CLSID** und in HKLM und HKCU, normalerweise werden Sie feststellen, dass der Wert in HKCU nicht existiert.
+Jetzt suchen Sie nach der CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}** in **HKEY\CLASSES\ROOT\CLSID** und in HKLM und HKCU. Normalerweise werden Sie feststellen, dass der Wert in HKCU nicht existiert.
 ```bash
 # Exists in HKCR\CLSID\
 Get-ChildItem -Path "Registry::HKCR\CLSID\{1936ED8A-BD93-3213-E325-F38D112938EF}"
