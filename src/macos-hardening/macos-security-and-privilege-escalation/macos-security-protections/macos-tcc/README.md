@@ -24,7 +24,7 @@ I permessi sono **ereditati dall'applicazione padre** e i **permessi** sono **tr
 
 ### Database TCC
 
-Le autorizzazioni/rifiuti sono quindi memorizzati in alcuni database TCC:
+Le autorizzazioni/negazioni sono quindi memorizzate in alcuni database TCC:
 
 - Il database a livello di sistema in **`/Library/Application Support/com.apple.TCC/TCC.db`**.
 - Questo database è **protetto da SIP**, quindi solo un bypass SIP può scriverci.
@@ -45,7 +45,7 @@ Le autorizzazioni/rifiuti sono quindi memorizzati in alcuni database TCC:
 > Il database TCC in **iOS** si trova in **`/private/var/mobile/Library/TCC/TCC.db`**.
 
 > [!NOTE]
-> L'**interfaccia del centro notifiche** può apportare **modifiche nel database TCC di sistema**:
+> L'**interfaccia del centro notifiche** può apportare **modifiche al database TCC di sistema**:
 >
 > ```bash
 > codesign -dv --entitlements :- /System/Library/PrivateFrameworks/TCC.framework/> Support/tccd
@@ -102,11 +102,11 @@ sqlite> select * from access where client LIKE "%telegram%" and auth_value=0;
 {{#endtabs}}
 
 > [!TIP]
-> Controllando entrambe le banche dati puoi verificare i permessi che un'app ha consentito, ha vietato o non ha (chiederà di essi).
+> Controllando entrambi i database puoi verificare i permessi che un'app ha consentito, ha vietato o non ha (chiederà di farlo).
 
 - Il **`service`** è la rappresentazione della stringa di **permesso** TCC
-- Il **`client`** è il **bundle ID** o il **percorso del binario** con i permessi
-- Il **`client_type`** indica se si tratta di un Identificatore di Bundle(0) o di un percorso assoluto(1)
+- Il **`client`** è il **bundle ID** o **percorso del binario** con i permessi
+- Il **`client_type`** indica se si tratta di un Bundle Identifier(0) o di un percorso assoluto(1)
 
 <details>
 
@@ -174,7 +174,7 @@ echo "X'$REQ_HEX'"
 Puoi anche controllare i **permessi già concessi** alle app in `System Preferences --> Security & Privacy --> Privacy --> Files and Folders`.
 
 > [!TIP]
-> Gli utenti _possono_ **eliminare o interrogare le regole** utilizzando **`tccutil`** .
+> Gli utenti _possono_ **eliminare o interrogare le regole** utilizzando **`tccutil`**.
 
 #### Ripristina i permessi TCC
 ```bash
@@ -206,7 +206,7 @@ csreq -t -r /tmp/telegram_csreq.bin
 Le app **non hanno solo bisogno** di **richiedere** e di avere **accesso** a alcune risorse, ma devono anche **avere i diritti pertinenti**.\
 Ad esempio, **Telegram** ha il diritto `com.apple.security.device.camera` per richiedere **accesso alla fotocamera**. Un **app** che **non ha** questo **diritto non potrà** accedere alla fotocamera (e l'utente non verrà nemmeno chiesto per i permessi).
 
-Tuttavia, per le app che devono **accedere** a **determinate cartelle utente**, come `~/Desktop`, `~/Downloads` e `~/Documents`, **non hanno bisogno** di avere diritti specifici. Il sistema gestirà l'accesso in modo trasparente e **chiederà all'utente** secondo necessità.
+Tuttavia, per le app per **accedere** a **determinate cartelle utente**, come `~/Desktop`, `~/Downloads` e `~/Documents`, **non hanno bisogno** di avere diritti specifici. Il sistema gestirà l'accesso in modo trasparente e **chiederà all'utente** secondo necessità.
 
 Le app di Apple **non genereranno richieste**. Contengono **diritti pre-concessi** nella loro lista di **diritti**, il che significa che **non genereranno mai un popup**, **né** appariranno in nessuna delle **banche dati TCC**. Ad esempio:
 ```bash
@@ -361,7 +361,7 @@ EOD
 Potresti abusare di questo per **scrivere il tuo database TCC utente**.
 
 > [!WARNING]
-> Con questo permesso sarai in grado di **chiedere a Finder di accedere alle cartelle TCC riservate** e darti i file, ma per quanto ne so **non sarai in grado di far eseguire a Finder codice arbitrario** per sfruttare completamente il suo accesso FDA.
+> Con questo permesso sarai in grado di **chiedere a Finder di accedere alle cartelle TCC riservate** e darti i file, ma per quanto ne so **non sarai in grado di far eseguire a Finder codice arbitrario** per abusare completamente del suo accesso FDA.
 >
 > Pertanto, non sarai in grado di abusare delle piene capacità FDA.
 
@@ -518,14 +518,14 @@ Non penso che questo sia un vero privesc, ma giusto nel caso lo trovi utile: Se 
 
 ### **SIP Bypass a TCC Bypass**
 
-Il database **TCC di sistema** è protetto da **SIP**, ecco perché solo i processi con le **autorizzazioni indicate potranno modificarlo**. Pertanto, se un attaccante trova un **bypass SIP** su un **file** (essere in grado di modificare un file ristretto da SIP), sarà in grado di:
+Il **database TCC di sistema** è protetto da **SIP**, ecco perché solo i processi con le **autorizzazioni indicate potranno modificarlo**. Pertanto, se un attaccante trova un **bypass SIP** su un **file** (essere in grado di modificare un file ristretto da SIP), sarà in grado di:
 
 - **Rimuovere la protezione** di un database TCC e darsi tutte le autorizzazioni TCC. Potrebbe abusare di uno di questi file, ad esempio:
 - Il database di sistema TCC
 - REG.db
 - MDMOverrides.plist
 
-Tuttavia, c'è un'altra opzione per abusare di questo **bypass SIP per bypassare TCC**, il file `/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist` è un elenco di applicazioni che richiedono un'eccezione TCC. Pertanto, se un attaccante può **rimuovere la protezione SIP** da questo file e aggiungere la sua **applicazione**, l'applicazione sarà in grado di bypassare TCC.\
+Tuttavia, c'è un'altra opzione per abusare di questo **bypass SIP per bypassare TCC**, il file `/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist` è un elenco di autorizzazione delle applicazioni che richiedono un'eccezione TCC. Pertanto, se un attaccante può **rimuovere la protezione SIP** da questo file e aggiungere la sua **propria applicazione**, l'applicazione sarà in grado di bypassare TCC.\
 Ad esempio, per aggiungere il terminale:
 ```bash
 # Get needed info
