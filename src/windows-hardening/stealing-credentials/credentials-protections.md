@@ -14,33 +14,63 @@ sekurlsa::wdigest
 ```bash
 reg query HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest /v UseLogonCredential
 ```
-## LSA 保护
+## LSA 保护 (PP 和 PPL 受保护进程)
 
-从 **Windows 8.1** 开始，Microsoft 增强了 LSA 的安全性，以 **阻止不受信任进程的未经授权的内存读取或代码注入**。此增强功能妨碍了像 `mimikatz.exe sekurlsa:logonpasswords` 这样的命令的典型功能。要 **启用此增强保护**，应将 _**HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA**_ 中的 _**RunAsPPL**_ 值调整为 1：
-```
-reg query HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA /v RunAsPPL
-```
-### 绕过
+**受保护进程 (PP)** 和 **受保护进程轻量版 (PPL)** 是 **Windows 内核级保护**，旨在防止对敏感进程（如 **LSASS**）的未经授权访问。**PP 模型**在 **Windows Vista** 中引入，最初是为 **DRM** 执行而创建，仅允许使用 **特殊媒体证书** 签名的二进制文件受到保护。标记为 **PP** 的进程只能被其他 **也为 PP** 且具有 **相等或更高保护级别** 的进程访问，即便如此，**也仅限于有限的访问权限**，除非特别允许。
 
-可以使用 Mimikatz 驱动程序 mimidrv.sys 绕过此保护：
+**PPL** 在 **Windows 8.1** 中引入，是 PP 的更灵活版本。它通过引入基于 **数字签名的 EKU (增强密钥使用)** 字段的 **“保护级别”**，允许 **更广泛的用例**（例如，LSASS、Defender）。保护级别存储在 `EPROCESS.Protection` 字段中，这是一个 `PS_PROTECTION` 结构，包含：
+- **类型**（`Protected` 或 `ProtectedLight`）
+- **签名者**（例如，`WinTcb`、`Lsa`、`Antimalware` 等）
+
+该结构被打包为一个字节，并决定 **谁可以访问谁**：
+- **更高的签名者值可以访问较低的**
+- **PPL 不能访问 PP**
+- **未保护的进程无法访问任何 PPL/PP**
+
+### 从攻击者的角度需要了解的内容
+
+- 当 **LSASS 以 PPL 运行** 时，尝试从普通管理员上下文使用 `OpenProcess(PROCESS_VM_READ | QUERY_INFORMATION)` 打开它 **会以 `0x5 (访问被拒绝)` 失败**，即使 `SeDebugPrivilege` 已启用。
+- 你可以使用 Process Hacker 等工具或通过读取 `EPROCESS.Protection` 值以编程方式 **检查 LSASS 的保护级别**。
+- LSASS 通常具有 `PsProtectedSignerLsa-Light` (`0x41`)，只能被 **使用更高级别签名者签名的进程** 访问，例如 `WinTcb` (`0x61` 或 `0x62`)。
+- PPL 是一个 **用户态限制**；**内核级代码可以完全绕过它**。
+- LSASS 为 PPL 并 **不阻止凭据转储，如果你可以执行内核 shellcode** 或 **利用具有适当访问权限的高特权进程**。
+- **设置或移除 PPL** 需要重启或 **安全启动/UEFI 设置**，这可以在注册表更改被撤销后仍然保持 PPL 设置。
+
+**绕过 PPL 保护的选项：**
+
+如果你想在 PPL 的情况下转储 LSASS，你有 3 个主要选项：
+1. **使用签名的内核驱动程序（例如，Mimikatz + mimidrv.sys）** 来 **移除 LSASS 的保护标志**：
 
 ![](../../images/mimidrv.png)
 
-## 凭据保护
+2. **带上你自己的易受攻击驱动程序 (BYOVD)** 来运行自定义内核代码并禁用保护。像 **PPLKiller**、**gdrv-loader** 或 **kdmapper** 这样的工具使这变得可行。
+3. **从另一个打开 LSASS 句柄的进程中窃取现有的 LSASS 句柄**（例如，一个 AV 进程），然后 **将其复制** 到你的进程中。这是 `pypykatz live lsa --method handledup` 技术的基础。
+4. **利用某些特权进程**，允许你将任意代码加载到其地址空间或另一个特权进程内部，从而有效绕过 PPL 限制。你可以在 [bypassing-lsa-protection-in-userland](https://blog.scrt.ch/2021/04/22/bypassing-lsa-protection-in-userland/) 或 [https://github.com/itm4n/PPLdump](https://github.com/itm4n/PPLdump) 中查看此示例。
 
-**凭据保护**是 **Windows 10（企业版和教育版）** 独有的功能，通过 **虚拟安全模式（VSM）** 和 **基于虚拟化的安全性（VBS）** 增强机器凭据的安全性。它利用 CPU 虚拟化扩展将关键进程隔离在受保护的内存空间中，远离主操作系统的触及。这种隔离确保即使是内核也无法访问 VSM 中的内存，有效保护凭据免受 **pass-the-hash** 等攻击。**本地安全机构（LSA）** 在这个安全环境中作为信任组件运行，而主操作系统中的 **LSASS** 进程仅充当与 VSM 的 LSA 的通信者。
+**检查 LSASS 的 LSA 保护 (PPL/PP) 当前状态**：
+```bash
+reg query HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA /v RunAsPPL
+```
+当你运行 **`mimikatz privilege::debug sekurlsa::logonpasswords`** 时，它可能会因为这个原因而失败，错误代码为 `0x00000005`。
 
-默认情况下，**凭据保护** 并未激活，需要在组织内手动激活。它对于增强抵御像 **Mimikatz** 这样的工具的安全性至关重要，这些工具在提取凭据时受到限制。然而，仍然可以通过添加自定义 **安全支持提供程序（SSP）** 来利用漏洞，在登录尝试期间捕获明文凭据。
+- 有关此信息的更多内容，请查看 [https://itm4n.github.io/lsass-runasppl/](https://itm4n.github.io/lsass-runasppl/)
 
-要验证 **凭据保护** 的激活状态，可以检查注册表项 _**LsaCfgFlags**_，位于 _**HKLM\System\CurrentControlSet\Control\LSA**_ 下。值为 "**1**" 表示激活并带有 **UEFI 锁**，"**2**" 表示没有锁，"**0**" 表示未启用。此注册表检查虽然是一个强有力的指示，但并不是启用凭据保护的唯一步骤。有关启用此功能的详细指导和 PowerShell 脚本可在线获取。
-```powershell
+
+## Credential Guard
+
+**Credential Guard** 是 **Windows 10（企业版和教育版）** 独有的功能，通过使用 **虚拟安全模式（VSM）** 和 **基于虚拟化的安全性（VBS）** 来增强机器凭据的安全性。它利用 CPU 虚拟化扩展将关键进程隔离在受保护的内存空间中，远离主操作系统的访问。这种隔离确保即使是内核也无法访问 VSM 中的内存，有效地保护凭据免受 **pass-the-hash** 等攻击。**本地安全机构（LSA）** 在这个安全环境中作为信任组件运行，而主操作系统中的 **LSASS** 进程仅充当与 VSM 的 LSA 之间的通信者。
+
+默认情况下，**Credential Guard** 并未激活，需要在组织内手动启用。它对于增强抵御像 **Mimikatz** 这样的工具的安全性至关重要，这些工具在提取凭据的能力上受到限制。然而，仍然可以通过添加自定义 **安全支持提供程序（SSP）** 来利用漏洞，在登录尝试期间捕获明文凭据。
+
+要验证 **Credential Guard** 的激活状态，可以检查注册表项 _**LsaCfgFlags**_，该项位于 _**HKLM\System\CurrentControlSet\Control\LSA**_ 下。值为 "**1**" 表示启用并具有 **UEFI 锁定**，值为 "**2**" 表示未锁定，值为 "**0**" 表示未启用。此注册表检查虽然是一个强有力的指示，但并不是启用 Credential Guard 的唯一步骤。有关启用此功能的详细指导和 PowerShell 脚本可在线获取。
+```bash
 reg query HKLM\System\CurrentControlSet\Control\LSA /v LsaCfgFlags
 ```
 为了全面了解和启用 **Credential Guard** 在 Windows 10 中的说明，以及在 **Windows 11 Enterprise 和 Education (版本 22H2)** 兼容系统中的自动激活，请访问 [Microsoft's documentation](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage)。
 
 有关实施自定义 SSP 进行凭据捕获的更多详细信息，请参阅 [this guide](../active-directory-methodology/custom-ssp.md)。
 
-## RDP RestrictedAdmin 模式
+## RDP RestrictedAdmin Mode
 
 **Windows 8.1 和 Windows Server 2012 R2** 引入了几个新的安全功能，包括 _**RDP 的 Restricted Admin 模式**_。此模式旨在通过减轻与 [**pass the hash**](https://blog.ahasayen.com/pass-the-hash/) 攻击相关的风险来增强安全性。
 
@@ -56,9 +86,9 @@ reg query HKLM\System\CurrentControlSet\Control\LSA /v LsaCfgFlags
 
 有关更多详细信息，请访问 [this resource](https://blog.ahasayen.com/restricted-admin-mode-for-rdp/)。
 
-## 缓存凭据
+## Cached Credentials
 
-Windows 通过 **本地安全机构 (LSA)** 保护 **域凭据**，支持使用 **Kerberos** 和 **NTLM** 等安全协议的登录过程。Windows 的一个关键特性是其能够缓存 **最后十个域登录**，以确保用户即使在 **域控制器离线** 时仍能访问他们的计算机——这对经常远离公司网络的笔记本电脑用户来说是一个福音。
+Windows 通过 **Local Security Authority (LSA)** 保护 **域凭据**，支持使用 **Kerberos** 和 **NTLM** 等安全协议的登录过程。Windows 的一个关键特性是其能够缓存 **最后十个域登录**，以确保用户即使在 **域控制器离线** 的情况下仍能访问他们的计算机——这对经常远离公司网络的笔记本电脑用户来说是一个福音。
 
 缓存登录的数量可以通过特定的 **注册表项或组策略** 进行调整。要查看或更改此设置，可以使用以下命令：
 ```bash
@@ -72,7 +102,7 @@ reg query "HKEY_LOCAL_MACHINE\SOFTWARE\MICROSOFT\WINDOWS NT\CURRENTVERSION\WINLO
 
 ## 受保护用户
 
-加入 **受保护用户组** 的成员为用户引入了几项安全增强措施，确保对凭据盗窃和滥用的更高保护级别：
+加入 **受保护用户组** 会为用户引入几项安全增强措施，确保更高水平的保护以防止凭据被盗和滥用：
 
 - **凭据委派 (CredSSP)**：即使 **允许委派默认凭据** 的组策略设置已启用，受保护用户的明文凭据也不会被缓存。
 - **Windows Digest**：从 **Windows 8.1 和 Windows Server 2012 R2** 开始，系统将不会缓存受保护用户的明文凭据，无论 Windows Digest 状态如何。
@@ -80,7 +110,7 @@ reg query "HKEY_LOCAL_MACHINE\SOFTWARE\MICROSOFT\WINDOWS NT\CURRENTVERSION\WINLO
 - **Kerberos**：对于受保护用户，Kerberos 认证不会生成 **DES** 或 **RC4 密钥**，也不会缓存明文凭据或超出初始票证授予票 (TGT) 获取的长期密钥。
 - **离线登录**：受保护用户在登录或解锁时不会创建缓存验证器，这意味着这些账户不支持离线登录。
 
-这些保护措施在 **受保护用户组** 的成员登录设备时立即激活。这确保了关键安全措施到位，以防止各种凭据泄露方法。
+这些保护措施在用户作为 **受保护用户组** 的成员登录设备时立即激活。这确保了关键安全措施到位，以防止各种凭据泄露的方法。
 
 有关更详细的信息，请查阅官方 [documentation](https://docs.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group)。
 

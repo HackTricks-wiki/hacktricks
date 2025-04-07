@@ -114,7 +114,7 @@
 - **Citrix CTX1** \[]
 - `MNGIKCAHMOGLKPAKMMGJKNAINPHKLOBLNNHILCBHNOHLLPBK`
 
-[http://k4.cba.pl/dw/crypo/tools/eng_atom128c.html](http://k4.cba.pl/dw/crypo/tools/eng_atom128c.html) - 404 死链: [https://web.archive.org/web/20190228181208/http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html](https://web.archive.org/web/20190228181208/http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html)
+[http://k4.cba.pl/dw/crypo/tools/eng_atom128c.html](http://k4.cba.pl/dw/crypo/tools/eng_atom128c.html) - 404 死链接: [https://web.archive.org/web/20190228181208/http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html](https://web.archive.org/web/20190228181208/http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html)
 
 ### HackerizeXS \[_╫Λ↻├☰┏_]
 ```
@@ -180,28 +180,28 @@ drnajapajrna
 ```
 8 15 12 1 3 1 18 1 3 15 12 1
 ```
-### 仿射密码编码
+### Affine Cipher Encode
 
 字母到数字 `(ax+b)%26` (_a_ 和 _b_ 是密钥，_x_ 是字母) 并将结果转换回字母
 ```
 krodfdudfrod
 ```
-### 短信代码
+### SMS Code
 
 **Multitap** [通过重复的数字](https://www.dcode.fr/word-letter-change) 替换一个字母，这些数字由手机 [键盘](https://www.dcode.fr/phone-keypad-cipher) 上对应的键码定义（此模式在编写短信时使用）。\
-例如：2=A, 22=B, 222=C, 3=D...\
-你可以识别这个代码，因为你会看到\*\*几个数字重复\*\*。
+例如：2=A，22=B，222=C，3=D...\
+您可以通过看到**多个数字重复**来识别此代码。
 
-你可以在以下网址解码此代码：[https://www.dcode.fr/multitap-abc-cipher](https://www.dcode.fr/multitap-abc-cipher)
+您可以在以下网址解码此代码：[https://www.dcode.fr/multitap-abc-cipher](https://www.dcode.fr/multitap-abc-cipher)
 
-### 培根代码
+### Bacon Code
 
 将每个字母替换为4个A或B（或1和0）
 ```
 00111 01101 01010 00000 00010 00000 10000 00000 00010 01101 01010 00000
 AABBB ABBAB ABABA AAAAA AAABA AAAAA BAAAA AAAAA AAABA ABBAB ABABA AAAAA
 ```
-### 符文
+### Runes
 
 ![](../images/runes.jpg)
 
@@ -211,7 +211,7 @@ AABBB ABBAB ABABA AAAAA AAABA AAAAA BAAAA AAAAA AAABA ABBAB ABABA AAAAA
 
 ## 简易加密
 
-### XOR - 自动解密器
+### XOR - 自动解算器
 
 - [https://wiremask.eu/tools/xor-cracker/](https://wiremask.eu/tools/xor-cracker/)
 
@@ -245,7 +245,7 @@ Key:
 ```
 - [https://asecuritysite.com/encryption/ferdecode](https://asecuritysite.com/encryption/ferdecode)
 
-### Samir 秘密共享
+### Samir Secret Sharing
 
 一个秘密被分成 X 部分，要恢复它需要 Y 部分 (_Y <=X_)。
 ```

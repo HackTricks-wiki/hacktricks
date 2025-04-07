@@ -2,12 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## RDP 进程注入
+## RDP Process Injection
 
-如果 **外部组** 对当前域中的任何 **计算机** 具有 **RDP 访问权限**，则 **攻击者** 可以 **入侵该计算机并等待他**。
+如果**外部组**对当前域中的任何**计算机**具有**RDP访问权限**，则**攻击者**可以**入侵该计算机并等待他**。
 
-一旦该用户通过 RDP 访问，**攻击者可以转移到该用户的会话** 并滥用其在外部域中的权限。
-```powershell
+一旦该用户通过RDP访问，**攻击者可以转移到该用户的会话**并滥用其在外部域中的权限。
+```bash
 # Supposing the group "External Users" has RDP access in the current domain
 ## lets find where they could access
 ## The easiest way would be with bloodhound, but you could also run:
@@ -36,8 +36,8 @@ beacon> inject 4960 x64 tcp-local
 
 如果用户通过 **RDP 访问一台机器**，而 **攻击者** 正在 **等待** 他，攻击者将能够 **在用户的 RDP 会话中注入一个信标**，如果 **受害者在通过 RDP 访问时挂载了他的驱动器**，**攻击者可以访问它**。
 
-在这种情况下，你可以通过在 **启动文件夹** 中写入一个 **后门** 来 **妥协** **受害者的原始计算机**。
-```powershell
+在这种情况下，你可以通过在 **启动文件夹** 中写入一个 **后门** 来 **妥协** **受害者** 的 **原始计算机**。
+```bash
 # Wait til someone logs in:
 net logons
 Logged on users at \\localhost:

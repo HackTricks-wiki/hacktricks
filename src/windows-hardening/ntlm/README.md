@@ -4,7 +4,7 @@
 
 ## 基本信息
 
-在运行 **Windows XP 和 Server 2003** 的环境中，使用 LM (Lan Manager) 哈希，尽管广泛认为这些哈希容易被破解。特定的 LM 哈希 `AAD3B435B51404EEAAD3B435B51404EE` 表示未使用 LM，代表一个空字符串的哈希。
+在运行 **Windows XP 和 Server 2003** 的环境中，使用 LM (Lan Manager) 哈希，尽管广泛认为这些哈希容易被破解。一个特定的 LM 哈希 `AAD3B435B51404EEAAD3B435B51404EE` 表示未使用 LM，代表一个空字符串的哈希。
 
 默认情况下，**Kerberos** 认证协议是主要使用的方法。NTLM (NT LAN Manager) 在特定情况下介入：缺少 Active Directory、域不存在、由于配置不当导致 Kerberos 故障，或在尝试使用 IP 地址而非有效主机名进行连接时。
 
@@ -12,10 +12,10 @@
 
 对认证协议 - LM、NTLMv1 和 NTLMv2 - 的支持由位于 `%windir%\Windows\System32\msv1\_0.dll` 的特定 DLL 提供。
 
-**要点**：
+**关键点**：
 
 - LM 哈希易受攻击，空 LM 哈希 (`AAD3B435B51404EEAAD3B435B51404EE`) 表示未使用。
-- Kerberos 是默认认证方法，NTLM 仅在特定条件下使用。
+- Kerberos 是默认的认证方法，NTLM 仅在特定条件下使用。
 - NTLM 认证数据包可通过 "NTLMSSP" 头部识别。
 - LM、NTLMv1 和 NTLMv2 协议由系统文件 `msv1\_0.dll` 支持。
 
@@ -44,48 +44,48 @@ reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa\ /v lmcompatibilitylevel /t RE
 4 - Send NTLMv2 response only, refuse LM
 5 - Send NTLMv2 response only, refuse LM & NTLM
 ```
-## Basic NTLM Domain authentication Scheme
+## 基本 NTLM 域认证方案
 
-1. 用户输入他的凭据
-2. 客户端机器发送身份验证请求，发送域名和用户名
-3. 服务器发送挑战
-4. 客户端使用密码的哈希作为密钥加密挑战并将其作为响应发送
-5. 服务器将域名、用户名、挑战和响应发送给域控制器。如果没有配置Active Directory或域名是服务器的名称，则凭据在本地进行检查。
-6. 域控制器检查一切是否正确并将信息发送给服务器
+1. **用户**输入他的 **凭据**
+2. 客户端机器 **发送认证请求**，发送 **域名** 和 **用户名**
+3. **服务器**发送 **挑战**
+4. **客户端使用**密码的哈希作为密钥对 **挑战** 进行加密，并将其作为响应发送
+5. **服务器将** **域名、用户名、挑战和响应** 发送给 **域控制器**。如果没有配置 Active Directory 或域名是服务器的名称，则凭据 **在本地检查**。
+6. **域控制器检查一切是否正确**，并将信息发送给服务器
 
-服务器和域控制器能够通过Netlogon服务器创建安全通道，因为域控制器知道服务器的密码（它在NTDS.DIT数据库中）。
+**服务器**和 **域控制器**能够通过 **Netlogon** 服务器创建 **安全通道**，因为域控制器知道服务器的密码（它在 **NTDS.DIT** 数据库中）。
 
-### Local NTLM authentication Scheme
+### 本地 NTLM 认证方案
 
-身份验证与之前提到的相同，但服务器知道尝试在SAM文件中进行身份验证的用户的哈希。因此，服务器将自行检查用户是否可以进行身份验证，而不是询问域控制器。
+认证与之前提到的 **相同，但** **服务器**知道尝试在 **SAM** 文件中进行身份验证的 **用户的哈希**。因此，服务器将 **自行检查** 用户是否可以进行身份验证，而不是询问域控制器。
 
-### NTLMv1 Challenge
+### NTLMv1 挑战
 
-挑战长度为8字节，响应长度为24字节。
+**挑战长度为 8 字节**，**响应长度为 24 字节**。
 
-哈希NT（16字节）分为3部分，每部分7字节（7B + 7B + (2B+0x00\*5)）：最后一部分用零填充。然后，挑战分别用每一部分加密，结果加密的字节连接在一起。总计：8B + 8B + 8B = 24字节。
+**哈希 NT (16 字节)** 被分为 **3 个部分，每个部分 7 字节**（7B + 7B + (2B+0x00\*5)）：**最后一部分用零填充**。然后，**挑战**与每个部分 **单独加密**，并将 **结果** 的加密字节 **连接**。总计：8B + 8B + 8B = 24 字节。
 
 **问题**：
 
-- 缺乏随机性
-- 这3部分可以单独攻击以找到NT哈希
-- DES是可破解的
-- 第三个密钥总是由5个零组成。
-- 给定相同的挑战，响应将是相同的。因此，您可以将字符串“1122334455667788”作为挑战提供给受害者，并使用预计算的彩虹表攻击响应。
+- 缺乏 **随机性**
+- 3 个部分可以 **单独攻击** 以找到 NT 哈希
+- **DES 可破解**
+- 第 3 个密钥始终由 **5 个零** 组成。
+- 给定 **相同的挑战**，**响应** 将是 **相同的**。因此，您可以将字符串 "**1122334455667788**" 作为 **挑战** 提供给受害者，并使用 **预计算的彩虹表** 攻击响应。
 
-### NTLMv1 attack
+### NTLMv1 攻击
 
-如今，发现配置了不受限制的委派的环境变得越来越少，但这并不意味着您不能滥用配置的打印后台处理程序服务。
+如今，发现配置了不受约束委派的环境变得越来越少，但这并不意味着您不能 **滥用配置的打印后台处理程序服务**。
 
-您可以滥用您在AD上已经拥有的一些凭据/会话，要求打印机对您控制的某个主机进行身份验证。然后，使用`metasploit auxiliary/server/capture/smb`或`responder`，您可以将身份验证挑战设置为1122334455667788，捕获身份验证尝试，如果使用的是NTLMv1，您将能够破解它。\
-如果您使用`responder`，您可以尝试使用标志`--lm`来尝试降级身份验证。\
-_请注意，对于此技术，身份验证必须使用NTLMv1进行（NTLMv2无效）。_
+您可以滥用您在 AD 上已经拥有的一些凭据/会话，**请求打印机对某个您控制的主机进行身份验证**。然后，使用 `metasploit auxiliary/server/capture/smb` 或 `responder`，您可以 **将认证挑战设置为 1122334455667788**，捕获认证尝试，如果使用 **NTLMv1** 进行，您将能够 **破解它**。\
+如果您使用 `responder`，可以尝试 **使用标志 `--lm`** 来尝试 **降级** **认证**。\
+_请注意，对于此技术，认证必须使用 NTLMv1 进行（NTLMv2 无效）。_
 
-请记住，打印机在身份验证期间将使用计算机帐户，而计算机帐户使用长且随机的密码，您可能无法使用常见字典破解它。但是，NTLMv1身份验证使用DES（[更多信息在这里](#ntlmv1-challenge)），因此使用一些专门用于破解DES的服务，您将能够破解它（例如，您可以使用[https://crack.sh/](https://crack.sh)或[https://ntlmv1.com/](https://ntlmv1.com)）。
+请记住，打印机在认证期间将使用计算机帐户，而计算机帐户使用 **长且随机的密码**，您 **可能无法使用常见的字典破解**。但是 **NTLMv1** 认证 **使用 DES** （[更多信息在这里](#ntlmv1-challenge)），因此使用一些专门用于破解 DES 的服务，您将能够破解它（例如，您可以使用 [https://crack.sh/](https://crack.sh) 或 [https://ntlmv1.com/](https://ntlmv1.com)）。
 
-### NTLMv1 attack with hashcat
+### 使用 hashcat 的 NTLMv1 攻击
 
-NTLMv1也可以通过NTLMv1 Multi Tool [https://github.com/evilmog/ntlmv1-multi](https://github.com/evilmog/ntlmv1-multi)进行破解，该工具以可以通过hashcat破解的方式格式化NTLMv1消息。
+NTLMv1 也可以通过 NTLMv1 Multi Tool [https://github.com/evilmog/ntlmv1-multi](https://github.com/evilmog/ntlmv1-multi) 破解，该工具以可以被 hashcat 破解的方式格式化 NTLMv1 消息。
 
 命令
 ```bash
@@ -143,13 +143,13 @@ b4b9b02e6f09a9 # this is part 1
 ./hashcat-utils/src/deskey_to_ntlm.pl bcba83e6895b9d
 bd760f388b6700 # this is part 2
 ```
-请提供您希望翻译的文本内容。
+请提供您希望翻译的具体内容。
 ```bash
 ./hashcat-utils/src/ct3_to_ntlm.bin BB23EF89F50FC595 1122334455667788
 
 586c # this is the last part
 ```
-请提供需要翻译的内容。
+请提供需要翻译的具体内容。
 ```bash
 NTHASH=b4b9b02e6f09a9bd760f388b6700586c
 ```
@@ -159,16 +159,16 @@ NTHASH=b4b9b02e6f09a9bd760f388b6700586c
 
 **第一个响应**是通过使用**HMAC_MD5**对由**客户端和域**组成的**字符串**进行加密生成的，并使用**NT hash**的**MD4 哈希**作为**密钥**。然后，**结果**将用作**密钥**，通过**HMAC_MD5**对**挑战**进行加密。为此，将**添加一个 8 字节的客户端挑战**。总计：24 B。
 
-**第二个响应**是使用**多个值**生成的（一个新的客户端挑战，一个**时间戳**以避免**重放攻击**...）
+**第二个响应**是使用**多个值**（一个新的客户端挑战，一个**时间戳**以避免**重放攻击**...）生成的。
 
-如果您有一个**捕获了成功身份验证过程的 pcap**，您可以按照本指南获取域、用户名、挑战和响应，并尝试破解密码：[https://research.801labs.org/cracking-an-ntlmv2-hash/](https://www.801labs.org/research-portal/post/cracking-an-ntlmv2-hash/)
+如果你有一个**捕获了成功身份验证过程的 pcap**，你可以按照本指南获取域、用户名、挑战和响应，并尝试破解密码：[https://research.801labs.org/cracking-an-ntlmv2-hash/](https://www.801labs.org/research-portal/post/cracking-an-ntlmv2-hash/)
 
 ## Pass-the-Hash
 
-**一旦您拥有受害者的哈希值**，您可以用它来**冒充**受害者。\
-您需要使用一个**工具**，该工具将**使用**该**哈希**执行**NTLM 身份验证**，**或者**您可以创建一个新的**sessionlogon**并将该**哈希**注入到**LSASS**中，这样当任何**NTLM 身份验证被执行**时，该**哈希将被使用**。最后一个选项就是 mimikatz 所做的。
+**一旦你拥有受害者的哈希**，你可以用它来**冒充**受害者。\
+你需要使用一个**工具**，它将**使用**该**哈希执行**NTLM身份验证，**或者**你可以创建一个新的**sessionlogon**并将该**哈希**注入到**LSASS**中，这样当任何**NTLM身份验证被执行**时，该**哈希将被使用**。最后一个选项就是 mimikatz 所做的。
 
-**请记住，您也可以使用计算机帐户执行 Pass-the-Hash 攻击。**
+**请记住，你也可以使用计算机帐户执行 Pass-the-Hash 攻击。**
 
 ### **Mimikatz**
 
@@ -176,25 +176,25 @@ NTHASH=b4b9b02e6f09a9bd760f388b6700586c
 ```bash
 Invoke-Mimikatz -Command '"sekurlsa::pth /user:username /domain:domain.tld /ntlm:NTLMhash /run:powershell.exe"'
 ```
-这将启动一个进程，该进程将属于已经启动 mimikatz 的用户，但在 LSASS 内部，保存的凭据是 mimikatz 参数中的内容。然后，您可以像该用户一样访问网络资源（类似于 `runas /netonly` 技巧，但您不需要知道明文密码）。
+这将启动一个进程，该进程将属于已经启动mimikatz的用户，但在LSASS内部，保存的凭据是mimikatz参数中的内容。然后，您可以像该用户一样访问网络资源（类似于`runas /netonly`技巧，但您不需要知道明文密码）。
 
-### 从 Linux 进行 Pass-the-Hash
+### 从Linux进行Pass-the-Hash
 
-您可以使用 Linux 从 Windows 机器上获得代码执行。\
+您可以使用Linux中的Pass-the-Hash在Windows机器上获得代码执行。\
 [**访问此处了解如何操作。**](https://github.com/carlospolop/hacktricks/blob/master/windows/ntlm/broken-reference/README.md)
 
-### Impacket Windows 编译工具
+### Impacket Windows编译工具
 
-您可以在此处下载[ impacket Windows 二进制文件](https://github.com/ropnop/impacket_static_binaries/releases/tag/0.9.21-dev-binaries)。
+您可以在此处下载[ impacket Windows二进制文件](https://github.com/ropnop/impacket_static_binaries/releases/tag/0.9.21-dev-binaries)。
 
 - **psexec_windows.exe** `C:\AD\MyTools\psexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.my.domain.local`
 - **wmiexec.exe** `wmiexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.dollarcorp.moneycorp.local`
-- **atexec.exe** （在这种情况下，您需要指定一个命令，cmd.exe 和 powershell.exe 不是有效的以获得交互式 shell）`C:\AD\MyTools\atexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.dollarcorp.moneycorp.local 'whoami'`
-- 还有更多 Impacket 二进制文件...
+- **atexec.exe**（在这种情况下，您需要指定一个命令，cmd.exe和powershell.exe无效以获得交互式shell）`C:\AD\MyTools\atexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.dollarcorp.moneycorp.local 'whoami'`
+- 还有更多Impacket二进制文件...
 
 ### Invoke-TheHash
 
-您可以从这里获取 powershell 脚本：[https://github.com/Kevin-Robertson/Invoke-TheHash](https://github.com/Kevin-Robertson/Invoke-TheHash)
+您可以从这里获取powershell脚本：[https://github.com/Kevin-Robertson/Invoke-TheHash](https://github.com/Kevin-Robertson/Invoke-TheHash)
 
 #### Invoke-SMBExec
 ```bash
@@ -214,7 +214,7 @@ Invoke-SMBEnum -Domain dollarcorp.moneycorp.local -Username svcadmin -Hash b38ff
 ```
 #### Invoke-TheHash
 
-此功能是**所有其他功能的混合**。您可以传递**多个主机**，**排除**某些主机并**选择**您想要使用的**选项**（_SMBExec, WMIExec, SMBClient, SMBEnum_）。如果您选择**任何**的**SMBExec**和**WMIExec**但您**没有**提供任何_**Command**_参数，它将仅**检查**您是否具有**足够的权限**。
+这个功能是**所有其他功能的混合**。您可以传递**多个主机**，**排除**某些主机，并**选择**您想要使用的**选项**（_SMBExec, WMIExec, SMBClient, SMBEnum_）。如果您选择**任何**的**SMBExec**和**WMIExec**但您**没有**提供任何_**Command**_参数，它将仅仅**检查**您是否拥有**足够的权限**。
 ```
 Invoke-TheHash -Type WMIExec -Target 192.168.100.0/24 -TargetExclude 192.168.100.50 -Username Administ -ty    h F6F38B793DB6A94BA04A52F1D3EE92F0
 ```
@@ -236,9 +236,21 @@ wce.exe -s <username>:<domain>:<hash_lm>:<hash_nt>
 
 ## 从Windows主机提取凭据
 
-**有关如何从Windows主机获取凭据的更多信息，请阅读此页面** [**如何获取Windows主机的凭据**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/ntlm/broken-reference/README.md)**。**
+**有关如何从Windows主机获取凭据的更多信息，请阅读此页面** [**如何获取凭据**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/ntlm/broken-reference/README.md)**。**
 
-## NTLM中继和Responder
+## 内部独白攻击
+
+内部独白攻击是一种隐秘的凭据提取技术，允许攻击者从受害者的机器中检索NTLM哈希值，**而无需直接与LSASS进程交互**。与Mimikatz不同，后者直接从内存中读取哈希值，且常常被终端安全解决方案或凭据保护阻止，此攻击利用**通过安全支持提供程序接口（SSPI）对NTLM认证包（MSV1_0）的本地调用**。攻击者首先**降级NTLM设置**（例如，LMCompatibilityLevel、NTLMMinClientSec、RestrictSendingNTLMTraffic），以确保允许NetNTLMv1。然后，他们伪装成从运行进程中获得的现有用户令牌，并在本地触发NTLM认证，以使用已知挑战生成NetNTLMv1响应。
+
+在捕获这些NetNTLMv1响应后，攻击者可以快速使用**预计算的彩虹表**恢复原始NTLM哈希，从而启用进一步的Pass-the-Hash攻击以进行横向移动。至关重要的是，内部独白攻击保持隐秘，因为它不会生成网络流量、注入代码或触发直接内存转储，使其比传统方法（如Mimikatz）更难被防御者检测。
+
+如果NetNTLMv1未被接受——由于强制的安全策略，攻击者可能无法检索到NetNTLMv1响应。
+
+为处理这种情况，内部独白工具进行了更新：它动态获取服务器令牌，使用`AcceptSecurityContext()`以在NetNTLMv1失败时仍然**捕获NetNTLMv2响应**。虽然NetNTLMv2更难破解，但在有限情况下，它仍然为中继攻击或离线暴力破解打开了一条路径。
+
+PoC可以在**[https://github.com/eladshamir/Internal-Monologue](https://github.com/eladshamir/Internal-Monologue)**找到。
+
+## NTLM中继和响应者
 
 **在这里阅读有关如何执行这些攻击的详细指南：**
 

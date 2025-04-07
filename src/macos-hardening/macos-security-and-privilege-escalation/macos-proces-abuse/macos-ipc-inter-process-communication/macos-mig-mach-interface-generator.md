@@ -4,7 +4,7 @@
 
 ## 基本信息
 
-MIG 的创建旨在 **简化 Mach IPC** 代码的生成过程。它基本上 **生成所需的代码** 以便服务器和客户端根据给定的定义进行通信。即使生成的代码不够优雅，开发者只需导入它，他的代码将比之前简单得多。
+MIG 的创建目的是 **简化 Mach IPC** 代码的生成过程。它基本上 **生成所需的代码** 以便服务器和客户端根据给定的定义进行通信。即使生成的代码不够优雅，开发者只需导入它，他的代码将比之前简单得多。
 
 定义使用接口定义语言 (IDL) 指定，扩展名为 `.defs`。
 
@@ -25,7 +25,7 @@ MIG 的创建旨在 **简化 Mach IPC** 代码的生成过程。它基本上 **�
 
 ### 示例
 
-创建一个定义文件，在这种情况下包含一个非常简单的函数：
+创建一个定义文件，在这种情况下是一个非常简单的函数：
 ```cpp:myipc.defs
 subsystem myipc 500; // Arbitrary name and id
 
@@ -50,7 +50,7 @@ mig -header myipcUser.h -sheader myipcServer.h myipc.defs
 
 > [!TIP]
 > 您可以在系统中找到更复杂的示例，使用：`mdfind mach_port.defs`\
-> 您可以从与文件相同的文件夹中编译它，使用：`mig -DLIBSYSCALL_INTERFACE mach_ports.defs`
+> 并且您可以从与文件相同的文件夹中编译它，使用：`mig -DLIBSYSCALL_INTERFACE mach_ports.defs`
 
 在文件 **`myipcServer.c`** 和 **`myipcServer.h`** 中，您可以找到结构 **`SERVERPREFmyipc_subsystem`** 的声明和定义，该结构基本上根据接收到的消息 ID 定义要调用的函数（我们指定了起始编号为 500）：
 
@@ -108,14 +108,14 @@ return SERVERPREFmyipc_subsystem.routine[msgh_id].stub_routine;
 
 如果该函数预期发送一个 **reply**，则函数 `mig_internal kern_return_t __MIG_check__Reply__<name>` 也会存在。
 
-实际上，可以在 **`myipcServer.h`** 中的结构 **`subsystem_to_name_map_myipc`** 中识别这种关系（在其他文件中为 **`subsystem*to_name_map*\***`\*\*）：
+实际上，可以在 **`myipcServer.h`** 中的结构 **`subsystem_to_name_map_myipc`** 中识别这种关系（在其他文件中为 **`subsystem*to_name_map*\***`）：
 ```c
 #ifndef subsystem_to_name_map_myipc
 #define subsystem_to_name_map_myipc \
 { "Subtract", 500 }
 #endif
 ```
-最后，另一个使服务器正常工作的关键功能是 **`myipc_server`**，它实际上会 **调用与接收到的 id 相关的函数**：
+最后，一个使服务器正常工作的另一个重要功能是 **`myipc_server`**，它实际上将 **调用与接收到的 id 相关的函数**：
 
 <pre class="language-c"><code class="lang-c">mig_external boolean_t myipc_server
 (mach_msg_header_t *InHeadP, mach_msg_header_t *OutHeadP)
@@ -132,7 +132,7 @@ mig_routine_t routine;
 
 OutHeadP->msgh_bits = MACH_MSGH_BITS(MACH_MSGH_BITS_REPLY(InHeadP->msgh_bits), 0);
 OutHeadP->msgh_remote_port = InHeadP->msgh_reply_port;
-/* 最小大小：routine() 如果不同会更新它 */
+/* 最小大小：routine() 如果不同将更新它 */
 OutHeadP->msgh_size = (mach_msg_size_t)sizeof(mig_reply_error_t);
 OutHeadP->msgh_local_port = MACH_PORT_NULL;
 OutHeadP->msgh_id = InHeadP->msgh_id + 100;
@@ -149,9 +149,9 @@ return FALSE;
 }
 </code></pre>
 
-检查之前突出显示的行，访问通过 ID 调用的函数。
+检查之前高亮的行，访问通过 ID 调用的函数。
 
-以下是创建一个简单的 **服务器** 和 **客户端** 的代码，其中客户端可以调用服务器的 Subtract 函数：
+以下是创建一个简单的 **server** 和 **client** 的代码，其中客户端可以调用服务器的 Subtract 函数：
 
 {{#tabs}}
 {{#tab name="myipc_server.c"}}
@@ -219,32 +219,32 @@ USERPREFSubtract(port, 40, 2);
 
 NDR_record 是由 `libsystem_kernel.dylib` 导出的，它是一个结构体，允许 MIG **转换数据，使其与所使用的系统无关**，因为 MIG 被认为是用于不同系统之间的（而不仅仅是在同一台机器上）。
 
-这很有趣，因为如果在二进制文件中找到 `_NDR_record` 作为依赖项（`jtool2 -S <binary> | grep NDR` 或 `nm`），这意味着该二进制文件是 MIG 客户端或服务器。
+这很有趣，因为如果在二进制文件中找到 `_NDR_record` 作为依赖项（`jtool2 -S <binary> | grep NDR` 或 `nm`），这意味着该二进制文件是一个 MIG 客户端或服务器。
 
 此外，**MIG 服务器**在 `__DATA.__const` 中有调度表（或在 macOS 内核中的 `__CONST.__constdata` 和其他 \*OS 内核中的 `__DATA_CONST.__const`）。这可以通过 **`jtool2`** 转储。
 
-而 **MIG 客户端** 将使用 `__NDR_record` 通过 `__mach_msg` 发送给服务器。
+而 **MIG 客户端**将使用 `__NDR_record` 通过 `__mach_msg` 发送给服务器。
 
 ## 二进制分析
 
 ### jtool
 
-由于许多二进制文件现在使用 MIG 来暴露 mach 端口，因此了解如何 **识别 MIG 的使用** 以及 **MIG 执行的函数** 与每个消息 ID 是很有趣的。
+由于许多二进制文件现在使用 MIG 来暴露 mach 端口，因此了解如何 **识别 MIG 的使用** 以及 **MIG 在每个消息 ID 中执行的函数** 是很有趣的。
 
 [**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/index.html#jtool2) 可以解析 Mach-O 二进制文件中的 MIG 信息，指示消息 ID 并识别要执行的函数：
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep MIG
 ```
-此外，MIG 函数只是实际被调用函数的包装，这意味着通过获取其反汇编并搜索 BL，您可能能够找到实际被调用的函数：
+此外，MIG 函数只是实际被调用函数的包装，这意味着获取其反汇编并搜索 BL，您可能能够找到实际被调用的函数：
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep BL
 ```
-### 汇编
+### Assembly
 
-之前提到过，负责**根据接收到的消息 ID 调用正确函数**的函数是 `myipc_server`。然而，通常你不会拥有二进制文件的符号（没有函数名称），因此检查**反编译后的样子**是很有趣的，因为它总是非常相似（此函数的代码与暴露的函数无关）：
+之前提到过，负责**根据接收到的消息 ID 调用正确函数**的函数是 `myipc_server`。然而，通常你不会拥有二进制文件的符号（没有函数名称），因此检查**反编译后的样子**是很有趣的，因为它总是非常相似（该函数的代码与暴露的函数无关）：
 
 {{#tabs}}
-{{#tab name="myipc_server 反编译 1"}}
+{{#tab name="myipc_server decompiled 1"}}
 
 <pre class="language-c"><code class="lang-c">int _myipc_server(int arg0, int arg1) {
 var_10 = arg0;
@@ -258,13 +258,13 @@ var_18 = arg1;
 *(int32_t *)(var_18 + 0x10) = 0x0;
 if (*(int32_t *)(var_10 + 0x14) <= 0x1f4 && *(int32_t *)(var_10 + 0x14) >= 0x1f4) {
 rax = *(int32_t *)(var_10 + 0x14);
-// 调用 sign_extend_64，可以帮助识别此函数
-// 这将指针存储在 rax 中，指向需要调用的调用
+// 调用 sign_extend_64，可以帮助识别该函数
+// 这将指针存储在 rax 中，指向需要调用的函数
 // 检查地址 0x100004040 的使用（函数地址数组）
 // 0x1f4 = 500（起始 ID）
 <strong>            rax = *(sign_extend_64(rax - 0x1f4) * 0x28 + 0x100004040);
 </strong>            var_20 = rax;
-// 如果 - 否则，if 返回 false，而 else 调用正确的函数并返回 true
+// 如果 - else，if 返回 false，而 else 调用正确的函数并返回 true
 <strong>            if (rax == 0x0) {
 </strong>                    *(var_18 + 0x18) = **_NDR_record;
 *(int32_t *)(var_18 + 0x20) = 0xfffffffffffffed1;
@@ -288,7 +288,7 @@ return rax;
 
 {{#endtab}}
 
-{{#tab name="myipc_server 反编译 2"}}
+{{#tab name="myipc_server decompiled 2"}}
 这是在不同的 Hopper 免费版本中反编译的相同函数：
 
 <pre class="language-c"><code class="lang-c">int _myipc_server(int arg0, int arg1) {
@@ -340,7 +340,7 @@ r8 = 0x1;
 var_4 = 0x0;
 }
 else {
-// 调用计算的地址，函数应该在此处
+// 调用计算出的地址，函数应该在这里
 <strong>                            (var_20)(var_10, var_18);
 </strong>                            var_4 = 0x1;
 }
@@ -365,7 +365,7 @@ return r0;
 {{#endtab}}
 {{#endtabs}}
 
-实际上，如果你去到函数**`0x100004000`**，你会发现**`routine_descriptor`** 结构的数组。结构的第一个元素是**函数**实现的**地址**，并且**结构占用 0x28 字节**，因此从字节 0 开始每 0x28 字节你可以获取 8 字节，这将是**将被调用的函数的地址**：
+实际上，如果你去到函数**`0x100004000`**，你会发现**`routine_descriptor`** 结构的数组。结构的第一个元素是**函数**实现的**地址**，并且**结构占用 0x28 字节**，因此每 0x28 字节（从字节 0 开始）你可以获取 8 字节，这将是**将被调用的函数的地址**：
 
 <figure><img src="../../../../images/image (35).png" alt=""><figcaption></figcaption></figure>
 
@@ -373,11 +373,11 @@ return r0;
 
 这些数据可以通过 [**使用这个 Hopper 脚本**](https://github.com/knightsc/hopper/blob/master/scripts/MIG%20Detect.py) 提取。
 
-### 调试
+### Debug
 
-MIG 生成的代码还调用 `kernel_debug` 以生成有关进入和退出操作的日志。可以使用 **`trace`** 或 **`kdv`** 检查它们：`kdv all | grep MIG`
+MIG 生成的代码还调用 `kernel_debug` 以生成有关进入和退出操作的日志。可以使用**`trace`**或**`kdv`**检查它们：`kdv all | grep MIG`
 
-## 参考
+## References
 
 - [\*OS Internals, Volume I, User Mode, Jonathan Levin](https://www.amazon.com/MacOS-iOS-Internals-User-Mode/dp/099105556X)
 

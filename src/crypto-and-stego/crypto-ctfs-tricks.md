@@ -45,7 +45,7 @@
 
 ### 基础编码自动解码器
 
-使用以下链接检查所有这些基础：[https://github.com/dhondta/python-codext](https://github.com/dhondta/python-codext)
+使用：[https://github.com/dhondta/python-codext](https://github.com/dhondta/python-codext) 检查所有这些基础
 
 - **Ascii85**
 - `BQ%]q@psCd@rH0l`
@@ -114,13 +114,13 @@
 - **Citrix CTX1** \[]
 - `MNGIKCAHMOGLKPAKMMGJKNAINPHKLOBLNNHILCBHNOHLLPBK`
 
-[http://k4.cba.pl/dw/crypo/tools/eng_atom128c.html](http://k4.cba.pl/dw/crypo/tools/eng_atom128c.html) - 404 死链接: [https://web.archive.org/web/20190228181208/http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html](https://web.archive.org/web/20190228181208/http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html)
+[http://k4.cba.pl/dw/crypo/tools/eng_atom128c.html](http://k4.cba.pl/dw/crypo/tools/eng_atom128c.html) - 404 Dead: [https://web.archive.org/web/20190228181208/http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html](https://web.archive.org/web/20190228181208/http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html)
 
 ### HackerizeXS \[_╫Λ↻├☰┏_]
 ```
 ╫☐↑Λ↻Λ┏Λ↻☐↑Λ
 ```
-- [http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html](http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html) - 404 死链接: [https://web.archive.org/web/20190228181208/http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html](https://web.archive.org/web/20190228181208/http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html)
+- [http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html](http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html) - 404 死链: [https://web.archive.org/web/20190228181208/http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html](https://web.archive.org/web/20190228181208/http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html)
 
 ### 摩尔斯
 ```
@@ -188,22 +188,22 @@ drnajapajrna
 ```
 krodfdudfrod
 ```
-### SMS 代码
+### SMS Code
 
-**Multitap** [通过重复的数字](https://www.dcode.fr/word-letter-change) 替换一个字母，这些数字由手机 [键盘](https://www.dcode.fr/phone-keypad-cipher) 上对应的键码定义（此模式在编写 SMS 时使用）。\
-例如：2=A, 22=B, 222=C, 3=D...\
-你可以通过看到\*\* 多个数字重复\*\* 来识别这个代码。
+**Multitap** [replaces a letter](https://www.dcode.fr/word-letter-change) by repeated digits defined by the corresponding key code on a mobile [phone keypad](https://www.dcode.fr/phone-keypad-cipher) (此模式用于编写短信)。\
+例如：2=A，22=B，222=C，3=D...\
+您可以通过看到**多个数字重复**来识别此代码。
 
-你可以在这里解码这个代码: [https://www.dcode.fr/multitap-abc-cipher](https://www.dcode.fr/multitap-abc-cipher)
+您可以在以下网址解码此代码：[https://www.dcode.fr/multitap-abc-cipher](https://www.dcode.fr/multitap-abc-cipher)
 
-### 培根代码
+### Bacon Code
 
-用 4 个 A 或 B（或 1 和 0）替代每个字母
+将每个字母替换为4个A或B（或1和0）
 ```
 00111 01101 01010 00000 00010 00000 10000 00000 00010 01101 01010 00000
 AABBB ABBAB ABABA AAAAA AAABA AAAAA BAAAA AAAAA AAABA ABBAB ABABA AAAAA
 ```
-### 符文
+### Runes
 
 ![](../images/runes.jpg)
 
@@ -249,7 +249,7 @@ Key:
 
 ### Samir 秘密共享
 
-一个秘密被分成 X 部分，要恢复它需要 Y 部分 (_Y <=X_).
+一个秘密被分成 X 部分，要恢复它需要 Y 部分 (_Y <=X_)。
 ```
 8019f8fa5879aa3e07858d08308dc1a8b45
 80223035713295bddf0b0bd1b10a5340b89

