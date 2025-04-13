@@ -39,13 +39,13 @@ Les autorisations/refus sont ensuite stockés dans certaines bases de données T
 - Il y a une **troisième** base de données TCC dans **`/var/db/locationd/clients.plist`** pour indiquer les clients autorisés à **accéder aux services de localisation**.
 - Le fichier protégé par SIP **`/Users/carlospolop/Downloads/REG.db`** (également protégé contre l'accès en lecture avec TCC), contient la **localisation** de toutes les **bases de données TCC valides**.
 - Le fichier protégé par SIP **`/Users/carlospolop/Downloads/MDMOverrides.plist`** (également protégé contre l'accès en lecture avec TCC), contient plus de permissions accordées par TCC.
-- Le fichier protégé par SIP **`/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist`** (mais lisible par quiconque) est une liste d'autorisation d'applications qui nécessitent une exception TCC.
+- Le fichier protégé par SIP **`/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist`** (mais lisible par quiconque) est une liste d'autorisation d'applications nécessitant une exception TCC.
 
 > [!TIP]
 > La base de données TCC dans **iOS** est dans **`/private/var/mobile/Library/TCC/TCC.db`**.
 
 > [!NOTE]
-> L'**interface utilisateur du centre de notification** peut apporter des **modifications dans la base de données TCC système** :
+> L'**interface utilisateur du centre de notifications** peut apporter des **modifications dans la base de données TCC système** :
 >
 > ```bash
 > codesign -dv --entitlements :- /System/Library/PrivateFrameworks/TCC.framework/> Support/tccd
@@ -171,12 +171,12 @@ echo "X'$REQ_HEX'"
 ```
 - Pour plus d'informations sur les **autres champs** du tableau [**consultez cet article de blog**](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive).
 
-Vous pouvez également vérifier les **permissions déjà accordées** aux applications dans `System Preferences --> Security & Privacy --> Privacy --> Files and Folders`.
+Vous pouvez également vérifier les **autorisations déjà accordées** aux applications dans `System Preferences --> Security & Privacy --> Privacy --> Files and Folders`.
 
 > [!TIP]
 > Les utilisateurs _peuvent_ **supprimer ou interroger des règles** en utilisant **`tccutil`**.
 
-#### Réinitialiser les permissions TCC
+#### Réinitialiser les autorisations TCC
 ```bash
 # You can reset all the permissions given to an application with
 tccutil reset All app.some.id
@@ -201,10 +201,10 @@ csreq -t -r /tmp/telegram_csreq.bin
 > [!WARNING]
 > Par conséquent, d'autres applications utilisant le même nom et ID de bundle ne pourront pas accéder aux autorisations accordées à d'autres applications.
 
-### Droits et autorisations TCC
+### Droits & Permissions TCC
 
 Les applications **n'ont pas seulement besoin** de **demander** et d'avoir **accès** à certaines ressources, elles doivent également **avoir les droits pertinents**.\
-Par exemple, **Telegram** a le droit `com.apple.security.device.camera` pour demander **l'accès à la caméra**. Une **application** qui **n'a pas** ce **droit ne pourra pas** accéder à la caméra (et l'utilisateur ne sera même pas invité à donner les autorisations).
+Par exemple, **Telegram** a le droit `com.apple.security.device.camera` pour demander **l'accès à la caméra**. Une **application** qui **n'a pas** ce **droit ne pourra pas** accéder à la caméra (et l'utilisateur ne sera même pas invité à donner les permissions).
 
 Cependant, pour que les applications **accèdent** à **certaines dossiers utilisateur**, tels que `~/Desktop`, `~/Downloads` et `~/Documents`, elles **n'ont pas besoin** d'avoir des **droits spécifiques.** Le système gérera l'accès de manière transparente et **demandera à l'utilisateur** si nécessaire.
 
@@ -226,7 +226,7 @@ Cela évitera que Calendar demande à l'utilisateur d'accéder aux rappels, au c
 
 Certaines autorisations TCC sont : kTCCServiceAppleEvents, kTCCServiceCalendar, kTCCServicePhotos... Il n'existe pas de liste publique qui définit toutes ces autorisations, mais vous pouvez consulter cette [**liste de celles connues**](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive#service).
 
-### Lieux sensibles non protégés
+### Endroits sensibles non protégés
 
 - $HOME (lui-même)
 - $HOME/.ssh, $HOME/.aws, etc
@@ -252,7 +252,7 @@ uuid 769FD8F1-90E0-3206-808C-A8947BEBD6C3
 > [!NOTE]
 > Il est curieux que l'attribut **`com.apple.macl`** soit géré par le **Sandbox**, et non par tccd.
 >
-> Notez également que si vous déplacez un fichier qui permet l'UUID d'une application sur votre ordinateur vers un autre ordinateur, parce que la même application aura des UIDs différents, cela ne donnera pas accès à cette application.
+> Notez également que si vous déplacez un fichier qui permet à l'UUID d'une application sur votre ordinateur vers un autre ordinateur, parce que la même application aura des UIDs différents, cela ne donnera pas accès à cette application.
 
 L'attribut étendu `com.apple.macl` **ne peut pas être effacé** comme d'autres attributs étendus car il est **protégé par SIP**. Cependant, comme [**expliqué dans ce post**](https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/), il est possible de le désactiver en **compressant** le fichier, en **le supprimant** et en **le décompressant**.
 
@@ -361,7 +361,7 @@ EOD
 Vous pourriez abuser de cela pour **écrire votre propre base de données TCC utilisateur**.
 
 > [!WARNING]
-> Avec cette permission, vous pourrez **demander à Finder d'accéder aux dossiers restreints par TCC** et de vous donner les fichiers, mais à ma connaissance, vous **ne pourrez pas faire exécuter du code arbitraire par Finder** pour abuser pleinement de son accès FDA.
+> Avec cette permission, vous pourrez **demander à Finder d'accéder aux dossiers restreints par TCC** et de vous donner les fichiers, mais à ma connaissance, vous **ne pourrez pas faire exécuter du code arbitraire à Finder** pour abuser pleinement de son accès FDA.
 >
 > Par conséquent, vous ne pourrez pas exploiter toutes les capacités de la FDA.
 
@@ -396,7 +396,7 @@ EOD
 ```
 </details>
 
-Il en va de même pour **l'application Script Editor,** elle peut contrôler Finder, mais en utilisant un AppleScript, vous ne pouvez pas le forcer à exécuter un script.
+Il en va de même pour l'**application Script Editor,** elle peut contrôler Finder, mais en utilisant un AppleScript, vous ne pouvez pas le forcer à exécuter un script.
 
 ### Automation (SE) à certains TCC
 
@@ -554,7 +554,7 @@ AllowApplicationsList.plist:
 </dict>
 </plist>
 ```
-### Bypasses TCC
+### Contournements TCC
 
 {{#ref}}
 macos-tcc-bypasses/
