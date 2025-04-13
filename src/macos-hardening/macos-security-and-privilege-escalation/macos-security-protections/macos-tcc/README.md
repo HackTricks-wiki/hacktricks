@@ -6,9 +6,9 @@
 
 **TCC (Transparentnost, Saglasnost i Kontrola)** je bezbednosni protokol koji se fokusira na regulisanje dozvola aplikacija. Njegova primarna uloga je da zaštiti osetljive funkcije kao što su **usluge lokacije, kontakti, fotografije, mikrofon, kamera, pristup punom disku**. Zahtevajući eksplicitnu saglasnost korisnika pre nego što odobri pristup aplikacijama ovim elementima, TCC poboljšava privatnost i kontrolu korisnika nad njihovim podacima.
 
-Korisnici se susreću sa TCC kada aplikacije traže pristup zaštićenim funkcijama. Ovo je vidljivo kroz prozor koji omogućava korisnicima da **odobri ili odbije pristup**. Pored toga, TCC omogućava direktne korisničke akcije, kao što su **prevlačenje i ispuštanje datoteka u aplikaciju**, kako bi se odobrio pristup određenim datotekama, osiguravajući da aplikacije imaju pristup samo onome što je eksplicitno dozvoljeno.
+Korisnici se susreću sa TCC kada aplikacije traže pristup zaštićenim funkcijama. Ovo je vidljivo kroz obaveštenje koje omogućava korisnicima da **odobri ili odbije pristup**. Pored toga, TCC omogućava direktne korisničke akcije, kao što su **prevlačenje i ispuštanje datoteka u aplikaciju**, kako bi se odobrio pristup određenim datotekama, osiguravajući da aplikacije imaju pristup samo onome što je eksplicitno dozvoljeno.
 
-![Primer TCC prozora](https://rainforest.engineering/images/posts/macos-tcc/tcc-prompt.png?1620047855)
+![Primer TCC obaveštenja](https://rainforest.engineering/images/posts/macos-tcc/tcc-prompt.png?1620047855)
 
 **TCC** se obrađuje od strane **daemon-a** koji se nalazi u `/System/Library/PrivateFrameworks/TCC.framework/Support/tccd` i konfiguriše se u `/System/Library/LaunchDaemons/com.apple.tccd.system.plist` (registrujući mach servis `com.apple.tccd.system`).
 
@@ -28,11 +28,11 @@ Dozvole/odbijanja se zatim čuvaju u nekim TCC bazama podataka:
 
 - Sistem-wide baza podataka u **`/Library/Application Support/com.apple.TCC/TCC.db`**.
 - Ova baza podataka je **SIP zaštićena**, tako da samo SIP bypass može da piše u nju.
-- Korisnička TCC baza podataka **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`** za podešavanja po korisniku.
+- Korisnička TCC baza podataka **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`** za per-user podešavanja.
 - Ova baza podataka je zaštićena tako da samo procesi sa visokim TCC privilegijama kao što je Full Disk Access mogu da pišu u nju (ali nije zaštićena SIP-om).
 
 > [!WARNING]
-> Prethodne baze podataka su takođe **TCC zaštićene za pristup čitanju**. Tako da **nećete moći da pročitate** svoju redovnu korisničku TCC bazu podataka osim ako nije iz TCC privilegovanog procesa.
+> Prethodne baze podataka su takođe **TCC zaštićene za pristup čitanju**. Tako da **nećete moći da pročitate** vašu redovnu korisničku TCC bazu podataka osim ako nije iz TCC privilegovanog procesa.
 >
 > Međutim, zapamtite da će proces sa ovim visokim privilegijama (kao što su **FDA** ili **`kTCCServiceEndpointSecurityClient`**) moći da piše u korisničku TCC bazu podataka.
 
@@ -112,7 +112,7 @@ sqlite> select * from access where client LIKE "%telegram%" and auth_value=0;
 
 <summary>Kako izvršiti ako je to apsolutna putanja</summary>
 
-Jednostavno uradite **`launctl load you_bin.plist`**, sa plist-om kao:
+Samo uradite **`launctl load you_bin.plist`**, sa plist-om kao:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -153,7 +153,7 @@ Jednostavno uradite **`launctl load you_bin.plist`**, sa plist-om kao:
 
 - **`auth_value`** može imati različite vrednosti: denied(0), unknown(1), allowed(2) ili limited(3).
 - **`auth_reason`** može imati sledeće vrednosti: Error(1), User Consent(2), User Set(3), System Set(4), Service Policy(5), MDM Policy(6), Override Policy(7), Missing usage string(8), Prompt Timeout(9), Preflight Unknown(10), Entitled(11), App Type Policy(12)
-- Polje **csreq** je tu da označi kako da se verifikuje binarni fajl za izvršavanje i dodeljivanje TCC dozvola:
+- **csreq** polje je tu da označi kako da se verifikuje binarni fajl za izvršavanje i dodeljivanje TCC dozvola:
 ```bash
 # Query to get cserq in printable hex
 select service, client, hex(csreq) from access where auth_value=2;
@@ -184,9 +184,9 @@ tccutil reset All app.some.id
 # Reset the permissions granted to all apps
 tccutil reset All
 ```
-### TCC Signature Checks
+### TCC Provere Potpisa
 
-TCC **baza podataka** čuva **Bundle ID** aplikacije, ali takođe **čuva** **informacije** o **potpisu** kako bi **osigurao** da je aplikacija koja traži korišćenje dozvole tačna.
+TCC **baza podataka** čuva **Bundle ID** aplikacije, ali takođe **čuva** **informacije** o **potpisu** kako bi **osigurao** da je aplikacija koja traži korišćenje dozvole ispravna.
 ```bash
 # From sqlite
 sqlite> select service, client, hex(csreq) from access where auth_value=2;
@@ -201,14 +201,14 @@ csreq -t -r /tmp/telegram_csreq.bin
 > [!WARNING]
 > Stoga, druge aplikacije koje koriste isto ime i ID paketa neće moći da pristupe dodeljenim dozvolama koje su date drugim aplikacijama.
 
-### Ovlašćenja i TCC dozvole
+### Dozvole i TCC dozvole
 
-Aplikacije **ne samo da treba** da **zatraže** i da im bude **odobren pristup** nekim resursima, već takođe treba da **imaju relevantna ovlašćenja**.\
-Na primer, **Telegram** ima ovlašćenje `com.apple.security.device.camera` da zatraži **pristup kameri**. Aplikacija koja **nema** ovo **ovlašćenje neće moći** da pristupi kameri (i korisnik neće biti ni upitan za dozvole).
+Aplikacije **ne samo da treba** da **zatraže** i da im bude **odobren pristup** nekim resursima, već takođe treba da **imaju relevantne dozvole**.\
+Na primer, **Telegram** ima dozvolu `com.apple.security.device.camera` da zatraži **pristup kameri**. Aplikacija koja **nema** ovu **dozvolu neće moći** da pristupi kameri (i korisnik neće biti ni upitan za dozvole).
 
-Međutim, da bi aplikacije **pristupile** **određenim korisničkim folderima**, kao što su `~/Desktop`, `~/Downloads` i `~/Documents`, **ne moraju** imati nikakva specifična **ovlašćenja.** Sistem će transparentno obraditi pristup i **pitati korisnika** po potrebi.
+Međutim, da bi aplikacije **pristupile** **određenim korisničkim folderima**, kao što su `~/Desktop`, `~/Downloads` i `~/Documents`, **ne moraju** imati nikakve specifične **dozvole.** Sistem će transparentno obraditi pristup i **pitati korisnika** po potrebi.
 
-Apple-ove aplikacije **neće generisati upite**. Sadrže **pre-odobrene prava** u svom **spisku ovlašćenja**, što znači da **nikada neće generisati iskačući prozor**, **niti** će se pojaviti u bilo kojoj od **TCC baza podataka.** Na primer:
+Apple-ove aplikacije **neće generisati upite**. Sadrže **pre-odobrene prava** u svom **spisku dozvola**, što znači da **nikada neće generisati iskačući prozor**, **niti** će se pojaviti u bilo kojoj od **TCC baza podataka.** Na primer:
 ```bash
 codesign -dv --entitlements :- /System/Applications/Calendar.app
 [...]
@@ -325,7 +325,7 @@ macos-apple-events.md
 ### Automatizacija (Finder) do FDA\*
 
 TCC naziv dozvole za Automatizaciju je: **`kTCCServiceAppleEvents`**\
-Ova specifična TCC dozvola takođe označava **aplikaciju koja može biti upravljana** unutar TCC baze podataka (tako da dozvole ne omogućavaju upravljanje svime).
+Ova specifična TCC dozvola takođe označava **aplikaciju koja može biti upravljana** unutar TCC baze podataka (tako da dozvole ne omogućavaju samo upravljanje svime).
 
 **Finder** je aplikacija koja **uvek ima FDA** (čak i ako se ne pojavljuje u UI), tako da ako imate **Automatizacione** privilegije nad njom, možete zloupotrebiti njene privilegije da **izvršite neke radnje**.\
 U ovom slučaju vaša aplikacija bi trebala dozvolu **`kTCCServiceAppleEvents`** nad **`com.apple.Finder`**.
@@ -398,7 +398,7 @@ EOD
 
 Isto se dešava sa **Script Editor aplikacijom,** može kontrolisati Finder, ali korišćenjem AppleScript-a ne možete je naterati da izvrši skriptu.
 
-### Automatizacija (SE) do nekog TCC
+### Automatizacija (SE) do nekih TCC
 
 **Sistem događaji mogu kreirati akcije za foldere, a akcije za foldere mogu pristupiti nekim TCC folderima** (Desktop, Documents & Downloads), tako da se skripta poput sledeće može koristiti za zloupotrebu ovog ponašanja:
 ```bash
@@ -508,7 +508,7 @@ Ako imate **`kTCCServiceEndpointSecurityClient`**, imate FDA. Kraj.
 
 Dobijajući **dozvole za pisanje** nad **user TCC** bazom, ne možete sebi dodeliti **`FDA`** dozvole, samo onaj koji živi u sistemskoj bazi može to dodeliti.
 
-Ali možete **dati** sebi **`Automation rights to Finder`**, i zloupotrebiti prethodnu tehniku da se eskalirate na FDA\*.
+Ali možete **možete** sebi dati **`Automation rights to Finder`**, i zloupotrebiti prethodnu tehniku da se uzdignete do FDA\*.
 
 ### **FDA do TCC dozvola**
 
@@ -520,13 +520,13 @@ Ne mislim da je ovo pravi privesc, ali samo u slučaju da to smatrate korisnim: 
 
 Sistem **TCC baza** je zaštićena **SIP**, zato samo procesi sa **navedenim privilegijama će moći da je modifikuju**. Stoga, ako napadač pronađe **SIP bypass** preko **fajla** (da može da modifikuje fajl koji je ograničen SIP-om), moći će da:
 
-- **Ukloni zaštitu** TCC baze i dodeli sebi sve TCC dozvole. Može zloupotrebiti bilo koji od ovih fajlova, na primer:
+- **Ukloni zaštitu** TCC baze, i da sebi dodeli sve TCC dozvole. Mogao bi zloupotrebiti bilo koji od ovih fajlova, na primer:
 - TCC sistemska baza
 - REG.db
 - MDMOverrides.plist
 
-Međutim, postoji još jedna opcija da zloupotrebite ovaj **SIP bypass da obiđete TCC**, fajl `/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist` je lista dozvoljenih aplikacija koje zahtevaju TCC izuzetak. Stoga, ako napadač može **ukloniti SIP zaštitu** sa ovog fajla i dodati svoju **vlastitu aplikaciju**, aplikacija će moći da obiđe TCC.\
-Na primer, da dodate terminal:
+Međutim, postoji još jedna opcija da se zloupotrebi ovaj **SIP bypass da bi se obišao TCC**, fajl `/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist` je lista dozvoljenih aplikacija koje zahtevaju TCC izuzetak. Stoga, ako napadač može **ukloniti SIP zaštitu** sa ovog fajla i dodati svoju **vlastitu aplikaciju**, aplikacija će moći da obiđe TCC.\
+Na primer, da doda terminal:
 ```bash
 # Get needed info
 codesign -d -r- /System/Applications/Utilities/Terminal.app
