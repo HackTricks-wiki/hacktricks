@@ -20,7 +20,7 @@ ps -ef | grep tcc
 0   374     1   0 Thu07PM ??         2:01.66 /System/Library/PrivateFrameworks/TCC.framework/Support/tccd system
 501 63079     1   0  6:59PM ??         0:01.95 /System/Library/PrivateFrameworks/TCC.framework/Support/tccd
 ```
-Los permisos son **heredados de la aplicación padre** y los **permisos** son **seguros** basados en el **Bundle ID** y el **Developer ID**.
+Los **permisos** son **heredados de la aplicación padre** y los **permisos** son **seguros** basados en el **Bundle ID** y el **Developer ID**.
 
 ### Bases de datos TCC
 
@@ -36,10 +36,10 @@ Las concesiones/denegaciones se almacenan en algunas bases de datos TCC:
 >
 > Sin embargo, recuerda que un proceso con estos altos privilegios (como **FDA** o **`kTCCServiceEndpointSecurityClient`**) podrá escribir en la base de datos TCC de los usuarios.
 
-- Hay una **tercera** base de datos TCC en **`/var/db/locationd/clients.plist`** para indicar los clientes permitidos para **acceder a los servicios de localización**.
+- Hay una **tercera** base de datos TCC en **`/var/db/locationd/clients.plist`** para indicar los clientes permitidos para **acceder a los servicios de ubicación**.
 - El archivo protegido por SIP **`/Users/carlospolop/Downloads/REG.db`** (también protegido del acceso de lectura con TCC), contiene la **ubicación** de todas las **bases de datos TCC válidas**.
 - El archivo protegido por SIP **`/Users/carlospolop/Downloads/MDMOverrides.plist`** (también protegido del acceso de lectura con TCC), contiene más permisos otorgados por TCC.
-- El archivo protegido por SIP **`/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist`** (pero legible por cualquier persona) es una lista de aplicaciones que requieren una excepción de TCC.
+- El archivo protegido por SIP **`/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist`** (pero legible por cualquiera) es una lista de aplicaciones que requieren una excepción de TCC.
 
 > [!TIP]
 > La base de datos TCC en **iOS** está en **`/private/var/mobile/Library/TCC/TCC.db`**.
@@ -102,7 +102,7 @@ sqlite> select * from access where client LIKE "%telegram%" and auth_value=0;
 {{#endtabs}}
 
 > [!TIP]
-> Al verificar ambas bases de datos, puedes comprobar los permisos que una aplicación ha permitido, ha prohibido o no tiene (lo solicitará).
+> Al verificar ambas bases de datos, puedes comprobar los permisos que una aplicación ha permitido, ha prohibido o no tiene (lo pedirá).
 
 - El **`service`** es la representación en cadena de la **permisión** de TCC
 - El **`client`** es el **ID del paquete** o **ruta al binario** con los permisos
@@ -152,7 +152,7 @@ Simplemente haz **`launctl load you_bin.plist`**, con un plist como:
 </details>
 
 - El **`auth_value`** puede tener diferentes valores: denied(0), unknown(1), allowed(2) o limited(3).
-- El **`auth_reason`** puede tomar los siguientes valores: Error(1), Consentimiento del Usuario(2), Establecido por el Usuario(3), Establecido por el Sistema(4), Política de Servicio(5), Política de MDM(6), Política de Anulación(7), Cadena de uso faltante(8), Tiempo de espera del aviso(9), Preflight Desconocido(10), Con derecho(11), Política de Tipo de Aplicación(12)
+- El **`auth_reason`** puede tomar los siguientes valores: Error(1), User Consent(2), User Set(3), System Set(4), Service Policy(5), MDM Policy(6), Override Policy(7), Missing usage string(8), Prompt Timeout(9), Preflight Unknown(10), Entitled(11), App Type Policy(12)
 - El campo **csreq** está ahí para indicar cómo verificar el binario para ejecutar y otorgar los permisos de TCC:
 ```bash
 # Query to get cserq in printable hex
@@ -184,7 +184,7 @@ tccutil reset All app.some.id
 # Reset the permissions granted to all apps
 tccutil reset All
 ```
-### TCC Signature Checks
+### Verificaciones de firma de TCC
 
 La **base de datos** de TCC almacena el **Bundle ID** de la aplicación, pero también **almacena** **información** sobre la **firma** para **asegurarse** de que la aplicación que solicita usar un permiso es la correcta.
 ```bash
@@ -203,7 +203,7 @@ csreq -t -r /tmp/telegram_csreq.bin
 
 ### Derechos y Permisos de TCC
 
-Las aplicaciones **no solo necesitan** **solicitar** y haber sido **otorgadas acceso** a algunos recursos, también necesitan **tener los derechos relevantes**.\
+Las aplicaciones **no solo necesitan** **solicitar** y haber **recibido acceso** a algunos recursos, también necesitan **tener los derechos relevantes**.\
 Por ejemplo, **Telegram** tiene el derecho `com.apple.security.device.camera` para solicitar **acceso a la cámara**. Una **aplicación** que **no tenga** este **derecho no podrá** acceder a la cámara (y el usuario ni siquiera será preguntado por los permisos).
 
 Sin embargo, para que las aplicaciones **accedan** a **ciertas carpetas de usuario**, como `~/Desktop`, `~/Downloads` y `~/Documents`, **no necesitan** tener ningún **derecho específico.** El sistema manejará el acceso de manera transparente y **pedirá al usuario** según sea necesario.
@@ -252,7 +252,7 @@ uuid 769FD8F1-90E0-3206-808C-A8947BEBD6C3
 > [!NOTE]
 > Es curioso que el atributo **`com.apple.macl`** sea gestionado por el **Sandbox**, no por tccd.
 >
-> También ten en cuenta que si mueves un archivo que permite el UUID de una aplicación en tu computadora a otra computadora, debido a que la misma aplicación tendrá diferentes UIDs, no se otorgará acceso a esa aplicación.
+> También ten en cuenta que si mueves un archivo que permite el UUID de una aplicación en tu computadora a otra computadora, debido a que la misma aplicación tendrá diferentes UIDs, no otorgará acceso a esa aplicación.
 
 El atributo extendido `com.apple.macl` **no se puede borrar** como otros atributos extendidos porque está **protegido por SIP**. Sin embargo, como [**se explica en esta publicación**](https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/), es posible desactivarlo **comprimendo** el archivo, **eliminándolo** y **descomprimiéndolo**.
 
@@ -345,7 +345,7 @@ EOD
 ```
 {{#endtab}}
 
-{{#tab name="Robar sistemas TCC.db"}}
+{{#tab name="Steal systems TCC.db"}}
 ```applescript
 osascript<<EOD
 tell application "Finder"
@@ -400,7 +400,7 @@ Lo mismo sucede con la **aplicación Script Editor,** puede controlar Finder, pe
 
 ### Automatización (SE) a algunos TCC
 
-**System Events puede crear Acciones de Carpeta, y las acciones de carpeta pueden acceder a algunas carpetas de TCC** (Escritorio, Documentos y Descargas), por lo que se puede usar un script como el siguiente para abusar de este comportamiento:
+**System Events puede crear Acciones de Carpeta, y las acciones de carpeta pueden acceder a algunas carpetas TCC** (Escritorio, Documentos y Descargas), por lo que se puede usar un script como el siguiente para abusar de este comportamiento:
 ```bash
 # Create script to execute with the action
 cat > "/tmp/script.js" <<EOD
@@ -554,7 +554,7 @@ AllowApplicationsList.plist:
 </dict>
 </plist>
 ```
-### TCC Bypasses
+### Bypasses de TCC
 
 {{#ref}}
 macos-tcc-bypasses/
