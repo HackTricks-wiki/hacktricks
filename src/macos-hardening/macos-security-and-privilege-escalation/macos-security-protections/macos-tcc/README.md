@@ -6,7 +6,7 @@
 
 **TCC (Transparenz, Zustimmung und Kontrolle)** ist ein Sicherheitsprotokoll, das sich auf die Regulierung von Anwendungsberechtigungen konzentriert. Seine Hauptaufgabe besteht darin, sensible Funktionen wie **Standortdienste, Kontakte, Fotos, Mikrofon, Kamera, Barrierefreiheit und Vollzugriff auf die Festplatte** zu schützen. Durch die Forderung nach ausdrücklicher Zustimmung des Benutzers, bevor der Zugriff auf diese Elemente gewährt wird, verbessert TCC die Privatsphäre und die Kontrolle der Benutzer über ihre Daten.
 
-Benutzer begegnen TCC, wenn Anwendungen Zugriff auf geschützte Funktionen anfordern. Dies wird durch eine Aufforderung sichtbar, die es den Benutzern ermöglicht, **Zugriff zu genehmigen oder abzulehnen**. Darüber hinaus ermöglicht TCC direkte Benutzeraktionen, wie **Dateien in eine Anwendung ziehen und ablegen**, um den Zugriff auf bestimmte Dateien zu gewähren, und stellt sicher, dass Anwendungen nur auf das zugreifen können, was ausdrücklich erlaubt ist.
+Benutzer begegnen TCC, wenn Anwendungen Zugriff auf geschützte Funktionen anfordern. Dies wird durch eine Aufforderung sichtbar, die es den Benutzern ermöglicht, **Zugriff zu genehmigen oder abzulehnen**. Darüber hinaus ermöglicht TCC direkte Benutzeraktionen, wie **das Ziehen und Ablegen von Dateien in eine Anwendung**, um den Zugriff auf bestimmte Dateien zu gewähren, und stellt sicher, dass Anwendungen nur auf das zugreifen, was ausdrücklich erlaubt ist.
 
 ![Ein Beispiel für eine TCC-Aufforderung](https://rainforest.engineering/images/posts/macos-tcc/tcc-prompt.png?1620047855)
 
@@ -14,7 +14,7 @@ Benutzer begegnen TCC, wenn Anwendungen Zugriff auf geschützte Funktionen anfor
 
 Es gibt einen **Benutzermodus tccd**, der pro angemeldetem Benutzer läuft und in `/System/Library/LaunchAgents/com.apple.tccd.plist` definiert ist, der die mach-Dienste `com.apple.tccd` und `com.apple.usernotifications.delegate.com.apple.tccd` registriert.
 
-Hier können Sie den tccd sehen, der als System und als Benutzer läuft:
+Hier sehen Sie den tccd, der als System und als Benutzer läuft:
 ```bash
 ps -ef | grep tcc
 0   374     1   0 Thu07PM ??         2:01.66 /System/Library/PrivateFrameworks/TCC.framework/Support/tccd system
@@ -252,9 +252,9 @@ uuid 769FD8F1-90E0-3206-808C-A8947BEBD6C3
 > [!NOTE]
 > Es ist interessant, dass das **`com.apple.macl`** Attribut vom **Sandbox** verwaltet wird, nicht von tccd.
 >
-> Beachten Sie auch, dass, wenn Sie eine Datei, die die UUID einer App auf Ihrem Computer erlaubt, auf einen anderen Computer verschieben, die gleiche App unterschiedliche UIDs haben wird und daher keinen Zugriff auf diese App gewährt.
+> Beachten Sie auch, dass, wenn Sie eine Datei, die die UUID einer App auf Ihrem Computer erlaubt, auf einen anderen Computer verschieben, die gleiche App unterschiedliche UIDs haben wird und somit keinen Zugriff auf diese App gewährt.
 
-Das erweiterte Attribut `com.apple.macl` **kann nicht gelöscht werden** wie andere erweiterte Attribute, da es **durch SIP geschützt ist**. Es ist jedoch möglich, es **zu deaktivieren**, indem man die Datei **zippt**, sie **löscht** und dann **entzippt**. 
+Das erweiterte Attribut `com.apple.macl` **kann nicht gelöscht werden** wie andere erweiterte Attribute, da es **durch SIP geschützt ist**. Allerdings ist es, wie [**in diesem Beitrag erklärt**](https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/), möglich, es zu deaktivieren, indem man die Datei **zippt**, sie **löscht** und dann **entzippt**.
 
 ## TCC Privesc & Bypasses
 
@@ -308,7 +308,7 @@ strftime('%s', 'now') -- last_reminded with default current timestamp
 
 ### TCC-Payloads
 
-Wenn Sie es geschafft haben, in eine App mit einigen TCC-Berechtigungen zu gelangen, überprüfen Sie die folgende Seite mit TCC-Payloads, um diese auszunutzen:
+Wenn Sie es geschafft haben, in eine App mit einigen TCC-Berechtigungen einzudringen, überprüfen Sie die folgende Seite mit TCC-Payloads, um diese auszunutzen:
 
 {{#ref}}
 macos-tcc-payloads.md
@@ -365,12 +365,12 @@ Sie könnten dies missbrauchen, um **Ihre eigene Benutzer-TCC-Datenbank zu schre
 >
 > Daher werden Sie nicht in der Lage sein, die vollen FDA-Fähigkeiten auszunutzen.
 
-Dies ist die TCC-Eingabeaufforderung, um Automatisierungsberechtigungen über Finder zu erhalten:
+Dies ist die TCC-Aufforderung, um Automatisierungsprivilegien über Finder zu erhalten:
 
 <figure><img src="../../../../images/image (27).png" alt="" width="244"><figcaption></figcaption></figure>
 
 > [!CAUTION]
-> Beachten Sie, dass die **Automator**-App die TCC-Berechtigung **`kTCCServiceAppleEvents`** hat, sodass sie **jede App steuern** kann, wie z. B. Finder. Wenn Sie die Berechtigung haben, Automator zu steuern, könnten Sie auch den **Finder** mit einem Code wie dem folgenden steuern:
+> Beachten Sie, dass die **Automator**-App die TCC-Berechtigung **`kTCCServiceAppleEvents`** hat, sodass sie **jede App steuern** kann, wie z. B. Finder. Wenn Sie die Berechtigung haben, Automator zu steuern, könnten Sie auch den **Finder** mit einem Code wie dem untenstehenden steuern:
 
 <details>
 
@@ -504,9 +504,9 @@ Wenn Sie **`kTCCServiceEndpointSecurityClient`** haben, haben Sie FDA. Ende.
 
 **`kTCCServiceSystemPolicySysAdminFiles`** ermöglicht es, das **`NFSHomeDirectory`** Attribut eines Benutzers zu **ändern**, was seinen Home-Ordner ändert und somit das **Umgehen von TCC** ermöglicht.
 
-### User TCC DB zu FDA
+### Benutzer TCC DB zu FDA
 
-Durch den Erhalt von **Schreibberechtigungen** über die **Benutzer-TCC**-Datenbank können Sie sich **`FDA`**-Berechtigungen nicht gewähren, nur derjenige, der in der Systemdatenbank lebt, kann das gewähren.
+Durch den Erhalt von **Schreibberechtigungen** über die **Benutzer TCC**-Datenbank können Sie sich **`FDA`**-Berechtigungen nicht gewähren, nur derjenige, der in der Systemdatenbank lebt, kann das gewähren.
 
 Aber Sie können sich **`Automatisierungsrechte für den Finder`** geben und die vorherige Technik missbrauchen, um zu FDA\* zu eskalieren.
 
@@ -516,9 +516,9 @@ Aber Sie können sich **`Automatisierungsrechte für den Finder`** geben und die
 
 Ich denke nicht, dass dies ein echtes Privesc ist, aber nur für den Fall, dass Sie es nützlich finden: Wenn Sie ein Programm mit FDA kontrollieren, können Sie **die TCC-Datenbank der Benutzer ändern und sich jeden Zugriff gewähren**. Dies kann als Persistenztechnik nützlich sein, falls Sie Ihre FDA-Berechtigungen verlieren sollten.
 
-### **SIP-Bypass zu TCC-Bypass**
+### **SIP Bypass zu TCC Bypass**
 
-Die **TCC-Datenbank** des Systems ist durch **SIP** geschützt, weshalb nur Prozesse mit den **angegebenen Berechtigungen in der Lage sind, sie zu ändern**. Daher, wenn ein Angreifer einen **SIP-Bypass** über eine **Datei** findet (in der Lage, eine durch SIP eingeschränkte Datei zu ändern), kann er:
+Die **TCC-Datenbank** des Systems ist durch **SIP** geschützt, weshalb nur Prozesse mit den **angegebenen Berechtigungen in der Lage sind, sie zu ändern**. Daher, wenn ein Angreifer einen **SIP-Bypass** über eine **Datei** findet (in der Lage ist, eine durch SIP eingeschränkte Datei zu ändern), kann er:
 
 - **Den Schutz** einer TCC-Datenbank entfernen und sich alle TCC-Berechtigungen gewähren. Er könnte beispielsweise eine dieser Dateien missbrauchen:
 - Die TCC-Systemdatenbank
