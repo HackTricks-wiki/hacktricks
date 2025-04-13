@@ -44,8 +44,10 @@ jobs:
           git config --global user.email "build@example.com"
           git config --global user.name "Build master"
           git config pull.rebase false
-          cp book/searchindex.js searchindex.js
-          cp book/searchindex.json searchindex.json
+          if [ -f "book/searchindex.js" ];
+            cp book/searchindex.js searchindex.js
+            cp book/searchindex.json searchindex.json
+          fi
           git add searchindex.js searchindex.json
           git commit -m "Update searchindex"
           git push

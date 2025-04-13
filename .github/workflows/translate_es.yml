@@ -71,8 +71,10 @@ jobs:
         run: |
           git checkout $BRANCH
           git pull
-          cp book/searchindex.js searchindex.js
-          cp book/searchindex.json searchindex.json
+          if [ -f "book/searchindex.js" ];
+            cp book/searchindex.js searchindex.js
+            cp book/searchindex.json searchindex.json
+          fi
           git add searchindex.js searchindex.json
           git commit -m "Update searchindex for $BRANCH"
           git push
