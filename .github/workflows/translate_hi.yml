@@ -74,6 +74,8 @@ jobs:
           git pull
           if [ -f "book/searchindex.js" ]; then
             cp book/searchindex.js searchindex.js
+          fi
+          if [ -f "book/searchindex.json" ]; then
             cp book/searchindex.json searchindex.json
           fi
           git add searchindex.js searchindex.json
