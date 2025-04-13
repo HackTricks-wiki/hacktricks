@@ -71,7 +71,7 @@ jobs:
         run: |
           git checkout $BRANCH
           git pull
-          if [ -f "book/searchindex.js" ];
+          if [ -f "book/searchindex.js" ]; then
             cp book/searchindex.js searchindex.js
             cp book/searchindex.json searchindex.json
           fi

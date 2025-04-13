@@ -44,7 +44,7 @@ jobs:
           git config --global user.email "build@example.com"
           git config --global user.name "Build master"
           git config pull.rebase false
-          if [ -f "book/searchindex.js" ];
+          if [ -f "book/searchindex.js" ]; then
             cp book/searchindex.js searchindex.js
             cp book/searchindex.json searchindex.json
           fi
