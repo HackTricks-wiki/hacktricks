@@ -37,6 +37,8 @@ jobs:
       
       - name: Update searchindex.js in repo
         run: |
+          ls -la
+          ls -la book
           git config --global --add safe.directory /__w/hacktricks/hacktricks
           git pull
           git config --global user.email "build@example.com"
