@@ -12,7 +12,7 @@
 
 **TCC**는 `/System/Library/PrivateFrameworks/TCC.framework/Support/tccd`에 위치한 **데몬**에 의해 처리되며, `/System/Library/LaunchDaemons/com.apple.tccd.system.plist`에서 구성됩니다 (mach 서비스 `com.apple.tccd.system` 등록).
 
-로그인한 사용자마다 실행되는 **사용자 모드 tccd**가 `/System/Library/LaunchAgents/com.apple.tccd.plist`에 정의되어 있으며, mach 서비스 `com.apple.tccd`와 `com.apple.usernotifications.delegate.com.apple.tccd`를 등록합니다.
+로그인한 사용자마다 실행되는 **사용자 모드 tccd**가 있으며, 이는 `/System/Library/LaunchAgents/com.apple.tccd.plist`에 정의되어 있고 mach 서비스 `com.apple.tccd` 및 `com.apple.usernotifications.delegate.com.apple.tccd`를 등록합니다.
 
 여기에서 시스템과 사용자로서 실행 중인 tccd를 볼 수 있습니다:
 ```bash
@@ -28,7 +28,7 @@ ps -ef | grep tcc
 
 - **`/Library/Application Support/com.apple.TCC/TCC.db`**에 있는 시스템 전체 데이터베이스.
 - 이 데이터베이스는 **SIP 보호**되어 있어, SIP 우회만이 여기에 쓸 수 있습니다.
-- 사용자 TCC 데이터베이스는 **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`**로, 사용자별 설정을 위한 것입니다.
+- 사용자 TCC 데이터베이스 **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`**는 사용자별 설정을 위한 것입니다.
 - 이 데이터베이스는 보호되어 있어, Full Disk Access와 같은 높은 TCC 권한을 가진 프로세스만 쓸 수 있습니다(하지만 SIP로 보호되지는 않습니다).
 
 > [!WARNING]
@@ -54,7 +54,7 @@ ps -ef | grep tcc
 > com.apple.rootless.storage.TCC
 > ```
 >
-> 그러나 사용자는 **`tccutil`** 명령줄 유틸리티로 **규칙을 삭제하거나 쿼리**할 수 있습니다.
+> 그러나 사용자는 **`tccutil`** 명령줄 유틸리티로 규칙을 **삭제하거나 쿼리**할 수 있습니다.
 
 #### 데이터베이스 쿼리
 
@@ -171,7 +171,7 @@ echo "X'$REQ_HEX'"
 ```
 - 더 많은 정보는 **다른 필드**에 대한 [**이 블로그 게시물**](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive)를 확인하세요.
 
-`System Preferences --> Security & Privacy --> Privacy --> Files and Folders`에서 앱에 **이미 부여된 권한**을 확인할 수도 있습니다.
+`System Preferences --> Security & Privacy --> Privacy --> Files and Folders`에서 앱에 대해 **이미 부여된 권한**을 확인할 수도 있습니다.
 
 > [!TIP]
 > 사용자는 **`tccutil`**을 사용하여 **규칙을 삭제하거나 쿼리**할 수 있습니다.
@@ -203,7 +203,7 @@ csreq -t -r /tmp/telegram_csreq.bin
 
 ### 권한 및 TCC 권한
 
-앱은 **단순히** **요청**하고 **접근 권한을 부여받는 것**만으로는 부족하며, **관련 권한을 가져야** 합니다.\
+앱은 **단순히** **요청**하고 **접근 권한을 부여받는 것**만으로는 충분하지 않으며, **관련 권한을 가져야** 합니다.\
 예를 들어 **Telegram**은 **카메라에 접근하기 위해** `com.apple.security.device.camera` 권한을 가지고 있습니다. 이 **권한이 없는 앱**은 카메라에 접근할 수 **없으며** (사용자에게 권한을 요청하지도 않습니다).
 
 그러나 앱이 `~/Desktop`, `~/Downloads` 및 `~/Documents`와 같은 **특정 사용자 폴더에 접근하기 위해서는** 특정 **권한이 필요하지 않습니다.** 시스템은 접근을 투명하게 처리하고 **필요에 따라 사용자에게 요청**합니다.
@@ -219,10 +219,10 @@ codesign -dv --entitlements :- /System/Applications/Calendar.app
 <string>kTCCServiceAddressBook</string>
 </array>
 ```
-이것은 Calendar가 사용자에게 알림, 캘린더 및 주소록에 접근할 것을 요청하지 않도록 합니다.
+이것은 Calendar가 사용자에게 알림, 캘린더 및 주소록에 접근할 것을 요청하는 것을 피할 것입니다.
 
 > [!TIP]
-> 권한에 대한 공식 문서 외에도 **다음에서 비공식적인 흥미로운 정보를 찾을 수 있습니다** [**https://newosxbook.com/ent.jl**](https://newosxbook.com/ent.jl)
+> 권한에 대한 공식 문서 외에도 **다음에서 권한에 대한 비공식적인 흥미로운 정보를 찾을 수 있습니다** [**https://newosxbook.com/ent.jl**](https://newosxbook.com/ent.jl)
 
 일부 TCC 권한은: kTCCServiceAppleEvents, kTCCServiceCalendar, kTCCServicePhotos... 모든 권한을 정의하는 공개 목록은 없지만 이 [**알려진 목록**](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive#service)을 확인할 수 있습니다.
 
@@ -234,7 +234,7 @@ codesign -dv --entitlements :- /System/Applications/Calendar.app
 
 ### 사용자 의도 / com.apple.macl
 
-앞서 언급했듯이, **파일을 드래그 앤 드롭하여 앱에 접근을 부여할 수 있습니다**. 이 접근은 어떤 TCC 데이터베이스에도 명시되지 않지만 **파일의 확장된 속성**으로 저장됩니다. 이 속성은 허용된 앱의 **UUID**를 저장합니다:
+앞서 언급했듯이, **파일에 접근하기 위해 앱으로 드래그 앤 드롭하여 접근을 부여할 수 있습니다**. 이 접근은 어떤 TCC 데이터베이스에도 명시되지 않지만 **파일의 확장된 속성**으로 저장됩니다. 이 속성은 허용된 앱의 **UUID**를 **저장**합니다:
 ```bash
 xattr Desktop/private.txt
 com.apple.macl
@@ -252,15 +252,15 @@ uuid 769FD8F1-90E0-3206-808C-A8947BEBD6C3
 > [!NOTE]
 > **`com.apple.macl`** 속성이 tccd가 아닌 **Sandbox**에 의해 관리된다는 점이 흥미롭습니다.
 >
-> 또한, 컴퓨터에서 앱의 UUID를 허용하는 파일을 다른 컴퓨터로 이동하면, 동일한 앱이 다른 UID를 가지기 때문에 해당 앱에 대한 접근 권한이 부여되지 않는다는 점에 유의하세요.
+> 또한, 컴퓨터에서 앱의 UUID를 허용하는 파일을 다른 컴퓨터로 이동하면, 동일한 앱이 다른 UID를 가지기 때문에 해당 앱에 대한 접근 권한이 부여되지 않습니다.
 
-확장 속성 `com.apple.macl` **는** 다른 확장 속성과 달리 **SIP에 의해 보호되기 때문에** **지울 수 없습니다**. 그러나 [**이 게시물에서 설명된 바와 같이**](https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/), 파일을 **압축**하고 **삭제**한 후 **압축 해제**하면 이를 비활성화할 수 있습니다.
+확장 속성 `com.apple.macl` **는** 다른 확장 속성과 달리 **SIP에 의해 보호되기 때문에** 지울 수 없습니다. 그러나 [**이 게시물에서 설명된 바와 같이**](https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/), 파일을 **압축**하고 **삭제**한 후 **압축 해제**하면 이를 비활성화할 수 있습니다.
 
 ## TCC Privesc & Bypasses
 
 ### TCC에 삽입
 
-어느 시점에서 TCC 데이터베이스에 대한 쓰기 접근 권한을 얻으면 다음과 같은 방법을 사용하여 항목을 추가할 수 있습니다(주석을 제거하세요):
+어떤 시점에 TCC 데이터베이스에 대한 쓰기 접근 권한을 얻으면 다음과 같은 방법을 사용하여 항목을 추가할 수 있습니다(주석을 제거하세요):
 
 <details>
 
@@ -331,7 +331,7 @@ macos-apple-events.md
 이 경우 귀하의 앱은 **`com.apple.Finder`**에 대한 **`kTCCServiceAppleEvents`** 권한이 필요합니다.
 
 {{#tabs}}
-{{#tab name="사용자 TCC.db 훔치기"}}
+{{#tab name="사용자의 TCC.db 훔치기"}}
 ```applescript
 # This AppleScript will copy the system TCC database into /tmp
 osascript<<EOD
@@ -358,7 +358,7 @@ EOD
 {{#endtab}}
 {{#endtabs}}
 
-이것을 악용하여 **자신만의 사용자 TCC 데이터베이스를 작성할 수 있습니다**.
+이것을 악용하여 **자신의 사용자 TCC 데이터베이스를 작성할 수 있습니다**.
 
 > [!WARNING]
 > 이 권한을 사용하면 **Finder에게 TCC 제한 폴더에 접근하도록 요청하고 파일을 받을 수 있지만**, 내가 아는 한 **Finder가 임의의 코드를 실행하도록 만들 수는 없습니다**. 따라서 FDA 접근을 완전히 악용할 수는 없습니다.
@@ -446,7 +446,7 @@ rm "$HOME/Desktop/file"
 
 **`System Events`**에서의 자동화 + 접근성 (**`kTCCServicePostEvent`**)은 **프로세스에 키 입력을 전송**할 수 있게 해줍니다. 이렇게 하면 Finder를 악용하여 사용자의 TCC.db를 변경하거나 임의의 앱에 FDA를 부여할 수 있습니다(비밀번호 입력이 필요할 수 있습니다).
 
-사용자의 TCC.db를 덮어쓰는 Finder 예:
+Finder가 사용자의 TCC.db를 덮어쓰는 예:
 ```applescript
 -- store the TCC.db file to copy in /tmp
 osascript <<EOF
@@ -506,15 +506,15 @@ EOF
 
 ### User TCC DB to FDA
 
-**사용자 TCC** 데이터베이스에 대한 **쓰기 권한**을 얻으면 **`FDA`** 권한을 부여할 수는 없지만, 시스템 데이터베이스에 있는 사용자만 그 권한을 부여할 수 있습니다.
+**사용자 TCC** 데이터베이스에 대한 **쓰기 권한**을 얻으면 **`FDA`** 권한을 부여할 수는 없으며, 시스템 데이터베이스에 있는 사용자만 이를 부여할 수 있습니다.
 
-하지만 **`Finder에 대한 자동화 권한`**을 부여하고 이전 기술을 남용하여 FDA\*로 권한 상승을 할 수 있습니다.
+하지만 **`Finder에 대한 자동화 권한`**을 부여하고 이전 기술을 남용하여 FDA\*로 상승할 수 있습니다.
 
 ### **FDA to TCC permissions**
 
 **전체 디스크 접근**의 TCC 이름은 **`kTCCServiceSystemPolicyAllFiles`**입니다.
 
-이것이 실제 권한 상승이라고 생각하지는 않지만, 만약 유용하다고 생각된다면: FDA를 제어하는 프로그램을 가지고 있다면 **사용자의 TCC 데이터베이스를 수정하고 자신에게 모든 접근 권한을 부여할 수 있습니다**. 이는 FDA 권한을 잃을 경우 지속성 기술로 유용할 수 있습니다.
+이것이 실제 권한 상승이라고 생각하지 않지만, 만약 유용하다면: FDA를 제어하는 프로그램을 가지고 있다면 **사용자의 TCC 데이터베이스를 수정하고 자신에게 모든 접근 권한을 부여할 수 있습니다**. 이는 FDA 권한을 잃을 경우 지속성 기술로 유용할 수 있습니다.
 
 ### **SIP Bypass to TCC Bypass**
 
