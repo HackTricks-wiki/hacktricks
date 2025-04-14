@@ -9,8 +9,9 @@ _Hacktricks logos & motion design by_ [_@ppiernacho_](https://www.instagram.com/
 ```bash
 # Download latest version of hacktricks
 git clone https://github.com/HackTricks-wiki/hacktricks
+
 # Select the language you want to use
-export LANG="master"
+export LANG="master" # Leave master for english
 # "af" for Afrikaans
 # "de" for German
 # "el" for Greek
@@ -27,6 +28,7 @@ export LANG="master"
 # "tr" for Turkish
 # "uk" for Ukrainian
 # "zh" for Chinese
+
 # Run the docker container indicating the path to the hacktricks folder
 docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git config --global --add safe.directory /app && git checkout $LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
