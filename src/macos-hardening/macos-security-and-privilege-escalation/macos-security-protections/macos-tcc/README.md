@@ -256,7 +256,7 @@ uuid 769FD8F1-90E0-3206-808C-A8947BEBD6C3
 
 Rozszerzony atrybut `com.apple.macl` **nie może być usunięty** jak inne rozszerzone atrybuty, ponieważ jest **chroniony przez SIP**. Jednak, jak [**wyjaśniono w tym poście**](https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/), możliwe jest jego wyłączenie **zipując** plik, **usuwając** go i **rozpakowując** go.
 
-## TCC Privesc & Bypassy
+## TCC Privesc & Bypass
 
 ### Wstaw do TCC
 
@@ -554,10 +554,10 @@ AllowApplicationsList.plist:
 </dict>
 </plist>
 ```
-### TCC Bypassy
+### TCC Bypass
 
 {{#ref}}
-macos-tcc-bypassy/
+macos-tcc-bypasses/
 {{#endref}}
 
 ## Odniesienia

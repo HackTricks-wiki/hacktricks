@@ -1,4 +1,4 @@
-# macOS TCC Bypassy
+# macOS TCC Bypass
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 
