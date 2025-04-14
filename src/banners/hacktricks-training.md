@@ -1,6 +1,7 @@
 > [!TIP]
 > 学习和实践 AWS 黑客技术：<img src="../../../../../images/arte.png" alt="" style="width:auto;height:24px;vertical-align:middle;">[**HackTricks Training AWS Red Team Expert (ARTE)**](https://training.hacktricks.xyz/courses/arte)<img src="../../../../../images/arte.png" alt="" style="width:auto;height:24px;vertical-align:middle;">\
 > 学习和实践 GCP 黑客技术：<img src="../../../../../images/grte.png" alt="" style="width:auto;height:24px;vertical-align:middle;">[**HackTricks Training GCP Red Team Expert (GRTE)**](https://training.hacktricks.xyz/courses/grte)<img src="../../../../../images/grte.png" alt="" style="width:auto;height:24px;vertical-align:middle;">
+> 学习和实践 Azure 黑客技术：<img src="../../../../../images/azrte.png" alt="" style="width:auto;height:24px;vertical-align:middle;">[**HackTricks Training Azure Red Team Expert (AzRTE)**](https://training.hacktricks.xyz/courses/azrte)<img src="../../../../../images/azrte.png" alt="" style="width:auto;height:24px;vertical-align:middle;">
 >
 > <details>
 >
