@@ -8,8 +8,28 @@ _Hacktricks logotipi i animacija dizajnirani od_ [_@ppiernacho_](https://www.ins
 ```bash
 # Download latest version of hacktricks
 git clone https://github.com/HackTricks-wiki/hacktricks
+
+# Select the language you want to use
+export LANG="master" # Leave master for english
+# "af" for Afrikaans
+# "de" for German
+# "el" for Greek
+# "es" for Spanish
+# "fr" for French
+# "hi" for Hindi
+# "it" for Italian
+# "ja" for Japanese
+# "ko" for Korean
+# "pl" for Polish
+# "pt" for Portuguese
+# "sr" for Serbian
+# "sw" for Swahili
+# "tr" for Turkish
+# "uk" for Ukrainian
+# "zh" for Chinese
+
 # Run the docker container indicating the path to the hacktricks folder
-docker run -d --rm -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git config --global --add safe.directory /app && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
+docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git config --global --add safe.directory /app && git checkout $LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
 Vaša lokalna kopija HackTricks biće **dostupna na [http://localhost:3337](http://localhost:3337)** nakon <5 minuta (potrebno je da se izgradi knjiga, budite strpljivi).
 
@@ -31,7 +51,7 @@ Možete proveriti njihov **blog** na [**https://blog.stmcyber.com**](https://blo
 
 <figure><img src="images/image (45).png" alt=""><figcaption></figcaption></figure>
 
-[**RootedCON**](https://www.rootedcon.com) je najrelevantnija sajber bezbednosna manifestacija u **Španiji** i jedna od najvažnijih u **Evropi**. Sa **misijom promovisanja tehničkog znanja**, ovaj kongres je vrelo mesto okupljanja profesionalaca u tehnologiji i sajber bezbednosti u svakoj disciplini.
+[**RootedCON**](https://www.rootedcon.com) je najrelevantnija manifestacija sajber bezbednosti u **Španiji** i jedna od najvažnijih u **Evropi**. Sa **misijom promovisanja tehničkog znanja**, ovaj kongres je vrelo mesto okupljanja za profesionalce u tehnologiji i sajber bezbednosti u svakoj disciplini.
 
 {{#ref}}
 https://www.rootedcon.com/
@@ -43,7 +63,7 @@ https://www.rootedcon.com/
 
 <figure><img src="images/image (47).png" alt=""><figcaption></figcaption></figure>
 
-**Intigriti** je **Evropa #1** etička platforma za hakovanje i **bug bounty.**
+**Intigriti** je **Evropa #1** etička platforma za hakovanje i **bug bounty platforma.**
 
 **Saveta za bug bounty**: **prijavite se** za **Intigriti**, premium **bug bounty platformu koju su kreirali hakeri, za hakere**! Pridružite nam se na [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) danas, i počnite da zarađujete nagrade do **$100,000**!
 
@@ -58,7 +78,7 @@ https://go.intigriti.com/hacktricks
 <figure><img src="images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Koristite [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) za lako kreiranje i **automatizaciju radnih tokova** pokretanih najnaprednijim zajedničkim alatima na svetu.
+Koristite [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) za lako kreiranje i **automatizaciju radnih tokova** pokretanih najnaprednijim alatima zajednice na svetu.
 
 Pribavite pristup danas:
 
@@ -102,7 +122,7 @@ https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktrick
 
 **SerpApi** nudi brze i lake API-je u realnom vremenu za **pristup rezultatima pretraživača**. Oni sakupljaju podatke sa pretraživača, upravljaju proxy-ima, rešavaju captcha izazove i analiziraju sve bogate strukturirane podatke za vas.
 
-Pretplata na jedan od SerpApi planova uključuje pristup više od 50 različitih API-ja za sakupljanje podataka sa različitih pretraživača, uključujući Google, Bing, Baidu, Yahoo, Yandex i druge.\
+Pretplata na jedan od planova SerpApi uključuje pristup više od 50 različitih API-ja za sakupljanje podataka sa različitih pretraživača, uključujući Google, Bing, Baidu, Yahoo, Yandex i druge.\
 Za razliku od drugih provajdera, **SerpApi ne sakuplja samo organske rezultate**. Odgovori SerpApi dosledno uključuju sve oglase, inline slike i video zapise, grafove znanja i druge elemente i funkcije prisutne u rezultatima pretrage.
 
 Trenutni klijenti SerpApi uključuju **Apple, Shopify i GrubHub**.\
@@ -115,7 +135,7 @@ Možete **napraviti besplatan nalog** [**ovde**](https://serpapi.com/users/sign_
 
 <figure><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Naučite tehnologije i veštine potrebne za izvođenje istraživanja ranjivosti, penetracionog testiranja i obrnute inženjeringa kako biste zaštitili mobilne aplikacije i uređaje. **Savladajte iOS i Android bezbednost** kroz naše kurseve na zahtev i **dobijte sertifikat**:
+Naučite tehnologije i veštine potrebne za sprovođenje istraživanja ranjivosti, penetracionog testiranja i obrnute inženjeringa kako biste zaštitili mobilne aplikacije i uređaje. **Savladajte iOS i Android bezbednost** kroz naše kurseve na zahtev i **dobijte sertifikat**:
 
 {{#ref}}
 https://academy.8ksec.io/
@@ -127,16 +147,31 @@ https://academy.8ksec.io/
 
 <figure><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.net) je profesionalna kompanija za sajber bezbednost sa sedištem u **Amsterdamu** koja pomaže **zaštiti** preduzeća **široko po svetu** od najnovijih pretnji u oblasti sajber bezbednosti pružajući **usluge ofanzivne bezbednosti** sa **modernim** pristupom.
+[**WebSec**](https://websec.net) je profesionalna kompanija za sajber bezbednost sa sedištem u **Amsterdamu** koja pomaže **zaštiti** preduzeća **široko u svetu** od najnovijih pretnji u oblasti sajber bezbednosti pružajući **usluge ofanzivne bezbednosti** sa **modernim** pristupom.
 
-WebSec je međunarodna bezbednosna kompanija sa kancelarijama u Amsterdamu i Vajomingu. Oni nude **sve-u-jednom usluge bezbednosti** što znači da rade sve; Pentesting, **Bezbednosne** revizije, Obuke o svesti, Phishing kampanje, Revizije koda, Razvoj eksploita, Outsourcing bezbednosnih stručnjaka i još mnogo toga.
+WebSec je međunarodna bezbednosna kompanija sa kancelarijama u Amsterdamu i Vajomingu. Oni nude **sve-u-jednom usluge bezbednosti** što znači da rade sve; Pentesting, **Bezbednosne** revizije, Obuke o svesti, Phishing kampanje, Revizija koda, Razvoj eksploita, Outsourcing bezbednosnih stručnjaka i još mnogo toga.
 
 Još jedna zanimljiva stvar o WebSec-u je da, za razliku od industrijskog proseka, WebSec je **veoma siguran u svoje veštine**, do te mere da **garantuje najbolje kvalitetne rezultate**, kako stoji na njihovom sajtu "**Ako ne možemo da hakujemo, ne plaćate!**". Za više informacija pogledajte njihov [**sajt**](https://websec.net/en/) i [**blog**](https://websec.net/blog/)!
 
-Pored navedenog, WebSec je takođe **posvećen podržavalac HackTricks.**
+Pored navedenog, WebSec je takođe **posvećen podržavalac HackTricks-a.**
 
 {{#ref}}
 https://www.youtube.com/watch?v=Zq2JycGDCPM
+{{#endref}}
+
+---
+
+### [Venacus](https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons)
+
+<figure><img src="images/venacus-logo.svg" alt="venacus logo"><figcaption></figcaption></figure>
+
+[**Venacus**](https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons) je pretraživač podataka o curenju (leak). \
+Pružamo pretragu nasumičnih stringova (poput Google-a) preko svih vrsta curenja podataka, velikih i malih --ne samo velikih-- iz više izvora. \
+Pretraga ljudi, pretraga AI, pretraga organizacija, API (OpenAPI) pristup, integracija theHarvester-a, sve funkcije koje pentester treba.\
+**HackTricks nastavlja da bude sjajna platforma za učenje za sve nas i ponosni smo što je sponzorišemo!**
+
+{{#ref}}
+https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons
 {{#endref}}
 
 ## Licenca i odricanje od odgovornosti
