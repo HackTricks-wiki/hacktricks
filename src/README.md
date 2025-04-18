@@ -8,8 +8,28 @@ _Hacktricks logoları ve hareket tasarımı_ [_@ppiernacho_](https://www.instagr
 ```bash
 # Download latest version of hacktricks
 git clone https://github.com/HackTricks-wiki/hacktricks
+
+# Select the language you want to use
+export LANG="master" # Leave master for english
+# "af" for Afrikaans
+# "de" for German
+# "el" for Greek
+# "es" for Spanish
+# "fr" for French
+# "hi" for Hindi
+# "it" for Italian
+# "ja" for Japanese
+# "ko" for Korean
+# "pl" for Polish
+# "pt" for Portuguese
+# "sr" for Serbian
+# "sw" for Swahili
+# "tr" for Turkish
+# "uk" for Ukrainian
+# "zh" for Chinese
+
 # Run the docker container indicating the path to the hacktricks folder
-docker run -d --rm -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git config --global --add safe.directory /app && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
+docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git config --global --add safe.directory /app && git checkout $LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
 Yerel kopyanız **[http://localhost:3337](http://localhost:3337)** adresinde **5 dakikadan** kısa bir süre içinde **mevcut olacak** (kitabı oluşturması gerekiyor, sabırlı olun).
 
@@ -19,7 +39,7 @@ Yerel kopyanız **[http://localhost:3337](http://localhost:3337)** adresinde **5
 
 <figure><img src="images/stm (1).png" alt=""><figcaption></figcaption></figure>
 
-[**STM Cyber**](https://www.stmcyber.com) **HACK THE UNHACKABLE** sloganına sahip harika bir siber güvenlik şirketidir. Kendi araştırmalarını yapar ve **birçok değerli siber güvenlik hizmeti** sunmak için kendi hacking araçlarını geliştirir; pentesting, Kırmızı takımlar ve eğitim gibi.
+[**STM Cyber**](https://www.stmcyber.com), sloganı **HACK THE UNHACKABLE** olan harika bir siber güvenlik şirketidir. Kendi araştırmalarını yapar ve **pentesting, Kırmızı takımlar ve eğitim** gibi birkaç değerli siber güvenlik hizmeti sunmak için kendi hacking araçlarını geliştirir.
 
 **Bloglarını** [**https://blog.stmcyber.com**](https://blog.stmcyber.com) adresinde kontrol edebilirsiniz.
 
@@ -31,7 +51,7 @@ Yerel kopyanız **[http://localhost:3337](http://localhost:3337)** adresinde **5
 
 <figure><img src="images/image (45).png" alt=""><figcaption></figcaption></figure>
 
-[**RootedCON**](https://www.rootedcon.com) **İspanya**'daki en önemli siber güvenlik etkinliği ve **Avrupa**'daki en önemli etkinliklerden biridir. **Teknik bilgiyi teşvik etme misyonu** ile bu kongre, her disiplinde teknoloji ve siber güvenlik profesyonelleri için kaynayan bir buluşma noktasıdır.
+[**RootedCON**](https://www.rootedcon.com), **İspanya**'daki en önemli siber güvenlik etkinliği ve **Avrupa**'daki en önemli etkinliklerden biridir. **Teknik bilgiyi teşvik etme misyonu** ile bu kongre, her disiplinde teknoloji ve siber güvenlik profesyonelleri için kaynayan bir buluşma noktasıdır.
 
 {{#ref}}
 https://www.rootedcon.com/
@@ -45,7 +65,7 @@ https://www.rootedcon.com/
 
 **Intigriti**, **Avrupa'nın #1** etik hacking ve **bug bounty platformudur.**
 
-**Bug bounty ipucu**: **Intigriti**'ye **kaydolun**, hackerlar tarafından, hackerlar için oluşturulmuş bir premium **bug bounty platformu**! Bugün [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) adresine katılın ve **$100,000**'a kadar ödüller kazanmaya başlayın!
+**Bug bounty ipucu**: **Intigriti**'ye **kaydolun**, hackerlar tarafından, hackerlar için oluşturulmuş bir premium **bug bounty platformu**! Bugün [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) adresinde bize katılın ve **$100,000**'a kadar ödüller kazanmaya başlayın!
 
 {{#ref}}
 https://go.intigriti.com/hacktricks
@@ -78,17 +98,17 @@ Deneyimli hackerlar ve bug bounty avcıları ile iletişim kurmak için [**Hacke
 - **Gerçek Zamanlı Hack Haberleri:** Hızla değişen hacking dünyasında gerçek zamanlı haberler ve içgörülerle güncel kalın
 - **Son Duyurular:** Yeni başlayan bug bounty'ler ve önemli platform güncellemeleri hakkında bilgi sahibi olun
 
-**Bugün** [**Discord**](https://discord.com/invite/N3FrSbmwdy) üzerinden bize katılın ve en iyi hackerlarla iş birliği yapmaya başlayın!
+**Bize katılın** [**Discord**](https://discord.com/invite/N3FrSbmwdy) üzerinde ve bugün en iyi hackerlarla iş birliği yapmaya başlayın!
 
 ---
 
-### [Pentest-Tools.com](https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons) - Temel penetrasyon testi araç seti
+### [Pentest-Tools.com](https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons) - Temel penetrasyon testi aracı
 
 <figure><img src="images/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
 
 **Web uygulamalarınız, ağınız ve bulutunuz hakkında bir hacker perspektifi edinin**
 
-**Gerçek iş etkisi olan kritik, istismar edilebilir güvenlik açıklarını bulun ve raporlayın.** Saldırı yüzeyini haritalamak, ayrıcalıkları artırmanıza izin veren güvenlik sorunlarını bulmak ve temel kanıtları toplamak için 20'den fazla özel aracımızı kullanarak, sıkı çalışmanızı ikna edici raporlara dönüştürün.
+**Gerçek iş etkisi olan kritik, istismar edilebilir güvenlik açıklarını bulun ve raporlayın.** Saldırı yüzeyini haritalamak, yetki yükseltmenize izin veren güvenlik sorunlarını bulmak ve temel kanıtları toplamak için 20'den fazla özel aracımızı kullanın, böylece sıkı çalışmanızı ikna edici raporlara dönüştürün.
 
 {{#ref}}
 https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons
@@ -100,10 +120,10 @@ https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktrick
 
 <figure><img src="images/image (1254).png" alt=""><figcaption></figcaption></figure>
 
-**SerpApi**, **arama motoru sonuçlarına** erişim için hızlı ve kolay gerçek zamanlı API'ler sunar. Arama motorlarını tarar, proxy'leri yönetir, captcha'ları çözer ve sizin için tüm zengin yapılandırılmış verileri ayrıştırır.
+**SerpApi**, **arama motoru sonuçlarına** hızlı ve kolay gerçek zamanlı API'ler sunar. Arama motorlarını tarar, proxy'leri yönetir, captcha'ları çözer ve sizin için tüm zengin yapılandırılmış verileri ayrıştırır.
 
-SerpApi'nın planlarından birine abone olmak, Google, Bing, Baidu, Yahoo, Yandex ve daha fazlası dahil olmak üzere farklı arama motorlarını taramak için 50'den fazla API'ye erişim içerir.\
-Diğer sağlayıcılardan farklı olarak, **SerpApi sadece organik sonuçları taramaz**. SerpApi yanıtları, arama sonuçlarında bulunan tüm reklamları, satır içi resimleri ve videoları, bilgi grafikleri ve diğer öğeleri ve özellikleri sürekli olarak içerir.
+SerpApi'nin planlarından birine abone olmak, Google, Bing, Baidu, Yahoo, Yandex ve daha fazlası dahil olmak üzere farklı arama motorlarını taramak için 50'den fazla API'ye erişim içerir.\
+Diğer sağlayıcılardan farklı olarak, **SerpApi sadece organik sonuçları taramaz**. SerpApi yanıtları sürekli olarak tüm reklamları, satır içi resimleri ve videoları, bilgi grafikleri ve arama sonuçlarında bulunan diğer öğeleri ve özellikleri içerir.
 
 Mevcut SerpApi müşterileri arasında **Apple, Shopify ve GrubHub** bulunmaktadır.\
 Daha fazla bilgi için [**bloglarına**](https://serpapi.com/blog/) göz atın veya [**oyun alanlarında**](https://serpapi.com/playground) bir örnek deneyin.\
@@ -115,7 +135,7 @@ Daha fazla bilgi için [**bloglarına**](https://serpapi.com/blog/) göz atın v
 
 <figure><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Mobil uygulamaları ve cihazları korumak için güvenlik açığı araştırması, penetrasyon testi ve tersine mühendislik yapma yeteneklerini öğrenin. **iOS ve Android güvenliğini** talep üzerine kurslarımızla öğrenin ve **sertifika alın**:
+Mobil uygulamaları ve cihazları korumak için güvenlik açığı araştırması, penetrasyon testi ve tersine mühendislik yapma yeteneklerini ve teknolojilerini öğrenin. **iOS ve Android güvenliğinde ustalaşın** ve **sertifika alın**:
 
 {{#ref}}
 https://academy.8ksec.io/
@@ -129,14 +149,29 @@ https://academy.8ksec.io/
 
 [**WebSec**](https://websec.net) **Amsterdam** merkezli profesyonel bir siber güvenlik şirketidir ve **dünyanın dört bir yanındaki** işletmeleri en son siber güvenlik tehditlerine karşı korumak için **ofansif güvenlik hizmetleri** sunmaktadır.
 
-WebSec, Amsterdam ve Wyoming'de ofisleri olan uluslararası bir güvenlik şirketidir. **Hepsi bir arada güvenlik hizmetleri** sunar; Pentesting, **Güvenlik** Denetimleri, Farkındalık Eğitimleri, Phishing Kampanyaları, Kod İncelemesi, Exploit Geliştirme, Güvenlik Uzmanları Dış Kaynak Kullanımı ve daha fazlasını içerir.
+WebSec, Amsterdam ve Wyoming'de ofisleri olan uluslararası bir güvenlik şirketidir. **Pentesting, Güvenlik Denetimleri, Farkındalık Eğitimleri, Phishing Kampanyaları, Kod İncelemesi, İstismar Geliştirme, Güvenlik Uzmanları Dış Kaynak Kullanımı** ve daha fazlasını içeren **hepsi bir arada güvenlik hizmetleri** sunmaktadır.
 
-WebSec'in bir diğer ilginç yanı, sektördeki ortalamadan farklı olarak WebSec'in **yeteneklerine çok güvenmesidir**, o kadar ki **en iyi kalite sonuçları garanti eder**, web sitelerinde "**Eğer hackleyemiyorsak, ödemezsiniz!**" ifadesi yer almaktadır. Daha fazla bilgi için [**web sitelerine**](https://websec.net/en/) ve [**bloglarına**](https://websec.net/blog/) göz atın!
+WebSec'in bir diğer ilginç yanı, sektördeki ortalamadan farklı olarak WebSec'in **yeteneklerine çok güvenmesidir**, o kadar ki **en iyi kalite sonuçları garanti eder**, web sitelerinde "**Eğer hackleyemiyorsak, ödemiyorsunuz!**" ifadesi yer almaktadır. Daha fazla bilgi için [**web sitelerine**](https://websec.net/en/) ve [**bloglarına**](https://websec.net/blog/) göz atın!
 
 Yukarıdakilere ek olarak WebSec, **HackTricks'in kararlı bir destekçisidir.**
 
 {{#ref}}
 https://www.youtube.com/watch?v=Zq2JycGDCPM
+{{#endref}}
+
+---
+
+### [Venacus](https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons)
+
+<figure><img src="images/venacus-logo.svg" alt="venacus logo"><figcaption></figcaption></figure>
+
+[**Venacus**](https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons), bir veri ihlali (leak) arama motorudur. \
+Küçük ve büyük tüm veri ihlalleri üzerinde (sadece büyük olanlar değil) rastgele dize araması (google gibi) sağlıyoruz. \
+İnsan araması, AI araması, organizasyon araması, API (OpenAPI) erişimi, theHarvester entegrasyonu, bir pentesterin ihtiyaç duyduğu tüm özellikler.\
+**HackTricks, hepimiz için harika bir öğrenme platformu olmaya devam ediyor ve onu desteklemekten gurur duyuyoruz!**
+
+{{#ref}}
+https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons
 {{#endref}}
 
 ## Lisans & Feragatname
