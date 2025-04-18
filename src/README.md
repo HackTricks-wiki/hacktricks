@@ -2,14 +2,34 @@
 
 <figure><img src="images/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
-_Hacktricks логотипи та анімаційний дизайн від_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
+_Логотипи та анімаційний дизайн Hacktricks від_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
 
 ### Запустіть HackTricks локально
 ```bash
 # Download latest version of hacktricks
 git clone https://github.com/HackTricks-wiki/hacktricks
+
+# Select the language you want to use
+export LANG="master" # Leave master for english
+# "af" for Afrikaans
+# "de" for German
+# "el" for Greek
+# "es" for Spanish
+# "fr" for French
+# "hi" for Hindi
+# "it" for Italian
+# "ja" for Japanese
+# "ko" for Korean
+# "pl" for Polish
+# "pt" for Portuguese
+# "sr" for Serbian
+# "sw" for Swahili
+# "tr" for Turkish
+# "uk" for Ukrainian
+# "zh" for Chinese
+
 # Run the docker container indicating the path to the hacktricks folder
-docker run -d --rm -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git config --global --add safe.directory /app && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
+docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git config --global --add safe.directory /app && git checkout $LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
 Ваш локальний екземпляр HackTricks буде **доступний за [http://localhost:3337](http://localhost:3337)** через <5 хвилин (необхідно зібрати книгу, будьте терплячими).
 
@@ -43,7 +63,7 @@ https://www.rootedcon.com/
 
 <figure><img src="images/image (47).png" alt=""><figcaption></figcaption></figure>
 
-**Intigriti** - це **№1 в Європі** платформа для етичного хакінгу та **bug bounty.**
+**Intigriti** - це **перша** етична платформа для хакінгу та **bug bounty** в **Європі**.
 
 **Порада щодо bug bounty**: **зареєструйтесь** на **Intigriti**, преміум **платформі bug bounty, створеній хакерами для хакерів**! Приєднуйтесь до нас на [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) сьогодні та почніть заробляти винагороди до **$100,000**!
 
@@ -58,7 +78,7 @@ https://go.intigriti.com/hacktricks
 <figure><img src="images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Використовуйте [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks), щоб легко створювати та **автоматизувати робочі процеси**, використовуючи найсучасніші інструменти спільноти.
+Використовуйте [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) для легкого створення та **автоматизації робочих процесів**, підтримуваних найсучаснішими інструментами спільноти.
 
 Отримайте доступ сьогодні:
 
@@ -86,7 +106,7 @@ https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktr
 
 <figure><img src="images/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
 
-**Отримайте погляд хакера на ваші веб-додатки, мережу та хмару**
+**Отримайте перспективу хакера на свої веб-додатки, мережу та хмару**
 
 **Знайдіть і повідомте про критичні, експлуатовані вразливості з реальним бізнес-імпактом.** Використовуйте наші 20+ спеціальних інструментів для картографування поверхні атаки, знаходження проблем безпеки, які дозволяють вам підвищити привілеї, і використовуйте автоматизовані експлойти для збору важливих доказів, перетворюючи вашу важку працю на переконливі звіти.
 
@@ -115,7 +135,7 @@ https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktrick
 
 <figure><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Вивчайте технології та навички, необхідні для проведення досліджень вразливостей, тестування на проникнення та реверс-інжинірингу для захисту мобільних додатків та пристроїв. **Опануйте безпеку iOS та Android** через наші курси на вимогу та **отримайте сертифікат**:
+Вивчайте технології та навички, необхідні для проведення досліджень вразливостей, тестування на проникнення та зворотного інженерії для захисту мобільних додатків та пристроїв. **Опануйте безпеку iOS та Android** через наші курси за запитом та **отримайте сертифікат**:
 
 {{#ref}}
 https://academy.8ksec.io/
@@ -127,16 +147,31 @@ https://academy.8ksec.io/
 
 <figure><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.net) - це професійна компанія з кібербезпеки, що базується в **Амстердамі**, яка допомагає **захищати** бізнеси **по всьому світу** від останніх загроз кібербезпеки, надаючи **послуги з наступальної безпеки** з **сучасним** підходом.
+[**WebSec**](https://websec.net) - це професійна компанія з кібербезпеки, що базується в **Амстердамі**, яка допомагає **захищати** бізнеси **по всьому світу** від останніх загроз у сфері кібербезпеки, надаючи **послуги наступальної безпеки** з **сучасним** підходом.
 
-WebSec - це міжнародна компанія з безпеки з офісами в Амстердамі та Вайомінгу. Вони пропонують **все-в-одному послуги безпеки**, що означає, що вони роблять все; Pentesting, **Аудити** безпеки, Тренінги з обізнаності, Фішингові кампанії, Огляд коду, Розробка експлойтів, Аутсорсинг експертів з безпеки та багато іншого.
+WebSec - це міжнародна компанія з безпеки з офісами в Амстердамі та Вайомінгу. Вони пропонують **все-в-одному послуги безпеки**, що означає, що вони роблять все; Pentesting, **Аудити** безпеки, Тренінги з обізнаності, Фішинг-кампанії, Огляд коду, Розробка експлойтів, Аутсорсинг експертів з безпеки та багато іншого.
 
-Ще одна цікава річ про WebSec полягає в тому, що на відміну від середньої по галузі, WebSec **дуже впевнена у своїх навичках**, настільки, що вони **гарантують найкращі результати якості**, на їхньому сайті зазначено: "**Якщо ми не можемо зламати це, ви не платите!**". Для отримання додаткової інформації ознайомтеся з їхнім [**сайтом**](https://websec.net/en/) та [**блогом**](https://websec.net/blog/)!
+Ще одна цікава річ про WebSec полягає в тому, що на відміну від середньої по галузі, WebSec **дуже впевнена у своїх навичках**, настільки, що вони **гарантують найкращі результати якості**, про що зазначено на їхньому веб-сайті "**Якщо ми не можемо зламати це, ви не платите!**". Для отримання додаткової інформації ознайомтеся з їхнім [**веб-сайтом**](https://websec.net/en/) та [**блогом**](https://websec.net/blog/)!
 
-На додаток до вищезазначеного, WebSec також є **відданим прихильником HackTricks.**
+На додаток до вищезазначеного, WebSec також є **відданим спонсором HackTricks.**
 
 {{#ref}}
 https://www.youtube.com/watch?v=Zq2JycGDCPM
+{{#endref}}
+
+---
+
+### [Venacus](https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons)
+
+<figure><img src="images/venacus-logo.svg" alt="venacus logo"><figcaption></figcaption></figure>
+
+[**Venacus**](https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons) - це пошукова система для витоків даних (leak). \
+Ми надаємо пошук випадкових рядків (як google) по всіх типах витоків даних великих і малих --не тільки великих-- з даних з кількох джерел. \
+Пошук людей, пошук AI, пошук організацій, доступ до API (OpenAPI), інтеграція theHarvester, всі функції, які потрібні pentester.\
+**HackTricks продовжує бути чудовою навчальною платформою для нас усіх, і ми пишаємося тим, що спонсоруємо її!**
+
+{{#ref}}
+https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons
 {{#endref}}
 
 ## Ліцензія та відмова від відповідальності
@@ -149,6 +184,6 @@ welcome/hacktricks-values-and-faq.md
 
 ## Статистика Github
 
-![Статистика HackTricks на Github](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
+![HackTricks Github Stats](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
 
 {{#include ./banners/hacktricks-training.md}}
