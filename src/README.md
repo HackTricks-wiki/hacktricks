@@ -8,10 +8,30 @@ _Logos e design em movimento do Hacktricks por_ [_@ppiernacho_](https://www.inst
 ```bash
 # Download latest version of hacktricks
 git clone https://github.com/HackTricks-wiki/hacktricks
+
+# Select the language you want to use
+export LANG="master" # Leave master for english
+# "af" for Afrikaans
+# "de" for German
+# "el" for Greek
+# "es" for Spanish
+# "fr" for French
+# "hi" for Hindi
+# "it" for Italian
+# "ja" for Japanese
+# "ko" for Korean
+# "pl" for Polish
+# "pt" for Portuguese
+# "sr" for Serbian
+# "sw" for Swahili
+# "tr" for Turkish
+# "uk" for Ukrainian
+# "zh" for Chinese
+
 # Run the docker container indicating the path to the hacktricks folder
-docker run -d --rm -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git config --global --add safe.directory /app && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
+docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git config --global --add safe.directory /app && git checkout $LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
-Sua cópia local do HackTricks estará **disponível em [http://localhost:3337](http://localhost:3337)** após <5 minutos (ele precisa compilar o livro, seja paciente).
+Sua cópia local do HackTricks estará **disponível em [http://localhost:3337](http://localhost:3337)** após <5 minutos (ele precisa construir o livro, seja paciente).
 
 ## Patrocinadores Corporativos
 
@@ -74,7 +94,7 @@ https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktr
 
 Junte-se ao servidor [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) para se comunicar com hackers experientes e caçadores de bugs!
 
-- **Insights de Hacking:** Envolva-se com conteúdo que explora a emoção e os desafios do hacking
+- **Insights de Hacking:** Envolva-se com conteúdo que mergulha na emoção e nos desafios do hacking
 - **Notícias de Hack em Tempo Real:** Mantenha-se atualizado com o mundo do hacking em ritmo acelerado através de notícias e insights em tempo real
 - **Últimos Anúncios:** Fique informado sobre os novos bug bounties lançados e atualizações cruciais da plataforma
 
@@ -100,7 +120,7 @@ https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktrick
 
 <figure><img src="images/image (1254).png" alt=""><figcaption></figcaption></figure>
 
-**SerpApi** oferece APIs rápidas e fáceis em tempo real para **acessar resultados de mecanismos de busca**. Eles raspam mecanismos de busca, gerenciam proxies, resolvem captchas e analisam todos os dados estruturados ricos para você.
+**SerpApi** oferece APIs rápidas e fáceis em tempo real para **acessar resultados de mecanismos de busca**. Eles raspam mecanismos de busca, lidam com proxies, resolvem captchas e analisam todos os dados estruturados ricos para você.
 
 Uma assinatura de um dos planos da SerpApi inclui acesso a mais de 50 APIs diferentes para raspagem de diferentes mecanismos de busca, incluindo Google, Bing, Baidu, Yahoo, Yandex e mais.\
 Ao contrário de outros provedores, **a SerpApi não apenas raspa resultados orgânicos**. As respostas da SerpApi incluem consistentemente todos os anúncios, imagens e vídeos inline, gráficos de conhecimento e outros elementos e recursos presentes nos resultados de busca.
@@ -111,7 +131,7 @@ Você pode **criar uma conta gratuita** [**aqui**](https://serpapi.com/users/sig
 
 ---
 
-### [8kSec Academy – Cursos de Segurança Móvel Aprofundados](https://academy.8ksec.io/)
+### [8kSec Academy – Cursos de Segurança Móvel em Profundidade](https://academy.8ksec.io/)
 
 <figure><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
@@ -137,6 +157,21 @@ Além do acima, a WebSec também é um **apoiador comprometido do HackTricks.**
 
 {{#ref}}
 https://www.youtube.com/watch?v=Zq2JycGDCPM
+{{#endref}}
+
+---
+
+### [Venacus](https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons)
+
+<figure><img src="images/venacus-logo.svg" alt="venacus logo"><figcaption></figcaption></figure>
+
+[**Venacus**](https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons) é um mecanismo de busca de vazamentos de dados (leak). \
+Fornecemos busca de strings aleatórias (como o google) sobre todos os tipos de vazamentos de dados grandes e pequenos --não apenas os grandes-- de dados de várias fontes. \
+Busca de pessoas, busca de IA, busca de organizações, acesso API (OpenAPI), integração com oTheHarvester, todos os recursos que um pentester precisa.\
+**HackTricks continua sendo uma ótima plataforma de aprendizado para todos nós e estamos orgulhosos de patrociná-la!**
+
+{{#ref}}
+https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons
 {{#endref}}
 
 ## Licença & Isenção de Responsabilidade
