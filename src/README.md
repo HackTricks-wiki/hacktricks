@@ -8,10 +8,30 @@ _Hacktricks लोगो और मोशन डिज़ाइन_ [_@ppiernach
 ```bash
 # Download latest version of hacktricks
 git clone https://github.com/HackTricks-wiki/hacktricks
+
+# Select the language you want to use
+export LANG="master" # Leave master for english
+# "af" for Afrikaans
+# "de" for German
+# "el" for Greek
+# "es" for Spanish
+# "fr" for French
+# "hi" for Hindi
+# "it" for Italian
+# "ja" for Japanese
+# "ko" for Korean
+# "pl" for Polish
+# "pt" for Portuguese
+# "sr" for Serbian
+# "sw" for Swahili
+# "tr" for Turkish
+# "uk" for Ukrainian
+# "zh" for Chinese
+
 # Run the docker container indicating the path to the hacktricks folder
-docker run -d --rm -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git config --global --add safe.directory /app && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
+docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git config --global --add safe.directory /app && git checkout $LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
-आपकी स्थानीय कॉपी HackTricks **[http://localhost:3337](http://localhost:3337)** पर <5 मिनट के बाद उपलब्ध होगी (इसे पुस्तक बनाने की आवश्यकता है, धैर्य रखें)।
+आपकी स्थानीय कॉपी HackTricks **[http://localhost:3337](http://localhost:3337)** पर <5 मिनट के बाद उपलब्ध होगी (इसमें पुस्तक बनाने की आवश्यकता है, धैर्य रखें)।
 
 ## कॉर्पोरेट प्रायोजक
 
@@ -19,7 +39,7 @@ docker run -d --rm -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr
 
 <figure><img src="images/stm (1).png" alt=""><figcaption></figcaption></figure>
 
-[**STM Cyber**](https://www.stmcyber.com) एक महान साइबर सुरक्षा कंपनी है जिसका नारा है **HACK THE UNHACKABLE**। वे अपने स्वयं के शोध करते हैं और **कई मूल्यवान साइबर सुरक्षा सेवाएं** जैसे pentesting, Red teams और प्रशिक्षण प्रदान करने के लिए अपने स्वयं के हैकिंग उपकरण विकसित करते हैं।
+[**STM Cyber**](https://www.stmcyber.com) एक महान साइबर सुरक्षा कंपनी है जिसका नारा है **HACK THE UNHACKABLE**। वे अपने स्वयं के शोध करते हैं और **कई मूल्यवान साइबर सुरक्षा सेवाएं** जैसे कि pentesting, Red teams और प्रशिक्षण के लिए अपने स्वयं के हैकिंग उपकरण विकसित करते हैं।
 
 आप उनके **ब्लॉग** को [**https://blog.stmcyber.com**](https://blog.stmcyber.com) पर देख सकते हैं।
 
@@ -58,7 +78,7 @@ https://go.intigriti.com/hacktricks
 <figure><img src="images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) का उपयोग करें ताकि आप आसानी से **वर्कफ़्लो** बना और **स्वचालित** कर सकें जो दुनिया के **सबसे उन्नत** सामुदायिक उपकरणों द्वारा संचालित हैं।
+[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) का उपयोग करें ताकि आप दुनिया के **सबसे उन्नत** सामुदायिक उपकरणों द्वारा संचालित **वर्कफ़्लो** को आसानी से बना और स्वचालित कर सकें।
 
 आज ही एक्सेस प्राप्त करें:
 
@@ -78,7 +98,7 @@ https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktr
 - **वास्तविक समय हैक समाचार:** वास्तविक समय की समाचार और अंतर्दृष्टि के माध्यम से तेज़-तर्रार हैकिंग दुनिया के साथ अद्यतित रहें
 - **नवीनतम घोषणाएँ:** नए बग बाउंटी लॉन्च और महत्वपूर्ण प्लेटफॉर्म अपडेट के साथ सूचित रहें
 
-**आज ही हमारे साथ जुड़ें** [**Discord**](https://discord.com/invite/N3FrSbmwdy) पर और शीर्ष हैकर्स के साथ सहयोग करना शुरू करें!
+**हमारे साथ जुड़ें** [**Discord**](https://discord.com/invite/N3FrSbmwdy) पर और आज ही शीर्ष हैकर्स के साथ सहयोग करना शुरू करें!
 
 ---
 
@@ -100,14 +120,14 @@ https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktrick
 
 <figure><img src="images/image (1254).png" alt=""><figcaption></figcaption></figure>
 
-**SerpApi** तेज और आसान वास्तविक समय APIs प्रदान करता है ताकि आप **सर्च इंजन परिणामों** तक पहुँच सकें। वे सर्च इंजनों को स्क्रैप करते हैं, प्रॉक्सी संभालते हैं, कैप्चा हल करते हैं, और आपके लिए सभी समृद्ध संरचित डेटा को पार्स करते हैं।
+**SerpApi** तेज और आसान वास्तविक समय APIs प्रदान करता है ताकि आप **सर्च इंजन परिणामों** तक पहुँच सकें। वे सर्च इंजनों को स्क्रैप करते हैं, प्रॉक्सी को संभालते हैं, कैप्चा हल करते हैं, और आपके लिए सभी समृद्ध संरचित डेटा को पार्स करते हैं।
 
-SerpApi की योजनाओं में से एक की सदस्यता में विभिन्न सर्च इंजनों को स्क्रैप करने के लिए 50 से अधिक विभिन्न APIs तक पहुँच शामिल है, जिसमें Google, Bing, Baidu, Yahoo, Yandex, और अधिक शामिल हैं।\
-अन्य प्रदाताओं के विपरीत, **SerpApi केवल जैविक परिणामों को स्क्रैप नहीं करता**। SerpApi प्रतिक्रियाएँ लगातार सभी विज्ञापनों, इनलाइन छवियों और वीडियो, ज्ञान ग्राफ़, और खोज परिणामों में मौजूद अन्य तत्वों और सुविधाओं को शामिल करती हैं।
+SerpApi की योजनाओं में से एक की सदस्यता में विभिन्न सर्च इंजनों के लिए 50 से अधिक विभिन्न APIs तक पहुँच शामिल है, जिसमें Google, Bing, Baidu, Yahoo, Yandex, और अधिक शामिल हैं।\
+अन्य प्रदाताओं के विपरीत, **SerpApi केवल जैविक परिणामों को स्क्रैप नहीं करता है**। SerpApi प्रतिक्रियाएँ लगातार सभी विज्ञापनों, इनलाइन छवियों और वीडियो, ज्ञान ग्राफ़, और खोज परिणामों में मौजूद अन्य तत्वों और सुविधाओं को शामिल करती हैं।
 
 वर्तमान SerpApi ग्राहक **Apple, Shopify, और GrubHub** हैं।\
 अधिक जानकारी के लिए उनके [**ब्लॉग**](https://serpapi.com/blog/) पर जाएं, या उनके [**प्लेग्राउंड**](https://serpapi.com/playground) में एक उदाहरण आजमाएं।\
-आप [**यहां**](https://serpapi.com/users/sign_up) **एक मुफ्त खाता बना सकते हैं**।
+आप **यहां** [**एक मुफ्त खाता बना सकते हैं**](https://serpapi.com/users/sign_up)**।**
 
 ---
 
@@ -115,7 +135,7 @@ SerpApi की योजनाओं में से एक की सदस्
 
 <figure><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-कमजोरियों के शोध, पेनिट्रेशन टेस्टिंग, और रिवर्स इंजीनियरिंग को करने के लिए आवश्यक तकनीकों और कौशलों को सीखें ताकि मोबाइल ऐप्लिकेशन और उपकरणों की सुरक्षा की जा सके। **iOS और Android सुरक्षा में महारत हासिल करें** हमारे ऑन-डिमांड पाठ्यक्रमों के माध्यम से और **प्रमाणित** हों:
+कमजोरियों के शोध, पेनिट्रेशन टेस्टिंग, और रिवर्स इंजीनियरिंग को करने के लिए आवश्यक तकनीकों और कौशलों को सीखें ताकि मोबाइल ऐप्लिकेशनों और उपकरणों की सुरक्षा की जा सके। **iOS और Android सुरक्षा में महारत हासिल करें** हमारे ऑन-डिमांड पाठ्यक्रमों के माध्यम से और **प्रमाणित हों**:
 
 {{#ref}}
 https://academy.8ksec.io/
@@ -127,16 +147,31 @@ https://academy.8ksec.io/
 
 <figure><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.net) एक पेशेवर साइबर सुरक्षा कंपनी है जो **एम्स्टर्डम** में स्थित है जो **दुनिया भर** में व्यवसायों की सुरक्षा करने में मदद करती है नवीनतम साइबर सुरक्षा खतरों के खिलाफ **आक्रामक-सुरक्षा सेवाएं** प्रदान करके एक **आधुनिक** दृष्टिकोण के साथ।
+[**WebSec**](https://websec.net) एक पेशेवर साइबर सुरक्षा कंपनी है जो **एम्स्टर्डम** में स्थित है जो **दुनिया भर में** व्यवसायों की **सुरक्षा** में मदद करती है नवीनतम साइबर सुरक्षा खतरों के खिलाफ **आक्रामक-सुरक्षा सेवाएं** प्रदान करके एक **आधुनिक** दृष्टिकोण के साथ।
 
 WebSec एक अंतरराष्ट्रीय सुरक्षा कंपनी है जिसके कार्यालय एम्स्टर्डम और वायोमिंग में हैं। वे **ऑल-इन-वन सुरक्षा सेवाएं** प्रदान करते हैं जिसका अर्थ है कि वे सब कुछ करते हैं; Pentesting, **सुरक्षा** ऑडिट, जागरूकता प्रशिक्षण, फ़िशिंग अभियान, कोड समीक्षा, शोषण विकास, सुरक्षा विशेषज्ञों का आउटसोर्सिंग और बहुत कुछ।
 
-WebSec के बारे में एक और अच्छी बात यह है कि उद्योग के औसत के विपरीत WebSec **अपने कौशल में बहुत आत्मविश्वास** है, इस हद तक कि वे **सर्वश्रेष्ठ गुणवत्ता परिणामों की गारंटी** देते हैं, यह उनके वेबसाइट पर लिखा है "**अगर हम इसे हैक नहीं कर सकते, तो आप इसका भुगतान नहीं करते!**" अधिक जानकारी के लिए उनकी [**वेबसाइट**](https://websec.net/en/) और [**ब्लॉग**](https://websec.net/blog/) पर जाएं!
+WebSec के बारे में एक और अच्छी बात यह है कि उद्योग के औसत के विपरीत WebSec **अपनी क्षमताओं में बहुत आत्मविश्वास** है, इस हद तक कि वे **सर्वश्रेष्ठ गुणवत्ता परिणामों की गारंटी** देते हैं, यह उनकी वेबसाइट पर लिखा है "**अगर हम इसे हैक नहीं कर सकते, तो आप इसका भुगतान नहीं करते!**" अधिक जानकारी के लिए उनकी [**वेबसाइट**](https://websec.net/en/) और [**ब्लॉग**](https://websec.net/blog/) पर जाएं!
 
-इसके अलावा, WebSec भी HackTricks का **प्रतिबद्ध समर्थक** है।
+उपरोक्त के अलावा WebSec भी HackTricks का **प्रतिबद्ध समर्थक** है।
 
 {{#ref}}
 https://www.youtube.com/watch?v=Zq2JycGDCPM
+{{#endref}}
+
+---
+
+### [Venacus](https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons)
+
+<figure><img src="images/venacus-logo.svg" alt="venacus logo"><figcaption></figcaption></figure>
+
+[**Venacus**](https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons) एक डेटा ब्रीच (leak) सर्च इंजन है। \
+हम सभी प्रकार के डेटा लीक पर यादृच्छिक स्ट्रिंग खोज (जैसे गूगल) प्रदान करते हैं -- केवल बड़े लीक नहीं -- विभिन्न स्रोतों से डेटा पर। \
+लोगों की खोज, AI खोज, संगठन की खोज, API (OpenAPI) एक्सेस, theHarvester एकीकरण, सभी सुविधाएँ जो एक pentester को चाहिए।\
+**HackTricks हमारे लिए एक महान शिक्षण मंच बना हुआ है और हम इसे प्रायोजित करने पर गर्व महसूस करते हैं!**
+
+{{#ref}}
+https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons
 {{#endref}}
 
 ## लाइसेंस और अस्वीकरण
