@@ -8,10 +8,30 @@ _Hacktricks logo's & bewegingsontwerp deur_ [_@ppiernacho_](https://www.instagra
 ```bash
 # Download latest version of hacktricks
 git clone https://github.com/HackTricks-wiki/hacktricks
+
+# Select the language you want to use
+export LANG="master" # Leave master for english
+# "af" for Afrikaans
+# "de" for German
+# "el" for Greek
+# "es" for Spanish
+# "fr" for French
+# "hi" for Hindi
+# "it" for Italian
+# "ja" for Japanese
+# "ko" for Korean
+# "pl" for Polish
+# "pt" for Portuguese
+# "sr" for Serbian
+# "sw" for Swahili
+# "tr" for Turkish
+# "uk" for Ukrainian
+# "zh" for Chinese
+
 # Run the docker container indicating the path to the hacktricks folder
-docker run -d --rm -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git config --global --add safe.directory /app && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
+docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git config --global --add safe.directory /app && git checkout $LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
-Your local copy of HackTricks will be **available at [http://localhost:3337](http://localhost:3337)** after <5 minutes (dit moet die boek bou, wees geduldig).
+Your local copy of HackTricks will be **available at [http://localhost:3337](http://localhost:3337)** after <5 minutes (it needs to build the book, be patient).
 
 ## Korporatiewe Borge
 
@@ -19,7 +39,7 @@ Your local copy of HackTricks will be **available at [http://localhost:3337](htt
 
 <figure><img src="images/stm (1).png" alt=""><figcaption></figcaption></figure>
 
-[**STM Cyber**](https://www.stmcyber.com) is 'n uitstekende kuberveiligheidsmaatskappy waarvan die leuse is **HACK THE UNHACKABLE**. Hulle doen hul eie navorsing en ontwikkel hul eie hacking gereedskap om **verskeie waardevolle kuberveiligheidsdienste** soos pentesting, Red teams en opleiding aan te bied.
+[**STM Cyber**](https://www.stmcyber.com) is 'n uitstekende kuberveiligheid maatskappy wie se leuse is **HACK THE UNHACKABLE**. Hulle doen hul eie navorsing en ontwikkel hul eie hacking gereedskap om **verskeie waardevolle kuberveiligheid dienste** soos pentesting, Red teams en opleiding aan te bied.
 
 Jy kan hul **blog** in [**https://blog.stmcyber.com**](https://blog.stmcyber.com) nagaan.
 
@@ -58,7 +78,7 @@ https://go.intigriti.com/hacktricks
 <figure><img src="images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Gebruik [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) om maklik **werkvloei** te bou en te **automate** wat aangedryf word deur die wêreld se **meest gevorderde** gemeenskap gereedskap.
+Gebruik [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) om maklik **werkvloei** te bou en te **automate** wat aangedryf word deur die wêreld se **mees gevorderde** gemeenskap gereedskap.
 
 Kry Toegang Vandag:
 
@@ -72,10 +92,10 @@ https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktr
 
 <figure><img src="images/image (3).png" alt=""><figcaption></figcaption></figure>
 
-Sluit by [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) bediener aan om met ervare hackers en bug bounty jagters te kommunikeer!
+Sluit aan by [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) bediener om met ervare hackers en bug bounty jagters te kommunikeer!
 
 - **Hacking Inligting:** Betrek met inhoud wat die opwinding en uitdagings van hacking ondersoek
-- **Regte Tyd Hack Nuus:** Bly op hoogte van die vinnig bewegende hacking wêreld deur middel van regte tyd nuus en insigte
+- **Regstydse Hack Nuus:** Bly op hoogte van die vinnig bewegende hacking wêreld deur regstydse nuus en insigte
 - **Laaste Aankondigings:** Bly ingelig oor die nuutste bug bounties wat bekendgestel word en belangrike platform opdaterings
 
 **Sluit by ons aan op** [**Discord**](https://discord.com/invite/N3FrSbmwdy) en begin vandag saamwerk met top hackers!
@@ -88,7 +108,7 @@ Sluit by [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) bedien
 
 **Kry 'n hacker se perspektief op jou web apps, netwerk, en wolk**
 
-**Vind en rapporteer kritieke, exploitable kwesbaarhede met werklike besigheidsimpak.** Gebruik ons 20+ pasgemaakte gereedskap om die aanval oppervlak te karteer, vind sekuriteitskwessies wat jou toelaat om bevoegdhede te verhoog, en gebruik geoutomatiseerde eksploit om noodsaaklike bewyse te versamel, wat jou harde werk in oortuigende verslae omskakel.
+**Vind en rapporteer kritieke, exploitable kwesbaarhede met werklike besigheidsimpak.** Gebruik ons 20+ pasgemaakte gereedskap om die aanvaloppervlak te karteer, vind sekuriteitskwessies wat jou toelaat om bevoegdhede te verhoog, en gebruik geoutomatiseerde exploits om noodsaaklike bewyse te versamel, wat jou harde werk in oortuigende verslae omskakel.
 
 {{#ref}}
 https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons
@@ -100,10 +120,10 @@ https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktrick
 
 <figure><img src="images/image (1254).png" alt=""><figcaption></figcaption></figure>
 
-**SerpApi** bied vinnige en maklike regte tyd API's om **toegang tot soekenjinresultate** te verkry. Hulle scrape soekenjins, hanteer proxies, los captchas op, en parse al die ryk gestruktureerde data vir jou.
+**SerpApi** bied vinnige en maklike regstydse API's om **toegang tot soekenjinresultate** te verkry. Hulle scrape soekenjins, hanteer proxies, los captchas op, en parse al die ryk gestruktureerde data vir jou.
 
 'n Intekening op een van SerpApi se planne sluit toegang tot meer as 50 verskillende API's in vir die scraping van verskillende soekenjins, insluitend Google, Bing, Baidu, Yahoo, Yandex, en meer.\
-In teenstelling met ander verskaffers, **SerpApi scrape nie net organiese resultate nie**. SerpApi antwoorde sluit konsekwent al die advertensies, inline beelde en video's, kennisgrafieke, en ander elemente en funksies wat in die soekresultate teenwoordig is, in.
+In teenstelling met ander verskaffers, **scrape SerpApi nie net organiese resultate nie**. SerpApi antwoorde sluit konsekwent al die advertensies, inline beelde en video's, kennisgrafieke, en ander elemente en funksies wat in die soekresultate teenwoordig is, in.
 
 Huidige SerpApi kliënte sluit **Apple, Shopify, en GrubHub** in.\
 Vir meer inligting, kyk na hul [**blog**](https://serpapi.com/blog/)**,** of probeer 'n voorbeeld in hul [**speelgrond**](https://serpapi.com/playground)**.**\
@@ -111,11 +131,11 @@ Jy kan **'n gratis rekening** [**hier**](https://serpapi.com/users/sign_up)**.**
 
 ---
 
-### [8kSec Academy – In-Depth Mobile Security Courses](https://academy.8ksec.io/)
+### [8kSec Academy – In-Diepte Mobiele Sekuriteit Kursusse](https://academy.8ksec.io/)
 
 <figure><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Leer die tegnologieë en vaardighede wat nodig is om kwesbaarheid navorsing, penetrasietoetsing, en omgekeerde ingenieurswese uit te voer om mobiele toepassings en toestelle te beskerm. **Meester iOS en Android sekuriteit** deur ons on-demand kursusse en **kry geakkrediteer**:
+Leer die tegnologieë en vaardighede wat benodig word om kwesbaarheid navorsing, penetrasietoetsing, en omgekeerde ingenieurswese uit te voer om mobiele toepassings en toestelle te beskerm. **Meester iOS en Android sekuriteit** deur ons on-demand kursusse en **kry geakkrediteer**:
 
 {{#ref}}
 https://academy.8ksec.io/
@@ -127,7 +147,7 @@ https://academy.8ksec.io/
 
 <figure><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.net) is 'n professionele kuberveiligheidsmaatskappy gebaseer in **Amsterdam** wat help om **besighede** **oor die wêreld** teen die nuutste kuberveiligheid bedreigings te beskerm deur **offensiewe-sekuriteit dienste** met 'n **moderne** benadering te bied.
+[**WebSec**](https://websec.net) is 'n professionele kuberveiligheid maatskappy gebaseer in **Amsterdam** wat help om **besighede** **oor die wêreld** teen die nuutste kuberveiligheid bedreigings te beskerm deur **offensiewe-sekuriteit dienste** met 'n **moderne** benadering te bied.
 
 WebSec is 'n internasionale sekuriteitsmaatskappy met kantore in Amsterdam en Wyoming. Hulle bied **alles-in-een sekuriteitsdienste** aan wat beteken dat hulle dit alles doen; Pentesting, **Sekuriteit** Oudit, Bewustheidsopleiding, Phishing Campagnes, Kode Hersiening, Exploit Ontwikkeling, Sekuriteit Eksperte Uitsourcing en nog baie meer.
 
@@ -139,9 +159,24 @@ Benewens die bogenoemde is WebSec ook 'n **toegewyde ondersteuner van HackTricks
 https://www.youtube.com/watch?v=Zq2JycGDCPM
 {{#endref}}
 
+---
+
+### [Venacus](https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons)
+
+<figure><img src="images/venacus-logo.svg" alt="venacus logo"><figcaption></figcaption></figure>
+
+[**Venacus**](https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons) is 'n data breuk (leak) soekenjin. \
+Ons bied random string soektog (soos google) oor alle tipes data breuke groot en klein --nie net die groot nie-- oor data van verskeie bronne. \
+Mense soektog, KI soektog, organisasie soektog, API (OpenAPI) toegang, dieHarvester integrasie, al die funksies wat 'n pentester benodig.\
+**HackTricks bly 'n wonderlike leerplatform vir ons almal en ons is trots om dit te borg!**
+
+{{#ref}}
+https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons
+{{#endref}}
+
 ## Lisensie & Vrywaring
 
-Kyk hulle in:
+Kyk na hulle in:
 
 {{#ref}}
 welcome/hacktricks-values-and-faq.md
