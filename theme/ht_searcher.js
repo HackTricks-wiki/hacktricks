@@ -470,17 +470,69 @@ window.search = window.search || {};
         // Display results
         showResults(true);
     }
-
-    var branch = lang === "en" ? "master" : lang
-    fetch(`https://raw.githubusercontent.com/HackTricks-wiki/hacktricks/refs/heads/${branch}/searchindex.json`)
-        .then(response => response.json())
-        .then(json => init(json))        
-        .catch(error => { // Try to load searchindex.js if fetch failed
-            var script = document.createElement('script');
-            script.src = `https://raw.githubusercontent.com/HackTricks-wiki/hacktricks/refs/heads/${branch}/searchindex.js`;
-            script.onload = () => init(window.search);
-            document.head.appendChild(script);
-        });
+    async function loadSearchIndex(lang = 'en') {
+        /* ---------- configuration ---------- */
+        const branch       = lang === 'en' ? 'master' : lang;
+        const remoteJson   = `https://raw.githubusercontent.com/HackTricks-wiki/hacktricks/refs/heads/${branch}/searchindex.json`;
+        const remoteJs     = `https://raw.githubusercontent.com/HackTricks-wiki/hacktricks/refs/heads/${branch}/searchindex.js`;
+        const localJson    = 'searchindex.json';
+        const localJs      = 'searchindex.js';
+        const TIMEOUT_MS   = 5_000;
+        /* ----------------------------------- */
+      
+        const fetchWithTimeout = (url, opt = {}) =>
+          Promise.race([
+            fetch(url, opt),
+            new Promise((_, r) => setTimeout(() => r(new Error('timeout')), TIMEOUT_MS))
+          ]);
+      
+        /* 1️⃣ remote JSON -------------------------------------------------- */
+        try {
+          const r = await fetchWithTimeout(remoteJson);
+          if (!r.ok) throw new Error(r.status);
+          return init(await r.json());
+        } catch (err) {
+          console.warn('Remote searchindex.json failed →', err);
+        }
+      
+        /* 2️⃣ local JSON --------------------------------------------------- */
+        try {
+          const r = await fetch(localJson);
+          if (!r.ok) throw new Error(r.status);
+          return init(await r.json());
+        } catch (err) {
+          console.warn('Local searchindex.json failed →', err);
+        }
+      
+        /* helper to load a <script> and wait for it ------------------------ */
+        const loadScript = src =>
+          new Promise((resolve, reject) => {
+            const s = document.createElement('script');
+            s.src = src;
+            s.onload  = resolve;
+            s.onerror = reject;
+            document.head.appendChild(s);
+          });
+      
+        /* 3️⃣ remote JS ----------------------------------------------------- */
+        try {
+          await loadScript(remoteJs);
+          return init(window.search);
+        } catch (err) {
+          console.warn('Remote searchindex.js failed →', err);
+        }
+      
+        /* 4️⃣ local JS ------------------------------------------------------ */
+        try {
+          await loadScript(localJs);
+          return init(window.search);
+        } catch (err) {
+          console.error('Local searchindex.js failed →', err);
+        }
+    }
+      
+    /* kick things off */
+    loadSearchIndex(window.lang || 'en');
 
     // Exported functions
     search.hasFocus = hasFocus;
