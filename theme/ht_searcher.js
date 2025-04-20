@@ -476,15 +476,8 @@ window.search = window.search || {};
         const branch      = lang === 'en' ? 'master' : lang;
         const baseRemote  = `https://raw.githubusercontent.com/HackTricks-wiki/hacktricks/${branch}`;
         const remoteJs    = `${baseRemote}/searchindex.js`;
-        const localJs     = './searchindex.js';
+        const localJs     = '/searchindex.js';
         const TIMEOUT_MS  = 5_000;
-        
-        /* ───────── helpers ───────── */
-        const fetchWithTimeout = (url, opt = {}) =>
-            Promise.race([
-            fetch(url, opt),
-            new Promise((_, r) => setTimeout(() => r(new Error('timeout')), TIMEOUT_MS))
-            ]);
         
         const loadScript = src =>
             new Promise((resolve, reject) => {
