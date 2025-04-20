@@ -80,7 +80,7 @@ jobs:
           fi
           (git add searchindex.js searchindex.json;
           git commit -m "Update searchindex";
-          git push) || true
+          git push) || echo "No changes to searchindex.js"
       
       # Login in AWs
       - name: Configure AWS credentials using OIDC
