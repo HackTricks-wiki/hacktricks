@@ -475,9 +475,7 @@ window.search = window.search || {};
         /* ───────── paths ───────── */
         const branch      = lang === 'en' ? 'master' : lang;
         const baseRemote  = `https://raw.githubusercontent.com/HackTricks-wiki/hacktricks/${branch}`;
-        const remoteJson  = `${baseRemote}/searchindex.json`;
         const remoteJs    = `${baseRemote}/searchindex.js`;
-        const localJson   = './searchindex.json';
         const localJs     = './searchindex.js';
         const TIMEOUT_MS  = 5_000;
         
@@ -497,16 +495,7 @@ window.search = window.search || {};
             document.head.appendChild(s);
             });
         
-        /* ───────── 1. remote JSON ───────── */
-        try {
-            const r = await fetchWithTimeout(remoteJson);
-            if (!r.ok) throw new Error(r.status);
-            return init(await r.json());
-        } catch (e) {
-            console.warn('Remote JSON failed →', e);
-        }
-        
-        /* ───────── 2. remote JS ───────── */
+        /* ───────── 1. remote JS ───────── */
         try {
             await loadScript(remoteJs);
             return init(window.search);
@@ -514,16 +503,7 @@ window.search = window.search || {};
             console.warn('Remote JS failed →', e);
         }
         
-        /* ───────── 3. local JSON ───────── */
-        try {
-            const r = await fetch(localJson);
-            if (!r.ok) throw new Error(r.status);
-            return init(await r.json());
-        } catch (e) {
-            console.warn('Local JSON failed →', e);
-        }
-        
-        /* ───────── 4. local JS ───────── */
+        /* ───────── 2. local JS ───────── */
         try {
             await loadScript(localJs);
             return init(window.search);
