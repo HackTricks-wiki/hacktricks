@@ -474,7 +474,7 @@ window.search = window.search || {};
     (async function loadSearchIndex(lang = window.lang || 'en') {
         /* ───────── paths ───────── */
         const branch      = lang === 'en' ? 'master' : lang;
-        const baseRemote  = `https://raw.githubusercontent.com/HackTricks-wiki/hacktricks/${branch}`;
+        const baseRemote  = `https://raw.githubusercontent.com/HackTricks-wiki/hacktricks/refs/heads/${branch}`;
         const remoteJs    = `${baseRemote}/searchindex.js`;
         const localJs     = '/searchindex.js';
         const TIMEOUT_MS  = 5_000;
