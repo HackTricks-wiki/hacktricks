@@ -433,6 +433,7 @@
   - [PrestaShop](network-services-pentesting/pentesting-web/prestashop.md)
   - [Python](network-services-pentesting/pentesting-web/python.md)
   - [Rocket Chat](network-services-pentesting/pentesting-web/rocket-chat.md)
+  - [RSQL Injection](network-services-pentesting/pentesting-web/rsql-injection.md)
   - [Special HTTP headers$$external:network-services-pentesting/pentesting-web/special-http-headers.md$$]()
   - [Source code Review / SAST Tools](network-services-pentesting/pentesting-web/code-review-tools.md)
   - [Spring Actuators](network-services-pentesting/pentesting-web/spring-actuators.md)
