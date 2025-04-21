@@ -471,39 +471,53 @@ window.search = window.search || {};
         showResults(true);
     }
 
-    (async function loadSearchIndex(lang = window.lang || 'en') {
-        /* ───────── paths ───────── */
-        const branch      = lang === 'en' ? 'master' : lang;
-        const baseRemote  = `https://raw.githubusercontent.com/HackTricks-wiki/hacktricks/refs/heads/${branch}`;
-        const remoteJs    = `${baseRemote}/searchindex.js`;
-        const localJs     = '/searchindex.js';
-        const TIMEOUT_MS  = 5_000;
-        
-        const loadScript = src =>
-            new Promise((resolve, reject) => {
-            const s = document.createElement('script');
-            s.src      = src;
-            s.onload   = resolve;
-            s.onerror  = reject;
+    (async function loadSearchIndex(lang = window.lang || "en") {
+        const branch  = lang === "en" ? "master" : lang;
+        const rawUrl  =
+          `https://raw.githubusercontent.com/HackTricks-wiki/hacktricks/refs/heads/${branch}/searchindex.js`;
+        const localJs = "/searchindex.js";
+        const TIMEOUT_MS = 5_000;
+      
+        /* helper: inject a <script src=…> and wait for it */
+        const injectScript = (src) =>
+          new Promise((resolve, reject) => {
+            const s   = document.createElement("script");
+            s.src     = src;
+            s.onload  = () => resolve(src);
+            s.onerror = (e) => reject(e);
             document.head.appendChild(s);
-            });
-        
-        /* ───────── 1. remote JS ───────── */
+          });
+      
         try {
-            await loadScript(remoteJs);
-            return init(window.search);
-        } catch (e) {
-            console.warn('Remote JS failed →', e);
+          /* 1 — download raw JS from GitHub */
+          const controller = new AbortController();
+          const timer      = setTimeout(() => controller.abort(), TIMEOUT_MS);
+      
+          const res  = await fetch(rawUrl, { signal: controller.signal });
+          clearTimeout(timer);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      
+          /* 2 — wrap in a Blob so the browser sees application/javascript */
+          const code     = await res.text();
+          const blobUrl  = URL.createObjectURL(
+                            new Blob([code], { type: "application/javascript" })
+                          );
+      
+          /* 3 — execute it */
+          await injectScript(blobUrl);
+          return init(window.search);
+        } catch (eRemote) {
+          console.warn("Remote JS failed →", eRemote);
         }
-        
-        /* ───────── 2. local JS ───────── */
+      
+        /* ───────── fallback: local copy ───────── */
         try {
-            await loadScript(localJs);
-            return init(window.search);
-        } catch (e) {
-            console.error('Local JS failed →', e);
+          await injectScript(localJs);
+          return init(window.search);
+        } catch (eLocal) {
+          console.error("Local JS failed →", eLocal);
         }
-    })();
+      })();
 
     // Exported functions
     search.hasFocus = hasFocus;
