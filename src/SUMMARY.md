@@ -561,6 +561,7 @@
 - [CSRF (Cross Site Request Forgery)](pentesting-web/csrf-cross-site-request-forgery.md)
 - [Dangling Markup - HTML scriptless injection](pentesting-web/dangling-markup-html-scriptless-injection/README.md)
   - [SS-Leaks](pentesting-web/dangling-markup-html-scriptless-injection/ss-leaks.md)
+- [DApps - Decentralized Applications](pentesting-web/dapps-DecentralizedApplications.md)
 - [Dependency Confusion](pentesting-web/dependency-confusion.md)
 - [Deserialization](pentesting-web/deserialization/README.md)
   - [NodeJS - \_\_proto\_\_ & prototype Pollution](pentesting-web/deserialization/nodejs-proto-prototype-pollution/README.md)
