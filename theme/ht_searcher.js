@@ -476,7 +476,7 @@ window.search = window.search || {};
         const rawUrl  =
           `https://raw.githubusercontent.com/HackTricks-wiki/hacktricks/refs/heads/${branch}/searchindex.js`;
         const localJs = "/searchindex.js";
-        const TIMEOUT_MS = 5_000;
+        const TIMEOUT_MS = 10_000;
       
         /* helper: inject a <script src=…> and wait for it */
         const injectScript = (src) =>
