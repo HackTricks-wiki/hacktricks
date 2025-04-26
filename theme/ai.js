@@ -136,6 +136,6 @@
   
     function createFloatingButton(){ const d=document.createElement("div"); d.id="ht-ai-btn"; d.textContent="🤖"; document.body.appendChild(d); return d; }
     function createTooltip(btn){ const t=document.createElement("div"); t.id="ht-ai-tooltip"; t.textContent=TOOLTIP_TEXT; document.body.appendChild(t); btn.addEventListener("mouseenter",()=>{const r=btn.getBoundingClientRect(); t.style.left=`${r.left+r.width/2}px`; t.style.top=`${r.top}px`; t.classList.add("show");}); btn.addEventListener("mouseleave",()=>t.classList.remove("show")); }
-    function createSidebar(){ const p=document.createElement("div"); p.id="ht-ai-panel"; p.innerHTML=`<div id="ht-ai-header"><strong>HackTricks Chat</strong><div class="ht-actions"><button id="ht-ai-reset" title="Reset">↺</button><span id="ht-ai-close" title="Close">✖</span></div></div><div id="ht-ai-chat"></div><div id="ht-ai-input"><textarea id="ht-ai-question" placeholder="Type your question…"></textarea><button id="ht-ai-send">Send</button></div>`; document.body.appendChild(p); return p; }
+    function createSidebar(){ const p=document.createElement("div"); p.id="ht-ai-panel"; p.innerHTML=`<div id="ht-ai-header"><strong>HackTricksAI Chat</strong><div class="ht-actions"><button id="ht-ai-reset" title="Reset">↺</button><span id="ht-ai-close" title="Close">✖</span></div></div><div id="ht-ai-chat"></div><div id="ht-ai-input"><textarea id="ht-ai-question" placeholder="Type your question…"></textarea><button id="ht-ai-send">Send</button></div>`; document.body.appendChild(p); return p; }
   })();
   
