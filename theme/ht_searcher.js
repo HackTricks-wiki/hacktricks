@@ -1,3 +1,26 @@
+/* ────────────────────────────────────────────────────────────────
+   Polyfill so requestIdleCallback works everywhere (IE 11/Safari)
+   ─────────────────────────────────────────────────────────────── */
+if (typeof window.requestIdleCallback !== "function") {
+window.requestIdleCallback = function (cb) {
+    const start = Date.now();
+    return setTimeout(function () {
+    cb({
+        didTimeout: false,
+        timeRemaining: function () {
+        return Math.max(0, 50 - (Date.now() - start));
+        }
+    });
+    }, 1);
+};
+window.cancelIdleCallback = window.clearTimeout;
+}
+
+  
+/* ────────────────────────────────────────────────────────────────
+   search.js
+   ─────────────────────────────────────────────────────────────── */
+
 "use strict";
 window.search = window.search || {};
 (function search(search) {
@@ -477,8 +500,7 @@ window.search = window.search || {};
           `https://raw.githubusercontent.com/HackTricks-wiki/hacktricks/refs/heads/${branch}/searchindex.js`;
         const localJs = "/searchindex.js";
         const TIMEOUT_MS = 10_000;
-      
-        /* helper: inject a <script src=…> and wait for it */
+
         const injectScript = (src) =>
           new Promise((resolve, reject) => {
             const s   = document.createElement("script");
@@ -487,37 +509,45 @@ window.search = window.search || {};
             s.onerror = (e) => reject(e);
             document.head.appendChild(s);
           });
-      
+
         try {
-          /* 1 — download raw JS from GitHub */
+          /* 1 — download raw JS from GitHub */
           const controller = new AbortController();
           const timer      = setTimeout(() => controller.abort(), TIMEOUT_MS);
-      
+
           const res  = await fetch(rawUrl, { signal: controller.signal });
           clearTimeout(timer);
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      
-          /* 2 — wrap in a Blob so the browser sees application/javascript */
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+          /* 2 — wrap in a Blob so the browser sees application/javascript */
           const code     = await res.text();
           const blobUrl  = URL.createObjectURL(
                             new Blob([code], { type: "application/javascript" })
                           );
-      
-          /* 3 — execute it */
+
+          /* 3 — execute it */
           await injectScript(blobUrl);
-          return init(window.search);
+
+          /* ───────────── PATCH ─────────────
+             heavy parsing now deferred to idle time
+          */ 
+          requestIdleCallback(() => init(window.search));
+          return;  // ✔ UI remains responsive
         } catch (eRemote) {
           console.warn("Remote JS failed →", eRemote);
         }
-      
+
         /* ───────── fallback: local copy ───────── */
         try {
           await injectScript(localJs);
-          return init(window.search);
+
+          /* ───────────── PATCH ───────────── */
+          requestIdleCallback(() => init(window.search));
+          return;
         } catch (eLocal) {
           console.error("Local JS failed →", eLocal);
         }
-      })();
+    })();
 
     // Exported functions
     search.hasFocus = hasFocus;
