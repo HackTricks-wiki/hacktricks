@@ -1,11 +1,11 @@
-# Phishing-Methodik
+# Phishing-Methodologie
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Methodik
+## Methodologie
 
 1. Rekognoszieren Sie das Opfer
-1. Wählen Sie die **Opferdomain** aus.
+1. Wählen Sie die **Opferdomain**.
 2. Führen Sie eine grundlegende Webenumeration durch, **um nach Anmeldeportalen** zu suchen, die vom Opfer verwendet werden, und **entscheiden** Sie, welches Sie **nachahmen** möchten.
 3. Verwenden Sie einige **OSINT**, um **E-Mails zu finden**.
 2. Bereiten Sie die Umgebung vor
@@ -22,17 +22,17 @@
 ### Techniken zur Variation von Domainnamen
 
 - **Schlüsselwort**: Der Domainname **enthält** ein wichtiges **Schlüsselwort** der ursprünglichen Domain (z.B. zelster.com-management.com).
-- **getrennter Subdomain**: Ändern Sie den **Punkt in einen Bindestrich** einer Subdomain (z.B. www-zelster.com).
-- **Neue TLD**: Dieselbe Domain mit einer **neuen TLD** (z.B. zelster.org).
+- **getrennte Subdomain**: Ändern Sie den **Punkt in einen Bindestrich** einer Subdomain (z.B. www-zelster.com).
+- **Neue TLD**: Gleiche Domain mit einer **neuen TLD** (z.B. zelster.org).
 - **Homoglyph**: Es **ersetzt** einen Buchstaben im Domainnamen durch **Buchstaben, die ähnlich aussehen** (z.B. zelfser.com).
 - **Transposition:** Es **tauscht zwei Buchstaben** innerhalb des Domainnamens (z.B. zelsetr.com).
 - **Singularisierung/Pluralisierung**: Fügt ein „s“ am Ende des Domainnamens hinzu oder entfernt es (z.B. zeltsers.com).
 - **Auslassung**: Es **entfernt einen** der Buchstaben aus dem Domainnamen (z.B. zelser.com).
 - **Wiederholung:** Es **wiederholt einen** der Buchstaben im Domainnamen (z.B. zeltsser.com).
-- **Ersetzung**: Wie Homoglyph, aber weniger heimlich. Es ersetzt einen der Buchstaben im Domainnamen, möglicherweise durch einen Buchstaben in der Nähe des ursprünglichen Buchstabens auf der Tastatur (z.B. zektser.com).
+- **Ersetzung**: Wie Homoglyph, aber weniger stealthy. Es ersetzt einen der Buchstaben im Domainnamen, möglicherweise mit einem Buchstaben in der Nähe des ursprünglichen Buchstabens auf der Tastatur (z.B. zektser.com).
 - **Subdominiert**: Fügen Sie einen **Punkt** innerhalb des Domainnamens ein (z.B. ze.lster.com).
 - **Einfügung**: Es **fügt einen Buchstaben** in den Domainnamen ein (z.B. zerltser.com).
-- **Fehlender Punkt**: Hängen Sie die TLD an den Domainnamen an. (z.B. zelstercom.com)
+- **Fehlender Punkt**: Fügen Sie die TLD an den Domainnamen an. (z.B. zelstercom.com)
 
 **Automatische Werkzeuge**
 
@@ -47,11 +47,11 @@
 
 ### Bitflipping
 
-Es besteht die **Möglichkeit, dass eines der Bits, die gespeichert oder in der Kommunikation sind, automatisch umgeschaltet wird**, aufgrund verschiedener Faktoren wie Sonnenstürme, kosmische Strahlen oder Hardwarefehler.
+Es besteht die **Möglichkeit, dass eines der Bits, die gespeichert oder in der Kommunikation sind, automatisch umgeschaltet wird** aufgrund verschiedener Faktoren wie Sonnenstürme, kosmische Strahlen oder Hardwarefehler.
 
 Wenn dieses Konzept auf DNS-Anfragen **angewendet wird**, ist es möglich, dass die **Domain, die vom DNS-Server empfangen wird**, nicht die gleiche ist wie die ursprünglich angeforderte Domain.
 
-Zum Beispiel kann eine einzige Bitänderung in der Domain "windows.com" sie in "windnws.com" ändern.
+Zum Beispiel kann eine einzelne Bitänderung in der Domain "windows.com" sie in "windnws.com" ändern.
 
 Angreifer können **dies ausnutzen, indem sie mehrere Bit-Flipping-Domains registrieren**, die der Domain des Opfers ähnlich sind. Ihre Absicht ist es, legitime Benutzer auf ihre eigene Infrastruktur umzuleiten.
 
@@ -73,8 +73,8 @@ Um sicherzustellen, dass die abgelaufene Domain, die Sie kaufen möchten, **bere
 - [https://hunter.io/](https://hunter.io)
 - [https://anymailfinder.com/](https://anymailfinder.com)
 
-Um **mehr** gültige E-Mail-Adressen zu **entdecken** oder die bereits entdeckten **zu überprüfen**, können Sie prüfen, ob Sie die SMTP-Server des Opfers brute-forcen können. [Erfahren Sie hier, wie Sie E-Mail-Adressen überprüfen/entdecken](../../network-services-pentesting/pentesting-smtp/index.html#username-bruteforce-enumeration).\
-Vergessen Sie außerdem nicht, dass, wenn die Benutzer **ein beliebiges Webportal verwenden, um auf ihre E-Mails zuzugreifen**, Sie überprüfen können, ob es anfällig für **Benutzername-Brute-Force** ist, und die Schwachstelle, wenn möglich, ausnutzen.
+Um **mehr** gültige E-Mail-Adressen zu **entdecken** oder die bereits entdeckten zu **verifizieren**, können Sie überprüfen, ob Sie die SMTP-Server des Opfers brute-forcen können. [Erfahren Sie hier, wie Sie E-Mail-Adressen verifizieren/entdecken](../../network-services-pentesting/pentesting-smtp/index.html#username-bruteforce-enumeration).\
+Vergessen Sie außerdem nicht, dass, wenn die Benutzer **ein Webportal verwenden, um auf ihre E-Mails zuzugreifen**, Sie überprüfen können, ob es anfällig für **Benutzername-Brute-Force** ist, und die Schwachstelle, wenn möglich, ausnutzen.
 
 ## Konfigurieren von GoPhish
 
@@ -91,7 +91,7 @@ ssh -L 3333:127.0.0.1:3333 <user>@<ip>
 
 **TLS-Zertifikat-Konfiguration**
 
-Bevor Sie diesen Schritt ausführen, sollten Sie **bereits die Domain** gekauft haben, die Sie verwenden möchten, und sie muss auf die **IP des VPS** zeigen, auf dem Sie **gophish** konfigurieren.
+Bevor Sie diesen Schritt ausführen, sollten Sie **bereits die Domain** gekauft haben, die Sie verwenden möchten, und sie muss **auf die IP des VPS** zeigen, auf dem Sie **gophish** konfigurieren.
 ```bash
 DOMAIN="<domain>"
 wget https://dl.eff.org/certbot-auto
@@ -219,15 +219,15 @@ service gophish status
 ss -l | grep "3333\|443"
 service gophish stop
 ```
-## Konfiguration des Mailservers und der Domain
+## Konfigurieren des Mailservers und der Domain
 
 ### Warten & legitim sein
 
-Je älter eine Domain ist, desto unwahrscheinlicher ist es, dass sie als Spam erkannt wird. Daher solltest du so viel Zeit wie möglich warten (mindestens 1 Woche) vor der Phishing-Bewertung. Außerdem wird die Reputation besser, wenn du eine Seite über einen reputationswürdigen Sektor einrichtest.
+Je älter eine Domain ist, desto unwahrscheinlicher ist es, dass sie als Spam erkannt wird. Daher solltest du so viel Zeit wie möglich warten (mindestens 1 Woche) vor der Phishing-Bewertung. Außerdem wird die Reputation besser, wenn du eine Seite über einen reputationswürdigen Sektor erstellst.
 
-Beachte, dass du auch, wenn du eine Woche warten musst, jetzt alles konfigurieren kannst.
+Beachte, dass du, auch wenn du eine Woche warten musst, jetzt alles konfigurieren kannst.
 
-### Konfiguriere den Reverse DNS (rDNS) Eintrag
+### Konfigurieren des Reverse DNS (rDNS) Eintrags
 
 Setze einen rDNS (PTR) Eintrag, der die IP-Adresse des VPS auf den Domainnamen auflöst.
 
@@ -247,7 +247,7 @@ v=spf1 mx a ip4:ip.ip.ip.ip ?all
 
 Sie müssen **einen DMARC-Eintrag für die neue Domain konfigurieren**. Wenn Sie nicht wissen, was ein DMARC-Eintrag ist, [**lesen Sie diese Seite**](../../network-services-pentesting/pentesting-smtp/index.html#dmarc).
 
-Sie müssen einen neuen DNS TXT-Eintrag erstellen, der auf den Hostnamen `_dmarc.<domain>` mit folgendem Inhalt zeigt:
+Sie müssen einen neuen DNS TXT-Eintrag erstellen, der den Hostnamen `_dmarc.<domain>` mit folgendem Inhalt zeigt:
 ```bash
 v=DMARC1; p=none
 ```
@@ -266,12 +266,12 @@ Dieses Tutorial basiert auf: [https://www.digitalocean.com/community/tutorials/h
 
 ### Testen Sie Ihre E-Mail-Konfigurationsbewertung
 
-Sie können das mit [https://www.mail-tester.com/](https://www.mail-tester.com) tun.\
-Greifen Sie einfach auf die Seite zu und senden Sie eine E-Mail an die Adresse, die sie Ihnen geben:
+Sie können das mit [https://www.mail-tester.com/](https://www.mail-tester.com) machen.\
+Zugreifen Sie einfach auf die Seite und senden Sie eine E-Mail an die Adresse, die sie Ihnen geben:
 ```bash
 echo "This is the body of the email" | mail -s "This is the subject line" test-iimosa79z@srv1.mail-tester.com
 ```
-Sie können auch **Ihre E-Mail-Konfiguration überprüfen**, indem Sie eine E-Mail an `check-auth@verifier.port25.com` senden und **die Antwort lesen** (dafür müssen Sie den Port **25** **öffnen** und die Antwort in der Datei _/var/mail/root_ sehen, wenn Sie die E-Mail als root senden).\
+Sie können auch **Ihre E-Mail-Konfiguration überprüfen**, indem Sie eine E-Mail an `check-auth@verifier.port25.com` senden und **die Antwort lesen** (dafür müssen Sie **Port 25 öffnen** und die Antwort in der Datei _/var/mail/root_ sehen, wenn Sie die E-Mail als root senden).\
 Überprüfen Sie, ob Sie alle Tests bestehen:
 ```bash
 ==========================================================
@@ -283,13 +283,13 @@ DKIM check:         pass
 Sender-ID check:    pass
 SpamAssassin check: ham
 ```
-Sie könnten auch eine **Nachricht an ein Gmail unter Ihrer Kontrolle** senden und die **E-Mail-Header** in Ihrem Gmail-Posteingang überprüfen. `dkim=pass` sollte im `Authentication-Results` Headerfeld vorhanden sein.
+Sie könnten auch eine **Nachricht an ein Gmail unter Ihrer Kontrolle** senden und die **E-Mail-Header** in Ihrem Gmail-Posteingang überprüfen. `dkim=pass` sollte im Headerfeld `Authentication-Results` vorhanden sein.
 ```
 Authentication-Results: mx.google.com;
 spf=pass (google.com: domain of contact@example.com designates --- as permitted sender) smtp.mail=contact@example.com;
 dkim=pass header.i=@example.com;
 ```
-### Entfernen von der Spamhaus-Blacklist
+### ​Entfernen von der Spamhaus-Blacklist
 
 Die Seite [www.mail-tester.com](https://www.mail-tester.com) kann Ihnen anzeigen, ob Ihre Domain von Spamhaus blockiert wird. Sie können die Entfernung Ihrer Domain/IP anfordern unter: ​[https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)
 
@@ -303,9 +303,9 @@ Die Seite [www.mail-tester.com](https://www.mail-tester.com) kann Ihnen anzeigen
 
 - Setzen Sie einen **Namen zur Identifizierung** des Absenderprofils
 - Entscheiden Sie, von welchem Konto Sie die Phishing-E-Mails senden werden. Vorschläge: _noreply, support, servicedesk, salesforce..._
-- Sie können den Benutzernamen und das Passwort leer lassen, aber stellen Sie sicher, dass Sie die Option "Zertifikatfehler ignorieren" aktivieren
+- Sie können den Benutzernamen und das Passwort leer lassen, aber stellen Sie sicher, dass Sie die Option "Zertifikatfehler ignorieren" aktivieren.
 
-![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
+![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
 
 > [!NOTE]
 > Es wird empfohlen, die Funktion "**Test-E-Mail senden**" zu verwenden, um zu testen, ob alles funktioniert.\
@@ -350,7 +350,7 @@ Beachten Sie, dass **um die Glaubwürdigkeit der E-Mail zu erhöhen**, empfohlen
 
 - Schreiben Sie einen **Namen**
 - **Schreiben Sie den HTML-Code** der Webseite. Beachten Sie, dass Sie **Webseiten importieren** können.
-- Markieren Sie **Eingereichte Daten erfassen** und **Passwörter erfassen**
+- Markieren Sie **Erfasste eingereichte Daten** und **Erfasste Passwörter**
 - Setzen Sie eine **Weiterleitung**
 
 ![](<../../images/image (826).png>)
@@ -360,7 +360,7 @@ Beachten Sie, dass **um die Glaubwürdigkeit der E-Mail zu erhöhen**, empfohlen
 > Beachten Sie, dass Sie, wenn Sie **statische Ressourcen** für das HTML verwenden müssen (vielleicht einige CSS- und JS-Seiten), diese in _**/opt/gophish/static/endpoint**_ speichern können und dann von _**/static/\<dateiname>**_ darauf zugreifen können.
 
 > [!NOTE]
-> Für die Weiterleitung könnten Sie **die Benutzer zur legitimen Hauptwebseite** des Opfers umleiten oder sie beispielsweise zu _/static/migration.html_ umleiten, eine **Ladeanimation** ([**https://loading.io/**](https://loading.io)**) für 5 Sekunden anzeigen und dann angeben, dass der Prozess erfolgreich war**.
+> Für die Weiterleitung könnten Sie **die Benutzer zur legitimen Hauptwebseite** des Opfers umleiten oder sie beispielsweise zu _/static/migration.html_ umleiten, eine **Ladeanimation** (**[**https://loading.io/**](https://loading.io)**) für 5 Sekunden anzeigen und dann angeben, dass der Prozess erfolgreich war.
 
 ### Benutzer & Gruppen
 
@@ -414,12 +414,12 @@ Hier sind Tools wie [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** 
 
 ### Via VNC
 
-Was wäre, wenn Sie anstatt **das Opfer auf eine bösartige Seite** mit dem gleichen Aussehen wie die Originalseite zu senden, ihn zu einer **VNC-Sitzung mit einem Browser, der mit der echten Webseite verbunden ist, senden**? Sie können sehen, was er tut, das Passwort stehlen, die verwendete MFA, die Cookies...\
+Was wäre, wenn Sie anstelle von **den Opfern auf eine bösartige Seite** mit dem gleichen Aussehen wie die Originalseite zu senden, ihn zu einer **VNC-Sitzung mit einem Browser, der mit der echten Webseite verbunden ist, senden**? Sie können sehen, was er tut, das Passwort, die verwendete MFA, die Cookies stehlen...\
 Sie können dies mit [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC) tun.
 
 ## Erkennung der Erkennung
 
-Offensichtlich ist eine der besten Möglichkeiten zu wissen, ob Sie enttarnt wurden, **Ihre Domain in schwarzen Listen zu durchsuchen**. Wenn sie aufgeführt ist, wurde Ihre Domain irgendwie als verdächtig erkannt.\
+Offensichtlich ist eine der besten Möglichkeiten zu wissen, ob Sie erwischt wurden, **Ihre Domain in schwarzen Listen zu durchsuchen**. Wenn sie aufgeführt ist, wurde Ihre Domain irgendwie als verdächtig erkannt.\
 Eine einfache Möglichkeit zu überprüfen, ob Ihre Domain in einer schwarzen Liste erscheint, ist die Verwendung von [https://malwareworld.com/](https://malwareworld.com).
 
 Es gibt jedoch auch andere Möglichkeiten zu wissen, ob das Opfer **aktiv nach verdächtigen Phishing-Aktivitäten in der Wildnis sucht**, wie in:
@@ -428,11 +428,11 @@ Es gibt jedoch auch andere Möglichkeiten zu wissen, ob das Opfer **aktiv nach v
 detecting-phising.md
 {{#endref}}
 
-Sie können **eine Domain mit einem sehr ähnlichen Namen** zur Domain des Opfers **kaufen und/oder ein Zertifikat** für eine **Subdomain** einer von Ihnen kontrollierten Domain **erstellen**, die das **Schlüsselwort** der Domain des Opfers enthält. Wenn das **Opfer** irgendeine Art von **DNS- oder HTTP-Interaktion** mit ihnen durchführt, wissen Sie, dass **es aktiv nach** verdächtigen Domains sucht und Sie sehr stealthy sein müssen.
+Sie können **eine Domain mit einem sehr ähnlichen Namen** zur Domain des Opfers **kaufen und/oder ein Zertifikat** für einen **Subdomain** einer von Ihnen kontrollierten Domain **erstellen**, die das **Schlüsselwort** der Domain des Opfers enthält. Wenn das **Opfer** irgendeine Art von **DNS- oder HTTP-Interaktion** mit ihnen durchführt, wissen Sie, dass **es aktiv nach** verdächtigen Domains sucht und Sie sehr stealthy sein müssen.
 
 ### Phishing bewerten
 
-Verwenden Sie [**Phishious** ](https://github.com/Rices/Phishious), um zu bewerten, ob Ihre E-Mail im Spam-Ordner landen wird oder ob sie blockiert oder erfolgreich sein wird.
+Verwenden Sie [**Phishious** ](https://github.com/Rices/Phishious), um zu bewerten, ob Ihre E-Mail im Spam-Ordner endet oder ob sie blockiert oder erfolgreich ist.
 
 ## Referenzen
 
