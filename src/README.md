@@ -4,7 +4,7 @@
 
 _Hacktricks-Logos & Motion Design von_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
 
-### Führen Sie HackTricks lokal aus
+### HackTricks lokal ausführen
 ```bash
 # Download latest version of hacktricks
 git clone https://github.com/HackTricks-wiki/hacktricks
@@ -31,15 +31,15 @@ export LANG="master" # Leave master for english
 # Run the docker container indicating the path to the hacktricks folder
 docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git config --global --add safe.directory /app && git checkout $LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
-Your local copy of HackTricks will be **verfügbar unter [http://localhost:3337](http://localhost:3337)** nach <5 Minuten (es muss das Buch erstellen, haben Sie Geduld).
+Ihre lokale Kopie von HackTricks wird **unter [http://localhost:3337](http://localhost:3337)** nach <5 Minuten verfügbar sein (es muss das Buch erstellt werden, haben Sie Geduld).
 
-## Corporate Sponsors
+## Unternehmenssponsoren
 
 ### [STM Cyber](https://www.stmcyber.com)
 
 <figure><img src="images/stm (1).png" alt=""><figcaption></figcaption></figure>
 
-[**STM Cyber**](https://www.stmcyber.com) ist ein großartiges Cybersicherheitsunternehmen, dessen Slogan **HACK THE UNHACKABLE** ist. Sie führen eigene Forschungen durch und entwickeln eigene Hacking-Tools, um **verschiedene wertvolle Cybersicherheitsdienste** wie Pentesting, Red Teams und Schulungen anzubieten.
+[**STM Cyber**](https://www.stmcyber.com) ist ein großartiges Cybersicherheitsunternehmen, dessen Slogan **HACK THE UNHACKABLE** lautet. Sie führen eigene Forschungen durch und entwickeln eigene Hacking-Tools, um **verschiedene wertvolle Cybersicherheitsdienste** wie Pentesting, Red Teams und Schulungen anzubieten.
 
 Sie können ihren **Blog** unter [**https://blog.stmcyber.com**](https://blog.stmcyber.com) einsehen.
 
@@ -65,7 +65,7 @@ https://www.rootedcon.com/
 
 **Intigriti** ist die **Nummer 1 in Europa** für ethisches Hacking und **Bug-Bounty-Plattform.**
 
-**Bug-Bounty-Tipp**: **Melden Sie sich an** bei **Intigriti**, einer Premium-**Bug-Bounty-Plattform, die von Hackern für Hacker erstellt wurde**! Schließen Sie sich uns heute unter [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) an und beginnen Sie, Belohnungen von bis zu **100.000 $** zu verdienen!
+**Bug-Bounty-Tipp**: **Melden Sie sich an** für **Intigriti**, eine Premium-**Bug-Bounty-Plattform, die von Hackern für Hacker erstellt wurde**! Schließen Sie sich uns heute unter [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) an und beginnen Sie, Belohnungen von bis zu **100.000 $** zu verdienen!
 
 {{#ref}}
 https://go.intigriti.com/hacktricks
@@ -94,7 +94,7 @@ https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktr
 
 Treten Sie dem [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) Server bei, um mit erfahrenen Hackern und Bug-Bounty-Jägern zu kommunizieren!
 
-- **Hacking Insights:** Engagieren Sie sich mit Inhalten, die in die Aufregung und Herausforderungen des Hackens eintauchen
+- **Hacking-Einblicke:** Engagieren Sie sich mit Inhalten, die in die Aufregung und Herausforderungen des Hackens eintauchen
 - **Echtzeit-Hack-Nachrichten:** Bleiben Sie auf dem Laufenden über die schnelllebige Welt des Hackens durch Echtzeitnachrichten und Einblicke
 - **Neueste Ankündigungen:** Bleiben Sie informiert über die neuesten Bug-Bounties und wichtige Plattform-Updates
 
@@ -108,7 +108,7 @@ Treten Sie dem [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) 
 
 **Erhalten Sie die Perspektive eines Hackers auf Ihre Webanwendungen, Netzwerke und Cloud**
 
-**Finden und melden Sie kritische, ausnutzbare Schwachstellen mit echtem Geschäftsauswirkungen.** Verwenden Sie unsere 20+ benutzerdefinierten Tools, um die Angriffsfläche zu kartieren, Sicherheitsprobleme zu finden, die Ihnen ermöglichen, Berechtigungen zu eskalieren, und automatisierte Exploits zu verwenden, um wesentliche Beweise zu sammeln, die Ihre harte Arbeit in überzeugende Berichte verwandeln.
+**Finden und melden Sie kritische, ausnutzbare Schwachstellen mit echtem Geschäftswert.** Verwenden Sie unsere 20+ benutzerdefinierten Tools, um die Angriffsfläche zu kartieren, Sicherheitsprobleme zu finden, die Ihnen Privilegien gewähren, und automatisierte Exploits zu verwenden, um wesentliche Beweise zu sammeln, die Ihre harte Arbeit in überzeugende Berichte verwandeln.
 
 {{#ref}}
 https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons
@@ -147,13 +147,13 @@ https://academy.8ksec.io/
 
 <figure><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.net) ist ein professionelles Cybersicherheitsunternehmen mit Sitz in **Amsterdam**, das **Unternehmen auf der ganzen Welt** hilft, sich gegen die neuesten Bedrohungen der Cybersicherheit zu schützen, indem es **offensive Sicherheitsdienste** mit einem **modernen** Ansatz anbietet.
+[**WebSec**](https://websec.net) ist ein professionelles Cybersicherheitsunternehmen mit Sitz in **Amsterdam**, das **Unternehmen auf der ganzen Welt** dabei hilft, sich gegen die neuesten Bedrohungen der Cybersicherheit zu schützen, indem es **offensive Sicherheitsdienste** mit einem **modernen** Ansatz anbietet.
 
 WebSec ist ein internationales Sicherheitsunternehmen mit Büros in Amsterdam und Wyoming. Sie bieten **All-in-One-Sicherheitsdienste** an, was bedeutet, dass sie alles abdecken; Pentesting, **Sicherheits**-Audits, Awareness-Trainings, Phishing-Kampagnen, Code-Überprüfungen, Exploit-Entwicklung, Outsourcing von Sicherheitsexperten und vieles mehr.
 
-Ein weiterer cooler Aspekt von WebSec ist, dass WebSec im Gegensatz zum Branchendurchschnitt **sehr zuversichtlich in ihre Fähigkeiten ist**, so sehr, dass sie **die besten Qualitätsresultate garantieren**, es steht auf ihrer Website: "**Wenn wir es nicht hacken können, zahlen Sie nicht!**". Für weitere Informationen werfen Sie einen Blick auf ihre [**Website**](https://websec.net/en/) und [**Blog**](https://websec.net/blog/)!
+Ein weiterer cooler Aspekt von WebSec ist, dass WebSec im Gegensatz zum Branchendurchschnitt **sehr zuversichtlich in ihre Fähigkeiten ist**, so sehr, dass sie **die besten Qualitätsresultate garantieren**, es steht auf ihrer Website: "**Wenn wir es nicht hacken können, zahlen Sie nicht!**". Für weitere Informationen werfen Sie einen Blick auf ihre [**Website**](https://websec.net/en/) und ihren [**Blog**](https://websec.net/blog/)!
 
-Zusätzlich zu den oben genannten ist WebSec auch ein **engagierter Unterstützer von HackTricks.**
+Zusätzlich zu den oben genannten Punkten ist WebSec auch ein **engagierter Unterstützer von HackTricks.**
 
 {{#ref}}
 https://www.youtube.com/watch?v=Zq2JycGDCPM
@@ -174,7 +174,7 @@ Menschen-Suche, KI-Suche, Organisationssuche, API (OpenAPI) Zugriff, dieHarveste
 https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons
 {{#endref}}
 
-## License & Disclaimer
+## Lizenz & Haftungsausschluss
 
 Überprüfen Sie sie in:
 
@@ -182,7 +182,7 @@ https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons
 welcome/hacktricks-values-and-faq.md
 {{#endref}}
 
-## Github Stats
+## Github-Statistiken
 
 ![HackTricks Github Stats](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
 
