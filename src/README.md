@@ -63,7 +63,7 @@ https://www.rootedcon.com/
 
 <figure><img src="images/image (47).png" alt=""><figcaption></figcaption></figure>
 
-**Intigriti** é a **plataforma de hacking ético e bug bounty #1 da Europa.**
+**Intigriti** é a **plataforma de hacking ético e bug bounty número 1 da Europa.**
 
 **Dica de bug bounty**: **inscreva-se** no **Intigriti**, uma plataforma premium de **bug bounty criada por hackers, para hackers**! Junte-se a nós em [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) hoje e comece a ganhar recompensas de até **$100,000**!
 
@@ -131,7 +131,7 @@ Você pode **criar uma conta gratuita** [**aqui**](https://serpapi.com/users/sig
 
 ---
 
-### [8kSec Academy – Cursos de Segurança Móvel em Profundidade](https://academy.8ksec.io/)
+### [8kSec Academy – Cursos de Segurança Móvel Aprofundados](https://academy.8ksec.io/)
 
 <figure><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
@@ -167,7 +167,7 @@ https://www.youtube.com/watch?v=Zq2JycGDCPM
 
 [**Venacus**](https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons) é um mecanismo de busca de vazamentos de dados (leak). \
 Fornecemos busca de strings aleatórias (como o google) sobre todos os tipos de vazamentos de dados grandes e pequenos --não apenas os grandes-- de dados de várias fontes. \
-Busca de pessoas, busca de IA, busca de organizações, acesso API (OpenAPI), integração com oTheHarvester, todos os recursos que um pentester precisa.\
+Busca de pessoas, busca de IA, busca de organizações, acesso API (OpenAPI), integração com theHarvester, todos os recursos que um pentester precisa.\
 **HackTricks continua sendo uma ótima plataforma de aprendizado para todos nós e estamos orgulhosos de patrociná-la!**
 
 {{#ref}}
