@@ -51,7 +51,7 @@ docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pw
 
 <figure><img src="images/image (45).png" alt=""><figcaption></figcaption></figure>
 
-[**RootedCON**](https://www.rootedcon.com) 是 **西班牙** 最相关的网络安全事件，也是 **欧洲** 最重要的事件之一。该大会的 **使命是促进技术知识**，是各个学科的技术和网络安全专业人士的热烈交流点。
+[**RootedCON**](https://www.rootedcon.com) 是 **西班牙** 最相关的网络安全事件，也是 **欧洲** 最重要的活动之一。该大会的 **使命是促进技术知识**，是各个学科技术和网络安全专业人士的热烈交流点。
 
 {{#ref}}
 https://www.rootedcon.com/
@@ -65,7 +65,7 @@ https://www.rootedcon.com/
 
 **Intigriti** 是 **欧洲第一** 的道德黑客和 **漏洞赏金平台**。
 
-**漏洞赏金提示**：**注册** **Intigriti**，这是一个由黑客为黑客创建的高级 **漏洞赏金平台**！今天就加入我们，访问 [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks)，开始赚取高达 **$100,000** 的赏金！
+**漏洞赏金提示**：**注册** **Intigriti**，这是一个由黑客为黑客创建的高级 **漏洞赏金平台**！今天就加入我们 [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks)，开始赚取高达 **$100,000** 的赏金！
 
 {{#ref}}
 https://go.intigriti.com/hacktricks
@@ -80,7 +80,7 @@ https://go.intigriti.com/hacktricks
 \
 使用 [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) 轻松构建和 **自动化工作流程**，由世界上 **最先进** 的社区工具提供支持。
 
-今天获取访问权限：
+今天就获取访问权限：
 
 {{#ref}}
 https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks
@@ -123,7 +123,7 @@ https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktrick
 **SerpApi** 提供快速且简单的实时 API，以 **访问搜索引擎结果**。他们抓取搜索引擎，处理代理，解决验证码，并为您解析所有丰富的结构化数据。
 
 订阅 SerpApi 的计划之一可访问超过 50 个不同的 API，用于抓取不同的搜索引擎，包括 Google、Bing、百度、Yahoo、Yandex 等。\
-与其他提供商不同，**SerpApi 不仅仅抓取自然结果**。SerpApi 的响应始终包括所有广告、内嵌图像和视频、知识图谱以及搜索结果中存在的其他元素和功能。
+与其他提供商不同，**SerpApi 不仅仅抓取自然结果**。SerpApi 的响应始终包括所有广告、内联图像和视频、知识图谱以及搜索结果中存在的其他元素和功能。
 
 当前的 SerpApi 客户包括 **Apple、Shopify 和 GrubHub**。\
 有关更多信息，请查看他们的 [**博客**](https://serpapi.com/blog/)**，**或在他们的 [**游乐场**](https://serpapi.com/playground)** 尝试示例。**\
@@ -135,7 +135,7 @@ https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktrick
 
 <figure><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-学习执行漏洞研究、渗透测试和逆向工程所需的技术和技能，以保护移动应用和设备。通过我们的按需课程 **掌握 iOS 和 Android 安全** 并 **获得认证**：
+学习执行漏洞研究、渗透测试和逆向工程所需的技术和技能，以保护移动应用程序和设备。通过我们的按需课程 **掌握 iOS 和 Android 安全** 并 **获得认证**：
 
 {{#ref}}
 https://academy.8ksec.io/
@@ -151,7 +151,7 @@ https://academy.8ksec.io/
 
 WebSec 是一家国际安全公司，在阿姆斯特丹和怀俄明州设有办事处。他们提供 **一体化安全服务**，这意味着他们可以做所有事情；渗透测试、**安全** 审计、意识培训、网络钓鱼活动、代码审查、漏洞开发、安全专家外包等等。
 
-WebSec 的另一个酷点是，与行业平均水平不同，WebSec 对他们的技能 **非常自信**，以至于他们 **保证最佳质量结果**，他们的网站上写着“**如果我们无法攻破它，您就不需要支付！**”。有关更多信息，请查看他们的 [**网站**](https://websec.net/en/) 和 [**博客**](https://websec.net/blog/)！
+WebSec 的另一个酷点是，与行业平均水平不同，WebSec 对他们的技能 **非常自信**，以至于他们 **保证最佳质量结果**，他们在网站上声明“**如果我们无法攻破它，您就不需要支付！**”。有关更多信息，请查看他们的 [**网站**](https://websec.net/en/) 和 [**博客**](https://websec.net/blog/)！
 
 除了上述内容，WebSec 还是 **HackTricks 的坚定支持者**。
 
@@ -184,6 +184,6 @@ welcome/hacktricks-values-and-faq.md
 
 ## Github 统计
 
-![HackTricks Github Stats](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
+![HackTricks Github 统计](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
 
 {{#include ./banners/hacktricks-training.md}}
