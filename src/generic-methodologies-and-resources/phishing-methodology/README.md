@@ -22,14 +22,14 @@
 ### Techniques de Variation de Noms de Domaine
 
 - **Mot-clé** : Le nom de domaine **contient** un **mot-clé** important du domaine original (par exemple, zelster.com-management.com).
-- **sous-domaine hyphéné** : Remplacer le **point par un tiret** d'un sous-domaine (par exemple, www-zelster.com).
+- **sous-domaine hyphéné** : Changer le **point par un tiret** d'un sous-domaine (par exemple, www-zelster.com).
 - **Nouveau TLD** : Même domaine utilisant un **nouveau TLD** (par exemple, zelster.org).
-- **Homoglyphes** : Il **remplace** une lettre dans le nom de domaine par des **lettres qui se ressemblent** (par exemple, zelfser.com).
+- **Homoglyph** : Il **remplace** une lettre dans le nom de domaine par des **lettres qui se ressemblent** (par exemple, zelfser.com).
 - **Transposition** : Il **échange deux lettres** dans le nom de domaine (par exemple, zelsetr.com).
-- **Singularisation/Pluralisation** : Ajoute ou enlève un "s" à la fin du nom de domaine (par exemple, zeltsers.com).
+- **Singularisation/Pluralisation** : Ajoute ou enlève un “s” à la fin du nom de domaine (par exemple, zeltsers.com).
 - **Omission** : Il **supprime une** des lettres du nom de domaine (par exemple, zelser.com).
 - **Répétition** : Il **répète une** des lettres dans le nom de domaine (par exemple, zeltsser.com).
-- **Remplacement** : Comme homoglyphes mais moins furtif. Il remplace une des lettres dans le nom de domaine, peut-être par une lettre proche de la lettre originale sur le clavier (par exemple, zektser.com).
+- **Remplacement** : Comme homoglyph mais moins furtif. Il remplace une des lettres dans le nom de domaine, peut-être par une lettre proche de la lettre originale sur le clavier (par exemple, zektser.com).
 - **Sous-domaine** : Introduire un **point** à l'intérieur du nom de domaine (par exemple, ze.lster.com).
 - **Insertion** : Il **insère une lettre** dans le nom de domaine (par exemple, zerltser.com).
 - **Point manquant** : Ajouter le TLD au nom de domaine. (par exemple, zelstercom.com)
@@ -53,7 +53,7 @@ Lorsque ce concept est **appliqué aux requêtes DNS**, il est possible que le *
 
 Par exemple, une seule modification de bit dans le domaine "windows.com" peut le changer en "windnws.com".
 
-Les attaquants peuvent **profiter de cela en enregistrant plusieurs domaines à bit-flipping** qui sont similaires au domaine de la victime. Leur intention est de rediriger les utilisateurs légitimes vers leur propre infrastructure.
+Les attaquants peuvent **profiter de cela en enregistrant plusieurs domaines de bit-flipping** qui sont similaires au domaine de la victime. Leur intention est de rediriger les utilisateurs légitimes vers leur propre infrastructure.
 
 Pour plus d'informations, lisez [https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
 
@@ -83,7 +83,7 @@ De plus, n'oubliez pas que si les utilisateurs utilisent **un portail web pour a
 Vous pouvez le télécharger depuis [https://github.com/gophish/gophish/releases/tag/v0.11.0](https://github.com/gophish/gophish/releases/tag/v0.11.0)
 
 Téléchargez et décompressez-le dans `/opt/gophish` et exécutez `/opt/gophish/gophish`\
-Un mot de passe pour l'utilisateur admin sur le port 3333 vous sera donné dans la sortie. Par conséquent, accédez à ce port et utilisez ces identifiants pour changer le mot de passe admin. Vous devrez peut-être faire un tunnel de ce port vers local :
+Un mot de passe pour l'utilisateur admin sera donné sur le port 3333 dans la sortie. Par conséquent, accédez à ce port et utilisez ces identifiants pour changer le mot de passe admin. Vous devrez peut-être faire un tunnel de ce port vers local :
 ```bash
 ssh -L 3333:127.0.0.1:3333 <user>@<ip>
 ```
@@ -91,7 +91,7 @@ ssh -L 3333:127.0.0.1:3333 <user>@<ip>
 
 **Configuration du certificat TLS**
 
-Avant cette étape, vous devriez **déjà avoir acheté le domaine** que vous allez utiliser et il doit **pointer** vers l'**IP du VPS** où vous configurez **gophish**.
+Avant cette étape, vous devez **déjà avoir acheté le domaine** que vous allez utiliser et il doit **pointer** vers l'**IP du VPS** où vous configurez **gophish**.
 ```bash
 DOMAIN="<domain>"
 wget https://dl.eff.org/certbot-auto
@@ -111,7 +111,7 @@ cp "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" /opt/gophish/ssl_keys/key.crt�
 
 Commencez par installer : `apt-get install postfix`
 
-Ensuite, ajoutez le domaine aux fichiers suivants :
+Ajoutez ensuite le domaine aux fichiers suivants :
 
 - **/etc/postfix/virtual_domains**
 - **/etc/postfix/transport**
@@ -223,11 +223,11 @@ service gophish stop
 
 ### Attendre et être légitime
 
-Plus un domaine est ancien, moins il est probable qu'il soit considéré comme du spam. Vous devriez donc attendre le plus longtemps possible (au moins 1 semaine) avant l'évaluation de phishing. De plus, si vous mettez une page sur un secteur de réputation, la réputation obtenue sera meilleure.
+Plus un domaine est ancien, moins il est probable qu'il soit considéré comme du spam. Vous devriez donc attendre le plus longtemps possible (au moins 1 semaine) avant l'évaluation de phishing. De plus, si vous mettez en place une page sur un secteur réputé, la réputation obtenue sera meilleure.
 
 Notez que même si vous devez attendre une semaine, vous pouvez terminer la configuration de tout maintenant.
 
-### Configurer l'enregistrement DNS inverse (rDNS)
+### Configurer l'enregistrement DNS inversé (rDNS)
 
 Définissez un enregistrement rDNS (PTR) qui résout l'adresse IP du VPS au nom de domaine.
 
@@ -373,7 +373,7 @@ Notez que **pour augmenter la crédibilité de l'email**, il est recommandé d'u
 
 Enfin, créez une campagne en sélectionnant un nom, le modèle d'email, la page de destination, l'URL, le profil d'envoi et le groupe. Notez que l'URL sera le lien envoyé aux victimes.
 
-Notez que le **profil d'envoi permet d'envoyer un email de test pour voir à quoi ressemblera le phishing final** :
+Notez que le **Profil d'envoi permet d'envoyer un email de test pour voir à quoi ressemblera le phishing final** :
 
 ![](<../../images/image (192).png>)
 
@@ -393,7 +393,7 @@ clone-a-website.md
 ## Documents & Fichiers avec porte dérobée
 
 Dans certaines évaluations de phishing (principalement pour les Red Teams), vous voudrez également **envoyer des fichiers contenant une sorte de porte dérobée** (peut-être un C2 ou peut-être juste quelque chose qui déclenchera une authentification).\
-Consultez la page suivante pour quelques exemples :
+Consultez la page suivante pour des exemples :
 
 {{#ref}}
 phishing-documents.md
@@ -403,13 +403,13 @@ phishing-documents.md
 
 ### Via Proxy MitM
 
-L'attaque précédente est assez astucieuse car vous simulez un vrai site web et recueillez les informations fournies par l'utilisateur. Malheureusement, si l'utilisateur n'a pas saisi le bon mot de passe ou si l'application que vous avez simulée est configurée avec 2FA, **ces informations ne vous permettront pas d'usurper l'identité de l'utilisateur trompé**.
+L'attaque précédente est assez astucieuse car vous simulez un vrai site web et recueillez les informations fournies par l'utilisateur. Malheureusement, si l'utilisateur n'a pas saisi le bon mot de passe ou si l'application que vous avez simulée est configurée avec 2FA, **ces informations ne vous permettront pas d'usurper l'utilisateur trompé**.
 
-C'est là que des outils comme [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** [**CredSniper**](https://github.com/ustayready/CredSniper) et [**muraena**](https://github.com/muraenateam/muraena) sont utiles. Cet outil vous permettra de générer une attaque de type MitM. En gros, l'attaque fonctionne de la manière suivante :
+C'est là que des outils comme [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** [**CredSniper**](https://github.com/ustayready/CredSniper) et [**muraena**](https://github.com/muraenateam/muraena) sont utiles. Cet outil vous permettra de générer une attaque de type MitM. En gros, les attaques fonctionnent de la manière suivante :
 
 1. Vous **usurpez le formulaire de connexion** de la vraie page web.
 2. L'utilisateur **envoie** ses **identifiants** à votre page factice et l'outil les envoie à la vraie page web, **vérifiant si les identifiants fonctionnent**.
-3. Si le compte est configuré avec **2FA**, la page MitM demandera cela et une fois que l'**utilisateur l'introduit**, l'outil l'enverra à la vraie page web.
+3. Si le compte est configuré avec **2FA**, la page MitM le demandera et une fois que l'**utilisateur l'introduit**, l'outil l'enverra à la vraie page web.
 4. Une fois que l'utilisateur est authentifié, vous (en tant qu'attaquant) aurez **capturé les identifiants, le 2FA, le cookie et toute information** de chaque interaction pendant que l'outil effectue un MitM.
 
 ### Via VNC
@@ -419,7 +419,7 @@ Vous pouvez faire cela avec [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVN
 
 ## Détecter la détection
 
-Évidemment, l'un des meilleurs moyens de savoir si vous avez été démasqué est de **chercher votre domaine dans les listes noires**. S'il apparaît, d'une manière ou d'une autre, votre domaine a été détecté comme suspect.\
+Évidemment, l'un des meilleurs moyens de savoir si vous avez été démasqué est de **chercher votre domaine dans des listes noires**. S'il apparaît, d'une manière ou d'une autre, votre domaine a été détecté comme suspect.\
 Un moyen facile de vérifier si votre domaine apparaît dans une liste noire est d'utiliser [https://malwareworld.com/](https://malwareworld.com)
 
 Cependant, il existe d'autres moyens de savoir si la victime **cherche activement des activités de phishing suspectes dans la nature** comme expliqué dans :
@@ -428,7 +428,7 @@ Cependant, il existe d'autres moyens de savoir si la victime **cherche activemen
 detecting-phising.md
 {{#endref}}
 
-Vous pouvez **acheter un domaine avec un nom très similaire** à celui du domaine de la victime **et/ou générer un certificat** pour un **sous-domaine** d'un domaine contrôlé par vous **contenant** le **mot-clé** du domaine de la victime. Si la **victime** effectue une sorte d'**interaction DNS ou HTTP** avec eux, vous saurez qu'**il cherche activement** des domaines suspects et vous devrez être très discret.
+Vous pouvez **acheter un domaine avec un nom très similaire** à celui du domaine de la victime **et/ou générer un certificat** pour un **sous-domaine** d'un domaine contrôlé par vous **contenant** le **mot-clé** du domaine de la victime. Si la **victime** effectue une sorte d'**interaction DNS ou HTTP** avec eux, vous saurez qu'elle **cherche activement** des domaines suspects et vous devrez être très discret.
 
 ### Évaluer le phishing
 
