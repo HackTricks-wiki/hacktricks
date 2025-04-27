@@ -2,7 +2,7 @@
 
 <figure><img src="images/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
-_Logotypy i animacje Hacktricks autorstwa_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
+_Logo i animacja Hacktricks autorstwa_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
 
 ### Uruchom HackTricks lokalnie
 ```bash
@@ -39,7 +39,7 @@ Twoja lokalna kopia HackTricks będzie **dostępna pod adresem [http://localhost
 
 <figure><img src="images/stm (1).png" alt=""><figcaption></figcaption></figure>
 
-[**STM Cyber**](https://www.stmcyber.com) to świetna firma zajmująca się cyberbezpieczeństwem, której hasło to **HACK THE UNHACKABLE**. Prowadzą własne badania i opracowują własne narzędzia hakerskie, aby **oferować kilka cennych usług w zakresie cyberbezpieczeństwa**, takich jak pentesting, Red teams i szkolenia.
+[**STM Cyber**](https://www.stmcyber.com) to świetna firma zajmująca się cyberbezpieczeństwem, której hasło to **HACK THE UNHACKABLE**. Prowadzą własne badania i opracowują własne narzędzia hakerskie, aby **oferować kilka cennych usług w zakresie cyberbezpieczeństwa**, takich jak pentesting, zespoły Red i szkolenia.
 
 Możesz sprawdzić ich **blog** pod adresem [**https://blog.stmcyber.com**](https://blog.stmcyber.com)
 
@@ -63,7 +63,7 @@ https://www.rootedcon.com/
 
 <figure><img src="images/image (47).png" alt=""><figcaption></figcaption></figure>
 
-**Intigriti** to **numer 1 w Europie** w zakresie etycznego hackingu i **platforma bug bounty.**
+**Intigriti** to **numer 1 w Europie** platforma do etycznego hackingu i **bug bounty.**
 
 **Wskazówka dotycząca bug bounty**: **zarejestruj się** w **Intigriti**, premium **platformie bug bounty stworzonej przez hakerów, dla hackerów**! Dołącz do nas pod adresem [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) już dziś i zacznij zarabiać nagrody do **100 000 USD**!
 
@@ -135,7 +135,7 @@ Możesz **utworzyć darmowe konto** [**tutaj**](https://serpapi.com/users/sign_u
 
 <figure><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Poznaj technologie i umiejętności potrzebne do przeprowadzania badań nad lukami, testów penetracyjnych i inżynierii odwrotnej, aby chronić aplikacje i urządzenia mobilne. **Opanuj bezpieczeństwo iOS i Android** dzięki naszym kursom na żądanie i **zdobądź certyfikat**:
+Poznaj technologie i umiejętności potrzebne do przeprowadzania badań nad lukami, testów penetracyjnych i inżynierii odwrotnej w celu ochrony aplikacji i urządzeń mobilnych. **Opanuj bezpieczeństwo iOS i Android** dzięki naszym kursom na żądanie i **zdobądź certyfikat**:
 
 {{#ref}}
 https://academy.8ksec.io/
@@ -166,7 +166,7 @@ https://www.youtube.com/watch?v=Zq2JycGDCPM
 <figure><img src="images/venacus-logo.svg" alt="venacus logo"><figcaption></figcaption></figure>
 
 [**Venacus**](https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons) to wyszukiwarka naruszeń danych (leak). \
-Oferujemy wyszukiwanie losowych ciągów (jak google) w różnych typach wycieków danych, dużych i małych --nie tylko tych dużych-- z danych z wielu źródeł. \
+Oferujemy wyszukiwanie losowych ciągów (jak google) we wszystkich typach naruszeń danych, dużych i małych --nie tylko tych dużych-- z danych z wielu źródeł. \
 Wyszukiwanie osób, wyszukiwanie AI, wyszukiwanie organizacji, dostęp do API (OpenAPI), integracja z theHarvester, wszystkie funkcje, których potrzebuje pentester.\
 **HackTricks nadal jest wspaniałą platformą edukacyjną dla nas wszystkich i jesteśmy dumni, że możemy ją sponsorować!**
 
