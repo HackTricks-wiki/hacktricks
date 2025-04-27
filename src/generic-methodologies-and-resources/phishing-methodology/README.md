@@ -24,15 +24,15 @@
 - **Palavra-chave**: O nome do domínio **contém** uma **palavra-chave** importante do domínio original (por exemplo, zelster.com-management.com).
 - **subdomínio hifenizado**: Mudar o **ponto por um hífen** de um subdomínio (por exemplo, www-zelster.com).
 - **Novo TLD**: Mesmo domínio usando um **novo TLD** (por exemplo, zelster.org).
-- **Homoglyph**: **Substitui** uma letra no nome do domínio por **letras que parecem semelhantes** (por exemplo, zelfser.com).
-- **Transposição:** **Troca duas letras** dentro do nome do domínio (por exemplo, zelsetr.com).
+- **Homoglyph**: Ele **substitui** uma letra no nome do domínio por **letras que parecem semelhantes** (por exemplo, zelfser.com).
+- **Transposição:** Ele **troca duas letras** dentro do nome do domínio (por exemplo, zelsetr.com).
 - **Singularização/Pluralização**: Adiciona ou remove “s” no final do nome do domínio (por exemplo, zeltsers.com).
-- **Omissão**: **Remove uma** das letras do nome do domínio (por exemplo, zelser.com).
-- **Repetição:** **Repete uma** das letras no nome do domínio (por exemplo, zeltsser.com).
-- **Substituição**: Como homoglyph, mas menos furtivo. Substitui uma das letras no nome do domínio, talvez por uma letra próxima da letra original no teclado (por exemplo, zektser.com).
-- **Subdominado**: Introduz um **ponto** dentro do nome do domínio (por exemplo, ze.lster.com).
-- **Inserção**: **Insere uma letra** no nome do domínio (por exemplo, zerltser.com).
-- **Ponto ausente**: Anexa o TLD ao nome do domínio. (por exemplo, zelstercom.com)
+- **Omissão**: Ele **remove uma** das letras do nome do domínio (por exemplo, zelser.com).
+- **Repetição:** Ele **repete uma** das letras no nome do domínio (por exemplo, zeltsser.com).
+- **Substituição**: Como homoglyph, mas menos furtivo. Ele substitui uma das letras no nome do domínio, talvez por uma letra próxima da letra original no teclado (por exemplo, zektser.com).
+- **Subdominado**: Introduzir um **ponto** dentro do nome do domínio (por exemplo, ze.lster.com).
+- **Inserção**: Ele **insere uma letra** no nome do domínio (por exemplo, zerltser.com).
+- **Ponto ausente**: Anexar o TLD ao nome do domínio. (por exemplo, zelstercom.com)
 
 **Ferramentas Automáticas**
 
@@ -47,7 +47,7 @@
 
 ### Bitflipping
 
-Há uma **possibilidade de que alguns bits armazenados ou em comunicação possam ser automaticamente invertidos** devido a vários fatores, como flares solares, raios cósmicos ou erros de hardware.
+Há uma **possibilidade de que um de alguns bits armazenados ou em comunicação possa ser automaticamente invertido** devido a vários fatores, como flares solares, raios cósmicos ou erros de hardware.
 
 Quando esse conceito é **aplicado a solicitações DNS**, é possível que o **domínio recebido pelo servidor DNS** não seja o mesmo que o domínio inicialmente solicitado.
 
@@ -107,7 +107,7 @@ mkdir /opt/gophish/ssl_keys
 cp "/etc/letsencrypt/live/$DOMAIN/privkey.pem" /opt/gophish/ssl_keys/key.pem
 cp "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" /opt/gophish/ssl_keys/key.crt​
 ```
-**Configuração de Mail**
+**Configuração de e-mail**
 
 Comece instalando: `apt-get install postfix`
 
@@ -126,7 +126,7 @@ Finalmente, modifique os arquivos **`/etc/hostname`** e **`/etc/mailname`** para
 
 Agora, crie um **registro DNS A** de `mail.<domain>` apontando para o **endereço IP** do VPS e um **registro DNS MX** apontando para `mail.<domain>`
 
-Agora vamos testar o envio de um email:
+Agora vamos testar o envio de um e-mail:
 ```bash
 apt install mailutils
 echo "This is the body of the email" | mail -s "This is the subject line" test@email.com
@@ -223,7 +223,7 @@ service gophish stop
 
 ### Espere e seja legítimo
 
-Quanto mais antigo for um domínio, menos provável é que ele seja identificado como spam. Portanto, você deve esperar o máximo de tempo possível (pelo menos 1 semana) antes da avaliação de phishing. Além disso, se você colocar uma página sobre um setor reputacional, a reputação obtida será melhor.
+Quanto mais antigo for um domínio, menos provável é que ele seja identificado como spam. Portanto, você deve esperar o máximo de tempo possível (pelo menos 1 semana) antes da avaliação de phishing. Além disso, se você criar uma página sobre um setor reputacional, a reputação obtida será melhor.
 
 Observe que, mesmo que você tenha que esperar uma semana, pode terminar de configurar tudo agora.
 
@@ -243,7 +243,7 @@ Este é o conteúdo que deve ser definido dentro de um registro TXT no domínio:
 ```bash
 v=spf1 mx a ip4:ip.ip.ip.ip ?all
 ```
-### Domain-based Message Authentication, Reporting & Conformance (DMARC) Record
+### Registro de Autenticação, Relatório e Conformidade de Mensagens Baseado em Domínio (DMARC)
 
 Você deve **configurar um registro DMARC para o novo domínio**. Se você não sabe o que é um registro DMARC [**leia esta página**](../../network-services-pentesting/pentesting-smtp/index.html#dmarc).
 
@@ -305,11 +305,11 @@ A página [www.mail-tester.com](https://www.mail-tester.com) pode indicar se seu
 - Decida de qual conta você vai enviar os emails de phishing. Sugestões: _noreply, support, servicedesk, salesforce..._
 - Você pode deixar em branco o nome de usuário e a senha, mas certifique-se de marcar a opção Ignorar Erros de Certificado
 
-![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
+![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
 
 > [!NOTE]
 > É recomendado usar a funcionalidade "**Enviar Email de Teste**" para testar se tudo está funcionando.\
-> Eu recomendaria **enviar os emails de teste para endereços de 10min** a fim de evitar ser colocado na lista negra durante os testes.
+> Eu recomendaria **enviar os emails de teste para endereços de 10min** para evitar ser colocado na lista negra durante os testes.
 
 ### Modelo de Email
 
@@ -338,7 +338,7 @@ WRITE HERE SOME SIGNATURE OF SOMEONE FROM THE COMPANY
 Note que **para aumentar a credibilidade do e-mail**, é recomendável usar alguma assinatura de um e-mail do cliente. Sugestões:
 
 - Envie um e-mail para um **endereço inexistente** e verifique se a resposta tem alguma assinatura.
-- Pesquise por **e-mails públicos** como info@ex.com ou press@ex.com ou public@ex.com e envie um e-mail para eles e aguarde a resposta.
+- Procure por **e-mails públicos** como info@ex.com ou press@ex.com ou public@ex.com e envie um e-mail para eles e aguarde a resposta.
 - Tente contatar **algum e-mail válido descoberto** e aguarde a resposta.
 
 ![](<../../images/image (80).png>)
@@ -403,13 +403,13 @@ phishing-documents.md
 
 ### Via Proxy MitM
 
-O ataque anterior é bastante inteligente, pois você está falsificando um site real e coletando as informações fornecidas pelo usuário. Infelizmente, se o usuário não inserir a senha correta ou se o aplicativo que você falsificou estiver configurado com 2FA, **essa informação não permitirá que você se passe pelo usuário enganado**.
+O ataque anterior é bastante inteligente, pois você está falsificando um site real e coletando as informações fornecidas pelo usuário. Infelizmente, se o usuário não inseriu a senha correta ou se o aplicativo que você falsificou está configurado com 2FA, **essa informação não permitirá que você se passe pelo usuário enganado**.
 
-É aqui que ferramentas como [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** [**CredSniper**](https://github.com/ustayready/CredSniper) e [**muraena**](https://github.com/muraenateam/muraena) são úteis. Essa ferramenta permitirá que você gere um ataque do tipo MitM. Basicamente, os ataques funcionam da seguinte maneira:
+É aqui que ferramentas como [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** [**CredSniper**](https://github.com/ustayready/CredSniper) e [**muraena**](https://github.com/muraenateam/muraena) são úteis. Esta ferramenta permitirá que você gere um ataque do tipo MitM. Basicamente, os ataques funcionam da seguinte maneira:
 
-1. Você **falsifica o formulário de login** da página da web real.
-2. O usuário **envia** suas **credenciais** para sua página falsa e a ferramenta as envia para a página da web real, **verificando se as credenciais funcionam**.
-3. Se a conta estiver configurada com **2FA**, a página MitM pedirá isso e, uma vez que o **usuário o introduza**, a ferramenta o enviará para a página da web real.
+1. Você **falsifica o formulário de login** da página real.
+2. O usuário **envia** suas **credenciais** para sua página falsa e a ferramenta as envia para a página real, **verificando se as credenciais funcionam**.
+3. Se a conta estiver configurada com **2FA**, a página MitM pedirá isso e, uma vez que o **usuário o introduza**, a ferramenta o enviará para a página real.
 4. Uma vez que o usuário esteja autenticado, você (como atacante) terá **capturado as credenciais, o 2FA, o cookie e qualquer informação** de cada interação enquanto a ferramenta está realizando um MitM.
 
 ### Via VNC
@@ -422,7 +422,7 @@ Você pode fazer isso com [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC)
 Obviamente, uma das melhores maneiras de saber se você foi descoberto é **pesquisar seu domínio em listas negras**. Se ele aparecer listado, de alguma forma seu domínio foi detectado como suspeito.\
 Uma maneira fácil de verificar se seu domínio aparece em alguma lista negra é usar [https://malwareworld.com/](https://malwareworld.com)
 
-No entanto, existem outras maneiras de saber se a vítima está **ativamente procurando por atividades de phishing suspeitas na web**, conforme explicado em:
+No entanto, existem outras maneiras de saber se a vítima está **ativamente procurando por atividades de phishing suspeitas na rede**, conforme explicado em:
 
 {{#ref}}
 detecting-phising.md

@@ -1,3 +1,26 @@
+/* ────────────────────────────────────────────────────────────────
+   Polyfill so requestIdleCallback works everywhere (IE 11/Safari)
+   ─────────────────────────────────────────────────────────────── */
+if (typeof window.requestIdleCallback !== "function") {
+window.requestIdleCallback = function (cb) {
+    const start = Date.now();
+    return setTimeout(function () {
+    cb({
+        didTimeout: false,
+        timeRemaining: function () {
+        return Math.max(0, 50 - (Date.now() - start));
+        }
+    });
+    }, 1);
+};
+window.cancelIdleCallback = window.clearTimeout;
+}
+
+  
+/* ────────────────────────────────────────────────────────────────
+   search.js
+   ─────────────────────────────────────────────────────────────── */
+
 "use strict";
 window.search = window.search || {};
 (function search(search) {
@@ -471,64 +494,58 @@ window.search = window.search || {};
         showResults(true);
     }
 
-    (async function loadSearchIndex(lang = window.lang || 'en') {
-        /* ───────── paths ───────── */
-        const branch      = lang === 'en' ? 'master' : lang;
-        const baseRemote  = `https://raw.githubusercontent.com/HackTricks-wiki/hacktricks/${branch}`;
-        const remoteJson  = `${baseRemote}/searchindex.json`;
-        const remoteJs    = `${baseRemote}/searchindex.js`;
-        const localJson   = './searchindex.json';
-        const localJs     = './searchindex.js';
-        const TIMEOUT_MS  = 5_000;
-        
-        /* ───────── helpers ───────── */
-        const fetchWithTimeout = (url, opt = {}) =>
-            Promise.race([
-            fetch(url, opt),
-            new Promise((_, r) => setTimeout(() => r(new Error('timeout')), TIMEOUT_MS))
-            ]);
-        
-        const loadScript = src =>
-            new Promise((resolve, reject) => {
-            const s = document.createElement('script');
-            s.src      = src;
-            s.onload   = resolve;
-            s.onerror  = reject;
+    (async function loadSearchIndex(lang = window.lang || "en") {
+        const branch  = lang === "en" ? "master" : lang;
+        const rawUrl  =
+          `https://raw.githubusercontent.com/HackTricks-wiki/hacktricks/refs/heads/${branch}/searchindex.js`;
+        const localJs = "/searchindex.js";
+        const TIMEOUT_MS = 10_000;
+
+        const injectScript = (src) =>
+          new Promise((resolve, reject) => {
+            const s   = document.createElement("script");
+            s.src     = src;
+            s.onload  = () => resolve(src);
+            s.onerror = (e) => reject(e);
             document.head.appendChild(s);
-            });
-        
-        /* ───────── 1. remote JSON ───────── */
+          });
+
         try {
-            const r = await fetchWithTimeout(remoteJson);
-            if (!r.ok) throw new Error(r.status);
-            return init(await r.json());
-        } catch (e) {
-            console.warn('Remote JSON failed →', e);
+          /* 1 — download raw JS from GitHub */
+          const controller = new AbortController();
+          const timer      = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
+          const res  = await fetch(rawUrl, { signal: controller.signal });
+          clearTimeout(timer);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+          /* 2 — wrap in a Blob so the browser sees application/javascript */
+          const code     = await res.text();
+          const blobUrl  = URL.createObjectURL(
+                            new Blob([code], { type: "application/javascript" })
+                          );
+
+          /* 3 — execute it */
+          await injectScript(blobUrl);
+
+          /* ───────────── PATCH ─────────────
+             heavy parsing now deferred to idle time
+          */ 
+          requestIdleCallback(() => init(window.search));
+          return;  // ✔ UI remains responsive
+        } catch (eRemote) {
+          console.warn("Remote JS failed →", eRemote);
         }
-        
-        /* ───────── 2. remote JS ───────── */
+
+        /* ───────── fallback: local copy ───────── */
         try {
-            await loadScript(remoteJs);
-            return init(window.search);
-        } catch (e) {
-            console.warn('Remote JS failed →', e);
-        }
-        
-        /* ───────── 3. local JSON ───────── */
-        try {
-            const r = await fetch(localJson);
-            if (!r.ok) throw new Error(r.status);
-            return init(await r.json());
-        } catch (e) {
-            console.warn('Local JSON failed →', e);
-        }
-        
-        /* ───────── 4. local JS ───────── */
-        try {
-            await loadScript(localJs);
-            return init(window.search);
-        } catch (e) {
-            console.error('Local JS failed →', e);
+          await injectScript(localJs);
+
+          /* ───────────── PATCH ───────────── */
+          requestIdleCallback(() => init(window.search));
+          return;
+        } catch (eLocal) {
+          console.error("Local JS failed →", eLocal);
         }
     })();
 
