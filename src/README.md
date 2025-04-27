@@ -4,7 +4,7 @@
 
 _Logo et design animé de Hacktricks par_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
 
-### Exécuter HackTricks localement
+### Exécuter HackTricks Localement
 ```bash
 # Download latest version of hacktricks
 git clone https://github.com/HackTricks-wiki/hacktricks
@@ -33,7 +33,7 @@ docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pw
 ```
 Votre copie locale de HackTricks sera **disponible à [http://localhost:3337](http://localhost:3337)** après <5 minutes (il faut construire le livre, soyez patient).
 
-## Sponsors Corporatifs
+## Sponsors d'entreprise
 
 ### [STM Cyber](https://www.stmcyber.com)
 
@@ -78,7 +78,7 @@ https://go.intigriti.com/hacktricks
 <figure><img src="images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Utilisez [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) pour créer et **automatiser des workflows** facilement grâce aux **outils communautaires les plus avancés** au monde.
+Utilisez [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) pour créer et **automatiser des flux de travail** alimentés par les outils communautaires **les plus avancés** au monde.
 
 Accédez dès aujourd'hui :
 
@@ -102,7 +102,7 @@ Rejoignez le serveur [**HackenProof Discord**](https://discord.com/invite/N3FrSb
 
 ---
 
-### [Pentest-Tools.com](https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons) - L'outil essentiel de test de pénétration
+### [Pentest-Tools.com](https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons) - L'outil essentiel pour les tests de pénétration
 
 <figure><img src="images/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
 
@@ -123,9 +123,9 @@ https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktrick
 **SerpApi** propose des API en temps réel rapides et faciles pour **accéder aux résultats des moteurs de recherche**. Ils extraient des moteurs de recherche, gèrent des proxies, résolvent des captchas et analysent toutes les données structurées riches pour vous.
 
 Un abonnement à l'un des plans de SerpApi inclut l'accès à plus de 50 API différentes pour extraire différents moteurs de recherche, y compris Google, Bing, Baidu, Yahoo, Yandex, et plus encore.\
-Contrairement à d'autres fournisseurs, **SerpApi ne se contente pas d'extraire des résultats organiques**. Les réponses de SerpApi incluent systématiquement toutes les publicités, images et vidéos en ligne, graphiques de connaissances, et d'autres éléments et fonctionnalités présents dans les résultats de recherche.
+Contrairement à d'autres fournisseurs, **SerpApi ne se contente pas d'extraire des résultats organiques**. Les réponses de SerpApi incluent systématiquement toutes les annonces, images et vidéos en ligne, graphiques de connaissances et autres éléments et fonctionnalités présents dans les résultats de recherche.
 
-Les clients actuels de SerpApi incluent **Apple, Shopify, et GrubHub**.\
+Les clients actuels de SerpApi incluent **Apple, Shopify et GrubHub**.\
 Pour plus d'informations, consultez leur [**blog**](https://serpapi.com/blog/)**,** ou essayez un exemple dans leur [**playground**](https://serpapi.com/playground)**.**\
 Vous pouvez **créer un compte gratuit** [**ici**](https://serpapi.com/users/sign_up)**.**
 
@@ -151,7 +151,7 @@ https://academy.8ksec.io/
 
 WebSec est une entreprise de sécurité internationale avec des bureaux à Amsterdam et Wyoming. Ils offrent des **services de sécurité tout-en-un**, ce qui signifie qu'ils font tout ; Pentesting, **Audits** de sécurité, Formations de sensibilisation, Campagnes de phishing, Revue de code, Développement d'exploits, Externalisation d'experts en sécurité et bien plus encore.
 
-Une autre chose intéressante à propos de WebSec est que, contrairement à la moyenne de l'industrie, WebSec est **très confiant dans ses compétences**, à tel point qu'ils **garantissent les meilleurs résultats de qualité**, comme indiqué sur leur site web "**Si nous ne pouvons pas le hacker, vous ne payez pas !**". Pour plus d'infos, jetez un œil à leur [**site web**](https://websec.net/en/) et [**blog**](https://websec.net/blog/) !
+Une autre chose intéressante à propos de WebSec est que, contrairement à la moyenne de l'industrie, WebSec est **très confiant dans ses compétences**, à tel point qu'ils **garantissent les meilleurs résultats de qualité**, comme indiqué sur leur site web "**Si nous ne pouvons pas le hacker, vous ne le payez pas !**". Pour plus d'infos, jetez un œil à leur [**site web**](https://websec.net/en/) et [**blog**](https://websec.net/blog/) !
 
 En plus de cela, WebSec est également un **soutien engagé de HackTricks.**
 
@@ -166,7 +166,7 @@ https://www.youtube.com/watch?v=Zq2JycGDCPM
 <figure><img src="images/venacus-logo.svg" alt="venacus logo"><figcaption></figcaption></figure>
 
 [**Venacus**](https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons) est un moteur de recherche de violations de données (leak). \
-Nous fournissons une recherche de chaînes aléatoires (comme Google) sur tous les types de fuites de données, grandes et petites --pas seulement les grandes-- provenant de multiples sources. \
+Nous fournissons une recherche de chaînes aléatoires (comme google) sur tous les types de fuites de données, grandes et petites --pas seulement les grandes-- provenant de multiples sources. \
 Recherche de personnes, recherche IA, recherche d'organisations, accès API (OpenAPI), intégration theHarvester, toutes les fonctionnalités dont un pentester a besoin.\
 **HackTricks continue d'être une excellente plateforme d'apprentissage pour nous tous et nous sommes fiers de le sponsoriser !**
 
