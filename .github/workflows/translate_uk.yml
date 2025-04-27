@@ -116,4 +116,11 @@ jobs:
       
       # Sync the build to S3
       - name: Sync to S3
-        run: aws s3 sync ./book s3://hacktricks-wiki/$BRANCH --delete
+        run: |
+          echo "Current branch:"
+          git rev-parse --abbrev-ref HEAD
+          echo "Syncing $BRANCH to S3"
+          aws s3 sync ./book s3://hacktricks-wiki/$BRANCH --delete
+          echo "Sync completed"
+          echo "Cat 3 files from the book"
+          find . -type f -name '*.md' -print | head -n 3 | xargs -r cat
