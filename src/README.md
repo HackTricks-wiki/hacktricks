@@ -31,7 +31,7 @@ export LANG="master" # Leave master for english
 # Run the docker container indicating the path to the hacktricks folder
 docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git config --global --add safe.directory /app && git checkout $LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
-당신의 로컬 HackTricks 복사본은 **<5분 후에 [http://localhost:3337](http://localhost:3337)** **이용 가능할 것입니다 (책을 빌드해야 하므로, 인내심을 가지세요).**
+당신의 로컬 HackTricks 복사본은 **5분 이내에 [http://localhost:3337](http://localhost:3337)**에서 **사용 가능**합니다 (책을 빌드해야 하므로, 인내심을 가지세요).
 
 ## 기업 후원사
 
@@ -39,11 +39,11 @@ docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pw
 
 <figure><img src="images/stm (1).png" alt=""><figcaption></figcaption></figure>
 
-[**STM Cyber**](https://www.stmcyber.com)는 **HACK THE UNHACKABLE**라는 슬로건을 가진 훌륭한 사이버 보안 회사입니다. 그들은 자체 연구를 수행하고 **여러 유용한 사이버 보안 서비스**를 제공하기 위해 자체 해킹 도구를 개발합니다. 이러한 서비스에는 pentesting, Red teams 및 교육이 포함됩니다.
+[**STM Cyber**](https://www.stmcyber.com)는 **HACK THE UNHACKABLE**라는 슬로건을 가진 훌륭한 사이버 보안 회사입니다. 그들은 자체 연구를 수행하고 **여러 가치 있는 사이버 보안 서비스**를 제공하기 위해 자체 해킹 도구를 개발합니다. 이러한 서비스에는 pentesting, Red teams 및 교육이 포함됩니다.
 
 그들의 **블로그**를 [**https://blog.stmcyber.com**](https://blog.stmcyber.com)에서 확인할 수 있습니다.
 
-**STM Cyber**는 또한 HackTricks와 같은 사이버 보안 오픈 소스 프로젝트를 지원합니다 :)
+**STM Cyber**는 HackTricks와 같은 사이버 보안 오픈 소스 프로젝트도 지원합니다 :)
 
 ---
 
@@ -78,7 +78,7 @@ https://go.intigriti.com/hacktricks
 <figure><img src="images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)를 사용하여 세계에서 **가장 진보된** 커뮤니티 도구로 **워크플로우**를 쉽게 구축하고 **자동화**하세요.
+[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)를 사용하여 세계에서 **가장 진보된** 커뮤니티 도구로 구동되는 **워크플로우**를 쉽게 구축하고 **자동화**하세요.
 
 오늘 액세스하세요:
 
@@ -92,7 +92,7 @@ https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktr
 
 <figure><img src="images/image (3).png" alt=""><figcaption></figcaption></figure>
 
-경험이 풍부한 해커 및 버그 바운티 헌터와 소통하기 위해 [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) 서버에 참여하세요!
+[**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) 서버에 가입하여 경험이 풍부한 해커 및 버그 바운티 헌터와 소통하세요!
 
 - **해킹 통찰력:** 해킹의 스릴과 도전에 대한 내용을 다루는 콘텐츠에 참여하세요.
 - **실시간 해킹 뉴스:** 실시간 뉴스와 통찰력을 통해 빠르게 변화하는 해킹 세계를 따라가세요.
@@ -102,13 +102,13 @@ https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktr
 
 ---
 
-### [Pentest-Tools.com](https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons) - 필수 침투 테스트 도구 모음
+### [Pentest-Tools.com](https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons) - 필수 침투 테스트 도구 키트
 
 <figure><img src="images/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
 
 **웹 앱, 네트워크 및 클라우드에 대한 해커의 관점을 얻으세요.**
 
-**실제 비즈니스에 영향을 미치는 중요한, 악용 가능한 취약점을 찾아보고 보고하세요.** 공격 표면을 매핑하고 권한 상승을 허용하는 보안 문제를 찾기 위해 20개 이상의 맞춤형 도구를 사용하고, 자동화된 익스플로잇을 사용하여 필수 증거를 수집하여 귀하의 노력을 설득력 있는 보고서로 전환하세요.
+**실제 비즈니스에 영향을 미치는 중요한, 악용 가능한 취약점을 찾아보고 보고하세요.** 공격 표면을 매핑하고 권한 상승을 허용하는 보안 문제를 찾아내며, 필수 증거를 수집하기 위해 자동화된 익스플로잇을 사용하여 귀하의 노력을 설득력 있는 보고서로 전환하세요.
 
 {{#ref}}
 https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons
@@ -120,9 +120,9 @@ https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktrick
 
 <figure><img src="images/image (1254).png" alt=""><figcaption></figcaption></figure>
 
-**SerpApi**는 **검색 엔진 결과**에 **빠르고 쉽게** 접근할 수 있는 실시간 API를 제공합니다. 그들은 검색 엔진을 스크랩하고, 프록시를 처리하며, 캡차를 해결하고, 모든 풍부한 구조화된 데이터를 파싱합니다.
+**SerpApi**는 **검색 엔진 결과**에 **접근하기 위한** 빠르고 쉬운 실시간 API를 제공합니다. 그들은 검색 엔진을 스크랩하고, 프록시를 처리하며, 캡차를 해결하고, 모든 풍부한 구조화된 데이터를 파싱합니다.
 
-SerpApi의 플랜 중 하나에 가입하면 Google, Bing, Baidu, Yahoo, Yandex 등 다양한 검색 엔진을 스크랩하기 위한 50개 이상의 API에 접근할 수 있습니다.\
+SerpApi의 계획 중 하나에 가입하면 Google, Bing, Baidu, Yahoo, Yandex 등 다양한 검색 엔진을 스크랩하기 위한 50개 이상의 API에 접근할 수 있습니다.\
 다른 제공업체와 달리 **SerpApi는 유기적 결과만 스크랩하지 않습니다**. SerpApi 응답은 항상 모든 광고, 인라인 이미지 및 비디오, 지식 그래프 및 검색 결과에 있는 기타 요소와 기능을 포함합니다.
 
 현재 SerpApi 고객에는 **Apple, Shopify 및 GrubHub**가 포함됩니다.\
@@ -135,7 +135,7 @@ SerpApi의 플랜 중 하나에 가입하면 Google, Bing, Baidu, Yahoo, Yandex 
 
 <figure><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-취약점 연구, 침투 테스트 및 리버스 엔지니어링을 수행하여 모바일 애플리케이션과 장치를 보호하는 데 필요한 기술과 기술을 배우세요. **온디맨드 과정**을 통해 iOS 및 Android 보안을 **마스터**하고 **인증을 받으세요**:
+취약점 연구, 침투 테스트 및 리버스 엔지니어링을 수행하여 모바일 애플리케이션 및 장치를 보호하는 데 필요한 기술과 기술을 배우세요. **온디맨드 과정**을 통해 iOS 및 Android 보안을 **마스터**하고 **인증을 받으세요**:
 
 {{#ref}}
 https://academy.8ksec.io/
@@ -153,7 +153,7 @@ WebSec는 암스테르담과 와이오밍에 사무소를 둔 국제 보안 회�
 
 WebSec의 또 다른 멋진 점은 업계 평균과 달리 WebSec가 **자신의 기술에 매우 자신감이 있다는 것입니다**, 그 정도로 **최고 품질의 결과를 보장합니다**, 그들의 웹사이트에는 "**우리가 해킹할 수 없다면, 당신은 지불하지 않습니다!**"라고 명시되어 있습니다. 더 많은 정보는 그들의 [**웹사이트**](https://websec.net/en/)와 [**블로그**](https://websec.net/blog/)를 확인하세요!
 
-위의 내용 외에도 WebSec는 **HackTricks의 헌신적인 후원자**이기도 합니다.
+위의 내용 외에도 WebSec는 HackTricks의 **헌신적인 후원자**이기도 합니다.
 
 {{#ref}}
 https://www.youtube.com/watch?v=Zq2JycGDCPM
@@ -165,7 +165,7 @@ https://www.youtube.com/watch?v=Zq2JycGDCPM
 
 <figure><img src="images/venacus-logo.svg" alt="venacus logo"><figcaption></figcaption></figure>
 
-[**Venacus**](https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons)는 데이터 유출(leak) 검색 엔진입니다. \
+[**Venacus**](https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons)는 데이터 유출 검색 엔진입니다. \
 우리는 모든 유형의 데이터 유출에 대해 무작위 문자열 검색(구글과 유사)을 제공합니다. \
 사람 검색, AI 검색, 조직 검색, API (OpenAPI) 접근, theHarvester 통합 등, pentester가 필요로 하는 모든 기능을 제공합니다.\
 **HackTricks는 우리 모두에게 훌륭한 학습 플랫폼으로 계속되고 있으며, 우리는 이를 후원하게 되어 자랑스럽습니다!**
