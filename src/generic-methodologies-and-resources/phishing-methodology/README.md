@@ -6,7 +6,7 @@
 
 1. Riconoscere la vittima
 1. Selezionare il **dominio della vittima**.
-2. Eseguire alcune basi di enumerazione web **cercando portali di accesso** utilizzati dalla vittima e **decidere** quale **fingere**.
+2. Eseguire alcune basi di enumerazione web **cercando portali di accesso** utilizzati dalla vittima e **decidere** quale impersonare.
 3. Utilizzare alcune **OSINT** per **trovare email**.
 2. Preparare l'ambiente
 1. **Acquistare il dominio** che si intende utilizzare per la valutazione di phishing
@@ -53,14 +53,14 @@ Quando questo concetto è **applicato alle richieste DNS**, è possibile che il 
 
 Ad esempio, una singola modifica di bit nel dominio "windows.com" può cambiarlo in "windnws.com."
 
-Gli attaccanti possono **sfruttare questo registrando più domini con bit-flipping** che sono simili al dominio della vittima. La loro intenzione è reindirizzare gli utenti legittimi alla propria infrastruttura.
+Gli attaccanti possono **sfruttare questo registrando più domini di bit-flipping** simili a quello della vittima. La loro intenzione è reindirizzare gli utenti legittimi alla propria infrastruttura.
 
 Per ulteriori informazioni leggi [https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
 
 ### Acquistare un dominio affidabile
 
 Puoi cercare in [https://www.expireddomains.net/](https://www.expireddomains.net) un dominio scaduto che potresti utilizzare.\
-Per assicurarti che il dominio scaduto che stai per acquistare **abbia già un buon SEO** puoi cercare come è categorizzato in:
+Per assicurarti che il dominio scaduto che stai per acquistare **abbia già un buon SEO**, puoi cercare come è categorizzato in:
 
 - [http://www.fortiguard.com/webfilter](http://www.fortiguard.com/webfilter)
 - [https://urlfiltering.paloaltonetworks.com/query/](https://urlfiltering.paloaltonetworks.com/query/)
@@ -73,7 +73,7 @@ Per assicurarti che il dominio scaduto che stai per acquistare **abbia già un b
 - [https://hunter.io/](https://hunter.io)
 - [https://anymailfinder.com/](https://anymailfinder.com)
 
-Per **scoprire di più** indirizzi email validi o **verificare quelli** che hai già scoperto puoi controllare se puoi forzare in modo brutale i server smtp della vittima. [Scopri come verificare/scoprire indirizzi email qui](../../network-services-pentesting/pentesting-smtp/index.html#username-bruteforce-enumeration).\
+Per **scoprire di più** indirizzi email validi o **verificare quelli** che hai già scoperto, puoi controllare se puoi forzare in modo brutale i server smtp della vittima. [Scopri come verificare/scoprire indirizzi email qui](../../network-services-pentesting/pentesting-smtp/index.html#username-bruteforce-enumeration).\
 Inoltre, non dimenticare che se gli utenti utilizzano **qualunque portale web per accedere alle loro email**, puoi controllare se è vulnerabile a **forza bruta del nome utente**, ed esplorare la vulnerabilità se possibile.
 
 ## Configurare GoPhish
@@ -134,7 +134,7 @@ echo "This is the body of the email" | mail -s "This is the subject line" test@e
 **Configurazione di Gophish**
 
 Ferma l'esecuzione di gophish e configuriamolo.\
-Modifica `/opt/gophish/config.json` come segue (nota l'uso di https):
+Modifica `/opt/gophish/config.json` nel seguente modo (nota l'uso di https):
 ```bash
 {
 "admin_server": {
@@ -239,7 +239,7 @@ Puoi usare [https://www.spfwizard.net/](https://www.spfwizard.net) per generare 
 
 ![](<../../images/image (1037).png>)
 
-Questo è il contenuto che deve essere impostato all'interno di un record TXT all'interno del dominio:
+Questo è il contenuto che deve essere impostato all'interno di un record TXT nel dominio:
 ```bash
 v=spf1 mx a ip4:ip.ip.ip.ip ?all
 ```
@@ -255,7 +255,7 @@ v=DMARC1; p=none
 
 Devi **configurare un DKIM per il nuovo dominio**. Se non sai cos'è un record DMARC [**leggi questa pagina**](../../network-services-pentesting/pentesting-smtp/index.html#dkim).
 
-Questo tutorial è basato su: [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
+Questo tutorial si basa su: [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
 
 > [!NOTE]
 > Devi concatenare entrambi i valori B64 che la chiave DKIM genera:
@@ -267,11 +267,11 @@ Questo tutorial è basato su: [https://www.digitalocean.com/community/tutorials/
 ### Testa il punteggio della tua configurazione email
 
 Puoi farlo usando [https://www.mail-tester.com/](https://www.mail-tester.com)\
-Basta accedere alla pagina e inviare un'email all'indirizzo che ti danno:
+Basta accedere alla pagina e inviare un'email all'indirizzo che ti forniscono:
 ```bash
 echo "This is the body of the email" | mail -s "This is the subject line" test-iimosa79z@srv1.mail-tester.com
 ```
-Puoi anche **controllare la configurazione della tua email** inviando un'email a `check-auth@verifier.port25.com` e **leggendo la risposta** (per questo dovrai **aprire** la porta **25** e vedere la risposta nel file _/var/mail/root_ se invii l'email come root).\
+Puoi anche **controllare la tua configurazione email** inviando un'email a `check-auth@verifier.port25.com` e **leggendo la risposta** (per questo dovrai **aprire** la porta **25** e vedere la risposta nel file _/var/mail/root_ se invii l'email come root).\
 Controlla di superare tutti i test:
 ```bash
 ==========================================================
@@ -339,12 +339,12 @@ Nota che **per aumentare la credibilità dell'email**, è consigliato utilizzare
 
 - Invia un'email a un **indirizzo inesistente** e controlla se la risposta ha qualche firma.
 - Cerca **email pubbliche** come info@ex.com o press@ex.com o public@ex.com e invia loro un'email e aspetta la risposta.
-- Prova a contattare **qualche email valida scoperta** e aspetta la risposta.
+- Prova a contattare **alcune email valide scoperte** e aspetta la risposta.
 
 ![](<../../images/image (80).png>)
 
 > [!NOTE]
-> Il modello di email consente anche di **allegare file da inviare**. Se desideri anche rubare le sfide NTLM utilizzando alcuni file/documenti appositamente creati [leggi questa pagina](../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md).
+> Il Modello di Email consente anche di **allegare file da inviare**. Se desideri anche rubare le sfide NTLM utilizzando alcuni file/documenti appositamente creati [leggi questa pagina](../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md).
 
 ### Landing Page
 
@@ -356,7 +356,7 @@ Nota che **per aumentare la credibilità dell'email**, è consigliato utilizzare
 ![](<../../images/image (826).png>)
 
 > [!NOTE]
-> Di solito dovrai modificare il codice HTML della pagina e fare alcuni test in locale (magari usando un server Apache) **fino a quando non ti piacciono i risultati.** Poi, scrivi quel codice HTML nella casella.\
+> Di solito dovrai modificare il codice HTML della pagina e fare alcuni test in locale (magari utilizzando un server Apache) **fino a quando non ti piacciono i risultati.** Poi, scrivi quel codice HTML nella casella.\
 > Nota che se hai bisogno di **utilizzare alcune risorse statiche** per l'HTML (magari alcune pagine CSS e JS) puoi salvarle in _**/opt/gophish/static/endpoint**_ e poi accedervi da _**/static/\<filename>**_
 
 > [!NOTE]
@@ -378,7 +378,7 @@ Nota che il **Profilo di Invio consente di inviare un'email di prova per vedere 
 ![](<../../images/image (192).png>)
 
 > [!NOTE]
-> Ti consiglio di **inviare le email di prova a indirizzi di 10min mail** per evitare di essere inserito in blacklist durante i test.
+> Ti consiglio di **inviare le email di prova a indirizzi di 10min** per evitare di essere messo nella blacklist durante i test.
 
 Una volta che tutto è pronto, lancia semplicemente la campagna!
 
@@ -392,7 +392,7 @@ clone-a-website.md
 
 ## Documenti e File Backdoor
 
-In alcune valutazioni di phishing (principalmente per Red Teams) vorrai anche **inviare file contenenti qualche tipo di backdoor** (magari un C2 o magari solo qualcosa che attivi un'autenticazione).\
+In alcune valutazioni di phishing (principalmente per Red Teams) vorrai anche **inviare file contenenti qualche tipo di backdoor** (magari un C2 o magari solo qualcosa che attiverà un'autenticazione).\
 Controlla la seguente pagina per alcuni esempi:
 
 {{#ref}}
@@ -403,19 +403,19 @@ phishing-documents.md
 
 ### Via Proxy MitM
 
-L'attacco precedente è piuttosto astuto poiché stai falsificando un sito web reale e raccogliendo le informazioni fornite dall'utente. Sfortunatamente, se l'utente non ha inserito la password corretta o se l'applicazione che hai falsificato è configurata con 2FA, **queste informazioni non ti permetteranno di impersonare l'utente ingannato**.
+L'attacco precedente è piuttosto astuto poiché stai simulando un vero sito web e raccogliendo le informazioni fornite dall'utente. Sfortunatamente, se l'utente non ha inserito la password corretta o se l'applicazione che hai simulato è configurata con 2FA, **queste informazioni non ti permetteranno di impersonare l'utente ingannato**.
 
-È qui che strumenti come [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** [**CredSniper**](https://github.com/ustayready/CredSniper) e [**muraena**](https://github.com/muraenateam/muraena) sono utili. Questo strumento ti permetterà di generare un attacco simile a MitM. Fondamentalmente, gli attacchi funzionano nel seguente modo:
+Qui è dove strumenti come [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** [**CredSniper**](https://github.com/ustayready/CredSniper) e [**muraena**](https://github.com/muraenateam/muraena) sono utili. Questo strumento ti permetterà di generare un attacco simile a MitM. Fondamentalmente, gli attacchi funzionano nel seguente modo:
 
-1. Tu **impersoni il modulo di accesso** della pagina web reale.
-2. L'utente **invia** le sue **credenziali** alla tua pagina falsa e lo strumento le invia alla pagina web reale, **controllando se le credenziali funzionano**.
-3. Se l'account è configurato con **2FA**, la pagina MitM chiederà di inserirlo e una volta che l'**utente lo introduce**, lo strumento lo invierà alla pagina web reale.
+1. Tu **impersoni il modulo di accesso** della vera pagina web.
+2. L'utente **invia** le sue **credenziali** alla tua pagina falsa e lo strumento le invia alla vera pagina web, **controllando se le credenziali funzionano**.
+3. Se l'account è configurato con **2FA**, la pagina MitM chiederà di inserirlo e una volta che l'**utente lo introduce**, lo strumento lo invierà alla vera pagina web.
 4. Una volta che l'utente è autenticato, tu (come attaccante) avrai **catturato le credenziali, il 2FA, il cookie e qualsiasi informazione** di ogni interazione mentre lo strumento sta eseguendo un MitM.
 
 ### Via VNC
 
-E se invece di **inviare la vittima a una pagina malevola** con lo stesso aspetto di quella originale, la invii a una **sessione VNC con un browser connesso alla pagina web reale**? Sarai in grado di vedere cosa fa, rubare la password, il MFA utilizzato, i cookie...\
-Puoi farlo con [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC)
+E se invece di **inviare la vittima a una pagina malevola** con lo stesso aspetto di quella originale, lo invii a una **sessione VNC con un browser connesso alla vera pagina web**? Sarai in grado di vedere cosa fa, rubare la password, il MFA utilizzato, i cookie...\
+Puoi fare questo con [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC)
 
 ## Rilevare la rilevazione
 
