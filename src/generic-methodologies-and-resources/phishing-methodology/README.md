@@ -9,7 +9,7 @@
 2. Wykonaj podstawową enumerację sieci **szukając portali logowania** używanych przez ofiarę i **zdecyduj**, który z nich będziesz **podrabiać**.
 3. Użyj **OSINT**, aby **znaleźć e-maile**.
 2. Przygotowanie środowiska
-1. **Kup domenę**, której zamierzasz użyć do oceny phishingowej.
+1. **Kup domenę**, którą zamierzasz użyć do oceny phishingowej.
 2. **Skonfiguruj usługi e-mail** związane z rekordami (SPF, DMARC, DKIM, rDNS).
 3. Skonfiguruj VPS z **gophish**.
 3. Przygotowanie kampanii
@@ -47,20 +47,20 @@
 
 ### Bitflipping
 
-Istnieje **możliwość, że jeden z bitów przechowywanych lub w komunikacji może zostać automatycznie zmieniony** z powodu różnych czynników, takich jak burze słoneczne, promieniowanie kosmiczne lub błędy sprzętowe.
+Istnieje **możliwość, że jeden z bitów przechowywanych lub w komunikacji może zostać automatycznie zmieniony** z powodu różnych czynników, takich jak wybuchy słoneczne, promieniowanie kosmiczne lub błędy sprzętowe.
 
 Gdy ten koncept jest **stosowany do zapytań DNS**, możliwe jest, że **domena odebrana przez serwer DNS** nie jest taka sama jak domena pierwotnie żądana.
 
 Na przykład, pojedyncza modyfikacja bitu w domenie "windows.com" może zmienić ją na "windnws.com."
 
-Napastnicy mogą **wykorzystać to, rejestrując wiele domen z bit-flipping**, które są podobne do domeny ofiary. Ich intencją jest przekierowanie legalnych użytkowników do własnej infrastruktury.
+Atakujący mogą **wykorzystać to, rejestrując wiele domen z bit-flipping**, które są podobne do domeny ofiary. Ich intencją jest przekierowanie legalnych użytkowników do własnej infrastruktury.
 
 Aby uzyskać więcej informacji, przeczytaj [https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
 
 ### Kup zaufaną domenę
 
-Możesz poszukać na [https://www.expireddomains.net/](https://www.expireddomains.net) wygasłej domeny, której możesz użyć.\
-Aby upewnić się, że wygasła domena, którą zamierzasz kupić, **ma już dobre SEO**, możesz sprawdzić, jak jest sklasyfikowana w:
+Możesz poszukać na [https://www.expireddomains.net/](https://www.expireddomains.net) wygasłej domeny, którą mógłbyś wykorzystać.\
+Aby upewnić się, że wygasła domena, którą zamierzasz kupić, **ma już dobrą SEO**, możesz sprawdzić, jak jest sklasyfikowana w:
 
 - [http://www.fortiguard.com/webfilter](http://www.fortiguard.com/webfilter)
 - [https://urlfiltering.paloaltonetworks.com/query/](https://urlfiltering.paloaltonetworks.com/query/)
@@ -73,14 +73,14 @@ Aby upewnić się, że wygasła domena, którą zamierzasz kupić, **ma już dob
 - [https://hunter.io/](https://hunter.io)
 - [https://anymailfinder.com/](https://anymailfinder.com)
 
-Aby **odkryć więcej** ważnych adresów e-mail lub **zweryfikować te, które** już odkryłeś, możesz sprawdzić, czy możesz przeprowadzić brute-force na serwerach smtp ofiary. [Dowiedz się, jak zweryfikować/odkryć adres e-mail tutaj](../../network-services-pentesting/pentesting-smtp/index.html#username-bruteforce-enumeration).\
+Aby **odkryć więcej** ważnych adresów e-mail lub **zweryfikować te**, które już odkryłeś, możesz sprawdzić, czy możesz przeprowadzić brute-force na serwerach smtp ofiary. [Dowiedz się, jak zweryfikować/odkryć adres e-mail tutaj](../../network-services-pentesting/pentesting-smtp/index.html#username-bruteforce-enumeration).\
 Ponadto nie zapomnij, że jeśli użytkownicy korzystają z **jakiegokolwiek portalu internetowego do dostępu do swoich e-maili**, możesz sprawdzić, czy jest on podatny na **brute force nazwy użytkownika** i wykorzystać tę podatność, jeśli to możliwe.
 
 ## Konfigurowanie GoPhish
 
 ### Instalacja
 
-Możesz pobrać go z [https://github.com/gophish/gophish/releases/tag/v0.11.0](https://github.com/gophish/gophish/releases/tag/v0.11.0)
+Możesz go pobrać z [https://github.com/gophish/gophish/releases/tag/v0.11.0](https://github.com/gophish/gophish/releases/tag/v0.11.0)
 
 Pobierz i rozpakuj go w `/opt/gophish` i uruchom `/opt/gophish/gophish`\
 Otrzymasz hasło dla użytkownika admin na porcie 3333 w wyjściu. Dlatego uzyskaj dostęp do tego portu i użyj tych danych logowania, aby zmienić hasło administratora. Może być konieczne tunelowanie tego portu do lokalnego:
@@ -109,7 +109,7 @@ cp "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" /opt/gophish/ssl_keys/key.crt�
 ```
 **Konfiguracja poczty**
 
-Zacznij od instalacji: `apt-get install postfix`
+Rozpocznij instalację: `apt-get install postfix`
 
 Następnie dodaj domenę do następujących plików:
 
@@ -117,14 +117,14 @@ Następnie dodaj domenę do następujących plików:
 - **/etc/postfix/transport**
 - **/etc/postfix/virtual_regexp**
 
-**Zmień także wartości następujących zmiennych w /etc/postfix/main.cf**
+**Zmień również wartości następujących zmiennych w /etc/postfix/main.cf**
 
-`myhostname = <domena>`\
-`mydestination = $myhostname, <domena>, localhost.com, localhost`
+`myhostname = <domain>`\
+`mydestination = $myhostname, <domain>, localhost.com, localhost`
 
 Na koniec zmodyfikuj pliki **`/etc/hostname`** i **`/etc/mailname`** na swoją nazwę domeny i **zrestartuj swój VPS.**
 
-Teraz stwórz **rekord A DNS** dla `mail.<domena>` wskazujący na **adres IP** VPS oraz **rekord MX DNS** wskazujący na `mail.<domena>`
+Teraz stwórz **rekord A DNS** dla `mail.<domain>` wskazujący na **adres IP** VPS oraz **rekord MX DNS** wskazujący na `mail.<domain>`
 
 Teraz przetestuj wysyłanie e-maila:
 ```bash
@@ -223,11 +223,11 @@ service gophish stop
 
 ### Czekaj i bądź legitny
 
-Im starsza domena, tym mniej prawdopodobne, że zostanie uznana za spam. Dlatego powinieneś czekać jak najdłużej (przynajmniej 1 tydzień) przed oceną phishingu. Co więcej, jeśli umieścisz stronę o reputacyjnym sektorze, uzyskana reputacja będzie lepsza.
+Im starsza domena, tym mniej prawdopodobne, że zostanie uznana za spam. Powinieneś więc czekać jak najdłużej (przynajmniej 1 tydzień) przed oceną phishingu. Co więcej, jeśli umieścisz stronę o reputacyjnym sektorze, uzyskana reputacja będzie lepsza.
 
 Zauważ, że nawet jeśli musisz czekać tydzień, możesz teraz zakończyć konfigurację wszystkiego.
 
-### Skonfiguruj rekord Reverse DNS (rDNS)
+### Skonfiguruj rekord odwrotnego DNS (rDNS)
 
 Ustaw rekord rDNS (PTR), który rozwiązuje adres IP VPS na nazwę domeny.
 
@@ -243,7 +243,7 @@ To jest zawartość, która musi być ustawiona wewnątrz rekordu TXT w domenie:
 ```bash
 v=spf1 mx a ip4:ip.ip.ip.ip ?all
 ```
-### Rekord uwierzytelniania wiadomości oparty na domenie, raportowanie i zgodność (DMARC)
+### Rekord uwierzytelniania wiadomości opartego na domenie, raportowania i zgodności (DMARC)
 
 Musisz **skonfigurować rekord DMARC dla nowej domeny**. Jeśli nie wiesz, czym jest rekord DMARC [**przeczytaj tę stronę**](../../network-services-pentesting/pentesting-smtp/index.html#dmarc).
 
@@ -253,7 +253,7 @@ v=DMARC1; p=none
 ```
 ### DomainKeys Identified Mail (DKIM)
 
-Musisz **skonfigurować DKIM dla nowej domeny**. Jeśli nie wiesz, co to jest rekord DMARC [**przeczytaj tę stronę**](../../network-services-pentesting/pentesting-smtp/index.html#dkim).
+Musisz **skonfigurować DKIM dla nowej domeny**. Jeśli nie wiesz, czym jest rekord DMARC [**przeczytaj tę stronę**](../../network-services-pentesting/pentesting-smtp/index.html#dkim).
 
 Ten samouczek oparty jest na: [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
 
@@ -271,7 +271,7 @@ Po prostu wejdź na stronę i wyślij e-mail na adres, który ci podadzą:
 ```bash
 echo "This is the body of the email" | mail -s "This is the subject line" test-iimosa79z@srv1.mail-tester.com
 ```
-Możesz również **sprawdzić swoją konfigurację e-mail** wysyłając wiadomość e-mail na `check-auth@verifier.port25.com` i **czytając odpowiedź** (w tym celu będziesz musiał **otworzyć** port **25** i zobaczyć odpowiedź w pliku _/var/mail/root_, jeśli wyślesz e-mail jako root).\
+Możesz również **sprawdzić swoją konfigurację e-mail** wysyłając wiadomość e-mail na `check-auth@verifier.port25.com` i **czytając odpowiedź** (w tym celu musisz **otworzyć** port **25** i zobaczyć odpowiedź w pliku _/var/mail/root_, jeśli wysyłasz e-mail jako root).\
 Sprawdź, czy przeszedłeś wszystkie testy:
 ```bash
 ==========================================================
@@ -289,29 +289,29 @@ Authentication-Results: mx.google.com;
 spf=pass (google.com: domain of contact@example.com designates --- as permitted sender) smtp.mail=contact@example.com;
 dkim=pass header.i=@example.com;
 ```
-### ​Usuwanie z czarnej listy Spamhouse
+### ​Usuwanie z Czarnej Listy Spamhouse
 
 Strona [www.mail-tester.com](https://www.mail-tester.com) może wskazać, czy Twoja domena jest blokowana przez spamhouse. Możesz poprosić o usunięcie swojej domeny/IP pod adresem: ​[https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)
 
-### Usuwanie z czarnej listy Microsoftu
+### Usuwanie z Czarnej Listy Microsoft
 
 ​​Możesz poprosić o usunięcie swojej domeny/IP pod adresem [https://sender.office.com/](https://sender.office.com).
 
-## Utwórz i uruchom kampanię GoPhish
+## Utwórz i Uruchom Kampanię GoPhish
 
-### Profil wysyłania
+### Profil Wysyłający
 
 - Ustaw **nazwę identyfikującą** profil nadawcy
-- Zdecyduj, z którego konta będziesz wysyłać phishingowe e-maile. Sugestie: _noreply, support, servicedesk, salesforce..._
-- Możesz pozostawić puste pole z nazwą użytkownika i hasłem, ale upewnij się, że zaznaczyłeś Ignoruj błędy certyfikatu
+- Zdecyduj, z którego konta będziesz wysyłać e-maile phishingowe. Sugestie: _noreply, support, servicedesk, salesforce..._
+- Możesz pozostawić puste nazwę użytkownika i hasło, ale upewnij się, że zaznaczyłeś Ignoruj błędy certyfikatu
 
 ![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
 
 > [!NOTE]
 > Zaleca się korzystanie z funkcji "**Wyślij e-mail testowy**", aby sprawdzić, czy wszystko działa.\
-> Zalecałbym **wysyłanie e-maili testowych na adresy 10min mail**, aby uniknąć dodania do czarnej listy podczas testów.
+> Zalecałbym **wysyłanie e-maili testowych na adresy 10min**, aby uniknąć dodania do czarnej listy podczas testów.
 
-### Szablon e-maila
+### Szablon E-mail
 
 - Ustaw **nazwę identyfikującą** szablon
 - Następnie napisz **temat** (nic dziwnego, po prostu coś, co mógłbyś oczekiwać w zwykłym e-mailu)
@@ -335,7 +335,7 @@ WRITE HERE SOME SIGNATURE OF SOMEONE FROM THE COMPANY
 </body>
 </html>
 ```
-Zauważ, że **aby zwiększyć wiarygodność e-maila**, zaleca się użycie jakiegoś podpisu z e-maila od klienta. Sugestie:
+Zauważ, że **aby zwiększyć wiarygodność e-maila**, zaleca się użycie jakiegoś podpisu z e-maila klienta. Sugestie:
 
 - Wyślij e-mail na **nieistniejący adres** i sprawdź, czy odpowiedź zawiera jakiś podpis.
 - Szukaj **publicznych e-maili** takich jak info@ex.com lub press@ex.com lub public@ex.com i wyślij im e-mail, a następnie czekaj na odpowiedź.
@@ -357,7 +357,7 @@ Zauważ, że **aby zwiększyć wiarygodność e-maila**, zaleca się użycie jak
 
 > [!NOTE]
 > Zazwyczaj będziesz musiał zmodyfikować kod HTML strony i przeprowadzić kilka testów lokalnie (może używając jakiegoś serwera Apache) **aż do uzyskania zadowalających wyników.** Następnie wpisz ten kod HTML w polu.\
-> Zauważ, że jeśli potrzebujesz **użyć jakichś zasobów statycznych** dla HTML (może jakieś strony CSS i JS), możesz je zapisać w _**/opt/gophish/static/endpoint**_ i następnie uzyskać do nich dostęp z _**/static/\<filename>**_
+> Zauważ, że jeśli potrzebujesz **użyć jakichś statycznych zasobów** dla HTML (może jakieś strony CSS i JS), możesz je zapisać w _**/opt/gophish/static/endpoint**_ i następnie uzyskać do nich dostęp z _**/static/\<filename>**_
 
 > [!NOTE]
 > W przypadku przekierowania możesz **przekierować użytkowników na legitną główną stronę internetową** ofiary lub przekierować ich na _/static/migration.html_, na przykład, umieścić jakiś **kręcący się kółko (**[**https://loading.io/**](https://loading.io)**) przez 5 sekund, a następnie wskazać, że proces zakończył się sukcesem**.
@@ -414,12 +414,12 @@ Tutaj przydatne są narzędzia takie jak [**evilginx2**](https://github.com/kgre
 
 ### Poprzez VNC
 
-Co jeśli zamiast **wysyłać ofiarę na złośliwą stronę** o takim samym wyglądzie jak oryginalna, wyślesz go do **sesji VNC z przeglądarką połączoną z prawdziwą stroną internetową**? Będziesz mógł zobaczyć, co robi, ukraść hasło, używaną MFA, ciasteczka...\
+Co jeśli zamiast **wysyłać ofiarę na złośliwą stronę** o takim samym wyglądzie jak oryginalna, wyślesz go na **sesję VNC z przeglądarką połączoną z prawdziwą stroną internetową**? Będziesz mógł zobaczyć, co robi, ukraść hasło, używane MFA, ciasteczka...\
 Możesz to zrobić za pomocą [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC)
 
 ## Wykrywanie wykrycia
 
-Oczywiście jednym z najlepszych sposobów, aby dowiedzieć się, czy zostałeś wykryty, jest **sprawdzenie swojej domeny w czarnych listach**. Jeśli pojawi się na liście, w jakiś sposób twoja domena została wykryta jako podejrzana.\
+Oczywiście jednym z najlepszych sposobów, aby dowiedzieć się, czy zostałeś złapany, jest **sprawdzenie swojej domeny w czarnych listach**. Jeśli pojawi się na liście, w jakiś sposób twoja domena została wykryta jako podejrzana.\
 Jednym z łatwych sposobów, aby sprawdzić, czy twoja domena pojawia się w jakiejkolwiek czarnej liście, jest użycie [https://malwareworld.com/](https://malwareworld.com)
 
 Jednak istnieją inne sposoby, aby dowiedzieć się, czy ofiara **aktywnie szuka podejrzanej aktywności phishingowej w sieci**, jak wyjaśniono w:
