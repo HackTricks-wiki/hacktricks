@@ -10,7 +10,7 @@
 3. Usar **OSINT** para **encontrar correos electrónicos**.
 2. Preparar el entorno
 1. **Comprar el dominio** que vas a usar para la evaluación de phishing.
-2. **Configurar el servicio de correo** registros relacionados (SPF, DMARC, DKIM, rDNS).
+2. **Configurar el servicio de correo** relacionado (SPF, DMARC, DKIM, rDNS).
 3. Configurar el VPS con **gophish**.
 3. Preparar la campaña
 1. Preparar la **plantilla de correo electrónico**.
@@ -32,7 +32,7 @@
 - **Reemplazo**: Como homoglyph pero menos sigiloso. Reemplaza una de las letras en el nombre de dominio, quizás con una letra cercana a la letra original en el teclado (por ejemplo, zektser.com).
 - **Subdominado**: Introducir un **punto** dentro del nombre de dominio (por ejemplo, ze.lster.com).
 - **Inserción**: **Inserta una letra** en el nombre de dominio (por ejemplo, zerltser.com).
-- **Punto faltante**: Adjuntar el TLD al nombre de dominio. (por ejemplo, zelstercom.com)
+- **Punto faltante**: Agregar el TLD al nombre de dominio. (por ejemplo, zelstercom.com)
 
 **Herramientas Automáticas**
 
@@ -74,7 +74,7 @@ Para asegurarte de que el dominio expirado que vas a comprar **ya tiene un buen 
 - [https://anymailfinder.com/](https://anymailfinder.com)
 
 Para **descubrir más** direcciones de correo electrónico válidas o **verificar las que ya has descubierto**, puedes comprobar si puedes forzar por fuerza bruta los servidores smtp de la víctima. [Aprende cómo verificar/descubrir direcciones de correo electrónico aquí](../../network-services-pentesting/pentesting-smtp/index.html#username-bruteforce-enumeration).\
-Además, no olvides que si los usuarios utilizan **cualquier portal web para acceder a sus correos**, puedes verificar si es vulnerable a **fuerza bruta de nombres de usuario**, y explotar la vulnerabilidad si es posible.
+Además, no olvides que si los usuarios utilizan **cualquier portal web para acceder a sus correos**, puedes verificar si es vulnerable a **fuerza bruta de nombres de usuario** y explotar la vulnerabilidad si es posible.
 
 ## Configurando GoPhish
 
@@ -82,7 +82,7 @@ Además, no olvides que si los usuarios utilizan **cualquier portal web para acc
 
 Puedes descargarlo de [https://github.com/gophish/gophish/releases/tag/v0.11.0](https://github.com/gophish/gophish/releases/tag/v0.11.0)
 
-Descarga y descomprime dentro de `/opt/gophish` y ejecuta `/opt/gophish/gophish`\
+Descarga y descomprime en `/opt/gophish` y ejecuta `/opt/gophish/gophish`\
 Se te dará una contraseña para el usuario administrador en el puerto 3333 en la salida. Por lo tanto, accede a ese puerto y usa esas credenciales para cambiar la contraseña del administrador. Puede que necesites tunelizar ese puerto a local:
 ```bash
 ssh -L 3333:127.0.0.1:3333 <user>@<ip>
@@ -126,7 +126,7 @@ Finalmente, modifica los archivos **`/etc/hostname`** y **`/etc/mailname`** a tu
 
 Ahora, crea un **registro A de DNS** de `mail.<domain>` apuntando a la **dirección IP** del VPS y un **registro MX de DNS** apuntando a `mail.<domain>`
 
-Ahora probemos enviar un correo electrónico:
+Ahora probemos enviar un correo:
 ```bash
 apt install mailutils
 echo "This is the body of the email" | mail -s "This is the subject line" test@email.com
@@ -161,7 +161,7 @@ Modifica `/opt/gophish/config.json` a lo siguiente (nota el uso de https):
 ```
 **Configurar el servicio gophish**
 
-Para crear el servicio gophish de modo que se pueda iniciar automáticamente y gestionar como un servicio, puedes crear el archivo `/etc/init.d/gophish` con el siguiente contenido:
+Para crear el servicio gophish para que se inicie automáticamente y se gestione como un servicio, puedes crear el archivo `/etc/init.d/gophish` con el siguiente contenido:
 ```bash
 #!/bin/bash
 # /etc/init.d/gophish
@@ -208,7 +208,7 @@ case $1 in
 start|stop|status) "$1" ;;
 esac
 ```
-Termina de configurar el servicio y verifica que funcione:
+Termina de configurar el servicio y verifica su funcionamiento haciendo:
 ```bash
 mkdir /var/log/gophish
 chmod +x /etc/init.d/gophish
@@ -231,7 +231,7 @@ Ten en cuenta que incluso si tienes que esperar una semana, puedes terminar de c
 
 Configura un registro rDNS (PTR) que resuelva la dirección IP del VPS al nombre de dominio.
 
-### Registro de Sender Policy Framework (SPF)
+### Registro de Marco de Políticas de Remitente (SPF)
 
 Debes **configurar un registro SPF para el nuevo dominio**. Si no sabes qué es un registro SPF [**lee esta página**](../../network-services-pentesting/pentesting-smtp/index.html#spf).
 
@@ -243,7 +243,7 @@ Este es el contenido que debe establecerse dentro de un registro TXT dentro del 
 ```bash
 v=spf1 mx a ip4:ip.ip.ip.ip ?all
 ```
-### Registro de Autenticación, Informe y Conformidad de Mensajes Basado en Dominio (DMARC)
+### Registro de Autenticación de Mensajes Basado en Dominio, Informes y Conformidad (DMARC)
 
 Debes **configurar un registro DMARC para el nuevo dominio**. Si no sabes qué es un registro DMARC [**lee esta página**](../../network-services-pentesting/pentesting-smtp/index.html#dmarc).
 
@@ -297,7 +297,7 @@ La página [www.mail-tester.com](https://www.mail-tester.com) puede indicarte si
 
 ​​Puedes solicitar la eliminación de tu dominio/IP en [https://sender.office.com/](https://sender.office.com).
 
-## Crear y lanzar campaña GoPhish
+## Crear y lanzar campaña de GoPhish
 
 ### Perfil de envío
 
@@ -308,8 +308,8 @@ La página [www.mail-tester.com](https://www.mail-tester.com) puede indicarte si
 ![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
 
 > [!NOTE]
-> Se recomienda utilizar la funcionalidad "**Enviar correo de prueba**" para comprobar que todo está funcionando.\
-> Recomendaría **enviar los correos de prueba a direcciones de 10min** para evitar ser incluido en la lista negra al hacer pruebas.
+> Se recomienda utilizar la funcionalidad "**Enviar correo de prueba**" para verificar que todo esté funcionando.\
+> Recomendaría **enviar los correos de prueba a direcciones de 10min** para evitar ser incluido en la lista negra durante las pruebas.
 
 ### Plantilla de correo electrónico
 
@@ -337,7 +337,7 @@ WRITE HERE SOME SIGNATURE OF SOMEONE FROM THE COMPANY
 ```
 Nota que **para aumentar la credibilidad del correo electrónico**, se recomienda usar alguna firma de un correo del cliente. Sugerencias:
 
-- Envía un correo a una **dirección no existente** y verifica si la respuesta tiene alguna firma.
+- Envía un correo a una **dirección inexistente** y verifica si la respuesta tiene alguna firma.
 - Busca **correos públicos** como info@ex.com o press@ex.com o public@ex.com y envíales un correo y espera la respuesta.
 - Intenta contactar **algún correo válido descubierto** y espera la respuesta.
 
@@ -349,7 +349,7 @@ Nota que **para aumentar la credibilidad del correo electrónico**, se recomiend
 ### Página de Aterrizaje
 
 - Escribe un **nombre**
-- **Escribe el código HTML** de la página web. Ten en cuenta que puedes **importar** páginas web.
+- **Escribe el código HTML** de la página web. Nota que puedes **importar** páginas web.
 - Marca **Capturar Datos Enviados** y **Capturar Contraseñas**
 - Establece una **redirección**
 
@@ -357,7 +357,7 @@ Nota que **para aumentar la credibilidad del correo electrónico**, se recomiend
 
 > [!NOTE]
 > Generalmente necesitarás modificar el código HTML de la página y hacer algunas pruebas en local (quizás usando algún servidor Apache) **hasta que te gusten los resultados.** Luego, escribe ese código HTML en el cuadro.\
-> Ten en cuenta que si necesitas **usar algunos recursos estáticos** para el HTML (quizás algunas páginas CSS y JS) puedes guardarlos en _**/opt/gophish/static/endpoint**_ y luego acceder a ellos desde _**/static/\<filename>**_
+> Nota que si necesitas **usar algunos recursos estáticos** para el HTML (quizás algunas páginas CSS y JS) puedes guardarlos en _**/opt/gophish/static/endpoint**_ y luego acceder a ellos desde _**/static/\<filename>**_
 
 > [!NOTE]
 > Para la redirección podrías **redirigir a los usuarios a la página web principal legítima** de la víctima, o redirigirlos a _/static/migration.html_ por ejemplo, poner alguna **rueda giratoria (**[**https://loading.io/**](https://loading.io)**) durante 5 segundos y luego indicar que el proceso fue exitoso**.
@@ -365,13 +365,13 @@ Nota que **para aumentar la credibilidad del correo electrónico**, se recomiend
 ### Usuarios y Grupos
 
 - Establece un nombre
-- **Importa los datos** (ten en cuenta que para usar la plantilla del ejemplo necesitas el nombre, apellido y dirección de correo electrónico de cada usuario)
+- **Importa los datos** (nota que para usar la plantilla del ejemplo necesitas el nombre, apellido y dirección de correo electrónico de cada usuario)
 
 ![](<../../images/image (163).png>)
 
 ### Campaña
 
-Finalmente, crea una campaña seleccionando un nombre, la plantilla de correo, la página de aterrizaje, la URL, el perfil de envío y el grupo. Ten en cuenta que la URL será el enlace enviado a las víctimas.
+Finalmente, crea una campaña seleccionando un nombre, la plantilla de correo, la página de aterrizaje, la URL, el perfil de envío y el grupo. Nota que la URL será el enlace enviado a las víctimas.
 
 Nota que el **Perfil de Envío permite enviar un correo de prueba para ver cómo se verá el correo de phishing final**:
 
@@ -410,7 +410,7 @@ Aquí es donde herramientas como [**evilginx2**](https://github.com/kgretzky/evi
 1. **Suplantas el formulario de inicio de sesión** de la página web real.
 2. El usuario **envía** sus **credenciales** a tu página falsa y la herramienta envía esas credenciales a la página web real, **verificando si las credenciales funcionan**.
 3. Si la cuenta está configurada con **2FA**, la página MitM lo pedirá y una vez que el **usuario lo introduzca**, la herramienta lo enviará a la página web real.
-4. Una vez que el usuario esté autenticado, tú (como atacante) habrás **capturado las credenciales, el 2FA, la cookie y cualquier información** de cada interacción mientras la herramienta está realizando un MitM.
+4. Una vez que el usuario esté autenticado, tú (como atacante) habrás **capturado las credenciales, el 2FA, la cookie y cualquier información** de cada interacción mientras la herramienta realiza un MitM.
 
 ### A través de VNC
 
@@ -422,7 +422,7 @@ Puedes hacer esto con [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC)
 Obviamente, una de las mejores maneras de saber si te han descubierto es **buscar tu dominio en listas negras**. Si aparece listado, de alguna manera tu dominio fue detectado como sospechoso.\
 Una forma fácil de verificar si tu dominio aparece en alguna lista negra es usar [https://malwareworld.com/](https://malwareworld.com)
 
-Sin embargo, hay otras formas de saber si la víctima está **buscando activamente actividad de phishing sospechosa en la naturaleza**, como se explica en:
+Sin embargo, hay otras formas de saber si la víctima está **buscando activamente actividad de phishing sospechosa en la naturaleza** como se explica en:
 
 {{#ref}}
 detecting-phising.md
