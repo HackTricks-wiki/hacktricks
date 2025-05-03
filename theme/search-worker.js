@@ -38,3 +38,4 @@ const idx = elasticlunr.Index.load(self.search.index);
 self.onmessage = ({data: q}) => {
   postMessage(idx.search(q, { bool:'AND', expand:true }));
 };
+
