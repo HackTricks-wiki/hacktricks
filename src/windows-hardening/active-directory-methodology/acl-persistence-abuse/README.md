@@ -146,6 +146,8 @@ To identify misconfigured GPOs, PowerSploit's cmdlets can be chained together. T
 
 **OUs with a Given Policy Applied**: Identifying organizational units (OUs) affected by a given policy can be done using `Get-DomainOU`.
 
+You can also use the tool [**GPOHound**](https://github.com/cogiceo/GPOHound) to enumerate GPOs and find issues in them.
+
 ### Abuse GPO - New-GPOImmediateTask
 
 Misconfigured GPOs can be exploited to execute code, for example, by creating an immediate scheduled task. This can be done to add a user to the local administrators group on affected machines, significantly elevating privileges:
