@@ -63,7 +63,7 @@ https://www.rootedcon.com/
 
 <figure><img src="images/image (47).png" alt=""><figcaption></figcaption></figure>
 
-**Intigriti** é a **plataforma de hacking ético e bug bounty número 1 da Europa.**
+**Intigriti** é a **plataforma de hacking ético e bug bounty #1 da Europa.**
 
 **Dica de bug bounty**: **inscreva-se** no **Intigriti**, uma plataforma premium de **bug bounty criada por hackers, para hackers**! Junte-se a nós em [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) hoje e comece a ganhar recompensas de até **$100,000**!
 
@@ -131,7 +131,7 @@ Você pode **criar uma conta gratuita** [**aqui**](https://serpapi.com/users/sig
 
 ---
 
-### [8kSec Academy – Cursos de Segurança Móvel Aprofundados](https://academy.8ksec.io/)
+### [8kSec Academy – Cursos de Segurança Móvel em Profundidade](https://academy.8ksec.io/)
 
 <figure><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
@@ -149,9 +149,9 @@ https://academy.8ksec.io/
 
 [**WebSec**](https://websec.net) é uma empresa profissional de cibersegurança com sede em **Amsterdã** que ajuda a **proteger** empresas **em todo o mundo** contra as mais recentes ameaças de cibersegurança, fornecendo **serviços de segurança ofensiva** com uma abordagem **moderna**.
 
-WebSec é uma empresa de segurança internacional com escritórios em Amsterdã e Wyoming. Eles oferecem **serviços de segurança tudo-em-um**, o que significa que fazem tudo; Pentesting, **Auditorias** de Segurança, Treinamentos de Conscientização, Campanhas de Phishing, Revisão de Código, Desenvolvimento de Exploits, Terceirização de Especialistas em Segurança e muito mais.
+WebSec é uma empresa de segurança internacional com escritórios em Amsterdã e Wyoming. Eles oferecem **serviços de segurança tudo-em-um**, o que significa que fazem tudo; Pentesting, **Auditorias de Segurança**, Treinamentos de Conscientização, Campanhas de Phishing, Revisão de Código, Desenvolvimento de Exploits, Terceirização de Especialistas em Segurança e muito mais.
 
-Outra coisa legal sobre a WebSec é que, ao contrário da média do setor, a WebSec é **muito confiante em suas habilidades**, a tal ponto que **garante os melhores resultados de qualidade**, afirmando em seu site "**Se não conseguimos hackear, você não paga!**". Para mais informações, dê uma olhada em seu [**site**](https://websec.net/en/) e [**blog**](https://websec.net/blog/)!
+Outra coisa legal sobre a WebSec é que, ao contrário da média da indústria, a WebSec é **muito confiante em suas habilidades**, a tal ponto que **garante os melhores resultados de qualidade**, afirmando em seu site "**Se não conseguimos hackear, você não paga!**". Para mais informações, dê uma olhada em seu [**site**](https://websec.net/en/) e [**blog**](https://websec.net/blog/)!
 
 Além do acima, a WebSec também é um **apoiador comprometido do HackTricks.**
 
@@ -166,13 +166,33 @@ https://www.youtube.com/watch?v=Zq2JycGDCPM
 <figure><img src="images/venacus-logo.svg" alt="venacus logo"><figcaption></figcaption></figure>
 
 [**Venacus**](https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons) é um mecanismo de busca de vazamentos de dados (leak). \
-Fornecemos busca de strings aleatórias (como o google) sobre todos os tipos de vazamentos de dados grandes e pequenos --não apenas os grandes-- de dados de várias fontes. \
+Fornecemos busca de strings aleatórias (como o google) sobre todos os tipos de vazamentos de dados grandes e pequenos --não apenas os grandes-- de dados de múltiplas fontes. \
 Busca de pessoas, busca de IA, busca de organizações, acesso API (OpenAPI), integração com theHarvester, todos os recursos que um pentester precisa.\
 **HackTricks continua sendo uma ótima plataforma de aprendizado para todos nós e estamos orgulhosos de patrociná-la!**
 
 {{#ref}}
 https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons
 {{#endref}}
+
+---
+
+### [Last Tower Solutions](https://www.lasttowersolutions.com/)
+
+<figure><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
+
+Last Tower Solutions oferece serviços especializados de cibersegurança para instituições de **Educação** e **FinTech**, com foco em **testes de penetração, avaliações de segurança em nuvem** e **preparação para conformidade** (SOC 2, PCI-DSS, NIST). Nossa equipe inclui **profissionais certificados OSCP e CISSP**, trazendo profunda expertise técnica e insights padrão da indústria para cada engajamento.
+
+Vamos além de varreduras automatizadas com **testes manuais, orientados por inteligência**, adaptados a ambientes de alto risco. Desde a proteção de registros de estudantes até a proteção de transações financeiras, ajudamos organizações a defender o que mais importa.
+
+_“Uma defesa de qualidade requer conhecer o ataque, fornecemos segurança através da compreensão.”_
+
+Fique informado e atualizado com as últimas novidades em cibersegurança visitando nosso [**blog**](https://www.lasttowersolutions.com/blog).
+
+{{#ref}}
+https://www.lasttowersolutions.com/
+{{#endref}}
+
+---
 
 ## Licença & Isenção de Responsabilidade
 
