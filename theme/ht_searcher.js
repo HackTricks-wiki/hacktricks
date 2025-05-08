@@ -134,8 +134,9 @@
     const abs=d.url.startsWith('http');
     const href=`${abs?'':path_to_root}${parts[0]}?${URL_MARK}=${enc}#${parts[1]}`;
     const style=d.cloud?" style=\"color:#1e88e5\"":"";
+    const isCloud=d.cloud?" [Cloud]":" [Book]";
     return `<a href="${href}" aria-details="teaser_${teaserCount}"${style}>`+
-           `${d.breadcrumbs}<span class="teaser" id="teaser_${teaserCount}" aria-label="Search Result Teaser">${teaser}</span></a>`;
+           `${d.breadcrumbs}${isCloud}<span class="teaser" id="teaser_${teaserCount}" aria-label="Search Result Teaser">${teaser}</span></a>`;
   }
 
   /* ───────────── UI control ───────────── */
