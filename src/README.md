@@ -176,6 +176,32 @@ People search, AI search, organization search, API (OpenAPI) access, theHarveste
 https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons
 {{#endref}}
 
+---
+
+### [Last Tower Solutions](https://www.lasttowersolutions.com/)
+
+<figure><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
+
+Last Tower Solutions delivers specialized cybersecurity services for **Education** and **FinTech**
+institutions, with a focus on **penetration testing, cloud security assessments**, and
+**compliance readiness** (SOC 2, PCI-DSS, NIST). Our team includes **OSCP and CISSP
+certified professionals**, bringing deep technical expertise and industry-standard insight to
+every engagement.
+
+We go beyond automated scans with **manual, intelligence-driven testing** tailored to
+high-stakes environments. From securing student records to protecting financial transactions,
+we help organizations defend what matters most.
+
+_“A quality defense requires knowing the offense, we provide security through understanding.”_
+
+Stay informed and up to date with the latest in cybersecurity by visiting our [**blog**](https://www.lasttowersolutions.com/blog).
+
+{{#ref}}
+https://www.lasttowersolutions.com/
+{{#endref}}
+
+---
+
 ## License & Disclaimer
 
 Check them in:
