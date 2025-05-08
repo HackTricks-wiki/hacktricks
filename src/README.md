@@ -78,7 +78,7 @@ https://go.intigriti.com/hacktricks
 <figure><img src="images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Gebruik [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) om maklik **werkvloei** te bou en te **automate** wat aangedryf word deur die wêreld se **meest gevorderde** gemeenskap gereedskap.
+Gebruik [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) om maklik **werkvloei** te bou en te **automate** wat aangedryf word deur die wêreld se **mees gevorderde** gemeenskap gereedskap.
 
 Kry Toegang Vandag:
 
@@ -92,7 +92,7 @@ https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktr
 
 <figure><img src="images/image (3).png" alt=""><figcaption></figcaption></figure>
 
-Sluit aan by [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) bediener om met ervare hackers en bug bounty jagters te kommunikeer!
+Sluit by [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) bediener aan om met ervare hackers en bug bounty jagters te kommunikeer!
 
 - **Hacking Inligting:** Betrek met inhoud wat die opwinding en uitdagings van hacking ondersoek
 - **Regstydse Hack Nuus:** Bly op hoogte van die vinnig bewegende hacking wêreld deur regstydse nuus en insigte
@@ -102,7 +102,7 @@ Sluit aan by [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) be
 
 ---
 
-### [Pentest-Tools.com](https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons) - Die noodsaaklike penetrasietoets gereedskapstel
+### [Pentest-Tools.com](https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons) - Die noodsaaklike penetrasietoets gereedskap
 
 <figure><img src="images/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
 
@@ -135,7 +135,7 @@ Jy kan **'n gratis rekening** [**hier**](https://serpapi.com/users/sign_up)**.**
 
 <figure><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Leer die tegnologieë en vaardighede wat benodig word om kwesbaarheid navorsing, penetrasietoetsing, en omgekeerde ingenieurswese uit te voer om mobiele toepassings en toestelle te beskerm. **Meester iOS en Android sekuriteit** deur ons on-demand kursusse en **kry geakkrediteer**:
+Leer die tegnologieë en vaardighede wat benodig word om kwesbaarheid navorsing, penetrasietoetsing, en omgekeerde ingenieurswese uit te voer om mobiele toepassings en toestelle te beskerm. **Beheers iOS en Android sekuriteit** deur ons on-demand kursusse en **kry geakkrediteer**:
 
 {{#ref}}
 https://academy.8ksec.io/
@@ -149,11 +149,11 @@ https://academy.8ksec.io/
 
 [**WebSec**](https://websec.net) is 'n professionele kuberveiligheidsmaatskappy gebaseer in **Amsterdam** wat help om **besighede** **oor die wêreld** teen die nuutste kuberveiligheid bedreigings te beskerm deur **offensiewe-sekuriteit dienste** met 'n **moderne** benadering te bied.
 
-WebSec is 'n internasionale sekuriteitsmaatskappy met kantore in Amsterdam en Wyoming. Hulle bied **alles-in-een sekuriteitsdienste** aan wat beteken dat hulle dit alles doen; Pentesting, **Sekuriteit** Oudit, Bewustheidsopleiding, Phishing Campagnes, Kode Hersiening, Exploit Ontwikkeling, Sekuriteit Eksperte Uitsourcing en nog baie meer.
+WebSec is 'n internasionale sekuriteitsmaatskappy met kantore in Amsterdam en Wyoming. Hulle bied **alles-in-een sekuriteitsdienste** aan wat beteken dat hulle dit alles doen; Pentesting, **Sekuriteit** Oudit, Bewustheidsopleiding, Phishing Campagnes, Kode Hersiening, Eksploit Ontwikkeling, Sekuriteit Eksperte Uitsourcing en nog baie meer.
 
-Nog 'n interessante ding oor WebSec is dat, in teenstelling met die industrie gemiddelde, WebSec **baie selfversekerd is in hul vaardighede**, tot so 'n mate dat hulle **die beste kwaliteit resultate waarborg**, dit staan op hul webwerf "**As ons dit nie kan hack nie, betaal jy nie!**". Vir meer inligting, kyk na hul [**webwerf**](https://websec.net/en/) en [**blog**](https://websec.net/blog/)!
+Nog 'n interessante ding oor WebSec is dat, in teenstelling met die bedryfsgemiddelde, WebSec **baie selfversekerd is in hul vaardighede**, tot so 'n mate dat hulle **die beste kwaliteit resultate waarborg**, dit staan op hul webwerf "**As ons dit nie kan hack nie, betaal jy nie!**". Vir meer inligting, kyk na hul [**webwerf**](https://websec.net/en/) en [**blog**](https://websec.net/blog/)!
 
-Benewens bogenoemde is WebSec ook 'n **toegewyde ondersteuner van HackTricks.**
+Benewens die bogenoemde is WebSec ook 'n **toegewyde ondersteuner van HackTricks.**
 
 {{#ref}}
 https://www.youtube.com/watch?v=Zq2JycGDCPM
@@ -167,12 +167,32 @@ https://www.youtube.com/watch?v=Zq2JycGDCPM
 
 [**Venacus**](https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons) is 'n data breek (leak) soekenjin. \
 Ons bied random string soektog (soos google) oor alle tipes data lekkasies groot en klein --nie net die groot nie-- oor data van verskeie bronne. \
-Mense soektog, KI soektog, organisasie soektog, API (OpenAPI) toegang, dieHarvester integrasie, al die funksies wat 'n pentester benodig.\
+Mense soek, AI soek, organisasie soek, API (OpenAPI) toegang, dieHarvester integrasie, al die funksies wat 'n pentester benodig.\
 **HackTricks bly 'n wonderlike leerplatform vir ons almal en ons is trots om dit te borg!**
 
 {{#ref}}
 https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons
 {{#endref}}
+
+---
+
+### [Last Tower Solutions](https://www.lasttowersolutions.com/)
+
+<figure><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
+
+Last Tower Solutions bied gespesialiseerde kuberveiligheidsdienste aan vir **Onderwys** en **FinTech** instellings, met 'n fokus op **penetrasietoetsing, wolk sekuriteit assesserings**, en **nakoming gereedheid** (SOC 2, PCI-DSS, NIST). Ons span sluit **OSCP en CISSP geakkrediteerde professionele** in, wat diep tegniese kundigheid en bedryfstandaard insig na elke betrokkenheid bring.
+
+Ons gaan verder as geoutomatiseerde skande met **handmatige, intelligensie-gedrewe toetsing** wat aangepas is vir hoë-stakes omgewings. Van die beveiliging van studentrekords tot die beskerming van finansiële transaksies, help ons organisasies om te verdedig wat die meeste saak maak.
+
+_“'n Kwaliteit verdediging vereis om die aanval te ken, ons bied sekuriteit deur begrip.”_
+
+Bly ingelig en op hoogte van die nuutste in kuberveiligheid deur ons [**blog**](https://www.lasttowersolutions.com/blog) te besoek.
+
+{{#ref}}
+https://www.lasttowersolutions.com/
+{{#endref}}
+
+---
 
 ## Lisensie & Vrywaring
 
