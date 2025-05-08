@@ -63,9 +63,9 @@ https://www.rootedcon.com/
 
 <figure><img src="images/image (47).png" alt=""><figcaption></figcaption></figure>
 
-**Intigriti** è la **piattaforma di ethical hacking e bug bounty #1 in Europa.**
+**Intigriti** è la **piattaforma di hacking etico e bug bounty numero 1 in Europa.**
 
-**Suggerimento bug bounty**: **iscriviti** a **Intigriti**, una premium **piattaforma di bug bounty creata da hacker, per hacker**! Unisciti a noi su [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) oggi e inizia a guadagnare ricompense fino a **$100,000**!
+**Suggerimento bug bounty**: **iscriviti** a **Intigriti**, una piattaforma premium di **bug bounty creata da hacker, per hacker**! Unisciti a noi su [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) oggi e inizia a guadagnare ricompense fino a **$100,000**!
 
 {{#ref}}
 https://go.intigriti.com/hacktricks
@@ -108,7 +108,7 @@ Unisciti al server [**HackenProof Discord**](https://discord.com/invite/N3FrSbmw
 
 **Ottieni la prospettiva di un hacker sulle tue app web, rete e cloud**
 
-**Trova e segnala vulnerabilità critiche e sfruttabili con un impatto reale sul business.** Usa i nostri oltre 20 strumenti personalizzati per mappare la superficie di attacco, trovare problemi di sicurezza che ti permettano di elevare i privilegi e utilizzare exploit automatizzati per raccogliere prove essenziali, trasformando il tuo duro lavoro in report persuasivi.
+**Trova e segnala vulnerabilità critiche ed esploitabili con un impatto reale sul business.** Usa i nostri oltre 20 strumenti personalizzati per mappare la superficie di attacco, trovare problemi di sicurezza che ti permettano di elevare i privilegi e utilizzare exploit automatizzati per raccogliere prove essenziali, trasformando il tuo duro lavoro in report persuasivi.
 
 {{#ref}}
 https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons
@@ -174,7 +174,27 @@ Ricerca di persone, ricerca AI, ricerca di organizzazioni, accesso API (OpenAPI)
 https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons
 {{#endref}}
 
-## Licenza e Dichiarazione di Non Responsabilità
+---
+
+### [Last Tower Solutions](https://www.lasttowersolutions.com/)
+
+<figure><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
+
+Last Tower Solutions offre servizi di cybersecurity specializzati per istituzioni di **Educazione** e **FinTech**, con un focus su **penetration testing, valutazioni di sicurezza cloud** e **preparazione alla conformità** (SOC 2, PCI-DSS, NIST). Il nostro team include **professionisti certificati OSCP e CISSP**, portando una profonda esperienza tecnica e intuizioni standard del settore in ogni incarico.
+
+Andiamo oltre le scansioni automatizzate con **test manuali, guidati dall'intelligenza**, su misura per ambienti ad alto rischio. Dalla protezione dei registri degli studenti alla protezione delle transazioni finanziarie, aiutiamo le organizzazioni a difendere ciò che conta di più.
+
+_“Una difesa di qualità richiede di conoscere l'offensiva, forniamo sicurezza attraverso la comprensione.”_
+
+Rimani informato e aggiornato sulle ultime novità in cybersecurity visitando il nostro [**blog**](https://www.lasttowersolutions.com/blog).
+
+{{#ref}}
+https://www.lasttowersolutions.com/
+{{#endref}}
+
+---
+
+## Licenza & Dichiarazione di non responsabilità
 
 Controllali in:
 
@@ -184,6 +204,6 @@ welcome/hacktricks-values-and-faq.md
 
 ## Statistiche Github
 
-![Statistiche Github di HackTricks](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
+![HackTricks Github Stats](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
 
 {{#include ./banners/hacktricks-training.md}}
