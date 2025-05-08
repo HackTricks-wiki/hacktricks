@@ -4,7 +4,7 @@
 
 _Logo et design animé de Hacktricks par_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
 
-### Exécuter HackTricks Localement
+### Exécuter HackTricks localement
 ```bash
 # Download latest version of hacktricks
 git clone https://github.com/HackTricks-wiki/hacktricks
@@ -31,9 +31,9 @@ export LANG="master" # Leave master for english
 # Run the docker container indicating the path to the hacktricks folder
 docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git config --global --add safe.directory /app && git checkout $LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
-Votre copie locale de HackTricks sera **disponible à [http://localhost:3337](http://localhost:3337)** après <5 minutes (il faut construire le livre, soyez patient).
+Votre copie locale de HackTricks sera **disponible à [http://localhost:3337](http://localhost:3337)** après <5 minutes (elle doit construire le livre, soyez patient).
 
-## Sponsors d'entreprise
+## Sponsors Corporatifs
 
 ### [STM Cyber](https://www.stmcyber.com)
 
@@ -78,7 +78,7 @@ https://go.intigriti.com/hacktricks
 <figure><img src="images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Utilisez [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) pour créer et **automatiser des flux de travail** alimentés par les outils communautaires **les plus avancés** au monde.
+Utilisez [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) pour créer et **automatiser des flux de travail** facilement grâce aux **outils communautaires les plus avancés** au monde.
 
 Accédez dès aujourd'hui :
 
@@ -123,9 +123,9 @@ https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktrick
 **SerpApi** propose des API en temps réel rapides et faciles pour **accéder aux résultats des moteurs de recherche**. Ils extraient des moteurs de recherche, gèrent des proxies, résolvent des captchas et analysent toutes les données structurées riches pour vous.
 
 Un abonnement à l'un des plans de SerpApi inclut l'accès à plus de 50 API différentes pour extraire différents moteurs de recherche, y compris Google, Bing, Baidu, Yahoo, Yandex, et plus encore.\
-Contrairement à d'autres fournisseurs, **SerpApi ne se contente pas d'extraire des résultats organiques**. Les réponses de SerpApi incluent systématiquement toutes les annonces, images et vidéos en ligne, graphiques de connaissances et autres éléments et fonctionnalités présents dans les résultats de recherche.
+Contrairement à d'autres fournisseurs, **SerpApi ne se contente pas d'extraire des résultats organiques**. Les réponses de SerpApi incluent systématiquement toutes les annonces, images et vidéos en ligne, graphiques de connaissances, et d'autres éléments et fonctionnalités présents dans les résultats de recherche.
 
-Les clients actuels de SerpApi incluent **Apple, Shopify et GrubHub**.\
+Les clients actuels de SerpApi incluent **Apple, Shopify, et GrubHub**.\
 Pour plus d'informations, consultez leur [**blog**](https://serpapi.com/blog/)**,** ou essayez un exemple dans leur [**playground**](https://serpapi.com/playground)**.**\
 Vous pouvez **créer un compte gratuit** [**ici**](https://serpapi.com/users/sign_up)**.**
 
@@ -149,9 +149,9 @@ https://academy.8ksec.io/
 
 [**WebSec**](https://websec.net) est une entreprise de cybersécurité professionnelle basée à **Amsterdam** qui aide à **protéger** les entreprises **dans le monde entier** contre les dernières menaces de cybersécurité en fournissant des **services de sécurité offensive** avec une approche **moderne**.
 
-WebSec est une entreprise de sécurité internationale avec des bureaux à Amsterdam et Wyoming. Ils offrent des **services de sécurité tout-en-un**, ce qui signifie qu'ils font tout ; Pentesting, **Audits** de sécurité, Formations de sensibilisation, Campagnes de phishing, Revue de code, Développement d'exploits, Externalisation d'experts en sécurité et bien plus encore.
+WebSec est une entreprise de sécurité internationale avec des bureaux à Amsterdam et Wyoming. Ils offrent des **services de sécurité tout-en-un**, ce qui signifie qu'ils font tout ; Pentesting, **Audits** de Sécurité, Formations de Sensibilisation, Campagnes de Phishing, Revue de Code, Développement d'Exploits, Externalisation d'Experts en Sécurité et bien plus encore.
 
-Une autre chose intéressante à propos de WebSec est que, contrairement à la moyenne de l'industrie, WebSec est **très confiant dans ses compétences**, à tel point qu'ils **garantissent les meilleurs résultats de qualité**, comme indiqué sur leur site web "**Si nous ne pouvons pas le hacker, vous ne le payez pas !**". Pour plus d'infos, jetez un œil à leur [**site web**](https://websec.net/en/) et [**blog**](https://websec.net/blog/) !
+Une autre chose intéressante à propos de WebSec est que, contrairement à la moyenne de l'industrie, WebSec est **très confiant dans ses compétences**, à tel point qu'ils **garantissent les meilleurs résultats de qualité**, comme indiqué sur leur site web "**Si nous ne pouvons pas le hacker, vous ne payez pas !**". Pour plus d'infos, jetez un œil à leur [**site web**](https://websec.net/en/) et [**blog**](https://websec.net/blog/) !
 
 En plus de cela, WebSec est également un **soutien engagé de HackTricks.**
 
@@ -173,6 +173,26 @@ Recherche de personnes, recherche IA, recherche d'organisations, accès API (Ope
 {{#ref}}
 https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons
 {{#endref}}
+
+---
+
+### [Last Tower Solutions](https://www.lasttowersolutions.com/)
+
+<figure><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
+
+Last Tower Solutions fournit des services de cybersécurité spécialisés pour les institutions **Éducatives** et **FinTech**, avec un accent sur **les tests de pénétration, les évaluations de sécurité cloud**, et **la préparation à la conformité** (SOC 2, PCI-DSS, NIST). Notre équipe comprend des **professionnels certifiés OSCP et CISSP**, apportant une expertise technique approfondie et un aperçu conforme aux normes de l'industrie à chaque engagement.
+
+Nous allons au-delà des analyses automatisées avec des **tests manuels, guidés par l'intelligence**, adaptés aux environnements à enjeux élevés. De la sécurisation des dossiers étudiants à la protection des transactions financières, nous aidons les organisations à défendre ce qui compte le plus.
+
+_“Une défense de qualité nécessite de connaître l'attaque, nous fournissons la sécurité par la compréhension.”_
+
+Restez informé et à jour avec les dernières nouvelles en cybersécurité en visitant notre [**blog**](https://www.lasttowersolutions.com/blog).
+
+{{#ref}}
+https://www.lasttowersolutions.com/
+{{#endref}}
+
+---
 
 ## Licence & Avertissement
 
