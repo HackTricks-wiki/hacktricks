@@ -51,7 +51,7 @@ Možete proveriti njihov **blog** na [**https://blog.stmcyber.com**](https://blo
 
 <figure><img src="images/image (45).png" alt=""><figcaption></figcaption></figure>
 
-[**RootedCON**](https://www.rootedcon.com) je najrelevantnija manifestacija sajber bezbednosti u **Španiji** i jedna od najvažnijih u **Evropi**. Sa **misijom promovisanja tehničkog znanja**, ovaj kongres je vrelo mesto okupljanja za profesionalce u tehnologiji i sajber bezbednosti u svakoj disciplini.
+[**RootedCON**](https://www.rootedcon.com) je najrelevantnija sajber bezbednosna manifestacija u **Španiji** i jedna od najvažnijih u **Evropi**. Sa **misijom promovisanja tehničkog znanja**, ovaj kongres je vrelo mesto okupljanja za profesionalce u tehnologiji i sajber bezbednosti u svakoj disciplini.
 
 {{#ref}}
 https://www.rootedcon.com/
@@ -65,7 +65,7 @@ https://www.rootedcon.com/
 
 **Intigriti** je **Evropa #1** etička platforma za hakovanje i **bug bounty.**
 
-**Saveta za bug bounty**: **prijavite se** za **Intigriti**, premium **bug bounty platformu koju su kreirali hakeri, za hakere**! Pridružite nam se na [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) danas, i počnite da zarađujete nagrade do **$100,000**!
+**Bug bounty savet**: **prijavite se** za **Intigriti**, premium **bug bounty platformu koju su kreirali hakeri, za hakere**! Pridružite nam se na [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) danas, i počnite da zarađujete nagrade do **$100,000**!
 
 {{#ref}}
 https://go.intigriti.com/hacktricks
@@ -125,7 +125,7 @@ https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktrick
 Pretplata na jedan od planova SerpApi uključuje pristup više od 50 različitih API-ja za sakupljanje podataka sa različitih pretraživača, uključujući Google, Bing, Baidu, Yahoo, Yandex i druge.\
 Za razliku od drugih provajdera, **SerpApi ne sakuplja samo organske rezultate**. Odgovori SerpApi dosledno uključuju sve oglase, inline slike i video zapise, grafove znanja i druge elemente i funkcije prisutne u rezultatima pretrage.
 
-Trenutni klijenti SerpApi uključuju **Apple, Shopify i GrubHub**.\
+Trenutni kupci SerpApi uključuju **Apple, Shopify i GrubHub**.\
 Za više informacija pogledajte njihov [**blog**](https://serpapi.com/blog/)**,** ili isprobajte primer u njihovom [**playground**](https://serpapi.com/playground)**.**\
 Možete **napraviti besplatan nalog** [**ovde**](https://serpapi.com/users/sign_up)**.**
 
@@ -147,13 +147,13 @@ https://academy.8ksec.io/
 
 <figure><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.net) je profesionalna kompanija za sajber bezbednost sa sedištem u **Amsterdamu** koja pomaže **zaštiti** preduzeća **široko po svetu** od najnovijih pretnji u oblasti sajber bezbednosti pružajući **usluge ofanzivne bezbednosti** sa **modernim** pristupom.
+[**WebSec**](https://websec.net) je profesionalna kompanija za sajber bezbednost sa sedištem u **Amsterdamu** koja pomaže **zaštiti** preduzeća **široko u svetu** od najnovijih pretnji u oblasti sajber bezbednosti pružajući **usluge ofanzivne bezbednosti** sa **modernim** pristupom.
 
-WebSec je međunarodna bezbednosna kompanija sa kancelarijama u Amsterdamu i Vajomingu. Oni nude **sve-u-jednom usluge bezbednosti** što znači da rade sve; Pentesting, **Bezbednosne** revizije, Obuke o svesti, Phishing kampanje, Revizija koda, Razvoj eksploita, Outsourcing bezbednosnih stručnjaka i još mnogo toga.
+WebSec je međunarodna bezbednosna kompanija sa kancelarijama u Amsterdamu i Vajomingu. Oni nude **sve-u-jednom usluge bezbednosti** što znači da rade sve; Pentesting, **Bezbednosne** revizije, Obuke o svesti, Phishing kampanje, Reviziju koda, Razvoj eksploita, Outsourcing bezbednosnih stručnjaka i još mnogo toga.
 
 Još jedna zanimljiva stvar o WebSec-u je da, za razliku od industrijskog proseka, WebSec je **veoma siguran u svoje veštine**, do te mere da **garantuje najbolje kvalitetne rezultate**, kako stoji na njihovom sajtu "**Ako ne možemo da hakujemo, ne plaćate!**". Za više informacija pogledajte njihov [**sajt**](https://websec.net/en/) i [**blog**](https://websec.net/blog/)!
 
-Pored navedenog, WebSec je takođe **posvećen podržavalac HackTricks-a.**
+Pored navedenog, WebSec je takođe **posvećen podržavalac HackTricks.**
 
 {{#ref}}
 https://www.youtube.com/watch?v=Zq2JycGDCPM
@@ -167,12 +167,32 @@ https://www.youtube.com/watch?v=Zq2JycGDCPM
 
 [**Venacus**](https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons) je pretraživač podataka o curenjima (leak). \
 Pružamo pretragu nasumičnih stringova (poput Google-a) preko svih vrsta curenja podataka, velikih i malih --ne samo velikih-- iz više izvora. \
-Pretraga ljudi, pretraga AI, pretraga organizacija, API (OpenAPI) pristup, integracija theHarvester, sve funkcije koje pentester treba.\
+Pretraga ljudi, pretraga AI, pretraga organizacija, API (OpenAPI) pristup, integracija theHarvester-a, sve funkcije koje pentester treba.\
 **HackTricks nastavlja da bude sjajna platforma za učenje za sve nas i ponosni smo što je sponzorišemo!**
 
 {{#ref}}
 https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons
 {{#endref}}
+
+---
+
+### [Last Tower Solutions](https://www.lasttowersolutions.com/)
+
+<figure><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
+
+Last Tower Solutions pruža specijalizovane usluge sajber bezbednosti za **obrazovne** i **FinTech** institucije, sa fokusom na **penetraciono testiranje, procene bezbednosti u oblaku**, i **pripremu za usklađenost** (SOC 2, PCI-DSS, NIST). Naš tim uključuje **OSCP i CISSP sertifikovane profesionalce**, donoseći duboku tehničku stručnost i uvide standarda industrije u svaku saradnju.
+
+Idemo dalje od automatskih skeniranja sa **ručno vođenim, inteligencijom vođenim testiranjem** prilagođenim visokorizičnim okruženjima. Od obezbeđivanja studentskih podataka do zaštite finansijskih transakcija, pomažemo organizacijama da brane ono što je najvažnije.
+
+_“Kvalitetna odbrana zahteva poznavanje napada, pružamo sigurnost kroz razumevanje.”_
+
+Budite informisani i u toku sa najnovijim u sajber bezbednosti posetom našem [**blogu**](https://www.lasttowersolutions.com/blog).
+
+{{#ref}}
+https://www.lasttowersolutions.com/
+{{#endref}}
+
+---
 
 ## Licenca i odricanje od odgovornosti
 
