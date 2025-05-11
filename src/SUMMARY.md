@@ -343,6 +343,7 @@
   - [iOS Extracting Entitlements From Compiled Application](mobile-pentesting/ios-pentesting/extracting-entitlements-from-compiled-application.md)
   - [iOS Frida Configuration](mobile-pentesting/ios-pentesting/frida-configuration-in-ios.md)
   - [iOS Hooking With Objection](mobile-pentesting/ios-pentesting/ios-hooking-with-objection.md)
+  - [iOS Pentesting withuot Jailbreak](mobile-pentesting/ios-pentesting/ios-pentesting-without-jailbreak.md)
   - [iOS Protocol Handlers](mobile-pentesting/ios-pentesting/ios-protocol-handlers.md)
   - [iOS Serialisation and Encoding](mobile-pentesting/ios-pentesting/ios-serialisation-and-encoding.md)
   - [iOS Testing Environment](mobile-pentesting/ios-pentesting/ios-testing-environment.md)
