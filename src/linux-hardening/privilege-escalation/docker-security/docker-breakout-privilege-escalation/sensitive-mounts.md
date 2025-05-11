@@ -2,7 +2,7 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-`/proc`、`/sys`、および`/var`の適切な名前空間の分離なしでの露出は、攻撃面の拡大や情報漏洩を含む重大なセキュリティリスクを引き起こします。これらのディレクトリには、誤って構成されたり、無許可のユーザーによってアクセスされたりすると、コンテナの脱出、ホストの変更、またはさらなる攻撃を助ける情報を提供する可能性のある機密ファイルが含まれています。たとえば、`-v /proc:/host/proc`を誤ってマウントすると、そのパスベースの性質によりAppArmorの保護を回避し、`/host/proc`が保護されなくなります。
+`/proc`、`/sys`、および`/var`の適切な名前空間の分離なしでの露出は、攻撃面の拡大や情報漏洩を含む重大なセキュリティリスクを引き起こします。これらのディレクトリには、誤って構成されたり、無許可のユーザーによってアクセスされたりすると、コンテナの脱出、ホストの変更、またはさらなる攻撃を助ける情報を提供する可能性のある機密ファイルが含まれています。たとえば、`-v /proc:/host/proc`を誤ってマウントすると、そのパスベースの性質によりAppArmorの保護を回避し、`/host/proc`が無防備になります。
 
 **各潜在的脆弱性の詳細は** [**https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts**](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)**で確認できます。**
 
@@ -10,25 +10,37 @@
 
 ### `/proc/sys`
 
-このディレクトリは、通常`sysctl(2)`を介してカーネル変数を変更するためのアクセスを許可し、いくつかの懸念されるサブディレクトリを含んでいます。
+このディレクトリは、通常`sysctl(2)`を介してカーネル変数を変更するためのアクセスを許可し、いくつかの懸念されるサブディレクトリを含んでいます：
 
 #### **`/proc/sys/kernel/core_pattern`**
 
 - [core(5)](https://man7.org/linux/man-pages/man5/core.5.html)で説明されています。
-- コアファイル生成時に実行するプログラムを定義でき、最初の128バイトが引数として使用されます。ファイルがパイプ`|`で始まる場合、コード実行につながる可能性があります。
-- **テストと悪用の例**:
+- このファイルに書き込むことができる場合、パイプ`|`の後にプログラムまたはスクリプトのパスを書き込むことが可能で、クラッシュが発生した後に実行されます。
+- 攻撃者は、`mount`を実行してホスト内のコンテナへのパスを見つけ、そのパスをコンテナのファイルシステム内のバイナリに書き込むことができます。その後、プログラムをクラッシュさせてカーネルがコンテナの外でバイナリを実行するようにします。
 
+- **テストと悪用の例**：
 ```bash
-[ -w /proc/sys/kernel/core_pattern ] && echo Yes # 書き込みアクセスのテスト
+[ -w /proc/sys/kernel/core_pattern ] && echo Yes # Test write access
 cd /proc/sys/kernel
-echo "|$overlay/shell.sh" > core_pattern # カスタムハンドラを設定
-sleep 5 && ./crash & # ハンドラをトリガー
+echo "|$overlay/shell.sh" > core_pattern # Set custom handler
+sleep 5 && ./crash & # Trigger handler
 ```
+この投稿をチェックしてください [this post](https://pwning.systems/posts/escaping-containers-for-fun/) さらなる情報のために。
 
+クラッシュする例のプログラム:
+```c
+int main(void) {
+char buf[1];
+for (int i = 0; i < 100; i++) {
+buf[i] = 1;
+}
+return 0;
+}
+```
 #### **`/proc/sys/kernel/modprobe`**
 
-- [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html)で詳述されています。
-- カーネルモジュールローダーへのパスが含まれ、カーネルモジュールをロードするために呼び出されます。
+- [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html)で詳細が説明されています。
+- カーネルモジュールをロードするために呼び出されるカーネルモジュールローダーへのパスを含みます。
 - **アクセス確認の例**:
 
 ```bash
@@ -42,18 +54,18 @@ ls -l $(cat /proc/sys/kernel/modprobe) # modprobeへのアクセスを確認
 
 #### **`/proc/sys/fs`**
 
-- [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html)によれば、ファイルシステムに関するオプションと情報が含まれています。
-- 書き込みアクセスにより、ホストに対するさまざまなサービス拒否攻撃を可能にします。
+- [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html)に従い、ファイルシステムに関するオプションと情報を含みます。
+- 書き込みアクセスは、ホストに対するさまざまなサービス拒否攻撃を可能にします。
 
 #### **`/proc/sys/fs/binfmt_misc`**
 
-- マジックナンバーに基づいて非ネイティブバイナリ形式のインタープリタを登録できます。
+- マジックナンバーに基づいて非ネイティブバイナリフォーマットのインタープリターを登録できます。
 - `/proc/sys/fs/binfmt_misc/register`が書き込み可能な場合、特権昇格やルートシェルアクセスにつながる可能性があります。
 - 関連するエクスプロイトと説明:
 - [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
 - 詳細なチュートリアル: [Video link](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
 
-### Others in `/proc`
+### その他の `/proc`
 
 #### **`/proc/config.gz`**
 
@@ -62,8 +74,8 @@ ls -l $(cat /proc/sys/kernel/modprobe) # modprobeへのアクセスを確認
 
 #### **`/proc/sysrq-trigger`**
 
-- Sysrqコマンドを呼び出すことができ、即座にシステムを再起動したり、他の重要なアクションを引き起こしたりする可能性があります。
-- **ホストを再起動する例**:
+- Sysrqコマンドを呼び出すことができ、即座にシステム再起動やその他の重要なアクションを引き起こす可能性があります。
+- **ホスト再起動の例**:
 
 ```bash
 echo b > /proc/sysrq-trigger # ホストを再起動
@@ -79,20 +91,20 @@ echo b > /proc/sysrq-trigger # ホストを再起動
 - カーネルがエクスポートしたシンボルとそのアドレスをリストします。
 - KASLRを克服するためのカーネルエクスプロイト開発に不可欠です。
 - アドレス情報は、`kptr_restrict`が`1`または`2`に設定されている場合に制限されます。
-- 詳細は[proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html)で。
+- [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html)で詳細。
 
 #### **`/proc/[pid]/mem`**
 
 - カーネルメモリデバイス`/dev/mem`とインターフェースします。
 - 歴史的に特権昇格攻撃に対して脆弱です。
-- 詳細は[proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html)で。
+- [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html)で詳細。
 
 #### **`/proc/kcore`**
 
 - システムの物理メモリをELFコア形式で表します。
 - 読み取りはホストシステムや他のコンテナのメモリ内容を漏洩させる可能性があります。
 - 大きなファイルサイズは読み取りの問題やソフトウェアのクラッシュを引き起こす可能性があります。
-- 詳細な使用法は[Dumping /proc/kcore in 2019](https://schlafwandler.github.io/posts/dumping-/proc/kcore/)で。
+- [Dumping /proc/kcore in 2019](https://schlafwandler.github.io/posts/dumping-/proc/kcore/)で詳細な使用法。
 
 #### **`/proc/kmem`**
 
@@ -102,7 +114,7 @@ echo b > /proc/sysrq-trigger # ホストを再起動
 #### **`/proc/mem`**
 
 - 物理メモリを表す`/dev/mem`の代替インターフェースです。
-- 読み取りと書き込みが可能で、すべてのメモリの変更には仮想アドレスを物理アドレスに解決する必要があります。
+- 読み取りと書き込みが可能で、すべてのメモリの変更には仮想アドレスから物理アドレスへの解決が必要です。
 
 #### **`/proc/sched_debug`**
 
@@ -114,13 +126,13 @@ echo b > /proc/sysrq-trigger # ホストを再起動
 - プロセスのマウント名前空間内のマウントポイントに関する情報を提供します。
 - コンテナの`rootfs`またはイメージの場所を公開します。
 
-### `/sys` Vulnerabilities
+### `/sys`の脆弱性
 
 #### **`/sys/kernel/uevent_helper`**
 
 - カーネルデバイス`uevents`を処理するために使用されます。
 - `/sys/kernel/uevent_helper`に書き込むことで、`uevent`トリガー時に任意のスクリプトを実行できます。
-- **悪用の例**: %%%bash
+- **エクスプロイトの例**: %%%bash
 
 #### ペイロードを作成
 
@@ -152,22 +164,24 @@ cat /output %%%
 
 #### **`/sys/kernel/security`**
 
-- `securityfs`インターフェースを持ち、AppArmorなどのLinuxセキュリティモジュールの構成を許可します。
-- アクセスにより、コンテナがそのMACシステムを無効にする可能性があります。
+- `securityfs`インターフェースを持ち、AppArmorなどのLinuxセキュリティモジュールの設定を許可します。
+- アクセスにより、コンテナがそのMACシステムを無効にすることができるかもしれません。
 
-#### **`/sys/firmware/efi/vars` および `/sys/firmware/efi/efivars`**
+#### **`/sys/firmware/efi/vars` と `/sys/firmware/efi/efivars`**
 
 - NVRAM内のEFI変数と対話するためのインターフェースを公開します。
-- 誤った構成や悪用により、ラップトップがブリックされたり、ホストマシンが起動不能になったりする可能性があります。
+- 誤設定や悪用により、ラップトップがブリックされたり、ホストマシンが起動不能になる可能性があります。
 
 #### **`/sys/kernel/debug`**
 
 - `debugfs`はカーネルへの「ルールなし」のデバッグインターフェースを提供します。
-- 制限のない性質により、セキュリティ問題の歴史があります。
+- 制限のない性質のため、セキュリティ問題の歴史があります。
 
-### `/var` Vulnerabilities
+### `/var`の脆弱性
 
-ホストの**/var**フォルダーには、コンテナランタイムソケットとコンテナのファイルシステムが含まれています。このフォルダーがコンテナ内にマウントされると、そのコンテナは他のコンテナのファイルシステムに対してルート権限で読み書きアクセスを得ます。これにより、コンテナ間のピボット、サービス拒否の引き起こし、または他のコンテナやそれらで実行されるアプリケーションへのバックドアを仕掛けることが悪用される可能性があります。
+ホストの**/var**フォルダーには、コンテナランタイムソケットとコンテナのファイルシステムが含まれています。
+このフォルダーがコンテナ内にマウントされている場合、そのコンテナは他のコンテナのファイルシステムに対してルート権限で読み書きアクセスを得ます。
+これを悪用してコンテナ間をピボットしたり、サービス拒否を引き起こしたり、他のコンテナやそれらで実行されるアプリケーションにバックドアを仕掛けることができます。
 
 #### Kubernetes
 
@@ -216,9 +230,9 @@ are/nginx/html/index2.html
 ```
 XSSは次のように達成されました：
 
-![Stored XSS via mounted /var folder](/images/stored-xss-via-mounted-var-folder.png)
+![マウントされた /var フォルダーを介した保存された XSS](/images/stored-xss-via-mounted-var-folder.png)
 
-コンテナは再起動やその他の操作を必要としないことに注意してください。マウントされた**/var**フォルダーを介して行われた変更は即座に適用されます。
+コンテナは再起動やその他の操作を必要としないことに注意してください。マウントされた **/var** フォルダーを介して行われた変更は即座に適用されます。
 
 構成ファイル、バイナリ、サービス、アプリケーションファイル、およびシェルプロファイルを置き換えることで、自動（または半自動）RCEを達成することもできます。
 
