@@ -10,26 +10,38 @@ La exposición de `/proc`, `/sys` y `/var` sin un aislamiento adecuado de namesp
 
 ### `/proc/sys`
 
-Este directorio permite el acceso para modificar variables del kernel, generalmente a través de `sysctl(2)`, y contiene varios subdirectorios de interés:
+Este directorio permite el acceso para modificar variables del kernel, generalmente a través de `sysctl(2)`, y contiene varias subcarpetas de interés:
 
 #### **`/proc/sys/kernel/core_pattern`**
 
 - Descrito en [core(5)](https://man7.org/linux/man-pages/man5/core.5.html).
-- Permite definir un programa para ejecutar en la generación de archivos de núcleo con los primeros 128 bytes como argumentos. Esto puede llevar a la ejecución de código si el archivo comienza con un pipe `|`.
-- **Ejemplo de prueba y explotación**:
+- Si puedes escribir dentro de este archivo, es posible escribir un pipe `|` seguido de la ruta a un programa o script que se ejecutará después de que ocurra un fallo.
+- Un atacante puede encontrar la ruta dentro del host a su contenedor ejecutando `mount` y escribir la ruta a un binario dentro de su sistema de archivos de contenedor. Luego, hacer que un programa falle para que el kernel ejecute el binario fuera del contenedor.
 
+- **Ejemplo de Prueba y Explotación**:
 ```bash
-[ -w /proc/sys/kernel/core_pattern ] && echo Yes # Probar acceso de escritura
+[ -w /proc/sys/kernel/core_pattern ] && echo Yes # Test write access
 cd /proc/sys/kernel
-echo "|$overlay/shell.sh" > core_pattern # Establecer controlador personalizado
-sleep 5 && ./crash & # Activar controlador
+echo "|$overlay/shell.sh" > core_pattern # Set custom handler
+sleep 5 && ./crash & # Trigger handler
 ```
+Consulta [esta publicación](https://pwning.systems/posts/escaping-containers-for-fun/) para más información.
 
+Ejemplo de programa que falla:
+```c
+int main(void) {
+char buf[1];
+for (int i = 0; i < 100; i++) {
+buf[i] = 1;
+}
+return 0;
+}
+```
 #### **`/proc/sys/kernel/modprobe`**
 
 - Detallado en [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 - Contiene la ruta al cargador de módulos del kernel, invocado para cargar módulos del kernel.
-- **Ejemplo de verificación de acceso**:
+- **Ejemplo de Verificación de Acceso**:
 
 ```bash
 ls -l $(cat /proc/sys/kernel/modprobe) # Verificar acceso a modprobe
@@ -38,7 +50,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Verificar acceso a modprobe
 #### **`/proc/sys/vm/panic_on_oom`**
 
 - Referenciado en [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
-- Una bandera global que controla si el kernel se bloquea o invoca al OOM killer cuando ocurre una condición OOM.
+- Una bandera global que controla si el kernel entra en pánico o invoca al OOM killer cuando ocurre una condición de OOM.
 
 #### **`/proc/sys/fs`**
 
@@ -48,7 +60,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Verificar acceso a modprobe
 #### **`/proc/sys/fs/binfmt_misc`**
 
 - Permite registrar intérpretes para formatos binarios no nativos basados en su número mágico.
-- Puede llevar a la escalada de privilegios o acceso a shell root si `/proc/sys/fs/binfmt_misc/register` es escribible.
+- Puede llevar a la escalada de privilegios o acceso a un shell root si `/proc/sys/fs/binfmt_misc/register` es escribible.
 - Exploit relevante y explicación:
 - [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
 - Tutorial en profundidad: [Video link](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
@@ -58,12 +70,12 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Verificar acceso a modprobe
 #### **`/proc/config.gz`**
 
 - Puede revelar la configuración del kernel si `CONFIG_IKCONFIG_PROC` está habilitado.
-- Útil para los atacantes para identificar vulnerabilidades en el kernel en ejecución.
+- Útil para atacantes para identificar vulnerabilidades en el kernel en ejecución.
 
 #### **`/proc/sysrq-trigger`**
 
-- Permite invocar comandos Sysrq, potencialmente causando reinicios inmediatos del sistema u otras acciones críticas.
-- **Ejemplo de reinicio del host**:
+- Permite invocar comandos Sysrq, lo que puede causar reinicios inmediatos del sistema u otras acciones críticas.
+- **Ejemplo de Reinicio del Host**:
 
 ```bash
 echo b > /proc/sysrq-trigger # Reinicia el host
@@ -78,7 +90,7 @@ echo b > /proc/sysrq-trigger # Reinicia el host
 
 - Lista símbolos exportados del kernel y sus direcciones.
 - Esencial para el desarrollo de exploits del kernel, especialmente para superar KASLR.
-- La información de dirección está restringida con `kptr_restrict` configurado en `1` o `2`.
+- La información de direcciones está restringida con `kptr_restrict` configurado en `1` o `2`.
 - Detalles en [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 
 #### **`/proc/[pid]/mem`**
@@ -106,21 +118,21 @@ echo b > /proc/sysrq-trigger # Reinicia el host
 
 #### **`/proc/sched_debug`**
 
-- Devuelve información de programación de procesos, eludiendo las protecciones del namespace PID.
+- Devuelve información sobre la programación de procesos, eludiendo las protecciones del espacio de nombres PID.
 - Expone nombres de procesos, IDs e identificadores de cgroup.
 
 #### **`/proc/[pid]/mountinfo`**
 
-- Proporciona información sobre puntos de montaje en el namespace de montaje del proceso.
+- Proporciona información sobre los puntos de montaje en el espacio de nombres de montaje del proceso.
 - Expone la ubicación del `rootfs` o imagen del contenedor.
 
-### Vulnerabilidades de `/sys`
+### Vulnerabilidades en `/sys`
 
 #### **`/sys/kernel/uevent_helper`**
 
 - Usado para manejar `uevents` de dispositivos del kernel.
 - Escribir en `/sys/kernel/uevent_helper` puede ejecutar scripts arbitrarios al activarse `uevent`.
-- **Ejemplo de explotación**: %%%bash
+- **Ejemplo de Explotación**: %%%bash
 
 #### Crea una carga útil
 
@@ -158,16 +170,16 @@ cat /output %%%
 #### **`/sys/firmware/efi/vars` y `/sys/firmware/efi/efivars`**
 
 - Expone interfaces para interactuar con variables EFI en NVRAM.
-- La mala configuración o explotación puede llevar a laptops bloqueadas o máquinas host que no se pueden iniciar.
+- Una mala configuración o explotación puede llevar a laptops bloqueadas o máquinas host que no se pueden iniciar.
 
 #### **`/sys/kernel/debug`**
 
 - `debugfs` ofrece una interfaz de depuración "sin reglas" al kernel.
 - Historial de problemas de seguridad debido a su naturaleza sin restricciones.
 
-### Vulnerabilidades de `/var`
+### Vulnerabilidades en `/var`
 
-La carpeta **/var** del host contiene sockets de tiempo de ejecución de contenedores y los sistemas de archivos de los contenedores. Si esta carpeta se monta dentro de un contenedor, ese contenedor obtendrá acceso de lectura y escritura a los sistemas de archivos de otros contenedores con privilegios de root. Esto puede ser abusado para pivotar entre contenedores, causar una denegación de servicio o crear puertas traseras en otros contenedores y aplicaciones que se ejecutan en ellos.
+La carpeta **/var** del host contiene sockets de tiempo de ejecución de contenedores y los sistemas de archivos de los contenedores. Si esta carpeta está montada dentro de un contenedor, ese contenedor obtendrá acceso de lectura y escritura a los sistemas de archivos de otros contenedores con privilegios de root. Esto puede ser abusado para pivotar entre contenedores, causar una denegación de servicio o crear puertas traseras en otros contenedores y aplicaciones que se ejecutan en ellos.
 
 #### Kubernetes
 
@@ -220,7 +232,7 @@ El XSS se logró:
 
 Tenga en cuenta que el contenedor NO requiere un reinicio ni nada. Cualquier cambio realizado a través de la carpeta montada **/var** se aplicará instantáneamente.
 
-También puede reemplazar archivos de configuración, binarios, servicios, archivos de aplicación y perfiles de shell para lograr RCE automático (o semi-automático).
+También puede reemplazar archivos de configuración, binarios, servicios, archivos de aplicaciones y perfiles de shell para lograr RCE automático (o semi-automático).
 
 ##### Acceso a credenciales de la nube
 
