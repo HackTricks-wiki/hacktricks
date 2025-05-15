@@ -1,5 +1,5 @@
 /**
- * HackTricks AI Chat Widget v1.16 – resizable sidebar
+ * HackTricks AI Chat Widget v1.16 – resizable sidebar
  * ---------------------------------------------------
  * ❶ Markdown rendering + sanitised (same as before)
  * ❷ NEW: drag‑to‑resize panel, width persists via localStorage
@@ -234,7 +234,9 @@
   /* =================================================================== */
   function injectStyles() {
     const css = `
-#ht-ai-btn{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);width:60px;height:60px;border-radius:50%;background:#1e1e1e;color:#fff;font-size:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:99999;box-shadow:0 2px 8px rgba(0,0,0,.4);transition:opacity .2s}
+#ht-ai-btn{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);min-width:60px;height:60px;border-radius:30px;background:linear-gradient(45deg, #b31328, #d42d3f, #2d5db4, #3470e4);background-size:300% 300%;animation:gradientShift 8s ease infinite;color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:99999;box-shadow:0 2px 8px rgba(0,0,0,.4);transition:opacity .2s;padding:0 20px}
+#ht-ai-btn span{margin-left:8px;font-weight:bold}
+@keyframes gradientShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 #ht-ai-btn:hover{opacity:.85}
 @media(max-width:768px){#ht-ai-btn{display:none}}
 #ht-ai-tooltip{position:fixed;padding:6px 8px;background:#111;color:#fff;border-radius:4px;font-size:13px;white-space:pre-wrap;pointer-events:none;opacity:0;transform:translate(-50%,-8px);transition:opacity .15s ease,transform .15s ease;z-index:100000}
@@ -276,7 +278,7 @@
   function createFloatingButton() {
     const d = document.createElement("div");
     d.id = "ht-ai-btn";
-    d.textContent = "🤖";
+    d.innerHTML = "🤖<span>HackTricksAI</span>";
     document.body.appendChild(d);
     return d;
   }
