@@ -52,7 +52,7 @@ lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=t
 ```
 > [!CAUTION]
 > このエラー _**Error: No storage pool found. Please create a new storage pool**_\
-> **`lxd init`** を実行し、すべてのオプションをデフォルトで設定します。その後、**前のコマンドの塊を繰り返します**
+> **`lxd init`** を実行し、すべてのオプションをデフォルトで設定します。その後、**前のコマンドのブロックを繰り返します**。
 
 最後に、コンテナを実行してルートを取得できます:
 ```bash
