@@ -8,8 +8,7 @@ As jy tot die _**lxd**_ **of** _**lxc**_ **groep** behoort, kan jy root word.
 
 ### Metode 1
 
-Jy kan 'n alpine beeld aflaai om met lxd van 'n vertroude repository te gebruik.
-Canonical publiseer daaglikse boue op hul webwerf: [https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)
+Jy kan 'n alpine beeld aflaai om met lxd van 'n vertroude repository te gebruik. Canonical publiseer daaglikse boue op hul webwerf: [https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/) 
 Neem net beide **lxd.tar.xz** en **rootfs.squashfs** van die nuutste bou. (Gidsnaam is die datum).
 
 Alternatiewelik kan jy hierdie distro bouer op jou masjien installeer: [https://github.com/lxc/distrobuilder](https://github.com/lxc/distrobuilder) (volg die instruksies van die github):
@@ -52,7 +51,7 @@ lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=t
 ```
 > [!CAUTION]
 > As jy hierdie fout _**Fout: Geen stoorpoel gevind nie. Skep asseblief 'n nuwe stoorpoel**_\
-> Voer **`lxd init`** uit en stel al die opsies op standaard in. Herhaal dan **die vorige stel opdragte**
+> Voer **`lxd init`** uit en stel al die opsies op verstek in. Herhaal dan die vorige stel opdragte
 
 Uiteindelik kan jy die houer uitvoer en root verkry:
 ```bash
