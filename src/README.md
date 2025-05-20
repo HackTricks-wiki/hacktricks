@@ -31,7 +31,7 @@ export LANG="master" # Leave master for english
 # Run the docker container indicating the path to the hacktricks folder
 docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git config --global --add safe.directory /app && git checkout $LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
-Yerel kopyanız **[http://localhost:3337](http://localhost:3337)** adresinde **5 dakikadan** kısa bir süre içinde **mevcut olacak** (kitabı oluşturması gerekiyor, sabırlı olun).
+Yerel kopyanız **[http://localhost:3337](http://localhost:3337)** adresinde **5 dakika içinde** (kitabı oluşturması gerekiyor, sabırlı olun) **mevcut olacaktır**.
 
 ## Kurumsal Sponsorlar
 
@@ -51,7 +51,7 @@ Yerel kopyanız **[http://localhost:3337](http://localhost:3337)** adresinde **5
 
 <figure><img src="images/image (45).png" alt=""><figcaption></figcaption></figure>
 
-[**RootedCON**](https://www.rootedcon.com), **İspanya**'daki en önemli siber güvenlik etkinliği ve **Avrupa**'daki en önemli etkinliklerden biridir. **Teknik bilgiyi teşvik etme misyonu** ile bu kongre, her disiplinde teknoloji ve siber güvenlik profesyonelleri için kaynayan bir buluşma noktasıdır.
+[**RootedCON**](https://www.rootedcon.com) **İspanya**'daki en önemli siber güvenlik etkinliği ve **Avrupa**'daki en önemli etkinliklerden biridir. **Teknik bilgiyi teşvik etme misyonu** ile bu kongre, her disiplinde teknoloji ve siber güvenlik profesyonelleri için kaynayan bir buluşma noktasıdır.
 
 {{#ref}}
 https://www.rootedcon.com/
@@ -94,7 +94,7 @@ https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktr
 
 Deneyimli hackerlar ve bug bounty avcıları ile iletişim kurmak için [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) sunucusuna katılın!
 
-- **Hacking İçgörüleri:** Hacking'in heyecanı ve zorluklarına dalan içeriklerle etkileşimde bulunun
+- **Hacking İçgörüleri:** Hacking'in heyecanı ve zorluklarına dair içeriklerle etkileşimde bulunun
 - **Gerçek Zamanlı Hack Haberleri:** Hızla değişen hacking dünyasında gerçek zamanlı haberler ve içgörülerle güncel kalın
 - **Son Duyurular:** Yeni başlayan bug bounty'ler ve önemli platform güncellemeleri hakkında bilgi sahibi olun
 
@@ -120,10 +120,10 @@ https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktrick
 
 <figure><img src="images/image (1254).png" alt=""><figcaption></figcaption></figure>
 
-**SerpApi**, **arama motoru sonuçlarına** erişim için hızlı ve kolay gerçek zamanlı API'ler sunar. Arama motorlarını tarar, proxy'leri yönetir, captcha'ları çözer ve sizin için tüm zengin yapılandırılmış verileri ayrıştırır.
+**SerpApi**, **arama motoru sonuçlarına** erişim sağlamak için hızlı ve kolay gerçek zamanlı API'ler sunar. Arama motorlarını tarar, proxy'leri yönetir, captcha'ları çözer ve sizin için tüm zengin yapılandırılmış verileri ayrıştırır.
 
 SerpApi'nin planlarından birine abone olmak, Google, Bing, Baidu, Yahoo, Yandex ve daha fazlası dahil olmak üzere farklı arama motorlarını taramak için 50'den fazla API'ye erişim içerir.\
-Diğer sağlayıcılardan farklı olarak, **SerpApi sadece organik sonuçları taramaz**. SerpApi yanıtları sürekli olarak tüm reklamları, satır içi resimleri ve videoları, bilgi grafiklerini ve arama sonuçlarında bulunan diğer öğeleri ve özellikleri içerir.
+Diğer sağlayıcılardan farklı olarak, **SerpApi sadece organik sonuçları taramaz**. SerpApi yanıtları sürekli olarak tüm reklamları, satır içi resimleri ve videoları, bilgi grafikleri ve arama sonuçlarında bulunan diğer öğeleri ve özellikleri içerir.
 
 Mevcut SerpApi müşterileri arasında **Apple, Shopify ve GrubHub** bulunmaktadır.\
 Daha fazla bilgi için [**bloglarına**](https://serpapi.com/blog/) göz atın veya [**oyun alanlarında**](https://serpapi.com/playground) bir örnek deneyin.\
@@ -149,11 +149,11 @@ https://academy.8ksec.io/
 
 [**WebSec**](https://websec.net) **Amsterdam** merkezli profesyonel bir siber güvenlik şirketidir ve **dünyanın dört bir yanındaki** işletmeleri en son siber güvenlik tehditlerine karşı korumak için **ofansif güvenlik hizmetleri** sunmaktadır.
 
-WebSec, Amsterdam ve Wyoming'de ofisleri olan uluslararası bir güvenlik şirketidir. **Pentesting, Güvenlik** Denetimleri, Farkındalık Eğitimleri, Phishing Kampanyaları, Kod İncelemesi, İstismar Geliştirme, Güvenlik Uzmanları Dış Kaynak Kullanımı ve daha fazlasını içeren **hepsi bir arada güvenlik hizmetleri** sunmaktadır.
+WebSec, Amsterdam ve Wyoming'de ofisleri olan uluslararası bir güvenlik şirketidir. **Pentesting, Güvenlik** Denetimleri, Farkındalık Eğitimleri, Phishing Kampanyaları, Kod İncelemesi, Exploit Geliştirme, Güvenlik Uzmanları Dış Kaynak Kullanımı ve daha fazlasını içeren **hepsi bir arada güvenlik hizmetleri** sunmaktadır.
 
-WebSec'in diğer bir ilginç yanı, sektördeki ortalamadan farklı olarak WebSec'in **yeteneklerine çok güvenmesidir**, o kadar ki **en iyi kalite sonuçları garanti eder**, web sitelerinde "**Eğer hackleyemiyorsak, ödeme yapmazsınız!**" ifadesi yer almaktadır. Daha fazla bilgi için [**web sitelerine**](https://websec.net/en/) ve [**bloglarına**](https://websec.net/blog/) göz atın!
+WebSec'in bir diğer harika yanı, sektördeki ortalamadan farklı olarak WebSec'in **yeteneklerine çok güvenmesidir**, o kadar ki **en iyi kalite sonuçları garanti eder**, web sitelerinde "**Eğer hackleyemiyorsak, ödeme yapmazsınız!**" ifadesi yer almaktadır. Daha fazla bilgi için [**web sitelerine**](https://websec.net/en/) ve [**bloglarına**](https://websec.net/blog/) göz atın!
 
-Yukarıdakilere ek olarak WebSec, **HackTricks'in kararlı bir destekçisidir.**
+Yukarıdakilere ek olarak WebSec, HackTricks'in de **kararlı bir destekçisidir.**
 
 {{#ref}}
 https://www.youtube.com/watch?v=Zq2JycGDCPM
@@ -186,7 +186,7 @@ Otomatik taramaların ötesine geçerek, yüksek riskli ortamlara özel **manuel
 
 _“Kaliteli bir savunma, saldırıyı bilmeyi gerektirir, biz anlayış yoluyla güvenlik sağlıyoruz.”_
 
-Siber güvenlikteki en son gelişmelerden haberdar olmak için [**blogumuzu**](https://www.lasttowersolutions.com/blog) ziyaret edin.
+En son siber güvenlik gelişmeleri hakkında bilgi sahibi olmak için [**bloglarına**](https://www.lasttowersolutions.com/blog) göz atın.
 
 {{#ref}}
 https://www.lasttowersolutions.com/
