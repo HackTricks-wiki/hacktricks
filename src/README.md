@@ -39,7 +39,7 @@ Ihre lokale Kopie von HackTricks wird **unter [http://localhost:3337](http://loc
 
 <figure><img src="images/stm (1).png" alt=""><figcaption></figcaption></figure>
 
-[**STM Cyber**](https://www.stmcyber.com) ist ein großartiges Cybersecurity-Unternehmen, dessen Slogan **HACK THE UNHACKABLE** lautet. Sie führen eigene Forschungen durch und entwickeln eigene Hacking-Tools, um **verschiedene wertvolle Cybersecurity-Dienste** wie Pentesting, Red Teams und Schulungen anzubieten.
+[**STM Cyber**](https://www.stmcyber.com) ist ein großartiges Cybersecurity-Unternehmen, dessen Slogan **HACK THE UNHACKABLE** lautet. Sie führen eigene Recherchen durch und entwickeln eigene Hacking-Tools, um **verschiedene wertvolle Cybersecurity-Dienste** wie Pentesting, Red Teams und Schulungen anzubieten.
 
 Sie können ihren **Blog** unter [**https://blog.stmcyber.com**](https://blog.stmcyber.com) einsehen.
 
@@ -147,11 +147,11 @@ https://academy.8ksec.io/
 
 <figure><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.net) ist ein professionelles Cybersecurity-Unternehmen mit Sitz in **Amsterdam**, das **Unternehmen auf der ganzen Welt** hilft, sich gegen die neuesten Cybersecurity-Bedrohungen zu schützen, indem es **offensive Sicherheitsdienste** mit einem **modernen** Ansatz anbietet.
+[**WebSec**](https://websec.net) ist ein professionelles Cybersecurity-Unternehmen mit Sitz in **Amsterdam**, das **Unternehmen auf der ganzen Welt** dabei hilft, sich gegen die neuesten Cybersecurity-Bedrohungen zu schützen, indem es **Offensive-Security-Dienste** mit einem **modernen** Ansatz anbietet.
 
 WebSec ist ein internationales Sicherheitsunternehmen mit Büros in Amsterdam und Wyoming. Sie bieten **All-in-One-Sicherheitsdienste** an, was bedeutet, dass sie alles abdecken; Pentesting, **Sicherheits**-Audits, Awareness-Trainings, Phishing-Kampagnen, Code-Überprüfungen, Exploit-Entwicklung, Outsourcing von Sicherheitsexperten und vieles mehr.
 
-Ein weiterer cooler Aspekt von WebSec ist, dass WebSec im Gegensatz zum Branchendurchschnitt **sehr zuversichtlich in ihre Fähigkeiten ist**, so sehr, dass sie **die besten Qualitätsresultate garantieren**, es steht auf ihrer Website: "**Wenn wir es nicht hacken können, zahlen Sie nicht!**". Für weitere Informationen werfen Sie einen Blick auf ihre [**Website**](https://websec.net/en/) und [**Blog**](https://websec.net/blog/)!
+Ein weiterer cooler Aspekt von WebSec ist, dass WebSec im Gegensatz zum Branchendurchschnitt **sehr zuversichtlich in ihre Fähigkeiten ist**, so sehr, dass sie **die besten Qualitätsresultate garantieren**, es steht auf ihrer Website: "**Wenn wir es nicht hacken können, zahlen Sie nicht!**". Für weitere Informationen werfen Sie einen Blick auf ihre [**Website**](https://websec.net/en/) und ihren [**Blog**](https://websec.net/blog/)!
 
 Zusätzlich zu den oben genannten ist WebSec auch ein **engagierter Unterstützer von HackTricks.**
 
@@ -165,10 +165,10 @@ https://www.youtube.com/watch?v=Zq2JycGDCPM
 
 <figure><img src="images/venacus-logo.svg" alt="venacus logo"><figcaption></figcaption></figure>
 
-[**Venacus**](https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons) ist eine Suchmaschine für Datenverletzungen (leak). \
-Wir bieten eine Suche nach zufälligen Zeichenfolgen (wie Google) über alle Arten von Datenlecks, groß und klein – nicht nur die großen – über Daten aus mehreren Quellen. \
-Menschen suchen, KI-Suche, Organisationssuche, API (OpenAPI) Zugriff, dieHarvester-Integration, alle Funktionen, die ein Pentester benötigt.\
-**HackTricks bleibt eine großartige Lernplattform für uns alle und wir sind stolz darauf, sie zu sponsern!**
+[**Venacus**](https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons) ist eine Suchmaschine für Datenlecks (leak). \
+Wir bieten eine zufällige Zeichenfolgen-Suche (wie Google) über alle Arten von Datenlecks, groß und klein – nicht nur die großen – über Daten aus mehreren Quellen. \
+Menschen-Suche, KI-Suche, Organisationssuche, API (OpenAPI) Zugriff, theHarvester-Integration, alle Funktionen, die ein Pentester benötigt.\
+**HackTricks bleibt eine großartige Lernplattform für uns alle, und wir sind stolz darauf, sie zu sponsern!**
 
 {{#ref}}
 https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons
