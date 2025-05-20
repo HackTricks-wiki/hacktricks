@@ -52,7 +52,7 @@ lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=t
 ```
 > [!CAUTION]
 > 이 오류를 발견하면 _**오류: 저장소 풀이 없습니다. 새 저장소 풀을 생성하십시오**_\
-> **`lxd init`**를 실행하고 모든 옵션을 기본값으로 설정하십시오. 그런 다음 **이전 명령어 덩어리를 반복하십시오**.
+> **`lxd init`**를 실행하고 모든 옵션을 기본값으로 설정하십시오. 그런 다음 **이전 명령어 덩어리를 반복하십시오.**
 
 마지막으로 컨테이너를 실행하고 root를 얻을 수 있습니다:
 ```bash
