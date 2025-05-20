@@ -31,9 +31,9 @@ export LANG="master" # Leave master for english
 # Run the docker container indicating the path to the hacktricks folder
 docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git config --global --add safe.directory /app && git checkout $LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
-Votre copie locale de HackTricks sera **disponible à [http://localhost:3337](http://localhost:3337)** après <5 minutes (elle doit construire le livre, soyez patient).
+Votre copie locale de HackTricks sera **disponible à [http://localhost:3337](http://localhost:3337)** après <5 minutes (il faut construire le livre, soyez patient).
 
-## Sponsors Corporatifs
+## Sponsors d'entreprise
 
 ### [STM Cyber](https://www.stmcyber.com)
 
@@ -63,7 +63,7 @@ https://www.rootedcon.com/
 
 <figure><img src="images/image (47).png" alt=""><figcaption></figcaption></figure>
 
-**Intigriti** est la **première plateforme** de hacking éthique et de **bug bounty en Europe.**
+**Intigriti** est la **première** plateforme de hacking éthique et de **bug bounty en Europe.**
 
 **Astuce bug bounty** : **inscrivez-vous** sur **Intigriti**, une plateforme de **bug bounty premium créée par des hackers, pour des hackers** ! Rejoignez-nous à [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) aujourd'hui, et commencez à gagner des primes allant jusqu'à **100 000 $** !
 
@@ -78,7 +78,7 @@ https://go.intigriti.com/hacktricks
 <figure><img src="images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Utilisez [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) pour créer et **automatiser des flux de travail** facilement grâce aux **outils communautaires les plus avancés** au monde.
+Utilisez [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) pour créer et **automatiser des flux de travail** alimentés par les **outils communautaires les plus avancés** au monde.
 
 Accédez dès aujourd'hui :
 
@@ -102,13 +102,13 @@ Rejoignez le serveur [**HackenProof Discord**](https://discord.com/invite/N3FrSb
 
 ---
 
-### [Pentest-Tools.com](https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons) - L'outil essentiel pour les tests de pénétration
+### [Pentest-Tools.com](https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons) - L'outil essentiel de test de pénétration
 
 <figure><img src="images/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
 
 **Obtenez la perspective d'un hacker sur vos applications web, votre réseau et votre cloud**
 
-**Trouvez et signalez des vulnérabilités critiques et exploitables ayant un impact commercial réel.** Utilisez nos 20+ outils personnalisés pour cartographier la surface d'attaque, trouver des problèmes de sécurité qui vous permettent d'escalader les privilèges, et utilisez des exploits automatisés pour collecter des preuves essentielles, transformant votre travail acharné en rapports convaincants.
+**Trouvez et signalez des vulnérabilités critiques et exploitables avec un impact commercial réel.** Utilisez nos 20+ outils personnalisés pour cartographier la surface d'attaque, trouver des problèmes de sécurité qui vous permettent d'escalader les privilèges, et utilisez des exploits automatisés pour collecter des preuves essentielles, transformant votre travail acharné en rapports convaincants.
 
 {{#ref}}
 https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons
@@ -149,9 +149,9 @@ https://academy.8ksec.io/
 
 [**WebSec**](https://websec.net) est une entreprise de cybersécurité professionnelle basée à **Amsterdam** qui aide à **protéger** les entreprises **dans le monde entier** contre les dernières menaces de cybersécurité en fournissant des **services de sécurité offensive** avec une approche **moderne**.
 
-WebSec est une entreprise de sécurité internationale avec des bureaux à Amsterdam et Wyoming. Ils offrent des **services de sécurité tout-en-un**, ce qui signifie qu'ils font tout ; Pentesting, **Audits** de Sécurité, Formations de Sensibilisation, Campagnes de Phishing, Revue de Code, Développement d'Exploits, Externalisation d'Experts en Sécurité et bien plus encore.
+WebSec est une entreprise de sécurité internationale avec des bureaux à Amsterdam et Wyoming. Ils offrent des **services de sécurité tout-en-un**, ce qui signifie qu'ils font tout ; Pentesting, **Audits** de sécurité, Formations de sensibilisation, Campagnes de phishing, Revue de code, Développement d'exploits, Externalisation d'experts en sécurité et bien plus encore.
 
-Une autre chose intéressante à propos de WebSec est que, contrairement à la moyenne de l'industrie, WebSec est **très confiant dans ses compétences**, à tel point qu'ils **garantissent les meilleurs résultats de qualité**, comme indiqué sur leur site web "**Si nous ne pouvons pas le hacker, vous ne payez pas !**". Pour plus d'infos, jetez un œil à leur [**site web**](https://websec.net/en/) et [**blog**](https://websec.net/blog/) !
+Une autre chose intéressante à propos de WebSec est que, contrairement à la moyenne de l'industrie, WebSec est **très confiant dans ses compétences**, à tel point qu'ils **garantissent les meilleurs résultats de qualité**, comme indiqué sur leur site web "**Si nous ne pouvons pas le hacker, vous ne le payez pas !**". Pour plus d'infos, jetez un œil à leur [**site web**](https://websec.net/en/) et [**blog**](https://websec.net/blog/) !
 
 En plus de cela, WebSec est également un **soutien engagé de HackTricks.**
 
@@ -168,7 +168,7 @@ https://www.youtube.com/watch?v=Zq2JycGDCPM
 [**Venacus**](https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons) est un moteur de recherche de violations de données (leak). \
 Nous fournissons une recherche de chaînes aléatoires (comme google) sur tous les types de fuites de données, grandes et petites --pas seulement les grandes-- provenant de multiples sources. \
 Recherche de personnes, recherche IA, recherche d'organisations, accès API (OpenAPI), intégration theHarvester, toutes les fonctionnalités dont un pentester a besoin.\
-**HackTricks continue d'être une excellente plateforme d'apprentissage pour nous tous et nous sommes fiers de le sponsoriser !**
+**HackTricks continue d'être une excellente plateforme d'apprentissage pour nous tous et nous sommes fiers de la sponsoriser !**
 
 {{#ref}}
 https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons
@@ -180,7 +180,7 @@ https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons
 
 <figure><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
 
-Last Tower Solutions fournit des services de cybersécurité spécialisés pour les institutions **Éducatives** et **FinTech**, avec un accent sur **les tests de pénétration, les évaluations de sécurité cloud**, et **la préparation à la conformité** (SOC 2, PCI-DSS, NIST). Notre équipe comprend des **professionnels certifiés OSCP et CISSP**, apportant une expertise technique approfondie et un aperçu conforme aux normes de l'industrie à chaque engagement.
+Last Tower Solutions fournit des services de cybersécurité spécialisés pour les institutions **d'éducation** et **FinTech**, avec un accent sur **les tests de pénétration, les évaluations de sécurité cloud**, et **la préparation à la conformité** (SOC 2, PCI-DSS, NIST). Notre équipe comprend des **professionnels certifiés OSCP et CISSP**, apportant une expertise technique approfondie et un aperçu conforme aux normes de l'industrie à chaque engagement.
 
 Nous allons au-delà des analyses automatisées avec des **tests manuels, guidés par l'intelligence**, adaptés aux environnements à enjeux élevés. De la sécurisation des dossiers étudiants à la protection des transactions financières, nous aidons les organisations à défendre ce qui compte le plus.
 
