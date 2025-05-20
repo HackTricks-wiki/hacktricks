@@ -61,7 +61,7 @@ lxc exec privesc /bin/sh
 ```
 ### Metodo 2
 
-Crea un'immagine Alpine e avviala utilizzando il flag `security.privileged=true`, costringendo il container a interagire come root con il filesystem dell'host.
+Costruisci un'immagine Alpine e avviala utilizzando il flag `security.privileged=true`, costringendo il container a interagire come root con il filesystem host.
 ```bash
 # build a simple alpine image
 git clone https://github.com/saghul/lxd-alpine-builder
