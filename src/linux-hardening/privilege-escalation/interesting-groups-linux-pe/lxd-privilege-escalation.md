@@ -34,7 +34,7 @@ wget https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml
 # Create the container - Beware of architecture while compiling locally.
 sudo $HOME/go/bin/distrobuilder build-incus alpine.yaml -o image.release=3.18 -o image.architecture=x86_64
 ```
-Laden Sie die Dateien **incus.tar.xz** (**lxd.tar.xz**, wenn Sie sie aus dem Canonical-Repository heruntergeladen haben) und **rootfs.squashfs** hoch, fügen Sie das Image zum Repository hinzu und erstellen Sie einen Container:
+Laden Sie die Dateien **incus.tar.xz** (**lxd.tar.xz**, wenn Sie aus dem Canonical-Repository heruntergeladen haben) und **rootfs.squashfs** hoch, fügen Sie das Image zum Repository hinzu und erstellen Sie einen Container:
 ```bash
 lxc image import lxd.tar.xz rootfs.squashfs --alias alpine
 
@@ -51,7 +51,7 @@ lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=t
 ```
 > [!CAUTION]
 > Wenn Sie diesen Fehler _**Fehler: Kein Speicherpool gefunden. Bitte erstellen Sie einen neuen Speicherpool**_\
-> Führen Sie **`lxd init`** aus und richten Sie alle Optionen auf die Standardeinstellungen ein. Dann **wiederholen** Sie den vorherigen Befehlssatz
+> Führen Sie **`lxd init`** aus und setzen Sie alle Optionen auf die Standardeinstellungen. Dann **wiederholen** Sie den vorherigen Befehlssatz
 
 Schließlich können Sie den Container ausführen und root erhalten:
 ```bash
