@@ -52,7 +52,7 @@ lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=t
 ```
 > [!CAUTION]
 > Ikiwa unakutana na kosa hili _**Kosa: Hakuna hifadhi ya kuhifadhi iliyopatikana. Tafadhali tengeneza hifadhi mpya ya kuhifadhi**_\
-> Kimbia **`lxd init`** na uweke chaguo zote kuwa za kawaida. Kisha **rudia** kipande cha awali cha amri
+> Kimbia **`lxd init`** na uweke chaguo zote kuwa za kawaida. Kisha **rudia** kipande cha amri kilichopita
 
 Hatimaye unaweza kutekeleza kontena na kupata root:
 ```bash
