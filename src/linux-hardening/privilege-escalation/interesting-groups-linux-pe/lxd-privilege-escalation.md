@@ -1,4 +1,4 @@
-# lxd/lxc Group - Podwyższenie uprawnień
+# lxd/lxc Group - Eskalacja uprawnień
 
 {{#include ../../../banners/hacktricks-training.md}}
 
