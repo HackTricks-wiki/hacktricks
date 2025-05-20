@@ -8,18 +8,23 @@ Ikiwa unahusishwa na _**lxd**_ **au** _**lxc**_ **group**, unaweza kuwa root
 
 ### Method 1
 
-Unaweza kufunga katika mashine yako mjenzi wa distro hii: [https://github.com/lxc/distrobuilder ](https://github.com/lxc/distrobuilder)(fuata maelekezo ya github):
+Unaweza kupakua picha ya alpine kutumia na lxd kutoka kwenye hazina inayotegemewa. 
+Canonical inachapisha toleo la kila siku kwenye tovuti yao: [https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)
+Chukua **lxd.tar.xz** na **rootfs.squashfs** kutoka kwenye toleo jipya zaidi. (Jina la saraka ni tarehe).
+
+Vinginevyo, unaweza kufunga kwenye mashine yako mjenzi wa distro hii: [https://github.com/lxc/distrobuilder](https://github.com/lxc/distrobuilder) (fuata maelekezo ya github):
 ```bash
-sudo su
 # Install requirements
 sudo apt update
-sudo apt install -y git golang-go debootstrap rsync gpg squashfs-tools
+sudo apt install -y golang-go gcc debootstrap rsync gpg squashfs-tools git make build-essential libwin-hivex-perl wimtools genisoimage
 
 # Clone repo
+mkdir -p $HOME/go/src/github.com/lxc/
+cd $HOME/go/src/github.com/lxc/
 git clone https://github.com/lxc/distrobuilder
 
 # Make distrobuilder
-cd distrobuilder
+cd ./distrobuilder
 make
 
 # Prepare the creation of alpine
@@ -27,13 +32,10 @@ mkdir -p $HOME/ContainerImages/alpine/
 cd $HOME/ContainerImages/alpine/
 wget https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml
 
-# Create the container
-## Using build-lxd
-sudo $HOME/go/bin/distrobuilder build-lxd alpine.yaml -o image.release=3.18
-## Using build-lxc
-sudo $HOME/go/bin/distrobuilder build-lxc alpine.yaml -o image.release=3.18
+# Create the container - Beware of architecture while compiling locally.
+sudo $HOME/go/bin/distrobuilder build-incus alpine.yaml -o image.release=3.18 -o image.architecture=x86_64
 ```
-Pakia faili **lxd.tar.xz** na **rootfs.squashfs**, ongeza picha kwenye repo na uunde kontena:
+Pakia faili **incus.tar.xz** (**lxd.tar.xz** ikiwa umepakua kutoka kwenye hifadhi ya Canonical) na **rootfs.squashfs**, ongeza picha kwenye repo na uunde kontena:
 ```bash
 lxc image import lxd.tar.xz rootfs.squashfs --alias alpine
 
@@ -49,8 +51,8 @@ lxc list
 lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=true
 ```
 > [!CAUTION]
-> Ikiwa unakutana na kosa hili _**Kosa: Hakuna hifadhi ya kuhifadhiwa iliyo patikana. Tafadhali tengeneza hifadhi mpya ya kuhifadhiwa**_\
-> Kimbia **`lxd init`** na **rudia** kipande cha amri kilichopita
+> Ikiwa unakutana na kosa hili _**Kosa: Hakuna hifadhi ya kuhifadhi iliyopatikana. Tafadhali tengeneza hifadhi mpya ya kuhifadhi**_\
+> Kimbia **`lxd init`** na uweke chaguo zote kuwa za kawaida. Kisha **rudia** kipande cha awali cha amri
 
 Hatimaye unaweza kutekeleza kontena na kupata root:
 ```bash
