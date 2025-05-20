@@ -31,7 +31,7 @@ export LANG="master" # Leave master for english
 # Run the docker container indicating the path to the hacktricks folder
 docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git config --global --add safe.directory /app && git checkout $LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
-Your local copy of HackTricks will be **available at [http://localhost:3337](http://localhost:3337)** after <5 minutes (it needs to build the book, be patient).
+Jou plaaslike kopie van HackTricks sal **beskikbaar wees by [http://localhost:3337](http://localhost:3337)** na <5 minute (dit moet die boek bou, wees geduldig).
 
 ## Korporatiewe Borge
 
@@ -39,7 +39,7 @@ Your local copy of HackTricks will be **available at [http://localhost:3337](htt
 
 <figure><img src="images/stm (1).png" alt=""><figcaption></figcaption></figure>
 
-[**STM Cyber**](https://www.stmcyber.com) is 'n uitstekende kuberveiligheidsmaatskappy waarvan die leuse is **HACK THE UNHACKABLE**. Hulle doen hul eie navorsing en ontwikkel hul eie hacking gereedskap om **verskeie waardevolle kuberveiligheidsdienste** soos pentesting, Red teams en opleiding aan te bied.
+[**STM Cyber**](https://www.stmcyber.com) is 'n uitstekende kuberveiligheid maatskappy wie se leuse is **HACK THE UNHACKABLE**. Hulle voer hul eie navorsing uit en ontwikkel hul eie hacking gereedskap om **verskeie waardevolle kuberveiligheid dienste** soos pentesting, Red teams en opleiding aan te bied.
 
 Jy kan hul **blog** in [**https://blog.stmcyber.com**](https://blog.stmcyber.com) nagaan.
 
@@ -78,7 +78,7 @@ https://go.intigriti.com/hacktricks
 <figure><img src="images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Gebruik [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) om maklik **werkvloei** te bou en te **automate** wat aangedryf word deur die wêreld se **mees gevorderde** gemeenskap gereedskap.
+Gebruik [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) om maklik **werkvloei** te bou en te **automate** wat aangedryf word deur die wêreld se **meest gevorderde** gemeenskap gereedskap.
 
 Kry Toegang Vandag:
 
@@ -92,7 +92,7 @@ https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktr
 
 <figure><img src="images/image (3).png" alt=""><figcaption></figcaption></figure>
 
-Sluit by [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) bediener aan om met ervare hackers en bug bounty jagters te kommunikeer!
+Sluit by die [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) bediener aan om met ervare hackers en bug bounty jagters te kommunikeer!
 
 - **Hacking Inligting:** Betrek met inhoud wat die opwinding en uitdagings van hacking ondersoek
 - **Regstydse Hack Nuus:** Bly op hoogte van die vinnig bewegende hacking wêreld deur regstydse nuus en insigte
@@ -102,13 +102,13 @@ Sluit by [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) bedien
 
 ---
 
-### [Pentest-Tools.com](https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons) - Die noodsaaklike penetrasietoets gereedskap
+### [Pentest-Tools.com](https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons) - Die noodsaaklike penetrasietoetsing gereedskapstel
 
 <figure><img src="images/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
 
 **Kry 'n hacker se perspektief op jou web apps, netwerk, en wolk**
 
-**Vind en rapporteer kritieke, exploitable kwesbaarhede met werklike besigheidsimpak.** Gebruik ons 20+ pasgemaakte gereedskap om die aanval oppervlak te karteer, vind sekuriteitskwessies wat jou toelaat om voorregte te verhoog, en gebruik geoutomatiseerde eksploit om noodsaaklike bewyse te versamel, wat jou harde werk in oortuigende verslae omskep.
+**Vind en rapporteer kritieke, exploiteerbare kwesbaarhede met werklike besigheidsimpak.** Gebruik ons 20+ pasgemaakte gereedskap om die aanval oppervlak te karteer, vind sekuriteitskwessies wat jou toelaat om bevoegdhede te verhoog, en gebruik geoutomatiseerde eksploit om noodsaaklike bewyse te versamel, wat jou harde werk in oortuigende verslae omskep.
 
 {{#ref}}
 https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons
@@ -131,7 +131,7 @@ Jy kan **'n gratis rekening** [**hier**](https://serpapi.com/users/sign_up)**.**
 
 ---
 
-### [8kSec Academy – In-Diepte Mobiele Sekuriteit Kursusse](https://academy.8ksec.io/)
+### [8kSec Academy – In-Depth Mobile Security Courses](https://academy.8ksec.io/)
 
 <figure><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
@@ -147,11 +147,11 @@ https://academy.8ksec.io/
 
 <figure><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.net) is 'n professionele kuberveiligheidsmaatskappy gebaseer in **Amsterdam** wat help om **besighede** **oor die wêreld** teen die nuutste kuberveiligheid bedreigings te beskerm deur **offensiewe-sekuriteit dienste** met 'n **moderne** benadering te bied.
+[**WebSec**](https://websec.net) is 'n professionele kuberveiligheid maatskappy gebaseer in **Amsterdam** wat help om **besighede** **oor die wêreld** te beskerm teen die nuutste kuberveiligheid bedreigings deur **offensiewe-sekuriteit dienste** met 'n **moderne** benadering te bied.
 
 WebSec is 'n internasionale sekuriteitsmaatskappy met kantore in Amsterdam en Wyoming. Hulle bied **alles-in-een sekuriteitsdienste** aan wat beteken dat hulle dit alles doen; Pentesting, **Sekuriteit** Oudit, Bewustheidsopleiding, Phishing Campagnes, Kode Hersiening, Eksploit Ontwikkeling, Sekuriteit Eksperte Uitsourcing en nog baie meer.
 
-Nog 'n interessante ding oor WebSec is dat, in teenstelling met die bedryfsgemiddelde, WebSec **baie selfversekerd is in hul vaardighede**, tot so 'n mate dat hulle **die beste kwaliteit resultate waarborg**, dit staan op hul webwerf "**As ons dit nie kan hack nie, betaal jy nie!**". Vir meer inligting, kyk na hul [**webwerf**](https://websec.net/en/) en [**blog**](https://websec.net/blog/)!
+Nog 'n interessante ding oor WebSec is dat, in teenstelling met die industrie gemiddelde, WebSec **baie selfversekerd is in hul vaardighede**, tot so 'n mate dat hulle **die beste kwaliteit resultate waarborg**, dit staan op hul webwerf "**As ons dit nie kan hack nie, betaal jy nie!**". Vir meer inligting, kyk na hul [**webwerf**](https://websec.net/en/) en [**blog**](https://websec.net/blog/)!
 
 Benewens die bogenoemde is WebSec ook 'n **toegewyde ondersteuner van HackTricks.**
 
@@ -165,9 +165,9 @@ https://www.youtube.com/watch?v=Zq2JycGDCPM
 
 <figure><img src="images/venacus-logo.svg" alt="venacus logo"><figcaption></figcaption></figure>
 
-[**Venacus**](https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons) is 'n data breek (leak) soekenjin. \
-Ons bied random string soektog (soos google) oor alle tipes data lekkasies groot en klein --nie net die groot nie-- oor data van verskeie bronne. \
-Mense soek, AI soek, organisasie soek, API (OpenAPI) toegang, dieHarvester integrasie, al die funksies wat 'n pentester benodig.\
+[**Venacus**](https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons) is 'n data breuk (leak) soekenjin. \
+Ons bied random string soektog (soos google) oor alle tipes data breuke groot en klein --nie net die groot nie-- oor data van verskeie bronne. \
+Mense soektog, KI soektog, organisasie soektog, API (OpenAPI) toegang, dieHarvester integrasie, al die funksies wat 'n pentester benodig.\
 **HackTricks bly 'n wonderlike leerplatform vir ons almal en ons is trots om dit te borg!**
 
 {{#ref}}
@@ -180,9 +180,9 @@ https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons
 
 <figure><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
 
-Last Tower Solutions bied gespesialiseerde kuberveiligheidsdienste aan vir **Onderwys** en **FinTech** instellings, met 'n fokus op **penetrasietoetsing, wolk sekuriteit assesserings**, en **nakoming gereedheid** (SOC 2, PCI-DSS, NIST). Ons span sluit **OSCP en CISSP geakkrediteerde professionele** in, wat diep tegniese kundigheid en bedryfstandaard insig na elke betrokkenheid bring.
+Last Tower Solutions bied gespesialiseerde kuberveiligheid dienste aan vir **Onderwys** en **FinTech** instellings, met 'n fokus op **penetrasietoetsing, wolk sekuriteit assesserings**, en **nakoming gereedheid** (SOC 2, PCI-DSS, NIST). Ons span sluit **OSCP en CISSP geakkrediteerde professionele persone** in, wat diep tegniese kundigheid en industrie-standaard insig na elke betrokkenheid bring.
 
-Ons gaan verder as geoutomatiseerde skande met **handmatige, intelligensie-gedrewe toetsing** wat aangepas is vir hoë-stakes omgewings. Van die beveiliging van studentrekords tot die beskerming van finansiële transaksies, help ons organisasies om te verdedig wat die meeste saak maak.
+Ons gaan verder as geoutomatiseerde skanderings met **handmatige, intelligensie-gedrewe toetsing** wat aangepas is vir hoë-stakes omgewings. Van die beveiliging van studentrekords tot die beskerming van finansiële transaksies, help ons organisasies om te verdedig wat die meeste saak maak.
 
 _“'n Kwaliteit verdediging vereis om die aanval te ken, ons bied sekuriteit deur begrip.”_
 
