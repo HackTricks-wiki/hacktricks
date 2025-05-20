@@ -94,7 +94,7 @@ https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktr
 
 Junte-se ao servidor [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) para se comunicar com hackers experientes e caçadores de bugs!
 
-- **Insights de Hacking:** Envolva-se com conteúdo que mergulha na emoção e nos desafios do hacking
+- **Insights de Hacking:** Engaje-se com conteúdo que mergulha na emoção e nos desafios do hacking
 - **Notícias de Hack em Tempo Real:** Mantenha-se atualizado com o mundo do hacking em ritmo acelerado através de notícias e insights em tempo real
 - **Últimos Anúncios:** Fique informado sobre os novos bug bounties lançados e atualizações cruciais da plataforma
 
@@ -131,7 +131,7 @@ Você pode **criar uma conta gratuita** [**aqui**](https://serpapi.com/users/sig
 
 ---
 
-### [8kSec Academy – Cursos de Segurança Móvel em Profundidade](https://academy.8ksec.io/)
+### [8kSec Academy – Cursos de Segurança Móvel Aprofundados](https://academy.8ksec.io/)
 
 <figure><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
@@ -166,8 +166,8 @@ https://www.youtube.com/watch?v=Zq2JycGDCPM
 <figure><img src="images/venacus-logo.svg" alt="venacus logo"><figcaption></figcaption></figure>
 
 [**Venacus**](https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons) é um mecanismo de busca de vazamentos de dados (leak). \
-Fornecemos busca de strings aleatórias (como o google) sobre todos os tipos de vazamentos de dados grandes e pequenos --não apenas os grandes-- de dados de múltiplas fontes. \
-Busca de pessoas, busca de IA, busca de organizações, acesso API (OpenAPI), integração com theHarvester, todos os recursos que um pentester precisa.\
+Fornecemos busca de strings aleatórias (como o google) sobre todos os tipos de vazamentos de dados grandes e pequenos --não apenas os grandes-- de dados de várias fontes. \
+Busca de pessoas, busca de IA, busca de organizações, acesso API (OpenAPI), integração com oTheHarvester, todos os recursos que um pentester precisa.\
 **HackTricks continua sendo uma ótima plataforma de aprendizado para todos nós e estamos orgulhosos de patrociná-la!**
 
 {{#ref}}
