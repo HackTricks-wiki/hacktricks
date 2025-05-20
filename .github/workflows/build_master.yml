@@ -46,8 +46,12 @@ jobs:
           cargo install mdbook-codename
 
       # Build the mdBook
+      - name: Clean build directory
+         run: rm -rf ./book 2>/dev/null
+
       - name: Build mdBook
-        run: mdbook build
+        run: |
+          mdbook build
       
       # Cat hacktricks-preprocessor.log
       #- name: Cat hacktricks-preprocessor.log

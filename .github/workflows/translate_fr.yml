@@ -104,8 +104,13 @@ jobs:
           git push --set-upstream origin "$BRANCH"
 
       # Build the mdBook
+      - name: Clean build directory
+         run: rm -rf ./book 2>/dev/null
+
       - name: Build mdBook
-        run: mdbook build
+        run: |
+          git checkout "$BRANCH"
+          mdbook build
       
       # Login in AWs
       - name: Configure AWS credentials using OIDC
@@ -123,4 +128,4 @@ jobs:
           aws s3 sync ./book s3://hacktricks-wiki/$BRANCH --delete
           echo "Sync completed"
           echo "Cat 3 files from the book"
-          find . -type f -name '*.md' -print | head -n 3 | xargs -r cat
+          find . -type f -name 'index.html' -print | head -n 3 | xargs -r cat
