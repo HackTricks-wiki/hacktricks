@@ -2,7 +2,7 @@
 
 <figure><img src="images/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
-_Logotypy i projektowanie ruchu HackTricks autorstwa_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
+_Logo i animacja Hacktricks autorstwa_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
 
 ### Uruchom HackTricks lokalnie
 ```bash
@@ -96,7 +96,7 @@ Dołącz do serwera [**HackenProof Discord**](https://discord.com/invite/N3FrSbm
 
 - **Wgląd w hacking:** Angażuj się w treści, które zagłębiają się w emocje i wyzwania związane z hackingiem
 - **Aktualności o hackingu w czasie rzeczywistym:** Bądź na bieżąco z dynamicznym światem hackingu dzięki aktualnym wiadomościom i wglądom
-- **Najnowsze ogłoszenia:** Bądź na bieżąco z najnowszymi nagrodami bug bounty oraz istotnymi aktualizacjami platformy
+- **Najnowsze ogłoszenia:** Bądź na bieżąco z nowymi nagrodami bug bounty i istotnymi aktualizacjami platformy
 
 **Dołącz do nas na** [**Discord**](https://discord.com/invite/N3FrSbmwdy) i zacznij współpracować z najlepszymi hakerami już dziś!
 
@@ -131,7 +131,7 @@ Możesz **utworzyć darmowe konto** [**tutaj**](https://serpapi.com/users/sign_u
 
 ---
 
-### [8kSec Academy – Szczegółowe kursy z zakresu bezpieczeństwa mobilnego](https://academy.8ksec.io/)
+### [8kSec Academy – Dogłębne kursy bezpieczeństwa mobilnego](https://academy.8ksec.io/)
 
 <figure><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
@@ -149,11 +149,11 @@ https://academy.8ksec.io/
 
 [**WebSec**](https://websec.net) to profesjonalna firma zajmująca się cyberbezpieczeństwem z siedzibą w **Amsterdamie**, która pomaga **chronić** firmy **na całym świecie** przed najnowszymi zagrożeniami w dziedzinie cyberbezpieczeństwa, oferując **usługi ofensywne** z **nowoczesnym** podejściem.
 
-WebSec to międzynarodowa firma zajmująca się bezpieczeństwem z biurami w Amsterdamie i Wyoming. Oferują **wszystko w jednym** usługi bezpieczeństwa, co oznacza, że robią wszystko; Pentesting, **Audyty** Bezpieczeństwa, Szkolenia w zakresie świadomości, Kampanie Phishingowe, Przegląd Kodów, Rozwój Exploitów, Outsourcing Ekspertów ds. Bezpieczeństwa i wiele więcej.
+WebSec to międzynarodowa firma zajmująca się bezpieczeństwem z biurami w Amsterdamie i Wyoming. Oferują **wszystko w jednym** usługi bezpieczeństwa, co oznacza, że robią wszystko; Pentesting, **Audyty** Bezpieczeństwa, Szkolenia w zakresie Świadomości, Kampanie Phishingowe, Przegląd Kodów, Rozwój Exploitów, Outsourcing Ekspertów ds. Bezpieczeństwa i wiele więcej.
 
 Kolejną fajną rzeczą w WebSec jest to, że w przeciwieństwie do średniej w branży, WebSec jest **bardzo pewny swoich umiejętności**, do tego stopnia, że **gwarantują najlepsze wyniki jakościowe**, jak stwierdzają na swojej stronie "**Jeśli nie możemy tego zhakować, nie płacisz!**". Aby uzyskać więcej informacji, zajrzyj na ich [**stronę**](https://websec.net/en/) i [**blog**](https://websec.net/blog/)!
 
-Oprócz powyższego, WebSec jest również **zaangażowanym wsparciem dla HackTricks.**
+Oprócz powyższego, WebSec jest również **zaangażowanym wsparciem HackTricks.**
 
 {{#ref}}
 https://www.youtube.com/watch?v=Zq2JycGDCPM
@@ -180,7 +180,7 @@ https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons
 
 <figure><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
 
-Last Tower Solutions dostarcza specjalistyczne usługi w zakresie cyberbezpieczeństwa dla instytucji **Edukacyjnych** i **FinTech**, koncentrując się na **testach penetracyjnych, ocenach bezpieczeństwa w chmurze** oraz **gotowości do zgodności** (SOC 2, PCI-DSS, NIST). Nasz zespół składa się z **profesjonalistów certyfikowanych OSCP i CISSP**, którzy wnoszą głęboką wiedzę techniczną i standardy branżowe do każdego zlecenia.
+Last Tower Solutions dostarcza specjalistyczne usługi w zakresie cyberbezpieczeństwa dla instytucji **Edukacyjnych** i **FinTech**, koncentrując się na **testach penetracyjnych, ocenach bezpieczeństwa w chmurze** oraz **gotowości do zgodności** (SOC 2, PCI-DSS, NIST). Nasz zespół składa się z **profesjonalistów z certyfikatami OSCP i CISSP**, którzy wnoszą głęboką wiedzę techniczną i standardy branżowe do każdego zlecenia.
 
 Przechodzimy poza automatyczne skany, oferując **ręczne testy oparte na wywiadzie**, dostosowane do środowisk o wysokim ryzyku. Od zabezpieczania rekordów studentów po ochronę transakcji finansowych, pomagamy organizacjom bronić tego, co najważniejsze.
 
@@ -204,6 +204,6 @@ welcome/hacktricks-values-and-faq.md
 
 ## Statystyki Github
 
-![HackTricks Github Stats](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
+![Statystyki Github HackTricks](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
 
 {{#include ./banners/hacktricks-training.md}}
