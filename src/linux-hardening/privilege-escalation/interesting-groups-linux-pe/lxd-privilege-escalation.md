@@ -50,7 +50,7 @@ lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=t
 ```
 > [!CAUTION]
 > Eğer bu hatayı _**Hata: Depo havuzu bulunamadı. Lütfen yeni bir depo havuzu oluşturun**_\
-> bulursanız, **`lxd init`** komutunu çalıştırın ve tüm seçenekleri varsayılan olarak ayarlayın. Ardından **önceki** komutlar grubunu **tekrar** edin
+> bulursanız, **`lxd init`** komutunu çalıştırın ve tüm seçenekleri varsayılan olarak ayarlayın. Ardından **önceki** komutlar grubunu **tekrar** edin.
 
 Sonunda konteyneri çalıştırabilir ve root alabilirsiniz:
 ```bash
