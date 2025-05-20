@@ -65,7 +65,7 @@ https://www.rootedcon.com/
 
 **Intigriti** è la **piattaforma di hacking etico e bug bounty numero 1 in Europa.**
 
-**Suggerimento bug bounty**: **iscriviti** a **Intigriti**, una piattaforma premium di **bug bounty creata da hacker, per hacker**! Unisciti a noi su [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) oggi e inizia a guadagnare ricompense fino a **$100,000**!
+**Suggerimento bug bounty**: **iscriviti** a **Intigriti**, una premium **piattaforma di bug bounty creata da hacker, per hacker**! Unisciti a noi su [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) oggi e inizia a guadagnare ricompense fino a **$100,000**!
 
 {{#ref}}
 https://go.intigriti.com/hacktricks
@@ -135,7 +135,7 @@ Puoi **creare un account gratuito** [**qui**](https://serpapi.com/users/sign_up)
 
 <figure><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Impara le tecnologie e le competenze necessarie per eseguire ricerche sulle vulnerabilità, penetration testing e reverse engineering per proteggere le applicazioni e i dispositivi mobili. **Diventa esperto in sicurezza iOS e Android** attraverso i nostri corsi on-demand e **ottieni una certificazione**:
+Impara le tecnologie e le competenze necessarie per eseguire ricerche sulle vulnerabilità, penetration testing e reverse engineering per proteggere le applicazioni e i dispositivi mobili. **Padroneggia la sicurezza di iOS e Android** attraverso i nostri corsi on-demand e **ottieni una certificazione**:
 
 {{#ref}}
 https://academy.8ksec.io/
@@ -151,7 +151,7 @@ https://academy.8ksec.io/
 
 WebSec è un'azienda di sicurezza internazionale con uffici ad Amsterdam e Wyoming. Offrono **servizi di sicurezza all-in-one**, il che significa che fanno tutto; Pentesting, **Audit** di Sicurezza, Formazione sulla Consapevolezza, Campagne di Phishing, Revisione del Codice, Sviluppo di Exploit, Outsourcing di Esperti di Sicurezza e molto altro.
 
-Un'altra cosa interessante di WebSec è che, a differenza della media del settore, WebSec è **molto sicura delle proprie competenze**, tanto da **garantire i migliori risultati di qualità**, come dichiarato sul loro sito web "**Se non possiamo hackarlo, non lo paghi!**". Per ulteriori informazioni, dai un'occhiata al loro [**sito web**](https://websec.net/en/) e [**blog**](https://websec.net/blog/)!
+Un'altra cosa interessante di WebSec è che, a differenza della media del settore, WebSec è **molto sicura delle proprie capacità**, tanto da **garantire i migliori risultati di qualità**, come dichiarato sul loro sito web "**Se non possiamo hackarlo, non lo paghi!**". Per ulteriori informazioni, dai un'occhiata al loro [**sito web**](https://websec.net/en/) e [**blog**](https://websec.net/blog/)!
 
 In aggiunta a quanto sopra, WebSec è anche un **sostenitore impegnato di HackTricks.**
 
@@ -182,7 +182,7 @@ https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons
 
 Last Tower Solutions offre servizi di cybersecurity specializzati per istituzioni di **Educazione** e **FinTech**, con un focus su **penetration testing, valutazioni di sicurezza cloud** e **preparazione alla conformità** (SOC 2, PCI-DSS, NIST). Il nostro team include **professionisti certificati OSCP e CISSP**, portando una profonda esperienza tecnica e intuizioni standard del settore in ogni incarico.
 
-Andiamo oltre le scansioni automatizzate con **test manuali, guidati dall'intelligenza**, su misura per ambienti ad alto rischio. Dalla protezione dei registri degli studenti alla protezione delle transazioni finanziarie, aiutiamo le organizzazioni a difendere ciò che conta di più.
+Andiamo oltre le scansioni automatizzate con **test manuali, guidati dall'intelligenza**, adattati a ambienti ad alto rischio. Dalla protezione dei registri degli studenti alla protezione delle transazioni finanziarie, aiutiamo le organizzazioni a difendere ciò che conta di più.
 
 _“Una difesa di qualità richiede di conoscere l'offensiva, forniamo sicurezza attraverso la comprensione.”_
 
@@ -194,7 +194,7 @@ https://www.lasttowersolutions.com/
 
 ---
 
-## Licenza & Dichiarazione di non responsabilità
+## Licenza e Dichiarazione di Non Responsabilità
 
 Controllali in:
 
