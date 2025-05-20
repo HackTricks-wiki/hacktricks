@@ -8,18 +8,21 @@
 
 ### 方法 1
 
-您可以在您的机器上安装这个发行版构建工具：[https://github.com/lxc/distrobuilder ](https://github.com/lxc/distrobuilder)(按照 GitHub 的说明进行操作)：
+您可以从受信任的存储库下载一个 alpine 镜像以供 lxd 使用。Canonical 在他们的网站上发布每日构建：[https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/) 只需从最新构建中获取 **lxd.tar.xz** 和 **rootfs.squashfs**。（目录名称是日期）。
+
+或者，您可以在您的机器上安装这个发行版构建工具：[https://github.com/lxc/distrobuilder](https://github.com/lxc/distrobuilder)（按照 GitHub 的说明进行操作）：
 ```bash
-sudo su
 # Install requirements
 sudo apt update
-sudo apt install -y git golang-go debootstrap rsync gpg squashfs-tools
+sudo apt install -y golang-go gcc debootstrap rsync gpg squashfs-tools git make build-essential libwin-hivex-perl wimtools genisoimage
 
 # Clone repo
+mkdir -p $HOME/go/src/github.com/lxc/
+cd $HOME/go/src/github.com/lxc/
 git clone https://github.com/lxc/distrobuilder
 
 # Make distrobuilder
-cd distrobuilder
+cd ./distrobuilder
 make
 
 # Prepare the creation of alpine
@@ -27,13 +30,10 @@ mkdir -p $HOME/ContainerImages/alpine/
 cd $HOME/ContainerImages/alpine/
 wget https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml
 
-# Create the container
-## Using build-lxd
-sudo $HOME/go/bin/distrobuilder build-lxd alpine.yaml -o image.release=3.18
-## Using build-lxc
-sudo $HOME/go/bin/distrobuilder build-lxc alpine.yaml -o image.release=3.18
+# Create the container - Beware of architecture while compiling locally.
+sudo $HOME/go/bin/distrobuilder build-incus alpine.yaml -o image.release=3.18 -o image.architecture=x86_64
 ```
-上传文件 **lxd.tar.xz** 和 **rootfs.squashfs**，将镜像添加到仓库并创建一个容器：
+上传文件 **incus.tar.xz** （如果从 Canonical 仓库下载，则为 **lxd.tar.xz**）和 **rootfs.squashfs**，将镜像添加到仓库并创建一个容器：
 ```bash
 lxc image import lxd.tar.xz rootfs.squashfs --alias alpine
 
@@ -50,7 +50,7 @@ lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=t
 ```
 > [!CAUTION]
 > 如果您发现此错误 _**错误：未找到存储池。请创建一个新的存储池**_\
-> 运行 **`lxd init`** 并 **重复** 之前的命令块
+> 运行 **`lxd init`** 并将所有选项设置为默认值。然后 **重复** 之前的命令块
 
 最后，您可以执行容器并获取 root：
 ```bash
