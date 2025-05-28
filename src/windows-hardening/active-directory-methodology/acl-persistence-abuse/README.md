@@ -4,13 +4,13 @@
 
 **Questa pagina è principalmente un riepilogo delle tecniche da** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces) **e** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)**. Per ulteriori dettagli, controlla gli articoli originali.**
 
-## BadSuccesor
+## BadSuccessor
 
 {{#ref}}
-BadSuccesor.md
+BadSuccessor.md
 {{#endref}}
 
-## **Diritti GenericAll su un Utente**
+## **Diritti GenericAll su Utente**
 
 Questo privilegio concede a un attaccante il pieno controllo su un account utente target. Una volta confermati i diritti `GenericAll` utilizzando il comando `Get-ObjectAcl`, un attaccante può:
 
@@ -58,7 +58,7 @@ net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domai
 ```
 ## **WriteProperty (Auto-Membership)**
 
-Un privilegio simile, questo consente agli attaccanti di aggiungersi direttamente ai gruppi modificando le proprietà del gruppo se hanno il diritto `WriteProperty` su quei gruppi. La conferma e l'esecuzione di questo privilegio vengono eseguite con:
+Un privilegio simile, questo consente agli attaccanti di aggiungersi direttamente ai gruppi modificando le proprietà del gruppo se hanno il diritto di `WriteProperty` su quei gruppi. La conferma e l'esecuzione di questo privilegio vengono eseguite con:
 ```bash
 Get-ObjectAcl -ResolveGUIDs | ? {$_.objectdn -eq "CN=Domain Admins,CN=Users,DC=offense,DC=local" -and $_.IdentityReference -eq "OFFENSE\spotless"}
 net group "domain admins" spotless /add /domain
@@ -112,17 +112,17 @@ $ADSI.psbase.commitchanges()
 ```
 ## **Replica nel Dominio (DCSync)**
 
-L'attacco DCSync sfrutta specifiche autorizzazioni di replica nel dominio per mimare un Domain Controller e sincronizzare i dati, comprese le credenziali degli utenti. Questa potente tecnica richiede autorizzazioni come `DS-Replication-Get-Changes`, consentendo agli attaccanti di estrarre informazioni sensibili dall'ambiente AD senza accesso diretto a un Domain Controller. [**Scopri di più sull'attacco DCSync qui.**](../dcsync.md)
+L'attacco DCSync sfrutta specifici permessi di replica nel dominio per mimare un Domain Controller e sincronizzare dati, inclusi le credenziali degli utenti. Questa potente tecnica richiede permessi come `DS-Replication-Get-Changes`, consentendo agli attaccanti di estrarre informazioni sensibili dall'ambiente AD senza accesso diretto a un Domain Controller. [**Scopri di più sull'attacco DCSync qui.**](../dcsync.md)
 
 ## Delegazione GPO <a href="#gpo-delegation" id="gpo-delegation"></a>
 
 ### Delegazione GPO
 
-L'accesso delegato per gestire gli Oggetti di Criterio di Gruppo (GPO) può presentare rischi significativi per la sicurezza. Ad esempio, se a un utente come `offense\spotless` vengono delegati i diritti di gestione GPO, potrebbero avere privilegi come **WriteProperty**, **WriteDacl** e **WriteOwner**. Queste autorizzazioni possono essere abusate per scopi malevoli, come identificato utilizzando PowerView: `bash Get-ObjectAcl -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
+L'accesso delegato per gestire gli Oggetti di Criterio di Gruppo (GPO) può presentare rischi significativi per la sicurezza. Ad esempio, se un utente come `offense\spotless` ha diritti di gestione GPO delegati, potrebbe avere privilegi come **WriteProperty**, **WriteDacl** e **WriteOwner**. Questi permessi possono essere abusati per scopi malevoli, come identificato utilizzando PowerView: `bash Get-ObjectAcl -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
 
-### Enumerare le Autorizzazioni GPO
+### Enumerare i Permessi GPO
 
-Per identificare GPO mal configurati, i cmdlet di PowerSploit possono essere concatenati. Questo consente di scoprire i GPO che un utente specifico ha il permesso di gestire: `powershell Get-NetGPO | %{Get-ObjectAcl -ResolveGUIDs -Name $_.Name} | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
+Per identificare GPO mal configurati, i cmdlet di PowerSploit possono essere concatenati. Questo consente di scoprire i GPO che un utente specifico ha permessi per gestire: `powershell Get-NetGPO | %{Get-ObjectAcl -ResolveGUIDs -Name $_.Name} | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
 
 **Computer con una Politica Applicata**: È possibile risolvere quali computer una specifica GPO si applica, aiutando a comprendere l'ambito del potenziale impatto. `powershell Get-NetOU -GUID "{DDC640FF-634A-4442-BC2E-C05EED132F0C}" | % {Get-NetComputer -ADSpath $_}`
 
@@ -157,15 +157,15 @@ Gli aggiornamenti GPO si verificano tipicamente ogni 90 minuti. Per accelerare q
 
 ### Sotto il cofano
 
-Dopo aver ispezionato i Task Pianificati per una data GPO, come la `Misconfigured Policy`, è possibile confermare l'aggiunta di task come `evilTask`. Questi task vengono creati tramite script o strumenti da riga di comando con l'obiettivo di modificare il comportamento del sistema o di elevare i privilegi.
+Dopo aver ispezionato i Compiti Pianificati per una data GPO, come la `Misconfigured Policy`, è possibile confermare l'aggiunta di compiti come `evilTask`. Questi compiti vengono creati tramite script o strumenti da riga di comando con l'obiettivo di modificare il comportamento del sistema o di elevare i privilegi.
 
-La struttura del task, come mostrato nel file di configurazione XML generato da `New-GPOImmediateTask`, delinea le specifiche del task pianificato - inclusi il comando da eseguire e i suoi trigger. Questo file rappresenta come i task pianificati sono definiti e gestiti all'interno delle GPO, fornendo un metodo per eseguire comandi o script arbitrari come parte dell'applicazione delle policy.
+La struttura del compito, come mostrato nel file di configurazione XML generato da `New-GPOImmediateTask`, delinea le specifiche del compito pianificato - inclusi il comando da eseguire e i suoi trigger. Questo file rappresenta come i compiti pianificati sono definiti e gestiti all'interno delle GPO, fornendo un metodo per eseguire comandi o script arbitrari come parte dell'applicazione delle policy.
 
 ### Utenti e Gruppi
 
-Le GPO consentono anche la manipolazione delle appartenenze a utenti e gruppi sui sistemi target. Modificando direttamente i file di policy degli Utenti e dei Gruppi, gli attaccanti possono aggiungere utenti a gruppi privilegiati, come il gruppo locale `administrators`. Questo è possibile attraverso la delega dei permessi di gestione delle GPO, che consente la modifica dei file di policy per includere nuovi utenti o cambiare le appartenenze ai gruppi.
+Le GPO consentono anche la manipolazione delle appartenenze degli utenti e dei gruppi sui sistemi target. Modificando direttamente i file di policy degli Utenti e dei Gruppi, gli attaccanti possono aggiungere utenti a gruppi privilegiati, come il gruppo locale `administrators`. Questo è possibile attraverso la delega dei permessi di gestione delle GPO, che consente la modifica dei file di policy per includere nuovi utenti o cambiare le appartenenze ai gruppi.
 
-Il file di configurazione XML per Utenti e Gruppi delinea come queste modifiche vengono implementate. Aggiungendo voci a questo file, utenti specifici possono essere concessi privilegi elevati sui sistemi interessati. Questo metodo offre un approccio diretto all'elevazione dei privilegi attraverso la manipolazione delle GPO.
+Il file di configurazione XML per Utenti e Gruppi delinea come queste modifiche vengono implementate. Aggiungendo voci a questo file, specifici utenti possono essere concessi privilegi elevati sui sistemi interessati. Questo metodo offre un approccio diretto all'elevazione dei privilegi attraverso la manipolazione delle GPO.
 
 Inoltre, possono essere considerate ulteriori metodologie per eseguire codice o mantenere la persistenza, come sfruttare script di accesso/disconnessione, modificare chiavi di registro per autorun, installare software tramite file .msi o modificare configurazioni di servizio. Queste tecniche forniscono vari modi per mantenere l'accesso e controllare i sistemi target attraverso l'abuso delle GPO.
 
