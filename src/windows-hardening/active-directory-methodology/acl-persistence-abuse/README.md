@@ -4,10 +4,10 @@
 
 **Diese Seite ist hauptsächlich eine Zusammenfassung der Techniken von** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces) **und** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)**. Für weitere Details, siehe die Originalartikel.**
 
-## BadSuccesor
+## BadSuccessor
 
 {{#ref}}
-BadSuccesor.md
+BadSuccessor.md
 {{#endref}}
 
 ## **GenericAll-Rechte auf Benutzer**
@@ -29,7 +29,7 @@ Set-DomainObject -Identity <username> -XOR @{UserAccountControl=4194304}
 
 Dieses Privileg ermöglicht es einem Angreifer, Gruppenmitgliedschaften zu manipulieren, wenn er `GenericAll`-Rechte auf einer Gruppe wie `Domain Admins` hat. Nachdem der Angreifer den distinguished name der Gruppe mit `Get-NetGroup` identifiziert hat, kann er:
 
-- **Sich Selbst zur Domain Admins Gruppe Hinzufügen**: Dies kann über direkte Befehle oder mithilfe von Modulen wie Active Directory oder PowerSploit erfolgen.
+- **Sich Selbst zur Domain-Admins-Gruppe Hinzufügen**: Dies kann über direkte Befehle oder mithilfe von Modulen wie Active Directory oder PowerSploit erfolgen.
 ```bash
 net group "domain admins" spotless /add /domain
 Add-ADGroupMember -Identity "domain admins" -Members spotless
@@ -65,7 +65,7 @@ net group "domain admins" spotless /add /domain
 ```
 ## **ForceChangePassword**
 
-Das Halten des `ExtendedRight` für einen Benutzer für `User-Force-Change-Password` ermöglicht Passwortzurücksetzungen, ohne das aktuelle Passwort zu kennen. Die Überprüfung dieses Rechts und dessen Ausnutzung kann über PowerShell oder alternative Befehlszeilentools erfolgen, die mehrere Methoden zum Zurücksetzen des Passworts eines Benutzers anbieten, einschließlich interaktiver Sitzungen und Einzeiler für nicht-interaktive Umgebungen. Die Befehle reichen von einfachen PowerShell-Aufrufen bis hin zur Verwendung von `rpcclient` auf Linux, was die Vielseitigkeit der Angriffsvektoren demonstriert.
+Das Halten des `ExtendedRight` für einen Benutzer für `User-Force-Change-Password` ermöglicht Passwortzurücksetzungen, ohne das aktuelle Passwort zu kennen. Die Überprüfung dieses Rechts und dessen Ausnutzung kann über PowerShell oder alternative Befehlszeilentools erfolgen, die mehrere Methoden zum Zurücksetzen des Passworts eines Benutzers bieten, einschließlich interaktiver Sitzungen und Einzeiler für nicht-interaktive Umgebungen. Die Befehle reichen von einfachen PowerShell-Aufrufen bis hin zur Verwendung von `rpcclient` auf Linux, was die Vielseitigkeit der Angriffsvektoren demonstriert.
 ```bash
 Get-ObjectAcl -SamAccountName delegate -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}
 Set-DomainUserPassword -Identity delegate -Verbose
@@ -163,11 +163,11 @@ Die Struktur der Aufgabe, wie sie in der XML-Konfigurationsdatei dargestellt ist
 
 ### Benutzer und Gruppen
 
-GPOs ermöglichen auch die Manipulation von Benutzer- und Gruppenmitgliedschaften auf Zielsystemen. Durch das direkte Bearbeiten der Benutzer- und Gruppendateien können Angreifer Benutzer zu privilegierten Gruppen, wie der lokalen `administrators`-Gruppe, hinzufügen. Dies ist durch die Delegation von GPO-Verwaltungsberechtigungen möglich, die die Modifikation von Richtliniendateien erlaubt, um neue Benutzer hinzuzufügen oder Gruppenmitgliedschaften zu ändern.
+GPOs ermöglichen auch die Manipulation von Benutzer- und Gruppenmitgliedschaften auf Zielsystemen. Durch das direkte Bearbeiten der Richtliniendateien für Benutzer und Gruppen können Angreifer Benutzer zu privilegierten Gruppen, wie der lokalen Gruppe `administrators`, hinzufügen. Dies ist durch die Delegation von GPO-Verwaltungsberechtigungen möglich, die die Modifikation von Richtliniendateien erlaubt, um neue Benutzer hinzuzufügen oder Gruppenmitgliedschaften zu ändern.
 
 Die XML-Konfigurationsdatei für Benutzer und Gruppen beschreibt, wie diese Änderungen umgesetzt werden. Durch das Hinzufügen von Einträgen zu dieser Datei können bestimmten Benutzern erhöhte Berechtigungen auf betroffenen Systemen gewährt werden. Diese Methode bietet einen direkten Ansatz zur Eskalation von Berechtigungen durch GPO-Manipulation.
 
-Darüber hinaus können zusätzliche Methoden zur Ausführung von Code oder zur Aufrechterhaltung der Persistenz, wie die Nutzung von Anmelde-/Abmelde-Skripten, die Modifikation von Registrierungsschlüsseln für Autoruns, die Installation von Software über .msi-Dateien oder die Bearbeitung von Dienstkonfigurationen, ebenfalls in Betracht gezogen werden. Diese Techniken bieten verschiedene Möglichkeiten, um den Zugriff aufrechtzuerhalten und Zielsysteme durch den Missbrauch von GPOs zu kontrollieren.
+Darüber hinaus können zusätzliche Methoden zur Ausführung von Code oder zur Aufrechterhaltung der Persistenz, wie die Nutzung von Anmelde-/Abmeldeskripten, die Modifikation von Registrierungsschlüsseln für Autoruns, die Installation von Software über .msi-Dateien oder die Bearbeitung von Dienstkonfigurationen, ebenfalls in Betracht gezogen werden. Diese Techniken bieten verschiedene Möglichkeiten, um den Zugriff aufrechtzuerhalten und Zielsysteme durch den Missbrauch von GPOs zu kontrollieren.
 
 ## Referenzen
 
