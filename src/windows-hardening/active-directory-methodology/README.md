@@ -166,7 +166,7 @@ Regarding [**ASREPRoast**](asreproast.md) you can now find every possible vulner
 
 - You could use the [**CMD to perform a basic recon**](../basic-cmd-for-pentesters.md#domain-info)
 - You can also use [**powershell for recon**](../basic-powershell-for-pentesters/index.html) which will be stealthier
-- You ca also [**use powerview**](../basic-powershell-for-pentesters/powerview.md) to extract more detailed information
+- You can also [**use powerview**](../basic-powershell-for-pentesters/powerview.md) to extract more detailed information
 - Another amazing tool for recon in an active directory is [**BloodHound**](bloodhound.md). It is **not very stealthy** (depending on the collection methods you use), but **if you don't care** about that, you should totally give it a try. Find where users can RDP, find path to other groups, etc.
   - **Other automated AD enumeration tools are:** [**AD Explorer**](bloodhound.md#ad-explorer)**,** [**ADRecon**](bloodhound.md#adrecon)**,** [**Group3r**](bloodhound.md#group3r)**,** [**PingCastle**](bloodhound.md#pingcastle)**.**
 - [**DNS records of the AD**](ad-dns-records.md) as they might contain interesting information.
@@ -322,7 +322,7 @@ Having **WRITE** privilege on an Active Directory object of a remote computer en
 resource-based-constrained-delegation.md
 {{#endref}}
 
-### ACLs Abuse
+### Permissions/ACLs Abuse
 
 The compromised user could have some **interesting privileges over some domain objects** that could let you **move** laterally/**escalate** privileges.
 
