@@ -4,15 +4,15 @@
 
 **Ukurasa huu ni muhtasari wa mbinu kutoka** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces) **na** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)**. Kwa maelezo zaidi, angalia makala asili.**
 
-## BadSuccesor
+## BadSuccessor
 
 {{#ref}}
-BadSuccesor.md
+BadSuccessor.md
 {{#endref}}
 
 ## **GenericAll Rights on User**
 
-Haki hii inampa mshambuliaji udhibiti kamili juu ya akaunti ya mtumiaji wa lengo. Mara haki za `GenericAll` zinapothibitishwa kwa kutumia amri `Get-ObjectAcl`, mshambuliaji anaweza:
+Haki hii inampa mshambuliaji udhibiti kamili juu ya akaunti ya mtumiaji wa lengo. Mara haki za `GenericAll` zinapothibitishwa kwa kutumia amri ya `Get-ObjectAcl`, mshambuliaji anaweza:
 
 - **Kubadilisha Nywila ya Lengo**: Kwa kutumia `net user <username> <password> /domain`, mshambuliaji anaweza kurekebisha nywila ya mtumiaji.
 - **Kerberoasting ya Lengo**: Weka SPN kwenye akaunti ya mtumiaji ili kuifanya iweze kerberoastable, kisha tumia Rubeus na targetedKerberoast.py kutoa na kujaribu kuvunja tiketi za tiketi za kutoa (TGT) hashes.
@@ -46,13 +46,13 @@ Kuwa na haki hizi kwenye kituo cha kompyuta au akaunti ya mtumiaji kunaruhusu:
 
 Ikiwa mtumiaji ana haki za `WriteProperty` kwenye vitu vyote kwa kundi maalum (mfano, `Domain Admins`), wanaweza:
 
-- **Kujiongeza Kwenye Kundi la Domain Admins**: Inaweza kufanywa kwa kuunganisha amri za `net user` na `Add-NetGroupUser`, mbinu hii inaruhusu kupandishwa vyeo ndani ya eneo.
+- **Kujiongeza Kwenye Kundi la Domain Admins**: Inaweza kufanywa kwa kuunganisha amri za `net user` na `Add-NetGroupUser`, mbinu hii inaruhusu kupandisha hadhi ndani ya eneo.
 ```bash
 net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"; net user spotless /domain
 ```
 ## **Self (Self-Membership) on Group**
 
-Hii haki inawawezesha washambuliaji kujiongeza kwenye vikundi maalum, kama `Domain Admins`, kupitia amri zinazoshughulikia uanachama wa kundi moja kwa moja. Kutumia mfuatano wa amri zifuatazo kunaruhusu kujiongeza:
+Haki hii inawawezesha washambuliaji kujiongeza kwenye vikundi maalum, kama `Domain Admins`, kupitia amri zinazoshughulikia uanachama wa kundi moja kwa moja. Kutumia mfuatano wa amri zifuatazo kunaruhusu kujiongeza:
 ```bash
 net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"; net user spotless /domain
 ```
@@ -65,7 +65,7 @@ net group "domain admins" spotless /add /domain
 ```
 ## **ForceChangePassword**
 
-Kushikilia `ExtendedRight` kwa mtumiaji kwa `User-Force-Change-Password` kunaruhusu mabadiliko ya nywila bila kujua nywila ya sasa. Uthibitishaji wa haki hii na matumizi yake yanaweza kufanywa kupitia PowerShell au zana nyingine za mistari ya amri, zikitoa mbinu kadhaa za kubadilisha nywila ya mtumiaji, ikiwa ni pamoja na vikao vya mwingiliano na mistari moja kwa mazingira yasiyo ya mwingiliano. Amri zinatofautiana kutoka kwa matumizi rahisi ya PowerShell hadi kutumia `rpcclient` kwenye Linux, ikionyesha ufanisi wa njia za shambulio.
+Kushikilia `ExtendedRight` kwa mtumiaji kwa `User-Force-Change-Password` kunaruhusu mabadiliko ya nywila bila kujua nywila ya sasa. Uthibitishaji wa haki hii na matumizi yake yanaweza kufanywa kupitia PowerShell au zana nyingine za amri, zikitoa mbinu kadhaa za kubadilisha nywila ya mtumiaji, ikiwa ni pamoja na vikao vya mwingiliano na mistari moja kwa mazingira yasiyo ya mwingiliano. Amri zinatofautiana kutoka kwa mwito rahisi wa PowerShell hadi kutumia `rpcclient` kwenye Linux, ikionyesha ufanisi wa njia za shambulio.
 ```bash
 Get-ObjectAcl -SamAccountName delegate -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}
 Set-DomainUserPassword -Identity delegate -Verbose
@@ -84,7 +84,7 @@ Get-ObjectAcl -ResolveGUIDs | ? {$_.objectdn -eq "CN=Domain Admins,CN=Users,DC=o
 Set-DomainObjectOwner -Identity S-1-5-21-2552734371-813931464-1050690807-512 -OwnerIdentity "spotless" -Verbose
 Set-DomainObjectOwner -Identity Herman -OwnerIdentity nico
 ```
-## **GenericWrite kwenye Mtumiaji**
+## **GenericWrite on User**
 
 Ruhusa hii inamruhusu mshambuliaji kubadilisha mali za mtumiaji. Kwa hakika, kwa ufikiaji wa `GenericWrite`, mshambuliaji anaweza kubadilisha njia ya skripti ya kuingia ya mtumiaji ili kutekeleza skripti mbaya wakati wa kuingia kwa mtumiaji. Hii inafikiwa kwa kutumia amri ya `Set-ADObject` kuboresha mali ya `scriptpath` ya mtumiaji anaye target ili kuelekeza kwenye skripti ya mshambuliaji.
 ```bash
@@ -102,7 +102,7 @@ Remove-DomainGroupMember -Credential $creds -Identity "Group Name" -Members 'use
 ```
 ## **WriteDACL + WriteOwner**
 
-Kuwa na kitu cha AD na kuwa na ruhusa za `WriteDACL` juu yake inamuwezesha mshambuliaji kujipatia ruhusa za `GenericAll` juu ya kitu hicho. Hii inafanywa kupitia udanganyifu wa ADSI, ikiruhusu udhibiti kamili juu ya kitu hicho na uwezo wa kubadilisha uanachama wake wa kikundi. Licha ya hili, kuna mipaka wakati wa kujaribu kutumia ruhusa hizi kwa kutumia cmdlets za moduli ya Active Directory `Set-Acl` / `Get-Acl`.
+Kuwa na kitu cha AD na kuwa na ruhusa za `WriteDACL` juu yake kunamwezesha mshambuliaji kujipatia ruhusa za `GenericAll` juu ya kitu hicho. Hii inafanywa kupitia udanganyifu wa ADSI, ikiruhusu udhibiti kamili juu ya kitu hicho na uwezo wa kubadilisha uanachama wake wa kikundi. Licha ya hili, kuna mipaka wakati wa kujaribu kutumia ruhusa hizi kwa kutumia cmdlets za moduli ya Active Directory `Set-Acl` / `Get-Acl`.
 ```bash
 $ADSI = [ADSI]"LDAP://CN=test,CN=Users,DC=offense,DC=local"
 $IdentityReference = (New-Object System.Security.Principal.NTAccount("spotless")).Translate([System.Security.Principal.SecurityIdentifier])
@@ -112,7 +112,7 @@ $ADSI.psbase.commitchanges()
 ```
 ## **Replication on the Domain (DCSync)**
 
-Shambulio la DCSync linatumia ruhusa maalum za kuiga kwenye eneo la kikoa ili kuiga Kituo cha Kikoa na kusawazisha data, ikiwa ni pamoja na akidi za watumiaji. Mbinu hii yenye nguvu inahitaji ruhusa kama `DS-Replication-Get-Changes`, ikiruhusu washambuliaji kutoa taarifa nyeti kutoka kwenye mazingira ya AD bila kupata moja kwa moja kwenye Kituo cha Kikoa. [**Jifunze zaidi kuhusu shambulio la DCSync hapa.**](../dcsync.md)
+Shambulio la DCSync linatumia ruhusa maalum za ureplication kwenye domain ili kuiga Kituo cha Domain na kusawazisha data, ikiwa ni pamoja na akidi za watumiaji. Mbinu hii yenye nguvu inahitaji ruhusa kama `DS-Replication-Get-Changes`, ikiruhusu washambuliaji kutoa taarifa nyeti kutoka kwenye mazingira ya AD bila kupata moja kwa moja kwenye Kituo cha Domain. [**Jifunze zaidi kuhusu shambulio la DCSync hapa.**](../dcsync.md)
 
 ## GPO Delegation <a href="#gpo-delegation" id="gpo-delegation"></a>
 
@@ -134,7 +134,7 @@ Unaweza pia kutumia zana [**GPOHound**](https://github.com/cogiceo/GPOHound) ili
 
 ### Abuse GPO - New-GPOImmediateTask
 
-GPO zilizo na mipangilio isiyo sahihi zinaweza kutumika vibaya kutekeleza msimbo, kwa mfano, kwa kuunda kazi ya ratiba ya papo hapo. Hii inaweza kufanywa kuongeza mtumiaji kwenye kundi la wasimamizi wa ndani kwenye mashine zilizoathiriwa, ikiongeza sana ruhusa:
+GPO zilizo na mipangilio isiyo sahihi zinaweza kutumika vibaya ili kutekeleza msimbo, kwa mfano, kwa kuunda kazi ya ratiba ya papo hapo. Hii inaweza kufanywa kuongeza mtumiaji kwenye kundi la wasimamizi wa ndani kwenye mashine zilizoathiriwa, ikiongeza sana ruhusa:
 ```bash
 New-GPOImmediateTask -TaskName evilTask -Command cmd -CommandArguments "/c net localgroup administrators spotless /add" -GPODisplayName "Misconfigured Policy" -Verbose -Force
 ```
@@ -153,7 +153,7 @@ SharpGPOAbuse inatoa njia ya kutumia GPO zilizopo kwa kuongeza kazi au kubadilis
 ```
 ### Kulazimisha Sasisho la Sera
 
-Sasisho la GPO kawaida hufanyika kila dakika 90. Ili kuharakisha mchakato huu, hasa baada ya kutekeleza mabadiliko, amri ya `gpupdate /force` inaweza kutumika kwenye kompyuta lengwa kulazimisha sasisho la sera mara moja. Amri hii inahakikisha kwamba mabadiliko yoyote kwenye GPO yanatekelezwa bila kusubiri mzunguko wa sasisho la moja kwa moja unaofuata.
+Sasisho la GPO kawaida hufanyika kila dakika 90. Ili kuharakisha mchakato huu, hasa baada ya kutekeleza mabadiliko, amri ya `gpupdate /force` inaweza kutumika kwenye kompyuta lengwa kulazimisha sasisho la sera mara moja. Amri hii inahakikisha kwamba mabadiliko yoyote kwenye GPO yanatumika bila kusubiri mzunguko wa sasisho la kiotomatiki unaofuata.
 
 ### Chini ya Mfuniko
 
@@ -161,13 +161,13 @@ Wakati wa ukaguzi wa Kazi za Ratiba kwa GPO fulani, kama vile `Misconfigured Pol
 
 Muundo wa kazi, kama inavyoonyeshwa katika faili ya usanifu wa XML iliyozalishwa na `New-GPOImmediateTask`, inaelezea maelezo ya kazi iliyopangwa - ikiwa ni pamoja na amri itakayotekelezwa na vichocheo vyake. Faili hii inawakilisha jinsi kazi zilizopangwa zinavyofafanuliwa na kusimamiwa ndani ya GPOs, ikitoa njia ya kutekeleza amri au skripti zisizo na mipaka kama sehemu ya utekelezaji wa sera.
 
-### Watumiaji na Vikundi
+### Watumiaji na Makundi
 
-GPOs pia zinaruhusu kubadilisha uanachama wa watumiaji na vikundi kwenye mifumo lengwa. Kwa kuhariri faili za sera za Watumiaji na Vikundi moja kwa moja, washambuliaji wanaweza kuongeza watumiaji kwenye vikundi vyenye mamlaka, kama vile kundi la `administrators` la ndani. Hii inawezekana kupitia ugawaji wa ruhusa za usimamizi wa GPO, ambayo inaruhusu kubadilisha faili za sera ili kujumuisha watumiaji wapya au kubadilisha uanachama wa vikundi.
+GPOs pia huruhusu upotoshaji wa uanachama wa watumiaji na makundi kwenye mifumo lengwa. Kwa kuhariri faili za sera za Watumiaji na Makundi moja kwa moja, washambuliaji wanaweza kuongeza watumiaji kwenye makundi yenye mamlaka, kama vile kundi la `administrators` la ndani. Hii inawezekana kupitia ugawaji wa ruhusa za usimamizi wa GPO, ambayo inaruhusu mabadiliko ya faili za sera ili kujumuisha watumiaji wapya au kubadilisha uanachama wa makundi.
 
-Faili ya usanifu wa XML kwa Watumiaji na Vikundi inaelezea jinsi mabadiliko haya yanavyotekelezwa. Kwa kuongeza entries kwenye faili hii, watumiaji maalum wanaweza kupewa mamlaka ya juu kwenye mifumo iliyoathiriwa. Njia hii inatoa mbinu ya moja kwa moja ya kuongeza mamlaka kupitia kubadilisha GPO.
+Faili ya usanifu wa XML kwa Watumiaji na Makundi inaelezea jinsi mabadiliko haya yanavyotekelezwa. Kwa kuongeza entries kwenye faili hii, watumiaji maalum wanaweza kupewa mamlaka ya juu kwenye mifumo iliyoathiriwa. Njia hii inatoa mbinu ya moja kwa moja ya kuongeza mamlaka kupitia upotoshaji wa GPO.
 
-Zaidi ya hayo, mbinu za ziada za kutekeleza msimbo au kudumisha kudumu, kama vile kutumia skripti za kuingia/kuondoka, kubadilisha funguo za rejista kwa ajili ya kuanzisha kiotomatiki, kufunga programu kupitia faili za .msi, au kuhariri mipangilio ya huduma, zinaweza pia kuzingatiwa. Mbinu hizi zinatoa njia mbalimbali za kudumisha ufikiaji na kudhibiti mifumo lengwa kupitia matumizi mabaya ya GPOs.
+Zaidi ya hayo, mbinu za ziada za kutekeleza msimbo au kudumisha kudumu, kama vile kutumia skripti za kuingia/kuondoka, kubadilisha funguo za rejista za kuanzisha, kufunga programu kupitia faili za .msi, au kuhariri usanifu wa huduma, zinaweza pia kuzingatiwa. Mbinu hizi zinatoa njia mbalimbali za kudumisha ufikiaji na kudhibiti mifumo lengwa kupitia matumizi mabaya ya GPOs.
 
 ## Marejeleo
 
