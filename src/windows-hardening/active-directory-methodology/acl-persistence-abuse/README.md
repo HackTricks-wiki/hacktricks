@@ -4,10 +4,10 @@
 
 **This page is mostly a summary of the techniques from** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces) **and** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)**. For more details, check the original articles.**
 
-## BadSuccesor
+## BadSuccessor
 
 {{#ref}}
-BadSuccesor.md
+BadSuccessor.md
 {{#endref}}
 
 ## **GenericAll Rights on User**
