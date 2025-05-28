@@ -4,12 +4,18 @@
 
 **Esta página é principalmente um resumo das técnicas de** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces) **e** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)**. Para mais detalhes, consulte os artigos originais.**
 
-## **Direitos GenericAll em Usuário**
+## BadSuccesor
+
+{{#ref}}
+BadSuccesor.md
+{{#endref}}
+
+## **Direitos GenericAll no Usuário**
 
 Este privilégio concede a um atacante controle total sobre uma conta de usuário alvo. Uma vez que os direitos `GenericAll` são confirmados usando o comando `Get-ObjectAcl`, um atacante pode:
 
 - **Alterar a Senha do Alvo**: Usando `net user <username> <password> /domain`, o atacante pode redefinir a senha do usuário.
-- **Kerberoasting Direcionado**: Atribua um SPN à conta do usuário para torná-la kerberoastable, depois use Rubeus e targetedKerberoast.py para extrair e tentar quebrar os hashes do ticket-granting ticket (TGT).
+- **Kerberoasting Direcionado**: Atribuir um SPN à conta do usuário para torná-la kerberoastable, em seguida, usar Rubeus e targetedKerberoast.py para extrair e tentar quebrar os hashes do ticket-granting ticket (TGT).
 ```bash
 Set-DomainObject -Credential $creds -Identity <username> -Set @{serviceprincipalname="fake/NOTHING"}
 .\Rubeus.exe kerberoast /user:<username> /nowrap
@@ -19,7 +25,7 @@ Set-DomainObject -Credential $creds -Identity <username> -Clear serviceprincipal
 ```bash
 Set-DomainObject -Identity <username> -XOR @{UserAccountControl=4194304}
 ```
-## **Direitos GenericAll no Grupo**
+## **Direitos GenericAll em Grupo**
 
 Esse privilégio permite que um atacante manipule as associações de grupo se tiver direitos `GenericAll` em um grupo como `Domain Admins`. Após identificar o nome distinto do grupo com `Get-NetGroup`, o atacante pode:
 
@@ -44,7 +50,7 @@ Se um usuário tiver direitos de `WriteProperty` em todos os objetos de um grupo
 ```bash
 net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"; net user spotless /domain
 ```
-## **Auto (Auto-Membresia) em Grupo**
+## **Self (Auto-Membresia) em Grupo**
 
 Esse privilégio permite que atacantes se adicionem a grupos específicos, como `Domain Admins`, por meio de comandos que manipulam diretamente a membresia do grupo. Usar a seguinte sequência de comandos permite a auto-adição:
 ```bash
@@ -52,7 +58,7 @@ net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domai
 ```
 ## **WriteProperty (Auto-Membresia)**
 
-Um privilégio semelhante, isso permite que atacantes se adicionem diretamente a grupos modificando as propriedades do grupo se tiverem o direito de `WriteProperty` sobre esses grupos. A confirmação e execução desse privilégio são realizadas com:
+Um privilégio semelhante, isso permite que atacantes se adicionem diretamente a grupos modificando as propriedades do grupo se tiverem o direito de `WriteProperty` nesses grupos. A confirmação e execução desse privilégio são realizadas com:
 ```bash
 Get-ObjectAcl -ResolveGUIDs | ? {$_.objectdn -eq "CN=Domain Admins,CN=Users,DC=offense,DC=local" -and $_.IdentityReference -eq "OFFENSE\spotless"}
 net group "domain admins" spotless /add /domain
@@ -72,7 +78,7 @@ rpcclient -U KnownUsername 10.10.10.192
 ```
 ## **WriteOwner em Grupo**
 
-Se um atacante descobrir que possui direitos de `WriteOwner` sobre um grupo, ele pode alterar a propriedade do grupo para si mesmo. Isso é particularmente impactante quando o grupo em questão é `Domain Admins`, pois mudar a propriedade permite um controle mais amplo sobre os atributos e a membresia do grupo. O processo envolve identificar o objeto correto via `Get-ObjectAcl` e, em seguida, usar `Set-DomainObjectOwner` para modificar o proprietário, seja por SID ou nome.
+Se um atacante descobrir que possui direitos de `WriteOwner` sobre um grupo, ele pode mudar a propriedade do grupo para si mesmo. Isso é particularmente impactante quando o grupo em questão é `Domain Admins`, pois mudar a propriedade permite um controle mais amplo sobre os atributos e a membresia do grupo. O processo envolve identificar o objeto correto via `Get-ObjectAcl` e, em seguida, usar `Set-DomainObjectOwner` para modificar o proprietário, seja por SID ou nome.
 ```bash
 Get-ObjectAcl -ResolveGUIDs | ? {$_.objectdn -eq "CN=Domain Admins,CN=Users,DC=offense,DC=local" -and $_.IdentityReference -eq "OFFENSE\spotless"}
 Set-DomainObjectOwner -Identity S-1-5-21-2552734371-813931464-1050690807-512 -OwnerIdentity "spotless" -Verbose
@@ -124,7 +130,9 @@ Para identificar GPOs mal configurados, os cmdlets do PowerSploit podem ser enca
 
 **OUs com uma Política Dada Aplicada**: Identificar unidades organizacionais (OUs) afetadas por uma política dada pode ser feito usando `Get-DomainOU`.
 
-### Abusar GPO - New-GPOImmediateTask
+Você também pode usar a ferramenta [**GPOHound**](https://github.com/cogiceo/GPOHound) para enumerar GPOs e encontrar problemas neles.
+
+### Abusar de GPO - New-GPOImmediateTask
 
 GPOs mal configurados podem ser explorados para executar código, por exemplo, criando uma tarefa agendada imediata. Isso pode ser feito para adicionar um usuário ao grupo de administradores locais em máquinas afetadas, elevando significativamente os privilégios:
 ```bash
@@ -149,13 +157,13 @@ Atualizações de GPO normalmente ocorrem a cada 90 minutos. Para acelerar esse 
 
 ### Nos Bastidores
 
-Ao inspecionar as Tarefas Agendadas para uma GPO específica, como a `Misconfigured Policy`, a adição de tarefas como `evilTask` pode ser confirmada. Essas tarefas são criadas através de scripts ou ferramentas de linha de comando com o objetivo de modificar o comportamento do sistema ou escalar privilégios.
+Ao inspecionar as Tarefas Agendadas para uma determinada GPO, como a `Misconfigured Policy`, a adição de tarefas como `evilTask` pode ser confirmada. Essas tarefas são criadas através de scripts ou ferramentas de linha de comando com o objetivo de modificar o comportamento do sistema ou escalar privilégios.
 
 A estrutura da tarefa, conforme mostrado no arquivo de configuração XML gerado pelo `New-GPOImmediateTask`, descreve os detalhes da tarefa agendada - incluindo o comando a ser executado e seus gatilhos. Este arquivo representa como as tarefas agendadas são definidas e gerenciadas dentro das GPOs, fornecendo um método para executar comandos ou scripts arbitrários como parte da aplicação de políticas.
 
 ### Usuários e Grupos
 
-As GPOs também permitem a manipulação de membros de usuários e grupos nos sistemas alvo. Ao editar diretamente os arquivos de política de Usuários e Grupos, os atacantes podem adicionar usuários a grupos privilegiados, como o grupo local `administrators`. Isso é possível através da delegação de permissões de gerenciamento de GPO, que permite a modificação dos arquivos de política para incluir novos usuários ou alterar as associações de grupos.
+As GPOs também permitem a manipulação de membros de usuários e grupos nos sistemas alvo. Ao editar os arquivos de política de Usuários e Grupos diretamente, os atacantes podem adicionar usuários a grupos privilegiados, como o grupo local `administrators`. Isso é possível através da delegação de permissões de gerenciamento de GPO, que permite a modificação dos arquivos de política para incluir novos usuários ou alterar a filiação a grupos.
 
 O arquivo de configuração XML para Usuários e Grupos descreve como essas mudanças são implementadas. Ao adicionar entradas a este arquivo, usuários específicos podem receber privilégios elevados em sistemas afetados. Este método oferece uma abordagem direta para escalonamento de privilégios através da manipulação de GPO.
 
