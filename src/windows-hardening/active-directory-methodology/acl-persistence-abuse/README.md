@@ -4,10 +4,10 @@
 
 **Esta página é principalmente um resumo das técnicas de** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces) **e** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)**. Para mais detalhes, consulte os artigos originais.**
 
-## BadSuccesor
+## BadSuccessor
 
 {{#ref}}
-BadSuccesor.md
+BadSuccessor.md
 {{#endref}}
 
 ## **Direitos GenericAll no Usuário**
@@ -44,21 +44,21 @@ Ter esses privilégios em um objeto de computador ou em uma conta de usuário pe
 
 ## **WriteProperty on Group**
 
-Se um usuário tiver direitos de `WriteProperty` em todos os objetos de um grupo específico (por exemplo, `Domain Admins`), ele pode:
+Se um usuário tiver direitos `WriteProperty` em todos os objetos de um grupo específico (por exemplo, `Domain Admins`), ele pode:
 
 - **Add Themselves to the Domain Admins Group**: Atingível através da combinação dos comandos `net user` e `Add-NetGroupUser`, este método permite a escalada de privilégios dentro do domínio.
 ```bash
 net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"; net user spotless /domain
 ```
-## **Self (Auto-Membresia) em Grupo**
+## **Auto (Auto-Membresia) em Grupo**
 
-Esse privilégio permite que atacantes se adicionem a grupos específicos, como `Domain Admins`, por meio de comandos que manipulam diretamente a membresia do grupo. Usar a seguinte sequência de comandos permite a auto-adição:
+Esse privilégio permite que atacantes se adicionem a grupos específicos, como `Domain Admins`, por meio de comandos que manipulam a membresia do grupo diretamente. Usar a seguinte sequência de comandos permite a auto-adição:
 ```bash
 net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"; net user spotless /domain
 ```
 ## **WriteProperty (Auto-Membresia)**
 
-Um privilégio semelhante, isso permite que atacantes se adicionem diretamente a grupos modificando as propriedades do grupo se tiverem o direito de `WriteProperty` nesses grupos. A confirmação e execução desse privilégio são realizadas com:
+Um privilégio semelhante, isso permite que atacantes se adicionem diretamente a grupos modificando as propriedades do grupo se tiverem o direito de `WriteProperty` sobre esses grupos. A confirmação e execução desse privilégio são realizadas com:
 ```bash
 Get-ObjectAcl -ResolveGUIDs | ? {$_.objectdn -eq "CN=Domain Admins,CN=Users,DC=offense,DC=local" -and $_.IdentityReference -eq "OFFENSE\spotless"}
 net group "domain admins" spotless /add /domain
@@ -112,7 +112,7 @@ $ADSI.psbase.commitchanges()
 ```
 ## **Replicação no Domínio (DCSync)**
 
-O ataque DCSync aproveita permissões específicas de replicação no domínio para imitar um Controlador de Domínio e sincronizar dados, incluindo credenciais de usuário. Essa técnica poderosa requer permissões como `DS-Replication-Get-Changes`, permitindo que atacantes extraiam informações sensíveis do ambiente AD sem acesso direto a um Controlador de Domínio. [**Saiba mais sobre o ataque DCSync aqui.**](../dcsync.md)
+O ataque DCSync aproveita permissões específicas de replicação no domínio para imitar um Controlador de Domínio e sincronizar dados, incluindo credenciais de usuários. Essa técnica poderosa requer permissões como `DS-Replication-Get-Changes`, permitindo que atacantes extraiam informações sensíveis do ambiente AD sem acesso direto a um Controlador de Domínio. [**Saiba mais sobre o ataque DCSync aqui.**](../dcsync.md)
 
 ## Delegação de GPO <a href="#gpo-delegation" id="gpo-delegation"></a>
 
@@ -132,7 +132,7 @@ Para identificar GPOs mal configurados, os cmdlets do PowerSploit podem ser enca
 
 Você também pode usar a ferramenta [**GPOHound**](https://github.com/cogiceo/GPOHound) para enumerar GPOs e encontrar problemas neles.
 
-### Abusar de GPO - New-GPOImmediateTask
+### Abusar GPO - New-GPOImmediateTask
 
 GPOs mal configurados podem ser explorados para executar código, por exemplo, criando uma tarefa agendada imediata. Isso pode ser feito para adicionar um usuário ao grupo de administradores locais em máquinas afetadas, elevando significativamente os privilégios:
 ```bash
@@ -157,13 +157,13 @@ Atualizações de GPO normalmente ocorrem a cada 90 minutos. Para acelerar esse 
 
 ### Nos Bastidores
 
-Ao inspecionar as Tarefas Agendadas para uma determinada GPO, como a `Misconfigured Policy`, a adição de tarefas como `evilTask` pode ser confirmada. Essas tarefas são criadas através de scripts ou ferramentas de linha de comando com o objetivo de modificar o comportamento do sistema ou escalar privilégios.
+Ao inspecionar as Tarefas Agendadas para uma determinada GPO, como a `Política Mal Configurada`, a adição de tarefas como `evilTask` pode ser confirmada. Essas tarefas são criadas através de scripts ou ferramentas de linha de comando com o objetivo de modificar o comportamento do sistema ou escalar privilégios.
 
-A estrutura da tarefa, conforme mostrado no arquivo de configuração XML gerado pelo `New-GPOImmediateTask`, descreve os detalhes da tarefa agendada - incluindo o comando a ser executado e seus gatilhos. Este arquivo representa como as tarefas agendadas são definidas e gerenciadas dentro das GPOs, fornecendo um método para executar comandos ou scripts arbitrários como parte da aplicação de políticas.
+A estrutura da tarefa, conforme mostrado no arquivo de configuração XML gerado pelo `New-GPOImmediateTask`, descreve os detalhes da tarefa agendada - incluindo o comando a ser executado e seus gatilhos. Este arquivo representa como as tarefas agendadas são definidas e gerenciadas dentro das GPOs, fornecendo um método para executar comandos ou scripts arbitrários como parte da aplicação da política.
 
 ### Usuários e Grupos
 
-As GPOs também permitem a manipulação de membros de usuários e grupos nos sistemas alvo. Ao editar os arquivos de política de Usuários e Grupos diretamente, os atacantes podem adicionar usuários a grupos privilegiados, como o grupo local `administrators`. Isso é possível através da delegação de permissões de gerenciamento de GPO, que permite a modificação dos arquivos de política para incluir novos usuários ou alterar a filiação a grupos.
+As GPOs também permitem a manipulação de membros de usuários e grupos nos sistemas alvo. Ao editar os arquivos de política de Usuários e Grupos diretamente, os atacantes podem adicionar usuários a grupos privilegiados, como o grupo local `administrators`. Isso é possível através da delegação de permissões de gerenciamento de GPO, que permite a modificação dos arquivos de política para incluir novos usuários ou alterar as associações de grupos.
 
 O arquivo de configuração XML para Usuários e Grupos descreve como essas mudanças são implementadas. Ao adicionar entradas a este arquivo, usuários específicos podem receber privilégios elevados em sistemas afetados. Este método oferece uma abordagem direta para escalonamento de privilégios através da manipulação de GPO.
 
