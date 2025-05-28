@@ -241,6 +241,7 @@
   - [Windows C Payloads](windows-hardening/windows-local-privilege-escalation/windows-c-payloads.md)
 - [Active Directory Methodology](windows-hardening/active-directory-methodology/README.md)
   - [Abusing Active Directory ACLs/ACEs](windows-hardening/active-directory-methodology/acl-persistence-abuse/README.md)
+    - [BadSuccessor](windows-hardening/active-directory-methodology/acl-persistence-abuse/BadSuccessor.md)
     - [Shadow Credentials](windows-hardening/active-directory-methodology/acl-persistence-abuse/shadow-credentials.md)
   - [AD Certificates](windows-hardening/active-directory-methodology/ad-certificates/README.md)
     - [AD CS Account Persistence](windows-hardening/active-directory-methodology/ad-certificates/account-persistence.md)
