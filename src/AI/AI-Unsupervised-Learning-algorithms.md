@@ -2,36 +2,35 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-
 ## Apprentissage non supervisé
 
-L'apprentissage non supervisé est un type d'apprentissage automatique où le modèle est entraîné sur des données sans réponses étiquetées. L'objectif est de trouver des motifs, des structures ou des relations au sein des données. Contrairement à l'apprentissage supervisé, où le modèle apprend à partir d'exemples étiquetés, les algorithmes d'apprentissage non supervisé travaillent avec des données non étiquetées. L'apprentissage non supervisé est souvent utilisé pour des tâches telles que le regroupement, la réduction de dimensionnalité et la détection d'anomalies. Il peut aider à découvrir des motifs cachés dans les données, à regrouper des éléments similaires ou à réduire la complexité des données tout en préservant ses caractéristiques essentielles.
-
+L'apprentissage non supervisé est un type d'apprentissage automatique où le modèle est entraîné sur des données sans réponses étiquetées. L'objectif est de trouver des motifs, des structures ou des relations au sein des données. Contrairement à l'apprentissage supervisé, où le modèle apprend à partir d'exemples étiquetés, les algorithmes d'apprentissage non supervisé travaillent avec des données non étiquetées.  
+L'apprentissage non supervisé est souvent utilisé pour des tâches telles que le regroupement, la réduction de dimensionnalité et la détection d'anomalies. Il peut aider à découvrir des motifs cachés dans les données, à regrouper des éléments similaires ou à réduire la complexité des données tout en préservant ses caractéristiques essentielles.
 
 ### Regroupement K-Means
 
-K-Means est un algorithme de regroupement basé sur les centroïdes qui partitionne les données en K clusters en assignant chaque point au centre de cluster le plus proche. L'algorithme fonctionne comme suit :
-1. **Initialisation** : Choisissez K centres de cluster initiaux (centroïdes), souvent aléatoirement ou via des méthodes plus intelligentes comme k-means++
-2. **Assignation** : Assignez chaque point de données au centroïde le plus proche en fonction d'une métrique de distance (par exemple, distance euclidienne).
-3. **Mise à jour** : Recalculez les centroïdes en prenant la moyenne de tous les points de données assignés à chaque cluster.
-4. **Répéter** : Les étapes 2–3 sont répétées jusqu'à ce que les assignations de clusters se stabilisent (les centroïdes ne se déplacent plus de manière significative).
+K-Means est un algorithme de regroupement basé sur les centroïdes qui partitionne les données en K clusters en assignant chaque point au centre de cluster le plus proche. L'algorithme fonctionne comme suit :  
+1. **Initialisation** : Choisir K centres de cluster initiaux (centroïdes), souvent aléatoirement ou via des méthodes plus intelligentes comme k-means++  
+2. **Affectation** : Assigner chaque point de données au centroïde le plus proche en fonction d'une métrique de distance (par exemple, la distance euclidienne).  
+3. **Mise à jour** : Recalculer les centroïdes en prenant la moyenne de tous les points de données assignés à chaque cluster.  
+4. **Répéter** : Les étapes 2–3 sont répétées jusqu'à ce que les affectations de cluster se stabilisent (les centroïdes ne se déplacent plus de manière significative).
 
-> [!TIP]
-> *Cas d'utilisation en cybersécurité :* K-Means est utilisé pour la détection d'intrusions en regroupant des événements réseau. Par exemple, des chercheurs ont appliqué K-Means au jeu de données d'intrusion KDD Cup 99 et ont constaté qu'il partitionnait efficacement le trafic en clusters normaux et d'attaque. En pratique, les analystes de sécurité pourraient regrouper des entrées de journaux ou des données de comportement des utilisateurs pour trouver des groupes d'activités similaires ; tout point qui n'appartient pas à un cluster bien formé pourrait indiquer des anomalies (par exemple, une nouvelle variante de malware formant son propre petit cluster). K-Means peut également aider à la classification des familles de malware en regroupant des binaires en fonction de profils de comportement ou de vecteurs de caractéristiques.
+> [!TIP]  
+> *Cas d'utilisation en cybersécurité :* K-Means est utilisé pour la détection d'intrusions en regroupant des événements réseau. Par exemple, des chercheurs ont appliqué K-Means au jeu de données d'intrusion KDD Cup 99 et ont constaté qu'il partitionnait efficacement le trafic en clusters normaux et d'attaque. En pratique, les analystes de sécurité peuvent regrouper des entrées de journaux ou des données de comportement des utilisateurs pour trouver des groupes d'activités similaires ; tout point qui ne fait pas partie d'un cluster bien formé pourrait indiquer des anomalies (par exemple, une nouvelle variante de malware formant son propre petit cluster). K-Means peut également aider à la classification des familles de malware en regroupant des binaires en fonction de profils de comportement ou de vecteurs de caractéristiques.
 
-#### Sélection de K
+#### Sélection de K  
 Le nombre de clusters (K) est un hyperparamètre qui doit être défini avant d'exécuter l'algorithme. Des techniques comme la méthode du coude ou le score de silhouette peuvent aider à déterminer une valeur appropriée pour K en évaluant la performance du regroupement :
 
-- **Méthode du coude** : Tracez la somme des distances au carré de chaque point à son centroïde de cluster assigné en fonction de K. Recherchez un point "coude" où le taux de diminution change brusquement, indiquant un nombre de clusters approprié.
-- **Score de silhouette** : Calculez le score de silhouette pour différentes valeurs de K. Un score de silhouette plus élevé indique des clusters mieux définis.
+- **Méthode du coude** : Tracer la somme des distances au carré de chaque point à son centroïde de cluster assigné en fonction de K. Rechercher un point de "coude" où le taux de diminution change brusquement, indiquant un nombre de clusters approprié.  
+- **Score de silhouette** : Calculer le score de silhouette pour différentes valeurs de K. Un score de silhouette plus élevé indique des clusters mieux définis.
 
 #### Hypothèses et limitations
 
 K-Means suppose que **les clusters sont sphériques et de taille égale**, ce qui peut ne pas être vrai pour tous les ensembles de données. Il est sensible au placement initial des centroïdes et peut converger vers des minima locaux. De plus, K-Means n'est pas adapté aux ensembles de données avec des densités variables ou des formes non globulaires et des caractéristiques avec des échelles différentes. Des étapes de prétraitement comme la normalisation ou la standardisation peuvent être nécessaires pour garantir que toutes les caractéristiques contribuent également aux calculs de distance.
 
-<details>
-<summary>Exemple -- Regroupement d'événements réseau
-</summary>
+<details>  
+<summary>Exemple -- Regroupement d'événements réseau  
+</summary>  
 Ci-dessous, nous simulons des données de trafic réseau et utilisons K-Means pour les regrouper. Supposons que nous ayons des événements avec des caractéristiques telles que la durée de connexion et le nombre d'octets. Nous créons 3 clusters de trafic "normal" et 1 petit cluster représentant un modèle d'attaque. Ensuite, nous exécutons K-Means pour voir s'il les sépare.
 ```python
 import numpy as np
@@ -161,7 +160,7 @@ L'ACP est une technique de **réduction de dimensionnalité** qui trouve un nouv
 Notez que cela est utile si les dimensions du jeu de données contiennent **des dépendances ou des corrélations linéaires significatives**.
 
 L'ACP fonctionne en identifiant les composantes principales des données, qui sont les directions de variance maximale. Les étapes impliquées dans l'ACP sont :
-1. **Standardisation** : Centrer les données en soustrayant la moyenne et en les mettant à l'échelle à une variance unitaire.
+1. **Standardisation** : Centrer les données en soustrayant la moyenne et en les mettant à l'échelle pour obtenir une variance unitaire.
 2. **Matrice de Covariance** : Calculer la matrice de covariance des données standardisées pour comprendre les relations entre les caractéristiques.
 3. **Décomposition en Valeurs Propres** : Effectuer une décomposition en valeurs propres sur la matrice de covariance pour obtenir les valeurs propres et les vecteurs propres.
 4. **Sélection des Composantes Principales** : Trier les valeurs propres par ordre décroissant et sélectionner les K vecteurs propres correspondants aux plus grandes valeurs propres. Ces vecteurs propres forment le nouvel espace de caractéristiques.
@@ -187,7 +186,7 @@ Expliquons cela avec un exemple. Imaginez que vous avez un ensemble de données 
 2. **Matrice de Covariance** : Calculer la matrice de covariance des données standardisées, qui capture comment les caractéristiques (pixels) varient ensemble.
 - Notez que la covariance entre deux variables (pixels dans ce cas) indique combien elles changent ensemble, donc l'idée ici est de découvrir quels pixels ont tendance à augmenter ou diminuer ensemble avec une relation linéaire.
 - Par exemple, si le pixel 1 et le pixel 2 ont tendance à augmenter ensemble, la covariance entre eux sera positive.
-- La matrice de covariance sera une matrice 10 000x10 000 où chaque entrée représente la covariance entre deux pixels.
+- La matrice de covariance sera une matrice de 10 000x10 000 où chaque entrée représente la covariance entre deux pixels.
 3. **Résoudre l'équation des valeurs propres** : L'équation des valeurs propres à résoudre est `C * v = λ * v` où C est la matrice de covariance, v est le vecteur propre, et λ est la valeur propre. Elle peut être résolue en utilisant des méthodes comme :
 - **Décomposition en Valeurs Propres** : Effectuer une décomposition en valeurs propres sur la matrice de covariance pour obtenir les valeurs propres et les vecteurs propres.
 - **Décomposition en Valeurs Singulières (SVD)** : Alternativement, vous pouvez utiliser la SVD pour décomposer la matrice de données en valeurs et vecteurs singuliers, ce qui peut également donner les composantes principales.
@@ -224,7 +223,7 @@ print("Original shape:", data_4d.shape, "Reduced shape:", data_2d.shape)
 # We can examine a few transformed points
 print("First 5 data points in PCA space:\n", data_2d[:5])
 ```
-Ici, nous avons pris les clusters de trafic normal précédents et avons étendu chaque point de données avec deux caractéristiques supplémentaires (paquets et erreurs) qui sont corrélées avec les octets et la durée. PCA est ensuite utilisé pour compresser les 4 caractéristiques en 2 composants principaux. Nous imprimons le ratio de variance expliquée, qui pourrait montrer que, par exemple, >95 % de la variance est capturée par 2 composants (ce qui signifie peu de perte d'information). La sortie montre également que la forme des données passe de (1500, 4) à (1500, 2). Les premiers points dans l'espace PCA sont donnés comme exemple. En pratique, on pourrait tracer data_2d pour vérifier visuellement si les clusters sont distinguables. Si une anomalie était présente, on pourrait la voir comme un point éloigné du cluster principal dans l'espace PCA. PCA aide donc à distiller des données complexes en une forme gérable pour l'interprétation humaine ou comme entrée pour d'autres algorithmes.
+Ici, nous avons pris les clusters de trafic normal précédents et avons étendu chaque point de données avec deux caractéristiques supplémentaires (paquets et erreurs) qui sont corrélées avec les octets et la durée. PCA est ensuite utilisé pour compresser les 4 caractéristiques en 2 composants principaux. Nous imprimons le ratio de variance expliquée, qui pourrait montrer que, par exemple, >95% de la variance est capturée par 2 composants (ce qui signifie peu de perte d'information). La sortie montre également que la forme des données passe de (1500, 4) à (1500, 2). Les premiers points dans l'espace PCA sont donnés comme exemple. En pratique, on pourrait tracer data_2d pour vérifier visuellement si les clusters sont distinguables. Si une anomalie était présente, on pourrait la voir comme un point éloigné du cluster principal dans l'espace PCA. PCA aide donc à distiller des données complexes en une forme gérable pour l'interprétation humaine ou comme entrée pour d'autres algorithmes.
 
 </details>
 
@@ -255,11 +254,11 @@ où :
 Le résultat est un ensemble de distributions gaussiennes qui modélisent collectivement la distribution globale des données. Nous pouvons utiliser le GMM ajusté pour le clustering en assignant chaque point au gaussien avec la plus haute probabilité, ou conserver les probabilités pour l'incertitude. On peut également évaluer la vraisemblance de nouveaux points pour voir s'ils s'intègrent dans le modèle (utile pour la détection d'anomalies).
 
 > [!TIP]
-> *Cas d'utilisation en cybersécurité :* GMM peut être utilisé pour la détection d'anomalies en modélisant la distribution des données normales : tout point avec une probabilité très faible sous le mélange appris est signalé comme une anomalie. Par exemple, vous pourriez entraîner un GMM sur des caractéristiques de trafic réseau légitime ; une connexion d'attaque qui ne ressemble à aucun cluster appris aurait une faible vraisemblance. Les GMM sont également utilisés pour regrouper des activités où les clusters pourraient avoir des formes différentes – par exemple, regrouper les utilisateurs par profils de comportement, où les caractéristiques de chaque profil pourraient être de type gaussien mais avec sa propre structure de variance. Un autre scénario : dans la détection de phishing, les caractéristiques des e-mails légitimes pourraient former un cluster gaussien, le phishing connu un autre, et de nouvelles campagnes de phishing pourraient apparaître soit comme un gaussien séparé, soit comme des points de faible vraisemblance par rapport au mélange existant.
+> *Cas d'utilisation en cybersécurité :* GMM peut être utilisé pour la détection d'anomalies en modélisant la distribution des données normales : tout point avec une probabilité très faible sous le mélange appris est signalé comme anomalie. Par exemple, vous pourriez entraîner un GMM sur des caractéristiques de trafic réseau légitime ; une connexion d'attaque qui ne ressemble à aucun cluster appris aurait une faible vraisemblance. Les GMM sont également utilisés pour regrouper des activités où les clusters peuvent avoir des formes différentes – par exemple, regrouper des utilisateurs par profils de comportement, où les caractéristiques de chaque profil peuvent être de type gaussien mais avec leur propre structure de variance. Un autre scénario : dans la détection de phishing, les caractéristiques des e-mails légitimes pourraient former un cluster gaussien, le phishing connu un autre, et de nouvelles campagnes de phishing pourraient apparaître soit comme un gaussien séparé, soit comme des points de faible vraisemblance par rapport au mélange existant.
 
 #### Hypothèses et Limitations
 
-GMM est une généralisation de K-Means qui incorpore la covariance, de sorte que les clusters peuvent être ellipsoïdaux (pas seulement sphériques). Il gère des clusters de tailles et de formes différentes si la covariance est complète. Le clustering doux est un avantage lorsque les frontières des clusters sont floues – par exemple, en cybersécurité, un événement pourrait avoir des traits de plusieurs types d'attaques ; GMM peut refléter cette incertitude avec des probabilités. GMM fournit également une estimation de densité probabiliste des données, utile pour détecter des valeurs aberrantes (points avec une faible vraisemblance sous tous les composants du mélange).
+GMM est une généralisation de K-Means qui incorpore la covariance, de sorte que les clusters peuvent être ellipsoïdaux (pas seulement sphériques). Il gère des clusters de tailles et de formes différentes si la covariance est complète. Le clustering doux est un avantage lorsque les frontières des clusters sont floues – par exemple, en cybersécurité, un événement peut avoir des traits de plusieurs types d'attaques ; GMM peut refléter cette incertitude avec des probabilités. GMM fournit également une estimation de densité probabiliste des données, utile pour détecter des valeurs aberrantes (points avec une faible vraisemblance sous tous les composants du mélange).
 
 En revanche, GMM nécessite de spécifier le nombre de composants K (bien qu'on puisse utiliser des critères comme BIC/AIC pour le sélectionner). EM peut parfois converger lentement ou vers un optimum local, donc l'initialisation est importante (souvent, on exécute EM plusieurs fois). Si les données ne suivent pas réellement un mélange de gaussiennes, le modèle peut être un mauvais ajustement. Il y a aussi un risque qu'une gaussienne se rétrécisse pour ne couvrir qu'une valeur aberrante (bien que la régularisation ou les limites de covariance minimales puissent atténuer cela).
 
@@ -289,7 +288,7 @@ Dans ce code, nous entraînons un GMM avec 3 Gaussiennes sur le trafic normal (e
 
 ### Isolation Forest
 
-**Isolation Forest** est un algorithme d'anomalie basé sur l'ensemble qui repose sur l'idée d'isoler aléatoirement des points. Le principe est que les anomalies sont rares et différentes, donc elles sont plus faciles à isoler que les points normaux. Un Isolation Forest construit de nombreux arbres d'isolation binaires (arbres de décision aléatoires) qui partitionnent les données de manière aléatoire. À chaque nœud d'un arbre, une caractéristique aléatoire est sélectionnée et une valeur de séparation aléatoire est choisie entre le min et le max de cette caractéristique pour les données dans ce nœud. Cette séparation divise les données en deux branches. L'arbre est développé jusqu'à ce que chaque point soit isolé dans sa propre feuille ou qu'une hauteur maximale de l'arbre soit atteinte.
+**Isolation Forest** est un algorithme d'anomalie basé sur l'idée d'isoler aléatoirement des points. Le principe est que les anomalies sont rares et différentes, donc elles sont plus faciles à isoler que les points normaux. Un Isolation Forest construit de nombreux arbres d'isolation binaires (arbres de décision aléatoires) qui partitionnent les données de manière aléatoire. À chaque nœud d'un arbre, une caractéristique aléatoire est sélectionnée et une valeur de séparation aléatoire est choisie entre le min et le max de cette caractéristique pour les données dans ce nœud. Cette séparation divise les données en deux branches. L'arbre est développé jusqu'à ce que chaque point soit isolé dans sa propre feuille ou qu'une hauteur d'arbre maximale soit atteinte.
 
 La détection d'anomalies est effectuée en observant la longueur du chemin de chaque point dans ces arbres aléatoires – le nombre de séparations nécessaires pour isoler le point. Intuitivement, les anomalies (valeurs aberrantes) tendent à être isolées plus rapidement car une séparation aléatoire est plus susceptible de séparer une valeur aberrante (qui se trouve dans une région sparse) qu'un point normal dans un cluster dense. L'Isolation Forest calcule un score d'anomalie à partir de la longueur moyenne du chemin sur tous les arbres : chemin moyen plus court → plus anormal. Les scores sont généralement normalisés entre [0,1] où 1 signifie très probablement une anomalie.
 
@@ -333,8 +332,8 @@ La sortie montre les étiquettes prédites pour les 20 premiers points (où -1 i
 L'algorithme a deux étapes principales :
 
 1. **Calculer les affinités par paires dans l'espace de haute dimension :** Pour chaque paire de points, t-SNE calcule une probabilité que l'on choisirait cette paire comme voisins (cela se fait en centrant une distribution gaussienne sur chaque point et en mesurant les distances – le paramètre de perplexité influence le nombre effectif de voisins considérés).
-2. **Calculer les affinités par paires dans l'espace de basse dimension (par exemple, 2D) :** Initialement, les points sont placés aléatoirement en 2D. t-SNE définit une probabilité similaire pour les distances dans cette carte (en utilisant un noyau de distribution t de Student, qui a des queues plus lourdes que la gaussienne pour permettre aux points éloignés plus de liberté).
-3. **Descente de gradient :** t-SNE déplace ensuite itérativement les points en 2D pour minimiser la divergence de Kullback–Leibler (KL) entre la distribution d'affinité en haute dimension et celle en basse dimension. Cela fait en sorte que l'agencement en 2D reflète autant que possible la structure en haute dimension – les points qui étaient proches dans l'espace original s'attireront, et ceux éloignés se repousseront, jusqu'à ce qu'un équilibre soit trouvé.
+2. **Calculer les affinités par paires dans l'espace de faible dimension (par exemple, 2D) :** Initialement, les points sont placés aléatoirement en 2D. t-SNE définit une probabilité similaire pour les distances dans cette carte (en utilisant un noyau de distribution t de Student, qui a des queues plus lourdes que la gaussienne pour permettre aux points éloignés plus de liberté).
+3. **Descente de gradient :** t-SNE déplace ensuite itérativement les points en 2D pour minimiser la divergence de Kullback–Leibler (KL) entre la distribution d'affinité en haute dimension et celle en faible dimension. Cela fait en sorte que l'agencement en 2D reflète autant que possible la structure en haute dimension – les points qui étaient proches dans l'espace original s'attireront, et ceux éloignés se repousseront, jusqu'à ce qu'un équilibre soit trouvé.
 
 Le résultat est souvent un nuage de points visuellement significatif où les clusters dans les données deviennent apparents.
 
@@ -345,13 +344,13 @@ Le résultat est souvent un nuage de points visuellement significatif où les cl
 
 t-SNE est excellent pour la découverte visuelle de motifs. Il peut révéler des clusters, des sous-clusters et des points aberrants que d'autres méthodes linéaires (comme PCA) pourraient ne pas détecter. Il a été utilisé dans la recherche en cybersécurité pour visualiser des données complexes comme les profils de comportement des logiciels malveillants ou les modèles de trafic réseau. Parce qu'il préserve la structure locale, il est bon pour montrer des regroupements naturels.
 
-Cependant, t-SNE est computationnellement plus lourd (environ $O(n^2)$) donc il peut nécessiter un échantillonnage pour des ensembles de données très volumineux. Il a également des hyperparamètres (perplexité, taux d'apprentissage, itérations) qui peuvent affecter la sortie – par exemple, différentes valeurs de perplexité pourraient révéler des clusters à différentes échelles. Les graphiques t-SNE peuvent parfois être mal interprétés – les distances dans la carte ne sont pas directement significatives globalement (il se concentre sur le voisinage local, parfois les clusters peuvent apparaître artificiellement bien séparés). De plus, t-SNE est principalement destiné à la visualisation ; il ne fournit pas un moyen simple de projeter de nouveaux points de données sans recomputation, et il n'est pas destiné à être utilisé comme prétraitement pour la modélisation prédictive (UMAP est une alternative qui aborde certains de ces problèmes avec une vitesse plus rapide).
+Cependant, t-SNE est computationnellement plus lourd (environ $O(n^2)$) donc il peut nécessiter un échantillonnage pour des ensembles de données très volumineux. Il a également des hyperparamètres (perplexité, taux d'apprentissage, itérations) qui peuvent affecter la sortie – par exemple, différentes valeurs de perplexité pourraient révéler des clusters à différentes échelles. Les graphiques t-SNE peuvent parfois être mal interprétés – les distances dans la carte ne sont pas directement significatives globalement (il se concentre sur le voisinage local, parfois les clusters peuvent apparaître artificiellement bien séparés). De plus, t-SNE est principalement destiné à la visualisation ; il ne fournit pas un moyen direct de projeter de nouveaux points de données sans recomputation, et il n'est pas destiné à être utilisé comme prétraitement pour la modélisation prédictive (UMAP est une alternative qui aborde certains de ces problèmes avec une vitesse plus rapide).
 
 <details>
 <summary>Exemple -- Visualisation des connexions réseau
 </summary>
 
-Nous allons utiliser t-SNE pour réduire un ensemble de données multi-caractéristiques à 2D. À titre d'illustration, prenons les données 4D précédentes (qui avaient 3 clusters naturels de trafic normal) et ajoutons quelques points d'anomalie. Nous exécutons ensuite t-SNE et (conceptuellement) visualisons les résultats.
+Nous allons utiliser t-SNE pour réduire un ensemble de données multi-caractéristiques en 2D. À titre d'illustration, prenons les données 4D précédentes (qui avaient 3 clusters naturels de trafic normal) et ajoutons quelques points d'anomalie. Nous exécutons ensuite t-SNE et (conceptuellement) visualisons les résultats.
 ```python
 # 1 ─────────────────────────────────────────────────────────────────────
 #    Create synthetic 4-D dataset
@@ -434,7 +433,7 @@ plt.legend()
 plt.tight_layout()
 plt.show()
 ```
-Ici, nous avons combiné notre précédent ensemble de données normal en 4D avec une poignée de valeurs aberrantes extrêmes (les valeurs aberrantes ont une caractéristique (“durée”) définie très haut, etc., pour simuler un modèle étrange). Nous exécutons t-SNE avec une perplexité typique de 30. Les données de sortie data_2d ont une forme (1505, 2). Nous ne tracerons en fait pas dans ce texte, mais si nous le faisions, nous nous attendrions à voir peut-être trois clusters serrés correspondant aux 3 clusters normaux, et les 5 valeurs aberrantes apparaissant comme des points isolés loin de ces clusters. Dans un flux de travail interactif, nous pourrions colorer les points par leur étiquette (normal ou quel cluster, contre anomalie) pour vérifier cette structure. Même sans étiquettes, un analyste pourrait remarquer ces 5 points se trouvant dans un espace vide sur le graphique 2D et les signaler. Cela montre comment t-SNE peut être un puissant outil d'aide à la détection visuelle d'anomalies et à l'inspection des clusters dans les données de cybersécurité, complétant les algorithmes automatisés ci-dessus.
+Ici, nous avons combiné notre précédent ensemble de données normal en 4D avec une poignée de valeurs aberrantes extrêmes (les valeurs aberrantes ont une caractéristique (“durée”) réglée très haut, etc., pour simuler un modèle étrange). Nous exécutons t-SNE avec une perplexité typique de 30. Les données de sortie data_2d ont une forme (1505, 2). Nous ne tracerons en fait pas dans ce texte, mais si nous le faisions, nous nous attendrions à voir peut-être trois clusters serrés correspondant aux 3 clusters normaux, et les 5 valeurs aberrantes apparaissant comme des points isolés loin de ces clusters. Dans un flux de travail interactif, nous pourrions colorer les points par leur étiquette (normal ou quel cluster, contre anomalie) pour vérifier cette structure. Même sans étiquettes, un analyste pourrait remarquer ces 5 points se trouvant dans un espace vide sur le graphique 2D et les signaler. Cela montre comment t-SNE peut être un puissant outil d'aide à la détection visuelle d'anomalies et à l'inspection des clusters dans les données de cybersécurité, complétant les algorithmes automatisés ci-dessus.
 
 </details>
 
