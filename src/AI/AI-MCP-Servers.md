@@ -2,11 +2,10 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-- (https://modelcontextprotocol.io/introduction
 
 ## What is MPC - Model Context Protocol
 
-The **Model Context Protocol (MCP)** is an open standard that allows AI models (LLMs) to connect with external tools and data sources in a plug-and-play fashion. This enables complex workflows: for example, an IDE or chatbot can *dynamically call functions* on MCP servers as if the model naturally "knew" how to use them. Under the hood, MCP uses a client-server architecture with JSON-based requests over various transports (HTTP, WebSockets, stdio, etc.).
+The [**Model Context Protocol (MCP)**](https://modelcontextprotocol.io/introduction) is an open standard that allows AI models (LLMs) to connect with external tools and data sources in a plug-and-play fashion. This enables complex workflows: for example, an IDE or chatbot can *dynamically call functions* on MCP servers as if the model naturally "knew" how to use them. Under the hood, MCP uses a client-server architecture with JSON-based requests over various transports (HTTP, WebSockets, stdio, etc.).
 
 A **host application** (e.g. Claude Desktop, Cursor IDE) runs an MCP client that connects to one or more **MCP servers**. Each server exposes a set of *tools* (functions, resources, or actions) described in a standardized schema. When the host connects, it asks the server for its available tools via a `tools/list` request; the returned tool descriptions are then inserted into the model's context so the AI knows what functions exist and how to call them.
 
