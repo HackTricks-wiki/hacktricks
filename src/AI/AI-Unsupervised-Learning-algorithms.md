@@ -1,38 +1,37 @@
-# Onbegeleide Leer Algoritmes
+# Ongehoorde Leer Algoritmes
 
 {{#include ../banners/hacktricks-training.md}}
 
+## Ongehoorde Leer
 
-## Onbegeleide Leer
-
-Onbegeleide leer is 'n tipe masjienleer waar die model op data sonder gelabelde antwoorde opgelei word. Die doel is om patrone, strukture of verhoudings binne die data te vind. Anders as begeleide leer, waar die model van gelabelde voorbeelde leer, werk onbegeleide leer algoritmes met ongelabelde data. Onbegeleide leer word dikwels gebruik vir take soos groepering, dimensie vermindering en anomalie opsporing. Dit kan help om versteekte patrone in data te ontdek, soortgelyke items saam te groepeer, of die kompleksiteit van die data te verminder terwyl die essensiële eienskappe behou word.
-
+Ongehoorde leer is 'n tipe masjienleer waar die model op data sonder gelabelde antwoorde opgelei word. Die doel is om patrone, strukture of verhoudings binne die data te vind. Anders as gesuperviseerde leer, waar die model van gelabelde voorbeelde leer, werk ongehoorde leer algoritmes met ongelabelde data. 
+Ongehoorde leer word dikwels gebruik vir take soos groepering, dimensie vermindering en anomalie opsporing. Dit kan help om versteekte patrone in data te ontdek, soortgelyke items saam te groepeer, of die kompleksiteit van die data te verminder terwyl dit sy essensiële kenmerke behou.
 
 ### K-Means Groepering
 
 K-Means is 'n sentroid-gebaseerde groeperingsalgoritme wat data in K groepe verdeel deur elke punt aan die naaste groep gemiddelde toe te ken. Die algoritme werk soos volg:
 1. **Inisialisering**: Kies K aanvanklike groep sentrums (sentroïede), dikwels ewekansig of via slimmer metodes soos k-means++
-2. **Toewysing**: Ken elke datapunt toe aan die naaste sentroid gebaseer op 'n afstandsmetrie (bv. Euclidiese afstand).
+2. **Toekenning**: Ken elke datapunt toe aan die naaste sentroid gebaseer op 'n afstandsmetrie (bv. Euclidiese afstand).
 3. **Opdatering**: Herbereken die sentroïede deur die gemiddelde van alle datapunte wat aan elke groep toegeken is, te neem.
-4. **Herhaal**: Stappe 2–3 word herhaal totdat die groep toewysings stabiliseer (sentroïede beweeg nie meer beduidend nie).
+4. **Herhaal**: Stappe 2–3 word herhaal totdat groep toekennings stabiliseer (sentroïede beweeg nie meer beduidend nie).
 
 > [!TIP]
-> *Gebruik gevalle in kuberveiligheid:* K-Means word gebruik vir indringing opsporing deur netwerkgebeurtenisse te groepeer. Byvoorbeeld, navorsers het K-Means toegepas op die KDD Cup 99 indringingsdataset en gevind dat dit effektief verkeer in normale teenoor aanval groepe verdeel. In praktyk kan sekuriteitsontleders loginskrywings of gebruikersgedragdata groepeer om groepe van soortgelyke aktiwiteit te vind; enige punte wat nie aan 'n goed gevormde groep behoort nie, kan anomalieë aandui (bv. 'n nuwe malware variasie wat sy eie klein groep vorm). K-Means kan ook help met malware familie klassifikasie deur binaire lêers op grond van gedragsprofiele of kenmerk vektore te groepeer.
+> *Gebruik gevalle in kuberveiligheid:* K-Means word gebruik vir indringing opsporing deur netwerkgebeurtenisse te groepeer. Byvoorbeeld, navorsers het K-Means toegepas op die KDD Cup 99 indringingsdataset en gevind dat dit effektief verkeer in normale teenoor aanval groepe verdeel. In praktyk kan sekuriteitsontleders loginskrywings of gebruikersgedragdata groepeer om groepe van soortgelyke aktiwiteit te vind; enige punte wat nie aan 'n goed gevormde groep behoort nie, kan anomalieë aandui (bv. 'n nuwe malware variasie wat sy eie klein groep vorm). K-Means kan ook help met malware familie klassifikasie deur binaire lêers op grond van gedragprofiele of kenmerk vektore te groepeer.
 
 #### Keuse van K
-Die aantal groepe (K) is 'n hiperparameter wat gedefinieer moet word voordat die algoritme uitgevoer word. Tegnieke soos die Elbow Metode of Silhouette Punt kan help om 'n toepaslike waarde vir K te bepaal deur die groepering prestasie te evalueer:
+Die aantal groepe (K) is 'n hiperparameter wat gedefinieer moet word voordat die algoritme uitgevoer word. Tegnieke soos die Elbo Metode of Silhouette Punt kan help om 'n toepaslike waarde vir K te bepaal deur die groepering prestasie te evalueer:
 
-- **Elbow Metode**: Plot die som van die kwadrate afstande van elke punt na sy toegekenne groep sentroid as 'n funksie van K. Soek 'n "elboog" punt waar die tempo van afname skerp verander, wat 'n geskikte aantal groepe aandui.
+- **Elbo Metode**: Plot die som van die kwadratiese afstanden van elke punt na sy toegekenne groep sentroid as 'n funksie van K. Soek 'n "elbo" punt waar die tempo van afname skerp verander, wat 'n geskikte aantal groepe aandui.
 - **Silhouette Punt**: Bereken die silhouette punt vir verskillende waardes van K. 'n Hoër silhouette punt dui op beter gedefinieerde groepe aan.
 
 #### Aannames en Beperkings
 
-K-Means neem aan dat **groepe sferies en gelyk groot is**, wat dalk nie vir alle datasets waar is nie. Dit is sensitief vir die aanvanklike plasing van sentroïede en kan na plaaslike minima konvergeer. Boonop is K-Means nie geskik vir datasets met verskillende digthede of nie-globulêre vorms en eienskappe met verskillende skale nie. Voorverwerkingsstappe soos normalisering of standaardisering mag nodig wees om te verseker dat alle eienskappe gelyk bydra tot die afstandsberekeninge.
+K-Means neem aan dat **groepe sferies en gelyk groot is**, wat dalk nie vir alle datasets waar is nie. Dit is sensitief vir die aanvanklike plasing van sentroïede en kan na plaaslike minima konvergeer. Boonop is K-Means nie geskik vir datasets met verskillende digthede of nie-globulêre vorms en kenmerke met verskillende skale nie. Voorverwerkingsstappe soos normalisering of standaardisering mag nodig wees om te verseker dat alle kenmerke gelyk bydra tot die afstandsberekeninge.
 
 <details>
 <summary>Voorbeeld -- Groepering van Netwerk Gebeurtenisse
 </summary>
-Hieronder simuleer ons netwerkverkeer data en gebruik K-Means om dit te groepeer. Neem aan ons het gebeurtenisse met eienskappe soos verbinding duur en byte telling. Ons skep 3 groepe van “normale” verkeer en 1 klein groep wat 'n aanvalspatroon verteenwoordig. Dan voer ons K-Means uit om te sien of dit hulle skei.
+Hieronder simuleer ons netwerkverkeer data en gebruik K-Means om dit te groepeer. Neem aan ons het gebeurtenisse met kenmerke soos verbinding duur en byte telling. Ons skep 3 groepe van “normale” verkeer en 1 klein groep wat 'n aanvalspatroon verteenwoordig. Dan voer ons K-Means uit om te sien of dit hulle skei.
 ```python
 import numpy as np
 from sklearn.cluster import KMeans
@@ -62,27 +61,27 @@ In hierdie voorbeeld moet K-Means 4 groepe vind. Die klein aanvalsgroep (met ong
 
 ### Hiërargiese Groepering
 
-Hiërargiese groepering bou 'n hiërargie van groepe op deur óf 'n onder-na-bo (agglomeratiewe) benadering óf 'n bo-na-onder (divisiewe) benadering te gebruik:
+Hiërargiese groepering bou 'n hiërargie van groepe deur óf 'n onder-na-bo (agglomeratiewe) benadering óf 'n bo-na-onder (divisiewe) benadering te gebruik:
 
-1. **Agglomeratiewe (Onder-Na-Bo)**: Begin met elke datapunt as 'n aparte groep en kombineer die naaste groepe iteratief totdat 'n enkele groep oorbly of 'n stopkriterium bereik word.
-2. **Divisiewe (Bo-Na-Onder)**: Begin met al die datapunte in 'n enkele groep en verdeel die groepe iteratief totdat elke datapunt sy eie groep is of 'n stopkriterium bereik word.
+1. **Agglomeratiewe (Onder-Na-Bo)**: Begin met elke datapunt as 'n aparte groep en kombineer herhaaldelik die naaste groepe totdat 'n enkele groep oorbly of 'n stopkriterium bereik word.
+2. **Divisiewe (Bo-Na-Onder)**: Begin met al die datapunte in 'n enkele groep en verdeel herhaaldelik die groepe totdat elke datapunt sy eie groep is of 'n stopkriterium bereik word.
 
-Agglomeratiewe groepering vereis 'n definisie van inter-groep afstand en 'n skakelingskriterium om te besluit watter groepe saamgevoeg moet word. Algemene skakelingsmetodes sluit enkele skakeling (afstand van die naaste punte tussen twee groepe), volledige skakeling (afstand van die verste punte), gemiddelde skakeling, ensovoorts in, en die afstandsmetrie is dikwels Euclidies. Die keuse van skakeling beïnvloed die vorm van die geproduceerde groepe. Daar is geen behoefte om die aantal groepe K vooraf te spesifiseer nie; jy kan die dendrogram op 'n gekose vlak "sny" om die gewenste aantal groepe te verkry.
+Agglomeratiewe groepering vereis 'n definisie van inter-groep afstand en 'n skakelingskriterium om te besluit watter groepe saamgevoeg moet word. Algemene skakelingsmetodes sluit enkele skakeling (afstand van die naaste punte tussen twee groepe), volledige skakeling (afstand van die verste punte), gemiddelde skakeling, ensovoorts in, en die afstandsmetrieks is dikwels Euclidies. Die keuse van skakeling beïnvloed die vorm van die geproduceerde groepe. Daar is geen behoefte om die aantal groepe K vooraf te spesifiseer nie; jy kan die dendrogram op 'n gekose vlak "sny" om die gewenste aantal groepe te verkry.
 
 Hiërargiese groepering produseer 'n dendrogram, 'n boomagtige struktuur wat die verhoudings tussen groepe op verskillende vlakke van granulariteit toon. Die dendrogram kan op 'n gewenste vlak gesny word om 'n spesifieke aantal groepe te verkry.
 
 > [!TIP]
-> *Gebruik gevalle in kuberveiligheid:* Hiërargiese groepering kan gebeurtenisse of entiteite in 'n boom organiseer om verhoudings te identifiseer. Byvoorbeeld, in malware-analise kan agglomeratiewe groepering monsters groepeer volgens gedragsgelykheid, wat 'n hiërargie van malware-families en variasies onthul. In netwerkveiligheid kan 'n mens IP-verkeerstrome groepeer en die dendrogram gebruik om subgroeperings van verkeer te sien (bv. volgens protokol, dan volgens gedrag). Omdat jy nie K vooraf hoef te kies nie, is dit nuttig wanneer jy nuwe data verken waarvoor die aantal aanvalkategorieë onbekend is.
+> *Gebruik gevalle in kuberveiligheid:* Hiërargiese groepering kan gebeurtenisse of entiteite in 'n boom organiseer om verhoudings te identifiseer. Byvoorbeeld, in malware-analise kan agglomeratiewe groepering monsters volgens gedragsgelykheid groepeer, wat 'n hiërargie van malware-families en variasies onthul. In netwerkveiligheid kan 'n mens IP-verkeerstrome groepeer en die dendrogram gebruik om subgroeperings van verkeer te sien (bv. volgens protokol, dan volgens gedrag). Omdat jy nie K vooraf hoef te kies nie, is dit nuttig wanneer jy nuwe data verken waarvoor die aantal aanvalkategorieë onbekend is.
 
 #### Aannames en Beperkings
 
-Hiërargiese groepering neem nie 'n spesifieke groepvorm aan nie en kan geneste groepe vasvang. Dit is nuttig om taksonomie of verhoudings tussen groepe te ontdek (bv. om malware volgens familie-subgroepe te groepeer). Dit is deterministies (geen random inisialisasie probleme nie). 'n Sleutelvoordeel is die dendrogram, wat insig bied in die data se groeperingsstruktuur op alle skale – sekuriteitsontleders kan 'n toepaslike afsnit besluit om betekenisvolle groepe te identifiseer. Dit is egter rekenaarintensief (tipies $O(n^2)$ tyd of erger vir naïewe implementasies) en nie haalbaar vir baie groot datastelle nie. Dit is ook 'n gulsige prosedure – sodra 'n samesmelting of splitsing gedoen is, kan dit nie ongedaan gemaak word nie, wat kan lei tot suboptimale groepe as 'n fout vroeg gebeur. Uitskieters kan ook sommige skakelstrategieë beïnvloed (enkele skakeling kan die "ketting" effek veroorsaak waar groepe via uitskieters skakel).
+Hiërargiese groepering neem nie 'n spesifieke groepvorm aan nie en kan geneste groepe vasvang. Dit is nuttig om taksonomie of verhoudings tussen groepe te ontdek (bv. om malware volgens familie-subgroepe te groepeer). Dit is deterministies (geen random inisialisasie probleme nie). 'n Sleutelvoordeel is die dendrogram, wat insig bied in die data se groeperingsstruktuur op alle skale – sekuriteitsontleders kan 'n toepaslike afsnit besluit om betekenisvolle groepe te identifiseer. Dit is egter rekenaarintensief (tipies $O(n^2)$ tyd of erger vir naïewe implementasies) en nie haalbaar vir baie groot datastelle nie. Dit is ook 'n gulsige prosedure – sodra 'n samesmelting of splitsing gedoen is, kan dit nie ongedaan gemaak word nie, wat kan lei tot suboptimale groepe as 'n fout vroeg gebeur. Uitskieters kan ook sommige skakelingsstrategieë beïnvloed (enkele skakeling kan die "ketting" effek veroorsaak waar groepe via uitskieters skakel).
 
 <details>
 <summary>Voorbeeld -- Agglomeratiewe Groepering van Gebeure
 </summary>
 
-Ons sal die sintetiese data van die K-Means voorbeeld (3 normale groepe + 1 aanvalsgroep) hergebruik en agglomeratiewe groepering toepas. Ons illustreer dan hoe om 'n dendrogram en groep etikette te verkry.
+Ons sal die sintetiese data van die K-Means voorbeeld (3 normale groepe + 1 aanvalsgroep) hergebruik en agglomeratiewe groepering toepas. Ons illustreer dan hoe om 'n dendrogram en groepetikette te verkry.
 ```python
 from sklearn.cluster import AgglomerativeClustering
 from scipy.cluster.hierarchy import linkage, dendrogram
@@ -104,7 +103,7 @@ print(f"Cluster sizes for 3 clusters: {np.bincount(clusters_3)}")
 
 ### DBSCAN (Digtheid-gebaseerde Ruimtelike Groepering van Toepassings met Ruis)
 
-DBSCAN is 'n digtheid-gebaseerde groeperingsalgoritme wat punte wat naby mekaar gepak is, saamgroepeer terwyl dit punte in lae-digtheid gebiede as uitskieters merk. Dit is veral nuttig vir datastelle met verskillende digthede en nie-sferiese vorms nie.
+DBSCAN is 'n digtheid-gebaseerde groeperingsalgoritme wat punte wat naby mekaar gepak is, saamgroepeer terwyl dit punte in lae-digtheid gebiede as uitskieters merk. Dit is veral nuttig vir datastelle met verskillende digthede en nie-sferiese vorms.
 
 DBSCAN werk deur twee parameters te definieer:
 - **Epsilon (ε)**: Die maksimum afstand tussen twee punte om as deel van dieselfde groep beskou te word.
@@ -115,16 +114,16 @@ DBSCAN identifiseer kernpunte, grenspunte en ruispunte:
 - **Grenspunt**: 'n Punt wat binne ε afstand van 'n kernpunt is, maar minder as MinPts bure het.
 - **Ruispunt**: 'n Punt wat nie 'n kernpunt of 'n grenspunt is nie.
 
-Groepering vorder deur 'n onbesoekte kernpunt te kies, dit as 'n nuwe groep te merk, en dan alle punte wat digtheid-bereikbaar is daarvan (kernpunte en hul bure, ens.) rekursief by te voeg. Grenspunte word by die groep van 'n nabye kern gevoeg. Nadat alle bereikbare punte uitgebrei is, beweeg DBSCAN na 'n ander onbesoekte kern om 'n nuwe groep te begin. Punte wat nie deur enige kern bereik is nie, bly as ruis gemerk.
+Groepering vorder deur 'n onbesoekte kernpunt te kies, dit as 'n nuwe groep te merk, en dan alle punte wat digtheid-bereikbaar is vanaf dit (kernpunte en hul bure, ens.) rekursief by te voeg. Grenspunte word by die groep van 'n nabye kern gevoeg. Nadat alle bereikbare punte uitgebrei is, beweeg DBSCAN na 'n ander onbesoekte kern om 'n nuwe groep te begin. Punte wat nie deur enige kern bereik is nie, bly as ruis gemerk.
 
 > [!TIP]
-> *Gebruik gevalle in kuberveiligheid:* DBSCAN is nuttig vir anomaliedetectie in netwerkverkeer. Byvoorbeeld, normale gebruikersaktiwiteit kan een of meer digte groepe in kenmerkruimte vorm, terwyl nuut aanvalsgedrag as verspreide punte verskyn wat DBSCAN as ruis (uitskieters) sal merk. Dit is gebruik om netwerkvloei rekords te groepeer, waar dit poortskandering of ontkenning-van-diens verkeer as dun gebiede van punte kan opspoor. 'n Ander toepassing is die groepering van malware variasies: as die meeste monsters volgens families groepeer, maar 'n paar nêrens pas nie, kan daardie paar nul-dag malware wees. Die vermoë om ruis te merk beteken dat sekuriteitspanne op die ondersoek van daardie uitskieters kan fokus.
+> *Gebruik gevalle in kuberveiligheid:* DBSCAN is nuttig vir anomaliedetektering in netwerkverkeer. Byvoorbeeld, normale gebruikersaktiwiteit kan een of meer digte groepe in kenmerkruimte vorm, terwyl nuut aanvalsgedrag as verspreide punte verskyn wat DBSCAN as ruis (uitskieters) sal merk. Dit is gebruik om netwerkvloei rekords te groepeer, waar dit poortskandering of ontkenning-van-diens verkeer as dun gebiede van punte kan opspoor. 'n Ander toepassing is die groepering van malware variasies: as die meeste monsters volgens families groepeer, maar 'n paar nêrens pas nie, kan daardie paar nul-dag malware wees. Die vermoë om ruis te merk beteken dat sekuriteitspanne op die ondersoek van daardie uitskieters kan fokus.
 
 #### Aannames en Beperkings
 
 **Aannames & Sterkte:**: DBSCAN neem nie sferiese groepe aan nie – dit kan arbitrêr gevormde groepe vind (selfs ketting-agtige of aangrensende groepe). Dit bepaal outomaties die aantal groepe op grond van datadigtheid en kan effektief uitskieters as ruis identifiseer. Dit maak dit kragtig vir werklike data met onreëlmatige vorms en ruis. Dit is robuust teen uitskieters (in teenstelling met K-Means, wat hulle in groepe dwing). Dit werk goed wanneer groepe ongeveer uniforme digtheid het.
 
-**Beperkings**: DBSCAN se prestasie hang af van die keuse van toepaslike ε en MinPts waardes. Dit kan sukkel met data wat verskillende digthede het – 'n enkele ε kan nie beide digte en dun groepe akkommodeer nie. As ε te klein is, merk dit die meeste punte as ruis; te groot, en groepe kan verkeerd saamvloei. Ook, DBSCAN kan ondoeltreffend wees op baie groot datastelle (naïef $O(n^2)$, hoewel ruimtelike indeksering kan help). In hoë-dimensionele kenmerkruimtes kan die konsep van “afstand binne ε” minder betekenisvol word (die vloek van dimensionaliteit), en DBSCAN mag sorgvuldige parameterafstemming benodig of mag misluk om intuïtiewe groepe te vind. Ten spyte hiervan, adresseer uitbreidings soos HDBSCAN sommige probleme (soos verskillende digtheid).
+**Beperkings**: DBSCAN se prestasie hang af van die keuse van toepaslike ε en MinPts waardes. Dit kan sukkel met data wat verskillende digthede het – 'n enkele ε kan nie sowel digte as dun groepe akkommodeer nie. As ε te klein is, merk dit die meeste punte as ruis; te groot, en groepe kan verkeerd saamvloei. Ook, DBSCAN kan ondoeltreffend wees op baie groot datastelle (naïef $O(n^2)$, hoewel ruimtelike indeksering kan help). In hoë-dimensionele kenmerkruimtes kan die konsep van “afstand binne ε” minder betekenisvol word (die vloek van dimensionaliteit), en DBSCAN mag versigtige parameterafstemming benodig of mag misluk om intuïtiewe groepe te vind. Ten spyte van hierdie, adresseer uitbreidings soos HDBSCAN sommige probleme (soos verskillende digtheid).
 
 <details>
 <summary>Voorbeeld -- Groepering met Ruis
@@ -156,11 +155,11 @@ In hierdie snit het ons `eps` en `min_samples` aangepas om by ons data-skaal te 
 
 ### Hoofkomponentanalise (PCA)
 
-PCA is 'n tegniek vir **dimensievermindering** wat 'n nuwe stel ortogonale assen (hoofkomponente) vind wat die maksimum variansie in die data vasvang. In eenvoudige terme draai en projekteer PCA die data op 'n nuwe koördinaatstelsel sodat die eerste hoofkomponent (PC1) die grootste moontlike variansie verduidelik, die tweede PC (PC2) die grootste variansie ortogonaal tot PC1 verduidelik, en so aan. Wiskundig bereken PCA die eie vektore van die data se kovariansiematrix – hierdie eie vektore is die richtings van die hoofkomponente, en die ooreenstemmende eie waardes dui die hoeveelheid variansie aan wat deur elkeen verduidelik word. Dit word dikwels gebruik vir kenmerk ekstraksie, visualisering, en geraasvermindering.
+PCA is 'n tegniek vir **dimensievermindering** wat 'n nuwe stel ortogonale as (hoofkomponente) vind wat die maksimum variansie in die data vasvang. In eenvoudige terme draai en projekteer PCA die data op 'n nuwe koördinaatstelsel sodat die eerste hoofkomponent (PC1) die grootste moontlike variansie verduidelik, die tweede PC (PC2) die grootste variansie ortogonaal tot PC1 verduidelik, en so aan. Wiskundig bereken PCA die eie vektore van die data se kovariansiematrix – hierdie eie vektore is die hoofkomponent rigtings, en die ooreenstemmende eie waardes dui die hoeveelheid variansie aan wat deur elkeen verduidelik word. Dit word dikwels gebruik vir kenmerk ekstraksie, visualisering, en geraasvermindering.
 
 Let daarop dat dit nuttig is as die dataset dimensies **beduidende lineêre afhanklikhede of korrelasies** bevat.
 
-PCA werk deur die hoofkomponente van die data te identifiseer, wat die richtings van maksimum variansie is. Die stappe wat betrokke is by PCA is:
+PCA werk deur die hoofkomponente van die data te identifiseer, wat die rigtings van maksimum variansie is. Die stappe wat betrokke is by PCA is:
 1. **Standarisering**: Sentra die data deur die gemiddelde af te trek en dit na eenheidsvariansie te skaal.
 2. **Kovariansiematrix**: Bereken die kovariansiematrix van die gestandaardiseerde data om die verhoudings tussen kenmerke te verstaan.
 3. **Eie waarde ontbinding**: Voer eie waarde ontbinding op die kovariansiematrix uit om die eie waardes en eie vektore te verkry.
@@ -181,7 +180,7 @@ Dan, `A * v = [ [1, 2], [2, 1]] * [1, 1] = [3, 3]` wat die eie waarde λ vermeni
 
 #### Eie waardes en Eie vektore in PCA
 
-Kom ons verduidelik dit met 'n voorbeeld. Stel jou voor jy het 'n dataset met baie grys skaal prente van gesigte van 100x100 pixels. Elke pixel kan as 'n kenmerk beskou word, so jy het 10,000 kenmerke per beeld (of 'n vektor van 10000 komponente per beeld). As jy die dimensie van hierdie dataset met behulp van PCA wil verminder, sal jy die volgende stappe volg:
+Kom ons verduidelik dit met 'n voorbeeld. Stel jou voor jy het 'n dataset met baie grys skaal prente van gesigte van 100x100 pixels. Elke pixel kan as 'n kenmerk beskou word, so jy het 10,000 kenmerke per beeld (of 'n vektor van 10000 komponente per beeld). As jy die dimensie van hierdie dataset met behulp van PCA wil verminder, sal jy hierdie stappe volg:
 
 1. **Standarisering**: Sentra die data deur die gemiddelde van elke kenmerk (pixel) van die dataset af te trek.
 2. **Kovariansiematrix**: Bereken die kovariansiematrix van die gestandaardiseerde data, wat vasvang hoe kenmerke (pixels) saam varieer.
@@ -191,20 +190,20 @@ Kom ons verduidelik dit met 'n voorbeeld. Stel jou voor jy het 'n dataset met ba
 3. **Los die eie waarde vergelyking op**: Die eie waarde vergelyking om op te los is `C * v = λ * v` waar C die kovariansiematrix is, v die eie vektor is, en λ die eie waarde is. Dit kan opgelos word met metodes soos:
 - **Eie waarde ontbinding**: Voer eie waarde ontbinding op die kovariansiematrix uit om die eie waardes en eie vektore te verkry.
 - **Singuliere Waarde Ontbinding (SVD)**: Alternatiewelik kan jy SVD gebruik om die datamatriks in singuliere waardes en vektore te ontbind, wat ook die hoofkomponente kan oplewer.
-4. **Kies Hoofkomponente**: Sorteer die eie waardes in aflopende volgorde en kies die top K eie vektore wat ooreenstem met die grootste eie waardes. Hierdie eie vektore verteenwoordig die richtings van maksimum variansie in die data.
+4. **Kies Hoofkomponente**: Sorteer die eie waardes in aflopende volgorde en kies die top K eie vektore wat ooreenstem met die grootste eie waardes. Hierdie eie vektore verteenwoordig die rigtings van maksimum variansie in die data.
 
 > [!TIP]
-> *Gebruik gevalle in kuberveiligheid:* 'n Algemene gebruik van PCA in sekuriteit is kenmerkvermindering vir anomaliedetektering. Byvoorbeeld, 'n indringingdeteksiesisteem met 40+ netwerkmetrieke (soos NSL-KDD kenmerke) kan PCA gebruik om dit tot 'n handjievol komponente te verminder, wat die data opsom vir visualisering of om in klustering algoritmes te voer. Analiste kan netwerkverkeer in die ruimte van die eerste twee hoofkomponente plot om te sien of aanvalle van normale verkeer skei. PCA kan ook help om oorvloedige kenmerke te elimineer (soos bytes gestuur teen bytes ontvang as hulle korreleer) om deteksie algoritmes meer robuust en vinniger te maak.
+> *Gebruik gevalle in kuberveiligheid:* 'n Algemene gebruik van PCA in sekuriteit is kenmerkvermindering vir anomaliedetektering. Byvoorbeeld, 'n indringingdeteksiesisteem met 40+ netwerkmetrieke (soos NSL-KDD kenmerke) kan PCA gebruik om tot 'n handjievol komponente te verminder, wat die data opsom vir visualisering of om in klustering algoritmes te voer. Analiste kan netwerkverkeer in die ruimte van die eerste twee hoofkomponente plot om te sien of aanvalle van normale verkeer skei. PCA kan ook help om oorvloedige kenmerke te elimineer (soos bytes gestuur teenoor bytes ontvang as hulle korreleer) om deteksie-algoritmes meer robuust en vinniger te maak.
 
 #### Aannames en Beperkings
 
-PCA neem aan dat **hoofasse van variansie betekenisvol is** – dit is 'n lineêre metode, so dit vang lineêre korrelasies in data. Dit is nie-begeleide omdat dit slegs die kenmerk kovariansie gebruik. Voordele van PCA sluit geraasvermindering in (klein-variansie komponente stem dikwels ooreen met geraas) en dekorelasie van kenmerke. Dit is rekenaar-effektief vir matig hoë dimensies en dikwels 'n nuttige voorverwerkings stap vir ander algoritmes (om die vloek van dimensie te verminder). Een beperking is dat PCA beperk is tot lineêre verhoudings – dit sal nie komplekse nie-lineêre struktuur vasvang nie (terwyl auto-enkoders of t-SNE dit mag). Ook kan PCA komponente moeilik wees om te interpreteer in terme van oorspronklike kenmerke (dit is kombinasies van oorspronklike kenmerke). In kuberveiligheid moet 'n mens versigtig wees: 'n aanval wat net 'n subtiele verandering in 'n lae-variansie kenmerk veroorsaak, mag nie in top PC's verskyn nie (aangesien PCA variansie prioritiseer, nie noodwendig "interessantheid" nie).
+PCA neem aan dat **hoofasse van variansie betekenisvol is** – dit is 'n lineêre metode, so dit vang lineêre korrelasies in data. Dit is nie-beheerd aangesien dit slegs die kenmerk kovariansie gebruik. Voordele van PCA sluit geraasvermindering in (klein-variansie komponente stem dikwels ooreen met geraas) en dekorelasie van kenmerke. Dit is rekenaar-effektief vir matig hoë dimensies en dikwels 'n nuttige voorverwerkings stap vir ander algoritmes (om die vloek van dimensie te verminder). Een beperking is dat PCA beperk is tot lineêre verhoudings – dit sal nie komplekse nie-lineêre struktuur vasvang nie (terwyl outokoders of t-SNE dit mag). Ook kan PCA komponente moeilik wees om te interpreteer in terme van oorspronklike kenmerke (dit is kombinasies van oorspronklike kenmerke). In kuberveiligheid moet 'n mens versigtig wees: 'n aanval wat net 'n subtiele verandering in 'n lae-variansie kenmerk veroorsaak, mag nie in top PC's verskyn nie (aangesien PCA variansie prioritiseer, nie noodwendig "interessantheid" nie).
 
 <details>
 <summary>Voorbeeld -- Vermindering van Dimensies van Netwerkdata
 </summary>
 
-Stel ons het netwerkverbinding logs met verskeie kenmerke (bv. duur, bytes, tellings). Ons sal 'n sintetiese 4-dimensionele dataset genereer (met 'n paar korrelasie tussen kenmerke) en PCA gebruik om dit tot 2 dimensies te verminder vir visualisering of verdere analise.
+Neem aan ons het netwerkverbinding logs met verskeie kenmerke (bv. duur, bytes, tellings). Ons sal 'n sintetiese 4-dimensionele dataset genereer (met 'n paar korrelasie tussen kenmerke) en PCA gebruik om dit tot 2 dimensies te verminder vir visualisering of verdere analise.
 ```python
 from sklearn.decomposition import PCA
 
@@ -224,7 +223,7 @@ print("Original shape:", data_4d.shape, "Reduced shape:", data_2d.shape)
 # We can examine a few transformed points
 print("First 5 data points in PCA space:\n", data_2d[:5])
 ```
-Hier het ons die vroeëre normale verkeersklusters geneem en elke datapunt met twee bykomende kenmerke (pakkette en foute) uitgebrei wat met bytes en duur korreleer. PCA word dan gebruik om die 4 kenmerke in 2 hoofkomponente te komprimeer. Ons druk die verduidelikte variantieverhouding, wat mag wys dat, sê, >95% van die variantie deur 2 komponente vasgevang word (wat min inligtingverlies beteken). Die uitvoer toon ook dat die datavorm verminder van (1500, 4) na (1500, 2). Die eerste paar punte in die PCA-ruimte word as 'n voorbeeld gegee. In praktyk kan 'n mens data_2d plot om visueel te kontroleer of die klusters onderskeibaar is. As 'n anomalie teenwoordig was, kan 'n mens dit sien as 'n punt wat weg van die hoofkluster in PCA-ruimte lê. PCA help dus om komplekse data in 'n hanteerbare vorm vir menslike interpretasie of as invoer vir ander algoritmes te distilleer.
+Hier het ons die vroeëre normale verkeersklusters geneem en elke datapunt met twee bykomende kenmerke (pakkette en foute) uitgebrei wat met bytes en duur korreleer. PCA word dan gebruik om die 4 kenmerke in 2 hoofkomponente te komprimeer. Ons druk die verduidelikte variantieverhouding, wat mag wys dat, sê, >95% van die variantie deur 2 komponente vasgevang word (wat min inligtingverlies beteken). Die uitvoer toon ook dat die datavorm verminder van (1500, 4) na (1500, 2). Die eerste paar punte in die PCA-ruimte word as 'n voorbeeld gegee. In praktyk kan 'n mens data_2d plot om visueel te kontroleer of die klusters onderskeibaar is. As 'n anomalie teenwoordig was, kan 'n mens dit sien as 'n punt wat weg van die hoofkluster in die PCA-ruimte lê. PCA help dus om komplekse data in 'n hanteerbare vorm vir menslike interpretasie of as invoer vir ander algoritmes te distilleer.
 
 </details>
 
@@ -233,21 +232,21 @@ Hier het ons die vroeëre normale verkeersklusters geneem en elke datapunt met t
 
 'n Gaussian Mixture Model neem aan dat data gegenereer word uit 'n mengsel van **verskeie Gaussian (normale) verspreidings met onbekende parameters**. In wese is dit 'n probabilistiese klusteringmodel: dit probeer om elke punt sagkens aan een van K Gaussian komponente toe te ken. Elke Gaussian komponent k het 'n gemiddelde vektor (μ_k), kovariansiematrix (Σ_k), en 'n menggewig (π_k) wat verteenwoordig hoe algemeen daardie kluster is. Anders as K-Means wat "harde" toewysings doen, gee GMM aan elke punt 'n waarskynlikheid om tot elke kluster te behoort.
 
-GMM-aanpassing word tipies gedoen via die Verwachting-Maximisering (EM) algoritme:
+GMM-aanpassing word tipies gedoen via die Verwachting-Maximisasie (EM) algoritme:
 
-- **Inisialisering**: Begin met aanvanklike raaiskote vir die gemiddeldes, kovariansies, en mengkoëffisiënte (of gebruik K-Means resultate as 'n beginpunt).
+- **Inisialisasie**: Begin met aanvanklike raaiskote vir die gemiddeldes, kovariansies, en mengkoëffisiënte (of gebruik K-Means resultate as 'n beginpunt).
 
-- **E-stap (Verwagting)**: Gegewe huidige parameters, bereken die verantwoordelikheid van elke kluster vir elke punt: essensieel `r_nk = P(z_k | x_n)` waar z_k die latente veranderlike is wat klusterlidmaatskap vir punt x_n aandui. Dit word gedoen met behulp van Bayes se stelling, waar ons die posterior waarskynlikheid van elke punt wat tot elke kluster behoort, gebaseer op die huidige parameters, bereken. Die verantwoordelikhede word bereken as:
+- **E-stap (Verwachting)**: Gegewe huidige parameters, bereken die verantwoordelikheid van elke kluster vir elke punt: essensieel `r_nk = P(z_k | x_n)` waar z_k die latente veranderlike is wat klusterlidmaatskap vir punt x_n aandui. Dit word gedoen met behulp van Bayes se stelling, waar ons die posterior waarskynlikheid van elke punt wat tot elke kluster behoort, gebaseer op die huidige parameters, bereken. Die verantwoordelikhede word bereken as:
 ```math
 r_{nk} = \frac{\pi_k \mathcal{N}(x_n | \mu_k, \Sigma_k)}{\sum_{j=1}^{K} \pi_j \mathcal{N}(x_n | \mu_j, \Sigma_j)}
 ```
 waar:
 - \( \pi_k \) is die mengkoëffisiënt vir kluster k (vooraf waarskynlikheid van kluster k),
-- \( \mathcal{N}(x_n | \mu_k, \Sigma_k) \) is die Gaussian waarskynlikheiddigtheidsfunksie vir punt \( x_n \) gegewe gemiddelde \( \mu_k \) en kovariansie \( \Sigma_k \).
+- \( \mathcal{N}(x_n | \mu_k, \Sigma_k) \) is die Gaussian waarskynlikheidsdigtheidsfunksie vir punt \( x_n \) gegewe gemiddelde \( \mu_k \) en kovariansie \( \Sigma_k \).
 
-- **M-stap (Maximisering)**: Werk die parameters op met behulp van die verantwoordelikhede wat in die E-stap bereken is:
+- **M-stap (Maximisasie)**: Werk die parameters op met behulp van die verantwoordelikhede wat in die E-stap bereken is:
 - Werk elke gemiddelde μ_k op as die gewogen gemiddelde van punte, waar gewigte die verantwoordelikhede is.
-- Werk elke kovariansie Σ_k op as die gewogen kovariansie van punte wat aan kluster k toegewys is.
+- Werk elke kovariansie Σ_k op as die gewogen kovariansie van punte wat aan kluster k toegeken is.
 - Werk mengkoëffisiënte π_k op as die gemiddelde verantwoordelikheid vir kluster k.
 
 - **Herhaal** E- en M-stappe totdat konvergensie plaasvind (parameters stabiliseer of waarskynlikheidsverbetering onder 'n drempel is).
@@ -261,7 +260,7 @@ Die resultaat is 'n stel Gaussian verspreidings wat saam die algehele dataverspr
 
 GMM is 'n generalisering van K-Means wat kovariansie inkorporeer, sodat klusters ellipsoïdaal kan wees (nie net sferies nie). Dit hanteer klusters van verskillende groottes en vorms as die kovariansie vol is. Sagte klustering is 'n voordeel wanneer klustergrense vaag is – byvoorbeeld, in kuberveiligheid kan 'n gebeurtenis eienskappe van verskeie aanvalstipes hê; GMM kan daardie onsekerheid met waarskynlikhede weerspieël. GMM bied ook 'n probabilistiese digtheidskattings van die data, nuttig vir die opsporing van uitskieters (punte met lae waarskynlikheid onder al die mengkomponente).
 
-Aan die ander kant vereis GMM die spesifisering van die aantal komponente K (alhoewel 'n mens kriteria soos BIC/AIC kan gebruik om dit te kies). EM kan soms stadig konvergeer of na 'n plaaslike optimum, so inisialisering is belangrik (dikwels EM verskeie kere gedoen). As die data nie werklik 'n mengsel van Gaussians volg nie, mag die model 'n swak pas wees. Daar is ook 'n risiko dat een Gaussian krimp om net 'n uitskieter te dek (alhoewel regularisering of minimum kovariansie grense dit kan verminder).
+Aan die ander kant vereis GMM die spesifisering van die aantal komponente K (alhoewel 'n mens kriteria soos BIC/AIC kan gebruik om dit te kies). EM kan soms stadig konvergeer of na 'n plaaslike optimum, so inisialisasie is belangrik (dikwels EM verskeie kere gedoen). As die data nie werklik 'n mengsel van Gaussians volg nie, mag die model 'n swak pas wees. Daar is ook 'n risiko dat een Gaussian krimp om net 'n uitskieter te dek (alhoewel regularisering of minimum kovariansie grense dit kan verminder).
 
 
 <details>
@@ -285,28 +284,28 @@ log_likelihood = gmm.score_samples(sample_attack)
 print("Cluster membership probabilities for sample attack:", probs)
 print("Log-likelihood of sample attack under GMM:", log_likelihood)
 ```
-In hierdie kode, oefen ons 'n GMM met 3 Gaussians op die normale verkeer (aannemende dat ons 3 profiele van wettige verkeer ken). Die gemiddeldes en kovariënsies wat gedruk word, beskryf hierdie klusters (byvoorbeeld, een gemiddelde mag rondom [50,500] wees wat ooreenstem met een kluster se sentrum, ens.). Ons toets dan 'n verdagte verbinding [duur=200, bytes=800]. Die predict_proba gee die waarskynlikheid dat hierdie punt aan elkeen van die 3 klusters behoort – ons sou verwag dat hierdie waarskynlikhede baie laag of hoog skewed is aangesien [200,800] ver van die normale klusters lê. Die algehele score_samples (log-likelihood) word gedruk; 'n baie lae waarde dui aan dat die punt nie goed by die model pas nie, wat dit as 'n anomalie merk. In praktyk kan 'n mens 'n drempel op die log-likelihood (of op die maksimum waarskynlikheid) stel om te besluit of 'n punt voldoende onwaarskynlik is om as kwaadwillig beskou te word. GMM bied dus 'n prinsipiële manier om anomaliedetektering te doen en lewer ook sagte klusters wat onsekerheid erken.
+In hierdie kode, oefen ons 'n GMM met 3 Gaussians op die normale verkeer (aannemende dat ons 3 profiele van wettige verkeer ken). Die gemiddeldes en kovariënsies wat gedruk word, beskryf hierdie klusters (byvoorbeeld, een gemiddelde mag rondom [50,500] wees wat ooreenstem met een kluster se sentrum, ens.). Ons toets dan 'n verdagte verbinding [duur=200, bytes=800]. Die predict_proba gee die waarskynlikheid dat hierdie punt aan elkeen van die 3 klusters behoort – ons sou verwag dat hierdie waarskynlikhede baie laag of hoog geskuif is, aangesien [200,800] ver van die normale klusters lê. Die algehele score_samples (log-likelihood) word gedruk; 'n baie lae waarde dui aan dat die punt nie goed by die model pas nie, wat dit as 'n anomalie merk. In praktyk kan 'n mens 'n drempel op die log-likelihood (of op die maksimum waarskynlikheid) stel om te besluit of 'n punt voldoende onwaarskynlik is om as kwaadwillig beskou te word. GMM bied dus 'n prinsipiële manier om anomaliedetectie te doen en lewer ook sagte klusters wat onsekerheid erken.
 
 ### Isolation Forest
 
-**Isolation Forest** is 'n ensemble anomaliedetektering algoritme gebaseer op die idee om punte ewekansig te isoleer. Die beginsel is dat anomalieë min en anders is, so hulle is makliker om te isoleer as normale punte. 'n Isolation Forest bou baie binêre isolasie-bome (ewekansige besluitbome) wat die data ewekansig partitioneer. By elke knoop in 'n boom, word 'n ewekansige kenmerk gekies en 'n ewekansige splitsingswaarde tussen die minimum en maksimum van daardie kenmerk vir die data in daardie knoop gekies. Hierdie splitsing verdeel die data in twee takke. Die boom word gegroei totdat elke punt in sy eie blad is of 'n maksimum boomhoogte bereik word.
+**Isolation Forest** is 'n ensemble anomaliedetectie-algoritme gebaseer op die idee om punte ewekansig te isoleer. Die beginsel is dat anomalieë min en anders is, so dit is makliker om te isoleer as normale punte. 'n Isolation Forest bou baie binêre isolasiebome (ewekansige besluitbome) wat die data ewekansig partitioneer. By elke knoop in 'n boom word 'n ewekansige kenmerk gekies en 'n ewekansige splitsingswaarde tussen die minimum en maksimum van daardie kenmerk vir die data in daardie knoop gekies. Hierdie splitsing verdeel die data in twee takke. Die boom word gegroei totdat elke punt in sy eie bladsy geisoleer is of 'n maksimum boomhoogte bereik is.
 
-Anomaliedetektering word uitgevoer deur die padlengte van elke punt in hierdie ewekansige bome te observeer – die aantal splitsings wat benodig word om die punt te isoleer. Intuïtief, anomalieë (uitvallers) neig om vinniger geisoleer te word omdat 'n ewekansige splitsing meer waarskynlik is om 'n uitvaller (wat in 'n spars gebied lê) te skei as wat dit 'n normale punt in 'n digte kluster sou doen. Die Isolation Forest bereken 'n anomalie telling vanaf die gemiddelde padlengte oor alle bome: korter gemiddelde pad → meer anomalies. Tellings word gewoonlik genormaliseer tot [0,1] waar 1 baie waarskynlik anomalie beteken.
+Anomaliedetectie word uitgevoer deur die padlengte van elke punt in hierdie ewekansige bome te observeer – die aantal splitsings wat benodig word om die punt te isoleer. Intuïtief, anomalieë (uitvallers) neig om vinniger geisoleer te word omdat 'n ewekansige splitsing meer waarskynlik is om 'n uitvaller (wat in 'n spars gebied lê) te skei as wat dit 'n normale punt in 'n digte kluster sou doen. Die Isolation Forest bereken 'n anomalie telling vanaf die gemiddelde padlengte oor alle bome: korter gemiddelde pad → meer anomalies. Tellings word gewoonlik genormaliseer tot [0,1] waar 1 baie waarskynlik anomalie beteken.
 
 > [!TIP]
 > *Gebruik gevalle in kuberveiligheid:* Isolation Forests is suksesvol gebruik in indringingdetectie en bedrogdetectie. Byvoorbeeld, oefen 'n Isolation Forest op netwerkverkeer logs wat meestal normale gedrag bevat; die woud sal kort paaie vir vreemde verkeer produseer (soos 'n IP wat 'n onbekende poort gebruik of 'n ongewone pakketgrootte patroon), wat dit vir inspeksie merk. Omdat dit nie gelabelde aanvalle vereis nie, is dit geskik om onbekende aanvalstipes te detecteer. Dit kan ook op gebruikersaanmeldingsdata ontplooi word om rekeningneem te detecteer (die anomaliese aanmeldtye of plekke word vinnig geisoleer). In een gebruiksgeval kan 'n Isolation Forest 'n onderneming beskerm deur stelselsmetrieke te monitor en 'n waarskuwing te genereer wanneer 'n kombinasie van metrieke (CPU, netwerk, lêer veranderinge) baie anders lyk (korte isolasiepaaie) van historiese patrone.
 
 #### Aannames en Beperkings
 
-**Voordele**: Isolation Forest vereis nie 'n verspreidingsaannames nie; dit teiken direk isolasie. Dit is doeltreffend op hoë-dimensionele data en groot datastelle (lineêre kompleksiteit $O(n\log n)$ vir die bou van die woud) aangesien elke boom punte met slegs 'n subset van kenmerke en splitsings isoleer. Dit hanteer numeriese kenmerke goed en kan vinniger wees as afstand-gebaseerde metodes wat $O(n^2)$ mag wees. Dit gee ook outomaties 'n anomalie telling, sodat jy 'n drempel vir waarskuwings kan stel (of 'n kontaminasieparameter kan gebruik om outomaties 'n afsnit te besluit gebaseer op 'n verwagte anomaliefraksie).
+**Voordele**: Isolation Forest vereis nie 'n verspreidingsaannames nie; dit teiken direk isolasie. Dit is doeltreffend op hoë-dimensionele data en groot datastelle (lineêre kompleksiteit $O(n\log n)$ vir die bou van die woud) aangesien elke boom punte met slegs 'n substel van kenmerke en splitsings isoleer. Dit hanteer numeriese kenmerke goed en kan vinniger wees as afstand-gebaseerde metodes wat $O(n^2)$ mag wees. Dit gee ook outomaties 'n anomalie telling, sodat jy 'n drempel vir waarskuwings kan stel (of 'n kontaminasieparameter kan gebruik om outomaties 'n afsnit te besluit gebaseer op 'n verwagte anomaliefraksie).
 
-**Beperkings**: Vanweë sy ewekansige aard, kan resultate effens verskil tussen lopies (alhoewel dit met voldoende bome gering is). As die data baie irrelevante kenmerke het of as anomalieë nie sterk in enige kenmerk onderskei nie, mag die isolasie nie effektief wees nie (ewkansige splitsings kan normale punte per toeval isoleer – egter, die gemiddelde van baie bome verlig dit). Ook, Isolation Forest neem oor die algemeen aan dat anomalieë 'n klein minderheid is (wat gewoonlik waar is in kuberveiligheid scenario's).
+**Beperkings**: Vanweë sy ewekansige aard, kan resultate effens verskil tussen lopies (alhoewel dit met voldoende bome gering is). As die data baie irrelevante kenmerke het of as anomalieë nie sterk in enige kenmerk onderskei nie, mag die isolasie nie effektief wees nie (ewkansige splitsings kan normale punte per toeval isoleer – egter, die gemiddelde van baie bome verlig hierdie probleem). Ook, Isolation Forest neem oor die algemeen aan dat anomalieë 'n klein minderheid is (wat gewoonlik waar is in kuberveiligheid scenario's).
 
 <details>
 <summary>Voorbeeld --  Detectie van Uitvallers in Netwerk Logs
 </summary>
 
-Ons sal die vroeëre toetsdatastel gebruik (wat normale en sommige aanvalspunte bevat) en 'n Isolation Forest uitvoer om te sien of dit die aanvalle kan skei. Ons sal aanneem dat ons verwag ~15% van die data anomalies is (vir demonstrasie).
+Ons sal die vroeëre toetsdatastel gebruik (wat normale en sommige aanvalspunte bevat) en 'n Isolation Forest laat loop om te sien of dit die aanvalle kan skei. Ons sal aanneem dat ons verwag dat ~15% van die data anomalies is (vir demonstrasie).
 ```python
 from sklearn.ensemble import IsolationForest
 
@@ -324,28 +323,28 @@ print("Example anomaly scores (lower means more anomalous):", anomaly_scores[:5]
 ```
 In hierdie kode, instantiate ons `IsolationForest` met 100 bome en stel `contamination=0.15` (wat beteken ons verwag ongeveer 15% anomalieë; die model sal sy tellingdrempel stel sodat ~15% van die punte geflag word). Ons pas dit toe op `X_test_if` wat 'n mengsel van normale en aanvalspunte bevat (let wel: normaalweg sou jy op opleidingsdata pas en dan voorspel op nuwe data, maar hier ter illustrasie pas ons toe en voorspel op dieselfde stel om die resultate direk waar te neem).
 
-Die uitvoer toon die voorspelde etikette vir die eerste 20 punte (waar -1 anomalie aandui). Ons druk ook uit hoeveel anomalieë in totaal opgespoor is en 'n paar voorbeeld anomalie tellinge. Ons sou verwag dat ongeveer 18 uit 120 punte as -1 geëtiketteer word (aangesien besmetting 15% was). As ons 20 aanval monsters werklik die mees uitspringende is, behoort die meeste van hulle in daardie -1 voorspellings te verskyn. Die anomalie telling (Isolation Forest se besluit funksie) is hoër vir normale punte en laer (meer negatief) vir anomalieë – ons druk 'n paar waardes uit om die skeiding te sien. In praktyk kan 'n mens die data volgens telling sorteer om die top uitspringendes te sien en hulle te ondersoek. Isolation Forest bied dus 'n doeltreffende manier om deur groot ongetekende sekuriteitsdata te sift en die mees onreëlmatige voorbeelde vir menslike analise of verdere geoutomatiseerde ondersoek uit te kies.
+Die uitvoer toon die voorspelde etikette vir die eerste 20 punte (waar -1 anomalie aandui). Ons druk ook uit hoeveel anomalieë in totaal opgespoor is en 'n paar voorbeeld anomalie tellinge. Ons sou verwag dat ongeveer 18 uit 120 punte as -1 geëtiketteer word (aangesien kontaminasie 15% was). As ons 20 aanval monsters werklik die mees uitspringende is, behoort die meeste van hulle in daardie -1 voorspellings te verskyn. Die anomalie telling (Isolation Forest se besluit funksie) is hoër vir normale punte en laer (meer negatief) vir anomalieë – ons druk 'n paar waardes uit om die skeiding te sien. In praktyk kan 'n mens die data volgens telling sorteer om die top uitspringendes te sien en hulle te ondersoek. Isolation Forest bied dus 'n doeltreffende manier om deur groot ongetekende sekuriteitsdata te sift en die mees onreëlmatige voorbeelde vir menslike analise of verdere geoutomatiseerde ondersoek uit te kies.
 
-### t-SNE (t-Gedistribueerde Stogastiese Buren Inbed)
+### t-SNE (t-Gedistribueerde Stokastiese Buren Inbed)
 
-**t-SNE** is 'n nie-lineêre dimensie reduksie tegniek spesifiek ontwerp om hoë-dimensionele data in 2 of 3 dimensies te visualiseer. Dit omskakel ooreenkomste tussen datapunte na gesamentlike waarskynlikheidsverdeling en probeer om die struktuur van plaaslike buurtes in die laer-dimensionele projek te behou. In eenvoudiger terme plaas t-SNE punte in (sê) 2D sodat soortgelyke punte (in die oorspronklike ruimte) naby mekaar eindig en onsimilar punte ver van mekaar met 'n hoë waarskynlikheid eindig.
+**t-SNE** is 'n nie-lineêre dimensie reduksie tegniek spesifiek ontwerp om hoë-dimensionele data in 2 of 3 dimensies te visualiseer. Dit omskep ooreenkomste tussen datapunte na gesamentlike waarskynlikheidsverdeling en probeer om die struktuur van plaaslike buurtes in die laer-dimensionele projek te behou. In eenvoudiger terme plaas t-SNE punte in (sê) 2D sodat soortgelyke punte (in die oorspronklike ruimte) naby mekaar eindig en onsimilar punte ver van mekaar met 'n hoë waarskynlikheid eindig.
 
 Die algoritme het twee hoof fases:
 
-1. **Bereken paargewys affiniteit in hoë-dimensionele ruimte:** Vir elke paar punte, bereken t-SNE 'n waarskynlikheid dat een daardie paar as bure sou kies (dit word gedoen deur 'n Gaussiese verspreiding op elke punt te sentreer en afstande te meet – die perplexity parameter beïnvloed die effektiewe aantal bure wat oorweeg word).
-2. **Bereken paargewys affiniteit in lae-dimensionele (bv. 2D) ruimte:** Aanvanklik word punte ewekansig in 2D geplaas. t-SNE definieer 'n soortgelyke waarskynlikheid vir afstande in hierdie kaart (met 'n Student t-verdeling kern, wat swaarder sterte as Gaussies het om verre punte meer vryheid te gee).
+1. **Bereken paargewys affiniteit in hoë-dimensionele ruimte:** Vir elke paar punte, bereken t-SNE 'n waarskynlikheid dat een daardie paar as bure sou kies (dit word gedoen deur 'n Gaussiese verspreiding op elke punt te sentreer en afstande te meet – die perplexiteit parameter beïnvloed die effektiewe aantal bure wat oorweeg word).
+2. **Bereken paargewys affiniteit in lae-dimensionele (bv. 2D) ruimte:** Aanvanklik word punte ewekansig in 2D geplaas. t-SNE definieer 'n soortgelyke waarskynlikheid vir afstande in hierdie kaart (met 'n Student t-verspreiding kern, wat swaarder sterte as Gaussies het om verre punte meer vryheid te gee).
 3. **Gradiënt Afdaling:** t-SNE beweeg dan iteratief die punte in 2D om die Kullback–Leibler (KL) divergensie tussen die hoë-D affiniteit verspreiding en die lae-D een te minimaliseer. Dit veroorsaak dat die 2D rangskikking die hoë-D struktuur soveel as moontlik weerspieël – punte wat naby was in die oorspronklike ruimte sal mekaar aantrek, en diegene wat ver is sal afstoot, totdat 'n balans gevind word.
 
 Die resultaat is dikwels 'n visueel betekenisvolle verspreidingsgrafiek waar klusters in die data duidelik word.
 
 > [!TIP]
-> *Gebruik gevalle in kuberveiligheid:* t-SNE word dikwels gebruik om **hoë-dimensionele sekuriteitsdata vir menslike analise te visualiseer**. Byvoorbeeld, in 'n sekuriteitsbedrywigheidsentrum kan analiste 'n gebeurtenisdatastel met dosyne kenmerke (poortnommers, frekwensies, byte tellings, ens.) neem en t-SNE gebruik om 'n 2D-grafiek te produseer. Aanvalle kan hul eie klusters vorm of van normale data in hierdie grafiek skei, wat dit makliker maak om te identifiseer. Dit is toegepas op malware datastelle om groepe van malware gesinne te sien of op netwerkindringingsdata waar verskillende aanval tipe duidelik groepeer, wat verdere ondersoek lei. Essensieel bied t-SNE 'n manier om struktuur in kuberdata te sien wat andersins onduidelik sou wees.
+> *Gebruik gevalle in kuberveiligheid:* t-SNE word dikwels gebruik om **hoë-dimensionele sekuriteitsdata vir menslike analise te visualiseer**. Byvoorbeeld, in 'n sekuriteitsbedrywigheidsentrum kan analiste 'n gebeurtenisdatastel met dosyne kenmerke (poortnommers, frekwensies, byte tellings, ens.) neem en t-SNE gebruik om 'n 2D-grafiek te produseer. Aanvalle kan hul eie klusters vorm of van normale data in hierdie grafiek skei, wat dit makliker maak om te identifiseer. Dit is toegepas op malware-datastelle om groepe van malware-families te sien of op netwerkindringingsdata waar verskillende aanvalstipes duidelik groepeer, wat verdere ondersoek lei. Essensieel bied t-SNE 'n manier om struktuur in kuberdata te sien wat andersins onduidelik sou wees.
 
 #### Aannames en Beperkings
 
 t-SNE is uitstekend vir visuele ontdekking van patrone. Dit kan klusters, subklusters en uitspringendes onthul wat ander lineêre metodes (soos PCA) dalk nie kan nie. Dit is gebruik in kuberveiligheid navorsing om komplekse data soos malware gedrag profiele of netwerkverkeer patrone te visualiseer. Omdat dit plaaslike struktuur behou, is dit goed om natuurlike groepe te toon.
 
-Echter, t-SNE is rekenaarintensief (ongeveer $O(n^2)$) so dit mag steekproefneming vereis vir baie groot datastelle. Dit het ook hiperparameters (perplexity, leer tempo, iterasies) wat die uitvoer kan beïnvloed – bv., verskillende perplexity waardes kan klusters op verskillende skale onthul. t-SNE grafieke kan soms verkeerd geïnterpreteer word – afstande in die kaart is nie direk betekenisvol globaal nie (dit fokus op plaaslike buurtes, soms kan klusters kunsmatig goed geskei voorkom). Ook, t-SNE is hoofsaaklik vir visualisering; dit bied nie 'n regstreekse manier om nuwe datapunte te projekteer sonder om weer te bereken nie, en dit is nie bedoel om as 'n voorverwerking vir voorspellende modellering gebruik te word nie (UMAP is 'n alternatief wat sommige van hierdie probleme met vinniger spoed aanspreek).
+Tog, t-SNE is rekenaarintensiewer (ongeveer $O(n^2)$) so dit mag vereis dat daar monsters geneem word vir baie groot datastelle. Dit het ook hiperparameters (perplexiteit, leer tempo, iterasies) wat die uitvoer kan beïnvloed – bv., verskillende perplexiteit waardes kan klusters op verskillende skale onthul. t-SNE grafieke kan soms verkeerd geïnterpreteer word – afstande in die kaart is nie direk betekenisvol globaal nie (dit fokus op plaaslike buurtes, soms kan klusters kunsmatig goed geskei voorkom). Ook, t-SNE is hoofsaaklik vir visualisering; dit bied nie 'n regstreekse manier om nuwe datapunte te projekteer sonder om weer te bereken nie, en dit is nie bedoel om as 'n voorverwerking vir voorspellende modellering gebruik te word nie (UMAP is 'n alternatief wat sommige van hierdie probleme met vinniger spoed aanspreek).
 
 <details>
 <summary>Voorbeeld -- Visualisering van Netwerkverbindinge
@@ -434,7 +433,7 @@ plt.legend()
 plt.tight_layout()
 plt.show()
 ```
-Hier het ons ons vorige 4D normale datastel gekombineer met 'n handvol ekstreme uitskieters (die uitskieters het een kenmerk (“duur”) baie hoog gestel, ens., om 'n vreemde patroon te simuleer). Ons voer t-SNE uit met 'n tipiese perplexiteit van 30. Die uitvoer data_2d het 'n vorm van (1505, 2). Ons gaan eintlik nie in hierdie teks plot nie, maar as ons dit sou doen, sou ons verwag om dalk drie stywe klusters te sien wat ooreenstem met die 3 normale klusters, en die 5 uitskieters wat as geïsoleerde punte ver van daardie klusters verskyn. In 'n interaktiewe werksvloei, kan ons die punte kleur volgens hul etiket (normaal of watter kluster, teen anomalie) om hierdie struktuur te verifieer. Selfs sonder etikette, mag 'n ontleder daardie 5 punte wat in leë ruimte op die 2D plot sit, opgemerk en merk. Dit toon hoe t-SNE 'n kragtige hulp kan wees vir visuele anomaliedetektering en klusterinspeksie in kuberveiligheidsdata, wat die geoutomatiseerde algoritmes hierbo aanvul.
+Hier het ons ons vorige 4D normale datastel gekombineer met 'n handvol ekstreme uitskieters (die uitskieters het een kenmerk (“duur”) baie hoog gestel, ens., om 'n vreemde patroon na te boots). Ons voer t-SNE uit met 'n tipiese perplexiteit van 30. Die uitvoer data_2d het 'n vorm van (1505, 2). Ons gaan eintlik nie in hierdie teks plot nie, maar as ons dit gedoen het, sou ons verwag om dalk drie stywe klusters te sien wat ooreenstem met die 3 normale klusters, en die 5 uitskieters wat as geïsoleerde punte ver van daardie klusters verskyn. In 'n interaktiewe werksvloei, kan ons die punte kleur volgens hul etiket (normaal of watter kluster, teenoor anomalie) om hierdie struktuur te verifieer. Selfs sonder etikette, mag 'n ontleder daardie 5 punte in leë ruimte op die 2D plot opgemerk het en dit merk. Dit toon hoe t-SNE 'n kragtige hulp kan wees vir visuele anomaliedetektering en klusterinspeksie in kuberveiligheidsdata, wat die geoutomatiseerde algoritmes hierbo aanvul.
 
 </details>
 
