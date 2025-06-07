@@ -2,13 +2,16 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
+
 ## Apprendimento Non Supervisionato
 
-L'apprendimento non supervisionato è un tipo di machine learning in cui il modello viene addestrato su dati senza risposte etichettate. L'obiettivo è trovare modelli, strutture o relazioni all'interno dei dati. A differenza dell'apprendimento supervisionato, in cui il modello impara da esempi etichettati, gli algoritmi di apprendimento non supervisionato lavorano con dati non etichettati. L'apprendimento non supervisionato è spesso utilizzato per compiti come clustering, riduzione della dimensionalità e rilevamento delle anomalie. Può aiutare a scoprire modelli nascosti nei dati, raggruppare elementi simili o ridurre la complessità dei dati mantenendo le sue caratteristiche essenziali.
+L'apprendimento non supervisionato è un tipo di machine learning in cui il modello viene addestrato su dati senza risposte etichettate. L'obiettivo è trovare modelli, strutture o relazioni all'interno dei dati. A differenza dell'apprendimento supervisionato, in cui il modello impara da esempi etichettati, gli algoritmi di apprendimento non supervisionato lavorano con dati non etichettati. 
+L'apprendimento non supervisionato è spesso utilizzato per compiti come clustering, riduzione della dimensionalità e rilevamento delle anomalie. Può aiutare a scoprire modelli nascosti nei dati, raggruppare elementi simili o ridurre la complessità dei dati mantenendo le sue caratteristiche essenziali.
+
 
 ### Clustering K-Means
 
-K-Means è un algoritmo di clustering basato sui centroidi che partiziona i dati in K cluster assegnando ogni punto al centroide del cluster più vicino. L'algoritmo funziona come segue:
+K-Means è un algoritmo di clustering basato su centroidi che partiziona i dati in K cluster assegnando ogni punto al centroide del cluster più vicino. L'algoritmo funziona come segue:
 1. **Inizializzazione**: Scegliere K centri di cluster iniziali (centroidi), spesso casualmente o tramite metodi più intelligenti come k-means++
 2. **Assegnazione**: Assegnare ogni punto dati al centroide più vicino in base a una metrica di distanza (ad es., distanza euclidea).
 3. **Aggiornamento**: Ricalcolare i centroidi prendendo la media di tutti i punti dati assegnati a ciascun cluster.
@@ -25,10 +28,10 @@ Il numero di cluster (K) è un iperparametro che deve essere definito prima di e
 
 #### Assunzioni e Limitazioni
 
-K-Means assume che **i cluster siano sferici e di dimensioni uguali**, il che potrebbe non essere vero per tutti i dataset. È sensibile alla posizione iniziale dei centroidi e può convergere a minimi locali. Inoltre, K-Means non è adatto per dataset con densità variabili o forme non globulari e caratteristiche con scale diverse. Passaggi di preprocessing come normalizzazione o standardizzazione potrebbero essere necessari per garantire che tutte le caratteristiche contribuiscano in modo equo ai calcoli delle distanze.
+K-Means assume che **i cluster siano sferici e di dimensioni uguali**, il che potrebbe non essere vero per tutti i dataset. È sensibile alla posizione iniziale dei centroidi e può convergere a minimi locali. Inoltre, K-Means non è adatto per dataset con densità variabili o forme non globulari e caratteristiche con scale diverse. Passaggi di preprocessing come normalizzazione o standardizzazione possono essere necessari per garantire che tutte le caratteristiche contribuiscano in modo equo ai calcoli delle distanze.
 
 <details>
-<summary>Esempio -- Clustering degli Eventi di Rete
+<summary>Esempio -- Clustering di Eventi di Rete
 </summary>
 Di seguito simuliamo dati di traffico di rete e utilizziamo K-Means per raggrupparli. Supponiamo di avere eventi con caratteristiche come la durata della connessione e il conteggio dei byte. Creiamo 3 cluster di traffico "normale" e 1 piccolo cluster che rappresenta un modello di attacco. Poi eseguiamo K-Means per vedere se li separa.
 ```python
@@ -109,14 +112,14 @@ DBSCAN funziona definendo due parametri:
 - **MinPts**: Il numero minimo di punti richiesti per formare una regione densa (punto centrale).
 
 DBSCAN identifica punti centrali, punti di confine e punti di rumore:
-- **Punto Centrale**: Un punto con almeno MinPts vicini entro una distanza ε.
-- **Punto di Confine**: Un punto che si trova entro una distanza ε da un punto centrale ma ha meno di MinPts vicini.
+- **Punto Centrale**: Un punto con almeno MinPts vicini entro una distanza di ε.
+- **Punto di Confine**: Un punto che si trova entro una distanza di ε da un punto centrale ma ha meno di MinPts vicini.
 - **Punto di Rumore**: Un punto che non è né un punto centrale né un punto di confine.
 
 Il clustering procede scegliendo un punto centrale non visitato, contrassegnandolo come un nuovo cluster, quindi aggiungendo ricorsivamente tutti i punti raggiungibili per densità da esso (punti centrali e i loro vicini, ecc.). I punti di confine vengono aggiunti al cluster di un punto centrale vicino. Dopo aver espanso tutti i punti raggiungibili, DBSCAN passa a un altro punto centrale non visitato per avviare un nuovo cluster. I punti non raggiunti da alcun punto centrale rimangono etichettati come rumore.
 
 > [!TIP]
-> *Casi d'uso nella cybersecurity:* DBSCAN è utile per la rilevazione di anomalie nel traffico di rete. Ad esempio, l'attività normale degli utenti potrebbe formare uno o più cluster densi nello spazio delle caratteristiche, mentre i comportamenti di attacco nuovi appaiono come punti sparsi che DBSCAN etichetterà come rumore (outlier). È stato utilizzato per raggruppare registri di flusso di rete, dove può rilevare scansioni di porte o traffico di denial-of-service come regioni sparse di punti. Un'altra applicazione è il raggruppamento di varianti di malware: se la maggior parte dei campioni si raggruppa per famiglie ma alcuni non si adattano da nessuna parte, quei pochi potrebbero essere malware zero-day. La capacità di segnalare il rumore significa che i team di sicurezza possono concentrarsi sull'indagine di quegli outlier.
+> *Casi d'uso nella cybersecurity:* DBSCAN è utile per il rilevamento di anomalie nel traffico di rete. Ad esempio, l'attività normale degli utenti potrebbe formare uno o più cluster densi nello spazio delle caratteristiche, mentre i comportamenti di attacco nuovi appaiono come punti sparsi che DBSCAN etichetterà come rumore (outlier). È stato utilizzato per raggruppare registri di flusso di rete, dove può rilevare scansioni di porte o traffico di denial-of-service come regioni sparse di punti. Un'altra applicazione è il raggruppamento di varianti di malware: se la maggior parte dei campioni si raggruppa per famiglie ma alcuni non si adattano da nessuna parte, quei pochi potrebbero essere malware zero-day. La capacità di segnalare il rumore significa che i team di sicurezza possono concentrarsi sull'indagine di quegli outlier.
 
 #### Assunzioni e Limitazioni
 
@@ -185,10 +188,10 @@ Spieghiamo questo con un esempio. Immagina di avere un dataset con molte immagin
 2. **Matrice di Covarianza**: Calcolare la matrice di covarianza dei dati standardizzati, che cattura come le caratteristiche (pixel) variano insieme.
 - Nota che la covarianza tra due variabili (pixel in questo caso) indica quanto cambiano insieme, quindi l'idea qui è scoprire quali pixel tendono ad aumentare o diminuire insieme con una relazione lineare.
 - Ad esempio, se il pixel 1 e il pixel 2 tendono ad aumentare insieme, la covarianza tra di loro sarà positiva.
-- La matrice di covarianza sarà una matrice 10.000x10.000 dove ogni voce rappresenta la covarianza tra due pixel.
+- La matrice di covarianza sarà una matrice 10.000x10.000 in cui ogni voce rappresenta la covarianza tra due pixel.
 3. **Risolvi l'equazione degli autovalori**: L'equazione degli autovalori da risolvere è `C * v = λ * v` dove C è la matrice di covarianza, v è l'autovettore e λ è l'autovalore. Può essere risolta utilizzando metodi come:
 - **Decomposizione degli Autovalori**: Eseguire la decomposizione degli autovalori sulla matrice di covarianza per ottenere gli autovalori e gli autovettori.
-- **Decomposizione ai Valori Singolari (SVD)**: In alternativa, puoi utilizzare SVD per decomporre la matrice dei dati in valori e vettori singolari, che possono anche fornire le componenti principali.
+- **Decomposizione ai Valori Singolari (SVD)**: In alternativa, puoi utilizzare la SVD per decomporre la matrice dei dati in valori e vettori singolari, che possono anche fornire le componenti principali.
 4. **Selezionare le Componenti Principali**: Ordinare gli autovalori in ordine decrescente e selezionare i primi K autovettori corrispondenti ai più grandi autovalori. Questi autovettori rappresentano le direzioni di massima varianza nei dati.
 
 > [!TIP]
@@ -231,11 +234,11 @@ Qui abbiamo preso i precedenti cluster di traffico normale e abbiamo esteso ogni
 
 Un Modello di Miscele Gaussiane assume che i dati siano generati da una miscela di **diverse distribuzioni gaussiane (normali) con parametri sconosciuti**. In sostanza, è un modello di clustering probabilistico: cerca di assegnare dolcemente ogni punto a uno dei K componenti gaussiani. Ogni componente gaussiano k ha un vettore medio (μ_k), una matrice di covarianza (Σ_k) e un peso di miscelazione (π_k) che rappresenta quanto è prevalente quel cluster. A differenza di K-Means che fa assegnazioni "dure", GMM dà a ogni punto una probabilità di appartenere a ciascun cluster.
 
-L'adattamento di GMM viene tipicamente effettuato tramite l'algoritmo di Massimizzazione delle Aspettative (EM):
+L'adattamento di GMM viene tipicamente eseguito tramite l'algoritmo di Massimizzazione delle Aspettative (EM):
 
 - **Inizializzazione**: Iniziare con stime iniziali per le medie, le covarianze e i coefficienti di miscelazione (o utilizzare i risultati di K-Means come punto di partenza).
 
-- **E-step (Aspettativa)**: Dati i parametri attuali, calcolare la responsabilità di ciascun cluster per ciascun punto: essenzialmente `r_nk = P(z_k | x_n)` dove z_k è la variabile latente che indica l'appartenenza al cluster per il punto x_n. Questo viene fatto usando il teorema di Bayes, dove calcoliamo la probabilità posteriore di ciascun punto appartenente a ciascun cluster in base ai parametri attuali. Le responsabilità sono calcolate come:
+- **E-step (Aspettativa)**: Dati i parametri attuali, calcolare la responsabilità di ciascun cluster per ogni punto: essenzialmente `r_nk = P(z_k | x_n)` dove z_k è la variabile latente che indica l'appartenenza al cluster per il punto x_n. Questo viene fatto usando il teorema di Bayes, dove calcoliamo la probabilità posteriore di ciascun punto appartenente a ciascun cluster in base ai parametri attuali. Le responsabilità vengono calcolate come:
 ```math
 r_{nk} = \frac{\pi_k \mathcal{N}(x_n | \mu_k, \Sigma_k)}{\sum_{j=1}^{K} \pi_j \mathcal{N}(x_n | \mu_j, \Sigma_j)}
 ```
@@ -250,7 +253,7 @@ dove:
 
 - **Iterare** i passi E e M fino alla convergenza (i parametri si stabilizzano o il miglioramento della verosimiglianza è al di sotto di una soglia).
 
-Il risultato è un insieme di distribuzioni gaussiane che modellano collettivamente la distribuzione complessiva dei dati. Possiamo utilizzare il GMM adattato per raggruppare assegnando a ciascun punto la gaussiana con la massima probabilità, o mantenere le probabilità per l'incertezza. Si può anche valutare la verosimiglianza di nuovi punti per vedere se si adattano al modello (utile per la rilevazione di anomalie).
+Il risultato è un insieme di distribuzioni gaussiane che modellano collettivamente la distribuzione complessiva dei dati. Possiamo utilizzare il GMM adattato per raggruppare assegnando a ciascun punto la gaussiana con la probabilità più alta, o mantenere le probabilità per l'incertezza. Si può anche valutare la verosimiglianza di nuovi punti per vedere se si adattano al modello (utile per la rilevazione di anomalie).
 
 > [!TIP]
 > *Casi d'uso nella cybersecurity:* GMM può essere utilizzato per la rilevazione di anomalie modellando la distribuzione dei dati normali: qualsiasi punto con probabilità molto bassa sotto la miscela appresa è contrassegnato come anomalia. Ad esempio, si potrebbe addestrare un GMM su caratteristiche di traffico di rete legittimo; una connessione di attacco che non somiglia a nessun cluster appreso avrebbe una bassa probabilità. I GMM vengono anche utilizzati per raggruppare attività in cui i cluster potrebbero avere forme diverse – ad esempio, raggruppare gli utenti per profili comportamentali, dove le caratteristiche di ciascun profilo potrebbero essere simili a gaussiane ma con la propria struttura di varianza. Un altro scenario: nella rilevazione di phishing, le caratteristiche delle email legittime potrebbero formare un cluster gaussiano, il phishing noto un altro, e le nuove campagne di phishing potrebbero apparire come una gaussiana separata o come punti a bassa probabilità rispetto alla miscela esistente.
@@ -283,7 +286,7 @@ log_likelihood = gmm.score_samples(sample_attack)
 print("Cluster membership probabilities for sample attack:", probs)
 print("Log-likelihood of sample attack under GMM:", log_likelihood)
 ```
-In questo codice, alleniamo un GMM con 3 Gaussiane sul traffico normale (supponendo di conoscere 3 profili di traffico legittimo). Le medie e le covarianze stampate descrivono questi cluster (ad esempio, una media potrebbe essere intorno a [50,500] corrispondente al centro di un cluster, ecc.). Testiamo quindi una connessione sospetta [duration=200, bytes=800]. La predict_proba fornisce la probabilità che questo punto appartenga a ciascuno dei 3 cluster – ci aspetteremmo che queste probabilità siano molto basse o altamente sbilanciate poiché [200,800] si trova lontano dai cluster normali. Il punteggio overall score_samples (log-verosimiglianza) è stampato; un valore molto basso indica che il punto non si adatta bene al modello, segnalandolo come un'anomalia. In pratica, si potrebbe impostare una soglia sulla log-verosimiglianza (o sulla massima probabilità) per decidere se un punto è sufficientemente improbabile da essere considerato malevolo. GMM fornisce quindi un modo fondato per fare rilevamento delle anomalie e produce anche cluster morbidi che riconoscono l'incertezza.
+In questo codice, alleniamo un GMM con 3 Gaussiane sul traffico normale (supponendo di conoscere 3 profili di traffico legittimo). Le medie e le covarianze stampate descrivono questi cluster (ad esempio, una media potrebbe essere intorno a [50,500] corrispondente al centro di un cluster, ecc.). Testiamo quindi una connessione sospetta [duration=200, bytes=800]. La predict_proba fornisce la probabilità che questo punto appartenga a ciascuno dei 3 cluster – ci aspetteremmo che queste probabilità siano molto basse o altamente sbilanciate poiché [200,800] si trova lontano dai cluster normali. Il punteggio overall score_samples (log-likelihood) è stampato; un valore molto basso indica che il punto non si adatta bene al modello, segnalandolo come un'anomalia. In pratica, si potrebbe impostare una soglia sulla log-likelihood (o sulla massima probabilità) per decidere se un punto è sufficientemente improbabile da essere considerato malevolo. GMM fornisce quindi un modo fondato per fare rilevamento delle anomalie e produce anche cluster morbidi che riconoscono l'incertezza.
 
 ### Isolation Forest
 
@@ -296,7 +299,7 @@ Il rilevamento delle anomalie viene eseguito osservando la lunghezza del percors
 
 #### Assunzioni e Limitazioni
 
-**Vantaggi**: L'Isolation Forest non richiede un'assunzione di distribuzione; mira direttamente all'isolamento. È efficiente su dati ad alta dimensione e set di dati di grandi dimensioni (complessità lineare $O(n\log n)$ per costruire la foresta) poiché ogni albero isola i punti utilizzando solo un sottoinsieme di caratteristiche e divisioni. Tende a gestire bene le caratteristiche numeriche e può essere più veloce dei metodi basati sulla distanza che potrebbero essere $O(n^2)$. Fornisce anche automaticamente un punteggio di anomalia, quindi puoi impostare una soglia per gli avvisi (o utilizzare un parametro di contaminazione per decidere automaticamente un cutoff basato su una frazione di anomalia attesa).
+**Vantaggi**: L'Isolation Forest non richiede un'assunzione di distribuzione; mira direttamente all'isolamento. È efficiente su dati ad alta dimensione e set di dati grandi (complessità lineare $O(n\log n)$ per costruire la foresta) poiché ogni albero isola i punti utilizzando solo un sottoinsieme di caratteristiche e divisioni. Tende a gestire bene le caratteristiche numeriche e può essere più veloce dei metodi basati sulla distanza che potrebbero essere $O(n^2)$. Fornisce anche automaticamente un punteggio di anomalia, quindi puoi impostare una soglia per gli avvisi (o utilizzare un parametro di contaminazione per decidere automaticamente un cutoff basato su una frazione di anomalia attesa).
 
 **Limitazioni**: A causa della sua natura casuale, i risultati possono variare leggermente tra le esecuzioni (anche se con un numero sufficiente di alberi questo è minore). Se i dati hanno molte caratteristiche irrilevanti o se le anomalie non si differenziano fortemente in alcuna caratteristica, l'isolamento potrebbe non essere efficace (le divisioni casuali potrebbero isolare punti normali per caso – tuttavia, la media di molti alberi mitiga questo). Inoltre, l'Isolation Forest generalmente assume che le anomalie siano una piccola minoranza (cosa che è solitamente vera negli scenari di cybersecurity).
 
@@ -320,7 +323,7 @@ print("Isolation Forest predicted labels (first 20):", preds[:20])
 print("Number of anomalies detected:", np.sum(preds == -1))
 print("Example anomaly scores (lower means more anomalous):", anomaly_scores[:5])
 ```
-In questo codice, istanziamo `IsolationForest` con 100 alberi e impostiamo `contamination=0.15` (il che significa che ci aspettiamo circa il 15% di anomalie; il modello imposterà la sua soglia di punteggio in modo che ~15% dei punti siano contrassegnati). Lo adattiamo su `X_test_if` che contiene un mix di punti normali e di attacco (nota: normalmente si adatterebbe ai dati di addestramento e poi si userebbe predict su nuovi dati, ma qui per illustrazione ci adattiamo e prevediamo sullo stesso insieme per osservare direttamente i risultati).
+In questo codice, istanziamo `IsolationForest` con 100 alberi e impostiamo `contamination=0.15` (il che significa che ci aspettiamo circa il 15% di anomalie; il modello imposterà la sua soglia di punteggio in modo che ~15% dei punti siano contrassegnati). Lo adattiamo su `X_test_if`, che contiene un mix di punti normali e di attacco (nota: normalmente si adatterebbe ai dati di addestramento e poi si userebbe predict su nuovi dati, ma qui per illustrazione ci adattiamo e prevediamo sullo stesso insieme per osservare direttamente i risultati).
 
 L'output mostra le etichette previste per i primi 20 punti (dove -1 indica un'anomalia). Stampiamo anche quanti anomalie sono state rilevate in totale e alcuni esempi di punteggi di anomalia. Ci aspetteremmo che circa 18 su 120 punti siano etichettati -1 (poiché la contaminazione era del 15%). Se i nostri 20 campioni di attacco sono davvero i più anomali, la maggior parte di essi dovrebbe apparire in quelle previsioni -1. Il punteggio di anomalia (la funzione di decisione di Isolation Forest) è più alto per i punti normali e più basso (più negativo) per le anomalie – stampiamo alcuni valori per vedere la separazione. In pratica, si potrebbe ordinare i dati per punteggio per vedere i principali outlier e indagarli. Isolation Forest fornisce quindi un modo efficiente per setacciare grandi dati di sicurezza non etichettati e selezionare le istanze più irregolari per un'analisi umana o un'ulteriore scrutinio automatizzato.
 
@@ -343,7 +346,7 @@ Il risultato è spesso un diagramma a dispersione visivamente significativo dove
 
 t-SNE è ottimo per la scoperta visiva di schemi. Può rivelare cluster, subcluster e outlier che altri metodi lineari (come PCA) potrebbero non rilevare. È stato utilizzato nella ricerca sulla cybersecurity per visualizzare dati complessi come profili di comportamento di malware o schemi di traffico di rete. Poiché preserva la struttura locale, è utile per mostrare raggruppamenti naturali.
 
-Tuttavia, t-SNE è computazionalmente più pesante (circa $O(n^2)$) quindi potrebbe richiedere campionamento per dataset molto grandi. Ha anche iperparametri (perplessità, tasso di apprendimento, iterazioni) che possono influenzare l'output – ad esempio, diversi valori di perplessità potrebbero rivelare cluster a scale diverse. I grafici t-SNE possono talvolta essere fraintesi – le distanze nella mappa non sono direttamente significative a livello globale (si concentra sul vicinato locale, a volte i cluster possono apparire artificialmente ben separati). Inoltre, t-SNE è principalmente per la visualizzazione; non fornisce un modo diretto per proiettare nuovi punti dati senza ricalcolare, e non è destinato ad essere utilizzato come preprocessing per la modellazione predittiva (UMAP è un'alternativa che affronta alcuni di questi problemi con una velocità maggiore).
+Tuttavia, t-SNE è computazionalmente più pesante (circa $O(n^2)$) quindi potrebbe richiedere campionamento per dataset molto grandi. Ha anche iperparametri (perplessità, tasso di apprendimento, iterazioni) che possono influenzare l'output – ad esempio, diversi valori di perplessità potrebbero rivelare cluster a scale diverse. I grafici t-SNE possono a volte essere fraintesi – le distanze nella mappa non sono direttamente significative a livello globale (si concentra sul vicinato locale, a volte i cluster possono apparire artificialmente ben separati). Inoltre, t-SNE è principalmente per la visualizzazione; non fornisce un modo diretto per proiettare nuovi punti dati senza ricalcolare, e non è destinato ad essere utilizzato come preprocessing per la modellazione predittiva (UMAP è un'alternativa che affronta alcuni di questi problemi con una velocità maggiore).
 
 <details>
 <summary>Esempio -- Visualizzazione delle Connessioni di Rete
@@ -432,7 +435,7 @@ plt.legend()
 plt.tight_layout()
 plt.show()
 ```
-Qui abbiamo combinato il nostro precedente dataset normale 4D con un numero limitato di outlier estremi (gli outlier hanno una caratteristica (“durata”) impostata molto alta, ecc., per simulare un modello strano). Eseguiamo t-SNE con una perplessità tipica di 30. I dati di output_2d hanno forma (1505, 2). In questo testo non tracciamo effettivamente, ma se lo facessimo, ci aspetteremmo di vedere forse tre cluster compatti corrispondenti ai 3 cluster normali, e i 5 outlier apparire come punti isolati lontani da quei cluster. In un flusso di lavoro interattivo, potremmo colorare i punti in base alla loro etichetta (normale o quale cluster, rispetto all'anomalia) per verificare questa struttura. Anche senza etichette, un analista potrebbe notare quei 5 punti seduti in uno spazio vuoto nel grafico 2D e segnalarli. Questo dimostra come t-SNE possa essere un potente aiuto per la rilevazione visiva delle anomalie e l'ispezione dei cluster nei dati di cybersecurity, complementando gli algoritmi automatizzati sopra.
+Qui abbiamo combinato il nostro precedente dataset normale 4D con un numero limitato di outlier estremi (gli outlier hanno una caratteristica (“durata”) impostata molto alta, ecc., per simulare un modello strano). Eseguiamo t-SNE con una perplessità tipica di 30. I dati di output data_2d hanno forma (1505, 2). In questo testo non tracciamo effettivamente, ma se lo facessimo, ci aspetteremmo di vedere forse tre cluster compatti corrispondenti ai 3 cluster normali, e i 5 outlier apparire come punti isolati lontani da quei cluster. In un flusso di lavoro interattivo, potremmo colorare i punti in base alla loro etichetta (normale o quale cluster, rispetto all'anomalia) per verificare questa struttura. Anche senza etichette, un analista potrebbe notare quei 5 punti seduti in uno spazio vuoto nel grafico 2D e segnalarli. Questo dimostra come t-SNE possa essere un potente aiuto per la rilevazione visiva delle anomalie e l'ispezione dei cluster nei dati di cybersecurity, complementando gli algoritmi automatizzati sopra.
 
 </details>
 
