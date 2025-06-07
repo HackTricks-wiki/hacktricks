@@ -792,8 +792,8 @@ clean:
 
 Execute `make` to compile it.
 
-```
-ake[1]: *** /lib/modules/5.10.0-kali7-amd64/build: No such file or directory.  Stop.
+```bash
+Make[1]: *** /lib/modules/5.10.0-kali7-amd64/build: No such file or directory.  Stop.
 
 sudo apt update
 sudo apt full-upgrade
@@ -1570,7 +1570,7 @@ f=open("/path/to/file.sh",'a+')
 f.write('New content for the file\n')
 ```
 
-> [!NOTE]
+> [!TIP]
 > Note that usually this immutable attribute is set and remove using:
 >
 > ```bash

@@ -4,6 +4,12 @@
 
 **This page was written by** [**@m2rc_p**](https://twitter.com/m2rc_p)**!**
 
+## Stop Defender
+
+- [defendnot](https://github.com/es3n1n/defendnot): A tool to stop Windows Defender from working.
+- [no-defender](https://github.com/es3n1n/no-defender): A tool to stop Windows Defender from working faking another AV.
+- [Disable Defender if you are admin](basic-powershell-for-pentesters/README.md)
+
 ## **AV Evasion Methodology**
 
 Currently, AVs use different methods for checking if a file is malicious or not, static detection, dynamic analysis, and for the more advanced EDRs, behavioural analysis.
@@ -24,7 +30,7 @@ Sometimes all you need to do is change some strings in your binary or script to 
 
 If you develop your own tools, there will be no known bad signatures, but this takes a lot of time and effort.
 
-> [!NOTE]
+> [!TIP]
 > A good way for checking against Windows Defender static detection is [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck). It basically splits the file into multiple segments and then tasks Defender to scan each one individually, this way, it can tell you exactly what are the flagged strings or bytes in your binary.
 
 I highly recommend you check out this [YouTube playlist](https://www.youtube.com/playlist?list=PLj05gPj8rk_pkb12mDe4PgYZ5qPxhGKGf) about practical AV Evasion.
@@ -51,7 +57,7 @@ For example, if you want to dump LSASS, **do you really need to use mimikatz**? 
 
 The right answer is probably the latter. Taking mimikatz as an example, it's probably one of, if not the most flagged piece of malware by AVs and EDRs, while the project itself is super cool, it's also a nightmare to work with it to get around AVs, so just look for alternatives for what you're trying to achieve.
 
-> [!NOTE]
+> [!TIP]
 > When modifying your payloads for evasion, make sure to **turn off automatic sample submission** in defender, and please, seriously, **DO NOT UPLOAD TO VIRUSTOTAL** if your goal is achieving evasion in the long run. If you want to check if your payload gets detected by a particular AV, install it on a VM, try to turn off the automatic sample submission, and test it there until you're satisfied with the result.
 
 ## EXEs vs DLLs
@@ -112,7 +118,7 @@ Both our shellcode (encoded with [SGN](https://github.com/EgeBalci/sgn)) and the
 
 <figure><img src="../images/image (193).png" alt=""><figcaption></figcaption></figure>
 
-> [!NOTE]
+> [!TIP]
 > I **highly recommend** you watch [S3cur3Th1sSh1t's twitch VOD](https://www.twitch.tv/videos/1644171543) about DLL Sideloading and also [ippsec's video](https://www.youtube.com/watch?v=3eROsG_WNpE) to learn more about what we've discussed more in-depth.
 
 ## [**Freeze**](https://github.com/optiv/Freeze)
@@ -130,7 +136,7 @@ Git clone the Freeze repo and build it (git clone https://github.com/optiv/Freez
 
 <figure><img src="../images/freeze_demo_hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
-> [!NOTE]
+> [!TIP]
 > Evasion is just a cat & mouse game, what works today could be detected tomorrow, so never rely on only one tool, if possible, try chaining multiple evasion techniques.
 
 ## AMSI (Anti-Malware Scan Interface)
@@ -201,7 +207,7 @@ Keep in mind, that this will probably get flagged once this post comes out, so y
 
 This technique was initially discovered by [@RastaMouse](https://twitter.com/_RastaMouse/) and it involves finding address for the "AmsiScanBuffer" function in amsi.dll (responsible for scanning the user-supplied input) and overwriting it with instructions to return the code for E_INVALIDARG, this way, the result of the actual scan will return 0, which is interpreted as a clean result.
 
-> [!NOTE]
+> [!TIP]
 > Please read [https://rastamouse.me/memory-patching-amsi-bypass/](https://rastamouse.me/memory-patching-amsi-bypass/) for a more detailed explanation.
 
 There are also many other techniques used to bypass AMSI with powershell, check out [**this page**](basic-powershell-for-pentesters/index.html#amsi-bypass) and [**this repo**](https://github.com/S3cur3Th1sSh1t/Amsi-Bypass-Powershell) to learn more about them.
@@ -236,7 +242,7 @@ To bypass PowerShell logging, you can use the following techniques:
 
 ## Obfuscation
 
-> [!NOTE]
+> [!TIP]
 > Several obfuscation techniques relies on encrypting data, which will increase the entropy of the binary which will make easier for AVs and EDRs to detect it. Be careful with this and maybe only apply encryption to specific sections of your code that is sensitive or needs to be hidden.
 
 There are several tools that can be used to **obfuscate C# clear-text code**, generate **metaprogramming templates** to compile binaries or **obfuscate compiled binaries** such as:
@@ -266,7 +272,7 @@ SmartScreen mainly works with a reputation-based approach, meaning that uncommon
 
 <figure><img src="../images/image (237).png" alt=""><figcaption><p>Checking the Zone.Identifier ADS for a file downloaded from the internet.</p></figcaption></figure>
 
-> [!NOTE]
+> [!TIP]
 > It's important to note that executables signed with a **trusted** signing certificate **won't trigger SmartScreen**.
 
 A very effective way to prevent your payloads from getting the Mark of The Web is by packaging them inside some sort of container like an ISO. This happens because Mark-of-the-Web (MOTW) **cannot** be applied to **non NTFS** volumes.
@@ -332,7 +338,7 @@ It's about injecting the post-exploitation malicious code **into its own process
 
 <figure><img src="../images/image (1136).png" alt=""><figcaption></figcaption></figure>
 
-> [!NOTE]
+> [!TIP]
 > If you want to read more about C# Assembly loading, please check out this article [https://securityintelligence.com/posts/net-execution-inlineexecute-assembly/](https://securityintelligence.com/posts/net-execution-inlineexecute-assembly/) and their InlineExecute-Assembly BOF ([https://github.com/xforcered/InlineExecute-Assembly](https://github.com/xforcered/InlineExecute-Assembly))
 
 You can also load C# Assemblies **from PowerShell**, check out [Invoke-SharpLoader](https://github.com/S3cur3Th1sSh1t/Invoke-SharpLoader) and [S3cur3th1sSh1t's video](https://www.youtube.com/watch?v=oe11Q-3Akuk).

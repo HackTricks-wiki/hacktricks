@@ -46,7 +46,7 @@ The allowances/denies then stored in some TCC databases:
 > [!TIP]
 > The TCC database in **iOS** is in **`/private/var/mobile/Library/TCC/TCC.db`**
 
-> [!NOTE]
+> [!TIP]
 > The **notification center UI** can make **changes in the system TCC database**:
 >
 > ```bash
@@ -267,7 +267,7 @@ otool -l /System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal| gr
     uuid 769FD8F1-90E0-3206-808C-A8947BEBD6C3
 ```
 
-> [!NOTE]
+> [!TIP]
 > It's curious that the **`com.apple.macl`** attribute is managed by the **Sandbox**, not tccd.
 >
 > Also note that if you move a file that allows the UUID of an app in your computer to a different computer, because the same app will have different UIDs, it won't grant access to that app.

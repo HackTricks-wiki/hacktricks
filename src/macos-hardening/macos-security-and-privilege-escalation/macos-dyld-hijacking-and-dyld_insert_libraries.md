@@ -152,7 +152,7 @@ And **execute** the binary and check the **library was loaded**:
 </strong>Usage: [...]
 </code></pre>
 
-> [!NOTE]
+> [!TIP]
 > A nice writeup about how to abuse this vulnerability to abuse the camera permissions of telegram can be found in [https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)
 
 ## Bigger Scale
