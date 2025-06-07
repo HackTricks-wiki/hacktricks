@@ -14,7 +14,7 @@ python3 -c 'import pty; pty.spawn("/bin/bash")'
 (inside the nc session) CTRL+Z;stty raw -echo; fg; ls; export SHELL=/bin/bash; export TERM=screen; stty rows 38 columns 116; reset;
 ```
 
-> [!NOTE]
+> [!TIP]
 > You can get the **number** of **rows** and **columns** executing **`stty -a`**
 
 #### script

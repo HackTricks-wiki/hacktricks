@@ -18,7 +18,7 @@ Flipper Zero has a built-in sub-1 GHz module based on a [﻿](https://www.st.com
 
 ### Frequency Analyser
 
-> [!NOTE]
+> [!TIP]
 > How to find which frequency is the remote using
 
 When analysing, Flipper Zero is scanning signals strength (RSSI) at all the frequencies available in frequency configuration. Flipper Zero displays the frequency with the highest RSSI value, with signal strength higher than -90 [dBm](https://en.wikipedia.org/wiki/DBm).
@@ -32,7 +32,7 @@ To determine the remote's frequency, do the following:
 
 ### Read
 
-> [!NOTE]
+> [!TIP]
 > Find info about the frequency used (also another way to find which frequency is used)
 
 The **Read** option **listens on the configured frequency** on the indicated modulation: 433.92 AM by default. If **something is found** when reading, **info is given** in the screen. This info could be use to replicate the signal in the future.
@@ -49,7 +49,7 @@ You can set **any that interests you**, however, if you are **not sure which fre
 
 ### **Read Raw**
 
-> [!NOTE]
+> [!TIP]
 > Steal (and replay) a signal in the configured frequency
 
 The **Read Raw** option **records signals** send in the listening frequency. This can be used to **steal** a signal and **repeat** it.
@@ -62,7 +62,7 @@ If you know the protocol used for example by the garage door it's possible to g*
 
 ### Add Manually
 
-> [!NOTE]
+> [!TIP]
 > Add signals from a configured list of protocols
 
 #### List of [supported protocols](https://docs.flipperzero.one/sub-ghz/add-new-remote) <a href="#id-3iglu" id="id-3iglu"></a>
@@ -94,7 +94,7 @@ Check the list in [https://docs.flipperzero.one/sub-ghz/frequencies](https://doc
 
 ### Test
 
-> [!NOTE]
+> [!TIP]
 > Get dBms of the saved frequencies
 
 ## Reference

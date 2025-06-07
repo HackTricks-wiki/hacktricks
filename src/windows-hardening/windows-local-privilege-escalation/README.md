@@ -1077,7 +1077,7 @@ If `ssh-agent` service is not running and you want it to automatically start on 
 Get-Service ssh-agent | Set-Service -StartupType Automatic -PassThru | Start-Service
 ```
 
-> [!NOTE]
+> [!TIP]
 > It looks like this technique isn't valid anymore. I tried to create some ssh keys, add them with `ssh-add` and login via ssh to a machine. The registry HKCU\Software\OpenSSH\Agent\Keys doesn't exist and procmon didn't identify the use of `dpapi.dll` during the asymmetric key authentication.
 
 ### Unattended files
@@ -1536,7 +1536,7 @@ sc create newservicename binPath= "C:\windows\system32\notepad.exe"
 sc start newservicename
 ```
 
-> [!NOTE]
+> [!TIP]
 > When creating a service binary make sure it's a valid service or that the binary performs the necessary actions to fast as it'll be killed in 20s if it's not a valid service.
 
 ### AlwaysInstallElevated

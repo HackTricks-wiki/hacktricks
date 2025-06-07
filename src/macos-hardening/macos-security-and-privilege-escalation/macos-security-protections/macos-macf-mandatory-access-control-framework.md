@@ -172,15 +172,15 @@ Which will go over all the registered mac policies calling their functions and s
 >
 > ```c
 > /*
->  * MAC_GRANT performs the designated check by walking the policy
->  * module list and checking with each as to how it feels about the
->  * request.  Unlike MAC_CHECK, it grants if any policies return '0',
->  * and otherwise returns EPERM.  Note that it returns its value via
->  * 'error' in the scope of the caller.
->  */
+> * MAC_GRANT performs the designated check by walking the policy
+> * module list and checking with each as to how it feels about the
+> * request.  Unlike MAC_CHECK, it grants if any policies return '0',
+> * and otherwise returns EPERM.  Note that it returns its value via
+> * 'error' in the scope of the caller.
+> */
 > #define MAC_GRANT(check, args...) do {                              \
->     error = EPERM;                                                  \
->     MAC_POLICY_ITERATE({                                            \
+>    error = EPERM;                                                  \
+>    MAC_POLICY_ITERATE({                                            \
 > 	if (mpc->mpc_ops->mpo_ ## check != NULL) {                  \
 > 	        DTRACE_MACF3(mac__call__ ## check, void *, mpc, int, error, int, MAC_ITERATE_GRANT); \
 > 	        int __step_res = mpc->mpc_ops->mpo_ ## check (args); \
@@ -189,7 +189,7 @@ Which will go over all the registered mac policies calling their functions and s
 > 	        }                                                   \
 > 	        DTRACE_MACF2(mac__rslt__ ## check, void *, mpc, int, __step_res); \
 > 	    }                                                           \
->     });                                                             \
+>    });                                                             \
 > } while (0)
 > ```
 

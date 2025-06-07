@@ -46,7 +46,7 @@ While obtaining the basic information you should check for weird things like:
 To obtain the memory of the running system, it's recommended to use [**LiME**](https://github.com/504ensicsLabs/LiME).\
 To **compile** it, you need to use the **same kernel** that the victim machine is using.
 
-> [!NOTE]
+> [!TIP]
 > Remember that you **cannot install LiME or any other thing** in the victim machine as it will make several changes to it
 
 So, if you have an identical version of Ubuntu you can use `apt-get install lime-forensics-dkms`\
@@ -262,7 +262,7 @@ Linux systems track user activities and system events through various log files.
 - **/var/log/xferlog**: Records FTP file transfers.
 - **/var/log/**: Always check for unexpected logs here.
 
-> [!NOTE]
+> [!TIP]
 > Linux system logs and audit subsystems may be disabled or deleted in an intrusion or malware incident. Because logs on Linux systems generally contain some of the most useful information about malicious activities, intruders routinely delete them. Therefore, when examining available log files, it is important to look for gaps or out of order entries that might be an indication of deletion or tampering.
 
 **Linux maintains a command history for each user**, stored in:
@@ -350,7 +350,7 @@ ls -laR --sort=time /bin```
 ls -lai /bin | sort -n```
 ````
 
-> [!NOTE]
+> [!TIP]
 > Note that an **attacker** can **modify** the **time** to make **files appear** **legitimate**, but he **cannot** modify the **inode**. If you find that a **file** indicates that it was created and modified at the **same time** as the rest of the files in the same folder, but the **inode** is **unexpectedly bigger**, then the **timestamps of that file were modified**.
 
 ## Compare files of different filesystem versions

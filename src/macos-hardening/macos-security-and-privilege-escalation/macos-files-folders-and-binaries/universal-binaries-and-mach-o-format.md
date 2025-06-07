@@ -360,7 +360,7 @@ Some potential malware related libraries are:
 - **AVFoundation:** Capture audio and video
 - **CoreWLAN**: Wifi scans.
 
-> [!NOTE]
+> [!TIP]
 > A Mach-O binary can contain one or **more** **constructors**, that will be **executed** **before** the address specified in **LC_MAIN**.\
 > The offsets of any constructors are held in the **\_\_mod_init_func** section of the **\_\_DATA_CONST** segment.
 

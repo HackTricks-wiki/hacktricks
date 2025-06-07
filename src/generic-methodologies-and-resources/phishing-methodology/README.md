@@ -273,7 +273,7 @@ You must **configure a DKIM for the new domain**. If you don't know what is a DM
 
 This tutorial is based on: [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
 
-> [!NOTE]
+> [!TIP]
 > You need to concatenate both B64 values that the DKIM key generates:
 >
 > ```
@@ -329,7 +329,7 @@ The page [www.mail-tester.com](https://www.mail-tester.com) can indicate you if 
 
 ![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
 
-> [!NOTE]
+> [!TIP]
 > It's recommended to use the "**Send Test Email**" functionality to test that everything is working.\
 > I would recommend to **send the test emails to 10min mails addresses** in order to avoid getting blacklisted making tests.
 
@@ -367,7 +367,7 @@ Note that **in order to increase the credibility of the email**, it's recommende
 
 ![](<../../images/image (80).png>)
 
-> [!NOTE]
+> [!TIP]
 > The Email Template also allows to **attach files to send**. If you would also like to steal NTLM challenges using some specially crafted files/documents [read this page](../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md).
 
 ### Landing Page
@@ -379,11 +379,11 @@ Note that **in order to increase the credibility of the email**, it's recommende
 
 ![](<../../images/image (826).png>)
 
-> [!NOTE]
+> [!TIP]
 > Usually you will need to modify the HTML code of the page and make some tests in local (maybe using some Apache server) **until you like the results.** Then, write that HTML code in the box.\
 > Note that if you need to **use some static resources** for the HTML (maybe some CSS and JS pages) you can save them in _**/opt/gophish/static/endpoint**_ and then access them from _**/static/\<filename>**_
 
-> [!NOTE]
+> [!TIP]
 > For the redirection you could **redirect the users to the legit main web page** of the victim, or redirect them to _/static/migration.html_ for example, put some **spinning wheel (**[**https://loading.io/**](https://loading.io)**) for 5 seconds and then indicate that the process was successful**.
 
 ### Users & Groups
@@ -401,7 +401,7 @@ Note that the **Sending Profile allow to send a test email to see how will the f
 
 ![](<../../images/image (192).png>)
 
-> [!NOTE]
+> [!TIP]
 > I would recommend to **send the test emails to 10min mails addresses** in order to avoid getting blacklisted making tests.
 
 Once everything is ready, just launch the campaign!

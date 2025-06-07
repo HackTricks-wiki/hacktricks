@@ -235,7 +235,7 @@ Executable=/Applications/Signal.app/Contents/MacOS/Signal
 designated => identifier "org.whispersystems.signal-desktop" and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = U68MSDN6DR
 ```
 
-> [!NOTE]
+> [!TIP]
 > Note how this signatures can check things like certification information, TeamID, IDs, entitlements and many other data.
 
 Moreover, it's possible to generate some compiled requirements using the `csreq` tool:

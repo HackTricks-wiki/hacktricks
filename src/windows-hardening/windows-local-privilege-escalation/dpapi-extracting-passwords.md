@@ -29,7 +29,7 @@ Note that the **domain key used to encrypt the master key is in the domain contr
 
 The encrypted blobs contain the **GUID of the master key** that was used to encrypt the data inside its headers.
 
-> [!NOTE]
+> [!TIP]
 > DPAPI encrypted blobs starts with **`01 00 00 00`**
 
 Find master keys:
