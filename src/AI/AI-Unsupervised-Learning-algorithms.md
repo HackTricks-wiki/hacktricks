@@ -2,8 +2,8 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Unsupervised Learning
 
+## Unsupervised Learning
 
 Unsupervised learning is a type of machine learning where the model is trained on data without labeled responses. The goal is to find patterns, structures, or relationships within the data. Unlike supervised learning, where the model learns from labeled examples, unsupervised learning algorithms work with unlabeled data.
 Unsupervised learning is often used for tasks such as clustering, dimensionality reduction, and anomaly detection. It can help discover hidden patterns in data, group similar items together, or reduce the complexity of the data while preserving its essential features.

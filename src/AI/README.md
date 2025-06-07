@@ -7,19 +7,19 @@
 The best starting point to learn about AI is to understand how the main machine learning algorithms work. This will help you to understand how AI works, how to use it and how to attack it:
 
 {{#ref}}
-AI-Supervised-Learning-Algorithms.md
+./AI-Supervised-Learning-Algorithms.md
 {{#endref}}
 
 {{#ref}}
-AI-Unsupervised-Learning-Algorithms.md
+./AI-Unsupervised-Learning-Algorithms.md
 {{#endref}}
 
 {{#ref}}
-AI-Reinforcement-Learning-Algorithms.md
+./AI-Reinforcement-Learning-Algorithms.md
 {{#endref}}
 
 {{#ref}}
-AI-Deep-Learning.md
+./AI-Deep-Learning.md
 {{#endref}}
 
 ### LLMs Architecture
