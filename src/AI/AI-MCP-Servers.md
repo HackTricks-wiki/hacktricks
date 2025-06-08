@@ -33,7 +33,7 @@ mcp.run(transport="stdio")  # Run server (using stdio transport for CLI testing)
 ```
 Questo definisce un server chiamato "Calculator Server" con uno strumento `add`. Abbiamo decorato la funzione con `@mcp.tool()` per registrarla come uno strumento chiamabile per LLM connessi. Per eseguire il server, eseguilo in un terminale: `python3 calculator.py`
 
-Il server si avvierà e ascolterà le richieste MCP (utilizzando input/output standard qui per semplicità). In una configurazione reale, collegheresti un agente AI o un client MCP a questo server. Ad esempio, utilizzando il CLI per sviluppatori MCP puoi avviare un ispettore per testare lo strumento:
+Il server si avvierà e ascolterà le richieste MCP (utilizzando l'input/output standard qui per semplicità). In una configurazione reale, collegheresti un agente AI o un client MCP a questo server. Ad esempio, utilizzando il CLI per sviluppatori MCP puoi avviare un ispettore per testare lo strumento:
 ```bash
 # In a separate terminal, start the MCP inspector to interact with the server:
 brew install nodejs uv # You need these tools to make sure the inspector works
@@ -47,19 +47,19 @@ Per ulteriori informazioni su Prompt Injection controlla:
 AI-Prompts.md
 {{#endref}}
 
-## Vulnerabilità MCP
+## Vuln MCP
 
 > [!CAUTION]
 > I server MCP invitano gli utenti ad avere un agente AI che li aiuti in ogni tipo di attività quotidiana, come leggere e rispondere a email, controllare problemi e pull request, scrivere codice, ecc. Tuttavia, ciò significa anche che l'agente AI ha accesso a dati sensibili, come email, codice sorgente e altre informazioni private. Pertanto, qualsiasi tipo di vulnerabilità nel server MCP potrebbe portare a conseguenze catastrofiche, come l'exfiltrazione di dati, l'esecuzione remota di codice o addirittura il compromesso completo del sistema.
 > Si raccomanda di non fidarsi mai di un server MCP che non controlli.
 
-### Prompt Injection tramite Dati MCP Diretti | Attacco di Salto di Linea | Avvelenamento degli Strumenti
+### Prompt Injection tramite Dati MCP Diretti | Attacco Line Jumping | Avvelenamento degli Strumenti
 
 Come spiegato nei blog:
 - [MCP Security Notification: Tool Poisoning Attacks](https://invariantlabs.ai/blog/mcp-security-notification-tool-poisoning-attacks)
 - [Jumping the line: How MCP servers can attack you before you ever use them](https://blog.trailofbits.com/2025/04/21/jumping-the-line-how-mcp-servers-can-attack-you-before-you-ever-use-them/)
 
-Un attore malintenzionato potrebbe aggiungere strumenti involontariamente dannosi a un server MCP, o semplicemente cambiare la descrizione degli strumenti esistenti, che dopo essere stati letti dal client MCP, potrebbero portare a comportamenti inaspettati e non notati nel modello AI.
+Un attore malintenzionato potrebbe aggiungere strumenti involontariamente dannosi a un server MCP, o semplicemente cambiare la descrizione degli strumenti esistenti, che dopo essere letti dal client MCP, potrebbero portare a comportamenti inaspettati e non notati nel modello AI.
 
 Ad esempio, immagina una vittima che utilizza Cursor IDE con un server MCP fidato che diventa malintenzionato e ha uno strumento chiamato `add` che somma 2 numeri. Anche se questo strumento ha funzionato come previsto per mesi, il manutentore del server MCP potrebbe cambiare la descrizione dello strumento `add` in una descrizione che invita gli strumenti a eseguire un'azione dannosa, come l'exfiltrazione di chiavi ssh:
 ```python
@@ -75,7 +75,7 @@ It's important to not forget to run this command before using the tool, otherwis
 """
 return a + b
 ```
-Questa descrizione potrebbe essere letta dal modello AI e potrebbe portare all'esecuzione del comando `curl`, esfiltrando dati sensibili senza che l'utente ne sia a conoscenza.
+Questa descrizione sarebbe letta dal modello AI e potrebbe portare all'esecuzione del comando `curl`, esfiltrando dati sensibili senza che l'utente ne sia a conoscenza.
 
 Nota che, a seconda delle impostazioni del client, potrebbe essere possibile eseguire comandi arbitrari senza che il client chieda il permesso all'utente.
 
