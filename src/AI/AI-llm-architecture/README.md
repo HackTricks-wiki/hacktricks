@@ -22,7 +22,7 @@ Bilmeniz gereken bazı temel kavramlar için bu gönderiyi okumaya başlamalıs�
 ## 2. Veri Örnekleme
 
 > [!TIP]
-> Bu ikinci aşamanın amacı çok basit: **Girdi verisini örneklemek ve genellikle veri kümesini belirli bir uzunluktaki cümlelere ayırarak ve beklenen yanıtı da üreterek eğitim aşamasına hazırlamak.**
+> Bu ikinci aşamanın amacı çok basit: **Girdi verisini örneklemek ve genellikle veri setini belirli bir uzunluktaki cümlelere ayırarak ve beklenen yanıtı da üreterek eğitim aşamasına hazırlamak.**
 
 {{#ref}}
 2.-data-sampling.md
@@ -34,7 +34,7 @@ Bilmeniz gereken bazı temel kavramlar için bu gönderiyi okumaya başlamalıs�
 > Bu üçüncü aşamanın amacı çok basit: **Sözlükteki önceki her token'a modelin eğitimi için istenen boyutlarda bir vektör atamak.** Sözlükteki her kelime, X boyutlu bir uzayda bir nokta olacaktır.\
 > Başlangıçta her kelimenin uzaydaki konumu "rastgele" başlatılır ve bu konumlar eğitilebilir parametrelerdir (eğitim sırasında geliştirilecektir).
 >
-> Ayrıca, token gömme sırasında **gömme katmanının başka bir katmanı oluşturulur** ki bu, **eğitim cümlesindeki kelimenin mutlak konumunu** temsil eder. Bu şekilde, cümledeki farklı konumlarda bir kelimenin farklı bir temsili (anlamı) olacaktır.
+> Ayrıca, token gömme sırasında **gömme katmanlarının başka bir katmanı oluşturulur** ki bu, **eğitim cümlesindeki kelimenin mutlak konumunu** temsil eder. Bu şekilde, cümledeki farklı konumlarda bir kelimenin farklı bir temsili (anlamı) olacaktır.
 
 {{#ref}}
 3.-token-embeddings.md
@@ -44,7 +44,7 @@ Bilmeniz gereken bazı temel kavramlar için bu gönderiyi okumaya başlamalıs�
 
 > [!TIP]
 > Bu dördüncü aşamanın amacı çok basit: **Bazı dikkat mekanizmaları uygulamak**. Bunlar, **sözlükteki bir kelimenin, LLM'yi eğitmek için kullanılan mevcut cümledeki komşularıyla olan ilişkisini yakalayacak çok sayıda **tekrarlanan katman** olacaktır.\
-> Bunun için çok sayıda katman kullanılmaktadır, bu nedenle çok sayıda eğitilebilir parametre bu bilgiyi yakalayacaktır.
+> Bunun için çok sayıda katman kullanılacak, bu nedenle çok sayıda eğitilebilir parametre bu bilgiyi yakalayacaktır.
 
 {{#ref}}
 4.-attention-mechanisms.md
@@ -53,9 +53,9 @@ Bilmeniz gereken bazı temel kavramlar için bu gönderiyi okumaya başlamalıs�
 ## 5. LLM Mimarisi
 
 > [!TIP]
-> Bu beşinci aşamanın amacı çok basit: **Tam LLM'nin mimarisini geliştirmek.** Her şeyi bir araya getirin, tüm katmanları uygulayın ve metin oluşturmak veya metni kimliklere dönüştürmek ve tersine çevirmek için tüm fonksiyonları oluşturun.
+> Bu beşinci aşamanın amacı çok basit: **Tam LLM'nin mimarisini geliştirmek.** Her şeyi bir araya getirin, tüm katmanları uygulayın ve metin oluşturmak veya metni kimliklere dönüştürmek ve tersine çevirmek için tüm işlevleri oluşturun.
 >
-> Bu mimari, hem eğitim hem de eğitimden sonra metin tahmin etmek için kullanılacaktır.
+> Bu mimari, hem eğitim hem de eğitimden sonra metin tahmini için kullanılacaktır.
 
 {{#ref}}
 5.-llm-architecture.md
@@ -64,7 +64,7 @@ Bilmeniz gereken bazı temel kavramlar için bu gönderiyi okumaya başlamalıs�
 ## 6. Ön Eğitim ve Modellerin Yüklenmesi
 
 > [!TIP]
-> Bu altıncı aşamanın amacı çok basit: **Modeli sıfırdan eğitmek.** Bunun için önceki LLM mimarisi, tanımlanan kayıp fonksiyonları ve optimizasyon kullanarak veri setleri üzerinde döngülerle tüm model parametrelerini eğitmek için kullanılacaktır.
+> Bu altıncı aşamanın amacı çok basit: **Modeli sıfırdan eğitmek.** Bunun için önceki LLM mimarisi, tanımlı kayıp fonksiyonları ve optimizasyon kullanarak veri setleri üzerinde döngülerle tüm model parametrelerini eğitmek için kullanılacaktır.
 
 {{#ref}}
 6.-pre-training-and-loading-models.md
@@ -73,7 +73,7 @@ Bilmeniz gereken bazı temel kavramlar için bu gönderiyi okumaya başlamalıs�
 ## 7.0. İnce Ayar için LoRA İyileştirmeleri
 
 > [!TIP]
-> **LoRA'nın kullanımı, zaten eğitilmiş modelleri ince ayar yapmak için gereken hesaplamayı büyük ölçüde azaltır.**
+> **LoRA'nın kullanımı,** zaten eğitilmiş modelleri **ince ayar yapmak için gereken hesaplamayı** büyük ölçüde azaltır.
 
 {{#ref}}
 7.0.-lora-improvements-in-fine-tuning.md
@@ -82,7 +82,7 @@ Bilmeniz gereken bazı temel kavramlar için bu gönderiyi okumaya başlamalıs�
 ## 7.1. Sınıflandırma için İnce Ayar
 
 > [!TIP]
-> Bu bölümün amacı, yeni metin oluşturmak yerine LLM'nin **verilen metnin her bir verilen kategoriye sınıflandırılma olasılıklarını** seçmesini sağlamak için zaten önceden eğitilmiş bir modeli nasıl ince ayar yapacağınızı göstermektir (örneğin, bir metin spam mı değil mi).
+> Bu bölümün amacı, **yeni metin oluşturmak yerine, LLM'nin verilen metnin her bir verilen kategoriye ait olma olasılıklarını seçmesini** sağlamak için zaten önceden eğitilmiş bir modeli nasıl ince ayar yapacağınızı göstermektir (örneğin, bir metnin spam olup olmadığını belirlemek).
 
 {{#ref}}
 7.1.-fine-tuning-for-classification.md
@@ -91,7 +91,7 @@ Bilmeniz gereken bazı temel kavramlar için bu gönderiyi okumaya başlamalıs�
 ## 7.2. Talimatları Takip Etmek için İnce Ayar
 
 > [!TIP]
-> Bu bölümün amacı, metin oluşturmak yerine **talimatları takip etmek için zaten önceden eğitilmiş bir modeli nasıl ince ayar yapacağınızı** göstermektir; örneğin, bir sohbet botu olarak görevlere yanıt vermek.
+> Bu bölümün amacı, **metin oluşturmak yerine talimatları takip etmek için zaten önceden eğitilmiş bir modeli nasıl ince ayar yapacağınızı** göstermektir; örneğin, bir sohbet botu olarak görevlere yanıt vermek.
 
 {{#ref}}
 7.2.-fine-tuning-to-follow-instructions.md
