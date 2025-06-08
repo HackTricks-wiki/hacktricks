@@ -27,7 +27,7 @@ Najbolja polazna tačka za učenje o AI je razumevanje kako glavni algoritmi ma�
 Na sledećoj stranici ćete pronaći osnove svakog komponente za izgradnju osnovnog LLM koristeći transformere:
 
 {{#ref}}
-llm-architecture/README.md
+AI-llm-architecture/README.md
 {{#endref}}
 
 ## AI Bezbednost
