@@ -82,7 +82,7 @@ Powinieneś zacząć od przeczytania tego posta, aby poznać podstawowe pojęcia
 ## 7.1. Fine-Tuning do Klasyfikacji
 
 > [!TIP]
-> Celem tej sekcji jest pokazanie, jak dostosować już wytrenowany model, aby zamiast generować nowy tekst, LLM podał **prawdopodobieństwa, że dany tekst będzie zaklasyfikowany w każdej z podanych kategorii** (na przykład, czy tekst jest spamem, czy nie).
+> Celem tej sekcji jest pokazanie, jak dostosować już wytrenowany model, aby zamiast generować nowy tekst, LLM podałby **prawdopodobieństwa, że dany tekst zostanie zaklasyfikowany w każdej z podanych kategorii** (na przykład, czy tekst jest spamem, czy nie).
 
 {{#ref}}
 7.1.-fine-tuning-for-classification.md
