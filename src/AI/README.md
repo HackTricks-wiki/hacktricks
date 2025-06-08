@@ -30,7 +30,7 @@ Na sledećoj stranici ćete pronaći osnove svakog komponente za izgradnju osnov
 AI-llm-architecture/README.md
 {{#endref}}
 
-## AI Bezbednost
+## Bezbednost AI
 
 ### Okviri Rizika AI
 
@@ -48,7 +48,7 @@ LLM-ovi su u poslednjim godinama doveli do eksplozije korišćenja AI, ali nisu 
 AI-Prompts.md
 {{#endref}}
 
-### RCE AI Modela
+### RCE Modela AI
 
 Veoma je uobičajeno da programeri i kompanije pokreću modele preuzete sa Interneta, međutim, samo učitavanje modela može biti dovoljno da se izvrši proizvoljan kod na sistemu. Ovo je veoma važna tema za razumevanje kako koristiti AI bezbedno i kako ga napasti:
 
@@ -56,7 +56,7 @@ Veoma je uobičajeno da programeri i kompanije pokreću modele preuzete sa Inter
 AI-Models-RCE.md
 {{#endref}}
 
-### Protokol Konteksta AI Modela
+### Protokol Konteksta Modela AI
 
 MCP (Protokol Konteksta Modela) je protokol koji omogućava AI agent klijentima da se povežu sa spoljnim alatima i izvorima podataka na način "plug-and-play". Ovo omogućava složene radne tokove i interakcije između AI modela i spoljnih sistema:
 
