@@ -27,7 +27,7 @@ AI hakkında öğrenmeye başlamak için en iyi nokta, ana makine öğrenimi alg
 Aşağıdaki sayfada, transformer'lar kullanarak temel bir LLM oluşturmak için her bileşenin temellerini bulacaksınız:
 
 {{#ref}}
-llm-architecture/README.md
+AI-llm-architecture/README.md
 {{#endref}}
 
 ## AI Güvenliği
