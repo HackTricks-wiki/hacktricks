@@ -50,7 +50,7 @@ Você deve começar lendo este post para alguns conceitos básicos que você dev
 4.-attention-mechanisms.md
 {{#endref}}
 
-## 5. Arquitetura de LLM
+## 5. Arquitetura do LLM
 
 > [!TIP]
 > O objetivo desta quinta fase é muito simples: **Desenvolver a arquitetura do LLM completo**. Juntar tudo, aplicar todas as camadas e criar todas as funções para gerar texto ou transformar texto em IDs e vice-versa.
@@ -61,7 +61,7 @@ Você deve começar lendo este post para alguns conceitos básicos que você dev
 5.-llm-architecture.md
 {{#endref}}
 
-## 6. Pré-treinamento & Carregamento de modelos
+## 6. Pré-treinamento e Carregamento de Modelos
 
 > [!TIP]
 > O objetivo desta sexta fase é muito simples: **Treinar o modelo do zero**. Para isso, a arquitetura LLM anterior será usada com alguns loops sobre os conjuntos de dados usando as funções de perda e otimizador definidos para treinar todos os parâmetros do modelo.
@@ -70,7 +70,7 @@ Você deve começar lendo este post para alguns conceitos básicos que você dev
 6.-pre-training-and-loading-models.md
 {{#endref}}
 
-## 7.0. Melhorias de LoRA em ajuste fino
+## 7.0. Melhorias de LoRA em Fine-Tuning
 
 > [!TIP]
 > O uso de **LoRA reduz muito a computação** necessária para **ajustar** modelos já treinados.
@@ -79,19 +79,19 @@ Você deve começar lendo este post para alguns conceitos básicos que você dev
 7.0.-lora-improvements-in-fine-tuning.md
 {{#endref}}
 
-## 7.1. Ajuste Fino para Classificação
+## 7.1. Fine-Tuning para Classificação
 
 > [!TIP]
-> O objetivo desta seção é mostrar como ajustar finamente um modelo já pré-treinado para que, em vez de gerar novo texto, o LLM selecione e forneça as **probabilidades do texto dado ser categorizado em cada uma das categorias dadas** (como se um texto é spam ou não).
+> O objetivo desta seção é mostrar como ajustar um modelo já pré-treinado para que, em vez de gerar novo texto, o LLM selecione e forneça as **probabilidades do texto dado ser categorizado em cada uma das categorias dadas** (como se um texto é spam ou não).
 
 {{#ref}}
 7.1.-fine-tuning-for-classification.md
 {{#endref}}
 
-## 7.2. Ajuste Fino para seguir instruções
+## 7.2. Fine-Tuning para Seguir Instruções
 
 > [!TIP]
-> O objetivo desta seção é mostrar como **ajustar finamente um modelo já pré-treinado para seguir instruções** em vez de apenas gerar texto, por exemplo, respondendo a tarefas como um chatbot.
+> O objetivo desta seção é mostrar como **ajustar um modelo já pré-treinado para seguir instruções** em vez de apenas gerar texto, por exemplo, respondendo a tarefas como um chatbot.
 
 {{#ref}}
 7.2.-fine-tuning-to-follow-instructions.md
