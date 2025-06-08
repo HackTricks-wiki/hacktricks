@@ -27,7 +27,7 @@ The best starting point to learn about AI is to understand how the main machine 
 In the following page you will find the basics of each component to build a basic LLM using transformers:
 
 {{#ref}}
-llm-architecture/README.md
+AI-llm-architecture/README.md
 {{#endref}}
 
 ## AI Security
