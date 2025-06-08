@@ -55,7 +55,7 @@ Dovresti iniziare leggendo questo post per alcuni concetti di base che dovresti 
 > [!TIP]
 > L'obiettivo di questa quinta fase è molto semplice: **Sviluppare l'architettura del LLM completo**. Metti tutto insieme, applica tutti i layer e crea tutte le funzioni per generare testo o trasformare testo in ID e viceversa.
 >
-> Questa architettura sarà utilizzata sia per l'addestramento che per la previsione del testo dopo che è stato addestrato.
+> Questa architettura sarà utilizzata sia per l'addestramento che per la previsione del testo dopo che è stata addestrata.
 
 {{#ref}}
 5.-llm-architecture.md
@@ -91,7 +91,7 @@ Dovresti iniziare leggendo questo post per alcuni concetti di base che dovresti 
 ## 7.2. Fine-Tuning to follow instructions
 
 > [!TIP]
-> L'obiettivo di questa sezione è mostrare come **ottimizzare un modello già pre-addestrato per seguire istruzioni** piuttosto che semplicemente generare testo, ad esempio, rispondere a compiti come un chatbot.
+> L'obiettivo di questa sezione è mostrare come **ottimizzare un modello già pre-addestrato per seguire istruzioni** piuttosto che semplicemente generare testo, ad esempio, rispondendo a compiti come un chatbot.
 
 {{#ref}}
 7.2.-fine-tuning-to-follow-instructions.md
