@@ -24,7 +24,7 @@ Die beste beginpunt om oor AI te leer, is om te verstaan hoe die hoof masjien le
 
 ### LLMs Argitektuur
 
-Op die volgende bladsy sal jy die basiese beginsels van elke komponent vind om 'n basiese LLM te bou met transformers:
+Op die volgende bladsy sal jy die basiese beginsels van elke komponent vind om 'n basiese LLM te bou met behulp van transformers:
 
 {{#ref}}
 AI-llm-architecture/README.md
@@ -50,7 +50,7 @@ AI-Prompts.md
 
 ### AI Modelle RCE
 
-Dit is baie algemeen vir ontwikkelaars en maatskappye om modelle wat van die Internet afgelaai is, te loop, maar net om 'n model te laai mag genoeg wees om arbitrêre kode op die stelsel uit te voer. Dit is 'n baie belangrike onderwerp om te verstaan hoe om AI veilig te gebruik en hoe om dit aan te val:
+Dit is baie algemeen vir ontwikkelaars en maatskappye om modelle wat van die Internet afgelaai is, te gebruik, maar net om 'n model te laai mag genoeg wees om arbitrêre kode op die stelsel uit te voer. Dit is 'n baie belangrike onderwerp om te verstaan hoe om AI veilig te gebruik en hoe om dit aan te val:
 
 {{#ref}}
 AI-Models-RCE.md
