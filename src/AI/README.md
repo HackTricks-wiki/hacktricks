@@ -27,7 +27,7 @@ O melhor ponto de partida para aprender sobre IA é entender como funcionam os p
 Na página a seguir, você encontrará o básico de cada componente para construir um LLM básico usando transformers:
 
 {{#ref}}
-llm-architecture/README.md
+AI-llm-architecture/README.md
 {{#endref}}
 
 ## Segurança da IA
@@ -42,7 +42,7 @@ AI-Risk-Frameworks.md
 
 ### Segurança de Prompts de IA
 
-LLMs fizeram o uso de IA explodir nos últimos anos, mas não são perfeitos e podem ser enganados por prompts adversariais. Este é um tópico muito importante para entender como usar a IA de forma segura e como atacá-la:
+LLMs fizeram o uso de IA explodir nos últimos anos, mas não são perfeitos e podem ser enganados por prompts adversariais. Este é um tópico muito importante para entender como usar a IA com segurança e como atacá-la:
 
 {{#ref}}
 AI-Prompts.md
@@ -50,7 +50,7 @@ AI-Prompts.md
 
 ### RCE de Modelos de IA
 
-É muito comum que desenvolvedores e empresas executem modelos baixados da Internet, no entanto, apenas carregar um modelo pode ser suficiente para executar código arbitrário no sistema. Este é um tópico muito importante para entender como usar a IA de forma segura e como atacá-la:
+É muito comum que desenvolvedores e empresas executem modelos baixados da Internet, no entanto, apenas carregar um modelo pode ser suficiente para executar código arbitrário no sistema. Este é um tópico muito importante para entender como usar a IA com segurança e como atacá-la:
 
 {{#ref}}
 AI-Models-RCE.md
