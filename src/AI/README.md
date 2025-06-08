@@ -4,7 +4,7 @@
 
 ## Hoof Masjien Leer Algoritmes
 
-Die beste beginpunt om meer oor AI te leer, is om te verstaan hoe die hoof masjien leer algoritmes werk. Dit sal jou help om te verstaan hoe AI werk, hoe om dit te gebruik en hoe om dit aan te val:
+Die beste beginpunt om oor AI te leer, is om te verstaan hoe die hoof masjien leer algoritmes werk. Dit sal jou help om te verstaan hoe AI werk, hoe om dit te gebruik en hoe om dit aan te val:
 
 {{#ref}}
 ./AI-Supervised-Learning-Algorithms.md
@@ -27,7 +27,7 @@ Die beste beginpunt om meer oor AI te leer, is om te verstaan hoe die hoof masji
 Op die volgende bladsy sal jy die basiese beginsels van elke komponent vind om 'n basiese LLM te bou met transformers:
 
 {{#ref}}
-llm-architecture/README.md
+AI-llm-architecture/README.md
 {{#endref}}
 
 ## AI Sekuriteit
