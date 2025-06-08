@@ -34,7 +34,7 @@ AI-llm-architecture/README.md
 
 ### KI-Risiko-Rahmenwerke
 
-Im Moment sind die beiden Hauptrahmenwerke zur Bewertung der Risiken von KI-Systemen das OWASP ML Top 10 und das Google SAIF:
+Im Moment sind die beiden Hauptrahmenwerke zur Bewertung der Risiken von KI-Systemen die OWASP ML Top 10 und das Google SAIF:
 
 {{#ref}}
 AI-Risk-Frameworks.md
