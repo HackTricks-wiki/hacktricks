@@ -82,7 +82,7 @@ Vous devriez commencer par lire ce post pour quelques concepts de base que vous 
 ## 7.1. Fine-Tuning for Classification
 
 > [!TIP]
-> L'objectif de cette section est de montrer comment affiner un modèle déjà pré-entraîné afin qu'au lieu de générer un nouveau texte, le LLM donnera les **probabilités que le texte donné soit catégorisé dans chacune des catégories données** (comme si un texte est du spam ou non).
+> L'objectif de cette section est de montrer comment affiner un modèle déjà pré-entraîné afin qu'au lieu de générer un nouveau texte, le LLM donnera les **probabilités que le texte donné soit catégorisé dans chacune des catégories données** (comme si un texte est un spam ou non).
 
 {{#ref}}
 7.1.-fine-tuning-for-classification.md
