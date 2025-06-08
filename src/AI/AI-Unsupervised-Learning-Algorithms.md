@@ -13,7 +13,7 @@ K-Ortalamalar, verileri en yakın küme ortalamasına atayarak K kümeye ayıran
 1. **Başlatma**: Genellikle rastgele veya k-means++ gibi daha akıllı yöntemlerle K başlangıç küme merkezleri (merkezler) seçin.
 2. **Atama**: Her veri noktasını bir mesafe metriğine (örneğin, Öklid mesafesi) dayanarak en yakın merkeze atayın.
 3. **Güncelleme**: Her kümeye atanan tüm veri noktalarının ortalamasını alarak merkezleri yeniden hesaplayın.
-4. **Tekrarla**: Küme atamaları istikrara kavuşana kadar (merkezler artık önemli ölçüde hareket etmemelidir) Adım 2-3'ü tekrarlayın.
+4. **Tekrar**: Küme atamaları istikrara kavuşana kadar (merkezler artık önemli ölçüde hareket etmemelidir) Adım 2-3'ü tekrarlayın.
 
 > [!TIP]
 > *Siber güvenlikte kullanım durumları:* K-Ortalamalar, ağ olaylarını kümeleyerek saldırı tespiti için kullanılır. Örneğin, araştırmacılar KDD Cup 99 saldırı veri kümesine K-Ortalamalar uyguladılar ve bunun trafiği normal ve saldırı kümelerine etkili bir şekilde ayırdığını buldular. Pratikte, güvenlik analistleri benzer etkinlik gruplarını bulmak için günlük girişlerini veya kullanıcı davranış verilerini kümeleyebilir; iyi biçimlenmiş bir kümeye ait olmayan herhangi bir nokta anomali gösterebilir (örneğin, kendi küçük kümesini oluşturan yeni bir kötü amaçlı yazılım varyantı). K-Ortalamalar, davranış profilleri veya özellik vektörlerine dayalı olarak ikili dosyaları gruplandırarak kötü amaçlı yazılım aile sınıflandırmasına da yardımcı olabilir.
@@ -26,12 +26,12 @@ Kümelerin sayısı (K), algoritmayı çalıştırmadan önce tanımlanması ger
 
 #### Varsayımlar ve Sınırlamalar
 
-K-Ortalamalar, **kümelerin küresel ve eşit boyutlu olduğu** varsayımında bulunur; bu, tüm veri setleri için geçerli olmayabilir. Merkezlerin başlangıç yerleştirmesine duyarlıdır ve yerel minimumlara yakınsama gösterebilir. Ayrıca, K-Ortalamalar, değişken yoğunluklara veya küresel olmayan şekillere sahip veri setleri ve farklı ölçeklere sahip özellikler için uygun değildir. Tüm özelliklerin mesafe hesaplamalarına eşit şekilde katkıda bulunmasını sağlamak için normalizasyon veya standartlaştırma gibi ön işleme adımları gerekli olabilir.
+K-Ortalamalar, **kümelerin küresel ve eşit boyutlu** olduğunu varsayar; bu, tüm veri setleri için geçerli olmayabilir. Merkezlerin başlangıç yerleştirmesine duyarlıdır ve yerel minimumlara yakınsama gösterebilir. Ayrıca, K-Ortalamalar, farklı yoğunluklara veya küresel olmayan şekillere sahip veri setleri ve farklı ölçeklere sahip özellikler için uygun değildir. Tüm özelliklerin mesafe hesaplamalarına eşit şekilde katkıda bulunmasını sağlamak için normalizasyon veya standartlaştırma gibi ön işleme adımları gerekli olabilir.
 
 <details>
 <summary>Örnek -- Ağ Olaylarını Kümeleme
 </summary>
-Aşağıda ağ trafiği verilerini simüle ediyoruz ve K-Ortalamalar kullanarak bunları kümelemeye çalışıyoruz. Bağlantı süresi ve bayt sayısı gibi özelliklere sahip olaylarımız olduğunu varsayalım. “Normal” trafiğin 3 kümesini ve bir saldırı desenini temsil eden 1 küçük küme oluşturuyoruz. Ardından, K-Ortalamalar'ı çalıştırarak bunları ayırıp ayıramayacağını görüyoruz.
+Aşağıda ağ trafiği verilerini simüle ediyoruz ve K-Ortalamalar kullanarak bunları kümelemeye çalışıyoruz. Bağlantı süresi ve bayt sayısı gibi özelliklere sahip olaylarımız olduğunu varsayalım. "Normal" trafiğin 3 kümesini ve bir saldırı desenini temsil eden 1 küçük küme oluşturuyoruz. Ardından, K-Ortalamalar'ı çalıştırarak bunları ayırıp ayıramayacağını görüyoruz.
 ```python
 import numpy as np
 from sklearn.cluster import KMeans
@@ -57,7 +57,7 @@ print("Cluster centers (duration, bytes):")
 for idx, center in enumerate(kmeans.cluster_centers_):
 print(f"  Cluster {idx}: {center}")
 ```
-Bu örnekte, K-Means 4 küme bulmalıdır. Küçük saldırı kümesi (olağandışı yüksek süre ~200) normal kümelerden uzaklığı nedeniyle ideal olarak kendi kümesini oluşturacaktır. Sonuçları yorumlamak için küme boyutlarını ve merkezlerini yazdırıyoruz. Gerçek bir senaryoda, birkaç noktadan oluşan kümeyi potansiyel anormallikler olarak etiketlemek veya üyelerini kötü niyetli faaliyetler için incelemek mümkündür.
+Bu örnekte, K-Means 4 küme bulmalıdır. Küçük saldırı kümesi (olağanüstü yüksek süre ~200) normal kümelerden uzaklığı nedeniyle ideal olarak kendi kümesini oluşturacaktır. Sonuçları yorumlamak için küme boyutlarını ve merkezlerini yazdırıyoruz. Gerçek bir senaryoda, birkaç noktadan oluşan kümeyi potansiyel anormallikler olarak etiketlemek veya üyelerini kötü niyetli faaliyetler için incelemek mümkündür.
 
 ### Hiyerarşik Kümeleme
 
@@ -68,10 +68,10 @@ Hiyerarşik kümeleme, ya aşağıdan yukarı (agglomeratif) bir yaklaşım ya d
 
 Agglomeratif kümeleme, kümeler arası mesafenin tanımını ve hangi kümelerin birleştirileceğini belirlemek için bir bağlantı kriteri gerektirir. Yaygın bağlantı yöntemleri arasında tek bağlantı (iki küme arasındaki en yakın noktaların mesafesi), tam bağlantı (en uzak noktaların mesafesi), ortalama bağlantı vb. bulunur ve mesafe metriği genellikle Öklidyen'dir. Bağlantı seçimi, üretilen kümelerin şeklini etkiler. Kümelerin sayısını K önceden belirtmeye gerek yoktur; istenen sayıda küme elde etmek için dendrogramı seçilen bir seviyede "kesebilirsiniz".
 
-Hiyerarşik kümeleme, farklı granülarite seviyelerinde kümeler arasındaki ilişkileri gösteren ağaç benzeri bir yapı olan bir dendrogram üretir. Dendrogram, belirli bir sayıda küme elde etmek için istenen bir seviyede kesilebilir.
+Hiyerarşik kümeleme, farklı ayrıntı seviyelerinde kümeler arasındaki ilişkileri gösteren bir ağaç benzeri yapı olan bir dendrogram üretir. Dendrogram, belirli bir sayıda küme elde etmek için istenen bir seviyede kesilebilir.
 
 > [!TIP]
-> *Siber güvenlikte kullanım durumları:* Hiyerarşik kümeleme, olayları veya varlıkları bir ağaç yapısına organize ederek ilişkileri tespit edebilir. Örneğin, kötü amaçlı yazılım analizinde, agglomeratif kümeleme örnekleri davranışsal benzerliğe göre gruplandırabilir ve kötü amaçlı yazılım aileleri ve varyantları hiyerarşisini ortaya çıkarabilir. Ağ güvenliğinde, IP trafik akışlarını kümeleyebilir ve dendrogramı kullanarak trafiğin alt gruplarını görebilirsiniz (örneğin, protokole göre, ardından davranışa göre). K'yi önceden seçmenize gerek olmadığından, saldırı kategorilerinin sayısının bilinmediği yeni verileri keşfederken faydalıdır.
+> *Siber güvenlikte kullanım durumları:* Hiyerarşik kümeleme, olayları veya varlıkları bir ağaç yapısına organize ederek ilişkileri tespit edebilir. Örneğin, kötü amaçlı yazılım analizinde, agglomeratif kümeleme örnekleri davranışsal benzerliğe göre gruplandırabilir ve kötü amaçlı yazılım aileleri ve varyantları hiyerarşisini ortaya çıkarabilir. Ağ güvenliğinde, IP trafik akışlarını kümeleyebilir ve dendrogramı trafik alt gruplarını görmek için kullanabilirsiniz (örneğin, protokole göre, ardından davranışa göre). K'yi önceden seçmenize gerek olmadığından, saldırı kategorilerinin sayısının bilinmediği yeni verileri keşfederken faydalıdır.
 
 #### Varsayımlar ve Sınırlamalar
 
@@ -114,14 +114,14 @@ DBSCAN, çekirdek noktaları, sınır noktaları ve gürültü noktalarını tan
 - **Sınır Noktası**: Bir çekirdek noktasının ε mesafesi içinde olan ancak MinPts'ten daha az komşusu olan bir nokta.
 - **Gürültü Noktası**: Ne bir çekirdek nokta ne de bir sınır noktası olan bir nokta.
 
-Kümeleme, ziyaret edilmemiş bir çekirdek noktasını seçerek, onu yeni bir küme olarak işaretleyerek ve ardından ondan yoğunlukla ulaşılabilir tüm noktaları (çekirdek noktalar ve komşuları vb.) özyinelemeli olarak ekleyerek devam eder. Sınır noktaları, yakın bir çekirdeğin kümesine eklenir. Tüm ulaşılabilir noktalar genişletildikten sonra, DBSCAN yeni bir küme başlatmak için başka bir ziyaret edilmemiş çekirdek noktasına geçer. Hiçbir çekirdek tarafından ulaşılmayan noktalar gürültü olarak etiketlenmeye devam eder.
+Kümeleme, ziyaret edilmemiş bir çekirdek noktasını seçerek başlar, onu yeni bir küme olarak işaretler ve ardından ondan yoğunlukla ulaşılabilir tüm noktaları (çekirdek noktalar ve komşuları vb.) özyinelemeli olarak ekler. Sınır noktaları, yakın bir çekirdek kümesine eklenir. Tüm ulaşılabilir noktalar genişletildikten sonra, DBSCAN yeni bir küme başlatmak için başka bir ziyaret edilmemiş çekirdek noktasına geçer. Hiçbir çekirdek tarafından ulaşılmayan noktalar gürültü olarak etiketlenir.
 
 > [!TIP]
-> *Siber güvenlikte kullanım durumları:* DBSCAN, ağ trafiğinde anomali tespiti için yararlıdır. Örneğin, normal kullanıcı etkinliği, özellik alanında bir veya daha fazla yoğun küme oluşturabilirken, yeni saldırı davranışları DBSCAN'ın gürültü (aykırı değerler) olarak etiketleyeceği dağınık noktalar olarak görünebilir. Ağ akış kayıtlarını kümelemek için kullanılmıştır; burada port taramaları veya hizmet reddi trafiğini seyrek nokta bölgeleri olarak tespit edebilir. Bir diğer uygulama, kötü amaçlı yazılım varyantlarını gruplamaktır: çoğu örnek aileler tarafından kümelenirken, birkaçının hiçbir yere uymadığı durumlarda, o birkaç örnek sıfır gün kötü amaçlı yazılım olabilir. Gürültüyü işaretleme yeteneği, güvenlik ekiplerinin bu aykırı değerleri araştırmaya odaklanmasını sağlar.
+> *Siber güvenlikte kullanım durumları:* DBSCAN, ağ trafiğinde anomali tespiti için yararlıdır. Örneğin, normal kullanıcı etkinliği, özellik alanında bir veya daha fazla yoğun küme oluşturabilirken, yeni saldırı davranışları DBSCAN'ın gürültü (aykırı değerler) olarak etiketleyeceği dağınık noktalar olarak görünebilir. Ağ akış kayıtlarını kümelemek için kullanılmıştır; burada, port taramaları veya hizmet reddi trafiğini seyrek nokta bölgeleri olarak tespit edebilir. Bir diğer uygulama, kötü amaçlı yazılım varyantlarını gruplamaktır: çoğu örnek aileler tarafından kümelenirken, birkaçının hiçbir yere uymadığı durumlarda, o birkaç örnek sıfır-gün kötü amaçlı yazılım olabilir. Gürültüyü işaretleme yeteneği, güvenlik ekiplerinin bu aykırı değerleri araştırmaya odaklanmasını sağlar.
 
 #### Varsayımlar ve Sınırlamalar
 
-**Varsayımlar ve Güçlü Yönler:** DBSCAN, küresel kümeler varsaymaz – keyfi şekilli kümeleri bulabilir (hatta zincir benzeri veya bitişik kümeler). Veri yoğunluğuna dayalı olarak küme sayısını otomatik olarak belirler ve aykırı değerleri gürültü olarak etkili bir şekilde tanımlayabilir. Bu, düzensiz şekiller ve gürültü içeren gerçek dünya verileri için güçlü kılar. Aykırı değerlere karşı dayanıklıdır (K-Means'in aksine, onları kümelere zorlamaz). Kümeler yaklaşık olarak uniform yoğunluğa sahip olduğunda iyi çalışır.
+**Varsayımlar & Güçlü Yönler:** DBSCAN, küresel kümeler varsaymaz – keyfi şekilli kümeleri bulabilir (hatta zincir benzeri veya bitişik kümeler). Veri yoğunluğuna dayalı olarak küme sayısını otomatik olarak belirler ve aykırı değerleri gürültü olarak etkili bir şekilde tanımlayabilir. Bu, düzensiz şekiller ve gürültü içeren gerçek dünya verileri için güçlü kılar. Aykırı değerlere karşı dayanıklıdır (K-Means'in aksine, onları kümelere zorlamaz). Kümeler yaklaşık olarak uniform yoğunluğa sahip olduğunda iyi çalışır.
 
 **Sınırlamalar:** DBSCAN'ın performansı uygun ε ve MinPts değerlerini seçmeye bağlıdır. Farklı yoğunluklara sahip verilerle zorlanabilir – tek bir ε, hem yoğun hem de seyrek kümeleri karşılayamaz. Eğer ε çok küçükse, çoğu noktayı gürültü olarak etiketler; çok büyükse, kümeler yanlış bir şekilde birleşebilir. Ayrıca, DBSCAN çok büyük veri setlerinde verimsiz olabilir (naif olarak $O(n^2)$, ancak mekansal indeksleme yardımcı olabilir). Yüksek boyutlu özellik alanlarında, “ε içinde mesafe” kavramı daha az anlamlı hale gelebilir (boyutlanma laneti) ve DBSCAN dikkatli parametre ayarlamaları gerektirebilir veya sezgisel kümeleri bulmakta başarısız olabilir. Tüm bunlara rağmen, HDBSCAN gibi uzantılar bazı sorunları (değişen yoğunluk gibi) ele alır.
 
@@ -149,27 +149,27 @@ num_noise = np.sum(labels == -1)
 print(f"DBSCAN found {num_clusters} clusters and {num_noise} noise points")
 print("Cluster labels for first 10 points:", labels[:10])
 ```
-Bu snippet'te, `eps` ve `min_samples` değerlerini veri ölçeğimize uygun hale getirdik (özellik birimlerinde 15.0 ve bir küme oluşturmak için 5 nokta gerektiriyor). DBSCAN, 2 küme (normal trafik kümeleri) bulmalı ve 5 enjekte edilmiş aykırı noktayı gürültü olarak işaretlemelidir. Bunu doğrulamak için kümelerin sayısını gürültü noktalarıyla karşılaştırıyoruz. Gerçek bir ortamda, ε üzerinde (ε'yi seçmek için bir k-uzaklık grafiği sezgisi kullanarak) ve MinPts üzerinde (genellikle veri boyutuna + 1 olarak ayarlanır) döngü yaparak kararlı kümeleme sonuçları bulmak mümkündür. Gürültüyü açıkça etiketleme yeteneği, potansiyel saldırı verilerini daha fazla analiz için ayırmaya yardımcı olur.
+Bu snippet'te, `eps` ve `min_samples` değerlerini veri ölçeğimize uygun hale getirdik (özellik birimlerinde 15.0 ve bir küme oluşturmak için 5 nokta gerektiriyor). DBSCAN, 2 küme (normal trafik kümeleri) bulmalı ve 5 enjekte edilmiş aykırı noktayı gürültü olarak işaretlemelidir. Bunu doğrulamak için kümelerin sayısını gürültü noktalarıyla karşılaştırıyoruz. Gerçek bir ortamda, ε üzerinde yineleme yapılabilir (ε'yi seçmek için bir k-uzaklık grafiği sezgisi kullanarak) ve MinPts (genellikle veri boyutuna + 1 olarak ayarlanır) ile kararlı kümeleme sonuçları bulmak için. Gürültüyü açıkça etiketleme yeteneği, potansiyel saldırı verilerini daha fazla analiz için ayırmaya yardımcı olur.
 
 </details>
 
 ### Temel Bileşen Analizi (PCA)
 
-PCA, verilerdeki maksimum varyansı yakalayan yeni bir ortogonal eksen seti (temel bileşenler) bulan **boyut azaltma** tekniğidir. Basit terimlerle, PCA verileri yeni bir koordinat sistemine döndürür ve projekte eder, böylece birinci temel bileşen (PC1) mümkün olan en büyük varyansı açıklar, ikinci PC (PC2) PC1'e dik en büyük varyansı açıklar ve bu şekilde devam eder. Matematiksel olarak, PCA verinin kovaryans matrisinin özvektörlerini hesaplar - bu özvektörler temel bileşen yönleridir ve karşılık gelen özdeğerler her birinin açıkladığı varyans miktarını gösterir. Genellikle özellik çıkarımı, görselleştirme ve gürültü azaltma için kullanılır.
+PCA, verilerdeki maksimum varyansı yakalayan yeni bir ortogonal eksen seti (temel bileşenler) bulan **boyut azaltma** tekniğidir. Basit terimlerle, PCA verileri yeni bir koordinat sistemine döndürür ve projekte eder, böylece birinci temel bileşen (PC1) mümkün olan en büyük varyansı açıklar, ikinci PC (PC2) PC1'e dik en büyük varyansı açıklar ve bu şekilde devam eder. Matematiksel olarak, PCA verilerin kovaryans matrisinin özvektörlerini hesaplar - bu özvektörler temel bileşen yönleridir ve karşılık gelen özdeğerler her birinin açıkladığı varyans miktarını gösterir. Genellikle özellik çıkarımı, görselleştirme ve gürültü azaltma için kullanılır.
 
 Bu, veri kümesi boyutlarının **önemli lineer bağımlılıklar veya korelasyonlar** içeriyorsa faydalıdır.
 
 PCA, verilerin temel bileşenlerini tanımlayarak çalışır; bu, maksimum varyans yönleridir. PCA'da yer alan adımlar şunlardır:
 1. **Standartlaştırma**: Verileri ortalamasını çıkararak merkezleme ve birim varyansa ölçekleme.
-2. **Kovaryans Matrisi**: Özellikler arasındaki ilişkileri anlamak için standartlaştırılmış verinin kovaryans matrisini hesaplama.
+2. **Kovaryans Matrisi**: Özellikler arasındaki ilişkileri anlamak için standartlaştırılmış verilerin kovaryans matrisini hesaplama.
 3. **Özdeğer Ayrıştırması**: Özdeğerleri ve özvektörleri elde etmek için kovaryans matrisinde özdeğer ayrıştırması yapma.
-4. **Temel Bileşenleri Seçme**: Özdeğerleri azalan sırayla sıralama ve en büyük özdeğerlere karşılık gelen en üst K özvektörünü seçme. Bu özvektörler yeni özellik alanını oluşturur.
+4. **Temel Bileşenleri Seçme**: Özdeğerleri azalan sırada sıralayın ve en büyük özdeğerlere karşılık gelen en üst K özvektörünü seçin. Bu özvektörler yeni özellik alanını oluşturur.
 5. **Veriyi Dönüştürme**: Seçilen temel bileşenleri kullanarak orijinal veriyi yeni özellik alanına projekte etme.
 PCA, veri görselleştirme, gürültü azaltma ve diğer makine öğrenimi algoritmaları için bir ön işleme adımı olarak yaygın olarak kullanılır. Verinin boyutunu azaltırken temel yapısını korumaya yardımcı olur.
 
 #### Özdeğerler ve Özvektörler
 
-Bir özdeğer, karşılık gelen özvektör tarafından yakalanan varyans miktarını gösteren bir skalar değerdir. Bir özvektör, verilerin en çok değiştiği yönü temsil eder.
+Bir özdeğer, karşılık gelen özvektörü tarafından yakalanan varyans miktarını gösteren bir skalar değerdir. Bir özvektör, verilerin en çok değiştiği yönü temsil eder.
 
 A'nın bir kare matris olduğunu ve v'nin sıfırdan farklı bir vektör olduğunu varsayalım: `A * v = λ * v`
 burada:
@@ -180,30 +180,30 @@ O zaman, `A * v = [ [1, 2], [2, 1]] * [1, 1] = [3, 3]` olacaktır; bu, özdeğer
 
 #### PCA'daki Özdeğerler ve Özvektörler
 
-Bunu bir örnekle açıklayalım. 100x100 piksel boyutunda birçok gri tonlamalı yüz resmi içeren bir veri kümesine sahip olduğunuzu hayal edin. Her piksel bir özellik olarak kabul edilebilir, bu nedenle her resim için 10.000 özellik (veya her resim için 10000 bileşenden oluşan bir vektör) vardır. Bu veri kümesinin boyutunu PCA kullanarak azaltmak istiyorsanız, şu adımları izlersiniz:
+Bunu bir örnekle açıklayalım. 100x100 piksel boyutunda birçok gri tonlamalı yüz resmi içeren bir veri kümesine sahip olduğunuzu hayal edin. Her piksel bir özellik olarak kabul edilebilir, bu nedenle her görüntü için 10.000 özellik (veya her görüntü için 10000 bileşenden oluşan bir vektör) vardır. Bu veri kümesinin boyutunu PCA kullanarak azaltmak istiyorsanız, şu adımları izlersiniz:
 
 1. **Standartlaştırma**: Her özelliğin (pikselin) ortalamasını veri kümesinden çıkararak verileri merkezleme.
-2. **Kovaryans Matrisi**: Özelliklerin (piksel) birlikte nasıl değiştiğini yakalayan standartlaştırılmış verinin kovaryans matrisini hesaplama.
+2. **Kovaryans Matrisi**: Özelliklerin (piksel) birlikte nasıl değiştiğini yakalayan standartlaştırılmış verilerin kovaryans matrisini hesaplama.
 - İki değişken (bu durumda pikseller) arasındaki kovaryans, birlikte ne kadar değiştiklerini gösterir, bu nedenle burada amaç, hangi piksellerin lineer bir ilişki ile birlikte artma veya azalma eğiliminde olduğunu bulmaktır.
 - Örneğin, piksel 1 ve piksel 2 birlikte artma eğilimindeyse, aralarındaki kovaryans pozitif olacaktır.
 - Kovaryans matrisi, her bir girişin iki piksel arasındaki kovaryansı temsil ettiği 10.000x10.000 boyutunda bir matris olacaktır.
 3. **Özdeğer denklemini çözme**: Çözülmesi gereken özdeğer denklemi `C * v = λ * v` şeklindedir; burada C kovaryans matrisidir, v özvektördür ve λ özdeğerdir. Şu yöntemlerle çözülebilir:
 - **Özdeğer Ayrıştırması**: Özdeğerleri ve özvektörleri elde etmek için kovaryans matrisinde özdeğer ayrıştırması yapma.
 - **Tekil Değer Ayrıştırması (SVD)**: Alternatif olarak, verileri tekil değerler ve vektörler olarak ayrıştırmak için SVD kullanabilirsiniz; bu da temel bileşenleri elde edebilir.
-4. **Temel Bileşenleri Seçme**: Özdeğerleri azalan sırayla sıralama ve en büyük özdeğerlere karşılık gelen en üst K özvektörünü seçme. Bu özvektörler, verilerdeki maksimum varyans yönlerini temsil eder.
+4. **Temel Bileşenleri Seçme**: Özdeğerleri azalan sırada sıralayın ve en büyük özdeğerlere karşılık gelen en üst K özvektörünü seçin. Bu özvektörler, verilerdeki maksimum varyans yönlerini temsil eder.
 
 > [!TIP]
-> *Siber güvenlikte kullanım durumları:* Güvenlikte PCA'nın yaygın bir kullanımı, anomali tespiti için özellik azaltmadır. Örneğin, 40'tan fazla ağ metriği (NSL-KDD özellikleri gibi) içeren bir saldırı tespit sistemi, verileri görselleştirmek veya kümeleme algoritmalarına beslemek için PCA kullanarak birkaç bileşene indirgenebilir. Analistler, saldırıların normal trafikten ayrılıp ayrılmadığını görmek için ağ trafiğini ilk iki temel bileşen alanında çizebilir. PCA, tespit algoritmalarını daha sağlam ve hızlı hale getirmek için de gereksiz özellikleri (eğer korelasyon varsa gönderilen baytlar ile alınan baytlar gibi) ortadan kaldırmaya yardımcı olabilir.
+> *Siber güvenlikte kullanım durumları:* Güvenlikte PCA'nın yaygın bir kullanımı, anomali tespiti için özellik azaltmadır. Örneğin, 40'tan fazla ağ metriği (NSL-KDD özellikleri gibi) içeren bir saldırı tespit sistemi, verileri görselleştirmek veya kümeleme algoritmalarına beslemek için PCA kullanarak birkaç bileşene indirgenebilir. Analistler, saldırıların normal trafikten ayrılıp ayrılmadığını görmek için ağ trafiğini ilk iki temel bileşen alanında çizebilir. PCA, tespit algoritmalarını daha sağlam ve hızlı hale getirmek için de gereksiz özellikleri (eğer korelasyon varsa, gönderilen baytlar ile alınan baytlar gibi) ortadan kaldırmaya yardımcı olabilir.
 
 #### Varsayımlar ve Sınırlamalar
 
-PCA, **temel varyans eksenlerinin anlamlı olduğunu varsayar** - bu, lineer bir yöntemdir, bu nedenle verilerdeki lineer korelasyonları yakalar. Sadece özellik kovaryansını kullandığı için denetimsizdir. PCA'nın avantajları arasında gürültü azaltma (küçük varyanslı bileşenler genellikle gürültü ile ilişkilidir) ve özelliklerin dekorrelasyonu bulunur. Orta derecede yüksek boyutlar için hesaplama açısından verimlidir ve diğer algoritmalar için genellikle yararlı bir ön işleme adımıdır (boyut lanetini azaltmak için). Bir sınırlama, PCA'nın yalnızca lineer ilişkilere sınırlı olmasıdır - karmaşık doğrusal olmayan yapıları yakalayamaz (oysa otomatik kodlayıcılar veya t-SNE bunu yapabilir). Ayrıca, PCA bileşenleri orijinal özellikler açısından yorumlanması zor olabilir (orijinal özelliklerin kombinasyonlarıdır). Siber güvenlikte, dikkatli olunmalıdır: düşük varyanslı bir özellikte yalnızca hafif bir değişiklik yaratan bir saldırı, en üst PC'lerde görünmeyebilir (çünkü PCA varyansı önceliklendirir, mutlaka "ilginçliği" değil).
+PCA, **temel varyans eksenlerinin anlamlı olduğunu varsayar** - bu, lineer bir yöntemdir, bu nedenle verilerdeki lineer korelasyonları yakalar. Sadece özellik kovaryansını kullandığı için denetimsizdir. PCA'nın avantajları arasında gürültü azaltma (küçük varyanslı bileşenler genellikle gürültü ile ilişkilidir) ve özelliklerin dekorrelasyonu bulunur. Orta derecede yüksek boyutlar için hesaplama açısından verimlidir ve diğer algoritmalar için genellikle yararlı bir ön işleme adımıdır (boyut lanetini azaltmak için). Bir sınırlama, PCA'nın yalnızca lineer ilişkilere sınırlı olmasıdır - karmaşık doğrusal olmayan yapıları yakalayamaz (oysa otomatik kodlayıcılar veya t-SNE yakalayabilir). Ayrıca, PCA bileşenleri, orijinal özellikler açısından yorumlanması zor olabilir (orijinal özelliklerin kombinasyonlarıdır). Siber güvenlikte, dikkatli olunmalıdır: Düşük varyanslı bir özellikte yalnızca hafif bir değişiklik yaratan bir saldırı, en üst PC'lerde görünmeyebilir (çünkü PCA varyansı önceliklendirir, mutlaka "ilginçliği" değil).
 
 <details>
 <summary>Örnek -- Ağ Verilerinin Boyutunu Azaltma
 </summary>
 
-Birden fazla özelliğe (örneğin, süreler, baytlar, sayılar) sahip ağ bağlantı günlüklerimiz olduğunu varsayalım. Özellikler arasında bazı korelasyonlar olan sentetik 4 boyutlu bir veri seti oluşturacağız ve bunu görselleştirme veya daha fazla analiz için 2 boyuta indirmek üzere PCA kullanacağız.
+Birden fazla özelliğe (örneğin, süreler, baytlar, sayılar) sahip ağ bağlantı günlüklerimiz olduğunu varsayalım. Bazı özellikler arasında korelasyon olan sentetik 4 boyutlu bir veri kümesi oluşturacağız ve bunu görselleştirme veya daha fazla analiz için 2 boyuta indirmek üzere PCA kullanacağız.
 ```python
 from sklearn.decomposition import PCA
 
@@ -223,14 +223,14 @@ print("Original shape:", data_4d.shape, "Reduced shape:", data_2d.shape)
 # We can examine a few transformed points
 print("First 5 data points in PCA space:\n", data_2d[:5])
 ```
-Burada daha önceki normal trafik kümelerini aldık ve her veri noktasını baytlar ve süre ile ilişkili iki ek özellik (paketler ve hatalar) ile genişlettik. PCA, ardından 4 özelliği 2 ana bileşene sıkıştırmak için kullanılır. Açıklanan varyans oranını yazdırıyoruz; bu, örneğin, %95'ten fazla varyansın 2 bileşen tarafından yakalandığını gösterebilir (bu da az bilgi kaybı anlamına gelir). Çıktı ayrıca veri şeklinin (1500, 4) den (1500, 2) ye düştüğünü gösterir. PCA alanındaki ilk birkaç nokta bir örnek olarak verilmiştir. Pratikte, veri_2d'yi çizerek kümelerin ayırt edilebilir olup olmadığını görsel olarak kontrol edebilirsiniz. Eğer bir anomali varsa, bunu PCA alanında ana kümeden uzakta bir nokta olarak görebilirsiniz. Bu nedenle, PCA karmaşık verileri insan yorumlaması için yönetilebilir bir forma veya diğer algoritmalara girdi olarak damıtmaya yardımcı olur.
+Burada daha önceki normal trafik kümelerini aldık ve her veri noktasını baytlar ve süre ile ilişkili iki ek özellik (paketler ve hatalar) ile genişlettik. PCA, ardından 4 özelliği 2 ana bileşene sıkıştırmak için kullanılır. Açıklanan varyans oranını yazdırıyoruz; bu, örneğin, %95'ten fazla varyansın 2 bileşen tarafından yakalandığını gösterebilir (yani az bilgi kaybı). Çıktı ayrıca veri şeklinin (1500, 4) den (1500, 2) düştüğünü gösterir. PCA alanındaki ilk birkaç nokta bir örnek olarak verilmiştir. Pratikte, veri_2d'yi çizerek kümelerin ayırt edilebilir olup olmadığını görsel olarak kontrol edebilirsiniz. Eğer bir anomali varsa, bunu PCA alanında ana kümeden uzakta bir nokta olarak görebilirsiniz. Bu nedenle, PCA karmaşık verileri insan yorumlaması için yönetilebilir bir forma veya diğer algoritmalara girdi olarak damıtmaya yardımcı olur.
 
 </details>
 
 
 ### Gaussian Karışım Modelleri (GMM)
 
-Bir Gaussian Karışım Modeli, verilerin **bilinmeyen parametrelerle birkaç Gaussian (normal) dağılımının karışımından üretildiğini** varsayar. Özünde, bu olasılıksal bir kümeleme modelidir: her noktayı K Gaussian bileşeninden birine yumuşak bir şekilde atamaya çalışır. Her Gaussian bileşeni k'nin bir ortalama vektörü (μ_k), bir kovaryans matrisine (Σ_k) ve o kümenin ne kadar yaygın olduğunu temsil eden bir karışım ağırlığı (π_k) vardır. K-Means'in "sert" atamalar yaptığı yerden farklı olarak, GMM her noktaya her kümede bulunma olasılığı verir.
+Bir Gaussian Karışım Modeli, verilerin **bilinmeyen parametrelerle birkaç Gaussian (normal) dağılımının karışımından üretildiğini** varsayar. Özünde, bu olasılıksal bir kümeleme modelidir: her noktayı K Gaussian bileşeninden birine yumuşak bir şekilde atamaya çalışır. Her Gaussian bileşeni k'nin bir ortalama vektörü (μ_k), bir kovaryans matrisine (Σ_k) ve o kümenin ne kadar yaygın olduğunu temsil eden bir karışım ağırlığı (π_k) vardır. K-Means'in "sert" atamalar yaptığı yerin aksine, GMM her noktaya her kümede bulunma olasılığı verir.
 
 GMM uyumu genellikle Beklenti-Maksimizasyon (EM) algoritması aracılığıyla yapılır:
 
@@ -251,16 +251,20 @@ burada:
 
 - **E ve M adımlarını** yakınsama sağlanana kadar yineleyin (parametreler stabilize olana veya olasılık iyileşmesi bir eşik altına düşene kadar).
 
-Sonuç, genel veri dağılımını topluca modelleyen bir dizi Gaussian dağılımıdır. Uyumlu GMM'yi, her noktayı en yüksek olasılığa sahip Gaussian'a atayarak kümelemek için kullanabiliriz veya belirsizlik için olasılıkları saklayabiliriz. Yeni noktaların modelle uyumlu olup olmadığını değerlendirmek için de olasılıklarını değerlendirebiliriz (anomali tespiti için yararlıdır).
+Sonuç, genel veri dağılımını topluca modelleyen bir dizi Gaussian dağılımıdır. Uyumlu GMM'yi, her noktayı en yüksek olasılığa sahip Gaussian'a atayarak kümelemek için kullanabiliriz veya belirsizlik için olasılıkları saklayabiliriz. Yeni noktaların modelle uyumlu olup olmadığını değerlendirmek için de olasılıkları değerlendirebiliriz (anomali tespiti için yararlıdır).
 
 > [!TIP]
-> *Siber güvenlikte kullanım durumları:* GMM, normal verilerin dağılımını modelleyerek anomali tespiti için kullanılabilir: öğrenilen karışım altında çok düşük olasılığa sahip herhangi bir nokta anomali olarak işaretlenir. Örneğin, meşru ağ trafiği özellikleri üzerinde bir GMM eğitebilirsiniz; herhangi bir öğrenilen kümeye benzemeyen bir saldırı bağlantısı düşük bir olasılığa sahip olacaktır. GMM'ler, kümelerin farklı şekillere sahip olabileceği aktiviteleri kümelemek için de kullanılır – örneğin, her profilin özellikleri Gaussian benzeri olabilir ancak kendi varyans yapısına sahip olduğu için kullanıcıları davranış profillerine göre gruplamak. Başka bir senaryo: oltalama tespitinde, meşru e-posta özellikleri bir Gaussian kümesi oluşturabilir, bilinen oltalama başka bir, yeni oltalama kampanyaları ise ya ayrı bir Gaussian ya da mevcut karışıma göre düşük olasılıklı noktalar olarak görünebilir.
+> *Siber güvenlikte kullanım durumları:* GMM, normal verilerin dağılımını modelleyerek anomali tespiti için kullanılabilir: öğrenilen karışım altında çok düşük olasılığa sahip herhangi bir nokta anomali olarak işaretlenir. Örneğin, meşru ağ trafiği özellikleri üzerinde bir GMM eğitebilirsiniz; herhangi bir öğrenilen kümeye benzemeyen bir saldırı bağlantısının düşük bir olasılığı olacaktır. GMM'ler ayrıca kümelerin farklı şekillere sahip olabileceği aktiviteleri kümelemek için de kullanılır – örneğin, her profilin özellikleri Gaussian benzeri olabilir ancak kendi varyans yapısına sahip olduğu kullanıcıları davranış profillerine göre gruplamak. Başka bir senaryo: oltalama tespitinde, meşru e-posta özellikleri bir Gaussian kümesi oluşturabilir, bilinen oltalama başka bir, yeni oltalama kampanyaları ise ya ayrı bir Gaussian ya da mevcut karışıma göre düşük olasılıklı noktalar olarak görünebilir.
 
 #### Varsayımlar ve Sınırlamalar
 
 GMM, kovaryansı içeren K-Means'in bir genellemesidir, böylece kümeler elipsoidal olabilir (sadece küresel değil). Kovaryans tam olduğunda farklı boyut ve şekillerdeki kümeleri işleyebilir. Yumuşak kümeleme, küme sınırları belirsiz olduğunda bir avantajdır – örneğin, siber güvenlikte bir olay birden fazla saldırı türünün özelliklerini taşıyabilir; GMM bu belirsizliği olasılıklarla yansıtabilir. GMM ayrıca verinin olasılıksal yoğunluk tahminini sağlar, bu da aykırı değerleri (tüm karışım bileşenleri altında düşük olasılığa sahip noktalar) tespit etmek için yararlıdır.
 
-Diğer yandan, GMM, bileşen sayısı K'nın belirtilmesini gerektirir (bunu seçmek için BIC/AIC gibi kriterler kullanılabilir). EM bazen yavaş yakınsama sağlayabilir veya yerel bir optimuma ulaşabilir, bu nedenle başlatma önemlidir (genellikle EM'yi birden fazla kez çalıştırmak gerekir). Veriler aslında Gaussian karışımını takip etmiyorsa, model kötü bir uyum sağlayabilir. Ayrıca, bir Gaussian'ın yalnızca bir aykırı değeri kapsayacak şekilde küçülme riski vardır (bunu hafifletmek için düzenleme veya minimum kovaryans sınırları kullanılabilir).
+Diğer yandan, GMM bileşen sayısını K belirtmeyi gerektirir (bunu seçmek için BIC/AIC gibi kriterler kullanılabilir). EM bazen yavaş yakınsama sağlayabilir veya yerel bir optimuma ulaşabilir, bu nedenle başlatma önemlidir (genellikle EM'yi birden fazla kez çalıştırmak gerekir). Veriler aslında Gaussian karışımını takip etmiyorsa, model kötü bir uyum sağlayabilir. Ayrıca, bir Gaussian'ın yalnızca bir aykırı değeri kapsayacak şekilde küçülme riski vardır (bunu hafifletmek için düzenleme veya minimum kovaryans sınırları kullanılabilir).
+
+<details>
+<summary>Örnek -- Yumuşak Kümeleme & Anomali Puanları
+</summary>
 ```python
 from sklearn.mixture import GaussianMixture
 
@@ -292,9 +296,9 @@ Anomali tespiti, bu rastgele ağaçlardaki her noktanın yol uzunluğunu gözlem
 
 #### Varsayımlar ve Sınırlamalar
 
-**Avantajlar**: Isolation Forest, bir dağılım varsayımına ihtiyaç duymaz; doğrudan izolasyonu hedefler. Yüksek boyutlu veriler ve büyük veri setleri üzerinde etkilidir (ormanı oluşturmak için lineer karmaşıklık $O(n\log n)$) çünkü her ağaç, yalnızca bir alt küme özellik ve bölünme ile noktaları izole eder. Sayısal özellikleri iyi bir şekilde işleme eğilimindedir ve $O(n^2)$ olabilecek mesafe tabanlı yöntemlerden daha hızlı olabilir. Ayrıca otomatik olarak bir anomali skoru verir, böylece uyarılar için bir eşik belirleyebilir (veya beklenen anomali oranına dayalı olarak otomatik bir kesim belirlemek için bir kontaminasyon parametresi kullanabilirsiniz).
+**Avantajlar**: Isolation Forest, bir dağılım varsayımına ihtiyaç duymaz; doğrudan izolasyonu hedefler. Yüksek boyutlu veriler ve büyük veri setleri üzerinde etkilidir (ormanı oluşturmak için lineer karmaşıklık $O(n\log n)$) çünkü her ağaç, yalnızca bir alt küme özellik ve bölünme ile noktaları izole eder. Sayısal özellikleri iyi bir şekilde işleme eğilimindedir ve $O(n^2)$ olabilecek mesafe tabanlı yöntemlerden daha hızlı olabilir. Ayrıca otomatik olarak bir anomali skoru verir, böylece uyarılar için bir eşik belirleyebilir (veya beklenen anomali oranına dayalı olarak otomatik bir kesim noktası belirlemek için bir kontaminasyon parametresi kullanabilirsiniz).
 
-**Sınırlamalar**: Rastgele doğası nedeniyle, sonuçlar çalıştırmalar arasında biraz değişiklik gösterebilir (yeterince çok ağaç varsa bu önemsizdir). Veriler çok sayıda alakasız özellik içeriyorsa veya anomali herhangi bir özellikte güçlü bir şekilde farklılaşmıyorsa, izolasyon etkili olmayabilir (rastgele bölünmeler normal noktaları şans eseri izole edebilir - ancak birçok ağacın ortalaması bunu hafifletir). Ayrıca, Isolation Forest genellikle anomali sayısının küçük bir azınlık olduğunu varsayar (bu genellikle siber güvenlik senaryolarında doğrudur).
+**Sınırlamalar**: Rastgele doğası nedeniyle, sonuçlar çalıştırmalar arasında biraz değişiklik gösterebilir (ancak yeterince çok ağaç varsa bu önemsizdir). Veriler çok sayıda alakasız özellik içeriyorsa veya anomali herhangi bir özellikte güçlü bir şekilde farklılaşmıyorsa, izolasyon etkili olmayabilir (rastgele bölünmeler normal noktaları şans eseri izole edebilir - ancak birçok ağacın ortalaması bunu hafifletir). Ayrıca, Isolation Forest genellikle anomali sayısının küçük bir azınlık olduğunu varsayar (bu genellikle siber güvenlik senaryolarında doğrudur).
 
 <details>
 <summary>Örnek -- Ağ Günlüklerinde Aykırı Değerleri Tespit Etme
@@ -316,28 +320,28 @@ print("Isolation Forest predicted labels (first 20):", preds[:20])
 print("Number of anomalies detected:", np.sum(preds == -1))
 print("Example anomaly scores (lower means more anomalous):", anomaly_scores[:5])
 ```
-Bu kodda, `IsolationForest`'ı 100 ağaç ile başlatıyoruz ve `contamination=0.15` ayarlıyoruz (bu, yaklaşık %15 anomali beklediğimiz anlamına gelir; model, ~%15'lik noktaların işaretlenmesi için puan eşik değerini ayarlayacaktır). Bunu, normal ve saldırı noktalarının karışımını içeren `X_test_if` üzerinde uyarlıyoruz (not: normalde eğitim verileri üzerinde uyarlayıp yeni verilerde tahmin yaparsınız, ancak burada örnekleme amacıyla aynı set üzerinde uyarlayıp tahmin yapıyoruz, böylece sonuçları doğrudan gözlemleyebiliyoruz).
+Bu kodda, `IsolationForest`'ı 100 ağaç ile başlatıyoruz ve `contamination=0.15` ayarlıyoruz (bu, yaklaşık %15 anomali beklediğimiz anlamına gelir; model, ~%15'lik noktaların işaretlenmesi için puan eşiğini ayarlayacaktır). Bunu, normal ve saldırı noktalarının bir karışımını içeren `X_test_if` üzerinde uyarlıyoruz (not: normalde eğitim verileri üzerinde uyarlayıp yeni verilerde tahmin yaparsınız, ancak burada sonuçları doğrudan gözlemlemek için aynı set üzerinde uyarlayıp tahmin ediyoruz).
 
-Çıktı, ilk 20 nokta için tahmin edilen etiketleri gösterir (burada -1 anomaliyi belirtir). Ayrıca toplamda kaç anomali tespit edildiğini ve bazı örnek anomali puanlarını yazdırıyoruz. 120 noktadan yaklaşık 18'inin -1 olarak etiketlenmesini bekleriz (çünkü kontaminasyon %15'ti). Eğer 20 saldırı örneğimiz gerçekten en dışlayıcı olanlarsa, bunların çoğu o -1 tahminlerinde görünmelidir. Anomali puanı (Isolation Forest’ın karar fonksiyonu) normal noktalar için daha yüksek ve anomali için daha düşük (daha negatif) olacaktır – ayrımı görmek için birkaç değeri yazdırıyoruz. Pratikte, verileri puana göre sıralamak, en üst dışlayıcıları görmek ve incelemek için yararlı olabilir. Isolation Forest, böylece büyük etiketlenmemiş güvenlik verilerini taramak ve insan analizi veya daha fazla otomatik inceleme için en düzensiz örnekleri seçmek için verimli bir yol sağlar.
+Çıktı, ilk 20 nokta için tahmin edilen etiketleri gösterir (burada -1 anomaliyi belirtir). Ayrıca toplamda kaç anomali tespit edildiğini ve bazı örnek anomali puanlarını yazdırıyoruz. 120 noktadan yaklaşık 18'inin -1 olarak etiketlenmesini bekleriz (çünkü kontaminasyon %15'ti). Eğer 20 saldırı örneğimiz gerçekten en uç noktalar ise, bunların çoğu o -1 tahminlerinde görünmelidir. Anomali puanı (Isolation Forest’ın karar fonksiyonu) normal noktalar için daha yüksek ve anomali için daha düşük (daha negatif) – ayrımı görmek için birkaç değeri yazdırıyoruz. Pratikte, verileri puana göre sıralamak, en üstteki uç noktaları görmek ve incelemek için yararlı olabilir. Isolation Forest, böylece büyük etiketlenmemiş güvenlik verilerini taramak ve insan analizi veya daha fazla otomatik inceleme için en düzensiz örnekleri seçmek için verimli bir yol sağlar.
 
 ### t-SNE (t-Dağıtılmış Stokastik Komşu Gömme)
 
-**t-SNE**, yüksek boyutlu verileri 2 veya 3 boyutta görselleştirmek için özel olarak tasarlanmış doğrusal olmayan bir boyut azaltma tekniğidir. Veri noktaları arasındaki benzerlikleri ortak olasılık dağılımlarına dönüştürür ve yerel komşulukların yapısını daha düşük boyutlu projeksiyonda korumaya çalışır. Daha basit bir ifadeyle, t-SNE, benzer noktaları (orijinal alanda) yakın yerleştirirken, benzer olmayan noktaları yüksek olasılıkla uzak yerleştirir.
+**t-SNE**, yüksek boyutlu verileri 2 veya 3 boyutta görselleştirmek için özel olarak tasarlanmış doğrusal olmayan bir boyut azaltma tekniğidir. Veri noktaları arasındaki benzerlikleri ortak olasılık dağılımlarına dönüştürür ve yerel komşulukların yapısını daha düşük boyutlu projeksiyonda korumaya çalışır. Daha basit bir ifadeyle, t-SNE, benzer noktaları (orijinal alanda) birbirine yakın ve benzer olmayan noktaları yüksek olasılıkla uzak yerleştirir.
 
 Algoritmanın iki ana aşaması vardır:
 
 1. **Yüksek boyutlu alanda çiftler arası yakınlıkları hesapla:** Her nokta çifti için, t-SNE, o çifti komşu olarak seçme olasılığını hesaplar (bu, her noktanın etrafında bir Gauss dağılımı merkezleyerek ve mesafeleri ölçerek yapılır – karmaşıklık parametresi, dikkate alınan etkili komşu sayısını etkiler).
-2. **Düşük boyutlu (örneğin 2D) alanda çiftler arası yakınlıkları hesapla:** Başlangıçta, noktalar 2D'de rastgele yerleştirilir. t-SNE, bu haritadaki mesafeler için benzer bir olasılık tanımlar (uzak noktaların daha fazla özgürlük tanıması için Gauss'tan daha ağır kuyruklara sahip bir Student t-dağılımı çekirdek kullanarak).
+2. **Düşük boyutlu (örneğin 2D) alanda çiftler arası yakınlıkları hesapla:** Başlangıçta, noktalar 2D'de rastgele yerleştirilir. t-SNE, bu haritadaki mesafeler için benzer bir olasılık tanımlar (uzak noktaların daha fazla özgürlük tanıması için Gauss'tan daha ağır kuyruklara sahip bir Student t-dağılımı çekirdeği kullanarak).
 3. **Gradyan İnişi:** t-SNE, ardından yüksek-D yakınlık dağılımı ile düşük-D olan arasındaki Kullback–Leibler (KL) ayrımını minimize etmek için noktaları 2D'de iteratif olarak hareket ettirir. Bu, 2D düzeninin yüksek-D yapısını mümkün olduğunca yansıtmasını sağlar – orijinal alanda yakın olan noktalar birbirini çeker, uzak olanlar ise itilir, ta ki bir denge bulunana kadar.
 
 Sonuç genellikle verilerdeki kümelerin belirgin hale geldiği görsel olarak anlamlı bir dağılım grafiğidir.
 
 > [!TIP]
-> *Siber güvenlikte kullanım durumları:* t-SNE, genellikle **insan analizi için yüksek boyutlu güvenlik verilerini görselleştirmek** için kullanılır. Örneğin, bir güvenlik operasyon merkezi içinde, analistler, birçok özelliğe (port numaraları, frekanslar, bayt sayıları vb.) sahip bir olay veri setini alabilir ve t-SNE kullanarak 2D bir grafik üretebilir. Saldırılar, bu grafikte kendi kümelerini oluşturabilir veya normal verilerden ayrılabilir, bu da onları tanımlamayı kolaylaştırır. Kötü amaçlı yazılım ailelerinin gruplarını görmek için kötü amaçlı yazılım veri setlerine veya farklı saldırı türlerinin belirgin şekilde kümelendiği ağ ihlali verilerine uygulanmıştır, bu da daha fazla araştırmayı yönlendirmektedir. Temelde, t-SNE, aksi takdirde anlaşılmaz olan siber verilerde yapı görmenin bir yolunu sağlar.
+> *Siber güvenlikte kullanım durumları:* t-SNE, genellikle **insan analizi için yüksek boyutlu güvenlik verilerini görselleştirmek** için kullanılır. Örneğin, bir güvenlik operasyon merkezi içinde, analistler, birçok özelliğe (port numaraları, frekanslar, bayt sayıları vb.) sahip bir olay veri setini alabilir ve t-SNE kullanarak 2D bir grafik üretebilir. Saldırılar, bu grafikte kendi kümelerini oluşturabilir veya normal verilerden ayrılabilir, bu da onları tanımlamayı kolaylaştırır. Kötü amaçlı yazılım ailelerinin gruplarını görmek için kötü amaçlı yazılım veri setlerine veya farklı saldırı türlerinin belirgin şekilde kümelendiği ağ ihlali verilerine uygulanmıştır ve daha fazla araştırmayı yönlendirmiştir. Temelde, t-SNE, aksi takdirde anlaşılmaz olan siber verilerde yapı görmenin bir yolunu sağlar.
 
 #### Varsayımlar ve Sınırlamalar
 
-t-SNE, desenlerin görsel keşfi için harikadır. Diğer doğrusal yöntemlerin (PCA gibi) göremeyebileceği kümeleri, alt kümeleri ve dışlayıcıları ortaya çıkarabilir. Kötü amaçlı yazılım davranış profilleri veya ağ trafiği desenleri gibi karmaşık verileri görselleştirmek için siber güvenlik araştırmalarında kullanılmıştır. Yerel yapıyı koruduğu için, doğal gruplamaları göstermede iyidir.
+t-SNE, desenlerin görsel keşfi için harikadır. Diğer doğrusal yöntemlerin (PCA gibi) göremeyebileceği kümeleri, alt kümeleri ve uç noktaları ortaya çıkarabilir. Kötü amaçlı yazılım davranış profilleri veya ağ trafiği desenleri gibi karmaşık verileri görselleştirmek için siber güvenlik araştırmalarında kullanılmıştır. Yerel yapıyı koruduğu için doğal gruplamaları göstermede iyidir.
 
 Ancak, t-SNE hesaplama açısından daha ağırdır (yaklaşık $O(n^2)$) bu nedenle çok büyük veri setleri için örnekleme gerektirebilir. Ayrıca, çıktıyı etkileyebilecek hiperparametreleri (karmaşıklık, öğrenme oranı, iterasyonlar) vardır – örneğin, farklı karmaşıklık değerleri farklı ölçeklerde kümeleri ortaya çıkarabilir. t-SNE grafikleri bazen yanlış yorumlanabilir – haritadaki mesafeler küresel olarak doğrudan anlamlı değildir (yerel komşuluğa odaklanır, bazen kümeler yapay olarak iyi ayrılmış görünebilir). Ayrıca, t-SNE esasen görselleştirme içindir; yeni veri noktalarını yeniden hesaplamadan projekte etmek için doğrudan bir yol sağlamaz ve tahmin modellemesi için ön işleme olarak kullanılmak üzere tasarlanmamıştır (UMAP, bu sorunların bazılarını daha hızlı hızla ele alan bir alternatiftir).
 
@@ -345,7 +349,7 @@ Ancak, t-SNE hesaplama açısından daha ağırdır (yaklaşık $O(n^2)$) bu ned
 <summary>Örnek -- Ağ Bağlantılarını Görselleştirme
 </summary>
 
-t-SNE'yi çok özellikli bir veri setini 2D'ye indirmek için kullanacağız. Örnekleme amacıyla, daha önceki 4D verileri (normal trafiğin 3 doğal kümesine sahip olan) alalım ve birkaç anomali noktası ekleyelim. Ardından t-SNE'yi çalıştırır ve (kavram olarak) sonuçları görselleştiririz.
+t-SNE'yi çok özellikli bir veri setini 2D'ye indirmek için kullanacağız. Örnek olarak, daha önceki 4D verileri (normal trafiğin 3 doğal kümesine sahip olan) alalım ve birkaç anomali noktası ekleyelim. Ardından t-SNE'yi çalıştırır ve (kavram olarak) sonuçları görselleştiririz.
 ```python
 # 1 ─────────────────────────────────────────────────────────────────────
 #    Create synthetic 4-D dataset
@@ -428,7 +432,7 @@ plt.legend()
 plt.tight_layout()
 plt.show()
 ```
-Burada önceki 4D normal veri setimizi birkaç aşırı uç ile birleştirdik (aşırı uçların bir özelliği (“süre”) çok yüksek ayarlanmış vb., garip bir deseni simüle etmek için). t-SNE'yi 30'luk tipik bir karmaşıklık ile çalıştırıyoruz. Çıktı data_2d'nin şekli (1505, 2) dir. Bu metinde aslında grafik çizmeyeceğiz, ama eğer çizersek, muhtemelen 3 normal kümeye karşılık gelen üç sıkı küme ve bu kümelerden uzakta izole noktalar olarak görünen 5 aşırı ucu göreceğiz. Etkileşimli bir iş akışında, bu yapıyı doğrulamak için noktaları etiketlerine (normal veya hangi küme, anomaliye karşı) göre renklendirebiliriz. Etiketler olmadan bile, bir analist bu 5 noktanın 2D grafikte boş alanda durduğunu fark edebilir ve bunları işaretleyebilir. Bu, t-SNE'nin siber güvenlik verilerinde görsel anomali tespiti ve küme incelemesi için güçlü bir yardımcı olabileceğini, yukarıdaki otomatik algoritmaları tamamladığını göstermektedir.
+Burada önceki 4D normal veri setimizi birkaç aşırı uç ile birleştirdik (aşırı uçların bir özelliği (“süre”) çok yüksek ayarlanmış vb., garip bir deseni simüle etmek için). t-SNE'yi tipik bir karmaşıklık değeri olan 30 ile çalıştırıyoruz. Çıktı data_2d'nin şekli (1505, 2) dir. Bu metinde aslında bir grafik çizmeyeceğiz, ama çizersek, muhtemelen 3 normal kümeye karşılık gelen üç sıkı küme ve bu kümelerden uzakta izole noktalar olarak görünen 5 aşırı ucu göreceğimizi bekleriz. Etkileşimli bir iş akışında, bu yapıyı doğrulamak için noktaları etiketlerine (normal veya hangi küme, anomaliye karşı) göre renklendirebiliriz. Etiketler olmadan bile, bir analist bu 5 noktanın 2D grafikte boş alanda durduğunu fark edebilir ve bunları işaretleyebilir. Bu, t-SNE'nin siber güvenlik verilerinde görsel anomali tespiti ve küme incelemesi için güçlü bir yardımcı olabileceğini, yukarıdaki otomatik algoritmaları tamamladığını göstermektedir.
 
 </details>
 
