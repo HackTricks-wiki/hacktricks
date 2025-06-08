@@ -9,13 +9,13 @@ O aprendizado não supervisionado é um tipo de aprendizado de máquina onde o m
 ### Agrupamento K-Means
 
 K-Means é um algoritmo de agrupamento baseado em centróides que particiona os dados em K clusters, atribuindo cada ponto ao centroide do cluster mais próximo. O algoritmo funciona da seguinte forma:
-1. **Inicialização**: Escolha K centros de cluster iniciais (centróides), frequentemente aleatoriamente ou por meio de métodos mais inteligentes como k-means++.
+1. **Inicialização**: Escolha K centros de cluster iniciais (centróides), muitas vezes aleatoriamente ou por meio de métodos mais inteligentes como k-means++.
 2. **Atribuição**: Atribua cada ponto de dados ao centróide mais próximo com base em uma métrica de distância (por exemplo, distância euclidiana).
 3. **Atualização**: Recalcule os centróides tomando a média de todos os pontos de dados atribuídos a cada cluster.
 4. **Repetir**: As etapas 2–3 são repetidas até que as atribuições de cluster se estabilizem (os centróides não se movem significativamente).
 
 > [!TIP]
-> *Casos de uso em cibersegurança:* K-Means é utilizado para detecção de intrusões agrupando eventos de rede. Por exemplo, pesquisadores aplicaram K-Means ao conjunto de dados de intrusão KDD Cup 99 e descobriram que ele particionava efetivamente o tráfego em clusters normais vs. de ataque. Na prática, analistas de segurança podem agrupar entradas de log ou dados de comportamento do usuário para encontrar grupos de atividades semelhantes; quaisquer pontos que não pertencem a um cluster bem formado podem indicar anomalias (por exemplo, uma nova variante de malware formando seu próprio pequeno cluster). K-Means também pode ajudar na classificação de famílias de malware agrupando binários com base em perfis de comportamento ou vetores de características.
+> *Casos de uso em cibersegurança:* K-Means é utilizado para detecção de intrusões agrupando eventos de rede. Por exemplo, pesquisadores aplicaram K-Means ao conjunto de dados de intrusão KDD Cup 99 e descobriram que ele particionava efetivamente o tráfego em clusters normais vs. de ataque. Na prática, analistas de segurança podem agrupar entradas de log ou dados de comportamento do usuário para encontrar grupos de atividade semelhante; quaisquer pontos que não pertencem a um cluster bem formado podem indicar anomalias (por exemplo, uma nova variante de malware formando seu próprio pequeno cluster). K-Means também pode ajudar na classificação de famílias de malware agrupando binários com base em perfis de comportamento ou vetores de características.
 
 #### Seleção de K
 O número de clusters (K) é um hiperparâmetro que precisa ser definido antes de executar o algoritmo. Técnicas como o Método do Cotovelo ou a Pontuação de Silhueta podem ajudar a determinar um valor apropriado para K, avaliando o desempenho do agrupamento:
@@ -25,7 +25,7 @@ O número de clusters (K) é um hiperparâmetro que precisa ser definido antes d
 
 #### Suposições e Limitações
 
-K-Means assume que **os clusters são esféricos e de tamanho igual**, o que pode não ser verdade para todos os conjuntos de dados. Ele é sensível à colocação inicial dos centróides e pode convergir para mínimos locais. Além disso, K-Means não é adequado para conjuntos de dados com densidades variáveis ou formas não globulares e características com escalas diferentes. Etapas de pré-processamento, como normalização ou padronização, podem ser necessárias para garantir que todas as características contribuam igualmente para os cálculos de distância.
+K-Means assume que **os clusters são esféricos e de tamanho igual**, o que pode não ser verdade para todos os conjuntos de dados. Ele é sensível à colocação inicial dos centróides e pode convergir para mínimos locais. Além disso, K-Means não é adequado para conjuntos de dados com densidades variáveis ou formas não globulares e características com diferentes escalas. Etapas de pré-processamento, como normalização ou padronização, podem ser necessárias para garantir que todas as características contribuam igualmente para os cálculos de distância.
 
 <details>
 <summary>Exemplo -- Agrupando Eventos de Rede
@@ -56,7 +56,7 @@ print("Cluster centers (duration, bytes):")
 for idx, center in enumerate(kmeans.cluster_centers_):
 print(f"  Cluster {idx}: {center}")
 ```
-Neste exemplo, o K-Means deve encontrar 4 clusters. O pequeno cluster de ataque (com duração incomumente alta ~200) idealmente formará seu próprio cluster, dada sua distância dos clusters normais. Imprimimos os tamanhos e centros dos clusters para interpretar os resultados. Em um cenário real, poderia-se rotular o cluster com poucos pontos como potenciais anomalias ou inspecionar seus membros em busca de atividade maliciosa.
+Neste exemplo, o K-Means deve encontrar 4 clusters. O cluster de ataque pequeno (com duração incomumente alta ~200) idealmente formará seu próprio cluster, dada sua distância dos clusters normais. Imprimimos os tamanhos e centros dos clusters para interpretar os resultados. Em um cenário real, poderia-se rotular o cluster com poucos pontos como potenciais anomalias ou inspecionar seus membros em busca de atividade maliciosa.
 
 ### Agrupamento Hierárquico
 
@@ -65,7 +65,7 @@ O agrupamento hierárquico constrói uma hierarquia de clusters usando uma abord
 1. **Aglomerativa (De Baixo para Cima)**: Começa com cada ponto de dados como um cluster separado e mescla iterativamente os clusters mais próximos até que um único cluster permaneça ou um critério de parada seja atendido.
 2. **Divisiva (De Cima para Baixo)**: Começa com todos os pontos de dados em um único cluster e divide iterativamente os clusters até que cada ponto de dados seja seu próprio cluster ou um critério de parada seja atendido.
 
-O agrupamento aglomerativo requer uma definição de distância entre clusters e um critério de ligação para decidir quais clusters mesclar. Métodos de ligação comuns incluem ligação simples (distância dos pontos mais próximos entre dois clusters), ligação completa (distância dos pontos mais distantes), ligação média, etc., e a métrica de distância é frequentemente euclidiana. A escolha da ligação afeta a forma dos clusters produzidos. Não há necessidade de pré-especificar o número de clusters K; você pode "cortar" o dendrograma em um nível escolhido para obter o número desejado de clusters.
+O agrupamento aglomerativo requer uma definição de distância entre clusters e um critério de ligação para decidir quais clusters mesclar. Métodos de ligação comuns incluem ligação simples (distância dos pontos mais próximos entre dois clusters), ligação completa (distância dos pontos mais distantes), ligação média, etc., e a métrica de distância é frequentemente Euclidiana. A escolha da ligação afeta a forma dos clusters produzidos. Não há necessidade de pré-especificar o número de clusters K; você pode "cortar" o dendrograma em um nível escolhido para obter o número desejado de clusters.
 
 O agrupamento hierárquico produz um dendrograma, uma estrutura em forma de árvore que mostra as relações entre clusters em diferentes níveis de granularidade. O dendrograma pode ser cortado em um nível desejado para obter um número específico de clusters.
 
@@ -74,7 +74,7 @@ O agrupamento hierárquico produz um dendrograma, uma estrutura em forma de árv
 
 #### Suposições e Limitações
 
-O agrupamento hierárquico não assume uma forma de cluster particular e pode capturar clusters aninhados. É útil para descobrir taxonomias ou relações entre grupos (por exemplo, agrupando malware por subgrupos familiares). É determinístico (sem problemas de inicialização aleatória). Uma vantagem chave é o dendrograma, que fornece uma visão da estrutura de agrupamento dos dados em todas as escalas – analistas de segurança podem decidir um corte apropriado para identificar clusters significativos. No entanto, é computacionalmente caro (tipicamente $O(n^2)$ de tempo ou pior para implementações ingênuas) e não viável para conjuntos de dados muito grandes. Também é um procedimento ganancioso – uma vez que uma mesclagem ou divisão é feita, não pode ser desfeita, o que pode levar a clusters subótimos se um erro ocorrer cedo. Outliers também podem afetar algumas estratégias de ligação (a ligação simples pode causar o efeito de "encadeamento", onde clusters se conectam via outliers).
+O agrupamento hierárquico não assume uma forma particular de cluster e pode capturar clusters aninhados. É útil para descobrir taxonomias ou relações entre grupos (por exemplo, agrupando malware por subgrupos familiares). É determinístico (sem problemas de inicialização aleatória). Uma vantagem chave é o dendrograma, que fornece insights sobre a estrutura de agrupamento dos dados em todas as escalas – analistas de segurança podem decidir um corte apropriado para identificar clusters significativos. No entanto, é computacionalmente caro (tipicamente $O(n^2)$ de tempo ou pior para implementações ingênuas) e não viável para conjuntos de dados muito grandes. Também é um procedimento ganancioso – uma vez que uma mesclagem ou divisão é feita, não pode ser desfeita, o que pode levar a clusters subótimos se um erro ocorrer cedo. Outliers também podem afetar algumas estratégias de ligação (a ligação simples pode causar o efeito de "encadeamento", onde clusters se conectam via outliers).
 
 <details>
 <summary>Exemplo -- Agrupamento Aglomerativo de Eventos
@@ -168,7 +168,7 @@ O PCA é amplamente utilizado para visualização de dados, redução de ruído 
 
 #### Autovalores e Autovetores
 
-Um autovalor é um escalar que indica a quantidade de variância capturada por seu autovetor correspondente. Um autovetor representa uma direção no espaço de características ao longo da qual os dados variam mais.
+Um autovalor é um escalar que indica a quantidade de variância capturada pelo seu autovetor correspondente. Um autovetor representa uma direção no espaço de características ao longo da qual os dados variam mais.
 
 Imagine que A é uma matriz quadrada, e v é um vetor não nulo tal que: `A * v = λ * v`
 onde:
@@ -188,7 +188,7 @@ Vamos explicar isso com um exemplo. Imagine que você tem um conjunto de dados c
 - A matriz de covariância será uma matriz 10.000x10.000 onde cada entrada representa a covariância entre dois pixels.
 3. **Resolver a equação do autovalor**: A equação do autovalor a ser resolvida é `C * v = λ * v` onde C é a matriz de covariância, v é o autovetor, e λ é o autovalor. Pode ser resolvida usando métodos como:
 - **Decomposição de Autovalores**: Realizar a decomposição de autovalores na matriz de covariância para obter os autovalores e autovetores.
-- **Decomposição em Valores Singulares (SVD)**: Alternativamente, você pode usar SVD para decompor a matriz de dados em valores e vetores singulares, que também podem resultar nos componentes principais.
+- **Decomposição em Valores Singulares (SVD)**: Alternativamente, você pode usar SVD para decompor a matriz de dados em valores e vetores singulares, que também podem gerar os componentes principais.
 4. **Selecionar Componentes Principais**: Classificar os autovalores em ordem decrescente e selecionar os K autovetores correspondentes aos maiores autovalores. Esses autovetores representam as direções de máxima variância nos dados.
 
 > [!TIP]
@@ -231,7 +231,7 @@ Aqui, pegamos os clusters de tráfego normal anteriores e estendemos cada ponto 
 
 Um Modelo de Mistura Gaussiana assume que os dados são gerados a partir de uma mistura de **várias distribuições Gaussianas (normais) com parâmetros desconhecidos**. Em essência, é um modelo de clustering probabilístico: tenta atribuir suavemente cada ponto a um dos K componentes Gaussianos. Cada componente Gaussiano k tem um vetor médio (μ_k), matriz de covariância (Σ_k) e um peso de mistura (π_k) que representa quão prevalente é aquele cluster. Ao contrário do K-Means, que faz atribuições "duras", o GMM dá a cada ponto uma probabilidade de pertencer a cada cluster.
 
-O ajuste do GMM é tipicamente feito via o algoritmo de Expectativa-Maximização (EM):
+O ajuste do GMM é tipicamente feito via algoritmo de Expectativa-Maximização (EM):
 
 - **Inicialização**: Comece com palpites iniciais para as médias, covariâncias e coeficientes de mistura (ou use os resultados do K-Means como ponto de partida).
 
@@ -257,9 +257,9 @@ O resultado é um conjunto de distribuições Gaussianas que modelam coletivamen
 
 #### Suposições e Limitações
 
-O GMM é uma generalização do K-Means que incorpora covariância, de modo que os clusters podem ser elipsoidais (não apenas esféricos). Ele lida com clusters de diferentes tamanhos e formas se a covariância for completa. O clustering suave é uma vantagem quando os limites dos clusters são difusos – por exemplo, em cibersegurança, um evento pode ter características de vários tipos de ataque; o GMM pode refletir essa incerteza com probabilidades. O GMM também fornece uma estimativa de densidade probabilística dos dados, útil para detectar outliers (pontos com baixa probabilidade sob todos os componentes da mistura).
+O GMM é uma generalização do K-Means que incorpora covariância, de modo que os clusters podem ser elipsoidais (não apenas esféricos). Ele lida com clusters de tamanhos e formas diferentes se a covariância for completa. O clustering suave é uma vantagem quando os limites dos clusters são difusos – por exemplo, em cibersegurança, um evento pode ter características de vários tipos de ataque; o GMM pode refletir essa incerteza com probabilidades. O GMM também fornece uma estimativa de densidade probabilística dos dados, útil para detectar outliers (pontos com baixa probabilidade sob todos os componentes da mistura).
 
-Por outro lado, o GMM requer especificar o número de componentes K (embora se possa usar critérios como BIC/AIC para selecioná-lo). O EM pode, às vezes, convergir lentamente ou para um ótimo local, então a inicialização é importante (geralmente executa-se o EM várias vezes). Se os dados não seguirem realmente uma mistura de Gaussianas, o modelo pode ser um ajuste ruim. Também há o risco de uma Gaussiana encolher para cobrir apenas um outlier (embora a regularização ou limites mínimos de covariância possam mitigar isso).
+Por outro lado, o GMM requer especificar o número de componentes K (embora se possa usar critérios como BIC/AIC para selecioná-lo). O EM pode às vezes convergir lentamente ou para um ótimo local, então a inicialização é importante (geralmente executa-se o EM várias vezes). Se os dados não seguirem realmente uma mistura de Gaussianas, o modelo pode ser um ajuste ruim. Também há o risco de uma Gaussiana encolher para cobrir apenas um outlier (embora a regularização ou limites mínimos de covariância possam mitigar isso).
 
 <details>
 <summary>Exemplo --  Clustering Suave & Pontuações de Anomalia
@@ -321,28 +321,28 @@ print("Example anomaly scores (lower means more anomalous):", anomaly_scores[:5]
 ```
 Neste código, instanciamos `IsolationForest` com 100 árvores e definimos `contamination=0.15` (o que significa que esperamos cerca de 15% de anomalias; o modelo definirá seu limite de pontuação para que ~15% dos pontos sejam sinalizados). Ajustamos em `X_test_if`, que contém uma mistura de pontos normais e de ataque (nota: normalmente você ajustaria em dados de treinamento e depois usaria predict em novos dados, mas aqui, para ilustração, ajustamos e prevemos no mesmo conjunto para observar diretamente os resultados).
 
-A saída mostra os rótulos previstos para os primeiros 20 pontos (onde -1 indica anomalia). Também imprimimos quantas anomalias foram detectadas no total e alguns exemplos de pontuações de anomalia. Esperaríamos que aproximadamente 18 dos 120 pontos fossem rotulados como -1 (já que a contaminação era de 15%). Se nossas 20 amostras de ataque são realmente as mais discrepantes, a maioria delas deve aparecer nessas previsões -1. A pontuação de anomalia (a função de decisão do Isolation Forest) é maior para pontos normais e menor (mais negativa) para anomalias – imprimimos alguns valores para ver a separação. Na prática, pode-se classificar os dados por pontuação para ver os principais outliers e investigá-los. O Isolation Forest, portanto, fornece uma maneira eficiente de filtrar grandes dados de segurança não rotulados e selecionar as instâncias mais irregulares para análise humana ou exame automatizado adicional.
+A saída mostra os rótulos previstos para os primeiros 20 pontos (onde -1 indica anomalia). Também imprimimos quantas anomalias foram detectadas no total e alguns exemplos de pontuações de anomalia. Esperaríamos que aproximadamente 18 dos 120 pontos fossem rotulados como -1 (já que a contaminação era de 15%). Se nossas 20 amostras de ataque são realmente as mais discrepantes, a maioria delas deve aparecer nessas previsões -1. A pontuação de anomalia (a função de decisão do Isolation Forest) é maior para pontos normais e menor (mais negativa) para anomalias – imprimimos alguns valores para ver a separação. Na prática, alguém poderia classificar os dados por pontuação para ver os principais outliers e investigá-los. O Isolation Forest, portanto, fornece uma maneira eficiente de filtrar grandes dados de segurança não rotulados e selecionar as instâncias mais irregulares para análise humana ou exame automatizado adicional.
 
 ### t-SNE (t-Distributed Stochastic Neighbor Embedding)
 
-**t-SNE** é uma técnica de redução de dimensionalidade não linear projetada especificamente para visualizar dados de alta dimensão em 2 ou 3 dimensões. Ela converte semelhanças entre pontos de dados em distribuições de probabilidade conjunta e tenta preservar a estrutura dos bairros locais na projeção de menor dimensão. Em termos mais simples, o t-SNE coloca pontos em (digamos) 2D de forma que pontos semelhantes (no espaço original) fiquem próximos e pontos dissimilares fiquem distantes com alta probabilidade.
+**t-SNE** é uma técnica de redução de dimensionalidade não linear projetada especificamente para visualizar dados de alta dimensão em 2 ou 3 dimensões. Ela converte similaridades entre pontos de dados em distribuições de probabilidade conjunta e tenta preservar a estrutura dos bairros locais na projeção de menor dimensão. Em termos mais simples, o t-SNE coloca pontos em (digamos) 2D de forma que pontos similares (no espaço original) fiquem próximos e pontos dissimilares fiquem distantes com alta probabilidade.
 
 O algoritmo tem duas etapas principais:
 
 1. **Calcular afinidades par a par no espaço de alta dimensão:** Para cada par de pontos, o t-SNE calcula uma probabilidade de que um escolheria aquele par como vizinhos (isso é feito centralizando uma distribuição Gaussiana em cada ponto e medindo distâncias – o parâmetro de perplexidade influencia o número efetivo de vizinhos considerados).
-2. **Calcular afinidades par a par no espaço de baixa dimensão (por exemplo, 2D):** Inicialmente, os pontos são colocados aleatoriamente em 2D. O t-SNE define uma probabilidade semelhante para distâncias neste mapa (usando um núcleo de distribuição t de Student, que tem caudas mais pesadas do que a Gaussiana para permitir que pontos distantes tenham mais liberdade).
+2. **Calcular afinidades par a par no espaço de baixa dimensão (por exemplo, 2D):** Inicialmente, os pontos são colocados aleatoriamente em 2D. O t-SNE define uma probabilidade similar para distâncias neste mapa (usando um núcleo de distribuição t de Student, que tem caudas mais pesadas do que a Gaussiana para permitir que pontos distantes tenham mais liberdade).
 3. **Descida do Gradiente:** O t-SNE então move iterativamente os pontos em 2D para minimizar a divergência de Kullback–Leibler (KL) entre a distribuição de afinidade de alta dimensão e a de baixa dimensão. Isso faz com que o arranjo em 2D reflita a estrutura de alta dimensão o máximo possível – pontos que estavam próximos no espaço original se atrairão, e aqueles distantes se repelirão, até que um equilíbrio seja encontrado.
 
 O resultado é frequentemente um gráfico de dispersão visualmente significativo onde os clusters nos dados se tornam aparentes.
 
 > [!TIP]
-> *Casos de uso em cibersegurança:* o t-SNE é frequentemente usado para **visualizar dados de segurança de alta dimensão para análise humana**. Por exemplo, em um centro de operações de segurança, analistas poderiam pegar um conjunto de dados de eventos com dezenas de características (números de porta, frequências, contagens de bytes, etc.) e usar o t-SNE para produzir um gráfico 2D. Ataques podem formar seus próprios clusters ou se separar dos dados normais neste gráfico, tornando-os mais fáceis de identificar. Foi aplicado a conjuntos de dados de malware para ver agrupamentos de famílias de malware ou a dados de intrusão de rede onde diferentes tipos de ataque se agrupam de forma distinta, orientando investigações adicionais. Essencialmente, o t-SNE fornece uma maneira de ver a estrutura em dados cibernéticos que, de outra forma, seriam incompreensíveis.
+> *Casos de uso em cibersegurança:* o t-SNE é frequentemente usado para **visualizar dados de segurança de alta dimensão para análise humana**. Por exemplo, em um centro de operações de segurança, analistas poderiam pegar um conjunto de dados de eventos com dezenas de características (números de porta, frequências, contagens de bytes, etc.) e usar o t-SNE para produzir um gráfico 2D. Ataques podem formar seus próprios clusters ou se separar de dados normais neste gráfico, tornando-os mais fáceis de identificar. Ele foi aplicado a conjuntos de dados de malware para ver agrupamentos de famílias de malware ou a dados de intrusão de rede onde diferentes tipos de ataque se agrupam de forma distinta, orientando investigações adicionais. Essencialmente, o t-SNE fornece uma maneira de ver a estrutura em dados cibernéticos que, de outra forma, seriam incompreensíveis.
 
 #### Suposições e Limitações
 
 O t-SNE é ótimo para descoberta visual de padrões. Ele pode revelar clusters, subclusters e outliers que outros métodos lineares (como PCA) podem não detectar. Tem sido usado em pesquisas de cibersegurança para visualizar dados complexos, como perfis de comportamento de malware ou padrões de tráfego de rede. Como preserva a estrutura local, é bom para mostrar agrupamentos naturais.
 
-No entanto, o t-SNE é computacionalmente mais pesado (aproximadamente $O(n^2)$), então pode exigir amostragem para conjuntos de dados muito grandes. Também possui hiperparâmetros (perplexidade, taxa de aprendizado, iterações) que podem afetar a saída – por exemplo, diferentes valores de perplexidade podem revelar clusters em diferentes escalas. Gráficos de t-SNE podem às vezes ser mal interpretados – distâncias no mapa não são diretamente significativas globalmente (foca no bairro local, às vezes clusters podem parecer artificialmente bem separados). Além disso, o t-SNE é principalmente para visualização; não fornece uma maneira direta de projetar novos pontos de dados sem recomputação, e não é destinado a ser usado como pré-processamento para modelagem preditiva (UMAP é uma alternativa que aborda algumas dessas questões com velocidade mais rápida).
+No entanto, o t-SNE é computacionalmente mais pesado (aproximadamente $O(n^2)$), então pode exigir amostragem para conjuntos de dados muito grandes. Também possui hiperparâmetros (perplexidade, taxa de aprendizado, iterações) que podem afetar a saída – por exemplo, diferentes valores de perplexidade podem revelar clusters em diferentes escalas. Gráficos de t-SNE podem às vezes ser mal interpretados – distâncias no mapa não são diretamente significativas globalmente (ele se concentra no bairro local, às vezes clusters podem parecer artificialmente bem separados). Além disso, o t-SNE é principalmente para visualização; não fornece uma maneira direta de projetar novos pontos de dados sem recomputação, e não é destinado a ser usado como pré-processamento para modelagem preditiva (UMAP é uma alternativa que aborda algumas dessas questões com velocidade mais rápida).
 
 <details>
 <summary>Exemplo -- Visualizando Conexões de Rede
