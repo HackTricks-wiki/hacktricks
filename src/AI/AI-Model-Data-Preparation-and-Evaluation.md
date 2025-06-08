@@ -240,3 +240,4 @@ The confusion matrix can be used to calculate various evaluation metrics, such a
 
 
 {{#include ../banners/hacktricks-training.md}}
+

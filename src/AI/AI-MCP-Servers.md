@@ -103,3 +103,4 @@ AI-Prompts.md
 {{#endref}}
 
 {{#include ../banners/hacktricks-training.md}}
+
