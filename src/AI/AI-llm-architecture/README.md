@@ -55,7 +55,7 @@ Dovresti iniziare leggendo questo post per alcuni concetti di base che dovresti 
 > [!TIP]
 > L'obiettivo di questa quinta fase è molto semplice: **Sviluppare l'architettura del LLM completo**. Metti tutto insieme, applica tutti i layer e crea tutte le funzioni per generare testo o trasformare testo in ID e viceversa.
 >
-> Questa architettura sarà utilizzata sia per l'addestramento che per la previsione del testo dopo che è stata addestrata.
+> Questa architettura sarà utilizzata sia per l'addestramento che per la previsione del testo dopo che è stato addestrato.
 
 {{#ref}}
 5.-llm-architecture.md
