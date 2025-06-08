@@ -42,7 +42,7 @@ AI-Risk-Frameworks.md
 
 ### AI İstemleri Güvenliği
 
-LLM'ler son yıllarda AI kullanımını patlattı, ancak mükemmel değiller ve düşmanca istemlerle kandırılabilirler. Bu, AI'yı güvenli bir şekilde kullanmayı ve ona nasıl saldırılacağını anlamak için çok önemli bir konudur:
+LLM'ler son yıllarda AI kullanımını patlatmış olsa da, mükemmel değillerdir ve düşmanca istemlerle kandırılabilirler. Bu, AI'yı güvenli bir şekilde kullanmayı ve ona nasıl saldırılacağını anlamak için çok önemli bir konudur:
 
 {{#ref}}
 AI-Prompts.md
