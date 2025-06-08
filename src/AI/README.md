@@ -27,7 +27,7 @@ Il miglior punto di partenza per imparare sull'AI è comprendere come funzionano
 Nella pagina seguente troverai le basi di ciascun componente per costruire un LLM di base utilizzando i trasformatori:
 
 {{#ref}}
-llm-architecture/README.md
+AI-llm-architecture/README.md
 {{#endref}}
 
 ## Sicurezza AI
