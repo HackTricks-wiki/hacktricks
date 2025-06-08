@@ -13,7 +13,7 @@ Sie sollten mit dem Lesen dieses Beitrags beginnen, um einige grundlegende Konze
 ## 1. Tokenisierung
 
 > [!TIP]
-> Das Ziel dieser ersten Phase ist sehr einfach: **Teilen Sie die Eingabe in Tokens (IDs) auf eine Weise, die Sinn macht**.
+> Das Ziel dieser Anfangsphase ist sehr einfach: **Teilen Sie die Eingabe in Tokens (IDs) auf eine Weise, die Sinn macht**.
 
 {{#ref}}
 1.-tokenizing.md
@@ -64,7 +64,7 @@ Sie sollten mit dem Lesen dieses Beitrags beginnen, um einige grundlegende Konze
 ## 6. Vortraining & Laden von Modellen
 
 > [!TIP]
-> Das Ziel dieser sechsten Phase ist sehr einfach: **Trainieren Sie das Modell von Grund auf neu**. Dazu wird die vorherige LLM-Architektur mit einigen Schleifen über die Datensätze unter Verwendung der definierten Verlustfunktionen und Optimierer verwendet, um alle Parameter des Modells zu trainieren.
+> Das Ziel dieser sechsten Phase ist sehr einfach: **Trainieren Sie das Modell von Grund auf neu**. Dazu wird die vorherige LLM-Architektur mit einigen Schleifen über die Datensätze unter Verwendung der definierten Verlustfunktionen und des Optimierers verwendet, um alle Parameter des Modells zu trainieren.
 
 {{#ref}}
 6.-pre-training-and-loading-models.md
@@ -91,7 +91,7 @@ Sie sollten mit dem Lesen dieses Beitrags beginnen, um einige grundlegende Konze
 ## 7.2. Feintuning zur Befolgung von Anweisungen
 
 > [!TIP]
-> Das Ziel dieses Abschnitts ist zu zeigen, wie man ein **bereits vortrainiertes Modell fein abstimmt, um Anweisungen zu befolgen**, anstatt nur Text zu generieren, zum Beispiel, um auf Aufgaben als Chatbot zu antworten.
+> Das Ziel dieses Abschnitts ist zu zeigen, wie man ein **bereits vortrainiertes Modell fein abstimmt, um Anweisungen zu befolgen**, anstatt nur Text zu generieren, zum Beispiel, um auf Aufgaben als Chatbot zu reagieren.
 
 {{#ref}}
 7.2.-fine-tuning-to-follow-instructions.md
