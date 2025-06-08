@@ -32,7 +32,7 @@ Jy moet begin deur hierdie pos te lees vir 'n paar basiese konsepte wat jy moet 
 
 > [!TIP]
 > Die doel van hierdie derde fase is baie eenvoudig: **Ken elkeen van die vorige tokens in die woordeskat 'n vektor van die verlangde dimensies toe om die model te oefen.** Elke woord in die woordeskat sal 'n punt in 'n ruimte van X dimensies wees.\
-> Let daarop dat die posisie van elke woord in die ruimte aanvanklik net "ewekansig" geïnitialiseer word en dat hierdie posisies opleibare parameters is (sal verbeter word tydens die opleiding).
+> Let daarop dat die posisie van elke woord in die ruimte aanvanklik net "ewekansig" geinitialiseer word en dat hierdie posisies opleibare parameters is (sal verbeter word tydens die opleiding).
 >
 > Boonop, tydens die token inbedding **word 'n ander laag van inbedings geskep** wat (in hierdie geval) die **absolute posisie van die woord in die opleidingssin** verteenwoordig. Op hierdie manier sal 'n woord in verskillende posisies in die sin 'n ander voorstelling (betekenis) hê.
 
@@ -64,7 +64,7 @@ Jy moet begin deur hierdie pos te lees vir 'n paar basiese konsepte wat jy moet 
 ## 6. Vooropleiding & Laai modelle
 
 > [!TIP]
-> Die doel van hierdie sesde fase is baie eenvoudig: **Oefen die model van nuuts af**. Hiervoor sal die vorige LLM argitektuur gebruik word met 'n paar lusse wat oor die datastelle gaan met die gedefinieerde verliesfunksies en optimizer om al die parameters van die model op te lei.
+> Die doel van hierdie sesde fase is baie eenvoudig: **Oefen die model van nuuts af**. Hiervoor sal die vorige LLM argitektuur gebruik word met 'n paar lusse wat oor die datastelle gaan met behulp van die gedefinieerde verliesfunksies en optimizer om al die parameters van die model op te lei.
 
 {{#ref}}
 6.-pre-training-and-loading-models.md
@@ -82,16 +82,16 @@ Jy moet begin deur hierdie pos te lees vir 'n paar basiese konsepte wat jy moet 
 ## 7.1. Fyn-Afstemming vir Kategorisering
 
 > [!TIP]
-> Die doel van hierdie afdeling is om te wys hoe om 'n reeds vooropgeleide model fyn af te stel sodat in plaas daarvan om nuwe teks te genereer, die LLM die **waarskynlikhede van die gegewe teks wat in elkeen van die gegewe kategorieë gekategoriseer word** sal gee (soos of 'n teks spam is of nie).
+> Die doel van hierdie afdeling is om te wys hoe om 'n reeds vooropgeleide model fyn af te stel sodat in plaas daarvan om nuwe teks te genereer, die LLM die **waarskynlikhede van die gegewe teks om in elkeen van die gegewe kategorieë gekategoriseer te word** (soos of 'n teks spam is of nie) sal gee.
 
 {{#ref}}
 7.1.-fine-tuning-for-classification.md
 {{#endref}}
 
-## 7.2. Fyn-Afstemming om Instruksies te Volg
+## 7.2. Fyn-Afstemming om instruksies te volg
 
 > [!TIP]
-> Die doel van hierdie afdeling is om te wys hoe om **'n reeds vooropgeleide model fyn af te stel om instruksies te volg** eerder as net om teks te genereer, byvoorbeeld, om op take te reageer as 'n chat bot.
+> Die doel van hierdie afdeling is om te wys hoe om **'n reeds vooropgeleide model fyn af te stel om instruksies te volg** eerder as net om teks te genereer, byvoorbeeld, om op take te reageer soos 'n chat bot.
 
 {{#ref}}
 7.2.-fine-tuning-to-follow-instructions.md
