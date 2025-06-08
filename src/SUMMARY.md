@@ -802,7 +802,7 @@
   - [AI Prompts](AI/AI-Prompts.md)
   - [AI Risk Frameworks](AI/AI-Risk-Frameworks.md)
   - [AI Supervised Learning Algorithms](AI/AI-Supervised-Learning-Algorithms.md)
-  - [AI Unsupervised Learning Algorithms](AI/AI-Unsupervised-Learning-algorithms.md)
+  - [AI Unsupervised Learning Algorithms](AI/AI-Unsupervised-Learning-Algorithms.md)
   - [AI Reinforcement Learning Algorithms](AI/AI-Reinforcement-Learning-Algorithms.md)
   - [LLM Training](AI/AI-llm-architecture/README.md)
     - [0. Basic LLM Concepts](AI/AI-llm-architecture/0.-basic-llm-concepts.md)
