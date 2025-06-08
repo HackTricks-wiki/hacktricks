@@ -34,7 +34,7 @@ Powinieneś zacząć od przeczytania tego posta, aby poznać podstawowe pojęcia
 > Cel tej trzeciej fazy jest bardzo prosty: **Przypisać każdemu z poprzednich tokenów w słowniku wektor o pożądanych wymiarach do trenowania modelu.** Każde słowo w słowniku będzie punktem w przestrzeni o X wymiarach.\
 > Zauważ, że początkowo pozycja każdego słowa w przestrzeni jest po prostu "losowo" inicjowana, a te pozycje są parametrami, które można trenować (będą poprawiane podczas treningu).
 >
-> Ponadto, podczas osadzania tokenów **tworzona jest kolejna warstwa osadzeń**, która reprezentuje (w tym przypadku) **absolutną pozycję słowa w zdaniu treningowym**. W ten sposób słowo w różnych pozycjach w zdaniu będzie miało różne reprezentacje (znaczenia).
+> Ponadto, podczas osadzania tokenów **tworzona jest kolejna warstwa osadzeń**, która reprezentuje (w tym przypadku) **absolutną pozycję słowa w zdaniu treningowym**. W ten sposób słowo w różnych pozycjach w zdaniu będzie miało inną reprezentację (znaczenie).
 
 {{#ref}}
 3.-token-embeddings.md
@@ -64,34 +64,34 @@ Powinieneś zacząć od przeczytania tego posta, aby poznać podstawowe pojęcia
 ## 6. Wstępne trenowanie i ładowanie modeli
 
 > [!TIP]
-> Cel tej szóstej fazy jest bardzo prosty: **Wytrenować model od podstaw**. W tym celu zostanie użyta wcześniejsza architektura LLM z pewnymi pętlami przechodzącymi przez zbiory danych, korzystając z zdefiniowanych funkcji straty i optymalizatora do trenowania wszystkich parametrów modelu.
+> Cel tej szóstej fazy jest bardzo prosty: **Wytrenować model od podstaw**. W tym celu zostanie użyta wcześniejsza architektura LLM z pewnymi pętlami przechodzącymi przez zbiory danych, korzystając z określonych funkcji straty i optymalizatora do trenowania wszystkich parametrów modelu.
 
 {{#ref}}
 6.-pre-training-and-loading-models.md
 {{#endref}}
 
-## 7.0. Ulepszenia LoRA w dostrajaniu
+## 7.0. Udoskonalenia LoRA w fine-tuningu
 
 > [!TIP]
-> Użycie **LoRA znacznie redukuje obliczenia** potrzebne do **dostrajania** już wytrenowanych modeli.
+> Użycie **LoRA znacznie redukuje obliczenia** potrzebne do **fine-tuningu** już wytrenowanych modeli.
 
 {{#ref}}
 7.0.-lora-improvements-in-fine-tuning.md
 {{#endref}}
 
-## 7.1. Dostrajanie do klasyfikacji
+## 7.1. Fine-Tuning do Klasyfikacji
 
 > [!TIP]
-> Celem tej sekcji jest pokazanie, jak dostroić już wytrenowany model, aby zamiast generować nowy tekst, LLM podałby **prawdopodobieństwa, że dany tekst zostanie zaklasyfikowany w każdej z podanych kategorii** (na przykład, czy tekst jest spamem, czy nie).
+> Celem tej sekcji jest pokazanie, jak dostosować już wytrenowany model, aby zamiast generować nowy tekst, LLM podał **prawdopodobieństwa, że dany tekst będzie zaklasyfikowany w każdej z podanych kategorii** (na przykład, czy tekst jest spamem, czy nie).
 
 {{#ref}}
 7.1.-fine-tuning-for-classification.md
 {{#endref}}
 
-## 7.2. Dostrajanie do wykonywania poleceń
+## 7.2. Fine-Tuning do wykonywania instrukcji
 
 > [!TIP]
-> Celem tej sekcji jest pokazanie, jak **dostroić już wytrenowany model do wykonywania poleceń** zamiast tylko generować tekst, na przykład, odpowiadając na zadania jako chatbot.
+> Celem tej sekcji jest pokazanie, jak **dostosować już wytrenowany model do wykonywania instrukcji** zamiast tylko generować tekst, na przykład, odpowiadając na zadania jako chatbot.
 
 {{#ref}}
 7.2.-fine-tuning-to-follow-instructions.md
