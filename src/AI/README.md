@@ -27,7 +27,7 @@ Najlepszym punktem wyjścia do nauki o AI jest zrozumienie, jak działają głó
 Na następnej stronie znajdziesz podstawy każdego komponentu do zbudowania podstawowego LLM przy użyciu transformerów:
 
 {{#ref}}
-llm-architecture/README.md
+AI-llm-architecture/README.md
 {{#endref}}
 
 ## Bezpieczeństwo AI
@@ -42,7 +42,7 @@ AI-Risk-Frameworks.md
 
 ### Bezpieczeństwo Podpowiedzi AI
 
-LLM-y spowodowały eksplozję użycia AI w ostatnich latach, ale nie są doskonałe i mogą być oszukiwane przez wrogie podpowiedzi. To bardzo ważny temat, aby zrozumieć, jak używać AI bezpiecznie i jak je atakować:
+LLM sprawiły, że użycie AI eksplodowało w ostatnich latach, ale nie są one doskonałe i mogą być oszukiwane przez wrogie podpowiedzi. To bardzo ważny temat, aby zrozumieć, jak używać AI bezpiecznie i jak je atakować:
 
 {{#ref}}
 AI-Prompts.md
