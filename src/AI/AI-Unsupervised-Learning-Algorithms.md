@@ -9,7 +9,7 @@ O aprendizado não supervisionado é um tipo de aprendizado de máquina onde o m
 ### Agrupamento K-Means
 
 K-Means é um algoritmo de agrupamento baseado em centróides que particiona os dados em K clusters, atribuindo cada ponto ao centroide do cluster mais próximo. O algoritmo funciona da seguinte forma:
-1. **Inicialização**: Escolha K centros de cluster iniciais (centróides), muitas vezes aleatoriamente ou por meio de métodos mais inteligentes como k-means++.
+1. **Inicialização**: Escolha K centros de cluster iniciais (centróides), frequentemente aleatoriamente ou por meio de métodos mais inteligentes como k-means++.
 2. **Atribuição**: Atribua cada ponto de dados ao centróide mais próximo com base em uma métrica de distância (por exemplo, distância euclidiana).
 3. **Atualização**: Recalcule os centróides tomando a média de todos os pontos de dados atribuídos a cada cluster.
 4. **Repetir**: As etapas 2–3 são repetidas até que as atribuições de cluster se estabilizem (os centróides não se movem significativamente).
@@ -56,7 +56,7 @@ print("Cluster centers (duration, bytes):")
 for idx, center in enumerate(kmeans.cluster_centers_):
 print(f"  Cluster {idx}: {center}")
 ```
-Neste exemplo, o K-Means deve encontrar 4 clusters. O cluster de ataque pequeno (com duração incomumente alta ~200) idealmente formará seu próprio cluster, dada sua distância dos clusters normais. Imprimimos os tamanhos e centros dos clusters para interpretar os resultados. Em um cenário real, poderia-se rotular o cluster com poucos pontos como potenciais anomalias ou inspecionar seus membros em busca de atividade maliciosa.
+Neste exemplo, o K-Means deve encontrar 4 clusters. O pequeno cluster de ataque (com duração incomumente alta ~200) idealmente formará seu próprio cluster, dada sua distância dos clusters normais. Imprimimos os tamanhos e centros dos clusters para interpretar os resultados. Em um cenário real, poderia-se rotular o cluster com poucos pontos como potenciais anomalias ou inspecionar seus membros em busca de atividade maliciosa.
 
 ### Agrupamento Hierárquico
 
@@ -74,7 +74,7 @@ O agrupamento hierárquico produz um dendrograma, uma estrutura em forma de árv
 
 #### Suposições e Limitações
 
-O agrupamento hierárquico não assume uma forma particular de cluster e pode capturar clusters aninhados. É útil para descobrir taxonomias ou relações entre grupos (por exemplo, agrupando malware por subgrupos familiares). É determinístico (sem problemas de inicialização aleatória). Uma vantagem chave é o dendrograma, que fornece insights sobre a estrutura de agrupamento dos dados em todas as escalas – analistas de segurança podem decidir um corte apropriado para identificar clusters significativos. No entanto, é computacionalmente caro (tipicamente $O(n^2)$ de tempo ou pior para implementações ingênuas) e não viável para conjuntos de dados muito grandes. Também é um procedimento ganancioso – uma vez que uma mesclagem ou divisão é feita, não pode ser desfeita, o que pode levar a clusters subótimos se um erro ocorrer cedo. Outliers também podem afetar algumas estratégias de ligação (a ligação simples pode causar o efeito de "encadeamento", onde clusters se conectam via outliers).
+O agrupamento hierárquico não assume uma forma de cluster particular e pode capturar clusters aninhados. É útil para descobrir taxonomias ou relações entre grupos (por exemplo, agrupando malware por subgrupos familiares). É determinístico (sem problemas de inicialização aleatória). Uma vantagem chave é o dendrograma, que fornece uma visão da estrutura de agrupamento dos dados em todas as escalas – analistas de segurança podem decidir um corte apropriado para identificar clusters significativos. No entanto, é computacionalmente caro (tipicamente $O(n^2)$ de tempo ou pior para implementações ingênuas) e não viável para conjuntos de dados muito grandes. Também é um procedimento ganancioso – uma vez que uma mesclagem ou divisão é feita, não pode ser desfeita, o que pode levar a clusters subótimos se um erro ocorrer cedo. Outliers também podem afetar algumas estratégias de ligação (a ligação simples pode causar o efeito de "encadeamento", onde clusters se conectam via outliers).
 
 <details>
 <summary>Exemplo -- Agrupamento Aglomerativo de Eventos
@@ -102,7 +102,7 @@ print(f"Cluster sizes for 3 clusters: {np.bincount(clusters_3)}")
 
 ### DBSCAN (Agrupamento Espacial Baseado em Densidade de Aplicações com Ruído)
 
-DBSCAN é um algoritmo de agrupamento baseado em densidade que agrupa pontos que estão próximos uns dos outros, enquanto marca pontos em regiões de baixa densidade como outliers. É particularmente útil para conjuntos de dados com densidades variáveis e formas não esféricas.
+DBSCAN é um algoritmo de agrupamento baseado em densidade que agrupa pontos que estão próximos uns dos outros, enquanto marca pontos em regiões de baixa densidade como outliers. É particularmente útil para conjuntos de dados com densidades variadas e formas não esféricas.
 
 DBSCAN funciona definindo dois parâmetros:
 - **Epsilon (ε)**: A distância máxima entre dois pontos para serem considerados parte do mesmo cluster.
@@ -120,9 +120,9 @@ O agrupamento prossegue escolhendo um ponto central não visitado, marcando-o co
 
 #### Suposições e Limitações
 
-**Suposições & Forças:**: O DBSCAN não assume clusters esféricos – ele pode encontrar clusters de formas arbitrárias (mesmo clusters em cadeia ou adjacentes). Ele determina automaticamente o número de clusters com base na densidade dos dados e pode identificar efetivamente outliers como ruído. Isso o torna poderoso para dados do mundo real com formas irregulares e ruído. É robusto a outliers (diferente do K-Means, que os força a entrar em clusters). Funciona bem quando os clusters têm densidade aproximadamente uniforme.
+**Suposições & Forças:**: O DBSCAN não assume clusters esféricos – ele pode encontrar clusters de formas arbitrárias (mesmo clusters em cadeia ou adjacentes). Ele determina automaticamente o número de clusters com base na densidade dos dados e pode identificar efetivamente outliers como ruído. Isso o torna poderoso para dados do mundo real com formas irregulares e ruído. É robusto a outliers (diferente do K-Means, que os força em clusters). Funciona bem quando os clusters têm densidade aproximadamente uniforme.
 
-**Limitações**: O desempenho do DBSCAN depende da escolha de valores apropriados para ε e MinPts. Ele pode ter dificuldades com dados que têm densidades variáveis – um único ε não pode acomodar clusters densos e esparsos. Se ε for muito pequeno, ele rotula a maioria dos pontos como ruído; se for muito grande, os clusters podem se fundir incorretamente. Além disso, o DBSCAN pode ser ineficiente em conjuntos de dados muito grandes (naïvamente $O(n^2)$, embora a indexação espacial possa ajudar). Em espaços de características de alta dimensão, o conceito de “distância dentro de ε” pode se tornar menos significativo (a maldição da dimensionalidade), e o DBSCAN pode precisar de ajuste cuidadoso de parâmetros ou pode falhar em encontrar clusters intuitivos. Apesar disso, extensões como HDBSCAN abordam algumas questões (como densidade variável).
+**Limitações**: O desempenho do DBSCAN depende da escolha de valores apropriados para ε e MinPts. Ele pode ter dificuldades com dados que possuem densidades variadas – um único ε não pode acomodar clusters densos e esparsos. Se ε for muito pequeno, rotula a maioria dos pontos como ruído; se for muito grande, os clusters podem se fundir incorretamente. Além disso, o DBSCAN pode ser ineficiente em conjuntos de dados muito grandes (naïve $O(n^2)$, embora a indexação espacial possa ajudar). Em espaços de características de alta dimensão, o conceito de “distância dentro de ε” pode se tornar menos significativo (a maldição da dimensionalidade), e o DBSCAN pode precisar de ajuste cuidadoso de parâmetros ou pode falhar em encontrar clusters intuitivos. Apesar disso, extensões como HDBSCAN abordam algumas questões (como densidade variável).
 
 <details>
 <summary>Exemplo -- Agrupamento com Ruído
@@ -231,7 +231,7 @@ Aqui, pegamos os clusters de tráfego normal anteriores e estendemos cada ponto 
 
 Um Modelo de Mistura Gaussiana assume que os dados são gerados a partir de uma mistura de **várias distribuições Gaussianas (normais) com parâmetros desconhecidos**. Em essência, é um modelo de clustering probabilístico: tenta atribuir suavemente cada ponto a um dos K componentes Gaussianos. Cada componente Gaussiano k tem um vetor médio (μ_k), matriz de covariância (Σ_k) e um peso de mistura (π_k) que representa quão prevalente é aquele cluster. Ao contrário do K-Means, que faz atribuições "duras", o GMM dá a cada ponto uma probabilidade de pertencer a cada cluster.
 
-O ajuste do GMM é tipicamente feito via algoritmo de Expectativa-Maximização (EM):
+O ajuste do GMM é tipicamente feito via o algoritmo de Expectativa-Maximização (EM):
 
 - **Inicialização**: Comece com palpites iniciais para as médias, covariâncias e coeficientes de mistura (ou use os resultados do K-Means como ponto de partida).
 
@@ -257,7 +257,7 @@ O resultado é um conjunto de distribuições Gaussianas que modelam coletivamen
 
 #### Suposições e Limitações
 
-O GMM é uma generalização do K-Means que incorpora covariância, de modo que os clusters podem ser elipsoidais (não apenas esféricos). Ele lida com clusters de tamanhos e formas diferentes se a covariância for completa. O clustering suave é uma vantagem quando os limites dos clusters são difusos – por exemplo, em cibersegurança, um evento pode ter características de vários tipos de ataque; o GMM pode refletir essa incerteza com probabilidades. O GMM também fornece uma estimativa de densidade probabilística dos dados, útil para detectar outliers (pontos com baixa probabilidade sob todos os componentes da mistura).
+O GMM é uma generalização do K-Means que incorpora covariância, de modo que os clusters podem ser elipsoidais (não apenas esféricos). Ele lida com clusters de diferentes tamanhos e formas se a covariância for completa. O clustering suave é uma vantagem quando os limites dos clusters são difusos – por exemplo, em cibersegurança, um evento pode ter características de vários tipos de ataque; o GMM pode refletir essa incerteza com probabilidades. O GMM também fornece uma estimativa de densidade probabilística dos dados, útil para detectar outliers (pontos com baixa probabilidade sob todos os componentes da mistura).
 
 Por outro lado, o GMM requer especificar o número de componentes K (embora se possa usar critérios como BIC/AIC para selecioná-lo). O EM pode às vezes convergir lentamente ou para um ótimo local, então a inicialização é importante (geralmente executa-se o EM várias vezes). Se os dados não seguirem realmente uma mistura de Gaussianas, o modelo pode ser um ajuste ruim. Também há o risco de uma Gaussiana encolher para cobrir apenas um outlier (embora a regularização ou limites mínimos de covariância possam mitigar isso).
 
@@ -321,7 +321,7 @@ print("Example anomaly scores (lower means more anomalous):", anomaly_scores[:5]
 ```
 Neste código, instanciamos `IsolationForest` com 100 árvores e definimos `contamination=0.15` (o que significa que esperamos cerca de 15% de anomalias; o modelo definirá seu limite de pontuação para que ~15% dos pontos sejam sinalizados). Ajustamos em `X_test_if`, que contém uma mistura de pontos normais e de ataque (nota: normalmente você ajustaria em dados de treinamento e depois usaria predict em novos dados, mas aqui, para ilustração, ajustamos e prevemos no mesmo conjunto para observar diretamente os resultados).
 
-A saída mostra os rótulos previstos para os primeiros 20 pontos (onde -1 indica anomalia). Também imprimimos quantas anomalias foram detectadas no total e alguns exemplos de pontuações de anomalia. Esperaríamos que aproximadamente 18 dos 120 pontos fossem rotulados como -1 (já que a contaminação era de 15%). Se nossas 20 amostras de ataque são realmente as mais discrepantes, a maioria delas deve aparecer nessas previsões -1. A pontuação de anomalia (a função de decisão do Isolation Forest) é maior para pontos normais e menor (mais negativa) para anomalias – imprimimos alguns valores para ver a separação. Na prática, alguém poderia classificar os dados por pontuação para ver os principais outliers e investigá-los. O Isolation Forest, portanto, fornece uma maneira eficiente de filtrar grandes dados de segurança não rotulados e selecionar as instâncias mais irregulares para análise humana ou exame automatizado adicional.
+A saída mostra os rótulos previstos para os primeiros 20 pontos (onde -1 indica anomalia). Também imprimimos quantas anomalias foram detectadas no total e alguns exemplos de pontuações de anomalia. Esperaríamos que aproximadamente 18 dos 120 pontos fossem rotulados como -1 (já que a contaminação era de 15%). Se nossas 20 amostras de ataque são realmente as mais discrepantes, a maioria delas deve aparecer nessas previsões -1. A pontuação de anomalia (a função de decisão do Isolation Forest) é maior para pontos normais e menor (mais negativa) para anomalias – imprimimos alguns valores para ver a separação. Na prática, pode-se classificar os dados por pontuação para ver os principais outliers e investigá-los. O Isolation Forest, portanto, fornece uma maneira eficiente de filtrar grandes dados de segurança não rotulados e selecionar as instâncias mais irregulares para análise humana ou escrutínio automatizado adicional.
 
 ### t-SNE (t-Distributed Stochastic Neighbor Embedding)
 
@@ -336,13 +336,13 @@ O algoritmo tem duas etapas principais:
 O resultado é frequentemente um gráfico de dispersão visualmente significativo onde os clusters nos dados se tornam aparentes.
 
 > [!TIP]
-> *Casos de uso em cibersegurança:* o t-SNE é frequentemente usado para **visualizar dados de segurança de alta dimensão para análise humana**. Por exemplo, em um centro de operações de segurança, analistas poderiam pegar um conjunto de dados de eventos com dezenas de características (números de porta, frequências, contagens de bytes, etc.) e usar o t-SNE para produzir um gráfico 2D. Ataques podem formar seus próprios clusters ou se separar de dados normais neste gráfico, tornando-os mais fáceis de identificar. Ele foi aplicado a conjuntos de dados de malware para ver agrupamentos de famílias de malware ou a dados de intrusão de rede onde diferentes tipos de ataque se agrupam de forma distinta, orientando investigações adicionais. Essencialmente, o t-SNE fornece uma maneira de ver a estrutura em dados cibernéticos que, de outra forma, seriam incompreensíveis.
+> *Casos de uso em cibersegurança:* o t-SNE é frequentemente usado para **visualizar dados de segurança de alta dimensão para análise humana**. Por exemplo, em um centro de operações de segurança, analistas poderiam pegar um conjunto de dados de eventos com dezenas de características (números de porta, frequências, contagens de bytes, etc.) e usar o t-SNE para produzir um gráfico 2D. Ataques podem formar seus próprios clusters ou se separar dos dados normais neste gráfico, tornando-os mais fáceis de identificar. Foi aplicado a conjuntos de dados de malware para ver agrupamentos de famílias de malware ou a dados de intrusão de rede onde diferentes tipos de ataque se agrupam de forma distinta, orientando investigações adicionais. Essencialmente, o t-SNE fornece uma maneira de ver a estrutura em dados cibernéticos que, de outra forma, seriam incompreensíveis.
 
 #### Suposições e Limitações
 
-O t-SNE é ótimo para descoberta visual de padrões. Ele pode revelar clusters, subclusters e outliers que outros métodos lineares (como PCA) podem não detectar. Tem sido usado em pesquisas de cibersegurança para visualizar dados complexos, como perfis de comportamento de malware ou padrões de tráfego de rede. Como preserva a estrutura local, é bom para mostrar agrupamentos naturais.
+O t-SNE é ótimo para descoberta visual de padrões. Ele pode revelar clusters, subclusters e outliers que outros métodos lineares (como PCA) podem não conseguir. Tem sido usado em pesquisas de cibersegurança para visualizar dados complexos, como perfis de comportamento de malware ou padrões de tráfego de rede. Como preserva a estrutura local, é bom para mostrar agrupamentos naturais.
 
-No entanto, o t-SNE é computacionalmente mais pesado (aproximadamente $O(n^2)$), então pode exigir amostragem para conjuntos de dados muito grandes. Também possui hiperparâmetros (perplexidade, taxa de aprendizado, iterações) que podem afetar a saída – por exemplo, diferentes valores de perplexidade podem revelar clusters em diferentes escalas. Gráficos de t-SNE podem às vezes ser mal interpretados – distâncias no mapa não são diretamente significativas globalmente (ele se concentra no bairro local, às vezes clusters podem parecer artificialmente bem separados). Além disso, o t-SNE é principalmente para visualização; não fornece uma maneira direta de projetar novos pontos de dados sem recomputação, e não é destinado a ser usado como pré-processamento para modelagem preditiva (UMAP é uma alternativa que aborda algumas dessas questões com velocidade mais rápida).
+No entanto, o t-SNE é computacionalmente mais pesado (aproximadamente $O(n^2)$), então pode exigir amostragem para conjuntos de dados muito grandes. Também possui hiperparâmetros (perplexidade, taxa de aprendizado, iterações) que podem afetar a saída – por exemplo, diferentes valores de perplexidade podem revelar clusters em diferentes escalas. Gráficos de t-SNE podem às vezes ser mal interpretados – distâncias no mapa não são diretamente significativas globalmente (foca no bairro local, às vezes clusters podem parecer artificialmente bem separados). Além disso, o t-SNE é principalmente para visualização; não fornece uma maneira direta de projetar novos pontos de dados sem recomputação, e não é destinado a ser usado como pré-processamento para modelagem preditiva (UMAP é uma alternativa que aborda algumas dessas questões com velocidade mais rápida).
 
 <details>
 <summary>Exemplo -- Visualizando Conexões de Rede
