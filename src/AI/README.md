@@ -22,12 +22,12 @@ Mahali bora pa kuanzia kujifunza kuhusu AI ni kuelewa jinsi mifumo mikuu ya kuji
 ./AI-Deep-Learning.md
 {{#endref}}
 
-### Msingi wa LLMs
+### Mifumo ya LLMs
 
 Katika ukurasa ufuatao utapata misingi ya kila kipengele kujenga LLM ya msingi kwa kutumia transformers:
 
 {{#ref}}
-llm-architecture/README.md
+AI-llm-architecture/README.md
 {{#endref}}
 
 ## Usalama wa AI
@@ -40,15 +40,15 @@ Kwa sasa, mifumo 2 kuu za kutathmini hatari za mifumo ya AI ni OWASP ML Top 10 n
 AI-Risk-Frameworks.md
 {{#endref}}
 
-### Usalama wa AI Prompts
+### Usalama wa Maagizo ya AI
 
-LLMs zimefanya matumizi ya AI kuongezeka katika miaka ya hivi karibuni, lakini si kamilifu na zinaweza kudanganywa na prompts za adui. Hii ni mada muhimu sana kuelewa jinsi ya kutumia AI kwa usalama na jinsi ya kuishambulia:
+LLMs zimefanya matumizi ya AI kuongezeka katika miaka ya hivi karibuni, lakini si kamilifu na zinaweza kudanganywa na maagizo ya adui. Hii ni mada muhimu sana kuelewa jinsi ya kutumia AI kwa usalama na jinsi ya kuishambulia:
 
 {{#ref}}
 AI-Prompts.md
 {{#endref}}
 
-### RCE ya Mifano ya AI
+### RCE za Mifano ya AI
 
 Ni kawaida kwa waendelezaji na kampuni kuendesha mifano iliyopakuliwa kutoka Mtandao, hata hivyo, kupakia mfano tu kunaweza kuwa na kutosha kutekeleza msimbo wa kawaida kwenye mfumo. Hii ni mada muhimu sana kuelewa jinsi ya kutumia AI kwa usalama na jinsi ya kuishambulia:
 
@@ -56,9 +56,9 @@ Ni kawaida kwa waendelezaji na kampuni kuendesha mifano iliyopakuliwa kutoka Mta
 AI-Models-RCE.md
 {{#endref}}
 
-### Protokali ya Muktadha wa Mfano wa AI
+### Itifaki ya Muktadha wa Mfano wa AI
 
-MCP (Model Context Protocol) ni protokali inayoruhusu wateja wa wakala wa AI kuungana na zana za nje na vyanzo vya data kwa njia ya plug-and-play. Hii inaruhusu michakato na mwingiliano tata kati ya mifano ya AI na mifumo ya nje:
+MCP (Model Context Protocol) ni itifaki inayoruhusu wateja wa wakala wa AI kuungana na zana za nje na vyanzo vya data kwa njia ya plug-and-play. Hii inaruhusu michakato na mwingiliano tata kati ya mifano ya AI na mifumo ya nje:
 
 {{#ref}}
 AI-MCP-Servers.md
