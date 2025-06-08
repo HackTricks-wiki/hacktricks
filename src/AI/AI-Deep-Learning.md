@@ -435,4 +435,3 @@ Moreover, to generate an image from a text prompt, diffusion models typically fo
 
 
 {{#include ../banners/hacktricks-training.md}}
-
