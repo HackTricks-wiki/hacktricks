@@ -34,7 +34,7 @@ Bilmeniz gereken bazı temel kavramlar için bu gönderiyi okumaya başlamalıs�
 > Bu üçüncü aşamanın amacı çok basit: **Sözlükteki önceki her token'a modelin eğitimi için istenen boyutlarda bir vektör atamak.** Sözlükteki her kelime, X boyutlu bir uzayda bir nokta olacaktır.\
 > Başlangıçta her kelimenin uzaydaki konumu "rastgele" başlatılır ve bu konumlar eğitilebilir parametrelerdir (eğitim sırasında geliştirilecektir).
 >
-> Ayrıca, token gömme sırasında **gömme katmanlarının başka bir katmanı oluşturulur** ki bu, **eğitim cümlesindeki kelimenin mutlak konumunu** temsil eder. Bu şekilde, cümledeki farklı konumlarda bir kelimenin farklı bir temsili (anlamı) olacaktır.
+> Ayrıca, token gömme sırasında **gömme katmanının başka bir katmanı oluşturulur** ki bu, **eğitim cümlesindeki kelimenin mutlak konumunu** temsil eder. Bu şekilde, cümledeki farklı konumlarda bir kelimenin farklı bir temsili (anlamı) olacaktır.
 
 {{#ref}}
 3.-token-embeddings.md
@@ -53,7 +53,7 @@ Bilmeniz gereken bazı temel kavramlar için bu gönderiyi okumaya başlamalıs�
 ## 5. LLM Mimarisi
 
 > [!TIP]
-> Bu beşinci aşamanın amacı çok basit: **Tam LLM'nin mimarisini geliştirmek.** Her şeyi bir araya getirin, tüm katmanları uygulayın ve metin oluşturmak veya metni kimliklere dönüştürmek ve geri almak için tüm işlevleri oluşturun.
+> Bu beşinci aşamanın amacı çok basit: **Tam LLM'nin mimarisini geliştirmek.** Her şeyi bir araya getirin, tüm katmanları uygulayın ve metin oluşturmak veya metni kimliklere dönüştürmek ve tersine çevirmek için tüm fonksiyonları oluşturun.
 >
 > Bu mimari, hem eğitim hem de eğitimden sonra metin tahmin etmek için kullanılacaktır.
 
@@ -82,7 +82,7 @@ Bilmeniz gereken bazı temel kavramlar için bu gönderiyi okumaya başlamalıs�
 ## 7.1. Sınıflandırma için İnce Ayar
 
 > [!TIP]
-> Bu bölümün amacı, yeni metin oluşturmak yerine LLM'nin **verilen metnin her bir verilen kategoriye sınıflandırılma olasılıklarını** seçmesini sağlamak için zaten önceden eğitilmiş bir modeli nasıl ince ayar yapacağınızı göstermektir (örneğin, bir metnin spam olup olmadığını belirlemek).
+> Bu bölümün amacı, yeni metin oluşturmak yerine LLM'nin **verilen metnin her bir verilen kategoriye sınıflandırılma olasılıklarını** seçmesini sağlamak için zaten önceden eğitilmiş bir modeli nasıl ince ayar yapacağınızı göstermektir (örneğin, bir metin spam mı değil mi).
 
 {{#ref}}
 7.1.-fine-tuning-for-classification.md
@@ -91,7 +91,7 @@ Bilmeniz gereken bazı temel kavramlar için bu gönderiyi okumaya başlamalıs�
 ## 7.2. Talimatları Takip Etmek için İnce Ayar
 
 > [!TIP]
-> Bu bölümün amacı, yalnızca metin oluşturmak yerine, örneğin, bir sohbet botu olarak görevlere yanıt vermek için **zaten önceden eğitilmiş bir modeli talimatları takip edecek şekilde nasıl ince ayar yapacağınızı** göstermektir.
+> Bu bölümün amacı, metin oluşturmak yerine **talimatları takip etmek için zaten önceden eğitilmiş bir modeli nasıl ince ayar yapacağınızı** göstermektir; örneğin, bir sohbet botu olarak görevlere yanıt vermek.
 
 {{#ref}}
 7.2.-fine-tuning-to-follow-instructions.md
