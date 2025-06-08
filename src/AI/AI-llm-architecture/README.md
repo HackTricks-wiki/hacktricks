@@ -82,7 +82,7 @@ Trebalo bi da počnete čitanjem ovog posta za neke osnovne koncepte koje treba 
 ## 7.1. Fino Podešavanje za Klasifikaciju
 
 > [!TIP]
-> Cilj ovog dela je da pokaže kako fino podešavati već obučeni model tako da umesto generisanja novog teksta LLM daje **verovatnoće da dati tekst bude kategorizovan u svaku od datih kategorija** (kao što je da li je tekst spam ili ne).
+> Cilj ovog odeljka je da pokaže kako fino podešavati već obučeni model tako da umesto generisanja novog teksta LLM daje **verovatnoće da dati tekst bude kategorizovan u svaku od datih kategorija** (kao što je da li je tekst spam ili ne).
 
 {{#ref}}
 7.1.-fine-tuning-for-classification.md
@@ -91,7 +91,7 @@ Trebalo bi da počnete čitanjem ovog posta za neke osnovne koncepte koje treba 
 ## 7.2. Fino Podešavanje za Praćenje Uputstava
 
 > [!TIP]
-> Cilj ovog dela je da pokaže kako **fino podešavati već obučeni model da prati uputstva** umesto samo generisanja teksta, na primer, odgovaranje na zadatke kao chat bot.
+> Cilj ovog odeljka je da pokaže kako **fino podešavati već obučeni model da prati uputstva** umesto samo generisanja teksta, na primer, odgovaranje na zadatke kao chat bot.
 
 {{#ref}}
 7.2.-fine-tuning-to-follow-instructions.md
