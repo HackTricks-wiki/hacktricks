@@ -10,7 +10,7 @@ Le [**Protocole de Contexte de Modèle (MCP)**](https://modelcontextprotocol.io/
 Une **application hôte** (par exemple, Claude Desktop, Cursor IDE) exécute un client MCP qui se connecte à un ou plusieurs **serveurs MCP**. Chaque serveur expose un ensemble d'*outils* (fonctions, ressources ou actions) décrits dans un schéma standardisé. Lorsque l'hôte se connecte, il demande au serveur ses outils disponibles via une requête `tools/list` ; les descriptions des outils retournées sont ensuite insérées dans le contexte du modèle afin que l'IA sache quelles fonctions existent et comment les appeler.
 
 
-## Serveur MCP de Base
+## Serveur MCP de base
 
 Nous utiliserons Python et le SDK `mcp` officiel pour cet exemple. Tout d'abord, installez le SDK et la CLI :
 ```bash
@@ -39,7 +39,7 @@ Le serveur démarrera et écoutera les requêtes MCP (utilisant l'entrée/sortie
 brew install nodejs uv # You need these tools to make sure the inspector works
 mcp dev calculator.py
 ```
-Une fois connecté, l'hôte (inspecteur ou un agent IA comme Cursor) récupérera la liste des outils. La description de l'outil `add` (générée automatiquement à partir de la signature de la fonction et de la docstring) est chargée dans le contexte du modèle, permettant à l'IA d'appeler `add` chaque fois que nécessaire. Par exemple, si l'utilisateur demande *"Quel est 2+3?"*, le modèle peut décider d'appeler l'outil `add` avec les arguments `2` et `3`, puis de retourner le résultat.
+Une fois connecté, l'hôte (inspecteur ou un agent IA comme Cursor) récupérera la liste des outils. La description de l'outil `add` (générée automatiquement à partir de la signature de la fonction et de la docstring) est chargée dans le contexte du modèle, permettant à l'IA d'appeler `add` chaque fois que nécessaire. Par exemple, si l'utilisateur demande *"Quel est 2+3?"*, le modèle peut décider d'appeler l'outil `add` avec les arguments `2` et `3`, puis retourner le résultat.
 
 Pour plus d'informations sur l'injection de prompt, consultez :
 
