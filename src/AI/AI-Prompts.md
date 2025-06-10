@@ -406,7 +406,7 @@ Let's see common LLM prompt WAF bypasses:
 
 As already explained above, prompt injection techniques can be used to bypass potential WAFs by trying to "convince" the LLM to leak the information or perform unexpected actions.
 
-### Token Smuggling
+### Token Confusion
 
 As explained in this [SpecterOps post](https://www.llama.com/docs/model-cards-and-prompt-formats/prompt-guard/), usually the WAFs are far less capable than the LLMs they protect. This means that usually they will be trained to detect more specific patterns to know if a message is malicious or not.
 
