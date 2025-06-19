@@ -117,7 +117,7 @@ msf> run
 nmap --script ajp-brute -p 8009 <IP>
 ```
 
-## AMQP (ActiveMQ, RabbitMQ, Qpid, JORAM and Solace)
+### AMQP (ActiveMQ, RabbitMQ, Qpid, JORAM and Solace)
 
 ```bash
 legba amqp --target localhost:5672 --username admin --password data/passwords.txt [--amql-ssl]
