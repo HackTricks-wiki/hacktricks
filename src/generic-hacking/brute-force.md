@@ -53,7 +53,7 @@ python3 cupp.py -h
 ```
 ### [Wister](https://github.com/cycurity/wister)
 
-Alat za generisanje rečnika, koji vam omogućava da navedete skup reči, dajući vam mogućnost da kreirate više varijacija od datih reči, stvarajući jedinstven i idealan rečnik za korišćenje u vezi sa specifičnim ciljem.
+Alat za generisanje rečnika, koji vam omogućava da obezbedite skup reči, dajući vam mogućnost da kreirate više varijacija od datih reči, stvarajući jedinstven i idealan rečnik za korišćenje u vezi sa specifičnim ciljem.
 ```bash
 python3 wister.py -w jane doe 2022 summer madrid 1998 -c 1 2 3 4 5 -o wordlist.lst
 
@@ -105,7 +105,7 @@ msf> run
 ```bash
 nmap --script ajp-brute -p 8009 <IP>
 ```
-## AMQP (ActiveMQ, RabbitMQ, Qpid, JORAM i Solace)
+### AMQP (ActiveMQ, RabbitMQ, Qpid, JORAM i Solace)
 ```bash
 legba amqp --target localhost:5672 --username admin --password data/passwords.txt [--amql-ssl]
 ```
@@ -446,7 +446,7 @@ crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 ```
 ## Lokalno
 
-### Online baze podataka za dešifrovanje
+### Online baze podataka za razbijanje
 
 - [~~http://hashtoolkit.com/reverse-hash?~~](http://hashtoolkit.com/reverse-hash?) (MD5 & SHA1)
 - [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 sa/bez ESS/SSP i sa bilo kojom vrednošću izazova)
@@ -480,7 +480,7 @@ hashcat.exe -m 13600 -a 0 .\hashzip.txt .\wordlists\rockyou.txt
 ```
 #### Napad sa poznatim otvorenim tekstom na zip
 
-Potrebno je da znate **otvoreni tekst** (ili deo otvorenog teksta) **fajla koji se nalazi unutar** enkriptovanog zip-a. Možete proveriti **imena fajlova i veličinu fajlova koji se nalaze unutar** enkriptovanog zip-a pokretanjem: **`7z l encrypted.zip`**\
+Morate znati **otvoreni tekst** (ili deo otvorenog teksta) **fajla koji se nalazi unutar** enkriptovanog zip-a. Možete proveriti **imena fajlova i veličinu fajlova koji se nalaze unutar** enkriptovanog zip-a pokretanjem: **`7z l encrypted.zip`**\
 Preuzmite [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0) sa stranice za izdanja.
 ```bash
 # You need to create a zip file containing only the file that is inside the encrypted zip
@@ -549,9 +549,9 @@ john --format=krb5tgs --wordlist=passwords_kerb.txt hashes.kerberoast
 hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
 ./tgsrepcrack.py wordlist.txt 1-MSSQLSvc~sql01.medin.local~1433-MYDOMAIN.LOCAL.kirbi
 ```
-### Luks slika
+### Lucks slika
 
-#### Metoda 1
+#### Metod 1
 
 Instalirajte: [https://github.com/glv2/bruteforce-luks](https://github.com/glv2/bruteforce-luks)
 ```bash
@@ -595,7 +595,7 @@ Koristite [https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john
 Ako imate xlsx datoteku sa kolonom zaštićenom lozinkom, možete je otključati:
 
 - **Otpremite je na google drive** i lozinka će biti automatski uklonjena
-- Da **uklonite** je **ručno**:
+- Da **uklonite** to **ručno**:
 ```bash
 unzip file.xlsx
 grep -R "sheetProtection" ./*
@@ -615,7 +615,7 @@ crackpkcs12 -d /usr/share/wordlists/rockyou.txt ./cert.pfx
 
 **Primeri hešova:** [https://openwall.info/wiki/john/sample-hashes](https://openwall.info/wiki/john/sample-hashes)
 
-### Hash-identifier
+### Hash-identifikator
 ```bash
 hash-identifier
 > <HASH>
@@ -652,7 +652,7 @@ hashcat.exe -a 0 -m 1000 C:\Temp\ntlm.txt .\rockyou.txt -r rules\best64.rule
 ```
 - **Wordlist combinator** napad
 
-Moguće je **kombinovati 2 rečnika u 1** sa hashcat-om.\
+Moguće je **kombinovati 2 liste reči u 1** sa hashcat-om.\
 Ako je lista 1 sadržala reč **"hello"** a druga je sadržala 2 reda sa rečima **"world"** i **"earth"**. Reči `helloworld` i `helloearth` će biti generisane.
 ```bash
 # This will combine 2 wordlists
@@ -696,7 +696,7 @@ hashcat.exe -a 3 -m 1000 C:\Temp\ntlm.txt -1 ?d?s ?u?l?l?l?l?l?l?l?1
 ## Use it to crack the password
 hashcat.exe -a 3 -m 1000 C:\Temp\ntlm.txt .\masks.hcmask
 ```
-- Lista reči + Maska (`-a 6`) / Maska + Lista reči (`-a 7`) napad
+- Wordlist + Mask (`-a 6`) / Mask + Wordlist (`-a 7`) napad
 ```bash
 # Mask numbers will be appended to each word in the wordlist
 hashcat.exe -a 6 -m 1000 C:\Temp\ntlm.txt \wordlist.txt ?d?d?d?d
@@ -715,7 +715,7 @@ Razbijanje Linux hešova - /etc/shadow datoteka
 7400 | sha256crypt $5$, SHA256(Unix)                    | Operating-Systems
 1800 | sha512crypt $6$, SHA512(Unix)                    | Operating-Systems
 ```
-Razbijanje Windows hešova
+Krekovanje Windows hešova
 ```
 3000 | LM                                               | Operating-Systems
 1000 | NTLM                                             | Operating-Systems
