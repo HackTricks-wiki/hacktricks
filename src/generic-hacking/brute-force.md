@@ -2,9 +2,9 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## デフォルトの資格情報
+## デフォルトの認証情報
 
-**使用されている技術のデフォルトの資格情報をGoogleで検索**するか、**これらのリンクを試してください**:
+**使用されている技術のデフォルトの認証情報をGoogleで検索**するか、**これらのリンクを試してください**:
 
 - [**https://github.com/ihebski/DefaultCreds-cheat-sheet**](https://github.com/ihebski/DefaultCreds-cheat-sheet)
 - [**http://www.phenoelit.org/dpl/dpl.html**](http://www.phenoelit.org/dpl/dpl.html)
@@ -105,7 +105,7 @@ msf> run
 ```bash
 nmap --script ajp-brute -p 8009 <IP>
 ```
-## AMQP (ActiveMQ、RabbitMQ、Qpid、JORAM、Solace)
+### AMQP (ActiveMQ、RabbitMQ、Qpid、JORAM、Solace)
 ```bash
 legba amqp --target localhost:5672 --username admin --password data/passwords.txt [--amql-ssl]
 ```
@@ -156,9 +156,9 @@ legba http.ntlm2 --domain example.org --workstation client --username admin --pa
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst domain.htb  http-post-form "/path/index.php:name=^USER^&password=^PASS^&enter=Sign+in:Login name or password is incorrect" -V
 # Use https-post-form mode for https
 ```
-http**s**の場合は、「http-post-form」を「**https-post-form」に変更する必要があります。
+For http**s** you have to change from "http-post-form" to "**https-post-form"**
 
-### **HTTP - CMS --** (W)ordpress、(J)oomla、(D)rupal、または(M)oodle
+### **HTTP - CMS --** (W)ordpress, (J)oomla or (D)rupal or (M)oodle
 ```bash
 cmsmap -f W/J/D/M -u a -p a https://wordpress.com
 # Check also https://github.com/evilsocket/legba/wiki/HTTP
@@ -278,7 +278,7 @@ nmap --script oracle-brute -p 1521 --script-args oracle-brute.sid=<SID> <IP>
 
 legba oracle --target localhost:1521 --oracle-database SYSTEM --username admin --password data/passwords.txt
 ```
-**oracle_login**を**patator**で使用するには、**install**する必要があります:
+**oracle_login**を**patator**で使用するには、**install**する必要があります：
 ```bash
 pip3 install cx_Oracle --upgrade
 ```
@@ -402,11 +402,11 @@ legba ssh --username admin --password '@/some/path/*' --ssh-auth-mode key --targ
 ```
 #### 弱いSSHキー / Debianの予測可能なPRNG
 
-一部のシステムには、暗号材料を生成するために使用されるランダムシードに既知の欠陥があります。これにより、キー空間が劇的に減少し、[snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute)のようなツールでブルートフォース攻撃が可能になります。弱いキーの事前生成されたセットも利用可能で、例えば[g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh)があります。
+一部のシステムには、暗号材料を生成するために使用されるランダムシードに既知の欠陥があります。これにより、[snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute)のようなツールでブルートフォース攻撃が可能な大幅に減少したキー空間が生じる可能性があります。弱いキーの事前生成されたセットも利用可能であり、例えば[g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh)があります。
 
 ### STOMP (ActiveMQ, RabbitMQ, HornetQ および OpenMQ)
 
-STOMPテキストプロトコルは、**RabbitMQ、ActiveMQ、HornetQ、およびOpenMQなどの人気のあるメッセージキューサービスとのシームレスな通信と相互作用を可能にする**広く使用されているメッセージングプロトコルです。メッセージを交換し、さまざまなメッセージング操作を実行するための標準化された効率的なアプローチを提供します。
+STOMPテキストプロトコルは、RabbitMQ、ActiveMQ、HornetQ、OpenMQなどの人気のあるメッセージキューサービスとの**シームレスな通信と相互作用を可能にする**広く使用されているメッセージングプロトコルです。メッセージを交換し、さまざまなメッセージング操作を実行するための標準化された効率的なアプローチを提供します。
 ```bash
 legba stomp --target localhost:61613 --username admin --password data/passwords.txt
 ```
@@ -478,9 +478,9 @@ john zip.john
 hashcat.exe -m 13600 -a 0 .\hashzip.txt .\wordlists\rockyou.txt
 .\hashcat.exe -m 13600 -i -a 0 .\hashzip.txt #Incremental attack
 ```
-#### Known plaintext zip attack
+#### 既知平文ZIP攻撃
 
-暗号化されたzip内に含まれる**ファイルの** **平文**（または平文の一部）を知っている必要があります。暗号化されたzip内に含まれる**ファイル名とファイルサイズ**を確認するには、**`7z l encrypted.zip`**を実行します。\
+暗号化されたZIP内に含まれるファイルの**平文**（または平文の一部）を知っている必要があります。暗号化されたZIP内に含まれる**ファイル名とファイルのサイズ**を確認するには、次のコマンドを実行します: **`7z l encrypted.zip`**\
 [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0)をリリースページからダウンロードしてください。
 ```bash
 # You need to create a zip file containing only the file that is inside the encrypted zip
@@ -560,7 +560,7 @@ cryptsetup luksOpen backup.img mylucksopen
 ls /dev/mapper/ #You should find here the image mylucksopen
 mount /dev/mapper/mylucksopen /mnt
 ```
-#### 方法2
+#### 方法 2
 ```bash
 cryptsetup luksDump backup.img #Check that the payload offset is set to 4096
 dd if=backup.img of=luckshash bs=512 count=4097 #Payload offset +1
@@ -646,7 +646,7 @@ john --wordlist=words.txt --rules=all --stdout > w_mutated.txt #Apply all rules
 
 - **ワードリスト攻撃** (`-a 0`) ルール付き
 
-**Hashcat** にはすでに **ルールを含むフォルダー** が付属していますが、[**他の興味深いルールはここにあります**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules)。
+**Hashcat** にはすでに **ルールを含むフォルダー** が付属していますが、[**他の興味深いルールはここで見つけることができます**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules)。
 ```
 hashcat.exe -a 0 -m 1000 C:\Temp\ntlm.txt .\rockyou.txt -r rules\best64.rule
 ```
