@@ -105,7 +105,7 @@ msf> run
 ```bash
 nmap --script ajp-brute -p 8009 <IP>
 ```
-## AMQP (ActiveMQ, RabbitMQ, Qpid, JORAM ve Solace)
+### AMQP (ActiveMQ, RabbitMQ, Qpid, JORAM ve Solace)
 ```bash
 legba amqp --target localhost:5672 --username admin --password data/passwords.txt [--amql-ssl]
 ```
@@ -278,7 +278,7 @@ nmap --script oracle-brute -p 1521 --script-args oracle-brute.sid=<SID> <IP>
 
 legba oracle --target localhost:1521 --oracle-database SYSTEM --username admin --password data/passwords.txt
 ```
-**oracle_login**'ı **patator** ile kullanmak için **kurmanız** gerekir:
+**oracle_login**'ı **patator** ile kullanmak için **kurmanız** gerekiyor:
 ```bash
 pip3 install cx_Oracle --upgrade
 ```
@@ -406,7 +406,7 @@ Bazı sistemler, kriptografik materyal oluşturmak için kullanılan rastgele to
 
 ### STOMP (ActiveMQ, RabbitMQ, HornetQ ve OpenMQ)
 
-STOMP metin protokolü, **RabbitMQ, ActiveMQ, HornetQ ve OpenMQ gibi popüler mesaj kuyruklama hizmetleriyle kesintisiz iletişim ve etkileşim sağlar.** Mesajları değiştirmek ve çeşitli mesajlaşma işlemleri gerçekleştirmek için standartlaştırılmış ve verimli bir yaklaşım sunar.
+STOMP metin protokolü, **RabbitMQ, ActiveMQ, HornetQ ve OpenMQ gibi popüler mesaj kuyruklama hizmetleriyle kesintisiz iletişim ve etkileşim sağlar**. Mesajları değiştirmek ve çeşitli mesajlaşma işlemleri gerçekleştirmek için standartlaştırılmış ve verimli bir yaklaşım sunar.
 ```bash
 legba stomp --target localhost:61613 --username admin --password data/passwords.txt
 ```
@@ -480,8 +480,8 @@ hashcat.exe -m 13600 -a 0 .\hashzip.txt .\wordlists\rockyou.txt
 ```
 #### Bilinen düz metin zip saldırısı
 
-Şifreli zip içinde bulunan bir dosyanın **düz metnini** (veya düz metnin bir kısmını) bilmeniz gerekir. Şifreli zip içinde bulunan **dosya adlarını ve dosyaların boyutunu** kontrol etmek için: **`7z l encrypted.zip`** komutunu çalıştırabilirsiniz.\
-[**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0) indirin.
+Şifreli zip içinde bulunan bir dosyanın **düz metnini** (veya düz metnin bir kısmını) bilmeniz gerekir. Şifreli zip içinde bulunan **dosya adlarını ve dosyaların boyutunu** kontrol etmek için şunu çalıştırabilirsiniz: **`7z l encrypted.zip`**\
+[**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0)indirin.
 ```bash
 # You need to create a zip file containing only the file that is inside the encrypted zip
 zip plaintext.zip plaintext.file
@@ -592,7 +592,7 @@ john --wordlist=/usr/share/wordlists/rockyou.txt ./hash
 
 ### Open Office Pwd Protected Column
 
-Eğer bir şifre ile korunan bir sütunu olan bir xlsx dosyanız varsa, onu korumasını kaldırabilirsiniz:
+Eğer bir şifre ile korunan bir sütun içeren bir xlsx dosyanız varsa, onu korumasını kaldırabilirsiniz:
 
 - **Google Drive'a yükleyin** ve şifre otomatik olarak kaldırılacaktır
 - **Manuel olarak kaldırmak için**:
@@ -629,13 +629,13 @@ hash-identifier
 
 ### **Kelime Listesi Üretim Araçları**
 
-- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** Konfigüre edilebilir temel karakterler, tuş haritası ve rotalar ile gelişmiş klavye yürüyüşü üreticisi.
+- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** Konfigüre edilebilir temel karakterler, tuş haritası ve rotalar ile gelişmiş klavye yürüyüşü üreteci.
 ```bash
 kwp64.exe basechars\custom.base keymaps\uk.keymap routes\2-to-10-max-3-direction-changes.route -o D:\Tools\keywalk.txt
 ```
 ### John mutation
 
-_**/etc/john/john.conf**_ dosyasını okuyun ve yapılandırın.
+_**/etc/john/john.conf**_ dosyasını okuyun ve yapılandırın
 ```bash
 john --wordlist=words.txt --rules --stdout > w_mutated.txt
 john --wordlist=words.txt --rules=all --stdout > w_mutated.txt #Apply all rules
