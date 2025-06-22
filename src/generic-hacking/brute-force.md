@@ -4,7 +4,7 @@
 
 ## Default Credentials
 
-**Tafuta kwenye google** kwa ajili ya akiba za kawaida za teknolojia inayotumika, au **jaribu hizi linki**:
+**Tafuta katika google** kwa ajili ya akiba za kawaida za teknolojia inayotumika, au **jaribu hizi viungo**:
 
 - [**https://github.com/ihebski/DefaultCreds-cheat-sheet**](https://github.com/ihebski/DefaultCreds-cheat-sheet)
 - [**http://www.phenoelit.org/dpl/dpl.html**](http://www.phenoelit.org/dpl/dpl.html)
@@ -19,7 +19,7 @@
 - [**https://many-passwords.github.io/**](https://many-passwords.github.io)
 - [**https://theinfocentric.com/**](https://theinfocentric.com/)
 
-## **Create your own Dictionaries**
+## **Unda Kamusi zako binafsi**
 
 Pata taarifa nyingi kadri uwezavyo kuhusu lengo na tengeneza kamusi maalum. Zana ambazo zinaweza kusaidia:
 
@@ -53,7 +53,7 @@ python3 cupp.py -h
 ```
 ### [Wister](https://github.com/cycurity/wister)
 
-Zana la kuunda orodha ya maneno, ambalo linakuwezesha kutoa seti ya maneno, likikupa uwezekano wa kuunda tofauti nyingi kutoka kwa maneno yaliyotolewa, na kuunda orodha ya maneno ya kipekee na bora ya kutumia kuhusu lengo maalum.
+Zana ya kuunda orodha ya maneno, inayokuruhusu kutoa seti ya maneno, ikikupa uwezekano wa kuunda mabadiliko mengi kutoka kwa maneno yaliyotolewa, kuunda orodha ya maneno ya kipekee na bora kutumia kuhusu lengo maalum.
 ```bash
 python3 wister.py -w jane doe 2022 summer madrid 1998 -c 1 2 3 4 5 -o wordlist.lst
 
@@ -105,7 +105,7 @@ msf> run
 ```bash
 nmap --script ajp-brute -p 8009 <IP>
 ```
-## AMQP (ActiveMQ, RabbitMQ, Qpid, JORAM na Solace)
+### AMQP (ActiveMQ, RabbitMQ, Qpid, JORAM na Solace)
 ```bash
 legba amqp --target localhost:5672 --username admin --password data/passwords.txt [--amql-ssl]
 ```
@@ -406,7 +406,7 @@ Baadhi ya mifumo yana kasoro zinazojulikana katika mbegu ya nasibu inayotumika k
 
 ### STOMP (ActiveMQ, RabbitMQ, HornetQ na OpenMQ)
 
-Protokali ya maandiko ya STOMP ni protokali maarufu ya ujumbe inayotumiwa sana ambayo **inaruhusu mawasiliano na mwingiliano bila mshono na huduma maarufu za kupanga ujumbe** kama RabbitMQ, ActiveMQ, HornetQ, na OpenMQ. Inatoa njia iliyoandikwa na yenye ufanisi ya kubadilishana ujumbe na kufanya operesheni mbalimbali za ujumbe.
+Protokali ya maandiko ya STOMP ni protokali maarufu ya ujumbe ambayo **inaruhusu mawasiliano na mwingiliano usio na mshono na huduma maarufu za kupanga ujumbe** kama RabbitMQ, ActiveMQ, HornetQ, na OpenMQ. Inatoa njia iliyo sanifishwa na yenye ufanisi ya kubadilishana ujumbe na kufanya operesheni mbalimbali za ujumbe.
 ```bash
 legba stomp --target localhost:61613 --username admin --password data/passwords.txt
 ```
@@ -551,7 +551,7 @@ hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
 ```
 ### Picha ya Luks
 
-#### Njia ya 1
+#### Njia 1
 
 Sakinisha: [https://github.com/glv2/bruteforce-luks](https://github.com/glv2/bruteforce-luks)
 ```bash
@@ -595,7 +595,7 @@ Tumia [https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py]
 Ikiwa una faili ya xlsx yenye safu iliyo na nenosiri, unaweza kuondoa ulinzi wake:
 
 - **Pakua kwenye google drive** na nenosiri litafutwa kiotomatiki
-- Ili **kuondoa** kwa **mkono**:
+- Ili **kuondoa** **kwa mikono**:
 ```bash
 unzip file.xlsx
 grep -R "sheetProtection" ./*
@@ -611,9 +611,9 @@ zip -r file.xls .
 # From https://github.com/crackpkcs12/crackpkcs12
 crackpkcs12 -d /usr/share/wordlists/rockyou.txt ./cert.pfx
 ```
-## Vifaa
+## Tools
 
-**Mifano ya Hash:** [https://openwall.info/wiki/john/sample-hashes](https://openwall.info/wiki/john/sample-hashes)
+**Hash examples:** [https://openwall.info/wiki/john/sample-hashes](https://openwall.info/wiki/john/sample-hashes)
 
 ### Hash-identifier
 ```bash
@@ -642,18 +642,18 @@ john --wordlist=words.txt --rules=all --stdout > w_mutated.txt #Apply all rules
 ```
 ### Hashcat
 
-#### Hashcat attacks
+#### Hashcat mashambulizi
 
-- **Wordlist attack** (`-a 0`) with rules
+- **Shambulio la orodha ya maneno** (`-a 0`) na sheria
 
-**Hashcat** tayari inakuja na **folda yenye sheria** lakini unaweza kupata [**sheria nyingine za kuvutia hapa**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules).
+**Hashcat** tayari inakuja na **folda inayoshikilia sheria** lakini unaweza kupata [**sheria nyingine za kuvutia hapa**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules).
 ```
 hashcat.exe -a 0 -m 1000 C:\Temp\ntlm.txt .\rockyou.txt -r rules\best64.rule
 ```
 - **Wordlist combinator** attack
 
 Ni uwezekano wa **kuunganisha orodha 2 za maneno kuwa 1** kwa kutumia hashcat.\
-Ikiwa orodha ya 1 ilikuwa na neno **"hello"** na ya pili ilikuwa na mistari 2 yenye maneno **"world"** na **"earth"**. Maneno `helloworld` na `helloearth` yatatengenezwa.
+Ikiwa orodha 1 ilikuwa na neno **"hello"** na ya pili ilikuwa na mistari 2 yenye maneno **"world"** na **"earth"**. Maneno `helloworld` na `helloearth` yatatengenezwa.
 ```bash
 # This will combine 2 wordlists
 hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt
@@ -708,7 +708,7 @@ hashcat.exe -a 7 -m 1000 C:\Temp\ntlm.txt ?d?d?d?d \wordlist.txt
 ```bash
 hashcat --example-hashes | grep -B1 -A2 "NTLM"
 ```
-Kuvunja Hashes za Linux - /etc/shadow file
+Kuvunja Hashes za Linux - faili /etc/shadow
 ```
 500 | md5crypt $1$, MD5(Unix)                          | Operating-Systems
 3200 | bcrypt $2*$, Blowfish(Unix)                      | Operating-Systems
