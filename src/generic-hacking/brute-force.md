@@ -4,7 +4,7 @@
 
 ## Default Credentials
 
-**구글에서** 사용 중인 기술의 기본 자격 증명을 검색하거나 **다음 링크를 시도해 보세요**:
+**구글에서 검색**하여 사용 중인 기술의 기본 자격 증명을 찾거나 **다음 링크를 시도**하세요:
 
 - [**https://github.com/ihebski/DefaultCreds-cheat-sheet**](https://github.com/ihebski/DefaultCreds-cheat-sheet)
 - [**http://www.phenoelit.org/dpl/dpl.html**](http://www.phenoelit.org/dpl/dpl.html)
@@ -21,7 +21,7 @@
 
 ## **자신만의 사전 만들기**
 
-대상에 대한 정보를 최대한 많이 찾아서 사용자 정의 사전을 생성하세요. 도움이 될 수 있는 도구:
+대상에 대한 정보를 최대한 많이 찾아 사용자 정의 사전을 생성하세요. 도움이 될 수 있는 도구:
 
 ### Crunch
 ```bash
@@ -53,7 +53,7 @@ python3 cupp.py -h
 ```
 ### [Wister](https://github.com/cycurity/wister)
 
-단어 목록 생성기 도구로, 단어 집합을 제공할 수 있으며, 주어진 단어로부터 여러 변형을 만들 수 있는 가능성을 제공합니다. 특정 대상을 위해 사용할 수 있는 독특하고 이상적인 단어 목록을 생성합니다.
+단어 목록 생성기 도구로, 단어 집합을 제공할 수 있으며, 주어진 단어로부터 여러 변형을 만들 수 있는 가능성을 제공합니다. 특정 대상을 고려하여 사용할 수 있는 독특하고 이상적인 단어 목록을 생성합니다.
 ```bash
 python3 wister.py -w jane doe 2022 summer madrid 1998 -c 1 2 3 4 5 -o wordlist.lst
 
@@ -105,7 +105,7 @@ msf> run
 ```bash
 nmap --script ajp-brute -p 8009 <IP>
 ```
-## AMQP (ActiveMQ, RabbitMQ, Qpid, JORAM 및 Solace)
+### AMQP (ActiveMQ, RabbitMQ, Qpid, JORAM 및 Solace)
 ```bash
 legba amqp --target localhost:5672 --username admin --password data/passwords.txt [--amql-ssl]
 ```
@@ -139,7 +139,7 @@ legba ftp --username admin --password wordlists/passwords.txt --target localhost
 
 #### [**WFuzz**](../pentesting-web/web-tool-wfuzz.md)
 
-### HTTP 기본 인증
+### HTTP Basic Auth
 ```bash
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst sizzle.htb.local http-get /certsrv/
 # Use https-get mode for https
@@ -320,7 +320,7 @@ ncrack -vv --user <User> -P pwds.txt rdp://<IP>
 hydra -V -f -L <userslist> -P <passwlist> rdp://<IP>
 legba rdp --target localhost:3389 --username admin --password data/passwords.txt [--rdp-domain <RDP_DOMAIN>] [--rdp-ntlm] [--rdp-admin-mode] [--rdp-auto-logon]
 ```
-### 레디스
+### Redis
 ```bash
 msf> use auxiliary/scanner/redis/redis_login
 nmap --script redis-brute -p 6379 <IP>
@@ -402,11 +402,11 @@ legba ssh --username admin --password '@/some/path/*' --ssh-auth-mode key --targ
 ```
 #### 약한 SSH 키 / Debian 예측 가능한 PRNG
 
-일부 시스템은 암호화 자료를 생성하는 데 사용되는 랜덤 시드에 알려진 결함이 있습니다. 이로 인해 키 공간이 극적으로 줄어들 수 있으며, [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute)와 같은 도구로 브루트포스 공격이 가능합니다. [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh)와 같은 약한 키의 미리 생성된 세트도 사용할 수 있습니다.
+일부 시스템은 암호화 자료를 생성하는 데 사용되는 랜덤 시드에 알려진 결함이 있습니다. 이로 인해 키 공간이 극적으로 줄어들 수 있으며, 이는 [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute)와 같은 도구로 브루트포스 공격을 받을 수 있습니다. [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh)와 같은 약한 키의 미리 생성된 세트도 사용할 수 있습니다.
 
 ### STOMP (ActiveMQ, RabbitMQ, HornetQ 및 OpenMQ)
 
-STOMP 텍스트 프로토콜은 **RabbitMQ, ActiveMQ, HornetQ 및 OpenMQ와 같은 인기 있는 메시지 큐 서비스와의 원활한 통신 및 상호작용을 허용하는** 널리 사용되는 메시징 프로토콜입니다. 메시지를 교환하고 다양한 메시징 작업을 수행하는 표준화되고 효율적인 접근 방식을 제공합니다.
+STOMP 텍스트 프로토콜은 **RabbitMQ, ActiveMQ, HornetQ 및 OpenMQ와 같은 인기 있는 메시지 큐 서비스와의 원활한 통신 및 상호작용을 허용하는** 널리 사용되는 메시징 프로토콜입니다. 이는 메시지를 교환하고 다양한 메시징 작업을 수행하는 표준화되고 효율적인 접근 방식을 제공합니다.
 ```bash
 legba stomp --target localhost:61613 --username admin --password data/passwords.txt
 ```
@@ -450,7 +450,7 @@ crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 
 - [~~http://hashtoolkit.com/reverse-hash?~~](http://hashtoolkit.com/reverse-hash?) (MD5 & SHA1)
 - [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 with/without ESS/SSP and with any challenge's value)
-- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (해시, WPA2 캡처, MSOffice, ZIP, PDF 아카이브...)
+- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (해시, WPA2 캡처, MSOffice, ZIP, PDF 아카이브 등)
 - [https://crackstation.net/](https://crackstation.net) (해시)
 - [https://md5decrypt.net/](https://md5decrypt.net) (MD5)
 - [https://gpuhash.me/](https://gpuhash.me) (해시 및 파일 해시)
@@ -481,7 +481,7 @@ hashcat.exe -m 13600 -a 0 .\hashzip.txt .\wordlists\rockyou.txt
 #### 알려진 평문 zip 공격
 
 암호화된 zip 안에 포함된 **파일의 평문** (또는 평문의 일부)을 알아야 합니다. 암호화된 zip 안에 포함된 **파일의 이름과 크기**를 확인하려면 다음을 실행하세요: **`7z l encrypted.zip`**\
-[**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0) 를 릴리스 페이지에서 다운로드하세요.
+[**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0)를 릴리스 페이지에서 다운로드하세요.
 ```bash
 # You need to create a zip file containing only the file that is inside the encrypted zip
 zip plaintext.zip plaintext.file
@@ -535,7 +535,7 @@ Format:USUARIO:ID:HASH_LM:HASH_NT:::
 john --wordlist=/usr/share/wordlists/rockyou.txt --format=NT file_NTLM.hashes
 hashcat -a 0 -m 1000 --username file_NTLM.hashes /usr/share/wordlists/rockyou.txt --potfile-path salida_NT.pot
 ```
-### Keepass
+### 키패스
 ```bash
 sudo apt-get install -y kpcli #Install keepass tools like keepass2john
 keepass2john file.kdbx > hash #The keepass is only using password
@@ -586,13 +586,13 @@ john --wordlist=/usr/share/wordlists/rockyou.txt ./hash
 
 <figure><img src="../images/image (663).png" alt=""><figcaption></figcaption></figure>
 
-### DPAPI Master Key
+### DPAPI 마스터 키
 
-Use [https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py) and then john
+[https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py)를 사용한 다음 john을 실행하세요.
 
-### Open Office Pwd Protected Column
+### Open Office 비밀번호 보호 열
 
-비밀번호로 보호된 열이 있는 xlsx 파일이 있는 경우, 다음과 같이 보호를 해제할 수 있습니다:
+비밀번호로 보호된 열이 있는 xlsx 파일이 있는 경우 다음과 같이 해제할 수 있습니다:
 
 - **구글 드라이브에 업로드**하면 비밀번호가 자동으로 제거됩니다.
 - **수동으로 제거**하려면:
@@ -620,22 +620,22 @@ crackpkcs12 -d /usr/share/wordlists/rockyou.txt ./cert.pfx
 hash-identifier
 > <HASH>
 ```
-### 단어 목록
+### Wordlists
 
 - **Rockyou**
 - [**Probable-Wordlists**](https://github.com/berzerk0/Probable-Wordlists)
 - [**Kaonashi**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/wordlists)
 - [**Seclists - Passwords**](https://github.com/danielmiessler/SecLists/tree/master/Passwords)
 
-### **단어 목록 생성 도구**
+### **Wordlist Generation Tools**
 
-- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** 구성 가능한 기본 문자, 키맵 및 경로를 가진 고급 키보드 워크 생성기.
+- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** 고급 키보드 워크 생성기로, 구성 가능한 기본 문자, 키맵 및 경로를 지원합니다.
 ```bash
 kwp64.exe basechars\custom.base keymaps\uk.keymap routes\2-to-10-max-3-direction-changes.route -o D:\Tools\keywalk.txt
 ```
 ### John mutation
 
-_read_ **/etc/john/john.conf** _을 읽고 구성합니다._
+_read **/etc/john/john.conf**를 읽고 구성합니다._
 ```bash
 john --wordlist=words.txt --rules --stdout > w_mutated.txt
 john --wordlist=words.txt --rules=all --stdout > w_mutated.txt #Apply all rules
@@ -644,7 +644,7 @@ john --wordlist=words.txt --rules=all --stdout > w_mutated.txt #Apply all rules
 
 #### Hashcat 공격
 
-- **단어 목록 공격** (`-a 0`) 규칙 포함
+- **단어 목록 공격** (`-a 0`) 규칙과 함께
 
 **Hashcat**은 이미 **규칙이 포함된 폴더**와 함께 제공되지만 [**여기에서 다른 흥미로운 규칙을 찾을 수 있습니다**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules).
 ```
@@ -653,7 +653,7 @@ hashcat.exe -a 0 -m 1000 C:\Temp\ntlm.txt .\rockyou.txt -r rules\best64.rule
 - **Wordlist combinator** 공격
 
 hashcat을 사용하여 **2개의 단어 목록을 1개로 결합**할 수 있습니다.\
-리스트 1에 단어 **"hello"**가 포함되어 있고 두 번째 리스트에 **"world"**와 **"earth"**라는 단어가 있는 2개의 줄이 포함되어 있다고 가정합니다. `helloworld`와 `helloearth`라는 단어가 생성됩니다.
+리스트 1에 단어 **"hello"**가 포함되어 있고 두 번째 리스트에 **"world"**와 **"earth"**라는 단어가 있는 2개의 줄이 포함되어 있다고 가정합니다. `helloworld`와 `helloearth`가 생성됩니다.
 ```bash
 # This will combine 2 wordlists
 hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt
@@ -664,7 +664,7 @@ hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt
 ## hello-earth!
 hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt -j $- -k $!
 ```
-- **Mask attack** (`-a 3`)
+- **마스크 공격** (`-a 3`)
 ```bash
 # Mask attack with simple mask
 hashcat.exe -a 3 -m 1000 C:\Temp\ntlm.txt ?u?l?l?l?l?l?l?l?d
@@ -704,7 +704,7 @@ hashcat.exe -a 6 -m 1000 C:\Temp\ntlm.txt \wordlist.txt ?d?d?d?d
 # Mask numbers will be prepended to each word in the wordlist
 hashcat.exe -a 7 -m 1000 C:\Temp\ntlm.txt ?d?d?d?d \wordlist.txt
 ```
-#### 해시캣 모드
+#### Hashcat 모드
 ```bash
 hashcat --example-hashes | grep -B1 -A2 "NTLM"
 ```
