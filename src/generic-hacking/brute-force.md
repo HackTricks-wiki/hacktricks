@@ -19,7 +19,7 @@
 - [**https://many-passwords.github.io/**](https://many-passwords.github.io)
 - [**https://theinfocentric.com/**](https://theinfocentric.com/)
 
-## **Δημιουργήστε τα δικά σας Λεξικά**
+## **Create your own Dictionaries**
 
 Βρείτε όσο το δυνατόν περισσότερες πληροφορίες σχετικά με τον στόχο και δημιουργήστε ένα προσαρμοσμένο λεξικό. Εργαλεία που μπορεί να βοηθήσουν:
 
@@ -89,7 +89,7 @@ Finished in 0.920s.
 
 ## Υπηρεσίες
 
-Ταξινομημένα αλφαβητικά κατά όνομα υπηρεσίας.
+Ταξινομημένες αλφαβητικά κατά όνομα υπηρεσίας.
 
 ### AFP
 ```bash
@@ -105,7 +105,7 @@ msf> run
 ```bash
 nmap --script ajp-brute -p 8009 <IP>
 ```
-## AMQP (ActiveMQ, RabbitMQ, Qpid, JORAM και Solace)
+### AMQP (ActiveMQ, RabbitMQ, Qpid, JORAM και Solace)
 ```bash
 legba amqp --target localhost:5672 --username admin --password data/passwords.txt [--amql-ssl]
 ```
@@ -278,7 +278,7 @@ nmap --script oracle-brute -p 1521 --script-args oracle-brute.sid=<SID> <IP>
 
 legba oracle --target localhost:1521 --oracle-database SYSTEM --username admin --password data/passwords.txt
 ```
-Για να χρησιμοποιήσετε το **oracle_login** με το **patator** πρέπει να **εγκαταστήσετε**:
+Για να χρησιμοποιήσετε **oracle_login** με **patator** πρέπει να **εγκαταστήσετε**:
 ```bash
 pip3 install cx_Oracle --upgrade
 ```
@@ -402,7 +402,7 @@ legba ssh --username admin --password '@/some/path/*' --ssh-auth-mode key --targ
 ```
 #### Αδύναμα κλειδιά SSH / Προβλέψιμος PRNG Debian
 
-Ορισμένα συστήματα έχουν γνωστά ελαττώματα στον τυχαίο σπόρο που χρησιμοποιείται για την παραγωγή κρυπτογραφικού υλικού. Αυτό μπορεί να έχει ως αποτέλεσμα μια δραματικά μειωμένη περιοχή κλειδιών που μπορεί να παραβιαστεί με εργαλεία όπως το [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute). Προγεννημένα σύνολα αδύναμων κλειδιών είναι επίσης διαθέσιμα όπως το [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh).
+Ορισμένα συστήματα έχουν γνωστά ελαττώματα στον τυχαίο σπόρο που χρησιμοποιείται για τη δημιουργία κρυπτογραφικού υλικού. Αυτό μπορεί να έχει ως αποτέλεσμα μια δραματικά μειωμένη περιοχή κλειδιών που μπορεί να παραβιαστεί με εργαλεία όπως το [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute). Προγεννημένα σύνολα αδύναμων κλειδιών είναι επίσης διαθέσιμα όπως το [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh).
 
 ### STOMP (ActiveMQ, RabbitMQ, HornetQ και OpenMQ)
 
@@ -478,10 +478,10 @@ john zip.john
 hashcat.exe -m 13600 -a 0 .\hashzip.txt .\wordlists\rockyou.txt
 .\hashcat.exe -m 13600 -i -a 0 .\hashzip.txt #Incremental attack
 ```
-#### Γνωστή επίθεση σε zip με απλό κείμενο
+#### Γνωστή επίθεση zip με καθαρό κείμενο
 
-Πρέπει να γνωρίζετε το **απλό κείμενο** (ή μέρος του απλού κειμένου) **ενός αρχείου που περιέχεται μέσα** στο κρυπτογραφημένο zip. Μπορείτε να ελέγξετε **τα ονόματα αρχείων και το μέγεθος των αρχείων που περιέχονται μέσα** σε ένα κρυπτογραφημένο zip εκτελώντας: **`7z l encrypted.zip`**\
-Κατεβάστε [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0)από τη σελίδα των εκδόσεων.
+Πρέπει να γνωρίζετε το **καθαρό κείμενο** (ή μέρος του καθαρού κειμένου) **ενός αρχείου που περιέχεται μέσα** στο κρυπτογραφημένο zip. Μπορείτε να ελέγξετε **τα ονόματα αρχείων και το μέγεθος των αρχείων που περιέχονται μέσα** σε ένα κρυπτογραφημένο zip εκτελώντας: **`7z l encrypted.zip`**\
+Κατεβάστε [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0) από τη σελίδα των εκδόσεων.
 ```bash
 # You need to create a zip file containing only the file that is inside the encrypted zip
 zip plaintext.zip plaintext.file
@@ -592,7 +592,7 @@ john --wordlist=/usr/share/wordlists/rockyou.txt ./hash
 
 ### Open Office Pwd Protected Column
 
-Αν έχετε ένα αρχείο xlsx με μια στήλη προστατευμένη με κωδικό πρόσβασης, μπορείτε να την αποδεσμεύσετε:
+Αν έχετε ένα αρχείο xlsx με μια στήλη προστατευμένη με κωδικό πρόσβασης μπορείτε να την αποδεσμεύσετε:
 
 - **Ανεβάστε το στο google drive** και ο κωδικός πρόσβασης θα αφαιρεθεί αυτόματα
 - Για να **αφαιρέσετε** το **χειροκίνητα**:
@@ -629,7 +629,7 @@ hash-identifier
 
 ### **Εργαλεία Δημιουργίας Λιστών Λέξεων**
 
-- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** Προηγμένος γεννήτορας περιπάτου πληκτρολογίου με ρυθμιζόμενους βασικούς χαρακτήρες, χάρτη πλήκτρων και διαδρομές.
+- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** Προηγμένος γεννήτορας διαδρομών πληκτρολογίου με ρυθμιζόμενους βασικούς χαρακτήρες, χάρτη πλήκτρων και διαδρομές.
 ```bash
 kwp64.exe basechars\custom.base keymaps\uk.keymap routes\2-to-10-max-3-direction-changes.route -o D:\Tools\keywalk.txt
 ```
@@ -708,7 +708,7 @@ hashcat.exe -a 7 -m 1000 C:\Temp\ntlm.txt ?d?d?d?d \wordlist.txt
 ```bash
 hashcat --example-hashes | grep -B1 -A2 "NTLM"
 ```
-Σπάζοντας τους Hashes του Linux - /etc/shadow αρχείο
+Σπάζοντας τους Hashes του Linux - αρχείο /etc/shadow
 ```
 500 | md5crypt $1$, MD5(Unix)                          | Operating-Systems
 3200 | bcrypt $2*$, Blowfish(Unix)                      | Operating-Systems
