@@ -21,7 +21,7 @@
 
 ## **创建你自己的字典**
 
-尽可能多地收集关于目标的信息并生成自定义字典。可能有帮助的工具：
+尽可能多地收集目标的信息并生成自定义字典。可能有帮助的工具：
 
 ### Crunch
 ```bash
@@ -34,7 +34,7 @@ crunch 4 4 -f /usr/share/crunch/charset.lst mixalpha # Only length 4 using chars
 ^ Special characters including spac
 crunch 6 8 -t ,@@^^%%
 ```
-### 基于网站的字典列表
+### 网站基础的字典列表
 ```bash
 # Cewl gets words from the victims page
 cewl example.com -m 5 -w words.txt
@@ -105,7 +105,7 @@ msf> run
 ```bash
 nmap --script ajp-brute -p 8009 <IP>
 ```
-## AMQP (ActiveMQ, RabbitMQ, Qpid, JORAM 和 Solace)
+### AMQP (ActiveMQ, RabbitMQ, Qpid, JORAM 和 Solace)
 ```bash
 legba amqp --target localhost:5672 --username admin --password data/passwords.txt [--amql-ssl]
 ```
@@ -151,12 +151,12 @@ legba http.basic --username admin --password wordlists/passwords.txt --target ht
 legba http.ntlm1 --domain example.org --workstation client --username admin --password wordlists/passwords.txt --target https://localhost:8888/
 legba http.ntlm2 --domain example.org --workstation client --username admin --password wordlists/passwords.txt --target https://localhost:8888/
 ```
-### HTTP - Post Form
+### HTTP - Post 表单
 ```bash
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst domain.htb  http-post-form "/path/index.php:name=^USER^&password=^PASS^&enter=Sign+in:Login name or password is incorrect" -V
 # Use https-post-form mode for https
 ```
-对于 http**s**，您必须将 "http-post-form" 更改为 "**https-post-form"**
+对于 http**s**，您必须将 "http-post-form" 更改为 "**https-post-form**"
 
 ### **HTTP - CMS --** (W)ordpress, (J)oomla 或 (D)rupal 或 (M)oodle
 ```bash
@@ -406,7 +406,7 @@ legba ssh --username admin --password '@/some/path/*' --ssh-auth-mode key --targ
 
 ### STOMP (ActiveMQ, RabbitMQ, HornetQ 和 OpenMQ)
 
-STOMP 文本协议是一种广泛使用的消息传递协议，**允许与流行的消息队列服务如 RabbitMQ、ActiveMQ、HornetQ 和 OpenMQ 进行无缝通信和交互**。它提供了一种标准化和高效的方法来交换消息和执行各种消息操作。
+STOMP 文本协议是一种广泛使用的消息传递协议，**允许与流行的消息队列服务如 RabbitMQ、ActiveMQ、HornetQ 和 OpenMQ 进行无缝通信和交互**。它提供了一种标准化和高效的方法来交换消息并执行各种消息操作。
 ```bash
 legba stomp --target localhost:61613 --username admin --password data/passwords.txt
 ```
@@ -449,7 +449,7 @@ crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 ### 在线破解数据库
 
 - [~~http://hashtoolkit.com/reverse-hash?~~](http://hashtoolkit.com/reverse-hash?) (MD5 & SHA1)
-- [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 有/无 ESS/SSP 和任何挑战值)
+- [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 带/不带 ESS/SSP 和任何挑战值)
 - [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (哈希, WPA2 捕获, 和 MSOffice, ZIP, PDF... 的档案)
 - [https://crackstation.net/](https://crackstation.net) (哈希)
 - [https://md5decrypt.net/](https://md5decrypt.net) (MD5)
@@ -549,7 +549,7 @@ john --format=krb5tgs --wordlist=passwords_kerb.txt hashes.kerberoast
 hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
 ./tgsrepcrack.py wordlist.txt 1-MSSQLSvc~sql01.medin.local~1433-MYDOMAIN.LOCAL.kirbi
 ```
-### Lucks 图像
+### Luks图像
 
 #### 方法 1
 
