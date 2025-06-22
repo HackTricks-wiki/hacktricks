@@ -34,7 +34,7 @@ crunch 4 4 -f /usr/share/crunch/charset.lst mixalpha # Only length 4 using chars
 ^ Special characters including spac
 crunch 6 8 -t ,@@^^%%
 ```
-### Словники на основі веб-сайтів
+### Словники на основі вебсайтів
 ```bash
 # Cewl gets words from the victims page
 cewl example.com -m 5 -w words.txt
@@ -105,7 +105,7 @@ msf> run
 ```bash
 nmap --script ajp-brute -p 8009 <IP>
 ```
-## AMQP (ActiveMQ, RabbitMQ, Qpid, JORAM та Solace)
+### AMQP (ActiveMQ, RabbitMQ, Qpid, JORAM та Solace)
 ```bash
 legba amqp --target localhost:5672 --username admin --password data/passwords.txt [--amql-ssl]
 ```
@@ -460,7 +460,7 @@ crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 - [https://www.md5online.org/md5-decrypt.html](https://www.md5online.org/md5-decrypt.html) (MD5)
 - [http://reverse-hash-lookup.online-domain-tools.com/](http://reverse-hash-lookup.online-domain-tools.com)
 
-Перевірте це перед спробою злому хешу.
+Перевірте це перед спробою брутфорсити хеш. 
 
 ### ZIP
 ```bash
@@ -481,7 +481,7 @@ hashcat.exe -m 13600 -a 0 .\hashzip.txt .\wordlists\rockyou.txt
 #### Відомий атака на zip з відкритим текстом
 
 Вам потрібно знати **відкритий текст** (або частину відкритого тексту) **файлу, що міститься всередині** зашифрованого zip. Ви можете перевірити **імена файлів та розмір файлів, що містяться всередині** зашифрованого zip, запустивши: **`7z l encrypted.zip`**\
-Завантажте [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0) зі сторінки релізів.
+Завантажте [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0)з сторінки релізів.
 ```bash
 # You need to create a zip file containing only the file that is inside the encrypted zip
 zip plaintext.zip plaintext.file
@@ -629,7 +629,7 @@ hash-identifier
 
 ### **Інструменти для генерації словників**
 
-- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** Розширений генератор клавіатурних прогулянок з налаштовуваними базовими символами, картами клавіш та маршрутами.
+- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** Розширений генератор клавіатурних комбінацій з налаштовуваними базовими символами, картами клавіш та маршрутами.
 ```bash
 kwp64.exe basechars\custom.base keymaps\uk.keymap routes\2-to-10-max-3-direction-changes.route -o D:\Tools\keywalk.txt
 ```
@@ -708,7 +708,7 @@ hashcat.exe -a 7 -m 1000 C:\Temp\ntlm.txt ?d?d?d?d \wordlist.txt
 ```bash
 hashcat --example-hashes | grep -B1 -A2 "NTLM"
 ```
-Злом Linux Hashes - файл /etc/shadow
+Злом Linux хешів - файл /etc/shadow
 ```
 500 | md5crypt $1$, MD5(Unix)                          | Operating-Systems
 3200 | bcrypt $2*$, Blowfish(Unix)                      | Operating-Systems
