@@ -226,7 +226,7 @@
         `threadId=${threadId}; Path=/; Secure; SameSite=Strict; Max-Age=7200`;
     } catch (e) {
       console.error("Error creating threadId:", e);
-      alert("Failed to initialise the conversation. Please refresh.");
+      console.log("Failed to initialise the conversation. Please refresh.");
       throw e;
     }
   }
