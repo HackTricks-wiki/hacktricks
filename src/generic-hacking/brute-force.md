@@ -53,7 +53,7 @@ python3 cupp.py -h
 ```
 ### [Wister](https://github.com/cycurity/wister)
 
-Uma ferramenta geradora de listas de palavras, que permite que você forneça um conjunto de palavras, dando a você a possibilidade de criar várias variações a partir das palavras fornecidas, criando uma lista de palavras única e ideal para usar em relação a um alvo específico.
+Uma ferramenta geradora de listas de palavras, que permite que você forneça um conjunto de palavras, dando a você a possibilidade de criar múltiplas variações a partir das palavras fornecidas, criando uma lista de palavras única e ideal para usar em relação a um alvo específico.
 ```bash
 python3 wister.py -w jane doe 2022 summer madrid 1998 -c 1 2 3 4 5 -o wordlist.lst
 
@@ -105,7 +105,7 @@ msf> run
 ```bash
 nmap --script ajp-brute -p 8009 <IP>
 ```
-## AMQP (ActiveMQ, RabbitMQ, Qpid, JORAM e Solace)
+### AMQP (ActiveMQ, RabbitMQ, Qpid, JORAM e Solace)
 ```bash
 legba amqp --target localhost:5672 --username admin --password data/passwords.txt [--amql-ssl]
 ```
@@ -402,7 +402,7 @@ legba ssh --username admin --password '@/some/path/*' --ssh-auth-mode key --targ
 ```
 #### Chaves SSH fracas / PRNG previsível do Debian
 
-Alguns sistemas têm falhas conhecidas na semente aleatória usada para gerar material criptográfico. Isso pode resultar em um espaço de chave drasticamente reduzido que pode ser atacado por força bruta com ferramentas como [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute). Conjuntos pré-gerados de chaves fracas também estão disponíveis, como [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh).
+Alguns sistemas têm falhas conhecidas na semente aleatória usada para gerar material criptográfico. Isso pode resultar em um espaço de chave dramaticamente reduzido que pode ser atacado por força bruta com ferramentas como [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute). Conjuntos pré-gerados de chaves fracas também estão disponíveis, como [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh).
 
 ### STOMP (ActiveMQ, RabbitMQ, HornetQ e OpenMQ)
 
@@ -615,7 +615,7 @@ crackpkcs12 -d /usr/share/wordlists/rockyou.txt ./cert.pfx
 
 **Exemplos de hash:** [https://openwall.info/wiki/john/sample-hashes](https://openwall.info/wiki/john/sample-hashes)
 
-### Identificador de hash
+### Hash-identifier
 ```bash
 hash-identifier
 > <HASH>
@@ -633,7 +633,7 @@ hash-identifier
 ```bash
 kwp64.exe basechars\custom.base keymaps\uk.keymap routes\2-to-10-max-3-direction-changes.route -o D:\Tools\keywalk.txt
 ```
-### Mutação do John
+### John mutation
 
 Leia _**/etc/john/john.conf**_ e configure-o
 ```bash
@@ -696,7 +696,7 @@ hashcat.exe -a 3 -m 1000 C:\Temp\ntlm.txt -1 ?d?s ?u?l?l?l?l?l?l?l?1
 ## Use it to crack the password
 hashcat.exe -a 3 -m 1000 C:\Temp\ntlm.txt .\masks.hcmask
 ```
-- Wordlist + Máscara (`-a 6`) / Máscara + Wordlist (`-a 7`) ataque
+- Wordlist + Mask (`-a 6`) / Mask + Wordlist (`-a 7`) ataque
 ```bash
 # Mask numbers will be appended to each word in the wordlist
 hashcat.exe -a 6 -m 1000 C:\Temp\ntlm.txt \wordlist.txt ?d?d?d?d
