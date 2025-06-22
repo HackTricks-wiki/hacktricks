@@ -4,7 +4,7 @@
 
 ## Identifiants par défaut
 
-**Recherchez sur google** les identifiants par défaut de la technologie utilisée, ou **essayez ces liens** :
+**Recherchez sur Google** les identifiants par défaut de la technologie utilisée, ou **essayez ces liens** :
 
 - [**https://github.com/ihebski/DefaultCreds-cheat-sheet**](https://github.com/ihebski/DefaultCreds-cheat-sheet)
 - [**http://www.phenoelit.org/dpl/dpl.html**](http://www.phenoelit.org/dpl/dpl.html)
@@ -105,7 +105,7 @@ msf> run
 ```bash
 nmap --script ajp-brute -p 8009 <IP>
 ```
-## AMQP (ActiveMQ, RabbitMQ, Qpid, JORAM et Solace)
+### AMQP (ActiveMQ, RabbitMQ, Qpid, JORAM et Solace)
 ```bash
 legba amqp --target localhost:5672 --username admin --password data/passwords.txt [--amql-ssl]
 ```
@@ -529,7 +529,7 @@ python crackjwt.py eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJkYXRhIjoie1widXNlcm5h
 python jwt2john.py eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJkYXRhIjoie1widXNlcm5hbWVcIjpcImFkbWluXCIsXCJyb2xlXCI6XCJhZG1pblwifSJ9.8R-KVuXe66y_DXVOVgrEqZEoadjBnpZMNbLGhM8YdAc > jwt.john
 john jwt.john #It does not work with Kali-John
 ```
-### Cracking NTLM
+### Crack NTLM
 ```bash
 Format:USUARIO:ID:HASH_LM:HASH_NT:::
 john --wordlist=/usr/share/wordlists/rockyou.txt --format=NT file_NTLM.hashes
@@ -629,7 +629,7 @@ hash-identifier
 
 ### **Outils de génération de listes de mots**
 
-- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** Générateur avancé de parcours de clavier avec des caractères de base configurables, une carte des touches et des itinéraires.
+- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** Générateur avancé de parcours clavier avec des caractères de base configurables, une carte des touches et des itinéraires.
 ```bash
 kwp64.exe basechars\custom.base keymaps\uk.keymap routes\2-to-10-max-3-direction-changes.route -o D:\Tools\keywalk.txt
 ```
@@ -650,7 +650,7 @@ john --wordlist=words.txt --rules=all --stdout > w_mutated.txt #Apply all rules
 ```
 hashcat.exe -a 0 -m 1000 C:\Temp\ntlm.txt .\rockyou.txt -r rules\best64.rule
 ```
-- **Attaque par combinaison de listes de mots**
+- **Attaque par combinatoire de listes de mots**
 
 Il est possible de **combiner 2 listes de mots en 1** avec hashcat.\
 Si la liste 1 contenait le mot **"hello"** et la seconde contenait 2 lignes avec les mots **"world"** et **"earth"**. Les mots `helloworld` et `helloearth` seront générés.
@@ -720,7 +720,7 @@ Craquer les hachages Windows
 3000 | LM                                               | Operating-Systems
 1000 | NTLM                                             | Operating-Systems
 ```
-Craquer des hachages d'application courants
+Craquer les hachages d'application courants
 ```
 900 | MD4                                              | Raw Hash
 0 | MD5                                              | Raw Hash
