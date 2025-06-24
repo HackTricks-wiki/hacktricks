@@ -180,7 +180,7 @@ https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons
 
 ### [CyberHelmets](https://cyberhelmets.com/courses/?ref=hacktricks)
 
-<figure><img src="images/cyberhelmets-logo.svg" alt="cyberhelmets logo"><figcaption></figcaption></figure>
+<figure><img src="images/cyberhelmets-logo.png" alt="cyberhelmets logo"><figcaption></figcaption></figure>
 
 
 **Built for the field. Built around you.**\
