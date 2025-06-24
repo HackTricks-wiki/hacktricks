@@ -89,7 +89,7 @@ Finished in 0.920s.
 
 ## Services
 
-सेवा नाम के अनुसार वर्णानुक्रम में व्यवस्थित। 
+सेवा नाम के अनुसार वर्णानुक्रम में व्यवस्थित।
 
 ### AFP
 ```bash
@@ -109,7 +109,7 @@ nmap --script ajp-brute -p 8009 <IP>
 ```bash
 legba amqp --target localhost:5672 --username admin --password data/passwords.txt [--amql-ssl]
 ```
-### कैसेंड्रा
+### कैसंड्रा
 ```bash
 nmap --script cassandra-brute -p 9160 <IP>
 # legba ScyllaDB / Apache Casandra
@@ -120,7 +120,7 @@ legba scylla --username cassandra --password wordlists/passwords.txt --target lo
 msf> use auxiliary/scanner/couchdb/couchdb_login
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst localhost -s 5984 http-get /
 ```
-### डॉकर रजिस्ट्री
+### Docker Registry
 ```
 hydra -L /usr/share/brutex/wordlists/simple-users.txt  -P /usr/share/brutex/wordlists/password.lst 10.10.10.10 -s 5000 https-get /v2/
 ```
@@ -156,7 +156,7 @@ legba http.ntlm2 --domain example.org --workstation client --username admin --pa
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst domain.htb  http-post-form "/path/index.php:name=^USER^&password=^PASS^&enter=Sign+in:Login name or password is incorrect" -V
 # Use https-post-form mode for https
 ```
-http**s** के लिए आपको "http-post-form" से "**https-post-form" में बदलना होगा**
+http**s** के लिए आपको "http-post-form" से "**https-post-form" में बदलना होगा
 
 ### **HTTP - CMS --** (W)ordpress, (J)oomla या (D)rupal या (M)oodle
 ```bash
@@ -478,9 +478,9 @@ john zip.john
 hashcat.exe -m 13600 -a 0 .\hashzip.txt .\wordlists\rockyou.txt
 .\hashcat.exe -m 13600 -i -a 0 .\hashzip.txt #Incremental attack
 ```
-#### ज्ञात प्लेनटेक्स्ट ज़िप हमला
+#### ज्ञात स्पष्ट पाठ ज़िप हमला
 
-आपको **एन्क्रिप्टेड ज़िप के अंदर** एक फ़ाइल का **प्लेनटेक्स्ट** (या प्लेनटेक्स्ट का एक भाग) जानना आवश्यक है। आप एन्क्रिप्टेड ज़िप के अंदर **फ़ाइलों के नाम और फ़ाइलों के आकार** की जांच कर सकते हैं: **`7z l encrypted.zip`**\
+आपको **संकीर्ण ज़िप के अंदर** एक फ़ाइल का **स्पष्ट पाठ** (या स्पष्ट पाठ का एक भाग) जानना आवश्यक है। आप **संकीर्ण ज़िप के अंदर शामिल फ़ाइलों के फ़ाइल नाम और आकार** की जांच कर सकते हैं: **`7z l encrypted.zip`**\
 [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0) को रिलीज़ पृष्ठ से डाउनलोड करें।
 ```bash
 # You need to create a zip file containing only the file that is inside the encrypted zip
@@ -588,14 +588,14 @@ john --wordlist=/usr/share/wordlists/rockyou.txt ./hash
 
 ### DPAPI मास्टर कुंजी
 
-उपयोग करें [https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py) और फिर john
+Use [https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py) and then john
 
 ### ओपन ऑफिस पासवर्ड से सुरक्षित कॉलम
 
 यदि आपके पास एक xlsx फ़ाइल है जिसमें एक कॉलम पासवर्ड द्वारा सुरक्षित है, तो आप इसे अनलॉक कर सकते हैं:
 
 - **इसे गूगल ड्राइव पर अपलोड करें** और पासवर्ड स्वचालित रूप से हटा दिया जाएगा
-- **हाथ से** इसे **हटाने के लिए**:
+- **मैन्युअल रूप से** इसे **हटाने के लिए**:
 ```bash
 unzip file.xlsx
 grep -R "sheetProtection" ./*
@@ -646,7 +646,7 @@ john --wordlist=words.txt --rules=all --stdout > w_mutated.txt #Apply all rules
 
 - **शब्दसूची हमला** (`-a 0`) नियमों के साथ
 
-**Hashcat** पहले से ही **नियमों वाला एक फ़ोल्डर** के साथ आता है लेकिन आप [**यहाँ अन्य दिलचस्प नियम पा सकते हैं**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules).
+**Hashcat** पहले से ही एक **नियमों वाला फ़ोल्डर** के साथ आता है लेकिन आप [**यहाँ अन्य दिलचस्प नियम पा सकते हैं**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules).
 ```
 hashcat.exe -a 0 -m 1000 C:\Temp\ntlm.txt .\rockyou.txt -r rules\best64.rule
 ```
