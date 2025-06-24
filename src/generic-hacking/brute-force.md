@@ -139,7 +139,7 @@ legba ftp --username admin --password wordlists/passwords.txt --target localhost
 
 #### [**WFuzz**](../pentesting-web/web-tool-wfuzz.md)
 
-### HTTP Auth de Base
+### HTTP Authentification de Base
 ```bash
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst sizzle.htb.local http-get /certsrv/
 # Use https-get mode for https
@@ -515,7 +515,7 @@ qpdf --password=<PASSWORD> --decrypt encrypted.pdf plaintext.pdf
 ```
 ### PDF Owner Password
 
-Pour cracker un mot de passe propriétaire PDF, consultez ceci : [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
+Pour cracker un mot de passe propriétaire PDF, vérifiez ceci : [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
 
 ### JWT
 ```bash
@@ -529,7 +529,7 @@ python crackjwt.py eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJkYXRhIjoie1widXNlcm5h
 python jwt2john.py eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJkYXRhIjoie1widXNlcm5hbWVcIjpcImFkbWluXCIsXCJyb2xlXCI6XCJhZG1pblwifSJ9.8R-KVuXe66y_DXVOVgrEqZEoadjBnpZMNbLGhM8YdAc > jwt.john
 john jwt.john #It does not work with Kali-John
 ```
-### Crack NTLM
+### Cracking NTLM
 ```bash
 Format:USUARIO:ID:HASH_LM:HASH_NT:::
 john --wordlist=/usr/share/wordlists/rockyou.txt --format=NT file_NTLM.hashes
@@ -590,7 +590,7 @@ john --wordlist=/usr/share/wordlists/rockyou.txt ./hash
 
 Utilisez [https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py) puis john
 
-### Colonne Protégée par Mot de Passe Open Office
+### Colonne Protégée par Mot de Passe dans Open Office
 
 Si vous avez un fichier xlsx avec une colonne protégée par un mot de passe, vous pouvez la déprotéger :
 
@@ -629,7 +629,7 @@ hash-identifier
 
 ### **Outils de génération de listes de mots**
 
-- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** Générateur avancé de parcours clavier avec des caractères de base configurables, une carte des touches et des itinéraires.
+- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** Générateur avancé de parcours de clavier avec des caractères de base configurables, une carte des touches et des itinéraires.
 ```bash
 kwp64.exe basechars\custom.base keymaps\uk.keymap routes\2-to-10-max-3-direction-changes.route -o D:\Tools\keywalk.txt
 ```
@@ -704,7 +704,7 @@ hashcat.exe -a 6 -m 1000 C:\Temp\ntlm.txt \wordlist.txt ?d?d?d?d
 # Mask numbers will be prepended to each word in the wordlist
 hashcat.exe -a 7 -m 1000 C:\Temp\ntlm.txt ?d?d?d?d \wordlist.txt
 ```
-#### Modes Hashcat
+#### Modes de Hashcat
 ```bash
 hashcat --example-hashes | grep -B1 -A2 "NTLM"
 ```
