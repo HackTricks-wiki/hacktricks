@@ -4,7 +4,7 @@
 
 ## Varsayılan Kimlik Bilgileri
 
-**Kullanılan teknolojinin** varsayılan kimlik bilgilerini google'da arayın veya **bu bağlantıları deneyin**:
+**Kullanılan teknolojinin** varsayılan kimlik bilgilerini bulmak için **Google'da arama yapın** veya **bu bağlantıları deneyin**:
 
 - [**https://github.com/ihebski/DefaultCreds-cheat-sheet**](https://github.com/ihebski/DefaultCreds-cheat-sheet)
 - [**http://www.phenoelit.org/dpl/dpl.html**](http://www.phenoelit.org/dpl/dpl.html)
@@ -402,7 +402,7 @@ legba ssh --username admin --password '@/some/path/*' --ssh-auth-mode key --targ
 ```
 #### Zayıf SSH anahtarları / Debian tahmin edilebilir PRNG
 
-Bazı sistemler, kriptografik materyal oluşturmak için kullanılan rastgele tohumda bilinen hatalara sahiptir. Bu, [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute) gibi araçlarla zorlanabilen dramatik şekilde azaltılmış bir anahtar alanına yol açabilir. Ayrıca, [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh) gibi önceden oluşturulmuş zayıf anahtar setleri de mevcuttur.
+Bazı sistemler, kriptografik materyal oluşturmak için kullanılan rastgele tohumda bilinen hatalara sahiptir. Bu, [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute) gibi araçlarla zorlanabilen dramatik şekilde azaltılmış bir anahtar alanına yol açabilir. Ayrıca, [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh) gibi zayıf anahtarların önceden oluşturulmuş setleri de mevcuttur.
 
 ### STOMP (ActiveMQ, RabbitMQ, HornetQ ve OpenMQ)
 
@@ -549,7 +549,7 @@ john --format=krb5tgs --wordlist=passwords_kerb.txt hashes.kerberoast
 hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
 ./tgsrepcrack.py wordlist.txt 1-MSSQLSvc~sql01.medin.local~1433-MYDOMAIN.LOCAL.kirbi
 ```
-### Luks resmi
+### Luks görüntüsü
 
 #### Yöntem 1
 
@@ -590,7 +590,7 @@ john --wordlist=/usr/share/wordlists/rockyou.txt ./hash
 
 [https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py) kullanın ve ardından john
 
-### Open Office Pwd Protected Column
+### Open Office Pwd Korunan Sütun
 
 Eğer bir şifre ile korunan bir sütun içeren bir xlsx dosyanız varsa, onu korumasını kaldırabilirsiniz:
 
@@ -620,14 +620,14 @@ crackpkcs12 -d /usr/share/wordlists/rockyou.txt ./cert.pfx
 hash-identifier
 > <HASH>
 ```
-### Kelime Listeleri
+### Wordlists
 
 - **Rockyou**
 - [**Probable-Wordlists**](https://github.com/berzerk0/Probable-Wordlists)
 - [**Kaonashi**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/wordlists)
-- [**Seclists - Parolalar**](https://github.com/danielmiessler/SecLists/tree/master/Passwords)
+- [**Seclists - Passwords**](https://github.com/danielmiessler/SecLists/tree/master/Passwords)
 
-### **Kelime Listesi Üretim Araçları**
+### **Wordlist Üretim Araçları**
 
 - [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** Konfigüre edilebilir temel karakterler, tuş haritası ve rotalar ile gelişmiş klavye yürüyüşü üreteci.
 ```bash
@@ -635,7 +635,7 @@ kwp64.exe basechars\custom.base keymaps\uk.keymap routes\2-to-10-max-3-direction
 ```
 ### John mutation
 
-_**/etc/john/john.conf**_ dosyasını okuyun ve yapılandırın
+_**/etc/john/john.conf**_ dosyasını okuyun ve yapılandırın.
 ```bash
 john --wordlist=words.txt --rules --stdout > w_mutated.txt
 john --wordlist=words.txt --rules=all --stdout > w_mutated.txt #Apply all rules
@@ -664,7 +664,7 @@ hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt
 ## hello-earth!
 hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt -j $- -k $!
 ```
-- **Maske saldırısı** (`-a 3`)
+- **Mask attack** (`-a 3`)
 ```bash
 # Mask attack with simple mask
 hashcat.exe -a 3 -m 1000 C:\Temp\ntlm.txt ?u?l?l?l?l?l?l?l?d
