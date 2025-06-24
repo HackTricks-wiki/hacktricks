@@ -34,7 +34,7 @@ crunch 4 4 -f /usr/share/crunch/charset.lst mixalpha # Only length 4 using chars
 ^ Special characters including spac
 crunch 6 8 -t ,@@^^%%
 ```
-### 网站基础的字典列表
+### 基于网站的字典列表
 ```bash
 # Cewl gets words from the victims page
 cewl example.com -m 5 -w words.txt
@@ -53,7 +53,7 @@ python3 cupp.py -h
 ```
 ### [Wister](https://github.com/cycurity/wister)
 
-一个单词列表生成工具，允许您提供一组单词，使您能够从给定的单词中制作多个变体，创建一个独特且理想的单词列表，以便针对特定目标使用。
+一个词表生成工具，允许您提供一组单词，使您能够从给定的单词中制作多个变体，创建一个独特且理想的词表，以便针对特定目标使用。
 ```bash
 python3 wister.py -w jane doe 2022 summer madrid 1998 -c 1 2 3 4 5 -o wordlist.lst
 
@@ -282,7 +282,7 @@ legba oracle --target localhost:1521 --oracle-database SYSTEM --username admin -
 ```bash
 pip3 install cx_Oracle --upgrade
 ```
-[Offline OracleSQL hash bruteforce](https://github.com/carlospolop/hacktricks/blob/master/network-services-pentesting/1521-1522-1529-pentesting-oracle-listener/remote-stealth-pass-brute-force.md#outer-perimeter-remote-stealth-pass-brute-force) (**版本 11.1.0.6, 11.1.0.7, 11.2.0.1, 11.2.0.2,** 和 **11.2.0.3**):
+[离线 OracleSQL 哈希暴力破解](https://github.com/carlospolop/hacktricks/blob/master/network-services-pentesting/1521-1522-1529-pentesting-oracle-listener/remote-stealth-pass-brute-force.md#outer-perimeter-remote-stealth-pass-brute-force) (**版本 11.1.0.6, 11.1.0.7, 11.2.0.1, 11.2.0.2,** 和 **11.2.0.3**):
 ```bash
 nmap -p1521 --script oracle-brute-stealth --script-args oracle-brute-stealth.sid=DB11g -n 10.11.21.30
 ```
@@ -402,7 +402,7 @@ legba ssh --username admin --password '@/some/path/*' --ssh-auth-mode key --targ
 ```
 #### 弱 SSH 密钥 / Debian 可预测 PRNG
 
-一些系统在生成加密材料时使用的随机种子存在已知缺陷。这可能导致密钥空间显著减少，可以使用工具如 [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute) 进行暴力破解。也可以找到预生成的弱密钥集，如 [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh)。
+某些系统在生成加密材料时使用的随机种子存在已知缺陷。这可能导致密钥空间显著减少，可以使用工具如 [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute) 进行暴力破解。也可以找到预生成的弱密钥集，如 [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh)。
 
 ### STOMP (ActiveMQ, RabbitMQ, HornetQ 和 OpenMQ)
 
@@ -449,8 +449,8 @@ crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 ### 在线破解数据库
 
 - [~~http://hashtoolkit.com/reverse-hash?~~](http://hashtoolkit.com/reverse-hash?) (MD5 & SHA1)
-- [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 带/不带 ESS/SSP 和任何挑战值)
-- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (哈希, WPA2 捕获, 和 MSOffice, ZIP, PDF... 的档案)
+- [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 有/无 ESS/SSP 和任何挑战值)
+- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (哈希，WPA2 捕获，以及 MSOffice、ZIP、PDF 等档案...)
 - [https://crackstation.net/](https://crackstation.net) (哈希)
 - [https://md5decrypt.net/](https://md5decrypt.net) (MD5)
 - [https://gpuhash.me/](https://gpuhash.me) (哈希和文件哈希)
@@ -549,7 +549,7 @@ john --format=krb5tgs --wordlist=passwords_kerb.txt hashes.kerberoast
 hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
 ./tgsrepcrack.py wordlist.txt 1-MSSQLSvc~sql01.medin.local~1433-MYDOMAIN.LOCAL.kirbi
 ```
-### Luks图像
+### Lucks 图像
 
 #### 方法 1
 
@@ -590,9 +590,9 @@ john --wordlist=/usr/share/wordlists/rockyou.txt ./hash
 
 使用 [https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py) 然后使用 john
 
-### Open Office 密码保护列
+### Open Office 密码保护的列
 
-如果你有一个带有密码保护列的 xlsx 文件，你可以解除保护：
+如果你有一个带有密码保护的列的 xlsx 文件，你可以解除保护：
 
 - **上传到 Google Drive**，密码将自动移除
 - 要 **手动** **移除**：
