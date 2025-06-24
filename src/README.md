@@ -17,7 +17,7 @@ export LANG="master" # Leave master for english
 # "el" for Greek
 # "es" for Spanish
 # "fr" for French
-# "hi" for Hindi
+# "hi" for HindiP
 # "it" for Italian
 # "ja" for Japanese
 # "ko" for Korean
@@ -174,6 +174,28 @@ People search, AI search, organization search, API (OpenAPI) access, theHarveste
 
 {{#ref}}
 https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons
+{{#endref}}
+
+---
+
+### [CyberHelmets](https://cyberhelmets.com/courses/?ref=hacktricks)
+
+<figure><img src="images/cyberhelmets-logo.svg" alt="cyberhelmets logo"><figcaption></figcaption></figure>
+
+
+**Built for the field. Built around you.**\
+[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) develops and delivers effective cybersecurity training built and led by
+industry experts. Their programs go beyond theory to equip teams with deep
+understanding and actionable skills, using custom environments that reflect real-world
+threats. For custom training inquiries, reach out to us [**here**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks).
+
+**What sets their training apart:**
+* Custom-built content and labs
+* Backed by top-tier tools and platforms
+* Designed and taught by practitioners
+
+{{#ref}}
+https://cyberhelmets.com/courses/?ref=hacktricks
 {{#endref}}
 
 ---
