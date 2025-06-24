@@ -406,7 +406,7 @@ Niektóre systemy mają znane wady w losowym ziarnie używanym do generowania ma
 
 ### STOMP (ActiveMQ, RabbitMQ, HornetQ i OpenMQ)
 
-Protokół tekstowy STOMP jest powszechnie używanym protokołem komunikacyjnym, który **umożliwia bezproblemową komunikację i interakcję z popularnymi usługami kolejkowania wiadomości** takimi jak RabbitMQ, ActiveMQ, HornetQ i OpenMQ. Oferuje ustandaryzowane i efektywne podejście do wymiany wiadomości oraz wykonywania różnych operacji związanych z wiadomościami.
+Protokół tekstowy STOMP jest powszechnie używanym protokołem komunikacyjnym, który **umożliwia bezproblemową komunikację i interakcję z popularnymi usługami kolejkowania wiadomości** takimi jak RabbitMQ, ActiveMQ, HornetQ i OpenMQ. Oferuje ustandaryzowane i efektywne podejście do wymiany wiadomości i wykonywania różnych operacji związanych z wiadomościami.
 ```bash
 legba stomp --target localhost:61613 --username admin --password data/passwords.txt
 ```
@@ -513,7 +513,7 @@ pdfcrack encrypted.pdf -w /usr/share/wordlists/rockyou.txt
 sudo apt-get install qpdf
 qpdf --password=<PASSWORD> --decrypt encrypted.pdf plaintext.pdf
 ```
-### PDF Owner Password
+### Hasło właściciela PDF
 
 Aby złamać hasło właściciela PDF, sprawdź to: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
 
@@ -635,7 +635,7 @@ kwp64.exe basechars\custom.base keymaps\uk.keymap routes\2-to-10-max-3-direction
 ```
 ### John mutation
 
-Przeczytaj _**/etc/john/john.conf**_ i skonfiguruj to
+Przeczytaj _**/etc/john/john.conf**_ i skonfiguruj go
 ```bash
 john --wordlist=words.txt --rules --stdout > w_mutated.txt
 john --wordlist=words.txt --rules=all --stdout > w_mutated.txt #Apply all rules
@@ -653,7 +653,7 @@ hashcat.exe -a 0 -m 1000 C:\Temp\ntlm.txt .\rockyou.txt -r rules\best64.rule
 - **Atak kombinatora listy słów**
 
 Możliwe jest **połączenie 2 list słów w 1** za pomocą hashcat.\
-Jeśli lista 1 zawierała słowo **"hello"**, a druga zawierała 2 linie ze słowami **"world"** i **"earth"**. Wygenerowane zostaną słowa `helloworld` i `helloearth`.
+Jeśli lista 1 zawierała słowo **"hello"**, a druga zawierała 2 linie ze słowami **"world"** i **"earth"**, to zostaną wygenerowane słowa `helloworld` i `helloearth`.
 ```bash
 # This will combine 2 wordlists
 hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt
@@ -708,14 +708,14 @@ hashcat.exe -a 7 -m 1000 C:\Temp\ntlm.txt ?d?d?d?d \wordlist.txt
 ```bash
 hashcat --example-hashes | grep -B1 -A2 "NTLM"
 ```
-Łamanie hashy Linuxa - plik /etc/shadow
+Cracking Linux Hashes - plik /etc/shadow
 ```
 500 | md5crypt $1$, MD5(Unix)                          | Operating-Systems
 3200 | bcrypt $2*$, Blowfish(Unix)                      | Operating-Systems
 7400 | sha256crypt $5$, SHA256(Unix)                    | Operating-Systems
 1800 | sha512crypt $6$, SHA512(Unix)                    | Operating-Systems
 ```
-Łamanie hashy Windows
+Łamanie haszy Windows
 ```
 3000 | LM                                               | Operating-Systems
 1000 | NTLM                                             | Operating-Systems
