@@ -53,7 +53,7 @@ python3 cupp.py -h
 ```
 ### [Wister](https://github.com/cycurity/wister)
 
-Alat za generisanje rečnika, koji vam omogućava da obezbedite skup reči, dajući vam mogućnost da kreirate više varijacija od datih reči, stvarajući jedinstven i idealan rečnik za korišćenje u vezi sa specifičnim ciljem.
+Alat za generisanje rečnika, koji vam omogućava da obezbedite skup reči, dajući vam mogućnost da kreirate više varijacija iz datih reči, stvarajući jedinstven i idealan rečnik za korišćenje u vezi sa specifičnim ciljem.
 ```bash
 python3 wister.py -w jane doe 2022 summer madrid 1998 -c 1 2 3 4 5 -o wordlist.lst
 
@@ -135,11 +135,11 @@ ncrack -p 21 --user root -P passwords.txt <IP> [-T 5]
 medusa -u root -P 500-worst-passwords.txt -h <IP> -M ftp
 legba ftp --username admin --password wordlists/passwords.txt --target localhost:21
 ```
-### HTTP Generički Brute
+### HTTP Generic Brute
 
 #### [**WFuzz**](../pentesting-web/web-tool-wfuzz.md)
 
-### HTTP Osnovna Autentifikacija
+### HTTP Basic Auth
 ```bash
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst sizzle.htb.local http-get /certsrv/
 # Use https-get mode for https
@@ -549,9 +549,9 @@ john --format=krb5tgs --wordlist=passwords_kerb.txt hashes.kerberoast
 hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
 ./tgsrepcrack.py wordlist.txt 1-MSSQLSvc~sql01.medin.local~1433-MYDOMAIN.LOCAL.kirbi
 ```
-### Lucks slika
+### Luks slika
 
-#### Metod 1
+#### Metoda 1
 
 Instalirajte: [https://github.com/glv2/bruteforce-luks](https://github.com/glv2/bruteforce-luks)
 ```bash
@@ -615,7 +615,7 @@ crackpkcs12 -d /usr/share/wordlists/rockyou.txt ./cert.pfx
 
 **Primeri hešova:** [https://openwall.info/wiki/john/sample-hashes](https://openwall.info/wiki/john/sample-hashes)
 
-### Hash-identifikator
+### Hash-identifier
 ```bash
 hash-identifier
 > <HASH>
@@ -633,7 +633,7 @@ hash-identifier
 ```bash
 kwp64.exe basechars\custom.base keymaps\uk.keymap routes\2-to-10-max-3-direction-changes.route -o D:\Tools\keywalk.txt
 ```
-### John mutacija
+### John mutation
 
 Pročitajte _**/etc/john/john.conf**_ i konfigurišite ga
 ```bash
@@ -652,7 +652,7 @@ hashcat.exe -a 0 -m 1000 C:\Temp\ntlm.txt .\rockyou.txt -r rules\best64.rule
 ```
 - **Wordlist combinator** napad
 
-Moguće je **kombinovati 2 liste reči u 1** sa hashcat-om.\
+Moguće je **kombinovati 2 rečnika u 1** sa hashcat-om.\
 Ako je lista 1 sadržala reč **"hello"** a druga je sadržala 2 reda sa rečima **"world"** i **"earth"**. Reči `helloworld` i `helloearth` će biti generisane.
 ```bash
 # This will combine 2 wordlists
@@ -715,7 +715,7 @@ Razbijanje Linux hešova - /etc/shadow datoteka
 7400 | sha256crypt $5$, SHA256(Unix)                    | Operating-Systems
 1800 | sha512crypt $6$, SHA512(Unix)                    | Operating-Systems
 ```
-Krekovanje Windows hešova
+Razbijanje Windows hešova
 ```
 3000 | LM                                               | Operating-Systems
 1000 | NTLM                                             | Operating-Systems
