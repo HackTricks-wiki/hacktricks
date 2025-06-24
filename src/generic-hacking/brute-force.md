@@ -21,7 +21,7 @@
 
 ## **Erstellen Sie Ihre eigenen Wörterbücher**
 
-Sammeln Sie so viele Informationen über das Ziel, wie Sie können, und erstellen Sie ein benutzerdefiniertes Wörterbuch. Tools, die helfen können:
+Sammeln Sie so viele Informationen über das Ziel, wie Sie können, und erstellen Sie ein benutzerdefiniertes Wörterbuch. Werkzeuge, die helfen können:
 
 ### Crunch
 ```bash
@@ -309,7 +309,7 @@ legba pgsql --username admin --password wordlists/passwords.txt --target localho
 ```
 ### PPTP
 
-Sie können das `.deb`-Paket zum Installieren von [https://http.kali.org/pool/main/t/thc-pptp-bruter/](https://http.kali.org/pool/main/t/thc-pptp-bruter/) herunterladen.
+Sie können das `.deb`-Paket von [https://http.kali.org/pool/main/t/thc-pptp-bruter/](https://http.kali.org/pool/main/t/thc-pptp-bruter/) herunterladen, um es zu installieren.
 ```bash
 sudo dpkg -i thc-pptp-bruter*.deb #Install the package
 cat rockyou.txt | thc-pptp-bruter –u <Username> <IP>
@@ -402,7 +402,7 @@ legba ssh --username admin --password '@/some/path/*' --ssh-auth-mode key --targ
 ```
 #### Schwache SSH-Schlüssel / Vorhersehbarer PRNG in Debian
 
-Einige Systeme weisen bekannte Mängel im Zufallsseed auf, der zur Erzeugung kryptografischer Materialien verwendet wird. Dies kann zu einem dramatisch reduzierten Schlüsselraum führen, der mit Tools wie [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute) bruteforced werden kann. Vorgefertigte Sets schwacher Schlüssel sind ebenfalls verfügbar, wie [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh).
+Einige Systeme weisen bekannte Mängel im Zufallsseed auf, der zur Generierung kryptografischer Materialien verwendet wird. Dies kann zu einem dramatisch reduzierten Schlüsselraum führen, der mit Tools wie [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute) bruteforced werden kann. Vorgefertigte Sets schwacher Schlüssel sind ebenfalls verfügbar, wie [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh).
 
 ### STOMP (ActiveMQ, RabbitMQ, HornetQ und OpenMQ)
 
@@ -592,7 +592,7 @@ Verwenden Sie [https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2
 
 ### Open Office Pwd Geschützte Spalte
 
-Wenn Sie eine xlsx-Datei mit einer durch ein Passwort geschützten Spalte haben, können Sie sie entsperren:
+Wenn Sie eine xlsx-Datei mit einer durch ein Passwort geschützten Spalte haben, können Sie sie aufheben:
 
 - **Laden Sie sie in Google Drive hoch** und das Passwort wird automatisch entfernt
 - Um es **manuell** zu **entfernen**:
@@ -652,7 +652,7 @@ hashcat.exe -a 0 -m 1000 C:\Temp\ntlm.txt .\rockyou.txt -r rules\best64.rule
 ```
 - **Wordlist-Kombinator**-Angriff
 
-Es ist möglich, **2 Wortlisten zu 1 zu kombinieren** mit hashcat.\
+Es ist möglich, **2 Wortlisten zu 1** mit hashcat zu kombinieren.\
 Wenn Liste 1 das Wort **"hello"** enthielt und die zweite 2 Zeilen mit den Wörtern **"world"** und **"earth"** enthielt. Die Wörter `helloworld` und `helloearth` werden generiert.
 ```bash
 # This will combine 2 wordlists
@@ -715,7 +715,7 @@ Cracking von Linux-Hashes - /etc/shadow-Datei
 7400 | sha256crypt $5$, SHA256(Unix)                    | Operating-Systems
 1800 | sha512crypt $6$, SHA512(Unix)                    | Operating-Systems
 ```
-Knacken von Windows-Hashes
+Windows-Hashes knacken
 ```
 3000 | LM                                               | Operating-Systems
 1000 | NTLM                                             | Operating-Systems
