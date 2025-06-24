@@ -19,7 +19,7 @@
 - [**https://many-passwords.github.io/**](https://many-passwords.github.io)
 - [**https://theinfocentric.com/**](https://theinfocentric.com/)
 
-## **Unda Kamusi zako binafsi**
+## **Create your own Dictionaries**
 
 Pata taarifa nyingi kadri uwezavyo kuhusu lengo na tengeneza kamusi maalum. Zana ambazo zinaweza kusaidia:
 
@@ -47,13 +47,13 @@ cat /path/to/js-urls.txt | python3 getjswords.py
 ```
 ### [CUPP](https://github.com/Mebus/cupp)
 
-Zalisha nywila kulingana na maarifa yako kuhusu mwathirika (majina, tarehe...)
+Tengeneza nywila kulingana na maarifa yako kuhusu mwathirika (majina, tarehe...)
 ```
 python3 cupp.py -h
 ```
 ### [Wister](https://github.com/cycurity/wister)
 
-Zana ya kuunda orodha ya maneno, inayokuruhusu kutoa seti ya maneno, ikikupa uwezekano wa kuunda mabadiliko mengi kutoka kwa maneno yaliyotolewa, kuunda orodha ya maneno ya kipekee na bora kutumia kuhusu lengo maalum.
+Zana la kuunda orodha ya maneno, ambalo linakuwezesha kutoa seti ya maneno, likikupa uwezekano wa kuunda mabadiliko mengi kutoka kwa maneno yaliyotolewa, na kuunda orodha ya maneno ya kipekee na bora kutumia kuhusu lengo maalum.
 ```bash
 python3 wister.py -w jane doe 2022 summer madrid 1998 -c 1 2 3 4 5 -o wordlist.lst
 
@@ -402,11 +402,11 @@ legba ssh --username admin --password '@/some/path/*' --ssh-auth-mode key --targ
 ```
 #### Funguo dhaifu za SSH / PRNG inayoweza kutabirika ya Debian
 
-Baadhi ya mifumo yana kasoro zinazojulikana katika mbegu ya nasibu inayotumika kuunda vifaa vya kificho. Hii inaweza kusababisha kupungua kwa kiasi cha funguo ambacho kinaweza kubruteforced kwa kutumia zana kama [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute). Seti zilizotengenezwa mapema za funguo dhaifu pia zinapatikana kama [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh).
+Baadhi ya mifumo yana kasoro zinazojulikana katika mbegu za nasibu zinazotumika kuunda vifaa vya kificho. Hii inaweza kusababisha kupungua kwa kiasi cha funguo ambacho kinaweza kubruteforced kwa zana kama [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute). Seti zilizotangulia za funguo dhaifu pia zinapatikana kama [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh).
 
 ### STOMP (ActiveMQ, RabbitMQ, HornetQ na OpenMQ)
 
-Protokali ya maandiko ya STOMP ni protokali maarufu ya ujumbe ambayo **inaruhusu mawasiliano na mwingiliano usio na mshono na huduma maarufu za kupanga ujumbe** kama RabbitMQ, ActiveMQ, HornetQ, na OpenMQ. Inatoa njia iliyo sanifishwa na yenye ufanisi ya kubadilishana ujumbe na kufanya operesheni mbalimbali za ujumbe.
+Protokali ya maandiko ya STOMP ni protokali maarufu ya ujumbe ambayo **inaruhusu mawasiliano na mwingiliano bila mshono na huduma maarufu za kupanga ujumbe** kama RabbitMQ, ActiveMQ, HornetQ, na OpenMQ. Inatoa njia iliyo sanifishwa na yenye ufanisi ya kubadilishana ujumbe na kufanya operesheni mbalimbali za ujumbe.
 ```bash
 legba stomp --target localhost:61613 --username admin --password data/passwords.txt
 ```
@@ -449,7 +449,7 @@ crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 ### Online cracking databases
 
 - [~~http://hashtoolkit.com/reverse-hash?~~](http://hashtoolkit.com/reverse-hash?) (MD5 & SHA1)
-- [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 na/au bila ESS/SSP na thamani yoyote ya changamoto)
+- [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 na/au bila ESS/SSP na na thamani yoyote ya changamoto)
 - [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (Hashes, WPA2 captures, na archives MSOffice, ZIP, PDF...)
 - [https://crackstation.net/](https://crackstation.net) (Hashes)
 - [https://md5decrypt.net/](https://md5decrypt.net) (MD5)
@@ -460,7 +460,7 @@ crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 - [https://www.md5online.org/md5-decrypt.html](https://www.md5online.org/md5-decrypt.html) (MD5)
 - [http://reverse-hash-lookup.online-domain-tools.com/](http://reverse-hash-lookup.online-domain-tools.com)
 
-Angalia hii kabla ya kujaribu kulazimisha Hash. 
+Check this out before trying to brute force a Hash.
 
 ### ZIP
 ```bash
@@ -551,7 +551,7 @@ hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
 ```
 ### Picha ya Luks
 
-#### Njia 1
+#### Njia ya 1
 
 Sakinisha: [https://github.com/glv2/bruteforce-luks](https://github.com/glv2/bruteforce-luks)
 ```bash
@@ -577,7 +577,7 @@ Another Luks BF tutorial: [http://blog.dclabs.com.br/2020/03/bruteforcing-linux-
 <USERNAME>:$mysqlna$<CHALLENGE>*<RESPONSE>
 dbuser:$mysqlna$112233445566778899aabbccddeeff1122334455*73def07da6fba5dcc1b19c918dbd998e0d1f3f9d
 ```
-### PGP/GPG Funguo Binafsi
+### PGP/GPG Keyi ya Faragha
 ```bash
 gpg2john private_pgp.key #This will generate the hash and save it in a file
 john --wordlist=/usr/share/wordlists/rockyou.txt ./hash
@@ -594,8 +594,8 @@ Tumia [https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py]
 
 Ikiwa una faili ya xlsx yenye safu iliyo na nenosiri, unaweza kuondoa ulinzi wake:
 
-- **Pakua kwenye google drive** na nenosiri litafutwa kiotomatiki
-- Ili **kuondoa** **kwa mikono**:
+- **Pakia kwenye google drive** na nenosiri litafutwa kiotomatiki
+- Ili **kuondoa** kwa **mkono**:
 ```bash
 unzip file.xlsx
 grep -R "sheetProtection" ./*
@@ -635,7 +635,7 @@ kwp64.exe basechars\custom.base keymaps\uk.keymap routes\2-to-10-max-3-direction
 ```
 ### John mutation
 
-Soma _**/etc/john/john.conf**_ na uweke mipangilio yake
+Soma _**/etc/john/john.conf**_ na uipange
 ```bash
 john --wordlist=words.txt --rules --stdout > w_mutated.txt
 john --wordlist=words.txt --rules=all --stdout > w_mutated.txt #Apply all rules
@@ -708,7 +708,7 @@ hashcat.exe -a 7 -m 1000 C:\Temp\ntlm.txt ?d?d?d?d \wordlist.txt
 ```bash
 hashcat --example-hashes | grep -B1 -A2 "NTLM"
 ```
-Kuvunja Hashes za Linux - faili /etc/shadow
+Kuvunja Hashes za Linux - /etc/shadow file
 ```
 500 | md5crypt $1$, MD5(Unix)                          | Operating-Systems
 3200 | bcrypt $2*$, Blowfish(Unix)                      | Operating-Systems
