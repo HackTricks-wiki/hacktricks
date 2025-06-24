@@ -2,9 +2,9 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## デフォルトの認証情報
+## デフォルトの資格情報
 
-**使用されている技術のデフォルトの認証情報をGoogleで検索**するか、**これらのリンクを試してください**:
+**使用されている技術のデフォルトの資格情報をGoogleで検索**するか、**これらのリンクを試してください**：
 
 - [**https://github.com/ihebski/DefaultCreds-cheat-sheet**](https://github.com/ihebski/DefaultCreds-cheat-sheet)
 - [**http://www.phenoelit.org/dpl/dpl.html**](http://www.phenoelit.org/dpl/dpl.html)
@@ -21,7 +21,7 @@
 
 ## **独自の辞書を作成する**
 
-ターゲットに関する情報をできるだけ多く集めて、カスタム辞書を生成します。役立つツール:
+ターゲットに関する情報をできるだけ多く集めて、カスタム辞書を生成します。役立つツール：
 
 ### Crunch
 ```bash
@@ -120,7 +120,7 @@ legba scylla --username cassandra --password wordlists/passwords.txt --target lo
 msf> use auxiliary/scanner/couchdb/couchdb_login
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst localhost -s 5984 http-get /
 ```
-### Docker Registry
+### Docker レジストリ
 ```
 hydra -L /usr/share/brutex/wordlists/simple-users.txt  -P /usr/share/brutex/wordlists/password.lst 10.10.10.10 -s 5000 https-get /v2/
 ```
@@ -151,7 +151,7 @@ legba http.basic --username admin --password wordlists/passwords.txt --target ht
 legba http.ntlm1 --domain example.org --workstation client --username admin --password wordlists/passwords.txt --target https://localhost:8888/
 legba http.ntlm2 --domain example.org --workstation client --username admin --password wordlists/passwords.txt --target https://localhost:8888/
 ```
-### HTTP - Post Form
+### HTTP - ポストフォーム
 ```bash
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst domain.htb  http-post-form "/path/index.php:name=^USER^&password=^PASS^&enter=Sign+in:Login name or password is incorrect" -V
 # Use https-post-form mode for https
@@ -278,7 +278,7 @@ nmap --script oracle-brute -p 1521 --script-args oracle-brute.sid=<SID> <IP>
 
 legba oracle --target localhost:1521 --oracle-database SYSTEM --username admin --password data/passwords.txt
 ```
-**oracle_login**を**patator**で使用するには、**install**する必要があります：
+**oracle_login**を**patator**で使用するには、**install**する必要があります:
 ```bash
 pip3 install cx_Oracle --upgrade
 ```
@@ -406,7 +406,7 @@ legba ssh --username admin --password '@/some/path/*' --ssh-auth-mode key --targ
 
 ### STOMP (ActiveMQ, RabbitMQ, HornetQ および OpenMQ)
 
-STOMPテキストプロトコルは、RabbitMQ、ActiveMQ、HornetQ、OpenMQなどの人気のあるメッセージキューサービスとの**シームレスな通信と相互作用を可能にする**広く使用されているメッセージングプロトコルです。メッセージを交換し、さまざまなメッセージング操作を実行するための標準化された効率的なアプローチを提供します。
+STOMPテキストプロトコルは、**RabbitMQ、ActiveMQ、HornetQ、およびOpenMQなどの人気のあるメッセージキューサービスとのシームレスな通信と相互作用を可能にする**広く使用されているメッセージングプロトコルです。メッセージを交換し、さまざまなメッセージング操作を実行するための標準化された効率的なアプローチを提供します。
 ```bash
 legba stomp --target localhost:61613 --username admin --password data/passwords.txt
 ```
@@ -560,7 +560,7 @@ cryptsetup luksOpen backup.img mylucksopen
 ls /dev/mapper/ #You should find here the image mylucksopen
 mount /dev/mapper/mylucksopen /mnt
 ```
-#### 方法 2
+#### 方法2
 ```bash
 cryptsetup luksDump backup.img #Check that the payload offset is set to 4096
 dd if=backup.img of=luckshash bs=512 count=4097 #Payload offset +1
@@ -620,22 +620,22 @@ crackpkcs12 -d /usr/share/wordlists/rockyou.txt ./cert.pfx
 hash-identifier
 > <HASH>
 ```
-### ワードリスト
+### Wordlists
 
 - **Rockyou**
 - [**Probable-Wordlists**](https://github.com/berzerk0/Probable-Wordlists)
 - [**Kaonashi**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/wordlists)
 - [**Seclists - Passwords**](https://github.com/danielmiessler/SecLists/tree/master/Passwords)
 
-### **ワードリスト生成ツール**
+### **Wordlist Generation Tools**
 
-- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** 設定可能なベース文字、キーマップ、ルートを持つ高度なキーボードウォークジェネレーター。
+- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** 高度なキーボードウォークジェネレーターで、設定可能なベース文字、キーマップ、ルートを持っています。
 ```bash
 kwp64.exe basechars\custom.base keymaps\uk.keymap routes\2-to-10-max-3-direction-changes.route -o D:\Tools\keywalk.txt
 ```
 ### John mutation
 
-_**/etc/john/john.conf**_ を読み込み、設定します。
+_read_ **/etc/john/john.conf** _を読み込み、設定します_
 ```bash
 john --wordlist=words.txt --rules --stdout > w_mutated.txt
 john --wordlist=words.txt --rules=all --stdout > w_mutated.txt #Apply all rules
