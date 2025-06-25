@@ -2,7 +2,7 @@
 
 <figure><img src="images/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
-_Logo i animacja Hacktricks autorstwa_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
+_Logotypy i projektowanie ruchu Hacktricks autorstwa_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_._
 
 ### Uruchom HackTricks lokalnie
 ```bash
@@ -16,7 +16,7 @@ export LANG="master" # Leave master for english
 # "el" for Greek
 # "es" for Spanish
 # "fr" for French
-# "hi" for Hindi
+# "hi" for HindiP
 # "it" for Italian
 # "ja" for Japanese
 # "ko" for Korean
@@ -29,7 +29,7 @@ export LANG="master" # Leave master for english
 # "zh" for Chinese
 
 # Run the docker container indicating the path to the hacktricks folder
-docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git config --global --add safe.directory /app && git checkout $LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
+docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "mkdir -p ~/.ssh && ssh-keyscan -H github.com >> ~/.ssh/known_hosts && cd /app && git config --global --add safe.directory /app && git checkout $LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
 Twoja lokalna kopia HackTricks będzie **dostępna pod adresem [http://localhost:3337](http://localhost:3337)** po <5 minutach (musi zbudować książkę, bądź cierpliwy).
 
@@ -135,7 +135,7 @@ Możesz **utworzyć darmowe konto** [**tutaj**](https://serpapi.com/users/sign_u
 
 <figure><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Poznaj technologie i umiejętności potrzebne do przeprowadzania badań nad lukami, testów penetracyjnych i inżynierii wstecznej, aby chronić aplikacje i urządzenia mobilne. **Opanuj bezpieczeństwo iOS i Android** dzięki naszym kursom na żądanie i **zdobądź certyfikat**:
+Poznaj technologie i umiejętności potrzebne do przeprowadzania badań nad lukami, testów penetracyjnych i inżynierii odwrotnej, aby chronić aplikacje i urządzenia mobilne. **Opanuj bezpieczeństwo iOS i Android** dzięki naszym kursom na żądanie i **zdobądź certyfikat**:
 
 {{#ref}}
 https://academy.8ksec.io/
@@ -153,7 +153,7 @@ WebSec to międzynarodowa firma zajmująca się bezpieczeństwem z biurami w Ams
 
 Kolejną fajną rzeczą w WebSec jest to, że w przeciwieństwie do średniej w branży, WebSec jest **bardzo pewny swoich umiejętności**, do tego stopnia, że **gwarantują najlepsze wyniki jakościowe**, jak stwierdzają na swojej stronie "**Jeśli nie możemy tego zhakować, nie płacisz!**". Aby uzyskać więcej informacji, zajrzyj na ich [**stronę**](https://websec.net/en/) i [**blog**](https://websec.net/blog/)!
 
-Oprócz powyższego, WebSec jest również **zaangażowanym wsparciem HackTricks.**
+Oprócz powyższego, WebSec jest również **zaangażowanym sponsorem HackTricks.**
 
 {{#ref}}
 https://www.youtube.com/watch?v=Zq2JycGDCPM
@@ -168,10 +168,31 @@ https://www.youtube.com/watch?v=Zq2JycGDCPM
 [**Venacus**](https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons) to wyszukiwarka naruszeń danych (leak). \
 Oferujemy wyszukiwanie losowych ciągów (jak google) w różnych typach wycieków danych, dużych i małych --nie tylko tych dużych-- z danych z wielu źródeł. \
 Wyszukiwanie osób, wyszukiwanie AI, wyszukiwanie organizacji, dostęp do API (OpenAPI), integracja z theHarvester, wszystkie funkcje, których potrzebuje pentester.\
-**HackTricks nadal jest wspaniałą platformą edukacyjną dla nas wszystkich i jesteśmy dumni, że ją sponsorujemy!**
+**HackTricks nadal jest wspaniałą platformą edukacyjną dla nas wszystkich i jesteśmy dumni, że możemy ją sponsorować!**
 
 {{#ref}}
 https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons
+{{#endref}}
+
+---
+
+### [CyberHelmets](https://cyberhelmets.com/courses/?ref=hacktricks)
+
+<figure><img src="images/cyberhelmets-logo.png" alt="cyberhelmets logo"><figcaption></figcaption></figure>
+
+**Stworzony dla terenu. Stworzony wokół Ciebie.**\
+[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) opracowuje i dostarcza skuteczne szkolenia w zakresie cyberbezpieczeństwa, które są prowadzone przez
+ekspertów branżowych. Ich programy wykraczają poza teorię, aby wyposażyć zespoły w głębokie
+zrozumienie i praktyczne umiejętności, korzystając z niestandardowych środowisk, które odzwierciedlają rzeczywiste
+zagrożenia. W przypadku zapytań dotyczących niestandardowego szkolenia, skontaktuj się z nami [**tutaj**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks).
+
+**Co wyróżnia ich szkolenie:**
+* Niestandardowe treści i laboratoria
+* Wsparcie przez narzędzia i platformy najwyższej klasy
+* Zaprojektowane i prowadzone przez praktyków
+
+{{#ref}}
+https://cyberhelmets.com/courses/?ref=hacktricks
 {{#endref}}
 
 ---
@@ -180,9 +201,14 @@ https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons
 
 <figure><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
 
-Last Tower Solutions dostarcza specjalistyczne usługi w zakresie cyberbezpieczeństwa dla instytucji **Edukacyjnych** i **FinTech**, koncentrując się na **testach penetracyjnych, ocenach bezpieczeństwa w chmurze** oraz **gotowości do zgodności** (SOC 2, PCI-DSS, NIST). Nasz zespół składa się z **profesjonalistów z certyfikatami OSCP i CISSP**, którzy wnoszą głęboką wiedzę techniczną i standardy branżowe do każdego zlecenia.
+Last Tower Solutions dostarcza specjalistyczne usługi w zakresie cyberbezpieczeństwa dla instytucji **Edukacyjnych** i **FinTech**,
+koncentrując się na **testach penetracyjnych, ocenach bezpieczeństwa w chmurze** oraz
+**gotowości do zgodności** (SOC 2, PCI-DSS, NIST). Nasz zespół składa się z **profesjonalistów z certyfikatami OSCP i CISSP**,
+przynosząc głęboką wiedzę techniczną i standardowe wglądy branżowe do każdego zlecenia.
 
-Przechodzimy poza automatyczne skany, oferując **ręczne testy oparte na wywiadzie**, dostosowane do środowisk o wysokim ryzyku. Od zabezpieczania rekordów studentów po ochronę transakcji finansowych, pomagamy organizacjom bronić tego, co najważniejsze.
+Przechodzimy poza automatyczne skany, oferując **ręczne, oparte na wywiadzie testy** dostosowane do
+środowisk o wysokim ryzyku. Od zabezpieczania danych studentów po ochronę transakcji finansowych,
+pomagamy organizacjom bronić tego, co najważniejsze.
 
 _„Jakościowa obrona wymaga znajomości ataku, zapewniamy bezpieczeństwo poprzez zrozumienie.”_
 
@@ -194,7 +220,7 @@ https://www.lasttowersolutions.com/
 
 ---
 
-## Licencja i zastrzeżenia
+## Licencja i zastrzeżenie
 
 Sprawdź je w:
 
