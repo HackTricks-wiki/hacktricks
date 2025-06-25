@@ -102,5 +102,9 @@ For more information about Prompt Injection check:
 AI-Prompts.md
 {{#endref}}
 
+Moreover, in [**this blog**](https://www.legitsecurity.com/blog/remote-prompt-injection-in-gitlab-duo) it's explained how it was possible to abuse the Gitlab AI agent to perform arbitrary actions (like modifying code or leaking code), but injecting maicious prompts in the data of the repository (even ofbuscating this prompts in a way that the LLM would understand but the user wouldn't).
+
+Note that the malicious indirect prompts would be located in a public repository the victim user would be using, however, as the agent still have access to the repos of the user, it'll be able to access them.
+
 {{#include ../banners/hacktricks-training.md}}
 
