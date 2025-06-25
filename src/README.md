@@ -2,9 +2,9 @@
 
 <figure><img src="images/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
-_Logo et design animé de Hacktricks par_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
+_Logo et design animé de Hacktricks par_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_._
 
-### Exécuter HackTricks localement
+### Exécuter HackTricks Localement
 ```bash
 # Download latest version of hacktricks
 git clone https://github.com/HackTricks-wiki/hacktricks
@@ -16,7 +16,7 @@ export LANG="master" # Leave master for english
 # "el" for Greek
 # "es" for Spanish
 # "fr" for French
-# "hi" for Hindi
+# "hi" for HindiP
 # "it" for Italian
 # "ja" for Japanese
 # "ko" for Korean
@@ -29,7 +29,7 @@ export LANG="master" # Leave master for english
 # "zh" for Chinese
 
 # Run the docker container indicating the path to the hacktricks folder
-docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git config --global --add safe.directory /app && git checkout $LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
+docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "mkdir -p ~/.ssh && ssh-keyscan -H github.com >> ~/.ssh/known_hosts && cd /app && git config --global --add safe.directory /app && git checkout $LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
 Votre copie locale de HackTricks sera **disponible à [http://localhost:3337](http://localhost:3337)** après <5 minutes (il faut construire le livre, soyez patient).
 
@@ -63,7 +63,7 @@ https://www.rootedcon.com/
 
 <figure><img src="images/image (47).png" alt=""><figcaption></figcaption></figure>
 
-**Intigriti** est la **première** plateforme de hacking éthique et de **bug bounty en Europe.**
+**Intigriti** est la **première plateforme** de hacking éthique et de **bug bounty en Europe.**
 
 **Astuce bug bounty** : **inscrivez-vous** sur **Intigriti**, une plateforme de **bug bounty premium créée par des hackers, pour des hackers** ! Rejoignez-nous à [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) aujourd'hui, et commencez à gagner des primes allant jusqu'à **100 000 $** !
 
@@ -135,7 +135,7 @@ Vous pouvez **créer un compte gratuit** [**ici**](https://serpapi.com/users/sig
 
 <figure><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Apprenez les technologies et compétences nécessaires pour effectuer des recherches sur les vulnérabilités, des tests de pénétration et de l'ingénierie inverse pour protéger les applications et appareils mobiles. **Maîtrisez la sécurité iOS et Android** grâce à nos cours à la demande et **obtenez une certification** :
+Apprenez les technologies et compétences nécessaires pour effectuer des recherches de vulnérabilités, des tests de pénétration et de l'ingénierie inverse pour protéger les applications et appareils mobiles. **Maîtrisez la sécurité iOS et Android** grâce à nos cours à la demande et **obtenez une certification** :
 
 {{#ref}}
 https://academy.8ksec.io/
@@ -167,11 +167,29 @@ https://www.youtube.com/watch?v=Zq2JycGDCPM
 
 [**Venacus**](https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons) est un moteur de recherche de violations de données (leak). \
 Nous fournissons une recherche de chaînes aléatoires (comme google) sur tous les types de fuites de données, grandes et petites --pas seulement les grandes-- provenant de multiples sources. \
-Recherche de personnes, recherche IA, recherche d'organisations, accès API (OpenAPI), intégration theHarvester, toutes les fonctionnalités dont un pentester a besoin.\
-**HackTricks continue d'être une excellente plateforme d'apprentissage pour nous tous et nous sommes fiers de la sponsoriser !**
+Recherche de personnes, recherche AI, recherche d'organisations, accès API (OpenAPI), intégration theHarvester, toutes les fonctionnalités dont un pentester a besoin.\
+**HackTricks continue d'être une excellente plateforme d'apprentissage pour nous tous et nous sommes fiers de le sponsoriser !**
 
 {{#ref}}
 https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons
+{{#endref}}
+
+---
+
+### [CyberHelmets](https://cyberhelmets.com/courses/?ref=hacktricks)
+
+<figure><img src="images/cyberhelmets-logo.png" alt="cyberhelmets logo"><figcaption></figcaption></figure>
+
+**Conçu pour le terrain. Conçu autour de vous.**\
+[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) développe et propose une formation en cybersécurité efficace, construite et dirigée par des experts de l'industrie. Leurs programmes vont au-delà de la théorie pour équiper les équipes d'une compréhension approfondie et de compétences exploitables, en utilisant des environnements personnalisés qui reflètent les menaces du monde réel. Pour des demandes de formation personnalisée, contactez-nous [**ici**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks).
+
+**Ce qui distingue leur formation :**
+* Contenu et laboratoires sur mesure
+* Soutenus par des outils et plateformes de premier plan
+* Conçus et enseignés par des praticiens
+
+{{#ref}}
+https://cyberhelmets.com/courses/?ref=hacktricks
 {{#endref}}
 
 ---
@@ -180,9 +198,9 @@ https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons
 
 <figure><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
 
-Last Tower Solutions fournit des services de cybersécurité spécialisés pour les institutions **d'éducation** et **FinTech**, avec un accent sur **les tests de pénétration, les évaluations de sécurité cloud**, et **la préparation à la conformité** (SOC 2, PCI-DSS, NIST). Notre équipe comprend des **professionnels certifiés OSCP et CISSP**, apportant une expertise technique approfondie et un aperçu conforme aux normes de l'industrie à chaque engagement.
+Last Tower Solutions fournit des services de cybersécurité spécialisés pour les institutions **d'éducation** et **FinTech**, avec un accent sur **les tests de pénétration, les évaluations de sécurité cloud**, et **la préparation à la conformité** (SOC 2, PCI-DSS, NIST). Notre équipe comprend des **professionnels certifiés OSCP et CISSP**, apportant une expertise technique approfondie et un aperçu des normes de l'industrie à chaque engagement.
 
-Nous allons au-delà des analyses automatisées avec des **tests manuels, guidés par l'intelligence**, adaptés aux environnements à enjeux élevés. De la sécurisation des dossiers étudiants à la protection des transactions financières, nous aidons les organisations à défendre ce qui compte le plus.
+Nous allons au-delà des analyses automatisées avec des **tests manuels, guidés par l'intelligence**, adaptés à des environnements à enjeux élevés. De la sécurisation des dossiers étudiants à la protection des transactions financières, nous aidons les organisations à défendre ce qui compte le plus.
 
 _“Une défense de qualité nécessite de connaître l'attaque, nous fournissons la sécurité par la compréhension.”_
 
@@ -204,6 +222,6 @@ welcome/hacktricks-values-and-faq.md
 
 ## Statistiques Github
 
-![Statistiques Github de HackTricks](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
+![HackTricks Github Stats](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
 
 {{#include ./banners/hacktricks-training.md}}
