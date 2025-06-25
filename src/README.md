@@ -2,7 +2,7 @@
 
 <figure><img src="images/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
-_Hacktricks logo's & bewegingsontwerp deur_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
+_Hacktricks logo's & bewegingsontwerp deur_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_._
 
 ### Voer HackTricks Plaaslik Uit
 ```bash
@@ -16,7 +16,7 @@ export LANG="master" # Leave master for english
 # "el" for Greek
 # "es" for Spanish
 # "fr" for French
-# "hi" for Hindi
+# "hi" for HindiP
 # "it" for Italian
 # "ja" for Japanese
 # "ko" for Korean
@@ -29,7 +29,7 @@ export LANG="master" # Leave master for english
 # "zh" for Chinese
 
 # Run the docker container indicating the path to the hacktricks folder
-docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git config --global --add safe.directory /app && git checkout $LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
+docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "mkdir -p ~/.ssh && ssh-keyscan -H github.com >> ~/.ssh/known_hosts && cd /app && git config --global --add safe.directory /app && git checkout $LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
 Jou plaaslike kopie van HackTricks sal **beskikbaar wees by [http://localhost:3337](http://localhost:3337)** na <5 minute (dit moet die boek bou, wees geduldig).
 
@@ -78,7 +78,7 @@ https://go.intigriti.com/hacktricks
 <figure><img src="images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Gebruik [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) om maklik **werkvloei** te bou en te **automate** wat aangedryf word deur die wêreld se **meest gevorderde** gemeenskap gereedskap.
+Gebruik [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) om maklik **werkvloei** te bou en te **automate** wat aangedryf word deur die wêreld se **mees gevorderde** gemeenskap gereedskap.
 
 Kry Toegang Vandag:
 
@@ -108,7 +108,7 @@ Sluit by die [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) be
 
 **Kry 'n hacker se perspektief op jou web apps, netwerk, en wolk**
 
-**Vind en rapporteer kritieke, exploiteerbare kwesbaarhede met werklike besigheidsimpak.** Gebruik ons 20+ pasgemaakte gereedskap om die aanval oppervlak te karteer, vind sekuriteitskwessies wat jou toelaat om bevoegdhede te verhoog, en gebruik geoutomatiseerde eksploit om noodsaaklike bewyse te versamel, wat jou harde werk in oortuigende verslae omskep.
+**Vind en rapporteer kritieke, exploiteerbare kwesbaarhede met werklike besigheidsimpak.** Gebruik ons 20+ pasgemaakte gereedskap om die aanvaloppervlak te karteer, vind sekuriteitskwessies wat jou toelaat om bevoegdhede te verhoog, en gebruik geoutomatiseerde eksploit om noodsaaklike bewyse te versamel, wat jou harde werk in oortuigende verslae omskep.
 
 {{#ref}}
 https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons
@@ -127,15 +127,15 @@ In teenstelling met ander verskaffers, **scrape SerpApi nie net organiese result
 
 Huidige SerpApi kliënte sluit **Apple, Shopify, en GrubHub** in.\
 Vir meer inligting, kyk na hul [**blog**](https://serpapi.com/blog/)**,** of probeer 'n voorbeeld in hul [**speelgrond**](https://serpapi.com/playground)**.**\
-Jy kan **'n gratis rekening** [**hier**](https://serpapi.com/users/sign_up)**.**
+Jy kan **'n gratis rekening skep** [**hier**](https://serpapi.com/users/sign_up)**.**
 
 ---
 
-### [8kSec Academy – In-Depth Mobile Security Courses](https://academy.8ksec.io/)
+### [8kSec Academy – In-Diepte Mobiele Sekuriteit Kursusse](https://academy.8ksec.io/)
 
 <figure><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Leer die tegnologieë en vaardighede wat benodig word om kwesbaarheid navorsing, penetrasietoetsing, en omgekeerde ingenieurswese uit te voer om mobiele toepassings en toestelle te beskerm. **Beheers iOS en Android sekuriteit** deur ons on-demand kursusse en **kry geakkrediteer**:
+Leer die tegnologieë en vaardighede wat nodig is om kwesbaarheid navorsing, penetrasietoetsing, en omgekeerde ingenieurswese uit te voer om mobiele toepassings en toestelle te beskerm. **Meester iOS en Android sekuriteit** deur ons on-demand kursusse en **kry geakkrediteer**:
 
 {{#ref}}
 https://academy.8ksec.io/
@@ -147,7 +147,7 @@ https://academy.8ksec.io/
 
 <figure><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.net) is 'n professionele kuberveiligheid maatskappy gebaseer in **Amsterdam** wat help om **besighede** **oor die wêreld** te beskerm teen die nuutste kuberveiligheid bedreigings deur **offensiewe-sekuriteit dienste** met 'n **moderne** benadering te bied.
+[**WebSec**](https://websec.net) is 'n professionele kuberveiligheid maatskappy gebaseer in **Amsterdam** wat help om **besighede** **oor die wêreld** teen die nuutste kuberveiligheid bedreigings te beskerm deur **offensiewe-sekuriteit dienste** met 'n **moderne** benadering te bied.
 
 WebSec is 'n internasionale sekuriteitsmaatskappy met kantore in Amsterdam en Wyoming. Hulle bied **alles-in-een sekuriteitsdienste** aan wat beteken dat hulle dit alles doen; Pentesting, **Sekuriteit** Oudit, Bewustheidsopleiding, Phishing Campagnes, Kode Hersiening, Eksploit Ontwikkeling, Sekuriteit Eksperte Uitsourcing en nog baie meer.
 
@@ -167,7 +167,7 @@ https://www.youtube.com/watch?v=Zq2JycGDCPM
 
 [**Venacus**](https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons) is 'n data breuk (leak) soekenjin. \
 Ons bied random string soektog (soos google) oor alle tipes data breuke groot en klein --nie net die groot nie-- oor data van verskeie bronne. \
-Mense soektog, KI soektog, organisasie soektog, API (OpenAPI) toegang, dieHarvester integrasie, al die funksies wat 'n pentester benodig.\
+Mense soektog, KI soektog, organisasie soektog, API (OpenAPI) toegang, dieHarvester integrasie, al die funksies wat 'n pentester nodig het.\
 **HackTricks bly 'n wonderlike leerplatform vir ons almal en ons is trots om dit te borg!**
 
 {{#ref}}
@@ -176,13 +176,40 @@ https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons
 
 ---
 
+### [CyberHelmets](https://cyberhelmets.com/courses/?ref=hacktricks)
+
+<figure><img src="images/cyberhelmets-logo.png" alt="cyberhelmets logo"><figcaption></figcaption></figure>
+
+**Gebou vir die veld. Gebou rondom jou.**\
+[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) ontwikkel en lewer effektiewe kuberveiligheid opleiding wat gebou en gelei word deur
+bedryf kenners. Hul programme gaan verder as teorie om spanne toe te rus met 'n diep
+begrip en uitvoerbare vaardighede, met behulp van pasgemaakte omgewings wat werklike
+bedreigings weerspieël. Vir pasgemaakte opleidingsnavrae, kontak ons [**hier**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks).
+
+**Wat hul opleiding onderskei:**
+* Pasgemaakte inhoud en laboratoriums
+* Ondersteun deur top-graad gereedskap en platforms
+* Ontwerp en geleer deur praktisyns
+
+{{#ref}}
+https://cyberhelmets.com/courses/?ref=hacktricks
+{{#endref}}
+
+---
+
 ### [Last Tower Solutions](https://www.lasttowersolutions.com/)
 
 <figure><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
 
-Last Tower Solutions bied gespesialiseerde kuberveiligheid dienste aan vir **Onderwys** en **FinTech** instellings, met 'n fokus op **penetrasietoetsing, wolk sekuriteit assesserings**, en **nakoming gereedheid** (SOC 2, PCI-DSS, NIST). Ons span sluit **OSCP en CISSP geakkrediteerde professionele persone** in, wat diep tegniese kundigheid en industrie-standaard insig na elke betrokkenheid bring.
+Last Tower Solutions lewer gespesialiseerde kuberveiligheid dienste vir **Onderwys** en **FinTech**
+instellings, met 'n fokus op **penetrasietoetsing, wolk sekuriteit assesserings**, en
+**nakoming gereedheid** (SOC 2, PCI-DSS, NIST). Ons span sluit **OSCP en CISSP
+geakkrediteerde professionele in**, wat diep tegniese kundigheid en bedryfstandaard insig na
+elke betrokkenheid bring.
 
-Ons gaan verder as geoutomatiseerde skanderings met **handmatige, intelligensie-gedrewe toetsing** wat aangepas is vir hoë-stakes omgewings. Van die beveiliging van studentrekords tot die beskerming van finansiële transaksies, help ons organisasies om te verdedig wat die meeste saak maak.
+Ons gaan verder as geoutomatiseerde skanderings met **handmatige, intelligensie-gedrewe toetsing** wat aangepas is vir
+hoë-stakes omgewings. Van die beveiliging van studentrekords tot die beskerming van finansiële transaksies,
+help ons organisasies om te verdedig wat die belangrikste is.
 
 _“'n Kwaliteit verdediging vereis om die aanval te ken, ons bied sekuriteit deur begrip.”_
 
