@@ -2,7 +2,7 @@
 
 <figure><img src="images/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
-_Hacktricks logotipi i animacija dizajnirali su_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
+_Hacktricks logotipi i animacija dizajnirani od_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_._
 
 ### Pokrenite HackTricks lokalno
 ```bash
@@ -16,7 +16,7 @@ export LANG="master" # Leave master for english
 # "el" for Greek
 # "es" for Spanish
 # "fr" for French
-# "hi" for Hindi
+# "hi" for HindiP
 # "it" for Italian
 # "ja" for Japanese
 # "ko" for Korean
@@ -29,7 +29,7 @@ export LANG="master" # Leave master for english
 # "zh" for Chinese
 
 # Run the docker container indicating the path to the hacktricks folder
-docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git config --global --add safe.directory /app && git checkout $LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
+docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "mkdir -p ~/.ssh && ssh-keyscan -H github.com >> ~/.ssh/known_hosts && cd /app && git config --global --add safe.directory /app && git checkout $LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
 Vaša lokalna kopija HackTricks biće **dostupna na [http://localhost:3337](http://localhost:3337)** nakon <5 minuta (potrebno je da se izgradi knjiga, budite strpljivi).
 
@@ -51,7 +51,7 @@ Možete proveriti njihov **blog** na [**https://blog.stmcyber.com**](https://blo
 
 <figure><img src="images/image (45).png" alt=""><figcaption></figcaption></figure>
 
-[**RootedCON**](https://www.rootedcon.com) je najrelevantnija sajber bezbednosna manifestacija u **Španiji** i jedna od najvažnijih u **Evropi**. Sa **misijom promovisanja tehničkog znanja**, ovaj kongres je vrelo mesto okupljanja za profesionalce u tehnologiji i sajber bezbednosti u svakoj disciplini.
+[**RootedCON**](https://www.rootedcon.com) je najrelevantnija manifestacija sajber bezbednosti u **Španiji** i jedna od najvažnijih u **Evropi**. Sa **misijom promovisanja tehničkog znanja**, ovaj kongres je vrelo mesto okupljanja profesionalaca u tehnologiji i sajber bezbednosti u svakoj disciplini.
 
 {{#ref}}
 https://www.rootedcon.com/
@@ -78,7 +78,7 @@ https://go.intigriti.com/hacktricks
 <figure><img src="images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Koristite [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) za lako kreiranje i **automatizaciju radnih tokova** pokretanih najnaprednijim zajedničkim alatima na svetu.
+Koristite [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) za lako kreiranje i **automatizaciju radnih tokova** pokretanih najnaprednijim alatima zajednice na svetu.
 
 Pristupite danas:
 
@@ -108,7 +108,7 @@ Pridružite se [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) 
 
 **Dobijte perspektivu hakera na vaše web aplikacije, mrežu i oblak**
 
-**Pronađite i prijavite kritične, iskoristive ranjivosti sa stvarnim poslovnim uticajem.** Koristite naših 20+ prilagođenih alata za mapiranje napadačke površine, pronalaženje sigurnosnih problema koji vam omogućavaju da eskalirate privilegije, i koristite automatizovane eksploite za prikupljanje suštinskih dokaza, pretvarajući vaš trud u uverljive izveštaje.
+**Pronađite i prijavite kritične, iskoristive ranjivosti sa stvarnim poslovnim uticajem.** Koristite naših 20+ prilagođenih alata za mapiranje napada, pronalaženje sigurnosnih problema koji vam omogućavaju da eskalirate privilegije, i koristite automatizovane eksploite za prikupljanje suštinskih dokaza, pretvarajući vaš trud u uverljive izveštaje.
 
 {{#ref}}
 https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons
@@ -120,10 +120,10 @@ https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktrick
 
 <figure><img src="images/image (1254).png" alt=""><figcaption></figcaption></figure>
 
-**SerpApi** nudi brze i lake API-je u realnom vremenu za **pristup rezultatima pretraživača**. Oni sakupljaju podatke sa pretraživača, upravljaju proxy-ima, rešavaju captcha, i analiziraju sve bogate strukturirane podatke za vas.
+**SerpApi** nudi brze i lake API-je u realnom vremenu za **pristup rezultatima pretraživača**. Oni pretražuju pretraživače, upravljaju proxy-ima, rešavaju captcha, i analiziraju sve bogate strukturirane podatke za vas.
 
-Pretplata na jedan od planova SerpApi uključuje pristup više od 50 različitih API-ja za sakupljanje podataka sa različitih pretraživača, uključujući Google, Bing, Baidu, Yahoo, Yandex i druge.\
-Za razliku od drugih provajdera, **SerpApi ne sakuplja samo organske rezultate**. Odgovori SerpApi dosledno uključuju sve oglase, inline slike i video zapise, grafove znanja i druge elemente i funkcije prisutne u rezultatima pretrage.
+Pretplata na jedan od planova SerpApi uključuje pristup više od 50 različitih API-ja za pretraživanje različitih pretraživača, uključujući Google, Bing, Baidu, Yahoo, Yandex i druge.\
+Za razliku od drugih provajdera, **SerpApi ne pretražuje samo organske rezultate**. Odgovori SerpApi dosledno uključuju sve oglase, inline slike i video zapise, grafove znanja i druge elemente i funkcije prisutne u rezultatima pretrage.
 
 Trenutni kupci SerpApi uključuju **Apple, Shopify i GrubHub**.\
 Za više informacija pogledajte njihov [**blog**](https://serpapi.com/blog/)**,** ili isprobajte primer u njihovom [**playground**](https://serpapi.com/playground)**.**\
@@ -147,11 +147,11 @@ https://academy.8ksec.io/
 
 <figure><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.net) je profesionalna kompanija za sajber bezbednost sa sedištem u **Amsterdamu** koja pomaže **zaštiti** preduzeća **široko u svetu** od najnovijih pretnji u oblasti sajber bezbednosti pružajući **usluge ofanzivne bezbednosti** sa **modernim** pristupom.
+[**WebSec**](https://websec.net) je profesionalna kompanija za sajber bezbednost sa sedištem u **Amsterdamu** koja pomaže **zaštiti** preduzeća **široko po svetu** od najnovijih pretnji u oblasti sajber bezbednosti pružajući **usluge ofanzivne bezbednosti** sa **modernim** pristupom.
 
-WebSec je međunarodna bezbednosna kompanija sa kancelarijama u Amsterdamu i Vajomingu. Oni nude **sve-u-jednom usluge bezbednosti** što znači da rade sve; Pentesting, **Bezbednosne** revizije, Obuke o svesti, Phishing kampanje, Revizija koda, Razvoj eksploita, Outsourcing bezbednosnih stručnjaka i još mnogo toga.
+WebSec je međunarodna bezbednosna kompanija sa kancelarijama u Amsterdamu i Vajomingu. Oni nude **sve-u-jednom usluge bezbednosti** što znači da rade sve; Pentesting, **Bezbednosne** revizije, Obuke o svesti, Phishing kampanje, Revizije koda, Razvoj eksploita, Outsourcing bezbednosnih stručnjaka i još mnogo toga.
 
-Još jedna zanimljiva stvar o WebSec-u je da, za razliku od proseka u industriji, WebSec je **veoma siguran u svoje veštine**, do te mere da **garantuje najbolje kvalitetne rezultate**, kako stoji na njihovom sajtu "**Ako ne možemo da hakujemo, ne plaćate!**". Za više informacija pogledajte njihov [**sajt**](https://websec.net/en/) i [**blog**](https://websec.net/blog/)!
+Još jedna zanimljiva stvar o WebSec-u je da, za razliku od proseka u industriji, WebSec je **veoma siguran u svoje veštine**, do te mere da **garantuje najbolje kvalitetne rezultate**, kako navode na svojoj veb stranici "**Ako ne možemo da hakujemo, ne plaćate!**". Za više informacija pogledajte njihovu [**vеб страницу**](https://websec.net/en/) i [**blog**](https://websec.net/blog/)!
 
 Pored navedenog, WebSec je takođe **posvećen podržavalac HackTricks.**
 
@@ -167,7 +167,7 @@ https://www.youtube.com/watch?v=Zq2JycGDCPM
 
 [**Venacus**](https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons) je pretraživač podataka o curenjima (leak). \
 Pružamo pretragu nasumičnih stringova (poput google-a) preko svih vrsta curenja podataka, velikih i malih --ne samo velikih-- iz više izvora. \
-Pretraga ljudi, pretraga AI, pretraga organizacija, API (OpenAPI) pristup, integracija theHarvester, sve funkcije koje pentester treba.\
+Pretraga ljudi, pretraga AI, pretraga organizacija, API (OpenAPI) pristup, integracija theHarvester, sve funkcije koje pentesteru trebaju.\
 **HackTricks nastavlja da bude sjajna platforma za učenje za sve nas i ponosni smo što je sponzorišemo!**
 
 {{#ref}}
@@ -176,15 +176,42 @@ https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons
 
 ---
 
+### [CyberHelmets](https://cyberhelmets.com/courses/?ref=hacktricks)
+
+<figure><img src="images/cyberhelmets-logo.png" alt="cyberhelmets logo"><figcaption></figcaption></figure>
+
+**Izgrađeno za teren. Izgrađeno oko vas.**\
+[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) razvija i pruža efikasnu obuku u oblasti sajber bezbednosti koju vode
+stručnjaci iz industrije. Njihovi programi prevazilaze teoriju kako bi opremili timove dubokim
+razumevanjem i praktičnim veštinama, koristeći prilagođena okruženja koja odražavaju stvarne
+pretnje. Za upite o prilagođenoj obuci, obratite nam se [**ovde**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks).
+
+**Šta izdvaja njihovu obuku:**
+* Prilagođeni sadržaj i laboratorije
+* Podržano vrhunskim alatima i platformama
+* Dizajnirano i predavano od strane praktičara
+
+{{#ref}}
+https://cyberhelmets.com/courses/?ref=hacktricks
+{{#endref}}
+
+---
+
 ### [Last Tower Solutions](https://www.lasttowersolutions.com/)
 
 <figure><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
 
-Last Tower Solutions pruža specijalizovane usluge sajber bezbednosti za **obrazovne** i **FinTech** institucije, sa fokusom na **penetraciono testiranje, procene bezbednosti u oblaku**, i **pripremu za usklađenost** (SOC 2, PCI-DSS, NIST). Naš tim uključuje **OSCP i CISSP sertifikovane profesionalce**, donoseći duboku tehničku stručnost i uvide standarda industrije u svaku saradnju.
+Last Tower Solutions pruža specijalizovane usluge sajber bezbednosti za **obrazovne** i **FinTech**
+institucije, sa fokusom na **penetraciono testiranje, procene bezbednosti u oblaku**, i
+**pripremu za usklađenost** (SOC 2, PCI-DSS, NIST). Naš tim uključuje **OSCP i CISSP
+sertifikovane profesionalce**, donoseći duboku tehničku stručnost i uvide standarda industrije u
+svaku saradnju.
 
-Idemo dalje od automatskih skeniranja sa **ručno, inteligencijom vođenim testiranjem** prilagođenim visokorizičnim okruženjima. Od obezbeđivanja studentskih podataka do zaštite finansijskih transakcija, pomažemo organizacijama da brane ono što je najvažnije.
+Idemo dalje od automatizovanih skeniranja sa **ručno, inteligencijom vođenim testiranjem** prilagođenim
+visokim rizicima. Od obezbeđivanja studentskih podataka do zaštite finansijskih transakcija,
+pomažemo organizacijama da brane ono što je najvažnije.
 
-_“Kvalitetna odbrana zahteva poznavanje napada, pružamo sigurnost kroz razumevanje.”_
+_„Kvalitetna odbrana zahteva poznavanje napada, pružamo sigurnost kroz razumevanje.”_
 
 Budite informisani i u toku sa najnovijim u sajber bezbednosti posetom našem [**blogu**](https://www.lasttowersolutions.com/blog).
 
