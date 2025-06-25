@@ -2,7 +2,7 @@
 
 <figure><img src="images/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
-_Hacktricks 标志和动态设计由_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._ 
+_Hacktricks 标志和动态设计由_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_._ 
 
 ### 本地运行 HackTricks
 ```bash
@@ -16,7 +16,7 @@ export LANG="master" # Leave master for english
 # "el" for Greek
 # "es" for Spanish
 # "fr" for French
-# "hi" for Hindi
+# "hi" for HindiP
 # "it" for Italian
 # "ja" for Japanese
 # "ko" for Korean
@@ -29,9 +29,9 @@ export LANG="master" # Leave master for english
 # "zh" for Chinese
 
 # Run the docker container indicating the path to the hacktricks folder
-docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git config --global --add safe.directory /app && git checkout $LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
+docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "mkdir -p ~/.ssh && ssh-keyscan -H github.com >> ~/.ssh/known_hosts && cd /app && git config --global --add safe.directory /app && git checkout $LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
-您的本地 HackTricks 副本将在 **[http://localhost:3337](http://localhost:3337)** 后 <5 分钟内可用（它需要构建书籍，请耐心等待）。
+您的本地 HackTricks 副本将在 **[http://localhost:3337](http://localhost:3337)** 后 <5 分钟可用（它需要构建书籍，请耐心等待）。
 
 ## 企业赞助商
 
@@ -65,7 +65,7 @@ https://www.rootedcon.com/
 
 **Intigriti** 是 **欧洲第一** 的道德黑客和 **漏洞赏金平台**。
 
-**漏洞赏金提示**：**注册** **Intigriti**，这是一个由黑客为黑客创建的高级 **漏洞赏金平台**！今天就加入我们，访问 [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks)，开始赚取高达 **$100,000** 的赏金！
+**漏洞赏金提示**：**注册** **Intigriti**，这是一个由黑客为黑客创建的高级 **漏洞赏金平台**！今天就加入我们 [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks)，开始赚取高达 **$100,000** 的赏金！
 
 {{#ref}}
 https://go.intigriti.com/hacktricks
@@ -95,10 +95,10 @@ https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktr
 加入 [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) 服务器，与经验丰富的黑客和漏洞赏金猎人交流！
 
 - **黑客见解**：参与深入探讨黑客的刺激和挑战的内容
-- **实时黑客新闻**：通过实时新闻和见解，跟上快速变化的黑客世界
+- **实时黑客新闻**：通过实时新闻和见解跟上快速变化的黑客世界
 - **最新公告**：了解最新的漏洞赏金发布和重要平台更新
 
-**今天就加入我们，** [**Discord**](https://discord.com/invite/N3FrSbmwdy)，开始与顶级黑客合作吧！
+**今天就加入我们** [**Discord**](https://discord.com/invite/N3FrSbmwdy)，开始与顶级黑客合作！
 
 ---
 
@@ -147,7 +147,7 @@ https://academy.8ksec.io/
 
 <figure><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.net) 是一家总部位于 **阿姆斯特丹** 的专业网络安全公司，帮助 **保护** 全球各地的企业免受最新网络安全威胁，通过提供 **进攻性安全服务** 采用 **现代** 方法。
+[**WebSec**](https://websec.net) 是一家总部位于 **阿姆斯特丹** 的专业网络安全公司，帮助 **保护** 全球企业免受最新网络安全威胁，通过提供 **进攻性安全服务** 采用 **现代** 方法。
 
 WebSec 是一家国际安全公司，在阿姆斯特丹和怀俄明州设有办事处。他们提供 **一体化安全服务**，这意味着他们可以做所有事情；渗透测试、**安全** 审计、意识培训、网络钓鱼活动、代码审查、漏洞开发、安全专家外包等等。
 
@@ -165,13 +165,31 @@ https://www.youtube.com/watch?v=Zq2JycGDCPM
 
 <figure><img src="images/venacus-logo.svg" alt="venacus logo"><figcaption></figcaption></figure>
 
-[**Venacus**](https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons) 是一个数据泄露（leak）搜索引擎。\
-我们提供随机字符串搜索（类似于谷歌），覆盖所有类型的大大小小的数据泄露——不仅仅是大的——来自多个来源的数据。\
+[**Venacus**](https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons) 是一个数据泄露（leak）搜索引擎。 \
+我们提供随机字符串搜索（如谷歌）覆盖所有类型的大大小小的数据泄露——不仅仅是大的——来自多个来源的数据。 \
 人们搜索、AI 搜索、组织搜索、API（OpenAPI）访问、theHarvester 集成，所有渗透测试人员所需的功能。\
-**HackTricks 继续成为我们所有人的优秀学习平台，我们为赞助它感到自豪！**
+**HackTricks 继续成为我们所有人的一个伟大学习平台，我们为赞助它感到自豪！**
 
 {{#ref}}
 https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons
+{{#endref}}
+
+---
+
+### [CyberHelmets](https://cyberhelmets.com/courses/?ref=hacktricks)
+
+<figure><img src="images/cyberhelmets-logo.png" alt="cyberhelmets logo"><figcaption></figcaption></figure>
+
+**为现场而建。围绕您而建。**\
+[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) 开发并提供有效的网络安全培训，由行业专家主导。 他们的课程超越理论，装备团队深入理解和可操作的技能，使用反映现实世界威胁的自定义环境。有关定制培训的咨询，请通过 [**这里**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks) 联系我们。
+
+**他们的培训与众不同之处：**
+* 定制内容和实验室
+* 由顶级工具和平台支持
+* 由从业者设计和教授
+
+{{#ref}}
+https://cyberhelmets.com/courses/?ref=hacktricks
 {{#endref}}
 
 ---
@@ -186,7 +204,7 @@ Last Tower Solutions 提供专门的网络安全服务，面向 **教育** 和 *
 
 _“高质量的防御需要了解进攻，我们通过理解提供安全。”_
 
-通过访问我们的 [**博客**](https://www.lasttowersolutions.com/blog) 保持对网络安全最新动态的了解。
+通过访问我们的 [**博客**](https://www.lasttowersolutions.com/blog) 了解网络安全的最新动态。
 
 {{#ref}}
 https://www.lasttowersolutions.com/
@@ -194,7 +212,7 @@ https://www.lasttowersolutions.com/
 
 ---
 
-## 许可证与免责声明
+## 许可证和免责声明
 
 请查看：
 
