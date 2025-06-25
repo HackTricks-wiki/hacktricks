@@ -2,7 +2,7 @@
 
 <figure><img src="images/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
-_Hacktricksのロゴとモーションデザインは_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_によるものです。_
+_Hacktricksのロゴとモーションデザインは_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_によるものです。_
 
 ### HackTricksをローカルで実行する
 ```bash
@@ -16,7 +16,7 @@ export LANG="master" # Leave master for english
 # "el" for Greek
 # "es" for Spanish
 # "fr" for French
-# "hi" for Hindi
+# "hi" for HindiP
 # "it" for Italian
 # "ja" for Japanese
 # "ko" for Korean
@@ -29,7 +29,7 @@ export LANG="master" # Leave master for english
 # "zh" for Chinese
 
 # Run the docker container indicating the path to the hacktricks folder
-docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git config --global --add safe.directory /app && git checkout $LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
+docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "mkdir -p ~/.ssh && ssh-keyscan -H github.com >> ~/.ssh/known_hosts && cd /app && git config --global --add safe.directory /app && git checkout $LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
 あなたのローカルコピーのHackTricksは、**[http://localhost:3337](http://localhost:3337)**で**5分以内に**利用可能になります（本をビルドする必要があるため、しばらくお待ちください）。
 
@@ -65,7 +65,7 @@ https://www.rootedcon.com/
 
 **Intigriti**は、**ヨーロッパの#1**エシカルハッキングおよび**バグバウンティプラットフォーム**です。
 
-**バグバウンティのヒント**: **Intigriti**に**サインアップ**してください。これは、ハッカーによって、ハッカーのために作られたプレミアム**バグバウンティプラットフォーム**です！今日、[**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks)に参加し、最大**$100,000**の報酬を得始めましょう！
+**バグバウンティのヒント**: **Intigriti**に**サインアップ**してください。ハッカーのためにハッカーによって作られたプレミアム**バグバウンティプラットフォーム**です！今日、[**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks)に参加し、最大**$100,000**のバウンティを獲得し始めましょう！
 
 {{#ref}}
 https://go.intigriti.com/hacktricks
@@ -78,7 +78,7 @@ https://go.intigriti.com/hacktricks
 <figure><img src="images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)を使用して、世界で最も**高度な**コミュニティツールによって**ワークフローを簡単に構築および自動化**します。
+[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)を使用して、世界で最も**高度な**コミュニティツールによって駆動される**ワークフロー**を簡単に構築および**自動化**します。
 
 今すぐアクセスを取得：
 
@@ -96,7 +96,7 @@ https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktr
 
 - **ハッキングの洞察:** ハッキングのスリルと課題に関するコンテンツに参加
 - **リアルタイムハックニュース:** リアルタイムのニュースと洞察を通じて、急速に変化するハッキングの世界を把握
-- **最新の発表:** 新しいバグバウンティの開始や重要なプラットフォームの更新について最新情報を入手
+- **最新の発表:** 新しいバグバウンティの開始や重要なプラットフォームの更新について情報を得る
 
 **私たちと一緒に** [**Discord**](https://discord.com/invite/N3FrSbmwdy)に参加し、今日からトップハッカーとコラボレーションを始めましょう！
 
@@ -122,8 +122,8 @@ https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktrick
 
 **SerpApi**は、**検索エンジンの結果**にアクセスするための迅速で簡単なリアルタイムAPIを提供します。彼らは検索エンジンをスクレイピングし、プロキシを処理し、キャプチャを解決し、すべてのリッチな構造化データを解析します。
 
-SerpApiのプランのサブスクリプションには、Google、Bing、Baidu、Yahoo、Yandexなど、さまざまな検索エンジンをスクレイピングするための50以上の異なるAPIへのアクセスが含まれます。\
-他のプロバイダーとは異なり、**SerpApiはオーガニック結果だけをスクレイピングするわけではありません**。SerpApiの応答には、常にすべての広告、インライン画像や動画、ナレッジグラフ、検索結果に存在する他の要素や機能が含まれます。
+SerpApiのプランのサブスクリプションには、Google、Bing、Baidu、Yahoo、Yandexなど、さまざまな検索エンジンをスクレイピングするための50以上の異なるAPIへのアクセスが含まれています。\
+他のプロバイダーとは異なり、**SerpApiはオーガニック結果だけをスクレイピングするわけではありません**。SerpApiの応答には、常にすべての広告、インライン画像と動画、ナレッジグラフ、検索結果に存在する他の要素や機能が含まれます。
 
 現在のSerpApiの顧客には、**Apple、Shopify、GrubHub**が含まれます。\
 詳細については、彼らの[**ブログ**](https://serpapi.com/blog/)をチェックするか、[**プレイグラウンド**](https://serpapi.com/playground)で例を試してみてください。\
@@ -147,13 +147,13 @@ https://academy.8ksec.io/
 
 <figure><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.net)は、**アムステルダム**に拠点を置くプロフェッショナルなサイバーセキュリティ会社で、最新のサイバーセキュリティ脅威から**世界中のビジネスを保護する**ために、**攻撃的セキュリティサービス**を**現代的**なアプローチで提供しています。
+[**WebSec**](https://websec.net)は、**アムステルダム**に拠点を置くプロフェッショナルなサイバーセキュリティ会社で、最新のサイバーセキュリティ脅威から**世界中のビジネスを保護する**ために、**攻撃的セキュリティサービス**を提供しています。
 
-WebSecは、アムステルダムとワイオミングにオフィスを持つ国際的なセキュリティ会社です。彼らは**オールインワンサービス**を提供しており、ペンテスト、**セキュリティ**監査、意識向上トレーニング、フィッシングキャンペーン、コードレビュー、エクスプロイト開発、セキュリティ専門家のアウトソーシングなど、すべてを行います。
+WebSecは、アムステルダムとワイオミングにオフィスを持つ国際的なセキュリティ会社です。彼らは**オールインワンサービス**を提供しており、ペンテスト、**セキュリティ**監査、意識向上トレーニング、フィッシングキャンペーン、コードレビュー、エクスプロイト開発、セキュリティ専門家のアウトソーシングなどを行っています。
 
-WebSecのもう一つの素晴らしい点は、業界の平均とは異なり、WebSecは**自分たちのスキルに非常に自信を持っている**ことであり、そのため、**最高の品質の結果を保証します**。彼らのウェブサイトには「**私たちがハッキングできなければ、あなたは支払わない！**」と記載されています。詳細については、彼らの[**ウェブサイト**](https://websec.net/en/)と[**ブログ**](https://websec.net/blog/)を見てください！
+WebSecのもう一つの素晴らしい点は、業界の平均とは異なり、WebSecは**自分たちのスキルに非常に自信を持っている**ことであり、その自信は**最高の品質の結果を保証する**ほどです。彼らのウェブサイトには「**私たちがハッキングできなければ、あなたは支払わない！**」と記載されています。詳細については、彼らの[**ウェブサイト**](https://websec.net/en/)と[**ブログ**](https://websec.net/blog/)をチェックしてください！
 
-上記に加えて、WebSecは**HackTricksの熱心なサポーターでもあります。**
+上記に加えて、WebSecは**HackTricksの熱心なサポーター**でもあります。
 
 {{#ref}}
 https://www.youtube.com/watch?v=Zq2JycGDCPM
@@ -176,15 +176,33 @@ https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons
 
 ---
 
+### [CyberHelmets](https://cyberhelmets.com/courses/?ref=hacktricks)
+
+<figure><img src="images/cyberhelmets-logo.png" alt="cyberhelmets logo"><figcaption></figcaption></figure>
+
+**現場のために構築され、あなたのために設計されています。**\
+[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks)は、業界の専門家によって構築され、提供される効果的なサイバーセキュリティトレーニングを開発しています。彼らのプログラムは理論を超えて、チームに深い理解と実用的なスキルを提供し、実際の脅威を反映したカスタム環境を使用します。カスタムトレーニングの問い合わせは、[**こちら**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks)からご連絡ください。
+
+**彼らのトレーニングの特徴:**
+* カスタム構築されたコンテンツとラボ
+* 一流のツールとプラットフォームに支えられた
+* 実務者によって設計され、教えられた
+
+{{#ref}}
+https://cyberhelmets.com/courses/?ref=hacktricks
+{{#endref}}
+
+---
+
 ### [Last Tower Solutions](https://www.lasttowersolutions.com/)
 
 <figure><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
 
-Last Tower Solutionsは、**教育**および**フィンテック**機関向けに特化したサイバーセキュリティサービスを提供し、**ペネトレーションテスト、クラウドセキュリティ評価**、および**コンプライアンス準備**（SOC 2、PCI-DSS、NIST）に焦点を当てています。私たちのチームには、**OSCPおよびCISSP認定の専門家**が含まれており、すべてのエンゲージメントに深い技術的専門知識と業界標準の洞察を提供します。
+Last Tower Solutionsは、**教育**および**フィンテック**機関向けに特化したサイバーセキュリティサービスを提供し、**ペネトレーションテスト、クラウドセキュリティ評価**、および**コンプライアンス準備**（SOC 2、PCI-DSS、NIST）に焦点を当てています。私たちのチームには、**OSCPおよびCISSP認定の専門家**が含まれており、すべてのエンゲージメントに深い技術的専門知識と業界標準の洞察をもたらします。
 
 私たちは、**手動でのインテリジェンス駆動のテスト**を通じて自動スキャンを超え、高リスク環境に合わせたテストを行います。学生の記録を保護することから、金融取引を守ることまで、私たちは組織が最も重要なものを守る手助けをします。
 
-_「質の高い防御には攻撃を知ることが必要です。私たちは理解を通じてセキュリティを提供します。」_
+_「質の高い防御は攻撃を知ることが必要です。私たちは理解を通じてセキュリティを提供します。」_
 
 最新のサイバーセキュリティ情報を得るために、私たちの[**ブログ**](https://www.lasttowersolutions.com/blog)を訪れてください。
 
