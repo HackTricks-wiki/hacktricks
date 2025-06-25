@@ -2,7 +2,7 @@
 
 <figure><img src="images/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
-_Hacktricks λογότυπα & κίνηση σχεδίαση από_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
+_Hacktricks λογότυπα & κίνηση σχεδίαση από_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_._
 
 ### Εκτέλεση του HackTricks Τοπικά
 ```bash
@@ -16,7 +16,7 @@ export LANG="master" # Leave master for english
 # "el" for Greek
 # "es" for Spanish
 # "fr" for French
-# "hi" for Hindi
+# "hi" for HindiP
 # "it" for Italian
 # "ja" for Japanese
 # "ko" for Korean
@@ -29,7 +29,7 @@ export LANG="master" # Leave master for english
 # "zh" for Chinese
 
 # Run the docker container indicating the path to the hacktricks folder
-docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git config --global --add safe.directory /app && git checkout $LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
+docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "mkdir -p ~/.ssh && ssh-keyscan -H github.com >> ~/.ssh/known_hosts && cd /app && git config --global --add safe.directory /app && git checkout $LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
 Η τοπική σας αντίγραφο του HackTricks θα είναι **διαθέσιμο στο [http://localhost:3337](http://localhost:3337)** μετά από <5 λεπτά (χρειάζεται να κατασκευάσει το βιβλίο, να είστε υπομονετικοί).
 
@@ -63,7 +63,7 @@ https://www.rootedcon.com/
 
 <figure><img src="images/image (47).png" alt=""><figcaption></figcaption></figure>
 
-**Intigriti** είναι η **νούμερο 1** ηθική πλατφόρμα hacking και **bug bounty στην Ευρώπη.**
+**Intigriti** είναι η **#1 στην Ευρώπη** πλατφόρμα ηθικού hacking και **bug bounty.**
 
 **Συμβουλή bug bounty**: **εγγραφείτε** στο **Intigriti**, μια premium **πλατφόρμα bug bounty που δημιουργήθηκε από hackers, για hackers**! Ελάτε μαζί μας στο [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) σήμερα και αρχίστε να κερδίζετε βραβεία έως **$100,000**!
 
@@ -78,7 +78,7 @@ https://go.intigriti.com/hacktricks
 <figure><img src="images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Χρησιμοποιήστε [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) για να δημιουργήσετε εύκολα και να **αυτοματοποιήσετε ροές εργασίας** που υποστηρίζονται από τα **πιο προηγμένα** εργαλεία της κοινότητας.
+Χρησιμοποιήστε [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) για να δημιουργήσετε εύκολα και **να αυτοματοποιήσετε ροές εργασίας** που υποστηρίζονται από τα **πιο προηγμένα** εργαλεία της κοινότητας.
 
 Αποκτήστε πρόσβαση σήμερα:
 
@@ -94,8 +94,8 @@ https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktr
 
 Εγγραφείτε στον [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server για να επικοινωνήσετε με έμπειρους hackers και κυνηγούς bug bounty!
 
-- **Ενημερώσεις Hacking:** Συμμετάσχετε σε περιεχόμενο που εμβαθύνει στην αδρεναλίνη και τις προκλήσεις του hacking
-- **Ειδήσεις Hack σε Πραγματικό Χρόνο:** Μείνετε ενημερωμένοι με τον ταχύτατο κόσμο του hacking μέσω ειδήσεων και ενημερώσεων σε πραγματικό χρόνο
+- **Insights Hacking:** Συμμετοχή σε περιεχόμενο που εμβαθύνει στην αδρεναλίνη και τις προκλήσεις του hacking
+- **Νέα Hack σε Πραγματικό Χρόνο:** Μείνετε ενημερωμένοι με τον ταχύτατο κόσμο του hacking μέσω ειδήσεων και insights σε πραγματικό χρόνο
 - **Τελευταίες Ανακοινώσεις:** Μείνετε ενημερωμένοι με τις πιο πρόσφατες εκκινήσεις bug bounty και κρίσιμες ενημερώσεις πλατφόρμας
 
 **Ελάτε μαζί μας στο** [**Discord**](https://discord.com/invite/N3FrSbmwdy) και αρχίστε να συνεργάζεστε με κορυφαίους hackers σήμερα!
@@ -120,7 +120,7 @@ https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktrick
 
 <figure><img src="images/image (1254).png" alt=""><figcaption></figcaption></figure>
 
-**SerpApi** προσφέρει γρήγορες και εύκολες APIs σε πραγματικό χρόνο για **πρόσβαση στα αποτελέσματα μηχανών αναζήτησης**. Scrape μηχανές αναζήτησης, διαχειρίζονται proxies, λύνουν captchas και αναλύουν όλα τα πλούσια δομημένα δεδομένα για εσάς.
+**SerpApi** προσφέρει γρήγορες και εύκολες APIs σε πραγματικό χρόνο για **πρόσβαση στα αποτελέσματα μηχανών αναζήτησης**. Scrape μηχανές αναζήτησης, χειρίζονται proxies, λύνουν captchas και αναλύουν όλα τα πλούσια δομημένα δεδομένα για εσάς.
 
 Μια συνδρομή σε ένα από τα σχέδια του SerpApi περιλαμβάνει πρόσβαση σε πάνω από 50 διαφορετικά APIs για scraping διαφορετικών μηχανών αναζήτησης, συμπεριλαμβανομένων των Google, Bing, Baidu, Yahoo, Yandex και άλλων.\
 Σε αντίθεση με άλλους παρόχους, **η SerpApi δεν scrapes μόνο οργανικά αποτελέσματα**. Οι απαντήσεις της SerpApi περιλαμβάνουν σταθερά όλες τις διαφημίσεις, inline εικόνες και βίντεο, γραφήματα γνώσεων και άλλα στοιχεία και χαρακτηριστικά που υπάρχουν στα αποτελέσματα αναζήτησης.
@@ -151,7 +151,7 @@ https://academy.8ksec.io/
 
 Η WebSec είναι μια διεθνής εταιρεία ασφάλειας με γραφεία στο Άμστερνταμ και το Wyoming. Προσφέρουν **υπηρεσίες ασφάλειας all-in-one** που σημαίνει ότι τα κάνουν όλα: Pentesting, **Ασφάλεια** Ελέγχων, Εκπαιδεύσεις Ευαισθητοποίησης, Καμπάνιες Phishing, Ανασκόπηση Κώδικα, Ανάπτυξη Εκμεταλλεύσεων, Εξωτερική Ανάθεση Ειδικών Ασφαλείας και πολλά άλλα.
 
-Ένα άλλο ενδιαφέρον πράγμα για την WebSec είναι ότι σε αντίθεση με τον μέσο όρο της βιομηχανίας, η WebSec είναι **πολύ σίγουρη για τις δεξιότητές της**, σε τέτοιο βαθμό που **εγγυάται τα καλύτερα ποιοτικά αποτελέσματα**, δηλώνει στην ιστοσελίδα της "**Αν δεν μπορούμε να το χακάρουμε, δεν πληρώνετε!**". Για περισσότερες πληροφορίες, ρίξτε μια ματιά στην [**ιστοσελίδα**](https://websec.net/en/) και το [**blog**](https://websec.net/blog/) τους!
+Ένα άλλο ενδιαφέρον πράγμα για την WebSec είναι ότι σε αντίθεση με τον μέσο όρο της βιομηχανίας, η WebSec είναι **πολύ σίγουρη για τις δεξιότητές της**, σε τέτοιο βαθμό που **εγγυάται τα καλύτερα ποιοτικά αποτελέσματα**, δηλώνει στην ιστοσελίδα της "**Αν δεν μπορούμε να το χακάρουμε, δεν το πληρώνετε!**". Για περισσότερες πληροφορίες, ρίξτε μια ματιά στην [**ιστοσελίδα**](https://websec.net/en/) και το [**blog**](https://websec.net/blog/) τους!
 
 Επιπλέον, η WebSec είναι επίσης **δεσμευμένος υποστηρικτής του HackTricks.**
 
@@ -166,7 +166,7 @@ https://www.youtube.com/watch?v=Zq2JycGDCPM
 <figure><img src="images/venacus-logo.svg" alt="venacus logo"><figcaption></figcaption></figure>
 
 [**Venacus**](https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons) είναι μια μηχανή αναζήτησης διαρροών δεδομένων (leak). \
-Παρέχουμε αναζητήσεις τυχαίων συμβολοσειρών (όπως η google) σε όλους τους τύπους διαρροών δεδομένων μεγάλων και μικρών --όχι μόνο τις μεγάλες-- από δεδομένα πολλών πηγών. \
+Παρέχουμε αναζητήσεις τυχαίων συμβολοσειρών (όπως η google) σε όλους τους τύπους διαρροών δεδομένων μεγάλων και μικρών --όχι μόνο τις μεγάλες-- από δεδομένα πολλαπλών πηγών. \
 Αναζητήσεις ανθρώπων, αναζητήσεις AI, αναζητήσεις οργανισμών, πρόσβαση API (OpenAPI), ενσωμάτωση theHarvester, όλα τα χαρακτηριστικά που χρειάζεται ένας pentester.\
 **Το HackTricks συνεχίζει να είναι μια εξαιρετική πλατφόρμα μάθησης για όλους μας και είμαστε περήφανοι που το υποστηρίζουμε!**
 
@@ -176,17 +176,44 @@ https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons
 
 ---
 
+### [CyberHelmets](https://cyberhelmets.com/courses/?ref=hacktricks)
+
+<figure><img src="images/cyberhelmets-logo.png" alt="cyberhelmets logo"><figcaption></figcaption></figure>
+
+**Κατασκευασμένο για το πεδίο. Κατασκευασμένο γύρω σας.**\
+[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) αναπτύσσει και παρέχει αποτελεσματική εκπαίδευση κυβερνοασφάλειας που κατασκευάζεται και καθοδηγείται από
+ειδικούς της βιομηχανίας. Τα προγράμματά τους ξεπερνούν τη θεωρία για να εξοπλίσουν τις ομάδες με βαθιά
+κατανόηση και εφαρμόσιμες δεξιότητες, χρησιμοποιώντας προσαρμοσμένα περιβάλλοντα που αντικατοπτρίζουν τις πραγματικές
+απειλές. Για ερωτήσεις σχετικά με προσαρμοσμένη εκπαίδευση, επικοινωνήστε μαζί μας [**εδώ**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks).
+
+**Τι ξεχωρίζει την εκπαίδευσή τους:**
+* Προσαρμοσμένο περιεχόμενο και εργαστήρια
+* Υποστηριζόμενο από κορυφαία εργαλεία και πλατφόρμες
+* Σχεδιασμένο και διδασκόμενο από επαγγελματίες
+
+{{#ref}}
+https://cyberhelmets.com/courses/?ref=hacktricks
+{{#endref}}
+
+---
+
 ### [Last Tower Solutions](https://www.lasttowersolutions.com/)
 
 <figure><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
 
-Η Last Tower Solutions παρέχει εξειδικευμένες υπηρεσίες κυβερνοασφάλειας για **Εκπαίδευση** και **FinTech** ιδρύματα, με έμφαση σε **δοκιμές διείσδυσης, αξιολογήσεις ασφάλειας cloud** και **ετοιμότητα συμμόρφωσης** (SOC 2, PCI-DSS, NIST). Η ομάδα μας περιλαμβάνει **πιστοποιημένους επαγγελματίες OSCP και CISSP**, φέρνοντας βαθιά τεχνική εμπειρία και γνώση βιομηχανίας σε κάθε συνεργασία.
+Last Tower Solutions παρέχει εξειδικευμένες υπηρεσίες κυβερνοασφάλειας για **Εκπαίδευση** και **FinTech**
+ιδρύματα, με έμφαση σε **δοκιμές διείσδυσης, αξιολογήσεις ασφάλειας cloud** και
+**ετοιμότητα συμμόρφωσης** (SOC 2, PCI-DSS, NIST). Η ομάδα μας περιλαμβάνει **OSCP και CISSP
+πιστοποιημένους επαγγελματίες**, φέρνοντας βαθιά τεχνική εμπειρία και γνώση βιομηχανίας σε
+κάθε συνεργασία.
 
-Πηγαίνουμε πέρα από τις αυτοματοποιημένες σαρώσεις με **χειροκίνητες, καθοδηγούμενες από πληροφορίες δοκιμές** προσαρμοσμένες σε περιβάλλοντα υψηλού κινδύνου. Από την ασφάλιση αρχείων φοιτητών έως την προστασία χρηματοοικονομικών συναλλαγών, βοηθάμε τους οργανισμούς να υπερασπιστούν ό,τι έχει σημασία περισσότερο.
+Πηγαίνουμε πέρα από τις αυτοματοποιημένες σαρώσεις με **χειροκίνητες, καθοδηγούμενες από πληροφορίες δοκιμές** προσαρμοσμένες σε
+υψηλού κινδύνου περιβάλλοντα. Από την ασφάλιση αρχείων φοιτητών έως την προστασία χρηματοοικονομικών συναλλαγών,
+βοηθάμε τους οργανισμούς να υπερασπιστούν ό,τι έχει σημασία περισσότερο.
 
 _“Μια ποιοτική άμυνα απαιτεί γνώση της επίθεσης, παρέχουμε ασφάλεια μέσω της κατανόησης.”_
 
-Μείνετε ενημερωμένοι και ενημερωμένοι με τα τελευταία νέα στην κυβερνοασφάλεια επισκεπτόμενοι το [**blog**](https://www.lasttowersolutions.com/blog) μας.
+Μείνετε ενημερωμένοι και ενημερωμένοι με τα τελευταία νέα στην κυβερνοασφάλεια επισκεπτόμενοι το [**blog**](https://www.lasttowersolutions.com/blog).
 
 {{#ref}}
 https://www.lasttowersolutions.com/
@@ -194,7 +221,7 @@ https://www.lasttowersolutions.com/
 
 ---
 
-## Άδεια & Αποποίηση Ευθύνης
+## Άδεια & Αποποίηση Ευθυνών
 
 Ελέγξτε τα εδώ:
 
