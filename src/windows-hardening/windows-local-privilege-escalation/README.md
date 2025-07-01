@@ -1525,6 +1525,178 @@ Then **read this to learn about UAC and UAC bypasses:**
 ../authentication-credentials-uac-and-efs/uac-user-account-control.md
 {{#endref}}
 
+## From Arbitrary Folder Delete/Move/Rename to SYSTEM EoP
+
+The technique described [**in this blog post**](https://www.zerodayinitiative.com/blog/2022/3/16/abusing-arbitrary-file-deletes-to-escalate-privilege-and-other-great-tricks) with a exploit code [**available here**](https://github.com/thezdi/PoC/tree/main/FilesystemEoPs).
+
+The attack basically consist of abusing the Windows Installer's rollback feature to replace legitimate files with malicious ones during the uninstallation process. For this the attacker needs to create a **malicious MSI installer** that will be used to hijack the `C:\Config.Msi` folder, which will later be used by he Windows Installer to store rollback files during the uninstallation of other MSI packages where the rollback files would have been modified to contain the malicious payload.
+
+The summarized technique is the following:
+
+1. **Stage 1 – Preparing for the Hijack (leave `C:\Config.Msi` empty)**
+
+- Step 1: Install the MSI
+    - Create an `.msi` that installs a harmless file (e.g., `dummy.txt`) in a writable folder (`TARGETDIR`).
+    - Mark the installer as **"UAC Compliant"**, so a **non-admin user** can run it.
+    - Keep a **handle** open to the file after install.
+
+- Step 2: Begin Uninstall
+    - Uninstall the same `.msi`.
+    - The uninstall process starts moving files to `C:\Config.Msi` and renaming them to `.rbf` files (rollback backups).
+    - **Poll the open file handle** using `GetFinalPathNameByHandle` to detect when the file becomes `C:\Config.Msi\<random>.rbf`.
+
+- Step 3: Custom Syncing
+    - The `.msi` includes a **custom uninstall action (`SyncOnRbfWritten`)** that:
+        - Signals when `.rbf` has been written.
+        - Then **waits** on another event before continuing the uninstall.
+
+- Step 4: Block Deletion of `.rbf`
+    - When signaled, **open the `.rbf` file** without `FILE_SHARE_DELETE` — this **prevents it from being deleted**.
+    - Then **signal back** so the uninstall can finish.
+    - Windows Installer fails to delete the `.rbf`, and because it can’t delete all contents, **`C:\Config.Msi` is not removed**.
+
+- Step 5: Manually Delete `.rbf`
+    - You (attacker) delete the `.rbf` file manually.
+    - Now **`C:\Config.Msi` is empty**, ready to be hijacked.
+
+> At this point, **trigger the SYSTEM-level arbitrary folder delete vulnerability** to delete `C:\Config.Msi`.
+
+2. **Stage 2 – Replacing Rollback Scripts with Malicious Ones**
+
+- Step 6: Recreate `C:\Config.Msi` with Weak ACLs
+    - Recreate the `C:\Config.Msi` folder yourself.
+    - Set **weak DACLs** (e.g., Everyone:F), and **keep a handle open** with `WRITE_DAC`.
+
+- Step 7: Run Another Install
+    - Install the `.msi` again, with:
+        - `TARGETDIR`: Writable location.
+        - `ERROROUT`: A variable that triggers a forced failure.
+    - This install will be used to trigger **rollback** again, which reads `.rbs` and `.rbf`.
+
+- Step 8: Monitor for `.rbs`
+    - Use `ReadDirectoryChangesW` to monitor `C:\Config.Msi` until a new `.rbs` appears.
+    - Capture its filename.
+
+- Step 9: Sync Before Rollback
+    - The `.msi` contains a **custom install action (`SyncBeforeRollback`)** that:
+        - Signals an event when the `.rbs` is created.
+        - Then **waits** before continuing.
+
+- Step 10: Reapply Weak ACL
+    - After receiving the `.rbs created` event:
+        - The Windows Installer **reapplies strong ACLs** to `C:\Config.Msi`.
+        - But since you still have a handle with `WRITE_DAC`, you can **reapply weak ACLs** again.
+
+> ACLs are **only enforced on handle open**, so you can still write to the folder.
+
+- Step 11: Drop Fake `.rbs` and `.rbf`
+    - Overwrite the `.rbs` file with a **fake rollback script** that tells Windows to:
+        - Restore your `.rbf` file (malicious DLL) into a **privileged location** (e.g., `C:\Program Files\Common Files\microsoft shared\ink\HID.DLL`).
+    - Drop your fake `.rbf` containing a **malicious SYSTEM-level payload DLL**.
+
+- Step 12: Trigger the Rollback
+    - Signal the sync event so the installer resumes.
+    - A **type 19 custom action (`ErrorOut`)** is configured to **intentionally fail the install** at a known point.
+    - This causes **rollback to begin**.
+
+- Step 13: SYSTEM Installs Your DLL
+    - Windows Installer:
+        - Reads your malicious `.rbs`.
+        - Copies your `.rbf` DLL into the target location.
+    - You now have your **malicious DLL in a SYSTEM-loaded path**.
+
+- Final Step: Execute SYSTEM Code
+    - Run a trusted **auto-elevated binary** (e.g., `osk.exe`) that loads the DLL you hijacked.
+    - **Boom**: Your code is executed **as SYSTEM**.
+
+
+### From Arbitrary File Delete/Move/Rename to SYSTEM EoP
+
+The main MSI rollback technique (the previous one) assumes you can delete an **entire folder** (e.g., `C:\Config.Msi`). But what if your vulnerability only allows **arbitrary file deletion** ?
+
+You could exploit **NTFS internals**: every folder has a hidden alternate data stream called:
+
+```
+C:\SomeFolder::$INDEX_ALLOCATION
+```
+
+This stream stores the **index metadata** of the folder.
+
+So, if you **delete the `::$INDEX_ALLOCATION` stream** of a folder, NTFS **removes the entire folder** from the filesystem.
+
+You can do this using standard file deletion APIs like:
+```c
+DeleteFileW(L"C:\\Config.Msi::$INDEX_ALLOCATION");
+```
+
+> Even though you're calling a *file* delete API, it **deletes the folder itself**.
+
+### From Folder Contents Delete to SYSTEM EoP
+What if your primitive doesn’t allow you to delete arbitrary files/folders, but it **does allow deletion of the *contents* of an attacker-controlled folder**?
+
+1. Step 1: Setup a bait folder and file
+- Create: `C:\temp\folder1`
+- Inside it: `C:\temp\folder1\file1.txt`
+
+2. Step 2: Place an **oplock** on `file1.txt`
+- The oplock **pauses execution** when a privileged process tries to delete `file1.txt`.
+
+```c
+// pseudo-code
+RequestOplock("C:\\temp\\folder1\\file1.txt");
+WaitForDeleteToTriggerOplock();
+```
+
+3. Step 3: Trigger SYSTEM process (e.g., `SilentCleanup`)
+- This process scans folders (e.g., `%TEMP%`) and tries to delete their contents.
+- When it reaches `file1.txt`, the **oplock triggers** and hands control to your callback.
+
+4. Step 4: Inside the oplock callback – redirect the deletion
+
+- Option A: Move `file1.txt` elsewhere
+    - This empties `folder1` without breaking the oplock.
+    - Don't delete `file1.txt` directly — that would release the oplock prematurely.
+
+- Option B: Convert `folder1` into a **junction**:
+
+```bash
+# folder1 is now a junction to \RPC Control (non-filesystem namespace)
+mklink /J C:\temp\folder1 \\?\GLOBALROOT\RPC Control
+```
+
+- Option C: Create a **symlink** in `\RPC Control`:
+```bash
+# Make file1.txt point to a sensitive folder stream
+CreateSymlink("\\RPC Control\\file1.txt", "C:\\Config.Msi::$INDEX_ALLOCATION")
+```
+
+> This targets the NTFS internal stream that stores folder metadata — deleting it deletes the folder.
+
+5. Step 5: Release the oplock
+- SYSTEM process continues and tries to delete `file1.txt`.
+- But now, due to the junction + symlink, it's actually deleting:
+```
+C:\Config.Msi::$INDEX_ALLOCATION
+```
+
+**Result**: `C:\Config.Msi` is deleted by SYSTEM.
+
+### From Arbitrary Folder Create to Permanent DoS
+
+Exploit a primitive that lets you **create an arbitrary folder as SYSTEM/admin** —  even if **you can’t write files** or **set weak permissions**.
+
+Create a **folder** (not a file) with the name of a **critical Windows driver**, e.g.:
+```
+C:\Windows\System32\cng.sys
+```
+
+- This path normally corresponds to the `cng.sys` kernel-mode driver.
+- If you **pre-create it as a folder**, Windows fails to load the actual driver on boot.
+- Then, Windows tries to load `cng.sys` during boot.
+- It sees the folder, **fails to resolve the actual driver**, and **crashes or halts boot**.
+- There’s **no fallback**, and **no recovery** without external intervention (e.g., boot repair or disk access).
+
+
 ## **From High Integrity to System**
 
 ### **New service**

@@ -357,6 +357,8 @@ In several occasions you will find that the **container has some volume mounted 
 docker run --rm -it -v /:/host ubuntu bash
 ```
 
+Another interesting example can be found in [**this blog**](https://projectdiscovery.io/blog/versa-concerto-authentication-bypass-rce) where it's indicated that the host's `/usr/bin/` and `/bin/` folders are mounted inside the container allowing the root user of the container to modify binaries inside these folders. Therefore, if a cron job is using any binary from there, like `/etc/cron.d/popularity-contest` this allows to escape from the container by modifying a binary used by the cron job.
+
 ### Privilege Escalation with 2 shells and host mount
 
 If you have access as **root inside a container** that has some folder from the host mounted and you have **escaped as a non privileged user to the host** and have read access over the mounted folder.\
