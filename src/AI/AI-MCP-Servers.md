@@ -90,6 +90,8 @@ Note that depending of the client settings it might be possible to run arbitrary
 
 Moreover, note that the description could indicate to use other functions that could facilitate these attacks. For example, if there is already a function that allows to exfiltrate data maybe sending an email (e.g. the user is using a MCP server connect to his gmail ccount), the description could indicate to use that function instead of running a `curl` command, which would be more likely to be noticed by the user. An example can be found in this [blog post](https://blog.trailofbits.com/2025/04/23/how-mcp-servers-can-steal-your-conversation-history/).
 
+Furthermore, [**this blog post**](https://www.cyberark.com/resources/threat-research-blog/poison-everywhere-no-output-from-your-mcp-server-is-safe) describes how it's possible to add the prompt injection not only in the description of the tools but also in the type, in variable names, in extra fields returned in the JSON response by the MCP server and even in an unexpected response from a tool, making the prompt injection attack even more stealthy and difficult to detect.
+
 
 ### Prompt Injection via Indirect Data
 

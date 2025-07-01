@@ -609,6 +609,7 @@
 - [hop-by-hop headers](pentesting-web/abusing-hop-by-hop-headers.md)
 - [IDOR](pentesting-web/idor.md)
 - [JWT Vulnerabilities (Json Web Tokens)](pentesting-web/hacking-jwt-json-web-tokens.md)
+- [JSON, XML and YAML Hacking](pentesting-web/json-xml-yaml-hacking.md)
 - [LDAP Injection](pentesting-web/ldap-injection.md)
 - [Login Bypass](pentesting-web/login-bypass/README.md)
   - [Login bypass List](pentesting-web/login-bypass/sql-login-bypass.md)
