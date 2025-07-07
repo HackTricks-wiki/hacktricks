@@ -47,6 +47,19 @@ TODO
 
 The file located in `/proc/sys/fs/binfmt_misc` indicates which binary should execute whic type of files. TODO: check the requirements to abuse this to execute a rev shell when a common file type is open.
 
+### Overwrite schema handlers (like http: or https:)
+
+An attacker with write permissions to a victim's configuration directories can easily replace or create files that change system behavior, resulting in unintended code execution. By modifying the `$HOME/.config/mimeapps.list` file to point HTTP and HTTPS URL handlers to a malicious file (e.g., setting `x-scheme-handler/http=evil.desktop`), the attacker ensures that **clicking any http or https link triggers code specified in that `evil.desktop` file**. For example, after placing the following malicious code in `evil.desktop` in `$HOME/.local/share/applications`, any external URL click runs the embedded command:
+
+```bash
+[Desktop Entry]
+Exec=sh -c 'zenity --info --title="$(uname -n)" --text="$(id)"'
+Type=Application
+Name=Evil Desktop Entry
+```
+
+For more info check [**this post**](https://chatgpt.com/c/67fac01f-0214-8006-9db3-19c40e45ee49) where it was used to exploit a real vulnerability.
+
 {{#include ../../banners/hacktricks-training.md}}
 
 

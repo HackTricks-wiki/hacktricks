@@ -19,7 +19,7 @@ This is like the [**LD_PRELOAD on Linux**](../../../../linux-hardening/privilege
 
 This technique may be also **used as an ASEP technique** as every application installed has a plist called "Info.plist" that allows for the **assigning of environmental variables** using a key called `LSEnvironmental`.
 
-> [!NOTE]
+> [!TIP]
 > Since 2012 **Apple has drastically reduced the power** of the **`DYLD_INSERT_LIBRARIES`**.
 >
 > Go to the code and **check `src/dyld.cpp`**. In the function **`pruneEnvironmentVariables`** you can see that **`DYLD_*`** variables are removed.
@@ -29,7 +29,7 @@ This technique may be also **used as an ASEP technique** as every application in
 > - The binary is `setuid/setgid`
 > - Existence of `__RESTRICT/__restrict` section in the macho binary.
 > - The software has entitlements (hardened runtime) without [`com.apple.security.cs.allow-dyld-environment-variables`](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables) entitlement
->   - Check **entitlements** of a binary with: `codesign -dv --entitlements :- </path/to/bin>`
+>  - Check **entitlements** of a binary with: `codesign -dv --entitlements :- </path/to/bin>`
 >
 > In more updated versions you can find this logic at the second part of the function **`configureProcessRestrictions`.** However, what is executed in newer versions is the **beginning checks of the function** (you can remove the ifs related to iOS or simulation as those won't be used in macOS.
 
@@ -157,7 +157,7 @@ From **`man dlopen`**:
 >
 > - If the binary is **unrestricted** and then it's possible to load something from the CWD or `/usr/local/lib` (or abusing one of the mentioned env variables)
 
-> [!NOTE]
+> [!TIP]
 > Note: There are **no** configuration files to **control dlopen searching**.
 >
 > Note: If the main executable is a **set\[ug]id binary or codesigned with entitlements**, then **all environment variables are ignored**, and only a full path can be used ([check DYLD_INSERT_LIBRARIES restrictions](macos-dyld-hijacking-and-dyld_insert_libraries.md#check-dyld_insert_librery-restrictions) for more detailed info)

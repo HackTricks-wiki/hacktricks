@@ -17,7 +17,7 @@ In the GUI behaviour it's recommended to enable a few things if your PC support 
 
 ![](<../../images/image (472).png>)
 
-> [!NOTE]
+> [!TIP]
 > If you realise that your PC is not capturing things try to disable OpenGL and lowering the sample rate.
 
 ### Uses

@@ -30,7 +30,7 @@ It's possible to **add manually** an iButton of type: **Dallas, Cyfral, and Meta
 
 It's possible to **emulate** saved iButtons (read or manually added).
 
-> [!NOTE]
+> [!TIP]
 > If you cannot make the expected contacts of the Flipper Zero touch the reader you can **use the external GPIO:**
 
 <figure><img src="../../../images/image (138).png" alt=""><figcaption></figcaption></figure>

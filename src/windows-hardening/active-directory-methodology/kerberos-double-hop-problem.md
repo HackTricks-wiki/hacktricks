@@ -29,7 +29,7 @@ Another way to avoid this problem which is [**notably insecure**](https://docs.m
 
 It is highly recommended that **CredSSP** be disabled on production systems, sensitive networks, and similar environments due to security concerns. To determine whether **CredSSP** is enabled, the `Get-WSManCredSSP` command can be run. This command allows for the **checking of CredSSP status** and can even be executed remotely, provided **WinRM** is enabled.
 
-```powershell
+```bash
 Invoke-Command -ComputerName bizintel -Credential ta\redsuit -ScriptBlock {
     Get-WSManCredSSP
 }
@@ -41,7 +41,7 @@ Invoke-Command -ComputerName bizintel -Credential ta\redsuit -ScriptBlock {
 
 To address the double hop issue, a method involving a nested `Invoke-Command` is presented. This does not solve the problem directly but offers a workaround without needing special configurations. The approach allows executing a command (`hostname`) on a secondary server through a PowerShell command executed from an initial attacking machine or through a previously established PS-Session with the first server. Here's how it's done:
 
-```powershell
+```bash
 $cred = Get-Credential ta\redsuit
 Invoke-Command -ComputerName bizintel -Credential $cred -ScriptBlock {
     Invoke-Command -ComputerName secdev -Credential $cred -ScriptBlock {hostname}
@@ -54,7 +54,7 @@ Alternatively, establishing a PS-Session with the first server and running the `
 
 A solution to bypass the double hop problem involves using `Register-PSSessionConfiguration` with `Enter-PSSession`. This method requires a different approach than `evil-winrm` and allows for a session that does not suffer from the double hop limitation.
 
-```powershell
+```bash
 Register-PSSessionConfiguration -Name doublehopsess -RunAsCredential domain_name\username
 Restart-Service WinRM
 Enter-PSSession -ConfigurationName doublehopsess -ComputerName <pc_name> -Credential domain_name\username

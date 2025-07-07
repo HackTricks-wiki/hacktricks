@@ -30,7 +30,7 @@ You could **download the raw LAPS policy** from `\\dc\SysVol\domain\Policies\{4A
 
 Moreover, the **native LAPS PowerShell cmdlets** can be used if they're installed on a machine we have access to:
 
-```powershell
+```bash
 Get-Command *AdmPwd*
 
 CommandType     Name                                               Version    Source
@@ -53,7 +53,7 @@ Get-AdmPwdPassword -ComputerName wkstn-2 | fl
 
 **PowerView** can also be used to find out **who can read the password and read it**:
 
-```powershell
+```bash
 # Find the principals that have ReadPropery on ms-Mcs-AdmPwd
 Get-AdmPwdPassword -ComputerName wkstn-2 | fl
 
@@ -67,7 +67,7 @@ The [LAPSToolkit](https://github.com/leoloobeek/LAPSToolkit) facilitates the enu
 One is parsing **`ExtendedRights`** for **all computers with LAPS enabled.** This will show **groups** specifically **delegated to read LAPS passwords**, which are often users in protected groups.\
 An **account** that has **joined a computer** to a domain receives `All Extended Rights` over that host, and this right gives the **account** the ability to **read passwords**. Enumeration may show a user account that can read the LAPS password on a host. This can help us **target specific AD users** who can read LAPS passwords.
 
-```powershell
+```bash
 # Get groups that can read passwords
 Find-LAPSDelegatedGroups
 
@@ -117,7 +117,7 @@ Password: 2Z@Ae)7!{9#Cq
 
 Once admin, it's possible to **obtain the passwords** and **prevent** a machine from **updating** its **password** by **setting the expiration date into the future**.
 
-```powershell
+```bash
 # Get expiration time
 Get-DomainObject -Identity computer-21 -Properties ms-mcs-admpwdexpirationtime
 

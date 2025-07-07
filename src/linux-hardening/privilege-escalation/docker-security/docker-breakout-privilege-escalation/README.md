@@ -37,12 +37,12 @@ nsenter --target 1 --mount --uts --ipc --net --pid -- bash
 docker run -it -v /:/host/ --cap-add=ALL --security-opt apparmor=unconfined --security-opt seccomp=unconfined --security-opt label:disable --pid=host --userns=host --uts=host --cgroupns=host ubuntu chroot /host/ bash
 ```
 
-> [!NOTE]
+> [!TIP]
 > In case the **docker socket is in an unexpected place** you can still communicate with it using the **`docker`** command with the parameter **`-H unix:///path/to/docker.sock`**
 
 Docker daemon might be also [listening in a port (by default 2375, 2376)](../../../../network-services-pentesting/2375-pentesting-docker.md) or on Systemd-based systems, communication with the Docker daemon can occur over the Systemd socket `fd://`.
 
-> [!NOTE]
+> [!TIP]
 > Additionally, pay attention to the runtime sockets of other high-level runtimes:
 >
 > - dockershim: `unix:///var/run/dockershim.sock`
@@ -357,6 +357,8 @@ In several occasions you will find that the **container has some volume mounted 
 docker run --rm -it -v /:/host ubuntu bash
 ```
 
+Another interesting example can be found in [**this blog**](https://projectdiscovery.io/blog/versa-concerto-authentication-bypass-rce) where it's indicated that the host's `/usr/bin/` and `/bin/` folders are mounted inside the container allowing the root user of the container to modify binaries inside these folders. Therefore, if a cron job is using any binary from there, like `/etc/cron.d/popularity-contest` this allows to escape from the container by modifying a binary used by the cron job.
+
 ### Privilege Escalation with 2 shells and host mount
 
 If you have access as **root inside a container** that has some folder from the host mounted and you have **escaped as a non privileged user to the host** and have read access over the mounted folder.\
@@ -510,7 +512,7 @@ This will trigger the payload which is present in the main.go file.
 
 For more information: [https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html](https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html)
 
-> [!NOTE]
+> [!TIP]
 > There are other CVEs the container can be vulnerable too, you can find a list in [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/cve-list](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/cve-list)
 
 ## Docker Custom Escape

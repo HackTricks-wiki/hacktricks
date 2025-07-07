@@ -46,7 +46,7 @@ The allowances/denies then stored in some TCC databases:
 > [!TIP]
 > The TCC database in **iOS** is in **`/private/var/mobile/Library/TCC/TCC.db`**
 
-> [!NOTE]
+> [!TIP]
 > The **notification center UI** can make **changes in the system TCC database**:
 >
 > ```bash
@@ -218,7 +218,7 @@ csreq -t -r /tmp/telegram_csreq.bin
 ### Entitlements & TCC Permissions
 
 Apps **don't only need** to **request** and have been **granted access** to some resources, they also need to **have the relevant entitlements**.\
-For example **Telegram** has the entitlement `com.apple.security.device.camera` to request **access to the camera**. An **app** that **doesn't** have this **entitlement won't be able** to access the camera (and the user won't be be even asked for the permissions).
+For example **Telegram** has the entitlement `com.apple.security.device.camera` to request **access to the camera**. An **app** that **doesn't** have this **entitlement won't be able** to access the camera (and the user won't even be asked for the permissions).
 
 However, for apps to **access** to **certain user folders**, such as `~/Desktop`, `~/Downloads` and `~/Documents`, they **don't need** to have any specific **entitlements.** The system will transparently handle access and **prompt the user** as needed.
 
@@ -250,7 +250,7 @@ Some TCC permissions are: kTCCServiceAppleEvents, kTCCServiceCalendar, kTCCServi
 
 ### User Intent / com.apple.macl
 
-As mentioned previously, it possible to **grant access to an App to a file by drag\&dropping it to it**. This access won't be specified in any TCC database but as an **extended** **attribute of the file**. This attribute will **store the UUID** of the allowed app:
+As mentioned previously, it is possible to **grant access to an App to a file by dragging\&dropping it to it**. This access won't be specified in any TCC database but as an **extended** **attribute of the file**. This attribute will **store the UUID** of the allowed app:
 
 ```bash
 xattr Desktop/private.txt
@@ -267,10 +267,10 @@ otool -l /System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal| gr
     uuid 769FD8F1-90E0-3206-808C-A8947BEBD6C3
 ```
 
-> [!NOTE]
+> [!TIP]
 > It's curious that the **`com.apple.macl`** attribute is managed by the **Sandbox**, not tccd.
 >
-> Also note that if you move a file that allows the UUID of an app in your computer to a different compiter, because the same app will have different UIDs, it won't grant access to that app.
+> Also note that if you move a file that allows the UUID of an app in your computer to a different computer, because the same app will have different UIDs, it won't grant access to that app.
 
 The extended attribute `com.apple.macl` **can’t be cleared** like other extended attributes because it’s **protected by SIP**. However, as [**explained in this post**](https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/), it's possible to disable it **zipping** the file, **deleting** it and **unzipping** it.
 
@@ -536,7 +536,7 @@ If you have **`kTCCServiceEndpointSecurityClient`**, you have FDA. End.
 
 ### User TCC DB to FDA
 
-Obtaining **write permissions** over the **user TCC** database you \*\*can'\*\*t grant yourself **`FDA`** permissions, only the one that lives in the system database can grant that.
+Obtaining **write permissions** over the **user TCC** database you **can'**t grant yourself **`FDA`** permissions, only the one that lives in the system database can grant that.
 
 But you can **can** give yourself **`Automation rights to Finder`**, and abuse the previous technique to escalate to FDA\*.
 
@@ -544,18 +544,18 @@ But you can **can** give yourself **`Automation rights to Finder`**, and abuse t
 
 **Full Disk Access** is TCC name is **`kTCCServiceSystemPolicyAllFiles`**
 
-I don't thing this is a real privesc, but just in case you find it useful: If you controls a program with FDA you can **modify the users TCC database and give yourself any access**. This can be useful as a persistence technique in case you might lose your FDA permissions.
+I don't think this is a real privesc, but just in case you find it useful: If you control a program with FDA you can **modify the users TCC database and give yourself any access**. This can be useful as a persistence technique in case you might lose your FDA permissions.
 
 ### **SIP Bypass to TCC Bypass**
 
-The system **TCC database** is protected by **SIP**, thats why only processes with the **indicated entitlements are going to be able to modify** it. Therefore, if an attacker finds a **SIP bypass** over a **file** (be able to modify a file restricted by SIP), he will be able to:
+The system **TCC database** is protected by **SIP**, that's why only processes with the **indicated entitlements are going to be able to modify** it. Therefore, if an attacker finds a **SIP bypass** over a **file** (be able to modify a file restricted by SIP), he will be able to:
 
 - **Remove the protection** of a TCC database, and give himself all TCC permissions. He could abuse any of these files for example:
   - The TCC systems database
   - REG.db
   - MDMOverrides.plist
 
-However, there is another option to abuse this **SIP bypass to bypass TCC**, the file `/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist` is an allow list of applications that require a TCC exception. Therefore, if an attacker can **remove the SIP protection** from this file and add his **own application** the application ill be able to bypass TCC.\
+However, there is another option to abuse this **SIP bypass to bypass TCC**, the file `/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist` is an allow list of applications that require a TCC exception. Therefore, if an attacker can **remove the SIP protection** from this file and add his **own application** the application will be able to bypass TCC.\
 For example to add terminal:
 
 ```bash

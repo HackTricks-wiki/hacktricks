@@ -36,6 +36,9 @@ To learn how to **attack an AD** you need to **understand** really good the **Ke
 
 You can take a lot to [https://wadcoms.github.io/](https://wadcoms.github.io) to have a quick view of which commands you can run to enumerate/exploit an AD.
 
+> [!WARNING]
+> Kerberos communication **requires a full qualifid name (FQDN)** for performing actions. If you try to access a machine by the IP address, **it'll use NTLM and not kerberos**.
+
 ## Recon Active Directory (No creds/sessions)
 
 If you just have access to an AD environment but you don't have any credentials/sessions you could:
@@ -109,7 +112,7 @@ Get-GlobalAddressList -ExchHostname [ip] -UserName [domain]\[username] -Password
 ```
 
 > [!WARNING]
-> You can find lists of usernames in [**this github repo**](https://github.com/danielmiessler/SecLists/tree/master/Usernames/Names) \*\*\*\* and this one ([**statistically-likely-usernames**](https://github.com/insidetrust/statistically-likely-usernames)).
+> You can find lists of usernames in [**this github repo**](https://github.com/danielmiessler/SecLists/tree/master/Usernames/Names)  and this one ([**statistically-likely-usernames**](https://github.com/insidetrust/statistically-likely-usernames)).
 >
 > However, you should have the **name of the people working on the company** from the recon step you should have performed before this. With the name and surname you could used the script [**namemash.py**](https://gist.github.com/superkojiman/11076951) to generate potential valid usernames.
 
@@ -135,7 +138,7 @@ You might be able to **obtain** some challenge **hashes** to crack **poisoning**
 
 ### NTLM Relay
 
-If you have managed to enumerate the active directory you will have **more emails and a better understanding of the network**. You might be able to to force NTLM [**relay attacks**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack) \*\*\*\* to get access to the AD env.
+If you have managed to enumerate the active directory you will have **more emails and a better understanding of the network**. You might be able to to force NTLM [**relay attacks**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)  to get access to the AD env.
 
 ### Steal NTLM Creds
 
@@ -163,7 +166,7 @@ Regarding [**ASREPRoast**](asreproast.md) you can now find every possible vulner
 
 - You could use the [**CMD to perform a basic recon**](../basic-cmd-for-pentesters.md#domain-info)
 - You can also use [**powershell for recon**](../basic-powershell-for-pentesters/index.html) which will be stealthier
-- You ca also [**use powerview**](../basic-powershell-for-pentesters/powerview.md) to extract more detailed information
+- You can also [**use powerview**](../basic-powershell-for-pentesters/powerview.md) to extract more detailed information
 - Another amazing tool for recon in an active directory is [**BloodHound**](bloodhound.md). It is **not very stealthy** (depending on the collection methods you use), but **if you don't care** about that, you should totally give it a try. Find where users can RDP, find path to other groups, etc.
   - **Other automated AD enumeration tools are:** [**AD Explorer**](bloodhound.md#ad-explorer)**,** [**ADRecon**](bloodhound.md#adrecon)**,** [**Group3r**](bloodhound.md#group3r)**,** [**PingCastle**](bloodhound.md#pingcastle)**.**
 - [**DNS records of the AD**](ad-dns-records.md) as they might contain interesting information.
@@ -215,7 +218,7 @@ It's very **unlikely** that you will find **tickets** in the current user **givi
 
 If you have managed to enumerate the active directory you will have **more emails and a better understanding of the network**. You might be able to to force NTLM [**relay attacks**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)**.**
 
-### **Looks for Creds in Computer Shares**
+### Looks for Creds in Computer Shares | SMB Shares
 
 Now that you have some basic credentials you should check if you can **find** any **interesting files being shared inside the AD**. You could do that manually but it's a very boring repetitive task (and more if you find hundreds of docs you need to check).
 
@@ -319,7 +322,7 @@ Having **WRITE** privilege on an Active Directory object of a remote computer en
 resource-based-constrained-delegation.md
 {{#endref}}
 
-### ACLs Abuse
+### Permissions/ACLs Abuse
 
 The compromised user could have some **interesting privileges over some domain objects** that could let you **move** laterally/**escalate** privileges.
 
@@ -385,19 +388,19 @@ For example you could:
 
 - Make users vulnerable to [**Kerberoast**](kerberoast.md)
 
-  ```powershell
+  ```bash
   Set-DomainObject -Identity <username> -Set @{serviceprincipalname="fake/NOTHING"}r
   ```
 
 - Make users vulnerable to [**ASREPRoast**](asreproast.md)
 
-  ```powershell
+  ```bash
   Set-DomainObject -Identity <username> -XOR @{UserAccountControl=4194304}
   ```
 
 - Grant [**DCSync**](#dcsync) privileges to a user
 
-  ```powershell
+  ```bash
   Add-DomainObjectAcl -TargetIdentity "DC=SUB,DC=DOMAIN,DC=LOCAL" -PrincipalIdentity bfarmer -Rights DCSync
   ```
 
@@ -561,9 +564,24 @@ Attackers with could access to resources in another domain through three primary
 - **Foreign Domain Group Membership**: Principals can also be members of groups within the foreign domain. However, the effectiveness of this method depends on the nature of the trust and the scope of the group.
 - **Access Control Lists (ACLs)**: Principals might be specified in an **ACL**, particularly as entities in **ACEs** within a **DACL**, providing them access to specific resources. For those looking to dive deeper into the mechanics of ACLs, DACLs, and ACEs, the whitepaper titled “[An ACE Up The Sleeve](https://specterops.io/assets/resources/an_ace_up_the_sleeve.pdf)” is an invaluable resource.
 
+### Find external users/groups with permissions
+
+You can check **`CN=<user_SID>,CN=ForeignSecurityPrincipals,DC=domain,DC=com`** to find foreign security principals in the domain. These will be user/group from **an external domain/forest**.
+
+You could check this in **Bloodhound** or using powerview:
+
+```powershell
+# Get users that are i groups outside of the current domain
+Get-DomainForeignUser
+
+# Get groups inside a domain with users our
+Get-DomainForeignGroupMember
+```
+
 ### Child-to-Parent forest privilege escalation
 
-```
+```bash
+# Fro powerview
 Get-DomainTrust
 
 SourceName      : sub.domain.local    --> current domain
@@ -573,6 +591,20 @@ TrustAttributes : WITHIN_FOREST       --> WITHIN_FOREST: Both in the same forest
 TrustDirection  : Bidirectional       --> Trust direction (2ways in this case)
 WhenCreated     : 2/19/2021 1:28:00 PM
 WhenChanged     : 2/19/2021 1:28:00 PM
+```
+
+Other ways to enumerate domain trusts:
+
+```bash
+# Get DCs
+nltest /dsgetdc:<DOMAIN>
+
+# Get all domain trusts
+nltest /domain_trusts /all_trusts /v
+
+# Get all trust of a domain
+nltest /dclist:sub.domain.local
+nltest /server:dc.sub.domain.local /domain_trusts /all_trusts
 ```
 
 > [!WARNING]
@@ -622,7 +654,7 @@ More details on this can be read in [From DA to EA with ESC5](https://posts.spec
 
 ### External Forest Domain - One-Way (Inbound) or bidirectional
 
-```powershell
+```bash
 Get-DomainTrust
 SourceName      : a.domain.local   --> Current domain
 TargetName      : domain.external  --> Destination domain
@@ -641,7 +673,7 @@ external-forest-domain-oneway-inbound.md
 
 ### External Forest Domain - One-Way (Outbound)
 
-```powershell
+```bash
 Get-DomainTrust -Domain current.local
 
 SourceName      : current.local   --> Current domain

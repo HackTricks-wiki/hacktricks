@@ -211,7 +211,7 @@ log show --style syslog --predicate 'eventMessage contains[c] "sandbox"' --last 
 {{#endtab}}
 {{#endtabs}}
 
-> [!NOTE]
+> [!TIP]
 > Note that the **Apple-authored** **software** that runs on **Windows** **doesn’t have additional security precautions**, such as application sandboxing.
 
 Bypasses examples:

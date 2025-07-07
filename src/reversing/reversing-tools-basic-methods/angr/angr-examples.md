@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-> [!NOTE]
+> [!TIP]
 > If the program is using `scanf` to get **several values at once from stdin** you need to generate a state that starts after the **`scanf`**.
 
 Codes taken from [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)
@@ -394,33 +394,33 @@ if __name__ == '__main__':
   main(sys.argv)
 ```
 
-> [!NOTE]
+> [!TIP]
 > Note that the symbolic file could also contain constant data merged with symbolic data:
 >
 > ```python
->   # Hello world, my name is John.
->   # ^                       ^
->   # ^ address 0             ^ address 24 (count the number of characters)
->   # In order to represent this in memory, we would want to write the string to
->   # the beginning of the file:
->   #
->   # hello_txt_contents = claripy.BVV('Hello world, my name is John.', 30*8)
->   #
->   # Perhaps, then, we would want to replace John with a
->   # symbolic variable. We would call:
->   #
->   # name_bitvector = claripy.BVS('symbolic_name', 4*8)
->   #
->   # Then, after the program calls fopen('hello.txt', 'r') and then
->   # fread(buffer, sizeof(char), 30, hello_txt_file), the buffer would contain
->   # the string from the file, except four symbolic bytes where the name would be
->   # stored.
->   # (!)
+>  # Hello world, my name is John.
+>  # ^                       ^
+>  # ^ address 0             ^ address 24 (count the number of characters)
+>  # In order to represent this in memory, we would want to write the string to
+>  # the beginning of the file:
+>  #
+>  # hello_txt_contents = claripy.BVV('Hello world, my name is John.', 30*8)
+>  #
+>  # Perhaps, then, we would want to replace John with a
+>  # symbolic variable. We would call:
+>  #
+>  # name_bitvector = claripy.BVS('symbolic_name', 4*8)
+>  #
+>  # Then, after the program calls fopen('hello.txt', 'r') and then
+>  # fread(buffer, sizeof(char), 30, hello_txt_file), the buffer would contain
+>  # the string from the file, except four symbolic bytes where the name would be
+>  # stored.
+>  # (!)
 > ```
 
 ### Applying Constrains
 
-> [!NOTE]
+> [!TIP]
 > Sometimes simple human operations like compare 2 words of length 16 **char by char** (loop), **cost** a lot to a **angr** because it needs to generate branches **exponentially** because it generates 1 branch per if: `2^16`\
 > Therefore, it's easier to **ask angr get to a previous point** (where the real difficult part was already done) and **set those constrains manually**.
 
@@ -498,7 +498,7 @@ if __name__ == '__main__':
 > [!CAUTION]
 > In some scenarios you can activate **veritesting**, which will merge similar status, in order to save useless branches and find the solution: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 
-> [!NOTE]
+> [!TIP]
 > Another thing you can do in these scenarios is to **hook the function giving angr something it can understand** more easily.
 
 ### Simulation Managers

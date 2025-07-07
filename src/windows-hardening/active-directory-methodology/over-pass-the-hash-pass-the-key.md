@@ -36,6 +36,15 @@ To conform to operational security and use AES256, the following command can be 
 .\Rubeus.exe asktgt /user:<USERNAME> /domain:<DOMAIN> /aes256:HASH /nowrap /opsec
 ```
 
+## Stealthier version
+
+> [!WARNING]
+> Each logon session can only have one active TGT at a time so be careful.
+
+1. Create a new logon sesison with **`make_token`** from Cobalt Strike.
+2. Then, use Rubeus to generate a TGT for the new logon session without affecting the existing one.
+
+
 ## References
 
 - [https://www.tarlogic.com/es/blog/como-atacar-kerberos/](https://www.tarlogic.com/es/blog/como-atacar-kerberos/)

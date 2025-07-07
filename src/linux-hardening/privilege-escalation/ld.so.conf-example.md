@@ -115,7 +115,7 @@ $ whoami
 ubuntu
 ```
 
-> [!NOTE]
+> [!TIP]
 > Note that in this example we haven't escalated privileges, but modifying the commands executed and **waiting for root or other privileged user to execute the vulnerable binary** we will be able to escalate privileges.
 
 ### Other misconfigurations - Same vuln
