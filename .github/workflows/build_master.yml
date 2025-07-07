@@ -35,18 +35,21 @@ jobs:
       - name: Build mdBook
         run: MDBOOK_BOOK__LANGUAGE=en mdbook build || (echo "Error logs" && cat hacktricks-preprocessor-error.log && echo "" && echo "" && echo "Debug logs" && (cat hacktricks-preprocessor.log | tail -n 20) && exit 1)
       
-      - name: Update searchindex.js in repo
+      - name: Update searchindex in repo
         run: |
+          ls -la
+          ls -la book
           git config --global --add safe.directory /__w/hacktricks/hacktricks
           git pull
           git config --global user.email "build@example.com"
           git config --global user.name "Build master"
           git config pull.rebase false
-          cp book/searchindex.js searchindex.js
-          cp book/searchindex.json searchindex.json
-          git add searchindex.js searchindex.json
-          git commit -m "Update searchindex"
-          git push
+          if [ -f "book/searchindex.js" ]; then
+            cp book/searchindex.js searchindex.js
+          fi
+          (git add searchindex.js;
+          git commit -m "Update searchindex";
+          git push) || echo "No changes to searchindex.js"
 
       # Login in AWs
       - name: Configure AWS credentials using OIDC

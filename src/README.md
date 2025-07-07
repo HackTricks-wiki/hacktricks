@@ -2,15 +2,35 @@
 
 <figure><img src="images/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
-_Hacktricks logos & motion design by_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
+_Hacktricks logos & motion design by_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_._
 
 ### Run HackTricks Locally
 
 ```bash
 # Download latest version of hacktricks
 git clone https://github.com/HackTricks-wiki/hacktricks
+
+# Select the language you want to use
+export LANG="master" # Leave master for english
+# "af" for Afrikaans
+# "de" for German
+# "el" for Greek
+# "es" for Spanish
+# "fr" for French
+# "hi" for HindiP
+# "it" for Italian
+# "ja" for Japanese
+# "ko" for Korean
+# "pl" for Polish
+# "pt" for Portuguese
+# "sr" for Serbian
+# "sw" for Swahili
+# "tr" for Turkish
+# "uk" for Ukrainian
+# "zh" for Chinese
+
 # Run the docker container indicating the path to the hacktricks folder
-docker run -d --rm -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git config --global --add safe.directory /app && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
+docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "mkdir -p ~/.ssh && ssh-keyscan -H github.com >> ~/.ssh/known_hosts && cd /app && git config --global --add safe.directory /app && git checkout $LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
 
 Your local copy of HackTricks will be **available at [http://localhost:3337](http://localhost:3337)** after <5 minutes (it needs to build the book, be patient).
@@ -140,6 +160,69 @@ In addition to the above WebSec is also a **committed supporter of HackTricks.**
 {{#ref}}
 https://www.youtube.com/watch?v=Zq2JycGDCPM
 {{#endref}}
+
+---
+
+### [Venacus](https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons)
+
+<figure><img src="images/venacus-logo.svg" alt="venacus logo"><figcaption></figcaption></figure>
+
+[**Venacus**](https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons) is a data breach (leak) search engine. \
+We provide random string search (like google) over all types of data leaks big and small --not only the big ones-- over data from multiple sources. \
+People search, AI search, organization search, API (OpenAPI) access, theHarvester integration, all features a pentester needs.\
+**HackTricks continues to be a great learning platform for us all and we're proud to be sponsoring it!**
+
+{{#ref}}
+https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons
+{{#endref}}
+
+---
+
+### [CyberHelmets](https://cyberhelmets.com/courses/?ref=hacktricks)
+
+<figure><img src="images/cyberhelmets-logo.png" alt="cyberhelmets logo"><figcaption></figcaption></figure>
+
+
+**Built for the field. Built around you.**\
+[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) develops and delivers effective cybersecurity training built and led by
+industry experts. Their programs go beyond theory to equip teams with deep
+understanding and actionable skills, using custom environments that reflect real-world
+threats. For custom training inquiries, reach out to us [**here**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks).
+
+**What sets their training apart:**
+* Custom-built content and labs
+* Backed by top-tier tools and platforms
+* Designed and taught by practitioners
+
+{{#ref}}
+https://cyberhelmets.com/courses/?ref=hacktricks
+{{#endref}}
+
+---
+
+### [Last Tower Solutions](https://www.lasttowersolutions.com/)
+
+<figure><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
+
+Last Tower Solutions delivers specialized cybersecurity services for **Education** and **FinTech**
+institutions, with a focus on **penetration testing, cloud security assessments**, and
+**compliance readiness** (SOC 2, PCI-DSS, NIST). Our team includes **OSCP and CISSP
+certified professionals**, bringing deep technical expertise and industry-standard insight to
+every engagement.
+
+We go beyond automated scans with **manual, intelligence-driven testing** tailored to
+high-stakes environments. From securing student records to protecting financial transactions,
+we help organizations defend what matters most.
+
+_“A quality defense requires knowing the offense, we provide security through understanding.”_
+
+Stay informed and up to date with the latest in cybersecurity by visiting our [**blog**](https://www.lasttowersolutions.com/blog).
+
+{{#ref}}
+https://www.lasttowersolutions.com/
+{{#endref}}
+
+---
 
 ## License & Disclaimer
 

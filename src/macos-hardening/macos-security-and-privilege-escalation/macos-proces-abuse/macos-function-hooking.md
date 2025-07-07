@@ -378,4 +378,3 @@ static void customConstructor(int argc, const char **argv) {
 {{#include ../../../banners/hacktricks-training.md}}
 
 
-

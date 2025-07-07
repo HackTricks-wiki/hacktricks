@@ -8,7 +8,7 @@ If the **external group** has **RDP access** to any **computer** in the current 
 
 Once that user has accessed via RDP, the **attacker can pivot to that users session** and abuse its permissions in the external domain.
 
-```powershell
+```bash
 # Supposing the group "External Users" has RDP access in the current domain
 ## lets find where they could access
 ## The easiest way would be with bloodhound, but you could also run:
@@ -40,7 +40,7 @@ If a user access via **RDP into a machine** where an **attacker** is **waiting**
 
 In this case you could just **compromise** the **victims** **original computer** by writing a **backdoor** in the **statup folder**.
 
-```powershell
+```bash
 # Wait til someone logs in:
 net logons
 Logged on users at \\localhost:

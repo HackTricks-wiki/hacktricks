@@ -89,7 +89,7 @@ You can download the package to create the reverse shell here. Please, note that
 Reverse.tar (1).gz
 {{#endfile}}
 
-> [!NOTE]
+> [!TIP]
 > This package is called `Reverse`. However, it was specially crafted so that when you exit the reverse shell the rest of the installation will fail, so you **won't leave any extra python package installed on the server** when you leave.
 
 ## Eval-ing python code
@@ -836,7 +836,7 @@ The challenge actually abuses another vulnerability in the server that allows to
 
 ## Dissecting Python Objects
 
-> [!NOTE]
+> [!TIP]
 > If you want to **learn** about **python bytecode** in depth read this **awesome** post about the topic: [**https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d**](https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d)
 
 In some CTFs you could be provided with the name of a **custom function where the flag** resides and you need to see the **internals** of the **function** to extract it.
@@ -1039,7 +1039,7 @@ mydict['__builtins__'] = __builtins__
 function_type(code_obj, mydict, None, None, None)("secretcode")
 ```
 
-> [!NOTE]
+> [!TIP]
 > Depending on the python version the **parameters** of `code_type` may have a **different order**. The best way to know the order of the params in the python version you are running is to run:
 >
 > ```

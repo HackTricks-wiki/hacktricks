@@ -143,7 +143,7 @@ ARM64 instructions generally have the **format `opcode dst, src1, src2`**, where
 - **`lsl`**, **`lsr`**, **`asr`**, **`ror`, `rrx`**:
   - **Logical shift left**: Add 0s from the end moving the other bits forward (multiply by n-times 2)
   - **Logical shift right**: Add 1s at the beginning moving the other bits backward (divide by n-times 2 in unsigned)
-  - **Arithmetic shift right**: Like **`lsr`**, but instead of adding 0s if the most significant bit is a 1, \*\*1s are added (\*\*divide by ntimes 2 in signed)
+  - **Arithmetic shift right**: Like **`lsr`**, but instead of adding 0s if the most significant bit is a 1, **1s are added (**divide by ntimes 2 in signed)
   - **Rotate right**: Like **`lsr`** but whatever is removed from the right it's appended to the left
   - **Rotate Right with Extend**: Like **`ror`**, but with the carry flag as the "most significant bit". So the carry flag is moved to the bit 31 and the removed bit to the carry flag.
 - **`bfm`**: **Bit Filed Move**, these operations **copy bits `0...n`** from a value an place them in positions **`m..m+n`**. The **`#s`** specifies the **leftmost bit** position and **`#r`** the **rotate right amount**.
@@ -250,7 +250,7 @@ ldp x29, x30, [sp], #16  ; load pair x29 and x30 from the stack and increment th
 
 Armv8-A support the execution of 32-bit programs. **AArch32** can run in one of **two instruction sets**: **`A32`** and **`T32`** and can switch between them via **`interworking`**.\
 **Privileged** 64-bit programs can schedule the **execution of 32-bit** programs by executing a exception level transfer to the lower privileged 32-bit.\
-Note that the transition from 64-bit to 32-bit occurs with a lower of the exception level (for example a 64-bit program in EL1 triggering a program in EL0). This is done by setting the **bit 4 of** **`SPSR_ELx`** special register **to 1** when the `AArch32` process thread is ready to be executed and the rest of `SPSR_ELx` stores the **`AArch32`** programs CPSR. Then, the privileged process calls the **`ERET`** instruction so the processor transitions to **`AArch32`** entering in A32 or T32 depending on CPSR\*\*.\*\*
+Note that the transition from 64-bit to 32-bit occurs with a lower of the exception level (for example a 64-bit program in EL1 triggering a program in EL0). This is done by setting the **bit 4 of** **`SPSR_ELx`** special register **to 1** when the `AArch32` process thread is ready to be executed and the rest of `SPSR_ELx` stores the **`AArch32`** programs CPSR. Then, the privileged process calls the **`ERET`** instruction so the processor transitions to **`AArch32`** entering in A32 or T32 depending on CPSR**.**
 
 The **`interworking`** occurs using the J and T bits of CPSR. `J=0` and `T=0` means **`A32`** and `J=0` and `T=1` means **T32**. This basically traduces on setting the **lowest bit to 1** to indicate the instruction set is T32.\
 This is set during the **interworking branch instructions,** but can also be set directly with other instructions when the PC is set as the destination register. Example:

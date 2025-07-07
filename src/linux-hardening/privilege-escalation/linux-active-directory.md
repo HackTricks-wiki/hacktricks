@@ -70,7 +70,7 @@ This procedure will attempt to inject into various sessions, indicating success 
 
 SSSD maintains a copy of the database at the path `/var/lib/sss/secrets/secrets.ldb`. The corresponding key is stored as a hidden file at the path `/var/lib/sss/secrets/.secrets.mkey`. By default, the key is only readable if you have **root** permissions.
 
-Invoking \*\*`SSSDKCMExtractor` \*\* with the --database and --key parameters will parse the database and **decrypt the secrets**.
+Invoking **`SSSDKCMExtractor`** with the --database and --key parameters will parse the database and **decrypt the secrets**.
 
 ```bash
 git clone https://github.com/fireeye/SSSDKCMExtractor

@@ -59,7 +59,7 @@ cd <SHAREDD_FOLDER>
 
 ## Local Exploit
 
-> [!NOTE]
+> [!TIP]
 > Note that if you can create a **tunnel from your machine to the victim machine you can still use the Remote version to exploit this privilege escalation tunnelling the required ports**.\
 > The following trick is in case the file `/etc/exports` **indicates an IP**. In this case you **won't be able to use** in any case the **remote exploit** and you will need to **abuse this trick**.\
 > Another required requirement for the exploit to work is that **the export inside `/etc/export`** **must be using the `insecure` flag**.\

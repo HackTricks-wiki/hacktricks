@@ -97,7 +97,7 @@ host> /tmp/bash
  -p #This will give you a shell as root
 ```
 
-> [!NOTE]
+> [!TIP]
 > Note that maybe you cannot mount the folder `/tmp` but you can mount a **different writable folder**. You can find writable directories using: `find / -writable -type d 2>/dev/null`
 >
 > **Note that not all the directories in a linux machine will support the suid bit!** In order to check which directories support the suid bit run `mount | grep -v "nosuid"` For example usually `/dev/shm` , `/run` , `/proc` , `/sys/fs/cgroup` and `/var/lib/lxcfs` don't support the suid bit.
@@ -168,7 +168,7 @@ capsh --print
 #You can abuse the SYS_MODULE capability
 ```
 
-> [!NOTE]
+> [!TIP]
 > The **`HostConfig`** is the key that usually contains the **interesting** **privileges** to escape from the container. However, as we have discussed previously, note how using Binds outside of it also works and may allow you to bypass restrictions.
 
 ## Disabling Plugin

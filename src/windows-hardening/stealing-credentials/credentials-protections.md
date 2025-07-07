@@ -18,19 +18,49 @@ To **toggle this feature off or on**, the _**UseLogonCredential**_ and _**Negoti
 reg query HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest /v UseLogonCredential
 ```
 
-## LSA Protection
+## LSA Protection (PP & PPL protected processes)
 
-Starting with **Windows 8.1**, Microsoft enhanced the security of LSA to **block unauthorized memory reads or code injections by untrusted processes**. This enhancement hinders the typical functioning of commands like `mimikatz.exe sekurlsa:logonpasswords`. To **enable this enhanced protection**, the _**RunAsPPL**_ value in _**HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA**_ should be adjusted to 1:
+**Protected Process (PP)** and **Protected Process Light (PPL)** are **Windows kernel-level protections** designed to prevent unauthorized access to sensitive processes like **LSASS**. Introduced in **Windows Vista**, the **PP model** was originally created for **DRM** enforcement and only allowed binaries signed with a **special media certificate** to be protected. A process marked as **PP** can only be accessed by other processes that are **also PP** and have an **equal or higher protection level**, and even then, **only with limited access rights** unless specifically allowed.
 
-```
+**PPL**, introduced in **Windows 8.1**, is a more flexible version of PP. It allows **broader use cases** (e.g., LSASS, Defender) by introducing **"protection levels"** based on the **digital signature’s EKU (Enhanced Key Usage)** field. The protection level is stored in the `EPROCESS.Protection` field, which is a `PS_PROTECTION` structure with:
+- **Type** (`Protected` or `ProtectedLight`)
+- **Signer** (e.g., `WinTcb`, `Lsa`, `Antimalware`, etc.)
+
+This structure is packed into a single byte and determines **who can access whom**:
+- **Higher signer values can access lower ones**
+- **PPLs can’t access PPs**
+- **Unprotected processes can't access any PPL/PP**
+  
+### What you need to know from an offensive perspective
+
+- When **LSASS runs as a PPL**, attempts to open it using `OpenProcess(PROCESS_VM_READ | QUERY_INFORMATION)` from a normal admin context **fail with `0x5 (Access Denied)`**, even if `SeDebugPrivilege` is enabled.
+- You can **check LSASS protection level** using tools like Process Hacker or programmatically by reading the `EPROCESS.Protection` value.
+- LSASS will typically have `PsProtectedSignerLsa-Light` (`0x41`), which can be accessed **only by processes signed with a higher-level signer**, such as `WinTcb` (`0x61` or `0x62`).
+- PPL is a **Userland-only restriction**; **kernel-level code can fully bypass it**.
+- LSASS being PPL does **not prevent credential dumping if you can execute kernel shellcode** or **leverage a high-privileged process with proper access**.
+- **Setting or removing PPL** requires reboot or **Secure Boot/UEFI settings**, which can persist the PPL setting even after registry changes are reversed.
+  
+**Bypass PPL protections options:**
+
+If you want to dump LSASS despite PPL, you have 3 main options:
+1. **Use a signed kernel driver (e.g., Mimikatz + mimidrv.sys)** to **remove LSASS’s protection flag**:
+
+![](../../images/mimidrv.png)
+
+2. **Bring Your Own Vulnerable Driver (BYOVD)** to run custom kernel code and disable the protection. Tools like **PPLKiller**, **gdrv-loader**, or **kdmapper** make this feasible.
+3. **Steal an existing LSASS handle** from another process that has it open (e.g., an AV process), then **duplicate it** into your process. This is the basis of the `pypykatz live lsa --method handledup` technique.
+4. **Abuse some privileged process** that will allow you to load arbitrary code into its address space or inside another privileged process, effectively bypassing the PPL restrictions. You can check an example of this in [bypassing-lsa-protection-in-userland](https://blog.scrt.ch/2021/04/22/bypassing-lsa-protection-in-userland/) or [https://github.com/itm4n/PPLdump](https://github.com/itm4n/PPLdump).
+
+**Check current status of LSA protection (PPL/PP) for LSASS**:
+
+```bash
 reg query HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA /v RunAsPPL
 ```
 
-### Bypass
+When you running **`mimikatz privilege::debug sekurlsa::logonpasswords`** it'll probably fail with the error code `0x00000005` becasue of this.
 
-It is possible to bypass this protection using Mimikatz driver mimidrv.sys:
+- For more information about this check [https://itm4n.github.io/lsass-runasppl/](https://itm4n.github.io/lsass-runasppl/)
 
-![](../../images/mimidrv.png)
 
 ## Credential Guard
 
@@ -40,7 +70,7 @@ By default, **Credential Guard** is not active and requires manual activation wi
 
 To verify **Credential Guard**'s activation status, the registry key _**LsaCfgFlags**_ under _**HKLM\System\CurrentControlSet\Control\LSA**_ can be inspected. A value of "**1**" indicates activation with **UEFI lock**, "**2**" without lock, and "**0**" denotes it is not enabled. This registry check, while a strong indicator, is not the sole step for enabling Credential Guard. Detailed guidance and a PowerShell script for enabling this feature are available online.
 
-```powershell
+```bash
 reg query HKLM\System\CurrentControlSet\Control\LSA /v LsaCfgFlags
 ```
 

@@ -1,487 +1,180 @@
-"use strict";
-window.search = window.search || {};
-(function search(search) {
-    // Search functionality
-    //
-    // You can use !hasFocus() to prevent keyhandling in your key
-    // event handlers while the user is typing their search.
+/* ht_searcher.js ────────────────────────────────────────────────
+   Dual‑index Web‑Worker search (HackTricks + HackTricks‑Cloud)
+   · keeps working even if one index fails
+   · cloud results rendered **blue**
+   · ⏳ while loading → 🔍 when ready
+*/
 
-    if (!Mark || !elasticlunr) {
-        return;
+(() => {
+  "use strict";
+
+  /* ───────────── 0. helpers (main thread) ───────────── */
+  const clear = el => { while (el.firstChild) el.removeChild(el.firstChild); };
+
+  /* ───────────── 1. Web‑Worker code ─────────────────── */
+  const workerCode = `
+    self.window = self;
+    self.search = self.search || {};
+    const abs = p => location.origin + p;
+
+    /* 1 — elasticlunr */
+    try { importScripts('https://cdn.jsdelivr.net/npm/elasticlunr@0.9.5/elasticlunr.min.js'); }
+    catch { importScripts(abs('/elasticlunr.min.js')); }
+
+    /* 2 — load a single index (remote → local) */
+    async function loadIndex(remote, local, isCloud=false){
+      let rawLoaded = false;
+      try {
+        const r = await fetch(remote,{mode:'cors'});
+        if (!r.ok) throw new Error('HTTP '+r.status);
+        importScripts(URL.createObjectURL(new Blob([await r.text()],{type:'application/javascript'})));
+        rawLoaded = true;
+      } catch(e){ console.warn('remote',remote,'failed →',e); }
+      if(!rawLoaded){
+        try { importScripts(abs(local)); rawLoaded = true; }
+        catch(e){ console.error('local',local,'failed →',e); }
+      }
+      if(!rawLoaded) return null;                 /* give up on this index */
+      const data = { json:self.search.index, urls:self.search.doc_urls, cloud:isCloud };
+      delete self.search.index; delete self.search.doc_urls;
+      return data;
     }
 
-    //IE 11 Compatibility from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/startsWith
-    if (!String.prototype.startsWith) {
-        String.prototype.startsWith = function(search, pos) {
-            return this.substr(!pos || pos < 0 ? 0 : +pos, search.length) === search;
-        };
-    }
+    (async () => {
+      const MAIN_RAW  = 'https://raw.githubusercontent.com/HackTricks-wiki/hacktricks/refs/heads/master/searchindex.js';
+      const CLOUD_RAW = 'https://raw.githubusercontent.com/HackTricks-wiki/hacktricks-cloud/refs/heads/master/searchindex.js';
 
-    var search_wrap = document.getElementById('search-wrapper'),
-        search_modal = document.getElementById('search-modal'),
-        searchbar = document.getElementById('searchbar'),
-        searchbar_outer = document.getElementById('searchbar-outer'),
-        searchresults = document.getElementById('searchresults'),
-        searchresults_outer = document.getElementById('searchresults-outer'),
-        searchresults_header = document.getElementById('searchresults-header'),
-        searchicon = document.getElementById('search-toggle'),
-        content = document.getElementById('content'),
+      const indices = [];
+      const main = await loadIndex(MAIN_RAW , '/searchindex.js',        false); if(main)  indices.push(main);
+      const cloud= await loadIndex(CLOUD_RAW, '/searchindex-cloud.js',  true ); if(cloud) indices.push(cloud);
 
-        searchindex = null,
-        doc_urls = [],
-        results_options = {
-            teaser_word_count: 30,
-            limit_results: 30,
-        },
-        search_options = {
-            bool: "AND",
-            expand: true,
-            fields: {
-                title: {boost: 1},
-                body: {boost: 1},
-                breadcrumbs: {boost: 0}
-            }
-        },
-        mark_exclude = [],
-        marker = new Mark(content),
-        current_searchterm = "",
-        URL_SEARCH_PARAM = 'search',
-        URL_MARK_PARAM = 'highlight',
-        teaser_count = 0,
+      if(!indices.length){ postMessage({ready:false, error:'no-index'}); return; }
 
-        SEARCH_HOTKEY_KEYCODE = 83,
-        ESCAPE_KEYCODE = 27,
-        DOWN_KEYCODE = 40,
-        UP_KEYCODE = 38,
-        SELECT_KEYCODE = 13;
+      /* build index objects */
+      const built = indices.map(d => ({
+        idx : elasticlunr.Index.load(d.json),
+        urls: d.urls,
+        cloud: d.cloud,
+        base: d.cloud ? 'https://cloud.hacktricks.wiki/' : ''
+      }));
 
-    function hasFocus() {
-        return searchbar === document.activeElement;
-    }
+      postMessage({ready:true});
+      const MAX = 30, opts = {bool:'AND', expand:true};
 
-    function removeChildren(elem) {
-        while (elem.firstChild) {
-            elem.removeChild(elem.firstChild);
-        }
-    }
+      self.onmessage = ({data:q}) => {
+        if(!q){ postMessage([]); return; }
 
-    // Helper to parse a url into its building blocks.
-    function parseURL(url) {
-        var a =  document.createElement('a');
-        a.href = url;
-        return {
-            source: url,
-            protocol: a.protocol.replace(':',''),
-            host: a.hostname,
-            port: a.port,
-            params: (function(){
-                var ret = {};
-                var seg = a.search.replace(/^\?/,'').split('&');
-                var len = seg.length, i = 0, s;
-                for (;i<len;i++) {
-                    if (!seg[i]) { continue; }
-                    s = seg[i].split('=');
-                    ret[s[0]] = s[1];
-                }
-                return ret;
-            })(),
-            file: (a.pathname.match(/\/([^/?#]+)$/i) || [,''])[1],
-            hash: a.hash.replace('#',''),
-            path: a.pathname.replace(/^([^/])/,'/$1')
-        };
-    }
-    
-    // Helper to recreate a url string from its building blocks.
-    function renderURL(urlobject) {
-        var url = urlobject.protocol + "://" + urlobject.host;
-        if (urlobject.port != "") {
-            url += ":" + urlobject.port;
-        }
-        url += urlobject.path;
-        var joiner = "?";
-        for(var prop in urlobject.params) {
-            if(urlobject.params.hasOwnProperty(prop)) {
-                url += joiner + prop + "=" + urlobject.params[prop];
-                joiner = "&";
-            }
-        }
-        if (urlobject.hash != "") {
-            url += "#" + urlobject.hash;
-        }
-        return url;
-    }
-    
-    // Helper to escape html special chars for displaying the teasers
-    var escapeHTML = (function() {
-        var MAP = {
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&#34;',
-            "'": '&#39;'
-        };
-        var repl = function(c) { return MAP[c]; };
-        return function(s) {
-            return s.replace(/[&<>'"]/g, repl);
-        };
-    })();
-    
-    function formatSearchMetric(count, searchterm) {
-        if (count == 1) {
-            return count + " search result for '" + searchterm + "':";
-        } else if (count == 0) {
-            return "No search results for '" + searchterm + "'.";
-        } else {
-            return count + " search results for '" + searchterm + "':";
-        }
-    }
-    
-    function formatSearchResult(result, searchterms) {
-        var teaser = makeTeaser(escapeHTML(result.doc.body), searchterms);
-        teaser_count++;
-
-        // The ?URL_MARK_PARAM= parameter belongs inbetween the page and the #heading-anchor
-        var url = doc_urls[result.ref].split("#");
-        if (url.length == 1) { // no anchor found
-            url.push("");
-        }
-
-        // encodeURIComponent escapes all chars that could allow an XSS except
-        // for '. Due to that we also manually replace ' with its url-encoded
-        // representation (%27).
-        var searchterms = encodeURIComponent(searchterms.join(" ")).replace(/\'/g, "%27");
-
-        return '<a href="' + path_to_root + url[0] + '?' + URL_MARK_PARAM + '=' + searchterms + '#' + url[1]
-            + '" aria-details="teaser_' + teaser_count + '">' + result.doc.breadcrumbs 
-            + '<span class="teaser" id="teaser_' + teaser_count + '" aria-label="Search Result Teaser">' 
-            + teaser + '</span>' + '</a>';
-    }
-    
-    function makeTeaser(body, searchterms) {
-        // The strategy is as follows:
-        // First, assign a value to each word in the document:
-        //  Words that correspond to search terms (stemmer aware): 40
-        //  Normal words: 2
-        //  First word in a sentence: 8
-        // Then use a sliding window with a constant number of words and count the
-        // sum of the values of the words within the window. Then use the window that got the
-        // maximum sum. If there are multiple maximas, then get the last one.
-        // Enclose the terms in <em>.
-        var stemmed_searchterms = searchterms.map(function(w) {
-            return elasticlunr.stemmer(w.toLowerCase());
-        });
-        var searchterm_weight = 40;
-        var weighted = []; // contains elements of ["word", weight, index_in_document]
-        // split in sentences, then words
-        var sentences = body.toLowerCase().split('. ');
-        var index = 0;
-        var value = 0;
-        var searchterm_found = false;
-        for (var sentenceindex in sentences) {
-            var words = sentences[sentenceindex].split(' ');
-            value = 8;
-            for (var wordindex in words) {
-                var word = words[wordindex];
-                if (word.length > 0) {
-                    for (var searchtermindex in stemmed_searchterms) {
-                        if (elasticlunr.stemmer(word).startsWith(stemmed_searchterms[searchtermindex])) {
-                            value = searchterm_weight;
-                            searchterm_found = true;
-                        }
-                    };
-                    weighted.push([word, value, index]);
-                    value = 2;
-                }
-                index += word.length;
-                index += 1; // ' ' or '.' if last word in sentence
-            };
-            index += 1; // because we split at a two-char boundary '. '
-        };
-
-        if (weighted.length == 0) {
-            return body;
-        }
-
-        var window_weight = [];
-        var window_size = Math.min(weighted.length, results_options.teaser_word_count);
-
-        var cur_sum = 0;
-        for (var wordindex = 0; wordindex < window_size; wordindex++) {
-            cur_sum += weighted[wordindex][1];
-        };
-        window_weight.push(cur_sum);
-        for (var wordindex = 0; wordindex < weighted.length - window_size; wordindex++) {
-            cur_sum -= weighted[wordindex][1];
-            cur_sum += weighted[wordindex + window_size][1];
-            window_weight.push(cur_sum);
-        };
-
-        if (searchterm_found) {
-            var max_sum = 0;
-            var max_sum_window_index = 0;
-            // backwards
-            for (var i = window_weight.length - 1; i >= 0; i--) {
-                if (window_weight[i] > max_sum) {
-                    max_sum = window_weight[i];
-                    max_sum_window_index = i;
-                }
-            };
-        } else {
-            max_sum_window_index = 0;
-        }
-
-        // add <em/> around searchterms
-        var teaser_split = [];
-        var index = weighted[max_sum_window_index][2];
-        for (var i = max_sum_window_index; i < max_sum_window_index+window_size; i++) {
-            var word = weighted[i];
-            if (index < word[2]) {
-                // missing text from index to start of `word`
-                teaser_split.push(body.substring(index, word[2]));
-                index = word[2];
-            }
-            if (word[1] == searchterm_weight) {
-                teaser_split.push("<em>")
-            }
-            index = word[2] + word[0].length;
-            teaser_split.push(body.substring(word[2], index));
-            if (word[1] == searchterm_weight) {
-                teaser_split.push("</em>")
-            }
-        };
-
-        return teaser_split.join('');
-    }
-
-    function init(config) {
-        results_options = config.results_options;
-        search_options = config.search_options;
-        searchbar_outer = config.searchbar_outer;
-        doc_urls = config.doc_urls;
-        searchindex = elasticlunr.Index.load(config.index);
-
-        // Set up events
-        searchicon.addEventListener('click', function(e) { searchIconClickHandler(); }, false);
-        search_wrap.addEventListener('click', function(e) { searchIconClickHandler(); }, false);
-        search_modal.addEventListener('click', function(e) { e.stopPropagation(); }, false);
-        searchbar.addEventListener('keyup', function(e) { searchbarKeyUpHandler(); }, false);
-        document.addEventListener('keydown', function(e) { globalKeyHandler(e); }, false);
-        // If the user uses the browser buttons, do the same as if a reload happened
-        window.onpopstate = function(e) { doSearchOrMarkFromUrl(); };
-        // Suppress "submit" events so the page doesn't reload when the user presses Enter
-        document.addEventListener('submit', function(e) { e.preventDefault(); }, false);
-
-        // If reloaded, do the search or mark again, depending on the current url parameters
-        doSearchOrMarkFromUrl();
-    }
-    
-    function unfocusSearchbar() {
-        // hacky, but just focusing a div only works once
-        var tmp = document.createElement('input');
-        tmp.setAttribute('style', 'position: absolute; opacity: 0;');
-        searchicon.appendChild(tmp);
-        tmp.focus();
-        tmp.remove();
-    }
-    
-    // On reload or browser history backwards/forwards events, parse the url and do search or mark
-    function doSearchOrMarkFromUrl() {
-        // Check current URL for search request
-        var url = parseURL(window.location.href);
-        if (url.params.hasOwnProperty(URL_SEARCH_PARAM)
-            && url.params[URL_SEARCH_PARAM] != "") {
-            showSearch(true);
-            searchbar.value = decodeURIComponent(
-                (url.params[URL_SEARCH_PARAM]+'').replace(/\+/g, '%20'));
-            searchbarKeyUpHandler(); // -> doSearch()
-        } else {
-            showSearch(false);
-        }
-
-        if (url.params.hasOwnProperty(URL_MARK_PARAM)) {
-            var words = decodeURIComponent(url.params[URL_MARK_PARAM]).split(' ');
-            marker.mark(words, {
-                exclude: mark_exclude
+        const all = [];
+        for(const s of built){
+          const res = s.idx.search(q,opts);
+          if(!res.length) continue;
+          const max = res[0].score || 1;
+          res.forEach(r => {
+            const doc = s.idx.documentStore.getDoc(r.ref);
+            all.push({
+              norm : r.score / max,
+              title: doc.title,
+              body : doc.body,
+              breadcrumbs: doc.breadcrumbs,
+              url  : s.base + s.urls[r.ref],
+              cloud: s.cloud
             });
-
-            var markers = document.querySelectorAll("mark");
-            function hide() {
-                for (var i = 0; i < markers.length; i++) {
-                    markers[i].classList.add("fade-out");
-                    window.setTimeout(function(e) { marker.unmark(); }, 300);
-                }
-            }
-            for (var i = 0; i < markers.length; i++) {
-                markers[i].addEventListener('click', hide);
-            }
+          });
         }
+        all.sort((a,b)=>b.norm-a.norm);
+        postMessage(all.slice(0,MAX));
+      };
+    })();
+  `;
+
+  /* ───────────── 2. spawn worker ───────────── */
+  const worker = new Worker(URL.createObjectURL(new Blob([workerCode],{type:'application/javascript'})));
+
+  /* ───────────── 3. DOM refs ─────────────── */
+  const wrap    = document.getElementById('search-wrapper');
+  const bar     = document.getElementById('searchbar');
+  const list    = document.getElementById('searchresults');
+  const listOut = document.getElementById('searchresults-outer');
+  const header  = document.getElementById('searchresults-header');
+  const icon    = document.getElementById('search-toggle');
+
+  const READY_ICON = icon.innerHTML;
+  icon.textContent = '⏳';
+  icon.setAttribute('aria-label','Loading search …');
+  icon.setAttribute('title','Search is loading, please wait...');
+
+  const HOT=83, ESC=27, DOWN=40, UP=38, ENTER=13;
+  let debounce, teaserCount=0;
+
+  /* ───────────── helpers (teaser, metric) ───────────── */
+  const escapeHTML = (()=>{const M={'&':'&amp;','<':'&lt;','>':'&gt;','"':'&#34;','\'':'&#39;'};return s=>s.replace(/[&<>'"]/g,c=>M[c]);})();
+  const URL_MARK='highlight';
+  function metric(c,t){return c?`${c} search result${c>1?'s':''} for '${t}':`:`No search results for '${t}'.`;}
+
+  function makeTeaser(body,terms){
+    const stem=w=>elasticlunr.stemmer(w.toLowerCase());
+    const T=terms.map(stem),W_S=40,W_F=8,W_N=2,WIN=30;
+    const W=[],sents=body.toLowerCase().split('. ');
+    let i=0,v=W_F,found=false;
+    sents.forEach(s=>{v=W_F; s.split(' ').forEach(w=>{ if(w){ if(T.some(t=>stem(w).startsWith(t))){v=W_S;found=true;} W.push([w,v,i]); v=W_N;} i+=w.length+1; }); i++;});
+    if(!W.length) return body;
+    const win=Math.min(W.length,WIN);
+    const sums=[W.slice(0,win).reduce((a,[,wt])=>a+wt,0)];
+    for(let k=1;k<=W.length-win;k++) sums[k]=sums[k-1]-W[k-1][1]+W[k+win-1][1];
+    const best=found?sums.lastIndexOf(Math.max(...sums)):0;
+    const out=[]; i=W[best][2];
+    for(let k=best;k<best+win;k++){const [w,wt,pos]=W[k]; if(i<pos){out.push(body.substring(i,pos)); i=pos;} if(wt===W_S) out.push('<em>'); out.push(body.substr(pos,w.length)); if(wt===W_S) out.push('</em>'); i=pos+w.length;}
+    return out.join('');
+  }
+
+  function format(d,terms){
+    const teaser=makeTeaser(escapeHTML(d.body),terms);
+    teaserCount++;
+    const enc=encodeURIComponent(terms.join(' ')).replace(/'/g,'%27');
+    const parts=d.url.split('#'); if(parts.length===1) parts.push('');
+    const abs=d.url.startsWith('http');
+    const href=`${abs?'':path_to_root}${parts[0]}?${URL_MARK}=${enc}#${parts[1]}`;
+    const style=d.cloud?" style=\"color:#1e88e5\"":"";
+    const isCloud=d.cloud?" [Cloud]":" [Book]";
+    return `<a href="${href}" aria-details="teaser_${teaserCount}"${style}>`+
+           `${d.breadcrumbs}${isCloud}<span class="teaser" id="teaser_${teaserCount}" aria-label="Search Result Teaser">${teaser}</span></a>`;
+  }
+
+  /* ───────────── UI control ───────────── */
+  function showUI(s){wrap.classList.toggle('hidden',!s); icon.setAttribute('aria-expanded',s); if(s){window.scrollTo(0,0); bar.focus(); bar.select();} else {listOut.classList.add('hidden'); [...list.children].forEach(li=>li.classList.remove('focus'));}}
+  function blur(){const t=document.createElement('input'); t.style.cssText='position:absolute;opacity:0;'; icon.appendChild(t); t.focus(); t.remove();}
+
+  icon.addEventListener('click',()=>showUI(wrap.classList.contains('hidden')));
+
+  document.addEventListener('keydown',e=>{
+    if(e.altKey||e.ctrlKey||e.metaKey||e.shiftKey) return;
+    const f=/^(?:input|select|textarea)$/i.test(e.target.nodeName);
+    if(e.keyCode===HOT && !f){e.preventDefault(); showUI(true);} else if(e.keyCode===ESC){e.preventDefault(); showUI(false); blur();}
+    else if(e.keyCode===DOWN && document.activeElement===bar){e.preventDefault(); const first=list.firstElementChild; if(first){blur(); first.classList.add('focus');}}
+    else if([DOWN,UP,ENTER].includes(e.keyCode) && document.activeElement!==bar){const cur=list.querySelector('li.focus'); if(!cur) return; e.preventDefault(); if(e.keyCode===DOWN){const nxt=cur.nextElementSibling; if(nxt){cur.classList.remove('focus'); nxt.classList.add('focus');}} else if(e.keyCode===UP){const prv=cur.previousElementSibling; cur.classList.remove('focus'); if(prv){prv.classList.add('focus');} else {bar.focus();}} else {const a=cur.querySelector('a'); if(a) window.location.assign(a.href);}}
+  });
+
+  bar.addEventListener('input',e=>{ clearTimeout(debounce); debounce=setTimeout(()=>worker.postMessage(e.target.value.trim()),120); });
+
+  /* ───────────── worker messages ───────────── */
+  worker.onmessage = ({data}) => {
+    if(data && data.ready!==undefined){
+      if(data.ready){ 
+        icon.innerHTML=READY_ICON; 
+        icon.setAttribute('aria-label','Open search (S)'); 
+        icon.removeAttribute('title');
+      }
+      else { 
+        icon.textContent='❌'; 
+        icon.setAttribute('aria-label','Search unavailable'); 
+        icon.setAttribute('title','Search is unavailable');
+      }
+      return;
     }
-    
-    // Eventhandler for keyevents on `document`
-    function globalKeyHandler(e) {
-        if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey || e.target.type === 'textarea' || e.target.type === 'text' || !hasFocus() && /^(?:input|select|textarea)$/i.test(e.target.nodeName)) { return; }
-
-        if (e.keyCode === ESCAPE_KEYCODE) {
-            e.preventDefault();
-            searchbar.classList.remove("active");
-            setSearchUrlParameters("",
-                (searchbar.value.trim() !== "") ? "push" : "replace");
-            if (hasFocus()) {
-                unfocusSearchbar();
-            }
-            showSearch(false);
-            marker.unmark();
-        } else if (!hasFocus() && e.keyCode === SEARCH_HOTKEY_KEYCODE) {
-            e.preventDefault();
-            showSearch(true);
-            window.scrollTo(0, 0);
-            searchbar.select();
-        } else if (hasFocus() && e.keyCode === DOWN_KEYCODE) {
-            e.preventDefault();
-            unfocusSearchbar();
-            searchresults.firstElementChild.classList.add("focus");
-        } else if (!hasFocus() && (e.keyCode === DOWN_KEYCODE
-                                || e.keyCode === UP_KEYCODE
-                                || e.keyCode === SELECT_KEYCODE)) {
-            // not `:focus` because browser does annoying scrolling
-            var focused = searchresults.querySelector("li.focus");
-            if (!focused) return;
-            e.preventDefault();
-            if (e.keyCode === DOWN_KEYCODE) {
-                var next = focused.nextElementSibling;
-                if (next) {
-                    focused.classList.remove("focus");
-                    next.classList.add("focus");
-                }
-            } else if (e.keyCode === UP_KEYCODE) {
-                focused.classList.remove("focus");
-                var prev = focused.previousElementSibling;
-                if (prev) {
-                    prev.classList.add("focus");
-                } else {
-                    searchbar.select();
-                }
-            } else { // SELECT_KEYCODE
-                window.location.assign(focused.querySelector('a'));
-            }
-        }
-    }
-    
-    function showSearch(yes) {
-        if (yes) {
-            search_wrap.classList.remove('hidden');
-            searchicon.setAttribute('aria-expanded', 'true');
-        } else {
-            search_wrap.classList.add('hidden');
-            searchicon.setAttribute('aria-expanded', 'false');
-            var results = searchresults.children;
-            for (var i = 0; i < results.length; i++) {
-                results[i].classList.remove("focus");
-            }
-        }
-    }
-
-    function showResults(yes) {
-        if (yes) {
-            searchresults_outer.classList.remove('hidden');
-        } else {
-            searchresults_outer.classList.add('hidden');
-        }
-    }
-
-    // Eventhandler for search icon
-    function searchIconClickHandler() {
-        if (search_wrap.classList.contains('hidden')) {
-            showSearch(true);
-            window.scrollTo(0, 0);
-            searchbar.select();
-        } else {
-            showSearch(false);
-        }
-    }
-    
-    // Eventhandler for keyevents while the searchbar is focused
-    function searchbarKeyUpHandler() {
-        var searchterm = searchbar.value.trim();
-        if (searchterm != "") {
-            searchbar.classList.add("active");
-            doSearch(searchterm);
-        } else {
-            searchbar.classList.remove("active");
-            showResults(false);
-            removeChildren(searchresults);
-        }
-
-        setSearchUrlParameters(searchterm, "push_if_new_search_else_replace");
-
-        // Remove marks
-        marker.unmark();
-    }
-    
-    // Update current url with ?URL_SEARCH_PARAM= parameter, remove ?URL_MARK_PARAM and #heading-anchor .
-    // `action` can be one of "push", "replace", "push_if_new_search_else_replace"
-    // and replaces or pushes a new browser history item.
-    // "push_if_new_search_else_replace" pushes if there is no `?URL_SEARCH_PARAM=abc` yet.
-    function setSearchUrlParameters(searchterm, action) {
-        var url = parseURL(window.location.href);
-        var first_search = ! url.params.hasOwnProperty(URL_SEARCH_PARAM);
-        if (searchterm != "" || action == "push_if_new_search_else_replace") {
-            url.params[URL_SEARCH_PARAM] = searchterm;
-            delete url.params[URL_MARK_PARAM];
-            url.hash = "";
-        } else {
-            delete url.params[URL_MARK_PARAM];
-            delete url.params[URL_SEARCH_PARAM];
-        }
-        // A new search will also add a new history item, so the user can go back
-        // to the page prior to searching. A updated search term will only replace
-        // the url.
-        if (action == "push" || (action == "push_if_new_search_else_replace" && first_search) ) {
-            history.pushState({}, document.title, renderURL(url));
-        } else if (action == "replace" || (action == "push_if_new_search_else_replace" && !first_search) ) {
-            history.replaceState({}, document.title, renderURL(url));
-        }
-    }
-    
-    function doSearch(searchterm) {
-
-        // Don't search the same twice
-        if (current_searchterm == searchterm) { return; }
-        else { current_searchterm = searchterm; }
-
-        if (searchindex == null) { return; }
-
-        // Do the actual search
-        var results = searchindex.search(searchterm, search_options);
-        var resultcount = Math.min(results.length, results_options.limit_results);
-
-        // Display search metrics
-        searchresults_header.innerText = formatSearchMetric(resultcount, searchterm);
-
-        // Clear and insert results
-        var searchterms  = searchterm.split(' ');
-        removeChildren(searchresults);
-        for(var i = 0; i < resultcount ; i++){
-            var resultElem = document.createElement('li');
-            resultElem.innerHTML = formatSearchResult(results[i], searchterms);
-            searchresults.appendChild(resultElem);
-        }
-
-        // Display results
-        showResults(true);
-    }
-
-    var branch = lang === "en" ? "master" : lang
-    fetch(`https://raw.githubusercontent.com/HackTricks-wiki/hacktricks/refs/heads/${branch}/searchindex.json`)
-        .then(response => response.json())
-        .then(json => init(json))        
-        .catch(error => { // Try to load searchindex.js if fetch failed
-            var script = document.createElement('script');
-            script.src = `https://raw.githubusercontent.com/HackTricks-wiki/hacktricks/refs/heads/${branch}/searchindex.js`;
-            script.onload = () => init(window.search);
-            document.head.appendChild(script);
-        });
-
-    // Exported functions
-    search.hasFocus = hasFocus;
-})(window.search);
+    const docs=data, q=bar.value.trim(), terms=q.split(/\s+/).filter(Boolean);
+    header.textContent=metric(docs.length,q);
+    clear(list);
+    docs.forEach(d=>{const li=document.createElement('li'); li.innerHTML=format(d,terms); list.appendChild(li);});
+    listOut.classList.toggle('hidden',!docs.length);
+  };
+})();

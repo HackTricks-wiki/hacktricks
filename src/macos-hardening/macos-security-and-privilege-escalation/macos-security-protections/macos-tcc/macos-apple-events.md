@@ -22,4 +22,3 @@ Sandboxed applications requires privileges like `allow appleevent-send` and `(al
 {{#include ../../../../banners/hacktricks-training.md}}
 
 
-

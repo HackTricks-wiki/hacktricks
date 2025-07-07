@@ -407,7 +407,7 @@ klist sessions
 
 ### Home folders
 
-```powershell
+```bash
 dir C:\Users
 Get-ChildItem C:\Users
 ```
@@ -621,7 +621,7 @@ If the path to an executable is not inside quotes, Windows will try to execute e
 
 For example, for the path _C:\Program Files\Some Folder\Service.exe_ Windows will try to execute:
 
-```powershell
+```bash
 C:\Program.exe
 C:\Program Files\Some.exe
 C:\Program Files\Some Folder\Service.exe
@@ -629,7 +629,7 @@ C:\Program Files\Some Folder\Service.exe
 
 List all unquoted service paths, excluding those belonging to built-in Windows services:
 
-```powershell
+```bash
 wmic service get name,pathname,displayname,startmode | findstr /i auto | findstr /i /v "C:\Windows\\" | findstr /i /v '\"'
 wmic service get name,displayname,pathname,startmode | findstr /i /v "C:\\Windows\\system32\\" |findstr /i /v '\"'  # Not only auto services
 
@@ -637,7 +637,7 @@ wmic service get name,displayname,pathname,startmode | findstr /i /v "C:\\Window
 Get-ServiceUnquoted -Verbose
 ```
 
-```powershell
+```bash
 for /f "tokens=2" %%n in ('sc query state^= all^| findstr SERVICE_NAME') do (
 	for /f "delims=: tokens=1*" %%r in ('sc qc "%%~n" ^| findstr BINARY_PATH_NAME ^| findstr /i /v /l /c:"c:\windows\system32" ^| findstr /v /c:""""') do (
 		echo %%~s | findstr /r /c:"[a-Z][ ][a-Z]" >nul 2>&1 && (echo %%n && echo %%~s && icacls %%s | findstr /i "(F) (M) (W) :\" | findstr /i ":\\ everyone authenticated users todos %username%") && echo.
@@ -645,7 +645,7 @@ for /f "tokens=2" %%n in ('sc query state^= all^| findstr SERVICE_NAME') do (
 )
 ```
 
-```powershell
+```bash
 gwmi -class Win32_Service -Property Name, DisplayName, PathName, StartMode | Where {$_.StartMode -eq "Auto" -and $_.PathName -notlike "C:\Windows*" -and $_.PathName -notlike '"*'} | select PathName,DisplayName,Name
 ```
 
@@ -873,7 +873,7 @@ The **Data Protection API (DPAPI)** provides a method for symmetric encryption o
 
 Encrypted user RSA keys, by using DPAPI, are stored in the `%APPDATA%\Microsoft\Protect\{SID}` directory, where `{SID}` represents the user's [Security Identifier](https://en.wikipedia.org/wiki/Security_Identifier). **The DPAPI key, co-located with the master key that safeguards the user's private keys in the same file**, typically consists of 64 bytes of random data. (It's important to note that access to this directory is restricted, preventing listing its contents via the `dir` command in CMD, though it can be listed through PowerShell).
 
-```powershell
+```bash
 Get-ChildItem  C:\Users\USER\AppData\Roaming\Microsoft\Protect\
 Get-ChildItem  C:\Users\USER\AppData\Local\Microsoft\Protect\
 ```
@@ -882,7 +882,7 @@ You can use **mimikatz module** `dpapi::masterkey` with the appropriate argument
 
 The **credentials files protected by the master password** are usually located in:
 
-```powershell
+```bash
 dir C:\Users\username\AppData\Local\Microsoft\Credentials\
 dir C:\Users\username\AppData\Roaming\Microsoft\Credentials\
 Get-ChildItem -Hidden C:\Users\username\AppData\Local\Microsoft\Credentials\
@@ -902,7 +902,7 @@ dpapi-extracting-passwords.md
 
 To **decrypt** a PS credentials from the file containing it you can do:
 
-```powershell
+```bash
 PS C:\> $credential = Import-Clixml -Path 'C:\pass.xml'
 PS C:\> $credential.GetNetworkCredential().username
 
@@ -1077,7 +1077,7 @@ If `ssh-agent` service is not running and you want it to automatically start on 
 Get-Service ssh-agent | Set-Service -StartupType Automatic -PassThru | Start-Service
 ```
 
-> [!NOTE]
+> [!TIP]
 > It looks like this technique isn't valid anymore. I tried to create some ssh keys, add them with `ssh-add` and login via ssh to a machine. The registry HKCU\Software\OpenSSH\Agent\Keys doesn't exist and procmon didn't identify the use of `dpapi.dll` during the asymmetric key authentication.
 
 ### Unattended files
@@ -1178,16 +1178,16 @@ crackmapexec smb 10.10.10.10 -u username -p pwd -M gpp_autologin
 
 ### IIS Web Config
 
-```powershell
+```bash
 Get-Childitem –Path C:\inetpub\ -Include web.config -File -Recurse -ErrorAction SilentlyContinue
 ```
 
-```powershell
+```bash
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\Config\web.config
 C:\inetpub\wwwroot\web.config
 ```
 
-```powershell
+```bash
 Get-Childitem –Path C:\inetpub\ -Include web.config -File -Recurse -ErrorAction SilentlyContinue
 Get-Childitem –Path C:\xampp\ -Include web.config -File -Recurse -ErrorAction SilentlyContinue
 ```
@@ -1362,7 +1362,7 @@ Tools to extract passwords from browsers:
 
 **Component Object Model (COM)** is a technology built within the Windows operating system that allows **intercommunication** between software components of different languages. Each COM component is **identified via a class ID (CLSID)** and each component exposes functionality via one or more interfaces, identified via interface IDs (IIDs).
 
-COM classes and interfaces are defined in the registry under **HKEY\_**_**CLASSES\_**_**ROOT\CLSID** and **HKEY\_**_**CLASSES\_**_**ROOT\Interface** respectively. This registry is created by merging the **HKEY\_**_**LOCAL\_**_**MACHINE\Software\Classes** + **HKEY\_**_**CURRENT\_**_**USER\Software\Classes** = **HKEY\_**_**CLASSES\_**_**ROOT.**
+COM classes and interfaces are defined in the registry under **HKEY\CLASSES\ROOT\CLSID** and **HKEY\CLASSES\ROOT\Interface** respectively. This registry is created by merging the **HKEY\LOCAL\MACHINE\Software\Classes** + **HKEY\CURRENT\USER\Software\Classes** = **HKEY\CLASSES\ROOT.**
 
 Inside the CLSIDs of this registry you can find the child registry **InProcServer32** which contains a **default value** pointing to a **DLL** and a value called **ThreadingModel** that can be **Apartment** (Single-Threaded), **Free** (Multi-Threaded), **Both** (Single or Multi) or **Neutral** (Thread Neutral).
 
@@ -1437,11 +1437,15 @@ Also the following tool allows to **intercept a named pipe communication with a 
 
 ## Misc
 
+### File Extensions that could execute stuff in Windows
+
+Check out the page **[https://filesec.io/](https://filesec.io/)**
+
 ### **Monitoring Command Lines for passwords**
 
 When getting a shell as a user, there may be scheduled tasks or other processes being executed which **pass credentials on the command line**. The script below captures process command lines every two seconds and compares the current state with the previous state, outputting any differences.
 
-```powershell
+```bash
 while($true)
 {
   $process = Get-WmiObject Win32_Process | Select-Object CommandLine
@@ -1521,16 +1525,191 @@ Then **read this to learn about UAC and UAC bypasses:**
 ../authentication-credentials-uac-and-efs/uac-user-account-control.md
 {{#endref}}
 
+## From Arbitrary Folder Delete/Move/Rename to SYSTEM EoP
+
+The technique described [**in this blog post**](https://www.zerodayinitiative.com/blog/2022/3/16/abusing-arbitrary-file-deletes-to-escalate-privilege-and-other-great-tricks) with a exploit code [**available here**](https://github.com/thezdi/PoC/tree/main/FilesystemEoPs).
+
+The attack basically consist of abusing the Windows Installer's rollback feature to replace legitimate files with malicious ones during the uninstallation process. For this the attacker needs to create a **malicious MSI installer** that will be used to hijack the `C:\Config.Msi` folder, which will later be used by he Windows Installer to store rollback files during the uninstallation of other MSI packages where the rollback files would have been modified to contain the malicious payload.
+
+The summarized technique is the following:
+
+1. **Stage 1 – Preparing for the Hijack (leave `C:\Config.Msi` empty)**
+
+- Step 1: Install the MSI
+    - Create an `.msi` that installs a harmless file (e.g., `dummy.txt`) in a writable folder (`TARGETDIR`).
+    - Mark the installer as **"UAC Compliant"**, so a **non-admin user** can run it.
+    - Keep a **handle** open to the file after install.
+
+- Step 2: Begin Uninstall
+    - Uninstall the same `.msi`.
+    - The uninstall process starts moving files to `C:\Config.Msi` and renaming them to `.rbf` files (rollback backups).
+    - **Poll the open file handle** using `GetFinalPathNameByHandle` to detect when the file becomes `C:\Config.Msi\<random>.rbf`.
+
+- Step 3: Custom Syncing
+    - The `.msi` includes a **custom uninstall action (`SyncOnRbfWritten`)** that:
+        - Signals when `.rbf` has been written.
+        - Then **waits** on another event before continuing the uninstall.
+
+- Step 4: Block Deletion of `.rbf`
+    - When signaled, **open the `.rbf` file** without `FILE_SHARE_DELETE` — this **prevents it from being deleted**.
+    - Then **signal back** so the uninstall can finish.
+    - Windows Installer fails to delete the `.rbf`, and because it can’t delete all contents, **`C:\Config.Msi` is not removed**.
+
+- Step 5: Manually Delete `.rbf`
+    - You (attacker) delete the `.rbf` file manually.
+    - Now **`C:\Config.Msi` is empty**, ready to be hijacked.
+
+> At this point, **trigger the SYSTEM-level arbitrary folder delete vulnerability** to delete `C:\Config.Msi`.
+
+2. **Stage 2 – Replacing Rollback Scripts with Malicious Ones**
+
+- Step 6: Recreate `C:\Config.Msi` with Weak ACLs
+    - Recreate the `C:\Config.Msi` folder yourself.
+    - Set **weak DACLs** (e.g., Everyone:F), and **keep a handle open** with `WRITE_DAC`.
+
+- Step 7: Run Another Install
+    - Install the `.msi` again, with:
+        - `TARGETDIR`: Writable location.
+        - `ERROROUT`: A variable that triggers a forced failure.
+    - This install will be used to trigger **rollback** again, which reads `.rbs` and `.rbf`.
+
+- Step 8: Monitor for `.rbs`
+    - Use `ReadDirectoryChangesW` to monitor `C:\Config.Msi` until a new `.rbs` appears.
+    - Capture its filename.
+
+- Step 9: Sync Before Rollback
+    - The `.msi` contains a **custom install action (`SyncBeforeRollback`)** that:
+        - Signals an event when the `.rbs` is created.
+        - Then **waits** before continuing.
+
+- Step 10: Reapply Weak ACL
+    - After receiving the `.rbs created` event:
+        - The Windows Installer **reapplies strong ACLs** to `C:\Config.Msi`.
+        - But since you still have a handle with `WRITE_DAC`, you can **reapply weak ACLs** again.
+
+> ACLs are **only enforced on handle open**, so you can still write to the folder.
+
+- Step 11: Drop Fake `.rbs` and `.rbf`
+    - Overwrite the `.rbs` file with a **fake rollback script** that tells Windows to:
+        - Restore your `.rbf` file (malicious DLL) into a **privileged location** (e.g., `C:\Program Files\Common Files\microsoft shared\ink\HID.DLL`).
+    - Drop your fake `.rbf` containing a **malicious SYSTEM-level payload DLL**.
+
+- Step 12: Trigger the Rollback
+    - Signal the sync event so the installer resumes.
+    - A **type 19 custom action (`ErrorOut`)** is configured to **intentionally fail the install** at a known point.
+    - This causes **rollback to begin**.
+
+- Step 13: SYSTEM Installs Your DLL
+    - Windows Installer:
+        - Reads your malicious `.rbs`.
+        - Copies your `.rbf` DLL into the target location.
+    - You now have your **malicious DLL in a SYSTEM-loaded path**.
+
+- Final Step: Execute SYSTEM Code
+    - Run a trusted **auto-elevated binary** (e.g., `osk.exe`) that loads the DLL you hijacked.
+    - **Boom**: Your code is executed **as SYSTEM**.
+
+
+### From Arbitrary File Delete/Move/Rename to SYSTEM EoP
+
+The main MSI rollback technique (the previous one) assumes you can delete an **entire folder** (e.g., `C:\Config.Msi`). But what if your vulnerability only allows **arbitrary file deletion** ?
+
+You could exploit **NTFS internals**: every folder has a hidden alternate data stream called:
+
+```
+C:\SomeFolder::$INDEX_ALLOCATION
+```
+
+This stream stores the **index metadata** of the folder.
+
+So, if you **delete the `::$INDEX_ALLOCATION` stream** of a folder, NTFS **removes the entire folder** from the filesystem.
+
+You can do this using standard file deletion APIs like:
+```c
+DeleteFileW(L"C:\\Config.Msi::$INDEX_ALLOCATION");
+```
+
+> Even though you're calling a *file* delete API, it **deletes the folder itself**.
+
+### From Folder Contents Delete to SYSTEM EoP
+What if your primitive doesn’t allow you to delete arbitrary files/folders, but it **does allow deletion of the *contents* of an attacker-controlled folder**?
+
+1. Step 1: Setup a bait folder and file
+- Create: `C:\temp\folder1`
+- Inside it: `C:\temp\folder1\file1.txt`
+
+2. Step 2: Place an **oplock** on `file1.txt`
+- The oplock **pauses execution** when a privileged process tries to delete `file1.txt`.
+
+```c
+// pseudo-code
+RequestOplock("C:\\temp\\folder1\\file1.txt");
+WaitForDeleteToTriggerOplock();
+```
+
+3. Step 3: Trigger SYSTEM process (e.g., `SilentCleanup`)
+- This process scans folders (e.g., `%TEMP%`) and tries to delete their contents.
+- When it reaches `file1.txt`, the **oplock triggers** and hands control to your callback.
+
+4. Step 4: Inside the oplock callback – redirect the deletion
+
+- Option A: Move `file1.txt` elsewhere
+    - This empties `folder1` without breaking the oplock.
+    - Don't delete `file1.txt` directly — that would release the oplock prematurely.
+
+- Option B: Convert `folder1` into a **junction**:
+
+```bash
+# folder1 is now a junction to \RPC Control (non-filesystem namespace)
+mklink /J C:\temp\folder1 \\?\GLOBALROOT\RPC Control
+```
+
+- Option C: Create a **symlink** in `\RPC Control`:
+```bash
+# Make file1.txt point to a sensitive folder stream
+CreateSymlink("\\RPC Control\\file1.txt", "C:\\Config.Msi::$INDEX_ALLOCATION")
+```
+
+> This targets the NTFS internal stream that stores folder metadata — deleting it deletes the folder.
+
+5. Step 5: Release the oplock
+- SYSTEM process continues and tries to delete `file1.txt`.
+- But now, due to the junction + symlink, it's actually deleting:
+```
+C:\Config.Msi::$INDEX_ALLOCATION
+```
+
+**Result**: `C:\Config.Msi` is deleted by SYSTEM.
+
+### From Arbitrary Folder Create to Permanent DoS
+
+Exploit a primitive that lets you **create an arbitrary folder as SYSTEM/admin** —  even if **you can’t write files** or **set weak permissions**.
+
+Create a **folder** (not a file) with the name of a **critical Windows driver**, e.g.:
+```
+C:\Windows\System32\cng.sys
+```
+
+- This path normally corresponds to the `cng.sys` kernel-mode driver.
+- If you **pre-create it as a folder**, Windows fails to load the actual driver on boot.
+- Then, Windows tries to load `cng.sys` during boot.
+- It sees the folder, **fails to resolve the actual driver**, and **crashes or halts boot**.
+- There’s **no fallback**, and **no recovery** without external intervention (e.g., boot repair or disk access).
+
+
 ## **From High Integrity to System**
 
 ### **New service**
 
-If you are already running on a High Integrity process, the **pass to SYSTEM** can be easy just **creating and executing a new service**:
+If you are already running on a High Integrity process, the **path to SYSTEM** can be easy just **creating and executing a new service**:
 
 ```
 sc create newservicename binPath= "C:\windows\system32\notepad.exe"
 sc start newservicename
 ```
+
+> [!TIP]
+> When creating a service binary make sure it's a valid service or that the binary performs the necessary actions to fast as it'll be killed in 20s if it's not a valid service.
 
 ### AlwaysInstallElevated
 
@@ -1560,9 +1739,9 @@ If you manages to **hijack a dll** being **loaded** by a **process** running as 
 
 ### **From Administrator or Network Service to System**
 
-{{#ref}}
-https://github.com/sailay1996/RpcSsImpersonator
-{{#endref}}
+- [https://github.com/sailay1996/RpcSsImpersonator](https://github.com/sailay1996/RpcSsImpersonator)
+- [https://decoder.cloud/2020/05/04/from-network-service-to-system/](https://decoder.cloud/2020/05/04/from-network-service-to-system/)
+- [https://github.com/decoder-it/NetworkServiceExploit](https://github.com/decoder-it/NetworkServiceExploit)
 
 ### From LOCAL SERVICE or NETWORK SERVICE to full privs
 

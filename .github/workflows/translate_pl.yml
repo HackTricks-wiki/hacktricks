@@ -66,17 +66,20 @@ jobs:
 
       - name: Build mdBook
         run: |
+          git checkout "$BRANCH"
+          git pull
           MDBOOK_BOOK__LANGUAGE=$BRANCH mdbook build || (echo "Error logs" && cat hacktricks-preprocessor-error.log && echo "" && echo "" && echo "Debug logs" && (cat hacktricks-preprocessor.log | tail -n 20) && exit 1)
       
       - name: Update searchindex.js in repo
         run: |
           git checkout $BRANCH
           git pull
-          cp book/searchindex.js searchindex.js
-          cp book/searchindex.json searchindex.json
-          git add searchindex.js searchindex.json
-          git commit -m "Update searchindex for $BRANCH"
-          git push
+          if [ -f "book/searchindex.js" ]; then
+            cp book/searchindex.js searchindex.js
+          fi
+          (git add searchindex.js;
+          git commit -m "Update searchindex";
+          git push) || echo "No changes to searchindex.js"
       
       # Login in AWs
       - name: Configure AWS credentials using OIDC
@@ -87,4 +90,11 @@ jobs:
       
       # Sync the build to S3
       - name: Sync to S3
-        run: aws s3 sync ./book s3://hacktricks-wiki/$BRANCH --delete
+        run: |
+          echo "Current branch:"
+          git rev-parse --abbrev-ref HEAD
+          echo "Syncing $BRANCH to S3"
+          aws s3 sync ./book s3://hacktricks-wiki/$BRANCH --delete
+          echo "Sync completed"
+          echo "Cat 3 files from the book"
+          find . -type f -name 'index.html' -print | head -n 3 | xargs -r cat

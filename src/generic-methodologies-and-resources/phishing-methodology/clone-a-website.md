@@ -1,7 +1,7 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 
-For a phishing assessment sometimes it might be useful to completely **clone a website**.
+For a phishing assessment sometimes it might be useful to completely **clone/dump a website**.
 
 Note that you can add also some payloads to the cloned website like a BeEF hook to "control" the tab of the user.
 
@@ -9,8 +9,10 @@ There are different tools you can use for this purpose:
 
 ## wget
 
-```text
-wget -mk -nH
+```bash
+wget --mirror --page-requisites --convert-links --adjust-extension <URL>
+cd <URL>
+python3 -m http.server 8000
 ```
 
 ## goclone

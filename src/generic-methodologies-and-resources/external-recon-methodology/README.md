@@ -513,7 +513,7 @@ vhostbrute.py --url="example.com" --remoteip="10.1.1.15" --base="www.example.com
 VHostScan -t example.com
 ```
 
-> [!NOTE]
+> [!TIP]
 > With this technique you may even be able to access internal/hidden endpoints.
 
 ### **CORS Brute Force**

