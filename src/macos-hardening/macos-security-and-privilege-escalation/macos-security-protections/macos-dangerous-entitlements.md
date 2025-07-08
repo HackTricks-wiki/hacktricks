@@ -25,7 +25,7 @@ Entitlement hii inaruhusu michakato mingine yenye entitlement **`com.apple.secur
 
 ### `com.apple.security.cs.debugger`
 
-Apps zenye Entitlement ya Zana za Ufuatiliaji zinaweza kuita `task_for_pid()` ili kupata task port halali kwa apps zisizosainiwa na wahusika wa tatu zenye entitlement ya `Get Task Allow` iliyowekwa kuwa `true`. Hata hivyo, hata na entitlement ya zana za ufuatiliaji, debuggers **haziwezi kupata task ports** za michakato ambazo **hazina entitlement ya `Get Task Allow`**, na hivyo kulindwa na Ulinzi wa Uthibitisho wa Mfumo. Angalia [**hii kwa maelezo zaidi**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger).
+Apps zenye Entitlement ya Zana za Ufuatiliaji zinaweza kuita `task_for_pid()` ili kupata task port halali kwa apps zisizosainiwa na za wahusika wa tatu zenye entitlement ya `Get Task Allow` iliyowekwa kuwa `true`. Hata hivyo, hata na entitlement ya zana za ufuatiliaji, debuggers **haziwezi kupata task ports** za michakato ambazo **hazina entitlement ya `Get Task Allow`**, na hivyo kulindwa na Ulinzi wa Uadilifu wa Mfumo. Angalia [**hii kwa maelezo zaidi**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger).
 
 ### `com.apple.security.cs.disable-library-validation`
 
@@ -33,7 +33,7 @@ Entitlement hii inaruhusu **kupakia frameworks, plug-ins, au maktaba bila kusain
 
 ### `com.apple.private.security.clear-library-validation`
 
-Entitlement hii ni sawa sana na **`com.apple.security.cs.disable-library-validation`** lakini **badala** ya **kuondoa** uthibitisho wa maktaba moja kwa moja, inaruhusu mchakato **kuita `csops` system call kuondoa**.\
+Entitlement hii ni sawa sana na **`com.apple.security.cs.disable-library-validation`** lakini **badala** ya **kuondoa** uthibitishaji wa maktaba moja kwa moja, inaruhusu mchakato **kuita `csops` system call kuondoa**.\
 Angalia [**hii kwa maelezo zaidi**](https://theevilbit.github.io/posts/com.apple.private.security.clear-library-validation/).
 
 ### `com.apple.security.cs.allow-dyld-environment-variables`
@@ -42,7 +42,7 @@ Entitlement hii inaruhusu **kutumia DYLD environment variables** ambazo zinaweza
 
 ### `com.apple.private.tcc.manager` au `com.apple.rootless.storage`.`TCC`
 
-[**Kulingana na blog hii**](https://objective-see.org/blog/blog_0x4C.html) **na** [**blog hii**](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/), entitlements hizi zinaruhusu **kubadilisha** hifadhidata ya **TCC**.
+[**Kulingana na blog hii**](https://objective-see.org/blog/blog_0x4C.html) **na** [**blog hii**](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/), entitlements hizi zinaruhusu **kubadilisha** database ya **TCC**.
 
 ### **`system.install.apple-software`** na **`system.install.apple-software.standar-user`**
 
@@ -50,7 +50,7 @@ Entitlements hizi zinaruhusu **kufunga programu bila kuomba ruhusa** kwa mtumiaj
 
 ### `com.apple.private.security.kext-management`
 
-Entitlement inayohitajika kuomba **kernel kupakia kiendelezi cha kernel**.
+Entitlement inayohitajika kuomba **kernel kupakia nyongeza ya kernel**.
 
 ### **`com.apple.private.icloud-account-access`**
 
@@ -66,11 +66,11 @@ TODO: Sijui hii inaruhusu kufanya nini
 
 ### `com.apple.private.apfs.revert-to-snapshot`
 
-TODO: Katika [**ripoti hii**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **imeelezwa kuwa hii inaweza kutumika** kuboresha maudhui yaliyolindwa na SSV baada ya kuanzisha upya. Ikiwa unajua jinsi inavyofanya, tafadhali tuma PR!
+TODO: Katika [**ripoti hii**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **imeelezwa kuwa hii inaweza kutumika** kuboresha yaliyomo yaliyo na ulinzi wa SSV baada ya kuanzisha upya. Ikiwa unajua jinsi inavyofanya, tafadhali tuma PR!
 
 ### `com.apple.private.apfs.create-sealed-snapshot`
 
-TODO: Katika [**ripoti hii**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **imeelezwa kuwa hii inaweza kutumika** kuboresha maudhui yaliyolindwa na SSV baada ya kuanzisha upya. Ikiwa unajua jinsi inavyofanya, tafadhali tuma PR!
+TODO: Katika [**ripoti hii**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **imeelezwa kuwa hii inaweza kutumika** kuboresha yaliyomo yaliyo na ulinzi wa SSV baada ya kuanzisha upya. Ikiwa unajua jinsi inavyofanya, tafadhali tuma PR!
 
 ### `keychain-access-groups`
 
@@ -97,7 +97,7 @@ Kama kufanya ziombwe mtumiaji kwa nywila yake:
 ```bash
 osascript -e 'tell app "App Store" to activate' -e 'tell app "App Store" to activate' -e 'tell app "App Store" to display dialog "App Store requires your password to continue." & return & return default answer "" with icon 1 with hidden answer with title "App Store Alert"'
 ```
-Or kufanya ziara **vitendo vya kawaida**.
+Or kufanya zifanye **vitendo vya kiholela**.
 
 ### **`kTCCServiceEndpointSecurityClient`**
 
@@ -145,11 +145,11 @@ TODO
 
 ### `com.apple.private.nullfs_allow`
 
-Ruhusa hii inaruhusu kuunganisha mfumo wa faili wa nullfs (uliozuiliwa kwa kawaida). Chombo: [**mount_nullfs**](https://github.com/JamaicanMoose/mount_nullfs/tree/master).
+Ruhusa hii inaruhusu kuunganisha mfumo wa faili wa nullfs (uliokatazwa kwa kawaida). Chombo: [**mount_nullfs**](https://github.com/JamaicanMoose/mount_nullfs/tree/master).
 
 ### `kTCCServiceAll`
 
-Kulingana na chapisho hili la blog, ruhusa hii ya TCC kwa kawaida hupatikana katika mfumo:
+Kulingana na chapisho hili la blogu, ruhusa hii ya TCC kwa kawaida hupatikana katika mfumo:
 ```
 [Key] com.apple.private.tcc.allow-prompting
 [Value]
@@ -163,3 +163,8 @@ Ruhusu mchakato **kuomba ruhusa zote za TCC**.
 {{#include ../../../banners/hacktricks-training.md}}
 
 </details>
+
+
+
+
+{{#include /banners/hacktricks-training.md}}
