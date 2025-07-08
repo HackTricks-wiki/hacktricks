@@ -149,6 +149,7 @@
   - [macOS AppleFS](macos-hardening/macos-security-and-privilege-escalation/macos-applefs.md)
   - [macOS Bypassing Firewalls](macos-hardening/macos-security-and-privilege-escalation/macos-bypassing-firewalls.md)
   - [macOS Defensive Apps](macos-hardening/macos-security-and-privilege-escalation/macos-defensive-apps.md)
+  - [Macos Dyld Hijacking And Dyld Insert Libraries](macos-hardening/macos-security-and-privilege-escalation/macos-dyld-hijacking-and-dyld_insert_libraries.md)
   - [macOS GCD - Grand Central Dispatch](macos-hardening/macos-security-and-privilege-escalation/macos-gcd-grand-central-dispatch.md)
   - [macOS Kernel & System Extensions](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture/README.md)
     - [macOS IOKit](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture/macos-iokit.md)
@@ -217,8 +218,10 @@
 
 # 🪟 Windows Hardening
 
+- [Authentication Credentials Uac And Efs](windows-hardening/authentication-credentials-uac-and-efs.md)
 - [Checklist - Local Windows Privilege Escalation](windows-hardening/checklist-windows-privilege-escalation.md)
 - [Windows Local Privilege Escalation](windows-hardening/windows-local-privilege-escalation/README.md)
+  - [Dll Hijacking](windows-hardening/windows-local-privilege-escalation/dll-hijacking.md)
   - [Abusing Tokens](windows-hardening/windows-local-privilege-escalation/privilege-escalation-abusing-tokens.md)
   - [Access Tokens](windows-hardening/windows-local-privilege-escalation/access-tokens.md)
   - [ACLs - DACLs/SACLs/ACEs](windows-hardening/windows-local-privilege-escalation/acls-dacls-sacls-aces.md)
@@ -248,6 +251,7 @@
     - [AD CS Domain Escalation](windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md)
     - [AD CS Domain Persistence](windows-hardening/active-directory-methodology/ad-certificates/domain-persistence.md)
     - [AD CS Certificate Theft](windows-hardening/active-directory-methodology/ad-certificates/certificate-theft.md)
+  - [Ad Certificates](windows-hardening/active-directory-methodology/ad-certificates.md)
   - [AD information in printers](windows-hardening/active-directory-methodology/ad-information-in-printers.md)
   - [AD DNS Records](windows-hardening/active-directory-methodology/ad-dns-records.md)
   - [ASREPRoast](windows-hardening/active-directory-methodology/asreproast.md)
@@ -431,7 +435,7 @@
       - [disable_functions bypass - via mem](network-services-pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable_functions-open_basedir-bypass/disable_functions-bypass-via-mem.md)
       - [disable_functions bypass - mod_cgi](network-services-pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable_functions-open_basedir-bypass/disable_functions-bypass-mod_cgi.md)
       - [disable_functions bypass - PHP 4 >= 4.2.0, PHP 5 pcntl_exec](network-services-pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable_functions-open_basedir-bypass/disable_functions-bypass-php-4-greater-than-4.2.0-php-5-pcntl_exec.md)
-    - [PHP - RCE abusing object creation: new $\_GET\["a"\]($\_GET\["b"\])](network-services-pentesting/pentesting-web/php-tricks-esp/php-rce-abusing-object-creation-new-usd_get-a-usd_get-b.md)
+    - [Php Rce Abusing Object Creation New Usd Get A Usd Get B](network-services-pentesting/pentesting-web/php-tricks-esp/php-rce-abusing-object-creation-new-usd_get-a-usd_get-b.md)
     - [PHP SSRF](network-services-pentesting/pentesting-web/php-tricks-esp/php-ssrf.md)
   - [PrestaShop](network-services-pentesting/pentesting-web/prestashop.md)
   - [Python](network-services-pentesting/pentesting-web/python.md)
@@ -439,6 +443,7 @@
   - [Ruby Tricks](network-services-pentesting/pentesting-web/ruby-tricks.md)
   - [Special HTTP headers$$external:network-services-pentesting/pentesting-web/special-http-headers.md$$]()
   - [Source code Review / SAST Tools](network-services-pentesting/pentesting-web/code-review-tools.md)
+  - [Special Http Headers](network-services-pentesting/pentesting-web/special-http-headers.md)
   - [Spring Actuators](network-services-pentesting/pentesting-web/spring-actuators.md)
   - [Symfony](network-services-pentesting/pentesting-web/symphony.md)
   - [Tomcat](network-services-pentesting/pentesting-web/tomcat/README.md)
@@ -895,3 +900,11 @@
 - [Cookies Policy](todo/cookies-policy.md)
 
 
+
+  - [Readme](blockchain/blockchain-and-crypto-currencies/README.md)
+  - [Readme](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture/macos-ipc-inter-process-communication/README.md)
+  - [Readme](network-services-pentesting/1521-1522-1529-pentesting-oracle-listener/README.md)
+  - [Readme](pentesting-web/web-vulnerabilities-methodology/README.md)
+  - [Readme](reversing/cryptographic-algorithms/README.md)
+  - [Readme](reversing/reversing-tools/README.md)
+  - [Readme](windows-hardening/windows-local-privilege-escalation/privilege-escalation-abusing-tokens/README.md)
