@@ -1,7 +1,5 @@
 # Windows Artifacts
 
-## Windows Artifacts
-
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Generic Windows Artifacts
@@ -20,7 +18,7 @@ Timeline은 방문한 웹 페이지, 편집된 문서 및 실행된 애플리케
 
 ### ADS (Alternate Data Streams)
 
-다운로드된 파일은 **ADS Zone.Identifier**를 포함할 수 있으며, 이는 **어떻게** 인트라넷, 인터넷 등에서 **다운로드되었는지** 나타냅니다. 일부 소프트웨어(예: 브라우저)는 파일이 다운로드된 **URL**과 같은 **더 많은** **정보**를 추가하는 경우가 많습니다.
+다운로드된 파일은 **ADS Zone.Identifier**를 포함할 수 있으며, 이는 **어떻게** intranet, internet 등에서 **다운로드되었는지** 나타냅니다. 일부 소프트웨어(예: 브라우저)는 파일이 다운로드된 **URL**과 같은 **더 많은** **정보**를 추가하는 경우가 많습니다.
 
 ## **File Backups**
 
@@ -42,9 +40,9 @@ Vista/Win7/Win8/Win10에서 **Recycle Bin**은 드라이브의 루트에 있는 
 
 ### 볼륨 섀도 복사본
 
-섀도 복사는 Microsoft Windows에 포함된 기술로, 컴퓨터 파일이나 볼륨의 **백업 복사본** 또는 스냅샷을 생성할 수 있습니다. 사용 중일 때도 가능합니다.
+섀도 복사는 Microsoft Windows에 포함된 기술로, 사용 중인 컴퓨터 파일이나 볼륨의 **백업 복사본** 또는 스냅샷을 생성할 수 있습니다.
 
-이 백업은 일반적으로 파일 시스템의 루트에 있는 `\System Volume Information`에 위치하며, 이름은 다음 이미지에 표시된 **UID**로 구성됩니다:
+이 백업은 일반적으로 파일 시스템의 루트에서 `\System Volume Information`에 위치하며, 이름은 다음 이미지에 표시된 **UID**로 구성됩니다:
 
 ![](<../../../images/image (94).png>)
 
@@ -52,15 +50,15 @@ Vista/Win7/Win8/Win10에서 **Recycle Bin**은 드라이브의 루트에 있는 
 
 ![](<../../../images/image (576).png>)
 
-레지스트리 항목 `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\BackupRestore`는 **백업하지 않을** 파일과 키를 포함합니다:
+레지스트리 항목 `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\BackupRestore`에는 **백업하지 않을** 파일과 키가 포함되어 있습니다:
 
 ![](<../../../images/image (254).png>)
 
-레지스트리 `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\VSS`는 `볼륨 섀도 복사본`에 대한 구성 정보도 포함합니다.
+레지스트리 `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\VSS`에도 `볼륨 섀도 복사본`에 대한 구성 정보가 포함되어 있습니다.
 
 ### Office 자동 저장 파일
 
-자동 저장된 Office 파일은 다음 위치에서 찾을 수 있습니다: `C:\Usuarios\\AppData\Roaming\Microsoft{Excel|Word|Powerpoint}\`
+Office 자동 저장 파일은 다음 위치에서 찾을 수 있습니다: `C:\Usuarios\\AppData\Roaming\Microsoft{Excel|Word|Powerpoint}\`
 
 ## 셸 항목
 
@@ -75,7 +73,7 @@ Windows는 사용자가 다음 위치에서 **파일을 열거나, 사용하거�
 
 폴더가 생성되면, 해당 폴더, 상위 폴더 및 조상 폴더에 대한 링크도 생성됩니다.
 
-이 자동 생성된 링크 파일은 **파일**인지 **폴더**인지, 해당 파일의 **MAC** **시간**, 파일이 저장된 **볼륨 정보**, **대상 파일의 폴더**와 같은 **출처에 대한 정보**를 **포함**합니다. 이 정보는 파일이 삭제된 경우 복구하는 데 유용할 수 있습니다.
+이 자동 생성된 링크 파일은 **파일**인지 **폴더**인지, 해당 파일의 **MAC** **시간**, 파일이 저장된 **볼륨 정보**, **대상 파일의 폴더**에 대한 정보를 **포함**합니다. 이 정보는 파일이 삭제된 경우 복구하는 데 유용할 수 있습니다.
 
 또한, 링크 파일의 **생성 날짜**는 원본 파일이 **처음 사용된** **시간**이며, 링크 파일의 **수정 날짜**는 원본 파일이 **마지막으로 사용된** **시간**입니다.
 
@@ -102,13 +100,13 @@ LECmd.exe -d C:\Users\student\Desktop\LNKs --csv C:\Users\student\Desktop\LNKs
 
 ### 점프 리스트
 
-이것은 각 애플리케이션별로 표시되는 최근 파일입니다. 각 애플리케이션에서 접근할 수 있는 **애플리케이션에서 사용된 최근 파일 목록**입니다. 이들은 **자동으로 생성되거나 사용자 정의**될 수 있습니다.
+이것은 각 애플리케이션에 의해 표시되는 최근 파일입니다. 각 애플리케이션에서 접근할 수 있는 **애플리케이션에 의해 사용된 최근 파일 목록**입니다. 이들은 **자동으로 생성되거나 사용자 정의**될 수 있습니다.
 
 자동으로 생성된 **점프 리스트**는 `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\AutomaticDestinations\`에 저장됩니다. 점프 리스트는 `{id}.autmaticDestinations-ms` 형식으로 이름이 지정되며, 초기 ID는 애플리케이션의 ID입니다.
 
 사용자 정의 점프 리스트는 `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\CustomDestination\`에 저장되며, 일반적으로 파일과 관련하여 **중요한** 일이 발생했기 때문에 애플리케이션에 의해 생성됩니다(아마도 즐겨찾기로 표시됨).
 
-어떤 점프 리스트의 **생성 시간**은 **파일에 처음 접근한 시간**을 나타내며, **수정 시간은 마지막 접근 시간**을 나타냅니다.
+모든 점프 리스트의 **생성 시간**은 **파일에 처음 접근한 시간**을 나타내며, **수정 시간은 마지막 접근 시간**을 나타냅니다.
 
 점프 리스트는 [**JumplistExplorer**](https://ericzimmerman.github.io/#!index.md)를 사용하여 검사할 수 있습니다.
 
@@ -118,7 +116,7 @@ LECmd.exe -d C:\Users\student\Desktop\LNKs --csv C:\Users\student\Desktop\LNKs
 
 ### 셸백
 
-[**이 링크를 따라가면 셸백이 무엇인지 배울 수 있습니다.**](interesting-windows-registry-keys.md#shellbags)
+[**이 링크를 따라가면 셸백에 대해 배울 수 있습니다.**](interesting-windows-registry-keys.md#shellbags)
 
 ## Windows USB 사용
 
@@ -132,7 +130,7 @@ USB 장치가 사용되었음을 식별할 수 있는 방법은 다음과 같은
 
 ![](<../../../images/image (218).png>)
 
-WPDNSE 폴더의 파일은 원본 파일의 복사본이므로 PC를 재시작하면 살아남지 않으며 GUID는 셸백에서 가져옵니다.
+WPDNSE 폴더의 파일은 원본 파일의 복사본이므로 PC를 재시작하면 유지되지 않으며 GUID는 셸백에서 가져옵니다.
 
 ### 레지스트리 정보
 
@@ -140,7 +138,7 @@ WPDNSE 폴더의 파일은 원본 파일의 복사본이므로 PC를 재시작�
 
 ### setupapi
 
-USB 연결이 발생한 시간을 알기 위해 `C:\Windows\inf\setupapi.dev.log` 파일을 확인하세요( `Section start`를 검색하세요).
+USB 연결이 발생한 시간을 알기 위해 `C:\Windows\inf\setupapi.dev.log` 파일을 확인하세요( `Section start`를 검색).
 
 ![](<../../../images/image (477) (2) (2) (2) (2) (2) (2) (2) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (14) (2).png>)
 
@@ -164,15 +162,15 @@ USB 연결이 발생한 시간을 알기 위해 `C:\Windows\inf\setupapi.dev.log
 - **UseUnifiedSchedulingEngine**: `TRUE`로 설정되어 있으며, 일반 작업 스케줄링 엔진을 사용함을 나타냅니다.
 - **MaintenanceSettings**:
 - **Period ('P1M')**: 작업 스케줄러에 정기적인 자동 유지 관리 중 매월 정리 작업을 시작하도록 지시합니다.
-- **Deadline ('P2M')**: 작업이 두 달 연속 실패할 경우, 작업 스케줄러에 비상 자동 유지 관리 중 작업을 실행하도록 지시합니다.
+- **Deadline ('P2M')**: 작업 스케줄러에 작업이 두 달 연속 실패할 경우 긴급 자동 유지 관리 중 작업을 실행하도록 지시합니다.
 
-이 구성은 정기적인 유지 관리 및 드라이버 정리를 보장하며, 연속 실패 시 작업을 재시도할 수 있는 조항을 포함합니다.
+이 구성은 드라이버의 정기적인 유지 관리 및 정리를 보장하며, 연속 실패 시 작업을 재시도할 수 있는 조항을 포함합니다.
 
 **자세한 정보는 다음을 확인하세요:** [**https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html**](https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html)
 
 ## 이메일
 
-이메일은 **2개의 흥미로운 부분: 헤더와 이메일 내용**을 포함합니다. **헤더**에서 다음과 같은 정보를 찾을 수 있습니다:
+이메일은 **2개의 흥미로운 부분: 헤더와 이메일 내용**을 포함합니다. **헤더**에서는 다음과 같은 정보를 찾을 수 있습니다:
 
 - **누가** 이메일을 보냈는지 (이메일 주소, IP, 이메일을 리디렉션한 메일 서버)
 - **언제** 이메일이 전송되었는지
@@ -217,8 +215,8 @@ PST 파일은 [**Kernel PST Viewer**](https://www.nucleustechnologies.com/es/vis
 
 잃어버린 첨부 파일은 다음에서 복구할 수 있습니다:
 
-- **IE10**의 경우: `%APPDATA%\Local\Microsoft\Windows\Temporary Internet Files\Content.Outlook`
-- **IE11 및 그 이상**의 경우: `%APPDATA%\Local\Microsoft\InetCache\Content.Outlook`
+- **IE10**: `%APPDATA%\Local\Microsoft\Windows\Temporary Internet Files\Content.Outlook`
+- **IE11 및 이후 버전**: `%APPDATA%\Local\Microsoft\InetCache\Content.Outlook`
 
 ### Thunderbird MBOX 파일
 
@@ -228,14 +226,14 @@ PST 파일은 [**Kernel PST Viewer**](https://www.nucleustechnologies.com/es/vis
 
 - **Windows XP 및 8-8.1**: 썸네일이 있는 폴더에 접근하면 삭제 후에도 이미지 미리보기를 저장하는 `thumbs.db` 파일이 생성됩니다.
 - **Windows 7/10**: UNC 경로를 통해 네트워크에서 접근할 때 `thumbs.db`가 생성됩니다.
-- **Windows Vista 및 이후 버전**: 썸네일 미리보기는 `%userprofile%\AppData\Local\Microsoft\Windows\Explorer`에 중앙 집중화되어 있으며, 파일 이름은 **thumbcache_xxx.db**입니다. [**Thumbsviewer**](https://thumbsviewer.github.io) 및 [**ThumbCache Viewer**](https://thumbcacheviewer.github.io)는 이러한 파일을 보기 위한 도구입니다.
+- **Windows Vista 및 이후 버전**: 썸네일 미리보기는 `%userprofile%\AppData\Local\Microsoft\Windows\Explorer`에 중앙 집중화되어 있으며, 파일 이름은 **thumbcache_xxx.db**입니다. [**Thumbsviewer**](https://thumbsviewer.github.io) 및 [**ThumbCache Viewer**](https://thumbcacheviewer.github.io) 도구를 사용하여 이러한 파일을 볼 수 있습니다.
 
 ### Windows 레지스트리 정보
 
 Windows 레지스트리는 방대한 시스템 및 사용자 활동 데이터를 저장하며, 다음 파일에 포함되어 있습니다:
 
 - `%windir%\System32\Config`에서 다양한 `HKEY_LOCAL_MACHINE` 하위 키에 대해.
-- `%UserProfile%{User}\NTUSER.DAT`에서 `HKEY_CURRENT_USER`에 대해.
+- `%UserProfile%{User}\NTUSER.DAT`에서 `HKEY_CURRENT_USER`.
 - Windows Vista 및 이후 버전에서는 `%Windir%\System32\Config\RegBack\`에 `HKEY_LOCAL_MACHINE` 레지스트리 파일을 백업합니다.
 - 또한, 프로그램 실행 정보는 Windows Vista 및 Windows 2008 Server 이후부터 `%UserProfile%\{User}\AppData\Local\Microsoft\Windows\USERCLASS.DAT`에 저장됩니다.
 
@@ -245,12 +243,12 @@ Windows 레지스트리는 방대한 시스템 및 사용자 활동 데이터를
 
 - **레지스트리 편집기**: Windows에 설치되어 있습니다. 현재 세션의 Windows 레지스트리를 탐색하는 GUI입니다.
 - [**Registry Explorer**](https://ericzimmerman.github.io/#!index.md): 레지스트리 파일을 로드하고 GUI를 통해 탐색할 수 있습니다. 흥미로운 정보를 가진 키를 강조하는 북마크도 포함되어 있습니다.
-- [**RegRipper**](https://github.com/keydet89/RegRipper3.0): 다시 GUI를 통해 로드된 레지스트리를 탐색할 수 있으며, 로드된 레지스트리 내의 흥미로운 정보를 강조하는 플러그인도 포함되어 있습니다.
-- [**Windows 레지스트리 복구**](https://www.mitec.cz/wrr.html): 로드된 레지스트리에서 중요한 정보를 추출할 수 있는 또 다른 GUI 애플리케이션입니다.
+- [**RegRipper**](https://github.com/keydet89/RegRipper3.0): 다시 GUI가 있어 로드된 레지스트리를 탐색할 수 있으며, 로드된 레지스트리 내의 흥미로운 정보를 강조하는 플러그인도 포함되어 있습니다.
+- [**Windows Registry Recovery**](https://www.mitec.cz/wrr.html): 로드된 레지스트리에서 중요한 정보를 추출할 수 있는 또 다른 GUI 애플리케이션입니다.
 
 ### 삭제된 요소 복구
 
-키가 삭제되면 그렇게 표시되지만, 그 공간이 필요해질 때까지 제거되지 않습니다. 따라서 **Registry Explorer**와 같은 도구를 사용하면 이러한 삭제된 키를 복구할 수 있습니다.
+키가 삭제되면 해당 키는 그렇게 표시되지만, 차지하고 있는 공간이 필요해질 때까지 제거되지 않습니다. 따라서 **Registry Explorer**와 같은 도구를 사용하면 이러한 삭제된 키를 복구할 수 있습니다.
 
 ### 마지막 수정 시간
 
@@ -260,7 +258,7 @@ Windows 레지스트리는 방대한 시스템 및 사용자 활동 데이터를
 
 파일/하이브 **SAM**은 시스템의 **사용자, 그룹 및 사용자 비밀번호** 해시를 포함합니다.
 
-`SAM\Domains\Account\Users`에서 사용자 이름, RID, 마지막 로그인, 마지막 실패한 로그인, 로그인 카운터, 비밀번호 정책 및 계정 생성 시간을 얻을 수 있습니다. **해시**를 얻으려면 **SYSTEM** 파일/하이브도 **필요합니다**.
+`SAM\Domains\Account\Users`에서 사용자 이름, RID, 마지막 로그인, 마지막 실패한 로그온, 로그인 카운터, 비밀번호 정책 및 계정 생성 시간을 얻을 수 있습니다. **해시**를 얻으려면 **SYSTEM** 파일/하이브도 **필요**합니다.
 
 ### Windows 레지스트리의 흥미로운 항목
 
@@ -280,19 +278,19 @@ interesting-windows-registry-keys.md
 
 ### BAM (백그라운드 활동 조정기)
 
-레지스트리 편집기를 사용하여 `SYSTEM` 파일을 열고 경로 `SYSTEM\CurrentControlSet\Services\bam\UserSettings\{SID}` 내에서 **각 사용자가 실행한 애플리케이션**에 대한 정보를 찾을 수 있습니다(경로의 `{SID}`에 유의하세요) 및 **언제** 실행되었는지(시간은 레지스트리의 데이터 값 내에 있습니다).
+레지스트리 편집기를 사용하여 `SYSTEM` 파일을 열고 경로 `SYSTEM\CurrentControlSet\Services\bam\UserSettings\{SID}` 내에서 **각 사용자가 실행한 애플리케이션**에 대한 정보를 찾을 수 있습니다(경로의 `{SID}`에 유의) 및 **언제** 실행되었는지(시간은 레지스트리의 데이터 값 내에 있습니다).
 
 ### Windows 프리패치
 
 프리패칭은 컴퓨터가 사용자가 **가까운 미래에 접근할 수 있는 콘텐츠를 표시하는 데 필요한 리소스를 조용히 가져오는** 기술입니다. 이를 통해 리소스에 더 빠르게 접근할 수 있습니다.
 
-Windows 프리패치는 **실행된 프로그램의 캐시를 생성**하여 더 빠르게 로드할 수 있도록 합니다. 이러한 캐시는 경로 `C:\Windows\Prefetch` 내에 `.pf` 파일로 생성됩니다. XP/VISTA/WIN7에서는 128개의 파일 제한이 있으며, Win8/Win10에서는 1024개의 파일 제한이 있습니다.
+Windows 프리패치는 **실행된 프로그램의 캐시를 생성**하여 더 빠르게 로드할 수 있도록 합니다. 이러한 캐시는 `C:\Windows\Prefetch` 경로 내에 `.pf` 파일로 생성됩니다. XP/VISTA/WIN7에서는 128개의 파일 제한이 있으며, Win8/Win10에서는 1024개의 파일 제한이 있습니다.
 
 파일 이름은 `{program_name}-{hash}.pf` 형식으로 생성됩니다(해시는 실행 파일의 경로와 인수에 기반합니다). W10에서는 이러한 파일이 압축됩니다. 파일의 존재만으로도 **프로그램이 실행되었음을** 나타냅니다.
 
 파일 `C:\Windows\Prefetch\Layout.ini`는 **프리패치된 파일의 폴더 이름**을 포함합니다. 이 파일은 **실행 횟수**, **실행 날짜** 및 **프로그램이 연 파일**에 대한 정보를 포함합니다.
 
-이 파일을 검사하려면 도구 [**PEcmd.exe**](https://github.com/EricZimmerman/PECmd)를 사용할 수 있습니다.
+이 파일을 검사하려면 도구 [**PEcmd.exe**](https://github.com/EricZimmerman/PECmd)를 사용할 수 있습니다:
 ```bash
 .\PECmd.exe -d C:\Users\student\Desktop\Prefetch --html "C:\Users\student\Desktop\out_folder"
 ```
@@ -303,13 +301,13 @@ Windows 프리패치는 **실행된 프로그램의 캐시를 생성**하여 더
 **Superprefetch**는 **다음에 로드될 프로그램**을 예측하여 **프로그램을 더 빠르게 로드**하는 것과 같은 목표를 가지고 있습니다. 그러나, prefetch 서비스를 대체하지는 않습니다.\
 이 서비스는 `C:\Windows\Prefetch\Ag*.db`에 데이터베이스 파일을 생성합니다.
 
-이 데이터베이스에서는 **프로그램의 이름**, **실행 횟수**, **열린 파일**, **접근한 볼륨**, **전체 경로**, **시간대** 및 **타임스탬프**를 찾을 수 있습니다.
+이 데이터베이스에서는 **프로그램**의 **이름**, **실행** **횟수**, **열린** **파일**, **접근한** **볼륨**, **전체** **경로**, **시간대** 및 **타임스탬프**를 찾을 수 있습니다.
 
 이 정보를 사용하여 [**CrowdResponse**](https://www.crowdstrike.com/resources/community-tools/crowdresponse/) 도구에 접근할 수 있습니다.
 
 ### SRUM
 
-**시스템 리소스 사용 모니터**(SRUM)는 **프로세스에 의해 소비된 리소스**를 **모니터링**합니다. W8에서 등장했으며, `C:\Windows\System32\sru\SRUDB.dat`에 ESE 데이터베이스로 데이터를 저장합니다.
+**System Resource Usage Monitor** (SRUM) **는** **프로세스**에 의해 **소비된** **자원**을 **모니터링**합니다. W8에서 등장했으며, `C:\Windows\System32\sru\SRUDB.dat`에 ESE 데이터베이스로 데이터를 저장합니다.
 
 다음과 같은 정보를 제공합니다:
 
@@ -329,7 +327,7 @@ Windows 프리패치는 **실행된 프로그램의 캐시를 생성**하여 더
 ```
 ### AppCompatCache (ShimCache)
 
-**AppCompatCache**는 **ShimCache**로도 알려져 있으며, **Microsoft**에서 애플리케이션 호환성 문제를 해결하기 위해 개발한 **Application Compatibility Database**의 일부입니다. 이 시스템 구성 요소는 다음과 같은 다양한 파일 메타데이터를 기록합니다:
+**AppCompatCache**는 **ShimCache**로도 알려져 있으며, **Microsoft**가 애플리케이션 호환성 문제를 해결하기 위해 개발한 **Application Compatibility Database**의 일부입니다. 이 시스템 구성 요소는 다음과 같은 다양한 파일 메타데이터를 기록합니다:
 
 - 파일의 전체 경로
 - 파일의 크기
@@ -339,7 +337,7 @@ Windows 프리패치는 **실행된 프로그램의 캐시를 생성**하여 더
 
 이러한 데이터는 운영 체제 버전에 따라 특정 위치의 레지스트리에 저장됩니다:
 
-- XP의 경우, 데이터는 `SYSTEM\CurrentControlSet\Control\SessionManager\Appcompatibility\AppcompatCache` 아래에 저장되며, 96개의 항목을 수용할 수 있습니다.
+- XP의 경우, 데이터는 `SYSTEM\CurrentControlSet\Control\SessionManager\Appcompatibility\AppcompatCache`에 저장되며, 96개의 항목을 수용할 수 있습니다.
 - Server 2003 및 Windows 버전 2008, 2012, 2016, 7, 8, 10의 경우, 저장 경로는 `SYSTEM\CurrentControlSet\Control\SessionManager\AppcompatCache\AppCompatCache`이며, 각각 512개 및 1024개의 항목을 수용합니다.
 
 저장된 정보를 파싱하기 위해 [**AppCompatCacheParser** tool](https://github.com/EricZimmerman/AppCompatCacheParser)의 사용이 권장됩니다.
@@ -362,7 +360,7 @@ AmcacheParser.exe -f C:\Users\genericUser\Desktop\Amcache.hve --csv C:\Users\gen
 
 ### RecentFileCache
 
-이 아티팩트는 W7에서만 `C:\Windows\AppCompat\Programs\RecentFileCache.bcf`에 존재하며, 일부 바이너리의 최근 실행에 대한 정보를 포함하고 있습니다.
+이 아티팩트는 W7에서만 `C:\Windows\AppCompat\Programs\RecentFileCache.bcf`에 있으며, 일부 바이너리의 최근 실행에 대한 정보를 포함하고 있습니다.
 
 파일을 파싱하려면 도구 [**RecentFileCacheParse**](https://github.com/EricZimmerman/RecentFileCacheParser)를 사용할 수 있습니다.
 
@@ -380,7 +378,8 @@ AmcacheParser.exe -f C:\Users\genericUser\Desktop\Amcache.hve --csv C:\Users\gen
 
 이 데이터베이스의 애플리케이션 테이블 내에서 "Application ID", "PackageNumber", "Display Name" 열을 찾을 수 있습니다. 이 열은 사전 설치된 애플리케이션과 설치된 애플리케이션에 대한 정보를 포함하고 있으며, 설치된 애플리케이션의 ID는 순차적이어야 하므로 일부 애플리케이션이 제거되었는지 확인할 수 있습니다.
 
-레지스트리 경로 `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Applications\`에서도 **설치된 애플리케이션**을 찾을 수 있습니다. 그리고 `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Deleted\`에서 **제거된 애플리케이션**을 찾을 수 있습니다.
+레지스트리 경로 `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Applications\`에서도 **설치된 애플리케이션**을 찾을 수 있습니다.\
+그리고 `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Deleted\`에서 **제거된 애플리케이션**을 찾을 수 있습니다.
 
 ## Windows Events
 
@@ -392,7 +391,7 @@ Windows 이벤트 내에 나타나는 정보는 다음과 같습니다:
 - 관련된 호스트 (호스트 이름, IP)
 - 접근된 자산 (파일, 폴더, 프린터, 서비스)
 
-로그는 Windows Vista 이전에는 `C:\Windows\System32\config`에, Windows Vista 이후에는 `C:\Windows\System32\winevt\Logs`에 위치합니다. Windows Vista 이전에는 이벤트 로그가 이진 형식이었고, 이후에는 **XML 형식**으로 **.evtx** 확장자를 사용합니다.
+로그는 Windows Vista 이전에는 `C:\Windows\System32\config`에 위치하고, Windows Vista 이후에는 `C:\Windows\System32\winevt\Logs`에 위치합니다. Windows Vista 이전에는 이벤트 로그가 이진 형식이었고, 이후에는 **XML 형식**으로 **.evtx** 확장자를 사용합니다.
 
 이벤트 파일의 위치는 **`HKLM\SYSTEM\CurrentControlSet\services\EventLog\{Application|System|Security}`**의 SYSTEM 레지스트리에서 찾을 수 있습니다.
 
@@ -400,16 +399,16 @@ Windows 이벤트 뷰어 (**`eventvwr.msc`**) 또는 [**Event Log Explorer**](ht
 
 ## Understanding Windows Security Event Logging
 
-접근 이벤트는 `C:\Windows\System32\winevt\Security.evtx`에 위치한 보안 구성 파일에 기록됩니다. 이 파일의 크기는 조정 가능하며, 용량에 도달하면 이전 이벤트가 덮어씌워집니다. 기록된 이벤트에는 사용자 로그인 및 로그오프, 사용자 행동, 보안 설정 변경, 파일, 폴더 및 공유 자산 접근이 포함됩니다.
+접근 이벤트는 `C:\Windows\System32\winevt\Security.evtx`에 위치한 보안 구성 파일에 기록됩니다. 이 파일의 크기는 조정 가능하며, 용량이 초과되면 이전 이벤트가 덮어씌워집니다. 기록된 이벤트에는 사용자 로그인 및 로그오프, 사용자 행동, 보안 설정 변경, 파일, 폴더 및 공유 자산 접근이 포함됩니다.
 
-### 사용자 인증을 위한 주요 이벤트 ID:
+### Key Event IDs for User Authentication:
 
 - **EventID 4624**: 사용자가 성공적으로 인증되었음을 나타냅니다.
 - **EventID 4625**: 인증 실패를 나타냅니다.
 - **EventIDs 4634/4647**: 사용자 로그오프 이벤트를 나타냅니다.
 - **EventID 4672**: 관리 권한으로 로그인했음을 나타냅니다.
 
-#### EventID 4634/4647 내의 하위 유형:
+#### Sub-types within EventID 4634/4647:
 
 - **Interactive (2)**: 직접 사용자 로그인.
 - **Network (3)**: 공유 폴더 접근.
@@ -424,16 +423,16 @@ Windows 이벤트 뷰어 (**`eventvwr.msc`**) 또는 [**Event Log Explorer**](ht
 - **Cache Remote Interactive (12)**: 캐시된 자격 증명으로 원격 로그인.
 - **Cached Unlock (13)**: 캐시된 자격 증명으로 잠금 해제.
 
-#### EventID 4625의 상태 및 하위 상태 코드:
+#### Status and Sub Status Codes for EventID 4625:
 
 - **0xC0000064**: 사용자 이름이 존재하지 않음 - 사용자 이름 열거 공격을 나타낼 수 있습니다.
-- **0xC000006A**: 올바른 사용자 이름이지만 잘못된 비밀번호 - 비밀번호 추측 또는 무차별 대입 시도를 나타낼 수 있습니다.
-- **0xC0000234**: 사용자 계정이 잠김 - 여러 번의 로그인 실패 후 무차별 대입 공격이 발생할 수 있습니다.
+- **0xC000006A**: 올바른 사용자 이름이지만 잘못된 비밀번호 - 비밀번호 추측 또는 무차별 대입 시도 가능성.
+- **0xC0000234**: 사용자 계정이 잠김 - 여러 번의 로그인 실패로 인한 무차별 대입 공격 후 발생할 수 있습니다.
 - **0xC0000072**: 계정 비활성화 - 비활성 계정에 대한 무단 접근 시도.
 - **0xC000006F**: 허용된 시간 외 로그인 - 설정된 로그인 시간 외 접근 시도, 무단 접근의 가능성을 나타냅니다.
 - **0xC0000070**: 워크스테이션 제한 위반 - 무단 위치에서 로그인 시도일 수 있습니다.
 - **0xC0000193**: 계정 만료 - 만료된 사용자 계정으로 접근 시도.
-- **0xC0000071**: 만료된 비밀번호 - 오래된 비밀번호로 로그인 시도.
+- **0xC0000071**: 비밀번호 만료 - 만료된 비밀번호로 로그인 시도.
 - **0xC0000133**: 시간 동기화 문제 - 클라이언트와 서버 간의 큰 시간 차이는 패스-더-티켓과 같은 더 정교한 공격을 나타낼 수 있습니다.
 - **0xC0000224**: 필수 비밀번호 변경 필요 - 빈번한 필수 변경은 계정 보안을 불안정하게 하려는 시도를 나타낼 수 있습니다.
 - **0xC0000225**: 보안 문제보다는 시스템 버그를 나타냅니다.
@@ -441,17 +440,17 @@ Windows 이벤트 뷰어 (**`eventvwr.msc`**) 또는 [**Event Log Explorer**](ht
 
 #### EventID 4616:
 
-- **시간 변경**: 시스템 시간 수정, 사건의 타임라인을 모호하게 할 수 있습니다.
+- **Time Change**: 시스템 시간 수정, 사건의 타임라인을 흐리게 할 수 있습니다.
 
-#### EventID 6005 및 6006:
+#### EventID 6005 and 6006:
 
-- **시스템 시작 및 종료**: EventID 6005는 시스템 시작을 나타내고, EventID 6006은 종료를 나타냅니다.
+- **System Startup and Shutdown**: EventID 6005는 시스템 시작을 나타내고, EventID 6006은 시스템 종료를 나타냅니다.
 
 #### EventID 1102:
 
-- **로그 삭제**: 보안 로그가 지워지는 경우, 이는 종종 불법 활동을 은폐하려는 신호입니다.
+- **Log Deletion**: 보안 로그가 지워지는 경우, 이는 종종 불법 활동을 숨기기 위한 신호입니다.
 
-#### USB 장치 추적을 위한 이벤트 ID:
+#### EventIDs for USB Device Tracking:
 
 - **20001 / 20003 / 10000**: USB 장치 첫 연결.
 - **10100**: USB 드라이버 업데이트.
@@ -459,34 +458,34 @@ Windows 이벤트 뷰어 (**`eventvwr.msc`**) 또는 [**Event Log Explorer**](ht
 
 로그인 유형 및 자격 증명 덤핑 기회를 시뮬레이션하는 실용적인 예는 [Altered Security의 자세한 가이드](https://www.alteredsecurity.com/post/fantastic-windows-logon-types-and-where-to-find-credentials-in-them)를 참조하십시오.
 
-상태 및 하위 상태 코드를 포함한 이벤트 세부정보는 이벤트 원인에 대한 추가 통찰력을 제공하며, 특히 Event ID 4625에서 주목할 만합니다.
+이벤트 세부정보, 상태 및 하위 상태 코드는 이벤트 원인에 대한 추가 통찰력을 제공하며, 특히 Event ID 4625에서 주목할 만합니다.
 
-### Windows 이벤트 복구
+### Recovering Windows Events
 
-삭제된 Windows 이벤트를 복구할 가능성을 높이기 위해, 의심되는 컴퓨터의 전원을 직접 분리하여 끄는 것이 좋습니다. **Bulk_extractor**, `.evtx` 확장자를 지정하는 복구 도구는 이러한 이벤트를 복구하려고 시도하는 데 권장됩니다.
+삭제된 Windows 이벤트를 복구할 가능성을 높이기 위해, 의심되는 컴퓨터의 전원을 직접 분리하여 끄는 것이 좋습니다. **Bulk_extractor**, `.evtx` 확장자를 지정하는 복구 도구가 이러한 이벤트를 복구하기 위해 권장됩니다.
 
-### Windows 이벤트를 통한 일반 공격 식별
+### Identifying Common Attacks via Windows Events
 
-일반 사이버 공격을 식별하는 데 Windows 이벤트 ID를 활용하는 포괄적인 가이드는 [Red Team Recipe](https://redteamrecipe.com/event-codes/)를 방문하십시오.
+일반 사이버 공격을 식별하기 위해 Windows 이벤트 ID를 활용하는 포괄적인 가이드는 [Red Team Recipe](https://redteamrecipe.com/event-codes/)를 방문하십시오.
 
-#### 무차별 대입 공격
+#### Brute Force Attacks
 
 여러 EventID 4625 기록으로 식별되며, 공격이 성공하면 EventID 4624가 뒤따릅니다.
 
-#### 시간 변경
+#### Time Change
 
-EventID 4616에 기록되며, 시스템 시간의 변경은 포렌식 분석을 복잡하게 만들 수 있습니다.
+EventID 4616에 기록되며, 시스템 시간 변경은 포렌식 분석을 복잡하게 만들 수 있습니다.
 
-#### USB 장치 추적
+#### USB Device Tracking
 
-USB 장치 추적을 위한 유용한 시스템 이벤트 ID는 초기 사용을 위한 20001/20003/10000, 드라이버 업데이트를 위한 10100, 삽입 타임스탬프를 위한 DeviceSetupManager의 EventID 112가 포함됩니다.
+USB 장치 추적에 유용한 시스템 이벤트 ID는 초기 사용을 위한 20001/20003/10000, 드라이버 업데이트를 위한 10100, 삽입 타임스탬프를 위한 DeviceSetupManager의 EventID 112가 포함됩니다.
 
-#### 시스템 전원 이벤트
+#### System Power Events
 
 EventID 6005는 시스템 시작을 나타내고, EventID 6006은 종료를 나타냅니다.
 
-#### 로그 삭제
+#### Log Deletion
 
-보안 EventID 1102는 로그 삭제를 신호하며, 이는 포렌식 분석에 중요한 이벤트입니다.
+보안 EventID 1102는 로그 삭제를 신호하며, 포렌식 분석에 중요한 이벤트입니다.
 
 {{#include ../../../banners/hacktricks-training.md}}

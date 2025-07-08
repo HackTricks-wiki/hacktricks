@@ -1,11 +1,13 @@
+# SeDebug + SeImpersonate - Token 복사
+
 {{#include ../../banners/hacktricks-training.md}}
 
 다음 코드는 **SeDebug 및 SeImpersonate 권한을 악용하여** **SYSTEM으로 실행 중인 프로세스**에서 **모든 토큰 권한**을 가진 토큰을 복사합니다. \
 이 경우, 이 코드는 **Windows 서비스 바이너리**로 컴파일되어 작동 여부를 확인할 수 있습니다.\
 그러나 **권한 상승이 발생하는 코드의 주요 부분**은 **`Exploit`** **함수** 내부에 있습니다.\
-해당 함수 내부에서 **프로세스 _**lsass.exe**_**가 검색되고, 그 **토큰이 복사**되며, 마지막으로 그 토큰이 복사된 토큰의 모든 권한으로 새로운 _**cmd.exe**_를 생성하는 데 사용됩니다.
+해당 함수 내부에서 **프로세스 _**lsass.exe**_**가 검색되고, 그 **토큰이 복사**되며, 마지막으로 그 토큰이 복사된 모든 권한을 가진 새로운 _**cmd.exe**_를 생성하는 데 사용됩니다.
 
-**SYSTEM으로 실행 중인 다른 프로세스** 중에서 모든 또는 대부분의 토큰 권한을 가진 프로세스는: **services.exe**, **svhost.exe** (가장 초기 프로세스 중 하나), **wininit.exe**, **csrss.exe**... (_보호된 프로세스에서 토큰을 복사할 수 없다는 점을 기억하세요_). 또한, 관리자 권한으로 실행되는 [Process Hacker](https://processhacker.sourceforge.io/downloads.php) 도구를 사용하여 프로세스의 토큰을 확인할 수 있습니다.
+**SYSTEM으로 실행 중인 다른 프로세스**들로는 **services.exe**, **svhost.exe** (가장 초기 프로세스 중 하나), **wininit.exe**, **csrss.exe**...가 있습니다. (_보호된 프로세스에서 토큰을 복사할 수 없다는 점을 기억하세요_). 또한, 관리자 권한으로 실행되는 [Process Hacker](https://processhacker.sourceforge.io/downloads.php) 도구를 사용하여 프로세스의 토큰을 확인할 수 있습니다.
 ```c
 // From https://cboard.cprogramming.com/windows-programming/106768-running-my-program-service.html
 #include <windows.h>

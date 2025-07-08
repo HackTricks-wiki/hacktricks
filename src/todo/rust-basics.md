@@ -1,8 +1,10 @@
 # Rust Basics
 
+{{#include /banners/hacktricks-training.md}}
+
 ### Generic Types
 
-어떤 값이든 될 수 있는 값 중 하나를 가진 구조체를 만듭니다.
+구조체를 생성하여 그 값 중 1개가 어떤 타입이 될 수 있도록 합니다.
 ```rust
 struct Wrapper<T> {
 value: T,
@@ -19,18 +21,18 @@ Wrapper::new("Foo").value, "Foo"
 ```
 ### Option, Some & None
 
-Option 타입은 값이 Some 타입일 수 있음을 의미합니다(무언가가 있음) 또는 None:
+Option 타입은 값이 Some 타입일 수 있음을 의미합니다 (무언가가 있음) 또는 None:
 ```rust
 pub enum Option<T> {
 None,
 Some(T),
 }
 ```
-`Option`의 값을 확인하기 위해 `is_some()` 또는 `is_none()`와 같은 함수를 사용할 수 있습니다.
+`is_some()` 또는 `is_none()`와 같은 함수를 사용하여 Option의 값을 확인할 수 있습니다.
 
 ### 매크로
 
-매크로는 수동으로 작성한 코드보다 더 많은 코드를 생성하기 때문에 함수보다 더 강력합니다. 예를 들어, 함수 시그니처는 함수가 가진 매개변수의 수와 유형을 선언해야 합니다. 반면에 매크로는 가변 개수의 매개변수를 받을 수 있습니다: 우리는 `println!("hello")`를 하나의 인수로 호출하거나 `println!("hello {}", name)`을 두 개의 인수로 호출할 수 있습니다. 또한, 매크로는 컴파일러가 코드의 의미를 해석하기 전에 확장되므로, 매크로는 예를 들어 주어진 유형에 대해 트레이트를 구현할 수 있습니다. 함수는 런타임에 호출되기 때문에 트레이트를 구현할 수 없습니다.
+매크로는 수동으로 작성한 코드보다 더 많은 코드를 생성하기 때문에 함수보다 더 강력합니다. 예를 들어, 함수 시그니처는 함수가 가지는 매개변수의 수와 유형을 선언해야 합니다. 반면에 매크로는 가변 개수의 매개변수를 받을 수 있습니다: `println!("hello")`를 하나의 인수로 호출하거나 `println!("hello {}", name)`을 두 개의 인수로 호출할 수 있습니다. 또한, 매크로는 컴파일러가 코드의 의미를 해석하기 전에 확장되므로, 매크로는 예를 들어 주어진 유형에 대해 트레이트를 구현할 수 있습니다. 함수는 런타임에 호출되기 때문에 트레이트를 구현할 수 없습니다.
 ```rust
 macro_rules! my_macro {
 () => {
@@ -132,7 +134,7 @@ break;
 }
 }
 ```
-#### 동안
+#### while
 ```rust
 let mut n = 1;
 while n < 101 {
@@ -222,7 +224,7 @@ optional = Some(i + 1);
 ```
 ### 특성
 
-타입에 대한 새로운 메서드 생성
+타입에 대한 새로운 메서드를 생성합니다.
 ```rust
 trait AppendBar {
 fn append_bar(self) -> Self;
@@ -250,7 +252,7 @@ assert_ne!(true, false);
 }
 }
 ```
-### 스레딩
+### Threading
 
 #### Arc
 
@@ -265,7 +267,7 @@ println!("{:?}", apple);
 });
 }
 ```
-#### 스레드
+#### Threads
 
 이 경우 스레드에 수정할 수 있는 변수를 전달할 것입니다.
 ```rust
@@ -285,4 +287,4 @@ thread::sleep(Duration::from_millis(500));
 }
 }
 ```
-
+{{#include /banners/hacktricks-training.md}}

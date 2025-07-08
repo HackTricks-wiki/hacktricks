@@ -1,6 +1,8 @@
 # LLM Training - Data Preparation
 
-**이것은 매우 추천되는 책** [**https://www.manning.com/books/build-a-large-language-model-from-scratch**](https://www.manning.com/books/build-a-large-language-model-from-scratch) **에서의 내 노트와 추가 정보입니다.**
+{{#include /banners/hacktricks-training.md}}
+
+**이것은 매우 추천하는 책** [**https://www.manning.com/books/build-a-large-language-model-from-scratch**](https://www.manning.com/books/build-a-large-language-model-from-scratch) **에서의 내 노트와 추가 정보입니다.**
 
 ## Basic Information
 
@@ -32,7 +34,7 @@
 
 > [!TIP]
 > 이 세 번째 단계의 목표는 매우 간단합니다: **어휘의 각 이전 토큰에 원하는 차원의 벡터를 할당하여 모델을 훈련하는 것입니다.** 어휘의 각 단어는 X 차원의 공간에서 한 점이 됩니다.\
-> 각 단어의 초기 위치는 "무작위로" 초기화되며, 이러한 위치는 훈련 가능한 매개변수입니다(훈련 중 개선됩니다).
+> 처음에 각 단어의 위치는 "무작위로" 초기화되며, 이 위치는 훈련 가능한 매개변수입니다(훈련 중 개선됩니다).
 >
 > 게다가, 토큰 임베딩 동안 **또 다른 임베딩 레이어가 생성됩니다**. 이는 (이 경우) **훈련 문장에서 단어의 절대 위치를 나타냅니다.** 이렇게 하면 문장에서 서로 다른 위치에 있는 단어는 서로 다른 표현(의미)을 갖게 됩니다.
 
@@ -43,8 +45,8 @@
 ## 4. Attention Mechanisms
 
 > [!TIP]
-> 이 네 번째 단계의 목표는 매우 간단합니다: **일부 주의 메커니즘을 적용하는 것입니다.** 이는 **어휘의 단어와 현재 LLM 훈련에 사용되는 문장에서의 이웃 간의 관계를 포착하는 많은 반복 레이어**가 될 것입니다.\
-> 이를 위해 많은 레이어가 사용되며, 많은 훈련 가능한 매개변수가 이 정보를 포착하게 됩니다.
+> 이 네 번째 단계의 목표는 매우 간단합니다: **일부 주의 메커니즘을 적용하는 것입니다.** 이는 LLM을 훈련하는 데 사용되는 현재 문장에서 단어와 이웃 간의 관계를 **포착하는 많은 반복 레이어**가 될 것입니다.\
+> 이를 위해 많은 레이어가 사용되므로 많은 훈련 가능한 매개변수가 이 정보를 포착하게 됩니다.
 
 {{#ref}}
 4.-attention-mechanisms.md
@@ -53,7 +55,7 @@
 ## 5. LLM Architecture
 
 > [!TIP]
-> 이 다섯 번째 단계의 목표는 매우 간단합니다: **전체 LLM의 아키텍처를 개발하는 것입니다.** 모든 것을 함께 모으고, 모든 레이어를 적용하며, 텍스트를 생성하거나 텍스트를 ID로 변환하고 그 반대로 변환하는 모든 기능을 생성합니다.
+> 이 다섯 번째 단계의 목표는 매우 간단합니다: **전체 LLM의 아키텍처를 개발하는 것입니다.** 모든 것을 함께 모으고, 모든 레이어를 적용하고, 텍스트를 생성하거나 텍스트를 ID로 변환하고 그 반대로 변환하는 모든 기능을 만듭니다.
 >
 > 이 아키텍처는 훈련 후 텍스트를 예측하는 데에도 사용됩니다.
 
@@ -96,3 +98,5 @@
 {{#ref}}
 7.2.-fine-tuning-to-follow-instructions.md
 {{#endref}}
+
+{{#include /banners/hacktricks-training.md}}
