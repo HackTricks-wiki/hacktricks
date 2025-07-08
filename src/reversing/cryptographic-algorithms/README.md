@@ -1,12 +1,10 @@
 # Kriptografiese/Kompressie Algoritmes
 
-## Kriptografiese/Kompressie Algoritmes
-
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Identifisering van Algoritmes
 
-As jy eindig in 'n kode **wat regte en linke skuif, xors en verskeie aritmetiese operasies gebruik**, is dit hoogs waarskynlik dat dit die implementering van 'n **kriptografiese algoritme** is. Hier gaan daar 'n paar maniere gewys word om die **algoritme wat gebruik word te identifiseer sonder om elke stap te moet omkeer**.
+As jy eindig in 'n kode **wat regte en linke skuif, xors en verskeie aritmetiese operasies** gebruik, is dit hoogs waarskynlik dat dit die implementering van 'n **kriptografiese algoritme** is. Hier gaan daar 'n paar maniere gewys word om die **algoritme wat gebruik word te identifiseer sonder om elke stap te moet omkeer**.
 
 ### API funksies
 
@@ -50,12 +48,12 @@ Jy kan enige van die ander konstantes soek en jy sal (waarskynlik) dieselfde res
 
 ### data info
 
-As die kode geen betekenisvolle konstante het nie, kan dit **inligting laai vanaf die .data afdeling**.\
-Jy kan daardie data toegang, **groepeer die eerste dword** en dit in Google soek soos ons in die vorige afdeling gedoen het:
+As die kode geen betekenisvolle konstante het nie, kan dit **inligting van die .data afdeling laai**.\
+Jy kan daardie data toegang, **die eerste dword groepeer** en dit in Google soek soos ons in die vorige afdeling gedoen het:
 
 ![](<../../images/image (372).png>)
 
-In hierdie geval, as jy soek na **0xA56363C6** kan jy vind dat dit verband hou met die **tabelle van die AES algoritme**.
+In hierdie geval, as jy soek vir **0xA56363C6** kan jy vind dat dit verband hou met die **tabelle van die AES algoritme**.
 
 ## RC4 **(Simmetriese Kriptografie)**
 
@@ -64,17 +62,17 @@ In hierdie geval, as jy soek na **0xA56363C6** kan jy vind dat dit verband hou m
 Dit bestaan uit 3 hoofdele:
 
 - **Inisialisering fase/**: Skep 'n **tabel van waardes van 0x00 tot 0xFF** (256bytes in totaal, 0x100). Hierdie tabel word algemeen die **Substitusie Boks** (of SBox) genoem.
-- **Scrambling fase**: Sal **deur die tabel loop** wat voorheen geskep is (lus van 0x100 iterasies, weer) en elke waarde met **semi-ewe random** bytes aanpas. Om hierdie semi-ewe random bytes te skep, word die RC4 **sleutel gebruik**. RC4 **sleutels** kan **tussen 1 en 256 bytes in lengte** wees, maar dit word gewoonlik aanbeveel dat dit bo 5 bytes is. Gewoonlik is RC4 sleutels 16 bytes in lengte.
+- **Hussel fase**: Sal **deur die tabel** wat voorheen geskep is (lus van 0x100 iterasies, weer) loop en elke waarde met **semi-ewe random** bytes modifiseer. Om hierdie semi-ewe random bytes te skep, word die RC4 **sleutel gebruik**. RC4 **sleutels** kan **tussen 1 en 256 bytes in lengte** wees, maar dit word gewoonlik aanbeveel dat dit bo 5 bytes is. Gewoonlik is RC4 sleutels 16 bytes in lengte.
 - **XOR fase**: Laastens, die plain-text of cyphertext word **XORed met die waardes wat voorheen geskep is**. Die funksie om te enkripteer en te dekripteer is dieselfde. Hiervoor sal 'n **lus deur die geskepte 256 bytes** uitgevoer word soveel keer as wat nodig is. Dit word gewoonlik in 'n dekompilde kode erken met 'n **%256 (mod 256)**.
 
-> [!NOTE]
+> [!TIP]
 > **Om 'n RC4 in 'n disassembly/dekompilde kode te identifiseer, kan jy kyk vir 2 lusse van grootte 0x100 (met die gebruik van 'n sleutel) en dan 'n XOR van die invoerdata met die 256 waardes wat voorheen in die 2 lusse geskep is, waarskynlik met 'n %256 (mod 256)**
 
 ### **Inisialisering fase/Substitusie Boks:** (Let op die nommer 256 wat as teenwoordiger gebruik word en hoe 'n 0 in elke plek van die 256 karakters geskryf word)
 
 ![](<../../images/image (377).png>)
 
-### **Scrambling Fase:**
+### **Hussel Fase:**
 
 ![](<../../images/image (378).png>)
 
@@ -87,7 +85,7 @@ Dit bestaan uit 3 hoofdele:
 ### **Kenmerke**
 
 - Gebruik van **substitusie bokse en opsoek tabelle**
-- Dit is moontlik om **AES te onderskei danksy die gebruik van spesifieke opsoek tabel waardes** (konstantes). _Let daarop dat die **konstante** in die binêre **gestoor** kan word **of geskep** _**dynamies**._
+- Dit is moontlik om **AES te onderskei danksy die gebruik van spesifieke opsoek tabel waardes** (konstantes). _Let daarop dat die **konstante** **gestoor** kan word in die binêre **of geskep** _ _**dynamies**._
 - Die **enkripsiesleutel** moet **deelbaar** wees deur **16** (gewoonlik 32B) en gewoonlik word 'n **IV** van 16B gebruik.
 
 ### SBox konstantes
@@ -108,11 +106,11 @@ Let ook op die **grootte van die lus** (**132**) en die **aantal XOR operasies**
 
 ![](<../../images/image (381).png>)
 
-Soos voorheen genoem, kan hierdie kode binne enige dekompiler as 'n **baie lang funksie** gesien word aangesien daar **nie spronge** binne dit is nie. Die dekompilde kode kan soos volg lyk:
+Soos voorheen genoem, kan hierdie kode binne enige dekompiler as 'n **baie lange funksie** gesien word aangesien daar **nie spronge** binne dit is nie. Die dekompilde kode kan soos volg lyk:
 
 ![](<../../images/image (382).png>)
 
-Daarom is dit moontlik om hierdie algoritme te identifiseer deur die **magiese nommer** en die **begin XORs** te kontroleer, 'n **baie lang funksie** te sien en **instruksies** van die lang funksie **te vergelyk** met 'n implementering (soos die skuif links deur 7 en die rotasie links deur 22).
+Daarom is dit moontlik om hierdie algoritme te identifiseer deur die **magiese nommer** en die **begin XORs** te kontroleer, 'n **baie lange funksie** te sien en **instruksies** van die lange funksie **te vergelyk** met 'n implementering (soos die skuif links deur 7 en die draai links deur 22).
 
 ## RSA **(Asimmetriese Kriptografie)**
 
@@ -120,7 +118,7 @@ Daarom is dit moontlik om hierdie algoritme te identifiseer deur die **magiese n
 
 - Meer kompleks as simmetriese algoritmes
 - Daar is geen konstantes nie! (aangepaste implementasies is moeilik om te bepaal)
-- KANAL (n kripto ontleder) misluk om leidrade oor RSA te wys en dit staatmaak op konstantes.
+- KANAL (n kripto ontleder) slaag nie daarin om leidrade oor RSA te wys nie en dit staatmaak op konstantes.
 
 ### Identifisering deur vergelykings
 

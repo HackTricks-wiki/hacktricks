@@ -1,6 +1,4 @@
-# Naam Pyp Kliënt Imersie
-
-## Naam Pyp Kliënt Imersie
+# Named Pipe Client Impersonation
 
 {{#include ../../banners/hacktricks-training.md}}
 

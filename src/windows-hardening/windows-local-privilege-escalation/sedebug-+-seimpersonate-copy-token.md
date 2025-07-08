@@ -1,11 +1,13 @@
+# SeDebug + SeImpersonate - Kopieer Token
+
 {{#include ../../banners/hacktricks-training.md}}
 
-Die volgende kode **benut die privilige SeDebug en SeImpersonate** om die token van 'n **proses wat as SYSTEM loop** en met **al die token privilige** te kopieer. \
-In hierdie geval kan hierdie kode saamgestel en gebruik word as 'n **Windows diens binêre** om te kyk of dit werk.\
+Die volgende kode **ontgin die voorregte SeDebug en SeImpersonate** om die token van 'n **proses wat as SYSTEM loop** en met **al die token voorregte** te kopieer. \
+In hierdie geval kan hierdie kode saamgestel en gebruik word as 'n **Windows diens binêre** om te kontroleer dat dit werk.\
 Die hoofdeel van die **kode waar die verhoging plaasvind** is binne die **`Exploit`** **funksie**.\
-Binne daardie funksie kan jy sien dat die **proses **_**lsass.exe**_** gesoek word**, dan word sy **token gekopieer**, en uiteindelik word daardie token gebruik om 'n nuwe _**cmd.exe**_ te spawn met al die privilige van die gekopieerde token.
+Binne daardie funksie kan jy sien dat die **proses **_**lsass.exe**_** gesoek word**, dan word sy **token gekopieer**, en uiteindelik word daardie token gebruik om 'n nuwe _**cmd.exe**_ met al die voorregte van die gekopieerde token te spawn.
 
-**Ander prosesse** wat as SYSTEM loop met al of die meeste van die token privilige is: **services.exe**, **svhost.exe** (een van die eerste), **wininit.exe**, **csrss.exe**... (_onthou dat jy nie 'n token van 'n beskermde proses kan kopieer_). Boonop kan jy die hulpmiddel [Process Hacker](https://processhacker.sourceforge.io/downloads.php) wat as administrateur loop gebruik om die tokens van 'n proses te sien.
+**Ander prosesse** wat as SYSTEM loop met al of die meeste van die token voorregte is: **services.exe**, **svhost.exe** (een van die eerste), **wininit.exe**, **csrss.exe**... (_onthou dat jy nie 'n token van 'n Beskermde proses kan kopieer_). Boonop kan jy die hulpmiddel [Process Hacker](https://processhacker.sourceforge.io/downloads.php) wat as administrateur loop gebruik om die tokens van 'n proses te sien.
 ```c
 // From https://cboard.cprogramming.com/windows-programming/106768-running-my-program-service.html
 #include <windows.h>

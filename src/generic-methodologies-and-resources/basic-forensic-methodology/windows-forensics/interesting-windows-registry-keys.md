@@ -1,16 +1,14 @@
 # Interessante Windows Registriesleutels
 
-### Interessante Windows Registriesleutels
-
 {{#include ../../../banners/hacktricks-training.md}}
 
 ### **Windows Weergawe en Eienaar Inligting**
 
-- Geleë by **`Software\Microsoft\Windows NT\CurrentVersion`**, sal jy die Windows weergawe, dienspakket, installasietyd en die geregistreerde eienaar se naam op 'n eenvoudige manier vind.
+- Geleë by **`Software\Microsoft\Windows NT\CurrentVersion`**, sal jy die Windows weergawe, dienspakket, installasietyd, en die geregistreerde eienaar se naam op 'n eenvoudige manier vind.
 
 ### **Rekenaarnaam**
 
-- Die gasheernaam is onder **`System\ControlSet001\Control\ComputerName\ComputerName`** te vind.
+- Die rekenaarnaam is onder **`System\ControlSet001\Control\ComputerName\ComputerName`** te vind.
 
 ### **Tydsone Instelling**
 
@@ -25,15 +23,15 @@
 
 - Die **Windows weergawe** dui die uitgawe aan (bv. Home, Pro) en sy vrystelling (bv. Windows 10, Windows 11), terwyl **dienspakkette** opdaterings is wat regstellings en, soms, nuwe funksies insluit.
 
-### Laaste Toegangstyd Inskakel
+### Laaste Toegangstyd Inskakeling
 
 - Die inskakeling van laaste toegangstyd opvolging laat jou toe om te sien wanneer lêers laas geopen is, wat krities kan wees vir forensiese analise of stelseltelling.
 
 ### Netwerk Inligting Besonderhede
 
-- Die register hou uitgebreide data oor netwerk konfigurasies, insluitend **tipes netwerke (draadloos, kabel, 3G)** en **netwerk kategorieë (Publiek, Privaat/Huis, Domein/ Werk)**, wat noodsaaklik is om netwerk sekuriteitsinstellings en toestemmings te verstaan.
+- Die register hou uitgebreide data oor netwerk konfigurasies, insluitend **tipes netwerke (draadloos, kabel, 3G)** en **netwerk kategorieë (Publiek, Privaat/Huis, Domein/Werk)**, wat noodsaaklik is om netwerk sekuriteitsinstellings en toestemmings te verstaan.
 
-### Kliëntkant Kaping (CSC)
+### Klientkant Kaping (CSC)
 
 - **CSC** verbeter offline lêer toegang deur kopieë van gedeelde lêers te kas. Verskillende **CSCFlags** instellings beheer hoe en watter lêers gekas word, wat prestasie en gebruikerservaring beïnvloed, veral in omgewings met intermitterende konnektiwiteit.
 
@@ -47,7 +45,7 @@
 
 ### USB Inligting en Forensika
 
-- Die besonderhede wat in die register oor USB toestelle gestoor is, kan help om te spoor watter toestelle aan 'n rekenaar gekoppel was, wat moontlik 'n toestel aan sensitiewe lêer oordragte of ongeoorloofde toegang insidente kan koppel.
+- Die besonderhede wat in die register oor USB toestelle gestoor is, kan help om te spoor watter toestelle aan 'n rekenaar gekoppel was, wat moontlik 'n toestel aan sensitiewe lêeroordragte of ongeoorloofde toegang insidente kan koppel.
 
 ### Volume Serienommer
 
@@ -64,7 +62,7 @@
 
 ### **Gedeelde Vouers**
 
-- Gedeelde vouers en instellings is onder **`System\ControlSet001\Services\lanmanserver\Shares`**. Die Kliëntkant Kaping (CSC) instellings bepaal offline lêer beskikbaarheid.
+- Gedeelde vouers en instellings is onder **`System\ControlSet001\Services\lanmanserver\Shares`**. Die Klientkant Kaping (CSC) instellings bepaal offline lêer beskikbaarheid.
 
 ### **Programme wat Outomaties Begin**
 
@@ -72,7 +70,7 @@
 
 ### **Soek en Getypte Paaie**
 
-- Explorer soeke en getypte paaie word in die register onder **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer`** vir WordwheelQuery en GetyptePaaie, onderskeidelik, opgeteken.
+- Explorer soeke en getypte paaie word in die register onder **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer`** vir WordwheelQuery en TypedPaths, onderskeidelik, opgeteken.
 
 ### **Onlangse Dokumente en Office Lêers**
 
@@ -84,7 +82,7 @@
 
 ### **Gebruikersaktiwiteit Opvolging**
 
-- Die User Assist funksie log gedetailleerde toepassingsgebruik statistieke, insluitend loop telling en laaste loop tyd, by **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{GUID}\Count`**.
+- Die User Assist kenmerk log gedetailleerde toepassingsgebruik statistieke, insluitend loop telling en laaste loop tyd, by **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{GUID}\Count`**.
 
 ### **Shellbags Analise**
 
@@ -93,9 +91,9 @@
 ### **USB Toestel Geskiedenis**
 
 - **`HKLM\SYSTEM\ControlSet001\Enum\USBSTOR`** en **`HKLM\SYSTEM\ControlSet001\Enum\USB`** bevat ryk besonderhede oor gekoppelde USB toestelle, insluitend vervaardiger, produknaam, en verbindingstydstempels.
-- Die gebruiker wat met 'n spesifieke USB toestel geassosieer word, kan bepaal word deur `NTUSER.DAT` hives vir die toestel se **{GUID}** te soek.
-- Die laaste gemonteerde toestel en sy volume serienommer kan opgespoor word deur `System\MountedDevices` en `Software\Microsoft\Windows NT\CurrentVersion\EMDMgmt`, onderskeidelik.
+- Die gebruiker wat met 'n spesifieke USB toestel geassosieer is, kan bepaal word deur `NTUSER.DAT` hives vir die toestel se **{GUID}** te soek.
+- Die laaste gemonteerde toestel en sy volume serienommer kan deur `System\MountedDevices` en `Software\Microsoft\Windows NT\CurrentVersion\EMDMgmt`, onderskeidelik, opgespoor word.
 
-Hierdie gids konsolideer die noodsaaklike paaie en metodes om gedetailleerde stelsel-, netwerk- en gebruikersaktiwiteit inligting op Windows stelsels te bekom, met die doel om duidelikheid en bruikbaarheid te bevorder.
+Hierdie gids konsolideer die belangrike paaie en metodes om toegang te verkry tot gedetailleerde stelsel-, netwerk- en gebruikersaktiwiteit inligting op Windows stelsels, met die doel om duidelikheid en bruikbaarheid te bevorder.
 
 {{#include ../../../banners/hacktricks-training.md}}

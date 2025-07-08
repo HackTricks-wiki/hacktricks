@@ -1,7 +1,5 @@
 # Windows Credentials Protections
 
-## Credentials Protections
-
 {{#include ../../banners/hacktricks-training.md}}
 
 ## WDigest
@@ -22,14 +20,14 @@ reg query HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest /v Use
 - **Tipe** (`Protected` of `ProtectedLight`)
 - **Signer** (bv. `WinTcb`, `Lsa`, `Antimalware`, ens.)
 
-Hierdie struktuur is in 'n enkele byte gepak en bepaal **wie kan toegang hê tot wie**:
-- **Hoër signer waardes kan laer ones toegang gee**
-- **PPL's kan nie PPs toegang gee nie**
-- **Onbeskermde prosesse kan nie enige PPL/PP toegang gee nie**
+Hierdie struktuur is in 'n enkele byte gepak en bepaal **wie wie kan benader**:
+- **Hoër signer waardes kan laer ones benader**
+- **PPL's kan nie PP's benader nie**
+- **Onbeskermde prosesse kan geen PPL/PP benader nie**
 
 ### Wat jy moet weet vanuit 'n offensiewe perspektief
 
-- Wanneer **LSASS as 'n PPL loop**, misluk pogings om dit te open met `OpenProcess(PROCESS_VM_READ | QUERY_INFORMATION)` vanuit 'n normale admin-konteks **met `0x5 (Toegang geweier)`**, selfs al is `SeDebugPrivilege` geaktiveer.
+- Wanneer **LSASS as 'n PPL loop**, misluk pogings om dit te open met `OpenProcess(PROCESS_VM_READ | QUERY_INFORMATION)` vanuit 'n normale admin-konteks **met `0x5 (Toegang Weier)`**, selfs al is `SeDebugPrivilege` geaktiveer.
 - Jy kan **LSASS-beskermingsvlak** nagaan met gereedskap soos Process Hacker of programmaties deur die `EPROCESS.Protection` waarde te lees.
 - LSASS sal tipies `PsProtectedSignerLsa-Light` (`0x41`) hê, wat **slegs deur prosesse gesertifiseer met 'n hoër vlak signer** soos `WinTcb` (`0x61` of `0x62`) benader kan word.
 - PPL is 'n **slegs gebruikersvlak beperking**; **kernvlak kode kan dit ten volle omseil**.
@@ -61,7 +59,7 @@ Wanneer jy **`mimikatz privilege::debug sekurlsa::logonpasswords`** uitvoer, sal
 
 Standaard is **Credential Guard** nie aktief nie en vereis handmatige aktivering binne 'n organisasie. Dit is krities vir die verbetering van sekuriteit teen gereedskap soos **Mimikatz**, wat belemmer word in hul vermoë om kredensiale te onttrek. Tog kan kwesbaarhede steeds uitgebuit word deur die toevoeging van pasgemaakte **Security Support Providers (SSP)** om kredensiale in duidelike teks tydens aanmeldpogings te vang.
 
-Om die aktiveringsstatus van **Credential Guard** te verifieer, kan die register sleutel _**LsaCfgFlags**_ onder _**HKLM\System\CurrentControlSet\Control\LSA**_ nagegaan word. 'n Waarde van "**1**" dui aktivering met **UEFI lock** aan, "**2**" sonder slot, en "**0**" dui aan dat dit nie geaktiveer is nie. Hierdie registerkontrole, terwyl 'n sterk aanduiding, is nie die enigste stap om Credential Guard te aktiveer nie. Gedetailleerde leiding en 'n PowerShell-skrip om hierdie kenmerk te aktiveer, is aanlyn beskikbaar.
+Om die aktiveringsstatus van **Credential Guard** te verifieer, kan die register sleutel _**LsaCfgFlags**_ onder _**HKLM\System\CurrentControlSet\Control\LSA**_ nagegaan word. 'n Waarde van "**1**" dui aktivering met **UEFI slot** aan, "**2**" sonder slot, en "**0**" dui aan dat dit nie geaktiveer is nie. Hierdie registerkontrole, terwyl 'n sterk aanduiding, is nie die enigste stap om Credential Guard te aktiveer nie. Gedetailleerde leiding en 'n PowerShell-skrip om hierdie kenmerk te aktiveer, is aanlyn beskikbaar.
 ```bash
 reg query HKLM\System\CurrentControlSet\Control\LSA /v LsaCfgFlags
 ```
@@ -75,7 +73,7 @@ Verder besonderhede oor die implementering van pasgemaakte SSPs vir geloofsbrief
 
 Tradisioneel, wanneer jy met 'n afstandrekenaar via RDP verbind, word jou geloofsbriewe op die teikenmasjien gestoor. Dit stel 'n beduidende sekuriteitsrisiko in, veral wanneer jy rekeninge met verhoogde regte gebruik. Met die bekendstelling van _**Restricted Admin mode**_ word hierdie risiko egter aansienlik verminder.
 
-Wanneer jy 'n RDP-verbinding begin met die opdrag **mstsc.exe /RestrictedAdmin**, word die outentisering na die afstandrekenaar uitgevoer sonder om jou geloofsbriewe daarop te stoor. Hierdie benadering verseker dat, in die geval van 'n malware-infeksie of as 'n kwaadwillige gebruiker toegang tot die afstandbediener verkry, jou geloofsbriewe nie gecompromitteer word nie, aangesien dit nie op die bediener gestoor word nie.
+Wanneer 'n RDP-verbinding met die opdrag **mstsc.exe /RestrictedAdmin** geïnisieer word, word die outentisering na die afstandrekenaar uitgevoer sonder om jou geloofsbriewe daarop te stoor. Hierdie benadering verseker dat, in die geval van 'n malware-infeksie of as 'n kwaadwillige gebruiker toegang tot die afstandbediener verkry, jou geloofsbriewe nie gecompromitteer word nie, aangesien dit nie op die bediener gestoor word nie.
 
 Dit is belangrik om te noem dat in **Restricted Admin mode**, pogings om netwerkbronne vanaf die RDP-sessie te benader nie jou persoonlike geloofsbriewe sal gebruik nie; eerder word die **masjien se identiteit** gebruik.
 
@@ -87,9 +85,9 @@ Vir meer gedetailleerde inligting besoek [hierdie hulpbron](https://blog.ahasaye
 
 ## Cached Credentials
 
-Windows beveilig **domein geloofsbriewe** deur die **Local Security Authority (LSA)**, wat aanmeldprosesse met sekuriteitsprotokolle soos **Kerberos** en **NTLM** ondersteun. 'n Sleutelkenmerk van Windows is sy vermoë om die **laaste tien domein aanmeldings** te kas om te verseker dat gebruikers steeds toegang tot hul rekenaars kan verkry, selfs as die **domeinbeheerder aflyn is**—'n voordeel vir skootrekenaargebruikers wat dikwels van hul maatskappy se netwerk af is.
+Windows beveilig **domein geloofsbriewe** deur die **Local Security Authority (LSA)**, wat aanmeldprosesse met sekuriteitsprotokolle soos **Kerberos** en **NTLM** ondersteun. 'n Sleutelkenmerk van Windows is sy vermoë om die **laaste tien domein aanmeldings** te kas, om te verseker dat gebruikers steeds toegang tot hul rekenaars kan hê, selfs as die **domeinbeheerder aflyn** is—'n voordeel vir skootrekenaargebruikers wat dikwels van hul maatskappy se netwerk af is.
 
-Die aantal gekaste aanmeldings is aanpasbaar via 'n spesifieke **registersleutel of groepbeleid**. Om hierdie instelling te besigtig of te verander, word die volgende opdrag gebruik:
+Die aantal gekasde aanmeldings is aanpasbaar via 'n spesifieke **registersleutel of groepbeleid**. Om hierdie instelling te besigtig of te verander, word die volgende opdrag gebruik:
 ```bash
 reg query "HKEY_LOCAL_MACHINE\SOFTWARE\MICROSOFT\WINDOWS NT\CURRENTVERSION\WINLOGON" /v CACHEDLOGONSCOUNT
 ```
@@ -97,23 +95,23 @@ Toegang tot hierdie gekapte geloofsbriewe word streng beheer, met slegs die **SY
 
 **Mimikatz** kan gebruik word om hierdie gekapte geloofsbriewe te onttrek met die opdrag `lsadump::cache`.
 
-Vir verdere besonderhede bied die oorspronklike [bron](http://juggernaut.wikidot.com/cached-credentials) omvattende inligting.
+Vir verdere besonderhede bied die oorspronklike [source](http://juggernaut.wikidot.com/cached-credentials) omvattende inligting.
 
 ## Gekapte Gebruikers
 
-Lidmaatskap in die **Gekapte Gebruikersgroep** stel verskeie sekuriteitsverbeterings vir gebruikers in, wat hoër vlakke van beskerming teen diefstal en misbruik van geloofsbriewe verseker:
+Lidmaatskap in die **Gekapte Gebruikersgroep** bring verskeie sekuriteitsverbeterings vir gebruikers, wat hoër vlakke van beskerming teen diefstal en misbruik van geloofsbriewe verseker:
 
-- **Geloofsbriefdelegasie (CredSSP)**: Selfs al is die Groepbeleidinstelling vir **Toelaat om standaard geloofsbriewe te delegeren** geaktiveer, sal die teksgeloofsbriewe van Gekapte Gebruikers nie gekap word nie.
-- **Windows Digest**: Begin vanaf **Windows 8.1 en Windows Server 2012 R2**, sal die stelsel nie teksgeloofsbriewe van Gekapte Gebruikers cache nie, ongeag die status van Windows Digest.
-- **NTLM**: Die stelsel sal nie die teksgeloofsbriewe van Gekapte Gebruikers of NT eenrigting funksies (NTOWF) cache nie.
-- **Kerberos**: Vir Gekapte Gebruikers sal Kerberos-verifikasie nie **DES** of **RC4 sleutels** genereer nie, en dit sal ook nie teksgeloofsbriewe of langtermynsleutels verder as die aanvanklike Ticket-Granting Ticket (TGT) verkryging cache nie.
-- **Aflyn Aanmelding**: Gekapte Gebruikers sal nie 'n gekapte verifikator hê wat by aanmelding of ontgrendeling geskep word nie, wat beteken dat aflyn aanmelding nie vir hierdie rekeninge ondersteun word nie.
+- **Geloofsbrief Delegasie (CredSSP)**: Selfs al is die Groep Beleid instelling vir **Toelaat om standaard geloofsbriewe te delegeren** geaktiveer, sal die platte teks geloofsbriewe van Gekapte Gebruikers nie gekap word nie.
+- **Windows Digest**: Begin vanaf **Windows 8.1 en Windows Server 2012 R2**, sal die stelsel nie platte teks geloofsbriewe van Gekapte Gebruikers cache nie, ongeag die Windows Digest status.
+- **NTLM**: Die stelsel sal nie platte teks geloofsbriewe van Gekapte Gebruikers of NT eenrigting funksies (NTOWF) cache nie.
+- **Kerberos**: Vir Gekapte Gebruikers sal Kerberos-outeentifikasie nie **DES** of **RC4 sleutels** genereer nie, en dit sal ook nie platte teks geloofsbriewe of langtermyn sleutels cache nie, behalwe vir die aanvanklike Ticket-Granting Ticket (TGT) verkryging.
+- **Offline Aanmelding**: Gekapte Gebruikers sal nie 'n gekapte verifikator hê wat by aanmelding of ontgrendeling geskep word nie, wat beteken dat offline aanmelding nie vir hierdie rekeninge ondersteun word nie.
 
-Hierdie beskermings word geaktiveer die oomblik wanneer 'n gebruiker, wat 'n lid van die **Gekapte Gebruikersgroep** is, by die toestel aanmeld. Dit verseker dat kritieke sekuriteitsmaatreëls in plek is om te beskerm teen verskeie metodes van geloofsbriefkompromie.
+Hierdie beskermings word geaktiveer die oomblik wanneer 'n gebruiker, wat 'n lid van die **Gekapte Gebruikersgroep** is, by die toestel aanmeld. Dit verseker dat kritieke sekuriteitsmaatreëls in plek is om te beskerm teen verskeie metodes van geloofsbrief kompromie.
 
-Vir meer gedetailleerde inligting, raadpleeg die amptelike [dokumentasie](https://docs.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group).
+Vir meer gedetailleerde inligting, raadpleeg die amptelike [documentation](https://docs.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group).
 
-**Tabel van** [**die dokumente**](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--protected-accounts-and-groups-in-active-directory)**.**
+**Tabel van** [**the docs**](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--protected-accounts-and-groups-in-active-directory)**.**
 
 | Windows Server 2003 RTM | Windows Server 2003 SP1+ | <p>Windows Server 2012,<br>Windows Server 2008 R2,<br>Windows Server 2008</p> | Windows Server 2016          |
 | ----------------------- | ------------------------ | ----------------------------------------------------------------------------- | ---------------------------- |

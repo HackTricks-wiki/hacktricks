@@ -1,8 +1,10 @@
 # Rust Basics
 
+{{#include /banners/hacktricks-training.md}}
+
 ### Generiese Tipes
 
-Skep 'n struct waar 1 van hul waardes enige tipe kan wees
+Skep 'n struktuur waar 1 van hul waardes enige tipe kan wees
 ```rust
 struct Wrapper<T> {
 value: T,
@@ -26,11 +28,11 @@ None,
 Some(T),
 }
 ```
-U kan funksies soos `is_some()` of `is_none()` gebruik om die waarde van die Opsie te kontroleer.
+U kan funksies soos `is_some()` of `is_none()` gebruik om die waarde van die Option te kontroleer.
 
 ### Makros
 
-Makros is kragtiger as funksies omdat hulle uitbrei om meer kode te produseer as die kode wat jy handmatig geskryf het. Byvoorbeeld, 'n funksie-handtekening moet die aantal en tipe parameters wat die funksie het, verklaar. Makros, aan die ander kant, kan 'n veranderlike aantal parameters neem: ons kan `println!("hello")` met een argument of `println!("hello {}", name)` met twee argumente aanroep. Ook, makros word uitgebrei voordat die kompilator die betekenis van die kode interpreteer, so 'n makro kan, byvoorbeeld, 'n trait op 'n gegewe tipe implementeer. 'n Funksie kan nie, omdat dit tydens uitvoering aangeroep word en 'n trait moet tydens kompilering geïmplementeer word.
+Makros is kragtiger as funksies omdat hulle uitbrei om meer kode te produseer as die kode wat jy handmatig geskryf het. Byvoorbeeld, 'n funksie-handtekening moet die aantal en tipe parameters wat die funksie het, verklaar. Makros, aan die ander kant, kan 'n veranderlike aantal parameters neem: ons kan `println!("hello")` met een argument of `println!("hello {}", name)` met twee argumente aanroep. Ook, makros word uitgebrei voordat die kompilateur die betekenis van die kode interpreteer, so 'n makro kan byvoorbeeld 'n trait op 'n gegewe tipe implementeer. 'n Funksie kan nie, omdat dit tydens uitvoering aangeroep word en 'n trait moet tydens kompilering geïmplementeer word.
 ```rust
 macro_rules! my_macro {
 () => {
@@ -94,7 +96,7 @@ print!("{} is positive", n);
 print!("{} is zero", n);
 }
 ```
-#### ooreenstem
+#### pas aan
 ```rust
 match number {
 // Match a single value
@@ -194,7 +196,7 @@ _ => "Hello",
 }
 }
 ```
-#### as laat
+#### as dit laat
 ```rust
 let optional_word = Some(String::from("rustlings"));
 if let word = optional_word {
@@ -254,7 +256,7 @@ assert_ne!(true, false);
 
 #### Arc
 
-'n Arc kan Clone gebruik om meer verwysings oor die objek te skep om dit aan die drade te oorhandig. Wanneer die laaste verwysingsaanwyser na 'n waarde buite die omvang is, word die veranderlike verwyder.
+'n Arc kan Clone gebruik om meer verwysings oor die objek te skep om dit aan die drade te oorhandig. Wanneer die laaste verwysingsaanwyser na 'n waarde buite die omvang is, word die veranderlike laat vaar.
 ```rust
 use std::sync::Arc;
 let apple = Arc::new("the same apple");
@@ -265,7 +267,7 @@ println!("{:?}", apple);
 });
 }
 ```
-#### Draad
+#### Threads
 
 In hierdie geval sal ons die draad 'n veranderlike gee wat dit sal kan wysig
 ```rust
@@ -285,4 +287,4 @@ thread::sleep(Duration::from_millis(500));
 }
 }
 ```
-
+{{#include /banners/hacktricks-training.md}}

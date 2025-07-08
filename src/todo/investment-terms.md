@@ -1,5 +1,7 @@
 # Beleggings Terme
 
+{{#include /banners/hacktricks-training.md}}
+
 ## Spot
 
 Dit is die mees basiese manier om handel te dryf. Jy kan **die hoeveelheid van die bate en die prys** wat jy wil koop of verkoop, aandui, en wanneer daardie prys bereik word, word die transaksie voltooi.
@@ -29,7 +31,7 @@ In die geval dat die prys daal, sal die fondsbestuurder voordele verdien omdat h
 
 ### Perpetuele Termynkontrakte
 
-**Dit is "termynkontrakte" wat onbepaald sal duur** (sonder 'n einddatum van die kontrak). Dit is baie algemeen om hulle te vind byvoorbeeld in kripto-beurse waar jy in en uit termynkontrakte kan gaan gebaseer op die prys van kripto's.
+**Dit is "termynkontrakte" wat onbepaald sal duur** (sonder 'n einddatum van die kontrak). Dit is baie algemeen om hulle byvoorbeeld in crypto beurse te vind waar jy in en uit termynkontrakte kan gaan gebaseer op die prys van crypto.
 
 Let daarop dat in hierdie gevalle die voordele en verliese in werklike tyd kan wees, as die prys met 1% styg, wen jy 1%, as die prys met 1% daal, sal jy dit verloor.
 
@@ -37,20 +39,20 @@ Let daarop dat in hierdie gevalle die voordele en verliese in werklike tyd kan w
 
 **Hefboom** stel jou in staat om 'n groter posisie in die mark te beheer met 'n kleiner bedrag geld. Dit stel jou basies in staat om "te wed" met baie meer geld as wat jy het, terwyl jy net die geld wat jy werklik het, riskeer.
 
-Byvoorbeeld, as jy 'n termynposisie in die BTC/USDT met 100$ en 'n 50x hefboom oopmaak, beteken dit dat as die prys met 1% styg, jy 1x50 = 50% van jou aanvanklike belegging (50$) sou wen. En daarom sal jy 150$ hê.\
+Byvoorbeeld, as jy 'n termynposisie in die BTC/USDT met 100$ en 'n 50x hefboom oopmaak, beteken dit dat as die prys met 1% styg, jy 1x50 = 50% van jou aanvanklike belegging (50$) sal wen. En dus sal jy 150$ hê.\
 As die prys egter met 1% daal, sal jy 50% van jou fondse verloor (59$ in hierdie geval). En as die prys met 2% daal, sal jy al jou weddenskap verloor (2x50 = 100%).
 
-Daarom stel hefboom jou in staat om die bedrag geld wat jy wed, te beheer terwyl jy die winste en verliese verhoog.
+Daarom stel hefboom jou in staat om die bedrag geld wat jy wed te beheer terwyl jy die winste en verliese verhoog.
 
 ## Verskille tussen Termynkontrakte & Opsies
 
 Die hoofverskil tussen termynkontrakte en opsies is dat die kontrak opsioneel is vir die koper: Hy kan besluit om dit uit te voer of nie (gewoonlik sal hy dit net doen as hy daarby baat). Die verkoper moet verkoop as die koper die opsie wil gebruik.\
-Die koper sal egter 'n fooi aan die verkoper betaal om die opsie te open (sodat die verkoper, wat blykbaar meer risiko neem, 'n bietjie geld begin verdien).
+Die koper sal egter 'n fooi aan die verkoper betaal om die opsie te open (sodat die verkoper, wat blykbaar meer risiko neem, begin om geld te verdien).
 
 ### 1. **Verpligting vs. Reg:**
 
 * **Termynkontrakte:** Wanneer jy 'n termynkontrak koop of verkoop, sluit jy 'n **bindende ooreenkoms** in om 'n bate teen 'n spesifieke prys op 'n toekomstige datum te koop of te verkoop. Beide die koper en die verkoper is **verplig** om die kontrak by verstryking na te kom (tenzij die kontrak voor dit gesluit word).
-* **Opsies:** Met opsies het jy die **reg, maar nie die verpligting** om 'n bate (in die geval van 'n **call opsie**) te koop of te verkoop (in die geval van 'n **put opsie**) teen 'n spesifieke prys voor of op 'n sekere vervaldatum. Die **koper** het die opsie om uit te voer, terwyl die **verkoper** verplig is om die transaksie na te kom as die koper besluit om die opsie uit te oefen.
+* **Opsies:** Met opsies het jy die **reg, maar nie die verpligting** om 'n bate te koop (in die geval van 'n **call opsie**) of te verkoop (in die geval van 'n **put opsie**) teen 'n spesifieke prys voor of op 'n sekere vervaldatum. Die **koper** het die opsie om uit te voer, terwyl die **verkoper** verplig is om die transaksie na te kom as die koper besluit om die opsie uit te oefen.
 
 ### 2. **Risiko:**
 
@@ -66,3 +68,5 @@ Die koper sal egter 'n fooi aan die verkoper betaal om die opsie te open (sodat 
 
 * **Termynkontrakte:** Die wins of verlies is gebaseer op die verskil tussen die markprys by verstryking en die ooreengekome prys in die kontrak.
 * **Opsies:** Die koper verdien wanneer die mark gunstig beweeg bo die uitoefenprys deur meer as die betaalde premie. Die verkoper verdien deur die premie te hou as die opsie nie uitgeoefen word nie.
+
+{{#include /banners/hacktricks-training.md}}
