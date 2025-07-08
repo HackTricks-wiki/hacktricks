@@ -5,7 +5,7 @@
 > [!WARNING]
 > Zauważ, że uprawnienia zaczynające się od **`com.apple`** nie są dostępne dla osób trzecich, tylko Apple może je przyznać.
 
-## Wysoki
+## Wysokie
 
 ### `com.apple.rootless.install.heritable`
 
@@ -29,7 +29,7 @@ Aplikacje z uprawnieniem narzędzia debugowania mogą wywołać `task_for_pid()`
 
 ### `com.apple.security.cs.disable-library-validation`
 
-To uprawnienie pozwala na **ładowanie frameworków, wtyczek lub bibliotek bez bycia podpisanym przez Apple lub podpisanym tym samym identyfikatorem zespołu** co główny plik wykonywalny, więc atakujący mógłby wykorzystać ładowanie dowolnej biblioteki do wstrzyknięcia kodu. Sprawdź [**to dla więcej informacji**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation).
+To uprawnienie pozwala na **ładowanie frameworków, wtyczek lub bibliotek bez bycia podpisanym przez Apple lub podpisanym tym samym identyfikatorem zespołu** co główny plik wykonywalny, więc atakujący mógłby nadużyć ładowania dowolnej biblioteki, aby wstrzyknąć kod. Sprawdź [**to dla więcej informacji**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation).
 
 ### `com.apple.private.security.clear-library-validation`
 
@@ -66,15 +66,15 @@ TODO: Nie wiem, co to pozwala zrobić
 
 ### `com.apple.private.apfs.revert-to-snapshot`
 
-TODO: W [**tym raporcie**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **wspomniano, że może to być użyte do** aktualizacji zawartości chronionej SSV po ponownym uruchomieniu. Jeśli wiesz jak, wyślij PR, proszę!
+TODO: W [**tym raporcie**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **wspomniano, że to może być użyte do** aktualizacji zawartości chronionej SSV po ponownym uruchomieniu. Jeśli wiesz jak, wyślij PR, proszę!
 
 ### `com.apple.private.apfs.create-sealed-snapshot`
 
-TODO: W [**tym raporcie**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **wspomniano, że może to być użyte do** aktualizacji zawartości chronionej SSV po ponownym uruchomieniu. Jeśli wiesz jak, wyślij PR, proszę!
+TODO: W [**tym raporcie**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **wspomniano, że to może być użyte do** aktualizacji zawartości chronionej SSV po ponownym uruchomieniu. Jeśli wiesz jak, wyślij PR, proszę!
 
 ### `keychain-access-groups`
 
-To uprawnienie wymienia grupy **keychain**, do których aplikacja ma dostęp:
+To uprawnienie listuje **grupy keychain**, do których aplikacja ma dostęp:
 ```xml
 <key>keychain-access-groups</key>
 <array>
@@ -87,7 +87,7 @@ To uprawnienie wymienia grupy **keychain**, do których aplikacja ma dostęp:
 ```
 ### **`kTCCServiceSystemPolicyAllFiles`**
 
-Daje **pełny dostęp do dysku**, jedno z najwyższych uprawnień TCC, jakie można mieć.
+Daje **Pełny dostęp do dysku**, jedno z najwyższych uprawnień TCC, jakie można mieć.
 
 ### **`kTCCServiceAppleEvents`**
 
@@ -127,10 +127,10 @@ To uprawnienie pozwala na **tworzenie pamięci, która jest zapisywalna i wykony
 
 ### `com.apple.security.cs.allow-unsigned-executable-memory`
 
-To uprawnienie pozwala na **nadpisywanie lub patchowanie kodu C**, użycie długo nieaktualizowanej **`NSCreateObjectFileImageFromMemory`** (co jest zasadniczo niebezpieczne), lub użycie frameworka **DVDPlayback**. Sprawdź [**to dla więcej informacji**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory).
+To uprawnienie pozwala na **nadpisywanie lub patchowanie kodu C**, używanie długo przestarzałej **`NSCreateObjectFileImageFromMemory`** (co jest zasadniczo niebezpieczne) lub korzystanie z frameworka **DVDPlayback**. Sprawdź [**to dla więcej informacji**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory).
 
 > [!CAUTION]
-> Włączenie tego uprawnienia naraża Twoją aplikację na powszechne luki w kodzie języków, które nie są bezpieczne w pamięci. Starannie rozważ, czy Twoja aplikacja potrzebuje tego wyjątku.
+> Włączenie tego uprawnienia naraża Twoją aplikację na powszechne luki w językach programowania, które są niebezpieczne dla pamięci. Dokładnie rozważ, czy Twoja aplikacja potrzebuje tego wyjątku.
 
 ### `com.apple.security.cs.disable-executable-page-protection`
 
@@ -163,3 +163,8 @@ Zezwól procesowi na **poproszenie o wszystkie uprawnienia TCC**.
 {{#include ../../../banners/hacktricks-training.md}}
 
 </details>
+
+
+
+
+{{#include /banners/hacktricks-training.md}}

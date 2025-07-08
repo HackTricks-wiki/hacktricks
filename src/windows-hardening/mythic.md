@@ -1,8 +1,10 @@
 # Mythic
 
+{{#include ../banners/hacktricks-training.md}}
+
 ## Czym jest Mythic?
 
-Mythic to otwartoźródłowy, modułowy framework dowodzenia i kontroli (C2) zaprojektowany do red teaming. Umożliwia specjalistom ds. bezpieczeństwa zarządzanie i wdrażanie różnych agentów (ładunków) na różnych systemach operacyjnych, w tym Windows, Linux i macOS. Mythic oferuje przyjazny interfejs webowy do zarządzania agentami, wykonywania poleceń i zbierania wyników, co czyni go potężnym narzędziem do symulowania rzeczywistych ataków w kontrolowanym środowisku.
+Mythic to otwartoźródłowy, modułowy framework do dowodzenia i kontroli (C2) zaprojektowany do red teamingu. Umożliwia specjalistom ds. bezpieczeństwa zarządzanie i wdrażanie różnych agentów (ładunków) na różnych systemach operacyjnych, w tym Windows, Linux i macOS. Mythic oferuje przyjazny interfejs webowy do zarządzania agentami, wykonywania poleceń i zbierania wyników, co czyni go potężnym narzędziem do symulowania rzeczywistych ataków w kontrolowanym środowisku.
 
 ### Instalacja
 
@@ -38,49 +40,49 @@ Zainstaluj go za pomocą:
 ```bash
 ./mythic-cli install github https://github.com/MythicAgents/Apollo.git
 ```
-Ten agent ma wiele poleceń, które czynią go bardzo podobnym do Beacona Cobalt Strike z dodatkowymi funkcjami. Wśród nich obsługuje:
+Ten agent ma wiele poleceń, co czyni go bardzo podobnym do Beacona Cobalt Strike z dodatkowymi funkcjami. Wśród nich obsługuje:
 
 ### Common actions
 
-- `cat`: Wyświetl zawartość pliku
-- `cd`: Zmień bieżący katalog roboczy
-- `cp`: Skopiuj plik z jednego miejsca do drugiego
-- `ls`: Wyświetl pliki i katalogi w bieżącym katalogu lub określonej ścieżce
-- `pwd`: Wyświetl bieżący katalog roboczy
-- `ps`: Wyświetl uruchomione procesy na systemie docelowym (z dodatkowymi informacjami)
-- `download`: Pobierz plik z systemu docelowego na lokalną maszynę
-- `upload`: Prześlij plik z lokalnej maszyny do systemu docelowego
-- `reg_query`: Zapytaj o klucze i wartości rejestru w systemie docelowym
-- `reg_write_value`: Zapisz nową wartość do określonego klucza rejestru
-- `sleep`: Zmień interwał snu agenta, który określa, jak często sprawdza połączenie z serwerem Mythic
+- `cat`: Wyświetla zawartość pliku
+- `cd`: Zmienia bieżący katalog roboczy
+- `cp`: Kopiuje plik z jednego miejsca do drugiego
+- `ls`: Wyświetla pliki i katalogi w bieżącym katalogu lub określonej ścieżce
+- `pwd`: Wyświetla bieżący katalog roboczy
+- `ps`: Wyświetla uruchomione procesy na systemie docelowym (z dodatkowymi informacjami)
+- `download`: Pobiera plik z systemu docelowego na lokalną maszynę
+- `upload`: Wysyła plik z lokalnej maszyny do systemu docelowego
+- `reg_query`: Zapytuje o klucze i wartości rejestru w systemie docelowym
+- `reg_write_value`: Zapisuje nową wartość do określonego klucza rejestru
+- `sleep`: Zmienia interwał snu agenta, który określa, jak często sprawdza połączenie z serwerem Mythic
 - I wiele innych, użyj `help`, aby zobaczyć pełną listę dostępnych poleceń.
 
 ### Privilege escalation
 
-- `getprivs`: Włącz jak najwięcej uprawnień na bieżącym tokenie wątku
-- `getsystem`: Otwórz uchwyt do winlogon i zdubluj token, skutecznie eskalując uprawnienia do poziomu SYSTEM
-- `make_token`: Utwórz nową sesję logowania i zastosuj ją do agenta, umożliwiając podszywanie się pod innego użytkownika
-- `steal_token`: Ukradnij główny token z innego procesu, umożliwiając agentowi podszywanie się pod użytkownika tego procesu
+- `getprivs`: Włącza jak najwięcej uprawnień na bieżącym tokenie wątku
+- `getsystem`: Otwiera uchwyt do winlogon i duplikuje token, skutecznie eskalując uprawnienia do poziomu SYSTEM
+- `make_token`: Tworzy nową sesję logowania i stosuje ją do agenta, umożliwiając podszywanie się pod innego użytkownika
+- `steal_token`: Kradnie główny token z innego procesu, umożliwiając agentowi podszywanie się pod użytkownika tego procesu
 - `pth`: Atak Pass-the-Hash, umożliwiający agentowi uwierzytelnienie się jako użytkownik przy użyciu ich hasha NTLM bez potrzeby posiadania hasła w postaci tekstowej
-- `mimikatz`: Uruchom polecenia Mimikatz, aby wyodrębnić dane uwierzytelniające, hashe i inne wrażliwe informacje z pamięci lub bazy danych SAM
-- `rev2self`: Przywróć token agenta do jego głównego tokena, skutecznie obniżając uprawnienia do pierwotnego poziomu
-- `ppid`: Zmień proces nadrzędny dla zadań poeksploatacyjnych, określając nowy identyfikator procesu nadrzędnego, co pozwala na lepszą kontrolę nad kontekstem wykonania zadań
-- `printspoofer`: Wykonaj polecenia PrintSpoofer, aby obejść środki bezpieczeństwa spooling drukarki, umożliwiając eskalację uprawnień lub wykonanie kodu
-- `dcsync`: Synchronizuj klucze Kerberos użytkownika z lokalną maszyną, umożliwiając łamanie haseł offline lub dalsze ataki
-- `ticket_cache_add`: Dodaj bilet Kerberos do bieżącej sesji logowania lub określonej, umożliwiając ponowne użycie biletu lub podszywanie się
+- `mimikatz`: Uruchamia polecenia Mimikatz w celu wyodrębnienia poświadczeń, hashy i innych wrażliwych informacji z pamięci lub bazy danych SAM
+- `rev2self`: Przywraca token agenta do jego głównego tokena, skutecznie obniżając uprawnienia do pierwotnego poziomu
+- `ppid`: Zmienia proces nadrzędny dla zadań poeksploatacyjnych, określając nowy identyfikator procesu nadrzędnego, co pozwala na lepszą kontrolę nad kontekstem wykonania zadań
+- `printspoofer`: Wykonuje polecenia PrintSpoofer, aby obejść środki bezpieczeństwa spooling drukarki, umożliwiając eskalację uprawnień lub wykonanie kodu
+- `dcsync`: Synchronizuje klucze Kerberos użytkownika z lokalną maszyną, umożliwiając łamanie haseł offline lub dalsze ataki
+- `ticket_cache_add`: Dodaje bilet Kerberos do bieżącej sesji logowania lub określonej, umożliwiając ponowne użycie biletu lub podszywanie się
 
 ### Process execution
 
 - `assembly_inject`: Umożliwia wstrzyknięcie loadera zestawu .NET do zdalnego procesu
 - `execute_assembly`: Wykonuje zestaw .NET w kontekście agenta
 - `execute_coff`: Wykonuje plik COFF w pamięci, umożliwiając wykonanie skompilowanego kodu w pamięci
-- `execute_pe`: Wykonuje niezarządzalny plik wykonywalny (PE)
+- `execute_pe`: Wykonuje niezarządzany plik wykonywalny (PE)
 - `inline_assembly`: Wykonuje zestaw .NET w jednorazowym AppDomain, umożliwiając tymczasowe wykonanie kodu bez wpływu na główny proces agenta
 - `run`: Wykonuje binarny plik na systemie docelowym, używając PATH systemu do znalezienia pliku wykonywalnego
 - `shinject`: Wstrzykuje shellcode do zdalnego procesu, umożliwiając wykonanie dowolnego kodu w pamięci
 - `inject`: Wstrzykuje shellcode agenta do zdalnego procesu, umożliwiając wykonanie kodu agenta w pamięci
-- `spawn`: Uruchamia nową sesję agenta w określonym pliku wykonywalnym, umożliwiając wykonanie shellcode w nowym procesie
-- `spawnto_x64` i `spawnto_x86`: Zmień domyślny plik binarny używany w zadaniach poeksploatacyjnych na określoną ścieżkę zamiast używać `rundll32.exe` bez parametrów, co jest bardzo hałaśliwe.
+- `spawn`: Tworzy nową sesję agenta w określonym pliku wykonywalnym, umożliwiając wykonanie shellcode w nowym procesie
+- `spawnto_x64` i `spawnto_x86`: Zmienia domyślny plik binarny używany w zadaniach poeksploatacyjnych na określoną ścieżkę zamiast używania `rundll32.exe` bez parametrów, co jest bardzo hałaśliwe.
 
 ### Mithic Forge
 
@@ -114,8 +116,8 @@ Po załadowaniu jednego modułu, pojawi się on na liście jako inna komenda, ja
 - `net_localgroup`: Wyświetla lokalne grupy na określonym komputerze, domyślnie na localhost, jeśli nie określono komputera.
 - `net_localgroup_member`: Pobiera członkostwo lokalnej grupy dla określonej grupy na lokalnym lub zdalnym komputerze, umożliwiając enumerację użytkowników w określonych grupach.
 - `net_shares`: Wyświetla zdalne udostępnienia i ich dostępność na określonym komputerze, przydatne do identyfikacji potencjalnych celów do ruchu lateralnego.
-- `socks`: Włącza proxy zgodne z SOCKS 5 w sieci docelowej, umożliwiając tunelowanie ruchu przez skompromitowany host. Kompatybilne z narzędziami takimi jak proxychains.
-- `rpfwd`: Rozpoczyna nasłuchiwanie na określonym porcie na docelowym hoście i przekazuje ruch przez Mythic do zdalnego adresu IP i portu, umożliwiając zdalny dostęp do usług w sieci docelowej.
+- `socks`: Włącza proxy zgodne z SOCKS 5 w docelowej sieci, umożliwiając tunelowanie ruchu przez skompromitowany host. Kompatybilne z narzędziami takimi jak proxychains.
+- `rpfwd`: Rozpoczyna nasłuchiwanie na określonym porcie na docelowym hoście i przekazuje ruch przez Mythic do zdalnego adresu IP i portu, umożliwiając zdalny dostęp do usług w docelowej sieci.
 - `listpipes`: Wyświetla wszystkie nazwane potoki w lokalnym systemie, co może być przydatne do ruchu lateralnego lub eskalacji uprawnień poprzez interakcję z mechanizmami IPC.
 
 ### Różne polecenia
@@ -163,3 +165,6 @@ Kiedy użytkownik korzysta z systemu Linux, ma do dyspozycji kilka interesujący
 - `shell`: Wykonaj pojedyncze polecenie powłoki za pomocą /bin/sh, umożliwiając bezpośrednie wykonanie poleceń na systemie docelowym.
 - `run`: Wykonaj polecenie z dysku z argumentami, umożliwiając wykonanie binariów lub skryptów na systemie docelowym.
 - `pty`: Otwórz interaktywny PTY, umożliwiając bezpośrednią interakcję z powłoką na systemie docelowym.
+
+
+{{#include ../banners/hacktricks-training.md}}
