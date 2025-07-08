@@ -1,14 +1,16 @@
-# FISSURE - The RF Framework
+# FISSURE - Το RF Framework
 
-**Ανεξάρτητη Συχνότητα SDR-βασισμένη Κατανόηση και Αντίστροφη Μηχανική Σημάτων**
+{{#include /banners/hacktricks-training.md}}
 
-Το FISSURE είναι ένα ανοιχτού κώδικα πλαίσιο RF και αντίστροφης μηχανικής σχεδιασμένο για όλα τα επίπεδα δεξιοτήτων με hooks για ανίχνευση και ταξινόμηση σημάτων, ανακάλυψη πρωτοκόλλων, εκτέλεση επιθέσεων, χειρισμό IQ, ανάλυση ευπαθειών, αυτοματοποίηση και AI/ML. Το πλαίσιο έχει κατασκευαστεί για να προάγει την ταχεία ενσωμάτωση λογισμικών μονάδων, ραδιοφώνων, πρωτοκόλλων, δεδομένων σημάτων, σεναρίων, ροών γραφημάτων, υλικού αναφοράς και εργαλείων τρίτων. Το FISSURE είναι ένας επιταχυντής ροής εργασίας που διατηρεί το λογισμικό σε μία τοποθεσία και επιτρέπει στις ομάδες να προσαρμόζονται εύκολα ενώ μοιράζονται την ίδια αποδεδειγμένη βασική διαμόρφωση για συγκεκριμένες διανομές Linux.
+**Κατανόηση και Αντίστροφη Μηχανική Σημάτων με SDR που δεν εξαρτώνται από τη Συχνότητα**
+
+Το FISSURE είναι ένα ανοιχτού κώδικα RF και πλαίσιο αντίστροφης μηχανικής σχεδιασμένο για όλα τα επίπεδα δεξιοτήτων με hooks για ανίχνευση και ταξινόμηση σημάτων, ανακάλυψη πρωτοκόλλων, εκτέλεση επιθέσεων, χειρισμό IQ, ανάλυση ευπαθειών, αυτοματοποίηση και AI/ML. Το πλαίσιο έχει κατασκευαστεί για να προάγει την ταχεία ενσωμάτωση λογισμικών μονάδων, ραδιοφώνων, πρωτοκόλλων, δεδομένων σημάτων, scripts, ροών γραφημάτων, υλικού αναφοράς και εργαλείων τρίτων. Το FISSURE είναι ένας επιταχυντής ροής εργασίας που διατηρεί το λογισμικό σε μία τοποθεσία και επιτρέπει στις ομάδες να προσαρμόζονται εύκολα ενώ μοιράζονται την ίδια αποδεδειγμένη βασική διαμόρφωση για συγκεκριμένες διανομές Linux.
 
 Το πλαίσιο και τα εργαλεία που περιλαμβάνονται στο FISSURE έχουν σχεδιαστεί για να ανιχνεύουν την παρουσία RF ενέργειας, να κατανοούν τα χαρακτηριστικά ενός σήματος, να συλλέγουν και να αναλύουν δείγματα, να αναπτύσσουν τεχνικές μετάδοσης και/ή ένεσης, και να δημιουργούν προσαρμοσμένα payloads ή μηνύματα. Το FISSURE περιέχει μια αυξανόμενη βιβλιοθήκη πληροφοριών πρωτοκόλλων και σημάτων για να βοηθήσει στην αναγνώριση, τη δημιουργία πακέτων και το fuzzing. Υπάρχουν δυνατότητες online αρχείου για λήψη αρχείων σημάτων και δημιουργία playlists για προσομοίωση κυκλοφορίας και δοκιμή συστημάτων.
 
 Η φιλική βάση κώδικα Python και η διεπαφή χρήστη επιτρέπουν στους αρχάριους να μάθουν γρήγορα για δημοφιλή εργαλεία και τεχνικές που σχετίζονται με RF και αντίστροφη μηχανική. Οι εκπαιδευτές στον τομέα της κυβερνοασφάλειας και της μηχανικής μπορούν να εκμεταλλευτούν το ενσωματωμένο υλικό ή να χρησιμοποιήσουν το πλαίσιο για να επιδείξουν τις δικές τους εφαρμογές στον πραγματικό κόσμο. Οι προγραμματιστές και οι ερευνητές μπορούν να χρησιμοποιήσουν το FISSURE για τις καθημερινές τους εργασίες ή για να εκθέσουν τις πρωτοποριακές λύσεις τους σε ένα ευρύτερο κοινό. Καθώς η ευαισθητοποίηση και η χρήση του FISSURE αυξάνονται στην κοινότητα, θα αυξάνεται και η έκταση των δυνατοτήτων του και η ποικιλία της τεχνολογίας που περιλαμβάνει.
 
-**Επιπλέον Πληροφορίες**
+**Πρόσθετες Πληροφορίες**
 
 * [AIS Page](https://www.ainfosec.com/technologies/fissure/)
 * [GRCon22 Slides](https://events.gnuradio.org/event/18/contributions/246/attachments/84/164/FISSURE\_Poore\_GRCon22.pdf)
@@ -16,7 +18,7 @@
 * [GRCon22 Video](https://www.youtube.com/watch?v=1f2umEKhJvE)
 * [Hack Chat Transcript](https://hackaday.io/event/187076-rf-hacking-hack-chat/log/212136-hack-chat-transcript-part-1)
 
-## Getting Started
+## Ξεκινώντας
 
 **Υποστηριζόμενα**
 
@@ -33,14 +35,14 @@
 
 **Σε Πρόοδο (beta)**
 
-Αυτά τα λειτουργικά συστήματα είναι ακόμα σε κατάσταση beta. Είναι υπό ανάπτυξη και αρκετές δυνατότητες είναι γνωστό ότι λείπουν. Αντικείμενα στον εγκαταστάτη μπορεί να συγκρούονται με υπάρχοντα προγράμματα ή να αποτύχουν να εγκατασταθούν μέχρι να αφαιρεθεί η κατάσταση.
+Αυτά τα λειτουργικά συστήματα είναι ακόμα σε κατάσταση beta. Είναι υπό ανάπτυξη και αρκετές δυνατότητες είναι γνωστό ότι λείπουν. Αντικείμενα στον εγκαταστάτη μπορεί να συγκρούονται με υπάρχουσες εφαρμογές ή να αποτύχουν να εγκατασταθούν μέχρι να αφαιρεθεί η κατάσταση.
 
 |     Λειτουργικό Σύστημα     |    Κλάδος FISSURE   |
 | :--------------------------: | :-----------------: |
 | DragonOS Focal (x86\_64)    |  Python3\_maint-3.8 |
 |    Ubuntu 22.04 (x64)       | Python3\_maint-3.10 |
 
-Σημείωση: Ορισμένα εργαλεία λογισμικού δεν λειτουργούν για κάθε OS. Ανατρέξτε σε [Software And Conflicts](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Help/Markdown/SoftwareAndConflicts.md)
+Σημείωση: Ορισμένα λογισμικά εργαλεία δεν λειτουργούν για κάθε OS. Ανατρέξτε σε [Software And Conflicts](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Help/Markdown/SoftwareAndConflicts.md)
 
 **Εγκατάσταση**
 ```
@@ -52,13 +54,13 @@ git submodule update --init
 ```
 Αυτό θα εγκαταστήσει τις εξαρτήσεις λογισμικού PyQt που απαιτούνται για την εκκίνηση των GUI εγκατάστασης αν δεν βρεθούν.
 
-Στη συνέχεια, επιλέξτε την επιλογή που ταιριάζει καλύτερα στο λειτουργικό σας σύστημα (θα ανιχνευθεί αυτόματα αν το λειτουργικό σας σύστημα ταιριάζει με μια επιλογή).
+Στη συνέχεια, επιλέξτε την επιλογή που ταιριάζει καλύτερα με το λειτουργικό σας σύστημα (θα ανιχνευθεί αυτόματα αν το λειτουργικό σας σύστημα ταιριάζει με μια επιλογή).
 
 |                                          Python2\_maint-3.7                                          |                                          Python3\_maint-3.8                                          |                                          Python3\_maint-3.10                                         |
 | :--------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------: |
 | ![install1b](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/install1b.png) | ![install1a](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/install1a.png) | ![install1c](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/install1c.png) |
 
-Συνιστάται να εγκαταστήσετε το FISSURE σε ένα καθαρό λειτουργικό σύστημα για να αποφύγετε υπάρχουσες συγκρούσεις. Επιλέξτε όλα τα συνιστώμενα πλαίσια ελέγχου (κουμπί προεπιλογής) για να αποφύγετε σφάλματα κατά τη λειτουργία των διαφόρων εργαλείων εντός του FISSURE. Θα υπάρχουν πολλαπλές προτροπές κατά τη διάρκεια της εγκατάστασης, κυρίως ζητώντας ανυψωμένα δικαιώματα και ονόματα χρηστών. Αν ένα στοιχείο περιέχει μια ενότητα "Επαλήθευση" στο τέλος, ο εγκαταστάτης θα εκτελέσει την εντολή που ακολουθεί και θα επισημάνει το στοιχείο του πλαισίου ελέγχου πράσινο ή κόκκινο ανάλογα με το αν παραχθούν σφάλματα από την εντολή. Τα ελεγμένα στοιχεία χωρίς ενότητα "Επαλήθευση" θα παραμείνουν μαύρα μετά την εγκατάσταση.
+Συνιστάται να εγκαταστήσετε το FISSURE σε ένα καθαρό λειτουργικό σύστημα για να αποφύγετε υπάρχουσες συγκρούσεις. Επιλέξτε όλα τα προτεινόμενα πλαίσια ελέγχου (κουμπί προεπιλογής) για να αποφύγετε σφάλματα κατά τη λειτουργία των διαφόρων εργαλείων εντός του FISSURE. Θα υπάρχουν πολλαπλές προτροπές κατά τη διάρκεια της εγκατάστασης, κυρίως ζητώντας ανυψωμένα δικαιώματα και ονόματα χρηστών. Αν ένα στοιχείο περιέχει μια ενότητα "Επαλήθευση" στο τέλος, ο εγκαταστάτης θα εκτελέσει την εντολή που ακολουθεί και θα επισημάνει το στοιχείο του πλαισίου ελέγχου πράσινο ή κόκκινο ανάλογα με το αν παραχθούν σφάλματα από την εντολή. Τα ελεγμένα στοιχεία χωρίς ενότητα "Επαλήθευση" θα παραμείνουν μαύρα μετά την εγκατάσταση.
 
 ![install2](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/install2.png)
 
@@ -74,20 +76,20 @@ fissure
 
 **Συστατικά**
 
-* Dashboard
-* Central Hub (HIPRFISR)
-* Target Signal Identification (TSI)
-* Protocol Discovery (PD)
-* Flow Graph & Script Executor (FGE)
+* Πίνακας ελέγχου
+* Κεντρικός κόμβος (HIPRFISR)
+* Αναγνώριση στόχου σήματος (TSI)
+* Ανακάλυψη πρωτοκόλλου (PD)
+* Γράφημα ροής & Εκτελεστής σεναρίων (FGE)
 
 ![components](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/components.png)
 
 **Δυνατότητες**
 
-| ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/detector.png)_**Signal Detector**_ | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/iq.png)_**IQ Manipulation**_      | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/library.png)_**Signal Lookup**_          | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/pd.png)_**Pattern Recognition**_ |
+| ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/detector.png)_**Ανιχνευτής Σήματος**_ | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/iq.png)_**Manipulation IQ**_      | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/library.png)_**Αναζήτηση Σήματος**_          | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/pd.png)_**Αναγνώριση Προτύπων**_ |
 | --------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/attack.png)_**Attacks**_           | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/fuzzing.png)_**Fuzzing**_         | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/archive.png)_**Signal Playlists**_       | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/gallery.png)_**Image Gallery**_  |
-| ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/packet.png)_**Packet Crafting**_   | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/scapy.png)_**Scapy Integration**_ | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/crc\_calculator.png)_**CRC Calculator**_ | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/log.png)_**Logging**_            |
+| ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/attack.png)_**Επιθέσεις**_           | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/fuzzing.png)_**Fuzzing**_         | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/archive.png)_**Λίστες Αναπαραγωγής Σήματος**_       | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/gallery.png)_**Γκαλερί Εικόνας**_  |
+| ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/packet.png)_**Δημιουργία Πακέτων**_   | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/scapy.png)_**Ενσωμάτωση Scapy**_ | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/crc\_calculator.png)_**Υπολογιστής CRC**_ | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/log.png)_**Καταγραφή**_            |
 
 **Υλικό**
 
@@ -96,7 +98,7 @@ fissure
 * USRP: X3xx, B2xx, B20xmini, USRP2, N2xx
 * HackRF
 * RTL2832U
-* 802.11 Adapters
+* 802.11 Αντάπτορες
 * LimeSDR
 * bladeRF, bladeRF 2.0 micro
 * Open Sniffer
@@ -122,14 +124,14 @@ fissure
 
 * [ ] Προσθήκη περισσότερων τύπων υλικού, RF πρωτοκόλλων, παραμέτρων σήματος, εργαλείων ανάλυσης
 * [ ] Υποστήριξη περισσότερων λειτουργικών συστημάτων
-* [ ] Ανάπτυξη υλικού μαθήματος γύρω από το FISSURE (RF Attacks, Wi-Fi, GNU Radio, PyQt, κ.λπ.)
+* [ ] Ανάπτυξη υλικού μαθήματος γύρω από το FISSURE (RF Επιθέσεις, Wi-Fi, GNU Radio, PyQt, κ.λπ.)
 * [ ] Δημιουργία ενός ρυθμιστή σήματος, εξαγωγέα χαρακτηριστικών και ταξινομητή σήματος με επιλεγμένες τεχνικές AI/ML
-* [ ] Υλοποίηση μηχανισμών αναδρομικής αποδιαμόρφωσης για την παραγωγή bitstream από άγνωστα σήματα
-* [ ] Μετάβαση των κύριων συστατικών του FISSURE σε ένα γενικό σχέδιο ανάπτυξης κόμβων αισθητήρων
+* [ ] Υλοποίηση αναδρομικών μηχανισμών αποδιαμόρφωσης για την παραγωγή bitstream από άγνωστα σήματα
+* [ ] Μετάβαση των κύριων συστατικών του FISSURE σε ένα γενικό σχέδιο ανάπτυξης αισθητήρα
 
-## Συμβολή
+## Συμμετοχή
 
-Προτάσεις για τη βελτίωση του FISSURE είναι ιδιαίτερα ευπρόσδεκτες. Αφήστε ένα σχόλιο στη σελίδα [Discussions](https://github.com/ainfosec/FISSURE/discussions) ή στο Discord Server αν έχετε οποιαδήποτε σκέψη σχετικά με τα εξής:
+Προτάσεις για τη βελτίωση του FISSURE είναι ιδιαίτερα ευπρόσδεκτες. Αφήστε ένα σχόλιο στη σελίδα [Discussions](https://github.com/ainfosec/FISSURE/discussions) ή στο Discord Server αν έχετε οποιεσδήποτε σκέψεις σχετικά με τα εξής:
 
 * Προτάσεις νέων χαρακτηριστικών και αλλαγές σχεδίασης
 * Λογισμικό εργαλεία με βήματα εγκατάστασης
@@ -142,8 +144,8 @@ fissure
 Οι συνεισφορές για τη βελτίωση του FISSURE είναι κρίσιμες για την επιτάχυνση της ανάπτυξής του. Οποιεσδήποτε συνεισφορές κάνετε είναι πολύ εκτιμητέες. Εάν επιθυμείτε να συμβάλετε μέσω ανάπτυξης κώδικα, παρακαλώ κάντε fork το repo και δημιουργήστε ένα pull request:
 
 1. Fork το έργο
-2. Δημιουργήστε το feature branch σας (`git checkout -b feature/AmazingFeature`)
-3. Commit τις αλλαγές σας (`git commit -m 'Add some AmazingFeature'`)
+2. Δημιουργήστε το branch χαρακτηριστικού σας (`git checkout -b feature/AmazingFeature`)
+3. Δεσμεύστε τις αλλαγές σας (`git commit -m 'Add some AmazingFeature'`)
 4. Push στο branch (`git push origin feature/AmazingFeature`)
 5. Ανοίξτε ένα pull request
 
@@ -157,7 +159,7 @@ fissure
 
 GPL-3.0
 
-Για λεπτομέρειες σχετικά με την άδεια, δείτε το αρχείο LICENSE.
+Για λεπτομέρειες άδειας, δείτε το αρχείο LICENSE.
 
 ## Επικοινωνία
 
@@ -178,3 +180,5 @@ Business Development - Assured Information Security, Inc. - bd@ainfosec.com
 ## Ευχαριστίες
 
 Ιδιαίτερες ευχαριστίες στον Dr. Samuel Mantravadi και τον Joseph Reith για τις συνεισφορές τους σε αυτό το έργο.
+
+{{#include /banners/hacktricks-training.md}}
