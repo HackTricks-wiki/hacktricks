@@ -36,9 +36,9 @@ C:\windows\tracing
 - Yaygın olarak **güvenilir** [**"LOLBAS's"**](https://lolbas-project.github.io/) ikili dosyaları, AppLocker'ı atlatmak için de yararlı olabilir.
 - **Kötü yazılmış kurallar da atlatılabilir**
 - Örneğin, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, istediğiniz herhangi bir yere **`allowed`** adında bir **klasör oluşturabilirsiniz** ve bu izinli olacaktır.
-- Kuruluşlar genellikle **`%System32%\WindowsPowerShell\v1.0\powershell.exe`** yürütülebilir dosyasını **engellemeye** odaklanır, ancak **diğer** [**PowerShell yürütülebilir konumlarını**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) unutur, örneğin `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` veya `PowerShell_ISE.exe`.
-- **DLL uygulaması çok nadiren etkinleştirilir** çünkü sistem üzerinde ek bir yük oluşturabilir ve hiçbir şeyin bozulmayacağından emin olmak için gereken test miktarı yüksektir. Bu nedenle, **DLL'leri arka kapı olarak kullanmak AppLocker'ı atlatmaya yardımcı olacaktır**.
-- [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) veya [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) kullanarak **Powershell** kodunu herhangi bir süreçte çalıştırabilir ve AppLocker'ı atlatabilirsiniz. Daha fazla bilgi için kontrol edin: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
+- Kuruluşlar genellikle **`%System32%\WindowsPowerShell\v1.0\powershell.exe`** çalıştırılabilir dosyasını **engellemeye** odaklanır, ancak **diğer** [**PowerShell çalıştırılabilir konumlarını**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) unutur, örneğin `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` veya `PowerShell_ISE.exe`.
+- **DLL uygulaması çok nadiren etkinleştirilir** çünkü sistem üzerinde ek bir yük oluşturabilir ve hiçbir şeyin bozulmadığından emin olmak için gereken test miktarı yüksektir. Bu nedenle, **DLL'leri arka kapı olarak kullanmak AppLocker'ı atlatmaya yardımcı olacaktır**.
+- Herhangi bir süreçte **Powershell** kodu çalıştırmak ve AppLocker'ı atlatmak için [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) veya [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) kullanabilirsiniz. Daha fazla bilgi için kontrol edin: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
 
 ## Kimlik Bilgileri Depolama
 
@@ -49,10 +49,10 @@ Yerel kimlik bilgileri bu dosyada mevcuttur, şifreler hashlenmiştir.
 ### Yerel Güvenlik Otoritesi (LSA) - LSASS
 
 **Kimlik bilgileri** (hashlenmiş) bu alt sistemin **belleğinde** **kaydedilir**.\
-**LSA**, yerel **güvenlik politikasını** (şifre politikası, kullanıcı izinleri...), **kimlik doğrulama**, **erişim jetonları**... yönetir.\
-LSA, sağlanan kimlik bilgilerini **SAM** dosyasında (yerel giriş için) **kontrol edecek** ve bir alan kullanıcısını kimlik doğrulamak için **alan denetleyicisi** ile **iletişim kuracaktır**.
+**LSA**, yerel **güvenlik politikasını** (şifre politikası, kullanıcı izinleri...), **kimlik doğrulama**, **erişim belirteçleri**... yönetir.\
+LSA, sağlanan kimlik bilgilerini **SAM** dosyasında (yerel giriş için) **kontrol eden** ve bir alan kullanıcısını kimlik doğrulamak için **alan denetleyicisi** ile **konuşan** olacaktır.
 
-**Kimlik bilgileri**, **işlem LSASS** içinde **kaydedilir**: Kerberos biletleri, NT ve LM hashleri, kolayca çözülebilen şifreler.
+**Kimlik bilgileri**, **işlem LSASS** içinde **kaydedilir**: Kerberos biletleri, NT ve LM hash'leri, kolayca çözülebilen şifreler.
 
 ### LSA gizli bilgileri
 
@@ -103,7 +103,7 @@ sc query windefend
 ```
 ## Şifreli Dosya Sistemi (EFS)
 
-EFS, dosyaları **şifreleme** yoluyla güvence altına alır ve **Dosya Şifreleme Anahtarı (FEK)** olarak bilinen **simetrik anahtar** kullanır. Bu anahtar, kullanıcının **açık anahtarı** ile şifrelenir ve şifreli dosyanın $EFS **alternatif veri akışında** saklanır. Şifre çözme gerektiğinde, kullanıcının dijital sertifikasının karşılık gelen **özel anahtarı** $EFS akışından FEK'yi çözmek için kullanılır. Daha fazla ayrıntı [burada](https://en.wikipedia.org/wiki/Encrypting_File_System) bulunabilir.
+EFS, dosyaları **simetrik anahtar** olan **Dosya Şifreleme Anahtarı (FEK)** ile şifreleyerek korur. Bu anahtar, kullanıcının **açık anahtarı** ile şifrelenir ve şifreli dosyanın $EFS **alternatif veri akışında** saklanır. Şifre çözme gerektiğinde, kullanıcının dijital sertifikasının ilgili **özel anahtarı** $EFS akışından FEK'yi çözmek için kullanılır. Daha fazla ayrıntı [burada](https://en.wikipedia.org/wiki/Encrypting_File_System) bulunabilir.
 
 **Kullanıcı başlatması olmadan şifre çözme senaryoları** şunları içerir:
 
@@ -121,7 +121,7 @@ Bu şifreleme yöntemi, sahibine şifreli dosyalara **şeffaf erişim** sağlar.
 
 ### EFS bilgilerini kontrol et
 
-Bir **kullanıcının** bu **hizmeti** kullanıp kullanmadığını kontrol etmek için bu yolun var olup olmadığını kontrol edin: `C:\users\<username>\appdata\roaming\Microsoft\Protect`
+Bir **kullanıcının** bu **hizmeti** kullanıp kullanmadığını kontrol etmek için bu yolun var olup olmadığını kontrol edin:`C:\users\<username>\appdata\roaming\Microsoft\Protect`
 
 Dosyaya **kimlerin** **erişimi** olduğunu kontrol etmek için cipher /c \<file>\
 Ayrıca, bir klasör içinde `cipher /e` ve `cipher /d` komutlarını kullanarak tüm dosyaları **şifreleyebilir** ve **şifre çözebilirsiniz**.
@@ -130,7 +130,7 @@ Ayrıca, bir klasör içinde `cipher /e` ve `cipher /d` komutlarını kullanarak
 
 #### Yetki Sistemi Olmak
 
-Bu yöntem, **kurban kullanıcının** ana bilgisayar içinde bir **işlem** çalıştırmasını gerektirir. Eğer durum buysa, `meterpreter` oturumları kullanarak kullanıcının işlem token'ını taklit edebilirsiniz (`incognito`'dan `impersonate_token`). Ya da sadece kullanıcının işlemine `migrate` yapabilirsiniz.
+Bu yöntem, **kurban kullanıcının** ana bilgisayar içinde bir **işlem** çalıştırmasını gerektirir. Eğer durum buysa, `meterpreter` oturumları kullanarak kullanıcının işlem token'ını taklit edebilirsiniz (`impersonate_token` from `incognito`). Ya da sadece kullanıcının işlemine `migrate` edebilirsiniz.
 
 #### Kullanıcının şifresini bilmek
 
@@ -143,12 +143,12 @@ https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files
 Microsoft, IT altyapılarındaki hizmet hesaplarının yönetimini basitleştirmek için **Grup Yönetilen Hizmet Hesapları (gMSA)** geliştirmiştir. Geleneksel hizmet hesaplarının genellikle "**Şifre asla süresi dolmaz**" ayarı etkinken, gMSA'lar daha güvenli ve yönetilebilir bir çözüm sunar:
 
 - **Otomatik Şifre Yönetimi**: gMSA'lar, alan veya bilgisayar politikasına göre otomatik olarak değişen karmaşık, 240 karakterli bir şifre kullanır. Bu süreç, Microsoft'un Anahtar Dağıtım Servisi (KDC) tarafından yönetilir ve manuel şifre güncellemeleri gereksiz hale gelir.
-- **Gelişmiş Güvenlik**: Bu hesaplar kilitlenmelere karşı bağışık olup, etkileşimli oturum açmak için kullanılamaz, bu da güvenliklerini artırır.
+- **Geliştirilmiş Güvenlik**: Bu hesaplar kilitlenmelere karşı bağışık olup, etkileşimli oturum açmak için kullanılamaz, böylece güvenliklerini artırır.
 - **Birden Fazla Ana Bilgisayar Desteği**: gMSA'lar, birden fazla ana bilgisayar arasında paylaşılabilir, bu da onları birden fazla sunucuda çalışan hizmetler için ideal hale getirir.
 - **Zamanlanmış Görev Yeteneği**: Yönetilen hizmet hesaplarının aksine, gMSA'lar zamanlanmış görevlerin çalıştırılmasını destekler.
 - **Basitleştirilmiş SPN Yönetimi**: Sistem, bilgisayarın sAMaccount ayrıntıları veya DNS adı değiştiğinde Hizmet Prensip Adını (SPN) otomatik olarak güncelleyerek SPN yönetimini basitleştirir.
 
-gMSA'ların şifreleri, LDAP özelliği _**msDS-ManagedPassword**_ içinde saklanır ve Alan Denetleyicileri (DC'ler) tarafından her 30 günde bir otomatik olarak sıfırlanır. Bu şifre, [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e) olarak bilinen şifreli bir veri bloğudur ve yalnızca yetkili yöneticiler ve gMSA'ların kurulu olduğu sunucular tarafından alınabilir, bu da güvenli bir ortam sağlar. Bu bilgilere erişmek için, LDAPS gibi güvenli bir bağlantı gereklidir veya bağlantı 'Sealing & Secure' ile kimlik doğrulaması yapılmalıdır.
+gMSA'ların şifreleri, LDAP özelliği _**msDS-ManagedPassword**_ içinde saklanır ve Alan Denetleyicileri (DC'ler) tarafından her 30 günde bir otomatik olarak sıfırlanır. Bu şifre, [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e) olarak bilinen şifreli bir veri bloğudur ve yalnızca yetkili yöneticiler ve gMSA'ların kurulu olduğu sunucular tarafından alınabilir, böylece güvenli bir ortam sağlanır. Bu bilgilere erişmek için, LDAPS gibi güvenli bir bağlantı gereklidir veya bağlantı 'Sealing & Secure' ile kimlik doğrulaması yapılmalıdır.
 
 ![https://cube0x0.github.io/Relaying-for-gMSA/](../images/asd1.png)
 
@@ -183,7 +183,7 @@ $ExecutionContext.SessionState.LanguageMode
 Powershell -version 2
 ```
 Mevcut Windows'ta bu Bypass çalışmayacak ama [**PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM) kullanabilirsiniz.\
-**Bunu derlemek için** **şunları yapmanız gerekebilir** **:** _**Bir Referans Ekle**_ -> _Gözat_ -> _Gözat_ -> `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` ekleyin ve **projeyi .Net4.5'e değiştirin**.
+**Bunu derlemek için** **şunları yapmanız gerekebilir**: **_Bir Referans Ekle_** -> _Gözat_ -> _Gözat_ -> `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` ekleyin ve **projeyi .Net4.5'e değiştirin**.
 
 #### Doğrudan bypass:
 ```bash
@@ -223,7 +223,7 @@ Daha fazlasını [burada](https://blog.netspi.com/15-ways-to-bypass-the-powershe
 
 Kullanıcıları kimlik doğrulamak için kullanılabilecek API'dir.
 
-SSPI, iletişim kurmak isteyen iki makine için uygun protokolü bulmaktan sorumludur. Bunun için tercih edilen yöntem Kerberos'tur. Ardından SSPI, hangi kimlik doğrulama protokolünün kullanılacağını müzakere eder, bu kimlik doğrulama protokolleri Güvenlik Destek Sağlayıcıları (SSP) olarak adlandırılır ve her Windows makinesinde bir DLL biçiminde bulunur ve her iki makinenin de iletişim kurabilmesi için aynı protokolü desteklemesi gerekir.
+SSPI, iletişim kurmak isteyen iki makine için uygun protokolü bulmaktan sorumlu olacaktır. Bunun için tercih edilen yöntem Kerberos'tur. Ardından SSPI, hangi kimlik doğrulama protokolünün kullanılacağını müzakere edecektir; bu kimlik doğrulama protokolleri Güvenlik Destek Sağlayıcıları (SSP) olarak adlandırılır ve her Windows makinesinde bir DLL biçiminde bulunur ve her iki makinenin de iletişim kurabilmesi için aynı protokolü desteklemesi gerekir.
 
 ### Ana SSP'ler
 
@@ -238,14 +238,14 @@ SSPI, iletişim kurmak isteyen iki makine için uygun protokolü bulmaktan sorum
 - **Negotiate**: Kullanılacak protokolü müzakere etmek için kullanılır (Kerberos veya NTLM, varsayılan olan Kerberos'tur)
 - %windir%\Windows\System32\lsasrv.dll
 
-#### Müzakere birkaç yöntem veya sadece bir tane sunabilir.
+#### Müzakere birkaç yöntem veya yalnızca bir tane sunabilir.
 
 ## UAC - Kullanıcı Hesabı Kontrolü
 
 [Kullanıcı Hesabı Kontrolü (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works), **yükseltilmiş etkinlikler için onay istemi** sağlayan bir özelliktir.
 
 {{#ref}}
-windows-security-controls/uac-user-account-control.md
+authentication-credentials-uac-and-efs/uac-user-account-control.md
 {{#endref}}
 
 {{#include ../banners/hacktricks-training.md}}
