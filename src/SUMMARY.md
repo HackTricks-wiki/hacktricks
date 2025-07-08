@@ -328,6 +328,7 @@
     - [Frida Tutorial 2](mobile-pentesting/android-app-pentesting/frida-tutorial/frida-tutorial-2.md)
     - [Frida Tutorial 3](mobile-pentesting/android-app-pentesting/frida-tutorial/owaspuncrackable-1.md)
     - [Objection Tutorial](mobile-pentesting/android-app-pentesting/frida-tutorial/objection-tutorial.md)
+  - [Getting Rce By Leveraging Companion App](mobile-pentesting/android-app-pentesting/getting-rce-by-leveraging-companion-app.md)
   - [Google CTF 2018 - Shall We Play a Game?](mobile-pentesting/android-app-pentesting/google-ctf-2018-shall-we-play-a-game.md)
   - [Install Burp Certificate](mobile-pentesting/android-app-pentesting/install-burp-certificate.md)
   - [Intent Injection](mobile-pentesting/android-app-pentesting/intent-injection.md)
