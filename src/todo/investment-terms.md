@@ -1,5 +1,7 @@
 # Investment Terms
 
+{{#include /banners/hacktricks-training.md}}
+
 ## Spot
 
 This is the most basic way to do some trading. You can **indicate the amount of the asset and the price** that you want to buy or sell, and whenever that price is reached the operation is done.
@@ -69,4 +71,4 @@ However, the buyer will be paying some fee to the seller for opening the option 
 
 
 
-
+{{#include /banners/hacktricks-training.md}}

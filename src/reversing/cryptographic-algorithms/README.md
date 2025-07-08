@@ -1,7 +1,5 @@
 # Cryptographic/Compression Algorithms
 
-## Cryptographic/Compression Algorithms
-
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Identifying Algorithms

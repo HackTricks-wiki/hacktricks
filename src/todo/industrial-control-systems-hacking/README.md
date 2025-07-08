@@ -1,5 +1,7 @@
 # Industrial Control Systems Hacking 
 
+{{#include /banners/hacktricks-training.md}}
+
 ## About this Section
 
 This section contains all about Industrial Control Systems including concepts as well as methodologies to hack them with various security issues that persists in them. 
@@ -16,5 +18,5 @@ These techniques can also be used to protect against attacks and blue teaming fo
 
 
 
-
+{{#include /banners/hacktricks-training.md}}
 
