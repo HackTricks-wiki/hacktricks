@@ -1,3 +1,5 @@
+# Bruteforce Hash Few Chars
+
 {{#include ../../banners/hacktricks-training.md}}
 
 ```python

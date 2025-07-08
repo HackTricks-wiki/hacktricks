@@ -1,3 +1,5 @@
+# Socket Command Injection
+
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Socket binding example with Python

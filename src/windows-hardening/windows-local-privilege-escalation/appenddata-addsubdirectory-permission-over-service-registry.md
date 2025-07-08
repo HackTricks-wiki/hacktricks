@@ -1,3 +1,5 @@
+# AppendData/AddSubdirectory Permission over Service Registry
+
 {{#include ../../banners/hacktricks-training.md}}
 
 **The original post is** [**https://itm4n.github.io/windows-registry-rpceptmapper-eop/**](https://itm4n.github.io/windows-registry-rpceptmapper-eop/)

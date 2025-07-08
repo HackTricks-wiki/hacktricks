@@ -1,3 +1,5 @@
+# Information in Printers
+
 {{#include ../../banners/hacktricks-training.md}}
 
 There are several blogs in the Internet which **highlight the dangers of leaving printers configured with LDAP with default/weak** logon credentials.\

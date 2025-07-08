@@ -1,3 +1,5 @@
+# Wildcards Spare Tricks
+
 {{#include ../../banners/hacktricks-training.md}}
 
 ## chown, chmod

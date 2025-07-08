@@ -856,11 +856,9 @@
 # ✍️ TODO
 
 - [Interesting Http](todo/interesting-http.md)
-- [Other Big References](todo/references.md)
 - [Rust Basics](todo/rust-basics.md)
 - [More Tools](todo/more-tools.md)
 - [MISC](todo/misc.md)
-- [Pentesting DNS](todo/pentesting-dns.md)
 - [Hardware Hacking](todo/hardware-hacking/README.md)
   - [Fault Injection Attacks](todo/hardware-hacking/fault_injection_attacks.md)
   - [I2C](todo/hardware-hacking/i2c.md)
@@ -892,7 +890,6 @@
 - [Interesting HTTP$$external:todo/interesting-http.md$$]()
 - [Android Forensics](todo/android-forensics.md)
 - [TR-069](todo/tr-069.md)
-- [6881/udp - Pentesting BitTorrent](todo/6881-udp-pentesting-bittorrent.md)
 - [Online Platforms with API](todo/online-platforms-with-api.md)
 - [Stealing Sensitive Information Disclosure from a Web](todo/stealing-sensitive-information-disclosure-from-a-web.md)
 - [Post Exploitation](todo/post-exploitation.md)

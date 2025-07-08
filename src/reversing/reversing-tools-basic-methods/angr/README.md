@@ -1,8 +1,10 @@
+# Angr
+
 {{#include ../../../banners/hacktricks-training.md}}
 
 Part of this cheatsheet is based on the [angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/).
 
-# Installation
+## Installation
 
 ```bash
 sudo apt-get install python3-dev libffi-dev build-essential
@@ -12,7 +14,7 @@ source ang/bin/activate
 pip install angr
 ```
 
-# Basic Actions
+## Basic Actions
 
 ```python
 import angr
@@ -32,9 +34,9 @@ proj.filename #Get filename "/bin/true"
 angr.Project('examples/fauxware/fauxware', main_opts={'backend': 'blob', 'arch': 'i386'}, lib_opts={'libc.so.6': {'backend': 'elf'}})
 ```
 
-# Loaded and Main object information
+## Loaded and Main object information
 
-## Loaded Data
+### Loaded Data
 
 ```python
 #LOADED DATA
@@ -59,7 +61,7 @@ proj.loader.all_pe_objects #Get all binaries loaded (Windows)
 proj.loader.find_object_containing(0x400000)#Get object loaded in an address "<ELF Object fauxware, maps [0x400000:0x60105f]>"
 ```
 
-## Main Object
+### Main Object
 
 ```python
 #Main Object (main binary loaded)
@@ -75,7 +77,7 @@ obj.plt['strcmp'] #Get plt address of a funcion (0x400550)
 obj.reverse_plt[0x400550] #Get function from plt address ('strcmp')
 ```
 
-## Symbols and Relocations
+### Symbols and Relocations
 
 ```python
 strcmp = proj.loader.find_symbol('strcmp') #<Symbol "strcmp" in libc.so.6 at 0x1089cd0>
@@ -94,7 +96,7 @@ main_strcmp.is_import #True
 main_strcmp.resolvedby #<Symbol "strcmp" in libc.so.6 at 0x1089cd0>
 ```
 
-## Blocks
+### Blocks
 
 ```python
 #Blocks
@@ -104,9 +106,9 @@ block.instructions #"0xb" Get number of instructions
 block.instruction_addrs #Get instructions addresses "[0x401670, 0x401672, 0x401675, 0x401676, 0x401679, 0x40167d, 0x40167e, 0x40167f, 0x401686, 0x40168d, 0x401694]"
 ```
 
-# Dynamic Analysis
+## Dynamic Analysis
 
-## Simulation Manager, States
+### Simulation Manager, States
 
 ```python
 #Live States
@@ -131,13 +133,13 @@ simgr.step() #Execute one step
 simgr.active[0].regs.rip #Get RIP from the last state
 ```
 
-## Calling functions
+### Calling functions
 
 - You can pass a list of arguments through `args` and a dictionary of environment variables through `env` into `entry_state` and `full_init_state`. The values in these structures can be strings or bitvectors, and will be serialized into the state as the arguments and environment to the simulated execution. The default `args` is an empty list, so if the program you're analyzing expects to find at least an `argv[0]`, you should always provide that!
 - If you'd like to have `argc` be symbolic, you can pass a symbolic bitvector as `argc` to the `entry_state` and `full_init_state` constructors. Be careful, though: if you do this, you should also add a constraint to the resulting state that your value for argc cannot be larger than the number of args you passed into `args`.
 - To use the call state, you should call it with `.call_state(addr, arg1, arg2, ...)`, where `addr` is the address of the function you want to call and `argN` is the Nth argument to that function, either as a python integer, string, or array, or a bitvector. If you want to have memory allocated and actually pass in a pointer to an object, you should wrap it in an PointerWrapper, i.e. `angr.PointerWrapper("point to me!")`. The results of this API can be a little unpredictable, but we're working on it.
 
-## BitVectors
+### BitVectors
 
 ```python
 #BitVectors
@@ -148,7 +150,7 @@ bv.zero_extend(30) #Will add 30 zeros on the left of the bitvector
 bv.sign_extend(30) #Will add 30 zeros or ones on the left of the BV extending the sign
 ```
 
-## Symbolic BitVectors & Constraints
+### Symbolic BitVectors & Constraints
 
 ```python
 x = state.solver.BVS("x", 64) #Symbolic variable BV of length 64
@@ -184,7 +186,7 @@ solver.min(expression) #minimum possible solution to the given expression.
 solver.max(expression) #maximum possible solution to the given expression.
 ```
 
-## Hooking
+### Hooking
 
 ```python
 >>> stub_func = angr.SIM_PROCEDURES['stubs']['ReturnUnconstrained'] # this is a CLASS
@@ -206,7 +208,7 @@ True
 
 Furthermore, you can use `proj.hook_symbol(name, hook)`, providing the name of a symbol as the first argument, to hook the address where the symbol lives
 
-# Examples
+## Examples
 
 {{#include ../../../banners/hacktricks-training.md}}
 

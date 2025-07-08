@@ -8,7 +8,7 @@ In Windows Vista and later versions, all protected items come with an **integrit
 
 A key rule is that objects can't be modified by processes with a lower integrity level than the object's level. The integrity levels are:
 
-- **Untrusted**: This level is for processes with anonymous logins. %%%Example: Chrome%%%
+- **Untrusted**: This level is for processes with anonymous logins. Example: Chrome
 - **Low**: Mainly for internet interactions, especially in Internet Explorer's Protected Mode, affecting associated files and processes, and certain folders like the **Temporary Internet Folder**. Low integrity processes face significant restrictions, including no registry write access and limited user profile write access.
 - **Medium**: The default level for most activities, assigned to standard users and objects without specific integrity levels. Even members of the Administrators group operate at this level by default.
 - **High**: Reserved for administrators, allowing them to modify objects at lower integrity levels, including those at the high level itself.

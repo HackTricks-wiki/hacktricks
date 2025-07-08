@@ -1,3 +1,5 @@
+# Misc
+
 {{#include ../banners/hacktricks-training.md}}
 
 In a ping response TTL:\

@@ -1,6 +1,9 @@
+# DCShadow
+
 {{#include ../../banners/hacktricks-training.md}}
 
-# DCShadow
+
+## Basic Information
 
 It registers a **new Domain Controller** in the AD and uses it to **push attributes** (SIDHistory, SPNs...) on specified objects **without** leaving any **logs** regarding the **modifications**. You **need DA** privileges and be inside the **root domain**.\
 Note that if you use wrong data, pretty ugly logs will appear.

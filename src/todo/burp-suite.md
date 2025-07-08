@@ -1,6 +1,8 @@
+# Burp Suite
+
 {{#include ../banners/hacktricks-training.md}}
 
-# Basic Payloads
+## Basic Payloads
 
 - **Simple List:** Just a list containing an entry in each line
 - **Runtime File:** A list read in runtime (not loaded in memory). For supporting big lists.
