@@ -172,3 +172,5 @@ Allow the process to **ask for all the TCC permissions**.
 
 
 
+
+{{#include /banners/hacktricks-training.md}}
