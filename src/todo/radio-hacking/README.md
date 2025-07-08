@@ -1,1 +1,3 @@
-# 无线电黑客技术
+# 无线电黑客
+
+{{#include /banners/hacktricks-training.md}}

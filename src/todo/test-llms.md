@@ -1,5 +1,7 @@
 # 测试 LLMs
 
+{{#include /banners/hacktricks-training.md}}
+
 ## 本地运行和训练模型
 
 ### [**Hugging Face Transformers**](https://github.com/huggingface/transformers)
@@ -17,7 +19,7 @@ LitGPT 是由 Lightning AI 开发的一个项目，利用 Lightning 框架来促
 ### [**LitServe**](https://github.com/Lightning-AI/LitServe)
 
 **描述：**\
-LitServe 是 Lightning AI 的一个部署工具，旨在快速高效地部署 AI 模型。它通过提供可扩展和优化的服务能力，简化了将 LLM 集成到实时应用程序中的过程。
+LitServe 是 Lightning AI 的一个部署工具，旨在快速高效地部署 AI 模型。它通过提供可扩展和优化的服务能力，简化了 LLM 在实时应用中的集成。
 
 ### [**Axolotl**](https://github.com/axolotl-ai-cloud/axolotl)
 
@@ -32,7 +34,7 @@ Axolotl 是一个基于云的平台，旨在简化 AI 模型（包括 LLM）的�
 
 * **模型**：一个庞大的 **预训练机器学习模型** 库，用户可以浏览、下载和集成用于文本生成、翻译、图像识别等各种任务的模型。
 * **数据集：** 一个全面的 **数据集集合**，用于训练和评估模型。它便于访问多样的数据源，使用户能够找到并利用特定机器学习项目所需的数据。
-* **空间：** 一个用于托管和共享 **交互式机器学习应用程序** 和演示的平台。它允许开发人员 **展示** 他们的模型，创建用户友好的界面，并通过共享实时演示与他人合作。
+* **空间：** 一个用于托管和共享 **互动机器学习应用程序** 和演示的平台。它允许开发人员 **展示** 他们的模型，创建用户友好的界面，并通过共享实时演示与他人合作。
 
 ## [**TensorFlow Hub**](https://www.tensorflow.org/hub) **&** [**Kaggle**](https://www.kaggle.com/)
 
@@ -48,3 +50,5 @@ Axolotl 是一个基于云的平台，旨在简化 AI 模型（包括 LLM）的�
 
 * **模型：** 一个由社区贡献的机器学习模型库，用户可以浏览、尝试并将模型集成到他们的应用程序中，几乎不需要努力。
 * **API 访问：** 简单的 API 用于运行模型，使开发人员能够轻松地在自己的应用程序中部署和扩展模型。
+
+{{#include /banners/hacktricks-training.md}}

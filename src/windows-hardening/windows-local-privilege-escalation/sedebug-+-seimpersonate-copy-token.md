@@ -1,11 +1,13 @@
+# SeDebug + SeImpersonate - Copy Token
+
 {{#include ../../banners/hacktricks-training.md}}
 
 以下代码**利用SeDebug和SeImpersonate权限**从一个**以SYSTEM身份运行的进程**中复制令牌，并且该进程具有**所有令牌权限**。\
-在这种情况下，这段代码可以编译并用作**Windows服务二进制文件**来检查其是否正常工作。\
+在这种情况下，这段代码可以编译并用作**Windows服务二进制文件**以检查其是否正常工作。\
 然而，**提升发生的主要代码部分**在**`Exploit`** **函数**内部。\
-在该函数内部，您可以看到**正在搜索进程**_**lsass.exe**_**，然后**复制其**令牌**，最后使用该令牌生成一个新的_**cmd.exe**_，并拥有复制令牌的所有权限。
+在该函数内部，您可以看到**进程**_**lsass.exe**_**被搜索**，然后**复制其令牌**，最后使用该令牌生成一个新的_**cmd.exe**_，并拥有复制令牌的所有权限。
 
-**其他以SYSTEM身份运行并具有所有或大部分令牌权限的进程**包括：**services.exe**、**svhost.exe**（最早的之一）、**wininit.exe**、**csrss.exe**...（_请记住，您将无法从受保护的进程复制令牌_）。此外，您可以使用以管理员身份运行的工具[Process Hacker](https://processhacker.sourceforge.io/downloads.php)查看进程的令牌。
+**其他以SYSTEM身份运行并具有所有或大部分令牌权限的进程包括**：**services.exe**、**svhost.exe**（最早的之一）、**wininit.exe**、**csrss.exe**...（_请记住，您无法从受保护的进程复制令牌_）。此外，您可以使用以管理员身份运行的工具[Process Hacker](https://processhacker.sourceforge.io/downloads.php)查看进程的令牌。
 ```c
 // From https://cboard.cprogramming.com/windows-programming/106768-running-my-program-service.html
 #include <windows.h>

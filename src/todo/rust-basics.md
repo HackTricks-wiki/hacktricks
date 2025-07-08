@@ -1,6 +1,8 @@
 # Rust Basics
 
-### 泛型类型
+{{#include /banners/hacktricks-training.md}}
+
+### 泛型
 
 创建一个结构体，其中一个值可以是任何类型
 ```rust
@@ -19,7 +21,7 @@ Wrapper::new("Foo").value, "Foo"
 ```
 ### Option, Some & None
 
-Option 类型意味着值可能是 Some 类型（有某些东西）或 None：
+Option类型意味着值可能是Some类型（有某些东西）或None：
 ```rust
 pub enum Option<T> {
 None,
@@ -30,7 +32,7 @@ Some(T),
 
 ### 宏
 
-宏比函数更强大，因为它们扩展以生成比您手动编写的代码更多的代码。例如，函数签名必须声明函数具有的参数数量和类型。另一方面，宏可以接受可变数量的参数：我们可以用一个参数调用 `println!("hello")`，或者用两个参数调用 `println!("hello {}", name)`。此外，宏在编译器解释代码含义之前被扩展，因此宏可以在给定类型上实现一个特征。例如，函数不能这样做，因为它在运行时被调用，而特征需要在编译时实现。
+宏比函数更强大，因为它们扩展以生成比您手动编写的代码更多的代码。例如，函数签名必须声明函数的参数数量和类型。另一方面，宏可以接受可变数量的参数：我们可以用一个参数调用 `println!("hello")`，或者用两个参数调用 `println!("hello {}", name)`。此外，宏在编译器解释代码含义之前就被扩展，因此宏可以在给定类型上实现一个特征。例如，函数不能这样做，因为它在运行时被调用，而特征需要在编译时实现。
 ```rust
 macro_rules! my_macro {
 () => {
@@ -83,7 +85,7 @@ let list = Cons(1, Cons(2, Cons(3, Nil)));
 ```
 ### 条件语句
 
-#### 如果
+#### if
 ```rust
 let n = 5;
 if n < 0 {
@@ -146,7 +148,7 @@ println!("{}", n);
 n += 1;
 }
 ```
-#### 为
+#### for
 ```rust
 for n in 1..101 {
 if n % 15 == 0 {
@@ -194,7 +196,7 @@ _ => "Hello",
 }
 }
 ```
-#### 如果让
+#### if let
 ```rust
 let optional_word = Some(String::from("rustlings"));
 if let word = optional_word {
@@ -254,7 +256,7 @@ assert_ne!(true, false);
 
 #### Arc
 
-Arc 可以使用 Clone 创建更多对对象的引用，以将它们传递给线程。当指向一个值的最后一个引用指针超出作用域时，该变量会被丢弃。
+Arc可以使用Clone来创建对对象的更多引用，以将它们传递给线程。当指向一个值的最后一个引用指针超出作用域时，该变量会被丢弃。
 ```rust
 use std::sync::Arc;
 let apple = Arc::new("the same apple");
@@ -265,7 +267,7 @@ println!("{:?}", apple);
 });
 }
 ```
-#### 线程
+#### Threads
 
 在这种情况下，我们将传递一个变量给线程，它将能够修改该变量。
 ```rust
@@ -285,4 +287,4 @@ thread::sleep(Duration::from_millis(500));
 }
 }
 ```
-
+{{#include /banners/hacktricks-training.md}}
