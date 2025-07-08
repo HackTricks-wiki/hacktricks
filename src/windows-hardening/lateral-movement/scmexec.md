@@ -4,7 +4,7 @@
 
 ## SCM
 
-**SCMExec** एक तकनीक है जो Service Control Manager (SCM) का उपयोग करके दूरस्थ सिस्टम पर कमांड निष्पादित करने के लिए एक सेवा बनाने के लिए कमांड चलाती है। यह विधि कुछ सुरक्षा नियंत्रणों, जैसे User Account Control (UAC) और Windows Defender को बायपास कर सकती है।
+**SCMExec** एक तकनीक है जो Service Control Manager (SCM) का उपयोग करके दूरस्थ सिस्टम पर कमांड निष्पादित करने के लिए एक सेवा बनाने के लिए है जो कमांड चलाती है। यह विधि कुछ सुरक्षा नियंत्रणों, जैसे कि User Account Control (UAC) और Windows Defender को बायपास कर सकती है।
 
 ## Tools
 
