@@ -4,32 +4,91 @@
 
 ## Diamond Ticket
 
-**Like a golden ticket**, a diamond ticket is a TGT which can be used to **access any service as any user**. A golden ticket is forged completely offline, encrypted with the krbtgt hash of that domain, and then passed into a logon session for use. Because domain controllers don't track TGTs it (or they) have legitimately issued, they will happily accept TGTs that are encrypted with its own krbtgt hash.
+A **Diamond Ticket** is a modified, legitimate Ticket Granting Ticket (TGT) obtained from a Domain Controller (DC) and re-encrypted to escalate privileges while preserving valid Kerberos flows. Unlike **Golden Tickets** (completely forged) or **Silver Tickets** (service-ticket forging), Diamond Tickets combine genuine and forged elements to evade common detections.
 
-There are two common techniques to detect the use of golden tickets:
+### Workflow
 
-- Look for TGS-REQs that have no corresponding AS-REQ.
-- Look for TGTs that have silly values, such as Mimikatz's default 10-year lifetime.
+1. Obtain a legitimate TGT via **AS-REQ/AS-REP** (e.g., using Rubeus `asktgt`).
+2. Decrypt the TGT with the **KRBTGT AES256** key.
+3. Modify **PAC attributes** (user/group information, timestamps, policy values).
+4. Re-encrypt the TGT with the KRBTGT key and inject it into the session (`/ptt`).
 
-A **diamond ticket** is made by **modifying the fields of a legitimate TGT that was issued by a DC**. This is achieved by **requesting** a **TGT**, **decrypting** it with the domain's krbtgt hash, **modifying** the desired fields of the ticket, then **re-encrypting it**. This **overcomes the two aforementioned shortcomings** of a golden ticket because:
+### Basic PoC
 
-- TGS-REQs will have a preceding AS-REQ.
-- The TGT was issued by a DC which means it will have all the correct details from the domain's Kerberos policy. Even though these can be accurately forged in a golden ticket, it's more complex and open to mistakes.
-
-```bash
+```powershell
 # Get user RID
-powershell Get-DomainUser -Identity <username> -Properties objectsid
+Get-DomainUser -Identity <username> -Properties objectSid
 
-.\Rubeus.exe diamond /tgtdeleg /ticketuser:<username> /ticketuserid:<RID of username> /groups:512
-
-# /tgtdeleg uses the Kerberos GSS-API to obtain a useable TGT for the user without needing to know their password, NTLM/AES hash, or elevation on the host.
-# /ticketuser is the username of the principal to impersonate.
-# /ticketuserid is the domain RID of that principal.
-# /groups are the desired group RIDs (512 being Domain Admins).
-# /krbkey is the krbtgt AES256 hash.
+# Forge a basic Diamond Ticket
+.\Rubeus.exe diamond /krbkey:<AES256_KRBTGT> /user:loki /password:Mischief$ /enctype:aes \
+  /domain:marvel.local /dc:earth-dc.marvel.local /ticketuser:thor /ticketuserid:1104 /nowrap /groups:512
 ```
 
+## Ticket Anatomy & PAC Structure
+
+When described with Rubeus, a Diamond Ticket reveals:
+
+- **ServiceName/Realm:** `krbtgt/<DOMAIN>`
+- **UserName/Realm:** `<ticketuser>@<DOMAIN>`
+- **Validity:** StartTime, EndTime, RenewTill (policy lifetimes)
+- **Flags:** initial, pre_authent, renewable, forwardable, etc.
+- **Encryption:** `aes256_cts_hmac_sha1` session key
+- **PAC (decrypted):**
+  - **LogonInfo:** LogonTime, PasswordLastSet, PasswordCanChange, LogonCount, BadPasswordCount, UserFlags, LogonServer
+  - **Groups:** list of group RIDs (e.g., 512, 513, 518, 519, 520)
+  - **EffectiveName, FullName:** from AD
+  - **RequestorSID**
+- **Checksums:** ServerChecksum & KDCChecksum (`KERB_CHECKSUM_HMAC_SHA1_96_AES256`)
+- **Block One Plain Text:** raw data for DES-attack demonstrations
+
+```powershell
+.\Rubeus.exe describe /servicekey:<AES256_KRBTGT> /ticket:diamond_ticket.ccache
+```
+
+## Limitations of Default PoC
+
+- Static PAC fields (hard-coded group RIDs, blank FullName, stale timestamps) are detectable by strict PAC validation (Protected Users, PAWs).
+- Missing domain policy values (MinimumPasswordLength, MaximumPasswordAge, LockoutBadCount, MaxTicketAge, MaxRenewAge) reduce authenticity.
+- Hard-coded values may break compatibility with some KDC implementations.
+
+## LDAP-Driven PAC Reconstruction ("Recutting")
+
+To fully populate the PAC with accurate data, extend Rubeus ForgeTicket/Diamond modules to:
+
+1. Accept `/ldap`, `/ldapuser`, `/ldappassword` parameters.
+2. Bind to AD via LDAP/LDAPS (`System.DirectoryServices.Protocols`):
+   - Retrieve user attributes: `displayName`, `sAMAccountName`, `userAccountControl`, `lastLogon`.
+   - Enumerate group memberships.
+3. Mount `\\<DC>\\IPC$` and `\\<DC>\\SYSVOL` over SMB:
+   - Read `GptTmpl.inf` for password policies (`MinimumPasswordLength`, `MaximumPasswordAge`, `LockoutBadCount`).
+   - Read Kerberos parameters for `MaxTicketAge`, `MaxRenewAge`.
+4. Build PAC with realistic fields:
+   - User **LogonInfo** (timestamps, flags).
+   - **FullName** and **EffectiveName**.
+   - Group RIDs from LDAP.
+   - Domain policy values from GPO files.
+
+## Enhanced Command & Stealth Output
+
+```powershell
+.\Rubeus.exe diamond /krbkey:<AES256_KRBTGT> /user:loki /password:Mischief$ /enctype:aes \
+  /domain:marvel.local /dc:earth-dc.marvel.local /ticketuser:thor /ticketuserid:1104 /nowrap \
+  /ldap /ldapuser:loki /ldappassword:Mischief$
+```
+
+Decryption via `describe` now shows a fully populated PAC, aligning timestamps and policy values to evade detection.
+
+## Detection & Mitigation
+
+- Monitor for anomalous AS-REQ patterns and mismatched TGT lifetimes (4768 vs 4769 events).
+- Enforce conditional MFA for TGT issuance and renewal.
+- Audit PAC consistency: compare PAC fields against expected domain policy and user attributes.
+- Alert on 4769 events without preceding 4768.
+
+## References
+
+- [Recutting the Kerberos Diamond Ticket](https://www.huntress.com/blog/recutting-the-kerberos-diamond-ticket)
+- [Rubeus GitHub Repository](https://github.com/GhostPack/Rubeus)
+- PoC modules in Rubeus: ForgeTicket.cs, Diamond.cs, Networking.cs
+
 {{#include ../../banners/hacktricks-training.md}}
-
-
-
