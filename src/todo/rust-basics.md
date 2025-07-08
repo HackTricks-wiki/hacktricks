@@ -1,8 +1,10 @@
 # Msingi wa Rust
 
+{{#include /banners/hacktricks-training.md}}
+
 ### Aina za Kijumla
 
-Unda muundo ambapo 1 ya thamani zao inaweza kuwa aina yoyote
+Unda struct ambapo 1 ya thamani zao inaweza kuwa aina yoyote
 ```rust
 struct Wrapper<T> {
 value: T,
@@ -30,7 +32,7 @@ Unaweza kutumia kazi kama `is_some()` au `is_none()` kuangalia thamani ya Chaguo
 
 ### Macros
 
-Macros ni zenye nguvu zaidi kuliko kazi kwa sababu zinapanuka kutoa msimbo zaidi kuliko ule ulioandika kwa mikono. Kwa mfano, saini ya kazi lazima itangaze idadi na aina ya vigezo ambavyo kazi ina. Hata hivyo, macros zinaweza kuchukua idadi tofauti ya vigezo: tunaweza kuita `println!("hello")` na hoja moja au `println!("hello {}", name)` na hoja mbili. Pia, macros zinapanuliwa kabla ya mkusanyiko kufasiri maana ya msimbo, hivyo macro inaweza, kwa mfano, kutekeleza sifa kwenye aina fulani. Kazi haiwezi, kwa sababu inaitwa wakati wa utekelezaji na sifa inahitaji kutekelezwa wakati wa mkusanyiko.
+Macros ni zenye nguvu zaidi kuliko kazi kwa sababu zinapanuka kutoa msimbo zaidi kuliko ule ulioandika kwa mikono. Kwa mfano, saini ya kazi lazima itangaze idadi na aina ya vigezo ambavyo kazi ina. Macros, kwa upande mwingine, zinaweza kuchukua idadi tofauti ya vigezo: tunaweza kuita `println!("hello")` na hoja moja au `println!("hello {}", name)` na hoja mbili. Pia, macros zinapanuliwa kabla ya mkusanyiko kufasiri maana ya msimbo, hivyo macro inaweza, kwa mfano, kutekeleza sifa kwenye aina fulani. Kazi haiwezi, kwa sababu inaitwa wakati wa wakati wa kukimbia na sifa inahitaji kutekelezwa wakati wa mkusanyiko.
 ```rust
 macro_rules! my_macro {
 () => {
@@ -117,7 +119,7 @@ true => 1,
 // TODO ^ Try commenting out one of these arms
 };
 ```
-#### mzunguko (usio na mwisho)
+#### loop (infinite)
 ```rust
 loop {
 count += 1;
@@ -238,7 +240,7 @@ let s = String::from("Foo");
 let s = s.append_bar();
 println!("s: {}", s);
 ```
-### Majaribio
+### Tests
 ```rust
 #[cfg(test)]
 mod tests {
@@ -267,7 +269,7 @@ println!("{:?}", apple);
 ```
 #### Threads
 
-Katika kesi hii tutapitia nyuzi mabadiliko ya kubadilisha.
+Katika kesi hii tutapitia nyuzi kiambato ambacho kitakuwa na uwezo wa kubadilisha.
 ```rust
 fn main() {
 let status = Arc::new(Mutex::new(JobStatus { jobs_completed: 0 }));
@@ -285,4 +287,4 @@ thread::sleep(Duration::from_millis(500));
 }
 }
 ```
-
+{{#include /banners/hacktricks-training.md}}

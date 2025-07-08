@@ -1,12 +1,10 @@
 # Interesting Windows Registry Keys
 
-### Interesting Windows Registry Keys
-
 {{#include ../../../banners/hacktricks-training.md}}
 
 ### **Windows Version and Owner Info**
 
-- Iko katika **`Software\Microsoft\Windows NT\CurrentVersion`**, utapata toleo la Windows, Service Pack, wakati wa usakinishaji, na jina la mmiliki aliyejiandikisha kwa njia rahisi.
+- Iko kwenye **`Software\Microsoft\Windows NT\CurrentVersion`**, utapata toleo la Windows, Service Pack, wakati wa usakinishaji, na jina la mmiliki aliyejiandikisha kwa njia rahisi.
 
 ### **Computer Name**
 
@@ -14,7 +12,7 @@
 
 ### **Time Zone Setting**
 
-- Muda wa mfumo umehifadhiwa katika **`System\ControlSet001\Control\TimeZoneInformation`**.
+- Kanda ya muda ya mfumo imehifadhiwa katika **`System\ControlSet001\Control\TimeZoneInformation`**.
 
 ### **Access Time Tracking**
 
@@ -39,32 +37,32 @@
 
 ### AutoStart Programs
 
-- Programu zilizoorodheshwa katika funguo mbalimbali za usajili za `Run` na `RunOnce` zinaanzishwa moja kwa moja wakati wa kuanzisha, zikihusisha muda wa kuanzisha mfumo na kuwa maeneo ya kupigiwa mfano kwa kutambua malware au programu zisizohitajika.
+- Programu zilizoorodheshwa katika funguo mbalimbali za `Run` na `RunOnce` za usajili zinaanzishwa kiotomatiki wakati wa kuanzisha, zikihusisha muda wa kuanzisha mfumo na kuwa maeneo ya kupigiwa mfano kwa kutambua malware au programu zisizohitajika.
 
 ### Shellbags
 
-- **Shellbags** sio tu hifadhi mapendeleo ya maoni ya folda bali pia hutoa ushahidi wa forensics wa ufikiaji wa folda hata kama folda hiyo haipo tena. Ni muhimu kwa uchunguzi, ikifunua shughuli za mtumiaji ambazo hazionekani kupitia njia nyingine.
+- **Shellbags** hazihifadhi tu mapendeleo ya maoni ya folda bali pia hutoa ushahidi wa forensics wa ufikiaji wa folda hata kama folda hiyo haipo tena. Ni muhimu kwa uchunguzi, ikifunua shughuli za mtumiaji ambazo si dhahiri kupitia njia nyingine.
 
 ### USB Information and Forensics
 
-- Maelezo yaliyohifadhiwa katika usajili kuhusu vifaa vya USB yanaweza kusaidia kufuatilia ni vifaa gani vilivyounganishwa kwenye kompyuta, ikihusisha kifaa na uhamishaji wa faili nyeti au matukio ya ufikiaji usioidhinishwa.
+- Maelezo yaliyohifadhiwa katika usajili kuhusu vifaa vya USB yanaweza kusaidia kufuatilia ni vifaa gani vilivyounganishwa kwenye kompyuta, ikihusisha kifaa na uhamisho wa faili nyeti au matukio ya ufikiaji usioidhinishwa.
 
 ### Volume Serial Number
 
-- **Nambari ya Serial ya Volume** inaweza kuwa muhimu kwa kufuatilia tukio maalum la mfumo wa faili, muhimu katika hali za forensics ambapo asili ya faili inahitaji kuanzishwa kati ya vifaa tofauti.
+- **Nambari ya Serial ya Volume** inaweza kuwa muhimu kwa kufuatilia tukio maalum la mfumo wa faili, inayofaa katika hali za forensics ambapo asili ya faili inahitaji kuanzishwa kati ya vifaa tofauti.
 
 ### **Shutdown Details**
 
-- Wakati wa kuzima na hesabu (hii ya mwisho ni kwa XP pekee) zinawekwa katika **`System\ControlSet001\Control\Windows`** na **`System\ControlSet001\Control\Watchdog\Display`**.
+- Wakati wa kuzima na hesabu (hii ya mwisho ni kwa XP tu) huhifadhiwa katika **`System\ControlSet001\Control\Windows`** na **`System\ControlSet001\Control\Watchdog\Display`**.
 
 ### **Network Configuration**
 
-- Kwa maelezo ya kina ya kiunganishi cha mtandao, rejelea **`System\ControlSet001\Services\Tcpip\Parameters\Interfaces{GUID_INTERFACE}`**.
+- Kwa maelezo ya kina ya kiunganishi cha mtandao, rejea **`System\ControlSet001\Services\Tcpip\Parameters\Interfaces{GUID_INTERFACE}`**.
 - Wakati wa kwanza na wa mwisho wa muunganisho wa mtandao, ikiwa ni pamoja na muunganisho wa VPN, umeandikwa chini ya njia mbalimbali katika **`Software\Microsoft\Windows NT\CurrentVersion\NetworkList`**.
 
 ### **Shared Folders**
 
-- Folda zilizoshirikiwa na mipangilio ziko chini ya **`System\ControlSet001\Services\lanmanserver\Shares`**. Mipangilio ya Client Side Caching (CSC) inaamuru upatikanaji wa faili za mbali.
+- Folda na mipangilio zilizoshirikiwa ziko chini ya **`System\ControlSet001\Services\lanmanserver\Shares`**. Mipangilio ya Client Side Caching (CSC) inaamuru upatikanaji wa faili za mbali.
 
 ### **Programs that Start Automatically**
 
@@ -76,7 +74,7 @@
 
 ### **Recent Documents and Office Files**
 
-- Hati za hivi karibuni na faili za Ofisi zilizofikiwa zinaandikwa katika `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs` na njia maalum za toleo la Ofisi.
+- Hati za hivi karibuni na faili za Ofisi zilizofikiwa zimeandikwa katika `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs` na njia maalum za toleo la Ofisi.
 
 ### **Most Recently Used (MRU) Items**
 
@@ -92,7 +90,7 @@
 
 ### **USB Device History**
 
-- **`HKLM\SYSTEM\ControlSet001\Enum\USBSTOR`** na **`HKLM\SYSTEM\ControlSet001\Enum\USB`** zina maelezo mengi kuhusu vifaa vya USB vilivyounganishwa, ikiwa ni pamoja na mtengenezaji, jina la bidhaa, na muda wa kuunganishwa.
+- **`HKLM\SYSTEM\ControlSet001\Enum\USBSTOR`** na **`HKLM\SYSTEM\ControlSet001\Enum\USB`** zina maelezo mengi kuhusu vifaa vya USB vilivyounganishwa, ikiwa ni pamoja na mtengenezaji, jina la bidhaa, na nyakati za muunganisho.
 - Mtumiaji anayehusishwa na kifaa maalum cha USB anaweza kupatikana kwa kutafuta hives za `NTUSER.DAT` kwa **{GUID}** ya kifaa.
 - Kifaa cha mwisho kilichounganishwa na nambari yake ya serial ya volume kinaweza kufuatiliwa kupitia `System\MountedDevices` na `Software\Microsoft\Windows NT\CurrentVersion\EMDMgmt`, mtawalia.
 

@@ -1,5 +1,7 @@
 # LLM Training - Data Preparation
 
+{{#include /banners/hacktricks-training.md}}
+
 **Hizi ni nota zangu kutoka kwa kitabu kinachopendekezwa sana** [**https://www.manning.com/books/build-a-large-language-model-from-scratch**](https://www.manning.com/books/build-a-large-language-model-from-scratch) **pamoja na taarifa za ziada.**
 
 ## Basic Information
@@ -13,7 +15,7 @@ Unapaswa kuanza kwa kusoma chapisho hili kwa baadhi ya dhana za msingi unazopasw
 ## 1. Tokenization
 
 > [!TIP]
-> Lengo la awamu hii ya awali ni rahisi sana: **Gawanya ingizo katika tokeni (ids) kwa njia ambayo ina maana**.
+> Lengo la awamu hii ya awali ni rahisi sana: **Gawanya ingizo katika tokens (ids) kwa njia ambayo ina maana**.
 
 {{#ref}}
 1.-tokenizing.md
@@ -31,10 +33,10 @@ Unapaswa kuanza kwa kusoma chapisho hili kwa baadhi ya dhana za msingi unazopasw
 ## 3. Token Embeddings
 
 > [!TIP]
-> Lengo la awamu hii ya tatu ni rahisi sana: **Patia kila moja ya tokeni za awali katika msamiati vector ya vipimo vinavyotakiwa ili kufundisha mfano.** Kila neno katika msamiati litakuwa na pointi katika nafasi ya vipimo X.\
-> Kumbuka kwamba awali nafasi ya kila neno katika nafasi inaanzishwa "kwa bahati" na nafasi hizi ni vigezo vinavyoweza kufundishwa (vitaboreshwa wakati wa mafunzo).
+> Lengo la awamu hii ya tatu ni rahisi sana: **Patia kila moja ya tokens zilizopita katika msamiati vector ya vipimo vinavyotakiwa ili kufundisha mfano.** Kila neno katika msamiati litakuwa na pointi katika nafasi ya vipimo X.\
+> Kumbuka kwamba awali nafasi ya kila neno katika nafasi inaanzishwa "kwa bahati nasibu" na nafasi hizi ni vigezo vinavyoweza kufundishwa (vitaboreshwa wakati wa mafunzo).
 >
-> Zaidi ya hayo, wakati wa kuingiza tokeni **tabaka lingine la kuingiza linaundwa** ambalo linawakilisha (katika kesi hii) **nafasi halisi ya neno katika sentensi ya mafunzo**. Kwa njia hii neno katika nafasi tofauti katika sentensi litakuwa na uwakilishi tofauti (maana).
+> Zaidi ya hayo, wakati wa token embedding **tabaka lingine la embeddings linaundwa** ambalo linawakilisha (katika kesi hii) **nafasi halisi ya neno katika sentensi ya mafunzo**. Kwa njia hii neno katika nafasi tofauti katika sentensi litakuwa na uwakilishi tofauti (maana).
 
 {{#ref}}
 3.-token-embeddings.md
@@ -64,7 +66,7 @@ Unapaswa kuanza kwa kusoma chapisho hili kwa baadhi ya dhana za msingi unazopasw
 ## 6. Pre-training & Loading models
 
 > [!TIP]
-> Lengo la awamu hii ya sita ni rahisi sana: **Fundisha mfano kutoka mwanzo**. Kwa hili muundo wa awali wa LLM utatumika na miduara fulani ikipita juu ya seti za data kwa kutumia kazi za hasara zilizofafanuliwa na msaidizi kufundisha vigezo vyote vya mfano.
+> Lengo la awamu hii ya sita ni rahisi sana: **Fundisha mfano kutoka mwanzo**. Kwa hili muundo wa awali wa LLM utatumika na mizunguko kadhaa ikipita juu ya seti za data kwa kutumia kazi za hasara zilizofafanuliwa na msaidizi kufundisha vigezo vyote vya mfano.
 
 {{#ref}}
 6.-pre-training-and-loading-models.md
@@ -91,8 +93,10 @@ Unapaswa kuanza kwa kusoma chapisho hili kwa baadhi ya dhana za msingi unazopasw
 ## 7.2. Fine-Tuning to follow instructions
 
 > [!TIP]
-> Lengo la sehemu hii ni kuonyesha jinsi ya **kurekebisha mfano uliofundishwa tayari ili kufuata maelekezo** badala ya tu kuzalisha maandiko, kwa mfano, kujibu kazi kama roboti ya mazungumzo.
+> Lengo la sehemu hii ni kuonyesha jinsi ya **kurekebisha mfano uliofundishwa tayari ili kufuata maagizo** badala ya tu kuzalisha maandiko, kwa mfano, kujibu kazi kama roboti ya mazungumzo.
 
 {{#ref}}
 7.2.-fine-tuning-to-follow-instructions.md
 {{#endref}}
+
+{{#include /banners/hacktricks-training.md}}

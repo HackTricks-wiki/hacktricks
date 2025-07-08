@@ -1,22 +1,20 @@
-# Algorithimu za Kijamii/Kubana
-
-## Algorithimu za Kijamii/Kubana
+# Cryptographic/Compression Algorithms
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Kutambua Algorithimu
+## Identifying Algorithms
 
-Ikiwa unamaliza katika msimbo **ukitumia shift kulia na kushoto, xors na operesheni kadhaa za hesabu** kuna uwezekano mkubwa kwamba ni utekelezaji wa **algorithimu ya kijamii**. Hapa kuna njia kadhaa za **kutambua algorithimu inayotumika bila kuhitaji kubadilisha kila hatua**.
+Ikiwa unamaliza katika msimbo **ukitumia shift rights and lefts, xors na operesheni kadhaa za hesabu** ni uwezekano mkubwa kwamba ni utekelezaji wa **cryptographic algorithm**. Hapa kuna njia kadhaa za **kutambua algorithm inayotumika bila kuhitaji kubadilisha kila hatua**.
 
-### API kazi
+### API functions
 
 **CryptDeriveKey**
 
-Ikiwa kazi hii inatumika, unaweza kupata ni **algorithimu ipi inatumika** ukikagua thamani ya parameter ya pili:
+Ikiwa kazi hii inatumika, unaweza kupata ni **algorithm gani inayotumika** ukichunguza thamani ya parameter ya pili:
 
 ![](<../../images/image (156).png>)
 
-Angalia hapa jedwali la algorithimu zinazowezekana na thamani zao zilizotolewa: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
+Angalia hapa jedwali la algorithms zinazowezekana na thamani zao zilizotolewa: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
 
 **RtlCompressBuffer/RtlDecompressBuffer**
 
@@ -24,87 +22,87 @@ Inabana na kufungua buffer fulani ya data.
 
 **CryptAcquireContext**
 
-Kutoka [nyaraka](https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-cryptacquirecontexta): Kazi ya **CryptAcquireContext** inatumika kupata mkono wa chombo maalum cha funguo ndani ya mtoa huduma maalum wa kijamii (CSP). **Mkononi huu unarudiwa unatumika katika simu za kazi za CryptoAPI** zinazotumia CSP iliyochaguliwa.
+Kutoka [the docs](https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-cryptacquirecontexta): Kazi ya **CryptAcquireContext** inatumika kupata mkono wa container maalum ya funguo ndani ya mtoa huduma maalum wa cryptographic (CSP). **Huu mkono uliorejeshwa unatumika katika wito wa kazi za CryptoAPI** zinazotumia CSP iliyochaguliwa.
 
 **CryptCreateHash**
 
-Inaanzisha hashing ya mtiririko wa data. Ikiwa kazi hii inatumika, unaweza kupata ni **algorithimu ipi inatumika** ukikagua thamani ya parameter ya pili:
+Inaanzisha hashing ya mtiririko wa data. Ikiwa kazi hii inatumika, unaweza kupata ni **algorithm gani inayotumika** ukichunguza thamani ya parameter ya pili:
 
 ![](<../../images/image (549).png>)
 
 \
-Angalia hapa jedwali la algorithimu zinazowezekana na thamani zao zilizotolewa: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
+Angalia hapa jedwali la algorithms zinazowezekana na thamani zao zilizotolewa: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
 
-### Misingi ya msimbo
+### Code constants
 
-Wakati mwingine ni rahisi sana kutambua algorithimu kutokana na ukweli kwamba inahitaji kutumia thamani maalum na ya kipekee.
+Wakati mwingine ni rahisi sana kutambua algorithm kutokana na ukweli kwamba inahitaji kutumia thamani maalum na ya kipekee.
 
 ![](<../../images/image (833).png>)
 
-Ikiwa unatafuta msingi wa kwanza kwenye Google hii ndiyo unayopata:
+Ikiwa unatafuta constant ya kwanza kwenye Google hii ndiyo unapata:
 
 ![](<../../images/image (529).png>)
 
 Kwa hivyo, unaweza kudhani kwamba kazi iliyotolewa ni **sha256 calculator.**\
-Unaweza kutafuta yoyote ya misingi mingine na utapata (labda) matokeo sawa.
+Unaweza kutafuta yoyote ya constants nyingine na utapata (labda) matokeo sawa.
 
-### taarifa za data
+### data info
 
-Ikiwa msimbo huna msingi wowote muhimu inaweza kuwa **inapakia taarifa kutoka sehemu ya .data**.\
-Unaweza kufikia data hiyo, **kundi la dword ya kwanza** na kutafuta hiyo kwenye google kama tulivyofanya katika sehemu iliyopita:
+Ikiwa msimbo huna constant yoyote muhimu inaweza kuwa **inapakia habari kutoka sehemu ya .data**.\
+Unaweza kufikia data hiyo, **kundi la dword ya kwanza** na kutafuta katika google kama tulivyofanya katika sehemu iliyopita:
 
 ![](<../../images/image (531).png>)
 
-Katika kesi hii, ikiwa utaangalia **0xA56363C6** unaweza kupata kwamba inahusiana na **meza za algorithimu ya AES**.
+Katika kesi hii, ikiwa utaangalia **0xA56363C6** unaweza kupata kwamba inahusiana na **meza za algorithm ya AES**.
 
-## RC4 **(Kijamii Crypt)**
+## RC4 **(Symmetric Crypt)**
 
-### Tabia
+### Characteristics
 
-Inajumuisha sehemu 3 kuu:
+Imepangwa kwa sehemu 3 kuu:
 
-- **Hatua ya Kuanza/**: Inaunda **meza ya thamani kutoka 0x00 hadi 0xFF** (256bytes kwa jumla, 0x100). Meza hii kwa kawaida inaitwa **Sanduku la Kubadilisha** (au SBox).
-- **Hatua ya Kuchanganya**: Itakuwa **inazunguka kupitia meza** iliyoundwa hapo awali (zunguko wa 0x100, tena) ikibadilisha kila thamani kwa **bytes za nadharia**. Ili kuunda hizi bytes za nadharia, funguo za RC4 **zinatumika**. Funguo za RC4 **zinaweza kuwa** **kati ya 1 na 256 bytes kwa urefu**, hata hivyo kawaida inapendekezwa iwe juu ya 5 bytes. Kwa kawaida, funguo za RC4 ni 16 bytes kwa urefu.
-- **Hatua ya XOR**: Hatimaye, maandiko ya wazi au cyphertext **yanapigwa XOR na thamani zilizoundwa hapo awali**. Kazi ya kuandika na kufungua ni ile ile. Kwa hili, **zunguko kupitia bytes 256 zilizoundwa** utafanywa mara nyingi kadri inavyohitajika. Hii kawaida inatambuliwa katika msimbo uliotolewa na **%256 (mod 256)**.
+- **Initialization stage/**: Inaunda **meza ya thamani kutoka 0x00 hadi 0xFF** (256bytes kwa jumla, 0x100). Meza hii kwa kawaida inaitwa **Substitution Box** (au SBox).
+- **Scrambling stage**: Itafanya **mzunguko kupitia meza** iliyoundwa hapo awali (mzunguko wa 0x100 iterations, tena) ikibadilisha kila thamani kwa **bytes za nadharia**. Ili kuunda hizi bytes za nadharia, funguo ya RC4 **inatumika**. Funguo za RC4 zinaweza kuwa **kati ya 1 na 256 bytes kwa urefu**, hata hivyo kawaida inapendekezwa iwe juu ya 5 bytes. Kwa kawaida, funguo za RC4 ni 16 bytes kwa urefu.
+- **XOR stage**: Hatimaye, maandiko ya wazi au cyphertext **yanapigwa XOR na thamani zilizoundwa hapo awali**. Kazi ya kuandika na kufungua ni ile ile. Kwa hili, **mzunguko kupitia bytes 256 zilizoundwa** utafanywa mara nyingi kadri inavyohitajika. Hii kwa kawaida inatambuliwa katika msimbo uliotolewa na **%256 (mod 256)**.
 
-> [!NOTE]
-> **Ili kutambua RC4 katika msimbo wa disassembly/uliotolewa unaweza kuangalia kwa zunguko 2 za ukubwa 0x100 (kwa kutumia funguo) na kisha XOR ya data ya ingizo na thamani 256 zilizoundwa hapo awali katika zunguko 2 labda kwa kutumia %256 (mod 256)**
+> [!TIP]
+> **Ili kutambua RC4 katika msimbo wa disassembly/decompiled unaweza kuangalia kwa mizunguko 2 ya ukubwa 0x100 (kwa kutumia funguo) na kisha XOR ya data ya ingizo na thamani 256 zilizoundwa hapo awali katika mizunguko 2 labda kwa kutumia %256 (mod 256)**
 
-### **Hatua ya Kuanza/Sanduku la Kubadilisha:** (Angalia nambari 256 inayotumika kama hesabu na jinsi 0 inavyoandikwa katika kila mahali pa wahusika 256)
+### **Initialization stage/Substitution Box:** (Angalia nambari 256 inayotumika kama hesabu na jinsi 0 inavyoandikwa katika kila mahali pa wahusika 256)
 
 ![](<../../images/image (584).png>)
 
-### **Hatua ya Kuchanganya:**
+### **Scrambling Stage:**
 
 ![](<../../images/image (835).png>)
 
-### **Hatua ya XOR:**
+### **XOR Stage:**
 
 ![](<../../images/image (904).png>)
 
-## **AES (Kijamii Crypt)**
+## **AES (Symmetric Crypt)**
 
-### **Tabia**
+### **Characteristics**
 
-- Matumizi ya **sanduku za kubadilisha na meza za kutafuta**
-- Inawezekana **kutofautisha AES kutokana na matumizi ya thamani maalum za meza za kutafuta** (misingi). _Kumbuka kwamba **misingi** inaweza **kuhifadhiwa** katika binary **au kuundwa** _**kikamilifu**._
-- **Funguo ya kuandika** lazima iwe **inaweza kugawanywa** na **16** (kawaida 32B) na kawaida **IV** ya 16B inatumika.
+- Matumizi ya **substitution boxes na lookup tables**
+- Inawezekana **kutofautisha AES kutokana na matumizi ya thamani maalum za lookup table** (constants). _Kumbuka kwamba **constant** inaweza **kuhifadhiwa** katika binary **au kuundwa** _**dynamically**._
+- Funguo ya **encryption** lazima iwe **inaweza kugawanywa** kwa **16** (kawaida 32B) na kawaida **IV** ya 16B inatumika.
 
-### Misingi ya SBox
+### SBox constants
 
 ![](<../../images/image (208).png>)
 
-## Serpent **(Kijamii Crypt)**
+## Serpent **(Symmetric Crypt)**
 
-### Tabia
+### Characteristics
 
-- Ni nadra kupata malware inayotumia lakini kuna mifano (Ursnif)
-- Rahisi kubaini ikiwa algorithimu ni Serpent au la kulingana na urefu wake (kazi ndefu sana)
+- Ni nadra kupata malware ikitumia lakini kuna mifano (Ursnif)
+- Rahisi kubaini ikiwa algorithm ni Serpent au la kulingana na urefu wake (kazi ndefu sana)
 
-### Kutambua
+### Identifying
 
-Katika picha ifuatayo angalia jinsi msingi **0x9E3779B9** unavyotumika (kumbuka kwamba msingi huu pia unatumika na algorithimu nyingine za crypto kama **TEA** -Tiny Encryption Algorithm).\
-Pia angalia **ukubwa wa zunguko** (**132**) na **idadi ya operesheni za XOR** katika **maelekezo ya disassembly** na katika **mfano wa msimbo**:
+Katika picha ifuatayo angalia jinsi constant **0x9E3779B9** inavyotumika (kumbuka kwamba constant hii pia inatumika na algorithms nyingine za crypto kama **TEA** -Tiny Encryption Algorithm).\
+Pia angalia **ukubwa wa mzunguko** (**132**) na **idadi ya operesheni za XOR** katika **maagizo ya disassembly** na katika **mfano wa msimbo**:
 
 ![](<../../images/image (547).png>)
 
@@ -112,17 +110,17 @@ Kama ilivyotajwa hapo awali, msimbo huu unaweza kuonyeshwa ndani ya decompiler y
 
 ![](<../../images/image (513).png>)
 
-Kwa hivyo, inawezekana kutambua algorithimu hii ukikagua **nambari ya uchawi** na **XORs za awali**, kuona **kazi ndefu sana** na **kulinganisha** baadhi ya **maelekezo** ya kazi ndefu **na utekelezaji** (kama shift kushoto kwa 7 na kuzungusha kushoto kwa 22).
+Kwa hivyo, inawezekana kutambua algorithm hii ukichunguza **nambari ya uchawi** na **XORs za awali**, kuona **kazi ndefu sana** na **kulinganisha** baadhi ya **maagizo** ya kazi ndefu **na utekelezaji** (kama shift left kwa 7 na rotate left kwa 22).
 
-## RSA **(Kijamii Crypt)**
+## RSA **(Asymmetric Crypt)**
 
-### Tabia
+### Characteristics
 
-- Ngumu zaidi kuliko algorithimu za kijamii
-- Hakuna misingi! (utekelezaji wa kawaida ni mgumu kubaini)
-- KANAL (mchambuzi wa crypto) inashindwa kuonyesha vidokezo juu ya RSA na inategemea misingi.
+- Ngumu zaidi kuliko algorithms za symmetric
+- Hakuna constants! (utekelezaji wa kawaida ni mgumu kubaini)
+- KANAL (mchambuzi wa crypto) inashindwa kuonyesha vidokezo juu ya RSA kwani inategemea constants.
 
-### Kutambua kwa kulinganisha
+### Identifying by comparisons
 
 ![](<../../images/image (1113).png>)
 
@@ -131,48 +129,48 @@ Kwa hivyo, inawezekana kutambua algorithimu hii ukikagua **nambari ya uchawi** n
 
 ## MD5 & SHA (hash)
 
-### Tabia
+### Characteristics
 
-- Kazi 3: Kuanza, Sasisha, Mwisho
+- Kazi 3: Init, Update, Final
 - Kazi za kuanzisha zinazofanana
 
-### Tambua
+### Identify
 
-**Kuanza**
+**Init**
 
-Unaweza kutambua zote mbili ukikagua misingi. Kumbuka kwamba sha_init ina msingi 1 ambao MD5 haina:
+Unaweza kutambua zote mbili ukichunguza constants. Kumbuka kwamba sha_init ina constant 1 ambayo MD5 haina:
 
 ![](<../../images/image (406).png>)
 
 **MD5 Transform**
 
-Kumbuka matumizi ya misingi zaidi
+Kumbuka matumizi ya constants zaidi
 
 ![](<../../images/image (253) (1) (1).png>)
 
 ## CRC (hash)
 
 - Ndogo na yenye ufanisi kwani kazi yake ni kupata mabadiliko yasiyokusudiwa katika data
-- Inatumia meza za kutafuta (hivyo unaweza kutambua misingi)
+- Inatumia lookup tables (hivyo unaweza kutambua constants)
 
-### Tambua
+### Identify
 
-Angalia **misingi ya meza za kutafuta**:
+Angalia **lookup table constants**:
 
 ![](<../../images/image (508).png>)
 
-Algorithimu ya hash ya CRC inaonekana kama:
+Algorithm ya CRC hash inaonekana kama:
 
 ![](<../../images/image (391).png>)
 
-## APLib (Kubana)
+## APLib (Compression)
 
-### Tabia
+### Characteristics
 
-- Hakuna misingi inayotambulika
-- Unaweza kujaribu kuandika algorithimu hiyo katika python na kutafuta mambo yanayofanana mtandaoni
+- Hakuna constants zinazotambulika
+- Unaweza kujaribu kuandika algorithm hiyo katika python na kutafuta mambo yanayofanana mtandaoni
 
-### Tambua
+### Identify
 
 Grafu ni kubwa sana:
 
