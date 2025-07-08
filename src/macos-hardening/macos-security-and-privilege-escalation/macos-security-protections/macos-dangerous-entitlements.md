@@ -15,7 +15,7 @@
 
 Право доступу **`com.apple.rootless.install`** дозволяє **обійти SIP**. Перевірте [це для отримання додаткової інформації](macos-sip.md#com.apple.rootless.install).
 
-### **`com.apple.system-task-ports` (раніше називалося `task_for_pid-allow`)**
+### **`com.apple.system-task-ports` (раніше називався `task_for_pid-allow`)**
 
 Це право доступу дозволяє отримати **порт завдання для будь-якого** процесу, за винятком ядра. Перевірте [**це для отримання додаткової інформації**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
 
@@ -25,11 +25,11 @@
 
 ### `com.apple.security.cs.debugger`
 
-Додатки з правом доступу до інструментів налагодження можуть викликати `task_for_pid()`, щоб отримати дійсний порт завдання для незахищених і сторонніх додатків з правом доступу `Get Task Allow`, встановленим на `true`. Однак навіть з правом доступу до інструментів налагодження, налагоджувач **не може отримати порти завдання** процесів, які **не мають права доступу `Get Task Allow`**, і які, отже, захищені захистом цілісності системи. Перевірте [**це для отримання додаткової інформації**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger).
+Додатки з правом доступу до інструментів налагодження можуть викликати `task_for_pid()`, щоб отримати дійсний порт завдання для незахищених і сторонніх додатків з правом доступу `Get Task Allow`, встановленим на `true`. Однак, навіть з правом доступу до інструментів налагодження, налагоджувач **не може отримати порти завдання** процесів, які **не мають права доступу `Get Task Allow`**, і які, отже, захищені захистом цілісності системи. Перевірте [**це для отримання додаткової інформації**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger).
 
 ### `com.apple.security.cs.disable-library-validation`
 
-Це право доступу дозволяє **завантажувати фреймворки, плагіни або бібліотеки без підпису Apple або підпису з тим же ідентифікатором команди**, тому зловмисник може зловживати завантаженням довільної бібліотеки для впровадження коду. Перевірте [**це для отримання додаткової інформації**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation).
+Це право доступу дозволяє **завантажувати фрейми, плагіни або бібліотеки без підпису Apple або підпису з тим же ідентифікатором команди**, як основний виконуваний файл, тому зловмисник може зловживати завантаженням довільної бібліотеки для впровадження коду. Перевірте [**це для отримання додаткової інформації**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation).
 
 ### `com.apple.private.security.clear-library-validation`
 
@@ -58,7 +58,7 @@
 
 **iMovie** та **Garageband** мали це право доступу.
 
-Для отримання більшої **інформації** про експлойт для **отримання токенів iCloud** з цього права доступу перевірте доповідь: [**#OBTS v5.0: "Що відбувається на вашому Mac, залишається в iCloud Apple?!" - Войцех Регула**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
+Для отримання більшої **інформації** про експлойт для **отримання токенів icloud** з цього права доступу перевірте доповідь: [**#OBTS v5.0: "Що відбувається на вашому Mac, залишається в iCloud Apple?!" - Войцех Регула**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
 
 ### `com.apple.private.tcc.manager.check-by-audit-token`
 
@@ -74,7 +74,7 @@ TODO: У [**цьому звіті**](https://jhftss.github.io/The-Nightmare-of-A
 
 ### `keychain-access-groups`
 
-Це право доступу перераховує **групи ключів**, до яких має доступ додаток:
+Це право доступу містить **групи ключів**, до яких має доступ додаток:
 ```xml
 <key>keychain-access-groups</key>
 <array>
@@ -109,7 +109,7 @@ osascript -e 'tell app "App Store" to activate' -e 'tell app "App Store" to acti
 
 ### **`kTCCServiceSystemPolicyAppBundles`**
 
-Дозволяє модифікувати файли всередині пакету додатків (всередині app.app), що **заборонено за замовчуванням**.
+Дозволяє модифікувати файли всередині пакету додатків (всередині app.app), що **за замовчуванням заборонено**.
 
 <figure><img src="../../../images/image (31).png" alt=""><figcaption></figcaption></figure>
 
@@ -163,3 +163,8 @@ TODO
 {{#include ../../../banners/hacktricks-training.md}}
 
 </details>
+
+
+
+
+{{#include /banners/hacktricks-training.md}}
