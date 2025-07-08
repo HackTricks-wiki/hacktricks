@@ -1,8 +1,10 @@
 # Mythic
 
+{{#include ../banners/hacktricks-training.md}}
+
 ## Šta je Mythic?
 
-Mythic je open-source, modularni komandni i kontrolni (C2) okvir dizajniran za red teaming. Omogućava bezbednosnim profesionalcima da upravljaju i implementiraju različite agente (payloads) na različitim operativnim sistemima, uključujući Windows, Linux i macOS. Mythic pruža korisnički prijateljski web interfejs za upravljanje agentima, izvršavanje komandi i prikupljanje rezultata, što ga čini moćnim alatom za simulaciju stvarnih napada u kontrolisanom okruženju.
+Mythic je open-source, modularni komandni i kontrolni (C2) okvir dizajniran za red teaming. Omogućava bezbednosnim profesionalcima da upravljaju i implementiraju različite agente (payloads) na različitim operativnim sistemima, uključujući Windows, Linux i macOS. Mythic pruža korisnički prijateljsko web sučelje za upravljanje agentima, izvršavanje komandi i prikupljanje rezultata, čineći ga moćnim alatom za simulaciju stvarnih napada u kontrolisanom okruženju.
 
 ### Instalacija
 
@@ -38,7 +40,7 @@ Instalirajte ga sa:
 ```bash
 ./mythic-cli install github https://github.com/MythicAgents/Apollo.git
 ```
-Ovaj agent ima mnogo komandi koje ga čine veoma sličnim Cobalt Strike-ovom Beacon-u sa nekim dodatnim funkcijama. Među njima, podržava:
+Ovaj agent ima mnogo komandi koje ga čine veoma sličnim Cobalt Strike's Beacon-u sa nekim dodatnim funkcijama. Među njima, podržava:
 
 ### Uobičajene akcije
 
@@ -58,15 +60,15 @@ Ovaj agent ima mnogo komandi koje ga čine veoma sličnim Cobalt Strike-ovom Bea
 ### Eskalacija privilegija
 
 - `getprivs`: Omogućava što više privilegija na trenutnom tokenu niti
-- `getsystem`: Otvara handle za winlogon i duplicira token, efikasno eskalirajući privilegije na nivo SISTEMA
+- `getsystem`: Otvara handle za winlogon i duplicira token, efektivno eskalirajući privilegije na nivo SISTEMA
 - `make_token`: Kreira novu sesiju prijavljivanja i primenjuje je na agenta, omogućavajući impersonaciju drugog korisnika
-- `steal_token`: Krade primarni token iz drugog procesa, omogućavajući agentu da impersonira korisnika tog procesa
+- `steal_token`: Krade primarni token iz drugog procesa, omogućavajući agentu da impersonuje korisnika tog procesa
 - `pth`: Pass-the-Hash napad, omogućavajući agentu da se autentifikuje kao korisnik koristeći njihov NTLM hash bez potrebe za plaintext lozinkom
 - `mimikatz`: Pokreće Mimikatz komande za ekstrakciju kredencijala, hash-eva i drugih osetljivih informacija iz memorije ili SAM baze podataka
-- `rev2self`: Vraća agentov token na njegov primarni token, efikasno vraćajući privilegije na originalni nivo
+- `rev2self`: Vraća agentov token na njegov primarni token, efektivno vraćajući privilegije na originalni nivo
 - `ppid`: Menja roditeljski proces za post-exploitation poslove tako što specificira novi ID roditeljskog procesa, omogućavajući bolju kontrolu nad kontekstom izvršenja posla
 - `printspoofer`: Izvršava PrintSpoofer komande da zaobiđe sigurnosne mere štampača, omogućavajući eskalaciju privilegija ili izvršenje koda
-- `dcsync`: Sinhronizuje Kerberos ključeve korisnika na lokalnu mašinu, omogućavajući offline razbijanje lozinki ili dalja napada
+- `dcsync`: Sinhronizuje Kerberos ključeve korisnika sa lokalnom mašinom, omogućavajući offline razbijanje lozinki ili dalja napada
 - `ticket_cache_add`: Dodaje Kerberos tiket trenutnoj sesiji prijavljivanja ili određenoj, omogućavajući ponovnu upotrebu tiketa ili impersonaciju
 
 ### Izvršenje procesa
@@ -76,7 +78,7 @@ Ovaj agent ima mnogo komandi koje ga čine veoma sličnim Cobalt Strike-ovom Bea
 - `execute_coff`: Izvršava COFF datoteku u memoriji, omogućavajući izvršenje kompajliranog koda u memoriji
 - `execute_pe`: Izvršava unmanaged izvršnu datoteku (PE)
 - `inline_assembly`: Izvršava .NET assembly u jednokratnom AppDomain-u, omogućavajući privremeno izvršenje koda bez uticaja na glavni proces agenta
-- `run`: Izvršava binarnu datoteku na ciljanom sistemu, koristeći sistemski PATH da pronađe izvršnu datoteku
+- `run`: Izvršava binarnu datoteku na ciljanom sistemu, koristeći sistemski PATH za pronalaženje izvršne datoteke
 - `shinject`: Injektuje shellcode u udaljeni proces, omogućavajući izvršenje proizvoljnog koda u memoriji
 - `inject`: Injektuje agentov shellcode u udaljeni proces, omogućavajući izvršenje agentovog koda u memoriji
 - `spawn`: Pokreće novu sesiju agenta u specificiranoj izvršnoj datoteci, omogućavajući izvršenje shellcode-a u novom procesu
@@ -107,20 +109,20 @@ Nakon što se jedan modul učita, pojaviće se na listi kao druga komanda poput 
 
 ### Lateralno kretanje
 
-- `jump_psexec`: Koristi PsExec tehniku za lateralno kretanje ka novom hostu tako što prvo kopira izvršni fajl Apollo agenta (apollo.exe) i izvršava ga.
-- `jump_wmi`: Koristi WMI tehniku za lateralno kretanje ka novom hostu tako što prvo kopira izvršni fajl Apollo agenta (apollo.exe) i izvršava ga.
+- `jump_psexec`: Koristi PsExec tehniku da se lateralno pomeri na novi host tako što prvo kopira izvršni fajl Apollo agenta (apollo.exe) i izvršava ga.
+- `jump_wmi`: Koristi WMI tehniku da se lateralno pomeri na novi host tako što prvo kopira izvršni fajl Apollo agenta (apollo.exe) i izvršava ga.
 - `wmiexecute`: Izvršava komandu na lokalnom ili određenom udaljenom sistemu koristeći WMI, sa opcionim kredencijalima za impersonaciju.
 - `net_dclist`: Preuzima listu kontrolera domena za određeni domen, korisno za identifikaciju potencijalnih ciljeva za lateralno kretanje.
-- `net_localgroup`: Prikazuje lokalne grupe na određenom računaru, podrazumevano na localhost ako nije specificiran računar.
+- `net_localgroup`: Prikazuje lokalne grupe na određenom računaru, podrazumevano na localhost ako nije naveden računar.
 - `net_localgroup_member`: Preuzima članstvo lokalne grupe za određenu grupu na lokalnom ili udaljenom računaru, omogućavajući enumeraciju korisnika u specifičnim grupama.
 - `net_shares`: Prikazuje udaljene deljene resurse i njihovu dostupnost na određenom računaru, korisno za identifikaciju potencijalnih ciljeva za lateralno kretanje.
-- `socks`: Omogućava SOCKS 5 kompatibilan proxy na ciljanom mrežnom okruženju, omogućavajući tunelovanje saobraćaja kroz kompromitovani host. Kompatibilno sa alatima poput proxychains.
-- `rpfwd`: Počinje da sluša na određenom portu na ciljanom hostu i prosleđuje saobraćaj kroz Mythic na udaljenu IP adresu i port, omogućavajući daljinski pristup uslugama na ciljanom mrežnom okruženju.
+- `socks`: Omogućava SOCKS 5 kompatibilan proxy na ciljanom mrežnom okruženju, omogućavajući tunelovanje saobraćaja kroz kompromitovani host. Kompatibilan sa alatima kao što su proxychains.
+- `rpfwd`: Počinje da sluša na određenom portu na ciljanom hostu i prosleđuje saobraćaj kroz Mythic na udaljenu IP adresu i port, omogućavajući udaljeni pristup uslugama na ciljanom mrežnom okruženju.
 - `listpipes`: Prikazuje sve imenovane cevi na lokalnom sistemu, što može biti korisno za lateralno kretanje ili eskalaciju privilegija interakcijom sa IPC mehanizmima.
 
 ### Razno
 - `help`: Prikazuje detaljne informacije o specifičnim komandama ili opšte informacije o svim dostupnim komandama u agentu.
-- `clear`: Označava zadatke kao 'obrisane' tako da ih agenti ne mogu preuzeti. Možete specificirati `all` da obrišete sve zadatke ili `task Num` da obrišete određeni zadatak.
+- `clear`: Označava zadatke kao 'obrisane' tako da ih agenti ne mogu preuzeti. Možete navesti `all` da obrišete sve zadatke ili `task Num` da obrišete određeni zadatak.
 
 
 ## [Poseidon Agent](https://github.com/MythicAgents/Poseidon)
@@ -151,15 +153,18 @@ Kada korisnik koristi linux, postoje neki zanimljivi komandi:
 ### Lateralno kretanje
 
 - `ssh`: SSH na host koristeći dodeljene akreditive i otvara PTY bez pokretanja ssh.
-- `sshauth`: SSH na određeni host(e) koristeći dodeljene akreditive. Takođe možete koristiti ovo za izvršavanje specifične komande na udaljenim hostovima putem SSH ili za SCP datoteke.
+- `sshauth`: SSH na određeni host(ove) koristeći dodeljene akreditive. Takođe možete koristiti ovo za izvršavanje specifične komande na udaljenim hostovima putem SSH ili za SCP datoteke.
 - `link_tcp`: Povezuje se sa drugim agentom preko TCP, omogućavajući direktnu komunikaciju između agenata.
 - `link_webshell`: Povezuje se sa agentom koristeći webshell P2P profil, omogućavajući daljinski pristup web interfejsu agenta.
 - `rpfwd`: Pokreće ili zaustavlja obrnuti port forwarding, omogućavajući daljinski pristup uslugama na ciljnjoj mreži.
 - `socks`: Pokreće ili zaustavlja SOCKS5 proxy na ciljnjoj mreži, omogućavajući tunelovanje saobraćaja kroz kompromitovani host. Kompatibilno sa alatima kao što je proxychains.
-- `portscan`: Skener host(e) za otvorene portove, korisno za identifikaciju potencijalnih ciljeva za lateralno kretanje ili dalja napada.
+- `portscan`: Skener host(ova) za otvorene portove, koristan za identifikaciju potencijalnih ciljeva za lateralno kretanje ili dalja napada.
 
 ### Izvršavanje procesa
 
 - `shell`: Izvršava jednu shell komandu putem /bin/sh, omogućavajući direktno izvršavanje komandi na ciljnim sistemima.
 - `run`: Izvršava komandu sa diska sa argumentima, omogućavajući izvršavanje binarnih datoteka ili skripti na ciljnim sistemima.
 - `pty`: Otvara interaktivni PTY, omogućavajući direktnu interakciju sa shell-om na ciljnim sistemima.
+
+
+{{#include ../banners/hacktricks-training.md}}

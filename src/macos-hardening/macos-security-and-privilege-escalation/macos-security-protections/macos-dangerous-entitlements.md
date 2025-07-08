@@ -3,7 +3,7 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
 > [!WARNING]
-> Imajte na umu da entitlements koji počinju sa **`com.apple`** nisu dostupni trećim stranama, samo Apple može da ih dodeli.
+> Imajte na umu da entitlements koji počinju sa **`com.apple`** nisu dostupni trećim stranama, samo Apple ih može dodeliti.
 
 ## High
 
@@ -17,28 +17,28 @@ Entitlement **`com.apple.rootless.install`** omogućava **obiđite SIP**. Prover
 
 ### **`com.apple.system-task-ports` (ranije nazvan `task_for_pid-allow`)**
 
-Ovaj entitlement omogućava dobijanje **task porta za bilo koji** proces, osim za kernel. Proverite [**ovo za više informacija**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
+Ovaj entitlement omogućava dobijanje **task porta za bilo koji** proces, osim jezgra. Proverite [**ovo za više informacija**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
 
 ### `com.apple.security.get-task-allow`
 
-Ovaj entitlement omogućava drugim procesima sa **`com.apple.security.cs.debugger`** entitlementom da dobiju task port procesa koji pokreće binarni fajl sa ovim entitlementom i **ubace kod u njega**. Proverite [**ovo za više informacija**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
+Ovaj entitlement omogućava drugim procesima sa **`com.apple.security.cs.debugger`** entitlement da dobiju task port procesa koji pokreće binarni fajl sa ovim entitlementom i **ubace kod u njega**. Proverite [**ovo za više informacija**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
 
 ### `com.apple.security.cs.debugger`
 
-Aplikacije sa Entitlementom za Alate za Debagovanje mogu pozvati `task_for_pid()` da dobiju važeći task port za nesignirane i treće strane aplikacije sa `Get Task Allow` entitlementom postavljenim na `true`. Međutim, čak i sa entitlementom za alat za debagovanje, debager **ne može dobiti task portove** procesa koji **nemaju `Get Task Allow` entitlement**, i koji su stoga zaštićeni Sistemskom Integritetom. Proverite [**ovo za više informacija**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger).
+Aplikacije sa Entitlement za Debugging Tool mogu pozvati `task_for_pid()` da dobiju važeći task port za nesignirane i treće strane aplikacije sa `Get Task Allow` entitlement postavljenim na `true`. Međutim, čak i sa entitlementom za debugging tool, debager **ne može dobiti task portove** procesa koji **nemaju `Get Task Allow` entitlement**, i koji su stoga zaštićeni od System Integrity Protection. Proverite [**ovo za više informacija**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger).
 
 ### `com.apple.security.cs.disable-library-validation`
 
-Ovaj entitlement omogućava **učitavanje frameworka, plug-inova ili biblioteka bez da budu potpisani od strane Apple-a ili potpisani sa istim Team ID** kao glavni izvršni fajl, tako da bi napadač mogao da zloupotrebi učitavanje neke proizvoljne biblioteke da ubaci kod. Proverite [**ovo za više informacija**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation).
+Ovaj entitlement omogućava **učitavanje frameworka, plug-inova ili biblioteka bez da budu potpisani od strane Apple-a ili potpisani sa istim Team ID** kao glavni izvršni fajl, tako da napadač može zloupotrebiti učitavanje neke proizvoljne biblioteke da ubaci kod. Proverite [**ovo za više informacija**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation).
 
 ### `com.apple.private.security.clear-library-validation`
 
-Ovaj entitlement je vrlo sličan **`com.apple.security.cs.disable-library-validation`** ali **umesto** da **direktno onemogući** validaciju biblioteka, omogućava procesu da **pozove `csops` sistemski poziv da ga onemogući**.\
+Ovaj entitlement je vrlo sličan **`com.apple.security.cs.disable-library-validation`** ali **umesto** da **direktno onemogući** validaciju biblioteka, omogućava procesu da **pozove `csops` sistemski poziv da je onemogući**.\
 Proverite [**ovo za više informacija**](https://theevilbit.github.io/posts/com.apple.private.security.clear-library-validation/).
 
 ### `com.apple.security.cs.allow-dyld-environment-variables`
 
-Ovaj entitlement omogućava **korišćenje DYLD promenljivih okruženja** koje bi mogle biti korišćene za ubacivanje biblioteka i koda. Proverite [**ovo za više informacija**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables).
+Ovaj entitlement omogućava **korišćenje DYLD promenljivih okruženja** koje se mogu koristiti za ubacivanje biblioteka i koda. Proverite [**ovo za više informacija**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables).
 
 ### `com.apple.private.tcc.manager` ili `com.apple.rootless.storage`.`TCC`
 
@@ -50,7 +50,7 @@ Ovi entitlements omogućavaju **instalaciju softvera bez traženja dozvola** od 
 
 ### `com.apple.private.security.kext-management`
 
-Entitlement potreban za traženje od **kernela da učita kernel ekstenziju**.
+Entitlement potreban za traženje od **jezgra da učita kernel ekstenziju**.
 
 ### **`com.apple.private.icloud-account-access`**
 
@@ -66,11 +66,11 @@ TODO: Ne znam šta ovo omogućava
 
 ### `com.apple.private.apfs.revert-to-snapshot`
 
-TODO: U [**ovom izveštaju**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **se pominje da bi ovo moglo biti korišćeno za** ažuriranje SSV-zaštićenog sadržaja nakon ponovnog pokretanja. Ako znate kako, pošaljite PR, molim vas!
+TODO: U [**ovoj izveštaju**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **se pominje da bi ovo moglo biti korišćeno za** ažuriranje SSV-zaštićenog sadržaja nakon ponovnog pokretanja. Ako znate kako, pošaljite PR, molim vas!
 
 ### `com.apple.private.apfs.create-sealed-snapshot`
 
-TODO: U [**ovom izveštaju**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **se pominje da bi ovo moglo biti korišćeno za** ažuriranje SSV-zaštićenog sadržaja nakon ponovnog pokretanja. Ako znate kako, pošaljite PR, molim vas!
+TODO: U [**ovoj izveštaju**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **se pominje da bi ovo moglo biti korišćeno za** ažuriranje SSV-zaštićenog sadržaja nakon ponovnog pokretanja. Ako znate kako, pošaljite PR, molim vas!
 
 ### `keychain-access-groups`
 
@@ -87,13 +87,13 @@ Ovaj entitlement lista **keychain** grupa kojima aplikacija ima pristup:
 ```
 ### **`kTCCServiceSystemPolicyAllFiles`**
 
-Daje **Full Disk Access** dozvole, jednu od najviših TCC dozvola koje možete imati.
+Daje **potpuni pristup disku** dozvole, jedna od najviših TCC dozvola koje možete imati.
 
 ### **`kTCCServiceAppleEvents`**
 
-Omogućava aplikaciji da šalje događaje drugim aplikacijama koje se obično koriste za **automatsko izvršavanje zadataka**. Kontrolisanjem drugih aplikacija, može zloupotrebiti dozvole koje su dodeljene tim drugim aplikacijama.
+Omogućava aplikaciji da šalje događaje drugim aplikacijama koje se obično koriste za **automatizaciju zadataka**. Kontrolisanjem drugih aplikacija, može zloupotrebiti dozvole koje su dodeljene tim drugim aplikacijama.
 
-Kao što je da ih natera da traže od korisnika njegovu lozinku:
+Kao što je navođenje da traže od korisnika njegovu lozinku:
 ```bash
 osascript -e 'tell app "App Store" to activate' -e 'tell app "App Store" to activate' -e 'tell app "App Store" to display dialog "App Store requires your password to continue." & return & return default answer "" with icon 1 with hidden answer with title "App Store Alert"'
 ```
@@ -105,7 +105,7 @@ Omogućava, između ostalog, da **piše u TCC bazu podataka korisnika**.
 
 ### **`kTCCServiceSystemPolicySysAdminFiles`**
 
-Omogućava da **promeni** **`NFSHomeDirectory`** atribut korisnika koji menja putanju svog domaćeg foldera i tako omogućava da **obiđe TCC**.
+Omogućava da **promeni** **`NFSHomeDirectory`** atribut korisnika koji menja putanju do svoje početne fascikle i tako omogućava **obići TCC**.
 
 ### **`kTCCServiceSystemPolicyAppBundles`**
 
@@ -117,7 +117,7 @@ Moguće je proveriti ko ima ovaj pristup u _System Settings_ > _Privacy & Securi
 
 ### `kTCCServiceAccessibility`
 
-Proces će moći da **zloupotrebi macOS funkcije pristupa**, što znači da će, na primer, moći da pritisne tastere. Tako bi mogao zatražiti pristup za kontrolu aplikacije kao što je Finder i odobriti dijalog sa ovom dozvolom.
+Proces će moći da **zloupotrebi macOS funkcije pristupačnosti**, što znači da će, na primer, moći da pritisne tastere. Tako bi mogao zatražiti pristup za kontrolu aplikacije kao što je Finder i odobriti dijalog sa ovom dozvolom.
 
 ## Medium
 
@@ -127,10 +127,10 @@ Ova dozvola omogućava da se **kreira memorija koja je zapisiva i izvršna** pro
 
 ### `com.apple.security.cs.allow-unsigned-executable-memory`
 
-Ova dozvola omogućava da se **prepiše ili zakrpi C kod**, koristi dugo ukinutu **`NSCreateObjectFileImageFromMemory`** (koja je fundamentalno nesigurna), ili koristi **DVDPlayback** okvir. Proverite [**ovo za više informacija**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory).
+Ova dozvola omogućava da se **prepiše ili zakrpi C kod**, koristi dugotrajno zastareli **`NSCreateObjectFileImageFromMemory`** (koji je fundamentalno nesiguran), ili koristi **DVDPlayback** okvir. Proverite [**ovo za više informacija**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory).
 
 > [!CAUTION]
-> Uključivanje ove dozvole izlaže vašu aplikaciju uobičajenim ranjivostima u jezicima koda koji nisu sigurni u memoriji. Pažljivo razmotrite da li vaša aplikacija treba ovu izuzetak.
+> Uključivanje ove dozvole izlaže vašu aplikaciju uobičajenim ranjivostima u jezicima koda koji nisu sigurni za memoriju. Pažljivo razmotrite da li vaša aplikacija treba ovu izuzetak.
 
 ### `com.apple.security.cs.disable-executable-page-protection`
 
@@ -145,7 +145,7 @@ TODO
 
 ### `com.apple.private.nullfs_allow`
 
-Ova dozvola omogućava montiranje nullfs fajlskog sistema (zabranjeno podrazumevano). Alat: [**mount_nullfs**](https://github.com/JamaicanMoose/mount_nullfs/tree/master).
+Ova dozvola omogućava montiranje nullfs fajl sistema (zabranjeno podrazumevano). Alat: [**mount_nullfs**](https://github.com/JamaicanMoose/mount_nullfs/tree/master).
 
 ### `kTCCServiceAll`
 
@@ -163,3 +163,8 @@ Dozvolite procesu da **zatraži sve TCC dozvole**.
 {{#include ../../../banners/hacktricks-training.md}}
 
 </details>
+
+
+
+
+{{#include /banners/hacktricks-training.md}}

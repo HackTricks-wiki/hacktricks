@@ -4,16 +4,16 @@
 
 ## Pregled
 
-Delegirani upravljani servisni nalozi (**dMSAs**) su potpuno novi tip AD principa uveden sa **Windows Server 2025**. Dizajnirani su da zamene nasleđene servisne naloge omogućavajući "migraciju" jednim klikom koja automatski kopira Service Principal Names (SPNs), članstva u grupama, postavke delegacije, pa čak i kriptografske ključeve starog naloga u novi dMSA, pružajući aplikacijama neprimetnu promenu i eliminišući rizik od Kerberoasting-a.
+Delegirani upravljani servisni nalozi (**dMSAs**) su potpuno novi tip AD principa uveden sa **Windows Server 2025**. Dizajnirani su da zamene nasleđene servisne naloge omogućavajući "migraciju" jednim klikom koja automatski kopira Service Principal Names (SPNs), članstva u grupama, postavke delegacije, pa čak i kriptografske ključeve starog naloga u novi dMSA, omogućavajući aplikacijama neometan prelaz i eliminišući rizik od Kerberoasting-a.
 
-Istraživači iz Akamai-a su otkrili da jedan atribut — **`msDS‑ManagedAccountPrecededByLink`** — govori KDC-u koji nasleđeni nalog dMSA "nasleđuje". Ako napadač može da upiše taj atribut (i preklopi **`msDS‑DelegatedMSAState` → 2**), KDC će rado izgraditi PAC koji **nasleđuje svaki SID od odabranog žrtve**, efikasno omogućavajući dMSA da se pretvara u bilo kog korisnika, uključujući Domain Admins.
+Istraživači Akamai-a su otkrili da jedan atribut — **`msDS‑ManagedAccountPrecededByLink`** — govori KDC-u koji nasleđeni nalog dMSA "nasleđuje". Ako napadač može da upiše taj atribut (i prebaciti **`msDS‑DelegatedMSAState` → 2**), KDC će rado izgraditi PAC koji **nasleđuje svaki SID od odabranog žrtvenog naloga**, efikasno omogućavajući dMSA da se pretvara u bilo kog korisnika, uključujući Domain Admins.
 
 ## Šta je tačno dMSA?
 
 * Izgrađen na osnovu **gMSA** tehnologije, ali smešten kao nova AD klasa **`msDS‑DelegatedManagedServiceAccount`**.
 * Podržava **migraciju na zahtev**: pozivanje `Start‑ADServiceAccountMigration` povezuje dMSA sa nasleđenim nalogom, dodeljuje nasleđenom nalogu pravo pisanja na `msDS‑GroupMSAMembership`, i prebacuje `msDS‑DelegatedMSAState` = 1.
 * Nakon `Complete‑ADServiceAccountMigration`, zamenjeni nalog se onemogućava i dMSA postaje potpuno funkcionalan; svaki host koji je prethodno koristio nasleđeni nalog automatski je ovlašćen da povuče lozinku dMSA.
-* Tokom autentifikacije, KDC ugrađuje **KERB‑SUPERSEDED‑BY‑USER** naznaku tako da Windows 11/24H2 klijenti neprimetno ponovo pokušavaju sa dMSA.
+* Tokom autentifikacije, KDC ugrađuje **KERB‑SUPERSEDED‑BY‑USER** naznaku tako da Windows 11/24H2 klijenti transparentno ponovo pokušavaju sa dMSA.
 
 ## Zahtevi za napad
 1. **Najmanje jedan Windows Server 2025 DC** kako bi dMSA LDAP klasa i KDC logika postojale.
@@ -23,7 +23,7 @@ Istraživači iz Akamai-a su otkrili da jedan atribut — **`msDS‑ManagedAccou
 
 ## Korak po korak: BadSuccessor*eskalacija privilegija
 
-1. **Locirajte ili kreirajte dMSA koji kontrolišete**
+1. **Pronađite ili kreirajte dMSA koji kontrolišete**
 ```bash
 New‑ADServiceAccount Attacker_dMSA `
 ‑DNSHostName ad.lab `
@@ -46,13 +46,13 @@ Rubeus.exe asktgs /targetuser:attacker_dmsa$ /service:krbtgt/aka.test /dmsa /ops
 
 Vraćeni PAC sada sadrži SID 500 (Administrator) plus grupe Domain Admins/Enterprise Admins.
 
-## Prikupite sve lozinke korisnika
+## Prikupite lozinke svih korisnika
 
-Tokom legitimnih migracija, KDC mora dozvoliti novom dMSA da dekriptuje **karte izdate starom nalogu pre promene**. Da bi izbegao prekid aktivnih sesija, stavlja i trenutne i prethodne ključeve unutar novog ASN.1 blob-a nazvanog **`KERB‑DMSA‑KEY‑PACKAGE`**.
+Tokom legitimnih migracija, KDC mora dozvoliti novom dMSA da dekriptuje **karte izdate starom nalogu pre prelaza**. Da bi izbegao prekid aktivnih sesija, stavlja i trenutne ključeve i prethodne ključeve unutar novog ASN.1 blob-a nazvanog **`KERB‑DMSA‑KEY‑PACKAGE`**.
 
-Pošto naša lažna migracija tvrdi da dMSA nasleđuje žrtvu, KDC savesno kopira RC4‑HMAC ključ žrtve u listu **prethodnih ključeva** – čak i ako dMSA nikada nije imao "prethodnu" lozinku. Taj RC4 ključ nije zasoljen, tako da je efikasno NT hash žrtve, dajući napadaču **offline cracking ili "pass-the-hash"** sposobnost.
+Pošto naša lažna migracija tvrdi da dMSA nasleđuje žrtvu, KDC savesno kopira RC4‑HMAC ključ žrtve u **prethodne ključeve** – čak i ako dMSA nikada nije imao "prethodnu" lozinku. Taj RC4 ključ nije zasoljen, tako da je efikasno NT hash žrtve, dajući napadaču **offline cracking ili "pass-the-hash"** sposobnost.
 
-Stoga, masovno povezivanje hiljada korisnika omogućava napadaču da izdumpuje hash-ove "u velikim razmerama", pretvarajući **BadSuccessor u primitivu za eskalaciju privilegija i kompromitaciju kredencijala**.
+Stoga, masovno povezivanje hiljada korisnika omogućava napadaču da izdumpuje hash-ove "na velikoj skali", pretvarajući **BadSuccessor u primitiv za eskalaciju privilegija i kompromitaciju kredencijala**.
 
 ## Alati
 
