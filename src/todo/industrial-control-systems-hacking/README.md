@@ -1,15 +1,19 @@
 # Hacking industrijskih kontrolnih sistema
 
-## O ovom odeljku
+{{#include /banners/hacktricks-training.md}}
 
-Ovaj odeljak sadrži sve o industrijskim kontrolnim sistemima, uključujući koncepte kao i metodologije za njihovo hakovanje sa raznim bezbednosnim problemima koji postoje u njima.
+## O ovoj sekciji
 
-Industrijski kontrolni sistemi su svuda, pošto su industrije od vitalnog značaja za ekonomski razvoj nacije. Ali ovi ICS su teški za ažuriranje i manje napretka je postignuto u ovoj oblasti. Stoga, pronalaženje bezbednosnih propusta je ovde uobičajeno. Većina protokola i standarda koji se koriste ovde razvijena su još devedesetih i imaju mnogo manje mogućnosti u poređenju sa trenutnim scenarijima napada.
+Ova sekcija sadrži sve o industrijskim kontrolnim sistemima, uključujući koncepte kao i metodologije za njihovo hakovanje sa raznim sigurnosnim problemima koji postoje u njima.
 
-Postalo je važno osigurati ove sisteme, pošto njihovo oštećenje može koštati mnogo, pa čak i živote u najgorem slučaju. Da bi se razumela bezbednost industrijskih kontrolnih sistema, potrebno je poznavati njihove unutrašnje aspekte.
+Industrijski kontrolni sistemi su svuda, pošto su industrije vitalne za ekonomski razvoj nacije. Ali ovi ICS su teški za ažuriranje i manje napretka je postignuto u ovoj oblasti. Stoga, pronalaženje sigurnosnih propusta je ovde uobičajeno. Većina protokola i standarda koji se koriste ovde razvijena su još devedesetih i imaju mnogo manje mogućnosti u poređenju sa trenutnim scenarijima napada.
 
-Pošto su industrijski kontrolni sistemi instalirani prema postavljenim standardima, poznavanje svakog komponenta bi pomoglo u međusobnom povezivanju svih drugih mehanizama u kontrolnom sistemu. Instalacija ovih uređaja kao što su PLC-ovi i SCADA sistemi je različita u raznim industrijama, stoga je prikupljanje informacija ključno.
+Postalo je važno osigurati ove sisteme, pošto njihovo oštećenje može koštati mnogo, pa čak i živote u najgorem slučaju. Da bi se razumela sigurnost industrijskih kontrolnih sistema, potrebno je poznavati njihove unutrašnje aspekte.
 
-Industrijski kontrolni sistemi mogu biti komplikovani u nekim trenucima i stoga zahtevaju mnogo strpljenja za bilo kakvu aktivnost. Sve se svodi na ispitivanje i izviđanje pre planiranja napada i razvijanja bilo kakvih eksploatacija.
+Pošto su industrijski kontrolni sistemi instalirani prema postavljenim standardima, poznavanje svakog komponenta bi pomoglo u međusobnom povezivanju svih drugih mehanizama u kontrolnom sistemu. Instalacija ovih uređaja kao što su PLC-ovi i SCADA sistemi se razlikuje u različitim industrijama, stoga je prikupljanje informacija ključno.
 
-Ove tehnike se takođe mogu koristiti za zaštitu od napada i plavi timing za industrijske kontrolne sisteme.
+Industrijski kontrolni sistemi mogu biti komplikovani u nekim trenucima i stoga zahtevaju mnogo strpljenja za bilo kakvu akciju. Sve se svodi na ispitivanje i izviđanje pre planiranja napada i razvijanja bilo kakvih eksploatacija.
+
+Ove tehnike se takođe mogu koristiti za zaštitu od napada i plavi tim za industrijske kontrolne sisteme.
+
+{{#include /banners/hacktricks-training.md}}

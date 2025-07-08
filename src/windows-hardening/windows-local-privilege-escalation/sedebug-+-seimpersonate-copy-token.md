@@ -1,3 +1,5 @@
+# SeDebug + SeImpersonate - Copy Token
+
 {{#include ../../banners/hacktricks-training.md}}
 
 Sledeći kod **iskorišćava privilegije SeDebug i SeImpersonate** da kopira token iz **procesa koji se izvršava kao SYSTEM** i sa **svim privilegijama tokena**. \

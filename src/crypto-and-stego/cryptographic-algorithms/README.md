@@ -1,12 +1,10 @@
 # Kriptografski/Kompresioni Algoritmi
 
-## Kriptografski/Kompresioni Algoritmi
-
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Identifikacija Algoritama
 
-Ako završite u kodu **koristeći pomeranja udesno i ulevo, XOR-ove i nekoliko aritmetičkih operacija**, veoma je verovatno da je to implementacija **kriptografskog algoritma**. Ovde će biti prikazani neki načini da se **identifikuje algoritam koji se koristi bez potrebe da se obrne svaki korak**.
+Ako završite u kodu **koristeći pomeranja udesno i ulevo, xore i nekoliko aritmetičkih operacija**, veoma je verovatno da je to implementacija **kriptografskog algoritma**. Ovde će biti prikazani neki načini da se **identifikuje algoritam koji se koristi bez potrebe da se obrne svaki korak**.
 
 ### API funkcije
 
@@ -24,7 +22,7 @@ Kompresuje i dekompresuje dati bafer podataka.
 
 **CryptAcquireContext**
 
-Iz [dokumentacije](https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-cryptacquirecontexta): Funkcija **CryptAcquireContext** se koristi za sticanje rukohvata za određeni kontejner ključeva unutar određenog kriptografskog servisnog provajdera (CSP). **Ovaj vraćeni rukohvat se koristi u pozivima funkcija CryptoAPI** koje koriste odabrani CSP.
+Iz [dokumentacije](https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-cryptacquirecontexta): Funkcija **CryptAcquireContext** se koristi za sticanje rukovanja određenim kontejnerom ključeva unutar određenog provajdera kriptografskih usluga (CSP). **Ovo vraćeno rukovanje se koristi u pozivima funkcija CryptoAPI** koje koriste odabrani CSP.
 
 **CryptCreateHash**
 
@@ -35,9 +33,9 @@ Inicira heširanje toka podataka. Ako se ova funkcija koristi, možete saznati k
 \
 Proverite ovde tabelu mogućih algoritama i njihovih dodeljenih vrednosti: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
 
-### Konstantne u kodu
+### Konstantne vrednosti koda
 
-Ponekad je zaista lako identifikovati algoritam zahvaljujući činjenici da mora koristiti posebnu i jedinstvenu vrednost.
+Ponekad je veoma lako identifikovati algoritam zahvaljujući činjenici da mora koristiti posebnu i jedinstvenu vrednost.
 
 ![](<../../images/image (833).png>)
 
@@ -45,7 +43,7 @@ Ako pretražujete prvu konstantu na Google-u, ovo je ono što dobijate:
 
 ![](<../../images/image (529).png>)
 
-Stoga, možete pretpostaviti da je dekompilovana funkcija **sha256 kalkulator.**\
+Stoga, možete pretpostaviti da je dekompilirana funkcija **sha256 kalkulator.**\
 Možete pretražiti bilo koju od drugih konstanti i dobićete (verovatno) isti rezultat.
 
 ### informacija o podacima
@@ -61,14 +59,14 @@ U ovom slučaju, ako tražite **0xA56363C6**, možete pronaći da je povezan sa 
 
 ### Karakteristike
 
-Sastoji se od 3 glavne komponente:
+Sastoji se od 3 glavna dela:
 
 - **Faza inicijalizacije/**: Kreira **tabelu vrednosti od 0x00 do 0xFF** (ukupno 256 bajtova, 0x100). Ova tabela se obično naziva **Substituciona Kutija** (ili SBox).
-- **Faza premeštanja**: **Prolazi kroz tabelu** kreiranu ranije (petlja od 0x100 iteracija, ponovo) modifikujući svaku vrednost sa **polu-nasumičnim** bajtovima. Da bi se kreirali ovi polu-nasumični bajtovi, koristi se RC4 **ključ**. RC4 **ključevi** mogu biti **između 1 i 256 bajtova dužine**, međutim obično se preporučuje da budu iznad 5 bajtova. Obično, RC4 ključevi su 16 bajtova dužine.
-- **XOR faza**: Na kraju, običan tekst ili šifrovani tekst se **XOR-uje sa vrednostima kreiranim ranije**. Funkcija za enkripciju i dekripciju je ista. Za ovo, **proći će se kroz kreiranih 256 bajtova** onoliko puta koliko je potrebno. Ovo se obično prepoznaje u dekompilovanom kodu sa **%256 (mod 256)**.
+- **Faza premeštanja**: **Prolazi kroz tabelu** kreiranu pre (petlja od 0x100 iteracija, ponovo) modifikujući svaku vrednost sa **polu-namernim** bajtovima. Da bi se kreirali ovi polu-namerni bajtovi, koristi se **ključ RC4**. **Ključevi RC4** mogu biti **između 1 i 256 bajtova dužine**, međutim obično se preporučuje da budu iznad 5 bajtova. Obično, ključevi RC4 su 16 bajtova dužine.
+- **XOR faza**: Na kraju, običan tekst ili šifrovani tekst se **XOR-uje sa vrednostima kreiranim pre**. Funkcija za enkripciju i dekripciju je ista. Za ovo, **proći će se kroz kreiranih 256 bajtova** onoliko puta koliko je potrebno. Ovo se obično prepoznaje u dekompiliranom kodu sa **%256 (mod 256)**.
 
-> [!NOTE]
-> **Da biste identifikovali RC4 u disasembleru/dekompilovanom kodu, možete proveriti 2 petlje veličine 0x100 (uz korišćenje ključa) i zatim XOR ulaznih podataka sa 256 vrednosti kreiranih ranije u 2 petlje, verovatno koristeći %256 (mod 256)**
+> [!TIP]
+> **Da biste identifikovali RC4 u disasembleru/dekompiliranom kodu, možete proveriti 2 petlje veličine 0x100 (uz korišćenje ključa) i zatim XOR ulaznih podataka sa 256 vrednosti kreiranih pre u 2 petlje verovatno koristeći %256 (mod 256)**
 
 ### **Faza inicijalizacije/Substituciona Kutija:** (Obratite pažnju na broj 256 korišćen kao brojač i kako se 0 piše na svakom mestu od 256 karaktera)
 
@@ -78,7 +76,7 @@ Sastoji se od 3 glavne komponente:
 
 ![](<../../images/image (835).png>)
 
-### **XOR Faza:**
+### **XOR faza:**
 
 ![](<../../images/image (904).png>)
 
@@ -103,12 +101,12 @@ Sastoji se od 3 glavne komponente:
 
 ### Identifikacija
 
-Na sledećoj slici obratite pažnju na to kako se konstanta **0x9E3779B9** koristi (napomena da se ova konstanta takođe koristi i od drugih kripto algoritama kao što je **TEA** -Tiny Encryption Algorithm).\
+Na sledećoj slici obratite pažnju na to kako se konstanta **0x9E3779B9** koristi (napomena da se ova konstanta takođe koristi od strane drugih kripto algoritama kao što je **TEA** -Tiny Encryption Algorithm).\
 Takođe obratite pažnju na **veličinu petlje** (**132**) i **broj XOR operacija** u **disasembleru** i u **primeru koda**:
 
 ![](<../../images/image (547).png>)
 
-Kao što je ranije pomenuto, ovaj kod može biti vizualizovan unutar bilo kog dekompilatora kao **veoma duga funkcija** jer **nema skakanja** unutar nje. Dekomplovani kod može izgledati ovako:
+Kao što je ranije pomenuto, ovaj kod može biti vizualizovan unutar bilo kog dekompilatora kao **veoma duga funkcija** jer **nema skakanja** unutar nje. Dekomplirani kod može izgledati ovako:
 
 ![](<../../images/image (513).png>)
 
@@ -127,7 +125,7 @@ Stoga, moguće je identifikovati ovaj algoritam proverom **magične brojke** i *
 ![](<../../images/image (1113).png>)
 
 - U liniji 11 (levo) postoji `+7) >> 3` što je isto kao u liniji 35 (desno): `+7) / 8`
-- Linija 12 (levo) proverava da li je `modulus_len < 0x040` a u liniji 36 (desno) proverava da li je `inputLen+11 > modulusLen`
+- Linija 12 (levo) proverava da li je `modulus_len < 0x040` i u liniji 36 (desno) proverava da li je `inputLen+11 > modulusLen`
 
 ## MD5 & SHA (heš)
 
@@ -140,11 +138,11 @@ Stoga, moguće je identifikovati ovaj algoritam proverom **magične brojke** i *
 
 **Init**
 
-Možete identifikovati oboje proverom konstanti. Napomena da sha_init ima 1 konstantu koju MD5 nema:
+Možete identifikovati oba proverom konstanti. Napomena da sha_init ima 1 konstantu koju MD5 nema:
 
 ![](<../../images/image (406).png>)
 
-**MD5 Transformacija**
+**MD5 Transform**
 
 Obratite pažnju na korišćenje više konstanti
 
@@ -170,7 +168,7 @@ CRC heš algoritam izgleda ovako:
 ### Karakteristike
 
 - Nema prepoznatljivih konstanti
-- Možete pokušati da napišete algoritam u Python-u i pretražite slične stvari na mreži
+- Možete pokušati da napišete algoritam u python-u i pretražujete slične stvari na mreži
 
 ### Identifikacija
 

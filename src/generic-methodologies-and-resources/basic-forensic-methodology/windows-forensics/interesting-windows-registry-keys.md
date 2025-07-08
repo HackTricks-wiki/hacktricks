@@ -1,12 +1,10 @@
 # Interesting Windows Registry Keys
 
-### Interesting Windows Registry Keys
-
 {{#include ../../../banners/hacktricks-training.md}}
 
 ### **Windows Version and Owner Info**
 
-- Located at **`Software\Microsoft\Windows NT\CurrentVersion`**, you will find verziju Windows-a, Service Pack, vreme instalacije i ime registrovanog vlasnika na jednostavan način.
+- Located at **`Software\Microsoft\Windows NT\CurrentVersion`**, you will find the Windows verzija, Service Pack, vreme instalacije i ime registrovanog vlasnika na jednostavan način.
 
 ### **Computer Name**
 
@@ -23,7 +21,7 @@
 
 ### Windows Versions and Service Packs
 
-- **Verzija Windows-a** označava izdanje (npr. Home, Pro) i njegovu verziju (npr. Windows 10, Windows 11), dok su **Service Packs** ažuriranja koja uključuju ispravke i, ponekad, nove funkcije.
+- **Windows verzija** označava izdanje (npr. Home, Pro) i njegovu verziju (npr. Windows 10, Windows 11), dok su **Service Packs** ažuriranja koja uključuju ispravke i, ponekad, nove funkcije.
 
 ### Enabling Last Access Time
 
@@ -31,7 +29,7 @@
 
 ### Network Information Details
 
-- Registry sadrži opsežne podatke o mrežnim konfiguracijama, uključujući **tipove mreža (bežične, kablovske, 3G)** i **kategorije mreža (Javna, Privatna/Domaća, Domen/Rad)**, što je od suštinskog značaja za razumevanje mrežnih bezbednosnih postavki i dozvola.
+- Registry sadrži opsežne podatke o mrežnim konfiguracijama, uključujući **tipove mreža (bežične, kablovske, 3G)** i **kategorije mreža (Javna, Privatna/Domaća, Domen/Rad)**, što je od vitalnog značaja za razumevanje mrežnih bezbednosnih postavki i dozvola.
 
 ### Client Side Caching (CSC)
 
@@ -39,11 +37,11 @@
 
 ### AutoStart Programs
 
-- Programi navedeni u raznim `Run` i `RunOnce` registry ključevima se automatski pokreću prilikom pokretanja, utičući na vreme podizanja sistema i potencijalno predstavljajući tačke interesa za identifikaciju malvera ili neželjenog softvera.
+- Programi navedeni u raznim `Run` i `RunOnce` registry ključevima automatski se pokreću pri pokretanju, utičući na vreme podizanja sistema i potencijalno predstavljajući tačke interesa za identifikaciju malvera ili neželjenog softvera.
 
 ### Shellbags
 
-- **Shellbags** ne samo da čuvaju podešavanja za prikaz foldera, već takođe pružaju forenzičke dokaze o pristupu folderima čak i ako folder više ne postoji. Oni su neprocenjivi za istrage, otkrivajući korisničke aktivnosti koje nisu očigledne na druge načine.
+- **Shellbags** ne samo da čuvaju podešavanja za prikaz foldera, već takođe pružaju forenzičke dokaze o pristupu folderima čak i ako folder više ne postoji. Oni su neprocenjivi za istrage, otkrivajući aktivnost korisnika koja nije očigledna kroz druge načine.
 
 ### USB Information and Forensics
 
@@ -51,16 +49,16 @@
 
 ### Volume Serial Number
 
-- **Serijski broj volumena** može biti ključan za praćenje specifične instance datotečnog sistema, koristan u forenzičkim scenarijima gde je potrebno utvrditi poreklo datoteke preko različitih uređaja.
+- **Volume Serial Number** može biti ključan za praćenje specifične instance datotečnog sistema, korisno u forenzičkim scenarijima gde je potrebno utvrditi poreklo datoteke preko različitih uređaja.
 
 ### **Shutdown Details**
 
-- Vreme gašenja i broj gašenja (potonji samo za XP) se čuvaju u **`System\ControlSet001\Control\Windows`** i **`System\ControlSet001\Control\Watchdog\Display`**.
+- Vreme gašenja i broj (potonji samo za XP) se čuvaju u **`System\ControlSet001\Control\Windows`** i **`System\ControlSet001\Control\Watchdog\Display`**.
 
 ### **Network Configuration**
 
 - Za detaljne informacije o mrežnim interfejsima, pogledajte **`System\ControlSet001\Services\Tcpip\Parameters\Interfaces{GUID_INTERFACE}`**.
-- Prva i poslednja vremena mrežne veze, uključujući VPN veze, su zabeležena pod raznim putanjama u **`Software\Microsoft\Windows NT\CurrentVersion\NetworkList`**.
+- Prva i poslednja vremena mrežne veze, uključujući VPN veze, beleže se pod raznim putanjama u **`Software\Microsoft\Windows NT\CurrentVersion\NetworkList`**.
 
 ### **Shared Folders**
 
@@ -68,19 +66,19 @@
 
 ### **Programs that Start Automatically**
 
-- Putanje poput **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Run`** i slični unosi pod `Software\Microsoft\Windows\CurrentVersion` detaljno opisuju programe postavljene da se pokreću prilikom pokretanja.
+- Putanje kao što su **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Run`** i slični unosi pod `Software\Microsoft\Windows\CurrentVersion` detaljno opisuju programe postavljene da se pokreću pri pokretanju.
 
 ### **Searches and Typed Paths**
 
-- Istraživanja u Explorer-u i unesene putanje se prate u registry pod **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer`** za WordwheelQuery i TypedPaths, respektivno.
+- Istraživanja u Exploreru i unesene putanje se prate u registry pod **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer`** za WordwheelQuery i TypedPaths, respektivno.
 
 ### **Recent Documents and Office Files**
 
-- Nedavne datoteke i Office datoteke koje su pristupane su zabeležene u `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs` i specifičnim putanjama verzije Office-a.
+- Nedavne datoteke i Office datoteke koje su pristupane beleže se u `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs` i specifičnim putanjama verzije Office-a.
 
 ### **Most Recently Used (MRU) Items**
 
-- MRU liste, koje ukazuju na nedavne putanje datoteka i komande, se čuvaju u raznim `ComDlg32` i `Explorer` podključevima pod `NTUSER.DAT`.
+- MRU liste, koje ukazuju na nedavne putanje datoteka i komande, čuvaju se u raznim `ComDlg32` i `Explorer` podključevima pod `NTUSER.DAT`.
 
 ### **User Activity Tracking**
 
@@ -88,13 +86,13 @@
 
 ### **Shellbags Analysis**
 
-- Shellbags, koji otkrivaju detalje o pristupu folderima, se čuvaju u `USRCLASS.DAT` i `NTUSER.DAT` pod `Software\Microsoft\Windows\Shell`. Koristite **[Shellbag Explorer](https://ericzimmerman.github.io/#!index.md)** za analizu.
+- Shellbags, koji otkrivaju detalje o pristupu folderima, čuvaju se u `USRCLASS.DAT` i `NTUSER.DAT` pod `Software\Microsoft\Windows\Shell`. Koristite **[Shellbag Explorer](https://ericzimmerman.github.io/#!index.md)** za analizu.
 
 ### **USB Device History**
 
 - **`HKLM\SYSTEM\ControlSet001\Enum\USBSTOR`** i **`HKLM\SYSTEM\ControlSet001\Enum\USB`** sadrže bogate detalje o povezanim USB uređajima, uključujući proizvođača, naziv proizvoda i vremenske oznake povezivanja.
 - Korisnik povezan sa specifičnim USB uređajem može se precizno odrediti pretraživanjem `NTUSER.DAT` hives za **{GUID}** uređaja.
-- Poslednji montirani uređaj i njegov serijski broj volumena mogu se pratiti kroz `System\MountedDevices` i `Software\Microsoft\Windows NT\CurrentVersion\EMDMgmt`, respektivno.
+- Poslednji montirani uređaj i njegov broj serije volumena mogu se pratiti kroz `System\MountedDevices` i `Software\Microsoft\Windows NT\CurrentVersion\EMDMgmt`, respektivno.
 
 This guide condenses the crucial paths and methods for accessing detailed system, network, and user activity information on Windows systems, aiming for clarity and usability.
 

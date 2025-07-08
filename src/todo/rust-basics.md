@@ -1,8 +1,10 @@
 # Osnove Rusta
 
+{{#include /banners/hacktricks-training.md}}
+
 ### Generički Tipovi
 
-Kreirajte strukturu gde bi 1 od njihovih vrednosti mogla biti bilo kog tipa
+Kreirajte strukturu gde jedna od njihovih vrednosti može biti bilo koji tip
 ```rust
 struct Wrapper<T> {
 value: T,
@@ -94,7 +96,7 @@ print!("{} is positive", n);
 print!("{} is zero", n);
 }
 ```
-#### podudaranje
+#### usklađivanje
 ```rust
 match number {
 // Match a single value
@@ -203,7 +205,7 @@ println!("The word is: {}", word);
 println!("The optional word doesn't contain anything");
 }
 ```
-#### dok neka
+#### while let
 ```rust
 let mut optional = Some(0);
 // This reads: "while `let` destructures `optional` into
@@ -238,7 +240,7 @@ let s = String::from("Foo");
 let s = s.append_bar();
 println!("s: {}", s);
 ```
-### Testovi
+### Тестови
 ```rust
 #[cfg(test)]
 mod tests {
@@ -254,7 +256,7 @@ assert_ne!(true, false);
 
 #### Arc
 
-Arc može koristiti Clone da kreira više referenci na objekat kako bi ih prosledio nitima. Kada poslednji referentni pokazivač na vrednost izađe iz opsega, promenljiva se uklanja.
+Arc može koristiti Clone da kreira više referenci na objekat kako bi ih prosledio nitima. Kada poslednji pokazivač na vrednost izađe iz opsega, promenljiva se uklanja.
 ```rust
 use std::sync::Arc;
 let apple = Arc::new("the same apple");
@@ -285,4 +287,4 @@ thread::sleep(Duration::from_millis(500));
 }
 }
 ```
-
+{{#include /banners/hacktricks-training.md}}
