@@ -29,6 +29,7 @@
 - [Phishing Methodology](generic-methodologies-and-resources/phishing-methodology/README.md)
   - [Clone a Website](generic-methodologies-and-resources/phishing-methodology/clone-a-website.md)
   - [Detecting Phishing](generic-methodologies-and-resources/phishing-methodology/detecting-phising.md)
+  - [Discord Invite Hijacking](generic-methodologies-and-resources/phishing-methodology/discord-invite-hijacking.md)
   - [Phishing Files & Documents](generic-methodologies-and-resources/phishing-methodology/phishing-documents.md)
 - [Basic Forensic Methodology](generic-methodologies-and-resources/basic-forensic-methodology/README.md)
   - [Baseline Monitoring](generic-methodologies-and-resources/basic-forensic-methodology/file-integrity-monitoring.md)
