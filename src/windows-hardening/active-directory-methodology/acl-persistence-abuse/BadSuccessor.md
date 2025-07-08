@@ -6,7 +6,7 @@
 
 Contas de Serviço Gerenciadas Delegadas (**dMSAs**) são um novo tipo de principal do AD introduzido com **Windows Server 2025**. Elas foram projetadas para substituir contas de serviço legadas, permitindo uma “migração” com um clique que copia automaticamente os Nomes de Principal de Serviço (SPNs), associações de grupo, configurações de delegação e até mesmo chaves criptográficas da conta antiga para a nova dMSA, proporcionando uma transição suave para as aplicações e eliminando o risco de Kerberoasting.
 
-Pesquisadores da Akamai descobriram que um único atributo — **`msDS‑ManagedAccountPrecededByLink`** — informa ao KDC qual conta legada uma dMSA “sucede”. Se um atacante puder escrever esse atributo (e alternar **`msDS‑DelegatedMSAState` → 2**), o KDC construirá felizmente um PAC que **herda todos os SIDs da vítima escolhida**, permitindo efetivamente que a dMSA se passe por qualquer usuário, incluindo Administradores de Domínio.
+Pesquisadores da Akamai descobriram que um único atributo — **`msDS‑ManagedAccountPrecededByLink`** — informa ao KDC qual conta legada uma dMSA “sucede”. Se um atacante puder escrever esse atributo (e alternar **`msDS‑DelegatedMSAState` → 2**), o KDC construirá um PAC que **herda todos os SIDs da vítima escolhida**, permitindo efetivamente que a dMSA se passe por qualquer usuário, incluindo Administradores de Domínio.
 
 ## O que exatamente é uma dMSA?
 
@@ -50,7 +50,7 @@ O PAC retornado agora contém o SID 500 (Administrador) além dos grupos Adminis
 
 Durante migrações legítimas, o KDC deve permitir que a nova dMSA decifre **tickets emitidos para a conta antiga antes da transição**. Para evitar quebrar sessões ativas, ele coloca tanto as chaves atuais quanto as chaves anteriores dentro de um novo blob ASN.1 chamado **`KERB‑DMSA‑KEY‑PACKAGE`**.
 
-Como nossa migração falsa afirma que a dMSA sucede a vítima, o KDC copia diligentemente a chave RC4‑HMAC da vítima para a lista de **chaves anteriores** – mesmo que a dMSA nunca tenha tido uma senha “anterior”. Essa chave RC4 não é salteada, portanto, é efetivamente o hash NT da vítima, dando ao atacante **capacidade de cracking offline ou “pass-the-hash”**.
+Como nossa migração falsa afirma que a dMSA sucede a vítima, o KDC copiosamente copia a chave RC4‑HMAC da vítima para a lista de **chaves anteriores** – mesmo que a dMSA nunca tenha tido uma senha “anterior”. Essa chave RC4 não é salteada, portanto, é efetivamente o hash NT da vítima, dando ao atacante **capacidade de cracking offline ou “pass-the-hash”**.
 
 Portanto, vincular em massa milhares de usuários permite que um atacante despeje hashes “em escala”, transformando **BadSuccessor em um primitivo de escalonamento de privilégios e comprometimento de credenciais**.
 

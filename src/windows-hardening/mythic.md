@@ -1,5 +1,7 @@
 # Mythic
 
+{{#include ../banners/hacktricks-training.md}}
+
 ## O que é Mythic?
 
 Mythic é um framework de comando e controle (C2) modular e de código aberto, projetado para red teaming. Ele permite que profissionais de segurança gerenciem e implantem vários agentes (payloads) em diferentes sistemas operacionais, incluindo Windows, Linux e macOS. Mythic fornece uma interface web amigável para gerenciar agentes, executar comandos e coletar resultados, tornando-se uma ferramenta poderosa para simular ataques do mundo real em um ambiente controlado.
@@ -52,7 +54,7 @@ Este agente possui muitos comandos que o tornam muito semelhante ao Beacon do Co
 - `upload`: Fazer upload de um arquivo da máquina local para o sistema alvo
 - `reg_query`: Consultar chaves e valores do registro no sistema alvo
 - `reg_write_value`: Escrever um novo valor em uma chave de registro especificada
-- `sleep`: Alterar o intervalo de sono do agente, que determina com que frequência ele se conecta ao servidor Mythic
+- `sleep`: Alterar o intervalo de sono do agente, que determina com que frequência ele se comunica com o servidor Mythic
 - E muitos outros, use `help` para ver a lista completa de comandos disponíveis.
 
 ### Escalação de privilégios
@@ -64,7 +66,7 @@ Este agente possui muitos comandos que o tornam muito semelhante ao Beacon do Co
 - `pth`: Ataque Pass-the-Hash, permitindo que o agente se autentique como um usuário usando seu hash NTLM sem precisar da senha em texto claro
 - `mimikatz`: Executar comandos Mimikatz para extrair credenciais, hashes e outras informações sensíveis da memória ou do banco de dados SAM
 - `rev2self`: Reverter o token do agente para seu token primário, efetivamente reduzindo privilégios de volta ao nível original
-- `ppid`: Alterar o processo pai para trabalhos de pós-exploração especificando um novo ID de processo pai, permitindo melhor controle sobre o contexto de execução do trabalho
+- `ppid`: Mudar o processo pai para trabalhos de pós-exploração especificando um novo ID de processo pai, permitindo melhor controle sobre o contexto de execução do trabalho
 - `printspoofer`: Executar comandos PrintSpoofer para contornar medidas de segurança do spooler de impressão, permitindo escalonamento de privilégios ou execução de código
 - `dcsync`: Sincronizar as chaves Kerberos de um usuário para a máquina local, permitindo quebra de senha offline ou ataques adicionais
 - `ticket_cache_add`: Adicionar um ticket Kerberos à sessão de logon atual ou a uma especificada, permitindo reutilização de tickets ou impersonação
@@ -77,10 +79,10 @@ Este agente possui muitos comandos que o tornam muito semelhante ao Beacon do Co
 - `execute_pe`: Executa um executável não gerenciado (PE)
 - `inline_assembly`: Executa um assembly .NET em um AppDomain descartável, permitindo a execução temporária de código sem afetar o processo principal do agente
 - `run`: Executa um binário no sistema alvo, usando o PATH do sistema para encontrar o executável
-- `shinject`: Injeta shellcode em um processo remoto, permitindo a execução em memória de código arbitrário
-- `inject`: Injeta shellcode do agente em um processo remoto, permitindo a execução em memória do código do agente
+- `shinject`: Injetar shellcode em um processo remoto, permitindo a execução em memória de código arbitrário
+- `inject`: Injetar shellcode do agente em um processo remoto, permitindo a execução em memória do código do agente
 - `spawn`: Cria uma nova sessão de agente no executável especificado, permitindo a execução de shellcode em um novo processo
-- `spawnto_x64` e `spawnto_x86`: Alterar o binário padrão usado em trabalhos de pós-exploração para um caminho especificado em vez de usar `rundll32.exe` sem parâmetros, que é muito barulhento.
+- `spawnto_x64` e `spawnto_x86`: Mudar o binário padrão usado em trabalhos de pós-exploração para um caminho especificado em vez de usar `rundll32.exe` sem parâmetros, que é muito barulhento.
 
 ### Mithic Forge
 
@@ -101,7 +103,7 @@ Depois que um módulo é carregado, ele aparecerá na lista como outro comando, 
 
 - `powershell_import`: Importa um novo script PowerShell (.ps1) para o cache do agente para execução posterior
 - `powershell`: Executa um comando PowerShell no contexto do agente, permitindo scripting avançado e automação
-- `powerpick`: Injeta um assembly loader do PowerShell em um processo sacrificial e executa um comando PowerShell (sem registro de logs do PowerShell).
+- `powerpick`: Injeta um assembly loader do PowerShell em um processo sacrificial e executa um comando PowerShell (sem registro de powershell).
 - `psinject`: Executa PowerShell em um processo especificado, permitindo a execução direcionada de scripts no contexto de outro processo
 - `shell`: Executa um comando de shell no contexto do agente, semelhante a executar um comando no cmd.exe
 
@@ -111,7 +113,7 @@ Depois que um módulo é carregado, ele aparecerá na lista como outro comando, 
 - `jump_wmi`: Usa a técnica WMI para se mover lateralmente para um novo host, copiando primeiro o executável do agente Apollo (apollo.exe) e executando-o.
 - `wmiexecute`: Executa um comando no sistema local ou remoto especificado usando WMI, com credenciais opcionais para impersonação.
 - `net_dclist`: Recupera uma lista de controladores de domínio para o domínio especificado, útil para identificar alvos potenciais para movimento lateral.
-- `net_localgroup`: Lista grupos locais no computador especificado, default para localhost se nenhum computador for especificado.
+- `net_localgroup`: Lista grupos locais no computador especificado, padrão para localhost se nenhum computador for especificado.
 - `net_localgroup_member`: Recupera a associação de grupos locais para um grupo especificado no computador local ou remoto, permitindo a enumeração de usuários em grupos específicos.
 - `net_shares`: Lista compartilhamentos remotos e sua acessibilidade no computador especificado, útil para identificar alvos potenciais para movimento lateral.
 - `socks`: Habilita um proxy compatível com SOCKS 5 na rede alvo, permitindo o tunelamento de tráfego através do host comprometido. Compatível com ferramentas como proxychains.
@@ -120,8 +122,7 @@ Depois que um módulo é carregado, ele aparecerá na lista como outro comando, 
 
 ### Comandos Diversos
 - `help`: Exibe informações detalhadas sobre comandos específicos ou informações gerais sobre todos os comandos disponíveis no agente.
-- `clear`: Marca tarefas como 'limpas' para que não possam ser retomadas por agentes. Você pode especificar `all` para limpar todas as tarefas ou `task Num` para limpar uma tarefa específica.
-
+- `clear`: Marca tarefas como 'limpas' para que não possam ser capturadas por agentes. Você pode especificar `all` para limpar todas as tarefas ou `task Num` para limpar uma tarefa específica.
 
 ## [Poseidon Agent](https://github.com/MythicAgents/Poseidon)
 
@@ -151,10 +152,10 @@ Quando o usuário está no linux, ele tem alguns comandos interessantes:
 ### Mover lateralmente
 
 - `ssh`: SSH para o host usando as credenciais designadas e abrir um PTY sem gerar ssh.
-- `sshauth`: SSH para host(s) especificados usando as credenciais designadas. Você também pode usar isso para executar um comando específico nos hosts remotos via SSH ou usá-lo para SCP arquivos.
+- `sshauth`: SSH para o(s) host(s) especificado(s) usando as credenciais designadas. Você também pode usar isso para executar um comando específico nos hosts remotos via SSH ou usá-lo para SCP arquivos.
 - `link_tcp`: Link para outro agente via TCP, permitindo comunicação direta entre agentes.
 - `link_webshell`: Link para um agente usando o perfil P2P do webshell, permitindo acesso remoto à interface web do agente.
-- `rpfwd`: Iniciar ou parar um Reverso Port Forward, permitindo acesso remoto a serviços na rede alvo.
+- `rpfwd`: Iniciar ou parar um Reencaminhamento de Porta Reversa, permitindo acesso remoto a serviços na rede alvo.
 - `socks`: Iniciar ou parar um proxy SOCKS5 na rede alvo, permitindo o tunelamento de tráfego através do host comprometido. Compatível com ferramentas como proxychains.
 - `portscan`: Escanear host(s) em busca de portas abertas, útil para identificar alvos potenciais para movimento lateral ou ataques adicionais.
 
@@ -163,3 +164,5 @@ Quando o usuário está no linux, ele tem alguns comandos interessantes:
 - `shell`: Executar um único comando shell via /bin/sh, permitindo a execução direta de comandos no sistema alvo.
 - `run`: Executar um comando do disco com argumentos, permitindo a execução de binários ou scripts no sistema alvo.
 - `pty`: Abrir um PTY interativo, permitindo interação direta com o shell no sistema alvo.
+
+{{#include ../banners/hacktricks-training.md}}

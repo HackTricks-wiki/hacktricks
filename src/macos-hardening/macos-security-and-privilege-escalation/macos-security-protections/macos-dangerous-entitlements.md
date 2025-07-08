@@ -17,28 +17,28 @@ A permissão **`com.apple.rootless.install`** permite **contornar o SIP**. Confi
 
 ### **`com.apple.system-task-ports` (anteriormente chamada `task_for_pid-allow`)**
 
-Essa permissão permite obter o **port de tarefa para qualquer** processo, exceto o kernel. Confira [**isso para mais informações**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
+Esta permissão permite obter a **porta de tarefa para qualquer** processo, exceto o kernel. Confira [**isso para mais informações**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
 
 ### `com.apple.security.get-task-allow`
 
-Essa permissão permite que outros processos com a permissão **`com.apple.security.cs.debugger`** obtenham o port de tarefa do processo executado pelo binário com essa permissão e **injete código nele**. Confira [**isso para mais informações**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
+Esta permissão permite que outros processos com a permissão **`com.apple.security.cs.debugger`** obtenham a porta de tarefa do processo executado pelo binário com esta permissão e **injete código nele**. Confira [**isso para mais informações**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
 
 ### `com.apple.security.cs.debugger`
 
-Aplicativos com a Permissão de Ferramenta de Depuração podem chamar `task_for_pid()` para recuperar um port de tarefa válido para aplicativos não assinados e de terceiros com a permissão `Get Task Allow` definida como `true`. No entanto, mesmo com a permissão da ferramenta de depuração, um depurador **não pode obter os ports de tarefa** de processos que **não têm a permissão `Get Task Allow`**, e que, portanto, estão protegidos pela Proteção de Integridade do Sistema. Confira [**isso para mais informações**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger).
+Aplicativos com a Permissão de Ferramenta de Depuração podem chamar `task_for_pid()` para recuperar uma porta de tarefa válida para aplicativos não assinados e de terceiros com a permissão `Get Task Allow` definida como `true`. No entanto, mesmo com a permissão da ferramenta de depuração, um depurador **não pode obter as portas de tarefa** de processos que **não têm a permissão `Get Task Allow`**, e que, portanto, estão protegidos pela Proteção de Integridade do Sistema. Confira [**isso para mais informações**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger).
 
 ### `com.apple.security.cs.disable-library-validation`
 
-Essa permissão permite **carregar frameworks, plug-ins ou bibliotecas sem serem assinados pela Apple ou assinados com o mesmo ID de Equipe** que o executável principal, então um atacante poderia abusar de algum carregamento arbitrário de biblioteca para injetar código. Confira [**isso para mais informações**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation).
+Esta permissão permite **carregar frameworks, plug-ins ou bibliotecas sem ser assinados pela Apple ou assinados com o mesmo ID de Equipe** que o executável principal, então um atacante poderia abusar de algum carregamento arbitrário de biblioteca para injetar código. Confira [**isso para mais informações**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation).
 
 ### `com.apple.private.security.clear-library-validation`
 
-Essa permissão é muito semelhante à **`com.apple.security.cs.disable-library-validation`**, mas **em vez de** **desabilitar diretamente** a validação de bibliotecas, permite que o processo **chame uma chamada de sistema `csops` para desabilitá-la**.\
+Esta permissão é muito semelhante à **`com.apple.security.cs.disable-library-validation`**, mas **em vez** de **desabilitar diretamente** a validação de bibliotecas, permite que o processo **chame uma chamada de sistema `csops` para desabilitá-la**.\
 Confira [**isso para mais informações**](https://theevilbit.github.io/posts/com.apple.private.security.clear-library-validation/).
 
 ### `com.apple.security.cs.allow-dyld-environment-variables`
 
-Essa permissão permite **usar variáveis de ambiente DYLD** que poderiam ser usadas para injetar bibliotecas e código. Confira [**isso para mais informações**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables).
+Esta permissão permite **usar variáveis de ambiente DYLD** que poderiam ser usadas para injetar bibliotecas e código. Confira [**isso para mais informações**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables).
 
 ### `com.apple.private.tcc.manager` ou `com.apple.rootless.storage`.`TCC`
 
@@ -62,7 +62,7 @@ Para mais **informações** sobre a exploração para **obter tokens do iCloud**
 
 ### `com.apple.private.tcc.manager.check-by-audit-token`
 
-TODO: Eu não sei o que isso permite fazer
+TODO: Não sei o que isso permite fazer
 
 ### `com.apple.private.apfs.revert-to-snapshot`
 
@@ -74,7 +74,7 @@ TODO: No [**este relatório**](https://jhftss.github.io/The-Nightmare-of-Apple-O
 
 ### `keychain-access-groups`
 
-Essa permissão lista os grupos de **keychain** aos quais o aplicativo tem acesso:
+Esta permissão lista os grupos de **keychain** aos quais o aplicativo tem acesso:
 ```xml
 <key>keychain-access-groups</key>
 <array>
@@ -163,3 +163,8 @@ Permitir que o processo **peça todas as permissões do TCC**.
 {{#include ../../../banners/hacktricks-training.md}}
 
 </details>
+
+
+
+
+{{#include /banners/hacktricks-training.md}}
