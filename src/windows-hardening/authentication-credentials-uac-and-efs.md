@@ -26,7 +26,7 @@ $a.rulecollections
 
 ### 绕过
 
-- 有用的 **可写文件夹** 用于绕过 AppLocker 策略：如果 AppLocker 允许在 `C:\Windows\System32` 或 `C:\Windows` 内执行任何内容，则可以使用 **可写文件夹** 来 **绕过此限制**。
+- 有用的 **可写文件夹** 以绕过 AppLocker 策略：如果 AppLocker 允许在 `C:\Windows\System32` 或 `C:\Windows` 内执行任何内容，则可以使用 **可写文件夹** 来 **绕过此限制**。
 ```
 C:\Windows\System32\Microsoft\Crypto\RSA\MachineKeys
 C:\Windows\System32\spool\drivers\color
@@ -37,7 +37,7 @@ C:\windows\tracing
 - **编写不当的规则也可能被绕过**
 - 例如，**`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**，您可以在任何地方创建一个 **名为 `allowed`** 的文件夹，它将被允许。
 - 组织通常还专注于 **阻止 `%System32%\WindowsPowerShell\v1.0\powershell.exe` 可执行文件**，但忘记了 **其他** [**PowerShell 可执行文件位置**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations)，例如 `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` 或 `PowerShell_ISE.exe`。
-- **DLL 强制执行很少启用**，因为它可能对系统造成额外负担，以及确保没有任何东西会崩溃所需的测试量。因此，使用 **DLL 作为后门将有助于绕过 AppLocker**。
+- **DLL 强制执行很少启用**，因为它可能对系统造成额外负担，并且需要大量测试以确保不会出现故障。因此，使用 **DLL 作为后门将有助于绕过 AppLocker**。
 - 您可以使用 [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) 或 [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) 在任何进程中 **执行 Powershell** 代码并绕过 AppLocker。有关更多信息，请查看: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode)。
 
 ## 凭据存储
@@ -69,7 +69,7 @@ LSA 可能会在磁盘上保存一些凭据：
 
 ## Defender
 
-[**Microsoft Defender**](https://en.wikipedia.org/wiki/Microsoft_Defender) 是 Windows 10 和 Windows 11 以及 Windows Server 版本中可用的防病毒软件。它 **阻止** 常见的渗透测试工具，如 **`WinPEAS`**。然而，有方法可以 **绕过这些保护**。
+[**Microsoft Defender**](https://en.wikipedia.org/wiki/Microsoft_Defender) 是 Windows 10 和 Windows 11 以及 Windows Server 版本中可用的防病毒软件。它 **阻止** 常见的渗透测试工具，如 **`WinPEAS`**。但是，有绕过这些保护的方法。
 
 ### 检查
 
@@ -103,7 +103,7 @@ sc query windefend
 ```
 ## 加密文件系统 (EFS)
 
-EFS 通过加密保护文件，使用称为 **文件加密密钥 (FEK)** 的 **对称密钥**。该密钥使用用户的 **公钥** 进行加密，并存储在加密文件的 $EFS **备用数据流** 中。当需要解密时，使用用户数字证书的相应 **私钥** 从 $EFS 流中解密 FEK。更多细节可以在 [这里](https://en.wikipedia.org/wiki/Encrypting_File_System) 找到。
+EFS 通过加密保护文件，使用称为 **文件加密密钥 (FEK)** 的 **对称密钥**。该密钥使用用户的 **公钥** 进行加密，并存储在加密文件的 $EFS **替代数据流** 中。当需要解密时，使用用户数字证书的相应 **私钥** 从 $EFS 流中解密 FEK。更多细节可以在 [这里](https://en.wikipedia.org/wiki/Encrypting_File_System) 找到。
 
 **无需用户启动的解密场景** 包括：
 
@@ -121,18 +121,18 @@ EFS 通过加密保护文件，使用称为 **文件加密密钥 (FEK)** 的 **�
 
 ### 检查 EFS 信息
 
-检查 **用户** 是否 **使用** 该 **服务**，检查此路径是否存在：`C:\users\<username>\appdata\roaming\Microsoft\Protect`
+检查 **用户** 是否 **使用** 了此 **服务**，检查此路径是否存在：`C:\users\<username>\appdata\roaming\Microsoft\Protect`
 
 使用 cipher /c \<file\> 检查 **谁** 有 **访问** 文件的权限\
-您还可以在文件夹内使用 `cipher /e` 和 `cipher /d` 来 **加密** 和 **解密** 所有文件。
+您还可以在文件夹内使用 `cipher /e` 和 `cipher /d` 来 **加密** 和 **解密** 所有文件
 
 ### 解密 EFS 文件
 
-#### 成为权限系统
+#### 作为权限系统
 
-这种方式要求 **受害者用户** 在主机内 **运行** 一个 **进程**。如果是这种情况，使用 `meterpreter` 会话可以模拟用户进程的令牌（`incognito` 中的 `impersonate_token`）。或者您可以直接 `migrate` 到用户的进程。
+这种方式要求 **受害者用户** 在主机内 **运行** 一个 **进程**。如果是这种情况，使用 `meterpreter` 会话可以模拟用户进程的令牌（`impersonate_token` 来自 `incognito`）。或者您可以直接 `migrate` 到用户的进程。
 
-#### 知道用户密码
+#### 知道用户的密码
 
 {{#ref}}
 https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files
@@ -148,7 +148,7 @@ https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files
 - **计划任务能力**：与管理服务账户不同，gMSA 支持运行计划任务。
 - **简化 SPN 管理**：当计算机的 sAMaccount 详细信息或 DNS 名称发生更改时，系统会自动更新服务主体名称 (SPN)，简化 SPN 管理。
 
-gMSA 的密码存储在 LDAP 属性 _**msDS-ManagedPassword**_ 中，并由域控制器 (DC) 每 30 天自动重置。此密码是一个加密数据块，称为 [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e)，只能由授权管理员和安装 gMSA 的服务器检索，从而确保安全环境。要访问此信息，需要使用安全连接，如 LDAPS，或连接必须经过 'Sealing & Secure' 认证。
+gMSA 的密码存储在 LDAP 属性 _**msDS-ManagedPassword**_ 中，并由域控制器 (DC) 每 30 天自动重置。此密码是一个加密数据块，称为 [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e)，只能由授权管理员和安装 gMSA 的服务器检索，确保了安全环境。要访问此信息，需要安全连接，如 LDAPS，或连接必须经过 'Sealing & Secure' 认证。
 
 ![https://cube0x0.github.io/Relaying-for-gMSA/](../images/asd1.png)
 
@@ -223,29 +223,29 @@ $command = "Write-Host 'My voice is my passport, verify me.'" $bytes = [System.T
 
 是用于验证用户的 API。
 
-SSPI 将负责为想要通信的两台机器找到合适的协议。首选方法是 Kerberos。然后，SSPI 将协商将使用的身份验证协议，这些身份验证协议称为安全支持提供者 (SSP)，以 DLL 的形式位于每台 Windows 机器内部，并且两台机器必须支持相同的协议才能进行通信。
+SSPI 将负责为想要通信的两台机器找到合适的协议。首选方法是 Kerberos。然后，SSPI 将协商使用哪个身份验证协议，这些身份验证协议称为安全支持提供者 (SSP)，以 DLL 形式位于每台 Windows 机器内部，且两台机器必须支持相同的协议才能进行通信。
 
 ### 主要 SSP
 
-- **Kerberos**: 首选
+- **Kerberos**：首选
 - %windir%\Windows\System32\kerberos.dll
-- **NTLMv1** 和 **NTLMv2**: 兼容性原因
+- **NTLMv1** 和 **NTLMv2**：出于兼容性原因
 - %windir%\Windows\System32\msv1_0.dll
-- **Digest**: Web 服务器和 LDAP，密码以 MD5 哈希形式存在
+- **Digest**：Web 服务器和 LDAP，密码以 MD5 哈希形式存在
 - %windir%\Windows\System32\Wdigest.dll
-- **Schannel**: SSL 和 TLS
+- **Schannel**：SSL 和 TLS
 - %windir%\Windows\System32\Schannel.dll
-- **Negotiate**: 用于协商使用的协议（Kerberos 或 NTLM，默认是 Kerberos）
+- **Negotiate**：用于协商使用的协议（Kerberos 或 NTLM，默认是 Kerberos）
 - %windir%\Windows\System32\lsasrv.dll
 
-#### 协商可以提供多种方法或仅提供一种。
+#### 协商可能提供多种方法或仅提供一种。
 
 ## UAC - 用户帐户控制
 
 [用户帐户控制 (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) 是一个启用 **提升活动的同意提示** 的功能。
 
 {{#ref}}
-windows-security-controls/uac-user-account-control.md
+authentication-credentials-uac-and-efs/uac-user-account-control.md
 {{#endref}}
 
 {{#include ../banners/hacktricks-training.md}}
