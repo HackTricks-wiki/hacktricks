@@ -1,5 +1,7 @@
 # Mythic
 
+{{#include ../banners/hacktricks-training.md}}
+
 ## Was ist Mythic?
 
 Mythic ist ein Open-Source, modulares Command and Control (C2) Framework, das für Red Teaming entwickelt wurde. Es ermöglicht Sicherheitsfachleuten, verschiedene Agenten (Payloads) über verschiedene Betriebssysteme hinweg zu verwalten und bereitzustellen, einschließlich Windows, Linux und macOS. Mythic bietet eine benutzerfreundliche Weboberfläche zur Verwaltung von Agenten, Ausführung von Befehlen und Sammlung von Ergebnissen, was es zu einem leistungsstarken Werkzeug zur Simulation von realen Angriffen in einer kontrollierten Umgebung macht.
@@ -25,7 +27,7 @@ Sie können mit dem vorherigen Befehl neue Agenten hinzufügen, auch wenn Mythic
 
 C2-Profile in Mythic definieren **wie Agenten mit dem Mythic-Server kommunizieren**. Sie geben das Kommunikationsprotokoll, die Verschlüsselungsmethoden und andere Einstellungen an. Sie können C2-Profile über die Mythic-Weboberfläche erstellen und verwalten.
 
-Standardmäßig wird Mythic ohne Profile installiert, jedoch ist es möglich, einige Profile aus dem Repo [**https://github.com/MythicC2Profiles**](https://github.com/MythicC2Profiles) herunterzuladen, indem Sie Folgendes ausführen:
+Standardmäßig wird Mythic ohne Profile installiert, es ist jedoch möglich, einige Profile aus dem Repo [**https://github.com/MythicC2Profiles**](https://github.com/MythicC2Profiles) herunterzuladen, indem Sie Folgendes ausführen:
 ```bash
 sudo ./mythic-cli install github https://github.com/MythicC2Profiles/<c2-profile>>
 sudo ./mythic-cli install github https://github.com/MythicC2Profiles/http
@@ -34,7 +36,7 @@ sudo ./mythic-cli install github https://github.com/MythicC2Profiles/http
 
 Apollo ist ein Windows-Agent, der in C# unter Verwendung des .NET Framework 4.0 geschrieben wurde und für die Verwendung in den Schulungsangeboten von SpecterOps konzipiert ist.
 
-Installiere es mit:
+Installieren Sie es mit:
 ```bash
 ./mythic-cli install github https://github.com/MythicAgents/Apollo.git
 ```
@@ -71,14 +73,14 @@ Dieser Agent hat viele Befehle, die ihn sehr ähnlich zu Cobalt Strike's Beacon 
 
 ### Prozesse ausführen
 
-- `assembly_inject`: Ermöglicht das Injizieren eines .NET-Assembly-Loaders in einen Remote-Prozess
+- `assembly_inject`: Ermöglicht das Injizieren eines .NET-Assembly-Laders in einen Remote-Prozess
 - `execute_assembly`: Führt eine .NET-Assembly im Kontext des Agents aus
 - `execute_coff`: Führt eine COFF-Datei im Speicher aus, was die Ausführung von kompiliertem Code im Speicher ermöglicht
 - `execute_pe`: Führt eine unmanaged ausführbare Datei (PE) aus
 - `inline_assembly`: Führt eine .NET-Assembly in einem temporären AppDomain aus, was die temporäre Ausführung von Code ermöglicht, ohne den Hauptprozess des Agents zu beeinträchtigen
 - `run`: Führt eine Binärdatei auf dem Zielsystem aus, wobei der PATH des Systems verwendet wird, um die ausführbare Datei zu finden
 - `shinject`: Injiziert Shellcode in einen Remote-Prozess, was die Ausführung von beliebigem Code im Speicher ermöglicht
-- `inject`: Injiziert Agent-Shellcode in einen Remote-Prozess, was die Ausführung des Codes des Agents im Speicher ermöglicht
+- `inject`: Injiziert Agenten-Shellcode in einen Remote-Prozess, was die Ausführung des Codes des Agents im Speicher ermöglicht
 - `spawn`: Startet eine neue Agentensitzung im angegebenen ausführbaren Programm, was die Ausführung von Shellcode in einem neuen Prozess ermöglicht
 - `spawnto_x64` und `spawnto_x86`: Ändert die Standard-Binärdatei, die in Post-Exploitation-Jobs verwendet wird, auf einen angegebenen Pfad, anstatt `rundll32.exe` ohne Parameter zu verwenden, was sehr laut ist.
 
@@ -109,7 +111,7 @@ Nachdem ein Modul geladen wurde, erscheint es in der Liste als ein weiterer Befe
 
 - `jump_psexec`: Verwendet die PsExec-Technik, um lateral zu einem neuen Host zu wechseln, indem zuerst die Apollo-Agenten-Executable (apollo.exe) kopiert und ausgeführt wird.
 - `jump_wmi`: Verwendet die WMI-Technik, um lateral zu einem neuen Host zu wechseln, indem zuerst die Apollo-Agenten-Executable (apollo.exe) kopiert und ausgeführt wird.
-- `wmiexecute`: Führt einen Befehl auf dem lokalen oder angegebenen Remote-System mithilfe von WMI aus, mit optionalen Anmeldeinformationen zur Identitätsübernahme.
+- `wmiexecute`: Führt einen Befehl auf dem lokalen oder angegebenen Remote-System unter Verwendung von WMI aus, mit optionalen Anmeldeinformationen zur Identitätsübernahme.
 - `net_dclist`: Ruft eine Liste von Domänencontrollern für die angegebene Domäne ab, nützlich zur Identifizierung potenzieller Ziele für laterale Bewegung.
 - `net_localgroup`: Listet lokale Gruppen auf dem angegebenen Computer auf, standardmäßig localhost, wenn kein Computer angegeben ist.
 - `net_localgroup_member`: Ruft die Mitgliedschaft in lokalen Gruppen für eine angegebene Gruppe auf dem lokalen oder Remote-Computer ab, was die Aufzählung von Benutzern in bestimmten Gruppen ermöglicht.
@@ -151,15 +153,18 @@ Wenn Benutzer über Linux arbeitet, gibt es einige interessante Befehle:
 ### Laterale Bewegung
 
 - `ssh`: SSH zu einem Host mit den angegebenen Anmeldeinformationen und öffnet ein PTY, ohne ssh zu starten.
-- `sshauth`: SSH zu angegebenen Host(s) mit den vorgesehenen Anmeldeinformationen. Sie können dies auch verwenden, um einen bestimmten Befehl auf den Remote-Hosts über SSH auszuführen oder um Dateien mit SCP zu übertragen.
+- `sshauth`: SSH zu angegebenen Host(s) mit den angegebenen Anmeldeinformationen. Sie können dies auch verwenden, um einen bestimmten Befehl auf den Remote-Hosts über SSH auszuführen oder um Dateien mit SCP zu übertragen.
 - `link_tcp`: Verbindet sich über TCP mit einem anderen Agenten, was eine direkte Kommunikation zwischen den Agenten ermöglicht.
 - `link_webshell`: Verbindet sich mit einem Agenten über das Webshell-P2P-Profil, was den Remote-Zugriff auf die Weboberfläche des Agenten ermöglicht.
 - `rpfwd`: Startet oder stoppt eine Reverse-Port-Weiterleitung, die den Remote-Zugriff auf Dienste im Zielnetzwerk ermöglicht.
 - `socks`: Startet oder stoppt einen SOCKS5-Proxy im Zielnetzwerk, der das Tunneln von Datenverkehr durch den kompromittierten Host ermöglicht. Kompatibel mit Tools wie proxychains.
-- `portscan`: Scannt Host(s) nach offenen Ports, nützlich zur Identifizierung potenzieller Ziele für laterale Bewegungen oder weitere Angriffe.
+- `portscan`: Scannt Host(s) nach offenen Ports, nützlich zur Identifizierung potenzieller Ziele für laterale Bewegung oder weitere Angriffe.
 
 ### Prozesse ausführen
 
 - `shell`: Führt einen einzelnen Shell-Befehl über /bin/sh aus, was die direkte Ausführung von Befehlen auf dem Zielsystem ermöglicht.
 - `run`: Führt einen Befehl von der Festplatte mit Argumenten aus, was die Ausführung von Binärdateien oder Skripten auf dem Zielsystem ermöglicht.
 - `pty`: Öffnet ein interaktives PTY, was die direkte Interaktion mit der Shell auf dem Zielsystem ermöglicht.
+
+
+{{#include ../banners/hacktricks-training.md}}

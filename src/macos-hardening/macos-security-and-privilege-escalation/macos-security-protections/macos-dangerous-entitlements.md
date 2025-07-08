@@ -29,11 +29,11 @@ Apps mit der Debugging-Tool-Berechtigung können `task_for_pid()` aufrufen, um e
 
 ### `com.apple.security.cs.disable-library-validation`
 
-Diese Berechtigung ermöglicht es, **Frameworks, Plug-ins oder Bibliotheken zu laden, ohne entweder von Apple signiert zu sein oder mit derselben Team-ID** wie die Hauptanwendung signiert zu sein, sodass ein Angreifer einige beliebige Bibliotheksladungen missbrauchen könnte, um Code zu injizieren. Überprüfen Sie [**dies für weitere Informationen**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation).
+Diese Berechtigung ermöglicht es, **Frameworks, Plug-ins oder Bibliotheken zu laden, ohne dass sie entweder von Apple signiert sind oder mit derselben Team-ID** wie die Hauptanwendung signiert sind, sodass ein Angreifer einige beliebige Bibliotheksladungen missbrauchen könnte, um Code zu injizieren. Überprüfen Sie [**dies für weitere Informationen**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation).
 
 ### `com.apple.private.security.clear-library-validation`
 
-Diese Berechtigung ist sehr ähnlich zu **`com.apple.security.cs.disable-library-validation`**, aber **anstatt** die Bibliotheksvalidierung **direkt zu deaktivieren**, ermöglicht sie dem Prozess, einen **`csops`-Systemaufruf zu tätigen, um sie zu deaktivieren**.\
+Diese Berechtigung ist sehr ähnlich zu **`com.apple.security.cs.disable-library-validation`**, aber **anstatt** die **Bibliotheksvalidierung direkt zu deaktivieren**, ermöglicht sie dem Prozess, **einen `csops`-Systemaufruf zu tätigen, um sie zu deaktivieren**.\
 Überprüfen Sie [**dies für weitere Informationen**](https://theevilbit.github.io/posts/com.apple.private.security.clear-library-validation/).
 
 ### `com.apple.security.cs.allow-dyld-environment-variables`
@@ -74,7 +74,7 @@ TODO: In [**diesem Bericht**](https://jhftss.github.io/The-Nightmare-of-Apple-OT
 
 ### `keychain-access-groups`
 
-Diese Berechtigung listet die **Keychain**-Gruppen auf, auf die die Anwendung Zugriff hat:
+Diese Berechtigung listet **Keychain**-Gruppen auf, auf die die Anwendung Zugriff hat:
 ```xml
 <key>keychain-access-groups</key>
 <array>
@@ -91,17 +91,17 @@ Gibt **Vollzugriff auf die Festplatte**-Berechtigungen, eine der höchsten TCC-B
 
 ### **`kTCCServiceAppleEvents`**
 
-Erlaubt der App, Ereignisse an andere Anwendungen zu senden, die häufig zum **Automatisieren von Aufgaben** verwendet werden. Durch die Kontrolle anderer Apps kann es die Berechtigungen missbrauchen, die diesen anderen Apps gewährt wurden.
+Erlaubt der App, Ereignisse an andere Anwendungen zu senden, die häufig für **Automatisierungsaufgaben** verwendet werden. Durch die Kontrolle anderer Apps kann es die Berechtigungen missbrauchen, die diesen anderen Apps gewährt wurden.
 
 Wie zum Beispiel, sie dazu zu bringen, den Benutzer nach seinem Passwort zu fragen:
 ```bash
 osascript -e 'tell app "App Store" to activate' -e 'tell app "App Store" to activate' -e 'tell app "App Store" to display dialog "App Store requires your password to continue." & return & return default answer "" with icon 1 with hidden answer with title "App Store Alert"'
 ```
-Oder sie dazu bringen, **willkürliche Aktionen** auszuführen.
+Oder sie dazu zu bringen, **willkürliche Aktionen** auszuführen.
 
 ### **`kTCCServiceEndpointSecurityClient`**
 
-Erlaubt unter anderem, die **TCC-Datenbank der Benutzer** zu **schreiben**.
+Erlaubt unter anderem die **Änderung der TCC-Datenbank der Benutzer**.
 
 ### **`kTCCServiceSystemPolicySysAdminFiles`**
 
@@ -117,27 +117,27 @@ Es ist möglich zu überprüfen, wer diesen Zugriff hat in _Systemeinstellungen_
 
 ### `kTCCServiceAccessibility`
 
-Der Prozess wird in der Lage sein, die **Zugänglichkeitsfunktionen von macOS** zu **missbrauchen**, was bedeutet, dass er beispielsweise Tastenanschläge drücken kann. Er könnte also Zugriff anfordern, um eine App wie Finder zu steuern und den Dialog mit dieser Berechtigung zu genehmigen.
+Der Prozess wird in der Lage sein, die **Zugänglichkeitsfunktionen von macOS auszunutzen**, was bedeutet, dass er beispielsweise Tastenanschläge simulieren kann. Er könnte also Zugriff anfordern, um eine App wie Finder zu steuern und den Dialog mit dieser Berechtigung zu genehmigen.
 
-## Mittel
+## Medium
 
 ### `com.apple.security.cs.allow-jit`
 
-Diese Berechtigung erlaubt es, **speicher zu erstellen, der beschreibbar und ausführbar ist**, indem das `MAP_JIT`-Flag an die `mmap()`-Systemfunktion übergeben wird. Weitere Informationen finden Sie [**hier**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-jit).
+Diese Berechtigung erlaubt es, **Speicher zu erstellen, der beschreibbar und ausführbar ist**, indem das `MAP_JIT`-Flag an die `mmap()`-Systemfunktion übergeben wird. Siehe [**dies für weitere Informationen**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-jit).
 
 ### `com.apple.security.cs.allow-unsigned-executable-memory`
 
-Diese Berechtigung erlaubt es, **C-Code zu überschreiben oder zu patchen**, die lange veraltete **`NSCreateObjectFileImageFromMemory`** (die grundsätzlich unsicher ist) zu verwenden oder das **DVDPlayback**-Framework zu nutzen. Weitere Informationen finden Sie [**hier**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory).
+Diese Berechtigung erlaubt es, **C-Code zu überschreiben oder zu patchen**, die längst veraltete **`NSCreateObjectFileImageFromMemory`** (die grundsätzlich unsicher ist) zu verwenden oder das **DVDPlayback**-Framework zu nutzen. Siehe [**dies für weitere Informationen**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory).
 
 > [!CAUTION]
-> Das Einfügen dieser Berechtigung setzt Ihre App gängigen Sicherheitsanfälligkeiten in speicherunsicheren Programmiersprachen aus. Überlegen Sie sorgfältig, ob Ihre App diese Ausnahme benötigt.
+> Das Einfügen dieser Berechtigung setzt Ihre App gängigen Schwachstellen in speicherunsicheren Programmiersprachen aus. Überlegen Sie sorgfältig, ob Ihre App diese Ausnahme benötigt.
 
 ### `com.apple.security.cs.disable-executable-page-protection`
 
-Diese Berechtigung erlaubt es, **Abschnitte seiner eigenen ausführbaren Dateien** auf der Festplatte zu **modifizieren**, um gewaltsam zu beenden. Weitere Informationen finden Sie [**hier**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-executable-page-protection).
+Diese Berechtigung erlaubt es, **Abschnitte seiner eigenen ausführbaren Dateien** auf der Festplatte zu ändern, um gewaltsam zu beenden. Siehe [**dies für weitere Informationen**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-executable-page-protection).
 
 > [!CAUTION]
-> Die Berechtigung zum Deaktivieren des Schutzes für ausführbaren Speicher ist eine extreme Berechtigung, die einen grundlegenden Sicherheitschutz Ihrer App entfernt, wodurch es einem Angreifer möglich wird, den ausführbaren Code Ihrer App unbemerkt umzuschreiben. Bevorzugen Sie, wenn möglich, engere Berechtigungen.
+> Die Berechtigung zum Deaktivieren des ausführbaren Speicherschutzes ist eine extreme Berechtigung, die einen grundlegenden Sicherheitschutz Ihrer App entfernt, wodurch es einem Angreifer möglich wird, den ausführbaren Code Ihrer App unbemerkt umzuschreiben. Bevorzugen Sie, wenn möglich, engere Berechtigungen.
 
 ### `com.apple.security.cs.allow-relative-library-loads`
 
@@ -163,3 +163,8 @@ Erlaube dem Prozess, **nach allen TCC-Berechtigungen zu fragen**.
 {{#include ../../../banners/hacktricks-training.md}}
 
 </details>
+
+
+
+
+{{#include /banners/hacktricks-training.md}}

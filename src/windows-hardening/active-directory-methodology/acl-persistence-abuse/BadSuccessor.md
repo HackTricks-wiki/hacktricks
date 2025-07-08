@@ -17,7 +17,7 @@ Akamai-Forscher fanden heraus, dass ein einzelnes Attribut — **`msDS‑Managed
 
 ## Anforderungen für den Angriff
 1. **Mindestens ein Windows Server 2025 DC**, damit die dMSA LDAP-Klasse und die KDC-Logik existieren.
-2. **Beliebige Objekt-Erstellungs- oder Attribut-Schreibrechte auf einer OU** (beliebige OU) – z.B. `Create msDS‑DelegatedManagedServiceAccount` oder einfach **Create All Child Objects**. Akamai fand heraus, dass 91 % der realen Mandanten solche "harmlosen" OU-Berechtigungen an Nicht-Administratoren gewähren.
+2. **Beliebige Objekt-Erstellungs- oder Attribut-Schreibrechte auf einer OU** (beliebige OU) – z.B. `Create msDS‑DelegatedManagedServiceAccount` oder einfach **Create All Child Objects**. Akamai fand heraus, dass 91 % der realen Mandanten solche "harmlosen" OU-Berechtigungen an Nicht-Administratoren gewähren.
 3. Fähigkeit, Tools (PowerShell/Rubeus) von einem beliebigen domänenverbundenen Host auszuführen, um Kerberos-Tickets anzufordern.
 *Keine Kontrolle über den Opferbenutzer ist erforderlich; der Angriff berührt das Zielkonto niemals direkt.*
 
@@ -32,7 +32,7 @@ New‑ADServiceAccount Attacker_dMSA `
 
 Da Sie das Objekt innerhalb einer OU erstellt haben, auf die Sie schreiben können, besitzen Sie automatisch alle seine Attribute.
 
-2. **Simulieren einer "abgeschlossenen Migration" in zwei LDAP-Schreibvorgängen**:
+2. **Simulieren Sie eine "abgeschlossene Migration" in zwei LDAP-Schreibvorgängen**:
 - Setzen Sie `msDS‑ManagedAccountPrecededByLink = DN` eines beliebigen Opfers (z.B. `CN=Administrator,CN=Users,DC=lab,DC=local`).
 - Setzen Sie `msDS‑DelegatedMSAState = 2` (Migration abgeschlossen).
 
@@ -50,9 +50,9 @@ Das zurückgegebene PAC enthält jetzt die SID 500 (Administrator) sowie die Gru
 
 Während legitimer Migrationen muss der KDC dem neuen dMSA erlauben, **Tickets zu entschlüsseln, die vor dem Übergang an das alte Konto ausgestellt wurden**. Um laufende Sitzungen nicht zu unterbrechen, platziert er sowohl aktuelle Schlüssel als auch vorherige Schlüssel in einem neuen ASN.1-Blob namens **`KERB‑DMSA‑KEY‑PACKAGE`**.
 
-Da unsere gefälschte Migration behauptet, dass das dMSA dem Opfer nachfolgt, kopiert der KDC pflichtbewusst den RC4-HMAC-Schlüssel des Opfers in die **previous-keys**-Liste – selbst wenn das dMSA niemals ein "vorheriges" Passwort hatte. Dieser RC4-Schlüssel ist ungesalzen, sodass er effektiv der NT-Hash des Opfers ist, was dem Angreifer **offline cracking oder "pass-the-hash"**-Fähigkeiten verleiht.
+Da unsere gefälschte Migration behauptet, dass das dMSA das Opfer nachfolgt, kopiert der KDC pflichtbewusst den RC4-HMAC-Schlüssel des Opfers in die **previous-keys**-Liste – selbst wenn das dMSA niemals ein "vorheriges" Passwort hatte. Dieser RC4-Schlüssel ist ungesalzen, sodass er effektiv den NT-Hash des Opfers darstellt, was dem Angreifer **offline cracking oder "pass-the-hash"**-Fähigkeiten verleiht.
 
-Daher ermöglicht das massenhafte Verlinken von Tausenden von Benutzern einem Angreifer, Hashes "in großem Maßstab" zu dumpen und verwandelt **BadSuccessor sowohl in ein Privilegieneskalations- als auch in ein Anmeldeinformationen-Kompromittierungsprimitive**.
+Daher ermöglicht das massenhafte Verknüpfen von Tausenden von Benutzern einem Angreifer, Hashes "in großem Maßstab" zu dumpen und **BadSuccessor sowohl zu einem Privilegieneskalations- als auch zu einem Anmeldeinformationen-Kompromittierungs-Primitive zu machen**.
 
 ## Werkzeuge
 
