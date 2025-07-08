@@ -228,7 +228,49 @@ BOOL APIENTRY DllMain (HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReser
 }
 ```
 
+## Case Study: CVE-2025-1729 - Privilege Escalation Using TPQMAssistant.exe
+
+This case demonstrates **Phantom DLL Hijacking** in Lenovo's TrackPoint Quick Menu (`TPQMAssistant.exe`), tracked as **CVE-2025-1729**.
+
+### Vulnerability Details
+
+- **Component**: `TPQMAssistant.exe` located at `C:\ProgramData\Lenovo\TPQM\Assistant\`.
+- **Scheduled Task**: `Lenovo\TrackPointQuickMenu\Schedule\ActivationDailyScheduleTask` runs daily at 9:30 AM under the context of the logged-on user.
+- **Directory Permissions**: Writable by `CREATOR OWNER`, allowing local users to drop arbitrary files.
+- **DLL Search Behavior**: Attempts to load `hostfxr.dll` from its working directory first and logs "NAME NOT FOUND" if missing, indicating local directory search precedence.
+
+### Exploit Implementation
+
+An attacker can place a malicious `hostfxr.dll` stub in the same directory, exploiting the missing DLL to achieve code execution under the user's context:
+
+```c
+#include <windows.h>
+
+BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved) {
+    if (fdwReason == DLL_PROCESS_ATTACH) {
+        // Payload: display a message box (proof-of-concept)
+        MessageBoxA(NULL, "DLL Hijacked!", "TPQM", MB_OK);
+    }
+    return TRUE;
+}
+```
+
+### Attack Flow
+
+1. As a standard user, drop `hostfxr.dll` into `C:\ProgramData\Lenovo\TPQM\Assistant\`.
+2. Wait for the scheduled task to run at 9:30 AM under the current user's context.
+3. If an administrator is logged in when the task executes, the malicious DLL runs in the administrator's session at medium integrity.
+4. Chain standard UAC bypass techniques to elevate from medium integrity to SYSTEM privileges.
+
+### Mitigation
+
+Lenovo released UWP version **1.12.54.0** via the Microsoft Store, which installs TPQMAssistant under `C:\Program Files (x86)\Lenovo\TPQM\TPQMAssistant\`, removes the vulnerable scheduled task, and uninstalls the legacy Win32 components.
+
 ## References
+
+- [CVE-2025-1729 - Privilege Escalation Using TPQMAssistant.exe](https://trustedsec.com/blog/cve-2025-1729-privilege-escalation-using-tpqmassistant-exe)
+- [Microsoft Store - TPQM Assistant UWP](https://apps.microsoft.com/detail/9mz08jf4t3ng)
+
 
 - [https://medium.com/@pranaybafna/tcapt-dll-hijacking-888d181ede8e](https://medium.com/@pranaybafna/tcapt-dll-hijacking-888d181ede8e)
 - [https://cocomelonc.github.io/pentest/2021/09/24/dll-hijacking-1.html](https://cocomelonc.github.io/pentest/2021/09/24/dll-hijacking-1.html)
