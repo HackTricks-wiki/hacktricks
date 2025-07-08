@@ -229,6 +229,34 @@ BOOL APIENTRY DllMain (HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReser
 }
 ```
 
+### Example: CVE-2025-1729 - Lenovo TPQMAssistant.exe
+
+In this real-world example of phantom DLL hijacking, Lenovo's TPQMAssistant.exe is invoked by a scheduled task and searches for a missing hostfxr.dll in a directory writable by non-privileged users:
+
+- **Scheduled Task**: `Lenovo\\TrackPointQuickMenu\\Schedule\\ActivationDailyScheduleTask` runs `C:\\ProgramData\\Lenovo\\TPQM\\Assistant\\TPQMAssistant.exe` daily at 9:30 AM under the logged-in user context.
+- **Writable directory**: `C:\\ProgramData\\Lenovo\\TPQM\\Assistant` grants `CREATOR OWNER:(OI)(CI)W`, allowing any user to write files.
+- **Missing dependency**: The application attempts to load `hostfxr.dll` and logs "Failed to load hostfxr.dll: NAME_NOT_FOUND".
+
+**Proof-of-Concept**:
+
+```c
+BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
+    MessageBoxA(NULL, "Got you!", "DLL Sideloader", MB_OK);
+    return TRUE;
+}
+```
+
+Compile:
+
+```powershell
+cl /LD hostfxr.c user32.lib
+```
+
+Place `hostfxr.dll` in `C:\\ProgramData\\Lenovo\\TPQM\\Assistant`. When the scheduled task runs, the malicious DLL is loaded and executed.
+
+- **Escalation**: If an administrator is logged in when the task executes, the DLL runs in their session at medium integrity. A UAC bypass (e.g., `fodhelper.exe`) can then elevate to SYSTEM.
+- **Mitigation**: Move executables and tasks to protected directories (e.g., `C:\\Program Files`) or restrict ACLs on application directories. Ensure legacy Win32 scheduler and binaries are removed from writable locations.
+
 ## References
 
 - [https://medium.com/@pranaybafna/tcapt-dll-hijacking-888d181ede8e](https://medium.com/@pranaybafna/tcapt-dll-hijacking-888d181ede8e)
