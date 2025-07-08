@@ -263,7 +263,7 @@ The SSPI will be in charge of finding the adequate protocol for two machines tha
 [User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) is a feature that enables a **consent prompt for elevated activities**.
 
 {{#ref}}
-windows-security-controls/uac-user-account-control.md
+authentication-credentials-uac-and-efs/uac-user-account-control.md
 {{#endref}}
 
 {{#include ../banners/hacktricks-training.md}}
