@@ -17,7 +17,7 @@ Akamai 研究人员发现，单个属性 — **`msDS‑ManagedAccountPrecededByL
 
 ## 攻击要求
 1. **至少一个 Windows Server 2025 DC**，以便 dMSA LDAP 类和 KDC 逻辑存在。
-2. **在 OU 上的任何对象创建或属性写入权限**（任何 OU） – 例如 `Create msDS‑DelegatedManagedServiceAccount` 或简单地 **Create All Child Objects**。Akamai 发现 91% 的真实租户将此类“良性”OU 权限授予非管理员。
+2. **在 OU 上的任何对象创建或属性写入权限**（任何 OU） – 例如 `Create msDS‑DelegatedManagedServiceAccount` 或简单地 **Create All Child Objects**。Akamai 发现 91% 的真实租户将此类“良性” OU 权限授予非管理员。
 3. 能够从任何域加入的主机上运行工具（PowerShell/Rubeus）以请求 Kerberos 票证。
 *不需要对受害者用户的控制；攻击从未直接接触目标账户。*
 
@@ -52,7 +52,7 @@ Rubeus.exe asktgs /targetuser:attacker_dmsa$ /service:krbtgt/aka.test /dmsa /ops
 
 因为我们的假迁移声称 dMSA 继承了受害者，KDC 认真地将受害者的 RC4-HMAC 密钥复制到 **previous‑keys** 列表中 — 即使 dMSA 从未拥有“以前”的密码。该 RC4 密钥是未加盐的，因此它实际上是受害者的 NT 哈希，赋予攻击者 **离线破解或“传递哈希”** 的能力。
 
-因此，大规模链接数千个用户使攻击者能够“规模化”地转储哈希，将 **BadSuccessor 变成特权提升和凭证泄露的原语**。
+因此，大规模链接数千个用户使攻击者能够“规模化”转储哈希，将 **BadSuccessor 变成特权提升和凭证泄露的原语**。
 
 ## 工具
 

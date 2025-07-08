@@ -29,7 +29,7 @@
 
 ### `com.apple.security.cs.disable-library-validation`
 
-此权限允许 **加载框架、插件或库，而不需要由 Apple 签名或与主可执行文件具有相同的团队 ID 签名**，因此攻击者可以利用某些任意库加载来注入代码。查看 [**此处获取更多信息**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation)。
+此权限允许 **加载框架、插件或库，而无需由 Apple 签名或与主可执行文件具有相同的团队 ID**，因此攻击者可以利用某些任意库加载来注入代码。查看 [**此处获取更多信息**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation)。
 
 ### `com.apple.private.security.clear-library-validation`
 
@@ -58,7 +58,7 @@
 
 **iMovie** 和 **Garageband** 拥有此权限。
 
-有关利用此权限 **获取 iCloud 令牌** 的更多 **信息**，请查看演讲：[**#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
+有关 **从该权限获取 iCloud 令牌的漏洞** 的更多 **信息**，请查看演讲：[**#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
 
 ### `com.apple.private.tcc.manager.check-by-audit-token`
 
@@ -87,7 +87,7 @@ TODO: 在 [**这份报告**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA
 ```
 ### **`kTCCServiceSystemPolicyAllFiles`**
 
-授予**完全磁盘访问**权限，这是您可以拥有的TCC最高权限之一。
+授予**完全磁盘访问**权限，这是TCC可以拥有的最高权限之一。
 
 ### **`kTCCServiceAppleEvents`**
 
@@ -97,19 +97,19 @@ TODO: 在 [**这份报告**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA
 ```bash
 osascript -e 'tell app "App Store" to activate' -e 'tell app "App Store" to activate' -e 'tell app "App Store" to display dialog "App Store requires your password to continue." & return & return default answer "" with icon 1 with hidden answer with title "App Store Alert"'
 ```
-或使它们执行 **任意操作**。
+或使它们执行**任意操作**。
 
 ### **`kTCCServiceEndpointSecurityClient`**
 
-允许在其他权限中 **写入用户的 TCC 数据库**。
+允许在其他权限中**写入用户的 TCC 数据库**。
 
 ### **`kTCCServiceSystemPolicySysAdminFiles`**
 
-允许 **更改** 用户的 **`NFSHomeDirectory`** 属性，从而更改其主文件夹路径，因此允许 **绕过 TCC**。
+允许**更改**用户的**`NFSHomeDirectory`**属性，从而更改其主文件夹路径，因此允许**绕过 TCC**。
 
 ### **`kTCCServiceSystemPolicyAppBundles`**
 
-允许修改应用程序包内的文件（在 app.app 内），这在 **默认情况下是不允许的**。
+允许修改应用程序包内的文件（在 app.app 内），这在默认情况下是**不允许的**。
 
 <figure><img src="../../../images/image (31).png" alt=""><figcaption></figcaption></figure>
 
@@ -117,27 +117,27 @@ osascript -e 'tell app "App Store" to activate' -e 'tell app "App Store" to acti
 
 ### `kTCCServiceAccessibility`
 
-该进程将能够 **滥用 macOS 辅助功能**，这意味着例如它将能够按下按键。因此，它可以请求访问控制像 Finder 这样的应用程序，并批准具有此权限的对话框。
+该进程将能够**滥用 macOS 辅助功能**，这意味着例如它将能够按下按键。因此，它可以请求访问控制像 Finder 这样的应用程序，并批准具有此权限的对话框。
 
 ## 中等
 
 ### `com.apple.security.cs.allow-jit`
 
-此权限允许通过将 `MAP_JIT` 标志传递给 `mmap()` 系统函数来 **创建可写和可执行的内存**。查看 [**更多信息**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-jit)。
+此权限允许通过将 `MAP_JIT` 标志传递给 `mmap()` 系统函数来**创建可写和可执行的内存**。查看[**更多信息**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-jit)。
 
 ### `com.apple.security.cs.allow-unsigned-executable-memory`
 
-此权限允许 **覆盖或修补 C 代码**，使用已被长期弃用的 **`NSCreateObjectFileImageFromMemory`**（这在根本上是不安全的），或使用 **DVDPlayback** 框架。查看 [**更多信息**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory)。
+此权限允许**覆盖或修补 C 代码**，使用已被长期弃用的**`NSCreateObjectFileImageFromMemory`**（这在根本上是不安全的），或使用**DVDPlayback**框架。查看[**更多信息**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory)。
 
 > [!CAUTION]
-> 包含此权限会使您的应用程序暴露于内存不安全代码语言中的常见漏洞。请仔细考虑您的应用程序是否需要此例外。
+> 包含此权限会使您的应用程序暴露于内存不安全代码语言中的常见漏洞。仔细考虑您的应用程序是否需要此例外。
 
 ### `com.apple.security.cs.disable-executable-page-protection`
 
-此权限允许 **修改其自身可执行文件** 在磁盘上的部分以强制退出。查看 [**更多信息**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-executable-page-protection)。
+此权限允许**修改其自身可执行文件**的部分内容以强制退出。查看[**更多信息**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-executable-page-protection)。
 
 > [!CAUTION]
-> 禁用可执行内存保护权限是一种极端权限，它从您的应用程序中移除了基本的安全保护，使攻击者能够在不被检测的情况下重写您应用程序的可执行代码。如果可能，优先选择更狭窄的权限。
+> 禁用可执行内存保护权限是一种极端权限，它从您的应用程序中移除了基本的安全保护，使攻击者能够在不被检测的情况下重写您应用程序的可执行代码。如果可能，优先选择更窄的权限。
 
 ### `com.apple.security.cs.allow-relative-library-loads`
 
@@ -163,3 +163,8 @@ osascript -e 'tell app "App Store" to activate' -e 'tell app "App Store" to acti
 {{#include ../../../banners/hacktricks-training.md}}
 
 </details>
+
+
+
+
+{{#include /banners/hacktricks-training.md}}

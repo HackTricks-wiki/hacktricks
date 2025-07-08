@@ -1,8 +1,10 @@
 # Mythic
 
+{{#include ../banners/hacktricks-training.md}}
+
 ## 什么是 Mythic？
 
-Mythic 是一个开源的、模块化的命令和控制 (C2) 框架，旨在用于红队渗透测试。它允许安全专业人员在不同操作系统（包括 Windows、Linux 和 macOS）上管理和部署各种代理（有效载荷）。Mythic 提供了一个用户友好的 Web 界面，用于管理代理、执行命令和收集结果，使其成为在受控环境中模拟真实攻击的强大工具。
+Mythic 是一个开源的、模块化的命令与控制 (C2) 框架，旨在用于红队测试。它允许安全专业人员在不同操作系统（包括 Windows、Linux 和 macOS）上管理和部署各种代理（有效载荷）。Mythic 提供了一个用户友好的网页界面，用于管理代理、执行命令和收集结果，使其成为在受控环境中模拟真实攻击的强大工具。
 
 ### 安装
 
@@ -32,7 +34,7 @@ sudo ./mythic-cli install github https://github.com/MythicC2Profiles/http
 ```
 ## [Apollo Agent](https://github.com/MythicAgents/Apollo)
 
-Apollo是一个用C#编写的Windows代理，使用4.0 .NET Framework，旨在用于SpecterOps的培训课程。
+Apollo 是一个用 C# 编写的 Windows 代理，使用 4.0 .NET Framework，旨在用于 SpecterOps 培训课程。
 
 使用以下命令安装：
 ```bash
@@ -82,15 +84,15 @@ Apollo是一个用C#编写的Windows代理，使用4.0 .NET Framework，旨在�
 - `spawn`: 在指定的可执行文件中生成新的代理会话，允许在新进程中执行shellcode
 - `spawnto_x64`和`spawnto_x86`: 将后渗透作业中使用的默认二进制文件更改为指定路径，而不是使用没有参数的`rundll32.exe`，这会产生很多噪音。
 
-### Mythic Forge
+### Mithic Forge
 
-这允许从Mythic Forge加载**COFF/BOF**文件，Mythic Forge是一个预编译有效载荷和工具的存储库，可以在目标系统上执行。通过可以加载的所有命令，将能够在当前代理进程中以BOF的形式执行常见操作（通常更隐蔽）。
+这允许从Mythic Forge加载**COFF/BOF**文件，Mythic Forge是一个预编译有效载荷和工具的存储库，可以在目标系统上执行。通过可以加载的所有命令，将能够以BOFs的形式在当前代理进程中执行常见操作（通常更隐蔽）。
 
 开始安装它们：
 ```bash
 ./mythic-cli install github https://github.com/MythicAgents/forge.git
 ```
-然后，使用 `forge_collections` 显示 Mythic Forge 中的 COFF/BOF 模块，以便能够选择并将它们加载到代理的内存中以执行。默认情况下，以下 2 个集合会在 Apollo 中添加：
+然后，使用 `forge_collections` 显示 Mythic Forge 中的 COFF/BOF 模块，以便能够选择并将它们加载到代理的内存中以执行。默认情况下，以下 2 个集合在 Apollo 中添加：
 
 - `forge_collections {"collectionName":"SharpCollection"}`
 - `forge_collections {"collectionName":"SliverArmory"}`
@@ -101,7 +103,7 @@ Apollo是一个用C#编写的Windows代理，使用4.0 .NET Framework，旨在�
 
 - `powershell_import`: 将新的 PowerShell 脚本 (.ps1) 导入代理缓存以供后续执行
 - `powershell`: 在代理的上下文中执行 PowerShell 命令，允许进行高级脚本编写和自动化
-- `powerpick`: 将 PowerShell 加载程序程序集注入到一个牺牲进程中并执行 PowerShell 命令（不进行 PowerShell 日志记录）。
+- `powerpick`: 将 PowerShell 加载程序程序集注入到一个牺牲进程中并执行 PowerShell 命令（不记录 PowerShell 日志）。
 - `psinject`: 在指定进程中执行 PowerShell，允许在另一个进程的上下文中有针对性地执行脚本
 - `shell`: 在代理的上下文中执行 shell 命令，类似于在 cmd.exe 中运行命令
 
@@ -111,7 +113,7 @@ Apollo是一个用C#编写的Windows代理，使用4.0 .NET Framework，旨在�
 - `jump_wmi`: 使用 WMI 技术通过首先复制 Apollo 代理可执行文件 (apollo.exe) 并执行它来横向移动到新主机。
 - `wmiexecute`: 使用 WMI 在本地或指定的远程系统上执行命令，提供可选的凭据进行模拟。
 - `net_dclist`: 检索指定域的域控制器列表，有助于识别潜在的横向移动目标。
-- `net_localgroup`: 列出指定计算机上的本地组，如果未指定计算机，则默认为本地主机。
+- `net_localgroup`: 列出指定计算机上的本地组，如果未指定计算机，则默认为 localhost。
 - `net_localgroup_member`: 检索本地或远程计算机上指定组的本地组成员资格，允许枚举特定组中的用户。
 - `net_shares`: 列出指定计算机上的远程共享及其可访问性，有助于识别潜在的横向移动目标。
 - `socks`: 在目标网络上启用 SOCKS 5 兼容代理，允许通过被攻陷的主机隧道流量。与 proxychains 等工具兼容。
@@ -149,16 +151,19 @@ Poseidon 是一个用 Golang 编写的代理，编译为 **Linux 和 macOS** 可
 
 ### 横向移动
 
-- `ssh`: 使用指定凭据 SSH 到主机并打开一个 PTY，而不生成 ssh。
+- `ssh`: 使用指定凭据 SSH 到主机，并在不生成 ssh 的情况下打开 PTY。
 - `sshauth`: 使用指定凭据 SSH 到指定主机。您还可以使用此命令通过 SSH 在远程主机上执行特定命令或使用它来 SCP 文件。
 - `link_tcp`: 通过 TCP 链接到另一个代理，允许代理之间的直接通信。
 - `link_webshell`: 使用 webshell P2P 配置文件链接到代理，允许远程访问代理的 Web 界面。
 - `rpfwd`: 启动或停止反向端口转发，允许远程访问目标网络上的服务。
-- `socks`: 在目标网络上启动或停止 SOCKS5 代理，允许通过被攻陷的主机进行流量隧道。与 proxychains 等工具兼容。
+- `socks`: 在目标网络上启动或停止 SOCKS5 代理，允许通过被攻陷的主机隧道流量。与 proxychains 等工具兼容。
 - `portscan`: 扫描主机以查找开放端口，有助于识别潜在的横向移动或进一步攻击的目标。
 
 ### 进程执行
 
 - `shell`: 通过 /bin/sh 执行单个 shell 命令，允许在目标系统上直接执行命令。
 - `run`: 从磁盘执行带参数的命令，允许在目标系统上执行二进制文件或脚本。
-- `pty`: 打开一个交互式 PTY，允许与目标系统上的 shell 进行直接交互。
+- `pty`: 打开一个交互式 PTY，允许与目标系统上的 shell 直接交互。
+
+
+{{#include ../banners/hacktricks-training.md}}
