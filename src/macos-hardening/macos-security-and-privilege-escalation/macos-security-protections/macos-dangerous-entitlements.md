@@ -21,11 +21,11 @@ Bu yetki, **çekirdek hariç** herhangi bir süreç için **görev portunu** alm
 
 ### `com.apple.security.get-task-allow`
 
-Bu yetki, **`com.apple.security.cs.debugger`** yetkisine sahip diğer süreçlerin, bu yetkiye sahip ikili dosya tarafından çalıştırılan sürecin görev portunu almasına ve **kod enjekte etmesine** izin verir. Daha fazla bilgi için [**bunu kontrol edin**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
+Bu yetki, **`com.apple.security.cs.debugger`** yetkisine sahip diğer süreçlerin, bu yetkiye sahip ikili tarafından çalıştırılan sürecin görev portunu almasına ve **kod enjekte etmesine** izin verir. Daha fazla bilgi için [**bunu kontrol edin**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
 
 ### `com.apple.security.cs.debugger`
 
-Hata Ayıklama Aracı Yetkisine sahip uygulamalar, `task_for_pid()` çağrısı yaparak, `Get Task Allow` yetkisi `true` olarak ayarlanmış imzasız ve üçüncü taraf uygulamalar için geçerli bir görev portu alabilir. Ancak, hata ayıklama aracı yetkisi olsa bile, bir hata ayıklayıcı **`Get Task Allow` yetkisine sahip olmayan** süreçlerin görev portlarını **alamaz** ve bu nedenle Sistem Bütünlüğü Koruması tarafından korunur. Daha fazla bilgi için [**bunu kontrol edin**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger).
+Hata Ayıklama Aracı Yetkisine sahip uygulamalar, `Get Task Allow` yetkisi `true` olarak ayarlanmış imzasız ve üçüncü taraf uygulamalar için geçerli bir görev portu almak üzere `task_for_pid()` çağrısı yapabilir. Ancak, hata ayıklama aracı yetkisi ile bile, bir hata ayıklayıcı **`Get Task Allow` yetkisine** sahip olmayan süreçlerin görev portlarını **alamaz** ve bu nedenle Sistem Bütünlüğü Koruması tarafından korunur. Daha fazla bilgi için [**bunu kontrol edin**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger).
 
 ### `com.apple.security.cs.disable-library-validation`
 
@@ -66,11 +66,11 @@ TODO: Bunun neye izin verdiğini bilmiyorum
 
 ### `com.apple.private.apfs.revert-to-snapshot`
 
-TODO: [**bu raporda**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **bu,** bir yeniden başlatmadan sonra SSV korumalı içerikleri güncellemek için kullanılabileceği belirtiliyor. Bunu nasıl yaptığını biliyorsanız bir PR gönderin lütfen!
+TODO: [**bu raporda**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **bu, bir yeniden başlatmadan sonra SSV korumalı içerikleri güncellemek için kullanılabileceği** belirtiliyor. Bunu nasıl yaptığını biliyorsanız bir PR gönderin lütfen!
 
 ### `com.apple.private.apfs.create-sealed-snapshot`
 
-TODO: [**bu raporda**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **bu,** bir yeniden başlatmadan sonra SSV korumalı içerikleri güncellemek için kullanılabileceği belirtiliyor. Bunu nasıl yaptığını biliyorsanız bir PR gönderin lütfen!
+TODO: [**bu raporda**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **bu, bir yeniden başlatmadan sonra SSV korumalı içerikleri güncellemek için kullanılabileceği** belirtiliyor. Bunu nasıl yaptığını biliyorsanız bir PR gönderin lütfen!
 
 ### `keychain-access-groups`
 
@@ -87,7 +87,7 @@ Bu yetki, uygulamanın erişim sağladığı **anahtar zinciri** gruplarını li
 ```
 ### **`kTCCServiceSystemPolicyAllFiles`**
 
-**Tam Disk Erişimi** izinlerini verir, sahip olabileceğiniz TCC'nin en yüksek izinlerinden biridir.
+**Tam Disk Erişimi** izinleri verir, sahip olabileceğiniz TCC'nin en yüksek izinlerinden biridir.
 
 ### **`kTCCServiceAppleEvents`**
 
@@ -97,19 +97,19 @@ Kullanıcıdan şifresini istemelerini sağlamak gibi:
 ```bash
 osascript -e 'tell app "App Store" to activate' -e 'tell app "App Store" to activate' -e 'tell app "App Store" to display dialog "App Store requires your password to continue." & return & return default answer "" with icon 1 with hidden answer with title "App Store Alert"'
 ```
-Or making them perform **keyfi eylemler**.
+Or making them perform **arbitrary actions**.
 
 ### **`kTCCServiceEndpointSecurityClient`**
 
-Kullanıcının TCC veritabanını **yazma** gibi izinler verir.
+Kullanıcının TCC veritabanını **yazma** gibi diğer izinlerin yanı sıra izin verir.
 
 ### **`kTCCServiceSystemPolicySysAdminFiles`**
 
-Kullanıcının ev dizin yolunu değiştiren **`NFSHomeDirectory`** niteliğini **değiştirmeye** izin verir ve böylece TCC'yi **bypass** etmeye olanak tanır.
+Kullanıcının ana dizin yolunu değiştiren **`NFSHomeDirectory`** niteliğini **değiştirmeye** izin verir ve böylece TCC'yi **bypass** etmeye olanak tanır.
 
 ### **`kTCCServiceSystemPolicyAppBundles`**
 
-Uygulama paketinin içindeki dosyaları değiştirmeye izin verir (app.app içinde), bu varsayılan olarak **yasaktır**.
+Uygulama paketinin içindeki dosyaları (app.app içinde) değiştirmeye izin verir, bu varsayılan olarak **yasaktır**.
 
 <figure><img src="../../../images/image (31).png" alt=""><figcaption></figcaption></figure>
 
@@ -117,9 +117,9 @@ Bu erişimi kimin sahip olduğunu _Sistem Ayarları_ > _Gizlilik ve Güvenlik_ >
 
 ### `kTCCServiceAccessibility`
 
-Bu süreç, **macOS erişilebilirlik özelliklerini kötüye kullanma** yeteneğine sahip olacak, bu da örneğin tuş vuruşlarını basabilmesi anlamına gelir. Böylece Finder gibi bir uygulamayı kontrol etmek için erişim talep edebilir ve bu izinle diyalogu onaylayabilir.
+Süreç, **macOS erişilebilirlik özelliklerini** **istismar** edebilecektir, bu da örneğin tuş vuruşlarını basabilmesi anlamına gelir. Böylece Finder gibi bir uygulamayı kontrol etmek için erişim talep edebilir ve bu izinle diyalogu onaylayabilir.
 
-## Orta
+## Medium
 
 ### `com.apple.security.cs.allow-jit`
 
@@ -127,7 +127,7 @@ Bu yetki, `mmap()` sistem fonksiyonuna `MAP_JIT` bayrağını geçirerek **yazı
 
 ### `com.apple.security.cs.allow-unsigned-executable-memory`
 
-Bu yetki, **C kodunu geçersiz kılmayı veya yamanmayı** sağlar, uzun süredir kullanılmayan **`NSCreateObjectFileImageFromMemory`** (temelde güvensizdir) veya **DVDPlayback** çerçevesini kullanmayı sağlar. Daha fazla bilgi için [**bunu kontrol edin**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory).
+Bu yetki, **C kodunu geçersiz kılmaya veya yamanmaya** izin verir, uzun süredir kullanılmayan **`NSCreateObjectFileImageFromMemory`** (temelde güvensizdir) veya **DVDPlayback** çerçevesini kullanabilir. Daha fazla bilgi için [**bunu kontrol edin**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory).
 
 > [!CAUTION]
 > Bu yetkiyi dahil etmek, uygulamanızı bellek-güvensiz kod dillerindeki yaygın güvenlik açıklarına maruz bırakır. Uygulamanızın bu istisnaya ihtiyaç duyup duymadığını dikkatlice değerlendirin.
@@ -163,3 +163,8 @@ Sürecin **tüm TCC izinlerini istemesine** izin verin.
 {{#include ../../../banners/hacktricks-training.md}}
 
 </details>
+
+
+
+
+{{#include /banners/hacktricks-training.md}}

@@ -4,7 +4,7 @@
 
 ## SCM
 
-**SCMExec**, uzaktan sistemlerde komutları çalıştırmak için Service Control Manager (SCM) kullanarak bir hizmet oluşturma tekniğidir. Bu yöntem, Kullanıcı Hesabı Kontrolü (UAC) ve Windows Defender gibi bazı güvenlik kontrollerini atlayabilir.
+**SCMExec**, komutları uzak sistemlerde çalıştırmak için Service Control Manager (SCM) kullanarak bir hizmet oluşturma tekniğidir. Bu yöntem, Kullanıcı Hesabı Kontrolü (UAC) ve Windows Defender gibi bazı güvenlik kontrollerini atlayabilir.
 
 ## Tools
 

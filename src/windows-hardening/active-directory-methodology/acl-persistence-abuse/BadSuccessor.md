@@ -23,7 +23,7 @@ Akamai araştırmacıları, tek bir niteliğin — **`msDS‑ManagedAccountPrece
 
 ## Adım adım: BadSuccessor* ayrıcalık yükseltme
 
-1. **Kontrol ettiğiniz bir dMSA'yı bulun veya oluşturun**
+1. **Kontrol ettiğiniz bir dMSA bulun veya oluşturun**
 ```bash
 New‑ADServiceAccount Attacker_dMSA `
 ‑DNSHostName ad.lab `
@@ -36,7 +36,7 @@ Nesneyi yazabileceğiniz bir OU içinde oluşturduğunuz için, otomatik olarak 
 - `msDS‑ManagedAccountPrecededByLink = DN` herhangi bir kurbanın (örneğin, `CN=Administrator,CN=Users,DC=lab,DC=local`) değerini ayarlayın.
 - `msDS‑DelegatedMSAState = 2` (göç tamamlandı) ayarlayın.
 
-**Set‑ADComputer, ldapmodify** veya hatta **ADSI Edit** gibi araçlar çalışır; alan yöneticisi haklarına ihtiyaç yoktur.
+**Set‑ADComputer, ldapmodify** veya hatta **ADSI Edit** gibi araçlar çalışır; alan yöneticisi hakları gerekmez.
 
 3. **dMSA için bir TGT talep edin** — Rubeus `/dmsa` bayrağını destekler:
 
@@ -50,9 +50,9 @@ Dönen PAC artık SID 500 (Administrator) artı Domain Admins/Enterprise Admins 
 
 Meşru göçler sırasında KDC, yeni dMSA'nın **eski hesaba verilen biletleri deşifre etmesine** izin vermelidir. Canlı oturumları bozmayı önlemek için, hem mevcut anahtarları hem de önceki anahtarları **`KERB‑DMSA‑KEY‑PACKAGE`** adlı yeni bir ASN.1 blob içinde yerleştirir.
 
-Sahte göçümüz, dMSA'nın kurbanı devraldığını iddia ettiğinden, KDC, kurbanın RC4‑HMAC anahtarını **önceki anahtarlar** listesine özenle kopyalar – dMSA'nın asla “önceki” bir şifreye sahip olmaması durumunda bile. O RC4 anahtarı tuzlanmamıştır, bu nedenle etkili bir şekilde kurbanın NT hash'idir ve saldırgana **çevrimdışı kırma veya “hash'i geçme”** yeteneği verir.
+Sahte göçümüz, dMSA'nın kurbanı devraldığını iddia ettiğinden, KDC, kurbanın RC4-HMAC anahtarını **önceki anahtarlar** listesine özenle kopyalar – dMSA'nın asla “önceki” bir şifreye sahip olmaması durumunda bile. O RC4 anahtarı tuzlanmamıştır, bu nedenle etkili bir şekilde kurbanın NT hash'idir ve saldırgana **çevrimdışı kırma veya “hash'i geçme”** yeteneği verir.
 
-Bu nedenle, binlerce kullanıcıyı toplu olarak bağlamak, bir saldırganın “ölçekli” olarak hash dökmesine olanak tanır ve **BadSuccessor'ı hem bir ayrıcalık yükseltme hem de kimlik bilgisi ihlali aracı haline getirir**.
+Bu nedenle, binlerce kullanıcıyı toplu olarak bağlamak, bir saldırganın **BadSuccessor'ı hem ayrıcalık yükseltme hem de kimlik bilgisi ihlali ilkesine** dönüştürmesine olanak tanır.
 
 ## Araçlar
 

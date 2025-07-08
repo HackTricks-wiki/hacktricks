@@ -1,8 +1,10 @@
-# Mythic
+# Mythic
+
+{{#include ../banners/hacktricks-training.md}}
 
 ## Mythic Nedir?
 
-Mythic, red teaming için tasarlanmış açık kaynaklı, modüler bir komut ve kontrol (C2) çerçevesidir. Güvenlik profesyonellerinin Windows, Linux ve macOS dahil olmak üzere farklı işletim sistemlerinde çeşitli ajanları (payloads) yönetmesine ve dağıtmasına olanak tanır. Mythic, ajanları yönetmek, komutları yürütmek ve sonuçları toplamak için kullanıcı dostu bir web arayüzü sağlar, bu da onu kontrollü bir ortamda gerçek dünya saldırılarını simüle etmek için güçlü bir araç haline getirir.
+Mythic, red teaming için tasarlanmış açık kaynaklı, modüler bir komut ve kontrol (C2) çerçevesidir. Güvenlik profesyonellerinin Windows, Linux ve macOS dahil olmak üzere farklı işletim sistemlerinde çeşitli ajanları (payloads) yönetmesine ve dağıtmasına olanak tanır. Mythic, ajanları yönetmek, komutları yürütmek ve sonuçları toplamak için kullanıcı dostu bir web arayüzü sunarak, kontrol edilen bir ortamda gerçek dünya saldırılarını simüle etmek için güçlü bir araçtır.
 
 ### Kurulum
 
@@ -25,7 +27,7 @@ Yeni ajanlar, Mythic zaten çalışıyorsa bile önceki komutla eklenebilir.
 
 Mythic'teki C2 profilleri, **ajanların Mythic sunucusuyla nasıl iletişim kurduğunu** tanımlar. İletişim protokolünü, şifreleme yöntemlerini ve diğer ayarları belirtir. C2 profillerini Mythic web arayüzü aracılığıyla oluşturabilir ve yönetebilirsiniz.
 
-Varsayılan olarak, Mythic hiçbir profil ile kurulmuştur, ancak bazı profilleri repodan [**https://github.com/MythicC2Profiles**](https://github.com/MythicC2Profiles) indirmeniz mümkündür:
+Varsayılan olarak Mythic, profil olmadan kurulur; ancak, bazı profilleri repodan [**https://github.com/MythicC2Profiles**](https://github.com/MythicC2Profiles) indirmeniz mümkündür:
 ```bash
 sudo ./mythic-cli install github https://github.com/MythicC2Profiles/<c2-profile>>
 sudo ./mythic-cli install github https://github.com/MythicC2Profiles/http
@@ -45,29 +47,29 @@ Bu ajan, bazı ek özelliklerle birlikte Cobalt Strike'ın Beacon'una çok benze
 - `cat`: Bir dosyanın içeriğini yazdır
 - `cd`: Geçerli çalışma dizinini değiştir
 - `cp`: Bir dosyayı bir yerden başka bir yere kopyala
-- `ls`: Geçerli dizindeki veya belirtilen yoldaki dosyaları ve dizinleri listele
+- `ls`: Geçerli dizindeki dosyaları ve dizinleri listele veya belirtilen yolu kontrol et
 - `pwd`: Geçerli çalışma dizinini yazdır
 - `ps`: Hedef sistemdeki çalışan süreçleri listele (ek bilgi ile)
 - `download`: Hedef sistemden yerel makineye bir dosya indir
 - `upload`: Yerel makineden hedef sisteme bir dosya yükle
 - `reg_query`: Hedef sistemdeki kayıt defteri anahtarlarını ve değerlerini sorgula
 - `reg_write_value`: Belirtilen kayıt defteri anahtarına yeni bir değer yaz
-- `sleep`: Ajanın uyku aralığını değiştir, bu da Mythic sunucusuyla ne sıklıkla kontrol yapacağını belirler
+- `sleep`: Ajanın uyku aralığını değiştir, bu aralık ajanın Mythic sunucusuyla ne sıklıkla kontrol yapacağını belirler
 - Ve daha fazlası, mevcut komutların tam listesini görmek için `help` kullanın.
 
 ### Yetki yükseltme
 
 - `getprivs`: Geçerli iş parçacığı belirtecinde mümkün olan en fazla yetkiyi etkinleştir
 - `getsystem`: Winlogon'a bir tanıtıcı aç ve belirteci kopyala, böylece yetkileri SYSTEM seviyesine yükselt
-- `make_token`: Yeni bir oturum aç ve bunu ajana uygula, başka bir kullanıcıyı taklit etmeye olanak tanır
+- `make_token`: Yeni bir oturum açma oturumu oluştur ve bunu ajana uygula, başka bir kullanıcıyı taklit etmeye olanak tanır
 - `steal_token`: Başka bir süreçten birincil belirteci çal, böylece ajan o sürecin kullanıcısını taklit edebilir
 - `pth`: Pass-the-Hash saldırısı, ajanın NTLM hash'ini kullanarak bir kullanıcı olarak kimlik doğrulamasına olanak tanır, düz metin parolasına ihtiyaç duymadan
 - `mimikatz`: Kimlik bilgilerini, hash'leri ve diğer hassas bilgileri bellekten veya SAM veritabanından çıkarmak için Mimikatz komutlarını çalıştır
 - `rev2self`: Ajanın belirtecini birincil belirtecine geri döndür, böylece yetkileri orijinal seviyeye düşür
 - `ppid`: Post-exploitation işleri için yeni bir ana süreç kimliği belirterek ana süreci değiştir, iş yürütme bağlamı üzerinde daha iyi kontrol sağlar
-- `printspoofer`: Yazıcı spooler güvenlik önlemlerini aşmak için PrintSpoofer komutlarını çalıştır, böylece yetki yükseltme veya kod yürütme sağlar
+- `printspoofer`: PrintSpoofer komutlarını çalıştırarak yazıcı sıralayıcı güvenlik önlemlerini aş, böylece yetki yükseltme veya kod yürütme sağlar
 - `dcsync`: Bir kullanıcının Kerberos anahtarlarını yerel makineye senkronize et, çevrimdışı parola kırma veya daha fazla saldırı için olanak tanır
-- `ticket_cache_add`: Mevcut oturum açma oturumuna veya belirtilen birine bir Kerberos bileti ekle, böylece bilet yeniden kullanımı veya taklitine olanak tanır
+- `ticket_cache_add`: Geçerli oturum açma oturumuna veya belirtilen birine bir Kerberos bileti ekle, böylece bilet yeniden kullanımı veya taklitine olanak tanır
 
 ### Süreç yürütme
 
@@ -75,7 +77,7 @@ Bu ajan, bazı ek özelliklerle birlikte Cobalt Strike'ın Beacon'una çok benze
 - `execute_assembly`: Ajanın bağlamında bir .NET assembly çalıştırır
 - `execute_coff`: Bellekte bir COFF dosyasını çalıştırır, derlenmiş kodun bellekte yürütülmesine olanak tanır
 - `execute_pe`: Yönetilmeyen bir yürütülebilir dosyayı (PE) çalıştırır
-- `inline_assembly`: Ajanın ana sürecini etkilemeden geçici kod yürütülmesine olanak tanıyan bir .NET assembly'yi geçici bir AppDomain'de çalıştırır
+- `inline_assembly`: Geçici bir AppDomain içinde bir .NET assembly çalıştırır, böylece ajanın ana sürecini etkilemeden kodun geçici olarak yürütülmesine olanak tanır
 - `run`: Hedef sistemde bir ikili dosyayı çalıştırır, yürütülebilir dosyayı bulmak için sistemin PATH'ini kullanır
 - `shinject`: Uzak bir sürece shellcode enjekte eder, böylece rastgele kodun bellekte yürütülmesine olanak tanır
 - `inject`: Ajan shellcode'unu uzak bir sürece enjekte eder, böylece ajanın kodunun bellekte yürütülmesine olanak tanır
@@ -99,7 +101,7 @@ Bir modül yüklendikten sonra, `forge_bof_sa-whoami` veya `forge_bof_sa-netuser
 
 ### Powershell & scripting execution
 
-- `powershell_import`: Yeni bir PowerShell betiğini (.ps1) ajan önbelleğine ithal eder ve daha sonra çalıştırmak için hazırlar.
+- `powershell_import`: Yeni bir PowerShell betiğini (.ps1) ajan önbelleğine ithal eder ve daha sonra çalıştırmak için saklar.
 - `powershell`: Ajan bağlamında bir PowerShell komutunu çalıştırır, gelişmiş betik yazma ve otomasyon sağlar.
 - `powerpick`: Bir PowerShell yükleyici derlemesini fedakâr bir süreçte enjekte eder ve bir PowerShell komutunu çalıştırır (powershell kaydı olmadan).
 - `psinject`: Belirtilen bir süreçte PowerShell'i çalıştırır, başka bir süreç bağlamında betiklerin hedefli olarak çalıştırılmasına olanak tanır.
@@ -110,13 +112,13 @@ Bir modül yüklendikten sonra, `forge_bof_sa-whoami` veya `forge_bof_sa-netuser
 - `jump_psexec`: PsExec tekniğini kullanarak Apollo ajan yürütülebilir dosyasını (apollo.exe) kopyalayarak yeni bir ana bilgisayara yan hareket eder ve çalıştırır.
 - `jump_wmi`: WMI tekniğini kullanarak Apollo ajan yürütülebilir dosyasını (apollo.exe) kopyalayarak yeni bir ana bilgisayara yan hareket eder ve çalıştırır.
 - `wmiexecute`: WMI kullanarak yerel veya belirtilen uzak sistemde bir komut çalıştırır, taklit için isteğe bağlı kimlik bilgileri ile.
-- `net_dclist`: Belirtilen alan için etki alanı denetleyicilerinin bir listesini alır, yan hareket için potansiyel hedefleri belirlemek için yararlıdır.
-- `net_localgroup`: Belirtilen bilgisayardaki yerel grupları listeler, bilgisayar belirtilmezse varsayılan olarak localhost'a döner.
+- `net_dclist`: Belirtilen alan için alan denetleyicilerinin bir listesini alır, yan hareket için potansiyel hedefleri belirlemek için yararlıdır.
+- `net_localgroup`: Belirtilen bilgisayardaki yerel grupları listeler, belirtilen bir bilgisayar yoksa localhost'a varsayılan olarak ayarlanır.
 - `net_localgroup_member`: Yerel veya uzak bilgisayardaki belirtilen bir grup için yerel grup üyeliğini alır, belirli gruplardaki kullanıcıların sayımına olanak tanır.
 - `net_shares`: Belirtilen bilgisayardaki uzak payları ve erişilebilirliklerini listeler, yan hareket için potansiyel hedefleri belirlemek için yararlıdır.
-- `socks`: Hedef ağda SOCKS 5 uyumlu bir proxy'yi etkinleştirir, böylece trafiği ele geçirilmiş ana bilgisayar üzerinden tünelleme sağlar. proxychains gibi araçlarla uyumludur.
-- `rpfwd`: Hedef ana bilgisayarda belirtilen bir portta dinlemeye başlar ve trafiği Mythic üzerinden uzak bir IP ve porta yönlendirir, böylece hedef ağdaki hizmetlere uzaktan erişim sağlar.
-- `listpipes`: Yerel sistemdeki tüm adlandırılmış boruları listeler, bu da IPC mekanizmalarıyla etkileşim yoluyla yan hareket veya ayrıcalık yükseltme için yararlı olabilir.
+- `socks`: Hedef ağda SOCKS 5 uyumlu bir proxy'yi etkinleştirir, böylece trafiği ele geçirilmiş ana bilgisayar üzerinden tünelleme yapılabilir. proxychains gibi araçlarla uyumludur.
+- `rpfwd`: Hedef ana bilgisayarda belirtilen bir portta dinlemeye başlar ve trafiği Mythic üzerinden uzak bir IP ve port'a yönlendirir, böylece hedef ağdaki hizmetlere uzaktan erişim sağlar.
+- `listpipes`: Yerel sistemdeki tüm adlandırılmış boruları listeler, bu da yan hareket veya ayrıcalık yükseltme için IPC mekanizmalarıyla etkileşimde bulunmak için yararlı olabilir.
 
 ### Miscellaneous Commands
 - `help`: Belirli komutlar hakkında ayrıntılı bilgi veya ajandaki tüm mevcut komutlar hakkında genel bilgi görüntüler.
@@ -129,6 +131,8 @@ Poseidon, **Linux ve macOS** yürütülebilir dosyalarına derlenen bir Golang a
 ```bash
 ./mythic-cli install github https://github.com/MythicAgents/Poseidon.git
 ```
+Kullanıcı Linux üzerinde bazı ilginç komutlara sahiptir:
+
 ### Yaygın eylemler
 
 - `cat`: Bir dosyanın içeriğini yazdır
@@ -159,5 +163,8 @@ Poseidon, **Linux ve macOS** yürütülebilir dosyalarına derlenen bir Golang a
 ### Süreç yürütme
 
 - `shell`: /bin/sh üzerinden tek bir shell komutunu çalıştır, hedef sistemde komutların doğrudan yürütülmesine izin verir.
-- `run`: Diskten argümanlarla bir komut çalıştır, hedef sistemde ikili dosyaların veya betiklerin yürütülmesine izin verir.
-- `pty`: Hedef sistemde shell ile doğrudan etkileşim sağlamak için etkileşimli bir PTY aç.
+- `run`: Diskten argümanlarla bir komutu çalıştır, hedef sistemde ikili dosyaların veya betiklerin yürütülmesine izin verir.
+- `pty`: Etkileşimli bir PTY aç, hedef sistemdeki shell ile doğrudan etkileşim sağlar.
+
+
+{{#include ../banners/hacktricks-training.md}}
