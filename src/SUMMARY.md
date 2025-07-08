@@ -82,6 +82,7 @@
   - [Reverse Shells - Linux](generic-hacking/reverse-shells/linux.md)
   - [Expose local to the internet](generic-hacking/reverse-shells/expose-local-to-the-internet.md)
   - [Full TTYs](generic-hacking/reverse-shells/full-ttys.md)
+- [Info Leak](generic-hacking/info-leak.md)
 - [Search Exploits](generic-hacking/search-exploits.md)
 - [Tunneling and Port Forwarding](generic-hacking/tunneling-and-port-forwarding.md)
 
