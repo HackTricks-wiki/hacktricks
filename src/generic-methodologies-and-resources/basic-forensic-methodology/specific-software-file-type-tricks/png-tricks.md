@@ -1,3 +1,5 @@
+# PNG Tricks
+
 {{#include ../../../banners/hacktricks-training.md}}
 
 **PNG files** are highly regarded in **CTF challenges** for their **lossless compression**, making them ideal for embedding hidden data. Tools like **Wireshark** enable the analysis of PNG files by dissecting their data within network packets, revealing embedded information or anomalies.

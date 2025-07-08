@@ -1,7 +1,9 @@
+# NFS No Root Squash Misconfiguration Privilege Escalation
+
 {{#include ../../banners/hacktricks-training.md}}
 
 
-# Squashing Basic Info
+## Squashing Basic Info
 
 NFS will usually (specially in linux) trust the indicated `uid` and `gid` by the client conencting to access the files (if kerberos is not used). However, there are some configurations that can be set in the server to **change this behavior**:
 
@@ -17,9 +19,9 @@ For more information about **NFS** check:
 ../../network-services-pentesting/nfs-service-pentesting.md
 {{#endref}}
 
-# Privilege Escalation
+## Privilege Escalation
 
-## Remote Exploit
+### Remote Exploit
 
 Option 1 using bash:
 - **Mounting that directory** in a client machine, and **as root copying** inside the mounted folder the **/bin/bash** binary and giving it **SUID** rights, and **executing from the victim** machine that bash binary.
@@ -57,7 +59,7 @@ cd <SHAREDD_FOLDER>
 ./payload #ROOT shell
 ```
 
-## Local Exploit
+### Local Exploit
 
 > [!TIP]
 > Note that if you can create a **tunnel from your machine to the victim machine you can still use the Remote version to exploit this privilege escalation tunnelling the required ports**.\
@@ -65,11 +67,11 @@ cd <SHAREDD_FOLDER>
 > Another required requirement for the exploit to work is that **the export inside `/etc/export`** **must be using the `insecure` flag**.\
 > --_I'm not sure that if `/etc/export` is indicating an IP address this trick will work_--
 
-## Basic Information
+### Basic Information
 
 The scenario involves exploiting a mounted NFS share on a local machine, leveraging a flaw in the NFSv3 specification which allows the client to specify its uid/gid, potentially enabling unauthorized access. The exploitation involves using [libnfs](https://github.com/sahlberg/libnfs), a library that allows for the forging of NFS RPC calls.
 
-### Compiling the Library
+#### Compiling the Library
 
 The library compilation steps might require adjustments based on the kernel version. In this specific case, the fallocate syscalls were commented out. The compilation process involves the following commands:
 
@@ -80,7 +82,7 @@ make
 gcc -fPIC -shared -o ld_nfs.so examples/ld_nfs.c -ldl -lnfs -I./include/ -L./lib/.libs/
 ```
 
-### Conducting the Exploit
+#### Conducting the Exploit
 
 The exploit involves creating a simple C program (`pwn.c`) that elevates privileges to root and then executing a shell. The program is compiled, and the resulting binary (`a.out`) is placed on the share with suid root, using `ld_nfs.so` to fake the uid in the RPC calls:
 
@@ -108,7 +110,7 @@ LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod u+s nfs:/
 #root
 ```
 
-## Bonus: NFShell for Stealthy File Access
+### Bonus: NFShell for Stealthy File Access
 
 Once root access is obtained, to interact with the NFS share without changing ownership (to avoid leaving traces), a Python script (nfsh.py) is used. This script adjusts the uid to match that of the file being accessed, allowing for interaction with files on the share without permission issues:
 

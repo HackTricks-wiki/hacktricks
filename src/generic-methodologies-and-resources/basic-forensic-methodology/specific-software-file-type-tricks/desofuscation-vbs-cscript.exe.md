@@ -1,3 +1,5 @@
+# Desobfuscation Techniques for VBS Files
+
 {{#include ../../../banners/hacktricks-training.md}}
 
 Some things that could be useful to debug/deobfuscate a malicious VBS file:

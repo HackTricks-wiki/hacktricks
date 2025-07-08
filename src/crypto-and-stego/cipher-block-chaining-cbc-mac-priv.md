@@ -1,10 +1,12 @@
+# Cipher Block Chaining (CBC) and CBC-MAC Privilege Escalation
+
 {{#include ../banners/hacktricks-training.md}}
 
-# CBC
+## CBC
 
 If the **cookie** is **only** the **username** (or the first part of the cookie is the username) and you want to impersonate the username "**admin**". Then, you can create the username **"bdmin"** and **bruteforce** the **first byte** of the cookie.
 
-# CBC-MAC
+## CBC-MAC
 
 **Cipher block chaining message authentication code** (**CBC-MAC**) is a method used in cryptography. It works by taking a message and encrypting it block by block, where each block's encryption is linked to the one before it. This process creates a **chain of blocks**, making sure that changing even a single bit of the original message will lead to an unpredictable change in the last block of encrypted data. To make or reverse such a change, the encryption key is required, ensuring security.
 
@@ -12,7 +14,7 @@ To calculate the CBC-MAC of message m, one encrypts m in CBC mode with zero init
 
 ![https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/CBC-MAC_structure_(en).svg/570px-CBC-MAC_structure_(en).svg.png](<https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/CBC-MAC_structure_(en).svg/570px-CBC-MAC_structure_(en).svg.png>)
 
-# Vulnerability
+## Vulnerability
 
 With CBC-MAC usually the **IV used is 0**.\
 This is a problem because 2 known messages (`m1` and `m2`) independently will generate 2 signatures (`s1` and `s2`). So:
@@ -42,7 +44,7 @@ now, you can use s32 as the signature of the full name **Administrator**.
 2. Get the signature of username **rator\x00\x00\x00 XOR s1 XOR 0** is s32**.**
 3. Set the cookie to s32 and it will be a valid cookie for the user **Administrator**.
 
-# Attack Controlling IV
+## Attack Controlling IV
 
 If you can control the used IV the attack could be very easy.\
 If the cookies is just the username encrypted, to impersonate the user "**administrator**" you can create the user "**Administrator**" and you will get it's cookie.\

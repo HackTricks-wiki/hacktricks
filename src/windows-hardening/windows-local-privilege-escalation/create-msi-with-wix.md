@@ -1,6 +1,6 @@
-{{#include ../../banners/hacktricks-training.md}}
-
 # Creating Malicious MSI and Getting Root
+
+{{#include ../../banners/hacktricks-training.md}}
 
 The creation of the MSI installer will be done using wixtools, specifically [wixtools](http://wixtoolset.org) will be utilized. It is worth mentioning that alternative MSI builders were attempted, but they were not successful in this particular case.
 

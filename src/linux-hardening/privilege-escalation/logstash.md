@@ -1,3 +1,5 @@
+# Logstash Privilege Escalation
+
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Logstash

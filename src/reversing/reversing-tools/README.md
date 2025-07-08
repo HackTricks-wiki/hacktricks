@@ -1,21 +1,23 @@
+# Reversing Tools
+
 {{#include ../../banners/hacktricks-training.md}}
 
-# Wasm Decompilation and Wat Compilation Guide
 
+## Wasm Decompilation and Wat Compilation Guide
 In the realm of **WebAssembly**, tools for **decompiling** and **compiling** are essential for developers. This guide introduces some online resources and software for handling **Wasm (WebAssembly binary)** and **Wat (WebAssembly text)** files.
 
-## Online Tools
+### Online Tools
 
 - To **decompile** Wasm to Wat, the tool available at [Wabt's wasm2wat demo](https://webassembly.github.io/wabt/demo/wasm2wat/index.html) comes in handy.
 - For **compiling** Wat back to Wasm, [Wabt's wat2wasm demo](https://webassembly.github.io/wabt/demo/wat2wasm/) serves the purpose.
 - Another decompilation option can be found at [web-wasmdec](https://wwwg.github.io/web-wasmdec/).
 
-## Software Solutions
+### Software Solutions
 
 - For a more robust solution, [JEB by PNF Software](https://www.pnfsoftware.com/jeb/demo) offers extensive features.
 - The open-source project [wasmdec](https://github.com/wwwg/wasmdec) is also available for decompilation tasks.
 
-# .Net Decompilation Resources
+## .Net Decompilation Resources
 
 Decompiling .Net assemblies can be accomplished with tools such as:
 
@@ -23,19 +25,19 @@ Decompiling .Net assemblies can be accomplished with tools such as:
 - For tasks involving **decompilation**, **modification**, and **recompilation**, [dnSpy](https://github.com/0xd4d/dnSpy/releases) is highly recommended. **Right-clicking** a method and choosing **Modify Method** enables code changes.
 - [JetBrains' dotPeek](https://www.jetbrains.com/es-es/decompiler/) is another alternative for decompiling .Net assemblies.
 
-## Enhancing Debugging and Logging with DNSpy
+### Enhancing Debugging and Logging with DNSpy
 
-### DNSpy Logging
+#### DNSpy Logging
 
 To log information to a file using DNSpy, incorporate the following .Net code snippet:
 
-%%%cpp
+```cpp
 using System.IO;
 path = "C:\\inetpub\\temp\\MyTest2.txt";
 File.AppendAllText(path, "Password: " + password + "\n");
-%%%
+```
 
-### DNSpy Debugging
+#### DNSpy Debugging
 
 For effective debugging with DNSpy, a sequence of steps is recommended to adjust **Assembly attributes** for debugging, ensuring that optimizations that could hinder debugging are disabled. This process includes changing the `DebuggableAttribute` settings, recompiling the assembly, and saving the changes.
 
@@ -85,14 +87,14 @@ To decompile Java bytecode, these tools can be very helpful:
 ### Deobfuscation and Analysis
 
 - **scdbg** provides insights into shellcode functions and deobfuscation capabilities.
-  %%%bash
+  ```bash
   scdbg.exe -f shellcode # Basic info
   scdbg.exe -f shellcode -r # Analysis report
   scdbg.exe -f shellcode -i -r # Interactive hooks
   scdbg.exe -f shellcode -d # Dump decoded shellcode
   scdbg.exe -f shellcode /findsc # Find start offset
   scdbg.exe -f shellcode /foff 0x0000004D # Execute from offset
-  %%%
+  ```
 
 - **CyberChef** for disassembling shellcode: [CyberChef recipe](https://gchq.github.io/CyberChef/#recipe=To_Hex%28'Space',0%29Disassemble_x86%28'32','Full%20x86%20architecture',16,0,true,true%29)
 

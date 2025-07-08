@@ -1,3 +1,5 @@
+# Video and Audio File Analysis
+
 {{#include ../../../banners/hacktricks-training.md}}
 
 **Audio and video file manipulation** is a staple in **CTF forensics challenges**, leveraging **steganography** and metadata analysis to hide or reveal secret messages. Tools such as **[mediainfo](https://mediaarea.net/en/MediaInfo)** and **`exiftool`** are essential for inspecting file metadata and identifying content types.

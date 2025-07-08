@@ -1,4 +1,6 @@
-# Mythic
+# Mythic
+
+{{#include ../banners/hacktricks-training.md}}
 
 ## What is Mythic?
 
@@ -174,3 +176,5 @@ When user over linux it has some interesting commands:
 - `run`: Execute a command from disk with arguments, allowing for the execution of binaries or scripts on the target system.
 - `pty`: Open up an interactive PTY, allowing for direct interaction with the shell on the target system.
 
+
+{{#include ../banners/hacktricks-training.md}}

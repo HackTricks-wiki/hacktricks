@@ -136,7 +136,8 @@ int main(void) {
 
 - Used for handling kernel device `uevents`.
 - Writing to `/sys/kernel/uevent_helper` can execute arbitrary scripts upon `uevent` triggers.
-- **Example for Exploitation**: %%%bash
+- **Example for Exploitation**: 
+```bash
 
   #### Creates a payload
 
@@ -156,7 +157,8 @@ int main(void) {
 
   #### Reads the output
 
-  cat /output %%%
+  cat /output
+  ```
 
 #### **`/sys/class/thermal`**
 

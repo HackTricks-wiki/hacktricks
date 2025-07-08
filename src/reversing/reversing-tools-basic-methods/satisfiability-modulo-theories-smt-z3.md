@@ -1,12 +1,14 @@
+# Satisfiability Modulo Theories (SMT) - Z3
+
 {{#include ../../banners/hacktricks-training.md}}
 
 Very basically, this tool will help us to find values for variables that need to satisfy some conditions and calculating them by hand will be so annoying. Therefore, you can indicate to Z3 the conditions the variables need to satisfy and it will find some values (if possible).
 
 **Some texts and examples are extracted from [https://ericpony.github.io/z3py-tutorial/guide-examples.htm](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)**
 
-# Basic Operations
+## Basic Operations
 
-## Booleans/And/Or/Not
+### Booleans/And/Or/Not
 
 ```python
 #pip3 install z3-solver
@@ -23,7 +25,7 @@ s.check() #If response is "sat" then the model is satifable, if "unsat" somethin
 print(s.model()) #Print valid values to satisfy the model
 ```
 
-## Ints/Simplify/Reals
+### Ints/Simplify/Reals
 
 ```python
 from z3 import *
@@ -45,7 +47,7 @@ set_option(precision=30)
 print(solve(r1**2 + r2**2 == 3, r1**3 == 2))
 ```
 
-## Printing Model
+### Printing Model
 
 ```python
 from z3 import *
@@ -61,7 +63,7 @@ for d in m.decls():
     print("%s = %s" % (d.name(), m[d]))
 ```
 
-# Machine Arithmetic
+## Machine Arithmetic
 
 Modern CPUs and main-stream programming languages use arithmetic over **fixed-size bit-vectors**. Machine arithmetic is available in Z3Py as **Bit-Vectors**.
 
@@ -80,7 +82,7 @@ b = BitVecVal(65535, 32)
 print(simplify(a == b)) #This is False
 ```
 
-## Signed/Unsigned Numbers
+### Signed/Unsigned Numbers
 
 Z3 provides special signed versions of arithmetical operations where it makes a difference whether the **bit-vector is treated as signed or unsigned**. In Z3Py, the operators **<, <=, >, >=, /, % and >>** correspond to the **signed** versions. The corresponding **unsigned** operators are **ULT, ULE, UGT, UGE, UDiv, URem and LShR.**
 
@@ -102,7 +104,7 @@ solve(x < 0)
 solve(ULT(x, 0))
 ```
 
-## Functions
+### Functions
 
 **Interpreted functio**ns such as arithmetic where the **function +** has a **fixed standard interpretation** (it adds two numbers). **Uninterpreted functions** and constants are **maximally flexible**; they allow **any interpretation** that is **consistent** with the **constraints** over the function or constant.
 
@@ -127,9 +129,9 @@ s.check()
 print(m.model())
 ```
 
-# Examples
+## Examples
 
-## Sudoku solver
+### Sudoku solver
 
 ```python
 # 9x9 matrix of integer variables

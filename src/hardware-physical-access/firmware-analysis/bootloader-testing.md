@@ -1,3 +1,5 @@
+# Bootloader Testing
+
 {{#include ../../banners/hacktricks-training.md}}
 
 The following steps are recommended for modifying device startup configurations and bootloaders like U-boot:
@@ -9,24 +11,24 @@ The following steps are recommended for modifying device startup configurations 
 2. **Modify Boot Arguments**:
 
    - Execute the following commands to append '`init=/bin/sh`' to the boot arguments, allowing execution of a shell command:
-     %%%
+     ```
      #printenv
      #setenv bootargs=console=ttyS0,115200 mem=63M root=/dev/mtdblock3 mtdparts=sflash:<partitiionInfo> rootfstype=<fstype> hasEeprom=0 5srst=0 init=/bin/sh
      #saveenv
      #boot
-     %%%
+     ```
 
 3. **Setup TFTP Server**:
 
    - Configure a TFTP server to load images over a local network:
-     %%%
+     ```
      #setenv ipaddr 192.168.2.2 #local IP of the device
      #setenv serverip 192.168.2.1 #TFTP server IP
      #saveenv
      #reset
      #ping 192.168.2.1 #check network access
      #tftp ${loadaddr} uImage-3.6.35 #loadaddr takes the address to load the file into and the filename of the image on the TFTP server
-     %%%
+     ```
 
 4. **Utilize `ubootwrite.py`**:
 

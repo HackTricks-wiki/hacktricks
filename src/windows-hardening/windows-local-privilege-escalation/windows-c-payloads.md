@@ -1,6 +1,8 @@
+# Windows C Payloads
+
 {{#include ../../banners/hacktricks-training.md}}
 
-# Add user
+## Add user
 
 ```c
 // i686-w64-mingw32-gcc -o scsiaccess.exe useradd.c
