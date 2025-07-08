@@ -1,7 +1,5 @@
 # Windows Credentials Protections
 
-## Credentials Protections
-
 {{#include ../../banners/hacktricks-training.md}}
 
 ## WDigest

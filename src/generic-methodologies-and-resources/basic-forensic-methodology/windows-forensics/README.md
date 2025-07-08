@@ -1,7 +1,5 @@
 # Windows Artifacts
 
-## Windows Artifacts
-
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Generic Windows Artifacts

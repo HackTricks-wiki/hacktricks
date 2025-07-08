@@ -1,5 +1,7 @@
 # Threat Modeling
 
+{{#include /banners/hacktricks-training.md}}
+
 ## Threat Modeling
 
 Welcome to HackTricks' comprehensive guide on Threat Modeling! Embark on an exploration of this critical aspect of cybersecurity, where we identify, understand, and strategize against potential vulnerabilities in a system. This thread serves as a step-by-step guide packed with real-world examples, helpful software, and easy-to-understand explanations. Ideal for both novices and experienced practitioners looking to fortify their cybersecurity defenses.
@@ -111,4 +113,5 @@ Now your finished model should look something like this. And this is how you mak
 This is a free tool from Microsoft that helps in finding threats in the design phase of software projects. It uses the STRIDE methodology and is particularly suitable for those developing on Microsoft's stack.
 
 
+{{#include /banners/hacktricks-training.md}}
 

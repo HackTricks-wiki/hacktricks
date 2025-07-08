@@ -1,5 +1,7 @@
 # Test LLMs
 
+{{#include /banners/hacktricks-training.md}}
+
 ## Run & train models locally
 
 ### [**Hugging Face Transformers**](https://github.com/huggingface/transformers)
@@ -50,5 +52,5 @@ It offers several sections like:
 * **API Access:** Simple APIs for running models the enable developers to deploy and scale models effortlessly within their own applications.
 
 
-
+{{#include /banners/hacktricks-training.md}}
 
