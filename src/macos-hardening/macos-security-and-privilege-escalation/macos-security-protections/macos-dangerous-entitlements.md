@@ -25,7 +25,7 @@ Hierdie toestemming maak dit moontlik vir ander prosesse met die **`com.apple.se
 
 ### `com.apple.security.cs.debugger`
 
-Toepassings met die Debugging Tool Toestemming kan `task_for_pid()` aanroep om 'n geldige taakpoort vir ongetekende en derdeparty toepassings met die `Get Task Allow` toestemming wat op `true` gestel is, te verkry. Tog, selfs met die debugging tool toestemming, kan 'n debugger **nie die taakpoorte** van prosesse wat **nie die `Get Task Allow` toestemming het nie**, en wat dus deur Stelselintegriteitsbeskerming beskerm word, verkry. Kyk [**hier vir meer inligting**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger).
+Apps met die Debugging Tool Toestemming kan `task_for_pid()` aanroep om 'n geldige taakpoort vir ongetekende en derdeparty-apps met die `Get Task Allow` toestemming wat op `true` gestel is, te verkry. Maar, selfs met die debugging tool toestemming, kan 'n debugger **nie die taakpoorte** van prosesse wat **nie die `Get Task Allow` toestemming het nie**, en wat dus deur Stelselintegriteitsbeskerming beskerm word, verkry nie. Kyk [**hier vir meer inligting**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger).
 
 ### `com.apple.security.cs.disable-library-validation`
 
@@ -33,12 +33,12 @@ Hierdie toestemming maak dit moontlik om **raamwerke, plug-ins, of biblioteke te
 
 ### `com.apple.private.security.clear-library-validation`
 
-Hierdie toestemming is baie soortgelyk aan **`com.apple.security.cs.disable-library-validation`** maar **in plaas daarvan** om **direk** biblioteekvalidasie te deaktiveer, maak dit dit moontlik vir die proses om **'n `csops` stelselaanroep te doen om dit te deaktiveer**.\
+Hierdie toestemming is baie soortgelyk aan **`com.apple.security.cs.disable-library-validation`** maar **in plaas daarvan** om **direk** biblioteekvalidasie te deaktiveer, laat dit die proses toe om **'n `csops` stelselaanroep te doen om dit te deaktiveer**.\
 Kyk [**hier vir meer inligting**](https://theevilbit.github.io/posts/com.apple.private.security.clear-library-validation/).
 
 ### `com.apple.security.cs.allow-dyld-environment-variables`
 
-Hierdie toestemming maak dit moontlik om **DYLD omgewing veranderlikes** te gebruik wat gebruik kan word om biblioteke en kode in te spuit. Kyk [**hier vir meer inligting**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables).
+Hierdie toestemming maak dit moontlik om **DYLD omgewingsveranderlikes** te gebruik wat gebruik kan word om biblioteke en kode in te spuit. Kyk [**hier vir meer inligting**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables).
 
 ### `com.apple.private.tcc.manager` of `com.apple.rootless.storage`.`TCC`
 
@@ -50,7 +50,7 @@ Hierdie toestemmings maak dit moontlik om **programmatuur te installeer sonder o
 
 ### `com.apple.private.security.kext-management`
 
-Toestemming wat benodig word om die **kernel te vra om 'n kernel uitbreiding** te laai.
+Toestemming wat benodig word om die **kernel te vra om 'n kernuitbreiding te laai**.
 
 ### **`com.apple.private.icloud-account-access`**
 
@@ -58,7 +58,7 @@ Die toestemming **`com.apple.private.icloud-account-access`** maak dit moontlik 
 
 **iMovie** en **Garageband** het hierdie toestemming gehad.
 
-Vir meer **inligting** oor die uitbuiting om **icloud tokens** van daardie toestemming te verkry, kyk die praatjie: [**#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
+Vir meer **inligting** oor die ontploffing om **icloud tokens** van daardie toestemming te verkry, kyk die praatjie: [**#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
 
 ### `com.apple.private.tcc.manager.check-by-audit-token`
 
@@ -91,13 +91,13 @@ Gee **Volle Skyf Toegang** regte, een van die TCC hoogste regte wat jy kan hê.
 
 ### **`kTCCServiceAppleEvents`**
 
-Laat die app toe om gebeurtenisse na ander toepassings te stuur wat algemeen gebruik word vir **outomatisering van take**. Deur ander apps te beheer, kan dit die regte wat aan hierdie ander apps toegeken is, misbruik.
+Laat die app toe om gebeurtenisse na ander toepassings te stuur wat algemeen gebruik word vir **automatisering van take**. Deur ander apps te beheer, kan dit die regte wat aan hierdie ander apps gegee is, misbruik.
 
 Soos om hulle te laat vra vir die gebruiker se wagwoord:
 ```bash
 osascript -e 'tell app "App Store" to activate' -e 'tell app "App Store" to activate' -e 'tell app "App Store" to display dialog "App Store requires your password to continue." & return & return default answer "" with icon 1 with hidden answer with title "App Store Alert"'
 ```
-Of om hulle **arbitraire aksies** te laat uitvoer.
+Of om hulle te laat **arbitraire aksies** uitvoer.
 
 ### **`kTCCServiceEndpointSecurityClient`**
 
@@ -117,13 +117,13 @@ Dit is moontlik om te kyk wie hierdie toegang het in _Stelselsinstellings_ > _Pr
 
 ### `kTCCServiceAccessibility`
 
-Die proses sal in staat wees om die **macOS toeganklikheidskenmerke** te **misbruik**, wat beteken dat hy byvoorbeeld sleutels kan druk. SO hy kan toegang vra om 'n toepassing soos Finder te beheer en die dialoog met hierdie toestemming goed te keur.
+Die proses sal in staat wees om die **macOS toeganklikheidskenmerke** te **misbruik**, wat beteken dat hy byvoorbeeld sleutels kan druk. Hy kan dus toegang vra om 'n toepassing soos Finder te beheer en die dialoog met hierdie toestemming goed te keur.
 
 ## Medium
 
 ### `com.apple.security.cs.allow-jit`
 
-Hierdie reg laat toe om **geheue te skep wat skryfbaar en uitvoerbaar is** deur die `MAP_JIT` vlag aan die `mmap()` stelselfunksie deur te gee. Kyk [**hier vir meer inligting**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-jit).
+Hierdie reg laat toe om **geheue te skep wat skryfbaar en uitvoerbaar is** deur die `MAP_JIT` vlag aan die `mmap()` stelselfunksie te gee. Kyk [**hier vir meer inligting**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-jit).
 
 ### `com.apple.security.cs.allow-unsigned-executable-memory`
 
@@ -134,10 +134,10 @@ Hierdie reg laat toe om **C-kode te oorskry of te patch**, gebruik die lank-gede
 
 ### `com.apple.security.cs.disable-executable-page-protection`
 
-Hierdie reg laat toe om **afdelings van sy eie uitvoerbare lêers** op skyf te **wysig** om gedwonge uitgang te dwing. Kyk [**hier vir meer inligting**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-executable-page-protection).
+Hierdie reg laat toe om **gedeeltes van sy eie uitvoerbare lêers** op skyf te **wysig** om gedwonge uitgang te dwing. Kyk [**hier vir meer inligting**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-executable-page-protection).
 
 > [!CAUTION]
-> Die Disable Executable Memory Protection Entitlement is 'n uiterste reg wat 'n fundamentele sekuriteitsbeskerming van jou toepassing verwyder, wat dit moontlik maak vir 'n aanvaller om jou toepassing se uitvoerbare kode sonder opsporing te herskryf. Verkies nouer regte indien moontlik.
+> Die Uitskakeling van Uitvoerbare Geheuebeskerming Reg is 'n uiterste reg wat 'n fundamentele sekuriteitsbeskerming van jou toepassing verwyder, wat dit moontlik maak vir 'n aanvaller om jou toepassing se uitvoerbare kode sonder opsporing te herskryf. Verkies nouer regte indien moontlik.
 
 ### `com.apple.security.cs.allow-relative-library-loads`
 
@@ -161,3 +161,10 @@ Laat die proses toe om **vir al die TCC-toestemmings te vra**.
 ### **`kTCCServicePostEvent`**
 
 {{#include ../../../banners/hacktricks-training.md}}
+
+</details>
+
+
+
+
+{{#include /banners/hacktricks-training.md}}

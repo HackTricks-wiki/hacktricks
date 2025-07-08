@@ -4,7 +4,7 @@
 
 ## SCM
 
-**SCMExec** is 'n tegniek om op afstand op stelsels opdragte uit te voer deur die Service Control Manager (SCM) te gebruik om 'n diens te skep wat die opdrag uitvoer. Hierdie metode kan sommige sekuriteitsbeheermaatreëls omseil, soos User Account Control (UAC) en Windows Defender.
+**SCMExec** is 'n tegniek om op afstand stelsels op te voer deur die Service Control Manager (SCM) te gebruik om 'n diens te skep wat die opdrag uitvoer. Hierdie metode kan sommige sekuriteitsbeheermaatreëls omseil, soos User Account Control (UAC) en Windows Defender.
 
 ## Tools
 

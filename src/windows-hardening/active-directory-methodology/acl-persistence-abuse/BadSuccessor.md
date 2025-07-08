@@ -4,20 +4,20 @@
 
 ## Oorsig
 
-Gedelegeerde Bestuurde Diens Rekeninge (**dMSAs**) is 'n splinternuwe AD hoofstuk tipe wat bekendgestel is met **Windows Server 2025**. Hulle is ontwerp om verouderde diensrekeninge te vervang deur 'n een-klik “migrasie” wat outomaties die ou rekening se Diens Hoofstuk Namen (SPNs), groep lidmaatskappe, gedelegeerde instellings, en selfs kriptografiese sleutels na die nuwe dMSA kopieer, wat toepassings 'n naatlose oorgang bied en die risiko van Kerberoasting elimineer.
+Gedelegeerde Bestuurde Diens Rekeninge (**dMSAs**) is 'n splinternuwe AD hoofstuk tipe wat met **Windows Server 2025** bekendgestel is. Hulle is ontwerp om verouderde diensrekeninge te vervang deur 'n een-klik “migrasie” wat outomaties die ou rekening se Diens Hoofstuk Namen (SPNs), groep lidmaatskappe, delegasie instellings, en selfs kriptografiese sleutels na die nuwe dMSA kopieer, wat toepassings 'n naatlose oorgang bied en die risiko van Kerberoasting elimineer.
 
 Akamai navorsers het gevind dat 'n enkele attribuut — **`msDS‑ManagedAccountPrecededByLink`** — die KDC vertel watter verouderde rekening 'n dMSA “opvolg”. As 'n aanvaller daardie attribuut kan skryf (en **`msDS‑DelegatedMSAState` → 2** kan omskakel), sal die KDC gelukkig 'n PAC bou wat **elke SID van die gekose slagoffer erf**, wat effektief die dMSA in staat stel om enige gebruiker na te volg, insluitend Domein Administrators.
 
-## Wat is 'n dMSA?
+## Wat is 'n dMSA presies?
 
 * Gebou op top van **gMSA** tegnologie maar gestoor as die nuwe AD klas **`msDS‑DelegatedManagedServiceAccount`**.
 * Ondersteun 'n **opt-in migrasie**: die aanroep van `Start‑ADServiceAccountMigration` koppel die dMSA aan die verouderde rekening, gee die verouderde rekening skryfrechten op `msDS‑GroupMSAMembership`, en draai `msDS‑DelegatedMSAState` = 1 om.
 * Na `Complete‑ADServiceAccountMigration`, word die vervangde rekening gedeaktiveer en die dMSA word ten volle funksioneel; enige gasheer wat voorheen die verouderde rekening gebruik het, word outomaties gemagtig om die dMSA se wagwoord te trek.
-* Tydens verifikasie, embed die KDC 'n **KERB‑SUPERSEDED‑BY‑USER** wenk sodat Windows 11/24H2 kliënte deursigtig weer probeer met die dMSA.
+* Tydens verifikasie, embed die KDC 'n **KERB‑SUPERSEDED‑BY‑USER** aanduiding sodat Windows 11/24H2 kliënte deursigtig weer probeer met die dMSA.
 
 ## Vereistes om aan te val
 1. **Ten minste een Windows Server 2025 DC** sodat die dMSA LDAP klas en KDC logika bestaan.
-2. **Enige objek-skepping of attribuut-skryfrechte op 'n OU** (enige OU) – bv. `Create msDS‑DelegatedManagedServiceAccount` of eenvoudig **Create All Child Objects**. Akamai het gevind dat 91% van werklike huurders sulke “benigne” OU toestemmings aan nie-administrators toeken.
+2. **Enige objek-skepping of attribuut-skryfrechte op 'n OU** (enige OU) – bv. `Create msDS‑DelegatedManagedServiceAccount` of eenvoudig **Create All Child Objects**. Akamai het gevind dat 91% van werklike huurders sulke “benigne” OU toestemmings aan nie-administrateurs toeken.
 3. Vermoë om gereedskap (PowerShell/Rubeus) van enige domein-verbonden gasheer te loop om Kerberos kaartjies aan te vra.
 *Geen beheer oor die slagoffer gebruiker is nodig nie; die aanval raak nooit die teikenrekening direk nie.*
 
@@ -44,7 +44,7 @@ Gereedskap soos **Set‑ADComputer, ldapmodify**, of selfs **ADSI Edit** werk; g
 Rubeus.exe asktgs /targetuser:attacker_dmsa$ /service:krbtgt/aka.test /dmsa /opsec /nowrap /ptt /ticket:<Machine TGT>
 ```
 
-Die teruggegee PAC bevat nou die SID 500 (Administrator) plus Domein Administrators/Enterprise Administrators groepe.
+Die teruggekeer PAC bevat nou die SID 500 (Administrator) plus Domein Administrators/Enterprise Administrators groepe.
 
 ## Versamel al die gebruikers se wagwoorde
 
@@ -52,7 +52,7 @@ Tydens wettige migrasies moet die KDC die nuwe dMSA toelaat om **kaartjies wat a
 
 Omdat ons valse migrasie beweer dat die dMSA die slagoffer opvolg, kopieer die KDC plegtig die slagoffer se RC4‑HMAC sleutel in die **vorige-sleutels** lys – selfs al het die dMSA nooit 'n “vorige” wagwoord gehad nie. Daardie RC4 sleutel is nie gesout nie, so dit is effektief die slagoffer se NT hash, wat die aanvaller **offline krak of “pass-the-hash”** vermoë bied.
 
-Daarom laat massakoppeling van duisende gebruikers 'n aanvaller toe om hashes “op skaal” te dump, wat **BadSuccessor in beide 'n privilege-escalasie en geloofsbrief-kompromie primitive** omskep.
+Daarom laat massakoppeling van duisende gebruikers 'n aanvaller toe om hashes “op skaal” te dump, wat **BadSuccessor in beide 'n privilege-escalasie en kredensieël-kompromie primitief** omskep.
 
 ## Gereedskap
 
