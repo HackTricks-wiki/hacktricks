@@ -1,5 +1,7 @@
 # Rust Grundlagen
 
+{{#include /banners/hacktricks-training.md}}
+
 ### Generische Typen
 
 Erstellen Sie eine Struktur, bei der 1 ihrer Werte jeden Typ haben könnte.
@@ -81,7 +83,7 @@ Nil,
 
 let list = Cons(1, Cons(2, Cons(3, Nil)));
 ```
-### Bedingungen
+### Bedingte Anweisungen
 
 #### wenn
 ```rust
@@ -194,7 +196,7 @@ _ => "Hello",
 }
 }
 ```
-#### wenn lass
+#### if let
 ```rust
 let optional_word = Some(String::from("rustlings"));
 if let word = optional_word {
@@ -203,7 +205,7 @@ println!("The word is: {}", word);
 println!("The optional word doesn't contain anything");
 }
 ```
-#### while let
+#### während lass
 ```rust
 let mut optional = Some(0);
 // This reads: "while `let` destructures `optional` into
@@ -254,7 +256,7 @@ assert_ne!(true, false);
 
 #### Arc
 
-Ein Arc kann Clone verwenden, um weitere Referenzen auf das Objekt zu erstellen, um sie an die Threads weiterzugeben. Wenn der letzte Referenzzeiger auf einen Wert außerhalb des Gültigkeitsbereichs ist, wird die Variable verworfen.
+Ein Arc kann Clone verwenden, um weitere Referenzen auf das Objekt zu erstellen, um sie an die Threads zu übergeben. Wenn der letzte Referenzzeiger auf einen Wert außerhalb des Geltungsbereichs ist, wird die Variable verworfen.
 ```rust
 use std::sync::Arc;
 let apple = Arc::new("the same apple");
@@ -285,4 +287,4 @@ thread::sleep(Duration::from_millis(500));
 }
 }
 ```
-
+{{#include /banners/hacktricks-training.md}}

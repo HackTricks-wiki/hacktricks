@@ -1,8 +1,10 @@
 # LLM Training - Datenvorbereitung
 
+{{#include /banners/hacktricks-training.md}}
+
 **Dies sind meine Notizen aus dem sehr empfohlenen Buch** [**https://www.manning.com/books/build-a-large-language-model-from-scratch**](https://www.manning.com/books/build-a-large-language-model-from-scratch) **mit einigen zusätzlichen Informationen.**
 
-## Grundlegende Informationen
+## Grundinformationen
 
 Sie sollten mit dem Lesen dieses Beitrags beginnen, um einige grundlegende Konzepte zu verstehen, die Sie wissen sollten:
 
@@ -19,7 +21,7 @@ Sie sollten mit dem Lesen dieses Beitrags beginnen, um einige grundlegende Konze
 1.-tokenizing.md
 {{#endref}}
 
-## 2. Datenstichproben
+## 2. Datensampling
 
 > [!TIP]
 > Das Ziel dieser zweiten Phase ist sehr einfach: **Proben Sie die Eingabedaten und bereiten Sie sie für die Trainingsphase vor, indem Sie den Datensatz normalerweise in Sätze einer bestimmten Länge unterteilen und auch die erwartete Antwort generieren.**
@@ -44,7 +46,7 @@ Sie sollten mit dem Lesen dieses Beitrags beginnen, um einige grundlegende Konze
 
 > [!TIP]
 > Das Ziel dieser vierten Phase ist sehr einfach: **Wenden Sie einige Aufmerksamkeitsmechanismen an**. Diese werden viele **wiederholte Schichten** sein, die die **Beziehung eines Wortes im Vokabular zu seinen Nachbarn im aktuellen Satz, der zum Trainieren des LLM verwendet wird, erfassen**.\
-> Viele Schichten werden dafür verwendet, sodass viele trainierbare Parameter diese Informationen erfassen werden.
+> Es werden viele Schichten dafür verwendet, sodass viele trainierbare Parameter diese Informationen erfassen.
 
 {{#ref}}
 4.-attention-mechanisms.md
@@ -82,7 +84,7 @@ Sie sollten mit dem Lesen dieses Beitrags beginnen, um einige grundlegende Konze
 ## 7.1. Feintuning für Klassifikation
 
 > [!TIP]
-> Das Ziel dieses Abschnitts ist zu zeigen, wie man ein bereits vortrainiertes Modell fein abstimmt, sodass das LLM anstelle von neuem Text die **Wahrscheinlichkeiten angibt, dass der gegebene Text in jede der angegebenen Kategorien eingeordnet wird** (zum Beispiel, ob ein Text Spam ist oder nicht).
+> Das Ziel dieses Abschnitts ist zu zeigen, wie man ein bereits vortrainiertes Modell fein abstimmt, sodass das LLM anstelle von neuem Text die **Wahrscheinlichkeiten des gegebenen Textes für jede der angegebenen Kategorien** (wie ob ein Text Spam ist oder nicht) angibt.
 
 {{#ref}}
 7.1.-fine-tuning-for-classification.md
@@ -96,3 +98,5 @@ Sie sollten mit dem Lesen dieses Beitrags beginnen, um einige grundlegende Konze
 {{#ref}}
 7.2.-fine-tuning-to-follow-instructions.md
 {{#endref}}
+
+{{#include /banners/hacktricks-training.md}}

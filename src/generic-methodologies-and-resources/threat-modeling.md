@@ -1,19 +1,21 @@
 # Bedrohungsmodellierung
 
+{{#include /banners/hacktricks-training.md}}
+
 ## Bedrohungsmodellierung
 
-Willkommen zu HackTricks' umfassendem Leitfaden zur Bedrohungsmodellierung! Beginnen Sie eine Erkundung dieses kritischen Aspekts der Cybersicherheit, bei dem wir potenzielle Schwachstellen in einem System identifizieren, verstehen und Strategien dagegen entwickeln. Dieser Thread dient als Schritt-für-Schritt-Anleitung, die mit realen Beispielen, hilfreicher Software und leicht verständlichen Erklärungen gefüllt ist. Ideal für sowohl Anfänger als auch erfahrene Praktiker, die ihre Cybersicherheitsverteidigung stärken möchten.
+Willkommen zu HackTricks' umfassendem Leitfaden zur Bedrohungsmodellierung! Beginnen Sie eine Erkundung dieses kritischen Aspekts der Cybersicherheit, bei dem wir potenzielle Schwachstellen in einem System identifizieren, verstehen und Strategien dagegen entwickeln. Dieser Thread dient als schrittweise Anleitung, die mit realen Beispielen, hilfreicher Software und leicht verständlichen Erklärungen gefüllt ist. Ideal für sowohl Anfänger als auch erfahrene Praktiker, die ihre Cybersicherheitsverteidigung stärken möchten.
 
 ### Häufig Verwendete Szenarien
 
-1. **Softwareentwicklung**: Im Rahmen des Secure Software Development Life Cycle (SSDLC) hilft die Bedrohungsmodellierung bei der **Identifizierung potenzieller Quellen von Schwachstellen** in den frühen Phasen der Entwicklung.
-2. **Penetration Testing**: Der Penetration Testing Execution Standard (PTES) erfordert **Bedrohungsmodellierung, um die Schwachstellen des Systems zu verstehen**, bevor der Test durchgeführt wird.
+1. **Softwareentwicklung**: Im Rahmen des Secure Software Development Life Cycle (SSDLC) hilft die Bedrohungsmodellierung dabei, **potenzielle Quellen von Schwachstellen** in den frühen Phasen der Entwicklung zu identifizieren.
+2. **Penetration Testing**: Der Penetration Testing Execution Standard (PTES) erfordert **Bedrohungsmodellierung, um die Schwachstellen des Systems** vor der Durchführung des Tests zu verstehen.
 
 ### Bedrohungsmodell in Kürze
 
-Ein Bedrohungsmodell wird typischerweise als Diagramm, Bild oder in einer anderen Form der visuellen Darstellung dargestellt, die die geplante Architektur oder den bestehenden Aufbau einer Anwendung zeigt. Es ähnelt einem **Datenflussdiagramm**, aber der entscheidende Unterschied liegt im sicherheitsorientierten Design.
+Ein Bedrohungsmodell wird typischerweise als Diagramm, Bild oder in einer anderen Form visueller Darstellung dargestellt, die die geplante Architektur oder den bestehenden Aufbau einer Anwendung zeigt. Es ähnelt einem **Datenflussdiagramm**, aber der entscheidende Unterschied liegt im sicherheitsorientierten Design.
 
-Bedrohungsmodelle enthalten oft Elemente, die in Rot markiert sind und potenzielle Schwachstellen, Risiken oder Barrieren symbolisieren. Um den Prozess der Risikoidentifizierung zu vereinfachen, wird das CIA (Vertraulichkeit, Integrität, Verfügbarkeit) Triad verwendet, das die Grundlage vieler Bedrohungsmodellierungsmethodologien bildet, wobei STRIDE eine der häufigsten ist. Die gewählte Methodologie kann jedoch je nach spezifischem Kontext und Anforderungen variieren.
+Bedrohungsmodelle enthalten oft Elemente, die in Rot markiert sind und potenzielle Schwachstellen, Risiken oder Barrieren symbolisieren. Um den Prozess der Risikoidentifikation zu vereinfachen, wird das CIA (Vertraulichkeit, Integrität, Verfügbarkeit) Triad verwendet, das die Grundlage vieler Bedrohungsmodellierungsmethodologien bildet, wobei STRIDE eine der häufigsten ist. Die gewählte Methodologie kann jedoch je nach spezifischem Kontext und Anforderungen variieren.
 
 ### Das CIA-Triad
 
@@ -27,10 +29,10 @@ Das CIA-Triad ist ein weithin anerkanntes Modell im Bereich der Informationssich
 
 1. **STRIDE**: Entwickelt von Microsoft, ist STRIDE ein Akronym für **Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service und Elevation of Privilege**. Jede Kategorie stellt eine Art von Bedrohung dar, und diese Methodologie wird häufig in der Entwurfsphase eines Programms oder Systems verwendet, um potenzielle Bedrohungen zu identifizieren.
 2. **DREAD**: Dies ist eine weitere Methodologie von Microsoft, die zur Risikobewertung identifizierter Bedrohungen verwendet wird. DREAD steht für **Damage potential, Reproducibility, Exploitability, Affected users und Discoverability**. Jeder dieser Faktoren wird bewertet, und das Ergebnis wird verwendet, um identifizierte Bedrohungen zu priorisieren.
-3. **PASTA** (Process for Attack Simulation and Threat Analysis): Dies ist eine siebenstufige, **risikozentrierte** Methodologie. Sie umfasst die Definition und Identifizierung von Sicherheitszielen, die Erstellung eines technischen Rahmens, die Anwendungszerlegung, die Bedrohungsanalyse, die Schwachstellenanalyse und die Risiko-/Triagebewertung.
+3. **PASTA** (Process for Attack Simulation and Threat Analysis): Dies ist eine siebenstufige, **risikozentrierte** Methodologie. Sie umfasst die Definition und Identifizierung von Sicherheitszielen, die Erstellung eines technischen Umfangs, die Anwendung von Zerlegung, Bedrohungsanalyse, Schwachstellenanalyse und Risiko-/Triagebewertung.
 4. **Trike**: Dies ist eine risikobasierte Methodologie, die sich auf den Schutz von Vermögenswerten konzentriert. Sie beginnt aus einer **Risikomanagement**-Perspektive und betrachtet Bedrohungen und Schwachstellen in diesem Kontext.
 5. **VAST** (Visual, Agile, and Simple Threat modeling): Dieser Ansatz zielt darauf ab, zugänglicher zu sein und in agile Entwicklungsumgebungen integriert zu werden. Er kombiniert Elemente aus den anderen Methodologien und konzentriert sich auf **visuelle Darstellungen von Bedrohungen**.
-6. **OCTAVE** (Operationally Critical Threat, Asset, and Vulnerability Evaluation): Entwickelt vom CERT Coordination Center, ist dieses Framework auf **organisatorische Risikobewertung anstelle spezifischer Systeme oder Software** ausgerichtet.
+6. **OCTAVE** (Operationally Critical Threat, Asset, and Vulnerability Evaluation): Entwickelt vom CERT Coordination Center, ist dieses Framework auf **organisatorische Risikobewertung und nicht auf spezifische Systeme oder Software** ausgerichtet.
 
 ## Werkzeuge
 
@@ -84,7 +86,7 @@ Nur eine kleine Erklärung zu den Entitäten:
 - Akteur (Eine Person wie ein Website-Besucher, Benutzer oder Administrator)
 - Datenflusslinie (Indikator für Interaktion)
 - Vertrauensgrenze (Verschiedene Netzwerksegmente oder -bereiche.)
-- Speicher (Dinge, in denen Daten gespeichert werden, wie Datenbanken)
+- Speicher (Dinge, in denen Daten gespeichert sind, wie Datenbanken)
 
 5. Eine Bedrohung erstellen (Schritt 1)
 
@@ -109,3 +111,5 @@ Jetzt sollte Ihr fertiges Modell so aussehen. Und so erstellen Sie ein einfaches
 ### [Microsoft Threat Modeling Tool](https://aka.ms/threatmodelingtool)
 
 Dies ist ein kostenloses Tool von Microsoft, das hilft, Bedrohungen in der Entwurfsphase von Softwareprojekten zu finden. Es verwendet die STRIDE-Methodologie und ist besonders geeignet für diejenigen, die auf Microsofts Stack entwickeln.
+
+{{#include /banners/hacktricks-training.md}}

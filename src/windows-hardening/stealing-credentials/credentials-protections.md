@@ -1,7 +1,5 @@
 # Windows Credentials Protections
 
-## Credentials Protections
-
 {{#include ../../banners/hacktricks-training.md}}
 
 ## WDigest
@@ -16,9 +14,9 @@ reg query HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest /v Use
 ```
 ## LSA-Schutz (PP & PPL geschützte Prozesse)
 
-**Protected Process (PP)** und **Protected Process Light (PPL)** sind **Windows-Kernel-Schutzmechanismen**, die entwickelt wurden, um unbefugten Zugriff auf sensible Prozesse wie **LSASS** zu verhindern. Eingeführt in **Windows Vista**, wurde das **PP-Modell** ursprünglich zur Durchsetzung von **DRM** geschaffen und erlaubte nur Binärdateien, die mit einem **besonderen Medienzertifikat** signiert sind, geschützt zu werden. Ein als **PP** markierter Prozess kann nur von anderen Prozessen, die **auch PP** sind und ein **gleiches oder höheres Schutzniveau** haben, zugegriffen werden, und selbst dann **nur mit eingeschränkten Zugriffsrechten**, es sei denn, dies ist ausdrücklich erlaubt.
+**Protected Process (PP)** und **Protected Process Light (PPL)** sind **Windows-Kernel-Schutzmechanismen**, die entwickelt wurden, um unbefugten Zugriff auf sensible Prozesse wie **LSASS** zu verhindern. Eingeführt in **Windows Vista**, wurde das **PP-Modell** ursprünglich zur Durchsetzung von **DRM** geschaffen und erlaubte nur Binärdateien, die mit einem **besonderen Medienzertifikat** signiert sind, geschützt zu werden. Ein als **PP** gekennzeichneter Prozess kann nur von anderen Prozessen, die **auch PP** sind und ein **gleiches oder höheres Schutzniveau** haben, zugegriffen werden, und selbst dann **nur mit eingeschränkten Zugriffsrechten**, es sei denn, dies ist ausdrücklich erlaubt.
 
-**PPL**, eingeführt in **Windows 8.1**, ist eine flexiblere Version von PP. Es erlaubt **breitere Anwendungsfälle** (z. B. LSASS, Defender), indem es **"Schutzniveaus"** basierend auf dem **EKU (Enhanced Key Usage)**-Feld der digitalen Signatur einführt. Das Schutzniveau wird im `EPROCESS.Protection`-Feld gespeichert, das eine `PS_PROTECTION`-Struktur mit folgenden Inhalten ist:
+**PPL**, eingeführt in **Windows 8.1**, ist eine flexiblere Version von PP. Es ermöglicht **breitere Anwendungsfälle** (z. B. LSASS, Defender), indem es **"Schutzniveaus"** basierend auf dem **EKU (Enhanced Key Usage)**-Feld der digitalen Signatur einführt. Das Schutzniveau wird im `EPROCESS.Protection`-Feld gespeichert, das eine `PS_PROTECTION`-Struktur mit folgenden Inhalten ist:
 - **Typ** (`Protected` oder `ProtectedLight`)
 - **Signer** (z. B. `WinTcb`, `Lsa`, `Antimalware` usw.)
 
@@ -29,9 +27,9 @@ Diese Struktur wird in einem einzelnen Byte gepackt und bestimmt **wer auf wen z
 
 ### Was Sie aus offensiver Perspektive wissen müssen
 
-- Wenn **LSASS als PPL ausgeführt wird**, schlagen Versuche, es mit `OpenProcess(PROCESS_VM_READ | QUERY_INFORMATION)` aus einem normalen Admin-Kontext zu öffnen, **mit `0x5 (Zugriff verweigert)` fehl**, selbst wenn `SeDebugPrivilege` aktiviert ist.
+- Wenn **LSASS als PPL ausgeführt wird**, schlagen Versuche, es mit `OpenProcess(PROCESS_VM_READ | QUERY_INFORMATION)` aus einem normalen Administratorkontext zu öffnen, **mit `0x5 (Zugriff verweigert)` fehl**, selbst wenn `SeDebugPrivilege` aktiviert ist.
 - Sie können **das Schutzniveau von LSASS überprüfen**, indem Sie Tools wie Process Hacker verwenden oder programmgesteuert den Wert von `EPROCESS.Protection` lesen.
-- LSASS hat typischerweise `PsProtectedSignerLsa-Light` (`0x41`), auf das **nur von Prozessen zugegriffen werden kann, die mit einem höherwertigen Signierer signiert sind**, wie `WinTcb` (`0x61` oder `0x62`).
+- LSASS hat typischerweise `PsProtectedSignerLsa-Light` (`0x41`), auf das **nur von Prozessen zugegriffen werden kann, die mit einem höherwertigen Signierer** signiert sind, wie z. B. `WinTcb` (`0x61` oder `0x62`).
 - PPL ist eine **nur für den Benutzerraum geltende Einschränkung**; **Kernel-Code kann dies vollständig umgehen**.
 - Dass LSASS PPL ist, **verhindert nicht das Auslesen von Anmeldeinformationen, wenn Sie Kernel-Shellcode ausführen können** oder **einen hochprivilegierten Prozess mit entsprechendem Zugriff nutzen**.
 - **Das Setzen oder Entfernen von PPL** erfordert einen Neustart oder **Secure Boot/UEFI-Einstellungen**, die die PPL-Einstellung auch nach Rückgängigmachung von Registrierungänderungen beibehalten können.
@@ -57,7 +55,7 @@ Wenn Sie **`mimikatz privilege::debug sekurlsa::logonpasswords`** ausführen, sc
 
 ## Credential Guard
 
-**Credential Guard**, eine Funktion, die exklusiv für **Windows 10 (Enterprise- und Education-Editionen)** ist, verbessert die Sicherheit von Maschinenanmeldeinformationen mithilfe von **Virtual Secure Mode (VSM)** und **Virtualization Based Security (VBS)**. Es nutzt CPU-Virtualisierungserweiterungen, um wichtige Prozesse innerhalb eines geschützten Speicherbereichs zu isolieren, der vom Hauptbetriebssystem nicht erreicht werden kann. Diese Isolation stellt sicher, dass selbst der Kernel nicht auf den Speicher in VSM zugreifen kann, wodurch Anmeldeinformationen effektiv vor Angriffen wie **pass-the-hash** geschützt werden. Die **Local Security Authority (LSA)** arbeitet innerhalb dieser sicheren Umgebung als Trustlet, während der **LSASS**-Prozess im Hauptbetriebssystem lediglich als Kommunikator mit der LSA von VSM fungiert.
+**Credential Guard**, eine Funktion, die exklusiv für **Windows 10 (Enterprise- und Education-Editionen)** ist, verbessert die Sicherheit von Maschinenanmeldeinformationen mithilfe von **Virtual Secure Mode (VSM)** und **Virtualization Based Security (VBS)**. Es nutzt CPU-Virtualisierungserweiterungen, um wichtige Prozesse innerhalb eines geschützten Speicherbereichs zu isolieren, der vom Hauptbetriebssystem nicht erreicht werden kann. Diese Isolation stellt sicher, dass selbst der Kernel nicht auf den Speicher in VSM zugreifen kann, wodurch Anmeldeinformationen effektiv vor Angriffen wie **pass-the-hash** geschützt werden. Die **Local Security Authority (LSA)** arbeitet in dieser sicheren Umgebung als Trustlet, während der **LSASS**-Prozess im Hauptbetriebssystem lediglich als Kommunikator mit der LSA von VSM fungiert.
 
 Standardmäßig ist **Credential Guard** nicht aktiv und erfordert eine manuelle Aktivierung innerhalb einer Organisation. Es ist entscheidend für die Verbesserung der Sicherheit gegen Tools wie **Mimikatz**, die in ihrer Fähigkeit, Anmeldeinformationen zu extrahieren, eingeschränkt sind. Allerdings können Schwachstellen weiterhin ausgenutzt werden, indem benutzerdefinierte **Security Support Providers (SSP)** hinzugefügt werden, um Anmeldeinformationen im Klartext während Anmeldeversuchen zu erfassen.
 
@@ -71,7 +69,7 @@ Weitere Details zur Implementierung benutzerdefinierter SSPs zur Erfassung von A
 
 ## RDP RestrictedAdmin-Modus
 
-**Windows 8.1 und Windows Server 2012 R2** führten mehrere neue Sicherheitsfunktionen ein, darunter den _**Restricted Admin-Modus für RDP**_. Dieser Modus wurde entwickelt, um die Sicherheit zu erhöhen, indem die Risiken im Zusammenhang mit [**pass the hash**](https://blog.ahasayen.com/pass-the-hash/) -Angriffen gemindert werden.
+**Windows 8.1 und Windows Server 2012 R2** führten mehrere neue Sicherheitsfunktionen ein, darunter den _**Restricted Admin-Modus für RDP**_. Dieser Modus wurde entwickelt, um die Sicherheit zu erhöhen, indem die Risiken im Zusammenhang mit [**Pass the Hash**](https://blog.ahasayen.com/pass-the-hash/) -Angriffen gemindert werden.
 
 Traditionell werden bei der Verbindung zu einem Remote-Computer über RDP Ihre Anmeldeinformationen auf dem Zielcomputer gespeichert. Dies stellt ein erhebliches Sicherheitsrisiko dar, insbesondere bei der Verwendung von Konten mit erhöhten Rechten. Mit der Einführung des _**Restricted Admin-Modus**_ wird dieses Risiko jedoch erheblich reduziert.
 
@@ -103,11 +101,11 @@ Für weitere Details bietet die ursprüngliche [Quelle](http://juggernaut.wikido
 
 Die Mitgliedschaft in der **Gruppe der geschützten Benutzer** führt zu mehreren Sicherheitsverbesserungen für Benutzer und gewährleistet höhere Schutzmaßnahmen gegen Diebstahl und Missbrauch von Anmeldeinformationen:
 
-- **Anmeldeinformationsdelegation (CredSSP)**: Selbst wenn die Gruppenrichtlinieneinstellung für **Standardanmeldeinformationen delegieren zulassen** aktiviert ist, werden die Klartextanmeldeinformationen geschützter Benutzer nicht zwischengespeichert.
-- **Windows Digest**: Ab **Windows 8.1 und Windows Server 2012 R2** wird das System die Klartextanmeldeinformationen geschützter Benutzer nicht zwischenspeichern, unabhängig vom Status von Windows Digest.
-- **NTLM**: Das System wird die Klartextanmeldeinformationen geschützter Benutzer oder NT-Einwegfunktionen (NTOWF) nicht zwischenspeichern.
-- **Kerberos**: Für geschützte Benutzer wird die Kerberos-Authentifizierung keine **DES**- oder **RC4-Schlüssel** generieren, noch werden Klartextanmeldeinformationen oder langfristige Schlüssel über den ursprünglichen Ticket-Granting Ticket (TGT)-Erwerb hinaus zwischengespeichert.
-- **Offline-Anmeldung**: Geschützte Benutzer haben bei der Anmeldung oder Entsperrung keinen zwischengespeicherten Verifier, was bedeutet, dass die Offline-Anmeldung für diese Konten nicht unterstützt wird.
+- **Anmeldeinformationsdelegation (CredSSP)**: Selbst wenn die Gruppenrichtlinieneinstellung für **Standardanmeldeinformationen delegieren zulassen** aktiviert ist, werden die Klartextanmeldeinformationen der geschützten Benutzer nicht zwischengespeichert.
+- **Windows Digest**: Ab **Windows 8.1 und Windows Server 2012 R2** wird das System die Klartextanmeldeinformationen der geschützten Benutzer nicht zwischenspeichern, unabhängig vom Status von Windows Digest.
+- **NTLM**: Das System wird die Klartextanmeldeinformationen der geschützten Benutzer oder NT-Einwegfunktionen (NTOWF) nicht zwischenspeichern.
+- **Kerberos**: Für geschützte Benutzer wird die Kerberos-Authentifizierung keine **DES**- oder **RC4-Schlüssel** generieren, noch werden Klartextanmeldeinformationen oder langfristige Schlüssel über den Erwerb des ursprünglichen Ticket-Granting Ticket (TGT) hinaus zwischengespeichert.
+- **Offline-Anmeldung**: Für geschützte Benutzer wird beim Anmelden oder Entsperren kein zwischengespeicherter Verifier erstellt, was bedeutet, dass die Offline-Anmeldung für diese Konten nicht unterstützt wird.
 
 Diese Schutzmaßnahmen werden aktiviert, sobald ein Benutzer, der Mitglied der **Gruppe der geschützten Benutzer** ist, sich am Gerät anmeldet. Dies stellt sicher, dass kritische Sicherheitsmaßnahmen vorhanden sind, um gegen verschiedene Methoden des Kompromittierens von Anmeldeinformationen zu schützen.
 

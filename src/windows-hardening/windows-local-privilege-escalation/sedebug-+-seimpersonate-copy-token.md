@@ -1,11 +1,13 @@
+# SeDebug + SeImpersonate - Token kopieren
+
 {{#include ../../banners/hacktricks-training.md}}
 
-Der folgende Code **nutzt die Berechtigungen SeDebug und SeImpersonate** aus, um das Token von einem **Prozess, der als SYSTEM läuft**, und mit **allen Token-Berechtigungen** zu kopieren. \
+Der folgende Code **nutzt die Berechtigungen SeDebug und SeImpersonate** aus, um das Token von einem **Prozess, der als SYSTEM läuft**, zu kopieren und mit **allen Token-Berechtigungen**. \
 In diesem Fall kann dieser Code kompiliert und als **Windows-Dienst-Binärdatei** verwendet werden, um zu überprüfen, ob er funktioniert.\
 Der Hauptteil des **Codes, in dem die Erhöhung erfolgt**, befindet sich in der **`Exploit`** **Funktion**.\
-Innerhalb dieser Funktion sehen Sie, dass der **Prozess **_**lsass.exe**_** gesucht wird**, dann wird **sein Token kopiert**, und schließlich wird dieses Token verwendet, um eine neue _**cmd.exe**_ mit allen Berechtigungen des kopierten Tokens zu starten.
+Innerhalb dieser Funktion sehen Sie, dass der **Prozess **_**lsass.exe**_** gesucht wird**, dann wird sein **Token kopiert**, und schließlich wird dieses Token verwendet, um eine neue _**cmd.exe**_ mit allen Berechtigungen des kopierten Tokens zu starten.
 
-**Andere Prozesse**, die als SYSTEM mit allen oder den meisten Token-Berechtigungen laufen, sind: **services.exe**, **svhost.exe** (einer der ersten), **wininit.exe**, **csrss.exe**... (_denken Sie daran, dass Sie kein Token von einem geschützten Prozess kopieren können_). Darüber hinaus können Sie das Tool [Process Hacker](https://processhacker.sourceforge.io/downloads.php) verwenden, das als Administrator ausgeführt wird, um die Tokens eines Prozesses zu sehen.
+**Andere Prozesse**, die als SYSTEM mit allen oder den meisten Token-Berechtigungen laufen, sind: **services.exe**, **svhost.exe** (einer der ersten), **wininit.exe**, **csrss.exe**... (_denken Sie daran, dass Sie kein Token von einem geschützten Prozess kopieren können_). Darüber hinaus können Sie das Tool [Process Hacker](https://processhacker.sourceforge.io/downloads.php) als Administrator verwenden, um die Tokens eines Prozesses zu sehen.
 ```c
 // From https://cboard.cprogramming.com/windows-programming/106768-running-my-program-service.html
 #include <windows.h>

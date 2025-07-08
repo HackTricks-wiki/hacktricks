@@ -1,7 +1,5 @@
 # Kryptografische/Kompressionsalgorithmen
 
-## Kryptografische/Kompressionsalgorithmen
-
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Identifizierung von Algorithmen
@@ -46,7 +44,7 @@ Wenn Sie die erste Konstante bei Google suchen, erhalten Sie Folgendes:
 ![](<../../images/image (371).png>)
 
 Daher können Sie annehmen, dass die dekompilierte Funktion ein **sha256-Rechner** ist.\
-Sie können jede der anderen Konstanten suchen und (wahrscheinlich) dasselbe Ergebnis erhalten.
+Sie können jede der anderen Konstanten suchen und Sie werden (wahrscheinlich) das gleiche Ergebnis erhalten.
 
 ### Dateninfo
 
@@ -64,10 +62,10 @@ In diesem Fall, wenn Sie nach **0xA56363C6** suchen, können Sie feststellen, da
 Es besteht aus 3 Hauptteilen:
 
 - **Initialisierungsphase/**: Erstellt eine **Tabelle von Werten von 0x00 bis 0xFF** (insgesamt 256 Bytes, 0x100). Diese Tabelle wird häufig als **Substitutionsbox** (oder SBox) bezeichnet.
-- **Scrambling-Phase**: Wird **durch die zuvor erstellte Tabelle** (Schleife von 0x100 Iterationen, erneut) schleifen und jeden Wert mit **semi-zufälligen** Bytes modifizieren. Um diese semi-zufälligen Bytes zu erstellen, wird der RC4 **Schlüssel verwendet**. RC4 **Schlüssel** können **zwischen 1 und 256 Bytes lang** sein, es wird jedoch normalerweise empfohlen, dass sie länger als 5 Bytes sind. Häufig sind RC4-Schlüssel 16 Bytes lang.
+- **Scrambling-Phase**: Wird **durch die zuvor erstellte Tabelle** (Schleife von 0x100 Iterationen, erneut) schleifen und jeden Wert mit **semi-zufälligen** Bytes modifizieren. Um diese semi-zufälligen Bytes zu erstellen, wird der RC4 **Schlüssel verwendet**. RC4 **Schlüssel** können **zwischen 1 und 256 Bytes lang** sein, es wird jedoch normalerweise empfohlen, dass sie mehr als 5 Bytes lang sind. Üblicherweise sind RC4-Schlüssel 16 Bytes lang.
 - **XOR-Phase**: Schließlich wird der Klartext oder Chiffretext mit den zuvor erstellten Werten **XORed**. Die Funktion zum Verschlüsseln und Entschlüsseln ist dieselbe. Dazu wird eine **Schleife durch die erstellten 256 Bytes** so oft durchgeführt, wie es notwendig ist. Dies wird normalerweise in einem dekompilierten Code mit einem **%256 (mod 256)** erkannt.
 
-> [!NOTE]
+> [!TIP]
 > **Um einen RC4 in einem Disassembly/dekompilierten Code zu identifizieren, können Sie nach 2 Schleifen der Größe 0x100 (unter Verwendung eines Schlüssels) suchen und dann ein XOR der Eingabedaten mit den 256 zuvor in den 2 Schleifen erstellten Werten, wahrscheinlich unter Verwendung eines %256 (mod 256)**
 
 ### **Initialisierungsphase/Substitutionsbox:** (Beachten Sie die Zahl 256, die als Zähler verwendet wird, und wie eine 0 an jedem Platz der 256 Zeichen geschrieben wird)
@@ -87,8 +85,8 @@ Es besteht aus 3 Hauptteilen:
 ### **Eigenschaften**
 
 - Verwendung von **Substitutionsboxen und Nachschlagetabellen**
-- Es ist möglich, **AES anhand der Verwendung spezifischer Nachschlagetabellenwerte** (Konstanten) zu unterscheiden. _Beachten Sie, dass die **Konstante** in der Binärdatei **gespeichert** oder _**dynamisch**_ **erzeugt** werden kann._
-- Der **Verschlüsselungsschlüssel** muss **durch 16** (normalerweise 32B) teilbar sein, und normalerweise wird ein **IV** von 16B verwendet.
+- Es ist möglich, **AES anhand der Verwendung spezifischer Nachschlagetabellenwerte** (Konstanten) zu unterscheiden. _Beachten Sie, dass die **Konstante** **im Binärformat gespeichert** oder _**dynamisch erstellt**_ werden kann._
+- Der **Verschlüsselungsschlüssel** muss **durch 16** (normalerweise 32B) **teilbar** sein, und normalerweise wird ein **IV** von 16B verwendet.
 
 ### SBox-Konstanten
 
@@ -120,7 +118,7 @@ Daher ist es möglich, diesen Algorithmus zu identifizieren, indem man die **mag
 
 - Komplexer als symmetrische Algorithmen
 - Es gibt keine Konstanten! (benutzerdefinierte Implementierungen sind schwer zu bestimmen)
-- KANAL (ein Krypto-Analyzer) zeigt keine Hinweise auf RSA, da er auf Konstanten angewiesen ist.
+- KANAL (ein Krypto-Analyzer) kann keine Hinweise zu RSA geben, da er auf Konstanten angewiesen ist.
 
 ### Identifizierung durch Vergleiche
 
@@ -169,8 +167,8 @@ Ein CRC-Hash-Algorithmus sieht wie folgt aus:
 
 ### Eigenschaften
 
-- Nicht erkennbare Konstanten
-- Sie können versuchen, den Algorithmus in Python zu schreiben und online nach ähnlichen Dingen zu suchen
+- Keine erkennbaren Konstanten
+- Sie können versuchen, den Algorithmus in Python zu schreiben und nach ähnlichen Dingen online zu suchen
 
 ### Identifizieren
 

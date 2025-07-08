@@ -1,8 +1,10 @@
 # FISSURE - Das RF-Framework
 
+{{#include /banners/hacktricks-training.md}}
+
 **Frequenzunabhängige SDR-basierte Signalverständnis und Reverse Engineering**
 
-FISSURE ist ein Open-Source-RF- und Reverse-Engineering-Framework, das für alle Fähigkeitsstufen entwickelt wurde und Schnittstellen für Signalentdeckung und -klassifizierung, Protokollentdeckung, Angriffsausführung, IQ-Manipulation, Schwachstellenanalyse, Automatisierung und KI/ML bietet. Das Framework wurde entwickelt, um die schnelle Integration von Softwaremodulen, Radios, Protokollen, Signal Daten, Skripten, Flussdiagrammen, Referenzmaterial und Drittanbieter-Tools zu fördern. FISSURE ist ein Workflow-Ermöglicher, der Software an einem Ort hält und es Teams ermöglicht, mühelos auf den gleichen bewährten Basiskonfigurationsstandard für spezifische Linux-Distributionen zuzugreifen.
+FISSURE ist ein Open-Source-RF- und Reverse-Engineering-Framework, das für alle Fähigkeitsstufen entwickelt wurde und Hooks für Signalentdeckung und -klassifizierung, Protokollentdeckung, Angriffsausführung, IQ-Manipulation, Schwachstellenanalyse, Automatisierung und KI/ML bietet. Das Framework wurde entwickelt, um die schnelle Integration von Softwaremodulen, Radios, Protokollen, Signaldaten, Skripten, Flussdiagrammen, Referenzmaterial und Drittanbieter-Tools zu fördern. FISSURE ist ein Workflow-Enabler, der Software an einem Ort hält und es Teams ermöglicht, mühelos auf den gleichen bewährten Basiskonfigurationsstandard für spezifische Linux-Distributionen zuzugreifen.
 
 Das Framework und die mit FISSURE enthaltenen Tools sind darauf ausgelegt, die Präsenz von RF-Energie zu erkennen, die Eigenschaften eines Signals zu verstehen, Proben zu sammeln und zu analysieren, Übertragungs- und/oder Injektionstechniken zu entwickeln und benutzerdefinierte Payloads oder Nachrichten zu erstellen. FISSURE enthält eine wachsende Bibliothek von Protokoll- und Signalinformationen, um bei der Identifizierung, Paketgestaltung und Fuzzing zu helfen. Online-Archivfunktionen existieren, um Signaldateien herunterzuladen und Playlists zu erstellen, um den Verkehr zu simulieren und Systeme zu testen.
 
@@ -20,7 +22,7 @@ Die benutzerfreundliche Python-Codebasis und Benutzeroberfläche ermöglicht es 
 
 **Unterstützt**
 
-Es gibt drei Zweige innerhalb von FISSURE, um die Dateinavigation zu erleichtern und den Code-Redundanz zu reduzieren. Der Branch Python2\_maint-3.7 enthält eine Codebasis, die auf Python2, PyQt4 und GNU Radio 3.7 basiert; der Branch Python3\_maint-3.8 basiert auf Python3, PyQt5 und GNU Radio 3.8; und der Branch Python3\_maint-3.10 basiert auf Python3, PyQt5 und GNU Radio 3.10.
+Es gibt drei Zweige innerhalb von FISSURE, um die Dateinavigation zu erleichtern und den Code-Redundanz zu reduzieren. Der Python2\_maint-3.7-Zweig enthält eine Codebasis, die auf Python2, PyQt4 und GNU Radio 3.7 basiert; der Python3\_maint-3.8-Zweig basiert auf Python3, PyQt5 und GNU Radio 3.8; und der Python3\_maint-3.10-Zweig basiert auf Python3, PyQt5 und GNU Radio 3.10.
 
 |   Betriebssystem   |   FISSURE-Zweig   |
 | :-----------------: | :---------------: |
@@ -68,7 +70,7 @@ Es wird empfohlen, FISSURE auf einem sauberen Betriebssystem zu installieren, um
 ```
 fissure
 ```
-Beziehen Sie sich auf das FISSURE-Hilfemenü für weitere Details zur Verwendung.
+Referenzieren Sie das FISSURE-Hilfemenü für weitere Details zur Nutzung.
 
 ## Details
 
@@ -104,7 +106,7 @@ Die folgende Liste umfasst "unterstützte" Hardware mit unterschiedlichen Integr
 
 ## Lektionen
 
-FISSURE enthält mehrere hilfreiche Anleitungen, um sich mit verschiedenen Technologien und Techniken vertraut zu machen. Viele beinhalten Schritte zur Verwendung verschiedener Werkzeuge, die in FISSURE integriert sind.
+FISSURE enthält mehrere hilfreiche Anleitungen, um sich mit verschiedenen Technologien und Techniken vertraut zu machen. Viele beinhalten Schritte zur Nutzung verschiedener Werkzeuge, die in FISSURE integriert sind.
 
 * [Lesson1: OpenBTS](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson1\_OpenBTS.md)
 * [Lesson2: Lua Dissectors](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson2\_LuaDissectors.md)
@@ -123,13 +125,13 @@ FISSURE enthält mehrere hilfreiche Anleitungen, um sich mit verschiedenen Techn
 * [ ] Fügen Sie weitere Hardwaretypen, RF-Protokolle, Signalparameter, Analysetools hinzu
 * [ ] Unterstützen Sie weitere Betriebssysteme
 * [ ] Entwickeln Sie Unterrichtsmaterial zu FISSURE (RF-Angriffe, Wi-Fi, GNU Radio, PyQt usw.)
-* [ ] Erstellen Sie einen Signalaufbereiter, Merkmalsextraktor und Signalklassifizierer mit wählbaren AI/ML-Techniken
+* [ ] Erstellen Sie einen Signalaufbereiter, Merkmals-Extraktor und Signal-Klassifizierer mit wählbaren AI/ML-Techniken
 * [ ] Implementieren Sie rekursive Demodulationsmechanismen zur Erzeugung eines Bitstroms aus unbekannten Signalen
 * [ ] Überführen Sie die Hauptkomponenten von FISSURE in ein generisches Sensor-Knoten-Bereitstellungsschema
 
 ## Mitwirken
 
-Vorschläge zur Verbesserung von FISSURE sind ausdrücklich erwünscht. Hinterlassen Sie einen Kommentar auf der [Discussions](https://github.com/ainfosec/FISSURE/discussions)-Seite oder im Discord-Server, wenn Sie Gedanken zu Folgendem haben:
+Vorschläge zur Verbesserung von FISSURE sind ausdrücklich erwünscht. Hinterlassen Sie einen Kommentar auf der [Discussions](https://github.com/ainfosec/FISSURE/discussions) Seite oder im Discord-Server, wenn Sie Gedanken zu Folgendem haben:
 
 * Vorschläge für neue Funktionen und Designänderungen
 * Softwaretools mit Installationsschritten
@@ -151,7 +153,7 @@ Das Erstellen von [Issues](https://github.com/ainfosec/FISSURE/issues), um auf F
 
 ## Zusammenarbeit
 
-Kontaktieren Sie Assured Information Security, Inc. (AIS) Business Development, um Vorschläge und formelle Möglichkeiten zur Zusammenarbeit mit FISSURE zu unterbreiten – sei es durch die Zuweisung von Zeit zur Integration Ihrer Software, durch die talentierten Mitarbeiter von AIS, die Lösungen für Ihre technischen Herausforderungen entwickeln, oder durch die Integration von FISSURE in andere Plattformen/Anwendungen.
+Kontaktieren Sie Assured Information Security, Inc. (AIS) Business Development, um Vorschläge für FISSURE-Kooperationsmöglichkeiten zu unterbreiten und zu formalisieren – sei es durch die Zuweisung von Zeit zur Integration Ihrer Software, durch die talentierten Mitarbeiter von AIS, die Lösungen für Ihre technischen Herausforderungen entwickeln, oder durch die Integration von FISSURE in andere Plattformen/Anwendungen.
 
 ## Lizenz
 
@@ -171,10 +173,14 @@ Business Development - Assured Information Security, Inc. - bd@ainfosec.com
 
 ## Credits
 
-Wir danken diesen Entwicklern:
+Wir erkennen diese Entwickler an und sind dankbar:
 
 [Credits](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/CREDITS.md)
 
 ## Danksagungen
 
 Besonderer Dank geht an Dr. Samuel Mantravadi und Joseph Reith für ihre Beiträge zu diesem Projekt.
+
+
+
+{{#include /banners/hacktricks-training.md}}

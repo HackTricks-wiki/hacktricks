@@ -1,7 +1,5 @@
 # Interessante Windows-Registrierungsschlüssel
 
-### Interessante Windows-Registrierungsschlüssel
-
 {{#include ../../../banners/hacktricks-training.md}}
 
 ### **Windows-Version und Besitzerinformationen**
@@ -43,7 +41,7 @@
 
 ### Shellbags
 
-- **Shellbags** speichern nicht nur Präferenzen für Ordnersichten, sondern liefern auch forensische Beweise für den Ordnerzugriff, selbst wenn der Ordner nicht mehr existiert. Sie sind für Ermittlungen von unschätzbarem Wert, da sie Benutzeraktivitäten offenbaren, die durch andere Mittel nicht offensichtlich sind.
+- **Shellbags** speichern nicht nur Präferenzen für Ordnersichten, sondern liefern auch forensische Beweise für den Zugriff auf Ordner, selbst wenn der Ordner nicht mehr existiert. Sie sind für Ermittlungen von unschätzbarem Wert, da sie Benutzeraktivitäten offenbaren, die durch andere Mittel nicht offensichtlich sind.
 
 ### USB-Informationen und Forensik
 
@@ -55,7 +53,7 @@
 
 ### **Herunterfahrdetails**
 
-- Die Herunterfahrzeit und -anzahl (letzteres nur für XP) werden in **`System\ControlSet001\Control\Windows`** und **`System\ControlSet001\Control\Watchdog\Display`** gespeichert.
+- Die Herunterfahrzeit und die Anzahl (letzteres nur für XP) werden in **`System\ControlSet001\Control\Windows`** und **`System\ControlSet001\Control\Watchdog\Display`** gespeichert.
 
 ### **Netzwerkkonfiguration**
 
@@ -72,7 +70,7 @@
 
 ### **Suchanfragen und eingegebene Pfade**
 
-- Explorer-Suchanfragen und eingegebene Pfade werden in der Registrierung unter **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer`** für WordwheelQuery und TypedPaths protokolliert.
+- Explorer-Suchanfragen und eingegebene Pfade werden in der Registrierung unter **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer`** für WordwheelQuery und TypedPaths verfolgt.
 
 ### **Kürzlich verwendete Dokumente und Office-Dateien**
 
