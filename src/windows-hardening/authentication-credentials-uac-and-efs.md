@@ -11,7 +11,7 @@ Es ist üblich, dass Organisationen **cmd.exe und PowerShell.exe** sowie Schreib
 
 ### Überprüfen
 
-Überprüfen Sie, welche Dateien/Erweiterungen auf der schwarzen Liste stehen oder auf der Whitelist sind:
+Überprüfen Sie, welche Dateien/Erweiterungen auf der schwarzen Liste/weißen Liste stehen:
 ```bash
 Get-ApplockerPolicy -Effective -xml
 
@@ -20,7 +20,7 @@ Get-AppLockerPolicy -Effective | select -ExpandProperty RuleCollections
 $a = Get-ApplockerPolicy -effective
 $a.rulecollections
 ```
-Dieser Registrierungspfad enthält die Konfigurationen und Richtlinien, die von AppLocker angewendet werden, und bietet eine Möglichkeit, die aktuellen Regeln zu überprüfen, die auf dem System durchgesetzt werden:
+Dieser Registrierungspfad enthält die Konfigurationen und Richtlinien, die von AppLocker angewendet werden, und bietet eine Möglichkeit, die aktuelle Regelmenge zu überprüfen, die auf dem System durchgesetzt wird:
 
 - `HKLM\Software\Policies\Microsoft\Windows\SrpV2`
 
@@ -36,7 +36,7 @@ C:\windows\tracing
 - Häufig **vertrauenswürdige** [**"LOLBAS's"**](https://lolbas-project.github.io/) Binärdateien können ebenfalls nützlich sein, um AppLocker zu umgehen.
 - **Schlecht geschriebene Regeln könnten ebenfalls umgangen werden**
 - Zum Beispiel, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, können Sie einen **Ordner namens `allowed`** überall erstellen und er wird erlaubt.
-- Organisationen konzentrieren sich oft darauf, die **`%System32%\WindowsPowerShell\v1.0\powershell.exe`** ausführbare Datei zu blockieren, vergessen jedoch die **anderen** [**PowerShell ausführbaren Standorte**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) wie `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` oder `PowerShell_ISE.exe`.
+- Organisationen konzentrieren sich oft darauf, die **`%System32%\WindowsPowerShell\v1.0\powershell.exe`** ausführbare Datei zu **blockieren**, vergessen jedoch die **anderen** [**PowerShell ausführbaren Standorte**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) wie `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` oder `PowerShell_ISE.exe`.
 - **DLL-Durchsetzung sehr selten aktiviert** aufgrund der zusätzlichen Belastung, die sie auf ein System ausüben kann, und der Menge an Tests, die erforderlich sind, um sicherzustellen, dass nichts kaputt geht. Daher wird die Verwendung von **DLLs als Hintertüren helfen, AppLocker zu umgehen**.
 - Sie können [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) oder [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) verwenden, um **Powershell**-Code in jedem Prozess auszuführen und AppLocker zu umgehen. Für weitere Informationen siehe: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
 
@@ -103,7 +103,7 @@ sc query windefend
 ```
 ## Encrypted File System (EFS)
 
-EFS sichert Dateien durch Verschlüsselung, indem es einen **symmetrischen Schlüssel** verwendet, der als **Dateiverschlüsselungsschlüssel (FEK)** bekannt ist. Dieser Schlüssel wird mit dem **öffentlichen Schlüssel** des Benutzers verschlüsselt und im $EFS **alternativen Datenstrom** der verschlüsselten Datei gespeichert. Wenn eine Entschlüsselung erforderlich ist, wird der entsprechende **private Schlüssel** des digitalen Zertifikats des Benutzers verwendet, um den FEK aus dem $EFS-Stream zu entschlüsseln. Weitere Details finden Sie [hier](https://en.wikipedia.org/wiki/Encrypting_File_System).
+EFS sichert Dateien durch Verschlüsselung, wobei ein **symmetrischer Schlüssel** verwendet wird, der als **Dateiverschlüsselungsschlüssel (FEK)** bekannt ist. Dieser Schlüssel wird mit dem **öffentlichen Schlüssel** des Benutzers verschlüsselt und im $EFS **alternativen Datenstrom** der verschlüsselten Datei gespeichert. Wenn eine Entschlüsselung erforderlich ist, wird der entsprechende **private Schlüssel** des digitalen Zertifikats des Benutzers verwendet, um den FEK aus dem $EFS-Stream zu entschlüsseln. Weitere Details finden Sie [hier](https://en.wikipedia.org/wiki/Encrypting_File_System).
 
 **Entschlüsselungsszenarien ohne Benutzerinitiierung** umfassen:
 
@@ -123,14 +123,14 @@ Diese Verschlüsselungsmethode ermöglicht **transparenten Zugriff** auf verschl
 
 Überprüfen Sie, ob ein **Benutzer** diesen **Dienst** genutzt hat, indem Sie überprüfen, ob dieser Pfad existiert: `C:\users\<username>\appdata\roaming\Microsoft\Protect`
 
-Überprüfen Sie, **wer** Zugriff auf die Datei hat, indem Sie cipher /c \<file>\
-Sie können auch `cipher /e` und `cipher /d` innerhalb eines Ordners verwenden, um alle Dateien zu **verschlüsseln** und **zu entschlüsseln**.
+Überprüfen Sie, **wer** Zugriff auf die Datei hat, indem Sie cipher /c \<file>\ verwenden.\
+Sie können auch `cipher /e` und `cipher /d` in einem Ordner verwenden, um alle Dateien zu **verschlüsseln** und **zu entschlüsseln**.
 
 ### EFS-Dateien entschlüsseln
 
 #### Als Autoritätssystem
 
-Dieser Weg erfordert, dass der **Opferbenutzer** einen **Prozess** auf dem Host **ausführt**. Wenn dies der Fall ist, können Sie mit einer `meterpreter`-Sitzung das Token des Prozesses des Benutzers nachahmen (`impersonate_token` von `incognito`). Oder Sie könnten einfach in den Prozess des Benutzers `migraten`.
+Dieser Weg erfordert, dass der **Opferbenutzer** einen **Prozess** im Host **ausführt**. Wenn dies der Fall ist, können Sie mit einer `meterpreter`-Sitzung das Token des Prozesses des Benutzers nachahmen (`impersonate_token` von `incognito`). Oder Sie könnten einfach in den Prozess des Benutzers `migraten`.
 
 #### Kenntnis des Benutzerpassworts
 
@@ -170,7 +170,7 @@ active-directory-methodology/laps.md
 
 ## PS Constrained Language Mode
 
-PowerShell [**Constrained Language Mode**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **schränkt viele der benötigten Funktionen** ein, um PowerShell effektiv zu nutzen, wie das Blockieren von COM-Objekten, das Zulassen nur genehmigter .NET-Typen, XAML-basierte Workflows, PowerShell-Klassen und mehr.
+PowerShell [**Constrained Language Mode**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **schränkt viele der Funktionen ein**, die benötigt werden, um PowerShell effektiv zu nutzen, wie das Blockieren von COM-Objekten, das Zulassen nur genehmigter .NET-Typen, XAML-basierte Workflows, PowerShell-Klassen und mehr.
 
 ### **Überprüfen**
 ```bash
@@ -183,7 +183,7 @@ $ExecutionContext.SessionState.LanguageMode
 Powershell -version 2
 ```
 In der aktuellen Windows-Version funktioniert dieser Bypass nicht, aber Sie können [**PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM) verwenden.\
-**Um es zu kompilieren, müssen Sie** **eine Referenz** _**hinzufügen**_ -> _Durchsuchen_ -> _Durchsuchen_ -> fügen Sie `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` hinzu und **ändern Sie das Projekt auf .Net4.5**.
+**Um es zu kompilieren, müssen Sie möglicherweise** **eine Referenz** _**hinzufügen**_ -> _Durchsuchen_ -> _Durchsuchen_ -> fügen Sie `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` hinzu und **ändern Sie das Projekt auf .Net4.5**.
 
 #### Direkter Bypass:
 ```bash
@@ -245,7 +245,7 @@ Die SSPI ist dafür verantwortlich, das geeignete Protokoll für zwei Maschinen 
 [Benutzerkontensteuerung (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) ist eine Funktion, die eine **Zustimmungseingabeaufforderung für erhöhte Aktivitäten** ermöglicht.
 
 {{#ref}}
-windows-security-controls/uac-user-account-control.md
+authentication-credentials-uac-and-efs/uac-user-account-control.md
 {{#endref}}
 
 {{#include ../banners/hacktricks-training.md}}
