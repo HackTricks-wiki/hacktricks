@@ -1,7 +1,5 @@
 # Clés de Registre Windows Intéressantes
 
-### Clés de Registre Windows Intéressantes
-
 {{#include ../../../banners/hacktricks-training.md}}
 
 ### **Informations sur la Version de Windows et le Propriétaire**
@@ -43,17 +41,17 @@
 
 ### Shellbags
 
-- Les **Shellbags** non seulement stockent des préférences pour les vues de dossiers mais fournissent également des preuves judiciaires d'accès aux dossiers même si le dossier n'existe plus. Ils sont inestimables pour les enquêtes, révélant l'activité des utilisateurs qui n'est pas évidente par d'autres moyens.
+- **Shellbags** non seulement stockent les préférences pour les vues de dossiers mais fournissent également des preuves judiciaires d'accès aux dossiers même si le dossier n'existe plus. Ils sont inestimables pour les enquêtes, révélant l'activité des utilisateurs qui n'est pas évidente par d'autres moyens.
 
 ### Informations et Analyse USB
 
-- Les détails stockés dans le registre concernant les appareils USB peuvent aider à retracer quels appareils ont été connectés à un ordinateur, liant potentiellement un appareil à des transferts de fichiers sensibles ou à des incidents d'accès non autorisés.
+- Les détails stockés dans le registre concernant les appareils USB peuvent aider à retracer quels appareils ont été connectés à un ordinateur, liant potentiellement un appareil à des transferts de fichiers sensibles ou à des incidents d'accès non autorisé.
 
 ### Numéro de Série de Volume
 
 - Le **Numéro de Série de Volume** peut être crucial pour suivre l'instance spécifique d'un système de fichiers, utile dans des scénarios judiciaires où l'origine d'un fichier doit être établie à travers différents appareils.
 
-### **Détails sur l'Arrêt**
+### **Détails de l'Arrêt**
 
 - L'heure et le nombre d'arrêts (ce dernier uniquement pour XP) sont conservés dans **`System\ControlSet001\Control\Windows`** et **`System\ControlSet001\Control\Watchdog\Display`**.
 
@@ -76,7 +74,7 @@
 
 ### **Documents Récents et Fichiers Office**
 
-- Les documents récents et les fichiers Office accessibles sont notés dans `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs` et des chemins spécifiques à la version d'Office.
+- Les documents récents et les fichiers Office accédés sont notés dans `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs` et des chemins spécifiques à la version d'Office.
 
 ### **Éléments les Plus Récemment Utilisés (MRU)**
 

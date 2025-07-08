@@ -1,7 +1,5 @@
 # Protections des Identifiants Windows
 
-## Protections des Identifiants
-
 {{#include ../../banners/hacktricks-training.md}}
 
 ## WDigest
@@ -32,9 +30,9 @@ Cette structure est empaquetée dans un seul octet et détermine **qui peut acc�
 - Lorsque **LSASS fonctionne en tant que PPL**, les tentatives de l'ouvrir en utilisant `OpenProcess(PROCESS_VM_READ | QUERY_INFORMATION)` depuis un contexte admin normal **échouent avec `0x5 (Accès refusé)`**, même si `SeDebugPrivilege` est activé.
 - Vous pouvez **vérifier le niveau de protection de LSASS** en utilisant des outils comme Process Hacker ou de manière programmatique en lisant la valeur `EPROCESS.Protection`.
 - LSASS aura généralement `PsProtectedSignerLsa-Light` (`0x41`), qui ne peut être accédé **que par des processus signés avec un signataire de niveau supérieur**, tel que `WinTcb` (`0x61` ou `0x62`).
-- PPL est une **restriction uniquement au niveau de l'espace utilisateur** ; **le code au niveau du noyau peut complètement le contourner**.
-- Le fait que LSASS soit PPL ne **prévent pas le dumping de credentials si vous pouvez exécuter du shellcode noyau** ou **exploiter un processus à privilèges élevés avec un accès approprié**.
-- **Définir ou supprimer PPL** nécessite un redémarrage ou des **paramètres de Secure Boot/UEFI**, ce qui peut persister le paramètre PPL même après que les modifications du registre aient été annulées.
+- PPL est une **restriction uniquement au niveau de l'espace utilisateur** ; **le code au niveau du noyau peut le contourner complètement**.
+- Le fait que LSASS soit PPL ne **prévent pas le dumping de credentials si vous pouvez exécuter du shellcode au niveau du noyau** ou **exploiter un processus à privilèges élevés avec un accès approprié**.
+- **Définir ou supprimer PPL** nécessite un redémarrage ou des **paramètres de Secure Boot/UEFI**, qui peuvent persister même après que les modifications du registre aient été annulées.
 
 **Options pour contourner les protections PPL :**
 
@@ -43,7 +41,7 @@ Si vous souhaitez dumper LSASS malgré PPL, vous avez 3 options principales :
 
 ![](../../images/mimidrv.png)
 
-2. **Apporter votre propre pilote vulnérable (BYOVD)** pour exécuter du code noyau personnalisé et désactiver la protection. Des outils comme **PPLKiller**, **gdrv-loader** ou **kdmapper** rendent cela faisable.
+2. **Apporter votre propre pilote vulnérable (BYOVD)** pour exécuter du code personnalisé au niveau du noyau et désactiver la protection. Des outils comme **PPLKiller**, **gdrv-loader** ou **kdmapper** rendent cela faisable.
 3. **Voler un handle LSASS existant** d'un autre processus qui l'a ouvert (par exemple, un processus AV), puis **le dupliquer** dans votre processus. C'est la base de la technique `pypykatz live lsa --method handledup`.
 4. **Abuser d'un processus privilégié** qui vous permettra de charger du code arbitraire dans son espace d'adresses ou à l'intérieur d'un autre processus privilégié, contournant ainsi efficacement les restrictions PPL. Vous pouvez consulter un exemple de cela dans [bypassing-lsa-protection-in-userland](https://blog.scrt.ch/2021/04/22/bypassing-lsa-protection-in-userland/) ou [https://github.com/itm4n/PPLdump](https://github.com/itm4n/PPLdump).
 
@@ -57,15 +55,15 @@ Lorsque vous exécutez **`mimikatz privilege::debug sekurlsa::logonpasswords`**,
 
 ## Credential Guard
 
-**Credential Guard**, une fonctionnalité exclusive aux **Windows 10 (versions Entreprise et Éducation)**, améliore la sécurité des identifiants de machine en utilisant **Virtual Secure Mode (VSM)** et **Virtualization Based Security (VBS)**. Il exploite les extensions de virtualisation du processeur pour isoler des processus clés dans un espace mémoire protégé, loin de l'accès du système d'exploitation principal. Cette isolation garantit que même le noyau ne peut pas accéder à la mémoire dans VSM, protégeant ainsi efficacement les identifiants contre des attaques telles que **pass-the-hash**. L'**Autorité de Sécurité Locale (LSA)** fonctionne dans cet environnement sécurisé en tant que trustlet, tandis que le processus **LSASS** dans le système d'exploitation principal agit simplement comme un communicateur avec le LSA de VSM.
+**Credential Guard**, une fonctionnalité exclusive aux **Windows 10 (versions Entreprise et Éducation)**, améliore la sécurité des identifiants de machine en utilisant **Virtual Secure Mode (VSM)** et **Virtualization Based Security (VBS)**. Il exploite les extensions de virtualisation du processeur pour isoler des processus clés dans un espace mémoire protégé, loin de l'accès du système d'exploitation principal. Cette isolation garantit que même le noyau ne peut pas accéder à la mémoire dans VSM, protégeant ainsi efficacement les identifiants contre des attaques comme **pass-the-hash**. L'**Autorité de Sécurité Locale (LSA)** fonctionne dans cet environnement sécurisé en tant que trustlet, tandis que le processus **LSASS** dans le système d'exploitation principal agit simplement comme un communicateur avec le LSA de VSM.
 
-Par défaut, **Credential Guard** n'est pas actif et nécessite une activation manuelle au sein d'une organisation. Il est crucial pour améliorer la sécurité contre des outils comme **Mimikatz**, qui sont entravés dans leur capacité à extraire des identifiants. Cependant, des vulnérabilités peuvent encore être exploitées par l'ajout de **Security Support Providers (SSP)** personnalisés pour capturer les identifiants en texte clair lors des tentatives de connexion.
+Par défaut, **Credential Guard** n'est pas actif et nécessite une activation manuelle au sein d'une organisation. Il est crucial pour améliorer la sécurité contre des outils comme **Mimikatz**, qui sont entravés dans leur capacité à extraire des identifiants. Cependant, des vulnérabilités peuvent encore être exploitées par l'ajout de **Security Support Providers (SSP)** personnalisés pour capturer des identifiants en texte clair lors des tentatives de connexion.
 
 Pour vérifier l'état d'activation de **Credential Guard**, la clé de registre _**LsaCfgFlags**_ sous _**HKLM\System\CurrentControlSet\Control\LSA**_ peut être inspectée. Une valeur de "**1**" indique une activation avec **UEFI lock**, "**2**" sans verrou, et "**0**" signifie qu'il n'est pas activé. Cette vérification de registre, bien qu'indicative, n'est pas la seule étape pour activer Credential Guard. Des conseils détaillés et un script PowerShell pour activer cette fonctionnalité sont disponibles en ligne.
 ```bash
 reg query HKLM\System\CurrentControlSet\Control\LSA /v LsaCfgFlags
 ```
-Pour une compréhension complète et des instructions sur l'activation de **Credential Guard** dans Windows 10 et son activation automatique dans les systèmes compatibles de **Windows 11 Enterprise et Education (version 22H2)**, visitez [la documentation de Microsoft](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage).
+Pour une compréhension complète et des instructions sur l'activation de **Credential Guard** dans Windows 10 et son activation automatique dans les systèmes compatibles de **Windows 11 Enterprise et Education (version 22H2)**, consultez [la documentation de Microsoft](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage).
 
 Des détails supplémentaires sur la mise en œuvre de SSP personnalisés pour la capture de credentials sont fournis dans [ce guide](../active-directory-methodology/custom-ssp.md).
 
@@ -75,15 +73,15 @@ Des détails supplémentaires sur la mise en œuvre de SSP personnalisés pour l
 
 Traditionnellement, lors de la connexion à un ordinateur distant via RDP, vos credentials sont stockés sur la machine cible. Cela pose un risque de sécurité significatif, surtout lors de l'utilisation de comptes avec des privilèges élevés. Cependant, avec l'introduction du _**mode Restricted Admin**_, ce risque est considérablement réduit.
 
-Lors de l'initiation d'une connexion RDP en utilisant la commande **mstsc.exe /RestrictedAdmin**, l'authentification à l'ordinateur distant est effectuée sans stocker vos credentials dessus. Cette approche garantit que, en cas d'infection par un malware ou si un utilisateur malveillant accède au serveur distant, vos credentials ne sont pas compromises, car elles ne sont pas stockées sur le serveur.
+Lors de l'initiation d'une connexion RDP en utilisant la commande **mstsc.exe /RestrictedAdmin**, l'authentification à l'ordinateur distant est effectuée sans stocker vos credentials sur celui-ci. Cette approche garantit que, en cas d'infection par un malware ou si un utilisateur malveillant accède au serveur distant, vos credentials ne sont pas compromises, car elles ne sont pas stockées sur le serveur.
 
 Il est important de noter qu'en **mode Restricted Admin**, les tentatives d'accès aux ressources réseau depuis la session RDP n'utiliseront pas vos credentials personnelles ; au lieu de cela, l'**identité de la machine** est utilisée.
 
-Cette fonctionnalité marque un pas en avant significatif dans la sécurisation des connexions de bureau à distance et la protection des informations sensibles contre l'exposition en cas de violation de la sécurité.
+Cette fonctionnalité marque un pas en avant significatif dans la sécurisation des connexions de bureau à distance et la protection des informations sensibles contre toute exposition en cas de violation de la sécurité.
 
 ![](../../images/RAM.png)
 
-Pour des informations plus détaillées, visitez [cette ressource](https://blog.ahasayen.com/restricted-admin-mode-for-rdp/).
+Pour des informations plus détaillées, consultez [cette ressource](https://blog.ahasayen.com/restricted-admin-mode-for-rdp/).
 
 ## Credentials mises en cache
 
@@ -93,7 +91,7 @@ Le nombre de connexions mises en cache est ajustable via une **clé de registre 
 ```bash
 reg query "HKEY_LOCAL_MACHINE\SOFTWARE\MICROSOFT\WINDOWS NT\CURRENTVERSION\WINLOGON" /v CACHEDLOGONSCOUNT
 ```
-L'accès à ces informations d'identification mises en cache est strictement contrôlé, seul le compte **SYSTEM** ayant les autorisations nécessaires pour les visualiser. Les administrateurs ayant besoin d'accéder à ces informations doivent le faire avec les privilèges de l'utilisateur SYSTEM. Les informations d'identification sont stockées à : `HKEY_LOCAL_MACHINE\SECURITY\Cache`
+L'accès à ces informations d'identification mises en cache est strictement contrôlé, seul le compte **SYSTEM** ayant les autorisations nécessaires pour les visualiser. Les administrateurs ayant besoin d'accéder à ces informations doivent le faire avec des privilèges d'utilisateur SYSTEM. Les informations d'identification sont stockées à : `HKEY_LOCAL_MACHINE\SECURITY\Cache`
 
 **Mimikatz** peut être utilisé pour extraire ces informations d'identification mises en cache en utilisant la commande `lsadump::cache`.
 

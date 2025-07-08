@@ -1,3 +1,5 @@
+# SeDebug + SeImpersonate - Copier le jeton
+
 {{#include ../../banners/hacktricks-training.md}}
 
 Le code suivant **exploite les privilèges SeDebug et SeImpersonate** pour copier le jeton d'un **processus s'exécutant en tant que SYSTEM** et avec **tous les privilèges du jeton**. \

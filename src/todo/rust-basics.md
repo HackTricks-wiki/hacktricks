@@ -1,8 +1,10 @@
 # Rust Basics
 
+{{#include /banners/hacktricks-training.md}}
+
 ### Types génériques
 
-Créez une struct où 1 de ses valeurs pourrait être de n'importe quel type
+Créez une structure où 1 de ses valeurs pourrait être de n'importe quel type
 ```rust
 struct Wrapper<T> {
 value: T,
@@ -30,7 +32,7 @@ Vous pouvez utiliser des fonctions telles que `is_some()` ou `is_none()` pour v�
 
 ### Macros
 
-Les macros sont plus puissantes que les fonctions car elles s'étendent pour produire plus de code que le code que vous avez écrit manuellement. Par exemple, une signature de fonction doit déclarer le nombre et le type de paramètres que la fonction a. Les macros, en revanche, peuvent prendre un nombre variable de paramètres : nous pouvons appeler `println!("hello")` avec un argument ou `println!("hello {}", name)` avec deux arguments. De plus, les macros sont étendues avant que le compilateur n'interprète la signification du code, donc une macro peut, par exemple, implémenter un trait sur un type donné. Une fonction ne peut pas le faire, car elle est appelée à l'exécution et un trait doit être implémenté à la compilation.
+Les macros sont plus puissantes que les fonctions car elles s'étendent pour produire plus de code que le code que vous avez écrit manuellement. Par exemple, une signature de fonction doit déclarer le nombre et le type de paramètres que la fonction a. Les macros, en revanche, peuvent prendre un nombre variable de paramètres : nous pouvons appeler `println!("hello")` avec un argument ou `println!("hello {}", name)` avec deux arguments. De plus, les macros sont étendues avant que le compilateur n'interprète le sens du code, donc une macro peut, par exemple, implémenter un trait sur un type donné. Une fonction ne peut pas le faire, car elle est appelée à l'exécution et un trait doit être implémenté à la compilation.
 ```rust
 macro_rules! my_macro {
 () => {
@@ -194,7 +196,7 @@ _ => "Hello",
 }
 }
 ```
-#### si laisser
+#### si laissez
 ```rust
 let optional_word = Some(String::from("rustlings"));
 if let word = optional_word {
@@ -285,4 +287,4 @@ thread::sleep(Duration::from_millis(500));
 }
 }
 ```
-
+{{#include /banners/hacktricks-training.md}}

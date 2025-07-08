@@ -1,32 +1,30 @@
-# Artefacts Windows
-
-## Artefacts Windows
+# Windows Artifacts
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Artefacts Windows Généraux
+## Generic Windows Artifacts
 
-### Notifications Windows 10
+### Windows 10 Notifications
 
 Dans le chemin `\Users\<username>\AppData\Local\Microsoft\Windows\Notifications`, vous pouvez trouver la base de données `appdb.dat` (avant l'anniversaire de Windows) ou `wpndatabase.db` (après l'anniversaire de Windows).
 
 À l'intérieur de cette base de données SQLite, vous pouvez trouver la table `Notification` avec toutes les notifications (au format XML) qui peuvent contenir des données intéressantes.
 
-### Chronologie
+### Timeline
 
-La chronologie est une caractéristique de Windows qui fournit un **historique chronologique** des pages web visitées, des documents modifiés et des applications exécutées.
+Timeline est une caractéristique de Windows qui fournit un **historique chronologique** des pages web visitées, des documents modifiés et des applications exécutées.
 
 La base de données se trouve dans le chemin `\Users\<username>\AppData\Local\ConnectedDevicesPlatform\<id>\ActivitiesCache.db`. Cette base de données peut être ouverte avec un outil SQLite ou avec l'outil [**WxTCmd**](https://github.com/EricZimmerman/WxTCmd) **qui génère 2 fichiers pouvant être ouverts avec l'outil** [**TimeLine Explorer**](https://ericzimmerman.github.io/#!index.md).
 
-### ADS (Flux de Données Alternatifs)
+### ADS (Alternate Data Streams)
 
 Les fichiers téléchargés peuvent contenir l'**ADS Zone.Identifier** indiquant **comment** il a été **téléchargé** depuis l'intranet, internet, etc. Certains logiciels (comme les navigateurs) ajoutent généralement même **plus** **d'informations** comme l'**URL** d'où le fichier a été téléchargé.
 
-## **Sauvegardes de Fichiers**
+## **File Backups**
 
-### Corbeille
+### Recycle Bin
 
-Dans Vista/Win7/Win8/Win10, la **Corbeille** se trouve dans le dossier **`$Recycle.bin`** à la racine du lecteur (`C:\$Recycle.bin`).\
+Dans Vista/Win7/Win8/Win10, la **Recycle Bin** peut être trouvée dans le dossier **`$Recycle.bin`** à la racine du lecteur (`C:\$Recycle.bin`).\
 Lorsqu'un fichier est supprimé dans ce dossier, 2 fichiers spécifiques sont créés :
 
 - `$I{id}` : Informations sur le fichier (date de sa suppression)
@@ -42,7 +40,7 @@ Avec ces fichiers, vous pouvez utiliser l'outil [**Rifiuti**](https://github.com
 
 ### Copies de Volume Shadow
 
-La copie Shadow est une technologie incluse dans Microsoft Windows qui peut créer des **copies de sauvegarde** ou des instantanés de fichiers ou de volumes d'ordinateur, même lorsqu'ils sont en cours d'utilisation.
+La technologie Shadow Copy incluse dans Microsoft Windows peut créer des **copies de sauvegarde** ou des instantanés de fichiers ou de volumes d'ordinateur, même lorsqu'ils sont en cours d'utilisation.
 
 Ces sauvegardes se trouvent généralement dans le `\System Volume Information` à la racine du système de fichiers et le nom est composé de **UIDs** montrés dans l'image suivante :
 
@@ -62,9 +60,9 @@ Le registre `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\VSS` contient 
 
 Vous pouvez trouver les fichiers autoenregistrés d'Office dans : `C:\Usuarios\\AppData\Roaming\Microsoft{Excel|Word|Powerpoint}\`
 
-## Éléments Shell
+## Éléments de Shell
 
-Un élément shell est un élément qui contient des informations sur la façon d'accéder à un autre fichier.
+Un élément de shell est un élément qui contient des informations sur la façon d'accéder à un autre fichier.
 
 ### Documents Récents (LNK)
 
@@ -77,7 +75,7 @@ Lorsqu'un dossier est créé, un lien vers le dossier, vers le dossier parent et
 
 Ces fichiers de lien créés automatiquement **contiennent des informations sur l'origine** comme s'il s'agit d'un **fichier** **ou** d'un **dossier**, les **temps MAC** de ce fichier, les **informations de volume** où le fichier est stocké et le **dossier du fichier cible**. Ces informations peuvent être utiles pour récupérer ces fichiers en cas de suppression.
 
-De plus, la **date de création du lien** est le premier **moment** où le fichier original a été **utilisé pour la première fois** et la **date** **modifiée** du fichier de lien est le **dernier** **moment** où le fichier d'origine a été utilisé.
+De plus, la **date de création du lien** est la première **fois** que le fichier original a été **utilisé** et la **date** **modifiée** du fichier de lien est la **dernière** **fois** que le fichier d'origine a été utilisé.
 
 Pour inspecter ces fichiers, vous pouvez utiliser [**LinkParser**](http://4discovery.com/our-tools/).
 
@@ -102,7 +100,7 @@ Dans ce cas, les informations vont être enregistrées dans un fichier CSV.
 
 ### Jumplists
 
-Ce sont les fichiers récents qui sont indiqués par application. C'est la liste des **fichiers récents utilisés par une application** auxquels vous pouvez accéder sur chaque application. Ils peuvent être créés **automatiquement ou être personnalisés**.
+Ce sont les fichiers récents indiqués par application. C'est la liste des **fichiers récents utilisés par une application** auxquels vous pouvez accéder sur chaque application. Ils peuvent être créés **automatiquement ou être personnalisés**.
 
 Les **jumplists** créés automatiquement sont stockés dans `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\AutomaticDestinations\`. Les jumplists sont nommés selon le format `{id}.autmaticDestinations-ms` où l'ID initial est l'ID de l'application.
 
@@ -142,7 +140,7 @@ Les fichiers dans le dossier WPDNSE sont une copie des originaux, donc ne surviv
 
 Vérifiez le fichier `C:\Windows\inf\setupapi.dev.log` pour obtenir les horodatages concernant le moment où la connexion USB a été produite (recherchez `Section start`).
 
-![](<../../../images/image (477) (2) (2) (2) (2) (2) (2) (2) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (14) (2).png>)
+![](<../../../images/image (477) (2) (2) (2) (2) (2) (2) (2) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (14) (2).png>)
 
 ### USB Detective
 
@@ -154,7 +152,7 @@ Vérifiez le fichier `C:\Windows\inf\setupapi.dev.log` pour obtenir les horodata
 
 La tâche planifiée connue sous le nom de 'Nettoyage Plug and Play' est principalement conçue pour la suppression des versions de pilotes obsolètes. Contrairement à son objectif spécifié de conserver la dernière version du package de pilotes, des sources en ligne suggèrent qu'elle cible également les pilotes qui ont été inactifs pendant 30 jours. Par conséquent, les pilotes pour les appareils amovibles non connectés au cours des 30 derniers jours peuvent être sujets à suppression.
 
-La tâche est située au chemin suivant : `C:\Windows\System32\Tasks\Microsoft\Windows\Plug and Play\Plug and Play Cleanup`.
+La tâche se trouve au chemin suivant : `C:\Windows\System32\Tasks\Microsoft\Windows\Plug and Play\Plug and Play Cleanup`.
 
 Une capture d'écran montrant le contenu de la tâche est fournie : ![](https://2.bp.blogspot.com/-wqYubtuR_W8/W19bV5S9XyI/AAAAAAAANhU/OHsBDEvjqmg9ayzdNwJ4y2DKZnhCdwSMgCLcBGAs/s1600/xml.png)
 
@@ -215,7 +213,7 @@ Un **fichier OST** est généré par Microsoft Outlook lorsqu'il est configuré 
 
 ### Récupération des Pièces Jointes
 
-Les pièces jointes perdues pourraient être récupérables à partir de :
+Les pièces jointes perdues peuvent être récupérées à partir de :
 
 - Pour **IE10** : `%APPDATA%\Local\Microsoft\Windows\Temporary Internet Files\Content.Outlook`
 - Pour **IE11 et supérieur** : `%APPDATA%\Local\Microsoft\InetCache\Content.Outlook`
@@ -236,15 +234,15 @@ Le Registre Windows, stockant d'importantes données sur le système et l'activi
 
 - `%windir%\System32\Config` pour divers sous-clés `HKEY_LOCAL_MACHINE`.
 - `%UserProfile%{User}\NTUSER.DAT` pour `HKEY_CURRENT_USER`.
-- Windows Vista et les versions ultérieures sauvegardent les fichiers de registre `HKEY_LOCAL_MACHINE` dans `%Windir%\System32\Config\RegBack\`.
+- Les versions Vista et ultérieures sauvegardent les fichiers de registre `HKEY_LOCAL_MACHINE` dans `%Windir%\System32\Config\RegBack\`.
 - De plus, les informations sur l'exécution des programmes sont stockées dans `%UserProfile%\{User}\AppData\Local\Microsoft\Windows\USERCLASS.DAT` à partir de Windows Vista et Windows 2008 Server.
 
 ### Outils
 
 Certains outils sont utiles pour analyser les fichiers de registre :
 
-- **Éditeur de Registre** : Il est installé dans Windows. C'est une interface graphique pour naviguer à travers le registre Windows de la session actuelle.
-- [**Registry Explorer**](https://ericzimmerman.github.io/#!index.md) : Il vous permet de charger le fichier de registre et de naviguer à travers eux avec une interface graphique. Il contient également des signets mettant en évidence des clés avec des informations intéressantes.
+- **Éditeur de Registre** : Il est installé dans Windows. C'est une interface graphique pour naviguer dans le registre Windows de la session actuelle.
+- [**Registry Explorer**](https://ericzimmerman.github.io/#!index.md) : Il vous permet de charger le fichier de registre et de naviguer à travers eux avec une interface graphique. Il contient également des signets mettant en évidence les clés avec des informations intéressantes.
 - [**RegRipper**](https://github.com/keydet89/RegRipper3.0) : Encore une fois, il a une interface graphique qui permet de naviguer à travers le registre chargé et contient également des plugins qui mettent en évidence des informations intéressantes à l'intérieur du registre chargé.
 - [**Windows Registry Recovery**](https://www.mitec.cz/wrr.html) : Une autre application GUI capable d'extraire les informations importantes du registre chargé.
 
@@ -292,7 +290,7 @@ Le nom du fichier est créé sous la forme `{program_name}-{hash}.pf` (le hachag
 
 Le fichier `C:\Windows\Prefetch\Layout.ini` contient les **noms des dossiers des fichiers qui sont préchargés**. Ce fichier contient **des informations sur le nombre d'exécutions**, **les dates** d'exécution et **les fichiers** **ouverts** par le programme.
 
-Pour inspecter ces fichiers, vous pouvez utiliser l'outil [**PEcmd.exe**](https://github.com/EricZimmerman/PECmd) :
+Pour inspecter ces fichiers, vous pouvez utiliser l'outil [**PEcmd.exe**](https://github.com/EricZimmerman/PECmd):
 ```bash
 .\PECmd.exe -d C:\Users\student\Desktop\Prefetch --html "C:\Users\student\Desktop\out_folder"
 ```
@@ -350,7 +348,7 @@ Pour analyser les informations stockées, l'outil [**AppCompatCacheParser**](htt
 
 Le fichier **Amcache.hve** est essentiellement une ruche de registre qui enregistre des détails sur les applications qui ont été exécutées sur un système. Il se trouve généralement à `C:\Windows\AppCompat\Programas\Amcache.hve`.
 
-Ce fichier est notable pour stocker des enregistrements de processus récemment exécutés, y compris les chemins vers les fichiers exécutables et leurs hachages SHA1. Ces informations sont inestimables pour suivre l'activité des applications sur un système.
+Ce fichier est notable pour stocker des enregistrements des processus récemment exécutés, y compris les chemins vers les fichiers exécutables et leurs hachages SHA1. Ces informations sont inestimables pour suivre l'activité des applications sur un système.
 
 Pour extraire et analyser les données de **Amcache.hve**, l'outil [**AmcacheParser**](https://github.com/EricZimmerman/AmcacheParser) peut être utilisé. La commande suivante est un exemple de la façon d'utiliser AmcacheParser pour analyser le contenu du fichier **Amcache.hve** et afficher les résultats au format CSV :
 ```bash
@@ -362,13 +360,13 @@ Le fichier CVS le plus intéressant généré est le `Amcache_Unassociated file 
 
 ### RecentFileCache
 
-Cet artefact ne peut être trouvé que dans W7 dans `C:\Windows\AppCompat\Programs\RecentFileCache.bcf` et il contient des informations sur l'exécution récente de certains binaires.
+Cet artefact ne peut être trouvé que dans W7 à `C:\Windows\AppCompat\Programs\RecentFileCache.bcf` et il contient des informations sur l'exécution récente de certains binaires.
 
 Vous pouvez utiliser l'outil [**RecentFileCacheParse**](https://github.com/EricZimmerman/RecentFileCacheParser) pour analyser le fichier.
 
 ### Tâches planifiées
 
-Vous pouvez les extraire de `C:\Windows\Tasks` ou `C:\Windows\System32\Tasks` et les lire au format XML.
+Vous pouvez les extraire de `C:\Windows\Tasks` ou `C:\Windows\System32\Tasks` et les lire en tant que XML.
 
 ### Services
 
@@ -426,7 +424,7 @@ Les événements d'accès sont enregistrés dans le fichier de configuration de 
 - **Cache Remote Interactive (12)** : Connexion à distance avec des informations d'identification mises en cache.
 - **Cached Unlock (13)** : Déverrouillage avec des informations d'identification mises en cache.
 
-#### Codes d'état et sous-état pour EventID 4625 :
+#### Codes d'état et sous-codes pour EventID 4625 :
 
 - **0xC0000064** : Le nom d'utilisateur n'existe pas - Pourrait indiquer une attaque d'énumération de noms d'utilisateur.
 - **0xC000006A** : Nom d'utilisateur correct mais mot de passe incorrect - Tentative de devinette de mot de passe ou de force brute possible.
@@ -483,7 +481,7 @@ Enregistré par l'EventID 4616, les changements d'heure système peuvent compliq
 
 Les EventIDs système utiles pour le suivi des appareils USB incluent 20001/20003/10000 pour l'utilisation initiale, 10100 pour les mises à jour de pilotes, et l'EventID 112 de DeviceSetupManager pour les horodatages d'insertion.
 
-#### Événements d'alimentation système
+#### Événements d'alimentation du système
 
 L'EventID 6005 indique le démarrage du système, tandis que l'EventID 6006 marque l'arrêt.
 

@@ -1,6 +1,4 @@
-# Usurpation de Client de Tube Nommé
-
-## Usurpation de Client de Tube Nommé
+# Usurpation d'identité du client de pipe nommé
 
 {{#include ../../banners/hacktricks-training.md}}
 

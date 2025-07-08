@@ -1,8 +1,10 @@
 # Modélisation des Menaces
 
+{{#include /banners/hacktricks-training.md}}
+
 ## Modélisation des Menaces
 
-Bienvenue dans le guide complet de HackTricks sur la Modélisation des Menaces ! Embarquez pour une exploration de cet aspect critique de la cybersécurité, où nous identifions, comprenons et élaborons des stratégies contre les vulnérabilités potentielles d'un système. Ce fil sert de guide étape par étape rempli d'exemples concrets, de logiciels utiles et d'explications faciles à comprendre. Idéal pour les novices comme pour les praticiens expérimentés cherchant à renforcer leurs défenses en cybersécurité.
+Bienvenue dans le guide complet de HackTricks sur la Modélisation des Menaces ! Embarquez pour une exploration de cet aspect critique de la cybersécurité, où nous identifions, comprenons et élaborons des stratégies contre les vulnérabilités potentielles dans un système. Ce fil sert de guide étape par étape rempli d'exemples concrets, de logiciels utiles et d'explications faciles à comprendre. Idéal pour les novices comme pour les praticiens expérimentés cherchant à renforcer leurs défenses en cybersécurité.
 
 ### Scénarios Couramment Utilisés
 
@@ -19,14 +21,14 @@ Les modèles de menaces présentent souvent des éléments marqués en rouge, sy
 
 La Triade CIA est un modèle largement reconnu dans le domaine de la sécurité de l'information, représentant la Confidentialité, l'Intégrité et la Disponibilité. Ces trois piliers forment la base sur laquelle de nombreuses mesures et politiques de sécurité sont construites, y compris les méthodologies de modélisation des menaces.
 
-1. **Confidentialité** : Assurer que les données ou le système ne soient pas accessibles par des individus non autorisés. C'est un aspect central de la sécurité, nécessitant des contrôles d'accès appropriés, du chiffrement et d'autres mesures pour prévenir les violations de données.
+1. **Confidentialité** : Assurer que les données ou le système ne sont pas accessibles par des individus non autorisés. C'est un aspect central de la sécurité, nécessitant des contrôles d'accès appropriés, le chiffrement et d'autres mesures pour prévenir les violations de données.
 2. **Intégrité** : L'exactitude, la cohérence et la fiabilité des données tout au long de leur cycle de vie. Ce principe garantit que les données ne sont pas modifiées ou altérées par des parties non autorisées. Il implique souvent des sommes de contrôle, du hachage et d'autres méthodes de vérification des données.
-3. **Disponibilité** : Cela garantit que les données et les services sont accessibles aux utilisateurs autorisés lorsque cela est nécessaire. Cela implique souvent de la redondance, de la tolérance aux pannes et des configurations de haute disponibilité pour maintenir les systèmes opérationnels même en cas de perturbations.
+3. **Disponibilité** : Cela garantit que les données et les services sont accessibles aux utilisateurs autorisés lorsque nécessaire. Cela implique souvent de la redondance, de la tolérance aux pannes et des configurations de haute disponibilité pour maintenir les systèmes opérationnels même en cas de perturbations.
 
 ### Méthodologies de Modélisation des Menaces
 
-1. **STRIDE** : Développé par Microsoft, STRIDE est un acronyme pour **Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, et Elevation of Privilege**. Chaque catégorie représente un type de menace, et cette méthodologie est couramment utilisée lors de la phase de conception d'un programme ou d'un système pour identifier les menaces potentielles.
-2. **DREAD** : C'est une autre méthodologie de Microsoft utilisée pour l'évaluation des risques des menaces identifiées. DREAD signifie **Damage potential, Reproducibility, Exploitability, Affected users, et Discoverability**. Chacun de ces facteurs est noté, et le résultat est utilisé pour prioriser les menaces identifiées.
+1. **STRIDE** : Développé par Microsoft, STRIDE est un acronyme pour **Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, and Elevation of Privilege**. Chaque catégorie représente un type de menace, et cette méthodologie est couramment utilisée lors de la phase de conception d'un programme ou d'un système pour identifier les menaces potentielles.
+2. **DREAD** : C'est une autre méthodologie de Microsoft utilisée pour l'évaluation des risques des menaces identifiées. DREAD signifie **Damage potential, Reproducibility, Exploitability, Affected users, and Discoverability**. Chacun de ces facteurs est noté, et le résultat est utilisé pour prioriser les menaces identifiées.
 3. **PASTA** (Process for Attack Simulation and Threat Analysis) : C'est une méthodologie en sept étapes, **centrée sur le risque**. Elle inclut la définition et l'identification des objectifs de sécurité, la création d'un périmètre technique, la décomposition de l'application, l'analyse des menaces, l'analyse des vulnérabilités et l'évaluation des risques/triage.
 4. **Trike** : C'est une méthodologie basée sur le risque qui se concentre sur la défense des actifs. Elle part d'une perspective de **gestion des risques** et examine les menaces et les vulnérabilités dans ce contexte.
 5. **VAST** (Visual, Agile, and Simple Threat modeling) : Cette approche vise à être plus accessible et s'intègre dans les environnements de développement Agile. Elle combine des éléments des autres méthodologies et se concentre sur **les représentations visuelles des menaces**.
@@ -38,7 +40,7 @@ Il existe plusieurs outils et solutions logicielles disponibles qui peuvent **ai
 
 ### [SpiderSuite](https://github.com/3nock/SpiderSuite)
 
-Un outil GUI web spider/crawler multi-fonction et multiplateforme avancé pour les professionnels de la cybersécurité. Spider Suite peut être utilisé pour la cartographie et l'analyse de la surface d'attaque.
+Un outil GUI de web spider/crawler multi-fonction et multiplateforme avancé pour les professionnels de la cybersécurité. Spider Suite peut être utilisé pour la cartographie et l'analyse de la surface d'attaque.
 
 **Utilisation**
 
@@ -83,7 +85,7 @@ Juste un peu d'explication sur les entités :
 - Processus (L'entité elle-même comme un serveur web ou une fonctionnalité web)
 - Acteur (Une personne comme un Visiteur de Site Web, un Utilisateur ou un Administrateur)
 - Ligne de Flux de Données (Indicateur d'Interaction)
-- Limite de Confiance (Différents segments ou périmètres de réseau.)
+- Limite de Confiance (Différents segments ou portées de réseau.)
 - Stocker (Choses où les données sont stockées comme des Bases de Données)
 
 5. Créer une Menace (Étape 1)
@@ -109,3 +111,6 @@ Maintenant, votre modèle terminé devrait ressembler à quelque chose comme cec
 ### [Microsoft Threat Modeling Tool](https://aka.ms/threatmodelingtool)
 
 C'est un outil gratuit de Microsoft qui aide à trouver des menaces dans la phase de conception des projets logiciels. Il utilise la méthodologie STRIDE et est particulièrement adapté à ceux qui développent sur la pile de Microsoft.
+
+
+{{#include /banners/hacktricks-training.md}}

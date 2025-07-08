@@ -1,10 +1,12 @@
 # LLM Training - Data Preparation
 
+{{#include /banners/hacktricks-training.md}}
+
 **Ce sont mes notes du livre très recommandé** [**https://www.manning.com/books/build-a-large-language-model-from-scratch**](https://www.manning.com/books/build-a-large-language-model-from-scratch) **avec quelques informations supplémentaires.**
 
 ## Basic Information
 
-Vous devriez commencer par lire ce post pour quelques concepts de base que vous devez connaître :
+Vous devriez commencer par lire ce post pour quelques concepts de base que vous devriez connaître :
 
 {{#ref}}
 0.-basic-llm-concepts.md
@@ -34,7 +36,7 @@ Vous devriez commencer par lire ce post pour quelques concepts de base que vous 
 > L'objectif de cette troisième phase est très simple : **Attribuer à chacun des tokens précédents dans le vocabulaire un vecteur des dimensions souhaitées pour entraîner le modèle.** Chaque mot dans le vocabulaire sera un point dans un espace de X dimensions.\
 > Notez qu'initialement, la position de chaque mot dans l'espace est simplement initialisée "au hasard" et ces positions sont des paramètres entraînables (seront améliorés pendant l'entraînement).
 >
-> De plus, pendant l'embedding des tokens, **une autre couche d'embeddings est créée** qui représente (dans ce cas) la **position absolue du mot dans la phrase d'entraînement**. De cette façon, un mot à différentes positions dans la phrase aura une représentation (signification) différente.
+> De plus, pendant l'embedding des tokens, **une autre couche d'embeddings est créée** qui représente (dans ce cas) la **position absolue du mot dans la phrase d'entraînement**. De cette manière, un mot à différentes positions dans la phrase aura une représentation différente (signification).
 
 {{#ref}}
 3.-token-embeddings.md
@@ -64,7 +66,7 @@ Vous devriez commencer par lire ce post pour quelques concepts de base que vous 
 ## 6. Pre-training & Loading models
 
 > [!TIP]
-> L'objectif de cette sixième phase est très simple : **Entraîner le modèle depuis zéro**. Pour cela, l'architecture LLM précédente sera utilisée avec quelques boucles parcourant les ensembles de données en utilisant les fonctions de perte et l'optimiseur définis pour entraîner tous les paramètres du modèle.
+> L'objectif de cette sixième phase est très simple : **Entraîner le modèle à partir de zéro**. Pour cela, l'architecture LLM précédente sera utilisée avec quelques boucles parcourant les ensembles de données en utilisant les fonctions de perte et l'optimiseur définis pour entraîner tous les paramètres du modèle.
 
 {{#ref}}
 6.-pre-training-and-loading-models.md
@@ -96,3 +98,5 @@ Vous devriez commencer par lire ce post pour quelques concepts de base que vous 
 {{#ref}}
 7.2.-fine-tuning-to-follow-instructions.md
 {{#endref}}
+
+{{#include /banners/hacktricks-training.md}}
