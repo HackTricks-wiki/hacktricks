@@ -1,4 +1,6 @@
-# Mythic
+# Mythic
+
+{{#include ../banners/hacktricks-training.md}}
 
 ## Che cos'è Mythic?
 
@@ -6,7 +8,7 @@ Mythic è un framework open-source e modulare di comando e controllo (C2) proget
 
 ### Installazione
 
-Per installare Mythic, segui le istruzioni nel **[repository ufficiale di Mythic](https://github.com/its-a-feature/Mythic)**.
+Per installare Mythic, segui le istruzioni nel **[repo ufficiale di Mythic](https://github.com/its-a-feature/Mythic)**.
 
 ### Agenti
 
@@ -14,7 +16,7 @@ Mythic supporta più agenti, che sono i **payload che eseguono compiti sui siste
 
 Per impostazione predefinita, Mythic non ha agenti installati. Tuttavia, offre alcuni agenti open source in [**https://github.com/MythicAgents**](https://github.com/MythicAgents).
 
-Per installare un agente da quel repository, devi solo eseguire:
+Per installare un agente da quel repo, devi semplicemente eseguire:
 ```bash
 sudo ./mythic-cli install github https://github.com/MythicAgents/<agent-name>
 sudo ./mythic-cli install github https://github.com/MythicAgents/apfell
@@ -66,12 +68,12 @@ Questo agente ha molti comandi che lo rendono molto simile al Beacon di Cobalt S
 - `rev2self`: Ripristina il token dell'agente al suo token primario, riducendo effettivamente i privilegi al livello originale
 - `ppid`: Cambia il processo padre per i lavori di post-exploitation specificando un nuovo ID processo padre, consentendo un migliore controllo sul contesto di esecuzione del lavoro
 - `printspoofer`: Esegue comandi PrintSpoofer per bypassare le misure di sicurezza dello spooler di stampa, consentendo l'escalation dei privilegi o l'esecuzione di codice
-- `dcsync`: Sincronizza le chiavi Kerberos di un utente sulla macchina locale, consentendo il cracking delle password offline o ulteriori attacchi
+- `dcsync`: Sincronizza le chiavi Kerberos di un utente sulla macchina locale, consentendo la decifratura offline delle password o ulteriori attacchi
 - `ticket_cache_add`: Aggiunge un biglietto Kerberos alla sessione di accesso corrente o a una specificata, consentendo il riutilizzo del biglietto o l'impersonificazione
 
 ### Esecuzione dei processi
 
-- `assembly_inject`: Consente di iniettare un loader di assembly .NET in un processo remoto
+- `assembly_inject`: Consente di iniettare un caricatore di assembly .NET in un processo remoto
 - `execute_assembly`: Esegue un assembly .NET nel contesto dell'agente
 - `execute_coff`: Esegue un file COFF in memoria, consentendo l'esecuzione in memoria di codice compilato
 - `execute_pe`: Esegue un eseguibile non gestito (PE)
@@ -114,13 +116,13 @@ Dopo che un modulo è stato caricato, apparirà nell'elenco come un altro comand
 - `net_localgroup`: Elenca i gruppi locali sul computer specificato, predefinito a localhost se non viene specificato alcun computer.
 - `net_localgroup_member`: Recupera l'appartenenza ai gruppi locali per un gruppo specificato sul computer locale o remoto, consentendo l'enumerazione degli utenti in gruppi specifici.
 - `net_shares`: Elenca le condivisioni remote e la loro accessibilità sul computer specificato, utile per identificare potenziali obiettivi per il movimento laterale.
-- `socks`: Abilita un proxy conforme a SOCKS 5 sulla rete target, consentendo il tunneling del traffico attraverso l'host compromesso. Compatibile con strumenti come proxychains.
+- `socks`: Abilita un proxy compatibile con SOCKS 5 sulla rete target, consentendo il tunneling del traffico attraverso l'host compromesso. Compatibile con strumenti come proxychains.
 - `rpfwd`: Inizia ad ascoltare su una porta specificata sull'host target e inoltra il traffico attraverso Mythic a un IP e una porta remoti, consentendo l'accesso remoto ai servizi sulla rete target.
 - `listpipes`: Elenca tutte le pipe nominate sul sistema locale, che possono essere utili per il movimento laterale o l'escalation dei privilegi interagendo con i meccanismi IPC.
 
 ### Comandi Vari
 - `help`: Mostra informazioni dettagliate su comandi specifici o informazioni generali su tutti i comandi disponibili nell'agente.
-- `clear`: Segna i compiti come 'puliti' in modo che non possano essere ripresi dagli agenti. Puoi specificare `all` per pulire tutti i compiti o `task Num` per pulire un compito specifico.
+- `clear`: Segna i compiti come 'cancellati' in modo che non possano essere ripresi dagli agenti. Puoi specificare `all` per cancellare tutti i compiti o `task Num` per cancellare un compito specifico.
 
 
 ## [Poseidon Agent](https://github.com/MythicAgents/Poseidon)
@@ -138,7 +140,7 @@ Quando si utilizza Linux, ci sono alcuni comandi interessanti:
 - `chmod`: Cambia i permessi di un file
 - `config`: Visualizza la configurazione attuale e le informazioni sull'host
 - `cp`: Copia un file da una posizione a un'altra
-- `curl`: Esegue una singola richiesta web con intestazioni e metodo opzionali
+- `curl`: Esegui una singola richiesta web con intestazioni e metodo opzionali
 - `upload`: Carica un file sul target
 - `download`: Scarica un file dal sistema target alla macchina locale
 - E molti altri
@@ -148,18 +150,21 @@ Quando si utilizza Linux, ci sono alcuni comandi interessanti:
 - `triagedirectory`: Trova file interessanti all'interno di una directory su un host, come file sensibili o credenziali.
 - `getenv`: Ottieni tutte le variabili ambientali correnti.
 
-### Spostati lateralmente
+### Muoversi lateralmente
 
 - `ssh`: SSH su host utilizzando le credenziali designate e apri un PTY senza avviare ssh.
 - `sshauth`: SSH su host specificati utilizzando le credenziali designate. Puoi anche usarlo per eseguire un comando specifico sui host remoti tramite SSH o usarlo per SCP file.
-- `link_tcp`: Collega un altro agente tramite TCP, consentendo comunicazioni dirette tra agenti.
-- `link_webshell`: Collega un agente utilizzando il profilo P2P webshell, consentendo l'accesso remoto all'interfaccia web dell'agente.
+- `link_tcp`: Collega a un altro agente tramite TCP, consentendo comunicazioni dirette tra agenti.
+- `link_webshell`: Collega a un agente utilizzando il profilo P2P webshell, consentendo l'accesso remoto all'interfaccia web dell'agente.
 - `rpfwd`: Avvia o ferma un Reverse Port Forward, consentendo l'accesso remoto ai servizi sulla rete target.
 - `socks`: Avvia o ferma un proxy SOCKS5 sulla rete target, consentendo il tunneling del traffico attraverso l'host compromesso. Compatibile con strumenti come proxychains.
-- `portscan`: Scansiona host per porte aperte, utile per identificare potenziali obiettivi per movimenti laterali o ulteriori attacchi.
+- `portscan`: Scansiona host per porte aperte, utile per identificare potenziali obiettivi per il movimento laterale o ulteriori attacchi.
 
 ### Esecuzione di processi
 
-- `shell`: Esegue un singolo comando shell tramite /bin/sh, consentendo l'esecuzione diretta di comandi sul sistema target.
-- `run`: Esegue un comando dal disco con argomenti, consentendo l'esecuzione di binari o script sul sistema target.
-- `pty`: Apri un PTY interattivo, consentendo un'interazione diretta con la shell sul sistema target.
+- `shell`: Esegui un singolo comando shell tramite /bin/sh, consentendo l'esecuzione diretta di comandi sul sistema target.
+- `run`: Esegui un comando dal disco con argomenti, consentendo l'esecuzione di binari o script sul sistema target.
+- `pty`: Apri un PTY interattivo, consentendo l'interazione diretta con la shell sul sistema target.
+
+
+{{#include ../banners/hacktricks-training.md}}

