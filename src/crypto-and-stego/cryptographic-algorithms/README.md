@@ -1,7 +1,5 @@
 # Algoritmos Criptográficos/Compressão
 
-## Algoritmos Criptográficos/Compressão
-
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Identificando Algoritmos
@@ -24,7 +22,7 @@ Comprime e descomprime um determinado buffer de dados.
 
 **CryptAcquireContext**
 
-Dos [docs](https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-cryptacquirecontexta): A função **CryptAcquireContext** é usada para adquirir um identificador para um determinado contêiner de chaves dentro de um determinado provedor de serviços criptográficos (CSP). **Este identificador retornado é usado em chamadas para funções da CryptoAPI** que utilizam o CSP selecionado.
+Dos [docs](https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-cryptacquirecontexta): A função **CryptAcquireContext** é usada para adquirir um identificador para um determinado contêiner de chaves dentro de um determinado provedor de serviços criptográficos (CSP). **Esse identificador retornado é usado em chamadas para funções da CryptoAPI** que utilizam o CSP selecionado.
 
 **CryptCreateHash**
 
@@ -35,7 +33,7 @@ Inicia a hash de um fluxo de dados. Se esta função for usada, você pode desco
 \
 Verifique aqui a tabela de possíveis algoritmos e seus valores atribuídos: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
 
-### Constantes de código
+### Constantes de Código
 
 Às vezes, é realmente fácil identificar um algoritmo graças ao fato de que ele precisa usar um valor especial e único.
 
@@ -45,7 +43,7 @@ Se você pesquisar a primeira constante no Google, isso é o que você obtém:
 
 ![](<../../images/image (529).png>)
 
-Portanto, você pode assumir que a função decompilada é um **calculador sha256.**\
+Portanto, você pode assumir que a função decompilada é um **calculador de sha256.**\
 Você pode pesquisar qualquer uma das outras constantes e provavelmente obterá o mesmo resultado.
 
 ### informações de dados
@@ -63,14 +61,14 @@ Neste caso, se você procurar **0xA56363C6**, pode descobrir que está relaciona
 
 É composto por 3 partes principais:
 
-- **Estágio de Inicialização/**: Cria uma **tabela de valores de 0x00 a 0xFF** (256bytes no total, 0x100). Esta tabela é comumente chamada de **Caixa de Substituição** (ou SBox).
-- **Estágio de Embaralhamento**: Irá **percorrer a tabela** criada anteriormente (loop de 0x100 iterações, novamente) modificando cada valor com bytes **semi-aleatórios**. Para criar esses bytes semi-aleatórios, a **chave RC4 é usada**. As **chaves RC4** podem ter **entre 1 e 256 bytes de comprimento**, no entanto, geralmente é recomendado que seja acima de 5 bytes. Comumente, as chaves RC4 têm 16 bytes de comprimento.
+- **Estágio de Inicialização/**: Cria uma **tabela de valores de 0x00 a 0xFF** (256 bytes no total, 0x100). Esta tabela é comumente chamada de **Caixa de Substituição** (ou SBox).
+- **Estágio de Embaralhamento**: Irá **percorrer a tabela** criada anteriormente (loop de 0x100 iterações, novamente) modificando cada valor com bytes **semi-aleatórios**. Para criar esses bytes semi-aleatórios, a **chave RC4 é usada**. As **chaves RC4** podem ter **entre 1 e 256 bytes de comprimento**, no entanto, geralmente é recomendado que sejam superiores a 5 bytes. Comumente, as chaves RC4 têm 16 bytes de comprimento.
 - **Estágio XOR**: Finalmente, o texto simples ou o texto cifrado é **XORed com os valores criados anteriormente**. A função para criptografar e descriptografar é a mesma. Para isso, um **loop pelos 256 bytes criados** será realizado quantas vezes forem necessárias. Isso geralmente é reconhecido em um código decompilado com um **%256 (mod 256)**.
 
-> [!NOTE]
+> [!TIP]
 > **Para identificar um RC4 em um código desassemblado/decompilado, você pode verificar 2 loops de tamanho 0x100 (com o uso de uma chave) e, em seguida, um XOR dos dados de entrada com os 256 valores criados anteriormente nos 2 loops, provavelmente usando um %256 (mod 256)**
 
-### **Estágio de Inicialização/Caixa de Substituição:** (Note o número 256 usado como contador e como um 0 é escrito em cada lugar dos 256 chars)
+### **Estágio de Inicialização/Caixa de Substituição:** (Note o número 256 usado como contador e como um 0 é escrito em cada lugar dos 256 caracteres)
 
 ![](<../../images/image (584).png>)
 
@@ -87,7 +85,7 @@ Neste caso, se você procurar **0xA56363C6**, pode descobrir que está relaciona
 ### **Características**
 
 - Uso de **caixas de substituição e tabelas de consulta**
-- É possível **distinguir o AES graças ao uso de valores específicos de tabelas de consulta** (constantes). _Note que a **constante** pode ser **armazenada** no binário **ou criada** _**dinamicamente**._
+- É possível **distinguir o AES graças ao uso de valores específicos de tabela de consulta** (constantes). _Note que a **constante** pode ser **armazenada** no binário **ou criada** _**dinamicamente**._
 - A **chave de criptografia** deve ser **divisível** por **16** (geralmente 32B) e geralmente um **IV** de 16B é usado.
 
 ### Constantes SBox
@@ -103,7 +101,7 @@ Neste caso, se você procurar **0xA56363C6**, pode descobrir que está relaciona
 
 ### Identificando
 
-Na imagem a seguir, note como a constante **0x9E3779B9** é usada (note que esta constante também é usada por outros algoritmos criptográficos como **TEA** -Tiny Encryption Algorithm).\
+Na imagem a seguir, note como a constante **0x9E3779B9** é usada (note que essa constante também é usada por outros algoritmos criptográficos como **TEA** -Tiny Encryption Algorithm).\
 Também note o **tamanho do loop** (**132**) e o **número de operações XOR** nas instruções de **desmontagem** e no exemplo de **código**:
 
 ![](<../../images/image (547).png>)

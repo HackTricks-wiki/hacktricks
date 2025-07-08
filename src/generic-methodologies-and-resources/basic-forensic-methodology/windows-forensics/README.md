@@ -1,14 +1,12 @@
 # Artefatos do Windows
 
-## Artefatos do Windows
-
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Artefatos Genéricos do Windows
 
 ### Notificações do Windows 10
 
-No caminho `\Users\<username>\AppData\Local\Microsoft\Windows\Notifications` você pode encontrar o banco de dados `appdb.dat` (antes do aniversário do Windows) ou `wpndatabase.db` (após o Aniversário do Windows).
+No caminho `\Users\<username>\AppData\Local\Microsoft\Windows\Notifications` você pode encontrar o banco de dados `appdb.dat` (antes do aniversário do Windows) ou `wpndatabase.db` (após o aniversário do Windows).
 
 Dentro deste banco de dados SQLite, você pode encontrar a tabela `Notification` com todas as notificações (em formato XML) que podem conter dados interessantes.
 
@@ -114,7 +112,7 @@ Você pode inspecionar os jumplists usando [**JumplistExplorer**](https://ericzi
 
 ![](<../../../images/image (168).png>)
 
-(_Observe que os timestamps fornecidos pelo JumplistExplorer estão relacionados ao arquivo jumplist em si_)
+(_Note que os timestamps fornecidos pelo JumplistExplorer estão relacionados ao arquivo jumplist_)
 
 ### Shellbags
 
@@ -128,11 +126,11 @@ Você pode inspecionar os jumplists usando [**JumplistExplorer**](https://ericzi
 - Pasta Recentes do Microsoft Office
 - Jumplists
 
-Observe que alguns arquivos LNK, em vez de apontar para o caminho original, apontam para a pasta WPDNSE:
+Note que alguns arquivos LNK em vez de apontar para o caminho original, apontam para a pasta WPDNSE:
 
 ![](<../../../images/image (218).png>)
 
-Os arquivos na pasta WPDNSE são uma cópia dos originais, portanto, não sobreviverão a uma reinicialização do PC e o GUID é retirado de um shellbag.
+Os arquivos na pasta WPDNSE são uma cópia dos originais, portanto não sobreviverão a uma reinicialização do PC e o GUID é retirado de um shellbag.
 
 ### Informações do Registro
 
@@ -152,7 +150,7 @@ Verifique o arquivo `C:\Windows\inf\setupapi.dev.log` para obter os timestamps s
 
 ### Limpeza de Plug and Play
 
-A tarefa agendada conhecida como 'Limpeza de Plug and Play' é projetada principalmente para a remoção de versões de driver desatualizadas. Ao contrário de seu propósito especificado de reter a versão mais recente do pacote de driver, fontes online sugerem que também visa drivers que estiveram inativos por 30 dias. Consequentemente, drivers para dispositivos removíveis não conectados nos últimos 30 dias podem estar sujeitos à exclusão.
+A tarefa agendada conhecida como 'Limpeza de Plug and Play' é projetada principalmente para a remoção de versões de driver desatualizadas. Ao contrário de seu propósito especificado de reter a versão mais recente do pacote de driver, fontes online sugerem que também visa drivers que estiveram inativos por 30 dias. Consequentemente, drivers para dispositivos removíveis não conectados nos últimos 30 dias podem ser sujeitos à exclusão.
 
 A tarefa está localizada no seguinte caminho: `C:\Windows\System32\Tasks\Microsoft\Windows\Plug and Play\Plug and Play Cleanup`.
 
@@ -166,7 +164,7 @@ Uma captura de tela mostrando o conteúdo da tarefa é fornecida: ![](https://2.
 - **Period ('P1M')**: Direciona o Agendador de Tarefas a iniciar a tarefa de limpeza mensalmente durante a manutenção automática regular.
 - **Deadline ('P2M')**: Instruções ao Agendador de Tarefas, se a tarefa falhar por dois meses consecutivos, para executar a tarefa durante a manutenção automática de emergência.
 
-Esta configuração garante manutenção e limpeza regulares dos drivers, com disposições para reattemptar a tarefa em caso de falhas consecutivas.
+Esta configuração garante manutenção e limpeza regulares dos drivers, com disposições para re-tentar a tarefa em caso de falhas consecutivas.
 
 **Para mais informações, verifique:** [**https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html**](https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html)
 
@@ -177,7 +175,7 @@ Os emails contêm **2 partes interessantes: Os cabeçalhos e o conteúdo** do em
 - **Quem** enviou os emails (endereço de email, IP, servidores de email que redirecionaram o email)
 - **Quando** o email foi enviado
 
-Além disso, dentro dos cabeçalhos `References` e `In-Reply-To`, você pode encontrar o ID das mensagens:
+Além disso, dentro dos cabeçalhos `References` e `In-Reply-To` você pode encontrar o ID das mensagens:
 
 ![](<../../../images/image (593).png>)
 
@@ -187,7 +185,7 @@ Este aplicativo salva emails em HTML ou texto. Você pode encontrar os emails de
 
 Os **metadados** dos emails e os **contatos** podem ser encontrados dentro do **banco de dados EDB**: `\Users\<username>\AppData\Local\Comms\UnistoreDB\store.vol`
 
-**Mude a extensão** do arquivo de `.vol` para `.edb` e você pode usar a ferramenta [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html) para abri-lo. Dentro da tabela `Message`, você pode ver os emails.
+**Mude a extensão** do arquivo de `.vol` para `.edb` e você pode usar a ferramenta [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html) para abri-lo. Dentro da tabela `Message` você pode ver os emails.
 
 ### Microsoft Outlook
 
@@ -211,7 +209,7 @@ Você pode abrir o arquivo PST usando a ferramenta [**Kernel PST Viewer**](https
 
 ### Arquivos OST do Microsoft Outlook
 
-Um **arquivo OST** é gerado pelo Microsoft Outlook quando está configurado com **IMAP** ou um servidor **Exchange**, armazenando informações semelhantes a um arquivo PST. Este arquivo é sincronizado com o servidor, retendo dados por **12 meses** até um **tamanho máximo de 50GB**, e está localizado no mesmo diretório que o arquivo PST. Para visualizar um arquivo OST, o [**Kernel OST viewer**](https://www.nucleustechnologies.com/ost-viewer.html) pode ser utilizado.
+Um **arquivo OST** é gerado pelo Microsoft Outlook quando está configurado com **IMAP** ou um servidor **Exchange**, armazenando informações semelhantes a um arquivo PST. Este arquivo é sincronizado com o servidor, retendo dados por **últimos 12 meses** até um **tamanho máximo de 50GB**, e está localizado no mesmo diretório que o arquivo PST. Para visualizar um arquivo OST, o [**Kernel OST viewer**](https://www.nucleustechnologies.com/ost-viewer.html) pode ser utilizado.
 
 ### Recuperando Anexos
 
@@ -226,7 +224,7 @@ Anexos perdidos podem ser recuperáveis de:
 
 ### Miniaturas de Imagem
 
-- **Windows XP e 8-8.1**: Acessar uma pasta com miniaturas gera um arquivo `thumbs.db` armazenando pré-visualizações de imagem, mesmo após a exclusão.
+- **Windows XP e 8-8.1**: Acessar uma pasta com miniaturas gera um arquivo `thumbs.db` armazenando pré-visualizações de imagens, mesmo após a exclusão.
 - **Windows 7/10**: `thumbs.db` é criado quando acessado através de uma rede via caminho UNC.
 - **Windows Vista e versões mais recentes**: Pré-visualizações de miniaturas são centralizadas em `%userprofile%\AppData\Local\Microsoft\Windows\Explorer` com arquivos nomeados **thumbcache_xxx.db**. [**Thumbsviewer**](https://thumbsviewer.github.io) e [**ThumbCache Viewer**](https://thumbcacheviewer.github.io) são ferramentas para visualizar esses arquivos.
 
@@ -250,17 +248,17 @@ Algumas ferramentas são úteis para analisar os arquivos de registro:
 
 ### Recuperando Elemento Excluído
 
-Quando uma chave é excluída, ela é marcada como tal, mas até que o espaço que ocupa seja necessário, não será removida. Portanto, usando ferramentas como **Registry Explorer**, é possível recuperar essas chaves excluídas.
+Quando uma chave é excluída, ela é marcada como tal, mas até que o espaço que está ocupando seja necessário, não será removida. Portanto, usando ferramentas como **Registry Explorer**, é possível recuperar essas chaves excluídas.
 
 ### Último Tempo de Escrita
 
-Cada Par Chave-Valor contém um **timestamp** indicando a última vez que foi modificado.
+Cada Par-Chave contém um **timestamp** indicando a última vez que foi modificado.
 
 ### SAM
 
 O arquivo/hive **SAM** contém os **usuários, grupos e hashes de senhas dos usuários** do sistema.
 
-Em `SAM\Domains\Account\Users`, você pode obter o nome de usuário, o RID, o último login, o último logon falhado, o contador de logins, a política de senhas e quando a conta foi criada. Para obter os **hashes**, você também **precisa** do arquivo/hive **SYSTEM**.
+Em `SAM\Domains\Account\Users` você pode obter o nome de usuário, o RID, o último login, o último logon falhado, o contador de logins, a política de senhas e quando a conta foi criada. Para obter os **hashes**, você também **precisa** do arquivo/hive **SYSTEM**.
 
 ### Entradas Interessantes no Registro do Windows
 
@@ -272,23 +270,23 @@ interesting-windows-registry-keys.md
 
 ### Processos Básicos do Windows
 
-Neste [post](https://jonahacks.medium.com/investigating-common-windows-processes-18dee5f97c1d), você pode aprender sobre os processos comuns do Windows para detectar comportamentos suspeitos.
+Neste [post](https://jonahacks.medium.com/investigating-common-windows-processes-18dee5f97c1d) você pode aprender sobre os processos comuns do Windows para detectar comportamentos suspeitos.
 
 ### Aplicativos Recentes do Windows
 
-Dentro do registro `NTUSER.DAT` no caminho `Software\Microsoft\Current Version\Search\RecentApps`, você pode encontrar subchaves com informações sobre o **aplicativo executado**, **última vez** que foi executado e **número de vezes** que foi iniciado.
+Dentro do registro `NTUSER.DAT` no caminho `Software\Microsoft\Current Version\Search\RecentApps` você pode subchaves com informações sobre o **aplicativo executado**, **última vez** que foi executado, e **número de vezes** que foi lançado.
 
 ### BAM (Moderador de Atividade em Segundo Plano)
 
 Você pode abrir o arquivo `SYSTEM` com um editor de registro e dentro do caminho `SYSTEM\CurrentControlSet\Services\bam\UserSettings\{SID}` você pode encontrar informações sobre os **aplicativos executados por cada usuário** (note o `{SID}` no caminho) e **a que horas** foram executados (a hora está dentro do valor de Dados do registro).
 
-### Prefetch do Windows
+### Windows Prefetch
 
-Prefetching é uma técnica que permite que um computador **busque silenciosamente os recursos necessários para exibir conteúdo** que um usuário **pode acessar em um futuro próximo**, para que os recursos possam ser acessados mais rapidamente.
+Prefetching é uma técnica que permite que um computador silenciosamente **busque os recursos necessários para exibir conteúdo** que um usuário **pode acessar em um futuro próximo** para que os recursos possam ser acessados mais rapidamente.
 
-O prefetch do Windows consiste em criar **caches dos programas executados** para poder carregá-los mais rapidamente. Esses caches são criados como arquivos `.pf` dentro do caminho: `C:\Windows\Prefetch`. Há um limite de 128 arquivos no XP/VISTA/WIN7 e 1024 arquivos no Win8/Win10.
+O prefetch do Windows consiste em criar **caches dos programas executados** para poder carregá-los mais rápido. Esses caches são criados como arquivos `.pf` dentro do caminho: `C:\Windows\Prefetch`. Há um limite de 128 arquivos no XP/VISTA/WIN7 e 1024 arquivos no Win8/Win10.
 
-O nome do arquivo é criado como `{program_name}-{hash}.pf` (o hash é baseado no caminho e argumentos do executável). No W10, esses arquivos são comprimidos. Observe que a mera presença do arquivo indica que **o programa foi executado** em algum momento.
+O nome do arquivo é criado como `{program_name}-{hash}.pf` (o hash é baseado no caminho e argumentos do executável). No W10, esses arquivos são comprimidos. Note que a mera presença do arquivo indica que **o programa foi executado** em algum momento.
 
 O arquivo `C:\Windows\Prefetch\Layout.ini` contém os **nomes das pastas dos arquivos que são pré-carregados**. Este arquivo contém **informações sobre o número de execuções**, **datas** da execução e **arquivos** **abertos** pelo programa.
 
@@ -298,9 +296,9 @@ Para inspecionar esses arquivos, você pode usar a ferramenta [**PEcmd.exe**](ht
 ```
 ![](<../../../images/image (315).png>)
 
-### Superfetch
+### Superprefetch
 
-**Superfetch** tem o mesmo objetivo que o prefetch, **carregar programas mais rápido** prevendo o que será carregado a seguir. No entanto, não substitui o serviço de prefetch.\
+**Superprefetch** tem o mesmo objetivo que o prefetch, **carregar programas mais rápido** prevendo o que será carregado a seguir. No entanto, não substitui o serviço de prefetch.\
 Este serviço gerará arquivos de banco de dados em `C:\Windows\Prefetch\Ag*.db`.
 
 Nestes bancos de dados, você pode encontrar o **nome** do **programa**, **número** de **execuções**, **arquivos** **abertos**, **volume** **acessado**, **caminho** **completo**, **períodos** e **timestamps**.
@@ -350,7 +348,7 @@ Para analisar as informações armazenadas, a ferramenta [**AppCompatCacheParser
 
 O arquivo **Amcache.hve** é essencialmente um hive de registro que registra detalhes sobre aplicativos que foram executados em um sistema. Ele é tipicamente encontrado em `C:\Windows\AppCompat\Programas\Amcache.hve`.
 
-Este arquivo é notável por armazenar registros de processos executados recentemente, incluindo os caminhos para os arquivos executáveis e seus hashes SHA1. Essas informações são inestimáveis para rastrear a atividade de aplicativos em um sistema.
+Este arquivo é notável por armazenar registros de processos recentemente executados, incluindo os caminhos para os arquivos executáveis e seus hashes SHA1. Essas informações são inestimáveis para rastrear a atividade de aplicativos em um sistema.
 
 Para extrair e analisar os dados do **Amcache.hve**, a ferramenta [**AmcacheParser**](https://github.com/EricZimmerman/AmcacheParser) pode ser usada. O seguinte comando é um exemplo de como usar o AmcacheParser para analisar o conteúdo do arquivo **Amcache.hve** e gerar os resultados em formato CSV:
 ```bash
@@ -379,9 +377,9 @@ Você pode encontrá-los no registro em `SYSTEM\ControlSet001\Services`. Você p
 Os aplicativos instalados podem ser encontrados em `\ProgramData\Microsoft\Windows\AppRepository\`\
 Este repositório possui um **log** com **cada aplicativo instalado** no sistema dentro do banco de dados **`StateRepository-Machine.srd`**.
 
-Dentro da tabela de Aplicativos deste banco de dados, é possível encontrar as colunas: "Application ID", "PackageNumber" e "Display Name". Essas colunas têm informações sobre aplicativos pré-instalados e instalados e pode-se verificar se alguns aplicativos foram desinstalados, pois os IDs dos aplicativos instalados devem ser sequenciais.
+Dentro da tabela de Aplicativos deste banco de dados, é possível encontrar as colunas: "Application ID", "PackageNumber" e "Display Name". Essas colunas têm informações sobre aplicativos pré-instalados e instalados e podem indicar se alguns aplicativos foram desinstalados, pois os IDs dos aplicativos instalados devem ser sequenciais.
 
-É também possível **encontrar aplicativos instalados** dentro do caminho do registro: `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Applications\`\
+Também é possível **encontrar aplicativos instalados** dentro do caminho do registro: `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Applications\`\
 E **aplicativos desinstalados** em: `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Deleted\`
 
 ## Eventos do Windows
@@ -415,11 +413,11 @@ Eventos de acesso são registrados no arquivo de configuração de segurança lo
 
 - **Interativo (2)**: Login direto do usuário.
 - **Rede (3)**: Acesso a pastas compartilhadas.
-- **Batch (4)**: Execução de processos em lote.
+- **Lote (4)**: Execução de processos em lote.
 - **Serviço (5)**: Lançamentos de serviços.
 - **Proxy (6)**: Autenticação proxy.
 - **Desbloquear (7)**: Tela desbloqueada com uma senha.
-- **Texto Claro da Rede (8)**: Transmissão de senha em texto claro, muitas vezes do IIS.
+- **Rede Cleartext (8)**: Transmissão de senha em texto claro, muitas vezes do IIS.
 - **Novas Credenciais (9)**: Uso de credenciais diferentes para acesso.
 - **Interativo Remoto (10)**: Login em serviços de desktop remoto ou terminal.
 - **Cache Interativo (11)**: Login com credenciais em cache sem contato com o controlador de domínio.
@@ -443,7 +441,7 @@ Eventos de acesso são registrados no arquivo de configuração de segurança lo
 
 #### EventID 4616:
 
-- **Mudança de Hora**: Modificação do horário do sistema, pode obscurecer a linha do tempo dos eventos.
+- **Mudança de Hora**: Modificação do tempo do sistema, pode obscurecer a linha do tempo dos eventos.
 
 #### EventID 6005 e 6006:
 
@@ -477,7 +475,7 @@ Identificáveis por múltiplos registros de EventID 4625, seguidos por um EventI
 
 #### Mudança de Hora
 
-Registrada pelo EventID 4616, mudanças no horário do sistema podem complicar a análise forense.
+Registrada pelo EventID 4616, mudanças no tempo do sistema podem complicar a análise forense.
 
 #### Rastreamento de Dispositivos USB
 
@@ -485,7 +483,7 @@ IDs de Evento do Sistema úteis para rastreamento de dispositivos USB incluem 20
 
 #### Eventos de Energia do Sistema
 
-EventID 6005 indica inicialização do sistema, enquanto EventID 6006 marca o desligamento.
+O EventID 6005 indica a inicialização do sistema, enquanto o EventID 6006 marca o desligamento.
 
 #### Exclusão de Log
 

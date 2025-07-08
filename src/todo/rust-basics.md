@@ -1,4 +1,6 @@
-# Rust Basics
+# Fundamentos do Rust
+
+{{#include /banners/hacktricks-training.md}}
 
 ### Tipos Genéricos
 
@@ -30,7 +32,7 @@ Você pode usar funções como `is_some()` ou `is_none()` para verificar o valor
 
 ### Macros
 
-Macros são mais poderosas do que funções porque se expandem para produzir mais código do que o código que você escreveu manualmente. Por exemplo, uma assinatura de função deve declarar o número e o tipo de parâmetros que a função possui. Macros, por outro lado, podem aceitar um número variável de parâmetros: podemos chamar `println!("hello")` com um argumento ou `println!("hello {}", name)` com dois argumentos. Além disso, as macros são expandidas antes que o compilador interprete o significado do código, então uma macro pode, por exemplo, implementar um trait em um tipo dado. Uma função não pode, porque é chamada em tempo de execução e um trait precisa ser implementado em tempo de compilação.
+Macros são mais poderosas do que funções porque se expandem para produzir mais código do que o código que você escreveu manualmente. Por exemplo, uma assinatura de função deve declarar o número e o tipo de parâmetros que a função possui. Macros, por outro lado, podem aceitar um número variável de parâmetros: podemos chamar `println!("hello")` com um argumento ou `println!("hello {}", name)` com dois argumentos. Além disso, as macros são expandidas antes que o compilador interprete o significado do código, então uma macro pode, por exemplo, implementar um trait em um determinado tipo. Uma função não pode, porque é chamada em tempo de execução e um trait precisa ser implementado em tempo de compilação.
 ```rust
 macro_rules! my_macro {
 () => {
@@ -285,4 +287,4 @@ thread::sleep(Duration::from_millis(500));
 }
 }
 ```
-
+{{#include /banners/hacktricks-training.md}}

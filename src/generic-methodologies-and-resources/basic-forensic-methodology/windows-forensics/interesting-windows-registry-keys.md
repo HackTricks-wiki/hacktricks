@@ -1,7 +1,5 @@
 # Chaves de Registro do Windows Interessantes
 
-### Chaves de Registro do Windows Interessantes
-
 {{#include ../../../banners/hacktricks-training.md}}
 
 ### **Informações sobre a Versão do Windows e Proprietário**
@@ -37,7 +35,7 @@
 
 - **CSC** melhora o acesso a arquivos offline armazenando cópias de arquivos compartilhados. Diferentes configurações de **CSCFlags** controlam como e quais arquivos são armazenados em cache, afetando o desempenho e a experiência do usuário, especialmente em ambientes com conectividade intermitente.
 
-### Programas de Inicialização Automática
+### Programas de AutoInício
 
 - Programas listados em várias chaves de registro `Run` e `RunOnce` são lançados automaticamente na inicialização, afetando o tempo de inicialização do sistema e potencialmente sendo pontos de interesse para identificar malware ou software indesejado.
 
@@ -60,7 +58,7 @@
 ### **Configuração de Rede**
 
 - Para informações detalhadas sobre a interface de rede, consulte **`System\ControlSet001\Services\Tcpip\Parameters\Interfaces{GUID_INTERFACE}`**.
-- Os tempos de conexão de rede, incluindo conexões VPN, são registrados em vários caminhos em **`Software\Microsoft\Windows NT\CurrentVersion\NetworkList`**.
+- Os tempos da primeira e última conexão de rede, incluindo conexões VPN, são registrados em vários caminhos em **`Software\Microsoft\Windows NT\CurrentVersion\NetworkList`**.
 
 ### **Pastas Compartilhadas**
 
@@ -80,11 +78,11 @@
 
 ### **Itens Mais Recentemente Usados (MRU)**
 
-- Listas MRU, indicando caminhos de arquivos e comandos recentes, são armazenadas em várias subchaves `ComDlg32` e `Explorer` sob `NTUSER.DAT`.
+- Listas MRU, indicando caminhos e comandos de arquivos recentes, são armazenadas em várias subchaves `ComDlg32` e `Explorer` sob `NTUSER.DAT`.
 
 ### **Rastreamento de Atividade do Usuário**
 
-- O recurso User Assist registra estatísticas detalhadas de uso de aplicativos, incluindo contagem de execuções e hora da última execução, em **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{GUID}\Count`**.
+- O recurso User Assist registra estatísticas detalhadas de uso de aplicativos, incluindo contagem de execuções e último tempo de execução, em **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{GUID}\Count`**.
 
 ### **Análise de Shellbags**
 
@@ -93,9 +91,9 @@
 ### **Histórico de Dispositivos USB**
 
 - **`HKLM\SYSTEM\ControlSet001\Enum\USBSTOR`** e **`HKLM\SYSTEM\ControlSet001\Enum\USB`** contêm detalhes ricos sobre dispositivos USB conectados, incluindo fabricante, nome do produto e timestamps de conexão.
-- O usuário associado a um dispositivo USB específico pode ser identificado pesquisando os hives `NTUSER.DAT` para o **{GUID}** do dispositivo.
+- O usuário associado a um dispositivo USB específico pode ser identificado pesquisando os hives `NTUSER.DAT` pelo **{GUID}** do dispositivo.
 - O último dispositivo montado e seu número de série do volume podem ser rastreados através de `System\MountedDevices` e `Software\Microsoft\Windows NT\CurrentVersion\EMDMgmt`, respectivamente.
 
-Este guia condensa os caminhos e métodos cruciais para acessar informações detalhadas sobre sistema, rede e atividade do usuário em sistemas Windows, visando clareza e usabilidade.
+Este guia condensa os caminhos e métodos cruciais para acessar informações detalhadas do sistema, rede e atividade do usuário em sistemas Windows, visando clareza e usabilidade.
 
 {{#include ../../../banners/hacktricks-training.md}}

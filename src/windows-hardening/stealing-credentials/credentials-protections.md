@@ -1,7 +1,5 @@
 # Proteções de Credenciais do Windows
 
-## Proteções de Credenciais
-
 {{#include ../../banners/hacktricks-training.md}}
 
 ## WDigest
@@ -18,7 +16,7 @@ reg query HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest /v Use
 
 **Processo Protegido (PP)** e **Processo Protegido Leve (PPL)** são **proteções a nível de kernel do Windows** projetadas para evitar acesso não autorizado a processos sensíveis como **LSASS**. Introduzido no **Windows Vista**, o **modelo PP** foi originalmente criado para a aplicação de **DRM** e permitia apenas que binários assinados com um **certificado de mídia especial** fossem protegidos. Um processo marcado como **PP** só pode ser acessado por outros processos que também são **PP** e têm um **nível de proteção igual ou superior**, e mesmo assim, **apenas com direitos de acesso limitados** a menos que especificamente permitido.
 
-**PPL**, introduzido no **Windows 8.1**, é uma versão mais flexível do PP. Ele permite **casos de uso mais amplos** (por exemplo, LSASS, Defender) ao introduzir **"níveis de proteção"** baseados no campo **EKU (Enhanced Key Usage)** da **assinatura digital**. O nível de proteção é armazenado no campo `EPROCESS.Protection`, que é uma estrutura `PS_PROTECTION` com:
+**PPL**, introduzido no **Windows 8.1**, é uma versão mais flexível do PP. Ele permite **casos de uso mais amplos** (por exemplo, LSASS, Defender) ao introduzir **"níveis de proteção"** baseados no campo **EKU (Enhanced Key Usage)** da assinatura digital. O nível de proteção é armazenado no campo `EPROCESS.Protection`, que é uma estrutura `PS_PROTECTION` com:
 - **Tipo** (`Protected` ou `ProtectedLight`)
 - **Signatário** (por exemplo, `WinTcb`, `Lsa`, `Antimalware`, etc.)
 
@@ -29,7 +27,7 @@ Essa estrutura é compactada em um único byte e determina **quem pode acessar q
 
 ### O que você precisa saber de uma perspectiva ofensiva
 
-- Quando **LSASS é executado como um PPL**, tentativas de abri-lo usando `OpenProcess(PROCESS_VM_READ | QUERY_INFORMATION)` a partir de um contexto de administrador normal **falham com `0x5 (Acesso Negado)`**, mesmo que `SeDebugPrivilege` esteja habilitado.
+- Quando **LSASS é executado como PPL**, tentativas de abri-lo usando `OpenProcess(PROCESS_VM_READ | QUERY_INFORMATION)` a partir de um contexto de administrador normal **falham com `0x5 (Acesso Negado)`**, mesmo que `SeDebugPrivilege` esteja habilitado.
 - Você pode **verificar o nível de proteção do LSASS** usando ferramentas como Process Hacker ou programaticamente lendo o valor `EPROCESS.Protection`.
 - O LSASS normalmente terá `PsProtectedSignerLsa-Light` (`0x41`), que pode ser acessado **apenas por processos assinados com um signatário de nível superior**, como `WinTcb` (`0x61` ou `0x62`).
 - PPL é uma **restrição apenas de Userland**; **código a nível de kernel pode contorná-la completamente**.
@@ -38,12 +36,12 @@ Essa estrutura é compactada em um único byte e determina **quem pode acessar q
 
 **Opções para contornar as proteções PPL:**
 
-Se você quiser despejar o LSASS apesar do PPL, você tem 3 opções principais:
+Se você quiser despejar LSASS apesar do PPL, você tem 3 opções principais:
 1. **Usar um driver de kernel assinado (por exemplo, Mimikatz + mimidrv.sys)** para **remover a flag de proteção do LSASS**:
 
 ![](../../images/mimidrv.png)
 
-2. **Trazer seu próprio driver vulnerável (BYOVD)** para executar código de kernel personalizado e desativar a proteção. Ferramentas como **PPLKiller**, **gdrv-loader** ou **kdmapper** tornam isso viável.
+2. **Trazer seu próprio driver vulnerável (BYOVD)** para executar código de kernel personalizado e desabilitar a proteção. Ferramentas como **PPLKiller**, **gdrv-loader** ou **kdmapper** tornam isso viável.
 3. **Roubar um handle existente do LSASS** de outro processo que o tenha aberto (por exemplo, um processo de AV), então **duplicá-lo** em seu processo. Esta é a base da técnica `pypykatz live lsa --method handledup`.
 4. **Abusar de algum processo privilegiado** que permitirá que você carregue código arbitrário em seu espaço de endereço ou dentro de outro processo privilegiado, contornando efetivamente as restrições do PPL. Você pode verificar um exemplo disso em [bypassing-lsa-protection-in-userland](https://blog.scrt.ch/2021/04/22/bypassing-lsa-protection-in-userland/) ou [https://github.com/itm4n/PPLdump](https://github.com/itm4n/PPLdump).
 
@@ -57,7 +55,7 @@ Quando você executa **`mimikatz privilege::debug sekurlsa::logonpasswords`**, p
 
 ## Credential Guard
 
-**Credential Guard**, uma funcionalidade exclusiva do **Windows 10 (edições Enterprise e Education)**, melhora a segurança das credenciais da máquina usando **Virtual Secure Mode (VSM)** e **Virtualization Based Security (VBS)**. Ele aproveita as extensões de virtualização da CPU para isolar processos-chave dentro de um espaço de memória protegido, longe do alcance do sistema operacional principal. Essa isolação garante que até mesmo o kernel não possa acessar a memória no VSM, protegendo efetivamente as credenciais de ataques como **pass-the-hash**. A **Local Security Authority (LSA)** opera dentro desse ambiente seguro como um trustlet, enquanto o processo **LSASS** no sistema operacional principal atua apenas como um comunicador com a LSA do VSM.
+**Credential Guard**, uma funcionalidade exclusiva do **Windows 10 (edições Enterprise e Education)**, aprimora a segurança das credenciais da máquina usando **Virtual Secure Mode (VSM)** e **Virtualization Based Security (VBS)**. Ele aproveita as extensões de virtualização da CPU para isolar processos-chave dentro de um espaço de memória protegido, longe do alcance do sistema operacional principal. Essa isolação garante que até mesmo o kernel não possa acessar a memória no VSM, protegendo efetivamente as credenciais de ataques como **pass-the-hash**. A **Local Security Authority (LSA)** opera dentro desse ambiente seguro como um trustlet, enquanto o processo **LSASS** no sistema operacional principal atua apenas como um comunicador com a LSA do VSM.
 
 Por padrão, **Credential Guard** não está ativo e requer ativação manual dentro de uma organização. É crítico para melhorar a segurança contra ferramentas como **Mimikatz**, que são dificultadas em sua capacidade de extrair credenciais. No entanto, vulnerabilidades ainda podem ser exploradas através da adição de **Security Support Providers (SSP)** personalizados para capturar credenciais em texto claro durante tentativas de login.
 
@@ -87,9 +85,9 @@ Para mais informações detalhadas, visite [este recurso](https://blog.ahasayen.
 
 ## Credenciais em Cache
 
-O Windows protege as **credenciais de domínio** através da **Autoridade de Segurança Local (LSA)**, suportando processos de logon com protocolos de segurança como **Kerberos** e **NTLM**. Uma característica chave do Windows é sua capacidade de armazenar em cache os **últimos dez logons de domínio** para garantir que os usuários ainda possam acessar seus computadores mesmo se o **controlador de domínio estiver offline**—uma vantagem para usuários de laptops que frequentemente estão fora da rede da empresa.
+O Windows protege as **credenciais de domínio** através da **Local Security Authority (LSA)**, suportando processos de logon com protocolos de segurança como **Kerberos** e **NTLM**. Uma característica chave do Windows é sua capacidade de armazenar em cache os **últimos dez logons de domínio** para garantir que os usuários ainda possam acessar seus computadores mesmo se o **controlador de domínio estiver offline**—uma vantagem para usuários de laptops que frequentemente estão longe da rede da empresa.
 
-O número de logons em cache é ajustável através de uma **chave de registro ou política de grupo** específica. Para visualizar ou alterar essa configuração, o seguinte comando é utilizado:
+O número de logons em cache é ajustável por meio de uma **chave de registro ou política de grupo** específica. Para visualizar ou alterar essa configuração, o seguinte comando é utilizado:
 ```bash
 reg query "HKEY_LOCAL_MACHINE\SOFTWARE\MICROSOFT\WINDOWS NT\CURRENTVERSION\WINLOGON" /v CACHEDLOGONSCOUNT
 ```
@@ -111,7 +109,7 @@ A adesão ao **grupo de Usuários Protegidos** introduz várias melhorias de seg
 
 Essas proteções são ativadas no momento em que um usuário, que é membro do **grupo de Usuários Protegidos**, faz login no dispositivo. Isso garante que medidas de segurança críticas estejam em vigor para proteger contra vários métodos de comprometimento de credenciais.
 
-Para informações mais detalhadas, consulte a [documentação](https://docs.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group) oficial.
+Para informações mais detalhadas, consulte a [documentação oficial](https://docs.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group).
 
 **Tabela de** [**documentos**](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--protected-accounts-and-groups-in-active-directory)**.**
 

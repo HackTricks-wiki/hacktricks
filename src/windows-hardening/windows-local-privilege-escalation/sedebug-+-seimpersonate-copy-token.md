@@ -1,11 +1,13 @@
+# SeDebug + SeImpersonate - Copiar Token
+
 {{#include ../../banners/hacktricks-training.md}}
 
-O seguinte código **explora os privilégios SeDebug e SeImpersonate** para copiar o token de um **processo executando como SYSTEM** e com **todos os privilégios do token**. \
-Neste caso, este código pode ser compilado e usado como um **binário de serviço do Windows** para verificar se está funcionando.\
-No entanto, a parte principal do **código onde ocorre a elevação** está dentro da **função** **`Exploit`**.\
+O seguinte código **explora os privilégios SeDebug e SeImpersonate** para copiar o token de um **processo em execução como SYSTEM** e com **todos os privilégios do token**. \
+Neste caso, esse código pode ser compilado e usado como um **binário de serviço do Windows** para verificar se está funcionando.\
+No entanto, a parte principal do **código onde a elevação ocorre** está dentro da **função** **`Exploit`**.\
 Dentro dessa função, você pode ver que o **processo **_**lsass.exe**_** é pesquisado**, então seu **token é copiado**, e finalmente esse token é usado para iniciar um novo _**cmd.exe**_ com todos os privilégios do token copiado.
 
-**Outros processos** executando como SYSTEM com todos ou a maioria dos privilégios do token são: **services.exe**, **svhost.exe** (um dos primeiros), **wininit.exe**, **csrss.exe**... (_lembre-se de que você não poderá copiar um token de um processo protegido_). Além disso, você pode usar a ferramenta [Process Hacker](https://processhacker.sourceforge.io/downloads.php) executando como administrador para ver os tokens de um processo.
+**Outros processos** em execução como SYSTEM com todos ou a maioria dos privilégios do token são: **services.exe**, **svhost.exe** (um dos primeiros), **wininit.exe**, **csrss.exe**... (_lembre-se de que você não poderá copiar um token de um processo protegido_). Além disso, você pode usar a ferramenta [Process Hacker](https://processhacker.sourceforge.io/downloads.php) executando como administrador para ver os tokens de um processo.
 ```c
 // From https://cboard.cprogramming.com/windows-programming/106768-running-my-program-service.html
 #include <windows.h>

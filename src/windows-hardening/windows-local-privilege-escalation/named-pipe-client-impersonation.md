@@ -1,6 +1,4 @@
-# Impersonação de Cliente de Named Pipe
-
-## Impersonação de Cliente de Named Pipe
+# Impersonação de Cliente de Pipe Nomeado
 
 {{#include ../../banners/hacktricks-training.md}}
 
