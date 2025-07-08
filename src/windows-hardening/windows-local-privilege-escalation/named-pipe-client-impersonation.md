@@ -1,6 +1,4 @@
-# İsimli Boru İstemci Taklidi
-
-## İsimli Boru İstemci Taklidi
+# Named Pipe Client Impersonation
 
 {{#include ../../banners/hacktricks-training.md}}
 

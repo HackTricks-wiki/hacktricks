@@ -1,9 +1,11 @@
+# SeDebug + SeImpersonate - Token Kopyala
+
 {{#include ../../banners/hacktricks-training.md}}
 
-Aşağıdaki kod **SeDebug ve SeImpersonate ayrıcalıklarını kullanarak** bir **SYSTEM olarak çalışan bir süreçten** **tüm token ayrıcalıklarıyla** token kopyalar. \
+Aşağıdaki kod **SeDebug ve SeImpersonate ayrıcalıklarını kullanarak** bir **SYSTEM olarak çalışan bir süreçten** ve **tüm token ayrıcalıklarıyla** token kopyalar. \
 Bu durumda, bu kod bir **Windows hizmeti ikili dosyası** olarak derlenip çalıştığını kontrol etmek için kullanılabilir.\
-Ancak, **yükseltmenin gerçekleştiği kodun ana kısmı** **`Exploit`** **fonksiyonu** içindedir.\
-O fonksiyonun içinde **_lsass.exe_** **sürecinin arandığını**, ardından **token'ının kopyalandığını** ve nihayetinde o token'ın kopyalanan token'ın tüm ayrıcalıklarıyla yeni bir _**cmd.exe**_ başlatmak için kullanıldığını görebilirsiniz.
+Ancak, **yükseltmenin gerçekleştiği ana kod** kısmı **`Exploit`** **fonksiyonu** içindedir.\
+O fonksiyonun içinde **_lsass.exe_** adlı sürecin arandığını, ardından **token'ının kopyalandığını** ve nihayetinde o token'ın kopyalanan token'ın tüm ayrıcalıklarıyla yeni bir _**cmd.exe**_ başlatmak için kullanıldığını görebilirsiniz.
 
 **SYSTEM olarak çalışan ve tüm veya çoğu token ayrıcalığına sahip diğer süreçler**: **services.exe**, **svhost.exe** (ilklerden biri), **wininit.exe**, **csrss.exe**... (_korumalı bir süreçten token kopyalayamayacağınızı unutmayın_). Ayrıca, bir sürecin token'larını görmek için yönetici olarak çalışan [Process Hacker](https://processhacker.sourceforge.io/downloads.php) aracını kullanabilirsiniz.
 ```c

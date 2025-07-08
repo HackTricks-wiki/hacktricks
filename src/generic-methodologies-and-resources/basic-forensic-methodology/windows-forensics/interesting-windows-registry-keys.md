@@ -1,16 +1,14 @@
 # İlginç Windows Kayıt Defteri Anahtarları
 
-### İlginç Windows Kayıt Defteri Anahtarları
-
 {{#include ../../../banners/hacktricks-training.md}}
 
 ### **Windows Sürümü ve Sahibi Bilgileri**
 
-- **`Software\Microsoft\Windows NT\CurrentVersion`** altında, Windows sürümü, Servis Paketi, kurulum zamanı ve kayıtlı sahibin adı basit bir şekilde bulunur.
+- **`Software\Microsoft\Windows NT\CurrentVersion`** altında, Windows sürümünü, Servis Paketini, kurulum zamanını ve kayıtlı sahibin adını basit bir şekilde bulabilirsiniz.
 
 ### **Bilgisayar Adı**
 
-- Host adı **`System\ControlSet001\Control\ComputerName\ComputerName`** altında bulunur.
+- Ana bilgisayar adı **`System\ControlSet001\Control\ComputerName\ComputerName`** altında bulunur.
 
 ### **Saat Dilimi Ayarı**
 
@@ -31,23 +29,23 @@
 
 ### Ağ Bilgileri Detayları
 
-- Kayıt defteri, **ağ türleri (kablosuz, kablolu, 3G)** ve **ağ kategorileri (Genel, Özel/Ev, Alan/İş)** dahil olmak üzere ağ yapılandırmaları hakkında kapsamlı veriler tutar; bu, ağ güvenlik ayarlarını ve izinlerini anlamak için hayati öneme sahiptir.
+- Kayıt defteri, ağ yapılandırmaları hakkında kapsamlı veriler tutar; bunlar arasında **ağ türleri (kablosuz, kablolu, 3G)** ve **ağ kategorileri (Halka Açık, Özel/Ev, Alan/İş)** bulunur; bu bilgiler ağ güvenlik ayarlarını ve izinlerini anlamak için hayati öneme sahiptir.
 
 ### İstemci Tarafı Önbellekleme (CSC)
 
-- **CSC**, paylaşılan dosyaların kopyalarını önbelleğe alarak çevrimdışı dosya erişimini artırır. Farklı **CSCFlags** ayarları, hangi dosyaların ve nasıl önbelleğe alınacağını kontrol eder, bu da performansı ve kullanıcı deneyimini etkiler, özellikle kesintili bağlantıların olduğu ortamlarda.
+- **CSC**, paylaşılan dosyaların kopyalarını önbelleğe alarak çevrimdışı dosya erişimini artırır. Farklı **CSCFlags** ayarları, hangi dosyaların ve nasıl önbelleğe alınacağını kontrol eder; bu, özellikle kesintili bağlantıların olduğu ortamlarda performansı ve kullanıcı deneyimini etkiler.
 
 ### Otomatik Başlatılan Programlar
 
-- Çeşitli `Run` ve `RunOnce` kayıt defteri anahtarlarında listelenen programlar, başlangıçta otomatik olarak başlatılır, bu da sistem açılış süresini etkiler ve kötü amaçlı yazılım veya istenmeyen yazılımları tanımlamak için ilgi noktaları olabilir.
+- Çeşitli `Run` ve `RunOnce` kayıt defteri anahtarlarında listelenen programlar, başlangıçta otomatik olarak başlatılır; bu, sistemin önyükleme süresini etkileyebilir ve kötü amaçlı yazılım veya istenmeyen yazılımları tanımlamak için ilgi noktaları olabilir.
 
 ### Shellbags
 
-- **Shellbags**, yalnızca klasör görünüm tercihlerini saklamakla kalmaz, aynı zamanda klasör artık mevcut olmasa bile klasör erişiminin adli kanıtını sağlar. Diğer yollarla belirgin olmayan kullanıcı etkinliğini ortaya çıkardığı için soruşturmalar için değerlidir.
+- **Shellbags**, yalnızca klasör görünüm tercihlerini saklamakla kalmaz, aynı zamanda klasör erişiminin adli kanıtını sağlar; bu, klasör artık mevcut olmasa bile geçerlidir. Soruşturmalar için paha biçilmezdir ve diğer yollarla belirgin olmayan kullanıcı etkinliklerini ortaya çıkarır.
 
 ### USB Bilgileri ve Adli Analiz
 
-- Kayıt defterinde saklanan USB cihazlarıyla ilgili detaylar, bir bilgisayara hangi cihazların bağlandığını izlemeye yardımcı olabilir ve potansiyel olarak bir cihazı hassas dosya transferleri veya yetkisiz erişim olaylarıyla ilişkilendirebilir.
+- Kayıt defterinde saklanan USB cihazlarıyla ilgili detaylar, hangi cihazların bir bilgisayara bağlandığını izlemeye yardımcı olabilir; bu, bir cihazı hassas dosya transferleri veya yetkisiz erişim olaylarıyla ilişkilendirebilir.
 
 ### Hacim Seri Numarası
 
@@ -59,12 +57,12 @@
 
 ### **Ağ Yapılandırması**
 
-- Ayrıntılı ağ arayüzü bilgileri için **`System\ControlSet001\Services\Tcpip\Parameters\Interfaces{GUID_INTERFACE}`**'e bakın.
+- Ayrıntılı ağ arayüzü bilgileri için **`System\ControlSet001\Services\Tcpip\Parameters\Interfaces{GUID_INTERFACE}`** adresine bakın.
 - İlk ve son ağ bağlantı zamanları, VPN bağlantıları dahil olmak üzere, **`Software\Microsoft\Windows NT\CurrentVersion\NetworkList`** altında çeşitli yollarla kaydedilir.
 
 ### **Paylaşılan Klasörler**
 
-- Paylaşılan klasörler ve ayarlar **`System\ControlSet001\Services\lanmanserver\Shares`** altında bulunur. İstemci tarafı önbellekleme (CSC) ayarları çevrimdışı dosya kullanılabilirliğini belirler.
+- Paylaşılan klasörler ve ayarlar **`System\ControlSet001\Services\lanmanserver\Shares`** altında bulunur. İstemci Tarafı Önbellekleme (CSC) ayarları, çevrimdışı dosya erişilebilirliğini belirler.
 
 ### **Otomatik Başlatılan Programlar**
 
@@ -72,7 +70,7 @@
 
 ### **Aramalar ve Yazılan Yollar**
 
-- Gezginde yapılan aramalar ve yazılan yollar, **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer`** altında WordwheelQuery ve TypedPaths için kaydedilir.
+- Gezginde yapılan aramalar ve yazılan yollar, **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer`** altında WordwheelQuery ve TypedPaths için sırasıyla izlenir.
 
 ### **Son Belgeler ve Ofis Dosyaları**
 
@@ -80,7 +78,7 @@
 
 ### **En Son Kullanılan (MRU) Öğeler**
 
-- Son dosya yolları ve komutları gösteren MRU listeleri, `NTUSER.DAT` altında çeşitli `ComDlg32` ve `Explorer` alt anahtarlarında saklanır.
+- En son dosya yollarını ve komutları gösteren MRU listeleri, `NTUSER.DAT` altında çeşitli `ComDlg32` ve `Explorer` alt anahtarlarında saklanır.
 
 ### **Kullanıcı Etkinliği Takibi**
 
@@ -93,9 +91,9 @@
 ### **USB Cihaz Geçmişi**
 
 - **`HKLM\SYSTEM\ControlSet001\Enum\USBSTOR`** ve **`HKLM\SYSTEM\ControlSet001\Enum\USB`** bağlı USB cihazları hakkında zengin detaylar içerir; bunlar arasında üretici, ürün adı ve bağlantı zaman damgaları bulunur.
-- Belirli bir USB cihazıyla ilişkili kullanıcı, cihazın **{GUID}**'sini arayarak `NTUSER.DAT` hives içinde belirlenebilir.
+- Belirli bir USB cihazıyla ilişkili kullanıcı, cihazın **{GUID}** için `NTUSER.DAT` hives'ında arama yaparak belirlenebilir.
 - Son takılı cihaz ve hacim seri numarası, sırasıyla `System\MountedDevices` ve `Software\Microsoft\Windows NT\CurrentVersion\EMDMgmt` üzerinden izlenebilir.
 
-Bu kılavuz, Windows sistemlerinde ayrıntılı sistem, ağ ve kullanıcı etkinliği bilgilerine erişim için kritik yolları ve yöntemleri özetler, açıklık ve kullanılabilirlik hedefler.
+Bu kılavuz, Windows sistemlerinde ayrıntılı sistem, ağ ve kullanıcı etkinliği bilgilerine erişim için kritik yolları ve yöntemleri özetlemektedir; açıklık ve kullanılabilirlik hedeflenmiştir.
 
 {{#include ../../../banners/hacktricks-training.md}}

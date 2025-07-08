@@ -1,1 +1,3 @@
-# Radyo Hacking
+# Radyo Hackleme
+
+{{#include /banners/hacktricks-training.md}}

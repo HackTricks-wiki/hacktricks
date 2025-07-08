@@ -1,5 +1,7 @@
 # Rust Temelleri
 
+{{#include /banners/hacktricks-training.md}}
+
 ### Genel Türler
 
 Herhangi bir türde olabilecek 1 değer içeren bir yapı oluşturun.
@@ -19,7 +21,7 @@ Wrapper::new("Foo").value, "Foo"
 ```
 ### Option, Some & None
 
-Option türü, değerin Some türünde (bir şey var) veya None türünde olabileceği anlamına gelir:
+Option türü, değerin Some (bir şey var) veya None olabileceği anlamına gelir:
 ```rust
 pub enum Option<T> {
 None,
@@ -194,7 +196,7 @@ _ => "Hello",
 }
 }
 ```
-#### eğer bırakılırsa
+#### if let
 ```rust
 let optional_word = Some(String::from("rustlings"));
 if let word = optional_word {
@@ -285,4 +287,4 @@ thread::sleep(Duration::from_millis(500));
 }
 }
 ```
-
+{{#include /banners/hacktricks-training.md}}

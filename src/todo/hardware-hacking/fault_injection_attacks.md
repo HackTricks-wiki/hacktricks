@@ -1,5 +1,9 @@
 # Fault Injection Attacks
 
-Fault injection saldırıları, elektronik devrelerde davranışını etkilemek için dışsal rahatsızlıklar tanıtmayı içerir; bu da bilgilerin ifşasına veya devredeki belirli kısıtlamaların aşılmasına yol açar. Bu saldırılar, elektronik devrelere saldırmak için birçok olasılık açar. Bu saldırıya ayrıca elektronik devrelerin glitching'i denir.
+{{#include /banners/hacktricks-training.md}}
 
-Bir elektronik devreye hata enjekte etmek için birçok yöntem ve ortam vardır.
+Hata enjekte etme saldırıları, elektronik devrelerde dışsal rahatsızlıklar tanıtarak davranışlarını etkilemeyi içerir; bu da bilgilerin ifşasına veya devredeki belirli kısıtlamaların aşılmasına yol açar. Bu saldırılar, elektronik devrelere saldırmak için birçok olasılık sunar. Bu saldırıya ayrıca elektronik devrelerin glitching'i denir.
+
+Elektronik bir devreye hata enjekte etmenin birçok yöntemi ve aracı vardır.
+
+{{#include /banners/hacktricks-training.md}}
