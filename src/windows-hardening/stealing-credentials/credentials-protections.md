@@ -1,6 +1,4 @@
-# Ochrona poświadczeń w systemie Windows
-
-## Ochrona poświadczeń
+# Ochrona poświadczeń systemu Windows
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -10,13 +8,13 @@ Protokół [WDigest](<https://technet.microsoft.com/pt-pt/library/cc778868(v=ws.
 ```bash
 sekurlsa::wdigest
 ```
-Aby **włączyć lub wyłączyć tę funkcję**, klucze rejestru _**UseLogonCredential**_ i _**Negotiate**_ w _**HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\SecurityProviders\WDigest**_ muszą być ustawione na "1". Jeśli te klucze są **nieobecne lub ustawione na "0"**, WDigest jest **wyłączony**:
+Aby **wyłączyć lub włączyć tę funkcję**, klucze rejestru _**UseLogonCredential**_ i _**Negotiate**_ w _**HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\SecurityProviders\WDigest**_ muszą być ustawione na "1". Jeśli te klucze są **nieobecne lub ustawione na "0"**, WDigest jest **wyłączony**:
 ```bash
 reg query HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest /v UseLogonCredential
 ```
 ## Ochrona LSA (procesy chronione PP i PPL)
 
-**Protected Process (PP)** i **Protected Process Light (PPL)** to **ochrony na poziomie jądra Windows**, zaprojektowane w celu zapobiegania nieautoryzowanemu dostępowi do wrażliwych procesów, takich jak **LSASS**. Wprowadzone w **Windows Vista**, **model PP** został pierwotnie stworzony do egzekwowania **DRM** i pozwalał na ochronę tylko tych binariów, które były podpisane **specjalnym certyfikatem medialnym**. Proces oznaczony jako **PP** może być dostępny tylko dla innych procesów, które są **również PP** i mają **równy lub wyższy poziom ochrony**, a nawet wtedy, **tylko z ograniczonymi prawami dostępu**, chyba że jest to wyraźnie dozwolone.
+**Protected Process (PP)** i **Protected Process Light (PPL)** to **ochrony na poziomie jądra Windows**, zaprojektowane w celu zapobiegania nieautoryzowanemu dostępowi do wrażliwych procesów, takich jak **LSASS**. Wprowadzone w **Windows Vista**, **model PP** został pierwotnie stworzony do egzekwowania **DRM** i pozwalał na ochronę tylko binariów podpisanych **specjalnym certyfikatem medialnym**. Proces oznaczony jako **PP** może być dostępny tylko dla innych procesów, które są **również PP** i mają **równy lub wyższy poziom ochrony**, a nawet wtedy, **tylko z ograniczonymi prawami dostępu**, chyba że jest to wyraźnie dozwolone.
 
 **PPL**, wprowadzony w **Windows 8.1**, jest bardziej elastyczną wersją PP. Umożliwia **szersze zastosowania** (np. LSASS, Defender) poprzez wprowadzenie **"poziomów ochrony"** opartych na polu **EKU (Enhanced Key Usage)** cyfrowego podpisu. Poziom ochrony jest przechowywany w polu `EPROCESS.Protection`, które jest strukturą `PS_PROTECTION` z:
 - **Typ** (`Protected` lub `ProtectedLight`)
@@ -43,7 +41,7 @@ Jeśli chcesz zrzucić LSASS pomimo PPL, masz 3 główne opcje:
 
 ![](../../images/mimidrv.png)
 
-2. **Przynieś własny podatny sterownik (BYOVD)**, aby uruchomić niestandardowy kod jądra i wyłączyć ochronę. Narzędzia takie jak **PPLKiller**, **gdrv-loader** lub **kdmapper** umożliwiają to.
+2. **Przynieś własny podatny sterownik (BYOVD)**, aby uruchomić niestandardowy kod jądra i wyłączyć ochronę. Narzędzia takie jak **PPLKiller**, **gdrv-loader** lub **kdmapper** czynią to możliwym.
 3. **Skradnij istniejący uchwyt LSASS** z innego procesu, który ma go otwartego (np. proces AV), a następnie **duplikuj go** do swojego procesu. To jest podstawa techniki `pypykatz live lsa --method handledup`.
 4. **Wykorzystaj jakiś uprzywilejowany proces**, który pozwoli ci załadować dowolny kod do jego przestrzeni adresowej lub wewnątrz innego uprzywilejowanego procesu, skutecznie omijając ograniczenia PPL. Możesz sprawdzić przykład tego w [bypassing-lsa-protection-in-userland](https://blog.scrt.ch/2021/04/22/bypassing-lsa-protection-in-userland/) lub [https://github.com/itm4n/PPLdump](https://github.com/itm4n/PPLdump).
 
@@ -74,11 +72,11 @@ Dalsze szczegóły dotyczące wdrażania niestandardowych SSP do przechwytywania
 
 **Windows 8.1 i Windows Server 2012 R2** wprowadziły kilka nowych funkcji zabezpieczeń, w tym _**tryb Restricted Admin dla RDP**_. Tryb ten został zaprojektowany w celu zwiększenia bezpieczeństwa poprzez ograniczenie ryzyka związanego z [**pass the hash**](https://blog.ahasayen.com/pass-the-hash/) atakami.
 
-Tradycyjnie, podczas łączenia się zdalnie z komputerem za pomocą RDP, twoje poświadczenia są przechowywane na docelowej maszynie. Stanowi to istotne ryzyko bezpieczeństwa, szczególnie przy użyciu kont z podwyższonymi uprawnieniami. Jednak dzięki wprowadzeniu _**trybu Restricted Admin**_, to ryzyko jest znacznie zredukowane.
+Tradycyjnie, podczas łączenia się z zdalnym komputerem za pomocą RDP, twoje poświadczenia są przechowywane na docelowej maszynie. Stanowi to znaczące ryzyko bezpieczeństwa, szczególnie przy użyciu kont z podwyższonymi uprawnieniami. Jednak dzięki wprowadzeniu _**trybu Restricted Admin**_, to ryzyko jest znacznie zredukowane.
 
 Podczas inicjowania połączenia RDP za pomocą polecenia **mstsc.exe /RestrictedAdmin**, uwierzytelnienie do zdalnego komputera odbywa się bez przechowywania twoich poświadczeń na nim. Takie podejście zapewnia, że w przypadku infekcji złośliwym oprogramowaniem lub jeśli złośliwy użytkownik uzyska dostęp do zdalnego serwera, twoje poświadczenia nie zostaną skompromitowane, ponieważ nie są przechowywane na serwerze.
 
-Ważne jest, aby zauważyć, że w **trybie Restricted Admin** próby dostępu do zasobów sieciowych z sesji RDP nie będą używać twoich osobistych poświadczeń; zamiast tego używana jest **tożsamość maszyny**.
+Ważne jest, aby zauważyć, że w **trybie Restricted Admin**, próby dostępu do zasobów sieciowych z sesji RDP nie będą używać twoich osobistych poświadczeń; zamiast tego używana jest **tożsamość maszyny**.
 
 Funkcja ta stanowi znaczący krok naprzód w zabezpieczaniu połączeń pulpitu zdalnego i ochronie wrażliwych informacji przed ujawnieniem w przypadku naruszenia bezpieczeństwa.
 
@@ -98,19 +96,19 @@ Dostęp do tych pamiętanych poświadczeń jest ściśle kontrolowany, a jedynie
 
 **Mimikatz** może być użyty do wyodrębnienia tych pamiętanych poświadczeń za pomocą polecenia `lsadump::cache`.
 
-Aby uzyskać więcej szczegółów, oryginalne [źródło](http://juggernaut.wikidot.com/cached-credentials) zawiera szczegółowe informacje.
+Aby uzyskać więcej szczegółów, oryginalne [źródło](http://juggernaut.wikidot.com/cached-credentials) zawiera obszerne informacje.
 
 ## Chronieni Użytkownicy
 
-Członkostwo w **grupie Chronionych Użytkowników** wprowadza kilka ulepszeń bezpieczeństwa dla użytkowników, zapewniając wyższy poziom ochrony przed kradzieżą i nadużywaniem poświadczeń:
+Członkostwo w grupie **Chronionych Użytkowników** wprowadza kilka ulepszeń bezpieczeństwa dla użytkowników, zapewniając wyższy poziom ochrony przed kradzieżą i nadużywaniem poświadczeń:
 
-- **Delegacja Poświadczeń (CredSSP)**: Nawet jeśli ustawienie zasad grupy dla **Zezwól na delegowanie domyślnych poświadczeń** jest włączone, poświadczenia w postaci tekstu jawnego Chronionych Użytkowników nie będą pamiętane.
-- **Windows Digest**: Począwszy od **Windows 8.1 i Windows Server 2012 R2**, system nie będzie pamiętał poświadczeń w postaci tekstu jawnego Chronionych Użytkowników, niezależnie od statusu Windows Digest.
-- **NTLM**: System nie będzie pamiętał poświadczeń w postaci tekstu jawnego Chronionych Użytkowników ani funkcji jednokierunkowych NT (NTOWF).
-- **Kerberos**: Dla Chronionych Użytkowników, uwierzytelnianie Kerberos nie wygeneruje **kluczy DES** ani **RC4**, ani nie będzie pamiętać poświadczeń w postaci tekstu jawnego ani kluczy długoterminowych poza początkowym uzyskaniem biletu Ticket-Granting Ticket (TGT).
-- **Logowanie Offline**: Chronieni Użytkownicy nie będą mieli utworzonego pamiętanego weryfikatora podczas logowania lub odblokowywania, co oznacza, że logowanie offline nie jest obsługiwane dla tych kont.
+- **Delegacja Poświadczeń (CredSSP)**: Nawet jeśli ustawienie zasad grupy dla **Zezwól na delegowanie domyślnych poświadczeń** jest włączone, poświadczenia w postaci czystego tekstu Chronionych Użytkowników nie będą pamiętane.
+- **Windows Digest**: Począwszy od **Windows 8.1 i Windows Server 2012 R2**, system nie będzie pamiętał poświadczeń w postaci czystego tekstu Chronionych Użytkowników, niezależnie od statusu Windows Digest.
+- **NTLM**: System nie będzie pamiętał poświadczeń w postaci czystego tekstu Chronionych Użytkowników ani funkcji jednokierunkowych NT (NTOWF).
+- **Kerberos**: Dla Chronionych Użytkowników, uwierzytelnianie Kerberos nie wygeneruje kluczy **DES** ani **RC4**, ani nie będzie pamiętać poświadczeń w postaci czystego tekstu ani kluczy długoterminowych poza początkowym uzyskaniem biletu Ticket-Granting Ticket (TGT).
+- **Logowanie Offline**: Chronieni Użytkownicy nie będą mieli utworzonego pamiętanego weryfikatora podczas logowania lub odblokowywania, co oznacza, że logowanie offline nie jest wspierane dla tych kont.
 
-Te zabezpieczenia są aktywowane w momencie, gdy użytkownik, który jest członkiem **grupy Chronionych Użytkowników**, loguje się do urządzenia. Zapewnia to, że krytyczne środki bezpieczeństwa są wprowadzone, aby chronić przed różnymi metodami kompromitacji poświadczeń.
+Te zabezpieczenia są aktywowane w momencie, gdy użytkownik, który jest członkiem grupy **Chronionych Użytkowników**, loguje się do urządzenia. Zapewnia to, że krytyczne środki bezpieczeństwa są wprowadzone, aby chronić przed różnymi metodami kompromitacji poświadczeń.
 
 Aby uzyskać bardziej szczegółowe informacje, zapoznaj się z oficjalną [dokumentacją](https://docs.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group).
 

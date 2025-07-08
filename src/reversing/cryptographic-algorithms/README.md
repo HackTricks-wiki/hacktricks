@@ -1,12 +1,10 @@
 # Algorytmy kryptograficzne/kompresji
 
-## Algorytmy kryptograficzne/kompresji
-
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Identyfikacja algorytmów
 
-Jeśli kończysz w kodzie **używając przesunięć w prawo i w lewo, xorów oraz kilku operacji arytmetycznych**, jest bardzo prawdopodobne, że to implementacja **algorytmu kryptograficznego**. Poniżej przedstawione zostaną sposoby na **identyfikację algorytmu, który jest używany bez potrzeby odwracania każdego kroku**.
+Jeśli kończysz w kodzie **używając przesunięć w prawo i w lewo, xorów oraz kilku operacji arytmetycznych**, to jest bardzo prawdopodobne, że jest to implementacja **algorytmu kryptograficznego**. Poniżej przedstawione zostaną sposoby na **identyfikację algorytmu, który jest używany bez potrzeby odwracania każdego kroku**.
 
 ### Funkcje API
 
@@ -50,14 +48,14 @@ Możesz wyszukać dowolną z innych stałych, a prawdopodobnie uzyskasz ten sam 
 
 ### Informacje o danych
 
-Jeśli kod nie ma żadnej istotnej stałej, może być **ładowanie informacji z sekcji .data**.\
-Możesz uzyskać dostęp do tych danych, **grupując pierwszy dword** i wyszukując go w Google, jak zrobiliśmy w poprzedniej sekcji:
+Jeśli kod nie ma żadnej znaczącej stałej, może być **ładowany informacje z sekcji .data**.\
+Możesz uzyskać dostęp do tych danych, **grupując pierwszy dword** i wyszukując go w Google, tak jak zrobiliśmy w poprzedniej sekcji:
 
 ![](<../../images/image (372).png>)
 
-W tym przypadku, jeśli wyszukasz **0xA56363C6**, możesz znaleźć, że jest związany z **tabelami algorytmu AES**.
+W tym przypadku, jeśli poszukasz **0xA56363C6**, możesz znaleźć, że jest to związane z **tabelami algorytmu AES**.
 
-## RC4 **(Kryptografia symetryczna)**
+## RC4 **(Symetryczna kryptografia)**
 
 ### Cechy
 
@@ -67,7 +65,7 @@ Składa się z 3 głównych części:
 - **Etap mieszania**: Będzie **przechodzić przez tabelę** utworzoną wcześniej (pętla 0x100 iteracji, ponownie) modyfikując każdą wartość za pomocą **półlosowych** bajtów. Aby stworzyć te półlosowe bajty, używany jest klucz RC4. Klucze RC4 mogą mieć **od 1 do 256 bajtów długości**, jednak zazwyczaj zaleca się, aby miały więcej niż 5 bajtów. Zwykle klucze RC4 mają długość 16 bajtów.
 - **Etap XOR**: Na koniec, tekst jawny lub szyfrogram jest **XORowany z wartościami utworzonymi wcześniej**. Funkcja do szyfrowania i deszyfrowania jest taka sama. W tym celu zostanie wykonana **pętla przez utworzone 256 bajtów** tyle razy, ile to konieczne. Zwykle jest to rozpoznawane w zdekompilowanym kodzie z **%256 (mod 256)**.
 
-> [!NOTE]
+> [!TIP]
 > **Aby zidentyfikować RC4 w kodzie disassembly/zdekompilowanym, możesz sprawdzić 2 pętle o rozmiarze 0x100 (z użyciem klucza), a następnie XOR danych wejściowych z 256 wartościami utworzonymi wcześniej w 2 pętlach, prawdopodobnie używając %256 (mod 256)**
 
 ### **Etap inicjalizacji/Substitution Box:** (Zauważ liczbę 256 używaną jako licznik i jak 0 jest zapisywane w każdym miejscu 256 znaków)
@@ -82,11 +80,11 @@ Składa się z 3 głównych części:
 
 ![](<../../images/image (379).png>)
 
-## **AES (Kryptografia symetryczna)**
+## **AES (Symetryczna kryptografia)**
 
 ### **Cechy**
 
-- Użycie **tabel substytucji i tabel wyszukiwania**
+- Użycie **tabel substytucyjnych i tabel wyszukiwania**
 - Możliwe jest **rozróżnienie AES dzięki użyciu specyficznych wartości tabel wyszukiwania** (stałych). _Zauważ, że **stała** może być **przechowywana** w binarnym **lub tworzona** _**dynamicznie**._
 - **Klucz szyfrowania** musi być **podzielny** przez **16** (zwykle 32B) i zazwyczaj używa się **IV** o długości 16B.
 
@@ -94,7 +92,7 @@ Składa się z 3 głównych części:
 
 ![](<../../images/image (380).png>)
 
-## Serpent **(Kryptografia symetryczna)**
+## Serpent **(Symetryczna kryptografia)**
 
 ### Cechy
 
@@ -103,18 +101,18 @@ Składa się z 3 głównych części:
 
 ### Identyfikacja
 
-Na poniższym obrazku zauważ, jak stała **0x9E3779B9** jest używana (zauważ, że ta stała jest również używana przez inne algorytmy kryptograficzne, takie jak **TEA** - Tiny Encryption Algorithm).\
-Zauważ także **rozmiar pętli** (**132**) oraz **liczbę operacji XOR** w instrukcjach **disassembly** i w **przykładzie kodu**:
+Na poniższym obrazie zauważ, jak stała **0x9E3779B9** jest używana (zauważ, że ta stała jest również używana przez inne algorytmy kryptograficzne, takie jak **TEA** - Tiny Encryption Algorithm).\
+Zauważ także **rozmiar pętli** (**132**) i **liczbę operacji XOR** w instrukcjach **disassembly** oraz w przykładzie **kodu**:
 
 ![](<../../images/image (381).png>)
 
-Jak wspomniano wcześniej, ten kod można zobaczyć w dowolnym dekompilatorze jako **bardzo długą funkcję**, ponieważ **nie ma skoków** w jej wnętrzu. Zdekompilowany kod może wyglądać następująco:
+Jak wspomniano wcześniej, ten kod może być wizualizowany w dowolnym dekompilatorze jako **bardzo długa funkcja**, ponieważ **nie ma skoków** w jej wnętrzu. Zdekompilowany kod może wyglądać następująco:
 
 ![](<../../images/image (382).png>)
 
-Dlatego możliwe jest zidentyfikowanie tego algorytmu, sprawdzając **magiczną liczbę** i **początkowe XOR**, widząc **bardzo długą funkcję** i **porównując** niektóre **instrukcje** długiej funkcji **z implementacją** (jak przesunięcie w lewo o 7 i obrót w lewo o 22).
+Dlatego możliwe jest zidentyfikowanie tego algorytmu, sprawdzając **magiczną liczbę** i **początkowe XORy**, widząc **bardzo długą funkcję** i **porównując** niektóre **instrukcje** długiej funkcji **z implementacją** (jak przesunięcie w lewo o 7 i obrót w lewo o 22).
 
-## RSA **(Kryptografia asymetryczna)**
+## RSA **(Asymetryczna kryptografia)**
 
 ### Cechy
 
@@ -126,7 +124,7 @@ Dlatego możliwe jest zidentyfikowanie tego algorytmu, sprawdzając **magiczną 
 
 ![](<../../images/image (383).png>)
 
-- W linii 11 (po lewej) jest `+7) >> 3`, co jest takie samo jak w linii 35 (po prawej): `+7) / 8`
+- W linii 11 (po lewej) znajduje się `+7) >> 3`, co jest takie samo jak w linii 35 (po prawej): `+7) / 8`
 - Linia 12 (po lewej) sprawdza, czy `modulus_len < 0x040`, a w linii 36 (po prawej) sprawdza, czy `inputLen+11 > modulusLen`
 
 ## MD5 i SHA (hash)

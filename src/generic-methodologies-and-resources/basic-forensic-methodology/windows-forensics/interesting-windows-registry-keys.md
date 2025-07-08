@@ -1,7 +1,5 @@
 # Ciekawe klucze rejestru systemu Windows
 
-### Ciekawe klucze rejestru systemu Windows
-
 {{#include ../../../banners/hacktricks-training.md}}
 
 ### **Informacje o wersji systemu Windows i właścicielu**
@@ -12,7 +10,7 @@
 
 - Nazwa hosta znajduje się w **`System\ControlSet001\Control\ComputerName\ComputerName`**.
 
-### **Ustawienia strefy czasowej**
+### **Ustawienie strefy czasowej**
 
 - Strefa czasowa systemu jest przechowywana w **`System\ControlSet001\Control\TimeZoneInformation`**.
 
@@ -39,7 +37,7 @@
 
 ### Programy uruchamiające się automatycznie
 
-- Programy wymienione w różnych kluczach rejestru `Run` i `RunOnce` są automatycznie uruchamiane przy starcie, co wpływa na czas uruchamiania systemu i może być punktami zainteresowania w identyfikacji złośliwego oprogramowania lub niechcianego oprogramowania.
+- Programy wymienione w różnych kluczach rejestru `Run` i `RunOnce` są automatycznie uruchamiane przy starcie, co wpływa na czas uruchamiania systemu i może być punktami zainteresowania przy identyfikacji złośliwego oprogramowania lub niechcianego oprogramowania.
 
 ### Shellbags
 
@@ -55,16 +53,16 @@
 
 ### **Szczegóły zamknięcia**
 
-- Czas zamknięcia i liczba zamknięć (to drugie tylko dla XP) są przechowywane w **`System\ControlSet001\Control\Windows`** oraz **`System\ControlSet001\Control\Watchdog\Display`**.
+- Czas zamknięcia i liczba zamknięć (ta ostatnia tylko dla XP) są przechowywane w **`System\ControlSet001\Control\Windows`** oraz **`System\ControlSet001\Control\Watchdog\Display`**.
 
 ### **Konfiguracja sieci**
 
-- Aby uzyskać szczegółowe informacje o interfejsie sieciowym, zapoznaj się z **`System\ControlSet001\Services\Tcpip\Parameters\Interfaces{GUID_INTERFACE}`**.
+- Aby uzyskać szczegółowe informacje o interfejsie sieciowym, odwołaj się do **`System\ControlSet001\Services\Tcpip\Parameters\Interfaces{GUID_INTERFACE}`**.
 - Czas pierwszego i ostatniego połączenia sieciowego, w tym połączenia VPN, jest rejestrowany w różnych ścieżkach w **`Software\Microsoft\Windows NT\CurrentVersion\NetworkList`**.
 
 ### **Foldery udostępnione**
 
-- Foldery udostępnione i ustawienia znajdują się w **`System\ControlSet001\Services\lanmanserver\Shares`**. Ustawienia Klient Side Caching (CSC) określają dostępność plików offline.
+- Foldery udostępnione i ustawienia znajdują się w **`System\ControlSet001\Services\lanmanserver\Shares`**. Ustawienia Client Side Caching (CSC) określają dostępność plików offline.
 
 ### **Programy, które uruchamiają się automatycznie**
 
@@ -76,7 +74,7 @@
 
 ### **Ostatnie dokumenty i pliki Office**
 
-- Ostatnie dokumenty i pliki Office, do których uzyskano dostęp, są notowane w `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs` oraz w określonych ścieżkach wersji Office.
+- Ostatnie dokumenty i pliki Office, które zostały otwarte, są notowane w `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs` oraz w specyficznych ścieżkach wersji Office.
 
 ### **Najczęściej używane (MRU) elementy**
 

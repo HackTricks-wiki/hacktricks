@@ -1,12 +1,14 @@
 # FISSURE - The RF Framework
 
-**Zrozumienie i inżynieria wsteczna sygnałów SDR niezależnych od częstotliwości**
+{{#include /banners/hacktricks-training.md}}
 
-FISSURE to otwartoźródłowa platforma RF i inżynierii wstecznej zaprojektowana dla wszystkich poziomów umiejętności, z funkcjami wykrywania i klasyfikacji sygnałów, odkrywania protokołów, wykonywania ataków, manipulacji IQ, analizy podatności, automatyzacji oraz AI/ML. Platforma została stworzona, aby promować szybkie integrowanie modułów oprogramowania, radii, protokołów, danych sygnałowych, skryptów, grafów przepływu, materiałów referencyjnych i narzędzi firm trzecich. FISSURE to narzędzie umożliwiające przepływ pracy, które utrzymuje oprogramowanie w jednym miejscu i pozwala zespołom na łatwe przyswajanie wiedzy, dzieląc się tą samą sprawdzoną konfiguracją bazową dla konkretnych dystrybucji Linuksa.
+**Zrozumienie i inżynieria wsteczna sygnałów opartych na SDR niezależnych od częstotliwości**
 
-Platforma i narzędzia zawarte w FISSURE są zaprojektowane do wykrywania obecności energii RF, rozumienia charakterystyki sygnału, zbierania i analizowania próbek, opracowywania technik transmisji i/lub wstrzykiwania oraz tworzenia niestandardowych ładunków lub wiadomości. FISSURE zawiera rosnącą bibliotekę informacji o protokołach i sygnałach, aby wspierać identyfikację, tworzenie pakietów i fuzzing. Istnieją możliwości archiwizacji online, aby pobierać pliki sygnałowe i tworzyć listy odtwarzania do symulacji ruchu i testowania systemów.
+FISSURE to otwartoźródłowa platforma RF i inżynierii wstecznej zaprojektowana dla wszystkich poziomów umiejętności, z funkcjami do wykrywania i klasyfikacji sygnałów, odkrywania protokołów, wykonywania ataków, manipulacji IQ, analizy podatności, automatyzacji oraz AI/ML. Platforma została stworzona, aby promować szybkie integrowanie modułów oprogramowania, radii, protokołów, danych sygnałowych, skryptów, grafów przepływu, materiałów referencyjnych i narzędzi firm trzecich. FISSURE to narzędzie umożliwiające przepływ pracy, które utrzymuje oprogramowanie w jednym miejscu i pozwala zespołom na łatwe przystosowanie się, dzieląc się tą samą sprawdzoną konfiguracją bazową dla konkretnych dystrybucji Linuxa.
 
-Przyjazna baza kodu Python i interfejs użytkownika pozwalają początkującym szybko nauczyć się popularnych narzędzi i technik związanych z RF i inżynierią wsteczną. Nauczyciele w dziedzinie cyberbezpieczeństwa i inżynierii mogą skorzystać z wbudowanego materiału lub wykorzystać platformę do demonstrowania własnych aplikacji w rzeczywistych warunkach. Programiści i badacze mogą używać FISSURE do codziennych zadań lub do prezentowania swoich nowatorskich rozwiązań szerszej publiczności. W miarę jak świadomość i wykorzystanie FISSURE rośnie w społeczności, tak samo wzrośnie zakres jego możliwości i różnorodność technologii, które obejmuje.
+Platforma i narzędzia zawarte w FISSURE są zaprojektowane do wykrywania obecności energii RF, rozumienia charakterystyki sygnału, zbierania i analizowania próbek, opracowywania technik nadawania i/lub wstrzykiwania oraz tworzenia niestandardowych ładunków lub wiadomości. FISSURE zawiera rosnącą bibliotekę informacji o protokołach i sygnałach, aby wspierać identyfikację, tworzenie pakietów i fuzzing. Istnieją możliwości archiwizacji online do pobierania plików sygnałowych i budowania list odtwarzania w celu symulacji ruchu i testowania systemów.
+
+Przyjazna baza kodu w Pythonie i interfejs użytkownika pozwala początkującym szybko nauczyć się popularnych narzędzi i technik związanych z RF i inżynierią wsteczną. Nauczyciele w dziedzinie cyberbezpieczeństwa i inżynierii mogą skorzystać z wbudowanego materiału lub wykorzystać platformę do demonstrowania własnych zastosowań w rzeczywistych scenariuszach. Programiści i badacze mogą używać FISSURE do codziennych zadań lub do prezentowania swoich nowatorskich rozwiązań szerszej publiczności. W miarę jak świadomość i wykorzystanie FISSURE rośnie w społeczności, tak samo wzrośnie zakres jego możliwości i różnorodność technologii, które obejmuje.
 
 **Dodatkowe informacje**
 
@@ -16,7 +18,7 @@ Przyjazna baza kodu Python i interfejs użytkownika pozwalają początkującym s
 * [GRCon22 Video](https://www.youtube.com/watch?v=1f2umEKhJvE)
 * [Hack Chat Transcript](https://hackaday.io/event/187076-rf-hacking-hack-chat/log/212136-hack-chat-transcript-part-1)
 
-## Getting Started
+## Rozpoczęcie
 
 **Obsługiwane**
 
@@ -52,7 +54,7 @@ git submodule update --init
 ```
 To zainstaluje zależności oprogramowania PyQt wymagane do uruchomienia interfejsów instalacyjnych, jeśli nie zostaną znalezione.
 
-Następnie wybierz opcję, która najlepiej odpowiada twojemu systemowi operacyjnemu (powinna być wykryta automatycznie, jeśli twój system operacyjny odpowiada opcji).
+Następnie wybierz opcję, która najlepiej odpowiada twojemu systemowi operacyjnemu (powinno być wykryte automatycznie, jeśli twój system operacyjny odpowiada opcji).
 
 |                                          Python2\_maint-3.7                                          |                                          Python3\_maint-3.8                                          |                                          Python3\_maint-3.10                                         |
 | :--------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------: |
@@ -118,14 +120,14 @@ FISSURE zawiera kilka pomocnych przewodników, aby zapoznać się z różnymi te
 * [Lekcja10: Egzaminy na radioamatora](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson10\_Ham\_Radio\_Exams.md)
 * [Lekcja11: Narzędzia Wi-Fi](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson11\_WiFi\_Tools.md)
 
-## Plan działania
+## Plan
 
 * [ ] Dodaj więcej typów sprzętu, protokołów RF, parametrów sygnału, narzędzi analitycznych
 * [ ] Wsparcie dla większej liczby systemów operacyjnych
 * [ ] Opracuj materiały dydaktyczne dotyczące FISSURE (Ataki RF, Wi-Fi, GNU Radio, PyQt itp.)
 * [ ] Stwórz kondycjonera sygnału, ekstraktora cech i klasyfikatora sygnału z wybieralnymi technikami AI/ML
-* [ ] Wdrożenie rekurencyjnych mechanizmów demodulacji do produkcji strumienia bitów z nieznanych sygnałów
-* [ ] Przejście głównych komponentów FISSURE do ogólnego schematu wdrażania węzłów czujnikowych
+* [ ] Wdrożenie mechanizmów demodulacji rekurencyjnej do produkcji strumienia bitów z nieznanych sygnałów
+* [ ] Przejście głównych komponentów FISSURE do ogólnego schematu wdrożenia węzła czujnikowego
 
 ## Wkład
 
@@ -178,3 +180,7 @@ Uznajemy i jesteśmy wdzięczni tym deweloperom:
 ## Uznania
 
 Szczególne podziękowania dla dr. Samuela Mantravadi i Josepha Reitha za ich wkład w ten projekt.
+
+
+
+{{#include /banners/hacktricks-training.md}}

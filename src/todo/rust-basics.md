@@ -1,5 +1,7 @@
 # Podstawy Rust
 
+{{#include /banners/hacktricks-training.md}}
+
 ### Typy ogólne
 
 Utwórz strukturę, w której 1 z ich wartości może być dowolnym typem
@@ -26,11 +28,11 @@ None,
 Some(T),
 }
 ```
-Możesz użyć funkcji takich jak `is_some()` lub `is_none()`, aby sprawdzić wartość opcji.
+Możesz używać funkcji takich jak `is_some()` lub `is_none()`, aby sprawdzić wartość opcji.
 
 ### Makra
 
-Makra są potężniejsze niż funkcje, ponieważ rozwijają się, aby wygenerować więcej kodu niż kod, który napisałeś ręcznie. Na przykład, sygnatura funkcji musi zadeklarować liczbę i typ parametrów, które ma funkcja. Makra, z drugiej strony, mogą przyjmować zmienną liczbę parametrów: możemy wywołać `println!("hello")` z jednym argumentem lub `println!("hello {}", name)` z dwoma argumentami. Ponadto, makra są rozwijane przed tym, jak kompilator interpretuje znaczenie kodu, więc makro może na przykład zaimplementować trait dla danego typu. Funkcja nie może, ponieważ jest wywoływana w czasie wykonywania, a trait musi być zaimplementowany w czasie kompilacji.
+Makra są potężniejsze niż funkcje, ponieważ rozwijają się, aby wygenerować więcej kodu niż ten, który napisałeś ręcznie. Na przykład, sygnatura funkcji musi zadeklarować liczbę i typ parametrów, które ma funkcja. Makra, z drugiej strony, mogą przyjmować zmienną liczbę parametrów: możemy wywołać `println!("hello")` z jednym argumentem lub `println!("hello {}", name)` z dwoma argumentami. Ponadto, makra są rozwijane przed tym, jak kompilator interpretuje znaczenie kodu, więc makro może na przykład zaimplementować trait dla danego typu. Funkcja nie może, ponieważ jest wywoływana w czasie wykonywania, a trait musi być zaimplementowany w czasie kompilacji.
 ```rust
 macro_rules! my_macro {
 () => {
@@ -72,7 +74,7 @@ for (key, hashvalue) in &*map {
 for key in map.keys() {
 for value in map.values() {
 ```
-### Rekurencyjna Skrzynka
+### Rekursywne Pudełko
 ```rust
 enum List {
 Cons(i32, List),
@@ -83,7 +85,7 @@ let list = Cons(1, Cons(2, Cons(3, Nil)));
 ```
 ### Warunki
 
-#### jeśli
+#### if
 ```rust
 let n = 5;
 if n < 0 {
@@ -194,7 +196,7 @@ _ => "Hello",
 }
 }
 ```
-#### jeśli niech
+#### if let
 ```rust
 let optional_word = Some(String::from("rustlings"));
 if let word = optional_word {
@@ -203,7 +205,7 @@ println!("The word is: {}", word);
 println!("The optional word doesn't contain anything");
 }
 ```
-#### podczas gdy pozwól
+#### while let
 ```rust
 let mut optional = Some(0);
 // This reads: "while `let` destructures `optional` into
@@ -250,7 +252,7 @@ assert_ne!(true, false);
 }
 }
 ```
-### Wątki
+### Threading
 
 #### Arc
 
@@ -285,4 +287,4 @@ thread::sleep(Duration::from_millis(500));
 }
 }
 ```
-
+{{#include /banners/hacktricks-training.md}}

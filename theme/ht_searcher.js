@@ -101,6 +101,7 @@
   const READY_ICON = icon.innerHTML;
   icon.textContent = '⏳';
   icon.setAttribute('aria-label','Loading search …');
+  icon.setAttribute('title','Search is loading, please wait...');
 
   const HOT=83, ESC=27, DOWN=40, UP=38, ENTER=13;
   let debounce, teaserCount=0;
@@ -158,8 +159,16 @@
   /* ───────────── worker messages ───────────── */
   worker.onmessage = ({data}) => {
     if(data && data.ready!==undefined){
-      if(data.ready){ icon.innerHTML=READY_ICON; icon.setAttribute('aria-label','Open search (S)'); }
-      else { icon.textContent='❌'; icon.setAttribute('aria-label','Search unavailable'); }
+      if(data.ready){ 
+        icon.innerHTML=READY_ICON; 
+        icon.setAttribute('aria-label','Open search (S)'); 
+        icon.removeAttribute('title');
+      }
+      else { 
+        icon.textContent='❌'; 
+        icon.setAttribute('aria-label','Search unavailable'); 
+        icon.setAttribute('title','Search is unavailable');
+      }
       return;
     }
     const docs=data, q=bar.value.trim(), terms=q.split(/\s+/).filter(Boolean);

