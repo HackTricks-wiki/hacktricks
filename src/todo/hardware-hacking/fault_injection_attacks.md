@@ -1,4 +1,4 @@
-# Fault Injection Attacks
+# Επιθέσεις Εισαγωγής Σφαλμάτων
 
 {{#include /banners/hacktricks-training.md}}
 

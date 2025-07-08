@@ -25,7 +25,7 @@
 
 ### `com.apple.security.cs.debugger`
 
-Οι εφαρμογές με το Entitlement Εργαλείου Αποσφαλμάτωσης μπορούν να καλέσουν `task_for_pid()` για να ανακτήσουν ένα έγκυρο task port για μη υπογεγραμμένες και τρίτες εφαρμογές με το entitlement `Get Task Allow` ρυθμισμένο σε `true`. Ωστόσο, ακόμη και με το entitlement εργαλείου αποσφαλμάτωσης, ένας αποσφαλματωτής **δεν μπορεί να αποκτήσει τα task ports** διαδικασιών που **δεν έχουν το entitlement `Get Task Allow`**, και οι οποίες προστατεύονται από την Προστασία Ακεραιότητας Συστήματος. Δείτε [**αυτό για περισσότερες πληροφορίες**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger).
+Οι εφαρμογές με το Entitlement Εργαλείου Αποσφαλμάτωσης μπορούν να καλέσουν `task_for_pid()` για να ανακτήσουν ένα έγκυρο task port για μη υπογεγραμμένες και τρίτες εφαρμογές με το entitlement `Get Task Allow` ρυθμισμένο σε `true`. Ωστόσο, ακόμη και με το entitlement εργαλείου αποσφαλμάτωσης, ένας αποσφαλματωτής **δεν μπορεί να αποκτήσει τα task ports** διαδικασιών που **δεν έχουν το entitlement `Get Task Allow`**, και που είναι επομένως προστατευμένες από την Προστασία Ακεραιότητας Συστήματος. Δείτε [**αυτό για περισσότερες πληροφορίες**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger).
 
 ### `com.apple.security.cs.disable-library-validation`
 
@@ -54,11 +54,11 @@ Entitlement που απαιτείται για να ζητήσει από τον
 
 ### **`com.apple.private.icloud-account-access`**
 
-Το entitlement **`com.apple.private.icloud-account-access`** επιτρέπει την επικοινωνία με την υπηρεσία XPC **`com.apple.iCloudHelper`** η οποία θα **παρέχει tokens iCloud**.
+Το entitlement **`com.apple.private.icloud-account-access`** επιτρέπει την επικοινωνία με την υπηρεσία XPC **`com.apple.iCloudHelper`** που θα **παρέχει tokens iCloud**.
 
 Το **iMovie** και το **Garageband** είχαν αυτό το entitlement.
 
-Για περισσότερες **πληροφορίες** σχετικά με την εκμετάλλευση για **να αποκτήσετε tokens icloud** από αυτό το entitlement δείτε την ομιλία: [**#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
+Για περισσότερες **πληροφορίες** σχετικά με την εκμετάλλευση για **να αποκτήσετε tokens icloud** από αυτό το entitlement, δείτε την ομιλία: [**#OBTS v5.0: "Τι συμβαίνει στον υπολογιστή σας, παραμένει στο iCloud της Apple;!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
 
 ### `com.apple.private.tcc.manager.check-by-audit-token`
 
@@ -66,11 +66,11 @@ TODO: Δεν ξέρω τι επιτρέπει να κάνετε
 
 ### `com.apple.private.apfs.revert-to-snapshot`
 
-TODO: Στην [**αυτή την αναφορά**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **αναφέρεται ότι αυτό θα μπορούσε να χρησιμοποιηθεί για** να ενημερώσει τα περιεχόμενα που προστατεύονται από SSV μετά από επανεκκίνηση. Αν ξέρετε πώς, στείλτε μια PR παρακαλώ!
+TODO: Στο [**αυτό το αναφορά**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **αναφέρεται ότι αυτό θα μπορούσε να χρησιμοποιηθεί για** να ενημερώσει τα περιεχόμενα που προστατεύονται από SSV μετά από επανεκκίνηση. Αν ξέρετε πώς, στείλτε μια PR παρακαλώ!
 
 ### `com.apple.private.apfs.create-sealed-snapshot`
 
-TODO: Στην [**αυτή την αναφορά**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **αναφέρεται ότι αυτό θα μπορούσε να χρησιμοποιηθεί για** να ενημερώσει τα περιεχόμενα που προστατεύονται από SSV μετά από επανεκκίνηση. Αν ξέρετε πώς, στείλτε μια PR παρακαλώ!
+TODO: Στο [**αυτό το αναφορά**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **αναφέρεται ότι αυτό θα μπορούσε να χρησιμοποιηθεί για** να ενημερώσει τα περιεχόμενα που προστατεύονται από SSV μετά από επανεκκίνηση. Αν ξέρετε πώς, στείλτε μια PR παρακαλώ!
 
 ### `keychain-access-groups`
 
@@ -97,19 +97,19 @@ TODO: Στην [**αυτή την αναφορά**](https://jhftss.github.io/The
 ```bash
 osascript -e 'tell app "App Store" to activate' -e 'tell app "App Store" to activate' -e 'tell app "App Store" to display dialog "App Store requires your password to continue." & return & return default answer "" with icon 1 with hidden answer with title "App Store Alert"'
 ```
-Or making them perform **arbitrary actions**.
+Ή να τους κάνει να εκτελούν **τυχαίες ενέργειες**.
 
 ### **`kTCCServiceEndpointSecurityClient`**
 
-Επιτρέπει, μεταξύ άλλων δικαιωμάτων, να **γράψει τη βάση δεδομένων TCC των χρηστών**.
+Επιτρέπει, μεταξύ άλλων αδειών, να **γράψει τη βάση δεδομένων TCC των χρηστών**.
 
 ### **`kTCCServiceSystemPolicySysAdminFiles`**
 
-Επιτρέπει να **αλλάξει** το **`NFSHomeDirectory`** χαρακτηριστικό ενός χρήστη που αλλάζει τη διαδρομή του φακέλου του και επομένως επιτρέπει να **παρακαμφθεί το TCC**.
+Επιτρέπει να **αλλάξει** την **`NFSHomeDirectory`** ιδιότητα ενός χρήστη που αλλάζει τη διαδρομή του φακέλου του και επομένως επιτρέπει να **παρακαμφθεί το TCC**.
 
 ### **`kTCCServiceSystemPolicyAppBundles`**
 
-Επιτρέπει να τροποποιηθούν αρχεία μέσα σε πακέτα εφαρμογών (μέσα στο app.app), κάτι που είναι **απαγορευμένο από προεπιλογή**.
+Επιτρέπει την τροποποίηση αρχείων μέσα σε πακέτα εφαρμογών (μέσα στο app.app), κάτι που είναι **απαγορευμένο από προεπιλογή**.
 
 <figure><img src="../../../images/image (31).png" alt=""><figcaption></figcaption></figure>
 
@@ -117,17 +117,17 @@ Or making them perform **arbitrary actions**.
 
 ### `kTCCServiceAccessibility`
 
-Η διαδικασία θα είναι σε θέση να **καταχραστεί τις δυνατότητες προσβασιμότητας του macOS**, που σημαίνει ότι για παράδειγμα θα μπορεί να πατήσει πλήκτρα. Έτσι θα μπορούσε να ζητήσει πρόσβαση για να ελέγξει μια εφαρμογή όπως το Finder και να εγκρίνει το παράθυρο διαλόγου με αυτή την άδεια.
+Η διαδικασία θα μπορεί να **καταχραστεί τις δυνατότητες προσβασιμότητας του macOS**, που σημαίνει ότι για παράδειγμα θα μπορεί να πατάει πλήκτρα. Έτσι θα μπορούσε να ζητήσει πρόσβαση για να ελέγξει μια εφαρμογή όπως το Finder και να εγκρίνει το διάλογο με αυτή την άδεια.
 
 ## Medium
 
 ### `com.apple.security.cs.allow-jit`
 
-Αυτή η άδεια επιτρέπει να **δημιουργήσει μνήμη που είναι εγγράψιμη και εκτελέσιμη** περνώντας τη σημαία `MAP_JIT` στη συνάρτηση συστήματος `mmap()`. Δείτε [**αυτό για περισσότερες πληροφορίες**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-jit).
+Αυτή η άδεια επιτρέπει να **δημιουργήσει μνήμη που είναι εγ writable και εκτελέσιμη** περνώντας τη σημαία `MAP_JIT` στη συνάρτηση συστήματος `mmap()`. Δείτε [**αυτό για περισσότερες πληροφορίες**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-jit).
 
 ### `com.apple.security.cs.allow-unsigned-executable-memory`
 
-Αυτή η άδεια επιτρέπει να **παρακάμψει ή να διορθώσει C κώδικα**, να χρησιμοποιήσει τη μακροχρόνια αποσυρμένη **`NSCreateObjectFileImageFromMemory`** (η οποία είναι θεμελιωδώς ανασφαλής), ή να χρησιμοποιήσει το **DVDPlayback** framework. Δείτε [**αυτό για περισσότερες πληροφορίες**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory).
+Αυτή η άδεια επιτρέπει να **υπερκαλύψει ή να διορθώσει C κώδικα**, να χρησιμοποιήσει τη μακροχρόνια αποσυρμένη **`NSCreateObjectFileImageFromMemory`** (η οποία είναι θεμελιωδώς ανασφαλής), ή να χρησιμοποιήσει το **DVDPlayback** framework. Δείτε [**αυτό για περισσότερες πληροφορίες**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory).
 
 > [!CAUTION]
 > Η συμπερίληψη αυτής της άδειας εκθέτει την εφαρμογή σας σε κοινές ευπάθειες σε γλώσσες κώδικα που είναι ανασφαλείς στη μνήμη. Σκεφτείτε προσεκτικά αν η εφαρμογή σας χρειάζεται αυτή την εξαίρεση.
@@ -145,7 +145,7 @@ TODO
 
 ### `com.apple.private.nullfs_allow`
 
-Αυτή η άδεια επιτρέπει να τοποθετηθεί ένα σύστημα αρχείων nullfs (απαγορευμένο από προεπιλογή). Εργαλείο: [**mount_nullfs**](https://github.com/JamaicanMoose/mount_nullfs/tree/master).
+Αυτή η άδεια επιτρέπει να τοποθετήσει ένα σύστημα αρχείων nullfs (απαγορευμένο από προεπιλογή). Εργαλείο: [**mount_nullfs**](https://github.com/JamaicanMoose/mount_nullfs/tree/master).
 
 ### `kTCCServiceAll`
 
@@ -163,3 +163,8 @@ TODO
 {{#include ../../../banners/hacktricks-training.md}}
 
 </details>
+
+
+
+
+{{#include /banners/hacktricks-training.md}}
