@@ -1,6 +1,8 @@
 # Rust Basics
 
-### Generic Types
+{{#include /banners/hacktricks-training.md}}
+
+### ジェネリック型
 
 任意の型を持つことができる値の1つを持つ構造体を作成します。
 ```rust
@@ -19,18 +21,18 @@ Wrapper::new("Foo").value, "Foo"
 ```
 ### Option, Some & None
 
-Option型は、値がSome型（何かがある）またはNone型である可能性があることを意味します。
+Option型は、値がSome型（何かがある）またはNone型（何もない）である可能性があることを意味します。
 ```rust
 pub enum Option<T> {
 None,
 Some(T),
 }
 ```
-`Option`の値をチェックするには、`is_some()`や`is_none()`のような関数を使用できます。
+`is_some()`や`is_none()`のような関数を使用して、Optionの値をチェックできます。
 
 ### マクロ
 
-マクロは関数よりも強力で、手動で書いたコードよりも多くのコードを生成するために展開されます。たとえば、関数のシグネチャは、関数が持つパラメータの数と型を宣言する必要があります。一方、マクロは可変数のパラメータを受け取ることができます：`println!("hello")`を1つの引数で呼び出したり、`println!("hello {}", name)`を2つの引数で呼び出したりできます。また、マクロはコンパイラがコードの意味を解釈する前に展開されるため、マクロは特定の型に対してトレイトを実装することができます。関数は実行時に呼び出されるため、トレイトはコンパイル時に実装する必要があります。
+マクロは関数よりも強力で、手動で書いたコードよりも多くのコードを生成するために展開されます。たとえば、関数のシグネチャは、関数が持つパラメータの数と型を宣言する必要があります。一方、マクロは可変数のパラメータを受け取ることができます：`println!("hello")`を1つの引数で呼び出したり、`println!("hello {}", name)`を2つの引数で呼び出したりできます。また、マクロはコンパイラがコードの意味を解釈する前に展開されるため、マクロは特定の型にトレイトを実装することができます。関数は実行時に呼び出されるため、トレイトはコンパイル時に実装する必要があります。
 ```rust
 macro_rules! my_macro {
 () => {
@@ -55,7 +57,7 @@ println!("Check out my macro!");
 }
 }
 ```
-### 反復する
+### 繰り返す
 ```rust
 // Iterate through a vector
 let my_fav_fruits = vec!["banana", "raspberry"];
@@ -146,7 +148,7 @@ println!("{}", n);
 n += 1;
 }
 ```
-#### ため
+#### for
 ```rust
 for n in 1..101 {
 if n % 15 == 0 {
@@ -267,7 +269,7 @@ println!("{:?}", apple);
 ```
 #### スレッド
 
-この場合、スレッドに変更できる変数を渡します。
+この場合、スレッドに変更可能な変数を渡します。
 ```rust
 fn main() {
 let status = Arc::new(Mutex::new(JobStatus { jobs_completed: 0 }));
@@ -285,4 +287,4 @@ thread::sleep(Duration::from_millis(500));
 }
 }
 ```
-
+{{#include /banners/hacktricks-training.md}}

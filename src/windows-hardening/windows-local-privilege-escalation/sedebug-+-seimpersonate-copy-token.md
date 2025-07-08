@@ -1,11 +1,13 @@
+# SeDebug + SeImpersonate - Copy Token
+
 {{#include ../../banners/hacktricks-training.md}}
 
-次のコードは**SeDebugおよびSeImpersonateの特権を悪用して**、**SYSTEMとして実行されているプロセス**からトークンをコピーします。\
+次のコードは、**SeDebugおよびSeImpersonateの特権を悪用して**、**SYSTEMとして実行されているプロセス**から**トークンをコピー**します。\
 この場合、このコードは**Windowsサービスバイナリ**としてコンパイルされ、動作を確認するために使用できます。\
-ただし、**特権昇格が発生するコードの主な部分**は**`Exploit`** **関数**の中にあります。\
-その関数の中では、**プロセス**_**lsass.exe**_**が検索され**、その後**トークンがコピーされ**、最後にそのトークンが使用されて新しい_**cmd.exe**_がコピーされたトークンのすべての特権で生成されます。
+ただし、**昇格が発生するコードの主要部分**は、**`Exploit`** **関数**の中にあります。\
+その関数の中では、**プロセス**_**lsass.exe**_**が検索され**、その後**トークンがコピーされ**、最後にそのトークンがコピーされたトークンのすべての特権を持つ新しい_**cmd.exe**_を生成するために使用されます。
 
-**SYSTEMとして実行されている他のプロセス**で、すべてまたはほとんどのトークン特権を持つものには、**services.exe**、**svhost.exe**（最初のものの1つ）、**wininit.exe**、**csrss.exe**...（_保護されたプロセスからトークンをコピーすることはできないことを忘れないでください_）。さらに、管理者として実行されているツール[Process Hacker](https://processhacker.sourceforge.io/downloads.php)を使用して、プロセスのトークンを確認できます。
+**SYSTEMとして実行されている他のプロセス**で、すべてまたはほとんどのトークン特権を持つものには、**services.exe**、**svhost.exe**（最初のものの1つ）、**wininit.exe**、**csrss.exe**...（_保護されたプロセスからトークンをコピーすることはできないことを覚えておいてください_）。さらに、管理者として実行されているツール[Process Hacker](https://processhacker.sourceforge.io/downloads.php)を使用して、プロセスのトークンを確認できます。
 ```c
 // From https://cboard.cprogramming.com/windows-programming/106768-running-my-program-service.html
 #include <windows.h>

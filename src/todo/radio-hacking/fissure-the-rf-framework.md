@@ -1,10 +1,12 @@
 # FISSURE - The RF Framework
 
+{{#include /banners/hacktricks-training.md}}
+
 **周波数に依存しないSDRベースの信号理解とリバースエンジニアリング**
 
-FISSUREは、信号検出と分類、プロトコル発見、攻撃実行、IQ操作、脆弱性分析、自動化、AI/MLのためのフックを備えた、すべてのスキルレベル向けに設計されたオープンソースのRFおよびリバースエンジニアリングフレームワークです。このフレームワークは、ソフトウェアモジュール、ラジオ、プロトコル、信号データ、スクリプト、フローベースのグラフ、参考資料、サードパーティツールの迅速な統合を促進するために構築されました。FISSUREは、ソフトウェアを1か所に保持し、特定のLinuxディストリビューションのための同じ実証済みのベースライン構成を共有しながら、チームがスムーズに作業を開始できるようにするワークフローの促進者です。
+FISSUREは、信号検出と分類、プロトコル発見、攻撃実行、IQ操作、脆弱性分析、自動化、AI/MLのためのフックを備えた、すべてのスキルレベル向けに設計されたオープンソースのRFおよびリバースエンジニアリングフレームワークです。このフレームワークは、ソフトウェアモジュール、ラジオ、プロトコル、信号データ、スクリプト、フローダイアグラム、参考資料、サードパーティツールの迅速な統合を促進するために構築されました。FISSUREは、ソフトウェアを1か所に保持し、特定のLinuxディストリビューションのための同じ実証済みのベースライン構成を共有しながら、チームがスムーズに作業を開始できるようにするワークフローの促進者です。
 
-FISSUREに含まれるフレームワークとツールは、RFエネルギーの存在を検出し、信号の特性を理解し、サンプルを収集・分析し、送信および/または注入技術を開発し、カスタムペイロードやメッセージを作成するために設計されています。FISSUREには、識別、パケット作成、ファジングを支援するためのプロトコルおよび信号情報の成長するライブラリが含まれています。オンラインアーカイブ機能を使用して信号ファイルをダウンロードし、トラフィックをシミュレートしてシステムをテストするためのプレイリストを構築することができます。
+FISSUREに含まれるフレームワークとツールは、RFエネルギーの存在を検出し、信号の特性を理解し、サンプルを収集・分析し、送信および/または注入技術を開発し、カスタムペイロードやメッセージを作成するために設計されています。FISSUREには、識別、パケット作成、ファジングを支援するためのプロトコルおよび信号情報の成長するライブラリが含まれています。オンラインアーカイブ機能があり、信号ファイルをダウンロードし、トラフィックをシミュレートしてシステムをテストするためのプレイリストを構築できます。
 
 フレンドリーなPythonコードベースとユーザーインターフェースにより、初心者はRFおよびリバースエンジニアリングに関する人気のツールや技術を迅速に学ぶことができます。サイバーセキュリティやエンジニアリングの教育者は、組み込みの資料を活用したり、フレームワークを利用して自分の実世界のアプリケーションを示すことができます。開発者や研究者は、日常のタスクにFISSUREを使用したり、最先端のソリューションをより広いオーディエンスに公開することができます。FISSUREの認知度と使用がコミュニティで高まるにつれて、その能力の範囲と包含する技術の幅も広がります。
 
@@ -16,7 +18,7 @@ FISSUREに含まれるフレームワークとツールは、RFエネルギー�
 * [GRCon22 Video](https://www.youtube.com/watch?v=1f2umEKhJvE)
 * [Hack Chat Transcript](https://hackaday.io/event/187076-rf-hacking-hack-chat/log/212136-hack-chat-transcript-part-1)
 
-## Getting Started
+## 始めに
 
 **サポートされている**
 
@@ -24,12 +26,12 @@ FISSURE内には、ファイルナビゲーションを容易にし、コード�
 
 |   オペレーティングシステム   |   FISSUREブランチ   |
 | :--------------------------: | :----------------: |
-|  Ubuntu 18.04 (x64)        | Python2\_maint-3.7 |
-| Ubuntu 18.04.5 (x64)       | Python2\_maint-3.7 |
-| Ubuntu 18.04.6 (x64)       | Python2\_maint-3.7 |
-| Ubuntu 20.04.1 (x64)       | Python3\_maint-3.8 |
-| Ubuntu 20.04.4 (x64)       | Python3\_maint-3.8 |
-|  KDE neon 5.25 (x64)       | Python3\_maint-3.8 |
+|  Ubuntu 18.04 (x64)         | Python2\_maint-3.7 |
+| Ubuntu 18.04.5 (x64)        | Python2\_maint-3.7 |
+| Ubuntu 18.04.6 (x64)        | Python2\_maint-3.7 |
+| Ubuntu 20.04.1 (x64)        | Python3\_maint-3.8 |
+| Ubuntu 20.04.4 (x64)        | Python3\_maint-3.8 |
+|  KDE neon 5.25 (x64)        | Python3\_maint-3.8 |
 
 **進行中（ベータ）**
 
@@ -37,8 +39,8 @@ FISSURE内には、ファイルナビゲーションを容易にし、コード�
 
 |     オペレーティングシステム     |    FISSUREブランチ   |
 | :------------------------------: | :-----------------: |
-| DragonOS Focal (x86\_64)       |  Python3\_maint-3.8 |
-|    Ubuntu 22.04 (x64)          | Python3\_maint-3.10 |
+| DragonOS Focal (x86\_64)        |  Python3\_maint-3.8 |
+|    Ubuntu 22.04 (x64)           | Python3\_maint-3.10 |
 
 注：特定のソフトウェアツールはすべてのOSで動作しません。[Software And Conflicts](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Help/Markdown/SoftwareAndConflicts.md)を参照してください。
 
@@ -50,7 +52,7 @@ git checkout <Python2_maint-3.7> or <Python3_maint-3.8> or <Python3_maint-3.10>
 git submodule update --init
 ./install
 ```
-これにより、インストールGUIを起動するために必要なPyQtソフトウェア依存関係がインストールされます。
+これにより、インストールGUIを起動するために必要なPyQtソフトウェアの依存関係がインストールされます。
 
 次に、オペレーティングシステムに最も適したオプションを選択します（OSがオプションに一致する場合は自動的に検出されるはずです）。
 
@@ -58,17 +60,17 @@ git submodule update --init
 | :--------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------: |
 | ![install1b](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/install1b.png) | ![install1a](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/install1a.png) | ![install1c](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/install1c.png) |
 
-既存の競合を避けるために、クリーンなオペレーティングシステムにFISSUREをインストールすることをお勧めします。FISSURE内のさまざまなツールを操作する際のエラーを避けるために、すべての推奨チェックボックス（デフォルトボタン）を選択してください。インストール中に複数のプロンプトが表示され、主に昇格された権限とユーザー名を要求されます。項目の最後に「Verify」セクションが含まれている場合、インストーラーはその後のコマンドを実行し、コマンドによってエラーが発生したかどうかに応じてチェックボックス項目を緑または赤で強調表示します。「Verify」セクションのないチェック済み項目は、インストール後も黒のままになります。
+FISSUREは、既存の競合を避けるためにクリーンなオペレーティングシステムにインストールすることをお勧めします。FISSURE内のさまざまなツールを操作する際のエラーを避けるために、すべての推奨チェックボックス（デフォルトボタン）を選択してください。インストール中に複数のプロンプトが表示され、主に昇格された権限やユーザー名を求められます。項目の最後に「Verify」セクションが含まれている場合、インストーラーはその後のコマンドを実行し、コマンドによってエラーが発生したかどうかに応じてチェックボックス項目を緑または赤で強調表示します。「Verify」セクションのないチェック済み項目は、インストール後も黒のままになります。
 
 ![install2](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/install2.png)
 
 **使用法**
 
-ターミナルを開き、次のコマンドを入力します：
+ターミナルを開き、次のコマンドを入力します:
 ```
 fissure
 ```
-FISSUREのヘルプメニューを参照して、使用方法の詳細を確認してください。
+FISSUREの使用方法についての詳細は、ヘルプメニューを参照してください。
 
 ## 詳細
 
@@ -91,7 +93,7 @@ FISSUREのヘルプメニューを参照して、使用方法の詳細を確認�
 
 **ハードウェア**
 
-以下は、さまざまな統合レベルを持つ「サポートされている」ハードウェアのリストです：
+以下は、異なる統合レベルを持つ「サポートされている」ハードウェアのリストです：
 
 * USRP: X3xx, B2xx, B20xmini, USRP2, N2xx
 * HackRF
@@ -107,7 +109,7 @@ FISSUREのヘルプメニューを参照して、使用方法の詳細を確認�
 FISSUREには、さまざまな技術や手法に慣れるためのいくつかの役立つガイドが付属しています。多くは、FISSUREに統合されたさまざまなツールの使用手順を含んでいます。
 
 * [Lesson1: OpenBTS](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson1\_OpenBTS.md)
-* [Lesson2: Luaディセクタ](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson2\_LuaDissectors.md)
+* [Lesson2: Luaディセクター](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson2\_LuaDissectors.md)
 * [Lesson3: Sound eXchange](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson3\_Sound\_eXchange.md)
 * [Lesson4: ESPボード](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson4\_ESP\_Boards.md)
 * [Lesson5: ラジオソン追跡](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson5\_Radiosonde\_Tracking.md)
@@ -129,17 +131,17 @@ FISSUREには、さまざまな技術や手法に慣れるためのいくつか�
 
 ## 貢献
 
-FISSUREの改善に関する提案は大いに歓迎されます。以下の件について考えがあれば、[ディスカッション](https://github.com/ainfosec/FISSURE/discussions)ページまたはDiscordサーバーにコメントを残してください：
+FISSUREの改善に関する提案は大いに歓迎されます。以下の点についての考えがあれば、[Discussions](https://github.com/ainfosec/FISSURE/discussions)ページまたはDiscordサーバーにコメントを残してください：
 
 * 新機能の提案やデザイン変更
 * インストール手順を含むソフトウェアツール
 * 新しいレッスンや既存のレッスンの追加資料
 * 興味のあるRFプロトコル
-* 統合のためのさらなるハードウェアやSDRタイプ
+* 統合のためのさらなるハードウェアおよびSDRタイプ
 * PythonでのIQ分析スクリプト
 * インストールの修正と改善
 
-FISSUREの改善に向けた貢献は、その開発を加速させるために重要です。あなたの貢献は大いに感謝されます。コード開発を通じて貢献したい場合は、リポジトリをフォークしてプルリクエストを作成してください：
+FISSUREの改善に向けた貢献は、その開発を加速させるために重要です。あなたの貢献は大変感謝されます。コード開発を通じて貢献したい場合は、リポジトリをフォークしてプルリクエストを作成してください：
 
 1. プロジェクトをフォーク
 2. フィーチャーブランチを作成 (`git checkout -b feature/AmazingFeature`)
@@ -147,11 +149,11 @@ FISSUREの改善に向けた貢献は、その開発を加速させるために�
 4. ブランチにプッシュ (`git push origin feature/AmazingFeature`)
 5. プルリクエストを開く
 
-バグに注意を促すための[イシュー](https://github.com/ainfosec/FISSURE/issues)の作成も歓迎します。
+バグに注意を促すための[Issues](https://github.com/ainfosec/FISSURE/issues)の作成も歓迎します。
 
 ## コラボレーション
 
-Assured Information Security, Inc. (AIS)のビジネス開発に連絡して、FISSUREのコラボレーション機会を提案し、正式化してください。ソフトウェアの統合に時間を割くこと、AISの才能ある人々があなたの技術的課題のためのソリューションを開発すること、またはFISSUREを他のプラットフォーム/アプリケーションに統合することなどです。
+Assured Information Security, Inc. (AIS)のビジネス開発に連絡して、FISSUREのコラボレーション機会を提案し、正式化してください。ソフトウェアの統合に時間を割くこと、AISの才能ある人々があなたの技術的課題のためのソリューションを開発すること、またはFISSUREを他のプラットフォーム/アプリケーションに統合することが含まれます。
 
 ## ライセンス
 
@@ -178,3 +180,7 @@ Chris Poore - Assured Information Security, Inc. - poorec@ainfosec.com
 ## 謝辞
 
 このプロジェクトへの貢献に対して、Dr. Samuel MantravadiとJoseph Reithに特別な感謝を捧げます。
+
+
+
+{{#include /banners/hacktricks-training.md}}

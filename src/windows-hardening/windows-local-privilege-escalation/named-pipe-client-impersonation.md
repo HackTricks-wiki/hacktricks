@@ -1,6 +1,4 @@
-# 名前付きパイプクライアントの偽装
-
-## 名前付きパイプクライアントの偽装
+# Named Pipe Client Impersonation
 
 {{#include ../../banners/hacktricks-training.md}}
 

