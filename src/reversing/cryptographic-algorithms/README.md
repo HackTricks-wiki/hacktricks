@@ -1,12 +1,10 @@
 # Algoritmi di Crittografia/Compressione
 
-## Algoritmi di Crittografia/Compressione
-
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Identificazione degli Algoritmi
 
-Se si termina in un codice **che utilizza shift a destra e a sinistra, xors e diverse operazioni aritmetiche** è altamente probabile che sia l'implementazione di un **algoritmo crittografico**. Qui verranno mostrati alcuni modi per **identificare l'algoritmo utilizzato senza dover invertire ogni passaggio**.
+Se si termina in un codice **utilizzando shift a destra e a sinistra, xors e diverse operazioni aritmetiche** è altamente probabile che sia l'implementazione di un **algoritmo crittografico**. Qui verranno mostrati alcuni modi per **identificare l'algoritmo utilizzato senza dover invertire ogni passaggio**.
 
 ### Funzioni API
 
@@ -50,7 +48,7 @@ Puoi cercare qualsiasi altra costante e otterrai (probabilmente) lo stesso risul
 
 ### info sui dati
 
-Se il codice non ha alcuna costante significativa, potrebbe essere **in caricamento di informazioni dalla sezione .data**.\
+Se il codice non ha alcuna costante significativa, potrebbe essere **in caricamento informazioni dalla sezione .data**.\
 Puoi accedere a quei dati, **raggruppare il primo dword** e cercarlo su Google come abbiamo fatto nella sezione precedente:
 
 ![](<../../images/image (372).png>)
@@ -64,11 +62,11 @@ In questo caso, se cerchi **0xA56363C6** puoi scoprire che è correlato alle **t
 È composto da 3 parti principali:
 
 - **Fase di inizializzazione/**: Crea una **tabella di valori da 0x00 a 0xFF** (256 byte in totale, 0x100). Questa tabella è comunemente chiamata **Substitution Box** (o SBox).
-- **Fase di mescolamento**: **Ciclerà attraverso la tabella** creata prima (ciclo di 0x100 iterazioni, di nuovo) modificando ciascun valore con byte **semi-casuali**. Per creare questi byte semi-casuali, viene utilizzata la **chiave RC4**. Le **chiavi RC4** possono essere **tra 1 e 256 byte di lunghezza**, tuttavia si raccomanda generalmente che siano superiori a 5 byte. Comunemente, le chiavi RC4 sono lunghe 16 byte.
-- **Fase XOR**: Infine, il testo in chiaro o il testo cifrato è **XORato con i valori creati prima**. La funzione per crittografare e decrittografare è la stessa. Per questo, verrà eseguito un **ciclo attraverso i 256 byte creati** tante volte quanto necessario. Questo è solitamente riconosciuto in un codice decompilato con un **%256 (mod 256)**.
+- **Fase di mescolamento**: Eseguirà un **loop attraverso la tabella** creata prima (loop di 0x100 iterazioni, di nuovo) modificando ciascun valore con byte **semi-casuali**. Per creare questi byte semi-casuali, viene utilizzata la **chiave RC4**. Le **chiavi RC4** possono essere **tra 1 e 256 byte di lunghezza**, tuttavia si raccomanda generalmente che siano superiori a 5 byte. Comunemente, le chiavi RC4 sono lunghe 16 byte.
+- **Fase XOR**: Infine, il testo in chiaro o il testo cifrato è **XORato con i valori creati prima**. La funzione per crittografare e decrittografare è la stessa. Per questo, verrà eseguito un **loop attraverso i 256 byte creati** tante volte quanto necessario. Questo è solitamente riconosciuto in un codice decompilato con un **%256 (mod 256)**.
 
-> [!NOTE]
-> **Per identificare un RC4 in un codice disassemblato/decompilato puoi controllare 2 cicli di dimensione 0x100 (con l'uso di una chiave) e poi un XOR dei dati di input con i 256 valori creati prima nei 2 cicli probabilmente usando un %256 (mod 256)**
+> [!TIP]
+> **Per identificare un RC4 in un codice disassemblato/decompilato puoi controllare 2 loop di dimensione 0x100 (con l'uso di una chiave) e poi un XOR dei dati di input con i 256 valori creati prima nei 2 loop probabilmente usando un %256 (mod 256)**
 
 ### **Fase di Inizializzazione/Substitution Box:** (Nota il numero 256 usato come contatore e come uno 0 è scritto in ciascun posto dei 256 caratteri)
 
@@ -87,7 +85,7 @@ In questo caso, se cerchi **0xA56363C6** puoi scoprire che è correlato alle **t
 ### **Caratteristiche**
 
 - Uso di **scatole di sostituzione e tabelle di ricerca**
-- È possibile **distinguere AES grazie all'uso di valori specifici delle tabelle di ricerca** (costanti). _Nota che la **costante** può essere **memorizzata** nel binario **o creata** _**dinamicamente**._
+- È possibile **distinguere AES grazie all'uso di valori specifici delle tabelle di ricerca** (costanti). _Nota che la **costante** può essere **memorizzata** nel binario **o creata** _ _**dinamicamente**._
 - La **chiave di crittografia** deve essere **divisibile** per **16** (di solito 32B) e di solito viene utilizzato un **IV** di 16B.
 
 ### Costanti SBox
@@ -104,11 +102,11 @@ In questo caso, se cerchi **0xA56363C6** puoi scoprire che è correlato alle **t
 ### Identificazione
 
 Nell'immagine seguente nota come la costante **0x9E3779B9** è utilizzata (nota che questa costante è utilizzata anche da altri algoritmi crittografici come **TEA** -Tiny Encryption Algorithm).\
-Nota anche la **dimensione del ciclo** (**132**) e il **numero di operazioni XOR** nelle **istruzioni di disassemblaggio** e nell'**esempio di codice**:
+Nota anche la **dimensione del loop** (**132**) e il **numero di operazioni XOR** nelle **istruzioni di disassemblaggio** e nell'**esempio di codice**:
 
 ![](<../../images/image (381).png>)
 
-Come è stato menzionato prima, questo codice può essere visualizzato all'interno di qualsiasi decompilatore come una **funzione molto lunga** poiché **non ci sono salti** al suo interno. Il codice decompilato può apparire come segue:
+Come accennato in precedenza, questo codice può essere visualizzato all'interno di qualsiasi decompilatore come una **funzione molto lunga** poiché **non ci sono salti** al suo interno. Il codice decompilato può apparire come segue:
 
 ![](<../../images/image (382).png>)
 

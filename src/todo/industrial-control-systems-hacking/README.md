@@ -1,5 +1,7 @@
 # Hacking dei Sistemi di Controllo Industriale
 
+{{#include /banners/hacktricks-training.md}}
+
 ## Informazioni su questa Sezione
 
 Questa sezione contiene tutto sui Sistemi di Controllo Industriale, inclusi concetti e metodologie per hackerarli con vari problemi di sicurezza che persistono in essi.
@@ -12,4 +14,6 @@ Poiché i Sistemi di Controllo Industriale sono installati seguendo standard sta
 
 I Sistemi di Controllo Industriale possono essere complicati a volte e quindi richiedono molta pazienza per fare qualsiasi cosa. Si tratta di sondare e fare ricognizione prima di pianificare attacchi e sviluppare exploit.
 
-Queste tecniche possono anche essere utilizzate per proteggere contro attacchi e blue teaming per i sistemi di controllo industriale.
+Queste tecniche possono essere utilizzate anche per proteggere contro attacchi e blue teaming per i sistemi di controllo industriale.
+
+{{#include /banners/hacktricks-training.md}}

@@ -1,5 +1,7 @@
 # Fondamenti di Rust
 
+{{#include /banners/hacktricks-training.md}}
+
 ### Tipi Generici
 
 Crea una struct in cui 1 dei loro valori potrebbe essere di qualsiasi tipo
@@ -267,7 +269,7 @@ println!("{:?}", apple);
 ```
 #### Thread
 
-In questo caso passeremo al thread una variabile che sarà in grado di modificare
+In questo caso passeremo al thread una variabile che sarà in grado di modificare.
 ```rust
 fn main() {
 let status = Arc::new(Mutex::new(JobStatus { jobs_completed: 0 }));
@@ -285,4 +287,4 @@ thread::sleep(Duration::from_millis(500));
 }
 }
 ```
-
+{{#include /banners/hacktricks-training.md}}

@@ -1,7 +1,5 @@
 # Chiavi di Registro di Windows Interessanti
 
-### Chiavi di Registro di Windows Interessanti
-
 {{#include ../../../banners/hacktricks-training.md}}
 
 ### **Informazioni sulla Versione di Windows e Proprietario**
@@ -18,7 +16,7 @@
 
 ### **Tracciamento del Tempo di Accesso**
 
-- Per impostazione predefinita, il tracciamento dell'ultimo tempo di accesso è disattivato (**`NtfsDisableLastAccessUpdate=1`**). Per abilitarlo, usa:
+- Per impostazione predefinita, il tracciamento dell'ultimo accesso è disattivato (**`NtfsDisableLastAccessUpdate=1`**). Per abilitarlo, usa:
 `fsutil behavior set disablelastaccess 0`
 
 ### Versioni di Windows e Service Pack
@@ -27,11 +25,11 @@
 
 ### Abilitazione del Tempo di Accesso
 
-- Abilitare il tracciamento dell'ultimo tempo di accesso consente di vedere quando i file sono stati aperti per l'ultima volta, il che può essere fondamentale per l'analisi forense o il monitoraggio del sistema.
+- Abilitare il tracciamento dell'ultimo accesso consente di vedere quando i file sono stati aperti l'ultima volta, il che può essere fondamentale per l'analisi forense o il monitoraggio del sistema.
 
 ### Dettagli sulle Informazioni di Rete
 
-- Il registro contiene dati estesi sulle configurazioni di rete, inclusi **tipi di reti (wireless, cavo, 3G)** e **categorie di rete (Pubblica, Privata/Casa, Dominio/Lavoro)**, che sono vitali per comprendere le impostazioni di sicurezza della rete e i permessi.
+- Il registro contiene dati estesi sulle configurazioni di rete, inclusi **tipi di reti (wireless, cavo, 3G)** e **categorie di rete (Pubblica, Privata/Home, Dominio/Lavoro)**, che sono vitali per comprendere le impostazioni di sicurezza della rete e i permessi.
 
 ### Caching Lato Client (CSC)
 
@@ -43,7 +41,7 @@
 
 ### Shellbags
 
-- **Shellbags** non solo memorizzano le preferenze per le visualizzazioni delle cartelle, ma forniscono anche prove forensi di accesso alle cartelle anche se la cartella non esiste più. Sono inestimabili per le indagini, rivelando l'attività dell'utente che non è ovvia attraverso altri mezzi.
+- I **Shellbags** non solo memorizzano le preferenze per le visualizzazioni delle cartelle, ma forniscono anche prove forensi di accesso alle cartelle anche se la cartella non esiste più. Sono inestimabili per le indagini, rivelando attività dell'utente che non sono ovvie attraverso altri mezzi.
 
 ### Informazioni e Forense USB
 
@@ -51,7 +49,7 @@
 
 ### Numero di Serie del Volume
 
-- Il **Numero di Serie del Volume** può essere cruciale per tracciare l'istanza specifica di un file system, utile in scenari forensi in cui è necessario stabilire l'origine del file su diversi dispositivi.
+- Il **Numero di Serie del Volume** può essere cruciale per tracciare l'istanza specifica di un file system, utile in scenari forensi in cui è necessario stabilire l'origine di un file su diversi dispositivi.
 
 ### **Dettagli di Spegnimento**
 
@@ -64,11 +62,11 @@
 
 ### **Cartelle Condivise**
 
-- Le cartelle condivise e le impostazioni si trovano in **`System\ControlSet001\Services\lanmanserver\Shares`**. Le impostazioni di Caching Lato Client (CSC) determinano la disponibilità dei file offline.
+- Le cartelle condivise e le impostazioni si trovano sotto **`System\ControlSet001\Services\lanmanserver\Shares`**. Le impostazioni di Caching Lato Client (CSC) determinano la disponibilità dei file offline.
 
 ### **Programmi che Si Avviano Automaticamente**
 
-- Percorsi come **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Run`** e voci simili sotto `Software\Microsoft\Windows\CurrentVersion` dettagliano i programmi impostati per avviarsi all'avvio.
+- Percorsi come **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Run`** e voci simili sotto `Software\Microsoft\Windows\CurrentVersion` dettagliano i programmi impostati per essere eseguiti all'avvio.
 
 ### **Ricerche e Percorsi Digitati**
 
@@ -78,17 +76,17 @@
 
 - I documenti recenti e i file di Office accessibili sono annotati in `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs` e percorsi specifici della versione di Office.
 
-### **Elementi Utilizzati di Recente (MRU)**
+### **Elementi Più Recentemente Utilizzati (MRU)**
 
 - Le liste MRU, che indicano i percorsi e i comandi dei file recenti, sono memorizzate in varie sottochiavi `ComDlg32` e `Explorer` sotto `NTUSER.DAT`.
 
 ### **Tracciamento dell'Attività Utente**
 
-- La funzione User Assist registra statistiche dettagliate sull'uso delle applicazioni, inclusi il conteggio delle esecuzioni e l'ora dell'ultima esecuzione, in **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{GUID}\Count`**.
+- La funzione User Assist registra statistiche dettagliate sull'uso delle applicazioni, inclusi conteggio delle esecuzioni e orario dell'ultima esecuzione, in **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{GUID}\Count`**.
 
-### **Analisi delle Shellbags**
+### **Analisi dei Shellbags**
 
-- Le shellbags, che rivelano dettagli sull'accesso alle cartelle, sono memorizzate in `USRCLASS.DAT` e `NTUSER.DAT` sotto `Software\Microsoft\Windows\Shell`. Usa **[Shellbag Explorer](https://ericzimmerman.github.io/#!index.md)** per l'analisi.
+- I Shellbags, che rivelano dettagli sull'accesso alle cartelle, sono memorizzati in `USRCLASS.DAT` e `NTUSER.DAT` sotto `Software\Microsoft\Windows\Shell`. Usa **[Shellbag Explorer](https://ericzimmerman.github.io/#!index.md)** per l'analisi.
 
 ### **Storia dei Dispositivi USB**
 
@@ -96,6 +94,6 @@
 - L'utente associato a un dispositivo USB specifico può essere individuato cercando nei registri `NTUSER.DAT` per il **{GUID}** del dispositivo.
 - L'ultimo dispositivo montato e il suo numero di serie del volume possono essere tracciati attraverso `System\MountedDevices` e `Software\Microsoft\Windows NT\CurrentVersion\EMDMgmt`, rispettivamente.
 
-Questa guida riassume i percorsi e i metodi cruciali per accedere a informazioni dettagliate su sistema, rete e attività utente sui sistemi Windows, puntando alla chiarezza e all'usabilità.
+Questa guida riassume i percorsi e i metodi cruciali per accedere a informazioni dettagliate sul sistema, sulla rete e sull'attività dell'utente sui sistemi Windows, puntando alla chiarezza e all'usabilità.
 
 {{#include ../../../banners/hacktricks-training.md}}

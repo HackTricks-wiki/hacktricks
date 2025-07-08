@@ -1,3 +1,5 @@
+# SeDebug + SeImpersonate - Copia Token
+
 {{#include ../../banners/hacktricks-training.md}}
 
 Il seguente codice **sfrutta i privilegi SeDebug e SeImpersonate** per copiare il token da un **processo in esecuzione come SYSTEM** e con **tutti i privilegi del token**. \

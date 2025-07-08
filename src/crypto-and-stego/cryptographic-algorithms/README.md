@@ -1,12 +1,10 @@
 # Algoritmi di Crittografia/Compressione
 
-## Algoritmi di Crittografia/Compressione
-
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Identificazione degli Algoritmi
 
-Se si termina in un codice **che utilizza shift a destra e a sinistra, xors e diverse operazioni aritmetiche** è altamente probabile che sia l'implementazione di un **algoritmo crittografico**. Qui verranno mostrati alcuni modi per **identificare l'algoritmo utilizzato senza dover invertire ogni passaggio**.
+Se si termina in un codice **utilizzando shift a destra e a sinistra, xors e diverse operazioni aritmetiche** è altamente probabile che sia l'implementazione di un **algoritmo crittografico**. Qui verranno mostrati alcuni modi per **identificare l'algoritmo utilizzato senza dover invertire ogni passaggio**.
 
 ### Funzioni API
 
@@ -24,7 +22,7 @@ Comprimi e decomprimi un dato buffer.
 
 **CryptAcquireContext**
 
-Dai [documenti](https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-cryptacquirecontexta): La funzione **CryptAcquireContext** è utilizzata per acquisire un handle a un particolare contenitore di chiavi all'interno di un particolare fornitore di servizi crittografici (CSP). **Questo handle restituito è utilizzato nelle chiamate alle funzioni CryptoAPI** che utilizzano il CSP selezionato.
+Dalla [documentazione](https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-cryptacquirecontexta): La funzione **CryptAcquireContext** è utilizzata per acquisire un handle a un particolare contenitore di chiavi all'interno di un particolare fornitore di servizi crittografici (CSP). **Questo handle restituito è utilizzato nelle chiamate alle funzioni CryptoAPI** che utilizzano il CSP selezionato.
 
 **CryptCreateHash**
 
@@ -50,7 +48,7 @@ Puoi cercare qualsiasi altra costante e otterrai (probabilmente) lo stesso risul
 
 ### info sui dati
 
-Se il codice non ha alcuna costante significativa, potrebbe essere **in caricamento di informazioni dalla sezione .data**.\
+Se il codice non ha alcuna costante significativa, potrebbe essere **in caricamento informazioni dalla sezione .data**.\
 Puoi accedere a quei dati, **raggruppare il primo dword** e cercarlo su Google come abbiamo fatto nella sezione precedente:
 
 ![](<../../images/image (531).png>)
@@ -64,11 +62,11 @@ In questo caso, se cerchi **0xA56363C6** puoi scoprire che è correlato alle **t
 È composto da 3 parti principali:
 
 - **Fase di inizializzazione/**: Crea una **tabella di valori da 0x00 a 0xFF** (256 byte in totale, 0x100). Questa tabella è comunemente chiamata **Substitution Box** (o SBox).
-- **Fase di mescolamento**: Eseguirà un **ciclo attraverso la tabella** creata prima (ciclo di 0x100 iterazioni, di nuovo) modificando ciascun valore con byte **semi-casuali**. Per creare questi byte semi-casuali, viene utilizzata la **chiave RC4**. Le **chiavi RC4** possono essere **tra 1 e 256 byte di lunghezza**, tuttavia di solito si raccomanda che siano superiori a 5 byte. Comunemente, le chiavi RC4 sono lunghe 16 byte.
-- **Fase XOR**: Infine, il testo in chiaro o il testo cifrato è **XORato con i valori creati prima**. La funzione per crittografare e decrittografare è la stessa. Per questo, verrà eseguito un **ciclo attraverso i 256 byte creati** tante volte quanto necessario. Questo è solitamente riconosciuto in un codice decompilato con un **%256 (mod 256)**.
+- **Fase di mescolamento**: Eseguirà un **loop attraverso la tabella** creata prima (loop di 0x100 iterazioni, di nuovo) modificando ciascun valore con byte **semi-casuali**. Per creare questi byte semi-casuali, viene utilizzata la **chiave RC4**. Le **chiavi RC4** possono essere **tra 1 e 256 byte di lunghezza**, tuttavia si raccomanda generalmente che siano superiori a 5 byte. Comunemente, le chiavi RC4 sono lunghe 16 byte.
+- **Fase XOR**: Infine, il testo in chiaro o il testo cifrato è **XORato con i valori creati prima**. La funzione per crittografare e decrittografare è la stessa. Per questo, verrà eseguito un **loop attraverso i 256 byte creati** tante volte quanto necessario. Questo è solitamente riconosciuto in un codice decompilato con un **%256 (mod 256)**.
 
-> [!NOTE]
-> **Per identificare un RC4 in un codice disassemblato/decompilato puoi controllare 2 cicli di dimensione 0x100 (con l'uso di una chiave) e poi un XOR dei dati di input con i 256 valori creati prima nei 2 cicli probabilmente usando un %256 (mod 256)**
+> [!TIP]
+> **Per identificare un RC4 in un codice disassemblato/decompilato puoi controllare 2 loop di dimensione 0x100 (con l'uso di una chiave) e poi un XOR dei dati di input con i 256 valori creati prima nei 2 loop probabilmente usando un %256 (mod 256)**
 
 ### **Fase di Inizializzazione/Substitution Box:** (Nota il numero 256 usato come contatore e come uno 0 è scritto in ciascun posto dei 256 caratteri)
 
@@ -104,7 +102,7 @@ In questo caso, se cerchi **0xA56363C6** puoi scoprire che è correlato alle **t
 ### Identificazione
 
 Nell'immagine seguente nota come la costante **0x9E3779B9** è utilizzata (nota che questa costante è utilizzata anche da altri algoritmi crittografici come **TEA** -Tiny Encryption Algorithm).\
-Nota anche la **dimensione del ciclo** (**132**) e il **numero di operazioni XOR** nelle **istruzioni di disassemblaggio** e nell'**esempio di codice**:
+Nota anche la **dimensione del loop** (**132**) e il **numero di operazioni XOR** nelle **istruzioni di disassemblaggio** e nell'**esempio di codice**:
 
 ![](<../../images/image (547).png>)
 
@@ -136,7 +134,7 @@ Pertanto, è possibile identificare questo algoritmo controllando il **numero ma
 - 3 funzioni: Init, Update, Final
 - Funzioni di inizializzazione simili
 
-### Identificazione
+### Identificare
 
 **Init**
 
@@ -155,9 +153,9 @@ Nota l'uso di più costanti
 - Più piccolo e più efficiente poiché la sua funzione è trovare cambiamenti accidentali nei dati
 - Usa tabelle di ricerca (quindi puoi identificare costanti)
 
-### Identificazione
+### Identificare
 
-Controlla **costanti della tabella di ricerca**:
+Controlla **le costanti della tabella di ricerca**:
 
 ![](<../../images/image (508).png>)
 
@@ -172,7 +170,7 @@ Un algoritmo hash CRC appare come:
 - Costanti non riconoscibili
 - Puoi provare a scrivere l'algoritmo in python e cercare cose simili online
 
-### Identificazione
+### Identificare
 
 Il grafico è piuttosto grande:
 

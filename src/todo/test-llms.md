@@ -1,5 +1,7 @@
 # Test LLMs
 
+{{#include /banners/hacktricks-training.md}}
+
 ## Esegui e addestra modelli localmente
 
 ### [**Hugging Face Transformers**](https://github.com/huggingface/transformers)
@@ -12,7 +14,7 @@ LangChain è un framework progettato per costruire applicazioni con LLM. Permett
 
 ### [**LitGPT**](https://github.com/Lightning-AI/litgpt)
 
-LitGPT è un progetto sviluppato da Lightning AI che sfrutta il framework Lightning per facilitare l'addestramento, il fine-tuning e la distribuzione di modelli basati su GPT. Si integra senza soluzione di continuità con altri strumenti di Lightning AI, fornendo flussi di lavoro ottimizzati per gestire modelli linguistici su larga scala con prestazioni e scalabilità migliorate.
+LitGPT è un progetto sviluppato da Lightning AI che sfrutta il framework Lightning per facilitare l'addestramento, il fine-tuning e la distribuzione di modelli basati su GPT. Si integra senza problemi con altri strumenti di Lightning AI, fornendo flussi di lavoro ottimizzati per gestire modelli linguistici su larga scala con prestazioni e scalabilità migliorate.
 
 ### [**LitServe**](https://github.com/Lightning-AI/LitServe)
 
@@ -30,9 +32,9 @@ Axolotl è una piattaforma basata su cloud progettata per semplificare la distri
 **Hugging Face** è una piattaforma e comunità leader per l'apprendimento automatico, particolarmente nota per il suo lavoro nell'elaborazione del linguaggio naturale (NLP). Fornisce strumenti, librerie e risorse che rendono più facile sviluppare, condividere e distribuire modelli di apprendimento automatico.\
 Offre diverse sezioni come:
 
-* **Modelli**: Un vasto repository di **modelli di apprendimento automatico pre-addestrati** dove gli utenti possono navigare, scaricare e integrare modelli per vari compiti come generazione di testo, traduzione, riconoscimento delle immagini e altro.
+* **Modelli**: Un vasto repository di **modelli di apprendimento automatico pre-addestrati** dove gli utenti possono navigare, scaricare e integrare modelli per vari compiti come generazione di testo, traduzione, riconoscimento di immagini e altro.
 * **Dataset:** Una **collezione completa di dataset** utilizzati per addestrare e valutare modelli. Facilita l'accesso a fonti di dati diverse, consentendo agli utenti di trovare e utilizzare dati per i loro specifici progetti di apprendimento automatico.
-* **Spazi:** Una piattaforma per ospitare e condividere **applicazioni interattive di apprendimento automatico** e dimostrazioni. Permette agli sviluppatori di **mostrare** i loro modelli in azione, creare interfacce user-friendly e collaborare con altri condividendo dimostrazioni dal vivo.
+* **Spazi:** Una piattaforma per ospitare e condividere **applicazioni e dimostrazioni interattive di apprendimento automatico**. Permette agli sviluppatori di **mostrare** i loro modelli in azione, creare interfacce user-friendly e collaborare con altri condividendo dimostrazioni dal vivo.
 
 ## [**TensorFlow Hub**](https://www.tensorflow.org/hub) **&** [**Kaggle**](https://www.kaggle.com/)
 
@@ -48,3 +50,5 @@ Offre diverse sezioni come:
 
 * **Modelli:** Un repository di modelli di apprendimento automatico contribuiti dalla comunità che gli utenti possono navigare, provare e integrare nei loro applicativi con il minimo sforzo.
 * **Accesso API:** API semplici per eseguire modelli che consentono agli sviluppatori di distribuire e scalare modelli senza sforzo all'interno delle proprie applicazioni.
+
+{{#include /banners/hacktricks-training.md}}

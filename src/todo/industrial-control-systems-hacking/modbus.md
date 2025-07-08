@@ -1,10 +1,12 @@
 # Il Protocollo Modbus
 
+{{#include /banners/hacktricks-training.md}}
+
 ## Introduzione al Protocollo Modbus
 
 Il protocollo Modbus è un protocollo ampiamente utilizzato nell'Automazione Industriale e nei Sistemi di Controllo. Modbus consente la comunicazione tra vari dispositivi come controllori logici programmabili (PLC), sensori, attuatori e altri dispositivi industriali. Comprendere il Protocollo Modbus è essenziale poiché è il protocollo di comunicazione più utilizzato negli ICS e presenta una grande superficie di attacco potenziale per il sniffing e persino l'iniezione di comandi nei PLC.
 
-Qui, i concetti sono espressi in modo puntuale fornendo il contesto del protocollo e la sua natura operativa. La maggiore sfida nella sicurezza dei sistemi ICS è il costo di implementazione e aggiornamento. Questi protocolli e standard sono stati progettati all'inizio degli anni '80 e '90 e sono ancora ampiamente utilizzati. Poiché un'industria ha molti dispositivi e connessioni, aggiornare i dispositivi è molto difficile, il che fornisce ai hacker un vantaggio nel trattare protocolli obsoleti. Gli attacchi a Modbus sono praticamente inevitabili poiché verrà utilizzato senza aggiornamenti, essendo la sua operazione critica per l'industria.
+Qui, i concetti sono espressi in modo puntuale fornendo contesto sul protocollo e sulla sua natura operativa. La maggiore sfida nella sicurezza dei sistemi ICS è il costo di implementazione e aggiornamento. Questi protocolli e standard sono stati progettati all'inizio degli anni '80 e '90 e sono ancora ampiamente utilizzati. Poiché un'industria ha molti dispositivi e connessioni, aggiornare i dispositivi è molto difficile, il che fornisce ai hacker un vantaggio nel trattare protocolli obsoleti. Gli attacchi a Modbus sono praticamente inevitabili poiché verrà utilizzato senza aggiornamenti, essendo la sua operazione critica per l'industria.
 
 ## L'Architettura Client-Server
 
@@ -20,7 +22,7 @@ I dati vengono trasmessi nel protocollo Modbus come ASCII o Binario, sebbene il 
 
 ## Codici Funzione
 
-Il Protocollo ModBus funziona con la trasmissione di codici funzione specifici che vengono utilizzati per operare i PLC e vari dispositivi di controllo. Questa parte è importante da comprendere poiché gli attacchi di replay possono essere effettuati ritrasmettendo i codici funzione. I dispositivi legacy non supportano alcuna crittografia per la trasmissione dei dati e di solito hanno cavi lunghi che li collegano, il che porta a manomissioni di questi cavi e alla cattura/iniezione di dati.
+Il Protocollo ModBus funziona con la trasmissione di specifici codici funzione che vengono utilizzati per operare i PLC e vari dispositivi di controllo. Questa parte è importante da comprendere poiché gli attacchi di replay possono essere effettuati ritrasmettendo i codici funzione. I dispositivi legacy non supportano alcuna crittografia per la trasmissione dei dati e di solito hanno cavi lunghi che li collegano, il che porta a manomissioni di questi cavi e alla cattura/iniezione di dati.
 
 ## Indirizzamento di Modbus
 
@@ -29,3 +31,5 @@ Ogni dispositivo nella rete ha un indirizzo unico che è essenziale per la comun
 Inoltre, Modbus implementa anche controlli di errore per garantire l'integrità dei dati trasmessi. Ma soprattutto, Modbus è uno Standard Aperto e chiunque può implementarlo nei propri dispositivi. Questo ha reso questo protocollo uno standard globale ed è ampiamente diffuso nell'industria dell'automazione industriale.
 
 A causa del suo ampio utilizzo e della mancanza di aggiornamenti, attaccare Modbus fornisce un vantaggio significativo con la sua superficie di attacco. Gli ICS dipendono fortemente dalla comunicazione tra i dispositivi e qualsiasi attacco effettuato su di essi può essere pericoloso per il funzionamento dei sistemi industriali. Attacchi come replay, iniezione di dati, sniffing di dati e leak, Denial of Service, falsificazione di dati, ecc. possono essere effettuati se il mezzo di trasmissione è identificato dall'attaccante.
+
+{{#include /banners/hacktricks-training.md}}
