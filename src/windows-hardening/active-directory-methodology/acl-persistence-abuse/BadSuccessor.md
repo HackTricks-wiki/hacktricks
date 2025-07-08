@@ -1,12 +1,12 @@
-# Abus des ACL/ACE Active Directory
+# Abuser des ACL/ACE Active Directory
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Aperçu
 
-Les Comptes de Service Gérés Délégués (**dMSAs**) sont un tout nouveau type de principal AD introduit avec **Windows Server 2025**. Ils sont conçus pour remplacer les comptes de service hérités en permettant une "migration" en un clic qui copie automatiquement les Noms de Principal de Service (SPNs), les appartenances à des groupes, les paramètres de délégation, et même les clés cryptographiques de l'ancien compte vers le nouveau dMSA, offrant aux applications une transition transparente et éliminant le risque de Kerberoasting.
+Les Comptes de Service Gérés Délégués (**dMSAs**) sont un tout nouveau type de principal AD introduit avec **Windows Server 2025**. Ils sont conçus pour remplacer les comptes de service hérités en permettant une “migration” en un clic qui copie automatiquement les Noms de Principal de Service (SPNs), les appartenances à des groupes, les paramètres de délégation, et même les clés cryptographiques de l'ancien compte vers le nouveau dMSA, offrant aux applications une transition transparente et éliminant le risque de Kerberoasting.
 
-Des chercheurs d'Akamai ont découvert qu'un seul attribut — **`msDS‑ManagedAccountPrecededByLink`** — indique au KDC quel compte hérité un dMSA "succède". Si un attaquant peut écrire cet attribut (et basculer **`msDS‑DelegatedMSAState` → 2**), le KDC construira avec plaisir un PAC qui **hérite de chaque SID de la victime choisie**, permettant ainsi au dMSA d'usurper n'importe quel utilisateur, y compris les Administrateurs de Domaine.
+Les chercheurs d'Akamai ont découvert qu'un seul attribut — **`msDS‑ManagedAccountPrecededByLink`** — indique au KDC quel compte hérité un dMSA “succède”. Si un attaquant peut écrire cet attribut (et basculer **`msDS‑DelegatedMSAState` → 2**), le KDC construira avec plaisir un PAC qui **hérite de chaque SID de la victime choisie**, permettant ainsi au dMSA d'usurper n'importe quel utilisateur, y compris les Administrateurs de Domaine.
 
 ## Qu'est-ce qu'un dMSA ?
 
@@ -17,7 +17,7 @@ Des chercheurs d'Akamai ont découvert qu'un seul attribut — **`msDS‑Managed
 
 ## Exigences pour attaquer
 1. **Au moins un DC Windows Server 2025** afin que la classe LDAP dMSA et la logique KDC existent.
-2. **Tous droits de création d'objet ou d'écriture d'attribut sur une OU** (n'importe quelle OU) – par exemple, `Create msDS‑DelegatedManagedServiceAccount` ou simplement **Create All Child Objects**. Akamai a trouvé que 91 % des locataires du monde réel accordent de telles permissions "bénignes" sur les OU à des non-administrateurs.
+2. **Tous droits de création d'objet ou d'écriture d'attribut sur une OU** (n'importe quelle OU) – par exemple, `Create msDS‑DelegatedManagedServiceAccount` ou simplement **Create All Child Objects**. Akamai a trouvé que 91 % des locataires du monde réel accordent de telles permissions “bénignes” sur les OU à des non-administrateurs.
 3. Capacité à exécuter des outils (PowerShell/Rubeus) depuis n'importe quel hôte joint au domaine pour demander des tickets Kerberos.
 *Aucun contrôle sur l'utilisateur victime n'est requis ; l'attaque ne touche jamais directement le compte cible.*
 
@@ -32,7 +32,7 @@ New‑ADServiceAccount Attacker_dMSA `
 
 Parce que vous avez créé l'objet à l'intérieur d'une OU à laquelle vous pouvez écrire, vous possédez automatiquement tous ses attributs.
 
-2. **Simuler une "migration terminée" en deux écritures LDAP** :
+2. **Simuler une “migration complétée” en deux écritures LDAP** :
 - Définir `msDS‑ManagedAccountPrecededByLink = DN` de n'importe quelle victime (par exemple, `CN=Administrator,CN=Users,DC=lab,DC=local`).
 - Définir `msDS‑DelegatedMSAState = 2` (migration terminée).
 
@@ -50,9 +50,9 @@ Le PAC retourné contient maintenant le SID 500 (Administrateur) ainsi que les g
 
 Lors des migrations légitimes, le KDC doit permettre au nouveau dMSA de déchiffrer **les tickets émis au compte ancien avant la transition**. Pour éviter de rompre les sessions en cours, il place à la fois les clés actuelles et les clés précédentes dans un nouveau blob ASN.1 appelé **`KERB‑DMSA‑KEY‑PACKAGE`**.
 
-Parce que notre fausse migration prétend que le dMSA succède à la victime, le KDC copie fidèlement la clé RC4‑HMAC de la victime dans la liste des **clés précédentes** – même si le dMSA n'a jamais eu de mot de passe "précédent". Cette clé RC4 n'est pas salée, donc elle est effectivement le hachage NT de la victime, donnant à l'attaquant la capacité de **craquer hors ligne ou de "passer le hachage"**.
+Parce que notre fausse migration prétend que le dMSA succède à la victime, le KDC copie fidèlement la clé RC4‑HMAC de la victime dans la liste des **clés précédentes** – même si le dMSA n'a jamais eu de mot de passe “précédent”. Cette clé RC4 n'est pas salée, donc elle est effectivement le hachage NT de la victime, donnant à l'attaquant la capacité de **craquer hors ligne ou de “passer le hachage”**.
 
-Ainsi, le lien massif de milliers d'utilisateurs permet à un attaquant de déverser des hachages "à grande échelle", transformant **BadSuccessor en un primitive d'élévation de privilèges et de compromission d'identifiants**.
+Ainsi, le lien massif de milliers d'utilisateurs permet à un attaquant de déverser des hachages “à grande échelle”, transformant **BadSuccessor en un primitive d'élévation de privilèges et de compromission d'identifiants**.
 
 ## Outils
 

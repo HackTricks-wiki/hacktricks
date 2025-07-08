@@ -1,12 +1,14 @@
 # Mythic
 
+{{#include ../banners/hacktricks-training.md}}
+
 ## Qu'est-ce que Mythic ?
 
 Mythic est un framework de commande et de contrôle (C2) modulaire et open-source conçu pour le red teaming. Il permet aux professionnels de la sécurité de gérer et de déployer divers agents (payloads) sur différents systèmes d'exploitation, y compris Windows, Linux et macOS. Mythic fournit une interface web conviviale pour gérer les agents, exécuter des commandes et collecter des résultats, ce qui en fait un outil puissant pour simuler des attaques du monde réel dans un environnement contrôlé.
 
 ### Installation
 
-Pour installer Mythic, suivez les instructions sur le **[Mythic repo](https://github.com/its-a-feature/Mythic)** officiel.
+Pour installer Mythic, suivez les instructions sur le **[repo Mythic](https://github.com/its-a-feature/Mythic)** officiel.
 
 ### Agents
 
@@ -14,7 +16,7 @@ Mythic prend en charge plusieurs agents, qui sont les **payloads qui effectuent 
 
 Par défaut, Mythic n'a aucun agent installé. Cependant, il propose quelques agents open source sur [**https://github.com/MythicAgents**](https://github.com/MythicAgents).
 
-Pour installer un agent à partir de ce repo, il vous suffit d'exécuter :
+Pour installer un agent depuis ce repo, vous devez simplement exécuter :
 ```bash
 sudo ./mythic-cli install github https://github.com/MythicAgents/<agent-name>
 sudo ./mythic-cli install github https://github.com/MythicAgents/apfell
@@ -63,10 +65,10 @@ Cet agent a beaucoup de commandes qui le rendent très similaire à Beacon de Co
 - `steal_token`: Voler un jeton principal d'un autre processus, permettant à l'agent d'imiter l'utilisateur de ce processus
 - `pth`: Attaque Pass-the-Hash, permettant à l'agent de s'authentifier en tant qu'utilisateur en utilisant leur hachage NTLM sans avoir besoin du mot de passe en clair
 - `mimikatz`: Exécuter des commandes Mimikatz pour extraire des identifiants, des hachages et d'autres informations sensibles de la mémoire ou de la base de données SAM
-- `rev2self`: Revenir au jeton principal de l'agent, redescendant ainsi les privilèges au niveau d'origine
+- `rev2self`: Revenir au jeton principal de l'agent, réduisant ainsi les privilèges au niveau d'origine
 - `ppid`: Changer le processus parent pour les travaux de post-exploitation en spécifiant un nouvel ID de processus parent, permettant un meilleur contrôle sur le contexte d'exécution des travaux
 - `printspoofer`: Exécuter des commandes PrintSpoofer pour contourner les mesures de sécurité du spouleur d'impression, permettant l'élévation de privilèges ou l'exécution de code
-- `dcsync`: Synchroniser les clés Kerberos d'un utilisateur sur la machine locale, permettant le craquage de mots de passe hors ligne ou d'autres attaques
+- `dcsync`: Synchroniser les clés Kerberos d'un utilisateur avec la machine locale, permettant le craquage de mots de passe hors ligne ou d'autres attaques
 - `ticket_cache_add`: Ajouter un ticket Kerberos à la session de connexion actuelle ou à une spécifiée, permettant la réutilisation de tickets ou l'imitation
 
 ### Exécution de processus
@@ -79,7 +81,7 @@ Cet agent a beaucoup de commandes qui le rendent très similaire à Beacon de Co
 - `run`: Exécute un binaire sur le système cible, en utilisant le PATH du système pour trouver l'exécutable
 - `shinject`: Injecte du shellcode dans un processus distant, permettant l'exécution en mémoire de code arbitraire
 - `inject`: Injecte le shellcode de l'agent dans un processus distant, permettant l'exécution en mémoire du code de l'agent
-- `spawn`: Crée une nouvelle session d'agent dans l'exécutable spécifié, permettant l'exécution de shellcode dans un nouveau processus
+- `spawn`: Lance une nouvelle session d'agent dans l'exécutable spécifié, permettant l'exécution de shellcode dans un nouveau processus
 - `spawnto_x64` et `spawnto_x86`: Changer le binaire par défaut utilisé dans les travaux de post-exploitation vers un chemin spécifié au lieu d'utiliser `rundll32.exe` sans paramètres, ce qui est très bruyant.
 
 ### Mithic Forge
@@ -129,7 +131,7 @@ Poseidon est un agent Golang qui se compile en exécutables **Linux et macOS**.
 ```bash
 ./mythic-cli install github https://github.com/MythicAgents/Poseidon.git
 ```
-Lorsque l'utilisateur est sur Linux, il a quelques commandes intéressantes :
+Lorsque l'utilisateur est sur Linux, il dispose de certaines commandes intéressantes :
 
 ### Actions courantes
 
@@ -155,7 +157,7 @@ Lorsque l'utilisateur est sur Linux, il a quelques commandes intéressantes :
 - `link_tcp`: Lier à un autre agent via TCP, permettant une communication directe entre les agents.
 - `link_webshell`: Lier à un agent en utilisant le profil P2P webshell, permettant un accès à distance à l'interface web de l'agent.
 - `rpfwd`: Démarrer ou arrêter un transfert de port inversé, permettant un accès à distance aux services sur le réseau cible.
-- `socks`: Démarrer ou arrêter un proxy SOCKS5 sur le réseau cible, permettant le tunneling du trafic à travers l'hôte compromis. Compatible avec des outils comme proxychains.
+- `socks`: Démarrer ou arrêter un proxy SOCKS5 sur le réseau cible, permettant le tunnelage du trafic à travers l'hôte compromis. Compatible avec des outils comme proxychains.
 - `portscan`: Scanner l'hôte(s) pour des ports ouverts, utile pour identifier des cibles potentielles pour un mouvement latéral ou d'autres attaques.
 
 ### Exécution de processus
@@ -163,3 +165,6 @@ Lorsque l'utilisateur est sur Linux, il a quelques commandes intéressantes :
 - `shell`: Exécuter une seule commande shell via /bin/sh, permettant l'exécution directe de commandes sur le système cible.
 - `run`: Exécuter une commande depuis le disque avec des arguments, permettant l'exécution de binaires ou de scripts sur le système cible.
 - `pty`: Ouvrir un PTY interactif, permettant une interaction directe avec le shell sur le système cible.
+
+
+{{#include ../banners/hacktricks-training.md}}

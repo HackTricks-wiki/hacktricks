@@ -29,7 +29,7 @@ Les applications avec le droit d'outil de débogage peuvent appeler `task_for_pi
 
 ### `com.apple.security.cs.disable-library-validation`
 
-Ce droit permet de **charger des frameworks, des plug-ins ou des bibliothèques sans être signés par Apple ou signés avec le même ID d'équipe** que l'exécutable principal, donc un attaquant pourrait abuser de n'importe quelle charge de bibliothèque pour injecter du code. Consultez [**ceci pour plus d'infos**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation).
+Ce droit permet de **charger des frameworks, des plug-ins ou des bibliothèques sans être signés par Apple ou signés avec le même ID d'équipe** que l'exécutable principal, donc un attaquant pourrait abuser de n'importe quelle bibliothèque chargée pour injecter du code. Consultez [**ceci pour plus d'infos**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation).
 
 ### `com.apple.private.security.clear-library-validation`
 
@@ -58,19 +58,19 @@ Le droit **`com.apple.private.icloud-account-access`** permet de communiquer ave
 
 **iMovie** et **Garageband** avaient ce droit.
 
-Pour plus **d'informations** sur l'exploit pour **obtenir des tokens icloud** à partir de ce droit, consultez la conférence : [**#OBTS v5.0 : "Ce qui se passe sur votre Mac, reste sur iCloud d'Apple ?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
+Pour plus **d'informations** sur l'exploit pour **obtenir des tokens icloud** à partir de ce droit, consultez la conférence : [**#OBTS v5.0 : "Que se passe-t-il sur votre Mac, reste sur l'iCloud d'Apple ?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
 
 ### `com.apple.private.tcc.manager.check-by-audit-token`
 
-TODO : Je ne sais pas ce que cela permet de faire
+TODO: Je ne sais pas ce que cela permet de faire
 
 ### `com.apple.private.apfs.revert-to-snapshot`
 
-TODO : Dans [**ce rapport**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **il est mentionné que cela pourrait être utilisé pour** mettre à jour le contenu protégé par SSV après un redémarrage. Si vous savez comment, envoyez une PR s'il vous plaît !
+TODO: Dans [**ce rapport**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **il est mentionné que cela pourrait être utilisé pour** mettre à jour le contenu protégé par SSV après un redémarrage. Si vous savez comment, envoyez une PR s'il vous plaît !
 
 ### `com.apple.private.apfs.create-sealed-snapshot`
 
-TODO : Dans [**ce rapport**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **il est mentionné que cela pourrait être utilisé pour** mettre à jour le contenu protégé par SSV après un redémarrage. Si vous savez comment, envoyez une PR s'il vous plaît !
+TODO: Dans [**ce rapport**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **il est mentionné que cela pourrait être utilisé pour** mettre à jour le contenu protégé par SSV après un redémarrage. Si vous savez comment, envoyez une PR s'il vous plaît !
 
 ### `keychain-access-groups`
 
@@ -97,11 +97,11 @@ Comme leur faire demander le mot de passe de l'utilisateur :
 ```bash
 osascript -e 'tell app "App Store" to activate' -e 'tell app "App Store" to activate' -e 'tell app "App Store" to display dialog "App Store requires your password to continue." & return & return default answer "" with icon 1 with hidden answer with title "App Store Alert"'
 ```
-Ou les amener à effectuer **des actions arbitraires**.
+Ou de les amener à effectuer **des actions arbitraires**.
 
 ### **`kTCCServiceEndpointSecurityClient`**
 
-Permet, entre autres autorisations, de **modifier la base de données TCC des utilisateurs**.
+Permet, entre autres permissions, de **modifier la base de données TCC des utilisateurs**.
 
 ### **`kTCCServiceSystemPolicySysAdminFiles`**
 
@@ -109,7 +109,7 @@ Permet de **changer** l'attribut **`NFSHomeDirectory`** d'un utilisateur, ce qui
 
 ### **`kTCCServiceSystemPolicyAppBundles`**
 
-Permet de modifier des fichiers à l'intérieur des bundles d'applications (à l'intérieur de app.app), ce qui est **interdit par défaut**.
+Permet de modifier des fichiers à l'intérieur des bundles d'applications (dans app.app), ce qui est **interdit par défaut**.
 
 <figure><img src="../../../images/image (31).png" alt=""><figcaption></figcaption></figure>
 
@@ -117,7 +117,7 @@ Il est possible de vérifier qui a cet accès dans _Paramètres Système_ > _Con
 
 ### `kTCCServiceAccessibility`
 
-Le processus pourra **abuser des fonctionnalités d'accessibilité de macOS**, ce qui signifie que, par exemple, il pourra appuyer sur des touches. Il pourrait donc demander l'accès pour contrôler une application comme Finder et approuver la boîte de dialogue avec cette autorisation.
+Le processus pourra **abuser des fonctionnalités d'accessibilité de macOS**, ce qui signifie que, par exemple, il pourra simuler des frappes au clavier. Il pourrait donc demander l'accès pour contrôler une application comme Finder et approuver la boîte de dialogue avec cette permission.
 
 ## Moyen
 
@@ -127,14 +127,14 @@ Cette autorisation permet de **créer de la mémoire qui est écrivable et exéc
 
 ### `com.apple.security.cs.allow-unsigned-executable-memory`
 
-Cette autorisation permet de **remplacer ou de patcher du code C**, d'utiliser le très obsolète **`NSCreateObjectFileImageFromMemory`** (qui est fondamentalement peu sûr), ou d'utiliser le framework **DVDPlayback**. Consultez [**ceci pour plus d'infos**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory).
+Cette autorisation permet de **remplacer ou de patcher du code C**, d'utiliser le très obsolète **`NSCreateObjectFileImageFromMemory`** (qui est fondamentalement non sécurisé), ou d'utiliser le framework **DVDPlayback**. Consultez [**ceci pour plus d'infos**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory).
 
 > [!CAUTION]
-> Inclure cette autorisation expose votre application à des vulnérabilités courantes dans les langages de code non sécurisé en mémoire. Considérez soigneusement si votre application a besoin de cette exception.
+> Inclure cette autorisation expose votre application à des vulnérabilités courantes dans les langages de code non sécurisés en mémoire. Considérez soigneusement si votre application a besoin de cette exception.
 
 ### `com.apple.security.cs.disable-executable-page-protection`
 
-Cette autorisation permet de **modifier des sections de ses propres fichiers exécutables** sur disque pour forcer la sortie. Consultez [**ceci pour plus d'infos**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-executable-page-protection).
+Cette autorisation permet de **modifier des sections de ses propres fichiers exécutables** sur le disque pour forcer la sortie. Consultez [**ceci pour plus d'infos**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-executable-page-protection).
 
 > [!CAUTION]
 > L'autorisation de désactiver la protection de la mémoire exécutable est une autorisation extrême qui supprime une protection de sécurité fondamentale de votre application, rendant possible pour un attaquant de réécrire le code exécutable de votre application sans détection. Préférez des autorisations plus étroites si possible.
@@ -149,15 +149,22 @@ Cette autorisation permet de monter un système de fichiers nullfs (interdit par
 
 ### `kTCCServiceAll`
 
-Selon ce billet de blog, cette autorisation TCC se trouve généralement sous la forme :
+Selon ce billet de blog, cette permission TCC se trouve généralement sous la forme :
 ```
 [Key] com.apple.private.tcc.allow-prompting
 [Value]
 [Array]
 [String] kTCCServiceAll
 ```
-Autoriser le processus à **demander toutes les autorisations TCC**.
+Permettre au processus de **demander toutes les autorisations TCC**.
 
 ### **`kTCCServicePostEvent`**
 
 {{#include ../../../banners/hacktricks-training.md}}
+
+</details>
+
+
+
+
+{{#include /banners/hacktricks-training.md}}
