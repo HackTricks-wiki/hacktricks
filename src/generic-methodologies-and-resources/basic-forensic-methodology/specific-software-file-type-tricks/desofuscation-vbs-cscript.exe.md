@@ -1,4 +1,6 @@
 # Desobfuscation Techniques for VBS Files
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -50,6 +52,3 @@ End Function
 ```
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

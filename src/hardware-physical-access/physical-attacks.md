@@ -1,4 +1,6 @@
 # Physical Attacks
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../banners/hacktricks-training.md}}
 
@@ -54,6 +56,3 @@ BitLocker encryption can potentially be bypassed if the **recovery password** is
 
 A new BitLocker recovery key can be added through social engineering tactics, convincing a user to execute a command that adds a new recovery key composed of zeros, thereby simplifying the decryption process.
 {{#include ../banners/hacktricks-training.md}}
-
-
-

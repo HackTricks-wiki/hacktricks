@@ -1,4 +1,6 @@
 # Wireshark tricks
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -155,6 +157,3 @@ f.close()
 ```
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

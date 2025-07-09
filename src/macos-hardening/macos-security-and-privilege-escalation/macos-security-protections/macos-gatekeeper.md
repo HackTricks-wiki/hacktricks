@@ -1,4 +1,6 @@
 # macOS Gatekeeper / Quarantine / XProtect
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -474,6 +476,3 @@ In an ".app" bundle if the quarantine xattr is not added to it, when executing i
 
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

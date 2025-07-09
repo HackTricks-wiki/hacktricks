@@ -1,4 +1,6 @@
 # Blobrunner
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -210,6 +212,3 @@ int main(int argc, char* argv[])
 ```
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

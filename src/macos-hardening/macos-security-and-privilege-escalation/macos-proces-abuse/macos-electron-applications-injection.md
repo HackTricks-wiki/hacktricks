@@ -1,4 +1,6 @@
 # macOS Electron Applications Injection
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -486,6 +488,3 @@ Loki was designed to backdoor Electron applications by replacing the application
 - [https://m.youtube.com/watch?v=VWQY5R2A6X8](https://m.youtube.com/watch?v=VWQY5R2A6X8)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

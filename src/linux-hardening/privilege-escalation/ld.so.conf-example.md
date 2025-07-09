@@ -1,4 +1,6 @@
 # ld.so privesc exploit example
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -151,6 +153,3 @@ ldd sharedvuln
 **As you can see, having sudo privileges over `ldconfig` you can exploit the same vulnerability.**
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

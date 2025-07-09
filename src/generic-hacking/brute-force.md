@@ -1,4 +1,6 @@
 # Brute Force - CheatSheet
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../banners/hacktricks-training.md}}
 
@@ -880,6 +882,3 @@ Cracking Common Application Hashes
 ```
 
 {{#include ../banners/hacktricks-training.md}}
-
-
-

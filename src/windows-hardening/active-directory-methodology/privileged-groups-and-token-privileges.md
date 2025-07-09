@@ -1,4 +1,6 @@
 # Privileged Groups
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -306,6 +308,3 @@ Get-NetGroupMember -Identity "Server Operators" -Recurse
 
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

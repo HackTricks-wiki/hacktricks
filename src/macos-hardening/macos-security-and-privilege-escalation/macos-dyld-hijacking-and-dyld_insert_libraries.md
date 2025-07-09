@@ -1,4 +1,6 @@
 # macOS Dyld Hijacking & DYLD_INSERT_LIBRARIES
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -164,6 +166,3 @@ sudo log stream --style syslog --predicate 'eventMessage CONTAINS[c] "[+] dylib"
 ```
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

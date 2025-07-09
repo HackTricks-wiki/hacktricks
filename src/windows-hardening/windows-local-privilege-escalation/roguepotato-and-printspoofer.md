@@ -1,4 +1,6 @@
 # RoguePotato, PrintSpoofer, SharpEfsPotato, GodPotato
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -94,6 +96,3 @@ nt authority\system
 - [https://github.com/zcgonvh/DCOMPotato](https://github.com/zcgonvh/DCOMPotato)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-
