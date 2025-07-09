@@ -364,6 +364,12 @@ Then copy-paste the text into the windows-shell and a file called nc.exe will be
 
 - [https://github.com/Stratiz/DNS-Exfil](https://github.com/Stratiz/DNS-Exfil)
 
+## Related Info Disclosure
+
+{{#ref}}
+windows-ntfs-kernel-pool-memory-leak.md
+{{#endref}}
+
 {{#include ../banners/hacktricks-training.md}}
 
 

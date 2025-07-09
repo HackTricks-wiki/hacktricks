@@ -84,6 +84,7 @@
   - [Full TTYs](generic-hacking/reverse-shells/full-ttys.md)
 - [Search Exploits](generic-hacking/search-exploits.md)
 - [Tunneling and Port Forwarding](generic-hacking/tunneling-and-port-forwarding.md)
+- [Windows Ntfs Kernel Pool Memory Leak](generic-hacking/windows-ntfs-kernel-pool-memory-leak.md)
 
 # 🐧 Linux Hardening
 
