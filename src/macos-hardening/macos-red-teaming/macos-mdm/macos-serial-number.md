@@ -1,6 +1,8 @@
 # macOS Serial Number
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## Basic Information
 
@@ -38,6 +40,5 @@ This character varies from 'C' (representing the first half of 2010) to 'Z' (sec
 Digits 1-9 correspond to weeks 1-9. Letters C-Y (excluding vowels and 'S') represent weeks 10-27. For the second half of the year, 26 is added to this number.
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 
 

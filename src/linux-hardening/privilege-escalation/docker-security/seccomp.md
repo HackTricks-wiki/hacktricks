@@ -1,6 +1,8 @@
 # Seccomp
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## Basic Information
 
@@ -156,6 +158,5 @@ Following output shows the “docker inspect” displaying the profile:
 ```
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 
 

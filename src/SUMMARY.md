@@ -283,6 +283,7 @@
   - [SID-History Injection](windows-hardening/active-directory-methodology/sid-history-injection.md)
   - [Silver Ticket](windows-hardening/active-directory-methodology/silver-ticket.md)
   - [Skeleton Key](windows-hardening/active-directory-methodology/skeleton-key.md)
+  - [Timeroasting](windows-hardening/active-directory-methodology/TimeRoasting.md)
   - [Unconstrained Delegation](windows-hardening/active-directory-methodology/unconstrained-delegation.md)
 - [Windows Security Controls](windows-hardening/authentication-credentials-uac-and-efs/README.md)
   - [UAC - User Account Control](windows-hardening/authentication-credentials-uac-and-efs/uac-user-account-control.md)

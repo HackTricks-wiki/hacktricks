@@ -1,6 +1,8 @@
 # macOS SIP
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## **Basic Information**
 
@@ -279,6 +281,5 @@ mount
 ```
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 
 

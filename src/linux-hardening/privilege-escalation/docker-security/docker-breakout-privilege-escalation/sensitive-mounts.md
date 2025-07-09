@@ -1,6 +1,8 @@
 # Sensitive Mounts
 
-{{#include ../../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 The exposure of `/proc`, `/sys`, and `/var` without proper namespace isolation introduces significant security risks, including attack surface enlargement and information disclosure. These directories contain sensitive files that, if misconfigured or accessed by an unauthorized user, can lead to container escape, host modification, or provide information aiding further attacks. For instance, incorrectly mounting `-v /proc:/host/proc` can bypass AppArmor protection due to its path-based nature, leaving `/host/proc` unprotected.
 
@@ -298,6 +300,5 @@ locate the other containers' filesystems and SA / web identity tokens
 - [Abusing Privileged and Unprivileged Linux Containers](https://www.nccgroup.com/globalassets/our-research/us/whitepapers/2016/june/container_whitepaper.pdf)
 
 {{#include ../../../../banners/hacktricks-training.md}}
-
 
 

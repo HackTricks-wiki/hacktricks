@@ -1,6 +1,8 @@
 # Introduction to x64
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## **Introduction to x64**
 
@@ -442,6 +444,5 @@ dup2:
 ```
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 
 

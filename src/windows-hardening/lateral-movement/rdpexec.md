@@ -1,6 +1,8 @@
 # RDPexec
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## How it Works
 
@@ -13,6 +15,5 @@ For more information check:
 {{#endref}}
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 

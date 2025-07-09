@@ -1,6 +1,8 @@
 # DPAPI - Extracting Passwords
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 
 
@@ -300,6 +302,5 @@ With extracted from LDAP computers list you can find every sub network even if y
 - [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c)
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 

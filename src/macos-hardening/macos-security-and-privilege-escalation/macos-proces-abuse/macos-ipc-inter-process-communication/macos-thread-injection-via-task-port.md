@@ -1,6 +1,8 @@
 # macOS Thread Injection via Task port
 
-{{#include ../../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## Code
 
@@ -175,6 +177,5 @@ By adhering to these guidelines and utilizing the `threadexec` library, one can 
 - [https://bazad.github.io/2018/10/bypassing-platform-binary-task-threads/](https://bazad.github.io/2018/10/bypassing-platform-binary-task-threads/)
 
 {{#include ../../../../banners/hacktricks-training.md}}
-
 
 

@@ -1,6 +1,8 @@
 # Bypass Linux Restrictions
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## Common Limitations Bypasses
 
@@ -348,6 +350,5 @@ bypass-fs-protections-read-only-no-exec-distroless/
 - [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 

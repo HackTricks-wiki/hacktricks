@@ -1,6 +1,8 @@
 # macOS Code Signing
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## Basic Information
 
@@ -368,6 +370,5 @@ struct cs_blob {
 - [**\*OS Internals Volume III**](https://newosxbook.com/home.html)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 
 

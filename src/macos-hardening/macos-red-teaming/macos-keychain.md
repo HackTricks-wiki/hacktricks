@@ -1,6 +1,8 @@
 # macOS Keychain
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## Main Keychains
 
@@ -132,6 +134,5 @@ And these are the **requirements** to be able to **export a secret without a pro
 - [**#OBTS v5.0: "Lock Picking the macOS Keychain" - Cody Thomas**](https://www.youtube.com/watch?v=jKE1ZW33JpY)
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 

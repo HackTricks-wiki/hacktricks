@@ -1,6 +1,8 @@
 # Angr - Examples
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 > [!TIP]
 > If the program is using `scanf` to get **several values at once from stdin** you need to generate a state that starts after the **`scanf`**.
@@ -834,6 +836,5 @@ if __name__ == '__main__':
 ```
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 
 

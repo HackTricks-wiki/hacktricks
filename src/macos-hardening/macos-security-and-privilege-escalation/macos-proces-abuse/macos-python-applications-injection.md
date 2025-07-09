@@ -1,6 +1,8 @@
 # macOS Python Applications Injection
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## Via `PYTHONWARNINGS` and `BROWSER` env variables
 
@@ -18,6 +20,5 @@ BROWSER="/bin/sh -c 'touch /tmp/hacktricks' #%s" python3 -I -W all:0:antigravity
 ```
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 
 

@@ -1,6 +1,8 @@
 # Mimikatz
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 
 **This page is based on one from [adsecurity.org](https://adsecurity.org/?page_id=1821)**. Check the original for further info!
@@ -210,6 +212,5 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 

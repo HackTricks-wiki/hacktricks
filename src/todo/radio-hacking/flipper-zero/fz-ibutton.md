@@ -1,6 +1,8 @@
 # FZ - iButton
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## Intro
 
@@ -40,6 +42,5 @@ It's possible to **emulate** saved iButtons (read or manually added).
 - [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 
 

@@ -1,6 +1,8 @@
 # macOS Dyld Process
 
-{{#include ../../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## Basic Information
 
@@ -314,6 +316,5 @@ find . -type f | xargs grep strcmp| grep key,\ \" | cut -d'"' -f2 | sort -u
 - [**\*OS Internals, Volume I: User Mode. By Jonathan Levin**](https://www.amazon.com/MacOS-iOS-Internals-User-Mode/dp/099105556X)
 
 {{#include ../../../../banners/hacktricks-training.md}}
-
 
 
