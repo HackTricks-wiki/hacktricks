@@ -18,7 +18,7 @@ In dokument afdeling 4 Protokol Voorbeelde punt 3
 >Gehaal uit die oorspronklike artikel：
 >>3. Na ontvangs van die versoek, verifieer die bediener dat die ontvangde boodskapgrootte 68 bytes is. As dit nie is nie, laat die bediener die versoek val (as die boodskapgrootte nie 48 bytes gelyk is nie) of hanteer dit as 'n nie-geverifieerde versoek (as die boodskapgrootte 48 bytes is). Aannemende dat die ontvangde boodskapgrootte 68 bytes is, onttrek die bediener die RID uit die ontvangde boodskap. Die bediener gebruik dit om die NetrLogonComputeServerDigest metode aan te roep (soos gespesifiseer in [MS-NRPC] afdeling 3.5.4.8.2) om die crypto-checksums te bereken en die crypto-checksum te kies gebaseer op die mees betekenisvolle bit van die Key Identifier subveld van die ontvangde boodskap, soos gespesifiseer in afdeling 3.2.5. Die bediener stuur dan 'n respons aan die kliënt, en stel die Key Identifier veld op 0 en die Crypto-Checksum veld op die berekende crypto-checksum.
 
-Volgens die beskrywing in die Microsoft amptelike dokument hierbo, hoef gebruikers nie enige verifikasie te hê nie; hulle moet net die RID invul om 'n versoek te begin, en dan kan hulle die kriptografiese checksum verkry. Die kriptografiese checksum word in afdeling 3.2.5.1.1 van die dokument verduidelik.
+Volgens die beskrywing in die Microsoft amptelike dokument hierbo, het gebruikers geen verifikasie nodig nie; hulle moet net die RID invul om 'n versoek te begin, en dan kan hulle die kriptografiese checksum verkry. Die kriptografiese checksum word in afdeling 3.2.5.1.1 van die dokument verduidelik.
 
 >Gehaal uit die oorspronklike artikel：
 >>Die bediener haal die RID uit die minste betekenisvolle 31 bits van die Key Identifier subveld van die Authenticator veld van die Client NTP Request boodskap. Die bediener gebruik die NetrLogonComputeServerDigest metode (soos gespesifiseer in [MS-NRPC] afdeling 3.5.4.8.2) om crypto-checksums te bereken met die volgende invoerparameters:
@@ -26,11 +26,13 @@ Volgens die beskrywing in die Microsoft amptelike dokument hierbo, hoef gebruike
 
 Die kriptografiese checksum word bereken met MD5, en die spesifieke proses kan in die inhoud van die dokument verwys word. Dit gee ons die geleentheid om 'n roasting aanval uit te voer.
 
-## hoe om aan te val
+## how to attack
 
-Citaat na https://swisskyrepo.github.io/InternalAllTheThings/active-directory/ad-roasting-timeroasting/
+Quote to https://swisskyrepo.github.io/InternalAllTheThings/active-directory/ad-roasting-timeroasting/
 
-[SecuraBV/Timeroast](https://github.com/SecuraBV/Timeroast) - Timeroasting skripte deur Tom Tervoort
+[SecuraBV/Timeroast](https://github.com/SecuraBV/Timeroast) - Timeroasting scripts by Tom Tervoort
 ```
 sudo ./timeroast.py 10.0.0.42 | tee ntp-hashes.txt
 hashcat -m 31300 ntp-hashes.txt
+```
+
