@@ -1,6 +1,8 @@
 # Class Pollution (Python's Prototype Pollution)
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## Basic Example
 
@@ -268,6 +270,5 @@ python-internal-read-gadgets.md
 - [https://blog.abdulrah33m.com/prototype-pollution-in-python/](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 

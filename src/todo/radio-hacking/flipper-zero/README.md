@@ -1,6 +1,8 @@
 # Flipper Zero
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 With [**Flipper Zero**](https://flipperzero.one/) you can:
 
@@ -16,6 +18,5 @@ With [**Flipper Zero**](https://flipperzero.one/) you can:
 **Other Flipper Zero resources in** [**https://github.com/djsime1/awesome-flipperzer**](https://github.com/djsime1/awesome-flipperzero)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 
 

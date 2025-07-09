@@ -1,6 +1,8 @@
 # Integrity Levels
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## Integrity Levels
 
@@ -97,6 +99,5 @@ Not all files and folders have a minimum integrity level, **but all processes ar
 Due to the restrictions commented in this and the previous section, from a security point of view, it's always **recommended to run a process in the lower level of integrity possible**.
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 

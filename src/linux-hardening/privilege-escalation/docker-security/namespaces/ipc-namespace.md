@@ -1,6 +1,8 @@
 # IPC Namespace
 
-{{#include ../../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## Basic Information
 
@@ -99,6 +101,5 @@ ipcs -m # Nothing is seen
 - [https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory](https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory)
 
 {{#include ../../../../banners/hacktricks-training.md}}
-
 
 

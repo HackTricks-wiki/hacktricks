@@ -1,6 +1,8 @@
 # Unpacking Binaries
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## Identifying packed binaries
 
@@ -24,6 +26,5 @@
 - When you dump an executable from a region of memory you can fix some headers using [PE-bear](https://github.com/hasherezade/pe-bear-releases/releases).
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 

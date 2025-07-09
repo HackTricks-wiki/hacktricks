@@ -1,6 +1,8 @@
 # MSSQL AD Abuse
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 
 ## **MSSQL Enumeration / Discovery**
@@ -312,6 +314,5 @@ A strategy that many authors have come up with is to force a SYSTEM service to a
 
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 

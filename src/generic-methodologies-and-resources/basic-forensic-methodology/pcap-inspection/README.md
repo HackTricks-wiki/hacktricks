@@ -1,6 +1,8 @@
 # Pcap Inspection
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 > [!TIP]
 > A note about **PCAP** vs **PCAPNG**: there are two versions of the PCAP file format; **PCAPNG is newer and not supported by all tools**. You may need to convert a file from PCAPNG to PCAP using Wireshark or another compatible tool, in order to work with it in some other tools.
@@ -231,6 +233,5 @@ usb-keystrokes.md
 ​
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 
 

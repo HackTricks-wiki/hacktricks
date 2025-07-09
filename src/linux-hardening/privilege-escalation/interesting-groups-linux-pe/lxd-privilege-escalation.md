@@ -1,6 +1,8 @@
 # lxd/lxc Group - Privilege escalation
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 If you belong to _**lxd**_ **or** _**lxc**_ **group**, you can become root
 
@@ -91,6 +93,5 @@ lxc config device add mycontainer mydevice disk source=/ path=/mnt/root recursiv
 ```
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 
 

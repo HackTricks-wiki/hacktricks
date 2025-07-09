@@ -1,6 +1,8 @@
 # DNSCat pcap analysis
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 If you have pcap with data being **exfiltrated by DNSCat** (without using encryption), you can find the exfiltrated content.
 
@@ -35,6 +37,5 @@ python3 dnscat_decoder.py sample.pcap bad_domain
 ```
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 
 

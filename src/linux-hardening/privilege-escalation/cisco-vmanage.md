@@ -1,6 +1,8 @@
 # Cisco - vmanage
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## Path 1
 
@@ -159,6 +161,5 @@ bash-4.4#
 ```
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 
