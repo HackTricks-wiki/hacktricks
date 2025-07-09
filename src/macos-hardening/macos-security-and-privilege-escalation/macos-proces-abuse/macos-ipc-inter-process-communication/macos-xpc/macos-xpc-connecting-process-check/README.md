@@ -1,6 +1,8 @@
 # macOS XPC Connecting Process Check
 
-{{#include ../../../../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## XPC Connecting Process Check
 
@@ -93,6 +95,5 @@ if ((csFlags & (cs_hard | cs_require_lv)) {
 ```
 
 {{#include ../../../../../../banners/hacktricks-training.md}}
-
 
 

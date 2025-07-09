@@ -1,6 +1,8 @@
 # Firmware Integrity
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 The **custom firmware and/or compiled binaries can be uploaded to exploit integrity or signature verification flaws**. The following steps can be followed for backdoor bind shell compilation:
 
@@ -25,6 +27,5 @@ If a root shell has already been obtained through dynamic analysis, bootloader m
 5. The meterpreter reverse shell can be executed on the compromised device.
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 

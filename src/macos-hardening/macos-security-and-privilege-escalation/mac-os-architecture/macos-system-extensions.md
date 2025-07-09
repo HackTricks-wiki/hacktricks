@@ -1,6 +1,8 @@
 # macOS System Extensions
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## System Extensions / Endpoint Security Framework
 
@@ -81,6 +83,5 @@ At the end this was fixed by giving the new permission **`kTCCServiceEndpointSec
 - [**https://knight.sc/reverse%20engineering/2019/08/24/system-extension-internals.html**](https://knight.sc/reverse%20engineering/2019/08/24/system-extension-internals.html)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 
 

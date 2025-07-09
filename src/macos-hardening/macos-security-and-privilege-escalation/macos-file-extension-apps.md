@@ -1,6 +1,8 @@
 # macOS File Extension & URL scheme app handlers
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## LaunchServices Database
 
@@ -70,6 +72,5 @@ grep -A3 CFBundleTypeExtensions Info.plist  | grep string
 ```
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 

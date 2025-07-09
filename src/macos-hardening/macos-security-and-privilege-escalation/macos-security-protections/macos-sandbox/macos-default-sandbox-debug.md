@@ -1,6 +1,8 @@
 # macOS Default Sandbox Debug
 
-{{#include ../../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 In this page you can find how to create an app to launch arbitrary commands from inside the default macOS sandbox:
 
@@ -113,6 +115,5 @@ codesign --remove-signature SandboxedShellApp.app
 ```
 
 {{#include ../../../../banners/hacktricks-training.md}}
-
 
 

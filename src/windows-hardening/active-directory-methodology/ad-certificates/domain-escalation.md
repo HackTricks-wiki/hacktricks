@@ -1,6 +1,8 @@
 # AD CS Domain Escalation
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 
 **This is a summary of escalation technique sections of the posts:**
@@ -966,6 +968,5 @@ Both scenarios lead to an **increase in the attack surface** from one forest to 
 
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 
 

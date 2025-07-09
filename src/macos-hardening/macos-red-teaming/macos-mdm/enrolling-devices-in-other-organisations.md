@@ -1,6 +1,8 @@
 # Enrolling Devices in Other Organisations
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## Intro
 
@@ -51,6 +53,5 @@ The research highlighted significant security concerns:
 1. **Information Disclosure**: By providing a DEP-registered serial number, sensitive organizational information contained in the DEP profile can be retrieved.
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 
 

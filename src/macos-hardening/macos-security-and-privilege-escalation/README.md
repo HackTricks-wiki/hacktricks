@@ -1,6 +1,8 @@
 # macOS Security & Privilege Escalation
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## Basic MacOS
 
@@ -118,6 +120,5 @@ macos-privilege-escalation.md
 - [**https://www.youtube.com/watch?v=vMGiplQtjTY**](https://www.youtube.com/watch?v=vMGiplQtjTY)
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 

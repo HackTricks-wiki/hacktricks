@@ -1,6 +1,8 @@
 # Browser Artifacts
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## Browsers Artifacts <a href="#id-3def" id="id-3def"></a>
 
@@ -163,6 +165,5 @@ These paths and commands are crucial for accessing and understanding the browsin
 
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 
 

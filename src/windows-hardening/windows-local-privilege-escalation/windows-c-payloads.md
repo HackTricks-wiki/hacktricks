@@ -1,6 +1,8 @@
 # Windows C Payloads
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## Add user
 
@@ -18,6 +20,5 @@ int main ()
 ```
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 

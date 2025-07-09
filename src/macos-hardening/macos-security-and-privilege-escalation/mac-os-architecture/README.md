@@ -1,6 +1,8 @@
 # macOS Kernel & System Extensions
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## XNU Kernel
 
@@ -69,6 +71,5 @@ macos-system-extensions.md
 - [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 
 

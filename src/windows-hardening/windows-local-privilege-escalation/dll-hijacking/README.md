@@ -1,6 +1,8 @@
 # Dll Hijacking
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 
 ## Basic Information
@@ -277,6 +279,5 @@ Lenovo released UWP version **1.12.54.0** via the Microsoft Store, which install
 
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 
 

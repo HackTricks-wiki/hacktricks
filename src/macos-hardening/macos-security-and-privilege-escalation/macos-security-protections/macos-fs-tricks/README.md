@@ -1,6 +1,8 @@
 # macOS FS Tricks
 
-{{#include ../../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## POSIX permissions combinations
 
@@ -467,6 +469,5 @@ This feature is particularly useful for preventing certain classes of security v
 - [https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/](https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/)
 
 {{#include ../../../../banners/hacktricks-training.md}}
-
 
 

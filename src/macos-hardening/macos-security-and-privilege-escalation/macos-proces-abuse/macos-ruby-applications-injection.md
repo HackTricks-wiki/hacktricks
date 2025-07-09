@@ -1,6 +1,8 @@
 # macOS Ruby Applications Injection
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## RUBYOPT
 
@@ -31,6 +33,5 @@ RUBYOPT="-I/tmp -rinject" ruby hello.rb --disable-rubyopt
 ```
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 
 

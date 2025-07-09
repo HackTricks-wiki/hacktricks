@@ -1,6 +1,8 @@
 # Full TTYs
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## Full TTY
 
@@ -107,6 +109,5 @@ expect -c 'spawn sudo -S cat "/root/root.txt";expect "*password*";send "<THE_PAS
 ```
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 

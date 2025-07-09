@@ -1,8 +1,41 @@
 # External Recon Methodology
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
+
+## Reconnaissance Fundamentals
+
+> Recon is divided into **passive** (gathering public data without interacting with the target) and **active** (direct probing and scanning) phases.
+
+- **Passive Methods**:
+  - WHOIS: `whois example.com`
+  - DNS queries: `dig NS example.com`
+  - Certificate transparency logs: [crt.sh](https://crt.sh)
+  - OSINT databases: Shodan, Censys, SecurityTrails
+
+- **Active Footprinting**:
+  - Nmap scan: `nmap -sV -p- example.com`
+  - Forced browsing: ffuf, Gobuster
+
+## Endpoint & Parameter Discovery
+
+Techniques for uncovering hidden URLs and parameters:
+
+- Comprehensive crawling with Burp Suite (proxy interception, loading JS/CSS)
+- Scraping `robots.txt` and `sitemap.xml`
+- Google dorks, e.g.: `site:target.com filetype:pdf`
+- Static JavaScript analysis:
+  - LinkFinder: `linkfinder -i script.js -o cli`
+  - Burp extensions: JSLinkFinder, JSpector
+- Browser bookmarklets: `javascript:(function(){/* extract endpoints */})();`
+- Fuzzing paths, parameters, and headers:
+  - ffuf: `ffuf -u https://target/FUZZ -w wordlist.txt -t 50`
+  - Gobuster
+  - Burp Intruder with custom payload lists
 
 ## Assets discoveries
+
 
 > So you were said that everything belonging to some company is inside the scope, and you want to figure out what this company actually owns.
 
@@ -680,6 +713,25 @@ The **majority of the vulnerabilities** found by bug hunters resides inside **we
 
 I also want to do a special mention to the section [**Web Automated Scanners open source tools**](../../network-services-pentesting/pentesting-web/index.html#automatic-scanners), as, if you shouldn't expect them to find you very sensitive vulnerabilities, they come handy to implement them on **workflows to have some initial web information.**
 
+## HTTP Fingerprinting
+
+Identifying server technologies and versions through:
+
+- HTTP header analysis:
+  - `Server`, `X-Powered-By`, custom headers like `X-Drupal-Cache`
+  - Tools: Burp (Repeater, Logger++), BChecks, `curl -I example.com`
+- Banner grabbing: `openssl s_client -connect example.com:443`
+- Malformed requests: `GET / HTTP/4.4`
+- Default error page inspection (Tomcat, Spring Boot, IIS)
+- Cookie name analysis: `PHPSESSID`, `JSESSIONID`
+- Correlation with passive tools: Shodan, Wappalyzer
+
+**Mitigations:**
+
+- Suppress or customize server headers
+- Remove default files and directories
+- Configure WAF rules to obfuscate fingerprints
+
 ## Recapitulation
 
 > Congratulations! At this point you have already perform **all the basic enumeration**. Yes, it's basic because a lot more enumeration can be done (will see more tricks later).
@@ -708,6 +760,6 @@ There are several tools out there that will perform part of the proposed actions
 ## **References**
 
 - All free courses of [**@Jhaddix**](https://twitter.com/Jhaddix) like [**The Bug Hunter's Methodology v4.0 - Recon Edition**](https://www.youtube.com/watch?v=p4JgIu1mceI)
+- [Recon Series Recap: Reconnaissance & Footprinting](https://www.yeswehack.com/learn-bug-bounty/recon-series-recap-reconnaissance-footprinting)
 
 {{#include ../../banners/hacktricks-training.md}}
-

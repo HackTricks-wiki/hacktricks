@@ -1,6 +1,8 @@
 # Local Cloud Storage
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 
 ## OneDrive
@@ -97,6 +99,5 @@ Other tables inside this database contain more interesting information:
 - **date_added**
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 
 

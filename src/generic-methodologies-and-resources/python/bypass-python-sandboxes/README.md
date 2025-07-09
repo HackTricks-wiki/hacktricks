@@ -1,6 +1,8 @@
 # Bypass Python sandboxes
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 These are some tricks to bypass python sandbox protections and execute arbitrary commands.
 

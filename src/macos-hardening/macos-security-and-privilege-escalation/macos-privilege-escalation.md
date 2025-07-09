@@ -1,6 +1,8 @@
 # macOS Privilege Escalation
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## TCC Privilege Escalation
 
@@ -245,6 +247,5 @@ macos-files-folders-and-binaries/macos-sensitive-locations.md
 {{#endref}}
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 

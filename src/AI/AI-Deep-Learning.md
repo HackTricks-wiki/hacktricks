@@ -1,6 +1,8 @@
 # Deep Learning
 
-{{#include ../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## Deep Learning
 
@@ -435,4 +437,3 @@ Moreover, to generate an image from a text prompt, diffusion models typically fo
 
 
 {{#include ../banners/hacktricks-training.md}}
-
