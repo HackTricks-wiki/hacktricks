@@ -1,4 +1,6 @@
 # Proxmark 3
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -62,6 +64,3 @@ proxmark3> script run mfkeys
 You can create a script to **fuzz tag readers**, so copying the data of a **valid card** just write a **Lua script** that **randomize** one or more random **bytes** and check if the **reader crashes** with any iteration.
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

@@ -1,4 +1,6 @@
 # UART
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -183,6 +185,3 @@ This will list the possible contents from the EEPROM as per the signatures found
 Although, it is necessary to note that it's not always the case that the uboot is unlocked even if it is being used. If the Enter Key doesn't do anything, check for different keys like Space Key, etc. If the bootloader is locked and does not get interrupted, this method would not work. To check if uboot is the bootloader for the device, check the output on the UART Console while booting of the device. It might mention uboot while booting.
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

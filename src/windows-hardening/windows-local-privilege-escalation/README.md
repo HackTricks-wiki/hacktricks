@@ -1,4 +1,6 @@
 # Windows Local Privilege Escalation
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../banners/hacktricks-training.md}}
 

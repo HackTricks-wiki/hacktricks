@@ -1,4 +1,6 @@
 # Escaping from KIOSKs
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../banners/hacktricks-training.md}}
 
@@ -277,6 +279,3 @@ These shortcuts are for the visual settings and sound settings, depending on the
 - [http://www.iphonehacks.com/2018/03/ipad-keyboard-shortcuts.html](http://www.iphonehacks.com/2018/03/ipad-keyboard-shortcuts.html)
 
 {{#include ../banners/hacktricks-training.md}}
-
-
-

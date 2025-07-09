@@ -1,4 +1,6 @@
 # Satisfiability Modulo Theories (SMT) - Z3
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -188,6 +190,3 @@ else:
 - [https://ericpony.github.io/z3py-tutorial/guide-examples.htm](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

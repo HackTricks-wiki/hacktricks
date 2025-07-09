@@ -1,4 +1,6 @@
 # Specific Software/File Type Tricks
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -41,6 +43,3 @@ zips-tricks.md
 {{#endref}}
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

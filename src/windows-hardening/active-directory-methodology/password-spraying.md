@@ -1,4 +1,6 @@
 # Password Spraying / Brute Force
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -149,6 +151,3 @@ To use any of these tools, you need a user list and a password / a small list of
 
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

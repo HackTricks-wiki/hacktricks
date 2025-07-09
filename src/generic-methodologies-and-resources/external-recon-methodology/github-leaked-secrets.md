@@ -1,4 +1,6 @@
 # Github Dorks & Leaks
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -305,6 +307,3 @@ AWS SECRET
 ```
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

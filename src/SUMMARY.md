@@ -244,6 +244,7 @@
   - [SeImpersonate from High To System](windows-hardening/windows-local-privilege-escalation/seimpersonate-from-high-to-system.md)
   - [Windows C Payloads](windows-hardening/windows-local-privilege-escalation/windows-c-payloads.md)
 - [Active Directory Methodology](windows-hardening/active-directory-methodology/README.md)
+- [Timeroasting](windows-hardening/active-directory-methodology/TimeRoasting.md)
   - [Abusing Active Directory ACLs/ACEs](windows-hardening/active-directory-methodology/acl-persistence-abuse/README.md)
     - [BadSuccessor](windows-hardening/active-directory-methodology/acl-persistence-abuse/BadSuccessor.md)
     - [Shadow Credentials](windows-hardening/active-directory-methodology/acl-persistence-abuse/shadow-credentials.md)

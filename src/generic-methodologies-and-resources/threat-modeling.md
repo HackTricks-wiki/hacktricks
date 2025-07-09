@@ -1,6 +1,7 @@
 # Threat Modeling
-
 {{#include /banners/hacktricks-training.md}}
+
+
 
 ## Threat Modeling
 
@@ -114,4 +115,3 @@ This is a free tool from Microsoft that helps in finding threats in the design p
 
 
 {{#include /banners/hacktricks-training.md}}
-

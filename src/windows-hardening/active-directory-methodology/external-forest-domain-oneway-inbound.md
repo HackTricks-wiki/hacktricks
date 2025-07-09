@@ -1,4 +1,6 @@
 # External Forest Domain - OneWay (Inbound) or bidirectional
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -127,6 +129,3 @@ Rubeus.exe asktgs /service:cifs/dc.doamin.external /domain:dc.domain.external /d
 ```
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

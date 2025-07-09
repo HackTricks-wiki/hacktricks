@@ -1,4 +1,6 @@
 # AppendData/AddSubdirectory Permission over Service Registry
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -28,6 +30,3 @@ The persistence and potential implications of this vulnerability were underscore
 Although the vulnerability was initially disclosed unintentionally through the script, it was emphasized that its exploitation is constrained to outdated Windows versions (e.g., **Windows 7 / Server 2008 R2**) and requires local access.
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

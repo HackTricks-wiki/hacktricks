@@ -1,4 +1,6 @@
 # macOS Privilege Escalation
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -245,6 +247,3 @@ macos-files-folders-and-binaries/macos-sensitive-locations.md
 {{#endref}}
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

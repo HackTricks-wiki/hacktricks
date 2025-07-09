@@ -1,4 +1,6 @@
 # Checklist - Linux Privilege Escalation
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../banners/hacktricks-training.md}}
 
@@ -141,6 +143,3 @@
 - [ ] Do you need to [**escape from a restrictive shell**](privilege-escalation/index.html#escaping-from-restricted-shells)?
 
 {{#include ../banners/hacktricks-training.md}}
-
-
-

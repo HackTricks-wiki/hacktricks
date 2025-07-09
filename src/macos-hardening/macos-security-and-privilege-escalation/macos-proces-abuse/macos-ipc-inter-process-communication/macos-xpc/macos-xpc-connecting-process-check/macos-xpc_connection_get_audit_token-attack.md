@@ -1,4 +1,6 @@
 # macOS xpc_connection_get_audit_token Attack
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../../../../../banners/hacktricks-training.md}}
 
@@ -123,6 +125,3 @@ Below is a visual representation of the described attack scenario:
 - **Current Status**: The issue persists in iOS 17 and macOS 14, posing a challenge for those seeking to identify and understand it.
 
 {{#include ../../../../../../banners/hacktricks-training.md}}
-
-
-

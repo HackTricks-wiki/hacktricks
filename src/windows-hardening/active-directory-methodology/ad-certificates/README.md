@@ -1,4 +1,6 @@
 # AD Certificates
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -127,6 +129,3 @@ certutil -v -dstemplate
 - [https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html](https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

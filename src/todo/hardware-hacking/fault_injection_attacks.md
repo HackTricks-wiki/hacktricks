@@ -1,6 +1,7 @@
 # Fault Injection Attacks 
-
 {{#include /banners/hacktricks-training.md}}
+
+
 
 Fault injections attacks includes introducing external distrubance in electronic circuits to influence it's behaviour, resulting to disclose information or even bypass certian restrictions in the circuit. This attacks opens a lot of possibilities for attacking electronic circuits. This attack is also referred as glitching of electronic circuits.
 

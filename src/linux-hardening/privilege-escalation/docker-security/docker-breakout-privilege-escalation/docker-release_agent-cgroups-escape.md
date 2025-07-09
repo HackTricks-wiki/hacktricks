@@ -1,4 +1,6 @@
 # Docker release_agent cgroups escape
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
@@ -59,6 +61,3 @@ sh -c "echo \$\$ > /tmp/cgrp/x/cgroup.procs"
 ```
 
 {{#include ../../../../banners/hacktricks-training.md}}
-
-
-

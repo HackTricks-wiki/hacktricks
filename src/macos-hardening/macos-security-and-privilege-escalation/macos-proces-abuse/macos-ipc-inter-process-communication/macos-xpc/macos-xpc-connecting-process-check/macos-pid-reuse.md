@@ -1,4 +1,6 @@
 # macOS PID Reuse
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../../../../../banners/hacktricks-training.md}}
 
@@ -290,6 +292,3 @@ int main(int argc, const char * argv[]) {
 - [https://saelo.github.io/presentations/warcon18_dont_trust_the_pid.pdf](https://saelo.github.io/presentations/warcon18_dont_trust_the_pid.pdf)
 
 {{#include ../../../../../../banners/hacktricks-training.md}}
-
-
-

@@ -1,4 +1,6 @@
 # Esoteric languages
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../banners/hacktricks-training.md}}
 
@@ -69,4 +71,3 @@ Kukarek
 ```
 
 {{#include ../banners/hacktricks-training.md}}
-

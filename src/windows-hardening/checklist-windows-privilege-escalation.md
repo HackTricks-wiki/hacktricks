@@ -1,4 +1,6 @@
 # Checklist - Local Windows Privilege Escalation
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../banners/hacktricks-training.md}}
 
@@ -112,6 +114,3 @@
 - [ ] Check if you can abuse it
 
 {{#include ../banners/hacktricks-training.md}}
-
-
-

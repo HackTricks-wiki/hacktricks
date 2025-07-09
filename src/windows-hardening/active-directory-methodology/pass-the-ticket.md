@@ -1,4 +1,6 @@
 # Pass the Ticket
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -45,6 +47,3 @@ klist #List tickets in cache to cehck that mimikatz has loaded the ticket
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-
