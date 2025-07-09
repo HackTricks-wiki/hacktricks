@@ -1,6 +1,8 @@
 # Reversing Tools & Basic Methods
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## ImGui Based Reversing tools
 

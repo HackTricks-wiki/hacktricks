@@ -1,6 +1,8 @@
 # macOS xattr-acls extra stuff
 
-{{#include ../../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ```bash
 rm -rf /tmp/test*
@@ -180,6 +182,5 @@ xattr -l protected
 ```
 
 {{#include ../../../../banners/hacktricks-training.md}}
-
 
 

@@ -1,6 +1,8 @@
 # Python Internal Read Gadgets
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## Basic Information
 
@@ -42,6 +44,5 @@ Use this payload to **change `app.secret_key`** (the name in your app might be d
 If the vulnerability is in a different python file, check the previous Flask trick to access the objects from the main python file.
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 

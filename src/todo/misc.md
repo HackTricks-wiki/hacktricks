@@ -1,6 +1,8 @@
 # Misc
 
-{{#include ../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 In a ping response TTL:\
 127 = Windows\
@@ -60,6 +62,5 @@ Snow --> Hide messages using spaces and tabs
 %E2%80%AE => RTL Character (writes payloads backwards)
 
 {{#include ../banners/hacktricks-training.md}}
-
 
 

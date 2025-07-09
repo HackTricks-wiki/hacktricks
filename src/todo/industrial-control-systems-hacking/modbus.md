@@ -2,6 +2,8 @@
 
 {{#include /banners/hacktricks-training.md}}
 
+
+
 ## Introduction to Modbus Protocol 
 
 The Modbus protocol is a widely used protocol in Industrial Automation and Control Systems. Modbus allows communication between various devices such as programmable logic controllers (PLCs), sensors, actuators, and other industrial devices. Understanding the Modbus Protocol is essential since this is the single most used communication protocol in the ICS and has a lot of potential attack surface for sniffing and even injecting commands into PLCs.
@@ -35,5 +37,4 @@ Due to it's large scale use and lack of upgradations, attacking Modbus provides 
 
 
 {{#include /banners/hacktricks-training.md}}
-
 

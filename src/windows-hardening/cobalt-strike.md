@@ -2,6 +2,8 @@
 
 {{#include /banners/hacktricks-training.md}}
 
+
+
 ### Listeners
 
 ### C2 Listeners
@@ -372,4 +374,3 @@ pscp -r root@kali:/opt/cobaltstrike/artifact-kit/dist-pipe .
 
 
 {{#include /banners/hacktricks-training.md}}
-

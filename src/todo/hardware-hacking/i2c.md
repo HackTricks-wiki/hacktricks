@@ -1,6 +1,8 @@
 # I2C
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## Bus Pirate
 
@@ -210,6 +212,5 @@ Any key to exit
 ```
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 

@@ -1,6 +1,8 @@
 # macOS Useful Commands
 
-{{#include ../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ### MacOS Automatic Enumeration Tools
 
@@ -148,6 +150,5 @@ Without prompts
 <figure><img src="../images/image (79).png" alt=""><figcaption></figcaption></figure>
 
 {{#include ../banners/hacktricks-training.md}}
-
 
 

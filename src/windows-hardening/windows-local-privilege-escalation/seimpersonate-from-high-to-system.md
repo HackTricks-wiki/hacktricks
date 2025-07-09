@@ -1,6 +1,8 @@
 # SeImpersonate from High To System
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ### Code
 
@@ -178,6 +180,5 @@ See the privileges "Administrators" have over `winlogon.exe`:
 Inside that process "Administrators" can "Read Memory" and "Read Permissions" which probably allows Administrators to impersonate the token used by this process.
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 

@@ -2,6 +2,8 @@
 
 {{#include /banners/hacktricks-training.md}}
 
+
+
 ### Generic Types
 
 Create a struct where 1 of their values could be any type
@@ -321,4 +323,3 @@ fn main() {
 
 
 {{#include /banners/hacktricks-training.md}}
-

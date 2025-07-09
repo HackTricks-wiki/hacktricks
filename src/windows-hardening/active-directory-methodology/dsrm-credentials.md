@@ -1,6 +1,8 @@
 # DSRM Credentials
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## Basic Information
 
@@ -34,6 +36,5 @@ More info about this in: [https://adsecurity.org/?p=1714](https://adsecurity.org
 - Event ID 4657 - Audit creation/change of `HKLM:\System\CurrentControlSet\Control\Lsa DsrmAdminLogonBehavior`
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 

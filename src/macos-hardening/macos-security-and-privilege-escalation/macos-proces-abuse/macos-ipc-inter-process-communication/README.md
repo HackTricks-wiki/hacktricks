@@ -1,6 +1,8 @@
 # macOS IPC - Inter Process Communication
 
-{{#include ../../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## Mach messaging via Ports
 
@@ -1285,6 +1287,5 @@ macos-mig-mach-interface-generator.md
 - [https://web.mit.edu/darwin/src/modules/xnu/osfmk/man/task_get_special_port.html](https://web.mit.edu/darwin/src/modules/xnu/osfmk/man/task_get_special_port.html)
 
 {{#include ../../../../banners/hacktricks-training.md}}
-
 
 
