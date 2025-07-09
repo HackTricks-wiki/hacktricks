@@ -252,6 +252,7 @@
     - [AD CS Domain Escalation](windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md)
     - [AD CS Domain Persistence](windows-hardening/active-directory-methodology/ad-certificates/domain-persistence.md)
     - [AD CS Certificate Theft](windows-hardening/active-directory-methodology/ad-certificates/certificate-theft.md)
+  - [Timeroasting](windows-hardening/active-directory-methodology/TimeRoasting.md)
   - [Ad Certificates](windows-hardening/active-directory-methodology/ad-certificates.md)
   - [AD information in printers](windows-hardening/active-directory-methodology/ad-information-in-printers.md)
   - [AD DNS Records](windows-hardening/active-directory-methodology/ad-dns-records.md)
