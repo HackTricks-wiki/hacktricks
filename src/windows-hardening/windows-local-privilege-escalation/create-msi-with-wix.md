@@ -1,4 +1,6 @@
 # Creating Malicious MSI and Getting Root
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -67,6 +69,3 @@ Please note that while this summary aims to provide valuable information, it is 
   [wixtools](http://wixtoolset.org)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

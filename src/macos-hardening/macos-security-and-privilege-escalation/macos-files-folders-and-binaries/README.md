@@ -1,4 +1,6 @@
 # macOS Files, Folders, Binaries & Memory
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -268,6 +270,3 @@ The directory `/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/
 - **`/private/var/db/launchd.db/com.apple.launchd/overrides.plist`**: List of daemons deactivated.
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

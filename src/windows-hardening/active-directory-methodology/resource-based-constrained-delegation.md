@@ -1,4 +1,6 @@
 # Resource-based Constrained Delegation
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -135,6 +137,3 @@ Lear about the [**available service tickets here**](silver-ticket.md#available-s
 
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

@@ -1,4 +1,6 @@
 # DCOM Exec
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -140,6 +142,3 @@ SharpMove.exe action=dcom computername=remote.host.local command="C:\windows\tem
 - [https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/](https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

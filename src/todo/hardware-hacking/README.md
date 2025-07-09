@@ -1,4 +1,6 @@
 # Hardware Hacking
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -50,6 +52,3 @@ SWD is an ARM-specific protocol designed for debugging.
 The SWD interface requires **two pins**: a bidirectional **SWDIO** signal, which is the equivalent of JTAG’s **TDI and TDO pins and a clock**, and **SWCLK**, which is the equivalent of **TCK** in JTAG. Many devices support the **Serial Wire or JTAG Debug Port (SWJ-DP)**, a combined JTAG and SWD interface that enables you to connect either a SWD or JTAG probe to the target.
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

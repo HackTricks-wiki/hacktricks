@@ -1,4 +1,6 @@
 # DNSCat pcap analysis
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -35,6 +37,3 @@ python3 dnscat_decoder.py sample.pcap bad_domain
 ```
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

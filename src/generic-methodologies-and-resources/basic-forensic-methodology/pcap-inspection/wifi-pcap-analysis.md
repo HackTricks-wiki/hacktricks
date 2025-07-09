@@ -1,4 +1,6 @@
 # Wifi Pcap Analysis
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -41,6 +43,3 @@ Edit --> Preferences --> Protocols --> IEEE 802.11--> Edit
 ![](<../../../images/image (499).png>)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

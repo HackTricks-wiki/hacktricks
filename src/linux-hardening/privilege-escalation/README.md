@@ -1,4 +1,6 @@
 # Linux Privilege Escalation
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -1659,4 +1661,3 @@ cisco-vmanage.md
 - [https://www.linode.com/docs/guides/what-is-systemd/](https://www.linode.com/docs/guides/what-is-systemd/)
 
 {{#include ../../banners/hacktricks-training.md}}
-

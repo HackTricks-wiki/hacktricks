@@ -1,4 +1,6 @@
 # Certificates
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../banners/hacktricks-training.md}}
 
@@ -204,6 +206,3 @@ openssl asn1parse -genconf certificatename.tpl -outform PEM -out certificatename
 ---
 
 {{#include ../banners/hacktricks-training.md}}
-
-
-

@@ -1,4 +1,6 @@
 # Introduction to ARM64v8
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -795,6 +797,3 @@ call_execve:
 ```
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-
