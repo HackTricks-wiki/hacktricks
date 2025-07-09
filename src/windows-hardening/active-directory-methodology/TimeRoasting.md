@@ -6,12 +6,12 @@ Les attaquants peuvent exploiter ce mécanisme pour obtenir des valeurs de hacha
 
 Le mécanisme spécifique peut être consulté dans la section 3.1.5.1 "Comportement de la demande d'authentification" de la [documentation officielle de Windows pour le protocole MS-SNTP](https://winprotocoldoc.z19.web.core.windows.net/MS-SNTP/%5bMS-SNTP%5d.pdf).
 
-Dans le document, la section 3.1.5.1 couvre le comportement de la demande d'authentification.
+Dans le document, la section 3.1.5.1 couvre le Comportement de la demande d'authentification.
 ![](../../images/Pasted%20image%2020250709114508.png)
 On peut voir que lorsque l'élément ADM ExtendedAuthenticatorSupported est défini sur `false`, le format Markdown d'origine est conservé.
 
 > Cité dans l'article original :
->> Si l'élément ADM ExtendedAuthenticatorSupported est faux, le client DOIT construire un message de demande NTP Client. La longueur du message de demande NTP Client est de 68 octets. Le client définit le champ Authenticator du message de demande NTP Client comme décrit dans la section 2.2.1, en écrivant les 31 bits de poids faible de la valeur RID dans les 31 bits de poids faible du sous-champ Key Identifier de l'authentificateur, puis en écrivant la valeur Key Selector dans le bit de poids fort du sous-champ Key Identifier.
+>> Si l'élément ADM ExtendedAuthenticatorSupported est faux, le client DOIT construire un message de demande NTP Client. La longueur du message de demande NTP Client est de 68 octets. Le client définit le champ Authenticator du message de demande NTP Client comme décrit dans la section 2.2.1, écrivant les 31 bits de poids faible de la valeur RID dans les 31 bits de poids faible du sous-champ Key Identifier de l'authentificateur, puis écrivant la valeur Key Selector dans le bit de poids fort du sous-champ Key Identifier.
 
 Dans la section 4 Exemples de protocole point 3
 
@@ -34,3 +34,5 @@ Citation à https://swisskyrepo.github.io/InternalAllTheThings/active-directory/
 ```
 sudo ./timeroast.py 10.0.0.42 | tee ntp-hashes.txt
 hashcat -m 31300 ntp-hashes.txt
+```
+
