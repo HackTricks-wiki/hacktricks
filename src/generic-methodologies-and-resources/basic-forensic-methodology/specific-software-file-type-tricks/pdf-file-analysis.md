@@ -1,4 +1,6 @@
 # PDF File analysis
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -18,6 +20,3 @@ For in-depth exploration or manipulation of PDFs, tools like [qpdf](https://gith
 For custom PDF analysis, Python libraries like [PeepDF](https://github.com/jesparza/peepdf) can be used to craft bespoke parsing scripts. Further, the PDF's potential for hidden data storage is so vast that resources like the NSA guide on PDF risks and countermeasures, though no longer hosted at its original location, still offer valuable insights. A [copy of the guide](http://www.itsecure.hu/library/file/Biztons%C3%A1gi%20%C3%BAtmutat%C3%B3k/Alkalmaz%C3%A1sok/Hidden%20Data%20and%20Metadata%20in%20Adobe%20PDF%20Files.pdf) and a collection of [PDF format tricks](https://github.com/corkami/docs/blob/master/PDF/PDF.md) by Ange Albertini can provide further reading on the subject.
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

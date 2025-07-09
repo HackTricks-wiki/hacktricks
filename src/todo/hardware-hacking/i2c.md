@@ -1,4 +1,6 @@
 # I2C
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -210,6 +212,3 @@ Any key to exit
 ```
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

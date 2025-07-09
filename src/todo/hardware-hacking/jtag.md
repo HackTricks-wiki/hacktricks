@@ -1,4 +1,6 @@
 # JTAG
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -24,6 +26,3 @@ Send the command s to start scanning:
 If you are contacting a JTAG, you will find one or several **lines starting by FOUND!** indicating the pins of JTAG.
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

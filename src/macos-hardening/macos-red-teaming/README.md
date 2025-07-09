@@ -1,4 +1,6 @@
 # macOS Red Teaming
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -249,6 +251,3 @@ When a file is downloaded in Safari, if its a "safe" file, it will be **automati
 
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

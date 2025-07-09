@@ -1,4 +1,6 @@
 # Supervised Learning Algorithms
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../banners/hacktricks-training.md}}
 
@@ -1028,5 +1030,3 @@ Ensemble methods like this demonstrate the principle that *"combining multiple m
 - [https://medium.com/@sarahzouinina/ensemble-learning-boosting-model-performance-by-combining-strengths-02e56165b901](https://medium.com/@sarahzouinina/ensemble-learning-boosting-model-performance-by-combining-strengths-02e56165b901)
 
 {{#include ../banners/hacktricks-training.md}}
-
-

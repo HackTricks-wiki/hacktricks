@@ -1,4 +1,6 @@
 # Windows Local Privilege Escalation
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -1529,6 +1531,11 @@ Then **read this to learn about UAC and UAC bypasses:**
 
 The technique described [**in this blog post**](https://www.zerodayinitiative.com/blog/2022/3/16/abusing-arbitrary-file-deletes-to-escalate-privilege-and-other-great-tricks) with a exploit code [**available here**](https://github.com/thezdi/PoC/tree/main/FilesystemEoPs).
 
+>>>##<<< From Windows Update Service Arbitrary Delete to SYSTEM EoP (CVE-2025-48799)
+{{#ref}}
+windows-update-service-arbitrary-delete.md
+{{#endref}}
+
 The attack basically consist of abusing the Windows Installer's rollback feature to replace legitimate files with malicious ones during the uninstallation process. For this the attacker needs to create a **malicious MSI installer** that will be used to hijack the `C:\Config.Msi` folder, which will later be used by he Windows Installer to store rollback files during the uninstallation of other MSI packages where the rollback files would have been modified to contain the malicious payload.
 
 The summarized technique is the following:
@@ -1611,6 +1618,58 @@ The summarized technique is the following:
 
 
 ### From Arbitrary File Delete/Move/Rename to SYSTEM EoP
+
+The technique described [**in this blog post**](https://www.zerodayinitiative.com/blog/2022/3/16/abusing-arbitrary-file-deletes-to-escalate-privilege-and-other-great-tricks) with a exploit code [**available here**](https://github.com/thezdi/PoC/tree/main/FilesystemEoPs).
+
+>>>##<<< From Windows Update Service Arbitrary Delete to SYSTEM EoP (CVE-2025-48799)
+{{#ref}}
+windows-update-service-arbitrary-delete.md
+{{#endref}}
+
+The attack basically consist of abusing the Windows Installer's rollback feature to replace legitimate files with malicious ones during the uninstallation process. For this the attacker needs to create a **malicious MSI installer** that will be used to hijack the `C:\Config.Msi` folder, which will later be used by he Windows Installer to store rollback files during the uninstallation of other MSI packages where the rollback files would have been modified to contain the malicious payload.
+
+The summarized technique is the following:
+
+1. **Stage 1 – Preparing for the Hijack (leave `C:\Config.Msi` empty)**
+
+- Step 1: Install the MSI
+    - Create an `.msi` that installs two files: a `.rbs` rollback script and an `.rbf` rollback file.
+    - Overwrite the `.rbs` file with a **fake rollback script** that tells Windows to:
+        - Restore your `.rbf` file (malicious DLL) into a **privileged location** (e.g., `C:\Program Files\Common Files\microsoft shared\ink\HID.DLL`).
+    - Drop your fake `.rbf` containing a **malicious SYSTEM-level payload DLL**.
+
+- Step 12: Trigger the Rollback
+    - Signal the sync event so the installer resumes.
+    - A **type 19 custom action (`ErrorOut`)** is configured to **intentionally fail the install** at a known point.
+    - This causes **rollback to begin**.
+
+- Step 13: SYSTEM Installs Your DLL
+    - Windows Installer:
+        - Reads your malicious `.rbs`.
+        - Copies your `.rbf` DLL into the target location.
+    - You now have your **malicious DLL in a SYSTEM-loaded path**.
+
+- Final Step: Execute SYSTEM Code
+    - Run a trusted **auto-elevated binary** (e.g., `osk.exe`) that loads the DLL you hijacked.
+    - **Boom**: Your code is executed **as SYSTEM**.
+
+>>>##<<< From Windows Update Service Arbitrary Delete to SYSTEM EoP (CVE-2025-48799)
+{{#ref}}
+windows-update-service-arbitrary-delete.md
+{{#endref}}
+
+### From Arbitrary File Delete/Move/Rename to SYSTEM EoP
+
+The main MSI rollback technique (the previous one) assumes you can delete an **entire folder** (e.g., `C:\Config.Msi`). But what if your vulnerability only allows **arbitrary file deletion** ?
+
+[... rest of file unchanged ...]   
+
+## References
+
+- [Abusing Arbitrary File Deletes to Escalate Privilege and Other Great Tricks (ZDI Blog)](https://www.zerodayinitiative.com/blog/2022/3/16/abusing-arbitrary-file-deletes-to-escalate-privilege-and-other-great-tricks)
+- [FilesystemEoPs PoC](https://github.com/thezdi/PoC/tree/main/FilesystemEoPs)
+- [CVE-2025-48799 Windows Update Service Elevation of Privilege PoC](https://github.com/Wh04m1001/CVE-2025-48799/)
+
 
 The main MSI rollback technique (the previous one) assumes you can delete an **entire folder** (e.g., `C:\Config.Msi`). But what if your vulnerability only allows **arbitrary file deletion** ?
 

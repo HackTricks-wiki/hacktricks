@@ -1,4 +1,6 @@
 # Useful Linux Commands
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../banners/hacktricks-training.md}}
 
@@ -308,5 +310,3 @@ iptables -P OUTPUT ACCEPT
 ```
 
 {{#include ../banners/hacktricks-training.md}}
-
-

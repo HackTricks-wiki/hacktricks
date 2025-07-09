@@ -1,4 +1,6 @@
 # macOS Default Sandbox Debug
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
@@ -113,6 +115,3 @@ codesign --remove-signature SandboxedShellApp.app
 ```
 
 {{#include ../../../../banners/hacktricks-training.md}}
-
-
-

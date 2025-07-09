@@ -1,4 +1,6 @@
 # venv
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -23,6 +25,3 @@ inside the virtual environment
 ```
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

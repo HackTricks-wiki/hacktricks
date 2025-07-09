@@ -1,4 +1,6 @@
 # Shells - Windows
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -557,6 +559,3 @@ WinPWN](https://github.com/SecureThisShit/WinPwn) PS console with some offensive
 - [https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

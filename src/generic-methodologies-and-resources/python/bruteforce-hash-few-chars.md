@@ -1,4 +1,6 @@
 # Bruteforce Hash Few Chars
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -54,6 +56,3 @@ main()
 ```
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

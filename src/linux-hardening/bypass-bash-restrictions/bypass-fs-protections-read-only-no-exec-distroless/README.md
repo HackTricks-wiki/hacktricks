@@ -1,4 +1,6 @@
 # Bypass FS protections: read-only / no-exec / Distroless
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -112,6 +114,3 @@ You can find **examples** on how to **exploit some RCE vulnerabilities** to get 
 
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

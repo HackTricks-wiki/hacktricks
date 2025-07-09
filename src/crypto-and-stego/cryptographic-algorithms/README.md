@@ -1,4 +1,6 @@
 # Cryptographic/Compression Algorithms
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -181,6 +183,3 @@ Check **3 comparisons to recognise it**:
 ![](<../../images/image (430).png>)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

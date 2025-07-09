@@ -1,4 +1,6 @@
 # Time Namespace
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
@@ -70,6 +72,3 @@ nsenter -T TARGET_PID --pid /bin/bash
 ```
 
 {{#include ../../../../banners/hacktricks-training.md}}
-
-
-
