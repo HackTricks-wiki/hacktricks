@@ -1,6 +1,8 @@
 # macOS IOKit
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## Basic Information
 
@@ -230,6 +232,5 @@ After the array is created you can see all the exported functions:
 > If you remember, to **call** an **exported** function from user space we don't need to call the name of the function, but the **selector number**. Here you can see that the selector **0** is the function **`initializeDecoder`**, the selector **1** is **`startDecoder`**, the selector **2** **`initializeEncoder`**...
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 
 

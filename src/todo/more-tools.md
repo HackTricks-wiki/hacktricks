@@ -1,6 +1,8 @@
 # More tools
 
-{{#include ../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 
 ## BlueTeam
@@ -120,6 +122,5 @@ Firmware emulation: FIRMADYNE (https://github.com/firmadyne/firmadyne/) is a pla
 
 
 {{#include ../banners/hacktricks-training.md}}
-
 
 

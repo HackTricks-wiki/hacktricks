@@ -1,6 +1,8 @@
 # macOS XPC Authorization
 
-{{#include ../../../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## XPC Authorization
 
@@ -440,6 +442,5 @@ int main(void) {
 - [https://theevilbit.github.io/posts/secure_coding_xpc_part1/](https://theevilbit.github.io/posts/secure_coding_xpc_part1/)
 
 {{#include ../../../../../banners/hacktricks-training.md}}
-
 
 

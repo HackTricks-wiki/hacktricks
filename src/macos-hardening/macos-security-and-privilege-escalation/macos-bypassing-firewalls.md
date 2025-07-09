@@ -1,6 +1,8 @@
 # macOS Bypassing Firewalls
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## Found techniques
 
@@ -84,6 +86,5 @@ macos-proces-abuse/
 - [https://www.youtube.com/watch?v=UlT5KFTMn2k](https://www.youtube.com/watch?v=UlT5KFTMn2k)
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 

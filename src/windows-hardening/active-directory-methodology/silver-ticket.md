@@ -1,6 +1,8 @@
 # Silver Ticket
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 
 
@@ -167,6 +169,5 @@ dcsync.md
 
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 

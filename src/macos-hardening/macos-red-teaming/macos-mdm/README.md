@@ -1,6 +1,8 @@
 # macOS MDM
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 **To learn about macOS MDMs check:**
 
@@ -201,6 +203,5 @@ enrolling-devices-in-other-organisations.md
 {{#endref}}
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 
 

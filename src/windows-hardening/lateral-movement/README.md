@@ -1,6 +1,8 @@
 # Lateral Movement
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 There are different different ways to execute commands in external systems, here you can find the explanations on how the main Windows lateral movements techniques work:
 
@@ -17,6 +19,5 @@ There are different different ways to execute commands in external systems, here
 - [**Pass the AzureAD Certificate**](https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/az-pass-the-certificate.html) (cloud)
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 

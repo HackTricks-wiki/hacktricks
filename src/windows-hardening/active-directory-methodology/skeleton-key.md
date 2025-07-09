@@ -1,6 +1,8 @@
 # Skeleton Key
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## Skeleton Key Attack
 
@@ -29,6 +31,5 @@ Verification after a system reboot is crucial to ensure that the protective meas
 - [https://blog.netwrix.com/2022/11/29/skeleton-key-attack-active-directory/](https://blog.netwrix.com/2022/11/29/skeleton-key-attack-active-directory/)
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 

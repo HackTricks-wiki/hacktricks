@@ -1,6 +1,8 @@
 # SeDebug + SeImpersonate - Copy Token
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 The following code **exploits the privileges SeDebug and SeImpersonate** to copy the token from a **process running as SYSTEM** and with **all the token privileges**. \
 In this case, this code can be compiled and used as a **Windows service binary** to check that it's working.\
@@ -215,6 +217,5 @@ int _tmain( int argc, TCHAR* argv[] )
 ```
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 

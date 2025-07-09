@@ -2,6 +2,8 @@
 
 {{#include /banners/hacktricks-training.md}}
 
+
+
 ## Run & train models locally
 
 ### [**Hugging Face Transformers**](https://github.com/huggingface/transformers)
@@ -53,4 +55,3 @@ It offers several sections like:
 
 
 {{#include /banners/hacktricks-training.md}}
-

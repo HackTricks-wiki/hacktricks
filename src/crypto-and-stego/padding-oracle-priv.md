@@ -1,6 +1,8 @@
 # Padding Oracle
 
-{{#include ../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## CBC - Cipher Block Chaining
 
@@ -107,6 +109,5 @@ But if you BF the padding (using padbuster for example) you manage to get anothe
 
 
 {{#include ../banners/hacktricks-training.md}}
-
 
 

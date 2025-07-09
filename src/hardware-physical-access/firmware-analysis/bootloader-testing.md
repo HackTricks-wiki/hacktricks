@@ -1,6 +1,8 @@
 # Bootloader Testing
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 The following steps are recommended for modifying device startup configurations and bootloaders like U-boot:
 
@@ -52,6 +54,5 @@ The following steps are recommended for modifying device startup configurations 
 - [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 
