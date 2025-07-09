@@ -1,4 +1,6 @@
 # Interesting Windows Registry Keys
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -97,5 +99,3 @@
 This guide condenses the crucial paths and methods for accessing detailed system, network, and user activity information on Windows systems, aiming for clarity and usability.
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-

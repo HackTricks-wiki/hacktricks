@@ -1,4 +1,6 @@
 # Shadow Credentials
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -65,6 +67,3 @@ ShadowSpray aims to **exploit GenericWrite/GenericAll permissions that wide user
 - [https://github.com/ShutdownRepo/pywhisker](https://github.com/ShutdownRepo/pywhisker)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

@@ -1,4 +1,6 @@
 # macOS XPC
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 
@@ -484,6 +486,3 @@ The communication between BridgeOS and the host occurs through a dedicated IPv6 
 It's possible to find thee communications using `netstat`, `nettop` or the open source option, `netbottom`.
 
 {{#include ../../../../../banners/hacktricks-training.md}}
-
-
-

@@ -1,4 +1,6 @@
 # Exfiltration
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../banners/hacktricks-training.md}}
 
@@ -365,6 +367,3 @@ Then copy-paste the text into the windows-shell and a file called nc.exe will be
 - [https://github.com/Stratiz/DNS-Exfil](https://github.com/Stratiz/DNS-Exfil)
 
 {{#include ../banners/hacktricks-training.md}}
-
-
-

@@ -1,4 +1,6 @@
 # macOS Sensitive Locations & Interesting Daemons
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -273,6 +275,3 @@ These are notifications that the user should see in the screen:
 - **`NSUserNotificationCenter`**: This is the iOS bulletin board in MacOS. The database with the notifications in located in `/var/folders/<user temp>/0/com.apple.notificationcenter/db2/db`
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

@@ -1,4 +1,6 @@
 # Angr
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -211,6 +213,3 @@ Furthermore, you can use `proj.hook_symbol(name, hook)`, providing the name of a
 ## Examples
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

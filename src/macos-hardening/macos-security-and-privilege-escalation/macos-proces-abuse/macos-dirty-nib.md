@@ -1,4 +1,6 @@
 # macOS Dirty NIB
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -71,6 +73,3 @@ From macOS Sonoma onwards, modifications inside App bundles are restricted. Howe
 **Note**: Recent macOS updates have mitigated this exploit by preventing file modifications within app bundles post Gatekeeper caching, rendering the exploit ineffective.
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

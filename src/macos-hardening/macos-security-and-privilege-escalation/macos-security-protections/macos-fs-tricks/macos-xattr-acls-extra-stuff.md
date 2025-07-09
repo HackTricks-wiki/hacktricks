@@ -1,4 +1,6 @@
 # macOS xattr-acls extra stuff
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
@@ -180,6 +182,3 @@ xattr -l protected
 ```
 
 {{#include ../../../../banners/hacktricks-training.md}}
-
-
-

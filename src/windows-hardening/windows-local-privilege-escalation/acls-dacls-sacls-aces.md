@@ -1,4 +1,6 @@
 # ACLs - DACLs/SACLs/ACEs
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -150,7 +152,3 @@ In summary, ACLs and ACEs help define precise access controls, ensuring that onl
 - [https://www.coopware.in2.info/\_ntfsacl_ht.htm](https://www.coopware.in2.info/_ntfsacl_ht.htm)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-
-

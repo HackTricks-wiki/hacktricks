@@ -1,4 +1,6 @@
 # Partitions/File Systems/Carving
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -234,6 +236,3 @@ You may notice that even performing that action there might be **other parts whe
 - **iHackLabs Certified Digital Forensics Windows**
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

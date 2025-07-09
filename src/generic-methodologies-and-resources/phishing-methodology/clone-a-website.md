@@ -1,4 +1,6 @@
 # Cloning a Website
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -32,6 +34,3 @@ goclone <url>
 
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-
