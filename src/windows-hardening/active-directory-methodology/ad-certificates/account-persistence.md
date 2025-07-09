@@ -1,4 +1,6 @@
 # AD CS Account Persistence
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -53,6 +55,3 @@ The final method discussed involves leveraging the **validity** and **renewal pe
 This approach allows for an **extended persistence** method, minimizing the risk of detection through fewer interactions with the CA server and avoiding the generation of artifacts that could alert administrators to the intrusion.
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

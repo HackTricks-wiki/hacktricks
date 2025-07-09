@@ -1,4 +1,6 @@
 # Payloads to execute
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -133,6 +135,3 @@ echo hacker:$((mkpasswd -m SHA-512 myhackerpass || openssl passwd -1 -salt mysal
 ```
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

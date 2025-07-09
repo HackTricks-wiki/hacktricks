@@ -1,4 +1,6 @@
 # Firmware Integrity
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -25,6 +27,3 @@ If a root shell has already been obtained through dynamic analysis, bootloader m
 5. The meterpreter reverse shell can be executed on the compromised device.
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

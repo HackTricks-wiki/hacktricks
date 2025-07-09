@@ -1,4 +1,6 @@
 # LOAD_NAME / LOAD_CONST opcode OOB Read
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -235,6 +237,3 @@ builtins['eval'](builtins['input']())
 ```
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

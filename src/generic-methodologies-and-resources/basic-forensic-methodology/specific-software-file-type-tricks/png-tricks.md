@@ -1,4 +1,6 @@
 # PNG Tricks
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -9,6 +11,3 @@ For checking PNG file integrity and repairing corruption, **pngcheck** is a cruc
 These strategies underscore the importance of a comprehensive approach in CTFs, utilizing a blend of analytical tools and repair techniques to uncover and recover hidden or lost data.
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

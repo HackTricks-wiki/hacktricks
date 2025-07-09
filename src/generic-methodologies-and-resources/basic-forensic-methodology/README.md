@@ -1,4 +1,6 @@
 # Basic Forensic Methodology
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -80,6 +82,3 @@ file-integrity-monitoring.md
 {{#endref}}
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

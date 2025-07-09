@@ -1,4 +1,6 @@
 # Browser Artifacts
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -163,6 +165,3 @@ These paths and commands are crucial for accessing and understanding the browsin
 
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

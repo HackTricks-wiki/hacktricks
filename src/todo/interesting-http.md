@@ -1,4 +1,6 @@
 # Interesting HTTP
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../banners/hacktricks-training.md}}
 
@@ -39,6 +41,3 @@ You can override this rule using an HTML meta tag (the attacker needs to exploit
 Never put any sensitive data inside GET parameters or paths in the URL.
 
 {{#include ../banners/hacktricks-training.md}}
-
-
-

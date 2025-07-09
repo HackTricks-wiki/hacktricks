@@ -1,4 +1,6 @@
 # PsExec/Winexec/ScExec/SMBExec
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -53,4 +55,3 @@ SharpMove.exe action=startservice computername=remote.host.local servicename=Tes
 
 
 {{#include ../../banners/hacktricks-training.md}}
-

@@ -1,4 +1,6 @@
 # Bypass Python sandboxes
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../../banners/hacktricks-training.md}}
 

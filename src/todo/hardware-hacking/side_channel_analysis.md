@@ -1,6 +1,7 @@
 # Side Channel Analysis Attacks 
-
 {{#include /banners/hacktricks-training.md}}
+
+
 
 Side Channel Analysis Attacks refers to determining the information from a device or entity by some other channel or source that has an indirect influence on it and information can be extracted from it. This can be explained better with an example: 
 

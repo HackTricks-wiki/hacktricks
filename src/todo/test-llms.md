@@ -1,6 +1,7 @@
 # Test LLMs
-
 {{#include /banners/hacktricks-training.md}}
+
+
 
 ## Run & train models locally
 
@@ -53,4 +54,3 @@ It offers several sections like:
 
 
 {{#include /banners/hacktricks-training.md}}
-

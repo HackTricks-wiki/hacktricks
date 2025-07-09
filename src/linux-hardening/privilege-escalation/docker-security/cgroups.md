@@ -1,4 +1,6 @@
 # CGroups
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -88,6 +90,3 @@ The **root cgroup** is an exception to these rules, allowing direct process plac
 - **Book: How Linux Works, 3rd Edition: What Every Superuser Should Know By Brian Ward**
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

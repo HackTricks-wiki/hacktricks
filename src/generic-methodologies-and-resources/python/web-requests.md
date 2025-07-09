@@ -1,4 +1,6 @@
 # Web Requests
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -103,6 +105,3 @@ term.cmdloop()
 ```
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

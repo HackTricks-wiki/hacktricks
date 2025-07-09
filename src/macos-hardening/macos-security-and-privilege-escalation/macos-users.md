@@ -1,4 +1,6 @@
 # macOS Users & External Accounts
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -33,6 +35,3 @@ MacOS also support to login via external identity providers such as FaceBook, Go
 Moreover, `accountsd` gets the list of account types from `/Library/Preferences/SystemConfiguration/com.apple.accounts.exists.plist`.
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-
