@@ -1,6 +1,6 @@
 ## TimeRoasting
 
-timeRoasting, glavni uzrok je zastarjeli mehanizam autentifikacije koji je Microsoft ostavio u svom proširenju za NTP servere, poznatom kao MS-SNTP. U ovom mehanizmu, klijenti mogu direktno koristiti bilo koji Relativni Identifikator (RID) računa računara, a kontroler domena će koristiti NTLM hash računa računara (generisan MD4) kao ključ za generisanje **Koda za autentifikaciju poruka (MAC)** paketa odgovora.
+timeRoasting, glavni uzrok je zastarjeli mehanizam autentifikacije koji je Microsoft ostavio u svom proširenju za NTP servere, poznatom kao MS-SNTP. U ovom mehanizmu, klijenti mogu direktno koristiti bilo koji Relativni Identifikator (RID) računa računara, a kontroler domena će koristiti NTLM hash računa računara (generisan MD4) kao ključ za generisanje **Koda za autentifikaciju poruke (MAC)** paketa odgovora.
 
 Napadači mogu iskoristiti ovaj mehanizam da dobiju ekvivalentne hash vrednosti proizvoljnih računa računara bez autentifikacije. Jasno je da možemo koristiti alate poput Hashcat za brute-forcing.
 
@@ -21,7 +21,7 @@ U odeljku 4 dokumenta Primeri protokola tačka 3
 Prema opisu u gornjem Microsoftovom zvaničnom dokumentu, korisnici ne trebaju nikakvu autentifikaciju; samo treba da popune RID da pokrenu zahtev, a zatim mogu dobiti kriptografski ček. Kriptografski ček je objašnjen u odeljku 3.2.5.1.1 dokumenta.
 
 >Citirano u originalnom članku：
->>Server preuzima RID iz najmanje značnih 31 bita podpolja Identifikator ključa polja Autentifikator poruke Klijent NTP Zahteva. Server koristi metodu NetrLogonComputeServerDigest (kako je navedeno u [MS-NRPC] odeljku 3.5.4.8.2) da izračuna kripto-čekove sa sledećim ulaznim parametrima:
+>>Server preuzima RID iz najmanje značajnih 31 bita podpolja Identifikator ključa polja Autentifikator poruke Klijent NTP Zahteva. Server koristi metodu NetrLogonComputeServerDigest (kako je navedeno u [MS-NRPC] odeljku 3.5.4.8.2) da izračuna kripto-čekove sa sledećim ulaznim parametrima:
 >>>![](../../images/Pasted%20image%2020250709115757.png)
 
 Kriptografski ček se izračunava koristeći MD5, a specifičan proces se može pogledati u sadržaju dokumenta. Ovo nam daje priliku da izvršimo napad roštiljanja.
@@ -34,3 +34,5 @@ Citat za https://swisskyrepo.github.io/InternalAllTheThings/active-directory/ad-
 ```
 sudo ./timeroast.py 10.0.0.42 | tee ntp-hashes.txt
 hashcat -m 31300 ntp-hashes.txt
+```
+
