@@ -1,6 +1,8 @@
 # FZ - Sub-GHz
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## Intro <a href="#kfpn7" id="kfpn7"></a>
 
@@ -102,6 +104,5 @@ Check the list in [https://docs.flipperzero.one/sub-ghz/frequencies](https://doc
 - [https://docs.flipperzero.one/sub-ghz](https://docs.flipperzero.one/sub-ghz)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 
 

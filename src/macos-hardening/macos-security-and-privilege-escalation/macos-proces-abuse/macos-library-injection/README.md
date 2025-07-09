@@ -1,6 +1,8 @@
 # macOS Library Injection
 
-{{#include ../../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 > [!CAUTION]
 > The code of **dyld is open source** and can be found in [https://opensource.apple.com/source/dyld/](https://opensource.apple.com/source/dyld/) and cab be downloaded a tar using a **URL such as** [https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)
@@ -337,6 +339,5 @@ DYLD_INSERT_LIBRARIES=inject.dylib ./hello-signed # Won't work
 - [**\*OS Internals, Volume I: User Mode. By Jonathan Levin**](https://www.amazon.com/MacOS-iOS-Internals-User-Mode/dp/099105556X)
 
 {{#include ../../../../banners/hacktricks-training.md}}
-
 
 

@@ -1,6 +1,8 @@
 # RC4 Encrypt and Decrypt
 
-{{#include ../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 If you can somehow encrypt a plaintext using RC4, you can decrypt any content encrypted by that RC4 (using the same password) just using the encryption function.
 
@@ -15,4 +17,3 @@ https://0xrick.github.io/hack-the-box/kryptos/
 {{#endref}}
 
 {{#include ../banners/hacktricks-training.md}}
-

@@ -1,6 +1,8 @@
 # WmiExec
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## How It Works Explained
 
@@ -148,6 +150,5 @@ SharpMove.exe action=executevbs computername=remote.host.local eventname=Debug a
 
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 

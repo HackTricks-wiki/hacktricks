@@ -1,6 +1,8 @@
 # Namespaces
 
-{{#include ../../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ### **PID namespace**
 
@@ -45,6 +47,5 @@ user-namespace.md
 {{#endref}}
 
 {{#include ../../../../banners/hacktricks-training.md}}
-
 
 

@@ -1,6 +1,8 @@
 # Docker Breakout / Privilege Escalation
 
-{{#include ../../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## Automatic Enumeration & Escape
 
@@ -638,6 +640,5 @@ If you are in **userspace** (**no kernel exploit** involved) the way to find new
 - [https://bishopfox.com/blog/kubernetes-pod-privilege-escalation#Pod4](https://bishopfox.com/blog/kubernetes-pod-privilege-escalation#Pod4)
 
 {{#include ../../../../banners/hacktricks-training.md}}
-
 
 

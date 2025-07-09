@@ -1,6 +1,8 @@
 # Logstash Privilege Escalation
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## Logstash
 
@@ -61,4 +63,3 @@ With **config.reload.automatic: true** in **/etc/logstash/logstash.yml**, Logsta
 ## References
 
 {{#include ../../banners/hacktricks-training.md}}
-

@@ -1,6 +1,8 @@
 # Diamond Ticket
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## Diamond Ticket
 
@@ -30,6 +32,5 @@ powershell Get-DomainUser -Identity <username> -Properties objectsid
 ```
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 

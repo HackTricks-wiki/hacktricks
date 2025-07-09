@@ -1,6 +1,8 @@
 # Checklist - Linux Privilege Escalation
 
-{{#include ../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ### **Best tool to look for Linux local privilege escalation vectors:** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
 
@@ -141,6 +143,5 @@
 - [ ] Do you need to [**escape from a restrictive shell**](privilege-escalation/index.html#escaping-from-restricted-shells)?
 
 {{#include ../banners/hacktricks-training.md}}
-
 
 

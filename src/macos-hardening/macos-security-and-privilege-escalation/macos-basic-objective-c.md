@@ -1,6 +1,8 @@
 # macOS Objective-C
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## Objective-C
 
@@ -346,6 +348,5 @@ It's also possible to manage files **using `NSURL` objects instead of `NSString`
 ```
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 

@@ -1,6 +1,8 @@
 # RDP Sessions Abuse
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## RDP Process Injection
 
@@ -73,6 +75,5 @@ beacon> upload C:\Payloads\pivot.exe
 ```
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 

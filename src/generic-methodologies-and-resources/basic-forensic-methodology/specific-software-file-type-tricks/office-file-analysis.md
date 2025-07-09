@@ -1,6 +1,8 @@
 # Office file analysis
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 
 For further information check [https://trailofbits.github.io/ctf/forensics/](https://trailofbits.github.io/ctf/forensics/). This is just a sumary:
@@ -19,6 +21,5 @@ olevba -c /path/to/document #Extract macros
 ```
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 
 

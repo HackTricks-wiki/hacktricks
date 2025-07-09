@@ -1,6 +1,8 @@
 # Antivirus (AV) Bypass
 
-{{#include ../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 **This page was written by** [**@m2rc_p**](https://twitter.com/m2rc_p)**!**
 
