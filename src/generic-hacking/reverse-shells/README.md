@@ -1,4 +1,6 @@
 # Reverse Shells
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -24,6 +26,3 @@
 - [**https://github.com/mthbernardes/rsg**](https://github.com/mthbernardes/rsg)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

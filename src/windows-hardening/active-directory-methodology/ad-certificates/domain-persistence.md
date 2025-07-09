@@ -1,4 +1,6 @@
 # AD CS Domain Persistence
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -65,6 +67,3 @@ Opportunities for **persistence** through **security descriptor modifications of
 An example of malicious implementation would involve an attacker, who has **elevated permissions** in the domain, adding the **`WriteOwner`** permission to the default **`User`** certificate template, with the attacker being the principal for the right. To exploit this, the attacker would first change the ownership of the **`User`** template to themselves. Following this, the **`mspki-certificate-name-flag`** would be set to **1** on the template to enable **`ENROLLEE_SUPPLIES_SUBJECT`**, allowing a user to provide a Subject Alternative Name in the request. Subsequently, the attacker could **enroll** using the **template**, choosing a **domain administrator** name as an alternative name, and utilize the acquired certificate for authentication as the DA.
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

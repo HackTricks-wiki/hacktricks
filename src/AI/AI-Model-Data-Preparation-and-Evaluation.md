@@ -1,4 +1,6 @@
 # Model Data Preparation & Evaluation
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../banners/hacktricks-training.md}}
 
@@ -240,4 +242,3 @@ The confusion matrix can be used to calculate various evaluation metrics, such a
 
 
 {{#include ../banners/hacktricks-training.md}}
-

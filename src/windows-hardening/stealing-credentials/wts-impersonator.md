@@ -1,4 +1,6 @@
 # WTS Impersonator
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -50,6 +52,3 @@ WTSEnumerateSessionsA → WTSQuerySessionInformationA → WTSQueryUserToken → 
     ```
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

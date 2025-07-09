@@ -1,4 +1,6 @@
 # Windows Local Privilege Escalation
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -654,6 +656,16 @@ gwmi -class Win32_Service -Property Name, DisplayName, PathName, StartMode | Whe
 ```bash
 msfvenom -p windows/exec CMD="net localgroup administrators username /add" -f exe-service -o service.exe
 ```
+
+### Storage Sense Symlink Abuse (Windows Update Service)
+
+By abusing Storage Sense’s AppX/MSI staging and cleanup paths, the `wuauserv` service can be tricked into deleting arbitrary SYSTEM folders via NTFS junctions.
+
+To learn more and see a full Proof-of-Concept:
+
+{{#ref}}
+storage-sense-symlink-abuse.md
+{{#endref}}
 
 ### Recovery Actions
 

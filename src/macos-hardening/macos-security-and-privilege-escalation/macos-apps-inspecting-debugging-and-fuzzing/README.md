@@ -1,4 +1,6 @@
 # macOS Apps - Inspecting, debugging and Fuzzing
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -633,6 +635,3 @@ litefuzz -s -a tcp://localhost:5900 -i input/screenshared-session --reportcrash 
 - [**The Art of Mac Malware: The Guide to Analyzing Malicious Software**](https://taomm.org/)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

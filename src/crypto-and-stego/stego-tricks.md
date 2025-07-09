@@ -1,4 +1,6 @@
 # Stego Tricks
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../banners/hacktricks-training.md}}
 
@@ -218,6 +220,3 @@ For translating Braille, the [Branah Braille Translator](https://www.branah.com/
 - [**https://github.com/DominicBreuker/stego-toolkit**](https://github.com/DominicBreuker/stego-toolkit)
 
 {{#include ../banners/hacktricks-training.md}}
-
-
-

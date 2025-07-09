@@ -1,4 +1,6 @@
 # macOS Auto Start
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../banners/hacktricks-training.md}}
 
@@ -1794,6 +1796,3 @@ RunService ()
 - [https://github.com/D00MFist/PersistentJXA](https://github.com/D00MFist/PersistentJXA)
 
 {{#include ../banners/hacktricks-training.md}}
-
-
-

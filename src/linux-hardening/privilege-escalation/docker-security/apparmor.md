@@ -1,4 +1,6 @@
 # AppArmor
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -291,6 +293,3 @@ chmod +x /tmp/test.pl
 ```
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

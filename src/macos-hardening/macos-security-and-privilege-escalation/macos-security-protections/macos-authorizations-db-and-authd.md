@@ -1,4 +1,6 @@
 # macOS Authorizations DB & Authd
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -86,6 +88,3 @@ That will fork and exec `/usr/libexec/security_authtrampoline /bin/ls` as root, 
 <figure><img src="../../../images/image (10).png" alt=""><figcaption></figcaption></figure>
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

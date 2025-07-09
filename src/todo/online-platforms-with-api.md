@@ -1,4 +1,6 @@
 # Online Platforms with API
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../banners/hacktricks-training.md}}
 
@@ -129,6 +131,3 @@ IP Geolocation and OISNT with targeted datapoints. Non commerical.
 [https://www.nmmapper.com/sys/tools/subdomainfinder/](https://www.nmmapper.com/) (in a commercial tool?)
 
 {{#include ../banners/hacktricks-training.md}}
-
-
-

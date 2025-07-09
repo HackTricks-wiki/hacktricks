@@ -1,4 +1,6 @@
 # Office file analysis
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -19,6 +21,3 @@ olevba -c /path/to/document #Extract macros
 ```
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

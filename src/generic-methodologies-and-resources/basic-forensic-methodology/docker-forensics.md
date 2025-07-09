@@ -1,4 +1,6 @@
 # Docker Forensics
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -119,6 +121,3 @@ Therefore (as root) you can **dump the memory of the processes** from the host a
 
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

@@ -1,4 +1,6 @@
 # Privilege Escalation with Autoruns
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -341,6 +343,3 @@ autorunsc.exe -m -nobanner -a * -ct /accepteula
 
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

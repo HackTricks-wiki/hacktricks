@@ -1,4 +1,6 @@
 # ASREPRoast
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -81,6 +83,3 @@ ASRepCatcher listen
 ---
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

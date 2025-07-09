@@ -1,4 +1,6 @@
 # macOS IPC - Inter Process Communication
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
@@ -849,6 +851,3 @@ For more info check:
 - [https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)
 
 {{#include ../../../../banners/hacktricks-training.md}}
-
-
-
