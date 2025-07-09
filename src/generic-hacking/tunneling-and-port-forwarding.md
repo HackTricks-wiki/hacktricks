@@ -1,6 +1,8 @@
 # Tunneling and Port Forwarding
 
-{{#include ../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## Nmap tip
 
@@ -651,6 +653,5 @@ tunnels:
 - [https://github.com/z3APA3A/3proxy](https://github.com/z3APA3A/3proxy)
 
 {{#include ../banners/hacktricks-training.md}}
-
 
 

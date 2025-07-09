@@ -1,6 +1,8 @@
 # Angr
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 Part of this cheatsheet is based on the [angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/).
 
@@ -211,6 +213,5 @@ Furthermore, you can use `proj.hook_symbol(name, hook)`, providing the name of a
 ## Examples
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 
 

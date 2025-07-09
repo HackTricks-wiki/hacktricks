@@ -1,6 +1,8 @@
 # MCP Servers
 
-{{#include ../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 
 ## What is MPC - Model Context Protocol
@@ -109,4 +111,3 @@ Moreover, in [**this blog**](https://www.legitsecurity.com/blog/remote-prompt-in
 Note that the malicious indirect prompts would be located in a public repository the victim user would be using, however, as the agent still have access to the repos of the user, it'll be able to access them.
 
 {{#include ../banners/hacktricks-training.md}}
-

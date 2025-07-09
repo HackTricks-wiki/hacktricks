@@ -1,6 +1,8 @@
 # Introduction to ARM64v8
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## **Exception Levels - EL (ARM64v8)**
 
@@ -795,6 +797,5 @@ call_execve:
 ```
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 
 

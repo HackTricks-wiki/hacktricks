@@ -1,6 +1,8 @@
 # iButton
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## Intro
 
@@ -43,6 +45,5 @@ flipper-zero/fz-ibutton.md
 - [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 

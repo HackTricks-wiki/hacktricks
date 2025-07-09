@@ -1,6 +1,8 @@
 # Android Forensics
 
-{{#include ../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## Locked Device
 
@@ -25,6 +27,5 @@ Create an [android backup using adb](../mobile-pentesting/android-app-pentesting
 Use Linux Memory Extractor (LiME) to extract the RAM information. It's a kernel extension that should be loaded via adb.
 
 {{#include ../banners/hacktricks-training.md}}
-
 
 

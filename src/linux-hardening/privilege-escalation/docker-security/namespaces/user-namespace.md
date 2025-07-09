@@ -1,6 +1,8 @@
 # User Namespace
 
-{{#include ../../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## Basic Information
 
@@ -146,6 +148,5 @@ Probando: 0x141 . . . Error
 ```
 
 {{#include ../../../../banners/hacktricks-training.md}}
-
 
 

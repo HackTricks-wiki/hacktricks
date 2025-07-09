@@ -1,6 +1,8 @@
 # macOS Sandbox
 
-{{#include ../../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## Basic Information
 
@@ -399,6 +401,5 @@ Sandbox also has a user daemon running exposing the XPC Mach service `com.apple.
 - [**\*OS Internals Volume III**](https://newosxbook.com/home.html)
 
 {{#include ../../../../banners/hacktricks-training.md}}
-
 
 

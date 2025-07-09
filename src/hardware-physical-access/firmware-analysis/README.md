@@ -1,6 +1,8 @@
 # Firmware Analysis
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## **Introduction**
 
@@ -252,6 +254,5 @@ To practice discovering vulnerabilities in firmware, use the following vulnerabl
 - [https://www.attify-store.com/products/offensive-iot-exploitation](https://www.attify-store.com/products/offensive-iot-exploitation)
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 

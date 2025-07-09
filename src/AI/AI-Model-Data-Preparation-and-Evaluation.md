@@ -1,6 +1,8 @@
 # Model Data Preparation & Evaluation
 
-{{#include ../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 Model data preparation is a crucial step in the machine learning pipeline, as it involves transforming raw data into a format suitable for training machine learning models. This process includes several key steps:
 
@@ -240,4 +242,3 @@ The confusion matrix can be used to calculate various evaluation metrics, such a
 
 
 {{#include ../banners/hacktricks-training.md}}
-

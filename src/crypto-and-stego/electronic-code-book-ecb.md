@@ -1,6 +1,8 @@
 # Electronic Code Book (ECB)
 
-{{#include ../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## ECB
 
@@ -74,6 +76,5 @@ The cookie of this user is going to be composed by 3 blocks: the first 2 is the 
 - [http://cryptowiki.net/index.php?title=Electronic_Code_Book\_(ECB)](<http://cryptowiki.net/index.php?title=Electronic_Code_Book_(ECB)>)
 
 {{#include ../banners/hacktricks-training.md}}
-
 
 

@@ -1,6 +1,8 @@
 # FZ - 125kHz RFID
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 
 ## Intro
@@ -53,6 +55,5 @@ After **copying** a card or **entering** the ID **manually** it's possible to **
 
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 
 

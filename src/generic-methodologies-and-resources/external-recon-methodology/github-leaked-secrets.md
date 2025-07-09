@@ -1,6 +1,8 @@
 # Github Dorks & Leaks
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 
 ### Tools to find secrets in git repos and file system
@@ -305,6 +307,5 @@ AWS SECRET
 ```
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 

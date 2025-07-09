@@ -1,6 +1,8 @@
 # macOS Apple Events
 
-{{#include ../../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## Basic Information
 
@@ -20,5 +22,4 @@ Sandboxed applications requires privileges like `allow appleevent-send` and `(al
 > ```
 
 {{#include ../../../../banners/hacktricks-training.md}}
-
 
