@@ -1,6 +1,8 @@
 # Brute Force - CheatSheet
 
-{{#include ../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## Default Credentials
 
@@ -880,6 +882,5 @@ Cracking Common Application Hashes
 ```
 
 {{#include ../banners/hacktricks-training.md}}
-
 
 

@@ -1,6 +1,8 @@
 # macOS Process Abuse
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## Processes Basic Information
 
@@ -275,5 +277,4 @@ Note that to call that function you need to be **the same uid** as the one runni
 - [https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 

@@ -1,6 +1,8 @@
 # LOAD_NAME / LOAD_CONST opcode OOB Read
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 **This info was taken** [**from this writeup**](https://blog.splitline.tw/hitcon-ctf-2022/)**.**
 
@@ -235,6 +237,5 @@ builtins['eval'](builtins['input']())
 ```
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 
 

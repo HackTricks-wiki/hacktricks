@@ -1,6 +1,8 @@
 # Kerberos Double Hop Problem
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 
 ## Introduction
@@ -103,6 +105,5 @@ icacls.exe "C:\Users\redsuit\Documents\ssh\OpenSSH-Win64" /grant Everyone:RX /T
 
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 

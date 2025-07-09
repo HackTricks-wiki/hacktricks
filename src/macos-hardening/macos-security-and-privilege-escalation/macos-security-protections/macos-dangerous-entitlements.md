@@ -1,6 +1,8 @@
 # macOS Dangerous Entitlements & TCC perms
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 > [!WARNING]
 > Note that entitlements starting with **`com.apple`** are not available to third-parties, only Apple can grant them.

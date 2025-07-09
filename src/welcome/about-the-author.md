@@ -1,6 +1,8 @@
 # About the author
 
-{{#include ../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ### Hello!!
 
@@ -11,6 +13,5 @@ HackTricks is a educational Wiki that compiles knowledge about **cyber-security*
 HackTricks is also a wiki were **a lot of researches also share their latest findings**, so it's a great place to keep up to date with the latest hacking techniques.
 
 {{#include ../banners/hacktricks-training.md}}
-
 
 

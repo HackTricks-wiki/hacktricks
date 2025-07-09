@@ -1,6 +1,8 @@
 # Memory dump analysis
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## Start
 
@@ -35,6 +37,5 @@ You should **open** it using **IDA** or **Radare** to inspection it in **depth**
 ​
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 
 

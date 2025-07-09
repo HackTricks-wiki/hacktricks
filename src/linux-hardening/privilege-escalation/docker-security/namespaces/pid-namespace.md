@@ -1,6 +1,8 @@
 # PID Namespace
 
-{{#include ../../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## Basic Information
 
@@ -89,6 +91,5 @@ Also, you can only **enter in another process PID namespace if you are root**. A
 - [https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory](https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory)
 
 {{#include ../../../../banners/hacktricks-training.md}}
-
 
 

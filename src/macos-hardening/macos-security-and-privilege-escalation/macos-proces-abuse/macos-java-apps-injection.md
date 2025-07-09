@@ -1,6 +1,8 @@
 # macOS Java Applications Injection
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## Enumeration
 
@@ -172,6 +174,5 @@ sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
 Note how interesting is that Android Studio in this example is trying to load the file **`/Applications/Android Studio.app.vmoptions`**, a place where any user from the **`admin` group has write access.**
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 
 

@@ -1,6 +1,8 @@
 # Bruteforce Hash Few Chars
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ```python
 import hashlib
@@ -54,6 +56,5 @@ main()
 ```
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 

@@ -1,6 +1,8 @@
 # macOS Apple Scripts
 
-{{#include ../../../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## Apple Scripts
 
@@ -32,6 +34,5 @@ and tin this case the content cannot be decompiled even with `osadecompile`
 However, there are still some tools that can be used to understand this kind of executables, [**read this research for more info**](https://labs.sentinelone.com/fade-dead-adventures-in-reversing-malicious-run-only-applescripts/)). The tool [**applescript-disassembler**](https://github.com/Jinmo/applescript-disassembler) with [**aevt_decompile**](https://github.com/SentineLabs/aevt_decompile) will be very useful to understand how the script works.
 
 {{#include ../../../../../banners/hacktricks-training.md}}
-
 
 

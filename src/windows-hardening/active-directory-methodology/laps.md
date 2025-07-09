@@ -1,6 +1,8 @@
 # LAPS
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 
 ## Basic Information
@@ -141,6 +143,5 @@ Then, just compile the new `AdmPwd.PS.dll` and upload it to the machine in `C:\T
 
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 

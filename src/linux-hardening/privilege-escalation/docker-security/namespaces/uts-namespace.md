@@ -1,6 +1,8 @@
 # UTS Namespace
 
-{{#include ../../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## Basic Information
 
@@ -76,6 +78,5 @@ nsenter -u TARGET_PID --pid /bin/bash
 ```
 
 {{#include ../../../../banners/hacktricks-training.md}}
-
 
 

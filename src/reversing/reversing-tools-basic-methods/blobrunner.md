@@ -1,6 +1,8 @@
 # Blobrunner
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 The only modified line from the [original code](https://github.com/OALabs/BlobRunner) is the line 10.  
 In order to compile it just **create a C/C++ project in Visual Studio Code, copy and paste the code and build it**.
@@ -210,6 +212,5 @@ int main(int argc, char* argv[])
 ```
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 

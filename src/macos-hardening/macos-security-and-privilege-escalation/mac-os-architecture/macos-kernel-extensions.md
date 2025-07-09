@@ -1,6 +1,8 @@
 # macOS Kernel Extensions & Debugging
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## Basic Information
 
@@ -148,6 +150,5 @@ nm -a binaries/com.apple.security.sandbox | wc -l
 - [https://www.youtube.com/watch?v=hGKOskSiaQo](https://www.youtube.com/watch?v=hGKOskSiaQo)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 
 

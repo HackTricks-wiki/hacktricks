@@ -1,6 +1,8 @@
 # Containerd (ctr) Privilege Escalation
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include /banners/hacktricks-training.md}}
+
+
 
 ## Basic information
 
@@ -50,6 +52,5 @@ docker-security/
 {{#endref}}
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 
