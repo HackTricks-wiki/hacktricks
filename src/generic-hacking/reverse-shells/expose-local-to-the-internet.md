@@ -1,4 +1,6 @@
 # Expose local to the internet
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -86,6 +88,3 @@ npx localtunnel --port 8000
 ```
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

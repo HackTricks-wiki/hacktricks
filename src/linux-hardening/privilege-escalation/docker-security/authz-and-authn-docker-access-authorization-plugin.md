@@ -1,4 +1,6 @@
 # Docker Access Authorization Plugin
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -196,6 +198,3 @@ Remember to **re-enable the plugin after escalating**, or a **restart of docker 
 - [https://staaldraad.github.io/post/2019-07-11-bypass-docker-plugin-with-containerd/](https://staaldraad.github.io/post/2019-07-11-bypass-docker-plugin-with-containerd/)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

@@ -1,4 +1,6 @@
 # External Forest Domain - One-Way (Outbound)
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -81,6 +83,3 @@ The cleartext password can be used to perform regular authentication as the trus
 - [https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-7-trust-account-attack-from-trusting-to-trusted](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-7-trust-account-attack-from-trusting-to-trusted)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

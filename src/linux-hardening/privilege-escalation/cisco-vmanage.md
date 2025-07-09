@@ -1,4 +1,6 @@
 # Cisco - vmanage
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -159,6 +161,3 @@ bash-4.4#
 ```
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

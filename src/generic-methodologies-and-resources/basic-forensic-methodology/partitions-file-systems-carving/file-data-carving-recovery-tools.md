@@ -1,4 +1,6 @@
 # File/Data Carving & Recovery Tools
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -93,6 +95,3 @@ You can use [**viu** ](https://github.com/atanunq/viu)to see images from the ter
 You can use the linux command line tool **pdftotext** to transform a pdf into text and read it.
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

@@ -1,6 +1,7 @@
 # Investment Terms
-
 {{#include /banners/hacktricks-training.md}}
+
+
 
 ## Spot
 

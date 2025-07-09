@@ -1,4 +1,6 @@
 # lxd/lxc Group - Privilege escalation
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -91,6 +93,3 @@ lxc config device add mycontainer mydevice disk source=/ path=/mnt/root recursiv
 ```
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

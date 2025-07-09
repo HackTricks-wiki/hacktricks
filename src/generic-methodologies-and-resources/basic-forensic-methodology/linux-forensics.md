@@ -1,4 +1,6 @@
 # Linux Forensics
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -396,7 +398,3 @@ git diff --no-index --diff-filter=D path/to/old_version/ path/to/new_version/
 - **Book: Malware Forensics Field Guide for Linux Systems: Digital Forensics Field Guides**
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-
-

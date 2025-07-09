@@ -1,4 +1,6 @@
 # Reversing Tools
+{{#include /banners/hacktricks-training.md}}
+
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -114,6 +116,3 @@ To decompile Java bytecode, these tools can be very helpful:
 - [https://github.com/malrev/ABD](https://github.com/malrev/ABD) \(Binary deobfuscation\)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-
