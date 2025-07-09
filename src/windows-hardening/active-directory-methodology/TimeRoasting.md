@@ -1,4 +1,6 @@
-## TimeRoasting
+# TimeRoasting
+
+{{#include /banners/hacktricks-training.md}}
 
 timeRoasting, la causa principale è il meccanismo di autenticazione obsoleto lasciato da Microsoft nella sua estensione ai server NTP, noto come MS-SNTP. In questo meccanismo, i client possono utilizzare direttamente l'Identificatore Relativo (RID) di qualsiasi account computer, e il controller di dominio utilizzerà l'hash NTLM dell'account computer (generato da MD4) come chiave per generare il **Message Authentication Code (MAC)** del pacchetto di risposta.
 
@@ -16,15 +18,15 @@ Si può vedere che quando l'elemento ADM ExtendedAuthenticatorSupported è impos
 Nella sezione 4 Esempi di Protocollo punto 3
 
 >Citato nell'articolo originale：
->>3. Dopo aver ricevuto la richiesta, il server verifica che la dimensione del messaggio ricevuto sia di 68 byte. Se non lo è, il server scarta la richiesta (se la dimensione del messaggio non è uguale a 48 byte) o la tratta come una richiesta non autenticata (se la dimensione del messaggio è di 48 byte). Supponendo che la dimensione del messaggio ricevuto sia di 68 byte, il server estrae il RID dal messaggio ricevuto. Il server lo utilizza per chiamare il metodo NetrLogonComputeServerDigest (come specificato nella sezione [MS-NRPC] 3.5.4.8.2) per calcolare i checksum crittografici e selezionare il checksum crittografico basato sul bit più significativo del sotto-campo Key Identifier dal messaggio ricevuto, come specificato nella sezione 3.2.5. Il server quindi invia una risposta al client, impostando il campo Key Identifier su 0 e il campo Crypto-Checksum sul checksum crittografico calcolato.
+>>3. Dopo aver ricevuto la richiesta, il server verifica che la dimensione del messaggio ricevuto sia di 68 byte. Se non lo è, il server scarta la richiesta (se la dimensione del messaggio non è uguale a 48 byte) o la tratta come una richiesta non autenticata (se la dimensione del messaggio è di 48 byte). Supponendo che la dimensione del messaggio ricevuto sia di 68 byte, il server estrae il RID dal messaggio ricevuto. Il server lo utilizza per chiamare il metodo NetrLogonComputeServerDigest (come specificato nella sezione [MS-NRPC] 3.5.4.8.2) per calcolare i crypto-checksum e selezionare il crypto-checksum basato sul bit più significativo del sotto-campo Key Identifier dal messaggio ricevuto, come specificato nella sezione 3.2.5. Il server quindi invia una risposta al client, impostando il campo Key Identifier a 0 e il campo Crypto-Checksum al crypto-checksum calcolato.
 
 Secondo la descrizione nel documento ufficiale Microsoft sopra, gli utenti non hanno bisogno di alcuna autenticazione; devono solo compilare il RID per avviare una richiesta, e poi possono ottenere il checksum crittografico. Il checksum crittografico è spiegato nella sezione 3.2.5.1.1 del documento.
 
 >Citato nell'articolo originale：
->>Il server recupera il RID dai 31 bit meno significativi del sotto-campo Key Identifier del campo Authenticator del messaggio di Richiesta NTP Client. Il server utilizza il metodo NetrLogonComputeServerDigest (come specificato nella sezione [MS-NRPC] 3.5.4.8.2) per calcolare i checksum crittografici con i seguenti parametri di input:
+>>Il server recupera il RID dai 31 bit meno significativi del sotto-campo Key Identifier del campo Authenticator del messaggio di Richiesta NTP Client. Il server utilizza il metodo NetrLogonComputeServerDigest (come specificato nella sezione [MS-NRPC] 3.5.4.8.2) per calcolare i crypto-checksum con i seguenti parametri di input:
 >>>![](../../images/Pasted%20image%2020250709115757.png)
 
-Il checksum crittografico è calcolato utilizzando MD5, e il processo specifico può essere consultato nel contenuto del documento. Questo ci offre l'opportunità di eseguire un attacco di roasting.
+Il checksum crittografico è calcolato utilizzando MD5, e il processo specifico può essere consultato nel contenuto del documento. Questo ci dà l'opportunità di eseguire un attacco di roasting.
 
 ## come attaccare
 
@@ -35,4 +37,4 @@ Citato in https://swisskyrepo.github.io/InternalAllTheThings/active-directory/ad
 sudo ./timeroast.py 10.0.0.42 | tee ntp-hashes.txt
 hashcat -m 31300 ntp-hashes.txt
 ```
-
+{{#include /banners/hacktricks-training.md}}
