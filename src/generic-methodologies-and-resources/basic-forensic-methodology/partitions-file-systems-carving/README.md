@@ -9,15 +9,15 @@ Dysk twardy lub **dysk SSD może zawierać różne partycje** w celu fizycznego 
 
 ### MBR (master Boot Record)
 
-Jest przydzielany w **pierwszym sektorze dysku po 446B kodu rozruchowego**. Ten sektor jest niezbędny, aby wskazać komputerowi, co i skąd powinno być zamontowane.\
-Pozwala na maksymalnie **4 partycje** (najwyżej **tylko 1** może być aktywna/**rozruchowa**). Jednak jeśli potrzebujesz więcej partycji, możesz użyć **partycji rozszerzonej**. **Ostatni bajt** tego pierwszego sektora to sygnatura rekordu rozruchowego **0x55AA**. Tylko jedna partycja może być oznaczona jako aktywna.\
+Jest przydzielany w **pierwszym sektorze dysku po 446B kodu rozruchowego**. Ten sektor jest niezbędny, aby wskazać PC, co i skąd powinno być zamontowane jako partycja.\
+Pozwala na maksymalnie **4 partycje** (najwyżej **tylko 1** może być aktywna/**rozruchowa**). Jednak jeśli potrzebujesz więcej partycji, możesz użyć **partycji rozszerzonej**. **Ostatni bajt** tego pierwszego sektora to podpis rekordu rozruchowego **0x55AA**. Tylko jedna partycja może być oznaczona jako aktywna.\
 MBR pozwala na **maks. 2.2TB**.
 
 ![](<../../../images/image (350).png>)
 
 ![](<../../../images/image (304).png>)
 
-Od **bajtów 440 do 443** MBR możesz znaleźć **Sygnaturę dysku Windows** (jeśli używany jest Windows). Litera logicznego dysku twardego zależy od Sygnatury dysku Windows. Zmiana tej sygnatury może uniemożliwić uruchomienie systemu Windows (narzędzie: [**Active Disk Editor**](https://www.disk-editor.org/index.html)**)**.
+W **bajtach od 440 do 443** MBR możesz znaleźć **Podpis dysku Windows** (jeśli używany jest Windows). Litera logicznego dysku twardego zależy od Podpisu dysku Windows. Zmiana tego podpisu może uniemożliwić uruchomienie Windows (narzędzie: [**Active Disk Editor**](https://www.disk-editor.org/index.html)**)**.
 
 ![](<../../../images/image (310).png>)
 
@@ -30,7 +30,7 @@ Od **bajtów 440 do 443** MBR możesz znaleźć **Sygnaturę dysku Windows** (je
 | 462 (0x1CE) | 16 (0x10)  | Druga partycja       |
 | 478 (0x1DE) | 16 (0x10)  | Trzecia partycja     |
 | 494 (0x1EE) | 16 (0x10)  | Czwarta partycja     |
-| 510 (0x1FE) | 2 (0x2)    | Sygnatura 0x55 0xAA |
+| 510 (0x1FE) | 2 (0x2)    | Podpis 0x55 0xAA     |
 
 **Format rekordu partycji**
 
@@ -39,7 +39,7 @@ Od **bajtów 440 do 443** MBR możesz znaleźć **Sygnaturę dysku Windows** (je
 | 0 (0x00)  | 1 (0x01) | Flaga aktywności (0x80 = rozruchowa)                    |
 | 1 (0x01)  | 1 (0x01) | Głowica startowa                                         |
 | 2 (0x02)  | 1 (0x01) | Sektor startowy (bity 0-5); wyższe bity cylindra (6-7) |
-| 3 (0x03)  | 1 (0x01) | Cylindr startowy najniższe 8 bitów                      |
+| 3 (0x03)  | 1 (0x01) | Cylindr startowy najniższe 8 bitów                       |
 | 4 (0x04)  | 1 (0x01) | Kod typu partycji (0x83 = Linux)                         |
 | 5 (0x05)  | 1 (0x01) | Głowica końcowa                                          |
 | 6 (0x06)  | 1 (0x01) | Sektor końcowy (bity 0-5); wyższe bity cylindra (6-7)   |
@@ -64,7 +64,7 @@ mount -o ro,loop,offset=32256,noatime /path/to/image.dd /media/part/
 
 ### GPT (GUID Partition Table)
 
-Tabela partycji GUID, znana jako GPT, jest preferowana ze względu na swoje ulepszone możliwości w porównaniu do MBR (Master Boot Record). Wyróżnia się **globalnie unikalnym identyfikatorem** dla partycji, GPT wyróżnia się w kilku aspektach:
+Tabela partycji GUID, znana jako GPT, jest preferowana ze względu na swoje ulepszone możliwości w porównaniu do MBR (Master Boot Record). Wyróżnia się dzięki **globalnie unikalnemu identyfikatorowi** dla partycji, GPT wyróżnia się na kilka sposobów:
 
 - **Lokalizacja i rozmiar**: Zarówno GPT, jak i MBR zaczynają się od **sektora 0**. Jednak GPT działa na **64 bitach**, w przeciwieństwie do 32 bitów MBR.
 - **Limity partycji**: GPT obsługuje do **128 partycji** w systemach Windows i pomieści do **9,4ZB** danych.
@@ -73,7 +73,7 @@ Tabela partycji GUID, znana jako GPT, jest preferowana ze względu na swoje ulep
 **Odporność danych i odzyskiwanie**:
 
 - **Redundancja**: W przeciwieństwie do MBR, GPT nie ogranicza partycjonowania i danych rozruchowych do jednego miejsca. Replikuje te dane w całym dysku, co zwiększa integralność danych i odporność.
-- **Cyclic Redundancy Check (CRC)**: GPT stosuje CRC, aby zapewnić integralność danych. Aktywnie monitoruje uszkodzenia danych, a po ich wykryciu GPT próbuje odzyskać uszkodzone dane z innej lokalizacji na dysku.
+- **Cykliczna kontrola redundancji (CRC)**: GPT stosuje CRC, aby zapewnić integralność danych. Aktywnie monitoruje uszkodzenia danych, a po ich wykryciu GPT próbuje odzyskać uszkodzone dane z innej lokalizacji na dysku.
 
 **Ochronny MBR (LBA0)**:
 
@@ -95,7 +95,7 @@ Nagłówek tabeli partycji definiuje użyteczne bloki na dysku. Definiuje równi
 
 | Offset    | Długość  | Zawartość                                                                                                                                                                     |
 | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 0 (0x00)  | 8 bajtów | Podpis ("EFI PART", 45h 46h 49h 20h 50h 41h 52h 54h lub 0x5452415020494645ULL[ ](https://en.wikipedia.org/wiki/GUID_Partition_Table#cite_note-8)na maszynach little-endian) |
+| 0 (0x00)  | 8 bajtów | Podpis ("EFI PART", 45h 46h 49h 20h 50h 41h 52h 54h lub 0x5452415020494645ULL[ ](https://en.wikipedia.org/wiki/GUID_Partition_Table#_note-8)na maszynach little-endian) |
 | 8 (0x08)  | 4 bajty  | Wersja 1.0 (00h 00h 01h 00h) dla UEFI 2.8                                                                                                                                  |
 | 12 (0x0C) | 4 bajty  | Rozmiar nagłówka w little endian (w bajtach, zazwyczaj 5Ch 00h 00h 00h lub 92 bajty)                                                                                                 |
 | 16 (0x10) | 4 bajty  | [CRC32](https://en.wikipedia.org/wiki/CRC32) nagłówka (offset +0 do rozmiaru nagłówka) w little endian, z tym polem wyzerowanym podczas obliczeń                             |
@@ -135,7 +135,7 @@ Po zamontowaniu obrazu forensycznego za pomocą [**ArsenalImageMounter**](https:
 
 ![](<../../../images/image (354).png>)
 
-Gdyby to była **tabela GPT zamiast MBR**, powinien pojawić się podpis _EFI PART_ w **sektorze 1** (który na poprzednim obrazie jest pusty).
+Gdyby to była **tabela GPT zamiast MBR**, powinna pojawić się sygnatura _EFI PART_ w **sektorze 1** (który na poprzednim obrazie jest pusty).
 
 ## Systemy plików
 
@@ -149,13 +149,13 @@ Gdyby to była **tabela GPT zamiast MBR**, powinien pojawić się podpis _EFI PA
 
 ### FAT
 
-System plików **FAT (File Allocation Table)** jest zaprojektowany wokół swojego kluczowego komponentu, tabeli alokacji plików, umieszczonej na początku woluminu. System ten chroni dane, utrzymując **dwie kopie** tabeli, zapewniając integralność danych, nawet jeśli jedna z nich ulegnie uszkodzeniu. Tabela, wraz z folderem głównym, musi znajdować się w **stałej lokalizacji**, co jest kluczowe dla procesu uruchamiania systemu.
+System plików **FAT (File Allocation Table)** jest zaprojektowany wokół swojego podstawowego komponentu, tabeli alokacji plików, umieszczonej na początku woluminu. System ten chroni dane, utrzymując **dwie kopie** tabeli, zapewniając integralność danych, nawet jeśli jedna z nich ulegnie uszkodzeniu. Tabela, wraz z folderem głównym, musi znajdować się w **stałej lokalizacji**, co jest kluczowe dla procesu uruchamiania systemu.
 
 Podstawową jednostką przechowywania w systemie plików jest **klaster, zazwyczaj 512B**, składający się z wielu sektorów. FAT ewoluował przez wersje:
 
 - **FAT12**, obsługujący 12-bitowe adresy klastrów i obsługujący do 4078 klastrów (4084 z UNIX).
-- **FAT16**, rozwijający się do 16-bitowych adresów, co pozwala na obsługę do 65,517 klastrów.
-- **FAT32**, dalej rozwijający się z 32-bitowymi adresami, pozwalając na imponujące 268,435,456 klastrów na wolumin.
+- **FAT16**, ulepszony do 16-bitowych adresów, co pozwala na obsługę do 65,517 klastrów.
+- **FAT32**, dalej rozwijający się z 32-bitowymi adresami, pozwalający na imponującą liczbę 268,435,456 klastrów na wolumin.
 
 Znaczącym ograniczeniem we wszystkich wersjach FAT jest **maksymalny rozmiar pliku wynoszący 4GB**, narzucony przez 32-bitowe pole używane do przechowywania rozmiaru pliku.
 
@@ -169,7 +169,7 @@ Kluczowe komponenty katalogu głównego, szczególnie dla FAT12 i FAT16, obejmuj
 
 ### EXT
 
-**Ext2** to najczęściej używany system plików dla **partycji bez dziennika** (**partycji, które nie zmieniają się zbyt często**) jak partycja rozruchowa. **Ext3/4** są **z dziennikiem** i są zazwyczaj używane dla **pozostałych partycji**.
+**Ext2** jest najczęściej używanym systemem plików dla **partycji bez dziennika** (**partycji, które nie zmieniają się zbytnio**) jak partycja rozruchowa. **Ext3/4** są **z dziennikiem** i są zazwyczaj używane dla **pozostałych partycji**.
 
 ## **Metadane**
 
@@ -201,17 +201,17 @@ file-data-carving-recovery-tools.md
 
 **File carving** to technika, która próbuje **znaleźć pliki w masie danych**. Istnieją 3 główne sposoby, w jakie działają takie narzędzia: **Na podstawie nagłówków i stopek typów plików**, na podstawie **struktur** typów plików oraz na podstawie **samej zawartości**.
 
-Należy zauważyć, że ta technika **nie działa na odzyskiwanie fragmentowanych plików**. Jeśli plik **nie jest przechowywany w sąsiadujących sektorach**, to ta technika nie będzie w stanie go znaleźć lub przynajmniej jego części.
+Należy zauważyć, że ta technika **nie działa w celu odzyskania fragmentowanych plików**. Jeśli plik **nie jest przechowywany w sąsiadujących sektorach**, to ta technika nie będzie w stanie go znaleźć lub przynajmniej jego części.
 
-Istnieje wiele narzędzi, które możesz użyć do carvingu plików, wskazując typy plików, które chcesz wyszukiwać.
+Istnieje kilka narzędzi, które możesz użyć do carvingu plików, wskazując typy plików, które chcesz wyszukiwać.
 
 {{#ref}}
 file-data-carving-recovery-tools.md
 {{#endref}}
 
-### Carving strumienia danych **C**
+### Carving strumieni danych
 
-Carving strumienia danych jest podobny do carvingu plików, ale **zamiast szukać kompletnych plików, szuka interesujących fragmentów** informacji.\
+Carving strumieni danych jest podobny do carvingu plików, ale **zamiast szukać kompletnych plików, szuka interesujących fragmentów** informacji.\
 Na przykład, zamiast szukać kompletnego pliku zawierającego zarejestrowane adresy URL, ta technika będzie szukać adresów URL.
 
 {{#ref}}
