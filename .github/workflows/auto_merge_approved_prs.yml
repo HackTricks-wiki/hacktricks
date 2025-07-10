@@ -49,7 +49,7 @@ jobs:
           max_merges=2
           
           echo "Repository owner: $repo_owner"
-          echo "Looking for PRs with 👍 emoji from owner..."
+          echo "Looking for PRs with 'merge' comment from owner..."
           
           # Get all open PRs
           prs=$(gh pr list --state open --json number,title,url)
@@ -76,17 +76,17 @@ jobs:
             # Get all comments for this PR
             comments=$(gh pr view "$pr_number" --json comments --jq '.comments[] | select(.author.login == "'"$repo_owner"'") | .body')
             
-            # Check if any comment from the owner contains the 👍 emoji
-            has_thumbs_up=false
+            # Check if any comment from the owner contains the word "merge"
+            has_merge_comment=false
             while IFS= read -r comment; do
-              if echo "$comment" | grep -q "👍"; then
-                has_thumbs_up=true
-                echo "Found 👍 emoji from owner in PR #$pr_number"
+              if echo "$comment" | grep -qi "merge"; then
+                has_merge_comment=true
+                echo "Found 'merge' comment from owner in PR #$pr_number"
                 break
               fi
             done <<< "$comments"
             
-            if [ "$has_thumbs_up" = true ]; then
+            if [ "$has_merge_comment" = true ]; then
               echo "Attempting to merge PR #$pr_number..."
               
               # Check if PR can be merged
@@ -104,7 +104,7 @@ jobs:
                 echo "PR #$pr_number is not mergeable (status: $pr_mergeable)"
               fi
             else
-              echo "No 👍 emoji found from owner in PR #$pr_number"
+              echo "No 'merge' comment found from owner in PR #$pr_number"
             fi
           done
           
