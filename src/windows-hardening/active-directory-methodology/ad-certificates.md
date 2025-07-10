@@ -71,12 +71,12 @@ Possono applicarsi controlli specifici, come:
 I certificati possono essere richiesti tramite:
 
 1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE), utilizzando interfacce DCOM.
-2. **ICertPassage Remote Protocol** (MS-ICPR), tramite pipe nominate o TCP/IP.
+2. **ICertPassage Remote Protocol** (MS-ICPR), attraverso pipe nominate o TCP/IP.
 3. L'**interfaccia web di iscrizione ai certificati**, con il ruolo di Web Enrollment dell'Autorità di Certificazione installato.
 4. Il **Certificate Enrollment Service** (CES), in combinazione con il servizio di Politica di Iscrizione ai Certificati (CEP).
 5. Il **Network Device Enrollment Service** (NDES) per dispositivi di rete, utilizzando il Simple Certificate Enrollment Protocol (SCEP).
 
-Gli utenti Windows possono anche richiedere certificati tramite l'interfaccia GUI (`certmgr.msc` o `certlm.msc`) o strumenti da riga di comando (`certreq.exe` o il comando `Get-Certificate` di PowerShell).
+Gli utenti Windows possono anche richiedere certificati tramite l'interfaccia grafica (`certmgr.msc` o `certlm.msc`) o strumenti da riga di comando (`certreq.exe` o il comando `Get-Certificate` di PowerShell).
 ```bash
 # Example of requesting a certificate using PowerShell
 Get-Certificate -Template "User" -CertStoreLocation "cert:\\CurrentUser\\My"
@@ -87,7 +87,7 @@ Active Directory (AD) supporta l'autenticazione tramite certificato, utilizzando
 
 ### Processo di Autenticazione Kerberos
 
-Nel processo di autenticazione Kerberos, la richiesta di un utente per un Ticket Granting Ticket (TGT) è firmata utilizzando la **chiave privata** del certificato dell'utente. Questa richiesta subisce diverse validazioni da parte del controller di dominio, inclusi la **validità** del certificato, il **percorso** e lo **stato di revoca**. Le validazioni includono anche la verifica che il certificato provenga da una fonte affidabile e la conferma della presenza dell'emittente nel **NTAUTH certificate store**. Validazioni riuscite portano all'emissione di un TGT. L'oggetto **`NTAuthCertificates`** in AD, si trova in:
+Nel processo di autenticazione Kerberos, la richiesta di un utente per un Ticket Granting Ticket (TGT) è firmata utilizzando la **chiave privata** del certificato dell'utente. Questa richiesta subisce diverse validazioni da parte del controller di dominio, inclusi la **validità** del certificato, il **percorso** e lo **stato di revoca**. Le validazioni includono anche la verifica che il certificato provenga da una fonte fidata e la conferma della presenza dell'emittente nel **NTAUTH certificate store**. Validazioni riuscite portano all'emissione di un TGT. L'oggetto **`NTAuthCertificates`** in AD, si trova in:
 ```bash
 CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>
 ```
@@ -124,9 +124,9 @@ certutil -v -dstemplate
 
 | Anno | ID / Nome | Impatto | Punti chiave |
 |------|-----------|--------|----------------|
-| 2022 | **CVE-2022-26923** – “Certifried” / ESC6 | *Escalation dei privilegi* tramite spoofing dei certificati degli account macchina durante PKINIT. | La patch è inclusa negli aggiornamenti di sicurezza del **10 maggio 2022**. Sono stati introdotti controlli di auditing e di mappatura forte tramite **KB5014754**; gli ambienti dovrebbero ora essere in modalità *Full Enforcement*. citeturn2search0 |
-| 2023 | **CVE-2023-35350 / 35351** | *Esecuzione di codice remoto* nei ruoli AD CS Web Enrollment (certsrv) e CES. | I PoC pubblici sono limitati, ma i componenti IIS vulnerabili sono spesso esposti internamente. Patch a partire dal **luglio 2023** Patch Tuesday. citeturn3search0 |
-| 2024 | **CVE-2024-49019** – “EKUwu” / ESC15 | Gli utenti a basso privilegio con diritti di registrazione potrebbero sovrascrivere **qualsiasi** EKU o SAN durante la generazione del CSR, emettendo certificati utilizzabili per l'autenticazione del client o la firma del codice, portando a *compromissione del dominio*. | Affrontato negli aggiornamenti di **aprile 2024**. Rimuovere “Supply in the request” dai modelli e limitare i permessi di registrazione. citeturn1search3 |
+| 2022 | **CVE-2022-26923** – “Certifried” / ESC6 | *Escalation dei privilegi* tramite spoofing dei certificati degli account macchina durante PKINIT. | La patch è inclusa negli aggiornamenti di sicurezza del **10 maggio 2022**. Sono stati introdotti controlli di auditing e di mappatura forte tramite **KB5014754**; gli ambienti dovrebbero ora essere in modalità *Full Enforcement*.  |
+| 2023 | **CVE-2023-35350 / 35351** | *Esecuzione di codice remoto* nei ruoli AD CS Web Enrollment (certsrv) e CES. | I PoC pubblici sono limitati, ma i componenti IIS vulnerabili sono spesso esposti internamente. Patch a partire dal **luglio 2023** Patch Tuesday.  |
+| 2024 | **CVE-2024-49019** – “EKUwu” / ESC15 | Gli utenti a basso privilegio con diritti di registrazione potrebbero sovrascrivere **qualsiasi** EKU o SAN durante la generazione del CSR, emettendo certificati utilizzabili per l'autenticazione del client o la firma del codice, portando a *compromissione del dominio*. | Affrontato negli aggiornamenti di **aprile 2024**. Rimuovere “Supply in the request” dai modelli e limitare i permessi di registrazione.  |
 
 ### Cronologia di indurimento di Microsoft (KB5014754)
 
@@ -134,18 +134,18 @@ Microsoft ha introdotto un rollout in tre fasi (Compatibilità → Audit → Enf
 
 1. Applicare patch a tutti i DC e server AD CS (maggio 2022 o successivi).
 2. Monitorare l'ID evento 39/41 per mappature deboli durante la fase di *Audit*.
-3. Riemettere certificati di autenticazione client con la nuova **estensione SID** o configurare mappature manuali forti prima di febbraio 2025. citeturn2search0
+3. Riemettere certificati di autenticazione client con la nuova **estensione SID** o configurare mappature manuali forti prima di febbraio 2025.
 
 ---
 
 ## Miglioramenti nella rilevazione e nell'indurimento
 
-* Il **Defender for Identity AD CS sensor (2023-2024)** ora fornisce valutazioni della postura per ESC1-ESC8/ESC11 e genera avvisi in tempo reale come *“Emissione di certificati per controller di dominio per un non-DC”* (ESC8) e *“Prevenire la registrazione dei certificati con politiche di applicazione arbitrarie”* (ESC15). Assicurati che i sensori siano distribuiti a tutti i server AD CS per beneficiare di queste rilevazioni. citeturn5search0
-* Disabilitare o limitare strettamente l'opzione **“Supply in the request”** su tutti i modelli; preferire valori SAN/EKU definiti esplicitamente.
-* Rimuovere **Any Purpose** o **No EKU** dai modelli a meno che non sia assolutamente necessario (affronta scenari ESC2).
-* Richiedere **approvazione del manager** o flussi di lavoro dedicati per l'agente di registrazione per modelli sensibili (ad es., WebServer / CodeSigning).
-* Limitare l'iscrizione web (`certsrv`) e gli endpoint CES/NDES a reti fidate o dietro autenticazione con certificato client.
-* Applicare la crittografia dell'iscrizione RPC (`certutil –setreg CA\InterfaceFlags +IF_ENFORCEENCRYPTICERTREQ`) per mitigare l'ESC11.
+* Il **Defender for Identity AD CS sensor (2023-2024)** ora presenta valutazioni della postura per ESC1-ESC8/ESC11 e genera avvisi in tempo reale come *“Emissione di certificati per controller di dominio per un non-DC”* (ESC8) e *“Prevenire la registrazione dei certificati con politiche di applicazione arbitrarie”* (ESC15). Assicurati che i sensori siano distribuiti a tutti i server AD CS per beneficiare di queste rilevazioni.
+* Disabilita o limita strettamente l'opzione **“Supply in the request”** su tutti i modelli; preferisci valori SAN/EKU definiti esplicitamente.
+* Rimuovi **Any Purpose** o **No EKU** dai modelli a meno che non sia assolutamente necessario (affronta scenari ESC2).
+* Richiedi **approvazione del manager** o flussi di lavoro dedicati per l'Enrollment Agent per modelli sensibili (ad es., WebServer / CodeSigning).
+* Limita l'iscrizione web (`certsrv`) e gli endpoint CES/NDES a reti fidate o dietro autenticazione del certificato client.
+* Applica la crittografia dell'iscrizione RPC (`certutil –setreg CA\InterfaceFlags +IF_ENFORCEENCRYPTICERTREQ`) per mitigare l'ESC11.
 
 ---
 

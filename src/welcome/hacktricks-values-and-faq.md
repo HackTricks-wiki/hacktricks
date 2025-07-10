@@ -8,14 +8,14 @@
 > Questi sono i **valori del Progetto HackTricks**:
 >
 > - Dare accesso **GRATUITO** a risorse di **hacking EDUCATIVO** a **TUTTI** su Internet.
->   - L'hacking riguarda l'apprendimento, e l'apprendimento dovrebbe essere il più gratuito possibile.
->   - Lo scopo di questo libro è servire come una **risorsa educativa** completa.
+>  - L'hacking riguarda l'apprendimento, e l'apprendimento dovrebbe essere il più gratuito possibile.
+>  - Lo scopo di questo libro è servire come una **risorsa educativa** completa.
 > - **ARCHIVIARE** tecniche di **hacking** fantastiche che la comunità pubblica dando a tutti gli **AUTORI ORIGINALI** tutti i **crediti**.
->   - **Non vogliamo il credito da altre persone**, vogliamo solo archiviare trucchi interessanti per tutti.
->   - Scriviamo anche **le nostre ricerche** in HackTricks.
->   - In diversi casi scriveremo **in HackTricks un riassunto delle parti importanti** della tecnica e **incoraggeremo il lettore a visitare il post originale** per maggiori dettagli.
-> - **ORGANIZZARE** tutte le tecniche di hacking nel libro in modo che siano **PIÙ ACCESSIBILI**
->   - Il team di HackTricks ha dedicato migliaia di ore gratuitamente **solo per organizzare il contenuto** affinché le persone possano **imparare più velocemente**
+>  - **Non vogliamo il credito da altre persone**, vogliamo solo archiviare trucchi interessanti per tutti.
+>  - Scriviamo anche **le nostre ricerche** in HackTricks.
+>  - In diversi casi scriveremo **in HackTricks un riassunto delle parti importanti** della tecnica e **incoraggeremo il lettore a visitare il post originale** per maggiori dettagli.
+> - **ORGANIZZARE** tutte le tecniche di hacking nel libro in modo che sia **PIÙ ACCESSIBILE**
+>  - Il team di HackTricks ha dedicato migliaia di ore gratuitamente **solo per organizzare il contenuto** affinché le persone possano **imparare più velocemente**
 
 <figure><img src="../images/hack tricks gif.gif" alt="" width="375"><figcaption></figcaption></figure>
 
@@ -123,9 +123,9 @@ Copyright © Tutti i diritti riservati, salvo diversa indicazione.
 
 - Uso Commerciale: Per richieste riguardanti l'uso commerciale di questo contenuto, ti preghiamo di contattarmi.
 
-Questa licenza non concede alcun diritto di marchio o branding in relazione al contenuto. Tutti i marchi e il branding presenti in questo blog/libro sono di proprietà dei rispettivi proprietari.
+Questa licenza non concede alcun diritto di marchio o branding in relazione al contenuto. Tutti i marchi e i branding presenti in questo blog/libro sono di proprietà dei rispettivi proprietari.
 
-**Accedendo o utilizzando HackTricks, accetti di rispettare i termini di questa licenza. Se non accetti questi termini, ti preghiamo di non accedere a questo sito web.**
+**Accedendo o utilizzando HackTricks, accetti di rispettare i termini di questa licenza. Se non sei d'accordo con questi termini, ti preghiamo di non accedere a questo sito web.**
 
 ## **Disclaimer**
 
