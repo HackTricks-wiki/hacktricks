@@ -14,16 +14,16 @@ Zaidi ya hayo, kazi hizi pia zinakubali **`entropy` parameter** ambayo pia itatu
 
 ### Uundaji wa funguo za Watumiaji
 
-DPAPI inaunda funguo ya kipekee (inayoitwa **`pre-key`**) kwa kila mtumiaji kulingana na akidi zao. Funguo hii inatokana na nenosiri la mtumiaji na mambo mengine na algorithimu inategemea aina ya mtumiaji lakini inamalizika kuwa SHA1. Kwa mfano, kwa watumiaji wa kikoa, **inategemea HTLM hash ya mtumiaji**.
+DPAPI inaunda funguo maalum (inayoitwa **`pre-key`**) kwa kila mtumiaji kulingana na akidi zao. Funguo hii inatokana na nywila ya mtumiaji na mambo mengine na algorithimu inategemea aina ya mtumiaji lakini inamalizika kuwa SHA1. Kwa mfano, kwa watumiaji wa kikoa, **inategemea HTLM hash ya mtumiaji**.
 
-Hii ni ya kuvutia hasa kwa sababu ikiwa mshambuliaji anaweza kupata hash ya nenosiri la mtumiaji, wanaweza:
+Hii ni ya kuvutia hasa kwa sababu ikiwa mshambuliaji anaweza kupata hash ya nywila ya mtumiaji, wanaweza:
 
 - **Kufungua data yoyote iliyosimbwa kwa kutumia DPAPI** kwa funguo ya mtumiaji huyo bila kuhitaji kuwasiliana na API yoyote
-- Jaribu **kufungua nenosiri** bila mtandaoni wakijaribu kuunda funguo halali ya DPAPI
+- Jaribu **kufungua nywila** bila mtandaoni wakijaribu kuunda funguo halali ya DPAPI
 
-Zaidi ya hayo, kila wakati data fulani inaposimbwa na mtumiaji kwa kutumia DPAPI, funguo mpya ya **master key** inaundwa. Funguo hii ya master ndiyo inayotumika kwa kweli kusimbia data. Kila funguo ya master inatolewa na **GUID** (Globally Unique Identifier) inayoiainisha.
+Zaidi ya hayo, kila wakati data fulani inaposimbwa na mtumiaji kwa kutumia DPAPI, funguo mpya ya **master key** inaundwa. Funguo hii ya master ndiyo inayotumika kweli kusimbia data. Kila funguo ya master inatolewa na **GUID** (Globally Unique Identifier) inayoiainisha.
 
-Funguo za master zinahifadhiwa katika **`%APPDATA%\Microsoft\Protect\<sid>\<guid>`** directory, ambapo `{SID}` ni Kitambulisho cha Usalama wa mtumiaji huyo. Funguo ya master inahifadhiwa ikiwa imefungwa na **`pre-key`** ya mtumiaji na pia na **funguo ya akiba ya kikoa** kwa ajili ya urejeleaji (hivyo funguo hiyo hiyo inahifadhiwa ikiwa imefungwa mara 2 na nywila 2 tofauti).
+Funguo za master zinahifadhiwa katika **`%APPDATA%\Microsoft\Protect\<sid>\<guid>`** directory, ambapo `{SID}` ni Kitambulisho cha Usalama wa mtumiaji huyo. Funguo ya master inahifadhiwa ikiwa imefungwa na **`pre-key`** ya mtumiaji na pia na **funguo ya akiba ya kikoa** kwa ajili ya urejeleaji (hivyo funguo hiyo hiyo inahifadhiwa ikiwa imefungwa mara 2 kwa nywila 2 tofauti).
 
 Kumbuka kwamba **funguo ya kikoa inayotumika kusimbia funguo ya master iko kwenye wasimamizi wa kikoa na haitabadilika kamwe**, hivyo ikiwa mshambuliaji ana ufikiaji wa msimamizi wa kikoa, wanaweza kupata funguo ya akiba ya kikoa na kufungua funguo za master za watumiaji wote katika kikoa.
 
@@ -47,7 +47,7 @@ Hii ndiyo inavyoonekana kwa funguo nyingi za Mwalimu wa mtumiaji:
 
 ### Uundaji wa funguo za Mashine/System
 
-Hii ni funguo inayotumika kwa mashine kuandika data. Inategemea **DPAPI_SYSTEM LSA secret**, ambayo ni funguo maalum ambayo ni lazima mtumiaji wa SYSTEM aweze kuipata. Funguo hii inatumika kuandika data ambayo inahitaji kupatikana na mfumo wenyewe, kama vile akreditif za kiwango cha mashine au siri za mfumo mzima.
+Hii ni funguo inayotumika kwa mashine kuandika data. Inategemea **DPAPI_SYSTEM LSA secret**, ambayo ni funguo maalum ambayo ni ya mtumiaji wa SYSTEM pekee. Funguo hii inatumika kuandika data ambayo inahitaji kupatikana na mfumo wenyewe, kama vile akreditif za kiwango cha mashine au siri za mfumo mzima.
 
 Kumbuka kwamba funguo hizi **hazina nakala ya eneo** hivyo zinapatikana tu kwa ndani:
 
@@ -74,7 +74,7 @@ Data iliyo hifadhiwa na mfumo inajumuisha:
 
 ### Chaguzi za kutoa funguo za Mwalimu
 
-- Ikiwa mtumiaji ana ruhusa za msimamizi wa eneo, wanaweza kupata **funguo ya nakala ya eneo** ili kufungua funguo zote za Mwalimu wa mtumiaji katika eneo:
+- Ikiwa mtumiaji ana ruhusa za msimamizi wa eneo, wanaweza kupata **funguo ya nakala ya eneo** ili kufungua funguo zote za mwalimu wa mtumiaji katika eneo:
 ```bash
 # Mimikatz
 lsadump::backupkeys /system:<DOMAIN CONTROLLER> /export
@@ -174,7 +174,7 @@ pbData             : b8f619[...snip...]b493fe
 ```
 - **Fikia masterkeys**:
 
-Fungua masterkey ya mtumiaji anayeomba **domain backup key** kwa kutumia RPC:
+Fungua masterkey ya mtumiaji anayeomba **funguo za akiba za domain** kwa kutumia RPC:
 ```bash
 # Mimikatz
 dpapi::masterkey /in:"C:\Users\USER\AppData\Roaming\Microsoft\Protect\SID\GUID" /rpc
@@ -234,7 +234,7 @@ SharpDPAPI.exe blob /target:C:\path\to\encrypted\file /unprotect
 
 Baadhi ya programu hupitisha thamani ya ziada ya **entropy** kwa `CryptProtectData`. Bila thamani hii, blob haiwezi kufichuliwa, hata kama funguo kuu sahihi inajulikana. Kupata entropy ni muhimu wakati wa kulenga akidi zilizolindwa kwa njia hii (kwa mfano, Microsoft Outlook, baadhi ya wateja wa VPN).
 
-[**EntropyCapture**](https://github.com/SpecterOps/EntropyCapture) (2022) ni DLL ya hali ya mtumiaji inayounganisha kazi za DPAPI ndani ya mchakato wa lengo na kurekodi kwa uwazi entropy yoyote ya hiari inayotolewa. Kuendesha EntropyCapture katika hali ya **DLL-injection** dhidi ya michakato kama `outlook.exe` au `vpnclient.exe` kutatoa faili inayounganisha kila buffer ya entropy na mchakato unaoitisha na blob. Entropy iliyorekodiwa inaweza baadaye kutolewa kwa **SharpDPAPI** (`/entropy:`) au **Mimikatz** (`/entropy:<file>`) ili kufichua data. citeturn5search0
+[**EntropyCapture**](https://github.com/SpecterOps/EntropyCapture) (2022) ni DLL ya hali ya mtumiaji inayounganisha kazi za DPAPI ndani ya mchakato wa lengo na kwa uwazi inarekodi entropy yoyote ya hiari inayotolewa. Kuendesha EntropyCapture katika hali ya **DLL-injection** dhidi ya michakato kama `outlook.exe` au `vpnclient.exe` kutatoa faili inayounganisha kila buffer ya entropy na mchakato unaoitisha na blob. Entropy iliyorekodiwa inaweza baadaye kutolewa kwa **SharpDPAPI** (`/entropy:`) au **Mimikatz** (`/entropy:<file>`) ili kufichua data.
 ```powershell
 # Inject EntropyCapture into the current user's Outlook
 InjectDLL.exe -pid (Get-Process outlook).Id -dll EntropyCapture.dll
@@ -244,7 +244,7 @@ SharpDPAPI.exe blob /target:secret.cred /entropy:entropy.bin /ntlm:<hash>
 ```
 ### Cracking masterkeys offline (Hashcat & DPAPISnoop)
 
-Microsoft ilianzisha muundo wa **context 3** masterkey kuanzia Windows 10 v1607 (2016). `hashcat` v6.2.6 (Desemba 2023) iliongeza hash-modes **22100** (DPAPI masterkey v1 context), **22101** (context 1) na **22102** (context 3) ikiruhusu kuvunja nywila za watumiaji kwa kutumia GPU moja kwa moja kutoka kwenye faili la masterkey. Washambuliaji wanaweza hivyo kufanya mashambulizi ya orodha ya maneno au brute-force bila kuingiliana na mfumo wa lengo. citeturn8search1
+Microsoft ilianzisha muundo wa **context 3** masterkey kuanzia Windows 10 v1607 (2016). `hashcat` v6.2.6 (Desemba 2023) iliongeza hash-modes **22100** (DPAPI masterkey v1 context), **22101** (context 1) na **22102** (context 3) ikiruhusu kuvunja nywila za watumiaji kwa kutumia GPU moja kwa moja kutoka kwenye faili la masterkey. Washambuliaji wanaweza hivyo kufanya mashambulizi ya orodha ya maneno au brute-force bila kuingiliana na mfumo wa lengo.
 
 `DPAPISnoop` (2024) inafanya mchakato kuwa otomatiki:
 ```bash
@@ -252,11 +252,12 @@ Microsoft ilianzisha muundo wa **context 3** masterkey kuanzia Windows 10 v1607 
 DPAPISnoop.exe masterkey-parse C:\Users\bob\AppData\Roaming\Microsoft\Protect\<sid> --mode hashcat --outfile bob.hc
 hashcat -m 22102 bob.hc wordlist.txt -O -w4
 ```
-Chombo kinaweza pia kuchambua Credential na Vault blobs, kuzikatisha na funguo zilizovunjwa na kuhamasisha nywila za wazi.
+Chombo kinaweza pia kuchambua Credential na Vault blobs, kuzikatisha na funguo zilizovunjwa na kusafirisha nywila za wazi.
 
-### Fikia data za mashine nyingine
 
-Katika **SharpDPAPI na SharpChrome** unaweza kuashiria chaguo la **`/server:HOST`** ili kufikia data za mashine ya mbali. Bila shaka unahitaji kuwa na uwezo wa kufikia mashine hiyo na katika mfano ufuatao inatarajiwa kuwa **funguo ya usimbaji ya akiba ya kikoa inajulikana**:
+### Pata data za mashine nyingine
+
+Katika **SharpDPAPI na SharpChrome** unaweza kuashiria chaguo la **`/server:HOST`** ili kupata data za mashine ya mbali. Bila shaka unahitaji kuwa na uwezo wa kufikia mashine hiyo na katika mfano ufuatao inatarajiwa kuwa **funguo ya usimbaji ya akiba ya kikoa inajulikana**:
 ```bash
 SharpDPAPI.exe triage /server:HOST /pvk:BASE64
 SharpChrome cookies /server:HOST /pvk:BASE64
@@ -277,38 +278,36 @@ Kwa orodha ya kompyuta zilizopatikana kutoka LDAP unaweza kupata kila sub networ
 
 * Kukusanya blobs kwa wakati mmoja kutoka kwa majeshi mamia
 * Kuchambua **context 3** masterkeys na kuunganisha kiotomatiki Hashcat cracking
-* Msaada kwa ajili ya vidakuzi vilivyofichwa vya Chrome "App-Bound" (angalia sehemu inayofuata)
-* Hali mpya ya **`--snapshot`** ya kuangalia mara kwa mara maeneo na kutofautisha blobs mpya zilizoundwa citeturn1search2
+* Msaada kwa ajili ya vidakuzi vilivyofichwa "App-Bound" vya Chrome (angalia sehemu inayofuata)
+* Hali mpya ya **`--snapshot`** ya kuangalia mara kwa mara mwisho na kulinganisha blobs mpya zilizoundwa
 
 ### DPAPISnoop
 
-[**DPAPISnoop**](https://github.com/Leftp/DPAPISnoop) ni parser ya C# kwa ajili ya masterkey/faili za akiba/credential ambazo zinaweza kutoa Hashcat/JtR formats na kwa hiari kuanzisha cracking kiotomatiki. Inasaidia kikamilifu fomati za masterkey za mashine na mtumiaji hadi Windows 11 24H1. citeturn2search0
-
+[**DPAPISnoop**](https://github.com/Leftp/DPAPISnoop) ni parser ya C# kwa ajili ya masterkey/credential/vault files ambayo inaweza kutoa Hashcat/JtR formats na kwa hiari kuanzisha cracking kiotomatiki. Inasaidia kikamilifu fomati za masterkey za mashine na mtumiaji hadi Windows 11 24H1.
 
 ## Common detections
 
 - Ufikiaji wa faili katika `C:\Users\*\AppData\Roaming\Microsoft\Protect\*`, `C:\Users\*\AppData\Roaming\Microsoft\Credentials\*` na directories nyingine zinazohusiana na DPAPI.
 - Haswa kutoka kwenye share ya mtandao kama **C$** au **ADMIN$**.
-- Matumizi ya **Mimikatz**, **SharpDPAPI** au zana zinazofanana kufikia kumbukumbu ya LSASS au kutoa masterkeys.
-- Tukio **4662**: *Operesheni ilifanyika kwenye kitu* – inaweza kuhusishwa na ufikiaji wa kitu cha **`BCKUPKEY`**.
+- Matumizi ya **Mimikatz**, **SharpDPAPI** au zana zinazofanana kupata kumbukumbu ya LSASS au kutoa masterkeys.
+- Tukio **4662**: *Operesheni ilifanyika kwenye kitu* – inaweza kuhusishwa na ufikiaji wa **`BCKUPKEY`** kitu.
 - Tukio **4673/4674** wakati mchakato unapoomba *SeTrustedCredManAccessPrivilege* (Credential Manager)
 
 ---
 ### 2023-2025 vulnerabilities & ecosystem changes
 
-* **CVE-2023-36004 – Windows DPAPI Secure Channel Spoofing** (Novemba 2023). Mshambuliaji mwenye ufikiaji wa mtandao anaweza kumdanganya mwanachama wa eneo ili kupata funguo ya akiba ya DPAPI yenye uharibifu, ikiruhusu ufichuzi wa masterkeys za watumiaji. Imefanyiwa marekebisho katika sasisho la jumla la Novemba 2023 – wasimamizi wanapaswa kuhakikisha DCs na vituo vya kazi vimefanyiwa marekebisho kikamilifu. citeturn4search0
-* **Chrome 127 “App-Bound” cookie encryption** (Julai 2024) ilibadilisha ulinzi wa zamani wa DPAPI pekee kwa funguo ya ziada iliyohifadhiwa chini ya **Credential Manager** ya mtumiaji. Ufichuzi wa vidakuzi nje ya mtandao sasa unahitaji masterkey ya DPAPI na **funguo ya GCM-wrapped app-bound**. SharpChrome v2.3 na DonPAPI 2.x zinaweza kurejesha funguo ya ziada wakati zinakimbia kwa muktadha wa mtumiaji. citeturn0search0
-
+* **CVE-2023-36004 – Windows DPAPI Secure Channel Spoofing** (Novemba 2023). Mshambuliaji mwenye ufikiaji wa mtandao anaweza kumdanganya mwanachama wa eneo ili kupata funguo ya akiba ya DPAPI yenye uharibifu, kuruhusu ufichuzi wa masterkeys za watumiaji. Imefanyiwa marekebisho katika sasisho la jumla la Novemba 2023 – wasimamizi wanapaswa kuhakikisha DCs na vituo vya kazi vimefanyiwa marekebisho kikamilifu.
+* **Chrome 127 “App-Bound” cookie encryption** (Julai 2024) ilibadilisha ulinzi wa zamani wa DPAPI pekee kwa funguo ya ziada iliyohifadhiwa chini ya **Credential Manager** ya mtumiaji. Ufichuzi wa vidakuzi bila mtandao sasa unahitaji masterkey ya DPAPI na **funguo ya GCM-wrapped app-bound**. SharpChrome v2.3 na DonPAPI 2.x zinaweza kurejesha funguo ya ziada wakati zinapofanya kazi na muktadha wa mtumiaji.
 
 ## References
 
-- https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13
-- https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c
-- https://msrc.microsoft.com/update-guide/vulnerability/CVE-2023-36004
-- https://security.googleblog.com/2024/07/improving-security-of-chrome-cookies-on.html
-- https://specterops.io/blog/2022/05/18/entropycapture-simple-extraction-of-dpapi-optional-entropy/
-- https://github.com/Hashcat/Hashcat/releases/tag/v6.2.6
-- https://github.com/Leftp/DPAPISnoop
-- https://pypi.org/project/donpapi/2.0.0/
+- [https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13](https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13)
+- [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c)
+- [https://msrc.microsoft.com/update-guide/vulnerability/CVE-2023-36004](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2023-36004)
+- [https://security.googleblog.com/2024/07/improving-security-of-chrome-cookies-on.html](https://security.googleblog.com/2024/07/improving-security-of-chrome-cookies-on.html)
+- [https://specterops.io/blog/2022/05/18/entropycapture-simple-extraction-of-dpapi-optional-entropy/](https://specterops.io/blog/2022/05/18/entropycapture-simple-extraction-of-dpapi-optional-entropy/)
+- [https://github.com/Hashcat/Hashcat/releases/tag/v6.2.6](https://github.com/Hashcat/Hashcat/releases/tag/v6.2.6)
+- [https://github.com/Leftp/DPAPISnoop](https://github.com/Leftp/DPAPISnoop)
+- [https://pypi.org/project/donpapi/2.0.0/](https://pypi.org/project/donpapi/2.0.0/)
 
 {{#include ../../banners/hacktricks-training.md}}
