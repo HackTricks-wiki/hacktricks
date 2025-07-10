@@ -29,13 +29,17 @@ jobs:
           
           if [ "$running_workflows" -gt 0 ]; then
             echo "Found $running_workflows running workflows. Exiting to avoid conflicts."
-            exit 0
+            echo "should_continue=false" >> $GITHUB_OUTPUT
+          else
+            echo "No other workflows running. Proceeding with auto-merge."
+            echo "should_continue=true" >> $GITHUB_OUTPUT
           fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Get repository owner
         id: repo_info
+        if: steps.check_workflows.outputs.should_continue == 'true'
         run: |
           repo_owner=$(gh repo view --json owner --jq '.owner.login')
           echo "repo_owner=$repo_owner" >> $GITHUB_OUTPUT
@@ -43,6 +47,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Find and merge approved PRs
+        if: steps.check_workflows.outputs.should_continue == 'true'
         run: |
           repo_owner="${{ steps.repo_info.outputs.repo_owner }}"
           merged_count=0
