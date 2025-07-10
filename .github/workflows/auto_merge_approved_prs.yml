@@ -37,24 +37,31 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
-      - name: Get repository owner
-        id: repo_info
+      - name: Get organization info
+        id: org_info
         if: steps.check_workflows.outputs.should_continue == 'true'
         run: |
-          repo_owner=$(gh repo view --json owner --jq '.owner.login')
-          echo "repo_owner=$repo_owner" >> $GITHUB_OUTPUT
+          repo_info=$(gh repo view --json owner)
+          org_name=$(echo "$repo_info" | jq -r '.owner.login')
+          echo "org_name=$org_name" >> $GITHUB_OUTPUT
+          
+          # Get all organization members with admin role
+          echo "Getting organization admins..."
+          admins=$(gh api "orgs/$org_name/members?role=admin" --jq '.[].login' | tr '\n' ' ')
+          echo "org_admins=$admins" >> $GITHUB_OUTPUT
+          echo "Organization admins: $admins"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Find and merge approved PRs
         if: steps.check_workflows.outputs.should_continue == 'true'
         run: |
-          repo_owner="${{ steps.repo_info.outputs.repo_owner }}"
+          org_admins="${{ steps.org_info.outputs.org_admins }}"
           merged_count=0
           max_merges=2
           
-          echo "Repository owner: $repo_owner"
-          echo "Looking for PRs with 'merge' comment from owner..."
+          echo "Organization admins: $org_admins"
+          echo "Looking for PRs with exact comment 'bot merge please' from any org admin..."
           
           # Get all open PRs
           prs=$(gh pr list --state open --json number,title,url)
@@ -79,17 +86,30 @@ jobs:
             echo "Checking PR #$pr_number: $pr_title"
             
             # Get all comments for this PR
-            comments=$(gh pr view "$pr_number" --json comments --jq '.comments[] | select(.author.login == "'"$repo_owner"'") | .body')
+            comments=$(gh pr view "$pr_number" --json comments --jq '.comments[]')
             
-            # Check if any comment from the owner contains the word "merge"
+            # Print all comment authors for debugging
+            echo "Comments in PR #$pr_number:"
+            echo "$comments" | jq -r '"  - Author: " + .author.login + " | Comment: " + (.body | split("\n")[0] | .[0:100])'
+            
+            # Check if any comment from an org admin contains exactly "bot merge please"
             has_merge_comment=false
-            while IFS= read -r comment; do
-              if echo "$comment" | grep -qi "merge"; then
-                has_merge_comment=true
-                echo "Found 'merge' comment from owner in PR #$pr_number"
-                break
+            echo "$comments" | jq -r '.author.login + "|" + .body' | while IFS='|' read -r comment_author comment_body; do
+              # Check if the comment author is in the list of org admins
+              if echo "$org_admins" | grep -wq "$comment_author"; then
+                # Check for exact match "bot merge please" (case-insensitive)
+                if echo "$comment_body" | grep -iExq "bot merge please"; then
+                  echo "Found exact 'bot merge please' comment from org admin '$comment_author' in PR #$pr_number"
+                  echo "true" > /tmp/has_merge_comment_$pr_number
+                  break
+                fi
               fi
-            done <<< "$comments"
+            done
+            
+            # Check if merge comment was found
+            if [ -f "/tmp/has_merge_comment_$pr_number" ]; then
+              has_merge_comment=true
+            fi
             
             if [ "$has_merge_comment" = true ]; then
               echo "Attempting to merge PR #$pr_number..."
@@ -109,8 +129,11 @@ jobs:
                 echo "PR #$pr_number is not mergeable (status: $pr_mergeable)"
               fi
             else
-              echo "No 'merge' comment found from owner in PR #$pr_number"
+              echo "No exact 'bot merge please' comment found from any org admin in PR #$pr_number"
             fi
+            
+            # Clean up temp file
+            rm -f "/tmp/has_merge_comment_$pr_number"
           done
           
           echo "Auto-merge process completed. Merged $merged_count PRs."
