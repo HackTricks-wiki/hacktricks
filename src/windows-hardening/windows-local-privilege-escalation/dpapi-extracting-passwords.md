@@ -267,7 +267,7 @@ SharpDPAPI.exe blob /target:C:\path\to\encrypted\file /unprotect
 
 Some applications pass an additional **entropy** value to `CryptProtectData`. Without this value the blob cannot be decrypted, even if the correct masterkey is known. Obtaining the entropy is therefore essential when targeting credentials protected in this way (e.g. Microsoft Outlook, some VPN clients).
 
-[**EntropyCapture**](https://github.com/SpecterOps/EntropyCapture) (2022) is a user-mode DLL that hooks the DPAPI functions inside the target process and transparently records any optional entropy that is supplied. Running EntropyCapture in **DLL-injection** mode against processes like `outlook.exe` or `vpnclient.exe` will output a file mapping each entropy buffer to the calling process and blob. The captured entropy can later be supplied to **SharpDPAPI** (`/entropy:`) or **Mimikatz** (`/entropy:<file>`) in order to decrypt the data. citeturn5search0
+[**EntropyCapture**](https://github.com/SpecterOps/EntropyCapture) (2022) is a user-mode DLL that hooks the DPAPI functions inside the target process and transparently records any optional entropy that is supplied. Running EntropyCapture in **DLL-injection** mode against processes like `outlook.exe` or `vpnclient.exe` will output a file mapping each entropy buffer to the calling process and blob. The captured entropy can later be supplied to **SharpDPAPI** (`/entropy:`) or **Mimikatz** (`/entropy:<file>`) in order to decrypt the data. 
 
 ```powershell
 # Inject EntropyCapture into the current user's Outlook
@@ -280,7 +280,7 @@ SharpDPAPI.exe blob /target:secret.cred /entropy:entropy.bin /ntlm:<hash>
 
 ### Cracking masterkeys offline (Hashcat & DPAPISnoop)
 
-Microsoft introduced a **context 3** masterkey format starting with Windows 10 v1607 (2016). `hashcat` v6.2.6 (December 2023) added hash-modes **22100** (DPAPI masterkey v1 context ), **22101** (context 1) and **22102** (context 3) allowing GPU-accelerated cracking of user passwords directly from the masterkey file. Attackers can therefore perform word-list or brute-force attacks without interacting with the target system. citeturn8search1
+Microsoft introduced a **context 3** masterkey format starting with Windows 10 v1607 (2016). `hashcat` v6.2.6 (December 2023) added hash-modes **22100** (DPAPI masterkey v1 context ), **22101** (context 1) and **22102** (context 3) allowing GPU-accelerated cracking of user passwords directly from the masterkey file. Attackers can therefore perform word-list or brute-force attacks without interacting with the target system. 
 
 `DPAPISnoop` (2024) automates the process:
 
@@ -319,11 +319,11 @@ With extracted from LDAP computers list you can find every sub network even if y
 * Parallel collection of blobs from hundreds of hosts
 * Parsing of **context 3** masterkeys and automatic Hashcat cracking integration
 * Support for Chrome "App-Bound" encrypted cookies (see next section)
-* A new **`--snapshot`** mode to repeatedly poll endpoints and diff newly-created blobs citeturn1search2
+* A new **`--snapshot`** mode to repeatedly poll endpoints and diff newly-created blobs 
 
 ### DPAPISnoop
 
-[**DPAPISnoop**](https://github.com/Leftp/DPAPISnoop) is a C# parser for masterkey/credential/vault files that can output Hashcat/JtR formats and optionally invoke cracking automatically. It fully supports machine and user masterkey formats up to Windows 11 24H1. citeturn2search0
+[**DPAPISnoop**](https://github.com/Leftp/DPAPISnoop) is a C# parser for masterkey/credential/vault files that can output Hashcat/JtR formats and optionally invoke cracking automatically. It fully supports machine and user masterkey formats up to Windows 11 24H1. 
 
 
 ## Common detections
@@ -337,19 +337,19 @@ With extracted from LDAP computers list you can find every sub network even if y
 ---
 ### 2023-2025 vulnerabilities & ecosystem changes
 
-* **CVE-2023-36004 – Windows DPAPI Secure Channel Spoofing** (November 2023). An attacker with network access could trick a domain member into retrieving a malicious DPAPI backup key, allowing decryption of user masterkeys. Patched in November 2023 cumulative update – administrators should ensure DCs and workstations are fully patched. citeturn4search0
-* **Chrome 127 “App-Bound” cookie encryption** (July 2024) replaced the legacy DPAPI-only protection with an additional key stored under the user’s **Credential Manager**. Offline decryption of cookies now requires both the DPAPI masterkey and the **GCM-wrapped app-bound key**. SharpChrome v2.3 and DonPAPI 2.x are able to recover the extra key when running with user context. citeturn0search0
+* **CVE-2023-36004 – Windows DPAPI Secure Channel Spoofing** (November 2023). An attacker with network access could trick a domain member into retrieving a malicious DPAPI backup key, allowing decryption of user masterkeys. Patched in November 2023 cumulative update – administrators should ensure DCs and workstations are fully patched. 
+* **Chrome 127 “App-Bound” cookie encryption** (July 2024) replaced the legacy DPAPI-only protection with an additional key stored under the user’s **Credential Manager**. Offline decryption of cookies now requires both the DPAPI masterkey and the **GCM-wrapped app-bound key**. SharpChrome v2.3 and DonPAPI 2.x are able to recover the extra key when running with user context. 
 
 
 ## References
 
-- https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13
-- https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c
-- https://msrc.microsoft.com/update-guide/vulnerability/CVE-2023-36004
-- https://security.googleblog.com/2024/07/improving-security-of-chrome-cookies-on.html
-- https://specterops.io/blog/2022/05/18/entropycapture-simple-extraction-of-dpapi-optional-entropy/
-- https://github.com/Hashcat/Hashcat/releases/tag/v6.2.6
-- https://github.com/Leftp/DPAPISnoop
-- https://pypi.org/project/donpapi/2.0.0/
+- [https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13](https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13)
+- [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c)
+- [https://msrc.microsoft.com/update-guide/vulnerability/CVE-2023-36004](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2023-36004)
+- [https://security.googleblog.com/2024/07/improving-security-of-chrome-cookies-on.html](https://security.googleblog.com/2024/07/improving-security-of-chrome-cookies-on.html)
+- [https://specterops.io/blog/2022/05/18/entropycapture-simple-extraction-of-dpapi-optional-entropy/](https://specterops.io/blog/2022/05/18/entropycapture-simple-extraction-of-dpapi-optional-entropy/)
+- [https://github.com/Hashcat/Hashcat/releases/tag/v6.2.6](https://github.com/Hashcat/Hashcat/releases/tag/v6.2.6)
+- [https://github.com/Leftp/DPAPISnoop](https://github.com/Leftp/DPAPISnoop)
+- [https://pypi.org/project/donpapi/2.0.0/](https://pypi.org/project/donpapi/2.0.0/)
 
 {{#include ../../banners/hacktricks-training.md}}
