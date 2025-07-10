@@ -12,7 +12,7 @@
 - Unikalny **Numer seryjny**, dostarczony przez Urząd Certyfikacji (CA), identyfikuje każdy certyfikat.
 - **Wystawca** odnosi się do CA, który wydał certyfikat.
 - **SubjectAlternativeName** pozwala na dodatkowe nazwy dla podmiotu, zwiększając elastyczność identyfikacji.
-- **Podstawowe ograniczenia** identyfikują, czy certyfikat jest dla CA, czy dla podmiotu końcowego, oraz definiują ograniczenia użytkowania.
+- **Podstawowe ograniczenia** identyfikują, czy certyfikat jest dla CA czy podmiotu końcowego oraz definiują ograniczenia użytkowania.
 - **Rozszerzone zastosowania kluczy (EKU)** określają konkretne cele certyfikatu, takie jak podpisywanie kodu czy szyfrowanie e-maili, za pomocą identyfikatorów obiektów (OID).
 - **Algorytm podpisu** określa metodę podpisywania certyfikatu.
 - **Podpis**, stworzony za pomocą klucza prywatnego wystawcy, gwarantuje autentyczność certyfikatu.
@@ -25,8 +25,8 @@
 
 AD CS uznaje certyfikaty CA w lesie AD poprzez wyznaczone kontenery, z których każdy pełni unikalne role:
 
-- Kontener **Urzędów Certyfikacji** przechowuje zaufane certyfikaty root CA.
-- Kontener **Usługi rejestracji** zawiera szczegóły dotyczące Enterprise CA i ich szablonów certyfikatów.
+- Kontener **Certification Authorities** przechowuje zaufane certyfikaty root CA.
+- Kontener **Enrolment Services** zawiera szczegóły dotyczące Enterprise CA i ich szablonów certyfikatów.
 - Obiekt **NTAuthCertificates** zawiera certyfikaty CA autoryzowane do uwierzytelniania AD.
 - Kontener **AIA (Authority Information Access)** ułatwia walidację łańcucha certyfikatów z certyfikatami CA pośrednimi i krzyżowymi.
 
@@ -39,13 +39,13 @@ AD CS uznaje certyfikaty CA w lesie AD poprzez wyznaczone kontenery, z których 
 
 ### Szablony certyfikatów
 
-Zdefiniowane w AD, te szablony określają ustawienia i uprawnienia do wydawania certyfikatów, w tym dozwolone EKU oraz prawa do rejestracji lub modyfikacji, co jest kluczowe dla zarządzania dostępem do usług certyfikacyjnych.
+Zdefiniowane w AD, te szablony określają ustawienia i uprawnienia do wydawania certyfikatów, w tym dozwolone EKU oraz prawa do rejestracji lub modyfikacji, co jest kluczowe dla zarządzania dostępem do usług certyfikatów.
 
 ## Rejestracja certyfikatu
 
 Proces rejestracji certyfikatów inicjuje administrator, który **tworzy szablon certyfikatu**, który następnie jest **publikowany** przez Enterprise Certificate Authority (CA). Umożliwia to klientom rejestrację, co osiąga się poprzez dodanie nazwy szablonu do pola `certificatetemplates` obiektu Active Directory.
 
-Aby klient mógł zażądać certyfikatu, muszą być przyznane **prawa rejestracji**. Prawa te są definiowane przez deskryptory zabezpieczeń na szablonie certyfikatu oraz samym Enterprise CA. Uprawnienia muszą być przyznane w obu lokalizacjach, aby żądanie mogło być skuteczne.
+Aby klient mógł zażądać certyfikatu, muszą być przyznane **prawa rejestracji**. Prawa te są określone przez deskryptory zabezpieczeń na szablonie certyfikatu oraz samym Enterprise CA. Uprawnienia muszą być przyznane w obu lokalizacjach, aby żądanie mogło być skuteczne.
 
 ### Prawa rejestracji szablonów
 
@@ -70,11 +70,11 @@ Mogą obowiązywać pewne kontrole, takie jak:
 
 Certyfikaty można żądać za pośrednictwem:
 
-1. **Protokół rejestracji certyfikatów klienta Windows** (MS-WCCE), używając interfejsów DCOM.
-2. **Protokół ICertPassage Remote** (MS-ICPR), przez potoki nazwane lub TCP/IP.
-3. **Interfejs internetowy rejestracji certyfikatów**, z zainstalowaną rolą Web Enrollment Urzędu Certyfikacji.
-4. **Usługa rejestracji certyfikatów** (CES), w połączeniu z usługą polityki rejestracji certyfikatów (CEP).
-5. **Usługa rejestracji urządzeń sieciowych** (NDES) dla urządzeń sieciowych, używając prostego protokołu rejestracji certyfikatów (SCEP).
+1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE), używając interfejsów DCOM.
+2. **ICertPassage Remote Protocol** (MS-ICPR), przez potoki nazwane lub TCP/IP.
+3. **interfejsu internetowego rejestracji certyfikatów**, z zainstalowaną rolą Web Enrollment Urzędu Certyfikacji.
+4. **Usługi rejestracji certyfikatów** (CES), w połączeniu z usługą polityki rejestracji certyfikatów (CEP).
+5. **Usługi rejestracji urządzeń sieciowych** (NDES) dla urządzeń sieciowych, używając prostego protokołu rejestracji certyfikatów (SCEP).
 
 Użytkownicy systemu Windows mogą również żądać certyfikatów za pośrednictwem GUI (`certmgr.msc` lub `certlm.msc`) lub narzędzi wiersza poleceń (`certreq.exe` lub polecenia PowerShell `Get-Certificate`).
 ```bash
@@ -95,11 +95,11 @@ jest kluczowe dla ustanowienia zaufania w przypadku uwierzytelniania certyfikat�
 
 ### Uwierzytelnianie Secure Channel (Schannel)
 
-Schannel ułatwia bezpieczne połączenia TLS/SSL, w których podczas handshake klient przedstawia certyfikat, który, jeśli zostanie pomyślnie zweryfikowany, autoryzuje dostęp. Mapowanie certyfikatu do konta AD może obejmować funkcję Kerberos **S4U2Self** lub **Subject Alternative Name (SAN)** certyfikatu, między innymi metody.
+Schannel ułatwia bezpieczne połączenia TLS/SSL, gdzie podczas handshake klient przedstawia certyfikat, który, jeśli zostanie pomyślnie zweryfikowany, autoryzuje dostęp. Mapowanie certyfikatu do konta AD może obejmować funkcję Kerberos **S4U2Self** lub **Subject Alternative Name (SAN)** certyfikatu, między innymi metody.
 
 ### Enumeracja usług certyfikatów AD
 
-Usługi certyfikatów AD można enumerować za pomocą zapytań LDAP, ujawniając informacje o **Enterprise Certificate Authorities (CAs)** i ich konfiguracjach. Jest to dostępne dla każdego użytkownika uwierzytelnionego w domenie bez specjalnych uprawnień. Narzędzia takie jak **[Certify](https://github.com/GhostPack/Certify)** i **[Certipy](https://github.com/ly4k/Certipy)** są używane do enumeracji i oceny podatności w środowiskach AD CS.
+Usługi certyfikatów AD mogą być enumerowane za pomocą zapytań LDAP, ujawniając informacje o **Enterprise Certificate Authorities (CAs)** i ich konfiguracjach. Jest to dostępne dla każdego użytkownika uwierzytelnionego w domenie bez specjalnych uprawnień. Narzędzia takie jak **[Certify](https://github.com/GhostPack/Certify)** i **[Certipy](https://github.com/ly4k/Certipy)** są używane do enumeracji i oceny podatności w środowiskach AD CS.
 
 Polecenia do korzystania z tych narzędzi obejmują:
 ```bash
@@ -108,16 +108,52 @@ Certify.exe cas
 # Identify vulnerable certificate templates with Certify
 Certify.exe find /vulnerable
 
-# Use Certipy for enumeration and identifying vulnerable templates
-certipy find -vulnerable -u john@corp.local -p Passw0rd -dc-ip 172.16.126.128
+# Use Certipy (>=4.0) for enumeration and identifying vulnerable templates
+certipy find -vulnerable -dc-only -u john@corp.local -p Passw0rd -target dc.corp.local
+
+# Request a certificate over the web enrollment interface (new in Certipy 4.x)
+certipy req -web -target ca.corp.local -template WebServer -upn john@corp.local -dns www.corp.local
 
 # Enumerate Enterprise CAs and certificate templates with certutil
 certutil.exe -TCAInfo
 certutil -v -dstemplate
 ```
-## Odniesienia
+---
+
+## Ostatnie luki i aktualizacje zabezpieczeń (2022-2025)
+
+| Rok  | ID / Nazwa | Wpływ | Kluczowe wnioski |
+|------|------------|-------|------------------|
+| 2022 | **CVE-2022-26923** – “Certifried” / ESC6 | *Escalacja uprawnień* poprzez fałszowanie certyfikatów konta maszyny podczas PKINIT. | Łatka jest zawarta w aktualizacjach zabezpieczeń z **10 maja 2022**. Wprowadzono audyt i silne kontrole mapowania za pomocą **KB5014754**; środowiska powinny teraz być w trybie *Pełnego Egzekwowania*. citeturn2search0 |
+| 2023 | **CVE-2023-35350 / 35351** | *Zdalne wykonanie kodu* w roli AD CS Web Enrollment (certsrv) i CES. | Publiczne PoC są ograniczone, ale podatne komponenty IIS są często narażone wewnętrznie. Łatka od **lipca 2023** w Patch Tuesday. citeturn3search0 |
+| 2024 | **CVE-2024-49019** – “EKUwu” / ESC15 | Użytkownicy z niskimi uprawnieniami z prawami do rejestracji mogą nadpisać **dowolny** EKU lub SAN podczas generowania CSR, wydając certyfikaty użyteczne do uwierzytelniania klienta lub podpisywania kodu, co prowadzi do *kompromitacji domeny*. | Rozwiązano w aktualizacjach z **kwietnia 2024**. Usuń “Dostarcz w żądaniu” z szablonów i ogranicz uprawnienia do rejestracji. citeturn1search3 |
+
+### Harmonogram wzmocnienia Microsoftu (KB5014754)
+
+Microsoft wprowadził trzyetapowe wdrożenie (Kompatybilność → Audyt → Egzekwowanie), aby przenieść uwierzytelnianie certyfikatów Kerberos z słabych mapowań domyślnych. Od **11 lutego 2025** kontrolery domeny automatycznie przełączają się na **Pełne Egzekwowanie**, jeśli wartość rejestru `StrongCertificateBindingEnforcement` nie jest ustawiona. Administratorzy powinni:
+
+1. Zainstalować łatki na wszystkich DC i serwerach AD CS (maj 2022 lub później).
+2. Monitorować identyfikatory zdarzeń 39/41 w poszukiwaniu słabych mapowań podczas fazy *Audytu*.
+3. Ponownie wydać certyfikaty uwierzytelniające klienta z nowym **rozszerzeniem SID** lub skonfigurować silne mapowania ręczne przed lutym 2025. citeturn2search0
+
+---
+
+## Ulepszenia wykrywania i wzmocnienia
+
+* **Defender for Identity AD CS sensor (2023-2024)** teraz przedstawia oceny postawy dla ESC1-ESC8/ESC11 i generuje alerty w czasie rzeczywistym, takie jak *“Wydanie certyfikatu kontrolera domeny dla nie-DC”* (ESC8) i *“Zapobiegaj rejestracji certyfikatów z dowolnymi politykami aplikacji”* (ESC15). Upewnij się, że czujniki są wdrożone na wszystkich serwerach AD CS, aby skorzystać z tych wykryć. citeturn5search0
+* Wyłącz lub ściśle ogranicz opcję **“Dostarcz w żądaniu”** we wszystkich szablonach; preferuj wyraźnie zdefiniowane wartości SAN/EKU.
+* Usuń **Dowolny cel** lub **Brak EKU** z szablonów, chyba że jest to absolutnie konieczne (dotyczy scenariuszy ESC2).
+* Wymagaj **zatwierdzenia menedżera** lub dedykowanych przepływów pracy Agenta Rejestracji dla wrażliwych szablonów (np. WebServer / CodeSigning).
+* Ogranicz rejestrację internetową (`certsrv`) oraz punkty końcowe CES/NDES do zaufanych sieci lub za uwierzytelnianiem certyfikatu klienta.
+* Wymuś szyfrowanie rejestracji RPC (`certutil –setreg CA\InterfaceFlags +IF_ENFORCEENCRYPTICERTREQ`), aby złagodzić ESC11.
+
+---
+
+## Odnośniki
 
 - [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)
 - [https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html](https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html)
+- [https://support.microsoft.com/en-us/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16](https://support.microsoft.com/en-us/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16)
+- [https://advisory.eventussecurity.com/advisory/critical-vulnerability-in-ad-cs-allows-privilege-escalation/](https://advisory.eventussecurity.com/advisory/critical-vulnerability-in-ad-cs-allows-privilege-escalation/)
 
 {{#include ../../banners/hacktricks-training.md}}
