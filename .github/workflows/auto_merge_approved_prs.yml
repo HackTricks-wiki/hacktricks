@@ -39,7 +39,7 @@ jobs:
           max_merges=2
           
           echo "Authorized user: $authorized_user"
-          echo "Looking for PRs with exact comment 'bot merge please' from $authorized_user..."
+          echo "Looking for PRs with exact comment 'merge' from $authorized_user..."
           
           # Get all open PRs
           prs=$(gh pr list --state open --json number,title,url --repo "$GITHUB_REPOSITORY")
@@ -74,14 +74,14 @@ jobs:
             echo "Comments in PR #$pr_number:"
             echo "$comments" | jq -r '"  - Author: " + .author.login + " | Comment: " + (.body | split("\n")[0] | .[0:100])'
             
-            # Check if any comment from carlospolop contains exactly "bot merge please"
+            # Check if any comment from carlospolop contains exactly "merge"
             has_merge_comment=false
             echo "$comments" | jq -r '.author.login + "|" + .body' | while IFS='|' read -r comment_author comment_body; do
               # Check if the comment author is exactly "carlospolop"
               if [ "$comment_author" = "$authorized_user" ]; then
-                # Check for exact match "bot merge please" (case-insensitive)
-                if echo "$comment_body" | grep -iExq "bot merge please"; then
-                  echo "Found exact 'bot merge please' comment from $authorized_user in PR #$pr_number"
+                # Check for exact match "merge" (case-insensitive)
+                if echo "$comment_body" | grep -iExq "merge"; then
+                  echo "Found exact 'merge' comment from $authorized_user in PR #$pr_number"
                   echo "true" > /tmp/has_merge_comment_$pr_number
                   break
                 fi
@@ -113,7 +113,7 @@ jobs:
                 echo "PR #$pr_number is not mergeable (status: $pr_mergeable)"
               fi
             else
-              echo "No exact 'bot merge please' comment found from $authorized_user in PR #$pr_number"
+              echo "No exact 'merge' comment found from $authorized_user in PR #$pr_number"
             fi
             
             # Clean up temp file
