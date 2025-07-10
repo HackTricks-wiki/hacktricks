@@ -9,9 +9,9 @@ L'unité **minimale** d'un disque est le **secteur** (normalement composé de 51
 
 ### MBR (master Boot Record)
 
-Il est alloué dans le **premier secteur du disque après les 446B du code de démarrage**. Ce secteur est essentiel pour indiquer à l'ordinateur ce qui doit être monté et d'où.\
+Il est alloué dans le **premier secteur du disque après les 446B du code de démarrage**. Ce secteur est essentiel pour indiquer au PC ce qui doit être monté et d'où.\
 Il permet jusqu'à **4 partitions** (au maximum **juste 1** peut être active/**démarrable**). Cependant, si vous avez besoin de plus de partitions, vous pouvez utiliser des **partitions étendues**. Le **dernier octet** de ce premier secteur est la signature du boot record **0x55AA**. Une seule partition peut être marquée comme active.\
-Le MBR permet **max 2.2TB**.
+Le MBR permet **max 2.2 To**.
 
 ![](<../../../images/image (350).png>)
 
@@ -34,18 +34,18 @@ Des **octets 440 à 443** du MBR, vous pouvez trouver la **signature de disque W
 
 **Format d'enregistrement de partition**
 
-| Décalage    | Longueur   | Élément                                                   |
-| ----------- | --------   | -------------------------------------------------------- |
-| 0 (0x00)    | 1 (0x01)   | Drapeau actif (0x80 = démarrable)                       |
-| 1 (0x01)    | 1 (0x01)   | Tête de départ                                           |
+| Décalage    | Longueur   | Élément                                               |
+| ----------- | ---------- | ---------------------------------------------------- |
+| 0 (0x00)    | 1 (0x01)   | Drapeau actif (0x80 = démarrable)                    |
+| 1 (0x01)    | 1 (0x01)   | Tête de départ                                        |
 | 2 (0x02)    | 1 (0x01)   | Secteur de départ (bits 0-5); bits supérieurs du cylindre (6-7) |
-| 3 (0x03)    | 1 (0x01)   | Cylindre de départ 8 bits les plus bas                   |
-| 4 (0x04)    | 1 (0x01)   | Code de type de partition (0x83 = Linux)                |
-| 5 (0x05)    | 1 (0x01)   | Tête de fin                                             |
-| 6 (0x06)    | 1 (0x01)   | Secteur de fin (bits 0-5); bits supérieurs du cylindre (6-7)   |
-| 7 (0x07)    | 1 (0x01)   | Cylindre de fin 8 bits les plus bas                     |
-| 8 (0x08)    | 4 (0x04)   | Secteurs précédant la partition (little endian)         |
-| 12 (0x0C)   | 4 (0x04)   | Secteurs dans la partition                               |
+| 3 (0x03)    | 1 (0x01)   | Cylindre de départ 8 bits les plus bas                |
+| 4 (0x04)    | 1 (0x01)   | Code de type de partition (0x83 = Linux)              |
+| 5 (0x05)    | 1 (0x01)   | Tête de fin                                          |
+| 6 (0x06)    | 1 (0x01)   | Secteur de fin (bits 0-5); bits supérieurs du cylindre (6-7) |
+| 7 (0x07)    | 1 (0x01)   | Cylindre de fin 8 bits les plus bas                  |
+| 8 (0x08)    | 4 (0x04)   | Secteurs précédant la partition (little endian)      |
+| 12 (0x0C)   | 4 (0x04)   | Secteurs dans la partition                            |
 
 Pour monter un MBR sous Linux, vous devez d'abord obtenir le décalage de départ (vous pouvez utiliser `fdisk` et la commande `p`)
 
@@ -60,20 +60,20 @@ mount -o ro,loop,offset=32256,noatime /path/to/image.dd /media/part/
 ```
 **LBA (Addressage de blocs logiques)**
 
-**L'addressage de blocs logiques** (**LBA**) est un schéma courant utilisé pour **spécifier l'emplacement des blocs** de données stockées sur des dispositifs de stockage informatique, généralement des systèmes de stockage secondaires tels que les disques durs. LBA est un schéma d'adressage linéaire particulièrement simple ; **les blocs sont localisés par un index entier**, le premier bloc étant LBA 0, le deuxième LBA 1, et ainsi de suite.
+**L'addressage de blocs logiques** (**LBA**) est un schéma courant utilisé pour **spécifier l'emplacement des blocs** de données stockées sur des dispositifs de stockage informatique, généralement des systèmes de stockage secondaire tels que les disques durs. LBA est un schéma d'adressage linéaire particulièrement simple ; **les blocs sont localisés par un index entier**, le premier bloc étant LBA 0, le deuxième LBA 1, et ainsi de suite.
 
 ### GPT (Table de partition GUID)
 
 La Table de partition GUID, connue sous le nom de GPT, est privilégiée pour ses capacités améliorées par rapport à MBR (Master Boot Record). Distinctive pour son **identifiant unique global** pour les partitions, GPT se distingue de plusieurs manières :
 
-- **Emplacement et taille** : À la fois GPT et MBR commencent au **secteur 0**. Cependant, GPT fonctionne sur **64 bits**, contrairement aux 32 bits de MBR.
+- **Emplacement et taille** : GPT et MBR commencent tous deux à **secteur 0**. Cependant, GPT fonctionne sur **64 bits**, contrairement aux 32 bits de MBR.
 - **Limites de partition** : GPT prend en charge jusqu'à **128 partitions** sur les systèmes Windows et peut accueillir jusqu'à **9,4 ZB** de données.
 - **Noms de partition** : Offre la possibilité de nommer les partitions avec jusqu'à 36 caractères Unicode.
 
 **Résilience et récupération des données** :
 
-- **Redondance** : Contrairement à MBR, GPT ne confine pas les données de partition et de démarrage à un seul endroit. Il réplique ces données sur le disque, améliorant ainsi l'intégrité et la résilience des données.
-- **Contrôle de redondance cyclique (CRC)** : GPT utilise le CRC pour garantir l'intégrité des données. Il surveille activement la corruption des données, et lorsqu'elle est détectée, GPT tente de récupérer les données corrompues à partir d'un autre emplacement sur le disque.
+- **Redondance** : Contrairement à MBR, GPT ne confine pas les données de partition et de démarrage à un seul endroit. Elle réplique ces données sur le disque, améliorant ainsi l'intégrité et la résilience des données.
+- **Contrôle de redondance cyclique (CRC)** : GPT utilise le CRC pour garantir l'intégrité des données. Elle surveille activement la corruption des données et, lorsqu'elle est détectée, GPT tente de récupérer les données corrompues à partir d'un autre emplacement sur le disque.
 
 **MBR protecteur (LBA0)** :
 
@@ -95,7 +95,7 @@ L'en-tête de la table de partition définit les blocs utilisables sur le disque
 
 | Offset    | Longueur | Contenu                                                                                                                                                                     |
 | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 0 (0x00)  | 8 octets | Signature ("EFI PART", 45h 46h 49h 20h 50h 41h 52h 54h ou 0x5452415020494645ULL[ ](https://en.wikipedia.org/wiki/GUID_Partition_Table#cite_note-8)sur les machines little-endian) |
+| 0 (0x00)  | 8 octets | Signature ("EFI PART", 45h 46h 49h 20h 50h 41h 52h 54h ou 0x5452415020494645ULL[ ](https://en.wikipedia.org/wiki/GUID_Partition_Table#_note-8)sur les machines little-endian) |
 | 8 (0x08)  | 4 octets | Révision 1.0 (00h 00h 01h 00h) pour UEFI 2.8                                                                                                                                  |
 | 12 (0x0C) | 4 octets | Taille de l'en-tête en little endian (en octets, généralement 5Ch 00h 00h 00h ou 92 octets)                                                                                                 |
 | 16 (0x10) | 4 octets | [CRC32](https://en.wikipedia.org/wiki/CRC32) de l'en-tête (offset +0 jusqu'à la taille de l'en-tête) en little endian, avec ce champ mis à zéro pendant le calcul                             |
@@ -114,14 +114,14 @@ L'en-tête de la table de partition définit les blocs utilisables sur le disque
 **Entrées de partition (LBA 2–33)**
 
 | Format d'entrée de partition GUID |          |                                                                                                               |
-| ------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------- |
-| Offset                          | Longueur | Contenu                                                                                                      |
-| 0 (0x00)                        | 16 octets | [Type de partition GUID](https://en.wikipedia.org/wiki/GUID_Partition_Table#Partition_type_GUIDs) (endian mixte) |
-| 16 (0x10)                      | 16 octets | GUID de partition unique (endian mixte)                                                                          |
-| 32 (0x20)                      | 8 octets  | Premier LBA ([little endian](https://en.wikipedia.org/wiki/Little_endian))                                      |
-| 40 (0x28)                      | 8 octets  | Dernier LBA (inclusif, généralement impair)                                                                             |
-| 48 (0x30)                      | 8 octets  | Drapeaux d'attributs (par exemple, le bit 60 désigne lecture seule)                                                               |
-| 56 (0x38)                      | 72 octets | Nom de la partition (36 [UTF-16](https://en.wikipedia.org/wiki/UTF-16)LE unités de code)                               |
+| --------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------- |
+| Offset                            | Longueur | Contenu                                                                                                      |
+| 0 (0x00)                          | 16 octets | [Type de partition GUID](https://en.wikipedia.org/wiki/GUID_Partition_Table#Partition_type_GUIDs) (endian mixte) |
+| 16 (0x10)                        | 16 octets | GUID de partition unique (endian mixte)                                                                          |
+| 32 (0x20)                        | 8 octets  | Premier LBA ([little endian](https://en.wikipedia.org/wiki/Little_endian))                                      |
+| 40 (0x28)                        | 8 octets  | Dernier LBA (inclusif, généralement impair)                                                                             |
+| 48 (0x30)                        | 8 octets  | Drapeaux d'attributs (par exemple, le bit 60 indique en lecture seule)                                                               |
+| 56 (0x38)                        | 72 octets | Nom de la partition (36 [UTF-16](https://en.wikipedia.org/wiki/UTF-16)LE unités de code)                               |
 
 **Types de partitions**
 
@@ -149,7 +149,7 @@ S'il s'agissait d'une **table GPT au lieu d'un MBR**, la signature _EFI PART_ de
 
 ### FAT
 
-Le système de fichiers **FAT (Table d'allocation de fichiers)** est conçu autour de son composant central, la table d'allocation de fichiers, positionnée au début du volume. Ce système protège les données en maintenant **deux copies** de la table, garantissant l'intégrité des données même si l'une est corrompue. La table, ainsi que le dossier racine, doit être à un **emplacement fixe**, crucial pour le processus de démarrage du système.
+Le système de fichiers **FAT (Table d'allocation de fichiers)** est conçu autour de son composant central, la table d'allocation de fichiers, positionnée au début du volume. Ce système protège les données en maintenant **deux copies** de la table, garantissant l'intégrité des données même si l'une est corrompue. La table, ainsi que le dossier racine, doit être dans un **emplacement fixe**, crucial pour le processus de démarrage du système.
 
 L'unité de stockage de base du système de fichiers est un **cluster, généralement 512B**, comprenant plusieurs secteurs. FAT a évolué à travers des versions :
 
@@ -157,7 +157,7 @@ L'unité de stockage de base du système de fichiers est un **cluster, général
 - **FAT16**, améliorant à des adresses de 16 bits, permettant ainsi d'accueillir jusqu'à 65 517 clusters.
 - **FAT32**, avançant encore avec des adresses de 32 bits, permettant un impressionnant 268 435 456 clusters par volume.
 
-Une limitation significative à travers les versions de FAT est la **taille maximale de fichier de 4 Go**, imposée par le champ de 32 bits utilisé pour le stockage de la taille des fichiers.
+Une limitation significative à travers les versions FAT est la **taille maximale de fichier de 4 Go**, imposée par le champ de 32 bits utilisé pour le stockage de la taille des fichiers.
 
 Les composants clés du répertoire racine, en particulier pour FAT12 et FAT16, incluent :
 
@@ -169,7 +169,7 @@ Les composants clés du répertoire racine, en particulier pour FAT12 et FAT16, 
 
 ### EXT
 
-**Ext2** est le système de fichiers le plus courant pour les **partitions non journaling** (**partitions qui ne changent pas beaucoup**) comme la partition de démarrage. **Ext3/4** sont **journaling** et sont généralement utilisés pour **les autres partitions**.
+**Ext2** est le système de fichiers le plus courant pour les **partitions non journalières** (**partitions qui ne changent pas beaucoup**) comme la partition de démarrage. **Ext3/4** sont **journalières** et sont généralement utilisées pour le **reste des partitions**.
 
 ## **Métadonnées**
 
@@ -189,7 +189,7 @@ Vous pouvez utiliser des outils comme [**exiftool**](https://exiftool.org) et [*
 
 ### Fichiers supprimés enregistrés
 
-Comme vu précédemment, il existe plusieurs endroits où le fichier est encore sauvegardé après avoir été "supprimé". Cela est dû au fait que généralement, la suppression d'un fichier d'un système de fichiers le marque simplement comme supprimé mais les données ne sont pas touchées. Il est donc possible d'inspecter les registres des fichiers (comme le MFT) et de trouver les fichiers supprimés.
+Comme vu précédemment, il existe plusieurs endroits où le fichier est encore sauvegardé après avoir été "supprimé". Cela est dû au fait que, généralement, la suppression d'un fichier d'un système de fichiers ne fait que le marquer comme supprimé, mais les données ne sont pas touchées. Il est donc possible d'inspecter les registres des fichiers (comme le MFT) et de trouver les fichiers supprimés.
 
 De plus, le système d'exploitation enregistre généralement beaucoup d'informations sur les modifications du système de fichiers et les sauvegardes, il est donc possible d'essayer de les utiliser pour récupérer le fichier ou autant d'informations que possible.
 
@@ -211,8 +211,8 @@ file-data-carving-recovery-tools.md
 
 ### Carving de flux de données **C**
 
-Le carving de flux de données est similaire au carving de fichiers mais **au lieu de chercher des fichiers complets, il recherche des fragments intéressants** d'informations.\
-Par exemple, au lieu de chercher un fichier complet contenant des URL enregistrées, cette technique recherchera des URL.
+Le carving de flux de données est similaire au carving de fichiers mais **au lieu de rechercher des fichiers complets, il recherche des fragments intéressants** d'informations.\
+Par exemple, au lieu de rechercher un fichier complet contenant des URL enregistrées, cette technique recherchera des URL.
 
 {{#ref}}
 file-data-carving-recovery-tools.md
@@ -220,7 +220,7 @@ file-data-carving-recovery-tools.md
 
 ### Suppression sécurisée
 
-Évidemment, il existe des moyens de **"supprimer de manière sécurisée" des fichiers et une partie des journaux les concernant**. Par exemple, il est possible de **réécrire le contenu** d'un fichier avec des données inutiles plusieurs fois, puis **de supprimer** les **journaux** du **$MFT** et **$LOGFILE** concernant le fichier, et **de supprimer les copies de volume shadow**.\
+Évidemment, il existe des moyens de **supprimer "sécuritairement" des fichiers et une partie des journaux les concernant**. Par exemple, il est possible de **surcharger le contenu** d'un fichier avec des données inutiles plusieurs fois, puis **de supprimer** les **journaux** du **$MFT** et **$LOGFILE** concernant le fichier, et **de supprimer les copies de l'ombre du volume**.\
 Vous pouvez remarquer qu'en effectuant cette action, il peut y avoir **d'autres parties où l'existence du fichier est toujours enregistrée**, et c'est vrai, et une partie du travail des professionnels de l'analyse judiciaire est de les trouver.
 
 ## Références

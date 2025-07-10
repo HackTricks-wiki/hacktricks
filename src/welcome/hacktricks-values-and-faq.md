@@ -8,14 +8,14 @@
 > Voici les **valeurs du projet HackTricks** :
 >
 > - Offrir un accès **GRATUIT** aux ressources de **FORMATION en hacking** à **TOUT** Internet.
->   - Le hacking est une question d'apprentissage, et l'apprentissage devrait être aussi gratuit que possible.
->   - Le but de ce livre est de servir de **ressource éducative** complète.
+>  - Le hacking est une question d'apprentissage, et l'apprentissage devrait être aussi gratuit que possible.
+>  - Le but de ce livre est de servir de **ressource éducative** complète.
 > - **STOCKER** des techniques de **hacking** incroyables que la communauté publie en donnant tous les **crédits** aux **AUTEURS ORIGINAUX**.
->   - **Nous ne voulons pas le crédit des autres**, nous voulons juste stocker des astuces intéressantes pour tout le monde.
->   - Nous écrivons également **nos propres recherches** dans HackTricks.
->   - Dans plusieurs cas, nous allons simplement écrire **dans HackTricks un résumé des parties importantes** de la technique et **encourager le lecteur à visiter le post original** pour plus de détails.
-> - **ORGANISER** toutes les techniques de hacking dans le livre afin qu'elles soient **PLUS ACCESSIBLES**
->   - L'équipe de HackTricks a consacré des milliers d'heures gratuitement **uniquement pour organiser le contenu** afin que les gens puissent **apprendre plus rapidement**
+>  - **Nous ne voulons pas le crédit des autres**, nous voulons juste stocker des astuces intéressantes pour tout le monde.
+>  - Nous écrivons également **nos propres recherches** dans HackTricks.
+>  - Dans plusieurs cas, nous allons simplement écrire **dans HackTricks un résumé des parties importantes** de la technique et **encourager le lecteur à visiter le post original** pour plus de détails.
+> - **ORGANISER** toutes les techniques de hacking dans le livre afin qu'elles soient **PLUS ACCESSIBLES**.
+>  - L'équipe de HackTricks a consacré des milliers d'heures gratuitement **uniquement pour organiser le contenu** afin que les gens puissent **apprendre plus rapidement**.
 
 <figure><img src="../images/hack tricks gif.gif" alt="" width="375"><figcaption></figcaption></figure>
 
@@ -76,7 +76,7 @@ La première **valeur** de **HackTricks** est d'offrir des ressources éducative
 
 Si vous pensez que les livres HackTricks sont faits à des **fins commerciales**, vous avez **COMPLÈTEMENT TORT**.
 
-Nous avons des sponsors parce que, même si tout le contenu est GRATUIT, nous voulons **offrir à la communauté la possibilité d'apprécier notre travail** si elle le souhaite. Par conséquent, nous offrons aux gens la possibilité de faire un don à HackTricks via [**Github sponsors**](https://github.com/sponsors/carlospolop), et à des **entreprises de cybersécurité pertinentes** de sponsoriser HackTricks et d'**avoir des publicités** dans le livre, les **publicités** étant toujours placées à des endroits où elles sont **visibles** mais **ne perturbent pas le processus d'apprentissage** si quelqu'un se concentre sur le contenu.
+Nous avons des sponsors parce que, même si tout le contenu est GRATUIT, nous voulons **offrir à la communauté la possibilité d'apprécier notre travail** si elle le souhaite. Par conséquent, nous offrons aux gens la possibilité de faire un don à HackTricks via [**Github sponsors**](https://github.com/sponsors/carlospolop), et **des entreprises de cybersécurité pertinentes** pour sponsoriser HackTricks et **avoir des publicités** dans le livre, les **publicités** étant toujours placées à des endroits où elles sont **visibles** mais **ne perturbent pas le processus d'apprentissage** si quelqu'un se concentre sur le contenu.
 
 Vous ne trouverez pas HackTricks rempli de publicités ennuyeuses comme d'autres blogs avec beaucoup moins de contenu que HackTricks, car HackTricks n'est pas fait à des fins commerciales.
 
@@ -134,10 +134,10 @@ Cette licence ne confère aucun droit de marque ou de branding en relation avec 
 >
 > Les auteurs et éditeurs ne sauraient en aucun cas être tenus responsables de toute perte ou dommage, y compris, sans limitation, toute perte ou dommage indirect ou consécutif, ou toute perte ou dommage de quelque nature que ce soit résultant de la perte de données ou de bénéfices découlant de, ou en relation avec, l'utilisation de ce livre.
 >
-> De plus, les techniques et conseils décrits dans ce livre sont fournis à des fins éducatives et d'information uniquement, et ne doivent pas être utilisés pour des activités illégales ou malveillantes. Les auteurs et éditeurs ne cautionnent ni ne soutiennent aucune activité illégale ou contraire à l'éthique, et toute utilisation des informations contenues dans ce livre est à vos propres risques et à votre discrétion.
+> De plus, les techniques et conseils décrits dans ce livre sont fournis à des fins éducatives et d'information uniquement, et ne doivent pas être utilisés pour des activités illégales ou malveillantes. Les auteurs et éditeurs ne cautionnent ni ne soutiennent aucune activité illégale ou contraire à l'éthique, et toute utilisation des informations contenues dans ce livre se fait à vos propres risques et à votre discrétion.
 >
 > L'utilisateur est seul responsable de toute action entreprise sur la base des informations contenues dans ce livre, et doit toujours demander des conseils et une assistance professionnels lorsqu'il tente de mettre en œuvre l'une des techniques ou conseils décrits ici.
 >
-> En utilisant ce livre, l'utilisateur accepte de dégager les auteurs et éditeurs de toute responsabilité et de toute obligation pour tout dommage, perte ou préjudice pouvant résulter de l'utilisation de ce livre ou de toute information qu'il contient.
+> En utilisant ce livre, l'utilisateur accepte de dégager les auteurs et éditeurs de toute responsabilité et de toute obligation pour tout dommage, perte ou préjudice pouvant résulter de l'utilisation de ce livre ou de l'une des informations qu'il contient.
 
 {{#include ../banners/hacktricks-training.md}}
