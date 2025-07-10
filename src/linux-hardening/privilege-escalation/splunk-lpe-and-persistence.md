@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Αν **καταμετράτε** μια μηχανή **εσωτερικά** ή **εξωτερικά** και βρείτε **το Splunk να τρέχει** (θύρα 8090), αν έχετε την τύχη να γνωρίζετε οποιαδήποτε **έγκυρα διαπιστευτήρια** μπορείτε να **καταχραστείτε την υπηρεσία Splunk** για να **εκτελέσετε ένα shell** ως ο χρήστης που τρέχει το Splunk. Αν το τρέχει ο root, μπορείτε να αναβαθμίσετε τα δικαιώματα σε root.
+Εάν **καταμετράτε** μια μηχανή **εσωτερικά** ή **εξωτερικά** και βρείτε **το Splunk να τρέχει** (θύρα 8090), αν τυχαίνει να γνωρίζετε οποιαδήποτε **έγκυρα διαπιστευτήρια** μπορείτε να **καταχραστείτε την υπηρεσία Splunk** για να **εκτελέσετε ένα shell** ως ο χρήστης που τρέχει το Splunk. Εάν το τρέχει ο root, μπορείτε να αναβαθμίσετε τα δικαιώματα σε root.
 
 Επίσης, αν είστε **ήδη root και η υπηρεσία Splunk δεν ακούει μόνο σε localhost**, μπορείτε να **κλέψετε** το **αρχείο** κωδικών **από** την υπηρεσία Splunk και να **σπάσετε** τους κωδικούς, ή να **προσθέσετε νέα** διαπιστευτήρια σε αυτό. Και να διατηρήσετε επιμονή στον host.
 
@@ -24,7 +24,7 @@
 **Εκτέλεση Εκμετάλλευσης:**
 
 1. Ο επιτιθέμενος αποκτά τον κωδικό του agent UF.
-2. Χρησιμοποιεί το API του Splunk για να στείλει εντολές ή scripts στους agents.
+2. Χρησιμοποιεί το API του Splunk για να στείλει εντολές ή σενάρια στους agents.
 3. Πιθανές ενέργειες περιλαμβάνουν εξαγωγή αρχείων, χειρισμό λογαριασμών χρηστών και διακυβέρνηση συστήματος.
 
 **Επίπτωση:**
@@ -39,12 +39,12 @@ for i in `cat ip.txt`; do python PySplunkWhisperer2_remote.py --host $i --port 8
 ```
 **Χρήσιμα δημόσια exploits:**
 
-- https://github.com/cnotin/SplunkWhisperer2/tree/master/PySplunkWhisperer2
-- https://www.exploit-db.com/exploits/46238
-- https://www.exploit-db.com/exploits/46487
+- [https://github.com/cnotin/SplunkWhisperer2/tree/master/PySplunkWhisperer2](https://github.com/cnotin/SplunkWhisperer2/tree/master/PySplunkWhisperer2)
+- [https://www.exploit-db.com/exploits/46238](https://www.exploit-db.com/exploits/46238)
+- [https://www.exploit-db.com/exploits/46487](https://www.exploit-db.com/exploits/46487)
 
 ## Κατάχρηση Ερωτημάτων Splunk
 
-**Για περισσότερες λεπτομέρειες ελέγξτε την ανάρτηση [https://blog.hrncirik.net/cve-2023-46214-analysis](https://blog.hrncirik.net/cve-2023-46214-analysis)**
+**Για περισσότερες λεπτομέρειες, ελέγξτε την ανάρτηση [https://blog.hrncirik.net/cve-2023-46214-analysis](https://blog.hrncirik.net/cve-2023-46214-analysis)**
 
 {{#include ../../banners/hacktricks-training.md}}
