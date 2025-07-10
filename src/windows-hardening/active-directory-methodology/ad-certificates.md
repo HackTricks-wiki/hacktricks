@@ -51,9 +51,9 @@ Damit ein Client ein Zertifikat anfordern kann, müssen **Registrierungsrechte**
 
 Diese Rechte werden durch Zugriffssteuerungseinträge (ACEs) spezifiziert, die Berechtigungen wie:
 
-- **Zertifikat-Registrierung** und **Zertifikat-Auto-Registrierung**-Rechte, die jeweils mit spezifischen GUIDs verbunden sind.
+- **Certificate-Enrollment** und **Certificate-AutoEnrollment**-Rechte, die jeweils mit spezifischen GUIDs verknüpft sind.
 - **ExtendedRights**, die alle erweiterten Berechtigungen erlauben.
-- **Vollzugriff/GenericAll**, die vollständige Kontrolle über die Vorlage bieten.
+- **FullControl/GenericAll**, die vollständige Kontrolle über die Vorlage bieten.
 
 ### Enterprise-CA-Registrierungsrechte
 
@@ -72,7 +72,7 @@ Zertifikate können angefordert werden über:
 
 1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE), unter Verwendung von DCOM-Schnittstellen.
 2. **ICertPassage Remote Protocol** (MS-ICPR), über benannte Pipes oder TCP/IP.
-3. Die **Zertifikatsregistrierungs-Webschnittstelle**, mit der Rolle der Web-Registrierung der Zertifizierungsstelle installiert.
+3. Die **Zertifikatsregistrierungs-Webschnittstelle**, mit der Rolle der Webregistrierung der Zertifizierungsstelle installiert.
 4. Den **Zertifikatsregistrierungsdienst** (CES), in Verbindung mit dem Zertifikatsregistrierungspolitikdienst (CEP).
 5. Den **Network Device Enrollment Service** (NDES) für Netzwerkgeräte, unter Verwendung des Simple Certificate Enrollment Protocol (SCEP).
 
@@ -99,7 +99,7 @@ Schannel ermöglicht sichere TLS/SSL-Verbindungen, bei denen der Client während
 
 ### AD-Zertifikatdienste Aufzählung
 
-Die Zertifikatdienste von AD können durch LDAP-Abfragen aufgezählt werden, wodurch Informationen über **Enterprise Certificate Authorities (CAs)** und deren Konfigurationen offengelegt werden. Dies ist für jeden domänenauthentifizierten Benutzer ohne besondere Berechtigungen zugänglich. Tools wie **[Certify](https://github.com/GhostPack/Certify)** und **[Certipy](https://github.com/ly4k/Certipy)** werden zur Aufzählung und Schwachstellenbewertung in AD CS-Umgebungen verwendet.
+Die Zertifikatdienste von AD können durch LDAP-Abfragen aufgezählt werden, die Informationen über **Enterprise Certificate Authorities (CAs)** und deren Konfigurationen offenbaren. Dies ist für jeden domänenauthentifizierten Benutzer ohne besondere Berechtigungen zugänglich. Tools wie **[Certify](https://github.com/GhostPack/Certify)** und **[Certipy](https://github.com/ly4k/Certipy)** werden zur Aufzählung und Schwachstellenbewertung in AD CS-Umgebungen verwendet.
 
 Befehle zur Verwendung dieser Tools umfassen:
 ```bash
@@ -123,28 +123,28 @@ certutil -v -dstemplate
 ## Aktuelle Schwachstellen & Sicherheitsupdates (2022-2025)
 
 | Jahr | ID / Name | Auswirkungen | Wichtige Erkenntnisse |
-|------|-----------|--------------|----------------------|
-| 2022 | **CVE-2022-26923** – “Certifried” / ESC6 | *Privilegieneskalation* durch Spoofing von Maschinenkontozertifikaten während PKINIT. | Patch ist in den Sicherheitsupdates vom **10. Mai 2022** enthalten. Auditing- & Strong-Mapping-Kontrollen wurden über **KB5014754** eingeführt; Umgebungen sollten jetzt im *Full Enforcement*-Modus sein. citeturn2search0 |
-| 2023 | **CVE-2023-35350 / 35351** | *Remote Code-Ausführung* in der AD CS Web Enrollment (certsrv) und CES-Rollen. | Öffentliche PoCs sind begrenzt, aber die anfälligen IIS-Komponenten sind oft intern exponiert. Patch ab **Juli 2023** Patch Tuesday. citeturn3search0 |
-| 2024 | **CVE-2024-49019** – “EKUwu” / ESC15 | Niedrigprivilegierte Benutzer mit Anmelderechten könnten **irgendeine** EKU oder SAN während der CSR-Generierung überschreiben, was zur Ausstellung von Zertifikaten führt, die für die Client-Authentifizierung oder Code-Signierung verwendet werden können und zu *Domänenkompromittierung* führen. | In den Updates vom **April 2024** behoben. Entfernen Sie “Supply in the request” aus Vorlagen und beschränken Sie die Anmeldeberechtigungen. citeturn1search3 |
+|------|-----------|--------------|-----------------------|
+| 2022 | **CVE-2022-26923** – “Certifried” / ESC6 | *Privilegieneskalation* durch Spoofing von Maschinenkontozertifikaten während PKINIT. | Der Patch ist in den Sicherheitsupdates vom **10. Mai 2022** enthalten. Auditing- & Strong-Mapping-Kontrollen wurden über **KB5014754** eingeführt; Umgebungen sollten jetzt im *Vollstreckungsmodus* sein. |
+| 2023 | **CVE-2023-35350 / 35351** | *Remote Code-Ausführung* in den AD CS Web Enrollment (certsrv) und CES-Rollen. | Öffentliche PoCs sind begrenzt, aber die anfälligen IIS-Komponenten sind oft intern exponiert. Patch ab dem **Juli 2023** Patch Tuesday. |
+| 2024 | **CVE-2024-49019** – “EKUwu” / ESC15 | Niedrigprivilegierte Benutzer mit Anmelderechten könnten **irgendeine** EKU oder SAN während der CSR-Generierung überschreiben, was zur Ausstellung von Zertifikaten führt, die für die Client-Authentifizierung oder Code-Signierung verwendet werden können und zu *Domänenkompromittierung* führen. | In den Updates vom **April 2024** behoben. Entfernen Sie “Supply in the request” aus Vorlagen und beschränken Sie die Anmeldeberechtigungen. |
 
 ### Microsoft-Härtungszeitplan (KB5014754)
 
-Microsoft führte einen dreiphasigen Rollout (Kompatibilität → Audit → Durchsetzung) ein, um die Kerberos-Zertifikatauthentifizierung von schwachen impliziten Zuordnungen wegzuführen. Ab dem **11. Februar 2025** wechseln Domänencontroller automatisch zu **Full Enforcement**, wenn der `StrongCertificateBindingEnforcement`-Registrierungswert nicht gesetzt ist. Administratoren sollten:
+Microsoft führte einen dreiphasigen Rollout (Kompatibilität → Audit → Durchsetzung) ein, um die Kerberos-Zertifikatauthentifizierung von schwachen impliziten Zuordnungen wegzuführen. Ab dem **11. Februar 2025** wechseln Domänencontroller automatisch zu **Vollstreckung**, wenn der Registrierungswert `StrongCertificateBindingEnforcement` nicht gesetzt ist. Administratoren sollten:
 
 1. Alle DCs & AD CS-Server patchen (Mai 2022 oder später).
 2. Ereignis-ID 39/41 während der *Audit*-Phase auf schwache Zuordnungen überwachen.
-3. Client-Auth-Zertifikate mit der neuen **SID-Erweiterung** neu ausstellen oder starke manuelle Zuordnungen vor Februar 2025 konfigurieren. citeturn2search0
+3. Client-Auth-Zertifikate mit der neuen **SID-Erweiterung** neu ausstellen oder starke manuelle Zuordnungen vor Februar 2025 konfigurieren.
 
 ---
 
-## Erkennung & Härtungsverbesserungen
+## Erkennungs- & Härtungsverbesserungen
 
-* **Defender for Identity AD CS-Sensor (2023-2024)** zeigt jetzt Statusbewertungen für ESC1-ESC8/ESC11 an und generiert Echtzeitwarnungen wie *“Zertifikatsausstellung für einen Nicht-DC”* (ESC8) und *“Zertifikatsanmeldung mit beliebigen Anwendungsrichtlinien verhindern”* (ESC15). Stellen Sie sicher, dass Sensoren auf allen AD CS-Servern bereitgestellt werden, um von diesen Erkennungen zu profitieren. citeturn5search0
+* **Defender for Identity AD CS-Sensor (2023-2024)** zeigt jetzt Statusbewertungen für ESC1-ESC8/ESC11 an und generiert Echtzeitwarnungen wie *“Zertifikatsausstellung für einen Nicht-DC”* (ESC8) und *“Zertifikatsanmeldung mit beliebigen Anwendungsrichtlinien verhindern”* (ESC15). Stellen Sie sicher, dass Sensoren auf allen AD CS-Servern bereitgestellt werden, um von diesen Erkennungen zu profitieren.
 * Deaktivieren oder eng einschränken die **“Supply in the request”**-Option in allen Vorlagen; bevorzugen Sie explizit definierte SAN/EKU-Werte.
 * Entfernen Sie **Any Purpose** oder **No EKU** aus Vorlagen, es sei denn, es ist absolut erforderlich (behandelt ESC2-Szenarien).
 * Erfordern Sie **Managergenehmigung** oder dedizierte Enrollment-Agent-Workflows für sensible Vorlagen (z. B. WebServer / CodeSigning).
-* Beschränken Sie die Webanmeldung (`certsrv`) und CES/NDES-Endpunkte auf vertrauenswürdige Netzwerke oder hinter der Client-Zertifikatauthentifizierung.
+* Beschränken Sie die Webanmeldung (`certsrv`) und CES/NDES-Endpunkte auf vertrauenswürdige Netzwerke oder hinter der Client-Zertifikatsauthentifizierung.
 * Erzwingen Sie die RPC-Anmeldeverschlüsselung (`certutil –setreg CA\InterfaceFlags +IF_ENFORCEENCRYPTICERTREQ`), um ESC11 zu mindern.
 
 ---
