@@ -6,7 +6,7 @@
 
 ## 什么是 DPAPI
 
-数据保护 API (DPAPI) 主要用于 Windows 操作系统中，进行 **对称加密非对称私钥**，利用用户或系统秘密作为重要的熵来源。这种方法简化了开发人员的加密工作，使他们能够使用从用户登录秘密派生的密钥进行数据加密，或者对于系统加密，使用系统的域认证秘密，从而免去开发人员自己管理加密密钥保护的需要。
+数据保护 API (DPAPI) 主要用于 Windows 操作系统中，进行 **对称加密非对称私钥**，利用用户或系统秘密作为重要的熵来源。这种方法简化了开发人员的加密过程，使他们能够使用从用户登录秘密派生的密钥进行数据加密，或者对于系统加密，使用系统的域认证秘密，从而免去开发人员自己管理加密密钥保护的需要。
 
 使用 DPAPI 的最常见方法是通过 **`CryptProtectData` 和 `CryptUnprotectData`** 函数，这些函数允许应用程序在当前登录的进程会话中安全地加密和解密数据。这意味着加密的数据只能由加密它的同一用户或系统解密。
 
@@ -14,9 +14,9 @@
 
 ### 用户密钥生成
 
-DPAPI 为每个用户生成一个唯一的密钥（称为 **`pre-key`**），该密钥基于用户的凭据派生。此密钥是从用户的密码和其他因素派生的，算法取决于用户的类型，但最终是 SHA1。例如，对于域用户，**它依赖于用户的 HTLM 哈希**。
+DPAPI 为每个用户生成一个唯一的密钥（称为 **`pre-key`**），该密钥基于用户的凭据生成。此密钥是从用户的密码和其他因素派生的，算法取决于用户的类型，但最终是 SHA1。例如，对于域用户，**它取决于用户的 HTLM 哈希**。
 
-这特别有趣，因为如果攻击者能够获取用户的密码哈希，他们可以：
+这特别有趣，因为如果攻击者能够获得用户的密码哈希，他们可以：
 
 - **解密任何使用 DPAPI 加密的数据**，而无需联系任何 API
 - 尝试 **离线破解密码**，试图生成有效的 DPAPI 密钥
@@ -51,7 +51,7 @@ Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\{SID}
 
 请注意，这些密钥**没有域备份**，因此只能在本地访问：
 
-- **Mimikatz** 可以通过使用命令 `mimikatz lsadump::secrets` 转储 LSA 秘密来访问它。
+- **Mimikatz** 可以通过使用命令 `mimikatz lsadump::secrets` 转储 LSA 秘密来访问它
 - 该秘密存储在注册表中，因此管理员可以**修改 DACL 权限以访问它**。注册表路径为：`HKEY_LOCAL_MACHINE\SECURITY\Policy\Secrets\DPAPI_SYSTEM`
 
 ### DPAPI 保护的数据
@@ -82,7 +82,7 @@ lsadump::backupkeys /system:<DOMAIN CONTROLLER> /export
 # SharpDPAPI
 SharpDPAPI.exe backupkey [/server:SERVER.domain] [/file:key.pvk]
 ```
-- 拥有本地管理员权限，可以**访问 LSASS 内存**以提取所有连接用户的 DPAPI 主密钥和 SYSTEM 密钥。
+- 拥有本地管理员权限后，可以**访问 LSASS 内存**以提取所有连接用户的 DPAPI 主密钥和 SYSTEM 密钥。
 ```bash
 # Mimikatz
 mimikatz sekurlsa::dpapi
@@ -92,7 +92,7 @@ mimikatz sekurlsa::dpapi
 # Mimikatz
 lsadump::secrets /system:DPAPI_SYSTEM /export
 ```
-- 如果已知用户的密码或 NTLM 哈希，您可以**直接解密用户的主密钥**：
+- 如果已知用户的密码或 NTLM 哈希，您可以 **直接解密用户的主密钥**：
 ```bash
 # Mimikatz
 dpapi::masterkey /in:<C:\PATH\MASTERKEY_LOCATON> /sid:<USER_SID> /password:<USER_PLAINTEXT> /protected
@@ -120,12 +120,12 @@ mimikatz vault::list
 
 ### 查找 DPAPI 加密数据
 
-常见用户 **受保护的文件** 位于：
+常见用户 **保护的文件** 位于：
 
 - `C:\Users\username\AppData\Roaming\Microsoft\Protect\*`
 - `C:\Users\username\AppData\Roaming\Microsoft\Credentials\*`
 - `C:\Users\username\AppData\Roaming\Microsoft\Vault\*`
-- 还可以在上述路径中将 `\Roaming\` 更改为 `\Local\` 进行检查。
+- 还可以尝试将上述路径中的 `\Roaming\` 更改为 `\Local\`。
 
 枚举示例：
 ```bash
@@ -182,7 +182,7 @@ dpapi::masterkey /in:"C:\Users\USER\AppData\Roaming\Microsoft\Protect\SID\GUID" 
 # SharpDPAPI
 SharpDPAPI.exe masterkeys /rpc
 ```
-**SharpDPAPI** 工具还支持这些用于主密钥解密的参数（注意可以使用 `/rpc` 获取域的备份密钥，使用 `/password` 来使用明文密码，或使用 `/pvk` 指定 DPAPI 域私钥文件...）：
+**SharpDPAPI** 工具还支持这些用于主密钥解密的参数（注意可以使用 `/rpc` 获取域的备份密钥，使用 `/password` 来使用明文密码，或使用 `/pvk` 来指定 DPAPI 域私钥文件...）：
 ```
 /target:FILE/folder     -   triage a specific masterkey, or a folder full of masterkeys (otherwise triage local masterkeys)
 /pvk:BASE64...          -   use a base64'ed DPAPI domain private key file to first decrypt reachable user masterkeys
@@ -232,9 +232,9 @@ SharpDPAPI.exe blob /target:C:\path\to\encrypted\file /unprotect
 ---
 ### 处理可选熵（“第三方熵”）
 
-一些应用程序将额外的 **熵** 值传递给 `CryptProtectData`。没有这个值，即使知道正确的主密钥，blob 也无法解密。因此，在针对以这种方式保护的凭据时，获取熵是至关重要的（例如 Microsoft Outlook、某些 VPN 客户端）。
+一些应用程序将额外的 **entropy** 值传递给 `CryptProtectData`。没有这个值，blob 无法被解密，即使知道正确的 masterkey。因此，在针对以这种方式保护的凭据时，获取熵是至关重要的（例如 Microsoft Outlook、某些 VPN 客户端）。
 
-[**EntropyCapture**](https://github.com/SpecterOps/EntropyCapture) (2022) 是一个用户模式 DLL，它在目标进程中钩住 DPAPI 函数，并透明地记录任何提供的可选熵。以 **DLL-injection** 模式运行 EntropyCapture 针对 `outlook.exe` 或 `vpnclient.exe` 等进程将输出一个文件，将每个熵缓冲区映射到调用进程和 blob。捕获的熵可以稍后提供给 **SharpDPAPI** (`/entropy:`) 或 **Mimikatz** (`/entropy:<file>`) 以解密数据。 citeturn5search0
+[**EntropyCapture**](https://github.com/SpecterOps/EntropyCapture) (2022) 是一个用户模式 DLL，它在目标进程中钩住 DPAPI 函数，并透明地记录任何提供的可选熵。在 **DLL-injection** 模式下运行 EntropyCapture 针对 `outlook.exe` 或 `vpnclient.exe` 等进程将输出一个文件，将每个熵缓冲区映射到调用进程和 blob。捕获的熵可以稍后提供给 **SharpDPAPI** (`/entropy:`) 或 **Mimikatz** (`/entropy:<file>`) 以解密数据。
 ```powershell
 # Inject EntropyCapture into the current user's Outlook
 InjectDLL.exe -pid (Get-Process outlook).Id -dll EntropyCapture.dll
@@ -244,7 +244,7 @@ SharpDPAPI.exe blob /target:secret.cred /entropy:entropy.bin /ntlm:<hash>
 ```
 ### 离线破解主密钥 (Hashcat & DPAPISnoop)
 
-微软从 Windows 10 v1607（2016）开始引入了 **context 3** 主密钥格式。`hashcat` v6.2.6（2023年12月）添加了哈希模式 **22100**（DPAPI 主密钥 v1 上下文）、**22101**（上下文 1）和 **22102**（上下文 3），允许通过 GPU 加速直接从主密钥文件破解用户密码。因此，攻击者可以在不与目标系统交互的情况下执行字典攻击或暴力破解攻击。 citeturn8search1
+微软从 Windows 10 v1607（2016）开始引入了 **context 3** 主密钥格式。`hashcat` v6.2.6（2023年12月）添加了哈希模式 **22100**（DPAPI 主密钥 v1 上下文）、**22101**（上下文 1）和 **22102**（上下文 3），允许通过 GPU 加速直接从主密钥文件破解用户密码。因此，攻击者可以在不与目标系统交互的情况下执行字典攻击或暴力破解攻击。
 
 `DPAPISnoop`（2024）自动化了这个过程：
 ```bash
@@ -265,7 +265,7 @@ SharpChrome cookies /server:HOST /pvk:BASE64
 
 ### HEKATOMB
 
-[**HEKATOMB**](https://github.com/Processus-Thief/HEKATOMB) 是一个自动提取 LDAP 目录中所有用户和计算机的工具，并通过 RPC 提取域控制器备份密钥。脚本将解析所有计算机的 IP 地址，并在所有计算机上执行 smbclient，以检索所有用户的 DPAPI blobs，并使用域备份密钥解密所有内容。
+[**HEKATOMB**](https://github.com/Processus-Thief/HEKATOMB) 是一个自动提取 LDAP 目录中所有用户和计算机的工具，并通过 RPC 提取域控制器备份密钥。然后，脚本将解析所有计算机的 IP 地址，并在所有计算机上执行 smbclient，以检索所有用户的 DPAPI blobs，并使用域备份密钥解密所有内容。
 
 `python3 hekatomb.py -hashes :ed0052e5a66b1c8e942cc9481a50d56 DOMAIN.local/administrator@10.0.0.1 -debug -dnstcp`
 
@@ -278,12 +278,11 @@ SharpChrome cookies /server:HOST /pvk:BASE64
 * 从数百个主机并行收集 blobs
 * 解析 **context 3** 主密钥和自动 Hashcat 破解集成
 * 支持 Chrome “App-Bound” 加密 cookie（见下一节）
-* 新的 **`--snapshot`** 模式以重复轮询端点并比较新创建的 blobs citeturn1search2
+* 新的 **`--snapshot`** 模式以重复轮询端点并比较新创建的 blobs
 
 ### DPAPISnoop
 
-[**DPAPISnoop**](https://github.com/Leftp/DPAPISnoop) 是一个 C# 解析器，用于主密钥/凭证/保管库文件，可以输出 Hashcat/JtR 格式，并可选择自动调用破解。它完全支持 Windows 11 24H1 之前的机器和用户主密钥格式。 citeturn2search0
-
+[**DPAPISnoop**](https://github.com/Leftp/DPAPISnoop) 是一个 C# 解析器，用于主密钥/凭证/保险库文件，可以输出 Hashcat/JtR 格式，并可选择自动调用破解。它完全支持 Windows 11 24H1 之前的机器和用户主密钥格式。
 
 ## 常见检测
 
@@ -296,19 +295,18 @@ SharpChrome cookies /server:HOST /pvk:BASE64
 ---
 ### 2023-2025 漏洞与生态系统变化
 
-* **CVE-2023-36004 – Windows DPAPI 安全通道欺骗**（2023年11月）。具有网络访问权限的攻击者可以欺骗域成员检索恶意 DPAPI 备份密钥，从而允许解密用户主密钥。已在 2023 年 11 月的累积更新中修补 – 管理员应确保 DC 和工作站完全修补。 citeturn4search0
-* **Chrome 127 “App-Bound” cookie 加密**（2024年7月）用存储在用户 **Credential Manager** 下的附加密钥替换了传统的仅 DPAPI 保护。离线解密 cookie 现在需要 DPAPI 主密钥和 **GCM 包装的应用绑定密钥**。SharpChrome v2.3 和 DonPAPI 2.x 能够在以用户上下文运行时恢复额外密钥。 citeturn0search0
-
+* **CVE-2023-36004 – Windows DPAPI 安全通道欺骗**（2023年11月）。具有网络访问权限的攻击者可以欺骗域成员检索恶意 DPAPI 备份密钥，从而允许解密用户主密钥。已在 2023 年 11 月的累积更新中修补 – 管理员应确保 DC 和工作站完全修补。
+* **Chrome 127 “App-Bound” cookie 加密**（2024年7月）用存储在用户 **Credential Manager** 下的附加密钥替换了传统的仅 DPAPI 保护。离线解密 cookie 现在需要 DPAPI 主密钥和 **GCM 包装的应用绑定密钥**。SharpChrome v2.3 和 DonPAPI 2.x 能够在以用户上下文运行时恢复额外密钥。
 
 ## 参考文献
 
-- https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13
-- https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c
-- https://msrc.microsoft.com/update-guide/vulnerability/CVE-2023-36004
-- https://security.googleblog.com/2024/07/improving-security-of-chrome-cookies-on.html
-- https://specterops.io/blog/2022/05/18/entropycapture-simple-extraction-of-dpapi-optional-entropy/
-- https://github.com/Hashcat/Hashcat/releases/tag/v6.2.6
-- https://github.com/Leftp/DPAPISnoop
-- https://pypi.org/project/donpapi/2.0.0/
+- [https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13](https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13)
+- [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c)
+- [https://msrc.microsoft.com/update-guide/vulnerability/CVE-2023-36004](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2023-36004)
+- [https://security.googleblog.com/2024/07/improving-security-of-chrome-cookies-on.html](https://security.googleblog.com/2024/07/improving-security-of-chrome-cookies-on.html)
+- [https://specterops.io/blog/2022/05/18/entropycapture-simple-extraction-of-dpapi-optional-entropy/](https://specterops.io/blog/2022/05/18/entropycapture-simple-extraction-of-dpapi-optional-entropy/)
+- [https://github.com/Hashcat/Hashcat/releases/tag/v6.2.6](https://github.com/Hashcat/Hashcat/releases/tag/v6.2.6)
+- [https://github.com/Leftp/DPAPISnoop](https://github.com/Leftp/DPAPISnoop)
+- [https://pypi.org/project/donpapi/2.0.0/](https://pypi.org/project/donpapi/2.0.0/)
 
 {{#include ../../banners/hacktricks-training.md}}

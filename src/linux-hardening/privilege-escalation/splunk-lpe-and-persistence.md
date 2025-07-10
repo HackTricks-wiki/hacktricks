@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-如果在**内部**或**外部**枚举一台机器时发现**Splunk正在运行**（端口8090），如果你幸运地知道任何**有效凭据**，你可以**利用Splunk服务**以运行Splunk的用户身份**执行一个shell**。如果是root在运行，你可以提升权限到root。
+如果在**内部**或**外部**枚举一台机器时发现**Splunk正在运行**（端口8090），如果你幸运地知道任何**有效凭据**，你可以**利用Splunk服务**以运行Splunk的用户身份**执行一个shell**。如果是root在运行它，你可以提升权限到root。
 
 此外，如果你**已经是root并且Splunk服务不仅在localhost上监听**，你可以**窃取**Splunk服务的**密码**文件并**破解**密码，或者**添加新的**凭据。并在主机上保持持久性。
 
@@ -39,9 +39,9 @@ for i in `cat ip.txt`; do python PySplunkWhisperer2_remote.py --host $i --port 8
 ```
 **可用的公共漏洞：**
 
-- https://github.com/cnotin/SplunkWhisperer2/tree/master/PySplunkWhisperer2
-- https://www.exploit-db.com/exploits/46238
-- https://www.exploit-db.com/exploits/46487
+- [https://github.com/cnotin/SplunkWhisperer2/tree/master/PySplunkWhisperer2](https://github.com/cnotin/SplunkWhisperer2/tree/master/PySplunkWhisperer2)
+- [https://www.exploit-db.com/exploits/46238](https://www.exploit-db.com/exploits/46238)
+- [https://www.exploit-db.com/exploits/46487](https://www.exploit-db.com/exploits/46487)
 
 ## 滥用 Splunk 查询
 
