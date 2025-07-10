@@ -10,7 +10,7 @@ Die Data Protection API (DPAPI) word hoofsaaklik binne die Windows-bedryfstelsel
 
 Die mees algemene manier om DPAPI te gebruik, is deur die **`CryptProtectData` en `CryptUnprotectData`** funksies, wat toepassings toelaat om data veilig te versleutel en te ontsleutel met die sessie van die proses wat tans aangemeld is. Dit beteken dat die versleutelde data slegs deur dieselfde gebruiker of stelsel wat dit versleutel, ontsleuteld kan word.
 
-Boonop aanvaar hierdie funksies ook 'n **`entropy` parameter** wat ook tydens versleuteling en ontsleuteling gebruik sal word, daarom, om iets te ontsleutel wat met hierdie parameter versleuteld is, moet jy dieselfde entropiewaarde verskaf wat tydens versleuteling gebruik is.
+Boonop aanvaar hierdie funksies ook 'n **`entropy` parameter** wat ook tydens versleuteling en ontsleuteling gebruik sal word, daarom, om iets te ontsleutel wat met hierdie parameter versleutel is, moet jy dieselfde entropiewaarde verskaf wat tydens versleuteling gebruik is.
 
 ### Gebruikers sleutelgenerasie
 
@@ -21,18 +21,18 @@ Dit is veral interessant omdat as 'n aanvaller die gebruiker se wagwoordhash kan
 - **Enige data ontsleutel wat met DPAPI versleutel is** met daardie gebruiker se sleutel sonder om enige API te kontak
 - Probeer om die **wagwoord te kraak** aflyn deur te probeer om die geldige DPAPI-sleutel te genereer
 
-Boonop, elke keer as 'n gebruiker data met DPAPI versleutel, word 'n nuwe **meestersleutel** gegenereer. Hierdie meestersleutel is die een wat werklik gebruik word om data te versleutel. Elke meestersleutel word gegee met 'n **GUID** (Globally Unique Identifier) wat dit identifiseer.
+Boonop, elke keer as 'n gebruiker data met DPAPI versleutel, word 'n nuwe **meester sleutel** gegenereer. Hierdie meester sleutel is die een wat werklik gebruik word om data te versleutel. Elke meester sleutel word gegee met 'n **GUID** (Globally Unique Identifier) wat dit identifiseer.
 
-Die meestersleutels word gestoor in die **`%APPDATA%\Microsoft\Protect\<sid>\<guid>`** gids, waar `{SID}` die Veiligheidsidentifiseerder van daardie gebruiker is. Die meestersleutel word versleuteld gestoor deur die gebruiker se **`pre-key`** en ook deur 'n **domein rugsteun sleutel** vir herstel (so die dieselfde sleutel word 2 keer versleuteld gestoor deur 2 verskillende wagwoorde).
+Die meester sleutels word gestoor in die **`%APPDATA%\Microsoft\Protect\<sid>\<guid>`** gids, waar `{SID}` die Veiligheidsidentifiseerder van daardie gebruiker is. Die meester sleutel word versleuteld gestoor deur die gebruiker se **`pre-key`** en ook deur 'n **domein rugsteun sleutel** vir herstel (so die dieselfde sleutel word 2 keer versleuteld gestoor deur 2 verskillende wagwoorde).
 
-Let daarop dat die **domeinsleutel wat gebruik word om die meestersleutel te versleutel in die domeinbeheerders is en nooit verander nie**, so as 'n aanvaller toegang tot die domeinbeheerder het, kan hulle die domeinrugsteun sleutel verkry en die meestersleutels van alle gebruikers in die domein ontsleutel.
+Let daarop dat die **domeinsleutel wat gebruik word om die meester sleutel te versleutel in die domeinbeheerders is en nooit verander nie**, so as 'n aanvaller toegang tot die domeinbeheerder het, kan hulle die domein rugsteun sleutel terugkry en die meester sleutels van alle gebruikers in die domein ontsleutel.
 
-Die versleutelde blobs bevat die **GUID van die meestersleutel** wat gebruik is om die data binne sy koppe te versleutel.
+Die versleutelde blobs bevat die **GUID van die meester sleutel** wat gebruik is om die data binne sy koppe te versleutel.
 
 > [!TIP]
 > DPAPI versleutelde blobs begin met **`01 00 00 00`**
 
-Vind meestersleutels:
+Vind meester sleutels:
 ```bash
 Get-ChildItem C:\Users\USER\AppData\Roaming\Microsoft\Protect\
 Get-ChildItem C:\Users\USER\AppData\Local\Microsoft\Protect
@@ -194,7 +194,7 @@ Die **SharpDPAPI** hulpmiddel ondersteun ook hierdie argumente vir meester sleut
 /server:SERVER          -   triage a remote server, assuming admin access
 /hashes                 -   output usermasterkey file 'hashes' in JTR/Hashcat format (no decryption)
 ```
-- **Deur 'n meester sleutel data ontsleutel**:
+- **Deur data te ontsleutel met 'n meester sleutel**:
 ```bash
 # Mimikatz
 dpapi::cred /in:C:\path\to\encrypted\file /masterkey:<MASTERKEY>
@@ -234,7 +234,7 @@ SharpDPAPI.exe blob /target:C:\path\to\encrypted\file /unprotect
 
 Sommige toepassings stuur 'n addisionele **entropie** waarde na `CryptProtectData`. Sonder hierdie waarde kan die blob nie gedekriptiseer word nie, selfs al is die korrekte meester sleutel bekend. Om die entropie te verkry is dus noodsaaklik wanneer daar gefokus word op akrediteer wat op hierdie manier beskerm word (bv. Microsoft Outlook, sommige VPN-kliënte).
 
-[**EntropyCapture**](https://github.com/SpecterOps/EntropyCapture) (2022) is 'n gebruikersmodus DLL wat die DPAPI-funksies binne die teikenproses haak en deursigtig enige opsionele entropie wat verskaf word, opneem. Om EntropyCapture in **DLL-inspuiting** modus teen prosesse soos `outlook.exe` of `vpnclient.exe` te laat loop, sal 'n lêer genereer wat elke entropie-buffer aan die oproepende proses en blob koppel. Die gevangenne entropie kan later aan **SharpDPAPI** (`/entropy:`) of **Mimikatz** (`/entropy:<file>`) verskaf word om die data te dekripteer. citeturn5search0
+[**EntropyCapture**](https://github.com/SpecterOps/EntropyCapture) (2022) is 'n gebruikersmodus DLL wat die DPAPI-funksies binne die teikenproses haak en deursigtig enige opsionele entropie wat verskaf word, opneem. Om EntropyCapture in **DLL-inspuiting** modus teen prosesse soos `outlook.exe` of `vpnclient.exe` te laat loop, sal 'n lêer genereer wat elke entropie-buffer aan die oproepende proses en blob koppel. Die gevangen entropie kan later aan **SharpDPAPI** (`/entropy:`) of **Mimikatz** (`/entropy:<file>`) verskaf word om die data te dekripteer.
 ```powershell
 # Inject EntropyCapture into the current user's Outlook
 InjectDLL.exe -pid (Get-Process outlook).Id -dll EntropyCapture.dll
@@ -242,9 +242,9 @@ InjectDLL.exe -pid (Get-Process outlook).Id -dll EntropyCapture.dll
 # Later decrypt a credential blob that required entropy
 SharpDPAPI.exe blob /target:secret.cred /entropy:entropy.bin /ntlm:<hash>
 ```
-### Cracking masterkeys offline (Hashcat & DPAPISnoop)
+### Krake van meester sleutels aflyn (Hashcat & DPAPISnoop)
 
-Microsoft het 'n **context 3** masterkey-formaat bekendgestel wat begin met Windows 10 v1607 (2016). `hashcat` v6.2.6 (Desember 2023) het hash-modes **22100** (DPAPI masterkey v1 context), **22101** (context 1) en **22102** (context 3) bygevoeg wat GPU-versnelde kraking van gebruikerswagwoorde direk vanaf die masterkey-lêer moontlik maak. Aanvallers kan dus woordlys- of brute-force-aanvalle uitvoer sonder om met die teikenstelsel te kommunikeer. citeturn8search1
+Microsoft het 'n **konteks 3** meester sleutel formaat bekendgestel wat begin met Windows 10 v1607 (2016). `hashcat` v6.2.6 (Desember 2023) het hash-modes **22100** (DPAPI meester sleutel v1 konteks), **22101** (konteks 1) en **22102** (konteks 3) bygevoeg wat GPU-versnelde kraking van gebruikerswagwoorde direk vanaf die meester sleutel lêer moontlik maak. Aanvallers kan dus woordlys of brute-force aanvalle uitvoer sonder om met die teikenstelsel te kommunikeer.
 
 `DPAPISnoop` (2024) outomatiseer die proses:
 ```bash
@@ -278,12 +278,11 @@ Met die onttrekking van die LDAP-rekenaarslys kan jy elke subnet vind selfs al h
 * Parallelle versameling van blobs van honderde gasheer
 * Ontleding van **context 3** meester sleutels en outomatiese Hashcat krak integrasie
 * Ondersteuning vir Chrome "App-Bound" versleutelde koekies (sien volgende afdeling)
-* 'n Nuwe **`--snapshot`** modus om herhaaldelik eindpunte te poll en nuut geskepte blobs te vergelyk citeturn1search2
+* 'n Nuwe **`--snapshot`** modus om herhaaldelik eindpunte te poll en nuut geskepte blobs te vergelyk
 
 ### DPAPISnoop
 
-[**DPAPISnoop**](https://github.com/Leftp/DPAPISnoop) is 'n C# parser vir meester sleutel/credential/vault lêers wat Hashcat/JtR formate kan uitvoer en opsioneel outomatiese krak kan aanroep. Dit ondersteun ten volle masjien en gebruiker meester sleutel formate tot Windows 11 24H1. citeturn2search0
-
+[**DPAPISnoop**](https://github.com/Leftp/DPAPISnoop) is 'n C# parser vir meester sleutel/credential/vault lêers wat Hashcat/JtR formate kan uitvoer en opsioneel outomaties krak kan aanroep. Dit ondersteun ten volle masjien en gebruiker meester sleutel formate tot Windows 11 24H1.
 
 ## Algemene opsporings
 
@@ -296,19 +295,18 @@ Met die onttrekking van die LDAP-rekenaarslys kan jy elke subnet vind selfs al h
 ---
 ### 2023-2025 kwesbaarhede & ekosisteem veranderinge
 
-* **CVE-2023-36004 – Windows DPAPI Secure Channel Spoofing** (November 2023). 'n Aanvaller met netwerktoegang kon 'n domeinlid mislei om 'n kwaadwillige DPAPI rugsteun sleutel te verkry, wat die ontsleuteling van gebruiker meester sleutels moontlik maak. Gepatch in November 2023 kumulatiewe opdatering – administrateurs moet verseker dat DC's en werkstasies ten volle gepatch is. citeturn4search0
-* **Chrome 127 “App-Bound” koekie versleuteling** (Julie 2024) het die ou DPAPI-slegs beskerming vervang met 'n bykomende sleutel wat onder die gebruiker se **Credential Manager** gestoor word. Offline ontsleuteling van koekies vereis nou beide die DPAPI meester sleutel en die **GCM-wrapped app-bound key**. SharpChrome v2.3 en DonPAPI 2.x kan die ekstra sleutel herstel wanneer dit met gebruiker konteks loop. citeturn0search0
-
+* **CVE-2023-36004 – Windows DPAPI Secure Channel Spoofing** (November 2023). 'n Aanvaller met netwerktoegang kan 'n domeinlid mislei om 'n kwaadwillige DPAPI rugsteun sleutel te verkry, wat die ontsleuteling van gebruiker meester sleutels moontlik maak. Gepatch in November 2023 kumulatiewe opdatering – administrateurs moet verseker dat DC's en werkstasies ten volle gepatch is.
+* **Chrome 127 “App-Bound” koekie versleuteling** (Julie 2024) het die ou DPAPI-slegs beskerming vervang met 'n bykomende sleutel wat onder die gebruiker se **Credential Manager** gestoor word. Aflyn ontsleuteling van koekies vereis nou beide die DPAPI meester sleutel en die **GCM-wrapped app-bound key**. SharpChrome v2.3 en DonPAPI 2.x kan die ekstra sleutel herstel wanneer dit met gebruiker konteks loop.
 
 ## Verwysings
 
-- https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13
-- https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c
-- https://msrc.microsoft.com/update-guide/vulnerability/CVE-2023-36004
-- https://security.googleblog.com/2024/07/improving-security-of-chrome-cookies-on.html
-- https://specterops.io/blog/2022/05/18/entropycapture-simple-extraction-of-dpapi-optional-entropy/
-- https://github.com/Hashcat/Hashcat/releases/tag/v6.2.6
-- https://github.com/Leftp/DPAPISnoop
-- https://pypi.org/project/donpapi/2.0.0/
+- [https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13](https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13)
+- [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c)
+- [https://msrc.microsoft.com/update-guide/vulnerability/CVE-2023-36004](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2023-36004)
+- [https://security.googleblog.com/2024/07/improving-security-of-chrome-cookies-on.html](https://security.googleblog.com/2024/07/improving-security-of-chrome-cookies-on.html)
+- [https://specterops.io/blog/2022/05/18/entropycapture-simple-extraction-of-dpapi-optional-entropy/](https://specterops.io/blog/2022/05/18/entropycapture-simple-extraction-of-dpapi-optional-entropy/)
+- [https://github.com/Hashcat/Hashcat/releases/tag/v6.2.6](https://github.com/Hashcat/Hashcat/releases/tag/v6.2.6)
+- [https://github.com/Leftp/DPAPISnoop](https://github.com/Leftp/DPAPISnoop)
+- [https://pypi.org/project/donpapi/2.0.0/](https://pypi.org/project/donpapi/2.0.0/)
 
 {{#include ../../banners/hacktricks-training.md}}

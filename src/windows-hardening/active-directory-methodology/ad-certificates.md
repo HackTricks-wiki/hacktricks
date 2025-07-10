@@ -26,7 +26,7 @@
 AD CS erken CA-sertifikate in 'n AD-woud deur middel van aangewese houers, elk wat unieke rolle dien:
 
 - Die **Sertifikaatowerhede** houer bevat vertroude wortel CA-sertifikate.
-- Die **Inskrywingsdienste** houer bevat besonderhede oor Enterprise CA's en hul sertifikaat sjablone.
+- Die **Inskrywingsdienste** houer bevat Enterprise CA's en hul sertifikaat sjablone.
 - Die **NTAuthCertificates** objek sluit CA-sertifikate in wat gemagtig is vir AD-outehentisering.
 - Die **AIA (Authority Information Access)** houer fasiliteer sertifikaatkettingvalidasie met tussenliggende en kruis CA-sertifikate.
 
@@ -52,12 +52,12 @@ Vir 'n kliënt om 'n sertifikaat aan te vra, moet **inskrywingsregte** toegeken 
 Hierdie regte word gespesifiseer deur middel van Toegang Beheer Inskrywings (ACEs), wat toestemmings soos:
 
 - **Sertifikaat-Inskrywing** en **Sertifikaat-AutoInskrywing** regte, elk geassosieer met spesifieke GUIDs.
-- **ExtendedRights**, wat alle uitgebreide toestemmings toelaat.
-- **VolleBeheer/GemiddeldAlles**, wat volledige beheer oor die sjabloon bied.
+- **VerlengdeRegte**, wat alle verlengde toestemmings toelaat.
+- **VolleBeheer/GenerieseAlles**, wat volledige beheer oor die sjabloon bied.
 
 ### Enterprise CA Enrollment Rights
 
-Die CA se regte word uiteengesit in sy sekuriteitsbeskrywing, toeganklik via die Sertifikaatowerheid bestuurskonsol. Sommige instellings laat selfs laag-geprivilegieerde gebruikers toe om afstandstoegang te hê, wat 'n sekuriteitskwessie kan wees.
+Die CA se regte word uiteengesit in sy sekuriteitsbeskrywing, toeganklik via die Sertifikaatowerheid bestuurconsole. Sommige instellings laat selfs laag-geprivilegieerde gebruikers toe om afstandstoegang te hê, wat 'n sekuriteitskwessie kan wees.
 
 ### Additional Issuance Controls
 
@@ -95,11 +95,11 @@ is sentraal tot die vestiging van vertroue vir sertifikaatverifikasie.
 
 ### Veilige Kanaal (Schannel) Verifikasie
 
-Schannel fasiliteer veilige TLS/SSL verbindings, waar tydens 'n handdruk, die kliënt 'n sertifikaat aanbied wat, indien suksesvol geverifieer, toegang magtig. Die toewysing van 'n sertifikaat aan 'n AD-rekening kan Kerberos se **S4U2Self** funksie of die sertifikaat se **Subject Alternative Name (SAN)** insluit, onder andere metodes.
+Schannel fasiliteer veilige TLS/SSL verbindings, waar tydens 'n handdruk, die kliënt 'n sertifikaat aanbied wat, indien suksesvol geverifieer, toegang magtig. Die toewysing van 'n sertifikaat aan 'n AD-rekening kan die Kerberos se **S4U2Self** funksie of die sertifikaat se **Subject Alternative Name (SAN)** insluit, onder andere metodes.
 
 ### AD Sertifikaat Dienste Enumerasie
 
-AD se sertifikaatdienste kan deur LDAP-vrae gelys word, wat inligting oor **Enterprise Certificate Authorities (CAs)** en hul konfigurasies onthul. Dit is toeganklik vir enige domein-geverifieerde gebruiker sonder spesiale voorregte. Gereedskap soos **[Certify](https://github.com/GhostPack/Certify)** en **[Certipy](https://github.com/ly4k/Certipy)** word gebruik vir enumerasie en kwesbaarheidsevaluering in AD CS omgewings.
+AD se sertifikaatdienste kan deur LDAP-vrae geënumerer word, wat inligting oor **Enterprise Certificate Authorities (CAs)** en hul konfigurasies onthul. Dit is toeganklik vir enige domein-geverifieerde gebruiker sonder spesiale voorregte. Gereedskap soos **[Certify](https://github.com/GhostPack/Certify)** en **[Certipy](https://github.com/ly4k/Certipy)** word gebruik vir enumerasie en kwesbaarheidsevaluering in AD CS omgewings.
 
 Opdragte om hierdie gereedskap te gebruik sluit in:
 ```bash
@@ -124,26 +124,26 @@ certutil -v -dstemplate
 
 | Jaar | ID / Naam | Impak | Sleutel Take-aways |
 |------|-----------|--------|----------------|
-| 2022 | **CVE-2022-26923** – “Certifried” / ESC6 | *Privilegie-eskalasie* deur die vervalsing van masjienrekeningsertifikate tydens PKINIT. | Patches is ingesluit in die **10 Mei 2022** sekuriteitsopdaterings. Ouditering & sterk-mapping kontroles is bekendgestel via **KB5014754**; omgewings behoort nou in *Volle Handhaving* modus te wees. citeturn2search0 |
-| 2023 | **CVE-2023-35350 / 35351** | *Afstandkode-uitvoering* in die AD CS Web Registrasie (certsrv) en CES rolle. | Publieke PoCs is beperk, maar die kwesbare IIS-komponente is dikwels intern blootgestel. Patch vanaf **Julie 2023** Patch Dinsdag. citeturn3search0 |
-| 2024 | **CVE-2024-49019** – “EKUwu” / ESC15 | Laag-geprivilegieerde gebruikers met registrasiederegte kon **enige** EKU of SAN oorskry tydens CSR-generasie, wat sertifikate uitreik wat gebruik kan word vir kliënt-authentisering of kode-handtekening en lei tot *domein-kompromie*. | Aangespreek in **April 2024** opdaterings. Verwyder “Verskaf in die versoek” uit sjablone en beperk registrasietoestemmings. citeturn1search3 |
+| 2022 | **CVE-2022-26923** – “Certifried” / ESC6 | *Privilegie-eskalasie* deur die vervalsing van masjienrekeningsertifikate tydens PKINIT. | Die regstelling is ingesluit in die **10 Mei 2022** sekuriteitsopdaterings. Ouditering & sterk-mapping kontroles is bekendgestel via **KB5014754**; omgewings behoort nou in *Volle Handhaving* modus te wees.  |
+| 2023 | **CVE-2023-35350 / 35351** | *Afstandkode-uitvoering* in die AD CS Web Registrasie (certsrv) en CES rolle. | Publieke PoCs is beperk, maar die kwesbare IIS-komponente is dikwels intern blootgestel. Regstelling vanaf **Julie 2023** Patch Dinsdag.  |
+| 2024 | **CVE-2024-49019** – “EKUwu” / ESC15 | Laag-geprivilegieerde gebruikers met registrasiederegte kon **enige** EKU of SAN oorskry tydens CSR-generasie, wat sertifikate uitreik wat gebruik kan word vir kliënt-authentisering of kode-handtekening en lei tot *domein-kompromie*. | Aangespreek in **April 2024** opdaterings. Verwyder “Verskaf in die versoek” uit sjablone en beperk registrasietoestemmings.  |
 
-### Microsoft verhogings tydlyn (KB5014754)
+### Microsoft verhoging tydlyn (KB5014754)
 
 Microsoft het 'n drie-fase uitrol (Compatibiliteit → Oudit → Handhaving) bekendgestel om Kerberos sertifikaat-authentisering weg te beweeg van swak implisiete mappings. Vanaf **11 Februarie 2025**, skakel domeinbeheerders outomaties oor na **Volle Handhaving** as die `StrongCertificateBindingEnforcement` registerwaarde nie gestel is nie. Administrateurs behoort:
 
-1. Alle DC's & AD CS bedieners te patch (Mei 2022 of later).
+1. Alle DC's & AD CS bedieners op te dateer (Mei 2022 of later).
 2. Gebeurtenis ID 39/41 te monitor vir swak mappings tydens die *Oudit* fase.
-3. Kliënt-auth sertifikate met die nuwe **SID uitbreiding** te heruitreik of sterk handmatige mappings te konfigureer voor Februarie 2025. citeturn2search0
+3. Kliënt-auth sertifikate met die nuwe **SID uitbreiding** te heruitreik of sterk handmatige mappings te konfigureer voor Februarie 2025.
 
 ---
 
 ## Opsporing & Verhoging Verbeterings
 
-* **Defender for Identity AD CS sensor (2023-2024)** toon nou posisie-evaluasies vir ESC1-ESC8/ESC11 en genereer regte tyd waarskuwings soos *“Domein-beheerder sertifikaat uitreiking vir 'n nie-DC”* (ESC8) en *“Voorkom Sertifikaat Registrasie met arbitrêre Aansoek Beleide”* (ESC15). Verseker dat sensors op alle AD CS bedieners ontplooi is om voordeel te trek uit hierdie opsporings. citeturn5search0
+* **Defender for Identity AD CS sensor (2023-2024)** bied nou posisie-evaluasies vir ESC1-ESC8/ESC11 en genereer regte tyd waarskuwings soos *“Domein-beheerder sertifikaat uitreiking vir 'n nie-DC”* (ESC8) en *“Voorkom Sertifikaat Registrasie met arbitrêre Toepassing Beleide”* (ESC15). Verseker dat sensors op alle AD CS bedieners ontplooi is om voordeel te trek uit hierdie opsporings.
 * Deaktiveer of beperk die **“Verskaf in die versoek”** opsie op alle sjablone; verkies eksplisiet gedefinieerde SAN/EKU waardes.
 * Verwyder **Enige Doel** of **Geen EKU** uit sjablone tensy absoluut nodig (adres ESC2 scenario's).
-* Vereis **bestuurder goedkeuring** of toegewyde Registrasie Agent werksvloeie vir sensitiewe sjablone (bv., WebServer / CodeSigning).
+* Vereis **bestuurder goedkeuring** of toegewyde Registrasie Agent werksvloeie vir sensitiewe sjablone (bv. WebServer / CodeSigning).
 * Beperk webregistrasie (`certsrv`) en CES/NDES eindpunte tot vertroude netwerke of agter kliënt-sertifikaat-authentisering.
 * Handhaaf RPC registrasie-enkripsie (`certutil –setreg CA\InterfaceFlags +IF_ENFORCEENCRYPTICERTREQ`) om ESC11 te verminder.
 
