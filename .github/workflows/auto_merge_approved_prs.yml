@@ -19,7 +19,7 @@ jobs:
         id: check_workflows
         run: |
           # Get all running workflows except this one
-          running_workflows=$(gh run list --status in_progress --json workflowName,name --jq '.[].name' | grep -v "Auto Merge Approved PRs" | wc -l)
+          running_workflows=$(gh run list --status in_progress --json workflowName,name --repo "$GITHUB_REPOSITORY" --jq '.[].name' | grep -v "Auto Merge Approved PRs" | wc -l)
           echo "running_workflows=$running_workflows" >> $GITHUB_OUTPUT
           
           if [ "$running_workflows" -gt 0 ]; then
@@ -43,7 +43,7 @@ jobs:
           echo "Looking for PRs with exact comment 'bot merge please' from $authorized_user..."
           
           # Get all open PRs
-          prs=$(gh pr list --state open --json number,title,url)
+          prs=$(gh pr list --state open --json number,title,url --repo "$GITHUB_REPOSITORY")
           
           if [ "$prs" = "[]" ]; then
             echo "No open PRs found."
@@ -65,7 +65,7 @@ jobs:
             echo "Checking PR #$pr_number: $pr_title"
             
             # Get all comments for this PR
-            comments=$(gh pr view "$pr_number" --json comments --jq '.comments[]')
+            comments=$(gh pr view "$pr_number" --json comments --jq '.comments[]' --repo "$GITHUB_REPOSITORY")
             
             # Print all comment authors for debugging
             echo "Comments in PR #$pr_number:"
@@ -94,7 +94,7 @@ jobs:
               echo "Attempting to merge PR #$pr_number..."
               
               # Check if PR can be merged
-              pr_mergeable=$(gh pr view "$pr_number" --json mergeable --jq '.mergeable')
+              pr_mergeable=$(gh pr view "$pr_number" --json mergeable --jq '.mergeable' --repo "$GITHUB_REPOSITORY")
               
               if [ "$pr_mergeable" = "MERGEABLE" ]; then
                 # Merge the PR (specify repo explicitly since we're not in a git directory)
