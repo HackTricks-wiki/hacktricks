@@ -97,8 +97,8 @@ jobs:
               pr_mergeable=$(gh pr view "$pr_number" --json mergeable --jq '.mergeable')
               
               if [ "$pr_mergeable" = "MERGEABLE" ]; then
-                # Merge the PR
-                if gh pr merge "$pr_number" --merge --delete-branch; then
+                # Merge the PR (specify repo explicitly since we're not in a git directory)
+                if gh pr merge "$pr_number" --merge --delete-branch --repo "$GITHUB_REPOSITORY"; then
                   echo "Successfully merged PR #$pr_number: $pr_title"
                   merged_count=$((merged_count + 1))
                 else
