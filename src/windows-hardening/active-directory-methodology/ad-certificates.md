@@ -130,9 +130,9 @@ certutil -v -dstemplate
 
 | Year | ID / Name | Impact | Key Take-aways |
 |------|-----------|--------|----------------|
-| 2022 | **CVE-2022-26923** – “Certifried” / ESC6 | *Privilege escalation* by spoofing machine account certificates during PKINIT. | Patch is included in the **May 10 2022** security updates. Auditing & strong-mapping controls were introduced via **KB5014754**; environments should now be in *Full Enforcement* mode. citeturn2search0 |
-| 2023 | **CVE-2023-35350 / 35351** | *Remote code-execution* in the AD CS Web Enrollment (certsrv) and CES roles. | Public PoCs are limited, but the vulnerable IIS components are often exposed internally. Patch as of **July 2023** Patch Tuesday. citeturn3search0 |
-| 2024 | **CVE-2024-49019** – “EKUwu” / ESC15 | Low-privileged users with enrollment rights could override **any** EKU or SAN during CSR generation, issuing certificates usable for client-authentication or code-signing and leading to *domain compromise*. | Addressed in **April 2024** updates. Remove “Supply in the request” from templates and restrict enrollment permissions. citeturn1search3 |
+| 2022 | **CVE-2022-26923** – “Certifried” / ESC6 | *Privilege escalation* by spoofing machine account certificates during PKINIT. | Patch is included in the **May 10 2022** security updates. Auditing & strong-mapping controls were introduced via **KB5014754**; environments should now be in *Full Enforcement* mode.  |
+| 2023 | **CVE-2023-35350 / 35351** | *Remote code-execution* in the AD CS Web Enrollment (certsrv) and CES roles. | Public PoCs are limited, but the vulnerable IIS components are often exposed internally. Patch as of **July 2023** Patch Tuesday.  |
+| 2024 | **CVE-2024-49019** – “EKUwu” / ESC15 | Low-privileged users with enrollment rights could override **any** EKU or SAN during CSR generation, issuing certificates usable for client-authentication or code-signing and leading to *domain compromise*. | Addressed in **April 2024** updates. Remove “Supply in the request” from templates and restrict enrollment permissions.  |
 
 ### Microsoft hardening timeline (KB5014754)
 
@@ -140,13 +140,13 @@ Microsoft introduced a three-phase rollout (Compatibility → Audit → Enforcem
 
 1. Patch all DCs & AD CS servers (May 2022 or later).
 2. Monitor Event ID 39/41 for weak mappings during the *Audit* phase.
-3. Re-issue client-auth certificates with the new **SID extension** or configure strong manual mappings before February 2025. citeturn2search0
+3. Re-issue client-auth certificates with the new **SID extension** or configure strong manual mappings before February 2025. 
 
 ---
 
 ## Detection & Hardening Enhancements
 
-* **Defender for Identity AD CS sensor (2023-2024)** now surfaces posture assessments for ESC1-ESC8/ESC11 and generates real-time alerts such as *“Domain-controller certificate issuance for a non-DC”* (ESC8) and *“Prevent Certificate Enrollment with arbitrary Application Policies”* (ESC15). Ensure sensors are deployed to all AD CS servers to benefit from these detections. citeturn5search0
+* **Defender for Identity AD CS sensor (2023-2024)** now surfaces posture assessments for ESC1-ESC8/ESC11 and generates real-time alerts such as *“Domain-controller certificate issuance for a non-DC”* (ESC8) and *“Prevent Certificate Enrollment with arbitrary Application Policies”* (ESC15). Ensure sensors are deployed to all AD CS servers to benefit from these detections. 
 * Disable or tightly scope the **“Supply in the request”** option on all templates; prefer explicitly defined SAN/EKU values.
 * Remove **Any Purpose** or **No EKU** from templates unless absolutely required (addresses ESC2 scenarios).
 * Require **manager approval** or dedicated Enrollment Agent workflows for sensitive templates (e.g., WebServer / CodeSigning).
