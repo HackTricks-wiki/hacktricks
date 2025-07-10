@@ -6,14 +6,14 @@
 
 ### Components of a Certificate
 
-- Die **Onderwerp** van die sertifikaat dui die eienaar aan.
+- Die **Onderwerp** van die sertifikaat dui sy eienaar aan.
 - 'n **Publieke Sleutel** word gekoppel aan 'n privaat besit sleutel om die sertifikaat aan sy regmatige eienaar te verbind.
 - Die **Geldigheidsperiode**, gedefinieer deur **NotBefore** en **NotAfter** datums, merk die sertifikaat se effektiewe duur.
 - 'n Unieke **Serienommer**, verskaf deur die Sertifikaatowerheid (CA), identifiseer elke sertifikaat.
 - Die **Uitgewer** verwys na die CA wat die sertifikaat uitgereik het.
 - **SubjectAlternativeName** laat vir addisionele name vir die onderwerp, wat identifikasiefleksibiliteit verbeter.
 - **Basiese Beperkings** identifiseer of die sertifikaat vir 'n CA of 'n eindentiteit is en definieer gebruiksbeperkings.
-- **Verlengde Sleutelgebruik (EKUs)** delineer die sertifikaat se spesifieke doele, soos kodehandtekening of e-posversleuteling, deur middel van Objektidentifiseerders (OIDs).
+- **Verlengde Sleutelgebruik (EKUs)** delineer die sertifikaat se spesifieke doele, soos kodeondertekening of e-posversleuteling, deur middel van Objektidentifiseerders (OIDs).
 - Die **Handtekening Algoritme** spesifiseer die metode vir die ondertekening van die sertifikaat.
 - Die **Handtekening**, geskep met die uitgewer se privaat sleutel, waarborg die sertifikaat se egtheid.
 
@@ -26,7 +26,7 @@
 AD CS erken CA-sertifikate in 'n AD-woud deur middel van aangewese houers, elk wat unieke rolle dien:
 
 - Die **Sertifikaatowerhede** houer bevat vertroude wortel CA-sertifikate.
-- Die **Inskrywingsdienste** houer bevat Enterprise CA's en hul sertifikaat sjablone.
+- Die **Inskrywingsdienste** houer bevat besonderhede oor Enterprise CA's en hul sertifikaat sjablone.
 - Die **NTAuthCertificates** objek sluit CA-sertifikate in wat gemagtig is vir AD-outehentisering.
 - Die **AIA (Authority Information Access)** houer fasiliteer sertifikaatkettingvalidasie met tussenliggende en kruis CA-sertifikate.
 
@@ -52,12 +52,12 @@ Vir 'n kliënt om 'n sertifikaat aan te vra, moet **inskrywingsregte** toegeken 
 Hierdie regte word gespesifiseer deur middel van Toegang Beheer Inskrywings (ACEs), wat toestemmings soos:
 
 - **Sertifikaat-Inskrywing** en **Sertifikaat-AutoInskrywing** regte, elk geassosieer met spesifieke GUIDs.
-- **VerlengdeRegte**, wat alle verlengde toestemmings toelaat.
-- **VolleBeheer/GenerieseAlles**, wat volledige beheer oor die sjabloon bied.
+- **ExtendedRights**, wat alle uitgebreide toestemmings toelaat.
+- **VolleBeheer/GemiddeldAlles**, wat volledige beheer oor die sjabloon bied.
 
 ### Enterprise CA Enrollment Rights
 
-Die CA se regte word uiteengesit in sy sekuriteitsbeskrywing, toeganklik via die Sertifikaatowerheid bestuurconsole. Sommige instellings laat selfs laag-geprivilegieerde gebruikers toe om afstandstoegang te hê, wat 'n sekuriteitskwessie kan wees.
+Die CA se regte word uiteengesit in sy sekuriteitsbeskrywing, toeganklik via die Sertifikaatowerheid bestuurskonsol. Sommige instellings laat selfs laag-geprivilegieerde gebruikers toe om afstandstoegang te hê, wat 'n sekuriteitskwessie kan wees.
 
 ### Additional Issuance Controls
 
@@ -70,11 +70,11 @@ Sekere kontroles mag van toepassing wees, soos:
 
 Sertifikate kan aangevra word deur:
 
-1. **Windows Kliënt Sertifikaat Inskrywing Protokol** (MS-WCCE), met DCOM interfaces.
-2. **ICertPassage Afstand Protokol** (MS-ICPR), deur middel van benoemde pype of TCP/IP.
-3. Die **sertifikaat inskrywing web koppelvlak**, met die Sertifikaatowerheid Web Inskrywing rol geïnstalleer.
-4. Die **Sertifikaat Inskrywing Diens** (CES), in samewerking met die Sertifikaat Inskrywing Beleid (CEP) diens.
-5. Die **Netwerk Toestel Inskrywing Diens** (NDES) vir netwerktoestelle, met die gebruik van die Eenvoudige Sertifikaat Inskrywing Protokol (SCEP).
+1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE), met DCOM interfaces.
+2. **ICertPassage Remote Protocol** (MS-ICPR), deur middel van benoemde pype of TCP/IP.
+3. Die **sertifikaat inskrywings web koppelvlak**, met die Sertifikaatowerheid Web Inskrywing rol geïnstalleer.
+4. Die **Sertifikaat Inskrywingsdiens** (CES), in samewerking met die Sertifikaat Inskrywingsbeleid (CEP) diens.
+5. Die **Netwerktoestel Inskrywingsdiens** (NDES) vir netwerktoestelle, met die Gebruik van die Eenvoudige Sertifikaat Inskrywingsprotokol (SCEP).
 
 Windows gebruikers kan ook sertifikate aan vra via die GUI (`certmgr.msc` of `certlm.msc`) of opdraglyn gereedskap (`certreq.exe` of PowerShell se `Get-Certificate` opdrag).
 ```bash
@@ -93,9 +93,9 @@ CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<do
 ```
 is sentraal tot die vestiging van vertroue vir sertifikaatverifikasie.
 
-### Secure Channel (Schannel) Verifikasie
+### Veilige Kanaal (Schannel) Verifikasie
 
-Schannel fasiliteer veilige TLS/SSL verbindings, waar tydens 'n handdruk, die kliënt 'n sertifikaat aanbied wat, indien suksesvol geverifieer, toegang magtig. Die toewysing van 'n sertifikaat aan 'n AD-rekening kan die Kerberos se **S4U2Self** funksie of die sertifikaat se **Subject Alternative Name (SAN)** insluit, onder andere metodes.
+Schannel fasiliteer veilige TLS/SSL verbindings, waar tydens 'n handdruk, die kliënt 'n sertifikaat aanbied wat, indien suksesvol geverifieer, toegang magtig. Die toewysing van 'n sertifikaat aan 'n AD-rekening kan Kerberos se **S4U2Self** funksie of die sertifikaat se **Subject Alternative Name (SAN)** insluit, onder andere metodes.
 
 ### AD Sertifikaat Dienste Enumerasie
 
@@ -108,16 +108,52 @@ Certify.exe cas
 # Identify vulnerable certificate templates with Certify
 Certify.exe find /vulnerable
 
-# Use Certipy for enumeration and identifying vulnerable templates
-certipy find -vulnerable -u john@corp.local -p Passw0rd -dc-ip 172.16.126.128
+# Use Certipy (>=4.0) for enumeration and identifying vulnerable templates
+certipy find -vulnerable -dc-only -u john@corp.local -p Passw0rd -target dc.corp.local
+
+# Request a certificate over the web enrollment interface (new in Certipy 4.x)
+certipy req -web -target ca.corp.local -template WebServer -upn john@corp.local -dns www.corp.local
 
 # Enumerate Enterprise CAs and certificate templates with certutil
 certutil.exe -TCAInfo
 certutil -v -dstemplate
 ```
+---
+
+## Onlangse Kwetsbaarhede & Sekuriteitsopdaterings (2022-2025)
+
+| Jaar | ID / Naam | Impak | Sleutel Take-aways |
+|------|-----------|--------|----------------|
+| 2022 | **CVE-2022-26923** – “Certifried” / ESC6 | *Privilegie-eskalasie* deur die vervalsing van masjienrekeningsertifikate tydens PKINIT. | Patches is ingesluit in die **10 Mei 2022** sekuriteitsopdaterings. Ouditering & sterk-mapping kontroles is bekendgestel via **KB5014754**; omgewings behoort nou in *Volle Handhaving* modus te wees. citeturn2search0 |
+| 2023 | **CVE-2023-35350 / 35351** | *Afstandkode-uitvoering* in die AD CS Web Registrasie (certsrv) en CES rolle. | Publieke PoCs is beperk, maar die kwesbare IIS-komponente is dikwels intern blootgestel. Patch vanaf **Julie 2023** Patch Dinsdag. citeturn3search0 |
+| 2024 | **CVE-2024-49019** – “EKUwu” / ESC15 | Laag-geprivilegieerde gebruikers met registrasiederegte kon **enige** EKU of SAN oorskry tydens CSR-generasie, wat sertifikate uitreik wat gebruik kan word vir kliënt-authentisering of kode-handtekening en lei tot *domein-kompromie*. | Aangespreek in **April 2024** opdaterings. Verwyder “Verskaf in die versoek” uit sjablone en beperk registrasietoestemmings. citeturn1search3 |
+
+### Microsoft verhogings tydlyn (KB5014754)
+
+Microsoft het 'n drie-fase uitrol (Compatibiliteit → Oudit → Handhaving) bekendgestel om Kerberos sertifikaat-authentisering weg te beweeg van swak implisiete mappings. Vanaf **11 Februarie 2025**, skakel domeinbeheerders outomaties oor na **Volle Handhaving** as die `StrongCertificateBindingEnforcement` registerwaarde nie gestel is nie. Administrateurs behoort:
+
+1. Alle DC's & AD CS bedieners te patch (Mei 2022 of later).
+2. Gebeurtenis ID 39/41 te monitor vir swak mappings tydens die *Oudit* fase.
+3. Kliënt-auth sertifikate met die nuwe **SID uitbreiding** te heruitreik of sterk handmatige mappings te konfigureer voor Februarie 2025. citeturn2search0
+
+---
+
+## Opsporing & Verhoging Verbeterings
+
+* **Defender for Identity AD CS sensor (2023-2024)** toon nou posisie-evaluasies vir ESC1-ESC8/ESC11 en genereer regte tyd waarskuwings soos *“Domein-beheerder sertifikaat uitreiking vir 'n nie-DC”* (ESC8) en *“Voorkom Sertifikaat Registrasie met arbitrêre Aansoek Beleide”* (ESC15). Verseker dat sensors op alle AD CS bedieners ontplooi is om voordeel te trek uit hierdie opsporings. citeturn5search0
+* Deaktiveer of beperk die **“Verskaf in die versoek”** opsie op alle sjablone; verkies eksplisiet gedefinieerde SAN/EKU waardes.
+* Verwyder **Enige Doel** of **Geen EKU** uit sjablone tensy absoluut nodig (adres ESC2 scenario's).
+* Vereis **bestuurder goedkeuring** of toegewyde Registrasie Agent werksvloeie vir sensitiewe sjablone (bv., WebServer / CodeSigning).
+* Beperk webregistrasie (`certsrv`) en CES/NDES eindpunte tot vertroude netwerke of agter kliënt-sertifikaat-authentisering.
+* Handhaaf RPC registrasie-enkripsie (`certutil –setreg CA\InterfaceFlags +IF_ENFORCEENCRYPTICERTREQ`) om ESC11 te verminder.
+
+---
+
 ## Verwysings
 
 - [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)
 - [https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html](https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html)
+- [https://support.microsoft.com/en-us/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16](https://support.microsoft.com/en-us/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16)
+- [https://advisory.eventussecurity.com/advisory/critical-vulnerability-in-ad-cs-allows-privilege-escalation/](https://advisory.eventussecurity.com/advisory/critical-vulnerability-in-ad-cs-allows-privilege-escalation/)
 
 {{#include ../../banners/hacktricks-training.md}}
