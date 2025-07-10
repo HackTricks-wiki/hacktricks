@@ -30,7 +30,7 @@ jobs:
             echo "should_continue=true" >> $GITHUB_OUTPUT
           fi
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
       
       - name: Find and merge approved PRs
         if: steps.check_workflows.outputs.should_continue == 'true'
@@ -127,4 +127,4 @@ jobs:
           # Clean up merge count file
           rm -f /tmp/merged_count
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
