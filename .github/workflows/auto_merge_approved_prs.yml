@@ -15,11 +15,6 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-      
       - name: Check for running workflows
         id: check_workflows
         run: |
@@ -37,31 +32,15 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
-      - name: Get organization info
-        id: org_info
-        if: steps.check_workflows.outputs.should_continue == 'true'
-        run: |
-          repo_info=$(gh repo view --json owner)
-          org_name=$(echo "$repo_info" | jq -r '.owner.login')
-          echo "org_name=$org_name" >> $GITHUB_OUTPUT
-          
-          # Get all organization members with admin role
-          echo "Getting organization admins..."
-          admins=$(gh api "orgs/$org_name/members?role=admin" --jq '.[].login' | tr '\n' ' ')
-          echo "org_admins=$admins" >> $GITHUB_OUTPUT
-          echo "Organization admins: $admins"
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
       - name: Find and merge approved PRs
         if: steps.check_workflows.outputs.should_continue == 'true'
         run: |
-          org_admins="${{ steps.org_info.outputs.org_admins }}"
+          authorized_user="carlospolop"
           merged_count=0
           max_merges=2
           
-          echo "Organization admins: $org_admins"
-          echo "Looking for PRs with exact comment 'bot merge please' from any org admin..."
+          echo "Authorized user: $authorized_user"
+          echo "Looking for PRs with exact comment 'bot merge please' from $authorized_user..."
           
           # Get all open PRs
           prs=$(gh pr list --state open --json number,title,url)
@@ -92,14 +71,14 @@ jobs:
             echo "Comments in PR #$pr_number:"
             echo "$comments" | jq -r '"  - Author: " + .author.login + " | Comment: " + (.body | split("\n")[0] | .[0:100])'
             
-            # Check if any comment from an org admin contains exactly "bot merge please"
+            # Check if any comment from carlospolop contains exactly "bot merge please"
             has_merge_comment=false
             echo "$comments" | jq -r '.author.login + "|" + .body' | while IFS='|' read -r comment_author comment_body; do
-              # Check if the comment author is in the list of org admins
-              if echo "$org_admins" | grep -wq "$comment_author"; then
+              # Check if the comment author is exactly "carlospolop"
+              if [ "$comment_author" = "$authorized_user" ]; then
                 # Check for exact match "bot merge please" (case-insensitive)
                 if echo "$comment_body" | grep -iExq "bot merge please"; then
-                  echo "Found exact 'bot merge please' comment from org admin '$comment_author' in PR #$pr_number"
+                  echo "Found exact 'bot merge please' comment from $authorized_user in PR #$pr_number"
                   echo "true" > /tmp/has_merge_comment_$pr_number
                   break
                 fi
@@ -129,7 +108,7 @@ jobs:
                 echo "PR #$pr_number is not mergeable (status: $pr_mergeable)"
               fi
             else
-              echo "No exact 'bot merge please' comment found from any org admin in PR #$pr_number"
+              echo "No exact 'bot merge please' comment found from $authorized_user in PR #$pr_number"
             fi
             
             # Clean up temp file
