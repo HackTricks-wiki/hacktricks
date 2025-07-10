@@ -8,15 +8,15 @@
 
 Data Protection API (DPAPI) se prvenstveno koristi unutar Windows operativnog sistema za **simetričnu enkripciju asimetričnih privatnih ključeva**, koristeći ili korisničke ili sistemske tajne kao značajan izvor entropije. Ovaj pristup pojednostavljuje enkripciju za programere omogućavajući im da enkriptuju podatke koristeći ključ izveden iz korisničkih lozinki ili, za sistemsku enkripciju, tajne autentifikacije domena sistema, čime se eliminiše potreba da programeri sami upravljaju zaštitom ključa za enkripciju.
 
-Najčešći način korišćenja DPAPI je kroz **`CryptProtectData` i `CryptUnprotectData`** funkcije, koje omogućavaju aplikacijama da sigurno enkriptuju i dekriptuju podatke sa sesijom procesa koji je trenutno prijavljen. To znači da se enkriptovani podaci mogu dekriptuju samo od strane istog korisnika ili sistema koji ih je enkriptovao.
+Najčešći način korišćenja DPAPI je kroz **`CryptProtectData` i `CryptUnprotectData`** funkcije, koje omogućavaju aplikacijama da sigurno enkriptuju i dekriptuju podatke sa sesijom procesa koji je trenutno prijavljen. To znači da se enkriptovani podaci mogu dekripovati samo od strane istog korisnika ili sistema koji ih je enkriptovao.
 
-Pored toga, ove funkcije takođe prihvataju **`entropy` parametar** koji će takođe biti korišćen tokom enkripcije i dekripcije, stoga, da biste dekripovali nešto što je enkriptovano koristeći ovaj parametar, morate pružiti istu vrednost entropije koja je korišćena tokom enkripcije.
+Pored toga, ove funkcije takođe prihvataju **`entropy` parametar** koji će se koristiti tokom enkripcije i dekripcije, stoga, da biste dekripovali nešto što je enkriptovano koristeći ovaj parametar, morate pružiti istu vrednost entropije koja je korišćena tokom enkripcije.
 
 ### Generisanje ključeva za korisnike
 
-DPAPI generiše jedinstveni ključ (nazvan **`pre-key`**) za svakog korisnika na osnovu njihovih kredencijala. Ovaj ključ se izvodi iz korisničke lozinke i drugih faktora, a algoritam zavisi od tipa korisnika, ali na kraju se koristi SHA1. Na primer, za korisnike domena, **zavisi od HTLM haša korisnika**.
+DPAPI generiše jedinstveni ključ (nazvan **`pre-key`**) za svakog korisnika na osnovu njihovih kredencijala. Ovaj ključ se izvodi iz korisničke lozinke i drugih faktora, a algoritam zavisi od tipa korisnika, ali na kraju se koristi SHA1. Na primer, za korisnike domena, **zavisi od HTLM heša korisnika**.
 
-Ovo je posebno zanimljivo jer ako napadač može da dobije haš lozinke korisnika, može:
+Ovo je posebno zanimljivo jer ako napadač može da dobije heš lozinke korisnika, može:
 
 - **Dekriptovati bilo koje podatke koji su enkriptovani koristeći DPAPI** sa tim korisničkim ključem bez potrebe da kontaktira bilo koji API
 - Pokušati da **provali lozinku** van mreže pokušavajući da generiše validan DPAPI ključ
@@ -67,7 +67,7 @@ Među ličnim podacima zaštićenim od strane DPAPI su:
 - Enkriptovani blobovi unutar registra
 - ...
 
-Podaci zaštićeni od strane sistema uključuju:
+Podaci zaštićeni sistemom uključuju:
 - Wifi lozinke
 - Lozinke za zakazane zadatke
 - ...
@@ -120,7 +120,7 @@ mimikatz vault::list
 
 ### Pronađite DPAPI Enkriptovane podatke
 
-Uobičajeni **zaštićeni fajlovi** korisnika se nalaze u:
+Uobičajeni korisnički **zaštićeni fajlovi** se nalaze u:
 
 - `C:\Users\username\AppData\Roaming\Microsoft\Protect\*`
 - `C:\Users\username\AppData\Roaming\Microsoft\Credentials\*`
@@ -162,7 +162,7 @@ SharpDPAPI.exe [credentials|vaults|rdg|keepass|certificates|triage] /unprotect
 # Decrypt machine data
 SharpDPAPI.exe machinetriage
 ```
-- **Dobijte informacije o akreditivima** kao što su enkriptovani podaci i guidMasterKey.
+- **Dobijte informacije o kredencijalima** kao što su enkriptovani podaci i guidMasterKey.
 ```bash
 mimikatz dpapi::cred /in:C:\Users\<username>\AppData\Local\Microsoft\Credentials\28350839752B38B238E5D56FDD7891A7
 
@@ -182,7 +182,7 @@ dpapi::masterkey /in:"C:\Users\USER\AppData\Roaming\Microsoft\Protect\SID\GUID" 
 # SharpDPAPI
 SharpDPAPI.exe masterkeys /rpc
 ```
-Alat **SharpDPAPI** takođe podržava ove argumente za dekripciju masterključa (obratite pažnju na to kako je moguće koristiti `/rpc` za dobijanje rezervnog ključa domena, `/password` za korišćenje lozinke u običnom tekstu, ili `/pvk` za određivanje DPAPI domena privatnog ključa...)
+Alat **SharpDPAPI** takođe podržava ove argumente za dekripciju masterključa (obratite pažnju na to kako je moguće koristiti `/rpc` za dobijanje rezervnog ključa domena, `/password` za korišćenje lozinke u običnom tekstu, ili `/pvk` za specificiranje DPAPI domena privatnog ključa...):
 ```
 /target:FILE/folder     -   triage a specific masterkey, or a folder full of masterkeys (otherwise triage local masterkeys)
 /pvk:BASE64...          -   use a base64'ed DPAPI domain private key file to first decrypt reachable user masterkeys
@@ -202,7 +202,7 @@ dpapi::cred /in:C:\path\to\encrypted\file /masterkey:<MASTERKEY>
 # SharpDPAPI
 SharpDPAPI.exe /target:<FILE/folder> /ntlm:<NTLM_HASH>
 ```
-Alat **SharpDPAPI** takođe podržava ove argumente za dekripciju `credentials|vaults|rdg|keepass|triage|blob|ps` (obratite pažnju na to kako je moguće koristiti `/rpc` za dobijanje rezervne ključeve domena, `/password` za korišćenje plaintext lozinke, `/pvk` za specifikaciju DPAPI domen privatnog ključa, `/unprotect` za korišćenje trenutne sesije korisnika...):
+Alat **SharpDPAPI** takođe podržava ove argumente za dekripciju `credentials|vaults|rdg|keepass|triage|blob|ps` (obratite pažnju na to kako je moguće koristiti `/rpc` za dobijanje rezervne ključeve domena, `/password` za korišćenje lozinke u običnom tekstu, `/pvk` za specificiranje DPAPI domen privatnog ključa, `/unprotect` za korišćenje trenutne sesije korisnika...):
 ```
 Decryption:
 /unprotect          -   force use of CryptUnprotectData() for 'ps', 'rdg', or 'blob' commands
@@ -230,11 +230,11 @@ dpapi::blob /in:C:\path\to\encrypted\file /unprotect
 SharpDPAPI.exe blob /target:C:\path\to\encrypted\file /unprotect
 ```
 ---
-### Rukovanje Opcionalnom Entropijom ("Entropija treće strane")
+### Rukovanje opcionalnom entropijom ("Entropija treće strane")
 
 Neke aplikacije prosleđuju dodatnu **entropiju** funkciji `CryptProtectData`. Bez ove vrednosti, blob ne može biti dekriptovan, čak i ako je poznat ispravan masterkey. Stoga je dobijanje entropije od suštinskog značaja kada se cilja na kredencijale zaštićene na ovaj način (npr. Microsoft Outlook, neki VPN klijenti).
 
-[**EntropyCapture**](https://github.com/SpecterOps/EntropyCapture) (2022) je DLL u režimu korisnika koji hvata DPAPI funkcije unutar ciljnog procesa i transparentno beleži svaku opcionalnu entropiju koja se prosledi. Pokretanje EntropyCapture u režimu **DLL-injection** protiv procesa kao što su `outlook.exe` ili `vpnclient.exe` će generisati datoteku koja mapira svaki entropijski bafer na pozivajući proces i blob. Uhvaćena entropija se kasnije može proslediti **SharpDPAPI** (`/entropy:`) ili **Mimikatz** (`/entropy:<file>`) kako bi se dekriptovali podaci. citeturn5search0
+[**EntropyCapture**](https://github.com/SpecterOps/EntropyCapture) (2022) je DLL u korisničkom režimu koji hvata DPAPI funkcije unutar ciljnog procesa i transparentno beleži svaku opcionalnu entropiju koja se prosledi. Pokretanje EntropyCapture u režimu **DLL-injection** protiv procesa kao što su `outlook.exe` ili `vpnclient.exe` će generisati datoteku koja mapira svaki entropijski bafer na pozivajući proces i blob. Uhvaćena entropija se kasnije može proslediti **SharpDPAPI** (`/entropy:`) ili **Mimikatz** (`/entropy:<file>`) kako bi se dekriptovali podaci.
 ```powershell
 # Inject EntropyCapture into the current user's Outlook
 InjectDLL.exe -pid (Get-Process outlook).Id -dll EntropyCapture.dll
@@ -244,7 +244,7 @@ SharpDPAPI.exe blob /target:secret.cred /entropy:entropy.bin /ntlm:<hash>
 ```
 ### Cracking masterkeys offline (Hashcat & DPAPISnoop)
 
-Microsoft je uveo **context 3** format masterkey-a počevši od Windows 10 v1607 (2016). `hashcat` v6.2.6 (decembar 2023) je dodao hash-mode-e **22100** (DPAPI masterkey v1 context), **22101** (context 1) i **22102** (context 3) omogućavajući GPU-akcelerirano razbijanje korisničkih lozinki direktno iz masterkey datoteke. Napadači mogu stoga izvesti napade sa rečnicima ili brute-force napade bez interakcije sa ciljnim sistemom. citeturn8search1
+Microsoft je uveo **context 3** format masterkey-a počevši od Windows 10 v1607 (2016). `hashcat` v6.2.6 (decembar 2023) je dodao hash-mode-e **22100** (DPAPI masterkey v1 context), **22101** (context 1) i **22102** (context 3) koji omogućavaju GPU-accelerated cracking korisničkih lozinki direktno iz masterkey datoteke. Napadači mogu stoga izvesti napade sa rečnicima ili brute-force napade bez interakcije sa ciljnim sistemom.
 
 `DPAPISnoop` (2024) automatizuje proces:
 ```bash
@@ -254,7 +254,7 @@ hashcat -m 22102 bob.hc wordlist.txt -O -w4
 ```
 Alat takođe može da analizira Credential i Vault blobove, dekriptuje ih sa otkrivenim ključevima i izvozi lozinke u čistom tekstu.
 
-### Pristup podacima sa drugih mašina
+### Pristup podacima sa druge mašine
 
 U **SharpDPAPI i SharpChrome** možete da navedete opciju **`/server:HOST`** da biste pristupili podacima sa udaljene mašine. Naravno, morate biti u mogućnosti da pristupite toj mašini i u sledećem primeru se pretpostavlja da je **ključ za enkripciju rezervne domene poznat**:
 ```bash
@@ -276,39 +276,39 @@ Sa listom računara iz LDAP-a možete pronaći svaku podmrežu čak i ako ih nis
 [**DonPAPI**](https://github.com/login-securite/DonPAPI) može automatski dumpovati tajne zaštićene DPAPI-jem. Verzija 2.x je uvela:
 
 * Paralelnu kolekciju blobova sa stotina hostova
-* Parsiranje **context 3** masterkeys i automatsku integraciju Hashcat-a
+* Parsiranje **context 3** masterključeva i automatsku integraciju Hashcat krakenja
 * Podršku za "App-Bound" enkriptovane kolačiće u Chrome-u (vidi sledeći odeljak)
-* Novi **`--snapshot`** režim za ponovnu proveru krajnjih tačaka i razliku novokreiranih blobova citeturn1search2
+* Novi **`--snapshot`** režim za ponovnu proveru krajnjih tačaka i razliku novokreiranih blobova
 
 ### DPAPISnoop
 
-[**DPAPISnoop**](https://github.com/Leftp/DPAPISnoop) je C# parser za masterkey/credential/vault datoteke koji može da izveze Hashcat/JtR formate i opcionalno automatski pokrene dekripciju. Potpuno podržava formate masterkey-a za mašine i korisnike do Windows 11 24H1. citeturn2search0
+[**DPAPISnoop**](https://github.com/Leftp/DPAPISnoop) je C# parser za masterkey/credential/vault datoteke koji može da izveze Hashcat/JtR formate i po želji automatski pokrene krakenje. Potpuno podržava formate masterključeva za mašine i korisnike do Windows 11 24H1.
 
 
 ## Uobičajene detekcije
 
 - Pristup datotekama u `C:\Users\*\AppData\Roaming\Microsoft\Protect\*`, `C:\Users\*\AppData\Roaming\Microsoft\Credentials\*` i drugim DPAPI povezanim direktorijumima.
 - Posebno sa mrežne deljene mape kao što su **C$** ili **ADMIN$**.
-- Korišćenje **Mimikatz**, **SharpDPAPI** ili sličnih alata za pristup LSASS memoriji ili dumpovanje masterkeys.
+- Korišćenje **Mimikatz**, **SharpDPAPI** ili sličnih alata za pristup LSASS memoriji ili dumpovanje masterključeva.
 - Događaj **4662**: *Operacija je izvršena na objektu* – može se korelirati sa pristupom **`BCKUPKEY`** objektu.
 - Događaj **4673/4674** kada proces zahteva *SeTrustedCredManAccessPrivilege* (Credential Manager)
 
 ---
 ### 2023-2025 ranjivosti i promene u ekosistemu
 
-* **CVE-2023-36004 – Windows DPAPI Secure Channel Spoofing** (novembar 2023). Napadač sa mrežnim pristupom mogao bi da prevari člana domena da preuzme zlonamerni DPAPI rezervni ključ, omogućavajući dekripciju korisničkih masterkeys. Ispravljeno u novembarskom kumulativnom ažuriranju – administratori bi trebali osigurati da su DC-ovi i radne stanice potpuno ažurirani. citeturn4search0
-* **Chrome 127 “App-Bound” kolačić enkripcija** (jul 2024) zamenila je staru DPAPI zaštitu dodatnim ključem koji se čuva pod korisnikovim **Credential Manager**. Offline dekripcija kolačića sada zahteva i DPAPI masterkey i **GCM-om obavijen app-bound ključ**. SharpChrome v2.3 i DonPAPI 2.x mogu da povrate dodatni ključ kada se pokreću sa korisničkim kontekstom. citeturn0search0
+* **CVE-2023-36004 – Windows DPAPI Secure Channel Spoofing** (novembar 2023). Napadač sa mrežnim pristupom mogao bi da prevari člana domena da preuzme zlonamerni DPAPI rezervni ključ, omogućavajući dekripciju korisničkih masterključeva. Ispravljeno u novembarskom kumulativnom ažuriranju 2023 – administratori bi trebali osigurati da su DC-ovi i radne stanice potpuno ažurirani.
+* **Chrome 127 “App-Bound” kolačić enkripcija** (jul 2024) zamenila je staru DPAPI zaštitu dodatnim ključem koji se čuva pod korisnikovim **Credential Manager**. Offline dekripcija kolačića sada zahteva i DPAPI masterključ i **GCM-om obavijen app-bound ključ**. SharpChrome v2.3 i DonPAPI 2.x mogu da povrate dodatni ključ kada se pokreću sa korisničkim kontekstom.
 
 
 ## Reference
 
-- https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13
-- https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c
-- https://msrc.microsoft.com/update-guide/vulnerability/CVE-2023-36004
-- https://security.googleblog.com/2024/07/improving-security-of-chrome-cookies-on.html
-- https://specterops.io/blog/2022/05/18/entropycapture-simple-extraction-of-dpapi-optional-entropy/
-- https://github.com/Hashcat/Hashcat/releases/tag/v6.2.6
-- https://github.com/Leftp/DPAPISnoop
-- https://pypi.org/project/donpapi/2.0.0/
+- [https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13](https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13)
+- [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c)
+- [https://msrc.microsoft.com/update-guide/vulnerability/CVE-2023-36004](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2023-36004)
+- [https://security.googleblog.com/2024/07/improving-security-of-chrome-cookies-on.html](https://security.googleblog.com/2024/07/improving-security-of-chrome-cookies-on.html)
+- [https://specterops.io/blog/2022/05/18/entropycapture-simple-extraction-of-dpapi-optional-entropy/](https://specterops.io/blog/2022/05/18/entropycapture-simple-extraction-of-dpapi-optional-entropy/)
+- [https://github.com/Hashcat/Hashcat/releases/tag/v6.2.6](https://github.com/Hashcat/Hashcat/releases/tag/v6.2.6)
+- [https://github.com/Leftp/DPAPISnoop](https://github.com/Leftp/DPAPISnoop)
+- [https://pypi.org/project/donpapi/2.0.0/](https://pypi.org/project/donpapi/2.0.0/)
 
 {{#include ../../banners/hacktricks-training.md}}

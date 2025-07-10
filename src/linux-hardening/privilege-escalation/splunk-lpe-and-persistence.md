@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Ako **enumerišete** mašinu **interno** ili **eksterno** i pronađete **Splunk koji radi** (port 8090), ako srećom znate neke **validne kredencijale** možete **iskoristiti Splunk servis** da **izvršite shell** kao korisnik koji pokreće Splunk. Ako ga pokreće root, možete eskalirati privilegije na root.
+Ako **enumerišete** mašinu **interno** ili **eksterno** i pronađete da **Splunk radi** (port 8090), ako srećom znate neke **validne kredencijale**, možete **iskoristiti Splunk servis** da **izvršite shell** kao korisnik koji pokreće Splunk. Ako ga pokreće root, možete eskalirati privilegije na root.
 
 Takođe, ako ste **već root i Splunk servis ne sluša samo na localhost**, možete **ukrasti** **datoteku** sa **lozinkama** **iz** Splunk servisa i **provaliti** lozinke, ili **dodati nove** kredencijale. I održati persistenciju na hostu.
 
@@ -10,7 +10,7 @@ Na prvoj slici ispod možete videti kako izgleda Splunkd web stranica.
 
 ## Pregled Eksploatacije Splunk Universal Forwarder Agenta
 
-Za više detalja pogledajte post [https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/](https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/). Ovo je samo sažetak:
+Za dalje detalje proverite post [https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/](https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/). Ovo je samo sažetak:
 
 **Pregled Eksploatacije:**
 Eksploatacija koja cilja Splunk Universal Forwarder Agenta (UF) omogućava napadačima sa lozinkom agenta da izvrše proizvoljan kod na sistemima koji pokreću agenta, potencijalno kompromitujući celu mrežu.
@@ -19,7 +19,7 @@ Eksploatacija koja cilja Splunk Universal Forwarder Agenta (UF) omogućava napad
 
 - UF agent ne validira dolazne konekcije ili autentičnost koda, što ga čini ranjivim na neovlašćeno izvršavanje koda.
 - Uobičajene metode sticanja lozinki uključuju pronalaženje u mrežnim direktorijumima, deljenju datoteka ili internim dokumentima.
-- Uspešna eksploatacija može dovesti do pristupa na SISTEM ili root nivou na kompromitovanim hostovima, eksfiltraciju podataka i dalju infiltraciju u mrežu.
+- Uspešna eksploatacija može dovesti do pristupa na SISTEM ili root nivou na kompromitovanim hostovima, eksfiltraciji podataka i daljoj infiltraciji u mrežu.
 
 **Izvršenje Eksploatacije:**
 
@@ -39,9 +39,9 @@ for i in `cat ip.txt`; do python PySplunkWhisperer2_remote.py --host $i --port 8
 ```
 **Iskoristive javne eksploatacije:**
 
-- https://github.com/cnotin/SplunkWhisperer2/tree/master/PySplunkWhisperer2
-- https://www.exploit-db.com/exploits/46238
-- https://www.exploit-db.com/exploits/46487
+- [https://github.com/cnotin/SplunkWhisperer2/tree/master/PySplunkWhisperer2](https://github.com/cnotin/SplunkWhisperer2/tree/master/PySplunkWhisperer2)
+- [https://www.exploit-db.com/exploits/46238](https://www.exploit-db.com/exploits/46238)
+- [https://www.exploit-db.com/exploits/46487](https://www.exploit-db.com/exploits/46487)
 
 ## Zloupotreba Splunk upita
 

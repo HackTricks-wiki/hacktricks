@@ -15,11 +15,11 @@
 - **Osnovna ograničenja** identifikuju da li je sertifikat za CA ili krajnji entitet i definišu ograničenja korišćenja.
 - **Proširene svrhe korišćenja ključeva (EKUs)** razdvajaju specifične svrhe sertifikata, kao što su potpisivanje koda ili enkripcija e-pošte, putem Identifikatora objekta (OIDs).
 - **Algoritam potpisa** specificira metodu za potpisivanje sertifikata.
-- **Potpis**, kreiran sa privatnim ključem izdavača, garantuje autentičnost sertifikata.
+- **Potpis**, kreiran sa privatnim ključem izdavaoca, garantuje autentičnost sertifikata.
 
 ### Special Considerations
 
-- **Alternativna imena subjekta (SANs)** proširuju primenljivost sertifikata na više identiteta, što je ključno za servere sa više domena. Sigurni procesi izdavanja su vitalni kako bi se izbegli rizici od impersonacije od strane napadača koji manipulišu SAN specifikacijom.
+- **Alternativna imena subjekta (SANs)** proširuju primenljivost sertifikata na više identiteta, što je ključno za servere sa više domena. Sigurni procesi izdavanja su od vitalnog značaja kako bi se izbegli rizici od impersonacije od strane napadača koji manipulišu SAN specifikacijom.
 
 ### Certificate Authorities (CAs) in Active Directory (AD)
 
@@ -39,13 +39,13 @@ AD CS priznaje CA sertifikate u AD šumi kroz određene kontejnere, od kojih sva
 
 ### Certificate Templates
 
-Definisani unutar AD, ovi šabloni opisuju podešavanja i dozvole za izdavanje sertifikata, uključujući dozvoljene EKUs i prava na upis ili modifikaciju, što je ključno za upravljanje pristupom uslugama sertifikata.
+Definisani unutar AD, ovi šabloni opisuju postavke i dozvole za izdavanje sertifikata, uključujući dozvoljene EKUs i prava na upis ili modifikaciju, što je ključno za upravljanje pristupom uslugama sertifikata.
 
 ## Certificate Enrollment
 
 Proces upisa sertifikata pokreće administrator koji **kreira šablon sertifikata**, koji zatim **objavljuje** Enterprise Sertifikaciona vlast (CA). Ovo čini šablon dostupnim za upis klijenata, što se postiže dodavanjem imena šablona u polje `certificatetemplates` objekta Active Directory.
 
-Da bi klijent zatražio sertifikat, **prava na upis** moraju biti dodeljena. Ova prava definišu se sigurnosnim descriptorima na šablonu sertifikata i samoj Enterprise CA. Dozvole moraju biti dodeljene na oba mesta kako bi zahtev bio uspešan.
+Da bi klijent zatražio sertifikat, **prava na upis** moraju biti dodeljena. Ova prava definišu se sigurnosnim deskriptorima na šablonu sertifikata i samoj Enterprise CA. Dozvole moraju biti dodeljene na oba mesta kako bi zahtev bio uspešan.
 
 ### Template Enrollment Rights
 
@@ -53,11 +53,11 @@ Ova prava su specificirana kroz Unose kontrole pristupa (ACE), detaljno opisuju�
 
 - **Prava na upis sertifikata** i **Automatski upis sertifikata**, svako povezano sa specifičnim GUID-ovima.
 - **Proširena prava**, omogućavajući sve proširene dozvole.
-- **Potpuna kontrola/GenericAll**, pružajući potpunu kontrolu nad šablonom.
+- **Potpuna kontrola/Generički svi**, pružajući potpunu kontrolu nad šablonom.
 
 ### Enterprise CA Enrollment Rights
 
-Prava CA su opisana u njegovom sigurnosnom descriptoru, dostupnom putem konzole za upravljanje Sertifikacionom vlasti. Neka podešavanja čak omogućavaju korisnicima sa niskim privilegijama daljinski pristup, što može biti bezbednosna zabrinutost.
+Prava CA su opisana u njegovom sigurnosnom deskriptoru, dostupnom putem konzole za upravljanje Sertifikacionom vlasti. Neka podešavanja čak omogućavaju korisnicima sa niskim privilegijama daljinski pristup, što može biti bezbednosna briga.
 
 ### Additional Issuance Controls
 
@@ -68,7 +68,7 @@ Određene kontrole mogu se primeniti, kao što su:
 
 ### Methods to Request Certificates
 
-Sertifikate je moguće zatražiti putem:
+Sertifikati se mogu zatražiti putem:
 
 1. **Protokola za upis sertifikata Windows klijenta** (MS-WCCE), koristeći DCOM interfejse.
 2. **ICertPassage Remote Protocol** (MS-ICPR), putem imenovanih cevi ili TCP/IP.
@@ -124,28 +124,28 @@ certutil -v -dstemplate
 
 | Godina | ID / Ime | Uticaj | Ključne informacije |
 |--------|----------|--------|---------------------|
-| 2022   | **CVE-2022-26923** – “Certifried” / ESC6 | *Povećanje privilegija* lažiranjem sertifikata mašinskog naloga tokom PKINIT-a. | Zakrpa je uključena u **bezbednosna ažuriranja od 10. maja 2022**. Uvedene su kontrole revizije i jakog mapiranja putem **KB5014754**; okruženja bi sada trebala biti u *Potpunoj primeni* modu. citeturn2search0 |
-| 2023   | **CVE-2023-35350 / 35351** | *Daljinsko izvršavanje koda* u AD CS Web Enrollment (certsrv) i CES rolama. | Javne PoC-ove su ograničene, ali su ranjivi IIS komponenti često izloženi interno. Zakrpa od **jula 2023** Patch Tuesday. citeturn3search0 |
-| 2024   | **CVE-2024-49019** – “EKUwu” / ESC15 | Korisnici sa niskim privilegijama koji imaju prava na upis mogli su da prevaziđu **bilo koji** EKU ili SAN tokom generisanja CSR-a, izdajući sertifikate koji se mogu koristiti za autentifikaciju klijenata ili potpisivanje koda, što dovodi do *kompromitacije domena*. | Rešeno u **aprilskim ažuriranjima 2024**. Uklonite “Supply in the request” iz šablona i ograničite prava na upis. citeturn1search3 |
+| 2022   | **CVE-2022-26923** – “Certifried” / ESC6 | *Povećanje privilegija* lažiranjem sertifikata mašinskog naloga tokom PKINIT-a. | Zakrpa je uključena u **bezbednosna ažuriranja od 10. maja 2022**. Uvedene su kontrole revizije i jakog mapiranja putem **KB5014754**; okruženja bi sada trebala biti u *Potpunoj primeni* režimu. |
+| 2023   | **CVE-2023-35350 / 35351** | *Daljinsko izvršavanje koda* u AD CS Web Enrollment (certsrv) i CES rolama. | Javne PoC-ove su ograničene, ali su ranjivi IIS komponenti često izloženi interno. Zakrpa od **jula 2023** Patch Tuesday. |
+| 2024   | **CVE-2024-49019** – “EKUwu” / ESC15 | Korisnici sa niskim privilegijama koji imaju prava na upis mogli su da prevaziđu **bilo koji** EKU ili SAN tokom generisanja CSR-a, izdajući sertifikate koji se mogu koristiti za autentifikaciju klijenata ili potpisivanje koda, što dovodi do *kompromitovanja domena*. | Rešeno u **aprilskim 2024** ažuriranjima. Uklonite “Supply in the request” iz šablona i ograničite prava na upis. |
 
-### Microsoftova vremenska linija za učvršćivanje (KB5014754)
+### Microsoftova vremenska linija jačanja (KB5014754)
 
 Microsoft je uveo trofazno uvođenje (Kompatibilnost → Revizija → Primena) kako bi prešao sa Kerberos sertifikatske autentifikacije sa slabih implicitnih mapiranja. Od **11. februara 2025**, kontroleri domena automatski prelaze na **Potpunu primenu** ako registry vrednost `StrongCertificateBindingEnforcement` nije postavljena. Administratori bi trebali:
 
 1. Zakrpiti sve DC-ove i AD CS servere (maj 2022. ili kasnije).
-2. Pratiti Event ID 39/41 za slaba mapiranja tokom *Revizije* faze.
-3. Ponovo izdati sertifikate za autentifikaciju klijenata sa novim **SID ekstenzijom** ili konfigurisati jaka ručna mapiranja pre februara 2025. citeturn2search0
+2. Pratiti Event ID 39/41 za slaba mapiranja tokom *Revizije*.
+3. Ponovo izdati sertifikate za autentifikaciju klijenata sa novim **SID ekstenzijom** ili konfigurisati jaka ručna mapiranja pre februara 2025.
 
 ---
 
-## Poboljšanja detekcije i učvršćivanja
+## Poboljšanja detekcije i jačanja
 
-* **Defender for Identity AD CS senzor (2023-2024)** sada prikazuje procene stanja za ESC1-ESC8/ESC11 i generiše upozorenja u realnom vremenu kao što su *“Izdavanje sertifikata kontrolera domena za ne-DC”* (ESC8) i *“Spriječiti upis sertifikata sa proizvoljnim aplikacionim politikama”* (ESC15). Osigurajte da su senzori raspoređeni na sve AD CS servere kako biste imali koristi od ovih detekcija. citeturn5search0
+* **Defender for Identity AD CS senzor (2023-2024)** sada prikazuje procene stanja za ESC1-ESC8/ESC11 i generiše real-time upozorenja kao što su *“Izdavanje sertifikata kontrolera domena za ne-DC”* (ESC8) i *“Spriječiti upis sertifikata sa proizvoljnim aplikacionim politikama”* (ESC15). Osigurajte da su senzori raspoređeni na sve AD CS servere kako biste imali koristi od ovih detekcija.
 * Onemogućite ili strogo ograničite opciju **“Supply in the request”** na svim šablonima; preferirajte eksplicitno definisane SAN/EKU vrednosti.
 * Uklonite **Any Purpose** ili **No EKU** iz šablona osim ako nije apsolutno neophodno (rešava ESC2 scenarije).
-* Zahtevajte **odobrenje menadžera** ili posvećene tokove rada za upis agenata za osetljive šablone (npr. WebServer / CodeSigning).
+* Zahtevajte **odobrenje menadžera** ili posvećene tokove rada za upis agenata za osetljive šablone (npr., WebServer / CodeSigning).
 * Ograničite web upis (`certsrv`) i CES/NDES krajnje tačke na pouzdane mreže ili iza autentifikacije klijent-sertifikata.
-* Primorajte enkripciju upisa RPC-a (`certutil –setreg CA\InterfaceFlags +IF_ENFORCEENCRYPTICERTREQ`) kako biste ublažili ESC11.
+* Sprovodite enkripciju upisa RPC-a (`certutil –setreg CA\InterfaceFlags +IF_ENFORCEENCRYPTICERTREQ`) kako biste ublažili ESC11.
 
 ---
 
