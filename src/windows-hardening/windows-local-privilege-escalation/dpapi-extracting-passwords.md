@@ -10,7 +10,7 @@ A Data Protection API (DPAPI) é utilizada principalmente dentro do sistema oper
 
 A maneira mais comum de usar o DPAPI é através das funções **`CryptProtectData` e `CryptUnprotectData`**, que permitem que aplicativos criptografem e descriptografem dados de forma segura com a sessão do processo que está atualmente logado. Isso significa que os dados criptografados só podem ser descriptografados pelo mesmo usuário ou sistema que os criptografou.
 
-Além disso, essas funções também aceitam um **parâmetro `entropy`** que será utilizado durante a criptografia e descriptografia; portanto, para descriptografar algo criptografado usando esse parâmetro, você deve fornecer o mesmo valor de entropia que foi usado durante a criptografia.
+Além disso, essas funções também aceitam um **parâmetro `entropy`** que será usado durante a criptografia e descriptografia; portanto, para descriptografar algo criptografado usando esse parâmetro, você deve fornecer o mesmo valor de entropia que foi usado durante a criptografia.
 
 ### Geração de chave dos usuários
 
@@ -134,7 +134,7 @@ dir /a:h C:\Users\username\AppData\Roaming\Microsoft\Credentials\
 Get-ChildItem -Hidden C:\Users\username\AppData\Local\Microsoft\Credentials\
 Get-ChildItem -Hidden C:\Users\username\AppData\Roaming\Microsoft\Credentials\
 ```
-[**SharpDPAPI**](https://github.com/GhostPack/SharpDPAPI) pode encontrar blobs criptografados pelo DPAPI no sistema de arquivos, registro e blobs B64:
+[**SharpDPAPI**](https://github.com/GhostPack/SharpDPAPI) pode encontrar blobs criptografados DPAPI no sistema de arquivos, registro e blobs B64:
 ```bash
 # Search blobs in the registry
 search /type:registry [/path:HKLM] # Search complete registry by default
@@ -182,7 +182,7 @@ dpapi::masterkey /in:"C:\Users\USER\AppData\Roaming\Microsoft\Protect\SID\GUID" 
 # SharpDPAPI
 SharpDPAPI.exe masterkeys /rpc
 ```
-A ferramenta **SharpDPAPI** também suporta esses argumentos para decriptação de masterkey (note como é possível usar `/rpc` para obter a chave de backup do domínio, `/password` para usar uma senha em texto simples, ou `/pvk` para especificar um arquivo de chave privada do domínio DPAPI...):
+A ferramenta **SharpDPAPI** também suporta esses argumentos para a descriptografia da chave mestra (note como é possível usar `/rpc` para obter a chave de backup do domínio, `/password` para usar uma senha em texto simples, ou `/pvk` para especificar um arquivo de chave privada do domínio DPAPI...):
 ```
 /target:FILE/folder     -   triage a specific masterkey, or a folder full of masterkeys (otherwise triage local masterkeys)
 /pvk:BASE64...          -   use a base64'ed DPAPI domain private key file to first decrypt reachable user masterkeys
@@ -234,7 +234,7 @@ SharpDPAPI.exe blob /target:C:\path\to\encrypted\file /unprotect
 
 Alguns aplicativos passam um valor adicional de **entropia** para `CryptProtectData`. Sem esse valor, o blob não pode ser descriptografado, mesmo que a chave mestra correta seja conhecida. Obter a entropia é, portanto, essencial ao direcionar credenciais protegidas dessa forma (por exemplo, Microsoft Outlook, alguns clientes VPN).
 
-[**EntropyCapture**](https://github.com/SpecterOps/EntropyCapture) (2022) é uma DLL em modo de usuário que intercepta as funções DPAPI dentro do processo alvo e registra de forma transparente qualquer entropia opcional que seja fornecida. Executar o EntropyCapture em modo **DLL-injection** contra processos como `outlook.exe` ou `vpnclient.exe` gerará um arquivo mapeando cada buffer de entropia para o processo chamador e o blob. A entropia capturada pode ser fornecida posteriormente ao **SharpDPAPI** (`/entropy:`) ou **Mimikatz** (`/entropy:<file>`) para descriptografar os dados. citeturn5search0
+[**EntropyCapture**](https://github.com/SpecterOps/EntropyCapture) (2022) é uma DLL em modo de usuário que intercepta as funções DPAPI dentro do processo alvo e registra de forma transparente qualquer entropia opcional que seja fornecida. Executar o EntropyCapture em modo **DLL-injection** contra processos como `outlook.exe` ou `vpnclient.exe` gerará um arquivo mapeando cada buffer de entropia para o processo chamador e o blob. A entropia capturada pode ser fornecida posteriormente ao **SharpDPAPI** (`/entropy:`) ou **Mimikatz** (`/entropy:<file>`) para descriptografar os dados.
 ```powershell
 # Inject EntropyCapture into the current user's Outlook
 InjectDLL.exe -pid (Get-Process outlook).Id -dll EntropyCapture.dll
@@ -244,7 +244,7 @@ SharpDPAPI.exe blob /target:secret.cred /entropy:entropy.bin /ntlm:<hash>
 ```
 ### Quebrando masterkeys offline (Hashcat & DPAPISnoop)
 
-A Microsoft introduziu um formato de masterkey **contexto 3** a partir do Windows 10 v1607 (2016). `hashcat` v6.2.6 (Dezembro de 2023) adicionou modos de hash **22100** (DPAPI masterkey v1 contexto), **22101** (contexto 1) e **22102** (contexto 3), permitindo a quebra acelerada por GPU de senhas de usuários diretamente do arquivo masterkey. Os atacantes podem, portanto, realizar ataques de lista de palavras ou força bruta sem interagir com o sistema alvo. citeturn8search1
+A Microsoft introduziu um formato de masterkey **contexto 3** a partir do Windows 10 v1607 (2016). `hashcat` v6.2.6 (dezembro de 2023) adicionou modos de hash **22100** (DPAPI masterkey v1 contexto), **22101** (contexto 1) e **22102** (contexto 3), permitindo a quebra acelerada por GPU de senhas de usuários diretamente do arquivo masterkey. Os atacantes podem, portanto, realizar ataques de lista de palavras ou força bruta sem interagir com o sistema alvo.
 
 `DPAPISnoop` (2024) automatiza o processo:
 ```bash
@@ -256,7 +256,7 @@ A ferramenta também pode analisar blobs de Credenciais e Cofres, descriptograf�
 
 ### Acessar dados de outra máquina
 
-No **SharpDPAPI e SharpChrome** você pode indicar a opção **`/server:HOST`** para acessar os dados de uma máquina remota. Claro que você precisa ser capaz de acessar essa máquina e no exemplo a seguir supõe-se que a **chave de criptografia de backup do domínio é conhecida**:
+No **SharpDPAPI e SharpChrome**, você pode indicar a opção **`/server:HOST`** para acessar os dados de uma máquina remota. Claro que você precisa ser capaz de acessar essa máquina e no exemplo a seguir supõe-se que a **chave de criptografia de backup do domínio é conhecida**:
 ```bash
 SharpDPAPI.exe triage /server:HOST /pvk:BASE64
 SharpChrome cookies /server:HOST /pvk:BASE64
@@ -269,46 +269,44 @@ SharpChrome cookies /server:HOST /pvk:BASE64
 
 `python3 hekatomb.py -hashes :ed0052e5a66b1c8e942cc9481a50d56 DOMAIN.local/administrator@10.0.0.1 -debug -dnstcp`
 
-Com a lista de computadores extraída do LDAP, você pode encontrar cada sub-rede, mesmo que não as conhecesse!
+Com a lista de computadores extraída do LDAP, você pode encontrar cada sub-rede, mesmo que não soubesse delas!
 
 ### DonPAPI 2.x (2024-05)
 
 [**DonPAPI**](https://github.com/login-securite/DonPAPI) pode despejar segredos protegidos por DPAPI automaticamente. A versão 2.x introduziu:
 
 * Coleta paralela de blobs de centenas de hosts
-* Análise de chaves mestres **contexto 3** e integração automática de cracking com Hashcat
+* Análise de **contexto 3** masterkeys e integração automática de cracking com Hashcat
 * Suporte para cookies criptografados "App-Bound" do Chrome (veja a próxima seção)
-* Um novo modo **`--snapshot`** para consultar repetidamente os endpoints e diferenciar blobs recém-criados citeturn1search2
+* Um novo modo **`--snapshot`** para consultar repetidamente os endpoints e diferenciar blobs recém-criados
 
 ### DPAPISnoop
 
-[**DPAPISnoop**](https://github.com/Leftp/DPAPISnoop) é um parser C# para arquivos de chave mestre/credencial/cofre que pode gerar formatos Hashcat/JtR e, opcionalmente, invocar cracking automaticamente. Ele suporta totalmente os formatos de chave mestre de máquina e usuário até o Windows 11 24H1. citeturn2search0
-
+[**DPAPISnoop**](https://github.com/Leftp/DPAPISnoop) é um parser em C# para arquivos de masterkey/credential/vault que pode gerar formatos Hashcat/JtR e, opcionalmente, invocar o cracking automaticamente. Ele suporta totalmente os formatos de masterkey de máquina e usuário até o Windows 11 24H1.
 
 ## Detecções comuns
 
 - Acesso a arquivos em `C:\Users\*\AppData\Roaming\Microsoft\Protect\*`, `C:\Users\*\AppData\Roaming\Microsoft\Credentials\*` e outros diretórios relacionados ao DPAPI.
 - Especialmente a partir de um compartilhamento de rede como **C$** ou **ADMIN$**.
-- Uso de **Mimikatz**, **SharpDPAPI** ou ferramentas similares para acessar a memória do LSASS ou despejar chaves mestres.
+- Uso de **Mimikatz**, **SharpDPAPI** ou ferramentas similares para acessar a memória do LSASS ou despejar masterkeys.
 - Evento **4662**: *Uma operação foi realizada em um objeto* – pode ser correlacionado com o acesso ao objeto **`BCKUPKEY`**.
-- Evento **4673/4674** quando um processo solicita *SeTrustedCredManAccessPrivilege* (Gerenciador de Credenciais)
+- Evento **4673/4674** quando um processo solicita *SeTrustedCredManAccessPrivilege* (Credential Manager)
 
 ---
 ### Vulnerabilidades de 2023-2025 e mudanças no ecossistema
 
-* **CVE-2023-36004 – Spoofing de Canal Seguro do Windows DPAPI** (Novembro de 2023). Um atacante com acesso à rede poderia enganar um membro do domínio para recuperar uma chave de backup DPAPI maliciosa, permitindo a descriptografia de chaves mestres de usuário. Corrigido na atualização cumulativa de novembro de 2023 – os administradores devem garantir que os DCs e estações de trabalho estejam totalmente corrigidos. citeturn4search0
-* **Criptografia de cookie "App-Bound" do Chrome 127** (Julho de 2024) substituiu a proteção DPAPI apenas legada por uma chave adicional armazenada sob o **Gerenciador de Credenciais** do usuário. A descriptografia offline de cookies agora requer tanto a chave mestre DPAPI quanto a **chave app-bound envolta em GCM**. SharpChrome v2.3 e DonPAPI 2.x são capazes de recuperar a chave extra ao serem executados com o contexto do usuário. citeturn0search0
-
+* **CVE-2023-36004 – Spoofing de Canal Seguro do Windows DPAPI** (Novembro de 2023). Um atacante com acesso à rede poderia enganar um membro do domínio para recuperar uma chave de backup DPAPI maliciosa, permitindo a descriptografia de masterkeys de usuário. Corrigido na atualização cumulativa de novembro de 2023 – os administradores devem garantir que os DCs e estações de trabalho estejam totalmente corrigidos.
+* **Criptografia de cookie "App-Bound" do Chrome 127** (Julho de 2024) substituiu a proteção DPAPI apenas legada por uma chave adicional armazenada sob o **Credential Manager** do usuário. A descriptografia offline de cookies agora requer tanto a masterkey DPAPI quanto a **chave app-bound envolta em GCM**. SharpChrome v2.3 e DonPAPI 2.x são capazes de recuperar a chave extra ao serem executados com o contexto do usuário.
 
 ## Referências
 
-- https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13
-- https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c
-- https://msrc.microsoft.com/update-guide/vulnerability/CVE-2023-36004
-- https://security.googleblog.com/2024/07/improving-security-of-chrome-cookies-on.html
-- https://specterops.io/blog/2022/05/18/entropycapture-simple-extraction-of-dpapi-optional-entropy/
-- https://github.com/Hashcat/Hashcat/releases/tag/v6.2.6
-- https://github.com/Leftp/DPAPISnoop
-- https://pypi.org/project/donpapi/2.0.0/
+- [https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13](https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13)
+- [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c)
+- [https://msrc.microsoft.com/update-guide/vulnerability/CVE-2023-36004](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2023-36004)
+- [https://security.googleblog.com/2024/07/improving-security-of-chrome-cookies-on.html](https://security.googleblog.com/2024/07/improving-security-of-chrome-cookies-on.html)
+- [https://specterops.io/blog/2022/05/18/entropycapture-simple-extraction-of-dpapi-optional-entropy/](https://specterops.io/blog/2022/05/18/entropycapture-simple-extraction-of-dpapi-optional-entropy/)
+- [https://github.com/Hashcat/Hashcat/releases/tag/v6.2.6](https://github.com/Hashcat/Hashcat/releases/tag/v6.2.6)
+- [https://github.com/Leftp/DPAPISnoop](https://github.com/Leftp/DPAPISnoop)
+- [https://pypi.org/project/donpapi/2.0.0/](https://pypi.org/project/donpapi/2.0.0/)
 
 {{#include ../../banners/hacktricks-training.md}}

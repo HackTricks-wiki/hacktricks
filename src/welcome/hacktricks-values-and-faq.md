@@ -8,18 +8,18 @@
 > Estes são os **valores do Projeto HackTricks**:
 >
 > - Dar acesso **GRATUITO** a recursos de **HACKING EDUCACIONAL** para **TODOS** na Internet.
->   - Hacking é sobre aprender, e aprender deve ser o mais gratuito possível.
->   - O objetivo deste livro é servir como um **recurso educacional** abrangente.
-> - **ARMAZENAR** técnicas de **hacking** incríveis que a comunidade publica, dando aos **AUTORES** **ORIGINAIS** todos os **créditos**.
->   - **Não queremos o crédito de outras pessoas**, apenas queremos armazenar truques legais para todos.
->   - Também escrevemos **nossas próprias pesquisas** no HackTricks.
->   - Em vários casos, escreveremos **no HackTricks um resumo das partes importantes** da técnica e **encorajaremos o leitor a visitar o post original** para mais detalhes.
-> - **ORGANIZAR** todas as técnicas de hacking no livro para que sejam **MAIS ACESSÍVEIS**
->   - A equipe do HackTricks dedicou milhares de horas gratuitamente **apenas para organizar o conteúdo** para que as pessoas possam **aprender mais rápido**
+>  - Hacking é sobre aprender, e aprender deve ser o mais gratuito possível.
+>  - O objetivo deste livro é servir como um **recurso educacional** abrangente.
+> - **ARMAZENAR** técnicas de **hacking** incríveis que a comunidade publica, dando todos os **créditos** aos **AUTORES ORIGINAIS**.
+>  - **Não queremos o crédito de outras pessoas**, apenas queremos armazenar truques legais para todos.
+>  - Também escrevemos **nossas próprias pesquisas** no HackTricks.
+>  - Em vários casos, escreveremos **no HackTricks um resumo das partes importantes** da técnica e **incentivaremos o leitor a visitar o post original** para mais detalhes.
+> - **ORGANIZAR** todas as técnicas de hacking no livro para que seja **MAIS ACESSÍVEL**
+>  - A equipe do HackTricks dedicou milhares de horas gratuitamente **apenas para organizar o conteúdo** para que as pessoas possam **aprender mais rápido**
 
 <figure><img src="../images/hack tricks gif.gif" alt="" width="375"><figcaption></figcaption></figure>
 
-## FAQ do HackTricks
+## faq do HackTricks
 
 > [!TIP]
 >
@@ -50,7 +50,7 @@ Sim, você pode, mas **não se esqueça de mencionar o(s) link(s) específico(s)
 >
 > - **Como posso citar uma página do HackTricks?**
 
-Desde que o link **da** página(s) de onde você obteve a informação apareça, é suficiente.\
+Desde que o link **da** página(s) de onde você obteve as informações apareça, é suficiente.\
 Se você precisar de um bibtex, pode usar algo como:
 ```latex
 @misc{hacktricks-bibtexing,
@@ -64,7 +64,7 @@ url = {\url{https://book.hacktricks.wiki/specific-page}},
 >
 > - **Posso copiar todos os HackTricks no meu blog?**
 
-**Eu preferiria que não**. Isso **não vai beneficiar ninguém**, já que todo o **conteúdo já está disponível publicamente** nos livros oficiais do HackTricks gratuitamente.
+**Eu preferiria que não**. Isso **não vai beneficiar ninguém**, pois todo o **conteúdo já está disponível publicamente** nos livros oficiais do HackTricks gratuitamente.
 
 Se você teme que isso desapareça, basta fazer um fork no Github ou baixá-lo, como eu disse, já é gratuito.
 
@@ -76,7 +76,7 @@ O primeiro **valor** do **HackTricks** é oferecer recursos educacionais de hack
 
 Se você acha que os livros do HackTricks são feitos para **fins comerciais**, você está **COMPLETAMENTE ERRADO**.
 
-Temos patrocinadores porque, mesmo que todo o conteúdo seja GRATUITO, queremos **oferecer à comunidade a possibilidade de apreciar nosso trabalho** se assim desejarem. Portanto, oferecemos às pessoas a opção de doar para o HackTricks via [**Github sponsors**](https://github.com/sponsors/carlospolop), e **empresas de cibersegurança relevantes** para patrocinar o HackTricks e **ter alguns anúncios** no livro, sendo os **anúncios** sempre colocados em locais que os tornem **visíveis**, mas que **não atrapalhem o processo de aprendizado** se alguém se concentrar no conteúdo.
+Temos patrocinadores porque, mesmo que todo o conteúdo seja GRATUITO, queremos **oferecer à comunidade a possibilidade de apreciar nosso trabalho** se assim desejarem. Portanto, oferecemos às pessoas a opção de doar para o HackTricks via [**patrocinadores do Github**](https://github.com/sponsors/carlospolop), e **empresas de cibersegurança relevantes** para patrocinar o HackTricks e **ter alguns anúncios** no livro, sendo os **anúncios** sempre colocados em locais que os tornem **visíveis**, mas que **não atrapalhem o processo de aprendizado** se alguém se concentrar no conteúdo.
 
 Você não encontrará o HackTricks cheio de anúncios irritantes como outros blogs com muito menos conteúdo do que o HackTricks, porque o HackTricks não é feito para fins comerciais.
 
@@ -84,7 +84,7 @@ Você não encontrará o HackTricks cheio de anúncios irritantes como outros bl
 >
 > - **O que devo fazer se alguma página do HackTricks for baseada no meu post de blog, mas não estiver referenciada?**
 
-**Lamentamos muito. Isso não deveria ter acontecido**. Por favor, nos avise via Github issues, Twitter, Discord... o link da página do HackTricks com o conteúdo e o link do seu blog e **nós iremos verificar e adicionar o mais rápido possível**.
+**Lamentamos muito. Isso não deveria ter acontecido**. Por favor, nos avise via problemas do Github, Twitter, Discord... o link da página do HackTricks com o conteúdo e o link do seu blog e **nós iremos verificar e adicionar o mais rápido possível**.
 
 > [!CAUTION]
 >
@@ -130,7 +130,7 @@ Esta licença não concede nenhum direito de marca registrada ou de branding em 
 ## **Disclaimer**
 
 > [!CAUTION]
-> Este livro, 'HackTricks', é destinado apenas para fins educacionais e informativos. O conteúdo dentro deste livro é fornecido em uma base 'como está', e os autores e editores não fazem representações ou garantias de qualquer tipo, expressas ou implícitas, sobre a completude, precisão, confiabilidade, adequação ou disponibilidade das informações, produtos, serviços ou gráficos relacionados contidos neste livro. Qualquer confiança que você coloque em tais informações é, portanto, estritamente por sua conta e risco.
+> Este livro, 'HackTricks', é destinado apenas para fins educacionais e informativos. O conteúdo dentro deste livro é fornecido em uma base 'como está', e os autores e editores não fazem representações ou garantias de qualquer tipo, expressas ou implícitas, sobre a completude, precisão, confiabilidade, adequação ou disponibilidade das informações, produtos, serviços ou gráficos relacionados contidos dentro deste livro. Qualquer confiança que você coloque em tais informações é, portanto, estritamente por sua conta e risco.
 >
 > Os autores e editores não serão, em nenhuma circunstância, responsáveis por qualquer perda ou dano, incluindo, sem limitação, perda ou dano indireto ou consequencial, ou qualquer perda ou dano que possa surgir da perda de dados ou lucros decorrentes do uso deste livro.
 >
