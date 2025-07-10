@@ -5,11 +5,11 @@
 ## Partitions
 
 Bir sabit disk veya bir **SSD disk farklı bölümler içerebilir** ve bu, verileri fiziksel olarak ayırma amacını taşır.\
-Diskin **minimum** birimi **sektördür** (normalde 512B'den oluşur). Bu nedenle, her bölüm boyutu bu boyutun katı olmalıdır.
+Diskin **minimum** birimi **sektördür** (normalde 512B'den oluşur). Bu nedenle, her bölüm boyutu bu boyutun katları olmalıdır.
 
 ### MBR (master Boot Record)
 
-**446B boot kodundan sonra diskin ilk sektöründe** tahsis edilir. Bu sektör, PC'ye bir bölümün ne zaman ve nereden bağlanması gerektiğini belirtmek için gereklidir.\
+**Boot kodunun 446B'sinden sonra diskin ilk sektöründe** tahsis edilmiştir. Bu sektör, PC'ye bir bölümün ne zaman ve nereden bağlanması gerektiğini belirtmek için gereklidir.\
 En fazla **4 bölüm** (en fazla **1** aktif/**bootable** olabilir) olmasına izin verir. Ancak daha fazla bölüme ihtiyacınız varsa **genişletilmiş bölümler** kullanabilirsiniz. Bu ilk sektörün **son baytı** boot kayıt imzası **0x55AA**'dır. Sadece bir bölüm aktif olarak işaretlenebilir.\
 MBR **maksimum 2.2TB**'ye izin verir.
 
@@ -17,7 +17,7 @@ MBR **maksimum 2.2TB**'ye izin verir.
 
 ![](<../../../images/image (304).png>)
 
-MBR'nin **440 ile 443 baytları** arasında **Windows Disk İmzası** bulunabilir (Windows kullanılıyorsa). Sabit diskin mantıksal sürücü harfi, Windows Disk İmzasına bağlıdır. Bu imzanın değiştirilmesi, Windows'un başlatılmasını engelleyebilir (araç: [**Active Disk Editor**](https://www.disk-editor.org/index.html)**)**.
+MBR'nin **440 ile 443 baytları** arasında **Windows Disk İmzası** bulabilirsiniz (Windows kullanılıyorsa). Sabit diskin mantıksal sürücü harfi, Windows Disk İmzasına bağlıdır. Bu imzanın değiştirilmesi, Windows'un başlatılmasını engelleyebilir (araç: [**Active Disk Editor**](https://www.disk-editor.org/index.html)**)**.
 
 ![](<../../../images/image (310).png>)
 
@@ -25,31 +25,31 @@ MBR'nin **440 ile 443 baytları** arasında **Windows Disk İmzası** bulunabili
 
 | Offset      | Length     | Item                |
 | ----------- | ---------- | ------------------- |
-| 0 (0x00)    | 446(0x1BE) | Boot code           |
-| 446 (0x1BE) | 16 (0x10)  | First Partition     |
-| 462 (0x1CE) | 16 (0x10)  | Second Partition    |
-| 478 (0x1DE) | 16 (0x10)  | Third Partition     |
-| 494 (0x1EE) | 16 (0x10)  | Fourth Partition    |
-| 510 (0x1FE) | 2 (0x2)    | Signature 0x55 0xAA |
+| 0 (0x00)    | 446(0x1BE) | Boot kodu           |
+| 446 (0x1BE) | 16 (0x10)  | İlk Bölüm           |
+| 462 (0x1CE) | 16 (0x10)  | İkinci Bölüm        |
+| 478 (0x1DE) | 16 (0x10)  | Üçüncü Bölüm        |
+| 494 (0x1EE) | 16 (0x10)  | Dördüncü Bölüm      |
+| 510 (0x1FE) | 2 (0x2)    | İmza 0x55 0xAA      |
 
-**Partition Record Format**
+**Bölüm Kayıt Formatı**
 
 | Offset    | Length   | Item                                                   |
 | --------- | -------- | ------------------------------------------------------ |
-| 0 (0x00)  | 1 (0x01) | Active flag (0x80 = bootable)                          |
-| 1 (0x01)  | 1 (0x01) | Start head                                             |
-| 2 (0x02)  | 1 (0x01) | Start sector (bits 0-5); upper bits of cylinder (6- 7) |
-| 3 (0x03)  | 1 (0x01) | Start cylinder lowest 8 bits                           |
-| 4 (0x04)  | 1 (0x01) | Partition type code (0x83 = Linux)                     |
-| 5 (0x05)  | 1 (0x01) | End head                                               |
-| 6 (0x06)  | 1 (0x01) | End sector (bits 0-5); upper bits of cylinder (6- 7)   |
-| 7 (0x07)  | 1 (0x01) | End cylinder lowest 8 bits                             |
-| 8 (0x08)  | 4 (0x04) | Sectors preceding partition (little endian)            |
-| 12 (0x0C) | 4 (0x04) | Sectors in partition                                   |
+| 0 (0x00)  | 1 (0x01) | Aktif bayrağı (0x80 = bootable)                       |
+| 1 (0x01)  | 1 (0x01) | Başlangıç başlığı                                      |
+| 2 (0x02)  | 1 (0x01) | Başlangıç sektörü (bit 0-5); silindirin üst bitleri (6-7) |
+| 3 (0x03)  | 1 (0x01) | Başlangıç silindiri en düşük 8 bit                     |
+| 4 (0x04)  | 1 (0x01) | Bölüm türü kodu (0x83 = Linux)                        |
+| 5 (0x05)  | 1 (0x01) | Bitiş başlığı                                          |
+| 6 (0x06)  | 1 (0x01) | Bitiş sektörü (bit 0-5); silindirin üst bitleri (6-7)   |
+| 7 (0x07)  | 1 (0x01) | Bitiş silindiri en düşük 8 bit                         |
+| 8 (0x08)  | 4 (0x04) | Bölümden önceki sektörler (little endian)             |
+| 12 (0x0C) | 4 (0x04) | Bölümdeki sektörler                                    |
 
 Bir MBR'yi Linux'ta bağlamak için önce başlangıç ofsetini almanız gerekir (bunu `fdisk` ve `p` komutunu kullanarak yapabilirsiniz)
 
-![](<../../../images/image (413) (3) (3) (3) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
+![](<../../../images/image (413) (3) (3) (3) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
 Ve ardından aşağıdaki kodu kullanın
 ```bash
@@ -64,7 +64,7 @@ mount -o ro,loop,offset=32256,noatime /path/to/image.dd /media/part/
 
 ### GPT (GUID Bölüm Tablosu)
 
-GUID Bölüm Tablosu, GPT olarak bilinir ve MBR (Ana Önyükleme Kaydı) ile karşılaştırıldığında geliştirilmiş yetenekleri nedeniyle tercih edilmektedir. Bölümler için **küresel benzersiz tanımlayıcı** ile ayırt edici olan GPT, birkaç yönden öne çıkmaktadır:
+GUID Bölüm Tablosu, GPT olarak bilinir ve MBR (Master Boot Record) ile karşılaştırıldığında geliştirilmiş yetenekleri nedeniyle tercih edilmektedir. Bölümler için **küresel benzersiz tanımlayıcı** ile ayırt edici olan GPT, birkaç yönden öne çıkmaktadır:
 
 - **Konum ve Boyut**: Hem GPT hem de MBR **sektör 0**'da başlar. Ancak, GPT **64 bit** üzerinde çalışırken, MBR **32 bit** kullanır.
 - **Bölüm Sınırları**: GPT, Windows sistemlerinde **128 bölüme** kadar destekler ve **9.4ZB**'a kadar veri depolayabilir.
@@ -85,31 +85,31 @@ GUID Bölüm Tablosu, GPT olarak bilinir ve MBR (Ana Önyükleme Kaydı) ile kar
 
 [Wikipedia'dan](https://en.wikipedia.org/wiki/GUID_Partition_Table)
 
-**EFI** yerine **BIOS** hizmetleri aracılığıyla **GPT tabanlı önyükleme** destekleyen işletim sistemlerinde, ilk sektör hala **önyükleyici** kodunun ilk aşamasını depolamak için kullanılabilir, ancak **değiştirilmiş** olarak **GPT** **bölümlerini** tanımak için. MBR'deki önyükleyici, 512 baytlık bir sektör boyutu varsaymamalıdır.
+**EFI** yerine **BIOS** hizmetleri aracılığıyla **GPT tabanlı önyükleme** destekleyen işletim sistemlerinde, ilk sektör hala **önyükleyici** kodunun ilk aşamasını depolamak için kullanılabilir, ancak **GPT** **bölümlerini tanıyacak şekilde **değiştirilmiştir. MBR'deki önyükleyici, 512 baytlık bir sektör boyutu varsaymamalıdır.
 
 **Bölüm tablosu başlığı (LBA 1)**
 
 [Wikipedia'dan](https://en.wikipedia.org/wiki/GUID_Partition_Table)
 
-Bölüm tablosu başlığı, diskteki kullanılabilir blokları tanımlar. Ayrıca, bölüm tablosunu oluşturan bölüm girişlerinin sayısını ve boyutunu tanımlar (tablodaki 80 ve 84 ofsetleri).
+Bölüm tablosu başlığı, diskteki kullanılabilir blokları tanımlar. Ayrıca, bölüm tablosunu oluşturan bölüm girişlerinin sayısını ve boyutunu tanımlar (tablodaki ofsetler 80 ve 84).
 
 | Ofset     | Uzunluk  | İçerik                                                                                                                                                                     |
 | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 0 (0x00)  | 8 bayt   | İmza ("EFI PART", 45h 46h 49h 20h 50h 41h 52h 54h veya 0x5452415020494645ULL[ ](https://en.wikipedia.org/wiki/GUID_Partition_Table#cite_note-8)küçük sonlu makinelerde) |
+| 0 (0x00)  | 8 bayt   | İmza ("EFI PART", 45h 46h 49h 20h 50h 41h 52h 54h veya 0x5452415020494645ULL[ ](https://en.wikipedia.org/wiki/GUID_Partition_Table#_note-8)küçük sonlu makinelerde) |
 | 8 (0x08)  | 4 bayt   | UEFI 2.8 için Revizyon 1.0 (00h 00h 01h 00h)                                                                                                                                  |
 | 12 (0x0C) | 4 bayt   | Küçük sonlu (bayt cinsinden, genellikle 5Ch 00h 00h 00h veya 92 bayt) başlık boyutu                                                                                                 |
-| 16 (0x10) | 4 bayt   | [CRC32](https://en.wikipedia.org/wiki/CRC32) başlığın (ofset +0'dan başlık boyutuna kadar) küçük sonlu, bu alan hesaplama sırasında sıfırlanmıştır                             |
+| 16 (0x10) | 4 bayt   | [CRC32](https://en.wikipedia.org/wiki/CRC32) başlığın (ofset +0'dan başlık boyutuna kadar) küçük sonlu, bu alan hesaplama sırasında sıfırlanır                             |
 | 20 (0x14) | 4 bayt   | Ayrılmış; sıfır olmalıdır                                                                                                                                                       |
 | 24 (0x18) | 8 bayt   | Mevcut LBA (bu başlık kopyasının konumu)                                                                                                                                   |
 | 32 (0x20) | 8 bayt   | Yedek LBA (diğer başlık kopyasının konumu)                                                                                                                               |
 | 40 (0x28) | 8 bayt   | Bölümler için ilk kullanılabilir LBA (birincil bölüm tablosunun son LBA'sı + 1)                                                                                                       |
 | 48 (0x30) | 8 bayt   | Son kullanılabilir LBA (ikincil bölüm tablosunun ilk LBA'sı − 1)                                                                                                                    |
 | 56 (0x38) | 16 bayt  | Disk GUID karışık sonlu                                                                                                                                                    |
-| 72 (0x48) | 8 bayt   | Bölüm girişlerinin bir dizisinin başlangıç LBA'sı (her zaman birincil kopyada 2)                                                                                                     |
-| 80 (0x50) | 4 bayt   | Dizideki bölüm girişlerinin sayısı                                                                                                                                         |
+| 72 (0x48) | 8 bayt   | Bir dizi bölüm girişinin başlangıç LBA'sı (her zaman birincil kopyada 2)                                                                                                     |
+| 80 (0x50) | 4 bayt   | Dizi içindeki bölüm girişlerinin sayısı                                                                                                                                         |
 | 84 (0x54) | 4 bayt   | Tek bir bölüm girişinin boyutu (genellikle 80h veya 128)                                                                                                                        |
-| 88 (0x58) | 4 bayt   | Bölüm girişleri dizisinin küçük sonlu CRC32'si                                                                                                                            |
-| 92 (0x5C) | \*       | Ayrılmış; geri kalan blok için sıfır olmalıdır (512 baytlık bir sektör boyutu için 420 bayt; ancak daha büyük sektör boyutları ile daha fazla olabilir)                                      |
+| 88 (0x58) | 4 bayt   | Küçük sonlu bölüm girişleri dizisinin CRC32'si                                                                                                                            |
+| 92 (0x5C) | \*       | Ayrılmış; blokun geri kalanında sıfır olmalıdır (512 baytlık bir sektör boyutu için 420 bayt; ancak daha büyük sektör boyutları ile daha fazla olabilir)                                      |
 
 **Bölüm girişleri (LBA 2–33)**
 
@@ -120,7 +120,7 @@ Bölüm tablosu başlığı, diskteki kullanılabilir blokları tanımlar. Ayrı
 | 16 (0x10)                 | 16 bayt  | Benzersiz bölüm GUID (karışık sonlu)                                                                          |
 | 32 (0x20)                 | 8 bayt   | İlk LBA ([küçük sonlu](https://en.wikipedia.org/wiki/Little_endian))                                      |
 | 40 (0x28)                 | 8 bayt   | Son LBA (dahil, genellikle tek)                                                                             |
-| 48 (0x30)                 | 8 bayt   | Nitelik bayrakları (örneğin, bit 60 yalnızca okunur olduğunu belirtir)                                                               |
+| 48 (0x30)                 | 8 bayt   | Nitelik bayrakları (örneğin, bit 60 yalnızca okunur)                                                               |
 | 56 (0x38)                 | 72 bayt  | Bölüm adı (36 [UTF-16](https://en.wikipedia.org/wiki/UTF-16)LE kod birimi)                               |
 
 **Bölüm Türleri**
@@ -131,7 +131,7 @@ Daha fazla bölüm türü için [https://en.wikipedia.org/wiki/GUID_Partition_Ta
 
 ### İnceleme
 
-[**ArsenalImageMounter**](https://arsenalrecon.com/downloads/) ile adli görüntüyü monte ettikten sonra, Windows aracı [**Active Disk Editor**](https://www.disk-editor.org/index.html)**'ı** kullanarak ilk sektörü inceleyebilirsiniz. Aşağıdaki görüntüde **sektör 0**'da bir **MBR** tespit edilmiştir ve yorumlanmıştır:
+[**ArsenalImageMounter**](https://arsenalrecon.com/downloads/) ile adli görüntüyü monte ettikten sonra, Windows aracı [**Active Disk Editor**](https://www.disk-editor.org/index.html)** kullanarak ilk sektörü inceleyebilirsiniz.** Aşağıdaki görüntüde **sektör 0**'da bir **MBR** tespit edilmiştir ve yorumlanmıştır:
 
 ![](<../../../images/image (354).png>)
 
@@ -149,17 +149,17 @@ Eğer bir **MBR yerine bir GPT tablosu** olsaydı, **sektör 1**'de _EFI PART_ i
 
 ### FAT
 
-**FAT (Dosya Tahsis Tablosu)** dosya sistemi, hacmin başlangıcında yer alan dosya tahsis tablosu etrafında tasarlanmıştır. Bu sistem, verilerin bütünlüğünü sağlamak için tablonun **iki kopyasını** tutarak verileri korur; bu sayede bir kopyası bozulsa bile veri bütünlüğü sağlanır. Tablo, kök klasör ile birlikte **sabit bir konumda** olmalıdır; bu, sistemin başlatma süreci için kritik öneme sahiptir.
+**FAT (Dosya Tahsis Tablosu)** dosya sistemi, temel bileşeni olan dosya tahsis tablosu etrafında tasarlanmıştır ve bu tablo hacmin başlangıcında yer alır. Bu sistem, verileri **iki kopya** tutarak korur ve birinin bozulması durumunda veri bütünlüğünü sağlar. Tablo, kök klasör ile birlikte **sabit bir konumda** olmalıdır; bu, sistemin başlatma süreci için kritik öneme sahiptir.
 
-Dosya sisteminin temel depolama birimi bir **küme, genellikle 512B**'dir ve birden fazla sektörden oluşur. FAT, sürümler boyunca evrim geçirmiştir:
+Dosya sisteminin temel depolama birimi bir **küme, genellikle 512B**'dir ve birden fazla sektörden oluşur. FAT, sürümler aracılığıyla evrim geçirmiştir:
 
 - **FAT12**, 12 bit küme adreslerini destekler ve 4078 kümeye kadar (4084 UNIX ile) işleyebilir.
 - **FAT16**, 16 bit adreslere yükseltilerek 65,517 kümeye kadar destek sağlar.
 - **FAT32**, 32 bit adreslerle daha da ilerleyerek her hacim için 268,435,456 kümeye kadar izin verir.
 
-FAT sürümleri arasında önemli bir sınırlama, **4GB maksimum dosya boyutu**'dur; bu, dosya boyutu depolamak için kullanılan 32 bit alan tarafından dayatılmaktadır.
+FAT sürümleri arasında önemli bir sınırlama, dosya boyutu depolamak için kullanılan 32 bit alan nedeniyle **4GB maksimum dosya boyutudur**.
 
-FAT12 ve FAT16 için kök dizininin ana bileşenleri şunlardır:
+FAT12 ve FAT16 için kök dizininin temel bileşenleri şunlardır:
 
 - **Dosya/Klasör Adı** (en fazla 8 karakter)
 - **Nitelikler**
@@ -169,11 +169,11 @@ FAT12 ve FAT16 için kök dizininin ana bileşenleri şunlardır:
 
 ### EXT
 
-**Ext2**, **günlük tutmayan** bölümler (**çok fazla değişmeyen bölümler**) için en yaygın dosya sistemidir; **Ext3/4** ise genellikle **diğer bölümler** için **günlük tutan** sistemlerdir.
+**Ext2**, **günlük tutmayan** bölümler (**çok fazla değişmeyen bölümler**) için en yaygın dosya sistemidir, örneğin önyükleme bölümü. **Ext3/4** ise **günlük tutan** sistemlerdir ve genellikle **diğer bölümler** için kullanılır.
 
 ## **Meta Veriler**
 
-Bazı dosyalar meta veriler içerir. Bu bilgiler, dosyanın içeriği hakkında olup, bazen bir analist için ilginç olabilir; dosya türüne bağlı olarak, aşağıdaki bilgileri içerebilir:
+Bazı dosyalar meta veriler içerir. Bu bilgiler, dosyanın içeriği hakkında olup, bazen bir analist için ilginç olabilir; dosya türüne bağlı olarak, aşağıdaki gibi bilgiler içerebilir:
 
 - Başlık
 - Kullanılan MS Office Versiyonu
@@ -187,9 +187,9 @@ Bir dosyanın meta verilerini almak için [**exiftool**](https://exiftool.org) v
 
 ## **Silinmiş Dosyaların Kurtarılması**
 
-### Kaydedilen Silinmiş Dosyalar
+### Günlük Kayıtlı Silinmiş Dosyalar
 
-Daha önce görüldüğü gibi, bir dosya "silindikten" sonra hala kaydedildiği birkaç yer vardır. Bunun nedeni, genellikle bir dosyanın dosya sisteminden silinmesinin sadece silindi olarak işaretlenmesidir; ancak veri dokunulmamıştır. Bu nedenle, dosyaların kayıtlarını (MFT gibi) incelemek ve silinmiş dosyaları bulmak mümkündür.
+Daha önce görüldüğü gibi, bir dosya "silindikten" sonra hala kaydedilen birkaç yer vardır. Bunun nedeni, genellikle bir dosyanın dosya sisteminden silinmesinin sadece silindi olarak işaretlenmesidir, ancak veriler dokunulmamıştır. Bu nedenle, dosyaların kayıtlarını (MFT gibi) incelemek ve silinmiş dosyaları bulmak mümkündür.
 
 Ayrıca, işletim sistemi genellikle dosya sistemi değişiklikleri ve yedeklemeleri hakkında çok fazla bilgi kaydeder, bu nedenle dosyayı veya mümkün olduğunca fazla bilgiyi kurtarmak için bunları kullanmaya çalışmak mümkündür.
 
@@ -199,7 +199,7 @@ file-data-carving-recovery-tools.md
 
 ### **Dosya Oymacılığı**
 
-**Dosya oymacılığı**, **veri yığınında dosyaları bulmaya çalışan** bir tekniktir. Bu tür araçların çalıştığı 3 ana yol vardır: **Dosya türü başlıkları ve alt başlıklarına dayalı**, dosya türü **yapılarına** dayalı ve **içerik**'e dayalı.
+**Dosya oymacılığı**, **veri yığınında dosyaları bulmaya** çalışan bir tekniktir. Bu tür araçların çalıştığı 3 ana yol vardır: **Dosya türü başlıkları ve alt başlıklarına dayalı**, dosya türü **yapılarına** dayalı ve **içerik** kendisine dayalı.
 
 Bu tekniğin **parçalanmış dosyaları geri almak için çalışmadığını** unutmayın. Eğer bir dosya **bitişik sektörlerde depolanmamışsa**, bu teknik onu veya en azından bir kısmını bulamayacaktır.
 
@@ -212,7 +212,7 @@ file-data-carving-recovery-tools.md
 ### Veri Akışı **C**arving
 
 Veri Akışı Oymacılığı, Dosya Oymacılığına benzer, ancak **tam dosyalar aramak yerine, ilginç bilgi parçalarını arar**.\
-Örneğin, kaydedilmiş URL'leri içeren bir tam dosya aramak yerine, bu teknik URL'leri arayacaktır.
+Örneğin, günlük kaydedilmiş URL'leri içeren bir tam dosya aramak yerine, bu teknik URL'leri arayacaktır.
 
 {{#ref}}
 file-data-carving-recovery-tools.md
@@ -220,8 +220,8 @@ file-data-carving-recovery-tools.md
 
 ### Güvenli Silme
 
-Açıkça, dosyaları ve bunlarla ilgili logların bir kısmını **"güvenli" bir şekilde silmenin** yolları vardır. Örneğin, bir dosyanın içeriğini birkaç kez gereksiz verilerle **üst üste yazmak** ve ardından dosya ile ilgili **$MFT** ve **$LOGFILE**'dan **logları kaldırmak** ve **Hacim Gölge Kopyalarını** **kaldırmak** mümkündür.\
-Bu işlemi gerçekleştirirken, dosyanın varlığının hala **diğer parçalarda kaydedilmiş olabileceğini** fark edebilirsiniz; bu doğrudur ve adli uzmanların işinin bir parçası da bunları bulmaktır.
+Açıkça, dosyaları ve bunlarla ilgili günlüklerin bir kısmını **"güvenli" bir şekilde silmenin yolları vardır**. Örneğin, bir dosyanın içeriğini birkaç kez çöp verilerle **üst üste yazmak** ve ardından dosya ile ilgili **$MFT** ve **$LOGFILE**'dan **günlükleri kaldırmak** ve **Hacim Gölge Kopyalarını kaldırmak** mümkündür.\
+Bu işlemi gerçekleştirirken, dosyanın varlığının hala kaydedildiği **diğer parçaların** olabileceğini fark edebilirsiniz ve bu doğrudur; adli uzmanların işi bunları bulmaktır.
 
 ## Referanslar
 

@@ -17,7 +17,7 @@
 - **İmza Algoritması**, sertifikayı imzalamak için kullanılan yöntemi belirtir.
 - **İmza**, vericinin özel anahtarı ile oluşturulur ve sertifikanın doğruluğunu garanti eder.
 
-### Özel Dikkatler
+### Özel Hususlar
 
 - **Subject Alternative Names (SAN'lar)**, bir sertifikanın birden fazla kimliğe uygulanabilirliğini genişletir, bu da birden fazla alan adı olan sunucular için kritik öneme sahiptir. Güvenli verilme süreçleri, saldırganların SAN spesifikasyonunu manipüle ederek kimlik taklidi risklerini önlemek için hayati öneme sahiptir.
 
@@ -81,9 +81,9 @@ Windows kullanıcıları ayrıca GUI (`certmgr.msc` veya `certlm.msc`) veya komu
 # Example of requesting a certificate using PowerShell
 Get-Certificate -Template "User" -CertStoreLocation "cert:\\CurrentUser\\My"
 ```
-## Sertifika Kimlik Doğrulama
+## Sertifika Kimlik Doğrulaması
 
-Active Directory (AD) sertifika kimlik doğrulamayı destekler, esasen **Kerberos** ve **Secure Channel (Schannel)** protokollerini kullanır.
+Active Directory (AD) sertifika kimlik doğrulamasını destekler, esasen **Kerberos** ve **Secure Channel (Schannel)** protokollerini kullanır.
 
 ### Kerberos Kimlik Doğrulama Süreci
 
@@ -99,7 +99,7 @@ Schannel, bir el sıkışma sırasında istemcinin, başarılı bir şekilde do�
 
 ### AD Sertifika Hizmetleri Sayımı
 
-AD'nin sertifika hizmetleri, **Enterprise Certificate Authorities (CAs)** ve bunların yapılandırmaları hakkında bilgi ortaya çıkaran LDAP sorguları aracılığıyla sayılabilir. Bu, özel ayrıcalıklara sahip olmadan herhangi bir alan kimlik doğrulamalı kullanıcı tarafından erişilebilir. **[Certify](https://github.com/GhostPack/Certify)** ve **[Certipy](https://github.com/ly4k/Certipy)** gibi araçlar, AD CS ortamlarında sayım ve güvenlik açığı değerlendirmesi için kullanılır.
+AD'nin sertifika hizmetleri, **Enterprise Certificate Authorities (CAs)** ve bunların yapılandırmaları hakkında bilgi açığa çıkaran LDAP sorguları aracılığıyla sayılabilir. Bu, özel ayrıcalıklara sahip olmadan herhangi bir alan kimlik doğrulamalı kullanıcı tarafından erişilebilir. **[Certify](https://github.com/GhostPack/Certify)** ve **[Certipy](https://github.com/ly4k/Certipy)** gibi araçlar, AD CS ortamlarında sayım ve güvenlik açığı değerlendirmesi için kullanılır.
 
 Bu araçları kullanmak için komutlar şunlardır:
 ```bash
@@ -120,13 +120,13 @@ certutil -v -dstemplate
 ```
 ---
 
-## Son Güvenlik Açıkları & Güncellemeler (2022-2025)
+## Son Güvenlik Açıkları & Güvenlik Güncellemeleri (2022-2025)
 
 | Yıl | ID / İsim | Etki | Ana Çıkarımlar |
 |------|-----------|--------|----------------|
-| 2022 | **CVE-2022-26923** – “Certifried” / ESC6 | *Yetki yükseltme* PKINIT sırasında makine hesap sertifikalarının taklit edilmesiyle. | Yamanın **10 Mayıs 2022** güvenlik güncellemelerine dahil edildi. Denetim ve güçlü eşleme kontrolleri **KB5014754** aracılığıyla tanıtıldı; ortamların artık *Tam Uygulama* modunda olması gerekiyor. citeturn2search0 |
-| 2023 | **CVE-2023-35350 / 35351** | *Uzaktan kod yürütme* AD CS Web Enrollment (certsrv) ve CES rollerinde. | Kamuya açık PoC'ler sınırlıdır, ancak savunmasız IIS bileşenleri genellikle dahili olarak açığa çıkar. Yamanın **Temmuz 2023** Yamanın Salısı itibarıyla mevcut. citeturn3search0 |
-| 2024 | **CVE-2024-49019** – “EKUwu” / ESC15 | Kayıt haklarına sahip düşük yetkili kullanıcılar, CSR oluşturma sırasında **herhangi** bir EKU veya SAN'ı geçersiz kılabilir, istemci kimlik doğrulaması veya kod imzalama için kullanılabilir sertifikalar vererek *alanın tehlikeye girmesine* yol açabilir. | **Nisan 2024** güncellemelerinde ele alındı. Şablonlardan “Talepte Sağla”yı kaldırın ve kayıt izinlerini kısıtlayın. citeturn1search3 |
+| 2022 | **CVE-2022-26923** – “Certifried” / ESC6 | *Yetki yükseltme* PKINIT sırasında makine hesap sertifikalarını taklit ederek. | Yamanın **10 Mayıs 2022** güvenlik güncellemelerine dahil edildi. Denetim ve güçlü eşleme kontrolleri **KB5014754** aracılığıyla tanıtıldı; ortamların artık *Tam Uygulama* modunda olması gerekiyor. |
+| 2023 | **CVE-2023-35350 / 35351** | *Uzaktan kod yürütme* AD CS Web Kaydı (certsrv) ve CES rollerinde. | Kamuya açık PoC'ler sınırlıdır, ancak savunmasız IIS bileşenleri genellikle dahili olarak açığa çıkar. **Temmuz 2023** Yamanın Salı günü itibarıyla yamanmıştır. |
+| 2024 | **CVE-2024-49019** – “EKUwu” / ESC15 | Kayıt haklarına sahip düşük yetkili kullanıcılar, CSR oluşturma sırasında **herhangi bir** EKU veya SAN'ı geçersiz kılabilir, istemci kimlik doğrulaması veya kod imzalama için kullanılabilir sertifikalar vererek *alanın ele geçirilmesine* yol açabilir. | **Nisan 2024** güncellemelerinde ele alındı. Şablonlardan “Talepte Sağla”yı kaldırın ve kayıt izinlerini kısıtlayın. |
 
 ### Microsoft sertifika güçlendirme zaman çizelgesi (KB5014754)
 
@@ -134,16 +134,16 @@ Microsoft, Kerberos sertifika kimlik doğrulamasını zayıf örtük eşlemelerd
 
 1. Tüm DC'leri ve AD CS sunucularını yamalaması (Mayıs 2022 veya sonrası).
 2. *Denetim* aşamasında zayıf eşlemeler için Olay ID 39/41'i izlemesi.
-3. Şubat 2025'ten önce yeni **SID uzantısı** ile istemci kimlik sertifikalarını yeniden vermesi veya güçlü manuel eşlemeleri yapılandırması gerekir. citeturn2search0
+3. Şubat 2025'ten önce yeni **SID uzantısı** ile istemci kimlik sertifikalarını yeniden vermesi veya güçlü manuel eşlemeleri yapılandırması gerekir.
 
 ---
 
 ## Tespit & Güçlendirme Geliştirmeleri
 
-* **Defender for Identity AD CS sensörü (2023-2024)** artık ESC1-ESC8/ESC11 için duruş değerlendirmeleri sunmakta ve *“Bir DC için sertifika verilmesi”* (ESC8) ve *“Rastgele Uygulama Politikaları ile Sertifika Kaydını Önle”* (ESC15) gibi gerçek zamanlı uyarılar üretmektedir. Bu tespitlerden yararlanmak için sensörlerin tüm AD CS sunucularına dağıtıldığından emin olun. citeturn5search0
+* **Defender for Identity AD CS sensörü (2023-2024)** artık ESC1-ESC8/ESC11 için duruş değerlendirmeleri sunmakta ve *“DC olmayan bir makine için etki alanı denetleyici sertifika verilmesi”* (ESC8) ve *“Rastgele Uygulama Politikaları ile Sertifika Kaydını Önle”* (ESC15) gibi gerçek zamanlı uyarılar üretmektedir. Bu tespitlerden yararlanmak için sensörlerin tüm AD CS sunucularına dağıtıldığından emin olun.
 * Tüm şablonlarda **“Talepte Sağla”** seçeneğini devre dışı bırakın veya sıkı bir şekilde sınırlayın; açıkça tanımlanmış SAN/EKU değerlerini tercih edin.
 * Şablonlardan **Her Amaç** veya **No EKU**'yu kaldırın, aksi takdirde kesinlikle gerekli olmadıkça (ESC2 senaryolarını ele alır).
-* Hassas şablonlar için **yönetici onayı** veya özel Kayıt Temsilcisi iş akışları gerektirin (örneğin, WebSunucu / Kod İmzalama).
+* Hassas şablonlar için **yönetici onayı** veya özel Kayıt Ajanı iş akışları gerektiriniz (örneğin, WebSunucu / Kod İmzalama).
 * Web kaydını (`certsrv`) ve CES/NDES uç noktalarını güvenilir ağlarla veya istemci sertifika kimlik doğrulaması arkasında kısıtlayın.
 * ESC11'i azaltmak için RPC kayıt şifrelemesini zorlayın (`certutil –setreg CA\InterfaceFlags +IF_ENFORCEENCRYPTICERTREQ`).
 
