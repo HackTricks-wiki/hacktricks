@@ -36,7 +36,6 @@ jobs:
         if: steps.check_workflows.outputs.should_continue == 'true'
         run: |
           authorized_user="carlospolop"
-          merged_count=0
           max_merges=2
           
           echo "Authorized user: $authorized_user"
@@ -50,9 +49,13 @@ jobs:
             exit 0
           fi
           
+          # Create a temp file to track merge count
+          echo "0" > /tmp/merged_count
+          
           # Process each PR
           echo "$prs" | jq -r '.[] | @base64' | while IFS= read -r pr_data; do
-            if [ "$merged_count" -ge "$max_merges" ]; then
+            current_count=$(cat /tmp/merged_count)
+            if [ "$current_count" -ge "$max_merges" ]; then
               echo "Reached maximum merge limit ($max_merges). Stopping."
               break
             fi
@@ -100,7 +103,9 @@ jobs:
                 # Merge the PR (specify repo explicitly since we're not in a git directory)
                 if gh pr merge "$pr_number" --merge --delete-branch --repo "$GITHUB_REPOSITORY"; then
                   echo "Successfully merged PR #$pr_number: $pr_title"
-                  merged_count=$((merged_count + 1))
+                  # Update merge count in temp file
+                  current_count=$(cat /tmp/merged_count)
+                  echo $((current_count + 1)) > /tmp/merged_count
                 else
                   echo "Failed to merge PR #$pr_number: $pr_title"
                 fi
@@ -115,6 +120,11 @@ jobs:
             rm -f "/tmp/has_merge_comment_$pr_number"
           done
           
-          echo "Auto-merge process completed. Merged $merged_count PRs."
+          # Read final merge count from temp file
+          final_count=$(cat /tmp/merged_count)
+          echo "Auto-merge process completed. Merged $final_count PRs."
+          
+          # Clean up merge count file
+          rm -f /tmp/merged_count
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
