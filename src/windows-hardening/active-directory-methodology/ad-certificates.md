@@ -26,13 +26,13 @@
 AD CS erkennt CA-Zertifikate in einem AD-Wald durch bestimmte Container an, die jeweils einzigartige Rollen erfüllen:
 
 - Der Container **Zertifizierungsstellen** enthält vertrauenswürdige Root-CA-Zertifikate.
-- Der Container **Registrierungsdienste** enthält Informationen zu Unternehmens-CAs und deren Zertifikatvorlagen.
+- Der Container **Registrierungsdienste** enthält Informationen zu Enterprise-CAs und deren Zertifikatvorlagen.
 - Das Objekt **NTAuthCertificates** umfasst CA-Zertifikate, die für die AD-Authentifizierung autorisiert sind.
-- Der Container **AIA (Authority Information Access)** erleichtert die Validierung der Zertifikatskette mit Zwischen- und Cross-CA-Zertifikaten.
+- Der Container **AIA (Authority Information Access)** erleichtert die Validierung der Zertifikatkette mit Zwischen- und Cross-CA-Zertifikaten.
 
 ### Zertifikatserwerb: Client-Zertifikatsanforderungsfluss
 
-1. Der Anforderungsprozess beginnt mit Clients, die eine Unternehmens-CA finden.
+1. Der Anforderungsprozess beginnt mit Clients, die eine Enterprise-CA finden.
 2. Ein CSR wird erstellt, der einen öffentlichen Schlüssel und andere Details enthält, nachdem ein öffentlich-privates Schlüsselpaar generiert wurde.
 3. Die CA bewertet den CSR anhand der verfügbaren Zertifikatvorlagen und stellt das Zertifikat basierend auf den Berechtigungen der Vorlage aus.
 4. Nach Genehmigung signiert die CA das Zertifikat mit ihrem privaten Schlüssel und gibt es an den Client zurück.
@@ -43,21 +43,21 @@ Diese Vorlagen, die innerhalb von AD definiert sind, umreißen die Einstellungen
 
 ## Zertifikatsregistrierung
 
-Der Registrierungsprozess für Zertifikate wird von einem Administrator initiiert, der **eine Zertifikatvorlage erstellt**, die dann von einer Unternehmens-Zertifizierungsstelle (CA) **veröffentlicht** wird. Dies macht die Vorlage für die Client-Registrierung verfügbar, ein Schritt, der erreicht wird, indem der Name der Vorlage in das Feld `certificatetemplates` eines Active Directory-Objekts eingefügt wird.
+Der Registrierungsprozess für Zertifikate wird von einem Administrator initiiert, der **eine Zertifikatvorlage erstellt**, die dann von einer Enterprise-Zertifizierungsstelle (CA) **veröffentlicht** wird. Dadurch wird die Vorlage für die Client-Registrierung verfügbar, ein Schritt, der erreicht wird, indem der Name der Vorlage in das Feld `certificatetemplates` eines Active Directory-Objekts eingefügt wird.
 
-Damit ein Client ein Zertifikat anfordern kann, müssen **Registrierungsrechte** gewährt werden. Diese Rechte sind durch Sicherheitsbeschreibungen auf der Zertifikatvorlage und der Unternehmens-CA selbst definiert. Berechtigungen müssen an beiden Orten gewährt werden, damit eine Anfrage erfolgreich ist.
+Damit ein Client ein Zertifikat anfordern kann, müssen **Registrierungsrechte** gewährt werden. Diese Rechte werden durch Sicherheitsbeschreibungen auf der Zertifikatvorlage und der Enterprise-CA selbst definiert. Berechtigungen müssen an beiden Orten gewährt werden, damit eine Anfrage erfolgreich ist.
 
 ### Vorlagenregistrierungsrechte
 
-Diese Rechte werden durch Access Control Entries (ACEs) spezifiziert, die Berechtigungen wie:
+Diese Rechte werden durch Zugriffssteuerungseinträge (ACEs) spezifiziert, die Berechtigungen wie:
 
-- **Certificate-Enrollment** und **Certificate-AutoEnrollment**-Rechte, die jeweils mit spezifischen GUIDs verknüpft sind.
+- **Zertifikat-Registrierung** und **Zertifikat-Auto-Registrierung**-Rechte, die jeweils mit spezifischen GUIDs verbunden sind.
 - **ExtendedRights**, die alle erweiterten Berechtigungen erlauben.
-- **FullControl/GenericAll**, die vollständige Kontrolle über die Vorlage bieten.
+- **Vollzugriff/GenericAll**, die vollständige Kontrolle über die Vorlage bieten.
 
-### Unternehmens-CA-Registrierungsrechte
+### Enterprise-CA-Registrierungsrechte
 
-Die Rechte der CA sind in ihrer Sicherheitsbeschreibung festgelegt, die über die Verwaltungs-Konsole der Zertifizierungsstelle zugänglich ist. Einige Einstellungen erlauben sogar Benutzern mit niedrigen Berechtigungen den Remote-Zugriff, was ein Sicherheitsrisiko darstellen könnte.
+Die Rechte der CA sind in ihrem Sicherheitsdescriptor festgelegt, der über die Verwaltungs-Konsole der Zertifizierungsstelle zugänglich ist. Einige Einstellungen erlauben sogar Benutzern mit niedrigen Berechtigungen den Remote-Zugriff, was ein Sicherheitsrisiko darstellen könnte.
 
 ### Zusätzliche Ausstellungssteuerungen
 
@@ -72,7 +72,7 @@ Zertifikate können angefordert werden über:
 
 1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE), unter Verwendung von DCOM-Schnittstellen.
 2. **ICertPassage Remote Protocol** (MS-ICPR), über benannte Pipes oder TCP/IP.
-3. Die **Zertifikatsregistrierungs-Webschnittstelle**, mit der Rolle der Webregistrierung der Zertifizierungsstelle installiert.
+3. Die **Zertifikatsregistrierungs-Webschnittstelle**, mit der Rolle der Web-Registrierung der Zertifizierungsstelle installiert.
 4. Den **Zertifikatsregistrierungsdienst** (CES), in Verbindung mit dem Zertifikatsregistrierungspolitikdienst (CEP).
 5. Den **Network Device Enrollment Service** (NDES) für Netzwerkgeräte, unter Verwendung des Simple Certificate Enrollment Protocol (SCEP).
 
@@ -108,16 +108,52 @@ Certify.exe cas
 # Identify vulnerable certificate templates with Certify
 Certify.exe find /vulnerable
 
-# Use Certipy for enumeration and identifying vulnerable templates
-certipy find -vulnerable -u john@corp.local -p Passw0rd -dc-ip 172.16.126.128
+# Use Certipy (>=4.0) for enumeration and identifying vulnerable templates
+certipy find -vulnerable -dc-only -u john@corp.local -p Passw0rd -target dc.corp.local
+
+# Request a certificate over the web enrollment interface (new in Certipy 4.x)
+certipy req -web -target ca.corp.local -template WebServer -upn john@corp.local -dns www.corp.local
 
 # Enumerate Enterprise CAs and certificate templates with certutil
 certutil.exe -TCAInfo
 certutil -v -dstemplate
 ```
+---
+
+## Aktuelle Schwachstellen & Sicherheitsupdates (2022-2025)
+
+| Jahr | ID / Name | Auswirkungen | Wichtige Erkenntnisse |
+|------|-----------|--------------|----------------------|
+| 2022 | **CVE-2022-26923** – “Certifried” / ESC6 | *Privilegieneskalation* durch Spoofing von Maschinenkontozertifikaten während PKINIT. | Patch ist in den Sicherheitsupdates vom **10. Mai 2022** enthalten. Auditing- & Strong-Mapping-Kontrollen wurden über **KB5014754** eingeführt; Umgebungen sollten jetzt im *Full Enforcement*-Modus sein. citeturn2search0 |
+| 2023 | **CVE-2023-35350 / 35351** | *Remote Code-Ausführung* in der AD CS Web Enrollment (certsrv) und CES-Rollen. | Öffentliche PoCs sind begrenzt, aber die anfälligen IIS-Komponenten sind oft intern exponiert. Patch ab **Juli 2023** Patch Tuesday. citeturn3search0 |
+| 2024 | **CVE-2024-49019** – “EKUwu” / ESC15 | Niedrigprivilegierte Benutzer mit Anmelderechten könnten **irgendeine** EKU oder SAN während der CSR-Generierung überschreiben, was zur Ausstellung von Zertifikaten führt, die für die Client-Authentifizierung oder Code-Signierung verwendet werden können und zu *Domänenkompromittierung* führen. | In den Updates vom **April 2024** behoben. Entfernen Sie “Supply in the request” aus Vorlagen und beschränken Sie die Anmeldeberechtigungen. citeturn1search3 |
+
+### Microsoft-Härtungszeitplan (KB5014754)
+
+Microsoft führte einen dreiphasigen Rollout (Kompatibilität → Audit → Durchsetzung) ein, um die Kerberos-Zertifikatauthentifizierung von schwachen impliziten Zuordnungen wegzuführen. Ab dem **11. Februar 2025** wechseln Domänencontroller automatisch zu **Full Enforcement**, wenn der `StrongCertificateBindingEnforcement`-Registrierungswert nicht gesetzt ist. Administratoren sollten:
+
+1. Alle DCs & AD CS-Server patchen (Mai 2022 oder später).
+2. Ereignis-ID 39/41 während der *Audit*-Phase auf schwache Zuordnungen überwachen.
+3. Client-Auth-Zertifikate mit der neuen **SID-Erweiterung** neu ausstellen oder starke manuelle Zuordnungen vor Februar 2025 konfigurieren. citeturn2search0
+
+---
+
+## Erkennung & Härtungsverbesserungen
+
+* **Defender for Identity AD CS-Sensor (2023-2024)** zeigt jetzt Statusbewertungen für ESC1-ESC8/ESC11 an und generiert Echtzeitwarnungen wie *“Zertifikatsausstellung für einen Nicht-DC”* (ESC8) und *“Zertifikatsanmeldung mit beliebigen Anwendungsrichtlinien verhindern”* (ESC15). Stellen Sie sicher, dass Sensoren auf allen AD CS-Servern bereitgestellt werden, um von diesen Erkennungen zu profitieren. citeturn5search0
+* Deaktivieren oder eng einschränken die **“Supply in the request”**-Option in allen Vorlagen; bevorzugen Sie explizit definierte SAN/EKU-Werte.
+* Entfernen Sie **Any Purpose** oder **No EKU** aus Vorlagen, es sei denn, es ist absolut erforderlich (behandelt ESC2-Szenarien).
+* Erfordern Sie **Managergenehmigung** oder dedizierte Enrollment-Agent-Workflows für sensible Vorlagen (z. B. WebServer / CodeSigning).
+* Beschränken Sie die Webanmeldung (`certsrv`) und CES/NDES-Endpunkte auf vertrauenswürdige Netzwerke oder hinter der Client-Zertifikatauthentifizierung.
+* Erzwingen Sie die RPC-Anmeldeverschlüsselung (`certutil –setreg CA\InterfaceFlags +IF_ENFORCEENCRYPTICERTREQ`), um ESC11 zu mindern.
+
+---
+
 ## Referenzen
 
 - [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)
 - [https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html](https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html)
+- [https://support.microsoft.com/en-us/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16](https://support.microsoft.com/en-us/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16)
+- [https://advisory.eventussecurity.com/advisory/critical-vulnerability-in-ad-cs-allows-privilege-escalation/](https://advisory.eventussecurity.com/advisory/critical-vulnerability-in-ad-cs-allows-privilege-escalation/)
 
 {{#include ../../banners/hacktricks-training.md}}
