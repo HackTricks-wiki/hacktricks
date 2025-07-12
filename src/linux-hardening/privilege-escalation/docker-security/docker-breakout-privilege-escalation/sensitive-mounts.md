@@ -15,8 +15,8 @@ Ovaj direktorijum omogućava pristup za modifikaciju kernel varijabli, obično p
 #### **`/proc/sys/kernel/core_pattern`**
 
 - Opisano u [core(5)](https://man7.org/linux/man-pages/man5/core.5.html).
-- Ako možete da pišete unutar ove datoteke, moguće je napisati cev `|` praćenu putanjom do programa ili skripte koja će biti izvršena nakon što dođe do pada.
-- Napadač može pronaći putanju unutar hosta do svog kontejnera izvršavajući `mount` i napisati putanju do binarne datoteke unutar svog kontejnerskog fajl sistema. Zatim, srušiti program kako bi naterao kernel da izvrši binarnu datoteku van kontejnera.
+- Ako možete da pišete unutar ove datoteke, moguće je napisati cevi `|` praćene putanjom do programa ili skripte koja će biti izvršena nakon što dođe do kvara.
+- Napadač može pronaći putanju unutar hosta do svog kontejnera izvršavajući `mount` i napisati putanju do binarne datoteke unutar svog kontejnerskog datotečnog sistema. Zatim, izazvati kvar programa kako bi naterao kernel da izvrši binarnu datoteku van kontejnera.
 
 - **Primer testiranja i eksploatacije**:
 ```bash
@@ -49,12 +49,12 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Proveri pristup modprobe
 
 #### **`/proc/sys/vm/panic_on_oom`**
 
-- Pominje se u [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
+- Referencirano u [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 - Globalna zastavica koja kontroliše da li kernel panici ili poziva OOM killer kada dođe do OOM uslova.
 
 #### **`/proc/sys/fs`**
 
-- Prema [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html), sadrži opcije i informacije o fajl sistemu.
+- Prema [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html), sadrži opcije i informacije o datotečnom sistemu.
 - Pristup za pisanje može omogućiti razne napade uskraćivanja usluge protiv hosta.
 
 #### **`/proc/sys/fs/binfmt_misc`**
@@ -103,13 +103,13 @@ echo b > /proc/sysrq-trigger # Restartuje host
 
 - Predstavlja fizičku memoriju sistema u ELF core formatu.
 - Čitanje može otkriti sadržaj memorije host sistema i drugih kontejnera.
-- Velika veličina fajla može dovesti do problema sa čitanjem ili rušenja softvera.
+- Velika veličina datoteke može dovesti do problema sa čitanjem ili rušenja softvera.
 - Detaljna upotreba u [Dumping /proc/kcore in 2019](https://schlafwandler.github.io/posts/dumping-/proc/kcore/).
 
 #### **`/proc/kmem`**
 
 - Alternativni interfejs za `/dev/kmem`, koji predstavlja kernel virtuelnu memoriju.
-- Omogućava čitanje i pisanje, što omogućava direktnu modifikaciju kernel memorije.
+- Omogućava čitanje i pisanje, što znači direktnu modifikaciju kernel memorije.
 
 #### **`/proc/mem`**
 
@@ -199,17 +199,17 @@ metadata:
     app: pentest  
 spec:  
   containers:  
-    - name: pod-mounts-var-folder  
-      image: alpine  
-      volumeMounts:  
-        - mountPath: /host-var  
-          name: noderoot  
-      command: [ "/bin/sh", "-c", "--" ]  
-      args: [ "while true; do sleep 30; done;" ]  
+  - name: pod-mounts-var-folder  
+    image: alpine  
+    volumeMounts:  
+    - mountPath: /host-var  
+      name: noderoot  
+    command: [ "/bin/sh", "-c", "--" ]  
+    args: [ "while true; do sleep 30; done;" ]  
   volumes:  
-    - name: noderoot  
-      hostPath:  
-        path: /var
+  - name: noderoot  
+    hostPath:  
+      path: /var
 ```
 
 Inside the **pod-mounts-var-folder** container:
@@ -263,7 +263,7 @@ the other containers' filesystems are available under a different base path:
 
 ```bash
 $ docker info | grep -i 'docker root\|storage driver'
-Skladišni drajver: overlay2
+Storage Driver: overlay2
 Docker Root Dir: /var/lib/docker
 ```
 
@@ -293,7 +293,7 @@ Mounting certain host Unix sockets or writable pseudo-filesystems is equivalent 
 ```text
 /run/containerd/containerd.sock     # containerd CRI soket  
 /var/run/crio/crio.sock             # CRI-O runtime soket  
-/run/podman/podman.sock             # Podman API (rootful ili rootless)  
+/run/podman/podman.sock             # Podman API (sa root privilegijama ili bez)  
 /var/run/kubelet.sock               # Kubelet API na Kubernetes čvorovima  
 /run/firecracker-containerd.sock    # Kata / Firecracker
 ```

