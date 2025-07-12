@@ -1,6 +1,6 @@
 # Radio Hacking
 
-{{#include /banners/hacktricks-training.md}}
+{{#include /src/banners/hacktricks-training.md}}
 
 
 
