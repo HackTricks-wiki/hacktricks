@@ -35,7 +35,7 @@
 ## 最近的漏洞 (2023-2025)
 
 * **CVE-2024-29862** – *ChirpStack gateway-bridge 和 mqtt-forwarder* 接受绕过有状态防火墙规则的 TCP 数据包，导致远程管理接口暴露。分别在 4.0.11 / 4.2.1 中修复。
-* **Dragino LG01/LG308 系列** – 多个 2022-2024 CVE（例如 2022-45227 目录遍历，2022-45228 CSRF）在 2025 年仍未修补；在数千个公共网关上启用未认证的固件转储或配置覆盖。
+* **Dragino LG01/LG308 系列** – 多个 2022-2024 CVE（例如 2022-45227 目录遍历，2022-45228 CSRF）在 2025 年仍未修补；在数千个公共网关上启用未经身份验证的固件转储或配置覆盖。
 * Semtech *数据包转发器 UDP* 溢出（未发布的建议，2023-10 修补）：构造的上行数据包大于 255 B 触发堆栈溢出 -> 在 SX130x 参考网关上 RCE（由 Black Hat EU 2023 “LoRa Exploitation Reloaded” 发现）。
 
 ---
@@ -61,7 +61,7 @@ python3 lorapwn/bruteforce_join.py --pcap smartcity.pcap --wordlist top1m.txt
 
 强制 SF12/125 kHz 以增加空中时间 → 耗尽网关的占空比（拒绝服务），同时对攻击者的电池影响较小（仅发送网络级 MAC 命令）。
 
-### 4. 反应式干扰
+### 4. 反应性干扰
 
 运行 GNU Radio 流图的 *HackRF One* 在检测到前导码时触发宽带啁啾 - 阻塞所有扩频因子，发射功率 ≤200 mW；在 2 公里范围内测量到完全中断。
 
@@ -90,6 +90,6 @@ python3 lorapwn/bruteforce_join.py --pcap smartcity.pcap --wordlist top1m.txt
 
 ## 参考文献
 
-* LoRaWAN 审计框架 (LAF) – https://github.com/IOActive/laf
-* Trend Micro LoRaPWN 概述 – https://www.hackster.io/news/trend-micro-finds-lorawan-security-lacking-develops-lorapwn-python-utility-bba60c27d57a
+* LoRaWAN 审计框架 (LAF) – [https://github.com/IOActive/laf](https://github.com/IOActive/laf)
+* Trend Micro LoRaPWN 概述 – [https://www.hackster.io/news/trend-micro-finds-lorawan-security-lacking-develops-lorapwn-python-utility-bba60c27d57a](https://www.hackster.io/news/trend-micro-finds-lorawan-security-lacking-develops-lorapwn-python-utility-bba60c27d57a)
 {{#include ../../banners/hacktricks-training.md}}

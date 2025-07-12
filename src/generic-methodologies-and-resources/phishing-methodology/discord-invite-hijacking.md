@@ -6,11 +6,11 @@ Discord 的邀请系统漏洞允许威胁行为者声称过期或删除的邀请
 
 ## 邀请类型和劫持风险
 
-| 邀请类型               | 可劫持？ | 条件 / 评论                                                                                             |
-|-----------------------|-------------|--------------------------------------------------------------------------------------------------------|
-| 临时邀请链接          | ✅          | 过期后，代码变得可用，可以被提升服务器重新注册为虚荣 URL。                                           |
-| 永久邀请链接          | ⚠️          | 如果被删除且仅由小写字母和数字组成，代码可能会再次变得可用。                                        |
-| 自定义虚荣链接        | ✅          | 如果原始服务器失去 Level 3 Boost，其虚荣邀请将变得可供新注册。                                      |
+| 邀请类型               | 可劫持？ | 条件 / 评论                                                                                           |
+|-----------------------|----------|------------------------------------------------------------------------------------------------------|
+| 临时邀请链接          | ✅       | 过期后，代码变得可用，可以被提升的服务器重新注册为虚荣 URL。                                         |
+| 永久邀请链接          | ⚠️       | 如果被删除且仅由小写字母和数字组成，代码可能会再次可用。                                            |
+| 自定义虚荣链接        | ✅       | 如果原始服务器失去 Level 3 Boost，其虚荣邀请将可供新注册。                                         |
 
 ## 利用步骤
 
@@ -22,7 +22,7 @@ Discord 的邀请系统漏洞允许威胁行为者声称过期或删除的邀请
 - 在 **服务器设置 → 虚荣 URL** 中，尝试分配目标邀请代码。如果被接受，该代码将被恶意服务器保留。
 3. 劫持激活
 - 对于临时邀请，等待原始邀请过期（或如果您控制源，则手动删除它）。
-- 对于包含大写字母的代码，小写变体可以立即声明，尽管重定向仅在过期后激活。
+- 对于包含大写字母的代码，可以立即声明小写变体，尽管重定向仅在过期后激活。
 4. 静默重定向
 - 一旦劫持激活，访问旧链接的用户将无缝地被发送到攻击者控制的服务器。
 
@@ -50,12 +50,12 @@ navigator.clipboard.writeText(cmd);
 
 - 使用包含至少一个大写字母或非字母数字字符的永久邀请链接（永不过期，不可重复使用）。
 - 定期更换邀请代码并撤销旧链接。
-- 监控 Discord 服务器的提升状态和个性化 URL 的声明。
+- 监控 Discord 服务器的提升状态和虚荣 URL 声明。
 - 教育用户验证服务器的真实性，并避免执行剪贴板粘贴的命令。
 
 ## 参考文献
 
-- 从信任到威胁：被劫持的 Discord 邀请用于多阶段恶意软件交付 – https://research.checkpoint.com/2025/from-trust-to-threat-hijacked-discord-invites-used-for-multi-stage-malware-delivery/
-- Discord 自定义邀请链接文档 – https://support.discord.com/hc/en-us/articles/115001542132-Custom-Invite-Link
+- 从信任到威胁：被劫持的 Discord 邀请用于多阶段恶意软件交付 – [https://research.checkpoint.com/2025/from-trust-to-threat-hijacked-discord-invites-used-for-multi-stage-malware-delivery/](https://research.checkpoint.com/2025/from-trust-to-threat-hijacked-discord-invites-used-for-multi-stage-malware-delivery/)
+- Discord 自定义邀请链接文档 – [https://support.discord.com/hc/en-us/articles/115001542132-Custom-Invite-Link](https://support.discord.com/hc/en-us/articles/115001542132-Custom-Invite-Link)
 
 {{#include ../../banners/hacktricks-training.md}}
