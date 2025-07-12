@@ -17,7 +17,7 @@ Long Range (**LoRa**)는 현재 가장 많이 배포된 LPWAN 물리 계층이�
 * LoRaWAN – LoRa-Alliance에서 유지 관리하는 개방형 MAC/네트워크 계층. 1.0.x 및 1.1 버전이 현장에서 일반적입니다.
 * 전형적인 아키텍처: *엔드 장치 → 게이트웨이 (패킷 포워더) → 네트워크 서버 → 애플리케이션 서버*.
 
-> **보안 모델**은 *조인* 절차 (OTAA) 중 세션 키를 파생하는 두 개의 AES-128 루트 키 (AppKey/NwkKey)에 의존합니다. 키가 유출되면 공격자는 해당 트래픽에 대한 전체 읽기/쓰기 권한을 얻게 됩니다.
+> **보안 모델**은 *조인* 절차 (OTAA) 중 세션 키를 파생하는 두 개의 AES-128 루트 키 (AppKey/NwkKey)에 의존합니다. 키가 유출되면 공격자는 해당 트래픽에 대한 전체 읽기/쓰기 권한을 얻습니다.
 
 ---
 
@@ -34,8 +34,8 @@ Long Range (**LoRa**)는 현재 가장 많이 배포된 LPWAN 물리 계층이�
 
 ## 최근 취약점 (2023-2025)
 
-* **CVE-2024-29862** – *ChirpStack gateway-bridge 및 mqtt-forwarder*가 Kerlink 게이트웨이에서 상태 기반 방화벽 규칙을 우회하는 TCP 패킷을 수용하여 원격 관리 인터페이스 노출을 허용했습니다. 각각 4.0.11 / 4.2.1에서 수정됨.
-* **Dragino LG01/LG308 시리즈** – 2022-2024년의 여러 CVE (예: 2022-45227 디렉토리 탐색, 2022-45228 CSRF)가 2025년에도 여전히 패치되지 않은 것으로 관찰됨; 수천 개의 공용 게이트웨이에서 인증되지 않은 펌웨어 덤프 또는 구성 덮어쓰기를 활성화함.
+* **CVE-2024-29862** – *ChirpStack gateway-bridge 및 mqtt-forwarder*가 Kerlink 게이트웨이에서 상태 저장 방화벽 규칙을 우회하는 TCP 패킷을 수용하여 원격 관리 인터페이스 노출을 허용했습니다. 각각 4.0.11 / 4.2.1에서 수정됨.
+* **Dragino LG01/LG308 시리즈** – 2022-2024년 동안 여러 CVE (예: 2022-45227 디렉토리 탐색, 2022-45228 CSRF)가 2025년에도 여전히 패치되지 않은 것으로 관찰됨; 수천 개의 공용 게이트웨이에서 인증되지 않은 펌웨어 덤프 또는 구성 덮어쓰기를 활성화함.
 * Semtech *패킷 포워더 UDP* 오버플로우 (발표되지 않음, 2023-10 패치): 255 B보다 큰 업링크가 스택 스매시를 유발하여 SX130x 참조 게이트웨이에 대한 RCE를 발생시킴 (Black Hat EU 2023 “LoRa Exploitation Reloaded”에서 발견됨).
 
 ---
@@ -57,9 +57,9 @@ python3 lorapwn/bruteforce_join.py --pcap smartcity.pcap --wordlist top1m.txt
 2. 원래 장치가 다시 전송하기 전에 즉시 재전송합니다 (또는 RSSI를 증가시킵니다).
 3. 네트워크 서버는 새로운 DevAddr 및 세션 키를 할당하는 동안 대상 장치는 이전 세션을 계속 사용합니다 → 공격자는 비어 있는 세션을 소유하고 위조된 업링크를 주입할 수 있습니다.
 
-### 3. 적응형 데이터 속도 (ADR) 다운그레이드
+### 3. 적응형 데이터 전송 속도 (ADR) 다운그레이드
 
-SF12/125 kHz를 강제로 설정하여 공중 시간을 증가시킵니다 → 게이트웨이의 듀티 사이클을 소모시킵니다 (서비스 거부) 동시에 공격자에게 배터리 영향을 낮게 유지합니다 (네트워크 수준 MAC 명령만 전송).
+SF12/125 kHz를 강제로 설정하여 공중 시간을 증가시킵니다 → 게이트웨이의 듀티 사이클을 소진시킵니다 (서비스 거부) 동시에 공격자에게 배터리 영향을 낮게 유지합니다 (네트워크 수준 MAC 명령만 전송).
 
 ### 4. 반응형 재밍
 
@@ -71,7 +71,7 @@ SF12/125 kHz를 강제로 설정하여 공중 시간을 증가시킵니다 → �
 
 | 도구 | 목적 | 비고 |
 |------|---------|-------|
-| **LoRaWAN 감사 프레임워크 (LAF)** | LoRaWAN 프레임 제작/파싱/공격, DB 기반 분석기, 브루트 포스 | Docker 이미지, Semtech UDP 입력 지원 |
+| **LoRaWAN 감사 프레임워크 (LAF)** | LoRaWAN 프레임 제작/구문 분석/공격, DB 기반 분석기, 브루트 포스 | Docker 이미지, Semtech UDP 입력 지원 |
 | **LoRaPWN** | OTAA를 브루트 포스하고, 다운링크를 생성하며, 페이로드를 복호화하는 Trend Micro Python 유틸리티 | 2023년 데모 출시, SDR 비독립적 |
 | **LoRAttack** | USRP와 함께하는 다채널 스니퍼 + 재전송; PCAP/LoRaTap 내보내기 | 좋은 Wireshark 통합 |
 | **gr-lora / gr-lorawan** | 기저대역 TX/RX를 위한 GNU Radio OOT 블록 | 사용자 정의 공격의 기초 |
@@ -80,7 +80,7 @@ SF12/125 kHz를 강제로 설정하여 공중 시간을 증가시킵니다 → �
 
 ## 방어 권장 사항 (펜테스터 체크리스트)
 
-1. 진정한 무작위 DevNonce를 가진 **OTAA** 장치를 선호합니다; 중복을 모니터링합니다.
+1. 진정으로 무작위 DevNonce를 가진 **OTAA** 장치를 선호합니다; 중복을 모니터링합니다.
 2. **LoRaWAN 1.1**을 시행합니다: 32비트 프레임 카운터, 구별된 FNwkSIntKey / SNwkSIntKey.
 3. 프레임 카운터를 비휘발성 메모리 (**ABP**)에 저장하거나 OTAA로 마이그레이션합니다.
 4. 루트 키를 펌웨어 추출로부터 보호하기 위해 **보안 요소** (ATECC608A/SX1262-TRX-SE)를 배포합니다.
@@ -90,6 +90,6 @@ SF12/125 kHz를 강제로 설정하여 공중 시간을 증가시킵니다 → �
 
 ## References
 
-* LoRaWAN Auditing Framework (LAF) – https://github.com/IOActive/laf
-* Trend Micro LoRaPWN 개요 – https://www.hackster.io/news/trend-micro-finds-lorawan-security-lacking-develops-lorapwn-python-utility-bba60c27d57a
+* LoRaWAN Auditing Framework (LAF) – [https://github.com/IOActive/laf](https://github.com/IOActive/laf)
+* Trend Micro LoRaPWN 개요 – [https://www.hackster.io/news/trend-micro-finds-lorawan-security-lacking-develops-lorapwn-python-utility-bba60c27d57a](https://www.hackster.io/news/trend-micro-finds-lorawan-security-lacking-develops-lorapwn-python-utility-bba60c27d57a)
 {{#include ../../banners/hacktricks-training.md}}
