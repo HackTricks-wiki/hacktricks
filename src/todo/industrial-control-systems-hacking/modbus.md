@@ -1,6 +1,6 @@
 # The Modbus Protocol 
 
-{{#include /src/banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
 
 ## Introduction to Modbus Protocol 
 
@@ -34,6 +34,5 @@ Due to it's large scale use and lack of upgradations, attacking Modbus provides 
 
 
 
-{{#include /src/banners/hacktricks-training.md}}
-
+{{#include ../../banners/hacktricks-training.md}}
 
