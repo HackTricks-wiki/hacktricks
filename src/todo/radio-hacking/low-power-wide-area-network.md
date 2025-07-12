@@ -26,7 +26,7 @@ Long Range (**LoRa**) è attualmente il livello fisico LPWAN più distribuito e 
 | Livello | Vulnerabilità | Impatto pratico |
 |-------|----------|------------------|
 | PHY | Jammazione reattiva / selettiva | 100 % di perdita di pacchetti dimostrata con un singolo SDR e <1 W di output |
-| MAC | Replay di Join-Accept & data-frame (riutilizzo nonce, rollover contatore ABP) | Spoofing del dispositivo, iniezione di messaggi, DoS |
+| MAC | Replay di Join-Accept e data-frame (riutilizzo nonce, rollover contatore ABP) | Spoofing del dispositivo, iniezione di messaggi, DoS |
 | Server di rete | Inoltratore di pacchetti insicuro, filtri MQTT/UDP deboli, firmware del gateway obsoleto | RCE sui gateway → pivot nel network OT/IT |
 | Applicazione | AppKeys hard-coded o prevedibili | Attacco di forza bruta/decrittazione del traffico, impersonificazione dei sensori |
 
@@ -35,7 +35,7 @@ Long Range (**LoRa**) è attualmente il livello fisico LPWAN più distribuito e 
 ## Vulnerabilità recenti (2023-2025)
 
 * **CVE-2024-29862** – *ChirpStack gateway-bridge & mqtt-forwarder* ha accettato pacchetti TCP che bypassavano le regole del firewall stateful sui gateway Kerlink, consentendo l'esposizione dell'interfaccia di gestione remota. Risolto in 4.0.11 / 4.2.1 rispettivamente.
-* **Dragino LG01/LG308 series** – Molteplici CVE 2022-2024 (ad es. 2022-45227 traversata di directory, 2022-45228 CSRF) ancora osservati non patchati nel 2025; abilitano il dump del firmware non autenticato o la sovrascrittura della configurazione su migliaia di gateway pubblici.
+* **Dragino LG01/LG308 series** – Molteplici CVE dal 2022 al 2024 (ad es. 2022-45227 traversata di directory, 2022-45228 CSRF) ancora osservati non patchati nel 2025; abilitano il dump del firmware non autenticato o la sovrascrittura della configurazione su migliaia di gateway pubblici.
 * Overflow *packet-forwarder UDP* di Semtech (avviso non rilasciato, patchato 2023-10): uplink creato più grande di 255 B ha attivato uno stack-smash ‑> RCE sui gateway di riferimento SX130x (trovato da Black Hat EU 2023 “LoRa Exploitation Reloaded”).
 
 ---
@@ -55,7 +55,7 @@ python3 lorapwn/bruteforce_join.py --pcap smartcity.pcap --wordlist top1m.txt
 
 1. Cattura un legittimo **JoinRequest**.
 2. Ritrasmettilo immediatamente (o incrementa RSSI) prima che il dispositivo originale trasmetta di nuovo.
-3. Il server di rete assegna un nuovo DevAddr e chiavi di sessione mentre il dispositivo target continua con la vecchia sessione → l'attaccante possiede la sessione vacante e può iniettare uplink falsificati.
+3. Il server di rete assegna un nuovo DevAddr e chiavi di sessione mentre il dispositivo target continua con la vecchia sessione → l'attaccante possiede una sessione vacante e può iniettare uplink falsificati.
 
 ### 3. Downgrading Adaptive Data-Rate (ADR)
 
@@ -90,6 +90,6 @@ Forza SF12/125 kHz per aumentare il tempo di trasmissione → esaurisci il ciclo
 
 ## Riferimenti
 
-* LoRaWAN Auditing Framework (LAF) – https://github.com/IOActive/laf
-* Panoramica di Trend Micro LoRaPWN – https://www.hackster.io/news/trend-micro-finds-lorawan-security-lacking-develops-lorapwn-python-utility-bba60c27d57a
+* LoRaWAN Auditing Framework (LAF) – [https://github.com/IOActive/laf](https://github.com/IOActive/laf)
+* Panoramica di Trend Micro LoRaPWN – [https://www.hackster.io/news/trend-micro-finds-lorawan-security-lacking-develops-lorapwn-python-utility-bba60c27d57a](https://www.hackster.io/news/trend-micro-finds-lorawan-security-lacking-develops-lorapwn-python-utility-bba60c27d57a)
 {{#include ../../banners/hacktricks-training.md}}

