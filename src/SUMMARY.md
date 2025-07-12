@@ -25,6 +25,7 @@
   - [Spoofing LLMNR, NBT-NS, mDNS/DNS and WPAD and Relay Attacks](generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md)
   - [Spoofing SSDP and UPnP Devices with EvilSSDP](generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md)
 - [Pentesting Wifi](generic-methodologies-and-resources/pentesting-wifi/README.md)
+  - [Enable Nexmon Monitor And Injection On Android](generic-methodologies-and-resources/pentesting-wifi/enable-nexmon-monitor-and-injection-on-android.md)
   - [Evil Twin EAP-TLS](generic-methodologies-and-resources/pentesting-wifi/evil-twin-eap-tls.md)
 - [Phishing Methodology](generic-methodologies-and-resources/phishing-methodology/README.md)
   - [Clone a Website](generic-methodologies-and-resources/phishing-methodology/clone-a-website.md)
