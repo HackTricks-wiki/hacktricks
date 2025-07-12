@@ -63,7 +63,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Überprüfen des Zugriffs auf modprobe
 - Kann zu Privilegieneskalation oder Root-Shell-Zugriff führen, wenn `/proc/sys/fs/binfmt_misc/register` beschreibbar ist.
 - Relevanter Exploit und Erklärung:
 - [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
-- Detailliertes Tutorial: [Video link](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
+- Ausführliches Tutorial: [Video link](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
 
 ### Andere in `/proc`
 
@@ -91,7 +91,7 @@ echo b > /proc/sysrq-trigger # Neustart des Hosts
 - Listet vom Kernel exportierte Symbole und deren Adressen auf.
 - Essentiell für die Entwicklung von Kernel-Exploits, insbesondere zum Überwinden von KASLR.
 - Adressinformationen sind eingeschränkt, wenn `kptr_restrict` auf `1` oder `2` gesetzt ist.
-- Details in [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
+- Einzelheiten in [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 
 #### **`/proc/[pid]/mem`**
 
@@ -131,7 +131,7 @@ echo b > /proc/sysrq-trigger # Neustart des Hosts
 #### **`/sys/kernel/uevent_helper`**
 
 - Wird zur Handhabung von Kernel-Gerät `uevents` verwendet.
-- Das Schreiben in `/sys/kernel/uevent_helper` kann beliebige Skripte bei `uevent`-Auslösungen ausführen.
+- Schreiben in `/sys/kernel/uevent_helper` kann beliebige Skripte bei `uevent`-Auslösungen ausführen.
 - **Beispiel für Ausnutzung**:
 ```bash
 

