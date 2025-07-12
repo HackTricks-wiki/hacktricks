@@ -1,6 +1,6 @@
 # Reinforcement Learning Algorithms
 
-{{#include ../banners/hacktricks-training.md}}
+{#include ../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## Reinforcement Learning
 
@@ -76,5 +76,4 @@ SARSA is an **on-policy** learning algorithm, meaning it updates the Q-values ba
 
 On-policy methods like SARSA can be more stable in certain environments, as they learn from the actions actually taken. However, they may converge more slowly compared to off-policy methods like Q-Learning, which can learn from a wider range of experiences.
 
-{{#include ../banners/hacktricks-training.md}}
-
+{#include ../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}

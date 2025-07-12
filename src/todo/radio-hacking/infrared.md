@@ -1,6 +1,6 @@
 # Infrared
 
-{{#include ../../banners/hacktricks-training.md}}
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## How the Infrared Works <a href="#how-the-infrared-port-works" id="how-the-infrared-port-works"></a>
 
@@ -78,7 +78,6 @@ flipper-zero/fz-infrared.md
 
 - [https://blog.flipperzero.one/infrared/](https://blog.flipperzero.one/infrared/)
 
-{{#include ../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

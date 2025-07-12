@@ -1,6 +1,6 @@
 # macOS PID Reuse
 
-{{#include ../../../../../../banners/hacktricks-training.md}}
+{#include ../../../../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## PID Reuse
 
@@ -289,7 +289,6 @@ int main(int argc, const char * argv[]) {
 - [https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/](https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/)
 - [https://saelo.github.io/presentations/warcon18_dont_trust_the_pid.pdf](https://saelo.github.io/presentations/warcon18_dont_trust_the_pid.pdf)
 
-{{#include ../../../../../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

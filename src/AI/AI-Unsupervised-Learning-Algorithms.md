@@ -1,6 +1,6 @@
 # Unsupervised Learning Algorithms
 
-{{#include ../banners/hacktricks-training.md}}
+{#include ../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## Unsupervised Learning
 
@@ -456,5 +456,4 @@ Here we combined our previous 4D normal dataset with a handful of extreme outlie
 </details>
 
 
-{{#include ../banners/hacktricks-training.md}}
-
+{#include ../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}

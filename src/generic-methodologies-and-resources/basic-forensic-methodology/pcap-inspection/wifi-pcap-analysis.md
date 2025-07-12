@@ -1,6 +1,6 @@
 # Wifi Pcap Analysis
 
-{{#include ../../../banners/hacktricks-training.md}}
+{#include ../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## Check BSSIDs
 
@@ -40,7 +40,6 @@ Edit --> Preferences --> Protocols --> IEEE 802.11--> Edit
 
 ![](<../../../images/image (499).png>)
 
-{{#include ../../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

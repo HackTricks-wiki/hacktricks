@@ -1,6 +1,6 @@
 # macOS TCC Bypasses
 
-{{#include ../../../../../banners/hacktricks-training.md}}
+{#include ../../../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## By functionality
 
@@ -535,6 +535,5 @@ Another way using [**CoreGraphics events**](https://objectivebythesea.org/v2/tal
 - [**20+ Ways to Bypass Your macOS Privacy Mechanisms**](https://www.youtube.com/watch?v=W9GxnP8c8FU)
 - [**Knockout Win Against TCC - 20+ NEW Ways to Bypass Your MacOS Privacy Mechanisms**](https://www.youtube.com/watch?v=a9hsxPdRxsY)
 
-{{#include ../../../../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 

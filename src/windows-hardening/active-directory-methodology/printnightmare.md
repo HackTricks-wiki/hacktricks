@@ -1,6 +1,6 @@
 # PrintNightmare (Windows Print Spooler RCE/LPE)
 
-{{#include ../../banners/hacktricks-training.md}}
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 > PrintNightmare is the collective name given to a family of vulnerabilities in the Windows **Print Spooler** service that allow **arbitrary code execution as SYSTEM** and, when the spooler is reachable over RPC, **remote code execution (RCE) on domain controllers and file servers**. The most-widely exploited CVEs are **CVE-2021-1675** (initially classed as LPE) and **CVE-2021-34527** (full RCE). Subsequent issues such as **CVE-2021-34481 (“Point & Print”)** and **CVE-2022-21999 (“SpoolFool”)** prove that the attack surface is still far from closed.
 
@@ -100,7 +100,7 @@ Import-Module .\SpoolFool.ps1 ; Invoke-SpoolFool -dll add_user.dll
 ## References
 
 * Microsoft – *KB5005652: Manage new Point & Print default driver installation behavior*  
-  <https://support.microsoft.com/en-us/topic/kb5005652-manage-new-point-and-print-default-driver-installation-behavior-cve-2021-34481-873642bf-2634-49c5-a23b-6d8e9a302872>
+  <[https://support.microsoft.com/en-us/topic/kb5005652-manage-new-point-and-print-default-driver-installation-behavior-cve-2021-34481-873642bf-2634-49c5-a23b-6d8e9a302872](https://support.microsoft.com/en-us/topic/kb5005652-manage-new-point-and-print-default-driver-installation-behavior-cve-2021-34481-873642bf-2634-49c5-a23b-6d8e9a302872)>
 * Oliver Lyak – *SpoolFool: CVE-2022-21999*  
-  <https://github.com/ly4k/SpoolFool>
-{{#include /banners/hacktricks-training.md}}
+  <[https://github.com/ly4k/SpoolFool](https://github.com/ly4k/SpoolFool)>
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}

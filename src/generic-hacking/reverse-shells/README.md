@@ -1,6 +1,6 @@
 # Reverse Shells
 
-{{#include ../../banners/hacktricks-training.md}}
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## [**Shells - Linux**](linux.md)
 
@@ -23,7 +23,6 @@
 - [**https://github.com/t0thkr1s/revshellgen**](https://github.com/t0thkr1s/revshellgen)
 - [**https://github.com/mthbernardes/rsg**](https://github.com/mthbernardes/rsg)
 
-{{#include ../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

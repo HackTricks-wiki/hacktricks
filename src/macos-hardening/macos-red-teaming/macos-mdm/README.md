@@ -1,6 +1,6 @@
 # macOS MDM
 
-{{#include ../../../banners/hacktricks-training.md}}
+{#include ../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 **To learn about macOS MDMs check:**
 
@@ -200,7 +200,6 @@ Therefore, this could be a dangerous entrypoint for attackers if the enrolment p
 enrolling-devices-in-other-organisations.md
 {{#endref}}
 
-{{#include ../../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

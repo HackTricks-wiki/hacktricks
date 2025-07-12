@@ -1,6 +1,6 @@
 # Cryptographic/Compression Algorithms
 
-{{#include ../../banners/hacktricks-training.md}}
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## Identifying Algorithms
 
@@ -180,7 +180,6 @@ Check **3 comparisons to recognise it**:
 
 ![](<../../images/image (384).png>)
 
-{{#include ../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

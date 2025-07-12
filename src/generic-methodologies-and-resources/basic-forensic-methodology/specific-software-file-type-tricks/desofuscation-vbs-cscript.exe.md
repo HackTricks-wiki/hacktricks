@@ -1,6 +1,6 @@
 # Desobfuscation Techniques for VBS Files
 
-{{#include ../../../banners/hacktricks-training.md}}
+{#include ../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 Some things that could be useful to debug/deobfuscate a malicious VBS file:
 
@@ -49,7 +49,6 @@ Function writeBinary(strBinary, strPath)
 End Function
 ```
 
-{{#include ../../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

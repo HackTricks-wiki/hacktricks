@@ -1,6 +1,6 @@
 # PsExec/Winexec/ScExec/SMBExec
 
-{{#include ../../banners/hacktricks-training.md}}
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## How do they work
 
@@ -52,5 +52,4 @@ SharpMove.exe action=startservice computername=remote.host.local servicename=Tes
 - You could also use **Impacket's `psexec` and `smbexec.py`**.
 
 
-{{#include ../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}

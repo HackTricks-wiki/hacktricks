@@ -1,6 +1,6 @@
 # AtExec / SchtasksExec
 
-{{#include ../../banners/hacktricks-training.md}}
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## How Does it works
 
@@ -42,7 +42,6 @@ SharpMove.exe action=taskscheduler computername=remote.host.local command="C:\wi
 
 More information about the [**use of schtasks with silver tickets here**](../active-directory-methodology/silver-ticket.md#host).
 
-{{#include ../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

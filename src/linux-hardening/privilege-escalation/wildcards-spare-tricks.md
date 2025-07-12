@@ -1,6 +1,6 @@
 # Wildcards Spare Tricks
 
-{{#include ../../banners/hacktricks-training.md}}
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## chown, chmod
 
@@ -71,7 +71,6 @@ _More info in Write-ups of the box CTF from HackTheBox._
 zip name.zip files -T --unzip-command "sh -c whoami"
 ```
 
-{{#include ../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

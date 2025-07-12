@@ -1,6 +1,6 @@
 # Stealing Sensitive Information Disclosure from a Web
 
-{{#include ../banners/hacktricks-training.md}}
+{#include ../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 If at some point you find a **web page that presents you sensitive information based on your session**: Maybe it's reflecting cookies, or printing or CC details or any other sensitive information, you may try to steal it.\
 Here I present you the main ways to can try to achieve it:
@@ -10,7 +10,6 @@ Here I present you the main ways to can try to achieve it:
 - [**Danging Markup**](../pentesting-web/dangling-markup-html-scriptless-injection/index.html): If you cannot inject XSS tags you still may be able to steal the info using other regular HTML tags.
 - [**Clickjaking**](../pentesting-web/clickjacking.md): If there is no protection against this attack, you may be able to trick the user into sending you the sensitive data (an example [here](https://medium.com/bugbountywriteup/apache-example-servlet-leads-to-61a2720cac20)).
 
-{{#include ../banners/hacktricks-training.md}}
-
+{#include ../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

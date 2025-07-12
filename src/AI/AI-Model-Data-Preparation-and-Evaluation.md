@@ -1,6 +1,6 @@
 # Model Data Preparation & Evaluation
 
-{{#include ../banners/hacktricks-training.md}}
+{#include ../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 Model data preparation is a crucial step in the machine learning pipeline, as it involves transforming raw data into a format suitable for training machine learning models. This process includes several key steps:
 
@@ -239,5 +239,4 @@ The confusion matrix is a table that summarizes the performance of a classificat
 The confusion matrix can be used to calculate various evaluation metrics, such as accuracy, precision, recall, and F1 score.
 
 
-{{#include ../banners/hacktricks-training.md}}
-
+{#include ../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}

@@ -1,6 +1,6 @@
 # Models RCE
 
-{{#include ../banners/hacktricks-training.md}}
+{#include ../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## Loading models to RCE
 
@@ -102,4 +102,4 @@ with tarfile.open("symlink_demo.model", "w:gz") as tf:
     tf.add(PAYLOAD)                      # rides the symlink
 ```
 
-{{#include ../banners/hacktricks-training.md}}
+{#include ../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}

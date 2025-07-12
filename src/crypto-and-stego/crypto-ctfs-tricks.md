@@ -1,6 +1,6 @@
 # Crypto CTFs Tricks
 
-{{#include ../banners/hacktricks-training.md}}
+{#include ../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## Online Hashes DBs
 
@@ -298,7 +298,6 @@ A secret is splitted in X parts and to recover it you need Y parts (_Y <=X_).
 - [https://github.com/lockedbyte/cryptovenom](https://github.com/lockedbyte/cryptovenom)
 - [https://github.com/nccgroup/featherduster](https://github.com/nccgroup/featherduster)
 
-{{#include ../banners/hacktricks-training.md}}
-
+{#include ../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

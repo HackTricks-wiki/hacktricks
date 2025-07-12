@@ -1,6 +1,6 @@
 # AI in Cybersecurity
 
-{{#include ../banners/hacktricks-training.md}}
+{#include ../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## Main Machine Learning Algorithms
 
@@ -64,4 +64,4 @@ MCP (Model Context Protocol) is a protocol that allows AI agent clients to conne
 AI-MCP-Servers.md
 {{#endref}} 
 
-{{#include ../banners/hacktricks-training.md}}
+{#include ../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}

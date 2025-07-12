@@ -1,6 +1,6 @@
 # RDP Sessions Abuse
 
-{{#include ../../banners/hacktricks-training.md}}
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## RDP Process Injection
 
@@ -72,7 +72,6 @@ beacon> cd \\tsclient\c\Users\<username>\AppData\Roaming\Microsoft\Windows\Start
 beacon> upload C:\Payloads\pivot.exe
 ```
 
-{{#include ../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

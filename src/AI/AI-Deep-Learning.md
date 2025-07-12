@@ -1,6 +1,6 @@
 # Deep Learning
 
-{{#include ../banners/hacktricks-training.md}}
+{#include ../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## Deep Learning
 
@@ -434,5 +434,4 @@ Moreover, to generate an image from a text prompt, diffusion models typically fo
 3. **Diffusion Steps**: The model applies a series of diffusion steps, gradually transforming the noise vector into an image that corresponds to the text prompt. Each step involves applying learned transformations to denoise the image.
 
 
-{{#include ../banners/hacktricks-training.md}}
-
+{#include ../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}

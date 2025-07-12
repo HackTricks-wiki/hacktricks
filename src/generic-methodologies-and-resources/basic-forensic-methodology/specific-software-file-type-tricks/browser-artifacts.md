@@ -1,6 +1,6 @@
 # Browser Artifacts
 
-{{#include ../../../banners/hacktricks-training.md}}
+{#include ../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## Browsers Artifacts <a href="#id-3def" id="id-3def"></a>
 
@@ -162,7 +162,6 @@ These paths and commands are crucial for accessing and understanding the browsin
 - **Book: OS X Incident Response: Scripting and Analysis By Jaron Bradley pag 123**
 
 
-{{#include ../../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

@@ -1,6 +1,6 @@
 # SID-History Injection
 
-{{#include ../../banners/hacktricks-training.md}}
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## SID History Injection Attack
 
@@ -156,7 +156,6 @@ raiseChild.py -target-exec 10.10.10.10 <child_domain>/username
 - [https://adsecurity.org/?p=1772](https://adsecurity.org/?p=1772)
 - [https://www.sentinelone.com/blog/windows-sid-history-injection-exposure-blog/](https://www.sentinelone.com/blog/windows-sid-history-injection-exposure-blog/)
 
-{{#include ../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

@@ -1,6 +1,6 @@
 # Stealing Windows Credentials
 
-{{#include ../../banners/hacktricks-training.md}}
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## Credentials Mimikatz
 
@@ -325,7 +325,6 @@ Download it from:[ http://www.tarasco.org/security/pwdump_7](http://www.tarasco.
 
 [**Learn about some credentials protections here.**](credentials-protections.md)
 
-{{#include ../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

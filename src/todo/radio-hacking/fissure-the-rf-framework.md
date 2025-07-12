@@ -1,6 +1,8 @@
 # FISSURE - The RF Framework
 
-{{#include /src/banners/hacktricks-training.md}}
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
+
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 **Frequency Independent SDR-based Signal Understanding and Reverse Engineering**
 
@@ -187,5 +189,6 @@ Special thanks to Dr. Samuel Mantravadi and Joseph Reith for their contributions
 
 
 
-{{#include /src/banners/hacktricks-training.md}}
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}

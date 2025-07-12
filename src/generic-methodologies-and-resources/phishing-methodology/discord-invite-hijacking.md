@@ -1,6 +1,6 @@
 # Discord Invite Hijacking
 
-{{#include ../../banners/hacktricks-training.md}}
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 Discord’s invite system vulnerability allows threat actors to claim expired or deleted invite codes (temporary, permanent, or custom vanity) as new vanity links on any Level 3 boosted server. By normalizing all codes to lowercase, attackers can pre-register known invite codes and silently hijack traffic once the original link expires or the source server loses its boost.
 
@@ -60,4 +60,5 @@ This approach avoids direct file downloads and leverages familiar UI elements to
 - From Trust to Threat: Hijacked Discord Invites Used for Multi-Stage Malware Delivery – https://research.checkpoint.com/2025/from-trust-to-threat-hijacked-discord-invites-used-for-multi-stage-malware-delivery/
 - Discord Custom Invite Link Documentation – https://support.discord.com/hc/en-us/articles/115001542132-Custom-Invite-Link
 
-{{#include /src/banners/hacktricks-training.md}}
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}

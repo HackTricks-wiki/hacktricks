@@ -1,6 +1,6 @@
 # macOS Ruby Applications Injection
 
-{{#include ../../../banners/hacktricks-training.md}}
+{#include ../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## RUBYOPT
 
@@ -30,7 +30,6 @@ Fun fact, it works even with param **`--disable-rubyopt`**:
 RUBYOPT="-I/tmp -rinject" ruby hello.rb --disable-rubyopt
 ```
 
-{{#include ../../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

@@ -1,6 +1,6 @@
 # Angr - Examples
 
-{{#include ../../../banners/hacktricks-training.md}}
+{#include ../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 > [!TIP]
 > If the program is using `scanf` to get **several values at once from stdin** you need to generate a state that starts after the **`scanf`**.
@@ -833,7 +833,6 @@ if __name__ == '__main__':
   main(sys.argv)
 ```
 
-{{#include ../../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

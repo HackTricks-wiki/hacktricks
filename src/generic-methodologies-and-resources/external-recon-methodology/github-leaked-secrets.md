@@ -1,6 +1,6 @@
 # Github Dorks & Leaks
 
-{{#include ../../banners/hacktricks-training.md}}
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 
 ### Tools to find secrets in git repos and file system
@@ -304,7 +304,6 @@ AWS SECRET
 "private" extension:pgp
 ```
 
-{{#include ../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

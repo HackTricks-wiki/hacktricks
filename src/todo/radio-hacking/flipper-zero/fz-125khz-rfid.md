@@ -1,6 +1,6 @@
 # FZ - 125kHz RFID
 
-{{#include ../../../banners/hacktricks-training.md}}
+{#include ../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 
 ## Intro
@@ -52,7 +52,6 @@ After **copying** a card or **entering** the ID **manually** it's possible to **
 - [https://blog.flipperzero.one/rfid/](https://blog.flipperzero.one/rfid/)
 
 
-{{#include ../../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

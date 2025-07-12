@@ -1,6 +1,6 @@
 # macOS Dyld Hijacking & DYLD_INSERT_LIBRARIES
 
-{{#include ../../../../banners/hacktricks-training.md}}
+{#include ../../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## DYLD_INSERT_LIBRARIES Basic example
 
@@ -163,7 +163,6 @@ If you are planing on trying to inject libraries in unexpected binaries you coul
 sudo log stream --style syslog --predicate 'eventMessage CONTAINS[c] "[+] dylib"'
 ```
 
-{{#include ../../../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

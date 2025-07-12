@@ -1,6 +1,6 @@
 # macOS Users & External Accounts
 
-{{#include ../../banners/hacktricks-training.md}}
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## Common Users
 
@@ -32,7 +32,6 @@ for i in "${state[@]}"; do sysadminctl -"${i}" status; done;
 MacOS also support to login via external identity providers such as FaceBook, Google... The main daemon performing this job is `accountsd` (`/System/Library/Frameworks/Accounts.framework//Versions/A/Support/accountsd`) and it's possible to find plugins used for external authentication inside the folder `/System/Library/Accounts/Authentication/`.\
 Moreover, `accountsd` gets the list of account types from `/Library/Preferences/SystemConfiguration/com.apple.accounts.exists.plist`.
 
-{{#include ../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

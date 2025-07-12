@@ -1,6 +1,6 @@
 # Specific Software/File Type Tricks
 
-{{#include ../../../banners/hacktricks-training.md}}
+{#include ../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 Here you can find interesting tricks for specific file-types and/or software:
 
@@ -40,7 +40,6 @@ video-and-audio-file-analysis.md
 zips-tricks.md
 {{#endref}}
 
-{{#include ../../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

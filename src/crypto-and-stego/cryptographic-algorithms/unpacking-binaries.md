@@ -1,6 +1,6 @@
 # Unpacking Binaries
 
-{{#include ../../banners/hacktricks-training.md}}
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## Identifying packed binaries
 
@@ -23,7 +23,6 @@
   However, if the packer already contains a lot of strings you can see how many strings contains the word "http" and see if this number increases.
 - When you dump an executable from a region of memory you can fix some headers using [PE-bear](https://github.com/hasherezade/pe-bear-releases/releases).
 
-{{#include ../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

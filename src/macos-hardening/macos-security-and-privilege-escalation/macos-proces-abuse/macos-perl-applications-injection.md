@@ -1,6 +1,6 @@
 # macOS Perl Applications Injection
 
-{{#include ../../../banners/hacktricks-training.md}}
+{#include ../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## Via `PERL5OPT` & `PERL5LIB` env variable
 
@@ -69,7 +69,6 @@ For example, if a script is importing **`use File::Basename;`** it would be poss
 
 - [https://www.youtube.com/watch?v=zxZesAN-TEk](https://www.youtube.com/watch?v=zxZesAN-TEk)
 
-{{#include ../../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

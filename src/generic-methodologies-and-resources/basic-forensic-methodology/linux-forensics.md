@@ -1,6 +1,6 @@
 # Linux Forensics
 
-{{#include ../../banners/hacktricks-training.md}}
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## Initial Information Gathering
 
@@ -395,8 +395,7 @@ git diff --no-index --diff-filter=D path/to/old_version/ path/to/new_version/
 - [https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---diff-filterACDMRTUXB82308203](https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---diff-filterACDMRTUXB82308203)
 - **Book: Malware Forensics Field Guide for Linux Systems: Digital Forensics Field Guides**
 
-{{#include ../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 
 

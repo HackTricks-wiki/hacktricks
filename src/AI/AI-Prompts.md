@@ -1,6 +1,6 @@
 # AI Prompts
 
-{{#include ../banners/hacktricks-training.md}}
+{#include ../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## Basic Information
 
@@ -419,4 +419,4 @@ The WAF won't see these tokens as malicious, but the back LLM will actually unde
 Note that this also shows how previuosly mentioned techniques where the message is sent encoded or obfuscated can be used to bypass the WAFs, as the WAFs will not understand the message, but the LLM will.
 
 
-{{#include ../banners/hacktricks-training.md}}
+{#include ../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
