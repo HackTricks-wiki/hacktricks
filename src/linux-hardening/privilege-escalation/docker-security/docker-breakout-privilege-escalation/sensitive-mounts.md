@@ -2,9 +2,9 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-`/proc`, `/sys` ve `/var`'ın uygun namespace izolasyonu olmadan açılması, saldırı yüzeyinin genişlemesi ve bilgi sızdırma gibi önemli güvenlik riskleri oluşturur. Bu dizinler, yanlış yapılandırıldığında veya yetkisiz bir kullanıcı tarafından erişildiğinde, konteyner kaçışına, ana makine değişikliğine veya daha fazla saldırıyı destekleyen bilgilerin sağlanmasına yol açabilecek hassas dosyalar içerir. Örneğin, `-v /proc:/host/proc` yanlış bir şekilde monte edilirse, yol tabanlı doğası nedeniyle AppArmor korumasını atlayabilir ve `/host/proc`'ı korumasız bırakabilir.
+`/proc`, `/sys` ve `/var`'ın uygun namespace izolasyonu olmadan açılması, saldırı yüzeyinin genişlemesi ve bilgi sızdırma gibi önemli güvenlik riskleri oluşturur. Bu dizinler, yanlış yapılandırıldığında veya yetkisiz bir kullanıcı tarafından erişildiğinde, konteyner kaçışı, ana makine değişikliği veya daha fazla saldırıyı destekleyen bilgilerin sağlanmasına yol açabilecek hassas dosyalar içerir. Örneğin, `-v /proc:/host/proc` yanlış bir şekilde monte edilirse, yol tabanlı doğası nedeniyle AppArmor korumasını atlayabilir ve `/host/proc`'ı korumasız bırakabilir.
 
-**Her potansiyel zafiyetin daha fazla detayını bulabilirsiniz** [**https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts**](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)**.**
+**Her potansiyel zafiyetin daha fazla detayını** [**https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts**](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)** adresinde bulabilirsiniz.**
 
 ## procfs Vulnerabilities
 
@@ -55,7 +55,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # modprobe erişimini kontrol et
 #### **`/proc/sys/fs`**
 
 - [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html) gereğince, dosya sistemi hakkında seçenekler ve bilgiler içerir.
-- Yazma erişimi, ana makineye karşı çeşitli hizmet reddi saldırılarını etkinleştirebilir.
+- Yazma erişimi, ana makineye karşı çeşitli hizmet reddi saldırılarını mümkün kılabilir.
 
 #### **`/proc/sys/fs/binfmt_misc`**
 
@@ -70,7 +70,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # modprobe erişimini kontrol et
 #### **`/proc/config.gz`**
 
 - `CONFIG_IKCONFIG_PROC` etkinse kernel yapılandırmasını açığa çıkarabilir.
-- Saldırganların çalışan kernel'deki zayıflıkları tanımlaması için faydalıdır.
+- Saldırganlar için çalışan kernel'deki zayıflıkları tanımlamakta faydalıdır.
 
 #### **`/proc/sysrq-trigger`**
 
@@ -96,24 +96,24 @@ echo b > /proc/sysrq-trigger # Ana makineyi yeniden başlatır
 #### **`/proc/[pid]/mem`**
 
 - Kernel bellek cihazı `/dev/mem` ile arayüz sağlar.
-- Tarihsel olarak ayrıcalık yükselme saldırılarına karşı savunmasızdır.
+- Tarihsel olarak ayrıcalık yükseltme saldırılarına karşı savunmasızdır.
 - Daha fazla bilgi için [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 
 #### **`/proc/kcore`**
 
-- Sisteminin fiziksel belleğini ELF core formatında temsil eder.
+- Sistemin fiziksel belleğini ELF çekirdek formatında temsil eder.
 - Okuma, ana makine ve diğer konteynerlerin bellek içeriklerini sızdırabilir.
 - Büyük dosya boyutu okuma sorunlarına veya yazılım çökmesine yol açabilir.
 - Detaylı kullanım için [Dumping /proc/kcore in 2019](https://schlafwandler.github.io/posts/dumping-/proc/kcore/) bağlantısına bakın.
 
 #### **`/proc/kmem`**
 
-- Kernel sanal belleğini temsil eden `/dev/kmem` için alternatif bir arayüz.
+- Kernel sanal belleğini temsil eden `/dev/kmem` için alternatif bir arayüzdür.
 - Okuma ve yazma işlemlerine izin verir, dolayısıyla kernel belleğinin doğrudan değiştirilmesine olanak tanır.
 
 #### **`/proc/mem`**
 
-- Fiziksel belleği temsil eden `/dev/mem` için alternatif bir arayüz.
+- Fiziksel belleği temsil eden `/dev/mem` için alternatif bir arayüzdür.
 - Okuma ve yazma işlemlerine izin verir, tüm belleğin değiştirilmesi sanal adreslerin fiziksel adreslere dönüştürülmesini gerektirir.
 
 #### **`/proc/sched_debug`**
@@ -231,7 +231,8 @@ REFRESH_TOKEN_SECRET=14<SNIP>ea
 /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/140/fs/usr/share/nginx/html/index.html
 /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/132/fs/usr/share/nginx/html/index.html
 
-/ # echo '<!DOCTYPE html><html lang="tr"><head><script>alert("Stored XSS!")</script></head></html>' > /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/140/fs/usr/share/nginx/html/index2.html
+/ # echo '<!DOCTYPE html><html lang="tr"><head><script>alert("Stored XSS!")</script></head></html>' > /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/140/fs/usr/sh
+are/nginx/html/index2.html
 ```
 
 The XSS was achieved:

