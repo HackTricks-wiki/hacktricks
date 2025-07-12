@@ -55,12 +55,12 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Verificar acesso ao modprobe
 #### **`/proc/sys/fs`**
 
 - De acordo com [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html), contém opções e informações sobre o sistema de arquivos.
-- O acesso de escrita pode permitir vários ataques de negação de serviço contra o host.
+- O acesso de gravação pode permitir vários ataques de negação de serviço contra o host.
 
 #### **`/proc/sys/fs/binfmt_misc`**
 
 - Permite registrar interpretadores para formatos binários não nativos com base em seu número mágico.
-- Pode levar à escalada de privilégios ou acesso ao shell root se `/proc/sys/fs/binfmt_misc/register` for gravável.
+- Pode levar a escalonamento de privilégios ou acesso a shell root se `/proc/sys/fs/binfmt_misc/register` for gravável.
 - Exploit relevante e explicação:
 - [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
 - Tutorial detalhado: [Video link](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
@@ -90,13 +90,13 @@ echo b > /proc/sysrq-trigger # Reinicializa o host
 
 - Lista símbolos exportados do kernel e seus endereços.
 - Essencial para o desenvolvimento de exploits de kernel, especialmente para superar KASLR.
-- As informações de endereço são restritas com `kptr_restrict` definido como `1` ou `2`.
+- Informações de endereço são restritas com `kptr_restrict` definido como `1` ou `2`.
 - Detalhes em [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 
 #### **`/proc/[pid]/mem`**
 
 - Interfaces com o dispositivo de memória do kernel `/dev/mem`.
-- Historicamente vulnerável a ataques de escalada de privilégios.
+- Historicamente vulnerável a ataques de escalonamento de privilégios.
 - Mais em [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 
 #### **`/proc/kcore`**
@@ -109,12 +109,12 @@ echo b > /proc/sysrq-trigger # Reinicializa o host
 #### **`/proc/kmem`**
 
 - Interface alternativa para `/dev/kmem`, representando a memória virtual do kernel.
-- Permite leitura e escrita, portanto, modificação direta da memória do kernel.
+- Permite leitura e gravação, portanto, modificação direta da memória do kernel.
 
 #### **`/proc/mem`**
 
 - Interface alternativa para `/dev/mem`, representando a memória física.
-- Permite leitura e escrita, a modificação de toda a memória requer a resolução de endereços virtuais para físicos.
+- Permite leitura e gravação, a modificação de toda a memória requer a resolução de endereços virtuais para físicos.
 
 #### **`/proc/sched_debug`**
 
@@ -131,7 +131,7 @@ echo b > /proc/sysrq-trigger # Reinicializa o host
 #### **`/sys/kernel/uevent_helper`**
 
 - Usado para manipular `uevents` de dispositivos do kernel.
-- Escrever em `/sys/kernel/uevent_helper` pode executar scripts arbitrários ao serem acionados `uevent`.
+- Gravar em `/sys/kernel/uevent_helper` pode executar scripts arbitrários ao serem acionados `uevent`.
 - **Exemplo de Exploração**:
 ```bash
 
@@ -291,8 +291,8 @@ locate the other containers' filesystems and SA / web identity tokens
 Mounting certain host Unix sockets or writable pseudo-filesystems is equivalent to giving the container full root on the node. **Treat the following paths as highly sensitive and never expose them to untrusted workloads**:
 
 ```text
-/run/containerd/containerd.sock     # socket CRI do containerd  
-/var/run/crio/crio.sock             # socket de runtime CRI-O  
+/run/containerd/containerd.sock     # soquete CRI do containerd  
+/var/run/crio/crio.sock             # soquete de runtime CRI-O  
 /run/podman/podman.sock             # API do Podman (com ou sem root)  
 /var/run/kubelet.sock               # API do Kubelet em nós do Kubernetes  
 /run/firecracker-containerd.sock    # Kata / Firecracker

