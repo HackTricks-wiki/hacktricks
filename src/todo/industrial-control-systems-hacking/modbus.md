@@ -1,12 +1,12 @@
 # Protokali ya Modbus
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
 
 ## Utangulizi wa Protokali ya Modbus
 
-Protokali ya Modbus ni protokali inayotumika sana katika Uhandisi wa Viwanda na Mifumo ya Kudhibiti. Modbus inaruhusu mawasiliano kati ya vifaa mbalimbali kama vile wakala wa mantiki wanaoweza kuprogramishwa (PLCs), sensorer, actuators, na vifaa vingine vya viwandani. Kuelewa Protokali ya Modbus ni muhimu kwani hii ndiyo protokali pekee inayotumika sana katika ICS na ina uso mkubwa wa mashambulizi kwa ajili ya kunasa na hata kuingiza amri katika PLCs.
+Protokali ya Modbus ni protokali inayotumika sana katika Uhandisi wa Viwanda na Mifumo ya Kudhibiti. Modbus inaruhusu mawasiliano kati ya vifaa mbalimbali kama vile wakala wa mantiki wanaoweza kuprogramwa (PLCs), sensorer, actuators, na vifaa vingine vya viwanda. Kuelewa Protokali ya Modbus ni muhimu kwani hii ndiyo protokali ya mawasiliano inayotumika zaidi katika ICS na ina uso mkubwa wa mashambulizi kwa ajili ya kunasa na hata kuingiza amri katika PLCs.
 
-Hapa, dhana zinaelezwa kwa alama zikitoa muktadha wa protokali na asili yake ya uendeshaji. Changamoto kubwa katika usalama wa mifumo ya ICS ni gharama ya utekelezaji na uboreshaji. Protokali hizi na viwango vilipangwa katika mwanzoni mwa miaka ya 80 na 90 ambazo bado zinatumika sana. Kwa kuwa tasnia ina vifaa na muunganisho mwingi, kuboresha vifaa ni vigumu sana, ambayo inawapa hackers faida ya kushughulikia protokali za zamani. Mashambulizi dhidi ya Modbus ni kama yasiyoweza kuepukika kwani itatumika bila uboreshaji na uendeshaji wake ni muhimu kwa tasnia.
+Hapa, dhana zinaelezwa kwa alama zikitoa muktadha wa protokali na asili yake ya uendeshaji. Changamoto kubwa katika usalama wa mifumo ya ICS ni gharama ya utekelezaji na uboreshaji. Protokali hizi na viwango vilipangwa mwanzoni mwa miaka ya 80 na 90 ambazo bado zinatumika sana. Kwa kuwa tasnia ina vifaa vingi na muunganisho, kuboresha vifaa ni vigumu sana, ambayo inawapa hackers faida ya kushughulikia protokali za zamani. Mashambulizi dhidi ya Modbus ni kama yasiyoweza kuepukika kwani itatumika bila uboreshaji na uendeshaji wake ni muhimu kwa tasnia.
 
 ## Muktadha wa Mteja-Mtumikaji
 
@@ -18,11 +18,11 @@ Protokali ya Modbus imeundwa kwa mawasiliano ya Serial na pia Mawasiliano ya Eth
 
 ## Uwakilishi wa Data
 
-Data inatumwa katika protokali ya Modbus kama ASCII au Binary, ingawa muundo wa binary unatumika kutokana na ufanisi wake na vifaa vya zamani.
+Data inatumwa katika protokali ya Modbus kama ASCII au Binary, ingawa muundo wa binary unatumika kwa sababu ya ufanisi wake na vifaa vya zamani.
 
 ## Mifumo ya Kazi
 
-Protokali ya ModBus inafanya kazi na uhamasishaji wa mifumo maalum ya kazi ambayo inatumika kuendesha PLCs na vifaa mbalimbali vya kudhibiti. Sehemu hii ni muhimu kuelewa kwani mashambulizi ya kurudi yanaweza kufanywa kwa kurudisha mifumo ya kazi. Vifaa vya zamani havisaidii usimbaji wa mawasiliano ya data na kwa kawaida vina nyaya ndefu zinazovihusisha, ambayo inasababisha kuingiliwa kwa nyaya hizi na kunasa/kuingiza data.
+Protokali ya ModBus inafanya kazi na uhamasishaji wa mifumo maalum ya kazi ambazo zinatumika kuendesha PLCs na vifaa mbalimbali vya kudhibiti. Sehemu hii ni muhimu kuelewa kwani mashambulizi ya kurudi yanaweza kufanywa kwa kurudisha mifumo ya kazi. Vifaa vya zamani havisaidii usimbaji wa mawasiliano ya data na kwa kawaida vina nyaya ndefu zinazovihusisha, ambayo inasababisha kuingiliwa kwa nyaya hizi na kunasa/kuingiza data.
 
 ## Anwani za Modbus
 
@@ -32,4 +32,4 @@ Zaidi ya hayo, Modbus pia inatekeleza ukaguzi wa makosa ili kuhakikisha uaminifu
 
 Kwa sababu ya matumizi yake makubwa na ukosefu wa uboreshaji, kushambulia Modbus kunatoa faida kubwa na uso wake wa mashambulizi. ICS inategemea sana mawasiliano kati ya vifaa na mashambulizi yoyote yaliyofanywa dhidi yao yanaweza kuwa hatari kwa uendeshaji wa mifumo ya viwanda. Mashambulizi kama kurudi, kuingiza data, kunasa data na kuvuja, Kukataa Huduma, uongo wa data, n.k. yanaweza kufanywa ikiwa njia ya uhamasishaji itatambuliwa na mshambuliaji.
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}

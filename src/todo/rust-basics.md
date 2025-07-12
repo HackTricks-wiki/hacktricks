@@ -1,6 +1,6 @@
 # Msingi wa Rust
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}
 
 ### Aina za Kijumla
 
@@ -32,7 +32,7 @@ Unaweza kutumia kazi kama `is_some()` au `is_none()` kuangalia thamani ya Chaguo
 
 ### Macros
 
-Macros ni zenye nguvu zaidi kuliko kazi kwa sababu zinapanuka kutoa msimbo zaidi kuliko ule ulioandika kwa mikono. Kwa mfano, saini ya kazi lazima itangaze idadi na aina ya vigezo ambavyo kazi ina. Macros, kwa upande mwingine, zinaweza kuchukua idadi tofauti ya vigezo: tunaweza kuita `println!("hello")` na hoja moja au `println!("hello {}", name)` na hoja mbili. Pia, macros zinapanuliwa kabla ya mkusanyiko kufasiri maana ya msimbo, hivyo macro inaweza, kwa mfano, kutekeleza sifa kwenye aina fulani. Kazi haiwezi, kwa sababu inaitwa wakati wa wakati wa kukimbia na sifa inahitaji kutekelezwa wakati wa mkusanyiko.
+Macros ni zenye nguvu zaidi kuliko kazi kwa sababu zinapanuka kutoa msimbo zaidi kuliko ule ulioandika kwa mikono. Kwa mfano, saini ya kazi lazima itangaze idadi na aina ya vigezo ambavyo kazi hiyo ina. Macros, kwa upande mwingine, zinaweza kuchukua idadi tofauti ya vigezo: tunaweza kuita `println!("hello")` na hoja moja au `println!("hello {}", name)` na hoja mbili. Pia, macros zinapanuliwa kabla ya mkusanyiko kufasiri maana ya msimbo, hivyo macro inaweza, kwa mfano, kutekeleza sifa kwenye aina fulani. Kazi haiwezi, kwa sababu inaitwa wakati wa wakati wa kukimbia na sifa inahitaji kutekelezwa wakati wa mkusanyiko.
 ```rust
 macro_rules! my_macro {
 () => {
@@ -287,4 +287,4 @@ thread::sleep(Duration::from_millis(500));
 }
 }
 ```
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}

@@ -1,12 +1,12 @@
 # Jaribu LLMs
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}
 
 ## Endesha & fundisha mifano kwa ndani
 
 ### [**Hugging Face Transformers**](https://github.com/huggingface/transformers)
 
-Hugging Face Transformers ni moja ya maktaba maarufu za chanzo wazi kwa kutumia, kufundisha, na kupeleka LLMs kama GPT, BERT, na wengine wengi. Inatoa mfumo kamili unaojumuisha mifano iliyofundishwa awali, seti za data, na uunganisho usio na mshono na Hugging Face Hub kwa ajili ya kuboresha na kupeleka.
+Hugging Face Transformers ni moja ya maktaba maarufu za chanzo wazi kwa kutumia, kufundisha, na kupeleka LLMs kama GPT, BERT, na wengine wengi. Inatoa mfumo kamili ambao unajumuisha mifano iliyofundishwa awali, seti za data, na uunganisho usio na mshono na Hugging Face Hub kwa ajili ya kuboresha na kupeleka.
 
 ### [**LangChain**](https://github.com/langchain-ai/langchain)
 
@@ -14,7 +14,7 @@ LangChain ni mfumo ulioandaliwa kwa ajili ya kujenga programu zenye LLMs. Inawaw
 
 ### [**LitGPT**](https://github.com/Lightning-AI/litgpt)
 
-LitGPT ni mradi ulioandaliwa na Lightning AI unaotumia mfumo wa Lightning kuwezesha mafunzo, kuboresha, na kupeleka mifano inayotegemea GPT. Inajumuisha kwa urahisi na zana nyingine za Lightning AI, ikitoa michakato iliyoboreshwa kwa kushughulikia mifano ya lugha kwa kiwango kikubwa kwa utendaji bora na upanuzi.
+LitGPT ni mradi ulioandaliwa na Lightning AI ambao unatumia mfumo wa Lightning ili kuwezesha mafunzo, kuboresha, na kupeleka mifano inayotegemea GPT. Inajumuisha kwa urahisi na zana nyingine za Lightning AI, ikitoa michakato iliyoboreshwa kwa kushughulikia mifano ya lugha kwa kiwango kikubwa kwa utendaji bora na upanuzi.
 
 ### [**LitServe**](https://github.com/Lightning-AI/LitServe)
 
@@ -33,22 +33,22 @@ Axolotl ni jukwaa la msingi wa wingu lililoundwa ili kurahisisha kupeleka, kupan
 Inatoa sehemu kadhaa kama:
 
 * **Mifano**: Hifadhi kubwa ya **mifano ya kujifunza mashine iliyofundishwa awali** ambapo watumiaji wanaweza kuvinjari, kupakua, na kuunganisha mifano kwa kazi mbalimbali kama vile uzalishaji wa maandiko, tafsiri, utambuzi wa picha, na zaidi.
-* **Seti za data:** **Mkusanyiko mpana wa seti za data** zinazotumika kwa mafunzo na kutathmini mifano. Inarahisisha ufikiaji rahisi wa vyanzo mbalimbali vya data, ikiwasaidia watumiaji kupata na kutumia data kwa miradi yao maalum ya kujifunza mashine.
+* **Seti za Data:** **Kukusanya kwa kina kwa seti za data** zinazotumika kwa mafunzo na kutathmini mifano. Inarahisisha ufikiaji rahisi wa vyanzo mbalimbali vya data, ikiwasaidia watumiaji kupata na kutumia data kwa miradi yao maalum ya kujifunza mashine.
 * **Nafasi:** Jukwaa la kuhifadhi na kushiriki **programu za kujifunza mashine za mwingiliano** na maonyesho. Inawawezesha waendelezaji **kuonyesha** mifano yao ikifanya kazi, kuunda interfaces rafiki kwa mtumiaji, na kushirikiana na wengine kwa kushiriki maonyesho ya moja kwa moja.
 
 ## [**TensorFlow Hub**](https://www.tensorflow.org/hub) **&** [**Kaggle**](https://www.kaggle.com/)
 
 **TensorFlow Hub** ni hifadhi kamili ya moduli za kujifunza mashine zinazoweza kutumika tena zilizotengenezwa na Google. Inalenga kuwezesha kushiriki na kupeleka mifano ya kujifunza mashine, hasa zile zilizojengwa na TensorFlow.
 
-* **Moduli:** Mkubwa wa makusanyo ya mifano iliyofundishwa awali na vipengele vya mfano ambapo watumiaji wanaweza kuvinjari, kupakua, na kuunganisha moduli kwa kazi kama vile uainishaji wa picha, uingizaji wa maandiko, na zaidi.
-* **Mafunzo:** Mwongozo wa hatua kwa hatua na mifano ambayo inawasaidia watumiaji kuelewa jinsi ya kutekeleza na kuboresha mifano wakitumia TensorFlow Hub.
-* **Hati:** Miongozo kamili na marejeleo ya API yanayosaidia waendelezaji kutumia rasilimali za hifadhi kwa ufanisi.
+* **Moduli:** Hifadhi kubwa ya mifano iliyofundishwa awali na vipengele vya mfano ambapo watumiaji wanaweza kuvinjari, kupakua, na kuunganisha moduli kwa kazi kama vile uainishaji wa picha, uhamasishaji wa maandiko, na zaidi.
+* **Mafunzo:** Mwongozo wa hatua kwa hatua na mifano ambayo inawasaidia watumiaji kuelewa jinsi ya kutekeleza na kuboresha mifano kwa kutumia TensorFlow Hub.
+* **Hati:** Miongozo kamili na marejeleo ya API ambayo yanawasaidia waendelezaji kutumia rasilimali za hifadhi kwa ufanisi.
 
 ## [**Replicate**](https://replicate.com/home)
 
-**Replicate** ni jukwaa linalowezesha waendelezaji kuendesha mifano ya kujifunza mashine kwenye wingu kupitia API rahisi. Inalenga kufanya mifano ya ML ipatikane kwa urahisi na kuweza kupelekwa bila haja ya kuweka miundombinu kubwa.
+**Replicate** ni jukwaa linalowezesha waendelezaji kuendesha mifano ya kujifunza mashine kwenye wingu kupitia API rahisi. Inalenga kufanya mifano ya ML ipatikane kwa urahisi na kuweza kupelekwa bila haja ya mipangilio kubwa ya miundombinu.
 
 * **Mifano:** Hifadhi ya mifano ya kujifunza mashine iliyochangia na jamii ambayo watumiaji wanaweza kuvinjari, kujaribu, na kuunganisha mifano katika programu zao kwa juhudi ndogo.
-* **Upatikanaji wa API:** APIs rahisi za kuendesha mifano zinazowezesha waendelezaji kupeleka na kupanua mifano bila va shida ndani ya programu zao wenyewe.
+* **Upatikanaji wa API:** APIs rahisi za kuendesha mifano zinazowawezesha waendelezaji kupeleka na kupanua mifano bila vae ya juhudi ndani ya programu zao.
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}

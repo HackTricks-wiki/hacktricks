@@ -1,14 +1,14 @@
 # FISSURE - The RF Framework
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
 
 **Kuelewa na Uhandisi wa Nyuma wa Ishara za SDR zisizo na Kiwango**
 
 FISSURE ni mfumo wa RF na uhandisi wa nyuma wa chanzo wazi ulioandaliwa kwa viwango vyote vya ujuzi ukiwa na viunganishi vya kugundua na kuainisha ishara, kugundua protokali, kutekeleza mashambulizi, kudhibiti IQ, kuchambua udhaifu, automatisering, na AI/ML. Mfumo huu ulijengwa ili kuhamasisha uunganishaji wa haraka wa moduli za programu, redio, protokali, data za ishara, skripti, grafu za mtiririko, vifaa vya rejea, na zana za wahusika wengine. FISSURE ni mwezeshaji wa mtiririko wa kazi ambao unashikilia programu katika eneo moja na unaruhusu timu kujiweka sawa kwa urahisi huku wakishiriki usanidi wa msingi uliojaribiwa kwa usahihi kwa usambazaji maalum wa Linux.
 
-Mfumo na zana zilizo pamoja na FISSURE zimeundwa kugundua uwepo wa nishati ya RF, kuelewa sifa za ishara, kukusanya na kuchambua sampuli, kuendeleza mbinu za kutuma na/au sindikiza, na kuunda mizigo au ujumbe maalum. FISSURE ina maktaba inayokua ya taarifa za protokali na ishara kusaidia katika utambuzi, uundaji wa pakiti, na fuzzing. Uwezo wa kuhifadhi mtandaoni upo ili kupakua faili za ishara na kujenga orodha za kucheza ili kuiga trafiki na kupima mifumo.
+Mfumo na zana zilizo pamoja na FISSURE zimeundwa kugundua uwepo wa nishati ya RF, kuelewa sifa za ishara, kukusanya na kuchambua sampuli, kuendeleza mbinu za kutuma na/au sindano, na kuunda mizigo au ujumbe maalum. FISSURE ina maktaba inayokua ya taarifa za protokali na ishara kusaidia katika utambuzi, uundaji wa pakiti, na fuzzing. Uwezo wa kuhifadhi mtandaoni upo ili kupakua faili za ishara na kujenga orodha za nyimbo kuiga trafiki na kujaribu mifumo.
 
-Msingi wa msimbo wa Python na kiolesura cha mtumiaji kinawaruhusu wanaanza kujifunza haraka kuhusu zana na mbinu maarufu zinazohusiana na RF na uhandisi wa nyuma. Walimu katika usalama wa mtandao na uhandisi wanaweza kutumia vifaa vilivyomo au kutumia mfumo huu kuonyesha maombi yao halisi. Wanaendelezi na watafiti wanaweza kutumia FISSURE kwa kazi zao za kila siku au kufichua suluhisho zao za kisasa kwa hadhira kubwa. Kadri ufahamu na matumizi ya FISSURE yanavyokua katika jamii, ndivyo uwezo wake na upeo wa teknolojia inayojumuisha itakavyoongezeka.
+Msingi wa msimbo wa Python na kiolesura cha mtumiaji kinawaruhusu wanaanza kujifunza haraka kuhusu zana na mbinu maarufu zinazohusiana na RF na uhandisi wa nyuma. Walimu katika usalama wa mtandao na uhandisi wanaweza kutumia vifaa vilivyomo au kutumia mfumo huu kuonyesha maombi yao halisi. Wataalamu na watafiti wanaweza kutumia FISSURE kwa kazi zao za kila siku au kufichua suluhisho zao za kisasa kwa hadhira pana. Kadri ufahamu na matumizi ya FISSURE yanavyokua katika jamii, ndivyo uwezo wake na wigo wa teknolojia inayojumuisha itakavyoongezeka.
 
 **Taarifa Zaidi**
 
@@ -42,7 +42,7 @@ Mifumo hii ya uendeshaji bado iko katika hali ya beta. Ziko katika maendeleo na 
 | DragonOS Focal (x86\_64)    |  Python3\_maint-3.8 |
 |    Ubuntu 22.04 (x64)       | Python3\_maint-3.10 |
 
-Kumbuka: Zana fulani za programu hazifanyi kazi kwa kila OS. Rejelea [Software And Conflicts](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Help/Markdown/SoftwareAndConflicts.md)
+Kumbuka: Zana fulani za programu hazifanyi kazi kwa kila OS. Angalia [Software And Conflicts](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Help/Markdown/SoftwareAndConflicts.md)
 
 **Usanidi**
 ```
@@ -52,7 +52,7 @@ git checkout <Python2_maint-3.7> or <Python3_maint-3.8> or <Python3_maint-3.10>
 git submodule update --init
 ./install
 ```
-Hii itasakinisha utegemezi wa programu za PyQt zinazohitajika kuanzisha GUI za usakinishaji ikiwa hazijapatikana.
+Hii itasakinisha utegemezi wa programu za PyQt zinazohitajika kuanzisha GUI za usakinishaji ikiwa hazipatikani.
 
 Ifuatayo, chagua chaguo linalofaa zaidi kwa mfumo wako wa uendeshaji (linapaswa kugundulika kiotomatiki ikiwa OS yako inalingana na chaguo).
 
@@ -93,7 +93,7 @@ Refer to the FISSURE Help menu for more details on usage.
 
 **Hardware**
 
-Orodha ifuatayo ni ya vifaa "vilivyosaidiwa" vyenye viwango tofauti vya uungwaji mkono:
+Orodha ifuatayo ni ya vifaa "vilivyosaidiwa" vyenye viwango tofauti vya uunganisho:
 
 * USRP: X3xx, B2xx, B20xmini, USRP2, N2xx
 * HackRF
@@ -106,7 +106,7 @@ Orodha ifuatayo ni ya vifaa "vilivyosaidiwa" vyenye viwango tofauti vya uungwaji
 
 ## Lessons
 
-FISSURE inakuja na miongozo kadhaa ya kusaidia kufahamiana na teknolojia na mbinu tofauti. Mengi yanajumuisha hatua za kutumia zana mbalimbali ambazo zimeunganishwa kwenye FISSURE.
+FISSURE inakuja na miongozo kadhaa ya kusaidia kufahamiana na teknolojia na mbinu tofauti. Mingi ina hatua za kutumia zana mbalimbali ambazo zimeunganishwa ndani ya FISSURE.
 
 * [Lesson1: OpenBTS](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson1\_OpenBTS.md)
 * [Lesson2: Lua Dissectors](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson2\_LuaDissectors.md)
@@ -125,7 +125,7 @@ FISSURE inakuja na miongozo kadhaa ya kusaidia kufahamiana na teknolojia na mbin
 * [ ] Ongeza aina zaidi za vifaa, protokali za RF, vigezo vya ishara, zana za uchambuzi
 * [ ] Saidia mifumo zaidi ya uendeshaji
 * [ ] Tengeneza vifaa vya darasa kuhusiana na FISSURE (RF Attacks, Wi-Fi, GNU Radio, PyQt, nk.)
-* [ ] Unda mabadiliko ya ishara, extractor ya vipengele, na mchanganuzi wa ishara kwa mbinu za AI/ML zinazoweza kuchaguliwa
+* [ ] Unda kondishina ya ishara, mtoa sifa, na mchanganuzi wa ishara kwa mbinu za AI/ML zinazoweza kuchaguliwa
 * [ ] Tekeleza mitambo ya demodulation ya kurudi kwa ajili ya kuzalisha bitstream kutoka kwa ishara zisizojulikana
 * [ ] Hamasisha vipengele vya msingi vya FISSURE kwa mpango wa uanzishaji wa node ya sensor ya jumla
 
@@ -137,8 +137,8 @@ Mapendekezo ya kuboresha FISSURE yanahimizwa sana. Acha maoni kwenye ukurasa wa 
 * Zana za programu zenye hatua za usakinishaji
 * Masomo mapya au nyenzo za ziada kwa masomo yaliyopo
 * Protokali za RF zinazovutia
-* Vifaa zaidi na aina za SDR kwa uungwaji mkono
-* Scripts za uchambuzi wa IQ katika Python
+* Vifaa zaidi na aina za SDR kwa uunganisho
+* Skripti za uchambuzi wa IQ katika Python
 * Marekebisho na maboresho ya usakinishaji
 
 Michango ya kuboresha FISSURE ni muhimu ili kuharakisha maendeleo yake. Michango yoyote unayofanya inathaminiwa sana. Ikiwa unataka kuchangia kupitia maendeleo ya msimbo, tafadhali fork repo na uunde ombi la kuvuta:
@@ -153,7 +153,7 @@ Kuunda [Issues](https://github.com/ainfosec/FISSURE/issues) ili kuleta umakini k
 
 ## Collaborating
 
-Wasiliana na Assured Information Security, Inc. (AIS) Business Development ili kupendekeza na kuimarisha fursa zozote za ushirikiano wa FISSURE–iwe ni kwa kujitolea muda wa kuunganisha programu yako, kuwa na watu wenye talanta katika AIS kuunda suluhisho kwa changamoto zako za kiufundi, au kuunganisha FISSURE kwenye majukwaa/aplikesheni nyingine.
+Wasiliana na Assured Information Security, Inc. (AIS) Business Development ili kupendekeza na kuimarisha fursa zozote za ushirikiano wa FISSURE–iwe ni kwa kujitolea muda wa kuunganisha programu yako, kuwa na watu wenye talanta katika AIS kuunda suluhisho kwa changamoto zako za kiufundi, au kuunganisha FISSURE katika majukwaa/aplikes nyingine.
 
 ## License
 
@@ -179,8 +179,6 @@ Tunaelewa na tunashukuru kwa hawa wabunifu:
 
 ## Acknowledgments
 
-Shukrani maalum kwa Dr. Samuel Mantravadi na Joseph Reith kwa michango yao kwenye mradi huu.
+Shukrani maalum kwa Dr. Samuel Mantravadi na Joseph Reith kwa michango yao katika mradi huu.
 
-
-
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}

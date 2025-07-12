@@ -3,7 +3,7 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
 > [!WARNING]
-> Kumbuka kwamba entitlements zinazohusisha **`com.apple`** hazipatikani kwa wahusika wa tatu, ni Apple pekee inayoweza kuzitoa.
+> Kumbuka kwamba entitlements zinazohusisha **`com.apple`** hazipatikani kwa wahusika wa tatu, ni Apple pekee inayoweza kuzitolea.
 
 ## High
 
@@ -29,7 +29,7 @@ Apps zenye Entitlement ya Zana za Ufuatiliaji zinaweza kuita `task_for_pid()` il
 
 ### `com.apple.security.cs.disable-library-validation`
 
-Entitlement hii inaruhusu **kupakia frameworks, plug-ins, au maktaba bila kusainiwa na Apple au kusainiwa na Team ID** sawa na executable kuu, hivyo mshambuliaji anaweza kutumia upakiaji wa maktaba fulani kuingiza msimbo. Angalia [**hii kwa maelezo zaidi**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation).
+Entitlement hii inaruhusu **kupakia frameworks, plug-ins, au maktaba bila kusainiwa na Apple au kusainiwa na Kitambulisho sawa na executable kuu**, hivyo mshambuliaji anaweza kutumia upakiaji wa maktaba fulani kuingiza msimbo. Angalia [**hii kwa maelezo zaidi**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation).
 
 ### `com.apple.private.security.clear-library-validation`
 
@@ -42,7 +42,7 @@ Entitlement hii inaruhusu **kutumia DYLD environment variables** ambazo zinaweza
 
 ### `com.apple.private.tcc.manager` au `com.apple.rootless.storage`.`TCC`
 
-[**Kulingana na blog hii**](https://objective-see.org/blog/blog_0x4C.html) **na** [**blog hii**](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/), entitlements hizi zinaruhusu **kubadilisha** database ya **TCC**.
+[**Kulingana na blog hii**](https://objective-see.org/blog/blog_0x4C.html) **na** [**blog hii**](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/), entitlements hizi zinaruhusu **kubadilisha** hifadhidata ya **TCC**.
 
 ### **`system.install.apple-software`** na **`system.install.apple-software.standar-user`**
 
@@ -56,9 +56,9 @@ Entitlement inayohitajika kuomba **kernel kupakia nyongeza ya kernel**.
 
 Entitlement **`com.apple.private.icloud-account-access`** inaruhusu kuwasiliana na huduma ya XPC **`com.apple.iCloudHelper`** ambayo itatoa **tokens za iCloud**.
 
-**iMovie** na **Garageband** walikuwa na entitlement hii.
+**iMovie** na **Garageband** zilikuwa na entitlement hii.
 
-Kwa maelezo zaidi kuhusu exploit ya **kupata tokens za icloud** kutoka kwa entitlement hiyo angalia mazungumzo: [**#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
+Kwa maelezo zaidi kuhusu exploit ya **kupata tokens za icloud** kutoka kwa entitlement hiyo angalia mazungumzo: [**#OBTS v5.0: "Nini Kinachotokea kwenye Mac yako, Kinabaki kwenye iCloud ya Apple?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
 
 ### `com.apple.private.tcc.manager.check-by-audit-token`
 
@@ -91,7 +91,7 @@ Inatoa ruhusa za **Upatikanaji wa Disk Kamili**, moja ya ruhusa za juu zaidi za 
 
 ### **`kTCCServiceAppleEvents`**
 
-Inaruhusu programu kutuma matukio kwa programu nyingine ambazo mara nyingi hutumiwa kwa **kujiendesha kazi**. Kwa kudhibiti programu nyingine, inaweza kutumia ruhusa zilizotolewa kwa programu hizi nyingine.
+Inaruhusu programu kutuma matukio kwa programu nyingine ambazo mara nyingi hutumiwa kwa **kujiendesha kazi**. Kwa kudhibiti programu nyingine, inaweza kutumia vibaya ruhusa zilizotolewa kwa programu hizi nyingine.
 
 Kama kufanya ziombwe mtumiaji kwa nywila yake:
 ```bash
@@ -134,10 +134,10 @@ Ruhusa hii inaruhusu **kufunika au kurekebisha msimbo wa C**, kutumia **`NSCreat
 
 ### `com.apple.security.cs.disable-executable-page-protection`
 
-Ruhusa hii inaruhusu **kubadilisha sehemu za faili zake za kutekelezwa** kwenye diski ili kutoka kwa nguvu. Angalia [**hii kwa maelezo zaidi**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-executable-page-protection).
+Ruhusa hii inaruhusu **kubadilisha sehemu za faili zake za kutekeleza** kwenye diski ili kutoka kwa nguvu. Angalia [**hii kwa maelezo zaidi**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-executable-page-protection).
 
 > [!CAUTION]
-> Ruhusa ya Kuondoa Ulinzi wa Kumbukumbu ya Kutekelezwa ni ruhusa kali ambayo inatoa ulinzi wa usalama wa msingi kutoka kwa programu yako, na kufanya iwezekane kwa mshambuliaji kuandika upya msimbo wa kutekelezwa wa programu yako bila kugundulika. Prefer ruhusa nyembamba ikiwa inawezekana.
+> Ruhusa ya Kuondoa Ulinzi wa Kumbukumbu ya Kutekeleza ni ruhusa kali ambayo inondoa ulinzi wa usalama wa msingi kutoka kwa programu yako, na kufanya iwezekane kwa mshambuliaji kuandika upya msimbo wa kutekeleza wa programu yako bila kugundulika. Prefer ruhusa nyembamba ikiwa inawezekana.
 
 ### `com.apple.security.cs.allow-relative-library-loads`
 
@@ -149,7 +149,7 @@ Ruhusa hii inaruhusu kuunganisha mfumo wa faili wa nullfs (uliokatazwa kwa kawai
 
 ### `kTCCServiceAll`
 
-Kulingana na chapisho hili la blogu, ruhusa hii ya TCC kwa kawaida hupatikana katika mfumo:
+Kulingana na chapisho hili la blog, ruhusa hii ya TCC kwa kawaida hupatikana katika mfumo:
 ```
 [Key] com.apple.private.tcc.allow-prompting
 [Value]
@@ -160,11 +160,11 @@ Ruhusu mchakato **kuomba ruhusa zote za TCC**.
 
 ### **`kTCCServicePostEvent`**
 
-{{#include ../../../banners/hacktricks-training.md}}
+
 
 </details>
 
 
 
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../../banners/hacktricks-training.md}}

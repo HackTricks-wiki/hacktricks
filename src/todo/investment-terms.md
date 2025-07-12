@@ -1,6 +1,6 @@
 # Investment Terms
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}
 
 ## Spot
 
@@ -16,7 +16,7 @@ Futures ni mkataba ambapo pande 2 zinakubaliana **kupata kitu katika siku zijazo
 
 Kwa wazi, ikiwa baada ya miezi 6 thamani ya bitcoin itakuwa 80,000$, upande wa muuzaji utapoteza pesa na upande wa mnunuzi utapata. Ikiwa katika miezi 6 thamani ya bitcoin itakuwa 60,000$, kinyume chake kinatokea.
 
-Hata hivyo, hii ni ya kuvutia kwa mfano kwa biashara ambazo zinazalisha bidhaa na zinahitaji kuwa na uhakika kwamba wataweza kuziuza kwa bei ya kulipa gharama. Au biashara ambazo zinataka kuhakikisha bei za kudumu katika siku zijazo kwa kitu hata kama ni juu.
+Hata hivyo, hii ni ya kuvutia kwa mfano kwa biashara ambazo zinazalisha bidhaa na zinahitaji kuwa na uhakika kwamba wataweza kuziuza kwa bei ya kulipia gharama. Au biashara ambazo zinataka kuhakikisha bei za kudumu katika siku zijazo kwa kitu hata kama ni juu.
 
 Ingawa katika masoko hii kawaida hutumiwa kujaribu kupata faida.
 
@@ -25,9 +25,9 @@ Ingawa katika masoko hii kawaida hutumiwa kujaribu kupata faida.
 
 ### Hedging With Futures <a href="#mntl-sc-block_7-0" id="mntl-sc-block_7-0"></a>
 
-Ikiwa meneja wa mfuko anaogopa kwamba hisa fulani zitashuka, anaweza kuchukua short position juu ya mali fulani kama bitcoin au mikataba ya futures ya S&P 500. Hii itakuwa sawa na kununua au kuwa na mali fulani na kuunda mkataba wa kuuza hizo katika wakati ujao kwa bei kubwa.
+Ikiwa meneja wa mfuko anaogopa kwamba hisa fulani zitashuka, anaweza kuchukua short position juu ya mali fulani kama bitcoin au mikataba ya S&P 500 futures. Hii itakuwa sawa na kununua au kuwa na mali fulani na kuunda mkataba wa kuuza hizo katika wakati ujao kwa bei kubwa.
 
-Iwapo bei itashuka meneja wa mfuko atapata faida kwa sababu atauza mali hizo kwa bei kubwa. Ikiwa bei ya mali itakapoongezeka meneja hatapata faida hiyo lakini bado atahifadhi mali zake.
+Iwapo bei itashuka, meneja wa mfuko atapata faida kwa sababu atauza mali hizo kwa bei kubwa. Ikiwa bei ya mali itakapoongezeka, meneja hatapata faida hiyo lakini bado atahifadhi mali zake.
 
 ### Perpetual Futures
 
@@ -39,10 +39,10 @@ Kumbuka kwamba katika kesi hizi faida na hasara zinaweza kuwa katika wakati hali
 
 **Leverage** inakuwezesha kudhibiti nafasi kubwa zaidi katika soko kwa kiasi kidogo cha pesa. Kimsingi inakuwezesha "kubeti" pesa nyingi zaidi kuliko ulizonazo ukihatarisha tu pesa ulizonazo.
 
-Kwa mfano, ikiwa unafungua nafasi ya future katika BTC/USDT na 100$ na leverage ya 50x hii inamaanisha kwamba ikiwa bei itaongezeka 1%, basi utakuwa unashinda 1x50 = 50% ya uwekezaji wako wa awali (50$). Na hivyo utakuwa na 150$.\
+Kwa mfano, ikiwa unafungua nafasi ya future katika BTC/USDT kwa 100$ na leverage ya 50x hii inamaanisha kwamba ikiwa bei itaongezeka 1%, basi utakuwa unashinda 1x50 = 50% ya uwekezaji wako wa awali (50$). Na hivyo utakuwa na 150$.\
 Hata hivyo, ikiwa bei itashuka 1%, utapoteza 50% ya fedha zako (59$ katika kesi hii). Na ikiwa bei itashuka 2% utapoteza bet yako yote (2x50 = 100%).
 
-Kwa hivyo, leveraging inaruhusu kudhibiti kiasi cha pesa unachobeti wakati unapanua faida na hasara.
+Kwa hivyo, leveraging inaruhusu kudhibiti kiasi cha pesa unazobeti wakati unapanua faida na hasara.
 
 ## Differences Futures & Options
 
@@ -62,11 +62,11 @@ Hata hivyo, mnunuzi atakuwa akilipa ada fulani kwa muuzaji kwa kufungua chaguo h
 ### 3. **Cost:**
 
 * **Futures:** Hakuna gharama ya awali zaidi ya margin inayohitajika kushikilia nafasi, kwani mnunuzi na muuzaji wote wanawajibika kukamilisha biashara.
-* **Options:** Mnunuzi lazima alipe **premium ya chaguo** mapema kwa haki ya kutekeleza chaguo. Premium hii kimsingi ni gharama ya chaguo.
+* **Options:** Mnunuzi lazima alipe **option premium** mapema kwa haki ya kutekeleza chaguo. Premium hii kimsingi ni gharama ya chaguo.
 
 ### 4. **Profit Potential:**
 
 * **Futures:** Faida au hasara inategemea tofauti kati ya bei ya soko wakati wa kumalizika na bei iliyokubaliwa katika mkataba.
 * **Options:** Mnunuzi anapata faida wakati soko linahamia kwa faida zaidi ya bei ya mgomo kuliko premium iliyolipwa. Muuzaji anapata faida kwa kuweka premium ikiwa chaguo halitekelezwi.
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}
