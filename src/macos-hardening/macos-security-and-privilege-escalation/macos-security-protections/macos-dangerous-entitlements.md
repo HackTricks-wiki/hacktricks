@@ -5,7 +5,7 @@
 > [!WARNING]
 > Nota che le autorizzazioni che iniziano con **`com.apple`** non sono disponibili per terze parti, solo Apple può concederle.
 
-## High
+## Alto
 
 ### `com.apple.rootless.install.heritable`
 
@@ -15,17 +15,17 @@ L'autorizzazione **`com.apple.rootless.install.heritable`** consente di **bypass
 
 L'autorizzazione **`com.apple.rootless.install`** consente di **bypassare SIP**. Controlla[ questo per maggiori informazioni](macos-sip.md#com.apple.rootless.install).
 
-### **`com.apple.system-task-ports` (precedentemente chiamato `task_for_pid-allow`)**
+### **`com.apple.system-task-ports` (precedentemente chiamata `task_for_pid-allow`)**
 
-Questa autorizzazione consente di ottenere il **task port per qualsiasi** processo, tranne il kernel. Controlla [**questo per maggiori informazioni**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
+Questa autorizzazione consente di ottenere il **port task per qualsiasi** processo, tranne il kernel. Controlla [**questo per maggiori informazioni**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
 
 ### `com.apple.security.get-task-allow`
 
-Questa autorizzazione consente ad altri processi con l'autorizzazione **`com.apple.security.cs.debugger`** di ottenere il task port del processo eseguito dal binario con questa autorizzazione e **iniettare codice su di esso**. Controlla [**questo per maggiori informazioni**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
+Questa autorizzazione consente ad altri processi con l'autorizzazione **`com.apple.security.cs.debugger`** di ottenere il port task del processo eseguito dal binario con questa autorizzazione e **iniettare codice su di esso**. Controlla [**questo per maggiori informazioni**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
 
 ### `com.apple.security.cs.debugger`
 
-Le app con l'autorizzazione Debugging Tool possono chiamare `task_for_pid()` per recuperare un task port valido per app non firmate e di terze parti con l'autorizzazione `Get Task Allow` impostata su `true`. Tuttavia, anche con l'autorizzazione dello strumento di debug, un debugger **non può ottenere i task port** di processi che **non hanno l'autorizzazione `Get Task Allow`**, e che sono quindi protetti dalla Protezione dell'Integrità di Sistema. Controlla [**questo per maggiori informazioni**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger).
+Le app con l'autorizzazione Debugging Tool possono chiamare `task_for_pid()` per recuperare un port task valido per app non firmate e di terze parti con l'autorizzazione `Get Task Allow` impostata su `true`. Tuttavia, anche con l'autorizzazione dello strumento di debug, un debugger **non può ottenere i port task** di processi che **non hanno l'autorizzazione `Get Task Allow`**, e che sono quindi protetti dalla Protezione dell'Integrità di Sistema. Controlla [**questo per maggiori informazioni**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger).
 
 ### `com.apple.security.cs.disable-library-validation`
 
@@ -97,7 +97,7 @@ Come farle chiedere all'utente la propria password:
 ```bash
 osascript -e 'tell app "App Store" to activate' -e 'tell app "App Store" to activate' -e 'tell app "App Store" to display dialog "App Store requires your password to continue." & return & return default answer "" with icon 1 with hidden answer with title "App Store Alert"'
 ```
-Or making them perform **azioni arbitrarie**.
+O farli eseguire **azioni arbitrarie**.
 
 ### **`kTCCServiceEndpointSecurityClient`**
 
@@ -109,7 +109,7 @@ Consente di **cambiare** l'attributo **`NFSHomeDirectory`** di un utente che cam
 
 ### **`kTCCServiceSystemPolicyAppBundles`**
 
-Consente di modificare i file all'interno del bundle delle app (all'interno di app.app), il che è **vietato per impostazione predefinita**.
+Consente di modificare file all'interno dei bundle delle app (all'interno di app.app), il che è **vietato per impostazione predefinita**.
 
 <figure><img src="../../../images/image (31).png" alt=""><figcaption></figcaption></figure>
 
@@ -117,24 +117,24 @@ Consente di modificare i file all'interno del bundle delle app (all'interno di a
 
 ### `kTCCServiceAccessibility`
 
-Il processo sarà in grado di **abusare delle funzionalità di accessibilità di macOS**, il che significa che, ad esempio, sarà in grado di premere tasti. Quindi potrebbe richiedere l'accesso per controllare un'app come Finder e approvare la finestra di dialogo con questo permesso.
+Il processo sarà in grado di **abuse delle funzionalità di accessibilità di macOS**, il che significa che, ad esempio, sarà in grado di premere tasti. Quindi potrebbe richiedere l'accesso per controllare un'app come Finder e approvare la finestra di dialogo con questo permesso.
 
-## Medium
+## Medio
 
 ### `com.apple.security.cs.allow-jit`
 
-Questa autorizzazione consente di **creare memoria che è scrivibile ed eseguibile** passando il flag `MAP_JIT` alla funzione di sistema `mmap()`. Controlla [**questo per maggiori informazioni**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-jit).
+Questa autorizzazione consente di **creare memoria che è scrivibile ed eseguibile** passando il flag `MAP_JIT` alla funzione di sistema `mmap()`. Controlla [**questo per ulteriori informazioni**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-jit).
 
 ### `com.apple.security.cs.allow-unsigned-executable-memory`
 
-Questa autorizzazione consente di **sovrascrivere o patchare codice C**, utilizzare il deprecato **`NSCreateObjectFileImageFromMemory`** (che è fondamentalmente insicuro) o utilizzare il framework **DVDPlayback**. Controlla [**questo per maggiori informazioni**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory).
+Questa autorizzazione consente di **sovrascrivere o patchare codice C**, utilizzare il deprecato **`NSCreateObjectFileImageFromMemory`** (che è fondamentalmente insicuro) o utilizzare il framework **DVDPlayback**. Controlla [**questo per ulteriori informazioni**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory).
 
 > [!CAUTION]
 > Includere questa autorizzazione espone la tua app a vulnerabilità comuni nei linguaggi di codice non sicuro in memoria. Considera attentamente se la tua app ha bisogno di questa eccezione.
 
 ### `com.apple.security.cs.disable-executable-page-protection`
 
-Questa autorizzazione consente di **modificare sezioni dei propri file eseguibili** su disco per uscire forzatamente. Controlla [**questo per maggiori informazioni**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-executable-page-protection).
+Questa autorizzazione consente di **modificare sezioni dei propri file eseguibili** su disco per forzare l'uscita. Controlla [**questo per ulteriori informazioni**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-executable-page-protection).
 
 > [!CAUTION]
 > L'Autorizzazione per Disabilitare la Protezione della Memoria Eseguibile è un'autorizzazione estrema che rimuove una protezione fondamentale della sicurezza dalla tua app, rendendo possibile per un attaccante riscrivere il codice eseguibile della tua app senza essere rilevato. Preferisci autorizzazioni più ristrette se possibile.
@@ -160,11 +160,11 @@ Consenti al processo di **richiedere tutte le autorizzazioni TCC**.
 
 ### **`kTCCServicePostEvent`**
 
-{{#include ../../../banners/hacktricks-training.md}}
+
 
 </details>
 
 
 
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../../banners/hacktricks-training.md}}

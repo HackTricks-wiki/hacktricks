@@ -1,6 +1,6 @@
 # Test LLMs
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}
 
 ## Esegui e addestra modelli localmente
 
@@ -34,14 +34,14 @@ Offre diverse sezioni come:
 
 * **Modelli**: Un vasto repository di **modelli di apprendimento automatico pre-addestrati** dove gli utenti possono navigare, scaricare e integrare modelli per vari compiti come generazione di testo, traduzione, riconoscimento di immagini e altro.
 * **Dataset:** Una **collezione completa di dataset** utilizzati per addestrare e valutare modelli. Facilita l'accesso a fonti di dati diverse, consentendo agli utenti di trovare e utilizzare dati per i loro specifici progetti di apprendimento automatico.
-* **Spazi:** Una piattaforma per ospitare e condividere **applicazioni e dimostrazioni interattive di apprendimento automatico**. Permette agli sviluppatori di **mostrare** i loro modelli in azione, creare interfacce user-friendly e collaborare con altri condividendo dimostrazioni dal vivo.
+* **Spazi:** Una piattaforma per ospitare e condividere **applicazioni interattive di apprendimento automatico** e dimostrazioni. Permette agli sviluppatori di **mostrare** i loro modelli in azione, creare interfacce user-friendly e collaborare con altri condividendo dimostrazioni dal vivo.
 
 ## [**TensorFlow Hub**](https://www.tensorflow.org/hub) **&** [**Kaggle**](https://www.kaggle.com/)
 
 **TensorFlow Hub** è un repository completo di moduli di apprendimento automatico riutilizzabili sviluppati da Google. Si concentra sul facilitare la condivisione e la distribuzione di modelli di apprendimento automatico, specialmente quelli costruiti con TensorFlow.
 
 * **Moduli:** Una vasta collezione di modelli pre-addestrati e componenti di modelli dove gli utenti possono navigare, scaricare e integrare moduli per compiti come classificazione delle immagini, embedding di testo e altro.
-* **Tutorial:** Guide passo-passo ed esempi che aiutano gli utenti a comprendere come implementare e ottimizzare modelli utilizzando TensorFlow Hub.
+* **Tutorial:** Guide passo-passo ed esempi che aiutano gli utenti a capire come implementare e ottimizzare modelli utilizzando TensorFlow Hub.
 * **Documentazione:** Guide complete e riferimenti API che assistono gli sviluppatori nell'utilizzare efficacemente le risorse del repository.
 
 ## [**Replicate**](https://replicate.com/home)
@@ -51,4 +51,5 @@ Offre diverse sezioni come:
 * **Modelli:** Un repository di modelli di apprendimento automatico contribuiti dalla comunità che gli utenti possono navigare, provare e integrare nei loro applicativi con il minimo sforzo.
 * **Accesso API:** API semplici per eseguire modelli che consentono agli sviluppatori di distribuire e scalare modelli senza sforzo all'interno delle proprie applicazioni.
 
-{{#include /banners/hacktricks-training.md}}
+
+{{#include ../banners/hacktricks-training.md}}

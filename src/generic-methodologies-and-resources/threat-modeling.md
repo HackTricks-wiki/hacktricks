@@ -1,27 +1,27 @@
 # Threat Modeling
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}
 
 ## Threat Modeling
 
-Benvenuto nella guida completa di HackTricks sul Threat Modeling! Inizia un'esplorazione di questo aspetto critico della cybersecurity, dove identifichiamo, comprendiamo e strategizziamo contro potenziali vulnerabilità in un sistema. Questo thread funge da guida passo-passo ricca di esempi del mondo reale, software utili e spiegazioni facili da comprendere. Ideale sia per i principianti che per i professionisti esperti che cercano di rafforzare le loro difese di cybersecurity.
+Benvenuto nella guida completa di HackTricks sul Threat Modeling! Inizia un'esplorazione di questo aspetto critico della cybersecurity, dove identifichiamo, comprendiamo e strategizziamo contro potenziali vulnerabilità in un sistema. Questo thread funge da guida passo-passo ricca di esempi reali, software utili e spiegazioni facili da comprendere. Ideale sia per i principianti che per i professionisti esperti che cercano di rafforzare le loro difese informatiche.
 
 ### Commonly Used Scenarios
 
 1. **Sviluppo Software**: Come parte del Ciclo di Vita dello Sviluppo Software Sicuro (SSDLC), il threat modeling aiuta a **identificare potenziali fonti di vulnerabilità** nelle fasi iniziali dello sviluppo.
-2. **Penetration Testing**: Il framework del Penetration Testing Execution Standard (PTES) richiede **il threat modeling per comprendere le vulnerabilità del sistema** prima di eseguire il test.
+2. **Penetration Testing**: Il framework Penetration Testing Execution Standard (PTES) richiede **il threat modeling per comprendere le vulnerabilità del sistema** prima di eseguire il test.
 
 ### Threat Model in a Nutshell
 
-Un Threat Model è tipicamente rappresentato come un diagramma, un'immagine o un'altra forma di illustrazione visiva che descrive l'architettura pianificata o la costruzione esistente di un'applicazione. Somiglia a un **diagramma di flusso dei dati**, ma la principale distinzione risiede nel suo design orientato alla sicurezza.
+Un Threat Model è tipicamente rappresentato come un diagramma, immagine o qualche altra forma di illustrazione visiva che descrive l'architettura pianificata o la costruzione esistente di un'applicazione. Somiglia a un **diagramma di flusso dei dati**, ma la principale distinzione risiede nel suo design orientato alla sicurezza.
 
-I threat model presentano spesso elementi contrassegnati in rosso, che simboleggiano potenziali vulnerabilità, rischi o barriere. Per semplificare il processo di identificazione dei rischi, viene impiegato il triade CIA (Confidenzialità, Integrità, Disponibilità), che forma la base di molte metodologie di threat modeling, con STRIDE che è una delle più comuni. Tuttavia, la metodologia scelta può variare a seconda del contesto specifico e dei requisiti.
+I threat model presentano spesso elementi contrassegnati in rosso, simboleggianti potenziali vulnerabilità, rischi o barriere. Per semplificare il processo di identificazione dei rischi, viene impiegato il triade CIA (Confidenzialità, Integrità, Disponibilità), che forma la base di molte metodologie di threat modeling, con STRIDE che è una delle più comuni. Tuttavia, la metodologia scelta può variare a seconda del contesto specifico e dei requisiti.
 
 ### The CIA Triad
 
 La triade CIA è un modello ampiamente riconosciuto nel campo della sicurezza delle informazioni, che sta per Confidenzialità, Integrità e Disponibilità. Questi tre pilastri formano la base su cui sono costruite molte misure e politiche di sicurezza, comprese le metodologie di threat modeling.
 
-1. **Confidenzialità**: Garantire che i dati o il sistema non siano accessibili da parte di individui non autorizzati. Questo è un aspetto centrale della sicurezza, che richiede controlli di accesso appropriati, crittografia e altre misure per prevenire le violazioni dei dati.
+1. **Confidenzialità**: Garantire che i dati o il sistema non siano accessibili da individui non autorizzati. Questo è un aspetto centrale della sicurezza, che richiede controlli di accesso appropriati, crittografia e altre misure per prevenire le violazioni dei dati.
 2. **Integrità**: L'accuratezza, la coerenza e l'affidabilità dei dati nel loro ciclo di vita. Questo principio garantisce che i dati non vengano alterati o manomessi da parti non autorizzate. Spesso coinvolge checksum, hashing e altri metodi di verifica dei dati.
 3. **Disponibilità**: Questo garantisce che i dati e i servizi siano accessibili agli utenti autorizzati quando necessario. Questo spesso implica ridondanza, tolleranza ai guasti e configurazioni ad alta disponibilità per mantenere i sistemi operativi anche di fronte a interruzioni.
 
@@ -70,7 +70,7 @@ A volte potrebbe apparire così:
 
 <figure><img src="../images/launch_new_project_2.jpg" alt=""><figcaption></figcaption></figure>
 
-3. Salva Il Nuovo Progetto
+3. Salva il Nuovo Progetto
 
 <figure><img src="../images/save_new_project.jpg" alt=""><figcaption></figcaption></figure>
 
@@ -86,7 +86,7 @@ Solo un po' di spiegazione sulle entità:
 - Attore (Una persona come un visitatore del sito, utente o amministratore)
 - Linea di Flusso Dati (Indicatore di interazione)
 - Confine di Fiducia (Segmenti o ambiti di rete diversi.)
-- Archiviazione (Luoghi dove i dati sono archiviati come Database)
+- Archiviazione (Luoghi dove i dati sono memorizzati come Database)
 
 5. Crea una Minaccia (Passo 1)
 
@@ -110,7 +110,7 @@ Ora il tuo modello finito dovrebbe apparire così. E questo è come crei un semp
 
 ### [Microsoft Threat Modeling Tool](https://aka.ms/threatmodelingtool)
 
-Questo è uno strumento gratuito di Microsoft che aiuta a trovare minacce nella fase di design dei progetti software. Utilizza la metodologia STRIDE ed è particolarmente adatto per coloro che sviluppano sulla stack di Microsoft.
+Questo è uno strumento gratuito di Microsoft che aiuta a trovare minacce nella fase di design dei progetti software. Utilizza la metodologia STRIDE ed è particolarmente adatto per coloro che sviluppano sulla piattaforma Microsoft.
 
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}

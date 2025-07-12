@@ -1,6 +1,6 @@
 # Termini di Investimento
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}
 
 ## Spot
 
@@ -12,16 +12,16 @@ Di solito puoi anche utilizzare il **prezzo di mercato attuale** per effettuare 
 
 ## Futures
 
-Un future è un contratto in cui 2 parti raggiungono un accordo per **acquisire qualcosa in futuro a un prezzo fisso**. Ad esempio, vendere 1 bitcoin tra 6 mesi a 70.000$.
+Un future è un contratto in cui 2 parti giungono a un accordo per **acquisire qualcosa in futuro a un prezzo fisso**. Ad esempio, vendere 1 bitcoin tra 6 mesi a 70.000$.
 
 Ovviamente, se tra 6 mesi il valore del bitcoin è 80.000$, la parte venditrice perde denaro e la parte acquirente guadagna. Se tra 6 mesi il valore del bitcoin è 60.000$, succede il contrario.
 
-Tuttavia, questo è interessante, ad esempio, per le aziende che stanno generando un prodotto e hanno bisogno di avere la sicurezza di poterlo vendere a un prezzo che copra i costi. O per le aziende che vogliono garantire prezzi fissi in futuro per qualcosa anche se più alti.
+Tuttavia, questo è interessante ad esempio per le aziende che stanno generando un prodotto e hanno bisogno di avere la sicurezza di poterlo vendere a un prezzo che copra i costi. O per le aziende che vogliono garantire prezzi fissi in futuro per qualcosa anche se più alti.
 
 Sebbene negli scambi questo venga solitamente utilizzato per cercare di realizzare un profitto.
 
-* Nota che una "Posizione Long" significa che qualcuno sta scommettendo che un prezzo aumenterà
-* Mentre una "Posizione Short" significa che qualcuno sta scommettendo che un prezzo scenderà
+* Nota che una "Posizione Long" significa che qualcuno sta scommettendo che un prezzo aumenterà.
+* Mentre una "Posizione Short" significa che qualcuno sta scommettendo che un prezzo scenderà.
 
 ### Hedging Con i Futures <a href="#mntl-sc-block_7-0" id="mntl-sc-block_7-0"></a>
 
@@ -31,16 +31,16 @@ Nel caso in cui il prezzo scenda, il gestore del fondo guadagnerà benefici perc
 
 ### Futures Perpetui
 
-**Questi sono "futures" che dureranno indefinitamente** (senza una data di scadenza del contratto). È molto comune trovarli, ad esempio, negli scambi di criptovalute dove puoi entrare e uscire dai futures in base al prezzo delle criptovalute.
+**Questi sono "futures" che dureranno indefinitamente** (senza una data di scadenza del contratto). È molto comune trovarli ad esempio negli scambi di criptovalute dove puoi entrare e uscire dai futures in base al prezzo delle criptovalute.
 
-Nota che in questi casi i benefici e le perdite possono essere in tempo reale; se il prezzo aumenta dell'1%, guadagni l'1%, se il prezzo diminuisce dell'1%, lo perderai.
+Nota che in questi casi i benefici e le perdite possono essere in tempo reale, se il prezzo aumenta dell'1% guadagni l'1%, se il prezzo diminuisce dell'1%, lo perderai.
 
 ### Futures con Leva
 
 **La leva** ti consente di controllare una posizione più grande nel mercato con una minore quantità di denaro. Fondamentalmente ti consente di "scommettere" molto più denaro di quanto hai, rischiando solo il denaro che hai effettivamente.
 
 Ad esempio, se apri una posizione future nel BTC/USDT con 100$ a una leva di 50x, questo significa che se il prezzo aumenta dell'1%, guadagneresti 1x50 = 50% del tuo investimento iniziale (50$). E quindi avrai 150$.\
-Tuttavia, se il prezzo diminuisce dell'1%, perderai il 50% dei tuoi fondi (59$ in questo caso). E se il prezzo diminuisce del 2%, perderai tutta la tua scommessa (2x50 = 100%).
+Tuttavia, se il prezzo diminuisce dell'1%, perderai il 50% dei tuoi fondi (59$ in questo caso). E se il prezzo diminuisce del 2% perderai tutta la tua scommessa (2x50 = 100%).
 
 Pertanto, la leva consente di controllare l'importo di denaro su cui scommetti, aumentando i guadagni e le perdite.
 
@@ -51,8 +51,8 @@ Tuttavia, l'acquirente pagherà una commissione al venditore per aprire l'opzion
 
 ### 1. **Obbligo vs. Diritto:**
 
-* **Futures:** Quando acquisti o vendi un contratto futures, stai entrando in un **accordo vincolante** per acquistare o vendere un asset a un prezzo specifico in una data futura. Sia l'acquirente che il venditore sono **obbligati** a rispettare il contratto alla scadenza (a meno che il contratto non venga chiuso prima).
-* **Opzioni:** Con le opzioni, hai il **diritto, ma non l'obbligo**, di acquistare (nel caso di un **call option**) o vendere (nel caso di un **put option**) un asset a un prezzo specifico prima o alla scadenza. L'**acquirente** ha l'opzione di eseguire, mentre il **venditore** è obbligato a completare l'operazione se l'acquirente decide di esercitare l'opzione.
+* **Futures:** Quando acquisti o vendi un contratto futures, stai entrando in un **accordo vincolante** per comprare o vendere un asset a un prezzo specifico in una data futura. Sia l'acquirente che il venditore sono **obbligati** a rispettare il contratto alla scadenza (a meno che il contratto non venga chiuso prima).
+* **Opzioni:** Con le opzioni, hai il **diritto, ma non l'obbligo**, di comprare (nel caso di un **call option**) o vendere (nel caso di un **put option**) un asset a un prezzo specifico prima o alla scadenza. L'**acquirente** ha l'opzione di eseguire, mentre il **venditore** è obbligato a completare l'operazione se l'acquirente decide di esercitare l'opzione.
 
 ### 2. **Rischio:**
 
@@ -69,4 +69,4 @@ Tuttavia, l'acquirente pagherà una commissione al venditore per aprire l'opzion
 * **Futures:** Il profitto o la perdita si basa sulla differenza tra il prezzo di mercato alla scadenza e il prezzo concordato nel contratto.
 * **Opzioni:** L'acquirente guadagna quando il mercato si muove favorevolmente oltre il prezzo di esercizio di più del premio pagato. Il venditore guadagna mantenendo il premio se l'opzione non viene esercitata.
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}

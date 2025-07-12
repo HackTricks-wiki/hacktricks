@@ -1,6 +1,6 @@
 # Il Protocollo Modbus
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
 
 ## Introduzione al Protocollo Modbus
 
@@ -32,4 +32,4 @@ Inoltre, Modbus implementa anche controlli di errore per garantire l'integrità 
 
 A causa del suo ampio utilizzo e della mancanza di aggiornamenti, attaccare Modbus fornisce un vantaggio significativo con la sua superficie di attacco. Gli ICS dipendono fortemente dalla comunicazione tra i dispositivi e qualsiasi attacco effettuato su di essi può essere pericoloso per il funzionamento dei sistemi industriali. Attacchi come replay, iniezione di dati, sniffing di dati e leak, Denial of Service, falsificazione di dati, ecc. possono essere effettuati se il mezzo di trasmissione è identificato dall'attaccante.
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}

