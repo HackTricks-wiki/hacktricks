@@ -1,6 +1,6 @@
 # Writable Sys Path +Dll Hijacking Privesc
 
-{{#include ../../../banners/hacktricks-training.md}}
+{#include ../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## Introduction
 
@@ -81,7 +81,6 @@ Having **generated the malicious Dll** (_in my case I used x64 rev shell and I g
 
 When the service is re-started, the **dll should be loaded and executed** (you can **reuse** the **procmon** trick to check if the **library was loaded as expected**).
 
-{{#include ../../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

@@ -1,6 +1,6 @@
 # Reversing Tools
 
-{{#include ../../banners/hacktricks-training.md}}
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 
 ## Wasm Decompilation and Wat Compilation Guide
@@ -113,7 +113,6 @@ To decompile Java bytecode, these tools can be very helpful:
 - [https://github.com/0xZ0F/Z0FCourse_ReverseEngineering](https://github.com/0xZ0F/Z0FCourse_ReverseEngineering)
 - [https://github.com/malrev/ABD](https://github.com/malrev/ABD) \(Binary deobfuscation\)
 
-{{#include ../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

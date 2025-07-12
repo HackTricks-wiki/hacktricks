@@ -1,6 +1,6 @@
 # Image Acquisition & Mount
 
-{{#include ../../banners/hacktricks-training.md}}
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 
 ## Acquisition
@@ -112,7 +112,6 @@ mount disk.img /mnt -o ro,offset=$((2048*512))
 ```
 
 
-{{#include ../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

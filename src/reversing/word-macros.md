@@ -1,6 +1,6 @@
 # Word Macros
 
-{{#include ../banners/hacktricks-training.md}}
+{#include ../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ### Junk Code
 
@@ -15,7 +15,6 @@ Using the **GetObject** function it's possible to obtain data from forms of the 
 
 ![](<../images/image (344).png>)
 
-{{#include ../banners/hacktricks-training.md}}
-
+{#include ../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

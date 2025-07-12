@@ -1,6 +1,6 @@
 # Objects in memory
 
-{{#include ../../../banners/hacktricks-training.md}}
+{#include ../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## CFRuntimeClass
 
@@ -150,7 +150,6 @@ This class use some bits of the isa field to indicate some information about the
 Then, the struct has a pointer to the struct `class_ro_t` stored on disk which contains attributes of the class like its name, base methods, properties and instance variables.\
 During runtime and additional structure `class_rw_t` is used containing pointers which can be altered such as methods, protocols, properties...
 
-{{#include ../../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

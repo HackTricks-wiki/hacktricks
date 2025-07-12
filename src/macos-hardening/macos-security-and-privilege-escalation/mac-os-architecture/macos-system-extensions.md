@@ -1,6 +1,6 @@
 # macOS System Extensions
 
-{{#include ../../../banners/hacktricks-training.md}}
+{#include ../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## System Extensions / Endpoint Security Framework
 
@@ -80,7 +80,6 @@ At the end this was fixed by giving the new permission **`kTCCServiceEndpointSec
 - [**OBTS v3.0: "Endpoint Security & Insecurity" - Scott Knight**](https://www.youtube.com/watch?v=jaVkpM1UqOs)
 - [**https://knight.sc/reverse%20engineering/2019/08/24/system-extension-internals.html**](https://knight.sc/reverse%20engineering/2019/08/24/system-extension-internals.html)
 
-{{#include ../../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

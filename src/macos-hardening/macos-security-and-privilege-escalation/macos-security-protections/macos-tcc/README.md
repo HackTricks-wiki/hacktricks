@@ -1,6 +1,6 @@
 # macOS TCC
 
-{{#include ../../../../banners/hacktricks-training.md}}
+{#include ../../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## **Basic Information**
 
@@ -601,7 +601,6 @@ macos-tcc-bypasses/
 - [**https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/**](https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/)
 - [**https://www.sentinelone.com/labs/bypassing-macos-tcc-user-privacy-protections-by-accident-and-design/**](https://www.sentinelone.com/labs/bypassing-macos-tcc-user-privacy-protections-by-accident-and-design/)
 
-{{#include ../../../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

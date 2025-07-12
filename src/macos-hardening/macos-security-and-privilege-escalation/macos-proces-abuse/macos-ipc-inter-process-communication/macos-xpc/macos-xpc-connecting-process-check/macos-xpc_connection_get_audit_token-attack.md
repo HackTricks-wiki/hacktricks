@@ -1,6 +1,6 @@
 # macOS xpc_connection_get_audit_token Attack
 
-{{#include ../../../../../../banners/hacktricks-training.md}}
+{#include ../../../../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 **For further information check the original post:** [**https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/**](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/). This is a summary:
 
@@ -122,7 +122,6 @@ Below is a visual representation of the described attack scenario:
 - **Absence of a Broader Fix**: It remains unclear why Apple didn't implement a more comprehensive fix, such as discarding messages not aligning with the saved audit token of the connection. The possibility of legitimate audit token changes in certain scenarios (e.g., `setuid` usage) might be a factor.
 - **Current Status**: The issue persists in iOS 17 and macOS 14, posing a challenge for those seeking to identify and understand it.
 
-{{#include ../../../../../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

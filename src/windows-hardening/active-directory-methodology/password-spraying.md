@@ -1,6 +1,6 @@
 # Password Spraying / Brute Force
 
-{{#include ../../banners/hacktricks-training.md}}
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 
 ## **Password Spraying**
@@ -148,7 +148,6 @@ To use any of these tools, you need a user list and a password / a small list of
 - [https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying](https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying)
 
 
-{{#include ../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

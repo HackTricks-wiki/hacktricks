@@ -1,6 +1,6 @@
 # Interesting HTTP
 
-{{#include ../banners/hacktricks-training.md}}
+{#include ../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## Referrer headers and policy
 
@@ -38,7 +38,6 @@ You can override this rule using an HTML meta tag (the attacker needs to exploit
 
 Never put any sensitive data inside GET parameters or paths in the URL.
 
-{{#include ../banners/hacktricks-training.md}}
-
+{#include ../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

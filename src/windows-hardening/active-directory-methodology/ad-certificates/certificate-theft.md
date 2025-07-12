@@ -1,6 +1,6 @@
 # AD CS Certificate Theft
 
-{{#include ../../../banners/hacktricks-training.md}}
+{#include ../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 **This is a small summary of the Theft chapters of the awesome research from [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)**
 
@@ -116,7 +116,6 @@ Additionally, it is noted that Kekeo can process smartcard-protected certificate
 
 This explanation encapsulates the process and tools involved in NTLM credential theft via PKINIT, focusing on the retrieval of NTLM hashes through TGT obtained using PKINIT, and the utilities that facilitate this process.
 
-{{#include ../../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

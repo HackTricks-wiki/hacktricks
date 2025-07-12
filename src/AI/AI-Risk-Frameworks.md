@@ -1,6 +1,6 @@
 # AI Risks
 
-{{#include ../banners/hacktricks-training.md}}
+{#include ../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## OWASP Top 10 Machine Learning Vulnerabilities
 
@@ -78,4 +78,4 @@ Google's [SAIF (Security AI Framework)](https://saif.google/secure-ai-framework/
 The [MITRE AI ATLAS Matrix](https://atlas.mitre.org/matrices/ATLAS) provides a comprehensive framework for understanding and mitigating risks associated with AI systems. It categorizes various attack techniques and tactics that adversaries may use against AI models and also how to use AI systems to perform different attacks.
 
 
-{{#include ../banners/hacktricks-training.md}}
+{#include ../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}

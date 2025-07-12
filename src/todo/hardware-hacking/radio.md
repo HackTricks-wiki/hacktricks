@@ -1,6 +1,6 @@
 # Radio
 
-{{#include ../../banners/hacktricks-training.md}}
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## SigDigger
 
@@ -199,4 +199,4 @@ You can use the **same technique as the one used in the AM example** to get the 
 
 You can use the **same technique as the one used in the AM example** to get the bits once you have **found the signal is modulated in frequency** and the **symbol rate**.
 
-{{#include ../../banners/hacktricks-training.md}}
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}

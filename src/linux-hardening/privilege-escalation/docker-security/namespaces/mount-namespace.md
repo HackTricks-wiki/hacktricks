@@ -1,6 +1,6 @@
 # Mount Namespace
 
-{{#include ../../../../banners/hacktricks-training.md}}
+{#include ../../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## Basic Information
 
@@ -133,7 +133,6 @@ vmware-root_662-2689143848
 - [https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory](https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory)
 - [https://unix.stackexchange.com/questions/464033/understanding-how-mount-namespaces-work-in-linux](https://unix.stackexchange.com/questions/464033/understanding-how-mount-namespaces-work-in-linux)
 
-{{#include ../../../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

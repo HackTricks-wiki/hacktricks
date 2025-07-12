@@ -1,6 +1,6 @@
 # Brute Force - CheatSheet
 
-{{#include ../banners/hacktricks-training.md}}
+{#include ../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## Default Credentials
 
@@ -879,7 +879,6 @@ Cracking Common Application Hashes
  1700 | SHA-512                                          | Raw Hash
 ```
 
-{{#include ../banners/hacktricks-training.md}}
-
+{#include ../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

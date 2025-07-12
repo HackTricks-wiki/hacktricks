@@ -1,6 +1,6 @@
 # macOS Apps - Inspecting, debugging and Fuzzing
 
-{{#include ../../../banners/hacktricks-training.md}}
+{#include ../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## Static Analysis
 
@@ -632,7 +632,6 @@ litefuzz -s -a tcp://localhost:5900 -i input/screenshared-session --reportcrash 
 - [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)
 - [**The Art of Mac Malware: The Guide to Analyzing Malicious Software**](https://taomm.org/)
 
-{{#include ../../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

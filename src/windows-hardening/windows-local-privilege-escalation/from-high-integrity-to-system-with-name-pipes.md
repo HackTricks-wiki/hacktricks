@@ -1,6 +1,6 @@
 # From High Integrity to SYSTEM with Name Pipes
 
-{{#include ../../banners/hacktricks-training.md}}
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 **Code flow:**
 
@@ -119,7 +119,6 @@ int main() {
 }
 ```
 
-{{#include ../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

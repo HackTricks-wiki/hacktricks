@@ -1,6 +1,6 @@
 # macOS Apple Events
 
-{{#include ../../../../banners/hacktricks-training.md}}
+{#include ../../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## Basic Information
 
@@ -19,6 +19,5 @@ Sandboxed applications requires privileges like `allow appleevent-send` and `(al
 > AEDebugSends=1 osascript -e 'tell application "iTerm" to activate'
 > ```
 
-{{#include ../../../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 

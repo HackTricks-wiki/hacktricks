@@ -1,6 +1,6 @@
 # macOS xattr-acls extra stuff
 
-{{#include ../../../../banners/hacktricks-training.md}}
+{#include ../../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ```bash
 rm -rf /tmp/test*
@@ -179,7 +179,6 @@ ditto -x -k --rsrc protected.zip .
 xattr -l protected
 ```
 
-{{#include ../../../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

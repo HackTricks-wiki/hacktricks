@@ -1,6 +1,6 @@
 # File/Data Carving & Recovery Tools
 
-{{#include ../../../banners/hacktricks-training.md}}
+{#include ../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## Carving & Recovery tools
 
@@ -92,7 +92,6 @@ Download [here](https://sourceforge.net/projects/findaes/).
 You can use [**viu** ](https://github.com/atanunq/viu)to see images from the terminal.\
 You can use the linux command line tool **pdftotext** to transform a pdf into text and read it.
 
-{{#include ../../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

@@ -1,6 +1,6 @@
 # Sub-GHz RF
 
-{{#include ../../banners/hacktricks-training.md}}
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## Garage Doors
 
@@ -84,7 +84,6 @@ Testing against an aftermarket rolling code system installed on a car, **sending
 - [https://samy.pl/defcon2015/](https://samy.pl/defcon2015/)
 - [https://hackaday.io/project/164566-how-to-hack-a-car/details](https://hackaday.io/project/164566-how-to-hack-a-car/details)
 
-{{#include ../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

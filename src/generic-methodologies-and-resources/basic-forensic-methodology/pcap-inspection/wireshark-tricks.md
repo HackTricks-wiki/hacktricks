@@ -1,6 +1,6 @@
 # Wireshark tricks
 
-{{#include ../../../banners/hacktricks-training.md}}
+{#include ../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## Improve your Wireshark skills
 
@@ -154,7 +154,6 @@ f.write(all_bytes)
 f.close()
 ```
 
-{{#include ../../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

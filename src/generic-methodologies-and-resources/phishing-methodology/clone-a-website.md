@@ -1,6 +1,6 @@
 # Cloning a Website
 
-{{#include ../../banners/hacktricks-training.md}}
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 
 For a phishing assessment sometimes it might be useful to completely **clone/dump a website**.
@@ -31,7 +31,6 @@ goclone <url>
 ```
 
 
-{{#include ../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

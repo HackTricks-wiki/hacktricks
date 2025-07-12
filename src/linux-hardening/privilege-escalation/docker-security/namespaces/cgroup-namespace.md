@@ -1,6 +1,6 @@
 # CGroup Namespace
 
-{{#include ../../../../banners/hacktricks-training.md}}
+{#include ../../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## Basic Information
 
@@ -89,7 +89,6 @@ Also, you can only **enter in another process namespace if you are root**. And y
 
 - [https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory](https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory)
 
-{{#include ../../../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

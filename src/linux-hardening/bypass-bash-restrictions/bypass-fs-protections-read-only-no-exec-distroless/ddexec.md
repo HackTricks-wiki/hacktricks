@@ -1,6 +1,6 @@
 # DDexec / EverythingExec
 
-{{#include ../../../banners/hacktricks-training.md}}
+{#include ../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## Context
 
@@ -92,7 +92,6 @@ Block this, EDRs.
 
 - [https://github.com/arget13/DDexec](https://github.com/arget13/DDexec)
 
-{{#include ../../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

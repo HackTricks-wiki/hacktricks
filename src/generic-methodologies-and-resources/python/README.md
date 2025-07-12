@@ -1,6 +1,6 @@
 # Python Sandbox Escape & Pyscript
 
-{{#include ../../banners/hacktricks-training.md}}
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 
 **Interesting pages to check:**
@@ -11,7 +11,6 @@
 - [**Basic python web requests syntax**](web-requests.md)
 - [**Basic python syntax and libraries**](basic-python.md)
 
-{{#include ../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

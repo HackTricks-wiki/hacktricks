@@ -1,6 +1,6 @@
 # macOS Files, Folders, Binaries & Memory
 
-{{#include ../../../banners/hacktricks-training.md}}
+{#include ../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## File hierarchy layout
 
@@ -267,7 +267,6 @@ The directory `/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/
 - **`/Library/Preferences/SystemConfiguration/com.apple.airport.preferences.plist`**: Data about wireless access points.
 - **`/private/var/db/launchd.db/com.apple.launchd/overrides.plist`**: List of daemons deactivated.
 
-{{#include ../../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

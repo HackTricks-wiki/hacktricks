@@ -1,6 +1,6 @@
 # CGroups
 
-{{#include ../../../banners/hacktricks-training.md}}
+{#include ../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## Basic Information
 
@@ -87,7 +87,6 @@ The **root cgroup** is an exception to these rules, allowing direct process plac
 
 - **Book: How Linux Works, 3rd Edition: What Every Superuser Should Know By Brian Ward**
 
-{{#include ../../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

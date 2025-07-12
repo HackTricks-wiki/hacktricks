@@ -1,6 +1,6 @@
 # macOS AppleFS
 
-{{#include ../../banners/hacktricks-training.md}}
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## Apple Propietary File System (APFS)
 
@@ -31,7 +31,6 @@ The list of firmlinks can be found in the **`/usr/share/firmlinks`** file.
 
 ```
 
-{{#include ../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

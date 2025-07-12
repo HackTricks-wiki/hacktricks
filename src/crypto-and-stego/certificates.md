@@ -1,6 +1,6 @@
 # Certificates
 
-{{#include ../banners/hacktricks-training.md}}
+{#include ../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## What is a Certificate
 
@@ -203,7 +203,6 @@ openssl asn1parse -genconf certificatename.tpl -outform PEM -out certificatename
 
 ---
 
-{{#include ../banners/hacktricks-training.md}}
-
+{#include ../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

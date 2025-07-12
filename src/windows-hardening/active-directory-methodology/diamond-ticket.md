@@ -1,6 +1,6 @@
 # Diamond Ticket
 
-{{#include ../../banners/hacktricks-training.md}}
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## Diamond Ticket
 
@@ -29,7 +29,6 @@ powershell Get-DomainUser -Identity <username> -Properties objectsid
 # /krbkey is the krbtgt AES256 hash.
 ```
 
-{{#include ../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

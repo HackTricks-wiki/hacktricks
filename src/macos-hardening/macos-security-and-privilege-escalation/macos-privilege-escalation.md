@@ -1,6 +1,6 @@
 # macOS Privilege Escalation
 
-{{#include ../../banners/hacktricks-training.md}}
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## TCC Privilege Escalation
 
@@ -244,7 +244,6 @@ This can be useful to escalate privileges:
 macos-files-folders-and-binaries/macos-sensitive-locations.md
 {{#endref}}
 
-{{#include ../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

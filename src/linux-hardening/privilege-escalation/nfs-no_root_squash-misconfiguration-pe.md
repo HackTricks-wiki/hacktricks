@@ -1,6 +1,6 @@
 # NFS No Root Squash Misconfiguration Privilege Escalation
 
-{{#include ../../banners/hacktricks-training.md}}
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 
 ## Squashing Basic Info
@@ -140,7 +140,6 @@ Run like:
 drwxr-x---  6 1008 1009 1024 Apr  5  2017 9.3_old
 ```
 
-{{#include ../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

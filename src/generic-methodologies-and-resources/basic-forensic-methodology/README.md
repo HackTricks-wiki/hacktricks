@@ -1,6 +1,6 @@
 # Basic Forensic Methodology
 
-{{#include ../../banners/hacktricks-training.md}}
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## Creating and Mounting an Image
 
@@ -79,7 +79,6 @@ anti-forensic-techniques.md
 file-integrity-monitoring.md
 {{#endref}}
 
-{{#include ../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

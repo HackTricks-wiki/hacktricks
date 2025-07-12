@@ -1,6 +1,6 @@
 # RDPexec
 
-{{#include ../../banners/hacktricks-training.md}}
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## How it Works
 
@@ -12,7 +12,6 @@ For more information check:
 ../../network-services-pentesting/pentesting-rdp.md
 {{#endref}}
 
-{{#include ../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

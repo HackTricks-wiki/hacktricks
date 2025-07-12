@@ -1,6 +1,6 @@
 # Docker release_agent cgroups escape
 
-{{#include ../../../../banners/hacktricks-training.md}}
+{#include ../../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 **For further details, refer to the** [**original blog post**](https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/)**.** This is just a summary:
 
@@ -58,7 +58,6 @@ chmod a+x /cmd
 sh -c "echo \$\$ > /tmp/cgrp/x/cgroup.procs"
 ```
 
-{{#include ../../../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

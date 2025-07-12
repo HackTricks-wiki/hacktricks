@@ -1,6 +1,6 @@
 # External Forest Domain - OneWay (Inbound) or bidirectional
 
-{{#include ../../banners/hacktricks-training.md}}
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 In this scenario an external domain is trusting you (or both are trusting each other), so you can get some kind of access over it.
 
@@ -126,7 +126,6 @@ Rubeus.exe asktgs /service:cifs/dc.doamin.external /domain:dc.domain.external /d
 # Now you have a TGS to access the CIFS service of the domain controller
 ```
 
-{{#include ../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

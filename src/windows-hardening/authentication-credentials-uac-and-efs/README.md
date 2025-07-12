@@ -1,6 +1,6 @@
 # Windows Security Controls
 
-{{#include ../../banners/hacktricks-training.md}}
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## AppLocker Policy
 
@@ -266,4 +266,4 @@ The SSPI will be in charge of finding the adequate protocol for two machines tha
 uac-user-account-control.md
 {{#endref}}
 
-{{#include ../../banners/hacktricks-training.md}}
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}

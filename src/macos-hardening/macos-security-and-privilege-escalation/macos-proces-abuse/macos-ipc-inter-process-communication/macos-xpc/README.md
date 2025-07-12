@@ -1,6 +1,6 @@
 # macOS XPC
 
-{{#include ../../../../../banners/hacktricks-training.md}}
+{#include ../../../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## Basic Information
 
@@ -483,7 +483,6 @@ It's possible to get information about remote services using the cli tool `/usr/
 The communication between BridgeOS and the host occurs through a dedicated IPv6 interface. The `MultiverseSupport.framework` allows to establish sockets whose `fd` will be used for communicating.\
 It's possible to find thee communications using `netstat`, `nettop` or the open source option, `netbottom`.
 
-{{#include ../../../../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

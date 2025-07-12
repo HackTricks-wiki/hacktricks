@@ -1,6 +1,6 @@
 # Low-Power Wide Area Network
 
-{{#include ../../banners/hacktricks-training.md}}
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## Introduction
 
@@ -13,7 +13,6 @@ Long Range (**LoRa**) it’s popular in multiple countries and has an open sourc
 
 [https://github.com/IOActive/laf](https://github.com/IOActive/laf)
 
-{{#include ../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

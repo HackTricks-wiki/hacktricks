@@ -1,6 +1,6 @@
 # Introduction to ARM64v8
 
-{{#include ../../../banners/hacktricks-training.md}}
+{#include ../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## **Exception Levels - EL (ARM64v8)**
 
@@ -794,7 +794,6 @@ call_execve:
     svc  #0x1337
 ```
 
-{{#include ../../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

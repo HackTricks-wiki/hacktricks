@@ -1,6 +1,6 @@
 # Containerd (ctr) Privilege Escalation
 
-{{#include ../../banners/hacktricks-training.md}}
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## Basic information
 
@@ -49,7 +49,6 @@ Then you can use some of the techniques mentioned in the following page to **esc
 docker-security/
 {{#endref}}
 
-{{#include ../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

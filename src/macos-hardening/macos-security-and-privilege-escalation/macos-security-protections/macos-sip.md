@@ -1,6 +1,6 @@
 # macOS SIP
 
-{{#include ../../../banners/hacktricks-training.md}}
+{#include ../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## **Basic Information**
 
@@ -278,7 +278,6 @@ mount
 /dev/disk3s1s1 on / (apfs, sealed, local, read-only, journaled)
 ```
 
-{{#include ../../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

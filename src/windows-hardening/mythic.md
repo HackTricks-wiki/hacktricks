@@ -1,6 +1,6 @@
 # Mythic
 
-{{#include ../banners/hacktricks-training.md}}
+{#include ../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## What is Mythic?
 
@@ -177,4 +177,4 @@ When user over linux it has some interesting commands:
 - `pty`: Open up an interactive PTY, allowing for direct interaction with the shell on the target system.
 
 
-{{#include ../banners/hacktricks-training.md}}
+{#include ../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}

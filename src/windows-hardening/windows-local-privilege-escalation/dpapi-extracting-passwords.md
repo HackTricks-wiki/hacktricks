@@ -1,6 +1,6 @@
 # DPAPI - Extracting Passwords
 
-{{#include ../../banners/hacktricks-training.md}}
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 
 
@@ -352,4 +352,4 @@ With extracted from LDAP computers list you can find every sub network even if y
 - [https://github.com/Leftp/DPAPISnoop](https://github.com/Leftp/DPAPISnoop)
 - [https://pypi.org/project/donpapi/2.0.0/](https://pypi.org/project/donpapi/2.0.0/)
 
-{{#include ../../banners/hacktricks-training.md}}
+{#include ../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}

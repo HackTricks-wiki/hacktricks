@@ -1,6 +1,6 @@
 # macOS Office Sandbox Bypasses
 
-{{#include ../../../../../banners/hacktricks-training.md}}
+{#include ../../../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ### Word Sandbox bypass via Launch Agents
 
@@ -49,7 +49,6 @@ The thing is that even if **`python`** was signed by Apple, it **won't execute**
 1. Drop a **`~$exploit.py`** file with arbitrary Python commands.
 2. Run _open_ **`–stdin='~$exploit.py' -a Python`**, which runs the Python app with our dropped file serving as its standard input. Python happily runs our code, and since it’s a child process of _launchd_, it isn’t bound to Word’s sandbox rules.
 
-{{#include ../../../../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

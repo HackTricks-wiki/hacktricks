@@ -1,6 +1,6 @@
 # macOS - AMFI - AppleMobileFileIntegrity
 
-{{#include ../../../banners/hacktricks-training.md}}
+{#include ../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## AppleMobileFileIntegrity.kext and amfid
 
@@ -128,7 +128,6 @@ iOS AMFI maintains a lost of known hashes which are signed ad-hoc, called the **
 
 - [**\*OS Internals Volume III**](https://newosxbook.com/home.html)
 
-{{#include ../../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 

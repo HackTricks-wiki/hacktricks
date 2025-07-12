@@ -1,6 +1,6 @@
 # FZ - NFC
 
-{{#include ../../../banners/hacktricks-training.md}}
+{#include ../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 ## Intro <a href="#id-9wrzi" id="id-9wrzi"></a>
 
@@ -76,7 +76,6 @@ However, you **can't read the CVV this way** (the 3 digits on the back of the ca
 
 - [https://blog.flipperzero.one/rfid/](https://blog.flipperzero.one/rfid/)
 
-{{#include ../../../banners/hacktricks-training.md}}
-
+{#include ../../../../../../../home/runner/work/HackTricks-Feed/HackTricks-Feed/src/banners/hacktricks-training.md}
 
 
