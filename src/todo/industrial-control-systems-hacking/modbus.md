@@ -1,24 +1,24 @@
 # Die Modbus-protokol
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
 
 ## Inleiding tot die Modbus-protokol
 
-Die Modbus-protokol is 'n wyd gebruikte protokol in Industriële Outomatisering en Beheerstelsels. Modbus stel kommunikasie tussen verskeie toestelle soos programmeerbare logika-beheerders (PLC's), sensors, actuators en ander industriële toestelle moontlik. Om die Modbus-protokol te verstaan, is noodsaaklik, aangesien dit die mees gebruikte kommunikasieprotokol in die ICS is en 'n groot potensiële aanvalsvlak het vir snuffeling en selfs die inspuiting van opdragte in PLC's.
+Die Modbus-protokol is 'n wyd gebruikte protokol in Industriële Outomatisering en Beheerstelsels. Modbus stel kommunikasie tussen verskeie toestelle soos programmeerbare logika-beheerders (PLC's), sensors, actuators en ander industriële toestelle in staat. Om die Modbus-protokol te verstaan, is noodsaaklik, aangesien dit die mees gebruikte kommunikasieprotokol in die ICS is en 'n groot potensiële aanvalsvlak het vir snuffeling en selfs die inspuiting van opdragte in PLC's.
 
-Hier word konsepte puntgewys uiteengesit om die konteks van die protokol en sy werking te verskaf. Die grootste uitdaging in ICS-stelselsekuriteit is die koste van implementering en opgradering. Hierdie protokolle en standaarde is in die vroeë 80's en 90's ontwerp en word steeds wyd gebruik. Aangesien 'n industrie baie toestelle en verbindings het, is dit baie moeilik om toestelle op te gradeer, wat hackers 'n voordeel gee om met verouderde protokolle te werk. Aanvalle op Modbus is prakties onontkombaar, aangesien dit gebruik gaan word sonder opgradering, en sy werking is krities vir die industrie.
+Hier word konsepte puntgewys uiteengesit om die konteks van die protokol en sy werking te verskaf. Die grootste uitdaging in ICS-stelselsekuriteit is die koste van implementering en opgradering. Hierdie protokolle en standaarde is in die vroeë 80's en 90's ontwerp en word steeds wyd gebruik. Aangesien 'n industrie baie toestelle en verbindings het, is dit baie moeilik om toestelle op te gradeer, wat hackers 'n voordeel gee om met verouderde protokolle te werk. Aanvalle op Modbus is prakties onontkombaar, aangesien dit gebruik gaan word sonder opgradering, omdat sy werking krities is vir die industrie.
 
 ## Die Kliënt-Server Argitektuur
 
-Die Modbus-protokol word tipies gebruik in 'n Kliënt-Server Argitektuur waar 'n meester toestel (kliënt) kommunikasie met een of meer slaaftoestelle (bedieners) begin. Dit word ook as 'n Meester-Slaaf argitektuur verwys, wat wyd in elektronika en IoT met SPI, I2C, ens. gebruik word.
+Die Modbus-protokol word tipies gebruik in 'n Kliënt-Server Argitektuur waar 'n meester toestel (kliënt) kommunikasie met een of meer slaaf toestelle (bedieners) begin. Dit word ook as Meester-Slaaf argitektuur verwys, wat wyd in elektronika en IoT met SPI, I2C, ens. gebruik word.
 
 ## Serial en Ethernet Weergawes
 
-Die Modbus-protokol is ontwerp vir beide, Seriële Kommunikasie sowel as Ethernet Kommunikasies. Die Seriële Kommunikasie word wyd in erfenisstelsels gebruik terwyl moderne toestelle Ethernet ondersteun, wat hoë datarates bied en meer geskik is vir moderne industriële netwerke.
+Die Modbus-protokol is ontwerp vir beide, Seriële Kommunikasie sowel as Ethernet Kommunikasie. Die Seriële Kommunikasie word wyd in erfenisstelsels gebruik terwyl moderne toestelle Ethernet ondersteun wat hoë datarates bied en meer geskik is vir moderne industriële netwerke.
 
 ## Data voorstelling
 
-Data word in die Modbus-protokol as ASCII of Binêr oorgedra, alhoewel die binêre formaat gebruik word weens sy kompakteerbaarheid met ouer toestelle.
+Data word in die Modbus-protokol as ASCII of Binêr oorgedra, alhoewel die binêre formaat gebruik word weens sy kompakte aard met ouer toestelle.
 
 ## Funksiekodes
 
@@ -32,4 +32,4 @@ Boonop implementeer Modbus ook foutkontroles om die integriteit van die oorgedra
 
 As gevolg van sy groot skaal gebruik en gebrek aan opgraderings, bied die aanval op Modbus 'n beduidende voordeel met sy aanvalsvlak. ICS is hoogs afhanklik van kommunikasie tussen toestelle en enige aanvalle daarop kan gevaarlik wees vir die werking van die industriële stelsels. Aanvalle soos herhaling, datainspuiting, datasnuffeling en lek, Denial of Service, data vervalsing, ens. kan uitgevoer word as die medium van oordrag deur die aanvaller geïdentifiseer word.
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}

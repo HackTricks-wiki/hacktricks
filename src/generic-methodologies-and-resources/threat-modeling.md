@@ -1,6 +1,6 @@
 # Bedreigingsmodellering
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}
 
 ## Bedreigingsmodellering
 
@@ -28,11 +28,11 @@ Die CIA Triade is 'n algemeen erkende model in die veld van inligtingsveiligheid
 ### Bedreigingsmodellering Metodologieë
 
 1. **STRIDE**: Ontwikkel deur Microsoft, STRIDE is 'n akroniem vir **Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, and Elevation of Privilege**. Elke kategorie verteenwoordig 'n tipe bedreiging, en hierdie metodologie word algemeen gebruik in die ontwerpfase van 'n program of stelsel om potensiële bedreigings te identifiseer.
-2. **DREAD**: Dit is 'n ander metodologie van Microsoft wat gebruik word vir risiko-assessering van geïdentifiseerde bedreigings. DREAD staan vir **Damage potential, Reproducibility, Exploitability, Affected users, and Discoverability**. Elke van hierdie faktore word gegradeer, en die resultaat word gebruik om geïdentifiseerde bedreigings te prioriseer.
+2. **DREAD**: Dit is 'n ander metodologie van Microsoft wat gebruik word vir risiko-assessering van geïdentifiseerde bedreigings. DREAD staan vir **Damage potential, Reproducibility, Exploitability, Affected users, and Discoverability**. Elke van hierdie faktore word gegradeer, en die resultaat word gebruik om geïdentifiseerde bedreigings te prioritiseer.
 3. **PASTA** (Proses vir Aanvalsimulasie en Bedreigingsanalise): Dit is 'n sewe-stap, **risiko-georiënteerde** metodologie. Dit sluit die definisie en identifikasie van sekuriteitsdoelwitte in, die skep van 'n tegniese omvang, toepassingsdekomposisie, bedreigingsanalise, kwesbaarheidsanalise, en risiko/triage assessering.
 4. **Trike**: Dit is 'n risiko-gebaseerde metodologie wat fokus op die verdediging van bates. Dit begin vanuit 'n **risikobestuur** perspektief en kyk na bedreigings en kwesbaarhede in daardie konteks.
 5. **VAST** (Visueel, Agile, en Eenvoudige Bedreigingsmodellering): Hierdie benadering poog om meer toeganklik te wees en integreer in Agile ontwikkelingsomgewings. Dit kombineer elemente van die ander metodologieë en fokus op **visuele voorstellings van bedreigings**.
-6. **OCTAVE** (Operationeel Kritieke Bedreiging, Bates, en Kwesbaarheid Evaluasie): Ontwikkel deur die CERT Koördinering Sentrum, is hierdie raamwerk gerig op **organisatoriese risiko-assessering eerder as spesifieke stelsels of sagteware**.
+6. **OCTAVE** (Operationeel Kritieke Bedreiging, Bates, en Kwesbaarheid Evaluasie): Ontwikkel deur die CERT Koördinasiesentrum, is hierdie raamwerk gerig op **organisatoriese risiko-assessering eerder as spesifieke stelsels of sagteware**.
 
 ## Gereedskap
 
@@ -54,7 +54,7 @@ Daar is verskeie gereedskap en sagteware-oplossings beskikbaar wat kan **help** 
 
 ### [OWASP Threat Dragon](https://github.com/OWASP/threat-dragon/releases)
 
-'n Oopbronprojek van OWASP, Threat Dragon is beide 'n web- en desktoptoepassing wat stelseldiagrammering insluit sowel as 'n reël enjin om bedreigings/mitigasies outomaties te genereer.
+'n Open-source projek van OWASP, Threat Dragon is beide 'n web- en desktoptoepassing wat stelseldiagrammering insluit sowel as 'n reël enjin om bedreigings/mitigasies outomaties te genereer.
 
 **Gebruik**
 
@@ -83,9 +83,9 @@ Jy kan gereedskap soos SpiderSuite Crawler gebruik om jou inspirasie te gee, 'n 
 Net 'n bietjie verduideliking oor die entiteite:
 
 - Proses (Die entiteit self soos Webbediener of web funksionaliteit)
-- Akteur (‘n Persoon soos 'n Webwerf Besoeker, Gebruiker of Administrateur)
+- Akteur ( 'n Persoon soos 'n Webwerf Besoeker, Gebruiker of Administrateur)
 - Data Vloei Lyn (Aanduiding van Interaksie)
-- Vertroue Grens (Verskillende netwerksegmente of -omgewings.)
+- Vertroue Grens (Verskillende netwerksegmente of skope.)
 - Stoor (Dinge waar data gestoor word soos Databasisse)
 
 5. Skep 'n Bedreiging (Stap 1)
@@ -104,7 +104,7 @@ Hou in gedagte dat daar 'n verskil is tussen Akteur Bedreigings en Proses Bedrei
 
 6. Klaar
 
-Nou moet jou voltooide model iets soos hierdie lyk. En dit is hoe jy 'n eenvoudige bedreigingsmodel met OWASP Threat Dragon maak.
+Nou moet jou voltooide model iets soos hierdie lyk. En so maak jy 'n eenvoudige bedreigingsmodel met OWASP Threat Dragon.
 
 <figure><img src="../images/threat_model_finished.jpg" alt=""><figcaption></figcaption></figure>
 
@@ -113,4 +113,4 @@ Nou moet jou voltooide model iets soos hierdie lyk. En dit is hoe jy 'n eenvoudi
 Dit is 'n gratis hulpmiddel van Microsoft wat help om bedreigings in die ontwerpfase van sagtewareprojekte te vind. Dit gebruik die STRIDE metodologie en is veral geskik vir diegene wat op Microsoft se stapel ontwikkel.
 
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}

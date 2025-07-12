@@ -1,6 +1,6 @@
 # Beleggings Terme
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}
 
 ## Spot
 
@@ -51,7 +51,7 @@ Die koper sal egter 'n fooi aan die verkoper betaal om die opsie te open (sodat 
 
 ### 1. **Verpligting vs. Reg:**
 
-* **Termynkontrakte:** Wanneer jy 'n termynkontrak koop of verkoop, sluit jy 'n **bindende ooreenkoms** in om 'n bate teen 'n spesifieke prys op 'n toekomstige datum te koop of te verkoop. Beide die koper en die verkoper is **verplig** om die kontrak by verstryking na te kom (tenzij die kontrak voor dit gesluit word).
+* **Termynkontrakte:** Wanneer jy 'n termynkontrak koop of verkoop, sluit jy 'n **bindende ooreenkoms** in om 'n bate teen 'n spesifieke prys op 'n toekomstige datum te koop of te verkoop. Beide die koper en die verkoper is **verplig** om die kontrak by vervaldatum na te kom (tenzij die kontrak voor dit gesluit word).
 * **Opsies:** Met opsies het jy die **reg, maar nie die verpligting** om 'n bate te koop (in die geval van 'n **call opsie**) of te verkoop (in die geval van 'n **put opsie**) teen 'n spesifieke prys voor of op 'n sekere vervaldatum. Die **koper** het die opsie om uit te voer, terwyl die **verkoper** verplig is om die transaksie na te kom as die koper besluit om die opsie uit te oefen.
 
 ### 2. **Risiko:**
@@ -66,7 +66,7 @@ Die koper sal egter 'n fooi aan die verkoper betaal om die opsie te open (sodat 
 
 ### 4. **Wins Potensiaal:**
 
-* **Termynkontrakte:** Die wins of verlies is gebaseer op die verskil tussen die markprys by verstryking en die ooreengekome prys in die kontrak.
+* **Termynkontrakte:** Die wins of verlies is gebaseer op die verskil tussen die markprys op vervaldatum en die ooreengekome prys in die kontrak.
 * **Opsies:** Die koper verdien wanneer die mark gunstig beweeg bo die uitoefenprys deur meer as die betaalde premie. Die verkoper verdien deur die premie te hou as die opsie nie uitgeoefen word nie.
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}
