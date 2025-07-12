@@ -94,6 +94,6 @@ Force SF12/125 kHz to increase airtime → exhaust duty-cycle of gateway (denial
 
 ## References
 
-* LoRaWAN Auditing Framework (LAF) – https://github.com/IOActive/laf
-* Trend Micro LoRaPWN overview – https://www.hackster.io/news/trend-micro-finds-lorawan-security-lacking-develops-lorapwn-python-utility-bba60c27d57a
+* LoRaWAN Auditing Framework (LAF) – [https://github.com/IOActive/laf](https://github.com/IOActive/laf)
+* Trend Micro LoRaPWN overview – [https://www.hackster.io/news/trend-micro-finds-lorawan-security-lacking-develops-lorapwn-python-utility-bba60c27d57a](https://www.hackster.io/news/trend-micro-finds-lorawan-security-lacking-develops-lorapwn-python-utility-bba60c27d57a)
 {{#include ../../banners/hacktricks-training.md}}
