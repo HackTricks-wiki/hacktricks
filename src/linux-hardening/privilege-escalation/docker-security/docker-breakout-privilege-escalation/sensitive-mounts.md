@@ -50,7 +50,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Sprawdź dostęp do modprobe
 #### **`/proc/sys/vm/panic_on_oom`**
 
 - Odniesione w [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
-- Globalny flag, który kontroluje, czy jądro panikuje, czy wywołuje OOM killer, gdy występuje warunek OOM.
+- Globalny flag, który kontroluje, czy jądro panikuje, czy wywołuje OOM killer, gdy wystąpi warunek OOM.
 
 #### **`/proc/sys/fs`**
 
@@ -89,7 +89,7 @@ echo b > /proc/sysrq-trigger # Ponownie uruchamia hosta
 #### **`/proc/kallsyms`**
 
 - Wymienia eksportowane symbole jądra i ich adresy.
-- Kluczowe dla rozwoju exploitów jądra, szczególnie w celu pokonania KASLR.
+- Niezbędne do rozwoju exploitów jądra, szczególnie w celu pokonania KASLR.
 - Informacje o adresach są ograniczone, gdy `kptr_restrict` jest ustawione na `1` lub `2`.
 - Szczegóły w [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 
@@ -109,7 +109,7 @@ echo b > /proc/sysrq-trigger # Ponownie uruchamia hosta
 #### **`/proc/kmem`**
 
 - Alternatywny interfejs dla `/dev/kmem`, reprezentujący wirtualną pamięć jądra.
-- Umożliwia odczyt i zapis, a tym samym bezpośrednią modyfikację pamięci jądra.
+- Umożliwia odczyt i zapis, a zatem bezpośrednią modyfikację pamięci jądra.
 
 #### **`/proc/mem`**
 
@@ -293,7 +293,7 @@ Mounting certain host Unix sockets or writable pseudo-filesystems is equivalent 
 ```text
 /run/containerd/containerd.sock     # gniazdo CRI containerd  
 /var/run/crio/crio.sock             # gniazdo runtime CRI-O  
-/run/podman/podman.sock             # API Podman (z uprawnieniami root lub bez)  
+/run/podman/podman.sock             # API Podman (z uprawnieniami lub bez)  
 /var/run/kubelet.sock               # API Kubelet na węzłach Kubernetes  
 /run/firecracker-containerd.sock    # Kata / Firecracker
 ```
