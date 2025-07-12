@@ -1,6 +1,6 @@
 # Investment Terms
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}
 
 ## Spot
 
@@ -71,4 +71,4 @@ However, the buyer will be paying some fee to the seller for opening the option 
 
 
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}
