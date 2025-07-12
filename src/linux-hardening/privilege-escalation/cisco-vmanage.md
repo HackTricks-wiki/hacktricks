@@ -128,7 +128,7 @@ Console Output:
 vmanage:/tmp$ gdb -x root.gdb /usr/bin/confd_cli
 GNU gdb (GDB) 8.0.1
 Copyright (C) 2017 Free Software Foundation, Inc.
-License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+License GPLv3+: GNU GPL version 3 or late<[http://gnu.org/licenses/gpl.html](http://gnu.org/licenses/gpl.html)>
 This is free software: you are free to change and redistribute it.
 There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
 and "show warranty" for details.
@@ -159,6 +159,5 @@ bash-4.4#
 ```
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 

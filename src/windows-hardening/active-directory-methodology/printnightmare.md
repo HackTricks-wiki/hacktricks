@@ -95,12 +95,12 @@ Import-Module .\SpoolFool.ps1 ; Invoke-SpoolFool -dll add_user.dll
 
 **More reading (external):** Check the 2024 walk-through blog post – [Understanding PrintNightmare Vulnerability](https://www.hackingarticles.in/understanding-printnightmare-vulnerability/)
 
-{{#include ../../banners/hacktricks-training.md}}
+
 
 ## References
 
 * Microsoft – *KB5005652: Manage new Point & Print default driver installation behavior*  
-  <https://support.microsoft.com/en-us/topic/kb5005652-manage-new-point-and-print-default-driver-installation-behavior-cve-2021-34481-873642bf-2634-49c5-a23b-6d8e9a302872>
+<[https://support.microsoft.com/en-us/topic/kb5005652-manage-new-point-and-print-default-driver-installation-behavior-cve-2021-34481-873642bf-2634-49c5-a23b-6d8e9a302872](https://support.microsoft.com/en-us/topic/kb5005652-manage-new-point-and-print-default-driver-installation-behavior-cve-2021-34481-873642bf-2634-49c5-a23b-6d8e9a302872)>
 * Oliver Lyak – *SpoolFool: CVE-2022-21999*  
-  <https://github.com/ly4k/SpoolFool>
-{{#include /banners/hacktricks-training.md}}
+<[https://github.com/ly4k/SpoolFool](https://github.com/ly4k/SpoolFool)>
+{{#include ../../banners/hacktricks-training.md}}
