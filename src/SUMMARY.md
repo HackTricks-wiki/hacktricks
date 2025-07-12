@@ -579,6 +579,7 @@
     - [Client Side Prototype Pollution](pentesting-web/deserialization/nodejs-proto-prototype-pollution/client-side-prototype-pollution.md)
     - [Express Prototype Pollution Gadgets](pentesting-web/deserialization/nodejs-proto-prototype-pollution/express-prototype-pollution-gadgets.md)
     - [Prototype Pollution to RCE](pentesting-web/deserialization/nodejs-proto-prototype-pollution/prototype-pollution-to-rce.md)
+  - [Aspnet Telerik Asyncuploadhandler Cve 2019 18935](pentesting-web/deserialization/aspnet-telerik-asyncuploadhandler-cve-2019-18935.md)
   - [Java JSF ViewState (.faces) Deserialization](pentesting-web/deserialization/java-jsf-viewstate-.faces-deserialization.md)
   - [Java DNS Deserialization, GadgetProbe and Java Deserialization Scanner](pentesting-web/deserialization/java-dns-deserialization-and-gadgetprobe.md)
   - [Basic Java Deserialization (ObjectInputStream, readObject)](pentesting-web/deserialization/basic-java-deserialization-objectinputstream-readobject.md)
