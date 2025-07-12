@@ -2,7 +2,7 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-Відкриття `/proc`, `/sys` та `/var` без належної ізоляції простору імен створює значні ризики для безпеки, включаючи збільшення поверхні атаки та розкриття інформації. Ці каталоги містять чутливі файли, які, якщо неправильно налаштовані або доступні несанкціонованому користувачу, можуть призвести до втечі з контейнера, модифікації хоста або надати інформацію, що сприяє подальшим атакам. Наприклад, неправильне монтування `-v /proc:/host/proc` може обійти захист AppArmor через його шляхову природу, залишаючи `/host/proc` незахищеним.
+Відкриття `/proc`, `/sys` та `/var` без належної ізоляції простору імен створює значні ризики безпеки, включаючи збільшення поверхні атаки та розкриття інформації. Ці каталоги містять чутливі файли, які, якщо неправильно налаштовані або доступні несанкціонованому користувачу, можуть призвести до втечі з контейнера, модифікації хоста або надати інформацію, що сприяє подальшим атакам. Наприклад, неправильне монтування `-v /proc:/host/proc` може обійти захист AppArmor через його шляхову природу, залишаючи `/host/proc` незахищеним.
 
 **Ви можете знайти додаткові деталі кожної потенційної вразливості в** [**https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts**](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)**.**
 
@@ -10,13 +10,13 @@
 
 ### `/proc/sys`
 
-Цей каталог дозволяє доступ до зміни змінних ядра, зазвичай через `sysctl(2)`, і містить кілька підкаталогів, які викликають занепокоєння:
+Цей каталог дозволяє доступ для зміни змінних ядра, зазвичай через `sysctl(2)`, і містить кілька підкаталогів, які викликають занепокоєння:
 
 #### **`/proc/sys/kernel/core_pattern`**
 
 - Описано в [core(5)](https://man7.org/linux/man-pages/man5/core.5.html).
 - Якщо ви можете записувати в цей файл, можливо, записати конвеєр `|`, за яким слідує шлях до програми або скрипту, який буде виконано після того, як станеться збій.
-- Зловмисник може знайти шлях всередині хоста до свого контейнера, виконавши `mount`, і записати шлях до бінарного файлу всередині файлової системи свого контейнера. Потім, викликати збій програми, щоб змусити ядро виконати бінарний файл поза контейнером.
+- Зловмисник може знайти шлях всередині хоста до свого контейнера, виконавши `mount`, і записати шлях до бінарного файлу всередині файлової системи свого контейнера. Потім, викликавши збій програми, змусити ядро виконати бінарний файл поза контейнером.
 
 - **Приклад тестування та експлуатації**:
 ```bash
@@ -44,13 +44,13 @@ return 0;
 - **Приклад перевірки доступу**:
 
 ```bash
-ls -l $(cat /proc/sys/kernel/modprobe) # Check access to modprobe
+ls -l $(cat /proc/sys/kernel/modprobe) # Перевірка доступу до modprobe
 ```
 
 #### **`/proc/sys/vm/panic_on_oom`**
 
 - Згадується в [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
-- Глобальний прапор, який контролює, чи панікує ядро або викликає OOM killer, коли виникає умова OOM.
+- Глобальний прапор, який контролює, чи панікує ядро або викликає OOM вбивцю, коли виникає умова OOM.
 
 #### **`/proc/sys/fs`**
 
@@ -60,7 +60,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Check access to modprobe
 #### **`/proc/sys/fs/binfmt_misc`**
 
 - Дозволяє реєструвати інтерпретатори для ненативних бінарних форматів на основі їх магічного номера.
-- Може призвести до підвищення привілеїв або доступу до root shell, якщо `/proc/sys/fs/binfmt_misc/register` доступний для запису.
+- Може призвести до підвищення привілеїв або доступу до кореневого шеллу, якщо `/proc/sys/fs/binfmt_misc/register` доступний для запису.
 - Відповідна експлуатація та пояснення:
 - [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
 - Докладний посібник: [Video link](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
@@ -78,7 +78,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Check access to modprobe
 - **Приклад перезавантаження хоста**:
 
 ```bash
-echo b > /proc/sysrq-trigger # Reboots the host
+echo b > /proc/sysrq-trigger # Перезавантажує хост
 ```
 
 #### **`/proc/kmsg`**
@@ -231,7 +231,7 @@ REFRESH_TOKEN_SECRET=14<SNIP>ea
 /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/140/fs/usr/share/nginx/html/index.html
 /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/132/fs/usr/share/nginx/html/index.html
 
-/ # echo '<!DOCTYPE html><html lang="uk"><head><script>alert("Збережений XSS!")</script></head></html>' > /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/140/fs/usr/sh
+/ # echo '<!DOCTYPE html><html lang="en"><head><script>alert("Stored XSS!")</script></head></html>' > /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/140/fs/usr/sh
 are/nginx/html/index2.html
 ```
 
@@ -292,10 +292,10 @@ locate the other containers' filesystems and SA / web identity tokens
 Mounting certain host Unix sockets or writable pseudo-filesystems is equivalent to giving the container full root on the node. **Treat the following paths as highly sensitive and never expose them to untrusted workloads**:
 
 ```text
-/run/containerd/containerd.sock     # сокет containerd CRI  
-/var/run/crio/crio.sock             # сокет виконання CRI-O  
-/run/podman/podman.sock             # API Podman (з правами root або без)  
-/var/run/kubelet.sock               # API Kubelet на вузлах Kubernetes  
+/run/containerd/containerd.sock     # сокет containerd CRI
+/var/run/crio/crio.sock             # сокет CRI-O
+/run/podman/podman.sock             # Podman API (з правами root або без)
+/var/run/kubelet.sock               # Kubelet API на вузлах Kubernetes
 /run/firecracker-containerd.sock    # Kata / Firecracker
 ```
 

