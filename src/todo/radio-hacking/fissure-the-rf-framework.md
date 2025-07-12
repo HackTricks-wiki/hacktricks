@@ -1,10 +1,10 @@
 # FISSURE - RF Çerçevesi
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
 
 **Frekansa Bağlı Olmayan SDR Tabanlı Sinyal Anlama ve Tersine Mühendislik**
 
-FISSURE, sinyal tespiti ve sınıflandırması, protokol keşfi, saldırı yürütme, IQ manipülasyonu, zafiyet analizi, otomasyon ve AI/ML için kancalarla tasarlanmış, tüm beceri seviyeleri için açık kaynaklı bir RF ve tersine mühendislik çerçevesidir. Çerçeve, yazılım modüllerinin, radyoların, protokollerin, sinyal verilerinin, betiklerin, akış grafiklerinin, referans materyallerin ve üçüncü taraf araçların hızlı entegrasyonunu teşvik etmek için inşa edilmiştir. FISSURE, yazılımı tek bir yerde tutan ve ekiplerin belirli Linux dağıtımları için aynı kanıtlanmış temel yapılandırmayı paylaşırken hızla uyum sağlamasını sağlayan bir iş akışı sağlayıcısıdır.
+FISSURE, sinyal tespiti ve sınıflandırması, protokol keşfi, saldırı yürütme, IQ manipülasyonu, zafiyet analizi, otomasyon ve AI/ML için kancalarla tasarlanmış, tüm beceri seviyelerine uygun açık kaynaklı bir RF ve tersine mühendislik çerçevesidir. Çerçeve, yazılım modüllerinin, radyoların, protokollerin, sinyal verilerinin, betiklerin, akış grafiklerinin, referans materyallerin ve üçüncü taraf araçların hızlı entegrasyonunu teşvik etmek için inşa edilmiştir. FISSURE, yazılımı tek bir konumda tutan ve ekiplerin belirli Linux dağıtımları için aynı kanıtlanmış temel yapılandırmayı paylaşırken hızla uyum sağlamasını sağlayan bir iş akışı etkinleştiricisidir.
 
 FISSURE ile birlikte gelen çerçeve ve araçlar, RF enerjisinin varlığını tespit etmek, bir sinyalin özelliklerini anlamak, örnekler toplamak ve analiz etmek, iletim ve/veya enjeksiyon teknikleri geliştirmek ve özel yükler veya mesajlar oluşturmak için tasarlanmıştır. FISSURE, tanımlama, paket oluşturma ve fuzzing konusunda yardımcı olmak için büyüyen bir protokol ve sinyal bilgisi kütüphanesi içerir. Sinyal dosyalarını indirmek ve trafik simüle etmek ve sistemleri test etmek için çalma listeleri oluşturmak için çevrimiçi arşiv yetenekleri mevcuttur.
 
@@ -25,7 +25,7 @@ Kullanıcı dostu Python kod tabanı ve kullanıcı arayüzü, acemilerin RF ve 
 FISSURE içinde dosya navigasyonunu kolaylaştırmak ve kod tekrarını azaltmak için üç dal bulunmaktadır. Python2\_maint-3.7 dalı, Python2, PyQt4 ve GNU Radio 3.7 etrafında inşa edilmiş bir kod tabanı içerir; Python3\_maint-3.8 dalı, Python3, PyQt5 ve GNU Radio 3.8 etrafında inşa edilmiştir; ve Python3\_maint-3.10 dalı, Python3, PyQt5 ve GNU Radio 3.10 etrafında inşa edilmiştir.
 
 |   İşletim Sistemi   |   FISSURE Dalı   |
-| :------------------: | :--------------: |
+| :------------------: | :----------------: |
 |  Ubuntu 18.04 (x64)  | Python2\_maint-3.7 |
 | Ubuntu 18.04.5 (x64) | Python2\_maint-3.7 |
 | Ubuntu 18.04.6 (x64) | Python2\_maint-3.7 |
@@ -35,10 +35,10 @@ FISSURE içinde dosya navigasyonunu kolaylaştırmak ve kod tekrarını azaltmak
 
 **Devam Eden (beta)**
 
-Bu işletim sistemleri hala beta durumundadır. Geliştirme aşamasındadır ve birkaç özelliğin eksik olduğu bilinmektedir. Yükleyicideki öğeler mevcut programlarla çakışabilir veya durum kaldırılana kadar yüklenemeyebilir.
+Bu işletim sistemleri hala beta durumundadır. Geliştirme aşamasındadır ve bazı özelliklerin eksik olduğu bilinmektedir. Yükleyicideki öğeler mevcut programlarla çakışabilir veya durum kaldırılana kadar yüklenemeyebilir.
 
 |     İşletim Sistemi     |    FISSURE Dalı   |
-| :----------------------: | :---------------: |
+| :----------------------: | :-----------------: |
 | DragonOS Focal (x86\_64) |  Python3\_maint-3.8 |
 |    Ubuntu 22.04 (x64)    | Python3\_maint-3.10 |
 
@@ -60,7 +60,7 @@ Sonra, işletim sisteminize en uygun seçeneği seçin (eğer işletim sistemini
 | :--------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------: |
 | ![install1b](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/install1b.png) | ![install1a](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/install1a.png) | ![install1c](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/install1c.png) |
 
-FISSURE'ı mevcut çatışmaları önlemek için temiz bir işletim sistemine kurmanız önerilir. FISSURE içindeki çeşitli araçları kullanırken hataları önlemek için tüm önerilen onay kutularını (Varsayılan buton) seçin. Yükleme sırasında, çoğunlukla yükseltilmiş izinler ve kullanıcı adları isteyen birden fazla istem olacaktır. Bir öğe sonunda "Doğrula" bölümü içeriyorsa, yükleyici takip eden komutu çalıştıracak ve komut tarafından herhangi bir hata üretilip üretilmediğine bağlı olarak onay kutusu öğesini yeşil veya kırmızı olarak vurgulayacaktır. "Doğrula" bölümü olmayan onaylı öğeler yüklemeden sonra siyah kalacaktır.
+FISSURE'ı mevcut çatışmaları önlemek için temiz bir işletim sistemine kurmanız önerilir. FISSURE içindeki çeşitli araçları kullanırken hatalardan kaçınmak için tüm önerilen onay kutularını (Varsayılan buton) seçin. Yükleme sırasında, çoğunlukla yükseltilmiş izinler ve kullanıcı adları isteyen birden fazla istem olacaktır. Bir öğe sonunda "Doğrula" bölümü içeriyorsa, yükleyici takip eden komutu çalıştıracak ve komut tarafından herhangi bir hata üretilip üretilmediğine bağlı olarak onay kutusu öğesini yeşil veya kırmızı olarak vurgulayacaktır. "Doğrula" bölümü olmayan onaylı öğeler yüklemeden sonra siyah kalacaktır.
 
 ![install2](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/install2.png)
 
@@ -153,7 +153,7 @@ Hatalara dikkat çekmek için [Sorunlar](https://github.com/ainfosec/FISSURE/iss
 
 ## İşbirliği
 
-FISSURE işbirliği fırsatlarını önermek ve resmileştirmek için Assured Information Security, Inc. (AIS) İş Geliştirme ile iletişime geçin; bu, yazılımınızı entegre etmek için zaman ayırmak, AIS'teki yetenekli kişilerin teknik zorluklarınız için çözümler geliştirmesi veya FISSURE'ı diğer platformlara/uygulamalara entegre etmek olabilir.
+FISSURE işbirliği fırsatlarını önermek ve resmileştirmek için Assured Information Security, Inc. (AIS) İş Geliştirme ile iletişime geçin; bu, yazılımınızı entegre etmek için zaman ayırmak, AIS'teki yetenekli kişilerin teknik zorluklarınız için çözümler geliştirmesi veya FISSURE'ı diğer platformlara/uygulamalara entegre etmesi şeklinde olabilir.
 
 ## Lisans
 
@@ -181,4 +181,4 @@ Bu geliştiricilere teşekkür ederiz:
 
 Bu projeye katkılarından dolayı Dr. Samuel Mantravadi ve Joseph Reith'e özel teşekkürler.
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}

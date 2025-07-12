@@ -1,6 +1,6 @@
 # Rust Temelleri
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}
 
 ### Genel Türler
 
@@ -21,7 +21,7 @@ Wrapper::new("Foo").value, "Foo"
 ```
 ### Option, Some & None
 
-Option türü, değerin Some (bir şey var) veya None olabileceği anlamına gelir:
+Option türü, değerin Some (bir şey var) veya None (hiçbir şey yok) türünde olabileceği anlamına gelir:
 ```rust
 pub enum Option<T> {
 None,
@@ -74,7 +74,7 @@ for (key, hashvalue) in &*map {
 for key in map.keys() {
 for value in map.values() {
 ```
-### Rekürsif Kutu
+### Recursive Box
 ```rust
 enum List {
 Cons(i32, List),
@@ -83,7 +83,7 @@ Nil,
 
 let list = Cons(1, Cons(2, Cons(3, Nil)));
 ```
-### Koşullu İfadeler
+### Koşullar
 
 #### eğer
 ```rust
@@ -287,4 +287,4 @@ thread::sleep(Duration::from_millis(500));
 }
 }
 ```
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}

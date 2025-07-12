@@ -1,10 +1,10 @@
 # Tehdit Modelleme
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}
 
 ## Tehdit Modelleme
 
-HackTricks'in Tehdit Modelleme üzerine kapsamlı kılavuzuna hoş geldiniz! Siber güvenliğin bu kritik yönünü keşfetmeye başlayın; burada bir sistemdeki potansiyel zayıflıkları tanımlıyor, anlıyor ve bunlara karşı stratejiler geliştiriyoruz. Bu konu, gerçek dünya örnekleri, yararlı yazılımlar ve anlaşılması kolay açıklamalarla dolu adım adım bir kılavuz olarak hizmet vermektedir. Hem yeni başlayanlar hem de siber güvenlik savunmalarını güçlendirmek isteyen deneyimli uygulayıcılar için idealdir.
+HackTricks'in Tehdit Modelleme üzerine kapsamlı kılavuzuna hoş geldiniz! Bu kritik siber güvenlik alanını keşfetmeye başlayın; burada bir sistemdeki potansiyel zayıflıkları tanımlıyor, anlıyor ve bunlara karşı stratejiler geliştiriyoruz. Bu konu, gerçek dünya örnekleri, yararlı yazılımlar ve anlaşılması kolay açıklamalarla dolu adım adım bir kılavuz olarak hizmet vermektedir. Hem yeni başlayanlar hem de siber güvenlik savunmalarını güçlendirmek isteyen deneyimli uygulayıcılar için idealdir.
 
 ### Yaygın Olarak Kullanılan Senaryolar
 
@@ -22,7 +22,7 @@ Tehdit modelleri genellikle kırmızı ile işaretlenmiş unsurlar içerir; bu, 
 CIA Üçlüsü, bilgi güvenliği alanında yaygın olarak tanınan bir modeldir ve Gizlilik, Bütünlük ve Erişilebilirlik anlamına gelir. Bu üç sütun, birçok güvenlik önlemi ve politikasının temelini oluşturur; bunlar arasında tehdit modelleme metodolojileri de bulunmaktadır.
 
 1. **Gizlilik**: Verilerin veya sistemin yetkisiz kişiler tarafından erişilmemesini sağlamak. Bu, veri ihlallerini önlemek için uygun erişim kontrolleri, şifreleme ve diğer önlemleri gerektiren güvenliğin merkezi bir yönüdür.
-2. **Bütünlük**: Verilerin yaşam döngüsü boyunca doğruluğu, tutarlılığı ve güvenilirliği. Bu ilke, verilerin yetkisiz taraflarca değiştirilmemesini veya müdahale edilmemesini sağlar. Genellikle kontrol toplamları, hashleme ve diğer veri doğrulama yöntemlerini içerir.
+2. **Bütünlük**: Verilerin yaşam döngüsü boyunca doğruluğu, tutarlılığı ve güvenilirliği. Bu ilke, verilerin yetkisiz taraflarca değiştirilmemesini veya bozulmamasını sağlar. Genellikle kontrol toplamları, hashleme ve diğer veri doğrulama yöntemlerini içerir.
 3. **Erişilebilirlik**: Bu, verilerin ve hizmetlerin ihtiyaç duyulduğunda yetkili kullanıcılara erişilebilir olmasını sağlar. Bu genellikle sistemlerin kesintilere rağmen çalışmaya devam etmesi için yedeklilik, hata toleransı ve yüksek erişilebilirlik yapılandırmalarını içerir.
 
 ### Tehdit Modelleme Metodolojileri
@@ -31,7 +31,7 @@ CIA Üçlüsü, bilgi güvenliği alanında yaygın olarak tanınan bir modeldir
 2. **DREAD**: Bu, tanımlanan tehditlerin risk değerlendirmesi için kullanılan başka bir Microsoft metodolojisidir. DREAD, **Zarar potansiyeli, Yeniden üretilebilirlik, Sömürülebilirlik, Etkilenen kullanıcılar ve Keşfedilebilirlik** anlamına gelir. Bu faktörlerin her biri puanlanır ve sonuç, tanımlanan tehditlerin önceliklendirilmesinde kullanılır.
 3. **PASTA** (Saldırı Simülasyonu ve Tehdit Analizi Süreci): Bu, yedi adımlı, **risk merkezli** bir metodolojidir. Güvenlik hedeflerini tanımlama ve belirleme, teknik kapsam oluşturma, uygulama ayrıştırma, tehdit analizi, zayıflık analizi ve risk/triage değerlendirmesini içerir.
 4. **Trike**: Bu, varlıkları savunmaya odaklanan risk temelli bir metodolojidir. **Risk yönetimi** perspektifinden başlar ve tehditler ile zayıflıkları bu bağlamda inceler.
-5. **VAST** (Görsel, Çevik ve Basit Tehdit modelleme): Bu yaklaşım, daha erişilebilir olmayı hedefler ve Çevik geliştirme ortamlarına entegre olur. Diğer metodolojilerden unsurlar birleştirir ve **tehditlerin görsel temsillerine** odaklanır.
+5. **VAST** (Görsel, Çevik ve Basit Tehdit Modelleme): Bu yaklaşım, daha erişilebilir olmayı hedefler ve Çevik geliştirme ortamlarına entegre olur. Diğer metodolojilerden unsurlar birleştirir ve **tehditlerin görsel temsillerine** odaklanır.
 6. **OCTAVE** (Operasyonel Olarak Kritik Tehdit, Varlık ve Zayıflık Değerlendirmesi): CERT Koordinasyon Merkezi tarafından geliştirilen bu çerçeve, **belirli sistemler veya yazılımlar yerine kurumsal risk değerlendirmesine** yöneliktir.
 
 ## Araçlar
@@ -40,7 +40,7 @@ Tehdit modellerinin oluşturulması ve yönetilmesi konusunda **yardımcı** ola
 
 ### [SpiderSuite](https://github.com/3nock/SpiderSuite)
 
-Siber güvenlik profesyonelleri için gelişmiş, çok özellikli, çok platformlu bir GUI web örümceği/kraker. Spider Suite, saldırı yüzeyi haritalama ve analiz için kullanılabilir.
+Siber güvenlik profesyonelleri için gelişmiş, çok özellikli, çok platformlu bir GUI web örümceği/gezgini. Spider Suite, saldırı yüzeyi haritalama ve analiz için kullanılabilir.
 
 **Kullanım**
 
@@ -54,7 +54,7 @@ Siber güvenlik profesyonelleri için gelişmiş, çok özellikli, çok platform
 
 ### [OWASP Threat Dragon](https://github.com/OWASP/threat-dragon/releases)
 
-OWASP'tan açık kaynak bir proje olan Threat Dragon, sistem diyagramları ile birlikte tehditleri/azaltmaları otomatik olarak oluşturmak için bir kural motoru içeren hem web hem de masaüstü uygulamasıdır.
+OWASP'tan açık kaynak bir proje olan Threat Dragon, sistem diyagramları ile tehditleri/azaltmaları otomatik olarak oluşturmak için bir kural motoru içeren hem web hem de masaüstü uygulamasıdır.
 
 **Kullanım**
 
@@ -86,7 +86,7 @@ Varlıklar hakkında biraz açıklama:
 - Aktör (Bir Kişi, örneğin bir Web Sitesi Ziyaretçisi, Kullanıcı veya Yöneticisi)
 - Veri Akış Hattı (Etkileşim Göstergesi)
 - Güven Sınırı (Farklı ağ segmentleri veya kapsamları.)
-- Depolama (Verilerin saklandığı yerler, örneğin Veritabanları)
+- Depolama (Verilerin depolandığı yerler, örneğin Veritabanları)
 
 5. Bir Tehdit Oluşturun (Adım 1)
 
@@ -94,11 +94,11 @@ Varlıklar hakkında biraz açıklama:
 
 <figure><img src="../images/3_threatmodel_chose-threat-layer.jpg" alt=""><figcaption></figcaption></figure>
 
-Artık tehdidi oluşturabilirsiniz.
+Şimdi tehdidi oluşturabilirsiniz.
 
 <figure><img src="../images/4_threatmodel_create-threat.jpg" alt=""><figcaption></figcaption></figure>
 
-Aktör Tehditleri ile Süreç Tehditleri arasında bir fark olduğunu unutmayın. Eğer bir tehdidi bir Aktöre eklerseniz, yalnızca "Sahtecilik" ve "Reddetme" seçeneklerini seçebilirsiniz. Ancak örneğimizde bir Süreç varlığına tehdit eklediğimiz için tehdit oluşturma kutusunda bunu göreceğiz:
+Aktör Tehditleri ile Süreç Tehditleri arasında bir fark olduğunu unutmayın. Eğer bir Aktöre tehdit eklerseniz, yalnızca "Sahtecilik" ve "Reddetme" seçeneklerini seçebilirsiniz. Ancak örneğimizde bir Süreç varlığına tehdit eklediğimiz için tehdit oluşturma kutusunda bunu göreceğiz:
 
 <figure><img src="../images/2_threatmodel_type-option.jpg" alt=""><figcaption></figcaption></figure>
 
@@ -110,6 +110,6 @@ Artık bitmiş modeliniz şöyle görünmelidir. Ve OWASP Threat Dragon ile basi
 
 ### [Microsoft Threat Modeling Tool](https://aka.ms/threatmodelingtool)
 
-Bu, yazılım projelerinin tasarım aşamasında tehditleri bulmaya yardımcı olan Microsoft'tan ücretsiz bir araçtır. STRIDE metodolojisini kullanır ve özellikle Microsoft'un yığınında geliştirme yapanlar için uygundur.
+Bu, yazılım projelerinin tasarım aşamasında tehditleri bulmaya yardımcı olan Microsoft'tan ücretsiz bir araçtır. STRIDE metodolojisini kullanır ve özellikle Microsoft'un yığını üzerinde geliştirme yapanlar için uygundur.
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}

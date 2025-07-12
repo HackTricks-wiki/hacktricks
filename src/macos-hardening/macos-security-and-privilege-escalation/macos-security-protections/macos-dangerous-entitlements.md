@@ -117,7 +117,7 @@ Bu erişimi kimin sahip olduğunu _Sistem Ayarları_ > _Gizlilik ve Güvenlik_ >
 
 ### `kTCCServiceAccessibility`
 
-Süreç, **macOS erişilebilirlik özelliklerini** **istismar** edebilecektir, bu da örneğin tuş vuruşlarını basabilmesi anlamına gelir. Böylece Finder gibi bir uygulamayı kontrol etmek için erişim talep edebilir ve bu izinle diyalogu onaylayabilir.
+Süreç, **macOS erişilebilirlik özelliklerini** **istismar** edebilecektir, bu da örneğin tuş vuruşlarını basabilmesi anlamına gelir. Bu nedenle, Finder gibi bir uygulamayı kontrol etmek için erişim talep edebilir ve bu izinle diyalogu onaylayabilir.
 
 ## Medium
 
@@ -127,7 +127,7 @@ Bu yetki, `mmap()` sistem fonksiyonuna `MAP_JIT` bayrağını geçirerek **yazı
 
 ### `com.apple.security.cs.allow-unsigned-executable-memory`
 
-Bu yetki, **C kodunu geçersiz kılmaya veya yamanmaya** izin verir, uzun süredir kullanılmayan **`NSCreateObjectFileImageFromMemory`** (temelde güvensizdir) veya **DVDPlayback** çerçevesini kullanabilir. Daha fazla bilgi için [**bunu kontrol edin**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory).
+Bu yetki, **C kodunu geçersiz kılmayı veya yamanmayı** sağlar, uzun süredir kullanılmayan **`NSCreateObjectFileImageFromMemory`** (temelde güvensizdir) veya **DVDPlayback** çerçevesini kullanmayı sağlar. Daha fazla bilgi için [**bunu kontrol edin**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory).
 
 > [!CAUTION]
 > Bu yetkiyi dahil etmek, uygulamanızı bellek-güvensiz kod dillerindeki yaygın güvenlik açıklarına maruz bırakır. Uygulamanızın bu istisnaya ihtiyaç duyup duymadığını dikkatlice değerlendirin.
@@ -160,11 +160,11 @@ Sürecin **tüm TCC izinlerini istemesine** izin verin.
 
 ### **`kTCCServicePostEvent`**
 
-{{#include ../../../banners/hacktricks-training.md}}
+
 
 </details>
 
 
 
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../../banners/hacktricks-training.md}}
