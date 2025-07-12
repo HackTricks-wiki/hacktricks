@@ -6,11 +6,11 @@ Discord의 초대 시스템 취약점은 위협 행위자가 만료되거나 삭
 
 ## 초대 유형 및 탈취 위험
 
-| 초대 유형               | 탈취 가능? | 조건 / 댓글                                                                                          |
-|-----------------------|-------------|-----------------------------------------------------------------------------------------------------|
-| 임시 초대 링크         | ✅          | 만료 후, 코드는 사용 가능해지며 부스트된 서버에 의해 맞춤 URL로 재등록될 수 있습니다.                  |
-| 영구 초대 링크         | ⚠️          | 삭제되고 소문자와 숫자로만 구성된 경우, 코드는 다시 사용 가능해질 수 있습니다.                        |
-| 사용자 정의 맞춤 링크  | ✅          | 원래 서버가 Level 3 Boost를 잃으면, 해당 맞춤 초대는 새로운 등록을 위해 사용 가능해집니다.          |
+| 초대 유형               | 탈취 가능? | 조건 / 비고                                                                                             |
+|-----------------------|-------------|--------------------------------------------------------------------------------------------------------|
+| 임시 초대 링크         | ✅          | 만료 후, 코드는 사용 가능해지며 부스트 서버에 의해 맞춤 URL로 재등록될 수 있습니다.                     |
+| 영구 초대 링크         | ⚠️          | 삭제되고 소문자와 숫자로만 구성된 경우, 코드는 다시 사용 가능해질 수 있습니다.                          |
+| 사용자 정의 맞춤 링크  | ✅          | 원래 서버가 Level 3 Boost를 잃으면, 해당 맞춤 초대는 새로운 등록을 위해 사용 가능해집니다.            |
 
 ## 악용 단계
 
@@ -29,7 +29,7 @@ Discord의 초대 시스템 취약점은 위협 행위자가 만료되거나 삭
 ## Discord 서버를 통한 피싱 흐름
 
 1. 서버 채널을 제한하여 **#verify** 채널만 보이도록 합니다.
-2. 신규 사용자가 OAuth2를 통해 인증하도록 유도하는 봇(예: **Safeguard#0786**)을 배포합니다.
+2. 봇(예: **Safeguard#0786**)을 배포하여 신규 사용자가 OAuth2를 통해 인증하도록 유도합니다.
 3. 봇이 사용자를 피싱 사이트(예: `captchaguard.me`)로 리디렉션합니다. 이는 CAPTCHA 또는 인증 단계의 가장을 씁니다.
 4. **ClickFix** UX 트릭을 구현합니다:
 - 깨진 CAPTCHA 메시지를 표시합니다.
@@ -50,7 +50,7 @@ navigator.clipboard.writeText(cmd);
 
 - 최소한 하나의 대문자 또는 비알파벳 문자가 포함된 영구 초대 링크를 사용하세요 (만료되지 않으며 재사용할 수 없음).
 - 정기적으로 초대 코드를 변경하고 오래된 링크를 취소하세요.
-- Discord 서버 부스트 상태 및 맞춤 URL 청구를 모니터링하세요.
+- Discord 서버 부스트 상태 및 사용자 정의 URL 청구를 모니터링하세요.
 - 사용자에게 서버의 진위를 확인하고 클립보드에 붙여넣은 명령을 실행하지 않도록 교육하세요.
 
 ## 참고 문헌
@@ -58,4 +58,4 @@ navigator.clipboard.writeText(cmd);
 - From Trust to Threat: Hijacked Discord Invites Used for Multi-Stage Malware Delivery – https://research.checkpoint.com/2025/from-trust-to-threat-hijacked-discord-invites-used-for-multi-stage-malware-delivery/
 - Discord Custom Invite Link Documentation – https://support.discord.com/hc/en-us/articles/115001542132-Custom-Invite-Link
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}

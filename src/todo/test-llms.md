@@ -1,6 +1,6 @@
 # Test LLMs
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}
 
 ## Run & train models locally
 
@@ -52,4 +52,4 @@ Axolotl은 LLM을 포함한 AI 모델의 배포, 확장 및 관리를 간소화�
 * **API Access:** 개발자가 자신의 애플리케이션 내에서 모델을 쉽게 배포하고 확장할 수 있도록 하는 간단한 API입니다.
 
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}

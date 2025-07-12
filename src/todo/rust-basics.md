@@ -1,6 +1,6 @@
 # Rust Basics
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}
 
 ### Generic Types
 
@@ -21,7 +21,7 @@ Wrapper::new("Foo").value, "Foo"
 ```
 ### Option, Some & None
 
-Option 타입은 값이 Some 타입일 수 있음을 의미합니다 (무언가가 있음) 또는 None:
+Option 타입은 값이 Some 타입일 수 있음을 의미합니다(무언가가 있음) 또는 None:
 ```rust
 pub enum Option<T> {
 None,
@@ -32,7 +32,7 @@ Some(T),
 
 ### 매크로
 
-매크로는 수동으로 작성한 코드보다 더 많은 코드를 생성하기 때문에 함수보다 더 강력합니다. 예를 들어, 함수 시그니처는 함수가 가지는 매개변수의 수와 유형을 선언해야 합니다. 반면에 매크로는 가변 개수의 매개변수를 받을 수 있습니다: `println!("hello")`를 하나의 인수로 호출하거나 `println!("hello {}", name)`을 두 개의 인수로 호출할 수 있습니다. 또한, 매크로는 컴파일러가 코드의 의미를 해석하기 전에 확장되므로, 매크로는 예를 들어 주어진 유형에 대해 트레이트를 구현할 수 있습니다. 함수는 런타임에 호출되기 때문에 트레이트를 구현할 수 없습니다.
+매크로는 수동으로 작성한 코드보다 더 많은 코드를 생성하기 때문에 함수보다 더 강력합니다. 예를 들어, 함수 시그니처는 함수가 가진 매개변수의 수와 유형을 선언해야 합니다. 반면에 매크로는 가변 개수의 매개변수를 받을 수 있습니다: `println!("hello")`를 하나의 인수로 호출하거나 `println!("hello {}", name)`을 두 개의 인수로 호출할 수 있습니다. 또한, 매크로는 컴파일러가 코드의 의미를 해석하기 전에 확장되므로, 매크로는 예를 들어 주어진 유형에 대해 트레이트를 구현할 수 있습니다. 함수는 런타임에 호출되기 때문에 트레이트를 구현할 수 없습니다; 트레이트는 컴파일 타임에 구현되어야 합니다.
 ```rust
 macro_rules! my_macro {
 () => {
@@ -287,4 +287,4 @@ thread::sleep(Duration::from_millis(500));
 }
 }
 ```
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}

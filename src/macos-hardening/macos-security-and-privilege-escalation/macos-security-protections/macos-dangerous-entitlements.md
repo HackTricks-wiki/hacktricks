@@ -13,32 +13,32 @@
 
 ### **`com.apple.rootless.install`**
 
-권한 **`com.apple.rootless.install`**는 **SIP를 우회**할 수 있게 해줍니다. [자세한 정보는 여기](macos-sip.md#com.apple.rootless.install)를 확인하세요.
+권한 **`com.apple.rootless.install`**은 **SIP를 우회**할 수 있게 해줍니다. [자세한 정보는 여기](macos-sip.md#com.apple.rootless.install)를 확인하세요.
 
 ### **`com.apple.system-task-ports` (이전 이름: `task_for_pid-allow`)**
 
-이 권한은 **커널을 제외한 모든** 프로세스의 **작업 포트**를 얻을 수 있게 해줍니다. [**자세한 정보는 여기**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html)를 확인하세요.
+이 권한은 **커널을 제외한 모든** 프로세스의 **작업 포트**를 얻을 수 있게 해줍니다. [자세한 정보는 여기](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html)를 확인하세요.
 
 ### `com.apple.security.get-task-allow`
 
-이 권한은 **`com.apple.security.cs.debugger`** 권한을 가진 다른 프로세스가 이 권한을 가진 바이너리로 실행된 프로세스의 작업 포트를 얻고 **코드를 주입**할 수 있게 해줍니다. [**자세한 정보는 여기**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html)를 확인하세요.
+이 권한은 **`com.apple.security.cs.debugger`** 권한을 가진 다른 프로세스가 이 권한을 가진 바이너리로 실행된 프로세스의 작업 포트를 얻고 **코드를 주입**할 수 있게 해줍니다. [자세한 정보는 여기](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html)를 확인하세요.
 
 ### `com.apple.security.cs.debugger`
 
-디버깅 도구 권한을 가진 앱은 `task_for_pid()`를 호출하여 서명되지 않은 제3자 앱의 유효한 작업 포트를 검색할 수 있습니다. 그러나 디버깅 도구 권한이 있어도, 디버거는 **`Get Task Allow` 권한이 없는** 프로세스의 작업 포트를 **얻을 수 없습니다**, 따라서 시스템 무결성 보호에 의해 보호됩니다. [**자세한 정보는 여기**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger)를 확인하세요.
+디버깅 도구 권한을 가진 앱은 `task_for_pid()`를 호출하여 서명되지 않은 제3자 앱의 유효한 작업 포트를 검색할 수 있습니다. 그러나 디버깅 도구 권한이 있어도, 디버거는 **`Get Task Allow` 권한이 없는** 프로세스의 작업 포트를 **얻을 수 없습니다**, 따라서 시스템 무결성 보호에 의해 보호됩니다. [자세한 정보는 여기](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger)를 확인하세요.
 
 ### `com.apple.security.cs.disable-library-validation`
 
-이 권한은 **Apple에 의해 서명되지 않거나 메인 실행 파일과 동일한 팀 ID로 서명되지 않은 프레임워크, 플러그인 또는 라이브러리를 로드**할 수 있게 해줍니다. 따라서 공격자는 임의의 라이브러리 로드를 악용하여 코드를 주입할 수 있습니다. [**자세한 정보는 여기**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation)를 확인하세요.
+이 권한은 **Apple에 의해 서명되지 않거나 메인 실행 파일과 동일한 팀 ID로 서명되지 않은 프레임워크, 플러그인 또는 라이브러리를 로드**할 수 있게 해줍니다. 따라서 공격자는 임의의 라이브러리 로드를 악용하여 코드를 주입할 수 있습니다. [자세한 정보는 여기](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation)를 확인하세요.
 
 ### `com.apple.private.security.clear-library-validation`
 
-이 권한은 **`com.apple.security.cs.disable-library-validation`**와 매우 유사하지만, **직접적으로** 라이브러리 검증을 **비활성화하는 대신**, 프로세스가 **`csops` 시스템 호출을 호출하여 비활성화할 수 있게 해줍니다**.\
-[**자세한 정보는 여기**](https://theevilbit.github.io/posts/com.apple.private.security.clear-library-validation/)를 확인하세요.
+이 권한은 **`com.apple.security.cs.disable-library-validation`**와 매우 유사하지만, **직접적으로** 라이브러리 검증을 **비활성화하는 대신**, 프로세스가 **`csops` 시스템 호출을 호출하여 이를 비활성화**할 수 있게 해줍니다.\
+[자세한 정보는 여기](https://theevilbit.github.io/posts/com.apple.private.security.clear-library-validation/)를 확인하세요.
 
 ### `com.apple.security.cs.allow-dyld-environment-variables`
 
-이 권한은 **DYLD 환경 변수를 사용**할 수 있게 해주며, 이는 라이브러리와 코드를 주입하는 데 사용될 수 있습니다. [**자세한 정보는 여기**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables)를 확인하세요.
+이 권한은 **DYLD 환경 변수를 사용**할 수 있게 해주며, 이는 라이브러리와 코드를 주입하는 데 사용될 수 있습니다. [자세한 정보는 여기](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables)를 확인하세요.
 
 ### `com.apple.private.tcc.manager` 또는 `com.apple.rootless.storage`.`TCC`
 
@@ -109,7 +109,7 @@ Or making them perform **임의의 작업**.
 
 ### **`kTCCServiceSystemPolicyAppBundles`**
 
-앱 번들(앱.app 내부) 내의 파일을 수정할 수 있도록 허용하며, 이는 기본적으로 **금지되어** 있습니다.
+앱 번들(앱.app 내부) 내의 파일을 수정할 수 있도록 허용하며, 이는 기본적으로 **금지되어 있습니다**.
 
 <figure><img src="../../../images/image (31).png" alt=""><figcaption></figcaption></figure>
 
@@ -119,7 +119,7 @@ Or making them perform **임의의 작업**.
 
 프로세스는 **macOS 접근성 기능을 악용**할 수 있으며, 예를 들어 키 입력을 누를 수 있습니다. 따라서 Finder와 같은 앱을 제어할 수 있는 접근 권한을 요청하고 이 권한으로 대화 상자를 승인할 수 있습니다.
 
-## 중간
+## Medium
 
 ### `com.apple.security.cs.allow-jit`
 
@@ -156,15 +156,15 @@ TODO
 [Array]
 [String] kTCCServiceAll
 ```
-프로세스가 **모든 TCC 권한을 요청하도록 허용합니다**.
+프로세스가 **모든 TCC 권한을 요청하도록 허용**합니다.
 
 ### **`kTCCServicePostEvent`**
 
-{{#include ../../../banners/hacktricks-training.md}}
+
 
 </details>
 
 
 
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../../banners/hacktricks-training.md}}
