@@ -1,6 +1,6 @@
 # LLM Training - Data Preparation
 
-{{#include /src/banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
 
 **These are my notes from the very recommended book** [**https://www.manning.com/books/build-a-large-language-model-from-scratch**](https://www.manning.com/books/build-a-large-language-model-from-scratch) **with some extra information.**
 
@@ -99,4 +99,4 @@ You should start by reading this post for some basic concepts you should know ab
 7.2.-fine-tuning-to-follow-instructions.md
 {{#endref}}
 
-{{#include /src/banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
