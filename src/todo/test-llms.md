@@ -1,8 +1,8 @@
 # Test LLMs
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}
 
-## Uruchom i trenuj modele lokalnie
+## Uruchamianie i trenowanie modeli lokalnie
 
 ### [**Hugging Face Transformers**](https://github.com/huggingface/transformers)
 
@@ -14,7 +14,7 @@ LangChain to framework zaprojektowany do budowania aplikacji z LLM. Umożliwia p
 
 ### [**LitGPT**](https://github.com/Lightning-AI/litgpt)
 
-LitGPT to projekt opracowany przez Lightning AI, który wykorzystuje framework Lightning do ułatwienia treningu, dostosowywania i wdrażania modeli opartych na GPT. Integruje się bezproblemowo z innymi narzędziami Lightning AI, zapewniając zoptymalizowane przepływy pracy do obsługi modeli językowych w dużej skali z poprawioną wydajnością i skalowalnością.
+LitGPT to projekt opracowany przez Lightning AI, który wykorzystuje framework Lightning do ułatwienia trenowania, dostosowywania i wdrażania modeli opartych na GPT. Integruje się bezproblemowo z innymi narzędziami Lightning AI, zapewniając zoptymalizowane przepływy pracy do obsługi modeli językowych w dużej skali z poprawioną wydajnością i skalowalnością.
 
 ### [**LitServe**](https://github.com/Lightning-AI/LitServe)
 
@@ -34,7 +34,7 @@ Oferuje kilka sekcji, takich jak:
 
 * **Modele**: Ogromny repozytorium **wstępnie wytrenowanych modeli uczenia maszynowego**, w którym użytkownicy mogą przeglądać, pobierać i integrować modele do różnych zadań, takich jak generowanie tekstu, tłumaczenie, rozpoznawanie obrazów i inne.
 * **Zbiory danych:** Kompletna **kolekcja zbiorów danych** używanych do trenowania i oceny modeli. Ułatwia łatwy dostęp do różnorodnych źródeł danych, umożliwiając użytkownikom znajdowanie i wykorzystywanie danych do ich specyficznych projektów uczenia maszynowego.
-* **Przestrzenie:** Platforma do hostowania i dzielenia się **interaktywnymi aplikacjami uczenia maszynowego** i demonstracjami. Umożliwia programistom **prezentowanie** swoich modeli w akcji, tworzenie przyjaznych interfejsów użytkownika oraz współpracę z innymi poprzez dzielenie się na żywo demonstracjami.
+* **Przestrzenie:** Platforma do hostowania i dzielenia się **interaktywnymi aplikacjami uczenia maszynowego** i demonstracjami. Umożliwia programistom **prezentowanie** swoich modeli w akcji, tworzenie przyjaznych interfejsów użytkownika i współpracę z innymi poprzez dzielenie się na żywo demonstracjami.
 
 ## [**TensorFlow Hub**](https://www.tensorflow.org/hub) **&** [**Kaggle**](https://www.kaggle.com/)
 
@@ -51,5 +51,4 @@ Oferuje kilka sekcji, takich jak:
 * **Modele:** Repozytorium modeli uczenia maszynowego wniesionych przez społeczność, które użytkownicy mogą przeglądać, wypróbować i integrować modele w swoich aplikacjach z minimalnym wysiłkiem.
 * **Dostęp do API:** Proste API do uruchamiania modeli, które umożliwia programistom łatwe wdrażanie i skalowanie modeli w ramach ich własnych aplikacji.
 
-
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}

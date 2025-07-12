@@ -1,6 +1,6 @@
 # Hacking Systemów Kontroli Przemysłowej
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
 
 ## O tej sekcji
 
@@ -16,4 +16,4 @@ Systemy Kontroli Przemysłowej mogą być czasami skomplikowane, dlatego wymagaj
 
 Te techniki mogą być również używane do ochrony przed atakami i blue teaming dla systemów kontroli przemysłowej.
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}

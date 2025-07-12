@@ -109,15 +109,15 @@ Pozwala na **zmianę** atrybutu **`NFSHomeDirectory`** użytkownika, co zmienia 
 
 ### **`kTCCServiceSystemPolicyAppBundles`**
 
-Pozwala na modyfikację plików wewnątrz pakietów aplikacji (wewnątrz app.app), co jest **domyślnie zabronione**.
+Pozwala na modyfikację plików wewnątrz pakietu aplikacji (wewnątrz app.app), co jest **domyślnie zabronione**.
 
 <figure><img src="../../../images/image (31).png" alt=""><figcaption></figcaption></figure>
 
-Można sprawdzić, kto ma ten dostęp w _Ustawienia systemowe_ > _Prywatność i bezpieczeństwo_ > _Zarządzanie aplikacjami._
+Można sprawdzić, kto ma ten dostęp w _Ustawieniach systemowych_ > _Prywatność i bezpieczeństwo_ > _Zarządzanie aplikacjami._
 
 ### `kTCCServiceAccessibility`
 
-Proces będzie mógł **nadużywać funkcji dostępności macOS**, co oznacza, że na przykład będzie mógł naciskać klawisze. MOŻE poprosić o dostęp do kontrolowania aplikacji, takiej jak Finder, i zatwierdzić okno dialogowe z tym uprawnieniem.
+Proces będzie mógł **nadużywać funkcji dostępności macOS**, co oznacza, że na przykład będzie mógł naciskać klawisze. MOŻE zatem poprosić o dostęp do kontrolowania aplikacji, takiej jak Finder, i zatwierdzić okno dialogowe z tym uprawnieniem.
 
 ## Medium
 
@@ -127,10 +127,10 @@ To uprawnienie pozwala na **tworzenie pamięci, która jest zapisywalna i wykony
 
 ### `com.apple.security.cs.allow-unsigned-executable-memory`
 
-To uprawnienie pozwala na **nadpisywanie lub patchowanie kodu C**, używanie długo przestarzałej **`NSCreateObjectFileImageFromMemory`** (co jest zasadniczo niebezpieczne) lub korzystanie z frameworka **DVDPlayback**. Sprawdź [**to dla więcej informacji**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory).
+To uprawnienie pozwala na **nadpisywanie lub patchowanie kodu C**, użycie długo przestarzałej **`NSCreateObjectFileImageFromMemory`** (co jest zasadniczo niebezpieczne), lub użycie frameworka **DVDPlayback**. Sprawdź [**to dla więcej informacji**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory).
 
 > [!CAUTION]
-> Włączenie tego uprawnienia naraża Twoją aplikację na powszechne luki w językach programowania, które są niebezpieczne dla pamięci. Dokładnie rozważ, czy Twoja aplikacja potrzebuje tego wyjątku.
+> Włączenie tego uprawnienia naraża Twoją aplikację na powszechne luki w kodzie języków, które nie są bezpieczne w pamięci. Starannie rozważ, czy Twoja aplikacja potrzebuje tego wyjątku.
 
 ### `com.apple.security.cs.disable-executable-page-protection`
 
@@ -160,11 +160,11 @@ Zezwól procesowi na **poproszenie o wszystkie uprawnienia TCC**.
 
 ### **`kTCCServicePostEvent`**
 
-{{#include ../../../banners/hacktricks-training.md}}
+
 
 </details>
 
 
 
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../../banners/hacktricks-training.md}}

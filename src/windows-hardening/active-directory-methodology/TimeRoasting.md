@@ -1,10 +1,10 @@
 # TimeRoasting
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
 
 timeRoasting, główną przyczyną jest przestarzały mechanizm uwierzytelniania pozostawiony przez Microsoft w jego rozszerzeniu do serwerów NTP, znanym jako MS-SNTP. W tym mechanizmie klienci mogą bezpośrednio używać dowolnego identyfikatora względnego (RID) konta komputerowego, a kontroler domeny użyje hasha NTLM konta komputerowego (generowanego przez MD4) jako klucza do wygenerowania **Message Authentication Code (MAC)** pakietu odpowiedzi.
 
-Napastnicy mogą wykorzystać ten mechanizm do uzyskania równoważnych wartości hash dowolnych kont komputerowych bez uwierzytelnienia. Oczywiście, możemy użyć narzędzi takich jak Hashcat do łamania haseł.
+Atakujący mogą wykorzystać ten mechanizm do uzyskania równoważnych wartości hash dowolnych kont komputerowych bez uwierzytelnienia. Oczywiście, możemy użyć narzędzi takich jak Hashcat do łamania haseł.
 
 Specyficzny mechanizm można zobaczyć w sekcji 3.1.5.1 "Zachowanie żądania uwierzytelnienia" w [oficjalnej dokumentacji Windows dla protokołu MS-SNTP](https://winprotocoldoc.z19.web.core.windows.net/MS-SNTP/%5bMS-SNTP%5d.pdf).
 
@@ -37,4 +37,4 @@ Cytat z https://swisskyrepo.github.io/InternalAllTheThings/active-directory/ad-r
 sudo ./timeroast.py 10.0.0.42 | tee ntp-hashes.txt
 hashcat -m 31300 ntp-hashes.txt
 ```
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}

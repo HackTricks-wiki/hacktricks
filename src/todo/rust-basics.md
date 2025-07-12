@@ -1,10 +1,10 @@
 # Podstawy Rust
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}
 
 ### Typy ogólne
 
-Utwórz strukturę, w której 1 z ich wartości może być dowolnym typem
+Utwórz strukturę, w której 1 z ich wartości może być dowolnego typu
 ```rust
 struct Wrapper<T> {
 value: T,
@@ -287,4 +287,4 @@ thread::sleep(Duration::from_millis(500));
 }
 }
 ```
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}

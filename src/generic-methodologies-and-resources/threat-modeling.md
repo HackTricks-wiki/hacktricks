@@ -1,10 +1,10 @@
 # Modelowanie zagrożeń
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}
 
 ## Modelowanie zagrożeń
 
-Witamy w kompleksowym przewodniku HackTricks na temat modelowania zagrożeń! Rozpocznij eksplorację tego krytycznego aspektu cyberbezpieczeństwa, gdzie identyfikujemy, rozumiemy i opracowujemy strategie przeciwko potencjalnym lukom w systemie. Ten wątek służy jako przewodnik krok po kroku, pełen przykładów z życia, pomocnego oprogramowania i łatwych do zrozumienia wyjaśnień. Idealny zarówno dla nowicjuszy, jak i doświadczonych praktyków, którzy chcą wzmocnić swoje obrony w zakresie cyberbezpieczeństwa.
+Witamy w kompleksowym przewodniku HackTricks na temat modelowania zagrożeń! Rozpocznij eksplorację tego krytycznego aspektu cyberbezpieczeństwa, gdzie identyfikujemy, rozumiemy i opracowujemy strategie przeciwko potencjalnym lukom w systemie. Ten wątek służy jako przewodnik krok po kroku, pełen przykładów z rzeczywistego świata, pomocnego oprogramowania i łatwych do zrozumienia wyjaśnień. Idealny zarówno dla nowicjuszy, jak i doświadczonych praktyków, którzy chcą wzmocnić swoje obrony w zakresie cyberbezpieczeństwa.
 
 ### Powszechnie używane scenariusze
 
@@ -23,7 +23,7 @@ Triada CIA to powszechnie uznawany model w dziedzinie bezpieczeństwa informacji
 
 1. **Poufność**: Zapewnienie, że dane lub system nie są dostępne dla nieautoryzowanych osób. To centralny aspekt bezpieczeństwa, wymagający odpowiednich kontroli dostępu, szyfrowania i innych środków zapobiegających naruszeniom danych.
 2. **Integralność**: Dokładność, spójność i wiarygodność danych w całym ich cyklu życia. Ta zasada zapewnia, że dane nie są zmieniane ani manipulowane przez nieautoryzowane strony. Często obejmuje sumy kontrolne, haszowanie i inne metody weryfikacji danych.
-3. **Dostępność**: Zapewnia, że dane i usługi są dostępne dla autoryzowanych użytkowników, gdy są potrzebne. Często obejmuje redundancję, tolerancję na błędy i konfiguracje wysokiej dostępności, aby systemy działały nawet w obliczu zakłóceń.
+3. **Dostępność**: Zapewnia, że dane i usługi są dostępne dla autoryzowanych użytkowników, gdy są potrzebne. Często wiąże się to z redundancją, odpornością na błędy i konfiguracjami wysokiej dostępności, aby systemy działały nawet w obliczu zakłóceń.
 
 ### Metodologie modelowania zagrożeń
 
@@ -76,16 +76,16 @@ Czasami może to wyglądać tak:
 
 4. Stwórz swój model
 
-Możesz użyć narzędzi takich jak SpiderSuite Crawler, aby zainspirować się, podstawowy model może wyglądać mniej więcej tak
+Możesz użyć narzędzi takich jak SpiderSuite Crawler, aby zainspirować się, podstawowy model mógłby wyglądać tak
 
 <figure><img src="../images/0_basic_threat_model.jpg" alt=""><figcaption></figcaption></figure>
 
-Tylko trochę wyjaśnienia dotyczącego podmiotów:
+Tylko trochę wyjaśnienia na temat podmiotów:
 
 - Proces (Podmiot sam w sobie, taki jak serwer WWW lub funkcjonalność webowa)
 - Aktor (Osoba, taka jak odwiedzający stronę, użytkownik lub administrator)
 - Linia przepływu danych (Wskaźnik interakcji)
-- Granica zaufania (Różne segmenty sieci lub zakresy.)
+- Granica zaufania (Różne segmenty lub zakresy sieci.)
 - Magazyn (Miejsca, w których przechowywane są dane, takie jak bazy danych)
 
 5. Utwórz zagrożenie (Krok 1)
@@ -98,7 +98,7 @@ Teraz możesz stworzyć zagrożenie
 
 <figure><img src="../images/4_threatmodel_create-threat.jpg" alt=""><figcaption></figcaption></figure>
 
-Pamiętaj, że istnieje różnica między zagrożeniami aktora a zagrożeniami procesu. Jeśli dodasz zagrożenie do aktora, będziesz mógł wybrać tylko "Spoofing" i "Repudiation". Jednak w naszym przykładzie dodajemy zagrożenie do podmiotu procesu, więc zobaczymy to w oknie tworzenia zagrożenia:
+Pamiętaj, że istnieje różnica między zagrożeniami aktorów a zagrożeniami procesów. Jeśli dodasz zagrożenie do aktora, będziesz mógł wybrać tylko "Spoofing" i "Repudiation". Jednak w naszym przykładzie dodajemy zagrożenie do podmiotu procesu, więc zobaczymy to w oknie tworzenia zagrożenia:
 
 <figure><img src="../images/2_threatmodel_type-option.jpg" alt=""><figcaption></figcaption></figure>
 
@@ -113,4 +113,4 @@ Teraz twój ukończony model powinien wyglądać mniej więcej tak. I tak tworzy
 To darmowe narzędzie od Microsoftu, które pomaga w znajdowaniu zagrożeń w fazie projektowania projektów oprogramowania. Używa metodologii STRIDE i jest szczególnie odpowiednie dla tych, którzy rozwijają na stosie Microsoftu.
 
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}
