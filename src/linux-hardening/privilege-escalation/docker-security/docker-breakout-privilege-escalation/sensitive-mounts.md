@@ -108,17 +108,17 @@ echo b > /proc/sysrq-trigger # Riavvia l'host
 
 #### **`/proc/kmem`**
 
-- Interfaccia alternativa per `/dev/kmem`, rappresenta la memoria virtuale del kernel.
-- Consente lettura e scrittura, quindi modifica diretta della memoria del kernel.
+- Interfaccia alternativa per `/dev/kmem`, che rappresenta la memoria virtuale del kernel.
+- Consente la lettura e la scrittura, quindi la modifica diretta della memoria del kernel.
 
 #### **`/proc/mem`**
 
-- Interfaccia alternativa per `/dev/mem`, rappresenta la memoria fisica.
-- Consente lettura e scrittura, la modifica di tutta la memoria richiede la risoluzione degli indirizzi virtuali in fisici.
+- Interfaccia alternativa per `/dev/mem`, che rappresenta la memoria fisica.
+- Consente la lettura e la scrittura, la modifica di tutta la memoria richiede la risoluzione degli indirizzi virtuali in fisici.
 
 #### **`/proc/sched_debug`**
 
-- Restituisce informazioni sulla pianificazione dei processi, bypassando le protezioni dello spazio dei nomi PID.
+- Restituisce informazioni sulla pianificazione dei processi, eludendo le protezioni dello spazio dei nomi PID.
 - Espone nomi di processi, ID e identificatori cgroup.
 
 #### **`/proc/[pid]/mountinfo`**
@@ -273,10 +273,10 @@ So the filesystems are under `/var/lib/docker/overlay2/`:
 ```bash
 $ sudo ls -la /var/lib/docker/overlay2
 
-drwx--x---  4 root root  4096 9 gen  22:14  00762bca8ea040b1bb28b61baed5704e013ab23a196f5fe4758dafb79dfafd5d
-drwx--x---  4 root root  4096 11 gen 17:00  03cdf4db9a6cc9f187cca6e98cd877d581f16b62d073010571e752c305719496
-drwx--x---  4 root root  4096 9 gen  21:23  049e02afb3f8dec80cb229719d9484aead269ae05afe81ee5880ccde2426ef4f
-drwx--x---  4 root root  4096 9 gen  21:22  062f14e5adbedce75cea699828e22657c8044cd22b68ff1bb152f1a3c8a377f2
+drwx--x---  4 root root  4096 9 gen  22:14 00762bca8ea040b1bb28b61baed5704e013ab23a196f5fe4758dafb79dfafd5d  
+drwx--x---  4 root root  4096 11 gen 17:00 03cdf4db9a6cc9f187cca6e98cd877d581f16b62d073010571e752c305719496  
+drwx--x---  4 root root  4096 9 gen  21:23 049e02afb3f8dec80cb229719d9484aead269ae05afe81ee5880ccde2426ef4f  
+drwx--x---  4 root root  4096 9 gen  21:22 062f14e5adbedce75cea699828e22657c8044cd22b68ff1bb152f1a3c8a377f2  
 <SNIP>
 ```
 
@@ -294,7 +294,7 @@ Mounting certain host Unix sockets or writable pseudo-filesystems is equivalent 
 ```text
 /run/containerd/containerd.sock     # socket CRI di containerd  
 /var/run/crio/crio.sock             # socket di runtime CRI-O  
-/run/podman/podman.sock             # API di Podman (con root o senza root)  
+/run/podman/podman.sock             # API di Podman (con privilegi o senza privilegi)  
 /var/run/kubelet.sock               # API di Kubelet sui nodi Kubernetes  
 /run/firecracker-containerd.sock    # Kata / Firecracker
 ```

