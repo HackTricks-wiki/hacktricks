@@ -1,6 +1,6 @@
 # Osnove Rusta
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}
 
 ### Generički Tipovi
 
@@ -96,7 +96,7 @@ print!("{} is positive", n);
 print!("{} is zero", n);
 }
 ```
-#### usklađivanje
+#### подударање
 ```rust
 match number {
 // Match a single value
@@ -256,7 +256,7 @@ assert_ne!(true, false);
 
 #### Arc
 
-Arc može koristiti Clone da kreira više referenci na objekat kako bi ih prosledio nitima. Kada poslednji pokazivač na vrednost izađe iz opsega, promenljiva se uklanja.
+Arc može koristiti Clone da kreira više referenci na objekat kako bi ih prosledio nitima. Kada poslednji referentni pokazivač na vrednost izađe iz opsega, promenljiva se uklanja.
 ```rust
 use std::sync::Arc;
 let apple = Arc::new("the same apple");
@@ -287,4 +287,4 @@ thread::sleep(Duration::from_millis(500));
 }
 }
 ```
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}

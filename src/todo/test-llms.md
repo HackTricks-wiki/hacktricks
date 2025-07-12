@@ -1,6 +1,6 @@
 # Test LLMs
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}
 
 ## Pokrenite i trenirajte modele lokalno
 
@@ -19,7 +19,7 @@ LitGPT je projekat koji je razvila Lightning AI i koji koristi Lightning okvir z
 ### [**LitServe**](https://github.com/Lightning-AI/LitServe)
 
 **Opis:**\
-LitServe je alat za implementaciju iz Lightning AI dizajniran za brzo i efikasno implementiranje AI modela. Pojednostavljuje integraciju LLM-ova u aplikacije u realnom vremenu pružajući skalabilne i optimizovane mogućnosti usluge.
+LitServe je alat za implementaciju iz Lightning AI dizajniran za brzo i efikasno implementiranje AI modela. Pojednostavljuje integraciju LLM-ova u aplikacije u realnom vremenu pružajući skalabilne i optimizovane mogućnosti usluživanja.
 
 ### [**Axolotl**](https://github.com/axolotl-ai-cloud/axolotl)
 
@@ -33,7 +33,7 @@ Axolotl je platforma zasnovana na oblaku dizajnirana za pojednostavljenje implem
 Nudi nekoliko sekcija kao što su:
 
 * **Modeli**: Ogroman repozitorij **unapred obučenih modela mašinskog učenja** gde korisnici mogu pretraživati, preuzimati i integrisati modele za razne zadatke kao što su generisanje teksta, prevođenje, prepoznavanje slika i još mnogo toga.
-* **Skupovi podataka:** Sveobuhvatna **kolekcija skupova podataka** korišćenih za obučavanje i evaluaciju modela. Olakšava lak pristup raznolikim izvorima podataka, omogućavajući korisnicima da pronađu i iskoriste podatke za svoje specifične projekte mašinskog učenja.
+* **Skupovi podataka:** Sveobuhvatna **kolekcija skupova podataka** korišćenih za obučavanje i evaluaciju modela. Olakšava lak pristup raznolikim izvorima podataka, omogućavajući korisnicima da pronađu i koriste podatke za svoje specifične projekte mašinskog učenja.
 * **Prostori:** Platforma za hostovanje i deljenje **interaktivnih aplikacija mašinskog učenja** i demo verzija. Omogućava programerima da **prikažu** svoje modele u akciji, kreiraju korisnički prijateljske interfejse i sarađuju sa drugima deljenjem live demo verzija.
 
 ## [**TensorFlow Hub**](https://www.tensorflow.org/hub) **&** [**Kaggle**](https://www.kaggle.com/)
@@ -48,7 +48,8 @@ Nudi nekoliko sekcija kao što su:
 
 **Replicate** je platforma koja omogućava programerima da pokreću modele mašinskog učenja u oblaku putem jednostavnog API-ja. Fokusira se na to da ML modeli budu lako dostupni i implementabilni bez potrebe za opsežnim postavljanjem infrastrukture.
 
-* **Modeli:** Repozitorij modela mašinskog učenja koje je doprinela zajednica, gde korisnici mogu pretraživati, isprobavati i integrisati modele u svoje aplikacije uz minimalan trud.
+* **Modeli:** Repozitorij modela mašinskog učenja koje je doprinela zajednica, a koji korisnici mogu pretraživati, isprobavati i integrisati u svoje aplikacije uz minimalan trud.
 * **API pristup:** Jednostavni API-ji za pokretanje modela koji omogućavaju programerima da lako implementiraju i skaliraju modele unutar svojih aplikacija.
 
-{{#include /banners/hacktricks-training.md}}
+
+{{#include ../banners/hacktricks-training.md}}

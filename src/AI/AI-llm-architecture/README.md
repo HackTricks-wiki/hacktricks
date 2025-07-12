@@ -1,12 +1,12 @@
 # LLM Trening - Priprema Podataka
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
 
 **Ovo su moje beleške iz veoma preporučene knjige** [**https://www.manning.com/books/build-a-large-language-model-from-scratch**](https://www.manning.com/books/build-a-large-language-model-from-scratch) **sa dodatnim informacijama.**
 
 ## Osnovne Informacije
 
-Trebalo bi da počnete čitanjem ovog posta za neke osnovne koncepte koje treba da znate:
+Trebalo bi da počnete čitanjem ovog posta za neke osnovne koncepte koje treba da znate o:
 
 {{#ref}}
 0.-basic-llm-concepts.md
@@ -30,13 +30,13 @@ Trebalo bi da počnete čitanjem ovog posta za neke osnovne koncepte koje treba 
 2.-data-sampling.md
 {{#endref}}
 
-## 3. Token Ugradnje
+## 3. Token Umetanja
 
 > [!TIP]
 > Cilj ove treće faze je veoma jednostavan: **Dodeliti svakom od prethodnih tokena u rečniku vektor željenih dimenzija za obuku modela.** Svaka reč u rečniku će biti tačka u prostoru X dimenzija.\
 > Imajte na umu da je inicijalno pozicija svake reči u prostoru samo "nasumično" inicijalizovana i te pozicije su parametri koji se mogu obučavati (biće poboljšani tokom obuke).
 >
-> Štaviše, tokom ugradnje tokena **stvara se još jedan sloj ugradnji** koji predstavlja (u ovom slučaju) **apsolutnu poziciju reči u rečenici za obuku**. Na ovaj način, reč na različitim pozicijama u rečenici će imati različitu reprezentaciju (značenje).
+> Štaviše, tokom umetanja tokena **stvara se još jedan sloj umetanja** koji predstavlja (u ovom slučaju) **apsolutnu poziciju reči u rečenici za obuku**. Na ovaj način, reč na različitim pozicijama u rečenici će imati različitu reprezentaciju (značenje).
 
 {{#ref}}
 3.-token-embeddings.md
@@ -45,7 +45,7 @@ Trebalo bi da počnete čitanjem ovog posta za neke osnovne koncepte koje treba 
 ## 4. Mehanizmi Pažnje
 
 > [!TIP]
-> Cilj ove četvrte faze je veoma jednostavan: **Primena nekih mehanizama pažnje**. Ovi će biti mnogo **ponovljenih slojeva** koji će **uhvatiti odnos reči u rečniku sa njenim susedima u trenutnoj rečenici koja se koristi za obuku LLM-a**.\
+> Cilj ove četvrte faze je veoma jednostavan: **Primena nekih mehanizama pažnje**. Ovi će biti mnogi **ponovljeni slojevi** koji će **uhvatiti odnos reči u rečniku sa njenim susedima u trenutnoj rečenici koja se koristi za obuku LLM-a**.\
 > Za ovo se koristi mnogo slojeva, tako da će mnogo parametara koji se mogu obučavati uhvatiti ove informacije.
 
 {{#ref}}
@@ -99,4 +99,4 @@ Trebalo bi da počnete čitanjem ovog posta za neke osnovne koncepte koje treba 
 7.2.-fine-tuning-to-follow-instructions.md
 {{#endref}}
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
