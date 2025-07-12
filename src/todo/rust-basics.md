@@ -1,8 +1,8 @@
 # Rust Basics
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}
 
-### Γενικοί Τύποι
+### Generic Types
 
 Δημιουργήστε μια δομή όπου 1 από τις τιμές τους θα μπορούσε να είναι οποιοσδήποτε τύπος
 ```rust
@@ -267,9 +267,9 @@ println!("{:?}", apple);
 });
 }
 ```
-#### Νήματα
+#### Threads
 
-Σε αυτή την περίπτωση θα περάσουμε στο νήμα μια μεταβλητή που θα μπορεί να τροποποιήσει
+Σε αυτή την περίπτωση θα περάσουμε το νήμα μια μεταβλητή που θα μπορεί να τροποποιήσει
 ```rust
 fn main() {
 let status = Arc::new(Mutex::new(JobStatus { jobs_completed: 0 }));
@@ -287,4 +287,4 @@ thread::sleep(Duration::from_millis(500));
 }
 }
 ```
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}

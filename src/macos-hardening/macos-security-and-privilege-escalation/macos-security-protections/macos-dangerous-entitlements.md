@@ -25,7 +25,7 @@
 
 ### `com.apple.security.cs.debugger`
 
-Οι εφαρμογές με το Entitlement Εργαλείου Αποσφαλμάτωσης μπορούν να καλέσουν `task_for_pid()` για να ανακτήσουν ένα έγκυρο task port για μη υπογεγραμμένες και τρίτες εφαρμογές με το entitlement `Get Task Allow` ρυθμισμένο σε `true`. Ωστόσο, ακόμη και με το entitlement εργαλείου αποσφαλμάτωσης, ένας αποσφαλματωτής **δεν μπορεί να αποκτήσει τα task ports** διαδικασιών που **δεν έχουν το entitlement `Get Task Allow`**, και που είναι επομένως προστατευμένες από την Προστασία Ακεραιότητας Συστήματος. Δείτε [**αυτό για περισσότερες πληροφορίες**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger).
+Οι εφαρμογές με το Entitlement Εργαλείου Αποσφαλμάτωσης μπορούν να καλέσουν `task_for_pid()` για να ανακτήσουν ένα έγκυρο task port για μη υπογεγραμμένες και τρίτες εφαρμογές με το entitlement `Get Task Allow` ρυθμισμένο σε `true`. Ωστόσο, ακόμη και με το entitlement εργαλείου αποσφαλμάτωσης, ένας αποσφαλματωτής **δεν μπορεί να αποκτήσει τα task ports** διαδικασιών που **δεν έχουν το entitlement `Get Task Allow`**, και οι οποίες προστατεύονται από την Προστασία Ακεραιότητας Συστήματος. Δείτε [**αυτό για περισσότερες πληροφορίες**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger).
 
 ### `com.apple.security.cs.disable-library-validation`
 
@@ -54,11 +54,11 @@ Entitlement που απαιτείται για να ζητήσει από τον
 
 ### **`com.apple.private.icloud-account-access`**
 
-Το entitlement **`com.apple.private.icloud-account-access`** επιτρέπει την επικοινωνία με την υπηρεσία XPC **`com.apple.iCloudHelper`** που θα **παρέχει tokens iCloud**.
+Το entitlement **`com.apple.private.icloud-account-access`** επιτρέπει την επικοινωνία με την υπηρεσία XPC **`com.apple.iCloudHelper`** η οποία θα **παρέχει tokens iCloud**.
 
 Το **iMovie** και το **Garageband** είχαν αυτό το entitlement.
 
-Για περισσότερες **πληροφορίες** σχετικά με την εκμετάλλευση για **να αποκτήσετε tokens icloud** από αυτό το entitlement, δείτε την ομιλία: [**#OBTS v5.0: "Τι συμβαίνει στον υπολογιστή σας, παραμένει στο iCloud της Apple;!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
+Για περισσότερες **πληροφορίες** σχετικά με την εκμετάλλευση για **να αποκτήσετε tokens icloud** από αυτό το entitlement δείτε την ομιλία: [**#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
 
 ### `com.apple.private.tcc.manager.check-by-audit-token`
 
@@ -93,7 +93,7 @@ TODO: Στο [**αυτό το αναφορά**](https://jhftss.github.io/The-Nig
 
 Επιτρέπει στην εφαρμογή να στέλνει γεγονότα σε άλλες εφαρμογές που χρησιμοποιούνται συνήθως για **αυτοματοποίηση εργασιών**. Ελέγχοντας άλλες εφαρμογές, μπορεί να καταχραστεί τις άδειες που έχουν παραχωρηθεί σε αυτές τις άλλες εφαρμογές.
 
-Όπως να τις κάνει να ζητούν από τον χρήστη τον κωδικό του:
+Όπως το να τις κάνει να ζητούν από τον χρήστη τον κωδικό του:
 ```bash
 osascript -e 'tell app "App Store" to activate' -e 'tell app "App Store" to activate' -e 'tell app "App Store" to display dialog "App Store requires your password to continue." & return & return default answer "" with icon 1 with hidden answer with title "App Store Alert"'
 ```
@@ -113,7 +113,7 @@ osascript -e 'tell app "App Store" to activate' -e 'tell app "App Store" to acti
 
 <figure><img src="../../../images/image (31).png" alt=""><figcaption></figcaption></figure>
 
-Είναι δυνατόν να ελεγχθεί ποιος έχει αυτή την πρόσβαση στο _System Settings_ > _Privacy & Security_ > _App Management._
+Είναι δυνατή η επαλήθευση του ποιος έχει αυτή την πρόσβαση στο _System Settings_ > _Privacy & Security_ > _App Management._
 
 ### `kTCCServiceAccessibility`
 
@@ -134,7 +134,7 @@ osascript -e 'tell app "App Store" to activate' -e 'tell app "App Store" to acti
 
 ### `com.apple.security.cs.disable-executable-page-protection`
 
-Αυτή η άδεια επιτρέπει να **τροποποιήσει τμήματα των εκτελέσιμων αρχείων της** στο δίσκο για να εξαναγκάσει την έξοδο. Δείτε [**αυτό για περισσότερες πληροφορίες**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-executable-page-protection).
+Αυτή η άδεια επιτρέπει να **τροποποιήσει τμήματα των δικών της εκτελέσιμων αρχείων** στο δίσκο για να εξαναγκάσει την έξοδο. Δείτε [**αυτό για περισσότερες πληροφορίες**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-executable-page-protection).
 
 > [!CAUTION]
 > Η Άδεια Απενεργοποίησης Προστασίας Εκτελέσιμης Μνήμης είναι μια ακραία άδεια που αφαιρεί μια θεμελιώδη προστασία ασφαλείας από την εφαρμογή σας, καθιστώντας δυνατή την αναγραφή του εκτελέσιμου κώδικα της εφαρμογής σας χωρίς ανίχνευση. Προτιμήστε στενότερες άδειες αν είναι δυνατόν.
@@ -160,11 +160,11 @@ TODO
 
 ### **`kTCCServicePostEvent`**
 
-{{#include ../../../banners/hacktricks-training.md}}
+
 
 </details>
 
 
 
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../../banners/hacktricks-training.md}}
