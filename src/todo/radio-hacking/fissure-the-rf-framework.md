@@ -1,10 +1,10 @@
 # FISSURE - Le cadre RF
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
 
 **Compréhension et ingénierie inverse des signaux SDR indépendants de la fréquence**
 
-FISSURE est un cadre RF et d'ingénierie inverse open-source conçu pour tous les niveaux de compétence avec des hooks pour la détection et la classification des signaux, la découverte de protocoles, l'exécution d'attaques, la manipulation IQ, l'analyse de vulnérabilités, l'automatisation et l'IA/ML. Le cadre a été construit pour promouvoir l'intégration rapide de modules logiciels, de radios, de protocoles, de données de signaux, de scripts, de graphiques de flux, de matériel de référence et d'outils tiers. FISSURE est un facilitateur de flux de travail qui garde les logiciels en un seul endroit et permet aux équipes de se mettre rapidement à jour tout en partageant la même configuration de base éprouvée pour des distributions Linux spécifiques.
+FISSURE est un cadre RF et d'ingénierie inverse open-source conçu pour tous les niveaux de compétence avec des hooks pour la détection et la classification des signaux, la découverte de protocoles, l'exécution d'attaques, la manipulation IQ, l'analyse de vulnérabilités, l'automatisation et l'IA/ML. Le cadre a été construit pour promouvoir l'intégration rapide de modules logiciels, de radios, de protocoles, de données de signaux, de scripts, de graphes de flux, de matériel de référence et d'outils tiers. FISSURE est un facilitateur de flux de travail qui garde les logiciels en un seul endroit et permet aux équipes de se mettre rapidement à jour tout en partageant la même configuration de base éprouvée pour des distributions Linux spécifiques.
 
 Le cadre et les outils inclus avec FISSURE sont conçus pour détecter la présence d'énergie RF, comprendre les caractéristiques d'un signal, collecter et analyser des échantillons, développer des techniques de transmission et/ou d'injection, et créer des charges utiles ou des messages personnalisés. FISSURE contient une bibliothèque croissante d'informations sur les protocoles et les signaux pour aider à l'identification, à la création de paquets et au fuzzing. Des capacités d'archive en ligne existent pour télécharger des fichiers de signaux et créer des listes de lecture pour simuler le trafic et tester des systèmes.
 
@@ -80,7 +80,7 @@ Référez-vous au menu d'aide de FISSURE pour plus de détails sur l'utilisation
 * Hub central (HIPRFISR)
 * Identification du signal cible (TSI)
 * Découverte de protocole (PD)
-* Graphique de flux et exécuteur de script (FGE)
+* Graphique de flux & Exécuteur de script (FGE)
 
 ![components](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/components.png)
 
@@ -93,7 +93,7 @@ Référez-vous au menu d'aide de FISSURE pour plus de détails sur l'utilisation
 
 **Matériel**
 
-Voici une liste de matériel "supporté" avec des niveaux d'intégration variés :
+La liste suivante présente le matériel "supporté" avec des niveaux d'intégration variés :
 
 * USRP : X3xx, B2xx, B20xmini, USRP2, N2xx
 * HackRF
@@ -109,10 +109,10 @@ Voici une liste de matériel "supporté" avec des niveaux d'intégration variés
 FISSURE est livré avec plusieurs guides utiles pour se familiariser avec différentes technologies et techniques. Beaucoup incluent des étapes pour utiliser divers outils intégrés dans FISSURE.
 
 * [Leçon1 : OpenBTS](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson1\_OpenBTS.md)
-* [Leçon2 : Dissécateurs Lua](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson2\_LuaDissectors.md)
+* [Leçon2 : Lua Dissectors](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson2\_LuaDissectors.md)
 * [Leçon3 : Sound eXchange](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson3\_Sound\_eXchange.md)
-* [Leçon4 : Cartes ESP](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson4\_ESP\_Boards.md)
-* [Leçon5 : Suivi de radiosondes](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson5\_Radiosonde\_Tracking.md)
+* [Leçon4 : ESP Boards](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson4\_ESP\_Boards.md)
+* [Leçon5 : Suivi de Radiosonde](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson5\_Radiosonde\_Tracking.md)
 * [Leçon6 : RFID](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson6\_RFID.md)
 * [Leçon7 : Types de données](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson7\_Data\_Types.md)
 * [Leçon8 : Blocs GNU Radio personnalisés](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson8\_Custom\_GNU\_Radio\_Blocks.md)
@@ -145,11 +145,11 @@ Les contributions pour améliorer FISSURE sont cruciales pour accélérer son d�
 
 1. Forkez le projet
 2. Créez votre branche de fonctionnalité (`git checkout -b feature/AmazingFeature`)
-3. Validez vos modifications (`git commit -m 'Ajoutez une AmazingFeature'`)
+3. Engagez vos modifications (`git commit -m 'Ajoutez une AmazingFeature'`)
 4. Poussez vers la branche (`git push origin feature/AmazingFeature`)
 5. Ouvrez une demande de tirage
 
-Créer des [Issues](https://github.com/ainfosec/FISSURE/issues) pour attirer l'attention sur les bogues est également bienvenu.
+Créer des [Problèmes](https://github.com/ainfosec/FISSURE/issues) pour attirer l'attention sur les bogues est également bienvenu.
 
 ## Collaboration
 
@@ -179,6 +179,6 @@ Nous reconnaissons et sommes reconnaissants envers ces développeurs :
 
 ## Remerciements
 
-Remerciements spéciaux à Dr. Samuel Mantravadi et Joseph Reith pour leurs contributions à ce projet.
+Un remerciement spécial à Dr. Samuel Mantravadi et Joseph Reith pour leurs contributions à ce projet.
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}

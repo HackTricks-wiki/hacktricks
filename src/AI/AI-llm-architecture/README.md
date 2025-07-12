@@ -1,12 +1,12 @@
 # LLM Training - Data Preparation
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
 
 **Ce sont mes notes du livre très recommandé** [**https://www.manning.com/books/build-a-large-language-model-from-scratch**](https://www.manning.com/books/build-a-large-language-model-from-scratch) **avec quelques informations supplémentaires.**
 
 ## Basic Information
 
-Vous devriez commencer par lire ce post pour quelques concepts de base que vous devriez connaître :
+Vous devriez commencer par lire ce post pour quelques concepts de base que vous devez connaître :
 
 {{#ref}}
 0.-basic-llm-concepts.md
@@ -36,7 +36,7 @@ Vous devriez commencer par lire ce post pour quelques concepts de base que vous 
 > L'objectif de cette troisième phase est très simple : **Attribuer à chacun des tokens précédents dans le vocabulaire un vecteur des dimensions souhaitées pour entraîner le modèle.** Chaque mot dans le vocabulaire sera un point dans un espace de X dimensions.\
 > Notez qu'initialement, la position de chaque mot dans l'espace est simplement initialisée "au hasard" et ces positions sont des paramètres entraînables (seront améliorés pendant l'entraînement).
 >
-> De plus, pendant l'embedding des tokens, **une autre couche d'embeddings est créée** qui représente (dans ce cas) la **position absolue du mot dans la phrase d'entraînement**. De cette manière, un mot à différentes positions dans la phrase aura une représentation différente (signification).
+> De plus, pendant l'embedding des tokens, **une autre couche d'embeddings est créée** qui représente (dans ce cas) la **position absolue du mot dans la phrase d'entraînement**. De cette façon, un mot à différentes positions dans la phrase aura une représentation différente (signification).
 
 {{#ref}}
 3.-token-embeddings.md
@@ -45,7 +45,7 @@ Vous devriez commencer par lire ce post pour quelques concepts de base que vous 
 ## 4. Attention Mechanisms
 
 > [!TIP]
-> L'objectif de cette quatrième phase est très simple : **Appliquer certains mécanismes d'attention**. Ce seront beaucoup de **couches répétées** qui vont **capturer la relation d'un mot dans le vocabulaire avec ses voisins dans la phrase actuelle utilisée pour entraîner le LLM**.\
+> L'objectif de cette quatrième phase est très simple : **Appliquer certains mécanismes d'attention**. Ceux-ci vont être beaucoup de **couches répétées** qui vont **capturer la relation d'un mot dans le vocabulaire avec ses voisins dans la phrase actuelle utilisée pour entraîner le LLM**.\
 > Beaucoup de couches sont utilisées pour cela, donc beaucoup de paramètres entraînables vont capturer cette information.
 
 {{#ref}}
@@ -99,4 +99,4 @@ Vous devriez commencer par lire ce post pour quelques concepts de base que vous 
 7.2.-fine-tuning-to-follow-instructions.md
 {{#endref}}
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}

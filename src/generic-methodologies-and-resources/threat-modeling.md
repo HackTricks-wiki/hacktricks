@@ -1,6 +1,6 @@
 # Modélisation des Menaces
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}
 
 ## Modélisation des Menaces
 
@@ -15,7 +15,7 @@ Bienvenue dans le guide complet de HackTricks sur la Modélisation des Menaces !
 
 Un Modèle de Menace est généralement représenté sous la forme d'un diagramme, d'une image ou d'une autre forme d'illustration visuelle qui décrit l'architecture prévue ou la construction existante d'une application. Il ressemble à un **diagramme de flux de données**, mais la distinction clé réside dans son design orienté sécurité.
 
-Les modèles de menaces présentent souvent des éléments marqués en rouge, symbolisant des vulnérabilités, des risques ou des barrières potentielles. Pour rationaliser le processus d'identification des risques, le triade CIA (Confidentialité, Intégrité, Disponibilité) est employée, formant la base de nombreuses méthodologies de modélisation des menaces, avec STRIDE étant l'une des plus courantes. Cependant, la méthodologie choisie peut varier en fonction du contexte et des exigences spécifiques.
+Les modèles de menaces présentent souvent des éléments marqués en rouge, symbolisant des vulnérabilités, des risques ou des barrières potentielles. Pour rationaliser le processus d'identification des risques, le triade CIA (Confidentialité, Intégrité, Disponibilité) est utilisée, formant la base de nombreuses méthodologies de modélisation des menaces, STRIDE étant l'une des plus courantes. Cependant, la méthodologie choisie peut varier en fonction du contexte et des exigences spécifiques.
 
 ### La Triade CIA
 
@@ -23,7 +23,7 @@ La Triade CIA est un modèle largement reconnu dans le domaine de la sécurité 
 
 1. **Confidentialité** : Assurer que les données ou le système ne sont pas accessibles par des individus non autorisés. C'est un aspect central de la sécurité, nécessitant des contrôles d'accès appropriés, le chiffrement et d'autres mesures pour prévenir les violations de données.
 2. **Intégrité** : L'exactitude, la cohérence et la fiabilité des données tout au long de leur cycle de vie. Ce principe garantit que les données ne sont pas modifiées ou altérées par des parties non autorisées. Il implique souvent des sommes de contrôle, du hachage et d'autres méthodes de vérification des données.
-3. **Disponibilité** : Cela garantit que les données et les services sont accessibles aux utilisateurs autorisés lorsque nécessaire. Cela implique souvent de la redondance, de la tolérance aux pannes et des configurations de haute disponibilité pour maintenir les systèmes opérationnels même en cas de perturbations.
+3. **Disponibilité** : Cela garantit que les données et les services sont accessibles aux utilisateurs autorisés lorsque cela est nécessaire. Cela implique souvent de la redondance, de la tolérance aux pannes et des configurations de haute disponibilité pour maintenir les systèmes en fonctionnement même en cas de perturbations.
 
 ### Méthodologies de Modélisation des Menaces
 
@@ -31,7 +31,7 @@ La Triade CIA est un modèle largement reconnu dans le domaine de la sécurité 
 2. **DREAD** : C'est une autre méthodologie de Microsoft utilisée pour l'évaluation des risques des menaces identifiées. DREAD signifie **Damage potential, Reproducibility, Exploitability, Affected users, and Discoverability**. Chacun de ces facteurs est noté, et le résultat est utilisé pour prioriser les menaces identifiées.
 3. **PASTA** (Process for Attack Simulation and Threat Analysis) : C'est une méthodologie en sept étapes, **centrée sur le risque**. Elle inclut la définition et l'identification des objectifs de sécurité, la création d'un périmètre technique, la décomposition de l'application, l'analyse des menaces, l'analyse des vulnérabilités et l'évaluation des risques/triage.
 4. **Trike** : C'est une méthodologie basée sur le risque qui se concentre sur la défense des actifs. Elle part d'une perspective de **gestion des risques** et examine les menaces et les vulnérabilités dans ce contexte.
-5. **VAST** (Visual, Agile, and Simple Threat modeling) : Cette approche vise à être plus accessible et s'intègre dans les environnements de développement Agile. Elle combine des éléments des autres méthodologies et se concentre sur **les représentations visuelles des menaces**.
+5. **VAST** (Visual, Agile, and Simple Threat modeling) : Cette approche vise à être plus accessible et s'intègre dans des environnements de développement Agile. Elle combine des éléments des autres méthodologies et se concentre sur **les représentations visuelles des menaces**.
 6. **OCTAVE** (Operationally Critical Threat, Asset, and Vulnerability Evaluation) : Développé par le CERT Coordination Center, ce cadre est orienté vers **l'évaluation des risques organisationnels plutôt que des systèmes ou logiciels spécifiques**.
 
 ## Outils
@@ -40,7 +40,7 @@ Il existe plusieurs outils et solutions logicielles disponibles qui peuvent **ai
 
 ### [SpiderSuite](https://github.com/3nock/SpiderSuite)
 
-Un outil GUI de web spider/crawler multi-fonction et multiplateforme avancé pour les professionnels de la cybersécurité. Spider Suite peut être utilisé pour la cartographie et l'analyse de la surface d'attaque.
+Un outil GUI web spider/crawler multi-fonction et multiplateforme avancé pour les professionnels de la cybersécurité. Spider Suite peut être utilisé pour la cartographie et l'analyse de la surface d'attaque.
 
 **Utilisation**
 
@@ -113,4 +113,4 @@ Maintenant, votre modèle terminé devrait ressembler à quelque chose comme cec
 C'est un outil gratuit de Microsoft qui aide à trouver des menaces dans la phase de conception des projets logiciels. Il utilise la méthodologie STRIDE et est particulièrement adapté à ceux qui développent sur la pile de Microsoft.
 
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}

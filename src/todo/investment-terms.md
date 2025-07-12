@@ -1,10 +1,10 @@
 # Termes d'Investissement
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}
 
 ## Spot
 
-C'est le moyen le plus basique de faire du trading. Vous pouvez **indiquer le montant de l'actif et le prix** que vous souhaitez acheter ou vendre, et dès que ce prix est atteint, l'opération est effectuée.
+C'est le moyen le plus basique de faire du trading. Vous pouvez **indiquer le montant de l'actif et le prix** auquel vous souhaitez acheter ou vendre, et dès que ce prix est atteint, l'opération est effectuée.
 
 En général, vous pouvez également utiliser le **prix du marché actuel** afin d'effectuer la transaction aussi rapidement que possible au prix actuel.
 
@@ -20,12 +20,12 @@ Cependant, cela est intéressant par exemple pour les entreprises qui génèrent
 
 Bien que dans les échanges, cela soit généralement utilisé pour essayer de réaliser un profit.
 
-* Remarquez qu'une "position longue" signifie que quelqu'un parie qu'un prix va augmenter.
-* Alors qu'une "position courte" signifie que quelqu'un parie qu'un prix va baisser.
+* Remarque qu'une "position longue" signifie que quelqu'un parie qu'un prix va augmenter
+* Alors qu'une "position courte" signifie que quelqu'un parie qu'un prix va baisser
 
 ### Couverture avec des Futures <a href="#mntl-sc-block_7-0" id="mntl-sc-block_7-0"></a>
 
-Si un gestionnaire de fonds craint que certaines actions vont baisser, il pourrait prendre une position courte sur certains actifs comme des bitcoins ou des contrats à terme S\&P 500. Cela serait similaire à acheter ou posséder des actifs et créer un contrat pour les vendre à un moment futur à un prix plus élevé.
+Si un gestionnaire de fonds craint que certaines actions vont baisser, il pourrait prendre une position courte sur certains actifs comme des bitcoins ou des contrats à terme S\&P 500. Cela serait similaire à acheter ou avoir certains actifs et créer un contrat pour les vendre à un moment futur à un prix plus élevé.
 
 Dans le cas où le prix baisse, le gestionnaire de fonds gagnera des bénéfices car il vendra les actifs à un prix plus élevé. Si le prix des actifs augmente, le gestionnaire ne gagnera pas ce bénéfice mais il conservera ses actifs.
 
@@ -33,7 +33,7 @@ Dans le cas où le prix baisse, le gestionnaire de fonds gagnera des bénéfices
 
 **Ce sont des "futures" qui dureront indéfiniment** (sans date de contrat de fin). Il est très courant de les trouver par exemple dans les échanges de crypto où vous pouvez entrer et sortir des futures en fonction du prix des cryptos.
 
-Remarquez que dans ces cas, les bénéfices et les pertes peuvent être en temps réel, si le prix augmente de 1%, vous gagnez 1%, si le prix diminue de 1%, vous le perdrez.
+Remarque qu dans ces cas, les bénéfices et les pertes peuvent être en temps réel, si le prix augmente de 1%, vous gagnez 1%, si le prix diminue de 1%, vous le perdrez.
 
 ### Futures avec Effet de Levier
 
@@ -51,13 +51,13 @@ Cependant, l'acheteur paiera des frais au vendeur pour ouvrir l'option (de sorte
 
 ### 1. **Obligation vs. Droit :**
 
-* **Futures :** Lorsque vous achetez ou vendez un contrat à terme, vous entrez dans un **accord contraignant** pour acheter ou vendre un actif à un prix spécifique à une date future. L'acheteur et le vendeur sont tous deux **obligés** de remplir le contrat à l'expiration (sauf si le contrat est clôturé avant cela).
+* **Futures :** Lorsque vous achetez ou vendez un contrat à terme, vous entrez dans un **accord contraignant** pour acheter ou vendre un actif à un prix spécifique à une date future. L'acheteur et le vendeur sont tous deux **obligés** de respecter le contrat à l'expiration (sauf si le contrat est clôturé avant cela).
 * **Options :** Avec les options, vous avez le **droit, mais pas l'obligation**, d'acheter (dans le cas d'une **option d'achat**) ou de vendre (dans le cas d'une **option de vente**) un actif à un prix spécifique avant ou à une certaine date d'expiration. L'**acheteur** a l'option d'exécuter, tandis que le **vendeur** est obligé de remplir la transaction si l'acheteur décide d'exercer l'option.
 
 ### 2. **Risque :**
 
 * **Futures :** L'acheteur et le vendeur prennent un **risque illimité** car ils sont obligés de compléter le contrat. Le risque est la différence entre le prix convenu et le prix du marché à la date d'expiration.
-* **Options :** Le risque de l'acheteur est limité à la **prime** payée pour acheter l'option. Si le marché ne se déplace pas en faveur du titulaire de l'option, il peut simplement laisser l'option expirer. Cependant, le **vendeur** (émetteur) de l'option a un risque illimité si le marché se déplace significativement contre lui.
+* **Options :** Le risque de l'acheteur est limité à la **prime** payée pour acheter l'option. Si le marché ne bouge pas en faveur du titulaire de l'option, il peut simplement laisser l'option expirer. Cependant, le **vendeur** (émetteur) de l'option a un risque illimité si le marché évolue de manière significative contre lui.
 
 ### 3. **Coût :**
 
@@ -67,6 +67,6 @@ Cependant, l'acheteur paiera des frais au vendeur pour ouvrir l'option (de sorte
 ### 4. **Potentiel de Profit :**
 
 * **Futures :** Le profit ou la perte est basé sur la différence entre le prix du marché à l'expiration et le prix convenu dans le contrat.
-* **Options :** L'acheteur profite lorsque le marché se déplace favorablement au-delà du prix d'exercice de plus que la prime payée. Le vendeur profite en conservant la prime si l'option n'est pas exercée.
+* **Options :** L'acheteur réalise un profit lorsque le marché évolue favorablement au-delà du prix d'exercice de plus que la prime payée. Le vendeur réalise un profit en conservant la prime si l'option n'est pas exercée.
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}

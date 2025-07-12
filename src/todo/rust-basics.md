@@ -1,10 +1,10 @@
 # Rust Basics
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}
 
 ### Types génériques
 
-Créez une structure où 1 de ses valeurs pourrait être de n'importe quel type
+Créez une struct où 1 de leurs valeurs pourrait être de n'importe quel type
 ```rust
 struct Wrapper<T> {
 value: T,
@@ -287,4 +287,4 @@ thread::sleep(Duration::from_millis(500));
 }
 }
 ```
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}

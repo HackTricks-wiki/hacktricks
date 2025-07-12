@@ -5,7 +5,7 @@
 > [!WARNING]
 > Notez que les droits commençant par **`com.apple`** ne sont pas disponibles pour les tiers, seul Apple peut les accorder.
 
-## Élevé
+## High
 
 ### `com.apple.rootless.install.heritable`
 
@@ -29,7 +29,7 @@ Les applications avec le droit d'outil de débogage peuvent appeler `task_for_pi
 
 ### `com.apple.security.cs.disable-library-validation`
 
-Ce droit permet de **charger des frameworks, des plug-ins ou des bibliothèques sans être signés par Apple ou signés avec le même ID d'équipe** que l'exécutable principal, donc un attaquant pourrait abuser de n'importe quelle bibliothèque chargée pour injecter du code. Consultez [**ceci pour plus d'infos**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation).
+Ce droit permet de **charger des frameworks, des plug-ins ou des bibliothèques sans être soit signé par Apple, soit signé avec le même ID d'équipe** que l'exécutable principal, donc un attaquant pourrait abuser de n'importe quelle bibliothèque arbitraire pour injecter du code. Consultez [**ceci pour plus d'infos**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation).
 
 ### `com.apple.private.security.clear-library-validation`
 
@@ -58,7 +58,7 @@ Le droit **`com.apple.private.icloud-account-access`** permet de communiquer ave
 
 **iMovie** et **Garageband** avaient ce droit.
 
-Pour plus **d'informations** sur l'exploit pour **obtenir des tokens icloud** à partir de ce droit, consultez la conférence : [**#OBTS v5.0 : "Que se passe-t-il sur votre Mac, reste sur l'iCloud d'Apple ?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
+Pour plus **d'informations** sur l'exploitation pour **obtenir des tokens icloud** de ce droit, consultez la conférence : [**#OBTS v5.0 : "Ce qui se passe sur votre Mac, reste sur iCloud d'Apple ?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
 
 ### `com.apple.private.tcc.manager.check-by-audit-token`
 
@@ -105,19 +105,19 @@ Permet, entre autres permissions, de **modifier la base de données TCC des util
 
 ### **`kTCCServiceSystemPolicySysAdminFiles`**
 
-Permet de **changer** l'attribut **`NFSHomeDirectory`** d'un utilisateur, ce qui modifie le chemin de son dossier personnel et permet donc de **contourner TCC**.
+Permet de **changer** l'attribut **`NFSHomeDirectory`** d'un utilisateur, ce qui change le chemin de son dossier personnel et permet donc de **contourner TCC**.
 
 ### **`kTCCServiceSystemPolicyAppBundles`**
 
-Permet de modifier des fichiers à l'intérieur des bundles d'applications (dans app.app), ce qui est **interdit par défaut**.
+Permet de modifier des fichiers à l'intérieur des bundles d'applications (à l'intérieur de app.app), ce qui est **interdit par défaut**.
 
 <figure><img src="../../../images/image (31).png" alt=""><figcaption></figcaption></figure>
 
-Il est possible de vérifier qui a cet accès dans _Paramètres Système_ > _Confidentialité et Sécurité_ > _Gestion des Applications._
+Il est possible de vérifier qui a cet accès dans _Paramètres Système_ > _Confidentialité et Sécurité_ > _Gestion des Applications_.
 
 ### `kTCCServiceAccessibility`
 
-Le processus pourra **abuser des fonctionnalités d'accessibilité de macOS**, ce qui signifie que, par exemple, il pourra simuler des frappes au clavier. Il pourrait donc demander l'accès pour contrôler une application comme Finder et approuver la boîte de dialogue avec cette permission.
+Le processus pourra **abuser des fonctionnalités d'accessibilité de macOS**, ce qui signifie que, par exemple, il pourra appuyer sur des touches. Il pourrait donc demander l'accès pour contrôler une application comme Finder et approuver la boîte de dialogue avec cette permission.
 
 ## Moyen
 
@@ -130,11 +130,11 @@ Cette autorisation permet de **créer de la mémoire qui est écrivable et exéc
 Cette autorisation permet de **remplacer ou de patcher du code C**, d'utiliser le très obsolète **`NSCreateObjectFileImageFromMemory`** (qui est fondamentalement non sécurisé), ou d'utiliser le framework **DVDPlayback**. Consultez [**ceci pour plus d'infos**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory).
 
 > [!CAUTION]
-> Inclure cette autorisation expose votre application à des vulnérabilités courantes dans les langages de code non sécurisés en mémoire. Considérez soigneusement si votre application a besoin de cette exception.
+> Inclure cette autorisation expose votre application à des vulnérabilités courantes dans les langages de code non sécurisé en mémoire. Considérez soigneusement si votre application a besoin de cette exception.
 
 ### `com.apple.security.cs.disable-executable-page-protection`
 
-Cette autorisation permet de **modifier des sections de ses propres fichiers exécutables** sur le disque pour forcer la sortie. Consultez [**ceci pour plus d'infos**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-executable-page-protection).
+Cette autorisation permet de **modifier des sections de ses propres fichiers exécutables** sur disque pour forcer la sortie. Consultez [**ceci pour plus d'infos**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-executable-page-protection).
 
 > [!CAUTION]
 > L'autorisation de désactiver la protection de la mémoire exécutable est une autorisation extrême qui supprime une protection de sécurité fondamentale de votre application, rendant possible pour un attaquant de réécrire le code exécutable de votre application sans détection. Préférez des autorisations plus étroites si possible.
@@ -156,15 +156,15 @@ Selon ce billet de blog, cette permission TCC se trouve généralement sous la f
 [Array]
 [String] kTCCServiceAll
 ```
-Permettre au processus de **demander toutes les autorisations TCC**.
+Autoriser le processus à **demander toutes les autorisations TCC**.
 
 ### **`kTCCServicePostEvent`**
 
-{{#include ../../../banners/hacktricks-training.md}}
+
 
 </details>
 
 
 
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../../banners/hacktricks-training.md}}

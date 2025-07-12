@@ -1,6 +1,6 @@
 # Hacking des Systèmes de Contrôle Industriels
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
 
 ## À Propos de Cette Section
 
@@ -10,10 +10,10 @@ Les Systèmes de Contrôle Industriels sont partout, car les industries sont vit
 
 Il est devenu important de sécuriser ces systèmes, car les endommager peut coûter cher et même des vies dans le pire des cas. Pour comprendre la sécurité des Systèmes de Contrôle Industriels, il est nécessaire de connaître leurs internes.
 
-Étant donné que les Systèmes de Contrôle Industriels sont installés selon des normes établies, connaître chaque composant aiderait à interconnecter tous les autres mécanismes dans le système de contrôle. L'installation de ces dispositifs comme les PLC et les systèmes SCADA est différente dans diverses industries, donc la collecte d'informations est critique.
+Étant donné que les Systèmes de Contrôle Industriels sont installés selon des normes établies, connaître chaque composant aiderait à interconnecter tous les autres mécanismes dans le système de contrôle. L'installation de ces dispositifs comme les PLC et les systèmes SCADA est différente dans diverses industries, d'où l'importance de la collecte d'informations.
 
-Les Systèmes de Contrôle Industriels peuvent être compliqués par moments et nécessitent donc beaucoup de patience pour faire quoi que ce soit. Tout est une question de sondage et de reconnaissance avant de planifier des attaques et de développer des exploits.
+Les Systèmes de Contrôle Industriels peuvent parfois être compliqués et nécessitent donc beaucoup de patience pour faire quoi que ce soit. Tout est une question de sondage et de reconnaissance avant de planifier des attaques et de développer des exploits.
 
 Ces techniques peuvent également être utilisées pour se protéger contre les attaques et le blue teaming pour les systèmes de contrôle industriels.
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
