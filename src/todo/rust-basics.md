@@ -1,6 +1,6 @@
 # Rust Basics
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}
 
 ### Generic Types
 
@@ -320,5 +320,4 @@ fn main() {
 ```
 
 
-{{#include /banners/hacktricks-training.md}}
-
+{{#include ../banners/hacktricks-training.md}}

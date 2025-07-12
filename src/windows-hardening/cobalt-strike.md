@@ -1,6 +1,6 @@
 # Cobalt Strike
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}
 
 ### Listeners
 
@@ -371,5 +371,4 @@ pscp -r root@kali:/opt/cobaltstrike/artifact-kit/dist-pipe .
 ```
 
 
-{{#include /banners/hacktricks-training.md}}
-
+{{#include ../banners/hacktricks-training.md}}
