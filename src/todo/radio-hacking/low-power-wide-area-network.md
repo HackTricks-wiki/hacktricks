@@ -25,7 +25,7 @@ Long Range (**LoRa**) é atualmente a camada física LPWAN mais implantada e sua
 | Camada | Fraqueza | Impacto prático |
 |--------|----------|------------------|
 | PHY    | Jamming reativo / seletivo | 100 % de perda de pacotes demonstrada com um único SDR e <1 W de saída |
-| MAC    | Repetição de Join-Accept & data-frame (reutilização de nonce, rollover de contador ABP) | Spoofing de dispositivo, injeção de mensagem, DoS |
+| MAC    | Repetição de Join-Accept & data-frame (reutilização de nonce, rollover de contador ABP) | Spoofing de dispositivo, injeção de mensagens, DoS |
 | Servidor de Rede | Encaminhador de pacotes inseguro, filtros MQTT/UDP fracos, firmware de gateway desatualizado | RCE em gateways → pivotar para a rede OT/IT |
 | Aplicação | AppKeys codificadas ou previsíveis | Força bruta/descriptografar tráfego, impersonar sensores |
 
@@ -50,13 +50,13 @@ python3 lorattack/sniffer.py \
 # Bruteforce AppKey from captured OTAA join-request/accept pairs
 python3 lorapwn/bruteforce_join.py --pcap smartcity.pcap --wordlist top1m.txt
 ```
-### 2. OTAA join-replay (reutilização de DevNonce)
+### 2. Repetição de join OTAA (reutilização de DevNonce)
 
 1. Capture um **JoinRequest** legítimo.
 2. Retransmita-o imediatamente (ou incremente o RSSI) antes que o dispositivo original transmita novamente.
 3. O servidor de rede aloca um novo DevAddr e chaves de sessão enquanto o dispositivo alvo continua com a sessão antiga → o atacante possui a sessão vaga e pode injetar uplinks forjados.
 
-### 3. Downgrade de Adaptive Data-Rate (ADR)
+### 3. Rebaixamento da Taxa de Dados Adaptativa (ADR)
 
 Force SF12/125 kHz para aumentar o tempo de transmissão → exaurir o ciclo de trabalho do gateway (negação de serviço) enquanto mantém o impacto na bateria do atacante baixo (apenas envie comandos MAC em nível de rede).
 
@@ -72,7 +72,7 @@ Force SF12/125 kHz para aumentar o tempo de transmissão → exaurir o ciclo de 
 |-------------|-----------|-------|
 | **LoRaWAN Auditing Framework (LAF)** | Criar/analisar/atacar quadros LoRaWAN, analisadores com suporte a DB, força bruta | Imagem Docker, suporta entrada UDP Semtech |
 | **LoRaPWN** | Utilitário Python da Trend Micro para força bruta OTAA, gerar downlinks, descriptografar payloads | Demonstração lançada em 2023, SDR-agnóstico |
-| **LoRAttack** | Sniffer multi-canal + replay com USRP; exporta PCAP/LoRaTap | Boa integração com Wireshark |
+| **LoRAttack** | Sniffer multi-canal + repetição com USRP; exporta PCAP/LoRaTap | Boa integração com Wireshark |
 | **gr-lora / gr-lorawan** | Blocos OOT do GNU Radio para TX/RX de banda base | Fundação para ataques personalizados |
 
 ---
@@ -89,6 +89,6 @@ Force SF12/125 kHz para aumentar o tempo de transmissão → exaurir o ciclo de 
 
 ## Referências
 
-* LoRaWAN Auditing Framework (LAF) – https://github.com/IOActive/laf
-* Visão geral do Trend Micro LoRaPWN – https://www.hackster.io/news/trend-micro-finds-lorawan-security-lacking-develops-lorapwn-python-utility-bba60c27d57a
+* LoRaWAN Auditing Framework (LAF) – [https://github.com/IOActive/laf](https://github.com/IOActive/laf)
+* Visão geral do Trend Micro LoRaPWN – [https://www.hackster.io/news/trend-micro-finds-lorawan-security-lacking-develops-lorapwn-python-utility-bba60c27d57a](https://www.hackster.io/news/trend-micro-finds-lorawan-security-lacking-develops-lorapwn-python-utility-bba60c27d57a)
 {{#include ../../banners/hacktricks-training.md}}

