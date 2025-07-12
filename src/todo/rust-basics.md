@@ -1,6 +1,6 @@
-# Fundamentos do Rust
+# Rust Basics
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}
 
 ### Tipos Genéricos
 
@@ -269,7 +269,7 @@ println!("{:?}", apple);
 ```
 #### Threads
 
-Neste caso, passaremos ao thread uma variável que ele poderá modificar.
+Neste caso, passaremos à thread uma variável que ela poderá modificar.
 ```rust
 fn main() {
 let status = Arc::new(Mutex::new(JobStatus { jobs_completed: 0 }));
@@ -287,4 +287,4 @@ thread::sleep(Duration::from_millis(500));
 }
 }
 ```
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}

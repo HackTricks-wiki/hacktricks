@@ -1,6 +1,6 @@
 # LLM Training - Data Preparation
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
 
 **Estas são minhas anotações do livro muito recomendado** [**https://www.manning.com/books/build-a-large-language-model-from-scratch**](https://www.manning.com/books/build-a-large-language-model-from-scratch) **com algumas informações extras.**
 
@@ -15,7 +15,7 @@ Você deve começar lendo este post para alguns conceitos básicos que você dev
 ## 1. Tokenization
 
 > [!TIP]
-> O objetivo desta fase inicial é muito simples: **Dividir a entrada em tokens (ids) de uma forma que faça sentido**.
+> O objetivo desta fase inicial é muito simples: **Dividir a entrada em tokens (ids) de uma maneira que faça sentido**.
 
 {{#ref}}
 1.-tokenizing.md
@@ -36,7 +36,7 @@ Você deve começar lendo este post para alguns conceitos básicos que você dev
 > O objetivo desta terceira fase é muito simples: **Atribuir a cada um dos tokens anteriores no vocabulário um vetor das dimensões desejadas para treinar o modelo.** Cada palavra no vocabulário será um ponto em um espaço de X dimensões.\
 > Note que inicialmente a posição de cada palavra no espaço é apenas inicializada "aleatoriamente" e essas posições são parâmetros treináveis (serão melhorados durante o treinamento).
 >
-> Além disso, durante a incorporação de tokens **outra camada de incorporações é criada** que representa (neste caso) a **posição absoluta da palavra na sentença de treinamento**. Dessa forma, uma palavra em diferentes posições na sentença terá uma representação (significado) diferente.
+> Além disso, durante a incorporação de tokens **outra camada de incorporações é criada** que representa (neste caso) a **posição absoluta da palavra na sentença de treinamento**. Dessa forma, uma palavra em diferentes posições na sentença terá uma representação diferente (significado).
 
 {{#ref}}
 3.-token-embeddings.md
@@ -45,7 +45,7 @@ Você deve começar lendo este post para alguns conceitos básicos que você dev
 ## 4. Attention Mechanisms
 
 > [!TIP]
-> O objetivo desta quarta fase é muito simples: **Aplicar alguns mecanismos de atenção**. Estes serão muitas **camadas repetidas** que vão **capturar a relação de uma palavra no vocabulário com seus vizinhos na sentença atual sendo usada para treinar o LLM**.\
+> O objetivo desta quarta fase é muito simples: **Aplicar alguns mecanismos de atenção**. Estas serão muitas **camadas repetidas** que vão **capturar a relação de uma palavra no vocabulário com seus vizinhos na sentença atual sendo usada para treinar o LLM**.\
 > Muitas camadas são usadas para isso, então muitos parâmetros treináveis estarão capturando essa informação.
 
 {{#ref}}
@@ -99,4 +99,4 @@ Você deve começar lendo este post para alguns conceitos básicos que você dev
 7.2.-fine-tuning-to-follow-instructions.md
 {{#endref}}
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}

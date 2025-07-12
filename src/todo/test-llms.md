@@ -1,6 +1,6 @@
 # Testar LLMs
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}
 
 ## Executar e treinar modelos localmente
 
@@ -34,7 +34,7 @@ Oferece várias seções como:
 
 * **Modelos**: Um vasto repositório de **modelos de aprendizado de máquina pré-treinados** onde os usuários podem navegar, baixar e integrar modelos para várias tarefas como geração de texto, tradução, reconhecimento de imagem e mais.
 * **Conjuntos de Dados:** Uma **coleção abrangente de conjuntos de dados** usados para treinar e avaliar modelos. Facilita o acesso fácil a diversas fontes de dados, permitindo que os usuários encontrem e utilizem dados para seus projetos específicos de aprendizado de máquina.
-* **Espaços:** Uma plataforma para hospedar e compartilhar **aplicações interativas de aprendizado de máquina** e demonstrações. Permite que os desenvolvedores **demonstrem** seus modelos em ação, criem interfaces amigáveis e colaborem com outros compartilhando demonstrações ao vivo.
+* **Espaços:** Uma plataforma para hospedar e compartilhar **aplicações interativas de aprendizado de máquina** e demonstrações. Permite que os desenvolvedores **mostrem** seus modelos em ação, criem interfaces amigáveis e colaborem com outros compartilhando demonstrações ao vivo.
 
 ## [**TensorFlow Hub**](https://www.tensorflow.org/hub) **&** [**Kaggle**](https://www.kaggle.com/)
 
@@ -51,4 +51,4 @@ Oferece várias seções como:
 * **Modelos:** Um repositório de modelos de aprendizado de máquina contribuídos pela comunidade que os usuários podem navegar, experimentar e integrar modelos em suas aplicações com esforço mínimo.
 * **Acesso à API:** APIs simples para executar modelos que permitem que os desenvolvedores implantem e escalem modelos sem esforço dentro de suas próprias aplicações.
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}

