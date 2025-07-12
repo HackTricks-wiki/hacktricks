@@ -1,64 +1,64 @@
-# macOS Небезпечні права доступу та TCC дозволи
+# macOS Небезпечні права та TCC дозволи
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 > [!WARNING]
-> Зверніть увагу, що права доступу, які починаються з **`com.apple`**, недоступні для третіх сторін, лише Apple може їх надати.
+> Зверніть увагу, що права, які починаються з **`com.apple`**, недоступні для третіх сторін, лише Apple може їх надати.
 
 ## Високий
 
 ### `com.apple.rootless.install.heritable`
 
-Право доступу **`com.apple.rootless.install.heritable`** дозволяє **обійти SIP**. Перевірте [це для отримання додаткової інформації](macos-sip.md#com.apple.rootless.install.heritable).
+Право **`com.apple.rootless.install.heritable`** дозволяє **обійти SIP**. Перевірте [це для отримання додаткової інформації](macos-sip.md#com.apple.rootless.install.heritable).
 
 ### **`com.apple.rootless.install`**
 
-Право доступу **`com.apple.rootless.install`** дозволяє **обійти SIP**. Перевірте [це для отримання додаткової інформації](macos-sip.md#com.apple.rootless.install).
+Право **`com.apple.rootless.install`** дозволяє **обійти SIP**. Перевірте [це для отримання додаткової інформації](macos-sip.md#com.apple.rootless.install).
 
-### **`com.apple.system-task-ports` (раніше називався `task_for_pid-allow`)**
+### **`com.apple.system-task-ports` (раніше називалося `task_for_pid-allow`)**
 
-Це право доступу дозволяє отримати **порт завдання для будь-якого** процесу, за винятком ядра. Перевірте [**це для отримання додаткової інформації**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
+Це право дозволяє отримати **порт завдання для будь-якого** процесу, за винятком ядра. Перевірте [**це для отримання додаткової інформації**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
 
 ### `com.apple.security.get-task-allow`
 
-Це право доступу дозволяє іншим процесам з правом доступу **`com.apple.security.cs.debugger`** отримати порт завдання процесу, запущеного бінарним файлом з цим правом доступу, і **впроваджувати код у нього**. Перевірте [**це для отримання додаткової інформації**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
+Це право дозволяє іншим процесам з правом **`com.apple.security.cs.debugger`** отримати порт завдання процесу, запущеного бінарним файлом з цим правом, і **впроваджувати код у нього**. Перевірте [**це для отримання додаткової інформації**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
 
 ### `com.apple.security.cs.debugger`
 
-Додатки з правом доступу до інструментів налагодження можуть викликати `task_for_pid()`, щоб отримати дійсний порт завдання для незахищених і сторонніх додатків з правом доступу `Get Task Allow`, встановленим на `true`. Однак, навіть з правом доступу до інструментів налагодження, налагоджувач **не може отримати порти завдання** процесів, які **не мають права доступу `Get Task Allow`**, і які, отже, захищені захистом цілісності системи. Перевірте [**це для отримання додаткової інформації**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger).
+Додатки з правом інструменту налагодження можуть викликати `task_for_pid()`, щоб отримати дійсний порт завдання для незахищених і сторонніх додатків з правом `Get Task Allow`, встановленим на `true`. Однак, навіть з правом інструменту налагодження, налагоджувач **не може отримати порти завдання** процесів, які **не мають права `Get Task Allow`**, і які, отже, захищені захистом цілісності системи. Перевірте [**це для отримання додаткової інформації**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger).
 
 ### `com.apple.security.cs.disable-library-validation`
 
-Це право доступу дозволяє **завантажувати фрейми, плагіни або бібліотеки без підпису Apple або підпису з тим же ідентифікатором команди**, як основний виконуваний файл, тому зловмисник може зловживати завантаженням довільної бібліотеки для впровадження коду. Перевірте [**це для отримання додаткової інформації**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation).
+Це право дозволяє **завантажувати фрейми, плагіни або бібліотеки без підпису Apple або підпису з тим же ідентифікатором команди**, як основний виконуваний файл, тому зловмисник може зловживати завантаженням довільної бібліотеки для впровадження коду. Перевірте [**це для отримання додаткової інформації**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation).
 
 ### `com.apple.private.security.clear-library-validation`
 
-Це право доступу дуже схоже на **`com.apple.security.cs.disable-library-validation`**, але **замість** **прямого відключення** перевірки бібліотек, воно дозволяє процесу **викликати системний виклик `csops`, щоб відключити його**.\
+Це право дуже схоже на **`com.apple.security.cs.disable-library-validation`**, але **замість** **прямого відключення** перевірки бібліотек, воно дозволяє процесу **викликати системний виклик `csops`, щоб відключити його**.\
 Перевірте [**це для отримання додаткової інформації**](https://theevilbit.github.io/posts/com.apple.private.security.clear-library-validation/).
 
 ### `com.apple.security.cs.allow-dyld-environment-variables`
 
-Це право доступу дозволяє **використовувати змінні середовища DYLD**, які можуть бути використані для впровадження бібліотек і коду. Перевірте [**це для отримання додаткової інформації**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables).
+Це право дозволяє **використовувати змінні середовища DYLD**, які можуть бути використані для впровадження бібліотек і коду. Перевірте [**це для отримання додаткової інформації**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables).
 
 ### `com.apple.private.tcc.manager` або `com.apple.rootless.storage`.`TCC`
 
-[**Згідно з цим блогом**](https://objective-see.org/blog/blog_0x4C.html) **і** [**цим блогом**](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/), ці права доступу дозволяють **модифікувати** базу даних **TCC**.
+[**Згідно з цим блогу**](https://objective-see.org/blog/blog_0x4C.html) **і** [**цим блогом**](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/), ці права дозволяють **модифікувати** базу даних **TCC**.
 
 ### **`system.install.apple-software`** та **`system.install.apple-software.standar-user`**
 
-Ці права доступу дозволяють **встановлювати програмне забезпечення без запиту дозволів** у користувача, що може бути корисним для **підвищення привілеїв**.
+Ці права дозволяють **встановлювати програмне забезпечення без запиту дозволів** у користувача, що може бути корисним для **підвищення привілеїв**.
 
 ### `com.apple.private.security.kext-management`
 
-Право доступу, необхідне для запиту **ядра на завантаження розширення ядра**.
+Право, необхідне для запиту **ядра на завантаження розширення ядра**.
 
 ### **`com.apple.private.icloud-account-access`**
 
-Право доступу **`com.apple.private.icloud-account-access`** дозволяє спілкуватися з **`com.apple.iCloudHelper`** XPC сервісом, який **надасть токени iCloud**.
+Право **`com.apple.private.icloud-account-access`** дозволяє спілкуватися з **`com.apple.iCloudHelper`** XPC сервісом, який **надасть токени iCloud**.
 
-**iMovie** та **Garageband** мали це право доступу.
+**iMovie** та **Garageband** мали це право.
 
-Для отримання більшої **інформації** про експлойт для **отримання токенів icloud** з цього права доступу перевірте доповідь: [**#OBTS v5.0: "Що відбувається на вашому Mac, залишається в iCloud Apple?!" - Войцех Регула**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
+Для отримання більшої **інформації** про експлойт для **отримання токенів icloud** з цього права перевірте доповідь: [**#OBTS v5.0: "Що відбувається на вашому Mac, залишається в iCloud Apple?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
 
 ### `com.apple.private.tcc.manager.check-by-audit-token`
 
@@ -74,7 +74,7 @@ TODO: У [**цьому звіті**](https://jhftss.github.io/The-Nightmare-of-A
 
 ### `keychain-access-groups`
 
-Це право доступу містить **групи ключів**, до яких має доступ додаток:
+Це право містить список **груп ключів**, до яких має доступ додаток:
 ```xml
 <key>keychain-access-groups</key>
 <array>
@@ -109,7 +109,7 @@ osascript -e 'tell app "App Store" to activate' -e 'tell app "App Store" to acti
 
 ### **`kTCCServiceSystemPolicyAppBundles`**
 
-Дозволяє модифікувати файли всередині пакету додатків (всередині app.app), що **за замовчуванням заборонено**.
+Дозволяє змінювати файли всередині пакету додатків (всередині app.app), що **за замовчуванням заборонено**.
 
 <figure><img src="../../../images/image (31).png" alt=""><figcaption></figcaption></figure>
 
@@ -134,7 +134,7 @@ osascript -e 'tell app "App Store" to activate' -e 'tell app "App Store" to acti
 
 ### `com.apple.security.cs.disable-executable-page-protection`
 
-Цей привілей дозволяє **модифікувати секції своїх власних виконуваних файлів** на диску, щоб примусово вийти. Перевірте [**це для отримання додаткової інформації**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-executable-page-protection).
+Цей привілей дозволяє **змінювати секції своїх власних виконуваних файлів** на диску, щоб примусово вийти. Перевірте [**це для отримання додаткової інформації**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-executable-page-protection).
 
 > [!CAUTION]
 > Привілей Disable Executable Memory Protection є екстремальним привілеєм, який усуває основний захист безпеки з вашого додатку, що робить можливим для зловмисника переписати виконуваний код вашого додатку без виявлення. Вибирайте вужчі привілеї, якщо це можливо.
@@ -160,11 +160,11 @@ TODO
 
 ### **`kTCCServicePostEvent`**
 
-{{#include ../../../banners/hacktricks-training.md}}
+
 
 </details>
 
 
 
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../../banners/hacktricks-training.md}}

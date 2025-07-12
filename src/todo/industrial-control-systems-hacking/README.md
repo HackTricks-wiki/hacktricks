@@ -1,6 +1,6 @@
 # Хакінг промислових контрольних систем
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
 
 ## Про цей розділ
 
@@ -16,4 +16,4 @@
 
 Ці техніки також можуть бути використані для захисту від атак і блакитного командування для промислових контрольних систем.
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
