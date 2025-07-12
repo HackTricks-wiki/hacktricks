@@ -90,7 +90,7 @@ echo b > /proc/sysrq-trigger # Redémarre l'hôte
 
 - Liste les symboles exportés par le noyau et leurs adresses.
 - Essentiel pour le développement d'exploits du noyau, en particulier pour surmonter KASLR.
-- Les informations d'adresse sont restreintes avec `kptr_restrict` réglé sur `1` ou `2`.
+- Les informations d'adresse sont restreintes avec `kptr_restrict` défini sur `1` ou `2`.
 - Détails dans [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 
 #### **`/proc/[pid]/mem`**
@@ -270,15 +270,13 @@ Répertoire racine de Docker : /var/lib/docker
 So the filesystems are under `/var/lib/docker/overlay2/`:
 
 ```bash
-```markdown
 $ sudo ls -la /var/lib/docker/overlay2
 
-drwx--x---  4 root root  4096 Jan  9 22:14 00762bca8ea040b1bb28b61baed5704e013ab23a196f5fe4758dafb79dfafd5d
-drwx--x---  4 root root  4096 Jan 11 17:00 03cdf4db9a6cc9f187cca6e98cd877d581f16b62d073010571e752c305719496
-drwx--x---  4 root root  4096 Jan  9 21:23 049e02afb3f8dec80cb229719d9484aead269ae05afe81ee5880ccde2426ef4f
-drwx--x---  4 root root  4096 Jan  9 21:22 062f14e5adbedce75cea699828e22657c8044cd22b68ff1bb152f1a3c8a377f2
+drwx--x---  4 root root  4096 Jan  9 22:14 00762bca8ea040b1bb28b61baed5704e013ab23a196f5fe4758dafb79dfafd5d  
+drwx--x---  4 root root  4096 Jan 11 17:00 03cdf4db9a6cc9f187cca6e98cd877d581f16b62d073010571e752c305719496  
+drwx--x---  4 root root  4096 Jan  9 21:23 049e02afb3f8dec80cb229719d9484aead269ae05afe81ee5880ccde2426ef4f  
+drwx--x---  4 root root  4096 Jan  9 21:22 062f14e5adbedce75cea699828e22657c8044cd22b68ff1bb152f1a3c8a377f2  
 <SNIP>
-```
 ```
 
 #### Note
