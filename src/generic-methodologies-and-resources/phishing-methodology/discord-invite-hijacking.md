@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Discord’un davet sistemi açığı, tehdit aktörlerinin süresi dolmuş veya silinmiş davet kodlarını (geçici, kalıcı veya özel vanity) yeni vanity bağlantıları olarak herhangi bir Seviye 3 artırılmış sunucuda talep etmesine olanak tanır. Tüm kodları küçük harfe normalize ederek, saldırganlar bilinen davet kodlarını önceden kaydedebilir ve orijinal bağlantı süresi dolduğunda veya kaynak sunucu artırmasını kaybettiğinde trafiği sessizce ele geçirebilirler.
+Discord’un davet sistemi açığı, tehdit aktörlerinin süresi dolmuş veya silinmiş davet kodlarını (geçici, kalıcı veya özel vanity) herhangi bir Seviye 3 artırılmış sunucuda yeni vanity bağlantıları olarak talep etmesine olanak tanır. Tüm kodları küçük harfe normalize ederek, saldırganlar bilinen davet kodlarını önceden kaydedebilir ve orijinal bağlantı süresi dolduğunda veya kaynak sunucu artırmasını kaybettiğinde trafiği sessizce ele geçirebilirler.
 
 ## Davet Türleri ve Ele Geçirme Riski
 
@@ -22,18 +22,18 @@ Discord’un davet sistemi açığı, tehdit aktörlerinin süresi dolmuş veya 
 - **Sunucu Ayarları → Vanity URL** kısmında hedef davet kodunu atamayı deneyin. Kabul edilirse, kod kötü niyetli sunucu tarafından rezerve edilir.
 3. Ele Geçirme Aktivasyonu
 - Geçici davetler için, orijinal davetin süresi dolana kadar bekleyin (veya kaynağı kontrol ediyorsanız manuel olarak silin).
-- Büyük harf içeren kodlar için, küçük harfli versiyonu hemen talep edilebilir, ancak yönlendirme yalnızca süresi dolduktan sonra aktif hale gelir.
+- Büyük harf içeren kodlar için, küçük harfli versiyonu hemen talep edilebilir, ancak yönlendirme yalnızca süresi dolduktan sonra aktif olur.
 4. Sessiz Yönlendirme
-- Eski bağlantıyı ziyaret eden kullanıcılar, ele geçirme aktif hale geldiğinde saldırgan kontrolündeki sunucuya sorunsuz bir şekilde yönlendirilir.
+- Eski bağlantıyı ziyaret eden kullanıcılar, ele geçirme aktif olduğunda saldırgan kontrolündeki sunucuya sorunsuz bir şekilde yönlendirilir.
 
 ## Discord Sunucusu Üzerinden Phishing Akışı
 
 1. Sunucu kanallarını kısıtlayarak yalnızca bir **#verify** kanalının görünür olmasını sağlayın.
-2. Yeni gelenleri OAuth2 ile doğrulamaya teşvik etmek için bir bot (örneğin, **Safeguard#0786**) dağıtın.
-3. Bot, kullanıcıları bir phishing sitesine (örneğin, `captchaguard.me`) yönlendirir ve bunu bir CAPTCHA veya doğrulama adımı olarak gösterir.
+2. Yeni gelenleri OAuth2 ile doğrulamaya yönlendirmek için bir bot (örneğin, **Safeguard#0786**) dağıtın.
+3. Bot, kullanıcıları bir CAPTCHA veya doğrulama adımı kılıfında bir phishing sitesine (örneğin, `captchaguard.me`) yönlendirir.
 4. **ClickFix** UX hilesini uygulayın:
 - Bozuk bir CAPTCHA mesajı gösterin.
-- Kullanıcıları **Win+R** diyalogunu açmaya, önceden yüklenmiş bir PowerShell komutunu yapıştırmaya ve Enter'a basmaya yönlendirin.
+- Kullanıcıları **Win+R** diyalogunu açmaya, önceden yüklenmiş bir PowerShell komutunu yapıştırmaya ve Enter tuşuna basmaya yönlendirin.
 
 ### ClickFix Panoya Enjeksiyon Örneği
 ```javascript
@@ -55,7 +55,7 @@ Bu yaklaşım, doğrudan dosya indirmelerini önler ve kullanıcı şüphesini a
 
 ## Referanslar
 
-- From Trust to Threat: Hijacked Discord Invites Used for Multi-Stage Malware Delivery – https://research.checkpoint.com/2025/from-trust-to-threat-hijacked-discord-invites-used-for-multi-stage-malware-delivery/
-- Discord Custom Invite Link Documentation – https://support.discord.com/hc/en-us/articles/115001542132-Custom-Invite-Link
+- From Trust to Threat: Hijacked Discord Invites Used for Multi-Stage Malware Delivery – [https://research.checkpoint.com/2025/from-trust-to-threat-hijacked-discord-invites-used-for-multi-stage-malware-delivery/](https://research.checkpoint.com/2025/from-trust-to-threat-hijacked-discord-invites-used-for-multi-stage-malware-delivery/)
+- Discord Custom Invite Link Documentation – [https://support.discord.com/hc/en-us/articles/115001542132-Custom-Invite-Link](https://support.discord.com/hc/en-us/articles/115001542132-Custom-Invite-Link)
 
 {{#include ../../banners/hacktricks-training.md}}
