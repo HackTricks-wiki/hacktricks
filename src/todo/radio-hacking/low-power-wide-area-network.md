@@ -14,7 +14,7 @@ Long Range (**LoRa**) ist derzeit die am häufigsten eingesetzte LPWAN-Physiksch
 
 * LoRa – Chirp Spread Spectrum (CSS) Physikschicht, entwickelt von Semtech (proprietär, aber dokumentiert).
 * LoRaWAN – Offene MAC-/Netzwerkschicht, die von der LoRa-Alliance gepflegt wird. Die Versionen 1.0.x und 1.1 sind im Feld verbreitet.
-* Typische Architektur: *Endgerät → Gateway (Paketweiterleitung) → Netzwerkserver → Anwendungsserver*.
+* Typische Architektur: *Endgerät → Gateway (Paketweiterleiter) → Netzwerkserver → Anwendungsserver*.
 
 > Das **Sicherheitsmodell** basiert auf zwei AES-128-Wurzel-Schlüsseln (AppKey/NwkKey), die während des *Join*-Verfahrens (OTAA) Sitzungsschlüssel ableiten oder fest codiert sind (ABP). Wenn ein Schlüssel geleakt wird, erhält der Angreifer vollständige Lese-/Schreibrechte über den entsprechenden Datenverkehr.
 
@@ -27,14 +27,14 @@ Long Range (**LoRa**) ist derzeit die am häufigsten eingesetzte LPWAN-Physiksch
 | PHY     | Reaktive / selektive Störung | 100 % Paketverlust, demonstriert mit einem einzelnen SDR und <1 W Ausgang |
 | MAC     | Join-Accept & Datenrahmen-Wiederholung (Nonce-Wiederverwendung, ABP-Zählerüberlauf) | Geräte-Spoofing, Nachrichteninjektion, DoS |
 | Netzwerk-Server | Unsicherer Paketweiterleiter, schwache MQTT/UDP-Filter, veraltete Gateway-Firmware | RCE auf Gateways → Pivot in OT/IT-Netzwerk |
-| Anwendung | Fest codierte oder vorhersehbare AppKeys | Brute-Force/Dekodierung des Datenverkehrs, Nachahmung von Sensoren |
+| Anwendung | Fest codierte oder vorhersehbare AppKeys | Brute-Force/Entschlüsselung des Datenverkehrs, Nachahmung von Sensoren |
 
 ---
 
 ## Jüngste Schwachstellen (2023-2025)
 
 * **CVE-2024-29862** – *ChirpStack gateway-bridge & mqtt-forwarder* akzeptierte TCP-Pakete, die die zustandsbehafteten Firewall-Regeln auf Kerlink-Gateways umgingen und die Exposition der Fernverwaltungsoberfläche ermöglichten. In 4.0.11 / 4.2.1 behoben.
-* **Dragino LG01/LG308-Serie** – Mehrere CVEs von 2022-2024 (z.B. 2022-45227 Verzeichnisdurchquerung, 2022-45228 CSRF) wurden 2025 weiterhin unpatched beobachtet; ermöglicht unauthentifizierten Firmware-Dump oder Konfigurationsüberschreibung auf Tausenden von öffentlichen Gateways.
+* **Dragino LG01/LG308-Serie** – Mehrere CVEs von 2022-2024 (z. B. 2022-45227 Verzeichnisdurchquerung, 2022-45228 CSRF) wurden 2025 weiterhin unpatched beobachtet; ermöglicht unauthentifizierten Firmware-Dump oder Konfigurationsüberschreibung auf Tausenden von öffentlichen Gateways.
 * Semtech *Paketweiterleiter UDP* Überlauf (nicht veröffentlichtes Advisory, gepatcht 2023-10): gestalteter Uplink größer als 255 B löste Stack-Smash aus ‑> RCE auf SX130x Referenz-Gateways (entdeckt von Black Hat EU 2023 “LoRa Exploitation Reloaded”).
 
 ---
@@ -58,11 +58,11 @@ python3 lorapwn/bruteforce_join.py --pcap smartcity.pcap --wordlist top1m.txt
 
 ### 3. Adaptive Data-Rate (ADR) Herabstufung
 
-Zwingen Sie SF12/125 kHz, um die Sendezeit zu erhöhen → erschöpfen Sie den Duty-Cycle des Gateways (Denial-of-Service), während die Auswirkungen auf die Batterie des Angreifers gering bleiben (nur Netzwerk-MAC-Befehle senden).
+Zwingen Sie SF12/125 kHz, um die Sendezeit zu erhöhen → erschöpfen Sie den Duty-Cycle des Gateways (Denial-of-Service), während die Auswirkungen auf den Akku des Angreifers gering bleiben (einfach Netzwerk-MAC-Befehle senden).
 
 ### 4. Reaktive Störung
 
-*HackRF One*, das einen GNU Radio-Flowgraph ausführt, löst einen Breitband-Chirp aus, wann immer ein Preamble erkannt wird – blockiert alle Spreizfaktoren mit ≤200 mW TX; vollständiger Ausfall bei 2 km Reichweite.
+*HackRF One*, das einen GNU Radio-Flowgraph ausführt, löst einen Breitband-Chirp aus, wann immer ein Preamble erkannt wird – blockiert alle Spreizfaktoren mit ≤200 mW TX; vollständiger Ausfall bei 2 km Reichweite gemessen.
 
 ---
 
@@ -89,6 +89,6 @@ Zwingen Sie SF12/125 kHz, um die Sendezeit zu erhöhen → erschöpfen Sie den D
 
 ## References
 
-* LoRaWAN Auditing Framework (LAF) – https://github.com/IOActive/laf
-* Trend Micro LoRaPWN Übersicht – https://www.hackster.io/news/trend-micro-finds-lorawan-security-lacking-develops-lorapwn-python-utility-bba60c27d57a
+* LoRaWAN Auditing Framework (LAF) – [https://github.com/IOActive/laf](https://github.com/IOActive/laf)
+* Trend Micro LoRaPWN Übersicht – [https://www.hackster.io/news/trend-micro-finds-lorawan-security-lacking-develops-lorapwn-python-utility-bba60c27d57a](https://www.hackster.io/news/trend-micro-finds-lorawan-security-lacking-develops-lorapwn-python-utility-bba60c27d57a)
 {{#include ../../banners/hacktricks-training.md}}
