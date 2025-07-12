@@ -15,7 +15,7 @@
 #### **`/proc/sys/kernel/core_pattern`**
 
 - [core(5)](https://man7.org/linux/man-pages/man5/core.5.html)で説明されています。
-- このファイルに書き込むことができる場合、パイプ`|`の後にプログラムまたはスクリプトのパスを書き込むことが可能で、クラッシュが発生した後に実行されます。
+- このファイルに書き込むことができる場合、クラッシュが発生した後に実行されるプログラムやスクリプトへのパスの後にパイプ`|`を書き込むことが可能です。
 - 攻撃者は、`mount`を実行してホスト内のコンテナへのパスを見つけ、そのパスをコンテナのファイルシステム内のバイナリに書き込むことができます。その後、プログラムをクラッシュさせてカーネルがコンテナの外でバイナリを実行するようにします。
 
 - **テストと悪用の例**:
@@ -40,7 +40,7 @@ return 0;
 #### **`/proc/sys/kernel/modprobe`**
 
 - [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html)で詳述されています。
-- カーネルモジュールローダーへのパスを含み、カーネルモジュールをロードするために呼び出されます。
+- カーネルモジュールをロードするために呼び出されるカーネルモジュールローダーへのパスを含みます。
 - **アクセス確認の例**:
 
 ```bash
@@ -59,13 +59,13 @@ ls -l $(cat /proc/sys/kernel/modprobe) # modprobeへのアクセスを確認
 
 #### **`/proc/sys/fs/binfmt_misc`**
 
-- マジックナンバーに基づいて非ネイティブバイナリ形式のインタープリターを登録することを許可します。
+- マジックナンバーに基づいて非ネイティブバイナリフォーマットのインタープリタを登録することを許可します。
 - `/proc/sys/fs/binfmt_misc/register`が書き込み可能な場合、特権昇格やルートシェルアクセスにつながる可能性があります。
 - 関連するエクスプロイトと説明:
 - [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
 - 詳細なチュートリアル: [Video link](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
 
-### その他の `/proc`
+### `/proc`内のその他
 
 #### **`/proc/config.gz`**
 
@@ -91,30 +91,30 @@ echo b > /proc/sysrq-trigger # ホストを再起動
 - カーネルがエクスポートしたシンボルとそのアドレスをリストします。
 - KASLRを克服するためのカーネルエクスプロイト開発に不可欠です。
 - アドレス情報は、`kptr_restrict`が`1`または`2`に設定されている場合に制限されます。
-- [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html)での詳細。
+- [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html)の詳細。
 
 #### **`/proc/[pid]/mem`**
 
 - カーネルメモリデバイス`/dev/mem`とインターフェースします。
 - 歴史的に特権昇格攻撃に対して脆弱です。
-- [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html)での詳細。
+- [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html)の詳細。
 
 #### **`/proc/kcore`**
 
 - システムの物理メモリをELFコア形式で表します。
 - 読み取りはホストシステムや他のコンテナのメモリ内容を漏洩させる可能性があります。
 - 大きなファイルサイズは読み取りの問題やソフトウェアのクラッシュを引き起こす可能性があります。
-- [Dumping /proc/kcore in 2019](https://schlafwandler.github.io/posts/dumping-/proc/kcore/)での詳細な使用法。
+- [Dumping /proc/kcore in 2019](https://schlafwandler.github.io/posts/dumping-/proc/kcore/)の詳細な使用法。
 
 #### **`/proc/kmem`**
 
 - カーネル仮想メモリを表す`/dev/kmem`の代替インターフェースです。
-- 読み取りと書き込みを許可し、したがってカーネルメモリの直接変更が可能です。
+- 読み取りと書き込みが可能で、したがってカーネルメモリの直接変更が可能です。
 
 #### **`/proc/mem`**
 
 - 物理メモリを表す`/dev/mem`の代替インターフェースです。
-- 読み取りと書き込みを許可し、すべてのメモリの変更には仮想アドレスから物理アドレスへの解決が必要です。
+- 読み取りと書き込みが可能で、すべてのメモリの変更には仮想アドレスから物理アドレスへの解決が必要です。
 
 #### **`/proc/sched_debug`**
 
@@ -291,11 +291,11 @@ locate the other containers' filesystems and SA / web identity tokens
 Mounting certain host Unix sockets or writable pseudo-filesystems is equivalent to giving the container full root on the node. **Treat the following paths as highly sensitive and never expose them to untrusted workloads**:
 
 ```text
-/run/containerd/containerd.sock     # containerd CRI ソケット  
-/var/run/crio/crio.sock             # CRI-O ランタイムソケット  
-/run/podman/podman.sock             # Podman API (rootful または rootless)  
-/var/run/kubelet.sock               # Kubernetes ノード上の Kubelet API  
-/run/firecracker-containerd.sock    # Kata / Firecracker
+/ run/containerd/containerd.sock     # containerd CRI ソケット  
+/ var/run/crio/crio.sock             # CRI-O ランタイムソケット  
+/ run/podman/podman.sock             # Podman API (rootful または rootless)  
+/ var/run/kubelet.sock               # Kubernetes ノード上の Kubelet API  
+/ run/firecracker-containerd.sock    # Kata / Firecracker
 ```
 
 Attack example abusing a mounted **containerd** socket:

