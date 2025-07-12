@@ -51,11 +51,11 @@ Cette approche évite les téléchargements de fichiers directs et utilise des �
 - Utilisez des liens d'invitation permanents contenant au moins une lettre majuscule ou un caractère non alphanumérique (jamais expirés, non réutilisables).
 - Faites régulièrement tourner les codes d'invitation et révoquez les anciens liens.
 - Surveillez l'état de boost du serveur Discord et les revendications d'URL personnalisées.
-- Éduquez les utilisateurs à vérifier l'authenticité du serveur et à éviter d'exécuter des commandes copiées dans le presse-papiers.
+- Éduquez les utilisateurs à vérifier l'authenticité du serveur et à éviter d'exécuter des commandes collées depuis le presse-papiers.
 
 ## Références
 
-- From Trust to Threat: Hijacked Discord Invites Used for Multi-Stage Malware Delivery – https://research.checkpoint.com/2025/from-trust-to-threat-hijacked-discord-invites-used-for-multi-stage-malware-delivery/
-- Discord Custom Invite Link Documentation – https://support.discord.com/hc/en-us/articles/115001542132-Custom-Invite-Link
+- From Trust to Threat: Hijacked Discord Invites Used for Multi-Stage Malware Delivery – [https://research.checkpoint.com/2025/from-trust-to-threat-hijacked-discord-invites-used-for-multi-stage-malware-delivery/](https://research.checkpoint.com/2025/from-trust-to-threat-hijacked-discord-invites-used-for-multi-stage-malware-delivery/)
+- Discord Custom Invite Link Documentation – [https://support.discord.com/hc/en-us/articles/115001542132-Custom-Invite-Link](https://support.discord.com/hc/en-us/articles/115001542132-Custom-Invite-Link)
 
 {{#include ../../banners/hacktricks-training.md}}
