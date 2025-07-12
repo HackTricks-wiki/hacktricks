@@ -1,6 +1,6 @@
 # Rust Grundlagen
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}
 
 ### Generische Typen
 
@@ -205,7 +205,7 @@ println!("The word is: {}", word);
 println!("The optional word doesn't contain anything");
 }
 ```
-#### während lass
+#### while let
 ```rust
 let mut optional = Some(0);
 // This reads: "while `let` destructures `optional` into
@@ -287,4 +287,4 @@ thread::sleep(Duration::from_millis(500));
 }
 }
 ```
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}

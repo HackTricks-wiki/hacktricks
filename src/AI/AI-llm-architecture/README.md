@@ -1,6 +1,6 @@
 # LLM Training - Datenvorbereitung
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
 
 **Dies sind meine Notizen aus dem sehr empfohlenen Buch** [**https://www.manning.com/books/build-a-large-language-model-from-scratch**](https://www.manning.com/books/build-a-large-language-model-from-scratch) **mit einigen zusätzlichen Informationen.**
 
@@ -34,7 +34,7 @@ Sie sollten mit dem Lesen dieses Beitrags beginnen, um einige grundlegende Konze
 
 > [!TIP]
 > Das Ziel dieser dritten Phase ist sehr einfach: **Weisen Sie jedem der vorherigen Tokens im Vokabular einen Vektor der gewünschten Dimensionen zu, um das Modell zu trainieren.** Jedes Wort im Vokabular wird einen Punkt in einem Raum von X Dimensionen haben.\
-> Beachten Sie, dass die Position jedes Wortes im Raum zunächst "zufällig" initialisiert wird und diese Positionen trainierbare Parameter sind (während des Trainings verbessert werden).
+> Beachten Sie, dass die Position jedes Wortes im Raum zunächst "zufällig" initialisiert wird und diese Positionen trainierbare Parameter sind (werden während des Trainings verbessert).
 >
 > Darüber hinaus wird während des Token-Embeddings **eine weitere Schicht von Embeddings erstellt**, die (in diesem Fall) die **absolute Position des Wortes im Trainingssatz** darstellt. Auf diese Weise hat ein Wort an verschiedenen Positionen im Satz eine unterschiedliche Darstellung (Bedeutung).
 
@@ -46,7 +46,7 @@ Sie sollten mit dem Lesen dieses Beitrags beginnen, um einige grundlegende Konze
 
 > [!TIP]
 > Das Ziel dieser vierten Phase ist sehr einfach: **Wenden Sie einige Aufmerksamkeitsmechanismen an**. Diese werden viele **wiederholte Schichten** sein, die die **Beziehung eines Wortes im Vokabular zu seinen Nachbarn im aktuellen Satz, der zum Trainieren des LLM verwendet wird, erfassen**.\
-> Es werden viele Schichten dafür verwendet, sodass viele trainierbare Parameter diese Informationen erfassen.
+> Viele Schichten werden dafür verwendet, sodass viele trainierbare Parameter diese Informationen erfassen werden.
 
 {{#ref}}
 4.-attention-mechanisms.md
@@ -66,7 +66,7 @@ Sie sollten mit dem Lesen dieses Beitrags beginnen, um einige grundlegende Konze
 ## 6. Vortraining & Laden von Modellen
 
 > [!TIP]
-> Das Ziel dieser sechsten Phase ist sehr einfach: **Trainieren Sie das Modell von Grund auf neu**. Dazu wird die vorherige LLM-Architektur mit einigen Schleifen über die Datensätze verwendet, wobei die definierten Verlustfunktionen und der Optimierer verwendet werden, um alle Parameter des Modells zu trainieren.
+> Das Ziel dieser sechsten Phase ist sehr einfach: **Trainieren Sie das Modell von Grund auf**. Dazu wird die vorherige LLM-Architektur mit einigen Schleifen über die Datensätze verwendet, wobei die definierten Verlustfunktionen und der Optimierer verwendet werden, um alle Parameter des Modells zu trainieren.
 
 {{#ref}}
 6.-pre-training-and-loading-models.md
@@ -84,7 +84,7 @@ Sie sollten mit dem Lesen dieses Beitrags beginnen, um einige grundlegende Konze
 ## 7.1. Feintuning für Klassifikation
 
 > [!TIP]
-> Das Ziel dieses Abschnitts ist zu zeigen, wie man ein bereits vortrainiertes Modell fein abstimmt, sodass das LLM anstelle von neuem Text die **Wahrscheinlichkeiten des gegebenen Textes für jede der angegebenen Kategorien** (wie ob ein Text Spam ist oder nicht) angibt.
+> Das Ziel dieses Abschnitts ist zu zeigen, wie man ein bereits vortrainiertes Modell fein abstimmt, sodass das LLM anstelle von neuem Text die **Wahrscheinlichkeiten des gegebenen Textes für jede der gegebenen Kategorien** (wie ob ein Text Spam ist oder nicht) angibt.
 
 {{#ref}}
 7.1.-fine-tuning-for-classification.md
@@ -99,4 +99,4 @@ Sie sollten mit dem Lesen dieses Beitrags beginnen, um einige grundlegende Konze
 7.2.-fine-tuning-to-follow-instructions.md
 {{#endref}}
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}

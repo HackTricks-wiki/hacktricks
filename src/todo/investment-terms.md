@@ -1,14 +1,14 @@
 # Investment Terms
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}
 
 ## Spot
 
-Dies ist die grundlegendste Art, um Handel zu treiben. Sie können **die Menge des Vermögenswerts und den Preis** angeben, zu dem Sie kaufen oder verkaufen möchten, und wann immer dieser Preis erreicht wird, wird die Transaktion durchgeführt.
+Dies ist die grundlegendste Art des Handels. Sie können **den Betrag des Vermögenswerts und den Preis** angeben, zu dem Sie kaufen oder verkaufen möchten, und wann immer dieser Preis erreicht wird, wird die Transaktion durchgeführt.
 
 In der Regel können Sie auch den **aktuellen Marktpreis** verwenden, um die Transaktion so schnell wie möglich zum aktuellen Preis durchzuführen.
 
-**Stop Loss - Limit**: Sie können auch die Menge und den Preis der Vermögenswerte angeben, die Sie kaufen oder verkaufen möchten, während Sie auch einen niedrigeren Preis angeben, um zu kaufen oder zu verkaufen, falls dieser erreicht wird (um Verluste zu stoppen).
+**Stop Loss - Limit**: Sie können auch den Betrag und den Preis der Vermögenswerte angeben, die Sie kaufen oder verkaufen möchten, während Sie auch einen niedrigeren Preis angeben, um zu kaufen oder zu verkaufen, falls dieser erreicht wird (um Verluste zu stoppen).
 
 ## Futures
 
@@ -42,7 +42,7 @@ Beachten Sie, dass in diesen Fällen die Gewinne und Verluste in Echtzeit erfolg
 Wenn Sie beispielsweise eine Future-Position im BTC/USDT mit 100$ und einem Hebel von 50x eröffnen, bedeutet dies, dass Sie, wenn der Preis um 1% steigt, 1x50 = 50% Ihrer ursprünglichen Investition (50$) gewinnen würden. Und daher hätten Sie 150$.\
 Wenn der Preis jedoch um 1% fällt, verlieren Sie 50% Ihres Kapitals (59$ in diesem Fall). Und wenn der Preis um 2% fällt, verlieren Sie Ihre gesamte Wette (2x50 = 100%).
 
-Daher ermöglicht es der Hebel, die Menge an Geld, die Sie setzen, zu kontrollieren, während die Gewinne und Verluste steigen.
+Daher ermöglicht es der Hebel, die Höhe des Geldes, das Sie setzen, zu kontrollieren, während die Gewinne und Verluste erhöht werden.
 
 ## Unterschiede Futures & Optionen
 
@@ -51,12 +51,12 @@ Der Käufer zahlt jedoch eine Gebühr an den Verkäufer für die Eröffnung der 
 
 ### 1. **Verpflichtung vs. Recht:**
 
-* **Futures:** Wenn Sie einen Futures-Vertrag kaufen oder verkaufen, treten Sie in eine **verbindliche Vereinbarung** ein, um einen Vermögenswert zu einem bestimmten Preis an einem zukünftigen Datum zu kaufen oder zu verkaufen. Sowohl der Käufer als auch der Verkäufer sind **verpflichtet**, den Vertrag bei Ablauf zu erfüllen (es sei denn, der Vertrag wird vorher geschlossen).
-* **Optionen:** Bei Optionen haben Sie das **Recht, aber nicht die Verpflichtung**, einen Vermögenswert zu einem bestimmten Preis vor oder zu einem bestimmten Ablaufdatum zu kaufen (im Falle einer **Call-Option**) oder zu verkaufen (im Falle einer **Put-Option**). Der **Käufer** hat die Option zur Ausführung, während der **Verkäufer** verpflichtet ist, den Handel zu erfüllen, wenn der Käufer sich entscheidet, die Option auszuüben.
+* **Futures:** Wenn Sie einen Futures-Vertrag kaufen oder verkaufen, treten Sie in eine **verbindliche Vereinbarung** ein, um einen Vermögenswert zu einem bestimmten Preis an einem zukünftigen Datum zu kaufen oder zu verkaufen. Sowohl der Käufer als auch der Verkäufer sind **verpflichtet**, den Vertrag bei Fälligkeit zu erfüllen (es sei denn, der Vertrag wird vorher geschlossen).
+* **Optionen:** Bei Optionen haben Sie das **Recht, aber nicht die Verpflichtung**, einen Vermögenswert zu einem bestimmten Preis vor oder zu einem bestimmten Fälligkeitsdatum zu kaufen (im Falle einer **Call-Option**) oder zu verkaufen (im Falle einer **Put-Option**). Der **Käufer** hat die Option zur Ausführung, während der **Verkäufer** verpflichtet ist, den Handel zu erfüllen, wenn der Käufer sich entscheidet, die Option auszuüben.
 
 ### 2. **Risiko:**
 
-* **Futures:** Sowohl der Käufer als auch der Verkäufer tragen **unbegrenztes Risiko**, da sie verpflichtet sind, den Vertrag zu erfüllen. Das Risiko ist die Differenz zwischen dem vereinbarten Preis und dem Marktpreis am Ablaufdatum.
+* **Futures:** Sowohl der Käufer als auch der Verkäufer tragen **unbegrenztes Risiko**, da sie verpflichtet sind, den Vertrag zu erfüllen. Das Risiko ist die Differenz zwischen dem vereinbarten Preis und dem Marktpreis am Fälligkeitstag.
 * **Optionen:** Das Risiko des Käufers ist auf die **Prämie** beschränkt, die zum Kauf der Option gezahlt wurde. Wenn sich der Markt nicht zugunsten des Optionsinhabers bewegt, kann er die Option einfach verfallen lassen. Der **Verkäufer** (Schreiber) der Option hat jedoch ein unbegrenztes Risiko, wenn sich der Markt erheblich gegen ihn bewegt.
 
 ### 3. **Kosten:**
@@ -66,7 +66,7 @@ Der Käufer zahlt jedoch eine Gebühr an den Verkäufer für die Eröffnung der 
 
 ### 4. **Gewinnpotenzial:**
 
-* **Futures:** Der Gewinn oder Verlust basiert auf der Differenz zwischen dem Marktpreis bei Ablauf und dem vereinbarten Preis im Vertrag.
+* **Futures:** Der Gewinn oder Verlust basiert auf der Differenz zwischen dem Marktpreis bei Fälligkeit und dem vereinbarten Preis im Vertrag.
 * **Optionen:** Der Käufer profitiert, wenn sich der Markt über den Ausübungspreis hinaus günstig bewegt, mehr als die gezahlte Prämie. Der Verkäufer profitiert, indem er die Prämie behält, wenn die Option nicht ausgeübt wird.
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}

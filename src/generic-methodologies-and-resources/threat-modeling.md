@@ -1,6 +1,6 @@
 # Bedrohungsmodellierung
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}
 
 ## Bedrohungsmodellierung
 
@@ -8,8 +8,8 @@ Willkommen zu HackTricks' umfassendem Leitfaden zur Bedrohungsmodellierung! Begi
 
 ### Häufig Verwendete Szenarien
 
-1. **Softwareentwicklung**: Im Rahmen des Secure Software Development Life Cycle (SSDLC) hilft die Bedrohungsmodellierung dabei, **potenzielle Quellen von Schwachstellen** in den frühen Phasen der Entwicklung zu identifizieren.
-2. **Penetration Testing**: Der Penetration Testing Execution Standard (PTES) erfordert **Bedrohungsmodellierung, um die Schwachstellen des Systems** vor der Durchführung des Tests zu verstehen.
+1. **Softwareentwicklung**: Im Rahmen des Secure Software Development Life Cycle (SSDLC) hilft die Bedrohungsmodellierung, **potenzielle Quellen von Schwachstellen** in den frühen Phasen der Entwicklung zu identifizieren.
+2. **Penetrationstests**: Der Penetration Testing Execution Standard (PTES) erfordert **Bedrohungsmodellierung, um die Schwachstellen des Systems** vor der Durchführung des Tests zu verstehen.
 
 ### Bedrohungsmodell in Kürze
 
@@ -76,21 +76,21 @@ Manchmal könnte es so aussehen:
 
 4. Erstellen Sie Ihr Modell
 
-Sie können Tools wie SpiderSuite Crawler verwenden, um Inspiration zu erhalten, ein einfaches Modell könnte so aussehen
+Sie können Werkzeuge wie SpiderSuite Crawler verwenden, um Inspiration zu erhalten, ein einfaches Modell könnte so aussehen
 
 <figure><img src="../images/0_basic_threat_model.jpg" alt=""><figcaption></figcaption></figure>
 
 Nur eine kleine Erklärung zu den Entitäten:
 
 - Prozess (Die Entität selbst, wie Webserver oder Webfunktionalität)
-- Akteur (Eine Person wie ein Website-Besucher, Benutzer oder Administrator)
+- Akteur (Eine Person wie ein Webseitenbesucher, Benutzer oder Administrator)
 - Datenflusslinie (Indikator für Interaktion)
-- Vertrauensgrenze (Verschiedene Netzwerksegmente oder -bereiche.)
+- Vertrauensgrenze (Verschiedene Netzwerksegmente oder Bereiche.)
 - Speicher (Dinge, in denen Daten gespeichert sind, wie Datenbanken)
 
 5. Eine Bedrohung erstellen (Schritt 1)
 
-Zuerst müssen Sie die Ebene auswählen, zu der Sie eine Bedrohung hinzufügen möchten
+Zuerst müssen Sie die Schicht auswählen, zu der Sie eine Bedrohung hinzufügen möchten
 
 <figure><img src="../images/3_threatmodel_chose-threat-layer.jpg" alt=""><figcaption></figcaption></figure>
 
@@ -112,4 +112,4 @@ Jetzt sollte Ihr fertiges Modell so aussehen. Und so erstellen Sie ein einfaches
 
 Dies ist ein kostenloses Tool von Microsoft, das hilft, Bedrohungen in der Entwurfsphase von Softwareprojekten zu finden. Es verwendet die STRIDE-Methodologie und ist besonders geeignet für diejenigen, die auf Microsofts Stack entwickeln.
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}

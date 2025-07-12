@@ -1,6 +1,6 @@
 # Das Modbus-Protokoll
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
 
 ## Einführung in das Modbus-Protokoll
 
@@ -18,7 +18,7 @@ Das Modbus-Protokoll ist sowohl für die serielle Kommunikation als auch für di
 
 ## Datenrepräsentation
 
-Daten werden im Modbus-Protokoll als ASCII oder Binär übertragen, obwohl das binäre Format aufgrund seiner Kompatibilität mit älteren Geräten verwendet wird.
+Daten werden im Modbus-Protokoll als ASCII oder Binär übertragen, obwohl das Binärformat aufgrund seiner Kompatibilität mit älteren Geräten verwendet wird.
 
 ## Funktionscodes
 
@@ -32,4 +32,4 @@ Darüber hinaus implementiert Modbus auch Fehlerprüfungen, um die Integrität d
 
 Aufgrund seiner großflächigen Nutzung und des Mangels an Aktualisierungen bietet ein Angriff auf Modbus einen erheblichen Vorteil mit seiner Angriffsfläche. ICS ist stark von der Kommunikation zwischen Geräten abhängig, und Angriffe auf diese können gefährlich für den Betrieb der industriellen Systeme sein. Angriffe wie Wiederholung, Dateninjektion, Datenschnüffeln und Leaks, Denial of Service, Datenfälschung usw. können durchgeführt werden, wenn das Übertragungsmedium vom Angreifer identifiziert wird.
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
