@@ -166,11 +166,11 @@ Allow the process to **ask for all the TCC permissions**.
 
 ### **`kTCCServicePostEvent`**
 
-{{#include ../../../banners/hacktricks-training.md}}
+
 
 </details>
 
 
 
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../../banners/hacktricks-training.md}}
