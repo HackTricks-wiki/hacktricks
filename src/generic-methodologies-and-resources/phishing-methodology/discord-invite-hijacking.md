@@ -2,38 +2,38 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Discord se uitnodigingstelsel se kwesbaarheid laat bedreigingsakteurs toe om vervalde of verwyderde uitnodigingskodes (tydelik, permanent, of pasgemaakte vanity) as nuwe vanity skakels op enige vlak 3 geboost bediener te eis. Deur alle kodes na kleinletters te normaliseer, kan aanvallers bekende uitnodigingskodes vooraf registreer en stilweg verkeer oorneem sodra die oorspronklike skakel verval of die bronbediener sy boost verloor.
+Discord se uitnodigingstelsel se kwesbaarheid laat bedreigingsakteurs toe om vervalle of verwyderde uitnodigingskodes (tydelik, permanent, of pasgemaakte vaniteit) as nuwe vaniteit skakels op enige vlak 3 geboost bediener te eis. Deur alle kodes na kleinletters te normaliseer, kan aanvallers bekende uitnodigingskodes vooraf registreer en stilweg verkeer oorneem sodra die oorspronklike skakel verval of die bronbediener sy boost verloor.
 
 ## Uitnodigingstipes en Oornemingsrisiko
 
-| Uitnodigingstype      | Oornemingsbaar? | Voorwaarde / Kommentaar                                                                                     |
-|-----------------------|------------------|------------------------------------------------------------------------------------------------------------|
-| Tydelike Uitnodigingskakel | ✅          | Na vervaldatum word die kode beskikbaar en kan dit weer geregistreer word as 'n vanity URL deur 'n geboost bediener. |
+| Uitnodigingstype      | Oornembaar? | Voorwaarde / Kommentaar                                                                                     |
+|-----------------------|-------------|------------------------------------------------------------------------------------------------------------|
+| Tydelike Uitnodigingskakel | ✅          | Na vervaldatum word die kode beskikbaar en kan dit weer geregistreer word as 'n vaniteit URL deur 'n geboost bediener. |
 | Permanente Uitnodigingskakel | ⚠️          | As verwyder en slegs uit kleinletters en syfers bestaan, kan die kode weer beskikbaar raak.                |
-| Pasgemaakte Vanityskakel    | ✅          | As die oorspronklike bediener sy Vlak 3 Boost verloor, word sy vanity-uitnodiging beskikbaar vir nuwe registrasie. |
+| Pasgemaakte Vaniteitskakel | ✅          | As die oorspronklike bediener sy vlak 3 Boost verloor, word sy vaniteit uitnodiging beskikbaar vir nuwe registrasie. |
 
 ## Exploitasiestappe
 
 1. Verkenning
 - Monitor openbare bronne (forums, sosiale media, Telegram-kanale) vir uitnodigingskakels wat die patroon `discord.gg/{code}` of `discord.com/invite/{code}` volg.
-- Versamel uitnodigingskodes van belang (tydelik of vanity).
+- Versamel uitnodigingskodes van belang (tydelik of vaniteit).
 2. Voorregistrasie
-- Skep of gebruik 'n bestaande Discord-bediener met Vlak 3 Boost voorregte.
-- In **Bedienerinstellings → Vanity URL**, probeer om die teikenuitnodigingskode toe te ken. As aanvaar, word die kode gereserveer deur die kwaadwillige bediener.
+- Skep of gebruik 'n bestaande Discord-bediener met vlak 3 Boost voorregte.
+- In **Bedienerinstellings → Vaniteit URL**, probeer om die teikenuitnodigingskode toe te ken. As aanvaar, word die kode gereserveer deur die kwaadwillige bediener.
 3. Oornemingsaktivering
 - Vir tydelike uitnodigings, wag totdat die oorspronklike uitnodiging verval (of verwyder dit handmatig as jy die bron beheer).
-- Vir kodes wat hoofletters bevat, kan die kleinlettervariant onmiddellik geëis word, hoewel omleiding slegs na vervaldatum aktiveer.
+- Vir kodes wat hoofletters bevat, kan die kleinlettervariant onmiddellik geëis word, hoewel omleiding slegs aktief word na vervaldatum.
 4. Stilweg Omleiding
 - Gebruikers wat die ou skakel besoek, word na die aanvaller-beheerde bediener gestuur sodra die oorneming aktief is.
 
-## Phishingvloei via Discord-bediener
+## Phishing Stroom via Discord Bediener
 
 1. Beperk bedienerkanale sodat slegs 'n **#verify** kanaal sigbaar is.
 2. Ontplooi 'n bot (bv. **Safeguard#0786**) om nuwelinge te vra om via OAuth2 te verifieer.
 3. Bot lei gebruikers na 'n phishing-webwerf (bv. `captchaguard.me`) onder die voorwendsel van 'n CAPTCHA of verifikasiefase.
 4. Implementeer die **ClickFix** UX truuk:
 - Vertoon 'n gebroke CAPTCHA boodskap.
-- Lei gebruikers om die **Win+R** dialoog te open, 'n vooraf gelaaide PowerShell-opdrag in te plak, en Enter te druk.
+- Lei gebruikers om die **Win+R** dialoog te open, plak 'n vooraf gelaaide PowerShell-opdrag, en druk Enter.
 
 ### ClickFix Clipboard Injection Voorbeeld
 ```javascript
@@ -49,13 +49,13 @@ Hierdie benadering vermy direkte lêeraflaaie en benut bekende UI-elemente om ge
 ## Versagtings
 
 - Gebruik permanente uitnodigingsskakels wat ten minste een hoofletter of nie-alfanumeriese karakter bevat (nooit verval, nie herbruikbaar nie).
-- Draai uitnodigingskodes gereeld om en herroep ou skakels.
+- Draai gereeld uitnodigingskodes en herroep ou skakels.
 - Monitor Discord-bediener se boost-status en vaniteit-URL-eise.
-- Onderwys gebruikers om die egtheid van die bediener te verifieer en om te verhoed dat hulle op die klembord-geplakte opdragte uitvoer.
+- Onderwys gebruikers om die egtheid van die bediener te verifieer en om te verhoed dat hulle op die klembord geplakte opdragte uitvoer.
 
 ## Verwysings
 
-- From Trust to Threat: Hijacked Discord Invites Used for Multi-Stage Malware Delivery – https://research.checkpoint.com/2025/from-trust-to-threat-hijacked-discord-invites-used-for-multi-stage-malware-delivery/
-- Discord Custom Invite Link Documentation – https://support.discord.com/hc/en-us/articles/115001542132-Custom-Invite-Link
+- From Trust to Threat: Hijacked Discord Invites Used for Multi-Stage Malware Delivery – [https://research.checkpoint.com/2025/from-trust-to-threat-hijacked-discord-invites-used-for-multi-stage-malware-delivery/](https://research.checkpoint.com/2025/from-trust-to-threat-hijacked-discord-invites-used-for-multi-stage-malware-delivery/)
+- Discord Custom Invite Link Documentation – [https://support.discord.com/hc/en-us/articles/115001542132-Custom-Invite-Link](https://support.discord.com/hc/en-us/articles/115001542132-Custom-Invite-Link)
 
 {{#include ../../banners/hacktricks-training.md}}
