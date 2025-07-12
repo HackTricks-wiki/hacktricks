@@ -40,7 +40,7 @@ return 0;
 #### **`/proc/sys/kernel/modprobe`**
 
 - Gedetailleerd in [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
-- Bevat die pad na die kernmodule laaier, wat aangeroep word om kernmodules te laai.
+- Bevat die pad na die kernmodule-laaier, wat aangeroep word om kernmodules te laai.
 - **Toegang Kontrole Voorbeeld**:
 
 ```bash
@@ -49,13 +49,13 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Kontroleer toegang tot modprobe
 
 #### **`/proc/sys/vm/panic_on_oom`**
 
-- Verwys in [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
-- 'n Globale vlag wat beheer of die kern paniek of die OOM killer aanroep wanneer 'n OOM toestand voorkom.
+- Verwys na [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
+- 'n Globale vlag wat beheer of die kern paniek of die OOM-killer aanroep wanneer 'n OOM-toestand voorkom.
 
 #### **`/proc/sys/fs`**
 
 - Volgens [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html), bevat opsies en inligting oor die lêerstelsel.
-- Skryftoegang kan verskeie ontkenning-van-diens aanvalle teen die gasheer moontlik maak.
+- Skryftoegang kan verskeie ontkenning-van-diens-aanvalle teen die gasheer moontlik maak.
 
 #### **`/proc/sys/fs/binfmt_misc`**
 
@@ -78,17 +78,17 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Kontroleer toegang tot modprobe
 - **Hervatting van Gasheer Voorbeeld**:
 
 ```bash
-echo b > /proc/sysrq-trigger # Herlaai die gasheer
+echo b > /proc/sysrq-trigger # Hervat die gasheer
 ```
 
 #### **`/proc/kmsg`**
 
-- Stel kernringbuffer boodskappe bloot.
-- Kan help met kernuitbuitings, adreslekke, en sensitiewe stelselinligting verskaf.
+- Stel kernringbufferboodskappe bloot.
+- Kan help in kernuitbuitings, adreslekke, en sensitiewe stelselinligting verskaf.
 
 #### **`/proc/kallsyms`**
 
-- Lys kern geëksporteerde simbole en hul adresse.
+- Lys kerngeëksporteerde simbole en hul adresse.
 - Essensieel vir kernuitbuiting ontwikkeling, veral om KASLR te oorkom.
 - Adresinligting is beperk met `kptr_restrict` op `1` of `2` gestel.
 - Besonderhede in [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
@@ -101,9 +101,9 @@ echo b > /proc/sysrq-trigger # Herlaai die gasheer
 
 #### **`/proc/kcore`**
 
-- Verteenwoordig die stelsel se fisiese geheue in ELF kernformaat.
+- Verteenwoordig die stelsel se fisiese geheue in ELF-kernformaat.
 - Lees kan die gasheer stelsel en ander houers se geheue-inhoud lek.
-- Groot lêergrootte kan lei tot leesprobleme of sagteware crashes.
+- Groot lêergrootte kan lei tot leesprobleme of sagtewarekrake.
 - Gedetailleerde gebruik in [Dumping /proc/kcore in 2019](https://schlafwandler.github.io/posts/dumping-/proc/kcore/).
 
 #### **`/proc/kmem`**
