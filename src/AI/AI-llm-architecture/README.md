@@ -1,6 +1,6 @@
 # LLM 训练 - 数据准备
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
 
 **这些是我从非常推荐的书籍中做的笔记** [**https://www.manning.com/books/build-a-large-language-model-from-scratch**](https://www.manning.com/books/build-a-large-language-model-from-scratch) **以及一些额外的信息。**
 
@@ -24,7 +24,7 @@
 ## 2. 数据采样
 
 > [!TIP]
-> 这个第二阶段的目标非常简单：**对输入数据进行采样，并为训练阶段准备数据，通常通过将数据集分成特定长度的句子，并生成预期的响应。**
+> 这个第二阶段的目标非常简单：**对输入数据进行采样，并为训练阶段准备，通常通过将数据集分成特定长度的句子，并生成预期的响应。**
 
 {{#ref}}
 2.-data-sampling.md
@@ -42,10 +42,10 @@
 3.-token-embeddings.md
 {{#endref}}
 
-## 4. 注意机制
+## 4. 注意力机制
 
 > [!TIP]
-> 这个第四阶段的目标非常简单：**应用一些注意机制**。这些将是许多**重复的层**，将**捕捉词汇表中单词与当前用于训练 LLM 的句子中其邻居的关系**。\
+> 这个第四阶段的目标非常简单：**应用一些注意力机制**。这些将是许多**重复的层**，将**捕捉词汇表中单词与当前用于训练 LLM 的句子中其邻居的关系**。\
 > 为此使用了许多层，因此许多可训练的参数将捕捉这些信息。
 
 {{#ref}}
@@ -55,7 +55,7 @@
 ## 5. LLM 架构
 
 > [!TIP]
-> 这个第五阶段的目标非常简单：**开发完整 LLM 的架构**。将所有内容整合在一起，应用所有层并创建所有函数以生成文本或将文本转换为 ID 及反向操作。
+> 这个第五阶段的目标非常简单：**开发完整 LLM 的架构**。将所有内容整合在一起，应用所有层并创建所有生成文本或将文本转换为 ID 及其反向的函数。
 >
 > 该架构将用于训练和预测文本。
 
@@ -99,4 +99,4 @@
 7.2.-fine-tuning-to-follow-instructions.md
 {{#endref}}
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}

@@ -1,14 +1,14 @@
 # FISSURE - The RF Framework
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
 
 **频率独立的基于SDR的信号理解和逆向工程**
 
-FISSURE是一个开源的RF和逆向工程框架，旨在适应所有技能水平，具有信号检测和分类、协议发现、攻击执行、IQ操控、漏洞分析、自动化和AI/ML的钩子。该框架旨在促进软件模块、无线电、协议、信号数据、脚本、流程图、参考材料和第三方工具的快速集成。FISSURE是一个工作流程启用器，将软件集中在一个位置，使团队能够轻松跟上进度，同时共享特定Linux发行版的相同经过验证的基线配置。
+FISSURE是一个开源的RF和逆向工程框架，旨在适合所有技能水平，具有信号检测和分类、协议发现、攻击执行、IQ操控、漏洞分析、自动化和AI/ML的钩子。该框架旨在促进软件模块、无线电、协议、信号数据、脚本、流程图、参考材料和第三方工具的快速集成。FISSURE是一个工作流启用器，将软件集中在一个位置，使团队能够轻松跟上进度，同时共享特定Linux发行版的相同经过验证的基线配置。
 
-FISSURE包含的框架和工具旨在检测RF能量的存在，理解信号的特性，收集和分析样本，开发传输和/或注入技术，并制作自定义有效载荷或消息。FISSURE包含一个不断增长的协议和信号信息库，以协助识别、数据包制作和模糊测试。在线档案功能可以下载信号文件并构建播放列表，以模拟流量和测试系统。
+FISSURE包含的框架和工具旨在检测RF能量的存在，理解信号的特性，收集和分析样本，开发传输和/或注入技术，并制作自定义有效载荷或消息。FISSURE包含一个不断增长的协议和信号信息库，以协助识别、数据包制作和模糊测试。在线档案功能可以下载信号文件并构建播放列表以模拟流量和测试系统。
 
-友好的Python代码库和用户界面使初学者能够快速了解涉及RF和逆向工程的流行工具和技术。网络安全和工程领域的教育工作者可以利用内置材料或利用该框架展示他们自己的实际应用。开发人员和研究人员可以将FISSURE用于日常任务或向更广泛的受众展示他们的前沿解决方案。随着FISSURE在社区中的认知和使用的增长，其能力和所涵盖的技术范围也将扩大。
+友好的Python代码库和用户界面使初学者能够快速了解涉及RF和逆向工程的流行工具和技术。网络安全和工程领域的教育工作者可以利用内置材料或利用该框架展示他们自己的实际应用。开发人员和研究人员可以将FISSURE用于日常任务或向更广泛的受众展示他们的前沿解决方案。随着FISSURE在社区中的认知和使用的增长，其能力和所涵盖技术的广度也将随之增加。
 
 **附加信息**
 
@@ -35,7 +35,7 @@ FISSURE中有三个分支，以便于文件导航并减少代码冗余。Python2
 
 **进行中（测试版）**
 
-这些操作系统仍处于测试版状态。它们正在开发中，已知缺少多个功能。安装程序中的项目可能与现有程序冲突或在状态被移除之前无法安装。
+这些操作系统仍处于测试状态。它们正在开发中，已知缺少多个功能。安装程序中的项目可能与现有程序冲突或在状态被移除之前无法安装。
 
 |     操作系统     |    FISSURE分支   |
 | :--------------: | :--------------: |
@@ -72,7 +72,7 @@ fissure
 ```
 参考FISSURE帮助菜单以获取更多使用细节。
 
-## 细节
+## 详细信息
 
 **组件**
 
@@ -109,16 +109,16 @@ fissure
 FISSURE附带了几本有用的指南，以帮助熟悉不同的技术和技巧。许多指南包括使用集成到FISSURE中的各种工具的步骤。
 
 * [Lesson1: OpenBTS](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson1\_OpenBTS.md)
-* [Lesson2: Lua解码器](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson2\_LuaDissectors.md)
-* [Lesson3: 声音交换](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson3\_Sound\_eXchange.md)
-* [Lesson4: ESP板](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson4\_ESP\_Boards.md)
-* [Lesson5: Radiosonde跟踪](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson5\_Radiosonde\_Tracking.md)
+* [Lesson2: Lua Dissectors](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson2\_LuaDissectors.md)
+* [Lesson3: Sound eXchange](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson3\_Sound\_eXchange.md)
+* [Lesson4: ESP Boards](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson4\_ESP\_Boards.md)
+* [Lesson5: Radiosonde Tracking](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson5\_Radiosonde\_Tracking.md)
 * [Lesson6: RFID](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson6\_RFID.md)
-* [Lesson7: 数据类型](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson7\_Data\_Types.md)
-* [Lesson8: 自定义GNU Radio模块](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson8\_Custom\_GNU\_Radio\_Blocks.md)
+* [Lesson7: Data Types](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson7\_Data\_Types.md)
+* [Lesson8: Custom GNU Radio Blocks](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson8\_Custom\_GNU\_Radio\_Blocks.md)
 * [Lesson9: TPMS](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson9\_TPMS.md)
-* [Lesson10: 无线电考试](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson10\_Ham\_Radio\_Exams.md)
-* [Lesson11: Wi-Fi工具](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson11\_WiFi\_Tools.md)
+* [Lesson10: Ham Radio Exams](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson10\_Ham\_Radio\_Exams.md)
+* [Lesson11: Wi-Fi Tools](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson11\_WiFi\_Tools.md)
 
 ## 路线图
 
@@ -141,13 +141,13 @@ FISSURE附带了几本有用的指南，以帮助熟悉不同的技术和技巧�
 * Python中的IQ分析脚本
 * 安装修正和改进
 
-对FISSURE的贡献对于加速其开发至关重要。您所做的任何贡献都将受到高度赞赏。如果您希望通过代码开发进行贡献，请先fork该仓库并创建一个pull请求：
+对FISSURE的贡献对于加速其开发至关重要。您所做的任何贡献都将受到高度赞赏。如果您希望通过代码开发进行贡献，请先fork该仓库并创建一个pull request：
 
 1. Fork项目
 2. 创建您的功能分支（`git checkout -b feature/AmazingFeature`）
 3. 提交您的更改（`git commit -m 'Add some AmazingFeature'`）
 4. 推送到分支（`git push origin feature/AmazingFeature`）
-5. 打开一个pull请求
+5. 打开一个pull request
 
 创建[问题](https://github.com/ainfosec/FISSURE/issues)以引起对错误的关注也是受欢迎的。
 
@@ -165,7 +165,7 @@ GPL-3.0
 
 加入Discord服务器：[https://discord.gg/JZDs5sgxcG](https://discord.gg/JZDs5sgxcG)
 
-在Twitter上关注：[ @FissureRF](https://twitter.com/fissurerf), [ @AinfoSec](https://twitter.com/ainfosec)
+在Twitter上关注：[ @FissureRF](https://twitter.com/fissurerf), [@AinfoSec](https://twitter.com/ainfosec)
 
 Chris Poore - Assured Information Security, Inc. - poorec@ainfosec.com
 
@@ -183,4 +183,4 @@ Chris Poore - Assured Information Security, Inc. - poorec@ainfosec.com
 
 
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}

@@ -1,3 +1,3 @@
 # 无线电黑客
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}

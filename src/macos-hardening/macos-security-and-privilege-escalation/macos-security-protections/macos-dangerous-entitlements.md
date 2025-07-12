@@ -13,7 +13,7 @@
 
 ### **`com.apple.rootless.install`**
 
-权限 **`com.apple.rootless.install`** 允许 **绕过 SIP**。查看[此处获取更多信息](macos-sip.md#com.apple.rootless.install)。
+权限 **`com.apple.rootless.install`** 允许 **绕过 SIP**。查看 [此处获取更多信息](macos-sip.md#com.apple.rootless.install)。
 
 ### **`com.apple.system-task-ports` (之前称为 `task_for_pid-allow`)**
 
@@ -123,18 +123,18 @@ osascript -e 'tell app "App Store" to activate' -e 'tell app "App Store" to acti
 
 ### `com.apple.security.cs.allow-jit`
 
-此权限允许通过将 `MAP_JIT` 标志传递给 `mmap()` 系统函数来**创建可写和可执行的内存**。查看[**更多信息**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-jit)。
+此权限允许通过将 `MAP_JIT` 标志传递给 `mmap()` 系统函数来**创建可写和可执行的内存**。查看[**此处以获取更多信息**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-jit)。
 
 ### `com.apple.security.cs.allow-unsigned-executable-memory`
 
-此权限允许**覆盖或修补 C 代码**，使用已被长期弃用的**`NSCreateObjectFileImageFromMemory`**（这在根本上是不安全的），或使用**DVDPlayback**框架。查看[**更多信息**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory)。
+此权限允许**覆盖或修补 C 代码**，使用长期弃用的**`NSCreateObjectFileImageFromMemory`**（这在根本上是不安全的），或使用**DVDPlayback**框架。查看[**此处以获取更多信息**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory)。
 
 > [!CAUTION]
 > 包含此权限会使您的应用程序暴露于内存不安全代码语言中的常见漏洞。仔细考虑您的应用程序是否需要此例外。
 
 ### `com.apple.security.cs.disable-executable-page-protection`
 
-此权限允许**修改其自身可执行文件**的部分内容以强制退出。查看[**更多信息**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-executable-page-protection)。
+此权限允许**修改其自身可执行文件**的部分内容以强制退出。查看[**此处以获取更多信息**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-executable-page-protection)。
 
 > [!CAUTION]
 > 禁用可执行内存保护权限是一种极端权限，它从您的应用程序中移除了基本的安全保护，使攻击者能够在不被检测的情况下重写您应用程序的可执行代码。如果可能，优先选择更窄的权限。
@@ -160,11 +160,11 @@ osascript -e 'tell app "App Store" to activate' -e 'tell app "App Store" to acti
 
 ### **`kTCCServicePostEvent`**
 
-{{#include ../../../banners/hacktricks-training.md}}
+
 
 </details>
 
 
 
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../../banners/hacktricks-training.md}}

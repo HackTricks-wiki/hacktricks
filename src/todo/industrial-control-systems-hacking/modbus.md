@@ -1,6 +1,6 @@
 # Modbus协议
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
 
 ## Modbus协议简介
 
@@ -32,4 +32,4 @@ ModBus协议通过传输特定的功能代码来操作PLC和各种控制设备�
 
 由于其大规模使用和缺乏升级，攻击Modbus提供了显著的优势，具有广泛的攻击面。ICS高度依赖设备之间的通信，任何对它们的攻击都可能对工业系统的操作造成危险。如果攻击者识别出传输媒介，可以进行重放、数据注入、数据嗅探和泄露、拒绝服务、数据伪造等攻击。
 
-{{#include /banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
