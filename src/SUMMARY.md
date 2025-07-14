@@ -337,6 +337,7 @@
   - [Manual DeObfuscation](mobile-pentesting/android-app-pentesting/manual-deobfuscation.md)
   - [React Native Application](mobile-pentesting/android-app-pentesting/react-native-application.md)
   - [Reversing Native Libraries](mobile-pentesting/android-app-pentesting/reversing-native-libraries.md)
+  - [Shizuku Privileged Api](mobile-pentesting/android-app-pentesting/shizuku-privileged-api.md)
   - [Smali - Decompiling, Modifying, Compiling](mobile-pentesting/android-app-pentesting/smali-changes.md)
   - [Spoofing your location in Play Store](mobile-pentesting/android-app-pentesting/spoofing-your-location-in-play-store.md)
   - [Tapjacking](mobile-pentesting/android-app-pentesting/tapjacking.md)
