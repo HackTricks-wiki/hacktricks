@@ -6,6 +6,10 @@
 
 ### C2 Listeners
 
+{{#ref}}
+../generic-hacking/aws-lambda-function-url-c2.md
+{{#endref}}
+
 `Cobalt Strike -> Listeners -> Add/Edit` then you can select where to listen, which kind of beacon to use (http, dns, smb...) and more.
 
 ### Peer2Peer Listeners
