@@ -429,6 +429,25 @@ You could abuse this env variable in a plist to maintain persistence adding thes
 The previous techniques will allow you to run **JS code inside the process of the electron application**. However, remember that the **child processes run under the same sandbox profile** as the parent application and **inherit their TCC permissions**.\
 Therefore, if you want to abuse entitlements to access the camera or microphone for example, you could just **run another binary from the process**.
 
+## Notable Electron macOS Vulnerabilities (2023-2024)
+
+### CVE-2023-44402 – ASAR integrity bypass
+
+Electron ≤22.3.23 and various 23-27 pre-releases allowed an attacker with write access to the `.app/Contents/Resources` folder to bypass the `embeddedAsarIntegrityValidation` **and** `onlyLoadAppFromAsar` fuses. The bug was a *file-type confusion* in the integrity checker that let a crafted **directory named `app.asar`** be loaded instead of the validated archive, so any JavaScript placed inside that directory was executed when the app started. Even vendors that had followed the hardening guidance and enabled both fuses were therefore still vulnerable on macOS.
+
+Patched Electron versions: **22.3.24**, **24.8.3**, **25.8.1**, **26.2.1** and **27.0.0-alpha.7**. Attackers who find an application running an older build can overwrite `Contents/Resources/app.asar` with their own directory to execute code with the application’s TCC entitlements. 
+
+### 2024 “RunAsNode” / “enableNodeCliInspectArguments” CVE cluster
+
+In January 2024 a series of CVEs (CVE-2024-23738 through CVE-2024-23743) highlighted that many Electron apps ship with the fuses **RunAsNode** and **EnableNodeCliInspectArguments** still enabled. A local attacker can therefore relaunch the program with the environment variable `ELECTRON_RUN_AS_NODE=1` or flags such as `--inspect-brk` to turn it into a *generic* Node.js process and inherit all the application’s sandbox and TCC permissions.
+
+Although the Electron team disputed the “critical” rating and noted that an attacker already needs local code–execution, the issue is still valuable during post-exploitation because it turns any vulnerable Electron bundle into a *living-off-the-land* binary that can e.g. read Contacts, Photos or other sensitive resources previously granted to the desktop app.
+
+Defensive guidance from the Electron maintainers:
+
+* Disable the `RunAsNode` and `EnableNodeCliInspectArguments` fuses in production builds.
+* Use the newer **UtilityProcess** API if your application legitimately needs a helper Node.js process instead of re-enabling those fuses. 
+
 ## Automatic Injection
 
 - [**electroniz3r**](https://github.com/r3ggi/electroniz3r)
@@ -483,9 +502,10 @@ Loki was designed to backdoor Electron applications by replacing the application
 
 - [https://www.electronjs.org/docs/latest/tutorial/fuses](https://www.electronjs.org/docs/latest/tutorial/fuses)
 - [https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks](https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks)
+- [https://github.com/electron/electron/security/advisories/GHSA-7m48-wc93-9g85](https://github.com/electron/electron/security/advisories/GHSA-7m48-wc93-9g85)
+- [https://www.electronjs.org/blog/statement-run-as-node-cves](https://www.electronjs.org/blog/statement-run-as-node-cves)
 - [https://m.youtube.com/watch?v=VWQY5R2A6X8](https://m.youtube.com/watch?v=VWQY5R2A6X8)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 
 
