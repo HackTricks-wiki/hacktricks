@@ -28,6 +28,7 @@
   - [Enable Nexmon Monitor And Injection On Android](generic-methodologies-and-resources/pentesting-wifi/enable-nexmon-monitor-and-injection-on-android.md)
   - [Evil Twin EAP-TLS](generic-methodologies-and-resources/pentesting-wifi/evil-twin-eap-tls.md)
 - [Phishing Methodology](generic-methodologies-and-resources/phishing-methodology/README.md)
+  - [Clipboard Hijacking](generic-methodologies-and-resources/phishing-methodology/clipboard-hijacking.md)
   - [Clone a Website](generic-methodologies-and-resources/phishing-methodology/clone-a-website.md)
   - [Detecting Phishing](generic-methodologies-and-resources/phishing-methodology/detecting-phising.md)
   - [Discord Invite Hijacking](generic-methodologies-and-resources/phishing-methodology/discord-invite-hijacking.md)
