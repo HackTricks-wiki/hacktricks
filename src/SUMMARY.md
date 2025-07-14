@@ -75,6 +75,7 @@
 
 # 🧙‍♂️ Generic Hacking
 
+- [Aws Lambda Function Url C2](generic-hacking/aws-lambda-function-url-c2.md)
 - [Brute Force - CheatSheet](generic-hacking/brute-force.md)
 - [Exfiltration](generic-hacking/exfiltration.md)
 - [Reverse Shells (Linux, Windows, MSFVenom)](generic-hacking/reverse-shells/README.md)
