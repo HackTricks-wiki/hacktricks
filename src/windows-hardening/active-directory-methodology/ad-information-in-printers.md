@@ -1,52 +1,104 @@
+# Inligting in Drukkers
+
 {{#include ../../banners/hacktricks-training.md}}
 
-Daar is verskeie blogs op die Internet wat **die gevare van die gebruik van printers met LDAP met standaard/ swak** aanmeldbesonderhede beklemtoon.\
-Dit is omdat 'n aanvaller **die printer kan mislei om teen 'n kwaadwillige LDAP-bediener te verifieer** (tipies is 'n `nc -vv -l -p 444` genoeg) en om die printer **aanmeldbesonderhede in duidelike teks** te vang.
+Daar is verskeie blogs op die Internet wat **die gevare van die laat van drukkers geconfigureer met LDAP met standaard/ swak** aanmeldbesonderhede beklemtoon.  \
+Dit is omdat 'n aanvaller die **drukker kan mislei om teen 'n valse LDAP-bediener te verifieer** (tipies is 'n `nc -vv -l -p 389` of `slapd -d 2` genoeg) en die drukkers **aanmeldbesonderhede in duidelike teks** kan vang.
 
-Ook, verskeie printers sal **logs met gebruikersname** bevat of kan selfs in staat wees om **alle gebruikersname** van die Domeinbeheerder te aflaai.
+Ook, verskeie drukkers sal **logs met gebruikersname** bevat of kan selfs in staat wees om **alle gebruikersname** van die Domeinbeheerder af te laai.
 
-Al hierdie **sensitiewe inligting** en die algemene **gebrek aan sekuriteit** maak printers baie interessant vir aanvallers.
+Al hierdie **sensitiewe inligting** en die algemene **gebrek aan sekuriteit** maak drukkers baie interessant vir aanvallers.
 
-Sommige blogs oor die onderwerp:
+Sommige inleidende blogs oor die onderwerp:
 
 - [https://www.ceos3c.com/hacking/obtaining-domain-credentials-printer-netcat/](https://www.ceos3c.com/hacking/obtaining-domain-credentials-printer-netcat/)
 - [https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
 
-## Printer Konfigurasie
+---
+## Drukker Konfigurasie
 
-- **Ligging**: Die LDAP-bediener lys is te vind by: `Network > LDAP Setting > Setting Up LDAP`.
-- **Gedrag**: Die koppelvlak laat LDAP-bediener wysigings toe sonder om aanmeldbesonderhede weer in te voer, wat op gebruikersgerief gemik is, maar sekuriteitsrisiko's inhou.
-- **Eksploiteer**: Die eksploitasie behels die herleiding van die LDAP-bediener adres na 'n beheerde masjien en die gebruik van die "Toets Verbinding" kenmerk om aanmeldbesonderhede te vang.
+- **Ligging**: Die LDAP-bedienerlys word gewoonlik in die webkoppelvlak gevind (bv. *Netwerk ➜ LDAP Instelling ➜ LDAP Opstel*).
+- **Gedrag**: Baie ingebedde webbedieners laat LDAP-bedienerwysigings toe **sonder om weer aanmeldbesonderhede in te voer** (bruikbaarheid kenmerk → sekuriteitsrisiko).
+- **Eksploiteer**: Herlei die LDAP-bedieneradres na 'n aanvaller-beheerde gasheer en gebruik die *Toets Verbinding* / *Adresboek Sinkroniseer* knoppie om die drukker te dwing om aan jou te bind.
 
+---
 ## Vang Aanmeldbesonderhede
 
-**Vir meer gedetailleerde stappe, verwys na die oorspronklike [bron](https://grimhacker.com/2018/03/09/just-a-printer/).**
-
-### Metode 1: Netcat Luisteraar
-
-'n Eenvoudige netcat luisteraar mag genoeg wees:
+### Metode 1 – Netcat Luisteraar
 ```bash
-sudo nc -k -v -l -p 386
+sudo nc -k -v -l -p 389     # LDAPS → 636 (or 3269)
 ```
-egter, die sukses van hierdie metode verskil.
+Klein/ou MFP's mag 'n eenvoudige *simple-bind* in duidelike teks stuur wat netcat kan vang. Moderne toestelle voer gewoonlik eers 'n anonieme navraag uit en probeer dan die bind, so resultate verskil.
 
-### Metode 2: Volledige LDAP-bediener met Slapd
+### Metode 2 – Volledige Rogue LDAP bediener (aanbeveel)
 
-'n Meer betroubare benadering behels die opstelling van 'n volledige LDAP-bediener omdat die drukker 'n null bind uitvoer gevolg deur 'n navraag voordat dit probeer om akreditasie te bind.
-
-1. **LDAP-bedieneropstelling**: Die gids volg stappe van [this source](https://www.server-world.info/en/note?os=Fedora_26&p=openldap).
-2. **Belangrike Stappe**:
-- Installeer OpenLDAP.
-- Konfigureer admin wagwoord.
-- Importeer basiese skemas.
-- Stel domeinnaam op LDAP DB.
-- Konfigureer LDAP TLS.
-3. **LDAP-diensuitvoering**: Sodra dit opgestel is, kan die LDAP-diens uitgevoer word met:
+Omdat baie toestelle 'n anonieme soektog sal doen *voor* hulle outentiseer, lewer die opstel van 'n werklike LDAP daemon baie meer betroubare resultate:
 ```bash
-slapd -d 2
+# Debian/Ubuntu example
+sudo apt install slapd ldap-utils
+sudo dpkg-reconfigure slapd   # set any base-DN – it will not be validated
+
+# run slapd in foreground / debug 2
+slapd -d 2 -h "ldap:///"      # only LDAP, no LDAPS
 ```
+Wanneer die drukker sy soektog uitvoer, sal jy die duidelike teks geloofsbriewe in die foutopsporing-uitset sien.
+
+> 💡 Jy kan ook `impacket/examples/ldapd.py` (Python rogue LDAP) of `Responder -w -r -f` gebruik om NTLMv2 hashes oor LDAP/SMB te versamel.
+
+---
+## Onlangse Pass-Back Kwesbaarhede (2024-2025)
+
+Pass-back is *nie* 'n teoretiese probleem nie – verskaffers publiseer voortaan advies in 2024/2025 wat hierdie aanvalsklas presies beskryf.
+
+### Xerox VersaLink – CVE-2024-12510 & CVE-2024-12511
+
+Firmware ≤ 57.69.91 van Xerox VersaLink C70xx MFPs het 'n geverifieerde admin (of enige iemand wanneer standaard geloofsbriewe oorbly) toegelaat om:
+
+* **CVE-2024-12510 – LDAP pass-back**: die LDAP-bedieneradres te verander en 'n soektog te aktiveer, wat die toestel dwing om die geconfigureerde Windows geloofsbriewe na die aanvaller-beheerde gasheer te lek.
+* **CVE-2024-12511 – SMB/FTP pass-back**: identiese probleem via *scan-to-folder* bestemmings, wat NetNTLMv2 of FTP duidelike teks geloofsbriewe lek.
+
+'n Eenvoudige luisteraar soos:
+```bash
+sudo nc -k -v -l -p 389     # capture LDAP bind
+```
+of 'n rogue SMB-bediener (`impacket-smbserver`) is genoeg om die geloofsbriewe te versamel.
+
+### Canon imageRUNNER / imageCLASS – Advies 20 Mei 2025
+
+Canon het 'n **SMTP/LDAP pass-back** swakheid in dosyne Laser & MFP produklyne bevestig. 'n Aanvaller met admin toegang kan die bediener konfigurasie verander en die gestoor geloofsbriewe vir LDAP **of** SMTP onttrek (baie organisasies gebruik 'n bevoorregte rekening om scan-to-mail toe te laat).
+
+Die verskaffer se leiding beveel eksplisiet aan:
+
+1. Opdateer na gepatchte firmware sodra dit beskikbaar is.
+2. Gebruik sterk, unieke admin wagwoorde.
+3. Vermy bevoorregte AD rekeninge vir drukker integrasie.
+
+---
+## Geoutomatiseerde Enumerasie / Exploitatie Gereedskap
+
+| Gereedskap | Doel | Voorbeeld |
+|------------|------|----------|
+| **PRET** (Printer Exploitation Toolkit) | PostScript/PJL/PCL misbruik, lêerstelsels toegang, standaard-geloofsbriewe kontrole, *SNMP ontdekking* | `python pret.py 192.168.1.50 pjl` |
+| **Praeda** | Versamel konfigurasie (insluitend adresboeke & LDAP geloofsbriewe) via HTTP/HTTPS | `perl praeda.pl -t 192.168.1.50` |
+| **Responder / ntlmrelayx** | Vang & herlei NetNTLM hashes van SMB/FTP pass-back | `responder -I eth0 -wrf` |
+| **impacket-ldapd.py** | Liggewig rogue LDAP diens om duidelike teks binds te ontvang | `python ldapd.py -debug` |
+
+---
+## Versterking & Opsporing
+
+1. **Patch / firmware-opdatering** MFPs vinnig (kontroleer verskaffer PSIRT bulletins).
+2. **Minimale Privilege Diens Rekeninge** – gebruik nooit Domein Admin vir LDAP/SMB/SMTP; beperk tot *lees-slegs* OU skope.
+3. **Beperk Bestuurs Toegang** – plaas drukker web/IPP/SNMP interfaces in 'n bestuurs VLAN of agter 'n ACL/VPN.
+4. **Deaktiveer Ongebruikte Protokolle** – FTP, Telnet, raw-9100, ouer SSL ciphers.
+5. **Aktiveer Oudit Logging** – sommige toestelle kan syslog LDAP/SMTP mislukkings; korreleer onverwagte binds.
+6. **Monitor vir Duidelike-Teks LDAP binds** op ongewone bronne (drukker behoort normaalweg net met DC's te kommunikeer).
+7. **SNMPv3 of deaktiveer SNMP** – gemeenskap `public` lek dikwels toestel & LDAP konfigurasie.
+
+---
 ## Verwysings
 
 - [https://grimhacker.com/2018/03/09/just-a-printer/](https://grimhacker.com/2018/03/09/just-a-printer/)
+- Rapid7. “Xerox VersaLink C7025 MFP Pass-Back Attack Vulnerabilities.” Februarie 2025.
+- Canon PSIRT. “Vulnerability Mitigation Against SMTP/LDAP Passback for Laser Printers and Small Office Multifunction Printers.” Mei 2025.
 
 {{#include ../../banners/hacktricks-training.md}}
