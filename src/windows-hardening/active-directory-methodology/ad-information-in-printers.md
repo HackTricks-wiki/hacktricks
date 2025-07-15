@@ -103,6 +103,7 @@ The vendor guidance explicitly recommends:
 ---
 ## References
 
+- [https://grimhacker.com/2018/03/09/just-a-printer/](https://grimhacker.com/2018/03/09/just-a-printer/)
 - Rapid7. “Xerox VersaLink C7025 MFP Pass-Back Attack Vulnerabilities.” February 2025.  
 - Canon PSIRT. “Vulnerability Mitigation Against SMTP/LDAP Passback for Laser Printers and Small Office Multifunction Printers.” May 2025.
 
