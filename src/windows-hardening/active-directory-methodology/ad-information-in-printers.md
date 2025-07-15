@@ -19,7 +19,7 @@ Alguns blogs introdutórios sobre o tema:
 
 - **Localização**: A lista de servidores LDAP geralmente é encontrada na interface web (por exemplo, *Rede ➜ Configuração LDAP ➜ Configurando LDAP*).
 - **Comportamento**: Muitos servidores web embutidos permitem modificações no servidor LDAP **sem reintroduzir credenciais** (recurso de usabilidade → risco de segurança).
-- **Exploit**: Redirecione o endereço do servidor LDAP para um host controlado pelo atacante e use o botão *Testar Conexão* / *Sincronização de Catálogo de Endereços* para forçar a impressora a se conectar a você.
+- **Exploit**: Redirecione o endereço do servidor LDAP para um host controlado pelo atacante e use o botão *Testar Conexão* / *Sincronização da Lista de Contatos* para forçar a impressora a se conectar a você.
 
 ---
 ## Capturando Credenciais
@@ -28,7 +28,7 @@ Alguns blogs introdutórios sobre o tema:
 ```bash
 sudo nc -k -v -l -p 389     # LDAPS → 636 (or 3269)
 ```
-Pequenos/impressoras multifuncionais antigas podem enviar um simples *simple-bind* em texto claro que o netcat pode capturar. Dispositivos modernos geralmente realizam uma consulta anônima primeiro e depois tentam o bind, então os resultados variam.
+Small/old MFPs podem enviar um simples *simple-bind* em texto claro que o netcat pode capturar. Dispositivos modernos geralmente realizam uma consulta anônima primeiro e depois tentam o bind, então os resultados variam.
 
 ### Método 2 – Servidor LDAP Rogue Completo (recomendado)
 
@@ -52,10 +52,10 @@ Pass-back *não* é um problema teórico – os fornecedores continuam publicand
 
 ### Xerox VersaLink – CVE-2024-12510 & CVE-2024-12511
 
-O firmware ≤ 57.69.91 dos MFPs Xerox VersaLink C70xx permitiu que um administrador autenticado (ou qualquer um quando as credenciais padrão permanecem) pudesse:
+Firmware ≤ 57.69.91 das MFPs Xerox VersaLink C70xx permitiu que um administrador autenticado (ou qualquer um quando as credenciais padrão permanecem) pudesse:
 
 * **CVE-2024-12510 – LDAP pass-back**: alterar o endereço do servidor LDAP e acionar uma busca, fazendo com que o dispositivo vazasse as credenciais do Windows configuradas para o host controlado pelo atacante.
-* **CVE-2024-12511 – SMB/FTP pass-back**: problema idêntico via destinos *scan-to-folder*, vazando credenciais em texto claro NetNTLMv2 ou FTP.
+* **CVE-2024-12511 – SMB/FTP pass-back**: problema idêntico via destinos de *scan-to-folder*, vazando credenciais em texto claro do NetNTLMv2 ou FTP.
 
 Um simples listener como:
 ```bash
@@ -65,7 +65,7 @@ ou um servidor SMB malicioso (`impacket-smbserver`) é suficiente para coletar a
 
 ### Canon imageRUNNER / imageCLASS – Aviso 20 de Maio de 2025
 
-A Canon confirmou uma vulnerabilidade de **pass-back SMTP/LDAP** em dezenas de linhas de produtos Laser e MFP. Um atacante com acesso de administrador pode modificar a configuração do servidor e recuperar as credenciais armazenadas para LDAP **ou** SMTP (muitas organizações usam uma conta privilegiada para permitir o envio de digitalizações por e-mail).
+A Canon confirmou uma vulnerabilidade de **pass-back SMTP/LDAP** em dezenas de linhas de produtos Laser e MFP. Um atacante com acesso de administrador pode modificar a configuração do servidor e recuperar as credenciais armazenadas para LDAP **ou** SMTP (muitas organizações usam uma conta privilegiada para permitir o envio de escaneamentos por e-mail).
 
 A orientação do fornecedor recomenda explicitamente:
 
@@ -77,7 +77,7 @@ A orientação do fornecedor recomenda explicitamente:
 ## Ferramentas de Enumeração / Exploração Automatizadas
 
 | Ferramenta | Propósito | Exemplo |
-|------------|-----------|---------|
+|-------------|-----------|---------|
 | **PRET** (Printer Exploitation Toolkit) | Abuso de PostScript/PJL/PCL, acesso ao sistema de arquivos, verificação de credenciais padrão, *descoberta SNMP* | `python pret.py 192.168.1.50 pjl` |
 | **Praeda** | Coletar configuração (incluindo catálogos de endereços e credenciais LDAP) via HTTP/HTTPS | `perl praeda.pl -t 192.168.1.50` |
 | **Responder / ntlmrelayx** | Capturar e retransmitir hashes NetNTLM de pass-back SMB/FTP | `responder -I eth0 -wrf` |
