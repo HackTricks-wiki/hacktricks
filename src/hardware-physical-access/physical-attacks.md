@@ -53,7 +53,68 @@ BitLocker encryption can potentially be bypassed if the **recovery password** is
 ### Social Engineering for Recovery Key Addition
 
 A new BitLocker recovery key can be added through social engineering tactics, convincing a user to execute a command that adds a new recovery key composed of zeros, thereby simplifying the decryption process.
+
+---
+
+### Offensive Network Implant Devices (Shark Jack, RaspyJack, LAN Turtle…)
+
+Small, head-less “plug-and-pwn” boards that expose an Ethernet (or USB-Ethernet) interface are extremely handy when you only have a few seconds of physical access to a wired network drop. Once connected they can automatically obtain an IP address, run predefined payloads, and exfiltrate loot over Wi-Fi or store it locally for later retrieval.
+
+#### RaspyJack ‑ DIY Shark Jack clone built around Raspberry Pi Zero 2 W
+
+**Key Features**
+
+* Menu-driven UI on a Waveshare 1.44'' TFT (joystick + 3 buttons)
+* Fully customisable `nmap` recon scans (any flags, arbitrary target ranges)
+* One-tap reverse-shell payloads (Bash / Python) with local or remote listener selection
+* Credential-capture modules:
+  * LLMNR / NetBIOS-NS poisoning via **Responder** to grab NTLMv2 hashes
+  * ARP MITM using **arpspoof** + **tcpdump** for packet capture
+  * DNS-spoof phishing via **dnsspoof** to transparently redirect victims
+* On-device loot viewer (Nmap, Responder, dnsspoof logs) + lightweight file browser
+* Theme editor, config back-up/restore, UI restart and safe shutdown menu
+* Drop-in support for custom Python scripts (`payloads/` directory)
+
+**Required Hardware**
+
+* Raspberry Pi Zero 2 W (or Pi Zero W + Ethernet/USB HAT)
+* Waveshare 1.44'' SPI TFT LCD HAT (includes joystick & 3 push buttons)
+* micro-SD card flashed with Raspberry Pi OS Lite (32-bit)
+
+**Initial Setup** (run as **root** after enabling SSH):
+
+```bash
+sudo apt update && sudo apt install git -y
+cd /root
+git clone https://github.com/7h30th3r0n3/raspyjack.git
+mv raspyjack Raspyjack
+cd Raspyjack
+chmod +x install_raspyjack.sh
+./install_raspyjack.sh
+reboot
+```
+
+**Updating** (back-up any loot in `/root/Raspyjack/loot/` first):
+
+```bash
+cd /root
+rm -rf Raspyjack
+git clone https://github.com/7h30th3r0n3/raspyjack.git
+mv raspyjack Raspyjack
+reboot
+```
+
+Boot-to-menu time on a Pi Zero 2 W is ~22 seconds, which makes RaspyJack perfect for quick “hit-and-run” red-team drops.
+
+#### Other Commercial Alternatives
+
+* **Hak5 Shark Jack** – BusyBox-based implant with switch-selectable payload modes
+* **Hak5 LAN Turtle / Packet Squirrel** – USB-Ethernet adapters offering persistent SSH, AutoSSH reverse tunnels, tcpdump capture and more
+
+RaspyJack replicates much of the above functionality using inexpensive, easily replaceable off-the-shelf hardware while remaining 100 % open-source.
+
+## References
+
+* [RaspyJack ‑ GitHub repository](https://github.com/7h30th3r0n3/Raspyjack)
+
 {{#include ../banners/hacktricks-training.md}}
-
-
-
