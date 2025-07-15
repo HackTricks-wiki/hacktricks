@@ -3,7 +3,7 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 互联网上有几个博客**强调了将打印机配置为使用默认/弱**登录凭据的LDAP的危险。 \
-这是因为攻击者可以**欺骗打印机向恶意LDAP服务器进行身份验证**（通常`nc -vv -l -p 389`或`slapd -d 2`就足够了），并捕获打印机**明文凭据**。
+这是因为攻击者可能**欺骗打印机向恶意LDAP服务器进行身份验证**（通常`nc -vv -l -p 389`或`slapd -d 2`就足够了），并捕获打印机**明文凭据**。
 
 此外，一些打印机将包含**带有用户名的日志**，甚至可能能够**从域控制器下载所有用户名**。
 
@@ -41,21 +41,21 @@ sudo dpkg-reconfigure slapd   # set any base-DN – it will not be validated
 # run slapd in foreground / debug 2
 slapd -d 2 -h "ldap:///"      # only LDAP, no LDAPS
 ```
-当打印机执行查找时，您将看到调试输出中的明文凭据。
+当打印机执行查找时，您将在调试输出中看到明文凭据。
 
 > 💡 您还可以使用 `impacket/examples/ldapd.py`（Python rogue LDAP）或 `Responder -w -r -f` 通过 LDAP/SMB 收集 NTLMv2 哈希。
 
 ---
 ## 最近的回传漏洞（2024-2025）
 
-回传*不是*一个理论问题——供应商在 2024/2025 年持续发布 advisories，准确描述了这一攻击类别。
+回传 *不是* 理论问题——供应商在 2024/2025 年持续发布建议，准确描述了这一攻击类别。
 
 ### 施乐 VersaLink – CVE-2024-12510 & CVE-2024-12511
 
 施乐 VersaLink C70xx MFP 的固件 ≤ 57.69.91 允许经过身份验证的管理员（或在默认凭据保持不变时的任何人）：
 
 * **CVE-2024-12510 – LDAP 回传**：更改 LDAP 服务器地址并触发查找，导致设备将配置的 Windows 凭据泄露给攻击者控制的主机。
-* **CVE-2024-12511 – SMB/FTP 回传**：通过 *scan-to-folder* 目标的相同问题，泄露 NetNTLMv2 或 FTP 明文凭据。
+* **CVE-2024-12511 – SMB/FTP 回传**：通过 *扫描到文件夹* 目标的相同问题，泄露 NetNTLMv2 或 FTP 明文凭据。
 
 一个简单的监听器，例如：
 ```bash
@@ -65,7 +65,7 @@ sudo nc -k -v -l -p 389     # capture LDAP bind
 
 ### 佳能 imageRUNNER / imageCLASS – 通告 2025年5月20日
 
-佳能确认了数十款激光和多功能产品线中的 **SMTP/LDAP 回传** 弱点。具有管理员访问权限的攻击者可以修改服务器配置并检索存储的 LDAP **或** SMTP 凭据（许多组织使用特权账户来允许扫描到邮件）。
+佳能确认了数十种激光和多功能产品线中的 **SMTP/LDAP 回传** 弱点。具有管理员访问权限的攻击者可以修改服务器配置并检索存储的 LDAP **或** SMTP 凭据（许多组织使用特权账户来允许扫描到邮件）。
 
 供应商指导明确建议：
 
