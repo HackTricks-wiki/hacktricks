@@ -76,6 +76,7 @@
 # 🧙‍♂️ Generic Hacking
 
 - [Brute Force - CheatSheet](generic-hacking/brute-force.md)
+- [Esim Javacard Exploitation](generic-hacking/esim-javacard-exploitation.md)
 - [Exfiltration](generic-hacking/exfiltration.md)
 - [Reverse Shells (Linux, Windows, MSFVenom)](generic-hacking/reverse-shells/README.md)
   - [MSFVenom - CheatSheet](generic-hacking/reverse-shells/msfvenom.md)
