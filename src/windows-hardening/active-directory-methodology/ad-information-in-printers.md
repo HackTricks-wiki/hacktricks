@@ -28,7 +28,7 @@ Quelques blogs d'introduction sur le sujet :
 ```bash
 sudo nc -k -v -l -p 389     # LDAPS → 636 (or 3269)
 ```
-Les petits anciens MFP peuvent envoyer un *simple-bind* simple en texte clair que netcat peut capturer. Les appareils modernes effectuent généralement d'abord une requête anonyme, puis tentent le bind, donc les résultats varient.
+Les petits anciens MFP peuvent envoyer un simple *simple-bind* en texte clair que netcat peut capturer. Les appareils modernes effectuent généralement d'abord une requête anonyme, puis tentent le bind, donc les résultats varient.
 
 ### Méthode 2 – Serveur LDAP rogue complet (recommandé)
 
@@ -61,16 +61,16 @@ Un simple écouteur tel que :
 ```bash
 sudo nc -k -v -l -p 389     # capture LDAP bind
 ```
-ou un serveur SMB rogue (`impacket-smbserver`) suffit à récolter les identifiants.
+ou un serveur SMB malveillant (`impacket-smbserver`) suffit à récolter les identifiants.
 
 ### Canon imageRUNNER / imageCLASS – Avis 20 mai 2025
 
-Canon a confirmé une faiblesse de **pass-back SMTP/LDAP** dans des dizaines de lignes de produits Laser et MFP. Un attaquant ayant un accès admin peut modifier la configuration du serveur et récupérer les identifiants stockés pour LDAP **ou** SMTP (de nombreuses organisations utilisent un compte privilégié pour permettre le scan vers le mail).
+Canon a confirmé une faiblesse de **pass-back SMTP/LDAP** dans des dizaines de lignes de produits Laser et MFP. Un attaquant ayant un accès administrateur peut modifier la configuration du serveur et récupérer les identifiants stockés pour LDAP **ou** SMTP (de nombreuses organisations utilisent un compte privilégié pour permettre le scan vers le mail).
 
 Les recommandations du fournisseur indiquent explicitement :
 
 1. Mettre à jour le firmware corrigé dès qu'il est disponible.
-2. Utiliser des mots de passe admin forts et uniques.
+2. Utiliser des mots de passe administratifs forts et uniques.
 3. Éviter les comptes AD privilégiés pour l'intégration des imprimantes.
 
 ---
@@ -81,7 +81,7 @@ Les recommandations du fournisseur indiquent explicitement :
 | **PRET** (Printer Exploitation Toolkit) | Abus de PostScript/PJL/PCL, accès au système de fichiers, vérification des identifiants par défaut, *découverte SNMP* | `python pret.py 192.168.1.50 pjl` |
 | **Praeda** | Récolter la configuration (y compris les annuaires et les identifiants LDAP) via HTTP/HTTPS | `perl praeda.pl -t 192.168.1.50` |
 | **Responder / ntlmrelayx** | Capturer et relayer les hachages NetNTLM depuis le pass-back SMB/FTP | `responder -I eth0 -wrf` |
-| **impacket-ldapd.py** | Service LDAP rogue léger pour recevoir des liaisons en texte clair | `python ldapd.py -debug` |
+| **impacket-ldapd.py** | Service LDAP malveillant léger pour recevoir des liaisons en texte clair | `python ldapd.py -debug` |
 
 ---
 ## Renforcement et détection
