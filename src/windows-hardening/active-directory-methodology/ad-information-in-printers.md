@@ -52,7 +52,7 @@ Il pass-back *non* è un problema teorico – i fornitori continuano a pubblicar
 
 ### Xerox VersaLink – CVE-2024-12510 & CVE-2024-12511
 
-Il firmware ≤ 57.69.91 delle stampanti multifunzione Xerox VersaLink C70xx ha permesso a un amministratore autenticato (o a chiunque quando le credenziali predefinite rimangono) di:
+Il firmware ≤ 57.69.91 delle MFP Xerox VersaLink C70xx ha consentito a un amministratore autenticato (o a chiunque quando le credenziali predefinite rimangono) di:
 
 * **CVE-2024-12510 – LDAP pass-back**: cambiare l'indirizzo del server LDAP e attivare una ricerca, causando la perdita delle credenziali Windows configurate verso l'host controllato dall'attaccante.
 * **CVE-2024-12511 – SMB/FTP pass-back**: problema identico tramite destinazioni *scan-to-folder*, perdendo credenziali NetNTLMv2 o FTP in chiaro.
@@ -87,18 +87,18 @@ Le indicazioni del fornitore raccomandano esplicitamente:
 ## Indurimento & Rilevamento
 
 1. **Patch / aggiornamento firmware** MFP tempestivamente (controllare i bollettini PSIRT del fornitore).
-2. **Account di Servizio con Minimi Privilegi** – non utilizzare mai Domain Admin per LDAP/SMB/SMTP; limitare a scope OU *solo in lettura*.
+2. **Account di Servizio con Minimo Privilegio** – non utilizzare mai Domain Admin per LDAP/SMB/SMTP; limitare a scope OU *solo in lettura*.
 3. **Limitare l'Accesso alla Gestione** – posizionare le interfacce web/IPP/SNMP della stampante in una VLAN di gestione o dietro un ACL/VPN.
 4. **Disabilitare i Protocolli Non Utilizzati** – FTP, Telnet, raw-9100, cifrari SSL obsoleti.
-5. **Abilitare il Logging di Audit** – alcuni dispositivi possono sysloggare i fallimenti LDAP/SMTP; correlare bind inaspettati.
-6. **Monitorare i bind LDAP in chiaro** da fonti insolite (le stampanti dovrebbero normalmente comunicare solo con i DC).
-7. **SNMPv3 o disabilitare SNMP** – la community `public` spesso rivela configurazioni di dispositivo e LDAP.
+5. **Abilitare il Logging di Audit** – alcuni dispositivi possono sysloggare i fallimenti LDAP/SMTP; correlare i bind inaspettati.
+6. **Monitorare i Bind LDAP in Chiaro** da fonti insolite (le stampanti dovrebbero normalmente comunicare solo con i DC).
+7. **SNMPv3 o disabilitare SNMP** – la community `public` spesso rivela la configurazione del dispositivo e LDAP.
 
 ---
 ## Riferimenti
 
 - [https://grimhacker.com/2018/03/09/just-a-printer/](https://grimhacker.com/2018/03/09/just-a-printer/)
-- Rapid7. “Vulnerabilità degli Attacchi Pass-Back della Xerox VersaLink C7025 MFP.” Febbraio 2025.
+- Rapid7. “Vulnerabilità degli Attacchi Pass-Back Xerox VersaLink C7025 MFP.” Febbraio 2025.
 - Canon PSIRT. “Mitigazione delle Vulnerabilità contro il Passback SMTP/LDAP per Stampanti Laser e Stampanti Multifunzionali per Piccoli Uffici.” Maggio 2025.
 
 {{#include ../../banners/hacktricks-training.md}}
