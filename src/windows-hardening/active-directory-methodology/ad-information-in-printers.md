@@ -1,52 +1,104 @@
+# Habari katika Printa
+
 {{#include ../../banners/hacktricks-training.md}}
 
-Kuna blogu kadhaa kwenye Mtandao ambazo **zinasisitiza hatari za kuacha printers zikiwa zimewekwa na LDAP zikiwa na** akauti za kuingia za kawaida/dhaifu.\
-Hii ni kwa sababu mshambuliaji anaweza **kudanganya printer kujiunga na seva ya LDAP isiyo halali** (kawaida `nc -vv -l -p 444` inatosha) na kukamata **akauti za printer kwa maandiko wazi**.
+Kuna blogu kadhaa kwenye Mtandao ambazo **zinasisitiza hatari za kuacha printa zikiwa zimewekwa na LDAP zikiwa na** akauti za kuingia za kawaida/dhaifu.  \
+Hii ni kwa sababu mshambuliaji anaweza **kudanganya printa kujiunga na seva ya LDAP isiyo halali** (kawaida `nc -vv -l -p 389` au `slapd -d 2` inatosha) na kukamata **akauti za printa kwa maandiko wazi**.
 
-Pia, printers kadhaa zitakuwa na **logs zenye majina ya watumiaji** au zinaweza hata kuwa na uwezo wa **kupakua majina yote ya watumiaji** kutoka kwa Domain Controller.
+Pia, printa kadhaa zitakuwa na **kumbukumbu za majina ya watumiaji** au zinaweza hata kuwa na uwezo wa **kupakua majina yote ya watumiaji** kutoka kwa Kituo cha Kikoa.
 
-Taarifa hii **nyeti** na **ukosefu wa usalama** wa kawaida inafanya printers kuwa za kuvutia sana kwa washambuliaji.
+Habari hii **nyeti** na **ukosefu wa usalama** wa kawaida hufanya printa kuwa za kuvutia sana kwa washambuliaji.
 
-Baadhi ya blogu kuhusu mada hii:
+Baadhi ya blogu za utangulizi kuhusu mada hii:
 
 - [https://www.ceos3c.com/hacking/obtaining-domain-credentials-printer-netcat/](https://www.ceos3c.com/hacking/obtaining-domain-credentials-printer-netcat/)
 - [https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
 
-## Mipangilio ya Printer
+---
+## Mipangilio ya Printa
 
-- **Mahali**: Orodha ya seva ya LDAP inapatikana kwenye: `Network > LDAP Setting > Setting Up LDAP`.
-- **Tabia**: Kiolesura kinaruhusu mabadiliko ya seva ya LDAP bila kuingiza tena akauti, ikilenga urahisi wa mtumiaji lakini ikileta hatari za usalama.
-- **Kuvunja**: Kuvunja kunahusisha kuelekeza anwani ya seva ya LDAP kwenye mashine iliyo chini ya udhibiti na kutumia kipengele cha "Test Connection" kukamata akauti.
+- **Mahali**: Orodha ya seva ya LDAP kwa kawaida hupatikana kwenye kiolesura cha wavuti (mfano *Network ➜ LDAP Setting ➜ Setting Up LDAP*).
+- **Tabia**: Seva nyingi za wavuti zilizojumuishwa zinaruhusu mabadiliko ya seva ya LDAP **bila kuingiza tena akauti** (kipengele cha matumizi → hatari ya usalama).
+- **Kuvunja**: Elekeza anwani ya seva ya LDAP kwa mwenyeji anayedhibitiwa na mshambuliaji na tumia kitufe cha *Test Connection* / *Address Book Sync* kulazimisha printa kujiunga na wewe.
 
+---
 ## Kukamata Akauti
 
-**Kwa hatua za kina zaidi, rejea kwenye [chanzo](https://grimhacker.com/2018/03/09/just-a-printer/).**
-
-### Njia 1: Netcat Listener
-
-Listener rahisi ya netcat inaweza kutosha:
+### Njia 1 – Netcat Listener
 ```bash
-sudo nc -k -v -l -p 386
+sudo nc -k -v -l -p 389     # LDAPS → 636 (or 3269)
 ```
-Hata hivyo, mafanikio ya mbinu hii yanatofautiana.
+Small/old MFPs zinaweza kutuma *simple-bind* rahisi katika maandiko wazi ambayo netcat inaweza kukamata. Vifaa vya kisasa kwa kawaida hufanya uchunguzi wa kutokujulikana kwanza na kisha kujaribu kuunganisha, hivyo matokeo yanatofautiana.
 
-### Method 2: Full LDAP Server with Slapd
+### Method 2 – Full Rogue LDAP server (recommended)
 
-Njia ya kuaminika zaidi inahusisha kuanzisha seva kamili ya LDAP kwa sababu printer inafanya bind ya null ikifuatiwa na uchunguzi kabla ya kujaribu kuunganisha akidi.
-
-1. **LDAP Server Setup**: Mwongozo unafuata hatua kutoka [this source](https://www.server-world.info/en/note?os=Fedora_26&p=openldap).
-2. **Key Steps**:
-- Sakinisha OpenLDAP.
-- Sanidi nenosiri la admin.
-- Ingiza mifano ya msingi.
-- Weka jina la kikoa kwenye DB ya LDAP.
-- Sanidi LDAP TLS.
-3. **LDAP Service Execution**: Mara tu inapoanzishwa, huduma ya LDAP inaweza kuendeshwa kwa kutumia:
+Kwa sababu vifaa vingi vitatoa utafutaji wa kutokujulikana *kabla* ya kuthibitisha, kusimika daemon halisi ya LDAP kunatoa matokeo ya kuaminika zaidi:
 ```bash
-slapd -d 2
+# Debian/Ubuntu example
+sudo apt install slapd ldap-utils
+sudo dpkg-reconfigure slapd   # set any base-DN – it will not be validated
+
+# run slapd in foreground / debug 2
+slapd -d 2 -h "ldap:///"      # only LDAP, no LDAPS
 ```
+Wakati printer inafanya utafutaji wake utaona akiba ya wazi ya taarifa za kuingia katika matokeo ya debug.
+
+> 💡 Unaweza pia kutumia `impacket/examples/ldapd.py` (Python rogue LDAP) au `Responder -w -r -f` kukusanya NTLMv2 hashes kupitia LDAP/SMB.
+
+---
+## Uthibitisho wa Hivi Karibuni wa Pass-Back (2024-2025)
+
+Pass-back *sio* suala la nadharia – wauzaji wanaendelea kuchapisha taarifa katika 2024/2025 ambazo zinaelezea kwa usahihi darasa hili la shambulio.
+
+### Xerox VersaLink – CVE-2024-12510 & CVE-2024-12511
+
+Firmware ≤ 57.69.91 ya Xerox VersaLink C70xx MFPs iliruhusu admin aliyeidhinishwa (au mtu yeyote wakati akiba za kawaida zipo) kufanya:
+
+* **CVE-2024-12510 – LDAP pass-back**: kubadilisha anwani ya seva ya LDAP na kuanzisha utafutaji, na kusababisha kifaa kuvuja akiba ya Windows iliyowekwa kwa mwenye shambulio.
+* **CVE-2024-12511 – SMB/FTP pass-back**: suala sawa kupitia *scan-to-folder* maeneo, kuvuja NetNTLMv2 au FTP akiba za wazi.
+
+Msikilizaji rahisi kama:
+```bash
+sudo nc -k -v -l -p 389     # capture LDAP bind
+```
+or a rogue SMB server (`impacket-smbserver`) is enough to harvest the credentials.
+
+### Canon imageRUNNER / imageCLASS – Advisory 20 Mei 2025
+
+Canon ilithibitisha udhaifu wa **SMTP/LDAP pass-back** katika mfululizo wa bidhaa za Laser & MFP. Mshambuliaji mwenye ufikiaji wa admin anaweza kubadilisha usanidi wa seva na kupata akiba ya taarifa za kuingia za LDAP **au** SMTP (mashirika mengi hutumia akaunti yenye mamlaka kuruhusu skana-kwa-barua).
+
+Mwongozo wa muuzaji unashauri wazi:
+
+1. Kusasisha firmware iliyorekebishwa mara tu inapatikana.
+2. Kutumia nywila za admin zenye nguvu na za kipekee.
+3. Kuepuka akaunti za AD zenye mamlaka kwa ajili ya uunganisho wa printer.
+
+---
+## Zana za Uhesabuji wa Otomatiki / Ukatili
+
+| Zana | Kusudi | Mfano |
+|------|---------|---------|
+| **PRET** (Printer Exploitation Toolkit) | Unyanyasaji wa PostScript/PJL/PCL, ufikiaji wa mfumo wa faili, ukaguzi wa default-creds, *SNMP discovery* | `python pret.py 192.168.1.50 pjl` |
+| **Praeda** | Kukusanya usanidi (ikiwemo vitabu vya anwani & LDAP creds) kupitia HTTP/HTTPS | `perl praeda.pl -t 192.168.1.50` |
+| **Responder / ntlmrelayx** | Kukamata & kuhamasisha NetNTLM hashes kutoka SMB/FTP pass-back | `responder -I eth0 -wrf` |
+| **impacket-ldapd.py** | Huduma ya LDAP isiyo na uzito kupokea viunganishi vya maandiko wazi | `python ldapd.py -debug` |
+
+---
+## Kuimarisha & Ugunduzi
+
+1. **Patch / firmware-update** MFPs mara moja (angalia taarifa za PSIRT za muuzaji).
+2. **Akaunti za Huduma za Least-Privilege** – kamwe usitumie Domain Admin kwa LDAP/SMB/SMTP; punguza kwa *read-only* OU scopes.
+3. **Punguza Ufikiaji wa Usimamizi** – weka interfaces za printer web/IPP/SNMP katika VLAN ya usimamizi au nyuma ya ACL/VPN.
+4. **Zima Protokali Zisizotumika** – FTP, Telnet, raw-9100, ciphers za SSL za zamani.
+5. **Washa Usajili wa Ukaguzi** – baadhi ya vifaa vinaweza syslog LDAP/SMTP failures; linganisha viunganishi visivyotarajiwa.
+6. **Fuatilia Viunganishi vya LDAP vya Maandishi Wazi** kutoka vyanzo visivyo vya kawaida (printer zinapaswa kuzungumza tu na DCs).
+7. **SNMPv3 au zima SNMP** – jamii `public` mara nyingi inavuja usanidi wa kifaa & LDAP.
+
+---
 ## Marejeleo
 
 - [https://grimhacker.com/2018/03/09/just-a-printer/](https://grimhacker.com/2018/03/09/just-a-printer/)
+- Rapid7. “Xerox VersaLink C7025 MFP Pass-Back Attack Vulnerabilities.” Februari 2025.
+- Canon PSIRT. “Vulnerability Mitigation Against SMTP/LDAP Passback for Laser Printers and Small Office Multifunction Printers.” Mei 2025.
 
 {{#include ../../banners/hacktricks-training.md}}
