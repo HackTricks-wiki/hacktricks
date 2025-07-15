@@ -61,16 +61,16 @@ Ein einfacher Listener wie:
 ```bash
 sudo nc -k -v -l -p 389     # capture LDAP bind
 ```
-oder ein rogue SMB-Server (`impacket-smbserver`) reicht aus, um die Anmeldeinformationen zu ernten.
+oder ein bösartiger SMB-Server (`impacket-smbserver`) reicht aus, um die Anmeldeinformationen zu ernten.
 
 ### Canon imageRUNNER / imageCLASS – Advisory 20. Mai 2025
 
-Canon bestätigte eine **SMTP/LDAP Pass-Back** Schwachstelle in Dutzenden von Laser- und MFP-Produktlinien. Ein Angreifer mit Admin-Zugriff kann die Serverkonfiguration ändern und die gespeicherten Anmeldeinformationen für LDAP **oder** SMTP abrufen (viele Organisationen verwenden ein privilegiertes Konto, um das Scannen per E-Mail zu ermöglichen).
+Canon bestätigte eine **SMTP/LDAP Pass-Back** Schwachstelle in Dutzenden von Laser- und MFP-Produktlinien. Ein Angreifer mit Administratorzugriff kann die Serverkonfiguration ändern und die gespeicherten Anmeldeinformationen für LDAP **oder** SMTP abrufen (viele Organisationen verwenden ein privilegiertes Konto, um das Scannen per E-Mail zu ermöglichen).
 
 Die Empfehlungen des Anbieters lauten ausdrücklich:
 
 1. Aktualisieren Sie die Firmware so schnell wie möglich auf die gepatchte Version.
-2. Verwenden Sie starke, einzigartige Admin-Passwörter.
+2. Verwenden Sie starke, einzigartige Administratorpasswörter.
 3. Vermeiden Sie privilegierte AD-Konten für die Druckerintegration.
 
 ---
@@ -81,14 +81,14 @@ Die Empfehlungen des Anbieters lauten ausdrücklich:
 | **PRET** (Printer Exploitation Toolkit) | Missbrauch von PostScript/PJL/PCL, Dateisystemzugriff, Überprüfung der Standardanmeldeinformationen, *SNMP-Entdeckung* | `python pret.py 192.168.1.50 pjl` |
 | **Praeda** | Ernte der Konfiguration (einschließlich Adressbücher & LDAP-Anmeldeinformationen) über HTTP/HTTPS | `perl praeda.pl -t 192.168.1.50` |
 | **Responder / ntlmrelayx** | Erfassen & Weiterleiten von NetNTLM-Hashes aus SMB/FTP-Pass-Back | `responder -I eth0 -wrf` |
-| **impacket-ldapd.py** | Leichter rogue LDAP-Dienst zum Empfangen von Klartext-Bindungen | `python ldapd.py -debug` |
+| **impacket-ldapd.py** | Leichter bösartiger LDAP-Dienst zum Empfangen von Klartext-Bindungen | `python ldapd.py -debug` |
 
 ---
 ## Härtung & Erkennung
 
 1. **Patch / Firmware-Update** MFPs umgehend (prüfen Sie die PSIRT-Bulletins des Anbieters).
-2. **Least-Privilege Service Accounts** – niemals Domain Admin für LDAP/SMB/SMTP verwenden; auf *read-only* OU-Bereiche beschränken.
-3. **Zugriff auf die Verwaltung einschränken** – Drucker-Web-/IPP/SNMP-Schnittstellen in ein Management-VLAN oder hinter einer ACL/VPN platzieren.
+2. **Least-Privilege Service Accounts** – niemals Domain Admin für LDAP/SMB/SMTP verwenden; auf *nur lesen* OU-Bereiche beschränken.
+3. **Zugriff auf die Verwaltung einschränken** – Drucker-Web-/IPP/SNMP-Schnittstellen in ein Verwaltungs-VLAN oder hinter einer ACL/VPN platzieren.
 4. **Deaktivieren Sie ungenutzte Protokolle** – FTP, Telnet, raw-9100, ältere SSL-Verschlüsselungen.
 5. **Aktivieren Sie die Protokollierung** – einige Geräte können LDAP/SMTP-Fehler sysloggen; unerwartete Bindungen korrelieren.
 6. **Überwachen Sie auf Klartext-LDAP-Bindungen** von ungewöhnlichen Quellen (Drucker sollten normalerweise nur mit DCs kommunizieren).
