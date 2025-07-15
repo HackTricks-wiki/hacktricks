@@ -28,7 +28,7 @@ Konu hakkında bazı tanıtıcı bloglar:
 ```bash
 sudo nc -k -v -l -p 389     # LDAPS → 636 (or 3269)
 ```
-Küçük/eski MFP'ler, netcat'in yakalayabileceği basit bir *simple-bind* gönderebilir. Modern cihazlar genellikle önce anonim bir sorgu yapar ve ardından bind denemesi yapar, bu nedenle sonuçlar değişkenlik gösterir.
+Küçük/eski MFP'ler, netcat'in yakalayabileceği basit bir *simple-bind* açık metin olarak gönderebilir. Modern cihazlar genellikle önce anonim bir sorgu yapar ve ardından bind denemesi yapar, bu nedenle sonuçlar değişkenlik gösterir.
 
 ### Yöntem 2 – Tam Rogue LDAP sunucusu (önerilir)
 
@@ -61,16 +61,16 @@ Basit bir dinleyici şöyle olabilir:
 ```bash
 sudo nc -k -v -l -p 389     # capture LDAP bind
 ```
-or bir siber SMB sunucusu (`impacket-smbserver`) kimlik bilgilerini toplamak için yeterlidir.
+veya bir rogue SMB sunucusu (`impacket-smbserver`) kimlik bilgilerini toplamak için yeterlidir.
 
 ### Canon imageRUNNER / imageCLASS – Tavsiye 20 Mayıs 2025
 
-Canon, birçok Laser & MFP ürün serisinde bir **SMTP/LDAP geri dönüş** zayıflığını doğruladı. Yönetici erişimine sahip bir saldırgan, sunucu yapılandırmasını değiştirebilir ve LDAP **veya** SMTP için saklanan kimlik bilgilerini alabilir (birçok kuruluş, tarama için e-posta gönderimini sağlamak amacıyla ayrıcalıklı bir hesap kullanır).
+Canon, birçok Laser ve MFP ürün serisinde bir **SMTP/LDAP pass-back** zayıflığını doğruladı. Yönetici erişimine sahip bir saldırgan, sunucu yapılandırmasını değiştirebilir ve LDAP **veya** SMTP için saklanan kimlik bilgilerini alabilir (birçok kuruluş, tarama için e-posta göndermeye izin vermek amacıyla ayrıcalıklı bir hesap kullanır).
 
 Satıcı kılavuzu açıkça şunları önermektedir:
 
-1. Mevcut olduğunda yamanmış firmware'e güncelleme yapın.
-2. Güçlü, benzersiz yönetici şifreleri kullanın.
+1. Mevcut olduğunda yamanmış firmware ile güncelleme yapın.
+2. Güçlü, benzersiz yönetici parolaları kullanın.
 3. Yazıcı entegrasyonu için ayrıcalıklı AD hesaplarından kaçının.
 
 ---
@@ -79,9 +79,9 @@ Satıcı kılavuzu açıkça şunları önermektedir:
 | Araç | Amaç | Örnek |
 |------|---------|---------|
 | **PRET** (Printer Exploitation Toolkit) | PostScript/PJL/PCL kötüye kullanımı, dosya sistemi erişimi, varsayılan kimlik bilgileri kontrolü, *SNMP keşfi* | `python pret.py 192.168.1.50 pjl` |
-| **Praeda** | HTTP/HTTPS üzerinden yapılandırma (adres defterleri & LDAP kimlik bilgileri dahil) toplama | `perl praeda.pl -t 192.168.1.50` |
-| **Responder / ntlmrelayx** | SMB/FTP geri dönüşünden NetNTLM hash'lerini yakalama & iletme | `responder -I eth0 -wrf` |
-| **impacket-ldapd.py** | Düz metin bağlamalarını almak için hafif bir sahte LDAP hizmeti | `python ldapd.py -debug` |
+| **Praeda** | HTTP/HTTPS üzerinden yapılandırma (adres defterleri ve LDAP kimlik bilgileri dahil) toplama | `perl praeda.pl -t 192.168.1.50` |
+| **Responder / ntlmrelayx** | SMB/FTP pass-back'ten NetNTLM hash'lerini yakalama ve iletme | `responder -I eth0 -wrf` |
+| **impacket-ldapd.py** | Düz metin bağlamalarını almak için hafif rogue LDAP servisi | `python ldapd.py -debug` |
 
 ---
 ## Güçlendirme & Tespit
@@ -90,15 +90,15 @@ Satıcı kılavuzu açıkça şunları önermektedir:
 2. **En Az Ayrıcalık Hizmet Hesapları** – LDAP/SMB/SMTP için asla Domain Admin kullanmayın; *salt okunur* OU kapsamları ile sınırlayın.
 3. **Yönetim Erişimini Kısıtlayın** – yazıcı web/IPP/SNMP arayüzlerini bir yönetim VLAN'ında veya bir ACL/VPN arkasında yerleştirin.
 4. **Kullanılmayan Protokolleri Devre Dışı Bırakın** – FTP, Telnet, raw-9100, eski SSL şifreleri.
-5. **Denetim Günlüğü Oluşturmayı Etkinleştirin** – bazı cihazlar LDAP/SMTP hatalarını syslog yapabilir; beklenmedik bağlamaları ilişkilendirin.
+5. **Denetim Günlüğü Oluşturmayı Etkinleştirin** – bazı cihazlar LDAP/SMTP hatalarını syslog yapabilir; beklenmeyen bağlamaları ilişkilendirin.
 6. **Alışılmadık Kaynaklarda Düz Metin LDAP bağlamalarını İzleyin** (yazıcılar normalde yalnızca DC'lerle iletişim kurmalıdır).
-7. **SNMPv3 veya SNMP'yi devre dışı bırakın** – topluluk `public` genellikle cihaz & LDAP yapılandırmasını sızdırır.
+7. **SNMPv3 veya SNMP'yi devre dışı bırakın** – topluluk `public` genellikle cihaz ve LDAP yapılandırmasını sızdırır.
 
 ---
 ## Referanslar
 
 - [https://grimhacker.com/2018/03/09/just-a-printer/](https://grimhacker.com/2018/03/09/just-a-printer/)
-- Rapid7. “Xerox VersaLink C7025 MFP Geri Dönüş Saldırı Zayıflıkları.” Şubat 2025.
-- Canon PSIRT. “Laser Yazıcılar ve Küçük Ofis Çok Fonksiyonlu Yazıcılar için SMTP/LDAP Geri Dönüşüne Karşı Zayıflık Azaltma.” Mayıs 2025.
+- Rapid7. “Xerox VersaLink C7025 MFP Pass-Back Attack Vulnerabilities.” Şubat 2025.
+- Canon PSIRT. “Lazer Yazıcılar ve Küçük Ofis Çok Fonksiyonlu Yazıcılar için SMTP/LDAP Passback'e Karşı Zayıflık Azaltma.” Mayıs 2025.
 
 {{#include ../../banners/hacktricks-training.md}}
