@@ -3,9 +3,9 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 Istnieje kilka blogów w Internecie, które **podkreślają niebezpieczeństwa związane z pozostawieniem drukarek skonfigurowanych z LDAP z domyślnymi/słabymi** danymi logowania.  \
-Dzieje się tak, ponieważ atakujący może **oszukać drukarkę, aby uwierzytelniła się w stosunku do złośliwego serwera LDAP** (zwykle `nc -vv -l -p 389` lub `slapd -d 2` wystarczy) i przechwycić **dane logowania drukarki w postaci czystego tekstu**.
+Dzieje się tak, ponieważ atakujący może **oszukać drukarkę, aby uwierzytelniła się w fałszywym serwerze LDAP** (zazwyczaj `nc -vv -l -p 389` lub `slapd -d 2` wystarczy) i przechwycić **dane logowania drukarki w postaci niezaszyfrowanej**.
 
-Ponadto, wiele drukarek będzie zawierać **dzienniki z nazwami użytkowników** lub może nawet być w stanie **pobierać wszystkie nazwy użytkowników** z kontrolera domeny.
+Ponadto, wiele drukarek będzie zawierać **logi z nazwami użytkowników** lub może nawet być w stanie **pobierać wszystkie nazwy użytkowników** z kontrolera domeny.
 
 Wszystkie te **wrażliwe informacje** oraz powszechny **brak bezpieczeństwa** sprawiają, że drukarki są bardzo interesujące dla atakujących.
 
@@ -52,10 +52,10 @@ Pass-back *nie* jest teoretycznym problemem – dostawcy wciąż publikują ostr
 
 ### Xerox VersaLink – CVE-2024-12510 i CVE-2024-12511
 
-Oprogramowanie układowe ≤ 57.69.91 drukarek Xerox VersaLink C70xx MFP pozwalało uwierzytelnionemu administratorowi (lub każdemu, gdy domyślne dane uwierzytelniające pozostają) na:
+Oprogramowanie układowe ≤ 57.69.91 drukarek Xerox VersaLink C70xx MFP pozwalało uwierzytelnionemu administratorowi (lub każdemu, gdy domyślne dane logowania pozostają) na:
 
-* **CVE-2024-12510 – LDAP pass-back**: zmianę adresu serwera LDAP i wywołanie zapytania, co powoduje, że urządzenie ujawnia skonfigurowane dane uwierzytelniające Windows do hosta kontrolowanego przez atakującego.
-* **CVE-2024-12511 – SMB/FTP pass-back**: identyczny problem przez *scan-to-folder* destynacje, ujawniając NetNTLMv2 lub dane uwierzytelniające FTP w postaci czystego tekstu.
+* **CVE-2024-12510 – LDAP pass-back**: zmianę adresu serwera LDAP i wywołanie zapytania, co powoduje, że urządzenie ujawnia skonfigurowane dane logowania Windows do hosta kontrolowanego przez atakującego.
+* **CVE-2024-12511 – SMB/FTP pass-back**: identyczny problem przez *scan-to-folder* destynacje, ujawniając NetNTLMv2 lub hasła FTP w postaci czystego tekstu.
 
 Prosty nasłuchiwacz, taki jak:
 ```bash
@@ -65,7 +65,7 @@ or serwer SMB (`impacket-smbserver`) wystarczy, aby zebrać dane uwierzytelniaj�
 
 ### Canon imageRUNNER / imageCLASS – Zawiadomienie 20 maja 2025
 
-Canon potwierdził słabość **SMTP/LDAP pass-back** w dziesiątkach linii produktów Laser & MFP. Atakujący z dostępem administratora może zmodyfikować konfigurację serwera i odzyskać zapisane dane uwierzytelniające dla LDAP **lub** SMTP (wiele organizacji używa uprzywilejowanego konta, aby umożliwić skanowanie na e-mail).
+Canon potwierdził słabość **SMTP/LDAP pass-back** w dziesiątkach linii produktów Laser & MFP. Atakujący z dostępem administratora może zmodyfikować konfigurację serwera i odzyskać przechowywane dane uwierzytelniające dla LDAP **lub** SMTP (wiele organizacji używa uprzywilejowanego konta, aby umożliwić skanowanie do poczty).
 
 Zalecenia producenta wyraźnie sugerują:
 
@@ -80,7 +80,7 @@ Zalecenia producenta wyraźnie sugerują:
 |------|---------|---------|
 | **PRET** (Printer Exploitation Toolkit) | Nadużycie PostScript/PJL/PCL, dostęp do systemu plików, sprawdzenie domyślnych danych uwierzytelniających, *odkrywanie SNMP* | `python pret.py 192.168.1.50 pjl` |
 | **Praeda** | Zbieranie konfiguracji (w tym książek adresowych i danych uwierzytelniających LDAP) przez HTTP/HTTPS | `perl praeda.pl -t 192.168.1.50` |
-| **Responder / ntlmrelayx** | Przechwytywanie i przekazywanie skrótów NetNTLM z SMB/FTP pass-back | `responder -I eth0 -wrf` |
+| **Responder / ntlmrelayx** | Przechwytywanie i przekazywanie skrótów NetNTLM z pass-back SMB/FTP | `responder -I eth0 -wrf` |
 | **impacket-ldapd.py** | Lekka usługa LDAP do odbierania połączeń w czystym tekście | `python ldapd.py -debug` |
 
 ---
@@ -99,6 +99,6 @@ Zalecenia producenta wyraźnie sugerują:
 
 - [https://grimhacker.com/2018/03/09/just-a-printer/](https://grimhacker.com/2018/03/09/just-a-printer/)
 - Rapid7. “Xerox VersaLink C7025 MFP Pass-Back Attack Vulnerabilities.” Luty 2025.
-- Canon PSIRT. “Mitigacja podatności na SMTP/LDAP Passback dla drukarek laserowych i małych wielofunkcyjnych drukarek biurowych.” Maj 2025.
+- Canon PSIRT. “Mitigacja podatności przeciwko SMTP/LDAP Passback dla drukarek laserowych i małych wielofunkcyjnych drukarek biurowych.” Maj 2025.
 
 {{#include ../../banners/hacktricks-training.md}}
