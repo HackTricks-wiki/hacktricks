@@ -2,60 +2,108 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-There are several blogs in the Internet which **highlight the dangers of leaving printers configured with LDAP with default/weak** logon credentials.\
-This is because an attacker could **trick the printer to authenticate against a rouge LDAP server** (typically a `nc -vv -l -p 444` is enough) and to capture the printer **credentials on clear-text**.
+There are several blogs in the Internet which **highlight the dangers of leaving printers configured with LDAP with default/weak** logon credentials.  \
+This is because an attacker could **trick the printer to authenticate against a rogue LDAP server** (typically a `nc -vv -l -p 389` or `slapd -d 2` is enough) and capture the printer **credentials in clear-text**.
 
-Also, several printers will contains **logs with usernames** or could even be able to **download all usernames** from the Domain Controller.
+Also, several printers will contain **logs with usernames** or could even be able to **download all usernames** from the Domain Controller.
 
 All this **sensitive information** and the common **lack of security** makes printers very interesting for attackers.
 
-Some blogs about the topic:
+Some introductory blogs about the topic:
 
 - [https://www.ceos3c.com/hacking/obtaining-domain-credentials-printer-netcat/](https://www.ceos3c.com/hacking/obtaining-domain-credentials-printer-netcat/)
 - [https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
 
+---
 ## Printer Configuration
 
-- **Location**: The LDAP server list is found at: `Network > LDAP Setting > Setting Up LDAP`.
-- **Behavior**: The interface allows LDAP server modifications without re-entering credentials, aiming for user convenience but posing security risks.
-- **Exploit**: The exploit involves redirecting the LDAP server address to a controlled machine and leveraging the "Test Connection" feature to capture credentials.
+- **Location**: The LDAP server list is usually found in the web interface (e.g. *Network ➜ LDAP Setting ➜ Setting Up LDAP*).
+- **Behavior**: Many embedded web servers allow LDAP server modifications **without re-entering credentials** (usability feature → security risk).
+- **Exploit**: Redirect the LDAP server address to an attacker-controlled host and use the *Test Connection* / *Address Book Sync* button to force the printer to bind to you.
 
+---
 ## Capturing Credentials
 
-**For more detailed steps, refer to the original [source](https://grimhacker.com/2018/03/09/just-a-printer/).**
-
-### Method 1: Netcat Listener
-
-A simple netcat listener might suffice:
+### Method 1 – Netcat Listener
 
 ```bash
-sudo nc -k -v -l -p 386
+sudo nc -k -v -l -p 389     # LDAPS → 636 (or 3269)
 ```
 
-However, this method's success varies.
+Small/old MFPs may send a simple *simple-bind* in clear-text that netcat can capture. Modern devices usually perform an anonymous query first and then attempt the bind, so results vary.
 
-### Method 2: Full LDAP Server with Slapd
+### Method 2 – Full Rogue LDAP server (recommended)
 
-A more reliable approach involves setting up a full LDAP server because the printer performs a null bind followed by a query before attempting credential binding.
-
-1. **LDAP Server Setup**: The guide follows steps from [this source](https://www.server-world.info/en/note?os=Fedora_26&p=openldap).
-2. **Key Steps**:
-   - Install OpenLDAP.
-   - Configure admin password.
-   - Import basic schemas.
-   - Set domain name on LDAP DB.
-   - Configure LDAP TLS.
-3. **LDAP Service Execution**: Once set up, the LDAP service can be run using:
+Because many devices will issue an anonymous search *before* authenticating, standing up a real LDAP daemon yields much more reliable results:
 
 ```bash
-slapd -d 2
+# Debian/Ubuntu example
+sudo apt install slapd ldap-utils
+sudo dpkg-reconfigure slapd   # set any base-DN – it will not be validated
+
+# run slapd in foreground / debug 2
+slapd -d 2 -h "ldap:///"      # only LDAP, no LDAPS
 ```
 
+When the printer performs its lookup you will see the clear-text credentials in the debug output.
+
+> 💡  You can also use `impacket/examples/ldapd.py` (Python rogue LDAP) or `Responder -w -r -f` to harvest NTLMv2 hashes over LDAP/SMB.
+
+---
+## Recent Pass-Back Vulnerabilities (2024-2025)
+
+Pass-back is *not* a theoretical issue – vendors keep publishing advisories in 2024/2025 that exactly describe this attack class.
+
+### Xerox VersaLink – CVE-2024-12510 & CVE-2024-12511
+
+Firmware ≤ 57.69.91 of Xerox VersaLink C70xx MFPs allowed an authenticated admin (or anyone when default creds remain) to:
+
+* **CVE-2024-12510 – LDAP pass-back**: change the LDAP server address and trigger a lookup, causing the device to leak the configured Windows credentials to the attacker-controlled host.
+* **CVE-2024-12511 – SMB/FTP pass-back**: identical issue via *scan-to-folder* destinations, leaking NetNTLMv2 or FTP clear-text creds.
+
+A simple listener such as:
+
+```bash
+sudo nc -k -v -l -p 389     # capture LDAP bind
+```
+
+or a rogue SMB server (`impacket-smbserver`) is enough to harvest the credentials.  
+
+### Canon imageRUNNER / imageCLASS – Advisory 20 May 2025
+
+Canon confirmed a **SMTP/LDAP pass-back** weakness in dozens of Laser & MFP product lines. An attacker with admin access can modify the server configuration and retrieve the stored credentials for LDAP **or** SMTP (many orgs use a privileged account to allow scan-to-mail).  
+
+The vendor guidance explicitly recommends:
+
+1. Updating to patched firmware as soon as available.
+2. Using strong, unique admin passwords.
+3. Avoiding privileged AD accounts for printer integration.
+
+---
+## Automated Enumeration / Exploitation Tools
+
+| Tool | Purpose | Example |
+|------|---------|---------|
+| **PRET** (Printer Exploitation Toolkit) | PostScript/PJL/PCL abuse, file-system access, default-creds check, *SNMP discovery* | `python pret.py 192.168.1.50 pjl` |
+| **Praeda** | Harvest configuration (including address books & LDAP creds) via HTTP/HTTPS | `perl praeda.pl -t 192.168.1.50` |
+| **Responder / ntlmrelayx** | Capture & relay NetNTLM hashes from SMB/FTP pass-back | `responder -I eth0 -wrf` |
+| **impacket-ldapd.py** | Lightweight rogue LDAP service to receive clear-text binds | `python ldapd.py -debug` |
+
+---
+## Hardening & Detection
+
+1. **Patch / firmware-update** MFPs promptly (check vendor PSIRT bulletins).
+2. **Least-Privilege Service Accounts** – never use Domain Admin for LDAP/SMB/SMTP; restrict to *read-only* OU scopes.
+3. **Restrict Management Access** – place printer web/IPP/SNMP interfaces in a management VLAN or behind an ACL/VPN.
+4. **Disable Unused Protocols** – FTP, Telnet, raw-9100, older SSL ciphers.
+5. **Enable Audit Logging** – some devices can syslog LDAP/SMTP failures; correlate unexpected binds.
+6. **Monitor for Clear-Text LDAP binds** on unusual sources (printers should normally talk only to DCs).
+7. **SNMPv3 or disable SNMP** – community `public` often leaks device & LDAP config.
+
+---
 ## References
 
-- [https://grimhacker.com/2018/03/09/just-a-printer/](https://grimhacker.com/2018/03/09/just-a-printer/)
+- Rapid7. “Xerox VersaLink C7025 MFP Pass-Back Attack Vulnerabilities.” February 2025.  
+- Canon PSIRT. “Vulnerability Mitigation Against SMTP/LDAP Passback for Laser Printers and Small Office Multifunction Printers.” May 2025.
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-
