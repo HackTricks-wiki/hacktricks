@@ -1,52 +1,104 @@
+# Informacje w drukarkach
+
 {{#include ../../banners/hacktricks-training.md}}
 
-W Internecie znajduje się kilka blogów, które **podkreślają niebezpieczeństwa związane z pozostawianiem drukarek skonfigurowanych z LDAP z domyślnymi/słabymi** danymi logowania.\
-Dzieje się tak, ponieważ atakujący może **oszukać drukarkę, aby uwierzytelniła się w fałszywym serwerze LDAP** (zwykle `nc -vv -l -p 444` wystarczy) i przechwycić **dane logowania drukarki w postaci czystego tekstu**.
+Istnieje kilka blogów w Internecie, które **podkreślają niebezpieczeństwa związane z pozostawieniem drukarek skonfigurowanych z LDAP z domyślnymi/słabymi** danymi logowania.  \
+Dzieje się tak, ponieważ atakujący może **oszukać drukarkę, aby uwierzytelniła się w stosunku do złośliwego serwera LDAP** (zwykle `nc -vv -l -p 389` lub `slapd -d 2` wystarczy) i przechwycić **dane logowania drukarki w postaci czystego tekstu**.
 
-Ponadto, wiele drukarek zawiera **dzienniki z nazwami użytkowników** lub może nawet być w stanie **pobierać wszystkie nazwy użytkowników** z kontrolera domeny.
+Ponadto, wiele drukarek będzie zawierać **dzienniki z nazwami użytkowników** lub może nawet być w stanie **pobierać wszystkie nazwy użytkowników** z kontrolera domeny.
 
-Wszystkie te **wrażliwe informacje** oraz powszechny **brak zabezpieczeń** sprawiają, że drukarki są bardzo interesujące dla atakujących.
+Wszystkie te **wrażliwe informacje** oraz powszechny **brak bezpieczeństwa** sprawiają, że drukarki są bardzo interesujące dla atakujących.
 
-Kilka blogów na ten temat:
+Kilka wprowadzających blogów na ten temat:
 
 - [https://www.ceos3c.com/hacking/obtaining-domain-credentials-printer-netcat/](https://www.ceos3c.com/hacking/obtaining-domain-credentials-printer-netcat/)
 - [https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
 
+---
 ## Konfiguracja drukarki
 
-- **Lokalizacja**: Lista serwerów LDAP znajduje się w: `Network > LDAP Setting > Setting Up LDAP`.
-- **Zachowanie**: Interfejs pozwala na modyfikacje serwera LDAP bez ponownego wprowadzania danych logowania, co ma na celu wygodę użytkownika, ale stwarza ryzyko bezpieczeństwa.
-- **Eksploatacja**: Eksploatacja polega na przekierowaniu adresu serwera LDAP do kontrolowanej maszyny i wykorzystaniu funkcji "Test Connection" do przechwycenia danych logowania.
+- **Lokalizacja**: Lista serwerów LDAP zazwyczaj znajduje się w interfejsie webowym (np. *Sieć ➜ Ustawienia LDAP ➜ Konfiguracja LDAP*).
+- **Zachowanie**: Wiele wbudowanych serwerów webowych pozwala na modyfikacje serwera LDAP **bez ponownego wprowadzania danych logowania** (funkcja użyteczności → ryzyko bezpieczeństwa).
+- **Eksploatacja**: Przekieruj adres serwera LDAP na host kontrolowany przez atakującego i użyj przycisku *Testuj połączenie* / *Synchronizacja książki adresowej*, aby zmusić drukarkę do połączenia z tobą.
 
+---
 ## Przechwytywanie danych logowania
 
-**Aby uzyskać bardziej szczegółowe kroki, zapoznaj się z oryginalnym [źródłem](https://grimhacker.com/2018/03/09/just-a-printer/).**
-
-### Metoda 1: Nasłuchiwacz Netcat
-
-Prosty nasłuchiwacz netcat może wystarczyć:
+### Metoda 1 – Nasłuchiwacz Netcat
 ```bash
-sudo nc -k -v -l -p 386
+sudo nc -k -v -l -p 389     # LDAPS → 636 (or 3269)
 ```
-Jednak sukces tej metody jest różny.
+Małe/stare MFP mogą wysyłać prosty *simple-bind* w czystym tekście, który netcat może przechwycić. Nowoczesne urządzenia zazwyczaj najpierw wykonują anonimowe zapytanie, a następnie próbują się uwierzytelnić, więc wyniki się różnią.
 
-### Metoda 2: Pełny serwer LDAP z Slapd
+### Metoda 2 – Pełny serwer LDAP typu Rogue (zalecane)
 
-Bardziej niezawodne podejście polega na skonfigurowaniu pełnego serwera LDAP, ponieważ drukarka wykonuje null bind, a następnie zapytanie przed próbą powiązania poświadczeń.
-
-1. **Konfiguracja serwera LDAP**: Przewodnik opiera się na krokach z [tego źródła](https://www.server-world.info/en/note?os=Fedora_26&p=openldap).
-2. **Kluczowe kroki**:
-- Zainstaluj OpenLDAP.
-- Skonfiguruj hasło administratora.
-- Importuj podstawowe schematy.
-- Ustaw nazwę domeny w bazie danych LDAP.
-- Skonfiguruj LDAP TLS.
-3. **Wykonanie usługi LDAP**: Po skonfigurowaniu, usługę LDAP można uruchomić za pomocą:
+Ponieważ wiele urządzeń wyda anonimowe zapytanie *przed* uwierzytelnieniem, uruchomienie prawdziwego demona LDAP daje znacznie bardziej wiarygodne wyniki:
 ```bash
-slapd -d 2
+# Debian/Ubuntu example
+sudo apt install slapd ldap-utils
+sudo dpkg-reconfigure slapd   # set any base-DN – it will not be validated
+
+# run slapd in foreground / debug 2
+slapd -d 2 -h "ldap:///"      # only LDAP, no LDAPS
 ```
+Kiedy drukarka wykonuje swoje zapytanie, zobaczysz hasła w postaci czystego tekstu w wyjściu debugowania.
+
+> 💡  Możesz również użyć `impacket/examples/ldapd.py` (Python rogue LDAP) lub `Responder -w -r -f`, aby zbierać hashe NTLMv2 przez LDAP/SMB.
+
+---
+## Ostatnie luki w zabezpieczeniach Pass-Back (2024-2025)
+
+Pass-back *nie* jest teoretycznym problemem – dostawcy wciąż publikują ostrzeżenia w 2024/2025, które dokładnie opisują tę klasę ataków.
+
+### Xerox VersaLink – CVE-2024-12510 i CVE-2024-12511
+
+Oprogramowanie układowe ≤ 57.69.91 drukarek Xerox VersaLink C70xx MFP pozwalało uwierzytelnionemu administratorowi (lub każdemu, gdy domyślne dane uwierzytelniające pozostają) na:
+
+* **CVE-2024-12510 – LDAP pass-back**: zmianę adresu serwera LDAP i wywołanie zapytania, co powoduje, że urządzenie ujawnia skonfigurowane dane uwierzytelniające Windows do hosta kontrolowanego przez atakującego.
+* **CVE-2024-12511 – SMB/FTP pass-back**: identyczny problem przez *scan-to-folder* destynacje, ujawniając NetNTLMv2 lub dane uwierzytelniające FTP w postaci czystego tekstu.
+
+Prosty nasłuchiwacz, taki jak:
+```bash
+sudo nc -k -v -l -p 389     # capture LDAP bind
+```
+or serwer SMB (`impacket-smbserver`) wystarczy, aby zebrać dane uwierzytelniające.
+
+### Canon imageRUNNER / imageCLASS – Zawiadomienie 20 maja 2025
+
+Canon potwierdził słabość **SMTP/LDAP pass-back** w dziesiątkach linii produktów Laser & MFP. Atakujący z dostępem administratora może zmodyfikować konfigurację serwera i odzyskać zapisane dane uwierzytelniające dla LDAP **lub** SMTP (wiele organizacji używa uprzywilejowanego konta, aby umożliwić skanowanie na e-mail).
+
+Zalecenia producenta wyraźnie sugerują:
+
+1. Aktualizację do poprawionego oprogramowania układowego, gdy tylko będzie dostępne.
+2. Używanie silnych, unikalnych haseł administratora.
+3. Unikanie uprzywilejowanych kont AD do integracji z drukarkami.
+
+---
+## Narzędzia do automatycznej enumeracji / eksploatacji
+
+| Narzędzie | Cel | Przykład |
+|------|---------|---------|
+| **PRET** (Printer Exploitation Toolkit) | Nadużycie PostScript/PJL/PCL, dostęp do systemu plików, sprawdzenie domyślnych danych uwierzytelniających, *odkrywanie SNMP* | `python pret.py 192.168.1.50 pjl` |
+| **Praeda** | Zbieranie konfiguracji (w tym książek adresowych i danych uwierzytelniających LDAP) przez HTTP/HTTPS | `perl praeda.pl -t 192.168.1.50` |
+| **Responder / ntlmrelayx** | Przechwytywanie i przekazywanie skrótów NetNTLM z SMB/FTP pass-back | `responder -I eth0 -wrf` |
+| **impacket-ldapd.py** | Lekka usługa LDAP do odbierania połączeń w czystym tekście | `python ldapd.py -debug` |
+
+---
+## Utwardzanie i wykrywanie
+
+1. **Szybka aktualizacja / aktualizacja oprogramowania układowego** MFP (sprawdź biuletyny PSIRT producenta).
+2. **Konta serwisowe z minimalnymi uprawnieniami** – nigdy nie używaj konta Domain Admin do LDAP/SMB/SMTP; ogranicz do *tylko do odczytu* zakresów OU.
+3. **Ogranicz dostęp do zarządzania** – umieść interfejsy web/IPP/SNMP drukarek w VLAN zarządzającym lub za ACL/VPN.
+4. **Wyłącz nieużywane protokoły** – FTP, Telnet, raw-9100, starsze szyfry SSL.
+5. **Włącz rejestrowanie audytów** – niektóre urządzenia mogą rejestrować błędy LDAP/SMTP w syslog; skoreluj niespodziewane połączenia.
+6. **Monitoruj połączenia LDAP w czystym tekście** z nietypowych źródeł (drukarki powinny normalnie komunikować się tylko z DC).
+7. **SNMPv3 lub wyłącz SNMP** – społeczność `public` często ujawnia konfigurację urządzenia i LDAP.
+
+---
 ## Odniesienia
 
 - [https://grimhacker.com/2018/03/09/just-a-printer/](https://grimhacker.com/2018/03/09/just-a-printer/)
+- Rapid7. “Xerox VersaLink C7025 MFP Pass-Back Attack Vulnerabilities.” Luty 2025.
+- Canon PSIRT. “Mitigacja podatności na SMTP/LDAP Passback dla drukarek laserowych i małych wielofunkcyjnych drukarek biurowych.” Maj 2025.
 
 {{#include ../../banners/hacktricks-training.md}}
