@@ -1,11 +1,11 @@
-# Information in Printers
+# Informacije u štampačima
 
 {{#include ../../banners/hacktricks-training.md}}
 
 Postoji nekoliko blogova na Internetu koji **ističu opasnosti ostavljanja štampača konfiguranih sa LDAP sa podrazumevanim/slabim** lozinkama.  \
-To je zato što bi napadač mogao **da prevari štampač da se autentifikuje protiv lažnog LDAP servera** (obično je `nc -vv -l -p 389` ili `slapd -d 2` dovoljno) i uhvati **akreditive štampača u čistom tekstu**.
+To je zato što bi napadač mogao **da prevari štampač da se autentifikuje protiv lažnog LDAP servera** (obično je `nc -vv -l -p 389` ili `slapd -d 2` dovoljno) i uhvati **lozinke štampača u čistom tekstu**.
 
-Takođe, nekoliko štampača će sadržati **logove sa korisničkim imenima** ili čak moći da **preuzmu sva korisnička imena** sa Kontrolera domena.
+Takođe, nekoliko štampača će sadržati **logove sa korisničkim imenima** ili čak mogu biti u mogućnosti da **preuzmu sva korisnička imena** sa Kontrolera domena.
 
 Sve ove **osetljive informacije** i uobičajeni **nedostatak sigurnosti** čine štampače veoma zanimljivim za napadače.
 
@@ -15,16 +15,16 @@ Neki uvodni blogovi o ovoj temi:
 - [https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
 
 ---
-## Printer Configuration
+## Konfiguracija štampača
 
-- **Location**: Lista LDAP servera se obično nalazi u veb interfejsu (npr. *Mreža ➜ LDAP Podešavanje ➜ Podešavanje LDAP-a*).
-- **Behavior**: Mnogi ugrađeni veb serveri omogućavaju izmene LDAP servera **bez ponovnog unošenja akreditiva** (karakteristika upotrebljivosti → sigurnosni rizik).
-- **Exploit**: Preusmerite adresu LDAP servera na host koji kontroliše napadač i koristite dugme *Test Connection* / *Address Book Sync* da primorate štampač da se poveže sa vama.
+- **Lokacija**: Lista LDAP servera se obično nalazi u veb interfejsu (npr. *Mreža ➜ LDAP Podešavanje ➜ Podešavanje LDAP-a*).
+- **Ponašanje**: Mnogi ugrađeni veb serveri omogućavaju izmene LDAP servera **bez ponovnog unošenja lozinki** (karakteristika upotrebljivosti → bezbednosni rizik).
+- **Eksploatacija**: Preusmerite adresu LDAP servera na host koji kontroliše napadač i koristite dugme *Testiraj vezu* / *Sinhronizacija adresara* da primorate štampač da se poveže sa vama.
 
 ---
-## Capturing Credentials
+## Hvatanje lozinki
 
-### Method 1 – Netcat Listener
+### Metod 1 – Netcat Listener
 ```bash
 sudo nc -k -v -l -p 389     # LDAPS → 636 (or 3269)
 ```
@@ -52,10 +52,10 @@ Pass-back *nije* teoretski problem – dobavljači nastavljaju da objavljuju oba
 
 ### Xerox VersaLink – CVE-2024-12510 & CVE-2024-12511
 
-Firmware ≤ 57.69.91 Xerox VersaLink C70xx MFP-a omogućio je autentifikovanom administratoru (ili bilo kome kada podrazumevani kredencijali ostanu) da:
+Firmware ≤ 57.69.91 Xerox VersaLink C70xx MFP-ova omogućio je autentifikovanom administratoru (ili bilo kome kada su podrazumevani kredencijali ostali) da:
 
-* **CVE-2024-12510 – LDAP pass-back**: promeni adresu LDAP servera i pokrene pretragu, uzrokujući da uređaj otkrije konfigurisane Windows kredencijale na hostu koji kontroliše napadač.
-* **CVE-2024-12511 – SMB/FTP pass-back**: identičan problem preko *scan-to-folder* odredišta, otkrivajući NetNTLMv2 ili FTP kredencijale u čistom tekstu.
+* **CVE-2024-12510 – LDAP pass-back**: promeni adresu LDAP servera i pokrene pretragu, uzrokujući da uređaj otkrije konfigurisane Windows kredencijale na hostu pod kontrolom napadača.
+* **CVE-2024-12511 – SMB/FTP pass-back**: identičan problem putem *scan-to-folder* odredišta, otkrivajući NetNTLMv2 ili FTP kredencijale u čistom tekstu.
 
 Jednostavan slušalac kao što je:
 ```bash
@@ -69,7 +69,7 @@ Canon je potvrdio **SMTP/LDAP pass-back** slabost u desetinama Laser & MFP proiz
 
 Preporuke proizvođača izričito sugerišu:
 
-1. Ažuriranje na zakrpljenu verziju firmvera čim postane dostupna.
+1. Ažuriranje na zakrpljeni firmware čim postane dostupan.
 2. Korišćenje jakih, jedinstvenih administratorskih lozinki.
 3. Izbegavanje privilegovanih AD naloga za integraciju štampača.
 
@@ -81,17 +81,17 @@ Preporuke proizvođača izričito sugerišu:
 | **PRET** (Printer Exploitation Toolkit) | Zloupotreba PostScript/PJL/PCL, pristup fajl sistemu, provera podrazumevanih kredencijala, *SNMP otkrivanje* | `python pret.py 192.168.1.50 pjl` |
 | **Praeda** | Prikupljanje konfiguracije (uključujući adresare i LDAP kredencijale) putem HTTP/HTTPS | `perl praeda.pl -t 192.168.1.50` |
 | **Responder / ntlmrelayx** | Hvatanje i preusmeravanje NetNTLM hash-eva iz SMB/FTP pass-back | `responder -I eth0 -wrf` |
-| **impacket-ldapd.py** | Lagana rogue LDAP usluga za primanje veza u čistom tekstu | `python ldapd.py -debug` |
+| **impacket-ldapd.py** | Lagana rogue LDAP usluga za primanje clear-text veza | `python ldapd.py -debug` |
 
 ---
 ## Ojačavanje i detekcija
 
-1. **Zakrpiti / ažurirati firmver** MFP-ove odmah (proveriti PSIRT biltene proizvođača).
+1. **Patch / ažuriranje firmware-a** MFP-ova odmah (proverite PSIRT biltene proizvođača).
 2. **Računi usluga sa najmanjim privilegijama** – nikada ne koristiti Domain Admin za LDAP/SMB/SMTP; ograničiti na *samo za čitanje* OU opsege.
 3. **Ograničiti pristup upravljanju** – staviti web/IPP/SNMP interfejse štampača u upravljački VLAN ili iza ACL/VPN.
 4. **Onemogućiti neiskorišćene protokole** – FTP, Telnet, raw-9100, stariji SSL šifri.
-5. **Omogućiti audit logovanje** – neki uređaji mogu syslogovati LDAP/SMTP greške; korelirati neočekivane veze.
-6. **Pratiti veze u čistom tekstu za LDAP** sa neobičnih izvora (štampači obično komuniciraju samo sa DC-ima).
+5. **Omogućiti audit logovanje** – neki uređaji mogu syslog-ovati LDAP/SMTP greške; korelirati neočekivane veze.
+6. **Pratiti clear-text LDAP veze** sa neobičnih izvora (štampači obično komuniciraju samo sa DC-ima).
 7. **SNMPv3 ili onemogućiti SNMP** – zajednica `public` često otkriva konfiguraciju uređaja i LDAP.
 
 ---
@@ -99,6 +99,6 @@ Preporuke proizvođača izričito sugerišu:
 
 - [https://grimhacker.com/2018/03/09/just-a-printer/](https://grimhacker.com/2018/03/09/just-a-printer/)
 - Rapid7. “Xerox VersaLink C7025 MFP Pass-Back Attack Vulnerabilities.” februar 2025.
-- Canon PSIRT. “Mitigacija ranjivosti protiv SMTP/LDAP passback za laserske štampače i multifunkcionalne štampače za mala preduzeća.” maj 2025.
+- Canon PSIRT. “Mitigacija ranjivosti protiv SMTP/LDAP passback za laserske štampače i male multifunkcionalne štampače.” maj 2025.
 
 {{#include ../../banners/hacktricks-training.md}}
