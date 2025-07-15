@@ -7,7 +7,7 @@ Hii ni kwa sababu mshambuliaji anaweza **kudanganya printa kujiunga na seva ya L
 
 Pia, printa kadhaa zitakuwa na **kumbukumbu za majina ya watumiaji** au zinaweza hata kuwa na uwezo wa **kupakua majina yote ya watumiaji** kutoka kwa Kituo cha Kikoa.
 
-Habari hii **nyeti** na **ukosefu wa usalama** wa kawaida hufanya printa kuwa za kuvutia sana kwa washambuliaji.
+Habari hii **nyeti** na **ukosefu wa usalama** wa kawaida inafanya printa kuwa za kuvutia sana kwa washambuliaji.
 
 Baadhi ya blogu za utangulizi kuhusu mada hii:
 
@@ -28,7 +28,7 @@ Baadhi ya blogu za utangulizi kuhusu mada hii:
 ```bash
 sudo nc -k -v -l -p 389     # LDAPS → 636 (or 3269)
 ```
-Small/old MFPs zinaweza kutuma *simple-bind* rahisi katika maandiko wazi ambayo netcat inaweza kukamata. Vifaa vya kisasa kwa kawaida hufanya uchunguzi wa kutokujulikana kwanza na kisha kujaribu kuunganisha, hivyo matokeo yanatofautiana.
+Small/old MFPs zinaweza kutuma *simple-bind* rahisi katika maandiko wazi ambayo netcat inaweza kukamata. Vifaa vya kisasa kawaida hufanya uchunguzi wa kutokujulikana kwanza na kisha kujaribu kuunganisha, hivyo matokeo yanatofautiana.
 
 ### Method 2 – Full Rogue LDAP server (recommended)
 
@@ -52,10 +52,10 @@ Pass-back *sio* suala la nadharia – wauzaji wanaendelea kuchapisha taarifa kat
 
 ### Xerox VersaLink – CVE-2024-12510 & CVE-2024-12511
 
-Firmware ≤ 57.69.91 ya Xerox VersaLink C70xx MFPs iliruhusu admin aliyeidhinishwa (au mtu yeyote wakati akiba za kawaida zipo) kufanya:
+Firmware ≤ 57.69.91 ya Xerox VersaLink C70xx MFPs iliruhusu admin aliyeidhinishwa (au mtu yeyote wakati akiba za kawaida zinabaki) kufanya:
 
-* **CVE-2024-12510 – LDAP pass-back**: kubadilisha anwani ya seva ya LDAP na kuanzisha utafutaji, na kusababisha kifaa kuvuja akiba ya Windows iliyowekwa kwa mwenye shambulio.
-* **CVE-2024-12511 – SMB/FTP pass-back**: suala sawa kupitia *scan-to-folder* maeneo, kuvuja NetNTLMv2 au FTP akiba za wazi.
+* **CVE-2024-12510 – LDAP pass-back**: kubadilisha anwani ya seva ya LDAP na kuanzisha utafutaji, ikisababisha kifaa kuvuja taarifa za kuingia za Windows zilizowekwa kwa mwenye shambulio.
+* **CVE-2024-12511 – SMB/FTP pass-back**: suala sawa kupitia *scan-to-folder* maeneo, ikivuja NetNTLMv2 au FTP akiba ya wazi ya taarifa za kuingia.
 
 Msikilizaji rahisi kama:
 ```bash
