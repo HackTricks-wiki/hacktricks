@@ -6,8 +6,8 @@
 
 1. Recon die slagoffer
 1. Kies die **slagoffer domein**.
-2. Voer 'n paar basiese web-opsomming uit **soek na aanmeldportale** wat deur die slagoffer gebruik word en **besluit** watter een jy gaan **naboots**.
-3. Gebruik 'n bietjie **OSINT** om **e-posse te vind**.
+2. Voer 'n paar basiese web-opsomming **uit om aanmeldportale** te soek wat deur die slagoffer gebruik word en **besluit** watter een jy gaan **naboots**.
+3. Gebruik 'n bietjie **OSINT** om **e-posse** te **vind**.
 2. Berei die omgewing voor
 1. **Koop die domein** wat jy gaan gebruik vir die phishing assessering
 2. **Konfigureer die e-posdiens** verwante rekords (SPF, DMARC, DKIM, rDNS)
@@ -53,7 +53,7 @@ Wanneer hierdie konsep **toegepas word op DNS versoeke**, is dit moontlik dat di
 
 Byvoorbeeld, 'n enkele bit-wijziging in die domein "windows.com" kan dit verander na "windnws.com."
 
-Aanvallers kan **voordeel trek uit hierdie deur verskeie bit-flipping domeine te registreer** wat soortgelyk is aan die slagoffer se domein. Hul bedoeling is om wettige gebruikers na hul eie infrastruktuur te herlei.
+Aanvallers kan **voordeel neem van hierdie deur verskeie bit-flipping domeine te registreer** wat soortgelyk is aan die slagoffer se domein. Hul bedoeling is om wettige gebruikers na hul eie infrastruktuur te herlei.
 
 Vir meer inligting lees [https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
 
@@ -73,8 +73,8 @@ Om seker te maak dat die vervalle domein wat jy gaan koop **alreeds 'n goeie SEO
 - [https://hunter.io/](https://hunter.io)
 - [https://anymailfinder.com/](https://anymailfinder.com)
 
-Om **meer** geldige e-posadresse te **ontdek of diegene** wat jy reeds ontdek het te **verifieer**, kan jy kyk of jy die slagoffer se smtp bedieners kan brute-force. [Leer hoe om e-posadres te verifieer/ontdek hier](../../network-services-pentesting/pentesting-smtp/index.html#username-bruteforce-enumeration).\
-Boonop, moenie vergeet dat as die gebruikers **enige webportaal gebruik om toegang tot hul e-posse te verkry**, jy kan kyk of dit kwesbaar is vir **gebruikersnaam brute force**, en die kwesbaarheid indien moontlik te benut.
+Om **meer** geldige e-posadresse te **ontdek** of **te verifieer** wat jy reeds ontdek het, kan jy kyk of jy die slagoffer se smtp bedieners kan brute-force. [Leer hoe om e-posadres hier te verifieer/ontdek](../../network-services-pentesting/pentesting-smtp/index.html#username-bruteforce-enumeration).\
+Boonop, moenie vergeet dat as die gebruikers **enige webportaal gebruik om toegang tot hul e-posse te verkry**, jy kan kyk of dit kwesbaar is vir **gebruikersnaam brute force**, en die kwesbaarheid indien moontlik benut.
 
 ## Konfigureer GoPhish
 
@@ -107,7 +107,7 @@ mkdir /opt/gophish/ssl_keys
 cp "/etc/letsencrypt/live/$DOMAIN/privkey.pem" /opt/gophish/ssl_keys/key.pem
 cp "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" /opt/gophish/ssl_keys/key.crt​
 ```
-**Pos konfigurasie**
+**E-pos konfigurasie**
 
 Begin met installasie: `apt-get install postfix`
 
@@ -119,12 +119,12 @@ Voeg dan die domein by die volgende lêers:
 
 **Verander ook die waardes van die volgende veranderlikes binne /etc/postfix/main.cf**
 
-`myhostname = <domein>`\
-`mydestination = $myhostname, <domein>, localhost.com, localhost`
+`myhostname = <domain>`\
+`mydestination = $myhostname, <domain>, localhost.com, localhost`
 
 Laastens, wysig die lêers **`/etc/hostname`** en **`/etc/mailname`** na jou domeinnaam en **herbegin jou VPS.**
 
-Nou, skep 'n **DNS A rekord** van `mail.<domein>` wat na die **ip adres** van die VPS wys en 'n **DNS MX** rekord wat na `mail.<domein>` wys.
+Skep nou 'n **DNS A rekord** van `mail.<domain>` wat na die **ip adres** van die VPS wys en 'n **DNS MX** rekord wat na `mail.<domain>` wys.
 
 Nou laat ons toets om 'n e-pos te stuur:
 ```bash
@@ -225,7 +225,7 @@ service gophish stop
 
 Hoe ouer 'n domein is, hoe minder waarskynlik is dit dat dit as spam beskou sal word. Dan moet jy soveel tyd as moontlik wag (ten minste 1 week) voor die phishing assessering. Boonop, as jy 'n bladsy oor 'n reputasionele sektor plaas, sal die reputasie wat verkry word beter wees.
 
-Let daarop dat jy, selfs al moet jy 'n week wag, alles nou kan klaar konfigureer.
+Let daarop dat selfs al moet jy 'n week wag, jy alles nou kan klaar konfigureer.
 
 ### Konfigureer Reverse DNS (rDNS) rekord
 
@@ -245,9 +245,9 @@ v=spf1 mx a ip4:ip.ip.ip.ip ?all
 ```
 ### Domein-gebaseerde Boodskapoutentiekering, Verslagdoening & Nakoming (DMARC) Rekord
 
-Jy moet **'n DMARC rekord vir die nuwe domein konfigureer**. As jy nie weet wat 'n DMARC rekord is nie, [**lees hierdie bladsy**](../../network-services-pentesting/pentesting-smtp/index.html#dmarc).
+Jy moet **'n DMARC rekord vir die nuwe domein konfigureer**. As jy nie weet wat 'n DMARC rekord is nie [**lees hierdie bladsy**](../../network-services-pentesting/pentesting-smtp/index.html#dmarc).
 
-Jy moet 'n nuwe DNS TXT rekord skep wat die gasheernaam `_dmarc.<domain>` met die volgende inhoud aandui:
+Jy moet 'n nuwe DNS TXT rekord skep wat die gasheernaam `_dmarc.<domain>` na die volgende inhoud wys:
 ```bash
 v=DMARC1; p=none
 ```
@@ -257,7 +257,7 @@ Jy moet **'n DKIM vir die nuwe domein konfigureer**. As jy nie weet wat 'n DMARC
 
 Hierdie tutoriaal is gebaseer op: [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
 
-> [!NOTE]
+> [!TIP]
 > Jy moet beide B64 waardes wat die DKIM-sleutel genereer, saamvoeg:
 >
 > ```
@@ -283,13 +283,13 @@ DKIM check:         pass
 Sender-ID check:    pass
 SpamAssassin check: ham
 ```
-Jy kan ook 'n **boodskap na 'n Gmail onder jou beheer** stuur, en die **e-pos se koptekste** in jou Gmail-inboks nagaan, `dkim=pass` moet teenwoordig wees in die `Authentication-Results` kopveld.
+Jy kan ook 'n **boodskap na 'n Gmail onder jou beheer** stuur, en die **e-pos se koptekste** in jou Gmail-inboks nagaan, `dkim=pass` moet teenwoordig wees in die `Authentication-Results` koptekstveld.
 ```
 Authentication-Results: mx.google.com;
 spf=pass (google.com: domain of contact@example.com designates --- as permitted sender) smtp.mail=contact@example.com;
 dkim=pass header.i=@example.com;
 ```
-### ​Verwydering van Spamhouse Swartlys
+### Verwydering van Spamhouse Swartlys
 
 Die bladsy [www.mail-tester.com](https://www.mail-tester.com) kan jou aandui of jou domein deur spamhouse geblokkeer word. Jy kan versoek dat jou domein/IP verwyder word by: ​[https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)
 
@@ -299,23 +299,23 @@ Die bladsy [www.mail-tester.com](https://www.mail-tester.com) kan jou aandui of 
 
 ## Skep & Begin GoPhish Campagne
 
-### Stuur Profiel
+### Stuurprofiel
 
-- Stel 'n **naam om die** sender profiel te identifiseer
-- Besluit vanaf watter rekening jy die phishing e-posse gaan stuur. Voorstelle: _noreply, support, servicedesk, salesforce..._
+- Stel 'n **naam om die** senderprofiel te identifiseer
+- Besluit vanaf watter rekening jy die phishing-e-posse gaan stuur. Voorstelle: _noreply, support, servicedesk, salesforce..._
 - Jy kan die gebruikersnaam en wagwoord leeg laat, maar maak seker om die Ignore Certificate Errors te merk
 
 ![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
 
-> [!NOTE]
+> [!TIP]
 > Dit word aanbeveel om die "**Stuur Toets E-pos**" funksionaliteit te gebruik om te toets of alles werk.\
-> Ek sou aanbeveel om **die toets e-posse na 10min e-pos adresse te stuur** om te voorkom dat jy op 'n swartlys geplaas word tydens toetse.
+> Ek sou aanbeveel om **die toets e-posse na 10min e-posadresse te stuur** om te verhoed dat jy op 'n swartlys geplaas word tydens toetse.
 
 ### E-pos Sjabloon
 
 - Stel 'n **naam om die** sjabloon te identifiseer
-- Skryf dan 'n **onderwerp** (niks vreemd nie, net iets wat jy sou verwag om in 'n gewone e-pos te lees)
-- Maak seker jy het "**Voeg Volg Beeld**" gemerk
+- Skryf dan 'n **onderwerp** (niks vreemd nie, net iets wat jy in 'n gewone e-pos sou verwag om te lees)
+- Maak seker jy het "**Voeg Volgbeeld**" gemerk
 - Skryf die **e-pos sjabloon** (jy kan veranderlikes gebruik soos in die volgende voorbeeld):
 ```html
 <html>
@@ -343,7 +343,7 @@ Let wel dat **om die geloofwaardigheid van die e-pos te verhoog**, dit aanbeveel
 
 ![](<../../images/image (80).png>)
 
-> [!NOTE]
+> [!TIP]
 > Die E-pos Sjabloon laat ook toe om **lêers aan te heg om te stuur**. As jy ook NTLM-uitdagings wil steel met behulp van spesiaal saamgestelde lêers/dokumente [lees hierdie bladsy](../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md).
 
 ### Landing Page
@@ -355,17 +355,17 @@ Let wel dat **om die geloofwaardigheid van die e-pos te verhoog**, dit aanbeveel
 
 ![](<../../images/image (826).png>)
 
-> [!NOTE]
+> [!TIP]
 > Gewoonlik sal jy die HTML-kode van die bladsy moet wysig en 'n paar toetse op plaaslik moet doen (miskien met 'n Apache-bediener) **totdat jy hou van die resultate.** Skryf dan daardie HTML-kode in die boks.\
-> Let daarop dat as jy **sommige statiese hulpbronne** vir die HTML moet gebruik (miskien 'n paar CSS en JS bladsye) jy dit in _**/opt/gophish/static/endpoint**_ kan stoor en dit dan kan benader vanaf _**/static/\<filename>**_
+> Let daarop dat as jy **sommige statiese hulpbronne** vir die HTML moet gebruik (miskien sommige CSS en JS bladsye) jy dit in _**/opt/gophish/static/endpoint**_ kan stoor en dit dan kan benader vanaf _**/static/\<filename>**_
 
-> [!NOTE]
-> Vir die omleiding kan jy **die gebruikers na die wettige hoof webblad** van die slagoffer omlei, of hulle na _/static/migration.html_ omlei, byvoorbeeld, plaas 'n **spinning wheel (**[**https://loading.io/**](https://loading.io)**) vir 5 sekondes en dui dan aan dat die proses suksesvol was**.
+> [!TIP]
+> Vir die omleiding kan jy **die gebruikers na die wettige hoof webblad** van die slagoffer omlei, of hulle na _/static/migration.html_ omlei, byvoorbeeld, plaas 'n **draaiwiel (**[**https://loading.io/**](https://loading.io)**) vir 5 sekondes en dui dan aan dat die proses suksesvol was**.
 
 ### Users & Groups
 
 - Stel 'n naam in
-- **Importeer die data** (let daarop dat jy die voornaam, van en e-posadres van elke gebruiker nodig het om die sjabloon vir die voorbeeld te gebruik)
+- **Importeer die data** (let daarop dat jy die voornaam, vannaam en e-posadres van elke gebruiker nodig het om die sjabloon vir die voorbeeld te gebruik)
 
 ![](<../../images/image (163).png>)
 
@@ -377,7 +377,7 @@ Let daarop dat die **Sending Profile toelaat om 'n toets e-pos te stuur om te si
 
 ![](<../../images/image (192).png>)
 
-> [!NOTE]
+> [!TIP]
 > Ek sou aanbeveel om **die toets e-posse na 10min e-posadresse te stuur** om te verhoed dat jy op 'n swartlys geplaas word terwyl jy toetse doen.
 
 Sodra alles gereed is, begin net die veldtog!
@@ -414,7 +414,7 @@ Hierdie is waar gereedskap soos [**evilginx2**](https://github.com/kgretzky/evil
 
 ### Via VNC
 
-Wat as jy in plaas daarvan om **die slagoffer na 'n kwaadwillige bladsy** met dieselfde voorkoms as die oorspronklike te stuur, hom na 'n **VNC-sessie met 'n blaaskans wat aan die werklike webblad gekoppel is** stuur? Jy sal kan sien wat hy doen, die wagwoord steel, die MFA wat gebruik word, die koekies...\
+Wat as jy in plaas daarvan om **die slagoffer na 'n kwaadwillige bladsy** met dieselfde voorkoms as die oorspronklike een te stuur, hom na 'n **VNC-sessie met 'n blaaskans wat aan die werklike webblad gekoppel is** stuur? Jy sal in staat wees om te sien wat hy doen, die wagwoord, die MFA wat gebruik word, die koekies te steel...\
 Jy kan dit doen met [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC)
 
 ## Detecting the detection
@@ -433,6 +433,14 @@ Jy kan **'n domein met 'n baie soortgelyke naam** as die slagoffer se domein **k
 ### Evaluate the phishing
 
 Gebruik [**Phishious** ](https://github.com/Rices/Phishious) om te evalueer of jou e-pos in die spammap gaan eindig of of dit geblokkeer gaan word of suksesvol gaan wees.
+
+## Clipboard Hijacking / Pastejacking
+
+Aanvallers kan stilweg kwaadwillige opdragte in die slagoffer se klembord kopieer vanaf 'n gecompromitteerde of typosquatted webblad en dan die gebruiker mislei om dit binne **Win + R**, **Win + X** of 'n terminal venster te plak, wat arbitrêre kode uitvoer sonder enige aflaai of aanhangsel.
+
+{{#ref}}
+clipboard-hijacking.md
+{{#endref}}
 
 ## References
 
