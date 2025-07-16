@@ -21,7 +21,7 @@ Inną interesującą fuzją, która nie będzie zapobiegać wstrzykiwaniu kodu, 
 
 - **EnableCookieEncryption**: Jeśli jest włączona, magazyn ciasteczek na dysku jest szyfrowany za pomocą kluczy kryptograficznych na poziomie systemu operacyjnego.
 
-### Sprawdzanie fuzji Electron
+### Sprawdzanie Fuzji Electron
 
 Możesz **sprawdzić te flagi** z aplikacji za pomocą:
 ```bash
@@ -50,11 +50,11 @@ Możesz załadować ten plik w [https://hexed.it/](https://hexed.it/) i wyszuka�
 
 <figure><img src="../../../images/image (34).png" alt=""><figcaption></figcaption></figure>
 
-Zauważ, że jeśli spróbujesz **nadpisać** binarny plik **`Electron Framework`** wewnątrz aplikacji z tymi zmodyfikowanymi bajtami, aplikacja nie uruchomi się.
+Zauważ, że jeśli spróbujesz **nadpisać** binarny plik **`Electron Framework`** wewnątrz aplikacji tymi zmodyfikowanymi bajtami, aplikacja nie będzie działać.
 
 ## RCE dodawanie kodu do aplikacji Electron
 
-Mogą istnieć **zewnętrzne pliki JS/HTML**, które wykorzystuje aplikacja Electron, więc atakujący mógłby wstrzyknąć kod do tych plików, których podpis nie będzie sprawdzany, i wykonać dowolny kod w kontekście aplikacji.
+Mogą istnieć **zewnętrzne pliki JS/HTML**, które wykorzystuje aplikacja Electron, więc atakujący może wstrzyknąć kod do tych plików, których podpis nie będzie sprawdzany, i wykonać dowolny kod w kontekście aplikacji.
 
 > [!CAUTION]
 > Jednak w tej chwili istnieją 2 ograniczenia:
@@ -64,7 +64,7 @@ Mogą istnieć **zewnętrzne pliki JS/HTML**, które wykorzystuje aplikacja Elec
 >
 > Co sprawia, że ta ścieżka ataku jest bardziej skomplikowana (lub niemożliwa).
 
-Zauważ, że możliwe jest obejście wymogu **`kTCCServiceSystemPolicyAppBundles`** poprzez skopiowanie aplikacji do innego katalogu (takiego jak **`/tmp`**), zmieniając nazwę folderu **`app.app/Contents`** na **`app.app/NotCon`**, **modyfikując** plik **asar** swoim **złośliwym** kodem, zmieniając go z powrotem na **`app.app/Contents`** i uruchamiając go.
+Zauważ, że możliwe jest obejście wymogu **`kTCCServiceSystemPolicyAppBundles`** poprzez skopiowanie aplikacji do innego katalogu (np. **`/tmp`**), zmieniając nazwę folderu **`app.app/Contents`** na **`app.app/NotCon`**, **modyfikując** plik **asar** swoim **złośliwym** kodem, zmieniając go z powrotem na **`app.app/Contents`** i uruchamiając go.
 
 Możesz rozpakować kod z pliku asar za pomocą:
 ```bash
@@ -86,7 +86,7 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 > [!CAUTION]
 > Jeśli bezpiecznik **`RunAsNode`** jest wyłączony, zmienna środowiskowa **`ELECTRON_RUN_AS_NODE`** zostanie zignorowana, a to nie zadziała.
 
-### Wstrzykiwanie z Plist Aplikacji
+### Wstrzykiwanie z Plist aplikacji
 
 Jak [**proponowano tutaj**](https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks/), możesz nadużyć tej zmiennej środowiskowej w plist, aby utrzymać persistencję:
 ```xml
@@ -396,20 +396,39 @@ Możesz nadużyć tej zmiennej środowiskowej w plist, aby utrzymać persistencj
 ## TCC Bypass abusing Older Versions
 
 > [!TIP]
-> Demon TCC w macOS nie sprawdza wersji aplikacji, która jest uruchamiana. Więc jeśli **nie możesz wstrzyknąć kodu w aplikację Electron** za pomocą żadnej z wcześniejszych technik, możesz pobrać wcześniejszą wersję APLIKACJI i wstrzyknąć w nią kod, ponieważ nadal uzyska uprawnienia TCC (chyba że Trust Cache to uniemożliwi).
+> Demon TCC w macOS nie sprawdza wersji aplikacji, która jest uruchamiana. Jeśli więc **nie możesz wstrzyknąć kodu do aplikacji Electron** za pomocą żadnej z wcześniejszych technik, możesz pobrać wcześniejszą wersję APLIKACJI i wstrzyknąć kod, ponieważ nadal uzyska ona uprawnienia TCC (chyba że Trust Cache to uniemożliwi).
 
 ## Run non JS Code
 
-Poprzednie techniki pozwolą ci uruchomić **kod JS wewnątrz procesu aplikacji electron**. Jednak pamiętaj, że **procesy potomne działają pod tym samym profilem piaskownicy** co aplikacja nadrzędna i **dziedziczą ich uprawnienia TCC**.\
-Dlatego, jeśli chcesz wykorzystać uprawnienia do uzyskania dostępu do kamery lub mikrofonu, możesz po prostu **uruchomić inny plik binarny z procesu**.
+Wcześniejsze techniki pozwolą ci uruchomić **kod JS wewnątrz procesu aplikacji electron**. Jednak pamiętaj, że **procesy podrzędne działają pod tym samym profilem piaskownicy** co aplikacja nadrzędna i **dziedziczą ich uprawnienia TCC**.\
+Dlatego, jeśli chcesz nadużyć uprawnień, aby uzyskać dostęp do kamery lub mikrofonu, możesz po prostu **uruchomić inny plik binarny z procesu**.
+
+## Notable Electron macOS Vulnerabilities (2023-2024)
+
+### CVE-2023-44402 – ASAR integrity bypass
+
+Electron ≤22.3.23 i różne wersje wstępne 23-27 pozwalały atakującemu z dostępem do folderu `.app/Contents/Resources` na obejście fuzji `embeddedAsarIntegrityValidation` **i** `onlyLoadAppFromAsar`. Błąd był *myleniem typów plików* w kontrolerze integralności, który pozwalał na załadowanie przygotowanego **katalogu o nazwie `app.asar`** zamiast zwalidowanego archiwum, więc każdy JavaScript umieszczony w tym katalogu był wykonywany, gdy aplikacja się uruchamiała. Nawet dostawcy, którzy przestrzegali wskazówek dotyczących wzmacniania i włączyli obie fuzje, byli zatem nadal podatni na ataki w macOS.
+
+Poprawione wersje Electron: **22.3.24**, **24.8.3**, **25.8.1**, **26.2.1** i **27.0.0-alpha.7**. Atakujący, którzy znajdą aplikację działającą na starszej wersji, mogą nadpisać `Contents/Resources/app.asar` swoim własnym katalogiem, aby wykonać kod z uprawnieniami TCC aplikacji.
+
+### 2024 “RunAsNode” / “enableNodeCliInspectArguments” CVE cluster
+
+W styczniu 2024 roku seria CVE (CVE-2024-23738 do CVE-2024-23743) podkreśliła, że wiele aplikacji Electron jest dostarczanych z włączonymi fuzjami **RunAsNode** i **EnableNodeCliInspectArguments**. Lokalny atakujący może zatem ponownie uruchomić program z zmienną środowiskową `ELECTRON_RUN_AS_NODE=1` lub flagami takimi jak `--inspect-brk`, aby przekształcić go w *ogólny* proces Node.js i dziedziczyć wszystkie uprawnienia piaskownicy i TCC aplikacji.
+
+Chociaż zespół Electron zakwestionował ocenę „krytyczną” i zauważył, że atakujący już potrzebuje lokalnego wykonania kodu, problem ten jest nadal cenny podczas post-exploitation, ponieważ przekształca każdy podatny pakiet Electron w *żyjący z ziemi* plik binarny, który może np. odczytywać Kontakty, Zdjęcia lub inne wrażliwe zasoby wcześniej przyznane aplikacji desktopowej.
+
+Wskazówki obronne od twórców Electron:
+
+* Wyłącz fuzje `RunAsNode` i `EnableNodeCliInspectArguments` w wersjach produkcyjnych.
+* Użyj nowszego API **UtilityProcess**, jeśli twoja aplikacja rzeczywiście potrzebuje pomocniczego procesu Node.js zamiast ponownego włączania tych fuzji.
 
 ## Automatic Injection
 
 - [**electroniz3r**](https://github.com/r3ggi/electroniz3r)
 
-Narzędzie [**electroniz3r**](https://github.com/r3ggi/electroniz3r) można łatwo wykorzystać do **znalezienia podatnych aplikacji electron** zainstalowanych i wstrzyknięcia w nie kodu. To narzędzie spróbuje użyć techniki **`--inspect`**:
+Narzędzie [**electroniz3r**](https://github.com/r3ggi/electroniz3r) można łatwo wykorzystać do **znalezienia podatnych aplikacji electron** zainstalowanych i wstrzyknięcia kodu do nich. To narzędzie spróbuje użyć techniki **`--inspect`**:
 
-Musisz skompilować je samodzielnie i możesz użyć go w ten sposób:
+Musisz skompilować je samodzielnie i możesz używać go w ten sposób:
 ```bash
 # Find electron apps
 ./electroniz3r list-apps
@@ -454,6 +473,8 @@ Loki został zaprojektowany do wprowadzania tylnego wejścia do aplikacji Electr
 
 - [https://www.electronjs.org/docs/latest/tutorial/fuses](https://www.electronjs.org/docs/latest/tutorial/fuses)
 - [https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks](https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks)
+- [https://github.com/electron/electron/security/advisories/GHSA-7m48-wc93-9g85](https://github.com/electron/electron/security/advisories/GHSA-7m48-wc93-9g85)
+- [https://www.electronjs.org/blog/statement-run-as-node-cves](https://www.electronjs.org/blog/statement-run-as-node-cves)
 - [https://m.youtube.com/watch?v=VWQY5R2A6X8](https://m.youtube.com/watch?v=VWQY5R2A6X8)
 
 {{#include ../../../banners/hacktricks-training.md}}
