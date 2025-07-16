@@ -19,7 +19,7 @@
 
 Μια άλλη ενδιαφέρουσα σημαία που δεν θα αποτρέπει την έγχυση κώδικα είναι:
 
-- **EnableCookieEncryption**: Αν είναι ενεργοποιημένο, το cookie store στον δίσκο είναι κρυπτογραφημένο χρησιμοποιώντας κλειδιά κρυπτογραφίας επιπέδου OS.
+- **EnableCookieEncryption**: Αν είναι ενεργοποιημένο, το αποθηκευτικό cookie στον δίσκο κρυπτογραφείται χρησιμοποιώντας κλειδιά κρυπτογράφησης επιπέδου OS.
 
 ### Checking Electron Fuses
 
@@ -84,11 +84,11 @@ ELECTRON_RUN_AS_NODE=1 /Applications/Discord.app/Contents/MacOS/Discord
 require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Calculator')
 ```
 > [!CAUTION]
-> Αν η ασφάλεια **`RunAsNode`** είναι απενεργοποιημένη, η μεταβλητή περιβάλλοντος **`ELECTRON_RUN_AS_NODE`** θα αγνοηθεί, και αυτό δεν θα λειτουργήσει.
+> Αν η ασφάλεια **`RunAsNode`** είναι απενεργοποιημένη, η μεταβλητή περιβάλλοντος **`ELECTRON_RUN_AS_NODE`** θα αγνοηθεί και αυτό δεν θα λειτουργήσει.
 
 ### Εισαγωγή από το App Plist
 
-Όπως [**προτείνεται εδώ**](https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks/), θα μπορούσατε να εκμεταλλευτείτε αυτή τη μεταβλητή περιβάλλοντος σε ένα plist για να διατηρήσετε την επιμονή:
+Όπως [**προτείνεται εδώ**](https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks/), μπορείτε να εκμεταλλευτείτε αυτή τη μεταβλητή περιβάλλοντος σε ένα plist για να διατηρήσετε την επιμονή:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -123,7 +123,7 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 NODE_OPTIONS="--require /tmp/payload.js" ELECTRON_RUN_AS_NODE=1 /Applications/Discord.app/Contents/MacOS/Discord
 ```
 > [!CAUTION]
-> Αν η ασφάλεια **`EnableNodeOptionsEnvironmentVariable`** είναι **απενεργοποιημένη**, η εφαρμογή θα **αγνοήσει** τη μεταβλητή περιβάλλοντος **NODE_OPTIONS** κατά την εκκίνηση, εκτός αν η μεταβλητή περιβάλλοντος **`ELECTRON_RUN_AS_NODE`** είναι ρυθμισμένη, η οποία θα **αγνοηθεί** επίσης αν η ασφάλεια **`RunAsNode`** είναι απενεργοποιημένη.
+> Αν η ασφάλεια **`EnableNodeOptionsEnvironmentVariable`** είναι **απενεργοποιημένη**, η εφαρμογή θα **αγνοήσει** τη μεταβλητή περιβάλλοντος **NODE_OPTIONS** όταν εκκινείται, εκτός αν η μεταβλητή περιβάλλοντος **`ELECTRON_RUN_AS_NODE`** είναι ρυθμισμένη, η οποία θα **αγνοηθεί** επίσης αν η ασφάλεια **`RunAsNode`** είναι απενεργοποιημένη.
 >
 > Αν δεν ρυθμίσετε **`ELECTRON_RUN_AS_NODE`**, θα βρείτε το **σφάλμα**: `Most NODE_OPTIONs are not supported in packaged apps. See documentation for more details.`
 
@@ -147,19 +147,19 @@ NODE_OPTIONS="--require /tmp/payload.js" ELECTRON_RUN_AS_NODE=1 /Applications/Di
 ```
 ## RCE με επιθεώρηση
 
-Σύμφωνα με [**αυτό**](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f), αν εκτελέσετε μια εφαρμογή Electron με σημαίες όπως **`--inspect`**, **`--inspect-brk`** και **`--remote-debugging-port`**, μια **θύρα αποσφαλμάτωσης θα είναι ανοιχτή** ώστε να μπορείτε να συνδεθείτε σε αυτή (για παράδειγμα από το Chrome στο `chrome://inspect`) και θα μπορείτε να **εισάγετε κώδικα σε αυτή** ή ακόμα και να εκκινήσετε νέες διεργασίες.\
+Σύμφωνα με [**αυτό**](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f), αν εκτελέσετε μια εφαρμογή Electron με σημαίες όπως **`--inspect`**, **`--inspect-brk`** και **`--remote-debugging-port`**, μια **θύρα αποσφαλμάτωσης θα είναι ανοιχτή** ώστε να μπορείτε να συνδεθείτε σε αυτή (για παράδειγμα από το Chrome στο `chrome://inspect`) και θα μπορείτε να **εισάγετε κώδικα σε αυτή** ή ακόμα και να εκκινήσετε νέες διαδικασίες.\
 Για παράδειγμα:
 ```bash
 /Applications/Signal.app/Contents/MacOS/Signal --inspect=9229
 # Connect to it using chrome://inspect and execute a calculator with:
 require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Calculator')
 ```
-Σε [**αυτήν την ανάρτηση**](https://hackerone.com/reports/1274695), αυτή η αποσφαλμάτωση εκμεταλλεύεται για να κάνει ένα headless chrome **να κατεβάσει αυθαίρετα αρχεία σε αυθαίρετες τοποθεσίες**.
+In [**αυτή την ανάρτηση**](https://hackerone.com/reports/1274695), αυτή η αποσφαλμάτωση κακοποιείται για να κάνει ένα headless chrome **να κατεβάσει αυθαίρετα αρχεία σε αυθαίρετες τοποθεσίες**.
 
 > [!TIP]
-> Αν μια εφαρμογή έχει τον δικό της τρόπο να ελέγχει αν οι μεταβλητές περιβάλλοντος ή οι παράμετροι όπως το `--inspect` είναι ρυθμισμένες, θα μπορούσατε να προσπαθήσετε να **παρακάμψετε** αυτό κατά την εκτέλεση χρησιμοποιώντας την παράμετρο `--inspect-brk`, η οποία θα **σταματήσει την εκτέλεση** στην αρχή της εφαρμογής και θα εκτελέσει μια παράκαμψη (υπεργράφοντας τις παραμέτρους ή τις μεταβλητές περιβάλλοντος της τρέχουσας διαδικασίας, για παράδειγμα).
+> Αν μια εφαρμογή έχει τον δικό της τρόπο να ελέγξει αν οι μεταβλητές περιβάλλοντος ή οι παράμετροι όπως το `--inspect` είναι ρυθμισμένες, θα μπορούσατε να προσπαθήσετε να **παρακάμψετε** το κατά την εκτέλεση χρησιμοποιώντας την παράμετρο `--inspect-brk`, η οποία θα **σταματήσει την εκτέλεση** στην αρχή της εφαρμογής και θα εκτελέσει μια παράκαμψη (υπεργράφοντας τις παραμέτρους ή τις μεταβλητές περιβάλλοντος της τρέχουσας διαδικασίας για παράδειγμα).
 
-Ακολουθούσε μια εκμετάλλευση που παρακολουθώντας και εκτελώντας την εφαρμογή με την παράμετρο `--inspect-brk`, ήταν δυνατό να παρακαμφθεί η προσαρμοσμένη προστασία που είχε (υπεργράφοντας τις παραμέτρους της διαδικασίας για να αφαιρεθεί το `--inspect-brk`) και στη συνέχεια να εισαχθεί ένα JS payload για να απορριφθούν τα cookies και τα διαπιστευτήρια από την εφαρμογή:
+Η παρακάτω ήταν μια εκμετάλλευση που παρακολουθώντας και εκτελώντας την εφαρμογή με την παράμετρο `--inspect-brk`, ήταν δυνατό να παρακαμφθεί η προσαρμοσμένη προστασία που είχε (υπεργράφοντας τις παραμέτρους της διαδικασίας για να αφαιρεθεί το `--inspect-brk`) και στη συνέχεια να εγχυθεί ένα JS payload για να απορρίψει cookies και διαπιστευτήρια από την εφαρμογή:
 ```python
 import asyncio
 import websockets
@@ -403,6 +403,25 @@ print(ws.recv()
 Οι προηγούμενες τεχνικές θα σας επιτρέψουν να εκτελέσετε **κώδικα JS μέσα στη διαδικασία της εφαρμογής electron**. Ωστόσο, θυμηθείτε ότι οι **παιδικές διαδικασίες εκτελούνται υπό το ίδιο προφίλ sandbox** με την γονική εφαρμογή και **κληρονομούν τα δικαιώματα TCC τους**.\
 Επομένως, αν θέλετε να εκμεταλλευτείτε τα δικαιώματα για να αποκτήσετε πρόσβαση στην κάμερα ή το μικρόφωνο, για παράδειγμα, μπορείτε απλά να **εκτελέσετε ένα άλλο δυαδικό από τη διαδικασία**.
 
+## Notable Electron macOS Vulnerabilities (2023-2024)
+
+### CVE-2023-44402 – ASAR integrity bypass
+
+Οι Electron ≤22.3.23 και διάφορες προ-εκδόσεις 23-27 επέτρεπαν σε έναν επιτιθέμενο με δικαιώματα εγγραφής στον φάκελο `.app/Contents/Resources` να παρακάμψει τις ασφάλειες `embeddedAsarIntegrityValidation` **και** `onlyLoadAppFromAsar`. Το σφάλμα ήταν μια *σύγχυση τύπου αρχείου* στον ελεγκτή ακεραιότητας που επέτρεπε σε έναν κατασκευασμένο **φάκελο ονόματι `app.asar`** να φορτωθεί αντί του επικυρωμένου αρχείου, έτσι οποιοσδήποτε JavaScript τοποθετηθεί μέσα σε αυτόν τον φάκελο εκτελούνταν όταν ξεκινούσε η εφαρμογή. Ακόμα και οι προμηθευτές που είχαν ακολουθήσει τις οδηγίες σκληρής ασφάλισης και είχαν ενεργοποιήσει και τις δύο ασφάλειες ήταν επομένως ακόμα ευάλωτοι στο macOS.
+
+Διορθωμένες εκδόσεις Electron: **22.3.24**, **24.8.3**, **25.8.1**, **26.2.1** και **27.0.0-alpha.7**. Οι επιτιθέμενοι που βρίσκουν μια εφαρμογή που εκτελεί παλαιότερη έκδοση μπορούν να αντικαταστήσουν το `Contents/Resources/app.asar` με τον δικό τους φάκελο για να εκτελέσουν κώδικα με τα δικαιώματα TCC της εφαρμογής.
+
+### 2024 “RunAsNode” / “enableNodeCliInspectArguments” CVE cluster
+
+Τον Ιανουάριο του 2024, μια σειρά από CVEs (CVE-2024-23738 έως CVE-2024-23743) ανέδειξαν ότι πολλές εφαρμογές Electron αποστέλλονται με τις ασφάλειες **RunAsNode** και **EnableNodeCliInspectArguments** ακόμα ενεργοποιημένες. Ένας τοπικός επιτιθέμενος μπορεί επομένως να επανεκκινήσει το πρόγραμμα με τη μεταβλητή περιβάλλοντος `ELECTRON_RUN_AS_NODE=1` ή με σημαίες όπως `--inspect-brk` για να το μετατρέψει σε μια *γενική* διαδικασία Node.js και να κληρονομήσει όλα τα δικαιώματα sandbox και TCC της εφαρμογής.
+
+Αν και η ομάδα της Electron αμφισβήτησε την "κρίσιμη" βαθμολογία και σημείωσε ότι ένας επιτιθέμενος χρειάζεται ήδη τοπική εκτέλεση κώδικα, το ζήτημα είναι ακόμα πολύτιμο κατά τη διάρκεια της μετα-εκμετάλλευσης, καθώς μετατρέπει οποιοδήποτε ευάλωτο πακέτο Electron σε ένα *living-off-the-land* δυαδικό που μπορεί π.χ. να διαβάσει Επαφές, Φωτογραφίες ή άλλους ευαίσθητους πόρους που είχαν προηγουμένως παραχωρηθεί στην επιτραπέζια εφαρμογή.
+
+Αμυντικές οδηγίες από τους συντηρητές της Electron:
+
+* Απενεργοποιήστε τις ασφάλειες `RunAsNode` και `EnableNodeCliInspectArguments` σε παραγωγικές εκδόσεις.
+* Χρησιμοποιήστε το νεότερο **UtilityProcess** API αν η εφαρμογή σας χρειάζεται νόμιμα μια βοηθητική διαδικασία Node.js αντί να επανενεργοποιήσετε αυτές τις ασφάλειες.
+
 ## Automatic Injection
 
 - [**electroniz3r**](https://github.com/r3ggi/electroniz3r)
@@ -454,6 +473,8 @@ Shell binding requested. Check `nc 127.0.0.1 12345`
 
 - [https://www.electronjs.org/docs/latest/tutorial/fuses](https://www.electronjs.org/docs/latest/tutorial/fuses)
 - [https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks](https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks)
+- [https://github.com/electron/electron/security/advisories/GHSA-7m48-wc93-9g85](https://github.com/electron/electron/security/advisories/GHSA-7m48-wc93-9g85)
+- [https://www.electronjs.org/blog/statement-run-as-node-cves](https://www.electronjs.org/blog/statement-run-as-node-cves)
 - [https://m.youtube.com/watch?v=VWQY5R2A6X8](https://m.youtube.com/watch?v=VWQY5R2A6X8)
 
 {{#include ../../../banners/hacktricks-training.md}}
