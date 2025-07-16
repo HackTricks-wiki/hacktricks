@@ -32,7 +32,7 @@
 - **Zamiana**: Jak homoglif, ale mniej dyskretny. Zastępuje jedną z liter w nazwie domeny, być może literą bliską oryginalnej literze na klawiaturze (np. zektser.com).
 - **Poddomenowana**: Wprowadza **kropkę** wewnątrz nazwy domeny (np. ze.lster.com).
 - **Wstawienie**: **Wstawia literę** do nazwy domeny (np. zerltser.com).
-- **Brak kropki**: Dołącz TLD do nazwy domeny. (np. zelstercom.com)
+- **Brakująca kropka**: Dołącz TLD do nazwy domeny. (np. zelstercom.com)
 
 **Narzędzia automatyczne**
 
@@ -109,7 +109,7 @@ cp "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" /opt/gophish/ssl_keys/key.crt�
 ```
 **Konfiguracja poczty**
 
-Rozpocznij instalację: `apt-get install postfix`
+Zacznij od instalacji: `apt-get install postfix`
 
 Następnie dodaj domenę do następujących plików:
 
@@ -117,7 +117,7 @@ Następnie dodaj domenę do następujących plików:
 - **/etc/postfix/transport**
 - **/etc/postfix/virtual_regexp**
 
-**Zmień również wartości następujących zmiennych w /etc/postfix/main.cf**
+**Zmień także wartości następujących zmiennych w /etc/postfix/main.cf**
 
 `myhostname = <domain>`\
 `mydestination = $myhostname, <domain>, localhost.com, localhost`
@@ -223,7 +223,7 @@ service gophish stop
 
 ### Czekaj i bądź legitny
 
-Im starsza domena, tym mniej prawdopodobne, że zostanie uznana za spam. Powinieneś więc czekać jak najdłużej (przynajmniej 1 tydzień) przed oceną phishingu. Co więcej, jeśli umieścisz stronę o reputacyjnym sektorze, uzyskana reputacja będzie lepsza.
+Im starsza domena, tym mniej prawdopodobne, że zostanie uznana za spam. Dlatego powinieneś czekać jak najdłużej (przynajmniej 1 tydzień) przed oceną phishingu. Co więcej, jeśli umieścisz stronę o reputacyjnym sektorze, uzyskana reputacja będzie lepsza.
 
 Zauważ, że nawet jeśli musisz czekać tydzień, możesz teraz zakończyć konfigurację wszystkiego.
 
@@ -235,7 +235,7 @@ Ustaw rekord rDNS (PTR), który rozwiązuje adres IP VPS na nazwę domeny.
 
 Musisz **skonfigurować rekord SPF dla nowej domeny**. Jeśli nie wiesz, czym jest rekord SPF [**przeczytaj tę stronę**](../../network-services-pentesting/pentesting-smtp/index.html#spf).
 
-Możesz użyć [https://www.spfwizard.net/](https://www.spfwizard.net), aby wygenerować swoją politykę SPF (użyj adresu IP maszyny VPS)
+Możesz użyć [https://www.spfwizard.net/](https://www.spfwizard.net) do wygenerowania swojej polityki SPF (użyj adresu IP maszyny VPS)
 
 ![](<../../images/image (1037).png>)
 
@@ -253,11 +253,11 @@ v=DMARC1; p=none
 ```
 ### DomainKeys Identified Mail (DKIM)
 
-Musisz **skonfigurować DKIM dla nowej domeny**. Jeśli nie wiesz, czym jest rekord DMARC [**przeczytaj tę stronę**](../../network-services-pentesting/pentesting-smtp/index.html#dkim).
+Musisz **skonfigurować DKIM dla nowej domeny**. Jeśli nie wiesz, co to jest rekord DMARC [**przeczytaj tę stronę**](../../network-services-pentesting/pentesting-smtp/index.html#dkim).
 
 Ten samouczek oparty jest na: [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
 
-> [!NOTE]
+> [!TIP]
 > Musisz połączyć oba wartości B64, które generuje klucz DKIM:
 >
 > ```
@@ -283,7 +283,7 @@ DKIM check:         pass
 Sender-ID check:    pass
 SpamAssassin check: ham
 ```
-Możesz również wysłać **wiadomość do Gmaila pod swoją kontrolą** i sprawdzić **nagłówki e-maila** w swojej skrzynce odbiorczej Gmail, `dkim=pass` powinien być obecny w polu nagłówka `Authentication-Results`.
+Możesz również wysłać **wiadomość do Gmaila, nad którym masz kontrolę**, i sprawdzić **nagłówki e-maila** w swojej skrzynce odbiorczej Gmail, `dkim=pass` powinno być obecne w polu nagłówka `Authentication-Results`.
 ```
 Authentication-Results: mx.google.com;
 spf=pass (google.com: domain of contact@example.com designates --- as permitted sender) smtp.mail=contact@example.com;
@@ -299,22 +299,22 @@ Strona [www.mail-tester.com](https://www.mail-tester.com) może wskazać, czy Tw
 
 ## Utwórz i Uruchom Kampanię GoPhish
 
-### Profil Wysyłający
+### Profil Wysyłania
 
 - Ustaw **nazwę identyfikującą** profil nadawcy
 - Zdecyduj, z którego konta będziesz wysyłać e-maile phishingowe. Sugestie: _noreply, support, servicedesk, salesforce..._
-- Możesz pozostawić puste nazwę użytkownika i hasło, ale upewnij się, że zaznaczyłeś Ignoruj błędy certyfikatu
+- Możesz pozostawić puste pole na nazwę użytkownika i hasło, ale upewnij się, że zaznaczyłeś Ignoruj błędy certyfikatu
 
 ![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
 
-> [!NOTE]
+> [!TIP]
 > Zaleca się korzystanie z funkcji "**Wyślij e-mail testowy**", aby sprawdzić, czy wszystko działa.\
-> Zalecałbym **wysyłanie e-maili testowych na adresy 10min**, aby uniknąć dodania do czarnej listy podczas testów.
+> Rekomenduję **wysyłanie e-maili testowych na adresy 10min mail**, aby uniknąć dodania do czarnej listy podczas testów.
 
 ### Szablon E-mail
 
 - Ustaw **nazwę identyfikującą** szablon
-- Następnie napisz **temat** (nic dziwnego, po prostu coś, co mógłbyś oczekiwać w zwykłym e-mailu)
+- Następnie napisz **temat** (nic dziwnego, po prostu coś, co można by się spodziewać w zwykłym e-mailu)
 - Upewnij się, że zaznaczyłeś "**Dodaj obrazek śledzący**"
 - Napisz **szablon e-maila** (możesz używać zmiennych, jak w poniższym przykładzie):
 ```html
@@ -343,7 +343,7 @@ Zauważ, że **aby zwiększyć wiarygodność e-maila**, zaleca się użycie jak
 
 ![](<../../images/image (80).png>)
 
-> [!NOTE]
+> [!TIP]
 > Szablon e-maila pozwala również na **załączanie plików do wysłania**. Jeśli chcesz również ukraść wyzwania NTLM za pomocą specjalnie przygotowanych plików/dokumentów [przeczytaj tę stronę](../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md).
 
 ### Strona docelowa
@@ -355,12 +355,12 @@ Zauważ, że **aby zwiększyć wiarygodność e-maila**, zaleca się użycie jak
 
 ![](<../../images/image (826).png>)
 
-> [!NOTE]
+> [!TIP]
 > Zazwyczaj będziesz musiał zmodyfikować kod HTML strony i przeprowadzić kilka testów lokalnie (może używając jakiegoś serwera Apache) **aż do uzyskania zadowalających wyników.** Następnie wpisz ten kod HTML w polu.\
-> Zauważ, że jeśli potrzebujesz **użyć jakichś statycznych zasobów** dla HTML (może jakieś strony CSS i JS), możesz je zapisać w _**/opt/gophish/static/endpoint**_ i następnie uzyskać do nich dostęp z _**/static/\<filename>**_
+> Zauważ, że jeśli musisz **użyć jakichś statycznych zasobów** dla HTML (może jakieś strony CSS i JS), możesz je zapisać w _**/opt/gophish/static/endpoint**_ i następnie uzyskać do nich dostęp z _**/static/\<filename>**_
 
-> [!NOTE]
-> W przypadku przekierowania możesz **przekierować użytkowników na legitną główną stronę internetową** ofiary lub przekierować ich na _/static/migration.html_, na przykład, umieścić jakiś **kręcący się kółko (**[**https://loading.io/**](https://loading.io)**) przez 5 sekund, a następnie wskazać, że proces zakończył się sukcesem**.
+> [!TIP]
+> W przypadku przekierowania możesz **przekierować użytkowników na legalną główną stronę** ofiary lub przekierować ich na _/static/migration.html_, na przykład, umieścić jakiś **kręcący się kółko (**[**https://loading.io/**](https://loading.io)**) przez 5 sekund, a następnie wskazać, że proces zakończył się sukcesem**.
 
 ### Użytkownicy i grupy
 
@@ -377,7 +377,7 @@ Zauważ, że **Profil wysyłania pozwala na wysłanie testowego e-maila, aby zob
 
 ![](<../../images/image (192).png>)
 
-> [!NOTE]
+> [!TIP]
 > Zalecałbym **wysyłanie testowych e-maili na adresy 10min mail**, aby uniknąć dodania do czarnej listy podczas testów.
 
 Gdy wszystko będzie gotowe, po prostu uruchom kampanię!
@@ -392,7 +392,7 @@ clone-a-website.md
 
 ## Dokumenty i pliki z backdoorem
 
-W niektórych ocenach phishingowych (głównie dla Red Teams) będziesz chciał również **wysłać pliki zawierające jakiś rodzaj backdoora** (może C2 lub może coś, co wywoła autoryzację).\
+W niektórych ocenach phishingowych (głównie dla Red Teams) będziesz chciał również **wysłać pliki zawierające jakiś rodzaj backdoora** (może C2 lub po prostu coś, co wywoła autoryzację).\
 Sprawdź następującą stronę w celu uzyskania przykładów:
 
 {{#ref}}
@@ -414,25 +414,33 @@ Tutaj przydatne są narzędzia takie jak [**evilginx2**](https://github.com/kgre
 
 ### Poprzez VNC
 
-Co jeśli zamiast **wysyłać ofiarę na złośliwą stronę** o takim samym wyglądzie jak oryginalna, wyślesz go na **sesję VNC z przeglądarką połączoną z prawdziwą stroną internetową**? Będziesz mógł zobaczyć, co robi, ukraść hasło, używane MFA, ciasteczka...\
+Co jeśli zamiast **wysyłać ofiarę na złośliwą stronę** o takim samym wyglądzie jak oryginalna, wyślesz ją do **sesji VNC z przeglądarką połączoną z prawdziwą stroną internetową**? Będziesz mógł zobaczyć, co robi, ukraść hasło, używane MFA, ciasteczka...\
 Możesz to zrobić za pomocą [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC)
 
 ## Wykrywanie wykrycia
 
-Oczywiście jednym z najlepszych sposobów, aby dowiedzieć się, czy zostałeś złapany, jest **sprawdzenie swojej domeny w czarnych listach**. Jeśli pojawi się na liście, w jakiś sposób twoja domena została wykryta jako podejrzana.\
+Oczywiście jednym z najlepszych sposobów, aby dowiedzieć się, czy zostałeś wykryty, jest **sprawdzenie swojej domeny w czarnych listach**. Jeśli pojawi się na liście, w jakiś sposób twoja domena została wykryta jako podejrzana.\
 Jednym z łatwych sposobów, aby sprawdzić, czy twoja domena pojawia się w jakiejkolwiek czarnej liście, jest użycie [https://malwareworld.com/](https://malwareworld.com)
 
-Jednak istnieją inne sposoby, aby dowiedzieć się, czy ofiara **aktywnie szuka podejrzanej aktywności phishingowej w sieci**, jak wyjaśniono w:
+Jednak istnieją inne sposoby, aby dowiedzieć się, czy ofiara **aktywnie poszukuje podejrzanej aktywności phishingowej w sieci**, jak wyjaśniono w:
 
 {{#ref}}
 detecting-phising.md
 {{#endref}}
 
-Możesz **kupić domenę o bardzo podobnej nazwie** do domeny ofiary **i/lub wygenerować certyfikat** dla **subdomeny** domeny kontrolowanej przez ciebie **zawierającej** **słowo kluczowe** domeny ofiary. Jeśli **ofiara** wykona jakąkolwiek **interakcję DNS lub HTTP** z nimi, będziesz wiedział, że **aktywnie szuka** podejrzanych domen i będziesz musiał być bardzo ostrożny.
+Możesz **kupić domenę o bardzo podobnej nazwie** do domeny ofiary **i/lub wygenerować certyfikat** dla **subdomeny** domeny kontrolowanej przez ciebie **zawierającej** **słowo kluczowe** domeny ofiary. Jeśli **ofiara** wykona jakąkolwiek **interakcję DNS lub HTTP** z nimi, będziesz wiedział, że **aktywnie poszukuje** podejrzanych domen i będziesz musiał być bardzo ostrożny.
 
 ### Oceń phishing
 
 Użyj [**Phishious** ](https://github.com/Rices/Phishious), aby ocenić, czy twój e-mail trafi do folderu spam lub czy zostanie zablokowany lub odniesie sukces.
+
+## Przechwytywanie schowka / Pastejacking
+
+Atakujący mogą cicho kopiować złośliwe polecenia do schowka ofiary z kompromitowanej lub źle napisanej strony internetowej, a następnie oszukać użytkownika, aby wkleił je w **Win + R**, **Win + X** lub oknie terminala, wykonując dowolny kod bez pobierania lub załączania.
+
+{{#ref}}
+clipboard-hijacking.md
+{{#endref}}
 
 ## Odniesienia
 
