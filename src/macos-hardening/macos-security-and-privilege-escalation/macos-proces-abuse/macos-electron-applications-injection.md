@@ -9,7 +9,7 @@ En node het 'n paar **parameters** en **omgewing veranderlikes** wat gebruik kan
 
 ### Electron Fuse
 
-Hierdie tegnieke sal volgende bespreek word, maar in onlangse tye het Electron verskeie **veiligheidsvlaggies bygevoeg om dit te voorkom**. Dit is die [**Electron Fuses**](https://www.electronjs.org/docs/latest/tutorial/fuses) en dit is diegene wat gebruik word om **te voorkom** dat Electron toepassings in macOS **arbitraire kode laai**:
+Hierdie tegnieke sal volgende bespreek word, maar onlangs het Electron verskeie **veiligheidsvlaggies bygevoeg om dit te voorkom**. Dit is die [**Electron Fuses**](https://www.electronjs.org/docs/latest/tutorial/fuses) en dit is diegene wat gebruik word om **te voorkom** dat Electron toepassings in macOS **arbitraire kode laai**:
 
 - **`RunAsNode`**: As dit gedeaktiveer is, voorkom dit die gebruik van die omgewing veranderlike **`ELECTRON_RUN_AS_NODE`** om kode in te spuit.
 - **`EnableNodeCliInspectArguments`**: As dit gedeaktiveer is, sal parameters soos `--inspect`, `--inspect-brk` nie gerespekteer word nie. Dit vermy hierdie manier om kode in te spuit.
@@ -23,7 +23,7 @@ Nog 'n interessante fuse wat nie kode-inspuiting sal voorkom nie, is:
 
 ### Kontroleer Electron Fuses
 
-Jy kan **hierdie vlaggies kontroleer** vanaf 'n toepassing met:
+Jy kan **hierdie vlaggies nagaan** vanaf 'n toepassing met:
 ```bash
 npx @electron/fuses read --app /Applications/Slack.app
 
@@ -39,14 +39,14 @@ LoadBrowserProcessSpecificV8Snapshot is Disabled
 ```
 ### Modifying Electron Fuses
 
-Soos die [**docs noem**](https://www.electronjs.org/docs/latest/tutorial/fuses#runasnode), die konfigurasie van die **Electron Fuses** is geconfigureer binne die **Electron binary** wat êrens die string **`dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX`** bevat.
+Soos die [**dokumentasie noem**](https://www.electronjs.org/docs/latest/tutorial/fuses#runasnode), is die konfigurasie van die **Electron Fuses** geconfigureer binne die **Electron binêre** wat êrens die string **`dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX`** bevat.
 
 In macOS toepassings is dit tipies in `application.app/Contents/Frameworks/Electron Framework.framework/Electron Framework`
 ```bash
 grep -R "dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX" Slack.app/
 Binary file Slack.app//Contents/Frameworks/Electron Framework.framework/Versions/A/Electron Framework matches
 ```
-U kan hierdie lêer in [https://hexed.it/](https://hexed.it/) laai en soek na die vorige string. Na hierdie string kan u in ASCII 'n nommer "0" of "1" sien wat aandui of elke sekering gedeaktiveer of geaktiveer is. Pas eenvoudig die hex kode (`0x30` is `0` en `0x31` is `1`) aan om **die sekering waardes te wysig**.
+U kan hierdie lêer in [https://hexed.it/](https://hexed.it/) laai en soek na die vorige string. Na hierdie string kan u in ASCII 'n nommer "0" of "1" sien wat aandui of elke fuse gedeaktiveer of geaktiveer is. Pas eenvoudig die hex kode (`0x30` is `0` en `0x31` is `1`) aan om **die fuse waardes te wysig**.
 
 <figure><img src="../../../images/image (34).png" alt=""><figcaption></figcaption></figure>
 
@@ -60,13 +60,13 @@ Daar kan **eksterne JS/HTML lêers** wees wat 'n Electron App gebruik, so 'n aan
 > egter, op die oomblik is daar 2 beperkings:
 >
 > - Die **`kTCCServiceSystemPolicyAppBundles`** toestemming is **nodig** om 'n App te wysig, so standaard is dit nie meer moontlik nie.
-> - Die gecompileerde **`asap`** lêer het gewoonlik die sekeringe **`embeddedAsarIntegrityValidation`** `en` **`onlyLoadAppFromAsar`** `geaktiveer`
+> - Die gecompileerde **`asap`** lêer het gewoonlik die fuses **`embeddedAsarIntegrityValidation`** `en` **`onlyLoadAppFromAsar`** `geaktiveer`
 >
 > Dit maak hierdie aanvalspad meer ingewikkeld (of onmoontlik).
 
 Let daarop dat dit moontlik is om die vereiste van **`kTCCServiceSystemPolicyAppBundles`** te omseil deur die toepassing na 'n ander gids te kopieer (soos **`/tmp`**), die vouer **`app.app/Contents`** te hernoem na **`app.app/NotCon`**, **die** **asar** lêer met u **kwaadwillige** kode te **wysig**, dit weer terug te hernoem na **`app.app/Contents`** en dit uit te voer.
 
-U kan die kode uit die asar lêer onpack met:
+U kan die kode uit die asar lêer onpak met:
 ```bash
 npx asar extract app.asar app-decomp
 ```
@@ -147,19 +147,19 @@ Jy kan hierdie env variabele in 'n plist misbruik om volharding te handhaaf deur
 ```
 ## RCE met inspeksie
 
-Volgens [**hierdie**](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f) kan jy 'n Electron-toepassing uitvoer met vlae soos **`--inspect`**, **`--inspect-brk`** en **`--remote-debugging-port`**, 'n **debug-poort sal oop wees** sodat jy daaraan kan koppel (byvoorbeeld van Chrome in `chrome://inspect`) en jy sal in staat wees om **kode daarop in te spuit** of selfs nuwe prosesse te begin.\
+Volgens [**hierdie**](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f) kan jy 'n Electron-toepassing uitvoer met vlae soos **`--inspect`**, **`--inspect-brk`** en **`--remote-debugging-port`**, 'n **debug-poort sal oop wees** sodat jy daaraan kan koppel (byvoorbeeld vanaf Chrome in `chrome://inspect`) en jy sal in staat wees om **kode daarop in te spuit** of selfs nuwe prosesse te begin.\
 Byvoorbeeld:
 ```bash
 /Applications/Signal.app/Contents/MacOS/Signal --inspect=9229
 # Connect to it using chrome://inspect and execute a calculator with:
 require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Calculator')
 ```
-In [**hierdie blogpos**](https://hackerone.com/reports/1274695), word hierdie foutopsporing misbruik om 'n headless chrome **arbitraire lêers in arbitraire plekke af te laai**.
+In [**hierdie blogpos**](https://hackerone.com/reports/1274695), word hierdie debugging misbruik om 'n headless chrome **arbitraire lêers in arbitraire plekke af te laai**.
 
 > [!TIP]
-> As 'n app sy eie manier het om te kyk of omgewingsveranderlikes of parameters soos `--inspect` gestel is, kan jy probeer om dit in runtime te **omseil** met die arg `--inspect-brk` wat die **uitvoering stop** aan die begin van die app en 'n omseiling uitvoer (deur die args of die omgewingsveranderlikes van die huidige proses te oorskryf byvoorbeeld).
+> As 'n app sy eie manier het om te kontroleer of omgewing veranderlikes of parameters soos `--inspect` gestel is, kan jy probeer om dit in runtime te **omseil** met die arg `--inspect-brk` wat die **uitvoering stop** aan die begin van die app en 'n omseiling uitvoer (deur die args of die omgewing veranderlikes van die huidige proses te oorskryf byvoorbeeld).
 
-Die volgende was 'n eksploit wat deur die app te monitor en uit te voer met die parameter `--inspect-brk`, dit moontlik gemaak het om die pasgemaakte beskerming wat dit gehad het te omseil (deur die parameters van die proses te oorskryf om `--inspect-brk` te verwyder) en dan 'n JS payload in te spuit om koekies en geloofsbriewe van die app te dump.
+Die volgende was 'n exploit wat monitering en die uitvoering van die app met die parameter `--inspect-brk` moontlik gemaak het om die persoonlike beskerming wat dit gehad het te omseil (deur die parameters van die proses te oorskryf om `--inspect-brk` te verwyder) en dan 'n JS payload in te spuit om koekies en geloofsbriewe van die app te dump.
 ```python
 import asyncio
 import websockets
@@ -367,7 +367,7 @@ asyncio.run(main())
 >
 > U kan egter steeds die **electron param `--remote-debugging-port=9229`** gebruik, maar die vorige payload sal nie werk om ander prosesse uit te voer nie.
 
-Met die param **`--remote-debugging-port=9222`** is dit moontlik om sekere inligting van die Electron App te steel, soos die **geskiedenis** (met GET-opdragte) of die **cookies** van die blaaskier (aangesien dit **ontsleuteld** binne die blaaskier is en daar 'n **json endpoint** is wat dit sal verskaf).
+Deur die param **`--remote-debugging-port=9222`** te gebruik, is dit moontlik om sekere inligting van die Electron App te steel, soos die **geskiedenis** (met GET-opdragte) of die **cookies** van die blaaier (aangesien dit **ontsleuteld** binne die blaaiers is en daar 'n **json endpoint** is wat hulle sal gee).
 
 U kan leer hoe om dit te doen in [**hier**](https://posts.specterops.io/hands-in-the-cookie-jar-dumping-cookies-with-chromiums-remote-debugger-port-34c4f468844e) en [**hier**](https://slyd0g.medium.com/debugging-cookie-dumping-failures-with-chromiums-remote-debugger-8a4c4d19429f) en die outomatiese hulpmiddel [WhiteChocolateMacademiaNut](https://github.com/slyd0g/WhiteChocolateMacademiaNut) of 'n eenvoudige skrip soos:
 ```python
@@ -400,14 +400,33 @@ Jy kan hierdie omgewing veranderlike in 'n plist misbruik om volharding te handh
 
 ## Voer nie-JS kode uit
 
-Die vorige tegnieke sal jou toelaat om **JS kode binne die proses van die electron-toepassing uit te voer**. Onthou egter dat die **kind prosesse onder dieselfde sandbox profiel** as die ouer toepassing loop en **hul TCC toestemmings erf**.\
+Die vorige tegnieke sal jou toelaat om **JS kode binne die proses van die electron-toepassing** uit te voer. Onthou egter dat die **kind prosesse onder dieselfde sandbox profiel** as die ouer toepassing loop en **hul TCC toestemmings erf**.\
 Daarom, as jy voorregte wil misbruik om toegang tot die kamera of mikrofoon te verkry, kan jy eenvoudig **'n ander binêre vanaf die proses uitvoer**.
+
+## Opmerklike Electron macOS Kw vulnerabilities (2023-2024)
+
+### CVE-2023-44402 – ASAR integriteit omseiling
+
+Electron ≤22.3.23 en verskeie 23-27 voorafweergawes het 'n aanvaller met skrywe toegang tot die `.app/Contents/Resources` gids toegelaat om die `embeddedAsarIntegrityValidation` **en** `onlyLoadAppFromAsar` fuses te omseil. Die fout was 'n *lêer-tipe verwarring* in die integriteitskontroleerder wat 'n vervaardigde **gids genaamd `app.asar`** toegelaat het om gelaai te word in plaas van die gevalideerde argief, sodat enige JavaScript wat binne daardie gids geplaas is, uitgevoer is wanneer die app begin het. Selfs verskaffers wat die hardening riglyne gevolg het en beide fuses geaktiveer het, was dus steeds kwesbaar op macOS.
+
+Gepatchte Electron weergawes: **22.3.24**, **24.8.3**, **25.8.1**, **26.2.1** en **27.0.0-alpha.7**. Aanvallers wat 'n toepassing vind wat 'n ouer weergawe uitvoer, kan `Contents/Resources/app.asar` met hul eie gids oorskryf om kode met die toepassing se TCC voorregte uit te voer.
+
+### 2024 “RunAsNode” / “enableNodeCliInspectArguments” CVE-kluster
+
+In Januarie 2024 het 'n reeks CVEs (CVE-2024-23738 tot CVE-2024-23743) beklemtoon dat baie Electron-apps met die fuses **RunAsNode** en **EnableNodeCliInspectArguments** steeds geaktiveer is. 'n Plaaslike aanvaller kan dus die program herlaai met die omgewing veranderlike `ELECTRON_RUN_AS_NODE=1` of vlae soos `--inspect-brk` om dit in 'n *generiese* Node.js proses te verander en al die toepassing se sandbox en TCC voorregte te erf.
+
+Alhoewel die Electron-span die “kritieke” gradering betwis het en opgemerk het dat 'n aanvaller reeds plaaslike kode-uitvoering benodig, is die probleem steeds waardevol tydens post-exploitatie omdat dit enige kwesbare Electron bundel in 'n *living-off-the-land* binêre kan verander wat byvoorbeeld Kontakte, Foto's of ander sensitiewe hulpbronne wat voorheen aan die desktop-app toegestaan is, kan lees.
+
+Defensiewe riglyne van die Electron onderhouders:
+
+* Deaktiveer die `RunAsNode` en `EnableNodeCliInspectArguments` fuses in produksie boue.
+* Gebruik die nuwer **UtilityProcess** API as jou toepassing wettiglik 'n helper Node.js proses benodig in plaas van om daardie fuses weer te aktiveer.
 
 ## Outomatiese Inspuiting
 
 - [**electroniz3r**](https://github.com/r3ggi/electroniz3r)
 
-Die hulpmiddel [**electroniz3r**](https://github.com/r3ggi/electroniz3r) kan maklik gebruik word om **kwetsbare electron-toepassings** wat geïnstalleer is te vind en kode daarop in te spuit. Hierdie hulpmiddel sal probeer om die **`--inspect`** tegniek te gebruik:
+Die hulpmiddel [**electroniz3r**](https://github.com/r3ggi/electroniz3r) kan maklik gebruik word om **kwesbare electron-toepassings** wat geïnstalleer is te vind en kode daarop in te spuit. Hierdie hulpmiddel sal probeer om die **`--inspect`** tegniek te gebruik:
 
 Jy moet dit self saamstel en kan dit soos volg gebruik:
 ```bash
@@ -454,6 +473,8 @@ Loki is ontwerp om Electron-toepassings te backdoor deur die toepassings se Java
 
 - [https://www.electronjs.org/docs/latest/tutorial/fuses](https://www.electronjs.org/docs/latest/tutorial/fuses)
 - [https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks](https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks)
+- [https://github.com/electron/electron/security/advisories/GHSA-7m48-wc93-9g85](https://github.com/electron/electron/security/advisories/GHSA-7m48-wc93-9g85)
+- [https://www.electronjs.org/blog/statement-run-as-node-cves](https://www.electronjs.org/blog/statement-run-as-node-cves)
 - [https://m.youtube.com/watch?v=VWQY5R2A6X8](https://m.youtube.com/watch?v=VWQY5R2A6X8)
 
 {{#include ../../../banners/hacktricks-training.md}}
