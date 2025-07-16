@@ -1,4 +1,4 @@
-# macOS Electron-Anwendungsinjektion
+# macOS Electron-Anwendungen Injection
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -7,21 +7,21 @@
 Wenn Sie nicht wissen, was Electron ist, finden Sie [**hier viele Informationen**](https://book.hacktricks.wiki/en/network-services-pentesting/pentesting-web/electron-desktop-apps/index.html#rce-xss--contextisolation). Aber für jetzt wissen Sie einfach, dass Electron **node** ausführt.\
 Und node hat einige **Parameter** und **Umgebungsvariablen**, die verwendet werden können, um **anderen Code auszuführen**, abgesehen von der angegebenen Datei.
 
-### Electron-Fuses
+### Electron Fuses
 
-Diese Techniken werden als Nächstes besprochen, aber in letzter Zeit hat Electron mehrere **Sicherheitsflags hinzugefügt, um sie zu verhindern**. Dies sind die [**Electron-Fuses**](https://www.electronjs.org/docs/latest/tutorial/fuses) und diese werden verwendet, um zu **verhindern**, dass Electron-Anwendungen in macOS **willkürlichen Code laden**:
+Diese Techniken werden als Nächstes besprochen, aber in letzter Zeit hat Electron mehrere **Sicherheitsflags hinzugefügt, um sie zu verhindern**. Dies sind die [**Electron Fuses**](https://www.electronjs.org/docs/latest/tutorial/fuses) und diese werden verwendet, um zu **verhindern**, dass Electron-Anwendungen in macOS **willkürlichen Code laden**:
 
 - **`RunAsNode`**: Wenn deaktiviert, verhindert es die Verwendung der Umgebungsvariable **`ELECTRON_RUN_AS_NODE`**, um Code zu injizieren.
 - **`EnableNodeCliInspectArguments`**: Wenn deaktiviert, werden Parameter wie `--inspect`, `--inspect-brk` nicht respektiert. Dies vermeidet diesen Weg, um Code zu injizieren.
-- **`EnableEmbeddedAsarIntegrityValidation`**: Wenn aktiviert, wird die geladene **`asar`** **Datei** von macOS **validiert**. Dadurch wird **Code-Injektion** durch Modifizierung des Inhalts dieser Datei **verhindert**.
-- **`OnlyLoadAppFromAsar`**: Wenn dies aktiviert ist, wird anstelle der Suche in der folgenden Reihenfolge: **`app.asar`**, **`app`** und schließlich **`default_app.asar`** nur app.asar überprüft und verwendet, wodurch sichergestellt wird, dass es in Kombination mit dem **`embeddedAsarIntegrityValidation`**-Fuse **unmöglich** ist, **nicht validierten Code** zu **laden**.
-- **`LoadBrowserProcessSpecificV8Snapshot`**: Wenn aktiviert, verwendet der Browserprozess die Datei `browser_v8_context_snapshot.bin` für seinen V8-Snapshot.
+- **`EnableEmbeddedAsarIntegrityValidation`**: Wenn aktiviert, wird die geladene **`asar`** **Datei** von macOS **validiert**. Dadurch wird **Code-Injection** verhindert, indem der Inhalt dieser Datei geändert wird.
+- **`OnlyLoadAppFromAsar`**: Wenn dies aktiviert ist, wird anstelle der Suche in der folgenden Reihenfolge: **`app.asar`**, **`app`** und schließlich **`default_app.asar`** nur app.asar überprüft und verwendet, wodurch sichergestellt wird, dass es in Kombination mit dem **`embeddedAsarIntegrityValidation`** Fuse **unmöglich** ist, **nicht-validierten Code** zu **laden**.
+- **`LoadBrowserProcessSpecificV8Snapshot`**: Wenn aktiviert, verwendet der Browserprozess die Datei namens `browser_v8_context_snapshot.bin` für seinen V8-Snapshot.
 
-Ein weiterer interessanter Fuse, der die Code-Injektion nicht verhindert, ist:
+Ein weiterer interessanter Fuse, der die Code-Injection nicht verhindert, ist:
 
 - **EnableCookieEncryption**: Wenn aktiviert, wird der Cookie-Speicher auf der Festplatte mit kryptografischen Schlüsseln auf Betriebssystemebene verschlüsselt.
 
-### Überprüfen der Electron-Fuses
+### Überprüfen der Electron Fuses
 
 Sie können **diese Flags** von einer Anwendung aus überprüfen mit:
 ```bash
@@ -50,11 +50,11 @@ Sie können diese Datei in [https://hexed.it/](https://hexed.it/) laden und nach
 
 <figure><img src="../../../images/image (34).png" alt=""><figcaption></figcaption></figure>
 
-Beachten Sie, dass die Anwendung nicht ausgeführt wird, wenn Sie versuchen, die **`Electron Framework`-Binärdatei** innerhalb einer Anwendung mit diesen modifizierten Bytes **zu überschreiben**.
+Beachten Sie, dass die Anwendung nicht ausgeführt wird, wenn Sie versuchen, die **`Electron Framework`**-Binärdatei innerhalb einer Anwendung mit diesen modifizierten Bytes **zu überschreiben**.
 
 ## RCE Code zu Electron-Anwendungen hinzufügen
 
-Es könnte **externe JS/HTML-Dateien** geben, die eine Electron-App verwendet, sodass ein Angreifer Code in diese Dateien injizieren könnte, deren Signatur nicht überprüft wird, und willkürlichen Code im Kontext der App ausführen könnte.
+Es könnte **externe JS/HTML-Dateien** geben, die eine Electron-App verwendet, sodass ein Angreifer Code in diese Dateien injizieren könnte, deren Signatur nicht überprüft wird, und willkürlichen Code im Kontext der App ausführen kann.
 
 > [!CAUTION]
 > Es gibt jedoch derzeit 2 Einschränkungen:
@@ -154,12 +154,12 @@ Zum Beispiel:
 # Connect to it using chrome://inspect and execute a calculator with:
 require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Calculator')
 ```
-In [**diesem Blogbeitrag**](https://hackerone.com/reports/1274695) wird dieses Debugging missbraucht, um einen headless chrome **willkürliche Dateien an willkürlichen Orten herunterzuladen**.
+In [**diesem Blogbeitrag**](https://hackerone.com/reports/1274695) wird dieses Debugging ausgenutzt, um einen headless chrome **willkürliche Dateien an willkürlichen Orten herunterzuladen**.
 
 > [!TIP]
 > Wenn eine App ihre eigene Methode hat, um zu überprüfen, ob Umgebungsvariablen oder Parameter wie `--inspect` gesetzt sind, könntest du versuchen, dies zur Laufzeit mit dem Argument `--inspect-brk` zu **umgehen**, das die Ausführung zu Beginn der App **stoppt** und einen Bypass ausführt (zum Beispiel durch Überschreiben der Argumente oder der Umgebungsvariablen des aktuellen Prozesses).
 
-Das Folgende war ein Exploit, bei dem durch Überwachung und Ausführung der App mit dem Parameter `--inspect-brk` es möglich war, den benutzerdefinierten Schutz zu umgehen (indem die Parameter des Prozesses überschrieben wurden, um `--inspect-brk` zu entfernen) und dann eine JS-Nutzlast einzufügen, um Cookies und Anmeldeinformationen aus der App zu extrahieren:
+Das Folgende war ein Exploit, bei dem durch Überwachung und Ausführung der App mit dem Parameter `--inspect-brk` das benutzerdefinierte Schutzsystem umgangen werden konnte (Überschreiben der Parameter des Prozesses, um `--inspect-brk` zu entfernen) und dann ein JS-Payload injiziert wurde, um Cookies und Anmeldeinformationen aus der App zu extrahieren:
 ```python
 import asyncio
 import websockets
@@ -400,14 +400,33 @@ Sie könnten diese Umgebungsvariable in einer plist missbrauchen, um Persistenz 
 
 ## Run non JS Code
 
-Die vorherigen Techniken ermöglichen es Ihnen, **JS-Code innerhalb des Prozesses der Electron-Anwendung** auszuführen. Denken Sie jedoch daran, dass die **Kindprozesse unter demselben Sandbox-Profil** wie die übergeordnete Anwendung ausgeführt werden und **ihre TCC-Berechtigungen erben**.\
-Wenn Sie also Berechtigungen missbrauchen möchten, um beispielsweise auf die Kamera oder das Mikrofon zuzugreifen, könnten Sie einfach **eine andere Binärdatei aus dem Prozess heraus ausführen**.
+Die vorherigen Techniken ermöglichen es Ihnen, **JS-Code innerhalb des Prozesses der Electron-Anwendung auszuführen**. Denken Sie jedoch daran, dass die **Kindprozesse unter demselben Sandbox-Profil** wie die übergeordnete Anwendung ausgeführt werden und **ihre TCC-Berechtigungen erben**.\
+Wenn Sie also Berechtigungen missbrauchen möchten, um beispielsweise auf die Kamera oder das Mikrofon zuzugreifen, könnten Sie einfach **eine andere Binärdatei aus dem Prozess ausführen**.
+
+## Notable Electron macOS Vulnerabilities (2023-2024)
+
+### CVE-2023-44402 – ASAR integrity bypass
+
+Electron ≤22.3.23 und verschiedene 23-27 Vorabversionen ermöglichten es einem Angreifer mit Schreibzugriff auf den Ordner `.app/Contents/Resources`, die `embeddedAsarIntegrityValidation` **und** `onlyLoadAppFromAsar` Fuses zu umgehen. Der Fehler war eine *Dateitypverwirrung* im Integritätsprüfer, die es ermöglichte, ein gestaltetes **Verzeichnis mit dem Namen `app.asar`** anstelle des validierten Archivs zu laden, sodass jeder JavaScript-Code, der in diesem Verzeichnis platziert wurde, beim Start der App ausgeführt wurde. Selbst Anbieter, die die Härtungsrichtlinien befolgt und beide Fuses aktiviert hatten, waren daher weiterhin auf macOS anfällig.
+
+Patchte Electron-Versionen: **22.3.24**, **24.8.3**, **25.8.1**, **26.2.1** und **27.0.0-alpha.7**. Angreifer, die eine Anwendung mit einer älteren Version finden, können `Contents/Resources/app.asar` mit ihrem eigenen Verzeichnis überschreiben, um Code mit den TCC-Berechtigungen der Anwendung auszuführen.
+
+### 2024 “RunAsNode” / “enableNodeCliInspectArguments” CVE cluster
+
+Im Januar 2024 hob eine Reihe von CVEs (CVE-2024-23738 bis CVE-2024-23743) hervor, dass viele Electron-Apps mit den Fuses **RunAsNode** und **EnableNodeCliInspectArguments** weiterhin aktiviert ausgeliefert werden. Ein lokaler Angreifer kann daher das Programm mit der Umgebungsvariable `ELECTRON_RUN_AS_NODE=1` oder Flags wie `--inspect-brk` neu starten, um es in einen *generischen* Node.js-Prozess zu verwandeln und alle Sandbox- und TCC-Berechtigungen der Anwendung zu erben.
+
+Obwohl das Electron-Team die "kritische" Bewertung bestritt und darauf hinwies, dass ein Angreifer bereits lokale Codeausführung benötigt, ist das Problem während der Post-Exploitation weiterhin wertvoll, da es jedes anfällige Electron-Bundle in eine *living-off-the-land* Binärdatei verwandelt, die z.B. Kontakte, Fotos oder andere sensible Ressourcen lesen kann, die zuvor der Desktop-App gewährt wurden.
+
+Defensive Richtlinien von den Electron-Maintainern:
+
+* Deaktivieren Sie die Fuses `RunAsNode` und `EnableNodeCliInspectArguments` in Produktionsversionen.
+* Verwenden Sie die neuere **UtilityProcess** API, wenn Ihre Anwendung legitim einen Hilfsprozess in Node.js benötigt, anstatt diese Fuses erneut zu aktivieren.
 
 ## Automatic Injection
 
 - [**electroniz3r**](https://github.com/r3ggi/electroniz3r)
 
-Das Tool [**electroniz3r**](https://github.com/r3ggi/electroniz3r) kann leicht verwendet werden, um **anfällige Electron-Anwendungen** zu finden und Code in diese zu injizieren. Dieses Tool wird versuchen, die **`--inspect`**-Technik zu verwenden:
+Das Tool [**electroniz3r**](https://github.com/r3ggi/electroniz3r) kann einfach verwendet werden, um **anfällige Electron-Anwendungen** zu finden und Code in sie zu injizieren. Dieses Tool wird versuchen, die **`--inspect`** Technik zu verwenden:
 
 Sie müssen es selbst kompilieren und können es so verwenden:
 ```bash
@@ -454,6 +473,8 @@ Loki wurde entwickelt, um Electron-Anwendungen zu backdooren, indem die JavaScri
 
 - [https://www.electronjs.org/docs/latest/tutorial/fuses](https://www.electronjs.org/docs/latest/tutorial/fuses)
 - [https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks](https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks)
+- [https://github.com/electron/electron/security/advisories/GHSA-7m48-wc93-9g85](https://github.com/electron/electron/security/advisories/GHSA-7m48-wc93-9g85)
+- [https://www.electronjs.org/blog/statement-run-as-node-cves](https://www.electronjs.org/blog/statement-run-as-node-cves)
 - [https://m.youtube.com/watch?v=VWQY5R2A6X8](https://m.youtube.com/watch?v=VWQY5R2A6X8)
 
 {{#include ../../../banners/hacktricks-training.md}}
