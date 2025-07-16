@@ -4,22 +4,22 @@
 
 ## Basic Information
 
-Ikiwa hujui ni nini Electron, unaweza kupata [**habari nyingi hapa**](https://book.hacktricks.wiki/en/network-services-pentesting/pentesting-web/electron-desktop-apps/index.html#rce-xss--contextisolation). Lakini kwa sasa jua tu kwamba Electron inatumia **node**.\
-Na node ina **parameta** na **mabadiliko ya mazingira** ambayo yanaweza kutumika **kufanya itekeleze msimbo mwingine** mbali na faili iliyoonyeshwa.
+Ikiwa hujui ni nini Electron, unaweza kupata [**habari nyingi hapa**](https://book.hacktricks.wiki/en/network-services-pentesting/pentesting-web/electron-desktop-apps/index.html#rce-xss--contextisolation). Lakini kwa sasa jua tu kwamba Electron inafanya kazi na **node**.\
+Na node ina **parameta** na **env variables** ambazo zinaweza kutumika **kufanya itekeleze msimbo mwingine** mbali na faili iliyoonyeshwa.
 
 ### Electron Fuses
 
-Mbinu hizi zitaongelewa baadaye, lakini katika nyakati za hivi karibuni Electron imeongeza **bendera za usalama kuzuia hizo**. Hizi ni [**Electron Fuses**](https://www.electronjs.org/docs/latest/tutorial/fuses) na hizi ndizo zinazotumika **kuzuia** programu za Electron katika macOS **kudhani msimbo usio na mpangilio**:
+Mbinu hizi zitaongelewa baadaye, lakini katika nyakati za hivi karibuni Electron imeongeza **bendera za usalama ili kuzuia hizo**. Hizi ni [**Electron Fuses**](https://www.electronjs.org/docs/latest/tutorial/fuses) na hizi ndizo zinazotumika **kuzuia** programu za Electron katika macOS **kudhamini msimbo usio na mpangilio**:
 
-- **`RunAsNode`**: Ikiwa imezimwa, inazuia matumizi ya mabadiliko ya mazingira **`ELECTRON_RUN_AS_NODE`** kuingiza msimbo.
-- **`EnableNodeCliInspectArguments`**: Ikiwa imezimwa, parameta kama `--inspect`, `--inspect-brk` hazitazingatiwa. Kuepusha njia hii ya kuingiza msimbo.
-- **`EnableEmbeddedAsarIntegrityValidation`**: Ikiwa imewezeshwa, **faili** ya **`asar`** itathibitishwa na macOS. **Kuzuia** njia hii **kuingizwa kwa msimbo** kwa kubadilisha maudhui ya faili hii.
-- **`OnlyLoadAppFromAsar`**: Ikiwa hii imewezeshwa, badala ya kutafuta kupakia kwa mpangilio ufuatao: **`app.asar`**, **`app`** na hatimaye **`default_app.asar`**. Itakagua tu na kutumia app.asar, hivyo kuhakikisha kwamba wakati **imeunganishwa** na **`embeddedAsarIntegrityValidation`** fuse haiwezekani **kudhani msimbo usio na uthibitisho**.
-- **`LoadBrowserProcessSpecificV8Snapshot`**: Ikiwa imewezeshwa, mchakato wa kivinjari unatumia faili inayoitwa `browser_v8_context_snapshot.bin` kwa ajili ya snapshot yake ya V8.
+- **`RunAsNode`**: Ikiwa imezimwa, inazuia matumizi ya env var **`ELECTRON_RUN_AS_NODE`** kuingiza msimbo.
+- **`EnableNodeCliInspectArguments`**: Ikiwa imezimwa, parameta kama `--inspect`, `--inspect-brk` hazitazingatiwa. Inakwepa njia hii ya kuingiza msimbo.
+- **`EnableEmbeddedAsarIntegrityValidation`**: Ikiwa imewezeshwa, **faili** ya **`asar`** itathibitishwa na macOS. **Ikizuia** njia hii **kuingiza msimbo** kwa kubadilisha maudhui ya faili hii.
+- **`OnlyLoadAppFromAsar`**: Ikiwa hii imewezeshwa, badala ya kutafuta kupakia kwa mpangilio ufuatao: **`app.asar`**, **`app`** na hatimaye **`default_app.asar`**. Itakagua tu na kutumia app.asar, hivyo kuhakikisha kwamba wakati **imeunganishwa** na **`embeddedAsarIntegrityValidation`** fuse haiwezekani **kudhamini msimbo usio thibitishwa**.
+- **`LoadBrowserProcessSpecificV8Snapshot`**: Ikiwa imewezeshwa, mchakato wa kivinjari hutumia faili inayoitwa `browser_v8_context_snapshot.bin` kwa ajili ya snapshot yake ya V8.
 
-Fuse nyingine ya kuvutia ambayo haitazuia kuingizwa kwa msimbo ni:
+Fuse nyingine ya kuvutia ambayo haitazuia kuingiza msimbo ni:
 
-- **EnableCookieEncryption**: Ikiwa imewezeshwa, duka la kuki kwenye diski linakuwa limefichwa kwa kutumia funguo za cryptography za kiwango cha OS.
+- **EnableCookieEncryption**: Ikiwa imewezeshwa, duka la kuki kwenye diski linachakatwa kwa kutumia funguo za cryptography za kiwango cha OS.
 
 ### Checking Electron Fuses
 
@@ -46,27 +46,27 @@ Katika programu za macOS, hii kwa kawaida iko katika `application.app/Contents/F
 grep -R "dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX" Slack.app/
 Binary file Slack.app//Contents/Frameworks/Electron Framework.framework/Versions/A/Electron Framework matches
 ```
-Unaweza kupakia faili hii katika [https://hexed.it/](https://hexed.it/) na kutafuta mfuatano wa awali. Baada ya mfuatano huu unaweza kuona katika ASCII nambari "0" au "1" ikionyesha kama kila fuse imezimwa au imewezeshwa. Badilisha tu msimbo wa hex (`0x30` ni `0` na `0x31` ni `1`) ili **kubadilisha thamani za fuse**.
+You could load this file in [https://hexed.it/](https://hexed.it/) and search for the previous string. After this string you can see in ASCII a number "0" or "1" indicating if each fuse is disabled or enabled. Just modify the hex code (`0x30` is `0` and `0x31` is `1`) to **modify the fuse values**.
 
 <figure><img src="../../../images/image (34).png" alt=""><figcaption></figcaption></figure>
 
-Kumbuka kwamba ukijaribu **kuandika upya** **`Electron Framework`** binary ndani ya programu na hizi bytes zimebadilishwa, programu hiyo haitafanya kazi.
+Note that if you try to **overwrite** the **`Electron Framework` binary** inside an application with these bytes modified, the app won't run.
 
-## RCE kuongeza msimbo kwenye Programu za Electron
+## RCE adding code to Electron Applications
 
-Kunaweza kuwa na **faili za nje za JS/HTML** ambazo Programu ya Electron inatumia, hivyo mshambuliaji anaweza kuingiza msimbo katika faili hizi ambao saini yake haitakaguliwa na kutekeleza msimbo wa kiholela katika muktadha wa programu.
+There could be **external JS/HTML files** that an Electron App is using, so an attacker could inject code in these files whose signature won't be checked and execute arbitrary code in the context of the app.
 
 > [!CAUTION]
 > Hata hivyo, kwa sasa kuna vizuizi 2:
 >
-> - Ruhusa ya **`kTCCServiceSystemPolicyAppBundles`** inahitajika kubadilisha Programu, hivyo kwa kawaida hii haiwezekani tena.
-> - Faili iliyokusanywa ya **`asap`** kwa kawaida ina fuse **`embeddedAsarIntegrityValidation`** `na` **`onlyLoadAppFromAsar`** `imewezeshwa`
+> - Ruhusa ya **`kTCCServiceSystemPolicyAppBundles`** inahitajika kubadilisha App, hivyo kwa kawaida hii haiwezekani tena.
+> - Faili iliyokusanywa ya **`asap`** kwa kawaida ina fuses **`embeddedAsarIntegrityValidation`** `na` **`onlyLoadAppFromAsar`** `imewezeshwa`
 >
 > Hii inafanya njia hii ya shambulio kuwa ngumu zaidi (au haiwezekani).
 
-Kumbuka kwamba inawezekana kupita hitaji la **`kTCCServiceSystemPolicyAppBundles`** kwa kunakili programu hiyo kwenye directory nyingine (kama **`/tmp`**), kubadilisha jina la folda **`app.app/Contents`** kuwa **`app.app/NotCon`**, **kubadilisha** faili la **asar** na msimbo wako **mbaya**, kubadilisha jina lake tena kuwa **`app.app/Contents`** na kuitekeleza.
+Note that it's possible to bypass the requirement of **`kTCCServiceSystemPolicyAppBundles`** by copying the application to another directory (like **`/tmp`**), renaming the folder **`app.app/Contents`** to **`app.app/NotCon`**, **modifying** the **asar** file with your **malicious** code, renaming it back to **`app.app/Contents`** and executing it.
 
-Unaweza kufungua msimbo kutoka kwa faili la asar kwa:
+You can unpack the code from the asar file with:
 ```bash
 npx asar extract app.asar app-decomp
 ```
@@ -123,7 +123,7 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 NODE_OPTIONS="--require /tmp/payload.js" ELECTRON_RUN_AS_NODE=1 /Applications/Discord.app/Contents/MacOS/Discord
 ```
 > [!CAUTION]
-> Ikiwa fuse **`EnableNodeOptionsEnvironmentVariable`** ime **zimwa**, app itakuwa **ipuuze** env var **NODE_OPTIONS** inapozinduliwa isipokuwa env variable **`ELECTRON_RUN_AS_NODE`** imewekwa, ambayo pia itapuuziliwa mbali ikiwa fuse **`RunAsNode`** imezimwa.
+> Ikiwa fuse **`EnableNodeOptionsEnvironmentVariable`** ime **zimwa**, programu itakuwa **ipuuze** env var **NODE_OPTIONS** inapozinduliwa isipokuwa env variable **`ELECTRON_RUN_AS_NODE`** imewekwa, ambayo pia itapuuziliwa mbali ikiwa fuse **`RunAsNode`** imezimwa.
 >
 > Ikiwa hujaweka **`ELECTRON_RUN_AS_NODE`**, utaona **kosa**: `Most NODE_OPTIONs are not supported in packaged apps. See documentation for more details.`
 
@@ -154,10 +154,10 @@ Kwa mfano:
 # Connect to it using chrome://inspect and execute a calculator with:
 require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Calculator')
 ```
-Katika [**hiki blogu**](https://hackerone.com/reports/1274695), ufuatiliaji huu unatumika vibaya ili kufanya chrome isiyo na kichwa **ipakue faili zisizo na mpangilio katika maeneo yasiyo na mpangilio**.
+Katika [**hiki blogu**](https://hackerone.com/reports/1274695), ufuatiliaji huu unatumika vibaya ili kufanya chrome isiyo na kichwa **ipakue faili zisizo na mipaka katika maeneo yasiyo na mipaka**.
 
 > [!TIP]
-> Ikiwa programu ina njia yake ya kawaida ya kuangalia ikiwa mabadiliko ya mazingira au vigezo kama `--inspect` vimewekwa, unaweza kujaribu **kuyapita** katika wakati wa utekelezaji kwa kutumia arg `--inspect-brk` ambayo it **isimamishe utekelezaji** mwanzoni mwa programu na kutekeleza bypass (kuandika upya vigezo au mabadiliko ya mazingira ya mchakato wa sasa kwa mfano).
+> Ikiwa programu ina njia yake ya kawaida ya kuangalia ikiwa mabadiliko ya mazingira au vigezo kama `--inspect` vimewekwa, unaweza kujaribu **kuyapita** katika wakati wa utekelezaji kwa kutumia arg `--inspect-brk` ambayo it **isimamishe utekelezaji** mwanzoni mwa programu na kutekeleza bypass (kuandika upya args au mabadiliko ya mazingira ya mchakato wa sasa kwa mfano).
 
 Ifuatayo ilikuwa exploit ambayo kwa kufuatilia na kutekeleza programu na param `--inspect-brk` ilikuwa inawezekana kuyapita ulinzi wa kawaida iliyo nayo (kuandika upya vigezo vya mchakato ili kuondoa `--inspect-brk`) na kisha kuingiza payload ya JS ili kutupa vidakuzi na akidi kutoka kwa programu:
 ```python
@@ -396,20 +396,39 @@ Unaweza kutumia hii env variable katika plist ili kudumisha uvumilivu kwa kuonge
 ## TCC Bypass abusing Older Versions
 
 > [!TIP]
-> Daemon ya TCC kutoka macOS haichunguzi toleo lililotekelezwa la programu. Hivyo kama huwezi **kuiingiza msimbo katika programu ya Electron** kwa kutumia mbinu zozote za awali unaweza kupakua toleo la awali la APP na kuingiza msimbo ndani yake kwani bado itapata ruhusa za TCC (isipokuwa Trust Cache iizuie).
+> Daemon ya TCC kutoka macOS haichunguzi toleo lililotekelezwa la programu. Hivyo kama huwezi **kuiingiza msimbo katika programu ya Electron** kwa kutumia mbinu zozote za awali unaweza kupakua toleo la zamani la APP na kuingiza msimbo ndani yake kwani bado itapata ruhusa za TCC (isipokuwa Trust Cache iizuie).
 
 ## Run non JS Code
 
-Mbinu za awali zitakuruhusu kuendesha **msimbo wa JS ndani ya mchakato wa programu ya electron**. Hata hivyo, kumbuka kwamba **mchakato wa watoto unakimbia chini ya wasifu sawa wa sandbox** kama programu ya mzazi na **unapata ruhusa zao za TCC**.\
-Hivyo, ikiwa unataka kutumia haki za kuingia ili kufikia kamera au kipaza sauti kwa mfano, unaweza tu **kuendesha binary nyingine kutoka kwa mchakato**.
+Mbinu za awali zitakuruhusu kuendesha **msimbo wa JS ndani ya mchakato wa programu ya electron**. Hata hivyo, kumbuka kwamba **mchakato wa watoto unafanya kazi chini ya wasifu sawa wa sandbox** kama programu ya mzazi na **urithi wa ruhusa zao za TCC**.\
+Hivyo, ikiwa unataka kutumia haki za kuingia ili kufikia kamera au kipaza sauti kwa mfano, unaweza tu **kuendesha binary nyingine kutoka kwenye mchakato**.
+
+## Notable Electron macOS Vulnerabilities (2023-2024)
+
+### CVE-2023-44402 – ASAR integrity bypass
+
+Electron ≤22.3.23 na toleo mbalimbali za awali za 23-27 ziliruhusu mshambuliaji mwenye ufikiaji wa kuandika kwenye folda ya `.app/Contents/Resources` kupita `embeddedAsarIntegrityValidation` **na** `onlyLoadAppFromAsar` fuses. Kosa lilikuwa ni *kuchanganya aina ya faili* katika mchakato wa kuangalia uaminifu ambao uliruhusu **directory iliyoundwa inayoitwa `app.asar`** kupakuliwa badala ya archive iliyothibitishwa, hivyo JavaScript yoyote iliyowekwa ndani ya directory hiyo ilitekelezwa wakati programu ilipoanza. Hata wauzaji ambao walifuata mwongozo wa kuimarisha na kuwezesha fuses zote walikuwa bado hatarini kwenye macOS.
+
+Toleo za Electron zilizorekebishwa: **22.3.24**, **24.8.3**, **25.8.1**, **26.2.1** na **27.0.0-alpha.7**. Wavamizi wanaopata programu inayofanya kazi na toleo la zamani wanaweza kubadilisha `Contents/Resources/app.asar` na directory yao ili kutekeleza msimbo na haki za TCC za programu.
+
+### 2024 “RunAsNode” / “enableNodeCliInspectArguments” CVE cluster
+
+Mnamo Januari 2024, mfululizo wa CVEs (CVE-2024-23738 hadi CVE-2024-23743) ulionyesha kwamba programu nyingi za Electron zinakuja na fuses **RunAsNode** na **EnableNodeCliInspectArguments** bado zikiwa zimewezeshwa. Mshambuliaji wa ndani anaweza hivyo kuanzisha tena programu hiyo kwa kutumia variable ya mazingira `ELECTRON_RUN_AS_NODE=1` au bendera kama `--inspect-brk` kuifanya kuwa mchakato wa *generic* Node.js na kurithi ruhusa zote za sandbox na TCC za programu.
+
+Ingawa timu ya Electron ilipinga kiwango cha “critical” na ikabaini kwamba mshambuliaji tayari anahitaji utekelezaji wa msimbo wa ndani, suala hili bado ni muhimu wakati wa baada ya unyakuzi kwa sababu linageuza kila pakiti ya Electron iliyo hatarini kuwa binary ya *living-off-the-land* ambayo inaweza e.g. kusoma Mawasiliano, Picha au rasilimali nyeti nyingine ambazo zilitolewa kwa programu ya desktop.
+
+Mwongozo wa kujihami kutoka kwa wahifadhi wa Electron:
+
+* Zima fuses za `RunAsNode` na `EnableNodeCliInspectArguments` katika toleo za uzalishaji.
+* Tumia API mpya ya **UtilityProcess** ikiwa programu yako inahitaji kwa halali mchakato wa Node.js wa kusaidia badala ya kuanzisha tena fuses hizo.
 
 ## Automatic Injection
 
 - [**electroniz3r**](https://github.com/r3ggi/electroniz3r)
 
-Chombo [**electroniz3r**](https://github.com/r3ggi/electroniz3r) kinaweza kutumika kwa urahisi ili **kupata programu za electron zenye udhaifu** zilizowekwa na kuingiza msimbo ndani yao. Chombo hiki kitajaribu kutumia mbinu ya **`--inspect`**:
+Chombo [**electroniz3r**](https://github.com/r3ggi/electroniz3r) kinaweza kutumika kwa urahisi ili **kupata programu za electron zenye hatari** zilizowekwa na kuingiza msimbo ndani yao. Chombo hiki kitajaribu kutumia mbinu ya **`--inspect`**:
 
-Unahitaji kukiunda mwenyewe na unaweza kuitumia kama hii:
+Unahitaji kukiunda mwenyewe na unaweza kuitumia kama ifuatavyo:
 ```bash
 # Find electron apps
 ./electroniz3r list-apps
@@ -447,13 +466,15 @@ Shell binding requested. Check `nc 127.0.0.1 12345`
 ```
 - [https://github.com/boku7/Loki](https://github.com/boku7/Loki)
 
-Loki ilitengenezwa ili kuingilia programu za Electron kwa kubadilisha faili za JavaScript za programu hizo na faili za JavaScript za Loki Command & Control.
+Loki ilipangwa kuingilia programu za Electron kwa kubadilisha faili za JavaScript za programu hizo na faili za JavaScript za Loki Command & Control.
 
 
 ## References
 
 - [https://www.electronjs.org/docs/latest/tutorial/fuses](https://www.electronjs.org/docs/latest/tutorial/fuses)
 - [https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks](https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks)
+- [https://github.com/electron/electron/security/advisories/GHSA-7m48-wc93-9g85](https://github.com/electron/electron/security/advisories/GHSA-7m48-wc93-9g85)
+- [https://www.electronjs.org/blog/statement-run-as-node-cves](https://www.electronjs.org/blog/statement-run-as-node-cves)
 - [https://m.youtube.com/watch?v=VWQY5R2A6X8](https://m.youtube.com/watch?v=VWQY5R2A6X8)
 
 {{#include ../../../banners/hacktricks-training.md}}
