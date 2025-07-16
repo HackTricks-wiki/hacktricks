@@ -46,21 +46,21 @@ In macOS applications this is typically in `application.app/Contents/Frameworks/
 grep -R "dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX" Slack.app/
 Binary file Slack.app//Contents/Frameworks/Electron Framework.framework/Versions/A/Electron Framework matches
 ```
-Bu dosyayı [https://hexed.it/](https://hexed.it/) adresinde yükleyebilir ve önceki dizeyi arayabilirsiniz. Bu dizeden sonra, her bir sigortanın devre dışı mı yoksa etkin mi olduğunu gösteren ASCII'de "0" veya "1" sayısını görebilirsiniz. **Sigorta değerlerini değiştirmek için** hex kodunu (`0x30` `0` ve `0x31` `1`'dir) değiştirin.
+Bu dosyayı [https://hexed.it/](https://hexed.it/) adresinde yükleyebilir ve önceki dizeyi arayabilirsiniz. Bu dizenin ardından, her bir sigortanın devre dışı mı yoksa etkin mi olduğunu gösteren ASCII'de "0" veya "1" sayısını görebilirsiniz. **Sigorta değerlerini değiştirmek için** hex kodunu (`0x30` `0` ve `0x31` `1`'dir) değiştirin.
 
 <figure><img src="../../../images/image (34).png" alt=""><figcaption></figcaption></figure>
 
-Eğer bu baytları değiştirilmiş **`Electron Framework` ikili dosyasını** bir uygulamanın içine **overwrite** etmeye çalışırsanız, uygulama çalışmayacaktır.
+Eğer bu baytları değiştirilmiş **`Electron Framework` ikili dosyasını** bir uygulamanın içine **üst üste yazmaya** çalışırsanız, uygulama çalışmayacaktır.
 
-## RCE Electron Uygulamalarına Kod Ekleme
+## RCE, Electron Uygulamalarına Kod Ekleme
 
-Bir Electron Uygulamasının kullandığı **harici JS/HTML dosyaları** olabilir, bu nedenle bir saldırgan bu dosyalara kod enjekte edebilir ve uygulama bağlamında rastgele kod çalıştırabilir.
+Bir Electron Uygulamasının kullandığı **harici JS/HTML dosyaları** olabilir, bu nedenle bir saldırgan bu dosyalara kod enjekte edebilir; bu dosyaların imzası kontrol edilmeyecek ve uygulama bağlamında rastgele kod çalıştırılabilir.
 
 > [!CAUTION]
 > Ancak, şu anda 2 sınırlama vardır:
 >
 > - Bir Uygulamayı değiştirmek için **`kTCCServiceSystemPolicyAppBundles`** izni **gerekir**, bu nedenle varsayılan olarak bu artık mümkün değildir.
-> - Derlenmiş **`asap`** dosyası genellikle **`embeddedAsarIntegrityValidation`** `ve` **`onlyLoadAppFromAsar`** sigortalarını `etkin` olarak içerir.
+> - Derlenmiş **`asap`** dosyası genellikle sigortaları **`embeddedAsarIntegrityValidation`** `ve` **`onlyLoadAppFromAsar`** `etkin` olarak içerir.
 >
 > Bu saldırı yolunu daha karmaşık (veya imkansız) hale getirir.
 
@@ -76,7 +76,7 @@ npx asar pack app-decomp app-new.asar
 ```
 ## RCE with ELECTRON_RUN_AS_NODE
 
-According to [**the docs**](https://www.electronjs.org/docs/latest/api/environment-variables#electron_run_as_node), bu ortam değişkeni ayarlandığında, süreci normal bir Node.js süreci olarak başlatır.
+[**Belgelerde**](https://www.electronjs.org/docs/latest/api/environment-variables#electron_run_as_node) belirtildiğine göre, bu ortam değişkeni ayarlandığında, süreci normal bir Node.js süreci olarak başlatır.
 ```bash
 # Run this
 ELECTRON_RUN_AS_NODE=1 /Applications/Discord.app/Contents/MacOS/Discord
@@ -123,13 +123,13 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 NODE_OPTIONS="--require /tmp/payload.js" ELECTRON_RUN_AS_NODE=1 /Applications/Discord.app/Contents/MacOS/Discord
 ```
 > [!CAUTION]
-> Eğer sigorta **`EnableNodeOptionsEnvironmentVariable`** **devre dışı** bırakılmışsa, uygulama **NODE_OPTIONS** ortam değişkenini başlatıldığında **yoksayacaktır**, eğer ortam değişkeni **`ELECTRON_RUN_AS_NODE`** ayarlanmadıysa, bu da sigorta **`RunAsNode`** devre dışı bırakılmışsa **yoksayılacaktır**.
+> Eğer sigorta **`EnableNodeOptionsEnvironmentVariable`** **devre dışı** bırakılmışsa, uygulama **NODE_OPTIONS** ortam değişkenini başlatıldığında **yoksayacaktır**, eğer ortam değişkeni **`ELECTRON_RUN_AS_NODE`** ayarlanmamışsa, bu da sigorta **`RunAsNode`** devre dışı bırakılmışsa **yoksayılacaktır**.
 >
 > Eğer **`ELECTRON_RUN_AS_NODE`** ayarlamazsanız, **hata** ile karşılaşacaksınız: `Most NODE_OPTIONs are not supported in packaged apps. See documentation for more details.`
 
 ### Uygulama Plist'inden Enjeksiyon
 
-Bu ortam değişkenini bir plist içinde kötüye kullanarak kalıcılığı sağlamak için bu anahtarları ekleyebilirsiniz:
+Bu ortam değişkenini bir plist içinde kötüye kullanarak kalıcılık sağlamak için bu anahtarları ekleyebilirsiniz:
 ```xml
 <dict>
 <key>EnvironmentVariables</key>
@@ -147,8 +147,8 @@ Bu ortam değişkenini bir plist içinde kötüye kullanarak kalıcılığı sa�
 ```
 ## RCE ile inceleme
 
-According to [**this**](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f), if you execute an Electron application with flags such as **`--inspect`**, **`--inspect-brk`** and **`--remote-debugging-port`**, a **debug port will be open** so you can connect to it (for example from Chrome in `chrome://inspect`) and you will be able to **inject code on it** or even launch new processes.\
-For example:
+[**şuna**](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f) göre, **`--inspect`**, **`--inspect-brk`** ve **`--remote-debugging-port`** gibi bayraklarla bir Electron uygulaması çalıştırırsanız, **bir hata ayıklama portu açılacaktır** böylece ona bağlanabilirsiniz (örneğin `chrome://inspect` üzerinden Chrome'dan) ve ona **kod enjekte edebilir** veya hatta yeni süreçler başlatabilirsiniz.\
+Örneğin:
 ```bash
 /Applications/Signal.app/Contents/MacOS/Signal --inspect=9229
 # Connect to it using chrome://inspect and execute a calculator with:
@@ -157,7 +157,7 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 In [**bu blog yazısında**](https://hackerone.com/reports/1274695), bu hata ayıklama, başsız bir chrome'un **rastgele dosyaları rastgele konumlara indirmesi** için kötüye kullanılıyor.
 
 > [!TIP]
-> Eğer bir uygulama, `--inspect` gibi env değişkenlerinin veya parametrelerin ayarlanıp ayarlanmadığını kontrol etmenin kendi özel yoluna sahipse, `--inspect-brk` argümanını kullanarak bunu çalışma zamanında **bypass** etmeyi deneyebilirsiniz; bu, uygulamanın başında **çalışmayı durduracak** ve bir bypass gerçekleştirecektir (örneğin, mevcut sürecin argümanlarını veya env değişkenlerini geçersiz kılmak).
+> Eğer bir uygulama, `--inspect` gibi env değişkenlerinin veya parametrelerin ayarlanıp ayarlanmadığını kontrol etmenin kendi özel yoluna sahipse, `--inspect-brk` argümanını kullanarak çalışma zamanında **bypass** etmeyi deneyebilirsiniz; bu, uygulamanın başında **çalışmayı durduracak** ve bir bypass gerçekleştirecektir (örneğin, mevcut sürecin argümanlarını veya env değişkenlerini geçersiz kılmak).
 
 Aşağıdaki, uygulamayı `--inspect-brk` parametresi ile izleyip çalıştırarak, sahip olduğu özel korumayı (parametreleri `--inspect-brk`'yi kaldıracak şekilde geçersiz kılmak) aşmanın mümkün olduğu bir istismardı ve ardından uygulamadan çerezleri ve kimlik bilgilerini dökmek için bir JS yükü enjekte edildi:
 ```python
@@ -363,7 +363,7 @@ if __name__ == "__main__":
 asyncio.run(main())
 ```
 > [!CAUTION]
-> Eğer **`EnableNodeCliInspectArguments`** sigortası devre dışı bırakılmışsa, uygulama başlatıldığında **node parametrelerini** (örneğin `--inspect`) **göz ardı edecektir**, eğer ortam değişkeni **`ELECTRON_RUN_AS_NODE`** ayarlanmamışsa, bu da **göz ardı edilecektir** eğer sigorta **`RunAsNode`** devre dışı bırakılmışsa.
+> Eğer **`EnableNodeCliInspectArguments`** sigortası devre dışı bırakılmışsa, uygulama **node parametrelerini** (örneğin `--inspect`) başlatıldığında **göz ardı edecektir**, eğer ortam değişkeni **`ELECTRON_RUN_AS_NODE`** ayarlanmamışsa, bu da **göz ardı edilecektir** eğer sigorta **`RunAsNode`** devre dışı bırakılmışsa.
 >
 > Ancak, **electron parametresi `--remote-debugging-port=9229`** kullanarak hala bazı bilgileri çalabilirsiniz, örneğin **geçmiş** (GET komutları ile) veya tarayıcının **çerezleri** (çünkü bunlar tarayıcı içinde **şifresi çözülmüş** durumdadır ve bunları verecek bir **json uç noktası** vardır).
 
@@ -394,18 +394,37 @@ Bu env değişkenini bir plist içinde kötüye kullanarak kalıcılığı sağl
 ## TCC Bypass eski sürümleri istismar etme
 
 > [!TIP]
-> macOS'taki TCC daemon, uygulamanın yürütülen sürümünü kontrol etmez. Bu nedenle, **bir Electron uygulamasına kod enjekte edemiyorsanız** önceki tekniklerden herhangi biriyle, APP'nin önceki bir sürümünü indirip üzerine kod enjekte edebilirsiniz çünkü hala TCC ayrıcalıklarını alacaktır (Trust Cache engellemediği sürece).
+> macOS'taki TCC daemon, uygulamanın yürütülen sürümünü kontrol etmez. Bu nedenle, eğer **bir Electron uygulamasına kod enjekte edemiyorsanız** önceki tekniklerden herhangi biriyle, APP'nin önceki bir sürümünü indirip üzerine kod enjekte edebilirsiniz çünkü hala TCC ayrıcalıklarını alacaktır (Trust Cache engellemediği sürece).
 
 ## JS Dışı Kod Çalıştırma
 
 Önceki teknikler, **electron uygulamasının sürecinde JS kodu çalıştırmanıza** izin verecektir. Ancak, **çocuk süreçlerin ana uygulama ile aynı sandbox profilinde çalıştığını** ve **TCC izinlerini miras aldığını** unutmayın.\
-Bu nedenle, örneğin kameraya veya mikrofona erişmek için hakları istismar etmek istiyorsanız, **süreçten başka bir ikili dosya çalıştırabilirsiniz**.
+Bu nedenle, örneğin kameraya veya mikrofona erişmek için hakları istismar etmek istiyorsanız, sadece **süreçten başka bir ikili dosya çalıştırabilirsiniz**.
+
+## Dikkate Değer Electron macOS Güvenlik Açıkları (2023-2024)
+
+### CVE-2023-44402 – ASAR bütünlük atlatma
+
+Electron ≤22.3.23 ve çeşitli 23-27 ön sürümleri, `.app/Contents/Resources` klasörüne yazma erişimi olan bir saldırganın `embeddedAsarIntegrityValidation` **ve** `onlyLoadAppFromAsar` fuse'larını atlatmasına izin verdi. Hata, doğrulama kontrolünde *dosya türü karışıklığı* idi ve bu, doğrulanan arşiv yerine **`app.asar`** adlı bir dizinin yüklenmesine izin verdi, bu nedenle o dizine yerleştirilen herhangi bir JavaScript uygulama başlatıldığında çalıştırıldı. Bu nedenle, sertleştirme kılavuzunu takip eden ve her iki fuse'u da etkinleştiren satıcılar bile macOS'ta hala savunmasızdı.
+
+Yamanmış Electron sürümleri: **22.3.24**, **24.8.3**, **25.8.1**, **26.2.1** ve **27.0.0-alpha.7**. Daha eski bir sürümde çalışan bir uygulama bulan saldırganlar, `Contents/Resources/app.asar` dosyasını kendi dizinleriyle değiştirebilir ve uygulamanın TCC haklarıyla kod çalıştırabilirler.
+
+### 2024 “RunAsNode” / “enableNodeCliInspectArguments” CVE kümesi
+
+Ocak 2024'te bir dizi CVE (CVE-2024-23738'den CVE-2024-23743'e kadar) birçok Electron uygulamasının **RunAsNode** ve **EnableNodeCliInspectArguments** fuse'larıyla birlikte gönderildiğini vurguladı. Bu nedenle, yerel bir saldırgan programı `ELECTRON_RUN_AS_NODE=1` ortam değişkeni veya `--inspect-brk` gibi bayraklarla yeniden başlatarak onu *genel* bir Node.js sürecine dönüştürebilir ve uygulamanın tüm sandbox ve TCC izinlerini miras alabilir.
+
+Electron ekibi “kritik” derecelendirmesini tartıştı ve bir saldırganın zaten yerel kod yürütme yeteneğine sahip olması gerektiğini belirtti, ancak bu sorun hala post-exploitation sırasında değerlidir çünkü herhangi bir savunmasız Electron paketi, örneğin İletişim, Fotoğraflar veya daha önce masaüstü uygulamasına verilen diğer hassas kaynakları okuyabilen bir *living-off-the-land* ikili dosyasına dönüşür.
+
+Electron bakımcılarından savunma kılavuzu:
+
+* Üretim sürümlerinde `RunAsNode` ve `EnableNodeCliInspectArguments` fuse'larını devre dışı bırakın.
+* Uygulamanızın gerçekten bir yardımcı Node.js sürecine ihtiyacı varsa, bu fuse'ları yeniden etkinleştirmek yerine daha yeni **UtilityProcess** API'sini kullanın.
 
 ## Otomatik Enjeksiyon
 
 - [**electroniz3r**](https://github.com/r3ggi/electroniz3r)
 
-Araç [**electroniz3r**](https://github.com/r3ggi/electroniz3r), **kurulu savunmasız electron uygulamalarını bulmak** ve bunlara kod enjekte etmek için kolayca kullanılabilir. Bu araç, **`--inspect`** tekniğini kullanmaya çalışacaktır:
+Araç [**electroniz3r**](https://github.com/r3ggi/electroniz3r), **savunmasız electron uygulamalarını** bulmak ve bunlara kod enjekte etmek için kolayca kullanılabilir. Bu araç, **`--inspect`** tekniğini kullanmaya çalışacaktır:
 
 Kendiniz derlemeniz gerekiyor ve bunu şu şekilde kullanabilirsiniz:
 ```bash
@@ -445,13 +464,15 @@ Shell binding requested. Check `nc 127.0.0.1 12345`
 ```
 - [https://github.com/boku7/Loki](https://github.com/boku7/Loki)
 
-Loki, Electron uygulamalarını arka kapı ile ele geçirmek için uygulamaların JavaScript dosyalarını Loki Komut ve Kontrol JavaScript dosyaları ile değiştirmek üzere tasarlandı.
+Loki, Electron uygulamalarını arka kapı ile ele geçirmek için uygulamaların JavaScript dosyalarını Loki Komut ve Kontrol JavaScript dosyalarıyla değiştirmek üzere tasarlandı.
 
 
 ## References
 
 - [https://www.electronjs.org/docs/latest/tutorial/fuses](https://www.electronjs.org/docs/latest/tutorial/fuses)
 - [https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks](https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks)
+- [https://github.com/electron/electron/security/advisories/GHSA-7m48-wc93-9g85](https://github.com/electron/electron/security/advisories/GHSA-7m48-wc93-9g85)
+- [https://www.electronjs.org/blog/statement-run-as-node-cves](https://www.electronjs.org/blog/statement-run-as-node-cves)
 - [https://m.youtube.com/watch?v=VWQY5R2A6X8](https://m.youtube.com/watch?v=VWQY5R2A6X8)
 
 {{#include ../../../banners/hacktricks-training.md}}
