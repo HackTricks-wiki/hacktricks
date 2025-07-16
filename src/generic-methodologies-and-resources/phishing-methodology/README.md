@@ -24,15 +24,15 @@
 - **Palavra-chave**: O nome do domínio **contém** uma **palavra-chave** importante do domínio original (por exemplo, zelster.com-management.com).
 - **subdomínio hifenizado**: Mudar o **ponto por um hífen** de um subdomínio (por exemplo, www-zelster.com).
 - **Novo TLD**: Mesmo domínio usando um **novo TLD** (por exemplo, zelster.org).
-- **Homoglyph**: Ele **substitui** uma letra no nome do domínio por **letras que parecem semelhantes** (por exemplo, zelfser.com).
-- **Transposição:** Ele **troca duas letras** dentro do nome do domínio (por exemplo, zelsetr.com).
+- **Homoglyph**: **Substitui** uma letra no nome do domínio por **letras que parecem semelhantes** (por exemplo, zelfser.com).
+- **Transposição:** **Troca duas letras** dentro do nome do domínio (por exemplo, zelsetr.com).
 - **Singularização/Pluralização**: Adiciona ou remove “s” no final do nome do domínio (por exemplo, zeltsers.com).
-- **Omissão**: Ele **remove uma** das letras do nome do domínio (por exemplo, zelser.com).
-- **Repetição:** Ele **repete uma** das letras no nome do domínio (por exemplo, zeltsser.com).
-- **Substituição**: Como homoglyph, mas menos furtivo. Ele substitui uma das letras no nome do domínio, talvez por uma letra próxima da letra original no teclado (por exemplo, zektser.com).
-- **Subdominado**: Introduzir um **ponto** dentro do nome do domínio (por exemplo, ze.lster.com).
-- **Inserção**: Ele **insere uma letra** no nome do domínio (por exemplo, zerltser.com).
-- **Ponto ausente**: Anexar o TLD ao nome do domínio. (por exemplo, zelstercom.com)
+- **Omissão**: **Remove uma** das letras do nome do domínio (por exemplo, zelser.com).
+- **Repetição:** **Repete uma** das letras no nome do domínio (por exemplo, zeltsser.com).
+- **Substituição**: Como homoglyph, mas menos furtivo. Substitui uma das letras no nome do domínio, talvez por uma letra próxima da letra original no teclado (por exemplo, zektser.com).
+- **Subdominado**: Introduz um **ponto** dentro do nome do domínio (por exemplo, ze.lster.com).
+- **Inserção**: **Insere uma letra** no nome do domínio (por exemplo, zerltser.com).
+- **Ponto ausente**: Anexa o TLD ao nome do domínio. (por exemplo, zelstercom.com)
 
 **Ferramentas Automáticas**
 
@@ -67,8 +67,8 @@ Para garantir que o domínio expirado que você vai comprar **já tenha um bom S
 
 ## Descobrindo E-mails
 
-- [https://github.com/laramies/theHarvester](https://github.com/laramies/theHarvester) (100% gratuito)
-- [https://phonebook.cz/](https://phonebook.cz) (100% gratuito)
+- [https://github.com/laramies/theHarvester](https://github.com/laramies/theHarvester) (100% grátis)
+- [https://phonebook.cz/](https://phonebook.cz) (100% grátis)
 - [https://maildb.io/](https://maildb.io)
 - [https://hunter.io/](https://hunter.io)
 - [https://anymailfinder.com/](https://anymailfinder.com)
@@ -82,7 +82,7 @@ Além disso, não se esqueça de que se os usuários usarem **qualquer portal we
 
 Você pode baixá-lo em [https://github.com/gophish/gophish/releases/tag/v0.11.0](https://github.com/gophish/gophish/releases/tag/v0.11.0)
 
-Baixe e descompacte-o dentro de `/opt/gophish` e execute `/opt/gophish/gophish`\
+Baixe e descompacte dentro de `/opt/gophish` e execute `/opt/gophish/gophish`\
 Você receberá uma senha para o usuário admin na porta 3333 na saída. Portanto, acesse essa porta e use essas credenciais para alterar a senha do admin. Você pode precisar redirecionar essa porta para local:
 ```bash
 ssh -L 3333:127.0.0.1:3333 <user>@<ip>
@@ -107,7 +107,7 @@ mkdir /opt/gophish/ssl_keys
 cp "/etc/letsencrypt/live/$DOMAIN/privkey.pem" /opt/gophish/ssl_keys/key.pem
 cp "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" /opt/gophish/ssl_keys/key.crt​
 ```
-**Configuração de e-mail**
+**Configuração de Mail**
 
 Comece instalando: `apt-get install postfix`
 
@@ -119,14 +119,14 @@ Em seguida, adicione o domínio aos seguintes arquivos:
 
 **Altere também os valores das seguintes variáveis dentro de /etc/postfix/main.cf**
 
-`myhostname = <domain>`\
-`mydestination = $myhostname, <domain>, localhost.com, localhost`
+`myhostname = <domínio>`\
+`mydestination = $myhostname, <domínio>, localhost.com, localhost`
 
-Finalmente, modifique os arquivos **`/etc/hostname`** e **`/etc/mailname`** para o seu nome de domínio e **reinicie seu VPS.**
+Finalmente, modifique os arquivos **`/etc/hostname`** e **`/etc/mailname`** para o nome do seu domínio e **reinicie seu VPS.**
 
-Agora, crie um **registro DNS A** de `mail.<domain>` apontando para o **endereço IP** do VPS e um **registro DNS MX** apontando para `mail.<domain>`
+Agora, crie um **registro DNS A** de `mail.<domínio>` apontando para o **endereço IP** do VPS e um **registro DNS MX** apontando para `mail.<domínio>`
 
-Agora vamos testar o envio de um e-mail:
+Agora vamos testar o envio de um email:
 ```bash
 apt install mailutils
 echo "This is the body of the email" | mail -s "This is the subject line" test@email.com
@@ -227,7 +227,7 @@ Quanto mais antigo for um domínio, menos provável é que ele seja identificado
 
 Observe que, mesmo que você tenha que esperar uma semana, pode terminar de configurar tudo agora.
 
-### Configure o registro de DNS reverso (rDNS)
+### Configure o registro de DNS Reverso (rDNS)
 
 Defina um registro rDNS (PTR) que resolva o endereço IP do VPS para o nome do domínio.
 
@@ -257,7 +257,7 @@ Você deve **configurar um DKIM para o novo domínio**. Se você não sabe o que
 
 Este tutorial é baseado em: [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
 
-> [!NOTE]
+> [!TIP]
 > Você precisa concatenar ambos os valores B64 que a chave DKIM gera:
 >
 > ```
@@ -307,7 +307,7 @@ A página [www.mail-tester.com](https://www.mail-tester.com) pode indicar se seu
 
 ![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
 
-> [!NOTE]
+> [!TIP]
 > É recomendado usar a funcionalidade "**Enviar Email de Teste**" para testar se tudo está funcionando.\
 > Eu recomendaria **enviar os emails de teste para endereços de 10min** para evitar ser colocado na lista negra durante os testes.
 
@@ -343,7 +343,7 @@ Note que **para aumentar a credibilidade do e-mail**, é recomendável usar algu
 
 ![](<../../images/image (80).png>)
 
-> [!NOTE]
+> [!TIP]
 > O Modelo de E-mail também permite **anexar arquivos para enviar**. Se você também gostaria de roubar desafios NTLM usando alguns arquivos/documentos especialmente elaborados [leia esta página](../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md).
 
 ### Página de Destino
@@ -355,11 +355,11 @@ Note que **para aumentar a credibilidade do e-mail**, é recomendável usar algu
 
 ![](<../../images/image (826).png>)
 
-> [!NOTE]
+> [!TIP]
 > Normalmente, você precisará modificar o código HTML da página e fazer alguns testes localmente (talvez usando algum servidor Apache) **até que você goste dos resultados.** Então, escreva esse código HTML na caixa.\
 > Note que se você precisar **usar alguns recursos estáticos** para o HTML (talvez algumas páginas CSS e JS) você pode salvá-los em _**/opt/gophish/static/endpoint**_ e então acessá-los de _**/static/\<filename>**_
 
-> [!NOTE]
+> [!TIP]
 > Para a redireção, você poderia **redirecionar os usuários para a página principal legítima** da vítima, ou redirecioná-los para _/static/migration.html_, por exemplo, colocar alguma **roda giratória (**[**https://loading.io/**](https://loading.io)**) por 5 segundos e então indicar que o processo foi bem-sucedido**.
 
 ### Usuários & Grupos
@@ -377,8 +377,8 @@ Note que o **Perfil de Envio permite enviar um e-mail de teste para ver como ser
 
 ![](<../../images/image (192).png>)
 
-> [!NOTE]
-> Eu recomendaria **enviar os e-mails de teste para endereços de e-mail de 10 minutos** para evitar ser colocado na lista negra durante os testes.
+> [!TIP]
+> Eu recomendaria **enviar os e-mails de teste para endereços de 10min mails** a fim de evitar ser colocado na lista negra durante os testes.
 
 Uma vez que tudo esteja pronto, basta lançar a campanha!
 
@@ -405,7 +405,7 @@ phishing-documents.md
 
 O ataque anterior é bastante inteligente, pois você está falsificando um site real e coletando as informações fornecidas pelo usuário. Infelizmente, se o usuário não inseriu a senha correta ou se o aplicativo que você falsificou está configurado com 2FA, **essa informação não permitirá que você se passe pelo usuário enganado**.
 
-É aqui que ferramentas como [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** [**CredSniper**](https://github.com/ustayready/CredSniper) e [**muraena**](https://github.com/muraenateam/muraena) são úteis. Esta ferramenta permitirá que você gere um ataque do tipo MitM. Basicamente, os ataques funcionam da seguinte maneira:
+É aqui que ferramentas como [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** [**CredSniper**](https://github.com/ustayready/CredSniper) e [**muraena**](https://github.com/muraenateam/muraena) são úteis. Essa ferramenta permitirá que você gere um ataque do tipo MitM. Basicamente, os ataques funcionam da seguinte maneira:
 
 1. Você **falsifica o formulário de login** da página real.
 2. O usuário **envia** suas **credenciais** para sua página falsa e a ferramenta as envia para a página real, **verificando se as credenciais funcionam**.
@@ -414,7 +414,7 @@ O ataque anterior é bastante inteligente, pois você está falsificando um site
 
 ### Via VNC
 
-E se em vez de **enviar a vítima para uma página maliciosa** com a mesma aparência da original, você a enviar para uma **sessão VNC com um navegador conectado à página da web real**? Você poderá ver o que ele faz, roubar a senha, o MFA usado, os cookies...\
+E se em vez de **enviar a vítima para uma página maliciosa** com a mesma aparência da original, você a enviar para uma **sessão VNC com um navegador conectado à página real**? Você poderá ver o que ele faz, roubar a senha, o MFA usado, os cookies...\
 Você pode fazer isso com [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC)
 
 ## Detectando a detecção
@@ -422,7 +422,7 @@ Você pode fazer isso com [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC)
 Obviamente, uma das melhores maneiras de saber se você foi descoberto é **pesquisar seu domínio em listas negras**. Se ele aparecer listado, de alguma forma seu domínio foi detectado como suspeito.\
 Uma maneira fácil de verificar se seu domínio aparece em alguma lista negra é usar [https://malwareworld.com/](https://malwareworld.com)
 
-No entanto, existem outras maneiras de saber se a vítima está **ativamente procurando por atividades de phishing suspeitas na rede**, conforme explicado em:
+No entanto, existem outras maneiras de saber se a vítima está **ativamente procurando por atividades de phishing suspeitas na web**, conforme explicado em:
 
 {{#ref}}
 detecting-phising.md
@@ -433,6 +433,14 @@ Você pode **comprar um domínio com um nome muito semelhante** ao domínio da v
 ### Avaliar o phishing
 
 Use [**Phishious** ](https://github.com/Rices/Phishious) para avaliar se seu e-mail vai acabar na pasta de spam ou se será bloqueado ou bem-sucedido.
+
+## Sequestro de Área de Transferência / Pastejacking
+
+Os atacantes podem copiar silenciosamente comandos maliciosos para a área de transferência da vítima a partir de uma página da web comprometida ou com erro de digitação e, em seguida, enganar o usuário para colá-los dentro de **Win + R**, **Win + X** ou uma janela de terminal, executando código arbitrário sem qualquer download ou anexo.
+
+{{#ref}}
+clipboard-hijacking.md
+{{#endref}}
 
 ## Referências
 
