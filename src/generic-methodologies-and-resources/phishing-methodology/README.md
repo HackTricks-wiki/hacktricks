@@ -53,7 +53,7 @@ Lorsque ce concept est **appliqué aux requêtes DNS**, il est possible que le *
 
 Par exemple, une seule modification de bit dans le domaine "windows.com" peut le changer en "windnws.com".
 
-Les attaquants peuvent **profiter de cela en enregistrant plusieurs domaines de bit-flipping** qui sont similaires au domaine de la victime. Leur intention est de rediriger les utilisateurs légitimes vers leur propre infrastructure.
+Les attaquants peuvent **profiter de cela en enregistrant plusieurs domaines à bit-flipping** qui sont similaires au domaine de la victime. Leur intention est de rediriger les utilisateurs légitimes vers leur propre infrastructure.
 
 Pour plus d'informations, lisez [https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
 
@@ -124,7 +124,7 @@ Ajoutez ensuite le domaine aux fichiers suivants :
 
 Enfin, modifiez les fichiers **`/etc/hostname`** et **`/etc/mailname`** avec votre nom de domaine et **redémarrez votre VPS.**
 
-Maintenant, créez un **enregistrement DNS A** de `mail.<domain>` pointant vers l'**adresse IP** du VPS et un **enregistrement DNS MX** pointant vers `mail.<domain>`
+Maintenant, créez un **enregistrement DNS A** de `mail.<domain>` pointant vers l'**adresse IP** du VPS et un enregistrement **DNS MX** pointant vers `mail.<domain>`
 
 Maintenant, testons l'envoi d'un email :
 ```bash
@@ -257,7 +257,7 @@ Vous devez **configurer un DKIM pour le nouveau domaine**. Si vous ne savez pas 
 
 Ce tutoriel est basé sur : [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
 
-> [!NOTE]
+> [!TIP]
 > Vous devez concaténer les deux valeurs B64 que la clé DKIM génère :
 >
 > ```
@@ -307,7 +307,7 @@ La page [www.mail-tester.com](https://www.mail-tester.com) peut vous indiquer si
 
 ![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
 
-> [!NOTE]
+> [!TIP]
 > Il est recommandé d'utiliser la fonctionnalité "**Envoyer un email de test**" pour vérifier que tout fonctionne.\
 > Je vous recommande d'**envoyer les emails de test à des adresses 10min** afin d'éviter d'être mis sur liste noire lors des tests.
 
@@ -343,7 +343,7 @@ Notez que **pour augmenter la crédibilité de l'email**, il est recommandé d'u
 
 ![](<../../images/image (80).png>)
 
-> [!NOTE]
+> [!TIP]
 > Le modèle d'email permet également de **joindre des fichiers à envoyer**. Si vous souhaitez également voler des défis NTLM en utilisant des fichiers/documents spécialement conçus [lisez cette page](../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md).
 
 ### Page de destination
@@ -355,11 +355,11 @@ Notez que **pour augmenter la crédibilité de l'email**, il est recommandé d'u
 
 ![](<../../images/image (826).png>)
 
-> [!NOTE]
+> [!TIP]
 > En général, vous devrez modifier le code HTML de la page et faire quelques tests en local (peut-être en utilisant un serveur Apache) **jusqu'à ce que vous soyez satisfait des résultats.** Ensuite, écrivez ce code HTML dans la boîte.\
-> Notez que si vous avez besoin d'**utiliser des ressources statiques** pour le HTML (peut-être des pages CSS et JS), vous pouvez les enregistrer dans _**/opt/gophish/static/endpoint**_ et ensuite y accéder depuis _**/static/\<filename>**_
+> Notez que si vous devez **utiliser des ressources statiques** pour le HTML (peut-être des pages CSS et JS), vous pouvez les enregistrer dans _**/opt/gophish/static/endpoint**_ et ensuite y accéder depuis _**/static/\<filename>**_
 
-> [!NOTE]
+> [!TIP]
 > Pour la redirection, vous pourriez **rediriger les utilisateurs vers la vraie page web principale** de la victime, ou les rediriger vers _/static/migration.html_ par exemple, mettre une **roue tournante (**[**https://loading.io/**](https://loading.io)**) pendant 5 secondes et ensuite indiquer que le processus a été réussi**.
 
 ### Utilisateurs & Groupes
@@ -373,12 +373,12 @@ Notez que **pour augmenter la crédibilité de l'email**, il est recommandé d'u
 
 Enfin, créez une campagne en sélectionnant un nom, le modèle d'email, la page de destination, l'URL, le profil d'envoi et le groupe. Notez que l'URL sera le lien envoyé aux victimes.
 
-Notez que le **Profil d'envoi permet d'envoyer un email de test pour voir à quoi ressemblera le phishing final** :
+Notez que le **Profil d'envoi permet d'envoyer un email test pour voir à quoi ressemblera le phishing final** :
 
 ![](<../../images/image (192).png>)
 
-> [!NOTE]
-> Je recommanderais d'**envoyer les emails de test à des adresses de 10min mails** afin d'éviter d'être blacklisté lors des tests.
+> [!TIP]
+> Je vous recommande d'**envoyer les emails tests à des adresses de 10min mails** afin d'éviter d'être blacklisté lors des tests.
 
 Une fois que tout est prêt, lancez simplement la campagne !
 
@@ -405,10 +405,10 @@ phishing-documents.md
 
 L'attaque précédente est assez astucieuse car vous simulez un vrai site web et recueillez les informations fournies par l'utilisateur. Malheureusement, si l'utilisateur n'a pas saisi le bon mot de passe ou si l'application que vous avez simulée est configurée avec 2FA, **ces informations ne vous permettront pas d'usurper l'utilisateur trompé**.
 
-C'est là que des outils comme [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** [**CredSniper**](https://github.com/ustayready/CredSniper) et [**muraena**](https://github.com/muraenateam/muraena) sont utiles. Cet outil vous permettra de générer une attaque de type MitM. En gros, les attaques fonctionnent de la manière suivante :
+C'est là que des outils comme [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** [**CredSniper**](https://github.com/ustayready/CredSniper) et [**muraena**](https://github.com/muraenateam/muraena) sont utiles. Cet outil vous permettra de générer une attaque de type MitM. En gros, l'attaque fonctionne de la manière suivante :
 
 1. Vous **usurpez le formulaire de connexion** de la vraie page web.
-2. L'utilisateur **envoie** ses **identifiants** à votre page factice et l'outil les envoie à la vraie page web, **vérifiant si les identifiants fonctionnent**.
+2. L'utilisateur **envoie** ses **identifiants** à votre page factice et l'outil envoie ceux-ci à la vraie page web, **vérifiant si les identifiants fonctionnent**.
 3. Si le compte est configuré avec **2FA**, la page MitM le demandera et une fois que l'**utilisateur l'introduit**, l'outil l'enverra à la vraie page web.
 4. Une fois que l'utilisateur est authentifié, vous (en tant qu'attaquant) aurez **capturé les identifiants, le 2FA, le cookie et toute information** de chaque interaction pendant que l'outil effectue un MitM.
 
@@ -433,6 +433,14 @@ Vous pouvez **acheter un domaine avec un nom très similaire** à celui du domai
 ### Évaluer le phishing
 
 Utilisez [**Phishious** ](https://github.com/Rices/Phishious) pour évaluer si votre email va finir dans le dossier spam ou s'il va être bloqué ou réussi.
+
+## Détournement du presse-papiers / Pastejacking
+
+Les attaquants peuvent silencieusement copier des commandes malveillantes dans le presse-papiers de la victime à partir d'une page web compromise ou mal orthographiée, puis tromper l'utilisateur pour qu'il les colle dans **Win + R**, **Win + X** ou une fenêtre de terminal, exécutant du code arbitraire sans aucun téléchargement ou pièce jointe.
+
+{{#ref}}
+clipboard-hijacking.md
+{{#endref}}
 
 ## Références
 
