@@ -22,11 +22,11 @@
 ### Tecniche di Variazione del Nome di Dominio
 
 - **Parola chiave**: Il nome di dominio **contiene** una **parola chiave** importante del dominio originale (es., zelster.com-management.com).
-- **sottodominio con trattino**: Cambiare il **punto con un trattino** di un sottodominio (es., www-zelster.com).
+- **sottodominio con trattino**: Cambiare il **punto in un trattino** di un sottodominio (es., www-zelster.com).
 - **Nuovo TLD**: Stesso dominio utilizzando un **nuovo TLD** (es., zelster.org)
 - **Omo-glyph**: **sostituisce** una lettera nel nome di dominio con **lettere che sembrano simili** (es., zelfser.com).
 - **Trasposizione:** **scambia due lettere** all'interno del nome di dominio (es., zelsetr.com).
-- **Singolarizzazione/Pluralizzazione**: Aggiunge o rimuove “s” alla fine del nome di dominio (es., zeltsers.com).
+- **Singolarizzazione/Plurale**: Aggiunge o rimuove “s” alla fine del nome di dominio (es., zeltsers.com).
 - **Omissione**: **rimuove una** delle lettere dal nome di dominio (es., zelser.com).
 - **Ripetizione:** **ripete una** delle lettere nel nome di dominio (es., zeltsser.com).
 - **Sostituzione**: Come l'omo-glyph ma meno furtivo. Sostituisce una delle lettere nel nome di dominio, forse con una lettera vicina alla lettera originale sulla tastiera (es., zektser.com).
@@ -134,7 +134,7 @@ echo "This is the body of the email" | mail -s "This is the subject line" test@e
 **Configurazione di Gophish**
 
 Ferma l'esecuzione di gophish e configuriamolo.\
-Modifica `/opt/gophish/config.json` nel seguente modo (nota l'uso di https):
+Modifica `/opt/gophish/config.json` come segue (nota l'uso di https):
 ```bash
 {
 "admin_server": {
@@ -257,14 +257,14 @@ Devi **configurare un DKIM per il nuovo dominio**. Se non sai cos'è un record D
 
 Questo tutorial si basa su: [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
 
-> [!NOTE]
+> [!TIP]
 > Devi concatenare entrambi i valori B64 che la chiave DKIM genera:
 >
 > ```
 > v=DKIM1; h=sha256; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0wPibdqPtzYk81njjQCrChIcHzxOp8a1wjbsoNtka2X9QXCZs+iXkvw++QsWDtdYu3q0Ofnr0Yd/TmG/Y2bBGoEgeE+YTUG2aEgw8Xx42NLJq2D1pB2lRQPW4IxefROnXu5HfKSm7dyzML1gZ1U0pR5X4IZCH0wOPhIq326QjxJZm79E1nTh3xj" "Y9N/Dt3+fVnIbMupzXE216TdFuifKM6Tl6O/axNsbswMS1TH812euno8xRpsdXJzFlB9q3VbMkVWig4P538mHolGzudEBg563vv66U8D7uuzGYxYT4WS8NVm3QBMg0QKPWZaKp+bADLkOSB9J2nUpk4Aj9KB5swIDAQAB
 > ```
 
-### Testa il punteggio della tua configurazione email
+### Testa il punteggio di configurazione della tua email
 
 Puoi farlo usando [https://www.mail-tester.com/](https://www.mail-tester.com)\
 Basta accedere alla pagina e inviare un'email all'indirizzo che ti forniscono:
@@ -307,7 +307,7 @@ Puoi richiedere la rimozione del tuo dominio/IP su [https://sender.office.com/](
 
 ![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
 
-> [!NOTE]
+> [!TIP]
 > È consigliato utilizzare la funzionalità "**Invia Email di Test**" per verificare che tutto funzioni.\
 > Ti consiglio di **inviare le email di test a indirizzi 10min** per evitare di essere inseriti nella blacklist durante i test.
 
@@ -343,7 +343,7 @@ Nota che **per aumentare la credibilità dell'email**, è consigliato utilizzare
 
 ![](<../../images/image (80).png>)
 
-> [!NOTE]
+> [!TIP]
 > Il Modello di Email consente anche di **allegare file da inviare**. Se desideri anche rubare le sfide NTLM utilizzando alcuni file/documenti appositamente creati [leggi questa pagina](../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md).
 
 ### Landing Page
@@ -355,12 +355,12 @@ Nota che **per aumentare la credibilità dell'email**, è consigliato utilizzare
 
 ![](<../../images/image (826).png>)
 
-> [!NOTE]
+> [!TIP]
 > Di solito dovrai modificare il codice HTML della pagina e fare alcuni test in locale (magari utilizzando un server Apache) **fino a quando non ti piacciono i risultati.** Poi, scrivi quel codice HTML nella casella.\
 > Nota che se hai bisogno di **utilizzare alcune risorse statiche** per l'HTML (magari alcune pagine CSS e JS) puoi salvarle in _**/opt/gophish/static/endpoint**_ e poi accedervi da _**/static/\<filename>**_
 
-> [!NOTE]
-> Per il reindirizzamento potresti **reindirizzare gli utenti alla legittima pagina principale** della vittima, o reindirizzarli a _/static/migration.html_ per esempio, mettere qualche **ruota che gira (**[**https://loading.io/**](https://loading.io)**) per 5 secondi e poi indicare che il processo è stato completato con successo**.
+> [!TIP]
+> Per il reindirizzamento potresti **reindirizzare gli utenti alla legittima pagina web principale** della vittima, o reindirizzarli a _/static/migration.html_ per esempio, mettere qualche **ruota che gira (**[**https://loading.io/**](https://loading.io)**) per 5 secondi e poi indicare che il processo è stato completato con successo**.
 
 ### Utenti e Gruppi
 
@@ -377,8 +377,8 @@ Nota che il **Profilo di Invio consente di inviare un'email di prova per vedere 
 
 ![](<../../images/image (192).png>)
 
-> [!NOTE]
-> Ti consiglio di **inviare le email di prova a indirizzi di 10min** per evitare di essere messo nella blacklist durante i test.
+> [!TIP]
+> Ti consiglio di **inviare le email di prova a indirizzi di 10min mail** per evitare di essere inserito in blacklist durante i test.
 
 Una volta che tutto è pronto, lancia semplicemente la campagna!
 
@@ -392,7 +392,7 @@ clone-a-website.md
 
 ## Documenti e File Backdoor
 
-In alcune valutazioni di phishing (principalmente per Red Teams) vorrai anche **inviare file contenenti qualche tipo di backdoor** (magari un C2 o magari solo qualcosa che attiverà un'autenticazione).\
+In alcune valutazioni di phishing (principalmente per Red Teams) vorrai anche **inviare file contenenti qualche tipo di backdoor** (magari un C2 o semplicemente qualcosa che attivi un'autenticazione).\
 Controlla la seguente pagina per alcuni esempi:
 
 {{#ref}}
@@ -414,7 +414,7 @@ Qui è dove strumenti come [**evilginx2**](https://github.com/kgretzky/evilginx2
 
 ### Via VNC
 
-E se invece di **inviare la vittima a una pagina malevola** con lo stesso aspetto di quella originale, lo invii a una **sessione VNC con un browser connesso alla vera pagina web**? Sarai in grado di vedere cosa fa, rubare la password, il MFA utilizzato, i cookie...\
+E se invece di **inviare la vittima a una pagina malevola** con lo stesso aspetto di quella originale, la invii a una **sessione VNC con un browser connesso alla vera pagina web**? Sarai in grado di vedere cosa fa, rubare la password, il MFA utilizzato, i cookie...\
 Puoi fare questo con [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC)
 
 ## Rilevare la rilevazione
@@ -428,11 +428,19 @@ Tuttavia, ci sono altri modi per sapere se la vittima è **attivamente alla rice
 detecting-phising.md
 {{#endref}}
 
-Puoi **comprare un dominio con un nome molto simile** a quello del dominio della vittima **e/o generare un certificato** per un **sottodominio** di un dominio controllato da te **contenente** la **parola chiave** del dominio della vittima. Se la **vittima** esegue qualche tipo di **interazione DNS o HTTP** con essi, saprai che **sta cercando attivamente** domini sospetti e dovrai essere molto furtivo.
+Puoi **comprare un dominio con un nome molto simile** a quello del dominio della vittima **e/o generare un certificato** per un **sottodominio** di un dominio controllato da te **contenente** la **parola chiave** del dominio della vittima. Se la **vittima** esegue qualche tipo di **interazione DNS o HTTP** con essi, saprai che **sta attivamente cercando** domini sospetti e dovrai essere molto furtivo.
 
 ### Valutare il phishing
 
 Usa [**Phishious** ](https://github.com/Rices/Phishious) per valutare se la tua email finirà nella cartella spam o se verrà bloccata o avrà successo.
+
+## Hijacking degli Appunti / Pastejacking
+
+Gli attaccanti possono silenziosamente copiare comandi malevoli negli appunti della vittima da una pagina web compromessa o typosquatted e poi ingannare l'utente a incollarli all'interno di **Win + R**, **Win + X** o una finestra del terminale, eseguendo codice arbitrario senza alcun download o allegato.
+
+{{#ref}}
+clipboard-hijacking.md
+{{#endref}}
 
 ## Riferimenti
 
