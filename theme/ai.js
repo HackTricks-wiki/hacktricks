@@ -4,9 +4,10 @@
 
 
 (() => {
-  const KEY  = 'htSummerDiscountDismissed';
-  const IMG  = '/images/discount.jpeg';
-  const TXT  = 'HT Summer Discount, Last Days!';
+  const KEY = 'htSummerDiscountsDismissed';
+  const IMG = '/images/discount.jpeg';
+  const TXT = 'Click here for HT Summer Discounts, Last Days!';
+  const URL = 'https://training.hacktricks.xyz';
 
   /* Stop if user already dismissed */
   if (localStorage.getItem(KEY) === 'true') return;
@@ -32,13 +33,37 @@
     display: flex; flex-direction: column; align-items: stretch;
   `);
 
-  /* --- Title bar (separate, over image) --- */
+  /* --- Title bar (link + close) --- */
   const titleBar = $('div', `
-    padding: 1rem; text-align: center;
+    position: relative;
+    padding: 1rem 2.5rem 1rem 1rem; /* room for the close button */
+    text-align: center;
     background: #222; color: #fff;
     font-size: 1.3rem; font-weight: 700;
   `);
-  titleBar.textContent = TXT;
+
+  const link = $('a', `
+    color: inherit;
+    text-decoration: none;
+    display: block;
+  `);
+  link.href = URL;
+  link.target = '_blank';
+  link.rel = 'noopener noreferrer';
+  link.textContent = TXT;
+  titleBar.appendChild(link);
+
+  /* Close "X" (no persistence) */
+  const closeBtn = $('button', `
+    position: absolute; top: .25rem; right: .5rem;
+    background: transparent; border: none;
+    color: #fff; font-size: 1.4rem; line-height: 1;
+    cursor: pointer; padding: 0; margin: 0;
+  `);
+  closeBtn.setAttribute('aria-label', 'Close');
+  closeBtn.textContent = '✕';
+  closeBtn.onclick = () => overlay.remove();
+  titleBar.appendChild(closeBtn);
 
   /* --- Image --- */
   const img = $('img');
@@ -62,11 +87,12 @@
   modal.append(titleBar, img, label);
   overlay.appendChild(modal);
 
-  (document.readyState === 'loading'
-    ? () => document.addEventListener('DOMContentLoaded', () => document.body.appendChild(overlay), { once: true })
-    : () => document.body.appendChild(overlay))();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => document.body.appendChild(overlay), { once: true });
+  } else {
+    document.body.appendChild(overlay);
+  }
 })();
-
 
 
 
