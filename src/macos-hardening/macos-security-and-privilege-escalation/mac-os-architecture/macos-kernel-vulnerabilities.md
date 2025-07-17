@@ -1,4 +1,4 @@
-# Luki w jądrze macOS
+# luki w jądrze macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -14,18 +14,18 @@
 Apple załatał dwa błędy związane z uszkodzeniem pamięci, które były aktywnie wykorzystywane przeciwko iOS i macOS w marcu 2024 (naprawione w macOS 14.4/13.6.5/12.7.4).
 
 * **CVE-2024-23225 – Jądro**
-• Zapis poza granicami w subsystemie pamięci wirtualnej XNU pozwala procesowi bez uprawnień na uzyskanie dowolnego odczytu/zapisu w przestrzeni adresowej jądra, omijając PAC/KTRR.
+• Zapis poza granicami w subsystemie pamięci wirtualnej XNU pozwala na nieuprzywilejowanemu procesowi uzyskanie dowolnego odczytu/zapisu w przestrzeni adresowej jądra, omijając PAC/KTRR.
 • Wywoływane z przestrzeni użytkownika za pomocą spreparowanej wiadomości XPC, która przepełnia bufor w `libxpc`, a następnie przechodzi do jądra, gdy wiadomość jest analizowana.
 * **CVE-2024-23296 – RTKit**
 • Uszkodzenie pamięci w Apple Silicon RTKit (procesor współpracujący w czasie rzeczywistym).
-• Obserwowane łańcuchy eksploatacji wykorzystywały CVE-2024-23225 do R/W jądra i CVE-2024-23296 do ucieczki z piaskownicy bezpiecznego współprocesora i wyłączenia PAC.
+• Obserwowane łańcuchy eksploatacji wykorzystywały CVE-2024-23225 do R/W jądra i CVE-2024-23296 do ucieczki z piaskownicy bezpiecznego procesora współpracującego i wyłączenia PAC.
 
 Wykrywanie poziomu łaty:
 ```bash
 sw_vers                 # ProductVersion 14.4 or later is patched
 authenticate sudo sysctl kern.osversion  # 23E214 or later for Sonoma
 ```
-Jeśli aktualizacja nie jest możliwa, złagodź ryzyko, wyłączając podatne usługi:
+Jeśli aktualizacja nie jest możliwa, złagodź problem, wyłączając podatne usługi:
 ```bash
 launchctl disable system/com.apple.analyticsd
 launchctl disable system/com.apple.rtcreportingd
@@ -34,10 +34,10 @@ launchctl disable system/com.apple.rtcreportingd
 
 ## 2023: MIG Type-Confusion – CVE-2023-41075
 
-`mach_msg()` wysyłane do nieuprzywilejowanego klienta IOKit prowadzą do **pomieszania typów** w kodzie klejącym generowanym przez MIG. Gdy wiadomość odpowiedzi jest reinterpretowana z większym zewnętrznym deskryptorem niż pierwotnie przydzielony, atakujący może osiągnąć kontrolowane **OOB write** w strefach sterty jądra i ostatecznie
+`mach_msg()` żądania wysyłane do nieuprzywilejowanego klienta IOKit prowadzą do **pomieszania typów** w generowanym przez MIG kodzie klejącym. Gdy wiadomość odpowiedzi jest reinterpretowana z większym zewnętrznym deskryptorem niż pierwotnie przydzielony, atakujący może osiągnąć kontrolowane **OOB write** w strefach sterty jądra i ostatecznie
 eskalować do `root`.
 
-Zarys prymitywy (Sonoma 14.0-14.1, Ventura 13.5-13.6):
+Primitive outline (Sonoma 14.0-14.1, Ventura 13.5-13.6):
 ```c
 // userspace stub
 typed_port_t p = get_user_client();
