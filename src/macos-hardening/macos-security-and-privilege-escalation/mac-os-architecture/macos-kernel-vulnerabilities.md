@@ -15,7 +15,7 @@ Apple ha corretto due bug di corruzione della memoria che sono stati attivamente
 
 * **CVE-2024-23225 – Kernel**
 • Scrittura fuori dai limiti nel sottosistema di memoria virtuale XNU consente a un processo non privilegiato di ottenere lettura/scrittura arbitraria nello spazio degli indirizzi del kernel, eludendo PAC/KTRR.
-• Attivato dallo spazio utente tramite un messaggio XPC creato ad hoc che fa traboccare un buffer in `libxpc`, quindi si sposta nel kernel quando il messaggio viene analizzato.
+• Attivato dallo spazio utente tramite un messaggio XPC creato ad arte che fa traboccare un buffer in `libxpc`, quindi si sposta nel kernel quando il messaggio viene analizzato.
 * **CVE-2024-23296 – RTKit**
 • Corruzione della memoria nel RTKit di Apple Silicon (co-processore in tempo reale).
 • Le catene di sfruttamento osservate utilizzavano CVE-2024-23225 per R/W del kernel e CVE-2024-23296 per sfuggire alla sandbox del co-processore sicuro e disabilitare PAC.
@@ -86,7 +86,7 @@ spctl --status                    # Confirms Gatekeeper state
 
 * **Luftrauser** – Fuzzer di messaggi Mach che prende di mira i sottosistemi MIG (`github.com/preshing/luftrauser`).
 * **oob-executor** – Generatore di primitive out-of-bounds IPC utilizzato nella ricerca CVE-2024-23225.
-* **kmutil inspect** – Utilità Apple integrata (macOS 11+) per analizzare staticamente i kext prima del caricamento: `kmutil inspect -b io.kext.bundleID`.
+* **kmutil inspect** – Utility Apple integrata (macOS 11+) per analizzare staticamente i kext prima del caricamento: `kmutil inspect -b io.kext.bundleID`.
 
 
 
