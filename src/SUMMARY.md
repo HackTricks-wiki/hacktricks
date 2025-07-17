@@ -268,6 +268,7 @@
   - [DSRM Credentials](windows-hardening/active-directory-methodology/dsrm-credentials.md)
   - [External Forest Domain - OneWay (Inbound) or bidirectional](windows-hardening/active-directory-methodology/external-forest-domain-oneway-inbound.md)
   - [External Forest Domain - One-Way (Outbound)](windows-hardening/active-directory-methodology/external-forest-domain-one-way-outbound.md)
+  - [Golden Dmsa Gmsa](windows-hardening/active-directory-methodology/golden-dmsa-gmsa.md)
   - [Golden Ticket](windows-hardening/active-directory-methodology/golden-ticket.md)
   - [Kerberoast](windows-hardening/active-directory-methodology/kerberoast.md)
   - [Kerberos Authentication](windows-hardening/active-directory-methodology/kerberos-authentication.md)
