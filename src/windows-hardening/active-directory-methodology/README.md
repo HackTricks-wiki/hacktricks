@@ -430,6 +430,12 @@ These are like golden tickets forged in a way that **bypasses common golden tick
 diamond-ticket.md
 {{#endref}}
 
+### Golden gMSA/dMSA (Golden dMSA)
+
+{{#ref}}
+golden-dmsa.md
+{{#endref}}
+
 ### **Certificates Account Persistence**
 
 **Having certificates of an account or being able to request them** is a very good way to be able to persist in the users account (even if he changes the password):
