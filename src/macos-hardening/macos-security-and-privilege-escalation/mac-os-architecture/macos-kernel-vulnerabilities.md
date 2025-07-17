@@ -57,8 +57,8 @@ Explorações públicas armam o bug da seguinte forma:
 
 Pesquisadores de segurança da Microsoft mostraram que o daemon de alto privilégio `storagekitd` pode ser forçado a carregar uma **extensão de kernel não assinada** e, assim, desativar completamente a **Proteção de Integridade do Sistema (SIP)** em macOS totalmente atualizado (anterior a 15.2). O fluxo de ataque é:
 
-1. Abusar do direito privado `com.apple.storagekitd.kernel-management` para gerar um helper sob controle do atacante.
-2. O helper chama `IOService::AddPersonalitiesFromKernelModule` com um dicionário de informações elaborado apontando para um pacote de kext malicioso.
+1. Abusar da concessão privada `com.apple.storagekitd.kernel-management` para gerar um auxiliar sob controle do atacante.
+2. O auxiliar chama `IOService::AddPersonalitiesFromKernelModule` com um dicionário de informações elaborado apontando para um pacote de kext malicioso.
 3. Como as verificações de confiança do SIP são realizadas *após* o kext ser preparado pelo `storagekitd`, o código é executado em ring-0 antes da validação e o SIP pode ser desativado com `csr_set_allow_all(1)`.
 
 Dicas de detecção:
