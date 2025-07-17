@@ -14,8 +14,8 @@
 Apple, Mart 2024'te iOS ve macOS'a karşı aktif olarak istismar edilen iki bellek bozulma hatasını yamanladı (macOS 14.4/13.6.5/12.7.4'te düzeltildi).
 
 * **CVE-2024-23225 – Kernel**
-• XNU sanal bellek alt sisteminde sınır dışı yazma, ayrıcalıksız bir işlemin çekirdek adres alanında keyfi okuma/yazma elde etmesine olanak tanır ve PAC/KTRR'yi atlatır.
-• Mesaj ayrıştırıldığında `libxpc` içindeki bir tamponu aşan bir XPC mesajı aracılığıyla kullanıcı alanından tetiklenir ve ardından çekirdeğe geçiş yapar.
+• XNU sanal bellek alt sisteminde sınır dışı yazma, ayrıcalıksız bir işlemin çekirdek adres alanında keyfi okuma/yazma elde etmesine olanak tanır, PAC/KTRR'yi atlar.
+• Mesaj ayrıştırıldığında `libxpc` içindeki bir tamponu taşan bir XPC mesajı aracılığıyla kullanıcı alanından tetiklenir ve ardından çekirdeğe geçiş yapar.
 * **CVE-2024-23296 – RTKit**
 • Apple Silicon RTKit (gerçek zamanlı yardımcı işlemci) içindeki bellek bozulması.
 • Gözlemlenen istismar zincirleri, çekirdek R/W için CVE-2024-23225 ve güvenli yardımcı işlemci kumandasından çıkmak ve PAC'yi devre dışı bırakmak için CVE-2024-23296 kullanmıştır.
@@ -34,7 +34,7 @@ launchctl disable system/com.apple.rtcreportingd
 
 ## 2023: MIG Tür Karışıklığı – CVE-2023-41075
 
-`mach_msg()` istekleri, ayrıcalıksız bir IOKit kullanıcı istemcisine gönderildiğinde, MIG tarafından üretilen yapıştırıcı kodda bir **tip karışıklığına** yol açar. Yanıt mesajı, başlangıçta tahsis edilenden daha büyük bir dıştan tanımlayıcı ile yeniden yorumlandığında, bir saldırgan kontrol edilen bir **OOB yazma** işlemi gerçekleştirebilir ve nihayetinde `root` yetkisine yükselebilir.
+`mach_msg()` istekleri, ayrıcalıksız bir IOKit kullanıcı istemcisine gönderildiğinde, MIG tarafından üretilen yapıştırıcı kodda bir **tür karışıklığına** yol açar. Yanıt mesajı, başlangıçta tahsis edilenden daha büyük bir dıştan tanımlayıcı ile yeniden yorumlandığında, bir saldırgan kontrol edilen bir **OOB yazma** işlemi gerçekleştirebilir ve nihayetinde `root` yetkisine yükselebilir.
 
 Temel taslak (Sonoma 14.0-14.1, Ventura 13.5-13.6):
 ```c
@@ -55,10 +55,10 @@ Public exploits, hatayı silahlandırarak:
 
 ## 2024-2025: Üçüncü Taraf Kext'ler Üzerinden SIP Bypass – CVE-2024-44243 (aka “Sigma”)
 
-Microsoft'tan güvenlik araştırmacıları, yüksek ayrıcalıklı daemon `storagekitd`'nin **imzasız bir çekirdek uzantısını** yüklemeye zorlanabileceğini ve böylece tamamen yamanmış macOS'ta (**15.2'den önce**) **Sistem Bütünlüğü Koruması (SIP)**'nı tamamen devre dışı bırakabileceğini gösterdi. Saldırı akışı:
+Microsoft'tan güvenlik araştırmacıları, yüksek ayrıcalıklı daemon `storagekitd`'nin **imzasız bir çekirdek uzantısını** yüklemeye zorlanabileceğini ve böylece tamamen yamanmış macOS'ta (**15.2'den önce**) **Sistem Bütünlüğü Koruması (SIP)**'nı tamamen devre dışı bırakabileceğini gösterdi. Saldırı akışı şudur:
 
-1. Saldırgan kontrolündeki bir yardımcıyı başlatmak için özel yetki `com.apple.storagekitd.kernel-management`'i kötüye kullanmak.
-2. Yardımcı, kötü niyetli bir kext paketi işaret eden hazırlanmış bir bilgi sözlüğü ile `IOService::AddPersonalitiesFromKernelModule`'u çağırır.
+1. Saldırgan kontrolünde bir yardımcı oluşturmak için özel yetki `com.apple.storagekitd.kernel-management`'i kötüye kullanmak.
+2. Yardımcı, kötü niyetli bir kext paketine işaret eden hazırlanmış bir bilgi sözlüğü ile `IOService::AddPersonalitiesFromKernelModule`'u çağırır.
 3. SIP güven kontrolü, `storagekitd` tarafından kext sahneye konduktan *sonra* gerçekleştirildiğinden, kod ring-0'da doğrulama öncesinde çalışır ve SIP `csr_set_allow_all(1)` ile kapatılabilir.
 
 Tespit ipuçları:
@@ -84,8 +84,8 @@ spctl --status                    # Confirms Gatekeeper state
 ## Fuzzing & Research Tools
 
 * **Luftrauser** – Mach mesaj fuzzer'ı, MIG alt sistemlerini hedef alır (`github.com/preshing/luftrauser`).
-* **oob-executor** – CVE-2024-23225 araştırmasında kullanılan IPC out-of-bounds ilke üreticisi.
-* **kmutil inspect** – Yüklemeden önce kext'leri statik olarak analiz etmek için yerleşik Apple aracı (macOS 11+): `kmutil inspect -b io.kext.bundleID`.
+* **oob-executor** – CVE-2024-23225 araştırmasında kullanılan IPC out-of-bounds primitive üreticisi.
+* **kmutil inspect** – Yüklemeden önce kext'leri statik olarak analiz etmek için kullanılan yerleşik Apple aracı (macOS 11+): `kmutil inspect -b io.kext.bundleID`.
 
 
 
