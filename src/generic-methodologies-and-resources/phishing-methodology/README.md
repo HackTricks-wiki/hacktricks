@@ -458,6 +458,14 @@ You can **buy a domain with a very similar name** to the victims domain **and/or
 
 Use [**Phishious** ](https://github.com/Rices/Phishious)to evaluate if your email is going to end in the spam folder or if it's going to be blocked or successful.
 
+## Clipboard Hijacking / Pastejacking
+
+Attackers can silently copy malicious commands into the victim’s clipboard from a compromised or typosquatted web page and then trick the user to paste them inside **Win + R**, **Win + X** or a terminal window, executing arbitrary code without any download or attachment.
+
+{{#ref}}
+clipboard-hijacking.md
+{{#endref}}
+
 ## References
 
 - [https://zeltser.com/domain-name-variations-in-phishing/](https://zeltser.com/domain-name-variations-in-phishing/)
