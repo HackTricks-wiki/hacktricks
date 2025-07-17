@@ -17,7 +17,7 @@ Apple het twee geheue-korrupsie foute reggestel wat aktief teen iOS en macOS in 
 • Uit-die-grense skrywe in die XNU virtuele-geheue subsysteem laat 'n onprivilegieerde proses toe om arbitrêre lees/skrywe in die kern adresruimte te verkry, wat PAC/KTRR omseil.
 • Geaktiveer vanuit gebruikersruimte via 'n vervaardigde XPC boodskap wat 'n buffer in `libxpc` oorloop, en dan in die kern draai wanneer die boodskap geparseer word.
 * **CVE-2024-23296 – RTKit**
-• Geheue korrupsie in die Apple Silicon RTKit (regte-tyd co-prosessor).
+• Geheue korrupsie in die Apple Silicon RTKit (regte tyd co-prosessor).
 • Uitbuitingskettings waargeneem het CVE-2024-23225 gebruik vir kern R/W en CVE-2024-23296 om die veilige co-prosessor sandbox te ontsnap en PAC te deaktiveer.
 
 Patch vlak opsporing:
@@ -25,16 +25,16 @@ Patch vlak opsporing:
 sw_vers                 # ProductVersion 14.4 or later is patched
 authenticate sudo sysctl kern.osversion  # 23E214 or later for Sonoma
 ```
-As die opgradering nie moontlik is nie, verminder risiko deur kwesbare dienste te deaktiveer:
+As opgradering nie moontlik is nie, versag deur kwesbare dienste te deaktiveer:
 ```bash
 launchctl disable system/com.apple.analyticsd
 launchctl disable system/com.apple.rtcreportingd
 ```
 ---
 
-## 2023: MIG Tipe-Bemesting – CVE-2023-41075
+## 2023: MIG Tipe-Verwarring – CVE-2023-41075
 
-`mach_msg()` versoeke wat na 'n onprivilegieerde IOKit gebruiker kliënt gestuur word, lei tot 'n **tipe bemesting** in die MIG gegenereerde gomkode. Wanneer die antwoordboodskap herinterpreteer word met 'n groter buite-lijn beskrywer as wat oorspronklik toegeken is, kan 'n aanvaller 'n beheerde **OOB skrywe** in kern hoop sone bereik en uiteindelik na `root` opgradeer.
+`mach_msg()` versoeke wat na 'n onprivilegieerde IOKit gebruiker kliënt gestuur word, lei tot 'n **tipe verwarring** in die MIG gegenereerde gomkode. Wanneer die antwoordboodskap herinterpreteer word met 'n groter buite-lijn beskrywer as wat oorspronklik toegeken is, kan 'n aanvaller 'n beheerde **OOB skrywe** in kern heap sone bereik en uiteindelik tot `root` opgradeer.
 
 Primitive oorsig (Sonoma 14.0-14.1, Ventura 13.5-13.6):
 ```c
@@ -55,9 +55,9 @@ Public exploits wapen die fout deur:
 
 ## 2024-2025: SIP Bypass deur Derdeparty Kexts – CVE-2024-44243 (ook bekend as “Sigma”)
 
-Sekuriteitsnavorsers van Microsoft het getoon dat die hoë-privilege daemon `storagekitd` gedwing kan word om 'n **ongetekende kernuitbreiding** te laai en dus **Sistem Integriteit Beskerming (SIP)** heeltemal te deaktiveer op ten volle gepatchte macOS (voor 15.2). Die aanvalstroom is:
+Sekuriteitsnavorsers van Microsoft het getoon dat die hoog-geprivilegieerde daemon `storagekitd` gedwing kan word om 'n **ongetekende kernuitbreiding** te laai en sodoende **Sisteem Integriteit Beskerming (SIP)** heeltemal te deaktiveer op ten volle gepatchte macOS (voor 15.2). Die aanvalstroom is:
 
-1. Misbruik die private regte `com.apple.storagekitd.kernel-management` om 'n helper onder aanvallerbeheer te genereer.
+1. Misbruik die private regte `com.apple.storagekitd.kernel-management` om 'n helper onder aanvallerbeheer te laat ontstaan.
 2. Die helper roep `IOService::AddPersonalitiesFromKernelModule` aan met 'n vervaardigde inligtingswoordeboek wat na 'n kwaadwillige kext-bundel wys.
 3. Omdat SIP vertrouenskontroles *na* die kext deur `storagekitd` gestoor is, voer kode in ring-0 uit voordat validasie plaasvind en kan SIP afgeskakel word met `csr_set_allow_all(1)`.
 
