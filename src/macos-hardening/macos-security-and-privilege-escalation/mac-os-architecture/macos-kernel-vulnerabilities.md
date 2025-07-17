@@ -11,7 +11,7 @@
 
 ## 2024: U divljini Kernel 0-dana (CVE-2024-23225 & CVE-2024-23296)
 
-Apple je zakrpio dve greške u korupciji memorije koje su aktivno korišćene protiv iOS-a i macOS-a u martu 2024. (ispravljeno u macOS 14.4/13.6.5/12.7.4).
+Apple je zakrpio dve greške u korupciji memorije koje su aktivno korišćene protiv iOS-a i macOS-a u martu 2024 (ispravljeno u macOS 14.4/13.6.5/12.7.4).
 
 * **CVE-2024-23225 – Kernel**
 • Pisanje van granica u XNU virtuelnom memorijskom podsistemu omogućava neprivilegovanom procesu da dobije proizvoljno čitanje/pisanje u adresnom prostoru kernela, zaobilazeći PAC/KTRR.
@@ -67,7 +67,7 @@ Detection tips:
 kmutil showloaded | grep -v com.apple   # list non-Apple kexts
 log stream --style syslog --predicate 'senderImagePath contains "storagekitd"'   # watch for suspicious child procs
 ```
-Odmah rešenje je ažuriranje na macOS Sequoia 15.2 ili noviji.
+Odmah rešenje je ažurirati na macOS Sequoia 15.2 ili noviji.
 
 ---
 
