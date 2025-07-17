@@ -4,14 +4,14 @@
 
 ## [Pwning OTA](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/)
 
-[**在本报告中**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) 解释了几个漏洞，这些漏洞允许通过软件更新程序破坏内核。\
+[**在本报告中**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) 解释了几个漏洞，这些漏洞允许通过软件更新程序来破坏内核。\
 [**PoC**](https://github.com/jhftss/POC/tree/main/CVE-2022-46722)。
 
 ---
 
 ## 2024: 在野外的内核0天漏洞 (CVE-2024-23225 & CVE-2024-23296)
 
-苹果在2024年3月修复了两个内存损坏漏洞，这些漏洞在iOS和macOS中被积极利用（在macOS 14.4/13.6.5/12.7.4中修复）。
+苹果在2024年3月修复了两个在iOS和macOS上被积极利用的内存损坏漏洞（在macOS 14.4/13.6.5/12.7.4中修复）。
 
 * **CVE-2024-23225 – 内核**
 • XNU虚拟内存子系统中的越界写入允许一个无特权进程在内核地址空间中获得任意的读/写权限，绕过PAC/KTRR。
@@ -34,7 +34,7 @@ launchctl disable system/com.apple.rtcreportingd
 
 ## 2023: MIG 类型混淆 – CVE-2023-41075
 
-`mach_msg()` 请求发送到一个没有特权的 IOKit 用户客户端，导致 MIG 生成的粘合代码中的 **类型混淆**。当回复消息被重新解释为一个比最初分配的更大的离线描述符时，攻击者可以实现对内核堆区域的受控 **OOB 写入**，并最终提升到 `root`。
+`mach_msg()` 请求发送到一个没有特权的 IOKit 用户客户端，导致 MIG 生成的胶水代码中的 **类型混淆**。当回复消息被重新解释为一个比最初分配的更大的离线描述符时，攻击者可以实现对内核堆区域的受控 **OOB 写入**，并最终提升到 `root`。
 
 原始概述（Sonoma 14.0-14.1，Ventura 13.5-13.6）：
 ```c
@@ -55,7 +55,7 @@ mach_msg(&msg.header, MACH_SEND_MSG|MACH_RCV_MSG, ...);
 
 ## 2024-2025: 通过第三方 Kext 绕过 SIP – CVE-2024-44243（又名“Sigma”）
 
-来自微软的安全研究人员显示，高权限守护进程 `storagekitd` 可以被迫加载一个 **未签名的内核扩展**，从而完全禁用完全修补的 macOS 上的 **系统完整性保护 (SIP)**（在 15.2 之前）。攻击流程如下：
+来自微软的安全研究人员显示，高权限守护进程 `storagekitd` 可以被迫加载一个 **未签名的内核扩展**，从而在完全修补的 macOS（15.2 之前）上完全禁用 **系统完整性保护（SIP）**。攻击流程如下：
 
 1. 滥用私有权限 `com.apple.storagekitd.kernel-management` 在攻击者控制下生成一个助手。
 2. 助手调用 `IOService::AddPersonalitiesFromKernelModule`，并使用指向恶意 kext 包的精心制作的信息字典。
@@ -85,7 +85,7 @@ spctl --status                    # Confirms Gatekeeper state
 
 * **Luftrauser** – Mach 消息模糊测试器，针对 MIG 子系统 (`github.com/preshing/luftrauser`)。
 * **oob-executor** – 用于 CVE-2024-23225 研究的 IPC 越界原语生成器。
-* **kmutil inspect** – 内置的 Apple 工具（macOS 11+），用于在加载前静态分析 kext：`kmutil inspect -b io.kext.bundleID`。
+* **kmutil inspect** – 内置的 Apple 工具 (macOS 11+) 用于在加载前静态分析 kexts：`kmutil inspect -b io.kext.bundleID`。
 
 
 
