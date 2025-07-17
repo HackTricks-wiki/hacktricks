@@ -11,14 +11,14 @@
 
 ## 2024: In-the-wild Kernel 0-days (CVE-2024-23225 & CVE-2024-23296)
 
-Apple hat im März 2024 zwei Speicherbeschädigungsfehler gepatcht, die aktiv gegen iOS und macOS ausgenutzt wurden (behoben in macOS 14.4/13.6.5/12.7.4).
+Apple hat zwei Speicherbeschädigungsfehler gepatcht, die aktiv gegen iOS und macOS im März 2024 ausgenutzt wurden (behoben in macOS 14.4/13.6.5/12.7.4).
 
 * **CVE-2024-23225 – Kernel**
 • Out-of-bounds-Schreibvorgang im XNU-Virtual-Memory-Subsystem ermöglicht es einem unprivilegierten Prozess, beliebige Lese-/Schreibzugriffe im Kernel-Adressraum zu erhalten und PAC/KTRR zu umgehen.
-• Aus dem Userspace ausgelöst über eine manipulierte XPC-Nachricht, die einen Puffer in `libxpc` überläuft und dann in den Kernel wechselt, wenn die Nachricht analysiert wird.
+• Aus dem Userspace über eine manipulierte XPC-Nachricht ausgelöst, die einen Puffer in `libxpc` überläuft und dann in den Kernel wechselt, wenn die Nachricht analysiert wird.
 * **CVE-2024-23296 – RTKit**
 • Speicherbeschädigung im Apple Silicon RTKit (Echtzeit-Co-Prozessor).
-• Beobachtete Ausnutzungs-Ketten verwendeten CVE-2024-23225 für Kernel R/W und CVE-2024-23296, um den sicheren Co-Prozessor-Sandbox zu verlassen und PAC zu deaktivieren.
+• Ausnutzungs-Ketten, die beobachtet wurden, verwendeten CVE-2024-23225 für Kernel R/W und CVE-2024-23296, um den sicheren Co-Prozessor-Sandbox zu verlassen und PAC zu deaktivieren.
 
 Patch-Level-Erkennung:
 ```bash
@@ -70,7 +70,7 @@ Sofortige Abhilfe besteht darin, auf macOS Sequoia 15.2 oder höher zu aktualisi
 
 ---
 
-### Schnelle Aufzählung Cheatsheet
+### Schnelle Aufzählungs-Checkliste
 ```bash
 uname -a                          # Kernel build
 kmutil showloaded                 # List loaded kernel extensions
@@ -84,7 +84,7 @@ spctl --status                    # Confirms Gatekeeper state
 ## Fuzzing & Research Tools
 
 * **Luftrauser** – Mach-Nachrichten-Fuzzer, der MIG-Subsysteme anvisiert (`github.com/preshing/luftrauser`).
-* **oob-executor** – IPC-Out-of-Bounds-Primitiv-Generator, der in der CVE-2024-23225-Forschung verwendet wird.
+* **oob-executor** – IPC-Out-of-Bounds-Primitiv-Generator, der in der Forschung zu CVE-2024-23225 verwendet wird.
 * **kmutil inspect** – Eingebaute Apple-Dienstprogramm (macOS 11+), um kexts vor dem Laden statisch zu analysieren: `kmutil inspect -b io.kext.bundleID`.
 
 
