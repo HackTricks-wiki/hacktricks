@@ -4,17 +4,17 @@
 
 ## [Pwning OTA](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/)
 
-[**이 보고서**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/)에서는 소프트웨어 업데이트 프로그램을 손상시켜 커널을 침해할 수 있는 여러 취약점이 설명되어 있습니다.\
+[**이 보고서에서는**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) 소프트웨어 업데이트 프로그램을 손상시켜 커널을 침해할 수 있는 여러 취약점이 설명되어 있습니다.\
 [**PoC**](https://github.com/jhftss/POC/tree/main/CVE-2022-46722).
 
 ---
 
 ## 2024: In-the-wild Kernel 0-days (CVE-2024-23225 & CVE-2024-23296)
 
-Apple은 2024년 3월에 iOS 및 macOS에 대해 적극적으로 악용된 두 개의 메모리 손상 버그를 패치했습니다( macOS 14.4/13.6.5/12.7.4에서 수정됨).
+Apple은 2024년 3월에 iOS 및 macOS에 대해 적극적으로 악용된 두 개의 메모리 손상 버그를 패치했습니다 (macOS 14.4/13.6.5/12.7.4에서 수정됨).
 
 * **CVE-2024-23225 – Kernel**
-• XNU 가상 메모리 하위 시스템의 경계 초과 쓰기로 인해 비특권 프로세스가 PAC/KTRR를 우회하여 커널 주소 공간에서 임의의 읽기/쓰기를 수행할 수 있습니다.
+• XNU 가상 메모리 서브시스템에서의 경계 초과 쓰기로 인해 비특권 프로세스가 PAC/KTRR를 우회하여 커널 주소 공간에서 임의의 읽기/쓰기를 얻을 수 있습니다.
 • `libxpc`의 버퍼를 오버플로우하는 조작된 XPC 메시지를 통해 사용자 공간에서 트리거되며, 메시지가 구문 분석될 때 커널로 전환됩니다.
 * **CVE-2024-23296 – RTKit**
 • Apple Silicon RTKit(실시간 보조 프로세서)에서의 메모리 손상.
@@ -84,8 +84,8 @@ spctl --status                    # Confirms Gatekeeper state
 ## Fuzzing & Research Tools
 
 * **Luftrauser** – Mach 메시지 퍼저로 MIG 서브시스템을 타겟으로 함 (`github.com/preshing/luftrauser`).
-* **oob-executor** – CVE-2024-23225 연구에 사용된 IPC 아웃 오브 바운드 원시 생성기.
-* **kmutil inspect** – 로딩 전에 kext를 정적으로 분석하기 위한 내장 Apple 유틸리티 (macOS 11+): `kmutil inspect -b io.kext.bundleID`.
+* **oob-executor** – CVE-2024-23225 연구에 사용되는 IPC 아웃 오브 바운드 원시 생성기.
+* **kmutil inspect** – 로딩 전에 kext를 정적으로 분석하는 내장 Apple 유틸리티 (macOS 11+): `kmutil inspect -b io.kext.bundleID`.
 
 
 
