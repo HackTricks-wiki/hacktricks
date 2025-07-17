@@ -346,6 +346,7 @@
   - [Webview Attacks](mobile-pentesting/android-app-pentesting/webview-attacks.md)
 - [iOS Pentesting Checklist](mobile-pentesting/ios-pentesting-checklist.md)
 - [iOS Pentesting](mobile-pentesting/ios-pentesting/README.md)
+  - [Air Keyboard Remote Input Injection](mobile-pentesting/ios-pentesting/air-keyboard-remote-input-injection.md)
   - [iOS App Extensions](mobile-pentesting/ios-pentesting/ios-app-extensions.md)
   - [iOS Basics](mobile-pentesting/ios-pentesting/ios-basics.md)
   - [iOS Basic Testing Operations](mobile-pentesting/ios-pentesting/basic-ios-testing-operations.md)
