@@ -58,7 +58,7 @@ Les exploits publics exploitent le bug en :
 
 Des chercheurs en sécurité de Microsoft ont montré que le démon à privilèges élevés `storagekitd` peut être contraint de charger une **extension de noyau non signée** et ainsi désactiver complètement **System Integrity Protection (SIP)** sur macOS entièrement patché (avant 15.2). Le flux d'attaque est :
 
-1. Abuser de l'attribution privée `com.apple.storagekitd.kernel-management` pour faire apparaître un helper sous le contrôle de l'attaquant.
+1. Abuser de l'attribution privée `com.apple.storagekitd.kernel-management` pour lancer un helper sous le contrôle de l'attaquant.
 2. Le helper appelle `IOService::AddPersonalitiesFromKernelModule` avec un dictionnaire d'informations conçu pointant vers un bundle de kext malveillant.
 3. Parce que les vérifications de confiance SIP sont effectuées *après* que le kext soit mis en scène par `storagekitd`, le code s'exécute en ring-0 avant validation et SIP peut être désactivé avec `csr_set_allow_all(1)`.
 
