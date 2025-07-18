@@ -11,7 +11,7 @@ Domyślnie protokół uwierzytelniania **Kerberos** jest główną metodą używ
 
 Obecność nagłówka **"NTLMSSP"** w pakietach sieciowych sygnalizuje proces uwierzytelniania NTLM.
 
-Wsparcie dla protokołów uwierzytelniania - LM, NTLMv1 i NTLMv2 - jest zapewniane przez konkretny plik DLL znajdujący się w `%windir%\Windows\System32\msv1\_0.dll`.
+Wsparcie dla protokołów uwierzytelniania - LM, NTLMv1 i NTLMv2 - jest zapewnione przez konkretny plik DLL znajdujący się w `%windir%\Windows\System32\msv1\_0.dll`.
 
 **Kluczowe punkty**:
 
@@ -54,7 +54,7 @@ Możliwe wartości:
 5. **serwer wysyła** do **kontrolera domeny** **nazwę domeny, nazwę użytkownika, wyzwanie i odpowiedź**. Jeśli **nie ma** skonfigurowanej Active Directory lub nazwa domeny jest nazwą serwera, dane uwierzytelniające są **sprawdzane lokalnie**.
 6. **kontroler domeny sprawdza, czy wszystko jest poprawne** i wysyła informacje do serwera
 
-**serwer** i **Kontroler Domeny** mogą utworzyć **Bezpieczny Kanał** za pośrednictwem serwera **Netlogon**, ponieważ Kontroler Domeny zna hasło serwera (jest ono w bazie **NTDS.DIT**).
+**serwer** i **Kontroler Domeny** mogą utworzyć **Bezpieczny Kanał** za pośrednictwem serwera **Netlogon**, ponieważ Kontroler Domeny zna hasło serwera (jest ono w bazie danych **NTDS.DIT**).
 
 ### Lokalny schemat uwierzytelniania NTLM
 
@@ -76,7 +76,7 @@ Uwierzytelnianie jest takie samo jak wspomniane **wcześniej, ale** **serwer** z
 
 ### Atak NTLMv1
 
-Obecnie coraz rzadziej spotyka się środowiska z skonfigurowaną Nieograniczoną Delegacją, ale to nie oznacza, że nie możesz **nadużyć usługi Print Spooler**.
+Obecnie coraz rzadziej spotyka się środowiska z skonfigurowaną Nieograniczoną Delegacją, ale to nie oznacza, że nie można **nadużyć usługi Print Spooler**.
 
 Możesz nadużyć niektóre dane uwierzytelniające/sesje, które już masz w AD, aby **poprosić drukarkę o uwierzytelnienie** przeciwko jakiemuś **hostowi pod twoją kontrolą**. Następnie, używając `metasploit auxiliary/server/capture/smb` lub `responder`, możesz **ustawić wyzwanie uwierzytelniające na 1122334455667788**, przechwycić próbę uwierzytelnienia, a jeśli została wykonana przy użyciu **NTLMv1**, będziesz mógł ją **złamać**.\
 Jeśli używasz `responder`, możesz spróbować **użyć flagi `--lm`**, aby spróbować **obniżyć** **uwierzytelnienie**.\
@@ -127,7 +127,7 @@ Uruchom hashcat (najlepiej w trybie rozproszonym za pomocą narzędzia takiego j
 ```bash
 ./hashcat -m 14000 -a 3 -1 charsets/DES_full.charset --hex-charset hashes.txt ?1?1?1?1?1?1?1?1
 ```
-W tym przypadku znamy hasło, które to hasło, więc oszukamy na potrzeby demonstracyjne:
+W tym przypadku znamy hasło, które to hasło, więc dla celów demonstracyjnych oszukamy:
 ```bash
 python ntlm-to-des.py --ntlm b4b9b02e6f09a9bd760f388b67351e2b
 DESKEY1: b55d6d04e67926
@@ -150,7 +150,7 @@ It seems that you haven't provided the text you want translated. Please share th
 
 586c # this is the last part
 ```
-I'm sorry, but I need the specific text you would like me to translate in order to assist you. Please provide the content you want translated.
+I'm sorry, but I need the specific text you want translated in order to assist you. Please provide the content you'd like me to translate.
 ```bash
 NTHASH=b4b9b02e6f09a9bd760f388b6700586c
 ```
@@ -177,11 +177,11 @@ Musisz użyć **narzędzia**, które **wykona** **uwierzytelnianie NTLM** przy u
 ```bash
 Invoke-Mimikatz -Command '"sekurlsa::pth /user:username /domain:domain.tld /ntlm:NTLMhash /run:powershell.exe"'
 ```
-To uruchomi proces, który będzie należał do użytkowników, którzy uruchomili mimikatz, ale wewnętrznie w LSASS zapisane poświadczenia to te w parametrach mimikatz. Następnie możesz uzyskać dostęp do zasobów sieciowych, jakbyś był tym użytkownikiem (podobnie jak sztuczka `runas /netonly`, ale nie musisz znać hasła w postaci czystego tekstu).
+To uruchomi proces, który będzie należał do użytkowników, którzy uruchomili mimikatz, ale wewnętrznie w LSASS zapisane poświadczenia to te w parametrach mimikatz. Następnie możesz uzyskać dostęp do zasobów sieciowych tak, jakbyś był tym użytkownikiem (podobnie jak sztuczka `runas /netonly`, ale nie musisz znać hasła w postaci jawnej).
 
 ### Pass-the-Hash z linuxa
 
-Możesz uzyskać wykonanie kodu na maszynach z Windows, używając Pass-the-Hash z Linuxa.\
+Możesz uzyskać wykonanie kodu na maszynach Windows, używając Pass-the-Hash z Linuxa.\
 [**Uzyskaj dostęp, aby dowiedzieć się, jak to zrobić.**](https://github.com/carlospolop/hacktricks/blob/master/windows/ntlm/broken-reference/README.md)
 
 ### Skonstruowane narzędzia Impacket dla Windows
@@ -229,7 +229,7 @@ To narzędzie zrobi to samo, co mimikatz (zmodyfikuje pamięć LSASS).
 ```
 wce.exe -s <username>:<domain>:<hash_lm>:<hash_nt>
 ```
-### Ręczne zdalne wykonywanie w systemie Windows z użyciem nazwy użytkownika i hasła
+### Ręczne zdalne wykonywanie w systemie Windows z nazwą użytkownika i hasłem
 
 {{#ref}}
 ../lateral-movement/
@@ -241,11 +241,11 @@ wce.exe -s <username>:<domain>:<hash_lm>:<hash_nt>
 
 ## Atak Internal Monologue
 
-Atak Internal Monologue to dyskretna technika ekstrakcji poświadczeń, która pozwala atakującemu na odzyskanie hashy NTLM z maszyny ofiary **bez bezpośredniego interakcji z procesem LSASS**. W przeciwieństwie do Mimikatz, który odczytuje hashe bezpośrednio z pamięci i jest często blokowany przez rozwiązania zabezpieczające na końcówkach lub Credential Guard, ten atak wykorzystuje **lokalne wywołania do pakietu uwierzytelniania NTLM (MSV1_0) za pośrednictwem interfejsu Security Support Provider (SSPI)**. Atakujący najpierw **obniża ustawienia NTLM** (np. LMCompatibilityLevel, NTLMMinClientSec, RestrictSendingNTLMTraffic), aby upewnić się, że NetNTLMv1 jest dozwolony. Następnie podszywa się pod istniejące tokeny użytkowników uzyskane z działających procesów i wywołuje lokalne uwierzytelnienie NTLM, aby wygenerować odpowiedzi NetNTLMv1 przy użyciu znanego wyzwania.
+Atak Internal Monologue to dyskretny sposób ekstrakcji poświadczeń, który pozwala atakującemu na odzyskanie hashy NTLM z maszyny ofiary **bez bezpośredniego interakcji z procesem LSASS**. W przeciwieństwie do Mimikatz, który odczytuje hashe bezpośrednio z pamięci i jest często blokowany przez rozwiązania zabezpieczające punkt końcowy lub Credential Guard, ten atak wykorzystuje **lokalne wywołania do pakietu uwierzytelniania NTLM (MSV1_0) za pośrednictwem interfejsu Security Support Provider (SSPI)**. Atakujący najpierw **obniża ustawienia NTLM** (np. LMCompatibilityLevel, NTLMMinClientSec, RestrictSendingNTLMTraffic), aby upewnić się, że NetNTLMv1 jest dozwolony. Następnie podszywa się pod istniejące tokeny użytkowników uzyskane z działających procesów i wywołuje lokalne uwierzytelnienie NTLM, aby wygenerować odpowiedzi NetNTLMv1 przy użyciu znanego wyzwania.
 
 Po przechwyceniu tych odpowiedzi NetNTLMv1, atakujący może szybko odzyskać oryginalne hashe NTLM przy użyciu **wstępnie obliczonych tabel tęczowych**, co umożliwia dalsze ataki Pass-the-Hash w celu ruchu bocznego. Kluczowe jest to, że atak Internal Monologue pozostaje dyskretny, ponieważ nie generuje ruchu sieciowego, nie wstrzykuje kodu ani nie wywołuje bezpośrednich zrzutów pamięci, co utrudnia obrońcom wykrycie w porównaniu do tradycyjnych metod, takich jak Mimikatz.
 
-Jeśli NetNTLMv1 nie jest akceptowany — z powodu wymuszonych polityk bezpieczeństwa, atakujący może nie być w stanie odzyskać odpowiedzi NetNTLMv1.
+Jeśli NetNTLMv1 nie jest akceptowany — z powodu egzekwowanych polityk bezpieczeństwa, atakujący może nie być w stanie odzyskać odpowiedzi NetNTLMv1.
 
 Aby poradzić sobie z tym przypadkiem, narzędzie Internal Monologue zostało zaktualizowane: dynamicznie pozyskuje token serwera za pomocą `AcceptSecurityContext()`, aby nadal **przechwycić odpowiedzi NetNTLMv2**, jeśli NetNTLMv1 zawiedzie. Chociaż NetNTLMv2 jest znacznie trudniejszy do złamania, nadal otwiera drogę do ataków relay lub offline brute-force w ograniczonych przypadkach.
 
@@ -253,13 +253,13 @@ PoC można znaleźć w **[https://github.com/eladshamir/Internal-Monologue](http
 
 ## NTLM Relay i Responder
 
-**Przeczytaj bardziej szczegółowy przewodnik, jak przeprowadzać te ataki tutaj:**
+**Przeczytaj bardziej szczegółowy przewodnik, jak przeprowadzić te ataki tutaj:**
 
 {{#ref}}
-../../generic-methodologies-and-resources/pentesting-network/`spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md`
+../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md
 {{#endref}}
 
-## Analiza wyzwań NTLM z przechwyconego ruchu sieciowego
+## Analiza wyzwań NTLM z przechwytywania sieciowego
 
 **Możesz użyć** [**https://github.com/mlgualtieri/NTLMRawUnHide**](https://github.com/mlgualtieri/NTLMRawUnHide)
 
@@ -267,7 +267,7 @@ PoC można znaleźć w **[https://github.com/eladshamir/Internal-Monologue](http
 
 Windows zawiera kilka środków zaradczych, które próbują zapobiec atakom *reflection*, w których uwierzytelnienie NTLM (lub Kerberos) pochodzące z hosta jest przekazywane z powrotem do **tego samego** hosta w celu uzyskania uprawnień SYSTEM.
 
-Microsoft złamał większość publicznych łańcuchów za pomocą MS08-068 (SMB→SMB), MS09-013 (HTTP→SMB), MS15-076 (DCOM→DCOM) i późniejszych poprawek, jednak **CVE-2025-33073** pokazuje, że zabezpieczenia mogą być nadal omijane poprzez nadużycie sposobu, w jaki **klient SMB obcina nazwy główne usługi (SPN)**, które zawierają *marshalled* (zserializowane) informacje o celu.
+Microsoft złamał większość publicznych łańcuchów za pomocą MS08-068 (SMB→SMB), MS09-013 (HTTP→SMB), MS15-076 (DCOM→DCOM) i późniejszych poprawek, jednak **CVE-2025-33073** pokazuje, że zabezpieczenia mogą być nadal omijane poprzez nadużycie sposobu, w jaki **klient SMB obcina nazwy głównych usług (SPN)**, które zawierają *marshalled* (zserializowane) informacje o celu.
 
 ### TL;DR błędu
 1. Atakujący rejestruje **rekord A DNS**, którego etykieta koduje marshalled SPN – np.
@@ -298,7 +298,7 @@ krbrelayx.py -t TARGET.DOMAIN.LOCAL -smb2support
 ### Łatki i łagodzenia
 * Łatka KB dla **CVE-2025-33073** dodaje sprawdzenie w `mrxsmb.sys::SmbCeCreateSrvCall`, które blokuje wszelkie połączenia SMB, których cel zawiera zserializowane informacje (`CredUnmarshalTargetInfo` ≠ `STATUS_INVALID_PARAMETER`).
 * Wymuszaj **podpisywanie SMB**, aby zapobiec refleksji nawet na niezałatanych hostach.
-* Monitoruj rekordy DNS przypominające `*<base64>...*` i blokuj wektory przymusu (PetitPotam, DFSCoerce, AuthIP...).
+* Monitoruj rekordy DNS przypominające `*<base64>...*` i blokuj wektory wymuszenia (PetitPotam, DFSCoerce, AuthIP...).
 
 ### Pomysły na wykrywanie
 * Przechwytywanie sieciowe z `NTLMSSP_NEGOTIATE_LOCAL_CALL`, gdzie adres IP klienta ≠ adres IP serwera.
@@ -306,7 +306,7 @@ krbrelayx.py -t TARGET.DOMAIN.LOCAL -smb2support
 * Logowania SYSTEM Windows Event 4624/4648 natychmiast po zdalnych zapisach SMB z tego samego hosta.
 
 ## Odniesienia
-* [Synacktiv – NTLM Reflection is Dead, Long Live NTLM Reflection!](https://www.synacktiv.com/en/publications/la-reflexion-ntlm-est-morte-vive-la-reflexion-ntlm-analyse-approfondie-de-la-cve-2025.html)
+* [NTLM Reflection is Dead, Long Live NTLM Reflection!](https://www.synacktiv.com/en/publications/la-reflexion-ntlm-est-morte-vive-la-reflexion-ntlm-analyse-approfondie-de-la-cve-2025.html)
 * [MSRC – CVE-2025-33073](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-33073)
 
 {{#include ../../banners/hacktricks-training.md}}
