@@ -2,7 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-
 ## Informações Básicas
 
 Em ambientes onde **Windows XP e Server 2003** estão em operação, hashes LM (Lan Manager) são utilizados, embora seja amplamente reconhecido que estes podem ser facilmente comprometidos. Um hash LM específico, `AAD3B435B51404EEAAD3B435B51404EE`, indica um cenário onde o LM não é empregado, representando o hash para uma string vazia.
@@ -72,17 +71,17 @@ O **hash NT (16bytes)** é dividido em **3 partes de 7bytes cada** (7B + 7B + (2
 - As 3 partes podem ser **atacadas separadamente** para encontrar o hash NT
 - **DES é quebrável**
 - A 3ª chave é composta sempre por **5 zeros**.
-- Dado o **mesmo desafio**, a **resposta** será a **mesma**. Assim, você pode dar como **desafio** à vítima a string "**1122334455667788**" e atacar a resposta usando **tabelas rainbow pré-computadas**.
+- Dado o **mesmo desafio**, a **resposta** será **a mesma**. Assim, você pode dar como **desafio** à vítima a string "**1122334455667788**" e atacar a resposta usando **tabelas rainbow pré-computadas**.
 
 ### Ataque NTLMv1
 
-Atualmente, está se tornando menos comum encontrar ambientes com Delegação Não Restrita configurada, mas isso não significa que você não possa **abusar de um serviço de Print Spooler** configurado.
+Atualmente, está se tornando menos comum encontrar ambientes com Delegação Não Restrita configurada, mas isso não significa que você não pode **abusar de um serviço de Print Spooler** configurado.
 
-Você poderia abusar de algumas credenciais/sessões que já possui no AD para **pedir à impressora que se autentique** contra algum **host sob seu controle**. Então, usando `metasploit auxiliary/server/capture/smb` ou `responder`, você pode **definir o desafio de autenticação como 1122334455667788**, capturar a tentativa de autenticação e, se foi feita usando **NTLMv1**, você poderá **quebrá-la**.\
+Você poderia abusar de algumas credenciais/sessões que já possui no AD para **pedir à impressora que se autentique** contra algum **host sob seu controle**. Então, usando `metasploit auxiliary/server/capture/smb` ou `responder`, você pode **definir o desafio de autenticação como 1122334455667788**, capturar a tentativa de autenticação e, se foi feito usando **NTLMv1**, você poderá **quebrá-lo**.\
 Se você estiver usando `responder`, pode tentar **usar a flag `--lm`** para tentar **rebaixar** a **autenticação**.\
 _Observe que para esta técnica a autenticação deve ser realizada usando NTLMv1 (NTLMv2 não é válido)._
 
-Lembre-se de que a impressora usará a conta do computador durante a autenticação, e contas de computador usam **senhas longas e aleatórias** que você **provavelmente não conseguirá quebrar** usando dicionários comuns. Mas a autenticação **NTLMv1** **usa DES** ([mais informações aqui](#ntlmv1-challenge)), então usando alguns serviços especialmente dedicados a quebrar DES, você conseguirá quebrá-la (você poderia usar [https://crack.sh/](https://crack.sh) ou [https://ntlmv1.com/](https://ntlmv1.com) por exemplo).
+Lembre-se de que a impressora usará a conta do computador durante a autenticação, e contas de computador usam **senhas longas e aleatórias** que você **provavelmente não conseguirá quebrar** usando dicionários comuns. Mas a autenticação **NTLMv1** **usa DES** ([mais informações aqui](#ntlmv1-challenge)), então usando alguns serviços especialmente dedicados a quebrar DES, você conseguirá quebrá-lo (você poderia usar [https://crack.sh/](https://crack.sh) ou [https://ntlmv1.com/](https://ntlmv1.com) por exemplo).
 
 ### Ataque NTLMv1 com hashcat
 
@@ -150,7 +149,7 @@ Desculpe, mas não há texto fornecido para traduzir. Por favor, forneça o cont
 
 586c # this is the last part
 ```
-I'm sorry, but I need the specific text you want me to translate in order to assist you. Please provide the content you'd like translated.
+I'm sorry, but I need the specific text you want translated in order to assist you. Please provide the content you'd like me to translate.
 ```bash
 NTHASH=b4b9b02e6f09a9bd760f388b6700586c
 ```
@@ -166,7 +165,7 @@ Se você tiver um **pcap que capturou um processo de autenticação bem-sucedido
 
 ## Pass-the-Hash
 
-**Uma vez que você tenha o hash da vítima**, pode usá-lo para **impersoná-la**.\
+**Uma vez que você tenha o hash da vítima**, você pode usá-lo para **impersonar**.\
 Você precisa usar uma **ferramenta** que **realize** a **autenticação NTLM usando** esse **hash**, **ou** você pode criar um novo **sessionlogon** e **injetar** esse **hash** dentro do **LSASS**, para que quando qualquer **autenticação NTLM for realizada**, esse **hash será usado.** A última opção é o que o mimikatz faz.
 
 **Por favor, lembre-se de que você pode realizar ataques Pass-the-Hash também usando contas de computador.**
@@ -247,7 +246,7 @@ Após capturar essas respostas NetNTLMv1, o atacante pode rapidamente recuperar 
 
 Se o NetNTLMv1 não for aceito—devido a políticas de segurança aplicadas, o atacante pode falhar em recuperar uma resposta NetNTLMv1.
 
-Para lidar com esse caso, a ferramenta Monólogo Interno foi atualizada: Ela adquire dinamicamente um token de servidor usando `AcceptSecurityContext()` para ainda **capturar respostas NetNTLMv2** se o NetNTLMv1 falhar. Embora o NetNTLMv2 seja muito mais difícil de quebrar, ainda abre um caminho para ataques de retransmissão ou força bruta offline em casos limitados.
+Para lidar com esse caso, a ferramenta Internal Monologue foi atualizada: Ela adquire dinamicamente um token de servidor usando `AcceptSecurityContext()` para ainda **capturar respostas NetNTLMv2** se o NetNTLMv1 falhar. Embora o NetNTLMv2 seja muito mais difícil de quebrar, ainda abre um caminho para ataques de retransmissão ou força bruta offline em casos limitados.
 
 O PoC pode ser encontrado em **[https://github.com/eladshamir/Internal-Monologue](https://github.com/eladshamir/Internal-Monologue)**.
 
@@ -256,7 +255,7 @@ O PoC pode ser encontrado em **[https://github.com/eladshamir/Internal-Monologue
 **Leia um guia mais detalhado sobre como realizar esses ataques aqui:**
 
 {{#ref}}
-../../generic-methodologies-and-resources/pentesting-network/`spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md`
+../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md
 {{#endref}}
 
 ## Analisar desafios NTLM de uma captura de rede
@@ -267,15 +266,15 @@ O PoC pode ser encontrado em **[https://github.com/eladshamir/Internal-Monologue
 
 O Windows contém várias mitig ações que tentam prevenir ataques de *reflexão* onde uma autenticação NTLM (ou Kerberos) que se origina de um host é retransmitida de volta para o **mesmo** host para obter privilégios de SYSTEM.
 
-A Microsoft quebrou a maioria das cadeias públicas com MS08-068 (SMB→SMB), MS09-013 (HTTP→SMB), MS15-076 (DCOM→DCOM) e patches posteriores, no entanto **CVE-2025-33073** mostra que as proteções ainda podem ser contornadas abusando de como o **cliente SMB trunca Nomes de Principal de Serviço (SPNs)** que contêm informações de destino *marshalled* (serializadas).
+A Microsoft quebrou a maioria das cadeias públicas com MS08-068 (SMB→SMB), MS09-013 (HTTP→SMB), MS15-076 (DCOM→DCOM) e patches posteriores, no entanto **CVE-2025-33073** mostra que as proteções ainda podem ser contornadas abusando de como o **cliente SMB trunca Nomes de Principais de Serviço (SPNs)** que contêm informações de destino *marshalled* (serializadas).
 
 ### Resumo do bug
-1. Um atacante registra um **registro A DNS** cujo rótulo codifica um SPN marshalled – por exemplo,
+1. Um atacante registra um **DNS A-record** cujo rótulo codifica um SPN marshalled – por exemplo,
 `srv11UWhRCAAAAAAAAAAAAAAAAAAAAAAAAAAAAwbEAYBAAAA → 10.10.10.50`
 2. A vítima é coagida a autenticar-se nesse nome de host (PetitPotam, DFSCoerce, etc.).
 3. Quando o cliente SMB passa a string de destino `cifs/srv11UWhRCAAAAA…` para `lsasrv!LsapCheckMarshalledTargetInfo`, a chamada para `CredUnmarshalTargetInfo` **remove** o blob serializado, deixando **`cifs/srv1`**.
 4. `msv1_0!SspIsTargetLocalhost` (ou o equivalente do Kerberos) agora considera o alvo como *localhost* porque a parte curta do host corresponde ao nome do computador (`SRV1`).
-5. Consequentemente, o servidor define `NTLMSSP_NEGOTIATE_LOCAL_CALL` e injeta **o token de acesso do SYSTEM do LSASS** no contexto (para o Kerberos, uma chave de subsessão marcada como SYSTEM é criada).
+5. Consequentemente, o servidor define `NTLMSSP_NEGOTIATE_LOCAL_CALL` e injeta **o token de acesso do SYSTEM do LSASS** no contexto (para Kerberos, uma chave de subsessão marcada como SYSTEM é criada).
 6. Retransmitir essa autenticação com `ntlmrelayx.py` **ou** `krbrelayx.py` concede direitos completos de SYSTEM no mesmo host.
 
 ### PoC Rápido
@@ -297,16 +296,16 @@ krbrelayx.py -t TARGET.DOMAIN.LOCAL -smb2support
 ```
 ### Patch & Mitigations
 * O patch KB para **CVE-2025-33073** adiciona uma verificação em `mrxsmb.sys::SmbCeCreateSrvCall` que bloqueia qualquer conexão SMB cujo alvo contenha informações marshalladas (`CredUnmarshalTargetInfo` ≠ `STATUS_INVALID_PARAMETER`).
-* Imponha **SMB signing** para prevenir reflexão mesmo em hosts não corrigidos.
+* Imponha **assinatura SMB** para prevenir reflexão mesmo em hosts não corrigidos.
 * Monitore registros DNS que se assemelham a `*<base64>...*` e bloqueie vetores de coerção (PetitPotam, DFSCoerce, AuthIP...).
 
 ### Detection ideas
-* Capturas de rede com `NTLMSSP_NEGOTIATE_LOCAL_CALL` onde o IP do cliente ≠ IP do servidor.
+* Capturas de rede com `NTLMSSP_NEGOTIATE_LOCAL_CALL` onde o IP do cliente ≠ o IP do servidor.
 * Kerberos AP-REQ contendo uma chave de subsessão e um principal de cliente igual ao nome do host.
-* Logons do SISTEMA do Windows Event 4624/4648 imediatamente seguidos por gravações SMB remotas do mesmo host.
+* Logons do SISTEMA do Windows Evento 4624/4648 imediatamente seguidos por gravações SMB remotas do mesmo host.
 
 ## References
-* [Synacktiv – NTLM Reflection is Dead, Long Live NTLM Reflection!](https://www.synacktiv.com/en/publications/la-reflexion-ntlm-est-morte-vive-la-reflexion-ntlm-analyse-approfondie-de-la-cve-2025.html)
+* [NTLM Reflection is Dead, Long Live NTLM Reflection!](https://www.synacktiv.com/en/publications/la-reflexion-ntlm-est-morte-vive-la-reflexion-ntlm-analyse-approfondie-de-la-cve-2025.html)
 * [MSRC – CVE-2025-33073](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-33073)
 
 {{#include ../../banners/hacktricks-training.md}}
