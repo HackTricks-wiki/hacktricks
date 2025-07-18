@@ -12,7 +12,7 @@ Existem duas variantes principais:
 
 Para ambas as variantes, a **senha não é armazenada** em cada Controlador de Domínio (DC) como um hash NT regular. Em vez disso, cada DC pode **derivar** a senha atual em tempo real a partir de:
 
-* A **Chave Raiz KDS** em todo o floresta (`KRBTGT\KDS`) – segredo nomeado por GUID gerado aleatoriamente, replicado para cada DC sob o contêiner `CN=Master Root Keys,CN=Group Key Distribution Service, CN=Services, CN=Configuration, …`.
+* A **Chave Raiz KDS** em todo o bosque (`KRBTGT\KDS`) – segredo nomeado por GUID gerado aleatoriamente, replicado para cada DC sob o contêiner `CN=Master Root Keys,CN=Group Key Distribution Service, CN=Services, CN=Configuration, …`.
 * O **SID** da conta alvo.
 * Um **ManagedPasswordID** (GUID) por conta encontrado no atributo `msDS-ManagedPasswordId`.
 
@@ -21,7 +21,7 @@ Nenhum tráfego Kerberos ou interação com o domínio é necessária durante o 
 
 ## Ataque Golden gMSA / Golden dMSA
 
-Se um atacante puder obter todas as três entradas **offline**, ele pode calcular **senhas válidas atuais e futuras** para **qualquer gMSA/dMSA na floresta** sem tocar no DC novamente, contornando:
+Se um atacante puder obter todas as três entradas **offline**, ele pode calcular **senhas válidas atuais e futuras** para **qualquer gMSA/dMSA no bosque** sem tocar no DC novamente, contornando:
 
 * Logs de pré-autenticação Kerberos / solicitação de ticket
 * Auditoria de leitura LDAP
@@ -31,7 +31,7 @@ Isso é análogo a um *Golden Ticket* para contas de serviço.
 
 ### Pré-requisitos
 
-1. **Comprometimento em nível de floresta** de **um DC** (ou Administrador da Empresa). O acesso `SYSTEM` é suficiente.
+1. **Comprometimento em nível de bosque** de **um DC** (ou Administrador da Empresa). O acesso `SYSTEM` é suficiente.
 2. Capacidade de enumerar contas de serviço (leitura LDAP / força bruta RID).
 3. Estação de trabalho .NET ≥ 4.7.2 x64 para executar [`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) ou código equivalente.
 
@@ -95,7 +95,7 @@ Os hashes resultantes podem ser injetados com **mimikatz** (`sekurlsa::pth`) ou 
 * Restringir as capacidades de **backup de DC e leitura do hive do registro** a administradores de Tier-0.
 * Monitorar a criação de **Modo de Restauração de Serviços de Diretório (DSRM)** ou **Cópia de Sombra de Volume** em DCs.
 * Auditar leituras / alterações em `CN=Master Root Keys,…` e flags `userAccountControl` de contas de serviço.
-* Detectar escritas de **senha base64** incomuns ou reutilização repentina de senhas de serviço entre hosts.
+* Detectar escritas de **senha em base64** incomuns ou reutilização repentina de senhas de serviço entre hosts.
 * Considerar converter gMSAs de alto privilégio em **contas de serviço clássicas** com rotações aleatórias regulares onde a isolação de Tier-0 não é possível.
 
 ## Ferramentas
