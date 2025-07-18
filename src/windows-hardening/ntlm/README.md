@@ -13,7 +13,7 @@
 
 对认证协议 - LM、NTLMv1 和 NTLMv2 - 的支持由位于 `%windir%\Windows\System32\msv1\_0.dll` 的特定 DLL 提供。
 
-**要点**：
+**关键点**：
 
 - LM 哈希易受攻击，空 LM 哈希 (`AAD3B435B51404EEAAD3B435B51404EE`) 表示未使用。
 - Kerberos 是默认的认证方法，NTLM 仅在特定条件下使用。
@@ -78,11 +78,11 @@ reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa\ /v lmcompatibilitylevel /t RE
 
 如今，发现配置了不受限制的委派的环境变得越来越少，但这并不意味着您不能**滥用配置的打印后台处理程序服务**。
 
-您可以滥用您在 AD 上已经拥有的一些凭据/会话，**请求打印机对某个**您控制的**主机进行身份验证**。然后，使用 `metasploit auxiliary/server/capture/smb` 或 `responder`，您可以**将认证挑战设置为 1122334455667788**，捕获认证尝试，如果使用的是**NTLMv1**，您将能够**破解它**。\
-如果您使用 `responder`，可以尝试**使用标志 `--lm`** 来尝试**降级**认证。\
+您可以滥用您在 AD 上已经拥有的一些凭据/会话，**请求打印机对某个**您控制的**主机进行身份验证**。然后，使用 `metasploit auxiliary/server/capture/smb` 或 `responder`，您可以**将身份验证挑战设置为 1122334455667788**，捕获身份验证尝试，如果使用的是**NTLMv1**，您将能够**破解它**。\
+如果您使用 `responder`，可以尝试**使用标志 `--lm`** 来尝试**降级**身份验证。\
 _请注意，对于此技术，身份验证必须使用 NTLMv1 进行（NTLMv2 无效）。_
 
-请记住，打印机在身份验证期间将使用计算机帐户，而计算机帐户使用**长且随机的密码**，您**可能无法使用常见的**字典**破解**。但是，**NTLMv1** 认证**使用 DES**（[更多信息在这里](#ntlmv1-challenge)），因此使用一些专门用于破解 DES 的服务，您将能够破解它（例如，您可以使用 [https://crack.sh/](https://crack.sh) 或 [https://ntlmv1.com/](https://ntlmv1.com)）。
+请记住，打印机在身份验证期间将使用计算机帐户，而计算机帐户使用**长且随机的密码**，您**可能无法使用常见的**字典**破解**。但是，**NTLMv1** 身份验证**使用 DES**（[更多信息在这里](#ntlmv1-challenge)），因此使用一些专门用于破解 DES 的服务，您将能够破解它（例如，您可以使用 [https://crack.sh/](https://crack.sh) 或 [https://ntlmv1.com/](https://ntlmv1.com)）。
 
 ### 使用 hashcat 的 NTLMv1 攻击
 
@@ -158,9 +158,9 @@ NTHASH=b4b9b02e6f09a9bd760f388b6700586c
 
 **挑战长度为 8 字节**，并且**发送 2 个响应**：一个是**24 字节**长，另一个的长度是**可变**的。
 
-**第一个响应**是通过使用**HMAC_MD5**对由**客户端和域**组成的**字符串**进行加密生成的，并使用**NT hash**的**MD4 哈希**作为**密钥**。然后，**结果**将用作**密钥**，通过**HMAC_MD5**对**挑战**进行加密。为此，将**添加一个 8 字节的客户端挑战**。总计：24 B。
+**第一个响应**是通过使用**HMAC_MD5**对由**客户端和域**组成的**字符串**进行加密，并使用**NT hash**的**MD4 哈希**作为**密钥**来创建的。然后，**结果**将用作**密钥**，通过**HMAC_MD5**对**挑战**进行加密。为此，将**添加一个 8 字节的客户端挑战**。总计：24 B。
 
-**第二个响应**是使用**多个值**（一个新的客户端挑战，一个**时间戳**以避免**重放攻击**等）生成的。
+**第二个响应**是使用**多个值**（一个新的客户端挑战，一个**时间戳**以避免**重放攻击**等）创建的。
 
 如果您有一个**捕获了成功身份验证过程的 pcap**，您可以按照本指南获取域、用户名、挑战和响应，并尝试破解密码：[https://research.801labs.org/cracking-an-ntlmv2-hash/](https://www.801labs.org/research-portal/post/cracking-an-ntlmv2-hash/)
 
@@ -186,7 +186,7 @@ Invoke-Mimikatz -Command '"sekurlsa::pth /user:username /domain:domain.tld /ntlm
 
 ### Impacket Windows编译工具
 
-您可以在此处下载[ impacket Windows二进制文件](https://github.com/ropnop/impacket_static_binaries/releases/tag/0.9.21-dev-binaries)。
+您可以在此处下载[impacket Windows二进制文件](https://github.com/ropnop/impacket_static_binaries/releases/tag/0.9.21-dev-binaries)。
 
 - **psexec_windows.exe** `C:\AD\MyTools\psexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.my.domain.local`
 - **wmiexec.exe** `wmiexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.dollarcorp.moneycorp.local`
@@ -215,7 +215,7 @@ Invoke-SMBEnum -Domain dollarcorp.moneycorp.local -Username svcadmin -Hash b38ff
 ```
 #### Invoke-TheHash
 
-这个功能是**所有其他功能的混合**。您可以传递**多个主机**，**排除**某些主机，并**选择**您想要使用的**选项**（_SMBExec, WMIExec, SMBClient, SMBEnum_）。如果您选择**任何**的**SMBExec**和**WMIExec**但**不**提供任何_**Command**_参数，它将仅**检查**您是否具有**足够的权限**。
+这个函数是**所有其他函数的混合**。你可以传递**多个主机**，**排除**某些主机，并**选择**你想使用的**选项**（_SMBExec, WMIExec, SMBClient, SMBEnum_）。如果你选择**任何**的**SMBExec**和**WMIExec**但**不**提供任何_**Command**_参数，它将仅仅**检查**你是否有**足够的权限**。
 ```
 Invoke-TheHash -Type WMIExec -Target 192.168.100.0/24 -TargetExclude 192.168.100.50 -Username Administ -ty    h F6F38B793DB6A94BA04A52F1D3EE92F0
 ```
@@ -243,7 +243,7 @@ wce.exe -s <username>:<domain>:<hash_lm>:<hash_nt>
 
 内部独白攻击是一种隐秘的凭据提取技术，允许攻击者从受害者的机器中检索NTLM哈希值，**而无需直接与LSASS进程交互**。与Mimikatz不同，后者直接从内存中读取哈希值，且常常被终端安全解决方案或凭据保护阻止，此攻击利用**通过安全支持提供程序接口（SSPI）对NTLM认证包（MSV1_0）的本地调用**。攻击者首先**降级NTLM设置**（例如，LMCompatibilityLevel、NTLMMinClientSec、RestrictSendingNTLMTraffic），以确保允许NetNTLMv1。然后，他们伪装成从运行进程中获取的现有用户令牌，并在本地触发NTLM认证，以使用已知挑战生成NetNTLMv1响应。
 
-在捕获这些NetNTLMv1响应后，攻击者可以快速使用**预计算的彩虹表**恢复原始NTLM哈希值，从而启用进一步的Pass-the-Hash攻击以进行横向移动。至关重要的是，内部独白攻击保持隐秘，因为它不会生成网络流量、注入代码或触发直接内存转储，使其比传统方法（如Mimikatz）更难被防御者检测。
+在捕获这些NetNTLMv1响应后，攻击者可以快速使用**预计算的彩虹表**恢复原始NTLM哈希值，从而启用进一步的Pass-the-Hash攻击以进行横向移动。至关重要的是，内部独白攻击保持隐秘，因为它不会生成网络流量、注入代码或触发直接内存转储，使得防御者比传统方法（如Mimikatz）更难检测。
 
 如果NetNTLMv1未被接受——由于强制的安全策略，攻击者可能无法检索到NetNTLMv1响应。
 
@@ -253,10 +253,10 @@ PoC可以在**[https://github.com/eladshamir/Internal-Monologue](https://github.
 
 ## NTLM中继和响应者
 
-**在这里阅读有关如何执行这些攻击的更详细指南：**
+**在这里阅读有关如何执行这些攻击的详细指南：**
 
 {{#ref}}
-../../generic-methodologies-and-resources/pentesting-network/`spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md`
+../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md
 {{#endref}}
 
 ## 从网络捕获中解析NTLM挑战
@@ -267,7 +267,7 @@ PoC可以在**[https://github.com/eladshamir/Internal-Monologue](https://github.
 
 Windows包含几种缓解措施，试图防止*反射*攻击，其中来自主机的NTLM（或Kerberos）认证被中继回**同一**主机以获取SYSTEM权限。
 
-微软通过MS08-068（SMB→SMB）、MS09-013（HTTP→SMB）、MS15-076（DCOM→DCOM）及后续补丁破坏了大多数公共链，然而**CVE-2025-33073**显示，保护措施仍然可以通过滥用**SMB客户端截断包含*序列化*（序列化）目标信息的服务主体名称（SPN）**来绕过。
+微软通过MS08-068（SMB→SMB）、MS09-013（HTTP→SMB）、MS15-076（DCOM→DCOM）及后续补丁破坏了大多数公共链，然而**CVE-2025-33073**显示，保护措施仍然可以通过滥用**SMB客户端截断服务主体名称（SPN）**来绕过，这些SPN包含*序列化*的目标信息。
 
 ### 漏洞的简要说明
 1. 攻击者注册一个**DNS A记录**，其标签编码一个序列化的SPN – 例如
@@ -276,7 +276,7 @@ Windows包含几种缓解措施，试图防止*反射*攻击，其中来自主�
 3. 当SMB客户端将目标字符串`cifs/srv11UWhRCAAAAA…`传递给`lsasrv!LsapCheckMarshalledTargetInfo`时，对`CredUnmarshalTargetInfo`的调用**剥离**了序列化的blob，留下**`cifs/srv1`**。
 4. `msv1_0!SspIsTargetLocalhost`（或Kerberos等效项）现在将目标视为*localhost*，因为短主机部分与计算机名称（`SRV1`）匹配。
 5. 因此，服务器设置`NTLMSSP_NEGOTIATE_LOCAL_CALL`并将**LSASS的SYSTEM访问令牌**注入上下文中（对于Kerberos，创建一个标记为SYSTEM的子会话密钥）。
-6. 使用`ntlmrelayx.py`**或**`krbrelayx.py`中继该认证可在同一主机上获得完全的SYSTEM权限。
+6. 使用`ntlmrelayx.py` **或** `krbrelayx.py`中继该认证可在同一主机上获得完全的SYSTEM权限。
 
 ### 快速PoC
 ```bash
@@ -296,17 +296,17 @@ ntlmrelayx.py -t TARGET.DOMAIN.LOCAL -smb2support
 krbrelayx.py -t TARGET.DOMAIN.LOCAL -smb2support
 ```
 ### 修补与缓解措施
-* 针对 **CVE-2025-33073** 的 KB 补丁在 `mrxsmb.sys::SmbCeCreateSrvCall` 中添加了检查，阻止任何目标包含序列化信息的 SMB 连接（`CredUnmarshalTargetInfo` ≠ `STATUS_INVALID_PARAMETER`）。
+* **CVE-2025-33073** 的 KB 补丁在 `mrxsmb.sys::SmbCeCreateSrvCall` 中添加了检查，阻止任何目标包含序列化信息的 SMB 连接（`CredUnmarshalTargetInfo` ≠ `STATUS_INVALID_PARAMETER`）。
 * 强制 **SMB 签名** 以防止即使在未打补丁的主机上也发生反射。
 * 监控类似 `*<base64>...*` 的 DNS 记录并阻止强制向量（PetitPotam, DFSCoerce, AuthIP...）。
 
 ### 检测思路
 * 网络捕获中包含 `NTLMSSP_NEGOTIATE_LOCAL_CALL`，其中客户端 IP ≠ 服务器 IP。
-* 包含子会话密钥和与主机名相等的客户端主体的 Kerberos AP-REQ。
+* 包含子会话密钥和客户端主体等于主机名的 Kerberos AP-REQ。
 * Windows 事件 4624/4648 系统登录后立即跟随来自同一主机的远程 SMB 写入。
 
 ## 参考文献
-* [Synacktiv – NTLM 反射已死，NTLM 反射万岁！](https://www.synacktiv.com/en/publications/la-reflexion-ntlm-est-morte-vive-la-reflexion-ntlm-analyse-approfondie-de-la-cve-2025.html)
+* [NTLM 反射已死，NTLM 反射万岁！](https://www.synacktiv.com/en/publications/la-reflexion-ntlm-est-morte-vive-la-reflexion-ntlm-analyse-approfondie-de-la-cve-2025.html)
 * [MSRC – CVE-2025-33073](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-33073)
 
 {{#include ../../banners/hacktricks-training.md}}
