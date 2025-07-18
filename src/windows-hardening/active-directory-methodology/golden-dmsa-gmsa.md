@@ -107,7 +107,7 @@ Le hash risultanti possono essere iniettati con **mimikatz** (`sekurlsa::pth`) o
 ## Riferimenti
 
 - [Golden dMSA – bypass dell'autenticazione per gli Account di Servizio Gestiti Delegati](https://www.semperis.com/blog/golden-dmsa-what-is-dmsa-authentication-bypass/)
-- [Repository GitHub Semperis/GoldenDMSA](https://github.com/Semperis/GoldenDMSA)
+- [Repository GitHub di Semperis/GoldenDMSA](https://github.com/Semperis/GoldenDMSA)
 - [Improsec – attacco di fiducia Golden gMSA](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-5-golden-gmsa-trust-attack-from-child-to-parent)
 
 {{#include ../../banners/hacktricks-training.md}}
