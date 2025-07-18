@@ -31,13 +31,13 @@ Ovo je analogno *Golden Ticket* za servisne naloge.
 
 ### Preduslovi
 
-1. **Kompromitovanje na nivou šume** **jednog DC** (ili Enterprise Admin). `SYSTEM` pristup je dovoljan.
+1. **Kompromitovanje na nivou šume** **jednog DC-a** (ili Enterprise Admin). `SYSTEM` pristup je dovoljan.
 2. Sposobnost da se enumerišu servisni nalozi (LDAP čitanje / RID brute-force).
 3. .NET ≥ 4.7.2 x64 radna stanica za pokretanje [`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) ili ekvivalentnog koda.
 
 ### Faza 1 – Ekstrakcija KDS Root Key
 
-Dump sa bilo kog DC (Volume Shadow Copy / sirove SAM+SECURITY hives ili daljinski tajne):
+Dump sa bilo kog DC-a (Volume Shadow Copy / sirove SAM+SECURITY hives ili daljinski tajne):
 ```cmd
 reg save HKLM\SECURITY security.hive
 reg save HKLM\SYSTEM  system.hive
@@ -48,7 +48,7 @@ mimikatz # lsadump::trust /patch   # shows KDS root keys too
 ```
 Base64 string označen `RootKey` (GUID ime) je potreban u kasnijim koracima.
 
-### Faza 2 – Enumerisanje gMSA/dMSA objekata
+### Faza 2 – Enumeracija gMSA/dMSA objekata
 
 Preuzmite barem `sAMAccountName`, `objectSid` i `msDS-ManagedPasswordId`:
 ```powershell
@@ -80,7 +80,7 @@ Alat izračunava kandidatske lozinke i upoređuje njihov base64 blob sa pravim `
 
 ### Faza 4 – Offline Izračunavanje Lozenke i Konverzija
 
-Kada je ManagedPasswordID poznat, važeća lozinka je na dohvat ruke:
+Kada je ManagedPasswordID poznat, važeća lozinka je na samo jednu komandu udaljena:
 ```powershell
 # derive base64 password
 GoldendMSA.exe compute -s <SID> -k <KDSRootKey> -d example.local -m <ManagedPasswordID>
@@ -95,7 +95,7 @@ Rezultantni hash-evi mogu biti injektovani pomoću **mimikatz** (`sekurlsa::pth`
 * Ograničiti **DC backup i čitanje registra** na Tier-0 administratore.
 * Pratiti **Directory Services Restore Mode (DSRM)** ili **Volume Shadow Copy** kreiranje na DC-ima.
 * Revizija čitanja / promena `CN=Master Root Keys,…` i `userAccountControl` oznaka servisnih naloga.
-* Detektovati neobične **base64 pisanje lozinki** ili iznenadnu ponovnu upotrebu lozinki servisa među hostovima.
+* Otkrivanje neobičnih **base64 pisanja lozinki** ili iznenadne ponovne upotrebe lozinki servisa na različitim hostovima.
 * Razmotriti konvertovanje visokoprivilegovanih gMSA u **klasične servisne naloge** sa redovnim nasumičnim rotacijama gde Tier-0 izolacija nije moguća.
 
 ## Alati

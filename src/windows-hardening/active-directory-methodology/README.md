@@ -14,7 +14,7 @@ Ključni koncepti unutar **Active Directory** uključuju:
 2. **Objekat** – Označava entitete unutar direktorijuma, uključujući **korisnike**, **grupe** ili **deljene foldere**.
 3. **Domen** – Služi kao kontejner za objekte direktorijuma, sa mogućnošću da više domena koegzistira unutar jedne **šume**, pri čemu svaki održava svoju kolekciju objekata.
 4. **Drvo** – Grupa domena koja deli zajednički korenski domen.
-5. **Šuma** – Vrhunska organizaciona struktura u Active Directory, sastavljena od nekoliko drveća sa **odnosima poverenja** među njima.
+5. **Šuma** – Vrh organizacione strukture u Active Directory, sastavljena od više drveća sa **odnosima poverenja** među njima.
 
 **Active Directory Domain Services (AD DS)** obuhvata niz usluga koje su ključne za centralizovano upravljanje i komunikaciju unutar mreže. Ove usluge uključuju:
 
@@ -22,14 +22,14 @@ Ključni koncepti unutar **Active Directory** uključuju:
 2. **Usluge sertifikata** – Nadgleda kreiranje, distribuciju i upravljanje sigurnim **digitalnim sertifikatima**.
 3. **Lagana direktorijumska usluga** – Podržava aplikacije omogućene direktorijumom putem **LDAP protokola**.
 4. **Usluge federacije direktorijuma** – Pruža mogućnosti **jednostavnog prijavljivanja** za autentifikaciju korisnika preko više web aplikacija u jednoj sesiji.
-5. **Upravljanje pravima** – Pomaže u zaštiti autorskih materijala regulisanjem njihove neovlašćene distribucije i korišćenja.
+5. **Upravljanje pravima** – Pomaže u zaštiti autorskog materijala regulisanjem njegove neovlašćene distribucije i korišćenja.
 6. **DNS usluga** – Ključna za rešavanje **domen imena**.
 
 Za detaljnije objašnjenje pogledajte: [**TechTerms - Definicija Active Directory**](https://techterms.com/definition/active_directory)
 
 ### **Kerberos Autentifikacija**
 
-Da biste naučili kako da **napadnete AD**, potrebno je da **razumete** veoma dobro **proces autentifikacije Kerberos**.\
+Da biste naučili kako da **napadnete AD**, morate **dobro razumeti** **proces autentifikacije Kerberos**.\
 [**Pročitajte ovu stranicu ako još ne znate kako to funkcioniše.**](kerberos-authentication.md)
 
 ## Cheat Sheet
@@ -44,7 +44,7 @@ Možete posetiti [https://wadcoms.github.io/](https://wadcoms.github.io) da bist
 Ako imate pristup AD okruženju, ali nemate nikakve kredencijale/sesije, možete:
 
 - **Pentestovati mrežu:**
-- Skenirajte mrežu, pronađite mašine i otvorene portove i pokušajte da **eksploatišete ranjivosti** ili **izvučete kredencijale** iz njih (na primer, [štampači bi mogli biti veoma zanimljivi ciljevi](ad-information-in-printers.md)).
+- Skenirati mrežu, pronaći mašine i otvorene portove i pokušati da **eksploatišete ranjivosti** ili **izvučete kredencijale** iz njih (na primer, [štampači bi mogli biti veoma zanimljivi ciljevi](ad-information-in-printers.md)).
 - Enumeracija DNS-a može dati informacije o ključnim serverima u domenu kao što su web, štampači, deljenja, vpn, mediji, itd.
 - `gobuster dns -d domain.local -t 25 -w /opt/Seclist/Discovery/DNS/subdomain-top2000.txt`
 - Pogledajte opštu [**Pentesting Metodologiju**](../../generic-methodologies-and-resources/pentesting-methodology.md) da biste pronašli više informacija o tome kako to uraditi.
@@ -52,7 +52,7 @@ Ako imate pristup AD okruženju, ali nemate nikakve kredencijale/sesije, možete
 - `enum4linux -a -u "" -p "" <DC IP> && enum4linux -a -u "guest" -p "" <DC IP>`
 - `smbmap -u "" -p "" -P 445 -H <DC IP> && smbmap -u "guest" -p "" -P 445 -H <DC IP>`
 - `smbclient -U '%' -L //<DC IP> && smbclient -U 'guest%' -L //`
-- Detaljniji vodič o tome kako da enumerišete SMB server može se naći ovde:
+- Detaljniji vodič o tome kako da enumerišete SMB server možete pronaći ovde:
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-smb/
@@ -60,7 +60,7 @@ Ako imate pristup AD okruženju, ali nemate nikakve kredencijale/sesije, možete
 
 - **Enumeracija Ldap**
 - `nmap -n -sV --script "ldap* and not brute" -p 389 <DC IP>`
-- Detaljniji vodič o tome kako da enumerišete LDAP može se naći ovde (obratite **posebnu pažnju na anonimni pristup**):
+- Detaljniji vodič o tome kako da enumerišete LDAP možete pronaći ovde (obratite **posebnu pažnju na anonimni pristup**):
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-ldap.md
@@ -71,8 +71,8 @@ Ako imate pristup AD okruženju, ali nemate nikakve kredencijale/sesije, možete
 - Pristupite hostu [**zloupotrebom napada relaya**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)
 - Prikupite kredencijale **izlažući** [**lažne UPnP usluge sa evil-S**](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md)[**SDP**](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
 - [**OSINT**](https://book.hacktricks.wiki/en/generic-methodologies-and-resources/external-recon-methodology/index.html):
-- Izvucite korisnička imena/ime iz internih dokumenata, društvenih mreža, usluga (pretežno web) unutar domena i takođe iz javno dostupnih izvora.
-- Ako pronađete puna imena radnika kompanije, možete pokušati različite AD **konvencije korisničkih imena** (**[pročitajte ovo](https://activedirectorypro.com/active-directory-user-naming-convention/)**). Najčešće konvencije su: _ImePrezime_, _Ime.Prezime_, _ImePrz_ (3 slova od svakog), _Im.Prez_, _IPrezime_, _I.Prezime_, _PrezimeIme_, _Prezime.Ime_, _PrezimeI_, _Prezime.I_, 3 _nasumična slova i 3 nasumična broja_ (abc123).
+- Izvucite korisnička imena/imena iz internih dokumenata, društvenih mreža, usluga (pretežno web) unutar domena i takođe iz javno dostupnih izvora.
+- Ako pronađete puna imena radnika kompanije, možete pokušati različite AD **konvencije korisničkih imena** (**[pročitajte ovo**](https://activedirectorypro.com/active-directory-user-naming-convention/)). Najčešće konvencije su: _ImePrezime_, _Ime.Prezime_, _ImPr_ (3 slova svake), _Im.Pre_, _IPrezime_, _I.Prezime_, _PrezimeIme_, _Prezime.Ime_, _PrezimeI_, _Prezime.N_, 3 _nasumična slova i 3 nasumična broja_ (abc123).
 - Alati:
 - [w0Tx/generate-ad-username](https://github.com/w0Tx/generate-ad-username)
 - [urbanadventurer/username-anarchy](https://github.com/urbanadventurer/username-anarchy)
@@ -81,7 +81,7 @@ Ako imate pristup AD okruženju, ali nemate nikakve kredencijale/sesije, možete
 
 - **Anonimna SMB/LDAP enumeracija:** Proverite [**pentesting SMB**](../../network-services-pentesting/pentesting-smb/index.html) i [**pentesting LDAP**](../../network-services-pentesting/pentesting-ldap.md) stranice.
 - **Kerbrute enumeracija**: Kada se zatraži **nevažeće korisničko ime**, server će odgovoriti koristeći **Kerberos grešku** kod _KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN_, omogućavajući nam da utvrdimo da je korisničko ime nevažeće. **Važeća korisnička imena** će izazvati ili **TGT u AS-REP** odgovoru ili grešku _KRB5KDC_ERR_PREAUTH_REQUIRED_, što ukazuje da je korisnik obavezan da izvrši pre-autentifikaciju.
-- **Bez autentifikacije protiv MS-NRPC**: Korišćenje auth-level = 1 (Bez autentifikacije) protiv MS-NRPC (Netlogon) interfejsa na kontrolerima domena. Metoda poziva funkciju `DsrGetDcNameEx2` nakon povezivanja MS-NRPC interfejsa da proveri da li korisnik ili računar postoji bez ikakvih kredencijala. Alat [NauthNRPC](https://github.com/sud0Ru/NauthNRPC) implementira ovu vrstu enumeracije. Istraživanje se može naći [ovde](https://media.kasperskycontenthub.com/wp-content/uploads/sites/43/2024/05/22190247/A-journey-into-forgotten-Null-Session-and-MS-RPC-interfaces.pdf)
+- **Bez autentifikacije protiv MS-NRPC**: Korišćenje auth-level = 1 (Bez autentifikacije) protiv MS-NRPC (Netlogon) interfejsa na kontrolerima domena. Metoda poziva funkciju `DsrGetDcNameEx2` nakon povezivanja MS-NRPC interfejsa da proveri da li korisnik ili računar postoji bez ikakvih kredencijala. Alat [NauthNRPC](https://github.com/sud0Ru/NauthNRPC) implementira ovu vrstu enumeracije. Istraživanje se može pronaći [ovde](https://media.kasperskycontenthub.com/wp-content/uploads/sites/43/2024/05/22190247/A-journey-into-forgotten-Null-Session-and-MS-RPC-interfaces.pdf)
 ```bash
 ./kerbrute_linux_amd64 userenum -d lab.ropnop.com --dc 10.10.10.10 usernames.txt #From https://github.com/ropnop/kerbrute/releases
 
@@ -110,13 +110,13 @@ Get-GlobalAddressList -ExchHostname [ip] -UserName [domain]\[username] -Password
 > [!WARNING]
 > Možete pronaći liste korisničkih imena u [**ovoj github repozitorijumu**](https://github.com/danielmiessler/SecLists/tree/master/Usernames/Names) i ovom ([**statistički verovatna korisnička imena**](https://github.com/insidetrust/statistically-likely-usernames)).
 >
-> Međutim, trebali biste imati **ime ljudi koji rade u kompaniji** iz koraka istraživanja koji ste trebali obaviti pre ovoga. Sa imenom i prezimenom mogli biste koristiti skriptu [**namemash.py**](https://gist.github.com/superkojiman/11076951) da generišete potencijalna validna korisnička imena.
+> Međutim, trebali biste imati **ime ljudi koji rade u kompaniji** iz koraka istraživanja koji ste trebali izvršiti pre ovoga. Sa imenom i prezimenom mogli biste koristiti skriptu [**namemash.py**](https://gist.github.com/superkojiman/11076951) da generišete potencijalna validna korisnička imena.
 
 ### Poznavanje jednog ili više korisničkih imena
 
-U redu, znate da već imate validno korisničko ime, ali nemate lozinke... Onda pokušajte:
+U redu, znate da već imate validno korisničko ime, ali nemate lozinke... Pokušajte:
 
-- [**ASREPRoast**](asreproast.md): Ako korisnik **nema** atribut _DONT_REQ_PREAUTH_, možete **zatražiti AS_REP poruku** za tog korisnika koja će sadržati neke podatke enkriptovane derivacijom lozinke korisnika.
+- [**ASREPRoast**](asreproast.md): Ako korisnik **nema** atribut _DONT_REQ_PREAUTH_, možete **zatražiti AS_REP poruku** za tog korisnika koja će sadržati neke podatke šifrovane derivacijom lozinke korisnika.
 - [**Password Spraying**](password-spraying.md): Pokušajmo sa najviše **uobičajenim lozinkama** za svakog od otkrivenih korisnika, možda neki korisnik koristi lošu lozinku (imajte na umu politiku lozinki!).
 - Imajte na umu da možete i **spray OWA servere** da pokušate da dobijete pristup korisničkim mail serverima.
 
@@ -156,9 +156,9 @@ kerberos-double-hop-problem.md
 
 ### Enumeracija
 
-Imati kompromitovan račun je **veliki korak ka kompromitovanju celog domena**, jer ćete moći da započnete **Enumeraciju Aktivnog Direktorijuma:**
+Kada ste kompromitovali nalog, to je **veliki korak ka kompromitovanju celog domena**, jer ćete moći da započnete **Enumeraciju Aktivnog Direktorijuma:**
 
-Što se tiče [**ASREPRoast**](asreproast.md), sada možete pronaći svakog mogućeg ranjivog korisnika, a što se tiče [**Password Spraying**](password-spraying.md), možete dobiti **listu svih korisničkih imena** i pokušati lozinku kompromitovanog računa, prazne lozinke i nove obećavajuće lozinke.
+Što se tiče [**ASREPRoast**](asreproast.md), sada možete pronaći svakog mogućeg ranjivog korisnika, a što se tiče [**Password Spraying**](password-spraying.md), možete dobiti **listu svih korisničkih imena** i pokušati lozinku kompromitovanog naloga, prazne lozinke i nove obećavajuće lozinke.
 
 - Možete koristiti [**CMD za osnovno istraživanje**](../basic-cmd-for-pentesters.md#domain-info)
 - Takođe možete koristiti [**powershell za istraživanje**](../basic-powershell-for-pentesters/index.html) što će biti diskretnije
@@ -172,15 +172,15 @@ Imati kompromitovan račun je **veliki korak ka kompromitovanju celog domena**, 
 - Takođe možete probati automatske alate kao:
 - [**tomcarver16/ADSearch**](https://github.com/tomcarver16/ADSearch)
 - [**61106960/adPEAS**](https://github.com/61106960/adPEAS)
-- **Izvlačenje svih korisnika domena**
+- **Ekstrakcija svih korisnika domena**
 
-Veoma je lako dobiti sva korisnička imena domena iz Windows-a (`net user /domain`, `Get-DomainUser` ili `wmic useraccount get name,sid`). U Linux-u, možete koristiti: `GetADUsers.py -all -dc-ip 10.10.10.110 domain.com/username` ili `enum4linux -a -u "user" -p "password" <DC IP>`
+Veoma je lako dobiti sva korisnička imena domena iz Windows-a (`net user /domain`, `Get-DomainUser` ili `wmic useraccount get name,sid`). U Linux-u možete koristiti: `GetADUsers.py -all -dc-ip 10.10.10.110 domain.com/username` ili `enum4linux -a -u "user" -p "password" <DC IP>`
 
 > Čak i ako ovaj deo o enumeraciji izgleda mali, ovo je najvažniji deo svega. Pristupite linkovima (pretežno onima o cmd, powershell, powerview i BloodHound), naučite kako da enumerišete domen i vežbajte dok se ne osećate prijatno. Tokom procene, ovo će biti ključni trenutak da pronađete svoj put do DA ili da odlučite da ništa ne može biti učinjeno.
 
 ### Kerberoast
 
-Kerberoasting uključuje dobijanje **TGS karata** koje koriste usluge povezane sa korisničkim računima i razbijanje njihove enkripcije—koja se zasniva na korisničkim lozinkama—**offline**.
+Kerberoasting uključuje dobijanje **TGS karata** koje koriste usluge povezane sa korisničkim nalozima i razbijanje njihove enkripcije—koja se zasniva na korisničkim lozinkama—**offline**.
 
 Više o ovome u:
 
@@ -190,11 +190,11 @@ kerberoast.md
 
 ### Daljinska konekcija (RDP, SSH, FTP, Win-RM, itd.)
 
-Kada dobijete neke kredencijale, možete proveriti da li imate pristup bilo kojoj **mašini**. U tom smislu, mogli biste koristiti **CrackMapExec** da pokušate povezivanje na nekoliko servera sa različitim protokolima, u skladu sa vašim skeniranjem portova.
+Kada dobijete neke kredencijale, možete proveriti da li imate pristup bilo kojoj **mašini**. U tom smislu, možete koristiti **CrackMapExec** da pokušate da se povežete na nekoliko servera sa različitim protokolima, u skladu sa vašim skeniranjem portova.
 
 ### Lokalno Eskaliranje Privilegija
 
-Ako imate kompromitovane kredencijale ili sesiju kao običan domen korisnik i imate **pristup** sa ovim korisnikom do **bilo koje mašine u domenu**, trebali biste pokušati da pronađete način da **eskalirate privilegije lokalno i tražite kredencijale**. To je zato što samo sa lokalnim administratorskim privilegijama možete **dumpovati hash-eve drugih korisnika** u memoriji (LSASS) i lokalno (SAM).
+Ako ste kompromitovali kredencijale ili sesiju kao običan domen korisnik i imate **pristup** sa ovim korisnikom do **bilo koje mašine u domenu**, trebali biste pokušati da pronađete način da **eskalirate privilegije lokalno i tražite kredencijale**. To je zato što samo sa lokalnim administratorskim privilegijama možete **dumpovati hash-eve drugih korisnika** u memoriji (LSASS) i lokalno (SAM).
 
 Postoji cela stranica u ovoj knjizi o [**lokalnom eskaliranju privilegija u Windows-u**](../windows-local-privilege-escalation/index.html) i [**checklist**](../checklist-windows-privilege-escalation.md). Takođe, ne zaboravite da koristite [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite).
 
@@ -214,13 +214,13 @@ Ako ste uspeli da enumerišete aktivni direktorijum, imaćete **više emailova i
 
 ### Looks for Creds in Computer Shares | SMB Shares
 
-Sada kada imate neke osnovne kredencijale, trebali biste proveriti da li možete **pronaći** bilo koje **zanimljive datoteke koje se dele unutar AD**. To možete uraditi ručno, ali je to veoma dosadan i ponavljajući zadatak (a još više ako pronađete stotine dokumenata koje treba da proverite).
+Sada kada imate neke osnovne kredencijale, trebali biste proveriti da li možete **pronaći** bilo koje **zanimljive datoteke koje se dele unutar AD**. To možete uraditi ručno, ali je to veoma dosadan ponavljajući zadatak (a još više ako pronađete stotine dokumenata koje treba da proverite).
 
-[**Pratite ovaj link da biste saznali više o alatima koje možete koristiti.**](../../network-services-pentesting/pentesting-smb/index.html#domain-shared-folders-search)
+[**Follow this link to learn about tools you could use.**](../../network-services-pentesting/pentesting-smb/index.html#domain-shared-folders-search)
 
 ### Steal NTLM Creds
 
-Ako možete **pristupiti drugim računarima ili deljenjima**, mogli biste **postaviti datoteke** (kao što je SCF datoteka) koje, ako se nekako pristupe, **pokrenu NTLM autentifikaciju protiv vas**, tako da možete **ukrasti** **NTLM izazov** da biste ga razbili:
+Ako možete **pristupiti drugim računarima ili deljenjima**, mogli biste **postaviti datoteke** (poput SCF datoteke) koje, ako se nekako pristupe, **pokrenu NTLM autentifikaciju protiv vas**, tako da možete **ukrasti** **NTLM izazov** da ga razbijete:
 
 {{#ref}}
 ../ntlm/places-to-steal-ntlm-creds.md
@@ -241,14 +241,14 @@ printnightmare.md
 ### Hash extraction
 
 Nadamo se da ste uspeli da **kompromitujete neki lokalni admin** nalog koristeći [AsRepRoast](asreproast.md), [Password Spraying](password-spraying.md), [Kerberoast](kerberoast.md), [Responder](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md) uključujući relaying, [EvilSSDP](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md), [escalating privileges locally](../windows-local-privilege-escalation/index.html).\
-Zatim, vreme je da izvučete sve hash-ove iz memorije i lokalno.\
-[**Pročitajte ovu stranicu o različitim načinima dobijanja hash-ova.**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/active-directory-methodology/broken-reference/README.md)
+Zatim, vreme je da izvučete sve hash-ove u memoriji i lokalno.\
+[**Read this page about different ways to obtain the hashes.**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/active-directory-methodology/broken-reference/README.md)
 
 ### Pass the Hash
 
 **Kada imate hash korisnika**, možete ga koristiti da **imituje**.\
 Trebalo bi da koristite neki **alat** koji će **izvršiti** **NTLM autentifikaciju koristeći** taj **hash**, **ili** možete kreirati novu **sessionlogon** i **ubaciti** taj **hash** unutar **LSASS**, tako da kada se izvrši bilo koja **NTLM autentifikacija**, taj **hash će biti korišćen.** Poslednja opcija je ono što radi mimikatz.\
-[**Pročitajte ovu stranicu za više informacija.**](../ntlm/index.html#pass-the-hash)
+[**Read this page for more information.**](../ntlm/index.html#pass-the-hash)
 
 ### Over Pass the Hash/Pass the Key
 
@@ -279,8 +279,8 @@ crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9c
 
 ### MSSQL Abuse & Trusted Links
 
-Ako korisnik ima privilegije da **pristupi MSSQL instancama**, mogao bi da ga koristi za **izvršavanje komandi** na MSSQL hostu (ako se pokreće kao SA), da **ukrade** NetNTLM **hash** ili čak da izvrši **relay** **napad**.\
-Takođe, ako je MSSQL instanca poverljiva (veza baze podataka) od strane druge MSSQL instance. Ako korisnik ima privilegije nad poverljivom bazom podataka, moći će da **iskoristi odnos poverenja za izvršavanje upita i u drugoj instanci**. Ove veze se mogu povezivati i u nekom trenutku korisnik bi mogao da pronađe pogrešno konfigurisanu bazu podataka gde može izvršavati komande.\
+Ako korisnik ima privilegije za **pristup MSSQL instancama**, mogao bi biti u mogućnosti da ih koristi za **izvršavanje komandi** na MSSQL hostu (ako se pokreće kao SA), **ukrade** NetNTLM **hash** ili čak izvrši **relay** **napad**.\
+Takođe, ako je MSSQL instanca poverena (link baze podataka) od strane druge MSSQL instance. Ako korisnik ima privilegije nad poverenom bazom podataka, moći će da **iskoristi odnos poverenja za izvršavanje upita i na drugoj instanci**. Ove poverene veze mogu se povezivati i u nekom trenutku korisnik bi mogao da pronađe pogrešno konfigurisanu bazu podataka gde može izvršavati komande.\
 **Veze između baza podataka funkcionišu čak i preko šumskih poverenja.**
 
 {{#ref}}
@@ -289,9 +289,9 @@ abusing-ad-mssql.md
 
 ### Unconstrained Delegation
 
-Ako pronađete bilo koji objekat računara sa atributom [ADS_UF_TRUSTED_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) i imate privilegije domena na računaru, moći ćete da izvučete TGT-ove iz memorije svih korisnika koji se prijave na računar.\
+Ako pronađete bilo koji objekat računara sa atributom [ADS_UF_TRUSTED_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) i imate privilegije domena na računaru, moći ćete da izvučete TGT-ove iz memorije svih korisnika koji se prijavljuju na računar.\
 Dakle, ako se **Domain Admin prijavi na računar**, moći ćete da izvučete njegov TGT i da se pretvarate da je on koristeći [Pass the Ticket](pass-the-ticket.md).\
-Zahvaljujući ograničenoj delegaciji, mogli biste čak i **automatski da kompromitujete Print Server** (nadamo se da će to biti DC).
+Zahvaljujući ograničenoj delegaciji, mogli biste čak i **automatski kompromitovati Print Server** (nadamo se da će to biti DC).
 
 {{#ref}}
 unconstrained-delegation.md
@@ -299,8 +299,8 @@ unconstrained-delegation.md
 
 ### Constrained Delegation
 
-Ako je korisniku ili računaru dozvoljena "Ograničena delegacija", moći će da **se pretvara u bilo kog korisnika kako bi pristupio nekim uslugama na računaru**.\
-Tada, ako **kompromitujete hash** ovog korisnika/računara, moći ćete da **se pretvarate u bilo kog korisnika** (čak i administratore domena) kako biste pristupili nekim uslugama.
+Ako je korisniku ili računaru dozvoljena "Ograničena delegacija", moći će da **pretvara bilo kog korisnika da pristupi nekim uslugama na računaru**.\
+Tada, ako **kompromitujete hash** ovog korisnika/računara, moći ćete da **pretvarate bilo kog korisnika** (čak i administratore domena) da pristupite nekim uslugama.
 
 {{#ref}}
 constrained-delegation.md
@@ -316,7 +316,7 @@ resource-based-constrained-delegation.md
 
 ### Permissions/ACLs Abuse
 
-Kompromitovani korisnik mogao bi imati neke **zanimljive privilegije nad nekim objektima domena** koje bi vam mogle omogućiti da **napredujete** lateralno/**povećate** privilegije.
+Kompromitovani korisnik mogao bi imati neke **zanimljive privilegije nad nekim objektima domena** koje bi vam mogle omogućiti da **premestite** lateralno/**escalate** privilegije.
 
 {{#ref}}
 acl-persistence-abuse/
@@ -324,7 +324,7 @@ acl-persistence-abuse/
 
 ### Printer Spooler service abuse
 
-Otkriće **Spool servisa koji sluša** unutar domena može se **iskoristiti** za **sticanje novih kredencijala** i **povećanje privilegija**.
+Otkriće **Spool servisa koji sluša** unutar domena može se **iskoristiti** za **sticanje novih kredencijala** i **escalaciju privilegija**.
 
 {{#ref}}
 printers-spooler-service-abuse.md
@@ -332,8 +332,8 @@ printers-spooler-service-abuse.md
 
 ### Third party sessions abuse
 
-Ako **drugi korisnici** **pristupaju** **kompromitovanoj** mašini, moguće je **prikupiti kredencijale iz memorije** i čak **ubaciti beacon-e u njihove procese** da bi se pretvarali da su oni.\
-Obično korisnici pristupaju sistemu putem RDP-a, pa ovde imate kako da izvršite nekoliko napada na RDP sesije trećih strana:
+Ako **drugi korisnici** **pristupaju** **kompromitovanom** računaru, moguće je **prikupiti kredencijale iz memorije** i čak **ubaciti beacon-e u njihove procese** da bi se pretvarali da su oni.\
+Obično korisnici pristupaju sistemu putem RDP-a, tako da ovde imate kako da izvršite nekoliko napada na treće strane RDP sesije:
 
 {{#ref}}
 rdp-sessions-abuse.md
@@ -341,7 +341,7 @@ rdp-sessions-abuse.md
 
 ### LAPS
 
-**LAPS** pruža sistem za upravljanje **lokalnom lozinkom administratora** na računarima pridruženim domenu, osiguravajući da je **nasumična**, jedinstvena i često **menjana**. Ove lozinke se čuvaju u Active Directory-u, a pristup se kontroliše putem ACL-a samo za ovlašćene korisnike. Sa dovoljnim privilegijama za pristup ovim lozinkama, prelazak na druge računare postaje moguć.
+**LAPS** pruža sistem za upravljanje **lokalnom lozinkom administratora** na računarima pridruženim domenu, osiguravajući da je **randomizovana**, jedinstvena i često **menjana**. Ove lozinke se čuvaju u Active Directory-u, a pristup se kontroliše putem ACL-a samo za ovlašćene korisnike. Sa dovoljnim privilegijama za pristup ovim lozinkama, prelazak na druge računare postaje moguć.
 
 {{#ref}}
 laps.md
@@ -349,7 +349,7 @@ laps.md
 
 ### Certificate Theft
 
-**Prikupljanje sertifikata** sa kompromitovane mašine može biti način za povećanje privilegija unutar okruženja:
+**Prikupljanje sertifikata** sa kompromitovanog računara može biti način za eskalaciju privilegija unutar okruženja:
 
 {{#ref}}
 ad-certificates/certificate-theft.md
@@ -357,7 +357,7 @@ ad-certificates/certificate-theft.md
 
 ### Certificate Templates Abuse
 
-Ako su **ranjivi šabloni** konfigurisani, moguće ih je iskoristiti za povećanje privilegija:
+Ako su **ranjivi šabloni** konfigurisani, moguće ih je iskoristiti za eskalaciju privilegija:
 
 {{#ref}}
 ad-certificates/domain-escalation.md
@@ -398,7 +398,7 @@ Add-DomainObjectAcl -TargetIdentity "DC=SUB,DC=DOMAIN,DC=LOCAL" -PrincipalIdenti
 
 ### Silver Ticket
 
-**Silver Ticket napad** kreira **legitimnu Ticket Granting Service (TGS) kartu** za određenu uslugu koristeći **NTLM hash** (na primer, **hash PC naloga**). Ova metoda se koristi za **pristup uslužnim privilegijama**.
+**Silver Ticket napad** kreira **legitimnu Ticket Granting Service (TGS) kartu** za specifičnu uslugu koristeći **NTLM hash** (na primer, **hash PC naloga**). Ova metoda se koristi za **pristup privilegijama usluge**.
 
 {{#ref}}
 silver-ticket.md
@@ -406,9 +406,9 @@ silver-ticket.md
 
 ### Golden Ticket
 
-**Golden Ticket napad** uključuje napadača koji dobija pristup **NTLM hash-u krbtgt naloga** u Active Directory (AD) okruženju. Ovaj nalog je poseban jer se koristi za potpisivanje svih **Ticket Granting Tickets (TGTs)**, koji su ključni za autentifikaciju unutar AD mreže.
+**Golden Ticket napad** uključuje napadača koji dobija pristup **NTLM hash-u krbtgt naloga** u Active Directory (AD) okruženju. Ovaj nalog je poseban jer se koristi za potpisivanje svih **Ticket Granting Tickets (TGTs)**, koji su neophodni za autentifikaciju unutar AD mreže.
 
-Kada napadač dobije ovaj hash, može kreirati **TGTs** za bilo koji nalog koji izabere (Silver ticket napad).
+Kada napadač dobije ovaj hash, može kreirati **TGT-ove** za bilo koji nalog koji izabere (Silver ticket napad).
 
 {{#ref}}
 golden-ticket.md
@@ -416,7 +416,7 @@ golden-ticket.md
 
 ### Diamond Ticket
 
-Ovi su poput zlatnih karata, ali su falsifikovani na način koji **zaobilazi uobičajene mehanizme za otkrivanje zlatnih karata.**
+Ovi su poput zlatnih karata, ali su krivotvoreni na način koji **zaobilazi uobičajene mehanizme za otkrivanje zlatnih karata.**
 
 {{#ref}}
 diamond-ticket.md
@@ -440,13 +440,13 @@ ad-certificates/domain-persistence.md
 
 ### AdminSDHolder Group
 
-**AdminSDHolder** objekat u Active Directory-u osigurava bezbednost **privilegovanih grupa** (kao što su Domain Admins i Enterprise Admins) primenom standardnog **Access Control List (ACL)** na ovim grupama kako bi se sprečile neovlašćene promene. Međutim, ova funkcija se može iskoristiti; ako napadač izmeni ACL AdminSDHolder-a da bi dao potpuni pristup običnom korisniku, taj korisnik dobija opsežnu kontrolu nad svim privilegovanim grupama. Ova mera bezbednosti, koja je zamišljena da zaštiti, može se tako obrnuti, omogućavajući neovlašćen pristup osim ako se ne prati pažljivo.
+**AdminSDHolder** objekat u Active Directory-u osigurava bezbednost **privilegovanih grupa** (kao što su Domain Admins i Enterprise Admins) primenom standardnog **Access Control List (ACL)** preko ovih grupa kako bi se sprečile neovlašćene promene. Međutim, ova funkcija se može iskoristiti; ako napadač izmeni ACL AdminSDHolder-a da bi dao potpuni pristup običnom korisniku, taj korisnik dobija opsežnu kontrolu nad svim privilegovanim grupama. Ova mera bezbednosti, koja je zamišljena da zaštiti, može se tako obrnuti, omogućavajući neovlašćen pristup osim ako se ne prati pažljivo.
 
 [**Više informacija o AdminDSHolder grupi ovde.**](privileged-groups-and-token-privileges.md#adminsdholder-group)
 
 ### DSRM Credentials
 
-Unutar svakog **Domain Controller (DC)**, postoji **lokalni administratorski** nalog. Dobijanjem administratorskih prava na takvoj mašini, lokalni Administrator hash može se izvući koristeći **mimikatz**. Nakon toga, neophodna je izmena registra da bi se **omogućila upotreba ove lozinke**, što omogućava daljinski pristup lokalnom administratorskom nalogu.
+Unutar svakog **Domain Controller (DC)**, postoji **lokalni administratorski** nalog. Dobijanjem administratorskih prava na takvom računaru, lokalni Administrator hash može se izvući koristeći **mimikatz**. Nakon toga, neophodna je modifikacija registra da bi se **omogućila upotreba ove lozinke**, omogućavajući daljinski pristup lokalnom administratorskom nalogu.
 
 {{#ref}}
 dsrm-credentials.md
@@ -454,7 +454,7 @@ dsrm-credentials.md
 
 ### ACL Persistence
 
-Možete **dati** neke **posebne privilegije** **korisniku** nad nekim specifičnim objektima domena koje će omogućiti korisniku da **poveća privilegije u budućnosti**.
+Možete **dati** neke **posebne privilegije** **korisniku** nad nekim specifičnim objektima domena koji će omogućiti korisniku da **escalira privilegije u budućnosti**.
 
 {{#ref}}
 acl-persistence-abuse/
@@ -479,7 +479,7 @@ skeleton-key.md
 ### Custom SSP
 
 [Saaznajte šta je SSP (Security Support Provider) ovde.](../authentication-credentials-uac-and-efs/index.html#security-support-provider-interface-sspi)\
-Možete kreirati svoj **vlastiti SSP** da **prikupite** u **čistom tekstu** **kredencijale** korišćene za pristup mašini.
+Možete kreirati svoj **vlastiti SSP** da **prikupite** u **čistom tekstu** **kredencijale** korišćene za pristup računaru.
 
 {{#ref}}
 custom-ssp.md
@@ -487,7 +487,7 @@ custom-ssp.md
 
 ### DCShadow
 
-Registruje **novi Domain Controller** u AD i koristi ga za **guranjem atributa** (SIDHistory, SPNs...) na određenim objektima **bez** ostavljanja bilo kakvih **logova** u vezi sa **izmenama**. Potrebne su vam **DA** privilegije i da budete unutar **root domena**.\
+Registruje **novi Domain Controller** u AD i koristi ga za **guranjem atributa** (SIDHistory, SPNs...) na određenim objektima **bez** ostavljanja bilo kakvih **logova** u vezi sa **modifikacijama**. Potrebne su **DA** privilegije i morate biti unutar **root domena**.\
 Imajte na umu da ako koristite pogrešne podatke, pojaviće se prilično ružni logovi.
 
 {{#ref}}
@@ -496,7 +496,7 @@ dcshadow.md
 
 ### LAPS Persistence
 
-Ranije smo razgovarali o tome kako povećati privilegije ako imate **dovoljno dozvola za čitanje LAPS lozinki**. Međutim, ove lozinke se takođe mogu koristiti za **održavanje trajnosti**.\
+Ranije smo razgovarali o tome kako eskalirati privilegije ako imate **dovoljno dozvola za čitanje LAPS lozinki**. Međutim, ove lozinke se takođe mogu koristiti za **održavanje trajnosti**.\
 Proverite:
 
 {{#ref}}
@@ -511,56 +511,56 @@ Microsoft gleda na **Forest** kao na bezbednosnu granicu. To implicira da **komp
 
 [**domen poverenje**](<http://technet.microsoft.com/en-us/library/cc759554(v=ws.10).aspx>) je bezbednosni mehanizam koji omogućava korisniku iz jednog **domena** da pristupi resursima u drugom **domenu**. Suštinski, stvara vezu između autentifikacionih sistema dva domena, omogućavajući verifikaciju autentifikacije da teče neometano. Kada domeni postave poverenje, razmenjuju i zadržavaju specifične **ključeve** unutar svojih **Domain Controllers (DCs)**, koji su ključni za integritet poverenja.
 
-U tipičnom scenariju, ako korisnik želi da pristupi usluzi u **poverljivom domenu**, prvo mora da zatraži posebnu kartu poznatu kao **inter-realm TGT** od svog domena DC. Ova TGT je enkriptovana sa zajedničkim **ključem** na kojem su se oba domena dogovorila. Korisnik zatim predstavlja ovu TGT **DC-u poverljivog domena** da bi dobio uslužnu kartu (**TGS**). Nakon uspešne validacije inter-realm TGT od strane DC-a poverljivog domena, izdaje TGS, dajući korisniku pristup usluzi.
+U tipičnom scenariju, ako korisnik želi da pristupi usluzi u **poverenom domenu**, prvo mora zatražiti posebnu kartu poznatu kao **inter-realm TGT** od svog domena DC. Ova TGT je enkriptovana sa zajedničkim **ključem** na kojem su se oba domena dogovorila. Korisnik zatim predstavlja ovu TGT **DC-u poverenog domena** da dobije kartu usluge (**TGS**). Nakon uspešne validacije inter-realm TGT od strane DC-a poverenog domena, izdaje TGS, dajući korisniku pristup usluzi.
 
 **Koraci**:
 
 1. **klijentski računar** u **Domen 1** započinje proces koristeći svoj **NTLM hash** da zatraži **Ticket Granting Ticket (TGT)** od svog **Domain Controller (DC1)**.
 2. DC1 izdaje novu TGT ako je klijent uspešno autentifikovan.
 3. Klijent zatim traži **inter-realm TGT** od DC1, koji je potreban za pristup resursima u **Domen 2**.
-4. Inter-realm TGT je enkriptovan sa **trust key** koji je podeljen između DC1 i DC2 kao deo dvosmernog poverenja domena.
+4. Inter-realm TGT je enkriptovan sa **trust key** koji je deljen između DC1 i DC2 kao deo dvosmernog poverenja domena.
 5. Klijent uzima inter-realm TGT do **Domain 2's Domain Controller (DC2)**.
-6. DC2 verifikuje inter-realm TGT koristeći svoj zajednički trust key i, ako je važeći, izdaje **Ticket Granting Service (TGS)** za server u Domenu 2 kojem klijent želi da pristupi.
-7. Na kraju, klijent predstavlja ovaj TGS serveru, koji je enkriptovan sa hash-om naloga servera, da bi dobio pristup usluzi u Domenu 2.
+6. DC2 verifikuje inter-realm TGT koristeći svoj zajednički trust key i, ako je važeći, izdaje **Ticket Granting Service (TGS)** za server u Domenu 2 kojem klijent želi pristupiti.
+7. Na kraju, klijent predstavlja ovaj TGS serveru, koji je enkriptovan sa hash-om serverovog naloga, da dobije pristup usluzi u Domenu 2.
 
 ### Different trusts
 
-Važno je primetiti da **poverenje može biti jednostrano ili dvostrano**. U dvostranoj opciji, oba domena će se međusobno poveravati, ali u **jednostranom** poverenju jedan od domena će biti **poverljiv** a drugi **pouzdani** domen. U poslednjem slučaju, **moći ćete da pristupite resursima unutar pouzdanog domena samo iz poverljivog**.
+Važno je primetiti da **poverenje može biti 1 put ili 2 puta**. U opciji 2 puta, oba domena će se međusobno poveravati, ali u **1 put** poverenju jedan od domena će biti **povereni** a drugi **pouzdani** domen. U poslednjem slučaju, **moći ćete da pristupite resursima unutar pouzdanog domena samo iz poverenog**.
 
-Ako Domen A poverava Domenu B, A je pouzdani domen a B je poverljiv. Štaviše, u **Domenu A**, ovo bi bilo **Outbound trust**; a u **Domenu B**, ovo bi bilo **Inbound trust**.
+Ako Domen A poverava Domenu B, A je pouzdani domen a B je povereni. Štaviše, u **Domenu A**, ovo bi bilo **Outbound trust**; a u **Domenu B**, ovo bi bilo **Inbound trust**.
 
 **Različiti odnosi poverenja**
 
 - **Parent-Child Trusts**: Ovo je uobičajena postavka unutar iste šume, gde dete domen automatski ima dvosmerno tranzitivno poverenje sa svojim roditeljskim domenom. Suštinski, to znači da zahtevi za autentifikaciju mogu teći neometano između roditelja i deteta.
-- **Cross-link Trusts**: Poznate kao "prečice poverenja", ove se uspostavljaju između domena dece kako bi se ubrzali procesi upućivanja. U složenim šumama, upućivanja za autentifikaciju obično moraju putovati do korena šume, a zatim do ciljnog domena. Kreiranjem prečica, putovanje se skraćuje, što je posebno korisno u geografski raspršenim okruženjima.
-- **External Trusts**: Ove se postavljaju između različitih, nepovezanih domena i po prirodi su ne-tranzitivne. Prema [Microsoftovoj dokumentaciji](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>), spoljašnja poverenja su korisna za pristup resursima u domenu izvan trenutne šume koji nije povezan šumskim poverenjem. Bezbednost se pojačava filtriranjem SID-a sa spoljnim poverenjima.
-- **Tree-root Trusts**: Ova poverenja se automatski uspostavljaju između korenskog domena šume i novog dodatog korena drveta. Iako se ne susreću često, poverenja korena drveta su važna za dodavanje novih domena drveća u šumu, omogućavajući im da zadrže jedinstveno ime domena i osiguravajući dvosmernu tranzitivnost. Više informacija možete pronaći u [Microsoftovom vodiču](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>).
+- **Cross-link Trusts**: Poznate kao "shortcut trusts", ove se uspostavljaju između domena dece kako bi se ubrzali procesi upućivanja. U složenim šumama, upućivanja za autentifikaciju obično moraju putovati do korena šume, a zatim do ciljnog domena. Kreiranjem međuveza, putovanje se skraćuje, što je posebno korisno u geografskim raspršenim okruženjima.
+- **External Trusts**: Ove se postavljaju između različitih, nepovezanih domena i po prirodi su ne-transitivne. Prema [Microsoftovoj dokumentaciji](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>), spoljašnja poverenja su korisna za pristup resursima u domenu izvan trenutne šume koji nije povezan šumskim poverenjem. Bezbednost se pojačava filtriranjem SID-a sa spoljnim poverenjima.
+- **Tree-root Trusts**: Ova poverenja se automatski uspostavljaju između korenskog domena šume i novododatog korena drveta. Iako se ne susreću često, poverenja korena drveta su važna za dodavanje novih domena drveća u šumu, omogućavajući im da zadrže jedinstveno ime domena i osiguravajući dvosmernu tranzitivnost. Više informacija može se naći u [Microsoftovom vodiču](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>).
 - **Forest Trusts**: Ova vrsta poverenja je dvosmerno tranzitivno poverenje između dva korenska domena šume, takođe primenjujući filtriranje SID-a kako bi se pojačale mere bezbednosti.
 - **MIT Trusts**: Ova poverenja se uspostavljaju sa ne-Windows, [RFC4120-kompatibilnim](https://tools.ietf.org/html/rfc4120) Kerberos domenima. MIT poverenja su malo specijalizovanija i prilagođena su okruženjima koja zahtevaju integraciju sa Kerberos-baziranim sistemima van Windows ekosistema.
 
 #### Ostale razlike u **odnosima poverenja**
 
 - Odnos poverenja može biti **tranzitivan** (A poverava B, B poverava C, onda A poverava C) ili **ne-tranzitivan**.
-- Odnos poverenja može biti postavljen kao **dvosmerno poverenje** (oba se međusobno poveravaju) ili kao **jednostrano poverenje** (samo jedan od njih se poverava drugom).
+- Odnos poverenja može biti postavljen kao **bidirekcionalno poverenje** (oba se međusobno poveravaju) ili kao **jednosmerno poverenje** (samo jedan od njih se poverava drugom).
 
 ### Attack Path
 
 1. **Enumerate** odnose poverenja
 2. Proverite da li bilo koji **bezbednosni princip** (korisnik/grupa/računar) ima **pristup** resursima **drugog domena**, možda putem ACE unosa ili tako što je u grupama drugog domena. Potražite **odnose preko domena** (poverenje je verovatno stvoreno za ovo).
-1. Kerberoast u ovom slučaju bi mogao biti još jedna opcija.
-3. **Kompromitujte** **naloge** koji mogu **preći** između domena.
+1. Kerberoast u ovom slučaju može biti još jedna opcija.
+3. **Kompromitujte** **naloge** koji mogu **preći** kroz domene.
 
 Napadači bi mogli pristupiti resursima u drugom domenu putem tri osnovna mehanizma:
 
 - **Članstvo u lokalnoj grupi**: Principi mogu biti dodati lokalnim grupama na mašinama, kao što je grupa “Administratori” na serveru, dajući im značajnu kontrolu nad tom mašinom.
 - **Članstvo u grupi stranog domena**: Principi takođe mogu biti članovi grupa unutar stranog domena. Međutim, efikasnost ove metode zavisi od prirode poverenja i obima grupe.
-- **Access Control Lists (ACLs)**: Principi mogu biti navedeni u **ACL**, posebno kao entiteti u **ACEs** unutar **DACL**, pružajući im pristup specifičnim resursima. Za one koji žele da se dublje upuste u mehaniku ACL-a, DACL-a i ACE-a, beleška pod nazivom “[An ACE Up The Sleeve](https://specterops.io/assets/resources/an_ace_up_the_sleeve.pdf)” je neprocenjiv resurs.
+- **Access Control Lists (ACLs)**: Principi mogu biti navedeni u **ACL**, posebno kao entiteti u **ACEs** unutar **DACL**, pružajući im pristup specifičnim resursima. Za one koji žele dublje da istraže mehaniku ACL-a, DACL-a i ACE-a, beleška pod nazivom “[An ACE Up The Sleeve](https://specterops.io/assets/resources/an_ace_up_the_sleeve.pdf)” je neprocenjiv resurs.
 
 ### Find external users/groups with permissions
 
-Možete proveriti **`CN=<user_SID>,CN=ForeignSecurityPrincipals,DC=domain,DC=com`** da biste pronašli strane bezbednosne principe u domenu. Ovo će biti korisnici/grupe iz **spoljnog domena/šume**.
+Možete proveriti **`CN=<user_SID>,CN=ForeignSecurityPrincipals,DC=domain,DC=com`** da pronađete strane bezbednosne principe u domenu. Ovo će biti korisnici/grupe iz **spoljnog domena/šume**.
 
-Možete proveriti ovo u **Bloodhound** ili koristeći powerview:
+Možete ovo proveriti u **Bloodhound** ili koristeći powerview:
 ```powershell
 # Get users that are i groups outside of the current domain
 Get-DomainForeignUser
@@ -581,7 +581,7 @@ TrustDirection  : Bidirectional       --> Trust direction (2ways in this case)
 WhenCreated     : 2/19/2021 1:28:00 PM
 WhenChanged     : 2/19/2021 1:28:00 PM
 ```
-Други начини за набрајање доменских поверења:
+Drugi načini za enumeraciju domena poverenja:
 ```bash
 # Get DCs
 nltest /dsgetdc:<DOMAIN>
@@ -644,7 +644,7 @@ ADCS ESC5 ranjivost cilja kontrolu nad objektima javne infrastrukture ključeva 
 
 Više detalja o ovome može se pročitati u [From DA to EA with ESC5](https://posts.specterops.io/from-da-to-ea-with-esc5-f9f045aa105c). U scenarijima bez ADCS, napadač ima mogućnost da postavi potrebne komponente, kao što je objašnjeno u [Escalating from Child Domain Admins to Enterprise Admins](https://www.pkisolutions.com/escalating-from-child-domains-admins-to-enterprise-admins-in-5-minutes-by-abusing-ad-cs-a-follow-up/).
 
-### Spoljna Forest Domen - Jednosmerno (Ulazno) ili bidirekcionalno
+### Spoljna šuma domena - Jednosmerno (ulazno) ili dvostrano
 ```bash
 Get-DomainTrust
 SourceName      : a.domain.local   --> Current domain
@@ -673,15 +673,15 @@ TrustDirection  : Outbound        --> Outbound trust
 WhenCreated     : 2/19/2021 10:15:24 PM
 WhenChanged     : 2/19/2021 10:15:24 PM
 ```
-U ovom scenariju **vaša domena** **pouzdava** neke **privilegije** principalu iz **drugih domena**.
+U ovom scenariju **vaša domena** **pouzdava** neka **prava** principalu iz **druge domene**.
 
-Međutim, kada **domena bude poverena** od strane poverene domene, poverena domena **kreira korisnika** sa **predvidivim imenom** koji koristi **lozinku poverene lozinke**. Što znači da je moguće **pristupiti korisniku iz poverene domene kako bi se ušlo u poverenu** da se enumeriše i pokuša da se eskalira više privilegija:
+Međutim, kada je **domena poverena** od strane poverene domene, poverena domena **kreira korisnika** sa **predvidivim imenom** koji koristi kao **lozinku poverenu lozinku**. Što znači da je moguće **pristupiti korisniku iz poverene domene da bi se ušlo u poverenu** da se enumeriše i pokuša da se eskalira više privilegija:
 
 {{#ref}}
 external-forest-domain-one-way-outbound.md
 {{#endref}}
 
-Drugi način da se kompromituje poverena domena je da se pronađe [**SQL poverena veza**](abusing-ad-mssql.md#mssql-trusted-links) kreirana u **suprotnoj pravcu** poverenja domena (što nije baš uobičajeno).
+Drugi način da se kompromituje poverena domena je da se pronađe [**SQL poverena veza**](abusing-ad-mssql.md#mssql-trusted-links) kreirana u **suprotnoj pravcu** od poverenja domena (što nije vrlo uobičajeno).
 
 Još jedan način da se kompromituje poverena domena je da se čeka na mašini na kojoj **korisnik iz poverene domene može pristupiti** da se prijavi putem **RDP**. Tada bi napadač mogao da ubaci kod u proces RDP sesije i **pristupi izvornoj domeni žrtve** odatle.\
 Štaviše, ako je **žrtva montirala svoj hard disk**, iz **RDP sesije** proces napadača mogao bi da sačuva **backdoor-e** u **folderu za pokretanje hard diska**. Ova tehnika se naziva **RDPInception.**
@@ -694,13 +694,13 @@ rdp-sessions-abuse.md
 
 ### **SID filtriranje:**
 
-- Rizik od napada koji koriste SID istorijski atribut preko šuma poverenja ublažava SID filtriranje, koje je podrazumevano aktivirano na svim međušumskim poverenjima. Ovo se zasniva na pretpostavci da su unutrašnja poverenja šuma sigurna, smatrajući šumu, a ne domenu, kao bezbednosnu granicu prema stavu Microsoft-a.
+- Rizik od napada koji koriste SID istorijski atribut preko šuma poverenja je ublažen SID filtriranjem, koje je podrazumevano aktivirano na svim međušumskim poverenjima. Ovo se zasniva na pretpostavci da su unutrašnja poverenja šuma sigurna, smatrajući šumu, a ne domenu, kao bezbednosnu granicu prema stavu Microsoft-a.
 - Međutim, postoji caka: SID filtriranje može ometati aplikacije i pristup korisnicima, što dovodi do povremene deaktivacije.
 
 ### **Selektivna autentifikacija:**
 
-- Za međušumska poverenja, korišćenje selektivne autentifikacije osigurava da korisnici iz dve šume nisu automatski autentifikovani. Umesto toga, potrebne su eksplicitne dozvole za korisnike da pristupe domenama i serverima unutar poverene domene ili šume.
-- Važno je napomenuti da ove mere ne štite od eksploatacije zapisivog Konfiguracionog imena konteksta (NC) ili napada na račun poverenja.
+- Za međušumska poverenja, primena selektivne autentifikacije osigurava da korisnici iz dve šume nisu automatski autentifikovani. Umesto toga, potrebne su eksplicitne dozvole za korisnike da pristupe domenama i serverima unutar poverene domene ili šume.
+- Važno je napomenuti da ove mere ne štite od eksploatacije zapisivog Konfiguracionog imenskog konteksta (NC) ili napada na račun poverenja.
 
 [**Više informacija o poverenjima domena na ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain)
 
@@ -736,7 +736,7 @@ https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-move
 - **Obilaženje Microsoft ATA detekcije**:
 - **Enumeracija korisnika**: Izbegavanje enumeracije sesija na kontrolerima domena kako bi se sprečila ATA detekcija.
 - **Impersonacija karte**: Korišćenje **aes** ključeva za kreiranje karata pomaže u izbegavanju detekcije ne prebacujući se na NTLM.
-- **DCSync napadi**: Preporučuje se izvršavanje sa non-Domain Controller-a kako bi se izbegla ATA detekcija, jer direktno izvršavanje sa kontrolera domena izaziva upozorenja.
+- **DCSync napadi**: Preporučuje se izvršavanje sa non-Domain Controller-a kako bi se izbegla ATA detekcija, jer direktno izvršavanje sa kontrolera domena pokreće upozorenja.
 
 ## Reference
 
