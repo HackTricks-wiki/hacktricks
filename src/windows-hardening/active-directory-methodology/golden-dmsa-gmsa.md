@@ -19,7 +19,7 @@ Derywacja to: `AES256_HMAC( KDSRootKey , SID || ManagedPasswordID )` → 240-baj
 
 ## Złoty gMSA / Złoty dMSA Atak
 
-Jeśli atakujący może uzyskać wszystkie trzy wejścia **offline**, może obliczyć **ważne aktualne i przyszłe hasła** dla **dowolnego gMSA/dMSA w lesie** bez ponownego dotykania DC, omijając:
+Jeśli atakujący może uzyskać wszystkie trzy wejścia **offline**, może obliczyć **ważne aktualne i przyszłe hasła** dla **dowolnego gMSA/dMSA w lesie**, nie dotykając ponownie DC, omijając:
 
 * logi wstępnej autoryzacji Kerberos / żądania biletów
 * audyt odczytu LDAP
