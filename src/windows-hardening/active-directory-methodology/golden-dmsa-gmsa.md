@@ -17,7 +17,7 @@ Windows Managed Service Accounts (MSA)는 비밀번호를 수동으로 관리할
 * `msDS-ManagedPasswordId` 속성에서 찾을 수 있는 계정별 **ManagedPasswordID** (GUID).
 
 파생 과정은: `AES256_HMAC( KDSRootKey , SID || ManagedPasswordID )` → 240 바이트 블롭이 최종적으로 **base64 인코딩**되어 `msDS-ManagedPassword` 속성에 저장됩니다.
-정상적인 비밀번호 사용 중에는 Kerberos 트래픽이나 도메인 상호작용이 필요하지 않으며, 멤버 호스트는 세 가지 입력값을 알고 있는 한 로컬에서 비밀번호를 파생합니다.
+정상적인 비밀번호 사용 중에는 Kerberos 트래픽이나 도메인 상호작용이 필요하지 않으며, 멤버 호스트는 세 가지 입력값을 알고 있는 한 로컬에서 비밀번호를 파생할 수 있습니다.
 
 ## Golden gMSA / Golden dMSA 공격
 
@@ -64,7 +64,7 @@ GoldendMSA.exe info -d example.local -m ldap
 # RID brute force if anonymous binds are blocked
 GoldendMSA.exe info -d example.local -m brute -r 5000 -u jdoe -p P@ssw0rd
 ```
-### Phase 3 – ManagedPasswordID 추측 / 발견 (누락된 경우)
+### Phase 3 – ManagedPasswordID 추측 / 발견 (누락 시)
 
 일부 배포에서는 `msDS-ManagedPasswordId`를 ACL 보호 읽기에서 *제거*합니다.  
 GUID가 128비트이기 때문에 단순한 무차별 대입은 불가능하지만:
@@ -76,7 +76,7 @@ GUID가 128비트이기 때문에 단순한 무차별 대입은 불가능하지�
 ```powershell
 GoldendMSA.exe wordlist -s <SID> -d example.local -f example.local -k <KDSKeyGUID>
 ```
-도구는 후보 비밀번호를 계산하고 그들의 base64 blob을 실제 `msDS-ManagedPassword` 속성과 비교합니다. 일치하면 올바른 GUID가 드러납니다.
+도구는 후보 비밀번호를 계산하고 그들의 base64 blob을 실제 `msDS-ManagedPassword` 속성과 비교합니다 – 일치하면 올바른 GUID가 드러납니다.
 
 ### Phase 4 – 오프라인 비밀번호 계산 및 변환
 
@@ -96,7 +96,7 @@ GoldendMSA.exe convert -d example.local -u svc_web$ -p <Base64Pwd>
 * DC에서 **디렉터리 서비스 복원 모드(DSRM)** 또는 **볼륨 섀도 복사** 생성을 모니터링합니다.
 * 서비스 계정의 `CN=Master Root Keys,…` 및 `userAccountControl` 플래그에 대한 읽기/변경을 감사합니다.
 * 비정상적인 **base64 비밀번호 쓰기** 또는 호스트 간의 갑작스러운 서비스 비밀번호 재사용을 감지합니다.
-* Tier-0 격리가 불가능한 경우, 고급 gMSA를 정기적인 무작위 회전이 있는 **클래식 서비스 계정**으로 변환하는 것을 고려합니다.
+* Tier-0 격리가 불가능한 경우, 높은 권한의 gMSA를 **클래식 서비스 계정**으로 변환하고 정기적으로 무작위 회전을 고려합니다.
 
 ## 도구
 
