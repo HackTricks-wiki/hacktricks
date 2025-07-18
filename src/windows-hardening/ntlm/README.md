@@ -346,4 +346,3 @@ krbrelayx.py -t TARGET.DOMAIN.LOCAL -smb2support
 
 {{#include ../../banners/hacktricks-training.md}}
 
-
