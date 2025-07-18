@@ -10,18 +10,18 @@ Windows 托管服务账户（MSA）是专门设计用于运行服务的特殊主
 1. **gMSA** – 组托管服务账户 – 可以在其 `msDS-GroupMSAMembership` 属性中授权的多个主机上使用。
 2. **dMSA** – 委派托管服务账户 – gMSA 的（预览）继任者，依赖于相同的加密技术，但允许更细粒度的委派场景。
 
-对于这两种变体，**密码不会存储**在每个域控制器（DC）上，就像常规的 NT-hash 一样。相反，每个 DC 可以 **动态推导** 当前密码，基于：
+对于这两种变体，**密码不会存储**在每个域控制器（DC）上，就像常规的 NT 哈希一样。相反，每个 DC 可以**动态推导**当前密码，基于：
 
 * 林范围的 **KDS 根密钥** (`KRBTGT\KDS`) – 随机生成的 GUID 命名的秘密，复制到每个 DC 下的 `CN=Master Root Keys,CN=Group Key Distribution Service, CN=Services, CN=Configuration, …` 容器中。
 * 目标账户的 **SID**。
 * 在 `msDS-ManagedPasswordId` 属性中找到的每个账户的 **ManagedPasswordID**（GUID）。
 
-推导公式为：`AES256_HMAC( KDSRootKey , SID || ManagedPasswordID )` → 240 字节的 blob 最终 **base64 编码** 并存储在 `msDS-ManagedPassword` 属性中。
+推导公式为：`AES256_HMAC( KDSRootKey , SID || ManagedPasswordID )` → 240 字节的 blob 最终**进行 base64 编码**并存储在 `msDS-ManagedPassword` 属性中。
 在正常密码使用期间，无需 Kerberos 流量或域交互 – 只要成员主机知道这三个输入，就可以在本地推导密码。
 
 ## Golden gMSA / Golden dMSA 攻击
 
-如果攻击者能够 **离线** 获取所有三个输入，他们可以计算出 **林中任何 gMSA/dMSA 的有效当前和未来密码**，而无需再次接触 DC，从而绕过：
+如果攻击者能够**离线**获取所有三个输入，他们可以计算出**任何 gMSA/dMSA 的有效当前和未来密码**，而无需再次接触 DC，从而绕过：
 
 * Kerberos 预身份验证 / 票证请求日志
 * LDAP 读取审计
@@ -50,7 +50,7 @@ mimikatz # lsadump::trust /patch   # shows KDS root keys too
 
 ### 第 2 阶段 – 枚举 gMSA/dMSA 对象
 
-至少检索 `sAMAccountName`、`objectSid` 和 `msDS-ManagedPasswordId`：
+检索至少 `sAMAccountName`、`objectSid` 和 `msDS-ManagedPasswordId`：
 ```powershell
 # Authenticated or anonymous depending on ACLs
 Get-ADServiceAccount -Filter * -Properties msDS-ManagedPasswordId | \
