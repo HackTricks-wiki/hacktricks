@@ -4,19 +4,19 @@
 
 ## Osnovne informacije
 
-U okruženjima gde su **Windows XP i Server 2003** u upotrebi, koriste se LM (Lan Manager) hešovi, iako je široko prepoznato da se lako mogu kompromitovati. Određeni LM heš, `AAD3B435B51404EEAAD3B435B51404EE`, ukazuje na situaciju u kojoj LM nije korišćen, predstavljajući heš za prazan string.
+U okruženjima gde su **Windows XP i Server 2003** u upotrebi, koriste se LM (Lan Manager) hešovi, iako je široko prepoznato da se lako mogu kompromitovati. Određeni LM heš, `AAD3B435B51404EEAAD3B435B51404EE`, ukazuje na scenario u kojem LM nije korišćen, predstavljajući heš za prazan string.
 
 Podrazumevano, **Kerberos** autentifikacioni protokol je primarna metoda koja se koristi. NTLM (NT LAN Manager) dolazi u obzir pod određenim okolnostima: odsustvo Active Directory, nepostojanje domena, neispravnost Kerberosa zbog nepravilne konfiguracije, ili kada se pokušavaju povezati koristeći IP adresu umesto važećeg imena hosta.
 
-Prisutnost **"NTLMSSP"** zaglavlja u mrežnim paketima signalizira NTLM autentifikacioni proces.
+Prisutnost **"NTLMSSP"** header-a u mrežnim paketima signalizira NTLM autentifikacioni proces.
 
 Podrška za autentifikacione protokole - LM, NTLMv1 i NTLMv2 - omogućena je specifičnom DLL datotekom smeštenom na `%windir%\Windows\System32\msv1\_0.dll`.
 
 **Ključne tačke**:
 
 - LM hešovi su ranjivi i prazan LM heš (`AAD3B435B51404EEAAD3B435B51404EE`) označava njegovo ne korišćenje.
-- Kerberos je podrazumevana metoda autentifikacije, dok se NTLM koristi samo pod određenim uslovima.
-- NTLM autentifikacioni paketi su prepoznatljivi po "NTLMSSP" zaglavlju.
+- Kerberos je podrazumevana autentifikaciona metoda, dok se NTLM koristi samo pod određenim uslovima.
+- NTLM autentifikacioni paketi su prepoznatljivi po "NTLMSSP" header-u.
 - LM, NTLMv1 i NTLMv2 protokoli su podržani od strane sistemske datoteke `msv1\_0.dll`.
 
 ## LM, NTLMv1 i NTLMv2
@@ -25,7 +25,7 @@ Možete proveriti i konfigurisati koji protokol će se koristiti:
 
 ### GUI
 
-Izvršite _secpol.msc_ -> Lokalne politike -> Bezbednosne opcije -> Mrežna bezbednost: LAN Manager nivo autentifikacije. Postoji 6 nivoa (od 0 do 5).
+Izvršite _secpol.msc_ -> Lokalne politike -> Opcije bezbednosti -> Mrežna bezbednost: LAN Manager nivo autentifikacije. Postoji 6 nivoa (od 0 do 5).
 
 ![](<../../images/image (919).png>)
 
@@ -50,16 +50,16 @@ Moguće vrednosti:
 2. Klijentska mašina **šalje zahtev za autentifikaciju** šaljući **ime domena** i **korisničko ime**
 3. **server** šalje **izazov**
 4. **klijent enkriptuje** **izazov** koristeći heš lozinke kao ključ i šalje ga kao odgovor
-5. **server šalje** **Kontroloru domena** **ime domena, korisničko ime, izazov i odgovor**. Ako **nije** konfigurisan Active Directory ili je ime domena ime servera, akreditivi se **proveravaju lokalno**.
+5. **server šalje** **kontroloru domena** **ime domena, korisničko ime, izazov i odgovor**. Ako **nije** konfigurisan Active Directory ili je ime domena ime servera, akreditivi se **proveravaju lokalno**.
 6. **kontrolor domena proverava da li je sve ispravno** i šalje informacije serveru
 
-**server** i **Kontrolor domena** mogu da kreiraju **Sigurni Kanal** putem **Netlogon** servera jer Kontrolor domena zna lozinku servera (ona je unutar **NTDS.DIT** baze).
+**server** i **kontrolor domena** mogu da kreiraju **sigurni kanal** putem **Netlogon** servera jer kontrolor domena zna lozinku servera (ona je unutar **NTDS.DIT** baze).
 
 ### Lokalna NTLM autentifikacija
 
-Autentifikacija je kao ona pomenuta **pre, ali** **server** zna **heš korisnika** koji pokušava da se autentifikuje unutar **SAM** fajla. Tako da, umesto da pita Kontrolora domena, **server će sam proveriti** da li korisnik može da se autentifikuje.
+Autentifikacija je kao ona pomenuta **pre, ali** **server** zna **heš korisnika** koji pokušava da se autentifikuje unutar **SAM** fajla. Tako da, umesto da pita kontrolora domena, **server će sam proveriti** da li korisnik može da se autentifikuje.
 
-### NTLMv1 Izazov
+### NTLMv1 izazov
 
 **dužina izazova je 8 bajtova** i **odgovor je dug 24 bajta**.
 
@@ -85,7 +85,7 @@ Zapamtite da će štampač koristiti račun računara tokom autentifikacije, a r
 
 ### NTLMv1 napad sa hashcat
 
-NTLMv1 se takođe može probiti sa NTLMv1 Multi Tool [https://github.com/evilmog/ntlmv1-multi](https://github.com/evilmog/ntlmv1-multi) koji formatira NTLMv1 poruke na način koji se može probiti sa hashcat.
+NTLMv1 se takođe može probiti sa NTLMv1 Multi Tool [https://github.com/evilmog/ntlmv1-multi](https://github.com/evilmog/ntlmv1-multi) koji formatira NTLMv1 poruke na način koji se može probiti sa hashcat. 
 
 Komanda
 ```bash
@@ -149,7 +149,7 @@ I'm sorry, but I need the specific text you want translated in order to assist y
 
 586c # this is the last part
 ```
-Please provide the text you would like me to translate.
+I'm sorry, but I need the specific text you want me to translate in order to assist you. Please provide the content you would like translated.
 ```bash
 NTHASH=b4b9b02e6f09a9bd760f388b6700586c
 ```
@@ -157,9 +157,9 @@ NTHASH=b4b9b02e6f09a9bd760f388b6700586c
 
 Dužina **izazova je 8 bajtova** i **2 odgovora se šalju**: Jedan je **dužine 24 bajta** a dužina **drugog** je **varijabilna**.
 
-**Prvi odgovor** se kreira šifrovanjem koristeći **HMAC_MD5** **niz** sastavljen od **klijenta i domena** i koristeći kao **ključ** **MD4 hash** **NT hash**. Zatim, **rezultat** će se koristiti kao **ključ** za šifrovanje koristeći **HMAC_MD5** **izazov**. Tome će se **dodati izazov klijenta od 8 bajtova**. Ukupno: 24 B.
+**Prvi odgovor** se kreira šifrovanjem koristeći **HMAC_MD5** **niz** sastavljen od **klijenta i domena** i koristeći kao **ključ** **MD4 hash** **NT hasha**. Zatim, **rezultat** će se koristiti kao **ključ** za šifrovanje koristeći **HMAC_MD5** **izazov**. Tome će se **dodati klijentski izazov od 8 bajtova**. Ukupno: 24 B.
 
-**Drugi odgovor** se kreira koristeći **nekoliko vrednosti** (novi izazov klijenta, **vremensku oznaku** da bi se izbegli **ponovno korišćeni napadi**...)
+**Drugi odgovor** se kreira koristeći **several values** (novi klijentski izazov, **vremensku oznaku** da bi se izbegli **replay napadi**...)
 
 Ako imate **pcap koji je uhvatio uspešan proces autentifikacije**, možete pratiti ovaj vodič da dobijete domen, korisničko ime, izazov i odgovor i pokušate da provalite lozinku: [https://research.801labs.org/cracking-an-ntlmv2-hash/](https://www.801labs.org/research-portal/post/cracking-an-ntlmv2-hash/)
 
@@ -180,7 +180,7 @@ Ovo će pokrenuti proces koji će pripadati korisnicima koji su pokrenuli mimika
 
 ### Pass-the-Hash sa linux-a
 
-Možete dobiti izvršenje koda na Windows mašinama koristeći Pass-the-Hash sa Linux-a.\
+Možete dobiti izvršavanje koda na Windows mašinama koristeći Pass-the-Hash sa Linux-a.\
 [**Pristupite ovde da naučite kako to uraditi.**](https://github.com/carlospolop/hacktricks/blob/master/windows/ntlm/broken-reference/README.md)
 
 ### Impacket Windows kompajlirani alati
@@ -224,11 +224,11 @@ Invoke-TheHash -Type WMIExec -Target 192.168.100.0/24 -TargetExclude 192.168.100
 
 **Mora se pokrenuti kao administrator**
 
-Ovaj alat će raditi istu stvar kao mimikatz (modifikovati LSASS memoriju).
+Ovaj alat će uraditi isto što i mimikatz (modifikovati LSASS memoriju).
 ```
 wce.exe -s <username>:<domain>:<hash_lm>:<hash_nt>
 ```
-### Ručna Windows daljinska izvršenja sa korisničkim imenom i lozinkom
+### Ručno izvršavanje na Windows-u sa korisničkim imenom i lozinkom
 
 {{#ref}}
 ../lateral-movement/
@@ -240,13 +240,13 @@ wce.exe -s <username>:<domain>:<hash_lm>:<hash_nt>
 
 ## Napad Interni Monolog
 
-Napad Interni Monolog je suptilna tehnika ekstrakcije kredencijala koja omogućava napadaču da preuzme NTLM hešove sa žrtvine mašine **bez direktne interakcije sa LSASS procesom**. Za razliku od Mimikatz-a, koji čita hešove direktno iz memorije i često ga blokiraju rešenja za bezbednost krajnjih tačaka ili Credential Guard, ovaj napad koristi **lokalne pozive NTLM autentifikacionom paketu (MSV1_0) putem Interfejsa za podršku bezbednosti (SSPI)**. Napadač prvo **smanjuje NTLM podešavanja** (npr., LMCompatibilityLevel, NTLMMinClientSec, RestrictSendingNTLMTraffic) kako bi osigurao da je NetNTLMv1 dozvoljen. Zatim se pretvara u postojeće korisničke tokene dobijene iz pokrenutih procesa i pokreće NTLM autentifikaciju lokalno kako bi generisao NetNTLMv1 odgovore koristeći poznati izazov.
+Napad Interni Monolog je suptilna tehnika ekstrakcije kredencijala koja omogućava napadaču da preuzme NTLM hešove sa žrtvine mašine **bez direktne interakcije sa LSASS procesom**. Za razliku od Mimikatz-a, koji čita hešove direktno iz memorije i često ga blokiraju rešenja za bezbednost krajnjih tačaka ili Credential Guard, ovaj napad koristi **lokalne pozive NTLM autentifikacionom paketu (MSV1_0) putem Interfejsa za podršku bezbednosti (SSPI)**. Napadač prvo **smanjuje NTLM podešavanja** (npr. LMCompatibilityLevel, NTLMMinClientSec, RestrictSendingNTLMTraffic) kako bi osigurao da je NetNTLMv1 dozvoljen. Zatim se pretvara u postojeće korisničke tokene dobijene iz pokrenutih procesa i pokreće NTLM autentifikaciju lokalno kako bi generisao NetNTLMv1 odgovore koristeći poznati izazov.
 
 Nakon hvatanja ovih NetNTLMv1 odgovora, napadač može brzo povratiti originalne NTLM hešove koristeći **prekomponovane rainbow tabele**, omogućavajući dalja Pass-the-Hash napade za lateralno kretanje. Ključno je da napad Interni Monolog ostaje suptilan jer ne generiše mrežni saobraćaj, ne ubrizgava kod, niti pokreće direktne dump-ove memorije, što ga čini teže uočljivim za odbrambene mehanizme u poređenju sa tradicionalnim metodama poput Mimikatz-a.
 
 Ako NetNTLMv1 nije prihvaćen—zbog primenjenih bezbednosnih politika, napadač može propasti u pokušaju da dobije NetNTLMv1 odgovor.
 
-Da bi se rešio ovaj slučaj, alat Interni Monolog je ažuriran: Dinamički dobija server token koristeći `AcceptSecurityContext()` kako bi i dalje **uhvatio NetNTLMv2 odgovore** ako NetNTLMv1 ne uspe. Iako je NetNTLMv2 mnogo teže probiti, i dalje otvara put za napade preusmeravanja ili offline brute-force u ograničenim slučajevima.
+Da bi se rešio ovaj slučaj, alat Interni Monolog je ažuriran: Dinamički stiče server token koristeći `AcceptSecurityContext()` kako bi i dalje **uhvatio NetNTLMv2 odgovore** ako NetNTLMv1 ne uspe. Iako je NetNTLMv2 mnogo teže probiti, i dalje otvara put za napade preusmeravanja ili offline brute-force u ograničenim slučajevima.
 
 PoC se može naći na **[https://github.com/eladshamir/Internal-Monologue](https://github.com/eladshamir/Internal-Monologue)**.
 
@@ -255,7 +255,7 @@ PoC se može naći na **[https://github.com/eladshamir/Internal-Monologue](https
 **Pročitajte detaljniji vodič o tome kako izvesti te napade ovde:**
 
 {{#ref}}
-../../generic-methodologies-and-resources/pentesting-network/`spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md`
+../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md
 {{#endref}}
 
 ## Parsiranje NTLM izazova iz mrežnog hvatanja
@@ -264,7 +264,7 @@ PoC se može naći na **[https://github.com/eladshamir/Internal-Monologue](https
 
 ## NTLM & Kerberos *Refleksija* putem Serijalizovanih SPN-ova (CVE-2025-33073)
 
-Windows sadrži nekoliko mitigacija koje pokušavaju da spreče *refleksivne* napade gde se NTLM (ili Kerberos) autentifikacija koja potiče sa hosta preusmerava nazad na **isti** host kako bi se dobile SYSTEM privilegije.
+Windows sadrži nekoliko mitigacija koje pokušavaju da spreče *refleksivne* napade gde se NTLM (ili Kerberos) autentifikacija koja potiče sa hosta preusmerava nazad na **isti** host kako bi se stekle SYSTEM privilegije.
 
 Microsoft je prekinuo većinu javnih lanaca sa MS08-068 (SMB→SMB), MS09-013 (HTTP→SMB), MS15-076 (DCOM→DCOM) i kasnijim zakrpama, međutim **CVE-2025-33073** pokazuje da se zaštite i dalje mogu zaobići zloupotrebom načina na koji **SMB klijent skraćuje Imena Servisnih Principala (SPN)** koja sadrže *marširane* (serijalizovane) informacije o cilju.
 
@@ -272,12 +272,12 @@ Microsoft je prekinuo većinu javnih lanaca sa MS08-068 (SMB→SMB), MS09-013 (H
 1. Napadač registruje **DNS A-zapis** čija oznaka kodira marširani SPN – npr.
 `srv11UWhRCAAAAAAAAAAAAAAAAAAAAAAAAAAAAwbEAYBAAAA → 10.10.10.50`
 2. Žrtva je primorana da se autentifikuje na to ime hosta (PetitPotam, DFSCoerce, itd.).
-3. Kada SMB klijent prosledi ciljni string `cifs/srv11UWhRCAAAAA…` `lsasrv!LsapCheckMarshalledTargetInfo`, poziv `CredUnmarshalTargetInfo` **uklanja** serijalizovani blob, ostavljajući **`cifs/srv1`**.
+3. Kada SMB klijent prosledi ciljni string `cifs/srv11UWhRCAAAAA…` funkciji `lsasrv!LsapCheckMarshalledTargetInfo`, poziv `CredUnmarshalTargetInfo` **uklanja** serijalizovani blob, ostavljajući **`cifs/srv1`**.
 4. `msv1_0!SspIsTargetLocalhost` (ili ekvivalent za Kerberos) sada smatra da je cilj *localhost* jer se kratki deo hosta poklapa sa imenom računara (`SRV1`).
-5. Kao posledica toga, server postavlja `NTLMSSP_NEGOTIATE_LOCAL_CALL` i ubrizgava **LSASS-ov SYSTEM pristupni token** u kontekst (za Kerberos se kreira podključ sesije označen kao SYSTEM).
+5. Kao posledica toga, server postavlja `NTLMSSP_NEGOTIATE_LOCAL_CALL` i ubrizgava **LSASS-ov SYSTEM pristupni token** u kontekst (za Kerberos se kreira SYSTEM-označeni podključ sesije).
 6. Preusmeravanje te autentifikacije sa `ntlmrelayx.py` **ili** `krbrelayx.py` daje pune SYSTEM privilegije na istom hostu.
 
-### Brzi PoC
+### Brza PoC
 ```bash
 # Add malicious DNS record
 dnstool.py -u 'DOMAIN\\user' -p 'pass' 10.10.10.1 \
@@ -296,7 +296,7 @@ krbrelayx.py -t TARGET.DOMAIN.LOCAL -smb2support
 ```
 ### Patch & Mitigations
 * KB zakrpa za **CVE-2025-33073** dodaje proveru u `mrxsmb.sys::SmbCeCreateSrvCall` koja blokira svaku SMB vezu čiji cilj sadrži marširane informacije (`CredUnmarshalTargetInfo` ≠ `STATUS_INVALID_PARAMETER`).
-* Sprovodite **SMB potpisivanje** da sprečite refleksiju čak i na neispravnim hostovima.
+* Sprovodite **SMB potpisivanje** da biste sprečili refleksiju čak i na neispravnim hostovima.
 * Pratite DNS zapise koji liče na `*<base64>...*` i blokirajte vektore prinude (PetitPotam, DFSCoerce, AuthIP...).
 
 ### Detection ideas
@@ -305,7 +305,7 @@ krbrelayx.py -t TARGET.DOMAIN.LOCAL -smb2support
 * Windows događaji 4624/4648 SYSTEM prijave odmah nakon daljinskih SMB pisanja sa istog hosta.
 
 ## References
-* [Synacktiv – NTLM Reflection is Dead, Long Live NTLM Reflection!](https://www.synacktiv.com/en/publications/la-reflexion-ntlm-est-morte-vive-la-reflexion-ntlm-analyse-approfondie-de-la-cve-2025.html)
+* [NTLM Reflection is Dead, Long Live NTLM Reflection!](https://www.synacktiv.com/en/publications/la-reflexion-ntlm-est-morte-vive-la-reflexion-ntlm-analyse-approfondie-de-la-cve-2025.html)
 * [MSRC – CVE-2025-33073](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-33073)
 
 {{#include ../../banners/hacktricks-training.md}}
