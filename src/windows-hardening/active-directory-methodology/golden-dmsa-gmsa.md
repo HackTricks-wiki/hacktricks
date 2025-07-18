@@ -9,13 +9,13 @@ Windows Yönetilen Hizmet Hesapları (MSA), parolalarını manuel olarak yönetm
 1. **gMSA** – grup Yönetilen Hizmet Hesabı – `msDS-GroupMSAMembership` niteliğinde yetkilendirilmiş birden fazla ana bilgisayarda kullanılabilir.
 2. **dMSA** – devredilmiş Yönetilen Hizmet Hesabı – gMSA'nın (önizleme) halefidir, aynı kriptografiye dayanır ancak daha ayrıntılı devretme senaryolarına izin verir.
 
-Her iki varyant için de **parola her Domain Controller (DC)** üzerinde düzenli bir NT-hash gibi **saklanmaz**. Bunun yerine her DC, mevcut parolayı anlık olarak aşağıdaki üç girdiden **türetebilir**:
+Her iki varyant için de **parola her Domain Controller (DC)** üzerinde düzenli bir NT-hash gibi **saklanmaz**. Bunun yerine her DC, mevcut parolayı anlık olarak aşağıdakilerden türetebilir:
 
-* Orman genelinde **KDS Kök Anahtarı** (`KRBTGT\KDS`) – her DC'ye `CN=Master Root Keys,CN=Group Key Distribution Service, CN=Services, CN=Configuration, …` konteyneri altında çoğaltılan rastgele oluşturulmuş GUID adında bir sır.
+* Orman genelinde **KDS Kök Anahtarı** (`KRBTGT\KDS`) – her DC'ye `CN=Master Root Keys,CN=Group Key Distribution Service, CN=Services, CN=Configuration, …` konteyneri altında çoğaltılan rastgele oluşturulmuş GUID adlı gizli anahtar.
 * Hedef hesap **SID**.
 * `msDS-ManagedPasswordId` niteliğinde bulunan her hesap için bir **ManagedPasswordID** (GUID).
 
-Türevleme işlemi: `AES256_HMAC( KDSRootKey , SID || ManagedPasswordID )` → 240 baytlık blob nihayetinde **base64-şifrelenir** ve `msDS-ManagedPassword` niteliğinde saklanır. Normal parola kullanımı sırasında Kerberos trafiği veya alan etkileşimi gerekmemektedir – bir üye ana bilgisayar, üç girdi bilindiği sürece parolayı yerel olarak türetebilir.
+Türevleme: `AES256_HMAC( KDSRootKey , SID || ManagedPasswordID )` → 240 baytlık blob nihayetinde **base64-şifrelenir** ve `msDS-ManagedPassword` niteliğinde saklanır. Normal parola kullanımı sırasında Kerberos trafiği veya alan etkileşimi gerekmemektedir – bir üye ana bilgisayar, üç girdi bilindiği sürece parolayı yerel olarak türetebilir.
 
 ## Golden gMSA / Golden dMSA Saldırısı
 
@@ -25,7 +25,7 @@ Bir saldırgan, tüm üç girdi **çevrimdışı** elde edebilirse, **orman içi
 * LDAP okuma denetimi
 * Parola değiştirme aralıkları (önceden hesaplayabilirler)
 
-Bu, hizmet hesapları için bir *Golden Ticket* ile benzerlik göstermektedir.
+Bu, hizmet hesapları için bir *Golden Ticket* ile benzerlik gösterir.
 
 ### Ön Koşullar
 
@@ -35,7 +35,7 @@ Bu, hizmet hesapları için bir *Golden Ticket* ile benzerlik göstermektedir.
 
 ### Aşama 1 – KDS Kök Anahtarını Çıkar
 
-Herhangi bir DC'den döküm alın (Hacim Gölge Kopyası / ham SAM+SECURITY hives veya uzaktan sırlar):
+Herhangi bir DC'den döküm (Hacim Gölgeleme Kopyası / ham SAM+SECURITY hives veya uzaktan gizli anahtarlar):
 ```cmd
 reg save HKLM\SECURITY security.hive
 reg save HKLM\SYSTEM  system.hive
@@ -74,7 +74,7 @@ Bu nedenle, her hesap için **dar bir kelime listesi** (± birkaç saat) gerçek
 ```powershell
 GoldendMSA.exe wordlist -s <SID> -d example.local -f example.local -k <KDSKeyGUID>
 ```
-Araç, aday şifreleri hesaplar ve bunların base64 blob'unu gerçek `msDS-ManagedPassword` niteliği ile karşılaştırır - eşleşme doğru GUID'i ortaya çıkarır.
+Arac, aday şifreleri hesaplar ve bunların base64 blob'unu gerçek `msDS-ManagedPassword` niteliği ile karşılaştırır – eşleşme doğru GUID'i ortaya çıkarır.
 
 ### Aşama 4 – Çevrimdışı Şifre Hesaplama ve Dönüştürme
 
