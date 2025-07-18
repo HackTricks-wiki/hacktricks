@@ -50,6 +50,7 @@ def ref(matchobj):
                 pass #nDont stop on broken link
     else:
         try:
+            href = href.replace("`", "") # Prevent hrefs like: ../../generic-methodologies-and-resources/pentesting-network/`spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md`
             if href.endswith("/"):
                 href = href+"README.md" # Fix if ref points to a folder
             if "#" in  href:
@@ -74,7 +75,7 @@ def ref(matchobj):
                     logger.debug(f'Recursive title search result: {chapter["name"]}')
             except Exception as e:
                 logger.debug(e)
-                logger.error(f'Error getting chapter title: {path.normpath(path.join(dir,href))}')
+                logger.error(f'Error getting chapter title: {path.normpath(path.join(dir,Error getting chapter title))}')
                 sys.exit(1)
 
 
