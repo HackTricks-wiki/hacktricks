@@ -21,7 +21,7 @@ Die Ableitung ist: `AES256_HMAC( KDSRootKey , SID || ManagedPasswordID )` → 24
 
 Wenn ein Angreifer alle drei Eingaben **offline** erhalten kann, kann er **gültige aktuelle und zukünftige Passwörter** für **jedes gMSA/dMSA im Forest** berechnen, ohne den DC erneut zu berühren, wodurch umgangen wird:
 
-* Kerberos-Vor-Authentifizierung / Ticketanforderungsprotokolle
+* Kerberos-Vorautorisierung / Ticketanforderungsprotokolle
 * LDAP-Leseaudits
 * Passwortänderungsintervalle (sie können vorab berechnen)
 
@@ -46,7 +46,7 @@ mimikatz # lsadump::trust /patch   # shows KDS root keys too
 ```
 Der base64-String mit der Bezeichnung `RootKey` (GUID-Name) wird in späteren Schritten benötigt.
 
-### Phase 2 – gMSA/dMSA-Objekte auflisten
+### Phase 2 – Enumerieren von gMSA/dMSA-Objekten
 
 Rufen Sie mindestens `sAMAccountName`, `objectSid` und `msDS-ManagedPasswordId` ab:
 ```powershell
@@ -64,10 +64,10 @@ GoldendMSA.exe info -d example.local -m brute -r 5000 -u jdoe -p P@ssw0rd
 ```
 ### Phase 3 – Erraten / Entdecken der ManagedPasswordID (wenn fehlend)
 
-Einige Bereitstellungen *entfernen* `msDS-ManagedPasswordId` von ACL-geschützten Lesevorgängen. 
+Einige Deployments *entfernen* `msDS-ManagedPasswordId` von ACL-geschützten Lesevorgängen. 
 Da die GUID 128-Bit ist, ist naives Brute-Forcing unpraktisch, aber:
 
-1. Die ersten **32 Bit = Unix-Epoche Zeit** der Kontoerstellung (Minutenauflösung).
+1. Die ersten **32 Bit = Unix-Epoche** der Kontoerstellung (Minutenauflösung).
 2. Gefolgt von 96 zufälligen Bits.
 
 Daher ist eine **enge Wortliste pro Konto** (± wenige Stunden) realistisch.
@@ -90,7 +90,7 @@ Die resultierenden Hashes können mit **mimikatz** (`sekurlsa::pth`) oder **Rube
 
 ## Detection & Mitigation
 
-* Beschränken Sie die **DC-Backup- und Registrierungshive-Lese**-Fähigkeiten auf Tier-0-Administratoren.
+* Beschränken Sie die **DC-Backup- und Registry-Hive-Lese**-Fähigkeiten auf Tier-0-Administratoren.
 * Überwachen Sie die Erstellung des **Directory Services Restore Mode (DSRM)** oder der **Volume Shadow Copy** auf DCs.
 * Protokollieren Sie Lesevorgänge / Änderungen an `CN=Master Root Keys,…` und `userAccountControl`-Flags von Dienstkonten.
 * Erkennen Sie ungewöhnliche **base64 Passwortschreibvorgänge** oder plötzliche Wiederverwendung von Dienstpasswörtern über Hosts hinweg.
@@ -104,8 +104,8 @@ Die resultierenden Hashes können mit **mimikatz** (`sekurlsa::pth`) oder **Rube
 
 ## References
 
-- [Golden dMSA – Authentifizierungsumgehung für delegierte verwaltete Dienstkonten](https://www.semperis.com/blog/golden-dmsa-what-is-dmsa-authentication-bypass/)
-- [Semperis/GoldenDMSA GitHub-Repository](https://github.com/Semperis/GoldenDMSA)
-- [Improsec – Golden gMSA Vertrauensangriff](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-5-golden-gmsa-trust-attack-from-child-to-parent)
+- [Golden dMSA – authentication bypass for delegated Managed Service Accounts](https://www.semperis.com/blog/golden-dmsa-what-is-dmsa-authentication-bypass/)
+- [Semperis/GoldenDMSA GitHub repository](https://github.com/Semperis/GoldenDMSA)
+- [Improsec – Golden gMSA trust attack](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-5-golden-gmsa-trust-attack-from-child-to-parent)
 
 {{#include ../../banners/hacktricks-training.md}}
