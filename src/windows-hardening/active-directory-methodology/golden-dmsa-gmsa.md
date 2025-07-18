@@ -80,7 +80,7 @@ L'outil calcule les mots de passe candidats et compare leur blob base64 avec le 
 
 ### Phase 4 – Calcul et Conversion de Mot de Passe Hors Ligne
 
-Une fois le ManagedPasswordID connu, le mot de passe valide est à une commande près :
+Une fois le ManagedPasswordID connu, le mot de passe valide est à une commande :
 ```powershell
 # derive base64 password
 GoldendMSA.exe compute -s <SID> -k <KDSRootKey> -d example.local -m <ManagedPasswordID>
@@ -90,13 +90,13 @@ GoldendMSA.exe convert -d example.local -u svc_web$ -p <Base64Pwd>
 ```
 Les hachages résultants peuvent être injectés avec **mimikatz** (`sekurlsa::pth`) ou **Rubeus** pour l'abus de Kerberos, permettant un **mouvement latéral** furtif et une **persistance**.
 
-## Détection et atténuation
+## Détection & Atténuation
 
 * Restreindre les capacités de **sauvegarde DC et de lecture de la ruche de registre** aux administrateurs de niveau 0.
-* Surveiller la création de **Mode de restauration des services d'annuaire (DSRM)** ou de **copie de volume** sur les DC.
-* Auditer les lectures / modifications des `CN=Master Root Keys,…` et des drapeaux `userAccountControl` des comptes de service.
+* Surveiller la création de **Mode de Récupération des Services d'Annuaire (DSRM)** ou de **Copie de Volume** sur les DC.
+* Auditer les lectures / modifications de `CN=Master Root Keys,…` et des drapeaux `userAccountControl` des comptes de service.
 * Détecter des **écritures de mots de passe base64** inhabituelles ou une réutilisation soudaine de mots de passe de service entre les hôtes.
-* Envisager de convertir des gMSA à privilèges élevés en **comptes de service classiques** avec des rotations aléatoires régulières lorsque l'isolement de niveau 0 n'est pas possible.
+* Envisager de convertir des gMSAs à privilèges élevés en **comptes de service classiques** avec des rotations aléatoires régulières lorsque l'isolement de niveau 0 n'est pas possible.
 
 ## Outils
 
@@ -106,7 +106,7 @@ Les hachages résultants peuvent être injectés avec **mimikatz** (`sekurlsa::p
 
 ## Références
 
-- [Golden dMSA – contournement d'authentification pour les comptes de service gérés délégués](https://www.semperis.com/blog/golden-dmsa-what-is-dmsa-authentication-bypass/)
+- [Golden dMSA – contournement d'authentification pour les Comptes de Service Gérés délégués](https://www.semperis.com/blog/golden-dmsa-what-is-dmsa-authentication-bypass/)
 - [Dépôt GitHub Semperis/GoldenDMSA](https://github.com/Semperis/GoldenDMSA)
 - [Improsec – attaque de confiance Golden gMSA](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-5-golden-gmsa-trust-attack-from-child-to-parent)
 
