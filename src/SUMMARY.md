@@ -334,6 +334,7 @@
     - [Frida Tutorial 3](mobile-pentesting/android-app-pentesting/frida-tutorial/owaspuncrackable-1.md)
     - [Objection Tutorial](mobile-pentesting/android-app-pentesting/frida-tutorial/objection-tutorial.md)
   - [Google CTF 2018 - Shall We Play a Game?](mobile-pentesting/android-app-pentesting/google-ctf-2018-shall-we-play-a-game.md)
+  - [Insecure In App Update Rce](mobile-pentesting/android-app-pentesting/insecure-in-app-update-rce.md)
   - [Install Burp Certificate](mobile-pentesting/android-app-pentesting/install-burp-certificate.md)
   - [Intent Injection](mobile-pentesting/android-app-pentesting/intent-injection.md)
   - [Make APK Accept CA Certificate](mobile-pentesting/android-app-pentesting/make-apk-accept-ca-certificate.md)
