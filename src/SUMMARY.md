@@ -283,6 +283,7 @@
   - [Privileged Groups](windows-hardening/active-directory-methodology/privileged-groups-and-token-privileges.md)
   - [RDP Sessions Abuse](windows-hardening/active-directory-methodology/rdp-sessions-abuse.md)
   - [Resource-based Constrained Delegation](windows-hardening/active-directory-methodology/resource-based-constrained-delegation.md)
+  - [Sccm Management Point Relay Sql Policy Secrets](windows-hardening/active-directory-methodology/sccm-management-point-relay-sql-policy-secrets.md)
   - [Security Descriptors](windows-hardening/active-directory-methodology/security-descriptors.md)
   - [SID-History Injection](windows-hardening/active-directory-methodology/sid-history-injection.md)
   - [Silver Ticket](windows-hardening/active-directory-methodology/silver-ticket.md)
