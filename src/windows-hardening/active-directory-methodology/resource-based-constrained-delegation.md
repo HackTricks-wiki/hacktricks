@@ -115,6 +115,48 @@ ls \\victim.domain.local\C$
 
 Lear about the [**available service tickets here**](silver-ticket.md#available-services).
 
+---
+
+## Recent tooling & attack chains (2021-2025)
+
+### KrbRelayUp – “universal” local privilege escalation (2022)
+
+In May 2022 researcher **Mor Davidovich** released **[KrbRelayUp](https://github.com/DecentSecurity/KrbRelayUp)**, a wrapper that chains *Powermad* + *impacket* relay techniques + *Rubeus* to achieve **SYSTEM** on any domain-joined host where LDAP signing/channel-binding is not enforced and a delegate-able admin credential is present in memory. The tool performs an end-to-end Resource-Based Constrained Delegation (RBCD) attack automatically:
+
+1. **Create/rename a computer object** abusing the default *MachineAccountQuota* (or reuse an existing one).
+2. **Relay** the host’s Kerberos authentication to LDAP and write its SID to the local machine’s **msDS-AllowedToActOnBehalfOfOtherIdentity** attribute.
+3. Use **S4U2Self → S4U2Proxy** to obtain a service ticket as *DOMAIN\\Administrator* for **HOST/<victim>**.
+4. **Pass-the-ticket** to SCM (or another service) and spawn a command as **NT AUTHORITY\SYSTEM**.
+
+Example:
+
+```powershell
+.\KrbRelayUp.exe rbcd /target:WIN10-WS.domain.local \
+                   /newcomputer:RBCDPWN$ /password:'P@ssw0rd!' \
+                   /servicecmd:'cmd.exe /c whoami > C:\pwn.txt'
+```
+
+💡 The attack continues to work after Microsoft disabled RC4 by default in 2023 because KrbRelayUp requests AES tickets.
+
+Mitigations (MSRC, May 2022):
+
+* **Require LDAP signing & channel binding** or force LDAPS.
+* Set **`ms-DS-MachineAccountQuota` = 0** and delegate workstation-join rights only to trusted principals.
+* Mark high-value accounts with **“Account is sensitive and cannot be delegated”**.
+* Monitor directory change **event ID 5136** for modifications to `msDS-AllowedToActOnBehalfOfOtherIdentity` and **event ID 4769** for S4U tickets without the *forwardable* flag (common in RBCD abuse).
+
+### Updated offensive tooling
+
+* **Impacket ≥ 0.11**: includes `addcomputer.py`, `rbcd.py` and `getST.py` to automate computer creation, RBCD ACL write and S4U ticket requests from *nix* environments.
+* **krbrelayx**: fork of impacket that adds `shadowcredentials` & `autobloot` modes and a dedicated `rbcd` helper.
+* **Rubeus 2.2** (2024) added `/hsts` option which pulls AES keys directly from LSASS, making the S4U chain password-less.
+
+### Patches that affect S4U/RBCD flows
+
+* **CVE-2021-42278 / CVE-2021-42287** (“noPAC” chain) introduced KDC hardening (`PacRequestorEnforcement`). While the patch blocks sAMAccountName-spoofing, **RBCD remains fully functional**. Make sure your lab controllers are patched or set the registry value to mimic production behaviour.
+
+---
+
 ## Kerberos Errors
 
 - **`KDC_ERR_ETYPE_NOTSUPP`**: This means that kerberos is configured to not use DES or RC4 and you are supplying just the RC4 hash. Supply to Rubeus at least the AES256 hash (or just supply it the rc4, aes128 and aes256 hashes). Example: `[Rubeus.Program]::MainString("s4u /user:FAKECOMPUTER /aes256:CC648CF0F809EE1AA25C52E963AC0487E87AC32B1F71ACC5304C73BF566268DA /aes128:5FC3D06ED6E8EA2C9BB9CC301EA37AD4 /rc4:EF266C6B963C0BB683941032008AD47F /impersonateuser:Administrator /msdsspn:CIFS/M3DC.M3C.LOCAL /ptt".split())`
@@ -132,9 +174,10 @@ Lear about the [**available service tickets here**](silver-ticket.md#available-s
 - [https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/resource-based-constrained-delegation-ad-computer-object-take-over-and-privilged-code-execution#modifying-target-computers-ad-object](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/resource-based-constrained-delegation-ad-computer-object-take-over-and-privilged-code-execution#modifying-target-computers-ad-object)
 - [https://stealthbits.com/blog/resource-based-constrained-delegation-abuse/](https://stealthbits.com/blog/resource-based-constrained-delegation-abuse/)
 - [https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61](https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61)
+- [https://github.com/DecentSecurity/KrbRelayUp](https://github.com/DecentSecurity/KrbRelayUp)
+- [https://www.microsoft.com/en-us/security/blog/2022/05/25/detecting-and-preventing-privilege-escalation-attacks-leveraging-kerberos-relaying-krbrelayup/](https://www.microsoft.com/en-us/security/blog/2022/05/25/detecting-and-preventing-privilege-escalation-attacks-leveraging-kerberos-relaying-krbrelayup/)
 
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 
