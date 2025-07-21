@@ -599,6 +599,7 @@
   - [JNDI - Java Naming and Directory Interface & Log4Shell](pentesting-web/deserialization/jndi-java-naming-and-directory-interface-and-log4shell.md)
   - [Ruby Json Pollution](pentesting-web/deserialization/ruby-_json-pollution.md)
   - [Ruby Class Pollution](pentesting-web/deserialization/ruby-class-pollution.md)
+  - [Sharepoint Exceldataset Webpart Rce](pentesting-web/deserialization/sharepoint-exceldataset-webpart-rce.md)
 - [Domain/Subdomain takeover](pentesting-web/domain-subdomain-takeover.md)
 - [Email Injections](pentesting-web/email-injections.md)
 - [File Inclusion/Path traversal](pentesting-web/file-inclusion/README.md)
