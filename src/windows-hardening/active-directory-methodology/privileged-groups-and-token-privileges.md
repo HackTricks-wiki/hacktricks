@@ -18,7 +18,7 @@ To identify the members of this group, the following command is executed:
 Get-NetGroupMember -Identity "Account Operators" -Recurse
 ```
 
-Adding new users is permitted, as well as local login to DC01.
+Adding new users is permitted, as well as local login to the DC.
 
 ## AdminSDHolder group
 
@@ -164,7 +164,10 @@ To list members of the DnsAdmins group, use:
 Get-NetGroupMember -Identity "DnsAdmins" -Recurse
 ```
 
-### Execute arbitrary DLL
+### Execute arbitrary DLL (CVE‑2021‑40469)
+
+> [!NOTE]
+> This vulnerability allows for the execution of arbitrary code with SYSTEM privileges in the DNS service (usually inside the DCs). This issue was fixed in 2021.
 
 Members can make the DNS server load an arbitrary DLL (either locally or from a remote share) using commands such as:
 
@@ -241,6 +244,10 @@ sc.exe start MozillaMaintenance
 ```
 
 Note: Hard link exploitation has been mitigated in recent Windows updates.
+
+## Group Policy Creators Owners	
+
+This group allows members to create Group Policies in the domain. However, its members can't apply group policies to users or group or edit existing GPOs.
 
 ## Organization Management
 
