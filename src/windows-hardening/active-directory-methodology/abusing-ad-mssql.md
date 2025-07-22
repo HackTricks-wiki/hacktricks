@@ -176,7 +176,7 @@ Verifique na página mencionada na **seção seguinte como fazer isso manualment
 
 ## Links Confiáveis do MSSQL
 
-Se uma instância MSSQL é confiável (link de banco de dados) por uma instância MSSQL diferente. Se o usuário tem privilégios sobre o banco de dados confiável, ele poderá **usar o relacionamento de confiança para executar consultas também na outra instância**. Essas confianças podem ser encadeadas e, em algum momento, o usuário pode ser capaz de encontrar algum banco de dados mal configurado onde pode executar comandos.
+Se uma instância MSSQL é confiável (link de banco de dados) por uma diferente instância MSSQL. Se o usuário tem privilégios sobre o banco de dados confiável, ele poderá **usar o relacionamento de confiança para executar consultas também na outra instância**. Essas confianças podem ser encadeadas e, em algum momento, o usuário pode ser capaz de encontrar algum banco de dados mal configurado onde ele pode executar comandos.
 
 **Os links entre bancos de dados funcionam mesmo através de confianças de floresta.**
 
@@ -278,9 +278,14 @@ EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT 
 
 O **usuário local do MSSQL** geralmente possui um tipo especial de privilégio chamado **`SeImpersonatePrivilege`**. Isso permite que a conta "imite um cliente após a autenticação".
 
-Uma estratégia que muitos autores desenvolveram é forçar um serviço do SYSTEM a se autenticar em um serviço malicioso ou man-in-the-middle que o atacante cria. Esse serviço malicioso é então capaz de imitar o serviço do SYSTEM enquanto tenta se autenticar.
+Uma estratégia que muitos autores desenvolveram é forçar um serviço do SYSTEM a se autenticar em um serviço malicioso ou man-in-the-middle que o atacante cria. Esse serviço malicioso pode então imitar o serviço do SYSTEM enquanto tenta se autenticar.
 
 [SweetPotato](https://github.com/CCob/SweetPotato) possui uma coleção dessas várias técnicas que podem ser executadas via comando `execute-assembly` do Beacon.
 
+### NTLM Relay do Ponto de Gerenciamento SCCM (Extração de Segredos OSD)
+Veja como os papéis SQL padrão dos **Pontos de Gerenciamento** do SCCM podem ser abusados para despejar a Conta de Acesso à Rede e segredos de Sequência de Tarefas diretamente do banco de dados do site:
+{{#ref}}
+sccm-management-point-relay-sql-policy-secrets.md
+{{#endref}}
 
 {{#include ../../banners/hacktricks-training.md}}
