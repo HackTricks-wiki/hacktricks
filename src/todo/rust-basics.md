@@ -32,7 +32,7 @@ U kan funksies soos `is_some()` of `is_none()` gebruik om die waarde van die Ops
 
 ### Makros
 
-Makros is kragtiger as funksies omdat hulle uitbrei om meer kode te produseer as die kode wat jy handmatig geskryf het. Byvoorbeeld, 'n funksie-handtekening moet die aantal en tipe parameters wat die funksie het, verklaar. Makros, aan die ander kant, kan 'n veranderlike aantal parameters neem: ons kan `println!("hello")` met een argument of `println!("hello {}", name)` met twee argumente aanroep. Ook, makros word uitgebrei voordat die kompilator die betekenis van die kode interpreteer, so 'n makro kan byvoorbeeld 'n trait op 'n gegewe tipe implementeer. 'n Funksie kan nie, omdat dit tydens uitvoering aangeroep word en 'n trait moet tydens kompilering geïmplementeer word.
+Makros is kragtiger as funksies omdat hulle uitbrei om meer kode te produseer as die kode wat jy handmatig geskryf het. Byvoorbeeld, 'n funksie-handtekening moet die aantal en tipe parameters wat die funksie het, verklaar. Makros, aan die ander kant, kan 'n veranderlike aantal parameters neem: ons kan `println!("hello")` met een argument of `println!("hello {}", name)` met twee argumente aanroep. Ook, makros word uitgebrei voordat die kompilateur die betekenis van die kode interpreteer, so 'n makro kan byvoorbeeld 'n trait op 'n gegewe tipe implementeer. 'n Funksie kan nie, omdat dit tydens uitvoering aangeroep word en 'n trait moet tydens kompilering geïmplementeer word.
 ```rust
 macro_rules! my_macro {
 () => {
@@ -287,4 +287,71 @@ thread::sleep(Duration::from_millis(500));
 }
 }
 ```
+### Sekuriteit Essensieel
+
+Rust bied sterk geheue-veilige waarborge standaard, maar jy kan steeds kritieke kwesbaarhede inbring deur `unsafe` kode, afhanklikheidsprobleme of logiese foute. Die volgende mini-cheatsheet versamel die primitiewe wat jy die meeste sal raakloop tydens offensiewe of defensiewe sekuriteitshersienings van Rust sagteware.
+
+#### Unsafe kode & geheue veiligheid
+
+`unsafe` blokke kies uit die kompilator se aliasing en grense kontroles, so **alle tradisionele geheue-korrupsie foute (OOB, gebruik-na-vry, dubbele vry, ens.) kan weer verskyn**. 'n Vinnige oudit kontrolelys:
+
+* Soek vir `unsafe` blokke, `extern "C"` funksies, oproepe na `ptr::copy*`, `std::mem::transmute`, `MaybeUninit`, rou wysers of `ffi` modules.
+* Valideer elke wysers aritmetiek en lengte argument wat aan lae-vlak funksies deurgegee word.
+* Verkies `#![forbid(unsafe_code)]` (crate-wyd) of `#[deny(unsafe_op_in_unsafe_fn)]` (1.68 +) om kompilasie te laat misluk wanneer iemand `unsafe` weer inbring.
+
+Voorbeeld oorgang geskep met rou wysers:
+```rust
+use std::ptr;
+
+fn vuln_copy(src: &[u8]) -> Vec<u8> {
+let mut dst = Vec::with_capacity(4);
+unsafe {
+// ❌ copies *src.len()* bytes, the destination only reserves 4.
+ptr::copy_nonoverlapping(src.as_ptr(), dst.as_mut_ptr(), src.len());
+dst.set_len(src.len());
+}
+dst
+}
+```
+Die uitvoering van Miri is 'n goedkoop manier om UB tydens toetsing te detecteer:
+```bash
+rustup component add miri
+cargo miri test  # hunts for OOB / UAF during unit tests
+```
+#### Ouditering van afhanklikhede met RustSec / cargo-audit
+
+Meeste werklike Rust kwesbaarhede bestaan in derdeparty crates. Die RustSec advies DB (gemeenskap-gedrewe) kan plaaslik gevra word:
+```bash
+cargo install cargo-audit
+cargo audit              # flags vulnerable versions listed in Cargo.lock
+```
+Integreer dit in CI en faal op `--deny warnings`.
+
+`cargo deny check advisories` bied soortgelyke funksionaliteit plus lisensie- en verbodlys kontroles.
+
+#### Verskaffingsketting verifikasie met cargo-vet (2024)
+
+`cargo vet` registreer 'n hersieningshash vir elke crate wat jy invoer en voorkom ongemerkde opgraderings:
+```bash
+cargo install cargo-vet
+cargo vet init      # generates vet.toml
+cargo vet --locked  # verifies packages referenced in Cargo.lock
+```
+Die hulpmiddel word aangeneem deur die Rust-projekinfrastruktuur en 'n groeiende aantal organisasies om vergiftigde-pakket-aanvalle te verminder.
+
+#### Fuzzing jou API-oppervlak (cargo-fuzz)
+
+Fuzz-toetse vang maklik panieks, heelgetal oorgange en logiese foute wat DoS of kantkanaalprobleme kan word:
+```bash
+cargo install cargo-fuzz
+cargo fuzz init              # creates fuzz_targets/
+cargo fuzz run fuzz_target_1 # builds with libFuzzer & runs continuously
+```
+Voeg die fuzz-teiken by jou repo en voer dit in jou pyplyn uit.
+
+## Verwysings
+
+- RustSec Adviesdatabasis – <https://rustsec.org>
+- Cargo-vet: "Auditing your Rust Dependencies" – <https://mozilla.github.io/cargo-vet/>
+
 {{#include ../banners/hacktricks-training.md}}
