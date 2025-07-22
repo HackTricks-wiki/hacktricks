@@ -96,7 +96,7 @@ print!("{} is positive", n);
 print!("{} is zero", n);
 }
 ```
-#### подударање
+#### podudaranje
 ```rust
 match number {
 // Match a single value
@@ -287,4 +287,71 @@ thread::sleep(Duration::from_millis(500));
 }
 }
 ```
+### Osnovi bezbednosti
+
+Rust pruža jake garancije bezbednosti memorije po defaultu, ali i dalje možete uvesti kritične ranjivosti kroz `unsafe` kod, probleme sa zavisnostima ili logičke greške. Sledeća mini-šema okuplja primitivne tipove koje ćete najčešće koristiti tokom ofanzivnih ili defensivnih bezbednosnih pregleda Rust softvera.
+
+#### Unsafe kod i bezbednost memorije
+
+`unsafe` blokovi isključuju proveru aliasinga i granica od strane kompajlera, tako da **sve tradicionalne greške u korupciji memorije (OOB, upotreba nakon oslobađanja, dvostruko oslobađanje itd.) mogu ponovo da se pojave**. Brza lista za reviziju:
+
+* Potražite `unsafe` blokove, `extern "C"` funkcije, pozive na `ptr::copy*`, `std::mem::transmute`, `MaybeUninit`, sirove pokazivače ili `ffi` module.
+* Validirajte svaku aritmetiku pokazivača i argument dužine prosleđene niskonivou funkcijama.
+* Preferirajte `#![forbid(unsafe_code)]` (na nivou crate-a) ili `#[deny(unsafe_op_in_unsafe_fn)]` (1.68 +) da bi se prekinula kompilacija kada neko ponovo uvede `unsafe`.
+
+Primer prelivanja stvorenog sa sirovim pokazivačima:
+```rust
+use std::ptr;
+
+fn vuln_copy(src: &[u8]) -> Vec<u8> {
+let mut dst = Vec::with_capacity(4);
+unsafe {
+// ❌ copies *src.len()* bytes, the destination only reserves 4.
+ptr::copy_nonoverlapping(src.as_ptr(), dst.as_mut_ptr(), src.len());
+dst.set_len(src.len());
+}
+dst
+}
+```
+Pokretanje Miri je jeftin način za otkrivanje UB u vreme testiranja:
+```bash
+rustup component add miri
+cargo miri test  # hunts for OOB / UAF during unit tests
+```
+#### Auditing dependencies with RustSec / cargo-audit
+
+Većina stvarnih Rust ranjivosti se nalazi u trećim paketima. RustSec savetodavna baza podataka (koju pokreće zajednica) može se pretraživati lokalno:
+```bash
+cargo install cargo-audit
+cargo audit              # flags vulnerable versions listed in Cargo.lock
+```
+Integrate it in CI and fail on `--deny warnings`.
+
+`cargo deny check advisories` nudi sličnu funkcionalnost plus provere licenci i ban-liste.
+
+#### Verifikacija lanca snabdevanja sa cargo-vet (2024)
+
+`cargo vet` beleži hash revizije za svaku kutiju koju uvozite i sprečava neprimećene nadogradnje:
+```bash
+cargo install cargo-vet
+cargo vet init      # generates vet.toml
+cargo vet --locked  # verifies packages referenced in Cargo.lock
+```
+Alat se usvaja od strane Rust projekta i sve većeg broja organizacija kako bi se umanjili napadi sa zaraženim paketima.
+
+#### Fuzzing vašeg API površine (cargo-fuzz)
+
+Fuzz testovi lako hvataju panike, prelivanja celih brojeva i logičke greške koje bi mogle postati DoS ili problemi sa bočnim kanalima:
+```bash
+cargo install cargo-fuzz
+cargo fuzz init              # creates fuzz_targets/
+cargo fuzz run fuzz_target_1 # builds with libFuzzer & runs continuously
+```
+Dodajte fuzz cilj u vaš repozitorijum i pokrenite ga u vašem pipeline-u.
+
+## Reference
+
+- RustSec Advisory Database – <https://rustsec.org>
+- Cargo-vet: "Auditing your Rust Dependencies" – <https://mozilla.github.io/cargo-vet/>
+
 {{#include ../banners/hacktricks-training.md}}
