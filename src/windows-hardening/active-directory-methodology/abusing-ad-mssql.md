@@ -7,7 +7,7 @@
 
 ### Python
 
-[MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) टूल impacket पर आधारित है, और यह kerberos टिकट का उपयोग करके प्रमाणित करने की अनुमति देता है, और लिंक श्रृंखलाओं के माध्यम से हमले करता है
+[MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) उपकरण impacket पर आधारित है, और यह kerberos टिकट का उपयोग करके प्रमाणित करने की अनुमति देता है, और लिंक श्रृंखलाओं के माध्यम से हमले करता है।
 
 <figure><img src="https://raw.githubusercontent.com/ScorpionesLabs/MSSqlPwner/main/assets/interractive.png"></figure>
 ```shell
@@ -79,7 +79,7 @@ mssqlpwner hosts.txt brute -ul users.txt -pl passwords.txt
 mssqlpwner hosts.txt brute -ul users.txt -hl hashes.txt
 
 ```
-### नेटवर्क से डोमेन सत्र के बिना एन्यूमरेटिंग
+### डोमेन सत्र के बिना नेटवर्क से एन्यूमरेट करना
 ```
 
 # Interactive mode
@@ -166,21 +166,21 @@ Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" }
 Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResults
 # Invoke-SQLOSCmd automatically checks if xp_cmdshell is enable and enables it if necessary
 ```
-Check in the page mentioned in the **following section how to do this manually.**
+**निम्नलिखित अनुभाग में मैन्युअल रूप से यह कैसे करना है, यह देखें।**
 
-### MSSQL Basic Hacking Tricks
+### MSSQL बुनियादी हैकिंग ट्रिक्स
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-mssql-microsoft-sql-server/
 {{#endref}}
 
-## MSSQL Trusted Links
+## MSSQL ट्रस्टेड लिंक
 
-यदि एक MSSQL उदाहरण को एक अलग MSSQL उदाहरण द्वारा विश्वसनीय (डेटाबेस लिंक) माना जाता है। यदि उपयोगकर्ता के पास विश्वसनीय डेटाबेस पर विशेषाधिकार हैं, तो वह **अन्य उदाहरण में क्वेरी निष्पादित करने के लिए विश्वास संबंध का उपयोग करने में सक्षम होगा**। ये विश्वास श्रृंखलाबद्ध किए जा सकते हैं और किसी बिंदु पर उपयोगकर्ता कुछ गलत कॉन्फ़िगर किए गए डेटाबेस को खोजने में सक्षम हो सकता है जहाँ वह कमांड निष्पादित कर सकता है।
+यदि एक MSSQL उदाहरण को एक अलग MSSQL उदाहरण द्वारा ट्रस्ट किया गया है (डेटाबेस लिंक)। यदि उपयोगकर्ता के पास ट्रस्टेड डेटाबेस पर विशेषाधिकार हैं, तो वह **अन्य उदाहरण में क्वेरी निष्पादित करने के लिए ट्रस्ट संबंध का उपयोग कर सकेगा**। ये ट्रस्ट चेन किए जा सकते हैं और किसी बिंदु पर उपयोगकर्ता कुछ गलत कॉन्फ़िगर किए गए डेटाबेस को खोजने में सक्षम हो सकता है जहाँ वह कमांड निष्पादित कर सकता है।
 
 **डेटाबेस के बीच के लिंक वन ट्रस्ट के पार भी काम करते हैं।**
 
-### Powershell Abuse
+### पॉवरशेल दुरुपयोग
 ```bash
 #Look for MSSQL links of an accessible instance
 Get-SQLServerLink -Instance dcorp-mssql -Verbose #Check for DatabaseLinkd > 0
@@ -220,7 +220,7 @@ inject-assembly 4704 ../SharpCollection/SharpSQLPwn.exe /modules:LIC /linkedsql:
 ```
 ### Metasploit
 
-आप मेटास्प्लॉइट का उपयोग करके आसानी से विश्वसनीय लिंक की जांच कर सकते हैं।
+आप आसानी से metasploit का उपयोग करके विश्वसनीय लिंक की जांच कर सकते हैं।
 ```bash
 #Set username, password, windows auth (if using AD), IP...
 msf> use exploit/windows/mssql/mssql_linkcrawler
@@ -232,7 +232,7 @@ msf> use exploit/windows/mssql/mssql_linkcrawler
 
 **Linux** से आप **sqsh** और **mssqlclient.py** के साथ एक MSSQL कंसोल शेल प्राप्त कर सकते हैं।
 
-**Windows** से आप लिंक भी ढूंढ सकते हैं और **MSSQL क्लाइंट जैसे** [**HeidiSQL**](https://www.heidisql.com) का उपयोग करके कमांड को मैन्युअल रूप से निष्पादित कर सकते हैं।
+**Windows** से आप लिंक खोज सकते हैं और **MSSQL क्लाइंट जैसे** [**HeidiSQL**](https://www.heidisql.com) का उपयोग करके कमांड को मैन्युअल रूप से निष्पादित कर सकते हैं।
 
 _Windows प्रमाणीकरण का उपयोग करके लॉगिन करें:_
 
@@ -245,7 +245,7 @@ EXEC sp_linkedservers;
 ```
 ![](<../../images/image (716).png>)
 
-#### विश्वसनीय लिंक में क्वेरी निष्पादित करें
+#### भरोसेमंद लिंक में क्वेरी निष्पादित करें
 
 लिंक के माध्यम से क्वेरी निष्पादित करें (उदाहरण: नए सुलभ उदाहरण में अधिक लिंक खोजें):
 ```sql
@@ -276,14 +276,14 @@ EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT 
 ```
 ## स्थानीय विशेषाधिकार वृद्धि
 
-**MSSQL स्थानीय उपयोगकर्ता** के पास आमतौर पर एक विशेष प्रकार का विशेषाधिकार होता है जिसे **`SeImpersonatePrivilege`** कहा जाता है। यह खाते को "प्रमाणीकरण के बाद एक ग्राहक का अनुकरण करने" की अनुमति देता है।
+**MSSQL स्थानीय उपयोगकर्ता** के पास आमतौर पर एक विशेष प्रकार का विशेषाधिकार होता है जिसे **`SeImpersonatePrivilege`** कहा जाता है। यह खाता "प्रमाणीकरण के बाद एक ग्राहक का अनुकरण" करने की अनुमति देता है।
 
 कई लेखकों द्वारा विकसित एक रणनीति यह है कि एक SYSTEM सेवा को एक धोखाधड़ी या मैन-इन-द-मिडल सेवा के लिए प्रमाणीकरण करने के लिए मजबूर किया जाए जिसे हमलावर बनाता है। यह धोखाधड़ी सेवा तब SYSTEM सेवा का अनुकरण कर सकती है जबकि यह प्रमाणीकरण करने की कोशिश कर रही है।
 
 [SweetPotato](https://github.com/CCob/SweetPotato) के पास इन विभिन्न तकनीकों का एक संग्रह है जिसे Beacon के `execute-assembly` कमांड के माध्यम से निष्पादित किया जा सकता है।
 
 ### SCCM प्रबंधन बिंदु NTLM रिले (OSD गुप्त निष्कर्षण)
-देखें कि SCCM **प्रबंधन बिंदुओं** की डिफ़ॉल्ट SQL भूमिकाओं का उपयोग नेटवर्क एक्सेस खाता और कार्य-क्रम गुप्तों को सीधे साइट डेटाबेस से डंप करने के लिए कैसे किया जा सकता है:
+देखें कि SCCM **प्रबंधन बिंदुओं** की डिफ़ॉल्ट SQL भूमिकाओं का उपयोग नेटवर्क एक्सेस खाता और कार्य-क्रम गुप्त को सीधे साइट डेटाबेस से डंप करने के लिए कैसे किया जा सकता है:
 {{#ref}}
 sccm-management-point-relay-sql-policy-secrets.md
 {{#endref}}
