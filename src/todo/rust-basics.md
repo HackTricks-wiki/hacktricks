@@ -287,4 +287,71 @@ thread::sleep(Duration::from_millis(500));
 }
 }
 ```
+### Основи безпеки
+
+Rust забезпечує сильні гарантії безпеки пам'яті за замовчуванням, але ви все ще можете ввести критичні вразливості через `unsafe` код, проблеми з залежностями або логічні помилки. Наступний міні-чернетка збирає примітиви, з якими ви найчастіше стикатиметеся під час наступальних або захисних перевірок безпеки програмного забезпечення Rust.
+
+#### Небезпечний код та безпека пам'яті
+
+`unsafe` блоки відмовляються від перевірок аліасів та меж компілятора, тому **всі традиційні помилки корупції пам'яті (OOB, використання після звільнення, подвійне звільнення тощо) можуть знову з'явитися**. Швидкий контрольний список для аудиту:
+
+* Шукайте `unsafe` блоки, `extern "C"` функції, виклики до `ptr::copy*`, `std::mem::transmute`, `MaybeUninit`, сирі вказівники або `ffi` модулі.
+* Перевіряйте кожну арифметику вказівників та аргументи довжини, передані низькорівневим функціям.
+* Вибирайте `#![forbid(unsafe_code)]` (по всьому крейту) або `#[deny(unsafe_op_in_unsafe_fn)]` (1.68 +), щоб зупинити компіляцію, коли хтось знову вводить `unsafe`.
+
+Приклад переповнення, створеного за допомогою сирих вказівників:
+```rust
+use std::ptr;
+
+fn vuln_copy(src: &[u8]) -> Vec<u8> {
+let mut dst = Vec::with_capacity(4);
+unsafe {
+// ❌ copies *src.len()* bytes, the destination only reserves 4.
+ptr::copy_nonoverlapping(src.as_ptr(), dst.as_mut_ptr(), src.len());
+dst.set_len(src.len());
+}
+dst
+}
+```
+Запуск Miri є недорогим способом виявлення UB під час тестування:
+```bash
+rustup component add miri
+cargo miri test  # hunts for OOB / UAF during unit tests
+```
+#### Аудит залежностей з RustSec / cargo-audit
+
+Більшість вразливостей Rust у реальному світі знаходяться в сторонніх пакетах. Базу даних рекомендацій RustSec (яка підтримується спільнотою) можна запитувати локально:
+```bash
+cargo install cargo-audit
+cargo audit              # flags vulnerable versions listed in Cargo.lock
+```
+Інтегруйте це в CI і провалюйте на `--deny warnings`.
+
+`cargo deny check advisories` пропонує подібну функціональність плюс перевірки ліцензій та заборонених списків.
+
+#### Перевірка постачальницького ланцюга з cargo-vet (2024)
+
+`cargo vet` записує хеш огляду для кожного пакету, який ви імпортуєте, і запобігає непоміченим оновленням:
+```bash
+cargo install cargo-vet
+cargo vet init      # generates vet.toml
+cargo vet --locked  # verifies packages referenced in Cargo.lock
+```
+Інструмент приймається інфраструктурою проекту Rust та зростаючою кількістю організацій для пом'якшення атак з отруєними пакетами.
+
+#### Fuzzing вашої API поверхні (cargo-fuzz)
+
+Fuzz-тести легко виявляють паніки, переповнення цілих чисел та логічні помилки, які можуть стати проблемами DoS або побічного каналу:
+```bash
+cargo install cargo-fuzz
+cargo fuzz init              # creates fuzz_targets/
+cargo fuzz run fuzz_target_1 # builds with libFuzzer & runs continuously
+```
+Додайте ціль для фуззингу до вашого репозиторію та запустіть її у вашому конвеєрі.
+
+## Посилання
+
+- RustSec Advisory Database – <https://rustsec.org>
+- Cargo-vet: "Аудит ваших залежностей Rust" – <https://mozilla.github.io/cargo-vet/>
+
 {{#include ../banners/hacktricks-training.md}}
