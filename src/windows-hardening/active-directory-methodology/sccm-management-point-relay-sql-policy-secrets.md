@@ -3,10 +3,10 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 ## TL;DR
-Wymuszając **System Center Configuration Manager (SCCM) Management Point (MP)** do uwierzytelnienia przez SMB/RPC i **przekazując** ten NTLM machine account do **bazy danych serwisu (MSSQL)**, uzyskujesz prawa `smsdbrole_MP` / `smsdbrole_MPUserSvc`. Te role pozwalają na wywołanie zestawu procedur składowanych, które ujawniają **Operating System Deployment (OSD)** policy blobs (poświadczenia Network Access Account, zmienne Task-Sequence itp.). Bloby są zakodowane/encrypted w formacie hex, ale mogą być dekodowane i odszyfrowane za pomocą **PXEthief**, co daje jawne sekrety.
+Wymuszając **System Center Configuration Manager (SCCM) Management Point (MP)** do uwierzytelnienia przez SMB/RPC i **przekazując** ten konto maszyny NTLM do **bazy danych witryny (MSSQL)** uzyskujesz prawa `smsdbrole_MP` / `smsdbrole_MPUserSvc`. Te role pozwalają na wywołanie zestawu procedur składowanych, które ujawniają **bloby polityki wdrażania systemu operacyjnego (OSD)** (poświadczenia konta dostępu do sieci, zmienne sekwencji zadań itp.). Bloby są zakodowane/encrypted w formacie hex, ale mogą być dekodowane i odszyfrowane za pomocą **PXEthief**, co daje jawne sekrety.
 
 Ogólny schemat:
-1. Odkryj MP & bazę danych serwisu ↦ nieautoryzowany punkt końcowy HTTP `/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA`.
+1. Odkryj MP i bazę danych witryny ↦ nieautoryzowany punkt końcowy HTTP `/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA`.
 2. Uruchom `ntlmrelayx.py -t mssql://<SiteDB> -ts -socks`.
 3. Wymuś MP używając **PetitPotam**, PrinterBug, DFSCoerce itp.
 4. Przez proxy SOCKS połącz się z `mssqlclient.py -windows-auth` jako przekazywane konto **<DOMAIN>\\<MP-host>$**.
@@ -20,14 +20,14 @@ Sekrety takie jak `OSDJoinAccount/OSDJoinPassword`, `NetworkAccessUsername/Passw
 
 ---
 
-## 1. Enumerowanie nieautoryzowanych punktów końcowych MP
-Rozszerzenie ISAPI MP **GetAuth.dll** ujawnia kilka parametrów, które nie wymagają uwierzytelnienia (chyba że serwis jest tylko PKI):
+## 1. Enumeracja nieautoryzowanych punktów końcowych MP
+Rozszerzenie ISAPI MP **GetAuth.dll** ujawnia kilka parametrów, które nie wymagają uwierzytelnienia (chyba że witryna jest tylko PKI):
 
 | Parametr | Cel |
 |-----------|---------|
-| `MPKEYINFORMATIONMEDIA` | Zwraca publiczny klucz certyfikatu podpisującego serwis + GUIDy urządzeń *x86* / *x64* **All Unknown Computers**. |
-| `MPLIST` | Wymienia każdy Management-Point w serwisie. |
-| `SITESIGNCERT` | Zwraca certyfikat podpisujący Primary-Site (identyfikuje serwer serwisu bez LDAP). |
+| `MPKEYINFORMATIONMEDIA` | Zwraca publiczny klucz certyfikatu podpisującego witrynę + GUIDy urządzeń *x86* / *x64* **Wszystkie Nieznane Komputery**. |
+| `MPLIST` | Wymienia każdy Management-Point w witrynie. |
+| `SITESIGNCERT` | Zwraca certyfikat podpisujący głównej witryny (identyfikuje serwer witryny bez LDAP). |
 
 Zbierz GUIDy, które będą działać jako **clientID** do późniejszych zapytań DB:
 ```bash
@@ -56,7 +56,7 @@ Połącz się przez proxy SOCKS (port 1080 domyślnie):
 ```bash
 proxychains mssqlclient.py CONTOSO/MP01$@10.10.10.15 -windows-auth
 ```
-Przełącz się na bazę danych **CM_<SiteCode>** (użyj 3-cyfrowego kodu lokalizacji, np. `CM_001`).
+Przełącz się na bazę danych **CM_<SiteCode>** (użyj 3-cyfrowego kodu witryny, np. `CM_001`).
 
 ### 3.1  Znajdź GUIDy nieznanych komputerów (opcjonalnie)
 ```sql
@@ -76,12 +76,12 @@ Skup się na politykach:
 * **TS_Sequence** – zmienne sekwencji zadań (OSDJoinAccount/Password)
 * **CollectionSettings** – może zawierać konta uruchamiane jako
 
-### 3.3  Pobierz pełne body
+### 3.3  Pobierz pełne ciało
 Jeśli już masz `PolicyID` i `PolicyVersion`, możesz pominąć wymaganie clientID, używając:
 ```sql
 EXEC MP_GetPolicyBody N'{083afd7a-b0be-4756-a4ce-c31825050325}', N'2.00';
 ```
-> WAŻNE: W SSMS zwiększ „Maksymalną liczbę pobranych znaków” (>65535), w przeciwnym razie blob zostanie obcięty.
+> WAŻNE: W SSMS zwiększ „Maksymalna liczba pobranych znaków” (>65535), w przeciwnym razie blob zostanie obcięty.
 
 ---
 
@@ -151,5 +151,5 @@ abusing-ad-mssql.md
 ## Odniesienia
 - [Chciałbym porozmawiać z Twoim menedżerem: Kradzież sekretów za pomocą relayów punktów zarządzania](https://specterops.io/blog/2025/07/15/id-like-to-speak-to-your-manager-stealing-secrets-with-management-point-relays/)
 - [PXEthief](https://github.com/MWR-CyberSec/PXEThief)
-- [Menadżer Niewłaściwej Konfiguracji – ELEVATE-4 i ELEVATE-5](https://github.com/subat0mik/Misconfiguration-Manager)
+- [Menadżer błędnej konfiguracji – ELEVATE-4 i ELEVATE-5](https://github.com/subat0mik/Misconfiguration-Manager)
 {{#include ../../banners/hacktricks-training.md}}

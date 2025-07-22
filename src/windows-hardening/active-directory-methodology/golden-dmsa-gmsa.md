@@ -29,7 +29,7 @@ Jest to analogiczne do *Złotego Biletu* dla kont usługowych.
 ### Wymagania wstępne
 
 1. **Kompromitacja na poziomie lasu** **jednego DC** (lub Administratora Enterprise), lub dostęp `SYSTEM` do jednego z DC w lesie.
-2. Możliwość enumeracji kont usługowych (odczyt LDAP / brutalne siłowe atakowanie RID).
+2. Możliwość enumeracji kont usługowych (odczyt LDAP / brute-force RID).
 3. Stacja robocza .NET ≥ 4.7.2 x64 do uruchomienia [`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) lub równoważnego kodu.
 
 ### Złoty gMSA / dMSA
@@ -73,13 +73,13 @@ GoldendMSA.exe info -d example.local -m brute -r 5000 -u jdoe -p P@ssw0rd
 ```
 ##### Faza 3 – Zgadnij / Odkryj ManagedPasswordID (gdy brakuje)
 
-Niektóre wdrożenia *usuwają* `msDS-ManagedPasswordId` z odczytów chronionych przez ACL.  
+Niektóre wdrożenia *usuwają* `msDS-ManagedPasswordId` z odczytów chronionych przez ACL. 
 Ponieważ GUID ma 128 bitów, naiwne brute force jest niepraktyczne, ale:
 
-1. Pierwsze **32 bity = czas epoki Unix** utworzenia konta (z dokładnością do minut).  
+1. Pierwsze **32 bity = czas epoki Unix** utworzenia konta (rozdzielczość minutowa).
 2. Następnie 96 losowych bitów.
 
-Dlatego **wąska lista słów dla konta** (± kilka godzin) jest realistyczna.
+Dlatego **wąska lista słów dla każdego konta** (± kilka godzin) jest realistyczna.
 ```powershell
 GoldendMSA.exe wordlist -s <SID> -d example.local -f example.local -k <KDSKeyGUID>
 ```
@@ -87,7 +87,7 @@ Narzędzie oblicza kandydatów na hasła i porównuje ich blob base64 z rzeczywi
 
 ##### Faza 4 – Offline Obliczanie Hasła i Konwersja
 
-Gdy znany jest ManagedPasswordID, ważne hasło jest na wyciągnięcie ręki:
+Gdy ManagedPasswordID jest znane, ważne hasło jest na wyciągnięcie ręki:
 ```powershell
 # derive base64 password
 GoldendMSA.exe compute -s <SID> -k <KDSRootKey> -d example.local -m <ManagedPasswordID> -i <KDSRootKey ID>
@@ -113,7 +113,7 @@ Wynikowe hashe mogą być wstrzykiwane za pomocą **mimikatz** (`sekurlsa::pth`)
 ## Odniesienia
 
 - [Golden dMSA – obejście uwierzytelniania dla delegowanych zarządzanych kont serwisowych](https://www.semperis.com/blog/golden-dmsa-what-is-dmsa-authentication-bypass/)
-- [gMSA Ataki Active Directory Konta](https://www.semperis.com/blog/golden-gmsa-attack/)
+- [gMSA Ataki na konta Active Directory](https://www.semperis.com/blog/golden-gmsa-attack/)
 - [Repozytorium GitHub Semperis/GoldenDMSA](https://github.com/Semperis/GoldenDMSA)
 - [Improsec – atak zaufania Golden gMSA](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-5-golden-gmsa-trust-attack-from-child-to-parent)
 

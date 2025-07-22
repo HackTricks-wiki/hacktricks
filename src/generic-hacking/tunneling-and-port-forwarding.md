@@ -2,10 +2,10 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Wskazówka Nmap
+## Nmap tip
 
 > [!WARNING]
-> **Skanowanie ICMP** i **SYN** nie może być tunelowane przez proxy socks, więc musimy **wyłączyć odkrywanie ping** (`-Pn`) i określić **skanowanie TCP** (`-sT`), aby to działało.
+> **Skanowanie ICMP** i **SYN** nie może być tunelowane przez proxy socks, więc musimy **wyłączyć odkrywanie ping** (`-Pn`) i określić **skany TCP** (`-sT`), aby to działało.
 
 ## **Bash**
 
@@ -68,7 +68,7 @@ ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 ```
 ### VPN-Tunnel
 
-Musisz mieć **root na obu urządzeniach** (ponieważ zamierzasz utworzyć nowe interfejsy) i konfiguracja sshd musi zezwalać na logowanie jako root:\
+Musisz mieć **roota na obu urządzeniach** (ponieważ zamierzasz utworzyć nowe interfejsy) i konfiguracja sshd musi zezwalać na logowanie jako root:\
 `PermitRootLogin yes`\
 `PermitTunnel yes`
 ```bash
@@ -89,12 +89,12 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
 > [!NOTE]
 > **Bezpieczeństwo – Atak Terrapin (CVE-2023-48795)**
-> Atak downgrade Terrapin z 2023 roku może pozwolić atakującemu typu man-in-the-middle na manipulację wczesnym handshake'iem SSH i wstrzykiwanie danych do **dowolnego przekazywanego kanału** ( `-L`, `-R`, `-D` ). Upewnij się, że zarówno klient, jak i serwer są załatane (**OpenSSH ≥ 9.6/LibreSSH 6.7**) lub wyraźnie wyłącz podatne algorytmy `chacha20-poly1305@openssh.com` i `*-etm@openssh.com` w `sshd_config`/`ssh_config`, zanim polegasz na tunelach SSH.
+> Atak degradacyjny Terrapin z 2023 roku może pozwolić atakującemu typu man-in-the-middle na manipulację wczesnym handshake'iem SSH i wstrzykiwanie danych do **dowolnego przekazywanego kanału** ( `-L`, `-R`, `-D` ). Upewnij się, że zarówno klient, jak i serwer są załatane (**OpenSSH ≥ 9.6/LibreSSH 6.7**) lub wyraźnie wyłącz podatne algorytmy `chacha20-poly1305@openssh.com` i `*-etm@openssh.com` w `sshd_config`/`ssh_config`, zanim polegasz na tunelach SSH.
 
 ## SSHUTTLE
 
-Możesz **tunele** przez **ssh** cały **ruch** do **podsieci** przez hosta.\
-Na przykład, przekazywanie całego ruchu idącego do 10.10.10.0/24
+Możesz **tunelować** przez **ssh** cały **ruch** do **podsieci** przez hosta.\
+Na przykład, przekazywanie całego ruchu kierowanego do 10.10.10.0/24
 ```bash
 pip install sshuttle
 sshuttle -r user@host 10.10.10.10/24
@@ -138,7 +138,7 @@ echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 
 ### SOCKS proxy
 
-Otwórz port w serwerze zespołowym nasłuchującym na wszystkich interfejsach, który może być używany do **przekierowywania ruchu przez beacon**.
+Otwórz port w serwerze zespołu nasłuchujący na wszystkich interfejsach, który może być używany do **przekierowywania ruchu przez beacon**.
 ```bash
 beacon> socks 1080
 [+] started SOCKS4a server on: 1080
@@ -149,12 +149,12 @@ proxychains nmap -n -Pn -sT -p445,3389,5985 10.10.17.25
 ### rPort2Port
 
 > [!WARNING]
-> W tym przypadku **port jest otwarty na hoście beacon**, a nie na serwerze Team Server, a ruch jest wysyłany do serwera Team Server, a stamtąd do wskazanego host:port
+> W tym przypadku **port jest otwarty na hoście beacon**, a nie na serwerze zespołu, a ruch jest wysyłany do serwera zespołu, a stamtąd do wskazanego hosta:port
 ```bash
 rportfwd [bind port] [forward host] [forward port]
 rportfwd stop [bind port]
 ```
-Do zauważenia:
+Aby zauważyć:
 
 - Odwrócone przekierowanie portów Beacona jest zaprojektowane do **tunnelingu ruchu do Serwera Zespołu, a nie do przekazywania między poszczególnymi maszynami**.
 - Ruch jest **tunnelowany w ramach ruchu C2 Beacona**, w tym linków P2P.
@@ -163,7 +163,7 @@ Do zauważenia:
 ### rPort2Port lokalnie
 
 > [!WARNING]
-> W tym przypadku **port jest otwierany na hoście beacona**, a nie na Serwerze Zespołu, a **ruch jest wysyłany do klienta Cobalt Strike** (a nie do Serwera Zespołu) i stamtąd do wskazanego hosta:port
+> W tym przypadku **port jest otwierany w hoście beacona**, a nie w Serwerze Zespołu, a **ruch jest wysyłany do klienta Cobalt Strike** (a nie do Serwera Zespołu) i stamtąd do wskazanego hosta:port
 ```bash
 rportfwd_local [bind port] [forward host] [forward port]
 rportfwd_local stop [bind port]
@@ -172,14 +172,14 @@ rportfwd_local stop [bind port]
 
 [https://github.com/sensepost/reGeorg](https://github.com/sensepost/reGeorg)
 
-Musisz przesłać plik tunelowy: ashx|aspx|js|jsp|php|php|jsp
+Musisz przesłać plik webowy tunel: ashx|aspx|js|jsp|php|php|jsp
 ```bash
 python reGeorgSocksProxy.py -p 8080 -u http://upload.sensepost.net:8080/tunnel/tunnel.jsp
 ```
 ## Chisel
 
-Możesz go pobrać ze strony wydań [https://github.com/jpillora/chisel](https://github.com/jpillora/chisel)\
-Musisz używać **tej samej wersji dla klienta i serwera**
+Możesz go pobrać z strony wydań [https://github.com/jpillora/chisel](https://github.com/jpillora/chisel)\
+Musisz użyć **tej samej wersji dla klienta i serwera**
 
 ### socks
 ```bash
@@ -231,7 +231,7 @@ listener_add --addr 0.0.0.0:30000 --to 127.0.0.1:10000 --tcp
 # Display the currently running listeners on the agent -- Attacker
 listener_list
 ```
-### Uzyskaj dostęp do lokalnych portów agenta
+### Uzyskiwanie dostępu do lokalnych portów agenta
 ```bash
 # Establish a tunnel from the proxy server to the agent
 # Create a route to redirect traffic for 240.0.0.1 to the Ligolo-ng interface to access the agent's local services -- Attacker
@@ -350,7 +350,7 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 Musisz mieć **dostęp RDP do systemu**.\
 Pobierz:
 
-1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - To narzędzie wykorzystuje `Dynamic Virtual Channels` (`DVC`) z funkcji Zdalnego Pulpitu w systemie Windows. DVC jest odpowiedzialne za **tunneling pakietów przez połączenie RDP**.
+1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - To narzędzie wykorzystuje `Dynamic Virtual Channels` (`DVC`) z funkcji Zdalnego Pulpitu w systemie Windows. DVC odpowiada za **tunneling pakietów przez połączenie RDP**.
 2. [Proxifier Portable Binary](https://www.proxifier.com/download/#win-tab)
 
 Na swoim komputerze klienckim załaduj **`SocksOverRDP-Plugin.dll`** w ten sposób:
@@ -370,9 +370,9 @@ netstat -antb | findstr 1080
 ```
 Teraz możesz użyć [**Proxifier**](https://www.proxifier.com/) **do proxyzowania ruchu przez ten port.**
 
-## Proxyzowanie aplikacji GUI w systemie Windows
+## Proxyzowanie aplikacji GUI w Windows
 
-Możesz sprawić, że aplikacje GUI w systemie Windows będą korzystać z proxy za pomocą [**Proxifier**](https://www.proxifier.com/).\
+Możesz sprawić, że aplikacje GUI w Windows będą korzystać z proxy za pomocą [**Proxifier**](https://www.proxifier.com/).\
 W **Profile -> Proxy Servers** dodaj adres IP i port serwera SOCKS.\
 W **Profile -> Proxification Rules** dodaj nazwę programu do proxyzowania oraz połączenia do adresów IP, które chcesz proxyzować.
 
@@ -396,7 +396,7 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-Teraz, jeśli ustawisz na przykład w ofierze usługę **SSH** do nasłuchiwania na porcie 443. Możesz się z nią połączyć przez port atakującego 2222.\
+Teraz, jeśli na przykład ustawisz na ofierze usługę **SSH** do nasłuchiwania na porcie 443. Możesz się z nią połączyć przez port atakującego 2222.\
 Możesz również użyć **meterpreter**, który łączy się z localhost:443, a atakujący nasłuchuje na porcie 2222.
 
 ## YARP
@@ -484,7 +484,7 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ## ngrok
 
 [**ngrok**](https://ngrok.com/) **to narzędzie do eksponowania rozwiązań w Internecie w jednej linii poleceń.**\
-_Adresy URI eksponujące są jak:_ **UID.ngrok.io**
+_URI eksponowania wygląda jak:_ **UID.ngrok.io**
 
 ### Instalacja
 
@@ -561,7 +561,7 @@ cloudflared tunnel --url http://localhost:8080
 cloudflared tunnel --url socks5://localhost:1080 --socks5
 # Now configure proxychains to use 127.0.0.1:1080
 ```
-### Trwałe tunele z DNS
+### Trwałe tunelowanie z DNS
 ```bash
 cloudflared tunnel create mytunnel
 cloudflared tunnel route dns mytunnel internal.example.com
@@ -612,7 +612,7 @@ Powyższe polecenie publikuje port ofiary **8080** jako **attacker_ip:9000** bez
 
 ## Tajne tunelowanie oparte na VM z QEMU
 
-Sieciowanie w trybie użytkownika QEMU (`-netdev user`) obsługuje opcję o nazwie `hostfwd`, która **wiąże port TCP/UDP na *hoście* i przekazuje go do *gościa***. Gdy gość uruchamia pełny demon SSH, reguła hostfwd daje ci jednorazowy serwer SSH, który żyje całkowicie wewnątrz efemerycznej VM – idealne do ukrywania ruchu C2 przed EDR, ponieważ wszystkie złośliwe działania i pliki pozostają na wirtualnym dysku.
+Sieciowanie w trybie użytkownika QEMU (`-netdev user`) obsługuje opcję o nazwie `hostfwd`, która **wiąże port TCP/UDP na *hoście* i przekazuje go do *gościa***. Gdy gość uruchamia pełny demon SSH, reguła hostfwd daje ci jednorazowy skok SSH, który żyje całkowicie wewnątrz efemerycznej VM – idealne do ukrywania ruchu C2 przed EDR, ponieważ wszystkie złośliwe działania i pliki pozostają na wirtualnym dysku.
 
 ### Szybka linia komend
 ```powershell
@@ -653,14 +653,14 @@ while ! ping -c1 45.77.4.101; do sleep 2; done
 ### Dlaczego to unika wykrycia
 
 • Tylko dwa niesigned executables (`qemu-system-*.exe`) dotykają dysku; nie są instalowane żadne sterowniki ani usługi.
-• Produkty zabezpieczające na hoście widzą **nieszkodliwy ruch loopback** (rzeczywisty C2 kończy się wewnątrz VM).
-• Skany pamięci nigdy nie analizują przestrzeni procesów złośliwych, ponieważ żyje ona w innym systemie operacyjnym.
+• Produkty zabezpieczające na hoście widzą **łagodny ruch loopback** (rzeczywisty C2 kończy się wewnątrz VM).
+• Skany pamięci nigdy nie analizują złośliwej przestrzeni procesów, ponieważ żyje ona w innym systemie operacyjnym.
 
 ### Wskazówki dla Defendera
 
 • Alarmuj na **nieoczekiwane binaria QEMU/VirtualBox/KVM** w ścieżkach zapisywalnych przez użytkownika.
 • Blokuj połączenia wychodzące, które pochodzą z `qemu-system*.exe`.
-• Poluj na rzadkie porty nasłuchujące (2222, 10022, …) wiążące się natychmiast po uruchomieniu QEMU.
+• Szukaj rzadkich portów nasłuchujących (2222, 10022, …) wiążących się natychmiast po uruchomieniu QEMU.
 
 ---
 

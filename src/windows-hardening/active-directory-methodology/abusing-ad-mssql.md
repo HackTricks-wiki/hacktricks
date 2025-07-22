@@ -7,7 +7,7 @@
 
 ### Python
 
-Narzędzie [MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) opiera się na impacket i pozwala również na uwierzytelnianie za pomocą biletów kerberos oraz atakowanie przez łańcuchy linków.
+Narzędzie [MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) opiera się na impacket i umożliwia również uwierzytelnianie za pomocą biletów kerberos oraz atakowanie przez łańcuchy linków.
 
 <figure><img src="https://raw.githubusercontent.com/ScorpionesLabs/MSSqlPwner/main/assets/interractive.png"></figure>
 ```shell
@@ -166,7 +166,7 @@ Możliwe jest również **wykonywanie poleceń** wewnątrz hosta MSSQL
 Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResults
 # Invoke-SQLOSCmd automatically checks if xp_cmdshell is enable and enables it if necessary
 ```
-Sprawdź na stronie wspomnianej w **następnym rozdziale, jak zrobić to ręcznie.**
+Sprawdź na stronie wspomnianej w **następującej sekcji, jak zrobić to ręcznie.**
 
 ### MSSQL Podstawowe Sztuczki Hackingowe
 
@@ -274,15 +274,15 @@ Możesz również nadużyć zaufanych linków używając `EXECUTE`:
 EXECUTE('EXECUTE(''CREATE LOGIN hacker WITH PASSWORD = ''''P@ssword123.'''' '') AT "DOMINIO\SERVER1"') AT "DOMINIO\SERVER2"
 EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT "DOMINIO\SERVER1"') AT "DOMINIO\SERVER2"
 ```
-## Eskalacja uprawnień lokalnych
+## Eskalacja Uprawnień Lokalnych
 
 **Użytkownik lokalny MSSQL** zazwyczaj ma specjalny rodzaj uprawnienia nazywanego **`SeImpersonatePrivilege`**. Umożliwia to kontu "podszywanie się pod klienta po uwierzytelnieniu".
 
-Strategią, którą opracowało wielu autorów, jest zmuszenie usługi SYSTEM do uwierzytelnienia się w fałszywej lub man-in-the-middle usłudze, którą tworzy atakujący. Ta fałszywa usługa może następnie podszywać się pod usługę SYSTEM, gdy ta próbuje się uwierzytelnić.
+Strategią, którą wielu autorów opracowało, jest zmuszenie usługi SYSTEM do uwierzytelnienia się w fałszywej lub man-in-the-middle usłudze, którą tworzy atakujący. Ta fałszywa usługa jest w stanie podszywać się pod usługę SYSTEM, gdy ta próbuje się uwierzytelnić.
 
 [SweetPotato](https://github.com/CCob/SweetPotato) ma zbiór tych różnych technik, które można wykonać za pomocą polecenia `execute-assembly` w Beaconie.
 
-### NTLM Relay punktu zarządzania SCCM (ekstrakcja sekretów OSD)
+### NTLM Relay Punktu Zarządzania SCCM (Ekstrakcja Sekretów OSD)
 Zobacz, jak domyślne role SQL punktów zarządzania SCCM **Management Points** mogą być wykorzystywane do zrzucania konta dostępu do sieci i sekretów sekwencji zadań bezpośrednio z bazy danych witryny:
 {{#ref}}
 sccm-management-point-relay-sql-policy-secrets.md

