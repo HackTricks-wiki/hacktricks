@@ -176,7 +176,7 @@ Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResu
 
 ## MSSQL Güvenilir Bağlantılar
 
-Eğer bir MSSQL örneği, farklı bir MSSQL örneği tarafından güvenilir (veritabanı bağlantısı) olarak kabul ediliyorsa. Kullanıcının güvenilir veritabanı üzerinde yetkileri varsa, **güven ilişkisini kullanarak diğer örnekte de sorgular çalıştırabilecektir**. Bu güven ilişkileri zincirlenebilir ve bir noktada kullanıcı, komutları çalıştırabileceği yanlış yapılandırılmış bir veritabanı bulabilir.
+Eğer bir MSSQL örneği, farklı bir MSSQL örneği tarafından güvenilir (veritabanı bağlantısı) olarak kabul ediliyorsa. Kullanıcının güvenilir veritabanı üzerinde yetkileri varsa, **güven ilişkisini kullanarak diğer örnekte de sorgular çalıştırabilecektir**. Bu güven ilişkileri zincirlenebilir ve bir noktada kullanıcı, komut çalıştırabileceği yanlış yapılandırılmış bir veritabanı bulabilir.
 
 **Veritabanları arasındaki bağlantılar, orman güvenleri arasında bile çalışır.**
 
@@ -278,9 +278,16 @@ EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT 
 
 **MSSQL yerel kullanıcısı** genellikle **`SeImpersonatePrivilege`** adı verilen özel bir yetkiye sahiptir. Bu, hesabın "kimlik doğrulamasından sonra bir istemciyi taklit etmesine" olanak tanır.
 
-Birçok yazarın geliştirdiği bir strateji, bir SİSTEM hizmetini, saldırganın oluşturduğu sahte veya ortadaki hizmete kimlik doğrulaması yapmaya zorlamaktır. Bu sahte hizmet, kimlik doğrulaması yapmaya çalışırken SİSTEM hizmetini taklit edebilir.
+Birçok yazarın geliştirdiği bir strateji, bir SİSTEM hizmetini, saldırganın oluşturduğu sahte veya ortadaki adam hizmetine kimlik doğrulaması yapmaya zorlamaktır. Bu sahte hizmet, kimlik doğrulaması yapmaya çalışırken SİSTEM hizmetini taklit edebilir.
 
-[SweetPotato](https://github.com/CCob/SweetPotato), Beacon'ın `execute-assembly` komutu aracılığıyla yürütülebilen bu çeşitli tekniklerin bir derlemesini sunmaktadır.
+[SweetPotato](https://github.com/CCob/SweetPotato), Beacon'ın `execute-assembly` komutu aracılığıyla yürütülebilecek bu çeşitli tekniklerin bir koleksiyonuna sahiptir.
 
+
+
+### SCCM Yönetim Noktası NTLM İletimi (OSD Gizli Çıkarma)
+SCCM **Yönetim Noktaları**nın varsayılan SQL rollerinin, Ağ Erişim Hesabı ve Görev Dizisi gizli bilgilerini doğrudan site veritabanından dökme amacıyla nasıl istismar edilebileceğini görün:
+{{#ref}}
+sccm-management-point-relay-sql-policy-secrets.md
+{{#endref}}
 
 {{#include ../../banners/hacktricks-training.md}}
