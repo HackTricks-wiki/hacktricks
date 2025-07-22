@@ -6,20 +6,20 @@
 
 Windows Managed Service Accounts (MSA) sind spezielle Prinzipien, die entwickelt wurden, um Dienste auszuführen, ohne dass die Passwörter manuell verwaltet werden müssen. Es gibt zwei Hauptvarianten:
 
-1. **gMSA** – gruppenverwaltetes Dienstkonto – kann auf mehreren Hosts verwendet werden, die in seinem Attribut `msDS-GroupMSAMembership` autorisiert sind.
-2. **dMSA** – delegiertes Managed Service Account – der (Vorschau-)Nachfolger von gMSA, der auf derselben Kryptografie basiert, aber granularere Delegationsszenarien ermöglicht.
+1. **gMSA** – gruppiertes Managed Service Account – kann auf mehreren Hosts verwendet werden, die in seinem `msDS-GroupMSAMembership` Attribut autorisiert sind.
+2. **dMSA** – delegiertes Managed Service Account – der (Vorschau) Nachfolger von gMSA, der auf derselben Kryptografie basiert, aber granularere Delegationsszenarien ermöglicht.
 
 Für beide Varianten wird das **Passwort nicht** auf jedem Domain Controller (DC) wie ein regulärer NT-Hash gespeichert. Stattdessen kann jeder DC das aktuelle Passwort **on-the-fly** ableiten von:
 
-* Dem forstweiten **KDS Root Key** (`KRBTGT\KDS`) – zufällig generierter, GUID-namensgegebener Geheimschlüssel, der auf jeden DC im Container `CN=Master Root Keys,CN=Group Key Distribution Service, CN=Services, CN=Configuration, …` repliziert wird.
+* Dem forestweiten **KDS Root Key** (`KRBTGT\KDS`) – zufällig generierter GUID-benannter Geheimnis, das zu jedem DC unter dem Container `CN=Master Root Keys,CN=Group Key Distribution Service, CN=Services, CN=Configuration, …` repliziert wird.
 * Der Zielkonto **SID**.
-* Einer pro Konto **ManagedPasswordID** (GUID), die im Attribut `msDS-ManagedPasswordId` zu finden ist.
+* Eine pro-Konto **ManagedPasswordID** (GUID), die im `msDS-ManagedPasswordId` Attribut gefunden wird.
 
-Die Ableitung ist: `AES256_HMAC( KDSRootKey , SID || ManagedPasswordID )` → 240 Byte Blob, das schließlich **base64-kodiert** und im Attribut `msDS-ManagedPassword` gespeichert wird. Während der normalen Passwortnutzung sind kein Kerberos-Verkehr oder Domain-Interaktionen erforderlich – ein Mitglieds-Host leitet das Passwort lokal ab, solange es die drei Eingaben kennt.
+Die Ableitung ist: `AES256_HMAC( KDSRootKey , SID || ManagedPasswordID )` → 240 Byte Blob, das schließlich **base64-kodiert** und im `msDS-ManagedPassword` Attribut gespeichert wird. Kein Kerberos-Verkehr oder Domäneninteraktion ist während der normalen Passwortnutzung erforderlich – ein Mitglieds-Host leitet das Passwort lokal ab, solange es die drei Eingaben kennt.
 
 ## Golden gMSA / Golden dMSA Angriff
 
-Wenn ein Angreifer alle drei Eingaben **offline** erhalten kann, kann er **gültige aktuelle und zukünftige Passwörter** für **jedes gMSA/dMSA in der Forest** berechnen, ohne den DC erneut zu berühren, wodurch umgangen wird:
+Wenn ein Angreifer alle drei Eingaben **offline** erhalten kann, kann er **gültige aktuelle und zukünftige Passwörter** für **jedes gMSA/dMSA im Forest** berechnen, ohne den DC erneut zu berühren, wodurch umgangen wird:
 
 * LDAP-Leseaudits
 * Passwortänderungsintervalle (sie können vorab berechnen)
@@ -28,7 +28,7 @@ Dies ist analog zu einem *Golden Ticket* für Dienstkonten.
 
 ### Voraussetzungen
 
-1. **Forstweite Kompromittierung** von **einem DC** (oder Enterprise Admin) oder `SYSTEM`-Zugriff auf einen der DCs im Forest.
+1. **Forest-weite Kompromittierung** von **einem DC** (oder Enterprise Admin) oder `SYSTEM`-Zugriff auf einen der DCs im Forest.
 2. Fähigkeit, Dienstkonten aufzulisten (LDAP-Lesen / RID-Brute-Force).
 3. .NET ≥ 4.7.2 x64 Arbeitsstation, um [`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) oder gleichwertigen Code auszuführen.
 
@@ -73,7 +73,7 @@ GoldendMSA.exe info -d example.local -m brute -r 5000 -u jdoe -p P@ssw0rd
 ```
 ##### Phase 3 – Erraten / Entdecken der ManagedPasswordID (wenn fehlend)
 
-Einige Deployments *entfernen* `msDS-ManagedPasswordId` von ACL-geschützten Lesevorgängen. 
+Einige Bereitstellungen *entfernen* `msDS-ManagedPasswordId` von ACL-geschützten Lesevorgängen. 
 Da die GUID 128-Bit ist, ist naives Brute-Forcing unpraktisch, aber:
 
 1. Die ersten **32 Bit = Unix-Epochenzeit** der Kontoerstellung (Minutenauflösung).
@@ -83,7 +83,7 @@ Daher ist eine **enge Wortliste pro Konto** (± wenige Stunden) realistisch.
 ```powershell
 GoldendMSA.exe wordlist -s <SID> -d example.local -f example.local -k <KDSKeyGUID>
 ```
-Das Tool berechnet Kandidatenpasswörter und vergleicht ihren Base64-BLOB mit dem echten `msDS-ManagedPassword`-Attribut – die Übereinstimmung zeigt die korrekte GUID an.
+Das Tool berechnet Kandidatenpasswörter und vergleicht deren Base64-Blob mit dem echten `msDS-ManagedPassword`-Attribut – die Übereinstimmung zeigt die korrekte GUID an.
 
 ##### Phase 4 – Offline-Passwortberechnung & -konvertierung
 
@@ -97,7 +97,7 @@ Die resultierenden Hashes können mit **mimikatz** (`sekurlsa::pth`) oder **Rube
 
 ## Detection & Mitigation
 
-* Beschränken Sie die **DC-Backup- und Registry-Hive-Lese**-Fähigkeiten auf Tier-0-Administratoren.
+* Beschränken Sie die **DC-Backup- und Registrierungshive-Lese**-Fähigkeiten auf Tier-0-Administratoren.
 * Überwachen Sie die Erstellung des **Directory Services Restore Mode (DSRM)** oder der **Volume Shadow Copy** auf DCs.
 * Protokollieren Sie Lesevorgänge / Änderungen an `CN=Master Root Keys,…` und `userAccountControl`-Flags von Dienstkonten.
 * Erkennen Sie ungewöhnliche **base64 Passwortschreibvorgänge** oder plötzliche Wiederverwendung von Dienstpasswörtern über Hosts hinweg.

