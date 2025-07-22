@@ -7,7 +7,7 @@
 
 ### Python
 
-[MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) aracı impacket üzerine kuruludur ve kerberos biletleri kullanarak kimlik doğrulama yapmayı ve bağlantı zincirleri aracılığıyla saldırı gerçekleştirmeyi sağlar.
+[MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) aracı impacket üzerine kuruludur ve kerberos biletleri kullanarak kimlik doğrulaması yapmayı ve bağlantı zincirleri aracılığıyla saldırı gerçekleştirmeyi sağlar.
 
 <figure><img src="https://raw.githubusercontent.com/ScorpionesLabs/MSSqlPwner/main/assets/interractive.png"></figure>
 ```shell
@@ -133,7 +133,7 @@ Get-SQLInstanceDomain | Get-SQLServerInfo -Verbose
 # Get DBs, test connections and get info in oneliner
 Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" } | Get-SQLServerInfo
 ```
-## MSSQL Temel Suistimal
+## MSSQL Temel İstismar
 
 ### Erişim Veritabanı
 ```bash
@@ -226,15 +226,15 @@ Metasploit kullanarak güvenilir bağlantıları kolayca kontrol edebilirsiniz.
 msf> use exploit/windows/mssql/mssql_linkcrawler
 [msf> set DEPLOY true] #Set DEPLOY to true if you want to abuse the privileges to obtain a meterpreter session
 ```
-Notice that metasploit will try to abuse only the `openquery()` function in MSSQL (so, if you can't execute command with `openquery()` you will need to try the `EXECUTE` method **manually** to execute commands, see more below.)
+Metasploit'in yalnızca MSSQL'deki `openquery()` fonksiyonunu kötüye kullanmaya çalışacağını unutmayın (yani, `openquery()` ile komut çalıştıramıyorsanız, komutları çalıştırmak için `EXECUTE` yöntemini **manuel** olarak denemeniz gerekecek, daha fazla bilgi aşağıda.)
 
-### Manual - Openquery()
+### Manuel - Openquery()
 
-From **Linux** you could obtain a MSSQL console shell with **sqsh** and **mssqlclient.py.**
+**Linux**'tan **sqsh** ve **mssqlclient.py** ile bir MSSQL konsol kabuğu elde edebilirsiniz.
 
-From **Windows** you could also find the links and execute commands manually using a **MSSQL client like** [**HeidiSQL**](https://www.heidisql.com)
+**Windows**'tan da bağlantıları bulabilir ve komutları manuel olarak bir **MSSQL istemcisi gibi** [**HeidiSQL**](https://www.heidisql.com) kullanarak çalıştırabilirsiniz.
 
-_Login using Windows authentication:_
+_Windows kimlik doğrulaması ile giriş yapın:_
 
 ![](<../../images/image (808).png>)
 
@@ -252,7 +252,7 @@ Bağlantı üzerinden sorguları çalıştırın (örnek: yeni erişilebilir ör
 select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 ```
 > [!WARNING]
-> İki ve tek tırnakların nerede kullanıldığını kontrol edin, bu şekilde kullanmak önemlidir.
+> Çift ve tek tırnakların nerede kullanıldığını kontrol edin, bu şekilde kullanmak önemlidir.
 
 ![](<../../images/image (643).png>)
 
@@ -280,12 +280,12 @@ EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT 
 
 Birçok yazarın geliştirdiği bir strateji, bir SİSTEM hizmetini, saldırganın oluşturduğu sahte veya ortadaki adam hizmetine kimlik doğrulaması yapmaya zorlamaktır. Bu sahte hizmet, kimlik doğrulaması yapmaya çalışırken SİSTEM hizmetini taklit edebilir.
 
-[SweetPotato](https://github.com/CCob/SweetPotato), Beacon'ın `execute-assembly` komutu aracılığıyla yürütülebilecek bu çeşitli tekniklerin bir koleksiyonuna sahiptir.
+[SweetPotato](https://github.com/CCob/SweetPotato), Beacon'ın `execute-assembly` komutu aracılığıyla yürütülebilen bu çeşitli tekniklerin bir koleksiyonuna sahiptir.
 
 
 
 ### SCCM Yönetim Noktası NTLM İletimi (OSD Gizli Çıkarma)
-SCCM **Yönetim Noktaları**nın varsayılan SQL rollerinin, Ağ Erişim Hesabı ve Görev Dizisi gizli bilgilerini doğrudan site veritabanından dökme amacıyla nasıl istismar edilebileceğini görün:
+SCCM **Yönetim Noktaları**nın varsayılan SQL rollerinin, Ağ Erişim Hesabı ve Görev Dizisi gizli bilgilerini doğrudan site veritabanından dökme amacıyla nasıl kötüye kullanılabileceğini görün:
 {{#ref}}
 sccm-management-point-relay-sql-policy-secrets.md
 {{#endref}}

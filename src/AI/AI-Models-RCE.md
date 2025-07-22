@@ -14,16 +14,16 @@ Yazım anında bu tür güvenlik açıklarına bazı örnekler şunlardır:
 | PyTorch **TorchServe**      | *ShellTorch* – **CVE-2023-43654**, **CVE-2022-1471**                                                                        | SSRF + kötü niyetli model indirme, kod çalıştırmaya neden olur; yönetim API'sinde Java serileştirme RCE                                   | |
 | **TensorFlow/Keras**        | **CVE-2021-37678** (güvensiz YAML) <br> **CVE-2024-3660** (Keras Lambda)                                                   | YAML'den model yüklemek `yaml.unsafe_load` kullanır (kod çalıştırma) <br> **Lambda** katmanı ile model yüklemek rastgele Python kodu çalıştırır | |
 | TensorFlow (TFLite)         | **CVE-2022-23559** (TFLite ayrıştırma)                                                                                       | Özel `.tflite` modeli, tam sayı taşması tetikler → bellek bozulması (potansiyel RCE)                                                  | |
-| **Scikit-learn** (Python)   | **CVE-2020-13092** (joblib/pickle)                                                                                          | `joblib.load` ile bir model yüklemek, saldırganın `__reduce__` yükünü çalıştırır                                                        | |
-| **NumPy** (Python)          | **CVE-2019-6446** (güvensiz `np.load`) *tartışmalı*                                                                         | `numpy.load` varsayılan olarak pickle nesne dizilerine izin veriyor – kötü niyetli `.npy/.npz` kod çalıştırmayı tetikler                | |
-| **ONNX / ONNX Runtime**     | **CVE-2022-25882** (dizin geçişi) <br> **CVE-2024-5187** (tar geçişi)                                                       | ONNX modelinin dış-ağırlık yolu dizinden çıkabilir (rastgele dosyaları okuyabilir) <br> Kötü niyetli ONNX model tar, rastgele dosyaları yazabilir (RCE'ye yol açar) | |
+| **Scikit-learn** (Python)   | **CVE-2020-13092** (joblib/pickle)                                                                                          | `joblib.load` ile bir model yüklemek, saldırganın `__reduce__` yükünü çalıştırır                                                         | |
+| **NumPy** (Python)          | **CVE-2019-6446** (güvensiz `np.load`) *tartışmalı*                                                                         | `numpy.load` varsayılan olarak pickle nesne dizilerine izin veriyordu – kötü niyetli `.npy/.npz` kod çalıştırmayı tetikler              | |
+| **ONNX / ONNX Runtime**     | **CVE-2022-25882** (dizin geçişi) <br> **CVE-2024-5187** (tar geçişi)                                                      | ONNX modelinin dış-ağırlık yolu dizinden çıkabilir (rastgele dosyaları okuyabilir) <br> Kötü niyetli ONNX model tar, rastgele dosyaları yazabilir (RCE'ye yol açar) | |
 | ONNX Runtime (tasarım riski) | *(CVE yok)* ONNX özel ops / kontrol akışı                                                                                   | Özel operatör içeren model, saldırganın yerel kodunu yüklemeyi gerektirir; karmaşık model grafikleri, istenmeyen hesaplamaları çalıştırmak için mantığı kötüye kullanır | |
 | **NVIDIA Triton Server**    | **CVE-2023-31036** (yol geçişi)                                                                                             | Model yükleme API'sini `--model-control` etkinleştirildiğinde kullanmak, dosyaları yazmak için göreli yol geçişine izin verir (örneğin, RCE için `.bashrc`'yi geçersiz kılmak) | |
 | **GGML (GGUF formatı)**     | **CVE-2024-25664 … 25668** (birden fazla bellek taşması)                                                                    | Bozuk GGUF model dosyası, ayrıştırıcıda bellek tamponu taşmalarına neden olur, kurban sistemde rastgele kod çalıştırmayı sağlar          | |
 | **Keras (eski formatlar)**  | *(Yeni CVE yok)* Eski Keras H5 modeli                                                                                       | Kötü niyetli HDF5 (`.h5`) modeli, Lambda katmanı kodu yüklenirken hala çalışır (Keras güvenli_modu eski formatı kapsamaz – “gerileme saldırısı”) | |
-| **Diğerleri** (genel)       | *Tasarım hatası* – Pickle serileştirme                                                                                      | Birçok ML aracı (örneğin, pickle tabanlı model formatları, Python `pickle.load`) model dosyalarına gömülü rastgele kodu çalıştıracaktır, önlem alınmadıkça | |
+| **Diğerleri** (genel)       | *Tasarım hatası* – Pickle serileştirmesi                                                                                     | Birçok ML aracı (örneğin, pickle tabanlı model formatları, Python `pickle.load`) model dosyalarına gömülü rastgele kodu çalıştıracaktır, önlem alınmadıkça | |
 
-Ayrıca, [PyTorch](https://github.com/pytorch/pytorch/security) tarafından kullanılanlar gibi bazı python pickle tabanlı modeller, `weights_only=True` ile yüklenmediklerinde sistemde rastgele kod çalıştırmak için kullanılabilir. Bu nedenle, tabloda listelenmemiş olsalar bile, herhangi bir pickle tabanlı model bu tür saldırılara özellikle duyarlı olabilir.
+Ayrıca, [PyTorch](https://github.com/pytorch/pytorch/security) tarafından kullanılan gibi bazı python pickle tabanlı modeller, `weights_only=True` ile yüklenmediklerinde sistemde rastgele kod çalıştırmak için kullanılabilir. Bu nedenle, tabloda listelenmemiş olsalar bile, herhangi bir pickle tabanlı model bu tür saldırılara özellikle duyarlı olabilir.
 
 ### 🆕  `torch.load` ile InvokeAI RCE (CVE-2024-12029)
 
@@ -35,7 +35,7 @@ checkpoint = torch.load(path, map_location=torch.device("meta"))
 ```
 Verilen dosya bir **PyTorch checkpoint (`*.ckpt`)** olduğunda, `torch.load` **pickle deserialization** işlemi gerçekleştirir. İçerik doğrudan kullanıcı kontrolündeki URL'den geldiği için, bir saldırgan checkpoint içine özel bir `__reduce__` yöntemi ile kötü niyetli bir nesne yerleştirebilir; bu yöntem **deserialization** sırasında çalıştırılır ve **uzaktan kod yürütme (RCE)** ile sonuçlanır.
 
-Açıklık **CVE-2024-12029** (CVSS 9.8, EPSS 61.17 %) olarak atanmıştır.
+Açık, **CVE-2024-12029** (CVSS 9.8, EPSS 61.17 %) olarak atanmıştır.
 
 #### Sömürü adım adım
 
@@ -87,7 +87,7 @@ Hazır exploit: **Metasploit** modülü `exploit/linux/http/invokeai_rce_cve_202
 
 ---
 
-Bir ters proxy arkasında eski InvokeAI sürümlerini çalıştırmanız gerekiyorsa, ad-hoc bir önlem örneği:
+Bir ters proxy arkasında eski InvokeAI sürümlerini çalıştırmak zorundaysanız, ad-hoc bir önlem örneği:
 ```nginx
 location /api/v2/models/install {
 deny all;                       # block direct Internet access
@@ -133,7 +133,7 @@ model.load_state_dict(torch.load("malicious_state.pth", weights_only=False))
 ```
 ## Modeller ile Yol Traversali
 
-[**bu blog yazısında**](https://blog.huntr.com/pivoting-archive-slip-bugs-into-high-value-ai/ml-bounties) belirtildiği gibi, farklı AI çerçeveleri tarafından kullanılan çoğu model formatı arşivlere dayanmaktadır, genellikle `.zip`. Bu nedenle, bu formatların kötüye kullanılarak yol traversali saldırıları gerçekleştirilmesi mümkün olabilir; bu da modelin yüklü olduğu sistemden rastgele dosyaların okunmasına olanak tanır.
+[**bu blog yazısında**](https://blog.huntr.com/pivoting-archive-slip-bugs-into-high-value-ai/ml-bounties) belirtildiği gibi, farklı AI çerçeveleri tarafından kullanılan çoğu model formatı arşivlere dayanmaktadır, genellikle `.zip`. Bu nedenle, bu formatların kötüye kullanılması yoluyla yol traversali saldırıları gerçekleştirmek mümkün olabilir; bu, modelin yüklü olduğu sistemden rastgele dosyaların okunmasına olanak tanır.
 
 Örneğin, aşağıdaki kod ile yüklendiğinde `/tmp` dizininde bir dosya oluşturacak bir model oluşturabilirsiniz:
 ```python
@@ -146,7 +146,7 @@ return member
 with tarfile.open("traversal_demo.model", "w:gz") as tf:
 tf.add("harmless.txt", filter=escape)
 ```
-Aşağıdaki kod ile yüklendiğinde `/tmp` dizinine bir symlink oluşturacak bir model oluşturabilirsiniz:
+Ya da, aşağıdaki kod ile yüklendiğinde `/tmp` dizinine bir symlink oluşturacak bir model oluşturabilirsiniz:
 ```python
 import tarfile, pathlib
 
