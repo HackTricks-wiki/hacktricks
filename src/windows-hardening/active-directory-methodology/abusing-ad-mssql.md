@@ -133,7 +133,7 @@ Get-SQLInstanceDomain | Get-SQLServerInfo -Verbose
 # Get DBs, test connections and get info in oneliner
 Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" } | Get-SQLServerInfo
 ```
-## MSSQL Abuso Básico
+## Abuso Básico do MSSQL
 
 ### Acessar DB
 ```bash
@@ -247,7 +247,7 @@ EXEC sp_linkedservers;
 
 #### Execute queries in trustable link
 
-Execute queries através do link (exemplo: encontre mais links na nova instância acessível):
+Execute consultas através do link (exemplo: encontre mais links na nova instância acessível):
 ```sql
 select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 ```

