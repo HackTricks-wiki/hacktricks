@@ -761,6 +761,7 @@
   - [SROP - Sigreturn-Oriented Programming](binary-exploitation/rop-return-oriented-programing/srop-sigreturn-oriented-programming/README.md)
     - [SROP - ARM64](binary-exploitation/rop-return-oriented-programing/srop-sigreturn-oriented-programming/srop-arm64.md)
 - [Array Indexing](binary-exploitation/array-indexing.md)
+- [Chrome Exploiting](binary-exploitation/chrome-exploiting.md)
 - [Integer Overflow](binary-exploitation/integer-overflow.md)
 - [Format Strings](binary-exploitation/format-strings/README.md)
   - [Format Strings - Arbitrary Read Example](binary-exploitation/format-strings/format-strings-arbitrary-read-example.md)
