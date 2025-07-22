@@ -3,11 +3,11 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 
-## **MSSQL Uainishaji / Ugunduzi**
+## **MSSQL Enumeration / Discovery**
 
 ### Python
 
-Zana ya [MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) inategemea impacket, na pia inaruhusu kuthibitisha kwa kutumia tiketi za kerberos, na kushambulia kupitia minyororo ya viungo.
+Zana ya [MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) inategemea impacket, na pia inaruhusu uthibitisho kwa kutumia tiketi za kerberos, na kushambulia kupitia minyororo ya viungo.
 
 <figure><img src="https://raw.githubusercontent.com/ScorpionesLabs/MSSqlPwner/main/assets/interractive.png"></figure>
 ```shell
@@ -176,9 +176,9 @@ Check in the page mentioned in the **following section how to do this manually.*
 
 ## MSSQL Trusted Links
 
-Ikiwa mfano wa MSSQL unaminiwa (kiungo cha database) na mfano mwingine wa MSSQL. Ikiwa mtumiaji ana mamlaka juu ya database iliyoaminiwa, ataweza **kutumia uhusiano wa kuaminiana kutekeleza maswali pia katika mfano mwingine**. Hii inategemea inaweza kuunganishwa na kwa wakati fulani mtumiaji anaweza kupata database isiyo na usanidi mzuri ambapo anaweza kutekeleza amri.
+Ikiwa mfano wa MSSQL unaminiwa (kiungo cha database) na mfano mwingine wa MSSQL. Ikiwa mtumiaji ana mamlaka juu ya database iliyoaminiwa, ataweza **kutumia uhusiano wa kuaminiana kutekeleza maswali pia katika mfano mwingine**. Hii inategemea inaweza kuunganishwa na kwa wakati fulani mtumiaji anaweza kupata database iliyo na mipangilio isiyo sahihi ambapo anaweza kutekeleza amri.
 
-**Viungo kati ya databases vinafanya kazi hata kupitia uaminifu wa msitu.**
+**Viungo kati ya databases vinafanya kazi hata katika uaminifu wa msitu.**
 
 ### Powershell Abuse
 ```bash
@@ -220,7 +220,7 @@ inject-assembly 4704 ../SharpCollection/SharpSQLPwn.exe /modules:LIC /linkedsql:
 ```
 ### Metasploit
 
-Unaweza kwa urahisi kuangalia viungo vinavyoaminika kwa kutumia metasploit.
+Unaweza kwa urahisi kuangalia viungo vinavyotegemewa kwa kutumia metasploit.
 ```bash
 #Set username, password, windows auth (if using AD), IP...
 msf> use exploit/windows/mssql/mssql_linkcrawler
@@ -276,11 +276,18 @@ EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT 
 ```
 ## Local Privilege Escalation
 
-Mtumiaji wa **MSSQL wa ndani** kwa kawaida ana aina maalum ya ruhusa inayoitwa **`SeImpersonatePrivilege`**. Hii inaruhusu akaunti "kujifanya mteja baada ya uthibitisho".
+Mkasisi wa **MSSQL local user** kwa kawaida ana aina maalum ya ruhusa inayoitwa **`SeImpersonatePrivilege`**. Hii inaruhusu akaunti "kujifanya mteja baada ya uthibitisho".
 
-Mkakati ambao waandishi wengi wamekuja nao ni kulazimisha huduma ya SYSTEM kuthibitisha kwa huduma ya uasi au mtu katikati ambayo mshambuliaji anaunda. Huduma hii ya uasi inaweza kujifanya kama huduma ya SYSTEM wakati inajaribu kuthibitisha.
+Mkakati ambao waandishi wengi wamekuja nao ni kulazimisha huduma ya SYSTEM kuthibitisha kwa huduma ya rogue au man-in-the-middle ambayo mshambuliaji anaunda. Huduma hii ya rogue inaweza kujifanya kama huduma ya SYSTEM wakati inajaribu kuthibitisha.
 
 [SweetPotato](https://github.com/CCob/SweetPotato) ina mkusanyiko wa mbinu hizi mbalimbali ambazo zinaweza kutekelezwa kupitia amri ya `execute-assembly` ya Beacon.
 
+
+
+### SCCM Management Point NTLM Relay (OSD Secret Extraction)
+Tazama jinsi majukumu ya kawaida ya SQL ya SCCM **Management Points** yanavyoweza kutumika vibaya ili kutoa Akaunti ya Upataji wa Mtandao na siri za Mfululizo wa Kazi moja kwa moja kutoka kwenye hifadhidata ya tovuti:
+{{#ref}}
+sccm-management-point-relay-sql-policy-secrets.md
+{{#endref}}
 
 {{#include ../../banners/hacktricks-training.md}}
