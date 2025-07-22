@@ -21,7 +21,7 @@ Wrapper::new("Foo").value, "Foo"
 ```
 ### Option, Some & None
 
-Option türü, değerin Some (bir şey var) veya None (hiçbir şey yok) türünde olabileceği anlamına gelir:
+Option türü, değerin Some (bir şey var) veya None olabileceği anlamına gelir:
 ```rust
 pub enum Option<T> {
 None,
@@ -74,7 +74,7 @@ for (key, hashvalue) in &*map {
 for key in map.keys() {
 for value in map.values() {
 ```
-### Recursive Box
+### Rekürsif Kutu
 ```rust
 enum List {
 Cons(i32, List),
@@ -269,7 +269,7 @@ println!("{:?}", apple);
 ```
 #### Threads
 
-Bu durumda, iş parçacığına değiştirebileceği bir değişken geçireceğiz.
+Bu durumda, iş parçacığına değiştirebileceği bir değişken geçeceğiz.
 ```rust
 fn main() {
 let status = Arc::new(Mutex::new(JobStatus { jobs_completed: 0 }));
@@ -287,4 +287,71 @@ thread::sleep(Duration::from_millis(500));
 }
 }
 ```
+### Güvenlik Temelleri
+
+Rust, varsayılan olarak güçlü bellek güvenliği garantileri sağlar, ancak yine de `unsafe` kod, bağımlılık sorunları veya mantık hataları yoluyla kritik güvenlik açıkları oluşturabilirsiniz. Aşağıdaki mini-kılavuz, Rust yazılımlarının saldırgan veya savunmacı güvenlik incelemeleri sırasında en sık karşılaşacağınız temel unsurları toplar.
+
+#### Unsafe kod & bellek güvenliği
+
+`unsafe` blokları derleyicinin takma adlandırma ve sınır kontrollerinden feragat eder, bu nedenle **tüm geleneksel bellek bozulma hataları (OOB, kullanımdan sonra serbest bırakma, çift serbest bırakma vb.) tekrar ortaya çıkabilir**. Hızlı bir denetim kontrol listesi:
+
+* `unsafe` bloklarını, `extern "C"` fonksiyonlarını, `ptr::copy*` çağrılarını, `std::mem::transmute`, `MaybeUninit`, ham işaretçileri veya `ffi` modüllerini arayın.
+* Düşük seviyeli fonksiyonlara geçirilen her işaretçi aritmetiği ve uzunluk argümanını doğrulayın.
+* Birisi `unsafe` kodunu yeniden tanıttığında derlemeyi başarısız kılmak için `#![forbid(unsafe_code)]` (crate genelinde) veya `#[deny(unsafe_op_in_unsafe_fn)]` (1.68 +) tercih edin.
+
+Ham işaretçilerle oluşturulmuş bir taşma örneği:
+```rust
+use std::ptr;
+
+fn vuln_copy(src: &[u8]) -> Vec<u8> {
+let mut dst = Vec::with_capacity(4);
+unsafe {
+// ❌ copies *src.len()* bytes, the destination only reserves 4.
+ptr::copy_nonoverlapping(src.as_ptr(), dst.as_mut_ptr(), src.len());
+dst.set_len(src.len());
+}
+dst
+}
+```
+Miri'yi çalıştırmak, test zamanında UB'yi tespit etmenin ucuz bir yoludur:
+```bash
+rustup component add miri
+cargo miri test  # hunts for OOB / UAF during unit tests
+```
+#### RustSec / cargo-audit ile bağımlılıkların denetimi
+
+Gerçek dünyadaki çoğu Rust zayıflığı üçüncü taraf crate'lerde bulunur. RustSec danışmanlık DB'si (topluluk destekli) yerel olarak sorgulanabilir:
+```bash
+cargo install cargo-audit
+cargo audit              # flags vulnerable versions listed in Cargo.lock
+```
+CI'ye entegre edin ve `--deny warnings` ile başarısız olsun.
+
+`cargo deny check advisories`, benzer işlevsellik sunar ve lisans ile yasaklı liste kontrolleri yapar.
+
+#### Cargo-vet ile tedarik zinciri doğrulaması (2024)
+
+`cargo vet`, her bir içe aktardığınız crate için bir inceleme hash'i kaydeder ve fark edilmeden yapılan güncellemeleri engeller:
+```bash
+cargo install cargo-vet
+cargo vet init      # generates vet.toml
+cargo vet --locked  # verifies packages referenced in Cargo.lock
+```
+Araç, zehirli paket saldırılarını azaltmak için Rust proje altyapısı ve artan sayıda organizasyon tarafından benimsenmektedir.
+
+#### API yüzeyinizi Fuzzing (cargo-fuzz)
+
+Fuzz testleri, DoS veya yan kanal sorunlarına dönüşebilecek panik, tam sayı taşmaları ve mantık hatalarını kolayca yakalar:
+```bash
+cargo install cargo-fuzz
+cargo fuzz init              # creates fuzz_targets/
+cargo fuzz run fuzz_target_1 # builds with libFuzzer & runs continuously
+```
+Fuzz hedefini reposuna ekle ve bunu pipeline'ında çalıştır.
+
+## Referanslar
+
+- RustSec Danışma Veritabanı – <https://rustsec.org>
+- Cargo-vet: "Rust Bağımlılıklarını Denetleme" – <https://mozilla.github.io/cargo-vet/>
+
 {{#include ../banners/hacktricks-training.md}}
