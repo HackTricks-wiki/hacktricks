@@ -10,14 +10,14 @@ Postoje dva glavna tipa:
 1. **gMSA** – grupni Managed Service Account – može se koristiti na više hostova koji su autorizovani u njegovom `msDS-GroupMSAMembership` atributu.
 2. **dMSA** – delegirani Managed Service Account – (preview) naslednik gMSA, oslanja se na istu kriptografiju, ali omogućava granularnije scenarije delegacije.
 
-Za oba varijante **lozinka nije pohranjena** na svakom Domain Controller-u (DC) kao običan NT-hash. Umesto toga, svaki DC može **izvesti** trenutnu lozinku u hodu iz:
+Za oba varijante **lozinka nije pohranjena** na svakom Domain Controller-u (DC) kao običan NT-hash. Umesto toga, svaki DC može **izvesti** trenutnu lozinku u realnom vremenu iz:
 
 * KDS Root Key-a na nivou šume (`KRBTGT\KDS`) – nasumično generisana tajna sa GUID imenom, replicirana na svaki DC pod `CN=Master Root Keys,CN=Group Key Distribution Service, CN=Services, CN=Configuration, …` kontejnerom.
 * Ciljanog naloga **SID**.
 * Per-nalog **ManagedPasswordID** (GUID) koji se nalazi u `msDS-ManagedPasswordId` atributu.
 
 Izvođenje je: `AES256_HMAC( KDSRootKey , SID || ManagedPasswordID )` → 240 byte blob konačno **base64-encoded** i pohranjen u `msDS-ManagedPassword` atributu. 
-Nema Kerberos saobraćaja ili interakcije sa domenom potrebne tokom normalne upotrebe lozinke – član hosta izvodi lozinku lokalno sve dok zna tri ulaza.
+Nema potrebe za Kerberos saobraćajem ili interakcijom sa domenom tokom normalne upotrebe lozinke – član hosta izvodi lozinku lokalno sve dok zna tri ulaza.
 
 ## Golden gMSA / Golden dMSA Attack
 
@@ -73,15 +73,15 @@ GoldendMSA.exe info -d example.local -m ldap
 # RID brute force if anonymous binds are blocked
 GoldendMSA.exe info -d example.local -m brute -r 5000 -u jdoe -p P@ssw0rd
 ```
-##### Faza 3 – Pogodi / Otkrij ManagedPasswordID (kada nedostaje)
+##### Фаза 3 – Погађање / Откривање ManagedPasswordID (када недостаје)
 
-Neka implementacija *uklanja* `msDS-ManagedPasswordId` iz ACL-zaštićenih čitanja.  
-Pošto je GUID 128-bitni, naivan bruteforce je neizvodljiv, ali:
+Неки распоређивања *уклањају* `msDS-ManagedPasswordId` из читања заштићених ACL-ом.  
+Пошто је GUID 128-битни, наивно брутално тестирање је непрактично, али:
 
-1. Prvih **32 bita = Unix epoch vreme** kreiranja naloga (rezolucija u minutima).  
-2. Nakon toga sledi 96 nasumičnih bitova.
+1. Првих **32 бита = Unix epoch време** креирања налога (резолуција у минутима).  
+2. Пратимо 96 насумичних бита.
 
-Stoga je **uska rečnik po nalogu** (± nekoliko sati) realističan.
+Стога је **уска листа речи по налогу** (± неколико сати) реална.
 ```powershell
 GoldendMSA.exe wordlist -s <SID> -d example.local -f example.local -k <KDSKeyGUID>
 ```
@@ -110,7 +110,7 @@ Rezultantni hash-evi mogu biti injektovani pomoću **mimikatz** (`sekurlsa::pth`
 * [`Semperis/GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) – referentna implementacija korišćena na ovoj stranici.
 * [`Semperis/GoldenGMSA`](https://github.com/Semperis/GoldenGMSA/) – referentna implementacija korišćena na ovoj stranici.
 * [`mimikatz`](https://github.com/gentilkiwi/mimikatz) – `lsadump::secrets`, `sekurlsa::pth`, `kerberos::ptt`.
-* [`Rubeus`](https://github.com/GhostPack/Rubeus) – pass-the-ticket koristeći derivirane AES ključeve.
+* [`Rubeus`](https://github.com/GhostPack/Rubeus) – pass-the-ticket koristeći izvedene AES ključeve.
 
 ## Reference
 

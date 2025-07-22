@@ -230,7 +230,7 @@ Obratite pažnju da će metasploit pokušati da zloupotrebi samo `openquery()` f
 
 ### Ručno - Openquery()
 
-Sa **Linux**-a možete dobiti MSSQL konzolu sa **sqsh** i **mssqlclient.py.**
+Sa **Linux**-a možete dobiti MSSQL konzolnu ljusku sa **sqsh** i **mssqlclient.py.**
 
 Sa **Windows**-a takođe možete pronaći linkove i izvršiti komande ručno koristeći **MSSQL klijent kao** [**HeidiSQL**](https://www.heidisql.com)
 
@@ -278,12 +278,14 @@ EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT 
 
 **MSSQL lokalni korisnik** obično ima posebnu vrstu privilegije nazvanu **`SeImpersonatePrivilege`**. Ovo omogućava nalogu da "imituje klijenta nakon autentifikacije".
 
-Strategija koju su mnogi autori smislili je da primoraju SYSTEM servis da se autentifikuje na lažni ili man-in-the-middle servis koji napadač kreira. Ovaj lažni servis tada može imitirati SYSTEM servis dok pokušava da se autentifikuje.
+Strategija koju su mnogi autori osmislili je da primoraju SYSTEM servis da se autentifikuje na lažni ili man-in-the-middle servis koji napadač kreira. Ovaj lažni servis tada može da imitira SYSTEM servis dok pokušava da se autentifikuje.
 
-[SweetPotato](https://github.com/CCob/SweetPotato) ima kolekciju ovih raznih tehnika koje se mogu izvršiti putem Beacon-ove `execute-assembly` komande.
+[SweetPotato](https://github.com/CCob/SweetPotato) ima kolekciju ovih različitih tehnika koje se mogu izvršiti putem Beacon-ove `execute-assembly` komande.
+
+
 
 ### SCCM Tačka Upravljanja NTLM Preusmeravanje (Ekstrakcija OSD Tajni)
-Pogledajte kako se podrazumevane SQL uloge SCCM **Tačaka Upravljanja** mogu zloupotrebiti za dumpovanje tajni Mrežnog Pristupnog Naloga i Task-Sequence direktno iz baze podataka sajta:
+Pogledajte kako se podrazumevane SQL uloge SCCM **Tačaka Upravljanja** mogu zloupotrebiti za dumpovanje Network Access Account i Task-Sequence tajni direktno iz baze podataka sajta:
 {{#ref}}
 sccm-management-point-relay-sql-policy-secrets.md
 {{#endref}}

