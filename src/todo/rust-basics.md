@@ -205,7 +205,7 @@ println!("The word is: {}", word);
 println!("The optional word doesn't contain anything");
 }
 ```
-#### while let
+#### während lass
 ```rust
 let mut optional = Some(0);
 // This reads: "while `let` destructures `optional` into
@@ -256,7 +256,7 @@ assert_ne!(true, false);
 
 #### Arc
 
-Ein Arc kann Clone verwenden, um weitere Referenzen auf das Objekt zu erstellen, um sie an die Threads zu übergeben. Wenn der letzte Referenzzeiger auf einen Wert außerhalb des Geltungsbereichs ist, wird die Variable verworfen.
+Ein Arc kann Clone verwenden, um weitere Referenzen auf das Objekt zu erstellen, um sie an die Threads zu übergeben. Wenn der letzte Referenzzeiger auf einen Wert außerhalb des Gültigkeitsbereichs ist, wird die Variable verworfen.
 ```rust
 use std::sync::Arc;
 let apple = Arc::new("the same apple");
@@ -287,4 +287,71 @@ thread::sleep(Duration::from_millis(500));
 }
 }
 ```
+### Sicherheit Essentials
+
+Rust bietet standardmäßig starke Garantien für die Speichersicherheit, aber Sie können dennoch kritische Schwachstellen durch `unsafe`-Code, Abhängigkeitsprobleme oder logische Fehler einführen. Das folgende Mini-Spickzettel sammelt die Primitiven, mit denen Sie während offensiver oder defensiver Sicherheitsüberprüfungen von Rust-Software am häufigsten in Berührung kommen werden.
+
+#### Unsafe-Code & Speichersicherheit
+
+`unsafe`-Blöcke verzichten auf die Aliasierung und Bereichsprüfungen des Compilers, sodass **alle traditionellen Speicherbeschädigungsfehler (OOB, use-after-free, double free usw.) wieder auftreten können**. Eine schnelle Prüfungscheckliste:
+
+* Suchen Sie nach `unsafe`-Blöcken, `extern "C"`-Funktionen, Aufrufen von `ptr::copy*`, `std::mem::transmute`, `MaybeUninit`, rohen Zeigern oder `ffi`-Modulen.
+* Validieren Sie jede Zeigerarithmetik und jedes Längenargument, das an Low-Level-Funktionen übergeben wird.
+* Bevorzugen Sie `#![forbid(unsafe_code)]` (crate-weit) oder `#[deny(unsafe_op_in_unsafe_fn)]` (1.68 +), um die Kompilierung zu fehlschlagen, wenn jemand `unsafe` wieder einführt.
+
+Beispielüberlauf, der mit rohen Zeigern erstellt wurde:
+```rust
+use std::ptr;
+
+fn vuln_copy(src: &[u8]) -> Vec<u8> {
+let mut dst = Vec::with_capacity(4);
+unsafe {
+// ❌ copies *src.len()* bytes, the destination only reserves 4.
+ptr::copy_nonoverlapping(src.as_ptr(), dst.as_mut_ptr(), src.len());
+dst.set_len(src.len());
+}
+dst
+}
+```
+Miri auszuführen ist eine kostengünstige Möglichkeit, UB zur Testzeit zu erkennen:
+```bash
+rustup component add miri
+cargo miri test  # hunts for OOB / UAF during unit tests
+```
+#### Auditing dependencies with RustSec / cargo-audit
+
+Die meisten realen Rust-Sicherheitsanfälligkeiten befinden sich in Drittanbieter-Crates. Die RustSec Advisory-Datenbank (gemeinschaftlich betrieben) kann lokal abgefragt werden:
+```bash
+cargo install cargo-audit
+cargo audit              # flags vulnerable versions listed in Cargo.lock
+```
+Integriere es in CI und fehle bei `--deny warnings`.
+
+`cargo deny check advisories` bietet ähnliche Funktionalität sowie Lizenz- und Verbotslistenprüfungen.
+
+#### Überprüfung der Lieferkette mit cargo-vet (2024)
+
+`cargo vet` zeichnet einen Überprüfungs-Hash für jedes Paket auf, das du importierst, und verhindert unbemerkte Upgrades:
+```bash
+cargo install cargo-vet
+cargo vet init      # generates vet.toml
+cargo vet --locked  # verifies packages referenced in Cargo.lock
+```
+Das Tool wird von der Rust-Projektinfrastruktur und einer wachsenden Anzahl von Organisationen übernommen, um Angriffe mit vergifteten Paketen zu mildern.
+
+#### Fuzzing Ihrer API-Oberfläche (cargo-fuzz)
+
+Fuzz-Tests erfassen leicht Panics, Ganzzahlüberläufe und Logikfehler, die zu DoS- oder Seitenkanalproblemen werden könnten:
+```bash
+cargo install cargo-fuzz
+cargo fuzz init              # creates fuzz_targets/
+cargo fuzz run fuzz_target_1 # builds with libFuzzer & runs continuously
+```
+Fügen Sie das Fuzz-Ziel zu Ihrem Repository hinzu und führen Sie es in Ihrer Pipeline aus.
+
+## Referenzen
+
+- RustSec Advisory Database – <https://rustsec.org>
+- Cargo-vet: "Auditing your Rust Dependencies" – <https://mozilla.github.io/cargo-vet/>
+
 {{#include ../banners/hacktricks-training.md}}
