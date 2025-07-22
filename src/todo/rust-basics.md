@@ -21,7 +21,7 @@ Wrapper::new("Foo").value, "Foo"
 ```
 ### Option, Some & None
 
-Option 类型意味着值可能是 Some 类型（有某些东西）或 None：
+Option类型意味着值可能是Some类型（有某些东西）或None：
 ```rust
 pub enum Option<T> {
 None,
@@ -32,7 +32,7 @@ Some(T),
 
 ### 宏
 
-宏比函数更强大，因为它们扩展以生成比您手动编写的代码更多的代码。例如，函数签名必须声明函数的参数数量和类型。另一方面，宏可以接受可变数量的参数：我们可以用一个参数调用 `println!("hello")`，或者用两个参数调用 `println!("hello {}", name)`。此外，宏在编译器解释代码含义之前被扩展，因此宏可以例如在给定类型上实现一个 trait。函数则不能，因为它在运行时被调用，而 trait 需要在编译时实现。
+宏比函数更强大，因为它们扩展以生成比您手动编写的代码更多的代码。例如，函数签名必须声明函数的参数数量和类型。另一方面，宏可以接受可变数量的参数：我们可以用一个参数调用 `println!("hello")`，或者用两个参数调用 `println!("hello {}", name)`。此外，宏在编译器解释代码含义之前被扩展，因此宏可以在给定类型上实现一个特征。例如，函数不能这样做，因为它在运行时被调用，而特征需要在编译时实现。
 ```rust
 macro_rules! my_macro {
 () => {
@@ -222,7 +222,7 @@ optional = Some(i + 1);
 // explicitly handling the failing case.
 }
 ```
-### Traits
+### 特性
 
 为一个类型创建一个新方法
 ```rust
@@ -256,7 +256,7 @@ assert_ne!(true, false);
 
 #### Arc
 
-Arc 可以使用 Clone 创建更多对对象的引用，以将它们传递给线程。当指向一个值的最后一个引用指针超出作用域时，该变量会被丢弃。
+Arc可以使用Clone来创建对对象的更多引用，以将它们传递给线程。当指向一个值的最后一个引用指针超出作用域时，该变量会被丢弃。
 ```rust
 use std::sync::Arc;
 let apple = Arc::new("the same apple");
@@ -287,4 +287,71 @@ thread::sleep(Duration::from_millis(500));
 }
 }
 ```
+### 安全基础
+
+Rust 默认提供强大的内存安全保证，但您仍然可以通过 `unsafe` 代码、依赖问题或逻辑错误引入关键漏洞。以下迷你备忘单汇集了您在对 Rust 软件进行攻防安全审查时最常接触的原语。
+
+#### 不安全代码与内存安全
+
+`unsafe` 块选择退出编译器的别名和边界检查，因此 **所有传统的内存损坏漏洞（越界、使用后释放、双重释放等）可能会再次出现**。快速审计检查清单：
+
+* 查找 `unsafe` 块、`extern "C"` 函数、对 `ptr::copy*` 的调用、`std::mem::transmute`、`MaybeUninit`、原始指针或 `ffi` 模块。
+* 验证传递给低级函数的每个指针算术和长度参数。
+* 优先使用 `#![forbid(unsafe_code)]`（整个 crate）或 `#[deny(unsafe_op_in_unsafe_fn)]`（1.68 +），以在有人重新引入 `unsafe` 时使编译失败。
+
+使用原始指针创建的溢出示例：
+```rust
+use std::ptr;
+
+fn vuln_copy(src: &[u8]) -> Vec<u8> {
+let mut dst = Vec::with_capacity(4);
+unsafe {
+// ❌ copies *src.len()* bytes, the destination only reserves 4.
+ptr::copy_nonoverlapping(src.as_ptr(), dst.as_mut_ptr(), src.len());
+dst.set_len(src.len());
+}
+dst
+}
+```
+运行 Miri 是在测试时检测 UB 的一种廉价方法：
+```bash
+rustup component add miri
+cargo miri test  # hunts for OOB / UAF during unit tests
+```
+#### 使用 RustSec / cargo-audit 审计依赖项
+
+大多数实际的 Rust 漏洞存在于第三方 crate 中。可以在本地查询 RustSec 顾问数据库（社区驱动）：
+```bash
+cargo install cargo-audit
+cargo audit              # flags vulnerable versions listed in Cargo.lock
+```
+将其集成到 CI 中，并在 `--deny warnings` 时失败。
+
+`cargo deny check advisories` 提供类似的功能，以及许可证和禁用列表检查。
+
+#### 使用 cargo-vet 进行供应链验证 (2024)
+
+`cargo vet` 为您导入的每个 crate 记录一个审查哈希，并防止未注意的升级：
+```bash
+cargo install cargo-vet
+cargo vet init      # generates vet.toml
+cargo vet --locked  # verifies packages referenced in Cargo.lock
+```
+该工具正在被Rust项目基础设施和越来越多的组织采用，以减轻被污染包攻击的风险。
+
+#### Fuzzing your API surface (cargo-fuzz)
+
+模糊测试可以轻松捕捉到可能导致DoS或旁路问题的恐慌、整数溢出和逻辑错误：
+```bash
+cargo install cargo-fuzz
+cargo fuzz init              # creates fuzz_targets/
+cargo fuzz run fuzz_target_1 # builds with libFuzzer & runs continuously
+```
+将模糊目标添加到您的仓库并在您的管道中运行它。
+
+## 参考
+
+- RustSec Advisory Database – <https://rustsec.org>
+- Cargo-vet: "审计您的 Rust 依赖项" – <https://mozilla.github.io/cargo-vet/>
+
 {{#include ../banners/hacktricks-training.md}}
