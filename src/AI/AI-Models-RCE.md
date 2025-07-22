@@ -23,7 +23,7 @@ Wakati wa kuandika, haya ni baadhi ya mifano ya aina hii ya udhaifu:
 | **Keras (older formats)**   | *(No new CVE)* Legacy Keras H5 model                                                                                         | Malicious HDF5 (`.h5`) model with Lambda layer code still executes on load (Keras safe_mode doesn’t cover old format – “downgrade attack”) | |
 | **Others** (general)        | *Design flaw* – Pickle serialization                                                                                         | Many ML tools (e.g., pickle-based model formats, Python `pickle.load`) will execute arbitrary code embedded in model files unless mitigated | |
 
-Zaidi ya hayo, kuna baadhi ya modeli za python pickle kama zile zinazotumiwa na [PyTorch](https://github.com/pytorch/pytorch/security) ambazo zinaweza kutumika kutekeleza msimbo wa kiholela kwenye mfumo ikiwa hazijapakiwa na `weights_only=True`. Hivyo, modeli yoyote inayotegemea pickle inaweza kuwa na hatari maalum kwa aina hii ya mashambulizi, hata kama hazijatajwa kwenye jedwali hapo juu.
+Zaidi ya hayo, kuna baadhi ya modeli zinazotegemea python pickle kama zile zinazotumiwa na [PyTorch](https://github.com/pytorch/pytorch/security) ambazo zinaweza kutumika kutekeleza msimbo wa kiholela kwenye mfumo ikiwa hazijapakiwa na `weights_only=True`. Hivyo, modeli yoyote inayotegemea pickle inaweza kuwa na hatari maalum kwa aina hii ya mashambulizi, hata kama hazijatajwa kwenye jedwali hapo juu.
 
 ### 🆕  InvokeAI RCE via `torch.load` (CVE-2024-12029)
 
@@ -33,7 +33,7 @@ Ndani, mwisho huu hatimaye unaita:
 ```python
 checkpoint = torch.load(path, map_location=torch.device("meta"))
 ```
-Wakati faili iliyotolewa ni **PyTorch checkpoint (`*.ckpt`)**, `torch.load` inafanya **pickle deserialization**. Kwa sababu maudhui yanatoka moja kwa moja kwenye URL inayodhibitiwa na mtumiaji, mshambuliaji anaweza kuingiza kitu kibaya chenye njia ya `__reduce__` iliyobinafsishwa ndani ya checkpoint; njia hiyo inatekelezwa **wakati wa deserialization**, ikisababisha **remote code execution (RCE)** kwenye seva ya InvokeAI.
+Wakati faili iliyopewa ni **PyTorch checkpoint (`*.ckpt`)**, `torch.load` inafanya **pickle deserialization**. Kwa sababu maudhui yanatoka moja kwa moja kwenye URL inayodhibitiwa na mtumiaji, mshambuliaji anaweza kuingiza kitu kibaya chenye njia ya `__reduce__` iliyobinafsishwa ndani ya checkpoint; njia hiyo inatekelezwa **wakati wa deserialization**, ikisababisha **remote code execution (RCE)** kwenye seva ya InvokeAI.
 
 Uthibitisho wa udhaifu ulipatiwa **CVE-2024-12029** (CVSS 9.8, EPSS 61.17 %).
 
@@ -67,9 +67,9 @@ json={},                                         # body can be empty
 timeout=5,
 )
 ```
-4. Wakati InvokeAI inaposhusha faili inaita `torch.load()` → gadget ya `os.system` inakimbia na mshambuliaji anapata utekelezaji wa msimbo katika muktadha wa mchakato wa InvokeAI.
+4. Wakati InvokeAI inapopakua faili inaita `torch.load()` → gadget ya `os.system` inakimbia na mshambuliaji anapata utekelezaji wa msimbo katika muktadha wa mchakato wa InvokeAI.
 
-Exploit iliyotengenezwa tayari: **Metasploit** moduli `exploit/linux/http/invokeai_rce_cve_2024_12029` inaweka mchakato mzima kuwa otomatiki.
+Ready-made exploit: **Metasploit** module `exploit/linux/http/invokeai_rce_cve_2024_12029` inafanya mchakato mzima kuwa wa kiotomatiki.
 
 #### Masharti
 
@@ -81,9 +81,9 @@ Exploit iliyotengenezwa tayari: **Metasploit** moduli `exploit/linux/http/invoke
 
 * Pandisha hadi **InvokeAI ≥ 5.4.3** – patch inafanya `scan=True` kuwa ya kawaida na inafanya uchunguzi wa malware kabla ya deserialization.
 * Wakati wa kupakia checkpoints kwa njia ya programu tumia `torch.load(file, weights_only=True)` au [`torch.load_safe`](https://pytorch.org/docs/stable/serialization.html#security) msaidizi mpya.
-* Lazimisha orodha za ruhusa / saini za vyanzo vya modeli na endesha huduma hiyo kwa ruhusa ndogo.
+* Lazimisha orodha za ruhusa / saini za vyanzo vya modeli na uendeshe huduma hiyo kwa ruhusa ndogo.
 
-> ⚠️ Kumbuka kwamba **aina yoyote** ya muundo wa pickle wa Python (ikiwemo faili nyingi za `.pt`, `.pkl`, `.ckpt`, `.pth`) kwa asili si salama kutekeleza kutoka vyanzo visivyoaminika.
+> ⚠️ Kumbuka kwamba **aina yoyote** ya muundo wa Python pickle (ikiwemo faili nyingi za `.pt`, `.pkl`, `.ckpt`, `.pth`) kwa asili si salama kutekeleza deserialization kutoka vyanzo visivyoaminika.
 
 ---
 
@@ -133,7 +133,7 @@ model.load_state_dict(torch.load("malicious_state.pth", weights_only=False))
 ```
 ## Models to Path Traversal
 
-Kama ilivyoelezwa katika [**hiki blogu**](https://blog.huntr.com/pivoting-archive-slip-bugs-into-high-value-ai/ml-bounties), muundo wa modeli nyingi zinazotumiwa na mifumo tofauti ya AI unategemea archives, mara nyingi `.zip`. Hivyo, inaweza kuwa inawezekana kutumia muundo huu kufanya mashambulizi ya path traversal, kuruhusu kusoma faili za kawaida kutoka kwa mfumo ambapo modeli imepakuliwa.
+Kama ilivyoelezwa katika [**hiki blogu**](https://blog.huntr.com/pivoting-archive-slip-bugs-into-high-value-ai/ml-bounties), muundo wa modeli nyingi zinazotumiwa na mifumo tofauti ya AI unategemea archives, mara nyingi `.zip`. Hivyo, inaweza kuwa inawezekana kutumia muundo huu kufanya mashambulizi ya path traversal, kuruhusu kusoma faili zisizo na mipaka kutoka kwenye mfumo ambapo modeli imepakuliwa.
 
 Kwa mfano, kwa kutumia msimbo ufuatao unaweza kuunda modeli ambayo itaunda faili katika saraka ya `/tmp` wakati inapo pakuliwa:
 ```python
@@ -161,7 +161,7 @@ with tarfile.open("symlink_demo.model", "w:gz") as tf:
 tf.add(pathlib.Path(PAYLOAD).parent, filter=link_it)
 tf.add(PAYLOAD)                      # rides the symlink
 ```
-## References
+## Marejeo
 
 - [OffSec blog – "CVE-2024-12029 – InvokeAI Deserialization of Untrusted Data"](https://www.offsec.com/blog/cve-2024-12029/)
 - [InvokeAI patch commit 756008d](https://github.com/invoke-ai/invokeai/commit/756008dc5899081c5aa51e5bd8f24c1b3975a59e)

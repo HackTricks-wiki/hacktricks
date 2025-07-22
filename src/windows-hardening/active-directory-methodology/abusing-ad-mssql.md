@@ -7,7 +7,7 @@
 
 ### Python
 
-Zana ya [MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) inategemea impacket, na pia inaruhusu uthibitisho kwa kutumia tiketi za kerberos, na kushambulia kupitia minyororo ya viungo.
+Zana ya [MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) inategemea impacket, na pia inaruhusu kuingia kwa kutumia tiketi za kerberos, na kushambulia kupitia minyororo ya viungo.
 
 <figure><img src="https://raw.githubusercontent.com/ScorpionesLabs/MSSqlPwner/main/assets/interractive.png"></figure>
 ```shell
@@ -176,9 +176,9 @@ Check in the page mentioned in the **following section how to do this manually.*
 
 ## MSSQL Trusted Links
 
-Ikiwa mfano wa MSSQL unaminiwa (kiungo cha database) na mfano mwingine wa MSSQL. Ikiwa mtumiaji ana mamlaka juu ya database iliyoaminiwa, ataweza **kutumia uhusiano wa kuaminiana kutekeleza maswali pia katika mfano mwingine**. Hii inategemea inaweza kuunganishwa na kwa wakati fulani mtumiaji anaweza kupata database iliyo na mipangilio isiyo sahihi ambapo anaweza kutekeleza amri.
+Ikiwa mfano wa MSSQL unaminiwa (kiungo cha database) na mfano mwingine wa MSSQL. Ikiwa mtumiaji ana mamlaka juu ya database iliyoaminika, ataweza **kutumia uhusiano wa kuaminiana kutekeleza maswali pia katika mfano mwingine**. Hii inategemea inaweza kuunganishwa na kwa wakati fulani mtumiaji anaweza kupata database isiyo na usanidi mzuri ambapo anaweza kutekeleza amri.
 
-**Viungo kati ya databases vinafanya kazi hata katika uaminifu wa msitu.**
+**Viungo kati ya databases vinafanya kazi hata kupitia uaminifu wa msitu.**
 
 ### Powershell Abuse
 ```bash
@@ -220,7 +220,7 @@ inject-assembly 4704 ../SharpCollection/SharpSQLPwn.exe /modules:LIC /linkedsql:
 ```
 ### Metasploit
 
-Unaweza kwa urahisi kuangalia viungo vinavyotegemewa kwa kutumia metasploit.
+Unaweza kwa urahisi kuangalia viungo vya kuaminika ukitumia metasploit.
 ```bash
 #Set username, password, windows auth (if using AD), IP...
 msf> use exploit/windows/mssql/mssql_linkcrawler
@@ -228,11 +228,11 @@ msf> use exploit/windows/mssql/mssql_linkcrawler
 ```
 Kumbuka kwamba metasploit itajaribu kutumia tu kazi ya `openquery()` katika MSSQL (hivyo, ikiwa huwezi kutekeleza amri na `openquery()` utahitaji kujaribu njia ya `EXECUTE` **kwa mikono** kutekeleza amri, angalia zaidi hapa chini.)
 
-### Mikono - Openquery()
+### Manual - Openquery()
 
 Kutoka **Linux** unaweza kupata shell ya MSSQL console kwa kutumia **sqsh** na **mssqlclient.py.**
 
-Kutoka **Windows** unaweza pia kupata viungo na kutekeleza amri kwa mikono ukitumia **MSSQL client kama** [**HeidiSQL**](https://www.heidisql.com)
+Kutoka **Windows** pia unaweza kupata viungo na kutekeleza amri kwa mikono ukitumia **MSSQL client kama** [**HeidiSQL**](https://www.heidisql.com)
 
 _Ingia kwa kutumia uthibitisho wa Windows:_
 
@@ -285,7 +285,7 @@ Mkakati ambao waandishi wengi wamekuja nao ni kulazimisha huduma ya SYSTEM kuthi
 
 
 ### SCCM Management Point NTLM Relay (OSD Secret Extraction)
-Tazama jinsi majukumu ya kawaida ya SQL ya SCCM **Management Points** yanavyoweza kutumika vibaya ili kutoa Akaunti ya Upataji wa Mtandao na siri za Mfululizo wa Kazi moja kwa moja kutoka kwenye hifadhidata ya tovuti:
+Tazama jinsi majukumu ya kawaida ya SQL ya SCCM **Management Points** yanavyoweza kutumika vibaya ili kutoa Akaunti ya Upataji wa Mtandao na siri za Mchakato wa Kazi moja kwa moja kutoka kwenye hifadhidata ya tovuti:
 {{#ref}}
 sccm-management-point-relay-sql-policy-secrets.md
 {{#endref}}
