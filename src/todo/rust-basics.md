@@ -4,7 +4,7 @@
 
 ### Generic Types
 
-구조체를 생성하여 그 값 중 1개가 어떤 타입이 될 수 있도록 합니다.
+값 중 하나가 어떤 타입이 될 수 있는 struct를 만듭니다.
 ```rust
 struct Wrapper<T> {
 value: T,
@@ -21,7 +21,7 @@ Wrapper::new("Foo").value, "Foo"
 ```
 ### Option, Some & None
 
-Option 타입은 값이 Some 타입일 수 있음을 의미합니다(무언가가 있음) 또는 None:
+Option 타입은 값이 Some 타입일 수도 있고 (무언가가 있음) None일 수도 있음을 의미합니다:
 ```rust
 pub enum Option<T> {
 None,
@@ -32,7 +32,7 @@ Some(T),
 
 ### 매크로
 
-매크로는 수동으로 작성한 코드보다 더 많은 코드를 생성하기 때문에 함수보다 더 강력합니다. 예를 들어, 함수 시그니처는 함수가 가진 매개변수의 수와 유형을 선언해야 합니다. 반면에 매크로는 가변 개수의 매개변수를 받을 수 있습니다: `println!("hello")`를 하나의 인수로 호출하거나 `println!("hello {}", name)`을 두 개의 인수로 호출할 수 있습니다. 또한, 매크로는 컴파일러가 코드의 의미를 해석하기 전에 확장되므로, 매크로는 예를 들어 주어진 유형에 대해 트레이트를 구현할 수 있습니다. 함수는 런타임에 호출되기 때문에 트레이트를 구현할 수 없습니다; 트레이트는 컴파일 타임에 구현되어야 합니다.
+매크로는 수동으로 작성한 코드보다 더 많은 코드를 생성하기 때문에 함수보다 더 강력합니다. 예를 들어, 함수 시그니처는 함수가 가진 매개변수의 수와 유형을 선언해야 합니다. 반면에 매크로는 가변 개수의 매개변수를 받을 수 있습니다: `println!("hello")`를 하나의 인수로 호출하거나 `println!("hello {}", name)`을 두 개의 인수로 호출할 수 있습니다. 또한, 매크로는 컴파일러가 코드의 의미를 해석하기 전에 확장되므로, 매크로는 예를 들어 주어진 유형에 대해 트레이트를 구현할 수 있습니다. 함수는 런타임에 호출되기 때문에 트레이트를 컴파일 타임에 구현할 수 없습니다.
 ```rust
 macro_rules! my_macro {
 () => {
@@ -224,7 +224,7 @@ optional = Some(i + 1);
 ```
 ### 특성
 
-타입에 대한 새로운 메서드를 생성합니다.
+타입을 위한 새로운 메서드 생성
 ```rust
 trait AppendBar {
 fn append_bar(self) -> Self;
@@ -287,4 +287,71 @@ thread::sleep(Duration::from_millis(500));
 }
 }
 ```
+### Security Essentials
+
+Rust는 기본적으로 강력한 메모리 안전성을 보장하지만, 여전히 `unsafe` 코드, 의존성 문제 또는 논리적 실수를 통해 치명적인 취약점을 도입할 수 있습니다. 다음 미니 치트시트는 Rust 소프트웨어의 공격적 또는 방어적 보안 검토 중 가장 일반적으로 접하게 될 원시 요소들을 모아놓았습니다.
+
+#### Unsafe code & memory safety
+
+`unsafe` 블록은 컴파일러의 별칭 및 경계 검사를 선택 해제하므로 **모든 전통적인 메모리 손상 버그(OOB, use-after-free, double free 등)가 다시 나타날 수 있습니다**. 빠른 감사 체크리스트:
+
+* `unsafe` 블록, `extern "C"` 함수, `ptr::copy*`, `std::mem::transmute`, `MaybeUninit`, 원시 포인터 또는 `ffi` 모듈을 찾으세요.
+* 저수준 함수에 전달되는 모든 포인터 산술 및 길이 인수를 검증하세요.
+* 누군가 `unsafe`를 다시 도입할 때 컴파일이 실패하도록 `#![forbid(unsafe_code)]` (크레이트 전체) 또는 `#[deny(unsafe_op_in_unsafe_fn)]` (1.68 +)를 선호하세요.
+
+원시 포인터로 생성된 오버플로우 예:
+```rust
+use std::ptr;
+
+fn vuln_copy(src: &[u8]) -> Vec<u8> {
+let mut dst = Vec::with_capacity(4);
+unsafe {
+// ❌ copies *src.len()* bytes, the destination only reserves 4.
+ptr::copy_nonoverlapping(src.as_ptr(), dst.as_mut_ptr(), src.len());
+dst.set_len(src.len());
+}
+dst
+}
+```
+Miri를 실행하는 것은 테스트 시간에 UB를 감지하는 저렴한 방법입니다:
+```bash
+rustup component add miri
+cargo miri test  # hunts for OOB / UAF during unit tests
+```
+#### Auditing dependencies with RustSec / cargo-audit
+
+대부분의 실제 Rust 취약점은 서드파티 크레이트에 존재합니다. RustSec 자문 DB(커뮤니티 기반)는 로컬에서 쿼리할 수 있습니다:
+```bash
+cargo install cargo-audit
+cargo audit              # flags vulnerable versions listed in Cargo.lock
+```
+CI에 통합하고 `--deny warnings`에서 실패합니다.
+
+`cargo deny check advisories`는 유사한 기능을 제공하며 라이센스 및 금지 목록 검사를 포함합니다.
+
+#### cargo-vet을 통한 공급망 검증 (2024)
+
+`cargo vet`는 가져오는 모든 crate에 대한 검토 해시를 기록하고 눈치채지 못한 업그레이드를 방지합니다:
+```bash
+cargo install cargo-vet
+cargo vet init      # generates vet.toml
+cargo vet --locked  # verifies packages referenced in Cargo.lock
+```
+이 도구는 Rust 프로젝트 인프라와 증가하는 수의 조직에서 오염된 패키지 공격을 완화하기 위해 채택되고 있습니다.
+
+#### API 표면의 퍼징 (cargo-fuzz)
+
+퍼징 테스트는 패닉, 정수 오버플로우 및 DoS 또는 사이드 채널 문제가 될 수 있는 논리 버그를 쉽게 포착합니다:
+```bash
+cargo install cargo-fuzz
+cargo fuzz init              # creates fuzz_targets/
+cargo fuzz run fuzz_target_1 # builds with libFuzzer & runs continuously
+```
+리포지토리에 퍼즈 타겟을 추가하고 파이프라인에서 실행하세요.
+
+## References
+
+- RustSec Advisory Database – <https://rustsec.org>
+- Cargo-vet: "Auditing your Rust Dependencies" – <https://mozilla.github.io/cargo-vet/>
+
 {{#include ../banners/hacktricks-training.md}}
