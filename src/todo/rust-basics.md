@@ -28,11 +28,11 @@ None,
 Some(T),
 }
 ```
-あなたは `is_some()` や `is_none()` のような関数を使用して、Optionの値をチェックできます。
+`is_some()`や`is_none()`のような関数を使用して、Optionの値をチェックできます。
 
 ### マクロ
 
-マクロは関数よりも強力です。なぜなら、手動で書いたコードよりも多くのコードを生成するために展開されるからです。例えば、関数のシグネチャは、関数が持つパラメータの数と型を宣言する必要があります。一方、マクロは可変数のパラメータを取ることができます：`println!("hello")` を1つの引数で呼び出すことも、`println!("hello {}", name)` を2つの引数で呼び出すこともできます。また、マクロはコンパイラがコードの意味を解釈する前に展開されるため、マクロは例えば、特定の型に対してトレイトを実装することができます。関数は実行時に呼び出されるため、トレイトはコンパイル時に実装する必要があります。
+マクロは関数よりも強力で、手動で書いたコードよりも多くのコードを生成するために展開されます。たとえば、関数のシグネチャは、関数が持つパラメータの数と型を宣言する必要があります。一方、マクロは可変数のパラメータを受け取ることができます：`println!("hello")`を1つの引数で呼び出すことも、`println!("hello {}", name)`を2つの引数で呼び出すこともできます。また、マクロはコンパイラがコードの意味を解釈する前に展開されるため、マクロは特定の型に対してトレイトを実装することができます。関数は実行時に呼び出されるため、トレイトはコンパイル時に実装する必要があります。
 ```rust
 macro_rules! my_macro {
 () => {
@@ -252,7 +252,7 @@ assert_ne!(true, false);
 }
 }
 ```
-### スレッディング
+### スレッド処理
 
 #### Arc
 
@@ -269,7 +269,7 @@ println!("{:?}", apple);
 ```
 #### スレッド
 
-この場合、スレッドに変更できる変数を渡します。
+この場合、スレッドに変更可能な変数を渡します
 ```rust
 fn main() {
 let status = Arc::new(Mutex::new(JobStatus { jobs_completed: 0 }));
@@ -287,4 +287,71 @@ thread::sleep(Duration::from_millis(500));
 }
 }
 ```
+### セキュリティの基本
+
+Rustはデフォルトで強力なメモリ安全性の保証を提供しますが、`unsafe`コード、依存関係の問題、または論理的なミスを通じて重大な脆弱性を導入することは依然として可能です。以下のミニチートシートは、Rustソフトウェアの攻撃的または防御的なセキュリティレビュー中に最も一般的に触れるプリミティブをまとめています。
+
+#### Unsafeコードとメモリ安全性
+
+`unsafe`ブロックはコンパイラのエイリアスと境界チェックをオプトアウトするため、**すべての従来のメモリ破損バグ（OOB、use-after-free、ダブルフリーなど）が再び現れる可能性があります**。迅速な監査チェックリスト：
+
+* `unsafe`ブロック、`extern "C"`関数、`ptr::copy*`への呼び出し、`std::mem::transmute`、`MaybeUninit`、生ポインタ、または`ffi`モジュールを探します。
+* 低レベル関数に渡されるすべてのポインタ算術と長さ引数を検証します。
+* 誰かが`unsafe`を再導入したときにコンパイルを失敗させるために、`#![forbid(unsafe_code)]`（クレート全体）または`#[deny(unsafe_op_in_unsafe_fn)]`（1.68 +）を好みます。
+
+生ポインタで作成されたオーバーフローの例：
+```rust
+use std::ptr;
+
+fn vuln_copy(src: &[u8]) -> Vec<u8> {
+let mut dst = Vec::with_capacity(4);
+unsafe {
+// ❌ copies *src.len()* bytes, the destination only reserves 4.
+ptr::copy_nonoverlapping(src.as_ptr(), dst.as_mut_ptr(), src.len());
+dst.set_len(src.len());
+}
+dst
+}
+```
+Miriを実行することは、テスト時にUBを検出するための手頃な方法です：
+```bash
+rustup component add miri
+cargo miri test  # hunts for OOB / UAF during unit tests
+```
+#### Auditing dependencies with RustSec / cargo-audit
+
+ほとんどの実世界のRustの脆弱性は、サードパーティのクレートに存在します。RustSecアドバイザリーデータベース（コミュニティ主導）は、ローカルでクエリできます：
+```bash
+cargo install cargo-audit
+cargo audit              # flags vulnerable versions listed in Cargo.lock
+```
+CIに統合し、`--deny warnings`で失敗させます。
+
+`cargo deny check advisories`は、ライセンスおよび禁止リストのチェックに加えて、類似の機能を提供します。
+
+#### cargo-vetによるサプライチェーンの検証 (2024)
+
+`cargo vet`は、インポートするすべてのクレートに対してレビューのハッシュを記録し、気づかないアップグレードを防ぎます：
+```bash
+cargo install cargo-vet
+cargo vet init      # generates vet.toml
+cargo vet --locked  # verifies packages referenced in Cargo.lock
+```
+このツールは、Rustプロジェクトのインフラストラクチャと、毒入りパッケージ攻撃を軽減するために増加している組織によって採用されています。
+
+#### APIサーフェスのファジング (cargo-fuzz)
+
+ファジテストは、DoSやサイドチャネルの問題になる可能性のあるパニック、整数オーバーフロー、論理バグを簡単にキャッチします。
+```bash
+cargo install cargo-fuzz
+cargo fuzz init              # creates fuzz_targets/
+cargo fuzz run fuzz_target_1 # builds with libFuzzer & runs continuously
+```
+リポジトリにfuzzターゲットを追加し、パイプラインで実行します。
+
+## 参考文献
+
+- RustSec Advisory Database – <https://rustsec.org>
+- Cargo-vet: "Auditing your Rust Dependencies" – <https://mozilla.github.io/cargo-vet/>
+
 {{#include ../banners/hacktricks-training.md}}
