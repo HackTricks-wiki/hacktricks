@@ -3,10 +3,10 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 ## TL;DR
-Deur 'n **System Center Configuration Manager (SCCM) Bestuurspunt (MP)** te dwing om oor SMB/RPC te autentiseer en daardie NTLM masjienrekening na die **terrein databasis (MSSQL)** te **relay**, verkry jy `smsdbrole_MP` / `smsdbrole_MPUserSvc` regte. Hierdie rolle laat jou toe om 'n stel gestoor prosedures aan te roep wat **Operating System Deployment (OSD)** beleid blobs (Netwerk Toegang Rekening kredensiale, Taak-Reeks veranderlikes, ens.) blootstel. Die blobs is hex-gecodeer/enkripteer, maar kan gedecodeer en ontsleutel word met **PXEthief**, wat platte teks geheime oplewer.
+Deur 'n **System Center Configuration Manager (SCCM) Bestuurspunt (MP)** te dwing om oor SMB/RPC te autentiseer en daardie NTLM masjienrekening na die **terrein databasis (MSSQL)** te **relay**, verkry jy `smsdbrole_MP` / `smsdbrole_MPUserSvc` regte. Hierdie rolle laat jou toe om 'n stel gestoor prosedures aan te roep wat **Operating System Deployment (OSD)** beleid blobs (Netwerk Toegang Rekening geloofsbriewe, Taak-Reeks veranderlikes, ens.) blootstel. Die blobs is hex-gecodeer/enkripteer, maar kan gedecodeer en ontsleutel word met **PXEthief**, wat platte teks geheime oplewer.
 
-Hoogvlak ketting:
-1. Ontdek MP & terrein DB ↦ nie-geoutentiseerde HTTP eindpunt `/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA`.
+Hoofketting:
+1. Ontdek MP & terrein DB ↦ ongeauthentiseerde HTTP eindpunt `/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA`.
 2. Begin `ntlmrelayx.py -t mssql://<SiteDB> -ts -socks`.
 3. Dwing MP met **PetitPotam**, PrinterBug, DFSCoerce, ens.
 4. Deur die SOCKS-proxy te verbind met `mssqlclient.py -windows-auth` as die gerelayde **<DOMAIN>\\<MP-host>$** rekening.
@@ -20,8 +20,8 @@ Geheime soos `OSDJoinAccount/OSDJoinPassword`, `NetworkAccessUsername/Password`,
 
 ---
 
-## 1. Opname van nie-geoutentiseerde MP eindpunte
-Die MP ISAPI uitbreiding **GetAuth.dll** stel verskeie parameters bloot wat nie outentisering vereis nie (tenzij die terrein slegs PKI is):
+## 1. Opname van ongeauthentiseerde MP eindpunte
+Die MP ISAPI uitbreiding **GetAuth.dll** stel verskeie parameters bloot wat nie autentisering vereis nie (tenzij die terrein slegs PKI is):
 
 | Parameter | Doel |
 |-----------|---------|
@@ -72,7 +72,7 @@ EXEC MP_GetMachinePolicyAssignments N'e9cd8c06-cc50-4b05-a4b2-9c9b5a51bbe7', N''
 Elke ry bevat `PolicyAssignmentID`, `Body` (hex), `PolicyID`, `PolicyVersion`.
 
 Fokus op beleide:
-* **NAAConfig**  – Netwerktoegang rekening krediete
+* **NAAConfig**  – Netwerktoegangrekening krediete
 * **TS_Sequence** – Taakvolgorde veranderlikes (OSDJoinAccount/Wagwoord)
 * **CollectionSettings** – Kan run-as rekeninge bevat
 
@@ -81,11 +81,11 @@ As jy reeds `PolicyID` & `PolicyVersion` het, kan jy die clientID vereiste oorsl
 ```sql
 EXEC MP_GetPolicyBody N'{083afd7a-b0be-4756-a4ce-c31825050325}', N'2.00';
 ```
-> BELANGRIJK: Verhoog "Maximum Characters Retrieved" in SSMS (>65535) of die blob sal afgekort word.
+> BELANGRIJK: Verhoog “Maximale Karakters Herwin” in SSMS (>65535) of die blob sal afgekort word.
 
 ---
 
-## 4. Dekodeer en ontsleutel die blob
+## 4. Dekodeer & dekripteer die blob
 ```bash
 # Remove the UTF-16 BOM, convert from hex → XML
 echo 'fffe3c003f0078…' | xxd -r -p > policy.xml
@@ -107,7 +107,7 @@ By relay word die aanmelding toegeken aan:
 * `smsdbrole_MP`
 * `smsdbrole_MPUserSvc`
 
-Hierdie rolle stel dosyne EXEC toestemmings bloot, die sleutel een wat in hierdie aanval gebruik word is:
+Hierdie rolle stel dosyne EXEC-toestemmings bloot, die sleutel wat in hierdie aanval gebruik word, is:
 
 | Gestoor Prosedure | Doel |
 |------------------|---------|
@@ -149,7 +149,7 @@ abusing-ad-mssql.md
 
 
 ## Verwysings
-- [Ek wil graag met jou bestuurder praat: Diefstal van geheime met Bestuurspunt Relays](https://specterops.io/blog/2025/07/15/id-like-to-speak-to-your-manager-stealing-secrets-with-management-point-relays/)
+- [I’d Like to Speak to Your Manager: Stealing Secrets with Management Point Relays](https://specterops.io/blog/2025/07/15/id-like-to-speak-to-your-manager-stealing-secrets-with-management-point-relays/)
 - [PXEthief](https://github.com/MWR-CyberSec/PXEThief)
-- [Misconfigurasie Bestuurder – ELEVATE-4 & ELEVATE-5](https://github.com/subat0mik/Misconfiguration-Manager)
+- [Misconfiguration Manager – ELEVATE-4 & ELEVATE-5](https://github.com/subat0mik/Misconfiguration-Manager)
 {{#include ../../banners/hacktricks-training.md}}

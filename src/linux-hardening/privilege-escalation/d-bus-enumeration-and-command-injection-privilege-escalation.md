@@ -2,11 +2,11 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## **GUI enumerasie**
+## **GUI-enumerasie**
 
-D-Bus word gebruik as die inter-proses kommunikasie (IPC) bemiddelaar in Ubuntu lessenaar omgewings. Op Ubuntu word die gelyktydige werking van verskeie boodskapbusse waargeneem: die stelselsbus, wat hoofsaaklik deur **bevoegde dienste gebruik word om dienste wat oor die stelsel relevant is, bloot te stel**, en 'n sessiebus vir elke ingelogde gebruiker, wat dienste blootstel wat slegs relevant is vir daardie spesifieke gebruiker. Die fokus hier is hoofsaaklik op die stelselsbus weens die verband met dienste wat op hoër bevoegdhede (bv. root) loop, aangesien ons doel is om bevoegdhede te verhoog. Dit word opgemerk dat D-Bus se argitektuur 'n 'router' per sessiebus gebruik, wat verantwoordelik is vir die herleiding van kliëntboodskappe na die toepaslike dienste gebaseer op die adres wat deur die kliënte vir die diens wat hulle wil kommunikeer, gespesifiseer is.
+D-Bus word gebruik as die inter-proses kommunikasie (IPC) bemiddelaar in Ubuntu desktop omgewings. Op Ubuntu word die gelyktydige werking van verskeie boodskapbusse waargeneem: die stelselsbus, wat hoofsaaklik deur **bevoegde dienste gebruik word om dienste wat oor die stelsel relevant is, bloot te stel**, en 'n sessiebus vir elke ingelogde gebruiker, wat dienste blootstel wat slegs relevant is vir daardie spesifieke gebruiker. Die fokus hier is hoofsaaklik op die stelselsbus weens die verband met dienste wat op hoër bevoegdhede (bv. root) loop, aangesien ons doel is om bevoegdhede te verhoog. Dit word opgemerk dat D-Bus se argitektuur 'n 'router' per sessiebus gebruik, wat verantwoordelik is vir die herleiding van kliëntboodskappe na die toepaslike dienste gebaseer op die adres wat deur die kliënte vir die diens wat hulle wil kommunikeer, gespesifiseer is.
 
-Dienste op D-Bus word gedefinieer deur die **objekte** en **interfaces** wat hulle blootstel. Objekte kan vergelyk word met klasinstansies in standaard OOP tale, met elke instansie uniek geïdentifiseer deur 'n **objekpad**. Hierdie pad, soortgelyk aan 'n lêerstelsel pad, identifiseer elke objek wat deur die diens blootgestel word. 'n Sleutelinterface vir navorsingsdoeleindes is die **org.freedesktop.DBus.Introspectable** interface, wat 'n enkele metode, Introspect, bevat. Hierdie metode keer 'n XML voorstelling van die objek se ondersteunende metodes, seine, en eienskappe terug, met 'n fokus hier op metodes terwyl eienskappe en seine weggelaat word.
+Dienste op D-Bus word gedefinieer deur die **objekte** en **interfaces** wat hulle blootstel. Objekte kan vergelyk word met klasinstansies in standaard OOP tale, met elke instansie uniek geïdentifiseer deur 'n **objekpad**. Hierdie pad, soortgelyk aan 'n lêerstelselpunt, identifiseer elke objek wat deur die diens blootgestel word. 'n Sleutelinterface vir navorsingsdoeleindes is die **org.freedesktop.DBus.Introspectable** interface, wat 'n enkele metode, Introspect, bevat. Hierdie metode keer 'n XML voorstelling van die objek se ondersteunende metodes, seine, en eienskappe terug, met 'n fokus hier op metodes terwyl eienskappe en seine weggelaat word.
 
 Vir kommunikasie met die D-Bus interface, is twee gereedskap gebruik: 'n CLI-gereedskap genaamd **gdbus** vir maklike aanroep van metodes wat deur D-Bus in skripte blootgestel word, en [**D-Feet**](https://wiki.gnome.org/Apps/DFeet), 'n Python-gebaseerde GUI-gereedskap wat ontwerp is om die dienste wat op elke bus beskikbaar is, te enumerate en om die objekte wat binne elke diens bevat is, te vertoon.
 ```bash
@@ -56,7 +56,7 @@ org.freedesktop.locale1                  - -               -                (act
 ```
 #### Verbindinge
 
-[From wikipedia:](https://en.wikipedia.org/wiki/D-Bus) Wanneer 'n proses 'n verbinding met 'n bus opstel, ken die bus 'n spesiale busnaam aan die verbinding toe wat _unieke verbindingsnaam_ genoem word. Busname van hierdie tipe is onveranderlik—dit is gewaarborg dat hulle nie sal verander solank die verbinding bestaan nie—en, belangriker, hulle kan nie hergebruik word gedurende die bus se lewensduur nie. Dit beteken dat geen ander verbinding met daardie bus ooit so 'n unieke verbindingsnaam toegeken sal word nie, selfs al sluit dieselfde proses die verbinding met die bus en skep 'n nuwe een. Unieke verbindingsname is maklik herkenbaar omdat hulle begin met die—andersins verbode—dubbelepuntkarakter.
+[From wikipedia:](https://en.wikipedia.org/wiki/D-Bus) Wanneer 'n proses 'n verbinding met 'n bus opstel, ken die bus 'n spesiale busnaam aan die verbinding toe wat _unieke verbindingsnaam_ genoem word. Busname van hierdie tipe is onveranderlik—dit is gewaarborg dat hulle nie sal verander solank die verbinding bestaan nie—en, meer belangrik, hulle kan nie hergebruik word gedurende die bus se lewensduur nie. Dit beteken dat geen ander verbinding met daardie bus ooit so 'n unieke verbindingsnaam toegeken sal word nie, selfs al sluit dieselfde proses die verbinding met die bus en skep 'n nuwe een. Unieke verbindingsname is maklik herkenbaar omdat hulle begin met die—andersins verbode—dubbelepuntkarakter.
 
 ### Diensobjek Inligting
 
@@ -152,7 +152,7 @@ org.freedesktop.DBus.Properties     interface -         -            -
 ```
 Let wel die metode `.Block` van die interface `htb.oouch.Block` (die een waarin ons belangstel). Die "s" van die ander kolomme kan beteken dat dit 'n string verwag.
 
-### Monitor/Vang Koppelvlak
+### Monitor/Vang Interface
 
 Met genoeg voorregte (net `send_destination` en `receive_sender` voorregte is nie genoeg nie) kan jy **'n D-Bus kommunikasie monitor**.
 
@@ -231,9 +231,9 @@ As gebruiker **qtc binne die gasheer "oouch" van HTB** kan jy 'n **onverwagte D-
 
 </busconfig>
 ```
-Let op van die vorige konfigurasie dat **jy die gebruiker `root` of `www-data` moet wees om inligting te stuur en te ontvang** via hierdie D-BUS kommunikasie.
+Let wel dat jy **die gebruiker `root` of `www-data` moet wees om inligting te stuur en te ontvang** via hierdie D-BUS kommunikasie.
 
-As gebruiker **qtc** binne die docker houer **aeb4525789d8** kan jy 'n paar dbus verwante kode in die lêer _/code/oouch/routes.py._ vind. Dit is die interessante kode:
+As gebruiker **qtc** binne die docker houer **aeb4525789d8** kan jy 'n paar dbus-verwante kode in die lêer _/code/oouch/routes.py._ vind. Dit is die interessante kode:
 ```python
 if primitive_xss.search(form.textfield.data):
 bus = dbus.SystemBus()
@@ -262,7 +262,7 @@ r = sd_bus_add_object_vtable(bus,
 block_vtable,
 NULL);
 ```
-Ook, in lyn 57 kan jy vind dat **die enigste metode geregistreer** vir hierdie D-Bus kommunikasie genoem word `Block`(_**Daarom gaan die payloads in die volgende afdeling na die diensobjek `htb.oouch.Block`, die koppelvlak `/htb/oouch/Block` en die metodenaam `Block` gestuur word**_):
+Ook, in lyn 57 kan jy vind dat **die enigste metode geregistreer** vir hierdie D-Bus kommunikasie `Block` genoem word (_**Daarom gaan die payloads in die volgende afdeling na die diensobjek `htb.oouch.Block`, die koppelvlak `/htb/oouch/Block` en die metodenaam `Block` gestuur word**_):
 ```c
 SD_BUS_METHOD("Block", "s", "s", method_block, SD_BUS_VTABLE_UNPRIVILEGED),
 ```
@@ -284,12 +284,12 @@ dbus-send --system --print-reply --dest=htb.oouch.Block /htb/oouch/Block htb.oou
 ```
 - `dbus-send` is 'n hulpmiddel wat gebruik word om boodskappe na “Message Bus” te stuur.
 - Message Bus – 'n sagteware wat deur stelsels gebruik word om kommunikasie tussen toepassings maklik te maak. Dit is verwant aan Message Queue (boodskappe is in volgorde) maar in Message Bus word die boodskappe in 'n subskripsiemodel gestuur en ook baie vinnig.
-- “-system” etiket word gebruik om te noem dat dit 'n stelselboodskap is, nie 'n sessieboodskap nie (per standaard).
-- “–print-reply” etiket word gebruik om ons boodskap toepaslik te druk en enige antwoorde in 'n menslike leesbare formaat te ontvang.
+- “-system” etiket word gebruik om te noem dat dit 'n stelselsboodskap is, nie 'n sessieboodskap nie (per standaard).
+- “–print-reply” etiket word gebruik om ons boodskap toepaslik te druk en ontvang enige antwoorde in 'n menslike leesbare formaat.
 - “–dest=Dbus-Interface-Block” Die adres van die Dbus-koppelvlak.
-- “–string:” – Tipe boodskap wat ons wil stuur na die koppelvlak. Daar is verskeie formate om boodskappe te stuur soos dubbel, bytes, booleans, int, objpath. Van hierdie, is die “object path” nuttig wanneer ons 'n pad van 'n lêer na die Dbus-koppelvlak wil stuur. Ons kan 'n spesiale lêer (FIFO) in hierdie geval gebruik om 'n opdrag na die koppelvlak te stuur in die naam van 'n lêer. “string:;” – Dit is om die object path weer aan te roep waar ons die FIFO reverse shell lêer/opdrag plaas.
+- “–string:” – Tipe boodskap wat ons wil stuur na die koppelvlak. Daar is verskeie formate om boodskappe te stuur soos dubbel, bytes, booleans, int, objpath. Van hierdie, is die “object path” nuttig wanneer ons 'n pad van 'n lêer na die Dbus-koppelvlak wil stuur. Ons kan 'n spesiale lêer (FIFO) in hierdie geval gebruik om 'n opdrag na die koppelvlak te stuur in die naam van 'n lêer. “string:;” – Dit is om die objekpad weer aan te roep waar ons die FIFO omgekeerde skulp lêer/opdrag plaas.
 
-_Note dat in `htb.oouch.Block.Block`, die eerste deel (`htb.oouch.Block`) verwys na die diensobjek en die laaste deel (`.Block`) verwys na die metode naam._
+_Note that in `htb.oouch.Block.Block`, the first part (`htb.oouch.Block`) references the service object and the last part (`.Block`) references the method name._
 
 ### C code
 ```c:d-bus_server.c
@@ -451,13 +451,13 @@ sudo dbus-map --enable-probes --null-agent --dump-methods --dump-properties
 
 ### uptux.py
 * Skrywer: @initstring – [https://github.com/initstring/uptux](https://github.com/initstring/uptux)
-* Slegs Python-skrip wat soek na *skryfbare* pades in systemd-eenhede **en** oormatig permissiewe D-Bus beleid lêers (bv. `send_destination="*"`).
+* Slegs Python-skrip wat soek na *skryfbare* paden in systemd-eenhede **en** oormatig permissiewe D-Bus beleid lêers (bv. `send_destination="*"`).
 * Vinnige gebruik:
 ```bash
 python3 uptux.py -n          # voer alle kontroles uit maar skryf nie 'n loglêer nie
-python3 uptux.py -d          # aktiveer gedetailleerde foutopsporing-uitvoer
+python3 uptux.py -d          # aktiveer gedetailleerde foutopsporing
 ```
-* Die D-Bus-module soek die direkteure hieronder en beklemtoon enige diens wat deur 'n normale gebruiker gespoof of gehuurm kan word:
+* Die D-Bus module soek die direkteure hieronder en beklemtoon enige diens wat deur 'n normale gebruiker gespoof of gehuurm kan word:
 * `/etc/dbus-1/system.d/` en `/usr/share/dbus-1/system.d/`
 * `/etc/dbus-1/system-local.d/` (verkoper oorskrywing)
 
@@ -465,7 +465,7 @@ python3 uptux.py -d          # aktiveer gedetailleerde foutopsporing-uitvoer
 
 ## Opmerklike D-Bus Privilege-Eskalasie Foute (2024-2025)
 
-Om 'n oog te hou op onlangs gepubliseerde CVE's help om soortgelyke onveilige patrone in pasgemaakte kode op te spoor. Die volgende hoë-impak plaaslike EoP-probleme spruit almal uit ontbrekende outentisering/autorisasie op die **stelsel bus**:
+Om 'n oog te hou op onlangs gepubliseerde CVE's help om soortgelyke onveilige patrone in pasgemaakte kode op te spoor. Die volgende hoë-impak plaaslike EoP probleme spruit almal uit ontbrekende outentisering/autorisasie op die **stelsel bus**:
 
 | Jaar | CVE | Komponent | Wortel Oorsaak | Een-Liner PoC |
 |------|-----|-----------|----------------|----------------|
@@ -491,7 +491,7 @@ grep -R --color -nE '<allow (own|send_destination|receive_sender)="[^"]*"' /etc/
 * Vereis Polkit vir gevaarlike metodes – selfs *root* proxies moet die *oproeper* PID aan `polkit_authority_check_authorization_sync()` oorhandig in plaas van hul eie.
 * Laat voorregte val in langlopende helpers (gebruik `sd_pid_get_owner_uid()` om name ruimtes te verander na verbinding met die bus).
 * As jy nie 'n diens kan verwyder nie, beperk dit ten minste tot 'n toegewyde Unix-groep en beperk toegang in sy XML-beleid.
-* Blou-span: aktiveer volgehoue vang van die stelsel bus met `busctl capture --output=/var/log/dbus_$(date +%F).pcap` en voer in Wireshark in vir anomalie opsporing.
+* Blou-span: aktiveer volgehoue vang van die stelsel bus met `busctl capture --output=/var/log/dbus_$(date +%F).pcap` en invoer in Wireshark vir anomalie opsporing.
 
 ---
 
