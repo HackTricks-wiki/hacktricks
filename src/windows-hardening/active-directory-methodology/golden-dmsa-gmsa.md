@@ -28,7 +28,7 @@ Se un attaccante può ottenere tutti e tre gli input **offline**, può calcolare
 
 Questo è analogo a un *Golden Ticket* per gli account di servizio.
 
-### Requisiti
+### Prerequisiti
 
 1. **Compromissione a livello di foresta** di **un DC** (o Enterprise Admin), o accesso `SYSTEM` a uno dei DC nella foresta.
 2. Capacità di enumerare gli account di servizio (lettura LDAP / brute-force RID).
@@ -100,10 +100,10 @@ Le hash risultanti possono essere iniettati con **mimikatz** (`sekurlsa::pth`) o
 ## Rilevamento e Mitigazione
 
 * Limitare le capacità di **backup DC e lettura del registro** agli amministratori di Tier-0.
-* Monitorare la creazione di **Directory Services Restore Mode (DSRM)** o **Volume Shadow Copy** sui DC.
+* Monitorare la creazione della **Modalità di Ripristino dei Servizi di Directory (DSRM)** o della **Copia Shadow del Volume** sui DC.
 * Audit delle letture / modifiche a `CN=Master Root Keys,…` e ai flag `userAccountControl` degli account di servizio.
 * Rilevare scritture di password **base64** insolite o riutilizzo improvviso di password di servizio tra host.
-* Considerare la conversione di gMSA ad alta privilegio in **account di servizio classici** con rotazioni casuali regolari dove l'isolamento di Tier-0 non è possibile.
+* Considerare la conversione di gMSA ad alto privilegio in **account di servizio classici** con rotazioni casuali regolari dove l'isolamento di Tier-0 non è possibile.
 
 ## Strumenti
 

@@ -166,7 +166,7 @@ Potrebbe essere anche possibile **eseguire comandi** all'interno dell'host MSSQL
 Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResults
 # Invoke-SQLOSCmd automatically checks if xp_cmdshell is enable and enables it if necessary
 ```
-Controlla nella pagina menzionata nella **seguente sezione come farlo manualmente.**
+Controlla nella pagina menzionata nella **sezione seguente come farlo manualmente.**
 
 ### MSSQL Tecniche di Hacking di Base
 
@@ -230,9 +230,9 @@ Nota che metasploit cercherà di abusare solo della funzione `openquery()` in MS
 
 ### Manuale - Openquery()
 
-Da **Linux** potresti ottenere una shell console MSSQL con **sqsh** e **mssqlclient.py.**
+Da **Linux** puoi ottenere una shell console MSSQL con **sqsh** e **mssqlclient.py.**
 
-Da **Windows** potresti anche trovare i link ed eseguire comandi manualmente utilizzando un **client MSSQL come** [**HeidiSQL**](https://www.heidisql.com)
+Da **Windows** puoi anche trovare i link ed eseguire comandi manualmente utilizzando un **client MSSQL come** [**HeidiSQL**](https://www.heidisql.com)
 
 _Esegui il login utilizzando l'autenticazione di Windows:_
 
@@ -256,7 +256,7 @@ select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 
 ![](<../../images/image (643).png>)
 
-Puoi continuare questa catena di link fidati per sempre manualmente.
+Puoi continuare questa catena di link fidati all'infinito manualmente.
 ```sql
 # First level RCE
 SELECT * FROM OPENQUERY("<computer>", 'select @@servername; exec xp_cmdshell ''powershell -w hidden -enc blah''')
@@ -278,14 +278,14 @@ EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT 
 
 L'**utente locale MSSQL** di solito ha un tipo speciale di privilegio chiamato **`SeImpersonatePrivilege`**. Questo consente all'account di "impersonare un client dopo l'autenticazione".
 
-Una strategia che molti autori hanno ideato è forzare un servizio SYSTEM ad autenticarsi a un servizio rogue o man-in-the-middle creato dall'attaccante. Questo servizio rogue è quindi in grado di impersonare il servizio SYSTEM mentre sta cercando di autenticarsi.
+Una strategia che molti autori hanno ideato è forzare un servizio SYSTEM ad autenticarsi a un servizio rogue o man-in-the-middle che l'attaccante crea. Questo servizio rogue è quindi in grado di impersonare il servizio SYSTEM mentre sta cercando di autenticarsi.
 
 [SweetPotato](https://github.com/CCob/SweetPotato) ha una raccolta di queste varie tecniche che possono essere eseguite tramite il comando `execute-assembly` di Beacon.
 
 
 
-### Relay NTLM del punto di gestione SCCM (Estrazione dei segreti OSD)
-Scopri come i ruoli SQL predefiniti dei **Punti di gestione SCCM** possono essere abusati per estrarre direttamente l'Account di Accesso alla Rete e i segreti della Sequenza di Attività dal database del sito:
+### Relay NTLM del Punto di Gestione SCCM (Estrazione dei Segreti OSD)
+Scopri come i ruoli SQL predefiniti dei **Punti di Gestione** SCCM possono essere abusati per estrarre direttamente l'Account di Accesso alla Rete e i segreti della Sequenza di Attività dal database del sito:
 {{#ref}}
 sccm-management-point-relay-sql-policy-secrets.md
 {{#endref}}
