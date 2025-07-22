@@ -168,13 +168,13 @@ Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResu
 ```
 Перевірте на сторінці, згаданій у **наступному розділі, як зробити це вручну.**
 
-### Основні трюки хакінгу MSSQL
+### MSSQL Основні Хакерські Трюки
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-mssql-microsoft-sql-server/
 {{#endref}}
 
-## Довірені посилання MSSQL
+## MSSQL Довірені Посилання
 
 Якщо екземпляр MSSQL є довіреним (посилання на базу даних) іншим екземпляром MSSQL. Якщо у користувача є привілеї над довіреною базою даних, він зможе **використовувати довірчі відносини для виконання запитів також в іншому екземплярі**. Ці довіри можуть бути з'єднані, і в якийсь момент користувач може знайти неправильно налаштовану базу даних, де він може виконувати команди.
 
@@ -226,7 +226,7 @@ inject-assembly 4704 ../SharpCollection/SharpSQLPwn.exe /modules:LIC /linkedsql:
 msf> use exploit/windows/mssql/mssql_linkcrawler
 [msf> set DEPLOY true] #Set DEPLOY to true if you want to abuse the privileges to obtain a meterpreter session
 ```
-Зверніть увагу, що metasploit намагатиметься зловживати лише функцією `openquery()` в MSSQL (отже, якщо ви не можете виконати команду з `openquery()`, вам потрібно буде спробувати метод `EXECUTE` **вручну** для виконання команд, див. більше нижче.)
+Зверніть увагу, що metasploit намагатиметься зловживати лише функцією `openquery()` в MSSQL (отже, якщо ви не можете виконати команду з `openquery()`, вам потрібно буде спробувати метод `EXECUTE` **вручну** для виконання команд, див. нижче.)
 
 ### Вручну - Openquery()
 
@@ -283,7 +283,7 @@ EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT 
 [SweetPotato](https://github.com/CCob/SweetPotato) має колекцію цих різних технік, які можна виконати за допомогою команди `execute-assembly` Beacon.
 
 ### NTLM Relay для управлінської точки SCCM (витягування секретів OSD)
-Дивіться, як стандартні SQL ролі **Управлінських Точок** SCCM можуть бути зловживані для виведення облікового запису доступу до мережі та секретів послідовності завдань безпосередньо з бази даних сайту:
+Дивіться, як стандартні SQL ролі **Управлінських Точок** SCCM можуть бути зловживані для виведення облікового запису мережевого доступу та секретів послідовності завдань безпосередньо з бази даних сайту:
 {{#ref}}
 sccm-management-point-relay-sql-policy-secrets.md
 {{#endref}}

