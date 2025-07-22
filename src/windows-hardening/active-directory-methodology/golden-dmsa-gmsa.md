@@ -16,8 +16,8 @@
 * Το **SID** του στοχευόμενου λογαριασμού.
 * Ένα **ManagedPasswordID** ανά λογαριασμό (GUID) που βρίσκεται στο χαρακτηριστικό `msDS-ManagedPasswordId`.
 
-Η παραγωγή είναι: `AES256_HMAC( KDSRootKey , SID || ManagedPasswordID )` → 240 byte blob που τελικά **κωδικοποιείται σε base64** και αποθηκεύεται στο χαρακτηριστικό `msDS-ManagedPassword`.
-Δεν απαιτείται καμία κίνηση Kerberos ή αλληλεπίδραση με το domain κατά τη διάρκεια της κανονικής χρήσης του κωδικού πρόσβασης – ένας μέλος υπολογιστής παράγει τον κωδικό πρόσβασης τοπικά όσο γνωρίζει τις τρεις εισόδους.
+Η παραγωγή είναι: `AES256_HMAC( KDSRootKey , SID || ManagedPasswordID )` → 240 byte blob τελικά **base64-encoded** και αποθηκευμένο στο χαρακτηριστικό `msDS-ManagedPassword`.
+Δεν απαιτείται καμία κίνηση Kerberos ή αλληλεπίδραση με το domain κατά τη διάρκεια της κανονικής χρήσης κωδικού πρόσβασης – ένας μέλος υπολογιστής παράγει τον κωδικό πρόσβασης τοπικά όσο γνωρίζει τις τρεις εισόδους.
 
 ## Χρυσή επίθεση gMSA / Χρυσή dMSA
 
@@ -32,7 +32,7 @@
 
 1. **Συμβιβασμός σε επίπεδο δάσους** ενός **DC** (ή Enterprise Admin), ή πρόσβαση `SYSTEM` σε έναν από τους DCs στο δάσος.
 2. Δυνατότητα καταμέτρησης λογαριασμών υπηρεσιών (ανάγνωση LDAP / brute-force RID).
-3. .NET ≥ 4.7.2 x64 workstation για να τρέξει το [`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) ή ισοδύναμο κώδικα.
+3. .NET ≥ 4.7.2 x64 workstation για να τρέξει [`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) ή ισοδύναμο κώδικα.
 
 ### Χρυσή gMSA / dMSA
 ##### Φάση 1 – Εξαγωγή του KDS Root Key
@@ -103,7 +103,7 @@ GoldenGMSA.exe compute --sid <SID> --kdskey <KDSRootKey> --pwdid <ManagedPasswor
 * Παρακολουθήστε τη δημιουργία **Λειτουργίας Επαναφοράς Υπηρεσιών Καταλόγου (DSRM)** ή **Αντίγραφο Σκιάς Όγκου** σε DCs.
 * Ελέγξτε τις αναγνώσεις / αλλαγές στα `CN=Master Root Keys,…` και τις σημαίες `userAccountControl` των λογαριασμών υπηρεσιών.
 * Ανιχνεύστε ασυνήθιστες **εγγραφές κωδικών πρόσβασης base64** ή ξαφνική επαναχρησιμοποίηση κωδικών πρόσβασης υπηρεσιών σε διάφορους υπολογιστές.
-* Σκεφτείτε να μετατρέψετε τις υψηλής προνομιακής gMSAs σε **κλασικούς λογαριασμούς υπηρεσιών** με κανονικές τυχαίες περιστροφές όπου η απομόνωση Tier-0 δεν είναι δυνατή.
+* Σκεφτείτε να μετατρέψετε τις gMSAs υψηλής προνομιακής πρόσβασης σε **κλασικούς λογαριασμούς υπηρεσιών** με κανονικές τυχαίες περιστροφές όπου η απομόνωση Tier-0 δεν είναι δυνατή.
 
 ## Εργαλεία
 
@@ -115,7 +115,7 @@ GoldenGMSA.exe compute --sid <SID> --kdskey <KDSRootKey> --pwdid <ManagedPasswor
 ## Αναφορές
 
 - [Golden dMSA – παράκαμψη αυθεντικοποίησης για εξουσιοδοτημένους Διαχειριζόμενους Λογαριασμούς Υπηρεσιών](https://www.semperis.com/blog/golden-dmsa-what-is-dmsa-authentication-bypass/)
-- [gMSA Επιθέσεις Λογαριασμών Active Directory](https://www.semperis.com/blog/golden-gmsa-attack/)
+- [gMSA Active Directory Επιθέσεις Λογαριασμών](https://www.semperis.com/blog/golden-gmsa-attack/)
 - [Semperis/GoldenDMSA GitHub repository](https://github.com/Semperis/GoldenDMSA)
 - [Improsec – Χρυσή επίθεση εμπιστοσύνης gMSA](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-5-golden-gmsa-trust-attack-from-child-to-parent)
 

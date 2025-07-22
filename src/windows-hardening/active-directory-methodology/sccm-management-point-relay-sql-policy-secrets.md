@@ -3,7 +3,7 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 ## TL;DR
-Με την πίεση ενός **System Center Configuration Manager (SCCM) Management Point (MP)** να αυθεντικοποιηθεί μέσω SMB/RPC και **αναμεταδίδοντας** αυτόν τον λογαριασμό μηχανής NTLM στη **βάση δεδομένων του ιστότοπου (MSSQL)** αποκτάτε δικαιώματα `smsdbrole_MP` / `smsdbrole_MPUserSvc`.  Αυτοί οι ρόλοι σας επιτρέπουν να καλέσετε ένα σύνολο αποθηκευμένων διαδικασιών που εκθέτουν **Operating System Deployment (OSD)** blobs (διαπιστευτήρια Network Access Account, μεταβλητές Task-Sequence, κ.λπ.).  Τα blobs είναι κωδικοποιημένα/κρυπτογραφημένα σε hex αλλά μπορούν να αποκωδικοποιηθούν και να αποκρυπτογραφηθούν με **PXEthief**, αποκαλύπτοντας κείμενα μυστικά.
+Με την πίεση ενός **System Center Configuration Manager (SCCM) Management Point (MP)** να αυθεντικοποιηθεί μέσω SMB/RPC και **αναμεταδίδοντας** αυτόν τον λογαριασμό μηχανής NTLM στη **βάση δεδομένων του ιστότοπου (MSSQL)** αποκτάτε δικαιώματα `smsdbrole_MP` / `smsdbrole_MPUserSvc`.  Αυτοί οι ρόλοι σας επιτρέπουν να καλέσετε ένα σύνολο αποθηκευμένων διαδικασιών που εκθέτουν **Operating System Deployment (OSD)** policy blobs (διαπιστευτήρια Network Access Account, μεταβλητές Task-Sequence, κ.λπ.).  Τα blobs είναι κωδικοποιημένα/κρυπτογραφημένα σε hex αλλά μπορούν να αποκωδικοποιηθούν και να αποκρυπτογραφηθούν με **PXEthief**, αποκαλύπτοντας κείμενα μυστικά.
 
 High-level chain:
 1. Discover MP & site DB ↦ unauthenticated HTTP endpoint `/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA`.
@@ -65,23 +65,23 @@ SELECT SMS_Unique_Identifier0
 FROM dbo.UnknownSystem_DISC
 WHERE DiscArchKey = 2; -- 2 = x64, 0 = x86
 ```
-### 3.2  Λίστα ανατεθειμένων πολιτικών
+### 3.2  Λίστα εκχωρημένων πολιτικών
 ```sql
 EXEC MP_GetMachinePolicyAssignments N'e9cd8c06-cc50-4b05-a4b2-9c9b5a51bbe7', N'';
 ```
 Κάθε γραμμή περιέχει `PolicyAssignmentID`,`Body` (hex), `PolicyID`, `PolicyVersion`.
 
 Επικεντρωθείτε σε πολιτικές:
-* **NAAConfig**  – Διαπιστευτήρια λογαριασμού πρόσβασης δικτύου
-* **TS_Sequence** – Μεταβλητές ακολουθίας εργασιών (OSDJoinAccount/Password)
-* **CollectionSettings** – Μπορεί να περιέχει λογαριασμούς εκτέλεσης
+* **NAAConfig**  – Διαπιστευτήρια Λογαριασμού Πρόσβασης Δικτύου
+* **TS_Sequence** – Μεταβλητές Ακολουθίας Εργασιών (OSDJoinAccount/Password)
+* **CollectionSettings** – Μπορεί να περιέχει λογαριασμούς run-as
 
 ### 3.3  Ανάκτηση πλήρους σώματος
 Εάν έχετε ήδη `PolicyID` & `PolicyVersion` μπορείτε να παραλείψετε την απαίτηση clientID χρησιμοποιώντας:
 ```sql
 EXEC MP_GetPolicyBody N'{083afd7a-b0be-4756-a4ce-c31825050325}', N'2.00';
 ```
-> ΣΗΜΑΝΤΙΚΟ: Στο SSMS αυξήστε το “Μέγιστο Πλήθος Χαρακτήρων που Ανακτήθηκαν” (>65535) ή το blob θα κοπεί.
+> ΣΗΜΑΝΤΙΚΟ: Στο SSMS αυξήστε το “Maximum Characters Retrieved” (>65535) αλλιώς το blob θα κοπεί.
 
 ---
 
@@ -93,7 +93,7 @@ echo 'fffe3c003f0078…' | xxd -r -p > policy.xml
 # Decrypt with PXEthief (7 = decrypt attribute value)
 python3 pxethief.py 7 $(xmlstarlet sel -t -v "//value/text()" policy.xml)
 ```
-Ανακτημένα μυστικά παράδειγμα:
+Παράδειγμα ανακτημένων μυστικών:
 ```
 OSDJoinAccount : CONTOSO\\joiner
 OSDJoinPassword: SuperSecret2025!
@@ -127,9 +127,9 @@ AND  pe.permission_name='EXECUTE';
 ---
 
 ## 6. Ανίχνευση & Σκληροποίηση
-1. **Παρακολούθηση συνδέσεων MP** – οποιοσδήποτε λογαριασμός υπολογιστή MP που συνδέεται από μια IP που δεν είναι η κεντρική του ≈ relay.
+1. **Παρακολούθηση συνδέσεων MP** – οποιοσδήποτε λογαριασμός υπολογιστή MP που συνδέεται από μια IP που δεν είναι ο οικοδεσπότης του ≈ relay.
 2. Ενεργοποιήστε την **Εκτενή Προστασία για Αυθεντικοποίηση (EPA)** στη βάση δεδομένων του ιστότοπου (`PREVENT-14`).
-3. Απενεργοποιήστε το μη χρησιμοποιούμενο NTLM, επιβάλετε την υπογραφή SMB, περιορίστε το RPC (
+3. Απενεργοποιήστε το NTLM που δεν χρησιμοποιείται, επιβάλετε την υπογραφή SMB, περιορίστε το RPC (
 οι ίδιες μετρήσεις που χρησιμοποιούνται κατά του `PetitPotam`/`PrinterBug`).
 4. Σκληρύνετε την επικοινωνία MP ↔ DB με IPSec / αμοιβαίο TLS.
 
@@ -149,7 +149,7 @@ abusing-ad-mssql.md
 
 
 ## Αναφορές
-- [Θα ήθελα να μιλήσω με τον διευθυντή σας: Κλέβοντας μυστικά με Management Point Relays](https://specterops.io/blog/2025/07/15/id-like-to-speak-to-your-manager-stealing-secrets-with-management-point-relays/)
+- [Θα ήθελα να μιλήσω με τον διευθυντή σας: Κλοπή μυστικών με Management Point Relays](https://specterops.io/blog/2025/07/15/id-like-to-speak-to-your-manager-stealing-secrets-with-management-point-relays/)
 - [PXEthief](https://github.com/MWR-CyberSec/PXEThief)
 - [Διαχειριστής Κακής Διαμόρφωσης – ELEVATE-4 & ELEVATE-5](https://github.com/subat0mik/Misconfiguration-Manager)
 {{#include ../../banners/hacktricks-training.md}}
