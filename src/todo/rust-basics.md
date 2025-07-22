@@ -269,7 +269,7 @@ println!("{:?}", apple);
 ```
 #### Threads
 
-Neste caso, passaremos à thread uma variável que ela poderá modificar.
+Neste caso, passaremos ao thread uma variável que ele poderá modificar.
 ```rust
 fn main() {
 let status = Arc::new(Mutex::new(JobStatus { jobs_completed: 0 }));
@@ -287,4 +287,71 @@ thread::sleep(Duration::from_millis(500));
 }
 }
 ```
+### Essentials de Segurança
+
+Rust fornece fortes garantias de segurança de memória por padrão, mas você ainda pode introduzir vulnerabilidades críticas através de código `unsafe`, problemas de dependência ou erros de lógica. O seguinte mini-cheatsheet reúne os primitivos que você mais comumente encontrará durante revisões de segurança ofensivas ou defensivas de software Rust.
+
+#### Código unsafe & segurança de memória
+
+Blocos `unsafe` optam por não seguir as verificações de aliasing e limites do compilador, então **todos os bugs tradicionais de corrupção de memória (OOB, uso após liberação, liberação dupla, etc.) podem reaparecer**. Uma lista de verificação rápida de auditoria:
+
+* Procure por blocos `unsafe`, funções `extern "C"`, chamadas para `ptr::copy*`, `std::mem::transmute`, `MaybeUninit`, ponteiros brutos ou módulos `ffi`.
+* Valide toda aritmética de ponteiros e argumentos de comprimento passados para funções de baixo nível.
+* Prefira `#![forbid(unsafe_code)]` (em todo o crate) ou `#[deny(unsafe_op_in_unsafe_fn)]` (1.68 +) para falhar na compilação quando alguém reintroduzir `unsafe`.
+
+Exemplo de estouro criado com ponteiros brutos:
+```rust
+use std::ptr;
+
+fn vuln_copy(src: &[u8]) -> Vec<u8> {
+let mut dst = Vec::with_capacity(4);
+unsafe {
+// ❌ copies *src.len()* bytes, the destination only reserves 4.
+ptr::copy_nonoverlapping(src.as_ptr(), dst.as_mut_ptr(), src.len());
+dst.set_len(src.len());
+}
+dst
+}
+```
+Executar Miri é uma maneira econômica de detectar UB durante o tempo de teste:
+```bash
+rustup component add miri
+cargo miri test  # hunts for OOB / UAF during unit tests
+```
+#### Auditoria de dependências com RustSec / cargo-audit
+
+A maioria das vulnerabilidades Rust do mundo real reside em crates de terceiros. O banco de dados de avisos do RustSec (movido pela comunidade) pode ser consultado localmente:
+```bash
+cargo install cargo-audit
+cargo audit              # flags vulnerable versions listed in Cargo.lock
+```
+Integre isso no CI e falhe em `--deny warnings`.
+
+`cargo deny check advisories` oferece funcionalidade semelhante, além de verificações de licença e lista de proibição.
+
+#### Verificação da cadeia de suprimentos com cargo-vet (2024)
+
+`cargo vet` registra um hash de revisão para cada crate que você importa e impede atualizações não percebidas:
+```bash
+cargo install cargo-vet
+cargo vet init      # generates vet.toml
+cargo vet --locked  # verifies packages referenced in Cargo.lock
+```
+A ferramenta está sendo adotada pela infraestrutura do projeto Rust e um número crescente de organizações para mitigar ataques de pacotes envenenados.
+
+#### Fuzzing sua superfície de API (cargo-fuzz)
+
+Testes de fuzz facilmente capturam panics, estouros de inteiros e bugs de lógica que podem se tornar problemas de DoS ou de canal lateral:
+```bash
+cargo install cargo-fuzz
+cargo fuzz init              # creates fuzz_targets/
+cargo fuzz run fuzz_target_1 # builds with libFuzzer & runs continuously
+```
+Adicione o alvo de fuzz ao seu repositório e execute-o em seu pipeline.
+
+## Referências
+
+- RustSec Advisory Database – <https://rustsec.org>
+- Cargo-vet: "Auditing your Rust Dependencies" – <https://mozilla.github.io/cargo-vet/>
+
 {{#include ../banners/hacktricks-training.md}}
