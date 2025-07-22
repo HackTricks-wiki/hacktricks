@@ -10,7 +10,7 @@ Windows 托管服务账户（MSA）是专门设计用于运行服务的特殊主
 1. **gMSA** – 组托管服务账户 – 可以在其 `msDS-GroupMSAMembership` 属性中授权的多个主机上使用。
 2. **dMSA** – 委派托管服务账户 – gMSA 的（预览）继任者，依赖于相同的加密技术，但允许更细粒度的委派场景。
 
-对于这两种变体，**密码不会存储**在每个域控制器（DC）上，就像常规的 NT 哈希一样。相反，每个 DC 可以 **动态推导** 当前密码，基于：
+对于这两种变体，**密码不会存储**在每个域控制器（DC）上，就像常规的 NT 哈希一样。相反，每个 DC 可以 **实时推导** 当前密码，基于：
 
 * 林范围的 **KDS 根密钥** (`KRBTGT\KDS`) – 随机生成的 GUID 命名的秘密，复制到每个 DC 下的 `CN=Master Root Keys,CN=Group Key Distribution Service, CN=Services, CN=Configuration, …` 容器中。
 * 目标账户的 **SID**。
@@ -30,12 +30,12 @@ Windows 托管服务账户（MSA）是专门设计用于运行服务的特殊主
 
 ### 先决条件
 
-1. **一个 DC**（或企业管理员）的 **林级别妥协**，或对林中一个 DC 的 `SYSTEM` 访问。
+1. **一个 DC 的林级别妥协**（或企业管理员），或对林中一个 DC 的 `SYSTEM` 访问。
 2. 能够枚举服务账户（LDAP 读取 / RID 暴力破解）。
 3. .NET ≥ 4.7.2 x64 工作站以运行 [`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) 或等效代码。
 
 ### Golden gMSA / dMSA
-##### 第 1 阶段 – 提取 KDS 根密钥
+##### 阶段 1 – 提取 KDS 根密钥
 
 从任何 DC 转储（卷影复制 / 原始 SAM+SECURITY 注册表或远程秘密）：
 ```cmd
@@ -53,11 +53,11 @@ GoldendMSA.exe kds
 # With GoldenGMSA
 GoldenGMSA.exe kdsinfo
 ```
-`RootKey`（GUID 名称）标签的 base64 字符串在后续步骤中是必需的。
+`RootKey`（GUID 名称）标记的 base64 字符串在后续步骤中是必需的。
 
 ##### 第 2 阶段 – 枚举 gMSA / dMSA 对象
 
-至少检索 `sAMAccountName`、`objectSid` 和 `msDS-ManagedPasswordId`：
+检索至少 `sAMAccountName`、`objectSid` 和 `msDS-ManagedPasswordId`：
 ```powershell
 # Authenticated or anonymous depending on ACLs
 Get-ADServiceAccount -Filter * -Properties msDS-ManagedPasswordId | \
@@ -85,7 +85,7 @@ GoldendMSA.exe info -d example.local -m brute -r 5000 -u jdoe -p P@ssw0rd
 ```powershell
 GoldendMSA.exe wordlist -s <SID> -d example.local -f example.local -k <KDSKeyGUID>
 ```
-该工具计算候选密码，并将其 base64 blob 与真实的 `msDS-ManagedPassword` 属性进行比较 – 匹配结果揭示了正确的 GUID。
+该工具计算候选密码并将其 base64 blob 与真实的 `msDS-ManagedPassword` 属性进行比较 – 匹配结果揭示了正确的 GUID。
 
 ##### 第 4 阶段 – 离线密码计算与转换
 
@@ -110,7 +110,7 @@ GoldenGMSA.exe compute --sid <SID> --kdskey <KDSRootKey> --pwdid <ManagedPasswor
 * [`Semperis/GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) – 本页面使用的参考实现。
 * [`Semperis/GoldenGMSA`](https://github.com/Semperis/GoldenGMSA/) – 本页面使用的参考实现。
 * [`mimikatz`](https://github.com/gentilkiwi/mimikatz) – `lsadump::secrets`，`sekurlsa::pth`，`kerberos::ptt`。
-* [`Rubeus`](https://github.com/GhostPack/Rubeus) – 使用派生的 AES 密钥进行票证传递。
+* [`Rubeus`](https://github.com/GhostPack/Rubeus) – 使用派生 AES 密钥的票证传递。
 
 ## 参考文献
 

