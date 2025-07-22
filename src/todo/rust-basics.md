@@ -269,7 +269,7 @@ println!("{:?}", apple);
 ```
 #### Threads
 
-Katika kesi hii tutapitia nyuzi kiambato ambacho kitakuwa na uwezo wa kubadilisha.
+Katika kesi hii tutapitia nyuzi mabadiliko ya kubadilisha.
 ```rust
 fn main() {
 let status = Arc::new(Mutex::new(JobStatus { jobs_completed: 0 }));
@@ -287,4 +287,71 @@ thread::sleep(Duration::from_millis(500));
 }
 }
 ```
+### Msingi wa Usalama
+
+Rust inatoa dhamana thabiti za usalama wa kumbukumbu kwa chaguo-msingi, lakini bado unaweza kuanzisha udhaifu muhimu kupitia `unsafe` code, matatizo ya utegemezi au makosa ya mantiki. Cheatsheet hii ndogo inakusanya primitives ambazo utagusa mara nyingi wakati wa ukaguzi wa usalama wa mashambulizi au ulinzi wa programu za Rust.
+
+#### Code isiyo salama & usalama wa kumbukumbu
+
+`unsafe` blocks zinakataa ukaguzi wa aliasing na mipaka ya kompyuta, hivyo **makosa yote ya jadi ya kuharibu kumbukumbu (OOB, matumizi baada ya kuachiliwa, kuachiliwa mara mbili, nk.) yanaweza kuonekana tena**. Orodha ya ukaguzi wa haraka:
+
+* Angalia `unsafe` blocks, `extern "C"` functions, simu za `ptr::copy*`, `std::mem::transmute`, `MaybeUninit`, viashiria vya kawaida au moduli za `ffi`.
+* Thibitisha kila hesabu ya kiashiria na hoja ya urefu inayopitishwa kwa kazi za kiwango cha chini.
+* Prefer `#![forbid(unsafe_code)]` (kote kwenye crate) au `#[deny(unsafe_op_in_unsafe_fn)]` (1.68 +) ili kushindwa kwa uundaji wakati mtu anaporudisha `unsafe`.
+
+Mfano wa overflow ulioanzishwa na viashiria vya kawaida:
+```rust
+use std::ptr;
+
+fn vuln_copy(src: &[u8]) -> Vec<u8> {
+let mut dst = Vec::with_capacity(4);
+unsafe {
+// ❌ copies *src.len()* bytes, the destination only reserves 4.
+ptr::copy_nonoverlapping(src.as_ptr(), dst.as_mut_ptr(), src.len());
+dst.set_len(src.len());
+}
+dst
+}
+```
+Kukimbia Miri ni njia ya gharama nafuu kugundua UB wakati wa mtihani:
+```bash
+rustup component add miri
+cargo miri test  # hunts for OOB / UAF during unit tests
+```
+#### Auditing dependencies with RustSec / cargo-audit
+
+Vikosi vingi vya kweli vya Rust vinapatikana katika crates za watu wengine. Hifadhidata ya ushauri ya RustSec (iliyotolewa na jamii) inaweza kuulizwa kwa ndani:
+```bash
+cargo install cargo-audit
+cargo audit              # flags vulnerable versions listed in Cargo.lock
+```
+Integrate it in CI and fail on `--deny warnings`.
+
+`cargo deny check advisories` offers similar functionality plus licence and ban-list checks.
+
+#### Uthibitisho wa mnyororo wa usambazaji na cargo-vet (2024)
+
+`cargo vet` records a review hash for every crate you import and prevents unnoticed upgrades:
+```bash
+cargo install cargo-vet
+cargo vet init      # generates vet.toml
+cargo vet --locked  # verifies packages referenced in Cargo.lock
+```
+Chombo kinapitishwa na miundombinu ya mradi wa Rust na idadi inayoongezeka ya mashirika ili kupunguza mashambulizi ya vifurushi vilivyo na sumu.
+
+#### Fuzzing uso wako wa API (cargo-fuzz)
+
+Majaribio ya fuzz yanapata kwa urahisi panics, overflows za nambari na makosa ya mantiki ambayo yanaweza kuwa masuala ya DoS au ya upande wa channel:
+```bash
+cargo install cargo-fuzz
+cargo fuzz init              # creates fuzz_targets/
+cargo fuzz run fuzz_target_1 # builds with libFuzzer & runs continuously
+```
+Ongeza lengo la fuzz kwenye repo yako na ulifanye katika pipeline yako.
+
+## Marejeleo
+
+- RustSec Advisory Database – <https://rustsec.org>
+- Cargo-vet: "Kukagua Mtegemeo wako wa Rust" – <https://mozilla.github.io/cargo-vet/>
+
 {{#include ../banners/hacktricks-training.md}}
