@@ -722,6 +722,12 @@ driverquery.exe /fo table
 driverquery /SI
 ```
 
+### VMware Tools VGAuthService Path Hijack & XXE File Disclosure
+
+{{#ref}}
+vmware-tools-vgauthservice-path-hijack-xxe.md
+{{#endref}}
+
 ## PATH DLL Hijacking
 
 If you have **write permissions inside a folder present on PATH** you could be able to hijack a DLL loaded by a process and **escalate privileges**.
