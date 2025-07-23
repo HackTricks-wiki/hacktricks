@@ -320,4 +320,72 @@ fn main() {
 ```
 
 
+### Security Essentials
+
+Rust provides strong memory-safety guarantees by default, but you can still introduce critical vulnerabilities through `unsafe` code, dependency issues or logic mistakes. The following mini-cheatsheet gathers the primitives you will most commonly touch during offensive or defensive security reviews of Rust software.
+
+#### Unsafe code & memory safety
+
+`unsafe` blocks opt-out of the compiler’s aliasing and bounds checks, so **all traditional memory-corruption bugs (OOB, use-after-free, double free, etc.) can appear again**. A quick audit checklist:
+
+* Look for `unsafe` blocks, `extern "C"` functions, calls to `ptr::copy*`, `std::mem::transmute`, `MaybeUninit`, raw pointers or `ffi` modules.
+* Validate every pointer arithmetic and length argument passed to low-level functions.
+* Prefer `#![forbid(unsafe_code)]` (crate-wide) or `#[deny(unsafe_op_in_unsafe_fn)]` (1.68 +) to fail compilation when someone re-introduces `unsafe`.
+
+Example overflow created with raw pointers:
+```rust
+use std::ptr;
+
+fn vuln_copy(src: &[u8]) -> Vec<u8> {
+    let mut dst = Vec::with_capacity(4);
+    unsafe {
+        // ❌ copies *src.len()* bytes, the destination only reserves 4.
+        ptr::copy_nonoverlapping(src.as_ptr(), dst.as_mut_ptr(), src.len());
+        dst.set_len(src.len());
+    }
+    dst
+}
+```
+Running Miri is an inexpensive way to detect UB at test time:
+```bash
+rustup component add miri
+cargo miri test  # hunts for OOB / UAF during unit tests
+```
+
+#### Auditing dependencies with RustSec / cargo-audit
+
+Most real-world Rust vulns live in third-party crates. The RustSec advisory DB (community-powered) can be queried locally:
+```bash
+cargo install cargo-audit
+cargo audit              # flags vulnerable versions listed in Cargo.lock
+```
+Integrate it in CI and fail on `--deny warnings`.
+
+`cargo deny check advisories` offers similar functionality plus licence and ban-list checks.
+
+#### Supply-chain verification with cargo-vet (2024)
+
+`cargo vet` records a review hash for every crate you import and prevents unnoticed upgrades:
+```bash
+cargo install cargo-vet
+cargo vet init      # generates vet.toml
+cargo vet --locked  # verifies packages referenced in Cargo.lock
+```
+The tool is being adopted by the Rust project infrastructure and a growing number of orgs to mitigate poisoned-package attacks.
+
+#### Fuzzing your API surface (cargo-fuzz)
+
+Fuzz tests easily catch panics, integer overflows and logic bugs that might become DoS or side-channel issues:
+```bash
+cargo install cargo-fuzz
+cargo fuzz init              # creates fuzz_targets/
+cargo fuzz run fuzz_target_1 # builds with libFuzzer & runs continuously
+```
+Add the fuzz target to your repo and run it in your pipeline.
+
+## References
+
+- RustSec Advisory Database – <https://rustsec.org>
+- Cargo-vet: "Auditing your Rust Dependencies" – <https://mozilla.github.io/cargo-vet/>
+
 {{#include ../banners/hacktricks-training.md}}
