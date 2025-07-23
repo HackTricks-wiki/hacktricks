@@ -37,21 +37,21 @@ jobs:
         run: |
           authorized_user="carlospolop"
           max_merges=2
-          
+
           echo "Authorized user: $authorized_user"
           echo "Looking for PRs with exact comment 'merge' from $authorized_user..."
-          
+
           # Get all open PRs
           prs=$(gh pr list --state open --json number,title,url --repo "$GITHUB_REPOSITORY")
-          
+
           if [ "$prs" = "[]" ]; then
             echo "No open PRs found."
             exit 0
           fi
-          
+
           # Create a temp file to track merge count
           echo "0" > /tmp/merged_count
-          
+
           # Process each PR
           echo "$prs" | jq -r '.[] | @base64' | while IFS= read -r pr_data; do
             current_count=$(cat /tmp/merged_count)
@@ -59,27 +59,25 @@ jobs:
               echo "Reached maximum merge limit ($max_merges). Stopping."
               break
             fi
-            
+
             pr_info=$(echo "$pr_data" | base64 --decode)
             pr_number=$(echo "$pr_info" | jq -r '.number')
             pr_title=$(echo "$pr_info" | jq -r '.title')
             pr_url=$(echo "$pr_info" | jq -r '.url')
-            
+
             echo "Checking PR #$pr_number: $pr_title"
-            
+
             # Get all comments for this PR
             comments=$(gh pr view "$pr_number" --json comments --jq '.comments[]' --repo "$GITHUB_REPOSITORY")
-            
+
             # Print all comment authors for debugging
             echo "Comments in PR #$pr_number:"
             echo "$comments" | jq -r '"  - Author: " + .author.login + " | Comment: " + (.body | split("\n")[0] | .[0:100])'
-            
+
             # Check if any comment from carlospolop contains exactly "merge"
             has_merge_comment=false
             echo "$comments" | jq -r '.author.login + "|" + .body' | while IFS='|' read -r comment_author comment_body; do
-              # Check if the comment author is exactly "carlospolop"
               if [ "$comment_author" = "$authorized_user" ]; then
-                # Check for exact match "merge" (case-insensitive)
                 if echo "$comment_body" | grep -iExq "merge"; then
                   echo "Found exact 'merge' comment from $authorized_user in PR #$pr_number"
                   echo "true" > /tmp/has_merge_comment_$pr_number
@@ -87,23 +85,34 @@ jobs:
                 fi
               fi
             done
-            
-            # Check if merge comment was found
+
             if [ -f "/tmp/has_merge_comment_$pr_number" ]; then
               has_merge_comment=true
             fi
-            
+
             if [ "$has_merge_comment" = true ]; then
               echo "Attempting to merge PR #$pr_number..."
-              
-              # Check if PR can be merged
-              pr_mergeable=$(gh pr view "$pr_number" --json mergeable --jq '.mergeable' --repo "$GITHUB_REPOSITORY")
-              
+
+              # --- Polling for non-UNKNOWN mergeable status ---
+              max_retries=10
+              retry=0
+              while true; do
+                pr_mergeable=$(gh pr view "$pr_number" --json mergeable --jq '.mergeable' --repo "$GITHUB_REPOSITORY")
+                if [ "$pr_mergeable" != "UNKNOWN" ]; then
+                  break
+                fi
+                if [ $retry -ge $max_retries ]; then
+                  echo "Timeout: mergeable status is still UNKNOWN after $max_retries retries"
+                  break
+                fi
+                echo "mergeable status UNKNOWN, retrying in 2s..."
+                sleep 2
+                retry=$((retry + 1))
+              done
+
               if [ "$pr_mergeable" = "MERGEABLE" ]; then
-                # Merge the PR (specify repo explicitly since we're not in a git directory)
                 if gh pr merge "$pr_number" --merge --delete-branch --repo "$GITHUB_REPOSITORY"; then
                   echo "Successfully merged PR #$pr_number: $pr_title"
-                  # Update merge count in temp file
                   current_count=$(cat /tmp/merged_count)
                   echo $((current_count + 1)) > /tmp/merged_count
                 else
@@ -115,16 +124,13 @@ jobs:
             else
               echo "No exact 'merge' comment found from $authorized_user in PR #$pr_number"
             fi
-            
-            # Clean up temp file
+
             rm -f "/tmp/has_merge_comment_$pr_number"
           done
-          
-          # Read final merge count from temp file
+
           final_count=$(cat /tmp/merged_count)
           echo "Auto-merge process completed. Merged $final_count PRs."
-          
-          # Clean up merge count file
           rm -f /tmp/merged_count
+
         env:
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}
