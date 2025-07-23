@@ -1,11 +1,110 @@
-# Side Channel Analysis Attacks
+# Napadi Analize Sporednih Kanala
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Napadi analize bočnih kanala se odnose na određivanje informacija sa uređaja ili entiteta putem nekog drugog kanala ili izvora koji ima indirektan uticaj na njega i iz kojeg se informacije mogu izvući. Ovo se može bolje objasniti primerom:
+Napadi sporednih kanala otkrivaju tajne posmatranjem fizičkog ili mikro-arhitektonskog "curenja" koje je *korelirano* sa unutrašnjim stanjem, ali *nije* deo logičkog interfejsa uređaja.  Primeri se kreću od merenja trenutne struje koju povlači pametna kartica do zloupotrebe efekata upravljanja snagom CPU-a preko mreže.
 
-Analiziranje vibracija u staklenim pločama koje su blizu izvora zvuka, ali izvor zvuka nije dostupan. Vibracije u staklu su pod uticajem izvora zvuka i ako se prate i analiziraju, zvuk se može dekodirati i interpretirati.
+---
 
-Ovi napadi su veoma popularni u slučaju curenja podataka kao što su privatni ključevi ili pronalaženje operacija u procesorima. Elektronski krug ima mnogo kanala iz kojih se informacije konstantno propuštaju. Praćenje i analiziranje može biti korisno za otkrivanje mnogih informacija o krugu i njegovim unutrašnjim delovima.
+## Glavni Kanali Curenja
+
+| Kanal | Tipični Cilj | Instrumentacija |
+|-------|--------------|-----------------|
+| Potrošnja energije | Pametne kartice, IoT MCU, FPGA | Osciloskop + shunt otpornik/HS sonda (npr. CW503) |
+| Elektromagnetno polje (EM) | CPU, RFID, AES akceleratori | H-poljska sonda + LNA, ChipWhisperer/RTL-SDR |
+| Vreme izvršenja / kešovi | Desktop i cloud CPU | Tajmeri visoke preciznosti (rdtsc/rdtscp), daljinsko merenje vremena |
+| Akustični / mehanički | Tastature, 3-D štampači, releji | MEMS mikrofon, laserski vibrometar |
+| Optički i termalni | LED, laserski štampači, DRAM | Fotodioda / kamera visoke brzine, IR kamera |
+| Greške izazvane | ASIC/MCU kriptos | Greška u satu/napajanju, EMFI, laserska injekcija |
+
+---
+
+## Analiza Snage
+
+### Jednostavna Analiza Snage (SPA)
+Posmatrajte *jedan* trag i direktno povežite vrhove/doline sa operacijama (npr. DES S-boxovi).
+```python
+# ChipWhisperer-husky example – capture one AES trace
+from chipwhisperer.capture.api.programmers import STMLink
+from chipwhisperer.capture import CWSession
+cw = CWSession(project='aes')
+trig = cw.scope.trig
+cw.connect(cw.capture.scopes[0])
+cw.capture.init()
+trace = cw.capture.capture_trace()
+print(trace.wave)  # numpy array of power samples
+```
+### Diferencijalna/Korelaciona Analiza Snage (DPA/CPA)
+Prikupite *N > 1 000* tragova, postavite hipotezu o bajtu ključa `k`, izračunajte HW/HD model i korelirajte sa leak-om.
+```python
+import numpy as np
+corr = np.corrcoef(leakage_model(k), traces[:,sample])
+```
+CPA ostaje na vrhuncu, ali varijante mašinskog učenja (MLA, duboko učenje SCA) sada dominiraju takmičenjima kao što je ASCAD-v2 (2023).
+
+---
+
+## Elektromagnetna analiza (EMA)
+Probes za blisko polje EM (500 MHz–3 GHz) otkrivaju identične informacije kao analiza snage *bez* umetanja shunt-ova. Istraživanje iz 2024. godine pokazalo je oporavak ključeva na **>10 cm** od STM32 koristeći spektralnu korelaciju i niskobudžetne RTL-SDR prednje strane.
+
+---
+
+## Napadi na vreme i mikroarhitekturu
+Savremeni CPU-ovi otkrivaju tajne kroz deljene resurse:
+* **Hertzbleed (2022)** – DVFS skaliranje frekvencije korelira sa Hammingovom težinom, omogućavajući *daljinsko* vađenje EdDSA ključeva.
+* **Downfall / Gather Data Sampling (Intel, 2023)** – prolazno izvršenje za čitanje AVX-gather podataka preko SMT niti.
+* **Zenbleed (AMD, 2023) & Inception (AMD, 2023)** – spekulativna pogrešna predikcija vektora otkriva registre između domena.
+
+Za široko razmatranje Spectre-klasnih problema vidi {{#ref}}
+../../cpu-microarchitecture/microarchitectural-attacks.md
+{{#endref}}
+
+---
+
+## Akustički i optički napadi
+* 2024. "​iLeakKeys" pokazao je 95 % tačnosti u oporavku otkucaja na laptopu sa **mikrofona pametnog telefona preko Zoom-a** koristeći CNN klasifikator.
+* Brzi fotodiodi hvataju DDR4 aktivnost LED i rekonstruišu AES runde ključeve za manje od 1 minuta (BlackHat 2023).
+
+---
+
+## Umetanje grešaka i diferencijalna analiza grešaka (DFA)
+Kombinovanje grešaka sa curenjem iz bočnih kanala skraćuje pretragu ključeva (npr. 1-trace AES DFA). Nedavni alati po ceni hobista:
+* **ChipSHOUTER & PicoEMP** – sub-1 ns elektromagnetno pulsno greškanje.
+* **GlitchKit-R5 (2025)** – platforma za greškanje sa otvorenim kodom koja podržava RISC-V SoCs.
+
+---
+
+## Tipičan radni tok napada
+1. Identifikujte kanal curenja i tačku montiranja (VCC pin, dekoupling kapacitor, mesto bliskog polja).
+2. Umetnite okidač (GPIO ili na osnovu obrazaca).
+3. Sakupite >1 k tragova sa pravilnim uzorkovanjem/filterima.
+4. Predobradite (poravnanje, uklanjanje proseka, LP/HP filter, wavelet, PCA).
+5. Statistički ili ML oporavak ključeva (CPA, MIA, DL-SCA).
+6. Validirajte i iterirajte na odstupanjima.
+
+---
+
+## Odbrane i učvršćivanje
+* **Implementacije konstantnog vremena** i algoritmi otporni na memoriju.
+* **Maskiranje/šuffling** – podelite tajne u nasumične delove; otpornost prvog reda sertifikovana TVLA.
+* **Skrivenje** – regulatori napona na čipu, nasumična satnica, dual-rail logika, EM štitovi.
+* **Detekcija grešaka** – redundantno računanje, potpisivanje praga.
+* **Operativno** – onemogućite DVFS/turbo u kripto jezgrima, izolujte SMT, zabranite ko-lokaciju u multi-tenant cloud-ovima.
+
+---
+
+## Alati i okviri
+* **ChipWhisperer-Husky** (2024) – 500 MS/s osciloskop + Cortex-M okidač; Python API kao gore.
+* **Riscure Inspector & FI** – komercijalno, podržava automatsku procenu curenja (TVLA-2.0).
+* **scaaml** – biblioteka za duboko učenje SCA zasnovana na TensorFlow-u (v1.2 – 2025).
+* **pyecsca** – ANSSI okvir za ECC SCA sa otvorenim kodom.
+
+---
+
+## Reference
+
+* [ChipWhisperer Documentation](https://chipwhisperer.readthedocs.io/en/latest/)
+* [Hertzbleed Attack Paper](https://www.hertzbleed.com/)
+
 
 {{#include ../../banners/hacktricks-training.md}}
