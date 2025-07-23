@@ -9,17 +9,17 @@
 
 ## 1. Thread Hijacking
 
-Inizialmente, la funzione **`task_threads()`** viene invocata sulla porta del task per ottenere un elenco di thread dal task remoto. Un thread viene selezionato per l'hijacking. Questo approccio si discosta dai metodi convenzionali di iniezione di codice poiché la creazione di un nuovo thread remoto è vietata a causa della nuova mitigazione che blocca `thread_create_running()`.
+Inizialmente, la funzione `task_threads()` viene invocata sulla porta del task per ottenere un elenco di thread dal task remoto. Un thread viene selezionato per l'hijacking. Questo approccio si discosta dai metodi convenzionali di iniezione di codice poiché la creazione di un nuovo thread remoto è vietata a causa della mitigazione che blocca `thread_create_running()`.
 
-Per controllare il thread, viene chiamato **`thread_suspend()`**, interrompendo la sua esecuzione.
+Per controllare il thread, viene chiamato `thread_suspend()`, fermando la sua esecuzione.
 
-Le uniche operazioni consentite sul thread remoto riguardano **fermare** e **avviare** il thread, **recuperare** e **modificare** i valori dei registri. Le chiamate a funzioni remote vengono avviate impostando i registri `x0` a `x7` sugli **argomenti**, configurando **`pc`** per mirare alla funzione desiderata e attivando il thread. Assicurarsi che il thread non si blocchi dopo il ritorno richiede la rilevazione del ritorno.
+Le uniche operazioni consentite sul thread remoto riguardano **fermarlo** e **riavviarlo** e **recuperare**/**modificare** i suoi valori di registro. Le chiamate a funzioni remote vengono avviate impostando i registri `x0` a `x7` sugli **argomenti**, configurando `pc` per puntare alla funzione desiderata e riprendendo il thread. Assicurarsi che il thread non si blocchi dopo il ritorno richiede la rilevazione del ritorno.
 
-Una strategia prevede **la registrazione di un gestore di eccezioni** per il thread remoto utilizzando `thread_set_exception_ports()`, impostando il registro `lr` su un indirizzo non valido prima della chiamata alla funzione. Questo attiva un'eccezione dopo l'esecuzione della funzione, inviando un messaggio alla porta di eccezione, consentendo l'ispezione dello stato del thread per recuperare il valore di ritorno. In alternativa, come adottato dall'exploit triple_fetch di Ian Beer, `lr` viene impostato per eseguire un ciclo infinito. I registri del thread vengono quindi monitorati continuamente fino a quando **`pc` punta a quell'istruzione**.
+Una strategia prevede la registrazione di un **gestore di eccezioni** per il thread remoto utilizzando `thread_set_exception_ports()`, impostando il registro `lr` su un indirizzo non valido prima della chiamata alla funzione. Questo attiva un'eccezione dopo l'esecuzione della funzione, inviando un messaggio alla porta di eccezione, consentendo l'ispezione dello stato del thread per recuperare il valore di ritorno. In alternativa, come adottato dall'exploit *triple_fetch* di Ian Beer, `lr` è impostato per eseguire un ciclo infinito; i registri del thread vengono quindi monitorati continuamente fino a quando `pc` punta a quell'istruzione.
 
 ## 2. Mach ports for communication
 
-La fase successiva prevede l'istituzione di porte Mach per facilitare la comunicazione con il thread remoto. Queste porte sono strumentali nel trasferire diritti di invio e ricezione arbitrari tra i task.
+La fase successiva prevede l'istituzione di porte Mach per facilitare la comunicazione con il thread remoto. Queste porte sono strumentali nel trasferire diritti di invio/ricezione arbitrari tra i task.
 
 Per la comunicazione bidirezionale, vengono create due porte di ricezione Mach: una nel task locale e l'altra nel task remoto. Successivamente, un diritto di invio per ciascuna porta viene trasferito al task corrispondente, consentendo lo scambio di messaggi.
 
@@ -33,23 +33,23 @@ Il completamento di questi passaggi porta all'istituzione di porte Mach, ponendo
 
 ## 3. Basic Memory Read/Write Primitives
 
-In questa sezione, l'attenzione è rivolta all'utilizzo del primitivo di esecuzione per stabilire primitive di lettura e scrittura della memoria di base. Questi passaggi iniziali sono cruciali per ottenere un maggiore controllo sul processo remoto, anche se i primitivi in questa fase non serviranno a molti scopi. Presto, saranno aggiornati a versioni più avanzate.
+In questa sezione, l'attenzione è rivolta all'utilizzo del primitivo di esecuzione per stabilire primitivi di lettura/scrittura della memoria di base. Questi passaggi iniziali sono cruciali per ottenere un maggiore controllo sul processo remoto, anche se i primitivi in questa fase non serviranno a molti scopi. Presto, saranno aggiornati a versioni più avanzate.
 
-### Memory Reading and Writing Using Execute Primitive
+### Memory reading and writing using the execute primitive
 
-L'obiettivo è eseguire letture e scritture di memoria utilizzando funzioni specifiche. Per leggere la memoria, vengono utilizzate funzioni che somigliano alla seguente struttura:
+L'obiettivo è eseguire letture e scritture di memoria utilizzando funzioni specifiche. Per **leggere la memoria**:
 ```c
 uint64_t read_func(uint64_t *address) {
 return *address;
 }
 ```
-E per scrivere in memoria, vengono utilizzate funzioni simili a questa struttura:
+Per **scrivere in memoria**:
 ```c
 void write_func(uint64_t *address, uint64_t value) {
 *address = value;
 }
 ```
-Queste funzioni corrispondono alle istruzioni assembly fornite:
+Queste funzioni corrispondono al seguente assembly:
 ```
 _read_func:
 ldr x0, [x0]
@@ -58,104 +58,116 @@ _write_func:
 str x1, [x0]
 ret
 ```
-### Identificazione delle Funzioni Adatte
+### Identificazione delle funzioni adatte
 
 Una scansione delle librerie comuni ha rivelato candidati appropriati per queste operazioni:
 
-1. **Lettura della Memoria:**
-La funzione `property_getName()` della [libreria runtime di Objective-C](https://opensource.apple.com/source/objc4/objc4-723/runtime/objc-runtime-new.mm.auto.html) è identificata come una funzione adatta per la lettura della memoria. La funzione è descritta di seguito:
+1. **Lettura della memoria — `property_getName()`** (libobjc):
 ```c
 const char *property_getName(objc_property_t prop) {
 return prop->name;
 }
 ```
-Questa funzione agisce efficacemente come il `read_func` restituendo il primo campo di `objc_property_t`.
-
-2. **Scrittura della memoria:**
-Trovare una funzione predefinita per scrivere in memoria è più difficile. Tuttavia, la funzione `_xpc_int64_set_value()` di libxpc è un candidato adatto con il seguente disassemblaggio:
+2. **Scrittura della memoria — `_xpc_int64_set_value()`** (libxpc):
 ```c
 __xpc_int64_set_value:
 str x1, [x0, #0x18]
 ret
 ```
-Per eseguire una scrittura a 64 bit a un indirizzo specifico, la chiamata remota è strutturata come:
+Per eseguire una scrittura a 64 bit a un indirizzo arbitrario:
 ```c
-_xpc_int64_set_value(address - 0x18, value)
+_xpc_int64_set_value(address - 0x18, value);
 ```
 Con queste primitive stabilite, il terreno è pronto per creare memoria condivisa, segnando un progresso significativo nel controllo del processo remoto.
 
 ## 4. Configurazione della Memoria Condivisa
 
-L'obiettivo è stabilire memoria condivisa tra compiti locali e remoti, semplificando il trasferimento dei dati e facilitando la chiamata di funzioni con più argomenti. L'approccio prevede di sfruttare `libxpc` e il suo tipo di oggetto `OS_xpc_shmem`, che si basa sulle voci di memoria Mach.
+L'obiettivo è stabilire memoria condivisa tra compiti locali e remoti, semplificando il trasferimento dei dati e facilitando la chiamata di funzioni con più argomenti. L'approccio sfrutta `libxpc` e il suo tipo di oggetto `OS_xpc_shmem`, che si basa sulle voci di memoria Mach.
 
-### Panoramica del Processo:
+### Panoramica del Processo
 
-1. **Allocazione della Memoria**:
-
-- Allocare la memoria per la condivisione utilizzando `mach_vm_allocate()`.
-- Utilizzare `xpc_shmem_create()` per creare un oggetto `OS_xpc_shmem` per la regione di memoria allocata. Questa funzione gestirà la creazione della voce di memoria Mach e memorizzerà il diritto di invio Mach all'offset `0x18` dell'oggetto `OS_xpc_shmem`.
-
-2. **Creazione della Memoria Condivisa nel Processo Remoto**:
-
-- Allocare memoria per l'oggetto `OS_xpc_shmem` nel processo remoto con una chiamata remota a `malloc()`.
-- Copiare il contenuto dell'oggetto `OS_xpc_shmem` locale nel processo remoto. Tuttavia, questa copia iniziale avrà nomi di voci di memoria Mach errati all'offset `0x18`.
-
-3. **Correzione della Voce di Memoria Mach**:
-
-- Utilizzare il metodo `thread_set_special_port()` per inserire un diritto di invio per la voce di memoria Mach nel compito remoto.
-- Correggere il campo della voce di memoria Mach all'offset `0x18` sovrascrivendolo con il nome della voce di memoria remota.
-
-4. **Finalizzazione della Configurazione della Memoria Condivisa**:
-- Validare l'oggetto `OS_xpc_shmem` remoto.
-- Stabilire la mappatura della memoria condivisa con una chiamata remota a `xpc_shmem_remote()`.
-
-Seguendo questi passaggi, la memoria condivisa tra i compiti locali e remoti sarà configurata in modo efficiente, consentendo trasferimenti di dati semplici e l'esecuzione di funzioni che richiedono più argomenti.
-
-## Codice Aggiuntivo
-
-Per l'allocazione della memoria e la creazione dell'oggetto di memoria condivisa:
-```c
-mach_vm_allocate();
-xpc_shmem_create();
-```
-Per creare e correggere l'oggetto di memoria condivisa nel processo remoto:
-```c
-malloc(); // for allocating memory remotely
-thread_set_special_port(); // for inserting send right
-```
-Ricorda di gestire correttamente i dettagli dei port Mach e dei nomi delle voci di memoria per garantire che la configurazione della memoria condivisa funzioni correttamente.
+1. **Allocazione della memoria**
+* Allocare memoria per la condivisione utilizzando `mach_vm_allocate()`.
+* Utilizzare `xpc_shmem_create()` per creare un oggetto `OS_xpc_shmem` per la regione allocata.
+2. **Creazione della memoria condivisa nel processo remoto**
+* Allocare memoria per l'oggetto `OS_xpc_shmem` nel processo remoto (`remote_malloc`).
+* Copiare l'oggetto modello locale; è ancora necessaria la correzione del diritto di invio Mach incorporato all'offset `0x18`.
+3. **Correzione della voce di memoria Mach**
+* Inserire un diritto di invio con `thread_set_special_port()` e sovrascrivere il campo `0x18` con il nome dell'entry remota.
+4. **Finalizzazione**
+* Validare l'oggetto remoto e mappare con una chiamata remota a `xpc_shmem_remote()`.
 
 ## 5. Ottenere il Controllo Completo
 
-Una volta stabilita con successo la memoria condivisa e acquisita la capacità di esecuzione arbitraria, abbiamo essenzialmente guadagnato il controllo completo sul processo target. Le funzionalità chiave che abilitano questo controllo sono:
+Una volta che l'esecuzione arbitraria e un canale di comunicazione in memoria condivisa sono disponibili, possiedi effettivamente il processo target:
 
-1. **Operazioni di Memoria Arbitraria**:
+* **R/W di memoria arbitraria** — utilizzare `memcpy()` tra regioni locali e condivise.
+* **Chiamate di funzione con > 8 argomenti** — posizionare gli argomenti extra nello stack seguendo la convenzione di chiamata arm64.
+* **Trasferimento di port Mach** — passare diritti nei messaggi Mach tramite i port stabiliti.
+* **Trasferimento di descrittori di file** — sfruttare fileports (vedi *triple_fetch*).
 
-- Eseguire letture di memoria arbitrarie invocando `memcpy()` per copiare dati dalla regione condivisa.
-- Eseguire scritture di memoria arbitrarie utilizzando `memcpy()` per trasferire dati nella regione condivisa.
+Tutto questo è racchiuso nella libreria [`threadexec`](https://github.com/bazad/threadexec) per un facile riutilizzo.
 
-2. **Gestione delle Chiamate di Funzione con Più Argomenti**:
+---
 
-- Per le funzioni che richiedono più di 8 argomenti, disporre gli argomenti aggiuntivi nello stack in conformità con la convenzione di chiamata.
+## 6. Sfide di Apple Silicon (arm64e)
 
-3. **Trasferimento di Port Mach**:
+Su dispositivi Apple Silicon (arm64e) **Codici di Autenticazione dei Puntatori (PAC)** proteggono tutti gli indirizzi di ritorno e molti puntatori di funzione. Le tecniche di dirottamento dei thread che *riutilizzano codice esistente* continuano a funzionare perché i valori originali in `lr`/`pc` portano già firme PAC valide. I problemi sorgono quando si cerca di saltare a memoria controllata dall'attaccante:
 
-- Trasferire port Mach tra i task tramite messaggi Mach attraverso port precedentemente stabiliti.
+1. Allocare memoria eseguibile all'interno del target (remote `mach_vm_allocate` + `mprotect(PROT_EXEC)`).
+2. Copiare il payload.
+3. All'interno del processo *remoto* firmare il puntatore:
+```c
+uint64_t ptr = (uint64_t)payload;
+ptr = ptrauth_sign_unauthenticated((void*)ptr, ptrauth_key_asia, 0);
+```
+4. Imposta `pc = ptr` nello stato del thread compromesso.
 
-4. **Trasferimento di Descrittori di File**:
-- Trasferire descrittori di file tra i processi utilizzando fileports, una tecnica evidenziata da Ian Beer in `triple_fetch`.
+In alternativa, rimani conforme a PAC concatenando gadget/funzioni esistenti (ROP tradizionale).
 
-Questo controllo completo è racchiuso all'interno della libreria [threadexec](https://github.com/bazad/threadexec), che fornisce un'implementazione dettagliata e un'API user-friendly per l'interazione con il processo vittima.
+## 7. Rilevamento e Indurimento con EndpointSecurity
 
-## Considerazioni Importanti:
+Il framework **EndpointSecurity (ES)** espone eventi del kernel che consentono ai difensori di osservare o bloccare i tentativi di iniezione di thread:
 
-- Assicurati di utilizzare correttamente `memcpy()` per le operazioni di lettura/scrittura della memoria per mantenere la stabilità del sistema e l'integrità dei dati.
-- Quando trasferisci port Mach o descrittori di file, segui i protocolli appropriati e gestisci le risorse in modo responsabile per prevenire leak o accessi non intenzionati.
+* `ES_EVENT_TYPE_AUTH_GET_TASK` – attivato quando un processo richiede il porto di un altro task (ad es. `task_for_pid()`).
+* `ES_EVENT_TYPE_NOTIFY_REMOTE_THREAD_CREATE` – emesso ogni volta che un thread viene creato in un *task* *diverso*.
+* `ES_EVENT_TYPE_NOTIFY_THREAD_SET_STATE` (aggiunto in macOS 14 Sonoma) – indica la manipolazione dei registri di un thread esistente.
 
-Seguendo queste linee guida e utilizzando la libreria `threadexec`, è possibile gestire e interagire con i processi a un livello granulare, ottenendo il controllo completo sul processo target.
+Client Swift minimale che stampa eventi di thread remoti:
+```swift
+import EndpointSecurity
+
+let client = try! ESClient(subscriptions: [.notifyRemoteThreadCreate]) {
+(_, msg) in
+if let evt = msg.remoteThreadCreate {
+print("[ALERT] remote thread in pid \(evt.target.pid) by pid \(evt.thread.pid)")
+}
+}
+RunLoop.main.run()
+```
+Interrogare con **osquery** ≥ 5.8:
+```sql
+SELECT target_pid, source_pid, target_path
+FROM es_process_events
+WHERE event_type = 'REMOTE_THREAD_CREATE';
+```
+### Considerazioni sul runtime rinforzato
+
+Distribuire la tua applicazione **senza** il diritto `com.apple.security.get-task-allow` impedisce agli attaccanti non root di ottenere il suo task-port. La Protezione dell'Integrità di Sistema (SIP) blocca ancora l'accesso a molti binari Apple, ma il software di terze parti deve disattivarlo esplicitamente.
+
+## 8. Strumenti Pubblici Recenti (2023-2025)
+
+| Strumento | Anno | Osservazioni |
+|-----------|------|--------------|
+| [`task_vaccine`](https://github.com/rodionovd/task_vaccine) | 2023 | PoC compatto che dimostra l'hijacking di thread consapevole del PAC su Ventura/Sonoma |
+| `remote_thread_es` | 2024 | Helper di EndpointSecurity utilizzato da diversi fornitori di EDR per visualizzare eventi `REMOTE_THREAD_CREATE` |
+
+> Leggere il codice sorgente di questi progetti è utile per comprendere le modifiche all'API introdotte in macOS 13/14 e per rimanere compatibili tra Intel ↔ Apple Silicon.
 
 ## Riferimenti
 
 - [https://bazad.github.io/2018/10/bypassing-platform-binary-task-threads/](https://bazad.github.io/2018/10/bypassing-platform-binary-task-threads/)
+- [https://github.com/rodionovd/task_vaccine](https://github.com/rodionovd/task_vaccine)
+- [https://developer.apple.com/documentation/endpointsecurity/es_event_type_notify_remote_thread_create](https://developer.apple.com/documentation/endpointsecurity/es_event_type_notify_remote_thread_create)
 
 {{#include ../../../../banners/hacktricks-training.md}}
