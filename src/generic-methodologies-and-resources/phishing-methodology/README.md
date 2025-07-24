@@ -29,7 +29,7 @@
 - **单数/复数化**: 在域名末尾添加或删除 “s” (例如，zeltsers.com)。
 - **省略**: 它 **删除域名中的一个字母** (例如，zelser.com)。
 - **重复**: 它 **重复域名中的一个字母** (例如，zeltsser.com)。
-- **替换**: 类似同形异义字但不那么隐蔽。它替换域名中的一个字母，可能是与原字母在键盘上相邻的字母 (例如，zektser.com)。
+- **替换**: 类似于同形异义字，但不那么隐蔽。它替换域名中的一个字母，可能是与原字母在键盘上相邻的字母 (例如，zektser.com)。
 - **子域化**: 在域名中引入一个 **点** (例如，ze.lster.com)。
 - **插入**: 它 **在域名中插入一个字母** (例如，zerltser.com)。
 - **缺失点**: 将 TLD 附加到域名上。 (例如，zelstercom.com)
@@ -53,7 +53,7 @@
 
 例如，域名 "windows.com" 中的单个位修改可以将其更改为 "windnws.com"。
 
-攻击者可能 **利用这一点注册多个位翻转域名**，这些域名与受害者的域名相似。他们的目的是将合法用户重定向到他们自己的基础设施。
+攻击者可能 **利用这一点注册多个位翻转域名**，这些域名与受害者的域名相似。他们的意图是将合法用户重定向到他们自己的基础设施。
 
 有关更多信息，请阅读 [https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
 
@@ -80,7 +80,7 @@
 
 ### 安装
 
-你可以从 [https://github.com/gophish/gophish/releases/tag/v0.11.0](https://github.com/gophish/gophish/releases/tag/v0.11.0) 下载它。
+你可以从 [https://github.com/gophish/gophish/releases/tag/v0.11.0](https://github.com/gophish/gophish/releases/tag/v0.11.0) 下载。
 
 下载并解压到 `/opt/gophish` 中，并执行 `/opt/gophish/gophish`\
 你将在输出中获得端口 3333 的管理员用户密码。因此，访问该端口并使用这些凭据更改管理员密码。你可能需要将该端口隧道到本地：
@@ -122,7 +122,7 @@ cp "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" /opt/gophish/ssl_keys/key.crt�
 `myhostname = <domain>`\
 `mydestination = $myhostname, <domain>, localhost.com, localhost`
 
-最后将文件 **`/etc/hostname`** 和 **`/etc/mailname`** 修改为您的域名，并 **重启您的 VPS。**
+最后将文件 **`/etc/hostname`** 和 **`/etc/mailname`** 修改为您的域名并 **重启您的 VPS。**
 
 现在，创建一个 **DNS A 记录** `mail.<domain>` 指向 **VPS 的 IP 地址**，并创建一个 **DNS MX** 记录指向 `mail.<domain>`
 
@@ -271,7 +271,7 @@ v=DMARC1; p=none
 ```bash
 echo "This is the body of the email" | mail -s "This is the subject line" test-iimosa79z@srv1.mail-tester.com
 ```
-您还可以通过发送电子邮件到 `check-auth@verifier.port25.com` 来**检查您的电子邮件配置**，并**阅读响应**（为此，您需要**打开**端口**25**，并在文件 _/var/mail/root_ 中查看响应，如果您以 root 身份发送电子邮件）。\
+您还可以通过向 `check-auth@verifier.port25.com` 发送电子邮件来**检查您的电子邮件配置**，并**阅读响应**（为此，您需要**打开**端口**25**，并在文件 _/var/mail/root_ 中查看响应，如果您以 root 身份发送电子邮件）。\
 检查您是否通过了所有测试：
 ```bash
 ==========================================================
@@ -291,7 +291,7 @@ dkim=pass header.i=@example.com;
 ```
 ### ​从Spamhouse黑名单中移除
 
-页面 [www.mail-tester.com](https://www.mail-tester.com) 可以指示您的域名是否被spamhouse阻止。您可以在以下地址请求移除您的域名/IP: ​[https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)
+页面 [www.mail-tester.com](https://www.mail-tester.com) 可以指示您的域名是否被spamhouse阻止。您可以在以下网址请求移除您的域名/IP: ​[https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)
 
 ### 从Microsoft黑名单中移除
 
@@ -335,7 +335,7 @@ WRITE HERE SOME SIGNATURE OF SOMEONE FROM THE COMPANY
 </body>
 </html>
 ```
-请注意，**为了提高电子邮件的可信度**，建议使用客户电子邮件中的某些签名。建议：
+注意，**为了提高电子邮件的可信度**，建议使用客户电子邮件中的某些签名。建议：
 
 - 向一个**不存在的地址**发送电子邮件，并检查回复是否有任何签名。
 - 搜索**公共电子邮件**，如 info@ex.com 或 press@ex.com 或 public@ex.com，向它们发送电子邮件并等待回复。
@@ -360,7 +360,7 @@ WRITE HERE SOME SIGNATURE OF SOMEONE FROM THE COMPANY
 > 请注意，如果您需要**使用某些静态资源**用于 HTML（可能是一些 CSS 和 JS 页面），您可以将它们保存在 _**/opt/gophish/static/endpoint**_ 中，然后从 _**/static/\<filename>**_ 访问它们。
 
 > [!TIP]
-> 对于重定向，您可以**将用户重定向到受害者的合法主网页**，或者例如重定向到 _/static/migration.html_，放置一些**旋转轮**（**[https://loading.io/](https://loading.io)**）5 秒钟，然后指示该过程成功。
+> 对于重定向，您可以**将用户重定向到受害者的合法主网页**，或者例如将他们重定向到 _/static/migration.html_，放置一些**旋转轮**（**[https://loading.io/](https://loading.io)**）5 秒钟，然后指示该过程成功。
 
 ### 用户与组
 
@@ -373,7 +373,7 @@ WRITE HERE SOME SIGNATURE OF SOMEONE FROM THE COMPANY
 
 最后，创建一个活动，选择一个名称、电子邮件模板、登陆页面、URL、发送配置文件和组。请注意，URL 将是发送给受害者的链接。
 
-请注意，**发送配置文件允许发送测试电子邮件以查看最终钓鱼电子邮件的外观**：
+注意，**发送配置文件允许发送测试电子邮件以查看最终的钓鱼电子邮件的样子**：
 
 ![](<../../images/image (192).png>)
 
@@ -403,9 +403,9 @@ phishing-documents.md
 
 ### 通过代理 MitM
 
-之前的攻击非常聪明，因为您伪造了一个真实的网站并收集了用户输入的信息。不幸的是，如果用户没有输入正确的密码，或者您伪造的应用程序配置了 2FA，**这些信息将无法让您冒充被欺骗的用户**。
+之前的攻击相当聪明，因为您伪造了一个真实的网站并收集了用户输入的信息。不幸的是，如果用户没有输入正确的密码，或者您伪造的应用程序配置了 2FA，**这些信息将无法让您冒充被欺骗的用户**。
 
-这就是像 [**evilginx2**](https://github.com/kgretzky/evilginx2)**、** [**CredSniper**](https://github.com/ustayready/CredSniper) 和 [**muraena**](https://github.com/muraenateam/muraena) 这样的工具有用的地方。该工具将允许您生成类似 MitM 的攻击。基本上，攻击的工作方式如下：
+这就是像 [**evilginx2**](https://github.com/kgretzky/evilginx2)**、** [**CredSniper**](https://github.com/ustayready/CredSniper) 和 [**muraena**](https://github.com/muraenateam/muraena) 这样的工具有用的地方。这个工具将允许您生成类似 MitM 的攻击。基本上，攻击的工作方式如下：
 
 1. 您**冒充真实网页的登录**表单。
 2. 用户**发送**他的**凭据**到您的假页面，工具将这些发送到真实网页，**检查凭据是否有效**。
@@ -414,7 +414,7 @@ phishing-documents.md
 
 ### 通过 VNC
 
-如果您不是**将受害者发送到一个与原始页面外观相同的恶意页面**，而是将他发送到一个**与真实网页连接的 VNC 会话**呢？您将能够看到他所做的事情，窃取密码、使用的 MFA、cookie...\
+如果您不是**将受害者发送到一个与原始页面外观相同的恶意页面**，而是将他发送到一个**与真实网页连接的 VNC 会话中的浏览器**呢？您将能够看到他所做的事情，窃取密码、使用的 MFA、cookie...\
 您可以使用 [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC) 来做到这一点。
 
 ## 检测检测
@@ -422,27 +422,33 @@ phishing-documents.md
 显然，知道您是否被发现的最佳方法之一是**在黑名单中搜索您的域**。如果它被列出，您的域以某种方式被检测为可疑。\
 检查您的域是否出现在任何黑名单中的一种简单方法是使用 [https://malwareworld.com/](https://malwareworld.com)。
 
-然而，还有其他方法可以知道受害者是否**积极寻找可疑的钓鱼活动**，如以下所述：
+然而，还有其他方法可以知道受害者是否**在积极寻找可疑的钓鱼活动**，如以下所述：
 
 {{#ref}}
 detecting-phising.md
 {{#endref}}
 
-您可以**购买一个与受害者域名非常相似的域名**，**和/或为您控制的域的**子域**生成证书**，**包含**受害者域的**关键字**。如果**受害者**与它们进行任何类型的**DNS 或 HTTP 交互**，您将知道**他在积极寻找**可疑域，您需要非常隐蔽。
+您可以**购买一个与受害者域名非常相似的域名**，**和/或为您控制的域的**一个**子域生成证书**，**包含**受害者域名的**关键字**。如果**受害者**与它们进行任何类型的**DNS 或 HTTP 交互**，您将知道**他在积极寻找**可疑域名，您需要非常隐蔽。
 
 ### 评估钓鱼
 
-使用 [**Phishious**](https://github.com/Rices/Phishious) 评估您的电子邮件是否会进入垃圾邮件文件夹，或者是否会被阻止或成功。
+使用 [**Phishious**](https://github.com/Rices/Phishious) 来评估您的电子邮件是否会进入垃圾邮件文件夹，或者是否会被阻止或成功。
 
 ## 剪贴板劫持 / 粘贴劫持
 
-攻击者可以在被攻陷或拼写错误的网页上静默地将恶意命令复制到受害者的剪贴板中，然后诱使用户在**Win + R**、**Win + X**或终端窗口中粘贴它们，从而执行任意代码，而无需任何下载或附件。
+攻击者可以在受害者的剪贴板中静默复制恶意命令，来自一个被攻陷或拼写错误的网页，然后诱使用户在**Win + R**、**Win + X**或终端窗口中粘贴它们，执行任意代码而无需任何下载或附件。
 
 {{#ref}}
 clipboard-hijacking.md
 {{#endref}}
 
-## 参考文献
+## 移动钓鱼和恶意应用分发（Android 和 iOS）
+
+{{#ref}}
+mobile-phishing-malicious-apps.md
+{{#endref}}
+
+## 参考
 
 - [https://zeltser.com/domain-name-variations-in-phishing/](https://zeltser.com/domain-name-variations-in-phishing/)
 - [https://0xpatrik.com/phishing-domains/](https://0xpatrik.com/phishing-domains/)
