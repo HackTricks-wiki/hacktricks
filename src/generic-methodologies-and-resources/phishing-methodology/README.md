@@ -67,8 +67,8 @@ Para garantir que o domínio expirado que você vai comprar **já tenha um bom S
 
 ## Descobrindo E-mails
 
-- [https://github.com/laramies/theHarvester](https://github.com/laramies/theHarvester) (100% grátis)
-- [https://phonebook.cz/](https://phonebook.cz) (100% grátis)
+- [https://github.com/laramies/theHarvester](https://github.com/laramies/theHarvester) (100% gratuito)
+- [https://phonebook.cz/](https://phonebook.cz) (100% gratuito)
 - [https://maildb.io/](https://maildb.io)
 - [https://hunter.io/](https://hunter.io)
 - [https://anymailfinder.com/](https://anymailfinder.com)
@@ -91,7 +91,7 @@ ssh -L 3333:127.0.0.1:3333 <user>@<ip>
 
 **Configuração do certificado TLS**
 
-Antes desta etapa, você deve **já ter comprado o domínio** que vai usar e ele deve estar **apontando** para o **IP do VPS** onde você está configurando **gophish**.
+Antes desta etapa, você deve **já ter comprado o domínio** que você vai usar e ele deve estar **apontando** para o **IP do VPS** onde você está configurando **gophish**.
 ```bash
 DOMAIN="<domain>"
 wget https://dl.eff.org/certbot-auto
@@ -289,7 +289,7 @@ Authentication-Results: mx.google.com;
 spf=pass (google.com: domain of contact@example.com designates --- as permitted sender) smtp.mail=contact@example.com;
 dkim=pass header.i=@example.com;
 ```
-### ​Removendo da Lista Negra do Spamhouse
+### Removendo da Lista Negra do Spamhouse
 
 A página [www.mail-tester.com](https://www.mail-tester.com) pode indicar se seu domínio está sendo bloqueado pelo spamhouse. Você pode solicitar a remoção do seu domínio/IP em: ​[https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)
 
@@ -414,7 +414,7 @@ O ataque anterior é bastante inteligente, pois você está falsificando um site
 
 ### Via VNC
 
-E se em vez de **enviar a vítima para uma página maliciosa** com a mesma aparência da original, você a enviar para uma **sessão VNC com um navegador conectado à página real**? Você poderá ver o que ele faz, roubar a senha, o MFA usado, os cookies...\
+E se, em vez de **enviar a vítima para uma página maliciosa** com a mesma aparência da original, você a enviar para uma **sessão VNC com um navegador conectado à página real**? Você poderá ver o que ele faz, roubar a senha, o MFA usado, os cookies...\
 Você pode fazer isso com [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC)
 
 ## Detectando a detecção
@@ -440,6 +440,12 @@ Os atacantes podem copiar silenciosamente comandos maliciosos para a área de tr
 
 {{#ref}}
 clipboard-hijacking.md
+{{#endref}}
+
+## Phishing Móvel & Distribuição de Aplicativos Maliciosos (Android & iOS)
+
+{{#ref}}
+mobile-phishing-malicious-apps.md
 {{#endref}}
 
 ## Referências
