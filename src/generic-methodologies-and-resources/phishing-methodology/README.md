@@ -6,7 +6,7 @@
 
 1. Recon die slagoffer
 1. Kies die **slagoffer domein**.
-2. Voer 'n paar basiese web-opsomming **uit om aanmeldportale** te soek wat deur die slagoffer gebruik word en **besluit** watter een jy gaan **naboots**.
+2. Voer 'n paar basiese web-opsomming uit **soek na aanmeldportale** wat deur die slagoffer gebruik word en **besluit** watter een jy gaan **naboots**.
 3. Gebruik 'n bietjie **OSINT** om **e-posse** te **vind**.
 2. Berei die omgewing voor
 1. **Koop die domein** wat jy gaan gebruik vir die phishing assessering
@@ -17,7 +17,7 @@
 2. Berei die **webblad** voor om die inligting te steel
 4. Begin die veldtog!
 
-## Genereer soortgelyke domeinnaam of koop 'n vertroude domein
+## Genereer soortgelyke domeinnames of koop 'n vertroude domein
 
 ### Domeinnaam Variasie Tegnieke
 
@@ -26,7 +26,7 @@
 - **Nuwe TLD**: Dieselfde domein met 'n **nuwe TLD** (bv. zelster.org)
 - **Homoglyph**: Dit **vervang** 'n letter in die domeinnaam met **letters wat soortgelyk lyk** (bv. zelfser.com).
 - **Transposisie:** Dit **ruil twee letters** binne die domeinnaam (bv. zelsetr.com).
-- **Singularisering/Meervouding**: Voeg “s” by of verwyder dit aan die einde van die domeinnaam (bv. zeltsers.com).
+- **Singularisering/Pluralisering**: Voeg "s" by of verwyder dit aan die einde van die domeinnaam (bv. zeltsers.com).
 - **Omissie**: Dit **verwyder een** van die letters uit die domeinnaam (bv. zelser.com).
 - **Herhaling:** Dit **herhaal een** van die letters in die domeinnaam (bv. zeltsser.com).
 - **Vervanging**: Soos homoglyph maar minder stil. Dit vervang een van die letters in die domeinnaam, dalk met 'n letter naby die oorspronklike letter op die sleutelbord (bv. zektser.com).
@@ -53,7 +53,7 @@ Wanneer hierdie konsep **toegepas word op DNS versoeke**, is dit moontlik dat di
 
 Byvoorbeeld, 'n enkele bit-wijziging in die domein "windows.com" kan dit verander na "windnws.com."
 
-Aanvallers kan **voordeel neem van hierdie deur verskeie bit-flipping domeine te registreer** wat soortgelyk is aan die slagoffer se domein. Hul bedoeling is om wettige gebruikers na hul eie infrastruktuur te herlei.
+Aanvallers kan **voordeel trek uit hierdie deur verskeie bit-flipping domeine te registreer** wat soortgelyk is aan die slagoffer se domein. Hul bedoeling is om wettige gebruikers na hul eie infrastruktuur te herlei.
 
 Vir meer inligting lees [https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
 
@@ -83,7 +83,7 @@ Boonop, moenie vergeet dat as die gebruikers **enige webportaal gebruik om toega
 Jy kan dit aflaai van [https://github.com/gophish/gophish/releases/tag/v0.11.0](https://github.com/gophish/gophish/releases/tag/v0.11.0)
 
 Laai dit af en ontspan dit binne `/opt/gophish` en voer `/opt/gophish/gophish` uit.\
-Jy sal 'n wagwoord vir die admin gebruiker op poort 3333 in die uitvoer ontvang. Daarom, toegang daartoe en gebruik daardie inligting om die admin wagwoord te verander. Jy mag dalk daardie poort na lokaal moet tonnel:
+Jy sal 'n wagwoord vir die admin gebruiker op poort 3333 in die uitvoer ontvang. Daarom, toegang daartoe en gebruik daardie geloofsbriewe om die admin wagwoord te verander. Jy mag dalk daardie poort na lokaal moet tonnel:
 ```bash
 ssh -L 3333:127.0.0.1:3333 <user>@<ip>
 ```
@@ -159,7 +159,7 @@ Wysig `/opt/gophish/config.json` na die volgende (let op die gebruik van https):
 }
 }
 ```
-**Stel gophish diens in**
+**Konfigureer gophish diens**
 
 Om die gophish diens te skep sodat dit outomaties begin kan word en as 'n diens bestuur kan word, kan jy die lêer `/etc/init.d/gophish` met die volgende inhoud skep:
 ```bash
@@ -225,7 +225,7 @@ service gophish stop
 
 Hoe ouer 'n domein is, hoe minder waarskynlik is dit dat dit as spam beskou sal word. Dan moet jy soveel tyd as moontlik wag (ten minste 1 week) voor die phishing assessering. Boonop, as jy 'n bladsy oor 'n reputasionele sektor plaas, sal die reputasie wat verkry word beter wees.
 
-Let daarop dat selfs al moet jy 'n week wag, jy alles nou kan klaar konfigureer.
+Let daarop dat jy, selfs al moet jy 'n week wag, alles nou kan klaar konfigureer.
 
 ### Konfigureer Reverse DNS (rDNS) rekord
 
@@ -245,15 +245,15 @@ v=spf1 mx a ip4:ip.ip.ip.ip ?all
 ```
 ### Domein-gebaseerde Boodskapoutentiekering, Verslagdoening & Nakoming (DMARC) Rekord
 
-Jy moet **'n DMARC rekord vir die nuwe domein konfigureer**. As jy nie weet wat 'n DMARC rekord is nie [**lees hierdie bladsy**](../../network-services-pentesting/pentesting-smtp/index.html#dmarc).
+Jy moet **'n DMARC rekord vir die nuwe domein konfigureer**. As jy nie weet wat 'n DMARC rekord is nie, [**lees hierdie bladsy**](../../network-services-pentesting/pentesting-smtp/index.html#dmarc).
 
-Jy moet 'n nuwe DNS TXT rekord skep wat die gasheernaam `_dmarc.<domain>` na die volgende inhoud wys:
+Jy moet 'n nuwe DNS TXT rekord skep wat die gasheernaam `_dmarc.<domain>` met die volgende inhoud aandui:
 ```bash
 v=DMARC1; p=none
 ```
 ### DomainKeys Identified Mail (DKIM)
 
-Jy moet **'n DKIM vir die nuwe domein konfigureer**. As jy nie weet wat 'n DMARC-record is nie, [**lees hierdie bladsy**](../../network-services-pentesting/pentesting-smtp/index.html#dkim).
+Jy moet **'n DKIM vir die nuwe domein konfigureer**. As jy nie weet wat 'n DMARC-record is nie [**lees hierdie bladsy**](../../network-services-pentesting/pentesting-smtp/index.html#dkim).
 
 Hierdie tutoriaal is gebaseer op: [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
 
@@ -266,7 +266,7 @@ Hierdie tutoriaal is gebaseer op: [https://www.digitalocean.com/community/tutori
 
 ### Toets jou e-pos konfigurasie telling
 
-Jy kan dit doen deur [https://www.mail-tester.com/](https://www.mail-tester.com)\
+Jy kan dit doen met [https://www.mail-tester.com/](https://www.mail-tester.com)\
 Besoek net die bladsy en stuur 'n e-pos na die adres wat hulle jou gee:
 ```bash
 echo "This is the body of the email" | mail -s "This is the subject line" test-iimosa79z@srv1.mail-tester.com
@@ -283,13 +283,13 @@ DKIM check:         pass
 Sender-ID check:    pass
 SpamAssassin check: ham
 ```
-Jy kan ook 'n **boodskap na 'n Gmail onder jou beheer** stuur, en die **e-pos se koptekste** in jou Gmail-inboks nagaan, `dkim=pass` moet teenwoordig wees in die `Authentication-Results` koptekstveld.
+Jy kan ook 'n **boodskap na 'n Gmail onder jou beheer** stuur, en die **e-pos se koptekste** in jou Gmail-inboks nagaan, `dkim=pass` moet teenwoordig wees in die `Authentication-Results` kopveld.
 ```
 Authentication-Results: mx.google.com;
 spf=pass (google.com: domain of contact@example.com designates --- as permitted sender) smtp.mail=contact@example.com;
 dkim=pass header.i=@example.com;
 ```
-### Verwydering van Spamhouse Swartlys
+### ​Verwydering van Spamhouse Swartlys
 
 Die bladsy [www.mail-tester.com](https://www.mail-tester.com) kan jou aandui of jou domein deur spamhouse geblokkeer word. Jy kan versoek dat jou domein/IP verwyder word by: ​[https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)
 
@@ -299,23 +299,23 @@ Die bladsy [www.mail-tester.com](https://www.mail-tester.com) kan jou aandui of 
 
 ## Skep & Begin GoPhish Campagne
 
-### Stuurprofiel
+### Stuur Profiel
 
-- Stel 'n **naam om die** senderprofiel te identifiseer
-- Besluit vanaf watter rekening jy die phishing-e-posse gaan stuur. Voorstelle: _noreply, support, servicedesk, salesforce..._
+- Stel 'n **naam om die** sender profiel te identifiseer
+- Besluit vanaf watter rekening jy die phishing e-posse gaan stuur. Voorstelle: _noreply, support, servicedesk, salesforce..._
 - Jy kan die gebruikersnaam en wagwoord leeg laat, maar maak seker om die Ignore Certificate Errors te merk
 
-![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
+![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
 
 > [!TIP]
 > Dit word aanbeveel om die "**Stuur Toets E-pos**" funksionaliteit te gebruik om te toets of alles werk.\
-> Ek sou aanbeveel om **die toets e-posse na 10min e-posadresse te stuur** om te verhoed dat jy op 'n swartlys geplaas word tydens toetse.
+> Ek sou aanbeveel om **die toets e-posse na 10min e-pos adresse te stuur** om te verhoed dat jy op 'n swartlys geplaas word tydens toetse.
 
 ### E-pos Sjabloon
 
 - Stel 'n **naam om die** sjabloon te identifiseer
 - Skryf dan 'n **onderwerp** (niks vreemd nie, net iets wat jy in 'n gewone e-pos sou verwag om te lees)
-- Maak seker jy het "**Voeg Volgbeeld**" gemerk
+- Maak seker jy het "**Voeg Volg Beeld**" gemerk
 - Skryf die **e-pos sjabloon** (jy kan veranderlikes gebruik soos in die volgende voorbeeld):
 ```html
 <html>
@@ -335,11 +335,11 @@ WRITE HERE SOME SIGNATURE OF SOMEONE FROM THE COMPANY
 </body>
 </html>
 ```
-Let wel dat **om die geloofwaardigheid van die e-pos te verhoog**, dit aanbeveel word om 'n handtekening van 'n e-pos van die kliënt te gebruik. Voorstelle:
+Let daarop dat **om die geloofwaardigheid van die e-pos te verhoog**, dit aanbeveel word om 'n handtekening van 'n e-pos van die kliënt te gebruik. Voorstelle:
 
 - Stuur 'n e-pos na 'n **nie-bestaande adres** en kyk of die antwoord enige handtekening het.
 - Soek na **publieke e-posse** soos info@ex.com of press@ex.com of public@ex.com en stuur hulle 'n e-pos en wag vir die antwoord.
-- Probeer om **'n geldige ontdekte** e-pos te kontak en wag vir die antwoord.
+- Probeer om **'n paar geldige ontdekte** e-posse te kontak en wag vir die antwoord.
 
 ![](<../../images/image (80).png>)
 
@@ -356,16 +356,16 @@ Let wel dat **om die geloofwaardigheid van die e-pos te verhoog**, dit aanbeveel
 ![](<../../images/image (826).png>)
 
 > [!TIP]
-> Gewoonlik sal jy die HTML-kode van die bladsy moet wysig en 'n paar toetse op plaaslik moet doen (miskien met 'n Apache-bediener) **totdat jy hou van die resultate.** Skryf dan daardie HTML-kode in die boks.\
-> Let daarop dat as jy **sommige statiese hulpbronne** vir die HTML moet gebruik (miskien sommige CSS en JS bladsye) jy dit in _**/opt/gophish/static/endpoint**_ kan stoor en dit dan kan benader vanaf _**/static/\<filename>**_
+> Gewoonlik sal jy die HTML-kode van die bladsy moet wysig en 'n paar toetse in plaaslike omgewing doen (miskien met 'n Apache-bediener) **totdat jy hou van die resultate.** Skryf dan daardie HTML-kode in die boks.\
+> Let daarop dat as jy **sommige statiese hulpbronne** vir die HTML nodig het (miskien sommige CSS en JS bladsye) jy dit kan stoor in _**/opt/gophish/static/endpoint**_ en dan toegang tot hulle kan kry vanaf _**/static/\<filename>**_
 
 > [!TIP]
-> Vir die omleiding kan jy **die gebruikers na die wettige hoof webblad** van die slagoffer omlei, of hulle na _/static/migration.html_ omlei, byvoorbeeld, plaas 'n **draaiwiel (**[**https://loading.io/**](https://loading.io)**) vir 5 sekondes en dui dan aan dat die proses suksesvol was**.
+> Vir die omleiding kan jy **die gebruikers na die wettige hoofwebblad** van die slagoffer omlei, of hulle na _/static/migration.html_ omlei, byvoorbeeld, plaas 'n **spinning wheel (**[**https://loading.io/**](https://loading.io)**) vir 5 sekondes en dui dan aan dat die proses suksesvol was**.
 
 ### Users & Groups
 
 - Stel 'n naam in
-- **Importeer die data** (let daarop dat jy die voornaam, vannaam en e-posadres van elke gebruiker nodig het om die sjabloon vir die voorbeeld te gebruik)
+- **Importeer die data** (let daarop dat jy die voornaam, van en e-posadres van elke gebruiker nodig het om die sjabloon vir die voorbeeld te gebruik)
 
 ![](<../../images/image (163).png>)
 
@@ -414,7 +414,7 @@ Hierdie is waar gereedskap soos [**evilginx2**](https://github.com/kgretzky/evil
 
 ### Via VNC
 
-Wat as jy in plaas daarvan om **die slagoffer na 'n kwaadwillige bladsy** met dieselfde voorkoms as die oorspronklike een te stuur, hom na 'n **VNC-sessie met 'n blaaskans wat aan die werklike webblad gekoppel is** stuur? Jy sal in staat wees om te sien wat hy doen, die wagwoord, die MFA wat gebruik word, die koekies te steel...\
+Wat as jy in plaas van **die slagoffer na 'n kwaadwillige bladsy** met dieselfde voorkoms as die oorspronklike te stuur, hom na 'n **VNC-sessie met 'n blaaskans wat aan die werklike webblad gekoppel is** stuur? Jy sal kan sien wat hy doen, die wagwoord steel, die MFA wat gebruik word, die koekies...\
 Jy kan dit doen met [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC)
 
 ## Detecting the detection
@@ -432,7 +432,7 @@ Jy kan **'n domein met 'n baie soortgelyke naam** as die slagoffer se domein **k
 
 ### Evaluate the phishing
 
-Gebruik [**Phishious** ](https://github.com/Rices/Phishious) om te evalueer of jou e-pos in die spammap gaan eindig of of dit geblokkeer gaan word of suksesvol gaan wees.
+Gebruik [**Phishious** ](https://github.com/Rices/Phishious) om te evalueer of jou e-pos in die spammap gaan eindig of of dit geblokkeer of suksesvol gaan wees.
 
 ## Clipboard Hijacking / Pastejacking
 
@@ -440,6 +440,12 @@ Aanvallers kan stilweg kwaadwillige opdragte in die slagoffer se klembord kopiee
 
 {{#ref}}
 clipboard-hijacking.md
+{{#endref}}
+
+## Mobile Phishing & Malicious App Distribution (Android & iOS)
+
+{{#ref}}
+mobile-phishing-malicious-apps.md
 {{#endref}}
 
 ## References
