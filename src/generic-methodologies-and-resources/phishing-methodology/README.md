@@ -5,7 +5,7 @@
 ## 手法
 
 1. 被害者の調査
-1. **被害者ドメイン**を選択します。
+1. **被害者のドメイン**を選択します。
 2. 被害者が使用している**ログインポータル**を探すために基本的なウェブ列挙を行い、**なりすます**ポータルを**決定**します。
 3. **OSINT**を使用して**メールアドレス**を**見つけます**。
 2. 環境の準備
@@ -24,12 +24,12 @@
 - **キーワード**: ドメイン名は元のドメインの重要な**キーワード**を**含みます**（例: zelster.com-management.com）。
 - **ハイフン付きサブドメイン**: サブドメインの**ドットをハイフンに変更**します（例: www-zelster.com）。
 - **新しいTLD**: 同じドメインを使用して**新しいTLD**を使用します（例: zelster.org）。
-- **ホモグリフ**: ドメイン名の文字を**似た文字に置き換えます**（例: zelfser.com）。
+- **ホモグリフ**: ドメイン名の文字を**似たような文字に置き換えます**（例: zelfser.com）。
 - **転置**: ドメイン名内の**2つの文字を入れ替えます**（例: zelsetr.com）。
 - **単数化/複数化**: ドメイン名の末尾に「s」を追加または削除します（例: zeltsers.com）。
 - **省略**: ドメイン名から**1つの文字を削除します**（例: zelser.com）。
 - **繰り返し**: ドメイン名内の**1つの文字を繰り返します**（例: zeltsser.com）。
-- **置換**: ホモグリフのようですが、あまりステルスではありません。ドメイン名の1つの文字を、元の文字の近くにあるキーボードの文字に置き換えます（例: zektser.com）。
+- **置換**: ホモグリフのようですが、あまりステルスではありません。ドメイン名内の1つの文字を、元の文字の近くにあるキーボードの文字に置き換えます（例: zektser.com）。
 - **サブドメイン化**: ドメイン名内に**ドットを挿入**します（例: ze.lster.com）。
 - **挿入**: ドメイン名に**文字を挿入します**（例: zerltser.com）。
 - **ドットの欠落**: ドメイン名にTLDを追加します（例: zelstercom.com）。
@@ -47,13 +47,13 @@
 
 ### ビットフリッピング
 
-いくつかのビットが保存されているか通信中に**自動的に反転する可能性があります**。これは、太陽フレア、宇宙線、またはハードウェアエラーなどのさまざまな要因によるものです。
+いくつかのビットが保存または通信中に**自動的に反転する可能性があります**。これは、太陽フレア、宇宙線、またはハードウェアエラーなどのさまざまな要因によるものです。
 
-この概念が**DNSリクエストに適用されると**、**DNSサーバーによって受信されたドメイン**が最初にリクエストされたドメインと同じでない可能性があります。
+この概念が**DNSリクエストに適用されると**、**DNSサーバーによって受信されたドメイン**が、最初にリクエストされたドメインと同じでない可能性があります。
 
 例えば、ドメイン「windows.com」の1ビットの変更は「windnws.com」に変わる可能性があります。
 
-攻撃者は、被害者のドメインに似た複数のビットフリッピングドメインを登録することで**これを利用する可能性があります**。彼らの意図は、正当なユーザーを自分たちのインフラにリダイレクトすることです。
+攻撃者は、被害者のドメインに似た**複数のビットフリッピングドメインを登録することでこれを利用する**かもしれません。彼らの意図は、正当なユーザーを自分たちのインフラにリダイレクトすることです。
 
 詳細については、[https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)をお読みください。
 
@@ -73,8 +73,8 @@
 - [https://hunter.io/](https://hunter.io)
 - [https://anymailfinder.com/](https://anymailfinder.com)
 
-**さらに多くの**有効なメールアドレスを**発見するか、すでに発見したものを**確認するために、被害者のSMTPサーバーをブルートフォース攻撃できるか確認できます。[メールアドレスの確認/発見方法についてはこちらを学んでください](../../network-services-pentesting/pentesting-smtp/index.html#username-bruteforce-enumeration)。\
-さらに、ユーザーが**メールにアクセスするためのウェブポータルを使用している場合**、それが**ユーザー名のブルートフォース**に対して脆弱であるか確認し、可能であればその脆弱性を悪用することを忘れないでください。
+**より多くの**有効なメールアドレスを**発見するか、すでに発見したものを**確認するために、被害者のSMTPサーバーをブルートフォース攻撃できるか確認できます。[メールアドレスの確認/発見方法についてはこちらを学んでください](../../network-services-pentesting/pentesting-smtp/index.html#username-bruteforce-enumeration)。\
+さらに、ユーザーが**メールにアクセスするためのウェブポータルを使用している場合**、それが**ユーザーブルートフォースに対して脆弱であるかどうかを確認し、可能であればその脆弱性を悪用することを忘れないでください**。
 
 ## GoPhishの設定
 
@@ -83,7 +83,7 @@
 [https://github.com/gophish/gophish/releases/tag/v0.11.0](https://github.com/gophish/gophish/releases/tag/v0.11.0)からダウンロードできます。
 
 `/opt/gophish`内にダウンロードして解凍し、`/opt/gophish/gophish`を実行します。\
-出力にポート3333の管理ユーザー用のパスワードが表示されます。したがって、そのポートにアクセスし、その資格情報を使用して管理者パスワードを変更します。ポートをローカルにトンネルする必要があるかもしれません。
+出力にポート3333の管理ユーザー用のパスワードが表示されます。したがって、そのポートにアクセスし、その資格情報を使用して管理者パスワードを変更します。そのポートをローカルにトンネリングする必要があるかもしれません。
 ```bash
 ssh -L 3333:127.0.0.1:3333 <user>@<ip>
 ```
@@ -134,7 +134,7 @@ echo "This is the body of the email" | mail -s "This is the subject line" test@e
 **Gophishの設定**
 
 gophishの実行を停止し、設定を行いましょう。\
-`/opt/gophish/config.json`を以下のように変更します（httpsの使用に注意）：
+`/opt/gophish/config.json`を以下のように変更します（httpsの使用に注意してください）：
 ```bash
 {
 "admin_server": {
@@ -247,7 +247,7 @@ v=spf1 mx a ip4:ip.ip.ip.ip ?all
 
 新しいドメインのために**DMARCレコードを設定する必要があります**。DMARCレコードが何か分からない場合は、[**このページを読んでください**](../../network-services-pentesting/pentesting-smtp/index.html#dmarc)。
 
-次の内容を持つホスト名`_dmarc.<domain>`を指す新しいDNS TXTレコードを作成する必要があります:
+次の内容でホスト名`_dmarc.<domain>`を指す新しいDNS TXTレコードを作成する必要があります:
 ```bash
 v=DMARC1; p=none
 ```
@@ -255,23 +255,23 @@ v=DMARC1; p=none
 
 新しいドメインのために**DKIMを設定する必要があります**。DMARCレコードが何か分からない場合は、[**このページを読んでください**](../../network-services-pentesting/pentesting-smtp/index.html#dkim)。
 
-このチュートリアルは、[https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)に基づいています。
+このチュートリアルは次に基づいています: [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
 
 > [!TIP]
-> DKIMキーが生成する両方のB64値を連結する必要があります：
+> DKIMキーが生成する両方のB64値を連結する必要があります:
 >
 > ```
 > v=DKIM1; h=sha256; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0wPibdqPtzYk81njjQCrChIcHzxOp8a1wjbsoNtka2X9QXCZs+iXkvw++QsWDtdYu3q0Ofnr0Yd/TmG/Y2bBGoEgeE+YTUG2aEgw8Xx42NLJq2D1pB2lRQPW4IxefROnXu5HfKSm7dyzML1gZ1U0pR5X4IZCH0wOPhIq326QjxJZm79E1nTh3xj" "Y9N/Dt3+fVnIbMupzXE216TdFuifKM6Tl6O/axNsbswMS1TH812euno8xRpsdXJzFlB9q3VbMkVWig4P538mHolGzudEBg563vv66U8D7uuzGYxYT4WS8NVm3QBMg0QKPWZaKp+bADLkOSB9J2nUpk4Aj9KB5swIDAQAB
 > ```
 
-### Test your email configuration score
+### メール設定スコアをテストする
 
 [https://www.mail-tester.com/](https://www.mail-tester.com)を使用してそれを行うことができます。\
-ページにアクセスして、彼らが提供するアドレスにメールを送信してください：
+ページにアクセスして、彼らが提供するアドレスにメールを送信してください:
 ```bash
 echo "This is the body of the email" | mail -s "This is the subject line" test-iimosa79z@srv1.mail-tester.com
 ```
-あなたはまた、**メール設定を確認する**ために `check-auth@verifier.port25.com` にメールを送信し、**レスポンスを読む**ことができます（これには、**ポート25を開く**必要があり、メールをrootとして送信した場合はファイル _/var/mail/root_ でレスポンスを確認します）。\
+あなたはまた、**メール設定を確認する**ために `check-auth@verifier.port25.com` にメールを送信し、**応答を読む**ことができます（これには、**ポート25を開く**必要があり、メールをrootとして送信した場合はファイル _/var/mail/root_ で応答を確認します）。\
 すべてのテストに合格していることを確認してください：
 ```bash
 ==========================================================
@@ -314,7 +314,7 @@ dkim=pass header.i=@example.com;
 ### メールテンプレート
 
 - テンプレートを識別するための**名前を設定**します
-- 次に、**件名**を書きます（奇妙なものではなく、通常のメールで読むことができるもの）
+- 次に、**件名**を書きます（特に奇妙なものではなく、通常のメールで読むことができるもの）
 - "**トラッキング画像を追加**"にチェックを入れていることを確認してください
 - **メールテンプレート**を書きます（以下の例のように変数を使用できます）：
 ```html
@@ -344,7 +344,7 @@ WRITE HERE SOME SIGNATURE OF SOMEONE FROM THE COMPANY
 ![](<../../images/image (80).png>)
 
 > [!TIP]
-> メールテンプレートでは、**送信するファイルを添付することもできます**。NTLMチャレンジを盗むために特別に作成されたファイル/ドキュメントを使用したい場合は、[このページを読んでください](../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md)。
+> メールテンプレートでは、**送信するファイルを添付**することもできます。特別に作成したファイル/ドキュメントを使用してNTLMチャレンジを盗むことに興味がある場合は、[このページを読む](../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md)。
 
 ### ランディングページ
 
@@ -356,11 +356,11 @@ WRITE HERE SOME SIGNATURE OF SOMEONE FROM THE COMPANY
 ![](<../../images/image (826).png>)
 
 > [!TIP]
-> 通常、ページのHTMLコードを修正し、ローカルでいくつかのテストを行う必要があります（おそらくApacheサーバーを使用して）**結果に満足するまで**。その後、そのHTMLコードをボックスに記入します。\
-> HTML用に**静的リソース**（CSSやJSページなど）を使用する必要がある場合は、_**/opt/gophish/static/endpoint**_に保存し、_**/static/\<filename>**_からアクセスできます。
+> 通常、ページのHTMLコードを修正し、ローカルでいくつかのテストを行う必要があります（おそらくApacheサーバーを使用して）**結果に満足するまで。**その後、そのHTMLコードをボックスに記入します。\
+> HTML用に**静的リソース**（おそらくCSSやJSページ）を使用する必要がある場合は、_**/opt/gophish/static/endpoint**_に保存し、_**/static/\<filename>**_からアクセスできます。
 
 > [!TIP]
-> リダイレクトでは、**被害者の正当なメインウェブページにユーザーをリダイレクトする**か、例えば_/static/migration.html_にリダイレクトし、5秒間**スピニングホイール**（**[https://loading.io/](https://loading.io)**）を表示してから、プロセスが成功したことを示すことができます。
+> リダイレクトでは、**被害者の正当なメインウェブページにユーザーをリダイレクト**するか、例えば_/static/migration.html_にリダイレクトし、5秒間**スピニングホイール**（**[https://loading.io/](https://loading.io)**）を表示してから、プロセスが成功したことを示すことができます。
 
 ### ユーザーとグループ
 
@@ -392,7 +392,7 @@ clone-a-website.md
 
 ## バックドア付きドキュメントとファイル
 
-いくつかのフィッシング評価（主にレッドチーム用）では、**バックドアを含むファイルを送信したい**場合があります（C2か、認証をトリガーする何かかもしれません）。\
+いくつかのフィッシング評価（主にレッドチーム用）では、**バックドアを含むファイルを送信したい**場合があります（おそらくC2、または認証をトリガーする何か）。\
 いくつかの例については、次のページを確認してください：
 
 {{#ref}}
@@ -408,21 +408,21 @@ phishing-documents.md
 ここで、[**evilginx2**](https://github.com/kgretzky/evilginx2)**、** [**CredSniper**](https://github.com/ustayready/CredSniper)および[**muraena**](https://github.com/muraenateam/muraena)のようなツールが役立ちます。このツールは、MitMのような攻撃を生成することを可能にします。基本的に、攻撃は次のように機能します：
 
 1. 実際のウェブページのログインフォームを**偽装**します。
-2. ユーザーは**資格情報**を偽のページに**送信**し、ツールはそれを実際のウェブページに送信し、**資格情報が機能するか確認します**。
+2. ユーザーは**資格情報**を偽のページに**送信**し、ツールはそれを実際のウェブページに送信し、**資格情報が機能するか確認**します。
 3. アカウントが**2FA**で設定されている場合、MitMページはそれを要求し、**ユーザーが入力**すると、ツールはそれを実際のウェブページに送信します。
 4. ユーザーが認証されると、（攻撃者として）**資格情報、2FA、クッキー、およびツールがMitMを実行している間のすべてのインタラクションの情報をキャプチャ**します。
 
 ### VNC経由
 
-もし**被害者を元のページと同じ外観の悪意のあるページ**に送る代わりに、**実際のウェブページに接続されたブラウザを持つVNCセッション**に送ったらどうなりますか？彼が何をしているかを見ることができ、パスワード、使用されているMFA、クッキーを盗むことができます...\
-これは[**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC)を使用して行うことができます。
+もし**被害者を元のページと同じ外観の悪意のあるページ**に送信する代わりに、**実際のウェブページに接続されたブラウザを持つVNCセッション**に送信したらどうなりますか？彼が何をしているかを見ることができ、パスワード、使用されるMFA、クッキーを盗むことができます...\
+これを[**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC)で行うことができます。
 
 ## 検出の検出
 
 明らかに、バストされたかどうかを知る最良の方法の1つは、**ブラックリスト内で自分のドメインを検索すること**です。リストに表示されている場合、何らかの形であなたのドメインが疑わしいと検出されました。\
 ドメインがブラックリストに表示されているかどうかを確認する簡単な方法は、[https://malwareworld.com/](https://malwareworld.com)を使用することです。
 
-ただし、被害者が**野外で疑わしいフィッシング活動を積極的に探しているかどうかを知る他の方法もあります**。詳細は次のように説明されています：
+ただし、被害者が**野外で疑わしいフィッシング活動を積極的に探しているかどうかを知る他の方法もあります**。詳細は次の通りです：
 
 {{#ref}}
 detecting-phising.md
@@ -436,10 +436,16 @@ detecting-phising.md
 
 ## クリップボードハイジャック / ペーストジャッキング
 
-攻撃者は、妥協されたまたはタイポスカットされたウェブページから被害者のクリップボードに悪意のあるコマンドを静かにコピーし、その後ユーザーを**Win + R**、**Win + X**、またはターミナルウィンドウにペーストさせ、ダウンロードや添付なしで任意のコードを実行させることができます。
+攻撃者は、妥協したまたはタイポスカットされたウェブページから被害者のクリップボードに悪意のあるコマンドを静かにコピーし、その後ユーザーを**Win + R**、**Win + X**、またはターミナルウィンドウにペーストさせ、ダウンロードや添付なしで任意のコードを実行させることができます。
 
 {{#ref}}
 clipboard-hijacking.md
+{{#endref}}
+
+## モバイルフィッシングと悪意のあるアプリ配布（Android & iOS）
+
+{{#ref}}
+mobile-phishing-malicious-apps.md
 {{#endref}}
 
 ## 参考文献
