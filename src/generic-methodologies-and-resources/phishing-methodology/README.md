@@ -466,6 +466,12 @@ Attackers can silently copy malicious commands into the victim’s clipboard fro
 clipboard-hijacking.md
 {{#endref}}
 
+## Mobile Phishing & Malicious App Distribution (Android & iOS)
+
+{{#ref}}
+mobile-phishing-malicious-apps.md
+{{#endref}}
+
 ## References
 
 - [https://zeltser.com/domain-name-variations-in-phishing/](https://zeltser.com/domain-name-variations-in-phishing/)
