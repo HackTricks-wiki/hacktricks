@@ -123,5 +123,6 @@ The rule triggers on any write attempt to `*/release_agent` from a process insid
 
 * [Unit 42 – CVE-2022-0492: container escape via cgroups](https://unit42.paloaltonetworks.com/cve-2022-0492-cgroups/) – detailed analysis and mitigation script.
 * [Sysdig Falco rule & detection guide](https://sysdig.com/blog/detecting-mitigating-cve-2022-0492-sysdig/)
+* [Cisco ISE privileged container escape via cgroup user-mode helpers (CVE-2025-20281)](https://www.thezdi.com/blog/2025/7/24/cve-2025-20281-cisco-ise-api-unauthenticated-remote-code-execution-vulnerability)
 
 {{#include ../../../../banners/hacktricks-training.md}}
