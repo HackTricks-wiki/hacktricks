@@ -17,7 +17,7 @@ Check if any is enabled running:
 ```bash
 rmMgmt=$(netstat -na | grep LISTEN | grep tcp46 | grep "*.3283" | wc -l);
 scrShrng=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | grep "*.5900" | wc -l);
-flShrng=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | egrep "\*.88|\*.445|\*.548" | wc -l);
+flShrng=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | egrep "\\*.88|\\*.445|\\*.548" | wc -l);
 rLgn=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | grep "*.22" | wc -l);
 rAE=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | grep "*.3031" | wc -l);
 bmM=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | grep "*.4488" | wc -l);
@@ -37,6 +37,28 @@ sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resourc
 ```
 
 ARD provides versatile control levels, including observation, shared control, and full control, with sessions persisting even after user password changes. It allows sending Unix commands directly, executing them as root for administrative users. Task scheduling and Remote Spotlight search are notable features, facilitating remote, low-impact searches for sensitive files across multiple machines.
+
+#### Recent Screen-Sharing / ARD vulnerabilities (2023-2025)
+
+| Year | CVE | Component | Impact | Fixed in |
+|------|-----|-----------|--------|----------|
+|2023|CVE-2023-42940|Screen Sharing|Incorrect session rendering could cause the *wrong* desktop or window to be transmitted, resulting in leakage of sensitive information|macOS Sonoma 14.2.1 (Dec 2023) |
+|2024|CVE-2024-23296|launchservicesd / login|Kernel memory-protection bypass that can be chained after a successful remote login (actively exploited in the wild)|macOS Ventura 13.6.4 / Sonoma 14.4 (Mar 2024) |
+
+**Hardening tips**
+
+* Disable *Screen Sharing*/*Remote Management* when not strictly required.
+* Keep macOS fully patched (Apple generally ships security fixes for the last three major releases).
+* Use a **Strong Password** *and* enforce the *“VNC viewers may control screen with password”* option **disabled** when possible.
+* Put the service behind a VPN instead of exposing TCP 5900/3283 to the Internet.
+* Add an Application Firewall rule to limit `ARDAgent` to the local subnet:
+
+  ```bash
+  sudo /usr/libexec/ApplicationFirewall/socketfilterfw --add /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/MacOS/ARDAgent
+  sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setblockapp /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/MacOS/ARDAgent on
+  ```
+
+---
 
 ## Bonjour Protocol
 
@@ -111,6 +133,43 @@ finally:
     zeroconf.close()
 ```
 
+### Enumerating Bonjour over the network
+
+* **Nmap NSE** – discover services advertised by a single host:
+
+  ```bash
+  nmap -sU -p 5353 --script=dns-service-discovery <target>
+  ```
+
+  The `dns-service-discovery` script sends a `_services._dns-sd._udp.local` query and then enumerates each advertised service type. 
+
+* **mdns_recon** – Python tool that scans entire ranges looking for *misconfigured* mDNS responders that answer unicast queries (useful to find devices reachable across subnets/WAN):
+
+  ```bash
+  git clone https://github.com/chadillac/mdns_recon && cd mdns_recon
+  python3 mdns_recon.py -r 192.0.2.0/24 -s _ssh._tcp.local
+  ```
+
+  This will return hosts exposing SSH via Bonjour outside the local link. 
+
+### Security considerations & recent vulnerabilities (2024-2025)
+
+| Year | CVE | Severity | Issue | Patched in |
+|------|-----|----------|-------|------------|
+|2024|CVE-2024-44183|Medium|A logic error in *mDNSResponder* allowed a crafted packet to trigger a **denial-of-service**|macOS Ventura 13.7 / Sonoma 14.7 / Sequoia 15.0 (Sep 2024) |
+|2025|CVE-2025-31222|High|A correctness issue in *mDNSResponder* could be abused for **local privilege escalation**|macOS Ventura 13.7.6 / Sonoma 14.7.6 / Sequoia 15.5 (May 2025) |
+
+**Mitigation guidance**
+
+1. Restrict UDP 5353 to *link-local* scope – block or rate-limit it on wireless controllers, routers, and host-based firewalls.
+2. Disable Bonjour entirely on systems that do not require service discovery:
+
+   ```bash
+   sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.mDNSResponder.plist
+   ```
+3. For environments where Bonjour is required internally but must never cross network boundaries, use *AirPlay Receiver* profile restrictions (MDM) or an mDNS proxy.
+4. Enable **System Integrity Protection (SIP)** and keep macOS up to date – both vulnerabilities above were patched quickly but relied on SIP being enabled for full protection.
+
 ### Disabling Bonjour
 
 If there are concerns about security or other reasons to disable Bonjour, it can be turned off using the following command:
@@ -124,8 +183,7 @@ sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.mDNSResponder.p
 - [**The Mac Hacker's Handbook**](https://www.amazon.com/-/es/Charlie-Miller-ebook-dp-B004U7MUMU/dp/B004U7MUMU/ref=mt_other?_encoding=UTF8&me=&qid=)
 - [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)
 - [**https://lockboxx.blogspot.com/2019/07/macos-red-teaming-206-ard-apple-remote.html**](https://lockboxx.blogspot.com/2019/07/macos-red-teaming-206-ard-apple-remote.html)
+- [**NVD – CVE-2023-42940**](https://nvd.nist.gov/vuln/detail/CVE-2023-42940)
+- [**NVD – CVE-2024-44183**](https://nvd.nist.gov/vuln/detail/CVE-2024-44183)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-
