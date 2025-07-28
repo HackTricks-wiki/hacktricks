@@ -6,7 +6,7 @@
 
 1. Riconoscere la vittima
 1. Selezionare il **dominio della vittima**.
-2. Eseguire alcune enumerazioni web di base **cercando portali di accesso** utilizzati dalla vittima e **decidere** quale impersonare.
+2. Eseguire alcune basi di enumerazione web **cercando portali di accesso** utilizzati dalla vittima e **decidere** quale impersonare.
 3. Utilizzare alcune **OSINT** per **trovare email**.
 2. Preparare l'ambiente
 1. **Acquistare il dominio** che si intende utilizzare per la valutazione di phishing
@@ -22,9 +22,13 @@
 ### Tecniche di Variazione del Nome di Dominio
 
 - **Parola chiave**: Il nome di dominio **contiene** una **parola chiave** importante del dominio originale (es., zelster.com-management.com).
-- **sottodominio con trattino**: Cambiare il **punto con un trattino** di un sottodominio (es., www-zelster.com).
+- **sottodominio con trattino**: Cambiare il **punto in un trattino** di un sottodominio (es., www-zelster.com).
 - **Nuovo TLD**: Stesso dominio utilizzando un **nuovo TLD** (es., zelster.org)
 - **Omo-glyph**: **sostituisce** una lettera nel nome di dominio con **lettere che sembrano simili** (es., zelfser.com).
+
+{{#ref}}
+homograph-attacks.md
+{{#endref}}
 - **Trasposizione:** **scambia due lettere** all'interno del nome di dominio (es., zelsetr.com).
 - **Singolarizzazione/Pluralizzazione**: Aggiunge o rimuove “s” alla fine del nome di dominio (es., zeltsers.com).
 - **Omissione**: **rimuove una** delle lettere dal nome di dominio (es., zelser.com).
@@ -32,7 +36,7 @@
 - **Sostituzione**: Come l'omo-glyph ma meno furtivo. Sostituisce una delle lettere nel nome di dominio, forse con una lettera vicina alla lettera originale sulla tastiera (es., zektser.com).
 - **Sottodominio**: Introduce un **punto** all'interno del nome di dominio (es., ze.lster.com).
 - **Inserimento**: **inserisce una lettera** nel nome di dominio (es., zerltser.com).
-- **Punto mancante**: Aggiunge il TLD al nome di dominio. (es., zelstercom.com)
+- **Punto mancante**: Aggiungere il TLD al nome di dominio. (es., zelstercom.com)
 
 **Strumenti Automatici**
 
@@ -53,7 +57,7 @@ Quando questo concetto è **applicato alle richieste DNS**, è possibile che il 
 
 Ad esempio, una singola modifica di bit nel dominio "windows.com" può cambiarlo in "windnws.com."
 
-Gli attaccanti possono **sfruttare questo registrando più domini con bit-flipping** simili a quello della vittima. La loro intenzione è reindirizzare gli utenti legittimi alla propria infrastruttura.
+Gli attaccanti possono **sfruttare questo registrando più domini di bit-flipping** simili a quello della vittima. La loro intenzione è reindirizzare gli utenti legittimi alla propria infrastruttura.
 
 Per ulteriori informazioni leggi [https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
 
@@ -91,7 +95,7 @@ ssh -L 3333:127.0.0.1:3333 <user>@<ip>
 
 **Configurazione del certificato TLS**
 
-Prima di questo passaggio dovresti aver **già acquistato il dominio** che intendi utilizzare e deve **puntare** all'**IP del VPS** dove stai configurando **gophish**.
+Prima di questo passaggio, dovresti **aver già acquistato il dominio** che intendi utilizzare e deve **puntare** all'**IP del VPS** dove stai configurando **gophish**.
 ```bash
 DOMAIN="<domain>"
 wget https://dl.eff.org/certbot-auto
@@ -161,7 +165,7 @@ Modifica `/opt/gophish/config.json` come segue (nota l'uso di https):
 ```
 **Configura il servizio gophish**
 
-Per creare il servizio gophish in modo che possa essere avviato automaticamente e gestito come un servizio, puoi creare il file `/etc/init.d/gophish` con il seguente contenuto:
+Per creare il servizio gophish in modo che possa essere avviato automaticamente e gestito come servizio, puoi creare il file `/etc/init.d/gophish` con il seguente contenuto:
 ```bash
 #!/bin/bash
 # /etc/init.d/gophish
@@ -239,7 +243,7 @@ Puoi usare [https://www.spfwizard.net/](https://www.spfwizard.net) per generare 
 
 ![](<../../images/image (1037).png>)
 
-Questo è il contenuto che deve essere impostato all'interno di un record TXT all'interno del dominio:
+Questo è il contenuto che deve essere impostato all'interno di un record TXT nel dominio:
 ```bash
 v=spf1 mx a ip4:ip.ip.ip.ip ?all
 ```
@@ -264,7 +268,7 @@ Questo tutorial si basa su: [https://www.digitalocean.com/community/tutorials/ho
 > v=DKIM1; h=sha256; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0wPibdqPtzYk81njjQCrChIcHzxOp8a1wjbsoNtka2X9QXCZs+iXkvw++QsWDtdYu3q0Ofnr0Yd/TmG/Y2bBGoEgeE+YTUG2aEgw8Xx42NLJq2D1pB2lRQPW4IxefROnXu5HfKSm7dyzML1gZ1U0pR5X4IZCH0wOPhIq326QjxJZm79E1nTh3xj" "Y9N/Dt3+fVnIbMupzXE216TdFuifKM6Tl6O/axNsbswMS1TH812euno8xRpsdXJzFlB9q3VbMkVWig4P538mHolGzudEBg563vv66U8D7uuzGYxYT4WS8NVm3QBMg0QKPWZaKp+bADLkOSB9J2nUpk4Aj9KB5swIDAQAB
 > ```
 
-### Testa il punteggio della tua configurazione email
+### Testa il punteggio di configurazione della tua email
 
 Puoi farlo usando [https://www.mail-tester.com/](https://www.mail-tester.com)\
 Basta accedere alla pagina e inviare un'email all'indirizzo che ti forniscono:
@@ -309,7 +313,7 @@ Puoi richiedere la rimozione del tuo dominio/IP su [https://sender.office.com/](
 
 > [!TIP]
 > È consigliato utilizzare la funzionalità "**Invia Email di Test**" per verificare che tutto funzioni.\
-> Ti consiglio di **inviare le email di test a indirizzi 10min** per evitare di essere inseriti nella blacklist durante i test.
+> Ti consiglio di **inviare le email di test a indirizzi di 10min** per evitare di essere inseriti nella blacklist durante i test.
 
 ### Modello di Email
 
@@ -360,7 +364,7 @@ Nota che **per aumentare la credibilità dell'email**, è consigliato utilizzare
 > Nota che se hai bisogno di **utilizzare alcune risorse statiche** per l'HTML (magari alcune pagine CSS e JS) puoi salvarle in _**/opt/gophish/static/endpoint**_ e poi accedervi da _**/static/\<filename>**_
 
 > [!TIP]
-> Per il reindirizzamento potresti **reindirizzare gli utenti alla legittima pagina principale** della vittima, o reindirizzarli a _/static/migration.html_ per esempio, mettere qualche **ruota che gira (**[**https://loading.io/**](https://loading.io)**) per 5 secondi e poi indicare che il processo è stato completato con successo**.
+> Per il reindirizzamento potresti **reindirizzare gli utenti alla legittima pagina web principale** della vittima, o reindirizzarli a _/static/migration.html_ per esempio, mettere qualche **ruota che gira (**[**https://loading.io/**](https://loading.io)**) per 5 secondi e poi indicare che il processo è stato completato con successo**.
 
 ### Utenti & Gruppi
 
@@ -378,19 +382,19 @@ Nota che il **Profilo di Invio consente di inviare un'email di prova per vedere 
 ![](<../../images/image (192).png>)
 
 > [!TIP]
-> Ti consiglio di **inviare le email di prova a indirizzi di 10min mail** per evitare di essere inserito nella blacklist durante i test.
+> Ti consiglio di **inviare le email di prova a indirizzi di 10min** per evitare di essere inserito in blacklist durante i test.
 
 Una volta che tutto è pronto, lancia semplicemente la campagna!
 
 ## Clonazione del Sito Web
 
-Se per qualche motivo desideri clonare il sito web, controlla la seguente pagina:
+Se per qualche motivo desideri clonare il sito web controlla la seguente pagina:
 
 {{#ref}}
 clone-a-website.md
 {{#endref}}
 
-## Documenti & File con Backdoor
+## Documenti & File Backdoor
 
 In alcune valutazioni di phishing (principalmente per Red Teams) vorrai anche **inviare file contenenti qualche tipo di backdoor** (magari un C2 o magari solo qualcosa che attivi un'autenticazione).\
 Controlla la seguente pagina per alcuni esempi:
@@ -403,18 +407,18 @@ phishing-documents.md
 
 ### Via Proxy MitM
 
-L'attacco precedente è piuttosto astuto poiché stai falsificando un sito web reale e raccogliendo le informazioni fornite dall'utente. Sfortunatamente, se l'utente non ha inserito la password corretta o se l'applicazione che hai falsificato è configurata con 2FA, **queste informazioni non ti permetteranno di impersonare l'utente ingannato**.
+L'attacco precedente è piuttosto astuto poiché stai simulando un vero sito web e raccogliendo le informazioni fornite dall'utente. Sfortunatamente, se l'utente non ha inserito la password corretta o se l'applicazione che hai simulato è configurata con 2FA, **queste informazioni non ti permetteranno di impersonare l'utente ingannato**.
 
 Qui è dove strumenti come [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** [**CredSniper**](https://github.com/ustayready/CredSniper) e [**muraena**](https://github.com/muraenateam/muraena) sono utili. Questo strumento ti permetterà di generare un attacco simile a MitM. Fondamentalmente, gli attacchi funzionano nel seguente modo:
 
-1. Tu **impersoni il modulo di accesso** della pagina web reale.
-2. L'utente **invia** le sue **credenziali** alla tua pagina falsa e lo strumento le invia alla pagina web reale, **controllando se le credenziali funzionano**.
-3. Se l'account è configurato con **2FA**, la pagina MitM chiederà di inserirlo e una volta che l'**utente lo introduce**, lo strumento lo invierà alla pagina web reale.
+1. Tu **impersoni il modulo di accesso** della vera pagina web.
+2. L'utente **invia** le sue **credenziali** alla tua pagina falsa e lo strumento le invia alla vera pagina web, **controllando se le credenziali funzionano**.
+3. Se l'account è configurato con **2FA**, la pagina MitM chiederà di inserirlo e una volta che l'**utente lo introduce** lo strumento lo invierà alla vera pagina web.
 4. Una volta che l'utente è autenticato, tu (come attaccante) avrai **catturato le credenziali, il 2FA, il cookie e qualsiasi informazione** di ogni interazione mentre lo strumento sta eseguendo un MitM.
 
 ### Via VNC
 
-E se invece di **inviare la vittima a una pagina malevola** con lo stesso aspetto di quella originale, la invii a una **sessione VNC con un browser connesso alla pagina web reale**? Sarai in grado di vedere cosa fa, rubare la password, il MFA utilizzato, i cookie...\
+E se invece di **inviare la vittima a una pagina malevola** con lo stesso aspetto di quella originale, lo invii a una **sessione VNC con un browser connesso alla vera pagina web**? Sarai in grado di vedere cosa fa, rubare la password, il MFA utilizzato, i cookie...\
 Puoi fare questo con [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC)
 
 ## Rilevare la rilevazione
