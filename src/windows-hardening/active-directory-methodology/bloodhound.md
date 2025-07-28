@@ -1,87 +1,78 @@
-# BloodHound & Other AD Enum Tools
+# BloodHound & Other Active Directory Enumeration Tools
 
 {{#include ../../banners/hacktricks-training.md}}
 
+{{#ref}}
+adws-enumeration.md
+{{#endref}}
+
+> NOTE: Ova stranica grupiše neke od najkorisnijih alata za **enumeraciju** i **vizualizaciju** odnosa u Active Directory-ju. Za prikupljanje preko stealthy **Active Directory Web Services (ADWS)** kanala, pogledajte referencu iznad.
+
+---
+
 ## AD Explorer
 
-[AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) je iz Sysinternal Suite:
+[AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) (Sysinternals) je napredni **AD preglednik i uređivač** koji omogućava:
 
-> Napredni preglednik i uređivač Active Directory (AD). Možete koristiti AD Explorer za lako navigiranje AD bazi podataka, definisanje omiljenih lokacija, pregled svojstava objekata i atributa bez otvaranja dijaloga, uređivanje dozvola, pregled šeme objekta i izvršavanje složenih pretraga koje možete sačuvati i ponovo izvršiti.
+* GUI pretraživanje stabla direktorijuma
+* Uređivanje atributa objekata i sigurnosnih deskriptora
+* Kreiranje / poređenje snimaka za analizu van mreže
 
-### Snapshots
+### Brza upotreba
 
-AD Explorer može kreirati snimke AD-a kako biste mogli da ga proverite offline.\
-Može se koristiti za otkrivanje ranjivosti offline, ili za upoređivanje različitih stanja AD DB-a tokom vremena.
+1. Pokrenite alat i povežite se na `dc01.corp.local` sa bilo kojim domena kredencijalima.
+2. Kreirajte offline snimak putem `File ➜ Create Snapshot`.
+3. Poređajte dva snimka sa `File ➜ Compare` da biste uočili promene u dozvolama.
 
-Biće vam potrebni korisničko ime, lozinka i pravac za povezivanje (bilo koji AD korisnik je potreban).
-
-Da biste napravili snimak AD-a, idite na `File` --> `Create Snapshot` i unesite ime za snimak.
+---
 
 ## ADRecon
 
-[**ADRecon**](https://github.com/adrecon/ADRecon) je alat koji izvlači i kombinuje razne artefakte iz AD okruženja. Informacije se mogu predstaviti u **posebno formatiranom** Microsoft Excel **izveštaju** koji uključuje sažetke sa metrikama kako bi olakšao analizu i pružio celovitu sliku trenutnog stanja ciljnog AD okruženja.
-```bash
-# Run it
-.\ADRecon.ps1
+[ADRecon](https://github.com/adrecon/ADRecon) izvlači veliki set artefakata iz domena (ACL-ovi, GPO-ovi, poverenja, CA šabloni …) i proizvodi **Excel izveštaj**.
+```powershell
+# On a Windows host in the domain
+PS C:\> .\ADRecon.ps1 -OutputDir C:\Temp\ADRecon
 ```
-## BloodHound
+---
 
-From [https://github.com/BloodHoundAD/BloodHound](https://github.com/BloodHoundAD/BloodHound)
+## BloodHound (grafička vizualizacija)
 
-> BloodHound je jednostavna Javascript web aplikacija, izgrađena na [Linkurious](http://linkurio.us/), kompajlirana sa [Electron](http://electron.atom.io/), sa [Neo4j](https://neo4j.com/) bazom podataka koju napaja C# sakupljač podataka.
+[BloodHound](https://github.com/BloodHoundAD/BloodHound) koristi teoriju grafova + Neo4j da otkrije skrivene privilegije unutar on-prem AD i Azure AD.
 
-BloodHound koristi teoriju grafova da otkrije skrivene i često nenamerne odnose unutar Active Directory ili Azure okruženja. Napadači mogu koristiti BloodHound da lako identifikuju veoma složene puteve napada koji bi inače bili nemogući za brzo identifikovanje. Branitelji mogu koristiti BloodHound da identifikuju i eliminišu iste te puteve napada. I plave i crvene ekipe mogu koristiti BloodHound da lako steknu dublje razumevanje odnosa privilegija u Active Directory ili Azure okruženju.
-
-Dakle, [Bloodhound ](https://github.com/BloodHoundAD/BloodHound)je neverovatan alat koji može automatski enumerisati domen, sačuvati sve informacije, pronaći moguće puteve za eskalaciju privilegija i prikazati sve informacije koristeći grafove.
-
-BloodHound se sastoji od 2 glavna dela: **ingestors** i **aplikacija za vizualizaciju**.
-
-**Ingestors** se koriste za **enumerisanje domena i ekstrakciju svih informacija** u formatu koji aplikacija za vizualizaciju može razumeti.
-
-**Aplikacija za vizualizaciju koristi neo4j** da prikaže kako su sve informacije povezane i da pokaže različite načine za eskalaciju privilegija u domenu.
-
-### Instalacija
-
-Nakon kreiranja BloodHound CE, ceo projekat je ažuriran radi lakšeg korišćenja sa Docker-om. Najlakši način da se započne je korišćenje njegove unapred konfigurirane Docker Compose konfiguracije.
-
-1. Instalirajte Docker Compose. Ovo bi trebalo da bude uključeno u [Docker Desktop](https://www.docker.com/products/docker-desktop/) instalaciju.
-2. Pokrenite:
+### Implementacija (Docker CE)
 ```bash
 curl -L https://ghst.ly/getbhce | docker compose -f - up
+# Web UI ➜ http://localhost:8080  (user: admin / password from logs)
 ```
-3. Pronađite nasumično generisanu lozinku u izlazu terminala Docker Compose.  
-4. U pretraživaču idite na http://localhost:8080/ui/login. Prijavite se sa korisničkim imenom **`admin`** i **`nasumično generisanom lozinkom`** koju možete pronaći u logovima docker compose.
+### Collectors
 
-Nakon toga, biće potrebno da promenite nasumično generisanu lozinku i bićete spremni sa novim interfejsom, iz kojeg možete direktno preuzeti ingestor-e.
+* `SharpHound.exe` / `Invoke-BloodHound` – nativna ili PowerShell varijanta
+* `AzureHound` – Azure AD enumeracija
+* **SoaPy + BOFHound** – ADWS kolekcija (vidi link na vrhu)
 
-### SharpHound
+#### Uobičajeni SharpHound režimi
+```powershell
+SharpHound.exe --CollectionMethods All           # Full sweep (noisy)
+SharpHound.exe --CollectionMethods Group,LocalAdmin,Session,Trusts,ACL
+SharpHound.exe --Stealth --LDAP                      # Low noise LDAP only
+```
+Kolektori generišu JSON koji se unosi putem BloodHound GUI-a.
 
-Imaju nekoliko opcija, ali ako želite da pokrenete SharpHound sa PC-a koji je pridružen domeni, koristeći vaš trenutni korisnički nalog i izvučete sve informacije, možete uraditi:
-```
-./SharpHound.exe --CollectionMethods All
-Invoke-BloodHound -CollectionMethod All
-```
-> Možete pročitati više o **CollectionMethod** i loop sesiji [ovde](https://support.bloodhoundenterprise.io/hc/en-us/articles/17481375424795-All-SharpHound-Community-Edition-Flags-Explained)
-
-Ako želite da izvršite SharpHound koristeći različite akreditive, možete kreirati CMD netonly sesiju i pokrenuti SharpHound odatle:
-```
-runas /netonly /user:domain\user "powershell.exe -exec bypass"
-```
-[**Saznajte više o Bloodhound-u na ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-with-bloodhound-on-kali-linux)
+---
 
 ## Group3r
 
-[**Group3r**](https://github.com/Group3r/Group3r) je alat za pronalaženje **ranjivosti** u Active Directory-ju povezanih sa **Group Policy**. \
-Morate **pokrenuti group3r** sa hosta unutar domena koristeći **bilo kog korisnika domena**.
+[Group3r](https://github.com/Group3r/Group3r) enumeriše **Group Policy Objects** i ističe pogrešne konfiguracije.
 ```bash
-group3r.exe -f <filepath-name.log>
-# -s sends results to stdin
-# -f send results to file
+# Execute inside the domain
+Group3r.exe -f gpo.log   # -s to stdout
 ```
+---
+
 ## PingCastle
 
-[**PingCastle**](https://www.pingcastle.com/documentation/) **procena sigurnosnog stanja AD okruženja** i pruža lep **izveštaj** sa grafikonima.
-
-Da biste ga pokrenuli, možete izvršiti binarni fajl `PingCastle.exe` i započeće **interaktivnu sesiju** koja prikazuje meni opcija. Podrazumevana opcija koju treba koristiti je **`healthcheck`** koja će uspostaviti osnovnu **pregled** **domena**, i pronaći **pogrešne konfiguracije** i **ranjivosti**.
-
+[PingCastle](https://www.pingcastle.com/documentation/) vrši **proveru zdravlja** Active Directory i generiše HTML izveštaj sa ocenom rizika.
+```powershell
+PingCastle.exe --healthcheck --server corp.local --user bob --password "P@ssw0rd!"
+```
 {{#include ../../banners/hacktricks-training.md}}
