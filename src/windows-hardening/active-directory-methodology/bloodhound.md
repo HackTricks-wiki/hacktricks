@@ -1,87 +1,78 @@
-# BloodHound & Andere AD Enum Tools
+# BloodHound & Andere Active Directory Enumerationswerkzeuge
 
 {{#include ../../banners/hacktricks-training.md}}
 
+{{#ref}}
+adws-enumeration.md
+{{#endref}}
+
+> HINWEIS: Diese Seite gruppiert einige der nützlichsten Dienstprogramme zur **Enumeration** und **Visualisierung** von Active Directory-Beziehungen. Für die Sammlung über den stealthy **Active Directory Web Services (ADWS)** Kanal siehe den oben genannten Verweis.
+
+---
+
 ## AD Explorer
 
-[AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) ist aus der Sysinternal Suite:
+[AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) (Sysinternals) ist ein fortgeschrittener **AD-Viewer & Editor**, der Folgendes ermöglicht:
 
-> Ein fortschrittlicher Active Directory (AD) Viewer und Editor. Sie können AD Explorer verwenden, um einfach durch eine AD-Datenbank zu navigieren, bevorzugte Standorte zu definieren, Objektattribute und -eigenschaften ohne Öffnen von Dialogfeldern anzuzeigen, Berechtigungen zu bearbeiten, das Schema eines Objekts anzuzeigen und komplexe Suchen auszuführen, die Sie speichern und erneut ausführen können.
+* GUI-Browsing des Verzeichnisbaums
+* Bearbeitung von Objektattributen & Sicherheitsbeschreibungen
+* Erstellung / Vergleich von Snapshots für die Offline-Analyse
 
-### Snapshots
+### Schnelle Nutzung
 
-AD Explorer kann Snapshots eines AD erstellen, sodass Sie es offline überprüfen können.\
-Es kann verwendet werden, um Schwachstellen offline zu entdecken oder um verschiedene Zustände der AD-Datenbank im Laufe der Zeit zu vergleichen.
+1. Starten Sie das Tool und verbinden Sie sich mit `dc01.corp.local` mit beliebigen Domänenanmeldeinformationen.
+2. Erstellen Sie einen Offline-Snapshot über `Datei ➜ Snapshot erstellen`.
+3. Vergleichen Sie zwei Snapshots mit `Datei ➜ Vergleichen`, um Berechtigungsabweichungen zu erkennen.
 
-Sie benötigen den Benutzernamen, das Passwort und die Richtung, um eine Verbindung herzustellen (jeder AD-Benutzer ist erforderlich).
-
-Um einen Snapshot von AD zu erstellen, gehen Sie zu `Datei` --> `Snapshot erstellen` und geben Sie einen Namen für den Snapshot ein.
+---
 
 ## ADRecon
 
-[**ADRecon**](https://github.com/adrecon/ADRecon) ist ein Tool, das verschiedene Artefakte aus einer AD-Umgebung extrahiert und kombiniert. Die Informationen können in einem **speziell formatierten** Microsoft Excel **Bericht** präsentiert werden, der Zusammenfassungsansichten mit Metriken enthält, um die Analyse zu erleichtern und ein ganzheitliches Bild des aktuellen Zustands der Ziel-AD-Umgebung zu bieten.
-```bash
-# Run it
-.\ADRecon.ps1
+[ADRecon](https://github.com/adrecon/ADRecon) extrahiert eine große Menge an Artefakten aus einer Domäne (ACLs, GPOs, Vertrauensstellungen, CA-Vorlagen …) und erstellt einen **Excel-Bericht**.
+```powershell
+# On a Windows host in the domain
+PS C:\> .\ADRecon.ps1 -OutputDir C:\Temp\ADRecon
 ```
-## BloodHound
+---
 
-Von [https://github.com/BloodHoundAD/BloodHound](https://github.com/BloodHoundAD/BloodHound)
+## BloodHound (Graphvisualisierung)
 
-> BloodHound ist eine einseitige Javascript-Webanwendung, die auf [Linkurious](http://linkurio.us/) basiert, mit [Electron](http://electron.atom.io/) kompiliert wurde und eine [Neo4j](https://neo4j.com/) Datenbank verwendet, die von einem C# Datenkollektor gespeist wird.
+[BloodHound](https://github.com/BloodHoundAD/BloodHound) verwendet Graphentheorie + Neo4j, um versteckte Berechtigungsbeziehungen in On-Prem AD & Azure AD offenzulegen.
 
-BloodHound verwendet Graphentheorie, um die verborgenen und oft unbeabsichtigten Beziehungen innerhalb einer Active Directory- oder Azure-Umgebung offenzulegen. Angreifer können BloodHound verwenden, um hochkomplexe Angriffswege leicht zu identifizieren, die sonst unmöglich schnell zu erkennen wären. Verteidiger können BloodHound nutzen, um dieselben Angriffswege zu identifizieren und zu beseitigen. Sowohl Blue- als auch Red-Teams können BloodHound verwenden, um ein tieferes Verständnis der Berechtigungsbeziehungen in einer Active Directory- oder Azure-Umgebung zu erlangen.
-
-Also, [Bloodhound ](https://github.com/BloodHoundAD/BloodHound) ist ein erstaunliches Tool, das eine Domäne automatisch auflisten, alle Informationen speichern, mögliche Privilegieneskalationspfade finden und alle Informationen mithilfe von Grafiken anzeigen kann.
-
-BloodHound besteht aus 2 Hauptteilen: **Ingestoren** und der **Visualisierungsanwendung**.
-
-Die **Ingestoren** werden verwendet, um **die Domäne aufzulisten und alle Informationen** in einem Format zu extrahieren, das die Visualisierungsanwendung verstehen kann.
-
-Die **Visualisierungsanwendung verwendet Neo4j**, um zu zeigen, wie alle Informationen miteinander verbunden sind und um verschiedene Möglichkeiten zur Eskalation von Berechtigungen in der Domäne anzuzeigen.
-
-### Installation
-
-Nach der Erstellung von BloodHound CE wurde das gesamte Projekt zur Benutzerfreundlichkeit mit Docker aktualisiert. Der einfachste Weg, um zu beginnen, ist die Verwendung der vorkonfigurierten Docker Compose-Konfiguration.
-
-1. Installieren Sie Docker Compose. Dies sollte mit der [Docker Desktop](https://www.docker.com/products/docker-desktop/) Installation enthalten sein.
-2. Führen Sie aus:
+### Bereitstellung (Docker CE)
 ```bash
 curl -L https://ghst.ly/getbhce | docker compose -f - up
+# Web UI ➜ http://localhost:8080  (user: admin / password from logs)
 ```
-3. Lokalisieren Sie das zufällig generierte Passwort in der Terminalausgabe von Docker Compose.  
-4. Navigieren Sie in einem Browser zu http://localhost:8080/ui/login. Melden Sie sich mit dem Benutzernamen **`admin`** und einem **`zufällig generierten Passwort`** an, das Sie in den Protokollen von Docker Compose finden können.
+### Sammler
 
-Nachdem Sie dies getan haben, müssen Sie das zufällig generierte Passwort ändern, und Sie haben die neue Benutzeroberfläche bereit, von der aus Sie die Ingestoren direkt herunterladen können.
+* `SharpHound.exe` / `Invoke-BloodHound` – native oder PowerShell-Variante
+* `AzureHound` – Azure AD Enumeration
+* **SoaPy + BOFHound** – ADWS-Sammlung (siehe Link oben)
 
-### SharpHound
+#### Häufige SharpHound-Modi
+```powershell
+SharpHound.exe --CollectionMethods All           # Full sweep (noisy)
+SharpHound.exe --CollectionMethods Group,LocalAdmin,Session,Trusts,ACL
+SharpHound.exe --Stealth --LDAP                      # Low noise LDAP only
+```
+Die Sammler erzeugen JSON, das über die BloodHound-GUI aufgenommen wird.
 
-Sie haben mehrere Optionen, aber wenn Sie SharpHound von einem PC ausführen möchten, der der Domäne beigetreten ist, und Ihren aktuellen Benutzer verwenden und alle Informationen extrahieren möchten, können Sie Folgendes tun:
-```
-./SharpHound.exe --CollectionMethods All
-Invoke-BloodHound -CollectionMethod All
-```
-> Sie können mehr über **CollectionMethod** und die Schleifensitzung [hier](https://support.bloodhoundenterprise.io/hc/en-us/articles/17481375424795-All-SharpHound-Community-Edition-Flags-Explained) lesen.
-
-Wenn Sie SharpHound mit anderen Anmeldeinformationen ausführen möchten, können Sie eine CMD netonly-Sitzung erstellen und SharpHound von dort aus ausführen:
-```
-runas /netonly /user:domain\user "powershell.exe -exec bypass"
-```
-[**Erfahren Sie mehr über Bloodhound auf ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-with-bloodhound-on-kali-linux)
+---
 
 ## Group3r
 
-[**Group3r**](https://github.com/Group3r/Group3r) ist ein Tool, um **Schwachstellen** in Active Directory zu finden, die mit **Gruppenrichtlinien** verbunden sind. \
-Sie müssen **group3r** von einem Host innerhalb der Domäne mit **einem beliebigen Domänenbenutzer** ausführen.
+[Group3r](https://github.com/Group3r/Group3r) enumeriert **Group Policy Objects** und hebt Fehlkonfigurationen hervor.
 ```bash
-group3r.exe -f <filepath-name.log>
-# -s sends results to stdin
-# -f send results to file
+# Execute inside the domain
+Group3r.exe -f gpo.log   # -s to stdout
 ```
+---
+
 ## PingCastle
 
-[**PingCastle**](https://www.pingcastle.com/documentation/) **bewertet die Sicherheitslage einer AD-Umgebung** und bietet einen schönen **Bericht** mit Grafiken.
-
-Um es auszuführen, kann die Binary `PingCastle.exe` gestartet werden, und es wird eine **interaktive Sitzung** mit einem Menü von Optionen präsentiert. Die Standardoption, die verwendet werden soll, ist **`healthcheck`**, die eine Basislinie **Übersicht** über die **Domäne** erstellt und **Fehlkonfigurationen** sowie **Schwachstellen** findet.
-
+[PingCastle](https://www.pingcastle.com/documentation/) führt einen **Gesundheitscheck** von Active Directory durch und erstellt einen HTML-Bericht mit Risikobewertung.
+```powershell
+PingCastle.exe --healthcheck --server corp.local --user bob --password "P@ssw0rd!"
+```
 {{#include ../../banners/hacktricks-training.md}}
