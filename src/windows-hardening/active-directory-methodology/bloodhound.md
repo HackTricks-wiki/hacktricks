@@ -1,87 +1,78 @@
-# BloodHound & Diğer AD Enum Araçları
+# BloodHound & Diğer Active Directory Enumeration Araçları
 
 {{#include ../../banners/hacktricks-training.md}}
 
+{{#ref}}
+adws-enumeration.md
+{{#endref}}
+
+> NOT: Bu sayfa, Active Directory ilişkilerini **enumerate** ve **visualise** etmek için en kullanışlı araçlardan bazılarını gruplar. Gizli **Active Directory Web Services (ADWS)** kanalı üzerinden toplama için yukarıdaki referansa bakın.
+
+---
+
 ## AD Explorer
 
-[AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) Sysinternal Suite'ten gelmektedir:
+[AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) (Sysinternals), aşağıdakileri sağlayan gelişmiş bir **AD görüntüleyici ve editör**'dür:
 
-> Gelişmiş bir Active Directory (AD) görüntüleyici ve düzenleyicisidir. AD Explorer'ı, bir AD veritabanında kolayca gezinmek, favori konumları tanımlamak, nesne özelliklerini ve niteliklerini diyalog kutuları açmadan görüntülemek, izinleri düzenlemek, bir nesnenin şemasını görüntülemek ve kaydedip yeniden çalıştırabileceğiniz karmaşık aramalar gerçekleştirmek için kullanabilirsiniz.
+* Dizin ağacının GUI taraması
+* Nesne özniteliklerinin ve güvenlik tanımlarının düzenlenmesi
+* Çevrimdışı analiz için anlık görüntü oluşturma / karşılaştırma
 
-### Anlık Görüntüler
+### Hızlı kullanım
 
-AD Explorer, AD'nin anlık görüntülerini oluşturabilir, böylece çevrimdışı kontrol edebilirsiniz.\
-Çevrimdışı olarak zafiyetleri keşfetmek veya AD DB'nin farklı durumlarını zaman içinde karşılaştırmak için kullanılabilir.
+1. Aracı başlatın ve herhangi bir alan kimlik bilgisi ile `dc01.corp.local`'a bağlanın.
+2. `File ➜ Create Snapshot` ile çevrimdışı bir anlık görüntü oluşturun.
+3. İzin farklılıklarını tespit etmek için `File ➜ Compare` ile iki anlık görüntüyü karşılaştırın.
 
-Bağlanmak için kullanıcı adı, şifre ve yön gerekecektir (herhangi bir AD kullanıcısı gereklidir).
-
-AD'nin anlık görüntüsünü almak için `File` --> `Create Snapshot` yolunu izleyin ve anlık görüntü için bir isim girin.
+---
 
 ## ADRecon
 
-[**ADRecon**](https://github.com/adrecon/ADRecon) bir AD ortamından çeşitli artefaktları çıkaran ve birleştiren bir araçtır. Bilgiler, analiz kolaylığı sağlamak ve hedef AD ortamının mevcut durumu hakkında bütünsel bir resim sunmak için metriklerle birlikte özet görünümler içeren **özel formatlanmış** Microsoft Excel **raporu** şeklinde sunulabilir.
-```bash
-# Run it
-.\ADRecon.ps1
+[ADRecon](https://github.com/adrecon/ADRecon), bir alan (ACL'ler, GPO'lar, güvenler, CA şablonları ...) üzerinden büyük bir artefakt seti çıkarır ve bir **Excel raporu** üretir.
+```powershell
+# On a Windows host in the domain
+PS C:\> .\ADRecon.ps1 -OutputDir C:\Temp\ADRecon
 ```
-## BloodHound
+---
 
-From [https://github.com/BloodHoundAD/BloodHound](https://github.com/BloodHoundAD/BloodHound)
+## BloodHound (grafik görselleştirme)
 
-> BloodHound, [Linkurious](http://linkurio.us/) üzerine inşa edilmiş, [Electron](http://electron.atom.io/) ile derlenmiş, C# veri toplayıcı tarafından beslenen bir [Neo4j](https://neo4j.com/) veritabanına sahip tek sayfa Javascript web uygulamasıdır.
+[BloodHound](https://github.com/BloodHoundAD/BloodHound), yerel AD ve Azure AD içindeki gizli ayrıcalık ilişkilerini ortaya çıkarmak için grafik teorisi + Neo4j kullanır.
 
-BloodHound, bir Active Directory veya Azure ortamındaki gizli ve genellikle istenmeyen ilişkileri ortaya çıkarmak için grafik teorisini kullanır. Saldırganlar, BloodHound'u kullanarak, aksi takdirde hızlı bir şekilde tanımlanması imkansız olan son derece karmaşık saldırı yollarını kolayca belirleyebilirler. Savunucular, BloodHound'u kullanarak aynı saldırı yollarını tanımlayıp ortadan kaldırabilirler. Hem mavi hem de kırmızı takımlar, BloodHound'u kullanarak bir Active Directory veya Azure ortamındaki ayrıcalık ilişkilerini daha derinlemesine anlamak için kolayca faydalanabilirler.
-
-Bu nedenle, [Bloodhound ](https://github.com/BloodHoundAD/BloodHound) otomatik olarak bir alanı listeleyebilen, tüm bilgileri kaydedebilen, olası ayrıcalık yükseltme yollarını bulabilen ve tüm bilgileri grafikler kullanarak gösteren harika bir araçtır.
-
-BloodHound, 2 ana bölümden oluşur: **ingestors** ve **görselleştirme uygulaması**.
-
-**Ingestors**, **alanı listelemek ve tüm bilgileri** görselleştirme uygulamasının anlayacağı bir formatta çıkarmak için kullanılır.
-
-**Görselleştirme uygulaması, neo4j** kullanarak tüm bilgilerin nasıl ilişkili olduğunu gösterir ve alandaki ayrıcalıkları yükseltmenin farklı yollarını sergiler.
-
-### Kurulum
-
-BloodHound CE'nin oluşturulmasından sonra, tüm proje Docker ile kullanım kolaylığı için güncellendi. Başlamak için en kolay yol, önceden yapılandırılmış Docker Compose yapılandırmasını kullanmaktır.
-
-1. Docker Compose'u kurun. Bu, [Docker Desktop](https://www.docker.com/products/docker-desktop/) kurulumuyla birlikte gelmelidir.
-2. Çalıştırın:
+### Dağıtım (Docker CE)
 ```bash
 curl -L https://ghst.ly/getbhce | docker compose -f - up
+# Web UI ➜ http://localhost:8080  (user: admin / password from logs)
 ```
-3. Docker Compose'un terminal çıktısında rastgele oluşturulmuş şifreyi bulun.
-4. Bir tarayıcıda, http://localhost:8080/ui/login adresine gidin. **`admin`** kullanıcı adı ve docker compose günlüklerinde bulabileceğiniz **`rastgele oluşturulmuş şifre`** ile giriş yapın.
+### Toplayıcılar
 
-Bundan sonra rastgele oluşturulmuş şifreyi değiştirmeniz gerekecek ve doğrudan ingestorları indirebileceğiniz yeni arayüz hazır olacak.
+* `SharpHound.exe` / `Invoke-BloodHound` – yerel veya PowerShell varyantı
+* `AzureHound` – Azure AD sayımı
+* **SoaPy + BOFHound** – ADWS toplama (üstteki bağlantıya bakın)
 
-### SharpHound
+#### Yaygın SharpHound modları
+```powershell
+SharpHound.exe --CollectionMethods All           # Full sweep (noisy)
+SharpHound.exe --CollectionMethods Group,LocalAdmin,Session,Trusts,ACL
+SharpHound.exe --Stealth --LDAP                      # Low noise LDAP only
+```
+Toplayıcılar, BloodHound GUI aracılığıyla alınan JSON'lar üretir.
 
-Birçok seçeneği var ama eğer alan adına katılmış bir PC'den SharpHound'u çalıştırmak ve mevcut kullanıcıyı kullanarak tüm bilgileri çıkarmak istiyorsanız, şunları yapabilirsiniz:
-```
-./SharpHound.exe --CollectionMethods All
-Invoke-BloodHound -CollectionMethod All
-```
-> **CollectionMethod** ve döngü oturumu hakkında daha fazla bilgiye [buradan](https://support.bloodhoundenterprise.io/hc/en-us/articles/17481375424795-All-SharpHound-Community-Edition-Flags-Explained) ulaşabilirsiniz.
-
-Farklı kimlik bilgileri kullanarak SharpHound'u çalıştırmak isterseniz, bir CMD netonly oturumu oluşturabilir ve oradan SharpHound'u çalıştırabilirsiniz:
-```
-runas /netonly /user:domain\user "powershell.exe -exec bypass"
-```
-[**Bloodhound hakkında daha fazla bilgi edinin ired.team'de.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-with-bloodhound-on-kali-linux)
+---
 
 ## Group3r
 
-[**Group3r**](https://github.com/Group3r/Group3r) Active Directory ile ilişkili **Group Policy**'deki **açıkları** bulmak için bir araçtır. \
-**group3r'ı** herhangi bir **domain kullanıcısı** kullanarak, alan içindeki bir hosttan **çalıştırmanız** gerekir.
+[Group3r](https://github.com/Group3r/Group3r), **Group Policy Objects**'ı listeleyerek yanlış yapılandırmaları vurgular.
 ```bash
-group3r.exe -f <filepath-name.log>
-# -s sends results to stdin
-# -f send results to file
+# Execute inside the domain
+Group3r.exe -f gpo.log   # -s to stdout
 ```
+---
+
 ## PingCastle
 
-[**PingCastle**](https://www.pingcastle.com/documentation/) **AD ortamının güvenlik durumunu değerlendirir** ve grafiklerle güzel bir **rapor** sunar.
-
-Çalıştırmak için, `PingCastle.exe` ikili dosyasını çalıştırabilir ve seçeneklerin bir menüsünü sunan bir **etkileşimli oturum** başlatır. Kullanılacak varsayılan seçenek **`healthcheck`** olup, **alan** hakkında bir temel **genel bakış** oluşturacak ve **yanlış yapılandırmaları** ve **zayıflıkları** bulacaktır.
-
+[PingCastle](https://www.pingcastle.com/documentation/) Active Directory'nin **sağlık kontrolünü** gerçekleştirir ve risk puanlaması ile bir HTML raporu oluşturur.
+```powershell
+PingCastle.exe --healthcheck --server corp.local --user bob --password "P@ssw0rd!"
+```
 {{#include ../../banners/hacktricks-training.md}}
