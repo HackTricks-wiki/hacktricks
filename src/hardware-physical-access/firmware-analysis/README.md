@@ -225,6 +225,53 @@ Operating systems like [AttifyOS](https://github.com/adi0x90/attifyos) and [Embe
 - [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS is a distro intended to help you perform security assessment and penetration testing of Internet of Things (IoT) devices. It saves you a lot of time by providing a pre-configured environment with all the necessary tools loaded.
 - [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Embedded security testing operating system based on Ubuntu 18.04 preloaded with firmware security testing tools.
 
+## Firmware Downgrade Attacks & Insecure Update Mechanisms
+
+Even when a vendor implements cryptographic signature checks for firmware images, **version rollback (downgrade) protection is frequently omitted**. When the boot- or recovery-loader only verifies the signature with an embedded public key but does not compare the *version* (or a monotonic counter) of the image being flashed, an attacker can legitimately install an **older, vulnerable firmware that still bears a valid signature** and thus re-introduce patched vulnerabilities.
+
+Typical attack workflow:
+
+1. **Obtain an older signed image**
+   * Grab it from the vendor’s public download portal, CDN or support site.
+   * Extract it from companion mobile/desktop applications (e.g. inside an Android APK under `assets/firmware/`).
+   * Retrieve it from third-party repositories such as VirusTotal, Internet archives, forums, etc.
+2. **Upload or serve the image to the device** via any exposed update channel:
+   * Web UI, mobile-app API, USB, TFTP, MQTT, etc.
+   * Many consumer IoT devices expose *unauthenticated* HTTP(S) endpoints that accept Base64-encoded firmware blobs, decode them server-side and trigger recovery/upgrade.
+3. After the downgrade, exploit a vulnerability that was patched in the newer release (for example a command-injection filter that was added later).
+4. Optionally flash the latest image back or disable updates to avoid detection once persistence is gained.
+
+### Example: Command Injection After Downgrade
+
+```http
+POST /check_image_and_trigger_recovery?md5=1; echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC...' >> /root/.ssh/authorized_keys HTTP/1.1
+Host: 192.168.0.1
+Content-Type: application/octet-stream
+Content-Length: 0
+```
+
+In the vulnerable (downgraded) firmware, the `md5` parameter is concatenated directly into a shell command without sanitisation, allowing injection of arbitrary commands (here – enabling SSH key-based root access). Later firmware versions introduced a basic character filter, but the absence of downgrade protection renders the fix moot.
+
+### Extracting Firmware From Mobile Apps
+
+Many vendors bundle full firmware images inside their companion mobile applications so that the app can update the device over Bluetooth/Wi-Fi. These packages are commonly stored unencrypted in the APK/APEX under paths like `assets/fw/` or `res/raw/`. Tools such as `apktool`, `ghidra`, or even plain `unzip` allow you to pull signed images without touching the physical hardware.
+
+```
+$ apktool d vendor-app.apk -o vendor-app
+$ ls vendor-app/assets/firmware
+firmware_v1.3.11.490_signed.bin
+```
+
+### Checklist for Assessing Update Logic
+
+* Is the transport/authentication of the *update endpoint* adequately protected (TLS + authentication)?
+* Does the device compare **version numbers** or a **monotonic anti-rollback counter** before flashing?
+* Is the image verified inside a secure boot chain (e.g. signatures checked by ROM code)?
+* Does userland code perform additional sanity checks (e.g. allowed partition map, model number)?
+* Are *partial* or *backup* update flows re-using the same validation logic?
+
+> 💡  If any of the above are missing, the platform is probably vulnerable to rollback attacks.
+
 ## Vulnerable firmware to practice
 
 To practice discovering vulnerabilities in firmware, use the following vulnerable firmware projects as a starting point.
@@ -246,6 +293,7 @@ To practice discovering vulnerabilities in firmware, use the following vulnerabl
 
 - [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
 - [Practical IoT Hacking: The Definitive Guide to Attacking the Internet of Things](https://www.amazon.co.uk/Practical-IoT-Hacking-F-Chantzis/dp/1718500904)
+- [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 
 ## Trainning and Cert
 
