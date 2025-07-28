@@ -1,12 +1,12 @@
-# Phishing-Methodologie
+# Phishing Methodology
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Methodologie
+## Methodology
 
-1. Rekognoszieren Sie das Opfer
-1. Wählen Sie die **Opferdomain**.
-2. Führen Sie eine grundlegende Webenumeration durch, **um nach Anmeldeportalen** zu suchen, die vom Opfer verwendet werden, und **entscheiden** Sie, welches Sie **nachahmen** möchten.
+1. Recon der Zielperson
+1. Wählen Sie die **Ziel-Domain** aus.
+2. Führen Sie eine grundlegende Webenumeration durch, **um nach Login-Portalen** zu suchen, die von der Zielperson verwendet werden, und **entscheiden** Sie, welches Sie **nachahmen** möchten.
 3. Verwenden Sie einige **OSINT**, um **E-Mails zu finden**.
 2. Bereiten Sie die Umgebung vor
 1. **Kaufen Sie die Domain**, die Sie für die Phishing-Bewertung verwenden möchten.
@@ -14,25 +14,29 @@
 3. Konfigurieren Sie den VPS mit **gophish**.
 3. Bereiten Sie die Kampagne vor
 1. Bereiten Sie die **E-Mail-Vorlage** vor.
-2. Bereiten Sie die **Webseite** vor, um die Anmeldeinformationen zu stehlen.
+2. Bereiten Sie die **Webseite** vor, um die Anmeldedaten zu stehlen.
 4. Starten Sie die Kampagne!
 
 ## Generieren Sie ähnliche Domainnamen oder kaufen Sie eine vertrauenswürdige Domain
 
 ### Techniken zur Variation von Domainnamen
 
-- **Schlüsselwort**: Der Domainname **enthält** ein wichtiges **Schlüsselwort** der ursprünglichen Domain (z.B. zelster.com-management.com).
-- **getrennte Subdomain**: Ändern Sie den **Punkt in einen Bindestrich** einer Subdomain (z.B. www-zelster.com).
+- **Keyword**: Der Domainname **enthält** ein wichtiges **Keyword** der ursprünglichen Domain (z.B. zelster.com-management.com).
+- **hypen-subdomain**: Ändern Sie den **Punkt in einen Bindestrich** einer Subdomain (z.B. www-zelster.com).
 - **Neue TLD**: Gleiche Domain mit einer **neuen TLD** (z.B. zelster.org).
 - **Homoglyph**: Es **ersetzt** einen Buchstaben im Domainnamen durch **Buchstaben, die ähnlich aussehen** (z.B. zelfser.com).
+
+{{#ref}}
+homograph-attacks.md
+{{#endref}}
 - **Transposition:** Es **tauscht zwei Buchstaben** innerhalb des Domainnamens (z.B. zelsetr.com).
 - **Singularisierung/Pluralisierung**: Fügt ein „s“ am Ende des Domainnamens hinzu oder entfernt es (z.B. zeltsers.com).
-- **Auslassung**: Es **entfernt einen** der Buchstaben aus dem Domainnamen (z.B. zelser.com).
+- **Omission**: Es **entfernt einen** der Buchstaben aus dem Domainnamen (z.B. zelser.com).
 - **Wiederholung:** Es **wiederholt einen** der Buchstaben im Domainnamen (z.B. zeltsser.com).
-- **Ersetzung**: Wie Homoglyph, aber weniger heimlich. Es ersetzt einen der Buchstaben im Domainnamen, möglicherweise mit einem Buchstaben in der Nähe des ursprünglichen Buchstabens auf der Tastatur (z.B. zektser.com).
+- **Ersetzung**: Wie Homoglyph, aber weniger stealthy. Es ersetzt einen der Buchstaben im Domainnamen, möglicherweise mit einem Buchstaben in der Nähe des ursprünglichen Buchstabens auf der Tastatur (z.B. zektser.com).
 - **Subdominiert**: Fügen Sie einen **Punkt** innerhalb des Domainnamens ein (z.B. ze.lster.com).
 - **Einfügung**: Es **fügt einen Buchstaben** in den Domainnamen ein (z.B. zerltser.com).
-- **Fehlender Punkt**: Fügen Sie die TLD an den Domainnamen an. (z.B. zelstercom.com)
+- **Fehlender Punkt**: Hängen Sie die TLD an den Domainnamen an. (z.B. zelstercom.com)
 
 **Automatische Werkzeuge**
 
@@ -51,7 +55,7 @@ Es besteht die **Möglichkeit, dass eines der Bits, die gespeichert oder in der 
 
 Wenn dieses Konzept auf DNS-Anfragen **angewendet wird**, ist es möglich, dass die **Domain, die vom DNS-Server empfangen wird**, nicht die gleiche ist wie die ursprünglich angeforderte Domain.
 
-Zum Beispiel kann eine einzige Bitänderung in der Domain "windows.com" sie in "windnws.com" ändern.
+Zum Beispiel kann eine einzelne Bitänderung in der Domain "windows.com" sie in "windnws.com" ändern.
 
 Angreifer können **dies ausnutzen, indem sie mehrere Bit-Flipping-Domains registrieren**, die der Domain des Opfers ähnlich sind. Ihre Absicht ist es, legitime Benutzer auf ihre eigene Infrastruktur umzuleiten.
 
@@ -60,7 +64,7 @@ Für weitere Informationen lesen Sie [https://www.bleepingcomputer.com/news/secu
 ### Kaufen Sie eine vertrauenswürdige Domain
 
 Sie können auf [https://www.expireddomains.net/](https://www.expireddomains.net) nach einer abgelaufenen Domain suchen, die Sie verwenden könnten.\
-Um sicherzustellen, dass die abgelaufene Domain, die Sie kaufen möchten, **bereits ein gutes SEO hat**, können Sie nachsehen, wie sie kategorisiert ist in:
+Um sicherzustellen, dass die abgelaufene Domain, die Sie kaufen möchten, **bereits eine gute SEO hat**, können Sie nachsehen, wie sie kategorisiert ist in:
 
 - [http://www.fortiguard.com/webfilter](http://www.fortiguard.com/webfilter)
 - [https://urlfiltering.paloaltonetworks.com/query/](https://urlfiltering.paloaltonetworks.com/query/)
@@ -83,7 +87,7 @@ Vergessen Sie außerdem nicht, dass, wenn die Benutzer **ein Webportal verwenden
 Sie können es von [https://github.com/gophish/gophish/releases/tag/v0.11.0](https://github.com/gophish/gophish/releases/tag/v0.11.0) herunterladen.
 
 Laden Sie es herunter und entpacken Sie es in `/opt/gophish` und führen Sie `/opt/gophish/gophish` aus.\
-Ihnen wird ein Passwort für den Admin-Benutzer auf Port 3333 in der Ausgabe angezeigt. Greifen Sie daher auf diesen Port zu und verwenden Sie diese Anmeldeinformationen, um das Admin-Passwort zu ändern. Möglicherweise müssen Sie diesen Port auf lokal tunneln:
+Sie erhalten ein Passwort für den Admin-Benutzer auf Port 3333 in der Ausgabe. Greifen Sie daher auf diesen Port zu und verwenden Sie diese Anmeldeinformationen, um das Admin-Passwort zu ändern. Möglicherweise müssen Sie diesen Port zu lokal tunneln:
 ```bash
 ssh -L 3333:127.0.0.1:3333 <user>@<ip>
 ```
@@ -223,19 +227,19 @@ service gophish stop
 
 ### Warten & legitim sein
 
-Je älter eine Domain ist, desto unwahrscheinlicher ist es, dass sie als Spam erkannt wird. Daher solltest du so viel Zeit wie möglich warten (mindestens 1 Woche) vor der Phishing-Bewertung. Außerdem wird die Reputation besser, wenn du eine Seite über einen reputationswürdigen Sektor erstellst.
+Je älter eine Domain ist, desto unwahrscheinlicher ist es, dass sie als Spam erkannt wird. Daher sollten Sie so viel Zeit wie möglich warten (mindestens 1 Woche) vor der Phishing-Bewertung. Darüber hinaus wird die Reputation besser sein, wenn Sie eine Seite über einen reputationswürdigen Sektor erstellen.
 
-Beachte, dass du, auch wenn du eine Woche warten musst, jetzt alles konfigurieren kannst.
+Beachten Sie, dass Sie, auch wenn Sie eine Woche warten müssen, jetzt alles konfigurieren können.
 
 ### Konfigurieren des Reverse DNS (rDNS) Eintrags
 
-Setze einen rDNS (PTR) Eintrag, der die IP-Adresse des VPS auf den Domainnamen auflöst.
+Setzen Sie einen rDNS (PTR) Eintrag, der die IP-Adresse des VPS auf den Domainnamen auflöst.
 
 ### Sender Policy Framework (SPF) Eintrag
 
-Du musst **einen SPF-Eintrag für die neue Domain konfigurieren**. Wenn du nicht weißt, was ein SPF-Eintrag ist, [**lies diese Seite**](../../network-services-pentesting/pentesting-smtp/index.html#spf).
+Sie müssen **einen SPF-Eintrag für die neue Domain konfigurieren**. Wenn Sie nicht wissen, was ein SPF-Eintrag ist, [**lesen Sie diese Seite**](../../network-services-pentesting/pentesting-smtp/index.html#spf).
 
-Du kannst [https://www.spfwizard.net/](https://www.spfwizard.net) verwenden, um deine SPF-Richtlinie zu generieren (verwende die IP der VPS-Maschine).
+Sie können [https://www.spfwizard.net/](https://www.spfwizard.net) verwenden, um Ihre SPF-Richtlinie zu generieren (verwenden Sie die IP der VPS-Maschine).
 
 ![](<../../images/image (1037).png>)
 
@@ -247,7 +251,7 @@ v=spf1 mx a ip4:ip.ip.ip.ip ?all
 
 Sie müssen **einen DMARC-Eintrag für die neue Domain konfigurieren**. Wenn Sie nicht wissen, was ein DMARC-Eintrag ist, [**lesen Sie diese Seite**](../../network-services-pentesting/pentesting-smtp/index.html#dmarc).
 
-Sie müssen einen neuen DNS TXT-Eintrag erstellen, der auf den Hostnamen `_dmarc.<domain>` mit folgendem Inhalt zeigt:
+Sie müssen einen neuen DNS TXT-Eintrag erstellen, der den Hostnamen `_dmarc.<domain>` mit folgendem Inhalt zeigt:
 ```bash
 v=DMARC1; p=none
 ```
@@ -314,7 +318,7 @@ Die Seite [www.mail-tester.com](https://www.mail-tester.com) kann Ihnen anzeigen
 ### E-Mail-Vorlage
 
 - Setzen Sie einen **Namen zur Identifizierung** der Vorlage
-- Schreiben Sie dann einen **Betreff** (nichts Ungewöhnliches, nur etwas, das Sie in einer regulären E-Mail erwarten würden)
+- Schreiben Sie dann einen **Betreff** (nichts Ungewöhnliches, einfach etwas, das Sie in einer regulären E-Mail erwarten würden)
 - Stellen Sie sicher, dass Sie "**Tracking-Bild hinzufügen**" aktiviert haben
 - Schreiben Sie die **E-Mail-Vorlage** (Sie können Variablen wie im folgenden Beispiel verwenden):
 ```html
@@ -350,7 +354,7 @@ Beachten Sie, dass **um die Glaubwürdigkeit der E-Mail zu erhöhen**, empfohlen
 
 - Schreiben Sie einen **Namen**
 - **Schreiben Sie den HTML-Code** der Webseite. Beachten Sie, dass Sie **Webseiten importieren** können.
-- Markieren Sie **Eingereichte Daten erfassen** und **Passwörter erfassen**
+- Aktivieren Sie **Erfasste eingereichte Daten** und **Erfasste Passwörter**
 - Setzen Sie eine **Weiterleitung**
 
 ![](<../../images/image (826).png>)
@@ -360,12 +364,12 @@ Beachten Sie, dass **um die Glaubwürdigkeit der E-Mail zu erhöhen**, empfohlen
 > Beachten Sie, dass Sie, wenn Sie **statische Ressourcen** für das HTML benötigen (vielleicht einige CSS- und JS-Seiten), diese in _**/opt/gophish/static/endpoint**_ speichern können und dann von _**/static/\<dateiname>**_ darauf zugreifen können.
 
 > [!TIP]
-> Für die Weiterleitung könnten Sie **die Benutzer zur legitimen Hauptwebseite** des Opfers umleiten oder sie beispielsweise zu _/static/migration.html_ umleiten, eine **Ladeanimation (**[**https://loading.io/**](https://loading.io)**) für 5 Sekunden anzeigen und dann angeben, dass der Prozess erfolgreich war**.
+> Für die Weiterleitung könnten Sie **die Benutzer zur legitimen Hauptwebseite** des Opfers umleiten oder sie beispielsweise zu _/static/migration.html_ umleiten, eine **Ladeanimation** (**[**https://loading.io/**](https://loading.io)**) für 5 Sekunden anzeigen und dann angeben, dass der Prozess erfolgreich war.
 
 ### Benutzer & Gruppen
 
 - Setzen Sie einen Namen
-- **Importieren Sie die Daten** (beachten Sie, dass Sie, um die Vorlage für das Beispiel zu verwenden, den Vornamen, Nachnamen und die E-Mail-Adresse jedes Benutzers benötigen)
+- **Importieren Sie die Daten** (beachten Sie, dass Sie für die Verwendung der Vorlage für das Beispiel den Vornamen, Nachnamen und die E-Mail-Adresse jedes Benutzers benötigen)
 
 ![](<../../images/image (163).png>)
 
@@ -392,7 +396,7 @@ clone-a-website.md
 
 ## Hintertür-Dokumente & -Dateien
 
-In einigen Phishing-Bewertungen (hauptsächlich für Red Teams) möchten Sie möglicherweise auch **Dateien mit einer Art Hintertür senden** (vielleicht ein C2 oder einfach etwas, das eine Authentifizierung auslöst).\
+In einigen Phishing-Bewertungen (hauptsächlich für Red Teams) möchten Sie möglicherweise auch **Dateien mit einer Art Hintertür senden** (vielleicht ein C2 oder vielleicht nur etwas, das eine Authentifizierung auslöst).\
 Überprüfen Sie die folgende Seite für einige Beispiele:
 
 {{#ref}}
@@ -414,7 +418,7 @@ Hier sind Tools wie [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** 
 
 ### Via VNC
 
-Was wäre, wenn Sie anstatt den **Opfer zu einer bösartigen Seite** mit dem gleichen Aussehen wie die Originalseite zu senden, ihn zu einer **VNC-Sitzung mit einem Browser, der mit der echten Webseite verbunden ist, senden**? Sie können sehen, was er tut, das Passwort, die verwendete MFA, die Cookies stehlen...\
+Was wäre, wenn Sie anstelle von **den Opfern auf eine bösartige Seite** mit dem gleichen Aussehen wie die Originalseite zu senden, sie zu einer **VNC-Sitzung mit einem Browser, der mit der echten Webseite verbunden ist,** senden? Sie können sehen, was er tut, das Passwort, die verwendete MFA, die Cookies stehlen...\
 Sie können dies mit [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC) tun.
 
 ## Erkennung der Erkennung
