@@ -260,6 +260,7 @@
   - [Ad Certificates](windows-hardening/active-directory-methodology/ad-certificates.md)
   - [AD information in printers](windows-hardening/active-directory-methodology/ad-information-in-printers.md)
   - [AD DNS Records](windows-hardening/active-directory-methodology/ad-dns-records.md)
+  - [Adws Enumeration](windows-hardening/active-directory-methodology/adws-enumeration.md)
   - [ASREPRoast](windows-hardening/active-directory-methodology/asreproast.md)
   - [BloodHound & Other AD Enum Tools](windows-hardening/active-directory-methodology/bloodhound.md)
   - [Constrained Delegation](windows-hardening/active-directory-methodology/constrained-delegation.md)

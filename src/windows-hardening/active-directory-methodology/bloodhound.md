@@ -1,87 +1,78 @@
-# BloodHound & Ander AD Enum Gereedskap
+# BloodHound & Ander Aktiewe Gidsen van Directory
 
 {{#include ../../banners/hacktricks-training.md}}
 
+{{#ref}}
+adws-enumeration.md
+{{#endref}}
+
+> LET WEL: Hierdie bladsy groepeer sommige van die nuttigste nutsmiddels om **te enumerate** en **te visualiseer** Aktiewe Directory verhoudings. Vir versameling oor die stealthy **Active Directory Web Services (ADWS)** kanaal, kyk na die verwysing hierbo.
+
+---
+
 ## AD Explorer
 
-[AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) is van die Sysinternal Suite:
+[AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) (Sysinternals) is 'n gevorderde **AD kyker & redigeerder** wat toelaat:
 
-> 'n Gevorderde Active Directory (AD) kyker en redigeerder. Jy kan AD Explorer gebruik om maklik deur 'n AD-databasis te navigeer, gunsteling plekke te definieer, objek eienskappe en attribuut te sien sonder om dialoogvensters te open, regte te redigeer, 'n objek se skema te sien, en gesofistikeerde soektogte uit te voer wat jy kan stoor en weer uitvoer.
+* GUI-browsing van die gidsboom
+* Redigering van objekattributen & sekuriteitsbeskrywings
+* Snapshot skepping / vergelyking vir offline analise
 
-### Snapshots
+### Vinnige gebruik
 
-AD Explorer kan snapshots van 'n AD skep sodat jy dit aflyn kan nagaan.\
-Dit kan gebruik word om kwesbaarhede aflyn te ontdek, of om verskillende toestande van die AD DB oor tyd te vergelyk.
+1. Begin die hulpmiddel en verbind met `dc01.corp.local` met enige domein akrediteer.
+2. Skep 'n offline snapshot via `File ➜ Create Snapshot`.
+3. Vergelyk twee snapshots met `File ➜ Compare` om toestemming verskille op te spoor.
 
-Jy sal die gebruikersnaam, wagwoord, en rigting benodig om te verbind (enige AD-gebruiker is benodig).
-
-Om 'n snapshot van AD te neem, gaan na `File` --> `Create Snapshot` en voer 'n naam vir die snapshot in.
+---
 
 ## ADRecon
 
-[**ADRecon**](https://github.com/adrecon/ADRecon) is 'n gereedskap wat verskeie artefakte uit 'n AD-omgewing onttrek en kombineer. Die inligting kan in 'n **spesiaal geformateerde** Microsoft Excel **verslag** aangebied word wat opsommingsoorsigte met metrieke insluit om analise te fasiliteer en 'n holistiese prentjie van die huidige toestand van die teiken AD-omgewing te bied.
-```bash
-# Run it
-.\ADRecon.ps1
+[ADRecon](https://github.com/adrecon/ADRecon) onttrek 'n groot stel artefakte uit 'n domein (ACLs, GPOs, trusts, CA templates …) en produseer 'n **Excel verslag**.
+```powershell
+# On a Windows host in the domain
+PS C:\> .\ADRecon.ps1 -OutputDir C:\Temp\ADRecon
 ```
-## BloodHound
+---
 
-From [https://github.com/BloodHoundAD/BloodHound](https://github.com/BloodHoundAD/BloodHound)
+## BloodHound (graf visualisering)
 
-> BloodHound is 'n enkele bladsy Javascript webtoepassing, gebou op [Linkurious](http://linkurio.us/), saamgestel met [Electron](http://electron.atom.io/), met 'n [Neo4j](https://neo4j.com/) databasis wat gevoed word deur 'n C# data versamelaar.
+[BloodHound](https://github.com/BloodHoundAD/BloodHound) gebruik grafteorie + Neo4j om verborge privilige verhoudings binne op-prem AD & Azure AD te onthul.
 
-BloodHound gebruik grafteorie om die versteekte en dikwels onbedoelde verhoudings binne 'n Active Directory of Azure omgewing te onthul. Aanvallers kan BloodHound gebruik om maklik hoogs komplekse aanvalspaaie te identifiseer wat andersins onmoontlik sou wees om vinnig te identifiseer. Verdedigers kan BloodHound gebruik om daardie selfde aanvalspaaie te identifiseer en te elimineer. Beide blou en rooi spanne kan BloodHound gebruik om maklik 'n dieper begrip van privilige verhoudings in 'n Active Directory of Azure omgewing te verkry.
-
-So, [Bloodhound ](https://github.com/BloodHoundAD/BloodHound)is 'n wonderlike hulpmiddel wat 'n domein outomaties kan opnoem, al die inligting kan stoor, moontlike privilige eskalasiepaaie kan vind en al die inligting kan vertoon met behulp van grafieke.
-
-Booldhound bestaan uit 2 hoofdele: **ingestors** en die **visualiseringstoepassing**.
-
-Die **ingestors** word gebruik om **die domein op te noem en al die inligting te onttrek** in 'n formaat wat die visualiseringstoepassing sal verstaan.
-
-Die **visualiseringstoepassing gebruik neo4j** om te wys hoe al die inligting verwant is en om verskillende maniere te wys om privilige in die domein te eskaleer.
-
-### Installation
-
-Na die skepping van BloodHound CE, is die hele projek opgedateer vir gebruiksgemak met Docker. Die maklikste manier om te begin is om sy vooraf-gekonfigureerde Docker Compose konfigurasie te gebruik.
-
-1. Installeer Docker Compose. Dit behoort ingesluit te wees met die [Docker Desktop](https://www.docker.com/products/docker-desktop/) installasie.
-2. Loop:
+### Ontplooiing (Docker CE)
 ```bash
 curl -L https://ghst.ly/getbhce | docker compose -f - up
+# Web UI ➜ http://localhost:8080  (user: admin / password from logs)
 ```
-3. Vind die ewekansig gegenereerde wagwoord in die terminaluitvoer van Docker Compose.  
-4. In 'n blaaier, navigeer na http://localhost:8080/ui/login. Meld aan met die gebruikersnaam **`admin`** en 'n **`ewekansig gegenereerde wagwoord`** wat jy in die logs van docker compose kan vind.
+### Versamelaars
 
-Na hierdie sal jy die ewekansig gegenereerde wagwoord moet verander en jy sal die nuwe koppelvlak gereed hê, waarvan jy direk die ingestors kan aflaai.
+* `SharpHound.exe` / `Invoke-BloodHound` – inheemse of PowerShell variasie
+* `AzureHound` – Azure AD enumerasie
+* **SoaPy + BOFHound** – ADWS versameling (sien skakel bo)
 
-### SharpHound
+#### Algemene SharpHound modi
+```powershell
+SharpHound.exe --CollectionMethods All           # Full sweep (noisy)
+SharpHound.exe --CollectionMethods Group,LocalAdmin,Session,Trusts,ACL
+SharpHound.exe --Stealth --LDAP                      # Low noise LDAP only
+```
+Die versamelaars genereer JSON wat via die BloodHound GUI ingeneem word.
 
-Hulle het verskeie opsies, maar as jy SharpHound vanaf 'n rekenaar wat by die domein aangesluit is, wil uitvoer, met jou huidige gebruiker en al die inligting wil onttrek, kan jy doen:
-```
-./SharpHound.exe --CollectionMethods All
-Invoke-BloodHound -CollectionMethod All
-```
-> Jy kan meer lees oor **CollectionMethod** en lus sessie [hier](https://support.bloodhoundenterprise.io/hc/en-us/articles/17481375424795-All-SharpHound-Community-Edition-Flags-Explained)
-
-As jy SharpHound met verskillende akrediteerbesonderhede wil uitvoer, kan jy 'n CMD netonly sessie skep en SharpHound van daar af uitvoer:
-```
-runas /netonly /user:domain\user "powershell.exe -exec bypass"
-```
-[**Leer meer oor Bloodhound in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-with-bloodhound-on-kali-linux)
+---
 
 ## Group3r
 
-[**Group3r**](https://github.com/Group3r/Group3r) is 'n hulpmiddel om **kwesbaarhede** in Active Directory geassosieer met **Groep Beleid** te vind. \
-Jy moet **group3r** vanaf 'n gasheer binne die domein gebruik met **enige domein gebruiker**.
+[Group3r](https://github.com/Group3r/Group3r) evalueer **Group Policy Objects** en beklemtoon miskonfigurasies.
 ```bash
-group3r.exe -f <filepath-name.log>
-# -s sends results to stdin
-# -f send results to file
+# Execute inside the domain
+Group3r.exe -f gpo.log   # -s to stdout
 ```
+---
+
 ## PingCastle
 
-[**PingCastle**](https://www.pingcastle.com/documentation/) **evalueer die sekuriteitsposisie van 'n AD-omgewing** en bied 'n mooi **verslag** met grafieke.
-
-Om dit te laat loop, kan jy die binêre `PingCastle.exe` uitvoer en dit sal 'n **interaktiewe sessie** begin wat 'n menu van opsies aanbied. Die standaardopsie om te gebruik is **`healthcheck`** wat 'n basislyn **oorsig** van die **domein** sal vestig, en **misconfigurasies** en **kwesbaarhede** sal vind.
-
+[PingCastle](https://www.pingcastle.com/documentation/) voer 'n **gesondheidskontrole** van Active Directory uit en genereer 'n HTML-verslag met risiko telling.
+```powershell
+PingCastle.exe --healthcheck --server corp.local --user bob --password "P@ssw0rd!"
+```
 {{#include ../../banners/hacktricks-training.md}}
