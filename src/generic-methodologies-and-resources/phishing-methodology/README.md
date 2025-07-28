@@ -25,6 +25,10 @@
 - **hypened subdomain**: Change the **dot for a hyphen** of a subdomain (e.g., www-zelster.com).
 - **New TLD**: Same domain using a **new TLD** (e.g., zelster.org)
 - **Homoglyph**: It **replaces** a letter in the domain name with **letters that look similar** (e.g., zelfser.com).
+
+{{#ref}}
+homograph-attacks.md
+{{#endref}}
 - **Transposition:** It **swaps two letters** within the domain name (e.g., zelsetr.com).
 - **Singularization/Pluralization**: Adds or removes “s” at the end of the domain name (e.g., zeltsers.com).
 - **Omission**: It **removes one** of the letters from the domain name (e.g., zelser.com).
@@ -464,6 +468,12 @@ Attackers can silently copy malicious commands into the victim’s clipboard fro
 
 {{#ref}}
 clipboard-hijacking.md
+{{#endref}}
+
+## Mobile Phishing & Malicious App Distribution (Android & iOS)
+
+{{#ref}}
+mobile-phishing-malicious-apps.md
 {{#endref}}
 
 ## References
