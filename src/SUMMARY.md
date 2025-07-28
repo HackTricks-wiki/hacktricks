@@ -224,6 +224,7 @@
 
 # 🪟 Windows Hardening
 
+- [Adaptix](windows-hardening/adaptix.md)
 - [Authentication Credentials Uac And Efs](windows-hardening/authentication-credentials-uac-and-efs.md)
 - [Checklist - Local Windows Privilege Escalation](windows-hardening/checklist-windows-privilege-escalation.md)
 - [Windows Local Privilege Escalation](windows-hardening/windows-local-privilege-escalation/README.md)
