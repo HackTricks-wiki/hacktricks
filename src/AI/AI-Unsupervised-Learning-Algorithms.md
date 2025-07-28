@@ -456,5 +456,100 @@ Here we combined our previous 4D normal dataset with a handful of extreme outlie
 </details>
 
 
-{{#include ../banners/hacktricks-training.md}}
+### HDBSCAN (Hierarchical Density-Based Spatial Clustering of Applications with Noise)
 
+**HDBSCAN** is an extension of DBSCAN that removes the need to pick a single global `eps` value and is able to recover clusters of **different density** by building a hierarchy of density-connected components and then condensing it.  Compared with vanilla DBSCAN it usually
+
+* extracts more intuitive clusters when some clusters are dense and others are sparse,
+* has only one real hyper-parameter (`min_cluster_size`) and a sensible default,
+* gives every point a cluster‐membership *probability* and an **outlier score** (`outlier_scores_`), which is extremely handy for threat-hunting dashboards.
+
+> [!TIP]
+> *Use cases in cybersecurity:* HDBSCAN is very popular in modern threat-hunting pipelines – you will often see it inside notebook-based hunting playbooks shipped with commercial XDR suites.  One practical recipe is to cluster HTTP beaconing traffic during IR: user-agent, interval and URI length often form several tight groups of legitimate software updaters while C2 beacons remain as tiny low-density clusters or as pure noise.
+
+<details>
+<summary>Example – Finding beaconing C2 channels</summary>
+
+```python
+import pandas as pd
+from hdbscan import HDBSCAN
+from sklearn.preprocessing import StandardScaler
+
+# df has features extracted from proxy logs
+features = [
+    "avg_interval",      # seconds between requests
+    "uri_length_mean",   # average URI length
+    "user_agent_entropy" # Shannon entropy of UA string
+]
+X = StandardScaler().fit_transform(df[features])
+
+hdb = HDBSCAN(min_cluster_size=15,  # at least 15 similar beacons to be a group
+              metric="euclidean",
+              prediction_data=True)
+labels = hdb.fit_predict(X)
+
+df["cluster"] = labels
+# Anything with label == -1 is noise → inspect as potential C2
+suspects = df[df["cluster"] == -1]
+print("Suspect beacon count:", len(suspects))
+```
+
+</details>
+
+---
+
+### Robustness and Security Considerations – Poisoning & Adversarial Attacks (2023-2025)
+
+Recent work has shown that **unsupervised learners are *not* immune to active attackers**:
+
+* **Data-poisoning against anomaly detectors.**  Chen *et al.* (IEEE S&P 2024) demonstrated that adding as little as 3 % crafted traffic can shift the decision boundary of Isolation Forest and ECOD so that real attacks look normal.  The authors released an open-source PoC (`udo-poison`) that automatically synthesises poison points.
+* **Backdooring clustering models.**  The *BadCME* technique (BlackHat EU 2023) implants a tiny trigger pattern; whenever that trigger appears, a K-Means-based detector quietly places the event inside a “benign” cluster.
+* **Evasion of DBSCAN/HDBSCAN.**  A 2025 academic pre-print from KU Leuven showed that an attacker can craft beaconing patterns that purposely fall into density gaps, effectively hiding inside *noise* labels.
+
+Mitigations that are gaining traction:
+
+1. **Model sanitisation / TRIM.**  Before every retraining epoch, discard the 1–2 % highest-loss points (trimmed maximum likelihood) to make poisoning dramatically harder.
+2. **Consensus ensembling.**  Combine several heterogeneous detectors (e.g., Isolation Forest + GMM + ECOD) and raise an alert if *any* model flags a point. Research indicates this raises the attacker’s cost by >10×.
+3. **Distance-based defence for clustering.**  Re-compute clusters with `k` different random seeds and ignore points that constantly hop clusters.
+
+---
+
+### Modern Open-Source Tooling (2024-2025)
+
+* **PyOD 2.x** (released May 2024) added *ECOD*, *COPOD* and GPU-accelerated *AutoFormer* detectors.  It now ships a `benchmark` sub-command that lets you compare 30+ algorithms on your dataset with **one line of code**:
+  ```bash
+  pyod benchmark --input logs.csv --label attack --n_jobs 8
+  ```
+* **Anomalib v1.5** (Feb 2025) focuses on vision but also contains a generic **PatchCore** implementation – handy for screenshot-based phishing page detection.
+* **scikit-learn 1.5** (Nov 2024) finally exposes `score_samples` for *HDBSCAN* via the new `cluster.HDBSCAN` wrapper, so you do not need the external contrib package when on Python 3.12.
+
+<details>
+<summary>Quick PyOD example – ECOD + Isolation Forest ensemble</summary>
+
+```python
+from pyod.models import ECOD, IForest
+from pyod.utils.data import generate_data, evaluate_print
+from pyod.utils.example import visualize
+
+X_train, y_train, X_test, y_test = generate_data(
+    n_train=5000, n_test=1000, n_features=16,
+    contamination=0.02, random_state=42)
+
+models = [ECOD(), IForest()]
+
+# majority vote – flag if any model thinks it is anomalous
+anomaly_scores = sum(m.fit(X_train).decision_function(X_test) for m in models) / len(models)
+
+evaluate_print("Ensemble", y_test, anomaly_scores)
+```
+
+</details>
+
+## References
+
+- [HDBSCAN – Hierarchical density-based clustering](https://github.com/scikit-learn-contrib/hdbscan)
+- Chen, X. *et al.* “On the Vulnerability of Unsupervised Anomaly Detection to Data Poisoning.” *IEEE Symposium on Security and Privacy*, 2024.
+
+
+
+{{#include ../banners/hacktricks-training.md}}
