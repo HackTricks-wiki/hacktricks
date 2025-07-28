@@ -23,16 +23,20 @@
 
 - **Słowo kluczowe**: Nazwa domeny **zawiera** ważne **słowo kluczowe** oryginalnej domeny (np. zelster.com-management.com).
 - **poddomena z myślnikiem**: Zmień **kropkę na myślnik** w poddomenie (np. www-zelster.com).
-- **Nowe TLD**: Ta sama domena używająca **nowego TLD** (np. zelster.org).
+- **Nowe TLD**: Ta sama domena z użyciem **nowego TLD** (np. zelster.org).
 - **Homoglif**: **Zastępuje** literę w nazwie domeny **literami, które wyglądają podobnie** (np. zelfser.com).
+
+{{#ref}}
+homograph-attacks.md
+{{#endref}}
 - **Transpozycja:** **Zamienia dwie litery** w nazwie domeny (np. zelsetr.com).
 - **Liczba pojedyncza/mnoga**: Dodaje lub usuwa „s” na końcu nazwy domeny (np. zeltsers.com).
 - **Ominięcie**: **Usuwa jedną** z liter z nazwy domeny (np. zelser.com).
 - **Powtórzenie:** **Powtarza jedną** z liter w nazwie domeny (np. zeltsser.com).
-- **Zamiana**: Jak homoglif, ale mniej dyskretny. Zastępuje jedną z liter w nazwie domeny, być może literą bliską oryginalnej literze na klawiaturze (np. zektser.com).
-- **Poddomenowana**: Wprowadza **kropkę** wewnątrz nazwy domeny (np. ze.lster.com).
+- **Zastąpienie**: Jak homoglif, ale mniej dyskretny. Zastępuje jedną z liter w nazwie domeny, być może literą bliską oryginalnej literze na klawiaturze (np. zektser.com).
+- **Subdomenowana**: Wprowadza **kropkę** wewnątrz nazwy domeny (np. ze.lster.com).
 - **Wstawienie**: **Wstawia literę** do nazwy domeny (np. zerltser.com).
-- **Brak kropki**: Dołącz TLD do nazwy domeny. (np. zelstercom.com)
+- **Brakująca kropka**: Dołącz TLD do nazwy domeny. (np. zelstercom.com)
 
 **Narzędzia automatyczne**
 
@@ -47,19 +51,19 @@
 
 ### Bitflipping
 
-Istnieje **możliwość, że jeden z bitów przechowywanych lub w komunikacji może zostać automatycznie zmieniony** z powodu różnych czynników, takich jak wybuchy słoneczne, promieniowanie kosmiczne lub błędy sprzętowe.
+Istnieje **możliwość, że jeden z bitów przechowywanych lub w komunikacji może zostać automatycznie zmieniony** z powodu różnych czynników, takich jak burze słoneczne, promieniowanie kosmiczne lub błędy sprzętowe.
 
 Gdy ten koncept jest **stosowany do zapytań DNS**, możliwe jest, że **domena odebrana przez serwer DNS** nie jest taka sama jak domena pierwotnie żądana.
 
 Na przykład, pojedyncza modyfikacja bitu w domenie "windows.com" może zmienić ją na "windnws.com."
 
-Atakujący mogą **wykorzystać to, rejestrując wiele domen z bit-flipping**, które są podobne do domeny ofiary. Ich intencją jest przekierowanie legalnych użytkowników do własnej infrastruktury.
+Napastnicy mogą **wykorzystać to, rejestrując wiele domen z bit-flipping**, które są podobne do domeny ofiary. Ich intencją jest przekierowanie legalnych użytkowników do własnej infrastruktury.
 
 Aby uzyskać więcej informacji, przeczytaj [https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
 
 ### Kup zaufaną domenę
 
-Możesz poszukać na [https://www.expireddomains.net/](https://www.expireddomains.net) wygasłej domeny, którą mógłbyś wykorzystać.\
+Możesz poszukać na [https://www.expireddomains.net/](https://www.expireddomains.net) wygasłej domeny, którą mógłbyś użyć.\
 Aby upewnić się, że wygasła domena, którą zamierzasz kupić, **ma już dobrą SEO**, możesz sprawdzić, jak jest sklasyfikowana w:
 
 - [http://www.fortiguard.com/webfilter](http://www.fortiguard.com/webfilter)
@@ -73,8 +77,8 @@ Aby upewnić się, że wygasła domena, którą zamierzasz kupić, **ma już dob
 - [https://hunter.io/](https://hunter.io)
 - [https://anymailfinder.com/](https://anymailfinder.com)
 
-Aby **odkryć więcej** ważnych adresów e-mail lub **zweryfikować te**, które już odkryłeś, możesz sprawdzić, czy możesz przeprowadzić brute-force na serwerach smtp ofiary. [Dowiedz się, jak zweryfikować/odkryć adres e-mail tutaj](../../network-services-pentesting/pentesting-smtp/index.html#username-bruteforce-enumeration).\
-Ponadto nie zapomnij, że jeśli użytkownicy korzystają z **jakiegokolwiek portalu internetowego do dostępu do swoich e-maili**, możesz sprawdzić, czy jest on podatny na **brute force nazwy użytkownika** i wykorzystać tę podatność, jeśli to możliwe.
+Aby **odkryć więcej** ważnych adresów e-mail lub **zweryfikować te, które już odkryłeś**, możesz sprawdzić, czy możesz przeprowadzić brute-force na serwerach smtp ofiary. [Dowiedz się, jak zweryfikować/odkryć adres e-mail tutaj](../../network-services-pentesting/pentesting-smtp/index.html#username-bruteforce-enumeration).\
+Ponadto nie zapomnij, że jeśli użytkownicy korzystają z **jakiegokolwiek portalu internetowego do dostępu do swoich e-maili**, możesz sprawdzić, czy jest on podatny na **brute force nazw użytkowników** i wykorzystać tę podatność, jeśli to możliwe.
 
 ## Konfigurowanie GoPhish
 
@@ -109,7 +113,7 @@ cp "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" /opt/gophish/ssl_keys/key.crt�
 ```
 **Konfiguracja poczty**
 
-Zacznij od instalacji: `apt-get install postfix`
+Rozpocznij instalację: `apt-get install postfix`
 
 Następnie dodaj domenę do następujących plików:
 
@@ -219,7 +223,7 @@ service gophish status
 ss -l | grep "3333\|443"
 service gophish stop
 ```
-## Konfiguracja serwera pocztowego i domeny
+## Konfigurowanie serwera pocztowego i domeny
 
 ### Czekaj i bądź legitny
 
@@ -235,7 +239,7 @@ Ustaw rekord rDNS (PTR), który rozwiązuje adres IP VPS na nazwę domeny.
 
 Musisz **skonfigurować rekord SPF dla nowej domeny**. Jeśli nie wiesz, czym jest rekord SPF [**przeczytaj tę stronę**](../../network-services-pentesting/pentesting-smtp/index.html#spf).
 
-Możesz użyć [https://www.spfwizard.net/](https://www.spfwizard.net), aby wygenerować swoją politykę SPF (użyj adresu IP maszyny VPS)
+Możesz użyć [https://www.spfwizard.net/](https://www.spfwizard.net) do wygenerowania swojej polityki SPF (użyj adresu IP maszyny VPS)
 
 ![](<../../images/image (1037).png>)
 
@@ -289,17 +293,17 @@ Authentication-Results: mx.google.com;
 spf=pass (google.com: domain of contact@example.com designates --- as permitted sender) smtp.mail=contact@example.com;
 dkim=pass header.i=@example.com;
 ```
-### Usuwanie z czarnej listy Spamhouse
+### Usuwanie z Czarnej Listy Spamhouse
 
 Strona [www.mail-tester.com](https://www.mail-tester.com) może wskazać, czy Twoja domena jest blokowana przez spamhouse. Możesz poprosić o usunięcie swojej domeny/IP pod adresem: ​[https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)
 
-### Usuwanie z czarnej listy Microsoft
+### Usuwanie z Czarnej Listy Microsoft
 
 ​​Możesz poprosić o usunięcie swojej domeny/IP pod adresem [https://sender.office.com/](https://sender.office.com).
 
-## Utwórz i uruchom kampanię GoPhish
+## Utwórz i Uruchom Kampanię GoPhish
 
-### Profil wysyłania
+### Profil Wysyłania
 
 - Ustaw **nazwę identyfikującą** profil nadawcy
 - Zdecyduj, z którego konta będziesz wysyłać e-maile phishingowe. Sugestie: _noreply, support, servicedesk, salesforce..._
@@ -311,12 +315,12 @@ Strona [www.mail-tester.com](https://www.mail-tester.com) może wskazać, czy Tw
 > Zaleca się korzystanie z funkcji "**Wyślij e-mail testowy**", aby sprawdzić, czy wszystko działa.\
 > Zalecałbym **wysyłanie e-maili testowych na adresy 10min mail**, aby uniknąć dodania do czarnej listy podczas testów.
 
-### Szablon e-maila
+### Szablon E-mail
 
 - Ustaw **nazwę identyfikującą** szablon
 - Następnie napisz **temat** (nic dziwnego, po prostu coś, co można by się spodziewać w zwykłym e-mailu)
 - Upewnij się, że zaznaczyłeś "**Dodaj obrazek śledzący**"
-- Napisz **szablon e-maila** (możesz używać zmiennych, jak w poniższym przykładzie):
+- Napisz **szablon e-mail** (możesz używać zmiennych, jak w poniższym przykładzie):
 ```html
 <html>
 <head>
@@ -360,7 +364,7 @@ Zauważ, że **aby zwiększyć wiarygodność e-maila**, zaleca się użycie jak
 > Zauważ, że jeśli musisz **użyć jakichś statycznych zasobów** dla HTML (może jakieś strony CSS i JS), możesz je zapisać w _**/opt/gophish/static/endpoint**_ i następnie uzyskać do nich dostęp z _**/static/\<filename>**_
 
 > [!TIP]
-> W przypadku przekierowania możesz **przekierować użytkowników na legitną główną stronę internetową** ofiary lub przekierować ich na _/static/migration.html_, na przykład, umieścić jakiś **kręcący się kółko (**[**https://loading.io/**](https://loading.io)**) przez 5 sekund, a następnie wskazać, że proces zakończył się sukcesem**.
+> W przypadku przekierowania możesz **przekierować użytkowników na legalną główną stronę** ofiary lub przekierować ich na _/static/migration.html_, na przykład, umieścić jakiś **kręcący się kółko (**[**https://loading.io/**](https://loading.io)**) przez 5 sekund, a następnie wskazać, że proces zakończył się sukcesem**.
 
 ### Użytkownicy i grupy
 
@@ -410,11 +414,11 @@ Tutaj przydatne są narzędzia takie jak [**evilginx2**](https://github.com/kgre
 1. **Podszywasz się pod formularz logowania** prawdziwej strony internetowej.
 2. Użytkownik **wysyła** swoje **dane logowania** na twoją fałszywą stronę, a narzędzie wysyła je na prawdziwą stronę internetową, **sprawdzając, czy dane logowania działają**.
 3. Jeśli konto jest skonfigurowane z **2FA**, strona MitM poprosi o to, a gdy **użytkownik wprowadzi** to, narzędzie wyśle to na prawdziwą stronę internetową.
-4. Gdy użytkownik jest uwierzytelniony, ty (jako atakujący) będziesz miał **przechwycone dane logowania, 2FA, ciasteczka i wszelkie informacje** z każdej interakcji, podczas gdy narzędzie wykonuje atak MitM.
+4. Gdy użytkownik zostanie uwierzytelniony, ty (jako atakujący) będziesz miał **przechwycone dane logowania, 2FA, ciasteczka i wszelkie informacje** z każdej interakcji, podczas gdy narzędzie wykonuje atak MitM.
 
 ### Poprzez VNC
 
-Co jeśli zamiast **wysyłać ofiarę na złośliwą stronę** o takim samym wyglądzie jak oryginalna, wyślesz go na **sesję VNC z przeglądarką połączoną z prawdziwą stroną internetową**? Będziesz mógł zobaczyć, co robi, ukraść hasło, używane MFA, ciasteczka...\
+Co jeśli zamiast **wysyłać ofiarę na złośliwą stronę** o takim samym wyglądzie jak oryginalna, wyślesz ją do **sesji VNC z przeglądarką połączoną z prawdziwą stroną internetową**? Będziesz mógł zobaczyć, co robi, ukraść hasło, używane MFA, ciasteczka...\
 Możesz to zrobić za pomocą [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC)
 
 ## Wykrywanie wykrycia
@@ -436,7 +440,7 @@ Użyj [**Phishious** ](https://github.com/Rices/Phishious), aby ocenić, czy tw�
 
 ## Przechwytywanie schowka / Pastejacking
 
-Atakujący mogą cicho kopiować złośliwe polecenia do schowka ofiary z kompromitowanej lub źle napisanej strony internetowej, a następnie oszukać użytkownika, aby wkleił je w **Win + R**, **Win + X** lub oknie terminala, wykonując dowolny kod bez pobierania lub załączania.
+Atakujący mogą cicho kopiować złośliwe polecenia do schowka ofiary z kompromitowanej lub błędnie napisanej strony internetowej, a następnie oszukać użytkownika, aby wkleił je w **Win + R**, **Win + X** lub oknie terminala, wykonując dowolny kod bez pobierania lub załączania.
 
 {{#ref}}
 clipboard-hijacking.md
