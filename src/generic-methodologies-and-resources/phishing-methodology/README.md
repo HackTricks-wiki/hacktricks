@@ -6,7 +6,7 @@
 
 1. Recon die slagoffer
 1. Kies die **slagoffer domein**.
-2. Voer 'n paar basiese web-opsomming uit **soek na aanmeldportale** wat deur die slagoffer gebruik word en **besluit** watter een jy gaan **naboots**.
+2. Voer 'n paar basiese web-opsomming **soek na aanmeldportale** wat deur die slagoffer gebruik word en **besluit** watter een jy gaan **naboots**.
 3. Gebruik 'n bietjie **OSINT** om **e-posse** te **vind**.
 2. Berei die omgewing voor
 1. **Koop die domein** wat jy gaan gebruik vir die phishing assessering
@@ -25,8 +25,12 @@
 - **gehipen subdomein**: Verander die **punt in 'n koppelteken** van 'n subdomein (bv. www-zelster.com).
 - **Nuwe TLD**: Dieselfde domein met 'n **nuwe TLD** (bv. zelster.org)
 - **Homoglyph**: Dit **vervang** 'n letter in die domeinnaam met **letters wat soortgelyk lyk** (bv. zelfser.com).
+
+{{#ref}}
+homograph-attacks.md
+{{#endref}}
 - **Transposisie:** Dit **ruil twee letters** binne die domeinnaam (bv. zelsetr.com).
-- **Singularisering/Pluralisering**: Voeg "s" by of verwyder dit aan die einde van die domeinnaam (bv. zeltsers.com).
+- **Singularisering/Meervouding**: Voeg “s” by of verwyder dit aan die einde van die domeinnaam (bv. zeltsers.com).
 - **Omissie**: Dit **verwyder een** van die letters uit die domeinnaam (bv. zelser.com).
 - **Herhaling:** Dit **herhaal een** van die letters in die domeinnaam (bv. zeltsser.com).
 - **Vervanging**: Soos homoglyph maar minder stil. Dit vervang een van die letters in die domeinnaam, dalk met 'n letter naby die oorspronklike letter op die sleutelbord (bv. zektser.com).
@@ -73,7 +77,7 @@ Om seker te maak dat die vervalle domein wat jy gaan koop **alreeds 'n goeie SEO
 - [https://hunter.io/](https://hunter.io)
 - [https://anymailfinder.com/](https://anymailfinder.com)
 
-Om **meer** geldige e-posadresse te **ontdek** of **te verifieer** wat jy reeds ontdek het, kan jy kyk of jy die slagoffer se smtp bedieners kan brute-force. [Leer hoe om e-posadres hier te verifieer/ontdek](../../network-services-pentesting/pentesting-smtp/index.html#username-bruteforce-enumeration).\
+Om **meer** geldige e-posadresse te **ontdek** of **diegene** wat jy reeds ontdek het te **verifieer**, kan jy kyk of jy die slagoffer se smtp bedieners kan brute-force. [Leer hoe om e-posadres hier te verifieer/ontdek](../../network-services-pentesting/pentesting-smtp/index.html#username-bruteforce-enumeration).\
 Boonop, moenie vergeet dat as die gebruikers **enige webportaal gebruik om toegang tot hul e-posse te verkry**, jy kan kyk of dit kwesbaar is vir **gebruikersnaam brute force**, en die kwesbaarheid indien moontlik benut.
 
 ## Konfigureer GoPhish
@@ -82,8 +86,8 @@ Boonop, moenie vergeet dat as die gebruikers **enige webportaal gebruik om toega
 
 Jy kan dit aflaai van [https://github.com/gophish/gophish/releases/tag/v0.11.0](https://github.com/gophish/gophish/releases/tag/v0.11.0)
 
-Laai dit af en ontspan dit binne `/opt/gophish` en voer `/opt/gophish/gophish` uit.\
-Jy sal 'n wagwoord vir die admin gebruiker op poort 3333 in die uitvoer ontvang. Daarom, toegang daartoe en gebruik daardie geloofsbriewe om die admin wagwoord te verander. Jy mag dalk daardie poort na lokaal moet tonnel:
+Laai dit af en ontbind dit binne `/opt/gophish` en voer `/opt/gophish/gophish` uit.\
+Jy sal 'n wagwoord vir die admin gebruiker op poort 3333 in die uitvoer ontvang. Daarom, toegang daartoe en gebruik daardie inligting om die admin wagwoord te verander. Jy mag dalk daardie poort na lokaal moet tonnel.
 ```bash
 ssh -L 3333:127.0.0.1:3333 <user>@<ip>
 ```
@@ -107,7 +111,7 @@ mkdir /opt/gophish/ssl_keys
 cp "/etc/letsencrypt/live/$DOMAIN/privkey.pem" /opt/gophish/ssl_keys/key.pem
 cp "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" /opt/gophish/ssl_keys/key.crt​
 ```
-**E-pos konfigurasie**
+**Poskonfigurasie**
 
 Begin met installasie: `apt-get install postfix`
 
@@ -119,12 +123,12 @@ Voeg dan die domein by die volgende lêers:
 
 **Verander ook die waardes van die volgende veranderlikes binne /etc/postfix/main.cf**
 
-`myhostname = <domain>`\
-`mydestination = $myhostname, <domain>, localhost.com, localhost`
+`myhostname = <domein>`\
+`mydestination = $myhostname, <domein>, localhost.com, localhost`
 
 Laastens, wysig die lêers **`/etc/hostname`** en **`/etc/mailname`** na jou domeinnaam en **herbegin jou VPS.**
 
-Skep nou 'n **DNS A rekord** van `mail.<domain>` wat na die **ip adres** van die VPS wys en 'n **DNS MX** rekord wat na `mail.<domain>` wys.
+Nou, skep 'n **DNS A rekord** van `mail.<domein>` wat na die **ip adres** van die VPS wys en 'n **DNS MX** rekord wat na `mail.<domein>` wys.
 
 Nou laat ons toets om 'n e-pos te stuur:
 ```bash
@@ -245,7 +249,7 @@ v=spf1 mx a ip4:ip.ip.ip.ip ?all
 ```
 ### Domein-gebaseerde Boodskapoutentiekering, Verslagdoening & Nakoming (DMARC) Rekord
 
-Jy moet **'n DMARC rekord vir die nuwe domein konfigureer**. As jy nie weet wat 'n DMARC rekord is nie, [**lees hierdie bladsy**](../../network-services-pentesting/pentesting-smtp/index.html#dmarc).
+Jy moet **'n DMARC rekord vir die nuwe domein konfigureer**. As jy nie weet wat 'n DMARC rekord is nie [**lees hierdie bladsy**](../../network-services-pentesting/pentesting-smtp/index.html#dmarc).
 
 Jy moet 'n nuwe DNS TXT rekord skep wat die gasheernaam `_dmarc.<domain>` met die volgende inhoud aandui:
 ```bash
@@ -266,7 +270,7 @@ Hierdie tutoriaal is gebaseer op: [https://www.digitalocean.com/community/tutori
 
 ### Toets jou e-pos konfigurasie telling
 
-Jy kan dit doen met [https://www.mail-tester.com/](https://www.mail-tester.com)\
+Jy kan dit doen deur [https://www.mail-tester.com/](https://www.mail-tester.com)\
 Besoek net die bladsy en stuur 'n e-pos na die adres wat hulle jou gee:
 ```bash
 echo "This is the body of the email" | mail -s "This is the subject line" test-iimosa79z@srv1.mail-tester.com
@@ -283,7 +287,7 @@ DKIM check:         pass
 Sender-ID check:    pass
 SpamAssassin check: ham
 ```
-Jy kan ook 'n **boodskap na 'n Gmail onder jou beheer** stuur, en die **e-pos se koptekste** in jou Gmail-inboks nagaan, `dkim=pass` moet teenwoordig wees in die `Authentication-Results` kopveld.
+Jy kan ook 'n **boodskap na 'n Gmail onder jou beheer** stuur, en die **e-pos se koptekste** in jou Gmail-inboks nagaan, `dkim=pass` moet teenwoordig wees in die `Authentication-Results` koptekstveld.
 ```
 Authentication-Results: mx.google.com;
 spf=pass (google.com: domain of contact@example.com designates --- as permitted sender) smtp.mail=contact@example.com;
@@ -305,7 +309,7 @@ Die bladsy [www.mail-tester.com](https://www.mail-tester.com) kan jou aandui of 
 - Besluit vanaf watter rekening jy die phishing e-posse gaan stuur. Voorstelle: _noreply, support, servicedesk, salesforce..._
 - Jy kan die gebruikersnaam en wagwoord leeg laat, maar maak seker om die Ignore Certificate Errors te merk
 
-![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
+![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
 
 > [!TIP]
 > Dit word aanbeveel om die "**Stuur Toets E-pos**" funksionaliteit te gebruik om te toets of alles werk.\
@@ -314,7 +318,7 @@ Die bladsy [www.mail-tester.com](https://www.mail-tester.com) kan jou aandui of 
 ### E-pos Sjabloon
 
 - Stel 'n **naam om die** sjabloon te identifiseer
-- Skryf dan 'n **onderwerp** (niks vreemd nie, net iets wat jy in 'n gewone e-pos sou verwag om te lees)
+- Skryf dan 'n **onderwerp** (niks vreemd nie, net iets wat jy sou verwag om in 'n gewone e-pos te lees)
 - Maak seker jy het "**Voeg Volg Beeld**" gemerk
 - Skryf die **e-pos sjabloon** (jy kan veranderlikes gebruik soos in die volgende voorbeeld):
 ```html
@@ -357,15 +361,15 @@ Let daarop dat **om die geloofwaardigheid van die e-pos te verhoog**, dit aanbev
 
 > [!TIP]
 > Gewoonlik sal jy die HTML-kode van die bladsy moet wysig en 'n paar toetse in plaaslike omgewing doen (miskien met 'n Apache-bediener) **totdat jy hou van die resultate.** Skryf dan daardie HTML-kode in die boks.\
-> Let daarop dat as jy **sommige statiese hulpbronne** vir die HTML nodig het (miskien sommige CSS en JS bladsye) jy dit kan stoor in _**/opt/gophish/static/endpoint**_ en dan toegang tot hulle kan kry vanaf _**/static/\<filename>**_
+> Let daarop dat as jy **bepaalde statiese hulpbronne** vir die HTML benodig (miskien 'n paar CSS en JS bladsye) jy dit in _**/opt/gophish/static/endpoint**_ kan stoor en dit dan kan benader vanaf _**/static/\<filename>**_
 
 > [!TIP]
-> Vir die omleiding kan jy **die gebruikers na die wettige hoofwebblad** van die slagoffer omlei, of hulle na _/static/migration.html_ omlei, byvoorbeeld, plaas 'n **spinning wheel (**[**https://loading.io/**](https://loading.io)**) vir 5 sekondes en dui dan aan dat die proses suksesvol was**.
+> Vir die omleiding kan jy **die gebruikers na die wettige hoofwebblad** van die slagoffer omlei, of hulle na _/static/migration.html_ omlei, byvoorbeeld, plaas 'n **draaiwiel (**[**https://loading.io/**](https://loading.io)**) vir 5 sekondes en dui dan aan dat die proses suksesvol was**.
 
 ### Users & Groups
 
 - Stel 'n naam in
-- **Importeer die data** (let daarop dat jy die voornaam, van en e-posadres van elke gebruiker nodig het om die sjabloon vir die voorbeeld te gebruik)
+- **Importeer die data** (let daarop dat jy die voornaam, van en e-posadres van elke gebruiker benodig om die sjabloon vir die voorbeeld te gebruik)
 
 ![](<../../images/image (163).png>)
 
@@ -414,7 +418,7 @@ Hierdie is waar gereedskap soos [**evilginx2**](https://github.com/kgretzky/evil
 
 ### Via VNC
 
-Wat as jy in plaas van **die slagoffer na 'n kwaadwillige bladsy** met dieselfde voorkoms as die oorspronklike te stuur, hom na 'n **VNC-sessie met 'n blaaskans wat aan die werklike webblad gekoppel is** stuur? Jy sal kan sien wat hy doen, die wagwoord steel, die MFA wat gebruik word, die koekies...\
+Wat as jy in plaas van **die slagoffer na 'n kwaadwillige bladsy** met dieselfde voorkoms as die oorspronklike een te stuur, hom na 'n **VNC-sessie met 'n blaaskoppeling na die werklike webblad** stuur? Jy sal kan sien wat hy doen, die wagwoord steel, die MFA wat gebruik word, die koekies...\
 Jy kan dit doen met [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC)
 
 ## Detecting the detection
@@ -422,7 +426,7 @@ Jy kan dit doen met [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC)
 Dit is duidelik dat een van die beste maniere om te weet of jy betrap is, is om **jou domein in swartlyste te soek**. As dit gelys word, was jou domein op een of ander manier as verdag beskou.\
 Een maklike manier om te kyk of jou domein in enige swartlys verskyn, is om [https://malwareworld.com/](https://malwareworld.com) te gebruik.
 
-Daar is egter ander maniere om te weet of die slagoffer **aktief op soek is na verdagte phishingaktiwiteite in die natuur** soos verduidelik in:
+Daar is egter ander maniere om te weet of die slagoffer **aktief op soek is na verdagte phishingaktiwiteite in die natuur**, soos verduidelik in:
 
 {{#ref}}
 detecting-phising.md
