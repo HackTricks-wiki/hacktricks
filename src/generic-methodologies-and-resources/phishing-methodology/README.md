@@ -24,15 +24,19 @@
 - **Palavra-chave**: O nome do domínio **contém** uma **palavra-chave** importante do domínio original (por exemplo, zelster.com-management.com).
 - **subdomínio hifenizado**: Mudar o **ponto por um hífen** de um subdomínio (por exemplo, www-zelster.com).
 - **Novo TLD**: Mesmo domínio usando um **novo TLD** (por exemplo, zelster.org).
-- **Homoglyph**: **Substitui** uma letra no nome do domínio por **letras que parecem semelhantes** (por exemplo, zelfser.com).
-- **Transposição:** **Troca duas letras** dentro do nome do domínio (por exemplo, zelsetr.com).
+- **Homoglyph**: Ele **substitui** uma letra no nome do domínio por **letras que parecem semelhantes** (por exemplo, zelfser.com).
+
+{{#ref}}
+homograph-attacks.md
+{{#endref}}
+- **Transposição:** Ele **troca duas letras** dentro do nome do domínio (por exemplo, zelsetr.com).
 - **Singularização/Pluralização**: Adiciona ou remove “s” no final do nome do domínio (por exemplo, zeltsers.com).
-- **Omissão**: **Remove uma** das letras do nome do domínio (por exemplo, zelser.com).
-- **Repetição:** **Repete uma** das letras no nome do domínio (por exemplo, zeltsser.com).
-- **Substituição**: Como homoglyph, mas menos furtivo. Substitui uma das letras no nome do domínio, talvez por uma letra próxima da letra original no teclado (por exemplo, zektser.com).
-- **Subdominado**: Introduz um **ponto** dentro do nome do domínio (por exemplo, ze.lster.com).
-- **Inserção**: **Insere uma letra** no nome do domínio (por exemplo, zerltser.com).
-- **Ponto ausente**: Anexa o TLD ao nome do domínio. (por exemplo, zelstercom.com)
+- **Omissão**: Ele **remove uma** das letras do nome do domínio (por exemplo, zelser.com).
+- **Repetição:** Ele **repete uma** das letras no nome do domínio (por exemplo, zeltsser.com).
+- **Substituição**: Como homoglyph, mas menos furtivo. Ele substitui uma das letras no nome do domínio, talvez por uma letra próxima da letra original no teclado (por exemplo, zektser.com).
+- **Subdominado**: Introduzir um **ponto** dentro do nome do domínio (por exemplo, ze.lster.com).
+- **Inserção**: Ele **insere uma letra** no nome do domínio (por exemplo, zerltser.com).
+- **Ponto ausente**: Anexar o TLD ao nome do domínio. (por exemplo, zelstercom.com)
 
 **Ferramentas Automáticas**
 
@@ -47,11 +51,11 @@
 
 ### Bitflipping
 
-Há uma **possibilidade de que um de alguns bits armazenados ou em comunicação possa ser automaticamente invertido** devido a vários fatores, como flares solares, raios cósmicos ou erros de hardware.
+Há uma **possibilidade de que um dos bits armazenados ou em comunicação possa ser automaticamente invertido** devido a vários fatores, como flares solares, raios cósmicos ou erros de hardware.
 
 Quando esse conceito é **aplicado a solicitações DNS**, é possível que o **domínio recebido pelo servidor DNS** não seja o mesmo que o domínio inicialmente solicitado.
 
-Por exemplo, uma única modificação de bit no domínio "windows.com" pode mudá-lo para "windnws.com".
+Por exemplo, uma única modificação de bit no domínio "windows.com" pode mudá-lo para "windnws.com."
 
 Os atacantes podem **se aproveitar disso registrando vários domínios de bit-flipping** que são semelhantes ao domínio da vítima. A intenção deles é redirecionar usuários legítimos para sua própria infraestrutura.
 
@@ -80,9 +84,9 @@ Além disso, não se esqueça de que se os usuários usarem **qualquer portal we
 
 ### Instalação
 
-Você pode baixá-lo em [https://github.com/gophish/gophish/releases/tag/v0.11.0](https://github.com/gophish/gophish/releases/tag/v0.11.0)
+Você pode baixá-lo de [https://github.com/gophish/gophish/releases/tag/v0.11.0](https://github.com/gophish/gophish/releases/tag/v0.11.0)
 
-Baixe e descompacte dentro de `/opt/gophish` e execute `/opt/gophish/gophish`\
+Baixe e descompacte-o dentro de `/opt/gophish` e execute `/opt/gophish/gophish`\
 Você receberá uma senha para o usuário admin na porta 3333 na saída. Portanto, acesse essa porta e use essas credenciais para alterar a senha do admin. Você pode precisar redirecionar essa porta para local:
 ```bash
 ssh -L 3333:127.0.0.1:3333 <user>@<ip>
@@ -91,7 +95,7 @@ ssh -L 3333:127.0.0.1:3333 <user>@<ip>
 
 **Configuração do certificado TLS**
 
-Antes desta etapa, você deve **já ter comprado o domínio** que você vai usar e ele deve estar **apontando** para o **IP do VPS** onde você está configurando **gophish**.
+Antes desta etapa, você deve **já ter comprado o domínio** que vai usar e ele deve estar **apontando** para o **IP do VPS** onde você está configurando **gophish**.
 ```bash
 DOMAIN="<domain>"
 wget https://dl.eff.org/certbot-auto
@@ -119,12 +123,12 @@ Em seguida, adicione o domínio aos seguintes arquivos:
 
 **Altere também os valores das seguintes variáveis dentro de /etc/postfix/main.cf**
 
-`myhostname = <domínio>`\
-`mydestination = $myhostname, <domínio>, localhost.com, localhost`
+`myhostname = <domain>`\
+`mydestination = $myhostname, <domain>, localhost.com, localhost`
 
 Finalmente, modifique os arquivos **`/etc/hostname`** e **`/etc/mailname`** para o nome do seu domínio e **reinicie seu VPS.**
 
-Agora, crie um **registro DNS A** de `mail.<domínio>` apontando para o **endereço IP** do VPS e um **registro DNS MX** apontando para `mail.<domínio>`
+Agora, crie um **registro DNS A** de `mail.<domain>` apontando para o **endereço IP** do VPS e um **registro DNS MX** apontando para `mail.<domain>`
 
 Agora vamos testar o envio de um email:
 ```bash
@@ -227,7 +231,7 @@ Quanto mais antigo for um domínio, menos provável é que ele seja identificado
 
 Observe que, mesmo que você tenha que esperar uma semana, pode terminar de configurar tudo agora.
 
-### Configure o registro de DNS Reverso (rDNS)
+### Configurar registro de DNS reverso (rDNS)
 
 Defina um registro rDNS (PTR) que resolva o endereço IP do VPS para o nome do domínio.
 
@@ -308,7 +312,7 @@ A página [www.mail-tester.com](https://www.mail-tester.com) pode indicar se seu
 ![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
 
 > [!TIP]
-> É recomendado usar a funcionalidade "**Enviar Email de Teste**" para testar se tudo está funcionando.\
+> É recomendável usar a funcionalidade "**Enviar Email de Teste**" para testar se tudo está funcionando.\
 > Eu recomendaria **enviar os emails de teste para endereços de 10min** para evitar ser colocado na lista negra durante os testes.
 
 ### Modelo de Email
@@ -405,7 +409,7 @@ phishing-documents.md
 
 O ataque anterior é bastante inteligente, pois você está falsificando um site real e coletando as informações fornecidas pelo usuário. Infelizmente, se o usuário não inseriu a senha correta ou se o aplicativo que você falsificou está configurado com 2FA, **essa informação não permitirá que você se passe pelo usuário enganado**.
 
-É aqui que ferramentas como [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** [**CredSniper**](https://github.com/ustayready/CredSniper) e [**muraena**](https://github.com/muraenateam/muraena) são úteis. Essa ferramenta permitirá que você gere um ataque do tipo MitM. Basicamente, os ataques funcionam da seguinte maneira:
+É aqui que ferramentas como [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** [**CredSniper**](https://github.com/ustayready/CredSniper) e [**muraena**](https://github.com/muraenateam/muraena) são úteis. Esta ferramenta permitirá que você gere um ataque do tipo MitM. Basicamente, os ataques funcionam da seguinte maneira:
 
 1. Você **falsifica o formulário de login** da página real.
 2. O usuário **envia** suas **credenciais** para sua página falsa e a ferramenta as envia para a página real, **verificando se as credenciais funcionam**.
