@@ -177,4 +177,10 @@ When user over linux it has some interesting commands:
 - `pty`: Open up an interactive PTY, allowing for direct interaction with the shell on the target system.
 
 
+
+
+{{#ref}}
+adaptix.md
+{{#endref}}
+
 {{#include ../banners/hacktricks-training.md}}

@@ -371,4 +371,10 @@ pscp -r root@kali:/opt/cobaltstrike/artifact-kit/dist-pipe .
 ```
 
 
+
+
+{{#ref}}
+adaptix.md
+{{#endref}}
+
 {{#include ../banners/hacktricks-training.md}}
