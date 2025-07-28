@@ -1,87 +1,78 @@
-# BloodHound & Other AD Enum Tools
+# BloodHound & Other Active Directory Enumeration Tools
 
 {{#include ../../banners/hacktricks-training.md}}
 
+{{#ref}}
+adws-enumeration.md
+{{#endref}}
+
+> KUMBUKA: Ukurasa huu unakusanya baadhi ya zana muhimu zaidi za **kuorodhesha** na **kuonyesha** uhusiano wa Active Directory. Kwa ukusanyaji kupitia njia ya siri ya **Active Directory Web Services (ADWS)** angalia rejea hapo juu.
+
+---
+
 ## AD Explorer
 
-[AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) ni kutoka Sysinternal Suite:
+[AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) (Sysinternals) ni mtazamaji wa **AD** wa hali ya juu na mhariri ambao unaruhusu:
 
-> Mtazamaji na mhariri wa hali ya juu wa Active Directory (AD). Unaweza kutumia AD Explorer kuvinjari hifadhidata ya AD kwa urahisi, kufafanua maeneo unayopenda, kuangalia mali za vitu, na sifa bila kufungua masanduku ya mazungumzo, kuhariri ruhusa, kuangalia muundo wa kitu, na kutekeleza utafutaji wa hali ya juu ambao unaweza kuokoa na kurudi kutekeleza.
+* Kuangalia mti wa directory kwa GUI
+* Kuedit mwelekeo wa vitu na maelezo ya usalama
+* Uundaji wa picha za wakati / kulinganisha kwa uchambuzi wa mbali
 
-### Snapshots
+### Matumizi ya haraka
 
-AD Explorer inaweza kuunda snapshots za AD ili uweze kuangalia mtandaoni.\
-Inaweza kutumika kugundua vulns mtandaoni, au kulinganisha hali tofauti za hifadhidata ya AD kwa muda.
+1. Anza zana na uungane na `dc01.corp.local` kwa akidi yoyote ya domain.
+2. Unda picha ya mbali kupitia `File ➜ Create Snapshot`.
+3. Linganisha picha mbili kwa `File ➜ Compare` ili kugundua mabadiliko ya ruhusa.
 
-Utahitaji jina la mtumiaji, nenosiri, na mwelekeo wa kuungana (mtumiaji yeyote wa AD anahitajika).
-
-Ili kuchukua snapshot ya AD, nenda kwenye `File` --> `Create Snapshot` na ingiza jina la snapshot.
+---
 
 ## ADRecon
 
-[**ADRecon**](https://github.com/adrecon/ADRecon) ni chombo ambacho kinatoa na kuunganisha vitu mbalimbali kutoka katika mazingira ya AD. Taarifa zinaweza kuwasilishwa katika **ripoti** ya Microsoft Excel **iliyoundwa kwa njia maalum** ambayo inajumuisha muonekano wa muhtasari na vipimo ili kuwezesha uchambuzi na kutoa picha kamili ya hali ya sasa ya mazingira ya AD ya lengo.
-```bash
-# Run it
-.\ADRecon.ps1
+[ADRecon](https://github.com/adrecon/ADRecon) inatoa seti kubwa ya vitu kutoka kwa domain (ACLs, GPOs, imani, templeti za CA …) na inazalisha **ripoti ya Excel**.
+```powershell
+# On a Windows host in the domain
+PS C:\> .\ADRecon.ps1 -OutputDir C:\Temp\ADRecon
 ```
-## BloodHound
+---
 
-From [https://github.com/BloodHoundAD/BloodHound](https://github.com/BloodHoundAD/BloodHound)
+## BloodHound (kuonyesha grafu)
 
-> BloodHound ni programu ya wavuti ya Javascript ya ukurasa mmoja, iliyojengwa juu ya [Linkurious](http://linkurio.us/), iliyokusanywa na [Electron](http://electron.atom.io/), ikiwa na hifadhidata ya [Neo4j](https://neo4j.com/) inayopatiwa na mkusanyiko wa data wa C#.
+[BloodHound](https://github.com/BloodHoundAD/BloodHound) inatumia nadharia ya grafu + Neo4j kufichua uhusiano wa mamlaka yaliyofichika ndani ya AD ya ndani na Azure AD.
 
-BloodHound inatumia nadharia ya grafu kufichua uhusiano wa siri na mara nyingi usiokusudiwa ndani ya mazingira ya Active Directory au Azure. Washambuliaji wanaweza kutumia BloodHound kutambua kwa urahisi njia za shambulio zenye ugumu mkubwa ambazo vinginevyo zingekuwa ngumu kutambua haraka. Walinzi wanaweza kutumia BloodHound kutambua na kuondoa njia hizo za shambulio. Timu za buluu na nyekundu zinaweza kutumia BloodHound kupata uelewa mzuri zaidi wa uhusiano wa mamlaka katika mazingira ya Active Directory au Azure.
-
-Hivyo, [Bloodhound ](https://github.com/BloodHoundAD/BloodHound) ni chombo cha ajabu ambacho kinaweza kuhesabu kikoa kiotomatiki, kuhifadhi taarifa zote, kutafuta njia zinazowezekana za kupandisha mamlaka na kuonyesha taarifa zote kwa kutumia grafu.
-
-Booldhound inajumuisha sehemu 2 kuu: **ingestors** na **programu ya uonyeshaji**.
-
-**Ingestors** zinatumika ku **hesabu kikoa na kutoa taarifa zote** katika muundo ambao programu ya uonyeshaji itaelewa.
-
-**Programu ya uonyeshaji inatumia neo4j** kuonyesha jinsi taarifa zote zinavyohusiana na kuonyesha njia tofauti za kupandisha mamlaka katika kikoa.
-
-### Installation
-
-Baada ya kuundwa kwa BloodHound CE, mradi mzima ulisasishwa kwa urahisi wa matumizi na Docker. Njia rahisi ya kuanza ni kutumia usanidi wa Docker Compose ulioandaliwa mapema.
-
-1. Sakinisha Docker Compose. Hii inapaswa kujumuishwa na usakinishaji wa [Docker Desktop](https://www.docker.com/products/docker-desktop/).
-2. Kimbia:
+### Usanidi (Docker CE)
 ```bash
 curl -L https://ghst.ly/getbhce | docker compose -f - up
+# Web UI ➜ http://localhost:8080  (user: admin / password from logs)
 ```
-3. Pata nenosiri lililotengenezwa kwa bahati katika matokeo ya terminal ya Docker Compose.  
-4. Katika kivinjari, tembelea http://localhost:8080/ui/login. Ingia kwa kutumia jina la mtumiaji **`admin`** na **`nenosiri lililotengenezwa kwa bahati`** ambalo unaweza kupata katika kumbukumbu za docker compose.
+### Wakusanyaji
 
-Baada ya hii, utahitaji kubadilisha nenosiri lililotengenezwa kwa bahati na utakuwa na kiolesura kipya kilichotayarishwa, ambacho unaweza kupakua ingestors moja kwa moja.
+* `SharpHound.exe` / `Invoke-BloodHound` – toleo la asili au PowerShell
+* `AzureHound` – uainishaji wa Azure AD
+* **SoaPy + BOFHound** – ukusanyaji wa ADWS (angalia kiungo kilichopo juu)
 
-### SharpHound
+#### Njia za kawaida za SharpHound
+```powershell
+SharpHound.exe --CollectionMethods All           # Full sweep (noisy)
+SharpHound.exe --CollectionMethods Group,LocalAdmin,Session,Trusts,ACL
+SharpHound.exe --Stealth --LDAP                      # Low noise LDAP only
+```
+Wakusanyaji wanazalisha JSON ambayo inachukuliwa kupitia GUI ya BloodHound.
 
-Wana chaguzi kadhaa lakini ikiwa unataka kuendesha SharpHound kutoka kwa PC iliyojiunga na eneo, ukitumia mtumiaji wako wa sasa na kutoa taarifa zote unaweza kufanya:
-```
-./SharpHound.exe --CollectionMethods All
-Invoke-BloodHound -CollectionMethod All
-```
-> Unaweza kusoma zaidi kuhusu **CollectionMethod** na kikao cha loop [hapa](https://support.bloodhoundenterprise.io/hc/en-us/articles/17481375424795-All-SharpHound-Community-Edition-Flags-Explained)
-
-Ikiwa unataka kutekeleza SharpHound ukitumia akreditif tofauti unaweza kuunda kikao cha CMD netonly na kuendesha SharpHound kutoka hapo:
-```
-runas /netonly /user:domain\user "powershell.exe -exec bypass"
-```
-[**Jifunze zaidi kuhusu Bloodhound katika ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-with-bloodhound-on-kali-linux)
+---
 
 ## Group3r
 
-[**Group3r**](https://github.com/Group3r/Group3r) ni chombo cha kutafuta **vulnerabilities** katika Active Directory zinazohusiana na **Group Policy**. \
-Unahitaji **kufanya kazi group3r** kutoka kwa mwenyeji ndani ya eneo la kikoa ukitumia **mtumiaji yeyote wa kikoa**.
+[Group3r](https://github.com/Group3r/Group3r) inataja **Group Policy Objects** na kuonyesha makosa ya usanidi.
 ```bash
-group3r.exe -f <filepath-name.log>
-# -s sends results to stdin
-# -f send results to file
+# Execute inside the domain
+Group3r.exe -f gpo.log   # -s to stdout
 ```
+---
+
 ## PingCastle
 
-[**PingCastle**](https://www.pingcastle.com/documentation/) **inafanya tathmini ya usalama wa mazingira ya AD** na inatoa **ripoti** nzuri yenye grafu.
-
-Ili kuikimbia, unaweza kutekeleza binary `PingCastle.exe` na itaanzisha **sehemu ya maingiliano** ikionyesha menyu ya chaguzi. Chaguo la msingi kutumia ni **`healthcheck`** ambalo litaanzisha **muonekano** wa **kanda**, na kutafuta **mipangilio isiyo sahihi** na **udhaifu**.
-
+[PingCastle](https://www.pingcastle.com/documentation/) inatekeleza **uchunguzi wa afya** wa Active Directory na inaunda ripoti ya HTML yenye alama za hatari.
+```powershell
+PingCastle.exe --healthcheck --server corp.local --user bob --password "P@ssw0rd!"
+```
 {{#include ../../banners/hacktricks-training.md}}
