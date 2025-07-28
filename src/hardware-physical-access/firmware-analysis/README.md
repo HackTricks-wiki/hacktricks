@@ -4,11 +4,11 @@
 
 ## **介绍**
 
-固件是使设备正常运行的基本软件，通过管理和促进硬件组件与用户交互软件之间的通信。它存储在永久内存中，确保设备在开机时能够访问重要指令，从而启动操作系统。检查和可能修改固件是识别安全漏洞的关键步骤。
+固件是使设备正常运行的基本软件，通过管理和促进硬件组件与用户交互的软件之间的通信。它存储在永久内存中，确保设备在开机时能够访问重要指令，从而启动操作系统。检查和可能修改固件是识别安全漏洞的关键步骤。
 
 ## **收集信息**
 
-**收集信息**是理解设备构成和所用技术的关键初步步骤。此过程涉及收集以下数据：
+**收集信息**是理解设备构成及其使用的技术的关键初步步骤。此过程涉及收集以下数据：
 
 - CPU架构和运行的操作系统
 - 引导加载程序的具体信息
@@ -19,7 +19,7 @@
 - 架构和流程图
 - 安全评估和已识别的漏洞
 
-为此，**开源情报（OSINT）**工具是不可或缺的，分析任何可用的开源软件组件通过手动和自动审查过程也同样重要。像[Coverity Scan](https://scan.coverity.com)和[Semmle’s LGTM](https://lgtm.com/#explore)这样的工具提供免费的静态分析，可以用来发现潜在问题。
+为此，**开源情报（OSINT）**工具是不可或缺的，同时通过手动和自动审查过程分析任何可用的开源软件组件也很重要。像[Coverity Scan](https://scan.coverity.com)和[Semmle’s LGTM](https://lgtm.com/#explore)这样的工具提供免费的静态分析，可以用来发现潜在问题。
 
 ## **获取固件**
 
@@ -35,7 +35,7 @@
 - 在设备通信中**嗅探**更新请求
 - 识别并使用**硬编码的更新端点**
 - 从引导加载程序或网络**转储**
-- 在万不得已时，**拆卸并读取**存储芯片，使用适当的硬件工具
+- 在所有其他方法失败时，**拆卸并读取**存储芯片，使用适当的硬件工具
 
 ## 分析固件
 
@@ -48,7 +48,7 @@ hexdump -C -n 512 <bin> > hexdump.out
 hexdump -C <bin> | head # might find signatures in header
 fdisk -lu <bin> #lists a drives partition and filesystems if multiple
 ```
-如果你用这些工具没有找到太多信息，可以使用 `binwalk -E <bin>` 检查图像的 **熵**，如果熵低，那么它不太可能被加密。如果熵高，则很可能被加密（或以某种方式压缩）。
+如果你使用这些工具没有找到太多信息，可以使用 `binwalk -E <bin>` 检查图像的 **entropy**，如果熵低，那么它不太可能被加密。如果熵高，则很可能被加密（或以某种方式压缩）。
 
 此外，你可以使用这些工具提取 **嵌入固件中的文件**：
 
@@ -117,7 +117,7 @@ $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 
 ### 初步分析工具
 
-提供了一组命令用于对二进制文件（称为 `<bin>`）进行初步检查。这些命令有助于识别文件类型、提取字符串、分析二进制数据以及理解分区和文件系统的详细信息：
+提供了一组命令用于初步检查二进制文件（称为 `<bin>`）。这些命令有助于识别文件类型、提取字符串、分析二进制数据以及理解分区和文件系统的详细信息：
 ```bash
 file <bin>
 strings -n8 <bin>
@@ -128,7 +128,7 @@ fdisk -lu <bin> #lists partitions and filesystems, if there are multiple
 ```
 为了评估图像的加密状态，使用 `binwalk -E <bin>` 检查 **entropy**。低熵表明缺乏加密，而高熵则表示可能存在加密或压缩。
 
-对于提取 **embedded files**，建议使用 **file-data-carving-recovery-tools** 文档和 **binvis.io** 进行文件检查的工具和资源。
+对于提取 **embedded files**，推荐使用 **file-data-carving-recovery-tools** 文档和 **binvis.io** 进行文件检查。
 
 ### 提取文件系统
 
@@ -142,7 +142,7 @@ $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 
 ### 文件系统分析
 
-提取文件系统后，开始寻找安全漏洞。关注不安全的网络守护进程、硬编码的凭据、API 端点、更新服务器功能、未编译的代码、启动脚本和用于离线分析的已编译二进制文件。
+提取文件系统后，开始寻找安全漏洞。关注不安全的网络守护进程、硬编码的凭据、API 端点、更新服务器功能、未编译的代码、启动脚本和编译的二进制文件以进行离线分析。
 
 **关键位置**和**项目**检查包括：
 
@@ -158,9 +158,9 @@ $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 - [**固件分析和比较工具 (FACT)**](https://github.com/fkie-cad/FACT_core) 用于全面的固件分析
 - [**FwAnalyzer**](https://github.com/cruise-automation/fwanalyzer)、[**ByteSweep**](https://gitlab.com/bytesweep/bytesweep)、[**ByteSweep-go**](https://gitlab.com/bytesweep/bytesweep-go) 和 [**EMBA**](https://github.com/e-m-b-a/emba) 用于静态和动态分析
 
-### 对已编译二进制文件的安全检查
+### 对编译二进制文件的安全检查
 
-必须仔细检查文件系统中发现的源代码和已编译二进制文件的漏洞。像 **checksec.sh** 这样的工具用于 Unix 二进制文件，**PESecurity** 用于 Windows 二进制文件，帮助识别可能被利用的未保护二进制文件。
+必须仔细检查文件系统中发现的源代码和编译的二进制文件以寻找漏洞。像 **checksec.sh** 这样的工具用于 Unix 二进制文件，**PESecurity** 用于 Windows 二进制文件，帮助识别可能被利用的未保护二进制文件。
 
 ## 模拟固件进行动态分析
 
@@ -168,7 +168,7 @@ $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 
 ### 模拟单个二进制文件
 
-检查单个程序时，识别程序的字节序和 CPU 架构至关重要。
+在检查单个程序时，识别程序的字节序和 CPU 架构至关重要。
 
 #### MIPS 架构示例
 
@@ -180,7 +180,7 @@ file ./squashfs-root/bin/busybox
 ```bash
 sudo apt-get install qemu qemu-user qemu-user-static qemu-system-arm qemu-system-mips qemu-system-x86 qemu-utils
 ```
-对于 MIPS（大端），使用 `qemu-mips`，而对于小端二进制文件，选择 `qemu-mipsel`。
+对于 MIPS（大端），使用 `qemu-mips`，而对于小端二进制文件，则选择 `qemu-mipsel`。
 
 #### ARM 架构仿真
 
@@ -188,36 +188,79 @@ sudo apt-get install qemu qemu-user qemu-user-static qemu-system-arm qemu-system
 
 ### 完整系统仿真
 
-像 [Firmadyne](https://github.com/firmadyne/firmadyne)、[Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit) 等工具，促进了完整固件仿真，自动化了过程并帮助进行动态分析。
+像 [Firmadyne](https://github.com/firmadyne/firmadyne)、[Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit) 等工具，促进了完整固件仿真，自动化了过程并有助于动态分析。
 
 ## 实践中的动态分析
 
-在这个阶段，使用真实或仿真的设备环境进行分析。保持对操作系统和文件系统的 shell 访问是至关重要的。仿真可能无法完美模拟硬件交互，因此需要偶尔重新启动仿真。分析应重新访问文件系统，利用暴露的网页和网络服务，并探索引导加载程序漏洞。固件完整性测试对于识别潜在后门漏洞至关重要。
+在这个阶段，使用真实或仿真的设备环境进行分析。保持对操作系统和文件系统的 shell 访问是至关重要的。仿真可能无法完美模拟硬件交互，因此需要偶尔重新启动仿真。分析应重新访问文件系统，利用暴露的网页和网络服务，并探索引导加载程序漏洞。固件完整性测试对于识别潜在的后门漏洞至关重要。
 
 ## 运行时分析技术
 
-运行时分析涉及在其操作环境中与进程或二进制文件交互，使用 gdb-multiarch、Frida 和 Ghidra 等工具设置断点，并通过模糊测试和其他技术识别漏洞。
+运行时分析涉及在其操作环境中与进程或二进制文件进行交互，使用工具如 gdb-multiarch、Frida 和 Ghidra 设置断点，并通过模糊测试和其他技术识别漏洞。
 
 ## 二进制利用和概念验证
 
-为识别的漏洞开发 PoC 需要对目标架构和低级语言编程有深入理解。嵌入式系统中的二进制运行时保护很少见，但在存在时，可能需要使用如返回导向编程（ROP）等技术。
+为识别的漏洞开发 PoC 需要对目标架构和低级语言编程有深入理解。嵌入式系统中的二进制运行时保护很少见，但如果存在，可能需要使用如返回导向编程（ROP）等技术。
 
-## 固件分析的准备操作系统
+## 准备好的操作系统用于固件分析
 
 像 [AttifyOS](https://github.com/adi0x90/attifyos) 和 [EmbedOS](https://github.com/scriptingxss/EmbedOS) 这样的操作系统提供了预配置的固件安全测试环境，配备必要的工具。
 
-## 分析固件的准备操作系统
+## 准备好的操作系统用于分析固件
 
-- [**AttifyOS**](https://github.com/adi0x90/attifyos)：AttifyOS 是一个旨在帮助您对物联网（IoT）设备进行安全评估和渗透测试的发行版。它通过提供一个预配置的环境，加载所有必要的工具，为您节省了大量时间。
+- [**AttifyOS**](https://github.com/adi0x90/attifyos)：AttifyOS 是一个旨在帮助您对物联网（IoT）设备进行安全评估和渗透测试的发行版。它通过提供一个预配置的环境，加载所有必要的工具，节省了您大量时间。
 - [**EmbedOS**](https://github.com/scriptingxss/EmbedOS)：基于 Ubuntu 18.04 的嵌入式安全测试操作系统，预装固件安全测试工具。
 
-## 漏洞固件练习
+## 固件降级攻击与不安全的更新机制
 
-要练习发现固件中的漏洞，可以使用以下漏洞固件项目作为起点。
+即使供应商对固件镜像实施了加密签名检查，**版本回滚（降级）保护通常被省略**。当引导或恢复加载程序仅使用嵌入的公钥验证签名，但不比较正在闪存的镜像的 *版本*（或单调计数器）时，攻击者可以合法地安装一个 **较旧的、仍然具有有效签名的易受攻击的固件**，从而重新引入已修补的漏洞。
+
+典型攻击工作流程：
+
+1. **获取较旧的签名镜像**
+   * 从供应商的公共下载门户、CDN 或支持网站获取。
+   * 从伴随的移动/桌面应用程序中提取（例如，在 Android APK 的 `assets/firmware/` 中）。
+   * 从第三方存储库如 VirusTotal、互联网档案、论坛等获取。
+2. **通过任何暴露的更新通道将镜像上传或提供给设备**：
+   * Web UI、移动应用 API、USB、TFTP、MQTT 等。
+   * 许多消费级 IoT 设备暴露 *未认证* 的 HTTP(S) 端点，接受 Base64 编码的固件块，服务器端解码并触发恢复/升级。
+3. 降级后，利用在新版本中修补的漏洞（例如，后来添加的命令注入过滤器）。
+4. 可选地将最新镜像重新闪存或禁用更新，以避免在获得持久性后被检测。
+
+### 示例：降级后的命令注入
+```http
+POST /check_image_and_trigger_recovery?md5=1; echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC...' >> /root/.ssh/authorized_keys HTTP/1.1
+Host: 192.168.0.1
+Content-Type: application/octet-stream
+Content-Length: 0
+```
+在易受攻击的（降级的）固件中，`md5` 参数直接连接到一个 shell 命令中而没有进行清理，从而允许注入任意命令（在这里 - 启用基于 SSH 的 root 访问）。后来的固件版本引入了基本的字符过滤器，但缺乏降级保护使得修复变得无效。
+
+### 从移动应用提取固件
+
+许多供应商将完整的固件映像打包在其配套的移动应用程序中，以便应用可以通过蓝牙/Wi-Fi 更新设备。这些包通常以未加密的形式存储在 APK/APEX 中，路径如 `assets/fw/` 或 `res/raw/`。工具如 `apktool`、`ghidra`，甚至普通的 `unzip` 允许您在不接触物理硬件的情况下提取签名的映像。
+```
+$ apktool d vendor-app.apk -o vendor-app
+$ ls vendor-app/assets/firmware
+firmware_v1.3.11.490_signed.bin
+```
+### 更新逻辑评估清单
+
+* *更新端点* 的传输/认证是否得到充分保护（TLS + 认证）？
+* 设备在刷写之前是否比较 **版本号** 或 **单调反回滚计数器**？
+* 映像是否在安全启动链中进行验证（例如，ROM代码检查签名）？
+* 用户空间代码是否执行额外的合理性检查（例如，允许的分区映射、型号）？
+* *部分* 或 *备份* 更新流程是否重用相同的验证逻辑？
+
+> 💡  如果上述任何一项缺失，平台可能容易受到回滚攻击。
+
+## 演练的易受攻击固件
+
+要练习发现固件中的漏洞，可以使用以下易受攻击的固件项目作为起点。
 
 - OWASP IoTGoat
 - [https://github.com/OWASP/IoTGoat](https://github.com/OWASP/IoTGoat)
-- The Damn Vulnerable Router Firmware Project
+- Damn Vulnerable Router Firmware Project
 - [https://github.com/praetorian-code/DVRF](https://github.com/praetorian-code/DVRF)
 - Damn Vulnerable ARM Router (DVAR)
 - [https://blog.exploitlab.net/2018/01/dvar-damn-vulnerable-arm-router.html](https://blog.exploitlab.net/2018/01/dvar-damn-vulnerable-arm-router.html)
@@ -228,10 +271,11 @@ sudo apt-get install qemu qemu-user qemu-user-static qemu-system-arm qemu-system
 - Damn Vulnerable IoT Device (DVID)
 - [https://github.com/Vulcainreo/DVID](https://github.com/Vulcainreo/DVID)
 
-## 参考文献
+## 参考资料
 
 - [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
 - [Practical IoT Hacking: The Definitive Guide to Attacking the Internet of Things](https://www.amazon.co.uk/Practical-IoT-Hacking-F-Chantzis/dp/1718500904)
+- [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 
 ## 培训和认证
 
