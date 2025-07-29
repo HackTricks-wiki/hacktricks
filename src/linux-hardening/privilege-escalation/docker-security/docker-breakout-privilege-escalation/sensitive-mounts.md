@@ -89,7 +89,7 @@ echo b > /proc/sysrq-trigger # Ponownie uruchamia hosta
 #### **`/proc/kallsyms`**
 
 - Wymienia eksportowane symbole jądra i ich adresy.
-- Niezbędne do rozwoju exploitów jądra, szczególnie w celu pokonania KASLR.
+- Kluczowe dla rozwoju exploitów jądra, szczególnie w celu pokonania KASLR.
 - Informacje o adresach są ograniczone, gdy `kptr_restrict` jest ustawione na `1` lub `2`.
 - Szczegóły w [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 
@@ -114,7 +114,7 @@ echo b > /proc/sysrq-trigger # Ponownie uruchamia hosta
 #### **`/proc/mem`**
 
 - Alternatywny interfejs dla `/dev/mem`, reprezentujący pamięć fizyczną.
-- Umożliwia odczyt i zapis, modyfikacja całej pamięci wymaga przekształcenia adresów wirtualnych na fizyczne.
+- Umożliwia odczyt i zapis, modyfikacja całej pamięci wymaga rozwiązania adresów wirtualnych na fizyczne.
 
 #### **`/proc/sched_debug`**
 
@@ -231,7 +231,8 @@ REFRESH_TOKEN_SECRET=14<SNIP>ea
 /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/140/fs/usr/share/nginx/html/index.html
 /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/132/fs/usr/share/nginx/html/index.html
 
-/ # echo '<!DOCTYPE html><html lang="pl"><head><script>alert("Stored XSS!")</script></head></html>' > /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/140/fs/usr/share/nginx/html/index2.html
+/ # echo '<!DOCTYPE html><html lang="pl"><head><script>alert("Stored XSS!")</script></head></html>' > /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/140/fs/usr/sh
+are/nginx/html/index2.html
 ```
 
 The XSS was achieved:
@@ -270,13 +271,15 @@ Katalog główny Dockera: /var/lib/docker
 So the filesystems are under `/var/lib/docker/overlay2/`:
 
 ```bash
+```markdown
 $ sudo ls -la /var/lib/docker/overlay2
 
-drwx--x---  4 root root  4096 Jan  9 22:14 00762bca8ea040b1bb28b61baed5704e013ab23a196f5fe4758dafb79dfafd5d  
-drwx--x---  4 root root  4096 Jan 11 17:00 03cdf4db9a6cc9f187cca6e98cd877d581f16b62d073010571e752c305719496  
-drwx--x---  4 root root  4096 Jan  9 21:23 049e02afb3f8dec80cb229719d9484aead269ae05afe81ee5880ccde2426ef4f  
-drwx--x---  4 root root  4096 Jan  9 21:22 062f14e5adbedce75cea699828e22657c8044cd22b68ff1bb152f1a3c8a377f2  
+drwx--x---  4 root root  4096 Jan  9 22:14 00762bca8ea040b1bb28b61baed5704e013ab23a196f5fe4758dafb79dfafd5d
+drwx--x---  4 root root  4096 Jan 11 17:00 03cdf4db9a6cc9f187cca6e98cd877d581f16b62d073010571e752c305719496
+drwx--x---  4 root root  4096 Jan  9 21:23 049e02afb3f8dec80cb229719d9484aead269ae05afe81ee5880ccde2426ef4f
+drwx--x---  4 root root  4096 Jan  9 21:22 062f14e5adbedce75cea699828e22657c8044cd22b68ff1bb152f1a3c8a377f2
 <SNIP>
+```
 ```
 
 #### Note
@@ -293,7 +296,8 @@ Mounting certain host Unix sockets or writable pseudo-filesystems is equivalent 
 ```text
 /run/containerd/containerd.sock     # gniazdo CRI containerd  
 /var/run/crio/crio.sock             # gniazdo runtime CRI-O  
-/run/podman/podman.sock             # API Podman (z uprawnieniami lub bez)  
+/run/podman/podman.sock             # API Podman (z uprawnieniami root lub bez)  
+/run/buildkit/buildkitd.sock        # demon BuildKit (z uprawnieniami root)  
 /var/run/kubelet.sock               # API Kubelet na węzłach Kubernetes  
 /run/firecracker-containerd.sock    # Kata / Firecracker
 ```
@@ -327,7 +331,7 @@ When the last process leaves the cgroup, `/tmp/pwn` runs **as root on the host**
 ### Mount-Related Escape CVEs (2023-2025)
 
 * **CVE-2024-21626 – runc “Leaky Vessels” file-descriptor leak**
-runc ≤1.1.11 leaked an open directory file descriptor that could point to the host root. A malicious image or `docker exec` could start a container whose *working directory* is already on the host filesystem, enabling arbitrary file read/write and privilege escalation. Fixed in runc 1.1.12 (Docker ≥25.0.3, containerd ≥1.7.14).
+runc ≤ 1.1.11 leaked an open directory file descriptor that could point to the host root. A malicious image or `docker exec` could start a container whose *working directory* is already on the host filesystem, enabling arbitrary file read/write and privilege escalation. Fixed in runc 1.1.12 (Docker ≥ 25.0.3, containerd ≥ 1.7.14).
 
 ```Dockerfile
 FROM scratch
@@ -338,11 +342,17 @@ CMD ["/bin/sh"]
 * **CVE-2024-23651 / 23653 – BuildKit OverlayFS copy-up TOCTOU**
 A race condition in the BuildKit snapshotter let an attacker replace a file that was about to be *copy-up* into the container’s rootfs with a symlink to an arbitrary path on the host, gaining write access outside the build context. Fixed in BuildKit v0.12.5 / Buildx 0.12.0. Exploitation requires an untrusted `docker build` on a vulnerable daemon.
 
+* **CVE-2024-1753 – Buildah / Podman bind-mount breakout during `build`**
+Buildah ≤ 1.35.0 (and Podman ≤ 4.9.3) incorrectly resolved absolute paths passed to `--mount=type=bind` in a *Containerfile*. A crafted build stage could mount `/` from the host **read-write** inside the build container when SELinux was disabled or in permissive mode, leading to full escape at build time. Patched in Buildah 1.35.1 and the corresponding Podman 4.9.4 back-port series.
+
+* **CVE-2024-40635 – containerd UID integer overflow**
+Supplying a `User` value larger than `2147483647` in an image config overflowed the 32-bit signed integer and started the process as UID 0 inside the host user namespace. Workloads expected to run as non-root could therefore obtain root privileges. Fixed in containerd 1.6.38 / 1.7.27 / 2.0.4.
+
 ### Hardening Reminders (2025)
 
 1. Bind-mount host paths **read-only** whenever possible and add `nosuid,nodev,noexec` mount options.
 2. Prefer dedicated side-car proxies or rootless clients instead of exposing the runtime socket directly.
-3. Keep the container runtime up-to-date (runc ≥1.1.12, BuildKit ≥0.12.5, containerd ≥1.7.14).
+3. Keep the container runtime up-to-date (runc ≥ 1.1.12, BuildKit ≥ 0.12.5, Buildah ≥ 1.35.1 / Podman ≥ 4.9.4, containerd ≥ 1.7.27).
 4. In Kubernetes, use `securityContext.readOnlyRootFilesystem: true`, the *restricted* PodSecurity profile and avoid `hostPath` volumes pointing to the paths listed above.
 
 ### References
@@ -352,5 +362,7 @@ A race condition in the BuildKit snapshotter let an attacker replace a file that
 - [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)
 - [Understanding and Hardening Linux Containers](https://research.nccgroup.com/wp-content/uploads/2020/07/ncc_group_understanding_hardening_linux_containers-1-1.pdf)
 - [Abusing Privileged and Unprivileged Linux Containers](https://www.nccgroup.com/globalassets/our-research/us/whitepapers/2016/june/container_whitepaper.pdf)
+- [Buildah CVE-2024-1753 advisory](https://github.com/containers/buildah/security/advisories/GHSA-pmf3-c36m-g5cf)
+- [containerd CVE-2024-40635 advisory](https://github.com/containerd/containerd/security/advisories/GHSA-265r-hfxg-fhmg)
 
 {{#include ../../../../banners/hacktricks-training.md}}
