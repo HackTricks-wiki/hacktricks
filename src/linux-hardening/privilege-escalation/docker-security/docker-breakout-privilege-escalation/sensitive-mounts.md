@@ -2,9 +2,9 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-`/proc`, `/sys`, और `/var` का उचित namespace isolation के बिना खुलासा महत्वपूर्ण सुरक्षा जोखिमों को पेश करता है, जिसमें हमले की सतह का विस्तार और जानकारी का खुलासा शामिल है। ये निर्देशिकाएँ संवेदनशील फ़ाइलें रखती हैं जो, यदि गलत तरीके से कॉन्फ़िगर की गईं या किसी अनधिकृत उपयोगकर्ता द्वारा एक्सेस की गईं, तो कंटेनर से भागने, होस्ट में संशोधन, या आगे के हमलों में मदद करने वाली जानकारी प्रदान कर सकती हैं। उदाहरण के लिए, `-v /proc:/host/proc` को गलत तरीके से माउंट करने से AppArmor सुरक्षा को बायपास किया जा सकता है, जिससे `/host/proc` असुरक्षित रह जाता है।
+`/proc`, `/sys`, और `/var` का उचित namespace isolation के बिना खुलासा महत्वपूर्ण सुरक्षा जोखिमों को जन्म देता है, जिसमें हमले की सतह का विस्तार और जानकारी का खुलासा शामिल है। ये निर्देशिकाएँ संवेदनशील फ़ाइलें रखती हैं जो, यदि गलत तरीके से कॉन्फ़िगर की गईं या किसी अनधिकृत उपयोगकर्ता द्वारा एक्सेस की गईं, तो कंटेनर से भागने, होस्ट में संशोधन, या आगे के हमलों में मदद करने वाली जानकारी प्रदान कर सकती हैं। उदाहरण के लिए, `-v /proc:/host/proc` को गलत तरीके से माउंट करने से AppArmor सुरक्षा को बायपास किया जा सकता है, जिससे `/host/proc` असुरक्षित रह जाता है।
 
-**आप प्रत्येक संभावित vuln के बारे में और विवरण पा सकते हैं** [**https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts**](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)**.**
+**आप प्रत्येक संभावित vuln के बारे में और विवरण पा सकते हैं** [**https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts**](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)**।**
 
 ## procfs Vulnerabilities
 
@@ -50,7 +50,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # modprobe तक पहुंच की 
 #### **`/proc/sys/vm/panic_on_oom`**
 
 - [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html) में संदर्भित।
-- एक वैश्विक ध्वज जो नियंत्रित करता है कि क्या कर्नेल पैनिक करता है या OOM स्थिति होने पर OOM किलर को बुलाता है।
+- एक वैश्विक ध्वज जो नियंत्रित करता है कि क्या कर्नेल पैनिक करता है या OOM किलर को बुलाता है जब OOM स्थिति होती है।
 
 #### **`/proc/sys/fs`**
 
@@ -59,7 +59,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # modprobe तक पहुंच की 
 
 #### **`/proc/sys/fs/binfmt_misc`**
 
-- मैजिक नंबर के आधार पर गैर-देशी बाइनरी प्रारूपों के लिए इंटरप्रेटर्स को पंजीकरण करने की अनुमति देता है।
+- उनके जादुई संख्या के आधार पर गैर-देशी बाइनरी प्रारूपों के लिए व्याख्याकारों को पंजीकरण करने की अनुमति देता है।
 - यदि `/proc/sys/fs/binfmt_misc/register` लिखा जा सकता है, तो यह विशेषाधिकार वृद्धि या रूट शेल पहुंच की ओर ले जा सकता है।
 - प्रासंगिक शोषण और व्याख्या:
 - [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
@@ -96,7 +96,7 @@ echo b > /proc/sysrq-trigger # होस्ट को रिबूट करत�
 #### **`/proc/[pid]/mem`**
 
 - कर्नेल मेमोरी डिवाइस `/dev/mem` के साथ इंटरफेस करता है।
-- ऐतिहासिक रूप से विशेषाधिकार वृद्धि के हमलों के प्रति संवेदनशील।
+- ऐतिहासिक रूप से विशेषाधिकार वृद्धि हमलों के प्रति संवेदनशील।
 - [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html) पर अधिक।
 
 #### **`/proc/kcore`**
@@ -199,17 +199,17 @@ metadata:
     app: pentest  
 spec:  
   containers:  
-  - name: pod-mounts-var-folder  
-    image: alpine  
-    volumeMounts:  
-    - mountPath: /host-var  
-      name: noderoot  
-    command: [ "/bin/sh", "-c", "--" ]  
-    args: [ "while true; do sleep 30; done;" ]  
+    - name: pod-mounts-var-folder  
+      image: alpine  
+      volumeMounts:  
+        - mountPath: /host-var  
+          name: noderoot  
+      command: [ "/bin/sh", "-c", "--" ]  
+      args: [ "while true; do sleep 30; done;" ]  
   volumes:  
-  - name: noderoot  
-    hostPath:  
-      path: /var
+    - name: noderoot  
+      hostPath:  
+        path: /var
 ```
 
 Inside the **pod-mounts-var-folder** container:
@@ -297,6 +297,7 @@ Mounting certain host Unix sockets or writable pseudo-filesystems is equivalent 
 /run/containerd/containerd.sock     # containerd CRI सॉकेट  
 /var/run/crio/crio.sock             # CRI-O रनटाइम सॉकेट  
 /run/podman/podman.sock             # Podman API (rootful या rootless)  
+/run/buildkit/buildkitd.sock        # BuildKit डेमॉन (rootful)  
 /var/run/kubelet.sock               # Kubernetes नोड्स पर Kubelet API  
 /run/firecracker-containerd.sock    # Kata / Firecracker
 ```
@@ -330,7 +331,7 @@ When the last process leaves the cgroup, `/tmp/pwn` runs **as root on the host**
 ### Mount-Related Escape CVEs (2023-2025)
 
 * **CVE-2024-21626 – runc “Leaky Vessels” file-descriptor leak**
-runc ≤1.1.11 leaked an open directory file descriptor that could point to the host root. A malicious image or `docker exec` could start a container whose *working directory* is already on the host filesystem, enabling arbitrary file read/write and privilege escalation. Fixed in runc 1.1.12 (Docker ≥25.0.3, containerd ≥1.7.14).
+runc ≤ 1.1.11 leaked an open directory file descriptor that could point to the host root. A malicious image or `docker exec` could start a container whose *working directory* is already on the host filesystem, enabling arbitrary file read/write and privilege escalation. Fixed in runc 1.1.12 (Docker ≥ 25.0.3, containerd ≥ 1.7.14).
 
 ```Dockerfile
 FROM scratch
@@ -341,11 +342,17 @@ CMD ["/bin/sh"]
 * **CVE-2024-23651 / 23653 – BuildKit OverlayFS copy-up TOCTOU**
 A race condition in the BuildKit snapshotter let an attacker replace a file that was about to be *copy-up* into the container’s rootfs with a symlink to an arbitrary path on the host, gaining write access outside the build context. Fixed in BuildKit v0.12.5 / Buildx 0.12.0. Exploitation requires an untrusted `docker build` on a vulnerable daemon.
 
+* **CVE-2024-1753 – Buildah / Podman bind-mount breakout during `build`**
+Buildah ≤ 1.35.0 (and Podman ≤ 4.9.3) incorrectly resolved absolute paths passed to `--mount=type=bind` in a *Containerfile*. A crafted build stage could mount `/` from the host **read-write** inside the build container when SELinux was disabled or in permissive mode, leading to full escape at build time. Patched in Buildah 1.35.1 and the corresponding Podman 4.9.4 back-port series.
+
+* **CVE-2024-40635 – containerd UID integer overflow**
+Supplying a `User` value larger than `2147483647` in an image config overflowed the 32-bit signed integer and started the process as UID 0 inside the host user namespace. Workloads expected to run as non-root could therefore obtain root privileges. Fixed in containerd 1.6.38 / 1.7.27 / 2.0.4.
+
 ### Hardening Reminders (2025)
 
 1. Bind-mount host paths **read-only** whenever possible and add `nosuid,nodev,noexec` mount options.
 2. Prefer dedicated side-car proxies or rootless clients instead of exposing the runtime socket directly.
-3. Keep the container runtime up-to-date (runc ≥1.1.12, BuildKit ≥0.12.5, containerd ≥1.7.14).
+3. Keep the container runtime up-to-date (runc ≥ 1.1.12, BuildKit ≥ 0.12.5, Buildah ≥ 1.35.1 / Podman ≥ 4.9.4, containerd ≥ 1.7.27).
 4. In Kubernetes, use `securityContext.readOnlyRootFilesystem: true`, the *restricted* PodSecurity profile and avoid `hostPath` volumes pointing to the paths listed above.
 
 ### References
@@ -355,5 +362,7 @@ A race condition in the BuildKit snapshotter let an attacker replace a file that
 - [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)
 - [Understanding and Hardening Linux Containers](https://research.nccgroup.com/wp-content/uploads/2020/07/ncc_group_understanding_hardening_linux_containers-1-1.pdf)
 - [Abusing Privileged and Unprivileged Linux Containers](https://www.nccgroup.com/globalassets/our-research/us/whitepapers/2016/june/container_whitepaper.pdf)
+- [Buildah CVE-2024-1753 advisory](https://github.com/containers/buildah/security/advisories/GHSA-pmf3-c36m-g5cf)
+- [containerd CVE-2024-40635 advisory](https://github.com/containerd/containerd/security/advisories/GHSA-265r-hfxg-fhmg)
 
 {{#include ../../../../banners/hacktricks-training.md}}
