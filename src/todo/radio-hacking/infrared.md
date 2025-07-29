@@ -26,19 +26,19 @@ Os bits são codificados modulando a duração do espaço entre os pulsos. A lar
 
 **2. Codificação por Largura de Pulso**
 
-Os bits são codificados pela modulação da largura do pulso. A largura do espaço após a explosão do pulso é constante.
+Os bits são codificados pela modulação da largura do pulso. A largura do espaço após o estouro do pulso é constante.
 
 <figure><img src="../../images/image (282).png" alt=""><figcaption></figcaption></figure>
 
 **3. Codificação de Fase**
 
-Também é conhecida como codificação Manchester. O valor lógico é definido pela polaridade da transição entre a explosão do pulso e o espaço. "Espaço para explosão de pulso" denota lógica "0", "explosão de pulso para espaço" denota lógica "1".
+Também é conhecida como codificação Manchester. O valor lógico é definido pela polaridade da transição entre o estouro do pulso e o espaço. "Espaço para estouro de pulso" denota lógica "0", "estouro de pulso para espaço" denota lógica "1".
 
 <figure><img src="../../images/image (634).png" alt=""><figcaption></figcaption></figure>
 
-**4. Combinação das anteriores e outras exóticas**
+**4. Combinação dos anteriores e outras exóticas**
 
-> [!NOTE]
+> [!TIP]
 > Existem protocolos IR que estão **tentando se tornar universais** para vários tipos de dispositivos. Os mais famosos são RC5 e NEC. Infelizmente, o mais famoso **não significa o mais comum**. No meu ambiente, encontrei apenas dois controles remotos NEC e nenhum RC5.
 >
 > Os fabricantes adoram usar seus próprios protocolos IR únicos, mesmo dentro da mesma gama de dispositivos (por exemplo, caixas de TV). Portanto, controles remotos de diferentes empresas e, às vezes, de diferentes modelos da mesma empresa, não conseguem funcionar com outros dispositivos do mesmo tipo.
@@ -49,7 +49,7 @@ A maneira mais confiável de ver como o sinal IR do controle remoto se parece é
 
 <figure><img src="../../images/image (235).png" alt=""><figcaption></figcaption></figure>
 
-Normalmente, há um preâmbulo no início de um pacote codificado. Isso permite que o receptor determine o nível de ganho e o fundo. Também existem protocolos sem preâmbulo, por exemplo, Sharp.
+Normalmente, há um preâmbulo no início de um pacote codificado. Isso permite que o receptor determine o nível de ganho e o fundo. Existem também protocolos sem preâmbulo, por exemplo, Sharp.
 
 Em seguida, os dados são transmitidos. A estrutura, o preâmbulo e o método de codificação de bits são determinados pelo protocolo específico.
 
@@ -59,14 +59,16 @@ O **comando NEC**, além do preâmbulo, consiste em um byte de endereço e um by
 
 O **código de repetição** tem um "1" após o preâmbulo, que é um bit de parada.
 
-Para **lógica "0" e "1"**, o NEC usa Codificação por Distância de Pulso: primeiro, uma explosão de pulso é transmitida, após a qual há uma pausa, cuja duração define o valor do bit.
+Para **lógica "0" e "1"**, o NEC usa Codificação por Distância de Pulso: primeiro, um estouro de pulso é transmitido, após o qual há uma pausa, cuja duração define o valor do bit.
 
-### Ar Condicionados
+### Ar Condicionado
 
-Diferente de outros controles remotos, **os ar condicionados não transmitem apenas o código do botão pressionado**. Eles também **transmitem todas as informações** quando um botão é pressionado para garantir que a **máquina de ar condicionado e o controle remoto estejam sincronizados**.\
+Ao contrário de outros controles remotos, **os ar condicionados não transmitem apenas o código do botão pressionado**. Eles também **transmitem todas as informações** quando um botão é pressionado para garantir que a **máquina de ar condicionado e o controle remoto estejam sincronizados**.\
 Isso evitará que uma máquina configurada para 20ºC seja aumentada para 21ºC com um controle remoto, e então, quando outro controle remoto, que ainda tem a temperatura como 20ºC, for usado para aumentar mais a temperatura, ela "aumentará" para 21ºC (e não para 22ºC pensando que está em 21ºC).
 
-### Ataques
+---
+
+## Ataques & Pesquisa Ofensiva <a href="#attacks" id="attacks"></a>
 
 Você pode atacar o Infravermelho com Flipper Zero:
 
@@ -74,8 +76,66 @@ Você pode atacar o Infravermelho com Flipper Zero:
 flipper-zero/fz-infrared.md
 {{#endref}}
 
+### Tomada de Controle de Smart-TV / Set-top Box (EvilScreen)
+
+Trabalhos acadêmicos recentes (EvilScreen, 2022) demonstraram que **controles remotos multicanal que combinam Infravermelho com Bluetooth ou Wi-Fi podem ser abusados para sequestrar completamente TVs inteligentes modernas**. O ataque encadeia códigos de serviço IR de alta privilégio com pacotes Bluetooth autenticados, contornando a isolação de canais e permitindo lançamentos arbitrários de aplicativos, ativação de microfone ou redefinição de fábrica sem acesso físico. Oito TVs populares de diferentes fornecedores — incluindo um modelo Samsung que afirma conformidade com ISO/IEC 27001 — foram confirmadas como vulneráveis. A mitigação requer correções de firmware do fornecedor ou desativação completa de receptores IR não utilizados.
+
+### Exfiltração de Dados Air-Gapped via LEDs IR (família aIR-Jumper)
+
+Câmeras de segurança, roteadores ou até mesmo pen drives maliciosos frequentemente incluem **LEDs IR de visão noturna**. Pesquisas mostram que malware pode modular esses LEDs (<10–20 kbit/s com OOK simples) para **exfiltrar segredos através de paredes e janelas** para uma câmera externa colocada a dezenas de metros de distância. Como a luz está fora do espectro visível, os operadores raramente notam. Medidas de contra-ataque:
+
+* Proteger fisicamente ou remover LEDs IR em áreas sensíveis
+* Monitorar o ciclo de trabalho do LED da câmera e a integridade do firmware
+* Implantar filtros de corte IR em janelas e câmeras de vigilância
+
+Um atacante também pode usar projetores IR fortes para **infiltrar** comandos na rede piscando dados de volta para câmeras inseguras.
+
+### Força Bruta de Longo Alcance & Protocolos Estendidos com Flipper Zero 1.0
+
+O firmware 1.0 (setembro de 2024) adicionou **dezenas de protocolos IR extras e módulos amplificadores externos opcionais**. Combinado com o modo de força bruta de controle remoto universal, um Flipper pode desativar ou reconfigurar a maioria das TVs/ACs públicas a até 30 m usando um diodo de alta potência.
+
+---
+
+## Ferramentas & Exemplos Práticos <a href="#tooling" id="tooling"></a>
+
+### Hardware
+
+* **Flipper Zero** – transceptor portátil com modos de aprendizado, reprodução e força bruta de dicionário (veja acima).
+* **Arduino / ESP32** + LED IR / receptor TSOP38xx – analisador/transmissor DIY barato. Combine com a biblioteca `Arduino-IRremote` (v4.x suporta >40 protocolos).
+* **Analisadores lógicos** (Saleae/FX2) – capturar temporizações brutas quando o protocolo é desconhecido.
+* **Smartphones com IR-blaster** (por exemplo, Xiaomi) – teste rápido em campo, mas com alcance limitado.
+
+### Software
+
+* **`Arduino-IRremote`** – biblioteca C++ ativamente mantida:
+```cpp
+#include <IRremote.hpp>
+IRsend sender;
+void setup(){ sender.begin(); }
+void loop(){
+sender.sendNEC(0x20DF10EF, 32); // Samsung TV Power
+delay(5000);
+}
+```
+* **IRscrutinizer / AnalysIR** – decodificadores GUI que importam capturas brutas e auto-identificam o protocolo + geram código Pronto/Arduino.
+* **LIRC / ir-keytable (Linux)** – receber e injetar IR a partir da linha de comando:
+```bash
+sudo ir-keytable -p nec,rc5 -t   # live-dump decoded scancodes
+irsend SEND_ONCE samsung KEY_POWER
+```
+
+---
+
+## Medidas Defensivas <a href="#defense" id="defense"></a>
+
+* Desativar ou cobrir receptores IR em dispositivos implantados em espaços públicos quando não forem necessários.
+* Impor *pareamento* ou verificações criptográficas entre smart-TVs e controles remotos; isolar códigos de “serviço” privilegiados.
+* Implantar filtros de corte IR ou detectores de onda contínua em áreas classificadas para quebrar canais ópticos encobertos.
+* Monitorar a integridade do firmware de câmeras/aparelhos IoT que expõem LEDs IR controláveis.
+
 ## Referências
 
-- [https://blog.flipperzero.one/infrared/](https://blog.flipperzero.one/infrared/)
+- [Postagem no blog do Flipper Zero sobre Infravermelho](https://blog.flipperzero.one/infrared/)
+- EvilScreen: Sequestro de Smart TV via imitação de controle remoto (arXiv 2210.03014)
 
 {{#include ../../banners/hacktricks-training.md}}
