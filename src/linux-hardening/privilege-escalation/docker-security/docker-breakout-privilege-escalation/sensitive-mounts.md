@@ -16,7 +16,7 @@
 
 - Описано в [core(5)](https://man7.org/linux/man-pages/man5/core.5.html).
 - Якщо ви можете записувати в цей файл, можливо, записати конвеєр `|`, за яким слідує шлях до програми або скрипту, який буде виконано після того, як станеться збій.
-- Зловмисник може знайти шлях всередині хоста до свого контейнера, виконавши `mount`, і записати шлях до бінарного файлу всередині файлової системи свого контейнера. Потім, викликавши збій програми, змусити ядро виконати бінарний файл поза контейнером.
+- Зловмисник може знайти шлях всередині хоста до свого контейнера, виконавши `mount`, і записати шлях до бінарного файлу всередині файлової системи свого контейнера. Потім, викликати збій програми, щоб змусити ядро виконати бінарний файл поза контейнером.
 
 - **Приклад тестування та експлуатації**:
 ```bash
@@ -44,7 +44,7 @@ return 0;
 - **Приклад перевірки доступу**:
 
 ```bash
-ls -l $(cat /proc/sys/kernel/modprobe) # Перевірка доступу до modprobe
+ls -l $(cat /proc/sys/kernel/modprobe) # Check access to modprobe
 ```
 
 #### **`/proc/sys/vm/panic_on_oom`**
@@ -60,7 +60,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Перевірка доступу до 
 #### **`/proc/sys/fs/binfmt_misc`**
 
 - Дозволяє реєструвати інтерпретатори для ненативних бінарних форматів на основі їх магічного номера.
-- Може призвести до підвищення привілеїв або доступу до кореневого шеллу, якщо `/proc/sys/fs/binfmt_misc/register` доступний для запису.
+- Може призвести до підвищення привілеїв або доступу до кореневого терміналу, якщо `/proc/sys/fs/binfmt_misc/register` доступний для запису.
 - Відповідна експлуатація та пояснення:
 - [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
 - Докладний посібник: [Video link](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
@@ -78,7 +78,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Перевірка доступу до 
 - **Приклад перезавантаження хоста**:
 
 ```bash
-echo b > /proc/sysrq-trigger # Перезавантажує хост
+echo b > /proc/sysrq-trigger # Reboots the host
 ```
 
 #### **`/proc/kmsg`**
@@ -119,12 +119,12 @@ echo b > /proc/sysrq-trigger # Перезавантажує хост
 #### **`/proc/sched_debug`**
 
 - Повертає інформацію про планування процесів, обходячи захисти простору PID.
-- Витікає імена процесів, ID та ідентифікатори cgroup.
+- Відкриває імена процесів, ID та ідентифікатори cgroup.
 
 #### **`/proc/[pid]/mountinfo`**
 
 - Надає інформацію про точки монту в просторі монту процесу.
-- Витікає місцезнаходження контейнера `rootfs` або образу.
+- Відкриває місцезнаходження контейнера `rootfs` або образу.
 
 ### Вразливості `/sys`
 
@@ -294,8 +294,9 @@ Mounting certain host Unix sockets or writable pseudo-filesystems is equivalent 
 ```text
 /run/containerd/containerd.sock     # сокет containerd CRI
 /var/run/crio/crio.sock             # сокет CRI-O
-/run/podman/podman.sock             # Podman API (з правами root або без)
-/var/run/kubelet.sock               # Kubelet API на вузлах Kubernetes
+/run/podman/podman.sock             # API Podman (з правами root або без)
+/run/buildkit/buildkitd.sock        # демон BuildKit (з правами root)
+/var/run/kubelet.sock               # API Kubelet на вузлах Kubernetes
 /run/firecracker-containerd.sock    # Kata / Firecracker
 ```
 
@@ -328,7 +329,7 @@ When the last process leaves the cgroup, `/tmp/pwn` runs **as root on the host**
 ### Mount-Related Escape CVEs (2023-2025)
 
 * **CVE-2024-21626 – runc “Leaky Vessels” file-descriptor leak**
-runc ≤1.1.11 leaked an open directory file descriptor that could point to the host root. A malicious image or `docker exec` could start a container whose *working directory* is already on the host filesystem, enabling arbitrary file read/write and privilege escalation. Fixed in runc 1.1.12 (Docker ≥25.0.3, containerd ≥1.7.14).
+runc ≤ 1.1.11 leaked an open directory file descriptor that could point to the host root. A malicious image or `docker exec` could start a container whose *working directory* is already on the host filesystem, enabling arbitrary file read/write and privilege escalation. Fixed in runc 1.1.12 (Docker ≥ 25.0.3, containerd ≥ 1.7.14).
 
 ```Dockerfile
 FROM scratch
@@ -339,11 +340,17 @@ CMD ["/bin/sh"]
 * **CVE-2024-23651 / 23653 – BuildKit OverlayFS copy-up TOCTOU**
 A race condition in the BuildKit snapshotter let an attacker replace a file that was about to be *copy-up* into the container’s rootfs with a symlink to an arbitrary path on the host, gaining write access outside the build context. Fixed in BuildKit v0.12.5 / Buildx 0.12.0. Exploitation requires an untrusted `docker build` on a vulnerable daemon.
 
+* **CVE-2024-1753 – Buildah / Podman bind-mount breakout during `build`**
+Buildah ≤ 1.35.0 (and Podman ≤ 4.9.3) incorrectly resolved absolute paths passed to `--mount=type=bind` in a *Containerfile*. A crafted build stage could mount `/` from the host **read-write** inside the build container when SELinux was disabled or in permissive mode, leading to full escape at build time. Patched in Buildah 1.35.1 and the corresponding Podman 4.9.4 back-port series.
+
+* **CVE-2024-40635 – containerd UID integer overflow**
+Supplying a `User` value larger than `2147483647` in an image config overflowed the 32-bit signed integer and started the process as UID 0 inside the host user namespace. Workloads expected to run as non-root could therefore obtain root privileges. Fixed in containerd 1.6.38 / 1.7.27 / 2.0.4.
+
 ### Hardening Reminders (2025)
 
 1. Bind-mount host paths **read-only** whenever possible and add `nosuid,nodev,noexec` mount options.
 2. Prefer dedicated side-car proxies or rootless clients instead of exposing the runtime socket directly.
-3. Keep the container runtime up-to-date (runc ≥1.1.12, BuildKit ≥0.12.5, containerd ≥1.7.14).
+3. Keep the container runtime up-to-date (runc ≥ 1.1.12, BuildKit ≥ 0.12.5, Buildah ≥ 1.35.1 / Podman ≥ 4.9.4, containerd ≥ 1.7.27).
 4. In Kubernetes, use `securityContext.readOnlyRootFilesystem: true`, the *restricted* PodSecurity profile and avoid `hostPath` volumes pointing to the paths listed above.
 
 ### References
@@ -353,5 +360,7 @@ A race condition in the BuildKit snapshotter let an attacker replace a file that
 - [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)
 - [Understanding and Hardening Linux Containers](https://research.nccgroup.com/wp-content/uploads/2020/07/ncc_group_understanding_hardening_linux_containers-1-1.pdf)
 - [Abusing Privileged and Unprivileged Linux Containers](https://www.nccgroup.com/globalassets/our-research/us/whitepapers/2016/june/container_whitepaper.pdf)
+- [Buildah CVE-2024-1753 advisory](https://github.com/containers/buildah/security/advisories/GHSA-pmf3-c36m-g5cf)
+- [containerd CVE-2024-40635 advisory](https://github.com/containerd/containerd/security/advisories/GHSA-265r-hfxg-fhmg)
 
 {{#include ../../../../banners/hacktricks-training.md}}
