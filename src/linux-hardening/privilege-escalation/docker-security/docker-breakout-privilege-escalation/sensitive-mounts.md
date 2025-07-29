@@ -1,12 +1,12 @@
-# Sensitive Mounts
+# 敏感挂载
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-暴露 `/proc`、`/sys` 和 `/var` 而没有适当的命名空间隔离会引入重大安全风险，包括攻击面扩大和信息泄露。这些目录包含敏感文件，如果配置错误或被未经授权的用户访问，可能导致容器逃逸、主机修改，或提供有助于进一步攻击的信息。例如，错误地挂载 `-v /proc:/host/proc` 可能会由于其基于路径的特性绕过 AppArmor 保护，使得 `/host/proc` 没有保护。
+暴露 `/proc`、`/sys` 和 `/var` 而没有适当的命名空间隔离会引入重大安全风险，包括攻击面扩大和信息泄露。这些目录包含敏感文件，如果配置错误或被未经授权的用户访问，可能导致容器逃逸、主机修改，或提供有助于进一步攻击的信息。例如，错误地挂载 `-v /proc:/host/proc` 可能会由于其基于路径的特性绕过 AppArmor 保护，使得 `/host/proc` 处于未保护状态。
 
 **您可以在** [**https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts**](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)** 中找到每个潜在漏洞的更多详细信息。**
 
-## procfs Vulnerabilities
+## procfs 漏洞
 
 ### `/proc/sys`
 
@@ -55,7 +55,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # 检查对 modprobe 的访问
 #### **`/proc/sys/fs`**
 
 - 根据 [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html)，包含有关文件系统的选项和信息。
-- 写入访问可能会对主机启用各种拒绝服务攻击。
+- 写入访问可以启用针对主机的各种拒绝服务攻击。
 
 #### **`/proc/sys/fs/binfmt_misc`**
 
@@ -65,12 +65,12 @@ ls -l $(cat /proc/sys/kernel/modprobe) # 检查对 modprobe 的访问
 - [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
 - 深入教程：[视频链接](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
 
-### 其他 `/proc` 中的内容
+### 其他在 `/proc` 中
 
 #### **`/proc/config.gz`**
 
-- 如果启用了 `CONFIG_IKCONFIG_PROC`，可能会泄露内核配置。
-- 对攻击者识别运行内核中的漏洞非常有用。
+- 如果启用了 `CONFIG_IKCONFIG_PROC`，可能会揭示内核配置。
+- 对攻击者识别正在运行的内核中的漏洞非常有用。
 
 #### **`/proc/sysrq-trigger`**
 
@@ -88,8 +88,8 @@ echo b > /proc/sysrq-trigger # 重启主机
 
 #### **`/proc/kallsyms`**
 
-- 列出内核导出的符号及其地址。
-- 对于内核漏洞开发至关重要，尤其是在克服 KASLR 时。
+- 列出内核导出符号及其地址。
+- 对于内核漏洞开发至关重要，特别是克服 KASLR。
 - 地址信息在 `kptr_restrict` 设置为 `1` 或 `2` 时受到限制。
 - 详细信息见 [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html)。
 
@@ -102,7 +102,7 @@ echo b > /proc/sysrq-trigger # 重启主机
 #### **`/proc/kcore`**
 
 - 以 ELF core 格式表示系统的物理内存。
-- 读取可能会泄露主机系统和其他容器的内存内容。
+- 读取可能泄漏主机系统和其他容器的内存内容。
 - 大文件大小可能导致读取问题或软件崩溃。
 - 详细用法见 [Dumping /proc/kcore in 2019](https://schlafwandler.github.io/posts/dumping-/proc/kcore/)。
 
@@ -124,7 +124,7 @@ echo b > /proc/sysrq-trigger # 重启主机
 #### **`/proc/[pid]/mountinfo`**
 
 - 提供有关进程挂载命名空间中挂载点的信息。
-- 暴露容器 `rootfs` 或映像的位置。
+- 暴露容器 `rootfs` 或镜像的位置。
 
 ### `/sys` 漏洞
 
@@ -273,10 +273,10 @@ So the filesystems are under `/var/lib/docker/overlay2/`:
 ```bash
 $ sudo ls -la /var/lib/docker/overlay2
 
-drwx--x---  4 root root  4096 1月  9 22:14 00762bca8ea040b1bb28b61baed5704e013ab23a196f5fe4758dafb79dfafd5d
-drwx--x---  4 root root  4096 1月 11 17:00 03cdf4db9a6cc9f187cca6e98cd877d581f16b62d073010571e752c305719496
-drwx--x---  4 root root  4096 1月  9 21:23 049e02afb3f8dec80cb229719d9484aead269ae05afe81ee5880ccde2426ef4f
-drwx--x---  4 root root  4096 1月  9 21:22 062f14e5adbedce75cea699828e22657c8044cd22b68ff1bb152f1a3c8a377f2
+drwx--x---  4 root root  4096 1月  9 22:14 00762bca8ea040b1bb28b61baed5704e013ab23a196f5fe4758dafb79dfafd5d  
+drwx--x---  4 root root  4096 1月 11 17:00 03cdf4db9a6cc9f187cca6e98cd877d581f16b62d073010571e752c305719496  
+drwx--x---  4 root root  4096 1月  9 21:23 049e02afb3f8dec80cb229719d9484aead269ae05afe81ee5880ccde2426ef4f  
+drwx--x---  4 root root  4096 1月  9 21:22 062f14e5adbedce75cea699828e22657c8044cd22b68ff1bb152f1a3c8a377f2  
 <SNIP>
 ```
 
@@ -295,6 +295,7 @@ Mounting certain host Unix sockets or writable pseudo-filesystems is equivalent 
 /run/containerd/containerd.sock     # containerd CRI 套接字  
 /var/run/crio/crio.sock             # CRI-O 运行时套接字  
 /run/podman/podman.sock             # Podman API（有根或无根）  
+/run/buildkit/buildkitd.sock        # BuildKit 守护进程（有根）  
 /var/run/kubelet.sock               # Kubernetes 节点上的 Kubelet API  
 /run/firecracker-containerd.sock    # Kata / Firecracker
 ```
@@ -314,7 +315,7 @@ A similar technique works with **crictl**, **podman** or the **kubelet** API onc
 Writable **cgroup v1** mounts are also dangerous. If `/sys/fs/cgroup` is bind-mounted **rw** and the host kernel is vulnerable to **CVE-2022-0492**, an attacker can set a malicious `release_agent` and execute arbitrary code in the *initial* namespace:
 
 ```bash
-# 假设容器具有 CAP_SYS_ADMIN 权限并且内核存在漏洞
+# 假设容器具有 CAP_SYS_ADMIN 权限和一个易受攻击的内核
 mkdir -p /tmp/x && echo 1 > /tmp/x/notify_on_release
 
 echo '/tmp/pwn' > /sys/fs/cgroup/release_agent   # 需要 CVE-2022-0492
@@ -328,7 +329,7 @@ When the last process leaves the cgroup, `/tmp/pwn` runs **as root on the host**
 ### Mount-Related Escape CVEs (2023-2025)
 
 * **CVE-2024-21626 – runc “Leaky Vessels” file-descriptor leak**
-runc ≤1.1.11 leaked an open directory file descriptor that could point to the host root. A malicious image or `docker exec` could start a container whose *working directory* is already on the host filesystem, enabling arbitrary file read/write and privilege escalation. Fixed in runc 1.1.12 (Docker ≥25.0.3, containerd ≥1.7.14).
+runc ≤ 1.1.11 leaked an open directory file descriptor that could point to the host root. A malicious image or `docker exec` could start a container whose *working directory* is already on the host filesystem, enabling arbitrary file read/write and privilege escalation. Fixed in runc 1.1.12 (Docker ≥ 25.0.3, containerd ≥ 1.7.14).
 
 ```Dockerfile
 FROM scratch
@@ -339,11 +340,17 @@ CMD ["/bin/sh"]
 * **CVE-2024-23651 / 23653 – BuildKit OverlayFS copy-up TOCTOU**
 A race condition in the BuildKit snapshotter let an attacker replace a file that was about to be *copy-up* into the container’s rootfs with a symlink to an arbitrary path on the host, gaining write access outside the build context. Fixed in BuildKit v0.12.5 / Buildx 0.12.0. Exploitation requires an untrusted `docker build` on a vulnerable daemon.
 
+* **CVE-2024-1753 – Buildah / Podman bind-mount breakout during `build`**
+Buildah ≤ 1.35.0 (and Podman ≤ 4.9.3) incorrectly resolved absolute paths passed to `--mount=type=bind` in a *Containerfile*. A crafted build stage could mount `/` from the host **read-write** inside the build container when SELinux was disabled or in permissive mode, leading to full escape at build time. Patched in Buildah 1.35.1 and the corresponding Podman 4.9.4 back-port series.
+
+* **CVE-2024-40635 – containerd UID integer overflow**
+Supplying a `User` value larger than `2147483647` in an image config overflowed the 32-bit signed integer and started the process as UID 0 inside the host user namespace. Workloads expected to run as non-root could therefore obtain root privileges. Fixed in containerd 1.6.38 / 1.7.27 / 2.0.4.
+
 ### Hardening Reminders (2025)
 
 1. Bind-mount host paths **read-only** whenever possible and add `nosuid,nodev,noexec` mount options.
 2. Prefer dedicated side-car proxies or rootless clients instead of exposing the runtime socket directly.
-3. Keep the container runtime up-to-date (runc ≥1.1.12, BuildKit ≥0.12.5, containerd ≥1.7.14).
+3. Keep the container runtime up-to-date (runc ≥ 1.1.12, BuildKit ≥ 0.12.5, Buildah ≥ 1.35.1 / Podman ≥ 4.9.4, containerd ≥ 1.7.27).
 4. In Kubernetes, use `securityContext.readOnlyRootFilesystem: true`, the *restricted* PodSecurity profile and avoid `hostPath` volumes pointing to the paths listed above.
 
 ### References
@@ -353,5 +360,7 @@ A race condition in the BuildKit snapshotter let an attacker replace a file that
 - [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)
 - [Understanding and Hardening Linux Containers](https://research.nccgroup.com/wp-content/uploads/2020/07/ncc_group_understanding_hardening_linux_containers-1-1.pdf)
 - [Abusing Privileged and Unprivileged Linux Containers](https://www.nccgroup.com/globalassets/our-research/us/whitepapers/2016/june/container_whitepaper.pdf)
+- [Buildah CVE-2024-1753 advisory](https://github.com/containers/buildah/security/advisories/GHSA-pmf3-c36m-g5cf)
+- [containerd CVE-2024-40635 advisory](https://github.com/containerd/containerd/security/advisories/GHSA-265r-hfxg-fhmg)
 
 {{#include ../../../../banners/hacktricks-training.md}}
