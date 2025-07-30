@@ -16,7 +16,7 @@ K-Średnich to algorytm klasteryzacji oparty na centroidach, który dzieli dane 
 4. **Powtórz**: Kroki 2–3 są powtarzane, aż przypisania klastrów się ustabilizują (centroidy przestają się znacząco poruszać).
 
 > [!TIP]
-> *Przykłady zastosowań w cyberbezpieczeństwie:* K-Średnich jest używane do wykrywania intruzji poprzez klasteryzację zdarzeń sieciowych. Na przykład, badacze zastosowali K-Średnich do zestawu danych o intruzjach KDD Cup 99 i stwierdzili, że skutecznie podzielił ruch na klastry normalne i atakujące. W praktyce analitycy bezpieczeństwa mogą klasteryzować wpisy dzienników lub dane o zachowaniach użytkowników, aby znaleźć grupy podobnej aktywności; wszelkie punkty, które nie należą do dobrze uformowanego klastra, mogą wskazywać na anomalie (np. nowa odmiana złośliwego oprogramowania tworząca własny mały klaster). K-Średnich może również pomóc w klasyfikacji rodzin złośliwego oprogramowania poprzez grupowanie plików binarnych na podstawie profili zachowań lub wektorów cech.
+> *Przykłady zastosowań w cyberbezpieczeństwie:* K-Średnich jest używane do wykrywania intruzji poprzez klasteryzację zdarzeń sieciowych. Na przykład, badacze zastosowali K-Średnich do zestawu danych o intruzjach KDD Cup 99 i stwierdzili, że skutecznie podzielił ruch na klastry normalne i atakujące. W praktyce analitycy bezpieczeństwa mogą klasteryzować wpisy dzienników lub dane o zachowaniu użytkowników, aby znaleźć grupy podobnej aktywności; wszelkie punkty, które nie należą do dobrze uformowanego klastra, mogą wskazywać na anomalie (np. nowa odmiana złośliwego oprogramowania tworząca własny mały klaster). K-Średnich może również pomóc w klasyfikacji rodzin złośliwego oprogramowania poprzez grupowanie plików binarnych na podstawie profili zachowań lub wektorów cech.
 
 #### Wybór K
 Liczba klastrów (K) jest hiperparametrem, który należy zdefiniować przed uruchomieniem algorytmu. Techniki takie jak Metoda Łokcia lub Wskaźnik Silhouette mogą pomóc w określeniu odpowiedniej wartości dla K, oceniając wydajność klasteryzacji:
@@ -57,32 +57,32 @@ print("Cluster centers (duration, bytes):")
 for idx, center in enumerate(kmeans.cluster_centers_):
 print(f"  Cluster {idx}: {center}")
 ```
-W tym przykładzie K-Means powinien znaleźć 4 klastry. Mały klaster ataku (o niezwykle wysokim czasie trwania ~200) idealnie utworzy własny klaster, biorąc pod uwagę jego odległość od normalnych klastrów. Drukujemy rozmiary klastrów i centra, aby zinterpretować wyniki. W rzeczywistym scenariuszu można oznaczyć klaster z kilkoma punktami jako potencjalne anomalie lub zbadać jego członków pod kątem złośliwej aktywności.
+W tym przykładzie K-Means powinien znaleźć 4 klastry. Mały klaster ataku (o niezwykle wysokim czasie trwania ~200) idealnie utworzy własny klaster, biorąc pod uwagę jego odległość od normalnych klastrów. Drukujemy rozmiary klastrów i ich centra, aby zinterpretować wyniki. W rzeczywistym scenariuszu można oznaczyć klaster z kilkoma punktami jako potencjalne anomalie lub zbadać jego członków pod kątem złośliwej aktywności.
 </details>
 
 ### Klasteryzacja Hierarchiczna
 
-Klasteryzacja hierarchiczna buduje hierarchię klastrów, używając podejścia od dołu do góry (agglomeratywnego) lub od góry do dołu (dzielącego):
+Klasteryzacja hierarchiczna buduje hierarchię klastrów, używając podejścia od dołu do góry (agglomerative) lub od góry do dołu (divisive):
 
-1. **Agglomeratywne (Od Dołu do Góry)**: Rozpocznij od każdego punktu danych jako osobnego klastra i iteracyjnie łącz najbliższe klastry, aż pozostanie jeden klaster lub zostanie spełniony kryterium zatrzymania.
-2. **Dzielące (Od Góry do Dołu)**: Rozpocznij od wszystkich punktów danych w jednym klastrze i iteracyjnie dziel klastry, aż każdy punkt danych stanie się swoim własnym klastrem lub zostanie spełniony kryterium zatrzymania.
+1. **Agglomerative (Od Dołu do Góry)**: Rozpocznij od każdego punktu danych jako osobnego klastra i iteracyjnie łącz najbliższe klastry, aż pozostanie jeden klaster lub zostanie spełniony kryterium zatrzymania.
+2. **Divisive (Od Góry do Dołu)**: Rozpocznij od wszystkich punktów danych w jednym klastrze i iteracyjnie dziel klastry, aż każdy punkt danych stanie się swoim własnym klastrem lub zostanie spełniony kryterium zatrzymania.
 
-Klasteryzacja agglomeratywna wymaga zdefiniowania odległości między klastrami oraz kryterium łączenia, aby zdecydować, które klastry połączyć. Powszechne metody łączenia obejmują pojedyncze łączenie (odległość najbliższych punktów między dwoma klastrami), pełne łączenie (odległość najdalszych punktów), średnie łączenie itp., a metryka odległości często jest euklidesowa. Wybór metody łączenia wpływa na kształt produkowanych klastrów. Nie ma potrzeby wstępnego określania liczby klastrów K; można "przeciąć" dendrogram na wybranym poziomie, aby uzyskać pożądaną liczbę klastrów.
+Klasteryzacja agglomerative wymaga zdefiniowania odległości między klastrami oraz kryterium łączenia, aby zdecydować, które klastry połączyć. Powszechne metody łączenia obejmują pojedyncze łączenie (odległość najbliższych punktów między dwoma klastrami), pełne łączenie (odległość najdalszych punktów), średnie łączenie itp., a metryka odległości często jest euklidesowa. Wybór metody łączenia wpływa na kształt produkowanych klastrów. Nie ma potrzeby wstępnego określania liczby klastrów K; można "przeciąć" dendrogram na wybranym poziomie, aby uzyskać pożądaną liczbę klastrów.
 
 Klasteryzacja hierarchiczna produkuje dendrogram, strukturę przypominającą drzewo, która pokazuje relacje między klastrami na różnych poziomach szczegółowości. Dendrogram można przeciąć na pożądanym poziomie, aby uzyskać określoną liczbę klastrów.
 
 > [!TIP]
-> *Przykłady zastosowań w cyberbezpieczeństwie:* Klasteryzacja hierarchiczna może organizować zdarzenia lub podmioty w drzewo, aby dostrzegać relacje. Na przykład w analizie złośliwego oprogramowania klasteryzacja agglomeratywna mogłaby grupować próbki według podobieństwa behawioralnego, ujawniając hierarchię rodzin i wariantów złośliwego oprogramowania. W bezpieczeństwie sieci można klasteryzować przepływy ruchu IP i używać dendrogramu do zobaczenia podgrup ruchu (np. według protokołu, a następnie według zachowania). Ponieważ nie trzeba wybierać K z góry, jest to przydatne podczas eksploracji nowych danych, dla których liczba kategorii ataków jest nieznana.
+> *Przykłady zastosowań w cyberbezpieczeństwie:* Klasteryzacja hierarchiczna może organizować zdarzenia lub podmioty w drzewo, aby dostrzegać relacje. Na przykład w analizie złośliwego oprogramowania klasteryzacja agglomerative mogłaby grupować próbki według podobieństwa behawioralnego, ujawniając hierarchię rodzin i wariantów złośliwego oprogramowania. W bezpieczeństwie sieciowym można klasteryzować przepływy ruchu IP i używać dendrogramu do zobaczenia podgrup ruchu (np. według protokołu, a następnie według zachowania). Ponieważ nie trzeba wybierać K z góry, jest to przydatne podczas eksploracji nowych danych, dla których liczba kategorii ataków jest nieznana.
 
 #### Założenia i Ograniczenia
 
-Klasteryzacja hierarchiczna nie zakłada określonego kształtu klastra i może uchwycić zagnieżdżone klastry. Jest przydatna do odkrywania taksonomii lub relacji między grupami (np. grupowanie złośliwego oprogramowania według podgrup rodzinnych). Jest deterministyczna (brak problemów z losową inicjalizacją). Kluczową zaletą jest dendrogram, który dostarcza wglądu w strukturę klasteryzacji danych na wszystkich poziomach – analitycy bezpieczeństwa mogą zdecydować o odpowiednim poziomie odcięcia, aby zidentyfikować znaczące klastry. Jednak jest to kosztowne obliczeniowo (zwykle czas $O(n^2)$ lub gorszy dla naiwnej implementacji) i niepraktyczne dla bardzo dużych zbiorów danych. Jest to również procedura zachłanna – po wykonaniu połączenia lub podziału nie można tego cofnąć, co może prowadzić do suboptymalnych klastrów, jeśli błąd wystąpi wcześnie. Odkrywcy mogą również wpływać na niektóre strategie łączenia (pojedyncze łączenie może powodować efekt "łańcuchowania", gdzie klastry łączą się przez odkrywców).
+Klasteryzacja hierarchiczna nie zakłada konkretnego kształtu klastra i może uchwycić zagnieżdżone klastry. Jest przydatna do odkrywania taksonomii lub relacji między grupami (np. grupowanie złośliwego oprogramowania według podgrup rodzinnych). Jest deterministyczna (brak problemów z losową inicjalizacją). Kluczową zaletą jest dendrogram, który dostarcza wglądu w strukturę klasteryzacji danych na wszystkich poziomach – analitycy bezpieczeństwa mogą zdecydować o odpowiednim poziomie odcięcia, aby zidentyfikować znaczące klastry. Jednak jest to kosztowne obliczeniowo (zwykle czas $O(n^2)$ lub gorszy dla naiwnej implementacji) i nie jest wykonalne dla bardzo dużych zbiorów danych. Jest to również procedura zachłanna – po wykonaniu połączenia lub podziału nie można tego cofnąć, co może prowadzić do suboptymalnych klastrów, jeśli błąd wystąpi wcześnie. Odstające punkty mogą również wpływać na niektóre strategie łączenia (pojedyncze łączenie może powodować efekt "łańcuchowy", gdzie klastry łączą się przez odstające punkty).
 
 <details>
-<summary>Przykład -- Klasteryzacja Agglomeratywna Zdarzeń
+<summary>Przykład -- Klasteryzacja Agglomerative Zdarzeń
 </summary>
 
-Ponownie wykorzystamy syntetyczne dane z przykładu K-Means (3 normalne klastry + 1 klaster ataku) i zastosujemy klasteryzację agglomeratywną. Następnie ilustrujemy, jak uzyskać dendrogram i etykiety klastrów.
+Ponownie wykorzystamy syntetyczne dane z przykładu K-Means (3 normalne klastry + 1 klaster ataku) i zastosujemy klasteryzację agglomerative. Następnie ilustrujemy, jak uzyskać dendrogram i etykiety klastrów.
 ```python
 from sklearn.cluster import AgglomerativeClustering
 from scipy.cluster.hierarchy import linkage, dendrogram
@@ -115,10 +115,10 @@ DBSCAN identyfikuje punkty rdzeniowe, punkty brzegowe i punkty szumowe:
 - **Punkt Brzegowy**: Punkt, który znajduje się w odległości ε od punktu rdzeniowego, ale ma mniej niż MinPts sąsiadów.
 - **Punkt Szumowy**: Punkt, który nie jest ani punktem rdzeniowym, ani punktem brzegowym.
 
-Grupowanie odbywa się poprzez wybranie nieodwiedzonego punktu rdzeniowego, oznaczenie go jako nową grupę, a następnie rekurencyjne dodawanie wszystkich punktów osiągalnych gęstościowo z niego (punkty rdzeniowe i ich sąsiedzi itp.). Punkty brzegowe są dodawane do grupy pobliskiego punktu rdzeniowego. Po rozszerzeniu wszystkich osiągalnych punktów, DBSCAN przechodzi do innego nieodwiedzonego punktu rdzeniowego, aby rozpocząć nową grupę. Punkty, które nie zostały osiągnięte przez żaden punkt rdzeniowy, pozostają oznaczone jako szum.
+Grupowanie przebiega poprzez wybranie nieodwiedzonego punktu rdzeniowego, oznaczenie go jako nową grupę, a następnie rekurencyjne dodawanie wszystkich punktów osiągalnych gęstościowo z niego (punkty rdzeniowe i ich sąsiedzi itp.). Punkty brzegowe są dodawane do grupy pobliskiego punktu rdzeniowego. Po rozszerzeniu wszystkich osiągalnych punktów, DBSCAN przechodzi do innego nieodwiedzonego punktu rdzeniowego, aby rozpocząć nową grupę. Punkty, które nie zostały osiągnięte przez żaden punkt rdzeniowy, pozostają oznaczone jako szum.
 
 > [!TIP]
-> *Przykłady zastosowań w cyberbezpieczeństwie:* DBSCAN jest przydatny do wykrywania anomalii w ruchu sieciowym. Na przykład, normalna aktywność użytkowników może tworzyć jedną lub więcej gęstych grup w przestrzeni cech, podczas gdy nowe zachowania ataków pojawiają się jako rozproszone punkty, które DBSCAN oznaczy jako szum (odstające). Był używany do grupowania rekordów przepływu sieciowego, gdzie może wykrywać skany portów lub ruch typu denial-of-service jako rzadkie obszary punktów. Innym zastosowaniem jest grupowanie wariantów złośliwego oprogramowania: jeśli większość próbek grupuje się według rodzin, ale kilka nie pasuje nigdzie, te kilka może być złośliwym oprogramowaniem zero-day. Możliwość oznaczania szumu oznacza, że zespoły bezpieczeństwa mogą skupić się na badaniu tych odstających.
+> *Przykłady zastosowań w cyberbezpieczeństwie:* DBSCAN jest przydatny do wykrywania anomalii w ruchu sieciowym. Na przykład, normalna aktywność użytkowników może tworzyć jedną lub więcej gęstych grup w przestrzeni cech, podczas gdy nowe zachowania ataków pojawiają się jako rozproszone punkty, które DBSCAN oznaczy jako szum (odstające). Został użyty do grupowania rekordów przepływu sieciowego, gdzie może wykrywać skany portów lub ruch typu denial-of-service jako rzadkie obszary punktów. Innym zastosowaniem jest grupowanie wariantów złośliwego oprogramowania: jeśli większość próbek grupuje się według rodzin, ale kilka nie pasuje nigdzie, te kilka może być złośliwym oprogramowaniem zero-day. Możliwość oznaczania szumu oznacza, że zespoły bezpieczeństwa mogą skupić się na badaniu tych odstających.
 
 #### Założenia i Ograniczenia
 
@@ -156,7 +156,7 @@ W tym fragmencie dostosowaliśmy `eps` i `min_samples` do skali naszych danych (
 
 ### Analiza Głównych Składników (PCA)
 
-PCA to technika **redukcji wymiarowości**, która znajduje nowy zestaw ortogonalnych osi (głównych składników), które uchwycają maksymalną wariancję w danych. Mówiąc prosto, PCA obraca i projektuje dane na nowy układ współrzędnych, tak aby pierwszy główny składnik (PC1) wyjaśniał największą możliwą wariancję, drugi PC (PC2) wyjaśniał największą wariancję ortogonalną do PC1, i tak dalej. Matematycznie, PCA oblicza wektory własne macierzy kowariancji danych – te wektory własne to kierunki głównych składników, a odpowiadające im wartości własne wskazują ilość wariancji wyjaśnianej przez każdy z nich. Często jest używane do ekstrakcji cech, wizualizacji i redukcji szumów.
+PCA to technika **redukcji wymiarowości**, która znajduje nowy zestaw ortogonalnych osi (głównych składników), które uchwycają maksymalną wariancję w danych. Mówiąc prosto, PCA obraca i projektuje dane na nowy układ współrzędnych, tak aby pierwszy główny składnik (PC1) wyjaśniał możliwie największą wariancję, drugi PC (PC2) wyjaśniał największą wariancję ortogonalną do PC1, i tak dalej. Matematycznie, PCA oblicza wektory własne macierzy kowariancji danych – te wektory własne to kierunki głównych składników, a odpowiadające im wartości własne wskazują ilość wariancji wyjaśnianej przez każdy z nich. Często jest używane do ekstrakcji cech, wizualizacji i redukcji szumów.
 
 Należy zauważyć, że jest to przydatne, jeśli wymiary zbioru danych zawierają **znaczące zależności liniowe lub korelacje**.
 
@@ -174,16 +174,16 @@ Wartość własna to skalar, który wskazuje ilość wariancji uchwyconej przez 
 
 Wyobraź sobie, że A jest macierzą kwadratową, a v jest wektorem różnym od zera, tak że: `A * v = λ * v`
 gdzie:
-- A to macierz kwadratowa, jak [ [1, 2], [2, 1]] (np. macierz kowariancji)
+- A to macierz kwadratowa, np. [ [1, 2], [2, 1]] (np. macierz kowariancji)
 - v to wektor własny (np. [1, 1])
 
 Wtedy `A * v = [ [1, 2], [2, 1]] * [1, 1] = [3, 3]`, co będzie wartością własną λ pomnożoną przez wektor własny v, co daje wartość własną λ = 3.
 
 #### Wartości Własne i Wektory Własne w PCA
 
-Wyjaśnijmy to na przykładzie. Wyobraź sobie, że masz zbiór danych z wieloma szaro-skalowymi zdjęciami twarzy o rozmiarze 100x100 pikseli. Każdy piksel można uznać za cechę, więc masz 10 000 cech na obraz (lub wektor 10000 komponentów na obraz). Jeśli chcesz zmniejszyć wymiarowość tego zbioru danych za pomocą PCA, powinieneś postępować zgodnie z tymi krokami:
+Wyjaśnijmy to na przykładzie. Wyobraź sobie, że masz zbiór danych z wieloma zdjęciami w odcieniach szarości twarzy o rozmiarze 100x100 pikseli. Każdy piksel można uznać za cechę, więc masz 10 000 cech na obraz (lub wektor 10 000 komponentów na obraz). Jeśli chcesz zmniejszyć wymiarowość tego zbioru danych za pomocą PCA, powinieneś postępować zgodnie z tymi krokami:
 
-1. **Standaryzacja**: Wyśrodkowanie danych poprzez odjęcie średniej każdej cechy (piksela) od zbioru danych.
+1. **Standaryzacja**: Wyśrodkowanie danych poprzez odjęcie średniej każdej cechy (piksela) z zbioru danych.
 2. **Macierz Kowariancji**: Obliczenie macierzy kowariancji standaryzowanych danych, która uchwyca, jak cechy (piksele) zmieniają się razem.
 - Należy zauważyć, że kowariancja między dwiema zmiennymi (pikselami w tym przypadku) wskazuje, jak bardzo zmieniają się razem, więc pomysł polega na odkryciu, które piksele mają tendencję do wzrostu lub spadku razem w relacji liniowej.
 - Na przykład, jeśli piksel 1 i piksel 2 mają tendencję do wzrostu razem, kowariancja między nimi będzie dodatnia.
@@ -194,11 +194,11 @@ Wyjaśnijmy to na przykładzie. Wyobraź sobie, że masz zbiór danych z wieloma
 4. **Wybór Głównych Składników**: Posortowanie wartości własnych w porządku malejącym i wybranie najlepszych K wektorów własnych odpowiadających największym wartościom własnym. Te wektory własne reprezentują kierunki maksymalnej wariancji w danych.
 
 > [!TIP]
-> *Przykłady zastosowań w cyberbezpieczeństwie:* Powszechnym zastosowaniem PCA w bezpieczeństwie jest redukcja cech do wykrywania anomalii. Na przykład, system wykrywania intruzów z ponad 40 metrykami sieciowymi (takimi jak cechy NSL-KDD) może użyć PCA do redukcji do kilku komponentów, podsumowując dane do wizualizacji lub wprowadzenia do algorytmów klastrowania. Analitycy mogą rysować ruch sieciowy w przestrzeni pierwszych dwóch głównych składników, aby zobaczyć, czy ataki oddzielają się od normalnego ruchu. PCA może również pomóc w eliminacji zbędnych cech (jak bajty wysłane w porównaniu do bajtów odebranych, jeśli są skorelowane), aby uczynić algorytmy wykrywania bardziej odpornymi i szybszymi.
+> *Przykłady zastosowań w cyberbezpieczeństwie:* Powszechnym zastosowaniem PCA w bezpieczeństwie jest redukcja cech do wykrywania anomalii. Na przykład, system wykrywania intruzów z ponad 40 metrykami sieciowymi (takimi jak cechy NSL-KDD) może użyć PCA do redukcji do kilku komponentów, podsumowując dane do wizualizacji lub wprowadzenia do algorytmów klastrowania. Analitycy mogą rysować ruch sieciowy w przestrzeni pierwszych dwóch głównych składników, aby zobaczyć, czy ataki oddzielają się od normalnego ruchu. PCA może również pomóc w eliminacji zbędnych cech (takich jak bajty wysłane w porównaniu do bajtów odebranych, jeśli są skorelowane), aby uczynić algorytmy wykrywania bardziej odpornymi i szybszymi.
 
 #### Założenia i Ograniczenia
 
-PCA zakłada, że **główne osie wariancji są znaczące** – jest to metoda liniowa, więc uchwyca liniowe korelacje w danych. Jest nienadzorowana, ponieważ wykorzystuje tylko kowariancję cech. Zalety PCA obejmują redukcję szumów (komponenty o małej wariancji często odpowiadają szumowi) i dekorelację cech. Jest obliczeniowo wydajne dla umiarkowanie wysokich wymiarów i często jest używane jako krok wstępny dla innych algorytmów (aby złagodzić przekleństwo wymiarowości). Jednym z ograniczeń jest to, że PCA jest ograniczone do relacji liniowych – nie uchwyci złożonej nieliniowej struktury (podczas gdy autoenkodery lub t-SNE mogą). Ponadto komponenty PCA mogą być trudne do interpretacji w kontekście oryginalnych cech (są kombinacjami oryginalnych cech). W cyberbezpieczeństwie należy być ostrożnym: atak, który powoduje tylko subtelną zmianę w cechach o niskiej wariancji, może nie pojawić się w głównych komponentach (ponieważ PCA priorytetowo traktuje wariancję, a niekoniecznie „interesującość”).
+PCA zakłada, że **główne osie wariancji są znaczące** – jest to metoda liniowa, więc uchwyca liniowe korelacje w danych. Jest nienadzorowana, ponieważ wykorzystuje tylko kowariancję cech. Zalety PCA obejmują redukcję szumów (komponenty o małej wariancji często odpowiadają szumowi) i dekorelację cech. Jest obliczeniowo wydajne dla umiarkowanie wysokich wymiarów i często stanowi użyteczny krok wstępny dla innych algorytmów (aby złagodzić przekleństwo wymiarowości). Jednym z ograniczeń jest to, że PCA jest ograniczone do relacji liniowych – nie uchwyci złożonej nieliniowej struktury (podczas gdy autoenkodery lub t-SNE mogą). Ponadto komponenty PCA mogą być trudne do interpretacji w kontekście oryginalnych cech (są kombinacjami oryginalnych cech). W cyberbezpieczeństwie należy być ostrożnym: atak, który powoduje tylko subtelną zmianę w cechach o niskiej wariancji, może nie pojawić się w głównych komponentach (ponieważ PCA priorytetowo traktuje wariancję, a niekoniecznie „interesującość”).
 
 <details>
 <summary>Przykład -- Redukcja Wymiarów Danych Sieciowych
@@ -224,20 +224,20 @@ print("Original shape:", data_4d.shape, "Reduced shape:", data_2d.shape)
 # We can examine a few transformed points
 print("First 5 data points in PCA space:\n", data_2d[:5])
 ```
-Tutaj wzięliśmy wcześniejsze klastry normalnego ruchu i rozszerzyliśmy każdy punkt danych o dwie dodatkowe cechy (pakiety i błędy), które korelują z bajtami i czasem trwania. Następnie używamy PCA do skompresowania 4 cech do 2 głównych komponentów. Drukujemy wskaźnik wyjaśnionej wariancji, który może pokazać, że na przykład >95% wariancji jest uchwycone przez 2 komponenty (co oznacza niewielką utratę informacji). Wynik pokazuje również, że kształt danych zmienia się z (1500, 4) na (1500, 2). Pierwsze kilka punktów w przestrzeni PCA podano jako przykład. W praktyce można by narysować data_2d, aby wizualnie sprawdzić, czy klastry są rozróżnialne. Jeśli występowała anomalia, można by ją zobaczyć jako punkt leżący z dala od głównego klastra w przestrzeni PCA. PCA w ten sposób pomaga destylować złożone dane do zarządzalnej formy dla ludzkiej interpretacji lub jako wejście do innych algorytmów.
+Tutaj wzięliśmy wcześniejsze klastry normalnego ruchu i rozszerzyliśmy każdy punkt danych o dwie dodatkowe cechy (pakiety i błędy), które korelują z bajtami i czasem trwania. Następnie używamy PCA do skompresowania 4 cech do 2 głównych komponentów. Drukujemy współczynnik wyjaśnionej wariancji, który może pokazać, że na przykład >95% wariancji jest uchwycone przez 2 komponenty (co oznacza niewielką utratę informacji). Wynik pokazuje również, że kształt danych zmienia się z (1500, 4) na (1500, 2). Pierwsze kilka punktów w przestrzeni PCA podano jako przykład. W praktyce można by narysować data_2d, aby wizualnie sprawdzić, czy klastry są rozróżnialne. Jeśli występowała anomalia, można by ją zobaczyć jako punkt leżący z dala od głównego klastra w przestrzeni PCA. PCA zatem pomaga destylować złożone dane do zarządzalnej formy dla ludzkiej interpretacji lub jako wejście do innych algorytmów.
 
 </details>
 
 
-### Modele Mieszanek Gaussowskich (GMM)
+### Modele Mieszanin Gaussowskich (GMM)
 
-Model Mieszanek Gaussowskich zakłada, że dane są generowane z mieszanki **kilku rozkładów Gaussowskich (normalnych) o nieznanych parametrach**. W istocie jest to probabilistyczny model klastrowania: stara się łagodnie przypisać każdy punkt do jednego z K komponentów Gaussowskich. Każdy komponent Gaussowski k ma wektor średni (μ_k), macierz kowariancji (Σ_k) oraz wagę mieszania (π_k), która reprezentuje, jak powszechny jest ten klaster. W przeciwieństwie do K-Means, który dokonuje "twardych" przypisań, GMM nadaje każdemu punktowi prawdopodobieństwo przynależności do każdego klastra.
+Model Mieszanin Gaussowskich zakłada, że dane są generowane z mieszaniny **kilku rozkładów Gaussowskich (normalnych) o nieznanych parametrach**. W istocie jest to probabilistyczny model klastrowania: stara się łagodnie przypisać każdy punkt do jednego z K komponentów Gaussowskich. Każdy komponent Gaussowski k ma wektor średni (μ_k), macierz kowariancji (Σ_k) oraz wagę mieszania (π_k), która reprezentuje, jak powszechny jest ten klaster. W przeciwieństwie do K-Means, który dokonuje "twardych" przypisań, GMM nadaje każdemu punktowi prawdopodobieństwo przynależności do każdego klastra.
 
 Dopasowanie GMM zazwyczaj odbywa się za pomocą algorytmu Oczekiwania-Maksymalizacji (EM):
 
 - **Inicjalizacja**: Rozpocznij od początkowych oszacowań dla średnich, kowariancji i współczynników mieszania (lub użyj wyników K-Means jako punktu wyjścia).
 
-- **E-krok (Oczekiwanie)**: Mając obecne parametry, oblicz odpowiedzialność każdego klastra dla każdego punktu: zasadniczo `r_nk = P(z_k | x_n)`, gdzie z_k to zmienna utajona wskazująca przynależność do klastra dla punktu x_n. To jest robione przy użyciu twierdzenia Bayesa, gdzie obliczamy prawdopodobieństwo a posteriori każdego punktu przynależności do każdego klastra na podstawie obecnych parametrów. Odpowiedzialności oblicza się jako:
+- **E-krok (Oczekiwanie)**: Mając obecne parametry, oblicz odpowiedzialność każdego klastra dla każdego punktu: zasadniczo `r_nk = P(z_k | x_n)`, gdzie z_k to zmienna utajona wskazująca przynależność do klastra dla punktu x_n. To jest robione za pomocą twierdzenia Bayesa, gdzie obliczamy prawdopodobieństwo a posteriori każdego punktu przynależności do każdego klastra na podstawie obecnych parametrów. Odpowiedzialności oblicza się jako:
 ```math
 r_{nk} = \frac{\pi_k \mathcal{N}(x_n | \mu_k, \Sigma_k)}{\sum_{j=1}^{K} \pi_j \mathcal{N}(x_n | \mu_j, \Sigma_j)}
 ```
@@ -255,13 +255,13 @@ gdzie:
 Wynikiem jest zestaw rozkładów Gaussowskich, które wspólnie modelują ogólny rozkład danych. Możemy użyć dopasowanego GMM do klastrowania, przypisując każdy punkt do Gaussa o najwyższym prawdopodobieństwie, lub zachować prawdopodobieństwa dla niepewności. Można również ocenić prawdopodobieństwo nowych punktów, aby sprawdzić, czy pasują do modelu (przydatne w wykrywaniu anomalii).
 
 > [!TIP]
-> *Przykłady zastosowań w cyberbezpieczeństwie:* GMM można wykorzystać do wykrywania anomalii, modelując rozkład normalnych danych: każdy punkt o bardzo niskim prawdopodobieństwie w ramach wyuczonej mieszanki jest oznaczany jako anomalia. Na przykład, można by wytrenować GMM na cechach legalnego ruchu sieciowego; połączenie atakujące, które nie przypomina żadnego wyuczonego klastra, miałoby niskie prawdopodobieństwo. GMM są również używane do klastrowania działań, gdzie klastry mogą mieć różne kształty – np. grupowanie użytkowników według profili zachowań, gdzie cechy każdego profilu mogą być podobne do Gaussa, ale z własną strukturą wariancji. Inny scenariusz: w wykrywaniu phishingu cechy legalnych e-maili mogą tworzyć jeden klaster Gaussowski, znane phishingi inny, a nowe kampanie phishingowe mogą pojawić się jako oddzielny Gauss lub jako punkty o niskim prawdopodobieństwie w stosunku do istniejącej mieszanki.
+> *Przykłady zastosowań w cyberbezpieczeństwie:* GMM może być używany do wykrywania anomalii poprzez modelowanie rozkładu normalnych danych: każdy punkt o bardzo niskim prawdopodobieństwie w ramach wyuczonej mieszaniny jest oznaczany jako anomalia. Na przykład, można by wytrenować GMM na cechach legalnego ruchu sieciowego; połączenie atakujące, które nie przypomina żadnego wyuczonego klastra, miałoby niskie prawdopodobieństwo. GMM są również używane do klastrowania działań, gdzie klastry mogą mieć różne kształty – np. grupowanie użytkowników według profili zachowań, gdzie cechy każdego profilu mogą być podobne do Gaussa, ale z własną strukturą wariancji. Inny scenariusz: w wykrywaniu phishingu cechy legalnych e-maili mogą tworzyć jeden klaster Gaussowski, znane phishingi inny, a nowe kampanie phishingowe mogą pojawiać się jako oddzielny Gauss lub jako punkty o niskim prawdopodobieństwie w odniesieniu do istniejącej mieszaniny.
 
 #### Założenia i ograniczenia
 
-GMM jest uogólnieniem K-Means, które uwzględnia kowariancję, dzięki czemu klastry mogą być elipsoidalne (nie tylko sferyczne). Radzi sobie z klastrami o różnych rozmiarach i kształtach, jeśli kowariancja jest pełna. Miękkie klastrowanie jest zaletą, gdy granice klastrów są nieostre – np. w cyberbezpieczeństwie zdarzenie może mieć cechy wielu typów ataków; GMM może odzwierciedlać tę niepewność za pomocą prawdopodobieństw. GMM dostarcza również probabilistycznej estymacji gęstości danych, co jest przydatne do wykrywania wartości odstających (punktów o niskim prawdopodobieństwie w ramach wszystkich komponentów mieszanki).
+GMM jest uogólnieniem K-Means, które uwzględnia kowariancję, dzięki czemu klastry mogą być elipsoidalne (nie tylko sferyczne). Radzi sobie z klastrami o różnych rozmiarach i kształtach, jeśli kowariancja jest pełna. Miękkie klastrowanie jest zaletą, gdy granice klastrów są nieostre – np. w cyberbezpieczeństwie zdarzenie może mieć cechy wielu typów ataków; GMM może odzwierciedlać tę niepewność za pomocą prawdopodobieństw. GMM dostarcza również probabilistycznej estymacji gęstości danych, co jest przydatne do wykrywania wartości odstających (punktów o niskim prawdopodobieństwie w ramach wszystkich komponentów mieszaniny).
 
-Z drugiej strony, GMM wymaga określenia liczby komponentów K (choć można użyć kryteriów takich jak BIC/AIC do jej wyboru). EM czasami może zbiegać się wolno lub do lokalnego optimum, więc inicjalizacja jest ważna (często uruchamia się EM wiele razy). Jeśli dane w rzeczywistości nie podążają za mieszanką Gaussów, model może być słabo dopasowany. Istnieje również ryzyko, że jeden Gauss skurczy się, aby pokryć tylko wartość odstającą (choć regularizacja lub minimalne ograniczenia kowariancji mogą to złagodzić).
+Z drugiej strony, GMM wymaga określenia liczby komponentów K (choć można użyć kryteriów takich jak BIC/AIC do jej wyboru). EM czasami może zbiegać się wolno lub do lokalnego optimum, więc inicjalizacja jest ważna (często uruchamia się EM wiele razy). Jeśli dane w rzeczywistości nie podążają za mieszaniną Gaussów, model może być słabo dopasowany. Istnieje również ryzyko, że jeden Gauss skurczy się, aby pokryć tylko wartość odstającą (choć regularizacja lub minimalne ograniczenia kowariancji mogą to złagodzić).
 
 
 <details>
@@ -289,7 +289,7 @@ W tym kodzie trenujemy GMM z 3 Gaussami na normalnym ruchu (zakładając, że zn
 
 ### Isolation Forest
 
-**Isolation Forest** to algorytm detekcji anomalii oparty na idei losowego izolowania punktów. Zasada jest taka, że anomalie są nieliczne i różne, więc łatwiej je izolować niż normalne punkty. Isolation Forest buduje wiele binarnych drzew izolacyjnych (losowych drzew decyzyjnych), które losowo dzielą dane. W każdym węźle drzewa wybierana jest losowa cecha, a losowa wartość podziału jest wybierana pomiędzy min i max tej cechy dla danych w tym węźle. Ten podział dzieli dane na dwie gałęzie. Drzewo rośnie, aż każdy punkt zostanie izolowany w swoim własnym liściu lub osiągnięta zostanie maksymalna wysokość drzewa.
+**Isolation Forest** to algorytm detekcji anomalii oparty na idei losowego izolowania punktów. Zasada polega na tym, że anomalie są nieliczne i różne, więc łatwiej je izolować niż normalne punkty. Isolation Forest buduje wiele binarnych drzew izolacyjnych (losowych drzew decyzyjnych), które losowo dzielą dane. W każdym węźle drzewa wybierana jest losowa cecha, a losowa wartość podziału jest wybierana pomiędzy minimum a maksimum tej cechy dla danych w tym węźle. Ten podział dzieli dane na dwie gałęzie. Drzewo rośnie, aż każdy punkt zostanie izolowany w swoim własnym liściu lub osiągnięta zostanie maksymalna wysokość drzewa.
 
 Wykrywanie anomalii odbywa się poprzez obserwację długości ścieżki każdego punktu w tych losowych drzewach – liczby podziałów wymaganych do izolacji punktu. Intuicyjnie, anomalie (odstające wartości) mają tendencję do szybszej izolacji, ponieważ losowy podział jest bardziej prawdopodobny, aby oddzielić odstającą wartość (która znajduje się w rzadkim obszarze) niż normalny punkt w gęstym klastrze. Isolation Forest oblicza wynik anomalii na podstawie średniej długości ścieżki we wszystkich drzewach: krótsza średnia ścieżka → bardziej anomalny. Wyniki są zazwyczaj normalizowane do [0,1], gdzie 1 oznacza bardzo prawdopodobną anomalię.
 
@@ -298,9 +298,9 @@ Wykrywanie anomalii odbywa się poprzez obserwację długości ścieżki każdeg
 
 #### Założenia i ograniczenia
 
-**Zalety**: Isolation Forest nie wymaga założenia rozkładu; bezpośrednio celuje w izolację. Jest wydajny w przypadku danych o wysokiej wymiarowości i dużych zbiorów danych (złożoność liniowa $O(n\log n)$ przy budowie lasu), ponieważ każde drzewo izoluje punkty tylko z podzbioru cech i podziałów. Zwykle dobrze radzi sobie z cechami numerycznymi i może być szybszy niż metody oparte na odległości, które mogą mieć złożoność $O(n^2)$. Automatycznie również daje wynik anomalii, więc można ustawić próg dla alertów (lub użyć parametru zanieczyszczenia, aby automatycznie zdecydować o odcięciu na podstawie oczekiwanej frakcji anomalii).
+**Zalety**: Isolation Forest nie wymaga założenia o rozkładzie; bezpośrednio celuje w izolację. Jest wydajny w przypadku danych o wysokiej wymiarowości i dużych zbiorów danych (złożoność liniowa $O(n\log n)$ przy budowie lasu), ponieważ każde drzewo izoluje punkty tylko z podzbioru cech i podziałów. Zwykle dobrze radzi sobie z cechami numerycznymi i może być szybszy niż metody oparte na odległości, które mogą mieć złożoność $O(n^2)$. Automatycznie również przyznaje wynik anomalii, więc można ustawić próg dla alertów (lub użyć parametru zanieczyszczenia, aby automatycznie zdecydować o odcięciu na podstawie oczekiwanej frakcji anomalii).
 
-**Ograniczenia**: Z powodu swojej losowej natury wyniki mogą się nieznacznie różnić między uruchomieniami (choć przy wystarczającej liczbie drzew jest to niewielkie). Jeśli dane mają wiele nieistotnych cech lub jeśli anomalie nie różnią się wyraźnie w żadnej cechie, izolacja może nie być skuteczna (losowe podziały mogą przypadkowo izolować normalne punkty – jednak uśrednianie wielu drzew łagodzi to). Ponadto, Isolation Forest zazwyczaj zakłada, że anomalie są małą mniejszością (co zazwyczaj jest prawdą w scenariuszach cyberbezpieczeństwa).
+**Ograniczenia**: Z powodu swojej losowej natury wyniki mogą się nieznacznie różnić między uruchomieniami (choć przy wystarczającej liczbie drzew jest to niewielkie). Jeśli dane mają wiele nieistotnych cech lub jeśli anomalie nie różnią się wyraźnie w żadnej cechie, izolacja może być nieskuteczna (losowe podziały mogą przypadkowo izolować normalne punkty – jednak uśrednianie wielu drzew łagodzi to). Ponadto, Isolation Forest zazwyczaj zakłada, że anomalie są małą mniejszością (co zazwyczaj jest prawdą w scenariuszach cyberbezpieczeństwa).
 
 <details>
 <summary>Przykład -- Wykrywanie odstających wartości w logach sieciowych
@@ -324,28 +324,28 @@ print("Example anomaly scores (lower means more anomalous):", anomaly_scores[:5]
 ```
 W tym kodzie instancjonujemy `IsolationForest` z 100 drzewami i ustawiamy `contamination=0.15` (co oznacza, że oczekujemy około 15% anomalii; model ustawi próg punktacji tak, aby ~15% punktów zostało oznaczonych). Dopasowujemy go do `X_test_if`, który zawiera mieszankę normalnych punktów i punktów ataku (uwaga: zazwyczaj dopasowujesz do danych treningowych, a następnie używasz predict na nowych danych, ale tutaj dla ilustracji dopasowujemy i przewidujemy na tym samym zbiorze, aby bezpośrednio zaobserwować wyniki).
 
-Wynik pokazuje przewidywane etykiety dla pierwszych 20 punktów (gdzie -1 oznacza anomalię). Drukujemy również, ile anomalii zostało wykrytych w sumie oraz kilka przykładowych punktów anomalii. Oczekiwalibyśmy, że około 18 z 120 punktów zostanie oznaczonych jako -1 (ponieważ zanieczyszczenie wynosiło 15%). Jeśli nasze 20 próbek ataku jest rzeczywiście najbardziej odstającymi, większość z nich powinna pojawić się w tych przewidywaniach -1. Wynik anomalii (funkcja decyzyjna Isolation Forest) jest wyższy dla normalnych punktów i niższy (bardziej negatywny) dla anomalii – drukujemy kilka wartości, aby zobaczyć separację. W praktyce można by posortować dane według wyniku, aby zobaczyć najlepsze odstające punkty i je zbadać. Isolation Forest zapewnia zatem efektywny sposób przeszukiwania dużych, nieoznakowanych danych bezpieczeństwa i wyodrębniania najbardziej nieregularnych przypadków do analizy przez ludzi lub dalszej automatycznej analizy.
+Wynik pokazuje przewidywane etykiety dla pierwszych 20 punktów (gdzie -1 oznacza anomalię). Drukujemy również, ile anomalii zostało wykrytych w sumie oraz kilka przykładowych punktów anomalii. Oczekiwalibyśmy, że około 18 z 120 punktów zostanie oznaczonych jako -1 (ponieważ zanieczyszczenie wynosiło 15%). Jeśli nasze 20 próbek ataku jest rzeczywiście najbardziej odstającymi, większość z nich powinna pojawić się w tych przewidywaniach -1. Punktacja anomalii (funkcja decyzyjna Isolation Forest) jest wyższa dla normalnych punktów i niższa (bardziej negatywna) dla anomalii – drukujemy kilka wartości, aby zobaczyć separację. W praktyce można by posortować dane według punktacji, aby zobaczyć najlepsze odstające i je zbadać. Isolation Forest zapewnia zatem efektywny sposób przeszukiwania dużych nieoznakowanych danych bezpieczeństwa i wyodrębniania najbardziej nieregularnych przypadków do analizy przez ludzi lub dalszej automatycznej analizy.
 
 ### t-SNE (t-Distributed Stochastic Neighbor Embedding)
 
-**t-SNE** to nieliniowa technika redukcji wymiarowości, zaprojektowana specjalnie do wizualizacji danych o wysokiej wymiarowości w 2 lub 3 wymiarach. Przekształca podobieństwa między punktami danych w wspólne rozkłady prawdopodobieństwa i stara się zachować strukturę lokalnych sąsiedztw w projekcji o niższej wymiarowości. Mówiąc prościej, t-SNE umieszcza punkty w (powiedzmy) 2D w taki sposób, że podobne punkty (w oryginalnej przestrzeni) znajdują się blisko siebie, a różne punkty są oddalone z dużym prawdopodobieństwem.
+**t-SNE** to nieliniowa technika redukcji wymiarów, zaprojektowana specjalnie do wizualizacji danych o wysokiej wymiarowości w 2 lub 3 wymiarach. Przekształca podobieństwa między punktami danych w wspólne rozkłady prawdopodobieństwa i stara się zachować strukturę lokalnych sąsiedztw w projekcji o niższej wymiarowości. Mówiąc prościej, t-SNE umieszcza punkty w (powiedzmy) 2D w taki sposób, że podobne punkty (w oryginalnej przestrzeni) znajdują się blisko siebie, a różne punkty są oddalone od siebie z dużym prawdopodobieństwem.
 
 Algorytm ma dwa główne etapy:
 
 1. **Obliczanie parowych afinitetów w przestrzeni o wysokiej wymiarowości:** Dla każdej pary punktów t-SNE oblicza prawdopodobieństwo, że wybierze tę parę jako sąsiadów (to jest realizowane przez centrowanie rozkładu Gaussa na każdym punkcie i mierzenie odległości – parametr złożoności wpływa na efektywną liczbę sąsiadów, które są brane pod uwagę).
-2. **Obliczanie parowych afinitetów w przestrzeni o niskiej wymiarowości (np. 2D):** Początkowo punkty są losowo umieszczane w 2D. t-SNE definiuje podobne prawdopodobieństwo dla odległości w tej mapie (używając jądra rozkładu t Studenta, które ma cięższe ogony niż Gauss, aby umożliwić odległym punktom większą swobodę).
-3. **Spadek gradientu:** t-SNE następnie iteracyjnie przemieszcza punkty w 2D, aby zminimalizować rozbieżność Kullbacka-Leiblera (KL) między rozkładem afinitetów w wysokiej wymiarowości a tym w niskiej wymiarowości. Powoduje to, że układ 2D odzwierciedla strukturę w wysokiej wymiarowości tak bardzo, jak to możliwe – punkty, które były blisko w oryginalnej przestrzeni, będą się przyciągać, a te oddalone będą się odpychać, aż znajdzie się równowaga.
+2. **Obliczanie parowych afinitetów w przestrzeni o niskiej wymiarowości (np. 2D):** Początkowo punkty są losowo umieszczane w 2D. t-SNE definiuje podobne prawdopodobieństwo dla odległości w tej mapie (używając jądra rozkładu t Studenta, które ma cięższe ogony niż Gauss, aby umożliwić dalszym punktom większą swobodę).
+3. **Spadek gradientu:** t-SNE następnie iteracyjnie przesuwa punkty w 2D, aby zminimalizować rozbieżność Kullbacka-Leiblera (KL) między rozkładem afinitetów w wysokiej wymiarowości a tym w niskiej wymiarowości. Powoduje to, że układ 2D odzwierciedla strukturę w wysokiej wymiarowości tak bardzo, jak to możliwe – punkty, które były blisko w oryginalnej przestrzeni, będą się przyciągać, a te oddalone będą się odpychać, aż znajdzie się równowaga.
 
-Wynik często jest wizualnie znaczącym wykresem punktowym, w którym klastry w danych stają się oczywiste.
+Wynik często stanowi wizualnie znaczący wykres punktowy, na którym klastry w danych stają się oczywiste.
 
 > [!TIP]
-> *Przykłady zastosowań w cyberbezpieczeństwie:* t-SNE jest często używane do **wizualizacji danych o wysokiej wymiarowości w celu analizy przez ludzi**. Na przykład, w centrum operacyjnym bezpieczeństwa, analitycy mogą wziąć zbiór danych o zdarzeniach z dziesiątkami cech (numery portów, częstotliwości, liczby bajtów itp.) i użyć t-SNE do wygenerowania wykresu 2D. Ataki mogą tworzyć własne klastry lub oddzielać się od normalnych danych na tym wykresie, co ułatwia ich identyfikację. Zostało to zastosowane do zbiorów danych złośliwego oprogramowania, aby zobaczyć grupy rodzin złośliwego oprogramowania lub do danych o włamaniu do sieci, gdzie różne typy ataków grupują się wyraźnie, co prowadzi do dalszego dochodzenia. W zasadzie t-SNE zapewnia sposób na zobaczenie struktury w danych cybernetycznych, które w przeciwnym razie byłyby nieczytelne.
+> *Przykłady zastosowań w cyberbezpieczeństwie:* t-SNE jest często używane do **wizualizacji danych o wysokiej wymiarowości w celu analizy przez ludzi**. Na przykład, w centrum operacyjnym bezpieczeństwa analitycy mogą wziąć zbiór danych o zdarzeniach z dziesiątkami cech (numery portów, częstotliwości, liczby bajtów itp.) i użyć t-SNE do wygenerowania wykresu 2D. Ataki mogą tworzyć własne klastry lub oddzielać się od normalnych danych na tym wykresie, co ułatwia ich identyfikację. Zostało to zastosowane do zbiorów danych złośliwego oprogramowania, aby zobaczyć grupy rodzin złośliwego oprogramowania lub do danych o włamaniu do sieci, gdzie różne typy ataków wyraźnie się grupują, co prowadzi do dalszego dochodzenia. W zasadzie t-SNE zapewnia sposób na zobaczenie struktury w danych cybernetycznych, które w przeciwnym razie byłyby nieczytelne.
 
 #### Założenia i ograniczenia
 
 t-SNE jest świetne do wizualnego odkrywania wzorców. Może ujawniać klastry, podklastry i odstające punkty, które inne metody liniowe (jak PCA) mogą przeoczyć. Zostało użyte w badaniach nad cyberbezpieczeństwem do wizualizacji złożonych danych, takich jak profile zachowań złośliwego oprogramowania lub wzorce ruchu sieciowego. Ponieważ zachowuje lokalną strukturę, dobrze pokazuje naturalne grupowania.
 
-Jednak t-SNE jest obliczeniowo cięższe (około $O(n^2)$), więc może wymagać próbkowania dla bardzo dużych zbiorów danych. Ma również hiperparametry (złożoność, współczynnik uczenia, iteracje), które mogą wpływać na wynik – np. różne wartości złożoności mogą ujawniać klastry w różnych skalach. Wykresy t-SNE mogą czasami być błędnie interpretowane – odległości na mapie nie mają bezpośredniego znaczenia globalnego (koncentruje się na lokalnym sąsiedztwie, czasami klastry mogą wydawać się sztucznie dobrze oddzielone). Ponadto t-SNE jest głównie do wizualizacji; nie zapewnia prostego sposobu na projektowanie nowych punktów danych bez ponownego obliczania i nie jest przeznaczone do użycia jako wstępne przetwarzanie dla modelowania predykcyjnego (UMAP jest alternatywą, która rozwiązuje niektóre z tych problemów z szybszą prędkością).
+Jednak t-SNE jest obliczeniowo cięższe (około $O(n^2)$), więc może wymagać próbkowania dla bardzo dużych zbiorów danych. Ma również hiperparametry (złożoność, współczynnik uczenia, iteracje), które mogą wpływać na wynik – np. różne wartości złożoności mogą ujawniać klastry w różnych skalach. Wykresy t-SNE mogą czasami być błędnie interpretowane – odległości na mapie nie mają bezpośredniego znaczenia globalnego (koncentruje się na lokalnym sąsiedztwie, czasami klastry mogą wydawać się sztucznie dobrze oddzielone). Ponadto t-SNE jest głównie do wizualizacji; nie zapewnia prostego sposobu na projekcję nowych punktów danych bez ponownego obliczania i nie jest przeznaczone do użycia jako wstępne przetwarzanie dla modelowania predykcyjnego (UMAP jest alternatywą, która rozwiązuje niektóre z tych problemów z szybszą prędkością).
 
 <details>
 <summary>Przykład -- Wizualizacja połączeń sieciowych
@@ -434,9 +434,101 @@ plt.legend()
 plt.tight_layout()
 plt.show()
 ```
-Tutaj połączyliśmy nasz wcześniejszy zbiór danych 4D z garstką ekstremalnych wartości odstających (wartości odstające mają jedną cechę (“czas trwania”) ustawioną bardzo wysoko, itd., aby zasymulować dziwny wzór). Uruchamiamy t-SNE z typową złożonością 30. Wyjściowe data_2d ma kształt (1505, 2). W tym tekście nie będziemy faktycznie rysować, ale gdybyśmy to zrobili, spodziewalibyśmy się zobaczyć może trzy zwarte klastry odpowiadające 3 normalnym klastrom, a 5 wartości odstających pojawiających się jako izolowane punkty daleko od tych klastrów. W interaktywnym przepływie pracy moglibyśmy pokolorować punkty według ich etykiety (normalne lub który klaster, w porównaniu do anomalii), aby zweryfikować tę strukturę. Nawet bez etykiet analityk mógłby zauważyć te 5 punktów siedzących w pustej przestrzeni na wykresie 2D i zgłosić je. To pokazuje, jak t-SNE może być potężnym narzędziem w wizualnej detekcji anomalii i inspekcji klastrów w danych z cyberbezpieczeństwa, uzupełniając powyższe zautomatyzowane algorytmy.
+Tutaj połączyliśmy nasz wcześniejszy zbiór danych 4D z garstką ekstremalnych wartości odstających (wartości odstające mają jedną cechę („czas trwania”) ustawioną bardzo wysoko, itd., aby zasymulować dziwny wzór). Uruchamiamy t-SNE z typową złożonością 30. Wyjściowe data_2d ma kształt (1505, 2). W rzeczywistości nie będziemy rysować w tym tekście, ale gdybyśmy to zrobili, spodziewalibyśmy się zobaczyć może trzy zwarte klastry odpowiadające 3 normalnym klastrom, a 5 wartości odstających pojawiających się jako izolowane punkty daleko od tych klastrów. W interaktywnym przepływie pracy moglibyśmy pokolorować punkty według ich etykiety (normalne lub który klaster, w porównaniu do anomalii), aby zweryfikować tę strukturę. Nawet bez etykiet analityk mógłby zauważyć te 5 punktów siedzących w pustej przestrzeni na wykresie 2D i je oznaczyć. To pokazuje, jak t-SNE może być potężnym narzędziem do wizualnej detekcji anomalii i inspekcji klastrów w danych z cyberbezpieczeństwa, uzupełniając powyższe zautomatyzowane algorytmy.
 
 </details>
+
+
+### HDBSCAN (Hierarchical Density-Based Spatial Clustering of Applications with Noise)
+
+**HDBSCAN** to rozszerzenie DBSCAN, które eliminuje potrzebę wyboru pojedynczej globalnej wartości `eps` i jest w stanie odzyskać klastry o **różnej gęstości**, budując hierarchię komponentów połączonych gęstością, a następnie ją kondensując. W porównaniu do standardowego DBSCAN zazwyczaj
+
+* wydobywa bardziej intuicyjne klastry, gdy niektóre klastry są gęste, a inne rzadkie,
+* ma tylko jeden rzeczywisty hiperparametr (`min_cluster_size`) i sensowną wartość domyślną,
+* przypisuje każdemu punktowi *prawdopodobieństwo* przynależności do klastra oraz **wynik odstający** (`outlier_scores_`), co jest niezwykle przydatne w pulpitach do poszukiwania zagrożeń.
+
+> [!TIP]
+> *Przykłady zastosowań w cyberbezpieczeństwie:* HDBSCAN jest bardzo popularny w nowoczesnych procesach poszukiwania zagrożeń – często zobaczysz go w podręcznikach do polowania opartych na notatnikach dostarczanych z komercyjnymi zestawami XDR. Jednym z praktycznych przepisów jest klastrowanie ruchu HTTP beaconing podczas IR: user-agent, interwał i długość URI często tworzą kilka zwartych grup legalnych aktualizacji oprogramowania, podczas gdy C2 beacons pozostają jako małe klastry o niskiej gęstości lub jako czysty szum.
+
+<details>
+<summary>Przykład – Znajdowanie kanałów C2 beaconing</summary>
+```python
+import pandas as pd
+from hdbscan import HDBSCAN
+from sklearn.preprocessing import StandardScaler
+
+# df has features extracted from proxy logs
+features = [
+"avg_interval",      # seconds between requests
+"uri_length_mean",   # average URI length
+"user_agent_entropy" # Shannon entropy of UA string
+]
+X = StandardScaler().fit_transform(df[features])
+
+hdb = HDBSCAN(min_cluster_size=15,  # at least 15 similar beacons to be a group
+metric="euclidean",
+prediction_data=True)
+labels = hdb.fit_predict(X)
+
+df["cluster"] = labels
+# Anything with label == -1 is noise → inspect as potential C2
+suspects = df[df["cluster"] == -1]
+print("Suspect beacon count:", len(suspects))
+```
+</details>
+
+---
+
+### Rozważania dotyczące odporności i bezpieczeństwa – Zatrucie i ataki adwersarialne (2023-2025)
+
+Najnowsze prace wykazały, że **uczniowie nienadzorowani *nie* są odporni na aktywnych atakujących**:
+
+* **Zatrucie danych przeciwko detektorom anomalii.** Chen *et al.* (IEEE S&P 2024) wykazali, że dodanie zaledwie 3 % stworzonych ruchów może przesunąć granicę decyzyjną Isolation Forest i ECOD, tak że prawdziwe ataki wyglądają normalnie. Autorzy opublikowali otwartoźródłowy PoC (`udo-poison`), który automatycznie syntetyzuje punkty zatrucia.
+* **Wprowadzanie backdoora do modeli klastrowania.** Technika *BadCME* (BlackHat EU 2023) implantuje mały wzór wyzwalający; gdy ten wyzwalacz się pojawia, detektor oparty na K-Means cicho umieszcza zdarzenie w "łagodnym" klastrze.
+* **Unikanie DBSCAN/HDBSCAN.** Preprint akademicki z 2025 roku z KU Leuven pokazał, że atakujący może stworzyć wzory sygnalizacyjne, które celowo wpadają w luki gęstości, skutecznie ukrywając się w etykietach *szumowych*.
+
+Mitigacje, które zyskują na znaczeniu:
+
+1. **Sanitacja modelu / TRIM.** Przed każdą epoką retrainingu, odrzuć 1–2 % punktów o najwyższej stracie (przycięte maksymalne prawdopodobieństwo), aby znacznie utrudnić zatrucie.
+2. **Ensemble konsensusu.** Połącz kilka heterogenicznych detektorów (np. Isolation Forest + GMM + ECOD) i podnieś alarm, jeśli *jakikolwiek* model oznaczy punkt. Badania wskazują, że podnosi to koszt atakującego o >10×.
+3. **Obrona oparta na odległości dla klastrowania.** Ponownie oblicz klastry z `k` różnymi losowymi nasionami i ignoruj punkty, które ciągle przeskakują między klastrami.
+
+---
+
+### Nowoczesne narzędzia open-source (2024-2025)
+
+* **PyOD 2.x** (wydany w maju 2024) dodał detektory *ECOD*, *COPOD* i przyspieszone GPU *AutoFormer*. Teraz zawiera podkomendę `benchmark`, która pozwala porównać 30+ algorytmów na twoim zbiorze danych za pomocą **jednej linii kodu**:
+```bash
+pyod benchmark --input logs.csv --label attack --n_jobs 8
+```
+* **Anomalib v1.5** (luty 2025) koncentruje się na wizji, ale zawiera również ogólną implementację **PatchCore** – przydatną do wykrywania stron phishingowych opartych na zrzutach ekranu.
+* **scikit-learn 1.5** (listopad 2024) w końcu ujawnia `score_samples` dla *HDBSCAN* za pośrednictwem nowego wrappera `cluster.HDBSCAN`, więc nie potrzebujesz zewnętrznego pakietu contrib, gdy używasz Pythona 3.12.
+
+<details>
+<summary>Szybki przykład PyOD – ensemble ECOD + Isolation Forest</summary>
+```python
+from pyod.models import ECOD, IForest
+from pyod.utils.data import generate_data, evaluate_print
+from pyod.utils.example import visualize
+
+X_train, y_train, X_test, y_test = generate_data(
+n_train=5000, n_test=1000, n_features=16,
+contamination=0.02, random_state=42)
+
+models = [ECOD(), IForest()]
+
+# majority vote – flag if any model thinks it is anomalous
+anomaly_scores = sum(m.fit(X_train).decision_function(X_test) for m in models) / len(models)
+
+evaluate_print("Ensemble", y_test, anomaly_scores)
+```
+</details>
+
+## Odniesienia
+
+- [HDBSCAN – Hierarchical density-based clustering](https://github.com/scikit-learn-contrib/hdbscan)
+- Chen, X. *et al.* “On the Vulnerability of Unsupervised Anomaly Detection to Data Poisoning.” *IEEE Symposium on Security and Privacy*, 2024.
+
 
 
 {{#include ../banners/hacktricks-training.md}}
