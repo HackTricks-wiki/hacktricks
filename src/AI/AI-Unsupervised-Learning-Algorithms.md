@@ -15,7 +15,7 @@ K-Means é um algoritmo de agrupamento baseado em centróides que particiona os 
 4. **Repetir**: As etapas 2–3 são repetidas até que as atribuições de cluster se estabilizem (os centróides não se movem significativamente).
 
 > [!TIP]
-> *Casos de uso em cibersegurança:* K-Means é utilizado para detecção de intrusões agrupando eventos de rede. Por exemplo, pesquisadores aplicaram K-Means ao conjunto de dados de intrusão KDD Cup 99 e descobriram que ele particionava efetivamente o tráfego em clusters normais vs. de ataque. Na prática, analistas de segurança podem agrupar entradas de log ou dados de comportamento do usuário para encontrar grupos de atividade semelhante; quaisquer pontos que não pertencem a um cluster bem formado podem indicar anomalias (por exemplo, uma nova variante de malware formando seu próprio pequeno cluster). K-Means também pode ajudar na classificação de famílias de malware agrupando binários com base em perfis de comportamento ou vetores de características.
+> *Casos de uso em cibersegurança:* K-Means é utilizado para detecção de intrusões agrupando eventos de rede. Por exemplo, pesquisadores aplicaram K-Means ao conjunto de dados de intrusão KDD Cup 99 e descobriram que ele particionava efetivamente o tráfego em clusters normais vs. de ataque. Na prática, analistas de segurança podem agrupar entradas de log ou dados de comportamento do usuário para encontrar grupos de atividades semelhantes; quaisquer pontos que não pertencem a um cluster bem formado podem indicar anomalias (por exemplo, uma nova variante de malware formando seu próprio pequeno cluster). K-Means também pode ajudar na classificação de famílias de malware agrupando binários com base em perfis de comportamento ou vetores de características.
 
 #### Seleção de K
 O número de clusters (K) é um hiperparâmetro que precisa ser definido antes de executar o algoritmo. Técnicas como o Método do Cotovelo ou a Pontuação de Silhueta podem ajudar a determinar um valor apropriado para K, avaliando o desempenho do agrupamento:
@@ -30,7 +30,7 @@ K-Means assume que **os clusters são esféricos e de tamanho igual**, o que pod
 <details>
 <summary>Exemplo -- Agrupando Eventos de Rede
 </summary>
-Abaixo, simulamos dados de tráfego de rede e usamos K-Means para agrupá-los. Suponha que temos eventos com características como duração da conexão e contagem de bytes. Criamos 3 clusters de tráfego "normal" e 1 pequeno cluster representando um padrão de ataque. Em seguida, executamos K-Means para ver se ele os separa.
+Abaixo simulamos dados de tráfego de rede e usamos K-Means para agrupá-los. Suponha que temos eventos com características como duração da conexão e contagem de bytes. Criamos 3 clusters de tráfego "normal" e 1 pequeno cluster representando um padrão de ataque. Em seguida, executamos K-Means para ver se ele os separa.
 ```python
 import numpy as np
 from sklearn.cluster import KMeans
@@ -56,7 +56,7 @@ print("Cluster centers (duration, bytes):")
 for idx, center in enumerate(kmeans.cluster_centers_):
 print(f"  Cluster {idx}: {center}")
 ```
-Neste exemplo, o K-Means deve encontrar 4 clusters. O pequeno cluster de ataque (com duração incomumente alta ~200) idealmente formará seu próprio cluster, dada sua distância dos clusters normais. Imprimimos os tamanhos e centros dos clusters para interpretar os resultados. Em um cenário real, poderia-se rotular o cluster com poucos pontos como potenciais anomalias ou inspecionar seus membros em busca de atividade maliciosa.
+Neste exemplo, o K-Means deve encontrar 4 clusters. O cluster de ataque pequeno (com duração incomumente alta ~200) idealmente formará seu próprio cluster, dada sua distância dos clusters normais. Imprimimos os tamanhos e centros dos clusters para interpretar os resultados. Em um cenário real, poderia-se rotular o cluster com poucos pontos como potenciais anomalias ou inspecionar seus membros em busca de atividade maliciosa.
 
 ### Agrupamento Hierárquico
 
@@ -65,7 +65,7 @@ O agrupamento hierárquico constrói uma hierarquia de clusters usando uma abord
 1. **Aglomerativa (De Baixo para Cima)**: Começa com cada ponto de dados como um cluster separado e mescla iterativamente os clusters mais próximos até que um único cluster permaneça ou um critério de parada seja atendido.
 2. **Divisiva (De Cima para Baixo)**: Começa com todos os pontos de dados em um único cluster e divide iterativamente os clusters até que cada ponto de dados seja seu próprio cluster ou um critério de parada seja atendido.
 
-O agrupamento aglomerativo requer uma definição de distância entre clusters e um critério de ligação para decidir quais clusters mesclar. Métodos de ligação comuns incluem ligação simples (distância dos pontos mais próximos entre dois clusters), ligação completa (distância dos pontos mais distantes), ligação média, etc., e a métrica de distância é frequentemente Euclidiana. A escolha da ligação afeta a forma dos clusters produzidos. Não há necessidade de pré-especificar o número de clusters K; você pode "cortar" o dendrograma em um nível escolhido para obter o número desejado de clusters.
+O agrupamento aglomerativo requer uma definição de distância entre clusters e um critério de ligação para decidir quais clusters mesclar. Métodos de ligação comuns incluem ligação simples (distância dos pontos mais próximos entre dois clusters), ligação completa (distância dos pontos mais distantes), ligação média, etc., e a métrica de distância é frequentemente euclidiana. A escolha da ligação afeta a forma dos clusters produzidos. Não há necessidade de pré-especificar o número de clusters K; você pode "cortar" o dendrograma em um nível escolhido para obter o número desejado de clusters.
 
 O agrupamento hierárquico produz um dendrograma, uma estrutura em forma de árvore que mostra as relações entre clusters em diferentes níveis de granularidade. O dendrograma pode ser cortado em um nível desejado para obter um número específico de clusters.
 
@@ -74,7 +74,7 @@ O agrupamento hierárquico produz um dendrograma, uma estrutura em forma de árv
 
 #### Suposições e Limitações
 
-O agrupamento hierárquico não assume uma forma de cluster particular e pode capturar clusters aninhados. É útil para descobrir taxonomias ou relações entre grupos (por exemplo, agrupando malware por subgrupos familiares). É determinístico (sem problemas de inicialização aleatória). Uma vantagem chave é o dendrograma, que fornece uma visão da estrutura de agrupamento dos dados em todas as escalas – analistas de segurança podem decidir um corte apropriado para identificar clusters significativos. No entanto, é computacionalmente caro (tipicamente $O(n^2)$ de tempo ou pior para implementações ingênuas) e não viável para conjuntos de dados muito grandes. Também é um procedimento ganancioso – uma vez que uma mesclagem ou divisão é feita, não pode ser desfeita, o que pode levar a clusters subótimos se um erro ocorrer cedo. Outliers também podem afetar algumas estratégias de ligação (a ligação simples pode causar o efeito de "encadeamento", onde clusters se conectam via outliers).
+O agrupamento hierárquico não assume uma forma de cluster particular e pode capturar clusters aninhados. É útil para descobrir taxonomias ou relações entre grupos (por exemplo, agrupando malware por subgrupos familiares). É determinístico (sem problemas de inicialização aleatória). Uma vantagem chave é o dendrograma, que fornece insights sobre a estrutura de agrupamento dos dados em todas as escalas – analistas de segurança podem decidir um corte apropriado para identificar clusters significativos. No entanto, é computacionalmente caro (tipicamente $O(n^2)$ de tempo ou pior para implementações ingênuas) e não viável para conjuntos de dados muito grandes. Também é um procedimento ganancioso – uma vez que uma mesclagem ou divisão é feita, não pode ser desfeita, o que pode levar a clusters subótimos se um erro ocorrer cedo. Outliers também podem afetar algumas estratégias de ligação (a ligação simples pode causar o efeito de "encadeamento", onde clusters se conectam via outliers).
 
 <details>
 <summary>Exemplo -- Agrupamento Aglomerativo de Eventos
@@ -116,13 +116,13 @@ DBSCAN identifica pontos centrais, pontos de borda e pontos de ruído:
 O agrupamento prossegue escolhendo um ponto central não visitado, marcando-o como um novo cluster, e então adicionando recursivamente todos os pontos acessíveis por densidade a partir dele (pontos centrais e seus vizinhos, etc.). Pontos de borda são adicionados ao cluster de um ponto central próximo. Após expandir todos os pontos acessíveis, o DBSCAN passa para outro ponto central não visitado para iniciar um novo cluster. Pontos que não foram alcançados por nenhum ponto central permanecem rotulados como ruído.
 
 > [!TIP]
-> *Casos de uso em cibersegurança:* DBSCAN é útil para detecção de anomalias no tráfego de rede. Por exemplo, a atividade normal do usuário pode formar um ou mais clusters densos no espaço de características, enquanto comportamentos de ataque novos aparecem como pontos dispersos que o DBSCAN rotulará como ruído (outliers). Ele tem sido usado para agrupar registros de fluxo de rede, onde pode detectar varreduras de portas ou tráfego de negação de serviço como regiões esparsas de pontos. Outra aplicação é agrupar variantes de malware: se a maioria das amostras se agrupar por famílias, mas algumas não se encaixam em lugar nenhum, essas poucas podem ser malware de dia zero. A capacidade de sinalizar ruído significa que as equipes de segurança podem se concentrar em investigar esses outliers.
+> *Casos de uso em cibersegurança:* DBSCAN é útil para detecção de anomalias em tráfego de rede. Por exemplo, a atividade normal do usuário pode formar um ou mais clusters densos no espaço de características, enquanto comportamentos de ataque novos aparecem como pontos dispersos que o DBSCAN rotulará como ruído (outliers). Ele tem sido usado para agrupar registros de fluxo de rede, onde pode detectar varreduras de portas ou tráfego de negação de serviço como regiões esparsas de pontos. Outra aplicação é agrupar variantes de malware: se a maioria das amostras se agrupar por famílias, mas algumas não se encaixam em lugar nenhum, essas poucas podem ser malware de dia zero. A capacidade de sinalizar ruído significa que as equipes de segurança podem se concentrar em investigar esses outliers.
 
 #### Suposições e Limitações
 
 **Suposições & Forças:**: O DBSCAN não assume clusters esféricos – ele pode encontrar clusters de formas arbitrárias (mesmo clusters em cadeia ou adjacentes). Ele determina automaticamente o número de clusters com base na densidade dos dados e pode identificar efetivamente outliers como ruído. Isso o torna poderoso para dados do mundo real com formas irregulares e ruído. É robusto a outliers (diferente do K-Means, que os força em clusters). Funciona bem quando os clusters têm densidade aproximadamente uniforme.
 
-**Limitações**: O desempenho do DBSCAN depende da escolha de valores apropriados para ε e MinPts. Ele pode ter dificuldades com dados que possuem densidades variadas – um único ε não pode acomodar clusters densos e esparsos. Se ε for muito pequeno, rotula a maioria dos pontos como ruído; se for muito grande, os clusters podem se fundir incorretamente. Além disso, o DBSCAN pode ser ineficiente em conjuntos de dados muito grandes (naïve $O(n^2)$, embora a indexação espacial possa ajudar). Em espaços de características de alta dimensão, o conceito de “distância dentro de ε” pode se tornar menos significativo (a maldição da dimensionalidade), e o DBSCAN pode precisar de ajuste cuidadoso de parâmetros ou pode falhar em encontrar clusters intuitivos. Apesar disso, extensões como HDBSCAN abordam algumas questões (como densidade variável).
+**Limitações**: O desempenho do DBSCAN depende da escolha de valores apropriados para ε e MinPts. Ele pode ter dificuldades com dados que têm densidades variadas – um único ε não pode acomodar clusters densos e esparsos. Se ε for muito pequeno, ele rotula a maioria dos pontos como ruído; se for muito grande, os clusters podem se fundir incorretamente. Além disso, o DBSCAN pode ser ineficiente em conjuntos de dados muito grandes (naïvamente $O(n^2)$, embora a indexação espacial possa ajudar). Em espaços de características de alta dimensão, o conceito de “distância dentro de ε” pode se tornar menos significativo (a maldição da dimensionalidade), e o DBSCAN pode precisar de ajuste cuidadoso de parâmetros ou pode falhar em encontrar clusters intuitivos. Apesar disso, extensões como HDBSCAN abordam algumas questões (como densidade variável).
 
 <details>
 <summary>Exemplo -- Agrupamento com Ruído
@@ -168,7 +168,7 @@ O PCA é amplamente utilizado para visualização de dados, redução de ruído 
 
 #### Autovalores e Autovetores
 
-Um autovalor é um escalar que indica a quantidade de variância capturada pelo seu autovetor correspondente. Um autovetor representa uma direção no espaço de características ao longo da qual os dados variam mais.
+Um autovalor é um escalar que indica a quantidade de variância capturada por seu autovetor correspondente. Um autovetor representa uma direção no espaço de características ao longo da qual os dados variam mais.
 
 Imagine que A é uma matriz quadrada, e v é um vetor não nulo tal que: `A * v = λ * v`
 onde:
@@ -259,7 +259,7 @@ O resultado é um conjunto de distribuições Gaussianas que modelam coletivamen
 
 O GMM é uma generalização do K-Means que incorpora covariância, de modo que os clusters podem ser elipsoidais (não apenas esféricos). Ele lida com clusters de diferentes tamanhos e formas se a covariância for completa. O clustering suave é uma vantagem quando os limites dos clusters são difusos – por exemplo, em cibersegurança, um evento pode ter características de vários tipos de ataque; o GMM pode refletir essa incerteza com probabilidades. O GMM também fornece uma estimativa de densidade probabilística dos dados, útil para detectar outliers (pontos com baixa probabilidade sob todos os componentes da mistura).
 
-Por outro lado, o GMM requer especificar o número de componentes K (embora se possa usar critérios como BIC/AIC para selecioná-lo). O EM pode às vezes convergir lentamente ou para um ótimo local, então a inicialização é importante (geralmente executa-se o EM várias vezes). Se os dados não seguirem realmente uma mistura de Gaussianas, o modelo pode ser um ajuste ruim. Também há o risco de uma Gaussiana encolher para cobrir apenas um outlier (embora a regularização ou limites mínimos de covariância possam mitigar isso).
+Por outro lado, o GMM requer especificar o número de componentes K (embora se possa usar critérios como BIC/AIC para selecioná-lo). O EM pode, às vezes, convergir lentamente ou para um ótimo local, então a inicialização é importante (geralmente executa-se o EM várias vezes). Se os dados não seguirem realmente uma mistura de Gaussianas, o modelo pode ser um ajuste ruim. Há também o risco de uma Gaussiana encolher para cobrir apenas um outlier (embora a regularização ou limites mínimos de covariância possam mitigar isso).
 
 <details>
 <summary>Exemplo --  Clustering Suave & Pontuações de Anomalia
@@ -321,16 +321,16 @@ print("Example anomaly scores (lower means more anomalous):", anomaly_scores[:5]
 ```
 Neste código, instanciamos `IsolationForest` com 100 árvores e definimos `contamination=0.15` (o que significa que esperamos cerca de 15% de anomalias; o modelo definirá seu limite de pontuação para que ~15% dos pontos sejam sinalizados). Ajustamos em `X_test_if`, que contém uma mistura de pontos normais e de ataque (nota: normalmente você ajustaria em dados de treinamento e depois usaria predict em novos dados, mas aqui, para ilustração, ajustamos e prevemos no mesmo conjunto para observar diretamente os resultados).
 
-A saída mostra os rótulos previstos para os primeiros 20 pontos (onde -1 indica anomalia). Também imprimimos quantas anomalias foram detectadas no total e alguns exemplos de pontuações de anomalia. Esperaríamos que aproximadamente 18 dos 120 pontos fossem rotulados como -1 (já que a contaminação era de 15%). Se nossas 20 amostras de ataque são realmente as mais discrepantes, a maioria delas deve aparecer nessas previsões -1. A pontuação de anomalia (a função de decisão do Isolation Forest) é maior para pontos normais e menor (mais negativa) para anomalias – imprimimos alguns valores para ver a separação. Na prática, pode-se classificar os dados por pontuação para ver os principais outliers e investigá-los. O Isolation Forest, portanto, fornece uma maneira eficiente de filtrar grandes dados de segurança não rotulados e selecionar as instâncias mais irregulares para análise humana ou escrutínio automatizado adicional.
+A saída mostra os rótulos previstos para os primeiros 20 pontos (onde -1 indica anomalia). Também imprimimos quantas anomalias foram detectadas no total e alguns exemplos de pontuações de anomalia. Esperaríamos que aproximadamente 18 dos 120 pontos fossem rotulados como -1 (já que a contaminação era de 15%). Se nossas 20 amostras de ataque são realmente as mais discrepantes, a maioria delas deve aparecer nessas previsões -1. A pontuação de anomalia (a função de decisão do Isolation Forest) é maior para pontos normais e menor (mais negativa) para anomalias – imprimimos alguns valores para ver a separação. Na prática, pode-se classificar os dados por pontuação para ver os principais outliers e investigá-los. O Isolation Forest, portanto, fornece uma maneira eficiente de filtrar grandes dados de segurança não rotulados e selecionar as instâncias mais irregulares para análise humana ou exame automatizado adicional.
 
 ### t-SNE (t-Distributed Stochastic Neighbor Embedding)
 
-**t-SNE** é uma técnica de redução de dimensionalidade não linear projetada especificamente para visualizar dados de alta dimensão em 2 ou 3 dimensões. Ela converte similaridades entre pontos de dados em distribuições de probabilidade conjunta e tenta preservar a estrutura dos bairros locais na projeção de menor dimensão. Em termos mais simples, o t-SNE coloca pontos em (digamos) 2D de forma que pontos similares (no espaço original) fiquem próximos e pontos dissimilares fiquem distantes com alta probabilidade.
+**t-SNE** é uma técnica de redução de dimensionalidade não linear projetada especificamente para visualizar dados de alta dimensão em 2 ou 3 dimensões. Ela converte semelhanças entre pontos de dados em distribuições de probabilidade conjunta e tenta preservar a estrutura dos bairros locais na projeção de menor dimensão. Em termos mais simples, o t-SNE coloca pontos em (digamos) 2D de forma que pontos semelhantes (no espaço original) fiquem próximos e pontos dissimilares fiquem distantes com alta probabilidade.
 
 O algoritmo tem duas etapas principais:
 
 1. **Calcular afinidades par a par no espaço de alta dimensão:** Para cada par de pontos, o t-SNE calcula uma probabilidade de que um escolheria aquele par como vizinhos (isso é feito centralizando uma distribuição Gaussiana em cada ponto e medindo distâncias – o parâmetro de perplexidade influencia o número efetivo de vizinhos considerados).
-2. **Calcular afinidades par a par no espaço de baixa dimensão (por exemplo, 2D):** Inicialmente, os pontos são colocados aleatoriamente em 2D. O t-SNE define uma probabilidade similar para distâncias neste mapa (usando um núcleo de distribuição t de Student, que tem caudas mais pesadas do que a Gaussiana para permitir que pontos distantes tenham mais liberdade).
+2. **Calcular afinidades par a par no espaço de baixa dimensão (por exemplo, 2D):** Inicialmente, os pontos são colocados aleatoriamente em 2D. O t-SNE define uma probabilidade semelhante para distâncias neste mapa (usando um núcleo de distribuição t de Student, que tem caudas mais pesadas do que a Gaussiana para permitir que pontos distantes tenham mais liberdade).
 3. **Descida do Gradiente:** O t-SNE então move iterativamente os pontos em 2D para minimizar a divergência de Kullback–Leibler (KL) entre a distribuição de afinidade de alta dimensão e a de baixa dimensão. Isso faz com que o arranjo em 2D reflita a estrutura de alta dimensão o máximo possível – pontos que estavam próximos no espaço original se atrairão, e aqueles distantes se repelirão, até que um equilíbrio seja encontrado.
 
 O resultado é frequentemente um gráfico de dispersão visualmente significativo onde os clusters nos dados se tornam aparentes.
@@ -340,7 +340,7 @@ O resultado é frequentemente um gráfico de dispersão visualmente significativ
 
 #### Suposições e Limitações
 
-O t-SNE é ótimo para descoberta visual de padrões. Ele pode revelar clusters, subclusters e outliers que outros métodos lineares (como PCA) podem não conseguir. Tem sido usado em pesquisas de cibersegurança para visualizar dados complexos, como perfis de comportamento de malware ou padrões de tráfego de rede. Como preserva a estrutura local, é bom para mostrar agrupamentos naturais.
+O t-SNE é ótimo para descoberta visual de padrões. Ele pode revelar clusters, subclusters e outliers que outros métodos lineares (como PCA) podem não detectar. Tem sido usado em pesquisas de cibersegurança para visualizar dados complexos, como perfis de comportamento de malware ou padrões de tráfego de rede. Como preserva a estrutura local, é bom para mostrar agrupamentos naturais.
 
 No entanto, o t-SNE é computacionalmente mais pesado (aproximadamente $O(n^2)$), então pode exigir amostragem para conjuntos de dados muito grandes. Também possui hiperparâmetros (perplexidade, taxa de aprendizado, iterações) que podem afetar a saída – por exemplo, diferentes valores de perplexidade podem revelar clusters em diferentes escalas. Gráficos de t-SNE podem às vezes ser mal interpretados – distâncias no mapa não são diretamente significativas globalmente (foca no bairro local, às vezes clusters podem parecer artificialmente bem separados). Além disso, o t-SNE é principalmente para visualização; não fornece uma maneira direta de projetar novos pontos de dados sem recomputação, e não é destinado a ser usado como pré-processamento para modelagem preditiva (UMAP é uma alternativa que aborda algumas dessas questões com velocidade mais rápida).
 
@@ -348,7 +348,7 @@ No entanto, o t-SNE é computacionalmente mais pesado (aproximadamente $O(n^2)$)
 <summary>Exemplo -- Visualizando Conexões de Rede
 </summary>
 
-Usaremos o t-SNE para reduzir um conjunto de dados multifuncional para 2D. Para ilustração, vamos pegar os dados 4D anteriores (que tinham 3 clusters naturais de tráfego normal) e adicionar alguns pontos de anomalia. Em seguida, executamos o t-SNE e (conceitualmente) visualizamos os resultados.
+Usaremos o t-SNE para reduzir um conjunto de dados com múltiplas características para 2D. Para ilustração, vamos pegar os dados 4D anteriores (que tinham 3 clusters naturais de tráfego normal) e adicionar alguns pontos de anomalia. Em seguida, executamos o t-SNE e (conceitualmente) visualizamos os resultados.
 ```python
 # 1 ─────────────────────────────────────────────────────────────────────
 #    Create synthetic 4-D dataset
@@ -431,9 +431,100 @@ plt.legend()
 plt.tight_layout()
 plt.show()
 ```
-Aqui combinamos nosso conjunto de dados normal 4D anterior com um punhado de outliers extremos (os outliers têm uma característica (“duração”) definida muito alta, etc., para simular um padrão estranho). Executamos t-SNE com uma perplexidade típica de 30. Os dados de saída data_2d têm a forma (1505, 2). Na verdade, não vamos plotar neste texto, mas se o fizéssemos, esperaríamos ver talvez três clusters compactos correspondendo aos 3 clusters normais, e os 5 outliers aparecendo como pontos isolados longe desses clusters. Em um fluxo de trabalho interativo, poderíamos colorir os pontos de acordo com seu rótulo (normal ou qual cluster, vs anomalia) para verificar essa estrutura. Mesmo sem rótulos, um analista pode notar aqueles 5 pontos sentados em espaço vazio no gráfico 2D e sinalizá-los. Isso mostra como t-SNE pode ser uma ferramenta poderosa para a detecção visual de anomalias e inspeção de clusters em dados de cibersegurança, complementando os algoritmos automatizados acima.
+Aqui combinamos nosso conjunto de dados normal 4D anterior com um punhado de outliers extremos (os outliers têm uma característica (“duração”) definida muito alta, etc., para simular um padrão estranho). Executamos t-SNE com uma perplexidade típica de 30. Os dados de saída _data_2d_ têm a forma (1505, 2). Na verdade, não vamos plotar neste texto, mas se o fizéssemos, esperaríamos ver talvez três clusters compactos correspondendo aos 3 clusters normais, e os 5 outliers aparecendo como pontos isolados longe desses clusters. Em um fluxo de trabalho interativo, poderíamos colorir os pontos por seu rótulo (normal ou qual cluster, vs anomalia) para verificar essa estrutura. Mesmo sem rótulos, um analista pode notar aqueles 5 pontos sentados em espaço vazio no gráfico 2D e sinalizá-los. Isso mostra como t-SNE pode ser uma ferramenta poderosa para a detecção visual de anomalias e inspeção de clusters em dados de cibersegurança, complementando os algoritmos automatizados acima.
 
 </details>
+
+### HDBSCAN (Clustering Espacial Hierárquico Baseado em Densidade de Aplicações com Ruído)
+
+**HDBSCAN** é uma extensão do DBSCAN que remove a necessidade de escolher um único valor global `eps` e é capaz de recuperar clusters de **densidade diferente** construindo uma hierarquia de componentes conectados por densidade e, em seguida, condensando-a. Comparado ao DBSCAN simples, geralmente
+
+* extrai clusters mais intuitivos quando alguns clusters são densos e outros são esparsos,
+* tem apenas um verdadeiro hiperparâmetro (`min_cluster_size`) e um padrão sensato,
+* dá a cada ponto uma *probabilidade* de pertencimento a um cluster e uma **pontuação de outlier** (`outlier_scores_`), que é extremamente útil para painéis de caça a ameaças.
+
+> [!TIP]
+> *Casos de uso em cibersegurança:* HDBSCAN é muito popular em pipelines modernas de caça a ameaças – você frequentemente o verá dentro de playbooks de caça baseados em notebook enviados com suítes comerciais de XDR. Uma receita prática é agrupar o tráfego de beaconing HTTP durante IR: user-agent, intervalo e comprimento da URI frequentemente formam vários grupos compactos de atualizadores de software legítimos, enquanto os beacons de C2 permanecem como pequenos clusters de baixa densidade ou como puro ruído.
+
+<details>
+<summary>Exemplo – Encontrando canais C2 de beaconing</summary>
+```python
+import pandas as pd
+from hdbscan import HDBSCAN
+from sklearn.preprocessing import StandardScaler
+
+# df has features extracted from proxy logs
+features = [
+"avg_interval",      # seconds between requests
+"uri_length_mean",   # average URI length
+"user_agent_entropy" # Shannon entropy of UA string
+]
+X = StandardScaler().fit_transform(df[features])
+
+hdb = HDBSCAN(min_cluster_size=15,  # at least 15 similar beacons to be a group
+metric="euclidean",
+prediction_data=True)
+labels = hdb.fit_predict(X)
+
+df["cluster"] = labels
+# Anything with label == -1 is noise → inspect as potential C2
+suspects = df[df["cluster"] == -1]
+print("Suspect beacon count:", len(suspects))
+```
+</details>
+
+---
+
+### Robustez e Considerações de Segurança – Envenenamento & Ataques Adversariais (2023-2025)
+
+Trabalhos recentes mostraram que **aprendizes não supervisionados *não* são imunes a atacantes ativos**:
+
+* **Envenenamento de dados contra detectores de anomalias.** Chen *et al.* (IEEE S&P 2024) demonstraram que adicionar apenas 3 % de tráfego elaborado pode deslocar a fronteira de decisão do Isolation Forest e ECOD de modo que ataques reais pareçam normais. Os autores lançaram um PoC de código aberto (`udo-poison`) que sintetiza automaticamente pontos de veneno.
+* **Backdooring em modelos de clustering.** A técnica *BadCME* (BlackHat EU 2023) implanta um pequeno padrão de gatilho; sempre que esse gatilho aparece, um detector baseado em K-Means coloca silenciosamente o evento dentro de um cluster “benigno”.
+* **Evasão de DBSCAN/HDBSCAN.** Um pré-print acadêmico de 2025 da KU Leuven mostrou que um atacante pode elaborar padrões de beaconing que caem propositalmente em lacunas de densidade, efetivamente se escondendo dentro de rótulos de *ruído*.
+
+Mitigações que estão ganhando força:
+
+1. **Sanitização de modelo / TRIM.** Antes de cada época de re-treinamento, descarte os 1–2 % de pontos com maior perda (máxima verossimilhança aparada) para tornar o envenenamento dramaticamente mais difícil.
+2. **Ensemble de consenso.** Combine vários detectores heterogêneos (por exemplo, Isolation Forest + GMM + ECOD) e levante um alerta se *qualquer* modelo sinalizar um ponto. Pesquisas indicam que isso aumenta o custo para o atacante em mais de 10×.
+3. **Defesa baseada em distância para clustering.** Recalcule clusters com `k` sementes aleatórias diferentes e ignore pontos que constantemente mudam de cluster.
+
+---
+
+### Ferramentas Modernas de Código Aberto (2024-2025)
+
+* **PyOD 2.x** (lançado em maio de 2024) adicionou detectores *ECOD*, *COPOD* e *AutoFormer* acelerados por GPU. Agora inclui um subcomando `benchmark` que permite comparar mais de 30 algoritmos em seu conjunto de dados com **uma linha de código**:
+```bash
+pyod benchmark --input logs.csv --label attack --n_jobs 8
+```
+* **Anomalib v1.5** (fev 2025) foca em visão, mas também contém uma implementação genérica de **PatchCore** – útil para detecção de páginas de phishing baseadas em captura de tela.
+* **scikit-learn 1.5** (nov 2024) finalmente expõe `score_samples` para *HDBSCAN* através do novo wrapper `cluster.HDBSCAN`, então você não precisa do pacote contrib externo quando estiver no Python 3.12.
+
+<details>
+<summary>Exemplo rápido de PyOD – ECOD + ensemble de Isolation Forest</summary>
+```python
+from pyod.models import ECOD, IForest
+from pyod.utils.data import generate_data, evaluate_print
+from pyod.utils.example import visualize
+
+X_train, y_train, X_test, y_test = generate_data(
+n_train=5000, n_test=1000, n_features=16,
+contamination=0.02, random_state=42)
+
+models = [ECOD(), IForest()]
+
+# majority vote – flag if any model thinks it is anomalous
+anomaly_scores = sum(m.fit(X_train).decision_function(X_test) for m in models) / len(models)
+
+evaluate_print("Ensemble", y_test, anomaly_scores)
+```
+</details>
+
+## Referências
+
+- [HDBSCAN – Agrupamento hierárquico baseado em densidade](https://github.com/scikit-learn-contrib/hdbscan)
+- Chen, X. *et al.* “Sobre a Vulnerabilidade da Detecção de Anomalias Não Supervisionada à Contaminação de Dados.” *IEEE Symposium on Security and Privacy*, 2024.
+
 
 
 {{#include ../banners/hacktricks-training.md}}
