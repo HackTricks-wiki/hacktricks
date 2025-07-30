@@ -21,6 +21,7 @@
   - [Network Protocols Explained (ESP)](generic-methodologies-and-resources/pentesting-network/network-protocols-explained-esp.md)
   - [Nmap Summary (ESP)](generic-methodologies-and-resources/pentesting-network/nmap-summary-esp.md)
   - [Pentesting IPv6](generic-methodologies-and-resources/pentesting-network/pentesting-ipv6.md)
+  - [Telecom Network Exploitation](generic-methodologies-and-resources/pentesting-network/telecom-network-exploitation.md)
   - [WebRTC DoS](generic-methodologies-and-resources/pentesting-network/webrtc-dos.md)
   - [Spoofing LLMNR, NBT-NS, mDNS/DNS and WPAD and Relay Attacks](generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md)
   - [Spoofing SSDP and UPnP Devices with EvilSSDP](generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md)
