@@ -462,6 +462,97 @@ You can **buy a domain with a very similar name** to the victims domain **and/or
 
 Use [**Phishious** ](https://github.com/Rices/Phishious)to evaluate if your email is going to end in the spam folder or if it's going to be blocked or successful.
 
+## High-Touch Identity Compromise (Help-Desk MFA Reset)
+
+Modern intrusion sets increasingly skip email lures entirely and **directly target the service-desk / identity-recovery workflow** to defeat MFA.  The attack is fully "living-off-the-land": once the operator owns valid credentials they pivot with built-in admin tooling – no malware is required.
+
+### Attack flow
+1. Recon the victim 
+   * Harvest personal & corporate details from LinkedIn, data breaches, public GitHub, etc.  
+   * Identify high-value identities (executives, IT, finance) and enumerate the **exact help-desk process** for password / MFA reset.
+2. Real-time social engineering  
+   * Phone, Teams or chat the help-desk while impersonating the target (often with **spoofed caller-ID** or **cloned voice**).  
+   * Provide the previously-collected PII to pass knowledge-based verification.  
+   * Convince the agent to **reset the MFA secret** or perform a **SIM-swap** on a registered mobile number.
+3. Immediate post-access actions (≤60 min in real cases)  
+   * Establish a foothold through any web SSO portal.  
+   * Enumerate AD / AzureAD with built-ins (no binaries dropped):
+     ```powershell
+     # list directory groups & privileged roles
+     Get-ADGroup -Filter * -Properties Members | ?{$_.Members -match $env:USERNAME}
+
+     # AzureAD / Graph – list directory roles
+     Get-MgDirectoryRole | ft DisplayName,Id
+
+     # Enumerate devices the account can login to
+     Get-MgUserRegisteredDevice -UserId <user@corp.local>
+     ```
+   * Lateral movement with **WMI**, **PsExec**, or legitimate **RMM** agents already whitelisted in the environment.
+
+### Detection & Mitigation
+* Treat help-desk identity recovery as a **privileged operation** – require step-up auth & manager approval.
+* Deploy **Identity Threat Detection & Response (ITDR)** / **UEBA** rules that alert on:  
+  * MFA method changed + authentication from new device / geo.  
+  * Immediate elevation of the same principal (user-→-admin).  
+* Record help-desk calls and enforce a **call-back to an already-registered number** before any reset.
+* Implement **Just-In-Time (JIT) / Privileged Access** so newly reset accounts do **not** automatically inherit high-privilege tokens.
+
+---
+
+## At-Scale Deception – SEO Poisoning & “ClickFix” Campaigns
+Commodity crews offset the cost of high-touch ops with mass attacks that turn **search engines & ad networks into the delivery channel**.
+
+1. **SEO poisoning / malvertising** pushes a fake result such as `chromium-update[.]site` to the top search ads.
+2. Victim downloads a small **first-stage loader** (often JS/HTA/ISO).  Examples seen by Unit 42:
+   * `RedLine stealer`
+   * `Lumma stealer`
+   * `Lampion Trojan`
+3. Loader exfiltrates browser cookies + credential DBs, then pulls a **silent loader** which decides – *in realtime* – whether to deploy:
+   * RAT (e.g. AsyncRAT, RustDesk)
+   * ransomware / wiper
+   * persistence component (registry Run key + scheduled task)
+
+### Hardening tips
+* Block newly-registered domains & enforce **Advanced DNS / URL Filtering** on *search-ads* as well as e-mail.
+* Restrict software installation to signed MSI / Store packages, deny `HTA`, `ISO`, `VBS` execution by policy.
+* Monitor for child processes of browsers opening installers:
+  ```yaml
+  - parent_image: /Program Files/Google/Chrome/*
+    and child_image: *\\*.exe
+  ```
+* Hunt for LOLBins frequently abused by first-stage loaders (e.g. `regsvr32`, `curl`, `mshta`).
+
+---
+
+## AI-Enhanced Phishing Operations
+Attackers now chain **LLM & voice-clone APIs** for fully personalised lures and real-time interaction.
+
+| Layer | Example use by threat actor |
+|-------|-----------------------------|
+|Automation|Generate & send >100 k emails / SMS with randomised wording & tracking links.|
+|Generative AI|Produce *one-off* emails referencing public M&A, inside jokes from social media; deep-fake CEO voice in callback scam.|
+|Agentic AI|Autonomously register domains, scrape open-source intel, craft next-stage mails when a victim clicks but doesn’t submit creds.|
+
+**Defence:**  
+• Add **dynamic banners** highlighting messages sent from untrusted automation (via ARC/DKIM anomalies).  
+• Deploy **voice-biometric challenge phrases** for high-risk phone requests.  
+• Continuously simulate AI-generated lures in awareness programmes – static templates are obsolete.
+
+---
+
+## MFA Fatigue / Push Bombing Variant – Forced Reset
+Besides classic push-bombing, operators simply **force a new MFA registration** during the help-desk call, nullifying the user’s existing token.  Any subsequent login prompt appears legitimate to the victim.
+
+```text
+[Attacker]  →  Help-Desk:  “I lost my phone while travelling, can you unenrol it so I can add a new authenticator?”
+[Help-Desk] →  AzureAD: ‘Delete existing methods’ → sends registration e-mail
+[Attacker]  →  Completes new TOTP enrolment on their own device
+```
+
+Monitor for AzureAD/AWS/Okta events where **`deleteMFA` + `addMFA`** occur **within minutes from the same IP**.
+
+
+
 ## Clipboard Hijacking / Pastejacking
 
 Attackers can silently copy malicious commands into the victim’s clipboard from a compromised or typosquatted web page and then trick the user to paste them inside **Win + R**, **Win + X** or a terminal window, executing arbitrary code without any download or attachment.
@@ -482,6 +573,7 @@ mobile-phishing-malicious-apps.md
 - [https://0xpatrik.com/phishing-domains/](https://0xpatrik.com/phishing-domains/)
 - [https://darkbyte.net/robando-sesiones-y-bypasseando-2fa-con-evilnovnc/](https://darkbyte.net/robando-sesiones-y-bypasseando-2fa-con-evilnovnc/)
 - [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
+- [2025 Unit 42 Global Incident Response Report – Social Engineering Edition](https://unit42.paloaltonetworks.com/2025-unit-42-global-incident-response-report-social-engineering-edition/)
 
 {{#include ../../banners/hacktricks-training.md}}
 
