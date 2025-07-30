@@ -69,6 +69,92 @@ sudo find /proc -maxdepth 3 -type l -name time -exec ls -l  {} \; 2>/dev/null | 
 nsenter -T TARGET_PID --pid /bin/bash
 ```
 
+
+## Manipulating Time Offsets
+
+Starting with Linux 5.6, two clocks can be virtualised per time namespace:
+
+* `CLOCK_MONOTONIC`
+* `CLOCK_BOOTTIME`
+
+Their per-namespace deltas are exposed (and can be modified) through the file `/proc/<PID>/timens_offsets`:
+
+```
+$ sudo unshare -Tr --mount-proc bash   # -T creates a new timens, -r drops capabilities
+$ cat /proc/$$/timens_offsets
+monotonic 0
+boottime  0
+```
+
+The file contains two lines – one per clock – with the offset in **nanoseconds**.  Processes that hold **CAP_SYS_TIME** _in the time namespace_ can change the value:
+
+```
+# advance CLOCK_MONOTONIC by two days (172 800 s)
+echo "monotonic 172800000000000" > /proc/$$/timens_offsets
+# verify
+$ cat /proc/$$/uptime   # first column uses CLOCK_MONOTONIC
+172801.37  13.57
+```
+
+If you need the wall clock (`CLOCK_REALTIME`) to change as well you still have to rely on classic mechanisms (`date`, `hwclock`, `chronyd`, …); it is **not** namespaced.
+
+
+### `unshare(1)` helper flags (util-linux ≥ 2.38)
+
+```
+sudo unshare -T \
+            --monotonic="+24h"  \
+            --boottime="+7d"    \
+            --mount-proc         \
+            bash
+```
+
+The long options automatically write the chosen deltas to `timens_offsets` right after the namespace is created, saving a manual `echo`.
+
+---
+
+## OCI & Runtime support
+
+* The **OCI Runtime Specification v1.1** (Nov 2023) added a dedicated `time` namespace type and the `linux.timeOffsets` field so that container engines can request time virtualisation in a portable way.
+* **runc >= 1.2.0** implements that part of the spec.  A minimal `config.json` fragment looks like:
+  ```json
+  {
+    "linux": {
+      "namespaces": [
+        {"type": "time"}
+      ],
+      "timeOffsets": {
+        "monotonic": 86400,
+        "boottime": 600
+      }
+    }
+  }
+  ```
+  Then run the container with `runc run <id>`.
+
+>  NOTE: runc **1.2.6** (Feb 2025) fixed an "exec into container with private timens" bug that could lead to a hang and potential DoS.  Make sure you are on ≥ 1.2.6 in production.
+
+---
+
+## Security considerations
+
+1. **Required capability** – A process needs **CAP_SYS_TIME** inside its user/time namespace to change the offsets.  Dropping that capability in the container (default in Docker & Kubernetes) prevents tampering.
+2. **No wall-clock changes** – Because `CLOCK_REALTIME` is shared with the host, attackers cannot spoof certificate lifetimes, JWT expiry, etc. via timens alone.
+3. **Log / detection evasion** – Software that relies on `CLOCK_MONOTONIC` (e.g. rate-limiters based on uptime) can be confused if the namespace user adjusts the offset.  Prefer `CLOCK_REALTIME` for security-relevant timestamps.
+4. **Kernel attack surface** – Even with `CAP_SYS_TIME` removed, the kernel code remains accessible; keep the host patched. Linux 5.6 → 5.12 received multiple timens bug-fixes (NULL-deref, signedness issues).
+
+### Hardening checklist
+
+* Drop `CAP_SYS_TIME` in your container runtime default profile.
+* Keep runtimes updated (runc ≥ 1.2.6, crun ≥ 1.12).
+* Pin util-linux ≥ 2.38 if you rely on the `--monotonic/--boottime` helpers.
+* Audit in-container software that reads **uptime** or **CLOCK_MONOTONIC** for security-critical logic.
+
+## References
+
+* man7.org – Time namespaces manual page: <https://man7.org/linux/man-pages/man7/time_namespaces.7.html>
+* OCI blog – "OCI v1.1: new time and RDT namespaces" (Nov 15 2023): <https://opencontainers.org/blog/2023/11/15/oci-spec-v1.1>
+
 {{#include ../../../../banners/hacktricks-training.md}}
 
 
