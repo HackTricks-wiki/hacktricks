@@ -10,7 +10,7 @@ Kwa mfano, tengeneza script hii:
 #!/usr/bin/perl
 print "Hello from the Perl script!\n";
 ```
-Sasa **exporta variable ya env** na uendeleze **perl** script:
+Sasa **export the env variable** na uendeleze **perl** script:
 ```bash
 export PERL5OPT='-Mwarnings;system("whoami")'
 perl test.pl # This will execute "whoami"
@@ -26,18 +26,19 @@ Na kisha tumia mabadiliko ya mazingira ili moduli ipatikane na kupakiwa kiotomat
 ```bash
 PERL5LIB=/tmp/ PERL5OPT=-Mpmod perl victim.pl
 ```
-### Mabadiliko mengine ya mazingira yanayovutia
+### Mengine mengine ya kuvutia
 
-* **`PERL5DB`** – wakati mfasiri anapoanzishwa na bendera **`-d`** (debugger), maudhui ya `PERL5DB` yanatekelezwa kama msimbo wa Perl *ndani ya* muktadha wa debugger. Ikiwa unaweza kuathiri mazingira **na** bendera za amri za mchakato wa Perl wenye mamlaka, unaweza kufanya kitu kama:
+* **`PERL5DB`** – wakati mfasiri anapoanzishwa na bendera **`-d`** (debugger), maudhui ya `PERL5DB` yanatekelezwa kama msimbo wa Perl *ndani ya* muktadha wa debugger. 
+Ikiwa unaweza kuathiri mazingira **na** bendera za amri za mchakato wa Perl wenye mamlaka, unaweza kufanya kitu kama:
 
 ```bash
 export PERL5DB='system("/bin/zsh")'
-sudo perl -d /usr/bin/some_admin_script.pl   # itatoa shell kabla ya kutekeleza skripti
+sudo perl -d /usr/bin/some_admin_script.pl   # itatoa shell kabla ya kutekeleza script
 ```
 
-* **`PERL5SHELL`** – kwenye Windows, mabadiliko haya yanadhibiti ni shell ipi inayoweza kutekelezwa ambayo Perl itatumia inapohitaji kuanzisha shell. Inatajwa hapa tu kwa ukamilifu, kwani si muhimu kwenye macOS.
+* **`PERL5SHELL`** – kwenye Windows, variable hii inasimamia ni executable ipi ya shell ambayo Perl itatumia inapohitajika kuanzisha shell. Inatajwa hapa tu kwa ukamilifu, kwani si muhimu kwenye macOS.
 
-Ingawa `PERL5DB` inahitaji swichi `-d`, ni kawaida kukutana na skripti za matengenezo au za installer ambazo zinafanywa kama *root* na bendera hii imewezeshwa kwa ajili ya kutatua matatizo kwa kina, na kufanya mabadiliko haya kuwa njia halali ya kupandisha mamlaka.
+Ingawa `PERL5DB` inahitaji swichi `-d`, ni kawaida kukutana na scripts za matengenezo au installer ambazo zinafanywa kama *root* na bendera hii imewezeshwa kwa ajili ya kutatua matatizo kwa kina, na kufanya variable hii kuwa njia halali ya kupandisha mamlaka.
 
 ## Kupitia utegemezi (@INC abuse)
 
@@ -66,10 +67,10 @@ Kwa mfano, ikiwa script inatumia **`use File::Basename;`** itakuwa inawezekana k
 
 ## SIP bypass kupitia Msaada wa Uhamiaji (CVE-2023-32369 “Migraine”)
 
-Mnamo Mei 2023 Microsoft ilifunua **CVE-2023-32369**, iliyopewa jina la **Migraine**, mbinu ya baada ya unyakuzi inayomruhusu mshambuliaji wa *root* **kuzidi kabisa Ulinzi wa Uhakika wa Mfumo (SIP)**.
+Mnamo Mei 2023 Microsoft ilifunua **CVE-2023-32369**, iliyopewa jina la **Migraine**, mbinu ya baada ya unyakuzi inayomruhusu mshambuliaji wa *root* **kuzidi kabisa Ulinzi wa Uhakika wa Mfumo (SIP)**. 
 Sehemu iliyo hatarini ni **`systemmigrationd`**, daemon iliyopewa haki ya **`com.apple.rootless.install.heritable`**. Mchakato wowote wa mtoto unaozalishwa na daemon hii unapata haki hiyo na hivyo unafanya kazi **nje** ya vizuizi vya SIP.
 
-Miongoni mwa watoto walioainishwa na watafiti ni mfasiri aliyeidhinishwa na Apple:
+Kati ya watoto walioainishwa na watafiti ni mfasiri aliyetia saini na Apple:
 ```
 /usr/bin/perl /usr/libexec/migrateLocalKDC …
 ```
@@ -87,8 +88,8 @@ Apple ilirekebisha tatizo katika macOS **Ventura 13.4**, **Monterey 12.6.6** na 
 
 ## Mapendekezo ya kuimarisha
 
-1. **Futa mabadiliko hatari** – launchdaemons zenye mamlaka au kazi za cron zinapaswa kuanza na mazingira safi (`launchctl unsetenv PERL5OPT`, `env -i`, nk.).
-2. **Epuka kuendesha wakalimani kama root** isipokuwa ni lazima. Tumia binaries zilizokusanywa au punguza mamlaka mapema.
+1. **Futa mabadiliko hatari** – launchdaemons au kazi za cron zenye mamlaka zinapaswa kuanza na mazingira safi (`launchctl unsetenv PERL5OPT`, `env -i`, nk.).
+2. **Epuka kuendesha waandishi kama root** isipokuwa ni lazima. Tumia binaries zilizokusanywa au punguza mamlaka mapema.
 3. **Scripts za muuzaji zikiwa na `-T` (hali ya uchafu)** ili Perl ipuuzie `PERL5OPT` na swichi nyingine zisizo salama wakati ukaguzi wa uchafu umewezeshwa.
 4. **Hifadhi macOS kuwa wa kisasa** – “Migraine” imepatikana kikamilifu katika toleo la sasa.
 

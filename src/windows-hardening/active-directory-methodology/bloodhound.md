@@ -20,7 +20,7 @@ adws-enumeration.md
 
 ### Matumizi ya haraka
 
-1. Anza zana na uungane na `dc01.corp.local` kwa akidi yoyote ya domain.
+1. Anza chombo na uungane na `dc01.corp.local` kwa akidi yoyote ya domain.
 2. Unda picha ya mbali kupitia `File ➜ Create Snapshot`.
 3. Linganisha picha mbili kwa `File ➜ Compare` ili kugundua mabadiliko ya ruhusa.
 
@@ -71,7 +71,7 @@ Group3r.exe -f gpo.log   # -s to stdout
 
 ## PingCastle
 
-[PingCastle](https://www.pingcastle.com/documentation/) inatekeleza **uchunguzi wa afya** wa Active Directory na inaunda ripoti ya HTML yenye alama za hatari.
+[PingCastle](https://www.pingcastle.com/documentation/) inafanya **ukaguzi wa afya** wa Active Directory na kuunda ripoti ya HTML yenye alama za hatari.
 ```powershell
 PingCastle.exe --healthcheck --server corp.local --user bob --password "P@ssw0rd!"
 ```

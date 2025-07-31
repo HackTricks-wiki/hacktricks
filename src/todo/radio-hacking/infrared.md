@@ -39,21 +39,21 @@ Inajulikana pia kama uandishi wa Manchester. Thamani ya mantiki inafafanuliwa na
 **4. Combination of previous ones and other exotics**
 
 > [!TIP]
-> Kuna protokali za IR ambazo **zinajaribu kuwa za ulimwengu mzima** kwa aina kadhaa za vifaa. Zile maarufu ni RC5 na NEC. Kwa bahati mbaya, maarufu **haimaanishi kuwa za kawaida**. Katika mazingira yangu, nilikutana na remote mbili za NEC na hakuna RC5.
+> Kuna protokali za IR ambazo **zinajaribu kuwa za ulimwengu mzima** kwa aina kadhaa za vifaa. Zile maarufu ni RC5 na NEC. Kwa bahati mbaya, maarufu **haimaanishi ya kawaida**. Katika mazingira yangu, nilikutana na remote mbili za NEC na hakuna RC5.
 >
 > Watengenezaji wanapenda kutumia protokali zao za IR za kipekee, hata ndani ya safu moja ya vifaa (kwa mfano, TV-boxes). Hivyo basi, remotes kutoka kampuni tofauti na wakati mwingine kutoka mifano tofauti kutoka kampuni moja, hazina uwezo wa kufanya kazi na vifaa vingine vya aina hiyo.
 
 ### Exploring an IR signal
 
-Njia ya kuaminika zaidi kuona jinsi ishara ya IR ya remote inavyoonekana ni kutumia oscilloscope. Hii haidondoshi au kugeuza ishara iliyopokelewa, inajitokeza "kama ilivyo". Hii ni muhimu kwa ajili ya kupima na kutatua matatizo. Nitaonyesha ishara inayotarajiwa kwa mfano wa protokali ya NEC IR.
+Njia ya kuaminika zaidi kuona jinsi ishara ya IR ya remote inavyoonekana ni kutumia oscilloscope. Hii haidhauri au kubadilisha ishara iliyopokelewa, inajitokeza "kama ilivyo". Hii ni muhimu kwa ajili ya kupima na kutatua matatizo. Nitaonyesha ishara inayotarajiwa kwa mfano wa protokali ya NEC IR.
 
 <figure><img src="../../images/image (235).png" alt=""><figcaption></figcaption></figure>
 
 Kawaida, kuna preamble mwanzoni mwa pakiti iliyowekwa. Hii inaruhusu mpokeaji kubaini kiwango cha gain na mandharinyuma. Pia kuna protokali bila preamble, kwa mfano, Sharp.
 
-Kisha data inatumwa. Muundo, preamble, na njia ya uandishi wa bit zinatolewa na protokali maalum.
+Kisha data inatumwa. Muundo, preamble, na njia ya uandishi wa bit zinatambuliwa na protokali maalum.
 
-**Protokali ya NEC IR** ina amri fupi na nambari ya kurudia, ambayo inatumwa wakati kifungo kinaposhinikizwa. Zote amri na nambari ya kurudia zina preamble sawa mwanzoni.
+**Protokali ya NEC IR** ina amri fupi na nambari ya kurudia, ambayo inatumwa wakati kifungo kinaposhinikizwa. Zote, amri na nambari ya kurudia zina preamble sawa mwanzoni.
 
 **Amri ya NEC**, mbali na preamble, inajumuisha byte ya anwani na byte ya nambari ya amri, ambayo kifaa kinaelewa kinachohitajika kutekelezwa. Byte za anwani na nambari ya amri zinajirudia kwa thamani za kinyume, ili kuangalia uadilifu wa uhamasishaji. Kuna bit ya kusitisha ya ziada mwishoni mwa amri.
 
@@ -63,8 +63,8 @@ Kwa **mantiki "0" na "1"** NEC inatumia Pulse Distance Encoding: kwanza, mlipuko
 
 ### Air Conditioners
 
-Tofauti na remotes nyingine, **viyoyozi havitumii tu nambari ya kifungo kilichoshinikizwa**. Pia **hutoa taarifa zote** wakati kifungo kinaposhinikizwa ili kuhakikisha kuwa **kifaa cha viyoyozi na remote vinashirikiana**.\
-Hii itazuia kwamba mashine iliyowekwa kama 20ºC inakuwa 21ºC kwa remote moja, na kisha wakati remote nyingine, ambayo bado ina joto kama 20ºC, inatumika kuongeza joto zaidi, itakuwa "inaongeza" hadi 21ºC (na si 22ºC ikidhani iko katika 21ºC).
+Tofauti na remotes nyingine, **viyoyozi havitumii tu nambari ya kifungo kilichoshinikizwa**. Pia **hutoa taarifa zote** wakati kifungo kinaposhinikizwa ili kuhakikisha kwamba **kifaa cha viyoyozi na remote vinapatana**.\
+Hii itazuia kwamba mashine iliyowekwa kama 20ºC inakuwa 21ºC kwa remote moja, na kisha wakati remote nyingine, ambayo bado ina joto kama 20ºC, inatumika kuongeza zaidi joto, itakuwa "inaongeza" hadi 21ºC (na si 22ºC ikidhani iko katika 21ºC).
 
 ---
 
@@ -78,11 +78,11 @@ flipper-zero/fz-infrared.md
 
 ### Smart-TV / Set-top Box Takeover (EvilScreen)
 
-Kazi za hivi karibuni za kitaaluma (EvilScreen, 2022) zilionyesha kuwa **remotes za multi-channel zinazochanganya Infrared na Bluetooth au Wi-Fi zinaweza kutumika vibaya ili kuchukua udhibiti wa smart-TVs za kisasa**. Shambulio linaunganisha nambari za huduma za IR zenye haki za juu pamoja na pakiti za Bluetooth zilizothibitishwa, zikiepuka kutengwa kwa channel na kuruhusu uzinduzi wa programu zisizo na mipaka, uanzishaji wa kipaza sauti, au kurejesha kiwanda bila ufikiaji wa kimwili. Televisheni nane maarufu kutoka wauzaji tofauti — ikiwemo mfano wa Samsung unaodai kufuata ISO/IEC 27001 — zilithibitishwa kuwa na udhaifu. Kupunguza hatari kunahitaji marekebisho ya firmware kutoka kwa wauzaji au kuzima kabisa mpokeaji wa IR usiotumika.
+Kazi za hivi karibuni za kitaaluma (EvilScreen, 2022) zilionyesha kwamba **remotes za multi-channel zinazochanganya Infrared na Bluetooth au Wi-Fi zinaweza kutumika vibaya ili kuchukua udhibiti wa smart-TVs za kisasa**. Shambulio linaunganisha nambari za huduma za IR zenye haki za juu pamoja na pakiti za Bluetooth zilizothibitishwa, zikiepuka kutengwa kwa channel na kuruhusu uzinduzi wa programu zisizo na mipaka, uanzishaji wa kipaza sauti, au kurejesha kiwanda bila ufikiaji wa kimwili. Televisheni nane maarufu kutoka kwa wauzaji tofauti — ikiwemo mfano wa Samsung unaodai kufuata ISO/IEC 27001 — zilithibitishwa kuwa na udhaifu. Kupunguza hatari kunahitaji marekebisho ya firmware kutoka kwa wauzaji au kuzima kabisa wapokeaji wa IR wasiotumika.
 
 ### Air-Gapped Data Exfiltration via IR LEDs (aIR-Jumper family)
 
-Mikamera ya usalama, routers au hata flash drives za uhalifu mara nyingi zinajumuisha **LED za IR za kuona usiku**. Utafiti unaonyesha kuwa malware inaweza kubadilisha hizi LED (<10–20 kbit/s na OOK rahisi) ili **kuhamasisha siri kupitia kuta na madirisha** kwa kamera ya nje iliyowekwa mita kadhaa mbali. Kwa sababu mwanga uko nje ya wigo unaoonekana, waendeshaji mara nyingi hawaoni. Hatua za kupambana:
+Mikamera ya usalama, routers au hata flash drives za uhalifu mara nyingi zinajumuisha **LED za IR za kuona usiku**. Utafiti unaonyesha kuwa malware inaweza kubadilisha hizi LED (<10–20 kbit/s kwa OOK rahisi) ili **kuhamasisha siri kupitia kuta na madirisha** kwa kamera ya nje iliyowekwa mita kumi mbali. Kwa sababu mwanga uko nje ya wigo unaoonekana, waendeshaji mara nyingi hawaoni. Hatua za kupambana:
 
 * Ficha kimwili au ondoa LED za IR katika maeneo nyeti
 * Fuata mzunguko wa LED wa kamera na uadilifu wa firmware
@@ -92,7 +92,7 @@ Mshambuliaji pia anaweza kutumia projector za IR zenye nguvu ili **kuingiza** am
 
 ### Long-Range Brute-Force & Extended Protocols with Flipper Zero 1.0
 
-Firmware 1.0 (Septemba 2024) iliongeza **mifumo ya ziada ya IR na moduli za nguvu za nje**. Imeunganishwa na hali ya brute-force ya remote ya ulimwengu mzima, Flipper inaweza kuzima au kubadilisha mipangilio ya televisheni/AC nyingi za umma kutoka hadi 30 m kwa kutumia diode yenye nguvu kubwa.
+Firmware 1.0 (Septemba 2024) iliongeza **mifumo ya ziada ya IR na moduli za nguvu za nje**. Imeunganishwa na hali ya brute-force ya universal-remote, Flipper inaweza kuzima au kubadilisha mipangilio ya televisheni/AC nyingi za umma kutoka hadi mita 30 kwa kutumia diode yenye nguvu kubwa.
 
 ---
 
@@ -117,8 +117,8 @@ sender.sendNEC(0x20DF10EF, 32); // Samsung TV Power
 delay(5000);
 }
 ```
-* **IRscrutinizer / AnalysIR** – decoders za GUI zinazounga mkono captures za raw na kujiandikisha protokali + kuunda msimbo wa Pronto/Arduino.
-* **LIRC / ir-keytable (Linux)** – pokea na ingiza IR kutoka kwenye mstari wa amri:
+* **IRscrutinizer / AnalysIR** – decoders za GUI zinazounga mkono captures za raw na kutambua protokali kiotomatiki + kuunda msimbo wa Pronto/Arduino.
+* **LIRC / ir-keytable (Linux)** – pokea na ingiza IR kutoka kwa mstari wa amri:
 ```bash
 sudo ir-keytable -p nec,rc5 -t   # live-dump decoded scancodes
 irsend SEND_ONCE samsung KEY_POWER
@@ -128,7 +128,7 @@ irsend SEND_ONCE samsung KEY_POWER
 
 ## Defensive Measures <a href="#defense" id="defense"></a>
 
-* Zima au funika mpokeaji wa IR kwenye vifaa vilivyowekwa katika maeneo ya umma wakati havihitajiki.
+* Zima au funika wapokeaji wa IR kwenye vifaa vilivyowekwa katika maeneo ya umma wakati havihitajiki.
 * Lazimisha *kuunganishwa* au ukaguzi wa kijasusi kati ya smart-TVs na remotes; tengeneza nambari za "huduma" zenye haki.
 * Tumia filters za IR-cut au detectors za mawimbi ya kuendelea karibu na maeneo yaliyotengwa ili kuvunja njia za siri za macho.
 * Fuata uadilifu wa firmware wa kamera/vifaa vya IoT vinavyofichua LED za IR zinazoweza kudhibitiwa.

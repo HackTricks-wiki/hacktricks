@@ -4,29 +4,29 @@
 
 ## What is ADWS?
 
-Active Directory Web Services (ADWS) **imewezeshwa kwa default kwenye kila Domain Controller tangu Windows Server 2008 R2** na inasikiliza kwenye TCP **9389**.  Licha ya jina, **hakuna HTTP inayohusika**.  Badala yake, huduma hii inaonyesha data ya mtindo wa LDAP kupitia seti ya protokali za umiliki za .NET:
+Active Directory Web Services (ADWS) **imewezeshwa kwa default kwenye kila Domain Controller tangu Windows Server 2008 R2** na inasikiliza kwenye TCP **9389**.  Licha ya jina, **hakuna HTTP inayohusika**.  Badala yake, huduma hii inatoa data ya mtindo wa LDAP kupitia seti ya protokali za umiliki za .NET:
 
 * MC-NBFX → MC-NBFSE → MS-NNS → MC-NMF
 
-Kwa sababu trafiki imefungwa ndani ya hizi binary SOAP frames na inasafiri kupitia bandari isiyo ya kawaida, **kuhesabu kupitia ADWS kuna uwezekano mdogo wa kukaguliwa, kuchujwa au kusainiwa kuliko trafiki ya kawaida ya LDAP/389 & 636**.  Kwa waendeshaji hii inamaanisha:
+Kwa sababu trafiki imefungwa ndani ya hizi frames za SOAP za binary na inasafiri kupitia bandari isiyo ya kawaida, **kuhesabu kupitia ADWS kuna uwezekano mdogo wa kukaguliwa, kuchujwa au kusainiwa kuliko trafiki ya kawaida ya LDAP/389 & 636**.  Kwa waendeshaji hii inamaanisha:
 
 * Utafiti wa siri – Timu za buluu mara nyingi hujikita kwenye maswali ya LDAP.
-* Uhuru wa kukusanya kutoka **kwa mwenyeji asiye wa Windows (Linux, macOS)** kwa kutoboa 9389/TCP kupitia SOCKS proxy.
-* Data sawa ambayo ungeweza kupata kupitia LDAP (watumiaji, vikundi, ACLs, muundo, nk.) na uwezo wa kufanya **kuandika** (mfano `msDs-AllowedToActOnBehalfOfOtherIdentity` kwa **RBCD**).
+* Uhuru wa kukusanya kutoka **kwa mwenyeji asiye wa Windows (Linux, macOS)** kwa kutunga 9389/TCP kupitia proxy ya SOCKS.
+* Data sawa unayoweza kupata kupitia LDAP (watumiaji, vikundi, ACLs, muundo, nk.) na uwezo wa kufanya **kuandika** (kwa mfano `msDs-AllowedToActOnBehalfOfOtherIdentity` kwa **RBCD**).
 
 > NOTE: ADWS pia inatumika na zana nyingi za RSAT GUI/PowerShell, hivyo trafiki inaweza kuchanganyika na shughuli halali za admin.
 
 ## SoaPy – Native Python Client
 
-[SoaPy](https://github.com/logangoins/soapy) ni **utekelezaji kamili wa protokali ya ADWS katika Python safi**.  Inaunda NBFX/NBFSE/NNS/NMF frames byte kwa byte, ikiruhusu ukusanyaji kutoka kwa mifumo kama Unix bila kugusa .NET runtime.
+[SoaPy](https://github.com/logangoins/soapy) ni **utekelezaji kamili wa protokali ya ADWS katika Python safi**.  Inaunda frames za NBFX/NBFSE/NNS/NMF byte kwa byte, ikiruhusu ukusanyaji kutoka kwa mifumo kama Unix bila kugusa runtime ya .NET.
 
 ### Key Features
 
 * Inasaidia **proxying kupitia SOCKS** (inayofaa kutoka kwa C2 implants).
 * Filters za utafutaji zenye undani sawa na LDAP `-q '(objectClass=user)'`.
-* Operesheni za hiari za **kuandika** ( `--set` / `--delete` ).
+* Operesheni za **kuandika** za hiari ( `--set` / `--delete` ).
 * **BOFHound output mode** kwa ajili ya uingizaji wa moja kwa moja katika BloodHound.
-* `--parse` flag ili kuboresha alama za muda / `userAccountControl` wakati usomaji wa kibinadamu unahitajika.
+* `--parse` bendera ya kupamba alama za muda / `userAccountControl` wakati usomaji wa kibinadamu unahitajika.
 
 ### Installation (operator host)
 ```bash
@@ -38,7 +38,7 @@ The following workflow shows how to enumerate **domain & ADCS objects** over ADW
 
 1. **Tunnel 9389/TCP** kutoka kwenye mtandao wa lengo hadi kwenye sanduku lako (kwa mfano kupitia Chisel, Meterpreter, SSH dynamic port-forward, n.k.). Export `export HTTPS_PROXY=socks5://127.0.0.1:1080` au tumia SoaPy’s `--proxyHost/--proxyPort`.
 
-2. **Kusanya kitu cha msingi cha domain:**
+2. **Kusanya kituo cha msingi cha domain:**
 ```bash
 soapy ludus.domain/jdoe:'P@ssw0rd'@10.2.10.10 \
 -q '(objectClass=domain)' \
@@ -56,7 +56,7 @@ soapy ludus.domain/jdoe:'P@ssw0rd'@10.2.10.10 \
 ```bash
 bofhound -i data --zip   # produces BloodHound.zip
 ```
-5. **Pakia ZIP** kwenye GUI ya BloodHound na uendeshe maswali ya cypher kama `MATCH (u:User)-[:Can_Enroll*1..]->(c:CertTemplate) RETURN u,c` ili kufichua njia za kupandisha cheo za cheti (ESC1, ESC8, n.k.).
+5. **Pakia ZIP** kwenye GUI ya BloodHound na uendeshe maswali ya cypher kama `MATCH (u:User)-[:Can_Enroll*1..]->(c:CertTemplate) RETURN u,c` ili kufichua njia za kupandisha cheo za cheti (ESC1, ESC8, nk).
 
 ### Kuandika `msDs-AllowedToActOnBehalfOfOtherIdentity` (RBCD)
 ```bash
@@ -68,21 +68,21 @@ Patanisha hii na `s4u2proxy`/`Rubeus /getticket` kwa mnyororo kamili wa **Resour
 
 ## Ugunduzi & Uimarishaji
 
-### Kurekodi kwa Kina ADDS
+### Kurekodi kwa ADDS kwa Maelezo Mengi
 
-wezesha funguo zifuatazo za rejista kwenye Watawala wa Kikoa ili kuonyesha utafutaji ghali / usio na ufanisi unaotoka kwenye ADWS (na LDAP):
+wezesha funguo zifuatazo za rejista kwenye Watawala wa Kikoa ili kuonyesha utafutaji mzito / usio na ufanisi unaotoka kwenye ADWS (na LDAP):
 ```powershell
 New-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Diagnostics' -Name '15 Field Engineering' -Value 5 -Type DWORD
 New-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters' -Name 'Expensive Search Results Threshold' -Value 1 -Type DWORD
 New-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters' -Name 'Search Time Threshold (msecs)' -Value 0 -Type DWORD
 ```
-Mifano itatokea chini ya **Directory-Service** na kichujio kamili cha LDAP, hata wakati ombi lilifika kupitia ADWS.
+Mifano ya matukio itaonekana chini ya **Directory-Service** na kichujio kamili cha LDAP, hata wakati ombi lilifika kupitia ADWS.
 
-### SACL Canary Objects
+### Vitu vya SACL Canary
 
 1. Unda kitu cha dummy (mfano, mtumiaji aliyezuiliwa `CanaryUser`).
 2. Ongeza **Audit** ACE kwa _Everyone_ principal, iliyokaguliwa kwenye **ReadProperty**.
-3. Wakati mshambuliaji anapofanya `(servicePrincipalName=*)`, `(objectClass=user)` nk, DC inatoa **Event 4662** ambayo ina SID halisi ya mtumiaji – hata wakati ombi linapokuwa na proxy au linatoka ADWS.
+3. Kila wakati mshambuliaji anapofanya `(servicePrincipalName=*)`, `(objectClass=user)` n.k. DC inatoa **Event 4662** ambayo ina SID halisi ya mtumiaji – hata wakati ombi linapokuwa na proxy au linatoka ADWS.
 
 Mfano wa sheria iliyojengwa awali ya Elastic:
 ```kql

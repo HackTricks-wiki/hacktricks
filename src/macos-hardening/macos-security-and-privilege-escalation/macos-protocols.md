@@ -32,21 +32,21 @@ Ili kuwezesha ARD kwa kazi mbalimbali za kiutawala kama vile kupandisha hadhi, u
 ```bash
 sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -allowAccessFor -allUsers -privs -all -clientopts -setmenuextra -menuextra yes
 ```
-ARD inatoa viwango tofauti vya udhibiti, ikiwa ni pamoja na ufuatiliaji, udhibiti wa pamoja, na udhibiti kamili, huku vikao vikidumu hata baada ya mabadiliko ya nenosiri la mtumiaji. Inaruhusu kutuma amri za Unix moja kwa moja, na kuzitekeleza kama root kwa watumiaji wa kiutawala. Ratiba za kazi na utafutaji wa Remote Spotlight ni vipengele vya kutambulika, vinavyorahisisha utafutaji wa mbali, wa athari ndogo kwa faili nyeti katika mashine nyingi.
+ARD inatoa viwango tofauti vya udhibiti, ikiwa ni pamoja na ufuatiliaji, udhibiti wa pamoja, na udhibiti kamili, huku vikao vikidumu hata baada ya mabadiliko ya nenosiri la mtumiaji. Inaruhusu kutuma amri za Unix moja kwa moja, kuzitekeleza kama root kwa watumiaji wa kiutawala. Ratiba za kazi na utafutaji wa Remote Spotlight ni vipengele vya kutambulika, vinavyorahisisha utafutaji wa mbali, wa athari ndogo kwa faili nyeti katika mashine nyingi.
 
 #### Uthibitisho wa hivi karibuni wa Screen-Sharing / ARD (2023-2025)
 
 | Mwaka | CVE | Kipengele | Athari | Imefanyiwa marekebisho katika |
 |------|-----|-----------|--------|----------|
-|2023|CVE-2023-42940|Screen Sharing|Uwasilishaji usio sahihi wa kikao unaweza kusababisha *desktop* au dirisha *sio sahihi* kuhamasishwa, na kusababisha uvujaji wa taarifa nyeti|macOS Sonoma 14.2.1 (Desemba 2023) |
-|2024|CVE-2024-23296|launchservicesd / login|Kuvunjwa kwa ulinzi wa kumbukumbu ya kernel ambayo inaweza kuunganishwa baada ya kuingia kwa mbali kwa mafanikio (inatumika kwa nguvu katika mazingira ya kawaida)|macOS Ventura 13.6.4 / Sonoma 14.4 (Machi 2024) |
+|2023|CVE-2023-42940|Screen Sharing|Uwasilishaji usio sahihi wa kikao unaweza kusababisha *desktop* au dirisha *sio sahihi* kuhamasishwa, na kusababisha uvujaji wa taarifa nyeti|macOS Sonoma 14.2.1 (Des 2023) |
+|2024|CVE-2024-23296|launchservicesd / login|Kuvunja ulinzi wa kumbukumbu ya kernel ambayo inaweza kuunganishwa baada ya kuingia kwa mbali kwa mafanikio (inatumika kwa nguvu katika mazingira ya kawaida)|macOS Ventura 13.6.4 / Sonoma 14.4 (Mar 2024) |
 
 **Vidokezo vya kuimarisha**
 
 * Zima *Screen Sharing*/*Remote Management* wakati sio muhimu sana.
 * Hifadhi macOS ikiwa na sasisho kamili (Apple kwa ujumla huleta marekebisho ya usalama kwa toleo tatu kubwa za mwisho).
 * Tumia **Nenosiri Imara** *na* kulazimisha chaguo la *“VNC viewers may control screen with password”* **limezimwa** inapowezekana.
-* Weka huduma hiyo nyuma ya VPN badala ya kuifichua TCP 5900/3283 kwa Mtandao.
+* Weka huduma nyuma ya VPN badala ya kufichua TCP 5900/3283 kwa Mtandao.
 * Ongeza sheria ya Firewall ya Programu ili kupunguza `ARDAgent` kwa subnet ya ndani:
 
 ```bash
@@ -66,15 +66,15 @@ Zero Configuration Networking, inayotolewa na Bonjour, inahakikisha kwamba vifaa
 - Kufanya **tafsiri ya jina hadi anwani** bila kuhitaji seva ya DNS.
 - **Gundua huduma** zinazopatikana kwenye mtandao.
 
-Vifaa vinavyotumia Bonjour vitajipatia **anwani ya IP kutoka kwenye anuwai ya 169.254/16** na kuthibitisha upekee wake kwenye mtandao. Macs huhifadhi kipengele cha routing kwa subnet hii, kinachoweza kuthibitishwa kupitia `netstat -rn | grep 169`.
+Vifaa vinavyotumia Bonjour vitajipatia **anwani ya IP kutoka kwenye anuwai ya 169.254/16** na kuthibitisha upekee wake kwenye mtandao. Macs huhifadhi kipengele cha jedwali la routing kwa subnet hii, kinachoweza kuthibitishwa kupitia `netstat -rn | grep 169`.
 
 Kwa DNS, Bonjour inatumia **protokali ya Multicast DNS (mDNS)**. mDNS inafanya kazi kupitia **bandari 5353/UDP**, ikitumia **maswali ya kawaida ya DNS** lakini ikilenga **anwani ya multicast 224.0.0.251**. Njia hii inahakikisha kwamba vifaa vyote vinavyosikiliza kwenye mtandao vinaweza kupokea na kujibu maswali, na kurahisisha sasisho la rekodi zao.
 
-Pale kifaa kinapoungana na mtandao, kila kifaa kinajichagulia jina, ambacho kwa kawaida kinaishia na **.local**, ambacho kinaweza kutokana na jina la mwenyeji au kutengenezwa kwa bahati nasibu.
+Pale kifaa kinapojiunga na mtandao, kila kifaa kinajichagulia jina, ambacho kwa kawaida kinaishia na **.local**, ambacho kinaweza kutokana na jina la mwenyeji au kutengenezwa kwa bahati nasibu.
 
-Gundua huduma ndani ya mtandao inarahisishwa na **DNS Service Discovery (DNS-SD)**. Kwa kutumia muundo wa rekodi za DNS SRV, DNS-SD inatumia **rekodi za DNS PTR** kuwezesha orodha ya huduma nyingi. Mteja anayetafuta huduma maalum ataomba rekodi ya PTR kwa `<Service>.<Domain>`, akipokea orodha ya rekodi za PTR zilizoundwa kama `<Instance>.<Service>.<Domain>` ikiwa huduma inapatikana kutoka kwa mwenyeji wengi.
+Gundua huduma ndani ya mtandao inarahisishwa na **DNS Service Discovery (DNS-SD)**. Kwa kutumia muundo wa rekodi za DNS SRV, DNS-SD inatumia **rekodi za DNS PTR** kuwezesha orodha ya huduma nyingi. Mteja anayepata huduma maalum atahitaji rekodi ya PTR kwa `<Service>.<Domain>`, akipokea orodha ya rekodi za PTR zilizoundwa kama `<Instance>.<Service>.<Domain>` ikiwa huduma inapatikana kutoka kwa mwenyeji wengi.
 
-Zana ya `dns-sd` inaweza kutumika kwa **kugundua na kutangaza huduma za mtandao**. Hapa kuna baadhi ya mifano ya matumizi yake:
+Zana ya `dns-sd` inaweza kutumika kwa **kugundua na kutangaza huduma za mtandao**. Hapa kuna mifano kadhaa ya matumizi yake:
 
 ### Kutafuta Huduma za SSH
 
@@ -96,9 +96,9 @@ Ili kutafuta huduma za HTTP kwenye mtandao:
 ```bash
 dns-sd -B _http._tcp
 ```
-Wakati huduma inaanza, inatangaza upatikanaji wake kwa vifaa vyote kwenye subnet kwa kutangaza uwepo wake. Vifaa vinavyovutiwa na huduma hizi havihitaji kutuma maombi bali vinahitaji kusikiliza matangazo haya.
+Wakati huduma inaanza, inatangaza upatikanaji wake kwa vifaa vyote kwenye subnet kwa kutangaza uwepo wake. Vifaa vinavyovutiwa na huduma hizi havihitaji kutuma maombi bali vinapaswa kusikiliza matangazo haya.
 
-Kwa kiolesura kinachofaa kwa mtumiaji, programu ya **Discovery - DNS-SD Browser** inayopatikana kwenye Apple App Store inaweza kuonyesha huduma zinazotolewa kwenye mtandao wako wa ndani.
+Kwa kiolesura kinachofaa zaidi kwa mtumiaji, programu ya **Discovery - DNS-SD Browser** inayopatikana kwenye Apple App Store inaweza kuonyesha huduma zinazotolewa kwenye mtandao wako wa ndani.
 
 Vinginevyo, skripti maalum zinaweza kuandikwa ili kuvinjari na kugundua huduma kwa kutumia maktaba ya `python-zeroconf`. Skripti ya [**python-zeroconf**](https://github.com/jstasiak/python-zeroconf) inaonyesha jinsi ya kuunda kivinjari cha huduma kwa huduma za `_http._tcp.local.`, ikichapisha huduma zilizoongezwa au kuondolewa:
 ```python
@@ -129,7 +129,7 @@ zeroconf.close()
 nmap -sU -p 5353 --script=dns-service-discovery <target>
 ```
 
-Script ya `dns-service-discovery` inatuma ombi la `_services._dns-sd._udp.local` kisha inakuorodhesha kila aina ya huduma iliyotangazwa.
+Script ya `dns-service-discovery` inatuma swali la `_services._dns-sd._udp.local` kisha inakuorodhesha kila aina ya huduma iliyotangazwa.
 
 * **mdns_recon** – Zana ya Python inayoskania maeneo yote kutafuta *maktaba* za mDNS ambazo zinajibu maswali ya unicast (inasaidia kupata vifaa vinavyoweza kufikiwa kupitia subnets/WAN):
 
@@ -149,7 +149,7 @@ Hii itarudisha mwenyeji wanaoonyesha SSH kupitia Bonjour nje ya kiungo cha ndani
 
 **Mwongozo wa kupunguza hatari**
 
-1. Punguza UDP 5353 kwa *muktadha wa kiungo-lokali* – zuia au punguza kiwango chake kwenye wasimamizi wa wireless, route, na firewalls za mwenyeji.
+1. Punguza UDP 5353 kwa *muktadha wa kiungo* – zuia au punguza kiwango chake kwenye wasimamizi wa wireless, route, na firewalls za mwenyeji.
 2. Zima Bonjour kabisa kwenye mifumo ambayo haitaji kugundua huduma:
 
 ```bash
