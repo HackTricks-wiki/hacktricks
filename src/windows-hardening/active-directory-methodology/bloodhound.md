@@ -62,7 +62,7 @@ Kolektorzy generują JSON, który jest wczytywany za pomocą interfejsu BloodHou
 
 ## Group3r
 
-[Group3r](https://github.com/Group3r/Group3r) enumeruje **Group Policy Objects** i podkreśla błędne konfiguracje.
+[Group3r](https://github.com/Group3r/Group3r) enumeruje **Obiekty Zasad Grupy** i podkreśla błędne konfiguracje.
 ```bash
 # Execute inside the domain
 Group3r.exe -f gpo.log   # -s to stdout

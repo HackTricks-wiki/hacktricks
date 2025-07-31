@@ -50,7 +50,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Sprawdź dostęp do modprobe
 #### **`/proc/sys/vm/panic_on_oom`**
 
 - Odniesione w [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
-- Globalny flag, który kontroluje, czy jądro panikuje, czy wywołuje OOM killer, gdy wystąpi warunek OOM.
+- Globalny flag, który kontroluje, czy jądro panikuje, czy wywołuje OOM killer, gdy występuje warunek OOM.
 
 #### **`/proc/sys/fs`**
 
@@ -89,7 +89,7 @@ echo b > /proc/sysrq-trigger # Ponownie uruchamia hosta
 #### **`/proc/kallsyms`**
 
 - Wymienia eksportowane symbole jądra i ich adresy.
-- Kluczowe dla rozwoju exploitów jądra, szczególnie w celu pokonania KASLR.
+- Niezbędne do rozwoju exploitów jądra, szczególnie w celu pokonania KASLR.
 - Informacje o adresach są ograniczone, gdy `kptr_restrict` jest ustawione na `1` lub `2`.
 - Szczegóły w [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 
@@ -114,7 +114,7 @@ echo b > /proc/sysrq-trigger # Ponownie uruchamia hosta
 #### **`/proc/mem`**
 
 - Alternatywny interfejs dla `/dev/mem`, reprezentujący pamięć fizyczną.
-- Umożliwia odczyt i zapis, modyfikacja całej pamięci wymaga rozwiązania adresów wirtualnych na fizyczne.
+- Umożliwia odczyt i zapis, modyfikacja całej pamięci wymaga przekształcenia adresów wirtualnych na fizyczne.
 
 #### **`/proc/sched_debug`**
 
@@ -271,15 +271,13 @@ Katalog główny Dockera: /var/lib/docker
 So the filesystems are under `/var/lib/docker/overlay2/`:
 
 ```bash
-```markdown
 $ sudo ls -la /var/lib/docker/overlay2
 
-drwx--x---  4 root root  4096 Jan  9 22:14 00762bca8ea040b1bb28b61baed5704e013ab23a196f5fe4758dafb79dfafd5d
-drwx--x---  4 root root  4096 Jan 11 17:00 03cdf4db9a6cc9f187cca6e98cd877d581f16b62d073010571e752c305719496
-drwx--x---  4 root root  4096 Jan  9 21:23 049e02afb3f8dec80cb229719d9484aead269ae05afe81ee5880ccde2426ef4f
-drwx--x---  4 root root  4096 Jan  9 21:22 062f14e5adbedce75cea699828e22657c8044cd22b68ff1bb152f1a3c8a377f2
+drwx--x---  4 root root  4096 Jan  9 22:14 00762bca8ea040b1bb28b61baed5704e013ab23a196f5fe4758dafb79dfafd5d  
+drwx--x---  4 root root  4096 Jan 11 17:00 03cdf4db9a6cc9f187cca6e98cd877d581f16b62d073010571e752c305719496  
+drwx--x---  4 root root  4096 Jan  9 21:23 049e02afb3f8dec80cb229719d9484aead269ae05afe81ee5880ccde2426ef4f  
+drwx--x---  4 root root  4096 Jan  9 21:22 062f14e5adbedce75cea699828e22657c8044cd22b68ff1bb152f1a3c8a377f2  
 <SNIP>
-```
 ```
 
 #### Note

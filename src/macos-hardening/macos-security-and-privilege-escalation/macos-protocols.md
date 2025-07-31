@@ -4,7 +4,7 @@
 
 ## Usługi zdalnego dostępu
 
-To są powszechne usługi macOS, aby uzyskać do nich zdalny dostęp.\
+To są powszechne usługi macOS do zdalnego dostępu.\
 Możesz włączyć/wyłączyć te usługi w `Ustawienia systemowe` --> `Udostępnianie`
 
 - **VNC**, znane jako “Udostępnianie ekranu” (tcp:5900)
@@ -32,12 +32,12 @@ Aby włączyć ARD do różnych zadań administracyjnych, takich jak eskalacja u
 ```bash
 sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -allowAccessFor -allUsers -privs -all -clientopts -setmenuextra -menuextra yes
 ```
-ARD zapewnia wszechstronne poziomy kontroli, w tym obserwację, wspólną kontrolę i pełną kontrolę, z sesjami utrzymującymi się nawet po zmianie hasła użytkownika. Umożliwia bezpośrednie wysyłanie poleceń Unix, wykonując je jako root dla użytkowników administracyjnych. Planowanie zadań i zdalne wyszukiwanie Spotlight to istotne funkcje, ułatwiające zdalne, niskoodpadowe wyszukiwania wrażliwych plików na wielu maszynach.
+ARD zapewnia wszechstronne poziomy kontroli, w tym obserwację, wspólną kontrolę i pełną kontrolę, z sesjami utrzymującymi się nawet po zmianach hasła użytkownika. Umożliwia bezpośrednie wysyłanie poleceń Unix, wykonując je jako root dla użytkowników administracyjnych. Planowanie zadań i zdalne wyszukiwanie Spotlight to godne uwagi funkcje, które ułatwiają zdalne, niskoodporne wyszukiwania wrażliwych plików na wielu maszynach.
 
 #### Ostatnie luki w Screen-Sharing / ARD (2023-2025)
 
 | Rok | CVE | Komponent | Wpływ | Naprawione w |
-|-----|-----|-----------|-------|--------------|
+|------|-----|-----------|--------|----------|
 |2023|CVE-2023-42940|Screen Sharing|Nieprawidłowe renderowanie sesji mogło spowodować przesyłanie *niewłaściwego* pulpitu lub okna, co skutkowało wyciekiem wrażliwych informacji|macOS Sonoma 14.2.1 (grudzień 2023) |
 |2024|CVE-2024-23296|launchservicesd / login|Obejście ochrony pamięci jądra, które można połączyć po udanym zdalnym logowaniu (aktywnie wykorzystywane w terenie)|macOS Ventura 13.6.4 / Sonoma 14.4 (marzec 2024) |
 
@@ -58,17 +58,17 @@ sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setblockapp /System/Libra
 
 ## Protokół Bonjour
 
-Bonjour, technologia zaprojektowana przez Apple, umożliwia **urządzeniom w tej samej sieci wykrywanie oferowanych przez siebie usług**. Znana również jako Rendezvous, **Zero Configuration** lub Zeroconf, pozwala urządzeniu dołączyć do sieci TCP/IP, **automatycznie wybrać adres IP** i ogłaszać swoje usługi innym urządzeniom w sieci.
+Bonjour, technologia zaprojektowana przez Apple, umożliwia **urządzeniom w tej samej sieci wykrywanie oferowanych przez siebie usług**. Znana również jako Rendezvous, **Zero Configuration** lub Zeroconf, umożliwia urządzeniu dołączenie do sieci TCP/IP, **automatyczne wybieranie adresu IP** i nadawanie swoich usług innym urządzeniom w sieci.
 
 Zero Configuration Networking, zapewniane przez Bonjour, gwarantuje, że urządzenia mogą:
 
-- **Automatycznie uzyskać adres IP** nawet w przypadku braku serwera DHCP.
+- **Automatycznie uzyskiwać adres IP** nawet w przypadku braku serwera DHCP.
 - Wykonywać **tłumaczenie nazwy na adres** bez potrzeby posiadania serwera DNS.
 - **Odkrywać usługi** dostępne w sieci.
 
 Urządzenia korzystające z Bonjour przypisują sobie **adres IP z zakresu 169.254/16** i weryfikują jego unikalność w sieci. Maci utrzymują wpis w tabeli routingu dla tej podsieci, co można zweryfikować za pomocą `netstat -rn | grep 169`.
 
-Dla DNS Bonjour wykorzystuje **protokół Multicast DNS (mDNS)**. mDNS działa na **porcie 5353/UDP**, stosując **standardowe zapytania DNS**, ale kierując je do **adresu multicast 224.0.0.251**. Takie podejście zapewnia, że wszystkie nasłuchujące urządzenia w sieci mogą odbierać i odpowiadać na zapytania, ułatwiając aktualizację swoich rekordów.
+Dla DNS Bonjour wykorzystuje **protokół Multicast DNS (mDNS)**. mDNS działa na **porcie 5353/UDP**, stosując **standardowe zapytania DNS**, ale kierując je na **adres multicast 224.0.0.251**. Takie podejście zapewnia, że wszystkie nasłuchujące urządzenia w sieci mogą odbierać i odpowiadać na zapytania, ułatwiając aktualizację swoich rekordów.
 
 Po dołączeniu do sieci każde urządzenie samodzielnie wybiera nazwę, zazwyczaj kończącą się na **.local**, która może pochodzić z nazwy hosta lub być generowana losowo.
 
@@ -82,7 +82,7 @@ Aby wyszukać usługi SSH w sieci, używa się następującego polecenia:
 ```bash
 dns-sd -B _ssh._tcp
 ```
-To polecenie inicjuje przeszukiwanie usług \_ssh.\_tcp i wyświetla szczegóły, takie jak znacznik czasu, flagi, interfejs, domena, typ usługi i nazwa instancji.
+To polecenie inicjuje przeszukiwanie usług \_ssh.\_tcp i wyświetla szczegóły takie jak znacznik czasu, flagi, interfejs, domena, typ usługi i nazwa instancji.
 
 ### Reklamowanie usługi HTTP
 

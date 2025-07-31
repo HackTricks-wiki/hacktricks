@@ -66,8 +66,8 @@ Na przykład, jeśli skrypt importuje **`use File::Basename;`**, możliwe byłob
 
 ## Ominięcie SIP za pomocą Asystenta Migracji (CVE-2023-32369 “Migrena”)
 
-W maju 2023 roku Microsoft ujawnił **CVE-2023-32369**, nazywany **Migreną**, technikę post-exploitation, która pozwala atakującemu *root* na całkowite **ominięcie Ochrony Integralności Systemu (SIP)**. 
-Wrażliwym komponentem jest **`systemmigrationd`**, demon z uprawnieniami **`com.apple.rootless.install.heritable`**. Każdy proces potomny uruchomiony przez ten demon dziedziczy uprawnienia i dlatego działa **poza** ograniczeniami SIP.
+W maju 2023 roku Microsoft ujawnił **CVE-2023-32369**, nazywany **Migreną**, technikę poeksploatacyjną, która pozwala atakującemu *root* całkowicie **ominąć Ochronę Integralności Systemu (SIP)**. 
+Wrażliwym komponentem jest **`systemmigrationd`**, demon z uprawnieniem **`com.apple.rootless.install.heritable`**. Każdy proces potomny uruchomiony przez ten demon dziedziczy to uprawnienie i dlatego działa **poza** ograniczeniami SIP.
 
 Wśród dzieci zidentyfikowanych przez badaczy znajduje się interpreter podpisany przez Apple:
 ```
@@ -88,7 +88,7 @@ Apple naprawiło problem w macOS **Ventura 13.4**, **Monterey 12.6.6** i **Big S
 ## Rekomendacje dotyczące zabezpieczeń
 
 1. **Wyczyść niebezpieczne zmienne** – uprzywilejowane launchdaemons lub zadania cron powinny startować w czystym środowisku (`launchctl unsetenv PERL5OPT`, `env -i`, itd.).
-2. **Unikaj uruchamiania interpreterów jako root** chyba że jest to ściśle konieczne. Używaj skompilowanych binariów lub szybko zrzucaj uprawnienia.
+2. **Unikaj uruchamiania interpreterów jako root**, chyba że jest to ściśle konieczne. Używaj skompilowanych binariów lub szybko zrzucaj uprawnienia.
 3. **Dostarczaj skrypty z `-T` (tryb zanieczyszczenia)**, aby Perl ignorował `PERL5OPT` i inne niebezpieczne przełączniki, gdy sprawdzanie zanieczyszczenia jest włączone.
 4. **Utrzymuj macOS w aktualności** – “Migraine” jest w pełni załatane w bieżących wydaniach.
 

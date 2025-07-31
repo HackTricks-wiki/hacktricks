@@ -4,7 +4,7 @@
 
 ## **Wprowadzenie**
 
-Oprogramowanie układowe to niezbędne oprogramowanie, które umożliwia urządzeniom prawidłowe działanie, zarządzając i ułatwiając komunikację między komponentami sprzętowymi a oprogramowaniem, z którym użytkownicy wchodzą w interakcję. Jest przechowywane w pamięci trwałej, co zapewnia, że urządzenie może uzyskać dostęp do istotnych instrukcji od momentu włączenia, co prowadzi do uruchomienia systemu operacyjnego. Badanie i potencjalna modyfikacja oprogramowania układowego to kluczowy krok w identyfikacji luk w zabezpieczeniach.
+Oprogramowanie układowe to niezbędne oprogramowanie, które umożliwia urządzeniom prawidłowe działanie, zarządzając i ułatwiając komunikację między komponentami sprzętowymi a oprogramowaniem, z którym użytkownicy wchodzą w interakcje. Jest przechowywane w pamięci trwałej, co zapewnia, że urządzenie może uzyskać dostęp do istotnych instrukcji od momentu włączenia, co prowadzi do uruchomienia systemu operacyjnego. Badanie i potencjalna modyfikacja oprogramowania układowego to kluczowy krok w identyfikacji luk w zabezpieczeniach.
 
 ## **Zbieranie informacji**
 
@@ -16,7 +16,7 @@ Oprogramowanie układowe to niezbędne oprogramowanie, które umożliwia urządz
 - Metryk bazy kodu i lokalizacji źródłowych
 - Zewnętrznych bibliotek i typów licencji
 - Historii aktualizacji i certyfikacji regulacyjnych
-- Diagramów architektonicznych i przepływów
+- Diagramów architektonicznych i przepływowych
 - Oceny bezpieczeństwa i zidentyfikowanych luk
 
 W tym celu narzędzia **inteligencji open-source (OSINT)** są nieocenione, podobnie jak analiza dostępnych komponentów oprogramowania open-source poprzez ręczne i zautomatyzowane procesy przeglądowe. Narzędzia takie jak [Coverity Scan](https://scan.coverity.com) i [Semmle’s LGTM](https://lgtm.com/#explore) oferują darmową analizę statyczną, która może być wykorzystana do znalezienia potencjalnych problemów.
@@ -25,7 +25,7 @@ W tym celu narzędzia **inteligencji open-source (OSINT)** są nieocenione, podo
 
 Pozyskiwanie oprogramowania układowego można podejść na różne sposoby, z których każdy ma swój poziom złożoności:
 
-- **Bezpośrednio** ze źródła (deweloperzy, producenci)
+- **Bezpośrednio** od źródła (deweloperzy, producenci)
 - **Budując** je na podstawie dostarczonych instrukcji
 - **Pobierając** z oficjalnych stron wsparcia
 - Wykorzystując zapytania **Google dork** do znajdowania hostowanych plików oprogramowania układowego
@@ -113,7 +113,7 @@ Pliki będą w katalogu "`squashfs-root`" po tym.
 
 ## Analiza Oprogramowania Układowego
 
-Gdy oprogramowanie układowe jest już uzyskane, istotne jest jego rozłożenie w celu zrozumienia struktury i potencjalnych luk w zabezpieczeniach. Proces ten polega na wykorzystaniu różnych narzędzi do analizy i wydobywania cennych danych z obrazu oprogramowania układowego.
+Gdy oprogramowanie układowe jest już uzyskane, istotne jest jego rozłożenie na części w celu zrozumienia jego struktury i potencjalnych luk. Proces ten polega na wykorzystaniu różnych narzędzi do analizy i wydobywania cennych danych z obrazu oprogramowania układowego.
 
 ### Narzędzia do Wstępnej Analizy
 
@@ -132,7 +132,7 @@ Do ekstrakcji **osadzonych plików** zaleca się korzystanie z dokumentacji **fi
 
 ### Ekstrakcja systemu plików
 
-Używając `binwalk -ev <bin>`, można zazwyczaj wyodrębnić system plików, często do katalogu nazwanego na cześć typu systemu plików (np. squashfs, ubifs). Jednak gdy **binwalk** nie rozpoznaje typu systemu plików z powodu brakujących bajtów magicznych, konieczna jest ręczna ekstrakcja. Polega to na użyciu `binwalk` do zlokalizowania offsetu systemu plików, a następnie polecenia `dd` do wyodrębnienia systemu plików:
+Używając `binwalk -ev <bin>`, można zazwyczaj wyodrębnić system plików, często do katalogu nazwanego na cześć typu systemu plików (np. squashfs, ubifs). Jednak gdy **binwalk** nie rozpoznaje typu systemu plików z powodu brakujących bajtów magicznych, konieczna jest ręczna ekstrakcja. Polega to na użyciu `binwalk` do zlokalizowania offsetu systemu plików, a następnie polecenia `dd` do wycięcia systemu plików:
 ```bash
 $ binwalk DIR850L_REVB.bin
 
@@ -180,7 +180,7 @@ Aby zainstalować niezbędne narzędzia emulacyjne:
 ```bash
 sudo apt-get install qemu qemu-user qemu-user-static qemu-system-arm qemu-system-mips qemu-system-x86 qemu-utils
 ```
-Dla MIPS (big-endian) używa się `qemu-mips`, a dla binarnych little-endian wybór to `qemu-mipsel`.
+Dla MIPS (big-endian) używa się `qemu-mips`, a dla binarnych little-endian wybór padłby na `qemu-mipsel`.
 
 #### Emulacja architektury ARM
 
@@ -192,7 +192,7 @@ Narzędzia takie jak [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmw
 
 ## Analiza dynamiczna w praktyce
 
-Na tym etapie używa się rzeczywistego lub emulowanego środowiska urządzenia do analizy. Ważne jest, aby utrzymać dostęp do powłoki systemu operacyjnego i systemu plików. Emulacja może nie idealnie odwzorowywać interakcje sprzętowe, co wymaga okazjonalnych restartów emulacji. Analiza powinna ponownie przeglądać system plików, wykorzystywać narażone strony internetowe i usługi sieciowe oraz badać luki w bootloaderze. Testy integralności firmware'u są kluczowe do identyfikacji potencjalnych luk backdoor.
+Na tym etapie używa się rzeczywistego lub emulowanego środowiska urządzenia do analizy. Ważne jest, aby utrzymać dostęp do powłoki systemu operacyjnego i systemu plików. Emulacja może nie idealnie odwzorowywać interakcje sprzętowe, co wymaga okazjonalnych restartów emulacji. Analiza powinna ponownie przeszukać system plików, wykorzystać narażone strony internetowe i usługi sieciowe oraz zbadać luki w bootloaderze. Testy integralności firmware'u są kluczowe do identyfikacji potencjalnych luk backdoor.
 
 ## Techniki analizy w czasie rzeczywistym
 
@@ -200,7 +200,7 @@ Analiza w czasie rzeczywistym polega na interakcji z procesem lub binariami w ic
 
 ## Eksploatacja binarna i dowód koncepcji
 
-Opracowanie PoC dla zidentyfikowanych luk wymaga głębokiego zrozumienia architektury docelowej i programowania w językach niskiego poziomu. Ochrony w czasie rzeczywistym w systemach wbudowanych są rzadkie, ale gdy są obecne, techniki takie jak Return Oriented Programming (ROP) mogą być konieczne.
+Opracowanie PoC dla zidentyfikowanych luk wymaga głębokiego zrozumienia docelowej architektury i programowania w językach niskiego poziomu. Ochrony w czasie rzeczywistym w systemach wbudowanych są rzadkie, ale gdy są obecne, techniki takie jak Return Oriented Programming (ROP) mogą być konieczne.
 
 ## Przygotowane systemy operacyjne do analizy firmware'u
 
@@ -208,12 +208,12 @@ Systemy operacyjne takie jak [AttifyOS](https://github.com/adi0x90/attifyos) i [
 
 ## Przygotowane systemy operacyjne do analizy firmware'u
 
-- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS to dystrybucja mająca na celu pomoc w przeprowadzaniu ocen bezpieczeństwa i testów penetracyjnych urządzeń Internetu Rzeczy (IoT). Oszczędza dużo czasu, zapewniając wstępnie skonfigurowane środowisko z wszystkimi niezbędnymi narzędziami.
+- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS to dystrybucja mająca na celu pomoc w przeprowadzaniu oceny bezpieczeństwa i testów penetracyjnych urządzeń Internetu Rzeczy (IoT). Oszczędza dużo czasu, zapewniając wstępnie skonfigurowane środowisko z wszystkimi niezbędnymi narzędziami.
 - [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): System operacyjny do testowania bezpieczeństwa wbudowanego, oparty na Ubuntu 18.04, wstępnie załadowany narzędziami do testowania bezpieczeństwa firmware'u.
 
 ## Ataki na obniżenie wersji firmware'u i niebezpieczne mechanizmy aktualizacji
 
-Nawet gdy dostawca wdraża kontrole podpisu kryptograficznego dla obrazów firmware'u, **ochrona przed cofaniem wersji (downgrade) jest często pomijana**. Gdy bootloader lub loader odzyskiwania tylko weryfikuje podpis za pomocą osadzonego klucza publicznego, ale nie porównuje *wersji* (lub monotonicznego licznika) obrazu, który jest wgrywany, atakujący może legalnie zainstalować **starszy, podatny firmware, który nadal ma ważny podpis** i w ten sposób ponownie wprowadzić załatane luki.
+Nawet gdy dostawca wdraża kontrole podpisu kryptograficznego dla obrazów firmware'u, **ochrona przed cofaniem wersji (downgrade) jest często pomijana**. Gdy boot- lub recovery-loader tylko weryfikuje podpis za pomocą osadzonego klucza publicznego, ale nie porównuje *wersji* (lub monotonicznego licznika) obrazu, który jest wgrywany, atakujący może legalnie zainstalować **starszy, podatny firmware, który nadal ma ważny podpis** i w ten sposób ponownie wprowadzić załatane luki.
 
 Typowy przebieg ataku:
 
@@ -223,7 +223,7 @@ Typowy przebieg ataku:
 * Pobierz go z repozytoriów stron trzecich, takich jak VirusTotal, archiwa internetowe, fora itp.
 2. **Prześlij lub udostępnij obraz urządzeniu** za pośrednictwem dowolnego narażonego kanału aktualizacji:
 * Interfejs webowy, API aplikacji mobilnej, USB, TFTP, MQTT itp.
-* Wiele konsumenckich urządzeń IoT udostępnia *nieautoryzowane* punkty końcowe HTTP(S), które akceptują blob'y firmware'u zakodowane w Base64, dekodują je po stronie serwera i uruchamiają odzyskiwanie/aktualizację.
+* Wiele konsumenckich urządzeń IoT udostępnia *nieautoryzowane* punkty końcowe HTTP(S), które akceptują blob'y firmware'u zakodowane w Base64, dekodują je po stronie serwera i uruchamiają proces odzyskiwania/aktualizacji.
 3. Po obniżeniu wersji wykorzystaj lukę, która została załatana w nowszej wersji (na przykład filtr wstrzykiwania poleceń, który został dodany później).
 4. Opcjonalnie wgraj najnowszy obraz z powrotem lub wyłącz aktualizacje, aby uniknąć wykrycia po uzyskaniu trwałości.
 
@@ -246,7 +246,7 @@ firmware_v1.3.11.490_signed.bin
 ```
 ### Lista kontrolna oceny logiki aktualizacji
 
-* Czy transport/autoryzacja *punktu aktualizacji* jest odpowiednio zabezpieczona (TLS + autoryzacja)?
+* Czy transport/autoryzacja *punktu aktualizacji* jest odpowiednio chroniona (TLS + autoryzacja)?
 * Czy urządzenie porównuje **numery wersji** lub **monotoniczny licznik przeciwdziałania cofaniu** przed wgraniem?
 * Czy obraz jest weryfikowany w ramach bezpiecznego łańcucha rozruchowego (np. podpisy sprawdzane przez kod ROM)?
 * Czy kod w przestrzeni użytkownika wykonuje dodatkowe kontrole poprawności (np. dozwolona mapa partycji, numer modelu)?
@@ -254,9 +254,9 @@ firmware_v1.3.11.490_signed.bin
 
 > 💡  Jeśli któregokolwiek z powyższych brakuje, platforma prawdopodobnie jest podatna na ataki cofania.
 
-## Podatne oprogramowanie układowe do ćwiczeń
+## Wrażliwe oprogramowanie układowe do ćwiczeń
 
-Aby ćwiczyć odkrywanie podatności w oprogramowaniu układowym, użyj następujących podatnych projektów oprogramowania układowego jako punktu wyjścia.
+Aby ćwiczyć odkrywanie luk w oprogramowaniu układowym, użyj następujących wrażliwych projektów oprogramowania układowego jako punktu wyjścia.
 
 - OWASP IoTGoat
 - [https://github.com/OWASP/IoTGoat](https://github.com/OWASP/IoTGoat)
@@ -277,7 +277,7 @@ Aby ćwiczyć odkrywanie podatności w oprogramowaniu układowym, użyj następu
 - [Practical IoT Hacking: The Definitive Guide to Attacking the Internet of Things](https://www.amazon.co.uk/Practical-IoT-Hacking-F-Chantzis/dp/1718500904)
 - [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 
-## Szkolenie i certyfikat
+## Szkolenie i certyfikacja
 
 - [https://www.attify-store.com/products/offensive-iot-exploitation](https://www.attify-store.com/products/offensive-iot-exploitation)
 

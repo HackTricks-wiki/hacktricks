@@ -8,13 +8,13 @@ Active Directory Web Services (ADWS) jest **włączone domyślnie na każdym kon
 
 * MC-NBFX → MC-NBFSE → MS-NNS → MC-NMF
 
-Ponieważ ruch jest enkapsulowany w tych binarnych ramach SOAP i podróżuje przez nietypowy port, **enumeracja przez ADWS jest znacznie mniej prawdopodobna do inspekcji, filtrowania lub podpisywania niż klasyczny ruch LDAP/389 i 636**. Dla operatorów oznacza to:
+Ponieważ ruch jest enkapsulowany w tych binarnych ramach SOAP i podróżuje przez rzadko używany port, **enumeracja przez ADWS jest znacznie mniej prawdopodobna do inspekcji, filtrowania lub podpisywania niż klasyczny ruch LDAP/389 i 636**. Dla operatorów oznacza to:
 
-* Cichsza rekonesans – zespoły niebieskie często koncentrują się na zapytaniach LDAP.
+* Cichsze rozpoznanie – zespoły niebieskie często koncentrują się na zapytaniach LDAP.
 * Wolność zbierania danych z **nie-Windowsowych hostów (Linux, macOS)** przez tunelowanie 9389/TCP przez proxy SOCKS.
-* Te same dane, które uzyskałbyś przez LDAP (użytkownicy, grupy, ACL, schemat itp.) oraz możliwość wykonywania **zapisów** (np. `msDs-AllowedToActOnBehalfOfOtherIdentity` dla **RBCD**).
+* Te same dane, które można uzyskać przez LDAP (użytkownicy, grupy, ACL, schemat itp.) oraz możliwość wykonywania **zapisów** (np. `msDs-AllowedToActOnBehalfOfOtherIdentity` dla **RBCD**).
 
-> UWAGA: ADWS jest również używane przez wiele narzędzi GUI/PowerShell RSAT, więc ruch może się mieszać z legalną aktywnością administracyjną.
+> UWAGA: ADWS jest również używane przez wiele narzędzi GUI/PowerShell RSAT, więc ruch może się mieszać z legalną aktywnością administratora.
 
 ## SoaPy – Nattywny klient Python
 
@@ -24,8 +24,8 @@ Ponieważ ruch jest enkapsulowany w tych binarnych ramach SOAP i podróżuje prz
 
 * Obsługuje **proxy przez SOCKS** (przydatne z implantami C2).
 * Szczegółowe filtry wyszukiwania identyczne do LDAP `-q '(objectClass=user)'`.
-* Opcjonalne operacje **zapisów** ( `--set` / `--delete` ).
-* **Tryb wyjścia BOFHound** do bezpośredniego wchłaniania do BloodHound.
+* Opcjonalne operacje **zapisów** (`--set` / `--delete`).
+* **Tryb wyjścia BOFHound** do bezpośredniego wczytywania do BloodHound.
 * Flaga `--parse` do upiększania znaczników czasowych / `userAccountControl`, gdy wymagana jest czytelność dla ludzi.
 
 ### Instalacja (host operatora)
@@ -36,9 +36,9 @@ python3 -m pip install soapy-adws   # or git clone && pip install -r requirement
 
 Poniższy workflow pokazuje, jak enumerować **obiekty domeny i ADCS** przez ADWS, konwertować je na JSON BloodHound i szukać ścieżek ataku opartych na certyfikatach – wszystko z systemu Linux:
 
-1. **Tunel 9389/TCP** z sieci docelowej do twojego komputera (np. za pomocą Chisel, Meterpreter, SSH dynamic port-forward itp.). Eksportuj `export HTTPS_PROXY=socks5://127.0.0.1:1080` lub użyj `--proxyHost/--proxyPort` SoaPy.
+1. **Tuneluj 9389/TCP** z sieci docelowej do swojego komputera (np. za pomocą Chisel, Meterpreter, SSH dynamic port-forward itp.). Eksportuj `export HTTPS_PROXY=socks5://127.0.0.1:1080` lub użyj `--proxyHost/--proxyPort` SoaPy.
 
-2. **Zbierz obiekt domeny głównej:**
+2. **Zbierz obiekt głównej domeny:**
 ```bash
 soapy ludus.domain/jdoe:'P@ssw0rd'@10.2.10.10 \
 -q '(objectClass=domain)' \
@@ -56,7 +56,7 @@ soapy ludus.domain/jdoe:'P@ssw0rd'@10.2.10.10 \
 ```bash
 bofhound -i data --zip   # produces BloodHound.zip
 ```
-5. **Prześlij ZIP** w interfejsie BloodHound i uruchom zapytania cypher, takie jak `MATCH (u:User)-[:Can_Enroll*1..]->(c:CertTemplate) RETURN u,c`, aby ujawnić ścieżki eskalacji certyfikatów (ESC1, ESC8 itp.).
+5. **Prześlij ZIP** w interfejsie BloodHound i uruchom zapytania cypher, takie jak `MATCH (u:User)-[:Can_Enroll*1..]->(c:CertTemplate) RETURN u,c`, aby ujawnić ścieżki eskalacji certyfikatów (ESC1, ESC8 itd.).
 
 ### Pisanie `msDs-AllowedToActOnBehalfOfOtherIdentity` (RBCD)
 ```bash
@@ -66,7 +66,7 @@ msDs-AllowedToActOnBehalfOfOtherIdentity 'B:32:01....'
 ```
 Połącz to z `s4u2proxy`/`Rubeus /getticket` dla pełnego **Resource-Based Constrained Delegation** łańcucha.
 
-## Wykrywanie i Wzmocnienie
+## Wykrywanie i Wzmacnianie
 
 ### Szczegółowe logowanie ADDS
 
@@ -93,14 +93,14 @@ Przykład wstępnie zbudowanej reguły Elastic:
 | Cel | Narzędzie | Uwagi |
 |-----|-----------|-------|
 | Enumeracja ADWS | [SoaPy](https://github.com/logangoins/soapy) | Python, SOCKS, odczyt/zapis |
-| Import BloodHound | [BOFHound](https://github.com/bohops/BOFHound) | Konwertuje logi SoaPy/ldapsearch |
+| Wczytywanie BloodHound | [BOFHound](https://github.com/bohops/BOFHound) | Konwertuje logi SoaPy/ldapsearch |
 | Kompromitacja certyfikatu | [Certipy](https://github.com/ly4k/Certipy) | Może być proxy przez ten sam SOCKS |
 
 ## Odniesienia
 
-* [SpecterOps – Upewnij się, że używasz SOAP(y) – Przewodnik operatora po dyskretnym zbieraniu AD za pomocą ADWS](https://specterops.io/blog/2025/07/25/make-sure-to-use-soapy-an-operators-guide-to-stealthy-ad-collection-using-adws/)
+* [SpecterOps – Make Sure to Use SOAP(y) – An Operators Guide to Stealthy AD Collection Using ADWS](https://specterops.io/blog/2025/07/25/make-sure-to-use-soapy-an-operators-guide-to-stealthy-ad-collection-using-adws/)
 * [SoaPy GitHub](https://github.com/logangoins/soapy)
 * [BOFHound GitHub](https://github.com/bohops/BOFHound)
-* [Microsoft – specyfikacje MC-NBFX, MC-NBFSE, MS-NNS, MC-NMF](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-nbfx/)
+* [Microsoft – MC-NBFX, MC-NBFSE, MS-NNS, MC-NMF specifications](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-nbfx/)
 
 {{#include ../../banners/hacktricks-training.md}}

