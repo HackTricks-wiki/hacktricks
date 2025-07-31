@@ -37,7 +37,7 @@ PS C:\> .\ADRecon.ps1 -OutputDir C:\Temp\ADRecon
 
 ## BloodHound (グラフ視覚化)
 
-[BloodHound](https://github.com/BloodHoundAD/BloodHound) は、グラフ理論 + Neo4j を使用して、オンプレミスの AD と Azure AD 内の隠れた特権関係を明らかにします。
+[BloodHound](https://github.com/BloodHoundAD/BloodHound) は、グラフ理論 + Neo4j を使用して、オンプレミスの AD および Azure AD 内の隠れた特権関係を明らかにします。
 
 ### デプロイメント (Docker CE)
 ```bash
@@ -48,7 +48,7 @@ curl -L https://ghst.ly/getbhce | docker compose -f - up
 
 * `SharpHound.exe` / `Invoke-BloodHound` – ネイティブまたはPowerShellバリアント
 * `AzureHound` – Azure AD列挙
-* **SoaPy + BOFHound** – ADWSコレクション（リンクは上部を参照）
+* **SoaPy + BOFHound** – ADWSコレクション（リンクは上部参照）
 
 #### 一般的なSharpHoundモード
 ```powershell
@@ -62,7 +62,7 @@ SharpHound.exe --Stealth --LDAP                      # Low noise LDAP only
 
 ## Group3r
 
-[Group3r](https://github.com/Group3r/Group3r) は **Group Policy Objects** を列挙し、誤設定を強調表示します。
+[Group3r](https://github.com/Group3r/Group3r) は**グループポリシーオブジェクト**を列挙し、誤設定を強調表示します。
 ```bash
 # Execute inside the domain
 Group3r.exe -f gpo.log   # -s to stdout
@@ -71,7 +71,7 @@ Group3r.exe -f gpo.log   # -s to stdout
 
 ## PingCastle
 
-[PingCastle](https://www.pingcastle.com/documentation/) は、Active Directory の**ヘルスチェック**を実行し、リスクスコアを含む HTML レポートを生成します。
+[PingCastle](https://www.pingcastle.com/documentation/) は、Active Directory の **ヘルスチェック** を実行し、リスクスコアを含む HTML レポートを生成します。
 ```powershell
 PingCastle.exe --healthcheck --server corp.local --user bob --password "P@ssw0rd!"
 ```

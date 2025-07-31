@@ -8,13 +8,13 @@ Active Directory Web Services (ADWS)は、**Windows Server 2008 R2以降のす�
 
 * MC-NBFX → MC-NBFSE → MS-NNS → MC-NMF
 
-トラフィックはこれらのバイナリSOAPフレーム内にカプセル化され、一般的でないポートを通過するため、**ADWSを介した列挙は、従来のLDAP/389および636トラフィックよりも検査、フィルタリング、または署名される可能性がはるかに低い**です。オペレーターにとって、これは意味します：
+トラフィックはこれらのバイナリSOAPフレーム内にカプセル化され、一般的でないポートを通過するため、**ADWSを通じた列挙は、従来のLDAP/389および636トラフィックよりも検査、フィルタリング、または署名される可能性がはるかに低い**です。オペレーターにとって、これは意味します：
 
 * ステルスな偵察 – ブルーチームはしばしばLDAPクエリに集中します。
-* **非Windowsホスト（Linux、macOS）**から9389/TCPをSOCKSプロキシを介してトンネリングする自由。
+* **非Windowsホスト（Linux、macOS）**から9389/TCPをSOCKSプロキシを通じてトンネリングする自由。
 * LDAPを介して取得するのと同じデータ（ユーザー、グループ、ACL、スキーマなど）と、**書き込み**を行う能力（例：**RBCD**のための`msDs-AllowedToActOnBehalfOfOtherIdentity`）。
 
-> 注：ADWSは多くのRSAT GUI/PowerShellツールでも使用されるため、トラフィックは正当な管理者の活動と混在する可能性があります。
+> 注：ADWSは多くのRSAT GUI/PowerShellツールでも使用されているため、トラフィックは正当な管理者の活動と混在する可能性があります。
 
 ## SoaPy – ネイティブPythonクライアント
 
@@ -52,11 +52,11 @@ soapy ludus.domain/jdoe:'P@ssw0rd'@10.2.10.10 \
 (objectClass=pkiEnrollmentService)(objectClass=msPKI-Enterprise-Oid))' \
 | tee data/adcs.log
 ```
-4. **BloodHoundに変換:**
+4. **BloodHoundに変換する:**
 ```bash
 bofhound -i data --zip   # produces BloodHound.zip
 ```
-5. **ZIPをアップロード**し、BloodHound GUIで`MATCH (u:User)-[:Can_Enroll*1..]->(c:CertTemplate) RETURN u,c`のようなサイファークエリを実行して、証明書昇格パス（ESC1、ESC8など）を明らかにします。
+5. **ZIPをBloodHound GUIにアップロード**し、`MATCH (u:User)-[:Can_Enroll*1..]->(c:CertTemplate) RETURN u,c`のようなサイファークエリを実行して、証明書昇格パス（ESC1、ESC8など）を明らかにします。
 
 ### `msDs-AllowedToActOnBehalfOfOtherIdentity` (RBCD)の記述
 ```bash
@@ -70,13 +70,13 @@ msDs-AllowedToActOnBehalfOfOtherIdentity 'B:32:01....'
 
 ### 詳細なADDSログ記録
 
-ドメインコントローラーで、ADWS（およびLDAP）からの高コスト/非効率的な検索を明らかにするために、次のレジストリキーを有効にします：
+ドメインコントローラーで以下のレジストリキーを有効にして、ADWS（およびLDAP）からの高コスト/非効率的な検索を明らかにします：
 ```powershell
 New-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Diagnostics' -Name '15 Field Engineering' -Value 5 -Type DWORD
 New-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters' -Name 'Expensive Search Results Threshold' -Value 1 -Type DWORD
 New-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters' -Name 'Search Time Threshold (msecs)' -Value 0 -Type DWORD
 ```
-イベントは**Directory-Service**の下に表示され、完全なLDAPフィルターが表示されます。クエリがADWS経由で到着した場合でも同様です。
+イベントは**Directory-Service**の下に表示され、完全なLDAPフィルターが適用されます。クエリがADWS経由で到着した場合でも同様です。
 
 ### SACLカナリアオブジェクト
 
@@ -84,7 +84,7 @@ New-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters'
 2. _Everyone_ プリンシパルに対して**Audit** ACEを追加し、**ReadProperty**で監査します。
 3. 攻撃者が`(servicePrincipalName=*)`、`(objectClass=user)`などを実行するたびに、DCは**Event 4662**を発行し、実際のユーザーSIDを含みます。リクエストがプロキシされている場合やADWSから発信されている場合でも同様です。
 
-Elasticの事前構築されたルールの例：
+Elasticの事前構築ルールの例：
 ```kql
 (event.code:4662 and not user.id:"S-1-5-18") and winlog.event_data.AccessMask:"0x10"
 ```
@@ -92,15 +92,15 @@ Elasticの事前構築されたルールの例：
 
 | 目的 | ツール | ノート |
 |------|-------|-------|
-| ADWS 列挙 | [SoaPy](https://github.com/logangoins/soapy) | Python, SOCKS, 読み書き |
-| BloodHound 取り込み | [BOFHound](https://github.com/bohops/BOFHound) | SoaPy/ldapsearch ログを変換 |
-| 証明書の妥協 | [Certipy](https://github.com/ly4k/Certipy) | 同じ SOCKS 経由でプロキシ可能 |
+| ADWS列挙 | [SoaPy](https://github.com/logangoins/soapy) | Python, SOCKS, 読み書き |
+| BloodHound取り込み | [BOFHound](https://github.com/bohops/BOFHound) | SoaPy/ldapsearchログを変換 |
+| 証明書の妥協 | [Certipy](https://github.com/ly4k/Certipy) | 同じSOCKSを通じてプロキシ可能 |
 
 ## 参考文献
 
-* [SpecterOps – SOAP(y) を使用することを確認してください – ADWS を使用したステルスな AD コレクションのためのオペレーターガイド](https://specterops.io/blog/2025/07/25/make-sure-to-use-soapy-an-operators-guide-to-stealthy-ad-collection-using-adws/)
+* [SpecterOps – Make Sure to Use SOAP(y) – An Operators Guide to Stealthy AD Collection Using ADWS](https://specterops.io/blog/2025/07/25/make-sure-to-use-soapy-an-operators-guide-to-stealthy-ad-collection-using-adws/)
 * [SoaPy GitHub](https://github.com/logangoins/soapy)
 * [BOFHound GitHub](https://github.com/bohops/BOFHound)
-* [Microsoft – MC-NBFX, MC-NBFSE, MS-NNS, MC-NMF 仕様](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-nbfx/)
+* [Microsoft – MC-NBFX, MC-NBFSE, MS-NNS, MC-NMF specifications](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-nbfx/)
 
 {{#include ../../banners/hacktricks-training.md}}

