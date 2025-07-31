@@ -1,6 +1,6 @@
 /**
  * HackTricks Training Discounts
- */
+
 
 
 (() => {
@@ -9,13 +9,13 @@
   const TXT = 'Click here for HT Summer Discounts, Last Days!';
   const URL = 'https://training.hacktricks.xyz';
 
-  /* Stop if user already dismissed */
+  // Stop if user already dismissed
   if (localStorage.getItem(KEY) === 'true') return;
 
-  /* Quick helper */
+  // Quick helper
   const $ = (tag, css = '') => Object.assign(document.createElement(tag), { style: css });
 
-  /* --- Overlay (blur + dim) --- */
+  // --- Overlay (blur + dim) ---
   const overlay = $('div', `
     position: fixed; inset: 0;
     background: rgba(0,0,0,.4);
@@ -24,7 +24,7 @@
     z-index: 10000;
   `);
 
-  /* --- Modal --- */
+  // --- Modal ---
   const modal = $('div', `
     max-width: 90vw; width: 480px;
     background: #fff; border-radius: 12px; overflow: hidden;
@@ -33,10 +33,10 @@
     display: flex; flex-direction: column; align-items: stretch;
   `);
 
-  /* --- Title bar (link + close) --- */
+  // --- Title bar (link + close) ---
   const titleBar = $('div', `
     position: relative;
-    padding: 1rem 2.5rem 1rem 1rem; /* room for the close button */
+    padding: 1rem 2.5rem 1rem 1rem; // room for the close button
     text-align: center;
     background: #222; color: #fff;
     font-size: 1.3rem; font-weight: 700;
@@ -53,7 +53,7 @@
   link.textContent = TXT;
   titleBar.appendChild(link);
 
-  /* Close "X" (no persistence) */
+  // Close "X" (no persistence)
   const closeBtn = $('button', `
     position: absolute; top: .25rem; right: .5rem;
     background: transparent; border: none;
@@ -65,11 +65,11 @@
   closeBtn.onclick = () => overlay.remove();
   titleBar.appendChild(closeBtn);
 
-  /* --- Image --- */
+  // --- Image ---
   const img = $('img');
   img.src = IMG; img.alt = TXT; img.style.width = '100%';
 
-  /* --- Checkbox row --- */
+  // --- Checkbox row ---
   const label = $('label', `
     display: flex; align-items: center; justify-content: center; gap: .6rem;
     padding: 1rem; font-size: 1rem; color: #222; cursor: pointer;
@@ -83,7 +83,7 @@
   };
   label.append(cb, document.createTextNode("Don't show again"));
 
-  /* --- Assemble & inject --- */
+  // --- Assemble & inject ---
   modal.append(titleBar, img, label);
   overlay.appendChild(modal);
 
@@ -93,7 +93,7 @@
     document.body.appendChild(overlay);
   }
 })();
-
+*/
 
 
 /**
