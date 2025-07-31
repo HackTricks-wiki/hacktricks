@@ -24,11 +24,11 @@ printf "\nThe following services are OFF if '0', or ON otherwise:\nScreen Sharin
 ```
 ### Pentesting ARD
 
-Apple Remote Desktop (ARD) 是一个增强版的 [Virtual Network Computing (VNC)](https://en.wikipedia.org/wiki/Virtual_Network_Computing)，专为 macOS 量身定制，提供额外功能。ARD 中一个显著的漏洞是其控制屏幕密码的认证方法，仅使用密码的前 8 个字符，使其容易受到 [brute force attacks](https://thudinh.blogspot.com/2017/09/brute-forcing-passwords-with-thc-hydra.html) 的攻击，使用像 Hydra 或 [GoRedShell](https://github.com/ahhh/GoRedShell/) 这样的工具，因为没有默认的速率限制。
+Apple Remote Desktop (ARD) 是一个针对 macOS 的增强版 [Virtual Network Computing (VNC)](https://en.wikipedia.org/wiki/Virtual_Network_Computing)，提供额外的功能。ARD 中一个显著的漏洞是其控制屏幕密码的认证方法，仅使用密码的前 8 个字符，使其容易受到 [brute force attacks](https://thudinh.blogspot.com/2017/09/brute-forcing-passwords-with-thc-hydra.html) 的攻击，使用像 Hydra 或 [GoRedShell](https://github.com/ahhh/GoRedShell/) 这样的工具，因为没有默认的速率限制。
 
 可以使用 **nmap** 的 `vnc-info` 脚本识别易受攻击的实例。支持 `VNC Authentication (2)` 的服务由于 8 个字符密码的截断，尤其容易受到暴力攻击。
 
-要启用 ARD 进行各种管理任务，如权限提升、GUI 访问或用户监控，请使用以下命令：
+要启用 ARD 以进行特权提升、GUI 访问或用户监控等各种管理任务，请使用以下命令：
 ```bash
 sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -allowAccessFor -allUsers -privs -all -clientopts -setmenuextra -menuextra yes
 ```
@@ -39,12 +39,12 @@ ARD 提供多种控制级别，包括观察、共享控制和完全控制，且�
 | 年份 | CVE | 组件 | 影响 | 修复于 |
 |------|-----|-----------|--------|----------|
 |2023|CVE-2023-42940|屏幕共享|不正确的会话渲染可能导致传输*错误*的桌面或窗口，从而泄露敏感信息|macOS Sonoma 14.2.1 (2023年12月) |
-|2024|CVE-2024-23296|launchservicesd / login|内核内存保护绕过，可以在成功的远程登录后链接（在野外被积极利用）|macOS Ventura 13.6.4 / Sonoma 14.4 (2024年3月) |
+|2024|CVE-2024-23296|launchservicesd / login|内核内存保护绕过，可在成功远程登录后链接（在野外被积极利用）|macOS Ventura 13.6.4 / Sonoma 14.4 (2024年3月) |
 
 **加固建议**
 
 * 在不严格需要时禁用*屏幕共享*/*远程管理*。
-* 保持 macOS 完全更新（Apple 通常会为最近三个主要版本发布安全修复）。
+* 保持 macOS 完全更新（Apple 通常为最近三个主要版本发布安全修复）。
 * 使用**强密码** *并* 在可能的情况下强制*“VNC 观看者可能使用密码控制屏幕”*选项**禁用**。
 * 将服务放在 VPN 后面，而不是将 TCP 5900/3283 暴露于互联网。
 * 添加应用防火墙规则，将 `ARDAgent` 限制在本地子网内：
@@ -131,7 +131,7 @@ nmap -sU -p 5353 --script=dns-service-discovery <target>
 
 `dns-service-discovery` 脚本发送一个 `_services._dns-sd._udp.local` 查询，然后枚举每个广告的服务类型。
 
-* **mdns_recon** – Python 工具，扫描整个范围以寻找 *配置错误* 的 mDNS 响应者，这些响应者回答单播查询（有助于找到跨子网/WAN 可达的设备）：
+* **mdns_recon** – 一个 Python 工具，扫描整个范围以寻找 *配置错误* 的 mDNS 响应者，这些响应者回答单播查询（有助于找到跨子网/WAN 可达的设备）：
 
 ```bash
 git clone https://github.com/chadillac/mdns_recon && cd mdns_recon
@@ -142,10 +142,10 @@ python3 mdns_recon.py -r 192.0.2.0/24 -s _ssh._tcp.local
 
 ### 安全考虑与近期漏洞 (2024-2025)
 
-| 年份 | CVE | 严重性 | 问题 | 修复于 |
-|------|-----|----------|-------|------------|
-|2024|CVE-2024-44183|中等|*mDNSResponder* 中的逻辑错误允许一个构造的包触发 **拒绝服务**|macOS Ventura 13.7 / Sonoma 14.7 / Sequoia 15.0 (2024年9月) |
-|2025|CVE-2025-31222|高|*mDNSResponder* 中的正确性问题可能被滥用以进行 **本地特权提升**|macOS Ventura 13.7.6 / Sonoma 14.7.6 / Sequoia 15.5 (2025年5月) |
+| 年份 | CVE | 严重性 | 问题 | 修复版本 |
+|------|-----|--------|-------|----------|
+|2024|CVE-2024-44183|中等|在 *mDNSResponder* 中的逻辑错误允许一个构造的包触发 **拒绝服务**|macOS Ventura 13.7 / Sonoma 14.7 / Sequoia 15.0 (2024年9月) |
+|2025|CVE-2025-31222|高|在 *mDNSResponder* 中的正确性问题可能被滥用以进行 **本地特权提升**|macOS Ventura 13.7.6 / Sonoma 14.7.6 / Sequoia 15.5 (2025年5月) |
 
 **缓解指导**
 
@@ -156,7 +156,7 @@ python3 mdns_recon.py -r 192.0.2.0/24 -s _ssh._tcp.local
 sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.mDNSResponder.plist
 ```
 3. 对于内部需要 Bonjour 但绝不能跨越网络边界的环境，使用 *AirPlay Receiver* 配置限制 (MDM) 或 mDNS 代理。
-4. 启用 **系统完整性保护 (SIP)** 并保持 macOS 更新 – 上述两个漏洞都迅速修复，但依赖于 SIP 被启用以获得全面保护。
+4. 启用 **系统完整性保护 (SIP)** 并保持 macOS 更新 – 上述两个漏洞都迅速修复，但依赖于启用 SIP 以获得全面保护。
 
 ### 禁用 Bonjour
 

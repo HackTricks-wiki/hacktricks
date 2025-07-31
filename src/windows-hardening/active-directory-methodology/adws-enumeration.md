@@ -11,14 +11,14 @@ Active Directory Web Services (ADWS) 是 **自 Windows Server 2008 R2 起在每�
 由于流量被封装在这些二进制 SOAP 帧中，并通过一个不常用的端口传输，**通过 ADWS 进行枚举的可能性远低于经典的 LDAP/389 和 636 流量被检查、过滤或签名**。对于操作员来说，这意味着：
 
 * 更隐蔽的侦察 – 蓝队通常集中于 LDAP 查询。
-* 通过 SOCKS 代理在 **非 Windows 主机（Linux, macOS）** 上隧道 9389/TCP 的自由收集。
+* 通过 SOCKS 代理在 **非 Windows 主机（Linux、macOS）** 上收集的自由。
 * 您可以通过 LDAP 获得的相同数据（用户、组、ACL、架构等），并能够执行 **写入**（例如 `msDs-AllowedToActOnBehalfOfOtherIdentity` 用于 **RBCD**）。
 
 > 注意：ADWS 也被许多 RSAT GUI/PowerShell 工具使用，因此流量可能与合法的管理员活动混合。
 
 ## SoaPy – 原生 Python 客户端
 
-[SoaPy](https://github.com/logangoins/soapy) 是 **用纯 Python 完全重新实现的 ADWS 协议栈**。它逐字节构建 NBFX/NBFSE/NNS/NMF 帧，允许从类 Unix 系统收集数据而不接触 .NET 运行时。
+[SoaPy](https://github.com/logangoins/soapy) 是 **用纯 Python 完全重新实现的 ADWS 协议栈**。它逐字节构建 NBFX/NBFSE/NNS/NMF 帧，允许从类 Unix 系统收集数据，而无需接触 .NET 运行时。
 
 ### 主要特性
 
@@ -64,7 +64,7 @@ soapy ludus.domain/jdoe:'P@ssw0rd'@dc.ludus.domain \
 --set 'CN=Victim,OU=Servers,DC=ludus,DC=domain' \
 msDs-AllowedToActOnBehalfOfOtherIdentity 'B:32:01....'
 ```
-将其与 `s4u2proxy`/`Rubeus /getticket` 结合，以形成完整的 **基于资源的受限委派** 链。
+将其与 `s4u2proxy`/`Rubeus /getticket` 结合，以形成完整的 **基于资源的受限委托** 链。
 
 ## 检测与加固
 
@@ -82,7 +82,7 @@ New-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters'
 
 1. 创建一个虚拟对象（例如，禁用用户 `CanaryUser`）。
 2. 为 _Everyone_ 主体添加一个 **Audit** ACE，审核 **ReadProperty**。
-3. 每当攻击者执行 `(servicePrincipalName=*)`、`(objectClass=user)` 等操作时，DC 会发出 **Event 4662**，其中包含真实用户 SID——即使请求是代理的或源自 ADWS。
+3. 每当攻击者执行 `(servicePrincipalName=*)`、`(objectClass=user)` 等时，DC 会发出 **Event 4662**，其中包含真实用户 SID——即使请求是通过代理或来自 ADWS。 
 
 Elastic 预构建规则示例：
 ```kql

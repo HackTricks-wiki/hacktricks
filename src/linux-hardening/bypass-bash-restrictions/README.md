@@ -140,7 +140,7 @@ echo ${PATH:0:1} #/
 ```
 ### DNS 数据外泄
 
-你可以使用 **burpcollab** 或 [**pingb**](http://pingb.in) 作为例子。
+你可以使用 **burpcollab** 或者 [**pingb**](http://pingb.in) 作为例子。
 
 ### 内置命令
 
@@ -259,7 +259,7 @@ ln /f*
 ## If there is a file /flag.txt that will create a hard link
 ## to it in the current folder
 ```
-### 4个字符的RCE
+### RCE 与 4 个字符
 ```bash
 # In a similar fashion to the previous bypass this one just need 4 chars to execute commands
 # it will follow the same principle of creating the command `ls -t>g` in a file
@@ -294,7 +294,7 @@ ln /f*
 'sh x'
 'sh g'
 ```
-## 只读/无执行/无发行版绕过
+## 只读/无执行/无发行版旁路
 
 如果您在一个具有 **只读和无执行保护** 的文件系统中，甚至在一个无发行版容器中，仍然有方法可以 **执行任意二进制文件，甚至是一个 shell！:**
 
@@ -302,7 +302,7 @@ ln /f*
 bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
-## Chroot 和其他监狱绕过
+## Chroot 和其他监狱旁路
 
 {{#ref}}
 ../privilege-escalation/escaping-from-limited-bash.md
@@ -322,7 +322,7 @@ bypass-fs-protections-read-only-no-exec-distroless/
 
 实际使用案例：
 
-1. **内存映射配置块**（例如 NVRAM），可跨进程访问。
+1. **内存映射配置块**（例如 NVRAM），可在进程之间访问。
 2. 攻击者无法写入 NULL 字节以对齐有效负载的情况。
 3. 仅提供 BusyBox `ash`/`sh` 的嵌入式设备 – 它们也会忽略前导空格。
 
