@@ -92,7 +92,7 @@ Napadač takođe može koristiti jake IR projektore da **infiltrira** komande u 
 
 ### Dugoročni brute-force i prošireni protokoli sa Flipper Zero 1.0
 
-Firmver 1.0 (septembar 2024) dodao je **desetine dodatnih IR protokola i opcionih spoljašnjih pojačivača**. U kombinaciji sa univerzalnim daljinskim upravljačem u režimu brute-force, Flipper može onemogućiti ili rekonfigurisati većinu javnih televizora/klimatizacija sa udaljenosti do 30 m koristeći visokopouzdani diod.
+Firmver 1.0 (septembar 2024) dodao je **desetine dodatnih IR protokola i opcionih spoljašnjih pojačivača**. U kombinaciji sa univerzalnim daljinskim upravljačem u režimu brute-force, Flipper može onemogućiti ili rekonfigurisati većinu javnih televizora/klimatizacija sa udaljenosti do 30 m koristeći visokopouzdani diodu.
 
 ---
 

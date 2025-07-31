@@ -1,16 +1,16 @@
-# macOS Network Services & Protocols
+# macOS Mrežne Usluge i Protokoli
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Remote Access Services
+## Usluge Daljinskog Pristupa
 
 Ovo su uobičajene macOS usluge za daljinski pristup.\
 Možete omogućiti/onemogućiti ove usluge u `System Settings` --> `Sharing`
 
-- **VNC**, poznat kao “Screen Sharing” (tcp:5900)
-- **SSH**, nazvan “Remote Login” (tcp:22)
-- **Apple Remote Desktop** (ARD), ili “Remote Management” (tcp:3283, tcp:5900)
-- **AppleEvent**, poznat kao “Remote Apple Event” (tcp:3031)
+- **VNC**, poznat kao “Deljenje Ekrana” (tcp:5900)
+- **SSH**, nazvan “Daljinska Prijava” (tcp:22)
+- **Apple Remote Desktop** (ARD), ili “Daljinsko Upravljanje” (tcp:3283, tcp:5900)
+- **AppleEvent**, poznat kao “Daljinski Apple Događaj” (tcp:3031)
 
 Proverite da li je neka od njih omogućena pokretanjem:
 ```bash
@@ -32,13 +32,13 @@ Da biste omogućili ARD za razne administrativne zadatke kao što su eskalacija 
 ```bash
 sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -allowAccessFor -allUsers -privs -all -clientopts -setmenuextra -menuextra yes
 ```
-ARD pruža svestrane nivoe kontrole, uključujući posmatranje, deljenu kontrolu i punu kontrolu, sa sesijama koje traju čak i nakon promene korisničke lozinke. Omogućava slanje Unix komandi direktno, izvršavajući ih kao root za administrativne korisnike. Planiranje zadataka i daljinsko Spotlight pretraživanje su značajne karakteristike, olakšavajući daljinsko, nisko-utično pretraživanje osetljivih datoteka na više mašina.
+ARD pruža svestrane nivoe kontrole, uključujući posmatranje, deljenu kontrolu i punu kontrolu, sa sesijama koje traju čak i nakon promene korisničke lozinke. Omogućava slanje Unix komandi direktno, izvršavajući ih kao root za administrativne korisnike. Planiranje zadataka i daljinsko Spotlight pretraživanje su značajne karakteristike, olakšavajući daljinsko, niskoprofilno pretraživanje osetljivih datoteka na više mašina.
 
 #### Nedavne ranjivosti u deljenju ekrana / ARD (2023-2025)
 
 | Godina | CVE | Komponenta | Uticaj | Ispravljeno u |
-|--------|-----|------------|--------|---------------|
-|2023|CVE-2023-42940|Deljenje ekrana|Netačno renderovanje sesije može uzrokovati da se *pogrešan* desktop ili prozor prenese, što rezultira curenjem osetljivih informacija|macOS Sonoma 14.2.1 (Dec 2023) |
+|--------|-----|------------|--------|----------------|
+|2023|CVE-2023-42940|Deljenje ekrana|Netačno renderovanje sesije može uzrokovati da se prenese *pogrešan* desktop ili prozor, što rezultira curenjem osetljivih informacija|macOS Sonoma 14.2.1 (Dec 2023) |
 |2024|CVE-2024-23296|launchservicesd / login|Zaobilaženje zaštite memorije kernela koje se može povezati nakon uspešnog daljinskog prijavljivanja (aktivno iskorišćeno u prirodi)|macOS Ventura 13.6.4 / Sonoma 14.4 (Mar 2024) |
 
 **Saveti za učvršćivanje**
@@ -47,7 +47,7 @@ ARD pruža svestrane nivoe kontrole, uključujući posmatranje, deljenu kontrolu
 * Održavajte macOS potpuno ažuriranim (Apple obično isporučuje bezbednosne ispravke za poslednje tri glavne verzije).
 * Koristite **Jaku lozinku** *i* primenite opciju *“VNC gledatelji mogu kontrolisati ekran sa lozinkom”* **onemogućeno** kada je to moguće.
 * Stavite uslugu iza VPN-a umesto da izlažete TCP 5900/3283 internetu.
-* Dodajte pravilo vatrozida aplikacija da ograničite `ARDAgent` na lokalnu podmrežu:
+* Dodajte pravilo vatrozida aplikacije da ograničite `ARDAgent` na lokalnu podmrežu:
 
 ```bash
 sudo /usr/libexec/ApplicationFirewall/socketfilterfw --add /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/MacOS/ARDAgent
@@ -96,11 +96,11 @@ Da biste zatim pretražili HTTP servise na mreži:
 ```bash
 dns-sd -B _http._tcp
 ```
-Kada usluga počne, obaveštava sve uređaje na podmreži o svojoj dostupnosti putem multicast-a. Uređaji zainteresovani za ove usluge ne moraju slati zahteve, već jednostavno slušaju ova obaveštenja.
+Kada usluga počne, ona najavljuje svoju dostupnost svim uređajima na podmreži putem multicast-a. Uređaji zainteresovani za ove usluge ne moraju slati zahteve, već jednostavno slušaju ove najave.
 
 Za korisnički prijatniji interfejs, aplikacija **Discovery - DNS-SD Browser** dostupna na Apple App Store-u može vizualizovati usluge koje se nude na vašoj lokalnoj mreži.
 
-Alternativno, mogu se napisati prilagođeni skripti za pretraživanje i otkrivanje usluga koristeći biblioteku `python-zeroconf`. Skripta [**python-zeroconf**](https://github.com/jstasiak/python-zeroconf) demonstrira kreiranje pretraživača usluga za `_http._tcp.local.` usluge, ispisujući dodate ili uklonjene usluge:
+Alternativno, mogu se napisati prilagođeni skripti za pretraživanje i otkrivanje usluga koristeći biblioteku `python-zeroconf`. Skripta [**python-zeroconf**](https://github.com/jstasiak/python-zeroconf) demonstrira kreiranje pretraživača usluga za `_http._tcp.local.` usluge, štampajući dodate ili uklonjene usluge:
 ```python
 from zeroconf import ServiceBrowser, Zeroconf
 
@@ -131,7 +131,7 @@ nmap -sU -p 5353 --script=dns-service-discovery <target>
 
 `dns-service-discovery` skripta šalje `_services._dns-sd._udp.local` upit i zatim enumeriše svaki oglašeni tip usluge.
 
-* **mdns_recon** – Python alat koji skenira čitave opsege u potrazi za *pogrešno konfigurisanim* mDNS responderima koji odgovaraju na unicast upite (korisno za pronalaženje uređaja dostupnih preko podmreža/WAN):
+* **mdns_recon** – Python alat koji skenira cele opsege u potrazi za *neispravno konfigurisanim* mDNS responderima koji odgovaraju na unicast upite (korisno za pronalaženje uređaja dostupnih preko podmreža/WAN):
 
 ```bash
 git clone https://github.com/chadillac/mdns_recon && cd mdns_recon
@@ -145,7 +145,7 @@ Ovo će vratiti hostove koji izlažu SSH putem Bonjura van lokalne veze.
 | Year | CVE | Severity | Issue | Patched in |
 |------|-----|----------|-------|------------|
 |2024|CVE-2024-44183|Medium|Logička greška u *mDNSResponder* omogućila je da kreirani paket izazove **denial-of-service**|macOS Ventura 13.7 / Sonoma 14.7 / Sequoia 15.0 (Sep 2024) |
-|2025|CVE-2025-31222|High|Problem sa tačnošću u *mDNSResponder* mogao bi biti zloupotrebljen za **lokalnu eskalaciju privilegija**|macOS Ventura 13.7.6 / Sonoma 14.7.6 / Sequoia 15.5 (May 2025) |
+|2025|CVE-2025-31222|High|Problem tačnosti u *mDNSResponder* mogao bi biti zloupotrebljen za **lokalnu eskalaciju privilegija**|macOS Ventura 13.7.6 / Sonoma 14.7.6 / Sequoia 15.5 (May 2025) |
 
 **Mitigation guidance**
 
@@ -156,17 +156,17 @@ Ovo će vratiti hostove koji izlažu SSH putem Bonjura van lokalne veze.
 sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.mDNSResponder.plist
 ```
 3. Za okruženja gde je Bonjour potreban interno, ali nikada ne sme preći mrežne granice, koristite *AirPlay Receiver* profil ograničenja (MDM) ili mDNS proxy.
-4. Omogućite **System Integrity Protection (SIP)** i održavajte macOS ažuriranim – obe ranjivosti su brzo zakrpljene, ali su se oslanjale na to da je SIP omogućen za potpunu zaštitu.
+4. Omogućite **System Integrity Protection (SIP)** i redovno ažurirajte macOS – obe ranjivosti su brzo zakrpljene, ali su se oslanjale na to da je SIP omogućen za potpunu zaštitu.
 
 ### Disabling Bonjour
 
-Ako postoje zabrinutosti u vezi sa bezbednošću ili drugi razlozi za onemogućavanje Bonjura, može se isključiti koristeći sledeću komandu:
+Ako postoje zabrinutosti u vezi sa bezbednošću ili drugi razlozi za onemogućavanje Bonjura, može se isključiti pomoću sledeće komande:
 ```bash
 sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.mDNSResponder.plist
 ```
 ## Reference
 
-- [**The Mac Hacker's Handbook**](https://www.amazon.com/-/es/Charlie-Miller-ebook-dp-B004U7MUMU/dp/B004U7MUMU/ref=mt_other?_encoding=UTF8&me=&qid=)
+- [**Priručnik za hakere na Mac-u**](https://www.amazon.com/-/es/Charlie-Miller-ebook-dp-B004U7MUMU/dp/B004U7MUMU/ref=mt_other?_encoding=UTF8&me=&qid=)
 - [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)
 - [**https://lockboxx.blogspot.com/2019/07/macos-red-teaming-206-ard-apple-remote.html**](https://lockboxx.blogspot.com/2019/07/macos-red-teaming-206-ard-apple-remote.html)
 - [**NVD – CVE-2023-42940**](https://nvd.nist.gov/vuln/detail/CVE-2023-42940)

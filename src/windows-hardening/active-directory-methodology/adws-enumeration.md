@@ -18,7 +18,7 @@ Pošto je saobraćaj enkapsuliran unutar ovih binarnih SOAP okvira i putuje prek
 
 ## SoaPy – Nativni Python Klijent
 
-[SoaPy](https://github.com/logangoins/soapy) je **potpuna re-implementacija ADWS protokolskog staka u čistom Python-u**.  Kreira NBFX/NBFSE/NNS/NMF okvire bajt po bajt, omogućavajući prikupljanje sa Unix-sličnih sistema bez dodirivanja .NET runtime-a.
+[SoaPy](https://github.com/logangoins/soapy) je **potpuna re-implementacija ADWS protokolskog steka u čistom Python-u**.  Kreira NBFX/NBFSE/NNS/NMF okvire bajt po bajt, omogućavajući prikupljanje sa Unix-sličnih sistema bez dodirivanja .NET runtime-a.
 
 ### Ključne Karakteristike
 
@@ -44,7 +44,7 @@ soapy ludus.domain/jdoe:'P@ssw0rd'@10.2.10.10 \
 -q '(objectClass=domain)' \
 | tee data/domain.log
 ```
-3. **Sakupite ADCS povezane objekte iz Configuration NC:**
+3. **Prikupite ADCS povezane objekte iz Configuration NC:**
 ```bash
 soapy ludus.domain/jdoe:'P@ssw0rd'@10.2.10.10 \
 -dn 'CN=Configuration,DC=ludus,DC=domain' \
@@ -82,7 +82,7 @@ Događaji će se pojaviti pod **Directory-Service** sa punim LDAP filtrima, čak
 
 1. Kreirajte lažni objekat (npr. onemogućeni korisnik `CanaryUser`).
 2. Dodajte **Audit** ACE za _Everyone_ princip, koji se prati na **ReadProperty**.
-3. Kada god napadač izvrši `(servicePrincipalName=*)`, `(objectClass=user)` itd., DC emituje **Event 4662** koji sadrži pravi SID korisnika – čak i kada je zahtev posredovan ili potiče iz ADWS.
+3. Kada napadač izvrši `(servicePrincipalName=*)`, `(objectClass=user)` itd., DC emituje **Event 4662** koji sadrži pravi SID korisnika – čak i kada je zahtev posredovan ili potiče iz ADWS.
 
 Primer unapred definisane pravila za Elastic:
 ```kql

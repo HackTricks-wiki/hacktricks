@@ -71,7 +71,7 @@ Group3r.exe -f gpo.log   # -s to stdout
 
 ## PingCastle
 
-[PingCastle](https://www.pingcastle.com/documentation/) vrši **proveru zdravlja** Active Directory i generiše HTML izveštaj sa ocenom rizika.
+[PingCastle](https://www.pingcastle.com/documentation/) vrši **proveru zdravlja** Active Directory-a i generiše HTML izveštaj sa ocenom rizika.
 ```powershell
 PingCastle.exe --healthcheck --server corp.local --user bob --password "P@ssw0rd!"
 ```

@@ -4,7 +4,7 @@
 
 ## Putem `PERL5OPT` & `PERL5LIB` env varijable
 
-Korišćenjem env varijable **`PERL5OPT`** moguće je naterati **Perl** da izvrši proizvoljne komande kada se interpreter pokrene (čak **pre** nego što se prva linija ciljnog skripta analizira).
+Korišćenjem env varijable **`PERL5OPT`** moguće je naterati **Perl** da izvrši proizvoljne komande kada se interpreter pokrene (čak **pre** nego što se prva linija ciljnog skripta obradi).
 Na primer, kreirajte ovaj skript:
 ```perl:test.pl
 #!/usr/bin/perl
@@ -58,7 +58,7 @@ Tipičan izlaz na macOS 13/14 izgleda ovako:
 /System/Library/Perl/Extras/5.30/darwin-thread-multi-2level
 /System/Library/Perl/Extras/5.30
 ```
-Neki od vraćenih foldera čak ni ne postoje, međutim **`/Library/Perl/5.30`** postoji, *nije* zaštićen SIP-om i *nalazi se* pre foldera zaštićenih SIP-om. Stoga, ako možete pisati kao *root*, možete postaviti zloćudni modul (npr. `File/Basename.pm`) koji će biti *preferencijalno* učitan od strane bilo kog privilegovanog skripta koji uvozi taj modul.
+Neki od vraćenih foldera čak ni ne postoje, međutim **`/Library/Perl/5.30`** postoji, *nije* zaštićen SIP-om i *pre* je zaštićenih foldera SIP-om. Stoga, ako možete pisati kao *root*, možete postaviti zloćudni modul (npr. `File/Basename.pm`) koji će biti *preferencijalno* učitan od strane bilo kog privilegovanog skripta koji uvozi taj modul.
 
 > [!WARNING]
 > I dalje vam je potreban **root** da biste pisali unutar `/Library/Perl`, a macOS će prikazati **TCC** prompt koji traži *Potpunu pristup disku* za proces koji vrši operaciju pisanja.
@@ -82,7 +82,7 @@ launchctl setenv PERL5OPT '-Mwarnings;system("/private/tmp/migraine.sh")'
 # Trigger a migration (or just wait – systemmigrationd will eventually spawn perl)
 open -a "Migration Assistant.app"   # or programmatically invoke /System/Library/PrivateFrameworks/SystemMigration.framework/Resources/MigrationUtility
 ```
-Kada `migrateLocalKDC` pokrene, `/usr/bin/perl` se pokreće sa zlonamernim `PERL5OPT` i izvršava `/private/tmp/migraine.sh` *pre nego što se SIP ponovo omogući*. Iz tog skripta možete, na primer, kopirati payload unutar **`/System/Library/LaunchDaemons`** ili dodeliti `com.apple.rootless` proširenu atribut kako biste učinili datoteku **neizbrisivom**.
+Kada `migrateLocalKDC` pokrene, `/usr/bin/perl` se pokreće sa malicioznim `PERL5OPT` i izvršava `/private/tmp/migraine.sh` *pre nego što se SIP ponovo omogući*. Iz tog skripta možete, na primer, kopirati payload unutar **`/System/Library/LaunchDaemons`** ili dodeliti `com.apple.rootless` proširenu atribut da biste učinili datoteku **neizbrisivom**.
 
 Apple je ispravio problem u macOS **Ventura 13.4**, **Monterey 12.6.6** i **Big Sur 11.7.7**, ali stariji ili neispravljeni sistemi ostaju podložni eksploataciji.
 

