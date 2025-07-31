@@ -4,11 +4,11 @@
 
 ## ADWS क्या है?
 
-Active Directory Web Services (ADWS) **Windows Server 2008 R2 से हर Domain Controller पर डिफ़ॉल्ट रूप से सक्षम है** और TCP **9389** पर सुनता है। नाम के बावजूद, **HTTP शामिल नहीं है**। इसके बजाय, यह सेवा LDAP-शैली के डेटा को एक प्रॉपराइटरी .NET फ्रेमिंग प्रोटोकॉल के स्टैक के माध्यम से उजागर करती है:
+Active Directory Web Services (ADWS) **Windows Server 2008 R2 से हर Domain Controller पर डिफ़ॉल्ट रूप से सक्षम है** और TCP **9389** पर सुनता है। नाम के बावजूद, **HTTP शामिल नहीं है**। इसके बजाय, यह सेवा LDAP-शैली के डेटा को एक मालिकाना .NET फ्रेमिंग प्रोटोकॉल के स्टैक के माध्यम से उजागर करती है:
 
 * MC-NBFX → MC-NBFSE → MS-NNS → MC-NMF
 
-चूंकि ट्रैफ़िक इन बाइनरी SOAP फ्रेमों के अंदर संकुचित होता है और एक असामान्य पोर्ट पर यात्रा करता है, **ADWS के माध्यम से एन्यूमरेशन की संभावना कम होती है कि इसे निरीक्षण, फ़िल्टर या सिग्नेचर किया जाएगा, क्लासिक LDAP/389 & 636 ट्रैफ़िक की तुलना में**। ऑपरेटरों के लिए इसका मतलब है:
+चूंकि ट्रैफ़िक इन बाइनरी SOAP फ्रेमों के अंदर संकुचित होता है और एक असामान्य पोर्ट पर यात्रा करता है, **ADWS के माध्यम से एन्यूमरेशन की संभावना क्लासिक LDAP/389 & 636 ट्रैफ़िक की तुलना में बहुत कम होती है कि इसकी जांच, फ़िल्टर या सिग्नेचर किया जाए**। ऑपरेटरों के लिए इसका मतलब है:
 
 * अधिक छिपा हुआ पुनःसंशोधन – नीली टीमें अक्सर LDAP क्वेरी पर ध्यान केंद्रित करती हैं।
 * **गैर-Windows होस्ट (Linux, macOS)** से 9389/TCP को SOCKS प्रॉक्सी के माध्यम से टनलिंग करके संग्रह करने की स्वतंत्रता।
@@ -56,9 +56,9 @@ soapy ludus.domain/jdoe:'P@ssw0rd'@10.2.10.10 \
 ```bash
 bofhound -i data --zip   # produces BloodHound.zip
 ```
-5. **ZIP अपलोड करें** BloodHound GUI में और साइफर क्वेरीज़ चलाएँ जैसे `MATCH (u:User)-[:Can_Enroll*1..]->(c:CertTemplate) RETURN u,c` ताकि प्रमाणपत्र वृद्धि पथ (ESC1, ESC8, आदि) प्रकट हो सकें।
+5. **ZIP अपलोड करें** BloodHound GUI में और साइफर क्वेरीज़ चलाएँ जैसे `MATCH (u:User)-[:Can_Enroll*1..]->(c:CertTemplate) RETURN u,c` ताकि सर्टिफिकेट वृद्धि पथ (ESC1, ESC8, आदि) प्रकट हो सकें।
 
-### `msDs-AllowedToActOnBehalfOfOtherIdentity` (RBCD) लिखना
+### लिखना `msDs-AllowedToActOnBehalfOfOtherIdentity` (RBCD)
 ```bash
 soapy ludus.domain/jdoe:'P@ssw0rd'@dc.ludus.domain \
 --set 'CN=Victim,OU=Servers,DC=ludus,DC=domain' \
@@ -92,9 +92,9 @@ Elastic pre-built rule example:
 
 | Purpose | Tool | Notes |
 |---------|------|-------|
-| ADWS enumeration | [SoaPy](https://github.com/logangoins/soapy) | Python, SOCKS, पढ़ें/लिखें |
+| ADWS enumeration | [SoaPy](https://github.com/logangoins/soapy) | Python, SOCKS, read/write |
 | BloodHound ingest | [BOFHound](https://github.com/bohops/BOFHound) | SoaPy/ldapsearch लॉग को परिवर्तित करता है |
-| Cert compromise | [Certipy](https://github.com/ly4k/Certipy) | समान SOCKS के माध्यम से प्रॉक्सी किया जा सकता है |
+| Cert compromise | [Certipy](https://github.com/ly4k/Certipy) | इसे उसी SOCKS के माध्यम से प्रॉक्सी किया जा सकता है |
 
 ## References
 

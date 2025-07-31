@@ -6,7 +6,7 @@
 adws-enumeration.md
 {{#endref}}
 
-> नोट: यह पृष्ठ कुछ सबसे उपयोगी उपयोगिताओं को **enumerate** और **visualise** Active Directory संबंधों के लिए समूहित करता है।  चुपके से **Active Directory Web Services (ADWS)** चैनल के माध्यम से संग्रह के लिए ऊपर दिए गए संदर्भ की जांच करें।
+> NOTE: यह पृष्ठ कुछ सबसे उपयोगी उपयोगिताओं को **enumerate** और **visualise** Active Directory संबंधों को समूहित करता है।  चुपके से **Active Directory Web Services (ADWS)** चैनल के माध्यम से संग्रह के लिए ऊपर दिए गए संदर्भ की जांच करें।
 
 ---
 
@@ -15,7 +15,7 @@ adws-enumeration.md
 [AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) (Sysinternals) एक उन्नत **AD viewer & editor** है जो अनुमति देता है:
 
 * निर्देशिका पेड़ का GUI ब्राउज़िंग
-* ऑब्जेक्ट विशेषताओं और सुरक्षा विवरणों का संपादन
+* ऑब्जेक्ट विशेषताओं और सुरक्षा वर्णनकर्ताओं का संपादन
 * ऑफ़लाइन विश्लेषण के लिए स्नैपशॉट निर्माण / तुलना
 
 ### त्वरित उपयोग
@@ -71,7 +71,7 @@ Group3r.exe -f gpo.log   # -s to stdout
 
 ## PingCastle
 
-[PingCastle](https://www.pingcastle.com/documentation/) Active Directory का **स्वास्थ्य-चेक** करता है और जोखिम स्कोरिंग के साथ एक HTML रिपोर्ट उत्पन्न करता है।
+[PingCastle](https://www.pingcastle.com/documentation/) Active Directory का **health-check** करता है और जोखिम स्कोरिंग के साथ एक HTML रिपोर्ट उत्पन्न करता है।
 ```powershell
 PingCastle.exe --healthcheck --server corp.local --user bob --password "P@ssw0rd!"
 ```
