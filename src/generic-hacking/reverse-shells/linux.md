@@ -81,7 +81,7 @@ toboggan -m nix.py -i
 ```
 Щоб безпосередньо використовувати інтерактивну оболонку. Ви можете додати `-b` для інтеграції з Burpsuite і видалити `-i` для більш базового обгортки rce.
 
-Ще одна можливість полягає у використанні реалізації вперед оболонки `IppSec` [**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell).
+Ще одна можливість полягає у використанні реалізації `IppSec` для форвардної оболонки [**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell).
 
 Вам просто потрібно змінити:
 
