@@ -21,7 +21,7 @@ Il firmware è un software essenziale che consente ai dispositivi di funzionare 
 
 A questo scopo, gli strumenti di **intelligence open-source (OSINT)** sono inestimabili, così come l'analisi di eventuali componenti software open-source disponibili attraverso processi di revisione manuale e automatizzati. Strumenti come [Coverity Scan](https://scan.coverity.com) e [Semmle’s LGTM](https://lgtm.com/#explore) offrono analisi statica gratuita che può essere sfruttata per trovare potenziali problemi.
 
-## **Acquisire il Firmware**
+## **Acquisizione del Firmware**
 
 Ottenere il firmware può essere affrontato attraverso vari mezzi, ognuno con il proprio livello di complessità:
 
@@ -37,7 +37,7 @@ Ottenere il firmware può essere affrontato attraverso vari mezzi, ognuno con il
 - **Dumping** dal bootloader o dalla rete
 - **Rimuovendo e leggendo** il chip di memoria, quando tutto il resto fallisce, utilizzando strumenti hardware appropriati
 
-## Analizzare il firmware
+## Analizzando il firmware
 
 Ora che **hai il firmware**, devi estrarre informazioni su di esso per sapere come trattarlo. Diversi strumenti che puoi utilizzare per questo:
 ```bash
@@ -91,7 +91,7 @@ Alternativamente, il seguente comando potrebbe essere eseguito.
 
 `$ dd if=DIR850L_REVB.bin bs=1 skip=$((0x1A0094)) of=dir.squashfs`
 
-- Per squashfs (utilizzato nell'esempio sopra)
+- Per squashfs (usato nell'esempio sopra)
 
 `$ unsquashfs dir.squashfs`
 
@@ -126,19 +126,19 @@ hexdump -C -n 512 <bin> > hexdump.out
 hexdump -C <bin> | head #useful for finding signatures in the header
 fdisk -lu <bin> #lists partitions and filesystems, if there are multiple
 ```
-Per valutare lo stato della crittografia dell'immagine, si controlla l'**entropia** con `binwalk -E <bin>`. Un'entropia bassa suggerisce una mancanza di crittografia, mentre un'entropia alta indica una possibile crittografia o compressione.
+Per valutare lo stato di crittografia dell'immagine, si controlla l'**entropia** con `binwalk -E <bin>`. Un'entropia bassa suggerisce una mancanza di crittografia, mentre un'entropia alta indica una possibile crittografia o compressione.
 
-Per estrarre i **file incorporati**, si raccomandano strumenti e risorse come la documentazione di **file-data-carving-recovery-tools** e **binvis.io** per l'ispezione dei file.
+Per estrarre i **file incorporati**, si raccomandano strumenti e risorse come la documentazione **file-data-carving-recovery-tools** e **binvis.io** per l'ispezione dei file.
 
 ### Estrazione del Filesystem
 
-Utilizzando `binwalk -ev <bin>`, è possibile solitamente estrarre il filesystem, spesso in una directory chiamata con il tipo di filesystem (ad esempio, squashfs, ubifs). Tuttavia, quando **binwalk** non riesce a riconoscere il tipo di filesystem a causa di byte magici mancanti, è necessaria un'estrazione manuale. Questo comporta l'uso di `binwalk` per localizzare l'offset del filesystem, seguito dal comando `dd` per estrarre il filesystem:
+Utilizzando `binwalk -ev <bin>`, è possibile solitamente estrarre il filesystem, spesso in una directory chiamata in base al tipo di filesystem (ad esempio, squashfs, ubifs). Tuttavia, quando **binwalk** non riesce a riconoscere il tipo di filesystem a causa di byte magici mancanti, è necessaria un'estrazione manuale. Questo comporta l'uso di `binwalk` per localizzare l'offset del filesystem, seguito dal comando `dd` per estrarre il filesystem:
 ```bash
 $ binwalk DIR850L_REVB.bin
 
 $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 ```
-Dopo, a seconda del tipo di filesystem (ad es. squashfs, cpio, jffs2, ubifs), vengono utilizzati comandi diversi per estrarre manualmente i contenuti.
+Dopo, a seconda del tipo di filesystem (ad es., squashfs, cpio, jffs2, ubifs), vengono utilizzati comandi diversi per estrarre manualmente i contenuti.
 
 ### Analisi del Filesystem
 
@@ -164,9 +164,9 @@ Sia il codice sorgente che i binari compilati trovati nel filesystem devono esse
 
 ## Emulazione del Firmware per Analisi Dinamica
 
-Il processo di emulazione del firmware consente un'**analisi dinamica** sia del funzionamento di un dispositivo che di un singolo programma. Questo approccio può incontrare sfide con dipendenze hardware o architetturali, ma trasferire il filesystem root o binari specifici su un dispositivo con architettura e endianness corrispondenti, come un Raspberry Pi, o su una macchina virtuale pre-costruita, può facilitare ulteriori test.
+Il processo di emulazione del firmware consente un'**analisi dinamica** sia del funzionamento di un dispositivo che di un programma individuale. Questo approccio può incontrare sfide con dipendenze hardware o architetturali, ma trasferire il filesystem root o binari specifici su un dispositivo con architettura e endianness corrispondenti, come un Raspberry Pi, o su una macchina virtuale pre-costruita, può facilitare ulteriori test.
 
-### Emulazione di Singoli Binari
+### Emulazione di Binari Individuali
 
 Per esaminare singoli programmi, è cruciale identificare l'endianness e l'architettura CPU del programma.
 
@@ -196,7 +196,7 @@ A questo stadio, viene utilizzato un ambiente di dispositivo reale o emulato per
 
 ## Tecniche di Analisi in Esecuzione
 
-L'analisi in esecuzione implica l'interazione con un processo o binario nel suo ambiente operativo, utilizzando strumenti come gdb-multiarch, Frida e Ghidra per impostare punti di interruzione e identificare vulnerabilità attraverso fuzzing e altre tecniche.
+L'analisi in esecuzione implica l'interazione con un processo o binario nel suo ambiente operativo, utilizzando strumenti come gdb-multiarch, Frida e Ghidra per impostare breakpoint e identificare vulnerabilità attraverso fuzzing e altre tecniche.
 
 ## Sfruttamento Binario e Proof-of-Concept
 
@@ -234,7 +234,7 @@ Host: 192.168.0.1
 Content-Type: application/octet-stream
 Content-Length: 0
 ```
-Nel firmware vulnerabile (downgradato), il parametro `md5` è concatenato direttamente in un comando shell senza sanificazione, consentendo l'iniezione di comandi arbitrari (qui – abilitazione dell'accesso root basato su chiave SSH). Le versioni firmware successive hanno introdotto un filtro di caratteri di base, ma l'assenza di protezione contro il downgrade rende la correzione inutile.
+Nel firmware vulnerabile (downgradato), il parametro `md5` è concatenato direttamente in un comando shell senza sanificazione, consentendo l'iniezione di comandi arbitrari (qui – abilitando l'accesso root basato su chiave SSH). Le versioni firmware successive hanno introdotto un filtro di caratteri di base, ma l'assenza di protezione contro il downgrade rende la correzione inutile.
 
 ### Estrazione del Firmware da App Mobili
 

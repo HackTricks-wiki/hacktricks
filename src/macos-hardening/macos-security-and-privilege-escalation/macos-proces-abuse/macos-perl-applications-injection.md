@@ -35,11 +35,11 @@ export PERL5DB='system("/bin/zsh")'
 sudo perl -d /usr/bin/some_admin_script.pl   # aprirà una shell prima di eseguire lo script
 ```
 
-* **`PERL5SHELL`** – su Windows questa variabile controlla quale eseguibile della shell Perl utilizzerà quando deve avviare una shell. Viene menzionata qui solo per completezza, poiché non è rilevante su macOS.
+* **`PERL5SHELL`** – su Windows, questa variabile controlla quale eseguibile della shell Perl utilizzerà quando deve generare una shell. Viene menzionata qui solo per completezza, poiché non è rilevante su macOS.
 
 Sebbene `PERL5DB` richieda l'opzione `-d`, è comune trovare script di manutenzione o di installazione che vengono eseguiti come *root* con questo flag abilitato per la risoluzione dei problemi dettagliata, rendendo la variabile un vettore di escalation valido.
 
-## Via dipendenze (@INC abuse)
+## Via dipendenze (abuso di @INC)
 
 È possibile elencare il percorso di inclusione che Perl cercherà (**`@INC`**) eseguendo:
 ```bash
@@ -57,16 +57,16 @@ L'output tipico su macOS 13/14 appare come:
 /System/Library/Perl/Extras/5.30/darwin-thread-multi-2level
 /System/Library/Perl/Extras/5.30
 ```
-Alcune delle cartelle restituite non esistono nemmeno, tuttavia **`/Library/Perl/5.30`** esiste, *non* è protetta da SIP ed è *prima* delle cartelle protette da SIP. Pertanto, se puoi scrivere come *root* puoi inserire un modulo malevolo (ad es. `File/Basename.pm`) che sarà *preferenzialmente* caricato da qualsiasi script privilegiato che importa quel modulo.
+Alcune delle cartelle restituite non esistono nemmeno, tuttavia **`/Library/Perl/5.30`** esiste, *non* è protetta da SIP ed è *prima* delle cartelle protette da SIP. Pertanto, se puoi scrivere come *root*, puoi inserire un modulo malevolo (ad es. `File/Basename.pm`) che sarà *preferenzialmente* caricato da qualsiasi script privilegiato che importa quel modulo.
 
 > [!WARNING]
-> Hai ancora bisogno di **root** per scrivere all'interno di `/Library/Perl` e macOS mostrerà un prompt **TCC** che chiede *Accesso completo al disco* per il processo che esegue l'operazione di scrittura.
+> Hai ancora bisogno di **root** per scrivere all'interno di `/Library/Perl` e macOS mostrerà un prompt **TCC** che chiede *Accesso Completo al Disco* per il processo che esegue l'operazione di scrittura.
 
-Ad esempio, se uno script importa **`use File::Basename;`** sarebbe possibile creare `/Library/Perl/5.30/File/Basename.pm` contenente codice controllato dall'attaccante.
+Ad esempio, se uno script importa **`use File::Basename;`**, sarebbe possibile creare `/Library/Perl/5.30/File/Basename.pm` contenente codice controllato dall'attaccante.
 
-## Bypass di SIP tramite Migration Assistant (CVE-2023-32369 “Migraine”)
+## Bypass SIP tramite Migration Assistant (CVE-2023-32369 “Migraine”)
 
-Nel maggio 2023 Microsoft ha divulgato **CVE-2023-32369**, soprannominato **Migraine**, una tecnica di post-exploitation che consente a un attaccante *root* di **bypassare completamente la Protezione dell'integrità di sistema (SIP)**. 
+Nel maggio 2023 Microsoft ha divulgato **CVE-2023-32369**, soprannominato **Migraine**, una tecnica di post-exploitation che consente a un attaccante *root* di **bypassare completamente la Protezione dell'Integrità di Sistema (SIP)**. 
 Il componente vulnerabile è **`systemmigrationd`**, un demone dotato di **`com.apple.rootless.install.heritable`**. Qualsiasi processo figlio generato da questo demone eredita il diritto e quindi viene eseguito **al di fuori** delle restrizioni SIP.
 
 Tra i figli identificati dai ricercatori c'è l'interprete firmato da Apple:
@@ -89,8 +89,8 @@ Apple ha risolto il problema in macOS **Ventura 13.4**, **Monterey 12.6.6** e **
 
 1. **Pulisci le variabili pericolose** – i launchdaemons privilegiati o i cron job dovrebbero avviarsi con un ambiente pulito (`launchctl unsetenv PERL5OPT`, `env -i`, ecc.).
 2. **Evita di eseguire interpreti come root** a meno che non sia strettamente necessario. Usa binari compilati o riduci i privilegi presto.
-3. **Fornisci script con `-T` (modalità taint)** in modo che Perl ignori `PERL5OPT` e altri switch non sicuri quando il controllo di taint è abilitato.
-4. **Tieni macOS aggiornato** – “Migraine” è completamente patchato nelle versioni attuali.
+3. **Fornisci script con `-T` (modalità taint)** in modo che Perl ignori `PERL5OPT` e altri switch non sicuri quando il controllo taint è abilitato.
+4. **Mantieni macOS aggiornato** – “Migraine” è completamente patchato nelle versioni attuali.
 
 ## Riferimenti
 

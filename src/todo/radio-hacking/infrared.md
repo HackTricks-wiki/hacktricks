@@ -2,13 +2,13 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Come funziona l'Infrarosso <a href="#how-the-infrared-port-works" id="how-the-infrared-port-works"></a>
+## Come Funziona l'Infrarosso <a href="#how-the-infrared-port-works" id="how-the-infrared-port-works"></a>
 
 **La luce infrarossa è invisibile agli esseri umani**. La lunghezza d'onda IR va da **0,7 a 1000 micron**. I telecomandi domestici utilizzano un segnale IR per la trasmissione dei dati e operano nella gamma di lunghezze d'onda di 0,75..1,4 micron. Un microcontrollore nel telecomando fa lampeggiare un LED infrarosso con una frequenza specifica, trasformando il segnale digitale in un segnale IR.
 
 Per ricevere i segnali IR si utilizza un **fotorecettore**. Esso **converte la luce IR in impulsi di tensione**, che sono già **segnali digitali**. Di solito, c'è un **filtro per la luce scura all'interno del ricevitore**, che lascia **passare solo la lunghezza d'onda desiderata** e taglia il rumore.
 
-### Varietà di protocolli IR <a href="#variety-of-ir-protocols" id="variety-of-ir-protocols"></a>
+### Varietà di Protocolli IR <a href="#variety-of-ir-protocols" id="variety-of-ir-protocols"></a>
 
 I protocolli IR differiscono in 3 fattori:
 
@@ -18,19 +18,19 @@ I protocolli IR differiscono in 3 fattori:
 
 #### Modi di codifica dei bit <a href="#bit-encoding-ways" id="bit-encoding-ways"></a>
 
-**1. Codifica della distanza degli impulsi**
+**1. Codifica della Distanza degli Impulsi**
 
 I bit sono codificati modulando la durata dello spazio tra gli impulsi. La larghezza dell'impulso stesso è costante.
 
 <figure><img src="../../images/image (295).png" alt=""><figcaption></figcaption></figure>
 
-**2. Codifica della larghezza degli impulsi**
+**2. Codifica della Larghezza degli Impulsi**
 
 I bit sono codificati modulando la larghezza dell'impulso. La larghezza dello spazio dopo l'esplosione dell'impulso è costante.
 
 <figure><img src="../../images/image (282).png" alt=""><figcaption></figcaption></figure>
 
-**3. Codifica di fase**
+**3. Codifica di Fase**
 
 È anche conosciuta come codifica Manchester. Il valore logico è definito dalla polarità della transizione tra l'esplosione dell'impulso e lo spazio. "Spazio a esplosione dell'impulso" denota logica "0", "esplosione dell'impulso a spazio" denota logica "1".
 
@@ -59,9 +59,9 @@ Il **comando NEC**, oltre al preambolo, è composto da un byte di indirizzo e un
 
 Il **codice di ripetizione** ha un "1" dopo il preambolo, che è un bit di stop.
 
-Per **logica "0" e "1"** NEC utilizza la Codifica della Distanza degli Impulsi: prima viene trasmesso un'esplosione di impulsi dopo la quale c'è una pausa, la cui lunghezza stabilisce il valore del bit.
+Per **logica "0" e "1"** NEC utilizza la Codifica della Distanza degli Impulsi: prima viene trasmessa un'esplosione di impulsi dopo la quale c'è una pausa, la cui lunghezza determina il valore del bit.
 
-### Condizionatori d'aria
+### Condizionatori d'Aria
 
 A differenza di altri telecomandi, **i condizionatori d'aria non trasmettono solo il codice del pulsante premuto**. Trasmettono anche **tutte le informazioni** quando un pulsante viene premuto per garantire che la **macchina del condizionatore e il telecomando siano sincronizzati**.\
 Questo eviterà che una macchina impostata a 20ºC venga aumentata a 21ºC con un telecomando, e poi quando un altro telecomando, che ha ancora la temperatura a 20ºC, viene utilizzato per aumentare ulteriormente la temperatura, essa "aumenterà" a 21ºC (e non a 22ºC pensando che sia a 21ºC).
@@ -76,11 +76,11 @@ Puoi attaccare l'Infrarosso con Flipper Zero:
 flipper-zero/fz-infrared.md
 {{#endref}}
 
-### Presa di controllo di Smart-TV / Set-top Box (EvilScreen)
+### Presa di Controllo di Smart-TV / Set-top Box (EvilScreen)
 
 Recenti lavori accademici (EvilScreen, 2022) hanno dimostrato che **i telecomandi multi-canale che combinano Infrarosso con Bluetooth o Wi-Fi possono essere abusati per dirottare completamente le moderne smart-TV**. L'attacco combina codici di servizio IR ad alta privilegio con pacchetti Bluetooth autenticati, bypassando l'isolamento dei canali e consentendo l'avvio arbitrario di app, l'attivazione del microfono o il ripristino di fabbrica senza accesso fisico. Otto TV mainstream di diversi fornitori — incluso un modello Samsung che afferma di essere conforme a ISO/IEC 27001 — sono state confermate vulnerabili. La mitigazione richiede correzioni del firmware del fornitore o la disabilitazione completa dei ricevitori IR non utilizzati.
 
-### Esfiltrazione di dati Air-Gapped tramite LED IR (famiglia aIR-Jumper)
+### Esfiltrazione di Dati Air-Gapped tramite LED IR (famiglia aIR-Jumper)
 
 Le telecamere di sicurezza, i router o anche le chiavette USB malevole includono spesso **LED IR per visione notturna**. La ricerca mostra che il malware può modulare questi LED (<10–20 kbit/s con semplice OOK) per **esfiltrare segreti attraverso muri e finestre** verso una telecamera esterna posizionata a decine di metri di distanza. Poiché la luce è al di fuori dello spettro visibile, gli operatori raramente se ne accorgono. Contromisure:
 
@@ -88,7 +88,7 @@ Le telecamere di sicurezza, i router o anche le chiavette USB malevole includono
 * Monitorare il ciclo di lavoro dei LED delle telecamere e l'integrità del firmware
 * Installare filtri IR-cut su finestre e telecamere di sorveglianza
 
-Un attaccante può anche utilizzare proiettori IR potenti per **infiltrare** comandi nella rete lampeggiando dati a telecamere insicure.
+Un attaccante può anche utilizzare proiettori IR potenti per **infiltrare** comandi nella rete lampeggiando dati verso telecamere insicure.
 
 ### Brute-Force a Lunga Distanza e Protocolli Estesi con Flipper Zero 1.0
 
@@ -113,7 +113,7 @@ Il firmware 1.0 (settembre 2024) ha aggiunto **dozzine di protocolli IR extra e 
 IRsend sender;
 void setup(){ sender.begin(); }
 void loop(){
-sender.sendNEC(0x20DF10EF, 32); // Samsung TV Power
+sender.sendNEC(0x20DF10EF, 32); // Accensione TV Samsung
 delay(5000);
 }
 ```

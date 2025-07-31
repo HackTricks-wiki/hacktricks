@@ -28,7 +28,7 @@ Apple Remote Desktop (ARD) è una versione avanzata di [Virtual Network Computin
 
 Le istanze vulnerabili possono essere identificate utilizzando lo script `vnc-info` di **nmap**. I servizi che supportano `VNC Authentication (2)` sono particolarmente suscettibili ad attacchi di forza bruta a causa della troncatura della password a 8 caratteri.
 
-Per abilitare ARD per vari compiti amministrativi come l'escalation dei privilegi, l'accesso GUI o il monitoraggio degli utenti, usa il seguente comando:
+Per abilitare ARD per vari compiti amministrativi come l'escalation dei privilegi, l'accesso GUI o il monitoraggio degli utenti, utilizzare il seguente comando:
 ```bash
 sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -allowAccessFor -allUsers -privs -all -clientopts -setmenuextra -menuextra yes
 ```
@@ -58,7 +58,7 @@ sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setblockapp /System/Libra
 
 ## Bonjour Protocol
 
-Bonjour, una tecnologia progettata da Apple, consente **ai dispositivi sulla stessa rete di rilevare i servizi offerti l'uno dall'altro**. Conosciuto anche come Rendezvous, **Zero Configuration**, o Zeroconf, consente a un dispositivo di unirsi a una rete TCP/IP, **scegliere automaticamente un indirizzo IP**, e trasmettere i propri servizi ad altri dispositivi di rete.
+Bonjour, una tecnologia progettata da Apple, consente **ai dispositivi sulla stessa rete di rilevare i servizi offerti l'uno dall'altro**. Conosciuto anche come Rendezvous, **Zero Configuration**, o Zeroconf, consente a un dispositivo di unirsi a una rete TCP/IP, **scegliere automaticamente un indirizzo IP** e trasmettere i propri servizi ad altri dispositivi di rete.
 
 La Zero Configuration Networking, fornita da Bonjour, garantisce che i dispositivi possano:
 
@@ -70,7 +70,7 @@ I dispositivi che utilizzano Bonjour si assegneranno un **indirizzo IP dall'inte
 
 Per DNS, Bonjour utilizza il **protocollo Multicast DNS (mDNS)**. mDNS opera su **porta 5353/UDP**, impiegando **query DNS standard** ma mirate all'**indirizzo multicast 224.0.0.251**. Questo approccio garantisce che tutti i dispositivi in ascolto sulla rete possano ricevere e rispondere alle query, facilitando l'aggiornamento dei loro record.
 
-All'unirsi alla rete, ogni dispositivo seleziona autonomamente un nome, che di solito termina in **.local**, derivato dal nome host o generato casualmente.
+All'unirsi alla rete, ogni dispositivo seleziona autonomamente un nome, che di solito termina con **.local**, derivato dal nome host o generato casualmente.
 
 La scoperta dei servizi all'interno della rete è facilitata da **DNS Service Discovery (DNS-SD)**. Sfruttando il formato dei record DNS SRV, DNS-SD utilizza **record DNS PTR** per abilitare l'elenco di più servizi. Un client che cerca un servizio specifico richiederà un record PTR per `<Service>.<Domain>`, ricevendo in cambio un elenco di record PTR formattati come `<Instance>.<Service>.<Domain>` se il servizio è disponibile da più host.
 
@@ -92,11 +92,11 @@ dns-sd -R "Index" _http._tcp . 80 path=/index.html
 ```
 Questo comando registra un servizio HTTP chiamato "Index" sulla porta 80 con un percorso di `/index.html`.
 
-Per cercare quindi servizi HTTP sulla rete:
+Per cercare quindi i servizi HTTP sulla rete:
 ```bash
 dns-sd -B _http._tcp
 ```
-Quando un servizio si avvia, annuncia la sua disponibilità a tutti i dispositivi sulla subnet multicasting la sua presenza. I dispositivi interessati a questi servizi non devono inviare richieste, ma semplicemente ascoltare questi annunci.
+Quando un servizio si avvia, annuncia la sua disponibilità a tutti i dispositivi sulla subnet multicastando la sua presenza. I dispositivi interessati a questi servizi non devono inviare richieste, ma semplicemente ascoltare questi annunci.
 
 Per un'interfaccia più user-friendly, l'app **Discovery - DNS-SD Browser** disponibile su Apple App Store può visualizzare i servizi offerti sulla tua rete locale.
 
@@ -131,7 +131,7 @@ nmap -sU -p 5353 --script=dns-service-discovery <target>
 
 Lo script `dns-service-discovery` invia una query `_services._dns-sd._udp.local` e poi enumera ciascun tipo di servizio pubblicizzato.
 
-* **mdns_recon** – strumento Python che scansiona interi intervalli alla ricerca di *risponditori* mDNS *malconfigurati* che rispondono a query unicast (utile per trovare dispositivi raggiungibili attraverso subnet/WAN):
+* **mdns_recon** – strumento Python che scansiona intere gamme alla ricerca di *risponditori* mDNS *malconfigurati* che rispondono a query unicast (utile per trovare dispositivi raggiungibili attraverso subnet/WAN):
 
 ```bash
 git clone https://github.com/chadillac/mdns_recon && cd mdns_recon

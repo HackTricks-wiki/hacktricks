@@ -63,19 +63,19 @@ In questo esempio, K-Means dovrebbe trovare 4 cluster. Il piccolo cluster di att
 
 Il clustering gerarchico costruisce una gerarchia di cluster utilizzando un approccio dal basso verso l'alto (agglomerativo) o un approccio dall'alto verso il basso (divisivo):
 
-1. **Agglomerativo (Dal Basso Verso l'Alto)**: Iniziare con ogni punto dati come un cluster separato e unire iterativamente i cluster più vicini fino a quando rimane un singolo cluster o viene soddisfatta una condizione di arresto.
-2. **Divisivo (Dall'Alto Verso il Basso)**: Iniziare con tutti i punti dati in un singolo cluster e dividere iterativamente i cluster fino a quando ogni punto dati è il proprio cluster o viene soddisfatta una condizione di arresto.
+1. **Agglomerativo (Dal Basso Verso l'Alto)**: Inizia con ogni punto dati come un cluster separato e unisce iterativamente i cluster più vicini fino a quando rimane un singolo cluster o viene soddisfatta una condizione di arresto.
+2. **Divisivo (Dall'Alto Verso il Basso)**: Inizia con tutti i punti dati in un singolo cluster e divide iterativamente i cluster fino a quando ogni punto dati è il proprio cluster o viene soddisfatta una condizione di arresto.
 
-Il clustering agglomerativo richiede una definizione della distanza inter-cluster e un criterio di collegamento per decidere quali cluster unire. I metodi di collegamento comuni includono il collegamento singolo (distanza dei punti più vicini tra due cluster), il collegamento completo (distanza dei punti più lontani), il collegamento medio, ecc., e la metrica di distanza è spesso euclidea. La scelta del collegamento influisce sulla forma dei cluster prodotti. Non è necessario specificare in anticipo il numero di cluster K; è possibile "tagliare" il dendrogramma a un livello scelto per ottenere il numero desiderato di cluster.
+Il clustering agglomerativo richiede una definizione della distanza inter-cluster e un criterio di collegamento per decidere quali cluster unire. I metodi di collegamento comuni includono il collegamento singolo (distanza dei punti più vicini tra due cluster), il collegamento completo (distanza dei punti più lontani), il collegamento medio, ecc., e la metrica di distanza è spesso euclidea. La scelta del collegamento influisce sulla forma dei cluster prodotti. Non è necessario specificare in anticipo il numero di cluster K; puoi "tagliare" il dendrogramma a un livello scelto per ottenere il numero desiderato di cluster.
 
 Il clustering gerarchico produce un dendrogramma, una struttura ad albero che mostra le relazioni tra i cluster a diversi livelli di granularità. Il dendrogramma può essere tagliato a un livello desiderato per ottenere un numero specifico di cluster.
 
 > [!TIP]
-> *Casi d'uso nella cybersecurity:* Il clustering gerarchico può organizzare eventi o entità in un albero per individuare relazioni. Ad esempio, nell'analisi del malware, il clustering agglomerativo potrebbe raggruppare i campioni per somiglianza comportamentale, rivelando una gerarchia di famiglie e varianti di malware. Nella sicurezza di rete, si potrebbe raggruppare i flussi di traffico IP e utilizzare il dendrogramma per vedere i sottogruppi di traffico (ad esempio, per protocollo, poi per comportamento). Poiché non è necessario scegliere K in anticipo, è utile quando si esplorano nuovi dati per i quali il numero di categorie di attacco è sconosciuto.
+> *Casi d'uso nella cybersecurity:* Il clustering gerarchico può organizzare eventi o entità in un albero per individuare relazioni. Ad esempio, nell'analisi del malware, il clustering agglomerativo potrebbe raggruppare i campioni per somiglianza comportamentale, rivelando una gerarchia di famiglie e varianti di malware. Nella sicurezza di rete, si potrebbe raggruppare i flussi di traffico IP e utilizzare il dendrogramma per vedere i sottogruppi di traffico (ad es., per protocollo, poi per comportamento). Poiché non è necessario scegliere K in anticipo, è utile quando si esplorano nuovi dati per i quali il numero di categorie di attacco è sconosciuto.
 
 #### Assunzioni e Limitazioni
 
-Il clustering gerarchico non assume una forma particolare del cluster e può catturare cluster annidati. È utile per scoprire tassonomie o relazioni tra gruppi (ad esempio, raggruppare il malware per sottogruppi familiari). È deterministico (nessun problema di inizializzazione casuale). Un vantaggio chiave è il dendrogramma, che fornisce informazioni sulla struttura di clustering dei dati a tutte le scale – gli analisti della sicurezza possono decidere un taglio appropriato per identificare cluster significativi. Tuttavia, è computazionalmente costoso (tipicamente $O(n^2)$ tempo o peggio per implementazioni naive) e non fattibile per dataset molto grandi. È anche una procedura avido – una volta che una fusione o una divisione è stata effettuata, non può essere annullata, il che può portare a cluster subottimali se si verifica un errore all'inizio. Gli outlier possono anche influenzare alcune strategie di collegamento (il collegamento singolo può causare l'effetto "chaining" in cui i cluster si collegano tramite outlier).
+Il clustering gerarchico non assume una forma particolare del cluster e può catturare cluster annidati. È utile per scoprire tassonomie o relazioni tra gruppi (ad es., raggruppare il malware per sottogruppi familiari). È deterministico (nessun problema di inizializzazione casuale). Un vantaggio chiave è il dendrogramma, che fornisce informazioni sulla struttura di clustering dei dati a tutte le scale – gli analisti della sicurezza possono decidere un taglio appropriato per identificare cluster significativi. Tuttavia, è computazionalmente costoso (tipicamente $O(n^2)$ tempo o peggio per implementazioni naive) e non fattibile per dataset molto grandi. È anche una procedura avido – una volta che una fusione o una divisione è stata effettuata, non può essere annullata, il che può portare a cluster subottimali se si verifica un errore all'inizio. Gli outlier possono anche influenzare alcune strategie di collegamento (il collegamento singolo può causare l'effetto "chaining" in cui i cluster si collegano tramite outlier).
 
 <details>
 <summary>Esempio -- Clustering Agglomerativo di Eventi
@@ -110,14 +110,14 @@ DBSCAN funziona definendo due parametri:
 - **MinPts**: Il numero minimo di punti richiesti per formare una regione densa (punto centrale).
 
 DBSCAN identifica punti centrali, punti di confine e punti di rumore:
-- **Punto Centrale**: Un punto con almeno MinPts vicini entro una distanza ε.
-- **Punto di Confine**: Un punto che si trova entro una distanza ε da un punto centrale ma ha meno di MinPts vicini.
+- **Punto Centrale**: Un punto con almeno MinPts vicini entro una distanza di ε.
+- **Punto di Confine**: Un punto che si trova entro una distanza di ε da un punto centrale ma ha meno di MinPts vicini.
 - **Punto di Rumore**: Un punto che non è né un punto centrale né un punto di confine.
 
 Il clustering procede scegliendo un punto centrale non visitato, contrassegnandolo come un nuovo cluster, quindi aggiungendo ricorsivamente tutti i punti raggiungibili per densità da esso (punti centrali e i loro vicini, ecc.). I punti di confine vengono aggiunti al cluster di un punto centrale vicino. Dopo aver espanso tutti i punti raggiungibili, DBSCAN passa a un altro punto centrale non visitato per avviare un nuovo cluster. I punti non raggiunti da alcun punto centrale rimangono etichettati come rumore.
 
 > [!TIP]
-> *Casi d'uso nella cybersecurity:* DBSCAN è utile per la rilevazione di anomalie nel traffico di rete. Ad esempio, l'attività normale degli utenti potrebbe formare uno o più cluster densi nello spazio delle caratteristiche, mentre i comportamenti di attacco nuovi appaiono come punti sparsi che DBSCAN etichetterà come rumore (outlier). È stato utilizzato per raggruppare registri di flusso di rete, dove può rilevare scansioni di porte o traffico di denial-of-service come regioni sparse di punti. Un'altra applicazione è il raggruppamento di varianti di malware: se la maggior parte dei campioni si raggruppa per famiglie ma alcuni non si adattano da nessuna parte, quei pochi potrebbero essere malware zero-day. La capacità di segnalare il rumore significa che i team di sicurezza possono concentrarsi sull'indagine di quegli outlier.
+> *Casi d'uso nella cybersecurity:* DBSCAN è utile per la rilevazione di anomalie nel traffico di rete. Ad esempio, l'attività normale degli utenti potrebbe formare uno o più cluster densi nello spazio delle caratteristiche, mentre i comportamenti di attacco nuovi appaiono come punti sparsi che DBSCAN etichetterà come rumore (outlier). È stato utilizzato per raggruppare i record di flusso di rete, dove può rilevare scansioni di porte o traffico di denial-of-service come regioni sparse di punti. Un'altra applicazione è il raggruppamento delle varianti di malware: se la maggior parte dei campioni si raggruppa per famiglie ma alcuni non si adattano da nessuna parte, quei pochi potrebbero essere malware zero-day. La capacità di segnalare il rumore significa che i team di sicurezza possono concentrarsi sull'indagine di quegli outlier.
 
 #### Assunzioni e Limitazioni
 
@@ -149,7 +149,7 @@ num_noise = np.sum(labels == -1)
 print(f"DBSCAN found {num_clusters} clusters and {num_noise} noise points")
 print("Cluster labels for first 10 points:", labels[:10])
 ```
-In questo frammento, abbiamo sintonizzato `eps` e `min_samples` per adattarli alla scala dei nostri dati (15.0 in unità di caratteristica e richiedendo 5 punti per formare un cluster). DBSCAN dovrebbe trovare 2 cluster (i cluster di traffico normale) e contrassegnare i 5 outlier iniettati come rumore. Produciamo il numero di cluster rispetto ai punti di rumore per verificare questo. In un contesto reale, si potrebbe iterare su ε (utilizzando un'euristica del grafo della distanza k per scegliere ε) e MinPts (spesso impostato intorno alla dimensionalità dei dati + 1 come regola empirica) per trovare risultati di clustering stabili. La capacità di etichettare esplicitamente il rumore aiuta a separare i dati potenzialmente attaccati per ulteriori analisi.
+In questo frammento, abbiamo sintonizzato `eps` e `min_samples` per adattarli alla scala dei nostri dati (15.0 in unità di caratteristica e richiedendo 5 punti per formare un cluster). DBSCAN dovrebbe trovare 2 cluster (i cluster di traffico normale) e contrassegnare i 5 outlier iniettati come rumore. Produciamo il numero di cluster rispetto ai punti di rumore per verificare questo. In un contesto reale, si potrebbe iterare su ε (utilizzando un'euristica del grafo della distanza k per scegliere ε) e MinPts (spesso impostato intorno alla dimensionalità dei dati + 1 come regola empirica) per trovare risultati di clustering stabili. La capacità di etichettare esplicitamente il rumore aiuta a separare i dati potenziali di attacco per ulteriori analisi.
 
 </details>
 
@@ -197,7 +197,7 @@ Spieghiamo questo con un esempio. Immagina di avere un dataset con molte immagin
 
 #### Assunzioni e Limitazioni
 
-La PCA assume che **gli assi principali di varianza siano significativi** – è un metodo lineare, quindi cattura correlazioni lineari nei dati. È non supervisionato poiché utilizza solo la covarianza delle caratteristiche. I vantaggi della PCA includono la riduzione del rumore (componenti a bassa varianza spesso corrispondono a rumore) e la decorrelazione delle caratteristiche. È computazionalmente efficiente per dimensioni moderatamente elevate ed è spesso un utile passo di preprocessing per altri algoritmi (per mitigare la maledizione della dimensionalità). Una limitazione è che la PCA è limitata a relazioni lineari – non catturerà strutture complesse non lineari (mentre autoencoder o t-SNE potrebbero). Inoltre, le componenti della PCA possono essere difficili da interpretare in termini di caratteristiche originali (sono combinazioni di caratteristiche originali). Nella cybersecurity, bisogna essere cauti: un attacco che causa solo un cambiamento sottile in una caratteristica a bassa varianza potrebbe non apparire nelle prime PC (poiché la PCA dà priorità alla varianza, non necessariamente all'"interessantezza").
+La PCA assume che **gli assi principali di varianza siano significativi** – è un metodo lineare, quindi cattura correlazioni lineari nei dati. È non supervisionato poiché utilizza solo la covarianza delle caratteristiche. I vantaggi della PCA includono la riduzione del rumore (componenti a bassa varianza spesso corrispondono a rumore) e la decorrelazione delle caratteristiche. È computazionalmente efficiente per dimensioni moderatamente elevate ed è spesso un utile passo di preprocessing per altri algoritmi (per mitigare la maledizione della dimensionalità). Una limitazione è che la PCA è limitata a relazioni lineari – non catturerà strutture complesse non lineari (mentre autoencoder o t-SNE potrebbero). Inoltre, le componenti PCA possono essere difficili da interpretare in termini di caratteristiche originali (sono combinazioni di caratteristiche originali). Nella cybersecurity, bisogna essere cauti: un attacco che causa solo un cambiamento sottile in una caratteristica a bassa varianza potrebbe non apparire nelle prime PC (poiché la PCA dà priorità alla varianza, non necessariamente all'"interessantezza").
 
 <details>
 <summary>Esempio -- Riduzione delle Dimensioni dei Dati di Rete
@@ -236,7 +236,7 @@ L'adattamento di GMM viene tipicamente eseguito tramite l'algoritmo di Massimizz
 
 - **Inizializzazione**: Iniziare con stime iniziali per le medie, le covarianze e i coefficienti di miscelazione (o utilizzare i risultati di K-Means come punto di partenza).
 
-- **E-step (Aspettativa)**: Dati i parametri attuali, calcolare la responsabilità di ciascun cluster per ciascun punto: essenzialmente `r_nk = P(z_k | x_n)` dove z_k è la variabile latente che indica l'appartenenza al cluster per il punto x_n. Questo viene fatto utilizzando il teorema di Bayes, dove calcoliamo la probabilità posteriore di ciascun punto appartenente a ciascun cluster in base ai parametri attuali. Le responsabilità vengono calcolate come:
+- **E-step (Aspettativa)**: Dati i parametri attuali, calcolare la responsabilità di ciascun cluster per ogni punto: essenzialmente `r_nk = P(z_k | x_n)` dove z_k è la variabile latente che indica l'appartenenza al cluster per il punto x_n. Questo viene fatto usando il teorema di Bayes, dove calcoliamo la probabilità posteriore di ciascun punto appartenente a ciascun cluster in base ai parametri attuali. Le responsabilità sono calcolate come:
 ```math
 r_{nk} = \frac{\pi_k \mathcal{N}(x_n | \mu_k, \Sigma_k)}{\sum_{j=1}^{K} \pi_j \mathcal{N}(x_n | \mu_j, \Sigma_j)}
 ```
@@ -245,8 +245,8 @@ dove:
 - \( \mathcal{N}(x_n | \mu_k, \Sigma_k) \) è la funzione di densità di probabilità gaussiana per il punto \( x_n \) dato la media \( \mu_k \) e la covarianza \( \Sigma_k \).
 
 - **M-step (Massimizzazione)**: Aggiornare i parametri utilizzando le responsabilità calcolate nell'E-step:
-- Aggiornare ciascuna media μ_k come la media ponderata dei punti, dove i pesi sono le responsabilità.
-- Aggiornare ciascuna covarianza Σ_k come la covarianza ponderata dei punti assegnati al cluster k.
+- Aggiornare ogni media μ_k come la media ponderata dei punti, dove i pesi sono le responsabilità.
+- Aggiornare ogni covarianza Σ_k come la covarianza ponderata dei punti assegnati al cluster k.
 - Aggiornare i coefficienti di miscelazione π_k come la responsabilità media per il cluster k.
 
 - **Iterare** i passi E e M fino alla convergenza (i parametri si stabilizzano o il miglioramento della verosimiglianza è al di sotto di una soglia).
@@ -284,7 +284,8 @@ log_likelihood = gmm.score_samples(sample_attack)
 print("Cluster membership probabilities for sample attack:", probs)
 print("Log-likelihood of sample attack under GMM:", log_likelihood)
 ```
-In questo codice, alleniamo un GMM con 3 Gaussiane sul traffico normale (supponendo di conoscere 3 profili di traffico legittimo). Le medie e le covarianze stampate descrivono questi cluster (ad esempio, una media potrebbe essere intorno a [50,500] corrispondente al centro di un cluster, ecc.). Testiamo quindi una connessione sospetta [duration=200, bytes=800]. La predict_proba fornisce la probabilità che questo punto appartenga a ciascuno dei 3 cluster – ci aspetteremmo che queste probabilità siano molto basse o altamente sbilanciate poiché [200,800] si trova lontano dai cluster normali. Il punteggio overall score_samples (log-verosimiglianza) è stampato; un valore molto basso indica che il punto non si adatta bene al modello, segnalandolo come un'anomalia. In pratica, si potrebbe impostare una soglia sulla log-verosimiglianza (o sulla massima probabilità) per decidere se un punto è sufficientemente improbabile da essere considerato malevolo. GMM fornisce quindi un modo fondato per fare rilevamento delle anomalie e produce anche cluster morbidi che riconoscono l'incertezza.
+In questo codice, alleniamo un GMM con 3 Gaussiane sul traffico normale (supponendo di conoscere 3 profili di traffico legittimo). Le medie e le covarianze stampate descrivono questi cluster (ad esempio, una media potrebbe essere intorno a [50,500] corrispondente al centro di un cluster, ecc.). Testiamo quindi una connessione sospetta [durata=200, byte=800]. La predict_proba fornisce la probabilità che questo punto appartenga a ciascuno dei 3 cluster – ci aspetteremmo che queste probabilità siano molto basse o altamente sbilanciate poiché [200,800] si trova lontano dai cluster normali. Il punteggio complessivo score_samples (log-verosimiglianza) viene stampato; un valore molto basso indica che il punto non si adatta bene al modello, segnalandolo come un'anomalia. In pratica, si potrebbe impostare una soglia sulla log-verosimiglianza (o sulla massima probabilità) per decidere se un punto è sufficientemente improbabile da essere considerato malevolo. GMM fornisce quindi un modo fondato per fare rilevamento delle anomalie e produce anche cluster morbidi che riconoscono l'incertezza.
+</details>
 
 ### Isolation Forest
 
@@ -321,7 +322,7 @@ print("Isolation Forest predicted labels (first 20):", preds[:20])
 print("Number of anomalies detected:", np.sum(preds == -1))
 print("Example anomaly scores (lower means more anomalous):", anomaly_scores[:5])
 ```
-In questo codice, istanziamo `IsolationForest` con 100 alberi e impostiamo `contamination=0.15` (il che significa che ci aspettiamo circa il 15% di anomalie; il modello imposterà la sua soglia di punteggio in modo che ~15% dei punti siano contrassegnati). Lo adattiamo su `X_test_if` che contiene un mix di punti normali e di attacco (nota: normalmente si adatterebbe ai dati di addestramento e poi si userebbe predict su nuovi dati, ma qui per illustrazione ci adattiamo e prevediamo sullo stesso insieme per osservare direttamente i risultati).
+In questo codice, istanziamo `IsolationForest` con 100 alberi e impostiamo `contamination=0.15` (il che significa che ci aspettiamo circa il 15% di anomalie; il modello imposterà la sua soglia di punteggio in modo che ~15% dei punti siano contrassegnati). Lo adattiamo su `X_test_if`, che contiene un mix di punti normali e di attacco (nota: normalmente si adatterebbe ai dati di addestramento e poi si userebbe predict su nuovi dati, ma qui per illustrazione ci adattiamo e prevediamo sullo stesso insieme per osservare direttamente i risultati).
 
 L'output mostra le etichette previste per i primi 20 punti (dove -1 indica un'anomalia). Stampiamo anche quanti anomalie sono state rilevate in totale e alcuni esempi di punteggi di anomalia. Ci aspetteremmo che circa 18 su 120 punti siano etichettati come -1 (poiché la contaminazione era del 15%). Se i nostri 20 campioni di attacco sono davvero i più anomali, la maggior parte di essi dovrebbe apparire in quelle previsioni -1. Il punteggio di anomalia (la funzione di decisione di Isolation Forest) è più alto per i punti normali e più basso (più negativo) per le anomalie – stampiamo alcuni valori per vedere la separazione. In pratica, si potrebbe ordinare i dati per punteggio per vedere i principali outlier e indagarli. Isolation Forest fornisce quindi un modo efficiente per setacciare grandi dati di sicurezza non etichettati e selezionare le istanze più irregolari per un'analisi umana o un'ulteriore scrutinio automatizzato.
 
@@ -338,7 +339,7 @@ L'algoritmo ha due fasi principali:
 Il risultato è spesso un diagramma a dispersione visivamente significativo dove i cluster nei dati diventano evidenti.
 
 > [!TIP]
-> *Casi d'uso nella cybersecurity:* t-SNE è spesso utilizzato per **visualizzare dati di sicurezza ad alta dimensione per analisi umane**. Ad esempio, in un centro operazioni di sicurezza, gli analisti potrebbero prendere un dataset di eventi con dozzine di caratteristiche (numeri di porta, frequenze, conteggi di byte, ecc.) e utilizzare t-SNE per produrre un grafico 2D. Gli attacchi potrebbero formare i propri cluster o separarsi dai dati normali in questo grafico, rendendoli più facili da identificare. È stato applicato a dataset di malware per vedere i raggruppamenti di famiglie di malware o a dati di intrusione di rete dove diversi tipi di attacco si raggruppano distintamente, guidando ulteriori indagini. Fondamentalmente, t-SNE fornisce un modo per vedere la struttura nei dati informatici che altrimenti sarebbe incomprensibile.
+> *Casi d'uso nella cybersecurity:* t-SNE è spesso utilizzato per **visualizzare dati di sicurezza ad alta dimensione per analisi umane**. Ad esempio, in un centro operazioni di sicurezza, gli analisti potrebbero prendere un dataset di eventi con dozzine di caratteristiche (numeri di porta, frequenze, conteggi di byte, ecc.) e utilizzare t-SNE per produrre un grafico 2D. Gli attacchi potrebbero formare i propri cluster o separarsi dai dati normali in questo grafico, rendendoli più facili da identificare. È stato applicato a dataset di malware per vedere raggruppamenti di famiglie di malware o a dati di intrusione di rete dove diversi tipi di attacco si raggruppano distintamente, guidando ulteriori indagini. Fondamentalmente, t-SNE fornisce un modo per vedere la struttura nei dati informatici che altrimenti sarebbe incomprensibile.
 
 #### Assunzioni e Limitazioni
 
@@ -433,20 +434,20 @@ plt.legend()
 plt.tight_layout()
 plt.show()
 ```
-Qui abbiamo combinato il nostro precedente dataset normale 4D con un numero limitato di outlier estremi (gli outlier hanno una caratteristica (“durata”) impostata molto alta, ecc., per simulare un modello strano). Eseguiamo t-SNE con una perplessità tipica di 30. I dati di output_2d hanno forma (1505, 2). In realtà non tracciamo in questo testo, ma se lo facessimo, ci aspetteremmo di vedere forse tre cluster compatti corrispondenti ai 3 cluster normali, e i 5 outlier apparire come punti isolati lontani da quei cluster. In un flusso di lavoro interattivo, potremmo colorare i punti in base alla loro etichetta (normale o quale cluster, rispetto all'anomalia) per verificare questa struttura. Anche senza etichette, un analista potrebbe notare quei 5 punti seduti in uno spazio vuoto nel grafico 2D e segnalarli. Questo dimostra come t-SNE possa essere un potente aiuto per la rilevazione visiva delle anomalie e l'ispezione dei cluster nei dati di cybersecurity, complementando gli algoritmi automatizzati sopra.
+Qui abbiamo combinato il nostro precedente dataset normale 4D con un numero limitato di outlier estremi (gli outlier hanno una caratteristica (“durata”) impostata molto alta, ecc., per simulare un modello strano). Eseguiamo t-SNE con una perplessità tipica di 30. I dati di output_2d hanno forma (1505, 2). In realtà non tracciamo in questo testo, ma se lo facessimo, ci aspetteremmo di vedere forse tre cluster compatti corrispondenti ai 3 cluster normali, e i 5 outlier apparire come punti isolati lontani da quei cluster. In un flusso di lavoro interattivo, potremmo colorare i punti in base alla loro etichetta (normale o quale cluster, vs anomalia) per verificare questa struttura. Anche senza etichette, un analista potrebbe notare quei 5 punti seduti in uno spazio vuoto nel grafico 2D e segnalarli. Questo dimostra come t-SNE possa essere un potente aiuto per la rilevazione visiva delle anomalie e l'ispezione dei cluster nei dati di cybersecurity, complementando gli algoritmi automatizzati sopra.
 
 </details>
 
 ### HDBSCAN (Clustering Spaziale Gerarchico Basato sulla Densità delle Applicazioni con Rumore)
 
-**HDBSCAN** è un'estensione di DBSCAN che rimuove la necessità di scegliere un singolo valore globale `eps` e riesce a recuperare cluster di **diversa densità** costruendo una gerarchia di componenti connesse per densità e poi condensandola. Rispetto al DBSCAN standard, di solito
+**HDBSCAN** è un'estensione di DBSCAN che rimuove la necessità di scegliere un singolo valore globale di `eps` e riesce a recuperare cluster di **diversa densità** costruendo una gerarchia di componenti connessi per densità e poi condensandola. Rispetto al DBSCAN standard, di solito
 
 * estrae cluster più intuitivi quando alcuni cluster sono densi e altri sono rari,
 * ha solo un vero iperparametro (`min_cluster_size`) e un valore predefinito sensato,
-* fornisce a ogni punto una *probabilità* di appartenenza al cluster e un **punteggio di outlier** (`outlier_scores_`), che è estremamente utile per i cruscotti di threat-hunting.
+* fornisce a ogni punto una *probabilità* di appartenenza al cluster e un **punteggio di outlier** (`outlier_scores_`), che è estremamente utile per i dashboard di threat-hunting.
 
 > [!TIP]
-> *Casi d'uso nella cybersecurity:* HDBSCAN è molto popolare nei moderni pipeline di threat-hunting – lo vedrai spesso all'interno di playbook di hunting basati su notebook forniti con suite commerciali di XDR. Una ricetta pratica è quella di raggruppare il traffico di beaconing HTTP durante l'IR: user-agent, intervallo e lunghezza URI formano spesso diversi gruppi compatti di aggiornamenti software legittimi mentre i beacon C2 rimangono come piccoli cluster a bassa densità o come puro rumore.
+> *Casi d'uso nella cybersecurity:* HDBSCAN è molto popolare nei moderni pipeline di threat-hunting – lo vedrai spesso all'interno di playbook di hunting basati su notebook forniti con suite commerciali di XDR. Una ricetta pratica è quella di raggruppare il traffico di beaconing HTTP durante l'IR: user-agent, intervallo e lunghezza URI formano spesso diversi gruppi compatti di aggiornatori software legittimi mentre i beacon C2 rimangono come piccoli cluster a bassa densità o come puro rumore.
 
 <details>
 <summary>Esempio – Trovare canali C2 di beaconing</summary>
@@ -481,13 +482,13 @@ print("Suspect beacon count:", len(suspects))
 
 Lavori recenti hanno dimostrato che **i modelli di apprendimento non supervisionato *non* sono immuni a attaccanti attivi**:
 
-* **Avvelenamento dei dati contro i rilevatori di anomalie.** Chen *et al.* (IEEE S&P 2024) ha dimostrato che aggiungere solo il 3 % di traffico creato ad hoc può spostare il confine decisionale di Isolation Forest e ECOD in modo che attacchi reali appaiano normali. Gli autori hanno rilasciato un PoC open-source (`udo-poison`) che sintetizza automaticamente i punti di avvelenamento.
+* **Avvelenamento dei dati contro i rilevatori di anomalie.** Chen *et al.* (IEEE S&P 2024) ha dimostrato che aggiungere solo il 3 % di traffico creato ad hoc può spostare il confine decisionale di Isolation Forest ed ECOD in modo che attacchi reali appaiano normali. Gli autori hanno rilasciato un PoC open-source (`udo-poison`) che sintetizza automaticamente i punti di avvelenamento.
 * **Backdooring dei modelli di clustering.** La tecnica *BadCME* (BlackHat EU 2023) impianta un piccolo pattern di attivazione; ogni volta che quel trigger appare, un rilevatore basato su K-Means colloca silenziosamente l'evento all'interno di un cluster “benigno”.
-* **Evasione di DBSCAN/HDBSCAN.** Un pre-stampa accademica del 2025 da KU Leuven ha mostrato che un attaccante può creare pattern di beaconing che cadono intenzionalmente in gap di densità, nascondendosi efficacemente all'interno di etichette di *rumore*.
+* **Evasione di DBSCAN/HDBSCAN.** Un pre-stampa accademica del 2025 da KU Leuven ha mostrato che un attaccante può creare pattern di beaconing che cadono intenzionalmente in gap di densità, nascondendosi efficacemente all'interno delle etichette di *rumore*.
 
 Mitigazioni che stanno guadagnando attenzione:
 
-1. **Sanitizzazione del modello / TRIM.** Prima di ogni epoca di riaddestramento, scartare l'1-2 % dei punti con la perdita più alta (massima verosimiglianza ridotta) per rendere l'avvelenamento drammaticamente più difficile.
+1. **Sanitizzazione del modello / TRIM.** Prima di ogni epoca di riaddestramento, scartare l'1–2 % dei punti con la perdita più alta (massima verosimiglianza ridotta) per rendere l'avvelenamento drasticamente più difficile.
 2. **Ensemble di consenso.** Combinare diversi rilevatori eterogenei (ad es., Isolation Forest + GMM + ECOD) e sollevare un allerta se *qualunque* modello segnala un punto. La ricerca indica che questo aumenta il costo per l'attaccante di oltre 10×.
 3. **Difesa basata sulla distanza per il clustering.** Ricalcolare i cluster con `k` semi casuali diversi e ignorare i punti che saltano costantemente tra i cluster.
 

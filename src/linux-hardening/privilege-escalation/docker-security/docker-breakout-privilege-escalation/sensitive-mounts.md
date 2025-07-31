@@ -74,7 +74,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Controlla l'accesso a modprobe
 
 #### **`/proc/sysrq-trigger`**
 
-- Consente di invocare comandi Sysrq, potenzialmente causando riavvii immediati del sistema o altre azioni critiche.
+- Consente di invocare comandi Sysrq, causando potenzialmente riavvii immediati del sistema o altre azioni critiche.
 - **Esempio di Riavvio Host**:
 
 ```bash
@@ -108,25 +108,25 @@ echo b > /proc/sysrq-trigger # Riavvia l'host
 
 #### **`/proc/kmem`**
 
-- Interfaccia alternativa per `/dev/kmem`, che rappresenta la memoria virtuale del kernel.
+- Interfaccia alternativa per `/dev/kmem`, rappresenta la memoria virtuale del kernel.
 - Consente la lettura e la scrittura, quindi la modifica diretta della memoria del kernel.
 
 #### **`/proc/mem`**
 
-- Interfaccia alternativa per `/dev/mem`, che rappresenta la memoria fisica.
+- Interfaccia alternativa per `/dev/mem`, rappresenta la memoria fisica.
 - Consente la lettura e la scrittura, la modifica di tutta la memoria richiede la risoluzione degli indirizzi virtuali in fisici.
 
 #### **`/proc/sched_debug`**
 
-- Restituisce informazioni sulla pianificazione dei processi, eludendo le protezioni dello spazio dei nomi PID.
-- Espone nomi di processi, ID e identificatori cgroup.
+- Restituisce informazioni sulla pianificazione dei processi, bypassando le protezioni dello spazio dei nomi PID.
+- Espone nomi di processi, ID e identificatori di cgroup.
 
 #### **`/proc/[pid]/mountinfo`**
 
 - Fornisce informazioni sui punti di montaggio nello spazio dei nomi di montaggio del processo.
 - Espone la posizione del `rootfs` o dell'immagine del container.
 
-### Vulnerabilità di `/sys`
+### Vulnerabilità in `/sys`
 
 #### **`/sys/kernel/uevent_helper`**
 
@@ -249,7 +249,7 @@ The container can read K8s serviceaccount tokens or AWS webidentity tokens
 which allows the container to gain unauthorized access to K8s or cloud:
 
 ```bash
-/ # trova /host-var/ -type f -iname '*token*' 2>/dev/null | grep kubernetes.io
+/ # find /host-var/ -type f -iname '*token*' 2>/dev/null | grep kubernetes.io
 /host-var/lib/kubelet/pods/21411f19-934c-489e-aa2c-4906f278431e/volumes/kubernetes.io~projected/kube-api-access-64jw2/..2025_01_22_12_37_42.4197672587/token
 <SNIP>
 /host-var/lib/kubelet/pods/01c671a5-aaeb-4e0b-adcd-1cacd2e418ac/volumes/kubernetes.io~projected/kube-api-access-bljdj/..2025_01_22_12_17_53.265458487/token
@@ -273,10 +273,10 @@ So the filesystems are under `/var/lib/docker/overlay2/`:
 ```bash
 $ sudo ls -la /var/lib/docker/overlay2
 
-drwx--x---  4 root root  4096 9 Gen  22:14 00762bca8ea040b1bb28b61baed5704e013ab23a196f5fe4758dafb79dfafd5d  
-drwx--x---  4 root root  4096 11 Gen 17:00 03cdf4db9a6cc9f187cca6e98cd877d581f16b62d073010571e752c305719496  
-drwx--x---  4 root root  4096 9 Gen  21:23 049e02afb3f8dec80cb229719d9484aead269ae05afe81ee5880ccde2426ef4f  
-drwx--x---  4 root root  4096 9 Gen  21:22 062f14e5adbedce75cea699828e22657c8044cd22b68ff1bb152f1a3c8a377f2  
+drwx--x---  4 root root  4096 9 gen  22:14  00762bca8ea040b1bb28b61baed5704e013ab23a196f5fe4758dafb79dfafd5d
+drwx--x---  4 root root  4096 11 gen 17:00  03cdf4db9a6cc9f187cca6e98cd877d581f16b62d073010571e752c305719496
+drwx--x---  4 root root  4096 9 gen  21:23  049e02afb3f8dec80cb229719d9484aead269ae05afe81ee5880ccde2426ef4f
+drwx--x---  4 root root  4096 9 gen  21:22  062f14e5adbedce75cea699828e22657c8044cd22b68ff1bb152f1a3c8a377f2
 <SNIP>
 ```
 
