@@ -2,7 +2,7 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-`/proc`, `/sys` ve `/var`'ın uygun namespace izolasyonu olmadan açılması, saldırı yüzeyinin genişlemesi ve bilgi sızdırma gibi önemli güvenlik riskleri oluşturur. Bu dizinler, yanlış yapılandırıldığında veya yetkisiz bir kullanıcı tarafından erişildiğinde, konteyner kaçışı, ana makine değişikliği veya daha fazla saldırıyı destekleyen bilgilerin sağlanmasına yol açabilecek hassas dosyalar içerir. Örneğin, `-v /proc:/host/proc` yanlış bir şekilde monte edilirse, yol tabanlı doğası nedeniyle AppArmor korumasını atlayabilir ve `/host/proc`'ı korumasız bırakabilir.
+`/proc`, `/sys` ve `/var`'ın uygun namespace izolasyonu olmadan açılması, saldırı yüzeyinin genişlemesi ve bilgi sızdırma gibi önemli güvenlik riskleri oluşturur. Bu dizinler, yanlış yapılandırıldığında veya yetkisiz bir kullanıcı tarafından erişildiğinde, konteyner kaçışına, ana makine değişikliğine veya daha fazla saldırıyı destekleyen bilgilerin sağlanmasına yol açabilecek hassas dosyalar içerir. Örneğin, `-v /proc:/host/proc` yanlış bir şekilde monte edilirse, yol tabanlı doğası nedeniyle AppArmor korumasını atlayabilir ve `/host/proc`'ı korumasız bırakabilir.
 
 **Her potansiyel zafiyetin daha fazla detayını bulabilirsiniz** [**https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts**](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)**.**
 
@@ -15,7 +15,7 @@ Bu dizin, genellikle `sysctl(2)` aracılığıyla çekirdek değişkenlerini de�
 #### **`/proc/sys/kernel/core_pattern`**
 
 - [core(5)](https://man7.org/linux/man-pages/man5/core.5.html) içinde tanımlanmıştır.
-- Bu dosyaya yazabiliyorsanız, bir boru `|` yazmak ve bir çökme gerçekleştiğinde çalıştırılacak bir program veya betiğin yolunu eklemek mümkündür.
+- Bu dosyaya yazabiliyorsanız, bir boru `|` yazıp ardından bir program veya betiğin yolunu yazmak mümkündür; bu, bir çökme gerçekleştiğinde çalıştırılacaktır.
 - Bir saldırgan, `mount` komutunu çalıştırarak konteynerinin içindeki ana makinedeki yolu bulabilir ve bu yolu konteyner dosya sistemindeki bir ikili dosyaya yazabilir. Ardından, bir programı çökertip çekirdeğin konteyner dışındaki ikili dosyayı çalıştırmasını sağlayabilir.
 
 - **Test ve Sömürü Örneği**:
@@ -55,7 +55,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # modprobe erişimini kontrol et
 #### **`/proc/sys/fs`**
 
 - [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html) gereğince, dosya sistemi hakkında seçenekler ve bilgiler içerir.
-- Yazma erişimi, ana makineye karşı çeşitli hizmet reddi saldırılarını mümkün kılabilir.
+- Yazma erişimi, ana makineye karşı çeşitli hizmet reddi saldırılarını etkinleştirebilir.
 
 #### **`/proc/sys/fs/binfmt_misc`**
 
@@ -83,27 +83,27 @@ echo b > /proc/sysrq-trigger # Ana makineyi yeniden başlatır
 
 #### **`/proc/kmsg`**
 
-- Kernel ring buffer mesajlarını açığa çıkarır.
-- Kernel istismarlarına, adres sızıntılarına yardımcı olabilir ve hassas sistem bilgileri sağlayabilir.
+- Kernel halka tamponu mesajlarını açığa çıkarır.
+- Kernel istismarları, adres sızıntıları ve hassas sistem bilgileri sağlamada yardımcı olabilir.
 
 #### **`/proc/kallsyms`**
 
 - Kernel tarafından dışa aktarılan sembolleri ve adreslerini listeler.
-- Kernel istismar geliştirme için esastır, özellikle KASLR'yi aşmak için.
+- Kernel istismar geliştirme için önemlidir, özellikle KASLR'yi aşmak için.
 - Adres bilgileri `kptr_restrict` `1` veya `2` olarak ayarlandığında kısıtlanır.
 - [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html) içinde detaylar.
 
 #### **`/proc/[pid]/mem`**
 
-- Kernel bellek cihazı `/dev/mem` ile arayüz sağlar.
-- Tarihsel olarak ayrıcalık yükseltme saldırılarına karşı savunmasızdır.
+- Kernel bellek cihazı `/dev/mem` ile etkileşimde bulunur.
+- Tarihsel olarak ayrıcalık yükselme saldırılarına karşı savunmasızdır.
 - Daha fazla bilgi için [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 
 #### **`/proc/kcore`**
 
-- Sistemin fiziksel belleğini ELF core formatında temsil eder.
+- Sisteminin fiziksel belleğini ELF çekirdek formatında temsil eder.
 - Okuma, ana makine ve diğer konteynerlerin bellek içeriklerini sızdırabilir.
-- Büyük dosya boyutu okuma sorunlarına veya yazılım çökmesine yol açabilir.
+- Büyük dosya boyutu okuma sorunlarına veya yazılım çökmesine neden olabilir.
 - Detaylı kullanım için [Dumping /proc/kcore in 2019](https://schlafwandler.github.io/posts/dumping-/proc/kcore/) bakınız.
 
 #### **`/proc/kmem`**
@@ -272,10 +272,10 @@ So the filesystems are under `/var/lib/docker/overlay2/`:
 ```bash
 $ sudo ls -la /var/lib/docker/overlay2
 
-drwx--x---  4 root root  4096 9 Oca 22:14  00762bca8ea040b1bb28b61baed5704e013ab23a196f5fe4758dafb79dfafd5d  
-drwx--x---  4 root root  4096 11 Oca 17:00  03cdf4db9a6cc9f187cca6e98cd877d581f16b62d073010571e752c305719496  
-drwx--x---  4 root root  4096 9 Oca 21:23  049e02afb3f8dec80cb229719d9484aead269ae05afe81ee5880ccde2426ef4f  
-drwx--x---  4 root root  4096 9 Oca 21:22  062f14e5adbedce75cea699828e22657c8044cd22b68ff1bb152f1a3c8a377f2  
+drwx--x---  4 root root  4096 9 Oca  22:14 00762bca8ea040b1bb28b61baed5704e013ab23a196f5fe4758dafb79dfafd5d  
+drwx--x---  4 root root  4096 11 Oca  17:00 03cdf4db9a6cc9f187cca6e98cd877d581f16b62d073010571e752c305719496  
+drwx--x---  4 root root  4096 9 Oca  21:23 049e02afb3f8dec80cb229719d9484aead269ae05afe81ee5880ccde2426ef4f  
+drwx--x---  4 root root  4096 9 Oca  21:22 062f14e5adbedce75cea699828e22657c8044cd22b68ff1bb152f1a3c8a377f2  
 <SNIP>
 ```
 
@@ -314,7 +314,7 @@ A similar technique works with **crictl**, **podman** or the **kubelet** API onc
 Writable **cgroup v1** mounts are also dangerous. If `/sys/fs/cgroup` is bind-mounted **rw** and the host kernel is vulnerable to **CVE-2022-0492**, an attacker can set a malicious `release_agent` and execute arbitrary code in the *initial* namespace:
 
 ```bash
-# konteynerin CAP_SYS_ADMIN ve savunmasız bir çekirdek olduğunu varsayarak
+# konteynerin CAP_SYS_ADMIN'e ve savunmasız bir çekirdeğe sahip olduğunu varsayıyoruz
 mkdir -p /tmp/x && echo 1 > /tmp/x/notify_on_release
 
 echo '/tmp/pwn' > /sys/fs/cgroup/release_agent   # CVE-2022-0492 gerektirir

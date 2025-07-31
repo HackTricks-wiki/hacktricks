@@ -56,7 +56,7 @@ SharpHound.exe --CollectionMethods All           # Full sweep (noisy)
 SharpHound.exe --CollectionMethods Group,LocalAdmin,Session,Trusts,ACL
 SharpHound.exe --Stealth --LDAP                      # Low noise LDAP only
 ```
-Toplayıcılar, BloodHound GUI aracılığıyla alınan JSON'lar üretir.
+Toplayıcılar, BloodHound GUI aracılığıyla alınan JSON üretir.
 
 ---
 

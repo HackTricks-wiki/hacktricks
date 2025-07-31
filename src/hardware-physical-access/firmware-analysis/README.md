@@ -8,9 +8,9 @@ Firmware, cihazların doğru bir şekilde çalışmasını sağlayan ve donanım
 
 ## **Bilgi Toplama**
 
-**Bilgi toplama**, bir cihazın yapısını ve kullandığı teknolojileri anlamada kritik bir ilk adımdır. Bu süreç, aşağıdaki verilerin toplanmasını içerir:
+**Bilgi toplama**, bir cihazın yapısını ve kullandığı teknolojileri anlamanın kritik bir başlangıç adımıdır. Bu süreç, aşağıdaki verilerin toplanmasını içerir:
 
-- CPU mimarisi ve çalıştığı işletim sistemi
+- Çalıştığı CPU mimarisi ve işletim sistemi
 - Bootloader ayrıntıları
 - Donanım düzeni ve veri sayfaları
 - Kod tabanı metrikleri ve kaynak konumları
@@ -39,7 +39,7 @@ Firmware edinmek, her biri kendi karmaşıklık seviyesine sahip çeşitli yolla
 
 ## Firmware'i Analiz Etme
 
-Artık **firmware'e sahip olduğunuzda**, ona nasıl yaklaşacağınızı bilmek için bilgi çıkarmanız gerekir. Bunun için kullanabileceğiniz farklı araçlar:
+Artık **firmware'e sahip olduğunuzda**, onunla nasıl başa çıkacağınızı bilmek için bilgi çıkarmanız gerekir. Bunun için kullanabileceğiniz farklı araçlar:
 ```bash
 file <bin>
 strings -n8 <bin>
@@ -60,7 +60,7 @@ Veya dosyayı incelemek için [**binvis.io**](https://binvis.io/#/) ([code](http
 
 ### Dosya Sistemini Alma
 
-Önceki bahsedilen araçlarla `binwalk -ev <bin>` kullanarak **dosya sistemini çıkarmış olmalısınız**.\
+Daha önce bahsedilen araçlarla `binwalk -ev <bin>` kullanarak **dosya sistemini çıkarmış olmalısınız**.\
 Binwalk genellikle bunu **dosya sistemi türüyle adlandırılan bir klasörün içine çıkarır**, bu genellikle aşağıdakilerden biridir: squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
 
 #### Manuel Dosya Sistemi Çıkartma
@@ -91,7 +91,7 @@ Alternatif olarak, aşağıdaki komut da çalıştırılabilir.
 
 `$ dd if=DIR850L_REVB.bin bs=1 skip=$((0x1A0094)) of=dir.squashfs`
 
-- Squashfs için (yukarıdaki örnekte kullanılmıştır)
+- squashfs (yukarıdaki örnekte kullanılan)
 
 `$ unsquashfs dir.squashfs`
 
@@ -101,11 +101,11 @@ Dosyalar daha sonra "`squashfs-root`" dizininde olacaktır.
 
 `$ cpio -ivd --no-absolute-filenames -F <bin>`
 
-- JFFS2 dosya sistemleri için
+- jffs2 dosya sistemleri için
 
 `$ jefferson rootfsfile.jffs2`
 
-- NAND flash ile UBIFS dosya sistemleri için
+- NAND flash ile ubifs dosya sistemleri için
 
 `$ ubireader_extract_images -u UBI -s <start_offset> <bin>`
 
@@ -132,7 +132,7 @@ Görüntünün şifreleme durumunu değerlendirmek için **entropy** `binwalk -E
 
 ### Dosya Sistemini Çıkarma
 
-`binwalk -ev <bin>` kullanarak genellikle dosya sistemi çıkarılabilir, genellikle dosya sistemi türüyle adlandırılan bir dizine (örneğin, squashfs, ubifs) çıkarılır. Ancak, **binwalk** sihirli baytların eksikliği nedeniyle dosya sistemi türünü tanımadığında, manuel çıkarma gereklidir. Bu, `binwalk` kullanarak dosya sisteminin ofsetini bulmayı ve ardından dosya sistemini çıkarmak için `dd` komutunu kullanmayı içerir:
+`binwalk -ev <bin>` kullanarak, genellikle dosya sistemini çıkarmak mümkündür; bu genellikle dosya sistemi türüyle adlandırılan bir dizine (örneğin, squashfs, ubifs) çıkar. Ancak, **binwalk** sihirli baytların eksikliği nedeniyle dosya sistemi türünü tanımadığında, manuel çıkarma gereklidir. Bu, `binwalk` kullanarak dosya sisteminin ofsetini bulmayı ve ardından dosya sistemini çıkarmak için `dd` komutunu kullanmayı içerir:
 ```bash
 $ binwalk DIR850L_REVB.bin
 
@@ -144,7 +144,7 @@ Sonrasında, dosya sistemi türüne bağlı olarak (örneğin, squashfs, cpio, j
 
 Dosya sistemi çıkarıldıktan sonra, güvenlik açıkları arayışına başlanır. Güvensiz ağ daemon'larına, hardcoded kimlik bilgilerine, API uç noktalarına, güncelleme sunucusu işlevlerine, derlenmemiş koda, başlangıç betiklerine ve çevrimdışı analiz için derlenmiş ikililere dikkat edilir.
 
-**Ana konumlar** ve **denetlenecek öğeler** şunlardır:
+**Ana konumlar** ve **incelemesi gereken öğeler** şunlardır:
 
 - **etc/shadow** ve **etc/passwd** kullanıcı kimlik bilgileri için
 - **etc/ssl** içindeki SSL sertifikaları ve anahtarlar
@@ -160,11 +160,11 @@ Dosya sistemi içindeki hassas bilgileri ve güvenlik açıklarını ortaya çı
 
 ### Derlenmiş İkililer Üzerinde Güvenlik Kontrolleri
 
-Dosya sisteminde bulunan hem kaynak kodu hem de derlenmiş ikililer güvenlik açıkları açısından incelenmelidir. **checksec.sh** gibi araçlar Unix ikilileri için ve **PESecurity** Windows ikilileri için, istismar edilebilecek korumasız ikilileri tanımlamaya yardımcı olur.
+Dosya sisteminde bulunan hem kaynak kodu hem de derlenmiş ikililer güvenlik açıkları açısından incelenmelidir. Unix ikilileri için **checksec.sh** ve Windows ikilileri için **PESecurity** gibi araçlar, istismar edilebilecek korumasız ikilileri tanımlamaya yardımcı olur.
 
 ## Dinamik Analiz için Firmware Taklit Etme
 
-Firmware taklit etme süreci, bir cihazın çalışmasının veya bireysel bir programın **dinamik analizini** sağlar. Bu yaklaşım, donanım veya mimari bağımlılıkları ile zorluklarla karşılaşabilir, ancak kök dosya sistemini veya belirli ikilileri, Raspberry Pi gibi eşleşen mimari ve endianlıkta bir cihaza veya önceden oluşturulmuş bir sanal makineye aktarmak, daha fazla test yapmayı kolaylaştırabilir.
+Firmware taklit etme süreci, bir cihazın çalışması veya bireysel bir programın **dinamik analizini** sağlar. Bu yaklaşım, donanım veya mimari bağımlılıkları ile zorluklarla karşılaşabilir, ancak kök dosya sistemini veya belirli ikilileri, Raspberry Pi gibi eşleşen mimari ve endianlıkta bir cihaza veya önceden oluşturulmuş bir sanal makineye aktarmak, daha fazla test yapmayı kolaylaştırabilir.
 
 ### Bireysel İkilileri Taklit Etme
 
@@ -196,7 +196,7 @@ Bu aşamada, analiz için gerçek veya emüle edilmiş bir cihaz ortamı kullan�
 
 ## Çalışma Zamanı Analiz Teknikleri
 
-Çalışma zamanı analizi, bir süreç veya ikili dosya ile işletim ortamında etkileşimde bulunmayı içerir; gdb-multiarch, Frida ve Ghidra gibi araçlar kullanılarak kesme noktaları ayarlanır ve zafiyetler fuzzing ve diğer teknikler aracılığıyla belirlenir.
+Çalışma zamanı analizi, gdb-multiarch, Frida ve Ghidra gibi araçlar kullanarak bir süreç veya ikili dosya ile işletim ortamında etkileşimde bulunmayı içerir; bu araçlar, kesme noktaları ayarlamak ve fuzzing gibi tekniklerle zafiyetleri tanımlamak için kullanılır.
 
 ## İkili İstismar ve Kanıt-of-Konsept
 
@@ -206,24 +206,24 @@ Belirlenen zafiyetler için bir PoC geliştirmek, hedef mimarinin derin bir anla
 
 [AttifyOS](https://github.com/adi0x90/attifyos) ve [EmbedOS](https://github.com/scriptingxss/EmbedOS) gibi işletim sistemleri, gerekli araçlarla donatılmış firmware güvenlik testleri için önceden yapılandırılmış ortamlar sağlar.
 
-## Firmware Analiz Etmek için Hazırlanmış OS'ler
+## Firmware Analizi için Hazırlanmış OS'ler
 
 - [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS, Nesnelerin İnterneti (IoT) cihazlarının güvenlik değerlendirmesi ve penetrasyon testleri yapmanıza yardımcı olmak için tasarlanmış bir dağıtımdır. Tüm gerekli araçların yüklü olduğu önceden yapılandırılmış bir ortam sunarak size çok zaman kazandırır.
 - [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Gömülü güvenlik test işletim sistemi, firmware güvenlik test araçları ile önceden yüklenmiş Ubuntu 18.04 tabanlıdır.
 
 ## Firmware Geri Alma Saldırıları ve Güvensiz Güncelleme Mekanizmaları
 
-Bir satıcı firmware görüntüleri için kriptografik imza kontrolleri uygulasa bile, **sürüm geri alma (downgrade) koruması sıklıkla atlanır**. Önyükleme veya kurtarma yükleyici yalnızca gömülü bir genel anahtar ile imzayı doğruluyorsa ancak *sürümü* (veya monoton bir sayacı) karşılaştırmıyorsa, bir saldırgan **geçerli bir imzaya sahip olan daha eski, savunmasız bir firmware'i meşru bir şekilde yükleyebilir** ve böylece yamanmış zafiyetleri yeniden tanıtabilir.
+Bir satıcı firmware görüntüleri için kriptografik imza kontrolleri uygulasa bile, **sürüm geri alma (downgrade) koruması sıklıkla atlanır**. Önyükleme veya kurtarma yükleyici yalnızca gömülü bir genel anahtar ile imzayı doğruluyorsa ancak flaşlanan görüntünün *sürümünü* (veya monoton bir sayacı) karşılaştırmıyorsa, bir saldırgan geçerli bir imzaya sahip **daha eski, savunmasız bir firmware'i meşru bir şekilde yükleyebilir** ve böylece yamanmış zafiyetleri yeniden tanıtabilir.
 
 Tipik saldırı iş akışı:
 
-1. **Daha eski bir imzalı görüntü elde et**
+1. **Daha eski imzalı bir görüntü elde et**
 * Bunu satıcının kamuya açık indirme portalından, CDN veya destek sitesinden alın.
 * Bunu eşlik eden mobil/masaüstü uygulamalardan çıkarın (örneğin, bir Android APK'sının `assets/firmware/` dizininde).
 * Bunu VirusTotal, internet arşivleri, forumlar vb. gibi üçüncü taraf depolardan alın.
 2. **Görüntüyü cihaza yükleyin veya sunun** herhangi bir açık güncelleme kanalı aracılığıyla:
 * Web UI, mobil uygulama API'si, USB, TFTP, MQTT vb.
-* Birçok tüketici IoT cihazı, Base64 kodlu firmware blob'larını kabul eden *kimlik doğrulaması yapılmamış* HTTP(S) uç noktaları açar, bunları sunucu tarafında çözer ve kurtarma/güncelleme işlemini tetikler.
+* Birçok tüketici IoT cihazı, Base64 kodlu firmware blob'larını kabul eden *kimlik doğrulaması yapılmamış* HTTP(S) uç noktaları açar, bunları sunucu tarafında çözer ve kurtarma/güncellemeyi tetikler.
 3. Geri alma işleminden sonra, daha yeni sürümde yamanmış bir zafiyeti istismar edin (örneğin, daha sonra eklenen bir komut enjekte etme filtresi).
 4. İsteğe bağlı olarak, en son görüntüyü geri yükleyin veya kalıcılık sağlandıktan sonra tespiti önlemek için güncellemeleri devre dışı bırakın.
 
@@ -234,7 +234,7 @@ Host: 192.168.0.1
 Content-Type: application/octet-stream
 Content-Length: 0
 ```
-Vulnerable (downgraded) firmware'de, `md5` parametresi doğrudan bir shell komutuna sanitizasyon olmadan eklenir, bu da rastgele komutların enjekte edilmesine olanak tanır (burada – SSH anahtar tabanlı root erişiminin etkinleştirilmesi). Daha sonraki firmware sürümleri temel bir karakter filtresi tanıttı, ancak downgrade korumasının olmaması düzeltmeyi anlamsız kılıyor.
+Vulnerable (downgraded) firmware'da, `md5` parametresi doğrudan bir shell komutuna sanitizasyon olmadan eklenir, bu da keyfi komutların enjekte edilmesine olanak tanır (burada – SSH anahtar tabanlı root erişiminin etkinleştirilmesi). Daha sonraki firmware sürümleri temel bir karakter filtresi tanıttı, ancak downgrade korumasının olmaması düzeltmeyi anlamsız kılıyor.
 
 ### Mobil Uygulamalardan Firmware Çıkartma
 

@@ -4,7 +4,7 @@
 
 ## ADWS Nedir?
 
-Active Directory Web Services (ADWS), **Windows Server 2008 R2'den itibaren her Domain Controller'da varsayılan olarak etkinleştirilmiştir** ve TCP **9389** üzerinde dinler. İsimden dolayı, **HTTP kullanılmamaktadır**. Bunun yerine, hizmet, özel .NET çerçeve protokolleri yığını aracılığıyla LDAP tarzı verileri açığa çıkarır:
+Active Directory Web Services (ADWS), **Windows Server 2008 R2'den itibaren her Domain Controller'da varsayılan olarak etkinleştirilmiştir** ve TCP **9389** üzerinde dinler. İsimden dolayı, **HTTP kullanılmaz**. Bunun yerine, hizmet, özel .NET çerçeve protokolleri yığını aracılığıyla LDAP tarzı verileri açığa çıkarır:
 
 * MC-NBFX → MC-NBFSE → MS-NNS → MC-NMF
 
@@ -23,12 +23,12 @@ Trafik bu ikili SOAP çerçeveleri içinde kapsüllenmiş olduğundan ve alış�
 ### Ana Özellikler
 
 * **SOCKS üzerinden proxy desteği** (C2 implantlarından faydalı).
-* LDAP `-q '(objectClass=user)'` ile aynı ince ayar arama filtreleri.
+* LDAP `-q '(objectClass=user)'` ile aynı ince ayarlı arama filtreleri.
 * Opsiyonel **yazma** işlemleri (`--set` / `--delete`).
 * BloodHound'a doğrudan alım için **BOFHound çıktı modu**.
 * İnsan okunabilirliği gerektiğinde zaman damgalarını / `userAccountControl`'ü güzelleştirmek için `--parse` bayrağı.
 
-### Kurulum (operatör host)
+### Kurulum (operatör hostu)
 ```bash
 python3 -m pip install soapy-adws   # or git clone && pip install -r requirements.txt
 ```
@@ -70,13 +70,13 @@ msDs-AllowedToActOnBehalfOfOtherIdentity 'B:32:01....'
 
 ### Ayrıntılı ADDS Günlüğü
 
-ADWS (ve LDAP) kaynaklı pahalı / verimsiz aramaları ortaya çıkarmak için Alan Denetleyicileri üzerinde aşağıdaki kayıt defteri anahtarlarını etkinleştirin:
+ADWS (ve LDAP) kaynaklı maliyetli / verimsiz aramaları ortaya çıkarmak için Alan Denetleyicileri üzerinde aşağıdaki kayıt defteri anahtarlarını etkinleştirin:
 ```powershell
 New-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Diagnostics' -Name '15 Field Engineering' -Value 5 -Type DWORD
 New-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters' -Name 'Expensive Search Results Threshold' -Value 1 -Type DWORD
 New-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters' -Name 'Search Time Threshold (msecs)' -Value 0 -Type DWORD
 ```
-Olaylar **Directory-Service** altında tam LDAP filtresi ile görünecektir, sorgu ADWS üzerinden gelse bile.
+Olaylar **Directory-Service** altında tam LDAP filtresi ile görünecektir, sorgu ADWS üzerinden geldiğinde bile.
 
 ### SACL Canary Nesneleri
 

