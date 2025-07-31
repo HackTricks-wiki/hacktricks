@@ -4,7 +4,7 @@
 
 ## O que é ADWS?
 
-Active Directory Web Services (ADWS) está **habilitado por padrão em todos os Controladores de Domínio desde o Windows Server 2008 R2** e escuta na porta TCP **9389**. Apesar do nome, **nenhum HTTP está envolvido**. Em vez disso, o serviço expõe dados no estilo LDAP através de uma pilha de protocolos de estrutura .NET proprietários:
+Active Directory Web Services (ADWS) está **habilitado por padrão em todos os Controladores de Domínio desde o Windows Server 2008 R2** e escuta na porta TCP **9389**. Apesar do nome, **nenhum HTTP está envolvido**. Em vez disso, o serviço expõe dados no estilo LDAP através de uma pilha de protocolos de moldura proprietários .NET:
 
 * MC-NBFX → MC-NBFSE → MS-NNS → MC-NMF
 
@@ -70,7 +70,7 @@ Combine isso com `s4u2proxy`/`Rubeus /getticket` para uma cadeia completa de **D
 
 ### Registro Verboso do ADDS
 
-Ative as seguintes chaves de registro nos Controladores de Domínio para expor buscas caras / ineficientes provenientes do ADWS (e LDAP):
+Ative as seguintes chaves de registro em Controladores de Domínio para expor buscas caras / ineficientes provenientes do ADWS (e LDAP):
 ```powershell
 New-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Diagnostics' -Name '15 Field Engineering' -Value 5 -Type DWORD
 New-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters' -Name 'Expensive Search Results Threshold' -Value 1 -Type DWORD

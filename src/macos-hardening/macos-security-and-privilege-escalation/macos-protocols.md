@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Remote Access Services
+## Serviços de Acesso Remoto
 
 Estes são os serviços comuns do macOS para acessá-los remotamente.\
 Você pode habilitar/desabilitar esses serviços em `System Settings` --> `Sharing`
@@ -32,20 +32,20 @@ Para habilitar o ARD para várias tarefas administrativas, como escalonamento de
 ```bash
 sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -allowAccessFor -allUsers -privs -all -clientopts -setmenuextra -menuextra yes
 ```
-ARD fornece níveis de controle versáteis, incluindo observação, controle compartilhado e controle total, com sessões persistindo mesmo após mudanças de senha do usuário. Permite o envio de comandos Unix diretamente, executando-os como root para usuários administrativos. O agendamento de tarefas e a pesquisa remota do Spotlight são recursos notáveis, facilitando pesquisas remotas de baixo impacto para arquivos sensíveis em várias máquinas.
+ARD fornece níveis de controle versáteis, incluindo observação, controle compartilhado e controle total, com sessões persistindo mesmo após mudanças de senha do usuário. Permite o envio de comandos Unix diretamente, executando-os como root para usuários administrativos. O agendamento de tarefas e a pesquisa remota do Spotlight são recursos notáveis, facilitando buscas remotas de baixo impacto por arquivos sensíveis em várias máquinas.
 
 #### Vulnerabilidades recentes de Compartilhamento de Tela / ARD (2023-2025)
 
 | Ano | CVE | Componente | Impacto | Corrigido em |
 |-----|-----|------------|---------|--------------|
-|2023|CVE-2023-42940|Compartilhamento de Tela|Renderização de sessão incorreta poderia causar a transmissão da *mesa de trabalho* ou janela *errada*, resultando em vazamento de informações sensíveis|macOS Sonoma 14.2.1 (Dez 2023) |
-|2024|CVE-2024-23296|launchservicesd / login|Bypass de proteção de memória do kernel que pode ser encadeado após um login remoto bem-sucedido (explorado ativamente na natureza)|macOS Ventura 13.6.4 / Sonoma 14.4 (Mar 2024) |
+|2023|CVE-2023-42940|Compartilhamento de Tela|Renderização de sessão incorreta poderia causar a transmissão da *tela* ou janela *errada*, resultando em vazamento de informações sensíveis|macOS Sonoma 14.2.1 (Dez 2023) |
+|2024|CVE-2024-23296|launchservicesd / login|Bypass de proteção de memória do kernel que pode ser encadeado após um login remoto bem-sucedido (explorado ativamente na prática)|macOS Ventura 13.6.4 / Sonoma 14.4 (Mar 2024) |
 
 **Dicas de Hardening**
 
 * Desative *Compartilhamento de Tela*/*Gerenciamento Remoto* quando não for estritamente necessário.
 * Mantenha o macOS totalmente atualizado (a Apple geralmente envia correções de segurança para as três últimas versões principais).
-* Use uma **Senha Forte** *e* aplique a opção *“visualizadores VNC podem controlar a tela com senha”* **desativada** sempre que possível.
+* Use uma **Senha Forte** *e* aplique a opção *“Os visualizadores VNC podem controlar a tela com senha”* **desativada** sempre que possível.
 * Coloque o serviço atrás de uma VPN em vez de expor TCP 5900/3283 à Internet.
 * Adicione uma regra de Firewall de Aplicação para limitar `ARDAgent` à sub-rede local:
 
@@ -76,7 +76,7 @@ A descoberta de serviços dentro da rede é facilitada pelo **DNS Service Discov
 
 A utilidade `dns-sd` pode ser empregada para **descobrir e anunciar serviços de rede**. Aqui estão alguns exemplos de seu uso:
 
-### Buscando Serviços SSH
+### Buscando por Serviços SSH
 
 Para buscar serviços SSH na rede, o seguinte comando é utilizado:
 ```bash

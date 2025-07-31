@@ -26,13 +26,13 @@ Os bits são codificados modulando a duração do espaço entre os pulsos. A lar
 
 **2. Codificação por Largura de Pulso**
 
-Os bits são codificados pela modulação da largura do pulso. A largura do espaço após o estouro do pulso é constante.
+Os bits são codificados pela modulação da largura do pulso. A largura do espaço após o pulso é constante.
 
 <figure><img src="../../images/image (282).png" alt=""><figcaption></figcaption></figure>
 
 **3. Codificação de Fase**
 
-Também é conhecida como codificação Manchester. O valor lógico é definido pela polaridade da transição entre o estouro do pulso e o espaço. "Espaço para estouro de pulso" denota lógica "0", "estouro de pulso para espaço" denota lógica "1".
+Também é conhecida como codificação Manchester. O valor lógico é definido pela polaridade da transição entre o pulso e o espaço. "Espaço para pulso" denota lógica "0", "pulso para espaço" denota lógica "1".
 
 <figure><img src="../../images/image (634).png" alt=""><figcaption></figcaption></figure>
 
@@ -59,11 +59,11 @@ O **comando NEC**, além do preâmbulo, consiste em um byte de endereço e um by
 
 O **código de repetição** tem um "1" após o preâmbulo, que é um bit de parada.
 
-Para **lógica "0" e "1"**, o NEC usa Codificação por Distância de Pulso: primeiro, um estouro de pulso é transmitido, após o qual há uma pausa, cuja duração define o valor do bit.
+Para **lógica "0" e "1"**, o NEC usa Codificação por Distância de Pulso: primeiro, um pulso é transmitido após o qual há uma pausa, cujo comprimento define o valor do bit.
 
 ### Ar Condicionado
 
-Ao contrário de outros controles remotos, **os ar condicionados não transmitem apenas o código do botão pressionado**. Eles também **transmitem todas as informações** quando um botão é pressionado para garantir que a **máquina de ar condicionado e o controle remoto estejam sincronizados**.\
+Diferente de outros controles remotos, **os ar condicionados não transmitem apenas o código do botão pressionado**. Eles também **transmitem todas as informações** quando um botão é pressionado para garantir que a **máquina de ar condicionado e o controle remoto estejam sincronizados**.\
 Isso evitará que uma máquina configurada para 20ºC seja aumentada para 21ºC com um controle remoto, e então, quando outro controle remoto, que ainda tem a temperatura como 20ºC, for usado para aumentar mais a temperatura, ela "aumentará" para 21ºC (e não para 22ºC pensando que está em 21ºC).
 
 ---
@@ -78,7 +78,7 @@ flipper-zero/fz-infrared.md
 
 ### Tomada de Controle de Smart-TV / Set-top Box (EvilScreen)
 
-Trabalhos acadêmicos recentes (EvilScreen, 2022) demonstraram que **controles remotos multicanal que combinam Infravermelho com Bluetooth ou Wi-Fi podem ser abusados para sequestrar completamente TVs inteligentes modernas**. O ataque encadeia códigos de serviço IR de alta privilégio com pacotes Bluetooth autenticados, contornando a isolação de canais e permitindo lançamentos arbitrários de aplicativos, ativação de microfone ou redefinição de fábrica sem acesso físico. Oito TVs populares de diferentes fornecedores — incluindo um modelo Samsung que afirma conformidade com ISO/IEC 27001 — foram confirmadas como vulneráveis. A mitigação requer correções de firmware do fornecedor ou desativação completa de receptores IR não utilizados.
+Trabalhos acadêmicos recentes (EvilScreen, 2022) demonstraram que **controles remotos multicanal que combinam Infravermelho com Bluetooth ou Wi-Fi podem ser abusados para sequestrar completamente TVs inteligentes modernas**. O ataque encadeia códigos de serviço IR de alta privilégio com pacotes Bluetooth autenticados, contornando a isolação de canais e permitindo lançamentos arbitrários de aplicativos, ativação de microfone ou reset de fábrica sem acesso físico. Oito TVs populares de diferentes fornecedores — incluindo um modelo Samsung que afirma conformidade com ISO/IEC 27001 — foram confirmadas como vulneráveis. A mitigação requer correções de firmware do fornecedor ou desativação completa de receptores IR não utilizados.
 
 ### Exfiltração de Dados Air-Gapped via LEDs IR (família aIR-Jumper)
 

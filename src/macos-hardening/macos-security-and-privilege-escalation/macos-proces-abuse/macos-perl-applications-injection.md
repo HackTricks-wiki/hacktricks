@@ -1,10 +1,10 @@
-# macOS Perl Applications Injection
+# Injeção de Aplicações Perl no macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Via `PERL5OPT` & `PERL5LIB` env variable
+## Através da variável de ambiente `PERL5OPT` & `PERL5LIB`
 
-Usando a variável de ambiente **`PERL5OPT`** é possível fazer com que **Perl** execute comandos arbitrários quando o interpretador inicia (mesmo **antes** da primeira linha do script alvo ser analisada).
+Usando a variável de ambiente **`PERL5OPT`**, é possível fazer com que **Perl** execute comandos arbitrários quando o interpretador inicia (mesmo **antes** da primeira linha do script alvo ser analisada).
 Por exemplo, crie este script:
 ```perl:test.pl
 #!/usr/bin/perl
@@ -35,11 +35,11 @@ export PERL5DB='system("/bin/zsh")'
 sudo perl -d /usr/bin/some_admin_script.pl   # irá abrir um shell antes de executar o script
 ```
 
-* **`PERL5SHELL`** – no Windows, essa variável controla qual executável de shell o Perl usará quando precisar criar um shell. Ela é mencionada aqui apenas para completude, pois não é relevante no macOS.
+* **`PERL5SHELL`** – no Windows, essa variável controla qual executável de shell o Perl usará quando precisar criar um shell. É mencionada aqui apenas para completude, pois não é relevante no macOS.
 
-Embora `PERL5DB` exija a switch `-d`, é comum encontrar scripts de manutenção ou instaladores que são executados como *root* com essa flag ativada para solução de problemas detalhada, tornando a variável um vetor de escalonamento válido.
+Embora `PERL5DB` exija a opção `-d`, é comum encontrar scripts de manutenção ou instaladores que são executados como *root* com essa flag ativada para solução de problemas detalhada, tornando a variável um vetor de escalonamento válido.
 
-## Via dependências (@INC abuse)
+## Via dependências (abuso de @INC)
 
 É possível listar o caminho de inclusão que o Perl irá buscar (**`@INC`**) executando:
 ```bash
@@ -66,7 +66,7 @@ Por exemplo, se um script estiver importando **`use File::Basename;`**, seria po
 
 ## Bypass do SIP via Assistente de Migração (CVE-2023-32369 “Migraine”)
 
-Em maio de 2023, a Microsoft divulgou **CVE-2023-32369**, apelidada de **Migraine**, uma técnica de pós-exploração que permite a um atacante *root* **burlar completamente a Proteção de Integridade do Sistema (SIP)**. O componente vulnerável é **`systemmigrationd`**, um daemon intitulado com **`com.apple.rootless.install.heritable`**. Qualquer processo filho gerado por esse daemon herda a concessão e, portanto, é executado **fora** das restrições do SIP.
+Em maio de 2023, a Microsoft divulgou **CVE-2023-32369**, apelidado de **Migraine**, uma técnica de pós-exploração que permite a um atacante *root* **burlar completamente a Proteção de Integridade do Sistema (SIP)**. O componente vulnerável é **`systemmigrationd`**, um daemon intitulado com **`com.apple.rootless.install.heritable`**. Qualquer processo filho gerado por esse daemon herda a concessão e, portanto, é executado **fora** das restrições do SIP.
 
 Entre os filhos identificados pelos pesquisadores está o interpretador assinado pela Apple:
 ```

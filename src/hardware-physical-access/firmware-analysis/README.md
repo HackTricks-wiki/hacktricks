@@ -23,7 +23,7 @@ Para esse propósito, ferramentas de **inteligência de código aberto (OSINT)**
 
 ## **Adquirindo o Firmware**
 
-Obter firmware pode ser abordado de várias maneiras, cada uma com seu próprio nível de complexidade:
+Obter firmware pode ser abordado por vários meios, cada um com seu próprio nível de complexidade:
 
 - **Diretamente** da fonte (desenvolvedores, fabricantes)
 - **Construindo** a partir de instruções fornecidas
@@ -61,7 +61,7 @@ Ou [**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/archive
 ### Obtendo o Sistema de Arquivos
 
 Com as ferramentas comentadas anteriormente, como `binwalk -ev <bin>`, você deve ter conseguido **extrair o sistema de arquivos**.\
-O Binwalk geralmente o extrai dentro de uma **pasta nomeada como o tipo de sistema de arquivos**, que geralmente é um dos seguintes: squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
+O binwalk geralmente o extrai dentro de uma **pasta nomeada como o tipo de sistema de arquivos**, que geralmente é um dos seguintes: squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
 
 #### Extração Manual do Sistema de Arquivos
 
@@ -148,7 +148,7 @@ Com o sistema de arquivos extraído, a busca por falhas de segurança começa. A
 
 - **etc/shadow** e **etc/passwd** para credenciais de usuário
 - Certificados e chaves SSL em **etc/ssl**
-- Arquivos de configuração e scripts para potenciais vulnerabilidades
+- Arquivos de configuração e scripts em busca de vulnerabilidades potenciais
 - Binários incorporados para análise adicional
 - Servidores web e binários comuns de dispositivos IoT
 
@@ -180,7 +180,7 @@ E para instalar as ferramentas de emulação necessárias:
 ```bash
 sudo apt-get install qemu qemu-user qemu-user-static qemu-system-arm qemu-system-mips qemu-system-x86 qemu-utils
 ```
-Para MIPS (big-endian), `qemu-mips` é utilizado, e para binários little-endian, `qemu-mipsel` seria a escolha.
+Para MIPS (big-endian), `qemu-mips` é usado, e para binários little-endian, `qemu-mipsel` seria a escolha.
 
 #### Emulação da Arquitetura ARM
 
@@ -188,15 +188,15 @@ Para binários ARM, o processo é semelhante, com o emulador `qemu-arm` sendo ut
 
 ### Emulação de Sistema Completo
 
-Ferramentas como [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit) e outras, facilitam a emulação completa de firmware, automatizando o processo e ajudando na análise dinâmica.
+Ferramentas como [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit) e outras, facilitam a emulação completa de firmware, automatizando o processo e auxiliando na análise dinâmica.
 
 ## Análise Dinâmica na Prática
 
-Nesta fase, um ambiente de dispositivo real ou emulado é utilizado para análise. É essencial manter acesso ao shell do sistema operacional e ao sistema de arquivos. A emulação pode não imitar perfeitamente as interações de hardware, necessitando reinicializações ocasionais da emulação. A análise deve revisitar o sistema de arquivos, explorar páginas da web expostas e serviços de rede, e investigar vulnerabilidades do bootloader. Testes de integridade do firmware são críticos para identificar potenciais vulnerabilidades de backdoor.
+Nesta fase, um ambiente de dispositivo real ou emulado é usado para análise. É essencial manter acesso ao shell do sistema operacional e ao sistema de arquivos. A emulação pode não imitar perfeitamente as interações de hardware, necessitando de reinicializações ocasionais da emulação. A análise deve revisitar o sistema de arquivos, explorar páginas da web expostas e serviços de rede, e investigar vulnerabilidades do bootloader. Testes de integridade do firmware são críticos para identificar potenciais vulnerabilidades de backdoor.
 
 ## Técnicas de Análise em Tempo de Execução
 
-A análise em tempo de execução envolve interagir com um processo ou binário em seu ambiente operacional, utilizando ferramentas como gdb-multiarch, Frida e Ghidra para definir pontos de interrupção e identificar vulnerabilidades através de fuzzing e outras técnicas.
+A análise em tempo de execução envolve interagir com um processo ou binário em seu ambiente operacional, usando ferramentas como gdb-multiarch, Frida e Ghidra para definir pontos de interrupção e identificar vulnerabilidades por meio de fuzzing e outras técnicas.
 
 ## Exploração Binária e Prova de Conceito
 
@@ -219,13 +219,13 @@ Fluxo de ataque típico:
 
 1. **Obter uma imagem assinada mais antiga**
 * Pegue-a do portal de download público do fornecedor, CDN ou site de suporte.
-* Extraia-a de aplicativos móveis/escrita acompanhantes (por exemplo, dentro de um APK Android sob `assets/firmware/`).
+* Extraia-a de aplicativos móveis/escrita acompanhantes (por exemplo, dentro de um APK Android em `assets/firmware/`).
 * Recupere-a de repositórios de terceiros, como VirusTotal, arquivos da Internet, fóruns, etc.
 2. **Carregar ou servir a imagem para o dispositivo** através de qualquer canal de atualização exposto:
 * UI da Web, API de aplicativo móvel, USB, TFTP, MQTT, etc.
 * Muitos dispositivos IoT de consumo expõem endpoints HTTP(S) *não autenticados* que aceitam blobs de firmware codificados em Base64, decodificam-nos no lado do servidor e acionam a recuperação/atualização.
 3. Após o downgrade, explore uma vulnerabilidade que foi corrigida na versão mais nova (por exemplo, um filtro de injeção de comando que foi adicionado posteriormente).
-4. Opcionalmente, grave a imagem mais recente de volta ou desative atualizações para evitar detecção uma vez que a persistência seja obtida.
+4. Opcionalmente, grave a imagem mais recente de volta ou desative as atualizações para evitar detecção uma vez que a persistência seja obtida.
 
 ### Exemplo: Injeção de Comando Após Downgrade
 ```http
@@ -234,7 +234,7 @@ Host: 192.168.0.1
 Content-Type: application/octet-stream
 Content-Length: 0
 ```
-No firmware vulnerável (rebaixado), o parâmetro `md5` é concatenado diretamente em um comando de shell sem sanitização, permitindo a injeção de comandos arbitrários (aqui – habilitando o acesso root baseado em chave SSH). Versões posteriores do firmware introduziram um filtro básico de caracteres, mas a ausência de proteção contra rebaixamento torna a correção irrelevante.
+No firmware vulnerável (rebaixado), o parâmetro `md5` é concatenado diretamente em um comando shell sem sanitização, permitindo a injeção de comandos arbitrários (aqui – habilitando o acesso root baseado em chave SSH). Versões posteriores do firmware introduziram um filtro básico de caracteres, mas a ausência de proteção contra rebaixamento torna a correção irrelevante.
 
 ### Extraindo Firmware de Aplicativos Móveis
 
@@ -248,11 +248,11 @@ firmware_v1.3.11.490_signed.bin
 
 * O transporte/autenticação do *endpoint de atualização* está adequadamente protegido (TLS + autenticação)?
 * O dispositivo compara **números de versão** ou um **contador anti-rollback monotônico** antes de gravar?
-* A imagem é verificada dentro de uma cadeia de inicialização segura (por exemplo, assinaturas verificadas pelo código ROM)?
-* O código do espaço do usuário realiza verificações adicionais de sanidade (por exemplo, mapa de partição permitido, número do modelo)?
+* A imagem é verificada dentro de uma cadeia de boot seguro (por exemplo, assinaturas verificadas pelo código ROM)?
+* O código do userland realiza verificações adicionais de sanidade (por exemplo, mapa de partição permitido, número do modelo)?
 * Os fluxos de atualização *parciais* ou *de backup* reutilizam a mesma lógica de validação?
 
-> 💡  Se algum dos itens acima estiver ausente, a plataforma provavelmente é vulnerável a ataques de rollback.
+> 💡  Se algum dos itens acima estiver faltando, a plataforma provavelmente é vulnerável a ataques de rollback.
 
 ## Firmware Vulnerável para Prática
 
