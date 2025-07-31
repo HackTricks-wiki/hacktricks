@@ -34,9 +34,9 @@ python3 -m pip install soapy-adws   # or git clone && pip install -r requirement
 ```
 ## Stealth AD Collection Workflow
 
-Die volgende werksvloei toon hoe om **domein & ADCS-objekte** oor ADWS te enummer, dit na BloodHound JSON om te skakel en jag vir sertifikaat-gebaseerde aanvalspaaie – alles vanaf Linux:
+Die volgende werksvloei toon hoe om **domein & ADCS-objekte** oor ADWS te enumerate, dit na BloodHound JSON om te skakel en jag te maak vir sertifikaat-gebaseerde aanvalspaaie – alles vanaf Linux:
 
-1. **Tunnel 9389/TCP** van die teiken netwerk na jou boks (bv. via Chisel, Meterpreter, SSH dinamiese poort-voorwaarts, ens.).  Eksporteer `export HTTPS_PROXY=socks5://127.0.0.1:1080` of gebruik SoaPy se `--proxyHost/--proxyPort`.
+1. **Tunnel 9389/TCP** vanaf die teiken netwerk na jou boks (bv. via Chisel, Meterpreter, SSH dinamiese poort-voorwaarts, ens.).  Eksporteer `export HTTPS_PROXY=socks5://127.0.0.1:1080` of gebruik SoaPy se `--proxyHost/--proxyPort`.
 
 2. **Versamel die worteldomein objek:**
 ```bash
@@ -64,7 +64,7 @@ soapy ludus.domain/jdoe:'P@ssw0rd'@dc.ludus.domain \
 --set 'CN=Victim,OU=Servers,DC=ludus,DC=domain' \
 msDs-AllowedToActOnBehalfOfOtherIdentity 'B:32:01....'
 ```
-Combineer dit met `s4u2proxy`/`Rubeus /getticket` vir 'n volledige **Hulpbron-gebaseerde Beperkte Afvaardiging** ketting.
+Combineer dit met `s4u2proxy`/`Rubeus /getticket` vir 'n volledige **Resource-Based Constrained Delegation** ketting.
 
 ## Opsporing & Versterking
 
@@ -81,7 +81,7 @@ Events sal verskyn onder **Directory-Service** met die volle LDAP-filter, selfs 
 ### SACL Canary Objects
 
 1. Skep 'n dummy objek (bv. gedeaktiveerde gebruiker `CanaryUser`).
-2. Voeg 'n **Audit** ACE by vir die _Everyone_ prinsiep, geoudit op **ReadProperty**.
+2. Voeg 'n **Audit** ACE by vir die _Everyone_ prinsiep, geauditeer op **ReadProperty**.
 3. Wanneer 'n aanvaller `(servicePrincipalName=*)`, `(objectClass=user)` ens. uitvoer, stuur die DC **Event 4662** wat die werklike gebruiker SID bevat – selfs wanneer die versoek geproksieer of van ADWS afkomstig is.
 
 Elastic voorafgeboude reël voorbeeld:

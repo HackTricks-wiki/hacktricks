@@ -1,45 +1,45 @@
-# Firmware Analysis
+# Firmware Analise
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## **Inleiding**
 
-Firmware is noodsaaklike sagteware wat toestelle in staat stel om korrek te werk deur die kommunikasie tussen die hardewarekomponente en die sagteware waarmee gebruikers interaksie het, te bestuur en te fasiliteer. Dit word in permanente geheue gestoor, wat verseker dat die toestel toegang kan verkry tot noodsaaklike instruksies vanaf die oomblik dat dit aangeskakel word, wat lei tot die bekendstelling van die bedryfstelsel. Om firmware te ondersoek en moontlik te wysig, is 'n kritieke stap in die identifisering van sekuriteitskwesbaarhede.
+Firmware is noodsaaklike sagteware wat toestelle in staat stel om korrek te werk deur die kommunikasie tussen die hardewarekomponente en die sagteware waarmee gebruikers interaksie het, te bestuur en te fasiliteer. Dit word in permanente geheue gestoor, wat verseker dat die toestel vitale instruksies kan verkry vanaf die oomblik dat dit aangeskakel word, wat lei tot die bekendstelling van die bedryfstelsel. Om firmware te ondersoek en moontlik te wysig, is 'n kritieke stap in die identifisering van sekuriteitskwesbaarhede.
 
 ## **Inligting Versameling**
 
 **Inligting versameling** is 'n kritieke aanvanklike stap in die begrip van 'n toestel se samestelling en die tegnologieë wat dit gebruik. Hierdie proses behels die versameling van data oor:
 
-- Die CPU-argitektuur en bedryfstelsel wat dit gebruik
-- Bootloader-spesifikasies
-- Hardeware-opstelling en datasheets
-- Kodebasis-metrieke en bronliggings
+- Die CPU-argitektuur en bedryfstelsel wat dit loop
+- Bootloader spesifikasies
+- Hardeware uitleg en datasheets
+- Kodebasis metrieke en bronliggings
 - Eksterne biblioteke en lisensietipes
-- Opdateringsgeskiedenisse en regulerende sertifikate
+- Opdatering geskiedenisse en regulerende sertifikate
 - Argitektoniese en vloediagramme
 - Sekuriteitsassessering en geïdentifiseerde kwesbaarhede
 
-Vir hierdie doel is **open-source intelligence (OSINT)** gereedskap van onskatbare waarde, sowel as die analise van enige beskikbare open-source sagtewarekomponente deur middel van handmatige en geoutomatiseerde hersieningsprosesse. Gereedskap soos [Coverity Scan](https://scan.coverity.com) en [Semmle’s LGTM](https://lgtm.com/#explore) bied gratis statiese analise wat benut kan word om potensiële probleme te vind.
+Vir hierdie doel is **open-source intelligence (OSINT)** gereedskap van onskatbare waarde, sowel as die analise van enige beskikbare open-source sagtewarekomponente deur handmatige en geoutomatiseerde hersieningsprosesse. Gereedskap soos [Coverity Scan](https://scan.coverity.com) en [Semmle’s LGTM](https://lgtm.com/#explore) bied gratis statiese analise wat benut kan word om potensiële probleme te vind.
 
-## **Verkryging van die Firmware**
+## **Die Firmware Verkryging**
 
-Die verkryging van firmware kan op verskillende maniere benader word, elk met sy eie vlak van kompleksiteit:
+Om firmware te verkry kan op verskeie maniere benader word, elk met sy eie vlak van kompleksiteit:
 
 - **Direk** van die bron (ontwikkelaars, vervaardigers)
 - **Bou** dit vanaf verskafde instruksies
 - **Aflaai** van amptelike ondersteuningswebwerwe
-- Gebruik van **Google dork** navrae om gehoste firmware-lêers te vind
+- Gebruik **Google dork** navrae om gehoste firmware-lêers te vind
 - Toegang tot **cloud storage** direk, met gereedskap soos [S3Scanner](https://github.com/sa7mon/S3Scanner)
-- Interseptering van **opdaterings** via man-in-the-middle tegnieke
-- **Uittrek** van die toestel deur verbindings soos **UART**, **JTAG**, of **PICit**
+- **Intercepteer** **opdaterings** via man-in-the-middle tegnieke
+- **Ekstrak** van die toestel deur verbindings soos **UART**, **JTAG**, of **PICit**
 - **Sniffing** vir opdateringsversoeke binne toestelkommunikasie
 - Identifisering en gebruik van **hardcoded update endpoints**
 - **Dumping** van die bootloader of netwerk
-- **Verwydering en lees** van die stoorchip, wanneer alles anders misluk, met toepaslike hardewaregereedskap
+- **Verwyder en lees** die stoorchip, wanneer alles anders misluk, met toepaslike hardeware gereedskap
 
 ## Analisering van die firmware
 
-Nou dat jy **die firmware het**, moet jy inligting daaroor uittrek om te weet hoe om dit te hanteer. Verskillende gereedskap wat jy daarvoor kan gebruik:
+Nou dat jy **die firmware het**, moet jy inligting daaroor onttrek om te weet hoe om dit te behandel. Verskillende gereedskap wat jy daarvoor kan gebruik:
 ```bash
 file <bin>
 strings -n8 <bin>
@@ -48,7 +48,7 @@ hexdump -C -n 512 <bin> > hexdump.out
 hexdump -C <bin> | head # might find signatures in header
 fdisk -lu <bin> #lists a drives partition and filesystems if multiple
 ```
-As jy nie veel met daardie gereedskap vind nie, kyk na die **entropy** van die beeld met `binwalk -E <bin>`, as die entropy laag is, is dit waarskynlik nie geënkripteer nie. As die entropy hoog is, is dit waarskynlik geënkripteer (of op een of ander manier gecomprimeer).
+As jy nie veel met daardie gereedskap vind nie, kyk na die **entropy** van die beeld met `binwalk -E <bin>`, as die entropy laag is, is dit waarskynlik nie versleuteld nie. As die entropy hoog is, is dit waarskynlik versleuteld (of op een of ander manier gecomprimeer).
 
 Boonop kan jy hierdie gereedskap gebruik om **lêers wat in die firmware ingebed is** te onttrek:
 
@@ -65,7 +65,7 @@ Binwalk onttrek dit gewoonlik binne 'n **map wat as die lêerstelseltipe genoem 
 
 #### Handmatige Lêerstelsel Onttrekking
 
-Soms sal binwalk **nie die magiese byte van die lêerstelsel in sy handtekeninge hê nie**. In hierdie gevalle, gebruik binwalk om die **offset van die lêerstelsel te vind en die gecomprimeerde lêerstelsel** uit die binêre te **karve** en die lêerstelsel volgens sy tipe handmatig te onttrek met die stappe hieronder.
+Soms sal binwalk **nie die magiese byte van die lêerstelsel in sy handtekeninge hê nie**. In hierdie gevalle, gebruik binwalk om die **offset van die lêerstelsel te vind en die gecomprimeerde lêerstelsel** uit die binêre te sny en die lêerstelsel **handmatig te onttrek** volgens sy tipe met die stappe hieronder.
 ```
 $ binwalk DIR850L_REVB.bin
 
@@ -117,7 +117,7 @@ Sodra die firmware verkry is, is dit noodsaaklik om dit te ontleed om die strukt
 
 ### Beginanalise Gereedskap
 
-'n Stel opdragte word verskaf vir die aanvanklike inspeksie van die binêre lêer (verwys na `<bin>`). Hierdie opdragte help om lêertipes te identifiseer, stringe te onttrek, binêre data te analiseer, en die partisie- en lêerstelselbesonderhede te verstaan:
+'n Stel opdragte word verskaf vir die aanvanklike inspeksie van die binêre lêer (verwys na `<bin>`). Hierdie opdragte help om lêertipes te identifiseer, stringe te onttrek, binêre data te analiseer, en die partisie en lêerstelsel besonderhede te verstaan:
 ```bash
 file <bin>
 strings -n8 <bin>
@@ -126,13 +126,13 @@ hexdump -C -n 512 <bin> > hexdump.out
 hexdump -C <bin> | head #useful for finding signatures in the header
 fdisk -lu <bin> #lists partitions and filesystems, if there are multiple
 ```
-Om die versleutelingstatus van die beeld te evalueer, word die **entropy** nagegaan met `binwalk -E <bin>`. Lae entropy dui op 'n gebrek aan versleuteling, terwyl hoë entropy moontlike versleuteling of kompressie aandui.
+Om die versleutelingstatus van die beeld te evalueer, word die **entropy** nagegaan met `binwalk -E <bin>`. Lae entropy dui op 'n gebrek aan versleuteling aan, terwyl hoë entropy moontlike versleuteling of kompressie aandui.
 
 Vir die onttrekking van **ingebedde lêers**, word gereedskap en hulpbronne soos die **file-data-carving-recovery-tools** dokumentasie en **binvis.io** vir lêerinspeksie aanbeveel.
 
 ### Onttrekking van die Lêerstelsel
 
-Met `binwalk -ev <bin>` kan 'n mens gewoonlik die lêerstelsel onttrek, dikwels in 'n gids wat na die lêerstelseltipe genoem word (bv. squashfs, ubifs). Wanneer **binwalk** egter nie die lêerstelseltipe kan herken nie weens ontbrekende magic bytes, is handmatige onttrekking nodig. Dit behels die gebruik van `binwalk` om die lêerstelseloffset te lokaliseer, gevolg deur die `dd` opdrag om die lêerstelsel uit te sny:
+Met `binwalk -ev <bin>` kan 'n mens gewoonlik die lêerstelsel onttrek, dikwels in 'n gids wat na die lêersteltype genoem is (bv. squashfs, ubifs). Wanneer **binwalk** egter nie die lêersteltype kan herken nie weens ontbrekende magic bytes, is handmatige onttrekking nodig. Dit behels die gebruik van `binwalk` om die lêerstel se offset te vind, gevolg deur die `dd` opdrag om die lêerstel uit te sny:
 ```bash
 $ binwalk DIR850L_REVB.bin
 
@@ -144,13 +144,13 @@ Daarna, afhangende van die lêerstelseltipe (bv. squashfs, cpio, jffs2, ubifs), 
 
 Met die lêerstelsel onttrek, begin die soektog na sekuriteitsfoute. Aandag word gegee aan onveilige netwerk daemons, hardgecodeerde akrediteer, API eindpunte, opdatering bediener funksies, nie-gecompileerde kode, opstart skripte, en gecompileerde binêre vir off-line analise.
 
-**Belangrike plekke** en **items** om te inspekteer sluit in:
+**Belangrike plekke** en **items** om te ondersoek sluit in:
 
 - **etc/shadow** en **etc/passwd** vir gebruikers akrediteer
 - SSL sertifikate en sleutels in **etc/ssl**
 - Konfigurasie en skrip lêers vir potensiële kwesbaarhede
 - Ingebedde binêre vir verdere analise
-- Algemene IoT toestel web bedieners en binêre
+- Algemene IoT toestel webbedieners en binêre
 
 Verskeie gereedskap help om sensitiewe inligting en kwesbaarhede binne die lêerstelsel te ontdek:
 
@@ -160,7 +160,7 @@ Verskeie gereedskap help om sensitiewe inligting en kwesbaarhede binne die lêer
 
 ### Sekuriteitskontroles op Gecompileerde Binêre
 
-Sowel die bronkode as gecompileerde binêre wat in die lêerstelsel gevind word, moet ondersoek word vir kwesbaarhede. Gereedskap soos **checksec.sh** vir Unix binêre en **PESecurity** vir Windows binêre help om onbeskermde binêre te identifiseer wat uitgebuit kan word.
+Sowel bronkode as gecompileerde binêre wat in die lêerstelsel gevind word, moet ondersoek word vir kwesbaarhede. Gereedskap soos **checksec.sh** vir Unix binêre en **PESecurity** vir Windows binêre help om onbeskermde binêre te identifiseer wat uitgebuit kan word.
 
 ## Emulering van Firmware vir Dynamiese Analise
 
@@ -168,7 +168,7 @@ Die proses van emulering van firmware stel **dynamiese analise** in staat, hetsy
 
 ### Emulering van Individuele Binêre
 
-Vir die ondersoek van enkele programme, is dit van kardinale belang om die program se endianness en CPU argitektuur te identifiseer.
+Vir die ondersoek van enkele programme, is dit noodsaaklik om die program se endianness en CPU argitektuur te identifiseer.
 
 #### Voorbeeld met MIPS Argitektuur
 
@@ -192,7 +192,7 @@ Gereedskap soos [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware A
 
 ## Dinamiese Analise in Praktyk
 
-Op hierdie stadium word 'n werklike of geëmuleerde toestelomgewing vir analise gebruik. Dit is noodsaaklik om shell-toegang tot die OS en lêerstelsel te handhaaf. Emulasie mag nie perfek hardeware-interaksies naboots nie, wat af en toe emulasie-herlaai vereis. Analise moet die lêerstelsel herbesoek, blootgestelde webbladsye en netwerkdienste benut, en opstartlaaier kwesbaarhede verken. Firmware integriteitstoetse is krities om potensiële agterdeur kwesbaarhede te identifiseer.
+Op hierdie stadium word 'n werklike of geëmuleerde toestelomgewing vir analise gebruik. Dit is noodsaaklik om shell-toegang tot die OS en lêerstelsel te handhaaf. Emulasie mag nie perfek hardeware-interaksies naboots nie, wat af en toe emulasie-herlaai vereis. Analise moet die lêerstelsel herbesoek, blootgestelde webbladsye en netwerkdienste ontgin, en opstartlaaier kwesbaarhede verken. Firmware integriteitstoetse is krities om potensiële agterdeur kwesbaarhede te identifiseer.
 
 ## Tydren Analise Tegnieke
 
@@ -200,7 +200,7 @@ Tydren analise behels interaksie met 'n proses of binary in sy bedryfsomgewing, 
 
 ## Binary Exploitatie en Bewys-van-Konsep
 
-Om 'n PoC vir geïdentifiseerde kwesbaarhede te ontwikkel, vereis 'n diep begrip van die teikenargitektuur en programmering in laervlak tale. Binary tydren beskermings in ingebedde stelsels is skaars, maar wanneer dit teenwoordig is, mag tegnieke soos Return Oriented Programming (ROP) nodig wees.
+Die ontwikkeling van 'n PoC vir geïdentifiseerde kwesbaarhede vereis 'n diep begrip van die teikenargitektuur en programmering in laervlak tale. Binary tydren beskermings in ingebedde stelsels is skaars, maar wanneer dit teenwoordig is, mag tegnieke soos Return Oriented Programming (ROP) nodig wees.
 
 ## Voorbereide Bedryfstelsels vir Firmware Analise
 
@@ -213,30 +213,30 @@ Bedryfstelsels soos [AttifyOS](https://github.com/adi0x90/attifyos) en [EmbedOS]
 
 ## Firmware Downgrade Aanvalle & Onveilige Opdatering Meganismes
 
-Selfs wanneer 'n verskaffer kriptografiese handtekening kontroles vir firmware beelde implementeer, **word weergawe terugrol (downgrade) beskerming dikwels weggelaat**. Wanneer die opstart- of herstel-laaier slegs die handtekening met 'n ingebedde publieke sleutel verifieer, maar nie die *weergawe* (of 'n monotone teller) van die beeld wat geflits word, vergelyk nie, kan 'n aanvaller wettig 'n **ouer, kwesbare firmware wat steeds 'n geldige handtekening het** installeer en dus gepatchte kwesbaarhede weer inbring.
+Selfs wanneer 'n verskaffer kriptografiese handtekening kontroles vir firmware beelde implementeer, **word weergawe terugrol (downgrade) beskerming dikwels weggelaat**. Wanneer die opstart- of herstel-laaier slegs die handtekening met 'n ingebedde publieke sleutel verifieer, maar nie die *weergawe* (of 'n monotone teller) van die beeld wat geflits word vergelyk nie, kan 'n aanvaller wettiglik 'n **ouer, kwesbare firmware wat steeds 'n geldige handtekening het** installeer en dus gepatchte kwesbaarhede weer inbring.
 
 Tipiese aanval werkvloei:
 
 1. **Verkry 'n ouer onderteken beeld**
-* Grijp dit van die verskaffer se publieke aflaaiportaal, CDN of ondersteuningsite.
+* Kry dit van die verskaffer se publieke aflaaiportaal, CDN of ondersteuningsite.
 * Trek dit uit metgesel mobiele/desktop toepassings (bv. binne 'n Android APK onder `assets/firmware/`).
-* Verkry dit van derdeparty repositories soos VirusTotal, Internet argiewe, forums, ens.
+* Verkry dit van derdeparty repositories soos VirusTotal, internet argiewe, forums, ens.
 2. **Laai of dien die beeld aan die toestel** via enige blootgestelde opdateringskanaal:
 * Web UI, mobiele-app API, USB, TFTP, MQTT, ens.
 * Baie verbruikers IoT toestelle stel *onaangetekende* HTTP(S) eindpunte bloot wat Base64-gecodeerde firmware blobs aanvaar, dekodeer dit bediener-kant en aktiveer herstel/opgradering.
-3. Na die terugrol, benut 'n kwesbaarheid wat in die nuwer weergawe gepatch is (byvoorbeeld 'n opdrag-inspuitfilter wat later bygevoeg is).
+3. Na die downgrade, exploiteer 'n kwesbaarheid wat in die nuwer weergawe gepatch is (byvoorbeeld 'n opdrag-inspuitfilter wat later bygevoeg is).
 4. Opsioneel flits die nuutste beeld terug of deaktiveer opdaterings om opsporing te vermy sodra volharding verkry is.
 
-### Voorbeeld: Opdrag Inspuiting Na Terugrol
+### Voorbeeld: Opdrag Inspuiting Na Downgrade
 ```http
 POST /check_image_and_trigger_recovery?md5=1; echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC...' >> /root/.ssh/authorized_keys HTTP/1.1
 Host: 192.168.0.1
 Content-Type: application/octet-stream
 Content-Length: 0
 ```
-In die kwesbare (afgegradeerde) firmware, word die `md5` parameter direk in 'n shell-opdrag gekonkateneer sonder sanitisering, wat die inspuiting van arbitrêre opdragte moontlik maak (hier – om SSH-sleutel-gebaseerde worteltoegang te aktiveer). Later firmware weergawes het 'n basiese karakterfilter bekendgestel, maar die afwesigheid van afgraderingsbeskerming maak die regstelling nutteloos.
+In die kwesbare (afgegradeerde) firmware, word die `md5` parameter direk in 'n skalkommando gekonkateneer sonder sanitisering, wat die inspuiting van arbitrêre opdragte moontlik maak (hier – om SSH-sleutel-gebaseerde worteltoegang te aktiveer). Later firmware weergawes het 'n basiese karakterfilter bekendgestel, maar die afwesigheid van afgraderingsbeskerming maak die regstelling nutteloos.
 
-### Uittreksel van Firmware Uit Mobiele Toepassings
+### Onthulling van Firmware Uit Mobiele Toepassings
 
 Baie verskaffers bundel volle firmware-beelde binne hul metgesel mobiele toepassings sodat die app die toestel oor Bluetooth/Wi-Fi kan opdateer. Hierdie pakkette word algemeen ongeënkripteerd in die APK/APEX onder paaie soos `assets/fw/` of `res/raw/` gestoor. Gereedskap soos `apktool`, `ghidra`, of selfs gewone `unzip` laat jou toe om ondertekende beelde te trek sonder om die fisiese hardeware aan te raak.
 ```
@@ -246,9 +246,9 @@ firmware_v1.3.11.490_signed.bin
 ```
 ### Kontrolelys vir die Assessering van Opdateringslogika
 
-* Is die vervoer/identifikasie van die *opdatering eindpunt* voldoende beskerm (TLS + identifikasie)?
+* Is die vervoer/identifikasie van die *opdaterings-eindpunt* voldoende beskerm (TLS + identifikasie)?
 * Vergelyk die toestel **weergawe nommers** of 'n **monotoniese anti-rollback teenaar** voordat dit geflashed word?
-* Word die beeld binne 'n veilige opstartketting geverifieer (bv. handtekeninge nagegaan deur ROM kode)?
+* Word die beeld binne 'n veilige opstartketting geverifieer (bv. handtekeninge nagegaan deur ROM-kode)?
 * Voer gebruikerslandkode addisionele gesondheidskontroles uit (bv. toegelate partisiekaart, modelnommer)?
 * Hergebruik *gedeeltelike* of *rugsteun* opdateringsvloei dieselfde valideringslogika?
 

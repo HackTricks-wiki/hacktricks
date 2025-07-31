@@ -4,9 +4,9 @@
 
 ## Hoe die Infrarooi Werk <a href="#how-the-infrared-port-works" id="how-the-infrared-port-works"></a>
 
-**Infrarooi lig is onsigbaar vir mense**. IR golflengte is van **0.7 tot 1000 mikron**. Huishoudelike afstandsbedienings gebruik 'n IR sein vir datatransmissie en werk in die golflengte-reeks van 0.75..1.4 mikron. 'n Mikrocontroller in die afstandsbediening laat 'n infrarooi LED flits met 'n spesifieke frekwensie, wat die digitale sein in 'n IR sein omskakel.
+**Infrarooi lig is onsigbaar vir mense**. IR golflengte is van **0.7 tot 1000 mikron**. Huishoudelike afstandsbedienings gebruik 'n IR sein vir datatransmissie en werk in die golflengte reeks van 0.75..1.4 mikron. 'n Mikrocontroller in die afstandsbediening laat 'n infrarooi LED flits met 'n spesifieke frekwensie, wat die digitale sein in 'n IR sein omskakel.
 
-Om IR seine te ontvang, word 'n **fotoreceiver** gebruik. Dit **omskakel IR lig in spanning pulsies**, wat reeds **digitale seine** is. Gewoonlik is daar 'n **donker ligfilter binne die ontvanger**, wat **slegs die gewenste golflengte deurlaat** en geraas uitsny.
+Om IR seine te ontvang, word 'n **fotoreceiver** gebruik. Dit **omskakel IR lig in spanning pulsasies**, wat reeds **digitale seine** is. Gewoonlik is daar 'n **donker ligfilter binne die ontvanger**, wat **slegs die gewenste golflengte deurlaat** en geraas uitsny.
 
 ### Verskeidenheid van IR Protokolle <a href="#variety-of-ir-protocols" id="variety-of-ir-protocols"></a>
 
@@ -20,19 +20,19 @@ IR protokolle verskil in 3 faktore:
 
 **1. Pulsafstand Kodering**
 
-Bits word gekodeer deur die duur van die ruimte tussen pulsies te moduler. Die breedte van die puls self is konstant.
+Bits word gekodeer deur die duur van die spasie tussen pulss te moduler. Die breedte van die puls self is konstant.
 
 <figure><img src="../../images/image (295).png" alt=""><figcaption></figcaption></figure>
 
 **2. Pulsbreedte Kodering**
 
-Bits word gekodeer deur die pulsbreedte te moduler. Die breedte van die ruimte na die pulsuitbarsting is konstant.
+Bits word gekodeer deur die modulering van die pulsbreedte. Die breedte van die spasie na die pulsuitbarsting is konstant.
 
 <figure><img src="../../images/image (282).png" alt=""><figcaption></figcaption></figure>
 
 **3. Fase Kodering**
 
-Dit is ook bekend as Manchester kodering. Die logiese waarde word gedefinieer deur die polariteit van die oorgang tussen pulsuitbarsting en ruimte. "Ruimte na pulsuitbarsting" dui logika "0" aan, "pulsuitbarsting na ruimte" dui logika "1" aan.
+Dit is ook bekend as Manchester kodering. Die logiese waarde word gedefinieer deur die polariteit van die oorgang tussen pulsuitbarsting en spasie. "Spasie na pulsuitbarsting" dui logika "0" aan, "pulsuitbarsting na spasie" dui logika "1" aan.
 
 <figure><img src="../../images/image (634).png" alt=""><figcaption></figcaption></figure>
 
@@ -64,7 +64,7 @@ Vir **logika "0" en "1"** gebruik NEC Pulsafstand Kodering: eerstens word 'n pul
 ### Lugversorgers
 
 In teenstelling met ander afstandsbedienings, **stuur lugversorgers nie net die kode van die ingedrukte knoppie nie**. Hulle **stuur ook al die inligting** wanneer 'n knoppie ingedruk word om te verseker dat die **lugversorgingsmasjien en die afstandsbediening gesinchroniseer is**.\
-Dit sal verhoed dat 'n masjien wat op 20ºC gestel is, verhoog word na 21ºC met een afstandsbediening, en dan wanneer 'n ander afstandsbediening, wat steeds die temperatuur as 20ºC het, gebruik word om die temperatuur verder te verhoog, dit "verhoog" na 21ºC (en nie na 22ºC nie, dinkend dit is op 21ºC).
+Dit sal verhoed dat 'n masjien wat op 20ºC gestel is, verhoog word na 21ºC met een afstandsbediening, en dan wanneer 'n ander afstandsbediening, wat steeds die temperatuur as 20ºC het, gebruik word om die temperatuur verder te verhoog, dit "verhoog" dit na 21ºC (en nie na 22ºC nie, dinkend dit is op 21ºC).
 
 ---
 
@@ -80,19 +80,19 @@ flipper-zero/fz-infrared.md
 
 Onlangse akademiese werk (EvilScreen, 2022) het getoon dat **multikanal afstandsbedienings wat Infrarooi met Bluetooth of Wi-Fi kombineer, misbruik kan word om moderne slim-TV's volledig oor te neem**. Die aanvalkettings verbind hoëprivilege IR dienskode saam met geverifieerde Bluetooth-pakkette, wat kanaal-isolasie omseil en willekeurige app-lancering, mikrofoonaktivering, of fabrieksherstel sonder fisiese toegang toelaat. Agt hoofstroom-TV's van verskillende verskaffers — insluitend 'n Samsung-model wat ISO/IEC 27001-nakoming beweer — is bevestig as kwesbaar. Mitigering vereis verskaffer firmware regstellings of die heeltemal deaktiveer van ongebruikte IR ontvangers.
 
-### Lug-Gap Data Ekstraksie via IR LEDs (aIR-Jumper familie)
+### Lug-Gepaste Data Uitsending via IR LEDs (aIR-Jumper familie)
 
-Sekuriteitskameras, routers of selfs kwaadwillige USB-sticks sluit dikwels **nagvisie IR LEDs** in. Navorsing toon dat malware hierdie LEDs kan moduler (<10–20 kbit/s met eenvoudige OOK) om **geheime deur mure en vensters te ekstrak** na 'n eksterne kamera wat tien meter weg geplaas is. Omdat die lig buite die sigbare spektrum is, merk operateurs selde op. Teenmaatreëls:
+Sekuriteitskameras, routers of selfs kwaadwillige USB-sticks sluit dikwels **nagvisie IR LEDs** in. Navorsing toon dat malware hierdie LEDs kan moduler (<10–20 kbit/s met eenvoudige OOK) om **geheime deur mure en vensters uit te stuur** na 'n eksterne kamera wat tien meter weg geplaas is. Omdat die lig buite die sigbare spektrum is, merk operateurs selde dit op. Teenmaatreëls:
 
 * Fisies beskerm of verwyder IR LEDs in sensitiewe areas
 * Monitor kamera LED pligsyklus en firmware integriteit
-* Plaas IR-snyfilters op vensters en toesighoudende kameras
+* Plaas IR-snyfilters op vensters en toesigkameras
 
-'n Aanvaller kan ook sterk IR projekteerders gebruik om **opdragte** in die netwerk in te voer deur data terug te flits na onveilige kameras.
+'n Aanvaller kan ook sterk IR projekteerders gebruik om **opdragte** in die netwerk in te voer deur data terug na onveilige kameras te flits.
 
 ### Langafstand Brute-Force & Uitgebreide Protokolle met Flipper Zero 1.0
 
-Firmware 1.0 (September 2024) het **tientalle ekstra IR protokolle en opsionele eksterne versterkermodules** bygevoeg. Gecombineer met die universele-afstandsbediening brute-force modus, kan 'n Flipper die meeste openbare TV's/AC's tot 30 m van 'n hoëkragdiode deaktiveer of herkonfigureer.
+Firmware 1.0 (September 2024) het **tientalle ekstra IR protokolle en opsionele eksterne versterkermodules** bygevoeg. Gekombineer met die universele-afstandsbediening brute-force modus, kan 'n Flipper die meeste openbare TV's/AC's tot 30 m van 'n hoëkragdiode deaktiveer of herkonfigureer.
 
 ---
 
@@ -101,13 +101,13 @@ Firmware 1.0 (September 2024) het **tientalle ekstra IR protokolle en opsionele 
 ### Hardeware
 
 * **Flipper Zero** – draagbare transceiver met leer-, herhaal- en woordeboek-brute-force modi (sien hierbo).
-* **Arduino / ESP32** + IR LED / TSOP38xx ontvanger – goedkoop DIY ontleder/ transmitter. Kombineer met die `Arduino-IRremote` biblioteek (v4.x ondersteun >40 protokolle).
+* **Arduino / ESP32** + IR LED / TSOP38xx ontvanger – goedkoop DIY ontleder/uitzender. Kombineer met die `Arduino-IRremote` biblioteek (v4.x ondersteun >40 protokolle).
 * **Logika ontleders** (Saleae/FX2) – vang rou tyds wanneer protokol onbekend is.
 * **Slimfone met IR-blaster** (bv. Xiaomi) – vinnige veldtoets maar beperkte reeks.
 
 ### Sagteware
 
-* **`Arduino-IRremote`** – aktief-onderhoude C++ biblioteek:
+* **`Arduino-IRremote`** – aktief onderhoude C++ biblioteek:
 ```cpp
 #include <IRremote.hpp>
 IRsend sender;
@@ -117,10 +117,10 @@ sender.sendNEC(0x20DF10EF, 32); // Samsung TV Krag
 delay(5000);
 }
 ```
-* **IRscrutinizer / AnalysIR** – GUI dekoders wat rou vangste invoer en protokol outomaties identifiseer + genereer Pronto/Arduino kode.
+* **IRscrutinizer / AnalysIR** – GUI dekoders wat rou vangste invoer en outomaties protokol identifiseer + Pronto/Arduino kode genereer.
 * **LIRC / ir-keytable (Linux)** – ontvang en inspuit IR vanaf die opdraglyn:
 ```bash
-sudo ir-keytable -p nec,rc5 -t   # live-dump gedecodeerde scankodes
+sudo ir-keytable -p nec,rc5 -t   # live-dump gedecodeerde skandeerkodes
 irsend SEND_ONCE samsung KEY_POWER
 ```
 

@@ -24,11 +24,11 @@ printf "\nThe following services are OFF if '0', or ON otherwise:\nScreen Sharin
 ```
 ### Pentesting ARD
 
-Apple Remote Desktop (ARD) is 'n verbeterde weergawe van [Virtual Network Computing (VNC)](https://en.wikipedia.org/wiki/Virtual_Network_Computing) wat vir macOS aangepas is, en bied addisionele kenmerke. 'n Noemenswaardige kwesbaarheid in ARD is sy outentikasie metode vir die kontroleer skerm wagwoord, wat slegs die eerste 8 karakters van die wagwoord gebruik, wat dit vatbaar maak vir [brute force attacks](https://thudinh.blogspot.com/2017/09/brute-forcing-passwords-with-thc-hydra.html) met gereedskap soos Hydra of [GoRedShell](https://github.com/ahhh/GoRedShell/), aangesien daar geen standaard koersbeperkings is nie.
+Apple Remote Desktop (ARD) is 'n verbeterde weergawe van [Virtual Network Computing (VNC)](https://en.wikipedia.org/wiki/Virtual_Network_Computing) wat vir macOS aangepas is, en bied addisionele kenmerke. 'n Opmerklike kwesbaarheid in ARD is sy outentikasie metode vir die kontroleer skerm wagwoord, wat slegs die eerste 8 karakters van die wagwoord gebruik, wat dit vatbaar maak vir [brute force attacks](https://thudinh.blogspot.com/2017/09/brute-forcing-passwords-with-thc-hydra.html) met gereedskap soos Hydra of [GoRedShell](https://github.com/ahhh/GoRedShell/), aangesien daar geen standaard koersbeperkings is nie.
 
 Kwetsbare instansies kan geïdentifiseer word met **nmap**'s `vnc-info` skrip. Dienste wat `VNC Authentication (2)` ondersteun, is veral vatbaar vir brute force-aanvalle weens die 8-karakter wagwoord afkorting.
 
-Om ARD in te skakel vir verskeie administratiewe take soos privilige eskalasie, GUI-toegang, of gebruikersmonitering, gebruik die volgende opdrag:
+Om ARD vir verskeie administratiewe take soos privilige eskalasie, GUI-toegang, of gebruikersmonitering in te skakel, gebruik die volgende opdrag:
 ```bash
 sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -allowAccessFor -allUsers -privs -all -clientopts -setmenuextra -menuextra yes
 ```
@@ -58,19 +58,19 @@ sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setblockapp /System/Libra
 
 ## Bonjour Protokol
 
-Bonjour, 'n Apple-ontwerpte tegnologie, laat **toestelle op dieselfde netwerk toe om mekaar se aangebied dienste te ontdek**. Ook bekend as Rendezvous, **Zero Configuration**, of Zeroconf, stel dit 'n toestel in staat om by 'n TCP/IP-netwerk aan te sluit, **automaties 'n IP-adres te kies**, en sy dienste aan ander netwerktoestelle te broadcast.
+Bonjour, 'n Apple-ontwerpte tegnologie, laat **toestelle op dieselfde netwerk mekaar se aangebied dienste opspoor**. Ook bekend as Rendezvous, **Zero Configuration**, of Zeroconf, stel dit 'n toestel in staat om by 'n TCP/IP-netwerk aan te sluit, **automaties 'n IP-adres te kies**, en sy dienste aan ander netwerktoestelle te broadcast.
 
-Zero Configuration Networking, verskaf deur Bonjour, verseker dat toestelle kan:
+Zero Configuration Networking, wat deur Bonjour verskaf word, verseker dat toestelle kan:
 
 - **Automaties 'n IP-adres verkry** selfs in die afwesigheid van 'n DHCP-bediener.
 - **Naam-naar-adres vertaling** uitvoer sonder om 'n DNS-bediener te vereis.
-- **Dienste** beskikbaar op die netwerk ontdek.
+- **Dienste** op die netwerk ontdek.
 
 Toestelle wat Bonjour gebruik, sal vir hulleself 'n **IP-adres uit die 169.254/16 reeks** toewys en die uniekheid daarvan op die netwerk verifieer. Macs hou 'n routeringstabelinvoer vir hierdie subnet, wat verifieer kan word via `netstat -rn | grep 169`.
 
 Vir DNS gebruik Bonjour die **Multicast DNS (mDNS) protokol**. mDNS werk oor **poort 5353/UDP**, wat **standaard DNS-vrae** gebruik maar teiken die **multicast adres 224.0.0.251**. Hierdie benadering verseker dat alle luisterende toestelle op die netwerk die vrae kan ontvang en daarop kan reageer, wat die opdatering van hul rekords vergemaklik.
 
-By die aansluiting by die netwerk, kies elke toestel self 'n naam, wat gewoonlik eindig op **.local**, wat afgelei kan wees van die gasheernaam of ewekansig gegenereer kan word.
+By die aansluiting by die netwerk, kies elke toestel self 'n naam, wat gewoonlik eindig op **.local**, wat afgelei kan word van die gasheernaam of ewekansig gegenereer kan word.
 
 Dienste ontdekking binne die netwerk word vergemaklik deur **DNS Service Discovery (DNS-SD)**. Deur die formaat van DNS SRV rekords te benut, gebruik DNS-SD **DNS PTR rekords** om die lys van verskeie dienste moontlik te maak. 'n Kliënt wat 'n spesifieke diens soek, sal 'n PTR rekord vir `<Service>.<Domain>` aan vra, en in ruil 'n lys van PTR rekords ontvang wat geformateer is as `<Instance>.<Service>.<Domain>` indien die diens beskikbaar is vanaf verskeie gasheer.
 
@@ -84,9 +84,9 @@ dns-sd -B _ssh._tcp
 ```
 Hierdie opdrag begin om \_ssh.\_tcp dienste te soek en gee besonderhede soos tydstempel, vlae, koppelvlak, domein, dienste tipe, en instansienaam uit.
 
-### Adverteer 'n HTTP Diens
+### Adverteer 'n HTTP-diens
 
-Om 'n HTTP diens te adverteer, kan jy gebruik:
+Om 'n HTTP-diens te adverteer, kan jy gebruik maak van:
 ```bash
 dns-sd -R "Index" _http._tcp . 80 path=/index.html
 ```
@@ -145,18 +145,18 @@ Dit sal gashere teruggee wat SSH via Bonjour buite die plaaslike skakel blootste
 | Jaar | CVE | Ernstigheid | Probleem | Gepatch in |
 |------|-----|----------|-------|------------|
 |2024|CVE-2024-44183|Medium|‘n Logika fout in *mDNSResponder* het 'n vervaardigde pakket toegelaat om 'n **diensonderbreking** te aktiveer|macOS Ventura 13.7 / Sonoma 14.7 / Sequoia 15.0 (Sep 2024) |
-|2025|CVE-2025-31222|High|‘n Korrekheid probleem in *mDNSResponder* kan misbruik word vir **lokale privilige-escalasie**|macOS Ventura 13.7.6 / Sonoma 14.7.6 / Sequoia 15.5 (Mei 2025) |
+|2025|CVE-2025-31222|High|‘n Korrekheid probleem in *mDNSResponder* kan misbruik word vir **lokale privilige eskalasie**|macOS Ventura 13.7.6 / Sonoma 14.7.6 / Sequoia 15.5 (Mei 2025) |
 
 **Mitigering riglyne**
 
 1. Beperk UDP 5353 tot *link-lokale* omvang – blokkeer of beperk dit op draadlose controllers, routers, en gasheer-gebaseerde vuurmure.
-2. Deaktiveer Bonjour heeltemal op stelsels wat nie diensontdekking benodig nie:
+2. Deaktiveer Bonjour heeltemal op stelsels wat nie diensontdekking vereis nie:
 
 ```bash
 sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.mDNSResponder.plist
 ```
-3. Vir omgewings waar Bonjour intern benodig word maar nooit netwerkgrense mag oorskry nie, gebruik *AirPlay Receiver* profielbeperkings (MDM) of 'n mDNS-proxy.
-4. Aktiveer **Stelsel Integriteit Beskerming (SIP)** en hou macOS op datum – beide kwesbaarhede hierbo is vinnig gepatch, maar het op SIP se aktivering staatgemaak vir volle beskerming.
+3. Vir omgewings waar Bonjour intern vereis word maar nooit netwerkgrense mag oorskry nie, gebruik *AirPlay Receiver* profielbeperkings (MDM) of 'n mDNS-proxy.
+4. Aktiveer **Stelselintegriteitbeskerming (SIP)** en hou macOS op datum – beide kwesbaarhede hierbo is vinnig gepatch, maar het op SIP se aktivering staatgemaak vir volle beskerming.
 
 ### Deaktivering van Bonjour
 

