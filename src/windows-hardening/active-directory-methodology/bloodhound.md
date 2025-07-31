@@ -62,7 +62,7 @@ SharpHound.exe --Stealth --LDAP                      # Low noise LDAP only
 
 ## Group3r
 
-[Group3r](https://github.com/Group3r/Group3r) καταμετρά **Group Policy Objects** και επισημαίνει κακές ρυθμίσεις.
+[Group3r](https://github.com/Group3r/Group3r) καταγράφει **Group Policy Objects** και επισημαίνει κακές ρυθμίσεις.
 ```bash
 # Execute inside the domain
 Group3r.exe -f gpo.log   # -s to stdout

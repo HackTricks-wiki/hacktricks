@@ -8,11 +8,11 @@
 
 * MC-NBFX → MC-NBFSE → MS-NNS → MC-NMF
 
-Δεδομένου ότι η κίνηση είναι ενσωματωμένη μέσα σε αυτά τα δυαδικά πλαίσια SOAP και ταξιδεύει μέσω μιας ασυνήθιστης θύρας, **η αρίθμηση μέσω ADWS είναι πολύ λιγότερο πιθανό να ελεγχθεί, φιλτραριστεί ή υπογραφεί από την κλασική κίνηση LDAP/389 & 636**. Για τους χειριστές αυτό σημαίνει:
+Επειδή η κίνηση είναι ενσωματωμένη μέσα σε αυτά τα δυαδικά πλαίσια SOAP και ταξιδεύει μέσω μιας ασυνήθιστης θύρας, **η αρίθμηση μέσω ADWS είναι πολύ λιγότερο πιθανό να ελεγχθεί, φιλτραριστεί ή υπογραφεί από την κλασική κίνηση LDAP/389 & 636**. Για τους χειριστές αυτό σημαίνει:
 
 * Πιο διακριτική αναγνώριση – Οι ομάδες Blue συχνά επικεντρώνονται σε ερωτήματα LDAP.
-* Ελευθερία συλλογής από **μη Windows hosts (Linux, macOS)** μέσω tunneling 9389/TCP μέσω ενός SOCKS proxy.
-* Τα ίδια δεδομένα που θα αποκτούσατε μέσω LDAP (χρήστες, ομάδες, ACLs, σχήμα κ.λπ.) και η δυνατότητα εκτέλεσης **εγγραφών** (π.χ. `msDs-AllowedToActOnBehalfOfOtherIdentity` για **RBCD**).
+* Ελευθερία συλλογής από **μη Windows hosts (Linux, macOS)** μέσω σήραγγας 9389/TCP μέσω ενός SOCKS proxy.
+* Τα ίδια δεδομένα που θα αποκτούσατε μέσω LDAP (χρήστες, ομάδες, ACLs, σχήμα, κ.λπ.) και η δυνατότητα εκτέλεσης **εγγραφών** (π.χ. `msDs-AllowedToActOnBehalfOfOtherIdentity` για **RBCD**).
 
 > ΣΗΜΕΙΩΣΗ: Το ADWS χρησιμοποιείται επίσης από πολλά εργαλεία RSAT GUI/PowerShell, οπότε η κίνηση μπορεί να συγχωνευθεί με νόμιμες δραστηριότητες διαχειριστή.
 
@@ -22,11 +22,11 @@
 
 ### Κύρια Χαρακτηριστικά
 
-* Υποστηρίζει **proxying μέσω SOCKS** (χρήσιμο από C2 implants).
+* Υποστηρίζει **proxy μέσω SOCKS** (χρήσιμο από C2 implants).
 * Λεπτομερείς φίλτρα αναζήτησης ταυτόσημα με LDAP `-q '(objectClass=user)'`.
 * Προαιρετικές **εγγραφές** ( `--set` / `--delete` ).
 * **Λειτουργία εξόδου BOFHound** για άμεση εισαγωγή στο BloodHound.
-* Σημαία `--parse` για να ομορφύνει τα timestamps / `userAccountControl` όταν απαιτείται ανθρώπινη αναγνωσιμότητα.
+* Σημαία `--parse` για να ομορφύνει τις χρονικές σφραγίδες / `userAccountControl` όταν απαιτείται ανθρώπινη αναγνωσιμότητα.
 
 ### Εγκατάσταση (host χειριστή)
 ```bash
@@ -34,7 +34,7 @@ python3 -m pip install soapy-adws   # or git clone && pip install -r requirement
 ```
 ## Stealth AD Collection Workflow
 
-Η παρακάτω ροή εργασίας δείχνει πώς να καταγράψετε **domain & ADCS objects** μέσω ADWS, να τα μετατρέψετε σε BloodHound JSON και να αναζητήσετε διαδρομές επιθέσεων με βάση πιστοποιητικά – όλα από Linux:
+Η παρακάτω ροή εργασίας δείχνει πώς να καταγράψετε **αντικείμενα τομέα & ADCS** μέσω ADWS, να τα μετατρέψετε σε BloodHound JSON και να κυνηγήσετε διαδρομές επιθέσεων με βάση πιστοποιητικά – όλα από το Linux:
 
 1. **Tunnel 9389/TCP** από το δίκτυο στόχο στο μηχάνημά σας (π.χ. μέσω Chisel, Meterpreter, SSH dynamic port-forward, κ.λπ.). Εξάγετε `export HTTPS_PROXY=socks5://127.0.0.1:1080` ή χρησιμοποιήστε το `--proxyHost/--proxyPort` του SoaPy.
 
@@ -88,15 +88,15 @@ New-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters'
 ```kql
 (event.code:4662 and not user.id:"S-1-5-18") and winlog.event_data.AccessMask:"0x10"
 ```
-## Περίληψη Εργαλείων
+## Tooling Summary
 
 | Σκοπός | Εργαλείο | Σημειώσεις |
-|--------|----------|------------|
+|---------|------|-------|
 | ADWS enumeration | [SoaPy](https://github.com/logangoins/soapy) | Python, SOCKS, read/write |
 | BloodHound ingest | [BOFHound](https://github.com/bohops/BOFHound) | Μετατρέπει τα logs του SoaPy/ldapsearch |
 | Cert compromise | [Certipy](https://github.com/ly4k/Certipy) | Μπορεί να προξενηθεί μέσω του ίδιου SOCKS |
 
-## Αναφορές
+## References
 
 * [SpecterOps – Make Sure to Use SOAP(y) – An Operators Guide to Stealthy AD Collection Using ADWS](https://specterops.io/blog/2025/07/25/make-sure-to-use-soapy-an-operators-guide-to-stealthy-ad-collection-using-adws/)
 * [SoaPy GitHub](https://github.com/logangoins/soapy)
