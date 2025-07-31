@@ -28,9 +28,9 @@ Der Erwerb von Firmware kann auf verschiedene Weise erfolgen, jede mit ihrem eig
 - **Direkt** von der Quelle (Entwickler, Hersteller)
 - **Bauen** aus bereitgestellten Anweisungen
 - **Herunterladen** von offiziellen Support-Seiten
-- Nutzung von **Google-Dork**-Abfragen zur Auffindung gehosteter Firmware-Dateien
+- Nutzung von **Google-Dork**-Abfragen, um gehostete Firmware-Dateien zu finden
 - Direkter Zugriff auf **Cloud-Speicher** mit Tools wie [S3Scanner](https://github.com/sa7mon/S3Scanner)
-- Abfangen von **Updates** mittels Man-in-the-Middle-Techniken
+- Abfangen von **Updates** über Man-in-the-Middle-Techniken
 - **Extrahieren** vom Gerät über Verbindungen wie **UART**, **JTAG** oder **PICit**
 - **Sniffen** von Update-Anfragen innerhalb der Gerätekommunikation
 - Identifizieren und Verwenden von **hardcodierten Update-Endpunkten**
@@ -48,9 +48,9 @@ hexdump -C -n 512 <bin> > hexdump.out
 hexdump -C <bin> | head # might find signatures in header
 fdisk -lu <bin> #lists a drives partition and filesystems if multiple
 ```
-Wenn Sie mit diesen Tools nicht viel finden, überprüfen Sie die **Entropie** des Bildes mit `binwalk -E <bin>`. Wenn die Entropie niedrig ist, ist es unwahrscheinlich, dass es verschlüsselt ist. Bei hoher Entropie ist es wahrscheinlich verschlüsselt (oder auf irgendeine Weise komprimiert).
+Wenn Sie mit diesen Tools nicht viel finden, überprüfen Sie die **Entropie** des Bildes mit `binwalk -E <bin>`. Bei niedriger Entropie ist es unwahrscheinlich, dass es verschlüsselt ist. Bei hoher Entropie ist es wahrscheinlich verschlüsselt (oder auf irgendeine Weise komprimiert).
 
-Darüber hinaus können Sie diese Tools verwenden, um **Dateien, die im Firmware eingebettet sind**, zu extrahieren:
+Darüber hinaus können Sie diese Tools verwenden, um **Dateien, die in der Firmware eingebettet sind**, zu extrahieren:
 
 {{#ref}}
 ../../generic-methodologies-and-resources/basic-forensic-methodology/partitions-file-systems-carving/file-data-carving-recovery-tools.md
@@ -113,7 +113,7 @@ Die Dateien befinden sich danach im Verzeichnis "`squashfs-root`".
 
 ## Firmware-Analyse
 
-Sobald die Firmware beschafft ist, ist es wichtig, sie zu zerlegen, um ihre Struktur und potenzielle Schwachstellen zu verstehen. Dieser Prozess umfasst die Nutzung verschiedener Tools zur Analyse und zum Extrahieren wertvoller Daten aus dem Firmware-Image.
+Sobald die Firmware beschafft ist, ist es wichtig, sie zu zerlegen, um ihre Struktur und potenzielle Schwachstellen zu verstehen. Dieser Prozess umfasst die Nutzung verschiedener Werkzeuge zur Analyse und zum Extrahieren wertvoller Daten aus dem Firmware-Image.
 
 ### Werkzeuge zur ersten Analyse
 
@@ -126,7 +126,7 @@ hexdump -C -n 512 <bin> > hexdump.out
 hexdump -C <bin> | head #useful for finding signatures in the header
 fdisk -lu <bin> #lists partitions and filesystems, if there are multiple
 ```
-Um den Verschlüsselungsstatus des Images zu bewerten, wird die **Entropie** mit `binwalk -E <bin>` überprüft. Niedrige Entropie deutet auf einen Mangel an Verschlüsselung hin, während hohe Entropie auf mögliche Verschlüsselung oder Kompression hinweist.
+Um den Verschlüsselungsstatus des Images zu bewerten, wird die **Entropie** mit `binwalk -E <bin>` überprüft. Eine niedrige Entropie deutet auf einen Mangel an Verschlüsselung hin, während eine hohe Entropie auf mögliche Verschlüsselung oder Kompression hinweist.
 
 Für das Extrahieren von **eingebetteten Dateien** werden Werkzeuge und Ressourcen wie die Dokumentation zu **file-data-carving-recovery-tools** und **binvis.io** zur Dateiansicht empfohlen.
 
@@ -158,13 +158,13 @@ Mehrere Tools helfen dabei, sensible Informationen und Schwachstellen im Dateisy
 - [**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT_core) für umfassende Firmware-Analysen
 - [**FwAnalyzer**](https://github.com/cruise-automation/fwanalyzer), [**ByteSweep**](https://gitlab.com/bytesweep/bytesweep), [**ByteSweep-go**](https://gitlab.com/bytesweep/bytesweep-go) und [**EMBA**](https://github.com/e-m-b-a/emba) für statische und dynamische Analysen
 
-### Sicherheitsprüfungen von kompilierten Binärdateien
+### Sicherheitsüberprüfungen von kompilierten Binärdateien
 
 Sowohl Quellcode als auch kompilierte Binärdateien, die im Dateisystem gefunden werden, müssen auf Schwachstellen überprüft werden. Tools wie **checksec.sh** für Unix-Binärdateien und **PESecurity** für Windows-Binärdateien helfen dabei, ungeschützte Binärdateien zu identifizieren, die ausgenutzt werden könnten.
 
 ## Emulation von Firmware für dynamische Analysen
 
-Der Prozess der Emulation von Firmware ermöglicht die **dynamische Analyse** entweder des Betriebs eines Geräts oder eines einzelnen Programms. Dieser Ansatz kann auf Herausforderungen mit Hardware- oder Architekturabhängigkeiten stoßen, aber das Übertragen des Root-Dateisystems oder spezifischer Binärdateien auf ein Gerät mit passender Architektur und Endianness, wie einem Raspberry Pi, oder auf eine vorgefertigte virtuelle Maschine, kann weitere Tests erleichtern.
+Der Prozess der Emulation von Firmware ermöglicht **dynamische Analysen** entweder des Betriebs eines Geräts oder eines einzelnen Programms. Dieser Ansatz kann auf Herausforderungen mit Hardware- oder Architekturabhängigkeiten stoßen, aber das Übertragen des Root-Dateisystems oder spezifischer Binärdateien auf ein Gerät mit passender Architektur und Endianness, wie z. B. einem Raspberry Pi, oder auf eine vorgefertigte virtuelle Maschine, kann weitere Tests erleichtern.
 
 ### Emulation einzelner Binärdateien
 
@@ -192,7 +192,7 @@ Tools wie [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware Analysi
 
 ## Dynamische Analyse in der Praxis
 
-In dieser Phase wird entweder eine reale oder emulierte Geräteumgebung für die Analyse verwendet. Es ist wichtig, den Shell-Zugriff auf das Betriebssystem und das Dateisystem aufrechtzuerhalten. Die Emulation kann die Hardware-Interaktionen möglicherweise nicht perfekt nachahmen, was gelegentliche Neustarts der Emulation erforderlich macht. Die Analyse sollte das Dateisystem erneut überprüfen, exponierte Webseiten und Netzwerkdienste ausnutzen und Bootloader-Schwachstellen erkunden. Firmware-Integritätstests sind entscheidend, um potenzielle Backdoor-Schwachstellen zu identifizieren.
+In diesem Stadium wird entweder eine reale oder emulierte Geräteumgebung für die Analyse verwendet. Es ist wichtig, den Shell-Zugriff auf das Betriebssystem und das Dateisystem aufrechtzuerhalten. Die Emulation kann die Hardware-Interaktionen möglicherweise nicht perfekt nachahmen, was gelegentliche Neustarts der Emulation erforderlich macht. Die Analyse sollte das Dateisystem erneut überprüfen, exponierte Webseiten und Netzwerkdienste ausnutzen und Bootloader-Schwachstellen erkunden. Firmware-Integritätstests sind entscheidend, um potenzielle Backdoor-Schwachstellen zu identifizieren.
 
 ## Laufzeitanalyse-Techniken
 
@@ -208,7 +208,7 @@ Betriebssysteme wie [AttifyOS](https://github.com/adi0x90/attifyos) und [EmbedOS
 
 ## Vorbereitete OSs zur Analyse von Firmware
 
-- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS ist eine Distribution, die Ihnen helfen soll, Sicherheitsbewertungen und Penetrationstests von Internet of Things (IoT)-Geräten durchzuführen. Es spart Ihnen viel Zeit, indem es eine vorkonfigurierte Umgebung mit allen notwendigen Tools bereitstellt.
+- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS ist eine Distribution, die Ihnen hilft, Sicherheitsbewertungen und Penetrationstests von Internet of Things (IoT)-Geräten durchzuführen. Es spart Ihnen viel Zeit, indem es eine vorkonfigurierte Umgebung mit allen notwendigen Tools bereitstellt.
 - [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Eingebettetes Sicherheitstestbetriebssystem basierend auf Ubuntu 18.04, vorinstalliert mit Tools für die Sicherheitstests von Firmware.
 
 ## Firmware-Downgrade-Angriffe & Unsichere Aktualisierungsmechanismen
@@ -218,23 +218,23 @@ Selbst wenn ein Anbieter kryptografische Signaturprüfungen für Firmware-Images
 Typischer Angriffsablauf:
 
 1. **Erhalten Sie ein älteres signiertes Image**
-* Laden Sie es von dem öffentlichen Download-Portal, CDN oder Support-Website des Anbieters herunter.
+* Laden Sie es von dem öffentlichen Download-Portal des Anbieters, CDN oder Support-Website herunter.
 * Extrahieren Sie es aus begleitenden mobilen/desktopp Anwendungen (z. B. innerhalb einer Android-APK unter `assets/firmware/`).
 * Holen Sie es aus Drittanbieter-Repositories wie VirusTotal, Internet-Archiven, Foren usw.
-2. **Laden Sie das Image auf das Gerät hoch oder stellen Sie es bereit** über jeden exponierten Aktualisierungskanal:
+2. **Laden Sie das Image auf das Gerät hoch oder stellen Sie es bereit** über einen beliebigen exponierten Aktualisierungskanal:
 * Web-UI, mobile-App-API, USB, TFTP, MQTT usw.
 * Viele Verbraucher-IoT-Geräte bieten *unauthentifizierte* HTTP(S)-Endpunkte, die Base64-kodierte Firmware-Blobs akzeptieren, diese serverseitig decodieren und die Wiederherstellung/Aktualisierung auslösen.
-3. Nach dem Downgrade eine Schwachstelle ausnutzen, die in der neueren Version gepatcht wurde (zum Beispiel einen Befehlseinschleusungsfilter, der später hinzugefügt wurde).
+3. Nach dem Downgrade eine Schwachstelle ausnutzen, die in der neueren Version gepatcht wurde (zum Beispiel einen Befehlseinschlussfilter, der später hinzugefügt wurde).
 4. Optional das neueste Image zurückflashen oder Updates deaktivieren, um eine Entdeckung zu vermeiden, sobald Persistenz erreicht ist.
 
-### Beispiel: Befehlseinschleusung nach Downgrade
+### Beispiel: Befehlseinschluss nach Downgrade
 ```http
 POST /check_image_and_trigger_recovery?md5=1; echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC...' >> /root/.ssh/authorized_keys HTTP/1.1
 Host: 192.168.0.1
 Content-Type: application/octet-stream
 Content-Length: 0
 ```
-In der verwundbaren (heruntergestuften) Firmware wird der `md5`-Parameter direkt in einen Shell-Befehl ohne Sanitärung eingefügt, was die Injektion beliebiger Befehle ermöglicht (hier – Aktivierung des SSH-Schlüssel-basierten Root-Zugriffs). Spätere Firmware-Versionen führten einen grundlegenden Zeichenfilter ein, aber das Fehlen eines Downgrade-Schutzes macht die Lösung wirkungslos.
+In der verwundbaren (heruntergestuften) Firmware wird der `md5`-Parameter direkt in einen Shell-Befehl ohne Sanitärbehandlung verkettet, was die Injektion beliebiger Befehle ermöglicht (hier – Aktivierung des SSH-Schlüssels für den Root-Zugriff). Spätere Firmware-Versionen führten einen grundlegenden Zeichenfilter ein, aber das Fehlen eines Downgrade-Schutzes macht die Lösung bedeutungslos.
 
 ### Extrahieren von Firmware aus mobilen Apps
 

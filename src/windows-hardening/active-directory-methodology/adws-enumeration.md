@@ -4,7 +4,7 @@
 
 ## Was ist ADWS?
 
-Active Directory Web Services (ADWS) ist **standardmäßig auf jedem Domänencontroller seit Windows Server 2008 R2 aktiviert** und hört auf TCP **9389**. Trotz des Namens ist **kein HTTP beteiligt**. Stattdessen stellt der Dienst LDAP-ähnliche Daten über einen Stapel proprietärer .NET-Frame-Protokolle bereit:
+Active Directory Web Services (ADWS) ist **standardmäßig auf jedem Domänencontroller seit Windows Server 2008 R2 aktiviert** und hört auf TCP **9389**. Trotz des Namens ist **kein HTTP beteiligt**. Stattdessen exponiert der Dienst LDAP-ähnliche Daten durch einen Stapel proprietärer .NET-Frame-Protokolle:
 
 * MC-NBFX → MC-NBFSE → MS-NNS → MC-NMF
 
@@ -12,7 +12,7 @@ Da der Datenverkehr in diesen binären SOAP-Frames gekapselt ist und über einen
 
 * Stealthier Recon – Blaue Teams konzentrieren sich oft auf LDAP-Abfragen.
 * Freiheit, von **nicht-Windows-Hosts (Linux, macOS)** zu sammeln, indem 9389/TCP durch einen SOCKS-Proxy getunnelt wird.
-* Die gleichen Daten, die Sie über LDAP erhalten würden (Benutzer, Gruppen, ACLs, Schema usw.) und die Möglichkeit, **Schreibvorgänge** durchzuführen (z. B. `msDs-AllowedToActOnBehalfOfOtherIdentity` für **RBCD**).
+* Die gleichen Daten, die Sie über LDAP erhalten würden (Benutzer, Gruppen, ACLs, Schema usw.) und die Fähigkeit, **Schreibvorgänge** durchzuführen (z. B. `msDs-AllowedToActOnBehalfOfOtherIdentity` für **RBCD**).
 
 > HINWEIS: ADWS wird auch von vielen RSAT GUI/PowerShell-Tools verwendet, sodass der Datenverkehr mit legitimen Administrationsaktivitäten vermischt werden kann.
 
@@ -23,7 +23,7 @@ Da der Datenverkehr in diesen binären SOAP-Frames gekapselt ist und über einen
 ### Hauptmerkmale
 
 * Unterstützt **Proxying über SOCKS** (nützlich von C2-Implantaten).
-* Fein abgestufte Suchfilter identisch zu LDAP `-q '(objectClass=user)'`.
+* Fein abgestimmte Suchfilter identisch zu LDAP `-q '(objectClass=user)'`.
 * Optionale **Schreib**-Operationen ( `--set` / `--delete` ).
 * **BOFHound-Ausgabemodus** für die direkte Eingabe in BloodHound.
 * `--parse`-Flag zur Verschönerung von Zeitstempeln / `userAccountControl`, wenn menschliche Lesbarkeit erforderlich ist.
@@ -44,7 +44,7 @@ soapy ludus.domain/jdoe:'P@ssw0rd'@10.2.10.10 \
 -q '(objectClass=domain)' \
 | tee data/domain.log
 ```
-3. **Sammeln Sie ADCS-bezogene Objekte aus dem Configuration NC:**
+3. **Sammeln Sie ADCS-bezogene Objekte aus der Konfigurations-NC:**
 ```bash
 soapy ludus.domain/jdoe:'P@ssw0rd'@10.2.10.10 \
 -dn 'CN=Configuration,DC=ludus,DC=domain' \
@@ -56,7 +56,7 @@ soapy ludus.domain/jdoe:'P@ssw0rd'@10.2.10.10 \
 ```bash
 bofhound -i data --zip   # produces BloodHound.zip
 ```
-5. **Laden Sie die ZIP-Datei** in die BloodHound-GUI hoch und führen Sie Cypher-Abfragen wie `MATCH (u:User)-[:Can_Enroll*1..]->(c:CertTemplate) RETURN u,c` aus, um Zertifikatseskalationspfade (ESC1, ESC8 usw.) offenzulegen.
+5. **Laden Sie die ZIP** in die BloodHound-GUI hoch und führen Sie Cypher-Abfragen wie `MATCH (u:User)-[:Can_Enroll*1..]->(c:CertTemplate) RETURN u,c` aus, um Zertifikatseskalationspfade (ESC1, ESC8 usw.) offenzulegen.
 
 ### Schreiben von `msDs-AllowedToActOnBehalfOfOtherIdentity` (RBCD)
 ```bash
@@ -80,11 +80,11 @@ Ereignisse erscheinen unter **Directory-Service** mit dem vollständigen LDAP-Fi
 
 ### SACL Canary Objects
 
-1. Erstellen Sie ein Dummy-Objekt (z. B. deaktivierter Benutzer `CanaryUser`).
+1. Erstellen Sie ein Dummy-Objekt (z.B. deaktivierter Benutzer `CanaryUser`).
 2. Fügen Sie eine **Audit** ACE für das _Everyone_ Prinzipal hinzu, die auf **ReadProperty** geprüft wird.
 3. Jedes Mal, wenn ein Angreifer `(servicePrincipalName=*)`, `(objectClass=user)` usw. ausführt, gibt der DC **Event 4662** aus, das die echte Benutzer-SID enthält – selbst wenn die Anfrage proxyisiert oder von ADWS stammt.
 
-Beispiel für eine vorgefertigte Regel von Elastic:
+Elastic vorgefertigtes Regelbeispiel:
 ```kql
 (event.code:4662 and not user.id:"S-1-5-18") and winlog.event_data.AccessMask:"0x10"
 ```

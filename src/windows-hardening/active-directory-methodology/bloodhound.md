@@ -6,7 +6,7 @@
 adws-enumeration.md
 {{#endref}}
 
-> HINWEIS: Diese Seite gruppiert einige der nützlichsten Dienstprogramme zur **Enumeration** und **Visualisierung** von Active Directory-Beziehungen. Für die Sammlung über den stealthy **Active Directory Web Services (ADWS)** Kanal siehe den oben genannten Verweis.
+> HINWEIS: Diese Seite gruppiert einige der nützlichsten Dienstprogramme zur **Enumeration** und **Visualisierung** von Active Directory-Beziehungen. Für die Sammlung über den stealthy **Active Directory Web Services (ADWS)**-Kanal siehe den obigen Verweis.
 
 ---
 
@@ -37,7 +37,7 @@ PS C:\> .\ADRecon.ps1 -OutputDir C:\Temp\ADRecon
 
 ## BloodHound (Graphvisualisierung)
 
-[BloodHound](https://github.com/BloodHoundAD/BloodHound) verwendet Graphentheorie + Neo4j, um versteckte Berechtigungsbeziehungen in On-Prem AD & Azure AD offenzulegen.
+[BloodHound](https://github.com/BloodHoundAD/BloodHound) verwendet Graphentheorie + Neo4j, um versteckte Berechtigungsbeziehungen in lokalem AD und Azure AD offenzulegen.
 
 ### Bereitstellung (Docker CE)
 ```bash

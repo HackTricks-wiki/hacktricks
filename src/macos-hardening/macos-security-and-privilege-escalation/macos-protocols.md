@@ -68,11 +68,11 @@ Zero Configuration Networking, bereitgestellt von Bonjour, stellt sicher, dass G
 
 Geräte, die Bonjour verwenden, weisen sich selbst eine **IP-Adresse aus dem Bereich 169.254/16** zu und überprüfen deren Einzigartigkeit im Netzwerk. Macs führen einen Routingtabelleneintrag für dieses Subnetz, der über `netstat -rn | grep 169` überprüft werden kann.
 
-Für DNS verwendet Bonjour das **Multicast DNS (mDNS)-Protokoll**. mDNS arbeitet über **Port 5353/UDP** und verwendet **Standard-DNS-Abfragen**, die jedoch an die **Multicast-Adresse 224.0.0.251** gerichtet sind. Dieser Ansatz stellt sicher, dass alle hörenden Geräte im Netzwerk die Abfragen empfangen und darauf reagieren können, was die Aktualisierung ihrer Einträge erleichtert.
+Für DNS nutzt Bonjour das **Multicast DNS (mDNS)-Protokoll**. mDNS arbeitet über **Port 5353/UDP** und verwendet **Standard-DNS-Abfragen**, die jedoch an die **Multicast-Adresse 224.0.0.251** gerichtet sind. Dieser Ansatz stellt sicher, dass alle hörenden Geräte im Netzwerk die Abfragen empfangen und darauf reagieren können, was die Aktualisierung ihrer Einträge erleichtert.
 
 Beim Beitritt zum Netzwerk wählt sich jedes Gerät selbst einen Namen, der typischerweise mit **.local** endet und entweder vom Hostnamen abgeleitet oder zufällig generiert wird.
 
-Die Dienstentdeckung im Netzwerk wird durch **DNS Service Discovery (DNS-SD)** erleichtert. Unter Verwendung des Formats von DNS SRV-Einträgen nutzt DNS-SD **DNS PTR-Einträge**, um die Auflistung mehrerer Dienste zu ermöglichen. Ein Client, der einen bestimmten Dienst sucht, fordert einen PTR-Eintrag für `<Service>.<Domain>` an und erhält im Gegenzug eine Liste von PTR-Einträgen im Format `<Instance>.<Service>.<Domain>`, wenn der Dienst von mehreren Hosts verfügbar ist.
+Die Dienstentdeckung im Netzwerk wird durch **DNS Service Discovery (DNS-SD)** erleichtert. Unter Verwendung des Formats von DNS SRV-Einträgen verwendet DNS-SD **DNS PTR-Einträge**, um die Auflistung mehrerer Dienste zu ermöglichen. Ein Client, der einen bestimmten Dienst sucht, fordert einen PTR-Eintrag für `<Service>.<Domain>` an und erhält im Gegenzug eine Liste von PTR-Einträgen im Format `<Instance>.<Service>.<Domain>`, wenn der Dienst von mehreren Hosts verfügbar ist.
 
 Das `dns-sd`-Dienstprogramm kann verwendet werden, um **Netzwerkdienste zu entdecken und zu bewerben**. Hier sind einige Beispiele für seine Verwendung:
 

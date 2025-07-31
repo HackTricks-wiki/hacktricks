@@ -16,7 +16,7 @@ Dieses Verzeichnis erlaubt den Zugriff zur Modifikation von Kernel-Variablen, no
 
 - Beschrieben in [core(5)](https://man7.org/linux/man-pages/man5/core.5.html).
 - Wenn Sie in diese Datei schreiben können, ist es möglich, eine Pipe `|` gefolgt von dem Pfad zu einem Programm oder Skript zu schreiben, das nach einem Absturz ausgeführt wird.
-- Ein Angreifer kann den Pfad innerhalb des Hosts zu seinem Container ermitteln, indem er `mount` ausführt, und den Pfad zu einer Binärdatei im Dateisystem seines Containers schreiben. Dann kann er ein Programm zum Absturz bringen, um den Kernel dazu zu bringen, die Binärdatei außerhalb des Containers auszuführen.
+- Ein Angreifer kann den Pfad innerhalb des Hosts zu seinem Container ermitteln, indem er `mount` ausführt, und den Pfad zu einer Binärdatei innerhalb seines Container-Dateisystems schreiben. Dann kann er ein Programm zum Absturz bringen, um den Kernel dazu zu bringen, die Binärdatei außerhalb des Containers auszuführen.
 
 - **Test- und Ausbeutungsbeispiel**:
 ```bash
@@ -50,7 +50,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Überprüfen des Zugriffs auf modprobe
 #### **`/proc/sys/vm/panic_on_oom`**
 
 - Referenziert in [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
-- Ein globales Flag, das steuert, ob der Kernel bei einem OOM-Zustand einen Panic auslöst oder den OOM-Killer aufruft.
+- Ein globales Flag, das steuert, ob der Kernel panikt oder den OOM-Killer aufruft, wenn eine OOM-Bedingung auftritt.
 
 #### **`/proc/sys/fs`**
 
@@ -63,7 +63,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Überprüfen des Zugriffs auf modprobe
 - Kann zu Privilegieneskalation oder Root-Shell-Zugriff führen, wenn `/proc/sys/fs/binfmt_misc/register` beschreibbar ist.
 - Relevanter Exploit und Erklärung:
 - [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
-- Ausführliches Tutorial: [Video link](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
+- Detailliertes Tutorial: [Video link](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
 
 ### Andere in `/proc`
 
@@ -75,7 +75,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Überprüfen des Zugriffs auf modprobe
 #### **`/proc/sysrq-trigger`**
 
 - Ermöglicht das Auslösen von Sysrq-Befehlen, was sofortige Systemneustarts oder andere kritische Aktionen verursachen kann.
-- **Beispiel für Neustart des Hosts**:
+- **Neustart des Hosts Beispiel**:
 
 ```bash
 echo b > /proc/sysrq-trigger # Neustart des Hosts
@@ -88,10 +88,10 @@ echo b > /proc/sysrq-trigger # Neustart des Hosts
 
 #### **`/proc/kallsyms`**
 
-- Listet exportierte Symbole des Kernels und deren Adressen auf.
+- Listet vom Kernel exportierte Symbole und deren Adressen auf.
 - Essentiell für die Entwicklung von Kernel-Exploits, insbesondere zum Überwinden von KASLR.
 - Adressinformationen sind eingeschränkt, wenn `kptr_restrict` auf `1` oder `2` gesetzt ist.
-- Einzelheiten in [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
+- Details in [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 
 #### **`/proc/[pid]/mem`**
 
@@ -102,7 +102,7 @@ echo b > /proc/sysrq-trigger # Neustart des Hosts
 #### **`/proc/kcore`**
 
 - Stellt den physischen Speicher des Systems im ELF-Core-Format dar.
-- Das Lesen kann Inhalte des Hosts und anderer Container offenbaren.
+- Das Lesen kann Inhalte des Host-Systems und anderer Container offenbaren.
 - Große Dateigröße kann zu Leseproblemen oder Softwareabstürzen führen.
 - Detaillierte Nutzung in [Dumping /proc/kcore in 2019](https://schlafwandler.github.io/posts/dumping-/proc/kcore/).
 
@@ -131,8 +131,8 @@ echo b > /proc/sysrq-trigger # Neustart des Hosts
 #### **`/sys/kernel/uevent_helper`**
 
 - Wird zur Handhabung von Kernel-Gerät `uevents` verwendet.
-- Das Schreiben in `/sys/kernel/uevent_helper` kann beliebige Skripte bei `uevent`-Auslösungen ausführen.
-- **Beispiel für Ausnutzung**:
+- Das Schreiben in `/sys/kernel/uevent_helper` kann beliebige Skripte bei `uevent`-Auslösern ausführen.
+- **Beispiel für die Ausnutzung**:
 ```bash
 
 #### Creates a payload
@@ -294,8 +294,8 @@ Mounting certain host Unix sockets or writable pseudo-filesystems is equivalent 
 ```text
 /run/containerd/containerd.sock     # containerd CRI-Socket  
 /var/run/crio/crio.sock             # CRI-O Runtime-Socket  
-/run/podman/podman.sock             # Podman API (root oder rootlos)  
-/run/buildkit/buildkitd.sock        # BuildKit-Daemon (root)  
+/run/podman/podman.sock             # Podman API (rootful oder rootless)  
+/run/buildkit/buildkitd.sock        # BuildKit-Daemon (rootful)  
 /var/run/kubelet.sock               # Kubelet API auf Kubernetes-Knoten  
 /run/firecracker-containerd.sock    # Kata / Firecracker
 ```

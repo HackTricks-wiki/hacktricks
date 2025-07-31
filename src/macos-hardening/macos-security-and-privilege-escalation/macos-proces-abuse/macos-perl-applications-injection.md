@@ -4,7 +4,7 @@
 
 ## Über die Umgebungsvariable `PERL5OPT` & `PERL5LIB`
 
-Mit der Umgebungsvariable **`PERL5OPT`** ist es möglich, dass **Perl** willkürliche Befehle ausführt, wenn der Interpreter startet (sogar **bevor** die erste Zeile des Zielskripts geparst wird). 
+Mit der Umgebungsvariable **`PERL5OPT`** ist es möglich, dass **Perl** willkürliche Befehle ausführt, wenn der Interpreter startet (sogar **bevor** die erste Zeile des Zielskripts analysiert wird). 
 Zum Beispiel, erstellen Sie dieses Skript:
 ```perl:test.pl
 #!/usr/bin/perl
@@ -35,11 +35,11 @@ export PERL5DB='system("/bin/zsh")'
 sudo perl -d /usr/bin/some_admin_script.pl   # wird eine Shell öffnen, bevor das Skript ausgeführt wird
 ```
 
-* **`PERL5SHELL`** – unter Windows steuert diese Variable, welches Shell-Executable Perl verwenden wird, wenn es eine Shell starten muss. Sie wird hier nur der Vollständigkeit halber erwähnt, da sie unter macOS nicht relevant ist.
+* **`PERL5SHELL`** – unter Windows steuert diese Variable, welches Shell-Executable Perl verwendet, wenn es eine Shell starten muss. Sie wird hier nur der Vollständigkeit halber erwähnt, da sie unter macOS nicht relevant ist.
 
-Obwohl `PERL5DB` den `-d` Schalter erfordert, ist es üblich, Wartungs- oder Installationsskripte zu finden, die als *root* mit diesem Flag aktiviert für ausführliche Fehlersuche ausgeführt werden, wodurch die Variable ein gültiger Eskalationsvektor wird.
+Obwohl `PERL5DB` den `-d` Schalter erfordert, ist es üblich, Wartungs- oder Installationsskripte zu finden, die als *root* mit diesem Flag aktiviert für ausführliche Fehlersuche ausgeführt werden, was die Variable zu einem gültigen Eskalationsvektor macht.
 
-## Über Abhängigkeiten (@INC-Missbrauch)
+## Über Abhängigkeiten (@INC Missbrauch)
 
 Es ist möglich, den Include-Pfad aufzulisten, den Perl durchsuchen wird (**`@INC`**), indem Sie Folgendes ausführen:
 ```bash
@@ -60,13 +60,13 @@ Typische Ausgaben auf macOS 13/14 sehen folgendermaßen aus:
 Einige der zurückgegebenen Ordner existieren nicht einmal, jedoch existiert **`/Library/Perl/5.30`**, ist *nicht* durch SIP geschützt und befindet sich *vor* den SIP-geschützten Ordnern. Daher, wenn Sie als *root* schreiben können, können Sie ein bösartiges Modul (z.B. `File/Basename.pm`) ablegen, das *bevorzugt* von jedem privilegierten Skript, das dieses Modul importiert, geladen wird.
 
 > [!WARNING]
-> Sie benötigen weiterhin **root**, um in `/Library/Perl` zu schreiben, und macOS zeigt ein **TCC**-Prompt an, das nach *Vollzugriff auf das Laufwerk* für den Prozess fragt, der die Schreiboperation durchführt.
+> Sie benötigen immer noch **root**, um in `/Library/Perl` zu schreiben, und macOS zeigt ein **TCC**-Prompt an, das nach *Vollzugriff auf das Laufwerk* für den Prozess fragt, der die Schreiboperation durchführt.
 
-Wenn beispielsweise ein Skript **`use File::Basename;`** importiert, wäre es möglich, `/Library/Perl/5.30/File/Basename.pm` zu erstellen, das vom Angreifer kontrollierten Code enthält.
+Wenn ein Skript beispielsweise **`use File::Basename;`** importiert, wäre es möglich, `/Library/Perl/5.30/File/Basename.pm` zu erstellen, das vom Angreifer kontrollierten Code enthält.
 
 ## SIP-Umgehung über den Migrationsassistenten (CVE-2023-32369 “Migraine”)
 
-Im Mai 2023 gab Microsoft **CVE-2023-32369** bekannt, mit dem Spitznamen **Migraine**, eine Post-Exploitation-Technik, die es einem *root*-Angreifer ermöglicht, den **System Integrity Protection (SIP)** vollständig zu **umgehen**. 
+Im Mai 2023 gab Microsoft **CVE-2023-32369** bekannt, mit dem Spitznamen **Migraine**, eine Post-Exploitation-Technik, die es einem *root*-Angreifer ermöglicht, **System Integrity Protection (SIP)** vollständig **zu umgehen**. 
 Die verwundbare Komponente ist **`systemmigrationd`**, ein Daemon mit der Berechtigung **`com.apple.rootless.install.heritable`**. Jeder von diesem Daemon erzeugte Kindprozess erbt die Berechtigung und läuft daher **außerhalb** der SIP-Beschränkungen.
 
 Unter den von den Forschern identifizierten Kindern befindet sich der von Apple signierte Interpreter:
@@ -88,7 +88,7 @@ Apple hat das Problem in macOS **Ventura 13.4**, **Monterey 12.6.6** und **Big S
 ## Empfehlungen zur Härtung
 
 1. **Gefährliche Variablen löschen** – privilegierte launchdaemons oder Cron-Jobs sollten mit einer sauberen Umgebung gestartet werden (`launchctl unsetenv PERL5OPT`, `env -i` usw.).
-2. **Vermeiden Sie es, Interpreter als root auszuführen**, es sei denn, es ist unbedingt erforderlich. Verwenden Sie kompilierte Binärdateien oder entziehen Sie frühzeitig die Berechtigungen.
+2. **Vermeiden Sie es, Interpreter als root auszuführen**, es sei denn, es ist unbedingt notwendig. Verwenden Sie kompilierte Binärdateien oder entziehen Sie frühzeitig die Berechtigungen.
 3. **Vendor-Skripte mit `-T` (Taint-Modus)**, damit Perl `PERL5OPT` und andere unsichere Schalter ignoriert, wenn die Taint-Prüfung aktiviert ist.
 4. **Halten Sie macOS auf dem neuesten Stand** – “Migraine” ist in den aktuellen Versionen vollständig gepatcht.
 
