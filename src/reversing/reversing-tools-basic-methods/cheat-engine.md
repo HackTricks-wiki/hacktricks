@@ -46,26 +46,26 @@ Então, vamos supor que há um valor importante (como a vida do seu usuário) qu
 
 ### Através de uma mudança conhecida
 
-Supondo que você está procurando o valor 100, você **realiza uma varredura** procurando por esse valor e encontra muitas coincidências:
+Supondo que você está procurando o valor 100, você **realiza um escaneamento** buscando por esse valor e encontra muitas coincidências:
 
 ![](<../../images/image (108).png>)
 
-Então, você faz algo para que **o valor mude**, e você **para** o jogo e **realiza** uma **próxima varredura**:
+Então, você faz algo para que **o valor mude**, e você **para** o jogo e **realiza** um **próximo escaneamento**:
 
 ![](<../../images/image (684).png>)
 
-Cheat Engine irá procurar os **valores** que **foram de 100 para o novo valor**. Parabéns, você **encontrou** o **endereço** do valor que estava procurando, agora você pode modificá-lo.\
-_Se você ainda tiver vários valores, faça algo para modificar novamente esse valor e realize outra "próxima varredura" para filtrar os endereços._
+Cheat Engine irá procurar pelos **valores** que **foram de 100 para o novo valor**. Parabéns, você **encontrou** o **endereço** do valor que estava procurando, agora você pode modificá-lo.\
+_Se você ainda tiver vários valores, faça algo para modificar novamente esse valor e realize outro "próximo escaneamento" para filtrar os endereços._
 
 ### Valor desconhecido, mudança conhecida
 
-No cenário em que você **não sabe o valor**, mas sabe **como fazê-lo mudar** (e até o valor da mudança), você pode procurar seu número.
+No cenário em que você **não sabe o valor**, mas sabe **como fazê-lo mudar** (e até mesmo o valor da mudança), você pode procurar seu número.
 
-Então, comece realizando uma varredura do tipo "**Valor inicial desconhecido**":
+Então, comece realizando um escaneamento do tipo "**Valor inicial desconhecido**":
 
 ![](<../../images/image (890).png>)
 
-Em seguida, faça o valor mudar, indique **como** o **valor** **mudou** (no meu caso, foi diminuído em 1) e realize uma **próxima varredura**:
+Em seguida, faça o valor mudar, indique **como** o **valor** **mudou** (no meu caso, foi diminuído em 1) e realize um **próximo escaneamento**:
 
 ![](<../../images/image (371).png>)
 
@@ -75,7 +75,7 @@ Você será apresentado a **todos os valores que foram modificados da maneira se
 
 Uma vez que você tenha encontrado seu valor, você pode modificá-lo.
 
-Note que há uma **porção de mudanças possíveis** e você pode fazer esses **passos quantas vezes quiser** para filtrar os resultados:
+Note que há uma **grande quantidade de mudanças possíveis** e você pode fazer esses **passos quantas vezes quiser** para filtrar os resultados:
 
 ![](<../../images/image (574).png>)
 
@@ -83,7 +83,7 @@ Note que há uma **porção de mudanças possíveis** e você pode fazer esses *
 
 Até agora, aprendemos como encontrar um endereço que armazena um valor, mas é altamente provável que em **diferentes execuções do jogo, esse endereço esteja em lugares diferentes da memória**. Então, vamos descobrir como sempre encontrar esse endereço.
 
-Usando alguns dos truques mencionados, encontre o endereço onde seu jogo atual está armazenando o valor importante. Então (parando o jogo se desejar), clique com o botão direito no **endereço** encontrado e selecione "**Descobrir o que acessa este endereço**" ou "**Descobrir o que escreve para este endereço**":
+Usando alguns dos truques mencionados, encontre o endereço onde seu jogo atual está armazenando o valor importante. Então (parando o jogo se desejar), clique com o botão direito no **endereço** encontrado e selecione "**Descobrir o que acessa este endereço**" ou "**Descobrir o que escreve neste endereço**":
 
 ![](<../../images/image (1067).png>)
 
@@ -102,11 +102,11 @@ Assim, você pode agora modificá-lo para que o código não afete seu número, 
 
 ### Endereço de memória aleatório - Encontrando o ponteiro
 
-Seguindo os passos anteriores, encontre onde o valor que você está interessado está. Em seguida, usando "**Descobrir o que escreve para este endereço**", descubra qual endereço escreve esse valor e clique duas vezes nele para obter a visualização da desassemblagem:
+Seguindo os passos anteriores, encontre onde o valor que você está interessado está. Então, usando "**Descobrir o que escreve neste endereço**", descubra qual endereço escreve esse valor e clique duas vezes nele para obter a visualização da desassemblagem:
 
 ![](<../../images/image (1039).png>)
 
-Em seguida, realize uma nova varredura **procurando o valor hex entre "\[]"** (o valor de $edx neste caso):
+Em seguida, realize um novo escaneamento **buscando o valor hex entre "\[]"** (o valor de $edx neste caso):
 
 ![](<../../images/image (994).png>)
 
@@ -154,10 +154,64 @@ Então, insira seu novo código assembly na seção "**newmem**" e remova o cód
 
 ![](<../../images/image (521).png>)
 
-**Clique em executar e assim por diante e seu código deve ser injetado no programa, mudando o comportamento da funcionalidade!**
+**Clique em executar e assim seu código deve ser injetado no programa, mudando o comportamento da funcionalidade!**
+
+## Recursos avançados no Cheat Engine 7.x (2023-2025)
+
+Cheat Engine continuou a evoluir desde a versão 7.0 e vários recursos de qualidade de vida e *reversão ofensiva* foram adicionados que são extremamente úteis ao analisar software moderno (e não apenas jogos!). Abaixo está um **guia de campo muito condensado** para as adições que você provavelmente usará durante o trabalho de red-team/CTF.
+
+### Melhorias do Scanner de Ponteiros 2
+* `Os ponteiros devem terminar com deslocamentos específicos` e o novo controle deslizante **Desvio** (≥7.4) reduzem muito os falsos positivos quando você rescaneia após uma atualização. Use-o junto com a comparação de multi-mapa (`.PTR` → *Comparar resultados com outro mapa de ponteiro salvo*) para obter um **único ponteiro-base resiliente** em apenas alguns minutos.
+* Atalho de filtro em massa: após o primeiro escaneamento, pressione `Ctrl+A → Espaço` para marcar tudo, depois `Ctrl+I` (inverter) para desmarcar endereços que falharam no rescaneamento.
+
+### Ultimap 3 – Rastreio Intel PT
+*Desde 7.5, o antigo Ultimap foi reimplementado sobre o **Intel Processor-Trace (IPT)**. Isso significa que agora você pode gravar *cada* ramificação que o alvo toma **sem passo a passo** (apenas em modo de usuário, não acionará a maioria dos gadgets anti-debug).
+```
+Memory View → Tools → Ultimap 3 → check «Intel PT»
+Select number of buffers → Start
+```
+Após alguns segundos, pare a captura e **clique com o botão direito → Salvar lista de execução em arquivo**. Combine endereços de ramificação com uma sessão de `Find out what addresses this instruction accesses` para localizar hotspots de lógica de jogo de alta frequência extremamente rápido.
+
+### Modelos de `jmp` / auto-patch de 1 byte
+A versão 7.5 introduziu um stub JMP *de um byte* (0xEB) que instala um manipulador SEH e coloca um INT3 na localização original. Ele é gerado automaticamente quando você usa **Auto Assembler → Template → Code Injection** em instruções que não podem ser patchadas com um salto relativo de 5 bytes. Isso torna possíveis ganchos "apertados" dentro de rotinas compactadas ou com restrição de tamanho.
+
+### Stealth em nível de kernel com DBVM (AMD & Intel)
+*DBVM* é o hipervisor Tipo-2 embutido do CE. Compilações recentes finalmente adicionaram **suporte AMD-V/SVM** para que você possa executar `Driver → Load DBVM` em hosts Ryzen/EPYC. O DBVM permite que você:
+1. Crie breakpoints de hardware invisíveis para verificações de Ring-3/anti-debug.
+2. Leia/escreva regiões de memória do kernel pagináveis ou protegidas, mesmo quando o driver em modo usuário está desativado.
+3. Realize bypasses de ataque de temporização sem VM-EXIT (por exemplo, consultar `rdtsc` do hipervisor).
+
+**Dica:** O DBVM se recusará a carregar quando HVCI/Memory-Integrity estiver habilitado no Windows 11 → desative-o ou inicialize um host de VM dedicado.
+
+### Depuração remota / multiplataforma com **ceserver**
+O CE agora inclui uma reescrita completa do *ceserver* e pode se conectar via TCP a **Linux, Android, macOS & iOS**. Um fork popular integra *Frida* para combinar instrumentação dinâmica com a GUI do CE – ideal quando você precisa patchar jogos Unity ou Unreal rodando em um telefone:
+```
+# on the target (arm64)
+./ceserver_arm64 &
+# on the analyst workstation
+adb forward tcp:52736 tcp:52736   # (or ssh tunnel)
+Cheat Engine → "Network" icon → Host = localhost → Connect
+```
+Para a ponte Frida, veja `bb33bb/frida-ceserver` no GitHub.
+
+### Outras novidades notáveis
+* **Patch Scanner** (MemView → Tools) – detecta mudanças de código inesperadas em seções executáveis; útil para análise de malware.
+* **Structure Dissector 2** – arraste um endereço → `Ctrl+D`, depois *Guess fields* para avaliar automaticamente estruturas C.
+* **.NET & Mono Dissector** – suporte melhorado para jogos Unity; chame métodos diretamente do console Lua do CE.
+* **Tipos personalizados Big-Endian** – escaneamento/edição de ordem de bytes revertida (útil para emuladores de console e buffers de pacotes de rede).
+* **Autosave & tabs** para janelas AutoAssembler/Lua, além de `reassemble()` para reescrita de instruções em várias linhas.
+
+### Notas de instalação e OPSEC (2024-2025)
+* O instalador oficial vem com ofertas **ad-offers** do InnoSetup (`RAV`, etc.). **Sempre clique em *Decline*** *ou compile a partir do código-fonte* para evitar PUPs. Os AVs ainda marcarão `cheatengine.exe` como um *HackTool*, o que é esperado.
+* Drivers modernos anti-cheat (EAC/Battleye, ACE-BASE.sys, mhyprot2.sys) detectam a classe de janela do CE mesmo quando renomeada. Execute sua cópia de reversão **dentro de uma VM descartável** ou após desativar o jogo em rede.
+* Se você só precisa de acesso em modo de usuário, escolha **`Settings → Extra → Kernel mode debug = off`** para evitar carregar o driver não assinado do CE que pode causar BSOD no Windows 11 24H2 Secure-Boot.
+
+---
 
 ## **Referências**
 
-- **Tutorial do Cheat Engine, complete-o para aprender como começar com o Cheat Engine**
+- [Notas de lançamento do Cheat Engine 7.5 (GitHub)](https://github.com/cheat-engine/cheat-engine/releases/tag/7.5)
+- [ponte cross-platform frida-ceserver](https://github.com/bb33bb/frida-ceserver-Mac-and-IOS)
+- **Tutorial do Cheat Engine, complete para aprender como começar com o Cheat Engine**
 
 {{#include ../../banners/hacktricks-training.md}}
