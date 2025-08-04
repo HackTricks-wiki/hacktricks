@@ -542,6 +542,40 @@ Proxychains intercepts `gethostbyname` libc call and tunnels tcp DNS request thr
 
 [https://github.com/hotnops/gtunnel](https://github.com/hotnops/gtunnel)
 
+### Custom DNS TXT / HTTP JSON C2 (AK47C2)
+
+The Storm-2603 actor created a **dual-channel C2 ("AK47C2")** that abuses *only* outbound **DNS** and **plain HTTP POST** traffic – two protocols that are rarely blocked on corporate networks.
+
+1. **DNS mode (AK47DNS)**
+   • Generates a random 5-character SessionID (e.g. `H4T14`).  
+   • Prepends `1` for *task requests* or `2` for *results* and concatenates different fields (flags, SessionID, computer name).  
+   • Each field is **XOR-encrypted with the ASCII key `VHBD@H`**, hex-encoded, and glued together with dots – finally ending with the attacker-controlled domain:
+
+   ```text
+   <1|2><SessionID>.a<SessionID>.<Computer>.update.updatemicfosoft.com
+   ```
+
+   • Requests use `DnsQuery()` for **TXT** (and fallback **MG**) records.  
+   • When the response exceeds 0xFF bytes the backdoor **fragments** the data into 63-byte pieces and inserts the markers:
+     `s<SessionID>t<TOTAL>p<POS>` so the C2 server can reorder them.
+
+2. **HTTP mode (AK47HTTP)**
+   • Builds a JSON envelope:
+   ```json
+   {"cmd":"","cmd_id":"","fqdn":"<host>","result":"","type":"task"}
+   ```
+   • The whole blob is XOR-`VHBD@H` → hex → sent as the body of a **`POST /`** with header `Content-Type: text/plain`.
+   • The reply follows the same encoding and the `cmd` field is executed with `cmd.exe /c <command> 2>&1`.
+
+Blue Team notes
+• Look for unusual **TXT queries** whose first label is long hexadecimal and always end in one rare domain.  
+• A constant XOR key followed by ASCII-hex is easy to detect with YARA: `6?56484244?484` (`VHBD@H` in hex).  
+• For HTTP, flag text/plain POST bodies that are pure hex and multiple of two bytes.
+
+{{#note}}
+The entire channel fits inside **standard RFC-compliant queries** and keeps each sub-domain label under 63 bytes, making it stealthy in most DNS logs.
+{{#endnote}}
+
 ## ICMP Tunneling
 
 ### Hans
@@ -792,6 +826,7 @@ Because Tiny Core is stateless, attackers usually:
 ## References
 
 - [Hiding in the Shadows: Covert Tunnels via QEMU Virtualization](https://trustedsec.com/blog/hiding-in-the-shadows-covert-tunnels-via-qemu-virtualization)
+- [Check Point Research – Before ToolShell: Exploring Storm-2603’s Previous Ransomware Operations](https://research.checkpoint.com/2025/before-toolshell-exploring-storm-2603s-previous-ransomware-operations/)
 
 {{#include ../banners/hacktricks-training.md}}
 
