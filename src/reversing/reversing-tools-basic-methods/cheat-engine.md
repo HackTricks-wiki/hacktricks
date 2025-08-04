@@ -38,7 +38,7 @@ E infine **spuntando la casella** per applicare la modifica nella memoria:
 
 ![](<../../images/image (385).png>)
 
-La **modifica** alla **memoria** sarà immediatamente **applicata** (nota che finché il gioco non utilizza di nuovo questo valore, il valore **non verrà aggiornato nel gioco**).
+La **modifica** alla **memoria** sarà immediatamente **applicata** (nota che fino a quando il gioco non utilizza di nuovo questo valore, il valore **non verrà aggiornato nel gioco**).
 
 ## Cercare il valore
 
@@ -83,7 +83,7 @@ Nota che ci sono **molti possibili cambiamenti** e puoi fare questi **passaggi q
 
 Fino ad ora abbiamo imparato come trovare un indirizzo che memorizza un valore, ma è altamente probabile che in **diverse esecuzioni del gioco quell'indirizzo si trovi in posti diversi della memoria**. Quindi scopriamo come trovare sempre quell'indirizzo.
 
-Utilizzando alcuni dei trucchi menzionati, trova l'indirizzo dove il tuo gioco attuale sta memorizzando il valore importante. Poi (ferma il gioco se lo desideri) fai **clic destro** sull'**indirizzo** trovato e seleziona "**Scopri cosa accede a questo indirizzo**" o "**Scopri cosa scrive a questo indirizzo**":
+Utilizzando alcuni dei trucchi menzionati, trova l'indirizzo dove il tuo gioco attuale sta memorizzando il valore importante. Poi (ferma il gioco se lo desideri) fai clic con il tasto destro sull'**indirizzo** trovato e seleziona "**Scopri cosa accede a questo indirizzo**" o "**Scopri cosa scrive a questo indirizzo**":
 
 ![](<../../images/image (1067).png>)
 
@@ -110,7 +110,7 @@ Poi, esegui una nuova scansione **cercando il valore esadecimale tra "\[]"** (il
 
 ![](<../../images/image (994).png>)
 
-(_Se ne appaiono diversi, di solito hai bisogno dell'indirizzo più piccolo_)\
+(_Se ne appaiono diversi, di solito hai bisogno di quello con l'indirizzo più piccolo_)\
 Ora, abbiamo **trovato il puntatore che modificherà il valore che ci interessa**.
 
 Fai clic su "**Aggiungi indirizzo manualmente**":
@@ -133,7 +133,7 @@ Ora, ogni volta che modifichi quel valore, stai **modificando il valore importan
 
 L'iniezione di codice è una tecnica in cui inietti un pezzo di codice nel processo target e poi reindirizzi l'esecuzione del codice per passare attraverso il tuo codice scritto (come darti punti invece di sottrarli).
 
-Quindi, immagina di aver trovato l'indirizzo che sottrae 1 alla vita del tuo giocatore:
+Quindi, immagina di aver trovato l'indirizzo che sta sottraendo 1 dalla vita del tuo giocatore:
 
 ![](<../../images/image (203).png>)
 
@@ -156,8 +156,62 @@ Quindi, inserisci il tuo nuovo codice assembly nella sezione "**newmem**" e rimu
 
 **Fai clic su esegui e così via e il tuo codice dovrebbe essere iniettato nel programma cambiando il comportamento della funzionalità!**
 
+## Funzionalità avanzate in Cheat Engine 7.x (2023-2025)
+
+Cheat Engine ha continuato a evolversi dalla versione 7.0 e sono state aggiunte diverse funzionalità di qualità della vita e *offensive-reversing* che sono estremamente utili quando si analizzano software moderni (e non solo giochi!). Di seguito è riportata una **guida sul campo molto condensata** alle aggiunte che probabilmente utilizzerai durante il lavoro di red-team/CTF.
+
+### Miglioramenti dello Scanner di Puntatori 2
+* `I puntatori devono terminare con offset specifici` e il nuovo cursore **Deviazione** (≥7.4) riduce notevolmente i falsi positivi quando esegui una nuova scansione dopo un aggiornamento. Usalo insieme al confronto multi-mappa (`.PTR` → *Confronta i risultati con un'altra mappa di puntatori salvata*) per ottenere un **singolo puntatore di base resiliente** in pochi minuti.
+* Scorciatoia per filtro in blocco: dopo la prima scansione premi `Ctrl+A → Spazio` per contrassegnare tutto, poi `Ctrl+I` (inverti) per deselezionare gli indirizzi che non hanno superato la nuova scansione.
+
+### Ultimap 3 – Tracciamento Intel PT
+*Dalla versione 7.5, il vecchio Ultimap è stato re-implementato sopra **Intel Processor-Trace (IPT)***. Questo significa che ora puoi registrare *ogni* ramo che il target prende **senza eseguire passo-passo** (solo in modalità utente, non attiverà la maggior parte dei gadget anti-debug).
+```
+Memory View → Tools → Ultimap 3 → check «Intel PT»
+Select number of buffers → Start
+```
+Dopo alcuni secondi, interrompi la cattura e **clicca con il tasto destro → Salva l'elenco di esecuzione su file**. Combina gli indirizzi dei rami con una sessione `Scopri quali indirizzi accede a questa istruzione` per localizzare rapidamente i punti critici della logica di gioco ad alta frequenza.
+
+### Modelli di `jmp` / auto-patch di 1 byte
+La versione 7.5 ha introdotto uno stub JMP *di un byte* (0xEB) che installa un gestore SEH e posiziona un INT3 nella posizione originale. Viene generato automaticamente quando utilizzi **Auto Assembler → Template → Code Injection** su istruzioni che non possono essere patchate con un salto relativo di 5 byte. Questo rende possibili hook “stretti” all'interno di routine compresse o con vincoli di dimensione.
+
+### Stealth a livello kernel con DBVM (AMD & Intel)
+*DBVM* è l'ipervisor di tipo 2 integrato in CE. Le versioni recenti hanno finalmente aggiunto il **supporto AMD-V/SVM** in modo da poter eseguire `Driver → Load DBVM` su host Ryzen/EPYC. DBVM ti consente di:
+1. Creare breakpoint hardware invisibili ai controlli Ring-3/anti-debug.
+2. Leggere/scrivere regioni di memoria kernel paginabili o protette anche quando il driver in modalità utente è disabilitato.
+3. Eseguire bypass di attacchi temporali senza VM-EXIT (ad es. interrogare `rdtsc` dall'ipervisor).
+
+**Suggerimento:** DBVM rifiuterà di caricarsi quando HVCI/Memory-Integrity è abilitato su Windows 11 → disattivalo o avvia un host VM dedicato.
+
+### Debugging remoto / cross-platform con **ceserver**
+CE ora include una riscrittura completa di *ceserver* e può collegarsi tramite TCP a **Linux, Android, macOS & iOS** target. Un fork popolare integra *Frida* per combinare l'istrumentazione dinamica con l'interfaccia grafica di CE – ideale quando hai bisogno di patchare giochi Unity o Unreal in esecuzione su un telefono:
+```
+# on the target (arm64)
+./ceserver_arm64 &
+# on the analyst workstation
+adb forward tcp:52736 tcp:52736   # (or ssh tunnel)
+Cheat Engine → "Network" icon → Host = localhost → Connect
+```
+Per il bridge di Frida vedere `bb33bb/frida-ceserver` su GitHub.
+
+### Altre utili risorse
+* **Patch Scanner** (MemView → Tools) – rileva cambiamenti di codice imprevisti nelle sezioni eseguibili; utile per l'analisi del malware.
+* **Structure Dissector 2** – trascina-un-indirizzo → `Ctrl+D`, poi *Indovina campi* per valutare automaticamente le strutture C.
+* **.NET & Mono Dissector** – supporto migliorato per i giochi Unity; chiama metodi direttamente dalla console Lua di CE.
+* **Tipi personalizzati Big-Endian** – scansione/modifica dell'ordine dei byte invertito (utile per emulatori di console e buffer di pacchetti di rete).
+* **Autosave & tabs** per finestre AutoAssembler/Lua, più `reassemble()` per la riscrittura di istruzioni su più righe.
+
+### Note di installazione e OPSEC (2024-2025)
+* L'installer ufficiale è avvolto con InnoSetup **offerte pubblicitarie** (`RAV` ecc.). **Clicca sempre su *Declina*** *o compila dal sorgente* per evitare PUP. Gli AV continueranno a contrassegnare `cheatengine.exe` come *HackTool*, il che è previsto.
+* I moderni driver anti-cheat (EAC/Battleye, ACE-BASE.sys, mhyprot2.sys) rilevano la classe della finestra di CE anche quando rinominata. Esegui la tua copia di reversing **all'interno di una VM usa e getta** o dopo aver disabilitato il gioco in rete.
+* Se hai solo bisogno di accesso in user-mode scegli **`Settings → Extra → Kernel mode debug = off`** per evitare di caricare il driver non firmato di CE che potrebbe causare BSOD su Windows 11 24H2 Secure-Boot.
+
+---
+
 ## **Riferimenti**
 
-- **Tutorial di Cheat Engine, completalo per imparare a iniziare con Cheat Engine**
+- [Note di rilascio di Cheat Engine 7.5 (GitHub)](https://github.com/cheat-engine/cheat-engine/releases/tag/7.5)
+- [bridge cross-platform frida-ceserver](https://github.com/bb33bb/frida-ceserver-Mac-and-IOS)
+- **Tutorial di Cheat Engine, completalo per imparare come iniziare con Cheat Engine**
 
 {{#include ../../banners/hacktricks-training.md}}
