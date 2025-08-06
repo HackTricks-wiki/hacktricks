@@ -6,6 +6,17 @@
 
 Kernel extensions (Kexts) are **packages** with a **`.kext`** extension that are **loaded directly into the macOS kernel space**, providing additional functionality to the main operating system.
 
+### Deprecation status & DriverKit / System Extensions  
+Starting with **macOS Catalina (10.15)** Apple marked most legacy KPIs as *deprecated* and introduced the **System Extensions & DriverKit** frameworks that run in **user-space**. From **macOS Big Sur (11)** the operating system will *refuse to load* third-party kexts that rely on deprecated KPIs unless the machine is booted in **Reduced Security** mode. On Apple Silicon, enabling kexts additionally requires the user to:
+
+1. Reboot into **Recovery** → *Startup Security Utility*.
+2. Select **Reduced Security** and tick **“Allow user management of kernel extensions from identified developers”**.
+3. Reboot and approve the kext from **System Settings → Privacy & Security**.
+
+User-land drivers written with DriverKit/System Extensions dramatically **reduce attack surface** because crashes or memory corruption are confined to a sandboxed process rather than kernel space.  
+
+> 📝 From macOS Sequoia (15) Apple has removed several legacy networking and USB KPIs entirely – the only forward-compatible solution for vendors is to migrate to System Extensions.
+
 ### Requirements
 
 Obviously, this is so powerful that it is **complicated to load a kernel extension**. These are the **requirements** that a kernel extension must meet to be loaded:
@@ -34,14 +45,39 @@ In Catalina it was like this: It is interesting to note that the **verification*
 
 If **`kextd`** is not available, **`kextutil`** can perform the same checks.
 
-### Enumeration (loaded kexts)
+### Enumeration & management (loaded kexts)
+
+`kextstat` was the historical tool but it is **deprecated** in recent macOS releases. The modern interface is **`kmutil`**:
 
 ```bash
-# Get loaded kernel extensions
+# List every extension currently linked in the kernel, sorted by load address
+sudo kmutil showloaded --sort
+
+# Show only third-party / auxiliary collections
+sudo kmutil showloaded --collection aux
+
+# Unload a specific bundle
+sudo kmutil unload -b com.example.mykext
+```
+
+Older syntax is still available for reference:
+
+```bash
+# (Deprecated) Get loaded kernel extensions
 kextstat
 
-# Get dependencies of the kext number 22
+# (Deprecated) Get dependencies of the kext number 22
 kextstat | grep " 22 " | cut -c2-5,50- | cut -d '(' -f1
+```
+
+`kmutil inspect` can also be leveraged to **dump the contents of a Kernel Collection (KC)** or verify that a kext resolves all symbol dependencies:
+
+```bash
+# List fileset entries contained in the boot KC
+kmutil inspect -B /System/Library/KernelCollections/BootKernelExtensions.kc --show-fileset-entries
+
+# Check undefined symbols of a 3rd party kext before loading
+kmutil libraries -p /Library/Extensions/FancyUSB.kext --undef-symbols
 ```
 
 ## Kernelcache
@@ -78,7 +114,7 @@ It's usually composed of the following components:
 Decompress the Kernelcache:
 
 ```bash
-# img4tool (https://github.com/tihmstar/img4tool
+# img4tool (https://github.com/tihmstar/img4tool)
 img4tool -e kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
 
 # pyimg4 (https://github.com/m1stadev/PyIMG4)
@@ -140,14 +176,68 @@ kextex_all kernelcache.release.iphone14.e
 nm -a binaries/com.apple.security.sandbox | wc -l
 ```
 
-## Debugging
+## Recent vulnerabilities & exploitation techniques
 
-## Referencias
+| Year | CVE | Summary |
+|------|-----|---------|
+| 2024 | **CVE-2024-44243** | Logic flaw in **`storagekitd`** allowed a *root* attacker to register a malicious file-system bundle that ultimately loaded an **unsigned kext**, **bypassing System Integrity Protection (SIP)** and enabling persistent rootkits. Patched in macOS 14.2 / 15.2.   |
+| 2021 | **CVE-2021-30892** (*Shrootless*) | Installation daemon with the entitlement `com.apple.rootless.install` could be abused to execute arbitrary post-install scripts, disable SIP and load arbitrary kexts.  |
 
-- [https://www.makeuseof.com/how-to-enable-third-party-kernel-extensions-apple-silicon-mac/](https://www.makeuseof.com/how-to-enable-third-party-kernel-extensions-apple-silicon-mac/)
-- [https://www.youtube.com/watch?v=hGKOskSiaQo](https://www.youtube.com/watch?v=hGKOskSiaQo)
+**Take-aways for red-teamers**
+
+1. **Look for entitled daemons (`codesign -dvv /path/bin | grep entitlements`) that interact with Disk Arbitration, Installer or Kext Management.**  
+2. **Abusing SIP bypasses almost always grants the ability to load a kext → kernel code execution**.
+
+**Defensive tips**
+
+*Keep SIP enabled*, monitor for `kmutil load`/`kmutil create -n aux` invocations coming from non-Apple binaries and alert on any write to `/Library/Extensions`. Endpoint Security events `ES_EVENT_TYPE_NOTIFY_KEXTLOAD` provide near real-time visibility.
+
+## Debugging macOS kernel & kexts
+
+Apple’s recommended workflow is to build a **Kernel Debug Kit (KDK)** that matches the running build and then attach **LLDB** over a **KDP (Kernel Debugging Protocol)** network session.
+
+### One-shot local debug of a panic
+
+```bash
+# Create a symbolication bundle for the latest panic
+sudo kdpwrit dump latest.kcdata
+kmutil analyze-panic latest.kcdata -o ~/panic_report.txt
+```
+
+### Live remote debugging from another Mac
+
+1. Download + install the exact **KDK** version for the target machine.
+2. Connect the target Mac and the host Mac with a **USB-C or Thunderbolt cable**.
+3. On the **target**:
+
+```bash
+sudo nvram boot-args="debug=0x100 kdp_match_name=macbook-target"
+reboot
+```
+
+4. On the **host**:
+
+```bash
+lldb
+(lldb) kdp-remote "udp://macbook-target"
+(lldb) bt  # get backtrace in kernel context
+```
+
+### Attaching LLDB to a specific loaded kext
+
+```bash
+# Identify load address of the kext
+ADDR=$(kmutil showloaded --bundle-identifier com.example.driver | awk '{print $4}')
+
+# Attach
+sudo lldb -n kernel_task -o "target modules load --file /Library/Extensions/Example.kext/Contents/MacOS/Example --slide $ADDR"
+```
+
+> ℹ️  KDP only exposes a **read-only** interface. For dynamic instrumentation you will need to patch the binary on-disk, leverage **kernel function hooking** (e.g. `mach_override`) or migrate the driver to a **hypervisor** for full read/write.
+
+## References
+
+- DriverKit Security – Apple Platform Security Guide 
+- Microsoft Security Blog – *Analyzing CVE-2024-44243 SIP bypass* 
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-
