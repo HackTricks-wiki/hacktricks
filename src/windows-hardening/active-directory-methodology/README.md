@@ -644,6 +644,12 @@ Detailed analysis and step-by-step guidance can be found in:
 golden-dmsa-gmsa.md
 {{#endref}}
 
+Complementary delegated MSA attack (BadSuccessor – abusing migration attributes):
+
+{{#ref}}
+badsuccessor-dmsa-migration-abuse.md
+{{#endref}}
+
 Additional external research: [Golden gMSA Trust Attacks](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-5-golden-gmsa-trust-attack-from-child-to-parent).
 
 **Schema change attack**
