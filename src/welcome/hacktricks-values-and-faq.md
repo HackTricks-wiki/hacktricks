@@ -48,9 +48,9 @@ Yes, you can, but **don't forget to mention the specific link(s)** where the con
 
 > [!TIP]
 >
-> - **How can I  a page of HackTricks?**
+> - **How can I cite a page of HackTricks?**
 
-As long as the link **of** the page(s) were you took the information from appears it's enough.\
+As long as the link **of** the page(s) where you took the information from appears it's enough.\
 If you need a bibtex you can use something like:
 
 ```latex
