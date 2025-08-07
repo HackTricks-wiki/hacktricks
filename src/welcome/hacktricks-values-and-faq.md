@@ -72,7 +72,7 @@ Se você teme que isso desapareça, basta fazer um fork no Github ou baixá-lo, 
 >
 > - **Por que você tem patrocinadores? Os livros do HackTricks são para fins comerciais?**
 
-O primeiro **valor** do **HackTricks** é oferecer recursos educacionais de hacking **GRATUITOS** para **TODOS** no mundo. A equipe do HackTricks dedicou **milhares de horas** para oferecer este conteúdo, novamente, **GRATUITAMENTE**.
+O primeiro **valor** do **HackTricks** é oferecer recursos educacionais de hacking **GRATUITOS** para **TODOS** no mundo. A equipe do HackTricks dedicou **milhares de horas** para oferecer este conteúdo, novamente, **GRATUITO**.
 
 Se você acha que os livros do HackTricks são feitos para **fins comerciais**, você está **COMPLETAMENTE ERRADO**.
 
@@ -90,7 +90,7 @@ Você não encontrará o HackTricks cheio de anúncios irritantes como outros bl
 >
 > - **O que devo fazer se houver conteúdo do meu blog no HackTricks e eu não quiser que esteja lá?**
 
-Observe que ter links para sua página no HackTricks:
+Note que ter links para sua página no HackTricks:
 
 - Melhora seu **SEO**
 - O conteúdo é **traduzido para mais de 15 idiomas**, possibilitando que mais pessoas acessem este conteúdo
@@ -100,7 +100,7 @@ No entanto, se você ainda quiser que o conteúdo do seu blog seja removido do H
 
 > [!CAUTION]
 >
-> - **O que devo fazer se eu encontrar conteúdo copiado e colado no HackTricks?**
+> - **O que devo fazer se encontrar conteúdo copiado e colado no HackTricks?**
 
 Nós sempre **damos todos os créditos aos autores originais**. Se você encontrar uma página com conteúdo copiado e colado sem a fonte original referenciada, nos avise e nós iremos **removê-lo**, **adicionar o link antes do texto**, ou **reescrevê-lo adicionando o link**.
 
