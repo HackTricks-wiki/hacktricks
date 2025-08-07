@@ -13,9 +13,9 @@
 > - **HIFADHI** mbinu za **hacking** za kushangaza ambazo jamii inachapisha ikitoa **WANDIKAJI** wa **AWALI** sifa zote.
 >  - **Hatupendi sifa kutoka kwa watu wengine**, tunataka tu kuhifadhi mbinu nzuri kwa kila mtu.
 >  - Pia tunaandika **utafiti wetu wenyewe** katika HackTricks.
->  - Katika hali kadhaa tutandika tu **katika HackTricks muhtasari wa sehemu muhimu** za mbinu na tutawatia moyo **wasomaji kutembelea chapisho la asili** kwa maelezo zaidi.
+>  - Katika hali kadhaa tutandika tu **katika HackTricks muhtasari wa sehemu muhimu** za mbinu na tutawatia **hamasa wasomaji kutembelea chapisho la asili** kwa maelezo zaidi.
 > - **ANDAA** mbinu zote za hacking katika kitabu ili iwe **RAHISI KUFIKIA**
->  - Timu ya HackTricks imejitolea masaa maelfu bure **kuandaa maudhui** ili watu waweze **kujifunza haraka**
+>  - Timu ya HackTricks imejitolea maelfu ya masaa bure **tu kuandaa maudhui** ili watu waweze **kujifunza haraka**
 
 <figure><img src="../images/hack tricks gif.gif" alt="" width="375"><figcaption></figcaption></figure>
 
@@ -48,9 +48,9 @@ Ndio, unaweza, lakini **usisahau kutaja kiungo maalum** ambacho maudhui yalitole
 
 > [!TIP]
 >
-> - **Ninaweza vipi kuandika ukurasa wa HackTricks?**
+> - **Ninaweza vipi kunukuu ukurasa wa HackTricks?**
 
-Mradi tu kiungo **cha** ukurasa(za) ulizochukua taarifa kutoka kitatosha.\
+Mradi tu kiungo **cha** ukurasa(za) ambapo ulipata taarifa kinatosha.\
 Ikiwa unahitaji bibtex unaweza kutumia kitu kama:
 ```latex
 @misc{hacktricks-bibtexing,
@@ -64,7 +64,7 @@ url = {\url{https://book.hacktricks.wiki/specific-page}},
 >
 > - **Naweza kunakili HackTricks zote kwenye blogu yangu?**
 
-**Ningependa kutokufanya hivyo**. Hii **haitafaidi mtu yeyote** kwani **maudhui yote yanapatikana tayari** katika vitabu rasmi vya HackTricks bure.
+**Ningependa kutokufanya hivyo**. Hii **haitafaidi mtu yeyote** kwani **maudhui yote tayari yanapatikana hadharani** katika vitabu rasmi vya HackTricks bure.
 
 Ikiwa unahofia kwamba itatoweka, tu fork kwenye Github au uipakue, kama nilivyosema tayari ni bure.
 
@@ -72,35 +72,35 @@ Ikiwa unahofia kwamba itatoweka, tu fork kwenye Github au uipakue, kama nilivyos
 >
 > - **Kwa nini una wadhamini? Je, vitabu vya HackTricks vina madhumuni ya kibiashara?**
 
-Thamani ya kwanza ya **HackTricks** ni kutoa rasilimali za elimu za **BURE** za hacking kwa **DUNIA YOTE**. Timu ya HackTricks imejitolea **masaa maelfu** kutoa maudhui haya, tena, **BURE**.
+Thamani ya kwanza ya **HackTricks** ni kutoa rasilimali za elimu ya hacking **BURE** kwa **DUNIA YOTE**. Timu ya HackTricks imejitolea **masaa maelfu** kutoa maudhui haya, tena, **BURE**.
 
-Ikiwa unafikiri vitabu vya HackTricks vimeandaliwa kwa **madhumuni ya kibiashara** uko **KABISA KOSA**.
+Ikiwa unafikiri vitabu vya HackTricks vimeandikwa kwa **madhumuni ya kibiashara** uko **KABISA KOSA**.
 
-Tuna wadhamini kwa sababu, hata kama maudhui yote ni BURE, tunataka **kutoa jamii fursa ya kuthamini kazi yetu** ikiwa wanataka. Kwa hivyo, tunawapa watu chaguo la kuchangia HackTricks kupitia [**wadhamini wa Github**](https://github.com/sponsors/carlospolop), na **makampuni muhimu ya usalama wa mtandao** kudhamini HackTricks na **kuwa na matangazo** katika kitabu, ambapo **matangazo** yanawekwa katika maeneo yanayofanya kuwa **naonekana** lakini **hayakoseshi mchakato wa kujifunza** ikiwa mtu anazingatia maudhui.
+Tuna wadhamini kwa sababu, hata kama maudhui yote ni BURE, tunataka **kutoa jamii fursa ya kuthamini kazi yetu** ikiwa wanataka. Kwa hivyo, tunawapa watu chaguo la kuchangia HackTricks kupitia [**wadhamini wa Github**](https://github.com/sponsors/carlospolop), na **makampuni muhimu ya usalama wa mtandao** kudhamini HackTricks na **kuwa na matangazo** katika kitabu, ambapo **matangazo** yanapangwa katika maeneo yanayofanya yawe **naonekana** lakini **hayakoseshi mchakato wa kujifunza** ikiwa mtu anazingatia maudhui.
 
-Hautapata HackTricks imejaa matangazo ya annoying kama blogu nyingine zenye maudhui kidogo kuliko HackTricks, kwa sababu HackTricks haijandikwa kwa madhumuni ya kibiashara.
+Hautapata HackTricks imejaa matangazo ya annoying kama blogu nyingine zenye maudhui kidogo kuliko HackTricks, kwa sababu HackTricks haijaundwa kwa madhumuni ya kibiashara.
 
 > [!CAUTION]
 >
-> - **Nifanye nini ikiwa ukurasa fulani wa HackTricks unategemea chapisho langu la blogu lakini haujarejelewa?**
+> - **Nifanyeje ikiwa ukurasa fulani wa HackTricks unategemea chapisho langu la blogu lakini haujarejelewa?**
 
 **Tunajuta sana. Hii haikupaswa kutokea**. Tafadhali, tujulishe kupitia masuala ya Github, Twitter, Discord... kiungo cha ukurasa wa HackTricks wenye maudhui na kiungo cha blogu yako na **tutakagua na kuongeza ASAP**.
 
 > [!CAUTION]
 >
-> - **Nifanye nini ikiwa kuna maudhui kutoka kwa blogu yangu katika HackTricks na sitaki iwepo?**
+> - **Nifanyeje ikiwa kuna maudhui kutoka kwa blogu yangu katika HackTricks na sitaki iwepo?**
 
 Kumbuka kwamba kuwa na viungo kwenye ukurasa wako katika HackTricks:
 
 - Inaboresha **SEO** yako
 - Maudhui yanapata **kutafsiriwa kwa zaidi ya lugha 15** ikifanya iwezekane kwa watu wengi kufikia maudhui haya
-- **HackTricks inahamasisha** watu **kuangalia ukurasa wako** (watu kadhaa wametujulisha kwamba tangu ukurasa wao uwe katika HackTricks wanapata ziara zaidi)
+- **HackTricks inahamasisha** watu **kuangalia ukurasa wako** (watu wengi wametujulisha kwamba tangu ukurasa wao uwe katika HackTricks wanapata ziara zaidi)
 
 Hata hivyo, ikiwa bado unataka maudhui ya blogu yako yaondolewe kutoka HackTricks tafadhali tujulishe na bila shaka **tutaondoa kila kiungo kwa blogu yako**, na maudhui yoyote yanayotegemea hiyo.
 
 > [!CAUTION]
 >
-> - **Nifanye nini ikiwa napata maudhui yaliyonakiliwa katika HackTricks?**
+> - **Nifanyeje ikiwa napata maudhui yaliyonakiliwa katika HackTricks?**
 
 Sisi daima **tunawapa waandishi wa asili sifa zote**. Ikiwa unapata ukurasa wenye maudhui yaliyonakiliwa bila chanzo cha asili kilichorejelewa, tujulishe na tutafanya **kuondoa**, **kuongeza kiungo kabla ya maandiko**, au **kuandika upya kwa kuongeza kiungo**.
 
@@ -111,15 +111,15 @@ Copyright © Haki zote zimehifadhiwa isipokuwa kama vinginevyo imeelezwa.
 #### Muhtasari wa Leseni:
 
 - Attributio: Una uhuru wa:
-- Kushiriki — kunakili na kusambaza nyenzo katika njia yoyote au muundo.
+- Kushiriki — kunakili na kugawa nyenzo katika njia yoyote au muundo.
 - Kubadilisha — kuchanganya, kubadilisha, na kujenga juu ya nyenzo.
 
 #### Masharti ya Ziada:
 
-- Maudhui ya Watu wa Tatu: Sehemu zingine za blogu/hiki kitabu zinaweza kujumuisha maudhui kutoka vyanzo vingine, kama vile nukuu kutoka blogu au machapisho mengine. Matumizi ya maudhui kama haya yanafanywa chini ya kanuni za matumizi ya haki au kwa ruhusa wazi kutoka kwa wamiliki wa hakimiliki husika. Tafadhali rejelea vyanzo vya asili kwa habari maalum za leseni kuhusu maudhui ya watu wa tatu.
-- Uandishi: Maudhui ya asili yaliyoandikwa na HackTricks yanategemea masharti ya leseni hii. Unahimizwa kutoa sifa kwa kazi hii unaposhiriki au kubadilisha.
+- Maudhui ya Watu wa Tatu: Sehemu zingine za blogu/hiki kitabu zinaweza kujumuisha maudhui kutoka vyanzo vingine, kama vile nukuu kutoka blogu nyingine au machapisho. Matumizi ya maudhui kama haya yanafanywa chini ya kanuni za matumizi ya haki au kwa ruhusa wazi kutoka kwa wamiliki wa hakimiliki husika. Tafadhali rejelea vyanzo vya asili kwa habari maalum ya leseni kuhusu maudhui ya watu wa tatu.
+- Uandishi: Maudhui ya asili yaliyoandikwa na HackTricks yanategemea masharti ya leseni hii. Unahimizwa kutoa sifa kwa kazi hii kwa wakati wa kushiriki au kubadilisha.
 
-#### Uondoaji:
+#### Mipango ya Kutengwa:
 
 - Matumizi ya Kibiashara: Kwa maswali kuhusu matumizi ya kibiashara ya maudhui haya, tafadhali wasiliana nami.
 
@@ -130,7 +130,7 @@ Leseni hii haitoi haki yoyote ya alama ya biashara au haki za chapa kuhusiana na
 ## **Kanusho**
 
 > [!CAUTION]
-> Hiki kitabu, 'HackTricks,' kinakusudiwa kwa madhumuni ya elimu na taarifa pekee. Maudhui ndani ya hiki kitabu yanatolewa kwa msingi wa 'kama ilivyo', na waandishi na wachapishaji hawatoi uwakilishi au dhamana yoyote, wazi au fiche, kuhusu ukamilifu, usahihi, uaminifu, kufaa, au upatikanaji wa habari, bidhaa, huduma, au picha zinazohusiana zilizomo ndani ya hiki kitabu. Kila unavyotegemea habari kama hiyo ni kwa hatari yako mwenyewe.
+> Hiki kitabu, 'HackTricks,' kinakusudiwa kwa madhumuni ya elimu na taarifa pekee. Maudhui ndani ya hiki kitabu yanatolewa kwa msingi wa 'kama ilivyo', na waandishi na wachapishaji hawatoi uwakilishi au dhamana yoyote ya aina yoyote, wazi au fiche, kuhusu ukamilifu, usahihi, uaminifu, kufaa, au upatikanaji wa habari, bidhaa, huduma, au picha zinazohusiana zilizomo ndani ya hiki kitabu. Kila unavyotegemea habari kama hiyo ni kwa hatari yako mwenyewe.
 >
 > Waandishi na wachapishaji hawatakuwa na jukumu lolote kwa hasara au uharibifu wowote, ikiwa ni pamoja na bila kikomo, hasara au uharibifu wa moja kwa moja au wa matokeo, au hasara au uharibifu wowote unaotokana na kupoteza data au faida zinazotokana na, au kuhusiana na, matumizi ya hiki kitabu.
 >
@@ -138,6 +138,6 @@ Leseni hii haitoi haki yoyote ya alama ya biashara au haki za chapa kuhusiana na
 >
 > Mtumiaji ndiye mwenye jukumu pekee kwa hatua zozote zinazochukuliwa kulingana na habari iliyomo ndani ya hiki kitabu, na inashauriwa kila wakati kutafuta ushauri wa kitaalamu na msaada wakati wa kujaribu kutekeleza mbinu au vidokezo vyovyote vilivyoelezewa hapa.
 >
-> Kwa kutumia hiki kitabu, mtumiaji anakubali kuachilia waandishi na wachapishaji kutoka kwa dhima na wajibu wowote kwa uharibifu, hasara, au madhara ambayo yanaweza kutokea kutokana na matumizi ya hiki kitabu au maudhui yoyote yaliyomo ndani yake.
+> Kwa kutumia hiki kitabu, mtumiaji anakubali kuachilia waandishi na wachapishaji kutoka kwa dhima yoyote na jukumu kwa uharibifu, hasara, au madhara yoyote yanayoweza kutokea kutokana na matumizi ya hiki kitabu au maudhui yoyote yaliyomo ndani yake.
 
 {{#include ../banners/hacktricks-training.md}}
