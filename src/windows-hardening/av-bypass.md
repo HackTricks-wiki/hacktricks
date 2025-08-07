@@ -245,9 +245,44 @@ To bypass PowerShell logging, you can use the following techniques:
 > [!TIP]
 > Several obfuscation techniques relies on encrypting data, which will increase the entropy of the binary which will make easier for AVs and EDRs to detect it. Be careful with this and maybe only apply encryption to specific sections of your code that is sensitive or needs to be hidden.
 
-There are several tools that can be used to **obfuscate C# clear-text code**, generate **metaprogramming templates** to compile binaries or **obfuscate compiled binaries** such as:
+### Deobfuscating ConfuserEx-Protected .NET Binaries
 
-- [**ConfuserEx**](https://github.com/yck1509/ConfuserEx): It's a great open-source obfuscator for .NET applications. It provides various protection techniques such as control flow obfuscation, anti-debugging, anti-tampering, and string encryption. It's recommened cause it allows even to obfuscate specific chunks of code.
+When analysing malware that uses ConfuserEx 2 (or commercial forks) it is common to face several layers of protection that will block decompilers and sandboxes.  The workflow below reliably **restores a near–original IL** that can afterwards be decompiled to C# in tools such as dnSpy or ILSpy.
+
+1.  Anti-tampering removal – ConfuserEx encrypts every *method body* and decrypts it inside the *module* static constructor (`<Module>.cctor`).  This also patches the PE checksum so any modification will crash the binary.  Use **AntiTamperKiller** to locate the encrypted metadata tables, recover the XOR keys and rewrite a clean assembly:
+   ```bash
+   # https://github.com/wwh1004/AntiTamperKiller
+   python AntiTamperKiller.py Confused.exe Confused.clean.exe
+   ```
+   Output contains the 6 anti-tamper parameters (`key0-key3`, `nameHash`, `internKey`) that can be useful when building your own unpacker.
+
+2.  Symbol / control-flow recovery – feed the *clean* file to **de4dot-cex** (a ConfuserEx-aware fork of de4dot).
+   ```bash
+   de4dot-cex -p crx Confused.clean.exe -o Confused.de4dot.exe
+   ```
+   Flags:
+     • `-p crx` – select the ConfuserEx 2 profile
+     • de4dot will undo control-flow flattening, restore original namespaces, classes and variable names and decrypt constant strings.
+
+3.  Proxy-call stripping – ConfuserEx replaces direct method calls with lightweight wrappers (a.k.a *proxy calls*) to further break decompilation.  Remove them with **ProxyCall-Remover**:
+   ```bash
+   ProxyCall-Remover.exe Confused.de4dot.exe Confused.fixed.exe
+   ```
+   After this step you should observe normal .NET API such as `Convert.FromBase64String` or `AES.Create()` instead of opaque wrapper functions (`Class8.smethod_10`, …).
+
+4.  Manual clean-up – run the resulting binary under dnSpy, search for large Base64 blobs or `RijndaelManaged`/`TripleDESCryptoServiceProvider` use to locate the *real* payload.  Often the malware stores it as a TLV-encoded byte array initialised inside `<Module>.byte_0`.
+
+The above chain restores execution flow **without** needing to run the malicious sample – useful when working on an offline workstation.
+
+> 🛈  ConfuserEx produces a custom attribute named `ConfusedByAttribute` that can be used as an IOC to automatically triage samples.
+
+#### One-liner
+```bash
+autotok.sh Confused.exe  # wrapper that performs the 3 steps above sequentially
+```
+
+---
+
 - [**InvisibilityCloak**](https://github.com/h4wkst3r/InvisibilityCloak)**: C# obfuscator**
 - [**Obfuscator-LLVM**](https://github.com/obfuscator-llvm/obfuscator): The aim of this project is to provide an open-source fork of the [LLVM](http://www.llvm.org/) compilation suite able to provide increased software security through [code obfuscation](<http://en.wikipedia.org/wiki/Obfuscation_(software)>) and tamper-proofing.
 - [**ADVobfuscator**](https://github.com/andrivet/ADVobfuscator): ADVobfuscator demonstates how to use `C++11/14` language to generate, at compile time, obfuscated code without using any external tool and without modifying the compiler.
@@ -679,5 +714,7 @@ Detection / Mitigation
 
 ## References
 
+- [Unit42 – New Infection Chain and ConfuserEx-Based Obfuscation for DarkCloud Stealer](https://unit42.paloaltonetworks.com/new-darkcloud-stealer-infection-chain/)
 - [Check Point Research – Before ToolShell: Exploring Storm-2603’s Previous Ransomware Operations](https://research.checkpoint.com/2025/before-toolshell-exploring-storm-2603s-previous-ransomware-operations/)
+
 {{#include ../banners/hacktricks-training.md}}
