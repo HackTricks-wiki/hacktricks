@@ -1,8 +1,8 @@
-# HackTricks 值观与常见问题
+# HackTricks 值与常见问题
 
 {{#include ../banners/hacktricks-training.md}}
 
-## HackTricks 值观
+## HackTricks 值
 
 > [!TIP]
 > 这些是 **HackTricks 项目的价值观**：
@@ -13,9 +13,9 @@
 > - **存储** 社区发布的精彩 **黑客** 技术，并给予 **原作者** 所有的 **荣誉**。
 >  - **我们不想要其他人的荣誉**，我们只想为大家存储酷炫的技巧。
 >  - 我们还在 HackTricks 中撰写 **我们自己的研究**。
->  - 在某些情况下，我们将仅在 HackTricks 中写出技术的重要部分的 **摘要**，并 **鼓励读者访问原始帖子** 以获取更多细节。
-> - **组织** 书中的所有黑客技术，使其 **更易获取**。
->  - HackTricks 团队投入了数千小时的时间，免费 **仅仅是为了组织内容**，以便人们可以 **更快学习**。
+>  - 在某些情况下，我们将仅在 HackTricks 中撰写技术的重要部分的 **摘要**，并 **鼓励读者访问原始帖子** 以获取更多细节。
+> - **组织** 书中的所有黑客技术，使其 **更易获取**
+>  - HackTricks 团队投入了数千小时的时间 **仅仅是为了组织内容**，以便人们可以 **更快学习**
 
 <figure><img src="../images/hack tricks gif.gif" alt="" width="375"><figcaption></figcaption></figure>
 
@@ -25,7 +25,7 @@
 >
 > - **非常感谢这些资源，我该如何感谢你们？**
 
-您可以在推特上公开感谢 HackTricks 团队，提到 [**@hacktricks_live**](https://twitter.com/hacktricks_live)。\
+您可以在推特上公开感谢 HackTricks 团队将所有这些资源整理在一起，提及 [**@hacktricks_live**](https://twitter.com/hacktricks_live)。\
 如果您特别感激，您也可以 [**在这里赞助该项目**](https://github.com/sponsors/carlospolop)。\
 并且不要忘记 **在 Github 项目中给个星星！**（在下面找到链接）。
 
@@ -33,7 +33,7 @@
 >
 > - **我该如何为该项目做贡献？**
 
-您可以 **与社区分享新的技巧和窍门或修复您在书中发现的错误**，通过向相应的 Github 页面发送 **Pull Request**：
+您可以 **与社区分享新的技巧和窍门或修复您在书中发现的错误**，向相应的 Github 页面发送 **Pull Request**：
 
 - [https://github.com/carlospolop/hacktricks](https://github.com/carlospolop/hacktricks)
 - [https://github.com/carlospolop/hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)
@@ -42,7 +42,7 @@
 
 > [!TIP]
 >
-> - **我可以复制一些 HackTricks 的内容并放到我的博客吗？**
+> - **我可以复制一些 HackTricks 的内容并放在我的博客上吗？**
 
 可以，但 **不要忘记提及具体的链接**，内容是从哪里获取的。
 
@@ -51,7 +51,7 @@
 > - **我该如何引用 HackTricks 的页面？**
 
 只要您引用的信息页面的 **链接** 出现即可。\
-如果您需要 bibtex，您可以使用类似的格式：
+如果您需要 bibtex，可以使用类似的格式：
 ```latex
 @misc{hacktricks-bibtexing,
 author = {"HackTricks Team" or the Authors name of the specific page/trick},
@@ -78,25 +78,25 @@ url = {\url{https://book.hacktricks.wiki/specific-page}},
 
 我们有赞助商，因为即使所有内容都是免费的，我们也希望**给社区提供欣赏我们工作的可能性**，如果他们愿意。因此，我们提供人们通过[**Github赞助商**](https://github.com/sponsors/carlospolop)向HackTricks捐款的选项，以及**相关的网络安全公司**赞助HackTricks并在书中**放置一些广告**，这些**广告**总是放在不会干扰学习过程的地方，以便让人们在专注于内容时仍能看到。
 
-你不会发现HackTricks充满了烦人的广告，就像其他内容远不如HackTricks的博客，因为HackTricks不是为了商业目的而制作的。
+你不会发现HackTricks充满了烦人的广告，就像其他内容远少于HackTricks的博客，因为HackTricks不是为了商业目的而制作的。
 
 > [!CAUTION]
 >
 > - **如果某个HackTricks页面基于我的博客文章但没有引用，我该怎么办？**
 
-**我们非常抱歉。这不应该发生**。请通过Github问题、Twitter、Discord等告知我们HackTricks页面的链接和你的博客链接，**我们会尽快检查并添加引用**。
+**我们非常抱歉。这不应该发生**。请通过Github问题、Twitter、Discord等告知我们HackTricks页面的链接和你的博客链接，**我们会尽快检查并添加**。
 
 > [!CAUTION]
 >
-> - **如果HackTricks中有我博客的内容而我不希望它在那里，我该怎么办？**
+> - **如果HackTricks中有我博客的内容而我不想要它，我该怎么办？**
 
 请注意，在HackTricks中链接到你的页面：
 
 - 改善你的**SEO**
-- 内容被**翻译成超过15种语言**，使更多人能够访问这些内容
-- **HackTricks鼓励**人们**查看你的页面**（有几个人提到，自从他们的某个页面出现在HackTricks中，他们的访问量增加了）
+- 内容被**翻译成15种以上的语言**，使更多人能够访问这些内容
+- **HackTricks鼓励**人们**查看你的页面**（有几个人提到，自从他们的某个页面在HackTricks中后，他们的访问量增加了）
 
-然而，如果你仍然希望从HackTricks中删除你博客的内容，请告知我们，我们将**删除所有指向你博客的链接**，以及任何基于该内容的内容。
+然而，如果你仍然希望从HackTricks中删除你博客的内容，请告知我们，我们将**删除所有指向你博客的链接**，以及任何基于它的内容。
 
 > [!CAUTION]
 >
@@ -112,7 +112,7 @@ Copyright © 保留所有权利，除非另有说明。
 
 - Attribution: 你可以自由地：
 - Share — 以任何媒介或格式复制和重新分发材料。
-- Adapt — 混合、转变和基于材料进行构建。
+- Adapt — 混合、转变并基于材料进行创作。
 
 #### Additional Terms:
 
@@ -125,12 +125,12 @@ Copyright © 保留所有权利，除非另有说明。
 
 此许可不授予与内容相关的任何商标或品牌权利。所有在本博客/书籍中出现的商标和品牌均为其各自所有者的财产。
 
-**通过访问或使用HackTricks，您同意遵守此许可的条款。如果您不同意这些条款，请不要访问此网站。**
+**通过访问或使用HackTricks，你同意遵守此许可的条款。如果你不同意这些条款，请不要访问此网站。**
 
 ## **免责声明**
 
 > [!CAUTION]
-> 本书《HackTricks》仅用于教育和信息目的。本书中的内容按“原样”提供，作者和出版商不对本书中包含的信息、产品、服务或相关图形的完整性、准确性、可靠性、适用性或可用性作出任何明示或暗示的陈述或保证。因此，您对这些信息的任何依赖均由您自行承担风险。
+> 本书《HackTricks》仅用于教育和信息目的。书中的内容是按“现状”提供的，作者和出版商不对书中包含的信息、产品、服务或相关图形的完整性、准确性、可靠性、适用性或可用性作出任何明示或暗示的陈述或保证。你对这些信息的任何依赖均由你自行承担风险。
 >
 > 作者和出版商在任何情况下均不对因使用本书而导致的任何损失或损害承担责任，包括但不限于间接或后果性损失或损害，或因数据或利润损失而产生的任何损失或损害。
 >
