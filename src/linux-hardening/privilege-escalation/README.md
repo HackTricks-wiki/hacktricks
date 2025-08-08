@@ -69,6 +69,12 @@ https://github.com/dirtycow/dirtycow.github.io/wiki/PoCs
 https://github.com/evait-security/ClickNRoot/blob/master/1/exploit.c
 ```
 
+### CVE-2025-38236 (AF_UNIX MSG_OOB UAF)
+
+{{#ref}}
+af_unix-msg_oob-uaf.md
+{{#endref}}
+
 ### Sudo version
 
 Based on the vulnerable sudo versions that appear in:

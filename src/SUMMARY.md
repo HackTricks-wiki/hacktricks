@@ -95,6 +95,7 @@
 
 - [Checklist - Linux Privilege Escalation](linux-hardening/linux-privilege-escalation-checklist.md)
 - [Linux Privilege Escalation](linux-hardening/privilege-escalation/README.md)
+  - [Af Unix Msg Oob Uaf](linux-hardening/privilege-escalation/af_unix-msg_oob-uaf.md)
   - [Arbitrary File Write to Root](linux-hardening/privilege-escalation/write-to-root.md)
   - [Cisco - vmanage](linux-hardening/privilege-escalation/cisco-vmanage.md)
   - [Containerd (ctr) Privilege Escalation](linux-hardening/privilege-escalation/containerd-ctr-privilege-escalation.md)
