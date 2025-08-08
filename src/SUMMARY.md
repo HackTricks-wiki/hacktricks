@@ -824,6 +824,7 @@
 
 # 🤖 AI
 - [AI Security](AI/README.md)
+  - [Ai Assisted Fuzzing And Vulnerability Discovery](AI/AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md)
   - [AI Security Methodology](AI/AI-Deep-Learning.md)
   - [AI MCP Security](AI/AI-MCP-Servers.md)
   - [AI Model Data Preparation](AI/AI-Model-Data-Preparation-and-Evaluation.md)
