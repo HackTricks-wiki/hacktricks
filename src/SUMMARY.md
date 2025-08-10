@@ -263,6 +263,7 @@
   - [AD DNS Records](windows-hardening/active-directory-methodology/ad-dns-records.md)
   - [Adws Enumeration](windows-hardening/active-directory-methodology/adws-enumeration.md)
   - [ASREPRoast](windows-hardening/active-directory-methodology/asreproast.md)
+  - [Badsuccessor Dmsa Migration Abuse](windows-hardening/active-directory-methodology/badsuccessor-dmsa-migration-abuse.md)
   - [BloodHound & Other AD Enum Tools](windows-hardening/active-directory-methodology/bloodhound.md)
   - [Constrained Delegation](windows-hardening/active-directory-methodology/constrained-delegation.md)
   - [Custom SSP](windows-hardening/active-directory-methodology/custom-ssp.md)
