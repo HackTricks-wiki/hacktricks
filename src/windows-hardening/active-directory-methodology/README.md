@@ -29,7 +29,7 @@
 
 ### **Kerberos Authentication**
 
-要学习如何 **攻击 AD**，您需要非常好地 **理解** **Kerberos 身份验证过程**。\
+要学习如何 **攻击 AD**，您需要非常好地 **理解** **Kerberos 认证过程**。\
 [**如果您仍然不知道它是如何工作的，请阅读此页面。**](kerberos-authentication.md)
 
 ## Cheat Sheet
@@ -44,7 +44,7 @@
 如果您仅访问 AD 环境，但没有任何凭据/会话，您可以：
 
 - **渗透测试网络：**
-- 扫描网络，查找机器和开放端口，并尝试 **利用漏洞** 或 **从中提取凭据**（例如，[打印机可能是非常有趣的目标](ad-information-in-printers.md)）。
+- 扫描网络，查找机器和开放端口，并尝试 **利用漏洞** 或 **提取凭据**（例如，[打印机可能是非常有趣的目标](ad-information-in-printers.md)）。
 - 枚举 DNS 可能会提供有关域中关键服务器的信息，如 Web、打印机、共享、VPN、媒体等。
 - `gobuster dns -d domain.local -t 25 -w /opt/Seclist/Discovery/DNS/subdomain-top2000.txt`
 - 查看一般的 [**渗透测试方法论**](../../generic-methodologies-and-resources/pentesting-methodology.md) 以获取有关如何执行此操作的更多信息。
@@ -69,7 +69,7 @@
 - **毒化网络**
 - 收集凭据 [**通过 Responder 冒充服务**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md)
 - 通过 [**滥用中继攻击**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack) 访问主机
-- 收集凭据 **暴露** [**伪造的 UPnP 服务与 evil-S**](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md)[**SDP**](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
+- 收集凭据 **暴露** [**假 UPnP 服务与 evil-S**](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md)[**SDP**](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
 - [**OSINT**](https://book.hacktricks.wiki/en/generic-methodologies-and-resources/external-recon-methodology/index.html):
 - 从内部文档、社交媒体、服务（主要是 Web）中提取用户名/姓名，以及从公开可用的信息中提取。
 - 如果您找到公司员工的完整姓名，您可以尝试不同的 AD **用户名约定**（**[阅读此文](https://activedirectorypro.com/active-directory-user-naming-convention/)**）。最常见的约定是：_NameSurname_、_Name.Surname_、_NamSur_（每个三个字母）、_Nam.Sur_、_NSurname_、_N.Surname_、_SurnameName_、_Surname.Name_、_SurnameN_、_Surname.N_、3 个 _随机字母和 3 个随机数字_（abc123）。
@@ -118,7 +118,7 @@ Get-GlobalAddressList -ExchHostname [ip] -UserName [domain]\[username] -Password
 
 - [**ASREPRoast**](asreproast.md)：如果用户 **没有** 属性 _DONT_REQ_PREAUTH_，你可以 **请求该用户的 AS_REP 消息**，其中将包含一些由用户密码的派生加密的数据。
 - [**密码喷洒**](password-spraying.md)：让我们尝试对每个发现的用户使用最 **常见的密码**，也许某个用户使用了一个糟糕的密码（记住密码策略！）。
-- 请注意，你也可以 **喷洒 OWA 服务器** 来尝试访问用户的邮件服务器。
+- 请注意，你还可以 **喷洒 OWA 服务器**，以尝试访问用户的邮件服务器。
 
 {{#ref}}
 password-spraying.md
@@ -134,7 +134,7 @@ password-spraying.md
 
 ### NTLM 中继
 
-如果你成功枚举了活动目录，你将拥有 **更多的电子邮件和对网络的更好理解**。你可能能够强制 NTLM [**中继攻击**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack) 来访问 AD 环境。
+如果你成功枚举了活动目录，你将拥有 **更多的电子邮件和对网络的更好理解**。你可能能够强制 NTLM [**中继攻击**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack) 以获取对 AD 环境的访问。
 
 ### 窃取 NTLM 凭证
 
@@ -158,15 +158,15 @@ kerberos-double-hop-problem.md
 
 成功妥协一个账户是 **开始妥协整个域的一个重要步骤**，因为你将能够开始 **活动目录枚举：**
 
-关于 [**ASREPRoast**](asreproast.md)，你现在可以找到每个可能的易受攻击用户，关于 [**密码喷洒**](password-spraying.md)，你可以获得 **所有用户名的列表**，并尝试妥协账户的密码、空密码和新的有前景的密码。
+关于 [**ASREPRoast**](asreproast.md)，你现在可以找到每个可能的易受攻击用户，关于 [**密码喷洒**](password-spraying.md)，你可以获取 **所有用户名的列表**，并尝试妥协账户的密码、空密码和新的有前景的密码。
 
 - 你可以使用 [**CMD 进行基本侦查**](../basic-cmd-for-pentesters.md#domain-info)
-- 你也可以使用 [**powershell 进行侦查**](../basic-powershell-for-pentesters/index.html)，这将更加隐蔽
+- 你还可以使用 [**powershell 进行侦查**](../basic-powershell-for-pentesters/index.html)，这将更加隐蔽
 - 你还可以 [**使用 powerview**](../basic-powershell-for-pentesters/powerview.md) 提取更详细的信息
 - 另一个在活动目录中进行侦查的惊人工具是 [**BloodHound**](bloodhound.md)。它 **不是很隐蔽**（取决于你使用的收集方法），但 **如果你不在乎**，你应该完全尝试一下。找出用户可以 RDP 的地方，找到其他组的路径等。
 - **其他自动化 AD 枚举工具有：** [**AD Explorer**](bloodhound.md#ad-explorer)**,** [**ADRecon**](bloodhound.md#adrecon)**,** [**Group3r**](bloodhound.md#group3r)**,** [**PingCastle**](bloodhound.md#pingcastle)**.**
 - [**AD 的 DNS 记录**](ad-dns-records.md)，因为它们可能包含有趣的信息。
-- 你可以使用 **AdExplorer.exe** 这个 **GUI 工具** 来枚举目录，来自 **SysInternal** 套件。
+- 你可以使用 **AdExplorer.exe** 这个 **GUI 工具** 来枚举目录，它来自 **SysInternal** 套件。
 - 你还可以使用 **ldapsearch** 在 LDAP 数据库中搜索，以查找 _userPassword_ 和 _unixUserPassword_ 字段中的凭证，甚至是 _Description_。请参阅 [PayloadsAllTheThings 中 AD 用户注释的密码](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#password-in-ad-user-comment) 以获取其他方法。
 - 如果你使用 **Linux**，你也可以使用 [**pywerview**](https://github.com/the-useless-one/pywerview) 枚举域。
 - 你还可以尝试自动化工具，如：
@@ -188,19 +188,19 @@ Kerberoasting 涉及获取 **TGS 票证**，这些票证用于与用户账户相
 kerberoast.md
 {{#endref}}
 
-### 远程连接 (RDP, SSH, FTP, Win-RM 等)
+### 远程连接（RDP、SSH、FTP、Win-RM 等）
 
-一旦你获得了一些凭证，你可以检查是否可以访问任何 **机器**。为此，你可以使用 **CrackMapExec** 尝试通过不同的协议连接到多个服务器，具体取决于你的端口扫描结果。
+一旦你获得了一些凭证，你可以检查是否可以访问任何 **机器**。为此，你可以使用 **CrackMapExec** 尝试通过不同协议连接到多个服务器，具体取决于你的端口扫描结果。
 
 ### 本地权限提升
 
-如果你已经妥协了凭证或作为普通域用户的会话，并且你可以 **使用该用户访问域中的任何机器**，你应该尝试找到 **本地提升权限和寻找凭证的方法**。这是因为只有在本地管理员权限下，你才能 **转储其他用户的哈希**（在内存中 LSASS 和本地 SAM）。
+如果你已经妥协了凭证或作为普通域用户的会话，并且你可以 **使用该用户访问域中的任何机器**，你应该尝试找到 **本地提升权限和寻找凭证的方法**。这是因为只有在本地管理员权限下，你才能 **转储其他用户的哈希**（在内存中（LSASS）和本地（SAM））。
 
 本书中有一整页关于 [**Windows 中的本地权限提升**](../windows-local-privilege-escalation/index.html) 和一个 [**检查表**](../checklist-windows-privilege-escalation.md)。此外，不要忘记使用 [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite)。
 
 ### 当前会话票证
 
-你很 **不太可能** 在当前用户中找到 **票证**，使你能够访问意外的资源，但你可以检查：
+你 **不太可能** 在当前用户中找到 **票证**，使你能够访问意外的资源，但你可以检查：
 ```bash
 ## List all tickets (if not admin, only current user tickets)
 .\Rubeus.exe triage
@@ -234,14 +234,14 @@ kerberoast.md
 printnightmare.md
 {{#endref}}
 
-## 使用特权凭据/会话在活动目录上进行特权提升
+## 在具有特权凭据/会话的活动目录上进行特权提升
 
 **对于以下技术，普通域用户是不够的，你需要一些特殊的特权/凭据来执行这些攻击。**
 
 ### 哈希提取
 
 希望你已经成功**破坏了一些本地管理员**账户，使用 [AsRepRoast](asreproast.md)、[Password Spraying](password-spraying.md)、[Kerberoast](kerberoast.md)、[Responder](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md) 包括中继、[EvilSSDP](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md)、[本地提升特权](../windows-local-privilege-escalation/index.html)。\
-然后，是时候在内存和本地转储所有哈希了。\
+然后，是时候转储内存和本地的所有哈希。\
 [**阅读此页面以了解获取哈希的不同方法。**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/active-directory-methodology/broken-reference/README.md)
 
 ### 传递哈希
@@ -250,9 +250,9 @@ printnightmare.md
 你需要使用某些**工具**来**执行**使用该**哈希**的**NTLM 认证**，**或者**你可以创建一个新的**sessionlogon**并**注入**该**哈希**到**LSASS**中，这样当任何**NTLM 认证被执行**时，该**哈希将被使用。**最后一个选项就是 mimikatz 所做的。\
 [**阅读此页面以获取更多信息。**](../ntlm/index.html#pass-the-hash)
 
-### 超越传递哈希/传递密钥
+### 超越哈希/传递密钥
 
-此攻击旨在**使用用户的 NTLM 哈希请求 Kerberos 票证**，作为常见的 NTLM 协议下的传递哈希的替代方案。因此，这在**禁用 NTLM 协议**且仅允许**Kerberos**作为认证协议的网络中尤其**有用**。
+此攻击旨在**使用用户的 NTLM 哈希请求 Kerberos 票证**，作为常见的 NTLM 协议下的传递哈希的替代方案。因此，这在**禁用 NTLM 协议**且仅允许**Kerberos**作为认证协议的网络中可能特别**有用**。
 
 {{#ref}}
 over-pass-the-hash-pass-the-key.md
@@ -268,7 +268,7 @@ pass-the-ticket.md
 
 ### 凭据重用
 
-如果你拥有**本地管理员**的**哈希**或**密码**，你应该尝试使用它**本地登录**到其他**PC**。
+如果你拥有**本地管理员**的**哈希**或**密码**，你应该尝试使用它**在其他 PC 上本地登录**。
 ```bash
 # Local Auth Spray (once you found some local admin pass or hash)
 ## --local-auth flag indicate to only try 1 time per machine
@@ -378,19 +378,19 @@ ad-certificates/domain-escalation.md
 之前讨论的一些技术可以用于持久性。\
 例如，你可以：
 
-- 使用户易受 [**Kerberoast**](kerberoast.md) 攻击
+- 使用户易受[**Kerberoast**](kerberoast.md)攻击
 
 ```bash
 Set-DomainObject -Identity <username> -Set @{serviceprincipalname="fake/NOTHING"}r
 ```
 
-- 使用户易受 [**ASREPRoast**](asreproast.md) 攻击
+- 使用户易受[**ASREPRoast**](asreproast.md)攻击
 
 ```bash
 Set-DomainObject -Identity <username> -XOR @{UserAccountControl=4194304}
 ```
 
-- 授予用户 [**DCSync**](#dcsync) 权限
+- 授予用户[**DCSync**](#dcsync)权限
 
 ```bash
 Add-DomainObjectAcl -TargetIdentity "DC=SUB,DC=DOMAIN,DC=LOCAL" -PrincipalIdentity bfarmer -Rights DCSync
@@ -398,7 +398,7 @@ Add-DomainObjectAcl -TargetIdentity "DC=SUB,DC=DOMAIN,DC=LOCAL" -PrincipalIdenti
 
 ### 银票
 
-**银票攻击**为特定服务创建一个**合法的票据授予服务 (TGS) 票据**，使用**NTLM 哈希**（例如，**PC 账户的哈希**）。此方法用于**访问服务权限**。
+**银票攻击**为特定服务创建一个**合法的票据授予服务（TGS）票据**，使用**NTLM 哈希**（例如，**PC 账户的哈希**）。此方法用于**访问服务权限**。
 
 {{#ref}}
 silver-ticket.md
@@ -406,7 +406,7 @@ silver-ticket.md
 
 ### 金票
 
-**金票攻击**涉及攻击者在 Active Directory (AD) 环境中获取**krbtgt 账户的 NTLM 哈希**。该账户是特殊的，因为它用于签署所有**票据授予票据 (TGTs)**，这些票据对于在 AD 网络中进行身份验证至关重要。
+**金票攻击**涉及攻击者在 Active Directory (AD) 环境中获取**krbtgt 账户的 NTLM 哈希**。该账户是特殊的，因为它用于签署所有**票据授予票据（TGTs）**，这些票据对于在 AD 网络中进行身份验证至关重要。
 
 一旦攻击者获得此哈希，他们可以为他们选择的任何账户创建**TGTs**（银票攻击）。
 
@@ -440,13 +440,13 @@ ad-certificates/domain-persistence.md
 
 ### AdminSDHolder 组
 
-Active Directory 中的 **AdminSDHolder** 对象通过在这些组中应用标准的**访问控制列表 (ACL)** 来确保**特权组**（如域管理员和企业管理员）的安全，以防止未经授权的更改。然而，这一功能可能被利用；如果攻击者修改 AdminSDHolder 的 ACL 以授予普通用户完全访问权限，该用户将获得对所有特权组的广泛控制。这个本应保护的安全措施因此可能适得其反，允许未经授权的访问，除非进行严格监控。
+Active Directory 中的**AdminSDHolder**对象通过在这些组中应用标准的**访问控制列表（ACL）**来确保**特权组**（如域管理员和企业管理员）的安全，以防止未经授权的更改。然而，这一功能可能被利用；如果攻击者修改 AdminSDHolder 的 ACL 以授予普通用户完全访问权限，该用户将获得对所有特权组的广泛控制。这一安全措施本意是保护的，但如果不加以监控，可能会适得其反，导致不当访问。
 
-[**有关 AdminDSHolder 组的更多信息。**](privileged-groups-and-token-privileges.md#adminsdholder-group)
+[**有关 AdminDSHolder 组的更多信息在这里。**](privileged-groups-and-token-privileges.md#adminsdholder-group)
 
 ### DSRM 凭据
 
-在每个**域控制器 (DC)** 内，存在一个**本地管理员**账户。通过在这样的机器上获得管理员权限，可以使用**mimikatz**提取本地管理员哈希。随后，需要进行注册表修改以**启用使用此密码**，允许远程访问本地管理员账户。
+在每个**域控制器（DC）**内部，存在一个**本地管理员**账户。通过在这样的机器上获得管理员权限，可以使用**mimikatz**提取本地管理员哈希。随后，需要进行注册表修改以**启用使用此密码**，从而允许远程访问本地管理员账户。
 
 {{#ref}}
 dsrm-credentials.md
@@ -462,13 +462,13 @@ acl-persistence-abuse/
 
 ### 安全描述符
 
-**安全描述符**用于**存储**对象对另一个对象的**权限**。如果你只需在对象的**安全描述符**中**进行一点更改**，你可以在不需要成为特权组成员的情况下获得对该对象的非常有趣的权限。
+**安全描述符**用于**存储**对象对另一个对象的**权限**。如果你能对对象的**安全描述符**进行**小改动**，你可以在不需要成为特权组成员的情况下获得对该对象的非常有趣的权限。
 
 {{#ref}}
 security-descriptors.md
 {{#endref}}
 
-### 骨架密钥
+### 骨架钥匙
 
 在内存中更改**LSASS**以建立一个**通用密码**，授予对所有域账户的访问权限。
 
@@ -478,7 +478,7 @@ skeleton-key.md
 
 ### 自定义 SSP
 
-[在这里了解什么是 SSP（安全支持提供者）。](../authentication-credentials-uac-and-efs/index.html#security-support-provider-interface-sspi)\
+[了解什么是 SSP（安全支持提供者）在这里。](../authentication-credentials-uac-and-efs/index.html#security-support-provider-interface-sspi)\
 你可以创建自己的**SSP**以**捕获**用于访问机器的**凭据**的**明文**。
 
 {{#ref}}
@@ -487,7 +487,7 @@ custom-ssp.md
 
 ### DCShadow
 
-它在 AD 中注册一个**新的域控制器**，并使用它在指定对象上**推送属性**（SIDHistory、SPNs...），**不留下**任何关于**修改**的**日志**。你**需要 DA** 权限并在**根域**内。\
+它在 AD 中注册一个**新的域控制器**，并使用它在指定对象上**推送属性**（SIDHistory、SPNs...），**不留**任何关于**修改**的**日志**。你**需要 DA** 权限并在**根域**内。\
 请注意，如果使用错误的数据，会出现相当丑陋的日志。
 
 {{#ref}}
@@ -509,18 +509,18 @@ laps.md
 
 ### 基本信息
 
-[**域信任**](<http://technet.microsoft.com/en-us/library/cc759554(v=ws.10).aspx>) 是一种安全机制，使一个**域**中的用户能够访问另一个**域**中的资源。它本质上在两个域的身份验证系统之间创建了一个链接，允许身份验证验证无缝流动。当域建立信任时，它们在其**域控制器 (DC)** 中交换并保留特定的**密钥**，这些密钥对信任的完整性至关重要。
+[**域信任**](<http://technet.microsoft.com/en-us/library/cc759554(v=ws.10).aspx>)是一种安全机制，使一个**域**中的用户能够访问另一个**域**中的资源。它本质上在两个域的身份验证系统之间创建了一个链接，允许身份验证验证无缝流动。当域建立信任时，它们在各自的**域控制器（DCs）**中交换并保留特定的**密钥**，这些密钥对信任的完整性至关重要。
 
 在典型场景中，如果用户打算访问**受信任域**中的服务，他们必须首先从自己域的 DC 请求一个称为**跨领域 TGT**的特殊票据。此 TGT 使用两个域已达成一致的共享**密钥**进行加密。然后，用户将此 TGT 提交给**受信任域的 DC**以获取服务票据（**TGS**）。在受信任域的 DC 成功验证跨领域 TGT 后，它会发出 TGS，授予用户访问该服务的权限。
 
 **步骤**：
 
-1. **域 1** 中的 **客户端计算机**开始该过程，使用其**NTLM 哈希**向其**域控制器 (DC1)** 请求**票据授予票据 (TGT)**。
+1. **域 1**中的**客户端计算机**开始该过程，使用其**NTLM 哈希**向其**域控制器（DC1）**请求**票据授予票据（TGT）**。
 2. 如果客户端成功通过身份验证，DC1 会发出新的 TGT。
-3. 客户端然后向 DC1 请求一个**跨领域 TGT**，该 TGT 是访问**域 2**中资源所需的。
+3. 客户端然后向 DC1 请求一个**跨领域 TGT**，该 TGT 是访问**域 2**中的资源所需的。
 4. 跨领域 TGT 使用作为双向域信任的一部分在 DC1 和 DC2 之间共享的**信任密钥**进行加密。
-5. 客户端将跨领域 TGT 带到**域 2 的域控制器 (DC2)**。
-6. DC2 使用其共享信任密钥验证跨领域 TGT，如果有效，则为客户端想要访问的域 2 中的服务器发出**票据授予服务 (TGS)**。
+5. 客户端将跨领域 TGT 带到**域 2 的域控制器（DC2）**。
+6. DC2 使用其共享信任密钥验证跨领域 TGT，如果有效，则为客户端想要访问的域 2 中的服务器发出**票据授予服务（TGS）**。
 7. 最后，客户端将此 TGS 提交给服务器，该 TGS 使用服务器的账户哈希进行加密，以获取对域 2 中服务的访问权限。
 
 ### 不同的信任
@@ -532,11 +532,11 @@ laps.md
 **不同的信任关系**
 
 - **父子信任**：这是同一森林内的常见设置，子域自动与其父域建立双向传递信任。这意味着身份验证请求可以在父域和子域之间无缝流动。
-- **交叉链接信任**：被称为“快捷信任”，这些信任在子域之间建立，以加快引用过程。在复杂的森林中，身份验证引用通常必须向森林根部上行，然后再向目标域下行。通过创建交叉链接，旅程缩短，这在地理分散的环境中特别有利。
-- **外部信任**：这些信任在不同的、不相关的域之间建立，通常是非传递的。根据[微软的文档](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>)，外部信任对于访问当前森林外的域中的资源非常有用，该域未通过森林信任连接。通过 SID 过滤增强安全性。
+- **交叉链接信任**：被称为“快捷信任”，这些是在子域之间建立的，以加快引用过程。在复杂的森林中，身份验证引用通常必须向森林根节点上行，然后再向目标域下行。通过创建交叉链接，旅程缩短，这在地理分散的环境中特别有利。
+- **外部信任**：这些是在不同的、不相关的域之间建立的，通常是非传递性的。根据[微软的文档](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>)，外部信任对于访问当前森林外的域中的资源非常有用，该域未通过森林信任连接。通过 SID 过滤增强安全性。
 - **树根信任**：这些信任在森林根域和新添加的树根之间自动建立。虽然不常见，但树根信任对于将新域树添加到森林非常重要，使其能够保持唯一的域名并确保双向传递性。有关更多信息，请参见[微软的指南](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>)。
-- **森林信任**：这种类型的信任是两个森林根域之间的双向传递信任，也强制执行 SID 过滤以增强安全措施。
-- **MIT 信任**：这些信任与非 Windows 的 [RFC4120 兼容](https://tools.ietf.org/html/rfc4120) Kerberos 域建立。MIT 信任更为专业，适用于需要与 Windows 生态系统外的基于 Kerberos 的系统集成的环境。
+- **森林信任**：这种类型的信任是两个森林根域之间的双向传递信任，也实施 SID 过滤以增强安全措施。
+- **MIT 信任**：这些信任与非 Windows 的[符合 RFC4120](https://tools.ietf.org/html/rfc4120) 的 Kerberos 域建立。这些信任更为专业，适用于需要与 Windows 生态系统外的基于 Kerberos 的系统集成的环境。
 
 #### **信任关系中的其他差异**
 
@@ -554,13 +554,13 @@ laps.md
 
 - **本地组成员资格**：主体可能被添加到机器上的本地组中，例如服务器上的“管理员”组，从而授予他们对该机器的重大控制。
 - **外部域组成员资格**：主体也可以是外部域中组的成员。然而，这种方法的有效性取决于信任的性质和组的范围。
-- **访问控制列表 (ACL)**：主体可能在**ACL**中被指定，特别是在**DACL**中的**ACE**中，提供对特定资源的访问。对于那些希望深入了解 ACL、DACL 和 ACE 机制的人，名为“[An ACE Up The Sleeve](https://specterops.io/assets/resources/an_ace_up_the_sleeve.pdf)”的白皮书是一个宝贵的资源。
+- **访问控制列表（ACLs）**：主体可能在**ACL**中被指定，特别是在**DACL**中的**ACE**内，提供对特定资源的访问权限。对于那些希望深入了解 ACL、DACL 和 ACE 机制的人，名为“[An ACE Up The Sleeve](https://specterops.io/assets/resources/an_ace_up_the_sleeve.pdf)”的白皮书是一个宝贵的资源。
 
 ### 查找具有权限的外部用户/组
 
-你可以检查 **`CN=<user_SID>,CN=ForeignSecurityPrincipals,DC=domain,DC=com`** 以查找域中的外部安全主体。这些将是来自**外部域/森林**的用户/组。
+你可以检查**`CN=<user_SID>,CN=ForeignSecurityPrincipals,DC=domain,DC=com`**以查找域中的外部安全主体。这些将是来自**外部域/森林**的用户/组。
 
-你可以在 **Bloodhound** 中检查此项或使用 powerview：
+你可以在**Bloodhound**中检查此项或使用 powerview：
 ```powershell
 # Get users that are i groups outside of the current domain
 Get-DomainForeignUser
@@ -630,7 +630,13 @@ sid-history-injection.md
 golden-dmsa-gmsa.md
 {{#endref}}
 
-额外的外部研究：[黄金 gMSA 信任攻击](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-5-golden-gmsa-trust-attack-from-child-to-parent)。
+补充的委派 MSA 攻击（BadSuccessor – 滥用迁移属性）：
+
+{{#ref}}
+badsuccessor-dmsa-migration-abuse.md
+{{#endref}}
+
+额外的外部研究：[Golden gMSA Trust Attacks](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-5-golden-gmsa-trust-attack-from-child-to-parent)。
 
 **架构变更攻击**
 
@@ -638,11 +644,11 @@ golden-dmsa-gmsa.md
 
 有关进一步阅读，请参见 [架构变更信任攻击](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-6-schema-change-trust-attack-from-child-to-parent)。
 
-**通过 ADCS ESC5 从 DA 到 EA**
+**从 DA 到 EA 的 ADCS ESC5**
 
 ADCS ESC5 漏洞针对对公钥基础设施 (PKI) 对象的控制，以创建一个证书模板，使其能够作为森林中的任何用户进行身份验证。由于 PKI 对象位于配置 NC 中，危害可写的子 DC 使得执行 ESC5 攻击成为可能。
 
-有关更多详细信息，请参见 [通过 ESC5 从 DA 到 EA](https://posts.specterops.io/from-da-to-ea-with-esc5-f9f045aa105c)。在缺乏 ADCS 的情况下，攻击者有能力设置必要的组件，如 [从子域管理员提升到企业管理员](https://www.pkisolutions.com/escalating-from-child-domains-admins-to-enterprise-admins-in-5-minutes-by-abusing-ad-cs-a-follow-up/) 中所讨论的。
+有关更多详细信息，请参见 [从 DA 到 EA 的 ESC5](https://posts.specterops.io/from-da-to-ea-with-esc5-f9f045aa105c)。在缺乏 ADCS 的情况下，攻击者有能力设置必要的组件，如 [从子域管理员提升到企业管理员](https://www.pkisolutions.com/escalating-from-child-domains-admins-to-enterprise-admins-in-5-minutes-by-abusing-ad-cs-a-follow-up/) 中所讨论的。
 
 ### 外部森林域 - 单向（入站）或双向
 ```bash
@@ -655,7 +661,7 @@ TrustDirection  : Inbound          --> Inboud trust
 WhenCreated     : 2/19/2021 10:50:56 PM
 WhenChanged     : 2/19/2021 10:50:56 PM
 ```
-在这种情况下，**您的域被外部域信任**，这使您拥有**不确定的权限**。您需要找出**您的域中的哪些主体对外部域具有哪些访问权限**，然后尝试利用这些权限：
+在这种情况下，**您的域受到外部域的信任**，这使您拥有**不确定的权限**。您需要找出**您的域中的哪些主体对外部域具有哪些访问权限**，然后尝试利用它：
 
 {{#ref}}
 external-forest-domain-oneway-inbound.md
@@ -673,9 +679,9 @@ TrustDirection  : Outbound        --> Outbound trust
 WhenCreated     : 2/19/2021 10:15:24 PM
 WhenChanged     : 2/19/2021 10:15:24 PM
 ```
-在这种情况下，**您的域**正在向来自**不同域**的主体**信任**一些**权限**。
+在这种情况下，**您的域**正在**信任**来自**不同域**的主体的一些**权限**。
 
-然而，当一个**域被信任**时，受信任的域**创建一个用户**，其**名称是可预测的**，并使用**受信任的密码**作为**密码**。这意味着可以**访问来自信任域的用户以进入受信任域**，以枚举它并尝试提升更多权限：
+然而，当一个**域被信任**时，受信任的域**创建一个用户**，其**名称是可预测的**，并使用**受信任的密码**作为**密码**。这意味着可以**访问来自信任域的用户以进入受信任的域**，以枚举它并尝试提升更多权限：
 
 {{#ref}}
 external-forest-domain-one-way-outbound.md
@@ -694,12 +700,12 @@ rdp-sessions-abuse.md
 
 ### **SID过滤：**
 
-- 通过SID过滤来减轻利用SID历史属性进行攻击的风险，该过滤在所有森林信任中默认启用。这是基于假设，考虑到森林而不是域作为安全边界，认为森林信任是安全的，符合微软的立场。
+- 通过SID过滤来减轻利用SID历史属性进行攻击的风险，该过滤在所有跨森林信任中默认启用。这是基于假设，考虑到森林而不是域作为安全边界，认为内部森林信任是安全的，这是微软的立场。
 - 然而，有一个问题：SID过滤可能会干扰应用程序和用户访问，导致其偶尔被禁用。
 
-### **选择性身份验证：**
+### **选择性认证：**
 
-- 对于森林间信任，采用选择性身份验证确保两个森林的用户不会自动进行身份验证。相反，用户需要明确的权限才能访问信任域或森林中的域和服务器。
+- 对于跨森林信任，采用选择性认证确保两个森林中的用户不会自动被认证。相反，用户需要明确的权限才能访问信任域或森林中的域和服务器。
 - 需要注意的是，这些措施并不能保护免受可写配置命名上下文（NC）的利用或对信任账户的攻击。
 
 [**有关域信任的更多信息，请访问ired.team。**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain)
@@ -717,24 +723,24 @@ https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-move
 ### **凭据保护的防御措施**
 
 - **域管理员限制**：建议仅允许域管理员登录到域控制器，避免在其他主机上使用。
-- **服务账户权限**：服务不应以域管理员（DA）权限运行，以保持安全性。
+- **服务账户权限**：服务不应以域管理员（DA）权限运行以保持安全。
 - **临时权限限制**：对于需要DA权限的任务，其持续时间应有限制。这可以通过以下方式实现：`Add-ADGroupMember -Identity ‘Domain Admins’ -Members newDA -MemberTimeToLive (New-TimeSpan -Minutes 20)`
 
 ### **实施欺骗技术**
 
-- 实施欺骗涉及设置陷阱，如诱饵用户或计算机，具有如不过期的密码或标记为受信任的委托等特征。详细方法包括创建具有特定权限的用户或将其添加到高权限组。
-- 一个实际示例涉及使用工具：`Create-DecoyUser -UserFirstName user -UserLastName manager-uncommon -Password Pass@123 | DeployUserDeception -UserFlag PasswordNeverExpires -GUID d07da11f-8a3d-42b6-b0aa-76c962be719a -Verbose`
+- 实施欺骗涉及设置陷阱，如诱饵用户或计算机，具有如不过期的密码或标记为受信任的委托等特征。详细的方法包括创建具有特定权限的用户或将其添加到高权限组。
+- 一个实际的例子涉及使用工具：`Create-DecoyUser -UserFirstName user -UserLastName manager-uncommon -Password Pass@123 | DeployUserDeception -UserFlag PasswordNeverExpires -GUID d07da11f-8a3d-42b6-b0aa-76c962be719a -Verbose`
 - 有关部署欺骗技术的更多信息，请访问[Deploy-Deception on GitHub](https://github.com/samratashok/Deploy-Deception)。
 
 ### **识别欺骗**
 
-- **对于用户对象**：可疑指标包括不寻常的ObjectSID、频率低的登录、创建日期和低错误密码计数。
-- **一般指标**：比较潜在诱饵对象的属性与真实对象的属性可以揭示不一致性。工具如[HoneypotBuster](https://github.com/JavelinNetworks/HoneypotBuster)可以帮助识别此类欺骗。
+- **对于用户对象**：可疑指标包括不寻常的ObjectSID、稀少的登录、创建日期和低错误密码计数。
+- **一般指标**：比较潜在诱饵对象的属性与真实对象的属性可以揭示不一致性。像[HoneypotBuster](https://github.com/JavelinNetworks/HoneypotBuster)这样的工具可以帮助识别这种欺骗。
 
 ### **绕过检测系统**
 
 - **Microsoft ATA检测绕过**：
-- **用户枚举**：避免在域控制器上进行会话枚举，以防止ATA检测。
+- **用户枚举**：避免在域控制器上进行会话枚举以防止ATA检测。
 - **票据冒充**：利用**aes**密钥创建票据有助于避免检测，因为不降级到NTLM。
 - **DCSync攻击**：建议从非域控制器执行，以避免ATA检测，因为直接从域控制器执行会触发警报。
 
