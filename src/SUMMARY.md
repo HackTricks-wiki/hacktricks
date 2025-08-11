@@ -79,6 +79,7 @@
 
 # 🧙‍♂️ Generic Hacking
 
+- [Archive Extraction Symlink Exploitation](generic-hacking/archive-extraction-symlink-exploitation.md)
 - [Brute Force - CheatSheet](generic-hacking/brute-force.md)
 - [Esim Javacard Exploitation](generic-hacking/esim-javacard-exploitation.md)
 - [Exfiltration](generic-hacking/exfiltration.md)
