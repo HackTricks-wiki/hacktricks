@@ -2,6 +2,12 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
+{{#ref}}
+../../../generic-hacking/archive-extraction-symlink-exploitation.md
+{{#endref}}
+
+**Command-line tools**
+
 **Command-line tools** for managing **zip files** are essential for diagnosing, repairing, and cracking zip files. Here are some key utilities:
 
 - **`unzip`**: Reveals why a zip file may not decompress.
