@@ -79,6 +79,7 @@
 
 # 🧙‍♂️ Generic Hacking
 
+- [Archive Extraction Path Traversal](generic-hacking/archive-extraction-path-traversal.md)
 - [Brute Force - CheatSheet](generic-hacking/brute-force.md)
 - [Esim Javacard Exploitation](generic-hacking/esim-javacard-exploitation.md)
 - [Exfiltration](generic-hacking/exfiltration.md)
