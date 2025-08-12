@@ -359,6 +359,46 @@ Certipy v4.0.0 - by Oliver Lyak (ly4k)
 [*] Saved certificate and private key to 'administrator.pfx'
 ```
 
+### Attack 3 – Manage Certificates Extension Abuse (SetExtension)
+
+#### Explanation
+
+In addition to the classic ESC7 abuses (enabling EDITF attributes or approving pending requests), **Certify 2.0** revealed a brand-new primitive that only requires the *Manage Certificates* (a.k.a. **Certificate Manager / Officer**) role on the Enterprise CA.
+
+The `ICertAdmin::SetExtension` RPC method can be executed by any principal holding *Manage Certificates*.  While the method was traditionally used by legitimate CAs to update extensions on **pending** requests, an attacker can abuse it to **append a *non-default* certificate extension** (for example a custom *Certificate Issuance Policy* OID such as `1.1.1.1`) to a request that is waiting for approval.
+
+Because the targeted template does **not define a default value for that extension**, the CA will NOT overwrite the attacker-controlled value when the request is eventually issued.  The resulting certificate therefore contains an attacker-chosen extension that may:
+
+* Satisfy Application / Issuance Policy requirements of other vulnerable templates (leading to privilege escalation).
+* Inject additional EKUs or policies that grant the certificate unexpected trust in third-party systems.
+
+In short, *Manage Certificates* – previously considered the “less powerful” half of ESC7 – can now be leveraged for full privilege escalation or long-term persistence, without touching CA configuration or requiring the more restrictive *Manage CA* right.
+
+#### Abusing the primitive with Certify 2.0
+
+1. **Submit a certificate request that will remain *pending*.**  This can be forced with a template that requires manager approval:
+   ```powershell
+   Certify.exe request --ca SERVER\\CA-NAME --template SecureUser --subject "CN=User" --manager-approval
+   # Take note of the returned Request ID
+   ```
+
+2. **Append a custom extension to the pending request** using the new `manage-ca` command:
+   ```powershell
+   Certify.exe manage-ca --ca SERVER\\CA-NAME \
+                     --request-id 1337 \
+                     --set-extension "1.1.1.1=DER,10,01 01 00 00"  # fake issuance-policy OID
+   ```
+   *If the template does not already define the *Certificate Issuance Policies* extension, the value above will be preserved after issuance.*
+
+3. **Issue the request** (if your role also has *Manage Certificates* approval rights) or wait for an operator to approve it.  Once issued, download the certificate:
+   ```powershell
+   Certify.exe request-download --ca SERVER\\CA-NAME --id 1337
+   ```
+
+4. The resulting certificate now contains the malicious issuance-policy OID and can be used in subsequent attacks (e.g. ESC13, domain escalation, etc.).
+
+> NOTE:  The same attack can be executed with Certipy ≥ 4.7 through the `ca` command and the `-set-extension` parameter.
+
 ## NTLM Relay to AD CS HTTP Endpoints – ESC8
 
 ### Explanation
@@ -964,6 +1004,10 @@ Upon authentication across a trust, the **Authenticated Users SID** is added to 
 
 Both scenarios lead to an **increase in the attack surface** from one forest to another. The settings of the certificate template could be exploited by an attacker to obtain additional privileges in a foreign domain.
 
+
+## References
+
+- [Certify 2.0 – SpecterOps Blog](https://specterops.io/blog/2025/08/11/certify-2-0/)
 
 {{#include ../../../banners/hacktricks-training.md}}
 
