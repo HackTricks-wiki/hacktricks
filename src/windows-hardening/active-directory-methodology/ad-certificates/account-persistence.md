@@ -50,7 +50,21 @@ This access enables the attacker to authenticate to **Kerberos** as the machine 
 
 The final method discussed involves leveraging the **validity** and **renewal periods** of certificate templates. By **renewing** a certificate before its expiration, an attacker can maintain authentication to Active Directory without the need for additional ticket enrolments, which could leave traces on the Certificate Authority (CA) server.
 
-This approach allows for an **extended persistence** method, minimizing the risk of detection through fewer interactions with the CA server and avoiding the generation of artifacts that could alert administrators to the intrusion.
+### Certificate Renewal with Certify 2.0
+
+Starting with **Certify 2.0** the renewal workflow is fully automated through the new `request-renew` command.  Given a previously issued certificate (in **base-64 PKCS#12** format) an attacker can renew it without interacting with the original owner – perfect for stealthy, long-term persistence:
+
+```powershell
+Certify.exe request-renew --ca SERVER\\CA-NAME \
+                         --cert-pfx MIACAQMwgAYJKoZIhvcNAQcBoIAkgA...   # original PFX
+```
+
+The command will return a fresh PFX that is valid for another full lifetime period, allowing you to keep authenticating even after the first certificate expires or is revoked.
+
+
+## References
+
+- [Certify 2.0 – SpecterOps Blog](https://specterops.io/blog/2025/08/11/certify-2-0/)
 
 {{#include ../../../banners/hacktricks-training.md}}
 
