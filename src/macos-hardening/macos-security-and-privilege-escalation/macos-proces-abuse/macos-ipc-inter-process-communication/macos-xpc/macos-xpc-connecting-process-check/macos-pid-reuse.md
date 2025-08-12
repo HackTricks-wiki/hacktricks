@@ -284,12 +284,41 @@ int main(int argc, const char * argv[]) {
 
 - [https://gergelykalman.com/why-you-shouldnt-use-a-commercial-vpn-amateur-hour-with-windscribe.html](https://gergelykalman.com/why-you-shouldnt-use-a-commercial-vpn-amateur-hour-with-windscribe.html)
 
-## Refereces
+### Recent vulnerable software (2023-2024)
+
+- **GOG Galaxy ClientService – CVE-2023-40713.** The privileged *com.galaxy.ClientService* helper only validated the caller’s PID and then called `proc_pidpath()` **after** processing the incoming request. By racing a fork/`posix_spawn()` sequence an unprivileged user could impersonate the legitimate GUI client and gain **root** on macOS Ventura ≤ 13.4. The issue was fixed in GOG Galaxy v2.0.67 by switching to `audit_token_t`-based checks and enforcing a code-signing requirement. 
+
+- **Sensei Mac Cleaner Helper – CVE-2024-7915.** The update/diagnostic helper *org.cindori.SenseiHelper* trusted `NSXPCConnection.processIdentifier`. A local attacker could exploit PID reuse to send crafted XPC messages and execute arbitrary helper methods, leading to full-disk access and privilege escalation on macOS Sonoma 14.1. Patched in Sensei v1.6.7. 
+
+### Modern mitigations & detection
+
+1. **Use audit tokens – not PIDs**  
+   Retrieve the peer audit token with the C API `xpc_connection_get_audit_token()` or the Objective-C property `NSXPCConnection.effectiveAuditToken` (macOS 12+). The 32-bit *pidversion* field inside the token makes it immune to PID reuse.
+
+2. **Enforce code-signing requirements (macOS 12+).**  
+   • C API: `xpc_connection_set_peer_code_signing_requirement(conn, "identifier com.mycorp.app and anchor apple");`  
+   • Obj-C:  
+   ```objectivec
+   if (@available(macOS 13.0, *)) {
+       [connection setCodeSigningRequirement:@"identifier com.mycorp.app and anchor apple"];
+   }
+   ```
+   These APIs completely remove the need for manual PID or audit-token parsing. 
+
+3. **Monitor for suspicious `SETEXEC` spawns.**  
+   EndpointSecurity can alert on `ES_EVENT_TYPE_NOTIFY_EXEC` events where `spawn_flags` contain `POSIX_SPAWN_SETEXEC` or `POSIX_SPAWN_START_SUSPENDED`, patterns that appear in most PID-reuse exploits.
+
+4. **Rate-limit forks or deny rapid restarts.**  
+   If the caller has performed an abnormal number of forks in a short period (obtainable via `proc_pidinfo()`), reject the request.
+
+## References
 
 - [https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/](https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/)
 - [https://saelo.github.io/presentations/warcon18_dont_trust_the_pid.pdf](https://saelo.github.io/presentations/warcon18_dont_trust_the_pid.pdf)
+- [https://security.ibmcloud.com/advisories/CVE-2023-40713](https://security.ibmcloud.com/advisories/CVE-2023-40713)
+- https://github.com/advisories/GHSA-vgfw-cgxj-f63c (CVE-2024-7915)
+- [https://developer.apple.com/forums/thread/681053](https://developer.apple.com/forums/thread/681053)
 
 {{#include ../../../../../../banners/hacktricks-training.md}}
-
 
 
