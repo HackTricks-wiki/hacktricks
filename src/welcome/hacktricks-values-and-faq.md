@@ -117,7 +117,7 @@ Copyright © Tous droits réservés sauf indication contraire.
 #### Conditions supplémentaires :
 
 - Contenu tiers : Certaines parties de ce blog/livre peuvent inclure du contenu provenant d'autres sources, telles que des extraits d'autres blogs ou publications. L'utilisation de ce contenu se fait selon les principes de l'utilisation équitable ou avec l'autorisation explicite des titulaires de droits d'auteur respectifs. Veuillez vous référer aux sources originales pour des informations spécifiques sur la licence concernant le contenu tiers.
-- Authorship : Le contenu original rédigé par HackTricks est soumis aux termes de cette licence. Vous êtes encouragé à attribuer ce travail à l'auteur lors du partage ou de l'adaptation.
+- Authorship : Le contenu original rédigé par HackTricks est soumis aux termes de cette licence. Vous êtes encouragé à attribuer ce travail à l'auteur lors de son partage ou de son adaptation.
 
 #### Exemptions :
 
@@ -127,7 +127,7 @@ Cette licence ne confère aucun droit de marque ou de branding en relation avec 
 
 **En accédant ou en utilisant HackTricks, vous acceptez de respecter les termes de cette licence. Si vous n'acceptez pas ces termes, veuillez ne pas accéder à ce site.**
 
-## **Disclaimer**
+## **Avertissement**
 
 > [!CAUTION]
 > Ce livre, 'HackTricks', est destiné à des fins éducatives et d'information uniquement. Le contenu de ce livre est fourni sur une base 'tel quel', et les auteurs et éditeurs ne font aucune déclaration ou garantie de quelque nature que ce soit, expresse ou implicite, concernant l'exhaustivité, l'exactitude, la fiabilité, l'adéquation ou la disponibilité des informations, produits, services ou graphiques connexes contenus dans ce livre. Toute confiance que vous placez dans de telles informations est donc strictement à vos propres risques.
