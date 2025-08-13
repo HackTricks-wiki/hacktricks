@@ -1,4 +1,4 @@
-# 使用 Autoruns 提升权限
+# Privilege Escalation with Autoruns
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -6,12 +6,12 @@
 
 ## WMIC
 
-**Wmic** 可用于在 **启动** 时运行程序。查看哪些二进制文件被编程为在启动时运行：
+**Wmic** 可以用来在 **启动** 时运行程序。查看哪些二进制文件被编程为在启动时运行：
 ```bash
 wmic startup get caption,command 2>nul & ^
 Get-CimInstance Win32_StartupCommand | select Name, command, Location, User | fl
 ```
-## 计划任务
+## 定时任务
 
 **任务**可以按**特定频率**安排运行。查看哪些二进制文件被安排运行：
 ```bash
@@ -26,7 +26,7 @@ schtasks /Create /RU "SYSTEM" /SC ONLOGON /TN "SchedPE" /TR "cmd /c net localgro
 ```
 ## 文件夹
 
-所有位于 **启动文件夹中的二进制文件将在启动时执行**。常见的启动文件夹如下所列，但启动文件夹在注册表中指示。[阅读此内容以了解更多信息。](privilege-escalation-with-autorun-binaries.md#startup-path)
+所有位于 **启动文件夹** 的二进制文件将在启动时执行。常见的启动文件夹如下所列，但启动文件夹在注册表中指示。[阅读此内容以了解更多信息。](privilege-escalation-with-autorun-binaries.md#startup-path)
 ```bash
 dir /b "C:\Documents and Settings\All Users\Start Menu\Programs\Startup" 2>nul
 dir /b "C:\Documents and Settings\%username%\Start Menu\Programs\Startup" 2>nul
@@ -35,14 +35,22 @@ dir /b "%appdata%\Microsoft\Windows\Start Menu\Programs\Startup" 2>nul
 Get-ChildItem "C:\Users\All Users\Start Menu\Programs\Startup"
 Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 ```
+> **注意**：归档提取 *路径遍历* 漏洞（例如在 WinRAR 7.13 之前被利用的漏洞 – CVE-2025-8088）可以被用来 **在解压缩过程中直接将有效载荷放入这些启动文件夹中**，导致在下次用户登录时执行代码。有关此技术的深入探讨，请参见：
+
+{{#ref}}
+../../generic-hacking/archive-extraction-path-traversal.md
+{{#endref}}
+
+
+
 ## 注册表
 
-> [!NOTE]
-> [来自这里的说明](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): **Wow6432Node** 注册表项表示您正在运行 64 位 Windows 版本。操作系统使用此键为在 64 位 Windows 版本上运行的 32 位应用程序显示 HKEY_LOCAL_MACHINE\SOFTWARE 的单独视图。
+> [!提示]
+> [来自这里的说明](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f)：**Wow6432Node** 注册表项表示您正在运行 64 位 Windows 版本。操作系统使用此键为在 64 位 Windows 版本上运行的 32 位应用程序显示 HKEY_LOCAL_MACHINE\SOFTWARE 的单独视图。
 
 ### 运行
 
-**通常称为** AutoRun 注册表：
+**常见的** AutoRun 注册表：
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\Run`
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\RunOnce`
@@ -69,19 +77,19 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 - `HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunServices`
 - `HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunServices`
 
-**RunOnceEx:**
+**RunOnceEx：**
 
 - `HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnceEx`
 - `HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnceEx`
 
-在 Windows Vista 及更高版本中，**Run** 和 **RunOnce** 注册表键不会自动生成。这些键中的条目可以直接启动程序或将其指定为依赖项。例如，要在登录时加载 DLL 文件，可以使用 **RunOnceEx** 注册表键以及一个 "Depend" 键。这通过添加一个注册表项来执行 "C:\temp\evil.dll" 在系统启动期间来演示：
+在 Windows Vista 及更高版本中，**Run** 和 **RunOnce** 注册表键不会自动生成。这些键中的条目可以直接启动程序或将其指定为依赖项。例如，要在登录时加载 DLL 文件，可以使用 **RunOnceEx** 注册表键以及一个 "Depend" 键。这通过添加一个注册表项来演示在系统启动时执行 "C:\temp\evil.dll"：
 ```
 reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx\\0001\\Depend /v 1 /d "C:\\temp\\evil.dll"
 ```
-> [!NOTE]
+> [!TIP]
 > **Exploit 1**: 如果您可以在 **HKLM** 中的任何提到的注册表项内写入，则当其他用户登录时，您可以提升权限。
 
-> [!NOTE]
+> [!TIP]
 > **Exploit 2**: 如果您可以覆盖 **HKLM** 中任何注册表项上指示的任何二进制文件，则当其他用户登录时，您可以用后门修改该二进制文件并提升权限。
 ```bash
 #CMD
@@ -145,10 +153,10 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\Ru
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders`
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders`
 
-放置在 **启动** 文件夹中的快捷方式将在用户登录或系统重启时自动触发服务或应用程序启动。**启动** 文件夹的位置在注册表中为 **本地计算机** 和 **当前用户** 范围定义。这意味着添加到这些指定 **启动** 位置的任何快捷方式都将确保链接的服务或程序在登录或重启过程后启动，从而成为自动调度程序运行的简单方法。
+放置在 **启动** 文件夹中的快捷方式将在用户登录或系统重启时自动触发服务或应用程序启动。 **启动** 文件夹的位置在注册表中为 **本地计算机** 和 **当前用户** 范围定义。这意味着添加到这些指定 **启动** 位置的任何快捷方式都将确保链接的服务或程序在登录或重启过程后启动，从而成为自动调度程序运行的简单方法。
 
-> [!NOTE]
-> 如果您可以覆盖 **HKLM** 下的任何 \[User] Shell Folder，您将能够将其指向由您控制的文件夹，并放置一个后门，该后门将在用户登录系统时执行，从而提升权限。
+> [!TIP]
+> 如果您可以覆盖 **HKLM** 下的任何 \[User] Shell Folder，您将能够将其指向您控制的文件夹，并放置一个后门，该后门将在用户登录系统时执行，从而提升权限。
 ```bash
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v "Common Startup"
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" /v "Common Startup"
@@ -164,14 +172,14 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion
 
 `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`
 
-通常，**Userinit** 键被设置为 **userinit.exe**。然而，如果此键被修改，指定的可执行文件将在用户登录时由 **Winlogon** 启动。同样，**Shell** 键旨在指向 **explorer.exe**，这是 Windows 的默认外壳。
+通常，**Userinit** 键设置为 **userinit.exe**。然而，如果此键被修改，指定的可执行文件将在用户登录时由 **Winlogon** 启动。同样，**Shell** 键旨在指向 **explorer.exe**，这是 Windows 的默认外壳。
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Userinit"
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Shell"
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name "Userinit"
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name "Shell"
 ```
-> [!NOTE]
+> [!TIP]
 > 如果您可以覆盖注册表值或二进制文件，您将能够提升权限。
 
 ### 策略设置
@@ -190,28 +198,28 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 
 ### 更改安全模式命令提示符
 
-在 Windows 注册表的 `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot` 下，默认设置有一个 **`AlternateShell`** 值为 `cmd.exe`。这意味着当你在启动时选择“带命令提示符的安全模式”（通过按 F8），将使用 `cmd.exe`。但是，可以设置计算机自动以此模式启动，而无需按 F8 并手动选择。
+在 Windows 注册表的 `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot` 下，默认设置有一个 **`AlternateShell`** 值为 `cmd.exe`。这意味着当你在启动时选择“带命令提示符的安全模式”（通过按 F8），将使用 `cmd.exe`。但是，可以设置计算机在不需要按 F8 和手动选择的情况下自动以此模式启动。
 
-创建自动以“带命令提示符的安全模式”启动的引导选项的步骤：
+创建自动在“带命令提示符的安全模式”中启动的引导选项的步骤：
 
-1. 更改 `boot.ini` 文件的属性以移除只读、系统和隐藏标志：`attrib c:\boot.ini -r -s -h`
+1. 更改 `boot.ini` 文件的属性以移除只读、系统和隐藏标志： `attrib c:\boot.ini -r -s -h`
 2. 打开 `boot.ini` 进行编辑。
-3. 插入一行，如：`multi(0)disk(0)rdisk(0)partition(1)\WINDOWS="Microsoft Windows XP Professional" /fastdetect /SAFEBOOT:MINIMAL(ALTERNATESHELL)`
+3. 插入一行，如： `multi(0)disk(0)rdisk(0)partition(1)\WINDOWS="Microsoft Windows XP Professional" /fastdetect /SAFEBOOT:MINIMAL(ALTERNATESHELL)`
 4. 保存对 `boot.ini` 的更改。
-5. 重新应用原始文件属性：`attrib c:\boot.ini +r +s +h`
+5. 重新应用原始文件属性： `attrib c:\boot.ini +r +s +h`
 
-- **Exploit 1:** 更改 **AlternateShell** 注册表键允许自定义命令 shell 设置，可能用于未经授权的访问。
-- **Exploit 2 (PATH 写权限):** 对系统 **PATH** 变量的任何部分具有写权限，特别是在 `C:\Windows\system32` 之前，可以执行自定义的 `cmd.exe`，如果系统在安全模式下启动，这可能是一个后门。
-- **Exploit 3 (PATH 和 boot.ini 写权限):** 对 `boot.ini` 的写入访问使得自动安全模式启动成为可能，从而在下次重启时促进未经授权的访问。
+- **利用 1：** 更改 **AlternateShell** 注册表键允许自定义命令 shell 设置，可能用于未经授权的访问。
+- **利用 2（PATH 写权限）：** 对系统 **PATH** 变量的任何部分具有写权限，特别是在 `C:\Windows\system32` 之前，可以执行自定义的 `cmd.exe`，如果系统在安全模式下启动，这可能是一个后门。
+- **利用 3（PATH 和 boot.ini 写权限）：** 对 `boot.ini` 的写访问权限使自动安全模式启动成为可能，从而在下次重启时促进未经授权的访问。
 
 要检查当前的 **AlternateShell** 设置，请使用以下命令：
 ```bash
 reg query HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot /v AlternateShell
 Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SafeBoot' -Name 'AlternateShell'
 ```
-### 安装的组件
+### 已安装组件
 
-Active Setup 是 Windows 中的一个功能，它**在桌面环境完全加载之前启动**。它优先执行某些命令，这些命令必须在用户登录继续之前完成。这个过程甚至在其他启动项（例如 Run 或 RunOnce 注册表部分中的项）被触发之前就发生。
+Active Setup 是 Windows 中的一个功能，它**在桌面环境完全加载之前启动**。它优先执行某些命令，这些命令必须在用户登录继续之前完成。此过程甚至在其他启动项（例如 Run 或 RunOnce 注册表部分中的项）被触发之前发生。
 
 Active Setup 通过以下注册表键进行管理：
 
@@ -224,12 +232,12 @@ Active Setup 通过以下注册表键进行管理：
 
 - **IsInstalled:**
 - `0` 表示该组件的命令将不会执行。
-- `1` 表示命令将为每个用户执行一次，如果缺少 `IsInstalled` 值，则这是默认行为。
+- `1` 表示该命令将为每个用户执行一次，如果缺少 `IsInstalled` 值，则这是默认行为。
 - **StubPath:** 定义 Active Setup 要执行的命令。它可以是任何有效的命令行，例如启动 `notepad`。
 
 **安全洞察：**
 
-- 修改或写入 **`IsInstalled`** 设置为 `"1"` 的键，并指定 **`StubPath`**，可能导致未经授权的命令执行，从而可能实现权限提升。
+- 修改或写入 **`IsInstalled`** 设置为 `"1"` 的键，并指定 **`StubPath`** 可能导致未经授权的命令执行，可能用于权限提升。
 - 更改任何 **`StubPath`** 值中引用的二进制文件也可能实现权限提升，前提是具有足够的权限。
 
 要检查 Active Setup 组件中的 **`StubPath`** 配置，可以使用以下命令：
@@ -264,7 +272,7 @@ reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\B
 - `HKLM\Software\Microsoft\Internet Explorer\Extensions`
 - `HKLM\Software\Wow6432Node\Microsoft\Internet Explorer\Extensions`
 
-注意，注册表将为每个 dll 包含 1 个新的注册表项，并由 **CLSID** 表示。您可以在 `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}` 中找到 CLSID 信息。
+请注意，注册表将为每个 dll 包含 1 个新的注册表项，并由 **CLSID** 表示。您可以在 `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}` 中找到 CLSID 信息。
 
 ### 字体驱动程序
 
@@ -293,13 +301,13 @@ HKLM\Software\Microsoft\Wow6432Node\Windows NT\CurrentVersion\Image File Executi
 ```
 ## SysInternals
 
-请注意，您可以找到 autoruns 的所有网站 **已经被**[ **winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe) **搜索过**。然而，对于 **更全面的自动执行** 文件列表，您可以使用来自 Sysinternals 的 [autoruns](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns)：
+注意，所有可以找到 autoruns 的网站都已被 **winpeas.exe** [ **搜索过**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe)。然而，对于 **更全面的自动执行** 文件列表，您可以使用来自 Sysinternals 的 [autoruns](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns)：
 ```
 autorunsc.exe -m -nobanner -a * -ct /accepteula
 ```
 ## 更多
 
-**在** [**https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2**](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2) **中找到更多类似的 Autoruns，如注册表项**
+**在** [**https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2**](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2) **中找到更多类似的 Autoruns，如注册表**
 
 ## 参考文献
 
