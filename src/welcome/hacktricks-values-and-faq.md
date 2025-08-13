@@ -84,7 +84,7 @@ Non troverai HackTricks pieno di pubblicità fastidiose come altri blog con molt
 >
 > - **Cosa devo fare se qualche pagina di HackTricks è basata sul mio post del blog ma non è citata?**
 
-**Ci dispiace molto. Questo non avrebbe dovuto accadere**. Per favore, facci sapere tramite Github issues, Twitter, Discord... il link della pagina di HackTricks con il contenuto e il link del tuo blog e **verificheremo e aggiungeremo ASAP**.
+**Ci dispiace molto. Questo non avrebbe dovuto accadere**. Per favore, facci sapere tramite Github issues, Twitter, Discord... il link della pagina di HackTricks con il contenuto e il link del tuo blog e **verificheremo e aggiungeremo il prima possibile**.
 
 > [!CAUTION]
 >
@@ -116,7 +116,7 @@ Copyright © Tutti i diritti riservati, salvo diversa indicazione.
 
 #### Termini Aggiuntivi:
 
-- Contenuto di Terzi: Alcune parti di questo blog/libro possono includere contenuti di altre fonti, come estratti di altri blog o pubblicazioni. L'uso di tali contenuti avviene secondo i principi di uso equo o con esplicita autorizzazione dai rispettivi titolari dei diritti d'autore. Si prega di fare riferimento alle fonti originali per informazioni specifiche sulla licenza riguardante i contenuti di terzi.
+- Contenuto di Terze Parti: Alcune parti di questo blog/libro possono includere contenuti di altre fonti, come estratti di altri blog o pubblicazioni. L'uso di tali contenuti avviene secondo i principi di uso equo o con esplicita autorizzazione dai rispettivi titolari dei diritti d'autore. Si prega di fare riferimento alle fonti originali per informazioni specifiche sulla licenza riguardante i contenuti di terze parti.
 - Autorialità: Il contenuto originale redatto da HackTricks è soggetto ai termini di questa licenza. Ti incoraggiamo ad attribuire questo lavoro all'autore quando lo condividi o lo adatti.
 
 #### Esenzioni:
