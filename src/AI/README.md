@@ -22,7 +22,7 @@ Mahali bora pa kuanzia kujifunza kuhusu AI ni kuelewa jinsi mifumo mikuu ya kuji
 ./AI-Deep-Learning.md
 {{#endref}}
 
-### Muktadha wa LLMs
+### Msingi wa LLMs
 
 Katika ukurasa ufuatao utapata misingi ya kila kipengele kujenga LLM ya msingi kwa kutumia transformers:
 
@@ -48,20 +48,26 @@ LLMs zimefanya matumizi ya AI kuongezeka katika miaka ya hivi karibuni, lakini s
 AI-Prompts.md
 {{#endref}}
 
-### RCE ya Mifano ya AI
+### RCE za AI Models
 
-Ni kawaida kwa waendelezaji na kampuni kukimbia mifano iliyopakuliwa kutoka Mtandao, hata hivyo, kupakia mfano tu kunaweza kuwa na kutosha kutekeleza msimbo wa kawaida kwenye mfumo. Hii ni mada muhimu sana kuelewa jinsi ya kutumia AI kwa usalama na jinsi ya kuishambulia:
+Ni kawaida kwa waendelezaji na kampuni kuendesha mifano iliyopakuliwa kutoka Mtandao, hata hivyo, kupakia mfano tu kunaweza kuwa na kutosha kutekeleza msimbo wa kawaida kwenye mfumo. Hii ni mada muhimu sana kuelewa jinsi ya kutumia AI kwa usalama na jinsi ya kuishambulia:
 
 {{#ref}}
 AI-Models-RCE.md
 {{#endref}}
 
-### Protokali ya Muktadha wa Mfano wa AI
+### Protokali ya Muktadha wa AI Model
 
 MCP (Model Context Protocol) ni protokali inayoruhusu wateja wa wakala wa AI kuungana na zana za nje na vyanzo vya data kwa njia ya plug-and-play. Hii inaruhusu michakato na mwingiliano tata kati ya mifano ya AI na mifumo ya nje:
 
 {{#ref}}
 AI-MCP-Servers.md
+{{#endref}}
+
+### Fuzzing ya AI na Ugunduzi wa Uthibitisho wa Otomatiki
+
+{{#ref}}
+AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
 {{#endref}}
 
 {{#include ../banners/hacktricks-training.md}}
