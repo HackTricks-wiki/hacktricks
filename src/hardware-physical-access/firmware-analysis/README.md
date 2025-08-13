@@ -4,6 +4,12 @@
 
 ## **Introdução**
 
+### Recursos relacionados
+
+{{#ref}}
+synology-encrypted-archive-decryption.md
+{{#endref}}
+
 Firmware é um software essencial que permite que dispositivos operem corretamente, gerenciando e facilitando a comunicação entre os componentes de hardware e o software com o qual os usuários interagem. Ele é armazenado em memória permanente, garantindo que o dispositivo possa acessar instruções vitais desde o momento em que é ligado, levando ao lançamento do sistema operacional. Examinar e potencialmente modificar o firmware é um passo crítico na identificação de vulnerabilidades de segurança.
 
 ## **Coleta de Informações**
@@ -13,7 +19,7 @@ Firmware é um software essencial que permite que dispositivos operem corretamen
 - A arquitetura da CPU e o sistema operacional que ele executa
 - Especificações do bootloader
 - Layout de hardware e folhas de dados
-- Métricas da base de código e locais de origem
+- Métricas de código e locais de origem
 - Bibliotecas externas e tipos de licença
 - Históricos de atualização e certificações regulatórias
 - Diagramas arquitetônicos e de fluxo
@@ -148,7 +154,7 @@ Com o sistema de arquivos extraído, a busca por falhas de segurança começa. A
 
 - **etc/shadow** e **etc/passwd** para credenciais de usuário
 - Certificados e chaves SSL em **etc/ssl**
-- Arquivos de configuração e scripts em busca de vulnerabilidades potenciais
+- Arquivos de configuração e scripts para potenciais vulnerabilidades
 - Binários incorporados para análise adicional
 - Servidores web e binários comuns de dispositivos IoT
 
@@ -164,7 +170,7 @@ Tanto o código-fonte quanto os binários compilados encontrados no sistema de a
 
 ## Emulando Firmware para Análise Dinâmica
 
-O processo de emular firmware permite **análise dinâmica** tanto da operação de um dispositivo quanto de um programa individual. Essa abordagem pode enfrentar desafios com dependências de hardware ou arquitetura, mas transferir o sistema de arquivos raiz ou binários específicos para um dispositivo com arquitetura e endianness correspondentes, como um Raspberry Pi, ou para uma máquina virtual pré-construída, pode facilitar testes adicionais.
+O processo de emular firmware permite a **análise dinâmica** tanto da operação de um dispositivo quanto de um programa individual. Essa abordagem pode enfrentar desafios com dependências de hardware ou arquitetura, mas transferir o sistema de arquivos raiz ou binários específicos para um dispositivo com arquitetura e endianness correspondentes, como um Raspberry Pi, ou para uma máquina virtual pré-construída, pode facilitar testes adicionais.
 
 ### Emulando Binários Individuais
 
@@ -188,7 +194,7 @@ Para binários ARM, o processo é semelhante, com o emulador `qemu-arm` sendo ut
 
 ### Emulação de Sistema Completo
 
-Ferramentas como [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit) e outras, facilitam a emulação completa de firmware, automatizando o processo e auxiliando na análise dinâmica.
+Ferramentas como [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit) e outras, facilitam a emulação completa de firmware, automatizando o processo e ajudando na análise dinâmica.
 
 ## Análise Dinâmica na Prática
 
@@ -221,7 +227,7 @@ Fluxo de ataque típico:
 * Pegue-a do portal de download público do fornecedor, CDN ou site de suporte.
 * Extraia-a de aplicativos móveis/escrita acompanhantes (por exemplo, dentro de um APK Android em `assets/firmware/`).
 * Recupere-a de repositórios de terceiros, como VirusTotal, arquivos da Internet, fóruns, etc.
-2. **Carregar ou servir a imagem para o dispositivo** através de qualquer canal de atualização exposto:
+2. **Carregar ou servir a imagem para o dispositivo** via qualquer canal de atualização exposto:
 * UI da Web, API de aplicativo móvel, USB, TFTP, MQTT, etc.
 * Muitos dispositivos IoT de consumo expõem endpoints HTTP(S) *não autenticados* que aceitam blobs de firmware codificados em Base64, decodificam-nos no lado do servidor e acionam a recuperação/atualização.
 3. Após o downgrade, explore uma vulnerabilidade que foi corrigida na versão mais nova (por exemplo, um filtro de injeção de comando que foi adicionado posteriormente).
@@ -234,7 +240,7 @@ Host: 192.168.0.1
 Content-Type: application/octet-stream
 Content-Length: 0
 ```
-No firmware vulnerável (rebaixado), o parâmetro `md5` é concatenado diretamente em um comando shell sem sanitização, permitindo a injeção de comandos arbitrários (aqui – habilitando o acesso root baseado em chave SSH). Versões posteriores do firmware introduziram um filtro básico de caracteres, mas a ausência de proteção contra rebaixamento torna a correção irrelevante.
+No firmware vulnerável (rebaixado), o parâmetro `md5` é concatenado diretamente em um comando de shell sem sanitização, permitindo a injeção de comandos arbitrários (aqui – habilitando o acesso root baseado em chave SSH). Versões posteriores do firmware introduziram um filtro básico de caracteres, mas a ausência de proteção contra rebaixamento torna a correção irrelevante.
 
 ### Extraindo Firmware de Aplicativos Móveis
 
