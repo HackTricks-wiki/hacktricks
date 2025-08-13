@@ -1,4 +1,4 @@
-# Elevazione dei privilegi con Autoruns
+# Privilege Escalation with Autoruns
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -26,7 +26,7 @@ schtasks /Create /RU "SYSTEM" /SC ONLOGON /TN "SchedPE" /TR "cmd /c net localgro
 ```
 ## Cartelle
 
-Tutti i binari situati nelle **cartelle di avvio verranno eseguiti all'avvio**. Le cartelle di avvio comuni sono quelle elencate di seguito, ma la cartella di avvio è indicata nel registro. [Read this to learn where.](privilege-escalation-with-autorun-binaries.md#startup-path)
+Tutti i file binari situati nelle **cartelle di avvio verranno eseguiti all'avvio**. Le comuni cartelle di avvio sono quelle elencate di seguito, ma la cartella di avvio è indicata nel registro. [Read this to learn where.](privilege-escalation-with-autorun-binaries.md#startup-path)
 ```bash
 dir /b "C:\Documents and Settings\All Users\Start Menu\Programs\Startup" 2>nul
 dir /b "C:\Documents and Settings\%username%\Start Menu\Programs\Startup" 2>nul
@@ -35,14 +35,22 @@ dir /b "%appdata%\Microsoft\Windows\Start Menu\Programs\Startup" 2>nul
 Get-ChildItem "C:\Users\All Users\Start Menu\Programs\Startup"
 Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 ```
+> **FYI**: Le vulnerabilità di *path traversal* nell'estrazione di archivi (come quella sfruttata in WinRAR prima della versione 7.13 – CVE-2025-8088) possono essere utilizzate per **depositare payload direttamente all'interno di queste cartelle di avvio durante la decompressione**, risultando in un'esecuzione di codice al successivo accesso dell'utente. Per un approfondimento su questa tecnica, vedere:
+
+{{#ref}}
+../../generic-hacking/archive-extraction-path-traversal.md
+{{#endref}}
+
+
+
 ## Registro
 
-> [!NOTE]
-> [Nota da qui](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): L'entry di registro **Wow6432Node** indica che stai eseguendo una versione di Windows a 64 bit. Il sistema operativo utilizza questa chiave per visualizzare una vista separata di HKEY_LOCAL_MACHINE\SOFTWARE per le applicazioni a 32 bit che girano su versioni di Windows a 64 bit.
+> [!TIP]
+> [Nota da qui](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): L'entrata di registro **Wow6432Node** indica che stai eseguendo una versione di Windows a 64 bit. Il sistema operativo utilizza questa chiave per visualizzare una vista separata di HKEY_LOCAL_MACHINE\SOFTWARE per le applicazioni a 32 bit che girano su versioni di Windows a 64 bit.
 
 ### Esecuzioni
 
-**Conosciuto comunemente** registro AutoRun:
+Registro AutoRun **comunemente conosciuto**:
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\Run`
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\RunOnce`
@@ -74,15 +82,15 @@ Le chiavi di registro conosciute come **Run** e **RunOnce** sono progettate per 
 - `HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnceEx`
 - `HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnceEx`
 
-Su Windows Vista e versioni successive, le chiavi di registro **Run** e **RunOnce** non vengono generate automaticamente. Le voci in queste chiavi possono avviare direttamente programmi o specificarli come dipendenze. Ad esempio, per caricare un file DLL all'accesso, si potrebbe utilizzare la chiave di registro **RunOnceEx** insieme a una chiave "Depend". Questo è dimostrato aggiungendo un'entry di registro per eseguire "C:\temp\evil.dll" durante l'avvio del sistema:
+Su Windows Vista e versioni successive, le chiavi di registro **Run** e **RunOnce** non vengono generate automaticamente. Le voci in queste chiavi possono avviare direttamente programmi o specificarli come dipendenze. Ad esempio, per caricare un file DLL all'accesso, si potrebbe utilizzare la chiave di registro **RunOnceEx** insieme a una chiave "Depend". Questo è dimostrato aggiungendo un'entrata di registro per eseguire "C:\temp\evil.dll" durante l'avvio del sistema:
 ```
 reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx\\0001\\Depend /v 1 /d "C:\\temp\\evil.dll"
 ```
-> [!NOTE]
+> [!TIP]
 > **Exploit 1**: Se puoi scrivere all'interno di uno dei registri menzionati in **HKLM**, puoi elevare i privilegi quando un altro utente accede.
 
-> [!NOTE]
-> **Exploit 2**: Se puoi sovrascrivere uno dei binari indicati in uno dei registri in **HKLM**, puoi modificare quel binario con una backdoor quando un altro utente accede ed elevare i privilegi.
+> [!TIP]
+> **Exploit 2**: Se puoi sovrascrivere uno dei binari indicati in uno dei registri all'interno di **HKLM**, puoi modificare quel binario con una backdoor quando un altro utente accede ed elevare i privilegi.
 ```bash
 #CMD
 reg query HKLM\Software\Microsoft\Windows\CurrentVersion\Run
@@ -138,17 +146,17 @@ Get-ItemProperty -Path 'Registry::HKLM\Software\Wow6432Node\Microsoft\Windows\Ru
 Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\RunOnceEx'
 Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\RunOnceEx'
 ```
-### Percorso di Avvio
+### Startup Path
 
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders`
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders`
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders`
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders`
 
-I collegamenti posizionati nella cartella **Avvio** attiveranno automaticamente servizi o applicazioni all'accesso dell'utente o al riavvio del sistema. La posizione della cartella **Avvio** è definita nel registro sia per l'ambito **Macchina Locale** che per l'**Utente Corrente**. Ciò significa che qualsiasi collegamento aggiunto a queste posizioni **Avvio** specificate garantirà che il servizio o il programma collegato si avvii dopo il processo di accesso o riavvio, rendendolo un metodo semplice per programmare l'esecuzione automatica dei programmi.
+I collegamenti posizionati nella cartella **Startup** attiveranno automaticamente servizi o applicazioni all'accesso dell'utente o al riavvio del sistema. La posizione della cartella **Startup** è definita nel registro sia per l'ambito **Local Machine** che per l'**Current User**. Ciò significa che qualsiasi collegamento aggiunto a queste posizioni **Startup** specificate garantirà che il servizio o il programma collegato si avvii dopo il processo di accesso o riavvio, rendendolo un metodo semplice per pianificare l'esecuzione automatica dei programmi.
 
-> [!NOTE]
-> Se puoi sovrascrivere qualsiasi \[User] Shell Folder sotto **HKLM**, sarai in grado di puntarlo a una cartella controllata da te e posizionare una backdoor che verrà eseguita ogni volta che un utente accede al sistema, aumentando i privilegi.
+> [!TIP]
+> Se puoi sovrascrivere qualsiasi \[User] Shell Folder sotto **HKLM**, sarai in grado di puntarlo a una cartella controllata da te e posizionare una backdoor che verrà eseguita ogni volta che un utente accede al sistema, elevando i privilegi.
 ```bash
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v "Common Startup"
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" /v "Common Startup"
@@ -171,7 +179,7 @@ reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Shell
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name "Userinit"
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name "Shell"
 ```
-> [!NOTE]
+> [!TIP]
 > Se puoi sovrascrivere il valore del registro o il binario, sarai in grado di elevare i privilegi.
 
 ### Impostazioni della Politica
@@ -190,7 +198,7 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 
 ### Modifica del Prompt dei Comandi in Modalità Provvisoria
 
-Nel Registro di Windows sotto `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`, c'è un valore **`AlternateShell`** impostato per impostazione predefinita su `cmd.exe`. Questo significa che quando scegli "Modalità Provvisoria con Prompt dei Comandi" durante l'avvio (premendo F8), viene utilizzato `cmd.exe`. Tuttavia, è possibile configurare il computer per avviarsi automaticamente in questa modalità senza dover premere F8 e selezionarla manualmente.
+Nel Registro di Windows sotto `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`, c'è un valore **`AlternateShell`** impostato per default su `cmd.exe`. Questo significa che quando scegli "Modalità Provvisoria con Prompt dei Comandi" durante l'avvio (premendo F8), viene utilizzato `cmd.exe`. Tuttavia, è possibile configurare il computer per avviarsi automaticamente in questa modalità senza dover premere F8 e selezionarla manualmente.
 
 Passaggi per creare un'opzione di avvio per avviarsi automaticamente in "Modalità Provvisoria con Prompt dei Comandi":
 
@@ -200,7 +208,7 @@ Passaggi per creare un'opzione di avvio per avviarsi automaticamente in "Modalit
 4. Salva le modifiche a `boot.ini`.
 5. Ripristina gli attributi originali del file: `attrib c:\boot.ini +r +s +h`
 
-- **Exploit 1:** Modificare la chiave di registro **AlternateShell** consente di configurare una shell di comando personalizzata, potenzialmente per accesso non autorizzato.
+- **Exploit 1:** Modificare la chiave di registro **AlternateShell** consente di configurare un shell di comando personalizzata, potenzialmente per accesso non autorizzato.
 - **Exploit 2 (Permessi di Scrittura nel PATH):** Avere permessi di scrittura su qualsiasi parte della variabile di sistema **PATH**, specialmente prima di `C:\Windows\system32`, consente di eseguire un `cmd.exe` personalizzato, che potrebbe essere una backdoor se il sistema viene avviato in Modalità Provvisoria.
 - **Exploit 3 (Permessi di Scrittura nel PATH e boot.ini):** L'accesso in scrittura a `boot.ini` consente l'avvio automatico in Modalità Provvisoria, facilitando l'accesso non autorizzato al successivo riavvio.
 
@@ -230,7 +238,7 @@ All'interno di queste chiavi, esistono vari sottochiavi, ciascuna corrispondente
 **Approfondimenti sulla Sicurezza:**
 
 - Modificare o scrivere in una chiave dove **`IsInstalled`** è impostato su `"1"` con un **`StubPath`** specifico può portare all'esecuzione non autorizzata di comandi, potenzialmente per l'escalation dei privilegi.
-- Alterare il file binario a cui si fa riferimento in qualsiasi valore di **`StubPath`** potrebbe anche ottenere l'escalation dei privilegi, date sufficienti autorizzazioni.
+- Alterare il file binario a cui si fa riferimento in qualsiasi valore di **`StubPath`** potrebbe anche portare a un'escalation dei privilegi, date le autorizzazioni sufficienti.
 
 Per ispezionare le configurazioni di **`StubPath`** attraverso i componenti di Active Setup, possono essere utilizzati i seguenti comandi:
 ```bash
@@ -241,20 +249,20 @@ reg query "HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components
 ```
 ### Browser Helper Objects
 
-### Panoramica dei Browser Helper Objects (BHO)
+### Overview of Browser Helper Objects (BHOs)
 
-I Browser Helper Objects (BHO) sono moduli DLL che aggiungono funzionalità extra a Internet Explorer di Microsoft. Si caricano in Internet Explorer e Windows Explorer ad ogni avvio. Tuttavia, la loro esecuzione può essere bloccata impostando la chiave **NoExplorer** a 1, impedendo loro di caricarsi con le istanze di Windows Explorer.
+Browser Helper Objects (BHOs) sono moduli DLL che aggiungono funzionalità extra a Microsoft Internet Explorer. Si caricano in Internet Explorer e Windows Explorer ad ogni avvio. Tuttavia, la loro esecuzione può essere bloccata impostando la chiave **NoExplorer** a 1, impedendo loro di caricarsi con le istanze di Windows Explorer.
 
-I BHO sono compatibili con Windows 10 tramite Internet Explorer 11, ma non sono supportati in Microsoft Edge, il browser predefinito nelle versioni più recenti di Windows.
+I BHOs sono compatibili con Windows 10 tramite Internet Explorer 11 ma non sono supportati in Microsoft Edge, il browser predefinito nelle versioni più recenti di Windows.
 
-Per esplorare i BHO registrati su un sistema, puoi ispezionare le seguenti chiavi di registro:
+Per esplorare i BHOs registrati su un sistema, puoi ispezionare le seguenti chiavi di registro:
 
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 - `HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 
 Ogni BHO è rappresentato dal suo **CLSID** nel registro, che funge da identificatore unico. Informazioni dettagliate su ciascun CLSID possono essere trovate sotto `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`.
 
-Per interrogare i BHO nel registro, possono essere utilizzati i seguenti comandi:
+Per interrogare i BHOs nel registro, possono essere utilizzati i seguenti comandi:
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
 reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
@@ -276,7 +284,7 @@ reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows NT\CurrentVersion\Font Dr
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Font Drivers'
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows NT\CurrentVersion\Font Drivers'
 ```
-### Comando di apertura
+### Open Command
 
 - `HKLM\SOFTWARE\Classes\htmlfile\shell\open\command`
 - `HKLM\SOFTWARE\Wow6432Node\Classes\htmlfile\shell\open\command`
