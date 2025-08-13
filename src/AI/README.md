@@ -4,7 +4,7 @@
 
 ## Główne Algorytmy Uczenia Maszynowego
 
-Najlepszym punktem wyjścia do nauki o AI jest zrozumienie, jak działają główne algorytmy uczenia maszynowego. Pomoże to zrozumieć, jak działa AI, jak go używać i jak je atakować:
+Najlepszym punktem wyjścia do nauki o AI jest zrozumienie, jak działają główne algorytmy uczenia maszynowego. Pomoże to zrozumieć, jak działa AI, jak go używać i jak go atakować:
 
 {{#ref}}
 ./AI-Supervised-Learning-Algorithms.md
@@ -42,7 +42,7 @@ AI-Risk-Frameworks.md
 
 ### Bezpieczeństwo Podpowiedzi AI
 
-LLM sprawiły, że użycie AI eksplodowało w ostatnich latach, ale nie są one doskonałe i mogą być oszukiwane przez wrogie podpowiedzi. To bardzo ważny temat, aby zrozumieć, jak używać AI bezpiecznie i jak je atakować:
+LLM-y spowodowały eksplozję użycia AI w ostatnich latach, ale nie są doskonałe i mogą być oszukiwane przez wrogie podpowiedzi. To bardzo ważny temat, aby zrozumieć, jak używać AI bezpiecznie i jak go atakować:
 
 {{#ref}}
 AI-Prompts.md
@@ -50,7 +50,7 @@ AI-Prompts.md
 
 ### RCE Modeli AI
 
-Bardzo powszechne jest, że deweloperzy i firmy uruchamiają modele pobrane z Internetu, jednak samo załadowanie modelu może być wystarczające do wykonania dowolnego kodu w systemie. To bardzo ważny temat, aby zrozumieć, jak używać AI bezpiecznie i jak je atakować:
+Bardzo powszechne jest, że deweloperzy i firmy uruchamiają modele pobrane z Internetu, jednak samo załadowanie modelu może być wystarczające do wykonania dowolnego kodu w systemie. To bardzo ważny temat, aby zrozumieć, jak używać AI bezpiecznie i jak go atakować:
 
 {{#ref}}
 AI-Models-RCE.md
@@ -62,6 +62,12 @@ MCP (Model Context Protocol) to protokół, który pozwala klientom agentów AI 
 
 {{#ref}}
 AI-MCP-Servers.md
+{{#endref}}
+
+### Fuzzing Wspomagany AI i Zautomatyzowane Odkrywanie Wrażliwości
+
+{{#ref}}
+AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
 {{#endref}}
 
 {{#include ../banners/hacktricks-training.md}}
