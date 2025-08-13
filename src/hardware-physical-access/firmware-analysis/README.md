@@ -4,7 +4,13 @@
 
 ## **Wprowadzenie**
 
-Oprogramowanie układowe to niezbędne oprogramowanie, które umożliwia urządzeniom prawidłowe działanie, zarządzając i ułatwiając komunikację między komponentami sprzętowymi a oprogramowaniem, z którym użytkownicy wchodzą w interakcje. Jest przechowywane w pamięci trwałej, co zapewnia, że urządzenie może uzyskać dostęp do istotnych instrukcji od momentu włączenia, co prowadzi do uruchomienia systemu operacyjnego. Badanie i potencjalna modyfikacja oprogramowania układowego to kluczowy krok w identyfikacji luk w zabezpieczeniach.
+### Powiązane zasoby
+
+{{#ref}}
+synology-encrypted-archive-decryption.md
+{{#endref}}
+
+Oprogramowanie układowe to niezbędne oprogramowanie, które umożliwia urządzeniom prawidłowe działanie, zarządzając i ułatwiając komunikację między komponentami sprzętowymi a oprogramowaniem, z którym użytkownicy wchodzą w interakcję. Jest przechowywane w pamięci trwałej, co zapewnia, że urządzenie może uzyskać dostęp do istotnych instrukcji od momentu włączenia, co prowadzi do uruchomienia systemu operacyjnego. Badanie i potencjalne modyfikowanie oprogramowania układowego jest kluczowym krokiem w identyfikacji luk w zabezpieczeniach.
 
 ## **Zbieranie informacji**
 
@@ -16,10 +22,10 @@ Oprogramowanie układowe to niezbędne oprogramowanie, które umożliwia urządz
 - Metryk bazy kodu i lokalizacji źródłowych
 - Zewnętrznych bibliotek i typów licencji
 - Historii aktualizacji i certyfikacji regulacyjnych
-- Diagramów architektonicznych i przepływowych
+- Diagramów architektonicznych i przepływów
 - Oceny bezpieczeństwa i zidentyfikowanych luk
 
-W tym celu narzędzia **inteligencji open-source (OSINT)** są nieocenione, podobnie jak analiza dostępnych komponentów oprogramowania open-source poprzez ręczne i zautomatyzowane procesy przeglądowe. Narzędzia takie jak [Coverity Scan](https://scan.coverity.com) i [Semmle’s LGTM](https://lgtm.com/#explore) oferują darmową analizę statyczną, która może być wykorzystana do znalezienia potencjalnych problemów.
+W tym celu narzędzia **inteligencji open-source (OSINT)** są nieocenione, podobnie jak analiza wszelkich dostępnych komponentów oprogramowania open-source poprzez ręczne i zautomatyzowane procesy przeglądowe. Narzędzia takie jak [Coverity Scan](https://scan.coverity.com) i [Semmle’s LGTM](https://lgtm.com/#explore) oferują darmową analizę statyczną, która może być wykorzystana do znalezienia potencjalnych problemów.
 
 ## **Pozyskiwanie oprogramowania układowego**
 
@@ -29,7 +35,7 @@ Pozyskiwanie oprogramowania układowego można podejść na różne sposoby, z k
 - **Budując** je na podstawie dostarczonych instrukcji
 - **Pobierając** z oficjalnych stron wsparcia
 - Wykorzystując zapytania **Google dork** do znajdowania hostowanych plików oprogramowania układowego
-- Uzyskując dostęp do **chmury** bezpośrednio, z narzędziami takimi jak [S3Scanner](https://github.com/sa7mon/S3Scanner)
+- Uzyskując dostęp do **chmury** bezpośrednio, za pomocą narzędzi takich jak [S3Scanner](https://github.com/sa7mon/S3Scanner)
 - Przechwytując **aktualizacje** za pomocą technik man-in-the-middle
 - **Ekstrahując** z urządzenia przez połączenia takie jak **UART**, **JTAG** lub **PICit**
 - **Podsłuchując** żądania aktualizacji w komunikacji urządzenia
@@ -113,7 +119,7 @@ Pliki będą w katalogu "`squashfs-root`" po tym.
 
 ## Analiza Oprogramowania Układowego
 
-Gdy oprogramowanie układowe jest już uzyskane, istotne jest jego rozłożenie na części w celu zrozumienia jego struktury i potencjalnych luk. Proces ten polega na wykorzystaniu różnych narzędzi do analizy i wydobywania cennych danych z obrazu oprogramowania układowego.
+Gdy oprogramowanie układowe jest już zdobyte, istotne jest jego rozłożenie na części w celu zrozumienia struktury i potencjalnych luk. Proces ten polega na wykorzystaniu różnych narzędzi do analizy i wydobywania cennych danych z obrazu oprogramowania układowego.
 
 ### Narzędzia do Wstępnej Analizy
 
@@ -132,7 +138,7 @@ Do ekstrakcji **osadzonych plików** zaleca się korzystanie z dokumentacji **fi
 
 ### Ekstrakcja systemu plików
 
-Używając `binwalk -ev <bin>`, można zazwyczaj wyodrębnić system plików, często do katalogu nazwanego na cześć typu systemu plików (np. squashfs, ubifs). Jednak gdy **binwalk** nie rozpoznaje typu systemu plików z powodu brakujących bajtów magicznych, konieczna jest ręczna ekstrakcja. Polega to na użyciu `binwalk` do zlokalizowania offsetu systemu plików, a następnie polecenia `dd` do wycięcia systemu plików:
+Używając `binwalk -ev <bin>`, można zazwyczaj wyodrębnić system plików, często do katalogu nazwanego na cześć typu systemu plików (np. squashfs, ubifs). Jednak gdy **binwalk** nie rozpoznaje typu systemu plików z powodu brakujących bajtów magicznych, konieczna jest ręczna ekstrakcja. Polega to na użyciu `binwalk` do zlokalizowania offsetu systemu plików, a następnie polecenia `dd` do wyodrębnienia systemu plików:
 ```bash
 $ binwalk DIR850L_REVB.bin
 
@@ -196,11 +202,11 @@ Na tym etapie używa się rzeczywistego lub emulowanego środowiska urządzenia 
 
 ## Techniki analizy w czasie rzeczywistym
 
-Analiza w czasie rzeczywistym polega na interakcji z procesem lub binariami w ich środowisku operacyjnym, przy użyciu narzędzi takich jak gdb-multiarch, Frida i Ghidra do ustawiania punktów przerwania i identyfikacji luk poprzez fuzzing i inne techniki.
+Analiza w czasie rzeczywistym polega na interakcji z procesem lub binariami w jego środowisku operacyjnym, przy użyciu narzędzi takich jak gdb-multiarch, Frida i Ghidra do ustawiania punktów przerwania i identyfikacji luk poprzez fuzzing i inne techniki.
 
 ## Eksploatacja binarna i dowód koncepcji
 
-Opracowanie PoC dla zidentyfikowanych luk wymaga głębokiego zrozumienia docelowej architektury i programowania w językach niskiego poziomu. Ochrony w czasie rzeczywistym w systemach wbudowanych są rzadkie, ale gdy są obecne, techniki takie jak Return Oriented Programming (ROP) mogą być konieczne.
+Opracowanie PoC dla zidentyfikowanych luk wymaga głębokiego zrozumienia architektury docelowej i programowania w językach niskiego poziomu. Ochrony w czasie rzeczywistym w systemach wbudowanych są rzadkie, ale gdy są obecne, techniki takie jak Return Oriented Programming (ROP) mogą być konieczne.
 
 ## Przygotowane systemy operacyjne do analizy firmware'u
 
@@ -208,22 +214,22 @@ Systemy operacyjne takie jak [AttifyOS](https://github.com/adi0x90/attifyos) i [
 
 ## Przygotowane systemy operacyjne do analizy firmware'u
 
-- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS to dystrybucja mająca na celu pomoc w przeprowadzaniu oceny bezpieczeństwa i testów penetracyjnych urządzeń Internetu Rzeczy (IoT). Oszczędza dużo czasu, zapewniając wstępnie skonfigurowane środowisko z wszystkimi niezbędnymi narzędziami.
+- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS to dystrybucja mająca na celu pomoc w przeprowadzaniu ocen bezpieczeństwa i testów penetracyjnych urządzeń Internetu Rzeczy (IoT). Oszczędza dużo czasu, oferując wstępnie skonfigurowane środowisko z wszystkimi niezbędnymi narzędziami.
 - [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): System operacyjny do testowania bezpieczeństwa wbudowanego, oparty na Ubuntu 18.04, wstępnie załadowany narzędziami do testowania bezpieczeństwa firmware'u.
 
 ## Ataki na obniżenie wersji firmware'u i niebezpieczne mechanizmy aktualizacji
 
-Nawet gdy dostawca wdraża kontrole podpisu kryptograficznego dla obrazów firmware'u, **ochrona przed cofaniem wersji (downgrade) jest często pomijana**. Gdy boot- lub recovery-loader tylko weryfikuje podpis za pomocą osadzonego klucza publicznego, ale nie porównuje *wersji* (lub monotonicznego licznika) obrazu, który jest wgrywany, atakujący może legalnie zainstalować **starszy, podatny firmware, który nadal ma ważny podpis** i w ten sposób ponownie wprowadzić załatane luki.
+Nawet gdy dostawca wdraża kontrole podpisu kryptograficznego dla obrazów firmware'u, **ochrona przed obniżeniem wersji (downgrade) jest często pomijana**. Gdy boot- lub recovery-loader tylko weryfikuje podpis za pomocą osadzonego klucza publicznego, ale nie porównuje *wersji* (lub monotonicznego licznika) obrazu, który jest wgrywany, atakujący może legalnie zainstalować **starszy, podatny firmware, który nadal ma ważny podpis** i w ten sposób ponownie wprowadzić załatane luki.
 
 Typowy przebieg ataku:
 
 1. **Uzyskaj starszy podpisany obraz**
 * Pobierz go z publicznego portalu pobierania dostawcy, CDN lub strony wsparcia.
-* Wyodrębnij go z towarzyszących aplikacji mobilnych/desktopowych (np. wewnątrz aplikacji Android APK w `assets/firmware/`).
+* Wyodrębnij go z towarzyszących aplikacji mobilnych/desktopowych (np. wewnątrz Android APK pod `assets/firmware/`).
 * Pobierz go z repozytoriów stron trzecich, takich jak VirusTotal, archiwa internetowe, fora itp.
-2. **Prześlij lub udostępnij obraz urządzeniu** za pośrednictwem dowolnego narażonego kanału aktualizacji:
+2. **Prześlij lub udostępnij obraz urządzeniu** przez dowolny narażony kanał aktualizacji:
 * Interfejs webowy, API aplikacji mobilnej, USB, TFTP, MQTT itp.
-* Wiele konsumenckich urządzeń IoT udostępnia *nieautoryzowane* punkty końcowe HTTP(S), które akceptują blob'y firmware'u zakodowane w Base64, dekodują je po stronie serwera i uruchamiają proces odzyskiwania/aktualizacji.
+* Wiele konsumenckich urządzeń IoT udostępnia *nieautoryzowane* punkty końcowe HTTP(S), które akceptują blob'y firmware'u zakodowane w Base64, dekodują je po stronie serwera i uruchamiają odzyskiwanie/aktualizację.
 3. Po obniżeniu wersji wykorzystaj lukę, która została załatana w nowszej wersji (na przykład filtr wstrzykiwania poleceń, który został dodany później).
 4. Opcjonalnie wgraj najnowszy obraz z powrotem lub wyłącz aktualizacje, aby uniknąć wykrycia po uzyskaniu trwałości.
 
@@ -260,7 +266,7 @@ Aby ćwiczyć odkrywanie luk w oprogramowaniu układowym, użyj następujących 
 
 - OWASP IoTGoat
 - [https://github.com/OWASP/IoTGoat](https://github.com/OWASP/IoTGoat)
-- Projekt Damn Vulnerable Router Firmware
+- Projekt Oprogramowania Układowego Routera z Wrażliwościami
 - [https://github.com/praetorian-code/DVRF](https://github.com/praetorian-code/DVRF)
 - Damn Vulnerable ARM Router (DVAR)
 - [https://blog.exploitlab.net/2018/01/dvar-damn-vulnerable-arm-router.html](https://blog.exploitlab.net/2018/01/dvar-damn-vulnerable-arm-router.html)
@@ -277,7 +283,7 @@ Aby ćwiczyć odkrywanie luk w oprogramowaniu układowym, użyj następujących 
 - [Practical IoT Hacking: The Definitive Guide to Attacking the Internet of Things](https://www.amazon.co.uk/Practical-IoT-Hacking-F-Chantzis/dp/1718500904)
 - [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 
-## Szkolenie i certyfikacja
+## Szkolenie i Certyfikacja
 
 - [https://www.attify-store.com/products/offensive-iot-exploitation](https://www.attify-store.com/products/offensive-iot-exploitation)
 
