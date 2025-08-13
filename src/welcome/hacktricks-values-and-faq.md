@@ -7,15 +7,15 @@
 > [!TIP]
 > Estos son los **valores del Proyecto HackTricks**:
 >
-> - Dar acceso **GRATIS** a recursos de **HACKING educativo** a **TODOS** en Internet.
+> - Dar acceso **GRATIS** a recursos de **HACKING EDUCATIVO** a **TODOS** en Internet.
 >  - Hacking se trata de aprender, y aprender debería ser lo más gratuito posible.
 >  - El propósito de este libro es servir como un **recurso educativo** integral.
 > - **ALMACENAR** técnicas de **hacking** increíbles que la comunidad publica dando a los **AUTORES** **ORIGINALES** todos los **créditos**.
 >  - **No queremos el crédito de otras personas**, solo queremos almacenar trucos geniales para todos.
 >  - También escribimos **nuestras propias investigaciones** en HackTricks.
->  - En varios casos, simplemente escribiremos **en HackTricks un resumen de las partes importantes** de la técnica y **alentaremos al lector a visitar la publicación original** para más detalles.
+>  - En varios casos, solo escribiremos **en HackTricks un resumen de las partes importantes** de la técnica y **alentaremos al lector a visitar la publicación original** para más detalles.
 > - **ORGANIZAR** todas las técnicas de hacking en el libro para que sea **MÁS ACCESIBLE**
->  - El equipo de HackTricks ha dedicado miles de horas de forma gratuita **solo para organizar el contenido** para que las personas puedan **aprender más rápido**
+>  - El equipo de HackTricks ha dedicado miles de horas de forma gratuita **solo para organizar el contenido** para que la gente pueda **aprender más rápido**
 
 <figure><img src="../images/hack tricks gif.gif" alt="" width="375"><figcaption></figcaption></figure>
 
@@ -96,7 +96,7 @@ Ten en cuenta que tener enlaces a tu página en HackTricks:
 - El contenido se **traduce a más de 15 idiomas** permitiendo que más personas accedan a este contenido
 - **HackTricks anima** a las personas a **revisar tu página** (varias personas nos han mencionado que desde que alguna de sus páginas está en HackTricks reciben más visitas)
 
-Sin embargo, si aún deseas que el contenido de tu blog sea eliminado de HackTricks, solo háznoslo saber y definitivamente **eliminaremos todos los enlaces a tu blog**, y cualquier contenido basado en él.
+Sin embargo, si aún deseas que el contenido de tu blog sea eliminado de HackTricks, solo háznoslo saber y definitivamente **eliminaremos cada enlace a tu blog**, y cualquier contenido basado en él.
 
 > [!CAUTION]
 >
@@ -130,7 +130,7 @@ Esta licencia no otorga ningún derecho de marca registrada o de branding en rel
 ## **Disclaimer**
 
 > [!CAUTION]
-> Este libro, 'HackTricks', está destinado únicamente a fines educativos e informativos. El contenido dentro de este libro se proporciona "tal cual", y los autores y editores no hacen representaciones ni garantías de ningún tipo, expresas o implícitas, sobre la integridad, precisión, fiabilidad, idoneidad o disponibilidad de la información, productos, servicios o gráficos relacionados contenidos dentro de este libro. Cualquier confianza que deposites en dicha información es, por lo tanto, estrictamente bajo tu propio riesgo.
+> Este libro, 'HackTricks', está destinado únicamente a fines educativos e informativos. El contenido dentro de este libro se proporciona "tal cual", y los autores y editores no hacen representaciones ni garantías de ningún tipo, expresas o implícitas, sobre la integridad, precisión, fiabilidad, idoneidad o disponibilidad de la información, productos, servicios o gráficos relacionados contenidos en este libro. Cualquier confianza que deposites en dicha información es, por lo tanto, estrictamente bajo tu propio riesgo.
 >
 > Los autores y editores no serán responsables en ningún caso de ninguna pérdida o daño, incluyendo, sin limitación, pérdida o daño indirecto o consecuente, o cualquier pérdida o daño que surja de la pérdida de datos o beneficios derivados de, o en conexión con, el uso de este libro.
 >
