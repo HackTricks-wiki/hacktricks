@@ -30,7 +30,7 @@ Nella pagina seguente troverai le basi di ciascun componente per costruire un LL
 AI-llm-architecture/README.md
 {{#endref}}
 
-## Sicurezza AI
+## Sicurezza dell'AI
 
 ### Framework di Rischio AI
 
@@ -58,10 +58,16 @@ AI-Models-RCE.md
 
 ### Protocollo di Contesto del Modello AI
 
-MCP (Model Context Protocol) è un protocollo che consente ai client agenti AI di connettersi con strumenti esterni e fonti di dati in modo plug-and-play. Questo abilita flussi di lavoro complessi e interazioni tra modelli AI e sistemi esterni:
+MCP (Model Context Protocol) è un protocollo che consente ai client agenti AI di connettersi a strumenti esterni e fonti di dati in modo plug-and-play. Questo abilita flussi di lavoro complessi e interazioni tra modelli AI e sistemi esterni:
 
 {{#ref}}
 AI-MCP-Servers.md
+{{#endref}}
+
+### Fuzzing Assistito da AI e Scoperta Automatica di Vulnerabilità
+
+{{#ref}}
+AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
 {{#endref}}
 
 {{#include ../banners/hacktricks-training.md}}
