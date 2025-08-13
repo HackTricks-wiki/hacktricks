@@ -14,7 +14,7 @@
 >  - **Wir wollen nicht den Kredit von anderen Menschen**, wir wollen nur coole Tricks für alle speichern.
 >  - Wir schreiben auch **unsere eigenen Forschungen** in HackTricks.
 >  - In mehreren Fällen werden wir einfach **in HackTricks eine Zusammenfassung der wichtigen Teile** der Technik schreiben und den **Leser ermutigen, den ursprünglichen Beitrag** für weitere Details zu besuchen.
-> - **ORGANISIEREN** Sie alle Hacking-Techniken im Buch, damit sie **ZUGÄNGLICHER** sind.
+> - **ORGANISIEREN** Sie alle Hacking-Techniken im Buch, damit es **ZUGÄNGLICHER** ist.
 >  - Das HackTricks-Team hat tausende von Stunden kostenlos damit verbracht, **nur den Inhalt zu organisieren**, damit die Leute **schneller lernen** können.
 
 <figure><img src="../images/hack tricks gif.gif" alt="" width="375"><figcaption></figcaption></figure>
@@ -64,7 +64,7 @@ url = {\url{https://book.hacktricks.wiki/specific-page}},
 >
 > - **Kann ich alle HackTricks in meinem Blog kopieren?**
 
-**Ich würde es lieber nicht**. Das **wird niemandem nützen**, da der **Inhalt bereits öffentlich verfügbar** ist in den offiziellen HackTricks-Büchern kostenlos.
+**Ich würde es lieber nicht**. Das **wird niemandem nützen**, da der **Inhalt bereits öffentlich** in den offiziellen HackTricks-Büchern kostenlos verfügbar ist.
 
 Wenn Sie befürchten, dass es verschwinden wird, forken Sie es einfach auf Github oder laden Sie es herunter, wie ich sagte, es ist bereits kostenlos.
 
@@ -78,7 +78,7 @@ Wenn Sie denken, dass HackTricks-Bücher für **kommerzielle Zwecke** gemacht si
 
 Wir haben Sponsoren, weil wir, auch wenn der gesamte Inhalt KOSTENLOS ist, der **Gemeinschaft die Möglichkeit bieten möchten, unsere Arbeit zu schätzen**, wenn sie möchten. Daher bieten wir den Menschen die Möglichkeit, HackTricks über [**Github-Sponsoren**](https://github.com/sponsors/carlospolop) zu unterstützen, und **relevante Cybersicherheitsunternehmen**, um HackTricks zu sponsern und **einige Anzeigen** im Buch zu haben, wobei die **Anzeigen** immer an Orten platziert werden, die sie **sichtbar** machen, aber den Lernprozess nicht stören, wenn sich jemand auf den Inhalt konzentriert.
 
-Sie werden HackTricks nicht mit lästigen Anzeigen gefüllt finden wie andere Blogs mit viel weniger Inhalt als HackTricks, denn HackTricks ist nicht für kommerzielle Zwecke gemacht.
+Sie werden HackTricks nicht mit nervigen Anzeigen gefüllt finden, wie andere Blogs mit viel weniger Inhalt als HackTricks, denn HackTricks ist nicht für kommerzielle Zwecke gemacht.
 
 > [!CAUTION]
 >
@@ -94,7 +94,7 @@ Beachten Sie, dass Links zu Ihrer Seite in HackTricks:
 
 - Ihre **SEO** verbessern
 - Der Inhalt wird **in mehr als 15 Sprachen übersetzt**, was es mehr Menschen ermöglicht, auf diesen Inhalt zuzugreifen
-- **HackTricks ermutigt** die Menschen, **Ihre Seite zu überprüfen** (mehrere Personen haben uns mitgeteilt, dass sie seitdem ihre Seite in HackTricks haben, mehr Besuche erhalten)
+- **HackTricks ermutigt** die Menschen, **Ihre Seite zu überprüfen** (mehrere Personen haben uns mitgeteilt, dass sie seitdem ihre Seite in HackTricks ist, mehr Besuche erhalten)
 
 Wenn Sie jedoch weiterhin möchten, dass der Inhalt Ihres Blogs aus HackTricks entfernt wird, lassen Sie es uns einfach wissen und wir werden definitiv **jeden Link zu Ihrem Blog** und jeden darauf basierenden Inhalt entfernen.
 
