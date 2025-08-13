@@ -1,14 +1,20 @@
-# Firmware Analysis
+# 固件分析
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## **Introduction**
+## **介绍**
+
+### 相关资源
+
+{{#ref}}
+synology-encrypted-archive-decryption.md
+{{#endref}}
 
 固件是使设备正常运行的基本软件，通过管理和促进硬件组件与用户交互的软件之间的通信。它存储在永久内存中，确保设备在开机时能够访问重要指令，从而启动操作系统。检查和可能修改固件是识别安全漏洞的关键步骤。
 
-## **Gathering Information**
+## **收集信息**
 
-**收集信息**是理解设备构成和所使用技术的关键初步步骤。此过程涉及收集以下数据：
+**收集信息**是理解设备构成及其使用技术的关键初步步骤。此过程涉及收集以下数据：
 
 - CPU架构和运行的操作系统
 - 引导加载程序的具体信息
@@ -19,14 +25,14 @@
 - 架构和流程图
 - 安全评估和已识别的漏洞
 
-为此，**开源情报（OSINT）**工具是不可或缺的，同时通过手动和自动审查过程分析任何可用的开源软件组件也很重要。像[Coverity Scan](https://scan.coverity.com)和[Semmle’s LGTM](https://lgtm.com/#explore)这样的工具提供免费的静态分析，可以用来发现潜在问题。
+为此，**开源情报（OSINT）**工具是不可或缺的，同时对任何可用的开源软件组件进行手动和自动审查也是非常重要的。像[Coverity Scan](https://scan.coverity.com)和[Semmle’s LGTM](https://lgtm.com/#explore)这样的工具提供免费的静态分析，可以用来发现潜在问题。
 
-## **Acquiring the Firmware**
+## **获取固件**
 
 获取固件可以通过多种方式进行，每种方式的复杂程度不同：
 
 - **直接**从源头（开发者、制造商）
-- **根据**提供的说明**构建**
+- **根据**提供的说明进行**构建**
 - **从**官方支持网站**下载**
 - 利用**Google dork**查询查找托管的固件文件
 - 直接访问**云存储**，使用像[S3Scanner](https://github.com/sa7mon/S3Scanner)这样的工具
@@ -35,11 +41,11 @@
 - 在设备通信中**嗅探**更新请求
 - 识别并使用**硬编码的更新端点**
 - 从引导加载程序或网络**转储**
-- 在所有其他方法失败时，**拆卸并读取**存储芯片，使用适当的硬件工具
+- 在所有其他方法失败时，使用适当的硬件工具**拆卸并读取**存储芯片
 
-## Analyzing the firmware
+## 分析固件
 
-现在你**拥有固件**，你需要提取有关它的信息，以了解如何处理它。你可以使用的不同工具有：
+现在你**拥有固件**，你需要提取有关它的信息，以了解如何处理它。你可以使用的不同工具包括：
 ```bash
 file <bin>
 strings -n8 <bin>
@@ -105,7 +111,7 @@ $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 
 `$ jefferson rootfsfile.jffs2`
 
-- 对于带有 NAND 闪存的 ubifs 文件系统
+- 对于带 NAND 闪存的 ubifs 文件系统
 
 `$ ubireader_extract_images -u UBI -s <start_offset> <bin>`
 
@@ -117,7 +123,7 @@ $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 
 ### 初步分析工具
 
-提供了一组命令用于对二进制文件（称为 `<bin>`）进行初步检查。这些命令有助于识别文件类型、提取字符串、分析二进制数据以及理解分区和文件系统的细节：
+提供了一组命令用于初步检查二进制文件（称为 `<bin>`）。这些命令有助于识别文件类型、提取字符串、分析二进制数据以及理解分区和文件系统的细节：
 ```bash
 file <bin>
 strings -n8 <bin>
@@ -128,7 +134,7 @@ fdisk -lu <bin> #lists partitions and filesystems, if there are multiple
 ```
 为了评估图像的加密状态，使用 `binwalk -E <bin>` 检查 **entropy**。低熵表明缺乏加密，而高熵则表示可能存在加密或压缩。
 
-对于提取 **embedded files**，推荐使用 **file-data-carving-recovery-tools** 文档和 **binvis.io** 进行文件检查。
+对于提取 **embedded files**，推荐使用 **file-data-carving-recovery-tools** 文档和 **binvis.io** 进行文件检查的工具和资源。
 
 ### 提取文件系统
 
@@ -188,25 +194,25 @@ sudo apt-get install qemu qemu-user qemu-user-static qemu-system-arm qemu-system
 
 ### 完整系统仿真
 
-像 [Firmadyne](https://github.com/firmadyne/firmadyne)、[Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit) 等工具，促进完整固件仿真，自动化过程并帮助动态分析。
+像 [Firmadyne](https://github.com/firmadyne/firmadyne)、[Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit) 等工具，促进了完整固件仿真，自动化了过程并帮助进行动态分析。
 
 ## 实践中的动态分析
 
-在此阶段，使用真实或仿真的设备环境进行分析。保持对操作系统和文件系统的 shell 访问至关重要。仿真可能无法完美模拟硬件交互，因此需要偶尔重新启动仿真。分析应重新访问文件系统，利用暴露的网页和网络服务，并探索引导加载程序漏洞。固件完整性测试对于识别潜在后门漏洞至关重要。
+在这个阶段，使用真实或仿真的设备环境进行分析。保持对操作系统和文件系统的 shell 访问是至关重要的。仿真可能无法完美模拟硬件交互，因此需要偶尔重新启动仿真。分析应重新访问文件系统，利用暴露的网页和网络服务，并探索引导加载程序漏洞。固件完整性测试对于识别潜在后门漏洞至关重要。
 
 ## 运行时分析技术
 
-运行时分析涉及在其操作环境中与进程或二进制文件交互，使用 gdb-multiarch、Frida 和 Ghidra 等工具设置断点，并通过模糊测试和其他技术识别漏洞。
+运行时分析涉及在其操作环境中与进程或二进制文件交互，使用工具如 gdb-multiarch、Frida 和 Ghidra 设置断点，并通过模糊测试和其他技术识别漏洞。
 
 ## 二进制利用和概念验证
 
-为识别的漏洞开发 PoC 需要对目标架构和低级语言编程有深入理解。嵌入式系统中的二进制运行时保护很少见，但如果存在，可能需要使用如返回导向编程（ROP）等技术。
+为识别的漏洞开发 PoC 需要对目标架构和低级语言编程有深入理解。嵌入式系统中的二进制运行时保护很少见，但在存在时，可能需要使用如返回导向编程（ROP）等技术。
 
 ## 准备好的操作系统用于固件分析
 
-像 [AttifyOS](https://github.com/adi0x90/attifyos) 和 [EmbedOS](https://github.com/scriptingxss/EmbedOS) 这样的操作系统提供预配置的固件安全测试环境，配备必要的工具。
+操作系统如 [AttifyOS](https://github.com/adi0x90/attifyos) 和 [EmbedOS](https://github.com/scriptingxss/EmbedOS) 提供了预配置的固件安全测试环境，配备必要的工具。
 
-## 准备好的操作系统分析固件
+## 准备好的操作系统用于分析固件
 
 - [**AttifyOS**](https://github.com/adi0x90/attifyos)：AttifyOS 是一个旨在帮助您对物联网（IoT）设备进行安全评估和渗透测试的发行版。它通过提供一个预配置的环境，加载所有必要的工具，节省了您大量时间。
 - [**EmbedOS**](https://github.com/scriptingxss/EmbedOS)：基于 Ubuntu 18.04 的嵌入式安全测试操作系统，预装固件安全测试工具。
