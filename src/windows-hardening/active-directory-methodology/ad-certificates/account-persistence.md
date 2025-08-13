@@ -38,8 +38,19 @@ Questo accesso consente all'attaccante di autenticarsi a **Kerberos** come accou
 
 ## **Estensione della Persistenza Tramite Rinnovo del Certificato - PERSIST3**
 
-Il metodo finale discusso implica l'utilizzo della **validità** e dei **periodi di rinnovo** dei modelli di certificato. Rinnovando un certificato prima della sua scadenza, un attaccante può mantenere l'autenticazione ad Active Directory senza la necessità di ulteriori registrazioni di ticket, che potrebbero lasciare tracce sul server dell'Autorità di Certificazione (CA).
+Il metodo finale discusso implica l'utilizzo della **validità** e dei **periodi di rinnovo** dei modelli di certificato. Rinnovando un certificato prima della sua scadenza, un attaccante può mantenere l'autenticazione ad Active Directory senza la necessità di ulteriori iscrizioni ai ticket, che potrebbero lasciare tracce sul server dell'Autorità di Certificazione (CA).
 
-Questo approccio consente un metodo di **persistenza estesa**, riducendo il rischio di rilevamento attraverso interazioni minori con il server CA e evitando la generazione di artefatti che potrebbero allertare gli amministratori sull'intrusione.
+### Rinnovo del Certificato con Certify 2.0
+
+A partire da **Certify 2.0**, il flusso di lavoro per il rinnovo è completamente automatizzato tramite il nuovo comando `request-renew`. Dato un certificato precedentemente emesso (in formato **base-64 PKCS#12**), un attaccante può rinnovarlo senza interagire con il proprietario originale – perfetto per una persistenza furtiva e a lungo termine:
+```powershell
+Certify.exe request-renew --ca SERVER\\CA-NAME \
+--cert-pfx MIACAQMwgAYJKoZIhvcNAQcBoIAkgA...   # original PFX
+```
+Il comando restituirà un nuovo PFX valido per un altro periodo di vita completo, consentendoti di continuare ad autenticarti anche dopo che il primo certificato è scaduto o è stato revocato.
+
+## Riferimenti
+
+- [Certify 2.0 – SpecterOps Blog](https://specterops.io/blog/2025/08/11/certify-2-0/)
 
 {{#include ../../../banners/hacktricks-training.md}}
