@@ -44,11 +44,11 @@ Ne zaboravite da **dajte zvezdicu na Github projektima!**
 >
 > - **Mogu li kopirati neki sadržaj iz HackTricks i staviti ga na svoj blog?**
 
-Da, možete, ali **ne zaboravite da navedete specifičan link(ove)** sa kojih je sadržaj preuzet.
+Da, možete, ali **ne zaboravite da pomenete specifični link(ove)** sa kojih je sadržaj preuzet.
 
 > [!TIP]
 >
-> - **Kako mogu citirati stranicu HackTricks?**
+> - **Kako mogu  stranicu HackTricks?**
 
 Sve dok se link **stranice** sa koje ste uzeli informacije pojavljuje, to je dovoljno.\
 Ako vam je potreban bibtex, možete koristiti nešto poput:
@@ -76,7 +76,7 @@ Prva **HackTricks** **vrednost** je da ponudi **BESPLATNE** obrazovne resurse za
 
 Ako mislite da su HackTricks knjige napravljene za **komercijalne svrhe**, **POTPUNO STE U GREŠCI**.
 
-Imamo sponzore jer, iako je sav sadržaj BESPLATAN, želimo da **ponudimo zajednici mogućnost da ceni naš rad** ako to žele. Stoga, nudimo ljudima opciju da doniraju HackTricks putem [**Github sponzora**](https://github.com/sponsors/carlospolop), i **relevantnim kompanijama za sajber bezbednost** da sponzorišu HackTricks i da **imaju neke oglase** u knjizi, pri čemu su **oglasi** uvek postavljeni na mestima gde ih čine **vidljivim**, ali **ne ometaju proces učenja** ako se neko fokusira na sadržaj.
+Imamo sponzore jer, iako je sav sadržaj BESPLATAN, želimo da **ponudimo zajednici mogućnost da ceni naš rad** ako to žele. Stoga, nudimo ljudima opciju da doniraju HackTricks putem [**Github sponzora**](https://github.com/sponsors/carlospolop), i **relevantne kompanije za sajber bezbednost** da sponzorišu HackTricks i da **imaju neke oglase** u knjizi, pri čemu su **oglasi** uvek postavljeni na mestima gde ih čine **vidljivim**, ali **ne ometaju proces učenja** ako se neko fokusira na sadržaj.
 
 Nećete naći HackTricks ispunjen dosadnim oglasima kao druge blogove sa mnogo manje sadržaja od HackTricks, jer HackTricks nije napravljen za komercijalne svrhe.
 
@@ -84,7 +84,7 @@ Nećete naći HackTricks ispunjen dosadnim oglasima kao druge blogove sa mnogo m
 >
 > - **Šta da radim ako neka HackTricks stranica se zasniva na mom blog postu, ali nije referencirana?**
 
-**Veoma nam je žao. Ovo se nije smelo desiti**. Molimo vas, javite nam putem Github problema, Twitter-a, Discord-a... link HackTricks stranice sa sadržajem i link vašeg bloga i **proverićemo to i dodati ASAP**.
+**Veoma nam je žao. Ovo se nije smelo desiti**. Molimo vas, javite nam putem Github issues, Twitter-a, Discord-a... link HackTricks stranice sa sadržajem i link vašeg bloga i **proverićemo to i dodati ASAP**.
 
 > [!CAUTION]
 >
@@ -112,7 +112,7 @@ Copyright © Sva prava zadržana osim ako nije drugačije navedeno.
 
 - Attribution: Slobodni ste da:
 - Share — kopirate i redistribuirate materijal u bilo kom mediju ili formatu.
-- Adapt — remiksujete, transformišete i gradite na materijalu.
+- Adapt — remiksirate, transformišete i gradite na materijalu.
 
 #### Additional Terms:
 
@@ -130,13 +130,13 @@ Ova licenca ne dodeljuje nikakva prava na zaštitni znak ili brendiranje u vezi 
 ## **Disclaimer**
 
 > [!CAUTION]
-> Ova knjiga, 'HackTricks,' je namenjena isključivo obrazovnim i informativnim svrhama. Sadržaj unutar ove knjige je dostupan na osnovu 'kako jeste', i autori i izdavači ne daju nikakve izjave ili garancije bilo koje vrste, izričite ili implicirane, o potpunosti, tačnosti, pouzdanosti, pogodnosti ili dostupnosti informacija, proizvoda, usluga ili povezanih grafika sadržanih unutar ove knjige. Svako oslanjanje na takve informacije je stoga strogo na vaš sopstveni rizik.
+> Ova knjiga, 'HackTricks,' je namenjena isključivo obrazovnim i informativnim svrhama. Sadržaj unutar ove knjige je dostupan na 'kako jeste' osnovi, a autori i izdavači ne daju nikakve izjave ili garancije bilo koje vrste, izričite ili implicirane, o potpunosti, tačnosti, pouzdanosti, pogodnosti ili dostupnosti informacija, proizvoda, usluga ili povezanih grafika sadržanih unutar ove knjige. Svako oslanjanje na takve informacije je stoga strogo na vaš sopstveni rizik.
 >
 > Autori i izdavači u nijednom slučaju neće biti odgovorni za bilo kakav gubitak ili štetu, uključujući, bez ograničenja, indirektne ili posledične gubitke ili štete, ili bilo kakav gubitak ili štetu koja proizađe iz gubitka podataka ili profita koji proizađu iz, ili u vezi sa, korišćenjem ove knjige.
 >
-> Štaviše, tehnike i saveti opisani u ovoj knjizi su pruženi isključivo u obrazovne i informativne svrhe, i ne bi trebali biti korišćeni za bilo kakve ilegalne ili zlonamerne aktivnosti. Autori i izdavači ne odobravaju niti podržavaju bilo kakve ilegalne ili neetičke aktivnosti, i svaka upotreba informacija sadržanih unutar ove knjige je na korisnikov sopstveni rizik i diskreciju.
+> Štaviše, tehnike i saveti opisani u ovoj knjizi su pruženi isključivo u obrazovne i informativne svrhe i ne bi trebali biti korišćeni za bilo kakve ilegalne ili zlonamerne aktivnosti. Autori i izdavači ne odobravaju niti podržavaju bilo kakve ilegalne ili neetičke aktivnosti, a svaka upotreba informacija sadržanih unutar ove knjige je na korisnikov sopstveni rizik i diskreciju.
 >
-> Korisnik je isključivo odgovoran za bilo kakve radnje preduzete na osnovu informacija sadržanih unutar ove knjige, i uvek bi trebao potražiti profesionalni savet i pomoć prilikom pokušaja implementacije bilo koje od tehnika ili saveta opisanih ovde.
+> Korisnik je isključivo odgovoran za bilo kakve radnje preduzete na osnovu informacija sadržanih unutar ove knjige i uvek bi trebao potražiti profesionalni savet i pomoć prilikom pokušaja implementacije bilo koje od tehnika ili saveta opisanih ovde.
 >
 > Korišćenjem ove knjige, korisnik se slaže da oslobodi autore i izdavače od bilo kakve i svake odgovornosti za bilo kakve štete, gubitke ili povrede koje mogu proizaći iz korišćenja ove knjige ili bilo koje od informacija sadržanih u njoj.
 
