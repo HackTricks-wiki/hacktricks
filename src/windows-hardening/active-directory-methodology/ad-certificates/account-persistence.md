@@ -4,9 +4,9 @@
 
 **Este es un pequeño resumen de los capítulos de persistencia de máquina de la increíble investigación de [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)**
 
-## **Comprendiendo el robo de credenciales de usuario activas con certificados – PERSIST1**
+## **Entendiendo el robo de credenciales de usuario activas con certificados – PERSIST1**
 
-En un escenario donde un usuario puede solicitar un certificado que permite la autenticación de dominio, un atacante tiene la oportunidad de **solicitar** y **robar** este certificado para **mantener persistencia** en una red. Por defecto, la plantilla `User` en Active Directory permite tales solicitudes, aunque a veces puede estar deshabilitada.
+En un escenario donde un certificado que permite la autenticación de dominio puede ser solicitado por un usuario, un atacante tiene la oportunidad de **solicitar** y **robar** este certificado para **mantener persistencia** en una red. Por defecto, la plantilla `User` en Active Directory permite tales solicitudes, aunque a veces puede estar deshabilitada.
 
 Usando una herramienta llamada [**Certify**](https://github.com/GhostPack/Certify), se puede buscar certificados válidos que habiliten el acceso persistente:
 ```bash
@@ -26,11 +26,11 @@ El archivo `.pfx` puede ser subido a un sistema objetivo y utilizado con una her
 ```bash
 Rubeus.exe asktgt /user:harmj0y /certificate:C:\Temp\cert.pfx /password:CertPass!
 ```
-Una advertencia importante se comparte sobre cómo esta técnica, combinada con otro método descrito en la sección **THEFT5**, permite a un atacante obtener de manera persistente el **hash NTLM** de una cuenta sin interactuar con el Local Security Authority Subsystem Service (LSASS), y desde un contexto no elevado, proporcionando un método más sigiloso para el robo de credenciales a largo plazo.
+Una advertencia importante se comparte sobre cómo esta técnica, combinada con otro método descrito en la sección **THEFT5**, permite a un atacante obtener de manera persistente el **hash NTLM** de una cuenta sin interactuar con el Servicio de Subsistema de Seguridad Local (LSASS), y desde un contexto no elevado, proporcionando un método más sigiloso para el robo de credenciales a largo plazo.
 
-## **Gaining Machine Persistence with Certificates - PERSIST2**
+## **Ganar Persistencia de Máquina con Certificados - PERSIST2**
 
-Otro método implica inscribir la cuenta de máquina de un sistema comprometido para un certificado, utilizando la plantilla predeterminada `Machine` que permite tales acciones. Si un atacante obtiene privilegios elevados en un sistema, puede usar la cuenta **SYSTEM** para solicitar certificados, proporcionando una forma de **persistence**:
+Otro método implica inscribir la cuenta de máquina de un sistema comprometido para un certificado, utilizando la plantilla `Machine` predeterminada que permite tales acciones. Si un atacante obtiene privilegios elevados en un sistema, puede usar la cuenta **SYSTEM** para solicitar certificados, proporcionando una forma de **persistencia**:
 ```bash
 Certify.exe request /ca:dc.theshire.local/theshire-DC-CA /template:Machine /machine
 ```
@@ -40,6 +40,17 @@ Este acceso permite al atacante autenticarse en **Kerberos** como la cuenta de m
 
 El método final discutido implica aprovechar los **períodos de validez** y **renovación** de las plantillas de certificados. Al **renovar** un certificado antes de su expiración, un atacante puede mantener la autenticación en Active Directory sin necesidad de inscripciones adicionales de tickets, lo que podría dejar rastros en el servidor de la Autoridad de Certificación (CA).
 
-Este enfoque permite un método de **persistencia extendida**, minimizando el riesgo de detección a través de menos interacciones con el servidor CA y evitando la generación de artefactos que podrían alertar a los administradores sobre la intrusión.
+### Renovación de Certificados con Certify 2.0
+
+A partir de **Certify 2.0**, el flujo de trabajo de renovación está completamente automatizado a través del nuevo comando `request-renew`. Dado un certificado emitido previamente (en formato **base-64 PKCS#12**), un atacante puede renovarlo sin interactuar con el propietario original, lo que es perfecto para una persistencia sigilosa y a largo plazo:
+```powershell
+Certify.exe request-renew --ca SERVER\\CA-NAME \
+--cert-pfx MIACAQMwgAYJKoZIhvcNAQcBoIAkgA...   # original PFX
+```
+El comando devolverá un PFX nuevo que es válido por otro período completo de vida, lo que te permitirá seguir autenticándote incluso después de que el primer certificado expire o sea revocado.
+
+## Referencias
+
+- [Certify 2.0 – SpecterOps Blog](https://specterops.io/blog/2025/08/11/certify-2-0/)
 
 {{#include ../../../banners/hacktricks-training.md}}
