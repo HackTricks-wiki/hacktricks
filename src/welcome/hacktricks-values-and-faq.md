@@ -11,10 +11,10 @@
 >  - Hacking geht darum zu lernen, und Lernen sollte so kostenlos wie möglich sein.
 >  - Der Zweck dieses Buches ist es, als umfassende **Bildungsressource** zu dienen.
 > - **SPEICHERN** Sie großartige **Hacking** Techniken, die die Community veröffentlicht, und geben Sie den **URSPRÜNGLICHEN** **AUTOREN** alle **Credits**.
->  - **Wir wollen nicht den Kredit von anderen Menschen**, wir wollen nur coole Tricks für alle speichern.
+>  - **Wir wollen nicht die Anerkennung von anderen**, wir wollen nur coole Tricks für alle speichern.
 >  - Wir schreiben auch **unsere eigenen Forschungen** in HackTricks.
 >  - In mehreren Fällen werden wir einfach **in HackTricks eine Zusammenfassung der wichtigen Teile** der Technik schreiben und den **Leser ermutigen, den ursprünglichen Beitrag** für weitere Details zu besuchen.
-> - **ORGANISIEREN** Sie alle Hacking-Techniken im Buch, damit es **ZUGÄNGLICHER** ist.
+> - **ORGANISIEREN** Sie alle Hacking-Techniken im Buch, damit sie **ZUGÄNGLICHER** sind.
 >  - Das HackTricks-Team hat tausende von Stunden kostenlos damit verbracht, **nur den Inhalt zu organisieren**, damit die Leute **schneller lernen** können.
 
 <figure><img src="../images/hack tricks gif.gif" alt="" width="375"><figcaption></figcaption></figure>
@@ -48,7 +48,7 @@ Ja, das können Sie, aber **vergessen Sie nicht, die spezifischen Link(s)** zu e
 
 > [!TIP]
 >
-> - **Wie kann ich eine Seite von HackTricks zitieren?**
+> - **Wie kann ich eine Seite von HackTricks?**
 
 Solange der Link **der** Seite(n), von der Sie die Informationen entnommen haben, erscheint, ist das ausreichend.\
 Wenn Sie ein Bibtex benötigen, können Sie etwas verwenden wie:
@@ -76,7 +76,7 @@ Der erste **HackTricks** **Wert** ist es, **KOSTENLOSE** Bildungsressourcen für
 
 Wenn Sie denken, dass HackTricks-Bücher für **kommerzielle Zwecke** gemacht sind, liegen Sie **VÖLLIG FALSCH**.
 
-Wir haben Sponsoren, weil wir, auch wenn der gesamte Inhalt KOSTENLOS ist, der **Gemeinschaft die Möglichkeit bieten möchten, unsere Arbeit zu schätzen**, wenn sie möchten. Daher bieten wir den Menschen die Möglichkeit, HackTricks über [**Github-Sponsoren**](https://github.com/sponsors/carlospolop) zu unterstützen, und **relevante Cybersicherheitsunternehmen**, um HackTricks zu sponsern und **einige Anzeigen** im Buch zu haben, wobei die **Anzeigen** immer an Orten platziert werden, die sie **sichtbar** machen, aber den Lernprozess nicht stören, wenn sich jemand auf den Inhalt konzentriert.
+Wir haben Sponsoren, weil wir, auch wenn der gesamte Inhalt KOSTENLOS ist, der **Gemeinschaft die Möglichkeit bieten wollen, unsere Arbeit zu schätzen**, wenn sie möchten. Daher bieten wir den Menschen die Möglichkeit, HackTricks über [**Github-Sponsoren**](https://github.com/sponsors/carlospolop) zu unterstützen, und **relevante Cybersicherheitsunternehmen**, um HackTricks zu sponsern und **einige Anzeigen** im Buch zu haben, wobei die **Anzeigen** immer an Orten platziert werden, die sie **sichtbar** machen, aber den Lernprozess nicht stören, wenn sich jemand auf den Inhalt konzentriert.
 
 Sie werden HackTricks nicht mit nervigen Anzeigen gefüllt finden, wie andere Blogs mit viel weniger Inhalt als HackTricks, denn HackTricks ist nicht für kommerzielle Zwecke gemacht.
 
@@ -92,9 +92,9 @@ Sie werden HackTricks nicht mit nervigen Anzeigen gefüllt finden, wie andere Bl
 
 Beachten Sie, dass Links zu Ihrer Seite in HackTricks:
 
-- Ihre **SEO** verbessern
+- Ihr **SEO** verbessern
 - Der Inhalt wird **in mehr als 15 Sprachen übersetzt**, was es mehr Menschen ermöglicht, auf diesen Inhalt zuzugreifen
-- **HackTricks ermutigt** die Menschen, **Ihre Seite zu überprüfen** (mehrere Personen haben uns mitgeteilt, dass sie seitdem ihre Seite in HackTricks ist, mehr Besuche erhalten)
+- **HackTricks ermutigt** die Menschen, **Ihre Seite zu überprüfen** (mehrere Personen haben uns erwähnt, dass sie seitdem ihre Seite in HackTricks ist, mehr Besuche erhalten)
 
 Wenn Sie jedoch weiterhin möchten, dass der Inhalt Ihres Blogs aus HackTricks entfernt wird, lassen Sie es uns einfach wissen und wir werden definitiv **jeden Link zu Ihrem Blog** und jeden darauf basierenden Inhalt entfernen.
 
@@ -102,7 +102,7 @@ Wenn Sie jedoch weiterhin möchten, dass der Inhalt Ihres Blogs aus HackTricks e
 >
 > - **Was soll ich tun, wenn ich kopierte Inhalte in HackTricks finde?**
 
-Wir **geben immer den ursprünglichen Autoren alle Credits**. Wenn Sie eine Seite mit kopierten Inhalten ohne referenzierte Originalquelle finden, lassen Sie es uns wissen und wir werden entweder **es entfernen**, **den Link vor dem Text hinzufügen** oder **es umschreiben und den Link hinzufügen**.
+Wir **geben den ursprünglichen Autoren immer alle Credits**. Wenn Sie eine Seite mit kopierten Inhalten ohne referenzierte Originalquelle finden, lassen Sie es uns wissen und wir werden entweder **es entfernen**, **den Link vor dem Text hinzufügen** oder **es umschreiben und den Link hinzufügen**.
 
 ## LICENSE
 
