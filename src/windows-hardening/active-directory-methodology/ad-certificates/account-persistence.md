@@ -34,12 +34,23 @@ Une autre méthode consiste à inscrire le compte machine d'un système compromi
 ```bash
 Certify.exe request /ca:dc.theshire.local/theshire-DC-CA /template:Machine /machine
 ```
-Cet accès permet à l'attaquant de s'authentifier à **Kerberos** en tant que compte machine et d'utiliser **S4U2Self** pour obtenir des tickets de service Kerberos pour tout service sur l'hôte, accordant ainsi à l'attaquant un accès persistant à la machine.
+Cet accès permet à l'attaquant de s'authentifier à **Kerberos** en tant que compte machine et d'utiliser **S4U2Self** pour obtenir des tickets de service Kerberos pour n'importe quel service sur l'hôte, accordant ainsi à l'attaquant un accès persistant à la machine.
 
 ## **Étendre la persistance par le renouvellement de certificat - PERSIST3**
 
-La dernière méthode discutée implique de tirer parti de la **validité** et des **périodes de renouvellement** des modèles de certificat. En **renouvelant** un certificat avant son expiration, un attaquant peut maintenir l'authentification à Active Directory sans avoir besoin d'enrôlements de tickets supplémentaires, ce qui pourrait laisser des traces sur le serveur de l'Autorité de Certification (CA).
+La dernière méthode discutée implique l'exploitation des **périodes de validité** et de **renouvellement** des modèles de certificats. En **renouvelant** un certificat avant son expiration, un attaquant peut maintenir l'authentification à Active Directory sans avoir besoin d'enrôlements de tickets supplémentaires, ce qui pourrait laisser des traces sur le serveur de l'Autorité de Certification (CA).
 
-Cette approche permet une méthode de **persistance étendue**, minimisant le risque de détection grâce à moins d'interactions avec le serveur CA et évitant la génération d'artefacts qui pourraient alerter les administrateurs de l'intrusion.
+### Renouvellement de certificat avec Certify 2.0
+
+À partir de **Certify 2.0**, le flux de travail de renouvellement est entièrement automatisé grâce à la nouvelle commande `request-renew`. Étant donné un certificat précédemment émis (au format **base-64 PKCS#12**), un attaquant peut le renouveler sans interagir avec le propriétaire d'origine – parfait pour une persistance discrète et à long terme :
+```powershell
+Certify.exe request-renew --ca SERVER\\CA-NAME \
+--cert-pfx MIACAQMwgAYJKoZIhvcNAQcBoIAkgA...   # original PFX
+```
+La commande renverra un nouveau PFX qui est valide pour une autre période de vie complète, vous permettant de continuer à vous authentifier même après l'expiration ou la révocation du premier certificat.
+
+## Références
+
+- [Certify 2.0 – SpecterOps Blog](https://specterops.io/blog/2025/08/11/certify-2-0/)
 
 {{#include ../../../banners/hacktricks-training.md}}
