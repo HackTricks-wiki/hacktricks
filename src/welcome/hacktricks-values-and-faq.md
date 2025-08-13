@@ -44,7 +44,7 @@ Ne zaboravite da **dajte zvezdicu na Github projektima!**
 >
 > - **Mogu li kopirati neki sadržaj iz HackTricks i staviti ga na svoj blog?**
 
-Da, možete, ali **ne zaboravite da pomenete specifičan link(ove)** sa kojih je sadržaj preuzet.
+Da, možete, ali **ne zaboravite da navedete specifičan link(ove)** sa kojih je sadržaj preuzet.
 
 > [!TIP]
 >
@@ -84,7 +84,7 @@ Nećete naći HackTricks ispunjen dosadnim oglasima kao druge blogove sa mnogo m
 >
 > - **Šta da radim ako neka HackTricks stranica se zasniva na mom blog postu, ali nije referencirana?**
 
-**Veoma nam je žao. Ovo se nije smelo desiti**. Molimo vas, javite nam putem Github issues, Twitter-a, Discord-a... link HackTricks stranice sa sadržajem i link vašeg bloga i **proverićemo to i dodati ASAP**.
+**Veoma nam je žao. Ovo se nije smelo desiti**. Molimo vas, javite nam putem Github problema, Twitter-a, Discord-a... link HackTricks stranice sa sadržajem i link vašeg bloga i **proverićemo to i dodati ASAP**.
 
 > [!CAUTION]
 >
@@ -100,7 +100,7 @@ Međutim, ako i dalje želite da se sadržaj vašeg bloga ukloni iz HackTricks-a
 
 > [!CAUTION]
 >
-> - **Šta da radim ako pronađem kopirani sadržaj u HackTricks?**
+> - **Šta da radim ako pronađem sadržaj koji je kopiran u HackTricks?**
 
 Uvek **damo originalnim autorima sve zasluge**. Ako pronađete stranicu sa kopiranim sadržajem bez referencirane originalne izvora, javite nam i mi ćemo ili **ukloniti**, **dodati link pre teksta**, ili **prepisati dodajući link**.
 
