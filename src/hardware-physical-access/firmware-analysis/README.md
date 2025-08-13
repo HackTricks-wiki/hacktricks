@@ -2,13 +2,19 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## **Utangulizi**
+## **Introduction**
+
+### Related resources
+
+{{#ref}}
+synology-encrypted-archive-decryption.md
+{{#endref}}
 
 Firmware ni programu muhimu inayowezesha vifaa kufanya kazi ipasavyo kwa kusimamia na kuwezesha mawasiliano kati ya vipengele vya vifaa na programu ambayo watumiaji wanashirikiana nayo. Inahifadhiwa katika kumbukumbu ya kudumu, kuhakikisha kwamba kifaa kinaweza kufikia maagizo muhimu tangu wakati kinapowashwa, na kusababisha uzinduzi wa mfumo wa uendeshaji. Kuchunguza na labda kubadilisha firmware ni hatua muhimu katika kubaini udhaifu wa usalama.
 
-## **Kukusanya Taarifa**
+## **Gathering Information**
 
-**Kukusanya taarifa** ni hatua ya awali muhimu katika kuelewa muundo wa kifaa na teknolojia zinazotumika. Mchakato huu unahusisha kukusanya data kuhusu:
+**Kukusanya taarifa** ni hatua ya awali muhimu katika kuelewa muundo wa kifaa na teknolojia zinazotumiwa. Mchakato huu unahusisha kukusanya data kuhusu:
 
 - Mchoro wa CPU na mfumo wa uendeshaji unaotumia
 - Maelezo ya bootloader
@@ -19,27 +25,27 @@ Firmware ni programu muhimu inayowezesha vifaa kufanya kazi ipasavyo kwa kusimam
 - Mchoro wa usanifu na michoro ya mtiririko
 - Tathmini za usalama na udhaifu ulioainishwa
 
-Kwa kusudi hili, zana za **open-source intelligence (OSINT)** ni muhimu, kama vile uchambuzi wa vipengele vyovyote vya programu za chanzo wazi vinavyopatikana kupitia mchakato wa ukaguzi wa mikono na wa kiotomatiki. Zana kama [Coverity Scan](https://scan.coverity.com) na [Semmle’s LGTM](https://lgtm.com/#explore) hutoa uchambuzi wa statiki bure ambao unaweza kutumika kugundua matatizo yanayoweza kutokea.
+Kwa kusudi hili, zana za **open-source intelligence (OSINT)** ni muhimu, kama vile uchambuzi wa vipengele vyovyote vya programu za chanzo wazi vinavyopatikana kupitia michakato ya ukaguzi wa mikono na otomatiki. Zana kama [Coverity Scan](https://scan.coverity.com) na [Semmle’s LGTM](https://lgtm.com/#explore) hutoa uchambuzi wa statiki bure ambao unaweza kutumika kugundua matatizo yanayoweza kutokea.
 
-## **Kupata Firmware**
+## **Acquiring the Firmware**
 
 Kupata firmware kunaweza kufanywa kwa njia mbalimbali, kila moja ikiwa na ngazi yake ya ugumu:
 
-- **Moja kwa moja** kutoka kwa chanzo (waendelezaji, watengenezaji)
+- **Moja kwa moja** kutoka kwa chanzo (wabunifu, watengenezaji)
 - **Kujenga** kutoka kwa maelekezo yaliyotolewa
 - **Kupakua** kutoka kwenye tovuti rasmi za msaada
 - Kutumia **Google dork** maswali ya kutafuta faili za firmware zilizohifadhiwa
 - Kufikia **hifadhi ya wingu** moja kwa moja, kwa kutumia zana kama [S3Scanner](https://github.com/sa7mon/S3Scanner)
 - Kukamata **sasisho** kupitia mbinu za mtu katikati
-- **Kutoa** kutoka kwa kifaa kupitia viunganisho kama **UART**, **JTAG**, au **PICit**
-- **Kusikiliza** maombi ya sasisho ndani ya mawasiliano ya kifaa
-- Kutambua na kutumia **nukta za sasisho zilizowekwa**
-- **Kutoa** kutoka kwa bootloader au mtandao
-- **Kuondoa na kusoma** chip ya uhifadhi, wakati njia zote zinafeli, kwa kutumia zana sahihi za vifaa
+- **Kutoa** kutoka kwa kifaa kupitia muunganisho kama **UART**, **JTAG**, au **PICit**
+- **Sniffing** kwa maombi ya sasisho ndani ya mawasiliano ya kifaa
+- Kutambua na kutumia **mipango ya sasisho iliyowekwa**
+- **Dumping** kutoka kwa bootloader au mtandao
+- **Kuondoa na kusoma** chip ya hifadhi, wakati kila kitu kingine kinashindwa, kwa kutumia zana sahihi za vifaa
 
-## Kuchambua firmware
+## Analyzing the firmware
 
-Sasa kwamba **una firmware**, unahitaji kutoa taarifa kuhusu hiyo ili kujua jinsi ya kuitendea. Zana tofauti unazoweza kutumia kwa hiyo:
+Sasa kwamba una **firmware**, unahitaji kutoa taarifa kuhusu hiyo ili kujua jinsi ya kuitendea. Zana tofauti unazoweza kutumia kwa hilo:
 ```bash
 file <bin>
 strings -n8 <bin>
@@ -48,7 +54,7 @@ hexdump -C -n 512 <bin> > hexdump.out
 hexdump -C <bin> | head # might find signatures in header
 fdisk -lu <bin> #lists a drives partition and filesystems if multiple
 ```
-Ikiwa hujapata mengi na zana hizo, angalia **entropy** ya picha kwa kutumia `binwalk -E <bin>`, ikiwa entropy ni ya chini, basi haiwezekani kuwa imefungwa. Ikiwa entropy ni ya juu, inawezekana imefungwa (au imepandwa kwa njia fulani).
+Ikiwa hujapata mengi na zana hizo angalia **entropy** ya picha kwa kutumia `binwalk -E <bin>`, ikiwa entropy ni ya chini, basi haiwezekani kuwa imefungwa. Ikiwa entropy ni ya juu, inawezekana imefungwa (au imepandwa kwa njia fulani).
 
 Zaidi ya hayo, unaweza kutumia zana hizi kutoa **faili zilizojumuishwa ndani ya firmware**:
 
@@ -61,11 +67,11 @@ Au [**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/archive
 ### Kupata Mfumo wa Faili
 
 Kwa zana zilizotajwa hapo awali kama `binwalk -ev <bin>` unapaswa kuwa umeweza **kutoa mfumo wa faili**.\
-Binwalk kawaida hutoa ndani ya **folda iliyo na jina la aina ya mfumo wa faili**, ambayo mara nyingi ni moja ya zifuatazo: squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
+Binwalk kawaida hutoa ndani ya **folda iliyopewa jina kama aina ya mfumo wa faili**, ambayo mara nyingi ni mojawapo ya yafuatayo: squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
 
 #### Utoaji wa Mfumo wa Faili kwa Mikono
 
-Wakati mwingine, binwalk haitakuwa na byte ya kichawi ya mfumo wa faili katika saini zake. Katika kesi hizi, tumia binwalk ili **kupata offset ya mfumo wa faili na kuchonga mfumo wa faili ulio pandwa** kutoka kwa binary na **kutoa kwa mikono** mfumo wa faili kulingana na aina yake kwa kutumia hatua zilizo hapa chini.
+Wakati mwingine, binwalk **haitakuwa na byte ya kichawi ya mfumo wa faili katika saini zake**. Katika kesi hizi, tumia binwalk ili **kupata offset ya mfumo wa faili na kuchonga mfumo wa faili ulio pandwa** kutoka kwa binary na **kutoa kwa mikono** mfumo wa faili kulingana na aina yake kwa kutumia hatua zilizo hapa chini.
 ```
 $ binwalk DIR850L_REVB.bin
 
@@ -142,7 +148,7 @@ Baada ya hapo, kulingana na aina ya mfumo wa faili (kwa mfano, squashfs, cpio, j
 
 ### Uchambuzi wa Mfumo wa Faili
 
-Mara mfumo wa faili unapotolewa, utafutaji wa kasoro za usalama huanza. Kipaumbele kinatolewa kwa daemons za mtandao zisizo salama, akidi za siri zilizowekwa kwa nguvu, mwisho wa API, kazi za seva za sasisho, msimbo usio na muundo, skripti za kuanzisha, na binaries zilizokusanywa kwa uchambuzi wa mbali.
+Mara mfumo wa faili umepatikana, utafutaji wa kasoro za usalama huanza. Kipaumbele kinatolewa kwa daemons za mtandao zisizo salama, akidi za siri zilizowekwa kwa nguvu, mwisho wa API, kazi za seva za sasisho, msimbo usio na muundo, skripti za kuanzisha, na binaries zilizokusanywa kwa uchambuzi wa mbali.
 
 **Mikoa muhimu** na **vitu** vya kukagua ni pamoja na:
 
@@ -160,11 +166,11 @@ Zana kadhaa zinasaidia katika kufichua taarifa nyeti na udhaifu ndani ya mfumo w
 
 ### Ukaguzi wa Usalama kwenye Binaries Zilizokusanywa
 
-Msimbo wa chanzo na binaries zilizokusanywa zinazopatikana katika mfumo wa faili zinapaswa kuchunguzwa kwa udhaifu. Zana kama **checksec.sh** kwa binaries za Unix na **PESecurity** kwa binaries za Windows husaidia kubaini binaries zisizo na ulinzi ambazo zinaweza kutumiwa.
+Msimbo wa chanzo na binaries zilizokusanywa zinazopatikana katika mfumo wa faili zinapaswa kuchunguzwa kwa udhaifu. Zana kama **checksec.sh** kwa binaries za Unix na **PESecurity** kwa binaries za Windows husaidia kubaini binaries zisizo na ulinzi ambazo zinaweza kutumika.
 
 ## Kuiga Firmware kwa Uchambuzi wa Dinamik
 
-Mchakato wa kuiga firmware unaruhusu **uchambuzi wa dinamik** ama wa uendeshaji wa kifaa au programu binafsi. Njia hii inaweza kukutana na changamoto za utegemezi wa vifaa au usanifu, lakini kuhamasisha mfumo wa faili wa mzizi au binaries maalum kwa kifaa chenye usanifu na endianness inayolingana, kama vile Raspberry Pi, au kwa mashine halisi iliyojengwa awali, kunaweza kuwezesha majaribio zaidi.
+Mchakato wa kuiga firmware unaruhusu **uchambuzi wa dinamik** ama wa uendeshaji wa kifaa au programu binafsi. Njia hii inaweza kukutana na changamoto za utegemezi wa vifaa au usanifu, lakini kuhamasisha mfumo wa faili wa mzizi au binaries maalum kwa kifaa chenye usanifu na endianness inayolingana, kama vile Raspberry Pi, au kwa mashine halisi iliyojengwa mapema, kunaweza kuwezesha majaribio zaidi.
 
 ### Kuiga Binaries Binafsi
 
@@ -184,48 +190,48 @@ Kwa MIPS (big-endian), `qemu-mips` inatumika, na kwa binaries za little-endian, 
 
 #### Uigaji wa Muktadha wa ARM
 
-Kwa binaries za ARM, mchakato ni sawa, na emulator `qemu-arm` inatumika kwa uigaji.
+Kwa binaries za ARM, mchakato ni sawa, huku emulator ya `qemu-arm` ikitumika kwa uigaji.
 
 ### Uigaji wa Mfumo Kamili
 
-Zana kama [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit), na zingine, zinawezesha uigaji kamili wa firmware, zikifanya mchakato kuwa wa kiotomatiki na kusaidia katika uchambuzi wa dynamic.
+Zana kama [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit), na nyingine, zinawezesha uigaji kamili wa firmware, zikifanya mchakato kuwa wa kiotomatiki na kusaidia katika uchambuzi wa dynamic.
 
 ## Uchambuzi wa Dynamic katika Vitendo
 
-Katika hatua hii, mazingira halisi au ya uigaji ya kifaa hutumika kwa uchambuzi. Ni muhimu kudumisha ufikiaji wa shell kwa OS na mfumo wa faili. Uigaji huenda usifanane kikamilifu na mwingiliano wa vifaa, hivyo inahitajika mara kwa mara kuanzisha upya uigaji. Uchambuzi unapaswa kutembelea mfumo wa faili, kutumia tovuti zilizofichuliwa na huduma za mtandao, na kuchunguza udhaifu wa bootloader. Majaribio ya uaminifu wa firmware ni muhimu ili kubaini udhaifu wa backdoor unaoweza kuwepo.
+Katika hatua hii, mazingira halisi au ya uigaji ya kifaa hutumika kwa uchambuzi. Ni muhimu kudumisha ufikiaji wa shell kwa OS na filesystem. Uigaji huenda usifanane kikamilifu na mwingiliano wa vifaa, hivyo inahitajika mara kwa mara kuanzisha upya uigaji. Uchambuzi unapaswa kutembelea filesystem, kutumia kurasa za wavuti zilizofichuliwa na huduma za mtandao, na kuchunguza udhaifu wa bootloader. Majaribio ya uadilifu wa firmware ni muhimu ili kubaini udhaifu wa backdoor unaoweza kuwepo.
 
-## Mbinu za Uchambuzi wa Wakati
+## Mbinu za Uchambuzi wa Wakati wa Uendeshaji
 
-Uchambuzi wa wakati unahusisha kuingiliana na mchakato au binary katika mazingira yake ya uendeshaji, kwa kutumia zana kama gdb-multiarch, Frida, na Ghidra kwa kuweka breakpoints na kubaini udhaifu kupitia fuzzing na mbinu nyingine.
+Uchambuzi wa wakati wa uendeshaji unahusisha kuingiliana na mchakato au binary katika mazingira yake ya uendeshaji, kwa kutumia zana kama gdb-multiarch, Frida, na Ghidra kwa kuweka breakpoints na kubaini udhaifu kupitia fuzzing na mbinu nyingine.
 
 ## Ukatili wa Binary na Ushahidi wa Dhihirisho
 
-Kuendeleza PoC kwa udhaifu ulioainishwa kunahitaji uelewa wa kina wa usanifu wa lengo na programu katika lugha za kiwango cha chini. Ulinzi wa wakati wa binary katika mifumo iliyojumuishwa ni nadra, lakini inapokuwepo, mbinu kama Return Oriented Programming (ROP) zinaweza kuwa muhimu.
+Kuendeleza PoC kwa udhaifu ulioainishwa kunahitaji uelewa wa kina wa usanifu wa lengo na programu katika lugha za kiwango cha chini. Ulinzi wa wakati wa uendeshaji wa binary katika mifumo iliyojumuishwa ni nadra, lakini inapokuwepo, mbinu kama Return Oriented Programming (ROP) zinaweza kuwa muhimu.
 
 ## Mifumo ya Uendeshaji Iliyoandaliwa kwa Uchambuzi wa Firmware
 
-Mifumo ya uendeshaji kama [AttifyOS](https://github.com/adi0x90/attifyos) na [EmbedOS](https://github.com/scriptingxss/EmbedOS) hutoa mazingira yaliyoandaliwa mapema kwa ajili ya mtihani wa usalama wa firmware, ikiwa na zana muhimu.
+Mifumo ya uendeshaji kama [AttifyOS](https://github.com/adi0x90/attifyos) na [EmbedOS](https://github.com/scriptingxss/EmbedOS) hutoa mazingira yaliyoandaliwa mapema kwa ajili ya mtihani wa usalama wa firmware, yakiwa na zana muhimu.
 
-## Mifumo ya Uendeshaji Iliyoandaliwa kuchambua Firmware
+## Mifumo ya Uendeshaji Iliyoandaliwa Kuchambua Firmware
 
-- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS ni distro inayokusudia kukusaidia kufanya tathmini ya usalama na mtihani wa penetration wa vifaa vya Internet of Things (IoT). Inakuokoa muda mwingi kwa kutoa mazingira yaliyoandaliwa mapema na zana zote muhimu.
+- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS ni distro inayokusudiwa kukusaidia kufanya tathmini ya usalama na mtihani wa penetration wa vifaa vya Internet of Things (IoT). Inakuokoa muda mwingi kwa kutoa mazingira yaliyoandaliwa mapema na zana zote muhimu.
 - [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Mfumo wa uendeshaji wa mtihani wa usalama wa embedded unaotegemea Ubuntu 18.04 uliojaa zana za mtihani wa usalama wa firmware.
 
 ## Mashambulizi ya Kupunguza Firmware na Mechanisms za Sasisho zisizo Salama
 
 Hata wakati muuzaji anatekeleza ukaguzi wa saini za cryptographic kwa picha za firmware, **ulinzi wa kurudi nyuma (downgrade) mara nyingi haujajumuishwa**. Wakati boot- au recovery-loader inathibitisha tu saini na funguo za umma zilizojumuishwa lakini hailinganishe *toleo* (au counter monotonic) ya picha inayowekwa, mshambuliaji anaweza halali kufunga **firmware ya zamani, yenye udhaifu ambayo bado ina saini halali** na hivyo kuanzisha tena udhaifu uliofanyiwa marekebisho.
 
-Mchakato wa kawaida wa shambulio:
+Mchakato wa shambulizi wa kawaida:
 
 1. **Pata picha ya zamani iliyosainiwa**
 * Iteue kutoka kwenye portal ya umma ya kupakua ya muuzaji, CDN au tovuti ya msaada.
 * Iondoe kutoka kwa programu za simu/kompyuta za mezani (kwa mfano ndani ya APK ya Android chini ya `assets/firmware/`).
 * Irejeshe kutoka kwa hifadhi za wahusika wengine kama VirusTotal, archives za mtandao, forums, nk.
-2. **Pakia au tolea picha hiyo kwa kifaa** kupitia njia yoyote ya sasisho iliyofichuliwa:
+2. **Pakia au tolea picha kwa kifaa** kupitia njia yoyote ya sasisho iliyofichuliwa:
 * Web UI, API ya programu ya simu, USB, TFTP, MQTT, nk.
 * Vifaa vingi vya IoT vya watumiaji vinatoa *michakato isiyoidhinishwa* ya HTTP(S) ambayo inakubali blobs za firmware zilizowekwa Base64, kuzifungua upande wa seva na kuanzisha urejeleaji/kuinua.
 3. Baada ya kupunguza, tumia udhaifu ambao ulifanyiwa marekebisho katika toleo jipya (kwa mfano, chujio cha kuingiza amri ambacho kiliongezwa baadaye).
-4. Kwa hiari flash picha ya hivi karibuni tena au zima sasisho ili kuepuka kugundulika mara tu uvumilivu umepatikana.
+4. Kwa hiari flash picha ya hivi karibuni tena au zima sasisho ili kuepuka kugunduliwa mara tu uvumilivu unapatikana.
 
 ### Mfano: Kuingiza Amri Baada ya Kupunguza
 ```http
@@ -234,11 +240,11 @@ Host: 192.168.0.1
 Content-Type: application/octet-stream
 Content-Length: 0
 ```
-Katika firmware iliyo hatarini (iliyoshushwa), parameter ya `md5` imeunganishwa moja kwa moja katika amri ya shell bila kusafishwa, ikiruhusu kuingiza amri za kiholela (hapa – kuwezesha ufikiaji wa mizizi kwa kutumia funguo za SSH). Toleo la baadaye la firmware lilileta chujio cha wahusika wa msingi, lakini ukosefu wa ulinzi wa kushusha unafanya marekebisho kuwa yasiyo na maana.
+Katika firmware iliyo hatarini (iliyoshushwa), parameter ya `md5` imeunganishwa moja kwa moja katika amri ya shell bila kusafishwa, ikiruhusu kuingiza amri zisizo na mipaka (hapa – kuwezesha ufikiaji wa mizizi kwa kutumia funguo za SSH). Toleo la baadaye la firmware lilileta chujio cha wahusika wa msingi, lakini ukosefu wa ulinzi wa kushusha unafanya marekebisho kuwa yasiyo na maana.
 
 ### Kutolewa kwa Firmware Kutoka kwa Programu za Simu
 
-Wauzaji wengi hujumuisha picha kamili za firmware ndani ya programu zao za simu za washirika ili programu iweze kusasisha kifaa kupitia Bluetooth/Wi-Fi. Paket hizi mara nyingi huhifadhiwa bila usimbaji katika APK/APEX chini ya njia kama `assets/fw/` au `res/raw/`. Zana kama `apktool`, `ghidra`, au hata `unzip` rahisi zinakuwezesha kutoa picha zilizotiwa saini bila kugusa vifaa vya kimwili.
+Wauzaji wengi hujumuisha picha kamili za firmware ndani ya programu zao za simu za washirika ili programu iweze kusasisha kifaa kupitia Bluetooth/Wi-Fi. Paket hizi kwa kawaida huhifadhiwa bila usimbaji katika APK/APEX chini ya njia kama `assets/fw/` au `res/raw/`. Zana kama `apktool`, `ghidra`, au hata `unzip` rahisi zinakuruhusu kutoa picha zilizotiwa saini bila kugusa vifaa vya kimwili.
 ```
 $ apktool d vendor-app.apk -o vendor-app
 $ ls vendor-app/assets/firmware
@@ -246,17 +252,17 @@ firmware_v1.3.11.490_signed.bin
 ```
 ### Orodha ya Kuangalia Mantiki ya Sasisho
 
-* Je, usafiri/uidhinishaji wa *kituo cha sasisho* umehifadhiwa ipasavyo (TLS + uidhinishaji)?
-* Je, kifaa kinalinganisha **nambari za toleo** au **kikadiriaji cha kupunguza nyuma kisichobadilika** kabla ya kuandika?
+* Je, usafirishaji/uidhinishaji wa *kituo cha sasisho* umehifadhiwa ipasavyo (TLS + uidhinishaji)?
+* Je, kifaa kinalinganisha **nambari za toleo** au **kikadiriaji cha kupunguza kurudi nyuma** kabla ya kuchoma?
 * Je, picha inathibitishwa ndani ya mnyororo wa kuanza salama (kwa mfano, saini zinakaguliwa na msimbo wa ROM)?
 * Je, msimbo wa userland unafanya ukaguzi wa ziada wa akili (kwa mfano, ramani ya sehemu inayoruhusiwa, nambari ya mfano)?
-* Je, *mchakato wa sehemu* au *hifadhi* wa sasisho unatumia mantiki ile ile ya uthibitishaji?
+* Je, *mchakato wa* sasisho *ya sehemu* au *ya akiba* unatumia mantiki ile ile ya uthibitishaji?
 
 > 💡  Ikiwa yoyote kati ya hapo juu inakosekana, jukwaa linaweza kuwa hatarini kwa mashambulizi ya kurudi nyuma.
 
 ## Firmware yenye Uhatari ya Kufanya Mazoezi
 
-Ili kufanya mazoezi ya kugundua udhaifu katika firmware, tumia miradi ifuatayo ya firmware yenye uhatari kama hatua ya mwanzo.
+Ili kufanya mazoezi ya kugundua udhaifu katika firmware, tumia miradi ifuatayo ya firmware yenye uhatari kama hatua ya kuanzia.
 
 - OWASP IoTGoat
 - [https://github.com/OWASP/IoTGoat](https://github.com/OWASP/IoTGoat)
