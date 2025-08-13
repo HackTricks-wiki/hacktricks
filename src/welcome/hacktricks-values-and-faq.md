@@ -10,10 +10,10 @@
 > - Gee **VRYE** toegang tot **OPVOEDKUNDIGE hacking** hulpbronne aan **AL** die Internet.
 >  - Hacking gaan oor leer, en leer moet so vry as moontlik wees.
 >  - Die doel van hierdie boek is om as 'n omvattende **opvoedkundige hulpbron** te dien.
-> - **BLAAS** wonderlike **hacking** tegnieke wat die gemeenskap publiseer en gee die **ORIGINELE** **SKRYWERS** al die **krediete**.
->  - **Ons wil nie die krediet van ander mense hê**, ons wil net cool truuks stoor vir almal.
+> - **BLAAS** wonderlike **hacking** tegnieke wat die gemeenskap publiseer, terwyl die **ORIGINELE** **SKRYWERS** al die **krediete** ontvang.
+>  - **Ons wil nie die krediet van ander mense hê**, ons wil net cool truuks vir almal stoor.
 >  - Ons skryf ook **ons eie navorsings** in HackTricks.
->  - In verskeie gevalle sal ons net **in HackTricks 'n opsomming van die belangrike dele** van die tegniek skryf en sal ons **die leser aanmoedig om die oorspronklike pos te besoek** vir meer besonderhede.
+>  - In verskeie gevalle sal ons net **in HackTricks 'n opsomming van die belangrike dele** van die tegniek skryf en die **leser aanmoedig om die oorspronklike pos** te besoek vir meer besonderhede.
 > - **ORGANISEER** al die hacking tegnieke in die boek sodat dit **MEER TOEGANKLIK** is.
 >  - Die HackTricks span het duisende ure gratis gewy **net om die inhoud te organiseer** sodat mense **vinnig kan leer**.
 
@@ -48,10 +48,10 @@ Ja, jy kan, maar **moet nie vergeet om die spesifieke skakel(s)** waar die inhou
 
 > [!TIP]
 >
-> - **Hoe kan ek 'n bladsy van HackTricks aanhaal?**
+> - **Hoe kan ek 'n bladsy van HackTricks?**
 
 Solank as wat die skakel **van** die bladsy(s) waar jy die inligting vandaan geneem het verskyn, is dit genoeg.\
-As jy 'n bibtex nodig het, kan jy iets soos gebruik:
+As jy 'n bibtex nodig het, kan jy iets soos:
 ```latex
 @misc{hacktricks-bibtexing,
 author = {"HackTricks Team" or the Authors name of the specific page/trick},
@@ -76,9 +76,9 @@ Die eerste **HackTricks** **waarde** is om **GRATIS** hacking opvoedkundige hulp
 
 As jy dink HackTricks boeke is gemaak vir **kommersiële doeleindes** is jy **HEELTEMAL VERKEERD**.
 
-Ons het borge omdat, selfs al is al die inhoud GRATIS, ons wil **die gemeenskap die moontlikheid bied om ons werk te waardeer** as hulle wil. Daarom bied ons mense die opsie om aan HackTricks te skenk via [**Github sponsors**](https://github.com/sponsors/carlospolop), en **relevante kuberveiligheid maatskappye** om HackTricks te borg en om **'n paar advertensies** in die boek te hê, wat die **advertensies** altyd op plekke geplaas word waar hulle **sigbaar** is maar **nie die leer** proses steur as iemand op die inhoud fokus nie.
+Ons het borge omdat, selfs al is al die inhoud GRATIS, ons wil **die gemeenskap die moontlikheid bied om ons werk te waardeer** as hulle wil. Daarom bied ons mense die opsie om aan HackTricks te skenk via [**Github sponsors**](https://github.com/sponsors/carlospolop), en **relevante kuberveiligheid maatskappye** om HackTricks te borg en om **'n paar advertensies** in die boek te hê, wat altyd geplaas word in plekke waar hulle **sigbaar** is maar **nie die leer** proses steur nie as iemand op die inhoud fokus.
 
-Jy sal nie HackTricks vol irritante advertensies vind soos ander blogs met baie minder inhoud as HackTricks nie, omdat HackTricks nie vir kommersiële doeleindes gemaak is nie.
+Jy sal nie HackTricks vol irritante advertensies vind soos ander blogs met baie minder inhoud as HackTricks nie, omdat HackTricks nie gemaak is vir kommersiële doeleindes nie.
 
 > [!CAUTION]
 >
@@ -92,9 +92,9 @@ Jy sal nie HackTricks vol irritante advertensies vind soos ander blogs met baie 
 
 Let daarop dat om skakels na jou bladsy in HackTricks te hê:
 
-- Jou **SEO** verbeter
+- Verbeter jou **SEO**
 - Die inhoud word **vertaal na meer as 15 tale** wat dit moontlik maak vir meer mense om toegang tot hierdie inhoud te hê
-- **HackTricks moedig** mense aan om **jou bladsy te besoek** (verskeie mense het vir ons genoem dat sedert 'n bladsy van hulle in HackTricks is, hulle meer besoeke ontvang)
+- **HackTricks moedig** mense aan om **jou bladsy te kyk** (verskeie mense het vir ons genoem dat sedert 'n bladsy van hulle in HackTricks is, hulle meer besoeke ontvang)
 
 As jy egter steeds wil hê dat die inhoud van jou blog verwyder moet word uit HackTricks, laat weet ons asseblief en ons sal beslis **elke skakel na jou blog verwyder**, en enige inhoud gebaseer daarop.
 
@@ -111,8 +111,8 @@ Copyright © Alle regte voorbehou tensy anders vermeld.
 #### License Summary:
 
 - Attribution: Jy is vry om:
-- Share — die materiaal in enige medium of formaat te kopieer en te herverdeel.
-- Adapt — remix, transformeer, en op die materiaal voortbou.
+- Share — kopieer en versprei die materiaal in enige medium of formaat.
+- Adapt — remix, transformeer, en bou voort op die materiaal.
 
 #### Additional Terms:
 
@@ -125,7 +125,7 @@ Copyright © Alle regte voorbehou tensy anders vermeld.
 
 Hierdie lisensie gee nie enige handelsmerk of handelsnaam regte in verband met die inhoud nie. Alle handelsmerke en handelsname wat in hierdie blog/boek verskyn, is die eiendom van hul onderskeie eienaars.
 
-**Deur toegang te verkry tot of HackTricks te gebruik, stem jy in om die bepalings van hierdie lisensie na te kom. As jy nie met hierdie bepalings saamstem nie, asseblief, moenie hierdie webwerf betree nie.**
+**Deur toegang te verkry tot of HackTricks te gebruik, stem jy in om die bepalings van hierdie lisensie na te kom. As jy nie met hierdie bepalings saamstem nie, asseblief, moenie toegang tot hierdie webwerf verkry nie.**
 
 ## **Disclaimer**
 
