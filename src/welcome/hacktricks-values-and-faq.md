@@ -48,7 +48,7 @@ Oui, vous pouvez, mais **n'oubliez pas de mentionner le(s) lien(s) spécifique(s
 
 > [!TIP]
 >
-> - **Comment puis-je citer une page de HackTricks ?**
+> - **Comment puis-je  une page de HackTricks ?**
 
 Tant que le lien **de** la ou des pages d'où vous avez pris l'information apparaît, c'est suffisant.\
 Si vous avez besoin d'un bibtex, vous pouvez utiliser quelque chose comme :
@@ -127,7 +127,7 @@ Cette licence ne confère aucun droit de marque ou de branding en relation avec 
 
 **En accédant ou en utilisant HackTricks, vous acceptez de respecter les termes de cette licence. Si vous n'acceptez pas ces termes, veuillez ne pas accéder à ce site.**
 
-## **Avertissement**
+## **Disclaimer**
 
 > [!CAUTION]
 > Ce livre, 'HackTricks', est destiné à des fins éducatives et d'information uniquement. Le contenu de ce livre est fourni sur une base 'tel quel', et les auteurs et éditeurs ne font aucune déclaration ou garantie de quelque nature que ce soit, expresse ou implicite, concernant l'exhaustivité, l'exactitude, la fiabilité, l'adéquation ou la disponibilité des informations, produits, services ou graphiques connexes contenus dans ce livre. Toute confiance que vous placez dans de telles informations est donc strictement à vos propres risques.
