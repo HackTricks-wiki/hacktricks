@@ -4,13 +4,19 @@
 
 ## **Giriş**
 
-Firmware, cihazların doğru bir şekilde çalışmasını sağlayan ve donanım bileşenleri ile kullanıcıların etkileşimde bulunduğu yazılım arasında iletişimi yönetip kolaylaştıran temel yazılımdır. Kalıcı bellekte depolanır, böylece cihaz açıldığında kritik talimatlara erişebilir ve işletim sisteminin başlatılmasını sağlar. Firmware'i incelemek ve potansiyel olarak değiştirmek, güvenlik açıklarını belirlemede kritik bir adımdır.
+### İlgili kaynaklar
+
+{{#ref}}
+synology-encrypted-archive-decryption.md
+{{#endref}}
+
+Firmware, cihazların doğru bir şekilde çalışmasını sağlayan ve donanım bileşenleri ile kullanıcıların etkileşimde bulunduğu yazılım arasında iletişimi yöneten temel bir yazılımdır. Kalıcı bellekte depolanır, böylece cihaz açıldığında kritik talimatlara erişebilir ve işletim sisteminin başlatılmasını sağlar. Firmware'i incelemek ve potansiyel olarak değiştirmek, güvenlik açıklarını belirlemede kritik bir adımdır.
 
 ## **Bilgi Toplama**
 
 **Bilgi toplama**, bir cihazın yapısını ve kullandığı teknolojileri anlamanın kritik bir başlangıç adımıdır. Bu süreç, aşağıdaki verilerin toplanmasını içerir:
 
-- Çalıştığı CPU mimarisi ve işletim sistemi
+- CPU mimarisi ve çalıştığı işletim sistemi
 - Bootloader ayrıntıları
 - Donanım düzeni ve veri sayfaları
 - Kod tabanı metrikleri ve kaynak konumları
@@ -23,14 +29,14 @@ Bu amaçla, **açık kaynak istihbaratı (OSINT)** araçları çok değerlidir; 
 
 ## **Firmware Edinme**
 
-Firmware edinmek, her biri kendi karmaşıklık seviyesine sahip çeşitli yollarla gerçekleştirilebilir:
+Firmware edinme, her biri kendi karmaşıklık seviyesine sahip çeşitli yollarla gerçekleştirilebilir:
 
 - **Doğrudan** kaynaktan (geliştiriciler, üreticiler)
 - Verilen talimatlardan **oluşturarak**
 - Resmi destek sitelerinden **indirerek**
 - Barındırılan firmware dosyalarını bulmak için **Google dork** sorguları kullanarak
 - [S3Scanner](https://github.com/sa7mon/S3Scanner) gibi araçlarla **bulut depolama** alanlarına doğrudan erişerek
-- Adam ortada teknikleriyle **güncellemeleri** yakalayarak
+- Man-in-the-middle teknikleriyle **güncellemeleri** yakalayarak
 - **UART**, **JTAG** veya **PICit** gibi bağlantılar aracılığıyla cihazdan **çıkararak**
 - Cihaz iletişimi içinde güncelleme taleplerini **dinleyerek**
 - **Sabit kodlu güncelleme uç noktalarını** tanımlayıp kullanarak
@@ -60,7 +66,7 @@ Veya dosyayı incelemek için [**binvis.io**](https://binvis.io/#/) ([code](http
 
 ### Dosya Sistemini Alma
 
-Daha önce bahsedilen araçlarla `binwalk -ev <bin>` kullanarak **dosya sistemini çıkarmış olmalısınız**.\
+Önceki bahsedilen araçlarla `binwalk -ev <bin>` kullanarak **dosya sistemini çıkarmış olmalısınız**.\
 Binwalk genellikle bunu **dosya sistemi türüyle adlandırılan bir klasörün içine çıkarır**, bu genellikle aşağıdakilerden biridir: squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
 
 #### Manuel Dosya Sistemi Çıkartma
@@ -91,7 +97,7 @@ Alternatif olarak, aşağıdaki komut da çalıştırılabilir.
 
 `$ dd if=DIR850L_REVB.bin bs=1 skip=$((0x1A0094)) of=dir.squashfs`
 
-- squashfs (yukarıdaki örnekte kullanılan)
+- Squashfs için (yukarıdaki örnekte kullanılmıştır)
 
 `$ unsquashfs dir.squashfs`
 
@@ -101,11 +107,11 @@ Dosyalar daha sonra "`squashfs-root`" dizininde olacaktır.
 
 `$ cpio -ivd --no-absolute-filenames -F <bin>`
 
-- jffs2 dosya sistemleri için
+- JFFS2 dosya sistemleri için
 
 `$ jefferson rootfsfile.jffs2`
 
-- NAND flash ile ubifs dosya sistemleri için
+- NAND flash ile UBIFS dosya sistemleri için
 
 `$ ubireader_extract_images -u UBI -s <start_offset> <bin>`
 
@@ -117,7 +123,7 @@ Firmware elde edildikten sonra, yapısını ve potansiyel zayıflıklarını anl
 
 ### İlk Analiz Araçları
 
-İlk inceleme için bir dizi komut sağlanmıştır ( `<bin>` olarak adlandırılan ikili dosya için). Bu komutlar dosya türlerini tanımlamaya, dizeleri çıkarmaya, ikili verileri analiz etmeye ve bölüm ile dosya sistemi ayrıntılarını anlamaya yardımcı olur:
+İlk inceleme için bir dizi komut sağlanmıştır ( `<bin>` olarak adlandırılan ikili dosya için). Bu komutlar dosya türlerini tanımlamaya, dizeleri çıkarmaya, ikili verileri analiz etmeye ve bölüm ve dosya sistemi ayrıntılarını anlamaya yardımcı olur:
 ```bash
 file <bin>
 strings -n8 <bin>
@@ -126,13 +132,13 @@ hexdump -C -n 512 <bin> > hexdump.out
 hexdump -C <bin> | head #useful for finding signatures in the header
 fdisk -lu <bin> #lists partitions and filesystems, if there are multiple
 ```
-Görüntünün şifreleme durumunu değerlendirmek için **entropy** `binwalk -E <bin>` ile kontrol edilir. Düşük entropy, şifreleme eksikliğini gösterirken, yüksek entropy olası şifreleme veya sıkıştırmayı belirtir.
+Görüntünün şifreleme durumunu değerlendirmek için, **entropy** `binwalk -E <bin>` ile kontrol edilir. Düşük entropy, şifreleme eksikliğini gösterirken, yüksek entropy olası şifreleme veya sıkıştırmayı belirtir.
 
-**Gömülü dosyaları** çıkarmak için **file-data-carving-recovery-tools** belgeleri ve dosya incelemesi için **binvis.io** gibi araçlar ve kaynaklar önerilir.
+**Gömülü dosyaları** çıkarmak için, **file-data-carving-recovery-tools** belgeleri ve dosya incelemesi için **binvis.io** gibi araçlar ve kaynaklar önerilir.
 
 ### Dosya Sistemini Çıkarma
 
-`binwalk -ev <bin>` kullanarak, genellikle dosya sistemini çıkarmak mümkündür; bu genellikle dosya sistemi türüyle adlandırılan bir dizine (örneğin, squashfs, ubifs) çıkar. Ancak, **binwalk** sihirli baytların eksikliği nedeniyle dosya sistemi türünü tanımadığında, manuel çıkarma gereklidir. Bu, `binwalk` kullanarak dosya sisteminin ofsetini bulmayı ve ardından dosya sistemini çıkarmak için `dd` komutunu kullanmayı içerir:
+`binwalk -ev <bin>` kullanarak, genellikle dosya sistemi çıkarılabilir, genellikle dosya sistemi türüyle adlandırılan bir dizine (örneğin, squashfs, ubifs) çıkarılır. Ancak, **binwalk** sihirli baytların eksikliği nedeniyle dosya sistemi türünü tanımadığında, manuel çıkarma gereklidir. Bu, `binwalk` kullanarak dosya sisteminin ofsetini bulmayı ve ardından dosya sistemini çıkarmak için `dd` komutunu kullanmayı içerir:
 ```bash
 $ binwalk DIR850L_REVB.bin
 
@@ -147,12 +153,12 @@ Dosya sistemi çıkarıldıktan sonra, güvenlik açıkları arayışına başla
 **Ana konumlar** ve **incelemesi gereken öğeler** şunlardır:
 
 - **etc/shadow** ve **etc/passwd** kullanıcı kimlik bilgileri için
-- **etc/ssl** içindeki SSL sertifikaları ve anahtarlar
+- **etc/ssl** içindeki SSL sertifikaları ve anahtarları
 - Potansiyel güvenlik açıkları için yapılandırma ve betik dosyaları
 - Daha fazla analiz için gömülü ikililer
 - Yaygın IoT cihazı web sunucuları ve ikilileri
 
-Dosya sistemi içindeki hassas bilgileri ve güvenlik açıklarını ortaya çıkarmaya yardımcı olan birkaç araç vardır:
+Dosya sistemi içindeki hassas bilgileri ve güvenlik açıklarını ortaya çıkarmaya yardımcı olan birkaç araç bulunmaktadır:
 
 - [**LinPEAS**](https://github.com/carlospolop/PEASS-ng) ve [**Firmwalker**](https://github.com/craigz28/firmwalker) hassas bilgi arayışı için
 - [**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT_core) kapsamlı firmware analizi için
@@ -162,17 +168,17 @@ Dosya sistemi içindeki hassas bilgileri ve güvenlik açıklarını ortaya çı
 
 Dosya sisteminde bulunan hem kaynak kodu hem de derlenmiş ikililer güvenlik açıkları açısından incelenmelidir. Unix ikilileri için **checksec.sh** ve Windows ikilileri için **PESecurity** gibi araçlar, istismar edilebilecek korumasız ikilileri tanımlamaya yardımcı olur.
 
-## Dinamik Analiz için Firmware Taklit Etme
+## Dinamik Analiz için Firmware Emülasyonu
 
-Firmware taklit etme süreci, bir cihazın çalışması veya bireysel bir programın **dinamik analizini** sağlar. Bu yaklaşım, donanım veya mimari bağımlılıkları ile zorluklarla karşılaşabilir, ancak kök dosya sistemini veya belirli ikilileri, Raspberry Pi gibi eşleşen mimari ve endianlıkta bir cihaza veya önceden oluşturulmuş bir sanal makineye aktarmak, daha fazla test yapmayı kolaylaştırabilir.
+Firmware emülasyonu süreci, bir cihazın çalışması veya bireysel bir programın **dinamik analizini** sağlar. Bu yaklaşım, donanım veya mimari bağımlılıkları ile zorluklarla karşılaşabilir, ancak kök dosya sistemini veya belirli ikilileri, Raspberry Pi gibi eşleşen mimari ve endianlıkta bir cihaza veya önceden oluşturulmuş bir sanal makineye aktarmak, daha fazla test yapmayı kolaylaştırabilir.
 
-### Bireysel İkilileri Taklit Etme
+### Bireysel İkililerin Emülasyonu
 
 Tek programları incelemek için, programın endianlığını ve CPU mimarisini belirlemek kritik öneme sahiptir.
 
 #### MIPS Mimarisi ile Örnek
 
-MIPS mimarisi ikilisini taklit etmek için şu komut kullanılabilir:
+MIPS mimarisi ikilisini emüle etmek için şu komut kullanılabilir:
 ```bash
 file ./squashfs-root/bin/busybox
 ```
@@ -188,7 +194,7 @@ ARM ikili dosyaları için süreç benzerdir; emülasyon için `qemu-arm` emüla
 
 ### Tam Sistem Emülasyonu
 
-[Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit) ve diğer araçlar, tam firmware emülasyonunu kolaylaştırarak süreci otomatikleştirir ve dinamik analize yardımcı olur.
+[Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit) gibi araçlar, tam firmware emülasyonunu kolaylaştırarak süreci otomatikleştirir ve dinamik analize yardımcı olur.
 
 ## Pratikte Dinamik Analiz
 
@@ -196,7 +202,7 @@ Bu aşamada, analiz için gerçek veya emüle edilmiş bir cihaz ortamı kullan�
 
 ## Çalışma Zamanı Analiz Teknikleri
 
-Çalışma zamanı analizi, gdb-multiarch, Frida ve Ghidra gibi araçlar kullanarak bir süreç veya ikili dosya ile işletim ortamında etkileşimde bulunmayı içerir; bu araçlar, kesme noktaları ayarlamak ve fuzzing gibi tekniklerle zafiyetleri tanımlamak için kullanılır.
+Çalışma zamanı analizi, bir süreç veya ikili dosya ile işletim ortamında etkileşimde bulunmayı içerir; gdb-multiarch, Frida ve Ghidra gibi araçlar kullanılarak kesme noktaları ayarlanır ve fuzzing gibi tekniklerle zafiyetler belirlenir.
 
 ## İkili İstismar ve Kanıt-of-Konsept
 
@@ -225,7 +231,7 @@ Tipik saldırı iş akışı:
 * Web UI, mobil uygulama API'si, USB, TFTP, MQTT vb.
 * Birçok tüketici IoT cihazı, Base64 kodlu firmware blob'larını kabul eden *kimlik doğrulaması yapılmamış* HTTP(S) uç noktaları açar, bunları sunucu tarafında çözer ve kurtarma/güncellemeyi tetikler.
 3. Geri alma işleminden sonra, daha yeni sürümde yamanmış bir zafiyeti istismar edin (örneğin, daha sonra eklenen bir komut enjekte etme filtresi).
-4. İsteğe bağlı olarak, en son görüntüyü geri yükleyin veya kalıcılık sağlandıktan sonra tespiti önlemek için güncellemeleri devre dışı bırakın.
+4. İsteğe bağlı olarak, en son görüntüyü tekrar flaşlayın veya kalıcılık sağlandıktan sonra tespiti önlemek için güncellemeleri devre dışı bırakın.
 
 ### Örnek: Geri Alma Sonrası Komut Enjeksiyonu
 ```http
@@ -246,11 +252,11 @@ firmware_v1.3.11.490_signed.bin
 ```
 ### Güncelleme Mantığını Değerlendirme Kontrol Listesi
 
-* *Güncelleme uç noktası* için taşıma/kimlik doğrulama yeterince korunmuş mu (TLS + kimlik doğrulama)?
+* *güncelleme uç noktası* yeterince korunmuş mu (TLS + kimlik doğrulama)?
 * Cihaz, flaşlamadan önce **sürüm numaralarını** veya **monotonik geri alma sayacını** karşılaştırıyor mu?
 * Görüntü, güvenli bir önyükleme zinciri içinde doğrulanıyor mu (örneğin, ROM kodu tarafından imzalar kontrol ediliyor mu)?
 * Kullanıcı alanı kodu ek güvenlik kontrolleri yapıyor mu (örneğin, izin verilen bölüm haritası, model numarası)?
-* *Kısmi* veya *yedek* güncelleme akışları aynı doğrulama mantığını yeniden kullanıyor mu?
+* *kısmi* veya *yedek* güncelleme akışları aynı doğrulama mantığını yeniden kullanıyor mu?
 
 > 💡  Yukarıdakilerden herhangi biri eksikse, platform muhtemelen geri alma saldırılarına karşı savunmasızdır.
 
