@@ -24,13 +24,13 @@ Najbolja polazna tačka za učenje o AI je razumevanje kako glavni algoritmi ma�
 
 ### Arhitektura LLM-ova
 
-Na sledećoj stranici ćete pronaći osnove svakog komponente za izgradnju osnovnog LLM koristeći transformere:
+Na sledećoj stranici naći ćete osnove svakog komponente za izgradnju osnovnog LLM koristeći transformere:
 
 {{#ref}}
 AI-llm-architecture/README.md
 {{#endref}}
 
-## Bezbednost AI
+## AI Bezbednost
 
 ### Okviri Rizika AI
 
@@ -62,6 +62,12 @@ MCP (Protokol Konteksta Modela) je protokol koji omogućava AI agent klijentima 
 
 {{#ref}}
 AI-MCP-Servers.md
+{{#endref}}
+
+### AI-Pomoćno Fuzzing i Automatizovano Otkriće Ranljivosti
+
+{{#ref}}
+AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
 {{#endref}}
 
 {{#include ../banners/hacktricks-training.md}}
