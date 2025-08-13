@@ -22,7 +22,7 @@
 ./AI-Deep-Learning.md
 {{#endref}}
 
-### Архітектура LLMs
+### Архітектура LLM
 
 На наступній сторінці ви знайдете основи кожного компонента для побудови базового LLM за допомогою трансформерів:
 
@@ -62,6 +62,12 @@ MCP (Протокол контексту моделі) - це протокол, 
 
 {{#ref}}
 AI-MCP-Servers.md
+{{#endref}}
+
+### AI-підтримуване фуззингування та автоматизоване виявлення вразливостей
+
+{{#ref}}
+AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
 {{#endref}}
 
 {{#include ../banners/hacktricks-training.md}}
