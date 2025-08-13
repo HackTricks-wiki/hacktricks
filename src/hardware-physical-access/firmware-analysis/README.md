@@ -4,6 +4,12 @@
 
 ## **Introducción**
 
+### Recursos relacionados
+
+{{#ref}}
+synology-encrypted-archive-decryption.md
+{{#endref}}
+
 El firmware es un software esencial que permite a los dispositivos operar correctamente al gestionar y facilitar la comunicación entre los componentes de hardware y el software con el que los usuarios interactúan. Se almacena en memoria permanente, asegurando que el dispositivo pueda acceder a instrucciones vitales desde el momento en que se enciende, lo que lleva al lanzamiento del sistema operativo. Examinar y potencialmente modificar el firmware es un paso crítico para identificar vulnerabilidades de seguridad.
 
 ## **Recolección de Información**
@@ -61,11 +67,11 @@ O [**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/archive/
 ### Obtener el Sistema de Archivos
 
 Con las herramientas comentadas anteriormente como `binwalk -ev <bin>`, deberías haber podido **extraer el sistema de archivos**.\
-Binwalk generalmente lo extrae dentro de una **carpeta nombrada como el tipo de sistema de archivos**, que generalmente es uno de los siguientes: squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
+Binwalk generalmente lo extrae dentro de una **carpeta nombrada como el tipo de sistema de archivos**, que suele ser uno de los siguientes: squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
 
 #### Extracción Manual del Sistema de Archivos
 
-A veces, binwalk **no tendrá el byte mágico del sistema de archivos en sus firmas**. En estos casos, usa binwalk para **encontrar el desplazamiento del sistema de archivos y tallar el sistema de archivos comprimido** del binario y **extraer manualmente** el sistema de archivos de acuerdo a su tipo utilizando los pasos a continuación.
+A veces, binwalk **no tendrá el byte mágico del sistema de archivos en sus firmas**. En estos casos, usa binwalk para **encontrar el desplazamiento del sistema de archivos y tallar el sistema de archivos comprimido** del binario y **extraer manualmente** el sistema de archivos según su tipo utilizando los pasos a continuación.
 ```
 $ binwalk DIR850L_REVB.bin
 
@@ -155,7 +161,7 @@ Con el sistema de archivos extraído, comienza la búsqueda de fallos de segurid
 Varias herramientas ayudan a descubrir información sensible y vulnerabilidades dentro del sistema de archivos:
 
 - [**LinPEAS**](https://github.com/carlospolop/PEASS-ng) y [**Firmwalker**](https://github.com/craigz28/firmwalker) para la búsqueda de información sensible
-- [**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT_core) para un análisis exhaustivo del firmware
+- [**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT_core) para un análisis completo del firmware
 - [**FwAnalyzer**](https://github.com/cruise-automation/fwanalyzer), [**ByteSweep**](https://gitlab.com/bytesweep/bytesweep), [**ByteSweep-go**](https://gitlab.com/bytesweep/bytesweep-go) y [**EMBA**](https://github.com/e-m-b-a/emba) para análisis estático y dinámico
 
 ### Comprobaciones de Seguridad en Binarios Compilados
@@ -164,7 +170,7 @@ Tanto el código fuente como los binarios compilados encontrados en el sistema d
 
 ## Emulando Firmware para Análisis Dinámico
 
-El proceso de emular firmware permite un **análisis dinámico** ya sea del funcionamiento de un dispositivo o de un programa individual. Este enfoque puede encontrar desafíos con dependencias de hardware o arquitectura, pero transferir el sistema de archivos raíz o binarios específicos a un dispositivo con arquitectura y endianness coincidentes, como una Raspberry Pi, o a una máquina virtual preconstruida, puede facilitar pruebas adicionales.
+El proceso de emular firmware permite un **análisis dinámico** ya sea del funcionamiento de un dispositivo o de un programa individual. Este enfoque puede encontrar desafíos con dependencias de hardware o arquitectura, pero transferir el sistema de archivos raíz o binarios específicos a un dispositivo con arquitectura y endianness coincidentes, como un Raspberry Pi, o a una máquina virtual preconstruida, puede facilitar pruebas adicionales.
 
 ### Emulando Binarios Individuales
 
@@ -200,7 +206,7 @@ El análisis en tiempo de ejecución implica interactuar con un proceso o binari
 
 ## Explotación Binaria y Prueba de Concepto
 
-Desarrollar un PoC para vulnerabilidades identificadas requiere un profundo entendimiento de la arquitectura objetivo y programación en lenguajes de bajo nivel. Las protecciones de tiempo de ejecución binaria en sistemas embebidos son raras, pero cuando están presentes, técnicas como Return Oriented Programming (ROP) pueden ser necesarias.
+Desarrollar un PoC para vulnerabilidades identificadas requiere un profundo entendimiento de la arquitectura objetivo y programación en lenguajes de bajo nivel. Las protecciones de tiempo de ejecución en sistemas embebidos son raras, pero cuando están presentes, técnicas como Return Oriented Programming (ROP) pueden ser necesarias.
 
 ## Sistemas Operativos Preparados para Análisis de Firmware
 
@@ -209,7 +215,7 @@ Sistemas operativos como [AttifyOS](https://github.com/adi0x90/attifyos) y [Embe
 ## Sistemas Operativos Preparados para Analizar Firmware
 
 - [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS es una distribución destinada a ayudar a realizar evaluaciones de seguridad y pruebas de penetración de dispositivos de Internet de las Cosas (IoT). Te ahorra mucho tiempo al proporcionar un entorno preconfigurado con todas las herramientas necesarias cargadas.
-- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Sistema operativo de pruebas de seguridad embebida basado en Ubuntu 18.04 precargado con herramientas de pruebas de seguridad de firmware.
+- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Sistema operativo de pruebas de seguridad embebido basado en Ubuntu 18.04 precargado con herramientas de pruebas de seguridad de firmware.
 
 ## Ataques de Downgrade de Firmware y Mecanismos de Actualización Inseguros
 
@@ -218,12 +224,12 @@ Incluso cuando un proveedor implementa verificaciones de firma criptográfica pa
 Flujo de trabajo típico del ataque:
 
 1. **Obtener una imagen firmada más antigua**
-* Obtenerla del portal de descarga pública del proveedor, CDN o sitio de soporte.
-* Extraerla de aplicaciones móviles/de escritorio complementarias (por ejemplo, dentro de un APK de Android bajo `assets/firmware/`).
-* Recuperarla de repositorios de terceros como VirusTotal, archivos de Internet, foros, etc.
+   * Obténla del portal de descarga pública del proveedor, CDN o sitio de soporte.
+   * Extráela de aplicaciones móviles/de escritorio complementarias (por ejemplo, dentro de un APK de Android bajo `assets/firmware/`).
+   * Recupérala de repositorios de terceros como VirusTotal, archivos de Internet, foros, etc.
 2. **Subir o servir la imagen al dispositivo** a través de cualquier canal de actualización expuesto:
-* Interfaz web, API de aplicación móvil, USB, TFTP, MQTT, etc.
-* Muchos dispositivos IoT de consumo exponen puntos finales HTTP(S) *no autenticados* que aceptan blobs de firmware codificados en Base64, los decodifican del lado del servidor y activan la recuperación/actualización.
+   * Interfaz web, API de aplicación móvil, USB, TFTP, MQTT, etc.
+   * Muchos dispositivos IoT de consumo exponen puntos finales HTTP(S) *no autenticados* que aceptan blobs de firmware codificados en Base64, los decodifican del lado del servidor y activan la recuperación/actualización.
 3. Después del downgrade, explotar una vulnerabilidad que fue parcheada en la versión más nueva (por ejemplo, un filtro de inyección de comandos que se agregó más tarde).
 4. Opcionalmente, flashear la imagen más reciente de nuevo o deshabilitar actualizaciones para evitar detección una vez que se obtiene persistencia.
 
@@ -248,7 +254,7 @@ firmware_v1.3.11.490_signed.bin
 
 * ¿Está adecuadamente protegida la *autenticación/transporte del endpoint de actualización* (TLS + autenticación)?
 * ¿Compara el dispositivo **números de versión** o un **contador anti-retroceso monotónico** antes de flashear?
-* ¿Se verifica la imagen dentro de una cadena de arranque seguro (por ejemplo, firmas verificadas por código ROM)?
+* ¿Se verifica la imagen dentro de una cadena de arranque seguro (por ejemplo, firmas verificadas por el código ROM)?
 * ¿El código de espacio de usuario realiza verificaciones adicionales de sanidad (por ejemplo, mapa de particiones permitido, número de modelo)?
 * ¿Los flujos de actualización *parciales* o *de respaldo* reutilizan la misma lógica de validación?
 
