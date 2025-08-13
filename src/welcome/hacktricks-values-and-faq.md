@@ -76,7 +76,7 @@ O primeiro **valor** do **HackTricks** é oferecer recursos educacionais de hack
 
 Se você acha que os livros do HackTricks são feitos para **fins comerciais**, você está **COMPLETAMENTE ERRADO**.
 
-Temos patrocinadores porque, mesmo que todo o conteúdo seja GRATUITO, queremos **oferecer à comunidade a possibilidade de apreciar nosso trabalho** se assim desejarem. Portanto, oferecemos às pessoas a opção de doar para o HackTricks via [**Github sponsors**](https://github.com/sponsors/carlospolop), e **empresas de cibersegurança relevantes** para patrocinar o HackTricks e **ter alguns anúncios** no livro, sendo os **anúncios** sempre colocados em locais que os tornam **visíveis**, mas que **não atrapalham o processo de aprendizado** se alguém se concentrar no conteúdo.
+Temos patrocinadores porque, mesmo que todo o conteúdo seja GRATUITO, queremos **oferecer à comunidade a possibilidade de apreciar nosso trabalho** se assim desejarem. Portanto, oferecemos às pessoas a opção de doar para o HackTricks via [**patrocinadores do Github**](https://github.com/sponsors/carlospolop), e **empresas de cibersegurança relevantes** para patrocinar o HackTricks e **ter alguns anúncios** no livro, sendo os **anúncios** sempre colocados em locais que os tornem **visíveis**, mas que **não atrapalhem o processo de aprendizado** se alguém se concentrar no conteúdo.
 
 Você não encontrará o HackTricks cheio de anúncios irritantes como outros blogs com muito menos conteúdo do que o HackTricks, porque o HackTricks não é feito para fins comerciais.
 
@@ -90,7 +90,7 @@ Você não encontrará o HackTricks cheio de anúncios irritantes como outros bl
 >
 > - **O que devo fazer se houver conteúdo do meu blog no HackTricks e eu não quiser que esteja lá?**
 
-Observe que ter links para sua página no HackTricks:
+Note que ter links para sua página no HackTricks:
 
 - Melhora seu **SEO**
 - O conteúdo é **traduzido para mais de 15 idiomas**, possibilitando que mais pessoas acessem este conteúdo
