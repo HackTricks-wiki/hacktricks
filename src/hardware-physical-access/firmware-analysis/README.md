@@ -4,6 +4,12 @@
 
 ## **Introduction**
 
+### Ressources connexes
+
+{{#ref}}
+synology-encrypted-archive-decryption.md
+{{#endref}}
+
 Le firmware est un logiciel essentiel qui permet aux appareils de fonctionner correctement en gérant et en facilitant la communication entre les composants matériels et le logiciel avec lequel les utilisateurs interagissent. Il est stocké dans une mémoire permanente, garantissant que l'appareil peut accéder à des instructions vitales dès qu'il est allumé, ce qui conduit au lancement du système d'exploitation. L'examen et la modification potentielle du firmware sont une étape cruciale pour identifier les vulnérabilités de sécurité.
 
 ## **Collecte d'informations**
@@ -31,7 +37,7 @@ L'obtention du firmware peut être abordée par divers moyens, chacun ayant son 
 - En utilisant des requêtes **Google dork** pour trouver des fichiers de firmware hébergés
 - En accédant directement au **stockage cloud**, avec des outils comme [S3Scanner](https://github.com/sa7mon/S3Scanner)
 - En interceptant les **mises à jour** via des techniques de l'homme du milieu
-- **En extrayant** du dispositif par des connexions comme **UART**, **JTAG** ou **PICit**
+- **En extrayant** de l'appareil par des connexions comme **UART**, **JTAG** ou **PICit**
 - **En reniflant** les requêtes de mise à jour dans la communication de l'appareil
 - En identifiant et en utilisant des **points de terminaison de mise à jour codés en dur**
 - **En dumpant** depuis le bootloader ou le réseau
@@ -60,7 +66,7 @@ Ou [**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/archive
 
 ### Récupération du Système de Fichiers
 
-Avec les outils précédemment commentés comme `binwalk -ev <bin>`, vous devriez avoir pu **extraire le système de fichiers**.\
+Avec les outils commentés précédemment comme `binwalk -ev <bin>`, vous devriez avoir pu **extraire le système de fichiers**.\
 Binwalk l'extrait généralement dans un **dossier nommé selon le type de système de fichiers**, qui est généralement l'un des suivants : squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
 
 #### Extraction Manuelle du Système de Fichiers
@@ -77,7 +83,7 @@ DECIMAL HEXADECIMAL DESCRIPTION
 1704052 0x1A0074 PackImg section delimiter tag, little endian size: 32256 bytes; big endian size: 8257536 bytes
 1704084 0x1A0094 Squashfs filesystem, little endian, version 4.0, compression:lzma, size: 8256900 bytes, 2688 inodes, blocksize: 131072 bytes, created: 2016-07-12 02:28:41
 ```
-Exécutez la **commande dd** suivante pour extraire le système de fichiers Squashfs.
+Exécutez la commande **dd** suivante pour extraire le système de fichiers Squashfs.
 ```
 $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 
@@ -206,7 +212,7 @@ Développer un PoC pour les vulnérabilités identifiées nécessite une compré
 
 Des systèmes d'exploitation comme [AttifyOS](https://github.com/adi0x90/attifyos) et [EmbedOS](https://github.com/scriptingxss/EmbedOS) fournissent des environnements préconfigurés pour les tests de sécurité des firmwares, équipés des outils nécessaires.
 
-## OS préparés pour analyser le firmware
+## Systèmes d'exploitation préparés pour analyser le firmware
 
 - [**AttifyOS**](https://github.com/adi0x90/attifyos) : AttifyOS est une distribution destinée à vous aider à effectuer des évaluations de sécurité et des tests de pénétration des dispositifs Internet des objets (IoT). Elle vous fait gagner beaucoup de temps en fournissant un environnement préconfiguré avec tous les outils nécessaires chargés.
 - [**EmbedOS**](https://github.com/scriptingxss/EmbedOS) : Système d'exploitation de test de sécurité embarqué basé sur Ubuntu 18.04 préchargé avec des outils de test de sécurité des firmwares.
@@ -218,9 +224,9 @@ Même lorsqu'un fournisseur met en œuvre des vérifications de signature crypto
 Flux de travail typique de l'attaque :
 
 1. **Obtenir une image signée plus ancienne**
-   * La récupérer depuis le portail de téléchargement public du fournisseur, CDN ou site de support.
-   * L'extraire d'applications mobiles/de bureau associées (par exemple, à l'intérieur d'un APK Android sous `assets/firmware/`).
-   * La récupérer depuis des dépôts tiers tels que VirusTotal, archives Internet, forums, etc.
+   * La récupérer sur le portail de téléchargement public du fournisseur, CDN ou site de support.
+   * L'extraire d'applications mobiles/de bureau compagnon (par exemple, à l'intérieur d'un APK Android sous `assets/firmware/`).
+   * La récupérer dans des dépôts tiers tels que VirusTotal, archives Internet, forums, etc.
 2. **Télécharger ou servir l'image au dispositif** via n'importe quel canal de mise à jour exposé :
    * Interface Web, API d'application mobile, USB, TFTP, MQTT, etc.
    * De nombreux dispositifs IoT grand public exposent des points de terminaison HTTP(S) *non authentifiés* qui acceptent des blobs de firmware encodés en Base64, les décodent côté serveur et déclenchent la récupération/mise à jour.
@@ -234,7 +240,7 @@ Host: 192.168.0.1
 Content-Type: application/octet-stream
 Content-Length: 0
 ```
-Dans le firmware vulnérable (rétrogradé), le paramètre `md5` est concaténé directement dans une commande shell sans assainissement, permettant l'injection de commandes arbitraires (ici – l'activation de l'accès root basé sur une clé SSH). Les versions ultérieures du firmware ont introduit un filtre de caractères de base, mais l'absence de protection contre la rétrogradation rend la correction inutile.
+Dans le firmware vulnérable (rétrogradé), le paramètre `md5` est concaténé directement dans une commande shell sans assainissement, permettant l'injection de commandes arbitraires (ici – l'activation de l'accès root basé sur des clés SSH). Les versions ultérieures du firmware ont introduit un filtre de caractères de base, mais l'absence de protection contre la rétrogradation rend la correction inutile.
 
 ### Extraction de Firmware à partir d'Applications Mobiles
 
