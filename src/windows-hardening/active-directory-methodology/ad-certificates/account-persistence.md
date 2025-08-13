@@ -6,7 +6,7 @@
 
 ## **Verstehen des Diebstahls aktiver Benutzeranmeldeinformationen mit Zertifikaten – PERSIST1**
 
-In einem Szenario, in dem ein Benutzer ein Zertifikat anfordern kann, das die Authentifizierung im Domänenbereich ermöglicht, hat ein Angreifer die Möglichkeit, dieses Zertifikat **anzufordern** und **zu stehlen**, um **Persistenz** in einem Netzwerk aufrechtzuerhalten. Standardmäßig erlaubt die `User`-Vorlage in Active Directory solche Anfragen, obwohl sie manchmal deaktiviert sein kann.
+In einem Szenario, in dem ein Benutzer ein Zertifikat anfordern kann, das die Domänenauthentifizierung ermöglicht, hat ein Angreifer die Möglichkeit, dieses Zertifikat **anzufordern** und **zu stehlen**, um **Persistenz** in einem Netzwerk aufrechtzuerhalten. Standardmäßig erlaubt die `User`-Vorlage in Active Directory solche Anfragen, obwohl sie manchmal deaktiviert sein kann.
 
 Mit einem Tool namens [**Certify**](https://github.com/GhostPack/Certify) kann man nach gültigen Zertifikaten suchen, die persistenten Zugriff ermöglichen:
 ```bash
@@ -18,7 +18,7 @@ Zertifikate können über eine grafische Benutzeroberfläche mit `certmgr.msc` o
 ```bash
 Certify.exe request /ca:CA-SERVER\CA-NAME /template:TEMPLATE-NAME
 ```
-Nach erfolgreicher Anfrage wird ein Zertifikat zusammen mit seinem privaten Schlüssel im `.pem`-Format generiert. Um dies in eine `.pfx`-Datei zu konvertieren, die auf Windows-Systemen verwendbar ist, wird der folgende Befehl verwendet:
+Nach erfolgreicher Anfrage wird ein Zertifikat zusammen mit seinem privaten Schlüssel im `.pem`-Format generiert. Um dies in eine `.pfx`-Datei umzuwandeln, die auf Windows-Systemen verwendbar ist, wird der folgende Befehl verwendet:
 ```bash
 openssl pkcs12 -in cert.pem -keyex -CSP "Microsoft Enhanced Cryptographic Provider v1.0" -export -out cert.pfx
 ```
@@ -30,7 +30,7 @@ Ein wichtiger Hinweis wird gegeben, wie diese Technik, kombiniert mit einer ande
 
 ## **Maschinenpersistenz mit Zertifikaten erlangen - PERSIST2**
 
-Eine andere Methode besteht darin, das Maschinenkonto eines kompromittierten Systems für ein Zertifikat zu registrieren, wobei die Standardvorlage `Machine` verwendet wird, die solche Aktionen erlaubt. Wenn ein Angreifer erhöhte Berechtigungen auf einem System erlangt, kann er das **SYSTEM**-Konto verwenden, um Zertifikate anzufordern, was eine Form der **Persistenz** bietet:
+Eine andere Methode besteht darin, das Maschinenkonto eines kompromittierten Systems für ein Zertifikat zu registrieren, wobei die Standardvorlage `Machine` verwendet wird, die solche Aktionen erlaubt. Wenn ein Angreifer erhöhte Berechtigungen auf einem System erlangt, kann er das **SYSTEM**-Konto verwenden, um Zertifikate anzufordern, was eine Form von **Persistenz** bietet:
 ```bash
 Certify.exe request /ca:dc.theshire.local/theshire-DC-CA /template:Machine /machine
 ```
@@ -40,6 +40,17 @@ Dieser Zugriff ermöglicht es dem Angreifer, sich als Maschinenkonto bei **Kerbe
 
 Die letzte besprochene Methode beinhaltet die Nutzung der **Gültigkeits**- und **Erneuerungszeiträume** von Zertifikatvorlagen. Durch die **Erneuerung** eines Zertifikats vor dessen Ablauf kann ein Angreifer die Authentifizierung bei Active Directory aufrechterhalten, ohne zusätzliche Ticketanmeldungen, die Spuren auf dem Zertifizierungsstellen- (CA) Server hinterlassen könnten.
 
-Dieser Ansatz ermöglicht eine **erweiterte Persistenz**-Methode, die das Risiko der Entdeckung durch weniger Interaktionen mit dem CA-Server minimiert und die Generierung von Artefakten vermeidet, die Administratoren auf die Eindringung aufmerksam machen könnten.
+### Zertifikatserneuerung mit Certify 2.0
+
+Beginnend mit **Certify 2.0** ist der Erneuerungsworkflow vollständig automatisiert durch den neuen `request-renew` Befehl. Angesichts eines zuvor ausgestellten Zertifikats (im **Base-64 PKCS#12** Format) kann ein Angreifer es erneuern, ohne mit dem ursprünglichen Eigentümer zu interagieren – perfekt für heimliche, langfristige Persistenz:
+```powershell
+Certify.exe request-renew --ca SERVER\\CA-NAME \
+--cert-pfx MIACAQMwgAYJKoZIhvcNAQcBoIAkgA...   # original PFX
+```
+Der Befehl gibt ein neues PFX zurück, das für einen weiteren vollständigen Lebenszyklus gültig ist, sodass Sie weiterhin authentifizieren können, selbst nachdem das erste Zertifikat abgelaufen oder widerrufen wurde.
+
+## References
+
+- [Certify 2.0 – SpecterOps Blog](https://specterops.io/blog/2025/08/11/certify-2-0/)
 
 {{#include ../../../banners/hacktricks-training.md}}
