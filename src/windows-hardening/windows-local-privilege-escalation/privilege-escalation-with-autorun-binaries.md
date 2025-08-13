@@ -1,4 +1,4 @@
-# Escalação de Privilégios com Autoruns
+# Escalada de Privilégios com Autoruns
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -26,7 +26,7 @@ schtasks /Create /RU "SYSTEM" /SC ONLOGON /TN "SchedPE" /TR "cmd /c net localgro
 ```
 ## Pastas
 
-Todos os binários localizados nas **pastas de Inicialização serão executados na inicialização**. As pastas de inicialização comuns são as listadas a seguir, mas a pasta de inicialização é indicada no registro. [Read this to learn where.](privilege-escalation-with-autorun-binaries.md#startup-path)
+Todos os binários localizados nas **pastas de Inicialização serão executados na inicialização**. As pastas de inicialização comuns são as listadas a seguir, mas a pasta de inicialização é indicada no registro. [Leia isso para saber onde.](privilege-escalation-with-autorun-binaries.md#startup-path)
 ```bash
 dir /b "C:\Documents and Settings\All Users\Start Menu\Programs\Startup" 2>nul
 dir /b "C:\Documents and Settings\%username%\Start Menu\Programs\Startup" 2>nul
@@ -35,14 +35,22 @@ dir /b "%appdata%\Microsoft\Windows\Start Menu\Programs\Startup" 2>nul
 Get-ChildItem "C:\Users\All Users\Start Menu\Programs\Startup"
 Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 ```
+> **FYI**: Vulnerabilidades de *traversal de caminho* na extração de arquivos (como a que foi explorada no WinRAR antes da versão 7.13 – CVE-2025-8088) podem ser aproveitadas para **depositar payloads diretamente dentro dessas pastas de Inicialização durante a descompressão**, resultando na execução de código no próximo logon do usuário. Para uma análise aprofundada dessa técnica, veja:
+
+{{#ref}}
+../../generic-hacking/archive-extraction-path-traversal.md
+{{#endref}}
+
+
+
 ## Registro
 
-> [!NOTE]
+> [!TIP]
 > [Nota daqui](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): A entrada de registro **Wow6432Node** indica que você está executando uma versão do Windows de 64 bits. O sistema operacional usa essa chave para exibir uma visão separada de HKEY_LOCAL_MACHINE\SOFTWARE para aplicativos de 32 bits que são executados em versões do Windows de 64 bits.
 
 ### Execuções
 
-**Comumente conhecido** AutoRun registro:
+Registro AutoRun **comumente conhecido**:
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\Run`
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\RunOnce`
@@ -56,7 +64,7 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 - `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\Runonce`
 - `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\RunonceEx`
 
-As chaves de registro conhecidas como **Run** e **RunOnce** são projetadas para executar automaticamente programas toda vez que um usuário faz login no sistema. A linha de comando atribuída como valor de dados de uma chave é limitada a 260 caracteres ou menos.
+As chaves de registro conhecidas como **Run** e **RunOnce** são projetadas para executar automaticamente programas toda vez que um usuário faz logon no sistema. A linha de comando atribuída como valor de dados de uma chave é limitada a 260 caracteres ou menos.
 
 **Execuções de serviço** (podem controlar a inicialização automática de serviços durante a inicialização):
 
@@ -78,10 +86,10 @@ No Windows Vista e versões posteriores, as chaves de registro **Run** e **RunOn
 ```
 reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx\\0001\\Depend /v 1 /d "C:\\temp\\evil.dll"
 ```
-> [!NOTE]
+> [!TIP]
 > **Exploit 1**: Se você puder escrever dentro de qualquer um dos registros mencionados dentro de **HKLM**, você pode escalar privilégios quando um usuário diferente fizer login.
 
-> [!NOTE]
+> [!TIP]
 > **Exploit 2**: Se você puder sobrescrever qualquer um dos binários indicados em qualquer um dos registros dentro de **HKLM**, você pode modificar esse binário com um backdoor quando um usuário diferente fizer login e escalar privilégios.
 ```bash
 #CMD
@@ -147,7 +155,7 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\Ru
 
 Atalhos colocados na pasta **Inicialização** irão automaticamente acionar serviços ou aplicativos para serem iniciados durante o logon do usuário ou a reinicialização do sistema. A localização da pasta **Inicialização** é definida no registro para os escopos **Máquina Local** e **Usuário Atual**. Isso significa que qualquer atalho adicionado a esses locais de **Inicialização** especificados garantirá que o serviço ou programa vinculado seja iniciado após o processo de logon ou reinicialização, tornando-se um método simples para agendar programas para serem executados automaticamente.
 
-> [!NOTE]
+> [!TIP]
 > Se você puder sobrescrever qualquer \[User] Shell Folder sob **HKLM**, você poderá apontá-lo para uma pasta controlada por você e colocar um backdoor que será executado sempre que um usuário fizer login no sistema, escalando privilégios.
 ```bash
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v "Common Startup"
@@ -164,14 +172,14 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion
 
 `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`
 
-Normalmente, a chave **Userinit** é definida como **userinit.exe**. No entanto, se essa chave for modificada, o executável especificado também será iniciado pelo **Winlogon** ao fazer login do usuário. Da mesma forma, a chave **Shell** é destinada a apontar para **explorer.exe**, que é o shell padrão do Windows.
+Normalmente, a chave **Userinit** é definida como **userinit.exe**. No entanto, se essa chave for modificada, o executável especificado também será iniciado pelo **Winlogon** ao fazer login do usuário. Da mesma forma, a chave **Shell** deve apontar para **explorer.exe**, que é o shell padrão do Windows.
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Userinit"
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Shell"
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name "Userinit"
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name "Shell"
 ```
-> [!NOTE]
+> [!TIP]
 > Se você puder sobrescrever o valor do registro ou o binário, conseguirá escalar privilégios.
 
 ### Configurações de Política
@@ -190,7 +198,7 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 
 ### Mudando o Prompt de Comando do Modo Seguro
 
-No Registro do Windows em `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`, há um valor **`AlternateShell`** definido por padrão como `cmd.exe`. Isso significa que, ao escolher "Modo Seguro com Prompt de Comando" durante a inicialização (pressionando F8), `cmd.exe` é utilizado. Mas, é possível configurar seu computador para iniciar automaticamente neste modo sem precisar pressionar F8 e selecioná-lo manualmente.
+No Registro do Windows em `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`, há um valor **`AlternateShell`** definido por padrão como `cmd.exe`. Isso significa que, ao escolher "Modo Seguro com Prompt de Comando" durante a inicialização (pressionando F8), `cmd.exe` é utilizado. No entanto, é possível configurar seu computador para iniciar automaticamente neste modo sem precisar pressionar F8 e selecioná-lo manualmente.
 
 Passos para criar uma opção de inicialização para iniciar automaticamente em "Modo Seguro com Prompt de Comando":
 
@@ -202,9 +210,9 @@ Passos para criar uma opção de inicialização para iniciar automaticamente em
 
 - **Exploit 1:** Alterar a chave de registro **AlternateShell** permite a configuração de um shell de comando personalizado, potencialmente para acesso não autorizado.
 - **Exploit 2 (Permissões de Escrita no PATH):** Ter permissões de escrita em qualquer parte da variável **PATH** do sistema, especialmente antes de `C:\Windows\system32`, permite que você execute um `cmd.exe` personalizado, que pode ser uma porta dos fundos se o sistema for iniciado em Modo Seguro.
-- **Exploit 3 (Permissões de Escrita no PATH e boot.ini):** O acesso de escrita ao `boot.ini` permite a inicialização automática em Modo Seguro, facilitando o acesso não autorizado na próxima reinicialização.
+- **Exploit 3 (Permissões de Escrita no PATH e boot.ini):** O acesso de escrita ao `boot.ini` permite a inicialização automática no Modo Seguro, facilitando o acesso não autorizado na próxima reinicialização.
 
-Para verificar a configuração atual de **AlternateShell**, use estes comandos:
+Para verificar a configuração atual do **AlternateShell**, use estes comandos:
 ```bash
 reg query HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot /v AlternateShell
 Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SafeBoot' -Name 'AlternateShell'
@@ -225,7 +233,7 @@ Dentro dessas chaves, existem várias subchaves, cada uma correspondendo a um co
 - **IsInstalled:**
 - `0` indica que o comando do componente não será executado.
 - `1` significa que o comando será executado uma vez para cada usuário, que é o comportamento padrão se o valor `IsInstalled` estiver ausente.
-- **StubPath:** Define o comando a ser executado pelo Active Setup. Pode ser qualquer linha de comando válida, como iniciar `notepad`.
+- **StubPath:** Define o comando a ser executado pelo Active Setup. Pode ser qualquer linha de comando válida, como iniciar o `notepad`.
 
 **Insights de Segurança:**
 
@@ -239,11 +247,11 @@ reg query "HKCU\SOFTWARE\Microsoft\Active Setup\Installed Components" /s /v Stub
 reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components" /s /v StubPath
 reg query "HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components" /s /v StubPath
 ```
-### Objetos Auxiliares do Navegador
+### Browser Helper Objects
 
-### Visão Geral dos Objetos Auxiliares do Navegador (BHOs)
+### Visão Geral dos Browser Helper Objects (BHOs)
 
-Os Objetos Auxiliares do Navegador (BHOs) são módulos DLL que adicionam recursos extras ao Internet Explorer da Microsoft. Eles são carregados no Internet Explorer e no Windows Explorer a cada inicialização. No entanto, sua execução pode ser bloqueada definindo a chave **NoExplorer** como 1, impedindo que sejam carregados com as instâncias do Windows Explorer.
+Browser Helper Objects (BHOs) são módulos DLL que adicionam recursos extras ao Internet Explorer da Microsoft. Eles são carregados no Internet Explorer e no Windows Explorer a cada inicialização. No entanto, sua execução pode ser bloqueada definindo a chave **NoExplorer** como 1, impedindo que sejam carregados com instâncias do Windows Explorer.
 
 Os BHOs são compatíveis com o Windows 10 via Internet Explorer 11, mas não são suportados no Microsoft Edge, o navegador padrão nas versões mais recentes do Windows.
 
@@ -264,7 +272,7 @@ reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\B
 - `HKLM\Software\Microsoft\Internet Explorer\Extensions`
 - `HKLM\Software\Wow6432Node\Microsoft\Internet Explorer\Extensions`
 
-Observe que o registro conterá 1 novo registro para cada dll e será representado pelo **CLSID**. Você pode encontrar as informações do CLSID em `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`
+Note que o registro conterá 1 novo registro para cada dll e será representado pelo **CLSID**. Você pode encontrar as informações do CLSID em `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`
 
 ### Drivers de Fonte
 
