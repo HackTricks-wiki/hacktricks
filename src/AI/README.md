@@ -58,10 +58,16 @@ AI-Models-RCE.md
 
 ### Protokoll für den Kontext von KI-Modellen
 
-MCP (Model Context Protocol) ist ein Protokoll, das es KI-Agenten-Clients ermöglicht, sich auf eine Plug-and-Play-Art und Weise mit externen Tools und Datenquellen zu verbinden. Dies ermöglicht komplexe Arbeitsabläufe und Interaktionen zwischen KI-Modellen und externen Systemen:
+MCP (Model Context Protocol) ist ein Protokoll, das es KI-Agenten-Clients ermöglicht, sich mit externen Tools und Datenquellen auf eine Plug-and-Play-Art und Weise zu verbinden. Dies ermöglicht komplexe Workflows und Interaktionen zwischen KI-Modellen und externen Systemen:
 
 {{#ref}}
 AI-MCP-Servers.md
+{{#endref}}
+
+### KI-unterstütztes Fuzzing & automatisierte Schwachstellenerkennung
+
+{{#ref}}
+AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
 {{#endref}}
 
 {{#include ../banners/hacktricks-training.md}}
