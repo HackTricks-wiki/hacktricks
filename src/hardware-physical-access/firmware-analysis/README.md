@@ -4,6 +4,12 @@
 
 ## **Introduzione**
 
+### Risorse correlate
+
+{{#ref}}
+synology-encrypted-archive-decryption.md
+{{#endref}}
+
 Il firmware è un software essenziale che consente ai dispositivi di funzionare correttamente gestendo e facilitando la comunicazione tra i componenti hardware e il software con cui gli utenti interagiscono. È memorizzato in memoria permanente, garantendo che il dispositivo possa accedere a istruzioni vitali dal momento in cui viene acceso, portando al lancio del sistema operativo. Esaminare e potenzialmente modificare il firmware è un passo critico per identificare vulnerabilità di sicurezza.
 
 ## **Raccolta di Informazioni**
@@ -15,11 +21,11 @@ Il firmware è un software essenziale che consente ai dispositivi di funzionare 
 - Layout hardware e schede tecniche
 - Metriche del codice sorgente e posizioni
 - Librerie esterne e tipi di licenza
-- Storie degli aggiornamenti e certificazioni normative
+- Storia degli aggiornamenti e certificazioni normative
 - Diagrammi architettonici e di flusso
 - Valutazioni di sicurezza e vulnerabilità identificate
 
-A questo scopo, gli strumenti di **intelligence open-source (OSINT)** sono inestimabili, così come l'analisi di eventuali componenti software open-source disponibili attraverso processi di revisione manuale e automatizzati. Strumenti come [Coverity Scan](https://scan.coverity.com) e [Semmle’s LGTM](https://lgtm.com/#explore) offrono analisi statica gratuita che può essere sfruttata per trovare potenziali problemi.
+A questo scopo, gli strumenti di **intelligence open-source (OSINT)** sono inestimabili, così come l'analisi di eventuali componenti software open-source disponibili attraverso processi di revisione manuale e automatizzati. Strumenti come [Coverity Scan](https://scan.coverity.com) e [Semmle’s LGTM](https://lgtm.com/#explore) offrono analisi statica gratuita che possono essere sfruttate per trovare potenziali problemi.
 
 ## **Acquisizione del Firmware**
 
@@ -37,7 +43,7 @@ Ottenere il firmware può essere affrontato attraverso vari mezzi, ognuno con il
 - **Dumping** dal bootloader o dalla rete
 - **Rimuovendo e leggendo** il chip di memoria, quando tutto il resto fallisce, utilizzando strumenti hardware appropriati
 
-## Analizzando il firmware
+## Analizzare il firmware
 
 Ora che **hai il firmware**, devi estrarre informazioni su di esso per sapere come trattarlo. Diversi strumenti che puoi utilizzare per questo:
 ```bash
@@ -126,13 +132,13 @@ hexdump -C -n 512 <bin> > hexdump.out
 hexdump -C <bin> | head #useful for finding signatures in the header
 fdisk -lu <bin> #lists partitions and filesystems, if there are multiple
 ```
-Per valutare lo stato di crittografia dell'immagine, si controlla l'**entropia** con `binwalk -E <bin>`. Un'entropia bassa suggerisce una mancanza di crittografia, mentre un'entropia alta indica una possibile crittografia o compressione.
+Per valutare lo stato della crittografia dell'immagine, si controlla l'**entropia** con `binwalk -E <bin>`. Un'entropia bassa suggerisce una mancanza di crittografia, mentre un'entropia alta indica una possibile crittografia o compressione.
 
-Per estrarre i **file incorporati**, si raccomandano strumenti e risorse come la documentazione **file-data-carving-recovery-tools** e **binvis.io** per l'ispezione dei file.
+Per estrarre i **file incorporati**, si raccomandano strumenti e risorse come la documentazione di **file-data-carving-recovery-tools** e **binvis.io** per l'ispezione dei file.
 
 ### Estrazione del Filesystem
 
-Utilizzando `binwalk -ev <bin>`, è possibile solitamente estrarre il filesystem, spesso in una directory chiamata in base al tipo di filesystem (ad esempio, squashfs, ubifs). Tuttavia, quando **binwalk** non riesce a riconoscere il tipo di filesystem a causa di byte magici mancanti, è necessaria un'estrazione manuale. Questo comporta l'uso di `binwalk` per localizzare l'offset del filesystem, seguito dal comando `dd` per estrarre il filesystem:
+Utilizzando `binwalk -ev <bin>`, è possibile solitamente estrarre il filesystem, spesso in una directory chiamata con il tipo di filesystem (ad esempio, squashfs, ubifs). Tuttavia, quando **binwalk** non riesce a riconoscere il tipo di filesystem a causa di byte magici mancanti, è necessaria un'estrazione manuale. Questo comporta l'uso di `binwalk` per localizzare l'offset del filesystem, seguito dal comando `dd` per estrarre il filesystem:
 ```bash
 $ binwalk DIR850L_REVB.bin
 
@@ -147,7 +153,7 @@ Con il filesystem estratto, inizia la ricerca di vulnerabilità di sicurezza. Si
 **Posizioni chiave** e **elementi** da ispezionare includono:
 
 - **etc/shadow** e **etc/passwd** per le credenziali degli utenti
-- Certificati e chiavi SSL in **etc/ssl**
+- Certificati SSL e chiavi in **etc/ssl**
 - File di configurazione e script per potenziali vulnerabilità
 - Binari incorporati per ulteriori analisi
 - Server web e binari comuni dei dispositivi IoT
@@ -180,7 +186,7 @@ E per installare gli strumenti di emulazione necessari:
 ```bash
 sudo apt-get install qemu qemu-user qemu-user-static qemu-system-arm qemu-system-mips qemu-system-x86 qemu-utils
 ```
-Per MIPS (big-endian), si utilizza `qemu-mips`, e per i binari little-endian, `qemu-mipsel` sarebbe la scelta.
+Per MIPS (big-endian), si utilizza `qemu-mips`, e per i binari little-endian, la scelta sarebbe `qemu-mipsel`.
 
 #### Emulazione dell'Architettura ARM
 
@@ -194,22 +200,22 @@ Strumenti come [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware An
 
 A questo stadio, viene utilizzato un ambiente di dispositivo reale o emulato per l'analisi. È essenziale mantenere l'accesso shell al sistema operativo e al filesystem. L'emulazione potrebbe non imitare perfettamente le interazioni hardware, rendendo necessari occasionali riavvii dell'emulazione. L'analisi dovrebbe riesaminare il filesystem, sfruttare le pagine web e i servizi di rete esposti, ed esplorare le vulnerabilità del bootloader. I test di integrità del firmware sono critici per identificare potenziali vulnerabilità di backdoor.
 
-## Tecniche di Analisi in Esecuzione
+## Tecniche di Analisi Runtime
 
-L'analisi in esecuzione implica l'interazione con un processo o binario nel suo ambiente operativo, utilizzando strumenti come gdb-multiarch, Frida e Ghidra per impostare breakpoint e identificare vulnerabilità attraverso fuzzing e altre tecniche.
+L'analisi runtime implica l'interazione con un processo o un binario nel suo ambiente operativo, utilizzando strumenti come gdb-multiarch, Frida e Ghidra per impostare breakpoint e identificare vulnerabilità attraverso fuzzing e altre tecniche.
 
 ## Sfruttamento Binario e Proof-of-Concept
 
-Sviluppare un PoC per vulnerabilità identificate richiede una profonda comprensione dell'architettura target e programmazione in linguaggi di basso livello. Le protezioni binarie in esecuzione nei sistemi embedded sono rare, ma quando presenti, tecniche come il Return Oriented Programming (ROP) possono essere necessarie.
+Sviluppare un PoC per vulnerabilità identificate richiede una profonda comprensione dell'architettura target e programmazione in linguaggi di basso livello. Le protezioni runtime binarie nei sistemi embedded sono rare, ma quando presenti, tecniche come il Return Oriented Programming (ROP) possono essere necessarie.
 
 ## Sistemi Operativi Preparati per l'Analisi del Firmware
 
-Sistemi operativi come [AttifyOS](https://github.com/adi0x90/attifyos) e [EmbedOS](https://github.com/scriptingxss/EmbedOS) forniscono ambienti pre-configurati per il testing della sicurezza del firmware, dotati degli strumenti necessari.
+Sistemi operativi come [AttifyOS](https://github.com/adi0x90/attifyos) e [EmbedOS](https://github.com/scriptingxss/EmbedOS) forniscono ambienti preconfigurati per il testing della sicurezza del firmware, dotati degli strumenti necessari.
 
 ## OS Preparati per Analizzare il Firmware
 
-- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS è una distribuzione destinata ad aiutarti a eseguire valutazioni di sicurezza e penetration testing di dispositivi Internet of Things (IoT). Ti fa risparmiare molto tempo fornendo un ambiente pre-configurato con tutti gli strumenti necessari caricati.
-- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Sistema operativo per il testing della sicurezza embedded basato su Ubuntu 18.04 pre-caricato con strumenti per il testing della sicurezza del firmware.
+- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS è una distribuzione destinata ad aiutarti a eseguire valutazioni di sicurezza e penetration testing di dispositivi Internet of Things (IoT). Ti fa risparmiare molto tempo fornendo un ambiente preconfigurato con tutti gli strumenti necessari caricati.
+- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Sistema operativo per il testing della sicurezza embedded basato su Ubuntu 18.04 precaricato con strumenti per il testing della sicurezza del firmware.
 
 ## Attacchi di Downgrade del Firmware e Meccanismi di Aggiornamento Insicuri
 
@@ -224,7 +230,7 @@ Flusso di attacco tipico:
 2. **Caricare o servire l'immagine al dispositivo** tramite qualsiasi canale di aggiornamento esposto:
 * Interfaccia Web, API dell'app mobile, USB, TFTP, MQTT, ecc.
 * Molti dispositivi IoT consumer espongono endpoint HTTP(S) *non autenticati* che accettano blob di firmware codificati in Base64, li decodificano lato server e attivano il ripristino/aggiornamento.
-3. Dopo il downgrade, sfruttare una vulnerabilità che è stata corretta nella versione più recente (ad esempio, un filtro di iniezione di comandi che è stato aggiunto successivamente).
+3. Dopo il downgrade, sfruttare una vulnerabilità che è stata corretta nella versione più recente (ad esempio, un filtro di injection di comandi che è stato aggiunto successivamente).
 4. Facoltativamente, flashare l'immagine più recente o disabilitare gli aggiornamenti per evitare il rilevamento una volta ottenuta la persistenza.
 
 ### Esempio: Iniezione di Comandi Dopo il Downgrade
@@ -238,7 +244,7 @@ Nel firmware vulnerabile (downgradato), il parametro `md5` è concatenato dirett
 
 ### Estrazione del Firmware da App Mobili
 
-Molti fornitori includono immagini firmware complete all'interno delle loro applicazioni mobili companion in modo che l'app possa aggiornare il dispositivo tramite Bluetooth/Wi-Fi. Questi pacchetti sono comunemente memorizzati non crittografati nell'APK/APEX sotto percorsi come `assets/fw/` o `res/raw/`. Strumenti come `apktool`, `ghidra`, o anche il semplice `unzip` ti consentono di estrarre immagini firmate senza toccare l'hardware fisico.
+Molti fornitori includono immagini firmware complete all'interno delle loro applicazioni mobili companion in modo che l'app possa aggiornare il dispositivo tramite Bluetooth/Wi-Fi. Questi pacchetti sono comunemente memorizzati non crittografati nell'APK/APEX sotto percorsi come `assets/fw/` o `res/raw/`. Strumenti come `apktool`, `ghidra` o anche il semplice `unzip` ti consentono di estrarre immagini firmate senza toccare l'hardware fisico.
 ```
 $ apktool d vendor-app.apk -o vendor-app
 $ ls vendor-app/assets/firmware
