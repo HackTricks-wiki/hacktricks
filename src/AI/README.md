@@ -34,7 +34,7 @@ AI-llm-architecture/README.md
 
 ### AIリスクフレームワーク
 
-現在、AIシステムのリスクを評価するための主な2つのフレームワークは、OWASP ML Top 10とGoogle SAIFです：
+現時点で、AIシステムのリスクを評価するための主な2つのフレームワークは、OWASP ML Top 10とGoogle SAIFです：
 
 {{#ref}}
 AI-Risk-Frameworks.md
@@ -62,6 +62,12 @@ MCP（モデルコンテキストプロトコル）は、AIエージェントク
 
 {{#ref}}
 AI-MCP-Servers.md
+{{#endref}}
+
+### AI支援ファジングと自動脆弱性発見
+
+{{#ref}}
+AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
 {{#endref}}
 
 {{#include ../banners/hacktricks-training.md}}
