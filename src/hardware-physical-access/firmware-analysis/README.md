@@ -4,6 +4,12 @@
 
 ## **Einführung**
 
+### Verwandte Ressourcen
+
+{{#ref}}
+synology-encrypted-archive-decryption.md
+{{#endref}}
+
 Firmware ist essentielle Software, die es Geräten ermöglicht, korrekt zu funktionieren, indem sie die Kommunikation zwischen den Hardwarekomponenten und der Software, mit der die Benutzer interagieren, verwaltet und erleichtert. Sie wird im permanenten Speicher gespeichert, sodass das Gerät von dem Moment an, in dem es eingeschaltet wird, auf wichtige Anweisungen zugreifen kann, was zum Start des Betriebssystems führt. Die Untersuchung und potenzielle Modifikation der Firmware ist ein kritischer Schritt zur Identifizierung von Sicherheitsanfälligkeiten.
 
 ## **Informationsbeschaffung**
@@ -28,7 +34,7 @@ Der Erwerb von Firmware kann auf verschiedene Weise erfolgen, jede mit ihrem eig
 - **Direkt** von der Quelle (Entwickler, Hersteller)
 - **Bauen** aus bereitgestellten Anweisungen
 - **Herunterladen** von offiziellen Support-Seiten
-- Nutzung von **Google-Dork**-Abfragen, um gehostete Firmware-Dateien zu finden
+- Nutzung von **Google-Dork**-Abfragen zur Auffindung gehosteter Firmware-Dateien
 - Direkter Zugriff auf **Cloud-Speicher** mit Tools wie [S3Scanner](https://github.com/sa7mon/S3Scanner)
 - Abfangen von **Updates** über Man-in-the-Middle-Techniken
 - **Extrahieren** vom Gerät über Verbindungen wie **UART**, **JTAG** oder **PICit**
@@ -48,7 +54,7 @@ hexdump -C -n 512 <bin> > hexdump.out
 hexdump -C <bin> | head # might find signatures in header
 fdisk -lu <bin> #lists a drives partition and filesystems if multiple
 ```
-Wenn Sie mit diesen Tools nicht viel finden, überprüfen Sie die **Entropie** des Bildes mit `binwalk -E <bin>`. Bei niedriger Entropie ist es unwahrscheinlich, dass es verschlüsselt ist. Bei hoher Entropie ist es wahrscheinlich verschlüsselt (oder auf irgendeine Weise komprimiert).
+Wenn Sie mit diesen Tools nicht viel finden, überprüfen Sie die **Entropie** des Bildes mit `binwalk -E <bin>`. Wenn die Entropie niedrig ist, ist es unwahrscheinlich, dass es verschlüsselt ist. Bei hoher Entropie ist es wahrscheinlich verschlüsselt (oder auf irgendeine Weise komprimiert).
 
 Darüber hinaus können Sie diese Tools verwenden, um **Dateien, die in der Firmware eingebettet sind**, zu extrahieren:
 
@@ -91,7 +97,7 @@ Alternativ kann auch der folgende Befehl ausgeführt werden.
 
 `$ dd if=DIR850L_REVB.bin bs=1 skip=$((0x1A0094)) of=dir.squashfs`
 
-- Für squashfs (wie im obigen Beispiel verwendet)
+- Für squashfs (im obigen Beispiel verwendet)
 
 `$ unsquashfs dir.squashfs`
 
@@ -128,11 +134,11 @@ fdisk -lu <bin> #lists partitions and filesystems, if there are multiple
 ```
 Um den Verschlüsselungsstatus des Images zu bewerten, wird die **Entropie** mit `binwalk -E <bin>` überprüft. Eine niedrige Entropie deutet auf einen Mangel an Verschlüsselung hin, während eine hohe Entropie auf mögliche Verschlüsselung oder Kompression hinweist.
 
-Für das Extrahieren von **eingebetteten Dateien** werden Werkzeuge und Ressourcen wie die Dokumentation zu **file-data-carving-recovery-tools** und **binvis.io** zur Dateiansicht empfohlen.
+Für das Extrahieren von **eingebetteten Dateien** werden Werkzeuge und Ressourcen wie die **file-data-carving-recovery-tools** Dokumentation und **binvis.io** zur Dateiansicht empfohlen.
 
 ### Extrahieren des Dateisystems
 
-Mit `binwalk -ev <bin>` kann man normalerweise das Dateisystem extrahieren, oft in ein Verzeichnis, das nach dem Dateisystemtyp benannt ist (z. B. squashfs, ubifs). Wenn **binwalk** jedoch den Dateisystemtyp aufgrund fehlender Magic Bytes nicht erkennt, ist eine manuelle Extraktion erforderlich. Dies beinhaltet die Verwendung von `binwalk`, um den Offset des Dateisystems zu lokalisieren, gefolgt vom `dd`-Befehl, um das Dateisystem herauszuschneiden:
+Mit `binwalk -ev <bin>` kann man normalerweise das Dateisystem extrahieren, oft in ein Verzeichnis, das nach dem Dateisystemtyp benannt ist (z. B. squashfs, ubifs). Wenn **binwalk** jedoch den Dateisystemtyp aufgrund fehlender Magic Bytes nicht erkennt, ist eine manuelle Extraktion erforderlich. Dies beinhaltet die Verwendung von `binwalk`, um den Offset des Dateisystems zu lokalisieren, gefolgt vom `dd` Befehl, um das Dateisystem herauszuschneiden:
 ```bash
 $ binwalk DIR850L_REVB.bin
 
@@ -164,7 +170,7 @@ Sowohl Quellcode als auch kompilierte Binärdateien, die im Dateisystem gefunden
 
 ## Emulation von Firmware für dynamische Analysen
 
-Der Prozess der Emulation von Firmware ermöglicht **dynamische Analysen** entweder des Betriebs eines Geräts oder eines einzelnen Programms. Dieser Ansatz kann auf Herausforderungen mit Hardware- oder Architekturabhängigkeiten stoßen, aber das Übertragen des Root-Dateisystems oder spezifischer Binärdateien auf ein Gerät mit passender Architektur und Endianness, wie z. B. einem Raspberry Pi, oder auf eine vorgefertigte virtuelle Maschine, kann weitere Tests erleichtern.
+Der Prozess der Emulation von Firmware ermöglicht die **dynamische Analyse** entweder des Betriebs eines Geräts oder eines einzelnen Programms. Dieser Ansatz kann auf Herausforderungen mit Hardware- oder Architekturabhängigkeiten stoßen, aber das Übertragen des Root-Dateisystems oder spezifischer Binärdateien auf ein Gerät mit passender Architektur und Endianness, wie einem Raspberry Pi, oder auf eine vorgefertigte virtuelle Maschine, kann weitere Tests erleichtern.
 
 ### Emulation einzelner Binärdateien
 
@@ -208,33 +214,33 @@ Betriebssysteme wie [AttifyOS](https://github.com/adi0x90/attifyos) und [EmbedOS
 
 ## Vorbereitete OSs zur Analyse von Firmware
 
-- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS ist eine Distribution, die Ihnen hilft, Sicherheitsbewertungen und Penetrationstests von Internet of Things (IoT)-Geräten durchzuführen. Es spart Ihnen viel Zeit, indem es eine vorkonfigurierte Umgebung mit allen notwendigen Tools bereitstellt.
+- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS ist eine Distribution, die Ihnen helfen soll, Sicherheitsbewertungen und Penetrationstests von Internet of Things (IoT)-Geräten durchzuführen. Es spart Ihnen viel Zeit, indem es eine vorkonfigurierte Umgebung mit allen notwendigen Tools bereitstellt.
 - [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Eingebettetes Sicherheitstestbetriebssystem basierend auf Ubuntu 18.04, vorinstalliert mit Tools für die Sicherheitstests von Firmware.
 
 ## Firmware-Downgrade-Angriffe & Unsichere Aktualisierungsmechanismen
 
-Selbst wenn ein Anbieter kryptografische Signaturprüfungen für Firmware-Images implementiert, **wird der Schutz vor Versionsrücksetzungen (Downgrade) häufig weggelassen**. Wenn der Boot- oder Wiederherstellungs-Loader nur die Signatur mit einem eingebetteten öffentlichen Schlüssel überprüft, aber die *Version* (oder einen monotonen Zähler) des geflashten Images nicht vergleicht, kann ein Angreifer legitim eine **ältere, anfällige Firmware installieren, die immer noch eine gültige Signatur trägt** und somit gepatchte Schwachstellen wieder einführen.
+Selbst wenn ein Anbieter kryptografische Signaturprüfungen für Firmware-Images implementiert, **wird der Schutz vor Versionsrücksetzungen (Downgrade) häufig weggelassen**. Wenn der Boot- oder Wiederherstellungs-Loader nur die Signatur mit einem eingebetteten öffentlichen Schlüssel überprüft, aber die *Version* (oder einen monotonen Zähler) des geflashten Images nicht vergleicht, kann ein Angreifer legitim eine **ältere, verwundbare Firmware installieren, die immer noch eine gültige Signatur trägt** und somit gepatchte Schwachstellen wieder einführen.
 
 Typischer Angriffsablauf:
 
 1. **Erhalten Sie ein älteres signiertes Image**
-* Laden Sie es von dem öffentlichen Download-Portal des Anbieters, CDN oder Support-Website herunter.
+* Laden Sie es von dem öffentlichen Download-Portal, CDN oder Support-Website des Anbieters herunter.
 * Extrahieren Sie es aus begleitenden mobilen/desktopp Anwendungen (z. B. innerhalb einer Android-APK unter `assets/firmware/`).
 * Holen Sie es aus Drittanbieter-Repositories wie VirusTotal, Internet-Archiven, Foren usw.
 2. **Laden Sie das Image auf das Gerät hoch oder stellen Sie es bereit** über einen beliebigen exponierten Aktualisierungskanal:
 * Web-UI, mobile-App-API, USB, TFTP, MQTT usw.
 * Viele Verbraucher-IoT-Geräte bieten *unauthentifizierte* HTTP(S)-Endpunkte, die Base64-kodierte Firmware-Blobs akzeptieren, diese serverseitig decodieren und die Wiederherstellung/Aktualisierung auslösen.
-3. Nach dem Downgrade eine Schwachstelle ausnutzen, die in der neueren Version gepatcht wurde (zum Beispiel einen Befehlseinschlussfilter, der später hinzugefügt wurde).
+3. Nach dem Downgrade eine Schwachstelle ausnutzen, die in der neueren Version gepatcht wurde (zum Beispiel einen Befehlseinschleusungsfilter, der später hinzugefügt wurde).
 4. Optional das neueste Image zurückflashen oder Updates deaktivieren, um eine Entdeckung zu vermeiden, sobald Persistenz erreicht ist.
 
-### Beispiel: Befehlseinschluss nach Downgrade
+### Beispiel: Befehlseinschleusung nach Downgrade
 ```http
 POST /check_image_and_trigger_recovery?md5=1; echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC...' >> /root/.ssh/authorized_keys HTTP/1.1
 Host: 192.168.0.1
 Content-Type: application/octet-stream
 Content-Length: 0
 ```
-In der verwundbaren (heruntergestuften) Firmware wird der `md5`-Parameter direkt in einen Shell-Befehl ohne Sanitärbehandlung verkettet, was die Injektion beliebiger Befehle ermöglicht (hier – Aktivierung des SSH-Schlüssels für den Root-Zugriff). Spätere Firmware-Versionen führten einen grundlegenden Zeichenfilter ein, aber das Fehlen eines Downgrade-Schutzes macht die Lösung bedeutungslos.
+Im anfälligen (heruntergestuften) Firmware wird der `md5`-Parameter direkt in einen Shell-Befehl ohne Sanitärmaßnahmen eingefügt, was die Injektion beliebiger Befehle ermöglicht (hier – Aktivierung des SSH-Schlüssel-basierten Root-Zugriffs). Spätere Firmware-Versionen führten einen grundlegenden Zeichenfilter ein, aber das Fehlen eines Downgrade-Schutzes macht die Lösung bedeutungslos.
 
 ### Extrahieren von Firmware aus mobilen Apps
 
@@ -248,11 +254,11 @@ firmware_v1.3.11.490_signed.bin
 
 * Ist der Transport/Authentifizierung des *Update-Endpunkts* angemessen geschützt (TLS + Authentifizierung)?
 * Vergleicht das Gerät **Versionsnummern** oder einen **monotonen Anti-Rollback-Zähler** vor dem Flashen?
-* Wird das Image innerhalb einer sicheren Boot-Kette verifiziert (z.B. Signaturen, die vom ROM-Code überprüft werden)?
-* Führt der Userland-Code zusätzliche Plausibilitätsprüfungen durch (z.B. erlaubte Partitionstabelle, Modellnummer)?
-* Nutzen *partielle* oder *Backup*-Update-Flows die gleiche Validierungslogik?
+* Wird das Image innerhalb einer sicheren Bootkette verifiziert (z. B. Signaturen, die vom ROM-Code überprüft werden)?
+* Führt der Userland-Code zusätzliche Plausibilitätsprüfungen durch (z. B. erlaubte Partitionstabelle, Modellnummer)?
+* Nutzen *partielle* oder *Backup*-Update-Workflows die gleiche Validierungslogik?
 
-> 💡  Wenn eines der oben genannten fehlt, ist die Plattform wahrscheinlich anfällig für Rollback-Angriffe.
+> 💡  Wenn eines der oben genannten Punkte fehlt, ist die Plattform wahrscheinlich anfällig für Rollback-Angriffe.
 
 ## Verwundbare Firmware zum Üben
 
@@ -277,7 +283,7 @@ Um das Entdecken von Schwachstellen in Firmware zu üben, verwenden Sie die folg
 - [Practical IoT Hacking: The Definitive Guide to Attacking the Internet of Things](https://www.amazon.co.uk/Practical-IoT-Hacking-F-Chantzis/dp/1718500904)
 - [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 
-## Training und Zertifizierung
+## Schulung und Zertifizierung
 
 - [https://www.attify-store.com/products/offensive-iot-exploitation](https://www.attify-store.com/products/offensive-iot-exploitation)
 
