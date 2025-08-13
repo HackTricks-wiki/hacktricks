@@ -64,4 +64,10 @@ MCP (Protocolo de Contexto de Modelos) es un protocolo que permite a los cliente
 AI-MCP-Servers.md
 {{#endref}}
 
+### Fuzzing Asistido por IA y Descubrimiento Automatizado de Vulnerabilidades
+
+{{#ref}}
+AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
+{{#endref}}
+
 {{#include ../banners/hacktricks-training.md}}
