@@ -8,7 +8,7 @@
 
 U scenariju gde korisnik može da zatraži sertifikat koji omogućava autentifikaciju domena, napadač ima priliku da **zatraži** i **ukrade** ovaj sertifikat kako bi **održao postojanost** na mreži. Po defaultu, `User` šablon u Active Directory omogućava takve zahteve, iako može ponekad biti onemogućen.
 
-Korišćenjem alata pod nazivom [**Certify**](https://github.com/GhostPack/Certify), može se pretraživati za validnim sertifikatima koji omogućavaju postojan pristup:
+Korišćenjem alata pod nazivom [**Certify**](https://github.com/GhostPack/Certify), može se pretraživati validne sertifikate koji omogućavaju postojan pristup:
 ```bash
 Certify.exe find /clientauth
 ```
@@ -34,12 +34,23 @@ Druga metoda uključuje registraciju mašinskog naloga kompromitovanog sistema z
 ```bash
 Certify.exe request /ca:dc.theshire.local/theshire-DC-CA /template:Machine /machine
 ```
-Ovaj pristup omogućava napadaču da se autentifikuje na **Kerberos** kao mašinski nalog i koristi **S4U2Self** da dobije Kerberos servisne karte za bilo koju uslugu na hostu, što efektivno daje napadaču trajni pristup mašini.
+Ovaj pristup omogućava napadaču da se autentifikuje na **Kerberos** kao mašinski nalog i koristi **S4U2Self** da dobije Kerberos servisne karte za bilo koju uslugu na hostu, efektivno dajući napadaču trajni pristup mašini.
 
-## **Produženje trajnosti kroz obnavljanje sertifikata - PERSIST3**
+## **Produženje Persistencije Kroz Obnovu Sertifikata - PERSIST3**
 
-Poslednja metoda koja se razmatra uključuje korišćenje **važenja** i **perioda obnove** šablona sertifikata. Obnavljanjem sertifikata pre njegovog isteka, napadač može održati autentifikaciju na Active Directory bez potrebe za dodatnim upisima karata, što bi moglo ostaviti tragove na serveru sertifikacione vlasti (CA).
+Poslednja metoda koja se razmatra uključuje korišćenje **važenja** i **perioda obnove** šablona sertifikata. Obnavljanjem sertifikata pre njegovog isteka, napadač može održati autentifikaciju na Active Directory bez potrebe za dodatnim upisima karata, što bi moglo ostaviti tragove na serveru Sertifikacione vlasti (CA).
 
-Ovaj pristup omogućava **produženu trajnost**, minimizirajući rizik od otkrivanja kroz manje interakcija sa CA serverom i izbegavajući generisanje artefakata koji bi mogli upozoriti administratore na upad.
+### Obnova Sertifikata sa Certify 2.0
+
+Počevši od **Certify 2.0**, proces obnove je potpuno automatizovan kroz novu `request-renew` komandu. Dajući prethodno izdat sertifikat (u **base-64 PKCS#12** formatu), napadač može da ga obnovi bez interakcije sa originalnim vlasnikom – savršeno za diskretnu, dugoročnu persistenciju:
+```powershell
+Certify.exe request-renew --ca SERVER\\CA-NAME \
+--cert-pfx MIACAQMwgAYJKoZIhvcNAQcBoIAkgA...   # original PFX
+```
+Komanda će vratiti novi PFX koji je važeći za još jedan puni period trajanja, omogućavajući vam da nastavite sa autentifikacijom čak i nakon što prvi sertifikat istekne ili bude opozvan.
+
+## References
+
+- [Certify 2.0 – SpecterOps Blog](https://specterops.io/blog/2025/08/11/certify-2-0/)
 
 {{#include ../../../banners/hacktricks-training.md}}
