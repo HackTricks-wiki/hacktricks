@@ -72,11 +72,11 @@ Se você teme que isso desapareça, basta fazer um fork no Github ou baixá-lo, 
 >
 > - **Por que você tem patrocinadores? Os livros do HackTricks são para fins comerciais?**
 
-O primeiro **valor** do **HackTricks** é oferecer recursos educacionais de hacking **GRATUITOS** para **TODOS** no mundo. A equipe do HackTricks dedicou **milhares de horas** para oferecer este conteúdo, novamente, **GRATUITO**.
+O primeiro **valor** do **HackTricks** é oferecer recursos educacionais de hacking **GRATUITOS** para **TODOS** no mundo. A equipe do HackTricks dedicou **milhares de horas** para oferecer este conteúdo, novamente, **GRATUITAMENTE**.
 
 Se você acha que os livros do HackTricks são feitos para **fins comerciais**, você está **COMPLETAMENTE ERRADO**.
 
-Temos patrocinadores porque, mesmo que todo o conteúdo seja GRATUITO, queremos **oferecer à comunidade a possibilidade de apreciar nosso trabalho** se assim desejarem. Portanto, oferecemos às pessoas a opção de doar para o HackTricks via [**patrocinadores do Github**](https://github.com/sponsors/carlospolop), e **empresas de cibersegurança relevantes** para patrocinar o HackTricks e **ter alguns anúncios** no livro, sendo os **anúncios** sempre colocados em locais que os tornem **visíveis**, mas que **não atrapalhem o processo de aprendizado** se alguém se concentrar no conteúdo.
+Temos patrocinadores porque, mesmo que todo o conteúdo seja GRATUITO, queremos **oferecer à comunidade a possibilidade de apreciar nosso trabalho** se assim desejarem. Portanto, oferecemos às pessoas a opção de doar para o HackTricks via [**Github sponsors**](https://github.com/sponsors/carlospolop), e **empresas de cibersegurança relevantes** para patrocinar o HackTricks e **ter alguns anúncios** no livro, sendo os **anúncios** sempre colocados em locais que os tornam **visíveis**, mas que **não atrapalham o processo de aprendizado** se alguém se concentrar no conteúdo.
 
 Você não encontrará o HackTricks cheio de anúncios irritantes como outros blogs com muito menos conteúdo do que o HackTricks, porque o HackTricks não é feito para fins comerciais.
 
@@ -84,13 +84,13 @@ Você não encontrará o HackTricks cheio de anúncios irritantes como outros bl
 >
 > - **O que devo fazer se alguma página do HackTricks for baseada no meu post de blog, mas não estiver referenciada?**
 
-**Lamentamos muito. Isso não deveria ter acontecido**. Por favor, nos avise via problemas do Github, Twitter, Discord... o link da página do HackTricks com o conteúdo e o link do seu blog e **nós iremos verificar e adicionar o mais rápido possível**.
+**Lamentamos muito. Isso não deveria ter acontecido**. Por favor, nos avise via Github issues, Twitter, Discord... o link da página do HackTricks com o conteúdo e o link do seu blog e **nós iremos verificar e adicionar o mais rápido possível**.
 
 > [!CAUTION]
 >
 > - **O que devo fazer se houver conteúdo do meu blog no HackTricks e eu não quiser que esteja lá?**
 
-Note que ter links para sua página no HackTricks:
+Observe que ter links para sua página no HackTricks:
 
 - Melhora seu **SEO**
 - O conteúdo é **traduzido para mais de 15 idiomas**, possibilitando que mais pessoas acessem este conteúdo
@@ -100,7 +100,7 @@ No entanto, se você ainda quiser que o conteúdo do seu blog seja removido do H
 
 > [!CAUTION]
 >
-> - **O que devo fazer se encontrar conteúdo copiado e colado no HackTricks?**
+> - **O que devo fazer se eu encontrar conteúdo copiado e colado no HackTricks?**
 
 Nós sempre **damos todos os créditos aos autores originais**. Se você encontrar uma página com conteúdo copiado e colado sem a fonte original referenciada, nos avise e nós iremos **removê-lo**, **adicionar o link antes do texto**, ou **reescrevê-lo adicionando o link**.
 
@@ -117,7 +117,7 @@ Copyright © Todos os direitos reservados, a menos que especificado de outra for
 #### Termos Adicionais:
 
 - Conteúdo de Terceiros: Algumas partes deste blog/livro podem incluir conteúdo de outras fontes, como trechos de outros blogs ou publicações. O uso de tal conteúdo é feito sob os princípios de uso justo ou com permissão explícita dos respectivos detentores de direitos autorais. Consulte as fontes originais para informações específicas de licenciamento sobre conteúdo de terceiros.
-- Autoria: O conteúdo original escrito pelo HackTricks está sujeito aos termos desta licença. Você é incentivado a atribuir este trabalho ao autor ao compartilhá-lo ou adaptá-lo.
+- Autoria: O conteúdo original escrito pelo HackTricks está sujeito aos termos desta licença. Você é encorajado a atribuir este trabalho ao autor ao compartilhá-lo ou adaptá-lo.
 
 #### Isenções:
 
