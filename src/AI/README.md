@@ -64,4 +64,10 @@ MCP（模型上下文协议）是一种协议，允许AI代理客户端以即插
 AI-MCP-Servers.md
 {{#endref}}
 
+### AI辅助模糊测试与自动化漏洞发现
+
+{{#ref}}
+AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
+{{#endref}}
+
 {{#include ../banners/hacktricks-training.md}}
