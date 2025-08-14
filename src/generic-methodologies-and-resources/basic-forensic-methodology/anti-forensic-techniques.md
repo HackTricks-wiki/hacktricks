@@ -4,16 +4,16 @@
 
 ## Χρονικά Σημάδια
 
-Ένας επιτιθέμενος μπορεί να ενδιαφέρεται για **να αλλάξει τα χρονικά σημάδια των αρχείων** για να αποφύγει την ανίχνευση.\
-Είναι δυνατόν να βρείτε τα χρονικά σημάδια μέσα στο MFT σε χαρακτηριστικά `$STANDARD_INFORMATION` \_\_ και \_\_ `$FILE_NAME`.
+Ένας επιτιθέμενος μπορεί να ενδιαφέρεται για **την αλλαγή των χρονικών σημείων των αρχείων** για να αποφύγει την ανίχνευση.\
+Είναι δυνατόν να βρείτε τα χρονικά σημεία μέσα στο MFT σε χαρακτηριστικά `$STANDARD_INFORMATION` \_\_ και \_\_ `$FILE_NAME`.
 
-Και τα δύο χαρακτηριστικά έχουν 4 χρονικά σημάδια: **Τροποποίηση**, **πρόσβαση**, **δημιουργία** και **τροποποίηση μητρώου MFT** (MACE ή MACB).
+Και τα δύο χαρακτηριστικά έχουν 4 χρονικά σημεία: **Τροποποίηση**, **πρόσβαση**, **δημιουργία** και **τροποποίηση μητρώου MFT** (MACE ή MACB).
 
 **Ο εξερευνητής των Windows** και άλλα εργαλεία δείχνουν τις πληροφορίες από **`$STANDARD_INFORMATION`**.
 
 ### TimeStomp - Αντι-δικαστικό Εργαλείο
 
-Αυτό το εργαλείο **τροποποιεί** τις πληροφορίες χρονικών σημάτων μέσα στο **`$STANDARD_INFORMATION`** **αλλά** **όχι** τις πληροφορίες μέσα στο **`$FILE_NAME`**. Επομένως, είναι δυνατόν να **εντοπιστεί** **ύποπτη** **δραστηριότητα**.
+Αυτό το εργαλείο **τροποποιεί** τις πληροφορίες χρονικών σημείων μέσα σε **`$STANDARD_INFORMATION`** **αλλά** **όχι** τις πληροφορίες μέσα σε **`$FILE_NAME`**. Επομένως, είναι δυνατόν να **εντοπιστεί** **ύποπτη** **δραστηριότητα**.
 
 ### Usnjrnl
 
@@ -25,28 +25,28 @@
 
 ### $LogFile
 
-**Όλες οι αλλαγές μεταδεδομένων σε ένα σύστημα αρχείων καταγράφονται** σε μια διαδικασία που ονομάζεται [write-ahead logging](https://en.wikipedia.org/wiki/Write-ahead_logging). Τα καταγεγραμμένα μεταδεδομένα διατηρούνται σε ένα αρχείο με όνομα `**$LogFile**`, που βρίσκεται στον ριζικό κατάλογο ενός συστήματος αρχείων NTFS. Εργαλεία όπως το [LogFileParser](https://github.com/jschicht/LogFileParser) μπορούν να χρησιμοποιηθούν για την ανάλυση αυτού του αρχείου και την αναγνώριση αλλαγών.
+**Όλες οι αλλαγές μεταδεδομένων σε ένα σύστημα αρχείων καταγράφονται** σε μια διαδικασία γνωστή ως [write-ahead logging](https://en.wikipedia.org/wiki/Write-ahead_logging). Τα καταγεγραμμένα μεταδεδομένα διατηρούνται σε ένα αρχείο ονόματι `**$LogFile**`, που βρίσκεται στον ριζικό κατάλογο ενός συστήματος αρχείων NTFS. Εργαλεία όπως το [LogFileParser](https://github.com/jschicht/LogFileParser) μπορούν να χρησιμοποιηθούν για την ανάλυση αυτού του αρχείου και την αναγνώριση αλλαγών.
 
 ![](<../../images/image (137).png>)
 
 Και πάλι, στην έξοδο του εργαλείου είναι δυνατόν να δούμε ότι **κάποιες αλλαγές πραγματοποιήθηκαν**.
 
-Χρησιμοποιώντας το ίδιο εργαλείο είναι δυνατόν να εντοπιστεί **σε ποιο χρόνο τροποποιήθηκαν τα χρονικά σημάδια**:
+Χρησιμοποιώντας το ίδιο εργαλείο είναι δυνατόν να εντοπιστεί **σε ποιο χρόνο τροποποιήθηκαν τα χρονικά σημεία**:
 
 ![](<../../images/image (1089).png>)
 
 - CTIME: Χρόνος δημιουργίας αρχείου
 - ATIME: Χρόνος τροποποίησης αρχείου
-- MTIME: Τροποποίηση μητρώου MFT του αρχείου
+- MTIME: Τροποποίηση μητρώου MFT αρχείου
 - RTIME: Χρόνος πρόσβασης αρχείου
 
 ### Σύγκριση `$STANDARD_INFORMATION` και `$FILE_NAME`
 
-Ένας άλλος τρόπος για να εντοπιστούν ύποπτα τροποποιημένα αρχεία θα ήταν να συγκρίνουμε το χρόνο και στα δύο χαρακτηριστικά αναζητώντας **ασυμφωνίες**.
+Ένας άλλος τρόπος για να εντοπιστούν ύποπτα τροποποιημένα αρχεία θα ήταν να συγκρίνουμε τον χρόνο και στα δύο χαρακτηριστικά αναζητώντας **ασυμφωνίες**.
 
 ### Νανοδευτερόλεπτα
 
-**Τα χρονικά σημάδια NTFS έχουν μια **ακρίβεια** **100 νανοδευτερόλεπτα**. Έτσι, η εύρεση αρχείων με χρονικά σημάδια όπως 2010-10-10 10:10:**00.000:0000 είναι πολύ ύποπτη**.
+**Τα χρονικά σημεία NTFS έχουν μια **ακρίβεια** **100 νανοδευτερολέπτων**. Έτσι, η εύρεση αρχείων με χρονικά σημεία όπως 2010-10-10 10:10:**00.000:0000 είναι πολύ ύποπτη**.
 
 ### SetMace - Αντι-δικαστικό Εργαλείο
 
@@ -64,7 +64,7 @@
 
 ## UsbKill
 
-Αυτό είναι ένα εργαλείο που θα **σβήσει τον υπολογιστή αν ανιχνευθεί οποιαδήποτε αλλαγή στις θύρες USB**.\
+Αυτό είναι ένα εργαλείο που θα **απενεργοποιήσει τον υπολογιστή αν ανιχνευθεί οποιαδήποτε αλλαγή στις θύρες USB**.\
 Ένας τρόπος για να το ανακαλύψετε θα ήταν να ελέγξετε τις τρέχουσες διαδικασίες και **να αναθεωρήσετε κάθε εκτελέσιμο python script**.
 
 ## Ζωντανές Διανομές Linux
@@ -77,20 +77,20 @@
 
 ## Ρύθμιση των Windows
 
-Είναι δυνατόν να απενεργοποιηθούν πολλές μέθοδοι καταγραφής των Windows για να καταστεί η δικαστική έρευνα πολύ πιο δύσκολη.
+Είναι δυνατόν να απενεργοποιηθούν πολλές μέθοδοι καταγραφής των Windows για να καταστήσουν την ποινική έρευνα πολύ πιο δύσκολη.
 
-### Απενεργοποίηση Χρονικών Σημάτων - UserAssist
+### Απενεργοποίηση Χρονικών Σημείων - UserAssist
 
-Αυτό είναι ένα κλειδί μητρώου που διατηρεί ημερομηνίες και ώρες όταν εκτελείται κάθε εκτελέσιμο από τον χρήστη.
+Αυτό είναι ένα κλειδί μητρώου που διατηρεί ημερομηνίες και ώρες όταν κάθε εκτελέσιμο εκτελείται από τον χρήστη.
 
 Η απενεργοποίηση του UserAssist απαιτεί δύο βήματα:
 
 1. Ρυθμίστε δύο κλειδιά μητρώου, `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackProgs` και `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackEnabled`, και τα δύο στο μηδέν για να δηλώσετε ότι θέλουμε να απενεργοποιηθεί το UserAssist.
 2. Καθαρίστε τους υποκαταλόγους του μητρώου σας που μοιάζουν με `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\<hash>`.
 
-### Απενεργοποίηση Χρονικών Σημάτων - Prefetch
+### Απενεργοποίηση Χρονικών Σημείων - Prefetch
 
-Αυτό θα αποθηκεύσει πληροφορίες σχετικά με τις εφαρμογές που εκτελούνται με στόχο τη βελτίωση της απόδοσης του συστήματος Windows. Ωστόσο, αυτό μπορεί επίσης να είναι χρήσιμο για δικαστικές πρακτικές.
+Αυτό θα αποθηκεύσει πληροφορίες σχετικά με τις εφαρμογές που εκτελούνται με στόχο τη βελτίωση της απόδοσης του συστήματος Windows. Ωστόσο, αυτό μπορεί επίσης να είναι χρήσιμο για ποινικές πρακτικές.
 
 - Εκτελέστε `regedit`
 - Επιλέξτε τη διαδρομή αρχείου `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SessionManager\Memory Management\PrefetchParameters`
@@ -98,9 +98,9 @@
 - Επιλέξτε Τροποποίηση σε καθένα από αυτά για να αλλάξετε την τιμή από 1 (ή 3) σε 0
 - Επανεκκινήστε
 
-### Απενεργοποίηση Χρονικών Σημάτων - Χρόνος Τελευταίας Πρόσβασης
+### Απενεργοποίηση Χρονικών Σημείων - Χρόνος Τελευταίας Πρόσβασης
 
-Όποτε ανοίγεται ένας φάκελος από έναν όγκο NTFS σε έναν διακομιστή Windows NT, το σύστημα παίρνει το χρόνο για να **ενημερώσει ένα πεδίο χρονικού σήματος σε κάθε καταχωρημένο φάκελο**, που ονομάζεται χρόνος τελευταίας πρόσβασης. Σε έναν πολύ χρησιμοποιούμενο όγκο NTFS, αυτό μπορεί να επηρεάσει την απόδοση.
+Όποτε ένα φάκελος ανοίγεται από έναν όγκο NTFS σε έναν διακομιστή Windows NT, το σύστημα παίρνει το χρόνο για να **ενημερώσει ένα πεδίο χρονικού σημείου σε κάθε καταγεγραμμένο φάκελο**, που ονομάζεται χρόνος τελευταίας πρόσβασης. Σε έναν πολύ χρησιμοποιούμενο όγκο NTFS, αυτό μπορεί να επηρεάσει την απόδοση.
 
 1. Ανοίξτε τον Επεξεργαστή Μητρώου (Regedit.exe).
 2. Περιηγηθείτε στο `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem`.
@@ -110,24 +110,24 @@
 ### Διαγραφή Ιστορικού USB
 
 Όλες οι **Εγγραφές Συσκευών USB** αποθηκεύονται στο Μητρώο των Windows κάτω από το κλειδί μητρώου **USBSTOR** που περιέχει υποκλειδιά που δημιουργούνται όποτε συνδέετε μια συσκευή USB στον υπολογιστή ή το φορητό σας. Μπορείτε να βρείτε αυτό το κλειδί εδώ H`KEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Διαγράφοντας αυτό** θα διαγράψετε το ιστορικό USB.\
-Μπορείτε επίσης να χρησιμοποιήσετε το εργαλείο [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html) για να βεβαιωθείτε ότι έχετε διαγράψει αυτά (και για να τα διαγράψετε).
+Μπορείτε επίσης να χρησιμοποιήσετε το εργαλείο [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html) για να βεβαιωθείτε ότι τα έχετε διαγράψει (και για να τα διαγράψετε).
 
 Ένα άλλο αρχείο που αποθηκεύει πληροφορίες σχετικά με τα USB είναι το αρχείο `setupapi.dev.log` μέσα στο `C:\Windows\INF`. Αυτό θα πρέπει επίσης να διαγραφεί.
 
-### Απενεργοποίηση Αντίγραφα Σκιάς
+### Απενεργοποίηση Σκιάς Αντιγράφων
 
-**Λίστα** αντίγραφων σκιάς με `vssadmin list shadowstorage`\
+**Λίστα** σκιαγραφημένων αντιγράφων με `vssadmin list shadowstorage`\
 **Διαγράψτε** τα εκτελώντας `vssadmin delete shadow`
 
 Μπορείτε επίσης να τα διαγράψετε μέσω GUI ακολουθώντας τα βήματα που προτείνονται στο [https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html)
 
-Για να απενεργοποιήσετε τα αντίγραφα σκιάς [βήματα από εδώ](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows):
+Για να απενεργοποιήσετε τα σκιά αντιγράφων [βήματα από εδώ](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows):
 
 1. Ανοίξτε το πρόγραμμα Υπηρεσίες πληκτρολογώντας "services" στο πλαίσιο αναζήτησης κειμένου μετά την κλικ στο κουμπί εκκίνησης των Windows.
 2. Από τη λίστα, βρείτε "Volume Shadow Copy", επιλέξτε το και στη συνέχεια αποκτήστε πρόσβαση στις Ιδιότητες κάνοντας δεξί κλικ.
 3. Επιλέξτε Απενεργοποιημένο από το αναπτυσσόμενο μενού "Τύπος εκκίνησης" και στη συνέχεια επιβεβαιώστε την αλλαγή κάνοντας κλικ στο Εφαρμογή και OK.
 
-Είναι επίσης δυνατόν να τροποποιήσετε τη ρύθμιση των αρχείων που θα αντιγραφούν στο αντίγραφο σκιάς στο μητρώο `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`
+Είναι επίσης δυνατόν να τροποποιήσετε τη ρύθμιση των αρχείων που θα αντιγραφούν στο σκιά αντίγραφο στο μητρώο `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`
 
 ### Επικαλύψτε διαγραμμένα αρχεία
 
@@ -142,12 +142,81 @@
 
 ### Απενεργοποίηση καταγραφών γεγονότων Windows
 
-- `reg add 'HKLM\SYSTEM\CurrentControlSet\Services\eventlog' /v Start /t REG_DWORD /d 4 /f`
+- `reg add 'HKLM\\SYSTEM\\CurrentControlSet\\Services\\eventlog' /v Start /t REG_DWORD /d 4 /f`
 - Μέσα στην ενότητα υπηρεσιών απενεργοποιήστε την υπηρεσία "Windows Event Log"
 - `WEvtUtil.exec clear-log` ή `WEvtUtil.exe cl`
 
 ### Απενεργοποίηση $UsnJrnl
 
 - `fsutil usn deletejournal /d c:`
+
+---
+
+## Προηγμένη Καταγραφή & Παρεμβολή Ιχνών (2023-2025)
+
+### Καταγραφή PowerShell ScriptBlock/Module
+
+Οι πρόσφατες εκδόσεις των Windows 10/11 και Windows Server διατηρούν **πλούσια ποινικά αποδεικτικά στοιχεία PowerShell** κάτω από
+`Microsoft-Windows-PowerShell/Operational` (γεγονότα 4104/4105/4106).
+Οι επιτιθέμενοι μπορούν να τα απενεργοποιήσουν ή να τα διαγράψουν εν κινήσει:
+```powershell
+# Turn OFF ScriptBlock & Module logging (registry persistence)
+New-ItemProperty -Path "HKLM:\\SOFTWARE\\Microsoft\\PowerShell\\3\\PowerShellEngine" \
+-Name EnableScriptBlockLogging -Value 0 -PropertyType DWord -Force
+New-ItemProperty -Path "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\ModuleLogging" \
+-Name EnableModuleLogging -Value 0 -PropertyType DWord -Force
+
+# In-memory wipe of recent PowerShell logs
+Get-WinEvent -LogName 'Microsoft-Windows-PowerShell/Operational' |
+Remove-WinEvent               # requires admin & Win11 23H2+
+```
+Οι αμυντικοί θα πρέπει να παρακολουθούν τις αλλαγές σε αυτά τα κλειδιά μητρώου και την υψηλή αφαίρεση γεγονότων PowerShell.
+
+### ETW (Event Tracing for Windows) Patch
+
+Τα προϊόντα ασφάλειας τερματικών εξαρτώνται σε μεγάλο βαθμό από το ETW. Μια δημοφιλής μέθοδος αποφυγής το 2024 είναι να
+διορθώσετε το `ntdll!EtwEventWrite`/`EtwEventWriteFull` στη μνήμη έτσι ώστε κάθε κλήση ETW να επιστρέφει `STATUS_SUCCESS`
+χωρίς να εκπέμπει το γεγονός:
+```c
+// 0xC3 = RET on x64
+unsigned char patch[1] = { 0xC3 };
+WriteProcessMemory(GetCurrentProcess(),
+GetProcAddress(GetModuleHandleA("ntdll.dll"), "EtwEventWrite"),
+patch, sizeof(patch), NULL);
+```
+Public PoCs (e.g. `EtwTiSwallow`) implement the same primitive in PowerShell or C++.  
+Because the patch is **process-local**, EDRs running inside other processes may miss it.  
+Detection: compare `ntdll` in memory vs. on disk, or hook before user-mode.
+
+### Αναβίωση Εναλλακτικών Ρευμάτων Δεδομένων (ADS)
+
+Malware campaigns in 2023 (e.g. **FIN12** loaders) have been seen staging second-stage binaries  
+inside ADS to stay out of sight of traditional scanners:
+```cmd
+rem Hide cobalt.bin inside an ADS of a PDF
+type cobalt.bin > report.pdf:win32res.dll
+rem Execute directly
+wmic process call create "cmd /c report.pdf:win32res.dll"
+```
+Αναγνωρίστε ροές με `dir /R`, `Get-Item -Stream *`, ή Sysinternals `streams64.exe`. Η αντιγραφή του αρχείου host σε FAT/exFAT ή μέσω SMB θα αφαιρέσει τη κρυφή ροή και μπορεί να χρησιμοποιηθεί από τους ερευνητές για να ανακτήσουν το payload.
+
+### BYOVD & “AuKill” (2023)
+
+Bring-Your-Own-Vulnerable-Driver χρησιμοποιείται πλέον τακτικά για **anti-forensics** σε επιθέσεις ransomware. Το εργαλείο ανοιχτού κώδικα **AuKill** φορτώνει έναν υπογεγραμμένο αλλά ευάλωτο οδηγό (`procexp152.sys`) για να αναστείλει ή να τερματίσει τους EDR και τους forensic αισθητήρες **πριν από την κρυπτογράφηση & την καταστροφή των καταγραφών**:
+```cmd
+AuKill.exe -e "C:\\Program Files\\Windows Defender\\MsMpEng.exe"
+AuKill.exe -k CrowdStrike
+```
+Ο οδηγός αφαιρείται στη συνέχεια, αφήνοντας ελάχιστα αποδεικτικά στοιχεία.  
+Μειώσεις: ενεργοποιήστε τη λίστα αποκλεισμού ευάλωτων οδηγών της Microsoft (HVCI/SAC) και ειδοποιήστε για τη δημιουργία υπηρεσίας πυρήνα από διαδρομές που μπορούν να γραφούν από χρήστες.
+
+---
+
+## Αναφορές
+
+- Sophos X-Ops – “AuKill: A Weaponized Vulnerable Driver for Disabling EDR” (Μάρτιος 2023)  
+https://news.sophos.com/en-us/2023/03/07/aukill-a-weaponized-vulnerable-driver-for-disabling-edr  
+- Red Canary – “Patching EtwEventWrite for Stealth: Detection & Hunting” (Ιούνιος 2024)  
+https://redcanary.com/blog/etw-patching-detection  
 
 {{#include ../../banners/hacktricks-training.md}}
