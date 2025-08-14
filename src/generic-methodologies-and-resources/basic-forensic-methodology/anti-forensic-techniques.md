@@ -9,7 +9,7 @@ Un attaccante potrebbe essere interessato a **cambiare i timestamp dei file** pe
 
 Entrambi gli attributi hanno 4 timestamp: **Modifica**, **accesso**, **creazione** e **modifica del registro MFT** (MACE o MACB).
 
-**Windows explorer** e altri strumenti mostrano le informazioni da **`$STANDARD_INFORMATION`**.
+**Esplora file di Windows** e altri strumenti mostrano le informazioni da **`$STANDARD_INFORMATION`**.
 
 ### TimeStomp - Strumento anti-forense
 
@@ -54,7 +54,7 @@ Questo strumento può modificare entrambi gli attributi `$STARNDAR_INFORMATION` 
 
 ## Nascondere Dati
 
-NFTS utilizza un cluster e la dimensione minima delle informazioni. Ciò significa che se un file occupa e utilizza un cluster e mezzo, il **mezzo rimanente non verrà mai utilizzato** fino a quando il file non viene eliminato. Quindi, è possibile **nascondere dati in questo spazio di slack**.
+NFTS utilizza un cluster e la dimensione minima delle informazioni. Ciò significa che se un file occupa e utilizza un cluster e mezzo, la **metà rimanente non verrà mai utilizzata** fino a quando il file non viene eliminato. Quindi, è possibile **nascondere dati in questo spazio di slack**.
 
 Ci sono strumenti come slacker che consentono di nascondere dati in questo spazio "nascosto". Tuttavia, un'analisi del `$logfile` e del `$usnjrnl` può mostrare che alcuni dati sono stati aggiunti:
 
@@ -86,7 +86,7 @@ Questa è una chiave di registro che mantiene date e ore in cui ciascun eseguibi
 Disabilitare UserAssist richiede due passaggi:
 
 1. Impostare due chiavi di registro, `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackProgs` e `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackEnabled`, entrambe a zero per segnalare che vogliamo disabilitare UserAssist.
-2. Cancellare i tuoi sottoalberi di registro che sembrano `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\<hash>`.
+2. Cancellare i sottotree di registro che sembrano `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\<hash>`.
 
 ### Disabilitare Timestamp - Prefetch
 
@@ -100,7 +100,7 @@ Questo salverà informazioni sulle applicazioni eseguite con l'obiettivo di migl
 
 ### Disabilitare Timestamp - Ultimo Tempo di Accesso
 
-Ogni volta che una cartella viene aperta da un volume NTFS su un server Windows NT, il sistema prende il tempo per **aggiornare un campo di timestamp su ciascuna cartella elencata**, chiamato ultimo tempo di accesso. Su un volume NTFS molto utilizzato, questo può influenzare le prestazioni.
+Ogni volta che una cartella viene aperta da un volume NTFS su un server Windows NT, il sistema prende il tempo per **aggiornare un campo di timestamp su ciascuna cartella elencata**, chiamato ultimo tempo di accesso. Su un volume NTFS molto utilizzato, questo può influire sulle prestazioni.
 
 1. Aprire l'Editor del Registro (Regedit.exe).
 2. Navigare a `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem`.
@@ -109,7 +109,7 @@ Ogni volta che una cartella viene aperta da un volume NTFS su un server Windows 
 
 ### Eliminare la Cronologia USB
 
-Tutti gli **USB Device Entries** sono memorizzati nel Registro di Windows sotto la chiave di registro **USBSTOR** che contiene sottochiavi create ogni volta che si collega un dispositivo USB al PC o Laptop. Puoi trovare questa chiave qui `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Eliminando questo** eliminerai la cronologia USB.\
+Tutti i **USB Device Entries** sono memorizzati nel Registro di Windows sotto la chiave di registro **USBSTOR** che contiene sottochiavi create ogni volta che si collega un dispositivo USB al PC o Laptop. Puoi trovare questa chiave qui `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Eliminando questa** eliminerai la cronologia USB.\
 Puoi anche utilizzare lo strumento [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html) per essere sicuro di averle eliminate (e per eliminarle).
 
 Un altro file che salva informazioni sugli USB è il file `setupapi.dev.log` all'interno di `C:\Windows\INF`. Questo dovrebbe essere eliminato.
@@ -142,12 +142,78 @@ Per disabilitare le copie shadow [passaggi da qui](https://support.waters.com/KB
 
 ### Disabilitare i registri eventi di Windows
 
-- `reg add 'HKLM\SYSTEM\CurrentControlSet\Services\eventlog' /v Start /t REG_DWORD /d 4 /f`
+- `reg add 'HKLM\\SYSTEM\\CurrentControlSet\\Services\\eventlog' /v Start /t REG_DWORD /d 4 /f`
 - All'interno della sezione servizi disabilitare il servizio "Windows Event Log"
 - `WEvtUtil.exec clear-log` o `WEvtUtil.exe cl`
 
 ### Disabilitare $UsnJrnl
 
 - `fsutil usn deletejournal /d c:`
+
+---
+
+## Logging Avanzato & Manomissione delle Tracce (2023-2025)
+
+### Logging ScriptBlock/Module di PowerShell
+
+Le versioni recenti di Windows 10/11 e Windows Server mantengono **artifacts forensi PowerShell ricchi** sotto
+`Microsoft-Windows-PowerShell/Operational` (eventi 4104/4105/4106).
+Gli attaccanti possono disabilitarli o eliminarli al volo:
+```powershell
+# Turn OFF ScriptBlock & Module logging (registry persistence)
+New-ItemProperty -Path "HKLM:\\SOFTWARE\\Microsoft\\PowerShell\\3\\PowerShellEngine" \
+-Name EnableScriptBlockLogging -Value 0 -PropertyType DWord -Force
+New-ItemProperty -Path "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\ModuleLogging" \
+-Name EnableModuleLogging -Value 0 -PropertyType DWord -Force
+
+# In-memory wipe of recent PowerShell logs
+Get-WinEvent -LogName 'Microsoft-Windows-PowerShell/Operational' |
+Remove-WinEvent               # requires admin & Win11 23H2+
+```
+I difensori dovrebbero monitorare le modifiche a quelle chiavi di registro e la rimozione ad alto volume di eventi PowerShell.
+
+### Patch ETW (Event Tracing for Windows)
+
+I prodotti di sicurezza degli endpoint si basano fortemente su ETW. Un metodo di evasione popolare del 2024 è quello di patchare `ntdll!EtwEventWrite`/`EtwEventWriteFull` in memoria in modo che ogni chiamata ETW restituisca `STATUS_SUCCESS` senza emettere l'evento:
+```c
+// 0xC3 = RET on x64
+unsigned char patch[1] = { 0xC3 };
+WriteProcessMemory(GetCurrentProcess(),
+GetProcAddress(GetModuleHandleA("ntdll.dll"), "EtwEventWrite"),
+patch, sizeof(patch), NULL);
+```
+Public PoCs (e.g. `EtwTiSwallow`) implementano la stessa primitiva in PowerShell o C++.  
+Poiché la patch è **locale al processo**, gli EDR che girano all'interno di altri processi potrebbero non rilevarla.  
+Rilevamento: confrontare `ntdll` in memoria rispetto a quello su disco, o hookare prima della modalità utente.
+
+### Ripristino dei Flussi di Dati Alternativi (ADS)
+
+Le campagne malware nel 2023 (e.g. **FIN12** loaders) sono state viste preparare binari di secondo stadio all'interno di ADS per rimanere fuori dalla vista degli scanner tradizionali:
+```cmd
+rem Hide cobalt.bin inside an ADS of a PDF
+type cobalt.bin > report.pdf:win32res.dll
+rem Execute directly
+wmic process call create "cmd /c report.pdf:win32res.dll"
+```
+Enumerare i flussi con `dir /R`, `Get-Item -Stream *`, o Sysinternals `streams64.exe`. Copiare il file host su FAT/exFAT o tramite SMB rimuoverà il flusso nascosto e può essere utilizzato dagli investigatori per recuperare il payload.
+
+### BYOVD & “AuKill” (2023)
+
+Bring-Your-Own-Vulnerable-Driver è ora comunemente usato per **anti-forensics** nelle intrusioni ransomware. Lo strumento open-source **AuKill** carica un driver firmato ma vulnerabile (`procexp152.sys`) per sospendere o terminare EDR e sensori forensi **prima della crittografia e della distruzione dei log**:
+```cmd
+AuKill.exe -e "C:\\Program Files\\Windows Defender\\MsMpEng.exe"
+AuKill.exe -k CrowdStrike
+```
+Il driver viene rimosso successivamente, lasciando artefatti minimi.  
+Mitigazioni: abilitare la blocklist dei driver vulnerabili di Microsoft (HVCI/SAC) e segnalare la creazione di servizi del kernel da percorsi scrivibili dall'utente.
+
+---
+
+## Riferimenti
+
+- Sophos X-Ops – “AuKill: A Weaponized Vulnerable Driver for Disabling EDR” (marzo 2023)  
+https://news.sophos.com/en-us/2023/03/07/aukill-a-weaponized-vulnerable-driver-for-disabling-edr
+- Red Canary – “Patching EtwEventWrite for Stealth: Detection & Hunting” (giugno 2024)  
+https://redcanary.com/blog/etw-patching-detection
 
 {{#include ../../banners/hacktricks-training.md}}
