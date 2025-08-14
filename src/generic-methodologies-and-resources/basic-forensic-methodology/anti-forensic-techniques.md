@@ -29,9 +29,9 @@ Das vorherige Bild ist die **Ausgabe**, die von dem **Tool** angezeigt wird, wo 
 
 ![](<../../images/image (137).png>)
 
-Wiederum ist in der Ausgabe des Tools zu sehen, dass **einige Änderungen vorgenommen wurden**.
+Wiederum ist es in der Ausgabe des Tools möglich zu sehen, dass **einige Änderungen vorgenommen wurden**.
 
-Mit demselben Tool ist es möglich zu identifizieren, **zu welcher Zeit die Zeitstempel geändert wurden**:
+Mit demselben Tool ist es möglich zu identifizieren, **zu welchem Zeitpunkt die Zeitstempel geändert wurden**:
 
 ![](<../../images/image (1089).png>)
 
@@ -46,11 +46,11 @@ Eine weitere Möglichkeit, verdächtig modifizierte Dateien zu identifizieren, w
 
 ### Nanosekunden
 
-**NTFS**-Zeitstempel haben eine **Präzision** von **100 Nanosekunden**. Daher ist es sehr **verdächtig**, Dateien mit Zeitstempeln wie 2010-10-10 10:10:**00.000:0000 zu finden.
+**NTFS** Zeitstempel haben eine **Präzision** von **100 Nanosekunden**. Daher ist es sehr **verdächtig**, Dateien mit Zeitstempeln wie 2010-10-10 10:10:**00.000:0000 zu finden.
 
 ### SetMace - Anti-forensisches Tool
 
-Dieses Tool kann beide Attribute `$STANDARD_INFORMATION` und `$FILE_NAME` ändern. Allerdings ist es seit Windows Vista notwendig, dass ein aktives Betriebssystem diese Informationen ändert.
+Dieses Tool kann beide Attribute `$STANDARD_INFORMATION` und `$FILE_NAME` modifizieren. Allerdings ist es seit Windows Vista notwendig, dass ein aktives Betriebssystem diese Informationen ändert.
 
 ## Datenversteckung
 
@@ -67,7 +67,7 @@ Dann ist es möglich, den Slack-Space mit Tools wie FTK Imager wiederherzustelle
 Dies ist ein Tool, das den Computer **ausschaltet, wenn eine Änderung an den USB**-Ports erkannt wird.\
 Eine Möglichkeit, dies zu entdecken, wäre, die laufenden Prozesse zu inspizieren und **jedes laufende Python-Skript zu überprüfen**.
 
-## Live-Linux-Distributionen
+## Live Linux-Distributionen
 
 Diese Distributionen werden **im RAM** ausgeführt. Die einzige Möglichkeit, sie zu erkennen, besteht darin, **wenn das NTFS-Dateisystem mit Schreibberechtigungen gemountet ist**. Wenn es nur mit Lesezugriff gemountet ist, wird es nicht möglich sein, die Eindringung zu erkennen.
 
@@ -95,8 +95,8 @@ Dies speichert Informationen über die ausgeführten Anwendungen mit dem Ziel, d
 - Führen Sie `regedit` aus
 - Wählen Sie den Dateipfad `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SessionManager\Memory Management\PrefetchParameters`
 - Klicken Sie mit der rechten Maustaste auf `EnablePrefetcher` und `EnableSuperfetch`
-- Wählen Sie Ändern bei jedem dieser, um den Wert von 1 (oder 3) auf 0 zu ändern
-- Neustart
+- Wählen Sie Ändern für jede dieser Optionen, um den Wert von 1 (oder 3) auf 0 zu ändern
+- Neustarten
 
 ### Zeitstempel deaktivieren - Letzte Zugriffszeit
 
@@ -107,9 +107,9 @@ Immer wenn ein Ordner von einem NTFS-Volume auf einem Windows NT-Server geöffne
 3. Suchen Sie nach `NtfsDisableLastAccessUpdate`. Wenn es nicht existiert, fügen Sie dieses DWORD hinzu und setzen Sie seinen Wert auf 1, um den Prozess zu deaktivieren.
 4. Schließen Sie den Registrierungs-Editor und starten Sie den Server neu.
 
-### USB-Historie löschen
+### USB-Verlauf löschen
 
-Alle **USB-Geräteeinträge** werden in der Windows-Registrierung unter dem **USBSTOR**-Registrierungsschlüssel gespeichert, der Unterschlüssel enthält, die erstellt werden, wenn Sie ein USB-Gerät an Ihren PC oder Laptop anschließen. Sie finden diesen Schlüssel hier `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Durch das Löschen dieses** Schlüssels löschen Sie die USB-Historie.\
+Alle **USB-Geräteeinträge** werden in der Windows-Registrierung unter dem **USBSTOR**-Registrierungsschlüssel gespeichert, der Unterschlüssel enthält, die erstellt werden, wenn Sie ein USB-Gerät an Ihren PC oder Laptop anschließen. Sie finden diesen Schlüssel hier `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Durch das Löschen dieses Schlüssels** löschen Sie den USB-Verlauf.\
 Sie können auch das Tool [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html) verwenden, um sicherzustellen, dass Sie sie gelöscht haben (und um sie zu löschen).
 
 Eine weitere Datei, die Informationen über die USBs speichert, ist die Datei `setupapi.dev.log` im Verzeichnis `C:\Windows\INF`. Diese sollte ebenfalls gelöscht werden.
@@ -123,7 +123,7 @@ Sie können sie auch über die GUI löschen, indem Sie die Schritte in [https://
 
 Um Schattenkopien zu deaktivieren, [Schritte von hier](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows):
 
-1. Öffnen Sie das Dienstprogramm Dienste, indem Sie "Dienste" in das Textsuchfeld eingeben, nachdem Sie auf die Windows-Starttaste geklickt haben.
+1. Öffnen Sie das Programm Dienste, indem Sie "Dienste" in das Textsuchfeld eingeben, nachdem Sie auf die Windows-Starttaste geklickt haben.
 2. Suchen Sie in der Liste nach "Volume Shadow Copy", wählen Sie es aus und greifen Sie dann mit einem Rechtsklick auf die Eigenschaften zu.
 3. Wählen Sie Deaktiviert aus dem Dropdown-Menü "Starttyp" und bestätigen Sie die Änderung, indem Sie auf Übernehmen und OK klicken.
 
@@ -142,12 +142,78 @@ Es ist auch möglich, die Konfiguration zu ändern, welche Dateien in der Schatt
 
 ### Windows-Ereignisprotokolle deaktivieren
 
-- `reg add 'HKLM\SYSTEM\CurrentControlSet\Services\eventlog' /v Start /t REG_DWORD /d 4 /f`
+- `reg add 'HKLM\\SYSTEM\\CurrentControlSet\\Services\\eventlog' /v Start /t REG_DWORD /d 4 /f`
 - Deaktivieren Sie im Abschnitt Dienste den Dienst "Windows-Ereignisprotokoll"
 - `WEvtUtil.exec clear-log` oder `WEvtUtil.exe cl`
 
-### Deaktivieren von $UsnJrnl
+### $UsnJrnl deaktivieren
 
 - `fsutil usn deletejournal /d c:`
+
+---
+
+## Fortgeschrittene Protokollierung & Spurenmanipulation (2023-2025)
+
+### PowerShell ScriptBlock/Modulprotokollierung
+
+Neuere Versionen von Windows 10/11 und Windows Server speichern **reiche PowerShell-forensische Artefakte** unter
+`Microsoft-Windows-PowerShell/Operational` (Ereignisse 4104/4105/4106).
+Angreifer können sie im laufenden Betrieb deaktivieren oder löschen:
+```powershell
+# Turn OFF ScriptBlock & Module logging (registry persistence)
+New-ItemProperty -Path "HKLM:\\SOFTWARE\\Microsoft\\PowerShell\\3\\PowerShellEngine" \
+-Name EnableScriptBlockLogging -Value 0 -PropertyType DWord -Force
+New-ItemProperty -Path "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\ModuleLogging" \
+-Name EnableModuleLogging -Value 0 -PropertyType DWord -Force
+
+# In-memory wipe of recent PowerShell logs
+Get-WinEvent -LogName 'Microsoft-Windows-PowerShell/Operational' |
+Remove-WinEvent               # requires admin & Win11 23H2+
+```
+Verteidiger sollten Änderungen an diesen Registrierungsschlüsseln und das Entfernen von PowerShell-Ereignissen in großem Umfang überwachen.
+
+### ETW (Event Tracing for Windows) Patch
+
+Endpoint-Sicherheitsprodukte verlassen sich stark auf ETW. Eine beliebte Umgehungsmethode aus dem Jahr 2024 besteht darin, `ntdll!EtwEventWrite`/`EtwEventWriteFull` im Speicher zu patchen, sodass jeder ETW-Aufruf `STATUS_SUCCESS` zurückgibt, ohne das Ereignis auszugeben:
+```c
+// 0xC3 = RET on x64
+unsigned char patch[1] = { 0xC3 };
+WriteProcessMemory(GetCurrentProcess(),
+GetProcAddress(GetModuleHandleA("ntdll.dll"), "EtwEventWrite"),
+patch, sizeof(patch), NULL);
+```
+Öffentliche PoCs (z.B. `EtwTiSwallow`) implementieren dasselbe Primitive in PowerShell oder C++. 
+Da der Patch **prozesslokal** ist, können EDRs, die in anderen Prozessen laufen, ihn möglicherweise übersehen. 
+Erkennung: Vergleiche `ntdll` im Speicher mit dem auf der Festplatte oder hooke vor dem Benutzermodus.
+
+### Wiederbelebung von Alternativen Datenströmen (ADS)
+
+Malware-Kampagnen im Jahr 2023 (z.B. **FIN12** Loader) wurden beobachtet, wie sie zweite Stufen-Binärdateien innerhalb von ADS lagern, um sich vor traditionellen Scannern zu verstecken:
+```cmd
+rem Hide cobalt.bin inside an ADS of a PDF
+type cobalt.bin > report.pdf:win32res.dll
+rem Execute directly
+wmic process call create "cmd /c report.pdf:win32res.dll"
+```
+Enumerieren Sie Streams mit `dir /R`, `Get-Item -Stream *` oder Sysinternals `streams64.exe`. Das Kopieren der Host-Datei auf FAT/exFAT oder über SMB entfernt den versteckten Stream und kann von Ermittlern verwendet werden, um die Nutzlast wiederherzustellen.
+
+### BYOVD & “AuKill” (2023)
+
+Bring-Your-Own-Vulnerable-Driver wird jetzt routinemäßig für **Anti-Forensik** bei Ransomware-Einbrüchen verwendet. Das Open-Source-Tool **AuKill** lädt einen signierten, aber anfälligen Treiber (`procexp152.sys`), um EDR- und forensische Sensoren **vor der Verschlüsselung & Protokolldestruktion** anzuhalten oder zu beenden:
+```cmd
+AuKill.exe -e "C:\\Program Files\\Windows Defender\\MsMpEng.exe"
+AuKill.exe -k CrowdStrike
+```
+Der Treiber wird anschließend entfernt, wodurch minimale Artefakte zurückbleiben.  
+Minderungen: Aktivieren Sie die Microsoft-Blockliste für anfällige Treiber (HVCI/SAC) und alarmieren Sie bei der Erstellung von Kernel-Diensten aus benutzerschreibbaren Pfaden.
+
+---
+
+## Referenzen
+
+- Sophos X-Ops – “AuKill: Ein bewaffneter anfälliger Treiber zum Deaktivieren von EDR” (März 2023)  
+https://news.sophos.com/en-us/2023/03/07/aukill-a-weaponized-vulnerable-driver-for-disabling-edr
+- Red Canary – “Patching EtwEventWrite für Stealth: Erkennung & Jagd” (Juni 2024)  
+https://redcanary.com/blog/etw-patching-detection
 
 {{#include ../../banners/hacktricks-training.md}}
