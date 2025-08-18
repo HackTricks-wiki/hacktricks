@@ -50,7 +50,7 @@ Yes, you can, but **don't forget to mention the specific link(s)** where the con
 >
 > - **How can I  a page of HackTricks?**
 
-As long as the link **of** the page(s) were you took the information from appears it's enough.\
+As long as the link **of** the page(s) where you took the information from appears it's enough.\
 If you need a bibtex you can use something like:
 
 ```latex
@@ -143,5 +143,4 @@ This license does not grant any trademark or branding rights in relation to the 
 > By using this book, the user agrees to release the authors and publishers from any and all liability and responsibility for any damages, losses, or harm that may result from the use of this book or any of the information contained within it.
 
 {{#include ../banners/hacktricks-training.md}}
-
 

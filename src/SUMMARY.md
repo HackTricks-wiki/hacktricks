@@ -79,6 +79,7 @@
 
 # 🧙‍♂️ Generic Hacking
 
+- [Archive Extraction Path Traversal](generic-hacking/archive-extraction-path-traversal.md)
 - [Brute Force - CheatSheet](generic-hacking/brute-force.md)
 - [Esim Javacard Exploitation](generic-hacking/esim-javacard-exploitation.md)
 - [Exfiltration](generic-hacking/exfiltration.md)
@@ -263,6 +264,7 @@
   - [AD DNS Records](windows-hardening/active-directory-methodology/ad-dns-records.md)
   - [Adws Enumeration](windows-hardening/active-directory-methodology/adws-enumeration.md)
   - [ASREPRoast](windows-hardening/active-directory-methodology/asreproast.md)
+  - [Badsuccessor Dmsa Migration Abuse](windows-hardening/active-directory-methodology/badsuccessor-dmsa-migration-abuse.md)
   - [BloodHound & Other AD Enum Tools](windows-hardening/active-directory-methodology/bloodhound.md)
   - [Constrained Delegation](windows-hardening/active-directory-methodology/constrained-delegation.md)
   - [Custom SSP](windows-hardening/active-directory-methodology/custom-ssp.md)
@@ -322,6 +324,7 @@
 
 - [Android APK Checklist](mobile-pentesting/android-checklist.md)
 - [Android Applications Pentesting](mobile-pentesting/android-app-pentesting/README.md)
+  - [Accessibility Services Abuse](mobile-pentesting/android-app-pentesting/accessibility-services-abuse.md)
   - [Android Applications Basics](mobile-pentesting/android-app-pentesting/android-applications-basics.md)
   - [Android Task Hijacking](mobile-pentesting/android-app-pentesting/android-task-hijacking.md)
   - [ADB Commands](mobile-pentesting/android-app-pentesting/adb-commands.md)
@@ -766,6 +769,7 @@
   - [Ret2vDSO](binary-exploitation/rop-return-oriented-programing/ret2vdso.md)
   - [SROP - Sigreturn-Oriented Programming](binary-exploitation/rop-return-oriented-programing/srop-sigreturn-oriented-programming/README.md)
     - [SROP - ARM64](binary-exploitation/rop-return-oriented-programing/srop-sigreturn-oriented-programming/srop-arm64.md)
+  - [Synology Encrypted Archive Decryption](hardware-physical-access/firmware-analysis/synology-encrypted-archive-decryption.md)
 - [Array Indexing](binary-exploitation/array-indexing.md)
 - [Chrome Exploiting](binary-exploitation/chrome-exploiting.md)
 - [Integer Overflow](binary-exploitation/integer-overflow.md)
@@ -823,6 +827,7 @@
 
 # 🤖 AI
 - [AI Security](AI/README.md)
+  - [Ai Assisted Fuzzing And Vulnerability Discovery](AI/AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md)
   - [AI Security Methodology](AI/AI-Deep-Learning.md)
   - [AI MCP Security](AI/AI-MCP-Servers.md)
   - [AI Model Data Preparation](AI/AI-Model-Data-Preparation-and-Evaluation.md)
@@ -886,6 +891,7 @@
 - [Industrial Control Systems Hacking](todo/industrial-control-systems-hacking/README.md)
   - [Modbus Protocol](todo/industrial-control-systems-hacking/modbus.md)
 - [Radio Hacking](todo/radio-hacking/README.md)
+  - [Maxiprox Mobile Cloner](todo/radio-hacking/maxiprox-mobile-cloner.md)
   - [Pentesting RFID](todo/radio-hacking/pentesting-rfid.md)
   - [Infrared](todo/radio-hacking/infrared.md)
   - [Sub-GHz RF](todo/radio-hacking/sub-ghz-rf.md)

