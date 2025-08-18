@@ -10,6 +10,7 @@
 
 - [Pentesting Methodology](generic-methodologies-and-resources/pentesting-methodology.md)
 - [External Recon Methodology](generic-methodologies-and-resources/external-recon-methodology/README.md)
+  - [Botnet C2 Fingerprinting Ermac](generic-methodologies-and-resources/external-recon-methodology/botnet-c2-fingerprinting-ermac.md)
   - [Wide Source Code Search](generic-methodologies-and-resources/external-recon-methodology/wide-source-code-search.md)
   - [Github Dorks & Leaks](generic-methodologies-and-resources/external-recon-methodology/github-leaked-secrets.md)
 - [Pentesting Network](generic-methodologies-and-resources/pentesting-network/README.md)
@@ -37,6 +38,7 @@
   - [Mobile Phishing Malicious Apps](generic-methodologies-and-resources/phishing-methodology/mobile-phishing-malicious-apps.md)
   - [Phishing Files & Documents](generic-methodologies-and-resources/phishing-methodology/phishing-documents.md)
 - [Basic Forensic Methodology](generic-methodologies-and-resources/basic-forensic-methodology/README.md)
+  - [Android Overlay Trojans Ermac](generic-methodologies-and-resources/basic-forensic-methodology/android-overlay-trojans-ermac.md)
   - [Baseline Monitoring](generic-methodologies-and-resources/basic-forensic-methodology/file-integrity-monitoring.md)
   - [Anti-Forensic Techniques](generic-methodologies-and-resources/basic-forensic-methodology/anti-forensic-techniques.md)
   - [Docker Forensics](generic-methodologies-and-resources/basic-forensic-methodology/docker-forensics.md)

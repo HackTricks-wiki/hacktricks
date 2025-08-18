@@ -58,6 +58,14 @@ bbot -t tesla.com -f subdomain-enum
 You can find the IP ranges of an organisation also using [http://asnlookup.com/](http://asnlookup.com) (it has free API).\
 You can find the IP and ASN of a domain using [http://ipv4info.com/](http://ipv4info.com).
 
+### Botnet/C2 Fingerprinting
+
+Targeting adversary infrastructure (for takedown and detection) often requires specific fingerprints. See these practical fingerprints for ERMAC 3.x:
+
+{{#ref}}
+botnet-c2-fingerprinting-ermac.md
+{{#endref}}
+
 ### **Looking for vulnerabilities**
 
 At this point we known **all the assets inside the scope**, so if you are allowed you could launch some **vulnerability scanner** (Nessus, OpenVAS) over all the hosts.\
@@ -544,7 +552,7 @@ _Note that sometimes the subdomain is hosted inside an IP that is not controlled
 ## IPs
 
 In the initial steps you might have **found some IP ranges, domains and subdomains**.\
-It’s time to **recollect all the IPs from those ranges** and for the **domains/subdomains (DNS queries).**
+It’s time to **recollect all the IPs from those ranges** and for the **domains/subdomains (DNS queries.)**
 
 Using services from the following **free apis** you can also find **previous IPs used by domains and subdomains**. These IPs might still be owned by the client (and might allow you to find [**CloudFlare bypasses**](../../network-services-pentesting/pentesting-web/uncovering-cloudflare.md))
 
@@ -710,4 +718,3 @@ There are several tools out there that will perform part of the proposed actions
 - All free courses of [**@Jhaddix**](https://twitter.com/Jhaddix) like [**The Bug Hunter's Methodology v4.0 - Recon Edition**](https://www.youtube.com/watch?v=p4JgIu1mceI)
 
 {{#include ../../banners/hacktricks-training.md}}
-
