@@ -6,19 +6,19 @@
 
 **Gatekeeper**는 Mac 운영 체제를 위해 개발된 보안 기능으로, 사용자가 **신뢰할 수 있는 소프트웨어만** 시스템에서 실행하도록 보장합니다. 이는 사용자가 **App Store 외부의 소스**에서 다운로드하고 열려고 시도하는 소프트웨어(앱, 플러그인 또는 설치 패키지 등)를 **검증**함으로써 작동합니다.
 
-Gatekeeper의 주요 메커니즘은 **검증** 프로세스에 있습니다. 다운로드한 소프트웨어가 **인정된 개발자에 의해 서명되었는지** 확인하여 소프트웨어의 진위를 보장합니다. 또한, 소프트웨어가 **Apple에 의해 노타리제이션(notarised)** 되었는지 확인하여, 알려진 악성 콘텐츠가 없고 노타리제이션 후에 변조되지 않았음을 확인합니다.
+Gatekeeper의 핵심 메커니즘은 **검증** 프로세스에 있습니다. 다운로드한 소프트웨어가 **인정된 개발자에 의해 서명되었는지** 확인하여 소프트웨어의 진위를 보장합니다. 또한, 소프트웨어가 **Apple에 의해 노타리제이션되었는지** 확인하여 알려진 악성 콘텐츠가 없고 노타리제이션 이후에 변조되지 않았음을 확인합니다.
 
-또한, Gatekeeper는 **사용자가 다운로드한 소프트웨어를 처음 열 때 승인하도록 요청**하여 사용자 제어 및 보안을 강화합니다. 이 보호 장치는 사용자가 무심코 해로운 실행 코드를 실행하는 것을 방지하는 데 도움을 줍니다.
+추가로, Gatekeeper는 사용자가 다운로드한 소프트웨어를 처음 열 때 **승인을 요청**하여 사용자 제어 및 보안을 강화합니다. 이 보호 장치는 사용자가 무심코 해로운 실행 코드를 실행하는 것을 방지하는 데 도움을 줍니다.
 
 ### Application Signatures
 
-애플리케이션 서명(Application signatures), 또는 코드 서명(code signatures)은 Apple의 보안 인프라의 중요한 구성 요소입니다. 이는 **소프트웨어 저자의 신원을 검증**하고 코드가 마지막으로 서명된 이후 변조되지 않았음을 보장하는 데 사용됩니다.
+애플리케이션 서명, 즉 코드 서명은 Apple의 보안 인프라의 중요한 구성 요소입니다. 이는 **소프트웨어 저자의 신원을 검증**(개발자)하고 코드가 마지막으로 서명된 이후에 변조되지 않았음을 보장하는 데 사용됩니다.
 
 작동 방식은 다음과 같습니다:
 
-1. **애플리케이션 서명:** 개발자가 애플리케이션을 배포할 준비가 되면, **개인 키를 사용하여 애플리케이션에 서명**합니다. 이 개인 키는 개발자가 Apple Developer Program에 등록할 때 Apple이 개발자에게 발급하는 **인증서**와 연결되어 있습니다. 서명 프로세스는 앱의 모든 부분에 대한 암호화 해시를 생성하고 이 해시를 개발자의 개인 키로 암호화하는 과정을 포함합니다.
+1. **애플리케이션 서명:** 개발자가 애플리케이션을 배포할 준비가 되면, **개인 키를 사용하여 애플리케이션에 서명**합니다. 이 개인 키는 개발자가 Apple Developer Program에 등록할 때 Apple이 개발자에게 발급하는 **인증서와 연결되어 있습니다**. 서명 프로세스는 앱의 모든 부분에 대한 암호화 해시를 생성하고 이 해시를 개발자의 개인 키로 암호화하는 과정을 포함합니다.
 2. **애플리케이션 배포:** 서명된 애플리케이션은 개발자의 인증서와 함께 사용자에게 배포되며, 이 인증서에는 해당 공개 키가 포함되어 있습니다.
-3. **애플리케이션 검증:** 사용자가 애플리케이션을 다운로드하고 실행하려고 시도할 때, Mac 운영 체제는 개발자의 인증서에서 공개 키를 사용하여 해시를 복호화합니다. 그런 다음 현재 애플리케이션 상태를 기반으로 해시를 재계산하고 이를 복호화된 해시와 비교합니다. 일치하면 **애플리케이션이 개발자가 서명한 이후로 수정되지 않았음을 의미**하며, 시스템은 애플리케이션 실행을 허용합니다.
+3. **애플리케이션 검증:** 사용자가 애플리케이션을 다운로드하고 실행하려고 시도할 때, Mac 운영 체제는 개발자의 인증서에서 공개 키를 사용하여 해시를 복호화합니다. 그런 다음 현재 애플리케이션 상태에 따라 해시를 재계산하고 이를 복호화된 해시와 비교합니다. 일치하면 **애플리케이션이 개발자가 서명한 이후로 수정되지 않았음을 의미**하며, 시스템은 애플리케이션 실행을 허용합니다.
 
 애플리케이션 서명은 Apple의 Gatekeeper 기술의 필수적인 부분입니다. 사용자가 **인터넷에서 다운로드한 애플리케이션을 열려고 시도할 때**, Gatekeeper는 애플리케이션 서명을 검증합니다. Apple이 알려진 개발자에게 발급한 인증서로 서명되었고 코드가 변조되지 않았다면, Gatekeeper는 애플리케이션 실행을 허용합니다. 그렇지 않으면 애플리케이션을 차단하고 사용자에게 경고합니다.
 
@@ -26,7 +26,7 @@ macOS Catalina부터는 **Gatekeeper가 애플리케이션이 Apple에 의해 �
 
 #### Check Signatures
 
-일부 **악성 샘플**을 검사할 때는 항상 **바이너리의 서명**을 **확인해야** 하며, 서명한 **개발자**가 이미 **악성 코드와 관련**이 있을 수 있습니다.
+일부 **악성 샘플**을 확인할 때는 항상 **바이너리의 서명**을 확인해야 하며, 서명한 **개발자**가 이미 **악성 코드와 관련이 있을 수 있습니다.**
 ```bash
 # Get signer
 codesign -vv -d /bin/ls 2>&1 | grep -E "Authority|TeamIdentifier"
@@ -45,9 +45,9 @@ codesign -s <cert-name-keychain> toolsdemo
 ```
 ### Notarization
 
-Apple의 노타리제이션 프로세스는 사용자들을 잠재적으로 해로운 소프트웨어로부터 보호하기 위한 추가적인 안전장치 역할을 합니다. 이는 **개발자가 자신의 애플리케이션을** **Apple의 Notary Service**에 제출하여 검토받는 과정을 포함합니다. 이 서비스는 App Review와 혼동해서는 안 됩니다. 이 서비스는 제출된 소프트웨어에 **악성 콘텐츠**와 코드 서명과 관련된 잠재적인 문제를 면밀히 조사하는 **자동화된 시스템**입니다.
+Apple의 노타리제이션 프로세스는 사용자를 잠재적으로 해로운 소프트웨어로부터 보호하기 위한 추가적인 안전장치 역할을 합니다. 이는 **개발자가 자신의 애플리케이션을** **Apple의 노타리 서비스**에 제출하여 검토받는 과정을 포함합니다. 이 서비스는 App Review와 혼동해서는 안 됩니다. 이 서비스는 제출된 소프트웨어에 **악성 콘텐츠**와 코드 서명과 관련된 잠재적인 문제를 검사하는 **자동화된 시스템**입니다.
 
-소프트웨어가 우려 사항 없이 이 검사를 **통과**하면, Notary Service는 노타리제이션 티켓을 생성합니다. 개발자는 이후 **이 티켓을 자신의 소프트웨어에 첨부해야** 하며, 이를 '스테이플링'이라고 합니다. 또한, 노타리제이션 티켓은 온라인에 게시되어 Gatekeeper, Apple의 보안 기술이 이를 접근할 수 있습니다.
+소프트웨어가 우려 사항 없이 이 검사를 **통과**하면, 노타리 서비스는 노타리제이션 티켓을 생성합니다. 개발자는 **이 티켓을 소프트웨어에 첨부해야** 하며, 이를 '스테이플링'이라고 합니다. 또한, 노타리제이션 티켓은 온라인에 게시되어 Gatekeeper, Apple의 보안 기술이 이를 접근할 수 있습니다.
 
 사용자가 소프트웨어를 처음 설치하거나 실행할 때, 노타리제이션 티켓의 존재 - 실행 파일에 스테이플링되었거나 온라인에서 발견된 경우 - **Gatekeeper에 소프트웨어가 Apple에 의해 노타리제이션되었음을 알립니다**. 결과적으로, Gatekeeper는 초기 실행 대화 상자에 설명 메시지를 표시하여 소프트웨어가 Apple에 의해 악성 콘텐츠에 대한 검사를 받았음을 나타냅니다. 이 과정은 사용자가 자신의 시스템에 설치하거나 실행하는 소프트웨어의 보안에 대한 신뢰를 높입니다.
 
@@ -84,9 +84,9 @@ anchor apple generic and certificate leaf[field.1.2.840.113635.100.6.1.9] exists
 anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] exists and (certificate leaf[field.1.2.840.113635.100.6.1.14] or certificate leaf[field.1.2.840.113635.100.6.1.13]) and notarized|1|0|Notarized Developer ID
 [...]
 ```
-**`syspolicyd`**는 `assess`, `update`, `record`, `cancel`과 같은 다양한 작업을 수행하는 XPC 서버를 노출하며, 이는 **`Security.framework`의 `SecAssessment*`** API를 사용하여 접근할 수 있습니다. **`xpctl`**은 실제로 XPC를 통해 **`syspolicyd`**와 통신합니다.
+**`syspolicyd`**는 `assess`, `update`, `record`, `cancel`과 같은 다양한 작업을 수행하는 XPC 서버를 노출하며, 이는 **`Security.framework`의 `SecAssessment*`** API를 통해 접근할 수 있습니다. **`spctl`**은 실제로 XPC를 통해 **`syspolicyd`**와 통신합니다.
 
-첫 번째 규칙이 "**App Store**"로 끝나고 두 번째 규칙이 "**Developer ID**"로 끝나는 점에 주목하세요. 이전 이미지에서는 **App Store 및 식별된 개발자**의 앱을 실행할 수 있도록 **활성화**되어 있었습니다.\
+첫 번째 규칙이 "**App Store**"로 끝나고 두 번째 규칙이 "**Developer ID**"로 끝나는 점에 주목하세요. 이전 이미지에서는 **App Store 및 식별된 개발자**의 앱 실행이 **활성화**되어 있었습니다.\
 해당 설정을 App Store로 **수정**하면 "**Notarized Developer ID" 규칙이 사라질 것입니다**.
 
 또한 **type GKE**의 수천 개의 규칙이 있습니다:
@@ -108,7 +108,7 @@ cdhash H"8d0d90ff23c3071211646c4c9c607cdb601cb18f"|1|0|GKE
 ```bash
 sudo spctl --list
 ```
-**`spctl`**의 **`--master-disable`** 및 **`--global-disable`** 옵션은 이러한 서명 검사를 완전히 **비활성화**합니다:
+옵션 **`--master-disable`** 및 **`--global-disable`**는 **`spctl`**의 서명 검사를 완전히 **비활성화**합니다:
 ```bash
 # Disable GateKeeper
 spctl --global-disable
@@ -122,11 +122,11 @@ spctl --master-enable
 
 <figure><img src="../../../images/image (1151).png" alt=""><figcaption></figcaption></figure>
 
-**앱이 GateKeeper에 의해 허용될지 확인할 수 있습니다**:
+**GateKeeper에 의해 앱이 허용될지 확인할 수 있습니다**:
 ```bash
 spctl --assess -v /Applications/App.app
 ```
-GateKeeper에 특정 앱의 실행을 허용하는 새로운 규칙을 추가하는 것이 가능합니다:
+GateKeeper에서 특정 앱의 실행을 허용하기 위해 새로운 규칙을 추가하는 것이 가능합니다:
 ```bash
 # Check if allowed - nop
 spctl --assess -v /Applications/App.app
@@ -141,24 +141,60 @@ sudo spctl --enable --label "whitelist"
 spctl --assess -v /Applications/App.app
 /Applications/App.app: accepted
 ```
-**커널 확장**에 관하여, 폴더 `/var/db/SystemPolicyConfiguration`에는 로드할 수 있는 kext 목록이 포함된 파일이 있습니다. 또한, `spctl`은 새로운 사전 승인된 커널 확장을 추가할 수 있기 때문에 `com.apple.private.iokit.nvram-csr` 권한을 가지고 있으며, 이는 `kext-allowed-teams` 키의 NVRAM에 저장되어야 합니다.
+Regarding **kernel extensions**, the folder `/var/db/SystemPolicyConfiguration` contains files with lists of kexts allowed to be loaded. Moreover, `spctl` has the entitlement `com.apple.private.iokit.nvram-csr` because it's capable of adding new pre-approved kernel extensions which need to be saved also in NVRAM in a `kext-allowed-teams` key.
 
-### 격리 파일
+#### Managing Gatekeeper on macOS 15 (Sequoia) and later
 
-**응용 프로그램**이나 파일을 **다운로드**할 때, 웹 브라우저나 이메일 클라이언트와 같은 특정 macOS **응용 프로그램**은 다운로드된 파일에 "**격리 플래그**"로 알려진 확장 파일 속성을 **첨부**합니다. 이 속성은 파일이 신뢰할 수 없는 출처(인터넷)에서 왔음을 **표시**하는 보안 조치로 작용하며, 잠재적인 위험을 내포하고 있습니다. 그러나 모든 응용 프로그램이 이 속성을 첨부하는 것은 아니며, 예를 들어 일반적인 BitTorrent 클라이언트 소프트웨어는 보통 이 과정을 우회합니다.
+Starting in macOS 15 Sequoia, end users can no longer toggle Gatekeeper policy from `spctl`. Management is performed via System Settings or by deploying an MDM configuration profile with the `com.apple.systempolicy.control` payload. Example profile snippet to allow App Store and identified developers (but not "Anywhere"):
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+<key>PayloadContent</key>
+<array>
+<dict>
+<key>PayloadType</key>
+<string>com.apple.systempolicy.control</string>
+<key>PayloadVersion</key>
+<integer>1</integer>
+<key>PayloadIdentifier</key>
+<string>com.example.gatekeeper</string>
+<key>EnableAssessment</key>
+<true/>
+<key>AllowIdentifiedDevelopers</key>
+<true/>
+</dict>
+</array>
+<key>PayloadType</key>
+<string>Configuration</string>
+<key>PayloadIdentifier</key>
+<string>com.example.profile.gatekeeper</string>
+<key>PayloadUUID</key>
+<string>00000000-0000-0000-0000-000000000000</string>
+<key>PayloadVersion</key>
+<integer>1</integer>
+<key>PayloadDisplayName</key>
+<string>Gatekeeper</string>
+</dict>
+</plist>
+```
+### Quarantine Files
+
+응용 프로그램이나 파일을 **다운로드**하면, 웹 브라우저나 이메일 클라이언트와 같은 특정 macOS **응용 프로그램**이 다운로드된 파일에 "**격리 플래그**"로 알려진 특정 파일 속성을 **첨부**합니다. 이 속성은 파일이 신뢰할 수 없는 출처(인터넷)에서 왔음을 **표시**하는 보안 조치로 작용하며, 잠재적인 위험을 내포하고 있습니다. 그러나 모든 응용 프로그램이 이 속성을 첨부하는 것은 아니며, 예를 들어 일반적인 BitTorrent 클라이언트 소프트웨어는 보통 이 과정을 우회합니다.
 
 **격리 플래그의 존재는 사용자가 파일을 실행하려고 할 때 macOS의 Gatekeeper 보안 기능을 신호합니다.**
 
-**격리 플래그가 없는 경우**(일부 BitTorrent 클라이언트를 통해 다운로드된 파일과 같이), Gatekeeper의 **검사가 수행되지 않을 수 있습니다**. 따라서 사용자는 덜 안전하거나 알려지지 않은 출처에서 다운로드한 파일을 열 때 주의해야 합니다.
+**격리 플래그가 없는 경우**(일부 BitTorrent 클라이언트를 통해 다운로드된 파일과 같이) Gatekeeper의 **검사가 수행되지 않을 수 있습니다**. 따라서 사용자는 덜 안전하거나 알려지지 않은 출처에서 다운로드한 파일을 열 때 주의해야 합니다.
 
-> [!NOTE] > **코드 서명의 유효성**을 **확인하는** 과정은 코드와 모든 번들 리소스의 암호화된 **해시**를 생성하는 것을 포함하는 **자원 집약적** 프로세스입니다. 또한, 인증서 유효성 검사는 발급 후 취소되었는지 확인하기 위해 Apple의 서버에 **온라인 확인**을 수행하는 것을 포함합니다. 이러한 이유로, 전체 코드 서명 및 인증 확인은 **앱이 실행될 때마다 수행하기에는 비현실적입니다**.
+> [!NOTE] > **코드 서명의 유효성**을 **확인하는** 과정은 코드와 모든 번들 리소스의 암호화된 **해시**를 생성하는 것을 포함하는 **자원 집약적** 프로세스입니다. 또한, 인증서 유효성 검사는 발급 후 취소되었는지 확인하기 위해 Apple의 서버에 **온라인 확인**을 수행하는 것을 포함합니다. 이러한 이유로, 앱이 실행될 때마다 전체 코드 서명 및 인증 확인을 **실행하는 것은 비현실적입니다**.
 >
 > 따라서 이러한 검사는 **격리 속성이 있는 앱을 실행할 때만 수행됩니다.**
 
 > [!WARNING]
 > 이 속성은 **파일을 생성/다운로드하는 응용 프로그램에 의해 설정되어야 합니다.**
 >
-> 그러나 샌드박스된 파일은 생성하는 모든 파일에 대해 이 속성이 설정됩니다. 비샌드박스 앱은 스스로 설정하거나 **Info.plist**에서 [**LSFileQuarantineEnabled**](https://developer.apple.com/documentation/bundleresources/information_property_list/lsfilequarantineenabled?language=objc) 키를 지정하여 시스템이 생성된 파일에 `com.apple.quarantine` 확장 속성을 설정하도록 할 수 있습니다.
+> 그러나 샌드박스된 파일은 생성하는 모든 파일에 이 속성이 설정됩니다. 비샌드박스 앱은 스스로 설정하거나 **Info.plist**에서 [**LSFileQuarantineEnabled**](https://developer.apple.com/documentation/bundleresources/information_property_list/lsfilequarantineenabled?language=objc) 키를 지정하여 시스템이 생성된 파일에 `com.apple.quarantine` 확장 속성을 설정하도록 할 수 있습니다.
 
 또한, **`qtn_proc_apply_to_self`**를 호출하는 프로세스에 의해 생성된 모든 파일은 격리됩니다. 또는 API **`qtn_file_apply_to_path`**는 지정된 파일 경로에 격리 속성을 추가합니다.
 
@@ -177,7 +213,7 @@ xattr file.png
 com.apple.macl
 com.apple.quarantine
 ```
-확인하십시오 **값** 의 **확장된** **속성** 및 찾으십시오 격리 속성을 작성한 앱:
+확인하십시오 **값** 의 **확장된** **속성** 및 찾으십시오 앱이 쓴 격리 속성:
 ```bash
 xattr -l portada.png
 com.apple.macl:
@@ -259,7 +295,7 @@ return 0;
 ```
 </details>
 
-그리고 **해당** 속성을 제거합니다:
+그리고 **해당** 속성을 제거하세요:
 ```bash
 xattr -d com.apple.quarantine portada.png
 #You can also remove this attribute from every file with
@@ -269,38 +305,56 @@ find . -iname '*' -print0 | xargs -0 xattr -d com.apple.quarantine
 ```bash
 find / -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf $9; printf "\n"}' | xargs -I {} xattr -lv {} | grep "com.apple.quarantine"
 ```
-격리 정보는 **`~/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**에 의해 관리되는 중앙 데이터베이스에 저장되어 있으며, 이는 GUI가 파일 출처에 대한 데이터를 얻을 수 있게 합니다. 또한, 이는 출처를 숨기려는 애플리케이션에 의해 덮어쓸 수 있습니다. 이는 LaunchServices API를 통해 수행될 수 있습니다.
+Quarantine 정보는 **`~/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**에 의해 LaunchServices에서 관리되는 중앙 데이터베이스에 저장되어 GUI가 파일 출처에 대한 데이터를 얻을 수 있도록 합니다. 또한, 이는 출처를 숨기려는 애플리케이션에 의해 덮어쓸 수 있습니다. 이는 LaunchServices API를 통해 수행될 수 있습니다.
 
-#### **libquarantine.dylb**
+#### **libquarantine.dylib**
 
-이 라이브러리는 확장 속성 필드를 조작할 수 있는 여러 기능을 내보냅니다.
+이 라이브러리는 확장 속성 필드를 조작할 수 있는 여러 함수를 내보냅니다.
 
-`qtn_file_*` API는 파일 격리 정책을 다루고, `qtn_proc_*` API는 프로세스(프로세스에 의해 생성된 파일)에 적용됩니다. 내보내지 않은 `__qtn_syscall_quarantine*` 함수는 정책을 적용하는 함수로, "Quarantine"을 첫 번째 인수로 하여 `mac_syscall`을 호출하여 `Quarantine.kext`에 요청을 보냅니다.
+`qtn_file_*` API는 파일 격리 정책을 다루고, `qtn_proc_*` API는 프로세스(프로세스에 의해 생성된 파일)에 적용됩니다. 내보내지 않은 `__qtn_syscall_quarantine*` 함수는 정책을 적용하는 함수로, "Quarantine"을 첫 번째 인수로 하여 `mac_syscall`을 호출하여 요청을 `Quarantine.kext`로 보냅니다.
 
 #### **Quarantine.kext**
 
-커널 확장은 **시스템의 커널 캐시**를 통해서만 사용할 수 있습니다. 그러나 **Kernel Debug Kit를** [**https://developer.apple.com/**](https://developer.apple.com/)에서 다운로드할 수 있으며, 이는 확장의 기호화된 버전을 포함합니다.
+커널 확장은 **시스템의 커널 캐시**를 통해서만 사용할 수 있습니다. 그러나 **Kernel Debug Kit를** [**https://developer.apple.com/**](https://developer.apple.com/)에서 다운로드할 수 있으며, 이 키트는 확장의 기호화된 버전을 포함합니다.
 
-이 Kext는 MACF를 통해 여러 호출을 후킹하여 모든 파일 생애 주기 이벤트를 가로채기 위해 사용됩니다: 생성, 열기, 이름 바꾸기, 하드 링크... 심지어 `setxattr`를 사용하여 `com.apple.quarantine` 확장 속성을 설정하지 못하도록 합니다.
+이 Kext는 MACF를 통해 여러 호출을 후킹하여 모든 파일 생애 주기 이벤트를 가로챕니다: 생성, 열기, 이름 바꾸기, 하드 링크... 심지어 `setxattr`를 사용하여 `com.apple.quarantine` 확장 속성을 설정하지 못하도록 방지합니다.
 
 또한 몇 가지 MIB를 사용합니다:
 
-- `security.mac.qtn.sandbox_enforce`: 샌드박스와 함께 격리를 시행
+- `security.mac.qtn.sandbox_enforce`: Sandbox와 함께 격리를 시행
 - `security.mac.qtn.user_approved_exec`: 격리된 프로세스는 승인된 파일만 실행할 수 있음
 
+#### Provenance xattr (Ventura 및 이후)
+
+macOS 13 Ventura는 격리된 앱이 처음 실행될 때 채워지는 별도의 출처 메커니즘을 도입했습니다. 두 개의 아티팩트가 생성됩니다:
+
+- `.app` 번들 디렉토리에 있는 `com.apple.provenance` xattr(기본 키와 플래그를 포함하는 고정 크기 이진 값).
+- `/var/db/SystemPolicyConfiguration/ExecPolicy/` 내 ExecPolicy 데이터베이스의 `provenance_tracking` 테이블에 앱의 cdhash 및 메타데이터를 저장하는 행.
+
+실용적인 사용:
+```bash
+# Inspect provenance xattr (if present)
+xattr -p com.apple.provenance /Applications/Some.app | hexdump -C
+
+# Observe Gatekeeper/provenance events in real time
+log stream --style syslog --predicate 'process == "syspolicyd"'
+
+# Retrieve historical Gatekeeper decisions for a specific bundle
+log show --last 2d --style syslog --predicate 'process == "syspolicyd" && eventMessage CONTAINS[cd] "GK scan"'
+```
 ### XProtect
 
-XProtect는 macOS에 내장된 **안티멀웨어** 기능입니다. XProtect는 **애플리케이션이 처음 실행되거나 수정될 때 알려진 악성 소프트웨어 및 안전하지 않은 파일 유형의 데이터베이스와 비교하여 확인합니다**. Safari, Mail 또는 Messages와 같은 특정 앱을 통해 파일을 다운로드하면 XProtect가 자동으로 파일을 스캔합니다. 데이터베이스에 있는 알려진 악성 소프트웨어와 일치하는 경우, XProtect는 **파일 실행을 차단하고** 위협에 대해 경고합니다.
+XProtect는 macOS에 내장된 **안티-멀웨어** 기능입니다. XProtect는 **응용 프로그램이 처음 실행되거나 수정될 때 알려진 멀웨어 및 안전하지 않은 파일 유형의 데이터베이스와 비교하여 확인합니다**. Safari, Mail 또는 Messages와 같은 특정 앱을 통해 파일을 다운로드하면 XProtect가 자동으로 파일을 스캔합니다. 데이터베이스에 있는 알려진 멀웨어와 일치하는 경우, XProtect는 **파일 실행을 차단하고 위협에 대해 경고합니다**.
 
-XProtect 데이터베이스는 Apple에 의해 **정기적으로 업데이트**되며, 새로운 악성 소프트웨어 정의가 포함됩니다. 이러한 업데이트는 자동으로 다운로드되어 Mac에 설치됩니다. 이는 XProtect가 항상 최신 알려진 위협에 대해 최신 상태를 유지하도록 보장합니다.
+XProtect 데이터베이스는 **Apple에 의해 정기적으로 업데이트**되며, 새로운 멀웨어 정의가 포함됩니다. 이러한 업데이트는 자동으로 다운로드되어 Mac에 설치됩니다. 이를 통해 XProtect는 항상 최신 알려진 위협에 대해 최신 상태를 유지합니다.
 
-그러나 **XProtect는 완전한 기능을 갖춘 안티바이러스 솔루션이 아닙니다**. 특정 알려진 위협 목록만 확인하며, 대부분의 안티바이러스 소프트웨어처럼 접근 시 스캔을 수행하지 않습니다.
+그러나 **XProtect는 전체 기능을 갖춘 안티바이러스 솔루션이 아닙니다**. 특정 알려진 위협 목록만 확인하며, 대부분의 안티바이러스 소프트웨어처럼 접근 시 스캔을 수행하지 않습니다.
 
-최신 XProtect 업데이트에 대한 정보를 얻으려면 실행하십시오:
+최신 XProtect 업데이트에 대한 정보를 얻으려면:
 ```bash
 system_profiler SPInstallHistoryDataType 2>/dev/null | grep -A 4 "XProtectPlistConfigData" | tail -n 5
 ```
-XProtect는 **/Library/Apple/System/Library/CoreServices/XProtect.bundle**에 위치하며, 번들 안에는 XProtect가 사용하는 정보가 있습니다:
+XProtect는 **/Library/Apple/System/Library/CoreServices/XProtect.bundle**에 위치한 SIP 보호 위치에 있으며, 번들 내부에서 XProtect가 사용하는 정보를 찾을 수 있습니다:
 
 - **`XProtect.bundle/Contents/Resources/LegacyEntitlementAllowlist.plist`**: 해당 cdhashes를 가진 코드가 레거시 권한을 사용할 수 있도록 허용합니다.
 - **`XProtect.bundle/Contents/Resources/XProtect.meta.plist`**: BundleID 및 TeamID를 통해 로드가 금지된 플러그인 및 확장 목록 또는 최소 버전을 나타냅니다.
@@ -309,14 +363,20 @@ XProtect는 **/Library/Apple/System/Library/CoreServices/XProtect.bundle**에 �
 
 **`/Library/Apple/System/Library/CoreServices/XProtect.app`**에는 Gatekeeper 프로세스와 관련이 없는 XProtect와 관련된 또 다른 앱이 있습니다.
 
+> XProtect Remediator: 최신 macOS에서 Apple은 주기적으로 launchd를 통해 실행되는 온디맨드 스캐너(XProtect Remediator)를 제공하여 맬웨어 계열을 탐지하고 수정합니다. 이러한 스캔은 통합 로그에서 확인할 수 있습니다:
+>
+> ```bash
+> log show --last 2h --predicate 'subsystem == "com.apple.XProtectFramework" || category CONTAINS "XProtect"' --style syslog
+> ```
+
 ### Not Gatekeeper
 
 > [!CAUTION]
-> Gatekeeper는 애플리케이션을 실행할 때마다 **실행되지 않습니다**. 오직 _**AppleMobileFileIntegrity**_ (AMFI)만이 Gatekeeper에 의해 이미 실행되고 검증된 앱을 실행할 때 **실행 가능한 코드 서명을 검증**합니다.
+> Gatekeeper는 애플리케이션을 실행할 때마다 **실행되지 않습니다.** 오직 _**AppleMobileFileIntegrity**_ (AMFI)만이 Gatekeeper에 의해 이미 실행되고 검증된 앱을 실행할 때 **실행 가능한 코드 서명**을 확인합니다.
 
-따라서 이전에는 앱을 실행하여 Gatekeeper로 캐시한 후, **애플리케이션의 실행 불가능한 파일**(예: Electron asar 또는 NIB 파일)을 수정하고, 다른 보호 장치가 없으면 애플리케이션이 **악성** 추가 사항과 함께 **실행되었습니다**.
+따라서 이전에는 앱을 실행하여 Gatekeeper로 캐시한 후, **애플리케이션의 실행 불가능한 파일**(예: Electron asar 또는 NIB 파일)을 수정하고 다른 보호 장치가 없으면 애플리케이션이 **악성** 추가 사항과 함께 **실행되었습니다.**
 
-하지만 이제는 macOS가 애플리케이션 번들 내의 파일 수정을 **방지하기 때문에** 이 작업이 불가능합니다. 따라서 [Dirty NIB](../macos-proces-abuse/macos-dirty-nib.md) 공격을 시도하면, 앱을 실행하여 Gatekeeper로 캐시한 후 번들을 수정할 수 없게 되어 더 이상 악용할 수 없음을 알게 될 것입니다. 예를 들어 Contents 디렉토리의 이름을 NotCon으로 변경하고 (악용에서 지시한 대로) 앱의 주요 바이너리를 실행하여 Gatekeeper로 캐시하면 오류가 발생하고 실행되지 않습니다.
+하지만 이제 macOS는 애플리케이션 번들 내의 파일을 **수정하는 것을 방지**하므로, [Dirty NIB](../macos-proces-abuse/macos-dirty-nib.md) 공격을 시도하면 더 이상 이를 악용할 수 없음을 알게 될 것입니다. Gatekeeper로 캐시하기 위해 앱을 실행한 후에는 번들을 수정할 수 없습니다. 예를 들어 Contents 디렉토리의 이름을 NotCon으로 변경하고 (악용에서 지시한 대로) 앱의 주요 바이너리를 실행하여 Gatekeeper로 캐시하면 오류가 발생하고 실행되지 않습니다.
 
 ## Gatekeeper Bypasses
 
@@ -330,9 +390,9 @@ Gatekeeper를 우회하는 방법(사용자가 무언가를 다운로드하고 G
 
 ### [CVE-2021-30990](https://ronmasas.com/posts/bypass-macos-gatekeeper)
 
-**Automator**로 생성된 애플리케이션의 경우, 실행에 필요한 정보는 `application.app/Contents/document.wflow`에 있으며 실행 파일에는 없습니다. 실행 파일은 **Automator Application Stub**이라는 일반 Automator 바이너리일 뿐입니다.
+**Automator**로 생성된 애플리케이션은 실행에 필요한 정보가 `application.app/Contents/document.wflow`에 있으며 실행 파일에는 없습니다. 실행 파일은 **Automator Application Stub**이라는 일반적인 Automator 바이너리입니다.
 
-따라서 `application.app/Contents/MacOS/Automator\ Application\ Stub`이 **시스템 내의 다른 Automator Application Stub을 가리키는 심볼릭 링크로 설정**할 수 있으며, 그러면 `document.wflow`(당신의 스크립트) 안의 내용을 **Gatekeeper를 트리거하지 않고 실행**합니다. 실제 실행 파일에는 격리 xattr가 없기 때문입니다.
+따라서 `application.app/Contents/MacOS/Automator\ Application\ Stub`이 **시스템 내의 다른 Automator Application Stub을 가리키는 심볼릭 링크로 설정**할 수 있으며, 그러면 `document.wflow`(당신의 스크립트) 내부의 내용을 **Gatekeeper를 트리거하지 않고 실행**합니다.
 
 예상 위치: `/System/Library/CoreServices/Automator\ Application\ Stub.app/Contents/MacOS/Automator\ Application\ Stub`
 
@@ -340,7 +400,7 @@ Gatekeeper를 우회하는 방법(사용자가 무언가를 다운로드하고 G
 
 ### [CVE-2022-22616](https://www.jamf.com/blog/jamf-threat-labs-safari-vuln-gatekeeper-bypass/)
 
-이 우회에서는 `application.app/Contents`에서 압축을 시작하는 애플리케이션으로 zip 파일이 생성되었습니다. 따라서 **quarantine attr**는 **`application.app/Contents`의 모든 파일에 적용되었지만**, **`application.app`에는 적용되지 않았습니다**. Gatekeeper가 확인하는 것은 `application.app`이기 때문에, `application.app`이 트리거될 때 **quarantine 속성이 없었습니다.**
+이 우회에서는 애플리케이션이 `application.app`가 아닌 `application.app/Contents`에서 압축을 시작하도록 zip 파일이 생성되었습니다. 따라서 **quarantine attr**는 **`application.app/Contents`의 모든 파일에 적용되었지만** **`application.app`에는 적용되지 않았습니다.** Gatekeeper가 확인하던 것이기 때문에, `application.app`가 트리거될 때 **quarantine 속성이 없었습니다.**
 ```bash
 zip -r test.app/Contents test.zip
 ```
@@ -352,7 +412,7 @@ Check the [**original report**](https://www.jamf.com/blog/jamf-threat-labs-safar
 ```bash
 aa archive -d test.app/Contents -o test.app.aar
 ```
-자세한 정보는 [**원본 보고서**](https://www.jamf.com/blog/jamf-threat-labs-macos-archive-utility-vulnerability/)를 확인하세요.
+Check the [**original report**](https://www.jamf.com/blog/jamf-threat-labs-macos-archive-utility-vulnerability/) for more information.
 
 ### [CVE-2022-42821](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)
 
@@ -365,7 +425,7 @@ xattr: [Errno 13] Permission denied: '/tmp/no-attr'
 ```
 또한, **AppleDouble** 파일 형식은 ACE를 포함하여 파일을 복사합니다.
 
-[**소스 코드**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html)에서 **`com.apple.acl.text`**라는 xattr에 저장된 ACL 텍스트 표현이 압축 해제된 파일의 ACL로 설정될 것임을 확인할 수 있습니다. 따라서, ACL이 다른 xattrs가 작성되는 것을 방지하는 애플리케이션을 **AppleDouble** 파일 형식으로 zip 파일에 압축했다면... 격리 xattr는 애플리케이션에 설정되지 않았습니다:
+[**소스 코드**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html)에서 **`com.apple.acl.text`**라는 xattr에 저장된 ACL 텍스트 표현이 압축 해제된 파일의 ACL로 설정될 것임을 확인할 수 있습니다. 따라서 ACL이 다른 xattrs가 작성되는 것을 방지하는 애플리케이션을 **AppleDouble** 파일 형식으로 zip 파일에 압축했다면... 격리 xattr는 애플리케이션에 설정되지 않았습니다:
 ```bash
 chmod +a "everyone deny write,writeattr,writeextattr" /tmp/test
 ditto -c -k test test.zip
@@ -397,7 +457,7 @@ aa archive -d test/ -o test.aar
 
 # If you downloaded the resulting test.aar and decompress it, the file test/._a won't have a quarantitne attribute
 ```
-파일을 생성할 수 있는 경우, 격리 속성이 설정되지 않으면 **Gatekeeper를 우회할 수 있었습니다.** 이 요령은 **AppleDouble 이름 규칙**을 사용하여 **DMG 파일 애플리케이션**을 생성하고, 격리 속성이 없는 이 숨겨진 파일에 대한 **심볼릭 링크로서 보이는 파일을 생성하는** 것이었습니다.\
+파일을 생성할 수 있는 경우, 격리 속성이 설정되지 않으면 **Gatekeeper를 우회할 수 있었습니다.** 요령은 **AppleDouble 이름 규칙**을 사용하여 **DMG 파일 애플리케이션**을 생성하고, 격리 속성이 없는 이 숨겨진 파일에 대한 **심볼릭 링크로서의 가시 파일을 생성하는** 것이었습니다.\
 **dmg 파일이 실행될 때**, 격리 속성이 없기 때문에 **Gatekeeper를 우회하게 됩니다.**
 ```bash
 # Create an app bundle with the backdoor an call it app.app
@@ -414,18 +474,35 @@ ln -s ._app.dmg s/app/app.dmg
 echo "[+] compressing files"
 aa archive -d s/ -o app.aar
 ```
-### uchg (from this [talk](https://codeblue.jp/2023/result/pdf/cb23-bypassing-macos-security-and-privacy-mechanisms-from-gatekeeper-to-system-integrity-protection-by-koh-nakagawa.pdf))
+### [CVE-2023-41067]
 
-- 앱이 포함된 디렉토리를 생성합니다.
+macOS Sonoma 14.0에서 수정된 Gatekeeper 우회는 조작된 앱이 프롬프트 없이 실행될 수 있도록 허용했습니다. 패치 후 공개적으로 세부 정보가 공개되었으며, 수정되기 전에 이 문제가 실제로 악용되었습니다. Sonoma 14.0 이상이 설치되어 있는지 확인하십시오.
+
+### [CVE-2024-27853]
+
+macOS 14.4(2024년 3월 출시)에서 `libarchive`가 악성 ZIP을 처리하는 과정에서 발생한 Gatekeeper 우회는 앱이 평가를 피할 수 있도록 했습니다. Apple이 문제를 해결한 14.4 이상으로 업데이트하십시오.
+
+### 제3자 압축 해제 도구의 격리 전파 오류 (2023–2024)
+
+인기 있는 추출 도구(예: The Unarchiver)에서 여러 취약점으로 인해 아카이브에서 추출된 파일이 `com.apple.quarantine` xattr를 놓쳐 Gatekeeper 우회 기회를 제공했습니다. 테스트할 때는 항상 macOS Archive Utility 또는 패치된 도구를 사용하고, 추출 후 xattrs를 검증하십시오.
+
+### uchg (이 [강연](https://codeblue.jp/2023/result/pdf/cb23-bypassing-macos-security-and-privacy-mechanisms-from-gatekeeper-to-system-integrity-protection-by-koh-nakagawa.pdf)에서)
+
+- 앱을 포함하는 디렉토리를 생성합니다.
 - 앱에 uchg를 추가합니다.
 - 앱을 tar.gz 파일로 압축합니다.
 - tar.gz 파일을 피해자에게 보냅니다.
 - 피해자가 tar.gz 파일을 열고 앱을 실행합니다.
 - Gatekeeper는 앱을 확인하지 않습니다.
 
-### Prevent Quarantine xattr
+### 격리 xattr 방지
 
-".app" 번들에 quarantine xattr가 추가되지 않으면, 실행할 때 **Gatekeeper가 트리거되지 않습니다**.
+".app" 번들에서 격리 xattr가 추가되지 않으면, 실행할 때 **Gatekeeper가 트리거되지 않습니다**.
 
+
+## References
+
+- Apple Platform Security: About the security content of macOS Sonoma 14.4 (includes CVE-2024-27853) – [https://support.apple.com/en-us/HT214084](https://support.apple.com/en-us/HT214084)
+- Eclectic Light: How macOS now tracks the provenance of apps – [https://eclecticlight.co/2023/05/10/how-macos-now-tracks-the-provenance-of-apps/](https://eclecticlight.co/2023/05/10/how-macos-now-tracks-the-provenance-of-apps/)
 
 {{#include ../../../banners/hacktricks-training.md}}
