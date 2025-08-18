@@ -21,6 +21,14 @@ Once flashed, open the serial monitor at 115200 baud and send `h` for help. Typi
 - `y` brute‑force IR to discover undocumented opcodes
 - `x` boundary‑scan snapshot of pin states
 
+![](<../../images/image (939).png>)
+
+![](<../../images/image (578).png>)
+
+![](<../../images/image (774).png>)
+
+
+
 If a valid TAP is found you will see lines starting with `FOUND!` indicating discovered pins.
 
 Tips
