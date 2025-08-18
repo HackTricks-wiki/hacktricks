@@ -91,7 +91,7 @@ anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] exists an
 [...]
 ```
 
-**`syspolicyd`** also exposes a XPC server with different operations like `assess`, `update`, `record` and `cancel` which are also reachable using **`Security.framework`'s `SecAssessment*`** APIs and **`xpctl`** actually talks to **`syspolicyd`** via XPC.
+**`syspolicyd`** also exposes a XPC server with different operations like `assess`, `update`, `record` and `cancel` which are also reachable using **`Security.framework`'s `SecAssessment*`** APIs and **`spctl`** actually talks to **`syspolicyd`** via XPC.
 
 Note how the first rule ended in "**App Store**" and the second one in "**Developer ID**" and that in the previous imaged it was **enabled to execute apps from the App Store and identified developers**.\
 If you **modify** that setting to App Store, the "**Notarized Developer ID" rules will disappear**.
@@ -159,6 +159,44 @@ spctl --assess -v /Applications/App.app
 ```
 
 Regarding **kernel extensions**, the folder `/var/db/SystemPolicyConfiguration` contains files with lists of kexts allowed to be loaded. Moreover, `spctl` has the entitlement `com.apple.private.iokit.nvram-csr` because it's capable of adding new pre-approved kernel extensions which need to be saved also in NVRAM in a `kext-allowed-teams` key.
+
+#### Managing Gatekeeper on macOS 15 (Sequoia) and later
+
+Starting in macOS 15 Sequoia, end users can no longer toggle Gatekeeper policy from `spctl`. Management is performed via System Settings or by deploying an MDM configuration profile with the `com.apple.systempolicy.control` payload. Example profile snippet to allow App Store and identified developers (but not "Anywhere"):
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>PayloadContent</key>
+  <array>
+    <dict>
+      <key>PayloadType</key>
+      <string>com.apple.systempolicy.control</string>
+      <key>PayloadVersion</key>
+      <integer>1</integer>
+      <key>PayloadIdentifier</key>
+      <string>com.example.gatekeeper</string>
+      <key>EnableAssessment</key>
+      <true/>
+      <key>AllowIdentifiedDevelopers</key>
+      <true/>
+    </dict>
+  </array>
+  <key>PayloadType</key>
+  <string>Configuration</string>
+  <key>PayloadIdentifier</key>
+  <string>com.example.profile.gatekeeper</string>
+  <key>PayloadUUID</key>
+  <string>00000000-0000-0000-0000-000000000000</string>
+  <key>PayloadVersion</key>
+  <integer>1</integer>
+  <key>PayloadDisplayName</key>
+  <string>Gatekeeper</string>
+</dict>
+</plist>
+```
 
 ### Quarantine Files
 
@@ -300,7 +338,7 @@ find / -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf $9; pri
 
 Quarantine information is also stored in a central database managed by LaunchServices in **`~/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`** which allows the GUI to obtain data about the file origins. Moreover this can be overwritten by applications which might be interested in hiding its origins. Moreover, this can be done from LaunchServices APIS.
 
-#### **libquarantine.dylb**
+#### **libquarantine.dylib**
 
 This library exports several functions that allow to manipulate the extended attribute fields.
 
@@ -316,6 +354,26 @@ It also uses a couple of MIBs:
 
 - `security.mac.qtn.sandbox_enforce`: Enforce quarantine along Sandbox
 - `security.mac.qtn.user_approved_exec`: Querantined procs can only execute approved files
+
+#### Provenance xattr (Ventura and later)
+
+macOS 13 Ventura introduced a separate provenance mechanism which is populated the first time a quarantined app is allowed to run. Two artefacts are created:
+
+- The `com.apple.provenance` xattr on the `.app` bundle directory (fixed-size binary value containing a primary key and flags).
+- A row in the `provenance_tracking` table inside the ExecPolicy database at `/var/db/SystemPolicyConfiguration/ExecPolicy/` storing the app’s cdhash and metadata.
+
+Practical usage:
+
+```bash
+# Inspect provenance xattr (if present)
+xattr -p com.apple.provenance /Applications/Some.app | hexdump -C
+
+# Observe Gatekeeper/provenance events in real time
+log stream --style syslog --predicate 'process == "syspolicyd"'
+
+# Retrieve historical Gatekeeper decisions for a specific bundle
+log show --last 2d --style syslog --predicate 'process == "syspolicyd" && eventMessage CONTAINS[cd] "GK scan"'
+```
 
 ### XProtect
 
@@ -339,6 +397,12 @@ XProtect is located on. SIP protected location at **/Library/Apple/System/Librar
 - **`XProtect.bundle/Contents/Resources/gk.db`**: SQLite3 database with hashes of blocked applications and TeamIDs.
 
 Note that there is another App in **`/Library/Apple/System/Library/CoreServices/XProtect.app`** related to XProtect that isn't involved with the Gatekeeper process.
+
+> XProtect Remediator: On modern macOS, Apple ships on-demand scanners (XProtect Remediator) that run periodically via launchd to detect and remediate families of malware. You can observe these scans in unified logs:
+>
+> ```bash
+> log show --last 2h --predicate 'subsystem == "com.apple.XProtectFramework" || category CONTAINS "XProtect"' --style syslog
+> ```
 
 ### Not Gatekeeper
 
@@ -459,6 +523,18 @@ echo "[+] compressing files"
 aa archive -d s/ -o app.aar
 ```
 
+### [CVE-2023-41067]
+
+A Gatekeeper bypass fixed in macOS Sonoma 14.0 allowed crafted apps to run without prompting. Details were disclosed publicly after patching and the issue was actively exploited in the wild before fix. Ensure Sonoma 14.0 or later is installed.
+
+### [CVE-2024-27853]
+
+A Gatekeeper bypass in macOS 14.4 (released March 2024) stemming from `libarchive` handling of malicious ZIPs allowed apps to evade assessment. Update to 14.4 or later where Apple addressed the issue.
+
+### Third‑party unarchivers mis‑propagating quarantine (2023–2024)
+
+Several vulnerabilities in popular extraction tools (e.g., The Unarchiver) caused files extracted from archives to miss the `com.apple.quarantine` xattr, enabling Gatekeeper bypass opportunities. Always rely on macOS Archive Utility or patched tools when testing, and validate xattrs after extraction.
+
 ### uchg (from this [talk](https://codeblue.jp/2023/result/pdf/cb23-bypassing-macos-security-and-privacy-mechanisms-from-gatekeeper-to-system-integrity-protection-by-koh-nakagawa.pdf))
 
 - Create a directory containing an app.
@@ -473,7 +549,9 @@ aa archive -d s/ -o app.aar
 In an ".app" bundle if the quarantine xattr is not added to it, when executing it **Gatekeeper won't be triggered**.
 
 
+## References
+
+- Apple Platform Security: About the security content of macOS Sonoma 14.4 (includes CVE-2024-27853) – [https://support.apple.com/en-us/HT214084](https://support.apple.com/en-us/HT214084)
+- Eclectic Light: How macOS now tracks the provenance of apps – [https://eclecticlight.co/2023/05/10/how-macos-now-tracks-the-provenance-of-apps/](https://eclecticlight.co/2023/05/10/how-macos-now-tracks-the-provenance-of-apps/)
+
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-
