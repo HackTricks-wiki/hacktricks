@@ -156,8 +156,64 @@ So, insert your new assembly code in the "**newmem**" section and remove the ori
 
 **Click on execute and so on and your code should be injected in the program changing the behaviour of the functionality!**
 
+## Advanced features in Cheat Engine 7.x (2023-2025)
+
+Cheat Engine has continued to evolve since version 7.0 and several quality-of-life and *offensive-reversing* features have been added that are extremely handy when analysing modern software (and not only games!). Below is a **very condensed field guide** to the additions you will most likely use during red-team/CTF work.
+
+### Pointer Scanner 2 improvements
+* `Pointers must end with specific offsets` and the new **Deviation** slider (≥7.4) greatly reduce false positives when you rescan after an update. Use it together with multi-map comparison (`.PTR` → *Compare results with other saved pointer map*) to obtain a **single resilient base-pointer** in just a few minutes.
+* Bulk-filter shortcut: after the first scan press `Ctrl+A → Space` to mark everything, then `Ctrl+I` (invert) to deselect addresses that failed the rescan.
+
+### Ultimap 3 – Intel PT tracing
+*From 7.5 the old Ultimap was re-implemented on top of **Intel Processor-Trace (IPT)***. This means you can now record *every* branch the target takes **without single-stepping** (user-mode only, it will not trip most anti-debug gadgets).
+
+```
+Memory View → Tools → Ultimap 3 → check «Intel PT»
+Select number of buffers → Start
+```
+After a few seconds stop the capture and **right-click → Save execution list to file**. Combine branch addresses with a `Find out what addresses this instruction accesses` session to locate high-frequency game-logic hotspots extremely fast. 
+
+### 1-byte `jmp` / auto-patch templates
+Version 7.5 introduced a *one-byte* JMP stub (0xEB) that installs an SEH handler and places an INT3 at the original location. It is generated automatically when you use **Auto Assembler → Template → Code Injection** on instructions that cannot be patched with a 5-byte relative jump. This makes “tight” hooks possible inside packed or size-constrained routines.
+
+### Kernel-level stealth with DBVM (AMD & Intel)
+*DBVM* is CE’s built-in Type-2 hypervisor. Recent builds finally added **AMD-V/SVM support** so you can run `Driver → Load DBVM` on Ryzen/EPYC hosts. DBVM lets you:
+1. Create hardware breakpoints invisible to Ring-3/anti-debug checks.
+2. Read/write pageable or protected kernel memory regions even when the user-mode driver is disabled.
+3. Perform VM-EXIT-less timing-attack bypasses (e.g. query `rdtsc` from the hypervisor).
+
+**Tip:** DBVM will refuse to load when HVCI/Memory-Integrity is enabled on Windows 11 → turn it off or boot a dedicated VM-host.
+
+### Remote / cross-platform debugging with **ceserver**
+CE now ships a full rewrite of *ceserver* and can attach over TCP to **Linux, Android, macOS & iOS** targets. A popular fork integrates *Frida* to combine dynamic instrumentation with CE’s GUI – ideal when you need to patch Unity or Unreal games running on a phone:
+
+```
+# on the target (arm64)
+./ceserver_arm64 &
+# on the analyst workstation
+adb forward tcp:52736 tcp:52736   # (or ssh tunnel)
+Cheat Engine → "Network" icon → Host = localhost → Connect
+```
+For the Frida bridge see `bb33bb/frida-ceserver` on GitHub. 
+
+### Other noteworthy goodies
+* **Patch Scanner** (MemView → Tools) – detects unexpected code changes in executable sections; handy for malware analysis.
+* **Structure Dissector 2** – drag-an-address → `Ctrl+D`, then *Guess fields* to auto-evaluate C-structures.
+* **.NET & Mono Dissector** – improved Unity game support; call methods directly from the CE Lua console.
+* **Big-Endian custom types** – reversed byte order scan/edit (useful for console emulators and network packet buffers).
+* **Autosave & tabs** for AutoAssembler/Lua windows, plus `reassemble()` for multi-line instruction rewrite.
+
+### Installation & OPSEC notes (2024-2025)
+* The official installer is wrapped with InnoSetup **ad-offers** (`RAV` etc.). **Always click *Decline*** *or compile from source* to avoid PUPs. AVs will still flag `cheatengine.exe` as a *HackTool*, which is expected.
+* Modern anti-cheat drivers (EAC/Battleye, ACE-BASE.sys, mhyprot2.sys) detect CE’s window class even when renamed. Run your reversing copy **inside a disposable VM** or after disabling network play.
+* If you only need user-mode access choose **`Settings → Extra → Kernel mode debug = off`** to avoid loading CE’s unsigned driver that may BSOD on Windows 11 24H2 Secure-Boot.
+
+---
+
 ## **References**
 
+- [Cheat Engine 7.5 release notes (GitHub)](https://github.com/cheat-engine/cheat-engine/releases/tag/7.5)
+- [frida-ceserver cross-platform bridge](https://github.com/bb33bb/frida-ceserver-Mac-and-IOS)
 - **Cheat Engine tutorial, complete it to learn how to start with Cheat Engine**
 
 {{#include ../../banners/hacktricks-training.md}}
