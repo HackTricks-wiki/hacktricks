@@ -53,15 +53,12 @@ sudo ewfacquire /dev/sdb -u evidence -c 1 -d "Seizure 2025-07-22" -e 1 -X examin
 ```
 ### Imaging Cloud Disks
 
-*AWS* – створити **судово-медичний знімок** без вимкнення екземпляра:
+*AWS* – створити **судово-експертний знімок** без вимкнення екземпляра:
 ```bash
 aws ec2 create-snapshot --volume-id vol-01234567 --description "IR-case-1234 web-server 2025-07-22"
 # Copy the snapshot to S3 and download with aws cli / aws snowball
 ```
-*Azure* – використовуйте `az snapshot create` та експортуйте до SAS URL. Дивіться сторінку HackTricks {{#ref}}
-../../cloud/azure/azure-forensics.md
-{{#endref}}
-
+*Azure* – використовуйте `az snapshot create` та експортуйте до SAS URL.
 
 ## Монтування
 
@@ -69,7 +66,7 @@ aws ec2 create-snapshot --volume-id vol-01234567 --description "IR-case-1234 web
 
 1. Монтуйте **весь диск**, коли вам потрібна оригінальна таблиця розділів (MBR/GPT).
 2. Монтуйте **файл одного розділу**, коли вам потрібен лише один том.
-3. Завжди монтуйте **тільки для читання** (`-o ro,norecovery`) і працюйте з **копіями**.
+3. Завжди монтуйте **тільки для читання** (`-o ro,norecovery`) та працюйте з **копіями**.
 
 ### Сирі зображення (dd, AFF4-extracted)
 ```bash
@@ -131,7 +128,7 @@ mount -o ro /dev/mapper/loop0p2 /mnt
 | Помилка | Типова причина | Виправлення |
 |-------|---------------|-----|
 | `cannot mount /dev/loop0 read-only` | Журналізована FS (ext4) не була коректно відмонтована | використовуйте `-o ro,norecovery` |
-| `bad superblock …` | Неправильний зсув або пошкоджена FS | обчисліть зсув (`sector*size`) або запустіть `fsck -n` на копії |
+| `bad superblock …` | Неправильний зсув або пошкоджена FS | розрахуйте зсув (`sector*size`) або запустіть `fsck -n` на копії |
 | `mount: unknown filesystem type 'LVM2_member'` | Контейнер LVM | активуйте групу томів за допомогою `vgchange -ay` |
 
 ### Очищення
@@ -143,7 +140,7 @@ kpartx -dv /dev/loop0  # or qemu-nbd --disconnect /dev/nbd0
 ```
 ## Посилання
 
-- AFF4 imaging tool announcement & specification: https://github.com/aff4/aff4
-- qemu-nbd manual page (mounting disk images safely): https://manpages.debian.org/qemu-system-common/qemu-nbd.1.en.html
+- Оголошення та специфікація інструменту зображення AFF4: https://github.com/aff4/aff4
+- Сторінка мануалу qemu-nbd (безпечне монтування образів дисків): https://manpages.debian.org/qemu-system-common/qemu-nbd.1.en.html
 
 {{#include ../../banners/hacktricks-training.md}}
