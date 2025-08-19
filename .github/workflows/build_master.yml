@@ -26,6 +26,10 @@ jobs:
     environment: prod
 
     steps:
+      - name: clean space
+        run: |
+          rm -rf /opt/hostedtoolcache
+      
       - name: Checkout code
         uses: actions/checkout@v4
         with:
