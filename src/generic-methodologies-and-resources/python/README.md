@@ -4,10 +4,10 @@
 
 **Цікаві сторінки для перевірки:**
 
-- [**Pyscript хакерські трюки**](pyscript.md)
-- [**Python десеріалізації**](../../pentesting-web/deserialization/index.html#python)
-- [**Трюки для обходу python пісочниць**](bypass-python-sandboxes/index.html)
-- [**Основний синтаксис веб-запитів на python**](web-requests.md)
-- [**Основний синтаксис python та бібліотеки**](basic-python.md)
+- [**Pyscript hacking tricks**](pyscript.md)
+- [**Python deserializations**](../../pentesting-web/deserialization/README.md)
+- [**Tricks to bypass python sandboxes**](bypass-python-sandboxes/README.md)
+- [**Basic python web requests syntax**](web-requests.md)
+- [**Basic python syntax and libraries**](basic-python.md)
 
 {{#include ../../banners/hacktricks-training.md}}
