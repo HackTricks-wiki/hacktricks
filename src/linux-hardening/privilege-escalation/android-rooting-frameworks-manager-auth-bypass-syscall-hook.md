@@ -49,7 +49,7 @@ As al die kontroles slaag, cache die kern die bestuurder se UID tydelik en aanva
 
 As die handtekening kontrole bind aan "die eerste ooreenstemmende /data/app/*/base.apk" wat in die proses FD tabel gevind word, verifieer dit nie eintlik die oproeper se eie pakket nie. 'n Aanvaller kan 'n wettig onderteken APK (die werklike bestuurder se) vooraf posisioneer sodat dit vroeër in die FD lys verskyn as hul eie base.apk.
 
-Hierdie vertroue deur indireksie laat 'n onbevoegde app toe om die bestuurder te verteenwoordig sonder om die bestuurder se onderteken sleutel te besit.
+Hierdie vertroue deur indireksie laat 'n onbevoegde app toe om die bestuurder te verteenwoordig sonder om die bestuurder se ondertekeningssleutel te besit.
 
 Sleutel eienskappe wat uitgebuit word:
 - Die FD skandering bind nie aan die oproeper se pakket identiteit nie; dit pas net pad stringe aan.
@@ -139,43 +139,43 @@ result = ksu_call(CMD_BECOME_MANAGER, (unsigned long)my_data_dir, 0, 0);
 return (int)result;
 }
 ```
-Na sukses, bevoorregte opdragte (voorbeelde):
+After success, privileged commands (examples):
 - CMD_GRANT_ROOT: bevorder huidige proses na root
 - CMD_ALLOW_SU: voeg jou pakket/UID by die toelaatlys vir volhoubare su
-- CMD_SET_SEPOLICY: pas SELinux-beleid aan soos deur die raamwerk ondersteun
+- CMD_SET_SEPOLICY: pas SELinux beleid aan soos ondersteun deur die raamwerk
 
-Wedloop/volhoubaarheid wenk:
+Race/persistence tip:
 - Registreer 'n BOOT_COMPLETED ontvanger in AndroidManifest (RECEIVE_BOOT_COMPLETED) om vroeg na herlaai te begin en probeer verifikasie voordat die werklike bestuurder.
 
 ---
-## Opsporing en versagting riglyne
+## Detection and mitigation guidance
 
-Vir raamwerk ontwikkelaars:
+For framework developers:
 - Bind verifikasie aan die oproeper se pakket/UID, nie aan arbitrêre FDs nie:
 - Los die oproeper se pakket op vanaf sy UID en verifieer teen die geïnstalleerde pakket se handtekening (via PackageManager) eerder as om FDs te skandeer.
-- As slegs op die kern, gebruik 'n stabiele oproeper identiteit (taak krediete) en valideer op 'n stabiele bron van waarheid wat deur init/userspace helper bestuur word, nie proses FDs nie.
-- Vermy pad-prefix kontroles as identiteit; dit is triviaal bevredigbaar deur die oproeper.
-- Gebruik nonce-gebaseerde uitdaging–antwoord oor die kanaal en maak enige gekapte bestuurder identiteit skoon by opstart of op sleutelgebeurtenisse.
+- As slegs kern, gebruik 'n stabiele oproeper identiteit (taak krediete) en valideer op 'n stabiele bron van waarheid wat deur init/userspace helper bestuur word, nie proses FDs nie.
+- Vermy pad-prefix kontrole as identiteit; dit is triviaal om deur die oproeper bevredig te word.
+- Gebruik nonce-gebaseerde uitdaging–antwoord oor die kanaal en maak enige gekapte bestuurder identiteit skoon by opstart of op sleutel gebeurtenisse.
 - Oorweeg binder-gebaseerde geverifieerde IPC eerder as om generiese syscalls te oorlaai wanneer dit haalbaar is.
 
-Vir verdedigers/blou span:
+For defenders/blue team:
 - Ontdek die teenwoordigheid van rooting raamwerke en bestuurder prosesse; monitor vir prctl oproepe met verdagte magiese konstantes (bv. 0xDEADBEEF) as jy kern telemetrie het.
-- Op bestuurde vloot, blokkeer of waarsku oor opstart ontvangers van onbetroubare pakkette wat vinnig probeer bevoorregte bestuurder opdragte na opstart.
+- Op bestuurde vloot, blokkeer of waarsku oor opstart ontvangers van onbetroubare pakkette wat vinnig probeer om bevoorregte bestuurder opdragte na opstart te gee.
 - Verseker dat toestelle opgedateer is na gepatchte raamwerk weergawes; maak gekapte bestuurder ID's ongeldig op opdatering.
 
-Beperkings van die aanval:
+Limitations of the attack:
 - Aangetas slegs toestelle wat reeds ge-root is met 'n kwesbare raamwerk.
-- Gewoonlik vereis 'n herlaai/wedloop venster voordat die wettige bestuurder verifieer (sommige raamwerke cache bestuurder UID tot reset).
+- Gewoonlik vereis 'n herlaai/race venster voordat die wettige bestuurder verifieer (sommige raamwerke cache bestuurder UID totdat dit gereset word).
 
 ---
-## Verwante notas oor raamwerke
+## Related notes across frameworks
 
 - Wagwoord-gebaseerde verifikasie (bv. historiese APatch/SKRoot bou) kan swak wees as wagwoorde raai-baar/bruteforce-baar is of verifikasies foutief is.
 - Pakket/handtekening-gebaseerde verifikasie (bv. KernelSU) is sterker in beginsel maar moet bind aan die werklike oproeper, nie indirekte artefakte soos FD skandeer nie.
-- Magisk: CVE-2024-48336 (MagiskEoP) het getoon dat selfs volwasse ekosisteme kwesbaar kan wees vir identiteit vervalsing wat lei tot kode-uitvoering met root binne bestuurder konteks.
+- Magisk: CVE-2024-48336 (MagiskEoP) het getoon dat selfs volwasse ekosisteme kwesbaar kan wees vir identiteit spoofing wat lei tot kode uitvoering met root binne bestuurder konteks.
 
 ---
-## Verwysings
+## References
 
 - [Zimperium – The Rooting of All Evil: Security Holes That Could Compromise Your Mobile Device](https://zimperium.com/blog/the-rooting-of-all-evil-security-holes-that-could-compromise-your-mobile-device)
 - [KernelSU v0.5.7 – core_hook.c path checks (L193, L201)](https://github.com/tiann/KernelSU/blob/v0.5.7/kernel/core_hook.c#L193)

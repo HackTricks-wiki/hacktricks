@@ -1,4 +1,4 @@
-# LOAD_NAME / LOAD_CONST opcode OOB Lees
+# LOAD_NAME / LOAD_CONST opcode OOB Read
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -6,9 +6,9 @@
 
 ### TL;DR <a href="#tldr-2" id="tldr-2"></a>
 
-Ons kan die OOB leesfunksie in LOAD_NAME / LOAD_CONST opcode gebruik om 'n simbool in die geheue te verkry. Dit beteken om 'n truuk soos `(a, b, c, ... honderde simbole ..., __getattribute__) if [] else [].__getattribute__(...)` te gebruik om 'n simbool (soos funksienaam) te kry wat jy wil hê.
+Ons kan die OOB read-funksie in LOAD_NAME / LOAD_CONST opcode gebruik om 'n simbool in die geheue te kry. Dit beteken om 'n truuk soos `(a, b, c, ... honderde simbole ..., __getattribute__) if [] else [].__getattribute__(...)` te gebruik om 'n simbool (soos funksienaam) te kry wat jy wil.
 
-Dan moet jy net jou uitbuiting saamstel.
+Dan net jou ontploffing saamstel.
 
 ### Oorsig <a href="#overview-1" id="overview-1"></a>
 
@@ -19,11 +19,11 @@ if len(source) > 13337: exit(print(f"{'L':O<13337}NG"))
 code = compile(source, '∅', 'eval').replace(co_consts=(), co_names=())
 print(eval(code, {'__builtins__': {}}))1234
 ```
-U kan arbitrêre Python-kode invoer, en dit sal gecompileer word na 'n [Python-kode objek](https://docs.python.org/3/c-api/code.html). egter `co_consts` en `co_names` van daardie kode objek sal vervang word met 'n leë tuple voordat daardie kode objek geëvalueer word.
+U kan arbitrêre Python-kode invoer, en dit sal gecompileer word na 'n [Python code object](https://docs.python.org/3/c-api/code.html). egter `co_consts` en `co_names` van daardie kode-object sal vervang word met 'n leë tuple voordat daardie kode-object geëvalueer word.
 
 So op hierdie manier, sal alle uitdrukkings wat konstantes bevat (bv. getalle, strings ens.) of name (bv. veranderlikes, funksies) uiteindelik 'n segmentasiefout kan veroorsaak.
 
-### Uit die Grens Lees <a href="#out-of-bound-read" id="out-of-bound-read"></a>
+### Uit die Grense Lees <a href="#out-of-bound-read" id="out-of-bound-read"></a>
 
 Hoe gebeur die segfault?
 
@@ -35,7 +35,7 @@ Kom ons begin met 'n eenvoudige voorbeeld, `[a, b, c]` kan in die volgende bytec
 6 BUILD_LIST               3
 8 RETURN_VALUE12345
 ```
-Maar wat as die `co_names` 'n leë tuple word? Die `LOAD_NAME 2` opcode word steeds uitgevoer en probeer om die waarde van daardie geheueadres te lees waar dit oorspronklik behoort te wees. Ja, dit is 'n uit-baan lees "kenmerk".
+Maar wat as die `co_names` 'n leë tuple word? Die `LOAD_NAME 2` opcode word steeds uitgevoer, en probeer om die waarde van daardie geheueadres te lees waar dit oorspronklik behoort te wees. Ja, dit is 'n uit-baan lees "kenmerk".
 
 Die kernkonsep vir die oplossing is eenvoudig. Sommige opcodes in CPython, byvoorbeeld `LOAD_NAME` en `LOAD_CONST`, is kwesbaar (?) vir OOB lees.
 
@@ -49,7 +49,7 @@ PUSH(value);
 FAST_DISPATCH();
 }1234567
 ```
-Op hierdie manier kan ons die OOB-funksie gebruik om 'n "naam" van arbitrêre geheue-offset te verkry. Om seker te maak watter naam dit het en wat sy offset is, hou net aan om `LOAD_NAME 0`, `LOAD_NAME 1` ... `LOAD_NAME 99` ... te probeer. En jy kan iets vind in ongeveer oparg > 700. Jy kan ook probeer om gdb te gebruik om na die geheue-indeling te kyk, natuurlik, maar ek dink nie dit sal makliker wees nie?
+Op hierdie manier kan ons die OOB-funksie gebruik om 'n "naam" van arbitrêre geheue-offset te verkry. Om seker te maak watter naam dit het en wat sy offset is, hou net aan om `LOAD_NAME 0`, `LOAD_NAME 1` ... `LOAD_NAME 99` ... te probeer. En jy kan iets vind in ongeveer oparg > 700. Jy kan ook probeer om gdb te gebruik om na die geheue-opstelling te kyk, natuurlik, maar ek dink nie dit sal makliker wees nie?
 
 ### Generating the Exploit <a href="#generating-the-exploit" id="generating-the-exploit"></a>
 
@@ -61,7 +61,7 @@ Kom ons neem aan ons kan 'n `__getattribute__` naam van offset 5 (`LOAD_NAME 5`)
 # you can get the __getattribute__ method of list object now!
 ]1234
 ```
-> Let op dat dit nie nodig is om dit as `__getattribute__` te noem nie, jy kan dit iets korter of meer vreemd noem
+> Let op dat dit nie nodig is om dit as `__getattribute__` te noem nie, jy kan dit as iets korter of meer vreemd noem
 
 Jy kan die rede agterkom deur net na die bytecode te kyk:
 ```python
@@ -227,11 +227,11 @@ builtins['eval'](builtins['input']())
 - `LOAD_NAME namei`, `STORE_NAME`, `DELETE_NAME`, `LOAD_GLOBAL`, `STORE_GLOBAL`, `IMPORT_NAME`, `IMPORT_FROM`, `LOAD_ATTR`, `STORE_ATTR` → lees name van `co_names[...]` (vir 3.11+ let op `LOAD_ATTR`/`LOAD_GLOBAL` stoor vlag bits in die lae bit; die werklike indeks is `namei >> 1`). Sien die disassembler dokumentasie vir presiese semantiek per weergawe. [Python dis docs].
 - Python 3.11+ het aanpasbare/inlyn caches bekendgestel wat versteekte `CACHE` inskrywings tussen instruksies voeg. Dit verander nie die OOB primitief nie; dit beteken net dat as jy bytecode handmatig saamstel, jy daardie cache inskrywings moet oorweeg wanneer jy `co_code` bou.
 
-Praktiese implikasie: die tegniek op hierdie bladsy bly werk op CPython 3.11, 3.12 en 3.13 wanneer jy 'n kode objek kan beheer (bv. via `CodeType.replace(...)`) en `co_consts`/`co_names` kan verklein.
+Praktiese implikasie: die tegniek op hierdie bladsy werk voort op CPython 3.11, 3.12 en 3.13 wanneer jy 'n kode objek kan beheer (bv. via `CodeType.replace(...)`) en `co_consts`/`co_names` kan verklein.
 
 ### Vinige skandeerder vir nuttige OOB indekse (3.11+/3.12+ versoenbaar)
 
-As jy verkies om direk van bytecode na interessante objekte te soek eerder as van hoëvlak bron, kan jy minimale kode objekte genereer en brute force indekse. Die helper hieronder voeg outomaties inlyn caches in wanneer nodig.
+As jy verkies om direk van bytecode na interessante objekte te soek eerder as van hoëvlak bron, kan jy minimale kode objekte genereer en indekse brute force. Die helper hieronder voeg outomaties inlyn caches in wanneer nodig.
 ```python
 import dis, types
 
@@ -323,12 +323,12 @@ raise ValueError("Bytecode refers to name index beyond co_names length")
 # validate_code_object(c)
 # eval(c, {'__builtins__': {}})
 ```
-Additional mitigation ideas
-- Moet nie arbitrêre `CodeType.replace(...)` op onbetroubare invoer toelaat nie, of voeg streng struktuurkontroles op die resultaatkode objek by.
-- Oorweeg om onbetroubare kode in 'n aparte proses met OS-vlak sandboxing (seccomp, job objects, containers) te laat loop in plaas van om op CPython semantiek te vertrou.
+Aanvullende versagingsidees
+- Moet nie arbitrêre `CodeType.replace(...)` op onbetroubare invoer toelaat nie, of voeg streng struktuurkontroles op die resulterende kodeobjek by.
+- Oorweeg om onbetroubare kode in 'n aparte proses met OS-vlak sandboxing (seccomp, werkobjekte, houers) te laat loop in plaas daarvan om op CPython-semantiek te vertrou.
 
-## References
+## Verwysings
 
-- Splitline’s HITCON CTF 2022 writeup “V O I D” (oorsprong van hierdie tegniek en hoëvlak exploit ketting): https://blog.splitline.tw/hitcon-ctf-2022/
+- Splitline se HITCON CTF 2022 skrywe “V O I D” (oorsprong van hierdie tegniek en hoëvlak eksploitketting): https://blog.splitline.tw/hitcon-ctf-2022/
 - Python disassembler docs (indekse semantiek vir LOAD_CONST/LOAD_NAME/etc., en 3.11+ `LOAD_ATTR`/`LOAD_GLOBAL` laag-biet vlaggies): https://docs.python.org/3.13/library/dis.html
 {{#include ../../../banners/hacktricks-training.md}}

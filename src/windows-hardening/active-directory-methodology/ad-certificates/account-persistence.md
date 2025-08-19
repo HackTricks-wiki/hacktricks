@@ -19,7 +19,7 @@ Certify.exe request /ca:CA-SERVER\CA-NAME /template:User
 # Using Certipy (RPC/DCOM/WebEnrollment supported). Saves a PFX by default
 certipy req -u 'john@corp.local' -p 'Passw0rd!' -ca 'CA-SERVER\CA-NAME' -template 'User' -out user.pfx
 ```
-Die krag van 'n sertifikaat lê in sy vermoë om as die gebruiker waarvoor dit behoort, te autentiseer, ongeag wagwoordveranderings, solank die sertifikaat geldig bly.
+Die krag van 'n sertifikaat lê in sy vermoë om as die gebruiker waarvoor dit behoort, te autentiseer, ongeag wagwoordveranderinge, solank die sertifikaat geldig bly.
 
 Jy kan PEM na PFX omskakel en dit gebruik om 'n TGT te verkry:
 ```bash
@@ -57,20 +57,20 @@ certipy req -u 'john@corp.local' -p 'Passw0rd!' -ca 'CA-SERVER\CA-NAME' \
 # (use the serial/thumbprint of the cert to renew; reusekeys preserves the keypair)
 certreq -enroll -user -cert <SerialOrID> renew [reusekeys]
 ```
-> Operasionele wenk: Hou lewensduur van aanvaller-gehou PFX-lêers dop en hernu vroeg. Hernuwing kan ook veroorsaak dat opgedateerde sertifikate die moderne SID-kaart uitbreidings insluit, wat dit bruikbaar hou onder strenger DC-kaartreëls (sien volgende afdeling).
+> Operasionele wenk: Hou lewensduur van aanvaller-gehou PFX-lêers dop en hernu vroeg. Hernuwing kan ook veroorsaak dat opgedateerde sertifikate die moderne SID-kaartuitbreiding insluit, wat dit bruikbaar hou onder strenger DC-kaartreëls (sien volgende afdeling).
 
-## Planting Expliciete Sertifikaat Mappings (altSecurityIdentities) – PERSIST4
+## Planting Expliciete Sertifikaat Kaartings (altSecurityIdentities) – PERSIST4
 
 As jy na 'n teikenrekening se `altSecurityIdentities` attribuut kan skryf, kan jy 'n aanvaller-beheerde sertifikaat eksplisiet aan daardie rekening koppel. Dit bly bestaan oor wagwoordveranderings en, wanneer sterk kaartformate gebruik word, bly dit funksioneel onder moderne DC-afdwinging.
 
 Hoëvlak vloei:
 
 1. Verkry of uitgee 'n kliënt-auth sertifikaat wat jy beheer (bv. registreer `User` sjabloon as jouself).
-2. Trek 'n sterk identifiseerder uit die sertifikaat (Uittreksel+Serieel, SKI, of SHA1-Publieke Sleutel).
-3. Voeg 'n eksplisiete kaart by die slagoffer se `altSecurityIdentities` met behulp van daardie identifiseerder.
-4. Verifieer met jou sertifikaat; die DC koppel dit aan die slagoffer via die eksplisiete kaart.
+2. Trek 'n sterk identifiseerder uit die sertifikaat (Uitgewer+Serienommer, SKI, of SHA1-Publieke Sleutel).
+3. Voeg 'n eksplisiete kaarting by die slagoffer se `altSecurityIdentities` met behulp van daardie identifiseerder.
+4. Verifieer met jou sertifikaat; die DC koppel dit aan die slagoffer via die eksplisiete kaarting.
 
-Voorbeeld (PowerShell) met 'n sterk Uittreksel+Serieel kaart:
+Voorbeeld (PowerShell) met 'n sterk Uitgewer+Serienommer kaarting:
 ```powershell
 # Example values - reverse the issuer DN and serial as required by AD mapping format
 $Issuer  = 'DC=corp,DC=local,CN=CORP-DC-CA'
@@ -84,9 +84,9 @@ Dan autentiseer met jou PFX. Certipy sal 'n TGT direk verkry:
 ```bash
 certipy auth -pfx attacker_user.pfx -dc-ip 10.0.0.10
 ```
-Notes
+Notas
 - Gebruik slegs sterk kaarttipe: X509IssuerSerialNumber, X509SKI, of X509SHA1PublicKey. Swak formate (Subject/Issuer, Subject-only, RFC822 e-pos) is verouderd en kan deur DC-beleid geblokkeer word.
-- Die sertifikaatketting moet na 'n wortel bou wat deur die DC vertrou word. Enterprise CAs in NTAuth word tipies vertrou; sommige omgewings vertrou ook openbare CAs.
+- Die sertifikaatketting moet bou na 'n wortel wat deur die DC vertrou word. Enterprise CAs in NTAuth word tipies vertrou; sommige omgewings vertrou ook openbare CAs.
 
 Vir meer oor swak eksplisiete kaartings en aanvalspaaie, sien:
 
@@ -94,9 +94,9 @@ Vir meer oor swak eksplisiete kaartings en aanvalspaaie, sien:
 domain-escalation.md
 {{#endref}}
 
-## Enrollment Agent as Persistence – PERSIST5
+## Registrasie Agent as Volharding – PERSIST5
 
-As jy 'n geldige Sertifikaatversoekagent/Enrollment Agent-sertifikaat verkry, kan jy nuwe aanmeldbare sertifikate namens gebruikers op aanvraag mint en die agent PFX aflyn hou as 'n volhardingstoken. Misbruik werkstroom:
+As jy 'n geldige Sertifikaatversoek Agent/Registrasie Agent sertifikaat verkry, kan jy nuwe aanmeldbare sertifikate namens gebruikers op aanvraag mint en die agent PFX aflyn hou as 'n volhardingstoken. Misbruik werkstroom:
 ```bash
 # Request an Enrollment Agent cert (requires template rights)
 Certify.exe request /ca:CA-SERVER\CA-NAME /template:"Certificate Request Agent"
@@ -116,7 +116,7 @@ Die herroeping van die agentsertifikaat of sjabloon toestemmings is nodig om hie
 Microsoft KB5014754 het Sterk Sertifikaat Kaartlegging Handhaving op domeinbeheerders bekendgestel. Sedert 11 Februarie 2025, is DC's standaard op Volle Handhaving, wat swak/onduidelike kaartleggings verwerp. Praktiese implikasies:
 
 - Pre-2022 sertifikate wat die SID kaartlegging uitbreiding ontbreek, mag implisiete kaartlegging misluk wanneer DC's in Volle Handhaving is. Aanvallers kan toegang behou deur sertifikate te hernu via AD CS (om die SID uitbreiding te verkry) of deur 'n sterk eksplisiete kaartlegging in `altSecurityIdentities` te plant (PERSIST4).
-- Eksplisiete kaartleggings wat sterk formate gebruik (Uitreiker+Serie, SKI, SHA1-Publieke Sleutel) werk steeds. Swak formate (Uitreiker/Onderwerp, Slegs Onderwerp, RFC822) kan geblokkeer word en moet vermy word vir volharding.
+- Eksplisiete kaartleggings wat sterk formate gebruik (Issuer+Serial, SKI, SHA1-PublicKey) werk steeds. Swak formate (Issuer/Subject, Subject-only, RFC822) kan geblokkeer word en moet vermy word vir volharding.
 
 Administrateurs moet monitor en waarsku oor:
 - Veranderinge aan `altSecurityIdentities` en die uitreiking/hernuwing van Registrasie Agent en Gebruiker sertifikate.
