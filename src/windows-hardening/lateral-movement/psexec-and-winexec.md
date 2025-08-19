@@ -140,7 +140,7 @@ Hunting ideas
 - Kerberos fails but NTLM is blocked: connect using hostname/FQDN (not IP), ensure proper SPNs, or supply -k/-no-pass with tickets when using Impacket.
 - Service start times out but payload ran: expected if not a real service binary; capture output to a file or use smbexec for live I/O.
 
-## Hardening notes (modern changes)
+## Hardening notes
 - Windows 11 24H2 and Windows Server 2025 require SMB signing by default for outbound (and Windows 11 inbound) connections. This does not break legitimate PsExec usage with valid creds but prevents unsigned SMB relay abuse and may impact devices that don’t support signing.
 - New SMB client NTLM blocking (Windows 11 24H2/Server 2025) can prevent NTLM fallback when connecting by IP or to non-Kerberos servers. In hardened environments this will break NTLM-based PsExec/SMBExec; use Kerberos (hostname/FQDN) or configure exceptions if legitimately needed.
 - Principle of least privilege: minimize local admin membership, prefer Just-in-Time/Just-Enough Admin, enforce LAPS, and monitor/alert on 7045 service installs.
