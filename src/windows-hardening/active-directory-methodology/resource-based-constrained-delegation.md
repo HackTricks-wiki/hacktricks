@@ -1,36 +1,36 @@
-# リソースベースの制約付き委任
+# Resource-based Constrained Delegation
 
 {{#include ../../banners/hacktricks-training.md}}
 
 
-## リソースベースの制約付き委任の基本
+## Basics of Resource-based Constrained Delegation
 
-これは基本的な [Constrained Delegation](constrained-delegation.md) に似ていますが、**オブジェクト**に**任意のユーザーをマシンに対してなりすます**権限を与えるのではなく、リソースベースの制約付き委任は**そのオブジェクトに対して任意のユーザーをなりすますことができる**ユーザーを**設定**します。
+これは基本的な [Constrained Delegation](constrained-delegation.md) に似ていますが、**代わりに** **オブジェクト** に **任意のユーザーをマシンに対してなりすます権限を与える** のではなく、リソースベースの制約付き委任は **そのオブジェクトに対して任意のユーザーをなりすますことができる者を設定します**。
 
-この場合、制約オブジェクトには、任意の他のユーザーをそのオブジェクトに対してなりすますことができるユーザーの名前を持つ属性 _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ が存在します。
+この場合、制約されたオブジェクトには、任意の他のユーザーをそのオブジェクトに対してなりすますことができるユーザーの名前を持つ属性 _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ が存在します。
 
-この制約付き委任と他の委任との重要な違いは、**マシンアカウントに対する書き込み権限** (_GenericAll/GenericWrite/WriteDacl/WriteProperty/etc_) を持つ任意のユーザーが **_msDS-AllowedToActOnBehalfOfOtherIdentity_** を設定できることです（他の委任形式ではドメイン管理者の特権が必要でした）。
+この制約付き委任と他の委任との重要な違いは、**マシンアカウントに対する書き込み権限** (_GenericAll/GenericWrite/WriteDacl/WriteProperty/etc_) を持つ任意のユーザーが **_msDS-AllowedToActOnBehalfOfOtherIdentity_** を設定できることです（他の委任の形式ではドメイン管理者の特権が必要でした）。
 
-### 新しい概念
+### New Concepts
 
 制約付き委任では、ユーザーの _userAccountControl_ 値内の **`TrustedToAuthForDelegation`** フラグが **S4U2Self** を実行するために必要であると述べられていました。しかし、それは完全に真実ではありません。\
-実際には、その値がなくても、**サービス**（SPNを持つ）であれば任意のユーザーに対して **S4U2Self** を実行できますが、**`TrustedToAuthForDelegation`** を持っている場合、返される TGS は **Forwardable** になります。もしそのフラグを持っていない場合、返される TGS は **Forwardable** ではありません。
+実際には、その値がなくても、**サービス**（SPNを持つ）であれば任意のユーザーに対して **S4U2Self** を実行できますが、**`TrustedToAuthForDelegation`** を持っている場合、返される TGS は **Forwardable** になります。そして、そのフラグを持っていない場合、返される TGS は **Forwardable** ではありません。
 
-ただし、**S4U2Proxy** で使用される **TGS** が **Forwardable でない**場合、基本的な制約付き委任を悪用しようとしても**機能しません**。しかし、リソースベースの制約付き委任を悪用しようとすると、**機能します**。
+ただし、**S4U2Proxy** で使用される **TGS** が **Forwardable でない** 場合、基本的な制約付き委任を悪用しようとしても **機能しません**。しかし、リソースベースの制約付き委任を悪用しようとしている場合は、**機能します**。
 
-### 攻撃構造
+### Attack structure
 
-> **コンピュータ**アカウントに対して**書き込み同等の権限**を持っている場合、そのマシンで**特権アクセス**を取得できます。
+> **コンピュータ** アカウントに対して **書き込み同等の特権** を持っている場合、そのマシンで **特権アクセス** を取得できます。
 
-攻撃者がすでに**被害者コンピュータに対する書き込み同等の権限**を持っていると仮定します。
+攻撃者がすでに **被害者コンピュータに対する書き込み同等の特権** を持っていると仮定します。
 
-1. 攻撃者は**SPN**を持つアカウントを**侵害**するか、**作成します**（“Service A”）。注意すべきは、**特別な権限**を持たない**管理ユーザー**は最大10個のコンピュータオブジェクト（**_MachineAccountQuota_**）を**作成**し、SPNを設定できることです。したがって、攻撃者はコンピュータオブジェクトを作成し、SPNを設定することができます。
-2. 攻撃者は被害者コンピュータ（ServiceB）に対する**書き込み権限**を悪用して、**リソースベースの制約付き委任を構成し、ServiceAがその被害者コンピュータ（ServiceB）に対して任意のユーザーをなりすますことを許可します**。
-3. 攻撃者は Rubeus を使用して、**特権アクセスを持つユーザー**のために Service A から Service B への **フル S4U 攻撃**（S4U2Self と S4U2Proxy）を実行します。
-   1. S4U2Self（侵害または作成されたアカウントの SPN から）：**私に対する管理者の TGS を要求します**（Forwardable ではない）。
-   2. S4U2Proxy：前のステップの**Forwardable でない TGS**を使用して、**被害者ホスト**への**管理者**の**TGS**を要求します。
-   3. Forwardable でない TGS を使用している場合でも、リソースベースの制約付き委任を悪用しているため、**機能します**。
-   4. 攻撃者は**チケットをパス**し、ユーザーを**なりすまし**て**被害者 ServiceB へのアクセスを取得します**。
+1. 攻撃者は **SPN** を持つアカウントを **侵害** するか、**作成します**（“Service A”）。注意すべきは、**特別な特権を持たない** _Admin User_ は最大10個のコンピュータオブジェクト（**_MachineAccountQuota_**）を **作成** し、**SPN** を設定できることです。したがって、攻撃者はコンピュータオブジェクトを作成し、SPNを設定することができます。
+2. 攻撃者は被害者コンピュータ（ServiceB）に対する **書き込み権限** を悪用して、**リソースベースの制約付き委任を構成し、ServiceAがその被害者コンピュータ（ServiceB）に対して任意のユーザーをなりすますことを許可します**。
+3. 攻撃者は Rubeus を使用して、**Service A から Service B への完全な S4U 攻撃**（S4U2Self と S4U2Proxy）を実行します。対象は **Service B に特権アクセスを持つユーザー** です。
+1. S4U2Self（侵害または作成されたアカウントの SPN から）：**私に対する Administrator の TGS を要求します**（Forwardable ではない）。
+2. S4U2Proxy：前のステップの **Forwardable でない TGS** を使用して、**被害者ホスト** に対する **Administrator** の **TGS** を要求します。
+3. Forwardable でない TGS を使用している場合でも、リソースベースの制約付き委任を悪用しているため、**機能します**。
+4. 攻撃者は **パス・ザ・チケット** を行い、ユーザーを **なりすまし、被害者 ServiceB へのアクセスを得ます**。
 
 ドメインの _**MachineAccountQuota**_ を確認するには、次のコマンドを使用できます：
 ```bash
@@ -50,7 +50,7 @@ Get-DomainComputer SERVICEA
 ```
 ### リソースベースの制約付き委任の構成
 
-**activedirectory PowerShell モジュールを使用**
+**activedirectory PowerShellモジュールを使用**
 ```bash
 Set-ADComputer $targetComputer -PrincipalsAllowedToDelegateToAccount SERVICEA$ #Assing delegation privileges
 Get-ADComputer $targetComputer -Properties PrincipalsAllowedToDelegateToAccount #Check that it worked
@@ -76,7 +76,7 @@ msds-allowedtoactonbehalfofotheridentity
 ```bash
 .\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local
 ```
-このコマンドは、そのアカウントのRC4およびAESハッシュを出力します。\
+これにより、そのアカウントのRC4およびAESハッシュが印刷されます。\
 次に、攻撃を実行できます：
 ```bash
 rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<aes256 hash> /aes128:<aes128 hash> /rc4:<rc4 hash> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /domain:domain.local /ptt
@@ -172,7 +172,7 @@ impacket-rbcd -delegate-to 'VICTIM$' -action flush 'domain.local/jdoe:Summer2025
   - 偽装しようとしているユーザーが希望するサービスにアクセスできない（偽装できないか、十分な権限がないため）
   - 要求されたサービスが存在しない（winrmのチケットを要求したが、winrmが実行されていない場合）
   - 作成されたfakecomputerが脆弱なサーバーに対する権限を失っており、それを戻す必要がある。
-  - クラシックKCDを悪用しています。RBCDは非転送可能なS4U2Selfチケットで機能することを覚えておいてください。一方、KCDは転送可能である必要があります。
+  - クラシックKCDを悪用している；RBCDは非転送可能なS4U2Selfチケットで機能することを覚えておいてください。一方、KCDは転送可能である必要があります。
 
 ## Notes, relays and alternatives
 
