@@ -72,7 +72,9 @@ aws ec2 create-snapshot --volume-id vol-01234567 --description "IR-case-1234 web
 # Copy the snapshot to S3 and download with aws cli / aws snowball
 ```
 
-*Azure* – use `az snapshot create` and export to a SAS URL.  See the HackTricks page {{#ref}}
+*Azure* – use `az snapshot create` and export to a SAS URL. See the page from HackTricks:
+
+{{#ref}}
 ../../cloud/azure/azure-forensics.md
 {{#endref}}
 
