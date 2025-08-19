@@ -5,7 +5,7 @@
 
 ## Acquisizione
 
-> Acquisisci sempre in **sola lettura** e **calcola l'hash mentre copi**. Mantieni il dispositivo originale **bloccato in scrittura** e lavora solo su copie verificate.
+> Acquisisci sempre in **sola lettura** e **calcola l'hash mentre copi**. Tieni il dispositivo originale **bloccato in scrittura** e lavora solo su copie verificate.
 
 ### DD
 ```bash
@@ -22,7 +22,7 @@ sha256sum disk.img > disk.img.sha256
 sudo dc3dd if=/dev/sdc of=/forensics/pc.img hash=sha256,sha1 hashlog=/forensics/pc.hashes log=/forensics/pc.log bs=1M
 ```
 ### Guymager
-Imager grafico multithread che supporta output **raw (dd)**, **EWF (E01/EWFX)** e **AFF4** con verifica parallela. Disponibile nella maggior parte dei repository Linux (`apt install guymager`).
+Imager grafico multithread che supporta **raw (dd)**, **EWF (E01/EWFX)** e **AFF4** output con verifica parallela. Disponibile nella maggior parte dei repository Linux (`apt install guymager`).
 ```bash
 # Start in GUI mode
 sudo guymager
@@ -31,7 +31,7 @@ sudo guymager --simulate --input /dev/sdb --format EWF --hash sha256 --output /e
 ```
 ### AFF4 (Advanced Forensics Format 4)
 
-AFF4 è il formato di imaging moderno di Google progettato per prove *molto* grandi (sparse, riprendibili, native al cloud).
+AFF4 è il formato di imaging moderno di Google progettato per prove *molto* grandi (sparse, riprendibili, nativo del cloud).
 ```bash
 # Acquire to AFF4 using the reference tool
 pipx install aff4imager
@@ -58,7 +58,9 @@ sudo ewfacquire /dev/sdb -u evidence -c 1 -d "Seizure 2025-07-22" -e 1 -X examin
 aws ec2 create-snapshot --volume-id vol-01234567 --description "IR-case-1234 web-server 2025-07-22"
 # Copy the snapshot to S3 and download with aws cli / aws snowball
 ```
-*Azure* – usa `az snapshot create` ed esporta in un URL SAS. Vedi la pagina HackTricks {{#ref}}
+*Azure* – usa `az snapshot create` ed esporta in un URL SAS. Vedi la pagina di HackTricks:
+
+{{#ref}}
 ../../cloud/azure/azure-forensics.md
 {{#endref}}
 
@@ -86,7 +88,7 @@ lsblk /dev/nbd0 -o NAME,SIZE,TYPE,FSTYPE,LABEL,UUID
 # Mount a partition (e.g. /dev/nbd0p2)
 sudo mount -o ro,uid=$(id -u) /dev/nbd0p2 /mnt
 ```
-Stacca quando hai finito:
+Scollegare quando finito:
 ```bash
 sudo umount /mnt && sudo qemu-nbd --disconnect /dev/nbd0
 ```
@@ -144,6 +146,6 @@ kpartx -dv /dev/loop0  # or qemu-nbd --disconnect /dev/nbd0
 ## Riferimenti
 
 - Annuncio e specifiche dello strumento di imaging AFF4: https://github.com/aff4/aff4
-- Pagina del manuale qemu-nbd (montaggio sicuro delle immagini disco): https://manpages.debian.org/qemu-system-common/qemu-nbd.1.en.html
+- Pagina man di qemu-nbd (montaggio sicuro delle immagini disco): https://manpages.debian.org/qemu-system-common/qemu-nbd.1.en.html
 
 {{#include ../../banners/hacktricks-training.md}}
