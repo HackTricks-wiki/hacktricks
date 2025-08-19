@@ -24,13 +24,13 @@ No entanto, se o **TGS** usado em **S4U2Proxy** **NÃO for Forwardable**, tentar
 
 Suponha que o atacante já tenha **privilégios equivalentes de escrita sobre o computador da vítima**.
 
-1. O atacante **compromete** uma conta que tem um **SPN** ou **cria um** (“Serviço A”). Note que **qualquer** _Usuário Admin_ sem nenhum outro privilégio especial pode **criar** até 10 objetos de Computador (**_MachineAccountQuota_**) e definir um **SPN** para eles. Assim, o atacante pode simplesmente criar um objeto de Computador e definir um SPN.
+1. O atacante **compromete** uma conta que tem um **SPN** ou **cria uma** (“Serviço A”). Note que **qualquer** _Usuário Admin_ sem nenhum outro privilégio especial pode **criar** até 10 objetos de Computador (**_MachineAccountQuota_**) e definir um **SPN** para eles. Assim, o atacante pode simplesmente criar um objeto de Computador e definir um SPN.
 2. O atacante **abusa de seu privilégio de ESCRITA** sobre o computador da vítima (Serviço B) para configurar **delegação constrangida baseada em recurso para permitir que o Serviço A impersonifique qualquer usuário** contra aquele computador da vítima (Serviço B).
 3. O atacante usa Rubeus para realizar um **ataque S4U completo** (S4U2Self e S4U2Proxy) do Serviço A para o Serviço B para um usuário **com acesso privilegiado ao Serviço B**.
-   1. S4U2Self (da conta SPN comprometida/criada): Solicitar um **TGS de Administrador para mim** (Não Forwardable).
-   2. S4U2Proxy: Usar o **TGS não Forwardable** do passo anterior para solicitar um **TGS** de **Administrador** para o **host da vítima**.
-   3. Mesmo que você esteja usando um TGS não Forwardable, como você está explorando a delegação constrangida baseada em recurso, funcionará.
-   4. O atacante pode **pass-the-ticket** e **impersonar** o usuário para ganhar **acesso ao Serviço B da vítima**.
+1. S4U2Self (da conta SPN comprometida/criada): Solicitar um **TGS de Administrador para mim** (Não Forwardable).
+2. S4U2Proxy: Usar o **TGS não Forwardable** do passo anterior para solicitar um **TGS** de **Administrador** para o **host da vítima**.
+3. Mesmo que você esteja usando um TGS não Forwardable, como você está explorando a delegação constrangida baseada em recurso, funcionará.
+4. O atacante pode **pass-the-ticket** e **impersonar** o usuário para ganhar **acesso ao Serviço B da vítima**.
 
 Para verificar o _**MachineAccountQuota**_ do domínio, você pode usar:
 ```bash
@@ -119,11 +119,11 @@ Neste exemplo, foi solicitado um TGS para o serviço **CIFS** do Administrador, 
 ```bash
 ls \\victim.domain.local\C$
 ```
-### Abusar de diferentes tickets de serviço
+### Abuse different service tickets
 
 Saiba mais sobre os [**tickets de serviço disponíveis aqui**](silver-ticket.md#available-services).
 
-## Enumeração, auditoria e limpeza
+## Enumerating, auditing and cleanup
 
 ### Enumerar computadores com RBCD configurado
 
@@ -148,7 +148,7 @@ Impacket (ler ou limpar com um comando):
 # Read who can delegate to VICTIM
 impacket-rbcd -delegate-to 'VICTIM$' -action read 'domain.local/jdoe:Summer2025!'
 ```
-### Limpeza / redefinição do RBCD
+### Limpeza / redefinir RBCD
 
 - PowerShell (limpar o atributo):
 ```powershell
@@ -197,5 +197,6 @@ adws-enumeration.md
 - [https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61](https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61)
 - Impacket rbcd.py (oficial): https://github.com/fortra/impacket/blob/master/examples/rbcd.py
 - Quick Linux cheatsheet with recent syntax: https://tldrbins.github.io/rbcd/
+
 
 {{#include ../../banners/hacktricks-training.md}}

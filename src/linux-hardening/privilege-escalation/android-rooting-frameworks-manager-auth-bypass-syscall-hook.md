@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Frameworks de rooting como KernelSU, APatch, SKRoot e Magisk frequentemente patcham o kernel Linux/Android e expõem funcionalidades privilegiadas a um aplicativo "gerenciador" de espaço de usuário não privilegiado através de uma syscall hookada. Se a etapa de autenticação do gerenciador for falha, qualquer aplicativo local pode acessar esse canal e escalar privilégios em dispositivos já enraizados.
+Frameworks de rooting como KernelSU, APatch, SKRoot e Magisk frequentemente patcham o kernel Linux/Android e expõem funcionalidades privilegiadas a um aplicativo "gerenciador" de espaço de usuário não privilegiado através de uma syscall hookada. Se a etapa de autenticação do gerenciador for falha, qualquer aplicativo local pode acessar esse canal e escalar privilégios em dispositivos já rootados.
 
 Esta página abstrai as técnicas e armadilhas descobertas em pesquisas públicas (notavelmente a análise da Zimperium do KernelSU v0.5.7) para ajudar tanto equipes vermelhas quanto azuis a entender superfícies de ataque, primitivas de exploração e mitigações robustas.
 
@@ -47,7 +47,7 @@ Se todas as verificações passarem, o kernel armazena temporariamente o UID do 
 ---
 ## Classe de vulnerabilidade: confiar no “primeiro APK correspondente” da iteração FD
 
-Se a verificação de assinatura se vincular ao "primeiro /data/app/*/base.apk correspondente" encontrado na tabela FD do processo, na verdade não está verificando o próprio pacote do chamador. Um atacante pode pré-posicionar um APK assinado legitimamente (o verdadeiro gerenciador) para que ele apareça antes na lista de FDs do que seu próprio base.apk.
+Se a verificação de assinatura se vincula ao "primeiro /data/app/*/base.apk correspondente" encontrado na tabela FD do processo, na verdade não está verificando o próprio pacote do chamador. Um atacante pode pré-posicionar um APK assinado legitimamente (o verdadeiro gerenciador) para que ele apareça antes na lista de FD do que seu próprio base.apk.
 
 Essa confiança por indireção permite que um aplicativo não privilegiado se passe pelo gerenciador sem possuir a chave de assinatura do gerenciador.
 
@@ -59,7 +59,7 @@ Propriedades-chave exploradas:
 ---
 ## Pré-condições de ataque
 
-- O dispositivo já está enraizado com um framework de rooting vulnerável (por exemplo, KernelSU v0.5.7).
+- O dispositivo já está rootado com um framework de rooting vulnerável (por exemplo, KernelSU v0.5.7).
 - O atacante pode executar código arbitrário não privilegiado localmente (processo de aplicativo Android).
 - O verdadeiro gerenciador ainda não autenticou (por exemplo, logo após uma reinicialização). Alguns frameworks armazenam em cache o UID do gerenciador após o sucesso; você deve vencer a corrida.
 
@@ -145,7 +145,7 @@ Após o sucesso, comandos privilegiados (exemplos):
 - CMD_SET_SEPOLICY: ajustar a política SELinux conforme suportado pelo framework
 
 Dica de corrida/persistência:
-- Registre um receptor BOOT_COMPLETED no AndroidManifest (RECEIVE_BOOT_COMPLETED) para iniciar cedo após a reinicialização e tentar autenticação antes do verdadeiro gerenciador.
+- Registre um receptor BOOT_COMPLETED no AndroidManifest (RECEIVE_BOOT_COMPLETED) para iniciar cedo após a reinicialização e tentar autenticação antes do gerenciador real.
 
 ---
 ## Orientações de detecção e mitigação
@@ -159,7 +159,7 @@ Para desenvolvedores de frameworks:
 - Considere IPC autenticado baseado em binder em vez de sobrecarregar syscalls genéricos quando viável.
 
 Para defensores/equipe azul:
-- Detecte a presença de frameworks de rooting e processos de gerenciador; monitore chamadas prctl com constantes mágicas suspeitas (por exemplo, 0xDEADBEEF) se você tiver telemetria de kernel.
+- Detecte a presença de frameworks de rooting e processos de gerenciador; monitore chamadas prctl com constantes mágicas suspeitas (por exemplo, 0xDEADBEEF) se você tiver telemetria do kernel.
 - Em frotas gerenciadas, bloqueie ou alerte sobre receptores de inicialização de pacotes não confiáveis que tentam rapidamente comandos privilegiados de gerenciador após a inicialização.
 - Certifique-se de que os dispositivos estejam atualizados para versões de framework corrigidas; invalide IDs de gerenciador em cache na atualização.
 

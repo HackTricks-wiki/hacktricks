@@ -27,6 +27,8 @@ Uma vez carregado, abra o monitor serial a 115200 baud e envie `h` para ajuda. F
 
 ![](<../../images/image (774).png>)
 
+
+
 Se um TAP válido for encontrado, você verá linhas começando com `FOUND!` indicando pinos descobertos.
 
 Dicas
@@ -54,13 +56,13 @@ openocd -f board/esp32s3-builtin.cfg -c "init; scan_chain; shutdown"
 ```
 Notas
 - Se você receber um IDCODE "todos uns/zeros", verifique a fiação, a energia, o Vtref e se a porta não está bloqueada por fusíveis/opções de bytes.
-- Veja OpenOCD `irscan`/`drscan` de baixo nível para interação manual com TAP ao iniciar cadeias desconhecidas.
+- Veja OpenOCD baixo nível `irscan`/`drscan` para interação manual com TAP ao iniciar cadeias desconhecidas.
 
 ## Parando a CPU e despejando memória/flash
 
-Uma vez que o TAP é reconhecido e um script de destino é escolhido, você pode parar o núcleo e despejar regiões de memória ou flash interno. Exemplos (ajuste o destino, endereços base e tamanhos):
+Uma vez que o TAP é reconhecido e um script de destino é escolhido, você pode parar o núcleo e despejar regiões de memória ou flash interno. Exemplos (ajuste o alvo, endereços base e tamanhos): 
 
-- Destino genérico após a inicialização:
+- Alvo genérico após a inicialização:
 ```
 openocd -f interface/jlink.cfg -f target/stm32f1x.cfg \
 -c "init; reset halt; mdw 0x08000000 4; dump_image flash.bin 0x08000000 0x00100000; shutdown"
@@ -83,7 +85,7 @@ Tips
 
 Mesmo quando o acesso de depuração da CPU está bloqueado, o boundary-scan ainda pode estar exposto. Com UrJTAG/OpenOCD você pode:
 - SAMPLE para capturar estados dos pinos enquanto o sistema está em execução (encontrar atividade no barramento, confirmar mapeamento de pinos).
-- EXTEST para acionar pinos (por exemplo, bit-bang linhas SPI externas via o MCU para lê-las offline se a fiação da placa permitir).
+- EXTEST para acionar pinos (por exemplo, bit-bang linhas SPI flash externas via o MCU para lê-las offline se a fiação da placa permitir).
 
 Fluxo mínimo do UrJTAG com um adaptador FT2232x:
 ```
@@ -105,9 +107,9 @@ Você precisa do BSDL do dispositivo para conhecer a ordem dos bits do registrad
 
 ## Defesas e endurecimento (o que esperar em dispositivos reais)
 
-- Desative permanentemente ou bloqueie JTAG/SWD na produção (por exemplo, nível 2 RDP STM32, eFuses ESP que desativam PAD JTAG, APPROTECT/DPAP NXP/Nordic).
-- Exija autenticação de debug (ARMv8.2‑A ADIv6 Autenticação de Debug, desafio-resposta gerenciado por OEM) enquanto mantém o acesso de fabricação.
-- Não roteie pads de teste fáceis; enterre vias de teste, remova/popule resistores para isolar TAP, use conectores com chaves ou fixadores de pino pogo.
+- Desative permanentemente ou bloqueie JTAG/SWD na produção (por exemplo, nível 2 RDP STM32, eFuses ESP que desativam PAD JTAG, APPROTECT/DPAP da NXP/Nordic).
+- Exija autenticação de debug (ARMv8.2‑A ADIv6 Debug Authentication, desafio-resposta gerenciado por OEM) enquanto mantém o acesso de fabricação.
+- Não roteie pads de teste fáceis; enterre vias de teste, remova/popule resistores para isolar TAP, use conectores com chaves ou fixações de pinos pogo.
 - Bloqueio de debug na inicialização: proteja o TAP atrás de um ROM inicial que impõe o boot seguro.
 
 ## Referências

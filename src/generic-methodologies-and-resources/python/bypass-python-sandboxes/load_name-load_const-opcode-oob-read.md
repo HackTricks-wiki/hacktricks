@@ -35,9 +35,9 @@ Vamos começar com um exemplo simples, `[a, b, c]` pode ser compilado no seguint
 6 BUILD_LIST               3
 8 RETURN_VALUE12345
 ```
-Mas e se o `co_names` se tornar uma tupla vazia? O opcode `LOAD_NAME 2` ainda é executado e tenta ler o valor daquele endereço de memória que originalmente deveria estar. Sim, isso é uma "característica" de leitura fora dos limites.
+Mas e se o `co_names` se tornar uma tupla vazia? O opcode `LOAD_NAME 2` ainda é executado e tenta ler o valor daquele endereço de memória que originalmente deveria estar. Sim, isso é um recurso de leitura fora dos limites.
 
-O conceito central para a solução é simples. Alguns opcodes no CPython, por exemplo `LOAD_NAME` e `LOAD_CONST`, são vulneráveis (?) a leitura fora dos limites.
+O conceito central para a solução é simples. Alguns opcodes no CPython, por exemplo, `LOAD_NAME` e `LOAD_CONST`, são vulneráveis (?) a leitura fora dos limites.
 
 Eles recuperam um objeto do índice `oparg` da tupla `consts` ou `names` (é assim que `co_consts` e `co_names` são chamados internamente). Podemos nos referir ao seguinte pequeno trecho sobre `LOAD_CONST` para ver o que o CPython faz quando processa o opcode `LOAD_CONST`.
 ```c
@@ -80,7 +80,7 @@ Você pode entender a razão por trás disso apenas visualizando seu bytecode:
 24 BUILD_LIST               1
 26 RETURN_VALUE1234567891011121314
 ```
-Observe que `LOAD_ATTR` também recupera o nome de `co_names`. O Python carrega nomes do mesmo offset se o nome for o mesmo, então o segundo `__getattribute__` ainda é carregado do offset=5. Usando esse recurso, podemos usar um nome arbitrário uma vez que o nome esteja na memória próxima.
+Observe que `LOAD_ATTR` também recupera o nome de `co_names`. O Python carrega nomes do mesmo deslocamento se o nome for o mesmo, então o segundo `__getattribute__` ainda é carregado do offset=5. Usando esse recurso, podemos usar um nome arbitrário uma vez que o nome esteja na memória próxima.
 
 Para gerar números, deve ser trivial:
 
@@ -205,7 +205,7 @@ print(source)
 # (python exp.py; echo '__import__("os").system("sh")'; cat -) | nc challenge.server port
 12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970717273
 ```
-Basicamente, ele faz as seguintes coisas, para essas strings obtemos do método `__dir__`:
+Basicamente, ele faz as seguintes coisas, para aquelas strings que obtemos do método `__dir__`:
 ```python
 getattr = (None).__getattribute__('__class__').__getattribute__
 builtins = getattr(
@@ -271,7 +271,7 @@ if obj is not None:
 print(idx, type(obj), repr(obj)[:80])
 ```
 Notas
-- Para sondar nomes em vez disso, troque `LOAD_CONST` por `LOAD_NAME`/`LOAD_GLOBAL`/`LOAD_ATTR` e ajuste o uso da sua pilha de acordo.
+- Para sondar nomes em vez disso, troque `LOAD_CONST` por `LOAD_NAME`/`LOAD_GLOBAL`/`LOAD_ATTR` e ajuste o uso da pilha de acordo.
 - Use `EXTENDED_ARG` ou múltiplos bytes de `arg` para alcançar índices >255, se necessário. Ao construir com `dis` como acima, você controla apenas o byte baixo; para índices maiores, construa os bytes brutos você mesmo ou divida o ataque em múltiplos loads.
 
 ### Padrão mínimo de RCE apenas com bytecode (co_consts OOB → builtins → eval/input)
@@ -285,7 +285,7 @@ Uma vez que você tenha identificado um índice `co_consts` que resolve para o m
 # 3) BINARY_SUBSCR to do builtins["input"] / builtins["eval"], CALL each, and RETURN_VALUE
 # This pattern is the same idea as the high-level exploit above, but expressed in raw bytecode.
 ```
-Essa abordagem é útil em desafios que lhe dão controle direto sobre `co_code` enquanto forçam `co_consts=()` e `co_names=()` (por exemplo, BCTF 2024 “awpcode”). Ela evita truques em nível de fonte e mantém o tamanho do payload pequeno ao aproveitar operações de pilha de bytecode e construtores de tuplas.
+Essa abordagem é útil em desafios que lhe dão controle direto sobre `co_code` enquanto forçam `co_consts=()` e `co_names=()` (por exemplo, BCTF 2024 “awpcode”). Ela evita truques em nível de fonte e mantém o tamanho do payload pequeno aproveitando operações de pilha de bytecode e construtores de tuplas.
 
 ### Verificações defensivas e mitigação para sandboxes
 
@@ -325,10 +325,10 @@ raise ValueError("Bytecode refers to name index beyond co_names length")
 ```
 Ideias adicionais de mitigação
 - Não permita `CodeType.replace(...)` arbitrário em entradas não confiáveis, ou adicione verificações estruturais rigorosas no objeto de código resultante.
-- Considere executar código não confiável em um processo separado com sandboxing a nível de OS (seccomp, objetos de trabalho, contêineres) em vez de depender da semântica do CPython.
+- Considere executar código não confiável em um processo separado com sandboxing a nível de SO (seccomp, objetos de trabalho, contêineres) em vez de confiar na semântica do CPython.
 
 ## Referências
 
 - O writeup do HITCON CTF 2022 da Splitline “V O I D” (origem desta técnica e cadeia de exploração de alto nível): https://blog.splitline.tw/hitcon-ctf-2022/
-- Documentos do desassemblador Python (semântica de índices para LOAD_CONST/LOAD_NAME/etc., e flags de baixo bit `LOAD_ATTR`/`LOAD_GLOBAL` para 3.11+): https://docs.python.org/3.13/library/dis.html
+- Documentação do desassemblador Python (semântica de índices para LOAD_CONST/LOAD_NAME/etc., e flags de baixo bit `LOAD_ATTR`/`LOAD_GLOBAL` para 3.11+): https://docs.python.org/3.13/library/dis.html
 {{#include ../../../banners/hacktricks-training.md}}

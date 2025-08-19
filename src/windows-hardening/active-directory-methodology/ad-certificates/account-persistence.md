@@ -8,7 +8,7 @@
 
 Em um cenário onde um certificado que permite a autenticação de domínio pode ser solicitado por um usuário, um atacante tem a oportunidade de solicitar e roubar esse certificado para manter a persistência em uma rede. Por padrão, o template `User` no Active Directory permite tais solicitações, embora às vezes possa estar desativado.
 
-Usando [Certify](https://github.com/GhostPack/Certify) ou [Certipy](https://github.com/ly4k/Certipy), você pode procurar por templates habilitados que permitem autenticação de cliente e então solicitar um:
+Usando [Certify](https://github.com/GhostPack/Certify) ou [Certipy](https://github.com/ly4k/Certipy), você pode procurar por templates habilitados que permitem autenticação de cliente e, em seguida, solicitar um:
 ```bash
 # Enumerate client-auth capable templates
 Certify.exe find /clientauth
@@ -86,7 +86,7 @@ certipy auth -pfx attacker_user.pfx -dc-ip 10.0.0.10
 ```
 Notas
 - Use apenas tipos de mapeamento fortes: X509IssuerSerialNumber, X509SKI ou X509SHA1PublicKey. Formatos fracos (Subject/Issuer, apenas Subject, e-mail RFC822) estão obsoletos e podem ser bloqueados pela política do DC.
-- A cadeia de certificados deve ser construída até uma raiz confiável pelo DC. CAs empresariais no NTAuth são tipicamente confiáveis; alguns ambientes também confiam em CAs públicas.
+- A cadeia de certificados deve ser construída até uma raiz confiável pelo DC. CAs empresariais em NTAuth são tipicamente confiáveis; alguns ambientes também confiam em CAs públicas.
 
 Para mais informações sobre mapeamentos explícitos fracos e caminhos de ataque, veja:
 
@@ -96,7 +96,7 @@ domain-escalation.md
 
 ## Agente de Inscrição como Persistência – PERSIST5
 
-Se você obtiver um certificado válido de Agente de Solicitação de Certificado/Agente de Inscrição, poderá criar novos certificados com capacidade de logon em nome dos usuários à vontade e manter o PFX do agente offline como um token de persistência. Fluxo de abuso:
+Se você obtiver um certificado válido de Agente de Solicitação de Certificado/Agente de Inscrição, poderá criar novos certificados capazes de logon em nome dos usuários à vontade e manter o PFX do agente offline como um token de persistência. Fluxo de abuso:
 ```bash
 # Request an Enrollment Agent cert (requires template rights)
 Certify.exe request /ca:CA-SERVER\CA-NAME /template:"Certificate Request Agent"
@@ -113,7 +113,7 @@ Revogação do certificado do agente ou permissões do modelo é necessária par
 
 ## 2025 Aplicação Rigorosa de Mapeamento de Certificados: Impacto na Persistência
 
-O Microsoft KB5014754 introduziu a Aplicação Rigorosa de Mapeamento de Certificados em controladores de domínio. Desde 11 de fevereiro de 2025, os DCs padrão para Aplicação Total, rejeitando mapeamentos fracos/ambíguos. Implicações práticas:
+O KB5014754 da Microsoft introduziu a Aplicação Rigorosa de Mapeamento de Certificados em controladores de domínio. Desde 11 de fevereiro de 2025, os DCs padrão para Aplicação Total, rejeitando mapeamentos fracos/ambíguos. Implicações práticas:
 
 - Certificados anteriores a 2022 que não possuem a extensão de mapeamento SID podem falhar no mapeamento implícito quando os DCs estão em Aplicação Total. Os atacantes podem manter o acesso renovando certificados através do AD CS (para obter a extensão SID) ou plantando um mapeamento explícito forte em `altSecurityIdentities` (PERSIST4).
 - Mapeamentos explícitos usando formatos fortes (Issuer+Serial, SKI, SHA1-PublicKey) continuam a funcionar. Formatos fracos (Issuer/Subject, Subject-only, RFC822) podem ser bloqueados e devem ser evitados para persistência.
