@@ -4,7 +4,7 @@
 
 Okvir za rootovanje kao što su KernelSU, APatch, SKRoot i Magisk često zakrpljuju Linux/Android kernel i izlažu privilegovanu funkcionalnost neprivilegovanom korisničkom "menadžer" aplikaciji putem uhvaćenog syscall-a. Ako je korak autentifikacije menadžera neispravan, bilo koja lokalna aplikacija može doći do ovog kanala i eskalirati privilegije na već rootovanim uređajima.
 
-Ova stranica apstrahuje tehnike i zamke otkrivene u javnim istraživanjima (posebno Zimperium-ova analiza KernelSU v0.5.7) kako bi pomogla i crvenim i plavim timovima da razumeju površine napada, primitivne eksploatacije i robusne mitigacije.
+Ova stranica apstrahuje tehnike i zamke otkrivene u javnim istraživanjima (posebno Zimperium-ova analiza KernelSU v0.5.7) kako bi pomogla i crvenim i plavim timovima da razumeju površine napada, primitivne metode eksploatacije i robusne mere zaštite.
 
 ---
 ## Arhitektonski obrazac: syscall-uhvaćen menadžerski kanal
@@ -49,7 +49,7 @@ Ako sve provere prođu, kernel privremeno kešira UID menadžera i prihvata priv
 
 Ako provera potpisa vezuje za "prvi odgovarajući /data/app/*/base.apk" pronađen u FD tabeli procesa, zapravo ne verifikuje paket pozivaoca. Napadač može unapred postaviti legitimno potpisan APK (pravog menadžera) tako da se pojavi ranije u FD listi od svog vlastitog base.apk.
 
-Ovo poverenje putem indirekcije omogućava neprivilegovanoj aplikaciji da se pretvara da je menadžer bez posedovanja menadžerskog ključa za potpisivanje.
+Ovo poverenje putem indirekcije omogućava neprivilegovanoj aplikaciji da se pretvara da je menadžer bez posedovanja menadžerovog ključa za potpisivanje.
 
 Ključne osobine koje se koriste:
 - FD skeniranje se ne vezuje za identitet paketa pozivaoca; samo se podudara sa putanjama.
@@ -70,14 +70,14 @@ Visok nivo koraka:
 1) Izgradite validnu putanju do svog direktorijuma podataka aplikacije da zadovoljite provere prefiksa i vlasništva.
 2) Osigurajte da je pravi KernelSU Manager base.apk otvoren na FD-u sa nižim brojem od vašeg vlastitog base.apk.
 3) Pozovite prctl(0xDEADBEEF, CMD_BECOME_MANAGER, <your_data_dir>, ...) da prođete provere.
-4) Izdajte privilegovane komande kao što su CMD_GRANT_ROOT, CMD_ALLOW_SU, CMD_SET_SEPOLICY da zadržite povišenje.
+4) Izdajte privilegovane komande kao što su CMD_GRANT_ROOT, CMD_ALLOW_SU, CMD_SET_SEPOLICY da zadržite elevaciju.
 
 Praktične napomene o koraku 2 (redosled FD):
 - Identifikujte FD vašeg procesa za vaš vlastiti /data/app/*/base.apk tako što ćete proći kroz /proc/self/fd symlinks.
 - Zatvorite nizak FD (npr., stdin, fd 0) i prvo otvorite legitimni menadžer APK tako da zauzme fd 0 (ili bilo koji indeks niži od vašeg vlastitog base.apk fd).
 - Uključite legitimni menadžer APK sa vašom aplikacijom tako da njegova putanja zadovoljava naivni filter kernela. Na primer, stavite ga pod podputanju koja odgovara /data/app/*/base.apk.
 
-Primer kodnih snimaka (Android/Linux, samo ilustrativno):
+Primeri kodova (Android/Linux, samo ilustrativno):
 
 Enumerišite otvorene FDs da locirate base.apk unose:
 ```c
@@ -107,7 +107,7 @@ closedir(d);
 return best_fd; // First (lowest) matching fd
 }
 ```
-Primorajte da niže numerisani FD usmeri na legitimni manager APK:
+Primorajte da niži FD pokazuje na legitimni manager APK:
 ```c
 #include <fcntl.h>
 #include <unistd.h>
@@ -141,38 +141,38 @@ return (int)result;
 ```
 After success, privileged commands (examples):
 - CMD_GRANT_ROOT: promovisi trenutni proces na root
-- CMD_ALLOW_SU: dodajte svoj paket/UID na listu dozvoljenih za trajni su
-- CMD_SET_SEPOLICY: prilagodite SELinux politiku prema podršci okvira
+- CMD_ALLOW_SU: dodaj svoj paket/UID na listu dozvoljenih za persistent su
+- CMD_SET_SEPOLICY: prilagodi SELinux politiku kako to podržava framework
 
 Race/persistence tip:
-- Registrujte BOOT_COMPLETED receiver u AndroidManifest (RECEIVE_BOOT_COMPLETED) da biste započeli rano nakon ponovnog pokretanja i pokušali autentifikaciju pre pravog menadžera.
+- Registruj BOOT_COMPLETED receiver u AndroidManifest (RECEIVE_BOOT_COMPLETED) da bi se pokrenuo rano nakon ponovnog pokretanja i pokušao autentifikaciju pre pravog menadžera.
 
 ---
 ## Detection and mitigation guidance
 
 For framework developers:
-- Povežite autentifikaciju sa paketom/UID pozivaoca, a ne sa proizvoljnim FD-ovima:
-- Rešite paket pozivaoca iz njegovog UID-a i verifikujte protiv potpisa instaliranog paketa (putem PackageManager-a) umesto skeniranja FD-ova.
-- Ako je samo kernel, koristite stabilni identitet pozivaoca (task creds) i validirajte na stabilnom izvoru istine koji upravlja init/userspace pomoćnikom, a ne procesnim FD-ovima.
-- Izbegavajte provere putanje kao identitet; one su trivijalno zadovoljavajuće od strane pozivaoca.
-- Koristite nonce-bazirani izazov–odgovor preko kanala i obrišite bilo koji keširani identitet menadžera pri pokretanju ili na ključnim događajima.
-- Razmotrite IPC sa autentifikacijom zasnovanom na binderu umesto preopterećenja generičkih syscalls kada je to izvodljivo.
+- Poveži autentifikaciju sa pozivateljevim paketom/UID, a ne sa proizvoljnim FD-ovima:
+- Reši pozivateljev paket iz njegovog UID-a i verifikuj protiv potpisa instaliranog paketa (putem PackageManager-a) umesto skeniranja FD-ova.
+- Ako je samo kernel, koristi stabilnu identitet pozivatelja (task creds) i validiraj na stabilnom izvoru istine koji upravlja init/userspace helper, a ne procesnim FD-ovima.
+- Izbegavaj provere putanje kao identitet; one su trivijalno zadovoljavajuće od strane pozivatelja.
+- Koristi nonce-bazirani izazov–odgovor preko kanala i obriši bilo koji keširani identitet menadžera pri pokretanju ili na ključnim događajima.
+- Razmotri IPC sa autentifikacijom zasnovanom na binderu umesto preopterećenja generičkih syscalls kada je to izvodljivo.
 
 For defenders/blue team:
-- Otkrivanje prisustva rooting okvira i procesa menadžera; pratite prctl pozive sa sumnjivim magičnim konstantama (npr., 0xDEADBEEF) ako imate kernel telemetriju.
-- Na upravljanim flotama, blokirajte ili upozorite na boot receiver-e iz nepouzdanih paketa koji brzo pokušavaju privilegovane komande menadžera nakon pokretanja.
-- Osigurajte da su uređaji ažurirani na zakrpljene verzije okvira; poništite keširane ID-eve menadžera prilikom ažuriranja.
+- Otkrivanje prisustva rooting framework-a i procesa menadžera; prati prctl pozive sa sumnjivim magičnim konstantama (npr., 0xDEADBEEF) ako imaš kernel telemetriju.
+- Na upravljanim flotama, blokiraj ili obavesti o boot receiver-ima iz nepouzdanih paketa koji brzo pokušavaju privilegovane komande menadžera nakon pokretanja.
+- Osiguraj da su uređaji ažurirani na zakrpljene verzije framework-a; invalidiraj keširane ID-eve menadžera prilikom ažuriranja.
 
 Limitations of the attack:
-- Pogađa samo uređaje koji su već rootovani sa ranjivim okvirom.
-- Obično zahteva ponovni pokretanje/race prozor pre nego što legitimni menadžer autentifikuje (neki okviri keširaju UID menadžera do resetovanja).
+- Pogađa samo uređaje koji su već rootovani sa ranjivim framework-om.
+- Obično zahteva ponovno pokretanje/race prozor pre nego što legitimni menadžer autentifikuje (neki framework-i keširaju UID menadžera do resetovanja).
 
 ---
 ## Related notes across frameworks
 
 - Autentifikacija zasnovana na lozinkama (npr., istorijski APatch/SKRoot build-ovi) može biti slaba ako su lozinke pogađane/bruteforce-ovane ili su validacije sa greškama.
-- Autentifikacija zasnovana na paketu/potpisu (npr., KernelSU) je jača u principu, ali mora biti povezana sa stvarnim pozivaocem, a ne indirektnim artefaktima poput FD skeniranja.
-- Magisk: CVE-2024-48336 (MagiskEoP) je pokazao da čak i zreli ekosistemi mogu biti podložni lažiranju identiteta što dovodi do izvršavanja koda sa root privilegijama unutar konteksta menadžera.
+- Autentifikacija zasnovana na paketu/potpisu (npr., KernelSU) je jača u principu, ali mora biti povezana sa stvarnim pozivateljem, a ne indirektnim artefaktima poput FD skeniranja.
+- Magisk: CVE-2024-48336 (MagiskEoP) je pokazao da čak i zreli ekosistemi mogu biti podložni lažiranju identiteta što dovodi do izvršavanja koda sa root-om unutar konteksta menadžera.
 
 ---
 ## References

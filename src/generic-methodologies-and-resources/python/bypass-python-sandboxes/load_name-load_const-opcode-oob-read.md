@@ -19,15 +19,15 @@ if len(source) > 13337: exit(print(f"{'L':O<13337}NG"))
 code = compile(source, '∅', 'eval').replace(co_consts=(), co_names=())
 print(eval(code, {'__builtins__': {}}))1234
 ```
-Možete uneti proizvoljni Python kod, i on će biti kompajliran u [Python kod objekat](https://docs.python.org/3/c-api/code.html). Međutim, `co_consts` i `co_names` tog kod objekta biće zamenjeni praznom tuple pre nego što se eval-uju taj kod objekat.
+Možete uneti proizvoljni Python kod, i on će biti kompajliran u [Python kod objekat](https://docs.python.org/3/c-api/code.html). Međutim, `co_consts` i `co_names` tog kod objekta biće zamenjeni praznom tuplom pre nego što se eval-uju.
 
-Tako da na ovaj način, sve izraze koji sadrže konstante (npr. brojevi, stringovi itd.) ili imena (npr. promenljive, funkcije) mogu izazvati segmentacijski grešku na kraju.
+Tako da na ovaj način, sve izraze koji sadrže konstante (npr. brojevi, stringovi itd.) ili imena (npr. promenljive, funkcije) mogu izazvati segfault na kraju.
 
 ### Out of Bound Read <a href="#out-of-bound-read" id="out-of-bound-read"></a>
 
 Kako se dešava segfault?
 
-Hajde da počnemo sa jednostavnim primerom, `[a, b, c]` bi mogao da se kompajlira u sledeći bajtkod.
+Hajde da počnemo sa jednostavnim primerom, `[a, b, c]` može biti kompajliran u sledeći bajtkod.
 ```
 1           0 LOAD_NAME                0 (a)
 2 LOAD_NAME                1 (b)
@@ -49,7 +49,7 @@ PUSH(value);
 FAST_DISPATCH();
 }1234567
 ```
-Na ovaj način možemo koristiti OOB funkciju da dobijemo "ime" sa proizvoljnog memorijskog ofseta. Da bismo bili sigurni koje ime ima i koji je njegov ofset, samo nastavite da pokušavate `LOAD_NAME 0`, `LOAD_NAME 1` ... `LOAD_NAME 99` ... I mogli biste pronaći nešto u vezi sa oparg > 700. Takođe možete pokušati da koristite gdb da pogledate raspored memorije, naravno, ali ne mislim da bi to bilo lakše?
+Na ovaj način možemo koristiti OOB funkciju da dobijemo "ime" sa proizvoljnog memorijskog ofseta. Da bismo bili sigurni koje ime ima i koji je njegov ofset, samo nastavite da pokušavate `LOAD_NAME 0`, `LOAD_NAME 1` ... `LOAD_NAME 99` ... I mogli biste pronaći nešto u vezi oparg > 700. Takođe možete pokušati da koristite gdb da pogledate raspored memorije, naravno, ali ne mislim da bi to bilo lakše?
 
 ### Generating the Exploit <a href="#generating-the-exploit" id="generating-the-exploit"></a>
 
@@ -227,7 +227,7 @@ builtins['eval'](builtins['input']())
 - `LOAD_NAME namei`, `STORE_NAME`, `DELETE_NAME`, `LOAD_GLOBAL`, `STORE_GLOBAL`, `IMPORT_NAME`, `IMPORT_FROM`, `LOAD_ATTR`, `STORE_ATTR` → čitaju imena iz `co_names[...]` (za 3.11+ napomena `LOAD_ATTR`/`LOAD_GLOBAL` čuva zastavice u niskom bitu; stvarni indeks je `namei >> 1`). Pogledajte dokumentaciju disassembler-a za tačnu semantiku po verziji. [Python dis docs].
 - Python 3.11+ je uveo adaptivne/in-line kešove koji dodaju skrivene `CACHE` unose između instrukcija. Ovo ne menja OOB primitiv; to samo znači da, ako ručno pravite bajtkod, morate uzeti u obzir te keš unose prilikom izgradnje `co_code`.
 
-Praktična implikacija: tehnika na ovoj stranici nastavlja da funkcioniše na CPython 3.11, 3.12 i 3.13 kada možete kontrolisati objekat koda (npr., putem `CodeType.replace(...)`) i smanjiti `co_consts`/`co_names`.
+Praktična implikacija: tehnika na ovoj stranici nastavlja da funkcioniše na CPython 3.11, 3.12 i 3.13 kada možete kontrolisati objekat koda (npr. putem `CodeType.replace(...)`) i smanjiti `co_consts`/`co_names`.
 
 ### Brzi skener za korisne OOB indekse (kompatibilan sa 3.11+/3.12+)
 
@@ -272,9 +272,9 @@ print(idx, type(obj), repr(obj)[:80])
 ```
 Notes
 - Da biste umesto toga ispitivali imena, zamenite `LOAD_CONST` sa `LOAD_NAME`/`LOAD_GLOBAL`/`LOAD_ATTR` i prilagodite korišćenje steka u skladu s tim.
-- Koristite `EXTENDED_ARG` ili više bajtova `arg` da biste došli do indeksa >255 ako je potrebno. Kada gradite sa `dis` kao gore, kontrolišete samo nizak bajt; za veće indekse, konstruisite sirove bajtove sami ili podelite napad na više učitavanja.
+- Koristite `EXTENDED_ARG` ili više bajtova `arg` da dođete do indeksa >255 ako je potrebno. Kada gradite sa `dis` kao gore, kontrolišete samo nizak bajt; za veće indekse, konstruisite sirove bajtove sami ili podelite napad na više učitavanja.
 
-### Minimalni bytecode-only RCE obrazac (co_consts OOB → builtins → eval/input)
+### Minimal bytecode-only RCE pattern (co_consts OOB → builtins → eval/input)
 
 Kada identifikujete `co_consts` indeks koji se rešava na builtins modul, možete rekonstruisati `eval(input())` bez ikakvih `co_names` manipulišući stekom:
 ```python
@@ -287,9 +287,9 @@ Kada identifikujete `co_consts` indeks koji se rešava na builtins modul, možet
 ```
 Ovaj pristup je koristan u izazovima koji vam daju direktnu kontrolu nad `co_code` dok primoravaju `co_consts=()` i `co_names=()` (npr., BCTF 2024 “awpcode”). Izbegava trikove na nivou izvora i održava veličinu payload-a malom koristeći bytecode stack ops i tuple graditelje.
 
-### Odbrambene provere i mitigacije za sandboksove
+### Defensivna provere i mitigacije za sandboksove
 
-Ako pišete Python “sandbox” koji kompajlira/evaluira nepouzdani kod ili manipuliše objektima koda, ne oslanjajte se na CPython da proverava granice indeksa tuple-a korišćenih od strane bytecode-a. Umesto toga, sami validirajte objekte koda pre nego što ih izvršite.
+Ako pišete Python “sandbox” koji kompajlira/evaluira nepouzdani kod ili manipuliše kod objektima, ne oslanjajte se na CPython da proverava granice tuple indeksa korišćenih od strane bytecode-a. Umesto toga, sami validirajte kod objekte pre nego što ih izvršite.
 
 Praktični validator (odbija OOB pristup co_consts/co_names)
 ```python
@@ -325,10 +325,10 @@ raise ValueError("Bytecode refers to name index beyond co_names length")
 ```
 Dodatne ideje za ublažavanje
 - Ne dozvolite proizvoljni `CodeType.replace(...)` na nepouzdanom ulazu, ili dodajte stroge strukturne provere na rezultantnom objektu koda.
-- Razmotrite pokretanje nepouzdanog koda u odvojenom procesu sa OS-nivo sandboksiranjem (seccomp, job objekti, kontejneri) umesto oslanjanja na CPython semantiku.
+- Razmotrite pokretanje nepouzdanog koda u odvojenom procesu sa OS-nivo sandboxingom (seccomp, job objekti, kontejneri) umesto oslanjanja na CPython semantiku.
 
 ## Reference
 
 - Splitline-ov HITCON CTF 2022 izveštaj “V O I D” (izvor ove tehnike i visoko-nivo lanac eksploatacije): https://blog.splitline.tw/hitcon-ctf-2022/
-- Python disassembler dokumentacija (indeksi semantike za LOAD_CONST/LOAD_NAME/etc., i 3.11+ `LOAD_ATTR`/`LOAD_GLOBAL` niske-bitne zastavice): https://docs.python.org/3.13/library/dis.html
+- Dokumentacija za Python disassembler (semantika indeksa za LOAD_CONST/LOAD_NAME/etc., i 3.11+ `LOAD_ATTR`/`LOAD_GLOBAL` niske-bitne zastavice): https://docs.python.org/3.13/library/dis.html
 {{#include ../../../banners/hacktricks-training.md}}

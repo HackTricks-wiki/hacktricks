@@ -881,7 +881,6 @@
 - [Interesting Http](todo/interesting-http.md)
 - [Rust Basics](todo/rust-basics.md)
 - [More Tools](todo/more-tools.md)
-- [MISC](todo/misc.md)
 - [Hardware Hacking](todo/hardware-hacking/README.md)
   - [Fault Injection Attacks](todo/hardware-hacking/fault_injection_attacks.md)
   - [I2C](todo/hardware-hacking/i2c.md)
