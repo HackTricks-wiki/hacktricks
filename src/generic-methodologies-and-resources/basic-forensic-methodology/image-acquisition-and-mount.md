@@ -5,7 +5,7 @@
 
 ## 取得
 
-> 常に**読み取り専用**で**コピー中にハッシュを取得**してください。元のデバイスは**書き込みブロック**されている状態を保ち、検証済みのコピーのみで作業してください。
+> 常に**読み取り専用**で取得し、**コピー中にハッシュを取る**こと。元のデバイスは**書き込みブロック**し、検証済みのコピーのみで作業する。 
 
 ### DD
 ```bash
@@ -58,22 +58,18 @@ sudo ewfacquire /dev/sdb -u evidence -c 1 -d "Seizure 2025-07-22" -e 1 -X examin
 aws ec2 create-snapshot --volume-id vol-01234567 --description "IR-case-1234 web-server 2025-07-22"
 # Copy the snapshot to S3 and download with aws cli / aws snowball
 ```
-*Azure* – `az snapshot create` を使用して、SAS URL にエクスポートします。HackTricks のページを参照してください:
-
-{{#ref}}
-../../cloud/azure/azure-forensics.md
-{{#endref}}
+*Azure* – use `az snapshot create` and export to a SAS URL.
 
 
 ## マウント
 
 ### 適切なアプローチの選択
 
-1. 元のパーティションテーブル (MBR/GPT) が必要な場合は、**全ディスク**をマウントします。
-2. 1 つのボリュームのみが必要な場合は、**単一パーティションファイル**をマウントします。
-3. 常に **読み取り専用** (`-o ro,norecovery`) でマウントし、**コピー**で作業します。
+1. 元のパーティションテーブル（MBR/GPT）が必要な場合は、**全ディスク**をマウントします。
+2. 1つのボリュームのみが必要な場合は、**単一パーティションファイル**をマウントします。
+3. 常に**読み取り専用**（`-o ro,norecovery`）でマウントし、**コピー**で作業します。
 
-### 生画像 (dd, AFF4-extracted)
+### 生画像（dd、AFF4抽出）
 ```bash
 # Identify partitions
 fdisk -l disk.img
@@ -88,7 +84,7 @@ lsblk /dev/nbd0 -o NAME,SIZE,TYPE,FSTYPE,LABEL,UUID
 # Mount a partition (e.g. /dev/nbd0p2)
 sudo mount -o ro,uid=$(id -u) /dev/nbd0p2 /mnt
 ```
-完了したら切り離してください:
+完了したら切り離す:
 ```bash
 sudo umount /mnt && sudo qemu-nbd --disconnect /dev/nbd0
 ```
@@ -111,7 +107,7 @@ mount -o ro /tmp/raw_mount/image.dd /mnt
 ```
 ### LVM / BitLocker / VeraCrypt ボリューム
 
-ブロックデバイス（ループまたは nbd）を接続した後：
+ブロックデバイス（ループまたはnbd）を接続した後：
 ```bash
 # LVM
 sudo vgchange -ay               # activate logical volumes
