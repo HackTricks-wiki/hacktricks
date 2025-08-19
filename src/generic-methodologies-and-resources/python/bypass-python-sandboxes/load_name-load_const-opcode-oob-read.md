@@ -8,7 +8,7 @@
 
 LOAD_NAME / LOAD_CONST opcode의 OOB read 기능을 사용하여 메모리에서 일부 심볼을 가져올 수 있습니다. 이는 `(a, b, c, ... 수백 개의 심볼 ..., __getattribute__) if [] else [].__getattribute__(...)`와 같은 트릭을 사용하여 원하는 심볼(예: 함수 이름)을 가져오는 것을 의미합니다.
 
-그런 다음 당신의 익스플로잇을 제작하세요.
+그런 다음 당신의 익스플로잇을 작성하세요.
 
 ### Overview <a href="#overview-1" id="overview-1"></a>
 
@@ -35,11 +35,11 @@ print(eval(code, {'__builtins__': {}}))1234
 6 BUILD_LIST               3
 8 RETURN_VALUE12345
 ```
-하지만 `co_names`가 빈 튜플이 되면 어떻게 될까요? `LOAD_NAME 2` opcode는 여전히 실행되며, 원래 읽어야 할 메모리 주소에서 값을 읽으려고 시도합니다. 네, 이것은 경계 초과 읽기 "기능"입니다.
+하지만 `co_names`가 빈 튜플이 된다면 어떻게 될까요? `LOAD_NAME 2` opcode는 여전히 실행되며, 원래 읽어야 할 메모리 주소에서 값을 읽으려고 시도합니다. 네, 이것은 경계 초과 읽기 "기능"입니다.
 
 해결책의 핵심 개념은 간단합니다. CPython의 일부 opcode, 예를 들어 `LOAD_NAME`과 `LOAD_CONST`는 OOB 읽기에 취약합니다(?).
 
-이들은 `consts` 또는 `names` 튜플에서 `oparg` 인덱스의 객체를 검색합니다(그것이 `co_consts`와 `co_names`가 내부적으로 명명된 방식입니다). CPython이 `LOAD_CONST` opcode를 처리할 때 무엇을 하는지 보기 위해 `LOAD_CONST`에 대한 다음 짧은 코드 조각을 참조할 수 있습니다.
+이들은 `consts` 또는 `names` 튜플에서 `oparg` 인덱스의 객체를 검색합니다(그것이 `co_consts`와 `co_names`가 내부적으로 명명된 방식입니다). CPython이 `LOAD_CONST` opcode를 처리할 때 어떤 일을 하는지 보기 위해 `LOAD_CONST`에 대한 다음의 짧은 스니펫을 참조할 수 있습니다.
 ```c
 case TARGET(LOAD_CONST): {
 PREDICTED(LOAD_CONST);
@@ -53,7 +53,7 @@ FAST_DISPATCH();
 
 ### Exploit 생성하기 <a href="#generating-the-exploit" id="generating-the-exploit"></a>
 
-유용한 이름/상수의 오프셋을 가져온 후, 그 오프셋에서 이름/상수를 어떻게 가져와서 사용할 수 있을까요? 여기에 대한 요령이 있습니다:\
+유용한 이름/const의 오프셋을 가져온 후, 그 오프셋에서 이름/const를 어떻게 가져와서 사용할 수 있을까요? 다음은 당신을 위한 트릭입니다:\
 오프셋 5(`LOAD_NAME 5`)에서 `__getattribute__` 이름을 가져올 수 있다고 가정해 보겠습니다(`co_names=()`). 그러면 다음 작업을 수행하세요:
 ```python
 [a,b,c,d,e,__getattribute__] if [] else [
@@ -61,7 +61,7 @@ FAST_DISPATCH();
 # you can get the __getattribute__ method of list object now!
 ]1234
 ```
-> `__getattribute__`로 이름을 지정할 필요는 없으며, 더 짧거나 이상한 이름으로 지정할 수 있습니다.
+> `__getattribute__`라고 이름을 붙일 필요는 없으며, 더 짧거나 이상한 이름으로 지정할 수 있습니다.
 
 그 이유는 바이트코드를 보기만 해도 이해할 수 있습니다:
 ```python
@@ -80,7 +80,7 @@ FAST_DISPATCH();
 24 BUILD_LIST               1
 26 RETURN_VALUE1234567891011121314
 ```
-`LOAD_ATTR`는 `co_names`에서 이름을 검색한다는 점에 유의하세요. Python은 이름이 동일할 경우 동일한 오프셋에서 이름을 로드하므로 두 번째 `__getattribute__`는 여전히 offset=5에서 로드됩니다. 이 기능을 사용하면 이름이 근처 메모리에 있을 때 임의의 이름을 사용할 수 있습니다.
+`LOAD_ATTR`는 `co_names`에서 이름을 검색한다는 점에 유의하세요. Python은 이름이 동일할 경우 동일한 오프셋에서 이름을 로드하므로 두 번째 `__getattribute__`도 offset=5에서 로드됩니다. 이 기능을 사용하면 이름이 메모리 근처에 있을 때 임의의 이름을 사용할 수 있습니다.
 
 숫자를 생성하는 것은 간단해야 합니다:
 
@@ -93,7 +93,7 @@ FAST_DISPATCH();
 
 길이 제한 때문에 consts를 사용하지 않았습니다.
 
-먼저, 이름의 오프셋을 찾기 위한 스크립트입니다.
+먼저 이름의 오프셋을 찾기 위한 스크립트입니다.
 ```python
 from types import CodeType
 from opcode import opmap
@@ -222,16 +222,16 @@ builtins['eval'](builtins['input']())
 
 ### 버전 노트 및 영향을 받는 opcode (Python 3.11–3.13)
 
-- CPython 바이트코드 opcode는 여전히 정수 피연산자로 `co_consts` 및 `co_names` 튜플에 인덱싱합니다. 공격자가 이러한 튜플을 비우거나(또는 바이트코드에서 사용되는 최대 인덱스보다 작게) 강제로 만들 수 있다면, 인터프리터는 해당 인덱스에 대해 경계 밖 메모리를 읽게 되어 인근 메모리에서 임의의 PyObject 포인터를 반환합니다. 관련 opcode에는 최소한 다음이 포함됩니다:
+- CPython 바이트코드 opcode는 여전히 정수 피연산자로 `co_consts` 및 `co_names` 튜플에 인덱싱합니다. 공격자가 이러한 튜플을 비워두거나(또는 바이트코드에서 사용되는 최대 인덱스보다 작게) 강제로 만들 수 있다면, 인터프리터는 해당 인덱스에 대해 경계 밖 메모리를 읽게 되어 인근 메모리에서 임의의 PyObject 포인터를 반환합니다. 관련 opcode에는 최소한 다음이 포함됩니다:
 - `LOAD_CONST consti` → `co_consts[consti]`를 읽습니다.
-- `LOAD_NAME namei`, `STORE_NAME`, `DELETE_NAME`, `LOAD_GLOBAL`, `STORE_GLOBAL`, `IMPORT_NAME`, `IMPORT_FROM`, `LOAD_ATTR`, `STORE_ATTR` → `co_names[...]`에서 이름을 읽습니다 (3.11+에서는 `LOAD_ATTR`/`LOAD_GLOBAL`이 낮은 비트에 저장 플래그 비트를 기록합니다; 실제 인덱스는 `namei >> 1`입니다). 각 버전별 정확한 의미는 디스어셈블러 문서를 참조하세요. [Python dis docs].
-- Python 3.11+는 명령어 사이에 숨겨진 `CACHE` 항목을 추가하는 적응형/인라인 캐시를 도입했습니다. 이는 OOB 원시를 변경하지 않으며, 바이트코드를 수동으로 작성할 경우 이러한 캐시 항목을 `co_code`를 구축할 때 고려해야 함을 의미합니다.
+- `LOAD_NAME namei`, `STORE_NAME`, `DELETE_NAME`, `LOAD_GLOBAL`, `STORE_GLOBAL`, `IMPORT_NAME`, `IMPORT_FROM`, `LOAD_ATTR`, `STORE_ATTR` → `co_names[...]`에서 이름을 읽습니다(3.11+에서는 `LOAD_ATTR`/`LOAD_GLOBAL`이 낮은 비트에 플래그 비트를 저장하므로 실제 인덱스는 `namei >> 1`입니다). 버전별 정확한 의미는 디스어셈블러 문서를 참조하십시오. [Python dis docs].
+- Python 3.11+에서는 명령어 사이에 숨겨진 `CACHE` 항목을 추가하는 적응형/인라인 캐시가 도입되었습니다. 이는 OOB 원시값을 변경하지 않으며, 바이트코드를 수동으로 작성할 경우 이러한 캐시 항목을 `co_code`를 구축할 때 고려해야 함을 의미합니다.
 
 실용적인 의미: 이 페이지의 기술은 코드 객체를 제어할 수 있을 때(CODEType.replace(...)를 통해) CPython 3.11, 3.12 및 3.13에서 계속 작동합니다. `co_consts`/`co_names`를 축소할 수 있습니다.
 
 ### 유용한 OOB 인덱스를 위한 빠른 스캐너 (3.11+/3.12+ 호환)
 
-바이트코드에서 고급 소스가 아닌 흥미로운 객체를 직접 탐색하는 것을 선호하는 경우, 최소한의 코드 객체를 생성하고 인덱스를 무차별 대입할 수 있습니다. 아래 도우미는 필요할 때 자동으로 인라인 캐시를 삽입합니다.
+고급 소스가 아닌 바이트코드에서 직접 흥미로운 객체를 탐색하는 것을 선호하는 경우, 최소한의 코드 객체를 생성하고 인덱스를 무작위로 시도할 수 있습니다. 아래 도우미는 필요할 때 자동으로 인라인 캐시를 삽입합니다.
 ```python
 import dis, types
 
@@ -274,7 +274,7 @@ Notes
 - 이름을 조사하려면 `LOAD_CONST`를 `LOAD_NAME`/`LOAD_GLOBAL`/`LOAD_ATTR`로 바꾸고 스택 사용을 적절히 조정하세요.
 - 필요하다면 `EXTENDED_ARG` 또는 여러 바이트의 `arg`를 사용하여 인덱스 >255에 도달하세요. 위와 같이 `dis`로 빌드할 때는 낮은 바이트만 제어할 수 있으며, 더 큰 인덱스의 경우 원시 바이트를 직접 구성하거나 여러 로드에 걸쳐 공격을 분할하세요.
 
-### Minimal bytecode-only RCE pattern (co_consts OOB → builtins → eval/input)
+### 최소 바이트코드 전용 RCE 패턴 (co_consts OOB → builtins → eval/input)
 
 `co_consts` 인덱스가 builtins 모듈로 해결되는 것을 식별한 후, 스택을 조작하여 `eval(input())`을 `co_names` 없이 재구성할 수 있습니다:
 ```python
@@ -289,7 +289,7 @@ Notes
 
 ### 샌드박스를 위한 방어적 검사 및 완화 조치
 
-신뢰할 수 없는 코드를 컴파일/평가하거나 코드 객체를 조작하는 Python “샌드박스”를 작성하는 경우, 바이트코드에서 사용되는 튜플 인덱스의 경계를 확인하기 위해 CPython에 의존하지 마십시오. 대신, 실행하기 전에 코드 객체를 직접 검증하십시오.
+신뢰할 수 없는 코드를 컴파일/평가하거나 코드 객체를 조작하는 Python “샌드박스”를 작성하는 경우, 바이트코드에서 사용되는 튜플 인덱스의 경계를 검사하는 데 CPython에 의존하지 마십시오. 대신, 실행하기 전에 코드 객체를 직접 검증하십시오.
 
 실용적인 검증기 (co_consts/co_names에 대한 OOB 접근 거부)
 ```python
@@ -323,9 +323,9 @@ raise ValueError("Bytecode refers to name index beyond co_names length")
 # validate_code_object(c)
 # eval(c, {'__builtins__': {}})
 ```
-추가 완화 아이디어
+추가적인 완화 아이디어
 - 신뢰할 수 없는 입력에 대해 임의의 `CodeType.replace(...)`를 허용하지 않거나, 결과 코드 객체에 대한 엄격한 구조 검사를 추가하십시오.
-- CPython 의미에 의존하는 대신 OS 수준 샌드박싱(예: seccomp, 작업 객체, 컨테이너)으로 신뢰할 수 없는 코드를 별도의 프로세스에서 실행하는 것을 고려하십시오.
+- CPython 의미에 의존하는 대신 OS 수준의 샌드박싱(예: seccomp, 작업 객체, 컨테이너)으로 신뢰할 수 없는 코드를 별도의 프로세스에서 실행하는 것을 고려하십시오.
 
 
 
