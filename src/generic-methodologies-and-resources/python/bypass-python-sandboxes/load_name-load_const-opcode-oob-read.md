@@ -19,7 +19,7 @@ if len(source) > 13337: exit(print(f"{'L':O<13337}NG"))
 code = compile(source, '∅', 'eval').replace(co_consts=(), co_names=())
 print(eval(code, {'__builtins__': {}}))1234
 ```
-Możesz wprowadzić dowolny kod Pythona, a zostanie on skompilowany do [obiektu kodu Pythona](https://docs.python.org/3/c-api/code.html). Jednak `co_consts` i `co_names` tego obiektu kodu zostaną zastąpione pustą krotką przed ewaluacją tego obiektu kodu.
+Możesz wprowadzić dowolny kod Python, a zostanie on skompilowany do [obiektu kodu Python](https://docs.python.org/3/c-api/code.html). Jednak `co_consts` i `co_names` tego obiektu kodu zostaną zastąpione pustą krotką przed eval tego obiektu kodu.
 
 W ten sposób wszystkie wyrażenia zawierające stałe (np. liczby, ciągi itp.) lub nazwy (np. zmienne, funkcje) mogą ostatecznie spowodować błąd segmentacji.
 
@@ -61,7 +61,7 @@ Załóżmy, że możemy uzyskać nazwę `__getattribute__` z przesunięcia 5 (`L
 # you can get the __getattribute__ method of list object now!
 ]1234
 ```
-> Zauważ, że nie jest konieczne nazywanie tego `__getattribute__`, możesz nadać mu krótszą lub bardziej dziwną nazwę.
+> Zauważ, że nie jest konieczne nazywanie tego `__getattribute__`, możesz nadać mu krótszą lub bardziej dziwną nazwę
 
 Możesz zrozumieć powód, po prostu oglądając jego bajtowy kod:
 ```python
@@ -80,7 +80,7 @@ Możesz zrozumieć powód, po prostu oglądając jego bajtowy kod:
 24 BUILD_LIST               1
 26 RETURN_VALUE1234567891011121314
 ```
-Zauważ, że `LOAD_ATTR` również pobiera nazwę z `co_names`. Python ładuje nazwy z tej samej pozycji, jeśli nazwa jest taka sama, więc drugi `__getattribute__` jest nadal ładowany z offsetu=5. Używając tej funkcji, możemy użyć dowolnej nazwy, gdy tylko nazwa znajduje się w pamięci w pobliżu.
+Zauważ, że `LOAD_ATTR` również pobiera nazwę z `co_names`. Python ładuje nazwy z tej samej pozycji, jeśli nazwa jest taka sama, więc drugi `__getattribute__` jest nadal ładowany z offsetu=5. Używając tej funkcji, możemy używać dowolnej nazwy, gdy tylko nazwa znajduje się w pobliskiej pamięci.
 
 Generowanie liczb powinno być trywialne:
 
@@ -271,7 +271,7 @@ if obj is not None:
 print(idx, type(obj), repr(obj)[:80])
 ```
 Notes
-- Aby zamiast tego badać nazwy, zamień `LOAD_CONST` na `LOAD_NAME`/`LOAD_GLOBAL`/`LOAD_ATTR` i dostosuj użycie stosu odpowiednio.
+- Aby zamiast tego zbadać nazwy, zamień `LOAD_CONST` na `LOAD_NAME`/`LOAD_GLOBAL`/`LOAD_ATTR` i dostosuj użycie stosu odpowiednio.
 - Użyj `EXTENDED_ARG` lub wielu bajtów `arg`, aby osiągnąć indeksy >255, jeśli to konieczne. Podczas budowania z `dis` jak powyżej, kontrolujesz tylko niski bajt; dla większych indeksów skonstruuj surowe bajty samodzielnie lub podziel atak na wiele ładowań.
 
 ### Minimalny wzór RCE tylko z bajtów (co_consts OOB → builtins → eval/input)
@@ -287,9 +287,9 @@ Gdy zidentyfikujesz indeks `co_consts`, który odnosi się do modułu builtins, 
 ```
 To podejście jest przydatne w wyzwaniach, które dają bezpośrednią kontrolę nad `co_code`, jednocześnie wymuszając `co_consts=()` i `co_names=()` (np. BCTF 2024 “awpcode”). Unika sztuczek na poziomie źródła i utrzymuje mały rozmiar ładunku, wykorzystując operacje stosu bajtowego i budowniczych krotek.
 
-### Sprawdzanie defensywne i łagodzenia dla piaskownic
+### Sprawdzanie defensywne i łagodzenie dla piaskownic
 
-Jeśli piszesz "piaskownicę" w Pythonie, która kompiluje/ocenia nieufny kod lub manipuluje obiektami kodu, nie polegaj na CPython w sprawdzaniu granic indeksów krotek używanych przez bajtowy kod. Zamiast tego, samodzielnie waliduj obiekty kodu przed ich wykonaniem.
+Jeśli piszesz "piaskownicę" w Pythonie, która kompiluje/ocenia nieufny kod lub manipuluje obiektami kodu, nie polegaj na CPython do sprawdzania granic indeksów krotek używanych przez bajtowy kod. Zamiast tego, samodzielnie waliduj obiekty kodu przed ich wykonaniem.
 
 Praktyczny walidator (odrzuca dostęp OOB do co_consts/co_names)
 ```python
@@ -324,12 +324,11 @@ raise ValueError("Bytecode refers to name index beyond co_names length")
 # eval(c, {'__builtins__': {}})
 ```
 Dodatkowe pomysły na łagodzenie
-
-- Nie pozwalaj na dowolne `CodeType.replace(...)` na niezaufanym wejściu, lub dodaj ścisłe kontrole strukturalne na wynikowym obiekcie kodu.
-- Rozważ uruchamianie niezaufanego kodu w osobnym procesie z użyciem sandboxingu na poziomie systemu operacyjnego (seccomp, obiekty zadań, kontenery) zamiast polegać na semantyce CPython.
+- Nie pozwalaj na dowolne `CodeType.replace(...)` na nieufnych danych wejściowych lub dodaj ścisłe kontrole strukturalne na wynikowym obiekcie kodu.
+- Rozważ uruchamianie nieufnego kodu w osobnym procesie z użyciem sandboxingu na poziomie systemu operacyjnego (seccomp, obiekty zadań, kontenery) zamiast polegać na semantyce CPython.
 
 ## Odniesienia
 
-- Artykuł Splitline’a z HITCON CTF 2022 „V O I D” (pochodzenie tej techniki i ogólny łańcuch exploitów): https://blog.splitline.tw/hitcon-ctf-2022/
+- Opis HITCON CTF 2022 autorstwa Splitline "V O I D" (pochodzenie tej techniki i ogólny łańcuch exploitów): https://blog.splitline.tw/hitcon-ctf-2022/
 - Dokumentacja dezasemblatora Pythona (semantyka indeksów dla LOAD_CONST/LOAD_NAME/itd., oraz niskobitowe flagi `LOAD_ATTR`/`LOAD_GLOBAL` w wersji 3.11+): https://docs.python.org/3.13/library/dis.html
 {{#include ../../../banners/hacktricks-training.md}}

@@ -13,12 +13,12 @@ README.md
 - Arduino: podłącz cyfrowe piny D2–D11 do maksymalnie 10 podejrzewanych padów/testpointów JTAG, a GND Arduino do GND celu. Zasilaj cel osobno, chyba że wiesz, że szyna jest bezpieczna. Preferuj logikę 3.3 V (np. Arduino Due) lub użyj konwertera poziomów/oporników szeregowych przy badaniu celów 1.8–3.3 V.
 - Raspberry Pi: budowa Pi udostępnia mniej użytecznych GPIO (więc skany są wolniejsze); sprawdź repozytorium, aby uzyskać aktualną mapę pinów i ograniczenia.
 
-Po załadowaniu, otwórz monitor szeregowy przy 115200 baud i wyślij `h` po pomoc. Typowy przebieg:
+Po wgraniu, otwórz monitor szeregowy na 115200 baud i wyślij `h` po pomoc. Typowy przepływ:
 
 - `l` znajdź pętle, aby uniknąć fałszywych pozytywów
 - `r` przełącz wewnętrzne pull-upy, jeśli to konieczne
 - `s` skanowanie TCK/TMS/TDI/TDO (a czasami TRST/SRST)
-- `y` brute-force IR, aby odkryć nieudokumentowane opcodes
+- `y` brute-force IR, aby odkryć nieudokumentowane opkody
 - `x` zrzut stanu pinów w boundary-scan
 
 ![](<../../images/image (939).png>)
@@ -27,12 +27,10 @@ Po załadowaniu, otwórz monitor szeregowy przy 115200 baud i wyślij `h` po pom
 
 ![](<../../images/image (774).png>)
 
-
-
 Jeśli znajdziesz ważny TAP, zobaczysz linie zaczynające się od `FOUND!`, wskazujące odkryte piny.
 
 Wskazówki
-- Zawsze dziel się masą i nigdy nie podnoś nieznanych pinów powyżej Vtref celu. W razie wątpliwości, dodaj oporniki szeregowe 100–470 Ω na pinach kandydujących.
+- Zawsze dziel wspólną masę i nigdy nie podnoś nieznanych pinów powyżej Vtref celu. W razie wątpliwości, dodaj oporniki szeregowe 100–470 Ω na pinach kandydujących.
 - Jeśli urządzenie używa SWD/SWJ zamiast 4-przewodowego JTAG, JTAGenum może go nie wykryć; spróbuj narzędzi SWD lub adaptera, który obsługuje SWJ-DP.
 
 ## Bezpieczniejsze poszukiwanie pinów i konfiguracja sprzętowa
@@ -55,14 +53,12 @@ openocd -f interface/jlink.cfg -c "transport select jtag; adapter speed 1000" \
 openocd -f board/esp32s3-builtin.cfg -c "init; scan_chain; shutdown"
 ```
 Notatki
-- Jeśli otrzymasz "wszystkie jedynki/zera" IDCODE, sprawdź okablowanie, zasilanie, Vtref oraz to, czy port nie jest zablokowany przez bezpieczniki/opcje bajtów.
-- Zobacz OpenOCD niskopoziomowe `irscan`/`drscan` dla ręcznej interakcji TAP przy uruchamianiu nieznanych łańcuchów.
+- Jeśli otrzymasz "wszystkie jedynki/zera" IDCODE, sprawdź okablowanie, zasilanie, Vtref oraz to, czy port nie jest zablokowany przez bezpieczniki/bajty opcji.
+- Zobacz OpenOCD niskopoziomowe `irscan`/`drscan` dla ręcznej interakcji TAP podczas uruchamiania nieznanych łańcuchów.
 
 ## Zatrzymywanie CPU i zrzut pamięci/flash
 
 Gdy TAP zostanie rozpoznany i wybrany skrypt docelowy, możesz zatrzymać rdzeń i zrzucić obszary pamięci lub wewnętrzny flash. Przykłady (dostosuj cel, adresy bazowe i rozmiary):
-
-- Ogólny cel po inicjalizacji:
 ```
 openocd -f interface/jlink.cfg -f target/stm32f1x.cfg \
 -c "init; reset halt; mdw 0x08000000 4; dump_image flash.bin 0x08000000 0x00100000; shutdown"
@@ -79,11 +75,11 @@ openocd -f board/esp32s3-builtin.cfg \
 ```
 Tips
 - Użyj `mdw/mdh/mdb`, aby sprawdzić pamięć przed długimi zrzutami.
-- W przypadku łańcuchów z wieloma urządzeniami, ustaw BYPASS na niecelach lub użyj pliku płyty, który definiuje wszystkie TAP-y.
+- W przypadku łańcuchów z wieloma urządzeniami, ustaw BYPASS na niecelach lub użyj pliku płyty, który definiuje wszystkie TAPy.
 
 ## Sztuczki z boundary-scan (EXTEST/SAMPLE)
 
-Nawet gdy dostęp do debugowania CPU jest zablokowany, boundary-scan może być nadal dostępny. Z UrJTAG/OpenOCD możesz:
+Nawet gdy dostęp debugowania CPU jest zablokowany, boundary-scan może być nadal dostępny. Z UrJTAG/OpenOCD możesz:
 - SAMPLE, aby uchwycić stany pinów podczas działania systemu (znaleźć aktywność magistrali, potwierdzić mapowanie pinów).
 - EXTEST, aby sterować pinami (np. bit-bang zewnętrzne linie SPI flash za pośrednictwem MCU, aby odczytać je offline, jeśli okablowanie płyty na to pozwala).
 

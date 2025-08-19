@@ -7,7 +7,7 @@ Frameworki rootujące, takie jak KernelSU, APatch, SKRoot i Magisk, często łat
 Ta strona abstrahuje techniki i pułapki odkryte w badaniach publicznych (szczególnie analiza KernelSU v0.5.7 przez Zimperium), aby pomóc zarówno zespołom red, jak i blue w zrozumieniu powierzchni ataku, prymitywów eksploatacji i solidnych środków zaradczych.
 
 ---
-## Wzorzec architektury: syscall-hooked manager channel
+## Wzorzec architektury: kanał menedżera z podłączonym syscall
 
 - Moduł/łatka jądra podłącza syscall (zwykle prctl), aby odbierać "komendy" z przestrzeni użytkownika.
 - Protokół zazwyczaj wygląda następująco: magic_value, command_id, arg_ptr/len ...
@@ -16,11 +16,11 @@ Ta strona abstrahuje techniki i pułapki odkryte w badaniach publicznych (szczeg
 - Zarządzaj listami dozwolonymi/zakazanymi dla su
 - Dostosuj politykę SELinux (np. CMD_SET_SEPOLICY)
 - Zapytaj o wersję/konfigurację
-- Ponieważ każda aplikacja może wywoływać syscalls, poprawność uwierzytelniania menedżera jest kluczowa.
+- Ponieważ każda aplikacja może wywoływać syscall, poprawność uwierzytelniania menedżera jest krytyczna.
 
 Przykład (projekt KernelSU):
 - Podłączony syscall: prctl
-- Magiczna wartość do przekierowania do handlera KernelSU: 0xDEADBEEF
+- Magiczna wartość do przekierowania do obsługi KernelSU: 0xDEADBEEF
 - Komendy obejmują: CMD_BECOME_MANAGER, CMD_GET_VERSION, CMD_ALLOW_SU, CMD_SET_SEPOLICY, CMD_GRANT_ROOT, itd.
 
 ---
@@ -40,14 +40,14 @@ Gdy przestrzeń użytkownika wywołuje prctl(0xDEADBEEF, CMD_BECOME_MANAGER, dat
 - Iteruj przez otwarte deskryptory plików (FD) procesu wywołującego.
 - Wybierz pierwszy plik, którego ścieżka pasuje do /data/app/*/base.apk.
 - Przeanalizuj podpis APK v2 i zweryfikuj go w stosunku do oficjalnego certyfikatu menedżera.
-- Odniesienia: manager.c (iteracja FDs), apk_sign.c (weryfikacja APK v2).
+- Odniesienia: manager.c (iteracja FD), apk_sign.c (weryfikacja APK v2).
 
 Jeśli wszystkie kontrole przejdą, jądro tymczasowo przechowuje UID menedżera i akceptuje uprzywilejowane komendy z tego UID, aż do resetu.
 
 ---
 ## Klasa podatności: zaufanie "pierwszemu pasującemu APK" z iteracji FD
 
-Jeśli sprawdzenie podpisu wiąże się z "pierwszym pasującym /data/app/*/base.apk" znalezionym w tabeli FD procesu, w rzeczywistości nie weryfikuje to pakietu wywołującego. Atakujący może wcześniej umieścić prawidłowo podpisany APK (prawdziwego menedżera), aby pojawił się wcześniej na liście FD niż jego własny base.apk.
+Jeśli kontrola podpisu wiąże się z "pierwszym pasującym /data/app/*/base.apk" znalezionym w tabeli FD procesu, w rzeczywistości nie weryfikuje własnego pakietu wywołującego. Atakujący może wcześniej umieścić prawidłowo podpisany APK (prawdziwego menedżera), aby pojawił się wcześniej na liście FD niż ich własny base.apk.
 
 To zaufanie przez pośrednictwo pozwala aplikacji bez uprawnień na podszywanie się pod menedżera bez posiadania klucza podpisującego menedżera.
 
@@ -68,14 +68,14 @@ Kluczowe właściwości wykorzystywane:
 
 Kroki na wysokim poziomie:
 1) Zbuduj prawidłową ścieżkę do swojego katalogu danych aplikacji, aby spełnić kontrole prefiksu i własności.
-2) Upewnij się, że prawdziwy plik APK menedżera KernelSU jest otwarty na niższym numerze FD niż twój własny base.apk.
+2) Upewnij się, że prawdziwy plik APK menedżera KernelSU jest otwarty na FD o niższym numerze niż twój własny base.apk.
 3) Wywołaj prctl(0xDEADBEEF, CMD_BECOME_MANAGER, <your_data_dir>, ...) aby przejść kontrole.
 4) Wydaj uprzywilejowane komendy, takie jak CMD_GRANT_ROOT, CMD_ALLOW_SU, CMD_SET_SEPOLICY, aby utrzymać podniesienie uprawnień.
 
 Praktyczne uwagi dotyczące kroku 2 (kolejność FD):
 - Zidentyfikuj FD swojego procesu dla swojego /data/app/*/base.apk, przechodząc przez symlinki /proc/self/fd.
 - Zamknij niski FD (np. stdin, fd 0) i najpierw otwórz prawdziwy plik APK menedżera, aby zajmował fd 0 (lub dowolny indeks niższy niż twój własny fd base.apk).
-- Spakuj prawdziwy plik APK menedżera z twoją aplikacją, aby jego ścieżka spełniała naiwne filtry jądra. Na przykład umieść go w podścieżce pasującej do /data/app/*/base.apk.
+- Spakuj prawdziwy plik APK menedżera z swoją aplikacją, aby jego ścieżka spełniała naiwne filtry jądra. Na przykład umieść go w podścieżce pasującej do /data/app/*/base.apk.
 
 Przykładowe fragmenty kodu (Android/Linux, tylko ilustracyjne):
 
@@ -156,7 +156,7 @@ Dla deweloperów frameworków:
 - Jeśli tylko jądro, użyj stabilnej tożsamości wywołującego (uprawnienia zadania) i zweryfikuj na stabilnym źródle prawdy zarządzanym przez init/użytkownika, a nie FD procesów.
 - Unikaj sprawdzania prefiksów ścieżek jako tożsamości; są one trywialnie spełniane przez wywołującego.
 - Użyj wyzwania opartego na nonce w odpowiedzi przez kanał i wyczyść wszelkie pamiętane tożsamości menedżera przy uruchomieniu lub przy kluczowych zdarzeniach.
-- Rozważ użycie uwierzytelnionego IPC opartego na binderze zamiast przeciążania ogólnych wywołań systemowych, gdy to możliwe.
+- Rozważ uwierzytelnioną IPC opartą na binderze zamiast przeciążania ogólnych wywołań systemowych, gdy to możliwe.
 
 Dla obrońców/zespół niebieski:
 - Wykryj obecność frameworków do rootowania i procesów menedżera; monitoruj wywołania prctl z podejrzanymi magicznymi stałymi (np. 0xDEADBEEF), jeśli masz telemetrię jądra.
@@ -175,7 +175,7 @@ Ograniczenia ataku:
 - Magisk: CVE-2024-48336 (MagiskEoP) pokazał, że nawet dojrzałe ekosystemy mogą być podatne na fałszowanie tożsamości prowadzące do wykonania kodu z roota w kontekście menedżera.
 
 ---
-## Odnośniki
+## Odniesienia
 
 - [Zimperium – The Rooting of All Evil: Security Holes That Could Compromise Your Mobile Device](https://zimperium.com/blog/the-rooting-of-all-evil-security-holes-that-could-compromise-your-mobile-device)
 - [KernelSU v0.5.7 – core_hook.c path checks (L193, L201)](https://github.com/tiann/KernelSU/blob/v0.5.7/kernel/core_hook.c#L193)
