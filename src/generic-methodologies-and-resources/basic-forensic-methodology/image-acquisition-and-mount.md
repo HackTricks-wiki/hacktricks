@@ -58,20 +58,18 @@ sudo ewfacquire /dev/sdb -u evidence -c 1 -d "Seizure 2025-07-22" -e 1 -X examin
 aws ec2 create-snapshot --volume-id vol-01234567 --description "IR-case-1234 web-server 2025-07-22"
 # Copy the snapshot to S3 and download with aws cli / aws snowball
 ```
-*Azure* – χρησιμοποιήστε `az snapshot create` και εξάγετε σε ένα SAS URL. Δείτε τη σελίδα HackTricks {{#ref}}
-../../cloud/azure/azure-forensics.md
-{{#endref}}
+*Azure* – use `az snapshot create` and export to a SAS URL.
 
 
 ## Mount
 
-### Επιλέγοντας τη σωστή προσέγγιση
+### Επιλογή της σωστής προσέγγισης
 
-1. Τοποθετήστε το **ολόκληρο δίσκο** όταν θέλετε τον αρχικό πίνακα κατατμήσεων (MBR/GPT).
-2. Τοποθετήστε ένα **αρχείο μίας κατατμήσεως** όταν χρειάζεστε μόνο έναν τόμο.
-3. Πάντα τοποθετήστε **μόνο για ανάγνωση** (`-o ro,norecovery`) και εργάζεστε σε **αντίγραφα**.
+1. Mount the **whole disk** when you want the original partition table (MBR/GPT).
+2. Mount a **single partition file** when you only need one volume.
+3. Always mount **read-only** (`-o ro,norecovery`) and work on **copies**.
 
-### Ακατέργαστες εικόνες (dd, AFF4-extracted)
+### Raw images (dd, AFF4-extracted)
 ```bash
 # Identify partitions
 fdisk -l disk.img
@@ -126,7 +124,7 @@ sudo mount -o ro /mnt/bitlocker/dislocker-file /mnt/evidence
 sudo kpartx -av disk.img  # creates /dev/mapper/loop0p1, loop0p2 …
 mount -o ro /dev/mapper/loop0p2 /mnt
 ```
-### Κοινά σφάλματα και διορθώσεις κατά την τοποθέτηση
+### Κοινά σφάλματα προσάρτησης & διορθώσεις
 
 | Σφάλμα | Τυπική Αιτία | Διόρθωση |
 |-------|---------------|-----|
@@ -136,7 +134,7 @@ mount -o ro /dev/mapper/loop0p2 /mnt
 
 ### Καθαρισμός
 
-Θυμηθείτε να **umount** και **αποσυνδέσετε** τις συσκευές loop/nbd για να αποφύγετε την παραμονή κρεμασμένων χαρτογραφήσεων που μπορεί να διαφθείρουν περαιτέρω εργασία:
+Θυμηθείτε να **umount** και **αποσυνδέσετε** τις συσκευές loop/nbd για να αποφύγετε την αφήγηση χαλαρών χαρτογραφήσεων που μπορεί να διαφθείρουν περαιτέρω εργασία:
 ```bash
 umount -Rl /mnt/evidence
 kpartx -dv /dev/loop0  # or qemu-nbd --disconnect /dev/nbd0
