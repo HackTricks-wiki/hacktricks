@@ -58,7 +58,9 @@ sudo ewfacquire /dev/sdb -u evidence -c 1 -d "Seizure 2025-07-22" -e 1 -X examin
 aws ec2 create-snapshot --volume-id vol-01234567 --description "IR-case-1234 web-server 2025-07-22"
 # Copy the snapshot to S3 and download with aws cli / aws snowball
 ```
-*Azure* – use `az snapshot create` and export to a SAS URL.  See the HackTricks page {{#ref}}
+*Azure* – `az snapshot create`를 사용하고 SAS URL로 내보냅니다. HackTricks의 페이지를 참조하세요:
+
+{{#ref}}
 ../../cloud/azure/azure-forensics.md
 {{#endref}}
 
@@ -71,7 +73,7 @@ aws ec2 create-snapshot --volume-id vol-01234567 --description "IR-case-1234 web
 2. 하나의 볼륨만 필요할 때 **단일 파티션 파일**을 마운트합니다.
 3. 항상 **읽기 전용**(`-o ro,norecovery`)으로 마운트하고 **복사본**에서 작업합니다.
 
-### 원시 이미지(dd, AFF4 추출)
+### 원시 이미지 (dd, AFF4 추출)
 ```bash
 # Identify partitions
 fdisk -l disk.img
@@ -136,7 +138,7 @@ mount -o ro /dev/mapper/loop0p2 /mnt
 
 ### 정리
 
-**umount** 및 **disconnect** 루프/nbd 장치를 기억하여 추가 작업을 손상시킬 수 있는 남은 매핑을 남기지 않도록 하십시오:
+**umount** 및 **disconnect** 루프/nbd 장치를 기억하여 추가 작업을 손상시킬 수 있는 남아 있는 매핑을 방지하세요:
 ```bash
 umount -Rl /mnt/evidence
 kpartx -dv /dev/loop0  # or qemu-nbd --disconnect /dev/nbd0
