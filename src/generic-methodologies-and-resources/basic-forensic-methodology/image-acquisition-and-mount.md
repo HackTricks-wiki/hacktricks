@@ -16,7 +16,7 @@ sha256sum disk.img > disk.img.sha256
 ```
 ### dc3dd / dcfldd
 
-`dc3dd` je aktivno održavana verzija dcfldd (DoD Computer Forensics Lab dd).
+`dc3dd` je aktivno održavana verzija dcfldd (DoD laboratorija za forenziku računara dd).
 ```bash
 # Create an image and calculate multiple hashes at acquisition time
 sudo dc3dd if=/dev/sdc of=/forensics/pc.img hash=sha256,sha1 hashlog=/forensics/pc.hashes log=/forensics/pc.log bs=1M
@@ -58,12 +58,7 @@ sudo ewfacquire /dev/sdb -u evidence -c 1 -d "Seizure 2025-07-22" -e 1 -X examin
 aws ec2 create-snapshot --volume-id vol-01234567 --description "IR-case-1234 web-server 2025-07-22"
 # Copy the snapshot to S3 and download with aws cli / aws snowball
 ```
-*Azure* – koristite `az snapshot create` i izvezite na SAS URL. Pogledajte stranicu iz HackTricks:
-
-{{#ref}}
-../../cloud/azure/azure-forensics.md
-{{#endref}}
-
+*Azure* – koristite `az snapshot create` i izvezite na SAS URL.
 
 ## Montiranje
 
