@@ -8,10 +8,10 @@ README.md
 
 ## JTAGenum
 
-[**JTAGenum**](https://github.com/cyphunk/JTAGenum) ni chombo ambacho unaweza kupakia kwenye MCU inayofaa na Arduino au (kwa majaribio) Raspberry Pi ili kujaribu pinouts za JTAG zisizojulikana na hata kuhesabu register za maagizo.
+[**JTAGenum**](https://github.com/cyphunk/JTAGenum) ni chombo ambacho unaweza kupakia kwenye MCU inayofanana na Arduino au (kitaalamu) Raspberry Pi ili kujaribu pinouts za JTAG zisizojulikana na hata kuhesabu register za maagizo.
 
-- Arduino: ung'anishe pini za dijitali D2–D11 kwa hadi 10 za JTAG zinazoshukiwa/punkti za mtihani, na GND ya Arduino kwa GND ya lengo. Pata nguvu kwa lengo tofauti isipokuwa unajua reli ni salama. Prefer 3.3 V logic (mfano, Arduino Due) au tumia level shifter/resistors za mfululizo unapochunguza malengo ya 1.8–3.3 V.
-- Raspberry Pi: toleo la Pi lina GPIO chache zinazoweza kutumika (hivyo skana ni polepole); angalia repo kwa ramani ya pini ya sasa na vizuizi.
+- Arduino: ung'anishe pini za kidijitali D2–D11 kwa hadi 10 za JTAG zinazoshukiwa/punkti za mtihani, na GND ya Arduino kwa GND ya lengo. Pata nguvu kwa lengo tofauti isipokuwa unajua reli ni salama. Prefer 3.3 V logic (mfano, Arduino Due) au tumia level shifter/resistors za mfululizo unapochunguza malengo ya 1.8–3.3 V.
+- Raspberry Pi: ujenzi wa Pi unatoa GPIO chache zinazoweza kutumika (hivyo skana ni polepole); angalia repo kwa ramani ya pini ya sasa na vikwazo.
 
 Mara tu unapoflash, fungua monitor ya serial kwa 115200 baud na tuma `h` kwa msaada. Mchakato wa kawaida:
 
@@ -33,12 +33,12 @@ Ikiwa TAP halali imepatikana utaona mistari inayaanza na `FOUND!` ikionyesha pin
 
 Vidokezo
 - Daima shiriki ardhi, na usiendeshe pini zisizojulikana juu ya Vtref ya lengo. Ikiwa una shaka, ongeza resistors za mfululizo 100–470 Ω kwenye pini za wagombea.
-- Ikiwa kifaa kinatumia SWD/SWJ badala ya JTAG ya nyaya 4, JTAGenum huenda kisigundue; jaribu zana za SWD au adapter inayounga mkono SWJ‑DP.
+- Ikiwa kifaa kinatumia SWD/SWJ badala ya JTAG ya nyaya 4, JTAGenum huenda kisikugundue; jaribu zana za SWD au adapter inayounga mkono SWJ‑DP.
 
 ## Uwindaji wa pini salama na usanidi wa vifaa
 
 - Tambua Vtref na GND kwanza kwa kutumia multimeter. Adapta nyingi zinahitaji Vtref kuweka voltage ya I/O.
-- Level shifting: pendelea level shifters za pande mbili zilizoundwa kwa ishara za push‑pull (michakato ya JTAG si wazi-drain). Epuka level shifters za I2C za auto‑direction kwa JTAG.
+- Level shifting: pendelea level shifters za pande mbili zilizoundwa kwa ishara za push‑pull (michakato ya JTAG si open‑drain). Epuka auto‑direction I2C shifters kwa JTAG.
 - Adapta zinazofaa: bodi za FT2232H/FT232H (mfano, Tigard), CMSIS‑DAP, J‑Link, ST‑LINK (maalum kwa muuzaji), ESP‑USB‑JTAG (juu ya ESP32‑Sx). Unganisha angalau TCK, TMS, TDI, TDO, GND na Vtref; hiari TRST na SRST.
 
 ## Mawasiliano ya kwanza na OpenOCD (scan na IDCODE)
@@ -56,18 +56,18 @@ openocd -f board/esp32s3-builtin.cfg -c "init; scan_chain; shutdown"
 ```
 Notes
 - Ikiwa unapata "sifuri/mmoja zote" IDCODE, angalia wiring, nguvu, Vtref, na kwamba bandari haijafungwa na fuses/option bytes.
-- Tazama OpenOCD low‑level `irscan`/`drscan` kwa ajili ya mwingiliano wa manual wa TAP unapofungua minyororo isiyojulikana.
+- Tazama OpenOCD low‑level `irscan`/`drscan` kwa mwingiliano wa manual wa TAP unapofungua minyororo isiyojulikana.
 
 ## Kusimamisha CPU na kutupa kumbukumbu/flash
 
-Mara tu TAP inapokubaliwa na script ya lengo imechaguliwa, unaweza kusimamisha msingi na kutupa maeneo ya kumbukumbu au flash ya ndani. Mifano (badilisha lengo, anwani za msingi na saizi): 
+Mara TAP inapokubaliwa na script ya lengo kuchaguliwa, unaweza kusimamisha msingi na kutupa maeneo ya kumbukumbu au flash ya ndani. Mifano (badilisha lengo, anwani za msingi na saizi): 
 
 - Lengo la jumla baada ya kuanzisha:
 ```
 openocd -f interface/jlink.cfg -f target/stm32f1x.cfg \
 -c "init; reset halt; mdw 0x08000000 4; dump_image flash.bin 0x08000000 0x00100000; shutdown"
 ```
-- RISC‑V SoC (prefa SBA inapopatikana):
+- RISC‑V SoC (pendelea SBA inapopatikana):
 ```
 openocd -f interface/ftdi/ft232h.cfg -f target/riscv.cfg \
 -c "init; riscv set_prefer_sba on; halt; dump_image sram.bin 0x80000000 0x20000; shutdown"
@@ -85,9 +85,9 @@ Tips
 
 Hata wakati ufikiaji wa debug wa CPU umefungwa, boundary-scan bado inaweza kuwa wazi. Kwa UrJTAG/OpenOCD unaweza:
 - SAMPLE kuchukua picha za hali za pini wakati mfumo unafanya kazi (pata shughuli za basi, thibitisha ramani ya pini).
-- EXTEST kuendesha pini (mfano, bit-bang mistari ya SPI flash ya nje kupitia MCU ili kuisoma mtandaoni ikiwa wiring ya bodi inaruhusu).
+- EXTEST kuendesha pini (kwa mfano, bit-bang mistari ya SPI flash ya nje kupitia MCU ili kuisoma bila mtandao ikiwa wiring ya bodi inaruhusu).
 
-Minimal UrJTAG flow with an FT2232x adapter:
+Mchakato wa chini wa UrJTAG na adapter ya FT2232x:
 ```
 jtag> cable ft2232 vid=0x0403 pid=0x6010 interface=1
 jtag> frequency 100000
@@ -97,24 +97,24 @@ jtag> instruction EXTEST
 jtag> shift ir
 jtag> dr  <bit pattern for boundary register>
 ```
-Unahitaji kifaa BSDL ili kujua mpangilio wa bit za register za mpaka. Kuwa makini kwamba wauzaji wengine wanaweza kufunga seli za uchunguzi wa mpaka katika uzalishaji.
+Unahitaji kifaa BSDL ili kujua mpangilio wa bit za register za mipaka. Kuwa makini kwamba wauzaji wengine wanafungia seli za uchunguzi wa mipaka katika uzalishaji.
 
 ## Malengo ya kisasa na maelezo
 
-- ESP32‑S3/C3 inajumuisha daraja la USB‑JTAG la asili; OpenOCD inaweza kuzungumza moja kwa moja kupitia USB bila kipimo cha nje. Ni rahisi sana kwa uchambuzi na dump.
-- Ufuatiliaji wa RISC‑V (v0.13+) unasaidiwa sana na OpenOCD; pendelea SBA kwa ufikiaji wa kumbukumbu wakati kiini hakiwezi kuzuiwa kwa usalama.
-- MCU nyingi zinafanya uthibitisho wa ufuatiliaji na hali za mzunguko. Ikiwa JTAG inaonekana kufa lakini nguvu ni sahihi, kifaa kinaweza kuwa kimeunganishwa katika hali iliyofungwa au kinahitaji kipimo kilichothibitishwa.
+- ESP32‑S3/C3 inajumuisha daraja la USB‑JTAG asilia; OpenOCD inaweza kuzungumza moja kwa moja kupitia USB bila kipimo cha nje. Ni rahisi sana kwa uchambuzi na dump.
+- Ufuatiliaji wa RISC‑V (v0.13+) unasaidiwa sana na OpenOCD; pendelea SBA kwa ufikiaji wa kumbukumbu wakati kiini hakiwezi kusimamishwa salama.
+- MCU nyingi zinafanya uthibitisho wa ufuatiliaji na hali za mzunguko wa maisha. Ikiwa JTAG inaonekana kufa lakini nguvu ni sahihi, kifaa kinaweza kuwa kimeunganishwa kwenye hali iliyofungwa au kinahitaji kipimo kilichothibitishwa.
 
 ## Ulinzi na kuimarisha (kila unachoweza kutarajia kwenye vifaa halisi)
 
-- Zima kabisa au fungia JTAG/SWD katika uzalishaji (mfano, STM32 RDP kiwango 2, ESP eFuses zinazozuia PAD JTAG, NXP/Nordic APPROTECT/DPAP).
+- Zima kabisa au fungia JTAG/SWD katika uzalishaji (mfano, STM32 RDP kiwango cha 2, ESP eFuses zinazozuia PAD JTAG, NXP/Nordic APPROTECT/DPAP).
 - Hitaji uthibitisho wa ufuatiliaji (ARMv8.2‑A ADIv6 Uthibitisho wa Ufuatiliaji, changamoto-ujibu inayosimamiwa na OEM) huku ukihifadhi ufikiaji wa utengenezaji.
-- Usipange pad za mtihani rahisi; ficha vias za mtihani, ondoa/jaza upinzani ili kutenga TAP, tumia viunganishi vyenye funguo au vifaa vya pogo‑pin.
+- Usipange pad za majaribio rahisi; ficha vias za majaribio, ondoa/jaza upinzani ili kutenga TAP, tumia viunganishi vyenye funguo au vifaa vya pogo‑pin.
 - Kufunga ufuatiliaji wa nguvu: funga TAP nyuma ya ROM ya mapema inayolazimisha kuanza salama.
 
 ## Marejeleo
 
-- OpenOCD User’s Guide – Amri za JTAG na usanidi. https://openocd.org/doc-release/html/JTAG-Commands.html
-- Espressif ESP32‑S3 Ufuatiliaji wa JTAG (USB‑JTAG, matumizi ya OpenOCD). https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/api-guides/jtag-debugging/
+- OpenOCD User’s Guide – JTAG Commands and configuration. https://openocd.org/doc-release/html/JTAG-Commands.html
+- Espressif ESP32‑S3 JTAG debugging (USB‑JTAG, OpenOCD usage). https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/api-guides/jtag-debugging/
 
 {{#include ../../banners/hacktricks-training.md}}

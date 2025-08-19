@@ -5,25 +5,25 @@
 
 ## Gatekeeper
 
-**Gatekeeper** ni kipengele cha usalama kilichotengenezwa kwa mifumo ya uendeshaji ya Mac, kilichoundwa kuhakikisha kwamba watumiaji **wanatumia tu programu zinazotegemewa** kwenye mifumo yao. Inafanya kazi kwa **kuhakiki programu** ambayo mtumiaji anapakua na kujaribu kufungua kutoka **vyanzo vya nje ya App Store**, kama vile programu, plug-in, au kifurushi cha installer.
+**Gatekeeper** ni kipengele cha usalama kilichoundwa kwa mifumo ya uendeshaji ya Mac, kilichokusudia kuhakikisha kwamba watumiaji **wanatumia tu programu zinazotegemewa** kwenye mifumo yao. Inafanya kazi kwa **kuhakiki programu** ambayo mtumiaji anapakua na kujaribu kufungua kutoka **vyanzo vya nje ya Duka la Programu**, kama vile programu, plug-in, au kifurushi cha installer.
 
-Mekaniki kuu ya Gatekeeper iko katika mchakato wake wa **kuhakiki**. Inakagua ikiwa programu iliyopakuliwa ime **sainiwa na mtengenezaji anayekubalika**, kuhakikisha uhalali wa programu hiyo. Zaidi ya hayo, inathibitisha ikiwa programu hiyo ime **notarised na Apple**, ikithibitisha kwamba haina maudhui mabaya yanayojulikana na haijabadilishwa baada ya notarisation.
+Mekaniki kuu ya Gatekeeper inategemea **mchakato wa uthibitishaji**. Inakagua ikiwa programu iliyopakuliwa **imeandikwa na mtengenezaji anayekubalika**, kuhakikisha uhalali wa programu hiyo. Zaidi ya hayo, inathibitisha ikiwa programu hiyo **imeandikwa na Apple**, ikithibitisha kwamba haina maudhui mabaya yanayojulikana na haijabadilishwa baada ya kuandikwa.
 
-Zaidi ya hayo, Gatekeeper inaimarisha udhibiti wa mtumiaji na usalama kwa **kuwataka watumiaji kuidhinisha ufunguzi** wa programu iliyopakuliwa kwa mara ya kwanza. Ulinzi huu husaidia kuzuia watumiaji kukimbiza kwa bahati mbaya msimbo wa utendaji ambao unaweza kuwa na madhara ambao wanaweza kuwa wamechukulia kama faili ya data isiyo na madhara.
+Zaidi, Gatekeeper inaimarisha udhibiti wa mtumiaji na usalama kwa **kuwataka watumiaji kuidhinisha ufunguzi** wa programu zilizopakuliwa kwa mara ya kwanza. Ulinzi huu husaidia kuzuia watumiaji kukimbiza kwa bahati mbaya msimbo wa utendaji ambao unaweza kuwa na madhara ambao wanaweza kuwa wameukosea kwa faili ya data isiyo na madhara.
 
 ### Application Signatures
 
-Saini za programu, pia zinajulikana kama saini za msimbo, ni sehemu muhimu ya miundombinu ya usalama ya Apple. Zinatumika ku **hakiki utambulisho wa mwandishi wa programu** (mtengenezaji) na kuhakikisha kwamba msimbo haujabadilishwa tangu uliposainiwa mara ya mwisho.
+Saini za programu, pia zinajulikana kama saini za msimbo, ni sehemu muhimu ya miundombinu ya usalama ya Apple. Zinatumika ku **thibitisha utambulisho wa mwandishi wa programu** (mtengenezaji) na kuhakikisha kwamba msimbo haujabadilishwa tangu ilipotiwa kwa mara ya mwisho.
 
-Hapa kuna jinsi inavyofanya kazi:
+Hivi ndivyo inavyofanya kazi:
 
-1. **Kusaini Programu:** Wakati mtengenezaji yuko tayari kusambaza programu yao, wan **asaini programu hiyo kwa kutumia funguo binafsi**. Funguo hii binafsi inahusishwa na **cheti ambacho Apple inatoa kwa mtengenezaji** wanapojisajili katika Programu ya Wataalamu wa Apple. Mchakato wa kusaini unajumuisha kuunda hash ya kijiografia ya sehemu zote za programu na kuificha hash hii kwa funguo binafsi za mtengenezaji.
+1. **Kusaini Programu:** Wakati mtengenezaji yuko tayari kusambaza programu yao, wan **asaini programu kwa kutumia funguo ya faragha**. Funguo hii ya faragha inahusishwa na **cheti ambacho Apple inatoa kwa mtengenezaji** wanapojisajili katika Programu ya Wataalamu wa Apple. Mchakato wa kusaini unajumuisha kuunda hash ya kijiografia ya sehemu zote za programu na kuificha hash hii kwa funguo ya faragha ya mtengenezaji.
 2. **Kusambaza Programu:** Programu iliyosainiwa kisha inasambazwa kwa watumiaji pamoja na cheti cha mtengenezaji, ambacho kinafunguo ya umma inayolingana.
-3. **Kuhakiki Programu:** Wakati mtumiaji anapakua na kujaribu kuendesha programu, mfumo wa uendeshaji wa Mac unatumia funguo ya umma kutoka kwa cheti cha mtengenezaji kufichua hash. Kisha inarejesha hash kulingana na hali ya sasa ya programu na kulinganisha hii na hash iliyofichuliwa. Ikiwa zinakubaliana, inamaanisha **programu hiyo haijabadilishwa** tangu mtengenezaji aisaini, na mfumo unaruhusu programu hiyo kuendesha.
+3. **Kuthibitisha Programu:** Wakati mtumiaji anapakua na kujaribu kuendesha programu, mfumo wa uendeshaji wa Mac unatumia funguo ya umma kutoka kwa cheti cha mtengenezaji kufichua hash. Kisha inarejesha hash kulingana na hali ya sasa ya programu na kulinganisha hii na hash iliyofichuliwa. Ikiwa zinakubaliana, inamaanisha **programu hiyo haijabadilishwa** tangu mtengenezaji aisaini, na mfumo unaruhusu programu hiyo kuendesha.
 
-Saini za programu ni sehemu muhimu ya teknolojia ya Gatekeeper ya Apple. Wakati mtumiaji anajaribu **kufungua programu iliyopakuliwa kutoka mtandao**, Gatekeeper inahakiki saini ya programu. Ikiwa imesainiwa kwa cheti kilichotolewa na Apple kwa mtengenezaji anayejulikana na msimbo haujabadilishwa, Gatekeeper inaruhusu programu hiyo kuendesha. Vinginevyo, inazuia programu hiyo na kumjulisha mtumiaji.
+Saini za programu ni sehemu muhimu ya teknolojia ya Gatekeeper ya Apple. Wakati mtumiaji anajaribu **kufungua programu iliyopakuliwa kutoka mtandao**, Gatekeeper inathibitisha saini ya programu. Ikiwa imeandikwa na cheti kilichotolewa na Apple kwa mtengenezaji anayejulikana na msimbo haujabadilishwa, Gatekeeper inaruhusu programu hiyo kuendesha. Vinginevyo, inazuia programu hiyo na kumjulisha mtumiaji.
 
-Kuanzia macOS Catalina, **Gatekeeper pia inakagua ikiwa programu hiyo ime notarised** na Apple, ikiongeza safu ya ziada ya usalama. Mchakato wa notarisation unakagua programu hiyo kwa masuala ya usalama yanayojulikana na msimbo mbaya, na ikiwa ukaguzi huu unakubalika, Apple inaongeza tiketi kwa programu ambayo Gatekeeper inaweza kuithibitisha.
+Kuanzia macOS Catalina, **Gatekeeper pia inakagua ikiwa programu hiyo imeandikwa** na Apple, ikiongeza safu ya ziada ya usalama. Mchakato wa kuandikwa unakagua programu hiyo kwa masuala ya usalama yanayojulikana na msimbo mbaya, na ikiwa ukaguzi huu unakubalika, Apple inaongeza tiketi kwa programu ambayo Gatekeeper inaweza kuthibitisha.
 
 #### Check Signatures
 
@@ -55,9 +55,9 @@ Wakati wa usakinishaji au utekelezaji wa kwanza wa programu na mtumiaji, uwepo w
 ### spctl & syspolicyd
 
 > [!CAUTION]
-> Kumbuka kwamba kuanzia toleo la Sequoia, **`spctl`** haiwaruhusu kubadilisha usanidi wa Gatekeeper tena.
+> Kumbuka kwamba kuanzia toleo la Sequoia, **`spctl`** haiwezeshi kubadilisha usanidi wa Gatekeeper tena.
 
-**`spctl`** ni zana ya CLI ya kuorodhesha na kuingiliana na Gatekeeper (pamoja na daemon ya `syspolicyd` kupitia ujumbe wa XPC). Kwa mfano, inawezekana kuona **hali** ya GateKeeper kwa:
+**`spctl`** ni chombo cha CLI cha kuorodhesha na kuingiliana na Gatekeeper (pamoja na daemon ya `syspolicyd` kupitia ujumbe wa XPC). Kwa mfano, inawezekana kuona **hali** ya GateKeeper kwa:
 ```bash
 # Check the status
 spctl --status
@@ -71,7 +71,7 @@ GateKeeper itakagua ikiwa kulingana na **mapendeleo & saini** binary inaweza kut
 
 **`syspolicyd`** ndiye daemon mkuu anayehusika na kutekeleza Gatekeeper. Inashikilia hifadhidata iliyoko katika `/var/db/SystemPolicy` na inawezekana kupata msimbo wa kusaidia [hifadhidata hapa](https://opensource.apple.com/source/Security/Security-58286.240.4/OSX/libsecurity_codesigning/lib/policydb.cpp) na [templeti ya SQL hapa](https://opensource.apple.com/source/Security/Security-58286.240.4/OSX/libsecurity_codesigning/lib/syspolicy.sql). Kumbuka kwamba hifadhidata hiyo haina vizuizi vya SIP na inaweza kuandikwa na root na hifadhidata `/var/db/.SystemPolicy-default` inatumika kama nakala ya awali endapo nyingine itaharibika.
 
-Zaidi ya hayo, vifurushi **`/var/db/gke.bundle`** na **`/var/db/gkopaque.bundle`** vina faili zenye sheria ambazo zinaingizwa katika hifadhidata. Unaweza kuangalia hifadhidata hii kama root kwa:
+Zaidi ya hayo, bundles **`/var/db/gke.bundle`** na **`/var/db/gkopaque.bundle`** zina faili zenye sheria ambazo zinaingizwa katika hifadhidata. Unaweza kuangalia hifadhidata hii kama root kwa:
 ```bash
 # Open database
 sqlite3 /var/db/SystemPolicy
@@ -87,7 +87,7 @@ anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] exists an
 ```
 **`syspolicyd`** pia inatoa seva ya XPC yenye operesheni tofauti kama `assess`, `update`, `record` na `cancel` ambazo pia zinaweza kufikiwa kwa kutumia **`Security.framework`'s `SecAssessment*`** APIs na **`spctl`** kwa kweli inazungumza na **`syspolicyd`** kupitia XPC.
 
-Tazama jinsi sheria ya kwanza ilivyomalizika katika "**App Store**" na ya pili katika "**Developer ID**" na kwamba katika picha iliyopita ilikuwa **imewezeshwa kutekeleza programu kutoka kwa App Store na waendelezaji waliotambulika**.\
+Tazama jinsi sheria ya kwanza ilivyomalizika kwa "**App Store**" na ya pili kwa "**Developer ID**" na kwamba katika picha iliyopita ilikuwa **imewezeshwa kutekeleza programu kutoka kwa App Store na waendelezaji waliotambulika**.\
 Ikiwa **unabadilisha** mipangilio hiyo kuwa App Store, sheria za "**Notarized Developer ID" zitaondoka**.
 
 Pia kuna maelfu ya sheria za **aina GKE** :
@@ -119,7 +119,7 @@ spctl --master-disable
 spctl --global-enable
 spctl --master-enable
 ```
-Wakati imewezeshwa kabisa, chaguo jipya litajitokeza:
+Wakati umewezeshwa kabisa, chaguo jipya litajitokeza:
 
 <figure><img src="../../../images/image (1151).png" alt=""><figcaption></figcaption></figure>
 
@@ -146,7 +146,7 @@ Regarding **kernel extensions**, the folder `/var/db/SystemPolicyConfiguration` 
 
 #### Managing Gatekeeper on macOS 15 (Sequoia) and later
 
-Kuanza katika macOS 15 Sequoia, watumiaji wa mwisho hawawezi tena kubadilisha sera ya Gatekeeper kutoka `spctl`. Usimamizi unafanywa kupitia Mipangilio ya Mfumo au kwa kutekeleza wasifu wa usanidi wa MDM na mzigo wa `com.apple.systempolicy.control`. Mfano wa kipande cha wasifu kuruhusu Duka la Programu na waendelezaji waliotambulika (lakini si "Popote"):
+Kuanza katika macOS 15 Sequoia, watumiaji wa mwisho hawawezi tena kubadilisha sera ya Gatekeeper kutoka `spctl`. Usimamizi unafanywa kupitia Mipangilio ya Mfumo au kwa kutekeleza wasifu wa usanidi wa MDM na payload ya `com.apple.systempolicy.control`. Mfano wa kipande cha wasifu kuruhusu Duka la Programu na waendelezaji waliotambulika (lakini si "Popote"):
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -180,15 +180,15 @@ Kuanza katika macOS 15 Sequoia, watumiaji wa mwisho hawawezi tena kubadilisha se
 </dict>
 </plist>
 ```
-### Fail za Kuzuia
+### Faili ya Kuzuia
 
-Baada ya **kupakua** programu au faili, programu maalum za macOS kama vile vivinjari vya wavuti au wateja wa barua pepe **huongeza sifa ya faili iliyopanuliwa**, inayojulikana kama "**bendera ya kuzuia**," kwa faili iliyopakuliwa. Sifa hii inafanya kazi kama kipimo cha usalama ili **kuashiria faili** kama inatoka kwenye chanzo kisichoaminika (mtandao), na inaweza kubeba hatari. Hata hivyo, si programu zote huongeza sifa hii, kwa mfano, programu maarufu za mteja wa BitTorrent kawaida hupita mchakato huu.
+Baada ya **kupakua** programu au faili, programu maalum za macOS kama vile vivinjari vya wavuti au wateja wa barua pepe **huongeza sifa ya faili iliyopanuliwa**, inayojulikana kwa jina la "**bendera ya kuzuia**," kwa faili iliyopakuliwa. Sifa hii inafanya kazi kama kipimo cha usalama ili **kuashiria faili** kama inatoka kwenye chanzo kisichoaminika (mtandao), na inaweza kubeba hatari. Hata hivyo, si programu zote huongeza sifa hii, kwa mfano, programu maarufu za mteja wa BitTorrent kawaida hupita mchakato huu.
 
 **Kuwepo kwa bendera ya kuzuia kunaashiria kipengele cha usalama cha Gatekeeper cha macOS wakati mtumiaji anajaribu kutekeleza faili hiyo**.
 
 Katika hali ambapo **bendera ya kuzuia haipo** (kama ilivyo kwa faili zilizopakuliwa kupitia baadhi ya wateja wa BitTorrent), **ukaguzi wa Gatekeeper unaweza kutofanyika**. Hivyo, watumiaji wanapaswa kuwa waangalifu wanapofungua faili zilizopakuliwa kutoka kwa vyanzo visivyo salama au visivyojulikana.
 
-> [!NOTE] > **Kuangalia** **halali** ya saini za msimbo ni mchakato wa **rasilimali nyingi** unaojumuisha kuunda **hashes** za kificho za msimbo na rasilimali zake zote zilizofungwa. Zaidi ya hayo, kuangalia halali ya cheti kunahusisha kufanya **ukaguzi mtandaoni** kwa seva za Apple ili kuona kama kimeondolewa baada ya kutolewa. Kwa sababu hizi, ukaguzi kamili wa saini ya msimbo na notarization ni **mgumu kufanywa kila wakati programu inapoanzishwa**.
+> [!NOTE] > **Kuangalia** **halali** ya saini za msimbo ni mchakato wa **rasilimali nyingi** unaojumuisha kuunda **hashes** za kificho za msimbo na rasilimali zake zote zilizofungwa. Zaidi ya hayo, kuangalia halali ya cheti kunahusisha kufanya **ukaguzi mtandaoni** kwa seva za Apple ili kuona kama kimeondolewa baada ya kutolewa. Kwa sababu hizi, ukaguzi kamili wa saini ya msimbo na uthibitisho ni **mgumu kufanywa kila wakati programu inapoanzishwa**.
 >
 > Kwa hivyo, ukaguzi huu **ufanywa tu wakati wa kutekeleza programu zenye sifa ya kuzuia.**
 
@@ -208,7 +208,7 @@ spctl --enable
 spctl --disable
 #You can also allow nee identifies to execute code using the binary "spctl"
 ```
-Unaweza pia **kupata kama faili ina sifa ya kupigwa karantini** na:
+Unaweza pia **kupata kama faili ina sifa ya kupambana na karantini** kwa kutumia:
 ```bash
 xattr file.png
 com.apple.macl
@@ -306,33 +306,33 @@ Na pata faili zote zilizowekwa karantini kwa:
 ```bash
 find / -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf $9; printf "\n"}' | xargs -I {} xattr -lv {} | grep "com.apple.quarantine"
 ```
-Quarantine information pia inahifadhiwa katika database kuu inayosimamiwa na LaunchServices katika **`~/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`** ambayo inaruhusu GUI kupata data kuhusu asili za faili. Aidha, hii inaweza kubadilishwa na programu ambazo zinaweza kuwa na nia ya kuficha asili zake. Aidha, hii inaweza kufanywa kutoka kwa LaunchServices APIS.
+Quarantine information is also stored in a central database managed by LaunchServices in **`~/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`** which allows the GUI to obtain data about the file origins. Moreover this can be overwritten by applications which might be interested in hiding its origins. Moreover, this can be done from LaunchServices APIS.
 
 #### **libquarantine.dylib**
 
-Maktaba hii inatoa kazi kadhaa ambazo zinaruhusu kubadilisha maeneo ya sifa za kupanuliwa.
+This library exports several functions that allow to manipulate the extended attribute fields.
 
-APIs za `qtn_file_*` zinahusiana na sera za karantini za faili, APIs za `qtn_proc_*` zinatumika kwa michakato (faili zilizoundwa na mchakato). Kazi zisizotolewa za `__qtn_syscall_quarantine*` ndizo zinazotumia sera ambazo zinaita `mac_syscall` na "Quarantine" kama hoja ya kwanza ambayo inatuma maombi kwa `Quarantine.kext`.
+The `qtn_file_*` APIs deal with file quarantine policies, the `qtn_proc_*` APIs are applied to processes (files created by the process). The unexported `__qtn_syscall_quarantine*` functions are the ones that applies the policies which calls `mac_syscall` with "Quarantine" as first argument which sends the requests to `Quarantine.kext`.
 
 #### **Quarantine.kext**
 
-Kipanuzi cha kernel kinapatikana tu kupitia **kernel cache kwenye mfumo**; hata hivyo, unaweza kupakua **Kernel Debug Kit kutoka** [**https://developer.apple.com/**](https://developer.apple.com/), ambayo itakuwa na toleo lililosimbwa la kipanuzi hicho.
+The kernel extension is only available through the **kernel cache on the system**; however, you _can_ download the **Kernel Debug Kit from** [**https://developer.apple.com/**](https://developer.apple.com/), which will contain a symbolicated version of the extension.
 
-Kext hii itashughulikia kupitia MACF simu kadhaa ili kukamata matukio yote ya mzunguko wa faili: Uumbaji, ufunguzi, upatanishi, kuunganisha ngumu... hata `setxattr` ili kuzuia kuweka sifa ya kupanuliwa ya `com.apple.quarantine`.
+This Kext will hook via MACF several calls in order to traps all file lifecycle events: Creation, opening, renaming, hard-linkning... even `setxattr` to prevent it from setting the `com.apple.quarantine` extended attribute.
 
-Pia inatumia MIB kadhaa:
+It also uses a couple of MIBs:
 
-- `security.mac.qtn.sandbox_enforce`: Lazimisha karantini pamoja na Sandbox
-- `security.mac.qtn.user_approved_exec`: Michakato iliyowekwa karantini inaweza tu kutekeleza faili zilizothibitishwa
+- `security.mac.qtn.sandbox_enforce`: Enforce quarantine along Sandbox
+- `security.mac.qtn.user_approved_exec`: Querantined procs can only execute approved files
 
-#### Provenance xattr (Ventura na baadaye)
+#### Provenance xattr (Ventura and later)
 
-macOS 13 Ventura ilianzisha mekanizma tofauti ya asili ambayo inajazwa mara ya kwanza programu iliyowekwa karantini inaporuhusiwa kuendesha. Vitu viwili vinaundwa:
+macOS 13 Ventura introduced a separate provenance mechanism which is populated the first time a quarantined app is allowed to run. Two artefacts are created:
 
-- Sifa ya `com.apple.provenance` kwenye directory ya `.app` bundle (thamani ya binary yenye ukubwa wa kudumu inayojumuisha ufunguo wa msingi na bendera).
-- Safu katika jedwali la `provenance_tracking` ndani ya database ya ExecPolicy katika `/var/db/SystemPolicyConfiguration/ExecPolicy/` ikihifadhi cdhash ya programu na metadata. 
+- The `com.apple.provenance` xattr on the `.app` bundle directory (fixed-size binary value containing a primary key and flags).
+- A row in the `provenance_tracking` table inside the ExecPolicy database at `/var/db/SystemPolicyConfiguration/ExecPolicy/` storing the app’s cdhash and metadata.
 
-Matumizi ya vitendo:
+Practical usage:
 ```bash
 # Inspect provenance xattr (if present)
 xattr -p com.apple.provenance /Applications/Some.app | hexdump -C
@@ -345,13 +345,13 @@ log show --last 2d --style syslog --predicate 'process == "syspolicyd" && eventM
 ```
 ### XProtect
 
-XProtect ni kipengele cha ndani cha **anti-malware** katika macOS. XProtect **huchunguza programu yoyote inapozinduliwa au kubadilishwa kwa mara ya kwanza dhidi ya hifadhidata yake** ya malware inayojulikana na aina za faili zisizo salama. Unaposhusha faili kupitia programu fulani, kama Safari, Mail, au Messages, XProtect kiotomatiki huchanganua faili hiyo. Ikiwa inalingana na malware yoyote inayojulikana katika hifadhidata yake, XProtect it **zuia faili hiyo isifanye kazi** na kukuarifu kuhusu tishio hilo.
+XProtect ni kipengele cha ndani cha **anti-malware** katika macOS. XProtect **huchunguza programu yoyote inapozinduliwa au kubadilishwa kwa mara ya kwanza dhidi ya hifadhidata yake** ya malware inayojulikana na aina za faili zisizo salama. Unaposhusha faili kupitia programu fulani, kama Safari, Mail, au Messages, XProtect kwa otomatiki huangalia faili hiyo. Ikiwa inalingana na malware yoyote inayojulikana katika hifadhidata yake, XProtect **itaizuia faili hiyo isifanye kazi** na kukujulisha kuhusu tishio hilo.
 
 Hifadhidata ya XProtect **inasasishwa mara kwa mara** na Apple kwa ufafanuzi mpya wa malware, na sasisho hizi zinashushwa na kufungwa kiotomatiki kwenye Mac yako. Hii inahakikisha kwamba XProtect iko daima na habari za hivi punde kuhusu vitisho vinavyojulikana.
 
 Hata hivyo, inafaa kutambua kwamba **XProtect si suluhisho kamili la antivirus**. Inachunguza tu orodha maalum ya vitisho vinavyojulikana na haisahihishi skanning ya upatikanaji kama programu nyingi za antivirus.
 
-Unaweza kupata habari kuhusu sasisho la hivi punde la XProtect likifanya kazi:
+Unaweza kupata habari kuhusu sasisho la hivi punde la XProtect ukikimbia:
 ```bash
 system_profiler SPInstallHistoryDataType 2>/dev/null | grep -A 4 "XProtectPlistConfigData" | tail -n 5
 ```
@@ -360,11 +360,11 @@ XProtect iko kwenye. SIP iliyo na ulinzi mahali kwenye **/Library/Apple/System/L
 - **`XProtect.bundle/Contents/Resources/LegacyEntitlementAllowlist.plist`**: Inaruhusu msimbo wenye cdhashes hizo kutumia ruhusa za zamani.
 - **`XProtect.bundle/Contents/Resources/XProtect.meta.plist`**: Orodha ya plugins na nyongeza ambazo haziruhusiwi kupakia kupitia BundleID na TeamID au kuashiria toleo la chini.
 - **`XProtect.bundle/Contents/Resources/XProtect.yara`**: Sheria za Yara kugundua malware.
-- **`XProtect.bundle/Contents/Resources/gk.db`**: Hifadhidata ya SQLite3 yenye hashes za programu zilizozuiwa na TeamIDs.
+- **`XProtect.bundle/Contents/Resources/gk.db`**: Hifadhidata ya SQLite3 yenye hashes za programu zilizozuiliwa na TeamIDs.
 
 Kumbuka kwamba kuna App nyingine katika **`/Library/Apple/System/Library/CoreServices/XProtect.app`** inayohusiana na XProtect ambayo haihusiki na mchakato wa Gatekeeper.
 
-> XProtect Remediator: Katika macOS ya kisasa, Apple inatoa skana za mahitaji (XProtect Remediator) ambazo zinafanya kazi mara kwa mara kupitia launchd kugundua na kurekebisha familia za malware. Unaweza kuona skana hizi katika kumbukumbu za umoja:
+> XProtect Remediator: Katika macOS ya kisasa, Apple inatoa skana za mahitaji (XProtect Remediator) ambazo zinafanya kazi mara kwa mara kupitia launchd kugundua na kurekebisha familia za malware. Unaweza kuona skana hizi katika kumbukumbu zilizounganishwa:
 >
 > ```bash
 > log show --last 2h --predicate 'subsystem == "com.apple.XProtectFramework" || category CONTAINS "XProtect"' --style syslog
@@ -373,15 +373,15 @@ Kumbuka kwamba kuna App nyingine katika **`/Library/Apple/System/Library/CoreSer
 ### Si Gatekeeper
 
 > [!CAUTION]
-> Kumbuka kwamba Gatekeeper **haitekelezwi kila wakati** unapoendesha programu, ni _**AppleMobileFileIntegrity**_ (AMFI) tu itakay **thibitisha saini za msimbo wa kutekeleza** unapofanya kazi na programu ambayo tayari imeendesha na kuthibitishwa na Gatekeeper.
+> Kumbuka kwamba Gatekeeper **haitekelezwi kila wakati** unapotekeleza programu, ni _**AppleMobileFileIntegrity**_ (AMFI) tu itakay **thibitisha saini za msimbo wa kutekeleza** unapotekeleza programu ambayo tayari imefanywa kazi na kuthibitishwa na Gatekeeper.
 
-Kwa hivyo, hapo awali ilikuwa inawezekana kuendesha programu ili kuikatia akiba na Gatekeeper, kisha **kubadilisha faili zisizo za kutekeleza za programu** (kama vile Electron asar au faili za NIB) na ikiwa hakuna ulinzi mwingine ulio kuwekwa, programu hiyo ilikuwa **ikiendesha** na **nyongeza** za **hatari**.
+Kwa hivyo, hapo awali ilikuwa inawezekana kutekeleza programu ili kuikatia akiba na Gatekeeper, kisha **kubadilisha faili zisizotekelezwa za programu** (kama vile Electron asar au faili za NIB) na ikiwa hakuna ulinzi mwingine ulio kuwekwa, programu hiyo ilitekelezwa na **nyongeza** za **hatari**.
 
-Hata hivyo, sasa hii haiwezekani kwa sababu macOS **inazuia kubadilisha faili** ndani ya bundles za programu. Hivyo, ukijaribu shambulio la [Dirty NIB](../macos-proces-abuse/macos-dirty-nib.md), utagundua kwamba si tena inawezekana kulitumia kwa sababu baada ya kuendesha programu ili kuikatia akiba na Gatekeeper, huwezi kubadilisha bundle hiyo. Na ikiwa badala yake unabadilisha jina la saraka ya Contents kuwa NotCon (kama ilivyoonyeshwa katika exploit), kisha uendeshe binary kuu ya programu ili kuikatia akiba na Gatekeeper, itasababisha kosa na haitatekelezwa.
+Hata hivyo, sasa hii haiwezekani kwa sababu macOS **inazuia kubadilisha faili** ndani ya bundles za programu. Hivyo, ukijaribu shambulio la [Dirty NIB](../macos-proces-abuse/macos-dirty-nib.md), utagundua kwamba si tena inawezekana kulitumia kwa sababu baada ya kutekeleza programu ili kuikatia akiba na Gatekeeper, huwezi kubadilisha bundle hiyo. Na ikiwa badala yake unabadilisha jina la saraka ya Contents kuwa NotCon (kama ilivyoonyeshwa katika exploit), kisha kutekeleza binary kuu ya programu ili kuikatia akiba na Gatekeeper, itasababisha kosa na haitatekelezwa.
 
 ## Bypasses za Gatekeeper
 
-Njia yoyote ya kupita Gatekeeper (kufanikiwa kumfanya mtumiaji apakue kitu na kukitekeleza wakati Gatekeeper inapaswa kukikataa) inachukuliwa kama udhaifu katika macOS. Hizi ni baadhi ya CVEs zilizotolewa kwa mbinu ambazo ziliruhusu kupita Gatekeeper katika siku za nyuma:
+Njia yoyote ya kupita Gatekeeper (kufanikiwa kumfanya mtumiaji apakue kitu na kukitekeleza wakati Gatekeeper inapaswa kukataa) inachukuliwa kuwa udhaifu katika macOS. Hizi ni baadhi ya CVEs zilizotolewa kwa mbinu ambazo ziliruhusu kupita Gatekeeper katika siku za nyuma:
 
 ### [CVE-2021-1810](https://labs.withsecure.com/publications/the-discovery-of-cve-2021-1810)
 
@@ -391,17 +391,17 @@ Angalia [**ripoti ya asili**](https://labs.withsecure.com/publications/the-disco
 
 ### [CVE-2021-30990](https://ronmasas.com/posts/bypass-macos-gatekeeper)
 
-Wakati programu inaundwa kwa kutumia **Automator**, taarifa kuhusu kile inachohitaji kutekeleza iko ndani ya `application.app/Contents/document.wflow` si katika executable. Executable ni binary ya jumla ya Automator inayoitwa **Automator Application Stub**.
+Wakati programu inaundwa kwa **Automator**, taarifa kuhusu kile inachohitaji kutekeleza iko ndani ya `application.app/Contents/document.wflow` si katika executable. Executable ni binary ya jumla ya Automator inayoitwa **Automator Application Stub**.
 
-Hivyo, unaweza kufanya `application.app/Contents/MacOS/Automator\ Application\ Stub` **kuonyesha kwa kiunga cha alama kwa Automator Application Stub nyingine ndani ya mfumo** na itatekeleza kile kilichomo ndani ya `document.wflow` (script yako) **bila kuamsha Gatekeeper** kwa sababu executable halisi haina xattr ya karantini.
+Hivyo, unaweza kufanya `application.app/Contents/MacOS/Automator\ Application\ Stub` **kuashiria kwa kiungo cha alama kwa Automator Application Stub nyingine ndani ya mfumo** na itatekeleza kile kilichomo ndani ya `document.wflow` (script yako) **bila kuamsha Gatekeeper** kwa sababu executable halisi haina xattr ya karantini.
 
-Mfano wa mahali inatarajiwa: `/System/Library/CoreServices/Automator\ Application\ Stub.app/Contents/MacOS/Automator\ Application\ Stub`
+Mfano wa mahali panatarajiwa: `/System/Library/CoreServices/Automator\ Application\ Stub.app/Contents/MacOS/Automator\ Application\ Stub`
 
 Angalia [**ripoti ya asili**](https://ronmasas.com/posts/bypass-macos-gatekeeper) kwa maelezo zaidi.
 
 ### [CVE-2022-22616](https://www.jamf.com/blog/jamf-threat-labs-safari-vuln-gatekeeper-bypass/)
 
-Katika bypass hii, faili ya zip iliundwa na programu ikianza kubana kutoka `application.app/Contents` badala ya `application.app`. Hivyo, **sifa ya karantini** ilitumika kwa **faili zote kutoka `application.app/Contents`** lakini **siyo kwa `application.app`**, ambayo ilikuwa inakaguliwa na Gatekeeper, hivyo Gatekeeper ilipita kwa sababu wakati `application.app` ilipohamasishwa **haikuwa na sifa ya karantini.**
+Katika bypass hii, faili ya zip iliundwa na programu ikianza kubana kutoka `application.app/Contents` badala ya `application.app`. Hivyo, **sifa ya karantini** ilitumika kwa **faili zote kutoka `application.app/Contents`** lakini **siyo kwa `application.app`**, ambayo ilikuwa inakaguliwa na Gatekeeper, hivyo Gatekeeper ilipita kwa sababu wakati `application.app` iliposhughulikiwa **haikuwa na sifa ya karantini.**
 ```bash
 zip -r test.app/Contents test.zip
 ```
@@ -413,7 +413,7 @@ Hata kama vipengele ni tofauti, matumizi ya udhaifu huu ni sawa sana na ule wa a
 ```bash
 aa archive -d test.app/Contents -o test.app.aar
 ```
-Angalia [**ripoti ya asili**](https://www.jamf.com/blog/jamf-threat-labs-macos-archive-utility-vulnerability/) kwa maelezo zaidi.
+Angalia [**ripoti asilia**](https://www.jamf.com/blog/jamf-threat-labs-macos-archive-utility-vulnerability/) kwa maelezo zaidi.
 
 ### [CVE-2022-42821](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)
 
@@ -424,9 +424,9 @@ chmod +a "everyone deny writeextattr" /tmp/no-attr
 xattr -w attrname vale /tmp/no-attr
 xattr: [Errno 13] Permission denied: '/tmp/no-attr'
 ```
-Zaidi ya hayo, muundo wa faili wa **AppleDouble** unakopi faili ikiwa ni pamoja na ACE zake.
+Zaidi ya hayo, muundo wa faili wa **AppleDouble** unakopi faili pamoja na ACE zake.
 
-Katika [**source code**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) inawezekana kuona kwamba uwakilishi wa maandiko wa ACL ulihifadhiwa ndani ya xattr inayoitwa **`com.apple.acl.text`** utawekwa kama ACL katika faili lililoshinikizwa. Hivyo, ikiwa umeweka programu katika faili la zip kwa muundo wa faili wa **AppleDouble** ukiwa na ACL inayozuia xattrs nyingine kuandikwa ndani yake... xattr ya karantini haikuwekwa katika programu:
+Katika [**source code**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) inawezekana kuona kwamba uwakilishi wa maandiko wa ACL ulihifadhiwa ndani ya xattr inayoitwa **`com.apple.acl.text`** utawekwa kama ACL katika faili lililoondolewa. Hivyo, ikiwa umecompress programu katika faili la zip kwa muundo wa faili wa **AppleDouble** ukiwa na ACL inayozuia xattrs nyingine kuandikwa ndani yake... xattr ya karantini haikuwekwa katika programu:
 ```bash
 chmod +a "everyone deny write,writeattr,writeextattr" /tmp/test
 ditto -c -k test test.zip
@@ -448,7 +448,7 @@ Iligundulika kwamba **Google Chrome haikuwa ikipanga sifa ya karantini** kwa fai
 
 ### [CVE-2023-27951](https://redcanary.com/blog/gatekeeper-bypass-vulnerabilities/)
 
-Mifumo ya faili ya AppleDouble huhifadhi sifa za faili katika faili tofauti inayoanisha kwa `._`, hii husaidia kunakili sifa za faili **katika mashine za macOS**. Hata hivyo, ilionekana kwamba baada ya kufungua faili la AppleDouble, faili inayoanisha kwa `._` **haikupatiwa sifa ya karantini**.
+Mifumo ya faili ya AppleDouble huhifadhi sifa za faili katika faili tofauti inayaanza na `._`, hii husaidia kuhamasisha sifa za faili **katika mashine za macOS**. Hata hivyo, ilionekana kwamba baada ya kufungua faili la AppleDouble, faili inayaanza na `._` **haikupatiwa sifa ya karantini**.
 ```bash
 mkdir test
 echo a > test/a
@@ -458,7 +458,7 @@ aa archive -d test/ -o test.aar
 
 # If you downloaded the resulting test.aar and decompress it, the file test/._a won't have a quarantitne attribute
 ```
-Kuweza kuunda faili ambayo haitakuwa na sifa ya karantini, ilikuwa **inawezekana kupita Gatekeeper.** Njia ilikuwa **kuunda faili ya DMG** kwa kutumia kanuni ya jina la AppleDouble (anza nayo `._`) na kuunda **faili inayoonekana kama kiungo cha sym kwa faili hii iliyofichwa** bila sifa ya karantini.\
+Kuweza kuunda faili ambayo haitakuwa na sifa ya karantini, ilikuwa **inawezekana kupita Gatekeeper.** Njia ilikuwa **kuunda programu ya faili la DMG** kwa kutumia kanuni ya jina la AppleDouble (anza nayo `._`) na kuunda **faili inayoonekana kama kiungo cha sym kwa faili hii iliyofichwa** bila sifa ya karantini.\
 Wakati **faili ya dmg inatekelezwa**, kwa kuwa haina sifa ya karantini itapita **Gatekeeper.**
 ```bash
 # Create an app bundle with the backdoor an call it app.app
@@ -477,24 +477,24 @@ aa archive -d s/ -o app.aar
 ```
 ### [CVE-2023-41067]
 
-Kukwepa Gatekeeper kulikorekwa katika macOS Sonoma 14.0 kuliruhusu programu zilizoundwa kwa makusudi kuendesha bila kuomba. Maelezo yalifichuliwa hadharani baada ya kurekebisha na tatizo lilitumiwa kwa nguvu kabla ya kurekebishwa. Hakikisha Sonoma 14.0 au toleo la baadaye limewekwa.
+Kukwepa kwa Gatekeeper kulikorekebishwa katika macOS Sonoma 14.0 kuliruhusu programu zilizoundwa kwa makusudi kuendesha bila kuomba. Maelezo yalifichuliwa hadharani baada ya kurekebisha na tatizo lilitumiwa kwa nguvu kabla ya kurekebishwa. Hakikisha Sonoma 14.0 au baadaye imewekwa.
 
 ### [CVE-2024-27853]
 
-Kukwepa Gatekeeper katika macOS 14.4 (iliyotolewa Machi 2024) inayotokana na `libarchive` kushughulikia ZIP zenye uharibifu kuliruhusu programu kukwepa tathmini. Sasisha hadi 14.4 au toleo la baadaye ambapo Apple ilishughulikia tatizo hilo.
+Kukwepa kwa Gatekeeper katika macOS 14.4 (iliyotolewa Machi 2024) kutokana na usimamizi wa `libarchive` wa ZIP zenye uharibifu kuliruhusu programu kukwepa tathmini. Sasisha hadi 14.4 au baadaye ambapo Apple ilishughulikia tatizo.
 
-### Unarchivers wa wahusika wengine wanaosambaza karantini vibaya (2023–2024)
+### Unarchivers wa wahusika wengine wakisambaza karantini vibaya (2023–2024)
 
-Vulnerabilities kadhaa katika zana maarufu za kutoa (mfano, The Unarchiver) zilisababisha faili zilizotolewa kutoka kwa archives kukosa `com.apple.quarantine` xattr, na hivyo kuwezesha fursa za kukwepa Gatekeeper. Daima tegemea macOS Archive Utility au zana zilizorekebishwa unapofanya majaribio, na thibitisha xattrs baada ya kutoa.
+Vulnerabilities kadhaa katika zana maarufu za kutoa (k.m., The Unarchiver) zilisababisha faili zilizotolewa kutoka kwa archives kukosa `com.apple.quarantine` xattr, na hivyo kuwezesha fursa za kukwepa Gatekeeper. Daima tegemea macOS Archive Utility au zana zilizorekebishwa unapofanya majaribio, na thibitisha xattrs baada ya kutoa.
 
 ### uchg (kutoka katika hii [talk](https://codeblue.jp/2023/result/pdf/cb23-bypassing-macos-security-and-privacy-mechanisms-from-gatekeeper-to-system-integrity-protection-by-koh-nakagawa.pdf))
 
 - Unda directory inayojumuisha programu.
-- Ongeza uchg kwenye programu.
+- Ongeza uchg kwa programu.
 - Funga programu hiyo kuwa faili ya tar.gz.
 - Tuma faili ya tar.gz kwa mwathirika.
 - Mwathirika anafungua faili ya tar.gz na kuendesha programu.
-- Gatekeeper haitakagua programu hiyo.
+- Gatekeeper haitakagua programu.
 
 ### Zuia xattr ya Karantini
 

@@ -32,11 +32,11 @@ Rubeus.exe asktgt /user:john /certificate:C:\Temp\cert.pfx /password:CertPass! /
 # Or with Certipy
 certipy auth -pfx user.pfx -dc-ip 10.0.0.10
 ```
-> Kumbuka: Iwapo inachanganywa na mbinu nyingine (angalia sehemu za THEFT), uthibitisho wa msingi wa cheti unaruhusu ufikiaji wa kudumu bila kugusa LSASS na hata kutoka kwa muktadha usio na kiwango cha juu.
+> Kumbuka: Imeunganishwa na mbinu nyingine (ona sehemu za THEFT), uthibitisho wa msingi wa cheti unaruhusu ufikiaji wa kudumu bila kugusa LSASS na hata kutoka kwa muktadha usio na kiwango cha juu.
 
 ## Kupata Uthibitisho wa Mashine kwa kutumia Vyeti - PERSIST2
 
-Iwapo mshambuliaji ana mamlaka ya juu kwenye mwenyeji, wanaweza kujiandikisha kwa akaunti ya mashine ya mfumo ulioathiriwa kwa cheti wakitumia kigezo cha `Machine` cha kawaida. Kujiandikisha kama mashine kunaruhusu S4U2Self kwa huduma za ndani na kunaweza kutoa uthibitisho wa kudumu wa mwenyeji:
+Ikiwa mshambuliaji ana mamlaka ya juu kwenye mwenyeji, wanaweza kujiandikisha kwa akaunti ya mashine ya mfumo ulioathiriwa kwa cheti kwa kutumia kigezo cha `Machine` cha kawaida. Kujiandikisha kama mashine kunaruhusu S4U2Self kwa huduma za ndani na kunaweza kutoa uthibitisho wa kudumu wa mwenyeji:
 ```bash
 # Request a machine certificate as SYSTEM
 Certify.exe request /ca:dc.theshire.local/theshire-DC-CA /template:Machine /machine
@@ -46,7 +46,7 @@ Rubeus.exe asktgt /user:HOSTNAME$ /certificate:C:\Temp\host.pfx /password:Passw0
 ```
 ## Extending Persistence Through Certificate Renewal - PERSIST3
 
-Kunyanyua muda wa uhalali na kipindi cha upya wa mifano ya vyeti kunaruhusu mshambuliaji kudumisha ufikiaji wa muda mrefu. Ikiwa una cheti kilichotolewa hapo awali na funguo yake ya faragha, unaweza kukiunda upya kabla ya kuisha ili kupata akreditivu mpya, ya muda mrefu bila kuacha mabaki ya maombi yanayohusiana na msingi wa awali.
+Kunyanyua muda wa uhalali na kipindi cha upya wa mifano ya vyeti kunaruhusu mshambuliaji kudumisha ufikiaji wa muda mrefu. Ikiwa una cheti kilichotolewa hapo awali na funguo yake ya faragha, unaweza kuki renew kabla ya kuisha muda ili kupata akreditivu mpya, ya muda mrefu bila kuacha mabaki ya maombi yanayohusiana na msingi wa awali.
 ```bash
 # Renewal with Certipy (works with RPC/DCOM/WebEnrollment)
 # Provide the existing PFX and target the same CA/template when possible
@@ -57,18 +57,18 @@ certipy req -u 'john@corp.local' -p 'Passw0rd!' -ca 'CA-SERVER\CA-NAME' \
 # (use the serial/thumbprint of the cert to renew; reusekeys preserves the keypair)
 certreq -enroll -user -cert <SerialOrID> renew [reusekeys]
 ```
-> Ushauri wa operesheni: Fuata muda wa maisha ya faili za PFX zinazoshikiliwa na mshambuliaji na upya mapema. Upya unaweza pia kusababisha vyeti vilivyosasishwa kujumuisha kiambatisho cha ramani ya SID ya kisasa, na kuviweka vinatumika chini ya sheria kali za ramani za DC (angalia sehemu inayofuata).
+> Ushauri wa operesheni: Fuata muda wa maisha ya faili za PFX zinazoshikiliwa na mshambuliaji na upya mapema. Upya unaweza pia kusababisha vyeti vilivyosasishwa kujumuisha kiambatisho cha ramani ya SID ya kisasa, na kuendelea kuwa na matumizi chini ya sheria kali za ramani za DC (tazama sehemu inayofuata).
 
 ## Kupanda Ramani za Vyeti Zenye Ufafanuzi (altSecurityIdentities) – PERSIST4
 
-Ikiwa unaweza kuandika kwenye sifa ya `altSecurityIdentities` ya akaunti lengwa, unaweza kuweka ramani wazi ya cheti kinachodhibitiwa na mshambuliaji kwa akaunti hiyo. Hii inabaki kuwa na nguvu hata baada ya mabadiliko ya nywila na, unapokuwa ukitumia muundo wa ramani wenye nguvu, inabaki kufanya kazi chini ya utekelezaji wa kisasa wa DC.
+Ikiwa unaweza kuandika kwenye sifa ya `altSecurityIdentities` ya akaunti lengwa, unaweza waziwazi kuunganisha cheti kinachodhibitiwa na mshambuliaji kwa akaunti hiyo. Hii inabaki kuwa na nguvu hata baada ya mabadiliko ya nywila na, unapokuwa ukitumia muundo wa ramani wenye nguvu, inabaki kufanya kazi chini ya utekelezaji wa kisasa wa DC.
 
 Mchakato wa juu:
 
-1. Pata au tolea cheti cha uthibitishaji wa mteja unachodhibiti (mfano, jiandikishe kwenye template ya `User` kama wewe mwenyewe).
+1. Pata au tolea cheti cha uthibitishaji wa mteja unachodhibiti (mfano, jiandikishe kwa template ya `User` kama wewe mwenyewe).
 2. Toa kitambulisho chenye nguvu kutoka kwa cheti (Mtoaji+Serial, SKI, au SHA1-PublicKey).
 3. Ongeza ramani wazi kwenye `altSecurityIdentities` ya mhusika wa kisa kwa kutumia kitambulisho hicho.
-4. Thibitisha na cheti chako; DC inakifanya kuwa na nguvu kwa mhusika kupitia ramani wazi.
+4. Thibitisha na cheti chako; DC inakifanya kuwa na uhusiano na mhusika kupitia ramani wazi.
 
 Mfano (PowerShell) ukitumia ramani yenye nguvu ya Mtoaji+Serial:
 ```powershell
@@ -86,7 +86,7 @@ certipy auth -pfx attacker_user.pfx -dc-ip 10.0.0.10
 ```
 Notes
 - Tumia aina za ramani zenye nguvu tu: X509IssuerSerialNumber, X509SKI, au X509SHA1PublicKey. Mifumo dhaifu (Subject/Issuer, Subject-only, RFC822 email) imeondolewa na inaweza kuzuiwa na sera ya DC.
-- Mnyororo wa cheti lazima ujenge hadi mzizi unaotambulika na DC. CAs za biashara katika NTAuth kwa kawaida zinatambulika; mazingira mengine pia yanatambua CAs za umma.
+- Mnyororo wa cheti lazima ujenge hadi kwenye mzizi unaotambulika na DC. CAs za biashara katika NTAuth kwa kawaida zinatambulika; mazingira mengine pia yanatambua CAs za umma.
 
 Kwa maelezo zaidi kuhusu ramani dhaifu za wazi na njia za shambulio, angalia:
 
@@ -96,7 +96,7 @@ domain-escalation.md
 
 ## Enrollment Agent as Persistence – PERSIST5
 
-Ikiwa unapata cheti halali cha Certificate Request Agent/Enrollment Agent, unaweza kutunga cheti mpya zenye uwezo wa kuingia kwa niaba ya watumiaji kwa hiari na kuweka PFX ya wakala mtandaoni kama tokeni ya kudumu. Njia ya matumizi:
+Ikiwa unapata cheti halali cha Certificate Request Agent/Enrollment Agent, unaweza kutunga cheti mpya zenye uwezo wa kuingia kwa niaba ya watumiaji kwa hiari na kuweka agent PFX mtandaoni kama tokeni ya kudumu. Njia ya matumizi:
 ```bash
 # Request an Enrollment Agent cert (requires template rights)
 Certify.exe request /ca:CA-SERVER\CA-NAME /template:"Certificate Request Agent"
@@ -124,7 +124,7 @@ Administrators should monitor and alert on:
 
 ## References
 
-- Microsoft. KB5014754: Mabadiliko ya uthibitishaji wa msingi wa cheti kwenye kudhibiti eneo la Windows (muda wa utekelezaji na ramani za nguvu).
+- Microsoft. KB5014754: Mabadiliko ya uthibitishaji wa msingi wa cheti kwenye wakala wa kikoa cha Windows (muda wa utekelezaji na ramani za nguvu).
 https://support.microsoft.com/en-au/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16
 - Certipy Wiki – Rejea ya Amri (`req -renew`, `auth`, `shadow`).
 https://github.com/ly4k/Certipy/wiki/08-%E2%80%90-Command-Reference

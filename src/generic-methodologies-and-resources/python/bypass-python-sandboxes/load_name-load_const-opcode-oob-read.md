@@ -19,13 +19,13 @@ if len(source) > 13337: exit(print(f"{'L':O<13337}NG"))
 code = compile(source, '∅', 'eval').replace(co_consts=(), co_names=())
 print(eval(code, {'__builtins__': {}}))1234
 ```
-Unaweza kuingiza msimbo wa Python wa kawaida, na utaandikwa kuwa [Python code object](https://docs.python.org/3/c-api/code.html). Hata hivyo, `co_consts` na `co_names` za kitu hicho cha msimbo zitabadilishwa kuwa tuple tupu kabla ya kutathmini kitu hicho cha msimbo.
+Unaweza kuingiza msimbo wa Python wa aina yoyote, na utaandikwa kuwa [Python code object](https://docs.python.org/3/c-api/code.html). Hata hivyo, `co_consts` na `co_names` za kitu hicho cha msimbo zitabadilishwa kuwa tuple tupu kabla ya kutathmini kitu hicho cha msimbo.
 
-Hivyo katika njia hii, kila usemi unao na consts (mfano, nambari, nyuzi n.k.) au majina (mfano, mabadiliko, kazi) yanaweza kusababisha makosa ya segmentation mwishoni.
+Hivyo katika njia hii, kila usemi unao na consts (k.m. nambari, nyuzi n.k.) au majina (k.m. mabadiliko, kazi) yanaweza kusababisha makosa ya segmentation mwishoni.
 
-### Out of Bound Read <a href="#out-of-bound-read" id="out-of-bound-read"></a>
+### Kusoma Nje ya Mipaka <a href="#out-of-bound-read" id="out-of-bound-read"></a>
 
-Segfault inatokea vipi?
+Je, makosa ya segfault yanatokea vipi?
 
 Tuanzie na mfano rahisi, `[a, b, c]` inaweza kuandikwa kuwa bytecode ifuatayo.
 ```
@@ -49,19 +49,19 @@ PUSH(value);
 FAST_DISPATCH();
 }1234567
 ```
-Kwa njia hii tunaweza kutumia kipengele cha OOB kupata "jina" kutoka kwa ofset ya kumbukumbu isiyo na mpangilio. Ili kuhakikisha jina lililo nayo na ofset yake ni ipi, jaribu tu `LOAD_NAME 0`, `LOAD_NAME 1` ... `LOAD_NAME 99` ... Na unaweza kupata kitu katika takriban oparg > 700. Unaweza pia kujaribu kutumia gdb kuangalia mpangilio wa kumbukumbu bila shaka, lakini sidhani kama itakuwa rahisi zaidi?
+Kwa njia hii tunaweza kutumia kipengele cha OOB kupata "jina" kutoka kwa ofset ya kumbukumbu isiyo na mpangilio. Ili kuhakikisha jina lililo nayo na ofset yake, jaribu tu `LOAD_NAME 0`, `LOAD_NAME 1` ... `LOAD_NAME 99` ... Na unaweza kupata kitu katika takriban oparg > 700. Unaweza pia kujaribu kutumia gdb kuangalia mpangilio wa kumbukumbu bila shaka, lakini sidhani kama itakuwa rahisi zaidi?
 
 ### Generating the Exploit <a href="#generating-the-exploit" id="generating-the-exploit"></a>
 
-Mara tu tunapopata hizo ofset muhimu za majina / consts, tunawezaje kupata jina / const kutoka kwa ofset hiyo na kulitumia? Hapa kuna hila kwako:\
-Tuchukulie tunaweza kupata jina la `__getattribute__` kutoka ofset 5 (`LOAD_NAME 5`) na `co_names=()`, kisha fanya mambo yafuatayo:
+Mara tu tunapopata hizo ofset muhimu za majina / consts, tuna _wezaje_ kupata jina / const kutoka kwa ofset hiyo na kulitumie? Hapa kuna hila kwako:\
+Tuchukulie kwamba tunaweza kupata jina la `__getattribute__` kutoka ofset 5 (`LOAD_NAME 5`) na `co_names=()`, kisha fanya mambo yafuatayo:
 ```python
 [a,b,c,d,e,__getattribute__] if [] else [
 [].__getattribute__
 # you can get the __getattribute__ method of list object now!
 ]1234
 ```
-> Kumbuka kwamba si lazima kuipa jina `__getattribute__`, unaweza kuipa jina fupi zaidi au la ajabu zaidi
+> Kumbuka kwamba si lazima uiite `__getattribute__`, unaweza kuiita kwa jina fupi zaidi au la ajabu zaidi
 
 Unaweza kuelewa sababu nyuma yake kwa kutazama bytecode yake:
 ```python
@@ -93,7 +93,7 @@ Kwa ajili ya kuzalisha nambari inapaswa kuwa rahisi:
 
 Sikutumia consts kutokana na kikomo cha urefu.
 
-Kwanza hapa kuna script ya kutusaidia kupata ofset hizo za majina.
+Kwanza hapa kuna script ya kutusaidia kupata hizo ofset za majina.
 ```python
 from types import CodeType
 from opcode import opmap
@@ -222,7 +222,7 @@ builtins['eval'](builtins['input']())
 
 ### Maelezo ya toleo na opcodes zilizoathiriwa (Python 3.11–3.13)
 
-- CPython bytecode opcodes bado huorodhesha katika `co_consts` na `co_names` tuples kwa kutumia operandi za nambari. Ikiwa mshambuliaji anaweza kulazimisha tuples hizi kuwa tupu (au ndogo kuliko kiashiria cha juu zaidi kinachotumika na bytecode), mfasiri atasoma kumbukumbu za nje ya mipaka kwa ajili ya kiashiria hicho, na kutoa kiashiria cha PyObject kisichokuwa na mpangilio kutoka kwa kumbukumbu ya karibu. OpCodes zinazohusiana zinajumuisha angalau:
+- CPython bytecode opcodes bado huorodhesha katika `co_consts` na `co_names` tuples kwa kutumia operandi za nambari. Ikiwa mshambuliaji anaweza kulazimisha tuples hizi kuwa tupu (au ndogo kuliko kiashiria cha juu zaidi kinachotumika na bytecode), mfasiri atasoma kumbukumbu za nje ya mipaka kwa ajili ya kiashiria hicho, na kutoa kiashiria cha PyObject kisichokuwa na mpangilio kutoka kwa kumbukumbu ya karibu. Opcodes zinazohusiana zinajumuisha angalau:
 - `LOAD_CONST consti` → inasoma `co_consts[consti]`.
 - `LOAD_NAME namei`, `STORE_NAME`, `DELETE_NAME`, `LOAD_GLOBAL`, `STORE_GLOBAL`, `IMPORT_NAME`, `IMPORT_FROM`, `LOAD_ATTR`, `STORE_ATTR` → inasoma majina kutoka `co_names[...]` (kwa 3.11+ kumbuka `LOAD_ATTR`/`LOAD_GLOBAL` hifadhi bendera za kiashiria katika bit ya chini; kiashiria halisi ni `namei >> 1`). Tazama nyaraka za disassembler kwa maana sahihi kwa kila toleo. [Python dis docs].
 - Python 3.11+ ilianzisha caches za kubadilika/inline ambazo zinaongeza entries za siri za `CACHE` kati ya maagizo. Hii haibadilishi primitive ya OOB; inamaanisha tu kwamba ikiwa unaunda bytecode kwa mikono, lazima uhesabu entries hizo za cache unapojenga `co_code`.
@@ -272,9 +272,9 @@ print(idx, type(obj), repr(obj)[:80])
 ```
 Notes
 - Ili kuchunguza majina badala yake, badilisha `LOAD_CONST` kwa `LOAD_NAME`/`LOAD_GLOBAL`/`LOAD_ATTR` na urekebishe matumizi yako ya stack ipasavyo.
-- Tumia `EXTENDED_ARG` au bytes nyingi za `arg` kufikia indexes >255 ikiwa inahitajika. Unapojenga na `dis` kama ilivyo hapo juu, unadhibiti tu byte ya chini; kwa indexes kubwa, jenga bytes za raw mwenyewe au gawanya shambulio hilo kwenye loads nyingi.
+- Tumia `EXTENDED_ARG` au bytes nyingi za `arg` kufikia indexes >255 ikiwa inahitajika. Unapojenga na `dis` kama ilivyo hapo juu, unadhibiti tu byte ya chini; kwa indexes kubwa, jenga bytes za raw mwenyewe au gawanya shambulio katika loads nyingi.
 
-### Mchoro wa RCE wa bytecode pekee (co_consts OOB → builtins → eval/input)
+### Minimal bytecode-only RCE pattern (co_consts OOB → builtins → eval/input)
 
 Mara tu unapokuwa umepata index ya `co_consts` inayorejelea moduli ya builtins, unaweza kujenga upya `eval(input())` bila `co_names` kwa kudhibiti stack:
 ```python
@@ -285,7 +285,7 @@ Mara tu unapokuwa umepata index ya `co_consts` inayorejelea moduli ya builtins, 
 # 3) BINARY_SUBSCR to do builtins["input"] / builtins["eval"], CALL each, and RETURN_VALUE
 # This pattern is the same idea as the high-level exploit above, but expressed in raw bytecode.
 ```
-Hii mbinu ni muhimu katika changamoto zinazokupa udhibiti wa moja kwa moja juu ya `co_code` wakati ukilazimisha `co_consts=()` na `co_names=()` (kwa mfano, BCTF 2024 “awpcode”). Inakwepa hila za kiwango cha chanzo na inahifadhi ukubwa wa payload kuwa mdogo kwa kutumia operesheni za bytecode stack na wajenzi wa tuple.
+Hii mbinu ni muhimu katika changamoto zinazokupa udhibiti wa moja kwa moja juu ya `co_code` wakati ukilazimisha `co_consts=()` na `co_names=()` (kwa mfano, BCTF 2024 “awpcode”). Inakwepa hila za kiwango cha chanzo na inashikilia ukubwa wa payload kuwa mdogo kwa kutumia operesheni za bytecode stack na wajenzi wa tuple.
 
 ### Ukaguzi wa kinga na mipango ya kupunguza hatari kwa sandboxes
 
