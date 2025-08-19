@@ -58,12 +58,7 @@ sudo ewfacquire /dev/sdb -u evidence -c 1 -d "Seizure 2025-07-22" -e 1 -X examin
 aws ec2 create-snapshot --volume-id vol-01234567 --description "IR-case-1234 web-server 2025-07-22"
 # Copy the snapshot to S3 and download with aws cli / aws snowball
 ```
-*Azure* – tumia `az snapshot create` na uhamasishaji kwa URL ya SAS. Tazama ukurasa kutoka HackTricks:
-
-{{#ref}}
-../../cloud/azure/azure-forensics.md
-{{#endref}}
-
+*Azure* – tumia `az snapshot create` na uhamasisha kwa URL ya SAS.
 
 ## Mount
 
@@ -128,13 +123,13 @@ sudo mount -o ro /mnt/bitlocker/dislocker-file /mnt/evidence
 sudo kpartx -av disk.img  # creates /dev/mapper/loop0p1, loop0p2 …
 mount -o ro /dev/mapper/loop0p2 /mnt
 ```
-### Makosa ya kawaida ya kuunganisha & suluhisho
+### Makosa ya kawaida ya kuunganisha & marekebisho
 
-| Kosa | Sababu ya Kawaida | Suluhisho |
+| Kosa | Sababu ya Kawaida | Marekebisho |
 |-------|---------------|-----|
-| `cannot mount /dev/loop0 read-only` | FS iliyoandikwa (ext4) haijafungwa vizuri | tumia `-o ro,norecovery` |
+| `cannot mount /dev/loop0 read-only` | FS iliyorekodiwa (ext4) haijafungwa kwa usahihi | tumia `-o ro,norecovery` |
 | `bad superblock …` | Offset mbaya au FS iliyoharibika | hesabu offset (`sector*size`) au endesha `fsck -n` kwenye nakala |
-| `mount: unknown filesystem type 'LVM2_member'` | Kontena la LVM | aktivisha kundi la volumu kwa `vgchange -ay` |
+| `mount: unknown filesystem type 'LVM2_member'` | Kontena la LVM | aktivisha kundi la kiasi kwa `vgchange -ay` |
 
 ### Safisha
 
@@ -145,7 +140,7 @@ kpartx -dv /dev/loop0  # or qemu-nbd --disconnect /dev/nbd0
 ```
 ## Marejeo
 
-- Tangazo la chombo cha picha za AFF4 & maelezo: https://github.com/aff4/aff4
+- Tangazo la chombo cha picha za AFF4 & spesifikesheni: https://github.com/aff4/aff4
 - Ukurasa wa mwongozo wa qemu-nbd (kuweka picha za diski kwa usalama): https://manpages.debian.org/qemu-system-common/qemu-nbd.1.en.html
 
 {{#include ../../banners/hacktricks-training.md}}
