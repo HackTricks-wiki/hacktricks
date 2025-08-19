@@ -5,7 +5,7 @@
 
 ## अधिग्रहण
 
-> हमेशा **पढ़ने के लिए केवल** और **कॉपी करते समय हैश** प्राप्त करें। मूल डिवाइस को **लेखन-रोक** रखें और केवल सत्यापित प्रतियों पर काम करें।
+> हमेशा **पढ़ने के लिए केवल** और **कॉपी करते समय हैश** प्राप्त करें। मूल डिवाइस को **लिखने से रोका** हुआ रखें और केवल सत्यापित प्रतियों पर काम करें।
 
 ### DD
 ```bash
@@ -16,7 +16,7 @@ sha256sum disk.img > disk.img.sha256
 ```
 ### dc3dd / dcfldd
 
-`dc3dd` dcfldd (DoD Computer Forensics Lab dd) का सक्रिय रूप से बनाए रखा गया फोर्क है।
+`dc3dd` dcfldd (DoD कंप्यूटर फॉरेंसिक्स लैब dd) का सक्रिय रूप से बनाए रखा गया फोर्क है।
 ```bash
 # Create an image and calculate multiple hashes at acquisition time
 sudo dc3dd if=/dev/sdc of=/forensics/pc.img hash=sha256,sha1 hashlog=/forensics/pc.hashes log=/forensics/pc.log bs=1M
@@ -42,7 +42,7 @@ velociraptor --config server.yaml frontend collect --artifact Windows.Disk.Acqui
 ```
 ### FTK Imager (Windows & Linux)
 
-आप [FTK Imager डाउनलोड कर सकते हैं](https://accessdata.com/product-download) और **कच्चे, E01 या AFF4** इमेज बना सकते हैं:
+आप [FTK Imager डाउनलोड कर सकते हैं](https://accessdata.com/product-download) और **raw, E01 या AFF4** इमेज बना सकते हैं:
 ```bash
 ftkimager /dev/sdb evidence --e01 --case-number 1 --evidence-number 1 \
 --description 'Laptop seizure 2025-07-22' --examiner 'AnalystName' --compress 6
@@ -53,21 +53,18 @@ sudo ewfacquire /dev/sdb -u evidence -c 1 -d "Seizure 2025-07-22" -e 1 -X examin
 ```
 ### Imaging Cloud Disks
 
-*AWS* – बिना इंस्टेंस को बंद किए **forensic snapshot** बनाएं:
+*AWS* – बिना इंस्टेंस को बंद किए एक **forensic snapshot** बनाएं:
 ```bash
 aws ec2 create-snapshot --volume-id vol-01234567 --description "IR-case-1234 web-server 2025-07-22"
 # Copy the snapshot to S3 and download with aws cli / aws snowball
 ```
-*Azure* – use `az snapshot create` and export to a SAS URL.  See the HackTricks page {{#ref}}
-../../cloud/azure/azure-forensics.md
-{{#endref}}
+*Azure* – `az snapshot create` का उपयोग करें और एक SAS URL पर निर्यात करें।
 
-
-## माउंट
+## Mount
 
 ### सही दृष्टिकोण चुनना
 
-1. **पूरे डिस्क** को माउंट करें जब आपको मूल विभाजन तालिका (MBR/GPT) की आवश्यकता हो।
+1. **पूर्ण डिस्क** को माउंट करें जब आपको मूल विभाजन तालिका (MBR/GPT) की आवश्यकता हो।
 2. **एकल विभाजन फ़ाइल** को माउंट करें जब आपको केवल एक वॉल्यूम की आवश्यकता हो।
 3. हमेशा **पढ़ने के लिए केवल** (`-o ro,norecovery`) माउंट करें और **कॉपीज़** पर काम करें।
 
@@ -119,7 +116,7 @@ sudo lvscan | grep "/dev/nbd0"
 sudo dislocker -V /dev/nbd0p3 -u -- /mnt/bitlocker
 sudo mount -o ro /mnt/bitlocker/dislocker-file /mnt/evidence
 ```
-### kpartx हेल्पर्स
+### kpartx helpers
 
 `kpartx` एक इमेज से विभाजनों को स्वचालित रूप से `/dev/mapper/` पर मैप करता है:
 ```bash
@@ -136,7 +133,7 @@ mount -o ro /dev/mapper/loop0p2 /mnt
 
 ### सफाई
 
-याद रखें कि **umount** और **disconnect** लूप/nbd उपकरणों को करें ताकि लटकते मैपिंग्स न छोड़ें जो आगे के काम को भ्रष्ट कर सकते हैं:
+याद रखें कि **umount** और **disconnect** करें loop/nbd उपकरणों को ताकि लटकते मैपिंग्स न छोड़ें जो आगे के काम को भ्रष्ट कर सकते हैं:
 ```bash
 umount -Rl /mnt/evidence
 kpartx -dv /dev/loop0  # or qemu-nbd --disconnect /dev/nbd0
