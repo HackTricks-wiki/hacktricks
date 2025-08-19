@@ -22,7 +22,7 @@ sha256sum disk.img > disk.img.sha256
 sudo dc3dd if=/dev/sdc of=/forensics/pc.img hash=sha256,sha1 hashlog=/forensics/pc.hashes log=/forensics/pc.log bs=1M
 ```
 ### Guymager
-Picha ya grafiki, yenye nyuzi nyingi inayounga mkono **raw (dd)**, **EWF (E01/EWFX)** na **AFF4** matokeo na uthibitisho wa sambamba. Inapatikana katika sehemu nyingi za Linux (`apt install guymager`).
+Picha ya grafiki, yenye nyuzi nyingi inayounga mkono **raw (dd)**, **EWF (E01/EWFX)** na **AFF4** matokeo yenye uthibitisho wa sambamba. Inapatikana katika sehemu nyingi za Linux (`apt install guymager`).
 ```bash
 # Start in GUI mode
 sudo guymager
@@ -31,7 +31,7 @@ sudo guymager --simulate --input /dev/sdb --format EWF --hash sha256 --output /e
 ```
 ### AFF4 (Advanced Forensics Format 4)
 
-AFF4 ni muundo wa picha wa kisasa wa Google ulioandaliwa kwa ajili ya *sana* ushahidi mkubwa (sparse, resumable, cloud-native).
+AFF4 ni muundo wa picha wa kisasa wa Google ulioandaliwa kwa ajili ya *sana* kubwa za ushahidi (sparse, resumable, cloud-native).
 ```bash
 # Acquire to AFF4 using the reference tool
 pipx install aff4imager
@@ -58,7 +58,9 @@ sudo ewfacquire /dev/sdb -u evidence -c 1 -d "Seizure 2025-07-22" -e 1 -X examin
 aws ec2 create-snapshot --volume-id vol-01234567 --description "IR-case-1234 web-server 2025-07-22"
 # Copy the snapshot to S3 and download with aws cli / aws snowball
 ```
-*Azure* – tumia `az snapshot create` na uhamasishaji kwa URL ya SAS. Tazama ukurasa wa HackTricks {{#ref}}
+*Azure* – tumia `az snapshot create` na uhamasishaji kwa URL ya SAS. Tazama ukurasa kutoka HackTricks:
+
+{{#ref}}
 ../../cloud/azure/azure-forensics.md
 {{#endref}}
 
@@ -102,7 +104,7 @@ sudo qemu-nbd --connect=/dev/nbd1 --read-only /mnt/ewf/ewf1
 # 3. Mount the desired partition
 sudo mount -o ro,norecovery /dev/nbd1p1 /mnt/evidence
 ```
-Mbadala yake, badilisha papo hapo kwa kutumia **xmount**:
+Kwa upande mwingine, badilisha papo hapo kwa kutumia **xmount**:
 ```bash
 xmount --in ewf evidence.E01 --out raw /tmp/raw_mount
 mount -o ro /tmp/raw_mount/image.dd /mnt
@@ -130,7 +132,7 @@ mount -o ro /dev/mapper/loop0p2 /mnt
 
 | Kosa | Sababu ya Kawaida | Suluhisho |
 |-------|---------------|-----|
-| `cannot mount /dev/loop0 read-only` | FS iliyorekodiwa (ext4) haijafungwa kwa usahihi | tumia `-o ro,norecovery` |
+| `cannot mount /dev/loop0 read-only` | FS iliyoandikwa (ext4) haijafungwa vizuri | tumia `-o ro,norecovery` |
 | `bad superblock …` | Offset mbaya au FS iliyoharibika | hesabu offset (`sector*size`) au endesha `fsck -n` kwenye nakala |
 | `mount: unknown filesystem type 'LVM2_member'` | Kontena la LVM | aktivisha kundi la volumu kwa `vgchange -ay` |
 
@@ -143,7 +145,7 @@ kpartx -dv /dev/loop0  # or qemu-nbd --disconnect /dev/nbd0
 ```
 ## Marejeo
 
-- Tangazo la chombo cha picha za AFF4 & spesifikesheni: https://github.com/aff4/aff4
+- Tangazo la chombo cha picha za AFF4 & maelezo: https://github.com/aff4/aff4
 - Ukurasa wa mwongozo wa qemu-nbd (kuweka picha za diski kwa usalama): https://manpages.debian.org/qemu-system-common/qemu-nbd.1.en.html
 
 {{#include ../../banners/hacktricks-training.md}}
