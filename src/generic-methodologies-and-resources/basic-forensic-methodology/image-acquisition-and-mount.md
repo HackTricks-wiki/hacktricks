@@ -5,7 +5,7 @@
 
 ## 获取
 
-> 始终进行**只读**获取并**在复制时进行哈希**。保持原始设备**写保护**，仅在经过验证的副本上工作。
+> 始终进行 **只读** 获取并 **在复制时进行哈希**。保持原始设备 **写保护**，仅在经过验证的副本上工作。
 
 ### DD
 ```bash
@@ -58,22 +58,17 @@ sudo ewfacquire /dev/sdb -u evidence -c 1 -d "Seizure 2025-07-22" -e 1 -X examin
 aws ec2 create-snapshot --volume-id vol-01234567 --description "IR-case-1234 web-server 2025-07-22"
 # Copy the snapshot to S3 and download with aws cli / aws snowball
 ```
-*Azure* – 使用 `az snapshot create` 并导出到 SAS URL。请参阅 HackTricks 的页面：
-
-{{#ref}}
-../../cloud/azure/azure-forensics.md
-{{#endref}}
-
+*Azure* – 使用 `az snapshot create` 并导出到 SAS URL。
 
 ## 挂载
 
 ### 选择正确的方法
 
-1. 当您需要原始分区表（MBR/GPT）时，挂载 **整个磁盘**。
+1. 当您需要原始分区表 (MBR/GPT) 时，挂载 **整个磁盘**。
 2. 当您只需要一个卷时，挂载 **单个分区文件**。
 3. 始终以 **只读** 模式挂载 (`-o ro,norecovery`) 并在 **副本** 上工作。
 
-### 原始镜像 (dd, AFF4-extracted)
+### 原始图像 (dd, AFF4-extracted)
 ```bash
 # Identify partitions
 fdisk -l disk.img
@@ -145,7 +140,7 @@ kpartx -dv /dev/loop0  # or qemu-nbd --disconnect /dev/nbd0
 ```
 ## 参考
 
-- AFF4 成像工具公告与规范: https://github.com/aff4/aff4
+- AFF4 成像工具公告与规格: https://github.com/aff4/aff4
 - qemu-nbd 手册页（安全挂载磁盘映像）: https://manpages.debian.org/qemu-system-common/qemu-nbd.1.en.html
 
 {{#include ../../banners/hacktricks-training.md}}
