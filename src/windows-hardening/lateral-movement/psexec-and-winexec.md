@@ -148,13 +148,15 @@ Hunting ideas
 ## See also
 
 - WMI-based remote exec (often more fileless):
+
 {{#ref}}
-lateral-movement/wmiexec.md
+wmiexec.md
 {{#endref}}
 
 - WinRM-based remote exec:
+
 {{#ref}}
-lateral-movement/winrm.md
+winrm.md
 {{#endref}}
 
 
@@ -163,4 +165,5 @@ lateral-movement/winrm.md
 
 - PsExec - Sysinternals | Microsoft Learn: https://learn.microsoft.com/sysinternals/downloads/psexec
 - SMB security hardening in Windows Server 2025 & Windows 11 (signing by default, NTLM blocking): https://techcommunity.microsoft.com/blog/filecab/smb-security-hardening-in-windows-server-2025--windows-11/4226591
+
 {{#include ../../banners/hacktricks-training.md}}
