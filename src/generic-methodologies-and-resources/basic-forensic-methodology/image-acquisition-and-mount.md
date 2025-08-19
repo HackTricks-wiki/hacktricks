@@ -16,7 +16,7 @@ sha256sum disk.img > disk.img.sha256
 ```
 ### dc3dd / dcfldd
 
-`dc3dd`, dcfldd (DoD Bilgisayar Adli Bilimler Laboratuvarı dd) için aktif olarak sürdürülen bir çatallamadır.
+`dc3dd`, dcfldd'nin (DoD Bilgisayar Adli Tıp Laboratuvarı dd) aktif olarak bakım yapılan bir çatallamasıdır.
 ```bash
 # Create an image and calculate multiple hashes at acquisition time
 sudo dc3dd if=/dev/sdc of=/forensics/pc.img hash=sha256,sha1 hashlog=/forensics/pc.hashes log=/forensics/pc.log bs=1M
@@ -42,7 +42,7 @@ velociraptor --config server.yaml frontend collect --artifact Windows.Disk.Acqui
 ```
 ### FTK Imager (Windows & Linux)
 
-FTK Imager'ı [indirip](https://accessdata.com/product-download) **ham, E01 veya AFF4** görüntüleri oluşturabilirsiniz:
+FTK Imager'ı [indirebilirsiniz](https://accessdata.com/product-download) ve **raw, E01 veya AFF4** görüntüleri oluşturabilirsiniz:
 ```bash
 ftkimager /dev/sdb evidence --e01 --case-number 1 --evidence-number 1 \
 --description 'Laptop seizure 2025-07-22' --examiner 'AnalystName' --compress 6
@@ -51,14 +51,16 @@ ftkimager /dev/sdb evidence --e01 --case-number 1 --evidence-number 1 \
 ```bash
 sudo ewfacquire /dev/sdb -u evidence -c 1 -d "Seizure 2025-07-22" -e 1 -X examiner --format encase6 --compression best
 ```
-### Bulut Disklerinin Görüntülenmesi
+### Imaging Cloud Disks
 
 *AWS* – örneği kapatmadan **adli anlık görüntü** oluşturun:
 ```bash
 aws ec2 create-snapshot --volume-id vol-01234567 --description "IR-case-1234 web-server 2025-07-22"
 # Copy the snapshot to S3 and download with aws cli / aws snowball
 ```
-*Azure* – `az snapshot create` komutunu kullanın ve bir SAS URL'sine dışa aktarın. HackTricks sayfasına bakın {{#ref}}
+*Azure* – `az snapshot create` komutunu kullanın ve bir SAS URL'sine dışa aktarın. HackTricks sayfasına bakın:
+
+{{#ref}}
 ../../cloud/azure/azure-forensics.md
 {{#endref}}
 
@@ -126,11 +128,11 @@ sudo mount -o ro /mnt/bitlocker/dislocker-file /mnt/evidence
 sudo kpartx -av disk.img  # creates /dev/mapper/loop0p1, loop0p2 …
 mount -o ro /dev/mapper/loop0p2 /mnt
 ```
-### Yayın hataları ve çözümleri
+### Yaygın montaj hataları ve çözümleri
 
 | Hata | Tipik Sebep | Çözüm |
 |-------|---------------|-----|
-| `cannot mount /dev/loop0 read-only` | Journaled FS (ext4) düzgün bir şekilde çıkarılmamış | `-o ro,norecovery` kullanın |
+| `cannot mount /dev/loop0 read-only` | Journaled FS (ext4) düzgün bir şekilde çıkarılmadı | `-o ro,norecovery` kullanın |
 | `bad superblock …` | Yanlış offset veya hasarlı FS | offset'i hesaplayın (`sector*size`) veya bir kopya üzerinde `fsck -n` çalıştırın |
 | `mount: unknown filesystem type 'LVM2_member'` | LVM konteyneri | `vgchange -ay` ile hacim grubunu etkinleştirin |
 
