@@ -4,7 +4,7 @@
 
 **Questo è un piccolo riassunto dei capitoli sulla persistenza degli account della fantastica ricerca di [https://specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://specterops.io/assets/resources/Certified_Pre-Owned.pdf)**
 
-## Comprendere il Furto delle Credenziali Utente Attive con i Certificati – PERSIST1
+## Comprendere il Furto di Credenziali Utente Attive con Certificati – PERSIST1
 
 In uno scenario in cui un certificato che consente l'autenticazione del dominio può essere richiesto da un utente, un attaccante ha l'opportunità di richiedere e rubare questo certificato per mantenere la persistenza su una rete. Per impostazione predefinita, il modello `User` in Active Directory consente tali richieste, anche se a volte può essere disabilitato.
 
@@ -46,7 +46,7 @@ Rubeus.exe asktgt /user:HOSTNAME$ /certificate:C:\Temp\host.pfx /password:Passw0
 ```
 ## Estensione della Persistenza Tramite Rinnovo del Certificato - PERSIST3
 
-Abusare dei periodi di validità e rinnovo dei modelli di certificato consente a un attaccante di mantenere l'accesso a lungo termine. Se possiedi un certificato precedentemente emesso e la sua chiave privata, puoi rinnovarlo prima della scadenza per ottenere una nuova credenziale a lungo termine senza lasciare ulteriori artefatti di richiesta legati al principale originale.
+Abusare dei periodi di validità e rinnovo dei modelli di certificato consente a un attaccante di mantenere l'accesso a lungo termine. Se possiedi un certificato emesso in precedenza e la sua chiave privata, puoi rinnovarlo prima della scadenza per ottenere una nuova credenziale a lungo termine senza lasciare ulteriori artefatti di richiesta legati al principale originale.
 ```bash
 # Renewal with Certipy (works with RPC/DCOM/WebEnrollment)
 # Provide the existing PFX and target the same CA/template when possible
@@ -65,7 +65,7 @@ Se puoi scrivere nell'attributo `altSecurityIdentities` di un account target, pu
 
 Flusso ad alto livello:
 
-1. Ottieni o emetti un certificato di autenticazione client che controlli (ad es., iscriviti al modello `User` come te stesso).
+1. Ottieni o emetti un certificato di autenticazione client che controlli (ad es., iscrivi il template `User` come te stesso).
 2. Estrai un identificatore forte dal certificato (Issuer+Serial, SKI o SHA1-PublicKey).
 3. Aggiungi una mappatura esplicita sull'`altSecurityIdentities` del principale vittima utilizzando quell'identificatore.
 4. Autenticati con il tuo certificato; il DC lo mappa alla vittima tramite la mappatura esplicita.

@@ -50,7 +50,7 @@ OpenOCD è l'OSS de facto per JTAG/SWD. Con un adattatore supportato puoi scansi
 openocd -f interface/jlink.cfg -c "transport select jtag; adapter speed 1000" \
 -c "init; scan_chain; shutdown"
 ```
-- ESP32‑S3 USB‑JTAG integrato (nessun probe esterno richiesto):
+- ESP32‑S3 USB‑JTAG integrato (nessun sondino esterno richiesto):
 ```
 openocd -f board/esp32s3-builtin.cfg -c "init; scan_chain; shutdown"
 ```
@@ -67,7 +67,7 @@ Una volta che il TAP è riconosciuto e uno script di destinazione è scelto, puo
 openocd -f interface/jlink.cfg -f target/stm32f1x.cfg \
 -c "init; reset halt; mdw 0x08000000 4; dump_image flash.bin 0x08000000 0x00100000; shutdown"
 ```
-- RISC‑V SoC (preferisci SBA quando disponibile):
+- RISC‑V SoC (preferire SBA quando disponibile):
 ```
 openocd -f interface/ftdi/ft232h.cfg -f target/riscv.cfg \
 -c "init; riscv set_prefer_sba on; halt; dump_image sram.bin 0x80000000 0x20000; shutdown"
@@ -107,7 +107,7 @@ Hai bisogno del BSDL del dispositivo per conoscere l'ordinamento dei bit del reg
 
 ## Difese e indurimento (cosa aspettarsi su dispositivi reali)
 
-- Disabilita o blocca permanentemente JTAG/SWD in produzione (ad es., STM32 RDP livello 2, ESP eFuses che disabilitano PAD JTAG, NXP/Nordic APPROTECT/DPAP).
+- Disabilita o blocca permanentemente JTAG/SWD in produzione (ad es., livello 2 RDP STM32, eFuses ESP che disabilitano PAD JTAG, APPROTECT/DPAP NXP/Nordic).
 - Richiedi debug autenticato (ARMv8.2‑A ADIv6 Debug Authentication, sfida-risposta gestita da OEM) mantenendo l'accesso alla produzione.
 - Non instradare pad di test facili; seppellire via di test, rimuovere/popolare resistori per isolare TAP, utilizzare connettori con chiavi o fixture a pogo-pin.
 - Blocco del debug all'accensione: controlla il TAP dietro ROM iniziali che impongono l'avvio sicuro.

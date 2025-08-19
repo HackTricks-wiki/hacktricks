@@ -23,7 +23,7 @@ Puoi inserire codice Python arbitrario, e verrà compilato in un [oggetto codice
 
 In questo modo, tutte le espressioni che contengono costanti (ad es. numeri, stringhe, ecc.) o nomi (ad es. variabili, funzioni) potrebbero causare un errore di segmentazione alla fine.
 
-### Out of Bound Read <a href="#out-of-bound-read" id="out-of-bound-read"></a>
+### Lettura Fuori Limite <a href="#out-of-bound-read" id="out-of-bound-read"></a>
 
 Come avviene l'errore di segmentazione?
 
@@ -35,7 +35,7 @@ Iniziamo con un semplice esempio, `[a, b, c]` potrebbe essere compilato nel segu
 6 BUILD_LIST               3
 8 RETURN_VALUE12345
 ```
-Ma cosa succede se i `co_names` diventano una tupla vuota? L'opcode `LOAD_NAME 2` viene comunque eseguito e cerca di leggere il valore da quell'indirizzo di memoria da cui dovrebbe originariamente essere. Sì, questa è una "caratteristica" di lettura fuori limite.
+Ma cosa succede se il `co_names` diventa una tupla vuota? L'opcode `LOAD_NAME 2` viene comunque eseguito e cerca di leggere il valore da quell'indirizzo di memoria da cui dovrebbe originariamente provenire. Sì, questa è una "caratteristica" di lettura fuori limite.
 
 Il concetto fondamentale per la soluzione è semplice. Alcuni opcodes in CPython, ad esempio `LOAD_NAME` e `LOAD_CONST`, sono vulnerabili (?) a letture OOB.
 
@@ -227,7 +227,7 @@ builtins['eval'](builtins['input']())
 - `LOAD_NAME namei`, `STORE_NAME`, `DELETE_NAME`, `LOAD_GLOBAL`, `STORE_GLOBAL`, `IMPORT_NAME`, `IMPORT_FROM`, `LOAD_ATTR`, `STORE_ATTR` → leggono nomi da `co_names[...]` (per 3.11+ nota che `LOAD_ATTR`/`LOAD_GLOBAL` memorizzano i bit di flag nel bit basso; l'indice effettivo è `namei >> 1`). Vedi la documentazione del disassemblatore per la semantica esatta per versione. [Python dis docs].
 - Python 3.11+ ha introdotto cache adattive/in-line che aggiungono voci `CACHE` nascoste tra le istruzioni. Questo non cambia il primitivo OOB; significa solo che se crei manualmente bytecode, devi tenere conto di quelle voci di cache quando costruisci `co_code`.
 
-Implicazione pratica: la tecnica in questa pagina continua a funzionare su CPython 3.11, 3.12 e 3.13 quando puoi controllare un oggetto di codice (ad es., tramite `CodeType.replace(...)`) e ridurre `co_consts`/`co_names`.
+Implicazione pratica: la tecnica in questa pagina continua a funzionare su CPython 3.11, 3.12 e 3.13 quando puoi controllare un oggetto di codice (ad esempio, tramite `CodeType.replace(...)`) e ridurre `co_consts`/`co_names`.
 
 ### Scanner rapido per indici OOB utili (compatibile 3.11+/3.12+)
 
@@ -285,7 +285,7 @@ Una volta identificato un indice `co_consts` che si risolve nel modulo builtins,
 # 3) BINARY_SUBSCR to do builtins["input"] / builtins["eval"], CALL each, and RETURN_VALUE
 # This pattern is the same idea as the high-level exploit above, but expressed in raw bytecode.
 ```
-Questo approccio è utile in sfide che ti danno il controllo diretto su `co_code` mentre forzano `co_consts=()` e `co_names=()` (ad esempio, BCTF 2024 “awpcode”). Evita trucchi a livello di sorgente e mantiene le dimensioni del payload ridotte sfruttando le operazioni sulla pila del bytecode e i costruttori di tuple.
+Questo approccio è utile in sfide che ti danno il controllo diretto su `co_code` mentre forzano `co_consts=()` e `co_names=()` (ad esempio, BCTF 2024 “awpcode”). Evita trucchi a livello di sorgente e mantiene le dimensioni del payload ridotte sfruttando le operazioni sulla stack di bytecode e i costruttori di tuple.
 
 ### Controlli difensivi e mitigazioni per sandbox
 
@@ -323,7 +323,7 @@ raise ValueError("Bytecode refers to name index beyond co_names length")
 # validate_code_object(c)
 # eval(c, {'__builtins__': {}})
 ```
-Idee di mitigazione aggiuntive
+Idee aggiuntive di mitigazione
 - Non consentire `CodeType.replace(...)` arbitrario su input non attendibili, o aggiungere controlli strutturali rigorosi sull'oggetto codice risultante.
 - Considerare di eseguire codice non attendibile in un processo separato con sandboxing a livello di OS (seccomp, job objects, containers) invece di fare affidamento sulla semantica di CPython.
 

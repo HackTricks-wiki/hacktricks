@@ -11,10 +11,10 @@ Questa pagina astratta le tecniche e le insidie scoperte nella ricerca pubblica 
 
 - Il modulo/patch del kernel hooka una syscall (comunemente prctl) per ricevere "comandi" da userspace.
 - Il protocollo tipicamente è: magic_value, command_id, arg_ptr/len ...
-- Un'app manager in userspace si autentica prima (ad esempio, CMD_BECOME_MANAGER). Una volta che il kernel contrassegna il chiamante come un manager fidato, i comandi privilegiati vengono accettati:
-- Concedi root al chiamante (ad esempio, CMD_GRANT_ROOT)
+- Un'app manager in userspace si autentica prima (ad es., CMD_BECOME_MANAGER). Una volta che il kernel contrassegna il chiamante come un manager fidato, i comandi privilegiati vengono accettati:
+- Concedi root al chiamante (ad es., CMD_GRANT_ROOT)
 - Gestisci le liste di autorizzazione/negazione per su
-- Regola la politica SELinux (ad esempio, CMD_SET_SEPOLICY)
+- Regola la politica SELinux (ad es., CMD_SET_SEPOLICY)
 - Interroga versione/configurazione
 - Poiché qualsiasi app può invocare syscall, la correttezza dell'autenticazione del manager è critica.
 
@@ -29,7 +29,7 @@ Esempio (design di KernelSU):
 Quando userspace chiama prctl(0xDEADBEEF, CMD_BECOME_MANAGER, data_dir_path, ...), KernelSU verifica:
 
 1) Controllo del prefisso del percorso
-- Il percorso fornito deve iniziare con un prefisso atteso per l'UID del chiamante, ad esempio /data/data/<pkg> o /data/user/<id>/<pkg>.
+- Il percorso fornito deve iniziare con un prefisso atteso per l'UID del chiamante, ad es. /data/data/<pkg> o /data/user/<id>/<pkg>.
 - Riferimento: core_hook.c (v0.5.7) logica del prefisso del percorso.
 
 2) Controllo della proprietà
@@ -37,7 +37,7 @@ Quando userspace chiama prctl(0xDEADBEEF, CMD_BECOME_MANAGER, data_dir_path, ...
 - Riferimento: core_hook.c (v0.5.7) logica della proprietà.
 
 3) Controllo della firma APK tramite scansione della tabella FD
-- Itera i descrittori di file aperti (FD) del processo chiamante.
+- Itera i descrittori di file (FD) aperti dal processo chiamante.
 - Scegli il primo file il cui percorso corrisponde a /data/app/*/base.apk.
 - Analizza la firma APK v2 e verifica contro il certificato ufficiale del manager.
 - Riferimenti: manager.c (iterando FDs), apk_sign.c (verifica APK v2).
@@ -52,29 +52,29 @@ Se il controllo della firma si lega a "il primo /data/app/*/base.apk corrisponde
 Questa fiducia per indiretto consente a un'app non privilegiata di impersonare il manager senza possedere la chiave di firma del manager.
 
 Proprietà chiave sfruttate:
-- La scansione FD non si lega all'identità del pacchetto del chiamante; si limita a corrispondere a stringhe di percorso.
+- La scansione FD non si lega all'identità del pacchetto del chiamante; si limita a fare un pattern-match delle stringhe di percorso.
 - open() restituisce il FD disponibile più basso. Chiudendo prima i FD numerati inferiormente, un attaccante può controllare l'ordinamento.
 - Il filtro controlla solo che il percorso corrisponda a /data/app/*/base.apk – non che corrisponda al pacchetto installato del chiamante.
 
 ---
 ## Precondizioni di attacco
 
-- Il dispositivo è già rootato con un framework di rooting vulnerabile (ad esempio, KernelSU v0.5.7).
+- Il dispositivo è già rootato con un framework di rooting vulnerabile (ad es., KernelSU v0.5.7).
 - L'attaccante può eseguire codice arbitrario non privilegiato localmente (processo dell'app Android).
-- Il vero manager non si è ancora autenticato (ad esempio, subito dopo un riavvio). Alcuni framework memorizzano l'UID del manager dopo il successo; devi vincere la corsa.
+- Il vero manager non si è ancora autenticato (ad es., subito dopo un riavvio). Alcuni framework memorizzano l'UID del manager dopo il successo; devi vincere la corsa.
 
 ---
 ## Schema di sfruttamento (KernelSU v0.5.7)
 
 Passaggi ad alto livello:
 1) Costruisci un percorso valido per la directory dei dati della tua app per soddisfare i controlli di prefisso e proprietà.
-2) Assicurati che un base.apk genuino di KernelSU Manager sia aperto su un FD numerato inferiormente rispetto al tuo base.apk.
+2) Assicurati che un base.apk genuino di KernelSU Manager sia aperto su un FD numerato inferiore rispetto al tuo base.apk.
 3) Invoca prctl(0xDEADBEEF, CMD_BECOME_MANAGER, <your_data_dir>, ...) per superare i controlli.
 4) Emissione di comandi privilegiati come CMD_GRANT_ROOT, CMD_ALLOW_SU, CMD_SET_SEPOLICY per mantenere l'elevazione.
 
 Note pratiche sul passaggio 2 (ordinamento FD):
 - Identifica il tuo FD di processo per il tuo /data/app/*/base.apk camminando nei symlink di /proc/self/fd.
-- Chiudi un FD basso (ad esempio, stdin, fd 0) e apri prima l'APK legittimo del manager in modo che occupi fd 0 (o qualsiasi indice inferiore al tuo fd base.apk).
+- Chiudi un FD basso (ad es., stdin, fd 0) e apri prima l'APK legittimo del manager in modo che occupi fd 0 (o qualsiasi indice inferiore al tuo fd base.apk).
 - Raggruppa l'APK legittimo del manager con la tua app in modo che il suo percorso soddisfi il filtro ingenuo del kernel. Ad esempio, posizionalo sotto un sottopercorso che corrisponde a /data/app/*/base.apk.
 
 Esempi di frammenti di codice (Android/Linux, solo illustrativi):
@@ -170,7 +170,7 @@ Limitazioni dell'attacco:
 ---
 ## Note correlate tra i framework
 
-- L'autenticazione basata su password (ad es., versioni storiche di APatch/SKRoot) può essere debole se le password sono indovinabili/bruteforceabili o se le convalide sono difettose.
+- L'autenticazione basata su password (ad es., build storiche di APatch/SKRoot) può essere debole se le password sono indovinabili/bruteforceabili o se le convalide sono difettose.
 - L'autenticazione basata su pacchetto/firma (ad es., KernelSU) è più forte in linea di principio ma deve legarsi al chiamante effettivo, non a artefatti indiretti come le scansioni di FD.
 - Magisk: CVE-2024-48336 (MagiskEoP) ha dimostrato che anche ecosistemi maturi possono essere suscettibili a spoofing dell'identità che porta all'esecuzione di codice con root all'interno del contesto del manager.
 
