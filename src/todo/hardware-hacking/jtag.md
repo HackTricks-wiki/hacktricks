@@ -18,7 +18,7 @@ Sobald geflasht, öffnen Sie den seriellen Monitor bei 115200 Baud und senden Si
 - `l` Schleifen finden, um Fehlalarme zu vermeiden
 - `r` interne Pull-Ups umschalten, falls erforderlich
 - `s` nach TCK/TMS/TDI/TDO (und manchmal TRST/SRST) scannen
-- `y` IR brute-forcen, um undokumentierte Opcodes zu entdecken
+- `y` IR brute-forcen, um nicht dokumentierte Opcodes zu entdecken
 - `x` Boundary-Scan-Snapshot der Pin-Zustände
 
 ![](<../../images/image (939).png>)
@@ -95,20 +95,20 @@ jtag> instruction EXTEST
 jtag> shift ir
 jtag> dr  <bit pattern for boundary register>
 ```
-Du benötigst die BSDL des Geräts, um die Bitreihenfolge der Boundary-Register zu kennen. Beachte, dass einige Anbieter Boundary-Scan-Zellen in der Produktion sperren.
+Sie benötigen die BSDL des Geräts, um die Bitreihenfolge der Boundary-Register zu kennen. Beachten Sie, dass einige Anbieter Boundary-Scan-Zellen in der Produktion sperren.
 
 ## Moderne Ziele und Hinweise
 
 - ESP32‑S3/C3 verfügen über eine native USB‑JTAG-Brücke; OpenOCD kann direkt über USB ohne externen Proben sprechen. Sehr praktisch für Triage und Dumps.
-- RISC‑V-Debug (v0.13+) wird von OpenOCD weitgehend unterstützt; bevorzuge SBA für den Speicherzugriff, wenn der Kern nicht sicher angehalten werden kann.
+- RISC‑V-Debug (v0.13+) wird von OpenOCD weitgehend unterstützt; bevorzugen Sie SBA für den Speicherzugriff, wenn der Kern nicht sicher angehalten werden kann.
 - Viele MCUs implementieren Debug-Authentifizierung und Lebenszykluszustände. Wenn JTAG tot erscheint, aber die Stromversorgung korrekt ist, könnte das Gerät in einen geschlossenen Zustand gefused sein oder erfordert eine authentifizierte Probe.
 
 ## Abwehrmaßnahmen und Härtung (was man bei echten Geräten erwarten kann)
 
 - JTAG/SWD in der Produktion dauerhaft deaktivieren oder sperren (z. B. STM32 RDP Level 2, ESP eFuses, die PAD JTAG deaktivieren, NXP/Nordic APPROTECT/DPAP).
 - Authentifizierte Debugging-Anforderungen (ARMv8.2‑A ADIv6 Debug-Authentifizierung, OEM-gesteuertes Challenge-Response) bei gleichzeitiger Beibehaltung des Zugangs zur Fertigung.
-- Keine einfachen Testpads routen; Testvias vergraben, Widerstände entfernen/platzieren, um TAP zu isolieren, Connectoren mit Codierung oder Pogo-Pin-Befestigungen verwenden.
-- Power-on-Debug-Sperre: Schalte den TAP hinter einem frühen ROM, das den sicheren Bootvorgang durchsetzt.
+- Keine einfachen Testpads routen; Testvias vergraben, Widerstände entfernen/bestücken, um TAP zu isolieren, Connectoren mit Codierung oder Pogo-Pin-Befestigungen verwenden.
+- Power-on-Debug-Sperre: Schalten Sie den TAP hinter einem frühen ROM, das einen sicheren Bootvorgang durchsetzt.
 
 ## Referenzen
 

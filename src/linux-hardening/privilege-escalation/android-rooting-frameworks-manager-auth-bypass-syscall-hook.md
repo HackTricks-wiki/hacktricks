@@ -42,17 +42,17 @@ Wenn der Userspace prctl(0xDEADBEEF, CMD_BECOME_MANAGER, data_dir_path, ...) auf
 - Analysiere die APK v2-Signatur und verifiziere sie gegen das offizielle Manager-Zertifikat.
 - Referenzen: manager.c (Iterieren über FDs), apk_sign.c (APK v2-Verifizierung).
 
-Wenn alle Prüfungen bestanden werden, speichert der Kernel die UID des Managers vorübergehend und akzeptiert privilegierte Befehle von dieser UID bis zum Reset.
+Wenn alle Prüfungen bestanden werden, speichert der Kernel die UID des Managers vorübergehend und akzeptiert privilegierte Befehle von dieser UID bis zum Zurücksetzen.
 
 ---
-## Schwachstellenklasse: Vertrauen in "die erste übereinstimmende APK" aus der FD-Iteration
+## Schwachstellenklasse: Vertrauen auf "die erste übereinstimmende APK" aus der FD-Iteration
 
 Wenn die Signaturprüfung an "der ersten übereinstimmenden /data/app/*/base.apk" bindet, die in der FD-Tabelle des Prozesses gefunden wird, wird tatsächlich nicht das eigene Paket des Aufrufers verifiziert. Ein Angreifer kann eine legitim signierte APK (die echte des Managers) vorpositionieren, sodass sie früher in der FD-Liste erscheint als die eigene base.apk.
 
 Dieses Vertrauen durch Indirektion ermöglicht es einer unprivilegierten App, den Manager zu impersonieren, ohne den Signing-Key des Managers zu besitzen.
 
 Ausgenutzte Schlüsselfunktionen:
-- Der FD-Scan bindet nicht an die Paketidentität des Aufrufers; er vergleicht nur Pfadstrings.
+- Der FD-Scan bindet nicht an die Paketidentität des Aufrufers; er vergleicht nur Pfadzeichenfolgen.
 - open() gibt den niedrigsten verfügbaren FD zurück. Indem ein Angreifer zuerst niedrigere FDs schließt, kann er die Reihenfolge kontrollieren.
 - Der Filter überprüft nur, dass der Pfad mit /data/app/*/base.apk übereinstimmt – nicht, dass er dem installierten Paket des Aufrufers entspricht.
 
@@ -73,7 +73,7 @@ Hochrangige Schritte:
 4) Gebe privilegierte Befehle wie CMD_GRANT_ROOT, CMD_ALLOW_SU, CMD_SET_SEPOLICY aus, um die Erhöhung beizubehalten.
 
 Praktische Hinweise zu Schritt 2 (FD-Reihenfolge):
-- Identifiziere den FD deines Prozesses für deine eigene /data/app/*/base.apk, indem du die /proc/self/fd Symlinks durchgehst.
+- Identifiziere den FD deines Prozesses für deine eigene /data/app/*/base.apk, indem du die Symlinks von /proc/self/fd durchgehst.
 - Schließe einen niedrigen FD (z.B. stdin, fd 0) und öffne zuerst die legitime Manager-APK, damit sie fd 0 (oder einen Index niedriger als dein eigener base.apk fd) belegt.
 - Bunde die legitime Manager-APK mit deiner App, sodass ihr Pfad den naiven Filter des Kernels erfüllt. Zum Beispiel, platziere sie unter einem Unterpfad, der mit /data/app/*/base.apk übereinstimmt.
 
@@ -151,7 +151,7 @@ Renn-/Persistenz-Tipp:
 ## Erkennungs- und Minderungshinweise
 
 Für Framework-Entwickler:
-- Binden Sie die Authentifizierung an das Paket/UID des Aufrufers, nicht an beliebige FDs:
+- Binden Sie die Authentifizierung an das Paket/UID des Aufrufers, nicht an willkürliche FDs:
 - Bestimmen Sie das Paket des Aufrufers anhand seiner UID und überprüfen Sie es gegen die Signatur des installierten Pakets (über PackageManager), anstatt FDs zu scannen.
 - Wenn nur im Kernel, verwenden Sie eine stabile Aufruferidentität (Task-Credentials) und validieren Sie auf einer stabilen Quelle der Wahrheit, die von init/userspace-Helfer verwaltet wird, nicht auf Prozess-FDs.
 - Vermeiden Sie Pfad-Präfixprüfungen als Identität; sie sind für den Aufrufer trivial erfüllbar.
@@ -161,11 +161,11 @@ Für Framework-Entwickler:
 Für Verteidiger/Blau-Team:
 - Erkennen Sie die Anwesenheit von Rooting-Frameworks und Manager-Prozessen; überwachen Sie prctl-Aufrufe mit verdächtigen magischen Konstanten (z. B. 0xDEADBEEF), wenn Sie Kernel-Telemetrie haben.
 - Bei verwalteten Flotten blockieren oder alarmieren Sie über Boot-Empfänger von nicht vertrauenswürdigen Paketen, die schnell versuchen, privilegierte Manager-Befehle nach dem Booten auszuführen.
-- Stellen Sie sicher, dass Geräte auf gepatchte Framework-Versionen aktualisiert werden; ungültig machen von zwischengespeicherten Manager-IDs bei Updates.
+- Stellen Sie sicher, dass Geräte auf gepatchte Framework-Versionen aktualisiert werden; ungültig machen Sie zwischengespeicherte Manager-IDs bei Updates.
 
 Einschränkungen des Angriffs:
 - Betrifft nur Geräte, die bereits mit einem verwundbaren Framework gerootet sind.
-- Erfordert typischerweise einen Neustart/Rennfenster, bevor der legitime Manager authentifiziert (einige Frameworks speichern die Manager-UID bis zum Zurücksetzen).
+- Erfordert typischerweise ein Neustart-/Rennfenster, bevor der legitime Manager authentifiziert (einige Frameworks speichern die Manager-UID bis zum Zurücksetzen).
 
 ---
 ## Verwandte Hinweise zu Frameworks
