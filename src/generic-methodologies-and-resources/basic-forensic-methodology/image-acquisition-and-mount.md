@@ -58,22 +58,17 @@ sudo ewfacquire /dev/sdb -u evidence -c 1 -d "Seizure 2025-07-22" -e 1 -X examin
 aws ec2 create-snapshot --volume-id vol-01234567 --description "IR-case-1234 web-server 2025-07-22"
 # Copy the snapshot to S3 and download with aws cli / aws snowball
 ```
-*Azure* – verwenden Sie `az snapshot create` und exportieren Sie zu einer SAS-URL. Siehe die Seite von HackTricks:
-
-{{#ref}}
-../../cloud/azure/azure-forensics.md
-{{#endref}}
-
+*Azure* – verwenden Sie `az snapshot create` und exportieren Sie zu einer SAS-URL.
 
 ## Mount
 
 ### Die richtige Vorgehensweise wählen
 
 1. Mounten Sie die **gesamte Festplatte**, wenn Sie die ursprüngliche Partitionstabelle (MBR/GPT) benötigen.
-2. Mounten Sie eine **einzelne Partition** , wenn Sie nur ein Volume benötigen.
-3. Mounten Sie immer **schreibgeschützt** (`-o ro,norecovery`) und arbeiten Sie mit **Kopien**.
+2. Mounten Sie eine **einzelne Partition**-Datei, wenn Sie nur ein Volume benötigen.
+3. Mounten Sie immer **schreibgeschützt** (`-o ro,norecovery`) und arbeiten Sie an **Kopien**.
 
-### Rohbilder (dd, AFF4-extracted)
+### Rohbilder (dd, AFF4-extrahiert)
 ```bash
 # Identify partitions
 fdisk -l disk.img
@@ -88,7 +83,7 @@ lsblk /dev/nbd0 -o NAME,SIZE,TYPE,FSTYPE,LABEL,UUID
 # Mount a partition (e.g. /dev/nbd0p2)
 sudo mount -o ro,uid=$(id -u) /dev/nbd0p2 /mnt
 ```
-Trennen, wenn fertig:
+Trennen, wenn abgeschlossen:
 ```bash
 sudo umount /mnt && sudo qemu-nbd --disconnect /dev/nbd0
 ```
@@ -104,14 +99,14 @@ sudo qemu-nbd --connect=/dev/nbd1 --read-only /mnt/ewf/ewf1
 # 3. Mount the desired partition
 sudo mount -o ro,norecovery /dev/nbd1p1 /mnt/evidence
 ```
-Alternativ können Sie mit **xmount** on-the-fly konvertieren:
+Alternativ können Sie mit **xmount** sofort konvertieren:
 ```bash
 xmount --in ewf evidence.E01 --out raw /tmp/raw_mount
 mount -o ro /tmp/raw_mount/image.dd /mnt
 ```
 ### LVM / BitLocker / VeraCrypt-Volumes
 
-Nachdem das Blockgerät (Loop oder NBD) angeschlossen ist:
+Nachdem das Blockgerät (Loop oder NBD) angeschlossen wurde:
 ```bash
 # LVM
 sudo vgchange -ay               # activate logical volumes
@@ -146,6 +141,6 @@ kpartx -dv /dev/loop0  # or qemu-nbd --disconnect /dev/nbd0
 ## Referenzen
 
 - AFF4 Imaging-Tool-Ankündigung & Spezifikation: https://github.com/aff4/aff4
-- qemu-nbd Handbuchseite (sicheres Mounten von Festplattenabbildern): https://manpages.debian.org/qemu-system-common/qemu-nbd.1.en.html
+- qemu-nbd Handbuchseite (sicheres Einbinden von Festplattenabbildern): https://manpages.debian.org/qemu-system-common/qemu-nbd.1.en.html
 
 {{#include ../../banners/hacktricks-training.md}}
