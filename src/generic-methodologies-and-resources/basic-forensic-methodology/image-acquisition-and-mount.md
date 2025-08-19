@@ -1,4 +1,4 @@
-# Aquisição de Imagem & Montagem
+# Aquisição e Montagem de Imagem
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -58,7 +58,9 @@ sudo ewfacquire /dev/sdb -u evidence -c 1 -d "Seizure 2025-07-22" -e 1 -X examin
 aws ec2 create-snapshot --volume-id vol-01234567 --description "IR-case-1234 web-server 2025-07-22"
 # Copy the snapshot to S3 and download with aws cli / aws snowball
 ```
-*Azure* – use `az snapshot create` e exporte para uma URL SAS. Veja a página HackTricks {{#ref}}
+*Azure* – use `az snapshot create` e exporte para uma URL SAS. Veja a página do HackTricks:
+
+{{#ref}}
 ../../cloud/azure/azure-forensics.md
 {{#endref}}
 
@@ -71,7 +73,7 @@ aws ec2 create-snapshot --volume-id vol-01234567 --description "IR-case-1234 web
 2. Monte um **arquivo de partição única** quando você precisar apenas de um volume.
 3. Sempre monte **somente leitura** (`-o ro,norecovery`) e trabalhe em **cópias**.
 
-### Imagens brutas (dd, extraídas de AFF4)
+### Imagens brutas (dd, extraídas do AFF4)
 ```bash
 # Identify partitions
 fdisk -l disk.img
@@ -126,7 +128,7 @@ sudo mount -o ro /mnt/bitlocker/dislocker-file /mnt/evidence
 sudo kpartx -av disk.img  # creates /dev/mapper/loop0p1, loop0p2 …
 mount -o ro /dev/mapper/loop0p2 /mnt
 ```
-### Erros comuns de montagem e correções
+### Erros comuns de montagem & correções
 
 | Erro | Causa Típica | Correção |
 |-------|---------------|-----|
