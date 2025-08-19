@@ -22,7 +22,7 @@ sha256sum disk.img > disk.img.sha256
 sudo dc3dd if=/dev/sdc of=/forensics/pc.img hash=sha256,sha1 hashlog=/forensics/pc.hashes log=/forensics/pc.log bs=1M
 ```
 ### Guymager
-Graficzny, wielowątkowy imager, który obsługuje **raw (dd)**, **EWF (E01/EWFX)** i **AFF4** jako wyjście z równoległą weryfikacją. Dostępny w większości repozytoriów Linuxa (`apt install guymager`).
+Graficzny, wielowątkowy imager, który obsługuje **raw (dd)**, **EWF (E01/EWFX)** i **AFF4** jako wyjście z równoległą weryfikacją. Dostępny w większości repozytoriów Linuksa (`apt install guymager`).
 ```bash
 # Start in GUI mode
 sudo guymager
@@ -53,12 +53,14 @@ sudo ewfacquire /dev/sdb -u evidence -c 1 -d "Seizure 2025-07-22" -e 1 -X examin
 ```
 ### Imaging Cloud Disks
 
-*AWS* – utwórz **snapshot** **forensyczny** bez wyłączania instancji:
+*AWS* – utwórz **forensic snapshot** bez wyłączania instancji:
 ```bash
 aws ec2 create-snapshot --volume-id vol-01234567 --description "IR-case-1234 web-server 2025-07-22"
 # Copy the snapshot to S3 and download with aws cli / aws snowball
 ```
-*Azure* – użyj `az snapshot create` i wyeksportuj do adresu URL SAS. Zobacz stronę HackTricks {{#ref}}
+*Azure* – użyj `az snapshot create` i wyeksportuj do adresu URL SAS. Zobacz stronę z HackTricks:
+
+{{#ref}}
 ../../cloud/azure/azure-forensics.md
 {{#endref}}
 
@@ -136,7 +138,7 @@ mount -o ro /dev/mapper/loop0p2 /mnt
 
 ### Czyszczenie
 
-Pamiętaj, aby **umount** i **odłączyć** urządzenia loop/nbd, aby uniknąć pozostawiania wiszących map, które mogą uszkodzić dalszą pracę:
+Pamiętaj, aby **umount** i **odłączyć** urządzenia loop/nbd, aby uniknąć pozostawiania wiszących mapowań, które mogą uszkodzić dalszą pracę:
 ```bash
 umount -Rl /mnt/evidence
 kpartx -dv /dev/loop0  # or qemu-nbd --disconnect /dev/nbd0
