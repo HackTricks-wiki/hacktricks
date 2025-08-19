@@ -58,7 +58,9 @@ sudo ewfacquire /dev/sdb -u evidence -c 1 -d "Seizure 2025-07-22" -e 1 -X examin
 aws ec2 create-snapshot --volume-id vol-01234567 --description "IR-case-1234 web-server 2025-07-22"
 # Copy the snapshot to S3 and download with aws cli / aws snowball
 ```
-*Azure* – koristite `az snapshot create` i izvezite na SAS URL.  Pogledajte stranicu HackTricks {{#ref}}
+*Azure* – koristite `az snapshot create` i izvezite na SAS URL. Pogledajte stranicu iz HackTricks:
+
+{{#ref}}
 ../../cloud/azure/azure-forensics.md
 {{#endref}}
 
