@@ -5,7 +5,7 @@
 
 ## Verkryging
 
-> Verkry altyd **slegs lees** en **hash terwyl jy kopieer**. Hou die oorspronklike toestel **skryfbeskerm** en werk slegs op geverifieerde kopieë.
+> Verkry altyd **slegs lees** en **hash terwyl jy kopieer**. Hou die oorspronklike toestel **skryf-geblooke** en werk slegs op geverifieerde kopieë.
 
 ### DD
 ```bash
@@ -22,7 +22,7 @@ sha256sum disk.img > disk.img.sha256
 sudo dc3dd if=/dev/sdc of=/forensics/pc.img hash=sha256,sha1 hashlog=/forensics/pc.hashes log=/forensics/pc.log bs=1M
 ```
 ### Guymager
-Grafiese, multithreaded imager wat **raw (dd)**, **EWF (E01/EWFX)** en **AFF4** uitvoer met parallelle verifikasie ondersteun. Beskikbaar in die meeste Linux repos (`apt install guymager`).
+Grafiese, multithreaded beeldverwerker wat **raw (dd)**, **EWF (E01/EWFX)** en **AFF4** uitvoer met parallelle verifikasie ondersteun. Beskikbaar in die meeste Linux repos (`apt install guymager`).
 ```bash
 # Start in GUI mode
 sudo guymager
@@ -31,7 +31,7 @@ sudo guymager --simulate --input /dev/sdb --format EWF --hash sha256 --output /e
 ```
 ### AFF4 (Geavanceerde Forensiese Formaat 4)
 
-AFF4 is Google se moderne beeldformaat wat ontwerp is vir *baie* groot bewyse (spaar, hervatbaar, wolk-natiewe).
+AFF4 is Google se moderne beeldformaat ontwerp vir *baie* groot bewys (spaar, hervatbaar, wolk-inheems).
 ```bash
 # Acquire to AFF4 using the reference tool
 pipx install aff4imager
@@ -47,7 +47,7 @@ Jy kan [FTK Imager aflaai](https://accessdata.com/product-download) en **raw, E0
 ftkimager /dev/sdb evidence --e01 --case-number 1 --evidence-number 1 \
 --description 'Laptop seizure 2025-07-22' --examiner 'AnalystName' --compress 6
 ```
-### EWF gereedskap (libewf)
+### EWF tools (libewf)
 ```bash
 sudo ewfacquire /dev/sdb -u evidence -c 1 -d "Seizure 2025-07-22" -e 1 -X examiner --format encase6 --compression best
 ```
@@ -58,18 +58,15 @@ sudo ewfacquire /dev/sdb -u evidence -c 1 -d "Seizure 2025-07-22" -e 1 -X examin
 aws ec2 create-snapshot --volume-id vol-01234567 --description "IR-case-1234 web-server 2025-07-22"
 # Copy the snapshot to S3 and download with aws cli / aws snowball
 ```
-*Azure* – gebruik `az snapshot create` en voer uit na 'n SAS-URL. Sien die HackTricks-bladsy {{#ref}}
-../../cloud/azure/azure-forensics.md
-{{#endref}}
+*Azure* – gebruik `az snapshot create` en voer uit na 'n SAS-URL.
 
+## Mount
 
-## Monteer
+### Keuse van die regte benadering
 
-### Kies die regte benadering
-
-1. Monteer die **hele skyf** wanneer jy die oorspronklike partisie tabel (MBR/GPT) wil hê.
-2. Monteer 'n **enkele partisie lêer** wanneer jy net een volume nodig het.
-3. Monteer altyd **slegs lees** (`-o ro,norecovery`) en werk op **kopieë**.
+1. Mount die **hele skyf** wanneer jy die oorspronklike partisie tabel (MBR/GPT) wil hê.
+2. Mount 'n **enkele partisie lêer** wanneer jy net een volume nodig het.
+3. Mount altyd **slegs lees** (`-o ro,norecovery`) en werk op **kopieë**.
 
 ### Rau beelde (dd, AFF4-uitgetrek)
 ```bash
