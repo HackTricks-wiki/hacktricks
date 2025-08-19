@@ -5,7 +5,7 @@
 
 ## Akquisition
 
-> Erwerben Sie immer **nur zum Lesen** und **hashen Sie, während Sie kopieren**. Halten Sie das Originalgerät **schreibgeschützt** und arbeiten Sie nur mit verifizierten Kopien.
+> Erwerben Sie immer **nur zum Lesen** und **hashen Sie während des Kopierens**. Halten Sie das Originalgerät **schreibgeschützt** und arbeiten Sie nur mit verifizierten Kopien.
 
 ### DD
 ```bash
@@ -31,7 +31,7 @@ sudo guymager --simulate --input /dev/sdb --format EWF --hash sha256 --output /e
 ```
 ### AFF4 (Advanced Forensics Format 4)
 
-AFF4 ist Googles modernes Imaging-Format, das für *sehr* große Beweise (sparse, resumable, cloud-native) entwickelt wurde.
+AFF4 ist Googles modernes Imaging-Format, das für *sehr* große Beweismittel (sparse, resumable, cloud-native) entwickelt wurde.
 ```bash
 # Acquire to AFF4 using the reference tool
 pipx install aff4imager
@@ -58,7 +58,9 @@ sudo ewfacquire /dev/sdb -u evidence -c 1 -d "Seizure 2025-07-22" -e 1 -X examin
 aws ec2 create-snapshot --volume-id vol-01234567 --description "IR-case-1234 web-server 2025-07-22"
 # Copy the snapshot to S3 and download with aws cli / aws snowball
 ```
-*Azure* – verwenden Sie `az snapshot create` und exportieren Sie zu einer SAS-URL. Siehe die HackTricks-Seite {{#ref}}
+*Azure* – verwenden Sie `az snapshot create` und exportieren Sie zu einer SAS-URL. Siehe die Seite von HackTricks:
+
+{{#ref}}
 ../../cloud/azure/azure-forensics.md
 {{#endref}}
 
@@ -69,9 +71,9 @@ aws ec2 create-snapshot --volume-id vol-01234567 --description "IR-case-1234 web
 
 1. Mounten Sie die **gesamte Festplatte**, wenn Sie die ursprüngliche Partitionstabelle (MBR/GPT) benötigen.
 2. Mounten Sie eine **einzelne Partition** , wenn Sie nur ein Volume benötigen.
-3. Mounten Sie immer **schreibgeschützt** (`-o ro,norecovery`) und arbeiten Sie an **Kopien**.
+3. Mounten Sie immer **schreibgeschützt** (`-o ro,norecovery`) und arbeiten Sie mit **Kopien**.
 
-### Rohbilder (dd, AFF4-extrahiert)
+### Rohbilder (dd, AFF4-extracted)
 ```bash
 # Identify partitions
 fdisk -l disk.img
@@ -102,14 +104,14 @@ sudo qemu-nbd --connect=/dev/nbd1 --read-only /mnt/ewf/ewf1
 # 3. Mount the desired partition
 sudo mount -o ro,norecovery /dev/nbd1p1 /mnt/evidence
 ```
-Alternativ können Sie mit **xmount** sofort konvertieren:
+Alternativ können Sie mit **xmount** on-the-fly konvertieren:
 ```bash
 xmount --in ewf evidence.E01 --out raw /tmp/raw_mount
 mount -o ro /tmp/raw_mount/image.dd /mnt
 ```
 ### LVM / BitLocker / VeraCrypt-Volumes
 
-Nachdem das Blockgerät (Loop oder NBD) angeschlossen wurde:
+Nachdem das Blockgerät (Loop oder NBD) angeschlossen ist:
 ```bash
 # LVM
 sudo vgchange -ay               # activate logical volumes
@@ -144,6 +146,6 @@ kpartx -dv /dev/loop0  # or qemu-nbd --disconnect /dev/nbd0
 ## Referenzen
 
 - AFF4 Imaging-Tool-Ankündigung & Spezifikation: https://github.com/aff4/aff4
-- qemu-nbd Handbuchseite (sicheres Einbinden von Festplattenabbildern): https://manpages.debian.org/qemu-system-common/qemu-nbd.1.en.html
+- qemu-nbd Handbuchseite (sicheres Mounten von Festplattenabbildern): https://manpages.debian.org/qemu-system-common/qemu-nbd.1.en.html
 
 {{#include ../../banners/hacktricks-training.md}}
