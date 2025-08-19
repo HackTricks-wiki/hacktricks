@@ -58,7 +58,9 @@ sudo ewfacquire /dev/sdb -u evidence -c 1 -d "Seizure 2025-07-22" -e 1 -X examin
 aws ec2 create-snapshot --volume-id vol-01234567 --description "IR-case-1234 web-server 2025-07-22"
 # Copy the snapshot to S3 and download with aws cli / aws snowball
 ```
-*Azure* – use `az snapshot create` and export to a SAS URL.  See the HackTricks page {{#ref}}
+*Azure* – `az snapshot create` を使用して、SAS URL にエクスポートします。HackTricks のページを参照してください:
+
+{{#ref}}
 ../../cloud/azure/azure-forensics.md
 {{#endref}}
 
@@ -67,11 +69,11 @@ aws ec2 create-snapshot --volume-id vol-01234567 --description "IR-case-1234 web
 
 ### 適切なアプローチの選択
 
-1. 元のパーティションテーブル（MBR/GPT）が必要な場合は、**全ディスク**をマウントします。
-2. 1つのボリュームのみが必要な場合は、**単一パーティションファイル**をマウントします。
-3. 常に**読み取り専用**（`-o ro,norecovery`）でマウントし、**コピー**で作業します。
+1. 元のパーティションテーブル (MBR/GPT) が必要な場合は、**全ディスク**をマウントします。
+2. 1 つのボリュームのみが必要な場合は、**単一パーティションファイル**をマウントします。
+3. 常に **読み取り専用** (`-o ro,norecovery`) でマウントし、**コピー**で作業します。
 
-### 生画像（dd、AFF4抽出）
+### 生画像 (dd, AFF4-extracted)
 ```bash
 # Identify partitions
 fdisk -l disk.img
@@ -102,14 +104,14 @@ sudo qemu-nbd --connect=/dev/nbd1 --read-only /mnt/ewf/ewf1
 # 3. Mount the desired partition
 sudo mount -o ro,norecovery /dev/nbd1p1 /mnt/evidence
 ```
-代わりに、**xmount**を使用してオンザフライで変換します:
+代わりに **xmount** を使用してオンザフライで変換します:
 ```bash
 xmount --in ewf evidence.E01 --out raw /tmp/raw_mount
 mount -o ro /tmp/raw_mount/image.dd /mnt
 ```
 ### LVM / BitLocker / VeraCrypt ボリューム
 
-ブロックデバイス（ループまたはnbd）を接続した後：
+ブロックデバイス（ループまたは nbd）を接続した後：
 ```bash
 # LVM
 sudo vgchange -ay               # activate logical volumes
@@ -130,7 +132,7 @@ mount -o ro /dev/mapper/loop0p2 /mnt
 
 | エラー | 一般的な原因 | 修正 |
 |-------|---------------|-----|
-| `cannot mount /dev/loop0 read-only` | ジャーナル化ファイルシステム (ext4) が正常にアンマウントされていない | `-o ro,norecovery` を使用 |
+| `cannot mount /dev/loop0 read-only` | ジャーナル化されたファイルシステム (ext4) が正常にアンマウントされていない | `-o ro,norecovery` を使用 |
 | `bad superblock …` | オフセットが間違っているか、ファイルシステムが破損している | オフセットを計算する (`sector*size`) か、コピーに対して `fsck -n` を実行 |
 | `mount: unknown filesystem type 'LVM2_member'` | LVMコンテナ | `vgchange -ay` でボリュームグループをアクティブ化 |
 
