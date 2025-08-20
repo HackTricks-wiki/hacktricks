@@ -26,7 +26,19 @@ jobs:
     environment: prod
 
     steps:
-      
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          # this might remove tools that are actually needed,
+          # when set to "true" but frees about 6 GB
+          tool-cache: true
+
+      - name: Clean space
+        run: |
+          echo "Cleaning space"
+          sudo rm -rf "/usr/local/share/boost"
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+
       - name: Checkout code
         uses: actions/checkout@v4
         with:
