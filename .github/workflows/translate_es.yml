@@ -34,6 +34,21 @@ jobs:
         with:
           fetch-depth: 0
       
+      - name: Update and download scripts
+        run: |
+          sudo apt-get update
+          sudo apt-get install wget -y
+          mkdir scripts
+          cd scripts
+          wget -O get_and_save_refs.py https://raw.githubusercontent.com/carlospolop/hacktricks-cloud/master/scripts/get_and_save_refs.py
+          wget -O compare_and_fix_refs.py https://raw.githubusercontent.com/carlospolop/hacktricks-cloud/master/scripts/compare_and_fix_refs.py
+          wget -O translator.py https://raw.githubusercontent.com/carlospolop/hacktricks-cloud/master/scripts/translator.py
+          cd ..
+
+      - name: Run get_and_save_refs.py
+        run: |
+          python scripts/get_and_save_refs.py
+
       - name: Download language branch
         run: |
           git config --global --add safe.directory /__w/hacktricks/hacktricks
@@ -43,26 +58,30 @@ jobs:
           git checkout $BRANCH
           git pull
           git checkout master
-
-      - name: Update & install translator.py (if needed)
-        run: |
-          sudo apt-get update
-          sudo apt-get install wget -y
-          mkdir scripts
-          cd scripts
-          wget https://raw.githubusercontent.com/carlospolop/hacktricks-cloud/master/scripts/translator.py
-          cd ..
       
+      - name: Update the refs from master to language branch
+        run: |
+          python scripts/compare_and_fix_refs.py --files-unmatched-paths /tmp/file_paths.txt
       
       - name: Run translation script on changed files
         run: |
           export OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
           git diff --name-only HEAD~1 | grep -v "SUMMARY.md" | while read -r file; do
             if echo "$file" | grep -qE '\.md$'; then
-              echo -n "$file , " >> /tmp/file_paths.txt
+              echo -n ",$file" >> /tmp/file_paths.txt
             fi
           done
-          python scripts/translator.py --language "$LANGUAGE" --branch "$BRANCH" --api-key "$OPENAI_API_KEY" -f "$(cat /tmp/file_paths.txt)" -t 3
+          
+          if [ -s /tmp/file_paths.txt ]; then
+            python scripts/translator.py \
+              --language "$LANGUAGE" \
+              --branch "$BRANCH" \
+              --api-key "$OPENAI_API_KEY" \
+              -f "$(cat /tmp/file_paths.txt)" \
+              -t 3
+          else
+            echo "No markdown files changed, skipping translation."
+          fi
 
       - name: Build mdBook
         run: |
