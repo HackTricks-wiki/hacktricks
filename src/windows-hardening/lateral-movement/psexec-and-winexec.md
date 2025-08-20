@@ -133,12 +133,12 @@ Jagdmöglichkeiten
 
 - WMI-basierte Remote-Ausführung (oft mehr fileless):
 {{#ref}}
-lateral-movement/wmiexec.md
+./wmiexec.md
 {{#endref}}
 
 - WinRM-basierte Remote-Ausführung:
 {{#ref}}
-lateral-movement/winrm.md
+./winrm.md
 {{#endref}}
 
 
