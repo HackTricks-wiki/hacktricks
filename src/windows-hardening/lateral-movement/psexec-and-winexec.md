@@ -133,12 +133,12 @@ cme smb HOST -u USER -H NTHASH -x "ipconfig /all" --exec-method smbexec
 
 - WMI-орієнтоване віддалене виконання (часто безфайлове):
 {{#ref}}
-lateral-movement/wmiexec.md
+./wmiexec.md
 {{#endref}}
 
 - WinRM-орієнтоване віддалене виконання:
 {{#ref}}
-lateral-movement/winrm.md
+./winrm.md
 {{#endref}}
 
 
