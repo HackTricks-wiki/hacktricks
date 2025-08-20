@@ -35,14 +35,22 @@ dir /b "%appdata%\Microsoft\Windows\Start Menu\Programs\Startup" 2>nul
 Get-ChildItem "C:\Users\All Users\Start Menu\Programs\Startup"
 Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 ```
+> **FYI**: Las vulnerabilidades de *traversal de ruta* en la extracción de archivos (como la que se abusó en WinRAR antes de la versión 7.13 – CVE-2025-8088) pueden ser aprovechadas para **depositar cargas útiles directamente dentro de estas carpetas de Inicio durante la descompresión**, lo que resulta en la ejecución de código en el próximo inicio de sesión del usuario. Para un análisis profundo de esta técnica, consulta:
+
+{{#ref}}
+../../generic-hacking/archive-extraction-path-traversal.md
+{{#endref}}
+
+
+
 ## Registro
 
-> [!NOTE]
+> [!TIP]
 > [Nota de aquí](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): La entrada de registro **Wow6432Node** indica que estás ejecutando una versión de Windows de 64 bits. El sistema operativo utiliza esta clave para mostrar una vista separada de HKEY_LOCAL_MACHINE\SOFTWARE para aplicaciones de 32 bits que se ejecutan en versiones de Windows de 64 bits.
 
 ### Ejecuciones
 
-**Conocido comúnmente** registro AutoRun:
+**Conocido comúnmente** como registro AutoRun:
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\Run`
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\RunOnce`
@@ -78,10 +86,10 @@ En Windows Vista y versiones posteriores, las claves de registro **Run** y **Run
 ```
 reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx\\0001\\Depend /v 1 /d "C:\\temp\\evil.dll"
 ```
-> [!NOTE]
+> [!TIP]
 > **Explotación 1**: Si puedes escribir dentro de cualquiera de los registros mencionados en **HKLM**, puedes escalar privilegios cuando un usuario diferente inicia sesión.
 
-> [!NOTE]
+> [!TIP]
 > **Explotación 2**: Si puedes sobrescribir cualquiera de los binarios indicados en cualquiera de los registros dentro de **HKLM**, puedes modificar ese binario con una puerta trasera cuando un usuario diferente inicia sesión y escalar privilegios.
 ```bash
 #CMD
@@ -147,8 +155,8 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\Ru
 
 Los accesos directos colocados en la carpeta **Inicio** activarán automáticamente servicios o aplicaciones para que se inicien durante el inicio de sesión del usuario o el reinicio del sistema. La ubicación de la carpeta **Inicio** está definida en el registro tanto para el ámbito de **Máquina Local** como para el de **Usuario Actual**. Esto significa que cualquier acceso directo agregado a estas ubicaciones de **Inicio** especificadas asegurará que el servicio o programa vinculado se inicie después del proceso de inicio de sesión o reinicio, lo que lo convierte en un método sencillo para programar la ejecución automática de programas.
 
-> [!NOTE]
-> Si puedes sobrescribir cualquier \[User] Shell Folder bajo **HKLM**, podrás apuntarlo a una carpeta controlada por ti y colocar un backdoor que se ejecutará cada vez que un usuario inicie sesión en el sistema, escalando privilegios.
+> [!TIP]
+> Si puedes sobrescribir cualquier \[User] Shell Folder bajo **HKLM**, podrás apuntarlo a una carpeta controlada por ti y colocar una puerta trasera que se ejecutará cada vez que un usuario inicie sesión en el sistema, escalando privilegios.
 ```bash
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v "Common Startup"
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" /v "Common Startup"
@@ -160,7 +168,7 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders' -Name "Common Startup"
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders' -Name "Common Startup"
 ```
-### Claves de Winlogon
+### Winlogon Keys
 
 `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`
 
@@ -171,10 +179,10 @@ reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Shell
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name "Userinit"
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name "Shell"
 ```
-> [!NOTE]
+> [!TIP]
 > Si puedes sobrescribir el valor del registro o el binario, podrás escalar privilegios.
 
-### Configuración de Políticas
+### Configuraciones de Política
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer`
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer`
@@ -190,7 +198,7 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 
 ### Cambiando el Símbolo del Sistema en Modo Seguro
 
-En el Registro de Windows bajo `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`, hay un valor **`AlternateShell`** configurado por defecto a `cmd.exe`. Esto significa que cuando eliges "Modo Seguro con Símbolo del Sistema" durante el inicio (presionando F8), se utiliza `cmd.exe`. Sin embargo, es posible configurar tu computadora para que inicie automáticamente en este modo sin necesidad de presionar F8 y seleccionarlo manualmente.
+En el Registro de Windows bajo `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`, hay un valor **`AlternateShell`** que por defecto está configurado como `cmd.exe`. Esto significa que cuando eliges "Modo Seguro con Símbolo del Sistema" durante el inicio (presionando F8), se utiliza `cmd.exe`. Sin embargo, es posible configurar tu computadora para que inicie automáticamente en este modo sin necesidad de presionar F8 y seleccionarlo manualmente.
 
 Pasos para crear una opción de arranque para iniciar automáticamente en "Modo Seguro con Símbolo del Sistema":
 
@@ -229,8 +237,8 @@ Dentro de estas claves, existen varias subclaves, cada una correspondiente a un 
 
 **Perspectivas de Seguridad:**
 
-- Modificar o escribir en una clave donde **`IsInstalled`** esté configurado como `"1"` con un **`StubPath`** específico puede llevar a la ejecución no autorizada de comandos, potencialmente para la escalada de privilegios.
-- Alterar el archivo binario referenciado en cualquier valor de **`StubPath`** también podría lograr la escalada de privilegios, dado que se tengan los permisos suficientes.
+- Modificar o escribir en una clave donde **`IsInstalled`** esté configurado como `"1"` con un **`StubPath`** específico puede llevar a la ejecución no autorizada de comandos, potencialmente para escalada de privilegios.
+- Alterar el archivo binario referenciado en cualquier valor de **`StubPath`** también podría lograr escalada de privilegios, dado que se tengan los permisos suficientes.
 
 Para inspeccionar las configuraciones de **`StubPath`** a través de los componentes de Active Setup, se pueden usar estos comandos:
 ```bash
@@ -243,7 +251,7 @@ reg query "HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components
 
 ### Descripción General de los Objetos Ayudantes del Navegador (BHO)
 
-Los Objetos Ayudantes del Navegador (BHO) son módulos DLL que añaden características adicionales a Internet Explorer de Microsoft. Se cargan en Internet Explorer y Windows Explorer en cada inicio. Sin embargo, su ejecución puede ser bloqueada configurando la clave **NoExplorer** a 1, impidiendo que se carguen con las instancias de Windows Explorer.
+Los Objetos Ayudantes del Navegador (BHO) son módulos DLL que añaden características adicionales al Internet Explorer de Microsoft. Se cargan en Internet Explorer y Windows Explorer en cada inicio. Sin embargo, su ejecución puede ser bloqueada configurando la clave **NoExplorer** a 1, impidiendo que se carguen con las instancias de Windows Explorer.
 
 Los BHO son compatibles con Windows 10 a través de Internet Explorer 11, pero no son compatibles con Microsoft Edge, el navegador predeterminado en versiones más recientes de Windows.
 
@@ -293,7 +301,7 @@ HKLM\Software\Microsoft\Wow6432Node\Windows NT\CurrentVersion\Image File Executi
 ```
 ## SysInternals
 
-Note que todos los sitios donde puedes encontrar autoruns ya han sido **buscados por** [**winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe). Sin embargo, para una **lista más completa de archivos auto-ejecutados** podrías usar [autoruns](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns) de sysinternals:
+Note que todos los sitios donde puedes encontrar autoruns ya han sido **buscados por** [**winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe). Sin embargo, para una **lista más completa de archivos auto-ejecutados** podrías usar [autoruns](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns) de Sysinternals:
 ```
 autorunsc.exe -m -nobanner -a * -ct /accepteula
 ```

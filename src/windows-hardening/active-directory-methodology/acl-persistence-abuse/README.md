@@ -4,12 +4,18 @@
 
 **Esta página es principalmente un resumen de las técnicas de** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces) **y** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)**. Para más detalles, consulta los artículos originales.**
 
-## **Derechos GenericAll en Usuario**
+## BadSuccessor
+
+{{#ref}}
+BadSuccessor.md
+{{#endref}}
+
+## **Derechos GenericAll en el Usuario**
 
 Este privilegio otorga a un atacante control total sobre una cuenta de usuario objetivo. Una vez que se confirman los derechos `GenericAll` utilizando el comando `Get-ObjectAcl`, un atacante puede:
 
 - **Cambiar la Contraseña del Objetivo**: Usando `net user <username> <password> /domain`, el atacante puede restablecer la contraseña del usuario.
-- **Kerberoasting Dirigido**: Asignar un SPN a la cuenta del usuario para hacerla susceptible a kerberoasting, luego usar Rubeus y targetedKerberoast.py para extraer e intentar romper los hashes del ticket-granting ticket (TGT).
+- **Kerberoasting Dirigido**: Asignar un SPN a la cuenta del usuario para hacerla susceptible a kerberoasting, luego usar Rubeus y targetedKerberoast.py para extraer e intentar descifrar los hashes del ticket de concesión de tickets (TGT).
 ```bash
 Set-DomainObject -Credential $creds -Identity <username> -Set @{serviceprincipalname="fake/NOTHING"}
 .\Rubeus.exe kerberoast /user:<username> /nowrap
@@ -72,7 +78,7 @@ rpcclient -U KnownUsername 10.10.10.192
 ```
 ## **WriteOwner en Grupo**
 
-Si un atacante descubre que tiene derechos de `WriteOwner` sobre un grupo, puede cambiar la propiedad del grupo a sí mismo. Esto es particularmente impactante cuando el grupo en cuestión es `Domain Admins`, ya que cambiar la propiedad permite un control más amplio sobre los atributos y la membresía del grupo. El proceso implica identificar el objeto correcto a través de `Get-ObjectAcl` y luego usar `Set-DomainObjectOwner` para modificar el propietario, ya sea por SID o nombre.
+Si un atacante descubre que tiene derechos de `WriteOwner` sobre un grupo, puede cambiar la propiedad del grupo a sí mismo. Esto es particularmente impactante cuando el grupo en cuestión es `Domain Admins`, ya que cambiar la propiedad permite un control más amplio sobre los atributos y la membresía del grupo. El proceso implica identificar el objeto correcto a través de `Get-ObjectAcl` y luego usar `Set-DomainObjectOwner` para modificar el propietario, ya sea por SID o por nombre.
 ```bash
 Get-ObjectAcl -ResolveGUIDs | ? {$_.objectdn -eq "CN=Domain Admins,CN=Users,DC=offense,DC=local" -and $_.IdentityReference -eq "OFFENSE\spotless"}
 Set-DomainObjectOwner -Identity S-1-5-21-2552734371-813931464-1050690807-512 -OwnerIdentity "spotless" -Verbose
@@ -106,7 +112,7 @@ $ADSI.psbase.commitchanges()
 ```
 ## **Replicación en el Dominio (DCSync)**
 
-El ataque DCSync aprovecha permisos específicos de replicación en el dominio para imitar un Controlador de Dominio y sincronizar datos, incluyendo credenciales de usuario. Esta poderosa técnica requiere permisos como `DS-Replication-Get-Changes`, permitiendo a los atacantes extraer información sensible del entorno de AD sin acceso directo a un Controlador de Dominio. [**Aprende más sobre el ataque DCSync aquí.**](../dcsync.md)
+El ataque DCSync aprovecha permisos de replicación específicos en el dominio para imitar un Controlador de Dominio y sincronizar datos, incluyendo credenciales de usuario. Esta poderosa técnica requiere permisos como `DS-Replication-Get-Changes`, permitiendo a los atacantes extraer información sensible del entorno de AD sin acceso directo a un Controlador de Dominio. [**Aprende más sobre el ataque DCSync aquí.**](../dcsync.md)
 
 ## Delegación de GPO <a href="#gpo-delegation" id="gpo-delegation"></a>
 
@@ -116,17 +122,19 @@ El acceso delegado para gestionar Objetos de Política de Grupo (GPO) puede pres
 
 ### Enumerar Permisos de GPO
 
-Para identificar GPOs mal configurados, se pueden encadenar los cmdlets de PowerSploit. Esto permite descubrir GPOs que un usuario específico tiene permisos para gestionar: `powershell Get-NetGPO | %{Get-ObjectAcl -ResolveGUIDs -Name $_.Name} | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
+Para identificar GPO mal configurados, se pueden encadenar los cmdlets de PowerSploit. Esto permite descubrir GPOs que un usuario específico tiene permisos para gestionar: `powershell Get-NetGPO | %{Get-ObjectAcl -ResolveGUIDs -Name $_.Name} | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
 
-**Computadoras con una Política Dada Aplicada**: Es posible resolver qué computadoras se aplica una GPO específica, ayudando a entender el alcance del impacto potencial. `powershell Get-NetOU -GUID "{DDC640FF-634A-4442-BC2E-C05EED132F0C}" | % {Get-NetComputer -ADSpath $_}`
+**Computadoras con una Política Dada Aplicada**: Es posible resolver qué computadoras se ven afectadas por un GPO específico, ayudando a entender el alcance del impacto potencial. `powershell Get-NetOU -GUID "{DDC640FF-634A-4442-BC2E-C05EED132F0C}" | % {Get-NetComputer -ADSpath $_}`
 
 **Políticas Aplicadas a una Computadora Dada**: Para ver qué políticas se aplican a una computadora en particular, se pueden utilizar comandos como `Get-DomainGPO`.
 
 **OUs con una Política Dada Aplicada**: Identificar unidades organizativas (OUs) afectadas por una política dada se puede hacer usando `Get-DomainOU`.
 
-### Abusar de GPO - New-GPOImmediateTask
+También puedes usar la herramienta [**GPOHound**](https://github.com/cogiceo/GPOHound) para enumerar GPOs y encontrar problemas en ellos.
 
-Los GPOs mal configurados pueden ser explotados para ejecutar código, por ejemplo, creando una tarea programada inmediata. Esto se puede hacer para agregar un usuario al grupo de administradores locales en las máquinas afectadas, elevando significativamente los privilegios:
+### Abuso de GPO - New-GPOImmediateTask
+
+Los GPO mal configurados pueden ser explotados para ejecutar código, por ejemplo, creando una tarea programada inmediata. Esto se puede hacer para agregar un usuario al grupo de administradores locales en las máquinas afectadas, elevando significativamente los privilegios:
 ```bash
 New-GPOImmediateTask -TaskName evilTask -Command cmd -CommandArguments "/c net localgroup administrators spotless /add" -GPODisplayName "Misconfigured Policy" -Verbose -Force
 ```
@@ -147,9 +155,9 @@ SharpGPOAbuse ofrece un método para abusar de GPOs existentes al agregar tareas
 
 Las actualizaciones de GPO suelen ocurrir aproximadamente cada 90 minutos. Para acelerar este proceso, especialmente después de implementar un cambio, se puede usar el comando `gpupdate /force` en la computadora objetivo para forzar una actualización inmediata de la política. Este comando asegura que cualquier modificación a los GPO se aplique sin esperar el próximo ciclo de actualización automática.
 
-### Detrás de Escena
+### Bajo el Capó
 
-Al inspeccionar las Tareas Programadas para un GPO dado, como la `Misconfigured Policy`, se puede confirmar la adición de tareas como `evilTask`. Estas tareas se crean a través de scripts o herramientas de línea de comandos con el objetivo de modificar el comportamiento del sistema o escalar privilegios.
+Al inspeccionar las Tareas Programadas para un GPO dado, como la `Política Mal Configurada`, se puede confirmar la adición de tareas como `evilTask`. Estas tareas se crean a través de scripts o herramientas de línea de comandos con el objetivo de modificar el comportamiento del sistema o escalar privilegios.
 
 La estructura de la tarea, como se muestra en el archivo de configuración XML generado por `New-GPOImmediateTask`, detalla las especificaciones de la tarea programada, incluyendo el comando a ejecutar y sus desencadenadores. Este archivo representa cómo se definen y gestionan las tareas programadas dentro de los GPO, proporcionando un método para ejecutar comandos o scripts arbitrarios como parte de la aplicación de políticas.
 
@@ -159,7 +167,7 @@ Los GPO también permiten la manipulación de membresías de usuarios y grupos e
 
 El archivo de configuración XML para Usuarios y Grupos detalla cómo se implementan estos cambios. Al agregar entradas a este archivo, se pueden otorgar privilegios elevados a usuarios específicos en los sistemas afectados. Este método ofrece un enfoque directo para la escalada de privilegios a través de la manipulación de GPO.
 
-Además, se pueden considerar métodos adicionales para ejecutar código o mantener persistencia, como aprovechar scripts de inicio/cierre de sesión, modificar claves del registro para autorun, instalar software a través de archivos .msi, o editar configuraciones de servicios. Estas técnicas proporcionan diversas vías para mantener el acceso y controlar sistemas objetivo a través del abuso de GPOs.
+Además, se pueden considerar métodos adicionales para ejecutar código o mantener persistencia, como aprovechar scripts de inicio/cierre de sesión, modificar claves del registro para autoruns, instalar software a través de archivos .msi o editar configuraciones de servicios. Estas técnicas proporcionan diversas vías para mantener el acceso y controlar sistemas objetivo a través del abuso de GPOs.
 
 ## Referencias
 

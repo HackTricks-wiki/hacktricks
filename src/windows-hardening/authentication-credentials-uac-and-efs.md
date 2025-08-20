@@ -36,7 +36,7 @@ C:\windows\tracing
 - Los binarios comúnmente **confiables** [**"LOLBAS's"**](https://lolbas-project.github.io/) también pueden ser útiles para eludir AppLocker.
 - **Reglas mal escritas también podrían ser eludidas**
 - Por ejemplo, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, puedes crear una **carpeta llamada `allowed`** en cualquier lugar y será permitida.
-- Las organizaciones también suelen centrarse en **bloquear el ejecutable `%System32%\WindowsPowerShell\v1.0\powershell.exe`**, pero se olvidan de las **otras** [**ubicaciones de ejecutables de PowerShell**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) como `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` o `PowerShell_ISE.exe`.
+- Las organizaciones también suelen centrarse en **bloquear el ejecutable `%System32%\WindowsPowerShell\v1.0\powershell.exe`**, pero se olvidan de las **otras** [**ubicaciones ejecutables de PowerShell**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) como `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` o `PowerShell_ISE.exe`.
 - **La aplicación de DLL rara vez está habilitada** debido a la carga adicional que puede poner en un sistema y la cantidad de pruebas requeridas para asegurar que nada se rompa. Así que usar **DLLs como puertas traseras ayudará a eludir AppLocker**.
 - Puedes usar [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) o [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) para **ejecutar código de Powershell** en cualquier proceso y eludir AppLocker. Para más información consulta: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
 
@@ -103,7 +103,7 @@ sc query windefend
 ```
 ## Encrypted File System (EFS)
 
-EFS asegura archivos a través de la encriptación, utilizando una **clave simétrica** conocida como la **Clave de Encriptación de Archivos (FEK)**. Esta clave se encripta con la **clave pública** del usuario y se almacena dentro del **flujo de datos alternativo** $EFS del archivo encriptado. Cuando se necesita la desencriptación, se utiliza la correspondiente **clave privada** del certificado digital del usuario para desencriptar la FEK del flujo $EFS. Más detalles se pueden encontrar [aquí](https://en.wikipedia.org/wiki/Encrypting_File_System).
+EFS asegura archivos a través de la encriptación, utilizando una **clave simétrica** conocida como la **Clave de Encriptación de Archivos (FEK)**. Esta clave se encripta con la **clave pública** del usuario y se almacena dentro del **flujo de datos alternativo** $EFS del archivo encriptado. Cuando se necesita la desencriptación, se utiliza la **clave privada** correspondiente del certificado digital del usuario para desencriptar la FEK del flujo $EFS. Más detalles se pueden encontrar [aquí](https://en.wikipedia.org/wiki/Encrypting_File_System).
 
 **Escenarios de desencriptación sin iniciación del usuario** incluyen:
 
@@ -119,7 +119,7 @@ Este método de encriptación permite **acceso transparente** a los archivos enc
 - La desencriptación automática ocurre bajo condiciones específicas, como copiar a FAT32 o transmisión por red.
 - Los archivos encriptados son accesibles para el propietario sin pasos adicionales.
 
-### Ver información de EFS
+### Verificar información de EFS
 
 Verifique si un **usuario** ha **utilizado** este **servicio** comprobando si existe esta ruta: `C:\users\<username>\appdata\roaming\Microsoft\Protect`
 
@@ -170,7 +170,7 @@ active-directory-methodology/laps.md
 
 ## Modo de Lenguaje Restringido de PowerShell
 
-PowerShell [**Modo de Lenguaje Restringido**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **bloquea muchas de las características** necesarias para usar PowerShell de manera efectiva, como bloquear objetos COM, permitiendo solo tipos .NET aprobados, flujos de trabajo basados en XAML, clases de PowerShell y más.
+PowerShell [**Modo de Lenguaje Restringido**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **bloquea muchas de las características** necesarias para usar PowerShell de manera efectiva, como bloquear objetos COM, permitir solo tipos .NET aprobados, flujos de trabajo basados en XAML, clases de PowerShell y más.
 
 ### **Verificar**
 ```bash
@@ -182,10 +182,10 @@ $ExecutionContext.SessionState.LanguageMode
 #Easy bypass
 Powershell -version 2
 ```
-En Windows actual, esa elusión no funcionará, pero puedes usar [**PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM).\
-**Para compilarlo, es posible que necesites** **_Agregar una Referencia_** -> _Examinar_ -> _Examinar_ -> agregar `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` y **cambiar el proyecto a .Net4.5**.
+En Windows actual, ese bypass no funcionará, pero puedes usar [**PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM).\
+**Para compilarlo, es posible que necesites** **_Agregar una Referencia_** -> _Explorar_ -> _Explorar_ -> agregar `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` y **cambiar el proyecto a .Net4.5**.
 
-#### Elusión directa:
+#### Bypass directo:
 ```bash
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogToConsole=true /U c:\temp\psby.exe
 ```

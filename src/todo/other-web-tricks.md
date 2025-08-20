@@ -16,15 +16,17 @@ Sin embargo, si **pasas la verificación** y tu sesión recibe ese valor "True" 
 
 ### Funcionalidad de registro
 
-Intenta registrarte como un usuario ya existente. También intenta usar caracteres equivalentes (puntos, muchos espacios y Unicode).
+Intenta registrarte como un usuario ya existente. También prueba usando caracteres equivalentes (puntos, muchos espacios y Unicode).
 
 ### Toma de correos electrónicos
 
 Registra un correo electrónico, antes de confirmarlo cambia el correo, luego, si el nuevo correo de confirmación se envía al primer correo registrado, puedes tomar cualquier correo. O si puedes habilitar el segundo correo confirmando el primero, también puedes tomar cualquier cuenta.
 
-### Acceso al servicio interno de atención al cliente de empresas usando Atlassian
+### Acceso al servicio interno de atención al cliente de empresas que usan Atlassian
 
-{% embed url="https://yourcompanyname.atlassian.net/servicedesk/customer/user/login" %}
+{{#ref}}
+https://yourcompanyname.atlassian.net/servicedesk/customer/user/login
+{{#endref}}
 
 ### Método TRACE
 

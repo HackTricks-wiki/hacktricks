@@ -2,7 +2,7 @@
 
 <figure><img src="images/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
-_Los logos y el diseño en movimiento de Hacktricks son de_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
+_Los logos y el diseño en movimiento de Hacktricks son de_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_._
 
 ### Ejecutar HackTricks Localmente
 ```bash
@@ -16,7 +16,7 @@ export LANG="master" # Leave master for english
 # "el" for Greek
 # "es" for Spanish
 # "fr" for French
-# "hi" for Hindi
+# "hi" for HindiP
 # "it" for Italian
 # "ja" for Japanese
 # "ko" for Korean
@@ -29,7 +29,7 @@ export LANG="master" # Leave master for english
 # "zh" for Chinese
 
 # Run the docker container indicating the path to the hacktricks folder
-docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "cd /app && git config --global --add safe.directory /app && git checkout $LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
+docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "mkdir -p ~/.ssh && ssh-keyscan -H github.com >> ~/.ssh/known_hosts && cd /app && git config --global --add safe.directory /app && git checkout $LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
 Tu copia local de HackTricks estará **disponible en [http://localhost:3337](http://localhost:3337)** después de <5 minutos (necesita construir el libro, ten paciencia).
 
@@ -51,7 +51,7 @@ Puedes consultar su **blog** en [**https://blog.stmcyber.com**](https://blog.stm
 
 <figure><img src="images/image (45).png" alt=""><figcaption></figcaption></figure>
 
-[**RootedCON**](https://www.rootedcon.com) es el evento de ciberseguridad más relevante en **España** y uno de los más importantes en **Europa**. Con **la misión de promover el conocimiento técnico**, este congreso es un punto de encuentro vibrante para profesionales de la tecnología y la ciberseguridad en todas las disciplinas.
+[**RootedCON**](https://www.rootedcon.com) es el evento de ciberseguridad más relevante en **España** y uno de los más importantes en **Europa**. Con **la misión de promover el conocimiento técnico**, este congreso es un punto de encuentro vibrante para profesionales de la tecnología y la ciberseguridad en cada disciplina.
 
 {{#ref}}
 https://www.rootedcon.com/
@@ -78,7 +78,7 @@ https://go.intigriti.com/hacktricks
 <figure><img src="images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Usa [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente impulsados por las herramientas comunitarias **más avanzadas** del mundo.
+Usa [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente, impulsados por las herramientas comunitarias **más avanzadas** del mundo.
 
 Obtén acceso hoy:
 
@@ -95,7 +95,7 @@ https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktr
 Únete al servidor de [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) para comunicarte con hackers experimentados y cazadores de bug bounty!
 
 - **Perspectivas de Hacking:** Participa en contenido que profundiza en la emoción y los desafíos del hacking
-- **Noticias de Hackeo en Tiempo Real:** Mantente al día con el mundo del hacking de ritmo rápido a través de noticias e información en tiempo real
+- **Noticias de Hackeo en Tiempo Real:** Mantente al día con el mundo del hacking a través de noticias e información en tiempo real
 - **Últimos Anuncios:** Mantente informado sobre las nuevas recompensas de bug bounty que se lanzan y actualizaciones cruciales de la plataforma
 
 **Únete a nosotros en** [**Discord**](https://discord.com/invite/N3FrSbmwdy) y comienza a colaborar con los mejores hackers hoy!
@@ -108,7 +108,7 @@ https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktr
 
 **Obtén la perspectiva de un hacker sobre tus aplicaciones web, red y nube**
 
-**Encuentra y reporta vulnerabilidades críticas y explotables con un impacto real en los negocios.** Usa nuestras más de 20 herramientas personalizadas para mapear la superficie de ataque, encontrar problemas de seguridad que te permitan escalar privilegios, y usar exploits automatizados para recopilar evidencia esencial, convirtiendo tu arduo trabajo en informes persuasivos.
+**Encuentra e informa sobre vulnerabilidades críticas y explotables con un impacto real en los negocios.** Usa nuestras más de 20 herramientas personalizadas para mapear la superficie de ataque, encontrar problemas de seguridad que te permitan escalar privilegios, y usar exploits automatizados para recopilar evidencia esencial, convirtiendo tu arduo trabajo en informes persuasivos.
 
 {{#ref}}
 https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons
@@ -120,12 +120,12 @@ https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktrick
 
 <figure><img src="images/image (1254).png" alt=""><figcaption></figcaption></figure>
 
-**SerpApi** ofrece APIs rápidas y fáciles en tiempo real para **acceder a resultados de motores de búsqueda**. Ellos extraen datos de motores de búsqueda, manejan proxies, resuelven captchas y analizan todos los datos estructurados ricos por ti.
+**SerpApi** ofrece APIs en tiempo real rápidas y fáciles para **acceder a resultados de motores de búsqueda**. Ellos extraen datos de motores de búsqueda, manejan proxies, resuelven captchas y analizan todos los datos estructurados ricos por ti.
 
 Una suscripción a uno de los planes de SerpApi incluye acceso a más de 50 APIs diferentes para extraer datos de diferentes motores de búsqueda, incluyendo Google, Bing, Baidu, Yahoo, Yandex, y más.\
 A diferencia de otros proveedores, **SerpApi no solo extrae resultados orgánicos**. Las respuestas de SerpApi incluyen consistentemente todos los anuncios, imágenes y videos en línea, gráficos de conocimiento y otros elementos y características presentes en los resultados de búsqueda.
 
-Los actuales clientes de SerpApi incluyen **Apple, Shopify y GrubHub**.\
+Los clientes actuales de SerpApi incluyen **Apple, Shopify y GrubHub**.\
 Para más información, consulta su [**blog**](https://serpapi.com/blog/)**,** o prueba un ejemplo en su [**playground**](https://serpapi.com/playground)**.**\
 Puedes **crear una cuenta gratuita** [**aquí**](https://serpapi.com/users/sign_up)**.**
 
@@ -135,7 +135,7 @@ Puedes **crear una cuenta gratuita** [**aquí**](https://serpapi.com/users/sign_
 
 <figure><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Aprende las tecnologías y habilidades requeridas para realizar investigación de vulnerabilidades, pruebas de penetración y ingeniería inversa para proteger aplicaciones y dispositivos móviles. **Domina la seguridad de iOS y Android** a través de nuestros cursos a demanda y **certifícate**:
+Aprende las tecnologías y habilidades necesarias para realizar investigación de vulnerabilidades, pruebas de penetración y ingeniería inversa para proteger aplicaciones y dispositivos móviles. **Domina la seguridad de iOS y Android** a través de nuestros cursos bajo demanda y **certifícate**:
 
 {{#ref}}
 https://academy.8ksec.io/
@@ -149,7 +149,7 @@ https://academy.8ksec.io/
 
 [**WebSec**](https://websec.net) es una empresa profesional de ciberseguridad con sede en **Ámsterdam** que ayuda a **proteger** negocios **en todo el mundo** contra las últimas amenazas de ciberseguridad al proporcionar **servicios de seguridad ofensiva** con un enfoque **moderno**.
 
-WebSec es una empresa de seguridad internacional con oficinas en Ámsterdam y Wyoming. Ofrecen **servicios de seguridad todo en uno**, lo que significa que lo hacen todo; Pentesting, **Auditorías** de Seguridad, Capacitación en Conciencia, Campañas de Phishing, Revisión de Código, Desarrollo de Exploits, Externalización de Expertos en Seguridad y mucho más.
+WebSec es una empresa de seguridad internacional con oficinas en Ámsterdam y Wyoming. Ofrecen **servicios de seguridad todo en uno**, lo que significa que lo hacen todo; Pentesting, **Auditorías de Seguridad**, Capacitación en Conciencia, Campañas de Phishing, Revisión de Código, Desarrollo de Exploits, Externalización de Expertos en Seguridad y mucho más.
 
 Otra cosa interesante sobre WebSec es que, a diferencia del promedio de la industria, WebSec es **muy confiado en sus habilidades**, hasta el punto de que **garantizan los mejores resultados de calidad**, se indica en su sitio web "**Si no podemos hackearlo, ¡no pagas!**". Para más información, echa un vistazo a su [**sitio web**](https://websec.net/en/) y [**blog**](https://websec.net/blog/)!
 
@@ -166,7 +166,7 @@ https://www.youtube.com/watch?v=Zq2JycGDCPM
 <figure><img src="images/venacus-logo.svg" alt="venacus logo"><figcaption></figcaption></figure>
 
 [**Venacus**](https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons) es un motor de búsqueda de filtraciones de datos (leak). \
-Proporcionamos búsqueda de cadenas aleatorias (como google) sobre todo tipo de filtraciones de datos grandes y pequeñas --no solo las grandes-- de múltiples fuentes. \
+Proporcionamos búsqueda de cadenas aleatorias (como google) sobre todo tipo de filtraciones de datos grandes y pequeñas --no solo las grandes-- de datos de múltiples fuentes. \
 Búsqueda de personas, búsqueda de IA, búsqueda de organizaciones, acceso a API (OpenAPI), integración de theHarvester, todas las características que un pentester necesita.\
 **HackTricks sigue siendo una gran plataforma de aprendizaje para todos nosotros y estamos orgullosos de patrocinarla!**
 
@@ -176,11 +176,29 @@ https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons
 
 ---
 
+### [CyberHelmets](https://cyberhelmets.com/courses/?ref=hacktricks)
+
+<figure><img src="images/cyberhelmets-logo.png" alt="cyberhelmets logo"><figcaption></figcaption></figure>
+
+**Construido para el campo. Construido a tu alrededor.**\
+[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) desarrolla y ofrece capacitación efectiva en ciberseguridad construida y liderada por expertos de la industria. Sus programas van más allá de la teoría para equipar a los equipos con una comprensión profunda y habilidades prácticas, utilizando entornos personalizados que reflejan amenazas del mundo real. Para consultas sobre capacitación personalizada, contáctanos [**aquí**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks).
+
+**Lo que distingue su capacitación:**
+* Contenido y laboratorios personalizados
+* Respaldado por herramientas y plataformas de primer nivel
+* Diseñado y enseñado por profesionales
+
+{{#ref}}
+https://cyberhelmets.com/courses/?ref=hacktricks
+{{#endref}}
+
+---
+
 ### [Last Tower Solutions](https://www.lasttowersolutions.com/)
 
 <figure><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
 
-Last Tower Solutions ofrece servicios de ciberseguridad especializados para instituciones de **Educación** y **FinTech**, con un enfoque en **pruebas de penetración, evaluaciones de seguridad en la nube** y **preparación para cumplimiento** (SOC 2, PCI-DSS, NIST). Nuestro equipo incluye **profesionales certificados OSCP y CISSP**, aportando una profunda experiencia técnica y conocimientos estándar de la industria a cada compromiso.
+Last Tower Solutions ofrece servicios especializados de ciberseguridad para instituciones de **Educación** y **FinTech**, con un enfoque en **pruebas de penetración, evaluaciones de seguridad en la nube** y **preparación para cumplimiento** (SOC 2, PCI-DSS, NIST). Nuestro equipo incluye **profesionales certificados OSCP y CISSP**, aportando una profunda experiencia técnica y conocimientos estándar de la industria a cada compromiso.
 
 Vamos más allá de los escaneos automatizados con **pruebas manuales impulsadas por inteligencia** adaptadas a entornos de alto riesgo. Desde asegurar registros de estudiantes hasta proteger transacciones financieras, ayudamos a las organizaciones a defender lo que más importa.
 
