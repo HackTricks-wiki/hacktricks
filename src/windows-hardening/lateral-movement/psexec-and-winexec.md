@@ -133,12 +133,12 @@ PsExecのような技術を使用する際の典型的なホスト/ネットワ�
 
 - WMIベースのリモート実行（しばしばファイルレス）：
 {{#ref}}
-lateral-movement/wmiexec.md
+./wmiexec.md
 {{#endref}}
 
 - WinRMベースのリモート実行：
 {{#ref}}
-lateral-movement/winrm.md
+./winrm.md
 {{#endref}}
 
 
