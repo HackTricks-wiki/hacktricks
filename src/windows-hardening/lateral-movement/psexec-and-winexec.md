@@ -9,13 +9,13 @@ Hierdie tegnieke misbruik die Windows Service Control Manager (SCM) op afstand o
 1. Verifieer by die teiken en toegang tot die ADMIN$ deel oor SMB (TCP/445).
 2. Kopieer 'n uitvoerbare lêer of spesifiseer 'n LOLBAS-opdraglyn wat die diens sal uitvoer.
 3. Skep 'n diens op afstand via SCM (MS-SCMR oor \PIPE\svcctl) wat na daardie opdrag of binêre wys.
-4. Begin die diens om die payload uit te voer en opsioneel stdin/stdout via 'n benoemde pyp te vang.
+4. Begin die diens om die payload uit te voer en opsioneel stdin/stdout via 'n benoemde pyplyn vas te vang.
 5. Stop die diens en maak skoon (verwyder die diens en enige gelaat binêre).
 
 Vereistes/voorvereistes:
 - Plaaslike Administrateur op die teiken (SeCreateServicePrivilege) of eksplisiete diens skeppingsregte op die teiken.
-- SMB (445) bereikbaar en ADMIN$ deel beskikbaar; Afstanddiensbestuur toegelaat deur die gasvuurmuur.
-- UAC Afstandbeperkings: met plaaslike rekeninge kan tokenfiltrering admin oor die netwerk blokkeer tensy die ingeboude Administrateur of LocalAccountTokenFilterPolicy=1 gebruik word.
+- SMB (445) bereikbaar en ADMIN$ deel beskikbaar; Afstandsdiensbestuur toegelaat deur die gasvuurmuur.
+- UAC Afstandsbeperkings: met plaaslike rekeninge kan tokenfiltrering admin oor die netwerk blokkeer tensy die ingeboude Administrator of LocalAccountTokenFilterPolicy=1 gebruik word.
 - Kerberos teen NTLM: die gebruik van 'n hostname/FQDN stel Kerberos in staat; verbinding deur IP val dikwels terug na NTLM (en kan geblokkeer word in geharde omgewings).
 
 ### Handmatige ScExec/WinExec via sc.exe
@@ -35,7 +35,7 @@ sc.exe \\TARGET delete HTSvc
 ```
 Notas:
 - Verwacht 'n tydsduur fout wanneer 'n nie-diens EXE begin; uitvoering gebeur steeds.
-- Om meer OPSEC-vriendelik te bly, verkies filielose opdragte (cmd /c, powershell -enc) of verwyder gelaaide artefakte.
+- Om meer OPSEC-vriendelik te bly, verkies fileless opdragte (cmd /c, powershell -enc) of verwyder gelaaide artefakte.
 
 Vind meer gedetailleerde stappe in: https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/
 
@@ -60,11 +60,11 @@ PsExec64.exe -accepteula \\HOST -r WinSvc$ -s cmd.exe /c ipconfig
 \\live.sysinternals.com\tools\PsExec64.exe -accepteula \\HOST -s cmd.exe /c whoami
 ```
 OPSEC
-- Laat diens installasie/ontinstallasie gebeurtenisse agter (Diensnaam dikwels PSEXESVC tensy -r gebruik word) en skep C:\Windows\PSEXESVC.exe tydens uitvoering.
+- Laat diensinstallasie/ontinstallasie gebeurtenisse agter (diensnaam dikwels PSEXESVC tensy -r gebruik word) en skep C:\Windows\PSEXESVC.exe tydens uitvoering.
 
 ### Impacket psexec.py (PsExec-agtig)
 
-- Gebruik 'n ingebedde RemCom-agtige diens. Laat 'n tydelike diens binêre (dikwels gerandomiseerde naam) val via ADMIN$, skep 'n diens (standaard dikwels RemComSvc), en proxy I/O oor 'n benoemde pyp.
+- Gebruik 'n ingebedde RemCom-agtige diens. Laat 'n tydelike diens-binary val (gewoonlik gerandomiseerde naam) via ADMIN$, skep 'n diens (standaard dikwels RemComSvc), en proxy I/O oor 'n benoemde pyp.
 ```bash
 # Password auth
 psexec.py DOMAIN/user:Password@HOST cmd.exe
@@ -114,29 +114,31 @@ Tipiese gasheer/netwerk artefakte wanneer PsExec-agtige tegnieke gebruik word:
 - Registrasie artefak vir Sysinternals EULA: HKCU\Software\Sysinternals\PsExec\EulaAccepted=0x1 op die operateur gasheer (indien nie onderdruk nie).
 
 Jag idees
-- Alarmering op diens installs waar die ImagePath cmd.exe /c, powershell.exe, of TEMP plekke insluit.
+- Waak op diens installs waar die ImagePath cmd.exe /c, powershell.exe, of TEMP plekke insluit.
 - Soek na proses skep waar ParentImage C:\Windows\PSEXESVC.exe is of kinders van services.exe wat as LOCAL SYSTEM shell uitvoer.
 - Merk naam pype wat eindig op -stdin/-stdout/-stderr of bekende PsExec kloon pyp name.
 
 ## Probleemoplossing algemene mislukkings
 - Toegang is geweier (5) wanneer dienste geskep word: nie werklik plaaslike admin nie, UAC afstand beperkings vir plaaslike rekeninge, of EDR tampering beskerming op die diens binêre pad.
 - Die netwerk pad is nie gevind nie (53) of kon nie met ADMIN$ verbind nie: firewall blokkeer SMB/RPC of admin deel is gedeaktiveer.
-- Kerberos misluk, maar NTLM is geblokkeer: verbind met hostname/FQDN (nie IP nie), verseker behoorlike SPNs, of verskaf -k/-no-pass met kaartjies wanneer Impacket gebruik word.
-- Diens begin tydens uitloop, maar payload het gedra: verwag as dit nie 'n werklike diens binêre is nie; vang uitvoer in 'n lêer of gebruik smbexec vir lewendige I/O.
+- Kerberos misluk maar NTLM is geblokkeer: verbind met hostname/FQDN (nie IP nie), verseker behoorlike SPNs, of verskaf -k/-no-pass met kaartjies wanneer Impacket gebruik word.
+- Diens begin neem te lank maar payload het gedra: verwag as dit nie 'n werklike diens binêre is nie; vang uitvoer in 'n lêer of gebruik smbexec vir lewendige I/O.
 
-## Versterking notas (moderne veranderinge)
-- Windows 11 24H2 en Windows Server 2025 vereis SMB ondertekening standaard vir uitgaande (en Windows 11 inkomende) verbindings. Dit breek nie wettige PsExec gebruik met geldige krediete nie, maar voorkom ongetekende SMB relay misbruik en kan toestelle beïnvloed wat nie ondertekening ondersteun nie.
+## Versterking notas
+- Windows 11 24H2 en Windows Server 2025 vereis SMB ondertekening standaard vir uitgaande (en Windows 11 inkomende) verbindings. Dit breek nie wettige PsExec gebruik met geldige kredensiaal nie, maar voorkom ongetekende SMB relay misbruik en kan toestelle beïnvloed wat nie ondertekening ondersteun nie.
 - Nuwe SMB kliënt NTLM blokkering (Windows 11 24H2/Server 2025) kan NTLM terugval voorkom wanneer verbind met IP of na nie-Kerberos bedieners. In versterkte omgewings sal dit NTLM-gebaseerde PsExec/SMBExec breek; gebruik Kerberos (hostname/FQDN) of stel uitsonderings in indien wettig nodig.
-- Beginsels van minste voorreg: minimaliseer plaaslike admin lidmaatskap, verkies Just-in-Time/Just-Enough Admin, handhaaf LAPS, en monitor/alarmeer op 7045 diens installs.
+- Beginsels van minste voorreg: minimaliseer plaaslike admin lidmaatskap, verkies Just-in-Time/Just-Enough Admin, handhaaf LAPS, en monitor/waak op 7045 diens installs.
 
 ## Sien ook
 
-- WMI-gebaseerde afstand exec (dikwels meer lêervry):
+- WMI-gebaseerde afstand exec (dikwels meer fileless):
+
 {{#ref}}
 ./wmiexec.md
 {{#endref}}
 
 - WinRM-gebaseerde afstand exec:
+
 {{#ref}}
 ./winrm.md
 {{#endref}}
@@ -147,4 +149,5 @@ Jag idees
 
 - PsExec - Sysinternals | Microsoft Learn: https://learn.microsoft.com/sysinternals/downloads/psexec
 - SMB sekuriteit versterking in Windows Server 2025 & Windows 11 (ondertekening standaard, NTLM blokkering): https://techcommunity.microsoft.com/blog/filecab/smb-security-hardening-in-windows-server-2025--windows-11/4226591
+
 {{#include ../../banners/hacktricks-training.md}}
