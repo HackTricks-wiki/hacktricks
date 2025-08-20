@@ -245,7 +245,7 @@ El SSPI se encargará de encontrar el protocolo adecuado para dos máquinas que 
 [Control de Cuentas de Usuario (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) es una característica que habilita un **mensaje de consentimiento para actividades elevadas**.
 
 {{#ref}}
-windows-security-controls/uac-user-account-control.md
+authentication-credentials-uac-and-efs/uac-user-account-control.md
 {{#endref}}
 
 {{#include ../banners/hacktricks-training.md}}
