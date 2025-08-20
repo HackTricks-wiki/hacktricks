@@ -35,9 +35,9 @@ sc.exe \\TARGET delete HTSvc
 ```
 Notlar:
 - Bir hizmet olmayan EXE başlatıldığında bir zaman aşımı hatası bekleyin; yürütme yine de gerçekleşir.
-- Daha OPSEC dostu kalmak için, dosyasız komutları (cmd /c, powershell -enc) tercih edin veya bırakılan artefaktları silin.
+- Daha OPSEC dostu kalmak için, dosyasız komutları (cmd /c, powershell -enc) tercih edin veya bırakılan kalıntıları silin.
 
-Daha ayrıntılı adımları bulmak için: https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/
+Daha ayrıntılı adımlar için: https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/
 
 ## Araçlar ve örnekler
 
@@ -94,7 +94,7 @@ smbexec.py -hashes LMHASH:NTHASH DOMAIN/user@HOST
 ```cmd
 SharpLateral.exe redexec HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe.exe malware.exe ServiceName
 ```
-- [SharpMove](https://github.com/0xthirteen/SharpMove), bir komutu uzaktan çalıştırmak için hizmetin değiştirilmesi/oluşturulmasını içerir.
+- [SharpMove](https://github.com/0xthirteen/SharpMove), bir komutu uzaktan çalıştırmak için hizmet modifikasyonu/oluşturmasını içerir.
 ```cmd
 SharpMove.exe action=modsvc computername=remote.host.local command="C:\windows\temp\payload.exe" amsi=true servicename=TestService
 SharpMove.exe action=startservice computername=remote.host.local servicename=TestService
@@ -108,9 +108,9 @@ cme smb HOST -u USER -H NTHASH -x "ipconfig /all" --exec-method smbexec
 
 PsExec benzeri teknikler kullanırken tipik host/ağ artefaktları:
 - Hedefte kullanılan admin hesabı için Güvenlik 4624 (Oturum Açma Türü 3) ve 4672 (Özel Ayrıcalıklar).
-- ADMIN$ erişimini ve hizmet ikili dosyalarının oluşturulmasını/yazılmasını gösteren Güvenlik 5140/5145 Dosya Paylaşımı ve Dosya Paylaşımı Ayrıntılı olayları (örn. PSEXESVC.exe veya rastgele 8 karakterli .exe).
+- ADMIN$ erişimi ve hizmet ikili dosyalarının oluşturulması/yazılması (örneğin, PSEXESVC.exe veya rastgele 8 karakterli .exe) gösteren Güvenlik 5140/5145 Dosya Paylaşımı ve Dosya Paylaşımı Ayrıntılı olayları.
 - Hedefteki Hizmet Yüklemesi için Güvenlik 7045: PSEXESVC, RemComSvc veya özel (-r / -service-name) gibi hizmet adları.
-- Sysmon 1 (Süreç Oluştur) için services.exe veya hizmet görüntüsü, 3 (Ağ Bağlantısı), 11 (Dosya Oluştur) C:\Windows\ içinde, 17/18 (Borular Oluşturuldu/Bağlandı) \\.\pipe\psexesvc, \\.\pipe\remcom_* gibi borular için veya rastgele eşdeğerleri.
+- Sysmon 1 (Süreç Oluştur) services.exe veya hizmet görüntüsü için, 3 (Ağ Bağlantısı), 11 (Dosya Oluştur) C:\Windows\ içinde, 17/18 (Borular Oluşturuldu/Bağlandı) \\.\pipe\psexesvc, \\.\pipe\remcom_* veya rastgele eşdeğerler gibi borular için.
 - Sysinternals EULA için Kayıt defteri artefaktı: HKCU\Software\Sysinternals\PsExec\EulaAccepted=0x1 operatör hostunda (eğer bastırılmamışsa).
 
 Av fikirleri
@@ -121,22 +121,24 @@ Av fikirleri
 ## Yaygın hataları giderme
 - Hizmetler oluşturulurken Erişim reddedildi (5): gerçekten yerel admin olmama, yerel hesaplar için UAC uzaktan kısıtlamaları veya hizmet ikili dosyası yolunda EDR müdahale koruması.
 - Ağ yolu bulunamadı (53) veya ADMIN$'ye bağlanılamadı: SMB/RPC'yi engelleyen güvenlik duvarı veya admin paylaşımlarının devre dışı bırakılması.
-- Kerberos başarısız oluyor ama NTLM engelleniyor: IP ile veya Kerberos olmayan sunuculara bağlanırken hostname/FQDN kullanın, uygun SPN'leri sağladığınızdan emin olun veya Impacket kullanırken biletlerle -k/-no-pass sağlayın.
+- Kerberos başarısız oluyor ama NTLM engelleniyor: IP ile veya Kerberos sunucularına bağlanırken hostname/FQDN kullanın, uygun SPN'leri sağladığınızdan emin olun veya Impacket kullanırken biletlerle -k/-no-pass sağlayın.
 - Hizmet başlatma süresi doluyor ama yük çalıştı: gerçek bir hizmet ikili dosyası değilse beklenir; çıktıyı bir dosyaya yakalayın veya canlı I/O için smbexec kullanın.
 
-## Güçlendirme notları (modern değişiklikler)
-- Windows 11 24H2 ve Windows Server 2025, varsayılan olarak dışa dönük (ve Windows 11 içe dönük) bağlantılar için SMB imzalamayı gerektirir. Bu, geçerli kimlik bilgileri ile meşru PsExec kullanımını bozmaz ancak imzasız SMB relay istismarını önler ve imzalamayı desteklemeyen cihazları etkileyebilir.
-- Yeni SMB istemcisi NTLM engelleme (Windows 11 24H2/Server 2025), IP ile bağlanırken veya Kerberos olmayan sunuculara bağlanırken NTLM geri dönüşünü engelleyebilir. Güçlendirilmiş ortamlarda bu, NTLM tabanlı PsExec/SMBExec'i bozacaktır; Kerberos (hostname/FQDN) kullanın veya meşru ihtiyaç durumunda istisnalar yapılandırın.
+## Güçlendirme notları
+- Windows 11 24H2 ve Windows Server 2025, varsayılan olarak outbound (ve Windows 11 inbound) bağlantılar için SMB imzalamayı gerektirir. Bu, geçerli kimlik bilgileri ile meşru PsExec kullanımını bozmaz ancak imzasız SMB relay istismarını önler ve imzalamayı desteklemeyen cihazları etkileyebilir.
+- Yeni SMB istemcisi NTLM engelleme (Windows 11 24H2/Server 2025), IP ile bağlanırken veya Kerberos olmayan sunuculara bağlanırken NTLM geri dönüşünü engelleyebilir. Güçlendirilmiş ortamlarda bu, NTLM tabanlı PsExec/SMBExec'i bozacaktır; Kerberos (hostname/FQDN) kullanın veya meşru ihtiyaç varsa istisnalar yapılandırın.
 - En az ayrıcalık ilkesi: yerel admin üyeliğini en aza indirin, Just-in-Time/Just-Enough Admin'i tercih edin, LAPS'i zorlayın ve 7045 hizmet yüklemeleri üzerinde izleme/uyarı yapın.
 
 ## Ayrıca bakınız
 
 - WMI tabanlı uzaktan yürütme (genellikle daha dosyasız):
+
 {{#ref}}
 ./wmiexec.md
 {{#endref}}
 
 - WinRM tabanlı uzaktan yürütme:
+
 {{#ref}}
 ./winrm.md
 {{#endref}}
@@ -147,4 +149,5 @@ Av fikirleri
 
 - PsExec - Sysinternals | Microsoft Learn: https://learn.microsoft.com/sysinternals/downloads/psexec
 - Windows Server 2025 & Windows 11'de SMB güvenlik güçlendirmesi (varsayılan olarak imzalama, NTLM engelleme): https://techcommunity.microsoft.com/blog/filecab/smb-security-hardening-in-windows-server-2025--windows-11/4226591
+
 {{#include ../../banners/hacktricks-training.md}}

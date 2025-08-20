@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Side-channel saldırıları, fiziksel veya mikro-mimari "sızıntı"yı gözlemleyerek sırları geri kazanır; bu sızıntı, iç durumla *ilişkili* ancak cihazın mantıksal arayüzünün bir parçası *değildir*. Örnekler, bir akıllı kartın anlık çektiği akımı ölçmekten, bir ağ üzerindeki CPU güç yönetimi etkilerini kötüye kullanmaya kadar uzanır.
+Side-channel saldırıları, fiziksel veya mikro-mimari "sızıntıları" gözlemleyerek sırları geri kazanır; bu sızıntılar, iç durumla *ilişkili* ancak cihazın mantıksal arayüzünün *bir parçası* değildir. Örnekler, bir akıllı kartın anlık akımını ölçmekten, bir ağ üzerinden CPU güç yönetimi etkilerini kötüye kullanmaya kadar uzanır.
 
 ---
 
@@ -12,7 +12,7 @@ Side-channel saldırıları, fiziksel veya mikro-mimari "sızıntı"yı gözleml
 |-------|-------------|---------|
 | Güç tüketimi | Akıllı kartlar, IoT MCU'lar, FPGA'lar | Osiloskop + şönt direnç/HS probu (örn. CW503) |
 | Elektromanyetik alan (EM) | CPU'lar, RFID, AES hızlandırıcıları | H-alan probu + LNA, ChipWhisperer/RTL-SDR |
-| Çalışma süresi / önbellekler | Masaüstü & bulut CPU'ları | Yüksek hassasiyetli zamanlayıcılar (rdtsc/rdtscp), uzaktan zaman uçuşu |
+| İcra süresi / önbellekler | Masaüstü & bulut CPU'ları | Yüksek hassasiyetli zamanlayıcılar (rdtsc/rdtscp), uzaktan zaman uçuşu |
 | Akustik / mekanik | Klavyeler, 3-D yazıcılar, röleler | MEMS mikrofon, lazer vibrometre |
 | Optik & termal | LED'ler, lazer yazıcılar, DRAM | Fotodiyot / yüksek hızlı kamera, IR kamera |
 | Hata kaynaklı | ASIC/MCU kriptoları | Saat/voltaj hatası, EMFI, lazer enjeksiyonu |
@@ -22,7 +22,7 @@ Side-channel saldırıları, fiziksel veya mikro-mimari "sızıntı"yı gözleml
 ## Güç Analizi
 
 ### Basit Güç Analizi (SPA)
-Bir *tek* iz gözlemleyin ve zirveleri/çukurları işlemlerle doğrudan ilişkilendirin (örn. DES S-kutuları).
+*Tek* bir iz gözlemleyin ve zirveleri/çukurları işlemlerle doğrudan ilişkilendirin (örn. DES S-kutuları).
 ```python
 # ChipWhisperer-husky example – capture one AES trace
 from chipwhisperer.capture.api.programmers import STMLink
@@ -40,12 +40,12 @@ print(trace.wave)  # numpy array of power samples
 import numpy as np
 corr = np.corrcoef(leakage_model(k), traces[:,sample])
 ```
-CPA, en son teknoloji olarak kalmaya devam ediyor, ancak makine öğrenimi varyantları (MLA, derin öğrenme SCA) artık ASCAD-v2 (2023) gibi yarışmalarda hakim durumda.
+CPA, en son teknoloji olmayı sürdürüyor ancak makine öğrenimi varyantları (MLA, derin öğrenme SCA) artık ASCAD-v2 (2023) gibi yarışmalarda hakim durumda.
 
 ---
 
 ## Elektromanyetik Analiz (EMA)
-Yakın alan EM probları (500 MHz–3 GHz), şant eklemeden güç analizine *eşit* bilgiler sızdırır. 2024 araştırması, spektrum korelasyonu ve düşük maliyetli RTL-SDR ön uçları kullanarak **>10 cm** mesafeden bir STM32'den anahtar kurtarma gösterdi.
+Yakın alan EM probeleri (500 MHz–3 GHz), şant eklemeden güç analizine *eşit* bilgiler sızdırır. 2024 araştırması, spektrum korelasyonu ve düşük maliyetli RTL-SDR ön uçları kullanarak **>10 cm** mesafeden bir STM32'den anahtar kurtarma gösterdi.
 
 ---
 
@@ -55,15 +55,11 @@ Modern CPU'lar, paylaşılan kaynaklar aracılığıyla sırları sızdırır:
 * **Downfall / Gather Data Sampling (Intel, 2023)** – geçici yürütme ile SMT iş parçacıkları arasında AVX-gather verilerini okuma.
 * **Zenbleed (AMD, 2023) & Inception (AMD, 2023)** – spekülatif vektör yanlış tahmini, kayıtları alanlar arası sızdırır.
 
-Spectre sınıfı sorunları için geniş bir inceleme için bkz. {{#ref}}
-../../cpu-microarchitecture/microarchitectural-attacks.md
-{{#endref}}
-
 ---
 
 ## Akustik ve Optik Saldırılar
 * 2024 "​iLeakKeys", bir **akıllı telefon mikrofonu üzerinden Zoom** kullanarak dizüstü bilgisayar tuş vuruşlarını %95 doğrulukla kurtardığını gösterdi.
-* Yüksek hızlı fotodiyotlar, DDR4 aktivite LED'ini yakalar ve AES tur anahtarlarını <1 dakika içinde yeniden inşa eder (BlackHat 2023).
+* Yüksek hızlı fotodiyotlar, DDR4 aktivite LED'ini yakalar ve AES tur anahtarlarını <1 dakikada yeniden oluşturur (BlackHat 2023).
 
 ---
 
@@ -84,9 +80,9 @@ Hataları yan kanal sızıntısı ile birleştirmek, anahtar aramasını kısalt
 
 ---
 
-## Savunmalar ve Güçlendirme
-* **Sabit zaman** uygulamaları ve bellek-ağır algoritmalar.
-* **Maskeleme/karıştırma** – sırları rastgele paylara ayırın; birinci dereceden direnç TVLA tarafından sertifikalandırılmıştır.
+## Savunmalar ve Sertleştirme
+* **Sabit zaman** uygulamaları ve bellek-zor algoritmalar.
+* **Maskeleme/karıştırma** – sırları rastgele paylara bölün; birinci dereceden direnç TVLA tarafından sertifikalandırılmıştır.
 * **Gizleme** – yonga üzeri voltaj regülatörleri, rastgeleleştirilmiş saat, çift ray mantığı, EM kalkanları.
 * **Hata tespiti** – yedek hesaplama, eşik imzaları.
 * **Operasyonel** – kripto çekirdeklerinde DVFS/turbo'yu devre dışı bırakın, SMT'yi izole edin, çok kiracılı bulutlarda birlikte yerleştirmeyi yasaklayın.
