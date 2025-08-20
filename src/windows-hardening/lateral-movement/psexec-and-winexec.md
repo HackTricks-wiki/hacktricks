@@ -133,12 +133,12 @@ Ideias de caça
 
 - Execução remota baseada em WMI (geralmente mais sem arquivos):
 {{#ref}}
-lateral-movement/wmiexec.md
+./wmiexec.md
 {{#endref}}
 
 - Execução remota baseada em WinRM:
 {{#ref}}
-lateral-movement/winrm.md
+./winrm.md
 {{#endref}}
 
 
