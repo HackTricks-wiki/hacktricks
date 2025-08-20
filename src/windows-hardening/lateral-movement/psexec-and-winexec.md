@@ -133,12 +133,12 @@ Ideje za lov
 
 - WMI-bazirani udaljeni exec (često više bezfajlovni):
 {{#ref}}
-lateral-movement/wmiexec.md
+./wmiexec.md
 {{#endref}}
 
 - WinRM-bazirani udaljeni exec:
 {{#ref}}
-lateral-movement/winrm.md
+./winrm.md
 {{#endref}}
 
 
