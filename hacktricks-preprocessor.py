@@ -65,7 +65,7 @@ def ref(matchobj):
             dir = path.dirname(current_chapter['source_path'])
             rel_path = path.normpath(path.join(dir,href))
             try:
-                logger.debug(f'Error getting chapter title: {href} trying with relative path {rel_path}')
+                logger.debug(f'Not found chapter title from: {href} -- trying with relative path {rel_path}')
                 if "#" in  href:
                     chapter, _path = findtitle(path.normpath(path.join(dir,href.split('#')[0])), book, "source_path")
                     title = " ".join(href.split("#")[1].split("-")).title()
