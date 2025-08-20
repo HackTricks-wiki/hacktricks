@@ -50,6 +50,7 @@ Unfortunately, the TGT's lifetime is not logged in 4769's, so you won't find thi
 
 In order to **bypass this detection** check the diamond tickets:
 
+
 {{#ref}}
 diamond-ticket.md
 {{#endref}}
@@ -68,6 +69,5 @@ Other little tricks defenders can do is **alert on 4769's for sensitive users** 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-golden-tickets] (https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-golden-tickets)
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 

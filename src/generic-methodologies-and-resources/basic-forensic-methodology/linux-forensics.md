@@ -155,6 +155,7 @@ Linux offers tools for ensuring the integrity of system components, crucial for 
 
 Read the following page to learn about tools that can be useful to find malware:
 
+
 {{#ref}}
 malware-analysis.md
 {{#endref}}
@@ -396,7 +397,6 @@ git diff --no-index --diff-filter=D path/to/old_version/ path/to/new_version/
 - **Book: Malware Forensics Field Guide for Linux Systems: Digital Forensics Field Guides**
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 
 

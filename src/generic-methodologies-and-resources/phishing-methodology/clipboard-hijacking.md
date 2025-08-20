@@ -84,7 +84,8 @@ Blue-teams can combine clipboard, process-creation and registry telemetry to pin
 ## Related Tricks
 
 * **Discord Invite Hijacking** often abuses the same ClickFix approach after luring users into a malicious server:
-  {{#ref}}
+  
+{{#ref}}
   discord-invite-hijacking.md
   {{#endref}}
 

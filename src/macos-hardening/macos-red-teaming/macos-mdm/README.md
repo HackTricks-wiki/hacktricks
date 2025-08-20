@@ -77,6 +77,7 @@ It's crucial to note that the ease of enrollment provided by DEP, while benefici
 
 Apple devices manufactured after 2010 generally have **12-character alphanumeric** serial numbers, with the **first three digits representing the manufacturing location**, the following **two** indicating the **year** and **week** of manufacture, the next **three** digits providing a **unique** **identifier**, and the **last** **four** digits representing the **model number**.
 
+
 {{#ref}}
 macos-serial-number.md
 {{#endref}}
@@ -196,11 +197,11 @@ Typically, **activation profile** provided by an MDM vendor will **include the f
 As previously commented, in order to try to enrol a device into an organization **only a Serial Number belonging to that Organization is needed**. Once the device is enrolled, several organizations will install sensitive data on the new device: certificates, applications, WiFi passwords, VPN configurations [and so on](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
 Therefore, this could be a dangerous entrypoint for attackers if the enrolment process isn't correctly protected:
 
+
 {{#ref}}
 enrolling-devices-in-other-organisations.md
 {{#endref}}
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 
 

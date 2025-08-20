@@ -10,6 +10,7 @@
 
 **If you don't know what are Windows Access Tokens, read the following page before continuing:**
 
+
 {{#ref}}
 access-tokens.md
 {{#endref}}
@@ -17,6 +18,7 @@ access-tokens.md
 ### ACLs - DACLs/SACLs/ACEs
 
 **Check the following page for more info about ACLs - DACLs/SACLs/ACEs:**
+
 
 {{#ref}}
 acls-dacls-sacls-aces.md
@@ -26,6 +28,7 @@ acls-dacls-sacls-aces.md
 
 **If you don't know what are integrity levels in Windows you should read the following page before continuing:**
 
+
 {{#ref}}
 integrity-levels.md
 {{#endref}}
@@ -33,6 +36,7 @@ integrity-levels.md
 ## Windows Security Controls
 
 There are different things in Windows that could **prevent you from enumerating the system**, run executables or even **detect your activities**. You should **read** the following **page** and **enumerate** all these **defenses** **mechanisms** before starting the privilege escalation enumeration:
+
 
 {{#ref}}
 ../authentication-credentials-uac-and-efs/
@@ -264,11 +268,13 @@ Just execute the created binary to escalate privileges.
 
 Read this tutorial to learn how to create a MSI wrapper using this tools. Note that you can wrap a "**.bat**" file if you **just** want to **execute** **command lines**
 
+
 {{#ref}}
 msi-wrapper.md
 {{#endref}}
 
 ### Create MSI with WIX
+
 
 {{#ref}}
 create-msi-with-wix.md
@@ -320,6 +326,7 @@ reg query HKLM\Software\Policies\Microsoft\Windows\EventLog\EventForwarding\Subs
 ### LAPS
 
 **LAPS** is designed for the **management of local Administrator passwords**, ensuring that each password is **unique, randomised, and regularly updated** on computers joined to a domain. These passwords are securely stored within Active Directory and can only be accessed by users who have been granted sufficient permissions through ACLs, allowing them to view local admin passwords if authorized.
+
 
 {{#ref}}
 ../active-directory-methodology/laps.md
@@ -385,6 +392,7 @@ Get-LocalGroupMember Administrators | ft Name, PrincipalSource
 
 If you **belongs to some privileged group you may be able to escalate privileges**. Learn about privileged groups and how to abuse them to escalate privileges here:
 
+
 {{#ref}}
 ../active-directory-methodology/privileged-groups-and-token-privileges.md
 {{#endref}}
@@ -393,6 +401,7 @@ If you **belongs to some privileged group you may be able to escalate privileges
 
 **Learn more** about what is a **token** in this page: [**Windows Tokens**](../authentication-credentials-uac-and-efs/index.html#access-tokens).\
 Check the following page to **learn about interesting tokens** and how to abuse them:
+
 
 {{#ref}}
 privilege-escalation-abusing-tokens.md
@@ -611,6 +620,7 @@ reg add HKLM\SYSTEM\CurrentControlSet\services\<service_name> /v ImagePath /t RE
 
 If you have this permission over a registry this means to **you can create sub registries from this one**. In case of Windows services this is **enough to execute arbitrary code:**
 
+
 {{#ref}}
 appenddata-addsubdirectory-permission-over-service-registry.md
 {{#endref}}
@@ -708,6 +718,7 @@ Get-ChildItem 'C:\Program Files\*','C:\Program Files (x86)\*' | % { try { Get-Ac
 **Check if you can overwrite some registry or binary that is going to be executed by a different user.**\
 **Read** the **following page** to learn more about interesting **autoruns locations to escalate privileges**:
 
+
 {{#ref}}
 privilege-escalation-with-autorun-binaries.md
 {{#endref}}
@@ -733,6 +744,7 @@ for %%A in ("%path:;=";"%") do ( cmd.exe /c icacls "%%~A" 2>nul | findstr /i "(F
 ```
 
 For more information about how to abuse this check:
+
 
 {{#ref}}
 dll-hijacking/writable-sys-path-+dll-hijacking-privesc.md
@@ -891,6 +903,7 @@ Get-ChildItem -Hidden C:\Users\username\AppData\Roaming\Microsoft\Credentials\
 
 You can use **mimikatz module** `dpapi::cred` with the appropiate `/masterkey` to decrypt.\
 You can **extract many DPAPI** **masterkeys** from **memory** with the `sekurlsa::dpapi` module (if you are root).
+
 
 {{#ref}}
 dpapi-extracting-passwords.md
@@ -1372,6 +1385,7 @@ Basically, if you can **overwrite any of the DLLs** that are going to be execute
 
 To learn how attackers use COM Hijacking as a persistence mechanism check:
 
+
 {{#ref}}
 com-hijacking.md
 {{#endref}}
@@ -1515,11 +1529,13 @@ https://github.com/jas502n/CVE-2019-1388
 
 Read this to **learn about Integrity Levels**:
 
+
 {{#ref}}
 integrity-levels.md
 {{#endref}}
 
 Then **read this to learn about UAC and UAC bypasses:**
+
 
 {{#ref}}
 ../authentication-credentials-uac-and-efs/uac-user-account-control.md
