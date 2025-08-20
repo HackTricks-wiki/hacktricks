@@ -58,10 +58,13 @@ jobs:
           git checkout $BRANCH
           git pull
           python scripts/compare_and_fix_refs.py --files-unmatched-paths /tmp/file_paths.txt
-          git checkout master
+          git add .
+          git commit -m "Fix unmatched refs" || echo "No changes to commit"
+          git push || echo "No changes to push"
       
       - name: Run translation script on changed files
         run: |
+          git checkout master
           export OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
           git diff --name-only HEAD~1 | grep -v "SUMMARY.md" | while read -r file; do
             if echo "$file" | grep -qE '\.md$'; then
