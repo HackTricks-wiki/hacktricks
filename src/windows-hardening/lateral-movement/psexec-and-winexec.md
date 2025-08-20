@@ -133,12 +133,12 @@ Idee di ricerca
 
 - Esecuzione remota basata su WMI (spesso più senza file):
 {{#ref}}
-lateral-movement/wmiexec.md
+./wmiexec.md
 {{#endref}}
 
 - Esecuzione remota basata su WinRM:
 {{#ref}}
-lateral-movement/winrm.md
+./winrm.md
 {{#endref}}
 
 
