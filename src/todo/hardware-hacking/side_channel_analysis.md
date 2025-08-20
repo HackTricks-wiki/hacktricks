@@ -56,10 +56,6 @@ Modern CPUs leak secrets through shared resources:
 * **Downfall / Gather Data Sampling (Intel, 2023)** – transient-execution to read AVX-gather data across SMT threads.
 * **Zenbleed (AMD, 2023) & Inception (AMD, 2023)** – speculative vector mis-prediction leaks registers cross-domain.
 
-For a broad treatment of Spectre-class issues see {{#ref}}
-../../cpu-microarchitecture/microarchitectural-attacks.md
-{{#endref}}
-
 ---
 
 ## Acoustic & Optical Attacks
