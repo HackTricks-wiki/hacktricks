@@ -133,12 +133,12 @@ cme smb HOST -u USER -H NTHASH -x "ipconfig /all" --exec-method smbexec
 
 - 基于WMI的远程执行（通常更无文件）：
 {{#ref}}
-lateral-movement/wmiexec.md
+./wmiexec.md
 {{#endref}}
 
 - 基于WinRM的远程执行：
 {{#ref}}
-lateral-movement/winrm.md
+./winrm.md
 {{#endref}}
 
 
