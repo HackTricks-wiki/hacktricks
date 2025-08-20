@@ -415,11 +415,13 @@ A common **issue** with NTLM relay attacks is the **short duration of NTLM sessi
 
 Nevertheless, this limitation is overcome by exploiting an NTLM relay attack to acquire a certificate for the user, as the certificate's validity period dictates the session's duration, and the certificate can be employed with services that **mandate NTLM signing**. For instructions on utilizing a stolen certificate, refer to:
 
+
 {{#ref}}
 account-persistence.md
 {{#endref}}
 
 Another limitation of NTLM relay attacks is that **an attacker-controlled machine must be authenticated to by a victim account**. The attacker could either wait or attempt to **force** this authentication:
+
 
 {{#ref}}
 ../printers-spooler-service-abuse.md
@@ -1010,6 +1012,5 @@ Both scenarios lead to an **increase in the attack surface** from one forest to 
 - [Certify 2.0 – SpecterOps Blog](https://specterops.io/blog/2025/08/11/certify-2-0/)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 
 

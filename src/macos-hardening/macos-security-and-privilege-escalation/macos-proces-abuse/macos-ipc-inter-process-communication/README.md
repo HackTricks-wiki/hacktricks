@@ -534,6 +534,7 @@ Any thread can get this port calling to **`mach_thread_sef`**.
 
 You can grab a shellcode from:
 
+
 {{#ref}}
 ../../macos-apps-inspecting-debugging-and-fuzzing/arm64-basic-assembly.md
 {{#endref}}
@@ -813,6 +814,7 @@ It was possible to **inject a simple shellcode** to execute a command because it
 Therefore, to **improve the thread** it should call **`pthread_create_from_mach_thread`** which will **create a valid pthread**. Then, this new pthread could **call dlopen** to **load a dylib** from the system, so instead of writing new shellcode to perform different actions it's possible to load custom libraries.
 
 You can find **example dylibs** in (for example the one that generates a log and then you can listen to it):
+
 
 {{#ref}}
 ../macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md
@@ -1104,6 +1106,7 @@ gcc -framework Foundation -framework Appkit dylib_injector.m -o dylib_injector
 
 In this technique a thread of the process is hijacked:
 
+
 {{#ref}}
 macos-thread-injection-via-task-port.md
 {{#endref}}
@@ -1258,6 +1261,7 @@ XPC, which stands for XNU (the kernel used by macOS) inter-Process Communication
 
 For more information about how this **communication work** on how it **could be vulnerable** check:
 
+
 {{#ref}}
 macos-xpc/
 {{#endref}}
@@ -1269,6 +1273,7 @@ MIG was created to **simplify the process of Mach IPC** code creation. This is b
 MIC basically **generates the needed code** for server and client to communicate with a given definition (in IDL -Interface Definition language-). Even if the generated code is ugly, a developer will just need to import it and his code will be much simpler than before.
 
 For more info check:
+
 
 {{#ref}}
 macos-mig-mach-interface-generator.md
@@ -1285,6 +1290,5 @@ macos-mig-mach-interface-generator.md
 - [https://web.mit.edu/darwin/src/modules/xnu/osfmk/man/task_get_special_port.html](https://web.mit.edu/darwin/src/modules/xnu/osfmk/man/task_get_special_port.html)
 
 {{#include ../../../../banners/hacktricks-training.md}}
-
 
 

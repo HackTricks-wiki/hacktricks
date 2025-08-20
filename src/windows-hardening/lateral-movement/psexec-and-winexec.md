@@ -149,11 +149,13 @@ Hunting ideas
 
 - WMI-based remote exec (often more fileless):
 
+
 {{#ref}}
 wmiexec.md
 {{#endref}}
 
 - WinRM-based remote exec:
+
 
 {{#ref}}
 winrm.md
