@@ -35,7 +35,7 @@ trace = cw.capture.capture_trace()
 print(trace.wave)  # numpy array of power samples
 ```
 ### Análise de Potência Diferencial/Corracional (DPA/CPA)
-Adquira *N > 1 000* traços, hipotetize o byte da chave `k`, calcule o modelo HW/HD e correlacione com o leak.
+Adquira *N > 1 000* traços, hipotetize o byte da chave `k`, compute o modelo HW/HD e correlacione com o leak.
 ```python
 import numpy as np
 corr = np.corrcoef(leakage_model(k), traces[:,sample])
@@ -49,15 +49,11 @@ Sondas EM de campo próximo (500 MHz–3 GHz) vazam informações idênticas à 
 
 ---
 
-## Ataques de Tempo & Microarquitetura
+## Ataques de Tempo & Micro-arquiteturais
 CPUs modernas vazam segredos através de recursos compartilhados:
 * **Hertzbleed (2022)** – escalonamento de frequência DVFS correlaciona com peso de Hamming, permitindo extração *remota* de chaves EdDSA.
 * **Downfall / Gather Data Sampling (Intel, 2023)** – execução transitória para ler dados AVX-gather através de threads SMT.
 * **Zenbleed (AMD, 2023) & Inception (AMD, 2023)** – predição de vetor especulativa vaza registradores entre domínios.
-
-Para um tratamento amplo de questões da classe Spectre, veja {{#ref}}
-../../cpu-microarchitecture/microarchitectural-attacks.md
-{{#endref}}
 
 ---
 
@@ -68,7 +64,7 @@ Para um tratamento amplo de questões da classe Spectre, veja {{#ref}}
 ---
 
 ## Injeção de Falhas & Análise de Falhas Diferenciais (DFA)
-Combinar falhas com vazamento de canal lateral encurta a busca de chaves (por exemplo, DFA AES de 1 traço). Ferramentas recentes com preços acessíveis para entusiastas:
+Combinar falhas com vazamento de canal lateral encurta a busca de chaves (por exemplo, DFA AES de 1 traço). Ferramentas recentes com preços de hobbyistas:
 * **ChipSHOUTER & PicoEMP** – glitching de pulso eletromagnético sub-1 ns.
 * **GlitchKit-R5 (2025)** – plataforma de glitch de clock/tensão de código aberto suportando SoCs RISC-V.
 
@@ -87,7 +83,7 @@ Combinar falhas com vazamento de canal lateral encurta a busca de chaves (por ex
 ## Defesas & Fortalecimento
 * Implementações **em tempo constante** e algoritmos resistentes à memória.
 * **Mascaramento/shuffling** – dividir segredos em partes aleatórias; resistência de primeira ordem certificada por TVLA.
-* **Ocultação** – reguladores de tensão on-chip, clock randomizado, lógica de dupla via, escudos EM.
+* **Ocultação** – reguladores de tensão on-chip, clock randomizado, lógica de dupla trilha, escudos EM.
 * **Detecção de falhas** – computação redundante, assinaturas de limiar.
 * **Operacional** – desabilitar DVFS/turbo em núcleos criptográficos, isolar SMT, proibir co-localização em nuvens multi-inquilino.
 
