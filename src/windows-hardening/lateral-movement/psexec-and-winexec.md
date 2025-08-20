@@ -133,12 +133,12 @@ Av fikirleri
 
 - WMI tabanlı uzaktan yürütme (genellikle daha dosyasız):
 {{#ref}}
-lateral-movement/wmiexec.md
+./wmiexec.md
 {{#endref}}
 
 - WinRM tabanlı uzaktan yürütme:
 {{#ref}}
-lateral-movement/winrm.md
+./winrm.md
 {{#endref}}
 
 
