@@ -71,7 +71,12 @@ jobs:
               echo -n ",$file" >> /tmp/file_paths.txt
             fi
           done
-          
+
+          echo "Files to translate:"
+          cat /tmp/file_paths.txt
+          echo ""
+          echo ""
+
           if [ -s /tmp/file_paths.txt ]; then
             python scripts/translator.py \
               --language "$LANGUAGE" \
@@ -89,16 +94,55 @@ jobs:
           git pull
           MDBOOK_BOOK__LANGUAGE=$BRANCH mdbook build || (echo "Error logs" && cat hacktricks-preprocessor-error.log && echo "" && echo "" && echo "Debug logs" && (cat hacktricks-preprocessor.log | tail -n 20) && exit 1)
       
-      - name: Update searchindex.js in repo
+      - name: Update searchindex.js in repo (purge history, keep current on HEAD)
         run: |
-          git checkout $BRANCH
-          git pull
+          set -euo pipefail
+
+          # Be explicit about workspace trust (avoids "dubious ownership")
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+          git checkout "$BRANCH"
+          git fetch origin "$BRANCH" --quiet
+          git pull --ff-only
+
+          # Choose the file to keep at HEAD:
+          # 1) Prefer freshly built version from book/
+          # 2) Fallback to the file currently at HEAD (if it exists)
+          HAS_FILE=0
           if [ -f "book/searchindex.js" ]; then
-            cp book/searchindex.js searchindex.js
+            cp "book/searchindex.js" /tmp/sidx.js
+            HAS_FILE=1
+          elif git cat-file -e "HEAD:searchindex.js" 2>/dev/null; then
+            git show "HEAD:searchindex.js" > /tmp/sidx.js
+            HAS_FILE=1
           fi
-          (git add searchindex.js;
-          git commit -m "Update searchindex";
-          git push) || echo "No changes to searchindex.js"
+
+          # Skip if there's nothing to purge AND nothing to keep
+          if [ "$HAS_FILE" = "1" ] || git rev-list -n 1 "$BRANCH" -- "searchindex.js" >/dev/null 2>&1; then
+            # **Fail early if working tree is dirty** (prevents confusing filter results)
+            git diff --quiet || { echo "Working tree has uncommitted changes; aborting purge." >&2; exit 1; }
+
+            # Make sure git-filter-repo is callable via `git filter-repo`
+            python -m pip install --quiet --user git-filter-repo
+            export PATH="$HOME/.local/bin:$PATH"
+
+            # Rewrite ONLY this branch, dropping all historical blobs of searchindex.js
+            git filter-repo --force --path "searchindex.js" --invert-paths --refs "refs/heads/$BRANCH"
+
+            # Re-add the current version on top of rewritten history (keep it in HEAD)
+            if [ "$HAS_FILE" = "1" ]; then
+              mv /tmp/sidx.js "searchindex.js"
+              git add "searchindex.js"
+              git commit -m "Update searchindex (purged history; keep current)"
+            else
+              echo "No current searchindex.js to re-add after purge."
+            fi
+
+            # **Safer force push** (prevents clobbering unexpected remote updates)
+            git push --force-with-lease origin "$BRANCH"
+          else
+            echo "Nothing to purge; skipping."
+          fi
       
       # Login in AWs
       - name: Configure AWS credentials using OIDC
