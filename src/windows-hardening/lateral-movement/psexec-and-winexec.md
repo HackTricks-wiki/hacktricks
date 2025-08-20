@@ -133,12 +133,12 @@ Jag idees
 
 - WMI-gebaseerde afstand exec (dikwels meer lêervry):
 {{#ref}}
-lateral-movement/wmiexec.md
+./wmiexec.md
 {{#endref}}
 
 - WinRM-gebaseerde afstand exec:
 {{#ref}}
-lateral-movement/winrm.md
+./winrm.md
 {{#endref}}
 
 
