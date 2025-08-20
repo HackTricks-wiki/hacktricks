@@ -156,6 +156,7 @@ Then, looking to this ca see when the execution was stopped in the dll you want 
 
 [**Cheat Engine**](https://www.cheatengine.org/downloads.php) is a useful program to find where important values are saved inside the memory of a running game and change them. More info in:
 
+
 {{#ref}}
 cheat-engine.md
 {{#endref}}
@@ -165,6 +166,7 @@ cheat-engine.md
 [**Decompiler Explorer**](https://dogbolt.org/) is a web front-end to a number of decompilers. This web service lets you compare the output of different decompilers on small executables.
 
 ## ARM & MIPS
+
 
 {{#ref}}
 https://github.com/nongiach/arm_now
@@ -179,6 +181,7 @@ Then, you need to **attach a debugger** (Ida or x64dbg) to the process and put a
 
 The releases github page contains zips containing the compiled releases: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
 You can find a slightly modified version of Blobrunner in the following link. In order to compile it just **create a C/C++ project in Visual Studio Code, copy and paste the code and build it**.
+
 
 {{#ref}}
 blobrunner.md
@@ -284,6 +287,7 @@ This will resolve the names of the functions.
 ## Compiled Python
 
 In this page you can find how to get the python code from an ELF/EXE python compiled binary:
+
 
 {{#ref}}
 ../../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/.pyc.md
@@ -403,6 +407,7 @@ So, in this challenge, knowing the values of the buttons, you needed to **press 
 **Reference for this tutorial:** [**https://exp.codes/Nostalgia/**](https://exp.codes/Nostalgia/)
 
 ## Game Boy
+
 
 {{#ref}}
 https://www.youtube.com/watch?v=VVbRe7wr3G4

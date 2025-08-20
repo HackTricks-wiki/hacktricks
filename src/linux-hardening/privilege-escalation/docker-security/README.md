@@ -155,6 +155,7 @@ Docker makes use of the following Linux kernel Namespaces to achieve Container i
 
 For **more information about the namespaces** check the following page:
 
+
 {{#ref}}
 namespaces/
 {{#endref}}
@@ -178,6 +179,7 @@ ls -l /proc/<PID>/ns #Get the Group and the namespaces (some may be uniq to the 
 
 For more information check:
 
+
 {{#ref}}
 cgroups.md
 {{#endref}}
@@ -188,6 +190,7 @@ Capabilities allow **finer control for the capabilities that can be allowed** fo
 
 When a docker container is run, the **process drops sensitive capabilities that the proccess could use to escape from the isolation**. This try to assure that the proccess won't be able to perform sensitive actions and escape:
 
+
 {{#ref}}
 ../linux-capabilities.md
 {{#endref}}
@@ -196,6 +199,7 @@ When a docker container is run, the **process drops sensitive capabilities that 
 
 This is a security feature that allows Docker to **limit the syscalls** that can be used inside the container:
 
+
 {{#ref}}
 seccomp.md
 {{#endref}}
@@ -203,6 +207,7 @@ seccomp.md
 ### AppArmor in Docker
 
 **AppArmor** is a kernel enhancement to confine **containers** to a **limited** set of **resources** with **per-program profiles**.:
+
 
 {{#ref}}
 apparmor.md
@@ -218,6 +223,7 @@ apparmor.md
 
 This mechanism ensures that even if a process within a container is compromised, it's confined to interacting only with objects that have the corresponding labels, significantly limiting the potential damage from such compromises.
 
+
 {{#ref}}
 ../selinux.md
 {{#endref}}
@@ -230,6 +236,7 @@ In Docker, an authorization plugin plays a crucial role in security by deciding 
 - **Command Context**: This comprises all pertinent data related to the request being made.
 
 These contexts help ensure that only legitimate requests from authenticated users are processed, enhancing the security of Docker operations.
+
 
 {{#ref}}
 authz-and-authn-docker-access-authorization-plugin.md
@@ -260,6 +267,7 @@ nc -lvp 4444 >/dev/null & while true; do cat /dev/urandom | nc <target IP> 4444;
 ### --privileged flag
 
 In the following page you can learn **what does the `--privileged` flag imply**:
+
 
 {{#ref}}
 docker-privileged.md
@@ -341,6 +349,7 @@ In Kubernetes environments, secrets are natively supported and can be further ma
 
 **gVisor** is an application kernel, written in Go, that implements a substantial portion of the Linux system surface. It includes an [Open Container Initiative (OCI)](https://www.opencontainers.org) runtime called `runsc` that provides an **isolation boundary between the application and the host kernel**. The `runsc` runtime integrates with Docker and Kubernetes, making it simple to run sandboxed containers.
 
+
 {{#ref}}
 https://github.com/google/gvisor
 {{#endref}}
@@ -348,6 +357,7 @@ https://github.com/google/gvisor
 ### Kata Containers
 
 **Kata Containers** is an open source community working to build a secure container runtime with lightweight virtual machines that feel and perform like containers, but provide **stronger workload isolation using hardware virtualization** technology as a second layer of defense.
+
 
 {{#ref}}
 https://katacontainers.io/
@@ -374,6 +384,7 @@ https://katacontainers.io/
 
 If you are **inside a docker container** or you have access to a user in the **docker group**, you could try to **escape and escalate privileges**:
 
+
 {{#ref}}
 docker-breakout-privilege-escalation/
 {{#endref}}
@@ -381,6 +392,7 @@ docker-breakout-privilege-escalation/
 ## Docker Authentication Plugin Bypass
 
 If you have access to the docker socket or have access to a user in the **docker group but your actions are being limited by a docker auth plugin**, check if you can **bypass it:**
+
 
 {{#ref}}
 authz-and-authn-docker-access-authorization-plugin.md
@@ -408,4 +420,3 @@ authz-and-authn-docker-access-authorization-plugin.md
 - [https://resources.experfy.com/bigdata-cloud/top-20-docker-security-tips/](https://resources.experfy.com/bigdata-cloud/top-20-docker-security-tips/)
 
 {{#include ../../../banners/hacktricks-training.md}}
-

@@ -29,6 +29,7 @@ If an attacker wants to append the string "append" he can:
 
 ### **Tool**
 
+
 {{#ref}}
 https://github.com/iagox86/hash_extender
 {{#endref}}
@@ -38,4 +39,3 @@ https://github.com/iagox86/hash_extender
 You can find this attack good explained in [https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks](https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)
 
 {{#include ../banners/hacktricks-training.md}}
-

@@ -177,6 +177,15 @@ with tarfile.open("symlink_demo.model", "w:gz") as tf:
     tf.add(PAYLOAD)                      # rides the symlink
 ```
 
+### Deep-dive: Keras .keras deserialization and gadget hunting
+
+For a focused guide on .keras internals, Lambda-layer RCE, the arbitrary import issue in ≤ 3.8, and post-fix gadget discovery inside the allowlist, see:
+
+
+{{#ref}}
+../generic-methodologies-and-resources/python/keras-model-deserialization-rce-and-gadget-hunting.md
+{{#endref}}
+
 ## References
 
 - [OffSec blog – "CVE-2024-12029 – InvokeAI Deserialization of Untrusted Data"](https://www.offsec.com/blog/cve-2024-12029/)

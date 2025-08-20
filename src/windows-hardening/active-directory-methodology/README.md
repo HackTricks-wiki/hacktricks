@@ -54,6 +54,7 @@ If you just have access to an AD environment but you don't have any credentials/
   - `smbclient -U '%' -L //<DC IP> && smbclient -U 'guest%' -L //`
   - A more detailed guide on how to enumerate a SMB server can be found here:
 
+
 {{#ref}}
 ../../network-services-pentesting/pentesting-smb/
 {{#endref}}
@@ -61,6 +62,7 @@ If you just have access to an AD environment but you don't have any credentials/
 - **Enumerate Ldap**
   - `nmap -n -sV --script "ldap* and not brute" -p 389 <DC IP>`
   - A more detailed guide on how to enumerate LDAP can be found here (pay **special attention to the anonymous access**):
+
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-ldap.md
@@ -124,6 +126,7 @@ Ok, so you know you have already a valid username but no passwords... Then try:
 - [**Password Spraying**](password-spraying.md): Let's try the most **common passwords** with each of the discovered users, maybe some user is using a bad password (keep in mind the password policy!).
   - Note that you can also **spray OWA servers** to try to get access to the users mail servers.
 
+
 {{#ref}}
 password-spraying.md
 {{#endref}}
@@ -131,6 +134,7 @@ password-spraying.md
 ### LLMNR/NBT-NS Poisoning
 
 You might be able to **obtain** some challenge **hashes** to crack **poisoning** some protocols of the **network**:
+
 
 {{#ref}}
 ../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md
@@ -144,6 +148,7 @@ If you have managed to enumerate the active directory you will have **more email
 
 If you can **access other PCs or shares** with the **null or guest user** you could **place files** (like a SCF file) that if somehow accessed will t**rigger an NTLM authentication against you** so you can **steal** the **NTLM challenge** to crack it:
 
+
 {{#ref}}
 ../ntlm/places-to-steal-ntlm-creds.md
 {{#endref}}
@@ -153,6 +158,7 @@ If you can **access other PCs or shares** with the **null or guest user** you co
 For this phase you need to have **compromised the credentials or a session of a valid domain account.** If you have some valid credentials or a shell as a domain user, **you should remember that the options given before are still options to compromise other users**.
 
 Before start the authenticated enumeration you should know what is the **Kerberos double hop problem.**
+
 
 {{#ref}}
 kerberos-double-hop-problem.md
@@ -187,6 +193,7 @@ Regarding [**ASREPRoast**](asreproast.md) you can now find every possible vulner
 Kerberoasting involves obtaining **TGS tickets** used by services tied to user accounts and cracking their encryption—which is based on user passwords—**offline**.
 
 More about this in:
+
 
 {{#ref}}
 kerberoast.md
@@ -228,6 +235,7 @@ Now that you have some basic credentials you should check if you can **find** an
 
 If you can **access other PCs or shares** you could **place files** (like a SCF file) that if somehow accessed will t**rigger an NTLM authentication against you** so you can **steal** the **NTLM challenge** to crack it:
 
+
 {{#ref}}
 ../ntlm/places-to-steal-ntlm-creds.md
 {{#endref}}
@@ -235,6 +243,7 @@ If you can **access other PCs or shares** you could **place files** (like a SCF 
 ### CVE-2021-1675/CVE-2021-34527 PrintNightmare
 
 This vulnerability allowed any authenticated user to **compromise the domain controller**.
+
 
 {{#ref}}
 printnightmare.md
@@ -260,6 +269,7 @@ You need to use some **tool** that will **perform** the **NTLM authentication us
 
 This attack aims to **use the user NTLM hash to request Kerberos tickets**, as an alternative to the common Pass The Hash over NTLM protocol. Therefore, this could be especially **useful in networks where NTLM protocol is disabled** and only **Kerberos is allowed** as authentication protocol.
 
+
 {{#ref}}
 over-pass-the-hash-pass-the-key.md
 {{#endref}}
@@ -267,6 +277,7 @@ over-pass-the-hash-pass-the-key.md
 ### Pass the Ticket
 
 In the **Pass The Ticket (PTT)** attack method, attackers **steal a user's authentication ticket** instead of their password or hash values. This stolen ticket is then used to **impersonate the user**, gaining unauthorized access to resources and services within a network.
+
 
 {{#ref}}
 pass-the-ticket.md
@@ -291,6 +302,7 @@ If a user has privileges to **access MSSQL instances**, he could be able to use 
 Also, if a MSSQL instance is trusted (database link) by a different MSSQL instance. If the user has privileges over the trusted database, he is going to be able to **use the trust relationship to execute queries also in the other instance**. These trusts can be chained and at some point the user might be able to find a misconfigured database where he can execute commands.\
 **The links between databases work even across forest trusts.**
 
+
 {{#ref}}
 abusing-ad-mssql.md
 {{#endref}}
@@ -301,6 +313,7 @@ If you find any Computer object with the attribute [ADS_UF_TRUSTED_FOR_DELEGATIO
 So, if a **Domain Admin logins onto the computer**, you will be able to dump his TGT and impersonate him using [Pass the Ticket](pass-the-ticket.md).\
 Thanks to constrained delegation you could even **automatically compromise a Print Server** (hopefully it will be a DC).
 
+
 {{#ref}}
 unconstrained-delegation.md
 {{#endref}}
@@ -310,6 +323,7 @@ unconstrained-delegation.md
 If a user or computer is allowed for "Constrained Delegation" it will be able to **impersonate any user to access some services in a computer**.\
 Then, if you **compromise the hash** of this user/computer you will be able to **impersonate any user** (even domain admins) to access some services.
 
+
 {{#ref}}
 constrained-delegation.md
 {{#endref}}
@@ -317,6 +331,7 @@ constrained-delegation.md
 ### Resourced-based Constrain Delegation
 
 Having **WRITE** privilege on an Active Directory object of a remote computer enables the attainment of code execution with **elevated privileges**:
+
 
 {{#ref}}
 resource-based-constrained-delegation.md
@@ -326,6 +341,7 @@ resource-based-constrained-delegation.md
 
 The compromised user could have some **interesting privileges over some domain objects** that could let you **move** laterally/**escalate** privileges.
 
+
 {{#ref}}
 acl-persistence-abuse/
 {{#endref}}
@@ -333,6 +349,7 @@ acl-persistence-abuse/
 ### Printer Spooler service abuse
 
 Discovering a **Spool service listening** within the domain can be **abused** to **acquire new credentials** and **escalate privileges**.
+
 
 {{#ref}}
 printers-spooler-service-abuse.md
@@ -343,6 +360,7 @@ printers-spooler-service-abuse.md
 If **other users** **access** the **compromised** machine, it's possible to **gather credentials from memory** and even **inject beacons in their processes** to impersonate them.\
 Usually users will access the system via RDP, so here you have how to performa couple of attacks over third party RDP sessions:
 
+
 {{#ref}}
 rdp-sessions-abuse.md
 {{#endref}}
@@ -350,6 +368,7 @@ rdp-sessions-abuse.md
 ### LAPS
 
 **LAPS** provides a system for managing the **local Administrator password** on domain-joined computers, ensuring it's **randomized**, unique, and frequently **changed**. These passwords are stored in Active Directory and access is controlled through ACLs to authorized users only. With sufficient permissions to access these passwords, pivoting to other computers becomes possible.
+
 
 {{#ref}}
 laps.md
@@ -359,6 +378,7 @@ laps.md
 
 **Gathering certificates** from the compromised machine could be a way to escalate privileges inside the environment:
 
+
 {{#ref}}
 ad-certificates/certificate-theft.md
 {{#endref}}
@@ -366,6 +386,7 @@ ad-certificates/certificate-theft.md
 ### Certificate Templates Abuse
 
 If **vulnerable templates** are configured it's possible to abuse them to escalate privileges:
+
 
 {{#ref}}
 ad-certificates/domain-escalation.md
@@ -408,6 +429,7 @@ For example you could:
 
 The **Silver Ticket attack** creates a **legitimate Ticket Granting Service (TGS) ticket** for a specific service by using the **NTLM hash** (for instance, the **hash of the PC account**). This method is employed to **access the service privileges**.
 
+
 {{#ref}}
 silver-ticket.md
 {{#endref}}
@@ -418,6 +440,7 @@ A **Golden Ticket attack** involves an attacker gaining access to the **NTLM has
 
 Once the attacker obtains this hash, they can create **TGTs** for any account they choose (Silver ticket attack).
 
+
 {{#ref}}
 golden-ticket.md
 {{#endref}}
@@ -425,6 +448,7 @@ golden-ticket.md
 ### Diamond Ticket
 
 These are like golden tickets forged in a way that **bypasses common golden tickets detection mechanisms.**
+
 
 {{#ref}}
 diamond-ticket.md
@@ -434,6 +458,7 @@ diamond-ticket.md
 
 **Having certificates of an account or being able to request them** is a very good way to be able to persist in the users account (even if he changes the password):
 
+
 {{#ref}}
 ad-certificates/account-persistence.md
 {{#endref}}
@@ -441,6 +466,7 @@ ad-certificates/account-persistence.md
 ### **Certificates Domain Persistence**
 
 **Using certificates is also possible to persist with high privileges inside the domain:**
+
 
 {{#ref}}
 ad-certificates/domain-persistence.md
@@ -456,6 +482,7 @@ The **AdminSDHolder** object in Active Directory ensures the security of **privi
 
 Inside every **Domain Controller (DC)**, a **local administrator** account exists. By obtaining admin rights on such a machine, the local Administrator hash can be extracted using **mimikatz**. Following this, a registry modification is necessary to **enable the use of this password**, allowing for remote access to the local Administrator account.
 
+
 {{#ref}}
 dsrm-credentials.md
 {{#endref}}
@@ -463,6 +490,7 @@ dsrm-credentials.md
 ### ACL Persistence
 
 You could **give** some **special permissions** to a **user** over some specific domain objects that will let the user **escalate privileges in the future**.
+
 
 {{#ref}}
 acl-persistence-abuse/
@@ -472,6 +500,7 @@ acl-persistence-abuse/
 
 The **security descriptors** are used to **store** the **permissions** an **object** have **over** an **object**. If you can just **make** a **little change** in the **security descriptor** of an object, you can obtain very interesting privileges over that object without needing to be member of a privileged group.
 
+
 {{#ref}}
 security-descriptors.md
 {{#endref}}
@@ -479,6 +508,7 @@ security-descriptors.md
 ### Skeleton Key
 
 Alter **LSASS** in memory to establish a **universal password**, granting access to all domain accounts.
+
 
 {{#ref}}
 skeleton-key.md
@@ -489,6 +519,7 @@ skeleton-key.md
 [Learn what is a SSP (Security Support Provider) here.](../authentication-credentials-uac-and-efs/index.html#security-support-provider-interface-sspi)\
 You can create you **own SSP** to **capture** in **clear text** the **credentials** used to access the machine.
 
+
 {{#ref}}
 custom-ssp.md
 {{#endref}}
@@ -498,6 +529,7 @@ custom-ssp.md
 It registers a **new Domain Controller** in the AD and uses it to **push attributes** (SIDHistory, SPNs...) on specified objects **without** leaving any **logs** regarding the **modifications**. You **need DA** privileges and be inside the **root domain**.\
 Note that if you use wrong data, pretty ugly logs will appear.
 
+
 {{#ref}}
 dcshadow.md
 {{#endref}}
@@ -506,6 +538,7 @@ dcshadow.md
 
 Previously we have discussed about how to escalate privileges if you have **enough permission to read LAPS passwords**. However, these passwords can also be used to **maintain persistence**.\
 Check:
+
 
 {{#ref}}
 laps.md
@@ -620,6 +653,7 @@ nltest /server:dc.sub.domain.local /domain_trusts /all_trusts
 
 Escalate as Enterprise admin to the child/parent domain abusing the trust with SID-History injection:
 
+
 {{#ref}}
 sid-history-injection.md
 {{#endref}}
@@ -640,11 +674,13 @@ An attack vector involves targeting privileged gMSAs within the domain. The KDS 
 
 Detailed analysis and step-by-step guidance can be found in:
 
+
 {{#ref}}
 golden-dmsa-gmsa.md
 {{#endref}}
 
 Complementary delegated MSA attack (BadSuccessor – abusing migration attributes):
+
 
 {{#ref}}
 badsuccessor-dmsa-migration-abuse.md
@@ -679,6 +715,7 @@ WhenChanged     : 2/19/2021 10:50:56 PM
 
 In this scenario **your domain is trusted** by an external one giving you **undetermined permissions** over it. You will need to find **which principals of your domain have which access over the external domain** and then try to exploit it:
 
+
 {{#ref}}
 external-forest-domain-oneway-inbound.md
 {{#endref}}
@@ -701,6 +738,7 @@ In this scenario **your domain** is **trusting** some **privileges** to principa
 
 However, when a **domain is trusted** by the trusting domain, the trusted domain **creates a user** with a **predictable name** that uses as **password the trusted password**. Which means that it's possible to **access a user from the trusting domain to get inside the trusted one** to enumerate it and try to escalate more privileges:
 
+
 {{#ref}}
 external-forest-domain-one-way-outbound.md
 {{#endref}}
@@ -709,6 +747,7 @@ Another way to compromise the trusted domain is to find a [**SQL trusted link**]
 
 Another way to compromise the trusted domain is to wait in a machine where a **user from the trusted domain can access** to login via **RDP**. Then, the attacker could inject code in the RDP session process and **access the origin domain of the victim** from there.\
 Moreover, if the **victim mounted his hard drive**, from the **RDP session** process the attacker could store **backdoors** in the **startup folder of the hard drive**. This technique is called **RDPInception.**
+
 
 {{#ref}}
 rdp-sessions-abuse.md
@@ -729,6 +768,7 @@ rdp-sessions-abuse.md
 [**More information about domain trusts in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain)
 
 ## AD -> Azure & Azure -> AD
+
 
 {{#ref}}
 https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/azure-ad-connect-hybrid-identity/index.html
@@ -769,4 +809,3 @@ https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-move
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain)
 
 {{#include ../../banners/hacktricks-training.md}}
-
