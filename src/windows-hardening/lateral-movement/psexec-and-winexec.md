@@ -133,12 +133,12 @@ PsExec와 유사한 기술을 사용할 때의 전형적인 호스트/네트워�
 
 - WMI 기반 원격 실행 (종종 더 파일리스):
 {{#ref}}
-lateral-movement/wmiexec.md
+./wmiexec.md
 {{#endref}}
 
 - WinRM 기반 원격 실행:
 {{#ref}}
-lateral-movement/winrm.md
+./winrm.md
 {{#endref}}
 
 
