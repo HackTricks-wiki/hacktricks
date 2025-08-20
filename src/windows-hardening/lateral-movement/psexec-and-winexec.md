@@ -9,8 +9,8 @@ Te techniki wykorzystują Menedżera Kontroli Usług Windows (SCM) zdalnie przez
 1. Uwierzytelnienie do celu i dostęp do udziału ADMIN$ przez SMB (TCP/445).
 2. Skopiowanie pliku wykonywalnego lub określenie linii poleceń LOLBAS, którą usługa uruchomi.
 3. Zdalne utworzenie usługi za pomocą SCM (MS-SCMR przez \PIPE\svcctl) wskazującej na to polecenie lub binarny plik.
-4. Uruchomienie usługi w celu wykonania ładunku i opcjonalnie przechwycenie stdin/stdout przez nazwany potok.
-5. Zatrzymanie usługi i sprzątanie (usunięcie usługi i wszelkich zrzucanych binarnych plików).
+4. Uruchomienie usługi w celu wykonania ładunku i opcjonalne przechwycenie stdin/stdout przez nazwany potok.
+5. Zatrzymanie usługi i sprzątanie (usunięcie usługi i wszelkich skopiowanych binarnych plików).
 
 Wymagania/wymogi wstępne:
 - Lokalny administrator na docelowym hoście (SeCreateServicePrivilege) lub wyraźne prawa do tworzenia usług na docelowym hoście.
@@ -20,7 +20,7 @@ Wymagania/wymogi wstępne:
 
 ### Ręczne ScExec/WinExec za pomocą sc.exe
 
-Poniżej przedstawiono minimalne podejście do tworzenia usługi. Obraz usługi może być zrzucanym EXE lub LOLBAS, takim jak cmd.exe lub powershell.exe.
+Poniżej przedstawiono minimalne podejście do tworzenia usługi. Obraz usługi może być skopiowanym EXE lub LOLBAS, takim jak cmd.exe lub powershell.exe.
 ```cmd
 :: Execute a one-liner without dropping a binary
 sc.exe \\TARGET create HTSvc binPath= "cmd.exe /c whoami > C:\\Windows\\Temp\\o.txt" start= demand
@@ -60,7 +60,7 @@ PsExec64.exe -accepteula \\HOST -r WinSvc$ -s cmd.exe /c ipconfig
 \\live.sysinternals.com\tools\PsExec64.exe -accepteula \\HOST -s cmd.exe /c whoami
 ```
 OPSEC
-- Zostawia zdarzenia instalacji/odinstalacji usługi (nazwa usługi często PSEXESVC, chyba że użyto -r) i tworzy C:\Windows\PSEXESVC.exe podczas wykonywania.
+- Zostawia zdarzenia instalacji/odinstalacji usługi (Nazwa usługi często PSEXESVC, chyba że użyto -r) i tworzy C:\Windows\PSEXESVC.exe podczas wykonywania.
 
 ### Impacket psexec.py (podobny do PsExec)
 
@@ -109,34 +109,36 @@ cme smb HOST -u USER -H NTHASH -x "ipconfig /all" --exec-method smbexec
 Typowe artefakty hosta/sieci przy użyciu technik podobnych do PsExec:
 - Zdarzenia zabezpieczeń 4624 (Typ logowania 3) i 4672 (Specjalne uprawnienia) na docelowym koncie administratora.
 - Zdarzenia zabezpieczeń 5140/5145 dotyczące udostępniania plików i szczegółowe zdarzenia udostępniania plików pokazujące dostęp do ADMIN$ oraz tworzenie/zapisywanie binariów usług (np. PSEXESVC.exe lub losowe 8-znakowe .exe).
-- Instalacja usługi zabezpieczeń 7045 na docelowym: nazwy usług takie jak PSEXESVC, RemComSvc lub niestandardowe (-r / -service-name).
+- Zainstalowanie usługi zabezpieczeń 7045 na docelowym: nazwy usług takie jak PSEXESVC, RemComSvc lub niestandardowe (-r / -service-name).
 - Sysmon 1 (Utworzenie procesu) dla services.exe lub obrazu usługi, 3 (Połączenie sieciowe), 11 (Utworzenie pliku) w C:\Windows\, 17/18 (Rura utworzona/połączona) dla rur takich jak \\.\pipe\psexesvc, \\.\pipe\remcom_*, lub zrandomizowane odpowiedniki.
 - Artefakt rejestru dla EULA Sysinternals: HKCU\Software\Sysinternals\PsExec\EulaAccepted=0x1 na hoście operatora (jeśli nie jest tłumione).
 
 Pomysły na polowanie
 - Powiadomienie o instalacjach usług, gdzie ImagePath zawiera cmd.exe /c, powershell.exe lub lokalizacje TEMP.
 - Szukaj tworzenia procesów, gdzie ParentImage to C:\Windows\PSEXESVC.exe lub dzieci services.exe działających jako LOCAL SYSTEM wykonujących powłokę.
-- Oznaczaj nazwane rury kończące się na -stdin/-stdout/-stderr lub znane nazwy rur klonów PsExec.
+- Oznacz nazwane rury kończące się na -stdin/-stdout/-stderr lub znane nazwy rur klonów PsExec.
 
 ## Rozwiązywanie typowych problemów
-- Odmowa dostępu (5) podczas tworzenia usług: brak prawdziwego lokalnego administratora, ograniczenia UAC dla lokalnych kont lub ochrona przed manipulacją EDR na ścieżce binariów usługi.
+- Odmowa dostępu (5) podczas tworzenia usług: brak prawdziwego lokalnego administratora, zdalne ograniczenia UAC dla lokalnych kont lub ochrona przed manipulacją EDR na ścieżce binariów usługi.
 - Ścieżka sieciowa nie została znaleziona (53) lub nie można połączyć się z ADMIN$: zapora blokująca SMB/RPC lub wyłączone udostępnianie administratora.
-- Kerberos nie działa, ale NTLM jest zablokowany: połącz się używając nazwy hosta/FQDN (nie IP), upewnij się, że SPN są poprawne, lub dostarcz -k/-no-pass z biletami przy użyciu Impacket.
+- Kerberos nie działa, ale NTLM jest zablokowany: połącz się używając nazwy hosta/FQDN (nie IP), upewnij się, że SPN są poprawne, lub dostarcz -k/-no-pass z biletami podczas korzystania z Impacket.
 - Rozpoczęcie usługi przekracza czas, ale ładunek działał: oczekiwane, jeśli nie jest to prawdziwy plik binarny usługi; przechwyć wyjście do pliku lub użyj smbexec do bieżącego I/O.
 
-## Notatki dotyczące zabezpieczeń (nowoczesne zmiany)
-- Windows 11 24H2 i Windows Server 2025 wymagają podpisywania SMB domyślnie dla połączeń wychodzących (i Windows 11 przychodzących). Nie wpływa to na legalne użycie PsExec z ważnymi poświadczeniami, ale zapobiega nadużywaniu niepodpisanego SMB relay i może wpłynąć na urządzenia, które nie obsługują podpisywania.
-- Nowe blokowanie NTLM klienta SMB (Windows 11 24H2/Server 2025) może uniemożliwić fallback NTLM przy łączeniu przez IP lub do serwerów nie-Kerberos. W zabezpieczonych środowiskach to złamie oparte na NTLM PsExec/SMBExec; użyj Kerberos (nazwa hosta/FQDN) lub skonfiguruj wyjątki, jeśli jest to rzeczywiście potrzebne.
+## Notatki dotyczące zabezpieczeń
+- Windows 11 24H2 i Windows Server 2025 wymagają podpisywania SMB domyślnie dla połączeń wychodzących (i Windows 11 przychodzących). Nie łamie to legalnego użycia PsExec z ważnymi poświadczeniami, ale zapobiega nadużywaniu niepodpisanego przekazywania SMB i może wpłynąć na urządzenia, które nie obsługują podpisywania.
+- Nowe blokowanie NTLM w kliencie SMB (Windows 11 24H2/Server 2025) może uniemożliwić powrót do NTLM podczas łączenia się przez IP lub do serwerów nie-Kerberos. W zabezpieczonych środowiskach to złamie oparte na NTLM PsExec/SMBExec; użyj Kerberos (nazwa hosta/FQDN) lub skonfiguruj wyjątki, jeśli jest to rzeczywiście potrzebne.
 - Zasada najmniejszych uprawnień: minimalizuj członkostwo lokalnych administratorów, preferuj Just-in-Time/Just-Enough Admin, egzekwuj LAPS i monitoruj/powiadamiaj o instalacjach usług 7045.
 
 ## Zobacz także
 
-- WMI-based remote exec (często bardziej bezplikowe):
+- Wykonanie zdalne oparte na WMI (często bardziej bezplikowe):
+
 {{#ref}}
 ./wmiexec.md
 {{#endref}}
 
-- WinRM-based remote exec:
+- Wykonanie zdalne oparte na WinRM:
+
 {{#ref}}
 ./winrm.md
 {{#endref}}
@@ -147,4 +149,5 @@ Pomysły na polowanie
 
 - PsExec - Sysinternals | Microsoft Learn: https://learn.microsoft.com/sysinternals/downloads/psexec
 - Zabezpieczenia SMB w Windows Server 2025 i Windows 11 (podpisywanie domyślnie, blokowanie NTLM): https://techcommunity.microsoft.com/blog/filecab/smb-security-hardening-in-windows-server-2025--windows-11/4226591
+
 {{#include ../../banners/hacktricks-training.md}}
