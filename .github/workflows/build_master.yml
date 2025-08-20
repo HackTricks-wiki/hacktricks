@@ -26,19 +26,6 @@ jobs:
     environment: prod
 
     steps:
-      - name: Free Disk Space (Ubuntu)
-        uses: jlumbroso/free-disk-space@main
-        with:
-          # this might remove tools that are actually needed,
-          # when set to "true" but frees about 6 GB
-          tool-cache: true
-
-      - name: Clean space
-        run: |
-          echo "Cleaning space"
-          sudo rm -rf "/usr/local/share/boost"
-          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
-
       - name: Checkout code
         uses: actions/checkout@v4
         with:
@@ -48,21 +35,60 @@ jobs:
       - name: Build mdBook
         run: MDBOOK_BOOK__LANGUAGE=en mdbook build || (echo "Error logs" && cat hacktricks-preprocessor-error.log && echo "" && echo "" && echo "Debug logs" && (cat hacktricks-preprocessor.log | tail -n 20) && exit 1)
       
-      - name: Update searchindex in repo
+      - name: Update searchindex in repo (purge history, keep current on HEAD)
         run: |
+          set -euo pipefail
+
           ls -la
           ls -la book
+
           git config --global --add safe.directory /__w/hacktricks/hacktricks
-          git pull
           git config --global user.email "build@example.com"
           git config --global user.name "Build master"
           git config pull.rebase false
+
+          # Ensure we're on the target branch and up to date
+          git pull --ff-only
+
+          # Choose the file to keep at HEAD:
+          # 1) Prefer freshly built version from book/
+          # 2) Fallback to the file currently at HEAD (if it exists)
+          HAS_FILE=0
           if [ -f "book/searchindex.js" ]; then
-            cp book/searchindex.js searchindex.js
+            cp "book/searchindex.js" /tmp/sidx.js
+            HAS_FILE=1
+          elif git cat-file -e "HEAD:searchindex.js" 2>/dev/null; then
+            git show "HEAD:searchindex.js" > /tmp/sidx.js
+            HAS_FILE=1
           fi
-          (git add searchindex.js;
-          git commit -m "Update searchindex";
-          git push) || echo "No changes to searchindex.js"
+
+          # Skip if there's nothing to purge AND nothing to keep
+          if [ "$HAS_FILE" = "1" ] || git rev-list -n 1 HEAD -- "searchindex.js" >/dev/null 2>&1; then
+            # Fail early if working tree is dirty (avoid confusing rewrites)
+            git diff --quiet || { echo "Working tree has uncommitted changes; aborting purge." >&2; exit 1; }
+
+            # Install git-filter-repo and ensure it's on PATH
+            python -m pip install --quiet --user git-filter-repo
+            export PATH="$HOME/.local/bin:$PATH"
+
+            # Rewrite ONLY the current branch, dropping all historical blobs of searchindex.js
+            git filter-repo --force --path "searchindex.js" --invert-paths --refs "$(git symbolic-ref -q HEAD)"
+
+            # Re-add the current version on top of rewritten history (keep it in HEAD)
+            if [ "$HAS_FILE" = "1" ]; then
+              mv /tmp/sidx.js "searchindex.js"
+              git add "searchindex.js"
+              git commit -m "Update searchindex (purged history; keep current)"
+            else
+              echo "No current searchindex.js to re-add after purge."
+            fi
+
+            # Safer force push (only updates if remote hasn't advanced)
+            git push --force-with-lease
+          else
+            echo "Nothing to purge; skipping."
+          fi
+
 
       # Login in AWs
       - name: Configure AWS credentials using OIDC
