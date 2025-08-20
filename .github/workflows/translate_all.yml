@@ -46,7 +46,7 @@ jobs:
 
     # Ensure only one job per branch runs at a time (even across workflow runs)
     concurrency:
-      group: translate-${{ matrix.branch }}
+      group: translate-cloud-${{ matrix.branch }}
       cancel-in-progress: false
 
     container:
