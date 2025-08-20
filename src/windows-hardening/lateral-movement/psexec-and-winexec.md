@@ -133,12 +133,12 @@ Mawazo ya uwindaji
 
 - WMI-based remote exec (mara nyingi zaidi bila faili):
 {{#ref}}
-lateral-movement/wmiexec.md
+./wmiexec.md
 {{#endref}}
 
 - WinRM-based remote exec:
 {{#ref}}
-lateral-movement/winrm.md
+./winrm.md
 {{#endref}}
 
 
