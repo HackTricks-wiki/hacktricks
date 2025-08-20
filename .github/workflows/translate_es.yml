@@ -1,4 +1,4 @@
-name: Translator to ES (Spachins)
+name: Translator to ES (Spanish)
 
 on:
   push:
@@ -49,7 +49,7 @@ jobs:
         run: |
           python scripts/get_and_save_refs.py
 
-      - name: Download language branch
+      - name: Download language branch & update refs
         run: |
           git config --global --add safe.directory /__w/hacktricks/hacktricks
           git config --global user.name 'Translator'
@@ -57,11 +57,8 @@ jobs:
           git config pull.rebase false
           git checkout $BRANCH
           git pull
-          git checkout master
-      
-      - name: Update the refs from master to language branch
-        run: |
           python scripts/compare_and_fix_refs.py --files-unmatched-paths /tmp/file_paths.txt
+          git checkout master
       
       - name: Run translation script on changed files
         run: |
