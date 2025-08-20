@@ -30,6 +30,7 @@ This is what was done in [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023
 
 In the [**last examples of Word sandbox bypass**](macos-office-sandbox-bypasses.md#word-sandbox-bypass-via-login-items-and-.zshenv) can be appreciated how the **`open`** cli functionality could be abused to bypass the sandbox.
 
+
 {{#ref}}
 macos-office-sandbox-bypasses.md
 {{#endref}}
@@ -47,6 +48,7 @@ For this you might even need **2 steps**: To make a process with a **more permis
 
 Check this page about **Auto Start locations**:
 
+
 {{#ref}}
 ../../../../macos-auto-start-locations.md
 {{#endref}}
@@ -54,6 +56,7 @@ Check this page about **Auto Start locations**:
 ### Abusing other processes
 
 If from then sandbox process you are able to **compromise other processes** running in less restrictive sandboxes (or none), you will be able to escape to their sandboxes:
+
 
 {{#ref}}
 ../../../macos-proces-abuse/
@@ -269,6 +272,7 @@ Note that even if some **actions** might be **allowed by at he sandbox** if an a
 ### Interposting Bypass
 
 For more information about **Interposting** check:
+
 
 {{#ref}}
 ../../../macos-proces-abuse/macos-function-hooking.md
@@ -499,6 +503,5 @@ Process 2517 exited with status = 0 (0x00000000)
 - [https://www.youtube.com/watch?v=mG715HcDgO8](https://www.youtube.com/watch?v=mG715HcDgO8)
 
 {{#include ../../../../../banners/hacktricks-training.md}}
-
 
 
