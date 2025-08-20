@@ -1,4 +1,4 @@
-name: Translator to ES (Spanish)
+name: Translate All
 
 on:
   push:
@@ -11,26 +11,54 @@ on:
       - Dockerfile
   workflow_dispatch:
 
-concurrency: es
-
 permissions:
   packages: write
   id-token: write
   contents: write
 
 jobs:
-  run-translation:
+  translate:
+    name: Translate → ${{ matrix.name }} (${{ matrix.branch }})
     runs-on: ubuntu-latest
+
+    # Run N languages in parallel (tune max-parallel if needed)
+    strategy:
+      fail-fast: false
+      # max-parallel: 3 #Nothing to run all in parallel
+      matrix:
+        include:
+          - { name: "Afrikaans", language: "Afrikaans", branch: "af" }
+          - { name: "German", language: "German", branch: "de" }
+          - { name: "Greek", language: "Greek", branch: "el" }
+          - { name: "Spanish", language: "Spanish", branch: "es" }
+          - { name: "French",  language: "French",  branch: "fr" }
+          - { name: "Hindi",  language: "Hindi",  branch: "hi" }
+          - { name: "Italian", language: "Italian", branch: "it" }
+          - { name: "Japanese", language: "Japanese", branch: "ja" }
+          - { name: "Korean", language: "Korean", branch: "ko" }
+          - { name: "Polish", language: "Polish", branch: "pl" }
+          - { name: "Portuguese", language: "Portuguese", branch: "pt" }
+          - { name: "Serbian", language: "Serbian", branch: "sr" }
+          - { name: "Swahili", language: "Swahili", branch: "sw" }
+          - { name: "Turkish", language: "Turkish", branch: "tr" }
+          - { name: "Ukrainian", language: "Ukrainian", branch: "uk" }
+          - { name: "Chinese", language: "Chinese", branch: "zh" }
+
+    # Ensure only one job per branch runs at a time (even across workflow runs)
+    concurrency:
+      group: translate-${{ matrix.branch }}
+      cancel-in-progress: false
+
     container:
       image: ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image:latest
-    environment: prod
+
     env:
-      LANGUAGE: Spanish
-      BRANCH: es
-    
+      LANGUAGE: ${{ matrix.language }}
+      BRANCH:   ${{ matrix.branch }}
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       
@@ -76,6 +104,7 @@ jobs:
           cat /tmp/file_paths.txt
           echo ""
           echo ""
+          touch /tmp/file_paths.txt
 
           if [ -s /tmp/file_paths.txt ]; then
             python scripts/translator.py \
