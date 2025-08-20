@@ -10,7 +10,7 @@
 
 | 通道 | 典型目标 | 仪器 |
 |---------|---------------|-----------------|
-| 功耗 | 智能卡、物联网MCU、FPGA | 示波器 + 分流电阻/高频探头（例如CW503） |
+| 电力消耗 | 智能卡、物联网MCU、FPGA | 示波器 + 分流电阻/高频探头（例如CW503） |
 | 电磁场（EM） | CPU、RFID、AES加速器 | H场探头 + LNA，ChipWhisperer/RTL-SDR |
 | 执行时间/缓存 | 桌面和云CPU | 高精度计时器（rdtsc/rdtscp），远程飞行时间 |
 | 声学/机械 | 键盘、3D打印机、继电器 | MEMS麦克风，激光振动计 |
@@ -19,9 +19,9 @@
 
 ---
 
-## 功率分析
+## 电力分析
 
-### 简单功率分析（SPA）
+### 简单电力分析（SPA）
 观察*单个*波形并直接将峰值/谷值与操作（例如DES S盒）关联。
 ```python
 # ChipWhisperer-husky example – capture one AES trace
@@ -40,7 +40,7 @@ print(trace.wave)  # numpy array of power samples
 import numpy as np
 corr = np.corrcoef(leakage_model(k), traces[:,sample])
 ```
-CPA 仍然是最先进的，但机器学习变体（MLA，深度学习 SCA）现在主导了 ASCAD-v2（2023）等比赛。
+CPA 仍然是最先进的技术，但机器学习变体（MLA，深度学习 SCA）现在主导了 ASCAD-v2（2023）等比赛。
 
 ---
 
@@ -49,15 +49,11 @@ CPA 仍然是最先进的，但机器学习变体（MLA，深度学习 SCA）现
 
 ---
 
-## 时序与微架构攻击
+## 定时与微架构攻击
 现代 CPU 通过共享资源泄漏秘密：
-* **Hertzbleed (2022)** – DVFS 频率缩放与 Hamming 权重相关，允许 *远程* 提取 EdDSA 密钥。
-* **Downfall / Gather Data Sampling (Intel, 2023)** – 瞬态执行读取 SMT 线程中的 AVX-gather 数据。
+* **Hertzbleed (2022)** – DVFS 频率缩放与汉明权重相关，允许 *远程* 提取 EdDSA 密钥。
+* **Downfall / Gather Data Sampling (Intel, 2023)** – 瞬态执行读取跨 SMT 线程的 AVX-gather 数据。
 * **Zenbleed (AMD, 2023) & Inception (AMD, 2023)** – 投机向量误预测泄漏跨域寄存器。
-
-有关 Spectre 类问题的广泛处理，请参见 {{#ref}}
-../../cpu-microarchitecture/microarchitectural-attacks.md
-{{#endref}}
 
 ---
 
@@ -95,7 +91,7 @@ CPA 仍然是最先进的，但机器学习变体（MLA，深度学习 SCA）现
 
 ## 工具与框架
 * **ChipWhisperer-Husky** (2024) – 500 MS/s 示波器 + Cortex-M 触发器；Python API 如上。
-* **Riscure Inspector & FI** – 商业，支持自动泄漏评估（TVLA-2.0）。
+* **Riscure Inspector & FI** – 商业，支持自动化泄漏评估（TVLA-2.0）。
 * **scaaml** – 基于 TensorFlow 的深度学习 SCA 库（v1.2 – 2025）。
 * **pyecsca** – ANSSI 开源 ECC SCA 框架。
 
