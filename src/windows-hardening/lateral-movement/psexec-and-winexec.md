@@ -133,12 +133,12 @@ Pomysły na polowanie
 
 - WMI-based remote exec (często bardziej bezplikowe):
 {{#ref}}
-lateral-movement/wmiexec.md
+./wmiexec.md
 {{#endref}}
 
 - WinRM-based remote exec:
 {{#ref}}
-lateral-movement/winrm.md
+./winrm.md
 {{#endref}}
 
 
