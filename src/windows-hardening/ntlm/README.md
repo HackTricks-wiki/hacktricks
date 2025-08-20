@@ -256,7 +256,7 @@ Le PoC peut être trouvé dans **[https://github.com/eladshamir/Internal-Monolog
 **Lisez un guide plus détaillé sur la façon de réaliser ces attaques ici :**
 
 {{#ref}}
-../../generic-methodologies-and-resources/pentesting-network/`spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md`
+../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md
 {{#endref}}
 
 ## Analyser les défis NTLM à partir d'une capture réseau
