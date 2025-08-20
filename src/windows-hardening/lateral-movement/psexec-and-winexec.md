@@ -34,10 +34,10 @@ sc.exe \\TARGET start HTSvc
 sc.exe \\TARGET delete HTSvc
 ```
 Note:
-- Aspettati un errore di timeout quando avvii un EXE non servizio; l'esecuzione avviene comunque.
+- Aspettati un errore di timeout quando avvii un EXE non di servizio; l'esecuzione avviene comunque.
 - Per rimanere più OPSEC-friendly, preferisci comandi senza file (cmd /c, powershell -enc) o elimina gli artefatti lasciati.
 
-Trova passi più dettagliati in: https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/
+Trova ulteriori passaggi dettagliati in: https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/
 
 ## Tooling e esempi
 
@@ -60,9 +60,9 @@ PsExec64.exe -accepteula \\HOST -r WinSvc$ -s cmd.exe /c ipconfig
 \\live.sysinternals.com\tools\PsExec64.exe -accepteula \\HOST -s cmd.exe /c whoami
 ```
 OPSEC
-- Lascia eventi di installazione/disinstallazione del servizio (Il nome del servizio è spesso PSEXESVC a meno che non venga utilizzato -r) e crea C:\Windows\PSEXESVC.exe durante l'esecuzione.
+- Lascia eventi di installazione/disinstallazione del servizio (il nome del servizio è spesso PSEXESVC a meno che non venga utilizzato -r) e crea C:\Windows\PSEXESVC.exe durante l'esecuzione.
 
-### Impacket psexec.py (Simile a PsExec)
+### Impacket psexec.py (simile a PsExec)
 
 - Utilizza un servizio incorporato simile a RemCom. Rilascia un binario di servizio transitorio (nome comunemente randomizzato) tramite ADMIN$, crea un servizio (di default spesso RemComSvc) e proxy I/O tramite un pipe nominato.
 ```bash
@@ -83,14 +83,14 @@ Artifacts
 
 ### Impacket smbexec.py (SMBExec)
 
-- Crea un servizio temporaneo che avvia cmd.exe e utilizza un named pipe per I/O. In genere evita di scaricare un payload EXE completo; l'esecuzione dei comandi è semi-interattiva.
+- Crea un servizio temporaneo che avvia cmd.exe e utilizza un pipe nominato per I/O. In genere evita di scaricare un payload EXE completo; l'esecuzione dei comandi è semi-interattiva.
 ```bash
 smbexec.py DOMAIN/user:Password@HOST
 smbexec.py -hashes LMHASH:NTHASH DOMAIN/user@HOST
 ```
 ### SharpLateral e SharpMove
 
-- [SharpLateral](https://github.com/mertdas/SharpLateral) (C#) implementa diversi metodi di movimento laterale, incluso l'exec basato su servizio.
+- [SharpLateral](https://github.com/mertdas/SharpLateral) (C#) implementa diversi metodi di movimento laterale, inclusa l'esecuzione basata su servizi.
 ```cmd
 SharpLateral.exe redexec HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe.exe malware.exe ServiceName
 ```
@@ -116,15 +116,15 @@ Artefatti tipici di host/rete quando si utilizzano tecniche simili a PsExec:
 Idee di ricerca
 - Allerta su installazioni di servizi dove l'ImagePath include cmd.exe /c, powershell.exe, o posizioni TEMP.
 - Cerca creazioni di processi dove ParentImage è C:\Windows\PSEXESVC.exe o figli di services.exe in esecuzione come LOCAL SYSTEM che eseguono shell.
-- Segnala pipe nominate che terminano con -stdin/-stdout/-stderr o nomi di pipe ben noti di clone di PsExec.
+- Segnala pipe nominate che terminano con -stdin/-stdout/-stderr o nomi di pipe clone di PsExec ben noti.
 
 ## Risoluzione dei problemi comuni
 - Accesso negato (5) durante la creazione di servizi: non è un vero admin locale, restrizioni UAC remote per account locali, o protezione da manomissione EDR sul percorso del binario di servizio.
 - Il percorso di rete non è stato trovato (53) o non è stato possibile connettersi a ADMIN$: firewall che blocca SMB/RPC o condivisioni admin disabilitate.
 - Kerberos fallisce ma NTLM è bloccato: connettersi utilizzando hostname/FQDN (non IP), assicurarsi che SPN siano corretti, o fornire -k/-no-pass con i biglietti quando si utilizza Impacket.
-- L'avvio del servizio scade ma il payload è stato eseguito: previsto se non è un vero binario di servizio; catturare l'output in un file o utilizzare smbexec per I/O dal vivo.
+- L'avvio del servizio scade ma il payload è stato eseguito: previsto se non è un vero binario di servizio; catturare l'output in un file o utilizzare smbexec per I/O live.
 
-## Note di indurimento (cambiamenti moderni)
+## Note di indurimento
 - Windows 11 24H2 e Windows Server 2025 richiedono la firma SMB per impostazione predefinita per le connessioni in uscita (e Windows 11 in entrata). Questo non interrompe l'uso legittimo di PsExec con credenziali valide ma previene l'abuso di relay SMB non firmati e può influenzare i dispositivi che non supportano la firma.
 - Il nuovo blocco NTLM del client SMB (Windows 11 24H2/Server 2025) può impedire il fallback NTLM quando ci si connette tramite IP o a server non Kerberos. In ambienti induriti, questo interromperà PsExec/SMBExec basato su NTLM; utilizzare Kerberos (hostname/FQDN) o configurare eccezioni se necessario legittimamente.
 - Principio del minimo privilegio: ridurre al minimo l'appartenenza all'amministratore locale, preferire Just-in-Time/Just-Enough Admin, applicare LAPS e monitorare/allertare sulle installazioni di servizi 7045.
@@ -132,11 +132,13 @@ Idee di ricerca
 ## Vedi anche
 
 - Esecuzione remota basata su WMI (spesso più senza file):
+
 {{#ref}}
 ./wmiexec.md
 {{#endref}}
 
 - Esecuzione remota basata su WinRM:
+
 {{#ref}}
 ./winrm.md
 {{#endref}}
@@ -147,4 +149,5 @@ Idee di ricerca
 
 - PsExec - Sysinternals | Microsoft Learn: https://learn.microsoft.com/sysinternals/downloads/psexec
 - Indurimento della sicurezza SMB in Windows Server 2025 & Windows 11 (firma per impostazione predefinita, blocco NTLM): https://techcommunity.microsoft.com/blog/filecab/smb-security-hardening-in-windows-server-2025--windows-11/4226591
+
 {{#include ../../banners/hacktricks-training.md}}

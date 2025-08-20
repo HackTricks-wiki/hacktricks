@@ -2,18 +2,18 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Gli attacchi di canale laterale recuperano segreti osservando la "leak" fisica o micro-architetturale che è *correlata* con lo stato interno ma *non* fa parte dell'interfaccia logica del dispositivo. Gli esempi variano dalla misurazione della corrente istantanea assorbita da una smart-card all'abuso degli effetti di gestione della potenza della CPU su una rete.
+Gli attacchi ai canali laterali recuperano segreti osservando la "perdita" fisica o micro-architetturale che è *correlata* con lo stato interno ma *non* fa parte dell'interfaccia logica del dispositivo. Gli esempi variano dalla misurazione della corrente istantanea assorbita da una smart card all'abuso degli effetti di gestione della potenza della CPU su una rete.
 
 ---
 
-## Principali Canali di Leak
+## Principali Canali di Perdita
 
 | Canale | Obiettivo Tipico | Strumentazione |
-|--------|------------------|----------------|
-| Consumo di potenza | Smart-card, MCU IoT, FPGA | Oscilloscopio + resistore shunt/probe HS (es. CW503) |
-| Campo elettromagnetico (EM) | CPU, RFID, acceleratori AES | Probe H-field + LNA, ChipWhisperer/RTL-SDR |
+|--------|------------------|-----------------|
+| Consumo di potenza | Smart card, MCU IoT, FPGA | Oscilloscopio + resistore shunt/probe HS (es. CW503) |
+| Campo elettromagnetico (EM) | CPU, RFID, acceleratori AES | Sonda H-field + LNA, ChipWhisperer/RTL-SDR |
 | Tempo di esecuzione / cache | CPU desktop e cloud | Timer ad alta precisione (rdtsc/rdtscp), tempo di volo remoto |
-| Acustico / meccanico | Tastiere, stampanti 3-D, relè | Microfono MEMS, vibrometro laser |
+| Acustico / meccanico | Tastiere, stampanti 3D, relè | Microfono MEMS, vibrometro laser |
 | Ottico e termico | LED, stampanti laser, DRAM | Fotodiodo / telecamera ad alta velocità, telecamera IR |
 | Indotto da guasti | ASIC/MCU crittografici | Glitch di clock/voltaggio, EMFI, iniezione laser |
 
@@ -34,8 +34,8 @@ cw.capture.init()
 trace = cw.capture.capture_trace()
 print(trace.wave)  # numpy array of power samples
 ```
-### Analisi Differenziale/Corrrelazione del Potere (DPA/CPA)
-Acquisire *N > 1 000* tracce, ipotizzare il byte della chiave `k`, calcolare il modello HW/HD e correlare con la leak.
+### Analisi del Potere Differenziale/Corrrelazione (DPA/CPA)
+Acquisire *N > 1 000* tracce, ipotizzare il byte della chiave `k`, calcolare il modello HW/HD e correlare con il leak.
 ```python
 import numpy as np
 corr = np.corrcoef(leakage_model(k), traces[:,sample])
@@ -55,20 +55,16 @@ Le CPU moderne rilasciano segreti attraverso risorse condivise:
 * **Downfall / Gather Data Sampling (Intel, 2023)** – esecuzione transitoria per leggere i dati AVX-gather attraverso i thread SMT.
 * **Zenbleed (AMD, 2023) & Inception (AMD, 2023)** – la previsione errata speculativa dei vettori rilascia registri cross-domain.
 
-Per un trattamento ampio delle questioni di classe Spectre vedere {{#ref}}
-../../cpu-microarchitecture/microarchitectural-attacks.md
-{{#endref}}
-
 ---
 
 ## Attacchi Acustici e Ottici
-* Il 2024 "​iLeakKeys" ha mostrato il 95 % di accuratezza nel recupero dei tasti digitati su laptop da un **microfono di smartphone su Zoom** utilizzando un classificatore CNN.
+* Il 2024 "​iLeakKeys" ha mostrato il 95 % di accuratezza nel recupero dei tasti della tastiera di un laptop da un **microfono di smartphone su Zoom** utilizzando un classificatore CNN.
 * I fotodiodi ad alta velocità catturano l'attività LED DDR4 e ricostruiscono le chiavi di round AES in meno di 1 minuto (BlackHat 2023).
 
 ---
 
-## Iniezione di Errori e Analisi Differenziale degli Errori (DFA)
-Combinare errori con perdite di canale laterale accelera la ricerca della chiave (ad es. DFA AES a 1 traccia). Strumenti recenti a prezzi da hobbista:
+## Iniezione di Guasti e Analisi dei Guasti Differenziali (DFA)
+Combinare guasti con perdite di canale laterale accelera la ricerca della chiave (ad es. 1-trace AES DFA). Strumenti recenti a prezzi da hobbista:
 * **ChipSHOUTER & PicoEMP** – glitching di impulsi elettromagnetici sub-1 ns.
 * **GlitchKit-R5 (2025)** – piattaforma di glitching di clock/voltaggio open-source che supporta SoC RISC-V.
 
@@ -88,7 +84,7 @@ Combinare errori con perdite di canale laterale accelera la ricerca della chiave
 * Implementazioni **a tempo costante** e algoritmi a memoria dura.
 * **Mascheramento/shuffling** – suddividere i segreti in condivisioni casuali; resistenza di primo ordine certificata da TVLA.
 * **Nascondere** – regolatori di tensione on-chip, clock randomizzati, logica dual-rail, scudi EM.
-* **Rilevamento di errori** – computazione ridondante, firme di soglia.
+* **Rilevamento dei guasti** – computazione ridondante, firme di soglia.
 * **Operativo** – disabilitare DVFS/turbo nei kernel crittografici, isolare SMT, vietare la co-locazione nei cloud multi-tenant.
 
 ---
