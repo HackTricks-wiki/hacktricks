@@ -124,6 +124,7 @@ jobs:
           MDBOOK_BOOK__LANGUAGE=$BRANCH mdbook build || (echo "Error logs" && cat hacktricks-preprocessor-error.log && echo "" && echo "" && echo "Debug logs" && (cat hacktricks-preprocessor.log | tail -n 20) && exit 1)
       
       - name: Update searchindex.js in repo (purge history, keep current on HEAD)
+        shell: bash
         run: |
           set -euo pipefail
 
