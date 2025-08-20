@@ -16,7 +16,7 @@
 - ターゲット上のローカル管理者（SeCreateServicePrivilege）またはターゲット上の明示的なサービス作成権限。
 - SMB（445）が到達可能で、ADMIN$共有が利用可能；ホストファイアウォールを通じてリモートサービス管理が許可されている。
 - UACリモート制限：ローカルアカウントを使用する場合、トークンフィルタリングによりネットワーク上の管理者がブロックされる可能性があるため、組み込みのAdministratorまたはLocalAccountTokenFilterPolicy=1を使用する必要があります。
-- Kerberos対NTLM：ホスト名/FQDNを使用するとKerberosが有効になり、IPで接続するとNTLMにフォールバックすることが多く（強化された環境ではブロックされる可能性があります）。
+- Kerberos対NTLM：ホスト名/FQDNを使用するとKerberosが有効になります；IPで接続すると、しばしばNTLMにフォールバックし（強化された環境ではブロックされる可能性があります）。
 
 ### sc.exeを介した手動ScExec/WinExec
 
@@ -35,9 +35,9 @@ sc.exe \\TARGET delete HTSvc
 ```
 ノート:
 - 非サービスEXEを起動するときにタイムアウトエラーが発生することがありますが、実行は続行されます。
-- よりOPSECフレンドリーであるために、ファイルレスコマンド(cmd /c, powershell -enc)を好むか、ドロップされたアーティファクトを削除してください。
+- OPSECに配慮するため、ファイルレスコマンド(cmd /c, powershell -enc)を使用するか、ドロップされたアーティファクトを削除することをお勧めします。
 
-詳細な手順については、こちらを参照してください: https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/
+詳細な手順については、次を参照してください: https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/
 
 ## ツールと例
 
@@ -83,7 +83,7 @@ Artifacts
 
 ### Impacket smbexec.py (SMBExec)
 
-- cmd.exeを起動する一時的なサービスを作成し、I/Oに名前付きパイプを使用します。一般的に完全なEXEペイロードをドロップすることは避けられ、コマンド実行はセミインタラクティブです。
+- cmd.exeを生成する一時的なサービスを作成し、I/Oに名前付きパイプを使用します。一般的に完全なEXEペイロードをドロップすることは避けられ、コマンド実行はセミインタラクティブです。
 ```bash
 smbexec.py DOMAIN/user:Password@HOST
 smbexec.py -hashes LMHASH:NTHASH DOMAIN/user@HOST
@@ -107,11 +107,11 @@ cme smb HOST -u USER -H NTHASH -x "ipconfig /all" --exec-method smbexec
 ## OPSEC、検出とアーティファクト
 
 PsExecのような技術を使用する際の典型的なホスト/ネットワークアーティファクト：
-- 管理者アカウントに対するセキュリティ4624（ログオンタイプ3）および4672（特権）。
-- ADMIN$アクセスおよびサービスバイナリの作成/書き込みを示すセキュリティ5140/5145ファイル共有およびファイル共有詳細イベント（例：PSEXESVC.exeまたはランダムな8文字の.exe）。
+- 使用された管理者アカウントのためのセキュリティ4624（ログオンタイプ3）および4672（特権）。
+- ADMIN$アクセスおよびサービスバイナリの作成/書き込み（例：PSEXESVC.exeまたはランダムな8文字の.exe）を示すセキュリティ5140/5145ファイル共有およびファイル共有詳細イベント。
 - ターゲット上のセキュリティ7045サービスインストール：PSEXESVC、RemComSvc、またはカスタム（-r / -service-name）のようなサービス名。
-- services.exeまたはサービスイメージのためのSysmon 1（プロセス作成）、3（ネットワーク接続）、11（ファイル作成）C:\Windows\内、\\.\pipe\psexesvc、\\.\pipe\remcom_*、またはランダム化された同等物のための17/18（パイプ作成/接続）。
-- Sysinternals EULAのためのレジストリアーティファクト：HKCU\Software\Sysinternals\PsExec\EulaAccepted=0x1オペレータホスト上（抑制されていない場合）。
+- services.exeまたはサービスイメージのためのSysmon 1（プロセス作成）、3（ネットワーク接続）、C:\Windows\内の11（ファイル作成）、\\.\pipe\psexesvc、\\.\pipe\remcom_*、またはランダム化された同等物のための17/18（パイプ作成/接続）。
+- オペレータホスト上のSysinternals EULAのためのレジストリアーティファクト：HKCU\Software\Sysinternals\PsExec\EulaAccepted=0x1（抑制されていない場合）。
 
 ハンティングアイデア
 - ImagePathにcmd.exe /c、powershell.exe、またはTEMPロケーションを含むサービスインストールにアラートを出す。
@@ -119,32 +119,19 @@ PsExecのような技術を使用する際の典型的なホスト/ネットワ�
 - -stdin/-stdout/-stderrで終わる名前付きパイプや、よく知られたPsExecクローンパイプ名にフラグを立てる。
 
 ## 一般的な失敗のトラブルシューティング
-- サービス作成時にアクセスが拒否される（5）：真のローカル管理者ではない、ローカルアカウントに対するUACリモート制限、またはサービスバイナリパス上のEDR改ざん保護。
+- サービス作成時にアクセスが拒否される（5）：真のローカル管理者でない、ローカルアカウントのUACリモート制限、またはサービスバイナリパス上のEDR改ざん保護。
 - ネットワークパスが見つからない（53）またはADMIN$に接続できない：SMB/RPCをブロックするファイアウォールまたは管理共有が無効。
 - Kerberosが失敗するがNTLMがブロックされる：ホスト名/FQDN（IPではなく）を使用して接続し、適切なSPNを確保するか、Impacketを使用する際にチケットと共に-k/-no-passを供給する。
 - サービス開始がタイムアウトするがペイロードが実行された：実際のサービスバイナリでない場合は予想される；出力をファイルにキャプチャするか、ライブI/Oのためにsmbexecを使用する。
 
-## ハードニングノート（現代の変更）
-- Windows 11 24H2およびWindows Server 2025は、デフォルトでアウトバウンド（およびWindows 11のインバウンド）接続に対してSMB署名を要求します。これは、正当な資格情報を持つPsExecの使用を妨げることはありませんが、署名されていないSMBリレーの悪用を防ぎ、署名をサポートしないデバイスに影響を与える可能性があります。
-- 新しいSMBクライアントのNTLMブロック（Windows 11 24H2/Server 2025）は、IPまたは非Kerberosサーバーへの接続時にNTLMフォールバックを防ぐことがあります。ハードニングされた環境では、NTLMベースのPsExec/SMBExecが壊れる；正当な必要がある場合はKerberos（ホスト名/FQDN）を使用するか、例外を設定する。
-- 最小特権の原則：ローカル管理者メンバーシップを最小限に抑え、Just-in-Time/Just-Enough Adminを優先し、LAPSを強制し、7045サービスインストールを監視/アラートする。
+## ハードニングノート
+- Windows 11 24H2およびWindows Server 2025は、デフォルトでアウトバウンド（およびWindows 11のインバウンド）接続にSMB署名を要求します。これは、有効な資格情報を持つ正当なPsExecの使用を妨げることはありませんが、署名されていないSMBリレーの悪用を防ぎ、署名をサポートしないデバイスに影響を与える可能性があります。
+- 新しいSMBクライアントのNTLMブロック（Windows 11 24H2/Server 2025）は、IPで接続する際や非Kerberosサーバーに接続する際のNTLMフォールバックを防ぐことがあります。ハードニングされた環境では、NTLMベースのPsExec/SMBExecが壊れるため、Kerberos（ホスト名/FQDN）を使用するか、正当な必要がある場合は例外を設定してください。
+- 最小特権の原則：ローカル管理者メンバーシップを最小限に抑え、Just-in-Time/Just-Enough Adminを優先し、LAPSを強制し、7045サービスインストールを監視/アラートします。
 
 ## 参照
 
-- WMIベースのリモート実行（しばしばファイルレス）：
-{{#ref}}
-./wmiexec.md
-{{#endref}}
-
-- WinRMベースのリモート実行：
-{{#ref}}
-./winrm.md
-{{#endref}}
-
-
-
-## 参考文献
-
 - PsExec - Sysinternals | Microsoft Learn: https://learn.microsoft.com/sysinternals/downloads/psexec
 - Windows Server 2025およびWindows 11におけるSMBセキュリティハードニング（デフォルトでの署名、NTLMブロック）：https://techcommunity.microsoft.com/blog/filecab/smb-security-hardening-in-windows-server-2025--windows-11/4226591
+
 {{#include ../../banners/hacktricks-training.md}}
