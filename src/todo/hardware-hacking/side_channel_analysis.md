@@ -1,8 +1,8 @@
-# Side Channel Analysis Attacks
+# Seitenkanalanalyse-Angriffe
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Side-Channel-Angriffe erholen Geheimnisse, indem sie physikalische oder mikroarchitektonische "Lecks" beobachten, die *korreliert* mit dem internen Zustand sind, aber *nicht* Teil der logischen Schnittstelle des Geräts sind. Beispiele reichen von der Messung des momentanen Stroms, der von einer Smartcard gezogen wird, bis hin zum Missbrauch von CPU-Leistungsmanagementeffekten über ein Netzwerk.
+Seitenkanalangriffe erholen Geheimnisse, indem sie physikalische oder mikroarchitektonische "Lecks" beobachten, die *korreliert* mit dem internen Zustand sind, aber *nicht* Teil der logischen Schnittstelle des Geräts sind. Beispiele reichen von der Messung des momentanen Stroms, der von einer Smartcard gezogen wird, bis hin zum Missbrauch von CPU-Leistungsmanagementeffekten über ein Netzwerk.
 
 ---
 
@@ -35,7 +35,7 @@ trace = cw.capture.capture_trace()
 print(trace.wave)  # numpy array of power samples
 ```
 ### Differential/Correlation Power Analysis (DPA/CPA)
-Erwerbe *N > 1 000* Spuren, hypothesiere den Schlüsselbyte `k`, berechne das HW/HD-Modell und korreliere mit dem Leak.
+Erwerben Sie *N > 1 000* Spuren, hypothesieren Sie das Schlüsselbyte `k`, berechnen Sie das HW/HD-Modell und korrelieren Sie mit dem Leak.
 ```python
 import numpy as np
 corr = np.corrcoef(leakage_model(k), traces[:,sample])
@@ -45,7 +45,7 @@ CPA bleibt auf dem neuesten Stand, aber Varianten des maschinellen Lernens (MLA,
 ---
 
 ## Elektromagnetische Analyse (EMA)
-Nahfeld-EM-Sonden (500 MHz–3 GHz) lecken identische Informationen wie die Leistungsanalyse *ohne* das Einfügen von Shunts. Forschungen aus 2024 zeigten die Schlüsselwiederherstellung in **>10 cm** Entfernung von einem STM32 unter Verwendung von Spektralkorrelation und kostengünstigen RTL-SDR-Frontends.
+Nahfeld-EM-Sonden (500 MHz–3 GHz) lecken identische Informationen wie die Leistungsanalyse *ohne* Shunts einzufügen. Forschungen aus 2024 zeigten die Schlüsselrückgewinnung in **>10 cm** von einem STM32 unter Verwendung von Spektralkorrelation und kostengünstigen RTL-SDR-Frontends.
 
 ---
 
@@ -55,13 +55,9 @@ Moderne CPUs lecken Geheimnisse durch gemeinsame Ressourcen:
 * **Downfall / Gather Data Sampling (Intel, 2023)** – Transient-Execution zum Lesen von AVX-Gather-Daten über SMT-Threads.
 * **Zenbleed (AMD, 2023) & Inception (AMD, 2023)** – spekulative Vektorfehlvorhersage leckt Register über Domänen hinweg.
 
-Für eine umfassende Behandlung von Spectre-Klassenproblemen siehe {{#ref}}
-../../cpu-microarchitecture/microarchitectural-attacks.md
-{{#endref}}
-
 ---
 
-## Akustische & Optische Angriffe
+## Akustische & optische Angriffe
 * 2024 "​iLeakKeys" zeigte eine Genauigkeit von 95 %, um Laptop-Tastatureingaben von einem **Smartphone-Mikrofon über Zoom** mit einem CNN-Klassifikator wiederherzustellen.
 * Hochgeschwindigkeits-Photodioden erfassen DDR4-Aktivitäts-LED und rekonstruieren AES-Rundenschlüssel innerhalb von <1 Minute (BlackHat 2023).
 
@@ -74,12 +70,12 @@ Die Kombination von Fehlern mit Seitenkanalleckagen verkürzt die Schlüsselsuch
 
 ---
 
-## Typischer Angriffsablauf
+## Typischer Angriffsworkflow
 1. Identifizieren Sie den Leckkanal & den Montagepunkt (VCC-Pin, Entkopplungskondensator, Nahfeldstelle).
 2. Trigger einfügen (GPIO oder musterbasiert).
 3. >1 k Traces mit ordnungsgemäßer Abtastung/Filtern sammeln.
 4. Vorverarbeiten (Ausrichtung, Mittelwertentfernung, LP/HP-Filter, Wavelet, PCA).
-5. Statistische oder ML-Schlüsselwiederherstellung (CPA, MIA, DL-SCA).
+5. Statistische oder ML-Schlüsselrückgewinnung (CPA, MIA, DL-SCA).
 6. Validieren und Iteration bei Ausreißern.
 
 ---
@@ -103,8 +99,8 @@ Die Kombination von Fehlern mit Seitenkanalleckagen verkürzt die Schlüsselsuch
 
 ## Referenzen
 
-* [ChipWhisperer Dokumentation](https://chipwhisperer.readthedocs.io/en/latest/)
-* [Hertzbleed Angriffs-Papier](https://www.hertzbleed.com/)
+* [ChipWhisperer Documentation](https://chipwhisperer.readthedocs.io/en/latest/)
+* [Hertzbleed Attack Paper](https://www.hertzbleed.com/)
 
 
 {{#include ../../banners/hacktricks-training.md}}
