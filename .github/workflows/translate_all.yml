@@ -1,0 +1,193 @@
+name: Translate All
+
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - 'scripts/**'
+      - '.gitignore'
+      - '.github/**'
+      - Dockerfile
+  workflow_dispatch:
+
+permissions:
+  packages: write
+  id-token: write
+  contents: write
+
+jobs:
+  translate:
+    name: Translate → ${{ matrix.name }} (${{ matrix.branch }})
+    runs-on: ubuntu-latest
+
+    # Run N languages in parallel (tune max-parallel if needed)
+    strategy:
+      fail-fast: false
+      # max-parallel: 3 #Nothing to run all in parallel
+      matrix:
+        include:
+          - { name: "Afrikaans", language: "Afrikaans", branch: "af" }
+          - { name: "German", language: "German", branch: "de" }
+          - { name: "Greek", language: "Greek", branch: "el" }
+          - { name: "Spanish", language: "Spanish", branch: "es" }
+          - { name: "French",  language: "French",  branch: "fr" }
+          - { name: "Hindi",  language: "Hindi",  branch: "hi" }
+          - { name: "Italian", language: "Italian", branch: "it" }
+          - { name: "Japanese", language: "Japanese", branch: "ja" }
+          - { name: "Korean", language: "Korean", branch: "ko" }
+          - { name: "Polish", language: "Polish", branch: "pl" }
+          - { name: "Portuguese", language: "Portuguese", branch: "pt" }
+          - { name: "Serbian", language: "Serbian", branch: "sr" }
+          - { name: "Swahili", language: "Swahili", branch: "sw" }
+          - { name: "Turkish", language: "Turkish", branch: "tr" }
+          - { name: "Ukrainian", language: "Ukrainian", branch: "uk" }
+          - { name: "Chinese", language: "Chinese", branch: "zh" }
+
+    # Ensure only one job per branch runs at a time (even across workflow runs)
+    concurrency:
+      group: translate-cloud-${{ matrix.branch }}
+      cancel-in-progress: false
+
+    container:
+      image: ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image:latest
+
+    env:
+      LANGUAGE: ${{ matrix.language }}
+      BRANCH:   ${{ matrix.branch }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Update and download scripts
+        run: |
+          sudo apt-get update
+          sudo apt-get install wget -y
+          mkdir scripts
+          cd scripts
+          wget -O get_and_save_refs.py https://raw.githubusercontent.com/HackTricks-wiki/hacktricks-cloud/master/scripts/get_and_save_refs.py
+          wget -O compare_and_fix_refs.py https://raw.githubusercontent.com/HackTricks-wiki/hacktricks-cloud/master/scripts/compare_and_fix_refs.py
+          wget -O translator.py https://raw.githubusercontent.com/HackTricks-wiki/hacktricks-cloud/master/scripts/translator.py
+          cd ..
+
+      - name: Run get_and_save_refs.py
+        run: |
+          python scripts/get_and_save_refs.py
+
+      - name: Download language branch & update refs
+        run: |
+          git config --global --add safe.directory /__w/hacktricks/hacktricks
+          git config --global user.name 'Translator'
+          git config --global user.email 'github-actions@github.com'
+          git config pull.rebase false
+          git checkout $BRANCH
+          git pull
+          python scripts/compare_and_fix_refs.py --files-unmatched-paths /tmp/file_paths.txt
+          git add .
+          git commit -m "Fix unmatched refs" || echo "No changes to commit"
+          git push || echo "No changes to push"
+      
+      - name: Run translation script on changed files
+        run: |
+          git checkout master
+          export OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+          git diff --name-only HEAD~1 | grep -v "SUMMARY.md" | while read -r file; do
+            if echo "$file" | grep -qE '\.md$'; then
+              echo -n ",$file" >> /tmp/file_paths.txt
+            fi
+          done
+
+          echo "Files to translate:"
+          cat /tmp/file_paths.txt
+          echo ""
+          echo ""
+          touch /tmp/file_paths.txt
+
+          if [ -s /tmp/file_paths.txt ]; then
+            python scripts/translator.py \
+              --language "$LANGUAGE" \
+              --branch "$BRANCH" \
+              --api-key "$OPENAI_API_KEY" \
+              -f "$(cat /tmp/file_paths.txt)" \
+              -t 3
+          else
+            echo "No markdown files changed, skipping translation."
+          fi
+
+      - name: Build mdBook
+        run: |
+          git checkout "$BRANCH"
+          git pull
+          MDBOOK_BOOK__LANGUAGE=$BRANCH mdbook build || (echo "Error logs" && cat hacktricks-preprocessor-error.log && echo "" && echo "" && echo "Debug logs" && (cat hacktricks-preprocessor.log | tail -n 20) && exit 1)
+      
+      - name: Update searchindex.js in repo (purge history, keep current on HEAD)
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # Be explicit about workspace trust (avoids "dubious ownership")
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+          git checkout "$BRANCH"
+          git fetch origin "$BRANCH" --quiet
+          git pull --ff-only
+
+          # Choose the file to keep at HEAD:
+          # 1) Prefer freshly built version from book/
+          # 2) Fallback to the file currently at HEAD (if it exists)
+          HAS_FILE=0
+          if [ -f "book/searchindex.js" ]; then
+            cp "book/searchindex.js" /tmp/sidx.js
+            HAS_FILE=1
+          elif git cat-file -e "HEAD:searchindex.js" 2>/dev/null; then
+            git show "HEAD:searchindex.js" > /tmp/sidx.js
+            HAS_FILE=1
+          fi
+
+          # Skip if there's nothing to purge AND nothing to keep
+          if [ "$HAS_FILE" = "1" ] || git rev-list -n 1 "$BRANCH" -- "searchindex.js" >/dev/null 2>&1; then
+            # **Fail early if working tree is dirty** (prevents confusing filter results)
+            git diff --quiet || { echo "Working tree has uncommitted changes; aborting purge." >&2; exit 1; }
+
+            # Make sure git-filter-repo is callable via `git filter-repo`
+            python -m pip install --quiet --user git-filter-repo
+            export PATH="$HOME/.local/bin:$PATH"
+
+            # Rewrite ONLY this branch, dropping all historical blobs of searchindex.js
+            git filter-repo --force --path "searchindex.js" --invert-paths --refs "refs/heads/$BRANCH"
+
+            # Re-add the current version on top of rewritten history (keep it in HEAD)
+            if [ "$HAS_FILE" = "1" ]; then
+              mv /tmp/sidx.js "searchindex.js"
+              git add "searchindex.js"
+              git commit -m "Update searchindex (purged history; keep current)"
+            else
+              echo "No current searchindex.js to re-add after purge."
+            fi
+
+            # **Safer force push** (prevents clobbering unexpected remote updates)
+            git push --force-with-lease origin "$BRANCH"
+          else
+            echo "Nothing to purge; skipping."
+          fi
+      
+      # Login in AWs
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+      
+      # Sync the build to S3
+      - name: Sync to S3
+        run: |
+          echo "Current branch:"
+          git rev-parse --abbrev-ref HEAD
+          echo "Syncing $BRANCH to S3"
+          aws s3 sync ./book s3://hacktricks-wiki/$BRANCH --delete
+          echo "Sync completed"
+          echo "Cat 3 files from the book"
+          find . -type f -name 'index.html' -print | head -n 3 | xargs -r cat
