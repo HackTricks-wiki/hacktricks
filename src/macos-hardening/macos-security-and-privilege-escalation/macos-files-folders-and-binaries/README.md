@@ -5,7 +5,7 @@
 ## Layout da hierarquia de arquivos
 
 - **/Applications**: Os aplicativos instalados devem estar aqui. Todos os usuários poderão acessá-los.
-- **/bin**: Binários de linha de comando
+- **/bin**: Binários da linha de comando
 - **/cores**: Se existir, é usado para armazenar dumps de núcleo
 - **/dev**: Tudo é tratado como um arquivo, então você pode ver dispositivos de hardware armazenados aqui.
 - **/etc**: Arquivos de configuração
@@ -13,23 +13,23 @@
 - **/private**: Não documentado, mas muitas das pastas mencionadas são links simbólicos para o diretório privado.
 - **/sbin**: Binários essenciais do sistema (relacionados à administração)
 - **/System**: Arquivo para fazer o OS X funcionar. Você deve encontrar principalmente apenas arquivos específicos da Apple aqui (não de terceiros).
-- **/tmp**: Arquivos são excluídos após 3 dias (é um link simbólico para /private/tmp)
-- **/Users**: Diretório home para usuários.
+- **/tmp**: Arquivos são excluídos após 3 dias (é um link suave para /private/tmp)
+- **/Users**: Diretório inicial para usuários.
 - **/usr**: Configuração e binários do sistema
 - **/var**: Arquivos de log
 - **/Volumes**: As unidades montadas aparecerão aqui.
-- **/.vol**: Executando `stat a.txt` você obtém algo como `16777223 7545753 -rw-r--r-- 1 username wheel ...` onde o primeiro número é o número de id do volume onde o arquivo existe e o segundo é o número do inode. Você pode acessar o conteúdo deste arquivo através de /.vol/ com essa informação executando `cat /.vol/16777223/7545753`
+- **/.vol**: Executando `stat a.txt` você obtém algo como `16777223 7545753 -rw-r--r-- 1 username wheel ...` onde o primeiro número é o número de identificação do volume onde o arquivo existe e o segundo é o número do inode. Você pode acessar o conteúdo deste arquivo através de /.vol/ com essa informação executando `cat /.vol/16777223/7545753`
 
 ### Pastas de Aplicativos
 
 - **Aplicativos do sistema** estão localizados em `/System/Applications`
 - **Aplicativos instalados** geralmente são instalados em `/Applications` ou em `~/Applications`
-- **Dados do aplicativo** podem ser encontrados em `/Library/Application Support` para os aplicativos executando como root e `~/Library/Application Support` para aplicativos executando como o usuário.
-- Daemons de aplicativos de terceiros que **precisam ser executados como root** geralmente estão localizados em `/Library/PrivilegedHelperTools/`
+- **Dados do aplicativo** podem ser encontrados em `/Library/Application Support` para os aplicativos executando como root e `~/Library/Application Support` para aplicativos executando como usuário.
+- **Daemons** de aplicativos de terceiros que **precisam ser executados como root** geralmente estão localizados em `/Library/PrivilegedHelperTools/`
 - Aplicativos **Sandboxed** são mapeados na pasta `~/Library/Containers`. Cada aplicativo tem uma pasta nomeada de acordo com o ID do bundle do aplicativo (`com.apple.Safari`).
 - O **kernel** está localizado em `/System/Library/Kernels/kernel`
 - **Extensões do kernel da Apple** estão localizadas em `/System/Library/Extensions`
-- **Extensões de kernel de terceiros** são armazenadas em `/Library/Extensions`
+- **Extensões do kernel de terceiros** são armazenadas em `/Library/Extensions`
 
 ### Arquivos com Informações Sensíveis
 
@@ -39,7 +39,7 @@ MacOS armazena informações como senhas em vários lugares:
 macos-sensitive-locations.md
 {{#endref}}
 
-### Instaladores pkg Vulneráveis
+### Instaladores de pkg Vulneráveis
 
 {{#ref}}
 macos-installers-abuse.md
@@ -52,7 +52,7 @@ macos-installers-abuse.md
 - **`.plist`**: Também conhecido como lista de propriedades, armazena informações em formato XML ou binário.
 - Pode ser XML ou binário. Os binários podem ser lidos com:
 - `defaults read config.plist`
-- `/usr/libexec/PlistBuddy -c print config.plist`
+- `/usr/libexec/PlistBuddy -c print config.plsit`
 - `plutil -p ~/Library/Preferences/com.apple.screensaver.plist`
 - `plutil -convert xml1 ~/Library/Preferences/com.apple.screensaver.plist -o -`
 - `plutil -convert json ~/Library/Preferences/com.apple.screensaver.plist -o -`
@@ -97,7 +97,7 @@ dyldex_all [dyld_shared_cache_path] # Extract all
 
 <figure><img src="../../../images/image (1152).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Alguns extratores não funcionarão, pois as dylibs estão pré-vinculadas com endereços codificados, portanto, podem estar pulando para endereços desconhecidos.
+Alguns extratores não funcionarão, pois as dylibs estão pré-linkadas com endereços codificados, portanto, podem estar pulando para endereços desconhecidos.
 
 > [!TIP]
 > Também é possível baixar o Cache de Biblioteca Compartilhada de outros dispositivos \*OS no macos usando um emulador no Xcode. Eles serão baixados dentro de: ls `$HOME/Library/Developer/Xcode/<*>OS\ DeviceSupport/<version>/Symbols/System/Library/Caches/com.apple.dyld/`, como: `$HOME/Library/Developer/Xcode/iOS\ DeviceSupport/14.1\ (18A8395)/Symbols/System/Library/Caches/com.apple.dyld/dyld_shared_cache_arm64`
@@ -121,13 +121,13 @@ Usando as variáveis de ambiente:
 
 ### Permissões de Pasta
 
-Em uma **pasta**, **ler** permite **listar**, **escrever** permite **deletar** e **escrever** arquivos nela, e **executar** permite **navegar** pelo diretório. Portanto, por exemplo, um usuário com **permissão de leitura sobre um arquivo** dentro de um diretório onde ele **não tem permissão de execução** **não poderá ler** o arquivo.
+Em uma **pasta**, **ler** permite **listá-la**, **escrever** permite **deletar** e **escrever** arquivos nela, e **executar** permite **navegar** pelo diretório. Portanto, por exemplo, um usuário com **permissão de leitura sobre um arquivo** dentro de um diretório onde ele **não tem permissão de execução** **não poderá ler** o arquivo.
 
 ### Modificadores de Flag
 
 Existem algumas flags que podem ser definidas nos arquivos que farão o arquivo se comportar de maneira diferente. Você pode **verificar as flags** dos arquivos dentro de um diretório com `ls -lO /path/directory`
 
-- **`uchg`**: Conhecida como flag **uchange**, **impede qualquer ação** de alteração ou exclusão do **arquivo**. Para defini-la, faça: `chflags uchg file.txt`
+- **`uchg`**: Conhecida como flag **uchange**, irá **prevenir qualquer ação** de alteração ou exclusão do **arquivo**. Para defini-la, faça: `chflags uchg file.txt`
 - O usuário root pode **remover a flag** e modificar o arquivo.
 - **`restricted`**: Esta flag faz com que o arquivo seja **protegido pelo SIP** (você não pode adicionar esta flag a um arquivo).
 - **`Sticky bit`**: Se um diretório tiver o sticky bit, **apenas** o **proprietário do diretório ou root pode renomear ou deletar** arquivos. Normalmente, isso é definido no diretório /tmp para impedir que usuários comuns excluam ou movam arquivos de outros usuários.
@@ -158,10 +158,10 @@ Todas as flags podem ser encontradas no arquivo `sys/stat.h` (encontre usando `m
 
 As **ACLs** de arquivo contêm **ACE** (Entradas de Controle de Acesso) onde permissões **mais granulares** podem ser atribuídas a diferentes usuários.
 
-É possível conceder a um **diretório** estas permissões: `listar`, `pesquisar`, `adicionar_arquivo`, `adicionar_subdiretório`, `deletar_filho`, `deletar_filho`.\
-E a um **arquivo**: `ler`, `escrever`, `adicionar`, `executar`.
+É possível conceder a uma **pasta** essas permissões: `list`, `search`, `add_file`, `add_subdirectory`, `delete_child`, `delete_child`.\
+E a um **arquivo**: `read`, `write`, `append`, `execute`.
 
-Quando o arquivo contém ACLs, você encontrará um "+" ao listar as permissões como em:
+Quando o arquivo contém ACLs, você encontrará um "+" ao listar as permissões, como em:
 ```bash
 ls -ld Movies
 drwx------+   7 username  staff     224 15 Apr 19:42 Movies
@@ -188,15 +188,15 @@ Atributos estendidos têm um nome e qualquer valor desejado, e podem ser vistos 
 - `com.apple.TextEncoding`: Especifica a codificação de texto de arquivos de texto ASCII
 - `com.apple.logd.metadata`: Usado pelo logd em arquivos em `/var/db/diagnostics`
 - `com.apple.genstore.*`: Armazenamento geracional (`/.DocumentRevisions-V100` na raiz do sistema de arquivos)
-- `com.apple.rootless`: MacOS: Usado pela Proteção de Integridade do Sistema para rotular arquivo (III/10)
+- `com.apple.rootless`: MacOS: Usado pela Proteção de Integridade do Sistema para rotular arquivos (III/10)
 - `com.apple.uuidb.boot-uuid`: marcações do logd de épocas de inicialização com UUID único
-- `com.apple.decmpfs`: MacOS: Compressão de arquivo transparente (II/7)
+- `com.apple.decmpfs`: MacOS: Compressão de arquivos transparente (II/7)
 - `com.apple.cprotect`: \*OS: Dados de criptografia por arquivo (III/11)
 - `com.apple.installd.*`: \*OS: Metadados usados pelo installd, por exemplo, `installType`, `uniqueInstallID`
 
 ### Forks de Recurso | macOS ADS
 
-Esta é uma maneira de obter **Fluxos de Dados Alternativos no MacOS**. Você pode salvar conteúdo dentro de um atributo estendido chamado **com.apple.ResourceFork** dentro de um arquivo salvando-o em **file/..namedfork/rsrc**.
+Esta é uma maneira de obter **Fluxos de Dados Alternativos em máquinas MacOS**. Você pode salvar conteúdo dentro de um atributo estendido chamado **com.apple.ResourceFork** dentro de um arquivo salvando-o em **file/..namedfork/rsrc**.
 ```bash
 echo "Hello" > a.txt
 echo "Hello Mac ADS" > a.txt/..namedfork/rsrc
@@ -213,9 +213,9 @@ find / -type f -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf
 ```
 ### decmpfs
 
-O atributo estendido `com.apple.decmpfs` indica que o arquivo está armazenado criptografado, `ls -l` reportará um **tamanho de 0** e os dados comprimidos estão dentro deste atributo. Sempre que o arquivo for acessado, ele será descriptografado na memória.
+O atributo estendido `com.apple.decmpfs` indica que o arquivo está armazenado criptografado, `ls -l` reportará um **tamanho de 0** e os dados comprimidos estão dentro desse atributo. Sempre que o arquivo for acessado, ele será descriptografado na memória.
 
-Esse atributo pode ser visto com `ls -lO` indicado como comprimido porque arquivos comprimidos também são marcados com a flag `UF_COMPRESSED`. Se um arquivo comprimido for removido essa flag com `chflags nocompressed </path/to/file>`, o sistema não saberá que o arquivo foi comprimido e, portanto, não poderá descomprimir e acessar os dados (ele pensará que está realmente vazio).
+Esse atributo pode ser visto com `ls -lO` indicado como comprimido porque arquivos comprimidos também são marcados com a flag `UF_COMPRESSED`. Se um arquivo comprimido for removido essa flag com `chflags nocompressed </path/to/file>`, o sistema não saberá que o arquivo foi comprimido e, portanto, não será capaz de descomprimir e acessar os dados (ele pensará que está realmente vazio).
 
 A ferramenta afscexpand pode ser usada para forçar a descompressão de um arquivo.
 
@@ -248,9 +248,9 @@ O diretório `/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/S
 
 - **`$HOME/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**: Contém informações sobre arquivos baixados, como a URL de onde foram baixados.
 - **`/var/log/system.log`**: Log principal dos sistemas OSX. com.apple.syslogd.plist é responsável pela execução do syslogging (você pode verificar se está desativado procurando por "com.apple.syslogd" em `launchctl list`).
-- **`/private/var/log/asl/*.asl`**: Estes são os Logs do Sistema da Apple que podem conter informações interessantes.
+- **`/private/var/log/asl/*.asl`**: Estes são os Logs do Sistema Apple que podem conter informações interessantes.
 - **`$HOME/Library/Preferences/com.apple.recentitems.plist`**: Armazena arquivos e aplicativos acessados recentemente através do "Finder".
-- **`$HOME/Library/Preferences/com.apple.loginitems.plsit`**: Armazena itens para iniciar ao iniciar o sistema.
+- **`$HOME/Library/Preferences/com.apple.loginitems.plsit`**: Armazena itens para iniciar na inicialização do sistema.
 - **`$HOME/Library/Logs/DiskUtility.log`**: Arquivo de log para o aplicativo DiskUtility (informações sobre drives, incluindo USBs).
 - **`/Library/Preferences/SystemConfiguration/com.apple.airport.preferences.plist`**: Dados sobre pontos de acesso sem fio.
 - **`/private/var/db/launchd.db/com.apple.launchd/overrides.plist`**: Lista de daemons desativados.

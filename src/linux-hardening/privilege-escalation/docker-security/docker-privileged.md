@@ -59,7 +59,7 @@ mount  | grep '(ro'
 
 ### Mascarando sobre sistemas de arquivos do kernel
 
-O sistema de arquivos **/proc** é seletivamente gravável, mas por segurança, certas partes são protegidas contra acesso de leitura e gravação, sobrepondo-as com **tmpfs**, garantindo que os processos do contêiner não possam acessar áreas sensíveis.
+O sistema de arquivos **/proc** é seletivamente gravável, mas por segurança, certas partes estão protegidas contra acesso de leitura e gravação, sobrepondo-as com **tmpfs**, garantindo que os processos do contêiner não possam acessar áreas sensíveis.
 
 > [!NOTE] > **tmpfs** é um sistema de arquivos que armazena todos os arquivos na memória virtual. tmpfs não cria nenhum arquivo no seu disco rígido. Portanto, se você desmontar um sistema de arquivos tmpfs, todos os arquivos que residem nele são perdidos para sempre.
 
@@ -118,7 +118,7 @@ Você pode manipular as capacidades disponíveis para um contêiner sem executar
 
 ### Seccomp
 
-**Seccomp** é útil para **limitar** as **syscalls** que um contêiner pode chamar. Um perfil seccomp padrão é habilitado por padrão ao executar contêineres docker, mas no modo privilegiado ele é desativado. Saiba mais sobre Seccomp aqui:
+**Seccomp** é útil para **limitar** as **syscalls** que um contêiner pode chamar. Um perfil seccomp padrão é ativado por padrão ao executar contêineres docker, mas no modo privilegiado ele é desativado. Saiba mais sobre Seccomp aqui:
 
 {{#ref}}
 seccomp.md
@@ -147,7 +147,7 @@ Seccomp_filters:	0
 # You can manually disable seccomp in docker with
 --security-opt seccomp=unconfined
 ```
-Além disso, note que quando o Docker (ou outros CRIs) são usados em um **cluster Kubernetes**, o **filtro seccomp está desativado por padrão**.
+Além disso, note que quando o Docker (ou outros CRIs) são usados em um cluster de **Kubernetes**, o **filtro seccomp está desativado por padrão**.
 
 ### AppArmor
 
@@ -162,7 +162,8 @@ apparmor.md
 ```
 ### SELinux
 
-Executar um contêiner com a flag `--privileged` desabilita os **rótulos SELinux**, fazendo com que ele herde o rótulo do mecanismo de contêiner, tipicamente `unconfined`, concedendo acesso total semelhante ao do mecanismo de contêiner. No modo sem root, usa `container_runtime_t`, enquanto no modo root, `spc_t` é aplicado.
+Executar um contêiner com a flag `--privileged` desabilita os **rótulos SELinux**, fazendo com que ele herde o rótulo do mecanismo de contêiner, tipicamente `unconfined`, concedendo acesso total semelhante ao do mecanismo de contêiner. No modo sem root, usa `container_runtime_t`, enquanto no modo root, aplica-se `spc_t`.
+
 
 {{#ref}}
 ../selinux.md
@@ -201,9 +202,9 @@ PID   USER     TIME  COMMAND
 {{#endtab}}
 {{#endtabs}}
 
-### Namespace de usuário
+### Namespace do usuário
 
-**Por padrão, os mecanismos de contêiner não utilizam namespaces de usuário, exceto para contêineres sem root**, que os requerem para montagem de sistema de arquivos e uso de múltiplos UIDs. Os namespaces de usuário, essenciais para contêineres sem root, não podem ser desativados e melhoram significativamente a segurança ao restringir privilégios.
+**Por padrão, os mecanismos de contêiner não utilizam namespaces de usuário, exceto para contêineres sem root**, que os requerem para montagem de sistema de arquivos e uso de múltiplos UIDs. Namespaces de usuário, essenciais para contêineres sem root, não podem ser desativados e melhoram significativamente a segurança ao restringir privilégios.
 
 ## Referências
 

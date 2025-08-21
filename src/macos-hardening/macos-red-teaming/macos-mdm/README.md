@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Para aprender sobre MDMs do macOS, consulte:**
+**Para aprender sobre MDMs do macOS, veja:**
 
 - [https://www.youtube.com/watch?v=ku8jZe-MHUU](https://www.youtube.com/watch?v=ku8jZe-MHUU)
 - [https://duo.com/labs/research/mdm-me-maybe](https://duo.com/labs/research/mdm-me-maybe)
@@ -19,23 +19,23 @@
 
 ### **Noções Básicas do DEP (Programa de Inscrição de Dispositivos)**
 
-O [Programa de Inscrição de Dispositivos](https://www.apple.com/business/site/docs/DEP_Guide.pdf) (DEP) oferecido pela Apple simplifica a integração do Gerenciamento de Dispositivos Móveis (MDM) ao facilitar a configuração sem toque para dispositivos iOS, macOS e tvOS. O DEP automatiza o processo de inscrição, permitindo que os dispositivos estejam operacionais assim que retirados da caixa, com mínima intervenção do usuário ou do administrador. Aspectos essenciais incluem:
+O [Programa de Inscrição de Dispositivos](https://www.apple.com/business/site/docs/DEP_Guide.pdf) (DEP) oferecido pela Apple simplifica a integração do Gerenciamento de Dispositivos Móveis (MDM) ao facilitar a configuração sem toque para dispositivos iOS, macOS e tvOS. O DEP automatiza o processo de inscrição, permitindo que os dispositivos estejam operacionais assim que retirados da caixa, com mínima intervenção do usuário ou do administrador. Os aspectos essenciais incluem:
 
 - Permite que os dispositivos se registrem autonomamente em um servidor MDM pré-definido na ativação inicial.
-- Principalmente benéfico para dispositivos novos, mas também aplicável a dispositivos que estão sendo reconfigurados.
+- Principalmente benéfico para dispositivos novos, mas também aplicável a dispositivos que estão passando por reconfiguração.
 - Facilita uma configuração simples, tornando os dispositivos prontos para uso organizacional rapidamente.
 
 ### **Consideração de Segurança**
 
-É crucial notar que a facilidade de inscrição proporcionada pelo DEP, embora benéfica, também pode representar riscos de segurança. Se as medidas de proteção não forem adequadamente aplicadas para a inscrição no MDM, os atacantes podem explorar esse processo simplificado para registrar seu dispositivo no servidor MDM da organização, disfarçando-se como um dispositivo corporativo.
+É crucial notar que a facilidade de inscrição proporcionada pelo DEP, embora benéfica, também pode representar riscos de segurança. Se as medidas de proteção não forem adequadamente aplicadas para a inscrição no MDM, atacantes podem explorar esse processo simplificado para registrar seu dispositivo no servidor MDM da organização, disfarçando-se como um dispositivo corporativo.
 
 > [!CAUTION]
 > **Alerta de Segurança**: A inscrição simplificada no DEP pode potencialmente permitir o registro não autorizado de dispositivos no servidor MDM da organização se as salvaguardas adequadas não estiverem em vigor.
 
-### Noções Básicas — O que é SCEP (Protocolo de Inscrição Simples de Certificado)?
+### Noções Básicas O que é SCEP (Protocolo de Inscrição Simples de Certificado)?
 
 - Um protocolo relativamente antigo, criado antes que TLS e HTTPS se tornassem amplamente utilizados.
-- Oferece aos clientes uma maneira padronizada de enviar um **Pedido de Assinatura de Certificado** (CSR) com o propósito de obter um certificado. O cliente solicitará ao servidor que lhe forneça um certificado assinado.
+- Oferece aos clientes uma maneira padronizada de enviar uma **Solicitação de Assinatura de Certificado** (CSR) com o propósito de obter um certificado. O cliente solicitará ao servidor que lhe forneça um certificado assinado.
 
 ### O que são Perfis de Configuração (também conhecidos como mobileconfigs)?
 
@@ -57,9 +57,9 @@ O [Programa de Inscrição de Dispositivos](https://www.apple.com/business/site/
 ### DEP
 
 - **3 APIs**: 1 para revendedores, 1 para fornecedores de MDM, 1 para identidade do dispositivo (não documentada):
-- A chamada [API "serviço em nuvem" DEP](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf). Esta é usada pelos servidores MDM para associar perfis DEP a dispositivos específicos.
+- A chamada [API "serviço em nuvem" DEP](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf). Esta é usada por servidores MDM para associar perfis DEP a dispositivos específicos.
 - A [API DEP usada por Revendedores Autorizados da Apple](https://applecareconnect.apple.com/api-docs/depuat/html/WSImpManual.html) para inscrever dispositivos, verificar status de inscrição e verificar status de transação.
-- A API privada DEP não documentada. Esta é usada pelos Dispositivos Apple para solicitar seu perfil DEP. No macOS, o binário `cloudconfigurationd` é responsável pela comunicação através dessa API.
+- A API privada DEP não documentada. Esta é usada por Dispositivos Apple para solicitar seu perfil DEP. No macOS, o binário `cloudconfigurationd` é responsável por se comunicar através dessa API.
 - Mais moderna e baseada em **JSON** (vs. plist)
 - A Apple concede um **token OAuth** ao fornecedor de MDM
 
@@ -70,12 +70,12 @@ O [Programa de Inscrição de Dispositivos](https://www.apple.com/business/site/
 - sincroniza “perfis DEP” da Apple para o servidor MDM (entregues pela Apple ao dispositivo posteriormente)
 - Um “perfil” DEP contém:
 - URL do servidor do fornecedor de MDM
-- Certificados confiáveis adicionais para a URL do servidor (fixação opcional)
+- Certificados confiáveis adicionais para a URL do servidor (opcional)
 - Configurações extras (por exemplo, quais telas pular na Assistente de Configuração)
 
 ## Número de Série
 
-Dispositivos Apple fabricados após 2010 geralmente têm números de série **alfanuméricos de 12 caracteres**, com os **três primeiros dígitos representando o local de fabricação**, os **dois** seguintes indicando o **ano** e a **semana** de fabricação, os próximos **três** dígitos fornecendo um **identificador único**, e os **últimos** **quatro** dígitos representando o **número do modelo**.
+Dispositivos Apple fabricados após 2010 geralmente têm números de série **alfanuméricos de 12 caracteres**, com os **três primeiros dígitos representando o local de fabricação**, os **dois** seguintes indicando o **ano** e a **semana** de fabricação, os próximos **três** dígitos fornecendo um **identificador** **único**, e os **últimos** **quatro** dígitos representando o **número do modelo**.
 
 {{#ref}}
 macos-serial-number.md
@@ -86,7 +86,7 @@ macos-serial-number.md
 1. Criação do registro do dispositivo (Revendedor, Apple): O registro para o novo dispositivo é criado
 2. Atribuição do registro do dispositivo (Cliente): O dispositivo é atribuído a um servidor MDM
 3. Sincronização do registro do dispositivo (Fornecedor de MDM): O MDM sincroniza os registros dos dispositivos e envia os perfis DEP para a Apple
-4. Check-in DEP (Dispositivo): O dispositivo recebe seu perfil DEP
+4. Check-in do DEP (Dispositivo): O dispositivo recebe seu perfil DEP
 5. Recuperação do perfil (Dispositivo)
 6. Instalação do perfil (Dispositivo) a. incl. payloads de MDM, SCEP e CA raiz
 7. Emissão de comando MDM (Dispositivo)
@@ -95,7 +95,7 @@ macos-serial-number.md
 
 O arquivo `/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/System/Library/PrivateFrameworks/ConfigurationProfiles.framework/ConfigurationProfiles.tbd` exporta funções que podem ser consideradas **"etapas" de alto nível** do processo de inscrição.
 
-### Etapa 4: Check-in DEP - Obtendo o Registro de Ativação
+### Etapa 4: Check-in do DEP - Obtendo o Registro de Ativação
 
 Esta parte do processo ocorre quando um **usuário inicializa um Mac pela primeira vez** (ou após uma limpeza completa)
 
@@ -104,13 +104,13 @@ Esta parte do processo ocorre quando um **usuário inicializa um Mac pela primei
 ou ao executar `sudo profiles show -type enrollment`
 
 - Determinar **se o dispositivo está habilitado para DEP**
-- O Registro de Ativação é o nome interno para o **"perfil" DEP**
+- Registro de Ativação é o nome interno para **"perfil" DEP**
 - Começa assim que o dispositivo está conectado à Internet
 - Impulsionado por **`CPFetchActivationRecord`**
 - Implementado por **`cloudconfigurationd`** via XPC. O **"Assistente de Configuração"** (quando o dispositivo é inicializado pela primeira vez) ou o comando **`profiles`** irá **contatar este daemon** para recuperar o registro de ativação.
-- LaunchDaemon (sempre executa como root)
+- LaunchDaemon (sempre roda como root)
 
-Segue algumas etapas para obter o Registro de Ativação realizado por **`MCTeslaConfigurationFetcher`**. Este processo utiliza uma criptografia chamada **Absinthe**
+Segue algumas etapas para obter o Registro de Ativação realizadas por **`MCTeslaConfigurationFetcher`**. Este processo utiliza uma criptografia chamada **Absinthe**
 
 1. Recuperar **certificado**
 1. GET [https://iprofiles.apple.com/resource/certificate.cer](https://iprofiles.apple.com/resource/certificate.cer)
@@ -138,11 +138,11 @@ A resposta é um dicionário JSON com alguns dados importantes, como:
 - Solicitação enviada para **url fornecida no perfil DEP**.
 - **Certificados âncora** são usados para **avaliar a confiança** se fornecidos.
 - Lembrete: a propriedade **anchor_certs** do perfil DEP
-- **A solicitação é um simples .plist** com identificação do dispositivo
+- **Solicitação é um simples .plist** com identificação do dispositivo
 - Exemplos: **UDID, versão do OS**.
 - Assinada por CMS, codificada em DER
 - Assinada usando o **certificado de identidade do dispositivo (do APNS)**
-- **A cadeia de certificados** inclui **Apple iPhone Device CA** expirado
+- **Cadeia de certificados** inclui **Apple iPhone Device CA** expirado
 
 ![](<../../../images/image (567) (1) (2) (2) (2) (2) (2) (2) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (2) (2).png>)
 
@@ -186,7 +186,7 @@ Normalmente, o **perfil de ativação** fornecido por um fornecedor de MDM inclu
 - Ao receber, é tratado pelo **`mdmclient`**
 - Para consultar comandos MDM, uma solicitação é enviada para ServerURL
 - Faz uso do payload de MDM previamente instalado:
-- **`ServerURLPinningCertificateUUIDs`** para fixação da solicitação
+- **`ServerURLPinningCertificateUUIDs`** para fixar a solicitação
 - **`IdentityCertificateUUID`** para o certificado de cliente TLS
 
 ## Ataques

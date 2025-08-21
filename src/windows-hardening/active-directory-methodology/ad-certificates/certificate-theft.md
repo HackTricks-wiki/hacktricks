@@ -20,7 +20,7 @@ certutil.exe -dump -v cert.pfx
 ```
 ## Exportando Certificados Usando as APIs Crypto – THEFT1
 
-Em uma **sessão de desktop interativa**, extrair um certificado de usuário ou máquina, junto com a chave privada, pode ser feito facilmente, especialmente se a **chave privada for exportável**. Isso pode ser alcançado navegando até o certificado em `certmgr.msc`, clicando com o botão direito sobre ele e selecionando `All Tasks → Export` para gerar um arquivo .pfx protegido por senha.
+Em uma **sessão de desktop interativa**, extrair um certificado de usuário ou máquina, juntamente com a chave privada, pode ser feito facilmente, especialmente se a **chave privada for exportável**. Isso pode ser alcançado navegando até o certificado em `certmgr.msc`, clicando com o botão direito sobre ele e selecionando `All Tasks → Export` para gerar um arquivo .pfx protegido por senha.
 
 Para uma **abordagem programática**, ferramentas como o cmdlet PowerShell `ExportPfxCertificate` ou projetos como [TheWover’s CertStealer C# project](https://github.com/TheWover/CertStealer) estão disponíveis. Estas utilizam a **Microsoft CryptoAPI** (CAPI) ou a Cryptography API: Next Generation (CNG) para interagir com o armazenamento de certificados. Essas APIs fornecem uma gama de serviços criptográficos, incluindo aqueles necessários para armazenamento e autenticação de certificados.
 
@@ -36,7 +36,7 @@ Mais informações sobre DPAPI em:
 
 No Windows, **as chaves privadas de certificados são protegidas pelo DPAPI**. É crucial reconhecer que os **locais de armazenamento para chaves privadas de usuário e máquina** são distintos, e as estruturas de arquivos variam dependendo da API criptográfica utilizada pelo sistema operacional. **SharpDPAPI** é uma ferramenta que pode navegar automaticamente por essas diferenças ao descriptografar os blobs do DPAPI.
 
-**Certificados de usuário** estão predominantemente armazenados no registro sob `HKEY_CURRENT_USER\SOFTWARE\Microsoft\SystemCertificates`, mas alguns também podem ser encontrados no diretório `%APPDATA%\Microsoft\SystemCertificates\My\Certificates`. As correspondentes **chaves privadas** para esses certificados são tipicamente armazenadas em `%APPDATA%\Microsoft\Crypto\RSA\User SID\` para chaves **CAPI** e `%APPDATA%\Microsoft\Crypto\Keys\` para chaves **CNG**.
+**Certificados de usuário** são predominantemente armazenados no registro sob `HKEY_CURRENT_USER\SOFTWARE\Microsoft\SystemCertificates`, mas alguns também podem ser encontrados no diretório `%APPDATA%\Microsoft\SystemCertificates\My\Certificates`. As correspondentes **chaves privadas** para esses certificados são tipicamente armazenadas em `%APPDATA%\Microsoft\Crypto\RSA\User SID\` para chaves **CAPI** e `%APPDATA%\Microsoft\Crypto\Keys\` para chaves **CNG**.
 
 Para **extrair um certificado e sua chave privada associada**, o processo envolve:
 
@@ -52,7 +52,7 @@ dpapi::masterkey /in:"C:\PATH\TO\KEY" /rpc
 # With mimikatz, if the user's password is known
 dpapi::masterkey /in:"C:\PATH\TO\KEY" /sid:accountSid /password:PASS
 ```
-Para simplificar a descriptografia de arquivos masterkey e arquivos de chave privada, o comando `certificates` do [**SharpDPAPI**](https://github.com/GhostPack/SharpDPAPI) se mostra benéfico. Ele aceita `/pvk`, `/mkfile`, `/password` ou `{GUID}:KEY` como argumentos para descriptografar as chaves privadas e os certificados vinculados, gerando posteriormente um arquivo `.pem`.
+Para simplificar a descriptografia de arquivos masterkey e arquivos de chave privada, o comando `certificates` do [**SharpDPAPI**](https://github.com/GhostPack/SharpDPAPI) é benéfico. Ele aceita `/pvk`, `/mkfile`, `/password` ou `{GUID}:KEY` como argumentos para descriptografar as chaves privadas e os certificados vinculados, gerando posteriormente um arquivo `.pem`.
 ```bash
 # Decrypting using SharpDPAPI
 SharpDPAPI.exe certificates /mkfile:C:\temp\mkeys.txt
@@ -92,9 +92,9 @@ john --wordlist=passwords.txt hash.txt
 ```
 ## NTLM Credential Theft via PKINIT – THEFT5 (UnPAC the hash)
 
-O conteúdo dado explica um método para roubo de credenciais NTLM via PKINIT, especificamente através do método de roubo rotulado como THEFT5. Aqui está uma reexplicação em voz passiva, com o conteúdo anonimizado e resumido onde aplicável:
+O conteúdo dado explica um método para roubo de credenciais NTLM via PKINIT, especificamente através do método de roubo rotulado como THEFT5. Aqui está uma reexplicação na voz passiva, com o conteúdo anonimizado e resumido onde aplicável:
 
-Para suportar a autenticação NTLM `MS-NLMP` para aplicações que não facilitam a autenticação Kerberos, o KDC é projetado para retornar a função unidirecional (OWF) NTLM do usuário dentro do certificado de atributo de privilégio (PAC), especificamente no buffer `PAC_CREDENTIAL_INFO`, quando o PKCA é utilizado. Consequentemente, se uma conta autenticar e garantir um Ticket-Granting Ticket (TGT) via PKINIT, um mecanismo é inerentemente fornecido que permite ao host atual extrair o hash NTLM do TGT para manter os protocolos de autenticação legados. Este processo envolve a descriptografia da estrutura `PAC_CREDENTIAL_DATA`, que é essencialmente uma representação NDR serializada do texto plano NTLM.
+Para suportar a autenticação NTLM `MS-NLMP` para aplicações que não facilitam a autenticação Kerberos, o KDC é projetado para retornar a função unidirecional (OWF) NTLM do usuário dentro do certificado de atributo de privilégio (PAC), especificamente no buffer `PAC_CREDENTIAL_INFO`, quando o PKCA é utilizado. Consequentemente, se uma conta autenticar e garantir um Ticket-Granting Ticket (TGT) via PKINIT, um mecanismo é inerentemente fornecido que permite ao host atual extrair o hash NTLM do TGT para manter os protocolos de autenticação legados. Este processo envolve a descriptografia da estrutura `PAC_CREDENTIAL_DATA`, que é essencialmente uma representação serializada NDR do texto simples NTLM.
 
 A utilidade **Kekeo**, acessível em [https://github.com/gentilkiwi/kekeo](https://github.com/gentilkiwi/kekeo), é mencionada como capaz de solicitar um TGT contendo esses dados específicos, facilitando assim a recuperação do NTLM do usuário. O comando utilizado para esse propósito é o seguinte:
 ```bash
@@ -102,8 +102,8 @@ tgt::pac /caname:generic-DC-CA /subject:genericUser /castore:current_user /domai
 ```
 **`Rubeus`** também pode obter essas informações com a opção **`asktgt [...] /getcredentials`**.
 
-Além disso, observa-se que o Kekeo pode processar certificados protegidos por smartcard, desde que o pin possa ser recuperado, com referência a [https://github.com/CCob/PinSwipe](https://github.com/CCob/PinSwipe). A mesma capacidade é indicada como suportada pelo **Rubeus**, disponível em [https://github.com/GhostPack/Rubeus](https://github.com/GhostPack/Rubeus).
+Além disso, observa-se que Kekeo pode processar certificados protegidos por smartcard, desde que o pin possa ser recuperado, com referência a [https://github.com/CCob/PinSwipe](https://github.com/CCob/PinSwipe). A mesma capacidade é indicada como suportada pelo **Rubeus**, disponível em [https://github.com/GhostPack/Rubeus](https://github.com/GhostPack/Rubeus).
 
-Esta explicação encapsula o processo e as ferramentas envolvidas no roubo de credenciais NTLM via PKINIT, focando na recuperação de hashes NTLM através do TGT obtido usando PKINIT, e as utilidades que facilitam esse processo.
+Esta explicação encapsula o processo e as ferramentas envolvidas na roubo de credenciais NTLM via PKINIT, focando na recuperação de hashes NTLM através do TGT obtido usando PKINIT, e as utilidades que facilitam esse processo.
 
 {{#include ../../../banners/hacktricks-training.md}}

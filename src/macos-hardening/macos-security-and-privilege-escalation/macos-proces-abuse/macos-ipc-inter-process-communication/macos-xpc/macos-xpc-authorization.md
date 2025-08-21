@@ -10,7 +10,7 @@ Quando um aplicativo precisa **executar ações como um usuário privilegiado**,
 
 ### ShouldAcceptNewConnection sempre YES
 
-Um exemplo pode ser encontrado em [EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample). Em `App/AppDelegate.m`, ele tenta **conectar** ao **HelperTool**. E em `HelperTool/HelperTool.m`, a função **`shouldAcceptNewConnection`** **não verificará** nenhum dos requisitos indicados anteriormente. Sempre retornará YES:
+Um exemplo pode ser encontrado em [EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample). Em `App/AppDelegate.m` ele tenta **conectar** ao **HelperTool**. E em `HelperTool/HelperTool.m` a função **`shouldAcceptNewConnection`** **não verificará** nenhum dos requisitos indicados anteriormente. Ela sempre retornará YES:
 ```objectivec
 - (BOOL)listener:(NSXPCListener *)listener shouldAcceptNewConnection:(NSXPCConnection *)newConnection
 // Called by our XPC listener when a new connection comes in.  We configure the connection
@@ -27,7 +27,7 @@ newConnection.exportedObject = self;
 return YES;
 }
 ```
-Para mais informações sobre como configurar corretamente esta verificação, consulte:
+Para mais informações sobre como configurar corretamente esta verificação:
 
 {{#ref}}
 macos-xpc-connecting-process-check/
@@ -228,7 +228,7 @@ assert(junk == errAuthorizationSuccess);
 return error;
 }
 ```
-Note que para **verificar os requisitos para obter o direito** de chamar esse método, a função `authorizationRightForCommand` apenas verificará o objeto de comentário previamente mencionado **`commandInfo`**. Em seguida, chamará **`AuthorizationCopyRights`** para verificar **se possui os direitos** de chamar a função (note que as flags permitem interação com o usuário).
+Note que para **verificar os requisitos para obter o direito** de chamar esse método, a função `authorizationRightForCommand` apenas verificará o objeto de comentário previamente mencionado **`commandInfo`**. Em seguida, chamará **`AuthorizationCopyRights`** para verificar **se possui os direitos** para chamar a função (note que as flags permitem interação com o usuário).
 
 Neste caso, para chamar a função `readLicenseKeyAuthorization`, o `kCommandKeyAuthRightDefault` é definido como `@kAuthorizationRuleClassAllow`. Assim, **qualquer um pode chamá-la**.
 
@@ -249,12 +249,12 @@ security authorizationdb read com.apple.safaridriver.allow
 Você pode encontrar **todas as configurações de permissões** [**aqui**](https://www.dssw.co.uk/reference/authorization-rights/), mas as combinações que não exigirão interação do usuário seriam:
 
 1. **'authenticate-user': 'false'**
-- Esta é a chave mais direta. Se definida como `false`, especifica que um usuário não precisa fornecer autenticação para obter este direito.
+- Esta é a chave mais direta. Se definida como `false`, especifica que um usuário não precisa fornecer autenticação para obter esse direito.
 - Isso é usado em **combinação com uma das 2 abaixo ou indicando um grupo** ao qual o usuário deve pertencer.
 2. **'allow-root': 'true'**
-- Se um usuário estiver operando como o usuário root (que tem permissões elevadas), e esta chave estiver definida como `true`, o usuário root poderia potencialmente obter este direito sem mais autenticação. No entanto, tipicamente, alcançar o status de usuário root já requer autenticação, então este não é um cenário de "sem autenticação" para a maioria dos usuários.
+- Se um usuário estiver operando como o usuário root (que tem permissões elevadas), e esta chave estiver definida como `true`, o usuário root poderia potencialmente obter esse direito sem mais autenticação. No entanto, tipicamente, alcançar o status de usuário root já requer autenticação, então este não é um cenário de "sem autenticação" para a maioria dos usuários.
 3. **'session-owner': 'true'**
-- Se definida como `true`, o proprietário da sessão (o usuário atualmente logado) obteria automaticamente este direito. Isso pode contornar a autenticação adicional se o usuário já estiver logado.
+- Se definida como `true`, o proprietário da sessão (o usuário atualmente logado) obteria automaticamente esse direito. Isso pode contornar a autenticação adicional se o usuário já estiver logado.
 4. **'shared': 'true'**
 - Esta chave não concede direitos sem autenticação. Em vez disso, se definida como `true`, significa que uma vez que o direito tenha sido autenticado, ele pode ser compartilhado entre vários processos sem que cada um precise re-autenticar. Mas a concessão inicial do direito ainda exigiria autenticação, a menos que combinada com outras chaves como `'authenticate-user': 'false'`.
 

@@ -6,7 +6,7 @@
 
 ### Notificações do Windows 10
 
-No caminho `\Users\<username>\AppData\Local\Microsoft\Windows\Notifications` você pode encontrar o banco de dados `appdb.dat` (antes do aniversário do Windows) ou `wpndatabase.db` (após o aniversário do Windows).
+No caminho `\Users\<username>\AppData\Local\Microsoft\Windows\Notifications` você pode encontrar o banco de dados `appdb.dat` (antes do aniversário do Windows) ou `wpndatabase.db` (após o Aniversário do Windows).
 
 Dentro deste banco de dados SQLite, você pode encontrar a tabela `Notification` com todas as notificações (em formato XML) que podem conter dados interessantes.
 
@@ -248,11 +248,11 @@ Algumas ferramentas são úteis para analisar os arquivos de registro:
 
 ### Recuperando Elemento Excluído
 
-Quando uma chave é excluída, ela é marcada como tal, mas até que o espaço que está ocupando seja necessário, não será removida. Portanto, usando ferramentas como **Registry Explorer**, é possível recuperar essas chaves excluídas.
+Quando uma chave é excluída, ela é marcada como tal, mas até que o espaço que ocupa seja necessário, não será removida. Portanto, usando ferramentas como **Registry Explorer**, é possível recuperar essas chaves excluídas.
 
 ### Último Tempo de Escrita
 
-Cada Par-Chave contém um **timestamp** indicando a última vez que foi modificado.
+Cada Key-Value contém um **timestamp** indicando a última vez que foi modificado.
 
 ### SAM
 
@@ -262,6 +262,7 @@ Em `SAM\Domains\Account\Users` você pode obter o nome de usuário, o RID, o úl
 
 ### Entradas Interessantes no Registro do Windows
 
+
 {{#ref}}
 interesting-windows-registry-keys.md
 {{#endref}}
@@ -270,7 +271,7 @@ interesting-windows-registry-keys.md
 
 ### Processos Básicos do Windows
 
-Neste [post](https://jonahacks.medium.com/investigating-common-windows-processes-18dee5f97c1d) você pode aprender sobre os processos comuns do Windows para detectar comportamentos suspeitos.
+Em [este post](https://jonahacks.medium.com/investigating-common-windows-processes-18dee5f97c1d) você pode aprender sobre os processos comuns do Windows para detectar comportamentos suspeitos.
 
 ### Aplicativos Recentes do Windows
 
@@ -278,11 +279,11 @@ Dentro do registro `NTUSER.DAT` no caminho `Software\Microsoft\Current Version\S
 
 ### BAM (Moderador de Atividade em Segundo Plano)
 
-Você pode abrir o arquivo `SYSTEM` com um editor de registro e dentro do caminho `SYSTEM\CurrentControlSet\Services\bam\UserSettings\{SID}` você pode encontrar informações sobre os **aplicativos executados por cada usuário** (note o `{SID}` no caminho) e **a que horas** foram executados (a hora está dentro do valor de Dados do registro).
+Você pode abrir o arquivo `SYSTEM` com um editor de registro e dentro do caminho `SYSTEM\CurrentControlSet\Services\bam\UserSettings\{SID}` você pode encontrar as informações sobre os **aplicativos executados por cada usuário** (note o `{SID}` no caminho) e **a que horas** foram executados (a hora está dentro do valor de Dados do registro).
 
 ### Windows Prefetch
 
-Prefetching é uma técnica que permite que um computador silenciosamente **busque os recursos necessários para exibir conteúdo** que um usuário **pode acessar em um futuro próximo** para que os recursos possam ser acessados mais rapidamente.
+Prefetching é uma técnica que permite que um computador **busque silenciosamente os recursos necessários para exibir conteúdo** que um usuário **pode acessar em um futuro próximo**, para que os recursos possam ser acessados mais rapidamente.
 
 O prefetch do Windows consiste em criar **caches dos programas executados** para poder carregá-los mais rápido. Esses caches são criados como arquivos `.pf` dentro do caminho: `C:\Windows\Prefetch`. Há um limite de 128 arquivos no XP/VISTA/WIN7 e 1024 arquivos no Win8/Win10.
 
@@ -296,9 +297,9 @@ Para inspecionar esses arquivos, você pode usar a ferramenta [**PEcmd.exe**](ht
 ```
 ![](<../../../images/image (315).png>)
 
-### Superprefetch
+### Superfetch
 
-**Superprefetch** tem o mesmo objetivo que o prefetch, **carregar programas mais rápido** prevendo o que será carregado a seguir. No entanto, não substitui o serviço de prefetch.\
+**Superfetch** tem o mesmo objetivo que o prefetch, **carregar programas mais rápido** prevendo o que será carregado a seguir. No entanto, não substitui o serviço de prefetch.\
 Este serviço gerará arquivos de banco de dados em `C:\Windows\Prefetch\Ag*.db`.
 
 Nestes bancos de dados, você pode encontrar o **nome** do **programa**, **número** de **execuções**, **arquivos** **abertos**, **volume** **acessado**, **caminho** **completo**, **períodos** e **timestamps**.
@@ -377,7 +378,7 @@ Você pode encontrá-los no registro em `SYSTEM\ControlSet001\Services`. Você p
 Os aplicativos instalados podem ser encontrados em `\ProgramData\Microsoft\Windows\AppRepository\`\
 Este repositório possui um **log** com **cada aplicativo instalado** no sistema dentro do banco de dados **`StateRepository-Machine.srd`**.
 
-Dentro da tabela de Aplicativos deste banco de dados, é possível encontrar as colunas: "Application ID", "PackageNumber" e "Display Name". Essas colunas têm informações sobre aplicativos pré-instalados e instalados e podem indicar se alguns aplicativos foram desinstalados, pois os IDs dos aplicativos instalados devem ser sequenciais.
+Dentro da tabela de Aplicativos deste banco de dados, é possível encontrar as colunas: "Application ID", "PackageNumber" e "Display Name". Essas colunas têm informações sobre aplicativos pré-instalados e instalados e pode-se verificar se alguns aplicativos foram desinstalados, pois os IDs dos aplicativos instalados devem ser sequenciais.
 
 Também é possível **encontrar aplicativos instalados** dentro do caminho do registro: `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Applications\`\
 E **aplicativos desinstalados** em: `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Deleted\`
@@ -463,7 +464,7 @@ Os detalhes do evento, incluindo códigos de status e substatus, fornecem mais i
 
 ### Recuperando Eventos do Windows
 
-Para aumentar as chances de recuperar Eventos do Windows excluídos, é aconselhável desligar o computador suspeito desconectando-o diretamente. **Bulk_extractor**, uma ferramenta de recuperação que especifica a extensão `.evtx`, é recomendada para tentar recuperar tais eventos.
+Para aumentar as chances de recuperar Eventos do Windows deletados, é aconselhável desligar o computador suspeito desconectando-o diretamente. **Bulk_extractor**, uma ferramenta de recuperação que especifica a extensão `.evtx`, é recomendada para tentar recuperar tais eventos.
 
 ### Identificando Ataques Comuns via Eventos do Windows
 

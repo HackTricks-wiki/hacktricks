@@ -13,7 +13,7 @@ Se você não sabe o que são Mensagens Mach, comece a verificar esta página:
 {{#endref}}
 
 Por enquanto, lembre-se que ([definição daqui](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing)):\
-Mensagens Mach são enviadas através de um _mach port_, que é um canal de comunicação **de um único receptor e múltiplos remetentes** incorporado no kernel mach. **Múltiplos processos podem enviar mensagens** para um mach port, mas em qualquer momento **apenas um único processo pode ler a partir dele**. Assim como descritores de arquivo e sockets, mach ports são alocados e gerenciados pelo kernel e os processos veem apenas um inteiro, que podem usar para indicar ao kernel qual dos seus mach ports desejam usar.
+Mensagens Mach são enviadas através de um _mach port_, que é um canal de comunicação **de receptor único e múltiplos remetentes** incorporado no kernel mach. **Múltiplos processos podem enviar mensagens** para um mach port, mas em qualquer momento **apenas um único processo pode ler a partir dele**. Assim como descritores de arquivo e sockets, mach ports são alocados e gerenciados pelo kernel e os processos veem apenas um inteiro, que podem usar para indicar ao kernel qual dos seus mach ports desejam usar.
 
 ## Conexão XPC
 
@@ -27,14 +27,14 @@ Se você não sabe como uma conexão XPC é estabelecida, verifique:
 
 O que é interessante saber é que **a abstração do XPC é uma conexão um-para-um**, mas é baseada em uma tecnologia que **pode ter múltiplos remetentes, então:**
 
-- Mach ports são de um único receptor, **múltiplos remetentes**.
+- Mach ports são de receptor único, **múltiplos remetentes**.
 - O token de auditoria de uma conexão XPC é o token de auditoria **copiado da mensagem recebida mais recentemente**.
 - Obter o **token de auditoria** de uma conexão XPC é crítico para muitas **verificações de segurança**.
 
 Embora a situação anterior pareça promissora, existem alguns cenários onde isso não causará problemas ([daqui](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing)):
 
-- Tokens de auditoria são frequentemente usados para uma verificação de autorização para decidir se aceitam uma conexão. Como isso acontece usando uma mensagem para o serviço port, **nenhuma conexão foi estabelecida ainda**. Mais mensagens nesse port serão tratadas apenas como solicitações de conexão adicionais. Portanto, quaisquer **verificações antes de aceitar uma conexão não são vulneráveis** (isso também significa que dentro de `-listener:shouldAcceptNewConnection:` o token de auditoria é seguro). Portanto, estamos **procurando conexões XPC que verificam ações específicas**.
-- Manipuladores de eventos XPC são tratados de forma síncrona. Isso significa que o manipulador de eventos para uma mensagem deve ser concluído antes de chamá-lo para a próxima, mesmo em filas de despacho concorrentes. Portanto, dentro de um **manipulador de eventos XPC, o token de auditoria não pode ser sobrescrito** por outras mensagens normais (não-resposta!).
+- Tokens de auditoria são frequentemente usados para uma verificação de autorização para decidir se aceitam uma conexão. Como isso acontece usando uma mensagem para o serviço port, **nenhuma conexão foi estabelecida ainda**. Mais mensagens nesse port serão tratadas apenas como solicitações de conexão adicionais. Portanto, quaisquer **verificações antes de aceitar uma conexão não são vulneráveis** (isso também significa que dentro de `-listener:shouldAcceptNewConnection:` o token de auditoria está seguro). Portanto, estamos **procurando conexões XPC que verificam ações específicas**.
+- Manipuladores de eventos XPC são tratados de forma síncrona. Isso significa que o manipulador de eventos para uma mensagem deve ser concluído antes de chamá-lo para a próxima, mesmo em filas de despacho concorrentes. Portanto, dentro de um **manipulador de eventos XPC, o token de auditoria não pode ser sobrescrito** por outras mensagens normais (não de resposta!).
 
 Dois métodos diferentes que podem ser exploráveis:
 
@@ -45,12 +45,12 @@ Dois métodos diferentes que podem ser exploráveis:
 - Assim, uma **mensagem diferente** poderia **sobrescrever o Token de Auditoria** porque está sendo despachada assíncronamente fora do manipulador de eventos.
 - O exploit passa para **o serviço B o direito de ENVIO para o serviço A**.
 - Assim, o svc **B** estará realmente **enviando** as **mensagens** para o serviço **A**.
-- O **exploit** tenta **chamar** a **ação privilegiada.** Em um RC, o svc **A** **verifica** a autorização dessa **ação** enquanto **svc B sobrescreveu o Token de Auditoria** (dando ao exploit acesso para chamar a ação privilegiada).
+- O **exploit** tenta **chamar** a **ação privilegiada**. Em um RC, o svc **A** **verifica** a autorização dessa **ação** enquanto **svc B sobrescreveu o Token de Auditoria** (dando ao exploit acesso para chamar a ação privilegiada).
 2. Variante 2:
 - O serviço **B** pode chamar uma **funcionalidade privilegiada** no serviço A que o usuário não pode
 - O exploit conecta-se com **o serviço A**, que **envia** ao exploit uma **mensagem esperando uma resposta** em um **port de resposta** específico.
 - O exploit envia ao **serviço** B uma mensagem passando **aquele port de resposta**.
-- Quando o serviço **B responde**, ele **envia a mensagem para o serviço A**, **enquanto** o **exploit** envia uma **mensagem diferente para o serviço A** tentando **alcançar uma funcionalidade privilegiada** e esperando que a resposta do serviço B sobrescreva o Token de Auditoria no momento perfeito (Condição de Corrida).
+- Quando o serviço **B responde**, ele **envia a mensagem para o serviço A**, **enquanto** o **exploit** envia uma mensagem diferente para o serviço A tentando **alcançar uma funcionalidade privilegiada** e esperando que a resposta do serviço B sobrescreva o Token de Auditoria no momento perfeito (Condição de Corrida).
 
 ## Variante 1: chamando xpc_connection_get_audit_token fora de um manipulador de eventos <a href="#variant-1-calling-xpc_connection_get_audit_token-outside-of-an-event-handler" id="variant-1-calling-xpc_connection_get_audit_token-outside-of-an-event-handler"></a>
 
@@ -58,7 +58,7 @@ Cenário:
 
 - Dois serviços mach **`A`** e **`B`** aos quais podemos nos conectar (com base no perfil de sandbox e nas verificações de autorização antes de aceitar a conexão).
 - _**A**_ deve ter uma **verificação de autorização** para uma ação específica que **`B`** pode passar (mas nosso aplicativo não pode).
-- Por exemplo, se B tiver algumas **entitlements** ou estiver rodando como **root**, isso pode permitir que ele peça a A para realizar uma ação privilegiada.
+- Por exemplo, se B tiver algumas **autorizações** ou estiver rodando como **root**, isso pode permitir que ele peça a A para realizar uma ação privilegiada.
 - Para essa verificação de autorização, **`A`** obtém o token de auditoria de forma assíncrona, por exemplo, chamando `xpc_connection_get_audit_token` de **`dispatch_async`**.
 
 > [!CAUTION]
@@ -71,7 +71,7 @@ Portanto, o serviço **B** é **`diagnosticd`** porque roda como **root** e pode
 Para realizar o ataque:
 
 1. Inicie uma **conexão** com o serviço chamado `smd` usando o protocolo XPC padrão.
-2. Forme uma **conexão secundária** com `diagnosticd`. Ao contrário do procedimento normal, em vez de criar e enviar dois novos mach ports, o direito de envio do port do cliente é substituído por um duplicado do **direito de envio** associado à conexão `smd`.
+2. Forme uma **conexão** secundária com `diagnosticd`. Ao contrário do procedimento normal, em vez de criar e enviar dois novos mach ports, o direito de envio do port do cliente é substituído por um duplicado do **direito de envio** associado à conexão `smd`.
 3. Como resultado, mensagens XPC podem ser despachadas para `diagnosticd`, mas as respostas de `diagnosticd` são redirecionadas para `smd`. Para `smd`, parece que as mensagens do usuário e de `diagnosticd` estão originando da mesma conexão.
 
 ![Imagem representando o processo do exploit](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/exploit.png)
@@ -98,7 +98,7 @@ Para explorar essa vulnerabilidade, a seguinte configuração é necessária:
 O processo de exploração envolve os seguintes passos:
 
 1. Aguarde o serviço **`A`** enviar uma mensagem que espera uma resposta.
-2. Em vez de responder diretamente a **`A`**, o port de resposta é sequestrado e usado para enviar uma mensagem para o serviço **`B`**.
+2. Em vez de responder diretamente a **`A`**, o port de resposta é sequestrado e usado para enviar uma mensagem ao serviço **`B`**.
 3. Subsequentemente, uma mensagem envolvendo a ação proibida é despachada, com a expectativa de que será processada de forma concorrente com a resposta de **`B`**.
 
 Abaixo está uma representação visual do cenário de ataque descrito:
@@ -112,7 +112,7 @@ Abaixo está uma representação visual do cenário de ataque descrito:
 - **Dificuldades em Localizar Instâncias**: A busca por instâncias de uso de `xpc_connection_get_audit_token` foi desafiadora, tanto estaticamente quanto dinamicamente.
 - **Metodologia**: Frida foi empregada para interceptar a função `xpc_connection_get_audit_token`, filtrando chamadas que não se originavam de manipuladores de eventos. No entanto, esse método foi limitado ao processo interceptado e exigiu uso ativo.
 - **Ferramentas de Análise**: Ferramentas como IDA/Ghidra foram usadas para examinar serviços mach acessíveis, mas o processo foi demorado, complicado por chamadas envolvendo o cache compartilhado dyld.
-- **Limitações de Script**: Tentativas de scriptar a análise para chamadas a `xpc_connection_get_audit_token` a partir de blocos `dispatch_async` foram dificultadas por complexidades na análise de blocos e interações com o cache compartilhado dyld.
+- **Limitações de Script**: Tentativas de scriptar a análise para chamadas a `xpc_connection_get_audit_token` de blocos `dispatch_async` foram dificultadas por complexidades na análise de blocos e interações com o cache compartilhado dyld.
 
 ## A correção <a href="#the-fix" id="the-fix"></a>
 

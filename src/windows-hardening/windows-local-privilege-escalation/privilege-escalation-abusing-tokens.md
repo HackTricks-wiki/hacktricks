@@ -14,7 +14,7 @@ access-tokens.md
 
 ### SeImpersonatePrivilege
 
-Este é um privilégio que é detido por qualquer processo que permite a impersonação (mas não a criação) de qualquer token, desde que um handle para ele possa ser obtido. Um token privilegiado pode ser adquirido de um serviço do Windows (DCOM) induzindo-o a realizar autenticação NTLM contra um exploit, permitindo assim a execução de um processo com privilégios de SYSTEM. Esta vulnerabilidade pode ser explorada usando várias ferramentas, como [juicy-potato](https://github.com/ohpe/juicy-potato), [RogueWinRM](https://github.com/antonioCoco/RogueWinRM) (que requer winrm desativado), [SweetPotato](https://github.com/CCob/SweetPotato) e [PrintSpoofer](https://github.com/itm4n/PrintSpoofer).
+Este é um privilégio que é detido por qualquer processo que permite a impersonação (mas não a criação) de qualquer token, desde que um identificador para ele possa ser obtido. Um token privilegiado pode ser adquirido de um serviço do Windows (DCOM) induzindo-o a realizar autenticação NTLM contra um exploit, permitindo assim a execução de um processo com privilégios de SYSTEM. Esta vulnerabilidade pode ser explorada usando várias ferramentas, como [juicy-potato](https://github.com/ohpe/juicy-potato), [RogueWinRM](https://github.com/antonioCoco/RogueWinRM) (que requer winrm desativado), [SweetPotato](https://github.com/CCob/SweetPotato) e [PrintSpoofer](https://github.com/itm4n/PrintSpoofer).
 
 {{#ref}}
 roguepotato-and-printspoofer.md
@@ -36,7 +36,7 @@ Se você tiver este token habilitado, pode usar **KERB_S4U_LOGON** para obter um
 
 ### SeBackupPrivilege
 
-O sistema é induzido a **conceder todo o controle de acesso de leitura** a qualquer arquivo (limitado a operações de leitura) por meio deste privilégio. É utilizado para **ler os hashes de senha das contas de Administrador local** do registro, após o que, ferramentas como "**psexec**" ou "**wmiexec**" podem ser usadas com o hash (técnica Pass-the-Hash). No entanto, esta técnica falha sob duas condições: quando a conta de Administrador Local está desativada ou quando uma política está em vigor que remove os direitos administrativos dos Administradores Locais que se conectam remotamente.\
+O sistema é induzido a **conceder todo o acesso de leitura** a qualquer arquivo (limitado a operações de leitura) por meio deste privilégio. É utilizado para **ler os hashes de senha das contas de Administrador local** do registro, após o que, ferramentas como "**psexec**" ou "**wmiexec**" podem ser usadas com o hash (técnica Pass-the-Hash). No entanto, esta técnica falha sob duas condições: quando a conta de Administrador Local está desativada ou quando uma política está em vigor que remove os direitos administrativos dos Administradores Locais que se conectam remotamente.\
 Você pode **abusar deste privilégio** com:
 
 - [https://github.com/Hackplayers/PsCabesha-tools/blob/master/Privesc/Acl-FullControl.ps1](https://github.com/Hackplayers/PsCabesha-tools/blob/master/Privesc/Acl-FullControl.ps1)
@@ -50,7 +50,7 @@ Você pode **abusar deste privilégio** com:
 
 ### SeRestorePrivilege
 
-Permissão para **acesso de gravação** a qualquer arquivo do sistema, independentemente da Lista de Controle de Acesso (ACL) do arquivo, é fornecida por este privilégio. Ele abre inúmeras possibilidades para escalonamento, incluindo a capacidade de **modificar serviços**, realizar DLL Hijacking e definir **debuggers** via Opções de Execução de Arquivo de Imagem, entre várias outras técnicas.
+Permissão para **acesso de gravação** a qualquer arquivo do sistema, independentemente da Lista de Controle de Acesso (ACL) do arquivo, é fornecida por este privilégio. Ele abre inúmeras possibilidades de escalonamento, incluindo a capacidade de **modificar serviços**, realizar DLL Hijacking e definir **debuggers** por meio de Opções de Execução de Arquivo de Imagem, entre várias outras técnicas.
 
 ### SeCreateTokenPrivilege
 
@@ -64,9 +64,9 @@ SeCreateTokenPrivilege é uma permissão poderosa, especialmente útil quando um
 
 ### SeLoadDriverPrivilege
 
-Este privilégio permite **carregar e descarregar drivers de dispositivo** com a criação de uma entrada de registro com valores específicos para `ImagePath` e `Type`. Como o acesso de gravação direto ao `HKLM` (HKEY_LOCAL_MACHINE) é restrito, `HKCU` (HKEY_CURRENT_USER) deve ser utilizado em vez disso. No entanto, para tornar `HKCU` reconhecível pelo kernel para configuração de driver, um caminho específico deve ser seguido.
+Este privilégio permite **carregar e descarregar drivers de dispositivo** com a criação de uma entrada de registro com valores específicos para `ImagePath` e `Type`. Como o acesso de gravação direto ao `HKLM` (HKEY_LOCAL_MACHINE) é restrito, o `HKCU` (HKEY_CURRENT_USER) deve ser utilizado em vez disso. No entanto, para tornar o `HKCU` reconhecível pelo kernel para configuração de driver, um caminho específico deve ser seguido.
 
-Este caminho é `\Registry\User\<RID>\System\CurrentControlSet\Services\DriverName`, onde `<RID>` é o Identificador Relativo do usuário atual. Dentro de `HKCU`, todo esse caminho deve ser criado, e dois valores precisam ser definidos:
+Este caminho é `\Registry\User\<RID>\System\CurrentControlSet\Services\DriverName`, onde `<RID>` é o Identificador Relativo do usuário atual. Dentro do `HKCU`, todo esse caminho deve ser criado, e dois valores precisam ser definidos:
 
 - `ImagePath`, que é o caminho para o binário a ser executado
 - `Type`, com um valor de `SERVICE_KERNEL_DRIVER` (`0x00000001`).
@@ -74,7 +74,7 @@ Este caminho é `\Registry\User\<RID>\System\CurrentControlSet\Services\DriverNa
 **Passos a Seguir:**
 
 1. Acesse `HKCU` em vez de `HKLM` devido ao acesso de gravação restrito.
-2. Crie o caminho `\Registry\User\<RID>\System\CurrentControlSet\Services\DriverName` dentro de `HKCU`, onde `<RID>` representa o Identificador Relativo do usuário atual.
+2. Crie o caminho `\Registry\User\<RID>\System\CurrentControlSet\Services\DriverName` dentro do `HKCU`, onde `<RID>` representa o Identificador Relativo do usuário atual.
 3. Defina o `ImagePath` para o caminho de execução do binário.
 4. Atribua o `Type` como `SERVICE_KERNEL_DRIVER` (`0x00000001`).
 ```python
@@ -156,7 +156,7 @@ Tabela completa de privilégios de token em [https://github.com/gtworek/Priv2Adm
 | Privilégio                 | Impacto     | Ferramenta              | Caminho de execução                                                                                                                                                                                                                                                                                                                                     | Observações                                                                                                                                                                                                                                                                                                                        |
 | -------------------------- | ----------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **`SeAssignPrimaryToken`** | _**Admin**_ | Ferramenta de terceiros  | _"Isso permitiria que um usuário impersonasse tokens e fizesse privesc para o sistema nt usando ferramentas como potato.exe, rottenpotato.exe e juicypotato.exe"_                                                                                                                                                                                                      | Obrigado [Aurélien Chalot](https://twitter.com/Defte_) pela atualização. Vou tentar reformular isso para algo mais parecido com uma receita em breve.                                                                                                                                                                                         |
-| **`SeBackup`**             | **Ameaça**  | _**Comandos embutidos**_ | Ler arquivos sensíveis com `robocopy /b`                                                                                                                                                                                                                                                                                                             | <p>- Pode ser mais interessante se você puder ler %WINDIR%\MEMORY.DMP<br><br>- <code>SeBackupPrivilege</code> (e robocopy) não é útil quando se trata de arquivos abertos.<br><br>- Robocopy requer tanto SeBackup quanto SeRestore para funcionar com o parâmetro /b.</p>                                                                      |
+| **`SeBackup`**             | **Ameaça**  | _**Comandos embutidos**_ | Ler arquivos sensíveis com `robocopy /b`                                                                                                                                                                                                                                                                                                             | <p>- Pode ser mais interessante se você puder ler %WINDIR%\MEMORY.DMP<br><br>- <code>SeBackupPrivilege</code> (e robocopy) não são úteis quando se trata de arquivos abertos.<br><br>- Robocopy requer tanto SeBackup quanto SeRestore para funcionar com o parâmetro /b.</p>                                                                      |
 | **`SeCreateToken`**        | _**Admin**_ | Ferramenta de terceiros  | Criar token arbitrário incluindo direitos de admin local com `NtCreateToken`.                                                                                                                                                                                                                                                                          |                                                                                                                                                                                                                                                                                                                                |
 | **`SeDebug`**              | _**Admin**_ | **PowerShell**          | Duplicar o token `lsass.exe`.                                                                                                                                                                                                                                                                                                                   | Script a ser encontrado em [FuzzySecurity](https://github.com/FuzzySecurity/PowerShell-Suite/blob/master/Conjure-LSASS.ps1)                                                                                                                                                                                                         |
 | **`SeLoadDriver`**         | _**Admin**_ | Ferramenta de terceiros  | <p>1. Carregar driver de kernel com falha como <code>szkg64.sys</code><br>2. Explorar a vulnerabilidade do driver<br><br>Alternativamente, o privilégio pode ser usado para descarregar drivers relacionados à segurança com o comando embutido <code>ftlMC</code>. i.e.: <code>fltMC sysmondrv</code></p>                                                                           | <p>1. A vulnerabilidade <code>szkg64</code> está listada como <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-15732">CVE-2018-15732</a><br>2. O <code>szkg64</code> <a href="https://www.greyhathacker.net/?p=1025">código de exploração</a> foi criado por <a href="https://twitter.com/parvezghh">Parvez Anwar</a></p> |
@@ -167,6 +167,6 @@ Tabela completa de privilégios de token em [https://github.com/gtworek/Priv2Adm
 ## Referência
 
 - Dê uma olhada nesta tabela definindo tokens do Windows: [https://github.com/gtworek/Priv2Admin](https://github.com/gtworek/Priv2Admin)
-- Dê uma olhada [**neste artigo**](https://github.com/hatRiot/token-priv/blob/master/abusing_token_eop_1.0.txt) sobre privesc com tokens.
+- Dê uma olhada em [**este artigo**](https://github.com/hatRiot/token-priv/blob/master/abusing_token_eop_1.0.txt) sobre privesc com tokens.
 
 {{#include ../../banners/hacktricks-training.md}}

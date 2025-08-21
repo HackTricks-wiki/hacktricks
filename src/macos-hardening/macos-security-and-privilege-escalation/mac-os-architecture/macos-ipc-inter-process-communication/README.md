@@ -8,9 +8,9 @@
 
 Mach usa **tarefas** como a **menor unidade** para compartilhar recursos, e cada tarefa pode conter **múltiplas threads**. Essas **tarefas e threads são mapeadas 1:1 para processos e threads POSIX**.
 
-A comunicação entre tarefas ocorre via Comunicação Inter-Processos Mach (IPC), utilizando canais de comunicação unidirecionais. **As mensagens são transferidas entre portas**, que atuam como **filas de mensagens** gerenciadas pelo kernel.
+A comunicação entre tarefas ocorre via Comunicação Inter-Processos Mach (IPC), utilizando canais de comunicação unidirecionais. **Mensagens são transferidas entre portas**, que atuam como **filas de mensagens** gerenciadas pelo kernel.
 
-Cada processo possui uma **tabela IPC**, onde é possível encontrar as **portas mach do processo**. O nome de uma porta mach é, na verdade, um número (um ponteiro para o objeto do kernel).
+Cada processo tem uma **tabela IPC**, onde é possível encontrar as **portas mach do processo**. O nome de uma porta mach é, na verdade, um número (um ponteiro para o objeto do kernel).
 
 Um processo também pode enviar um nome de porta com alguns direitos **para uma tarefa diferente** e o kernel fará com que essa entrada na **tabela IPC da outra tarefa** apareça.
 
@@ -19,14 +19,14 @@ Um processo também pode enviar um nome de porta com alguns direitos **para uma 
 Os direitos de porta, que definem quais operações uma tarefa pode realizar, são fundamentais para essa comunicação. Os possíveis **direitos de porta** são ([definições daqui](https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html)):
 
 - **Direito de Receber**, que permite receber mensagens enviadas para a porta. As portas Mach são filas MPSC (múltiplos produtores, um único consumidor), o que significa que pode haver apenas **um direito de receber para cada porta** em todo o sistema (diferente de pipes, onde múltiplos processos podem manter descritores de arquivo para a extremidade de leitura de um pipe).
-- Uma **tarefa com o Direito de Receber** pode receber mensagens e **criar Direitos de Envio**, permitindo que envie mensagens. Originalmente, apenas a **própria tarefa possui o Direito de Receber sobre sua porta**.
+- Uma **tarefa com o Direito de Receber** pode receber mensagens e **criar Direitos de Enviar**, permitindo que envie mensagens. Originalmente, apenas a **própria tarefa tem o Direito de Receber sobre sua porta**.
 - **Direito de Enviar**, que permite enviar mensagens para a porta.
 - O Direito de Enviar pode ser **clonado**, de modo que uma tarefa que possui um Direito de Enviar pode clonar o direito e **concedê-lo a uma terceira tarefa**.
 - **Direito de Enviar uma vez**, que permite enviar uma mensagem para a porta e depois desaparece.
-- **Direito de Conjunto de Portas**, que denota um _conjunto de portas_ em vez de uma única porta. Desenfileirar uma mensagem de um conjunto de portas desenfileira uma mensagem de uma das portas que ele contém. Conjuntos de portas podem ser usados para escutar várias portas simultaneamente, muito parecido com `select`/`poll`/`epoll`/`kqueue` no Unix.
+- **Direito de conjunto de portas**, que denota um _conjunto de portas_ em vez de uma única porta. Desenfileirar uma mensagem de um conjunto de portas desenfileira uma mensagem de uma das portas que ele contém. Conjuntos de portas podem ser usados para escutar várias portas simultaneamente, muito parecido com `select`/`poll`/`epoll`/`kqueue` no Unix.
 - **Nome morto**, que não é um direito de porta real, mas apenas um espaço reservado. Quando uma porta é destruída, todos os direitos de porta existentes para a porta se tornam nomes mortos.
 
-**As tarefas podem transferir direitos de ENVIO para outras**, permitindo que enviem mensagens de volta. **Os direitos de ENVIO também podem ser clonados, de modo que uma tarefa possa duplicar e dar o direito a uma terceira tarefa**. Isso, combinado com um processo intermediário conhecido como **servidor de inicialização**, permite uma comunicação eficaz entre tarefas.
+**As tarefas podem transferir direitos de ENVIO para outras**, permitindo que enviem mensagens de volta. **Os direitos de ENVIO também podem ser clonados, então uma tarefa pode duplicar e dar o direito a uma terceira tarefa**. Isso, combinado com um processo intermediário conhecido como **servidor de inicialização**, permite uma comunicação eficaz entre tarefas.
 
 ### Portas de Arquivo
 
@@ -45,19 +45,19 @@ Como mencionado, para estabelecer o canal de comunicação, o **servidor de inic
 5. Ao adquirir um direito de ENVIAR, a Tarefa **B** é capaz de **formular** uma **mensagem** e enviá-la **para a Tarefa A**.
 6. Para uma comunicação bidirecional, geralmente a tarefa **B** gera uma nova porta com um direito de **RECEBER** e um direito de **ENVIAR**, e concede o **direito de ENVIAR à Tarefa A** para que ela possa enviar mensagens para a TAREFA B (comunicação bidirecional).
 
-O servidor de inicialização **não pode autenticar** o nome do serviço reivindicado por uma tarefa. Isso significa que uma **tarefa** poderia potencialmente **se passar por qualquer tarefa do sistema**, como falsamente **reivindicar um nome de serviço de autorização** e, em seguida, aprovar cada solicitação.
+O servidor de inicialização **não pode autenticar** o nome do serviço reivindicado por uma tarefa. Isso significa que uma **tarefa** poderia potencialmente **impersonar qualquer tarefa do sistema**, como falsamente **reivindicar um nome de serviço de autorização** e, em seguida, aprovar cada solicitação.
 
 Então, a Apple armazena os **nomes dos serviços fornecidos pelo sistema** em arquivos de configuração seguros, localizados em diretórios **protegidos pelo SIP**: `/System/Library/LaunchDaemons` e `/System/Library/LaunchAgents`. Juntamente com cada nome de serviço, o **binário associado também é armazenado**. O servidor de inicialização criará e manterá um **direito de RECEBER para cada um desses nomes de serviço**.
 
 Para esses serviços predefinidos, o **processo de busca difere ligeiramente**. Quando um nome de serviço está sendo buscado, o launchd inicia o serviço dinamicamente. O novo fluxo de trabalho é o seguinte:
 
-- A tarefa **B** inicia uma **busca** de inicialização por um nome de serviço.
-- **launchd** verifica se a tarefa está em execução e, se não estiver, **inicia**.
+- A tarefa **B** inicia uma **busca de inicialização** por um nome de serviço.
+- O **launchd** verifica se a tarefa está em execução e, se não estiver, **inicia**.
 - A tarefa **A** (o serviço) realiza um **check-in de inicialização**. Aqui, o **servidor de inicialização** cria um direito de ENVIAR, retém-o e **transfere o direito de RECEBER para a Tarefa A**.
 - O launchd duplica o **direito de ENVIAR e o envia para a Tarefa B**.
-- A Tarefa **B** gera uma nova porta com um direito de **RECEBER** e um direito de **ENVIAR**, e dá o **direito de ENVIAR à Tarefa A** (o svc) para que ela possa enviar mensagens para a TAREFA B (comunicação bidirecional).
+- A tarefa **B** gera uma nova porta com um direito de **RECEBER** e um direito de **ENVIAR**, e dá o **direito de ENVIAR à Tarefa A** (o svc) para que ela possa enviar mensagens para a TAREFA B (comunicação bidirecional).
 
-No entanto, esse processo se aplica apenas a tarefas do sistema predefinidas. Tarefas não do sistema ainda operam como descrito originalmente, o que poderia potencialmente permitir a impersonificação.
+No entanto, esse processo se aplica apenas a tarefas do sistema predefinidas. Tarefas não do sistema ainda operam como descrito originalmente, o que poderia potencialmente permitir a impersonação.
 
 ### Uma Mensagem Mach
 
@@ -76,7 +76,7 @@ mach_msg_id_t                 msgh_id;
 ```
 Processos que possuem um _**direito de recebimento**_ podem receber mensagens em uma porta Mach. Por outro lado, os **remetentes** recebem um _**direito de envio**_ ou um _**direito de envio-uma-vez**_. O direito de envio-uma-vez é exclusivamente para enviar uma única mensagem, após a qual se torna inválido.
 
-Para alcançar uma fácil **comunicação bidirecional**, um processo pode especificar uma **porta mach** no **cabeçalho da mensagem** mach chamada de _porta de resposta_ (**`msgh_local_port`**) onde o **receptor** da mensagem pode **enviar uma resposta** a esta mensagem. Os bits em **`msgh_bits`** podem ser usados para **indicar** que um **direito de envio-uma-vez** deve ser derivado e transferido para esta porta (`MACH_MSG_TYPE_MAKE_SEND_ONCE`).
+Para alcançar uma fácil **comunicação bidirecional**, um processo pode especificar uma **porta mach** no **cabeçalho da mensagem** mach chamada de _porta de resposta_ (**`msgh_local_port`**) onde o **destinatário** da mensagem pode **enviar uma resposta** a esta mensagem. Os bits em **`msgh_bits`** podem ser usados para **indicar** que um **direito de envio-uma-vez** deve ser derivado e transferido para esta porta (`MACH_MSG_TYPE_MAKE_SEND_ONCE`).
 
 > [!TIP]
 > Note que esse tipo de comunicação bidirecional é usado em mensagens XPC que esperam uma resposta (`xpc_connection_send_message_with_reply` e `xpc_connection_send_message_with_reply_sync`). Mas **geralmente portas diferentes são criadas** como explicado anteriormente para criar a comunicação bidirecional.
@@ -86,10 +86,10 @@ Os outros campos do cabeçalho da mensagem são:
 - `msgh_size`: o tamanho de todo o pacote.
 - `msgh_remote_port`: a porta na qual esta mensagem é enviada.
 - `msgh_voucher_port`: [vouchers mach](https://robert.sesek.com/2023/6/mach_vouchers.html).
-- `msgh_id`: o ID desta mensagem, que é interpretado pelo receptor.
+- `msgh_id`: o ID desta mensagem, que é interpretado pelo destinatário.
 
 > [!CAUTION]
-> Note que **mensagens mach são enviadas através de uma \_porta mach**\_, que é um canal de comunicação **um único receptor**, **múltiplos remetentes** embutido no núcleo mach. **Múltiplos processos** podem **enviar mensagens** para uma porta mach, mas a qualquer momento apenas **um único processo pode ler** dela.
+> Note que **mensagens mach são enviadas através de uma \_porta mach**\_, que é um canal de comunicação **um único receptor**, **múltiplos remetentes** embutido no núcleo mach. **Múltiplos processos** podem **enviar mensagens** para uma porta mach, mas em qualquer momento apenas **um único processo pode ler** dela.
 
 ### Enumerar portas
 ```bash
@@ -230,7 +230,7 @@ printf("Sent a message\n");
 - **Porta do host**: Se um processo tiver privilégio de **Enviar** sobre esta porta, ele pode obter **informações** sobre o **sistema** (por exemplo, `host_processor_info`).
 - **Porta priv do host**: Um processo com direito de **Enviar** sobre esta porta pode realizar **ações privilegiadas** como carregar uma extensão de kernel. O **processo precisa ser root** para obter essa permissão.
 - Além disso, para chamar a API **`kext_request`**, é necessário ter outros direitos **`com.apple.private.kext*`** que são concedidos apenas a binários da Apple.
-- **Porta do nome da tarefa:** Uma versão não privilegiada da _porta de tarefa_. Ela referencia a tarefa, mas não permite controlá-la. A única coisa que parece estar disponível através dela é `task_info()`.
+- **Porta de nome da tarefa:** Uma versão não privilegiada da _porta de tarefa_. Ela referencia a tarefa, mas não permite controlá-la. A única coisa que parece estar disponível através dela é `task_info()`.
 - **Porta de tarefa** (também conhecida como porta do kernel): Com permissão de Enviar sobre esta porta, é possível controlar a tarefa (ler/escrever memória, criar threads...).
 - Chame `mach_task_self()` para **obter o nome** desta porta para a tarefa chamadora. Esta porta é apenas **herdada** através de **`exec()`**; uma nova tarefa criada com `fork()` recebe uma nova porta de tarefa (como um caso especial, uma tarefa também recebe uma nova porta de tarefa após `exec()` em um binário suid). A única maneira de criar uma tarefa e obter sua porta é realizar a ["dança de troca de porta"](https://robert.sesek.com/2014/1/changes_to_xnu_mach_ipc.html) enquanto faz um `fork()`.
 - Estas são as restrições para acessar a porta (do `macos_task_policy` do binário `AppleMobileFileIntegrity`):
@@ -241,6 +241,7 @@ printf("Sent a message\n");
 ### Injeção de Shellcode em thread via Porta de Tarefa
 
 Você pode pegar um shellcode de:
+
 
 {{#ref}}
 ../../macos-apps-inspecting-debugging-and-fuzzing/arm64-basic-assembly.md
@@ -498,15 +499,16 @@ return 0;
 gcc -framework Foundation -framework Appkit sc_inject.m -o sc_inject
 ./inject <pi or string>
 ```
-### Injeção de Dylib em thread via Porta de Tarefa
+### Injeção de Dylib em thread via porta de Tarefa
 
 No macOS, **threads** podem ser manipuladas via **Mach** ou usando a **api posix `pthread`**. A thread que geramos na injeção anterior foi gerada usando a api Mach, então **não é compatível com posix**.
 
-Foi possível **injetar um shellcode simples** para executar um comando porque **não precisava trabalhar com apis** compatíveis com posix, apenas com Mach. **Injeções mais complexas** precisariam que a **thread** também fosse **compatível com posix**.
+Foi possível **injetar um shellcode simples** para executar um comando porque **não precisava funcionar com apis** compatíveis com posix, apenas com Mach. **Injeções mais complexas** precisariam que a **thread** também fosse **compatível com posix**.
 
 Portanto, para **melhorar a thread**, ela deve chamar **`pthread_create_from_mach_thread`**, que irá **criar um pthread válido**. Então, esse novo pthread poderia **chamar dlopen** para **carregar um dylib** do sistema, assim, em vez de escrever um novo shellcode para realizar diferentes ações, é possível carregar bibliotecas personalizadas.
 
-Você pode encontrar **dylibs de exemplo** em (por exemplo, aquele que gera um log e depois você pode ouvi-lo):
+Você pode encontrar **exemplos de dylibs** em (por exemplo, aquele que gera um log e depois você pode ouvi-lo):
+
 
 {{#ref}}
 ../../macos-dyld-hijacking-and-dyld_insert_libraries.md
@@ -794,6 +796,7 @@ gcc -framework Foundation -framework Appkit dylib_injector.m -o dylib_injector
 
 Nesta técnica, um thread do processo é sequestrado:
 
+
 {{#ref}}
 ../../macos-proces-abuse/macos-ipc-inter-process-communication/macos-thread-injection-via-task-port.md
 {{#endref}}
@@ -802,9 +805,10 @@ Nesta técnica, um thread do processo é sequestrado:
 
 ### Informações Básicas
 
-XPC, que significa XNU (o kernel usado pelo macOS) inter-Process Communication, é uma estrutura para **comunicação entre processos** no macOS e iOS. O XPC fornece um mecanismo para fazer **chamadas de método assíncronas e seguras entre diferentes processos** no sistema. É parte do paradigma de segurança da Apple, permitindo a **criação de aplicativos com separação de privilégios** onde cada **componente** é executado com **apenas as permissões necessárias** para realizar seu trabalho, limitando assim o potencial de dano de um processo comprometido.
+XPC, que significa XNU (o kernel usado pelo macOS) inter-Process Communication, é uma estrutura para **comunicação entre processos** no macOS e iOS. O XPC fornece um mecanismo para fazer **chamadas de método assíncronas e seguras entre diferentes processos** no sistema. É parte do paradigma de segurança da Apple, permitindo a **criação de aplicativos com separação de privilégios** onde cada **componente** é executado com **apenas as permissões necessárias** para realizar seu trabalho, limitando assim o potencial de danos de um processo comprometido.
 
 Para mais informações sobre como essa **comunicação funciona** e como ela **pode ser vulnerável**, consulte:
+
 
 {{#ref}}
 ../../macos-proces-abuse/macos-ipc-inter-process-communication/macos-xpc/
@@ -815,6 +819,7 @@ Para mais informações sobre como essa **comunicação funciona** e como ela **
 O MIG foi criado para **simplificar o processo de criação de código Mach IPC**. Ele basicamente **gera o código necessário** para que o servidor e o cliente se comuniquem com uma definição dada. Mesmo que o código gerado seja feio, um desenvolvedor só precisará importá-lo e seu código será muito mais simples do que antes.
 
 Para mais informações, consulte:
+
 
 {{#ref}}
 ../../macos-proces-abuse/macos-ipc-inter-process-communication/macos-mig-mach-interface-generator.md

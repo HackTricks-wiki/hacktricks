@@ -30,7 +30,7 @@ No Modo de Leitura, o Flipper está esperando que a chave iButton toque e é cap
 
 É possível **emular** iButtons salvos (lidos ou adicionados manualmente).
 
-> [!NOTE]
+> [!TIP]
 > Se você não conseguir fazer os contatos esperados do Flipper Zero tocarem o leitor, você pode **usar o GPIO externo:**
 
 <figure><img src="../../../images/image (138).png" alt=""><figcaption></figcaption></figure>

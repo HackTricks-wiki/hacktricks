@@ -180,7 +180,9 @@ subprocess.Popen('whoami', shell=True) # Calc.exe will pop up
 
 <details>
 
-<summary>Substituindo
+<summary>Substituindo <strong><code>__kwdefaults__</code></strong></summary>
+
+**`__kwdefaults__`** é um atributo especial de todas as funções, baseado na [documentação](https://docs.python.org/3/library/inspect.html) do Python, é um “mapeamento de quaisquer valores padrão para parâmetros **somente de palavra-chave**”. Poluir este atributo nos permite controlar os valores padrão dos parâmetros somente de palavra-chave de uma função, que são os parâmetros da função que vêm após \* ou \*args.
 ```python
 from os import system
 import json
@@ -221,9 +223,9 @@ execute() #> Executing echo Polluted
 
 <details>
 
-<summary>Substituição do segredo do Flask em arquivos</summary>
+<summary>Substituindo o segredo do Flask em arquivos</summary>
 
-Então, se você puder fazer uma poluição de classe sobre um objeto definido no arquivo python principal da web, mas **cuja classe é definida em um arquivo diferente** do principal. Porque, para acessar \_\_globals\_\_ nas cargas úteis anteriores, você precisa acessar a classe do objeto ou métodos da classe, você poderá **acessar os globais naquele arquivo, mas não no principal**. \
+Então, se você puder fazer uma poluição de classe sobre um objeto definido no arquivo python principal da web, mas **cuja classe está definida em um arquivo diferente** do principal. Porque, para acessar \_\_globals\_\_ nos payloads anteriores, você precisa acessar a classe do objeto ou métodos da classe, você poderá **acessar os globals naquele arquivo, mas não no principal**. \
 Portanto, você **não poderá acessar o objeto global do app Flask** que definiu a **chave secreta** na página principal:
 ```python
 app = Flask(__name__, template_folder='templates')

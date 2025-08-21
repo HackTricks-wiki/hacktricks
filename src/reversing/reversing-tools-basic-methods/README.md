@@ -31,7 +31,7 @@ O mérito aqui é que se um código fonte perdido requer restauração de um ass
 
 ### [.NET Reflector](https://www.red-gate.com/products/reflector/)
 
-Com um modelo de add-in abrangente e uma API que estende a ferramenta para atender às suas necessidades exatas, o .NET Reflector economiza tempo e simplifica o desenvolvimento. Vamos dar uma olhada na infinidade de serviços de engenharia reversa que esta ferramenta fornece:
+Com um modelo de add-in abrangente e uma API que estende a ferramenta para atender às suas necessidades exatas, .NET Reflector economiza tempo e simplifica o desenvolvimento. Vamos dar uma olhada na infinidade de serviços de engenharia reversa que esta ferramenta fornece:
 
 - Fornece uma visão de como os dados fluem através de uma biblioteca ou componente
 - Fornece insights sobre a implementação e uso de linguagens e frameworks .NET
@@ -47,13 +47,13 @@ Se você precisar **descompilar**, **modificar** e **recompilar** novamente, pod
 
 ### Registro do DNSpy
 
-Para fazer o **DNSpy registrar algumas informações em um arquivo**, você pode usar este trecho:
+Para fazer **DNSpy registrar algumas informações em um arquivo**, você pode usar este trecho:
 ```cs
 using System.IO;
 path = "C:\\inetpub\\temp\\MyTest2.txt";
 File.AppendAllText(path, "Password: " + password + "\n");
 ```
-### DNSpy Debugging
+### Depuração com DNSpy
 
 Para depurar código usando DNSpy, você precisa:
 
@@ -78,9 +78,9 @@ Em seguida, salve o novo arquivo via _**File >> Save module...**_:
 
 ![](<../../images/image (602).png>)
 
-Isso é necessário porque, se você não fizer isso, durante o **runtime** várias **optimisations** serão aplicadas ao código e pode ser possível que, ao depurar, um **break-point nunca seja atingido** ou algumas **variables não existam**.
+Isso é necessário porque, se você não fizer isso, em **runtime** várias **optimisations** serão aplicadas ao código e pode ser possível que, ao depurar, um **break-point nunca seja atingido** ou algumas **variáveis não existam**.
 
-Então, se sua aplicação .NET estiver sendo **run** pelo **IIS**, você pode **restart** ela com:
+Então, se sua aplicação .NET estiver sendo **run** pelo **IIS**, você pode **restart** com:
 ```
 iisreset /noforce
 ```
@@ -88,7 +88,7 @@ Então, para começar a depuração, você deve fechar todos os arquivos abertos
 
 ![](<../../images/image (318).png>)
 
-Em seguida, selecione **w3wp.exe** para se conectar ao **IIS server** e clique em **attach**:
+Em seguida, selecione **w3wp.exe** para anexar ao **IIS server** e clique em **attach**:
 
 ![](<../../images/image (113).png>)
 
@@ -125,7 +125,7 @@ Clique com o botão direito em qualquer módulo no **Assembly Explorer** e cliqu
 
 ![](<../../images/image (704).png>)
 
-Então, quando você começar a depurar, **a execução será interrompida quando cada DLL for carregada**, e quando o rundll32 carregar sua DLL, a execução será interrompida.
+Então, quando você começar a depurar, **a execução será interrompida quando cada DLL for carregada**, então, quando o rundll32 carregar sua DLL, a execução será interrompida.
 
 Mas, como você pode chegar ao código da DLL que foi carregada? Usando este método, eu não sei como.
 
@@ -186,7 +186,7 @@ Você pode baixar uma versão compilada de [jmp2it na página de lançamentos](h
 
 [**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) é a GUI do radare. Usando o cutter, você pode emular o shellcode e inspecioná-lo dinamicamente.
 
-Observe que o Cutter permite que você "Abra Arquivo" e "Abra Shellcode". No meu caso, quando abri o shellcode como um arquivo, ele o decompilou corretamente, mas quando o abri como um shellcode, não:
+Observe que o Cutter permite que você "Abra Arquivo" e "Abra Shellcode". No meu caso, quando eu abri o shellcode como um arquivo, ele o decompilou corretamente, mas quando eu o abri como um shellcode, não:
 
 ![](<../../images/image (562).png>)
 
@@ -200,7 +200,7 @@ Você pode ver a pilha, por exemplo, dentro de um dump hex:
 
 ![](<../../images/image (186).png>)
 
-### Desofuscando shellcode e obtendo funções executadas
+### Deobfuscando shellcode e obtendo funções executadas
 
 Você deve tentar [**scdbg**](http://sandsprite.com/blogs/index.php?uid=7&pid=152).\
 Ele irá te informar coisas como **quais funções** o shellcode está usando e se o shellcode está **decodificando** a si mesmo na memória.
@@ -216,7 +216,7 @@ scDbg também conta com um lançador gráfico onde você pode selecionar as opç
 
 ![](<../../images/image (258).png>)
 
-A opção **Create Dump** irá despejar o shellcode final se alguma alteração for feita no shellcode dinamicamente na memória (útil para baixar o shellcode decodificado). O **start offset** pode ser útil para iniciar o shellcode em um deslocamento específico. A opção **Debug Shell** é útil para depurar o shellcode usando o terminal scDbg (no entanto, eu acho que qualquer uma das opções explicadas anteriormente é melhor para isso, pois você poderá usar o Ida ou x64dbg).
+A opção **Create Dump** irá despejar o shellcode final se alguma alteração for feita no shellcode dinamicamente na memória (útil para baixar o shellcode decodificado). O **start offset** pode ser útil para iniciar o shellcode em um deslocamento específico. A opção **Debug Shell** é útil para depurar o shellcode usando o terminal scDbg (no entanto, eu acho que qualquer uma das opções explicadas antes é melhor para isso, pois você poderá usar o Ida ou x64dbg).
 
 ### Desmontando usando CyberChef
 
@@ -251,7 +251,7 @@ Tendo o **nome** das **funções** sendo chamadas, pesquise por elas na **Intern
 
 Para binários compilados em Delphi, você pode usar [https://github.com/crypto2011/IDR](https://github.com/crypto2011/IDR)
 
-Se você precisar reverter um binário Delphi, eu sugeriria usar o plugin IDA [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)
+Se você precisar reverter um binário Delphi, eu sugeriria que você usasse o plugin IDA [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)
 
 Basta pressionar **ATL+f7** (importar plugin python no IDA) e selecionar o plugin python.
 
@@ -261,7 +261,7 @@ Este plugin executará o binário e resolverá os nomes das funções dinamicame
 
 ## Golang
 
-Se você precisar reverter um binário Golang, eu sugeriria usar o plugin IDA [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)
+Se você precisar reverter um binário Golang, eu sugeriria que você usasse o plugin IDA [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)
 
 Basta pressionar **ATL+f7** (importar plugin python no IDA) e selecionar o plugin python.
 
@@ -284,7 +284,7 @@ Se você obtiver o **binário** de um jogo GBA, pode usar diferentes ferramentas
 - [**gba-ghidra-loader**](https://github.com/pudii/gba-ghidra-loader) - Plugin Ghidra
 - [**GhidraGBA**](https://github.com/SiD3W4y/GhidraGBA) - Plugin Ghidra
 
-No [**no$gba**](https://problemkaputt.de/gba.htm), em _**Options --> Emulation Setup --> Controls**_** ** você pode ver como pressionar os **botões** do Game Boy Advance
+Em [**no$gba**](https://problemkaputt.de/gba.htm), em _**Options --> Emulation Setup --> Controls**_** ** você pode ver como pressionar os **botões** do Game Boy Advance
 
 ![](<../../images/image (581).png>)
 
@@ -373,14 +373,15 @@ No código anterior, você pode ver que estamos comparando **uVar1** (o lugar on
 - Primeiro, é comparado com o **valor 4** (**botão SELECT**): No desafio, este botão limpa a tela.
 - Em seguida, é comparado com o **valor 8** (**botão START**): No desafio, isso verifica se o código é válido para obter a flag.
 - Neste caso, a var **`DAT_030000d8`** é comparada com 0xf3 e, se o valor for o mesmo, algum código é executado.
-- Em qualquer outro caso, algum cont (`DAT_030000d4`) é verificado. É um cont porque está adicionando 1 logo após entrar no código.\
-**Se** for menor que 8, algo que envolve **adicionar** valores a **`DAT_030000d8`** é feito (basicamente, está adicionando os valores das teclas pressionadas nesta variável, desde que o cont seja menor que 8).
+- Em qualquer outro caso, um cont (`DAT_030000d4`) é verificado. É um cont porque está adicionando 1 logo após entrar no código.\
+**Se** for menor que 8, algo que envolve **adicionar** valores a **`DAT_030000d8`** é feito (basicamente, está adicionando os valores das teclas pressionadas nesta variável enquanto o cont for menor que 8).
 
-Assim, neste desafio, sabendo os valores dos botões, você precisava **pressionar uma combinação com um comprimento menor que 8 que a adição resultante seja 0xf3.**
+Portanto, neste desafio, sabendo os valores dos botões, você precisava **pressionar uma combinação com um comprimento menor que 8 que a adição resultante seja 0xf3.**
 
 **Referência para este tutorial:** [**https://exp.codes/Nostalgia/**](https://exp.codes/Nostalgia/)
 
 ## Game Boy
+
 
 {{#ref}}
 https://www.youtube.com/watch?v=VVbRe7wr3G4

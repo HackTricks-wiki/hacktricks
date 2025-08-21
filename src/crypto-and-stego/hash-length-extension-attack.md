@@ -1,10 +1,10 @@
-# Ataque de Extensão de Comprimento de Hash
+# Hash Length Extension Attack
 
 {{#include ../banners/hacktricks-training.md}}
 
 ## Resumo do ataque
 
-Imagine um servidor que está **assinando** alguns **dados** ao **anexar** um **segredo** a alguns dados de texto claro conhecidos e, em seguida, fazendo o hash desses dados. Se você souber:
+Imagine um servidor que está **assinando** alguns **dados** ao **anexar** um **segredo** a alguns dados de texto claro conhecidos e, em seguida, hashando esses dados. Se você souber:
 
 - **O comprimento do segredo** (isso também pode ser forçado a partir de um intervalo de comprimento dado)
 - **Os dados de texto claro**
@@ -17,7 +17,7 @@ Então, é possível para um **atacante** **anexar** **dados** e **gerar** uma *
 
 ### Como?
 
-Basicamente, os algoritmos vulneráveis geram os hashes primeiro **fazendo o hash de um bloco de dados**, e então, **a partir do** **hash** **anteriormente** criado (estado), eles **adicionam o próximo bloco de dados** e **fazem o hash**.
+Basicamente, os algoritmos vulneráveis geram os hashes primeiro **hashando um bloco de dados**, e então, **a partir** do **hash** **anteriormente** criado (estado), eles **adicionam o próximo bloco de dados** e **hasham**.
 
 Então, imagine que o segredo é "secret" e os dados são "data", o MD5 de "secretdata" é 6036708eba0d11f6ef52ad44e8b74d5b.\
 Se um atacante quiser anexar a string "append", ele pode:

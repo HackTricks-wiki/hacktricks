@@ -20,7 +20,7 @@ Você também pode verificar a seguinte página para aprender **outras maneiras 
 
 ### FreeIPA
 
-FreeIPA é uma **alternativa** de código aberto ao **Active Directory** da Microsoft, principalmente para ambientes **Unix**. Ele combina um **diretório LDAP** completo com um Centro de Distribuição de Chaves **Kerberos** da MIT para gerenciamento semelhante ao Active Directory. Utilizando o Dogtag **Certificate System** para gerenciamento de certificados CA e RA, suporta autenticação **multifatorial**, incluindo smartcards. O SSSD está integrado para processos de autenticação Unix. Saiba mais sobre isso em:
+FreeIPA é uma **alternativa** de código aberto ao **Active Directory** da Microsoft, principalmente para ambientes **Unix**. Ele combina um **diretório LDAP** completo com um Centro de Distribuição de Chaves **Kerberos** da MIT para gerenciamento semelhante ao Active Directory. Utilizando o Dogtag **Certificate System** para gerenciamento de certificados CA & RA, suporta autenticação **multifatorial**, incluindo smartcards. O SSSD está integrado para processos de autenticação Unix. Saiba mais sobre isso em:
 
 {{#ref}}
 ../freeipa-pentesting.md
@@ -38,7 +38,7 @@ Nesta página, você encontrará diferentes lugares onde pode **encontrar ticket
 
 ### Reutilização de ticket CCACHE de /tmp
 
-Os arquivos CCACHE são formatos binários para **armazenar credenciais Kerberos** e geralmente são armazenados com permissões 600 em `/tmp`. Esses arquivos podem ser identificados pelo seu **formato de nome, `krb5cc_%{uid}`,** correlacionando ao UID do usuário. Para verificação do ticket de autenticação, a **variável de ambiente `KRB5CCNAME`** deve ser definida para o caminho do arquivo de ticket desejado, permitindo sua reutilização.
+Os arquivos CCACHE são formatos binários para **armazenar credenciais Kerberos** e geralmente são armazenados com permissões 600 em `/tmp`. Esses arquivos podem ser identificados pelo seu **formato de nome, `krb5cc_%{uid}`,** correlacionando-se ao UID do usuário. Para verificação do ticket de autenticação, a **variável de ambiente `KRB5CCNAME`** deve ser definida para o caminho do arquivo de ticket desejado, permitindo sua reutilização.
 
 Liste o ticket atual usado para autenticação com `env | grep KRB5CCNAME`. O formato é portátil e o ticket pode ser **reutilizado definindo a variável de ambiente** com `export KRB5CCNAME=/tmp/ticket.ccache`. O formato do nome do ticket Kerberos é `krb5cc_%{uid}` onde uid é o UID do usuário.
 ```bash
@@ -62,7 +62,7 @@ make CONF=Release
 ```
 Este procedimento tentará injetar em várias sessões, indicando sucesso ao armazenar os tickets extraídos em `/tmp` com uma convenção de nomenclatura de `__krb_UID.ccache`.
 
-### Reutilização de tickets CCACHE do SSSD KCM
+### Reutilização de ticket CCACHE do SSSD KCM
 
 O SSSD mantém uma cópia do banco de dados no caminho `/var/lib/sss/secrets/secrets.ldb`. A chave correspondente é armazenada como um arquivo oculto no caminho `/var/lib/sss/secrets/.secrets.mkey`. Por padrão, a chave só é legível se você tiver permissões de **root**.
 
@@ -71,7 +71,7 @@ Invocar **`SSSDKCMExtractor`** com os parâmetros --database e --key irá analis
 git clone https://github.com/fireeye/SSSDKCMExtractor
 python3 SSSDKCMExtractor.py --database secrets.ldb --key secrets.mkey
 ```
-O **blob de cache de credenciais Kerberos pode ser convertido em um arquivo Kerberos CCache utilizável** que pode ser passado para Mimikatz/Rubeus.
+O **blob de cache de credenciais Kerberos pode ser convertido em um arquivo CCache Kerberos utilizável** que pode ser passado para Mimikatz/Rubeus.
 
 ### Reutilização de ticket CCACHE a partir do keytab
 ```bash
@@ -83,7 +83,7 @@ klist -k /etc/krb5.keytab
 
 As chaves de contas de serviço, essenciais para serviços que operam com privilégios de root, são armazenadas de forma segura nos arquivos **`/etc/krb5.keytab`**. Essas chaves, semelhantes a senhas para serviços, exigem estrita confidencialidade.
 
-Para inspecionar o conteúdo do arquivo keytab, **`klist`** pode ser empregado. A ferramenta é projetada para exibir detalhes da chave, incluindo o **NT Hash** para autenticação de usuários, particularmente quando o tipo de chave é identificado como 23.
+Para inspecionar o conteúdo do arquivo keytab, pode-se empregar **`klist`**. A ferramenta é projetada para exibir detalhes da chave, incluindo o **NT Hash** para autenticação de usuários, particularmente quando o tipo de chave é identificado como 23.
 ```bash
 klist.exe -t -K -e -k FILE:C:/Path/to/your/krb5.keytab
 # Output includes service principal details and the NT Hash

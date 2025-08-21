@@ -40,9 +40,9 @@ Tela de leitura de cartão desconhecidoPara cartões NFC desconhecidos, o Flippe
 
 <figure><img src="https://cdn.flipperzero.one/Monosnap_Miro_2022-08-17_12-27-53.png?auto=format&ixlib=react-9.1.1&h=932&w=2634" alt=""><figcaption></figcaption></figure>
 
-### Cartões NFC tipos B, F e V <a href="#wyg51" id="wyg51"></a>
+### Tipos de cartões NFC B, F e V <a href="#wyg51" id="wyg51"></a>
 
-Para **cartões NFC tipos B, F e V**, o Flipper Zero pode apenas **ler e exibir um UID** sem salvá-lo.
+Para **tipos de cartões NFC B, F e V**, o Flipper Zero pode apenas **ler e exibir um UID** sem salvá-lo.
 
 <figure><img src="https://archbee.imgix.net/3StCFqarJkJQZV-7N79yY/zBU55Fyj50TFO4U7S-OXH_screenshot-2022-08-12-at-182540.png?auto=format&ixlib=react-9.1.1&h=1080&w=2704" alt=""><figcaption></figcaption></figure>
 
@@ -70,7 +70,7 @@ Caso o Flipper Zero não consiga encontrar o tipo de cartão a partir dos dados 
 #### Cartões Bancários EMV (PayPass, payWave, Apple Pay, Google Pay) <a href="#emv-bank-cards-paypass-paywave-apple-pay-google-pay" id="emv-bank-cards-paypass-paywave-apple-pay-google-pay"></a>
 
 Além de simplesmente ler o UID, você pode extrair muito mais dados de um cartão bancário. É possível **obter o número completo do cartão** (os 16 dígitos na frente do cartão), **data de validade**, e em alguns casos até mesmo o **nome do proprietário** junto com uma lista das **transações mais recentes**.\
-No entanto, você **não pode ler o CVV dessa forma** (os 3 dígitos na parte de trás do cartão). Além disso, **cartões bancários estão protegidos contra ataques de repetição**, então copiá-lo com o Flipper e depois tentar emulá-lo para pagar por algo não funcionará.
+No entanto, você **não pode ler o CVV dessa forma** (os 3 dígitos na parte de trás do cartão). Além disso, **cartões bancários estão protegidos contra ataques de replay**, então copiá-lo com o Flipper e depois tentar emulá-lo para pagar por algo não funcionará.
 
 ## Referências
 

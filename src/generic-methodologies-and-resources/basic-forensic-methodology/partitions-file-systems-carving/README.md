@@ -5,19 +5,19 @@
 ## Partições
 
 Um disco rígido ou um **SSD pode conter diferentes partições** com o objetivo de separar dados fisicamente.\
-A **unidade mínima** de um disco é o **setor** (normalmente composto por 512B). Assim, cada tamanho de partição precisa ser um múltiplo desse tamanho.
+A **unidade mínima** de um disco é o **setor** (normalmente composto por 512B). Portanto, cada tamanho de partição precisa ser um múltiplo desse tamanho.
 
 ### MBR (master Boot Record)
 
 Ele é alocado no **primeiro setor do disco após os 446B do código de inicialização**. Este setor é essencial para indicar ao PC o que e de onde uma partição deve ser montada.\
 Permite até **4 partições** (no máximo **apenas 1** pode ser ativa/**inicializável**). No entanto, se você precisar de mais partições, pode usar **partições estendidas**. O **último byte** deste primeiro setor é a assinatura do registro de inicialização **0x55AA**. Apenas uma partição pode ser marcada como ativa.\
-MBR permite **máx 2.2TB**.
+O MBR permite **máx 2.2TB**.
 
 ![](<../../../images/image (350).png>)
 
 ![](<../../../images/image (304).png>)
 
-Dos **bytes 440 a 443** do MBR, você pode encontrar a **Assinatura do Disco do Windows** (se o Windows estiver em uso). A letra da unidade lógica do disco rígido depende da Assinatura do Disco do Windows. Alterar essa assinatura pode impedir que o Windows inicialize (ferramenta: [**Active Disk Editor**](https://www.disk-editor.org/index.html)**)**.
+Dos **bytes 440 a 443** do MBR, você pode encontrar a **Assinatura do Disco do Windows** (se o Windows estiver em uso). A letra da unidade lógica do disco rígido depende da Assinatura do Disco do Windows. Alterar essa assinatura pode impedir o Windows de inicializar (ferramenta: [**Active Disk Editor**](https://www.disk-editor.org/index.html)**)**.
 
 ![](<../../../images/image (310).png>)
 
@@ -25,31 +25,31 @@ Dos **bytes 440 a 443** do MBR, você pode encontrar a **Assinatura do Disco do 
 
 | Offset      | Comprimento | Item                |
 | ----------- | ----------- | ------------------- |
-| 0 (0x00)    | 446(0x1BE)  | Código de inicialização           |
-| 446 (0x1BE) | 16 (0x10)   | Primeira Partição     |
+| 0 (0x00)    | 446(0x1BE)  | Código de inicialização |
+| 446 (0x1BE) | 16 (0x10)   | Primeira Partição   |
 | 462 (0x1CE) | 16 (0x10)   | Segunda Partição    |
-| 478 (0x1DE) | 16 (0x10)   | Terceira Partição     |
-| 494 (0x1EE) | 16 (0x10)   | Quarta Partição    |
+| 478 (0x1DE) | 16 (0x10)   | Terceira Partição   |
+| 494 (0x1EE) | 16 (0x10)   | Quarta Partição     |
 | 510 (0x1FE) | 2 (0x2)     | Assinatura 0x55 0xAA |
 
 **Formato do Registro da Partição**
 
 | Offset    | Comprimento | Item                                                   |
 | --------- | ----------- | ------------------------------------------------------ |
-| 0 (0x00)  | 1 (0x01)   | Sinalizador ativo (0x80 = inicializável)                          |
-| 1 (0x01)  | 1 (0x01)   | Cabeça de início                                             |
-| 2 (0x02)  | 1 (0x01)   | Setor de início (bits 0-5); bits superiores do cilindro (6- 7) |
-| 3 (0x03)  | 1 (0x01)   | Cilindro de início 8 bits mais baixos                           |
-| 4 (0x04)  | 1 (0x01)   | Código do tipo de partição (0x83 = Linux)                     |
-| 5 (0x05)  | 1 (0x01)   | Cabeça final                                               |
-| 6 (0x06)  | 1 (0x01)   | Setor final (bits 0-5); bits superiores do cilindro (6- 7)   |
-| 7 (0x07)  | 1 (0x01)   | Cilindro final 8 bits mais baixos                             |
-| 8 (0x08)  | 4 (0x04)   | Setores precedendo a partição (little endian)            |
+| 0 (0x00)  | 1 (0x01)   | Sinalizador ativo (0x80 = inicializável)               |
+| 1 (0x01)  | 1 (0x01)   | Cabeça de início                                       |
+| 2 (0x02)  | 1 (0x01)   | Setor de início (bits 0-5); bits superiores do cilindro (6-7) |
+| 3 (0x03)  | 1 (0x01)   | Cilindro de início, 8 bits mais baixos                 |
+| 4 (0x04)  | 1 (0x01)   | Código do tipo de partição (0x83 = Linux)             |
+| 5 (0x05)  | 1 (0x01)   | Cabeça final                                           |
+| 6 (0x06)  | 1 (0x01)   | Setor final (bits 0-5); bits superiores do cilindro (6-7)   |
+| 7 (0x07)  | 1 (0x01)   | Cilindro final, 8 bits mais baixos                     |
+| 8 (0x08)  | 4 (0x04)   | Setores precedendo a partição (little endian)         |
 | 12 (0x0C) | 4 (0x04)   | Setores na partição                                   |
 
 Para montar um MBR no Linux, você primeiro precisa obter o deslocamento inicial (você pode usar `fdisk` e o comando `p`)
 
-![](<../../../images/image (413) (3) (3) (3) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
+![](<../../../images/image (413) (3) (3) (3) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
 E então use o seguinte código
 ```bash
@@ -64,7 +64,7 @@ mount -o ro,loop,offset=32256,noatime /path/to/image.dd /media/part/
 
 ### GPT (Tabela de Partição GUID)
 
-A Tabela de Partição GUID, conhecida como GPT, é favorecida por suas capacidades aprimoradas em comparação ao MBR (Registro de Inicialização Mestre). Distinta por seu **identificador único global** para partições, a GPT se destaca de várias maneiras:
+A Tabela de Partição GUID, conhecida como GPT, é favorecida por suas capacidades aprimoradas em comparação ao MBR (Registro de Inicialização Mestre). Distintiva por seu **identificador único global** para partições, a GPT se destaca de várias maneiras:
 
 - **Localização e Tamanho**: Tanto a GPT quanto a MBR começam no **setor 0**. No entanto, a GPT opera em **64 bits**, contrastando com os 32 bits da MBR.
 - **Limites de Partição**: A GPT suporta até **128 partições** em sistemas Windows e acomoda até **9,4ZB** de dados.
@@ -159,7 +159,7 @@ A unidade básica de armazenamento do sistema de arquivos é um **cluster, geral
 
 Uma limitação significativa em todas as versões do FAT é o **tamanho máximo de arquivo de 4GB**, imposto pelo campo de 32 bits usado para armazenamento do tamanho do arquivo.
 
-Os componentes principais do diretório raiz, particularmente para FAT12 e FAT16, incluem:
+Os componentes-chave do diretório raiz, particularmente para FAT12 e FAT16, incluem:
 
 - **Nome do Arquivo/Pasta** (até 8 caracteres)
 - **Atributos**
@@ -169,7 +169,7 @@ Os componentes principais do diretório raiz, particularmente para FAT12 e FAT16
 
 ### EXT
 
-**Ext2** é o sistema de arquivos mais comum para **partições que não fazem journaling** (**partições que não mudam muito**) como a partição de inicialização. **Ext3/4** são **journaling** e geralmente são usados para as **demais partições**.
+**Ext2** é o sistema de arquivos mais comum para **partições que não fazem journaling** (**partições que não mudam muito**) como a partição de inicialização. **Ext3/4** são **journaling** e são usados geralmente para as **demais partições**.
 
 ## **Metadados**
 
@@ -199,11 +199,11 @@ file-data-carving-recovery-tools.md
 
 ### **File Carving**
 
-**File carving** é uma técnica que tenta **encontrar arquivos no volume de dados**. Existem 3 maneiras principais pelas quais ferramentas como essa funcionam: **Baseadas em cabeçalhos e rodapés de tipos de arquivos**, baseadas em **estruturas** de tipos de arquivos e baseadas no **conteúdo** em si.
+**File carving** é uma técnica que tenta **encontrar arquivos no volume de dados**. Existem 3 maneiras principais pelas quais ferramentas como essa funcionam: **Baseadas em cabeçalhos e rodapés de tipos de arquivo**, baseadas em **estruturas** de tipos de arquivo e baseadas no **conteúdo** em si.
 
 Observe que essa técnica **não funciona para recuperar arquivos fragmentados**. Se um arquivo **não estiver armazenado em setores contíguos**, então essa técnica não será capaz de encontrá-lo ou pelo menos parte dele.
 
-Existem várias ferramentas que você pode usar para file carving indicando os tipos de arquivos que deseja pesquisar.
+Existem várias ferramentas que você pode usar para file carving indicando os tipos de arquivo que deseja pesquisar.
 
 {{#ref}}
 file-data-carving-recovery-tools.md
@@ -212,7 +212,7 @@ file-data-carving-recovery-tools.md
 ### Carving de Fluxo de Dados
 
 Carving de Fluxo de Dados é semelhante ao File Carving, mas **em vez de procurar arquivos completos, procura fragmentos interessantes** de informação.\
-Por exemplo, em vez de procurar um arquivo completo contendo URLs registradas, essa técnica irá buscar por URLs.
+Por exemplo, em vez de procurar um arquivo completo contendo URLs registradas, essa técnica buscará URLs.
 
 {{#ref}}
 file-data-carving-recovery-tools.md
@@ -220,7 +220,7 @@ file-data-carving-recovery-tools.md
 
 ### Exclusão Segura
 
-Obviamente, existem maneiras de **"excluir" arquivos e parte dos logs sobre eles de forma "segura"**. Por exemplo, é possível **sobrescrever o conteúdo** de um arquivo com dados aleatórios várias vezes e, em seguida, **remover** os **logs** do **$MFT** e **$LOGFILE** sobre o arquivo, e **remover as Cópias de Sombra do Volume**.\
+Obviamente, existem maneiras de **"excluir com segurança" arquivos e parte dos logs sobre eles**. Por exemplo, é possível **sobrescrever o conteúdo** de um arquivo com dados aleatórios várias vezes e, em seguida, **remover** os **logs** do **$MFT** e **$LOGFILE** sobre o arquivo, e **remover as Cópias de Sombra do Volume**.\
 Você pode notar que mesmo realizando essa ação, pode haver **outras partes onde a existência do arquivo ainda está registrada**, e isso é verdade, e parte do trabalho do profissional de forense é encontrá-las.
 
 ## Referências

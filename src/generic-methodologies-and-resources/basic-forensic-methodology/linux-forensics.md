@@ -6,7 +6,7 @@
 
 ### Informações Básicas
 
-Primeiramente, é recomendável ter um **USB** com **binaries e bibliotecas bem conhecidas** (você pode apenas obter o ubuntu e copiar as pastas _/bin_, _/sbin_, _/lib,_ e _/lib64_), então monte o USB e modifique as variáveis de ambiente para usar esses binaries:
+Primeiramente, é recomendado ter um **USB** com **binaries e bibliotecas bem conhecidas** (você pode apenas pegar o ubuntu e copiar as pastas _/bin_, _/sbin_, _/lib,_ e _/lib64_), então monte o USB e modifique as variáveis de ambiente para usar esses binaries:
 ```bash
 export PATH=/mnt/usb/bin:/mnt/usb/sbin
 export LD_LIBRARY_PATH=/mnt/usb/lib:/mnt/usb/lib64
@@ -63,8 +63,8 @@ LiME também pode ser usado para **enviar o dump via rede** em vez de armazená-
 
 #### Desligando
 
-Primeiramente, você precisará **desligar o sistema**. Isso nem sempre é uma opção, pois às vezes o sistema será um servidor de produção que a empresa não pode se dar ao luxo de desligar.\
-Existem **2 maneiras** de desligar o sistema, um **desligamento normal** e um **desligamento "desconectar da tomada"**. O primeiro permitirá que os **processos sejam encerrados normalmente** e o **sistema de arquivos** seja **sincronizado**, mas também permitirá que o possível **malware** **destrua evidências**. A abordagem "desconectar da tomada" pode acarretar **alguma perda de informação** (não muita informação será perdida, pois já tiramos uma imagem da memória) e o **malware não terá nenhuma oportunidade** de fazer algo a respeito. Portanto, se você **suspeitar** que pode haver um **malware**, apenas execute o **comando** **`sync`** no sistema e desconecte da tomada.
+Primeiro de tudo, você precisará **desligar o sistema**. Isso nem sempre é uma opção, pois às vezes o sistema será um servidor de produção que a empresa não pode se dar ao luxo de desligar.\
+Existem **2 maneiras** de desligar o sistema, um **desligamento normal** e um **desligamento "desconectar da tomada"**. O primeiro permitirá que os **processos terminem normalmente** e o **sistema de arquivos** seja **sincronizado**, mas também permitirá que o possível **malware** **destrua evidências**. A abordagem "desconectar da tomada" pode acarretar **alguma perda de informação** (não muita informação será perdida, pois já tiramos uma imagem da memória) e o **malware não terá nenhuma oportunidade** de fazer algo a respeito. Portanto, se você **suspeitar** que pode haver um **malware**, apenas execute o **comando** **`sync`** no sistema e desconecte da tomada.
 
 #### Tirando uma imagem do disco
 
@@ -151,7 +151,7 @@ malware-analysis.md
 
 ## Pesquisa de programas instalados
 
-Para pesquisar efetivamente por programas instalados em sistemas Debian e RedHat, considere aproveitar logs do sistema e bancos de dados juntamente com verificações manuais em diretórios comuns.
+Para pesquisar efetivamente programas instalados em sistemas Debian e RedHat, considere aproveitar logs do sistema e bancos de dados juntamente com verificações manuais em diretórios comuns.
 
 - Para Debian, inspecione _**`/var/lib/dpkg/status`**_ e _**`/var/log/dpkg.log`**_ para obter detalhes sobre instalações de pacotes, usando `grep` para filtrar informações específicas.
 - Usuários do RedHat podem consultar o banco de dados RPM com `rpm -qa --root=/mntpath/var/lib/rpm` para listar pacotes instalados.
@@ -174,7 +174,7 @@ find / -type f -executable | grep <something>
 ```
 ## Recuperar Binários em Execução Deletados
 
-Imagine um processo que foi executado de /tmp/exec e então deletado. É possível extrair isso.
+Imagine um processo que foi executado de /tmp/exec e depois deletado. É possível extrair isso.
 ```bash
 cd /proc/3746/ #PID with the exec file deleted
 head -1 maps #Get address of the file. It was 08048000-08049000
@@ -196,7 +196,7 @@ cat /var/spool/cron/crontabs/*  \
 #MacOS
 ls -l /usr/lib/cron/tabs/ /Library/LaunchAgents/ /Library/LaunchDaemons/ ~/Library/LaunchAgents/
 ```
-#### Hunt: Abuso de Cron/Anacron via 0anacron e stubs suspeitos
+#### Caça: Abuso de Cron/Anacron via 0anacron e stubs suspeitos
 Os atacantes frequentemente editam o stub 0anacron presente em cada diretório /etc/cron.*/ para garantir a execução periódica.
 ```bash
 # List 0anacron files and their timestamps/sizes
@@ -233,7 +233,7 @@ Caminhos onde um malware poderia ser instalado como um serviço:
 - **/etc/systemd/system**: Um diretório para scripts do gerenciador de sistema e serviços.
 - **/etc/systemd/system/multi-user.target.wants/**: Contém links para serviços que devem ser iniciados em um nível de execução multiusuário.
 - **/usr/local/etc/rc.d/**: Para serviços personalizados ou de terceiros.
-- **\~/.config/autostart/**: Para aplicativos de inicialização automática específicos do usuário, que podem ser um esconderijo para malware direcionado ao usuário.
+- **\~/.config/autostart/**: Para aplicativos de inicialização automática específicos do usuário, que podem ser um esconderijo para malware direcionado a usuários.
 - **/lib/systemd/system/**: Arquivos de unidade padrão do sistema fornecidos por pacotes instalados.
 
 ### Módulos do Kernel
@@ -246,10 +246,10 @@ Módulos do kernel Linux, frequentemente utilizados por malware como componentes
 
 ### Outros Locais de Autostart
 
-O Linux emprega vários arquivos para executar automaticamente programas ao fazer login do usuário, potencialmente abrigando malware:
+O Linux emprega vários arquivos para executar automaticamente programas na entrada do usuário, potencialmente abrigando malware:
 
 - **/etc/profile.d/**\*, **/etc/profile**, e **/etc/bash.bashrc**: Executados para qualquer login de usuário.
-- **\~/.bashrc**, **\~/.bash_profile**, **\~/.profile**, e **\~/.config/autostart**: Arquivos específicos do usuário que são executados ao fazer login.
+- **\~/.bashrc**, **\~/.bash_profile**, **\~/.profile**, e **\~/.config/autostart**: Arquivos específicos do usuário que são executados na entrada.
 - **/etc/rc.local**: Executa após todos os serviços do sistema terem sido iniciados, marcando o fim da transição para um ambiente multiusuário.
 
 ## Examinar Logs
@@ -306,7 +306,7 @@ Alguns aplicativos também geram seus próprios logs:
 
 ### Logs de USB
 
-[**usbrip**](https://github.com/snovvcrash/usbrip) é um pequeno software escrito em Python 3 puro que analisa arquivos de log do Linux (`/var/log/syslog*` ou `/var/log/messages*` dependendo da distribuição) para construir tabelas de histórico de eventos USB.
+[**usbrip**](https://github.com/snovvcrash/usbrip) é um pequeno software escrito em Python puro que analisa arquivos de log do Linux (`/var/log/syslog*` ou `/var/log/messages*` dependendo da distribuição) para construir tabelas de histórico de eventos USB.
 
 É interessante **saber todos os USBs que foram usados** e será mais útil se você tiver uma lista autorizada de USBs para encontrar "eventos de violação" (o uso de USBs que não estão dentro dessa lista).
 
@@ -329,7 +329,7 @@ Mais exemplos e informações dentro do github: [https://github.com/snovvcrash/u
 
 Examine o _**/etc/passwd**_, _**/etc/shadow**_ e **logs de segurança** em busca de nomes ou contas incomuns criadas e ou usadas em estreita proximidade com eventos não autorizados conhecidos. Além disso, verifique possíveis ataques de força bruta ao sudo.\
 Além disso, verifique arquivos como _**/etc/sudoers**_ e _**/etc/groups**_ para privilégios inesperados concedidos a usuários.\
-Finalmente, procure por contas com **sem senhas** ou **senhas facilmente adivinháveis**.
+Por fim, procure por contas com **sem senhas** ou **senhas facilmente adivinháveis**.
 
 ## Examinar Sistema de Arquivos
 
@@ -375,16 +375,16 @@ git diff --no-index --diff-filter=M path/to/old_version/ path/to/new_version/ | 
 ```bash
 git diff --no-index --diff-filter=D path/to/old_version/ path/to/new_version/
 ```
-- **Opções de filtro** (`--diff-filter`) ajudam a restringir a mudanças específicas, como arquivos adicionados (`A`), excluídos (`D`) ou modificados (`M`).
+- **Opções de filtro** (`--diff-filter`) ajudam a restringir a mudanças específicas, como arquivos adicionados (`A`), deletados (`D`) ou modificados (`M`).
 - `A`: Arquivos adicionados
 - `C`: Arquivos copiados
-- `D`: Arquivos excluídos
+- `D`: Arquivos deletados
 - `M`: Arquivos modificados
 - `R`: Arquivos renomeados
 - `T`: Mudanças de tipo (por exemplo, arquivo para symlink)
 - `U`: Arquivos não mesclados
 - `X`: Arquivos desconhecidos
-- `B`: Arquivos corrompidos
+- `B`: Arquivos quebrados
 
 ## Referências
 

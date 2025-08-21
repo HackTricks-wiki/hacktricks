@@ -64,7 +64,7 @@ OPSEC
 
 ### Impacket psexec.py (semelhante ao PsExec)
 
-- Usa um serviço embutido semelhante ao RemCom. Lança um binário de serviço transitório (nome comumente aleatório) via ADMIN$, cria um serviço (o padrão é frequentemente RemComSvc) e faz proxy de I/O através de um pipe nomeado.
+- Usa um serviço embutido semelhante ao RemCom. Lança um binário de serviço transitório (nome frequentemente aleatório) via ADMIN$, cria um serviço (o padrão é frequentemente RemComSvc) e faz proxy de I/O através de um pipe nomeado.
 ```bash
 # Password auth
 psexec.py DOMAIN/user:Password@HOST cmd.exe
@@ -115,17 +115,17 @@ Artefatos típicos de host/rede ao usar técnicas semelhantes ao PsExec:
 
 Ideias de caça
 - Alerta em instalações de serviços onde o ImagePath inclui cmd.exe /c, powershell.exe ou locais TEMP.
-- Procure por criações de processos onde ParentImage é C:\Windows\PSEXESVC.exe ou filhos de services.exe executando como LOCAL SYSTEM executando shells.
+- Procure por criações de processos onde ParentImage é C:\Windows\PSEXESVC.exe ou filhos de services.exe executando como SYSTEM LOCAL executando shells.
 - Marque pipes nomeados terminando com -stdin/-stdout/-stderr ou nomes de pipes de clone do PsExec bem conhecidos.
 
 ## Solucionando falhas comuns
-- Acesso negado (5) ao criar serviços: não é realmente administrador local, restrições de UAC para contas locais, ou proteção contra manipulação de EDR no caminho do binário do serviço.
-- O caminho da rede não foi encontrado (53) ou não foi possível conectar ao ADMIN$: firewall bloqueando SMB/RPC ou compartilhamentos administrativos desativados.
-- Kerberos falha, mas NTLM está bloqueado: conecte usando hostname/FQDN (não IP), assegure SPNs adequados, ou forneça -k/-no-pass com tickets ao usar Impacket.
+- Acesso negado (5) ao criar serviços: não é realmente administrador local, restrições de UAC para contas locais ou proteção contra manipulação de EDR no caminho do binário do serviço.
+- O caminho da rede não foi encontrado (53) ou não foi possível conectar ao ADMIN$: firewall bloqueando SMB/RPC ou compartilhamentos de administrador desativados.
+- Kerberos falha, mas NTLM está bloqueado: conecte-se usando hostname/FQDN (não IP), garanta SPNs adequados ou forneça -k/-no-pass com tickets ao usar Impacket.
 - O tempo de início do serviço expira, mas o payload foi executado: esperado se não for um binário de serviço real; capture a saída em um arquivo ou use smbexec para I/O ao vivo.
 
 ## Notas de endurecimento
-- Windows 11 24H2 e Windows Server 2025 requerem assinatura SMB por padrão para conexões de saída (e Windows 11 de entrada). Isso não quebra o uso legítimo do PsExec com credenciais válidas, mas previne abusos de relay SMB não assinado e pode impactar dispositivos que não suportam assinatura.
+- Windows 11 24H2 e Windows Server 2025 exigem assinatura SMB por padrão para conexões de saída (e Windows 11 de entrada). Isso não quebra o uso legítimo do PsExec com credenciais válidas, mas impede o abuso de relay SMB não assinado e pode impactar dispositivos que não suportam assinatura.
 - O novo bloqueio NTLM do cliente SMB (Windows 11 24H2/Server 2025) pode impedir o fallback NTLM ao conectar por IP ou a servidores não-Kerberos. Em ambientes endurecidos, isso quebrará PsExec/SMBExec baseado em NTLM; use Kerberos (hostname/FQDN) ou configure exceções se necessário legitimamente.
 - Princípio do menor privilégio: minimize a associação de administrador local, prefira Just-in-Time/Just-Enough Admin, aplique LAPS e monitore/alarme sobre instalações de serviços 7045.
 
@@ -133,11 +133,13 @@ Ideias de caça
 
 - Execução remota baseada em WMI (geralmente mais sem arquivos):
 
+
 {{#ref}}
 ./wmiexec.md
 {{#endref}}
 
 - Execução remota baseada em WinRM:
+
 
 {{#ref}}
 ./winrm.md

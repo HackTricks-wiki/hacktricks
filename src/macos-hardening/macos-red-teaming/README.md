@@ -2,7 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-
 ## Abusando de MDMs
 
 - JAMF Pro: `jamf checkJSSConnection`
@@ -20,25 +19,25 @@ macos-mdm/
 
 Um MDM terá permissão para instalar, consultar ou remover perfis, instalar aplicativos, criar contas de administrador locais, definir senha de firmware, mudar a chave do FileVault...
 
-Para executar seu próprio MDM, você precisa que **seu CSR seja assinado por um fornecedor**, o que você poderia tentar obter com [**https://mdmcert.download/**](https://mdmcert.download/). E para executar seu próprio MDM para dispositivos Apple, você poderia usar [**MicroMDM**](https://github.com/micromdm/micromdm).
+Para executar seu próprio MDM, você precisa que **seu CSR seja assinado por um fornecedor**, o que você pode tentar obter com [**https://mdmcert.download/**](https://mdmcert.download/). E para executar seu próprio MDM para dispositivos Apple, você pode usar [**MicroMDM**](https://github.com/micromdm/micromdm).
 
 No entanto, para instalar um aplicativo em um dispositivo inscrito, você ainda precisa que ele seja assinado por uma conta de desenvolvedor... no entanto, após a inscrição no MDM, o **dispositivo adiciona o certificado SSL do MDM como uma CA confiável**, então você pode agora assinar qualquer coisa.
 
-Para inscrever o dispositivo em um MDM, você precisa instalar um **`mobileconfig`** como root, que pode ser entregue via um **pkg** (você pode compactá-lo em zip e, ao ser baixado do safari, ele será descompactado).
+Para inscrever o dispositivo em um MDM, você precisa instalar um arquivo **`mobileconfig`** como root, que pode ser entregue via um arquivo **pkg** (você pode compactá-lo em zip e, ao ser baixado do Safari, ele será descompactado).
 
 **Mythic agent Orthrus** usa essa técnica.
 
 ### Abusando do JAMF PRO
 
-JAMF pode executar **scripts personalizados** (scripts desenvolvidos pelo sysadmin), **payloads nativos** (criação de conta local, definir senha EFI, monitoramento de arquivos/processos...) e **MDM** (configurações de dispositivo, certificados de dispositivo...).
+O JAMF pode executar **scripts personalizados** (scripts desenvolvidos pelo sysadmin), **payloads nativos** (criação de conta local, definir senha EFI, monitoramento de arquivos/processos...) e **MDM** (configurações de dispositivo, certificados de dispositivo...).
 
 #### Auto-inscrição do JAMF
 
-Vá para uma página como `https://<company-name>.jamfcloud.com/enroll/` para ver se eles têm **auto-inscrição habilitada**. Se tiver, pode **pedir credenciais para acessar**.
+Vá para uma página como `https://<company-name>.jamfcloud.com/enroll/` para ver se eles têm **auto-inscrição habilitada**. Se tiver, pode **pedir credenciais para acesso**.
 
-Você poderia usar o script [**JamfSniper.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfSniper.py) para realizar um ataque de password spraying.
+Você pode usar o script [**JamfSniper.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfSniper.py) para realizar um ataque de password spraying.
 
-Além disso, após encontrar credenciais adequadas, você poderia ser capaz de forçar outros nomes de usuário com o próximo formulário:
+Além disso, após encontrar credenciais adequadas, você pode ser capaz de forçar outros nomes de usuário com o próximo formulário:
 
 ![](<../../images/image (107).png>)
 
@@ -46,10 +45,10 @@ Além disso, após encontrar credenciais adequadas, você poderia ser capaz de f
 
 <figure><img src="../../images/image (167).png" alt=""><figcaption></figcaption></figure>
 
-O **binário `jamf`** continha o segredo para abrir o keychain que, no momento da descoberta, era **compartilhado** entre todos e era: **`jk23ucnq91jfu9aj`**.\
-Além disso, jamf **persiste** como um **LaunchDaemon** em **`/Library/LaunchAgents/com.jamf.management.agent.plist`**
+O binário **`jamf`** continha o segredo para abrir o keychain que, na época da descoberta, era **compartilhado** entre todos e era: **`jk23ucnq91jfu9aj`**.\
+Além disso, o jamf **persiste** como um **LaunchDaemon** em **`/Library/LaunchAgents/com.jamf.management.agent.plist`**
 
-#### Tomada de Controle de Dispositivo JAMF
+#### Tomada de Controle do Dispositivo JAMF
 
 A **URL** do **JSS** (Jamf Software Server) que **`jamf`** usará está localizada em **`/Library/Preferences/com.jamfsoftware.jamf.plist`**.\
 Este arquivo basicamente contém a URL:
@@ -60,7 +59,7 @@ plutil -convert xml1 -o - /Library/Preferences/com.jamfsoftware.jamf.plist
 <key>is_virtual_machine</key>
 <false/>
 <key>jss_url</key>
-<string>https://halbornasd.jamfcloud.com/</string>
+<string>https://subdomain-company.jamfcloud.com/</string>
 <key>last_management_framework_change_id</key>
 <integer>4</integer>
 [...]
@@ -74,7 +73,7 @@ sudo jamf policy -id 0
 ```
 #### Impersonação do JAMF
 
-Para **impersonar a comunicação** entre um dispositivo e o JAMF, você precisa:
+Para **impersonar a comunicação** entre um dispositivo e o JMF, você precisa:
 
 - O **UUID** do dispositivo: `ioreg -d2 -c IOPlatformExpertDevice | awk -F" '/IOPlatformUUID/{print $(NF-1)}'`
 - O **keychain do JAMF** de: `/Library/Application\ Support/Jamf/JAMF.keychain`, que contém o certificado do dispositivo
@@ -95,6 +94,7 @@ O script [**JamfExplorer.py**](https://github.com/WithSecureLabs/Jamf-Attack-Too
 
 E também sobre os **protocolos** **de rede** "especiais" do **MacOS**:
 
+
 {{#ref}}
 ../macos-security-and-privilege-escalation/macos-protocols.md
 {{#endref}}
@@ -103,13 +103,16 @@ E também sobre os **protocolos** **de rede** "especiais" do **MacOS**:
 
 Em algumas ocasiões, você encontrará que o **computador MacOS está conectado a um AD**. Nesse cenário, você deve tentar **enumerar** o diretório ativo como está acostumado. Encontre alguma **ajuda** nas seguintes páginas:
 
+
 {{#ref}}
 ../../network-services-pentesting/pentesting-ldap.md
 {{#endref}}
 
+
 {{#ref}}
 ../../windows-hardening/active-directory-methodology/
 {{#endref}}
+
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-kerberos-88/
@@ -119,7 +122,7 @@ Alguma **ferramenta local do MacOS** que também pode ajudar é `dscl`:
 ```bash
 dscl "/Active Directory/[Domain]/All Domains" ls /
 ```
-Além disso, existem algumas ferramentas preparadas para MacOS para enumerar automaticamente o AD e interagir com o kerberos:
+Também existem algumas ferramentas preparadas para MacOS para enumerar automaticamente o AD e interagir com o kerberos:
 
 - [**Machound**](https://github.com/XMCyber/MacHound): MacHound é uma extensão da ferramenta de auditoria Bloodhound que permite coletar e ingerir relacionamentos do Active Directory em hosts MacOS.
 - [**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrost é um projeto em Objective-C projetado para interagir com as APIs Heimdal krb5 no macOS. O objetivo do projeto é permitir testes de segurança melhores em torno do Kerberos em dispositivos macOS usando APIs nativas, sem exigir nenhum outro framework ou pacotes no alvo.
@@ -134,7 +137,7 @@ echo show com.apple.opendirectoryd.ActiveDirectory | scutil
 Os três tipos de usuários do MacOS são:
 
 - **Usuários Locais** — Gerenciados pelo serviço OpenDirectory local, não estão conectados de nenhuma forma ao Active Directory.
-- **Usuários de Rede** — Usuários voláteis do Active Directory que requerem uma conexão com o servidor DC para autenticar.
+- **Usuários de Rede** — Usuários voláteis do Active Directory que requerem uma conexão com o servidor DC para autenticação.
 - **Usuários Móveis** — Usuários do Active Directory com um backup local para suas credenciais e arquivos.
 
 As informações locais sobre usuários e grupos são armazenadas na pasta _/var/db/dslocal/nodes/Default._\
@@ -168,13 +171,13 @@ dsconfigad -show
 ```
 Mais informações em [https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/](https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/)
 
-### Computer$ senha
+### Senha do Computer$
 
 Obtenha senhas usando:
 ```bash
 bifrost --action askhash --username [name] --password [password] --domain [domain]
 ```
-É possível acessar a senha **`Computer$`** dentro do chaveiro do Sistema.
+É possível acessar a **`Computer$`** senha dentro do chaveiro do Sistema.
 
 ### Over-Pass-The-Hash
 
@@ -226,6 +229,5 @@ Quando um arquivo é baixado no Safari, se for um arquivo "seguro", ele será **
 - [**https://gist.github.com/its-a-feature/1a34f597fb30985a2742bb16116e74e0**](https://gist.github.com/its-a-feature/1a34f597fb30985a2742bb16116e74e0)
 - [**Come to the Dark Side, We Have Apples: Turning macOS Management Evil**](https://www.youtube.com/watch?v=pOQOh07eMxY)
 - [**OBTS v3.0: "An Attackers Perspective on Jamf Configurations" - Luke Roberts / Calum Hall**](https://www.youtube.com/watch?v=ju1IYWUv4ZA)
-
 
 {{#include ../../banners/hacktricks-training.md}}

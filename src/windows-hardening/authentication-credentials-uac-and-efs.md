@@ -103,7 +103,7 @@ sc query windefend
 ```
 ## Encrypted File System (EFS)
 
-EFS protege arquivos por meio de criptografia, utilizando uma **chave simétrica** conhecida como **File Encryption Key (FEK)**. Esta chave é criptografada com a **chave pública** do usuário e armazenada dentro do **fluxo de dados alternativo** $EFS do arquivo criptografado. Quando a descriptografia é necessária, a correspondente **chave privada** do certificado digital do usuário é usada para descriptografar a FEK do fluxo $EFS. Mais detalhes podem ser encontrados [aqui](https://en.wikipedia.org/wiki/Encrypting_File_System).
+EFS protege arquivos por meio de criptografia, utilizando uma **chave simétrica** conhecida como **File Encryption Key (FEK)**. Esta chave é criptografada com a **chave pública** do usuário e armazenada dentro do **fluxo de dados alternativo** $EFS do arquivo criptografado. Quando a descriptografia é necessária, a correspondente **chave privada** do certificado digital do usuário é usada para descriptografar o FEK do fluxo $EFS. Mais detalhes podem ser encontrados [aqui](https://en.wikipedia.org/wiki/Encrypting_File_System).
 
 **Cenários de descriptografia sem a iniciação do usuário** incluem:
 
@@ -114,8 +114,8 @@ Este método de criptografia permite **acesso transparente** a arquivos criptogr
 
 **Principais Conclusões**:
 
-- EFS usa uma FEK simétrica, criptografada com a chave pública do usuário.
-- A descriptografia utiliza a chave privada do usuário para acessar a FEK.
+- EFS usa um FEK simétrico, criptografado com a chave pública do usuário.
+- A descriptografia utiliza a chave privada do usuário para acessar o FEK.
 - A descriptografia automática ocorre sob condições específicas, como copiar para FAT32 ou transmissão pela rede.
 - Arquivos criptografados são acessíveis ao proprietário sem etapas adicionais.
 
@@ -132,7 +132,7 @@ Você também pode usar `cipher /e` e `cipher /d` dentro de uma pasta para **cri
 
 Esse método requer que o **usuário vítima** esteja **executando** um **processo** dentro do host. Se esse for o caso, usando sessões `meterpreter`, você pode impersonar o token do processo do usuário (`impersonate_token` do `incognito`). Ou você poderia apenas `migrate` para o processo do usuário.
 
-#### Conhecendo a senha do usuário
+#### Conhecendo a senha dos usuários
 
 {{#ref}}
 https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files
@@ -162,7 +162,7 @@ Além disso, verifique esta [página da web](https://cube0x0.github.io/Relaying-
 
 ## LAPS
 
-A **Solução de Senha do Administrador Local (LAPS)**, disponível para download no [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), permite a gestão de senhas de Administrador local. Essas senhas, que são **aleatórias**, únicas e **regularmente alteradas**, são armazenadas centralmente no Active Directory. O acesso a essas senhas é restrito através de ACLs a usuários autorizados. Com permissões suficientes concedidas, a capacidade de ler senhas de administrador local é fornecida.
+A **Solução de Senha do Administrador Local (LAPS)**, disponível para download na [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), permite a gestão de senhas de Administrador local. Essas senhas, que são **aleatórias**, únicas e **trocadas regularmente**, são armazenadas centralmente no Active Directory. O acesso a essas senhas é restrito através de ACLs a usuários autorizados. Com permissões suficientes concedidas, a capacidade de ler senhas de administrador local é fornecida.
 
 {{#ref}}
 active-directory-methodology/laps.md
@@ -223,7 +223,7 @@ Mais pode ser encontrado [aqui](https://blog.netspi.com/15-ways-to-bypass-the-po
 
 É a API que pode ser usada para autenticar usuários.
 
-O SSPI será responsável por encontrar o protocolo adequado para duas máquinas que desejam se comunicar. O método preferido para isso é o Kerberos. Em seguida, o SSPI negociará qual protocolo de autenticação será usado, esses protocolos de autenticação são chamados de Provedor de Suporte de Segurança (SSP), estão localizados dentro de cada máquina Windows na forma de um DLL e ambas as máquinas devem suportar o mesmo para poderem se comunicar.
+O SSPI será responsável por encontrar o protocolo adequado para duas máquinas que desejam se comunicar. O método preferido para isso é o Kerberos. Em seguida, o SSPI negociará qual protocolo de autenticação será usado, esses protocolos de autenticação são chamados de Provedor de Suporte de Segurança (SSP), estão localizados dentro de cada máquina Windows na forma de uma DLL e ambas as máquinas devem suportar o mesmo para poderem se comunicar.
 
 ### Principais SSPs
 

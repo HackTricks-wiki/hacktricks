@@ -18,7 +18,7 @@ malware-analysis.md
 
 ## Inspecionando uma Imagem
 
-Se você receber uma **imagem forense** de um dispositivo, pode começar **analisando as partições, o sistema de arquivos** utilizado e **recuperando** arquivos potencialmente **interessantes** (mesmo os deletados). Aprenda como em:
+Se você receber uma **imagem forense** de um dispositivo, pode começar **a analisar as partições, o sistema de arquivos** utilizado e **recuperar** arquivos potencialmente **interessantes** (mesmo os deletados). Aprenda como em:
 
 {{#ref}}
 partitions-file-systems-carving/
@@ -38,7 +38,7 @@ linux-forensics.md
 docker-forensics.md
 {{#endref}}
 
-## Inspeção profunda de tipos de arquivos específicos e Software
+## Inspeção Profunda de Tipos de Arquivos Específicos e Software
 
 Se você tiver um **arquivo** muito **suspeito**, então **dependendo do tipo de arquivo e do software** que o criou, vários **truques** podem ser úteis.\
 Leia a página a seguir para aprender alguns truques interessantes:

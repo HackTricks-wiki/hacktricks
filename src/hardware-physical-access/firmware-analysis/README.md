@@ -29,7 +29,7 @@ Para esse propósito, ferramentas de **inteligência de código aberto (OSINT)**
 
 ## **Adquirindo o Firmware**
 
-Obter firmware pode ser abordado por vários meios, cada um com seu próprio nível de complexidade:
+Obter firmware pode ser abordado de várias maneiras, cada uma com seu próprio nível de complexidade:
 
 - **Diretamente** da fonte (desenvolvedores, fabricantes)
 - **Construindo** a partir de instruções fornecidas
@@ -45,7 +45,7 @@ Obter firmware pode ser abordado por vários meios, cada um com seu próprio ní
 
 ## Analisando o firmware
 
-Agora que você **tem o firmware**, você precisa extrair informações sobre ele para saber como tratá-lo. Diferentes ferramentas que você pode usar para isso:
+Agora que você **tem o firmware**, precisa extrair informações sobre ele para saber como tratá-lo. Diferentes ferramentas que você pode usar para isso:
 ```bash
 file <bin>
 strings -n8 <bin>
@@ -67,11 +67,11 @@ Ou [**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/archive
 ### Obtendo o Sistema de Arquivos
 
 Com as ferramentas comentadas anteriormente, como `binwalk -ev <bin>`, você deve ter conseguido **extrair o sistema de arquivos**.\
-O binwalk geralmente o extrai dentro de uma **pasta nomeada como o tipo de sistema de arquivos**, que geralmente é um dos seguintes: squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
+O Binwalk geralmente o extrai dentro de uma **pasta nomeada como o tipo de sistema de arquivos**, que geralmente é um dos seguintes: squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
 
 #### Extração Manual do Sistema de Arquivos
 
-Às vezes, o binwalk **não terá o byte mágico do sistema de arquivos em suas assinaturas**. Nesses casos, use o binwalk para **encontrar o deslocamento do sistema de arquivos e extrair o sistema de arquivos comprimido** do binário e **extrair manualmente** o sistema de arquivos de acordo com seu tipo usando os passos abaixo.
+Às vezes, o binwalk **não terá o byte mágico do sistema de arquivos em suas assinaturas**. Nesses casos, use o binwalk para **encontrar o deslocamento do sistema de arquivos e esculpir o sistema de arquivos comprimido** do binário e **extrair manualmente** o sistema de arquivos de acordo com seu tipo usando os passos abaixo.
 ```
 $ binwalk DIR850L_REVB.bin
 
@@ -138,7 +138,7 @@ Para extrair **arquivos incorporados**, ferramentas e recursos como a documenta�
 
 ### Extraindo o Sistema de Arquivos
 
-Usando `binwalk -ev <bin>`, geralmente é possível extrair o sistema de arquivos, frequentemente em um diretório nomeado de acordo com o tipo de sistema de arquivos (por exemplo, squashfs, ubifs). No entanto, quando **binwalk** não consegue reconhecer o tipo de sistema de arquivos devido à falta de bytes mágicos, a extração manual é necessária. Isso envolve usar `binwalk` para localizar o deslocamento do sistema de arquivos, seguido pelo comando `dd` para extrair o sistema de arquivos:
+Usando `binwalk -ev <bin>`, geralmente é possível extrair o sistema de arquivos, frequentemente em um diretório nomeado de acordo com o tipo de sistema de arquivos (por exemplo, squashfs, ubifs). No entanto, quando **binwalk** não consegue reconhecer o tipo de sistema de arquivos devido à falta de bytes mágicos, a extração manual é necessária. Isso envolve usar `binwalk` para localizar o deslocamento do sistema de arquivos, seguido do comando `dd` para extrair o sistema de arquivos:
 ```bash
 $ binwalk DIR850L_REVB.bin
 
@@ -170,7 +170,7 @@ Tanto o código-fonte quanto os binários compilados encontrados no sistema de a
 
 ## Emulando Firmware para Análise Dinâmica
 
-O processo de emular firmware permite a **análise dinâmica** tanto da operação de um dispositivo quanto de um programa individual. Essa abordagem pode enfrentar desafios com dependências de hardware ou arquitetura, mas transferir o sistema de arquivos raiz ou binários específicos para um dispositivo com arquitetura e endianness correspondentes, como um Raspberry Pi, ou para uma máquina virtual pré-construída, pode facilitar testes adicionais.
+O processo de emular firmware permite a **análise dinâmica** tanto da operação de um dispositivo quanto de um programa individual. Essa abordagem pode enfrentar desafios com dependências de hardware ou arquitetura, mas transferir o sistema de arquivos raiz ou binários específicos para um dispositivo com arquitetura e endianness compatíveis, como um Raspberry Pi, ou para uma máquina virtual pré-construída, pode facilitar testes adicionais.
 
 ### Emulando Binários Individuais
 
@@ -194,15 +194,15 @@ Para binários ARM, o processo é semelhante, com o emulador `qemu-arm` sendo ut
 
 ### Emulação de Sistema Completo
 
-Ferramentas como [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit) e outras, facilitam a emulação completa de firmware, automatizando o processo e ajudando na análise dinâmica.
+Ferramentas como [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit) e outras, facilitam a emulação completa de firmware, automatizando o processo e auxiliando na análise dinâmica.
 
 ## Análise Dinâmica na Prática
 
-Nesta fase, um ambiente de dispositivo real ou emulado é usado para análise. É essencial manter acesso ao shell do sistema operacional e ao sistema de arquivos. A emulação pode não imitar perfeitamente as interações de hardware, necessitando de reinicializações ocasionais da emulação. A análise deve revisitar o sistema de arquivos, explorar páginas da web expostas e serviços de rede, e investigar vulnerabilidades do bootloader. Testes de integridade do firmware são críticos para identificar potenciais vulnerabilidades de backdoor.
+Nesta fase, um ambiente de dispositivo real ou emulado é usado para análise. É essencial manter acesso ao shell do sistema operacional e ao sistema de arquivos. A emulação pode não imitar perfeitamente as interações de hardware, necessitando reinicializações ocasionais da emulação. A análise deve revisitar o sistema de arquivos, explorar páginas da web expostas e serviços de rede, e investigar vulnerabilidades do bootloader. Testes de integridade do firmware são críticos para identificar potenciais vulnerabilidades de backdoor.
 
 ## Técnicas de Análise em Tempo de Execução
 
-A análise em tempo de execução envolve interagir com um processo ou binário em seu ambiente operacional, usando ferramentas como gdb-multiarch, Frida e Ghidra para definir pontos de interrupção e identificar vulnerabilidades por meio de fuzzing e outras técnicas.
+A análise em tempo de execução envolve interagir com um processo ou binário em seu ambiente operacional, usando ferramentas como gdb-multiarch, Frida e Ghidra para definir pontos de interrupção e identificar vulnerabilidades através de fuzzing e outras técnicas.
 
 ## Exploração Binária e Prova de Conceito
 
@@ -227,7 +227,7 @@ Fluxo de ataque típico:
 * Pegue-a do portal de download público do fornecedor, CDN ou site de suporte.
 * Extraia-a de aplicativos móveis/escrita acompanhantes (por exemplo, dentro de um APK Android em `assets/firmware/`).
 * Recupere-a de repositórios de terceiros, como VirusTotal, arquivos da Internet, fóruns, etc.
-2. **Carregar ou servir a imagem para o dispositivo** via qualquer canal de atualização exposto:
+2. **Carregar ou servir a imagem para o dispositivo** através de qualquer canal de atualização exposto:
 * UI da Web, API de aplicativo móvel, USB, TFTP, MQTT, etc.
 * Muitos dispositivos IoT de consumo expõem endpoints HTTP(S) *não autenticados* que aceitam blobs de firmware codificados em Base64, decodificam-nos no lado do servidor e acionam a recuperação/atualização.
 3. Após o downgrade, explore uma vulnerabilidade que foi corrigida na versão mais nova (por exemplo, um filtro de injeção de comando que foi adicionado posteriormente).
@@ -240,7 +240,7 @@ Host: 192.168.0.1
 Content-Type: application/octet-stream
 Content-Length: 0
 ```
-No firmware vulnerável (rebaixado), o parâmetro `md5` é concatenado diretamente em um comando de shell sem sanitização, permitindo a injeção de comandos arbitrários (aqui – habilitando o acesso root baseado em chave SSH). Versões posteriores do firmware introduziram um filtro básico de caracteres, mas a ausência de proteção contra rebaixamento torna a correção irrelevante.
+No firmware vulnerável (rebaixado), o parâmetro `md5` é concatenado diretamente em um comando shell sem sanitização, permitindo a injeção de comandos arbitrários (aqui – habilitando o acesso root baseado em chave SSH). Versões de firmware posteriores introduziram um filtro básico de caracteres, mas a ausência de proteção contra rebaixamento torna a correção irrelevante.
 
 ### Extraindo Firmware de Aplicativos Móveis
 

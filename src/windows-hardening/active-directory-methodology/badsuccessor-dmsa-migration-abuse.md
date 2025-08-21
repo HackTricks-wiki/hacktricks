@@ -4,7 +4,7 @@
 
 ## Visão Geral
 
-Contas de Serviço Gerenciadas Delegadas (**dMSA**) são a próxima geração sucessora das **gMSA** que serão lançadas no Windows Server 2025. Um fluxo de trabalho de migração legítimo permite que administradores substituam uma conta *antiga* (usuário, computador ou conta de serviço) por um dMSA enquanto preservam permissões de forma transparente. O fluxo de trabalho é exposto através de cmdlets do PowerShell, como `Start-ADServiceAccountMigration` e `Complete-ADServiceAccountMigration`, e depende de dois atributos LDAP do **objeto dMSA**:
+Contas de Serviço Gerenciadas Delegadas (**dMSA**) são o sucessor de próxima geração das **gMSA** que serão lançadas no Windows Server 2025. Um fluxo de migração legítimo permite que administradores substituam uma conta *antiga* (usuário, computador ou conta de serviço) por um dMSA enquanto preservam permissões de forma transparente. O fluxo é exposto através de cmdlets do PowerShell, como `Start-ADServiceAccountMigration` e `Complete-ADServiceAccountMigration`, e depende de dois atributos LDAP do **objeto dMSA**:
 
 * **`msDS-ManagedAccountPrecededByLink`** – *link DN* para a conta supersedida (antiga).
 * **`msDS-DelegatedMSAState`**       – estado da migração (`0` = nenhum, `1` = em andamento, `2` = *completo*).
@@ -18,7 +18,7 @@ Essa técnica foi chamada de **BadSuccessor** pela Unit 42 em 2025. No momento d
 1. Uma conta que é *permitida* a criar objetos dentro de **uma Unidade Organizacional (OU)** *e* tem pelo menos um dos seguintes:
 * `Create Child` → **`msDS-DelegatedManagedServiceAccount`** classe de objeto
 * `Create Child` → **`All Objects`** (criação genérica)
-2. Conectividade de rede com LDAP e Kerberos (cenário padrão de domínio unido / ataque remoto).
+2. Conectividade de rede com LDAP & Kerberos (cenário padrão de domínio unido / ataque remoto).
 
 ## Enumerando OUs Vulneráveis
 
@@ -72,7 +72,7 @@ Ative a **Auditoria de Objetos** em OUs e monitore os seguintes Eventos de Segur
 
 * **5137** – Criação do objeto **dMSA**
 * **5136** – Modificação de **`msDS-ManagedAccountPrecededByLink`**
-* **4662** – Mudanças em atributos específicos
+* **4662** – Mudanças específicas de atributos
 * GUID `2f5c138a-bd38-4016-88b4-0ec87cbb4919` → `msDS-DelegatedMSAState`
 * GUID `a0945b2b-57a2-43bd-b327-4d112a4e8bd1` → `msDS-ManagedAccountPrecededByLink`
 * **2946** – Emissão de TGT para o dMSA

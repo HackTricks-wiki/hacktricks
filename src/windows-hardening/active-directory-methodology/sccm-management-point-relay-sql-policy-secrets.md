@@ -3,7 +3,7 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 ## TL;DR
-Ao forçar um **System Center Configuration Manager (SCCM) Management Point (MP)** a autenticar via SMB/RPC e **revezar** essa conta de máquina NTLM para o **banco de dados do site (MSSQL)**, você obtém direitos `smsdbrole_MP` / `smsdbrole_MPUserSvc`. Esses papéis permitem que você chame um conjunto de procedimentos armazenados que expõem blobs de política de **Implantação do Sistema Operacional (OSD)** (credenciais da Conta de Acesso à Rede, variáveis de Sequência de Tarefas, etc.). Os blobs são codificados/criptografados em hex, mas podem ser decodificados e descriptografados com **PXEthief**, resultando em segredos em texto claro.
+Ao forçar um **System Center Configuration Manager (SCCM) Management Point (MP)** a autenticar via SMB/RPC e **revezar** essa conta de máquina NTLM para o **banco de dados do site (MSSQL)**, você obtém direitos `smsdbrole_MP` / `smsdbrole_MPUserSvc`. Esses papéis permitem que você chame um conjunto de procedimentos armazenados que expõem blobs de política de **Implantação do Sistema Operacional (OSD)** (credenciais da Conta de Acesso à Rede, variáveis de Sequência de Tarefas, etc.). Os blobs são codificados/encriptados em hex, mas podem ser decodificados e descriptografados com **PXEthief**, resultando em segredos em texto claro.
 
 Cadeia de alto nível:
 1. Descubra MP & DB do site ↦ endpoint HTTP não autenticado `/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA`.
@@ -29,7 +29,7 @@ A extensão ISAPI do MP **GetAuth.dll** expõe vários parâmetros que não requ
 | `MPLIST` | Lista todos os Management-Points no site. |
 | `SITESIGNCERT` | Retorna o certificado de assinatura do Site Primário (identifica o servidor do site sem LDAP). |
 
-Capture os GUIDs que atuarão como o **clientID** para consultas de DB posteriores:
+Capture os GUIDs que atuarão como **clientID** para consultas de DB posteriores:
 ```bash
 curl http://MP01.contoso.local/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA | xmllint --format -
 ```
@@ -81,7 +81,7 @@ Se você já tiver `PolicyID` e `PolicyVersion`, pode pular o requisito de clien
 ```sql
 EXEC MP_GetPolicyBody N'{083afd7a-b0be-4756-a4ce-c31825050325}', N'2.00';
 ```
-> IMPORTANTE: No SSMS aumente “Maximum Characters Retrieved” (>65535) ou o blob será truncado.
+> IMPORTANTE: No SSMS, aumente "Máximo de Caracteres Recuperados" (>65535) ou o blob será truncado.
 
 ---
 
@@ -110,7 +110,7 @@ Ao relatar, o login é mapeado para:
 Essas funções expõem dezenas de permissões EXEC, as principais usadas neste ataque são:
 
 | Procedimento Armazenado | Propósito |
-|--------------------------|----------|
+|-------------------------|----------|
 | `MP_GetMachinePolicyAssignments` | Listar políticas aplicadas a um `clientID`. |
 | `MP_GetPolicyBody` / `MP_GetPolicyBodyAfterAuthorization` | Retornar o corpo completo da política. |
 | `MP_GetListOfMPsInSiteOSD` | Retornado pelo caminho `MPKEYINFORMATIONMEDIA`. |
@@ -129,7 +129,7 @@ AND  pe.permission_name='EXECUTE';
 ## 6. Detecção e Fortalecimento
 1. **Monitore logins do MP** – qualquer conta de computador do MP fazendo login de um IP que não é seu host ≈ relay.
 2. Ative a **Proteção Estendida para Autenticação (EPA)** no banco de dados do site (`PREVENT-14`).
-3. Desative NTLM não utilizado, imponha assinatura SMB, restrinja RPC (
+3. Desative NTLM não utilizado, aplique assinatura SMB, restrinja RPC (
 mesmas mitig ações usadas contra `PetitPotam`/`PrinterBug`).
 4. Fortaleça a comunicação MP ↔ DB com IPSec / mutual-TLS.
 
@@ -137,11 +137,13 @@ mesmas mitig ações usadas contra `PetitPotam`/`PrinterBug`).
 
 ## Veja também
 * Fundamentos de relay NTLM:
+
 {{#ref}}
 ../ntlm/README.md
 {{#endref}}
 
 * Abuso de MSSQL e pós-exploração:
+
 {{#ref}}
 abusing-ad-mssql.md
 {{#endref}}
@@ -149,7 +151,7 @@ abusing-ad-mssql.md
 
 
 ## Referências
-- [Gostaria de Falar com Seu Gerente: Roubo de Segredos com Relays de Ponto de Gerenciamento](https://specterops.io/blog/2025/07/15/id-like-to-speak-to-your-manager-stealing-secrets-with-management-point-relays/)
+- [I’d Like to Speak to Your Manager: Stealing Secrets with Management Point Relays](https://specterops.io/blog/2025/07/15/id-like-to-speak-to-your-manager-stealing-secrets-with-management-point-relays/)
 - [PXEthief](https://github.com/MWR-CyberSec/PXEThief)
-- [Gerenciador de Configuração Incorreta – ELEVATE-4 & ELEVATE-5](https://github.com/subat0mik/Misconfiguration-Manager)
+- [Misconfiguration Manager – ELEVATE-4 & ELEVATE-5](https://github.com/subat0mik/Misconfiguration-Manager)
 {{#include ../../banners/hacktricks-training.md}}

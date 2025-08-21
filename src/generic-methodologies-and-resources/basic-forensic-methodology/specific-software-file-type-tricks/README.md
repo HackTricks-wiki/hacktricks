@@ -1,38 +1,49 @@
+# Truques Específicos de Software/Tipo de Arquivo
+
 {{#include ../../../banners/hacktricks-training.md}}
 
-Aqui você pode encontrar truques interessantes para tipos de arquivos e/ou software específicos:
+Aqui você pode encontrar truques interessantes para tipos de arquivo e/ou software específicos:
+
 
 {{#ref}}
 .pyc.md
 {{#endref}}
 
+
 {{#ref}}
 browser-artifacts.md
 {{#endref}}
+
 
 {{#ref}}
 desofuscation-vbs-cscript.exe.md
 {{#endref}}
 
+
 {{#ref}}
 local-cloud-storage.md
 {{#endref}}
+
 
 {{#ref}}
 office-file-analysis.md
 {{#endref}}
 
+
 {{#ref}}
 pdf-file-analysis.md
 {{#endref}}
+
 
 {{#ref}}
 png-tricks.md
 {{#endref}}
 
+
 {{#ref}}
 video-and-audio-file-analysis.md
 {{#endref}}
+
 
 {{#ref}}
 zips-tricks.md

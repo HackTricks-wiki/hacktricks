@@ -4,11 +4,11 @@
 
 ## Silver ticket
 
-O ataque **Silver Ticket** envolve a exploração de tickets de serviço em ambientes do Active Directory (AD). Este método depende de **adquirir o hash NTLM de uma conta de serviço**, como uma conta de computador, para forjar um ticket de Serviço de Concessão de Ticket (TGS). Com este ticket forjado, um atacante pode acessar serviços específicos na rede, **impersonando qualquer usuário**, geralmente visando privilégios administrativos. É enfatizado que usar chaves AES para forjar tickets é mais seguro e menos detectável.
+O ataque **Silver Ticket** envolve a exploração de tickets de serviço em ambientes do Active Directory (AD). Este método depende de **adquirir o hash NTLM de uma conta de serviço**, como uma conta de computador, para forjar um ticket do Ticket Granting Service (TGS). Com este ticket forjado, um atacante pode acessar serviços específicos na rede, **impersonando qualquer usuário**, geralmente visando privilégios administrativos. É enfatizado que usar chaves AES para forjar tickets é mais seguro e menos detectável.
 
 > [!WARNING]
 > Silver Tickets são menos detectáveis do que Golden Tickets porque exigem apenas o **hash da conta de serviço**, não a conta krbtgt. No entanto, eles são limitados ao serviço específico que visam. Além disso, apenas roubar a senha de um usuário.
-Além disso, se você comprometer a **senha de uma conta com um SPN**, pode usar essa senha para criar um Silver Ticket impersonando qualquer usuário para esse serviço.
+Além disso, se você comprometer a **senha de uma conta com um SPN**, pode usar essa senha para criar um Silver Ticket impersonando qualquer usuário para aquele serviço.
 
 Para a criação de tickets, diferentes ferramentas são empregadas com base no sistema operacional:
 
@@ -47,7 +47,7 @@ O serviço CIFS é destacado como um alvo comum para acessar o sistema de arquiv
 | Tarefas Agendadas                         | HOST                                                                       |
 | Compartilhamento de Arquivos do Windows, também psexec | CIFS                                                                       |
 | Operações LDAP, incluindo DCSync          | LDAP                                                                       |
-| Ferramentas de Administração de Servidores Remotos do Windows | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                         |
+| Ferramentas de Administração de Servidor Remoto do Windows | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                         |
 | Golden Tickets                             | krbtgt                                                                     |
 
 Usando **Rubeus** você pode **pedir todos** esses tickets usando o parâmetro:
@@ -136,6 +136,7 @@ Com esse privilégio, você pode despejar o banco de dados do DC usando **DCSync
 mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.local /user:krbtgt
 ```
 **Saiba mais sobre DCSync** na página a seguir:
+
 
 {{#ref}}
 dcsync.md

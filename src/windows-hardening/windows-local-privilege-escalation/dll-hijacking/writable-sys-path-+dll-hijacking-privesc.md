@@ -61,7 +61,7 @@ Neste caso, os .exe são inúteis, então ignore-os, os DLLs perdidos eram de:
 | Serviço de Política de Diagnóstico (DPS) | Unknown.DLL        | `C:\Windows\System32\svchost.exe -k LocalServiceNoNetwork -p -s DPS` |
 | ???                             | SharedRes.dll      | `C:\Windows\system32\svchost.exe -k UnistackSvcGroup`                |
 
-Depois de encontrar isso, encontrei este interessante post de blog que também explica como [**abusar do WptsExtensions.dll para privesc**](https://juggernaut-sec.com/dll-hijacking/#Windows_10_Phantom_DLL_Hijacking_-_WptsExtensionsdll). Que é o que **vamos fazer agora**.
+Depois de encontrar isso, encontrei este interessante post de blog que também explica como [**abusar do WptsExtensions.dll para elevação de privilégios**](https://juggernaut-sec.com/dll-hijacking/#Windows_10_Phantom_DLL_Hijacking_-_WptsExtensionsdll). Que é o que **vamos fazer agora**.
 
 ### Exploração
 
@@ -70,7 +70,7 @@ Então, para **escalar privilégios**, vamos sequestrar a biblioteca **WptsExten
 Você pode [**tentar usar qualquer um desses exemplos**](#creating-and-compiling-dlls). Você poderia executar payloads como: obter um rev shell, adicionar um usuário, executar um beacon...
 
 > [!WARNING]
-> Note que **nem todos os serviços são executados** com **`NT AUTHORITY\SYSTEM`**, alguns também são executados com **`NT AUTHORITY\LOCAL SERVICE`**, que tem **menos privilégios** e você **não poderá criar um novo usuário** para abusar de suas permissões.\
+> Note que **nem todos os serviços são executados** com **`NT AUTHORITY\SYSTEM`**, alguns também são executados com **`NT AUTHORITY\LOCAL SERVICE`**, que tem **menos privilégios** e você **não poderá criar um novo usuário** abusando de suas permissões.\
 > No entanto, esse usuário tem o privilégio **`seImpersonate`**, então você pode usar o [**potato suite para escalar privilégios**](../roguepotato-and-printspoofer.md). Portanto, neste caso, um rev shell é uma opção melhor do que tentar criar um usuário.
 
 No momento em que escrevo, o serviço **Agendador de Tarefas** está sendo executado com **Nt AUTHORITY\SYSTEM**.

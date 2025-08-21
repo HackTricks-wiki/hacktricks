@@ -4,7 +4,7 @@
 
 ## Informações Básicas
 
-Um cgroup namespace é um recurso do kernel Linux que fornece **isolamento de hierarquias de cgroup para processos em execução dentro de um namespace**. Cgroups, abreviação de **control groups**, são um recurso do kernel que permite organizar processos em grupos hierárquicos para gerenciar e impor **limites nos recursos do sistema** como CPU, memória e I/O.
+Um cgroup namespace é um recurso do kernel Linux que fornece **isolamento de hierarquias de cgroup para processos em execução dentro de um namespace**. Cgroups, abreviação de **grupos de controle**, são um recurso do kernel que permite organizar processos em grupos hierárquicos para gerenciar e impor **limites sobre recursos do sistema** como CPU, memória e I/O.
 
 Embora os cgroup namespaces não sejam um tipo de namespace separado como os outros que discutimos anteriormente (PID, mount, network, etc.), eles estão relacionados ao conceito de isolamento de namespace. **Cgroup namespaces virtualizam a visão da hierarquia de cgroup**, de modo que os processos em execução dentro de um cgroup namespace têm uma visão diferente da hierarquia em comparação com os processos em execução no host ou em outros namespaces.
 
@@ -34,11 +34,11 @@ Ao montar uma nova instância do sistema de arquivos `/proc` se você usar o par
 
 <summary>Erro: bash: fork: Não é possível alocar memória</summary>
 
-Quando `unshare` é executado sem a opção `-f`, um erro é encontrado devido à forma como o Linux lida com novos namespaces de PID (Identificação de Processo). Os detalhes principais e a solução estão descritos abaixo:
+Quando `unshare` é executado sem a opção `-f`, um erro é encontrado devido à forma como o Linux lida com novos namespaces de PID (ID do Processo). Os detalhes principais e a solução estão descritos abaixo:
 
 1. **Explicação do Problema**:
 
-- O kernel do Linux permite que um processo crie novos namespaces usando a chamada de sistema `unshare`. No entanto, o processo que inicia a criação de um novo namespace de PID (referido como o processo "unshare") não entra no novo namespace; apenas seus processos filhos o fazem.
+- O kernel do Linux permite que um processo crie novos namespaces usando a chamada de sistema `unshare`. No entanto, o processo que inicia a criação de um novo namespace de PID (referido como o processo "unshare") não entra no novo namespace; apenas seus processos filhos entram.
 - Executar `%unshare -p /bin/bash%` inicia `/bin/bash` no mesmo processo que `unshare`. Consequentemente, `/bin/bash` e seus processos filhos estão no namespace de PID original.
 - O primeiro processo filho de `/bin/bash` no novo namespace se torna PID 1. Quando esse processo sai, ele aciona a limpeza do namespace se não houver outros processos, já que PID 1 tem o papel especial de adotar processos órfãos. O kernel do Linux então desabilitará a alocação de PID nesse namespace.
 

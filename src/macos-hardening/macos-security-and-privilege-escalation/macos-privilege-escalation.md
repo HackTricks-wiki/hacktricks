@@ -10,7 +10,7 @@ Se você veio aqui procurando por escalação de privilégios TCC, vá para:
 macos-security-protections/macos-tcc/
 {{#endref}}
 
-## Privesc no Linux
+## Escalação de Privilégios no Linux
 
 Por favor, note que **a maioria das técnicas de escalação de privilégios que afetam Linux/Unix também afetará máquinas MacOS**. Então veja:
 
@@ -121,7 +121,7 @@ killall Dock
 ```
 {{#endtab}}
 
-{{#tab name="Imitação do Finder"}}
+{{#tab name="Impersonação do Finder"}}
 Algumas sugestões:
 
 - Você **não pode remover o Finder do Dock**, então se você for adicioná-lo ao Dock, pode colocar o Finder falso logo ao lado do verdadeiro. Para isso, você precisa **adicionar a entrada do Finder falso no início do array do Dock**.
@@ -231,6 +231,7 @@ Uma explicação mais detalhada pode ser [**encontrada no relatório original**]
 ## Informações Sensíveis
 
 Isso pode ser útil para escalar privilégios:
+
 
 {{#ref}}
 macos-files-folders-and-binaries/macos-sensitive-locations.md

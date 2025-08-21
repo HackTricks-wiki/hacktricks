@@ -16,7 +16,7 @@ O Flipper usa um receptor de sinal IR digital TSOP, que **permite interceptar si
 
 O **receptor infravermelho do Flipper é bastante sensível**. Você pode até **captar o sinal** enquanto permanece **em algum lugar entre** o controle remoto e a TV. Apontar o controle remoto diretamente para a porta IR do Flipper é desnecessário. Isso é útil quando alguém está trocando de canal enquanto está perto da TV, e tanto você quanto o Flipper estão a uma certa distância.
 
-Como a **decodificação do sinal infravermelho** acontece do lado do **software**, o Flipper Zero potencialmente suporta a **recepção e transmissão de quaisquer códigos remotos IR**. No caso de **protocolos desconhecidos** que não puderam ser reconhecidos - ele **grava e reproduz** o sinal bruto exatamente como recebido.
+Como a **decodificação do sinal infravermelho** acontece do lado do **software**, o Flipper Zero potencialmente suporta a **recepção e transmissão de quaisquer códigos de controle remoto IR**. No caso de **protocolos desconhecidos** que não puderam ser reconhecidos - ele **grava e reproduz** o sinal bruto exatamente como recebido.
 
 ## Ações
 

@@ -4,16 +4,16 @@
 
 ## Informações Básicas sobre Processos
 
-Um processo é uma instância de um executável em execução, no entanto, os processos não executam código, esses são threads. Portanto, **os processos são apenas contêineres para threads em execução** fornecendo memória, descritores, portas, permissões...
+Um processo é uma instância de um executável em execução, no entanto, os processos não executam código, esses são threads. Portanto, **os processos são apenas contêineres para threads em execução** fornecendo a memória, descritores, portas, permissões...
 
-Tradicionalmente, os processos eram iniciados dentro de outros processos (exceto o PID 1) chamando **`fork`**, que criaria uma cópia exata do processo atual e então o **processo filho** geralmente chamaria **`execve`** para carregar o novo executável e executá-lo. Então, **`vfork`** foi introduzido para tornar esse processo mais rápido sem qualquer cópia de memória.\
+Tradicionalmente, os processos eram iniciados dentro de outros processos (exceto PID 1) chamando **`fork`**, que criaria uma cópia exata do processo atual e então o **processo filho** geralmente chamaria **`execve`** para carregar o novo executável e executá-lo. Então, **`vfork`** foi introduzido para tornar esse processo mais rápido sem qualquer cópia de memória.\
 Depois, **`posix_spawn`** foi introduzido combinando **`vfork`** e **`execve`** em uma única chamada e aceitando flags:
 
 - `POSIX_SPAWN_RESETIDS`: Redefinir ids efetivos para ids reais
 - `POSIX_SPAWN_SETPGROUP`: Definir afiliação do grupo de processos
 - `POSUX_SPAWN_SETSIGDEF`: Definir comportamento padrão do sinal
 - `POSIX_SPAWN_SETSIGMASK`: Definir máscara de sinal
-- `POSIX_SPAWN_SETEXEC`: Execução no mesmo processo (como `execve` com mais opções)
+- `POSIX_SPAWN_SETEXEC`: Exec no mesmo processo (como `execve` com mais opções)
 - `POSIX_SPAWN_START_SUSPENDED`: Iniciar suspenso
 - `_POSIX_SPAWN_DISABLE_ASLR`: Iniciar sem ASLR
 - `_POSIX_SPAWN_NANO_ALLOCATOR:` Usar o alocador Nano da libmalloc
@@ -23,7 +23,7 @@ Depois, **`posix_spawn`** foi introduzido combinando **`vfork`** e **`execve`** 
 
 Além disso, `posix_spawn` permite especificar um array de **`posix_spawnattr`** que controla alguns aspectos do processo gerado, e **`posix_spawn_file_actions`** para modificar o estado dos descritores.
 
-Quando um processo morre, ele envia o **código de retorno para o processo pai** (se o pai morreu, o novo pai é o PID 1) com o sinal `SIGCHLD`. O pai precisa obter esse valor chamando `wait4()` ou `waitid()` e até que isso aconteça, o filho permanece em um estado zumbi onde ainda está listado, mas não consome recursos.
+Quando um processo morre, ele envia o **código de retorno para o processo pai** (se o pai morreu, o novo pai é PID 1) com o sinal `SIGCHLD`. O pai precisa obter esse valor chamando `wait4()` ou `waitid()` e até que isso aconteça, o filho permanece em um estado zumbi onde ainda está listado, mas não consome recursos.
 
 ### PIDs
 
@@ -31,15 +31,15 @@ PIDs, identificadores de processo, identificam um processo único. No XNU, os **
 
 ### Grupos de Processos, Sessões e Coalizões
 
-**Processos** podem ser inseridos em **grupos** para facilitar seu manuseio. Por exemplo, comandos em um script de shell estarão no mesmo grupo de processos, então é possível **sinalizá-los juntos** usando kill, por exemplo.\
+**Processos** podem ser inseridos em **grupos** para facilitar o manuseio. Por exemplo, comandos em um script de shell estarão no mesmo grupo de processos, então é possível **sinalizá-los juntos** usando kill, por exemplo.\
 Também é possível **agrupar processos em sessões**. Quando um processo inicia uma sessão (`setsid(2)`), os processos filhos são colocados dentro da sessão, a menos que iniciem sua própria sessão.
 
-Coalizão é outra maneira de agrupar processos no Darwin. Um processo que se junta a uma coalizão permite acessar recursos do pool, compartilhando um livro-razão ou enfrentando Jetsam. As coalizões têm diferentes papéis: Líder, serviço XPC, Extensão.
+Coalizão é outra maneira de agrupar processos no Darwin. Um processo que se junta a uma coalizão permite acessar recursos compartilhados, compartilhando um livro-razão ou enfrentando Jetsam. As coalizões têm diferentes papéis: Líder, serviço XPC, Extensão.
 
 ### Credenciais e Personas
 
-Cada processo possui **credenciais** que **identificam seus privilégios** no sistema. Cada processo terá um `uid` primário e um `gid` primário (embora possa pertencer a vários grupos).\
-Também é possível mudar o id do usuário e do grupo se o binário tiver o bit `setuid/setgid`.\
+Cada processo mantém **credenciais** que **identificam seus privilégios** no sistema. Cada processo terá um `uid` primário e um `gid` primário (embora possa pertencer a vários grupos).\
+Também é possível mudar o id de usuário e o id de grupo se o binário tiver o bit `setuid/setgid`.\
 Existem várias funções para **definir novos uids/gids**.
 
 A syscall **`persona`** fornece um conjunto **alternativo** de **credenciais**. Adotar uma persona assume seu uid, gid e associações de grupo **de uma só vez**. No [**código-fonte**](https://github.com/apple/darwin-xnu/blob/main/bsd/sys/persona.h) é possível encontrar a struct:
@@ -58,7 +58,7 @@ char     persona_name[MAXLOGNAME + 1];
 ```
 ## Informações Básicas sobre Threads
 
-1. **POSIX Threads (pthreads):** O macOS suporta threads POSIX (`pthreads`), que fazem parte de uma API de threading padrão para C/C++. A implementação de pthreads no macOS é encontrada em `/usr/lib/system/libsystem_pthread.dylib`, que vem do projeto `libpthread` disponível publicamente. Esta biblioteca fornece as funções necessárias para criar e gerenciar threads.
+1. **POSIX Threads (pthreads):** o macOS suporta threads POSIX (`pthreads`), que fazem parte de uma API de threading padrão para C/C++. A implementação de pthreads no macOS é encontrada em `/usr/lib/system/libsystem_pthread.dylib`, que vem do projeto `libpthread` disponível publicamente. Esta biblioteca fornece as funções necessárias para criar e gerenciar threads.
 2. **Criando Threads:** A função `pthread_create()` é usada para criar novas threads. Internamente, essa função chama `bsdthread_create()`, que é uma chamada de sistema de nível inferior específica para o kernel XNU (o kernel no qual o macOS é baseado). Esta chamada de sistema aceita várias flags derivadas de `pthread_attr` (atributos) que especificam o comportamento da thread, incluindo políticas de agendamento e tamanho da pilha.
 - **Tamanho da Pilha Padrão:** O tamanho da pilha padrão para novas threads é de 512 KB, o que é suficiente para operações típicas, mas pode ser ajustado através de atributos de thread se mais ou menos espaço for necessário.
 3. **Inicialização da Thread:** A função `__pthread_init()` é crucial durante a configuração da thread, utilizando o argumento `env[]` para analisar variáveis de ambiente que podem incluir detalhes sobre a localização e o tamanho da pilha.
@@ -66,7 +66,7 @@ char     persona_name[MAXLOGNAME + 1];
 #### Terminação de Threads no macOS
 
 1. **Saindo de Threads:** As threads são tipicamente terminadas chamando `pthread_exit()`. Esta função permite que uma thread saia de forma limpa, realizando a limpeza necessária e permitindo que a thread envie um valor de retorno de volta para qualquer thread que a tenha juntado.
-2. **Limpeza da Thread:** Ao chamar `pthread_exit()`, a função `pthread_terminate()` é invocada, que lida com a remoção de todas as estruturas de thread associadas. Ela desaloca portas de thread Mach (Mach é o subsistema de comunicação no kernel XNU) e chama `bsdthread_terminate`, uma syscall que remove as estruturas de nível de kernel associadas à thread.
+2. **Limpeza de Threads:** Ao chamar `pthread_exit()`, a função `pthread_terminate()` é invocada, que lida com a remoção de todas as estruturas de thread associadas. Ela desaloca portas de thread Mach (Mach é o subsistema de comunicação no kernel XNU) e chama `bsdthread_terminate`, uma syscall que remove as estruturas de nível de kernel associadas à thread.
 
 #### Mecanismos de Sincronização
 
@@ -77,12 +77,12 @@ Para gerenciar o acesso a recursos compartilhados e evitar condições de corrid
 - **Mutex Rápido (Assinatura: 0x4d55545A):** Semelhante a um mutex regular, mas otimizado para operações mais rápidas, também com 60 bytes de tamanho.
 2. **Variáveis de Condição:**
 - Usadas para esperar que certas condições ocorram, com um tamanho de 44 bytes (40 bytes mais uma assinatura de 4 bytes).
-- **Atributos de Variável de Condição (Assinatura: 0x434e4441):** Atributos de configuração para variáveis de condição, com tamanho de 12 bytes.
+- **Atributos de Variável de Condição (Assinatura: 0x434e4441):** Atributos de configuração para variáveis de condição, com 12 bytes de tamanho.
 3. **Variável Once (Assinatura: 0x4f4e4345):**
-- Garante que um trecho de código de inicialização seja executado apenas uma vez. Seu tamanho é de 12 bytes.
+- Garante que um pedaço de código de inicialização seja executado apenas uma vez. Seu tamanho é de 12 bytes.
 4. **Locks de Leitura-Gravação:**
 - Permite múltiplos leitores ou um escritor por vez, facilitando o acesso eficiente a dados compartilhados.
-- **Lock de Leitura-Gravação (Assinatura: 0x52574c4b):** Tamanho de 196 bytes.
+- **Lock de Leitura-Gravação (Assinatura: 0x52574c4b):** Com 196 bytes de tamanho.
 - **Atributos de Lock de Leitura-Gravação (Assinatura: 0x52574c41):** Atributos para locks de leitura-gravação, com 20 bytes de tamanho.
 
 > [!TIP]
@@ -107,7 +107,7 @@ No binário Mach-O, os dados relacionados a variáveis locais de thread são org
 - **`__DATA.__thread_vars`**: Esta seção contém os metadados sobre as variáveis locais de thread, como seus tipos e status de inicialização.
 - **`__DATA.__thread_bss`**: Esta seção é usada para variáveis locais de thread que não são explicitamente inicializadas. É uma parte da memória reservada para dados inicializados com zero.
 
-Mach-O também fornece uma API específica chamada **`tlv_atexit`** para gerenciar variáveis locais de thread quando uma thread sai. Esta API permite que você **registre destrutores**—funções especiais que limpam os dados locais de thread quando uma thread termina.
+Mach-O também fornece uma API específica chamada **`tlv_atexit`** para gerenciar variáveis locais de thread quando uma thread sai. Esta API permite que você **registre destrutores**—funções especiais que limpam dados locais de thread quando uma thread termina.
 
 ### Prioridades de Thread
 
@@ -135,7 +135,7 @@ As classes de QoS são uma abordagem mais moderna para lidar com prioridades de 
 4. **Fundo:**
 - Esta classe é para tarefas que operam em segundo plano e não são visíveis para o usuário. Estas podem ser tarefas como indexação, sincronização ou backups. Elas têm a menor prioridade e impacto mínimo no desempenho do sistema.
 
-Usando classes de QoS, os desenvolvedores não precisam gerenciar os números de prioridade exatos, mas sim se concentrar na natureza da tarefa, e o sistema otimiza os recursos de CPU de acordo.
+Usando classes de QoS, os desenvolvedores não precisam gerenciar os números de prioridade exatos, mas sim focar na natureza da tarefa, e o sistema otimiza os recursos de CPU de acordo.
 
 Além disso, existem diferentes **políticas de agendamento de thread** que fluem para especificar um conjunto de parâmetros de agendamento que o escalonador levará em consideração. Isso pode ser feito usando `thread_policy_[set/get]`. Isso pode ser útil em ataques de condição de corrida.
 
@@ -177,7 +177,7 @@ macos-electron-applications-injection.md
 
 ### Injeção de Chromium
 
-É possível usar as flags `--load-extension` e `--use-fake-ui-for-media-stream` para realizar um **ataque man in the browser** permitindo roubar pressionamentos de tecla, tráfego, cookies, injetar scripts em páginas...:
+É possível usar as flags `--load-extension` e `--use-fake-ui-for-media-stream` para realizar um **ataque man-in-the-browser** permitindo roubar pressionamentos de tecla, tráfego, cookies, injetar scripts em páginas...:
 
 {{#ref}}
 macos-chromium-injection.md
@@ -234,7 +234,7 @@ Observe que executáveis compilados com **`pyinstaller`** não usarão essas var
 
 > [!CAUTION]
 > No geral, não consegui encontrar uma maneira de fazer o Python executar código arbitrário abusando de variáveis de ambiente.\
-> No entanto, a maioria das pessoas instala Python usando **Homebrew**, que instalará Python em um **local gravável** para o usuário admin padrão. Você pode sequestrá-lo com algo como:
+> No entanto, a maioria das pessoas instala Python usando **Homebrew**, que instalará Python em um **local gravável** para o usuário administrador padrão. Você pode sequestrá-lo com algo como:
 >
 > ```bash
 > mv /opt/homebrew/bin/python3 /opt/homebrew/bin/python3.old
@@ -246,7 +246,7 @@ Observe que executáveis compilados com **`pyinstaller`** não usarão essas var
 > chmod +x /opt/homebrew/bin/python3
 > ```
 >
-> Mesmo **root** executará este código ao rodar o Python.
+> Mesmo **root** executará este código ao executar o Python.
 
 ## Detecção
 
@@ -257,11 +257,11 @@ Observe que executáveis compilados com **`pyinstaller`** não usarão essas var
 - Usando **Variáveis Ambientais**: Ele monitorará a presença de qualquer uma das seguintes variáveis ambientais: **`DYLD_INSERT_LIBRARIES`**, **`CFNETWORK_LIBRARY_PATH`**, **`RAWCAMERA_BUNDLE_PATH`** e **`ELECTRON_RUN_AS_NODE`**
 - Usando chamadas **`task_for_pid`**: Para descobrir quando um processo deseja obter o **port de tarefa de outro**, o que permite injetar código no processo.
 - **Parâmetros de aplicativos Electron**: Alguém pode usar os argumentos de linha de comando **`--inspect`**, **`--inspect-brk`** e **`--remote-debugging-port`** para iniciar um aplicativo Electron em modo de depuração e, assim, injetar código nele.
-- Usando **symlinks** ou **hardlinks**: Normalmente, o abuso mais comum é **colocar um link com nossos privilégios de usuário** e **apontá-lo para um local de maior privilégio**. A detecção é muito simples tanto para hardlinks quanto para symlinks. Se o processo que cria o link tiver um **nível de privilégio diferente** do arquivo de destino, criamos um **alerta**. Infelizmente, no caso de symlinks, o bloqueio não é possível, pois não temos informações sobre o destino do link antes da criação. Esta é uma limitação do framework EndpointSecurity da Apple.
+- Usando **symlinks** ou **hardlinks**: Normalmente, o abuso mais comum é **colocar um link com nossos privilégios de usuário** e **apontá-lo para um local de maior privilégio**. A detecção é muito simples para ambos, hardlink e symlink. Se o processo que cria o link tiver um **nível de privilégio diferente** do arquivo de destino, criamos um **alerta**. Infelizmente, no caso de symlinks, o bloqueio não é possível, pois não temos informações sobre o destino do link antes da criação. Esta é uma limitação do framework EndpointSecurity da Apple.
 
 ### Chamadas feitas por outros processos
 
-Em [**este post do blog**](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html) você pode encontrar como é possível usar a função **`task_name_for_pid`** para obter informações sobre outros **processos que injetam código em um processo** e, em seguida, obter informações sobre esse outro processo.
+Neste [**post de blog**](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html) você pode encontrar como é possível usar a função **`task_name_for_pid`** para obter informações sobre outros **processos que injetam código em um processo** e, em seguida, obter informações sobre esse outro processo.
 
 Observe que, para chamar essa função, você precisa ser **o mesmo uid** que o que está executando o processo ou **root** (e ela retorna informações sobre o processo, não uma maneira de injetar código).
 

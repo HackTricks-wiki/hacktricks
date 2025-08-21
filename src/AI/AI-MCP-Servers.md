@@ -12,7 +12,7 @@ Uma **aplicação host** (por exemplo, Claude Desktop, Cursor IDE) executa um cl
 
 ## Servidor MCP Básico
 
-Usaremos Python e o SDK oficial `mcp` para este exemplo. Primeiro, instale o SDK e o CLI:
+Usaremos Python e o SDK oficial `mcp` para este exemplo. Primeiro, instale o SDK e a CLI:
 ```bash
 pip3 install mcp "mcp[cli]"
 mcp version      # verify installation`
@@ -39,7 +39,7 @@ O servidor será iniciado e ouvirá por solicitações MCP (usando entrada/saíd
 brew install nodejs uv # You need these tools to make sure the inspector works
 mcp dev calculator.py
 ```
-Uma vez conectado, o host (inspector ou um agente de IA como o Cursor) buscará a lista de ferramentas. A descrição da ferramenta `add` (gerada automaticamente a partir da assinatura da função e da docstring) é carregada no contexto do modelo, permitindo que a IA chame `add` sempre que necessário. Por exemplo, se o usuário perguntar *"Qual é 2+3?"*, o modelo pode decidir chamar a ferramenta `add` com os argumentos `2` e `3`, e então retornar o resultado.
+Uma vez conectado, o host (inspetor ou um agente de IA como o Cursor) buscará a lista de ferramentas. A descrição da ferramenta `add` (gerada automaticamente a partir da assinatura da função e da docstring) é carregada no contexto do modelo, permitindo que a IA chame `add` sempre que necessário. Por exemplo, se o usuário perguntar *"Qual é 2+3?"*, o modelo pode decidir chamar a ferramenta `add` com os argumentos `2` e `3`, e então retornar o resultado.
 
 Para mais informações sobre Prompt Injection, consulte:
 
@@ -47,7 +47,7 @@ Para mais informações sobre Prompt Injection, consulte:
 AI-Prompts.md
 {{#endref}}
 
-## Vulnerabilidades do MCP
+## Vulnerabilidades MCP
 
 > [!CAUTION]
 > Os servidores MCP convidam os usuários a ter um agente de IA ajudando-os em todo tipo de tarefas do dia a dia, como ler e responder e-mails, verificar problemas e pull requests, escrever código, etc. No entanto, isso também significa que o agente de IA tem acesso a dados sensíveis, como e-mails, código-fonte e outras informações privadas. Portanto, qualquer tipo de vulnerabilidade no servidor MCP pode levar a consequências catastróficas, como exfiltração de dados, execução remota de código ou até mesmo comprometimento completo do sistema.
@@ -95,12 +95,12 @@ AI-Prompts.md
 
 Além disso, em [**este blog**](https://www.legitsecurity.com/blog/remote-prompt-injection-in-gitlab-duo) é explicado como foi possível abusar do agente de IA do Gitlab para realizar ações arbitrárias (como modificar código ou vazar código), injetando prompts maliciosos nos dados do repositório (mesmo ofuscando esses prompts de uma maneira que o LLM entenderia, mas o usuário não).
 
-Note que os prompts indiretos maliciosos estariam localizados em um repositório público que o usuário vítima estaria usando, no entanto, como o agente ainda tem acesso aos repositórios do usuário, ele poderá acessá-los.
+Note que os prompts indiretos maliciosos estariam localizados em um repositório público que o usuário vítima estaria usando; no entanto, como o agente ainda tem acesso aos repositórios do usuário, ele poderá acessá-los.
 
 ### Execução de Código Persistente via Bypass de Confiança do MCP (Cursor IDE – "MCPoison")
 
-Começando no início de 2025, a Check Point Research divulgou que o **Cursor IDE** centrado em IA vinculou a confiança do usuário ao *nome* de uma entrada MCP, mas nunca revalidou seu `command` ou `args` subjacentes. 
-Esse erro de lógica (CVE-2025-54136, também conhecido como **MCPoison**) permite que qualquer um que possa escrever em um repositório compartilhado transforme um MCP já aprovado e benigno em um comando arbitrário que será executado *toda vez que o projeto for aberto* – sem prompt exibido.
+Começando no início de 2025, a Check Point Research divulgou que o **Cursor IDE** centrado em IA vinculava a confiança do usuário ao *nome* de uma entrada MCP, mas nunca revalidava seu `command` ou `args` subjacentes. 
+Esse erro de lógica (CVE-2025-54136, também conhecido como **MCPoison**) permite que qualquer pessoa que possa escrever em um repositório compartilhado transforme um MCP já aprovado e benigno em um comando arbitrário que será executado *toda vez que o projeto for aberto* – sem prompt exibido.
 
 #### Fluxo de trabalho vulnerável
 

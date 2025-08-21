@@ -12,7 +12,7 @@ Mais informações em:
 macos-gatekeeper.md
 {{#endref}}
 
-## Processos Limitantes
+## Limitações de Processos
 
 ### MACF
 
@@ -32,7 +32,7 @@ macos-sandbox/
 
 ### TCC - **Transparência, Consentimento e Controle**
 
-**TCC (Transparência, Consentimento e Controle)** é uma estrutura de segurança. É projetada para **gerenciar as permissões** das aplicações, especificamente regulando seu acesso a recursos sensíveis. Isso inclui elementos como **serviços de localização, contatos, fotos, microfone, câmera, acessibilidade e acesso total ao disco**. O TCC garante que os aplicativos só possam acessar esses recursos após obter o consentimento explícito do usuário, reforçando assim a privacidade e o controle sobre os dados pessoais.
+**TCC (Transparência, Consentimento e Controle)** é uma estrutura de segurança. É projetada para **gerenciar as permissões** das aplicações, especificamente regulando seu acesso a recursos sensíveis. Isso inclui elementos como **serviços de localização, contatos, fotos, microfone, câmera, acessibilidade e acesso total ao disco**. O TCC garante que os aplicativos só possam acessar esses recursos após obter o consentimento explícito do usuário, fortalecendo assim a privacidade e o controle sobre os dados pessoais.
 
 {{#ref}}
 macos-tcc/
@@ -40,7 +40,7 @@ macos-tcc/
 
 ### Restrições de Lançamento/Ambiente & Cache de Confiança
 
-As restrições de lançamento no macOS são um recurso de segurança para **regulamentar a iniciação de processos** definindo **quem pode lançar** um processo, **como** e **de onde**. Introduzidas no macOS Ventura, elas categorizam binários do sistema em categorias de restrição dentro de um **cache de confiança**. Cada binário executável tem **regras** definidas para seu **lançamento**, incluindo **próprio**, **pai** e **responsável**. Estendidas a aplicativos de terceiros como **Restrições de Ambiente** no macOS Sonoma, esses recursos ajudam a mitigar potenciais explorações do sistema ao governar as condições de lançamento de processos.
+As restrições de lançamento no macOS são um recurso de segurança para **regulamentar a iniciação de processos** definindo **quem pode lançar** um processo, **como** e **de onde**. Introduzidas no macOS Ventura, elas categorizam binários do sistema em categorias de restrição dentro de um **cache de confiança**. Cada binário executável tem **regras** definidas para seu **lançamento**, incluindo restrições de **auto**, **pai** e **responsável**. Estendidas a aplicativos de terceiros como **Restrições de Ambiente** no macOS Sonoma, esses recursos ajudam a mitigar potenciais explorações do sistema ao governar as condições de lançamento de processos.
 
 {{#ref}}
 macos-launch-environment-constraints.md
@@ -52,9 +52,9 @@ A Ferramenta de Remoção de Malware (MRT) é outra parte da infraestrutura de s
 
 Uma vez que o malware é detectado em um Mac (seja pelo XProtect ou por outros meios), o MRT pode ser usado para **remover automaticamente o malware**. O MRT opera silenciosamente em segundo plano e normalmente é executado sempre que o sistema é atualizado ou quando uma nova definição de malware é baixada (parece que as regras que o MRT tem para detectar malware estão dentro do binário).
 
-Embora tanto o XProtect quanto o MRT façam parte das medidas de segurança do macOS, eles desempenham funções diferentes:
+Enquanto o XProtect e o MRT são parte das medidas de segurança do macOS, eles desempenham funções diferentes:
 
-- **XProtect** é uma ferramenta preventiva. Ele **verifica arquivos à medida que são baixados** (por meio de certos aplicativos) e, se detectar qualquer tipo conhecido de malware, **impede que o arquivo seja aberto**, evitando assim que o malware infecte seu sistema em primeiro lugar.
+- **XProtect** é uma ferramenta preventiva. Ele **verifica arquivos à medida que são baixados** (via certos aplicativos) e, se detectar qualquer tipo conhecido de malware, **impede que o arquivo seja aberto**, evitando assim que o malware infecte seu sistema em primeiro lugar.
 - **MRT**, por outro lado, é uma **ferramenta reativa**. Ele opera após o malware ter sido detectado em um sistema, com o objetivo de remover o software ofensivo para limpar o sistema.
 
 O aplicativo MRT está localizado em **`/Library/Apple/System/Library/CoreServices/MRT.app`**
@@ -99,13 +99,13 @@ chmod +x dumpBTM
 xattr -rc dumpBTM # Remove quarantine attr
 ./dumpBTM
 ```
-Essas informações estão sendo armazenadas em **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v4.btm`** e o Terminal precisa de FDA.
+Esta informação está sendo armazenada em **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v4.btm`** e o Terminal precisa de FDA.
 
 ### Brincando com BTM
 
 Quando uma nova persistência é encontrada, um evento do tipo **`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`** é gerado. Portanto, qualquer maneira de **prevenir** que este **evento** seja enviado ou que o **agente alerte** o usuário ajudará um atacante a _**contornar**_ o BTM.
 
-- **Redefinindo o banco de dados**: Executar o seguinte comando redefinirá o banco de dados (deve reconstruí-lo do zero), no entanto, por algum motivo, após executar isso, **nenhuma nova persistência será alertada até que o sistema seja reiniciado**.
+- **Redefinindo o banco de dados**: Executar o seguinte comando irá redefinir o banco de dados (deve reconstruí-lo do zero), no entanto, por algum motivo, após executar isso, **nenhuma nova persistência será alertada até que o sistema seja reiniciado**.
 - **root** é necessário.
 ```bash
 # Reset the database

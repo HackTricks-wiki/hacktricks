@@ -4,9 +4,9 @@
 
 ## Informações Básicas
 
-XPC, que significa Comunicação Inter-Processo XNU (o kernel usado pelo macOS), é uma estrutura para **comunicação entre processos** no macOS e iOS. O XPC fornece um mecanismo para fazer **chamadas de método assíncronas e seguras entre diferentes processos** no sistema. É parte do paradigma de segurança da Apple, permitindo a **criação de aplicativos com separação de privilégios** onde cada **componente** é executado com **apenas as permissões necessárias** para realizar seu trabalho, limitando assim o potencial de dano de um processo comprometido.
+XPC, que significa Comunicação Inter-Processo do XNU (o kernel usado pelo macOS), é uma estrutura para **comunicação entre processos** no macOS e iOS. O XPC fornece um mecanismo para fazer **chamadas de método seguras e assíncronas entre diferentes processos** no sistema. É parte do paradigma de segurança da Apple, permitindo a **criação de aplicativos com privilégios separados**, onde cada **componente** é executado com **apenas as permissões necessárias** para realizar seu trabalho, limitando assim o potencial de dano de um processo comprometido.
 
-O XPC utiliza uma forma de Comunicação Inter-Processo (IPC), que é um conjunto de métodos para diferentes programas em execução no mesmo sistema trocarem dados.
+O XPC usa uma forma de Comunicação Inter-Processo (IPC), que é um conjunto de métodos para diferentes programas em execução no mesmo sistema trocarem dados.
 
 Os principais benefícios do XPC incluem:
 
@@ -89,7 +89,7 @@ Um exemplo de um **`xpc_pipe`** é o **bootstrap pipe** criado pelo **`launchd`*
 
 - **`NSXPC*`**
 
-Esses são objetos de alto nível em Objective-C que permitem a abstração de conexões XPC.\
+Estes são objetos de alto nível em Objective-C que permitem a abstração de conexões XPC.\
 Além disso, é mais fácil depurar esses objetos com DTrace do que os anteriores.
 
 - **`GCD Queues`**
@@ -98,29 +98,29 @@ XPC usa GCD para passar mensagens, além disso, gera certas filas de despacho co
 
 ## Serviços XPC
 
-Esses são **pacotes com extensão `.xpc`** localizados dentro da pasta **`XPCServices`** de outros projetos e no `Info.plist` eles têm o `CFBundlePackageType` definido como **`XPC!`**.\
+Estes são **pacotes com extensão `.xpc`** localizados dentro da pasta **`XPCServices`** de outros projetos e no `Info.plist` eles têm o `CFBundlePackageType` definido como **`XPC!`**.\
 Este arquivo possui outras chaves de configuração, como `ServiceType`, que pode ser Application, User, System ou `_SandboxProfile`, que pode definir um sandbox, ou `_AllowedClients`, que pode indicar direitos ou ID necessários para contatar o serviço. Essas e outras opções de configuração serão úteis para configurar o serviço ao ser iniciado.
 
 ### Iniciando um Serviço
 
-O aplicativo tenta **conectar** a um serviço XPC usando `xpc_connection_create_mach_service`, então o launchd localiza o daemon e inicia **`xpcproxy`**. **`xpcproxy`** impõe as restrições configuradas e gera o serviço com os FDs e portas Mach fornecidos.
+O aplicativo tenta **conectar** a um serviço XPC usando `xpc_connection_create_mach_service`, então o launchd localiza o daemon e inicia o **`xpcproxy`**. O **`xpcproxy`** impõe as restrições configuradas e gera o serviço com os FDs e portas Mach fornecidos.
 
 Para melhorar a velocidade da busca pelo serviço XPC, um cache é utilizado.
 
-É possível rastrear as ações de `xpcproxy` usando:
+É possível rastrear as ações do `xpcproxy` usando:
 ```bash
 supraudit S -C -o /tmp/output /dev/auditpipe
 ```
-A biblioteca XPC usa `kdebug` para registrar ações chamando `xpc_ktrace_pid0` e `xpc_ktrace_pid1`. Os códigos que utiliza não são documentados, então é necessário adicioná-los em `/usr/share/misc/trace.codes`. Eles têm o prefixo `0x29` e, por exemplo, um é `0x29000004`: `XPC_serializer_pack`.\
+A biblioteca XPC usa `kdebug` para registrar ações chamando `xpc_ktrace_pid0` e `xpc_ktrace_pid1`. Os códigos que utiliza não são documentados, então é necessário adicioná-los em `/usr/share/misc/trace.codes`. Eles têm o prefixo `0x29` e, por exemplo, um deles é `0x29000004`: `XPC_serializer_pack`.\
 A utilidade `xpcproxy` usa o prefixo `0x22`, por exemplo: `0x2200001c: xpcproxy:will_do_preexec`.
 
 ## Mensagens de Evento XPC
 
 Aplicativos podem **se inscrever** em diferentes **mensagens de evento**, permitindo que sejam **iniciadas sob demanda** quando tais eventos ocorrem. A **configuração** para esses serviços é feita em arquivos **plist do launchd**, localizados nos **mesmos diretórios que os anteriores** e contendo uma chave extra **`LaunchEvent`**.
 
-### Verificação do Processo Conectando via XPC
+### Verificação do Processo de Conexão XPC
 
-Quando um processo tenta chamar um método através de uma conexão XPC, o **serviço XPC deve verificar se esse processo tem permissão para se conectar**. Aqui estão as maneiras comuns de verificar isso e as armadilhas comuns:
+Quando um processo tenta chamar um método via uma conexão XPC, o **serviço XPC deve verificar se esse processo tem permissão para se conectar**. Aqui estão as maneiras comuns de verificar isso e as armadilhas comuns:
 
 {{#ref}}
 macos-xpc-connecting-process-check/
@@ -440,7 +440,7 @@ return;
 ## Remote XPC
 
 Essa funcionalidade fornecida pelo `RemoteXPC.framework` (do `libxpc`) permite comunicar via XPC entre diferentes hosts.\
-Os serviços que suportam XPC remoto terão em seu plist a chave UsesRemoteXPC, como é o caso de `/System/Library/LaunchDaemons/com.apple.SubmitDiagInfo.plist`. No entanto, embora o serviço esteja registrado com `launchd`, é o `UserEventAgent` com os plugins `com.apple.remoted.plugin` e `com.apple.remoteservicediscovery.events.plugin` que fornece a funcionalidade.
+Os serviços que suportam XPC remoto terão em seu plist a chave UsesRemoteXPC, como é o caso de `/System/Library/LaunchDaemons/com.apple.SubmitDiagInfo.plist`. No entanto, embora o serviço seja registrado com `launchd`, é o `UserEventAgent` com os plugins `com.apple.remoted.plugin` e `com.apple.remoteservicediscovery.events.plugin` que fornece a funcionalidade.
 
 Além disso, o `RemoteServiceDiscovery.framework` permite obter informações do `com.apple.remoted.plugin`, expondo funções como `get_device`, `get_unique_device`, `connect`...
 

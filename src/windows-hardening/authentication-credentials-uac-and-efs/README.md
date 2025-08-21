@@ -26,7 +26,7 @@ Este caminho do registro contém as configurações e políticas aplicadas pelo 
 
 ### Bypass
 
-- **Pastas graváveis** úteis para contornar a política do AppLocker: Se o AppLocker estiver permitindo a execução de qualquer coisa dentro de `C:\Windows\System32` ou `C:\Windows`, existem **pastas graváveis** que você pode usar para **contornar isso**.
+- **Pastas graváveis** úteis para contornar a política do AppLocker: Se o AppLocker estiver permitindo a execução de qualquer coisa dentro de `C:\Windows\System32` ou `C:\Windows`, há **pastas graváveis** que você pode usar para **contornar isso**.
 ```
 C:\Windows\System32\Microsoft\Crypto\RSA\MachineKeys
 C:\Windows\System32\spool\drivers\color
@@ -37,7 +37,7 @@ C:\windows\tracing
 - **Regras mal escritas também podem ser contornadas**
 - Por exemplo, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, você pode criar uma **pasta chamada `allowed`** em qualquer lugar e ela será permitida.
 - As organizações também costumam se concentrar em **bloquear o executável `%System32%\WindowsPowerShell\v1.0\powershell.exe`**, mas esquecem das **outras** [**localizações de executáveis do PowerShell**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) como `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` ou `PowerShell_ISE.exe`.
-- **A imposição de DLL raramente é ativada** devido à carga adicional que pode colocar em um sistema e à quantidade de testes necessários para garantir que nada quebre. Portanto, usar **DLLs como backdoors ajudará a contornar o AppLocker**.
+- **A imposição de DLLs raramente é ativada** devido à carga adicional que pode colocar em um sistema e à quantidade de testes necessários para garantir que nada quebre. Portanto, usar **DLLs como backdoors ajudará a contornar o AppLocker**.
 - Você pode usar [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) ou [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) para **executar código Powershell** em qualquer processo e contornar o AppLocker. Para mais informações, consulte: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
 
 ## Armazenamento de Credenciais
@@ -103,7 +103,7 @@ sc query windefend
 ```
 ## Encrypted File System (EFS)
 
-EFS protege arquivos por meio de criptografia, utilizando uma **chave simétrica** conhecida como **File Encryption Key (FEK)**. Esta chave é criptografada com a **chave pública** do usuário e armazenada dentro do **fluxo de dados alternativo** $EFS do arquivo criptografado. Quando a descriptografia é necessária, a correspondente **chave privada** do certificado digital do usuário é usada para descriptografar o FEK do fluxo $EFS. Mais detalhes podem ser encontrados [aqui](https://en.wikipedia.org/wiki/Encrypting_File_System).
+EFS protege arquivos por meio de criptografia, utilizando uma **chave simétrica** conhecida como **File Encryption Key (FEK)**. Esta chave é criptografada com a **chave pública** do usuário e armazenada dentro do **fluxo de dados alternativo** $EFS do arquivo criptografado. Quando a descriptografia é necessária, a correspondente **chave privada** do certificado digital do usuário é usada para descriptografar a FEK do fluxo $EFS. Mais detalhes podem ser encontrados [aqui](https://en.wikipedia.org/wiki/Encrypting_File_System).
 
 **Cenários de descriptografia sem a iniciação do usuário** incluem:
 
@@ -114,8 +114,8 @@ Este método de criptografia permite **acesso transparente** a arquivos criptogr
 
 **Principais Conclusões**:
 
-- EFS usa um FEK simétrico, criptografado com a chave pública do usuário.
-- A descriptografia utiliza a chave privada do usuário para acessar o FEK.
+- EFS usa uma FEK simétrica, criptografada com a chave pública do usuário.
+- A descriptografia utiliza a chave privada do usuário para acessar a FEK.
 - A descriptografia automática ocorre sob condições específicas, como copiar para FAT32 ou transmissão pela rede.
 - Arquivos criptografados são acessíveis ao proprietário sem etapas adicionais.
 
@@ -130,9 +130,10 @@ Você também pode usar `cipher /e` e `cipher /d` dentro de uma pasta para **cri
 
 #### Sendo Autoridade do Sistema
 
-Esse método requer que o **usuário vítima** esteja **executando** um **processo** dentro do host. Se esse for o caso, usando uma sessão `meterpreter`, você pode impersonar o token do processo do usuário (`impersonate_token` do `incognito`). Ou você poderia apenas `migrate` para o processo do usuário.
+Esse método requer que o **usuário vítima** esteja **executando** um **processo** dentro do host. Se esse for o caso, usando sessões `meterpreter`, você pode impersonar o token do processo do usuário (`impersonate_token` do `incognito`). Ou você poderia apenas `migrate` para o processo do usuário.
 
 #### Conhecendo a senha do usuário
+
 
 {{#ref}}
 https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files
@@ -146,7 +147,7 @@ A Microsoft desenvolveu **Group Managed Service Accounts (gMSA)** para simplific
 - **Segurança Aprimorada**: Essas contas são imunes a bloqueios e não podem ser usadas para logins interativos, aumentando sua segurança.
 - **Suporte a Múltiplos Hosts**: gMSAs podem ser compartilhados entre vários hosts, tornando-os ideais para serviços que rodam em vários servidores.
 - **Capacidade de Tarefas Agendadas**: Ao contrário das contas de serviço gerenciadas, gMSAs suportam a execução de tarefas agendadas.
-- **Gerenciamento Simplificado de SPN**: O sistema atualiza automaticamente o Nome Principal de Serviço (SPN) quando há alterações nos detalhes do sAMaccount do computador ou no nome DNS, simplificando o gerenciamento de SPN.
+- **Gerenciamento Simplificado de SPN**: O sistema atualiza automaticamente o Nome Principal do Serviço (SPN) quando há alterações nos detalhes do sAMaccount do computador ou no nome DNS, simplificando o gerenciamento de SPN.
 
 As senhas para gMSAs são armazenadas na propriedade LDAP _**msDS-ManagedPassword**_ e são redefinidas automaticamente a cada 30 dias pelos Controladores de Domínio (DCs). Esta senha, um blob de dados criptografados conhecido como [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e), só pode ser recuperada por administradores autorizados e pelos servidores nos quais os gMSAs estão instalados, garantindo um ambiente seguro. Para acessar essas informações, é necessária uma conexão segura, como LDAPS, ou a conexão deve ser autenticada com 'Sealing & Secure'.
 
@@ -170,7 +171,7 @@ A **Solução de Senha do Administrador Local (LAPS)**, disponível para downloa
 
 ## Modo de Linguagem Constrangida do PowerShell
 
-O [**Modo de Linguagem Constrangida**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) do PowerShell **limita muitas das funcionalidades** necessárias para usar o PowerShell de forma eficaz, como bloquear objetos COM, permitindo apenas tipos .NET aprovados, fluxos de trabalho baseados em XAML, classes do PowerShell e mais.
+O PowerShell [**Modo de Linguagem Constrangida**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **bloqueia muitas das funcionalidades** necessárias para usar o PowerShell de forma eficaz, como bloquear objetos COM, permitindo apenas tipos .NET aprovados, fluxos de trabalho baseados em XAML, classes do PowerShell e mais.
 
 ### **Verifique**
 ```bash
@@ -219,11 +220,11 @@ $command = "Write-Host 'My voice is my passport, verify me.'" $bytes = [System.T
 ```
 Mais pode ser encontrado [aqui](https://blog.netspi.com/15-ways-to-bypass-the-powershell-execution-policy/)
 
-## Interface de Suporte de Segurança (SSPI)
+## Security Support Provider Interface (SSPI)
 
 É a API que pode ser usada para autenticar usuários.
 
-O SSPI será responsável por encontrar o protocolo adequado para duas máquinas que desejam se comunicar. O método preferido para isso é o Kerberos. Em seguida, o SSPI negociará qual protocolo de autenticação será usado, esses protocolos de autenticação são chamados de Provedor de Suporte de Segurança (SSP), estão localizados dentro de cada máquina Windows na forma de uma DLL e ambas as máquinas devem suportar o mesmo para poderem se comunicar.
+O SSPI será responsável por encontrar o protocolo adequado para duas máquinas que desejam se comunicar. O método preferido para isso é o Kerberos. Em seguida, o SSPI negociará qual protocolo de autenticação será usado, esses protocolos de autenticação são chamados de Security Support Provider (SSP), estão localizados dentro de cada máquina Windows na forma de uma DLL e ambas as máquinas devem suportar o mesmo para poderem se comunicar.
 
 ### Principais SSPs
 
@@ -235,7 +236,7 @@ O SSPI será responsável por encontrar o protocolo adequado para duas máquinas
 - %windir%\Windows\System32\Wdigest.dll
 - **Schannel**: SSL e TLS
 - %windir%\Windows\System32\Schannel.dll
-- **Negotiate**: É usado para negociar o protocolo a ser usado (Kerberos ou NTLM, sendo Kerberos o padrão)
+- **Negotiate**: É usado para negociar o protocolo a ser utilizado (Kerberos ou NTLM, sendo Kerberos o padrão)
 - %windir%\Windows\System32\lsasrv.dll
 
 #### A negociação pode oferecer vários métodos ou apenas um.

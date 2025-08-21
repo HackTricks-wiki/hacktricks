@@ -6,7 +6,7 @@
 adws-enumeration.md
 {{#endref}}
 
-> NOTA: Esta página agrupa algumas das utilidades mais úteis para **enumerar** e **visualizar** relacionamentos do Active Directory. Para coleta através do canal stealthy **Active Directory Web Services (ADWS)**, consulte a referência acima.
+> NOTA: Esta página agrupa algumas das utilidades mais úteis para **enumerar** e **visualizar** relacionamentos do Active Directory. Para coleta através do canal discreto **Active Directory Web Services (ADWS)**, consulte a referência acima.
 
 ---
 
@@ -16,19 +16,19 @@ adws-enumeration.md
 
 * Navegação GUI da árvore de diretórios
 * Edição de atributos de objetos e descritores de segurança
-* Criação / comparação de snapshots para análise offline
+* Criação / comparação de instantâneos para análise offline
 
 ### Uso rápido
 
 1. Inicie a ferramenta e conecte-se a `dc01.corp.local` com quaisquer credenciais de domínio.
-2. Crie um snapshot offline via `File ➜ Create Snapshot`.
-3. Compare dois snapshots com `File ➜ Compare` para identificar desvios de permissão.
+2. Crie um instantâneo offline via `File ➜ Create Snapshot`.
+3. Compare dois instantâneos com `File ➜ Compare` para identificar desvios de permissão.
 
 ---
 
 ## ADRecon
 
-[ADRecon](https://github.com/adrecon/ADRecon) extrai um grande conjunto de artefatos de um domínio (ACLs, GPOs, trusts, templates de CA …) e produz um **relatório Excel**.
+[ADRecon](https://github.com/adrecon/ADRecon) extrai um grande conjunto de artefatos de um domínio (ACLs, GPOs, trusts, modelos de CA…) e produz um **relatório Excel**.
 ```powershell
 # On a Windows host in the domain
 PS C:\> .\ADRecon.ps1 -OutputDir C:\Temp\ADRecon

@@ -56,10 +56,10 @@ ou usando _Process Explorer_ da Sysinternals (selecione o processo e acesse a ab
 
 ### Administrador local
 
-Quando um administrador local faz login, **dois tokens de acesso são criados**: um com direitos de administrador e outro com direitos normais. **Por padrão**, quando esse usuário executa um processo, o que possui **direitos regulares** (não-administrador) **é utilizado**. Quando esse usuário tenta **executar** qualquer coisa **como administrador** ("Executar como Administrador", por exemplo), o **UAC** será utilizado para pedir permissão.\
+Quando um administrador local faz login, **dois tokens de acesso são criados**: um com direitos de administrador e outro com direitos normais. **Por padrão**, quando esse usuário executa um processo, o que possui **direitos regulares** (não-administrador) **é utilizado**. Quando esse usuário tenta **executar** qualquer coisa **como administrador** ("Executar como Administrador", por exemplo), o **UAC** será usado para pedir permissão.\
 Se você quiser [**saber mais sobre o UAC, leia esta página**](../authentication-credentials-uac-and-efs/index.html#uac)**.**
 
-### Impersonação de credenciais de usuário
+### Impersonação de usuário com credenciais
 
 Se você tiver **credenciais válidas de qualquer outro usuário**, pode **criar** uma **nova sessão de logon** com essas credenciais:
 ```
@@ -70,7 +70,7 @@ Você pode iniciar um processo que **usa credenciais diferentes para acessar ser
 ```
 runas /user:domain\username /netonly cmd.exe
 ```
-Isso é útil se você tiver credenciais válidas para acessar objetos na rede, mas essas credenciais não são válidas dentro do host atual, pois serão usadas apenas na rede (no host atual, os privilégios do seu usuário atual serão utilizados).
+Isso é útil se você tiver credenciais úteis para acessar objetos na rede, mas essas credenciais não são válidas dentro do host atual, pois serão usadas apenas na rede (no host atual, os privilégios do seu usuário atual serão utilizados).
 
 ### Tipos de tokens
 
@@ -90,6 +90,7 @@ Usando o módulo _**incognito**_ do metasploit, se você tiver privilégios sufi
 ### Privilégios de Token
 
 Saiba quais **privilégios de token podem ser abusados para escalar privilégios:**
+
 
 {{#ref}}
 privilege-escalation-abusing-tokens.md

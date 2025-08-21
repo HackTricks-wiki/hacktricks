@@ -17,7 +17,7 @@ Geralmente, isso significa que para escapar você precisa ser root dentro do chr
 ### Root + CWD
 
 > [!WARNING]
-> Se você é **root** dentro de um chroot, você **pode escapar** criando **outro chroot**. Isso porque 2 chroots não podem coexistir (no Linux), então se você criar uma pasta e depois **criar um novo chroot** nessa nova pasta sendo **você fora dele**, agora você estará **fora do novo chroot** e, portanto, estará no FS.
+> Se você é **root** dentro de um chroot, você **pode escapar** criando **outro chroot**. Isso porque 2 chroots não podem coexistir (no Linux), então se você criar uma pasta e depois **criar um novo chroot** nessa nova pasta sendo **você fora dela**, agora você estará **fora do novo chroot** e, portanto, estará no FS.
 >
 > Isso ocorre porque geralmente o chroot NÃO move seu diretório de trabalho para o indicado, então você pode criar um chroot, mas estar fora dele.
 
@@ -116,13 +116,13 @@ chroot(".");
 > - Execute chroot no processo filho em uma pasta diferente
 > - No processo pai, crie um FD de uma pasta que está fora do novo chroot do processo filho
 > - Passe para o processo filho esse FD usando o UDS
-> - O processo filho muda o diretório para esse FD, e como está fora do seu chroot, ele escapará da prisão
+> - O processo filho muda de diretório para esse FD, e como está fora do seu chroot, ele escapará da prisão
 
 ### Root + Mount
 
 > [!WARNING]
 >
-> - Montando o dispositivo raiz (/) em um diretório dentro do chroot
+> - Montando o dispositivo root (/) em um diretório dentro do chroot
 > - Chrooting nesse diretório
 >
 > Isso é possível no Linux
@@ -147,7 +147,7 @@ chroot(".");
 
 > [!WARNING]
 >
-> - Há algum tempo, os usuários podiam depurar seus próprios processos a partir de um processo deles mesmos... mas isso não é mais possível por padrão
+> - Antigamente, os usuários podiam depurar seus próprios processos a partir de um processo deles mesmos... mas isso não é mais possível por padrão
 > - De qualquer forma, se for possível, você poderia ptrace em um processo e executar um shellcode dentro dele ([veja este exemplo](linux-capabilities.md#cap_sys_ptrace)).
 
 ## Bash Jails
@@ -202,12 +202,13 @@ Você pode sobrescrever, por exemplo, o arquivo sudoers.
 ```bash
 wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 ```
-### Outros truques
+### Outras truques
 
 [**https://fireshellsecurity.team/restricted-linux-shell-escaping-techniques/**](https://fireshellsecurity.team/restricted-linux-shell-escaping-techniques/)\
 [https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells](https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells)\
 [https://gtfobins.github.io](https://gtfobins.github.io)\
 **Também pode ser interessante a página:**
+
 
 {{#ref}}
 ../bypass-bash-restrictions/
@@ -216,6 +217,7 @@ wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 ## Jails Python
 
 Truques sobre como escapar de jails python na seguinte página:
+
 
 {{#ref}}
 ../../generic-methodologies-and-resources/python/bypass-python-sandboxes/
@@ -234,7 +236,7 @@ Alguns truques para **chamar funções de uma biblioteca sem usar pontos**:
 print(string.char(0x41, 0x42))
 print(rawget(string, "char")(0x41, 0x42))
 ```
-Enumere as funções de uma biblioteca:
+Enumerar funções de uma biblioteca:
 ```bash
 for k,v in pairs(string) do print(k,v) end
 ```

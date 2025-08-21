@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Esta página coleta **pequenos trechos de C autônomos** que são úteis durante a Escalada de Privilégios Local no Windows ou pós-exploração. Cada payload é projetado para ser **amigável ao copiar e colar**, requer apenas a API do Windows / tempo de execução C, e pode ser compilado com `i686-w64-mingw32-gcc` (x86) ou `x86_64-w64-mingw32-gcc` (x64).
+Esta página coleta **pequenos trechos de C autônomos** que são úteis durante a Escalação de Privilégios Locais no Windows ou pós-exploração. Cada payload é projetado para ser **amigável ao copiar e colar**, requer apenas a API do Windows / tempo de execução C, e pode ser compilado com `i686-w64-mingw32-gcc` (x86) ou `x86_64-w64-mingw32-gcc` (x64).
 
 > ⚠️  Esses payloads assumem que o processo já possui os privilégios mínimos necessários para realizar a ação (por exemplo, `SeDebugPrivilege`, `SeImpersonatePrivilege` ou contexto de integridade média para um bypass de UAC). Eles são destinados a **configurações de red-team ou CTF** onde explorar uma vulnerabilidade resultou na execução de código nativo arbitrário.
 
@@ -115,6 +115,7 @@ return 0;
 }
 ```
 Para uma explicação mais profunda de como isso funciona, veja:
+
 {{#ref}}
 sedebug-+-seimpersonate-copy-token.md
 {{#endref}}
@@ -122,7 +123,7 @@ sedebug-+-seimpersonate-copy-token.md
 ---
 
 ## Patch AMSI & ETW em Memória (Evasão de Defesa)
-A maioria dos motores AV/EDR modernos depende de **AMSI** e **ETW** para inspecionar comportamentos maliciosos. Fazer patch em ambas as interfaces cedo dentro do processo atual impede que payloads baseados em script (por exemplo, PowerShell, JScript) sejam escaneados.
+A maioria dos motores AV/EDR modernos depende do **AMSI** e do **ETW** para inspecionar comportamentos maliciosos. Fazer patch em ambas as interfaces cedo dentro do processo atual impede que payloads baseados em script (por exemplo, PowerShell, JScript) sejam escaneados.
 ```c
 // gcc -o patch_amsi.exe patch_amsi.c -lntdll
 #define _CRT_SECURE_NO_WARNINGS

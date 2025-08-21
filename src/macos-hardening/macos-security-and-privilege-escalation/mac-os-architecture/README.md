@@ -12,7 +12,7 @@ Versão de código aberto do XNU: [https://opensource.apple.com/source/xnu/](htt
 
 ### Mach
 
-Mach é um **microkernel** projetado para ser **compatível com UNIX**. Um de seus princípios de design chave era **minimizar** a quantidade de **código** executando no espaço do **núcleo** e, em vez disso, permitir que muitas funções típicas do núcleo, como sistema de arquivos, rede e I/O, **executem como tarefas de nível de usuário**.
+Mach é um **microkernel** projetado para ser **compatível com UNIX**. Um de seus princípios de design chave foi **minimizar** a quantidade de **código** executando no espaço do **núcleo** e, em vez disso, permitir que muitas funções típicas do núcleo, como sistema de arquivos, rede e I/O, **executem como tarefas de nível de usuário**.
 
 No XNU, Mach é **responsável por muitas das operações críticas de baixo nível** que um núcleo normalmente lida, como agendamento de processador, multitarefa e gerenciamento de memória virtual.
 
@@ -27,9 +27,9 @@ O **núcleo** XNU também **incorpora** uma quantidade significativa de código 
 - Pilha TCP/IP e sockets
 - Firewall e filtragem de pacotes
 
-Entender a interação entre BSD e Mach pode ser complexo, devido aos seus diferentes frameworks conceituais. Por exemplo, o BSD usa processos como sua unidade fundamental de execução, enquanto Mach opera com base em threads. Essa discrepância é reconciliada no XNU **associando cada processo BSD a uma tarefa Mach** que contém exatamente uma thread Mach. Quando a chamada de sistema fork() do BSD é usada, o código BSD dentro do núcleo utiliza funções Mach para criar uma estrutura de tarefa e thread.
+Entender a interação entre BSD e Mach pode ser complexo, devido aos seus diferentes frameworks conceituais. Por exemplo, o BSD usa processos como sua unidade fundamental de execução, enquanto Mach opera com base em threads. Essa discrepância é reconciliada no XNU **associando cada processo BSD a uma tarefa Mach** que contém exatamente uma thread Mach. Quando a chamada de sistema fork() do BSD é usada, o código BSD dentro do núcleo utiliza funções Mach para criar uma tarefa e uma estrutura de thread.
 
-Além disso, **Mach e BSD mantêm diferentes modelos de segurança**: o modelo de segurança do **Mach** é baseado em **direitos de porta**, enquanto o modelo de segurança do BSD opera com base em **propriedade de processos**. Disparidades entre esses dois modelos ocasionalmente resultaram em vulnerabilidades de escalonamento de privilégios locais. Além das chamadas de sistema típicas, também existem **traps Mach que permitem que programas de espaço de usuário interajam com o núcleo**. Esses diferentes elementos juntos formam a arquitetura híbrida multifacetada do núcleo do macOS.
+Além disso, **Mach e BSD mantêm modelos de segurança diferentes**: o modelo de segurança de **Mach** é baseado em **direitos de porta**, enquanto o modelo de segurança do BSD opera com base em **propriedade de processos**. Disparidades entre esses dois modelos ocasionalmente resultaram em vulnerabilidades de escalonamento de privilégios local. Além das chamadas de sistema típicas, também existem **traps Mach que permitem que programas de espaço de usuário interajam com o núcleo**. Esses diferentes elementos juntos formam a arquitetura híbrida multifacetada do núcleo do macOS.
 
 ### I/O Kit - Drivers
 
@@ -47,7 +47,7 @@ macos-iokit.md
 
 ## macOS Kernel Extensions
 
-O macOS é **super restritivo para carregar Extensões de Núcleo** (.kext) devido aos altos privilégios com que o código será executado. Na verdade, por padrão, é virtualmente impossível (a menos que um bypass seja encontrado).
+macOS é **super restritivo para carregar Extensões de Núcleo** (.kext) devido aos altos privilégios com que o código será executado. Na verdade, por padrão, é virtualmente impossível (a menos que um bypass seja encontrado).
 
 Na página seguinte, você também pode ver como recuperar o `.kext` que o macOS carrega dentro de seu **kernelcache**:
 

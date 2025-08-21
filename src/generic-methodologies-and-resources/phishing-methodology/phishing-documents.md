@@ -142,11 +142,13 @@ self.close
 
 Existem várias maneiras de **forçar a autenticação NTLM "remotamente"**, por exemplo, você poderia adicionar **imagens invisíveis** a e-mails ou HTML que o usuário acessará (até mesmo HTTP MitM?). Ou enviar à vítima o **endereço de arquivos** que irão **disparar** uma **autenticação** apenas por **abrir a pasta.**
 
-**Confira essas ideias e mais nas páginas a seguir:**
+**Verifique essas ideias e mais nas páginas a seguir:**
+
 
 {{#ref}}
 ../../windows-hardening/active-directory-methodology/printers-spooler-service-abuse.md
 {{#endref}}
+
 
 {{#ref}}
 ../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md

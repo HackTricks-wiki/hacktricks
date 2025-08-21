@@ -148,7 +148,7 @@ debugfs:  dump /tmp/asd1.txt /tmp/asd2.txt
 ```
 No entanto, se você tentar **escrever arquivos de propriedade do root** (como `/etc/shadow` ou `/etc/passwd`), você terá um erro de "**Permissão negada**".
 
-## Grupo de Vídeo
+## Video Group
 
 Usando o comando `w`, você pode descobrir **quem está logado no sistema** e ele mostrará uma saída como a seguinte:
 ```bash
@@ -167,7 +167,7 @@ Para **abrir** a **imagem bruta**, você pode usar **GIMP**, selecionar o arquiv
 
 ![](<../../../images/image (463).png>)
 
-Em seguida, modifique a Largura e Altura para as usadas na tela e verifique diferentes Tipos de Imagem (e selecione o que melhor mostra a tela):
+Em seguida, modifique a Largura e Altura para as que são usadas na tela e verifique diferentes Tipos de Imagem (e selecione o que melhor mostra a tela):
 
 ![](<../../../images/image (317).png>)
 
@@ -193,7 +193,7 @@ echo 'toor:$1$.ZcF5ts0$i4k6rQYzeegUkacRCvfxC0:0:0:root:/root:/bin/sh' >> /etc/pa
 #Ifyou just want filesystem and network access you can startthe following container:
 docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chroot /mnt bashbash
 ```
-Finalmente, se você não gostar de nenhuma das sugestões anteriores, ou se elas não estiverem funcionando por algum motivo (firewall da API do docker?), você sempre pode tentar **executar um contêiner privilegiado e escapar dele** como explicado aqui:
+Finalmente, se você não gostar de nenhuma das sugestões anteriores, ou se elas não estiverem funcionando por algum motivo (firewall da api do docker?), você sempre pode tentar **executar um contêiner privilegiado e escapar dele** como explicado aqui:
 
 {{#ref}}
 ../docker-security/

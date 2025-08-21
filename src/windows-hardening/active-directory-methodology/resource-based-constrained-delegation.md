@@ -24,7 +24,7 @@ No entanto, se o **TGS** usado em **S4U2Proxy** **NÃO for Forwardable**, tentar
 
 Suponha que o atacante já tenha **privilégios equivalentes de escrita sobre o computador da vítima**.
 
-1. O atacante **compromete** uma conta que tem um **SPN** ou **cria uma** (“Serviço A”). Note que **qualquer** _Usuário Admin_ sem nenhum outro privilégio especial pode **criar** até 10 objetos de Computador (**_MachineAccountQuota_**) e definir um **SPN** para eles. Assim, o atacante pode simplesmente criar um objeto de Computador e definir um SPN.
+1. O atacante **compromete** uma conta que tem um **SPN** ou **cria uma** (“Serviço A”). Note que **qualquer** _Usuário Admin_ sem nenhum outro privilégio especial pode **criar** até 10 objetos de Computador (**_MachineAccountQuota_**) e definir um **SPN** para eles. Assim, o atacante pode apenas criar um objeto de Computador e definir um SPN.
 2. O atacante **abusa de seu privilégio de ESCRITA** sobre o computador da vítima (Serviço B) para configurar **delegação constrangida baseada em recurso para permitir que o Serviço A impersonifique qualquer usuário** contra aquele computador da vítima (Serviço B).
 3. O atacante usa Rubeus para realizar um **ataque S4U completo** (S4U2Self e S4U2Proxy) do Serviço A para o Serviço B para um usuário **com acesso privilegiado ao Serviço B**.
 1. S4U2Self (da conta SPN comprometida/criada): Solicitar um **TGS de Administrador para mim** (Não Forwardable).
@@ -48,7 +48,7 @@ New-MachineAccount -MachineAccount SERVICEA -Password $(ConvertTo-SecureString '
 # Check if created
 Get-DomainComputer SERVICEA
 ```
-### Configurando Delegação Constrangida Baseada em Recurso
+### Configurando Delegação Constrangida Baseada em Recursos
 
 **Usando o módulo PowerShell do activedirectory**
 ```bash
@@ -72,7 +72,7 @@ msds-allowedtoactonbehalfofotheridentity
 ```
 ### Realizando um ataque S4U completo (Windows/Rubeus)
 
-Primeiramente, criamos o novo objeto Computador com a senha `123456`, então precisamos do hash dessa senha:
+Primeiro de tudo, criamos o novo objeto Computador com a senha `123456`, então precisamos do hash dessa senha:
 ```bash
 .\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local
 ```
@@ -109,7 +109,7 @@ impacket-secretsdump -k -no-pass Administrator@victim.domain.local
 ```
 Notas
 - Se a assinatura LDAP/LDAPS for aplicada, use `impacket-rbcd -use-ldaps ...`.
-- Prefira chaves AES; muitos domínios modernos restringem RC4. Impacket e Rubeus suportam fluxos apenas com AES.
+- Prefira chaves AES; muitos domínios modernos restringem RC4. Impacket e Rubeus suportam fluxos apenas AES.
 - Impacket pode reescrever o `sname` ("AnySPN") para algumas ferramentas, mas obtenha o SPN correto sempre que possível (por exemplo, CIFS/LDAP/HTTP/HOST/MSSQLSvc).
 
 ### Acessando
@@ -123,7 +123,7 @@ ls \\victim.domain.local\C$
 
 Saiba mais sobre os [**tickets de serviço disponíveis aqui**](silver-ticket.md#available-services).
 
-## Enumerating, auditing and cleanup
+## Enumerando, auditando e limpeza
 
 ### Enumerar computadores com RBCD configurado
 
@@ -148,7 +148,7 @@ Impacket (ler ou limpar com um comando):
 # Read who can delegate to VICTIM
 impacket-rbcd -delegate-to 'VICTIM$' -action read 'domain.local/jdoe:Summer2025!'
 ```
-### Limpeza / redefinir RBCD
+### Limpeza / redefinição do RBCD
 
 - PowerShell (limpar o atributo):
 ```powershell
@@ -178,11 +178,13 @@ impacket-rbcd -delegate-to 'VICTIM$' -action flush 'domain.local/jdoe:Summer2025
 
 - Você também pode escrever o SD RBCD sobre os Serviços Web do AD (ADWS) se o LDAP estiver filtrado. Veja:
 
+
 {{#ref}}
 adws-enumeration.md
 {{#endref}}
 
-- Cadeias de relé do Kerberos frequentemente terminam em RBCD para alcançar o SYSTEM local em um único passo. Veja exemplos práticos de ponta a ponta:
+- Cadeias de relé do Kerberos frequentemente terminam em RBCD para alcançar o SYSTEM local em um passo. Veja exemplos práticos de ponta a ponta:
+
 
 {{#ref}}
 ../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md
