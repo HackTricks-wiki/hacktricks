@@ -27,11 +27,13 @@ When a connection is stablished to an XPC service, the server will check if the 
 For more information about the PID reuse attack check:
 
 
+
 {{#ref}}
 macos-pid-reuse.md
 {{#endref}}
 
 For more information **`xpc_connection_get_audit_token`** attack check:
+
 
 
 {{#ref}}
@@ -95,5 +97,4 @@ if ((csFlags & (cs_hard | cs_require_lv)) {
 ```
 
 {{#include ../../../../../../banners/hacktricks-training.md}}
-
 

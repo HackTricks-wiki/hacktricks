@@ -232,6 +232,7 @@ wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 **It could also be interesting the page:**
 
 
+
 {{#ref}}
 ../bypass-bash-restrictions/
 {{#endref}}
@@ -239,6 +240,7 @@ wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 ## Python Jails
 
 Tricks about escaping from python jails in the following page:
+
 
 
 {{#ref}}
@@ -292,5 +294,4 @@ debug.debug()
 - [https://www.youtube.com/watch?v=UO618TeyCWo](https://www.youtube.com/watch?v=UO618TeyCWo) (Slides: [https://deepsec.net/docs/Slides/2015/Chw00t_How_To_Break%20Out_from_Various_Chroot_Solutions\_-_Bucsay_Balazs.pdf](https://deepsec.net/docs/Slides/2015/Chw00t_How_To_Break%20Out_from_Various_Chroot_Solutions_-_Bucsay_Balazs.pdf))
 
 {{#include ../../banners/hacktricks-training.md}}
-
 

@@ -51,6 +51,7 @@ Once connected, the host (inspector or an AI agent like Cursor) will fetch the t
 For more information about Prompt Injection check:
 
 
+
 {{#ref}}
 AI-Prompts.md
 {{#endref}}
@@ -102,6 +103,7 @@ A user that is giving access to his Github repositories to a client could ask th
 For more information about Prompt Injection check:
 
 
+
 {{#ref}}
 AI-Prompts.md
 {{#endref}}
@@ -109,6 +111,32 @@ AI-Prompts.md
 Moreover, in [**this blog**](https://www.legitsecurity.com/blog/remote-prompt-injection-in-gitlab-duo) it's explained how it was possible to abuse the Gitlab AI agent to perform arbitrary actions (like modifying code or leaking code), but injecting maicious prompts in the data of the repository (even ofbuscating this prompts in a way that the LLM would understand but the user wouldn't).
 
 Note that the malicious indirect prompts would be located in a public repository the victim user would be using, however, as the agent still have access to the repos of the user, it'll be able to access them.
+
+### Auto‑trusted tools in Gemini CLI (Zapier)
+
+Some MCP clients ship with permissive defaults that auto‑approve tool calls, creating a high‑impact primitive when combined with prompt injection. In particular, the Google Gemini CLI configured the Zapier MCP server with `trust:true`, approving tool invocations without user confirmation:
+
+```json
+{
+  "mcpServers": {
+    "zapier": {
+      "trust": true
+    }
+  }
+}
+```
+
+In field tests, a multimodal prompt injection hidden inside an uploaded image only became visible after the CLI downscaled it for the model. The model then invoked Zapier tools (e.g., read Google Calendar and email to attacker) without any user prompt because of the auto‑trust setting.
+
+- Risk pattern: perception–input mismatch (user sees the original image; model consumes a transformed, downscaled version) + auto‑approved tools = silent data exfiltration.
+- Mitigations: do not ship with `trust:true`; require explicit confirmation for sensitive tools; show a preview of the transformed input that the model will receive (even in CLI/API contexts).
+
+See the scaling‑based multimodal injection technique here:
+
+
+{{#ref}}
+AI-Prompts.md
+{{#endref}}
 
 ### Persistent Code Execution via MCP Trust Bypass (Cursor IDE – "MCPoison")
 
@@ -155,6 +183,7 @@ The payload can be anything the current OS user can run, e.g. a reverse-shell ba
 
 ## References
 - [CVE-2025-54136 – MCPoison Cursor IDE persistent RCE](https://research.checkpoint.com/2025/cursor-vulnerability-mcpoison/)
+- [Weaponizing image scaling against production AI systems](https://blog.trailofbits.com/2025/08/21/weaponizing-image-scaling-against-production-ai-systems/)
+- [Gemini CLI issue: Zapier MCP trusted by default (trust=true)](https://github.com/google-gemini/gemini-cli/issues/5598)
 
 {{#include ../banners/hacktricks-training.md}}
-

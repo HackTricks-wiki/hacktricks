@@ -196,6 +196,7 @@ As was seen before there are several places where the file is still saved after 
 Also, the OS usually saves a lot of information about file system changes and backups, so it's possible to try to use them to recover the file or as much information as possible.
 
 
+
 {{#ref}}
 file-data-carving-recovery-tools.md
 {{#endref}}
@@ -209,6 +210,7 @@ Note that this technique **doesn't work to retrieve fragmented files**. If a fil
 There are several tools that you can use for file Carving indicating the file types you want to search for
 
 
+
 {{#ref}}
 file-data-carving-recovery-tools.md
 {{#endref}}
@@ -217,6 +219,7 @@ file-data-carving-recovery-tools.md
 
 Data Stream Carving is similar to File Carving but **instead of looking for complete files, it looks for interesting fragments** of information.\
 For example, instead of looking for a complete file containing logged URLs, this technique will search for URLs.
+
 
 
 {{#ref}}
@@ -237,4 +240,3 @@ You may notice that even performing that action there might be **other parts whe
 - **iHackLabs Certified Digital Forensics Windows**
 
 {{#include ../../../banners/hacktricks-training.md}}
-

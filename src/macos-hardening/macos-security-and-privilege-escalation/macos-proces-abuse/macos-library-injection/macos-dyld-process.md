@@ -20,6 +20,7 @@ Dyld will be loaded by **`dyldboostrap::start`**, which will also load things su
 **`dyls::_main()`** is the entry point of dyld and it's first task is to run `configureProcessRestrictions()`, which usually restricts **`DYLD_*`** environment variables explained in:
 
 
+
 {{#ref}}
 ./
 {{#endref}}
@@ -315,5 +316,4 @@ find . -type f | xargs grep strcmp| grep key,\ \" | cut -d'"' -f2 | sort -u
 - [**\*OS Internals, Volume I: User Mode. By Jonathan Levin**](https://www.amazon.com/MacOS-iOS-Internals-User-Mode/dp/099105556X)
 
 {{#include ../../../../banners/hacktricks-training.md}}
-
 

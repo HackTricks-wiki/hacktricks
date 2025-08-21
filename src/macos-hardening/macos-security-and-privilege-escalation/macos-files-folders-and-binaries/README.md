@@ -36,11 +36,13 @@
 MacOS stores information such as passwords in several places:
 
 
+
 {{#ref}}
 macos-sensitive-locations.md
 {{#endref}}
 
 ### Vulnerable pkg installers
+
 
 
 {{#ref}}
@@ -70,6 +72,7 @@ macos-installers-abuse.md
 ### macOS Bundles
 
 A bundle is a **directory** which **looks like an object in Finder** (a Bundle example are `*.app` files).
+
 
 
 {{#ref}}
@@ -239,6 +242,7 @@ The tool afscexpand can be used to force decompress a dile.
 Mac OS binaries usually are compiled as **universal binaries**. A **universal binary** can **support multiple architectures in the same file**.
 
 
+
 {{#ref}}
 universal-binaries-and-mach-o-format.md
 {{#endref}}
@@ -246,6 +250,7 @@ universal-binaries-and-mach-o-format.md
 ## macOS Process Memory
 
 ## macOS memory dumping
+
 
 
 {{#ref}}
@@ -273,5 +278,4 @@ The directory `/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/
 - **`/private/var/db/launchd.db/com.apple.launchd/overrides.plist`**: List of daemons deactivated.
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 
