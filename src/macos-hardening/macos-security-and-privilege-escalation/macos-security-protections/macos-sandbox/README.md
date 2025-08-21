@@ -288,6 +288,7 @@ On macOS, unlike iOS where processes are sandboxed from the start by the kernel,
 Processes are automatically Sandboxed from userland when they start if they have the entitlement: `com.apple.security.app-sandbox`. For a detailed explanation of this process check:
 
 
+
 {{#ref}}
 macos-sandbox-debug-and-bypass/
 {{#endref}}
@@ -400,5 +401,4 @@ Sandbox also has a user daemon running exposing the XPC Mach service `com.apple.
 - [**\*OS Internals Volume III**](https://newosxbook.com/home.html)
 
 {{#include ../../../../banners/hacktricks-training.md}}
-
 

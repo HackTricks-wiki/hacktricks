@@ -9,6 +9,7 @@ Gatekeeper is usually used to refer to the combination of **Quarantine + Gatekee
 More information in:
 
 
+
 {{#ref}}
 macos-gatekeeper.md
 {{#endref}}
@@ -20,6 +21,7 @@ macos-gatekeeper.md
 ### SIP - System Integrity Protection
 
 
+
 {{#ref}}
 macos-sip.md
 {{#endref}}
@@ -27,6 +29,7 @@ macos-sip.md
 ### Sandbox
 
 MacOS Sandbox **limits applications** running inside the sandbox to the **allowed actions specified in the Sandbox profile** the app is running with. This helps to ensure that **the application will be accessing only expected resources**.
+
 
 
 {{#ref}}
@@ -38,6 +41,7 @@ macos-sandbox/
 **TCC (Transparency, Consent, and Control)** is a security framework. It's designed to **manage the permissions** of applications, specifically by regulating their access to sensitive features. This includes elements like **location services, contacts, photos, microphone, camera, accessibility, and full disk access**. TCC ensures that apps can only access these features after obtaining explicit user consent, thereby bolstering privacy and control over personal data.
 
 
+
 {{#ref}}
 macos-tcc/
 {{#endref}}
@@ -45,6 +49,7 @@ macos-tcc/
 ### Launch/Environment Constraints & Trust Cache
 
 Launch constraints in macOS are a security feature to **regulate process initiation** by defining **who can launch** a process, **how**, and **from where**. Introduced in macOS Ventura, they categorize system binaries into constraint categories within a **trust cache**. Every executable binary has set **rules** for its **launch**, including **self**, **parent**, and **responsible** constraints. Extended to third-party apps as **Environment** Constraints in macOS Sonoma, these features help mitigate potential system exploitations by governing process launching conditions.
+
 
 
 {{#ref}}
@@ -148,5 +153,4 @@ References and **more information about BTM**:
 - [https://support.apple.com/en-gb/guide/deployment/depdca572563/web](https://support.apple.com/en-gb/guide/deployment/depdca572563/web)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 

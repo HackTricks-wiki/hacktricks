@@ -98,6 +98,7 @@ Using the _**incognito**_ module of metasploit if you have enough privileges you
 Learn which **token privileges can be abused to escalate privileges:**
 
 
+
 {{#ref}}
 privilege-escalation-abusing-tokens.md
 {{#endref}}
@@ -109,5 +110,4 @@ Take a look to [**all the possible token privileges and some definitions on this
 Learn more about tokens in this tutorials: [https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa](https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa) and [https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
 
 {{#include ../../banners/hacktricks-training.md}}
-
 

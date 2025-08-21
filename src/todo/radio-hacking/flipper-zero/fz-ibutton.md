@@ -7,6 +7,7 @@
 For more info about what is an iButton check:
 
 
+
 {{#ref}}
 ../ibutton.md
 {{#endref}}
@@ -41,5 +42,4 @@ It's possible to **emulate** saved iButtons (read or manually added).
 - [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 

@@ -87,6 +87,7 @@ copy afile.txt \\vulnerable.computer\C$\Windows\Temp
 You will also be able to obtain a shell inside the host or execute arbitrary commands using **psexec**:
 
 
+
 {{#ref}}
 ../lateral-movement/psexec-and-winexec.md
 {{#endref}}
@@ -124,6 +125,7 @@ wmic remote.computer.local list full /format:list
 Find **more information about wmiexec** in the following page:
 
 
+
 {{#ref}}
 ../lateral-movement/wmiexec.md
 {{#endref}}
@@ -137,6 +139,7 @@ New-PSSession -Name PSC -ComputerName the.computer.name; Enter-PSSession PSC
 ```
 
 Check the following page to learn **more ways to connect with a remote host using winrm**:
+
 
 
 {{#ref}}
@@ -157,6 +160,7 @@ mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.loc
 **Learn more about DCSync** in the following page:
 
 
+
 {{#ref}}
 dcsync.md
 {{#endref}}
@@ -171,5 +175,4 @@ dcsync.md
 
 
 {{#include ../../banners/hacktricks-training.md}}
-
 

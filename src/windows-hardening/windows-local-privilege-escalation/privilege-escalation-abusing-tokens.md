@@ -7,6 +7,7 @@
 If you **don't know what are Windows Access Tokens** read this page before continuing:
 
 
+
 {{#ref}}
 access-tokens.md
 {{#endref}}
@@ -18,9 +19,11 @@ access-tokens.md
 This is privilege that is held by any process allows the impersonation (but not creation) of any token, given that a handle to it can be obtained. A privileged token can be acquired from a Windows service (DCOM) by inducing it to perform NTLM authentication against an exploit, subsequently enabling the execution of a process with SYSTEM privileges. This vulnerability can be exploited using various tools, such as [juicy-potato](https://github.com/ohpe/juicy-potato), [RogueWinRM](https://github.com/antonioCoco/RogueWinRM) (which requires winrm to be disabled), [SweetPotato](https://github.com/CCob/SweetPotato), and [PrintSpoofer](https://github.com/itm4n/PrintSpoofer).
 
 
+
 {{#ref}}
 roguepotato-and-printspoofer.md
 {{#endref}}
+
 
 
 {{#ref}}
@@ -46,6 +49,7 @@ You can **abuse this privilege** with:
 - [https://github.com/giuliano108/SeBackupPrivilege/tree/master/SeBackupPrivilegeCmdLets/bin/Debug](https://github.com/giuliano108/SeBackupPrivilege/tree/master/SeBackupPrivilegeCmdLets/bin/Debug)
 - following **IppSec** in [https://www.youtube.com/watch?v=IfCysW0Od8w\&t=2610\&ab_channel=IppSec](https://www.youtube.com/watch?v=IfCysW0Od8w&t=2610&ab_channel=IppSec)
 - Or as explained in the **escalating privileges with Backup Operators** section of:
+
 
 
 {{#ref}}
@@ -186,5 +190,4 @@ Full token privileges cheatsheet at [https://github.com/gtworek/Priv2Admin](http
 - Take a look to [**this paper**](https://github.com/hatRiot/token-priv/blob/master/abusing_token_eop_1.0.txt) about privesc with tokens.
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
