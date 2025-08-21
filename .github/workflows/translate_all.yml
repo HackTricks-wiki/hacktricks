@@ -68,9 +68,9 @@ jobs:
           sudo apt-get install wget -y
           mkdir scripts
           cd scripts
-          wget -O get_and_save_refs.py https://raw.githubusercontent.com/carlospolop/hacktricks-cloud/master/scripts/get_and_save_refs.py
-          wget -O compare_and_fix_refs.py https://raw.githubusercontent.com/carlospolop/hacktricks-cloud/master/scripts/compare_and_fix_refs.py
-          wget -O translator.py https://raw.githubusercontent.com/carlospolop/hacktricks-cloud/master/scripts/translator.py
+          wget -O get_and_save_refs.py https://raw.githubusercontent.com/HackTricks-wiki/hacktricks-cloud/master/scripts/get_and_save_refs.py
+          wget -O compare_and_fix_refs.py https://raw.githubusercontent.com/HackTricks-wiki/hacktricks-cloud/master/scripts/compare_and_fix_refs.py
+          wget -O translator.py https://raw.githubusercontent.com/HackTricks-wiki/hacktricks-cloud/master/scripts/translator.py
           cd ..
 
       - name: Run get_and_save_refs.py
